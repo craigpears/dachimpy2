@@ -456,6 +456,7 @@
       const bestOpt = deal.options.find((x) => x.grade === 'best');
       fb.innerHTML = `<div class="verdict ${good ? 'good' : o.grade === 'tight' ? 'ok' : 'bad'}">${pickOne(LINES[o.grade])}</div>
         ${o.name ? `<p>That leaves a <b>${o.name}</b>, one of the classic two-piece finishes.</p>` : ''}
+        ${o.grade === 'best' && deal.options.filter((x) => x.grade === 'best').length > 1 ? '<p class="hint">Both green moves do about as well here: either was right.</p>' : ''}
         ${o.grade !== 'best' && bestOpt ? `<p class="hint">The green option was stronger${bestOpt.name ? `: it leaves a <b>${bestOpt.name}</b>` : ''}. ${whyBetter(o, bestOpt)}</p>` : ''}
         <button class="btn next">${o.grade === 'dead' ? 'See the damage' : 'Next piece'} <kbd>Enter</kbd></button>
         ${good ? '<span class="auto"><i></i></span>' : ''}`;
@@ -499,7 +500,7 @@
           </div>
         </div>
         <div class="draw-zone">
-          <p class="ask">You get three draws. Do you think ${an(gap)} will turn up?</p>
+          <p class="ask">${opts.bet ? `You get three draws. Do you think ${an(gap)} will turn up?` : `You get three draws to find ${an(gap)}.`}</p>
           ${wallet != null ? `
             <div class="bet">
               <p class="label">Bet your doubloons · pays ${price}</p>
@@ -916,7 +917,7 @@
           <div class="purse-bar"><span>Purse ${coin(purse.get())}</span><span>Masterpiece streak <b>${v.streak}</b></span>
             <a class="btn" href="#/port/${next.id}">Sail to ${next.name} →</a></div>
           <div class="map-wrap">${mapSvg(v)}</div>
-          <p class="hint">Three holes at every port. Every Masterpiece earns doubloons, more on a streak, and you can bet them on the last piece turning up. <button class="linkish reset">Start a new voyage</button></p>
+          <p class="hint">Three holes at every port. Every Masterpiece earns doubloons, more on a streak. Bet them against other pirates at the harbour table. <button class="linkish reset">Start a new voyage</button></p>
         </section>
       </article>`;
     $('.reset', main).addEventListener('click', () => {
@@ -951,10 +952,8 @@
       main.innerHTML = '<article><section class="run"></section></article>';
       holeRun($('.run', main), {
         size: port.size, deal: port.deal, storm: port.storm, core: port.core, hint: port.hint, header,
-        bet: () => purse.get(),
         onFinish: (r) => {
           const cur = voyage();
-          if (r.betDelta) purse.add(r.betDelta, r.betDelta > 0 ? 'Bet won' : 'Bet lost');
           if (r.masterpiece) {
             cur.streak++;
             const reward = 5 * port.size + 2 * (cur.streak - 1);

@@ -443,23 +443,26 @@
   function dealStep(cells, count = 1, storm = false, held = []) {
     const base = held.slice(0, count - 1);
     const fresh = (n) => Array.from({ length: n }, () => dealLetter(storm));
-    for (let t = 0; t < 12; t++) {
-      const letters = base.concat(fresh(count - base.length));
-      const options = stepOptions(cells, letters);
-      if (options) return { letters, options, skipped: t };
-    }
     const useful = shuffle(finishInfo(cells).useful);
-    for (const l of useful) {
-      const letters = base.concat(l, fresh(count - base.length - 1));
-      const options = stepOptions(cells, letters);
-      if (options) return { letters, options, skipped: 12 };
-    }
-    // A single piece with only one sensible spot is no choice at all: offer a second piece instead.
-    if (count === 1) {
-      for (const l of useful) for (const m of useful) {
-        if (m === l) continue;
-        const options = stepOptions(cells, [l, m], 2, false);
-        if (options) return { letters: [l, m], options, skipped: 12, pickOne: true };
+    // First look for a deal with a clear best move; failing that, allow moves that tie.
+    for (const strict of [true, false]) {
+      for (let t = 0; t < 12; t++) {
+        const letters = base.concat(fresh(count - base.length));
+        const options = stepOptions(cells, letters, 2, true, strict);
+        if (options) return { letters, options, skipped: t };
+      }
+      for (const l of useful) {
+        const letters = base.concat(l, fresh(count - base.length - 1));
+        const options = stepOptions(cells, letters, 2, true, strict);
+        if (options) return { letters, options, skipped: 12 };
+      }
+      // A single piece with only one sensible spot is no choice at all: offer a second piece instead.
+      if (count === 1) {
+        for (const l of useful) for (const m of useful) {
+          if (m === l) continue;
+          const options = stepOptions(cells, [l, m], 2, false, strict);
+          if (options) return { letters: [l, m], options, skipped: 12, pickOne: true };
+        }
       }
     }
     for (const l of useful) {
@@ -530,7 +533,9 @@
   }
 
   const GRADES = [[0.95, 'best'], [0.6, 'good'], [0.25, 'tight'], [1e-12, 'risky'], [-1, 'dead']];
-  const gradeOf = (score, best) => (score <= 0 ? 'dead' : (GRADES.find(([t]) => score / best >= t) || [0, 'risky'])[1]);
+  // Two chances a player can't tell apart: within a tenth or so, or within a fifth of each other.
+  const close = (a, b) => Math.abs(a - b) < 0.08 || Math.min(a, b) > 0.8 * Math.max(a, b);
+  const gradeOf = (score, best) => (score <= 0 ? 'dead' : close(score, best) ? 'best' : (GRADES.find(([t]) => score / best >= t) || [0, 'risky'])[1]);
 
   // The two-piece finishes named in Hawkings' Carpentry tutorial on YPPedia.
   const NAMED = [
@@ -583,7 +588,7 @@
 
   /* Up to three placements that all look like sensible moves (they hug the edge and strand
      no squares), chosen so they differ in how well they set up the finish. */
-  function stepOptions(cells, letters, min = 2, keep = true) {
+  function stepOptions(cells, letters, min = 2, keep = true, strict = true) {
     const inHole = new Set(cells.map(([r, c]) => key(r, c)));
     const all = [];
     for (const letter of [...new Set(letters)]) {
@@ -616,11 +621,21 @@
       return true;
     }).sort((a, b) => b.contact - a.contact);
     const chosen = [all[0]];
-    const near = pool.find((o) => o.score > 0 && o.score < best * 0.9);
+    // No two options may finish about as often, or there's no right answer to find. (Not strict:
+    // the last resort, where ties are allowed and both get the top grade.)
+    const apart = (o) => !strict || chosen.every((c) => !close(c.score, o.score));
+    const near = pool.find((o) => o.score > 0 && (strict ? apart(o) : o.score < best * 0.9));
     if (near) chosen.push(near);
-    const weak = pool.filter((o) => !chosen.includes(o) && o.score < best * 0.5);
+    const weak = pool.filter((o) => !chosen.includes(o) && o.score < best * 0.5 && apart(o));
     if (weak.length) chosen.push(weak[rand(Math.min(2, weak.length))]);
-    for (const o of pool) { if (chosen.length >= 3) break; if (!chosen.includes(o)) chosen.push(o); }
+    for (const o of pool) { if (chosen.length >= 3) break; if (!chosen.includes(o) && apart(o)) chosen.push(o); }
+    // Every move that hugs the edge does about as well (say, you hold the closing piece either
+    // way): find the contrast in a placement that hugs it a little less.
+    if (chosen.length < 2) {
+      const looser = all.filter((o) => o !== all[0] && o.contact >= maxContact - 4).sort((a, b) => b.contact - a.contact);
+      const o = looser.find((x) => x.score > 0 && apart(x)) || looser.find(apart);
+      if (o) chosen.push(o);
+    }
     if (chosen.length < min) return null;
     chosen.forEach((o) => { o.grade = gradeOf(o.score, best); });
     return shuffle(chosen);

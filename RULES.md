@@ -26,6 +26,12 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
   in a fold-out panel.
 - **Every choice must be a real choice.** Never show a single option. If one piece has only
   one sensible spot, offer two pieces to pick from instead.
+- **There must be a right answer.** No two options may finish about as often (they must differ by
+  at least a tenth and a fifth), or "the green one was stronger" splits hairs. When every move
+  really is as good (often because you hold the closing piece), both show green and the feedback
+  says either was right.
+- **No betting on the voyage.** The bet on the last draw was dropped there; betting lives at the
+  harbour table. The voyage is for earning.
 - **Options must be plausible.** No obviously bad moves: every option hugs the edge and strands
   no squares. They should differ in what they set up ("leaves a Dogleg", "keeps it square").
 - **Feedback must stay on screen long enough to read** before the next step rolls on.
