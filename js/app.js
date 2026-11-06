@@ -237,6 +237,8 @@
   }
 
   const PAIR_MAX = 4; // five-piece holes are slow to grow and have too many answers
+  // Bigger holes are much harder to see, so the pay climbs steeply: 2 pieces 1, 3 pieces 4, 4 pieces 10.
+  const PAIR_PAY = [0, 0, 1, 4, 10];
   const pairSize = () => Math.min(PAIR_MAX, Math.max(2, store.get().pairSize || 2));
 
   const QUIZZES = {
@@ -254,8 +256,7 @@
       lede: 'Exactly one of these sets of pieces drops into the hole cleanly. Turn and flip them in your head. Slide for bigger holes: they pay more.',
       layout: 'pairs',
       gen: () => C.genPairQuiz(pairSize()),
-      // Two pieces pay 1 doubloon, and every extra piece adds another.
-      pay: (q, rating) => (rating === 'masterpiece' ? q.size - 1 : 0),
+      pay: (q, rating) => (rating === 'masterpiece' ? PAIR_PAY[q.size] : 0),
       controls: () => `<label class="size-pick">Pieces to finish it
           <input type="range" min="2" max="${PAIR_MAX}" step="1" value="${pairSize()}">
           <b class="size-n"></b><span class="size-pay"></span></label>`,
@@ -263,7 +264,7 @@
         const input = $('.size-pick input', root);
         const show = () => {
           $('.size-n', root).textContent = input.value;
-          $('.size-pay', root).innerHTML = `pays ${coin(input.value - 1)}`;
+          $('.size-pay', root).innerHTML = `pays ${coin(PAIR_PAY[input.value])}`;
         };
         show();
         input.addEventListener('input', show);
@@ -1151,15 +1152,21 @@
   function harbourPage() {
     const api = window.Social && Social.api;
     let view = null, offset = 0, state = null, flipped = 0, lastPoll = 0, fetching = false, resultShown = false, timer = null;
+    let lastStake = new Map(); // what each pirate had on last time we drew the crew, to spot new bets
     const t = () => Date.now() + offset - view.start;
     const secs = (ms) => Math.max(0, Math.ceil(ms / 1000));
+    const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    const isMe = (name) => { const me = Social.me(); return !!me && me.name === name; };
+    const RANKS = ['Rarest', '2nd rarest', '3rd rarest', 'Likeliest'];
+    const rank = (i) => view.holes.filter((h, j) => h.chance < view.holes[i].chance || (h.chance === view.holes[i].chance && j < i)).length;
+    const hue = (name) => [...name].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) % 360, 7);
 
     main.innerHTML = `
       <article class="bet-page harbour">
         <header class="page-head">
           <p class="eyebrow">Harbour games</p>
           <h1>Harbour table</h1>
-          <p class="lede">Everyone online plays the same table. You've 20 seconds to back the holes you think will get finished, then ${TABLE_DRAWS} pieces come off the pile for everyone. All the stakes go into one pot, and whoever backed a finished hole splits it. If nobody did, the pot rolls over to the next round.</p>
+          <p class="lede">Everyone online plays the same table. You've 20 seconds to back the holes you think will get finished, then ${TABLE_DRAWS} pieces come off the pile for everyone. All the stakes go into one pot. If more than one hole gets finished, the rarest one with money on it takes the lot, and its backers split it. If nobody backed a finished hole, the pot rolls over to the next round.</p>
         </header>
         <div class="h-body"><p class="hint">Pulling up a chair…</p></div>
       </article>`;
@@ -1197,14 +1204,18 @@
           <span>Your purse ${coin(`<span class="purse-live">${purse.get()}</span>`)}</span>
           <span>Pot ${coin('<span class="pot-n">0</span>')}<span class="carry"></span></span>
           <span class="clock"></span>
+          <span class="h-bar"><i></i></span>
         </div>
         ${me ? '' : `<form class="h-join"><label for="h-name">Put your pirate name on the board to take a seat</label>
           <div class="b-row"><input id="h-name" name="name" maxlength="16" placeholder="Pirate name" autocomplete="nickname" required><button class="btn sm">Join</button></div>
           <p class="b-err" role="alert"></p></form>`}
         <p class="h-note"></p>
+        <div class="h-layout">
+        <aside class="h-crew"><h2>At the table</h2><p class="h-count"></p><ul></ul></aside>
+        <div class="h-play">
         <div class="table-holes">${view.holes.map((h, i) => `
           <div class="tcard" data-i="${i}">
-            <div class="t-head"><span class="t-name">${HOLE_NAMES[i]}</span><span class="t-price"></span></div>
+            <div class="t-head"><span class="t-name">${HOLE_NAMES[i]}</span><span class="t-rank r${rank(i)}">${RANKS[rank(i)]}</span></div>
             <div class="hole-wrap t-board">${holeBoard(i)}</div>
             <div class="t-needs">${needsText(h, state[i])}<p class="t-odds">From ${TABLE_DRAWS} pieces: finished ${timesText(h.chance)}</p></div>
             <div class="t-stake"><span class="t-amt">${coin('<span class="amt-n">0</span>')}</span>
@@ -1216,7 +1227,8 @@
           <div class="cards">${Array.from({ length: TABLE_DRAWS }, (_, i) => `<div class="card-slot"><div class="card" data-i="${i}"><div class="card-in"><div class="face back"></div><div class="face front"></div></div></div><span class="card-cap"></span></div>`).join('')}</div>
           <div class="settle" hidden></div>
         </div>
-        <section class="h-feed"><h2>At the table</h2><ul></ul></section>`;
+        </div></div>`;
+      lastStake = new Map();
       const form = $('.h-join', body);
       if (form) form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -1240,19 +1252,41 @@
         $('.amt-n', c).textContent = mine;
         $('.t-stake', c).hidden = !open || !me;
         $('.plus', c).disabled = staked + view.stakeStep > view.cap || purse.get() < view.stakeStep;
-        // Your share if this were the only hole finished: the whole pot, split by stake.
+        // Your share if this hole takes the pot: the whole pot, split by stake.
         const share = mine ? Math.floor(view.pot * mine / total) : Math.floor((view.pot + view.stakeStep) * view.stakeStep / (total + view.stakeStep));
-        $('.t-backed', c).innerHTML = `<p>On this hole ${coin(total)}${mine ? ` · yours ${coin(mine)}` : ''}</p>`
-          + (open ? `<p class="t-share">${mine ? `If only ${HOLE_NAMES[i]} is finished, you get about ${coin(share)}` : `${view.stakeStep} here would win about ${coin(share)} if only ${HOLE_NAMES[i]} is finished`}</p>` : '');
+        const backers = view.bets.filter((b) => b.hole === i).sort((a, b) => b.amt - a.amt);
+        $('.t-backed', c).innerHTML = `<p>On this hole ${coin(total)}</p>`
+          + (backers.length ? `<ul class="backers">${backers.map((b) => `<li class="${b.bot ? 'bot' : ''}${isMe(b.name) ? ' me' : ''}">${isMe(b.name) ? 'You' : esc(b.name)} ${coin(b.amt)}</li>`).join('')}</ul>` : '')
+          + (open ?`<p class="t-share">${mine ? `If ${HOLE_NAMES[i]} takes the pot, you get about ${coin(share)}` : `${view.stakeStep} here wins about ${coin(share)} if ${HOLE_NAMES[i]} takes the pot`}</p>` : '');
       });
       let note = '';
       if (!me) note = 'You can watch, but you need a pirate name to bet.';
       else if (purse.get() < view.stakeStep && !staked) note = 'Your purse is empty. Earn doubloons on the voyage or in the quick puzzles to get back to the table.';
       else if (open) note = `Bets are final. You can stake up to ${coin(view.cap)} a round${staked ? `, and you've staked ${coin(staked)}` : ''}.`;
       $('.h-note', body).innerHTML = note;
-      $('.h-feed ul', body).innerHTML = view.bets.length
-        ? view.bets.slice(0, 10).map((b) => `<li class="${b.bot ? 'bot' : ''}${me && b.name === me.name ? ' me' : ''}"><b>${b.name.replace(/</g, '&lt;')}</b> ${coin(b.amt)} on <b>${HOLE_NAMES[b.hole]}</b></li>`).join('')
-        : '<li class="hint">No bets yet.</li>';
+      paintCrew();
+    }
+
+    // Everyone at the table, what they've got on which hole, and once it's settled, who won.
+    function paintCrew() {
+      const open = t() < view.betMs, res = view.result;
+      const crew = [...view.crew].sort((a, b) => (res ? b.won - a.won : 0) || isMe(b.name) - isMe(a.name) || a.bot - b.bot || b.staked - a.staked);
+      const people = crew.filter((c) => !c.bot).length;
+      $('.h-count', body).textContent = `${people ? plural(people, 'pirate') : 'No pirates'} and ${plural(crew.length - people, 'house pirate')}`;
+      const mark = (i) => (res && res.hole === i ? ' paid' : state[i].done ? ' done' : res ? ' bodged' : '');
+      $('.h-crew ul', body).innerHTML = crew.map((c) => {
+        const holes = view.bets.filter((b) => b.name === c.name).sort((a, b) => a.hole - b.hole);
+        const bump = lastStake.has(c.name) && c.staked > lastStake.get(c.name);
+        lastStake.set(c.name, c.staked);
+        const what = holes.length
+          ? holes.map((b) => `<span class="hb${mark(b.hole)}"><b>${HOLE_NAMES[b.hole]}</b> ${coin(b.amt)}</span>`).join('')
+          : `<span class="hint">${open ? (c.bot ? 'Thinking…' : 'Watching') : 'Sat this one out'}</span>`;
+        const net = c.won - c.staked;
+        const out = res && c.staked ? `<span class="h-out ${net > 0 ? 'up' : net < 0 ? 'down' : ''}">${c.won ? `Won ${coin(c.won)}` : `Lost ${coin(c.staked)}`}</span>` : '';
+        return `<li class="seat${c.bot ? ' bot' : ''}${isMe(c.name) ? ' me' : ''}${bump ? ' bump' : ''}${res && c.won ? ' winner' : ''}">
+          <span class="s-face" style="--h:${hue(c.name)}">${esc(c.name.replace(/^Cap'n /, '')[0])}</span>
+          <span class="who"><span class="nm"><b>${isMe(c.name) ? 'You' : esc(c.name)}</b>${c.bot ? '<small>House</small>' : ''}</span><span class="what">${what}${out}</span></span></li>`;
+      }).join('');
     }
 
     async function bet(i, btn) {
@@ -1296,6 +1330,7 @@
       if (!res) { resultShown = false; return; }
       const cards = body.querySelectorAll('.tcard');
       view.holes.forEach((_, i) => {
+        if (i === res.hole) $('.t-result', cards[i]).innerHTML = '<span class="tag-grade best">Takes the pot</span>';
         if (state[i].done) return;
         $('.t-result', cards[i]).innerHTML = '<span class="tag-grade risky">Bodged</span>';
         if (view.mine[i]) shake($('.t-board', cards[i]));
@@ -1304,10 +1339,12 @@
       const staked = view.mine.reduce((a, b) => a + b, 0);
       const won = r ? r.won : 0, net = won - staked;
       const fin = res.finished.map((i) => HOLE_NAMES[i]);
+      const paid = view.crew.filter((c) => c.won).sort((a, b) => b.won - a.won).map((c) => `${isMe(c.name) ? 'you' : esc(c.name)} ${coin(c.won)}`);
+      paintCrew();
       const box = $('.settle', body);
       box.hidden = false;
       box.innerHTML = `<div class="verdict ${net > 0 ? 'good' : net < 0 ? 'bad' : 'ok'}">${!staked ? 'You sat this one out.' : net > 0 ? `You won ${coin(won)}!` : won ? `You got ${coin(won)} back.` : `You lost ${coin(staked)}.`}</div>
-        <p>${fin.length ? `Finished: <b>${fin.join(', ')}</b>.` : 'Nothing got finished.'} ${res.rollover ? `Nobody backed a finished hole, so the pot of ${coin(res.rollover)} rolls over to the next round.` : `The pot of ${coin(res.pot)} was split between the pirates who backed ${fin.length > 1 ? 'them' : 'it'}.`}</p>
+        <p>${fin.length ? `Finished: <b>${fin.join(', ')}</b>.` : 'Nothing got finished.'} ${res.rollover ? `Nobody backed a finished hole, so the pot of ${coin(res.rollover)} rolls over to the next round.` : `${HOLE_NAMES[res.hole]} ${res.finished.length > 1 ? 'was the rarest finished hole with money on it, so it took' : 'took'} the pot of ${coin(res.pot)}: ${paid.join(', ')}.`}</p>
         <p class="hint next-in"></p>`;
     }
 
@@ -1326,7 +1363,8 @@
         if (!fetching) load().then((v) => { if (v.n === view.n) { view = v; paint(); } }).catch(() => {});
       } else if (now < view.settleMs) clock.innerHTML = 'Pieces coming off the pile';
       else clock.innerHTML = `Next round in <b>${secs(view.roundMs - now)}s</b>`;
-      if (view.draws) while (flipped < view.draws.length && now >= view.flipAt[flipped]) flip(flipped++);
+      $('.h-bar i', body).style.width = `${now < view.betMs ? 100 * (view.betMs - now) / view.betMs : 0}%`;
+      if (view.draws) while (flipped < view.draws.length && now >= view.flipAt[flipped]) { flip(flipped++); paintCrew(); }
       if (view.draws && now >= view.settleMs && !resultShown) showResult();
       const ni = $('.next-in', body);
       if (ni) ni.textContent = `Next round in ${secs(view.roundMs - now)}s.`;

@@ -1,7 +1,7 @@
 /* The harbour table: one shared betting round for everyone online, on the clock.
    Each round: 20 seconds to bet, then five pieces come off the pile for everyone at once.
-   All stakes go into one pot, and whoever backed a finished hole splits it in proportion to
-   their stake. If nobody backed a finished hole, the pot rolls over into the next round.
+   All stakes go into one pot. If more than one hole gets finished, the rarest one takes it:
+   its backers split the pot by stake. If nobody backed a finished hole, the pot rolls over.
    A few house pirates bet every round, so there's always a pot and someone to beat. */
 import '../js/engine.js';
 import TABLES from './tables.json';
@@ -9,6 +9,9 @@ import TABLES from './tables.json';
 const C = globalThis.Carp;
 export const ROUND_MS = 45000, BET_MS = 20000, FLIP_AT = [21500, 25000, 28500, 32000, 35500], SETTLE_MS = 37000;
 export const STAKE_STEP = 5, ROUND_CAP = 20;
+// A pirate counts as at the table if their page has asked for the round this recently.
+const SEAT_MS = 20000;
+const BOTS = ["Cap'n Bones", 'One-Eyed Peg', 'Barnacle Bill'];
 
 export const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS rounds (
@@ -20,6 +23,7 @@ export const SCHEMA = [
      won INTEGER NOT NULL DEFAULT 0, claimed INTEGER NOT NULL DEFAULT 0)`,
   'CREATE INDEX IF NOT EXISTS bets_round ON bets (n)',
   'CREATE INDEX IF NOT EXISTS bets_pirate ON bets (pirate, claimed)',
+  'CREATE TABLE IF NOT EXISTS seats (pirate TEXT PRIMARY KEY, name TEXT NOT NULL, seen INTEGER NOT NULL)',
 ];
 
 const roundOf = (t) => Math.floor(t / ROUND_MS);
@@ -55,13 +59,22 @@ const holeTotals = (holes, bets) => {
   return t;
 };
 
+/* The hole that takes the pot: of the finished holes somebody backed, the one least likely
+   to get finished. -1 if there isn't one. */
+export function potHole(holes, finished, totals) {
+  const backed = finished.filter((i) => totals[i] > 0).sort((a, b) => holes[a].chance - holes[b].chance || a - b);
+  return backed.length ? backed[0] : -1;
+}
+
 async function settle(db, round) {
   if (round.settled || Date.now() < startOf(round.n) + SETTLE_MS) return round;
   const holes = TABLES[round.tbl], draws = JSON.parse(round.draws);
   const { results: bets } = await db.prepare('SELECT id, hole, amt FROM bets WHERE n = ?').bind(round.n).all();
-  const { finished } = playOut(holes, draws, holeTotals(holes, bets));
+  const totals = holeTotals(holes, bets);
+  const { finished } = playOut(holes, draws, totals);
   const pot = round.carry + bets.reduce((a, b) => a + b.amt, 0);
-  const winners = bets.filter((b) => finished.includes(b.hole));
+  const paid = potHole(holes, finished, totals);
+  const winners = bets.filter((b) => b.hole === paid);
   const winStake = winners.reduce((a, b) => a + b.amt, 0);
   const stmts = winners.map((b) => db.prepare('UPDATE bets SET won = ? WHERE id = ?').bind(Math.floor(pot * b.amt / winStake), b.id));
   const rollover = winStake ? 0 : pot;
@@ -97,7 +110,7 @@ export async function roundView(db, me) {
   const now = Date.now(), start = startOf(round.n), closed = now >= start + BET_MS;
   round = await settle(db, round);
   const holes = TABLES[round.tbl];
-  const { results } = await db.prepare('SELECT pirate, name, bot, hole, amt, at FROM bets WHERE n = ? AND at <= ? ORDER BY at').bind(round.n, now).all();
+  const { results } = await db.prepare('SELECT pirate, name, bot, hole, amt, at, won FROM bets WHERE n = ? AND at <= ? ORDER BY at').bind(round.n, now).all();
   const totals = holeTotals(holes, results);
   // One line per pirate per hole, newest first.
   const lines = new Map();
@@ -107,20 +120,36 @@ export async function roundView(db, me) {
     cur.amt += b.amt; cur.at = Math.max(cur.at, b.at);
     lines.set(k, cur);
   });
-  const id = me ? me.toLowerCase() : null;
+  const id = me && /^[A-Za-z]{3,16}$/.test(me) ? me.toLowerCase() : null;
   const mine = holes.map((_, i) => results.filter((b) => b.pirate === id && b.hole === i).reduce((a, b) => a + b.amt, 0));
+  // Who's at the table: the house pirates, anyone watching, and anyone with money on this round.
+  // A seat is only rewritten every few seconds, to keep database writes down.
+  if (id) await db.prepare(`INSERT INTO seats (pirate, name, seen) SELECT id, name, ? FROM pirates WHERE id = ?
+      ON CONFLICT (pirate) DO UPDATE SET seen = excluded.seen WHERE excluded.seen > seats.seen + 5000`).bind(now, id).run();
+  const { results: seated } = await db.prepare('SELECT pirate, name FROM seats WHERE seen > ? ORDER BY name').bind(now - SEAT_MS).all();
+  const crew = new Map();
+  seated.forEach((s) => crew.set(s.pirate, { name: s.name, bot: false, staked: 0 }));
+  BOTS.forEach((name) => crew.set('bot:' + name, { name, bot: true, staked: 0 }));
+  results.forEach((b) => {
+    if (!crew.has(b.pirate)) crew.set(b.pirate, { name: b.name, bot: !!b.bot, staked: 0 });
+    const c = crew.get(b.pirate); c.staked += b.amt; c.won = (c.won || 0) + b.won;
+  });
   const view = {
     n: round.n, now, start, roundMs: ROUND_MS, betMs: BET_MS, flipAt: FLIP_AT, settleMs: SETTLE_MS,
     stakeStep: STAKE_STEP, cap: ROUND_CAP,
     holes: holes.map((h) => ({ cells: h.cells, gap: h.gap, first: h.first, name: h.name, useful: h.useful, chance: h.chance })),
     carry: round.carry, pot: round.carry + totals.reduce((a, b) => a + b, 0), totals, mine,
     bets: [...lines.values()].sort((a, b) => b.at - a.at).map(({ at, ...b }) => b),
+    crew: [...crew.values()].map((c) => (round.settled ? { ...c, won: c.won || 0 } : { name: c.name, bot: c.bot, staked: c.staked })),
   };
   if (closed) {
     view.draws = JSON.parse(round.draws);
     view.order = playOut(holes, view.draws, totals).order;
   }
-  if (round.settled) view.result = { finished: JSON.parse(round.finished), pot: round.pot, rollover: round.rollover };
+  if (round.settled) {
+    const finished = JSON.parse(round.finished);
+    view.result = { finished, pot: round.pot, rollover: round.rollover, hole: potHole(holes, finished, totals) };
+  }
   return view;
 }
 

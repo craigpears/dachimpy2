@@ -502,11 +502,45 @@ svg.map { display: block; width: 100%; height: auto; }
 .harbour .t-backed p { margin: 0 0 4px; }
 .t-share { font-size: 15px; color: var(--muted); }
 .harbour .t-stake { justify-content: space-between; }
-.h-feed h2 { font-size: 21px; margin-top: 28px; }
-.h-feed ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; max-width: 460px; }
-.h-feed li { display: flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 8px; background: var(--panel); font-size: 16px; }
-.h-feed li.bot b:first-child { color: var(--muted); }
-.h-feed li.me { background: var(--accent); color: var(--accent-ink); }
+.h-bar { flex-basis: 100%; height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.h-bar i { display: block; width: 0; height: 100%; background: var(--accent); transition: width 0.25s linear; }
+.t-rank { font-size: 13px; padding: 2px 8px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); }
+.t-rank.r0 { background: #e0a92a; border-color: #b8860b; color: #2b1d05; font-weight: 700; }
+.backers { list-style: none; margin: 2px 0 6px; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; font-size: 14px; }
+.backers li, .hb { display: inline-flex; align-items: center; gap: 3px; padding: 1px 8px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--line); }
+.backers li.bot { color: var(--muted); }
+.backers li.me { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+/* Who's at the table: beside the holes when there's room, above them when there isn't */
+.h-body { container-type: inline-size; }
+.h-layout { display: grid; gap: 18px; }
+@container (min-width: 760px) {
+  .h-layout { grid-template-columns: minmax(0, 1fr) 270px; align-items: start; }
+  .h-crew { order: 2; position: sticky; top: 96px; }
+}
+.h-crew { padding: 14px; background: var(--panel); border: 2px solid #b8860b; border-radius: var(--radius); box-shadow: var(--shadow); }
+.h-crew h2 { font-size: 22px; margin: 0; }
+.h-count { margin: 2px 0 10px; color: var(--muted); font-size: 15px; }
+.h-crew ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.seat { display: grid; grid-template-columns: 38px minmax(0, 1fr); align-items: center; gap: 10px; padding: 8px; border-radius: 10px; background: var(--panel-2); border: 1px solid transparent; }
+.s-face { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font: 700 18px var(--serif); color: #fff; background: hsl(var(--h) 45% 40%); }
+.seat.bot .s-face { background: var(--bench); color: #f3e2b8; }
+.seat.me { border-color: var(--accent); }
+.seat.winner { background: var(--good-bg); border-color: var(--good); }
+.seat .nm { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+.seat .nm b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.seat small { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.seat .what { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; font-size: 14px; }
+.seat .what .hint { margin: 0; font-size: 14px; }
+.hb.done { border-color: var(--good); }
+.hb.paid { background: var(--good-bg); border-color: var(--good); font-weight: 700; }
+.hb.bodged { opacity: 0.55; text-decoration: line-through; }
+.h-out { margin-left: auto; display: flex; align-items: center; gap: 3px; font-size: 15px; font-weight: 700; white-space: nowrap; }
+.h-out.up { color: var(--good); }
+.h-out.down { color: var(--bad); }
+.seat.bump { animation: seat-bump 1s ease-out; }
+@keyframes seat-bump { from { box-shadow: 0 0 0 3px #e0a92a; } to { box-shadow: 0 0 0 0 transparent; } }
+@media (prefers-reduced-motion: reduce) { .seat.bump { animation: none; } }
 /* On a phone the five cards share the width instead of pushing the page wider. */
 @media (max-width: 520px) {
   .cards .card-slot { flex: 1 1 0; min-width: 0; }

@@ -42,8 +42,8 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
   and you can add bets between pieces. Holes that don't get finished are "bodged".
 - **Which pair fits?** is exactly right for teaching two-piece finishes; build more games in that style.
   A slider sets how many pieces finish the hole (2 to 4; five-piece holes are too slow to build
-  and have too many answers). A right answer pays one doubloon for two pieces, plus one more for
-  each extra piece.
+  and have too many answers). Harder holes must feel properly rewarded, so the pay climbs steeply:
+  2 pieces pay 1, 3 pieces 4, 4 pieces 10.
 - **Place your bets: no "A before B".** A piece only fills one hole, but the order mustn't feel
   arbitrary. If two holes need the same piece, it goes to the one with more of your money on it,
   and the prices are worked out with that rule. Stakes leave the purse as you place them, and
@@ -65,13 +65,19 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 - **Competitive play is capped.** Head-to-head games give everyone the same stake, so a big purse
   buys no edge. If you run out, you earn your way back in with the quick puzzles first.
 - **The harbour table is player against player.** One shared round every 45 seconds: 20 seconds
-  to bet, then five pieces for everyone. No bookie's prices: all stakes go in one pot, split by
-  stake between whoever backed a finished hole; if nobody did, the pot rolls over. House pirates
+  to bet, then five pieces for everyone. No bookie's prices: all stakes go in one pot. If more than one
+  hole gets finished, the rarest one with money on it takes the whole pot, split by stake among
+  its backers (so a crowded easy hole pays little, a long shot pays big); if nobody backed a
+  finished hole, the pot rolls over. Each hole is labelled Rarest … Likeliest. House pirates
   (Cap'n Bones, One-Eyed Peg, Barnacle Bill) bet every round so there's always a pot. Stakes are
   capped at 20 a round, bets are final, and the pieces stay secret on the server until betting
   closes. The solo table against the bookie stays as *Practice bets*.
+- **Who's at the table must be obvious.** A prominent panel beside the holes (above them on narrow
+  screens) lists every pirate at the table, house pirates marked, with what each has on which hole,
+  and after the round who won and who lost. Each hole also lists its backers by name.
 - Ideas to build next: a daily head-to-head on Hole of the Day (same pieces for everyone, a board
   of who got the Masterpiece); and *carpentry poker*: two pieces in your hand,
   the holes on the table, then shared pieces dealt like a flop, turn and river, with betting
-  between each.
+  between each; and *crew carpentry*: a co-op Hole of the Day where the crew take turns round a
+  circle, each picking one of the dealt pieces, and the whole crew shares the grade and the pay.
 - Dropped ideas: *Commit or wait* (not interesting).
