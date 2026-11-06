@@ -8,7 +8,7 @@
   const save = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch { /* storage unavailable */ } };
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
-  let getPurse = () => 0, me = load(), el = null, syncTimer = null, last = null;
+  let getPurse = () => 0, addPurse = () => {}, me = load(), el = null, syncTimer = null, last = null;
 
   async function api(path, body) {
     const res = await fetch('api/' + path, body ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) } : {});
@@ -52,17 +52,27 @@
     el = document.getElementById('lboard');
   }
 
-  async function join(form) {
-    const name = form.name.value.trim(), err = form.querySelector('.b-err'), btn = form.querySelector('button');
-    if (!/^[A-Za-z]{3,16}$/.test(name)) { err.textContent = 'Use 3 to 16 letters, no spaces.'; return; }
-    btn.disabled = true;
+  const OUT_OF_REACH = 'The board is out of reach. Try again in a moment.';
+
+  // Claim a pirate name. Resolves to an error message, or null when it worked.
+  async function joinAs(name) {
+    if (!/^[A-Za-z]{3,16}$/.test(name)) return 'Use 3 to 16 letters, no spaces.';
     try {
       const r = await api('pirates', { name, dubs: getPurse() });
-      if (!r.ok) { err.textContent = r.data.message || 'The board is out of reach. Try again in a moment.'; btn.disabled = false; return; }
+      if (!r.ok) return r.data.message || OUT_OF_REACH;
       me = { name: r.data.name, key: r.data.key };
       save(me);
       refresh();
-    } catch { err.textContent = 'The board is out of reach. Try again in a moment.'; btn.disabled = false; }
+      document.dispatchEvent(new Event('pirate-joined'));
+      return null;
+    } catch { return OUT_OF_REACH; }
+  }
+
+  async function join(form) {
+    const err = form.querySelector('.b-err'), btn = form.querySelector('button');
+    btn.disabled = true;
+    const problem = await joinAs(form.name.value.trim());
+    if (problem) { err.textContent = problem; btn.disabled = false; }
   }
 
   // Post the purse a moment after it settles, so a run of bets sends one update.
@@ -78,13 +88,29 @@
     }, SYNC_MS);
   }
 
+  // Collect winnings from finished harbour-table rounds, including ones you left part-way.
+  async function claim() {
+    if (!me) return null;
+    try {
+      const r = await api('harbour/claim', { name: me.name, key: me.key });
+      if (!r.ok) return null;
+      if (r.data.won) addPurse(r.data.won, 'Harbour table winnings');
+      return r.data;
+    } catch { return null; }
+  }
+
   window.Social = {
-    start(purseGetter) {
+    start(purseGetter, purseAdder) {
       getPurse = purseGetter;
+      addPurse = purseAdder;
       refresh();
-      if (me) purseChanged();
+      if (me) { purseChanged(); claim(); }
       setInterval(() => { if (!document.hidden) refresh(); }, REFRESH_MS);
     },
     purseChanged,
+    me: () => me,
+    joinAs,
+    claim,
+    api,
   };
 })();

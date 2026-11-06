@@ -64,9 +64,14 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
   with guard rails (no huge jumps in one go). Only ever show pirate names, never real ones.
 - **Competitive play is capped.** Head-to-head games give everyone the same stake, so a big purse
   buys no edge. If you run out, you earn your way back in with the quick puzzles first.
-- Ideas to build next, in this order: a daily head-to-head on Hole of the Day (same pieces for
-  everyone, a board of who got the Masterpiece); live betting tables with a join code (everyone
-  sees the same pile and bets at the same time); and *carpentry poker*: two pieces in your hand,
+- **The harbour table is player against player.** One shared round every 45 seconds: 20 seconds
+  to bet, then five pieces for everyone. No bookie's prices: all stakes go in one pot, split by
+  stake between whoever backed a finished hole; if nobody did, the pot rolls over. House pirates
+  (Cap'n Bones, One-Eyed Peg, Barnacle Bill) bet every round so there's always a pot. Stakes are
+  capped at 20 a round, bets are final, and the pieces stay secret on the server until betting
+  closes. The solo table against the bookie stays as *Practice bets*.
+- Ideas to build next: a daily head-to-head on Hole of the Day (same pieces for everyone, a board
+  of who got the Masterpiece); and *carpentry poker*: two pieces in your hand,
   the holes on the table, then shared pieces dealt like a flop, turn and river, with betting
   between each.
 - Dropped ideas: *Commit or wait* (not interesting).

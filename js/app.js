@@ -1145,12 +1145,210 @@
     out.innerHTML = html;
   }
 
+  // ---------- the harbour table: everyone online bets on the same round ----------
+  /* One round every 45 seconds, run by the server: 20 seconds to bet, then five pieces for
+     everyone. All the stakes go in one pot, split between whoever backed a finished hole. */
+  function harbourPage() {
+    const api = window.Social && Social.api;
+    let view = null, offset = 0, state = null, flipped = 0, lastPoll = 0, fetching = false, resultShown = false, timer = null;
+    const t = () => Date.now() + offset - view.start;
+    const secs = (ms) => Math.max(0, Math.ceil(ms / 1000));
+
+    main.innerHTML = `
+      <article class="bet-page harbour">
+        <header class="page-head">
+          <p class="eyebrow">Harbour games</p>
+          <h1>Harbour table</h1>
+          <p class="lede">Everyone online plays the same table. You've 20 seconds to back the holes you think will get finished, then ${TABLE_DRAWS} pieces come off the pile for everyone. All the stakes go into one pot, and whoever backed a finished hole splits it. If nobody did, the pot rolls over to the next round.</p>
+        </header>
+        <div class="h-body"><p class="hint">Pulling up a chair…</p></div>
+      </article>`;
+    const body = $('.h-body', main);
+
+    async function load() {
+      fetching = true;
+      try {
+        const me = Social.me();
+        const r = await api('harbour' + (me ? '?me=' + encodeURIComponent(me.name) : ''));
+        if (!r.ok) throw new Error('no harbour');
+        return r.data;
+      } finally { fetching = false; }
+    }
+
+    async function newRound() {
+      try { view = await load(); } catch {
+        view = null;
+        body.innerHTML = `<p>The harbour table needs the online server, and it can't be reached from here.</p>
+          <p><a class="btn" href="#/games/bets">Play the practice table</a></p>`;
+        return;
+      }
+      offset = view.now - Date.now();
+      state = C.tableState(view.holes);
+      flipped = 0; resultShown = false; lastPoll = Date.now();
+      build();
+    }
+
+    const holeBoard = (i, fresh) => R.board(state[i].rest, state[i].placed.map((p, j) => ({ ...p, fresh: fresh && j === state[i].placed.length - 1 })), { cell: 22, labels: false });
+
+    function build() {
+      const me = Social.me();
+      body.innerHTML = `
+        <div class="purse-bar bet-purse">
+          <span>Your purse ${coin(`<span class="purse-live">${purse.get()}</span>`)}</span>
+          <span>Pot ${coin('<span class="pot-n">0</span>')}<span class="carry"></span></span>
+          <span class="clock"></span>
+        </div>
+        ${me ? '' : `<form class="h-join"><label for="h-name">Put your pirate name on the board to take a seat</label>
+          <div class="b-row"><input id="h-name" name="name" maxlength="16" placeholder="Pirate name" autocomplete="nickname" required><button class="btn sm">Join</button></div>
+          <p class="b-err" role="alert"></p></form>`}
+        <p class="h-note"></p>
+        <div class="table-holes">${view.holes.map((h, i) => `
+          <div class="tcard" data-i="${i}">
+            <div class="t-head"><span class="t-name">${HOLE_NAMES[i]}</span><span class="t-price"></span></div>
+            <div class="hole-wrap t-board">${holeBoard(i)}</div>
+            <div class="t-needs">${needsText(h, state[i])}<p class="t-odds">From ${TABLE_DRAWS} pieces: finished ${timesText(h.chance)}</p></div>
+            <div class="t-stake"><span class="t-amt">${coin('<span class="amt-n">0</span>')}</span>
+              <button class="sbtn plus" aria-label="Put ${view.stakeStep} on ${HOLE_NAMES[i]}">+${view.stakeStep}</button></div>
+            <div class="t-backed"></div>
+            <div class="t-result"></div>
+          </div>`).join('')}</div>
+        <div class="draw-zone">
+          <div class="cards">${Array.from({ length: TABLE_DRAWS }, (_, i) => `<div class="card-slot"><div class="card" data-i="${i}"><div class="card-in"><div class="face back"></div><div class="face front"></div></div></div><span class="card-cap"></span></div>`).join('')}</div>
+          <div class="settle" hidden></div>
+        </div>
+        <section class="h-feed"><h2>At the table</h2><ul></ul></section>`;
+      const form = $('.h-join', body);
+      if (form) form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = $('button', form);
+        btn.disabled = true;
+        const problem = await Social.joinAs(form.name.value.trim());
+        if (problem) { $('.b-err', form).textContent = problem; btn.disabled = false; }
+      });
+      body.querySelectorAll('.tcard .plus').forEach((b, i) => b.addEventListener('click', () => bet(i, b)));
+      paint();
+    }
+
+    function paint() {
+      const cards = body.querySelectorAll('.tcard'), open = t() < view.betMs, me = Social.me();
+      const staked = view.mine.reduce((a, b) => a + b, 0);
+      $('.pot-n', body).textContent = view.pot;
+      $('.carry', body).innerHTML = view.carry ? ` · ${coin(view.carry)} rolled over` : '';
+      view.holes.forEach((h, i) => {
+        const c = cards[i], total = view.totals[i], mine = view.mine[i];
+        c.classList.toggle('backed', mine > 0);
+        $('.amt-n', c).textContent = mine;
+        $('.t-stake', c).hidden = !open || !me;
+        $('.plus', c).disabled = staked + view.stakeStep > view.cap || purse.get() < view.stakeStep;
+        // Your share if this were the only hole finished: the whole pot, split by stake.
+        const share = mine ? Math.floor(view.pot * mine / total) : Math.floor((view.pot + view.stakeStep) * view.stakeStep / (total + view.stakeStep));
+        $('.t-backed', c).innerHTML = `<p>On this hole ${coin(total)}${mine ? ` · yours ${coin(mine)}` : ''}</p>`
+          + (open ? `<p class="t-share">${mine ? `If only ${HOLE_NAMES[i]} is finished, you get about ${coin(share)}` : `${view.stakeStep} here would win about ${coin(share)} if only ${HOLE_NAMES[i]} is finished`}</p>` : '');
+      });
+      let note = '';
+      if (!me) note = 'You can watch, but you need a pirate name to bet.';
+      else if (purse.get() < view.stakeStep && !staked) note = 'Your purse is empty. Earn doubloons on the voyage or in the quick puzzles to get back to the table.';
+      else if (open) note = `Bets are final. You can stake up to ${coin(view.cap)} a round${staked ? `, and you've staked ${coin(staked)}` : ''}.`;
+      $('.h-note', body).innerHTML = note;
+      $('.h-feed ul', body).innerHTML = view.bets.length
+        ? view.bets.slice(0, 10).map((b) => `<li class="${b.bot ? 'bot' : ''}${me && b.name === me.name ? ' me' : ''}"><b>${b.name.replace(/</g, '&lt;')}</b> ${coin(b.amt)} on <b>${HOLE_NAMES[b.hole]}</b></li>`).join('')
+        : '<li class="hint">No bets yet.</li>';
+    }
+
+    async function bet(i, btn) {
+      const me = Social.me();
+      if (!me || purse.get() < view.stakeStep) return;
+      btn.disabled = true;
+      const r = await api('harbour/bet', { name: me.name, key: me.key, n: view.n, hole: i, amt: view.stakeStep }).catch(() => null);
+      if (r && r.ok) {
+        purse.add(-view.stakeStep);
+        view.mine[i] += view.stakeStep; view.totals[i] += view.stakeStep; view.pot += view.stakeStep;
+        view.bets.unshift({ name: me.name, hole: i, amt: view.stakeStep });
+      } else if (r) toast('', r.data.message || 'That bet didn’t go through.', false);
+      paint();
+    }
+
+    function flip(i) {
+      const l = view.draws[i];
+      const card = main.querySelector(`.card[data-i="${i}"]`);
+      $('.front', card).innerHTML = R.piece(l, null, { cell: 12, box: 70 }) + `<span>${l}</span>`;
+      card.classList.add('flipped');
+      const into = C.tableDraw(view.holes, state, l, view.order);
+      const cap = card.parentElement.querySelector('.card-cap');
+      const cards = body.querySelectorAll('.tcard');
+      if (into < 0) { cap.textContent = 'Spare'; card.classList.add('miss'); return; }
+      cap.innerHTML = `Into <b>${HOLE_NAMES[into]}</b>`;
+      $('.t-board', cards[into]).innerHTML = holeBoard(into, true);
+      $('.t-needs', cards[into]).innerHTML = needsText(view.holes[into], state[into]);
+      if (state[into].done) {
+        card.classList.add('hit');
+        cards[into].classList.add('done');
+        $('.t-board', cards[into]).classList.add('glow');
+        $('.t-result', cards[into]).innerHTML = '<span class="tag-grade best">Finished</span>';
+      }
+    }
+
+    async function showResult() {
+      resultShown = true;
+      const [mine, fresh] = await Promise.all([Social.claim(), load().catch(() => null)]);
+      if (fresh && fresh.n === view.n) view = { ...fresh, mine: view.mine };
+      const res = view.result;
+      if (!res) { resultShown = false; return; }
+      const cards = body.querySelectorAll('.tcard');
+      view.holes.forEach((_, i) => {
+        if (state[i].done) return;
+        $('.t-result', cards[i]).innerHTML = '<span class="tag-grade risky">Bodged</span>';
+        if (view.mine[i]) shake($('.t-board', cards[i]));
+      });
+      const r = mine && mine.rounds.find((x) => x.n === view.n);
+      const staked = view.mine.reduce((a, b) => a + b, 0);
+      const won = r ? r.won : 0, net = won - staked;
+      const fin = res.finished.map((i) => HOLE_NAMES[i]);
+      const box = $('.settle', body);
+      box.hidden = false;
+      box.innerHTML = `<div class="verdict ${net > 0 ? 'good' : net < 0 ? 'bad' : 'ok'}">${!staked ? 'You sat this one out.' : net > 0 ? `You won ${coin(won)}!` : won ? `You got ${coin(won)} back.` : `You lost ${coin(staked)}.`}</div>
+        <p>${fin.length ? `Finished: <b>${fin.join(', ')}</b>.` : 'Nothing got finished.'} ${res.rollover ? `Nobody backed a finished hole, so the pot of ${coin(res.rollover)} rolls over to the next round.` : `The pot of ${coin(res.pot)} was split between the pirates who backed ${fin.length > 1 ? 'them' : 'it'}.`}</p>
+        <p class="hint next-in"></p>`;
+    }
+
+    function tick() {
+      if (!view || !document.body.contains(body)) return;
+      const now = t();
+      const clock = $('.clock', body);
+      if (now < view.betMs) {
+        clock.innerHTML = `Betting closes in <b>${secs(view.betMs - now)}s</b>`;
+        if (Date.now() - lastPoll > 3000 && !fetching) {
+          lastPoll = Date.now();
+          load().then((v) => { if (v.n === view.n) { view = v; paint(); } }).catch(() => {});
+        }
+      } else if (!view.draws) {
+        clock.innerHTML = 'Betting closed';
+        if (!fetching) load().then((v) => { if (v.n === view.n) { view = v; paint(); } }).catch(() => {});
+      } else if (now < view.settleMs) clock.innerHTML = 'Pieces coming off the pile';
+      else clock.innerHTML = `Next round in <b>${secs(view.roundMs - now)}s</b>`;
+      if (view.draws) while (flipped < view.draws.length && now >= view.flipAt[flipped]) flip(flipped++);
+      if (view.draws && now >= view.settleMs && !resultShown) showResult();
+      const ni = $('.next-in', body);
+      if (ni) ni.textContent = `Next round in ${secs(view.roundMs - now)}s.`;
+      if (now >= view.roundMs + 300 && !fetching) newRound();
+    }
+
+    function onJoin() { if (view) load().then((v) => { if (v.n === view.n) { view = v; build(); } }).catch(() => {}); }
+    if (api) {
+      document.addEventListener('pirate-joined', onJoin);
+      timer = setInterval(tick, 250);
+      onLeave = () => { clearInterval(timer); document.removeEventListener('pirate-joined', onJoin); };
+    }
+    newRound();
+  }
+
   // ---------- router ----------
   const ROUTES = {
     '/': home,
     '/daily': dailyPage,
     '/games/pair': () => quizPage(QUIZZES.pair),
     '/games/remnant': () => quizPage(QUIZZES.remnant),
+    '/games/table': harbourPage,
     '/games/bets': betPage,
     '/pieces': piecesPage,
     '/two-piece': twoPiecePage,
@@ -1173,7 +1371,7 @@
   document.body.insertAdjacentHTML('afterbegin', R.defs());
   window.addEventListener('hashchange', route);
   route();
-  if (window.Social) Social.start(() => purse.get());
+  if (window.Social) Social.start(() => purse.get(), (n, why) => purse.add(n, why));
   // Build the remnant atlas in the background so the games start instantly.
   setTimeout(() => C.atlas(), 300);
 })();

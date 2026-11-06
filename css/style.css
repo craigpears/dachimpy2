@@ -101,7 +101,7 @@ button { font: inherit; color: inherit; }
 .nav-group { font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); padding: 16px 10px 4px; }
 
 @media (max-width: 820px) {
-  .shell { grid-template-columns: 1fr; }
+  .shell { grid-template-columns: minmax(0, 1fr); }
   .nav { position: sticky; z-index: 5; height: auto; flex-direction: row; overflow-x: auto; padding: 8px 12px; border-right: 0; border-bottom: 1px solid var(--line); gap: 4px; scrollbar-width: none; }
   .nav a { white-space: nowrap; padding: 6px 10px; font-size: 15px; }
   .nav .brand { font-size: 17px; padding: 6px 10px; white-space: nowrap; }
@@ -491,3 +491,26 @@ svg.map { display: block; width: 100%; height: auto; }
   .b-list, .b-join { max-width: 420px; }
 }
 @media (max-width: 820px) { .lboard { grid-column: 1; } }
+
+/* The harbour table: one shared round for everyone online */
+.harbour .clock { margin-left: auto; font-size: 17px; }
+.harbour .clock b { color: var(--accent); font-variant-numeric: tabular-nums; }
+.harbour .carry { color: var(--muted); font-size: 15px; }
+.h-note { font-size: 16px; color: var(--muted); min-height: 1.2em; margin: 12px 0; }
+.h-join { margin: 14px 0; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); max-width: 460px; }
+.h-join label { display: block; font-weight: 700; margin-bottom: 6px; }
+.harbour .t-backed p { margin: 0 0 4px; }
+.t-share { font-size: 15px; color: var(--muted); }
+.harbour .t-stake { justify-content: space-between; }
+.h-feed h2 { font-size: 21px; margin-top: 28px; }
+.h-feed ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; max-width: 460px; }
+.h-feed li { display: flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 8px; background: var(--panel); font-size: 16px; }
+.h-feed li.bot b:first-child { color: var(--muted); }
+.h-feed li.me { background: var(--accent); color: var(--accent-ink); }
+/* On a phone the five cards share the width instead of pushing the page wider. */
+@media (max-width: 520px) {
+  .cards .card-slot { flex: 1 1 0; min-width: 0; }
+  .cards .card { width: 100%; max-width: 72px; height: auto; aspect-ratio: 3 / 4; }
+  .card .front svg { max-width: 90%; height: auto; }
+  .draw-zone { padding: 12px; }
+}

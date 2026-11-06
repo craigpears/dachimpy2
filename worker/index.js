@@ -1,7 +1,9 @@
 /* The leaderboard: a small Cloudflare Worker in front of the static site.
    Pirates pick a name, their browser keeps a secret key, and their purse is posted here.
    The purse itself lives in the player's browser, so this is an honour system with a few
-   guard rails: names are letters only, and a purse can't leap by more than a big win at once. */
+   guard rails: names are letters only, and a purse can't leap by more than a big win at once.
+   The shared betting table lives in harbour.js. */
+import * as harbour from './harbour.js';
 
 const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS pirates (
@@ -9,6 +11,7 @@ const SCHEMA = [
      dubs INTEGER NOT NULL DEFAULT 0, best INTEGER NOT NULL DEFAULT 0,
      created INTEGER NOT NULL, updated INTEGER NOT NULL)`,
   'CREATE INDEX IF NOT EXISTS pirates_dubs ON pirates (dubs DESC)',
+  ...harbour.SCHEMA,
 ];
 const BOARD_SIZE = 15, MAX_DUBS = 1_000_000, JOIN_MAX = 2000;
 const NAME = /^[A-Za-z]{3,16}$/;
@@ -57,11 +60,18 @@ async function join(db, body) {
   return json({ name: display(name), key, dubs });
 }
 
-async function postPurse(db, body) {
+// The pirate making a request, if their secret key matches.
+async function signedIn(db, body) {
   const name = tidyName(body.name);
-  if (!NAME.test(name) || typeof body.key !== 'string') return json({ error: 'auth' }, 403);
-  const row = await db.prepare('SELECT key_hash, dubs FROM pirates WHERE id = ?').bind(name.toLowerCase()).first();
-  if (!row || row.key_hash !== await sha256(body.key)) return json({ error: 'auth' }, 403);
+  if (!NAME.test(name) || typeof body.key !== 'string') return null;
+  const row = await db.prepare('SELECT id, name, key_hash, dubs FROM pirates WHERE id = ?').bind(name.toLowerCase()).first();
+  return row && row.key_hash === await sha256(body.key) ? row : null;
+}
+
+async function postPurse(db, body) {
+  const row = await signedIn(db, body);
+  if (!row) return json({ error: 'auth' }, 403);
+  const name = row.id;
   const dubs = allowed(row.dubs, cleanDubs(body.dubs));
   await db.prepare('UPDATE pirates SET dubs = ?, best = MAX(best, ?), updated = ? WHERE id = ?')
     .bind(dubs, dubs, Date.now(), name.toLowerCase()).run();
@@ -76,10 +86,17 @@ export default {
       await ensureSchema(env.DB);
       const route = `${request.method} ${url.pathname}`;
       if (route === 'GET /api/board') return json(await board(env.DB, url.searchParams.get('me')));
+      if (route === 'GET /api/harbour') return json(await harbour.roundView(env.DB, url.searchParams.get('me')));
       if (request.method === 'POST') {
         const body = await request.json().catch(() => ({}));
         if (route === 'POST /api/pirates') return join(env.DB, body);
         if (route === 'POST /api/purse') return postPurse(env.DB, body);
+        if (url.pathname.startsWith('/api/harbour/')) {
+          const pirate = await signedIn(env.DB, body);
+          if (!pirate) return json({ error: 'auth', message: 'Put your pirate name on the board to take a seat.' }, 403);
+          if (route === 'POST /api/harbour/bet') { const r = await harbour.placeBet(env.DB, pirate, body); return json(r.body, r.status); }
+          if (route === 'POST /api/harbour/claim') return json(await harbour.claim(env.DB, pirate));
+        }
       }
       return json({ error: 'not found' }, 404);
     } catch (e) {
