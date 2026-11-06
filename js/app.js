@@ -171,7 +171,9 @@
       s.total++;
       if (right) { s.right++; s.streak++; s.best = Math.max(s.best, s.streak); } else s.streak = 0;
       store.patch(d.id, s);
-      if (right) purse.add(d.pay ? d.pay(q) : QUIZ_PAY, 'Right answer');
+      // Every harbour game pays into the one purse.
+      const earn = d.pay ? d.pay(q, rating) : right ? QUIZ_PAY : 0;
+      if (earn) purse.add(earn, right ? 'Right answer' : 'Close call');
 
       el.querySelectorAll('.opt').forEach((b, j) => {
         b.disabled = true;
@@ -207,6 +209,8 @@
           <h1>${d.title}</h1>
           <p class="lede">${d.lede}</p>
           ${d.controls ? d.controls() : ''}
+          <div class="purse-bar quiz-purse"><span>Your purse ${coin(`<span class="purse-live">${purse.get()}</span>`)}</span>
+            ${d.payNote ? `<span class="hint">${d.payNote()}</span>` : ''}</div>
           <div class="drill-score"></div>
         </header>
         <section class="drill"></section>
@@ -250,7 +254,7 @@
       layout: 'pairs',
       gen: () => C.genPairQuiz(pairSize()),
       // Two pieces pay 1 doubloon, and every extra piece adds another.
-      pay: (q) => q.size - 1,
+      pay: (q, rating) => (rating === 'masterpiece' ? q.size - 1 : 0),
       controls: () => `<label class="size-pick">Pieces to finish it
           <input type="range" min="2" max="${PAIR_MAX}" step="1" value="${pairSize()}">
           <b class="size-n"></b><span class="size-pay"></span></label>`,
@@ -291,6 +295,9 @@
       gen: C.genRemnantQuiz,
       prompt: () => '',
       options: (q) => q.options.map((o) => R.board(o.cells, [], { cell: 26 })),
+      // The best gap pays 2; a close second, nearly as likely to finish, still pays 1.
+      pay: (q, rating) => ({ masterpiece: QUIZ_PAY, craft: 1 }[rating] || 0),
+      payNote: () => `The best gap pays ${coin(QUIZ_PAY)}, a close second ${coin(1)}`,
       grade: (q, i) => {
         const c = C.finishChance(q.options[i].cells), best = Math.max(...q.options.map((x) => C.finishChance(x.cells)));
         if (q.options[i].correct) return 'masterpiece';

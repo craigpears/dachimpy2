@@ -392,11 +392,8 @@ svg.map { display: block; width: 100%; height: auto; }
 .map .isle.locked { opacity: 0.45; }
 .map .isle.open { cursor: pointer; }
 .map .isle.open:hover .sand { fill: #f5e2ae; }
-.map .ring { fill: none; stroke: #ffd76a; stroke-width: 2.5; stroke-dasharray: 6 6; animation: spin 12s linear infinite; transform-box: fill-box; transform-origin: center; }
-@keyframes spin { to { transform: rotate(360deg); } }
+.map .ring { fill: none; stroke: #ffd76a; stroke-width: 2.5; stroke-dasharray: 6 6; }
 .map .hull { fill: #5a3b22; } .map .sail { fill: #fdf6e3; }
-.map .ship { animation: bob 2.4s ease-in-out infinite; }
-@keyframes bob { 50% { transform: translateY(-3px); } }
 .port-intro, .port-done { max-width: 720px; }
 .mentor { display: flex; gap: 16px; align-items: flex-start; margin: 18px 0; }
 .mentor-face { flex: none; width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; font-size: 28px; background: var(--bench); color: #f3e2b8; }
@@ -469,3 +466,4 @@ svg.map { display: block; width: 100%; height: auto; }
 .working th, .working td { padding: 3px 10px 3px 0; text-align: left; }
 .working th { color: var(--muted); font-weight: 500; }
 .working .sum { font-size: 16px; }
+.quiz-purse { margin: 10px 0 0; font-size: 16px; }

@@ -50,6 +50,10 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
   the purse is shown on the page, not just in the corner.
 - **Every hole on the betting table shows its odds**, two-piece holes too: how often a starting
   piece turns up ("about 1 in 2 pieces") and how often it gets finished from the pieces left.
+- **Every game feeds the one purse**, and its page shows your purse and what it pays.
+  *Which gap?* pays 2 for the best gap and 1 for a close second.
+- **No looping animations.** The bobbing ship and spinning ring on the map hurt to watch. Movement
+  should be a short reaction to something you did (a piece dropping in, a shake, a glow).
 - **Keep text readable.** Nothing that matters (stakes, returns, odds) in tiny hint text.
 - **Say why a move is risky in plain odds.** Every option shows "Finishes about N times in 10"
   (three draws for each piece still needed), and the grades come from that same number.
