@@ -520,8 +520,28 @@ svg.map { display: block; width: 100%; height: auto; }
 .harbour .clock b { color: var(--accent); font-variant-numeric: tabular-nums; }
 .harbour .carry { color: var(--muted); font-size: 15px; }
 .h-note { font-size: 16px; color: var(--muted); min-height: 1.2em; margin: 12px 0; }
-.h-join { margin: 14px 0; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); max-width: 460px; }
-.h-join label { display: block; font-weight: 700; margin-bottom: 6px; }
+.h-join { margin: 14px 0; padding: 14px 16px; border: 2px solid #b8860b; border-radius: var(--radius); background: var(--panel); box-shadow: var(--shadow); max-width: 560px; }
+.h-join h3 { margin: 0 0 4px; font-size: 21px; }
+.h-join label { display: block; margin-bottom: 8px; }
+.h-join input { font-size: 18px; padding: 8px 12px; }
+/* Your stake: picked once, then one button per hole places it */
+.stake-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 14px 0 4px; }
+.stake-pick[hidden] { display: none; }
+.sp-label { font: 700 19px var(--serif); margin-right: 4px; }
+.sp-opt { display: inline-flex; align-items: center; gap: 4px; min-width: 64px; justify-content: center; padding: 8px 12px; border-radius: 999px; border: 2px solid var(--line); background: var(--panel); color: var(--ink); font: 700 18px var(--sans, inherit); cursor: pointer; }
+.sp-opt:hover:not(:disabled) { border-color: #b8860b; }
+.sp-opt[aria-checked="true"] { border-color: #b8860b; background: #e0a92a; color: #2b1d05; box-shadow: var(--shadow); }
+.sp-opt:disabled { opacity: 0.4; cursor: default; }
+.sp-then { color: var(--muted); font-size: 15px; }
+/* Your holes stand out */
+.harbour .tcard.backed { border: 2px solid #b8860b; box-shadow: 0 0 0 3px rgb(224 169 42 / 0.35), var(--shadow); }
+.h-split { margin-top: 12px; padding: 12px 14px; border-radius: 10px; background: var(--panel-2); border: 1px solid var(--line); text-align: left; }
+.h-split h3 { margin: 0 0 6px; font-size: 19px; }
+.h-split p { margin: 0 0 6px; }
+.h-split ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.t-mine { margin: auto 0 0; }
+.t-mine:empty { display: none; }
+.mine-tag { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 8px; border-radius: 10px; background: #e0a92a; color: #2b1d05; font-weight: 700; font-size: 17px; }
 .harbour .t-backed p { margin: 0 0 4px; }
 .t-share { font-size: 15px; color: var(--muted); }
 .harbour .t-stake { justify-content: space-between; }

@@ -1,6 +1,6 @@
 /* The harbour table: one shared betting round for everyone online, on the clock.
    Each round: 20 seconds to bet, then five pieces come off the pile for everyone at once.
-   All stakes go into one pot. If more than one hole gets finished, the rarest one takes it, and
+   Pirates can back several holes, up to 20 a round. All stakes go into one pot. If more than one hole gets finished, the rarest one takes it, and
    it's paid out poker style (Carp.potPayout): from each pirate you can only win as much as you
    put on that hole. If nobody backed a finished hole, the pot rolls over.
    A few house pirates bet every round, so there's always a pot and someone to beat. */
@@ -161,11 +161,13 @@ export async function placeBet(db, pirate, body) {
   if (Number(body.n) !== n || now >= startOf(n) + BET_MS) return { status: 409, body: { error: 'closed', message: 'Betting has closed for this round.' } };
   const round = await currentRound(db);
   const hole = Number(body.hole), amt = Number(body.amt);
-  if (!(hole >= 0 && hole < TABLES[round.tbl].length) || amt !== STAKE_STEP) return { status: 400, body: { error: 'bet' } };
-  const { staked } = await db.prepare('SELECT COALESCE(SUM(amt), 0) AS staked FROM bets WHERE n = ? AND pirate = ?').bind(n, pirate.id).first();
-  if (staked + amt > ROUND_CAP) return { status: 409, body: { error: 'cap', message: `The most you can stake in a round is ${ROUND_CAP}.` } };
-  await db.prepare('INSERT INTO bets (n, pirate, name, hole, amt, at) VALUES (?, ?, ?, ?, ?, ?)').bind(n, pirate.id, pirate.name, hole, amt, now).run();
-  return { status: 200, body: { staked: staked + amt } };
+  if (!(hole >= 0 && hole < TABLES[round.tbl].length) || !(amt >= STAKE_STEP && amt <= ROUND_CAP && amt % STAKE_STEP === 0)) return { status: 400, body: { error: 'bet' } };
+  // The cap check and the insert are one statement, so two quick clicks can't go over it.
+  const res = await db.prepare(`INSERT INTO bets (n, pirate, name, hole, amt, at) SELECT ?, ?, ?, ?, ?, ?
+      WHERE (SELECT COALESCE(SUM(amt), 0) FROM bets WHERE n = ? AND pirate = ?) + ? <= ?`)
+    .bind(n, pirate.id, pirate.name, hole, amt, now, n, pirate.id, amt, ROUND_CAP).run();
+  if (!res.meta.changes) return { status: 409, body: { error: 'cap', message: `The most you can stake in a round is ${ROUND_CAP}.` } };
+  return { status: 200, body: {} };
 }
 
 /* Pays out every finished round the pirate had money in and hasn't collected yet.

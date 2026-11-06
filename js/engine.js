@@ -706,8 +706,9 @@
      like side pots: the first 5 of it between every winner who put in at least 5, the next 5
      between those who put in at least 10, and so on. Whatever no winner matched goes back to its
      owner, and money rolled over from earlier rounds goes to the winners by stake.
-     bets: [{ who, hole, amt }]. Returns a Map of who -> doubloons they get back. */
-  function potPayout(bets, hole, carry = 0) {
+     bets: [{ who, hole, amt }]. Returns a Map of who -> doubloons they get back.
+     Pass a flows array to have each doubloon that changes hands logged in it as { from, to, n }. */
+  function potPayout(bets, hole, carry = 0, flows = null) {
     const staked = new Map(), on = new Map();
     bets.forEach((b) => {
       staked.set(b.who, (staked.get(b.who) || 0) + b.amt);
@@ -715,10 +716,13 @@
     });
     const back = new Map([...staked.keys()].map((w) => [w, 0]));
     if (!on.size) return back; // nobody won: it all rolls over
-    const give = (who, n) => back.set(who, back.get(who) + n);
+    const give = (who, n, from = who) => {
+      back.set(who, back.get(who) + n);
+      if (flows && n && from !== who) flows.push({ from, to: who, n });
+    };
     const levels = [...new Set(on.values())].sort((a, b) => a - b);
     const winStake = [...on.values()].reduce((a, b) => a + b, 0);
-    on.forEach((w, who) => give(who, w + Math.floor(carry * w / winStake)));
+    on.forEach((w, who) => { give(who, w); give(who, Math.floor(carry * w / winStake), null); });
     staked.forEach((s, who) => {
       const lose = s - (on.get(who) || 0);
       let prev = 0;
@@ -729,7 +733,7 @@
         const takers = [...on.keys()].filter((w) => w !== who && on.get(w) >= l);
         if (!takers.length) return give(who, part);
         const each = Math.floor(part / takers.length);
-        takers.forEach((w) => give(w, each));
+        takers.forEach((w) => give(w, each, who));
         give(who, part - each * takers.length); // odd doubloons go back
       });
       give(who, lose - Math.min(lose, prev)); // more than any winner matched

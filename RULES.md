@@ -85,6 +85,13 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 - **The table fits on one screen.** All four holes in one row, the crew in its own column on the
   right (in place of the leaderboard), a short intro with the pot rules folded away, and the page
   brings the pile into view as the pieces turn over. Betting is one big button per hole.
+- **Stake first, then holes.** The stake is picked separately (5, 10, 15 or 20, as chips above the
+  holes), then each hole's button places it. Betting on several holes at once stays: it's fun.
+  (Tried and dropped: one hole per round.) The holes you've backed are highlighted.
+- **Show how the split worked.** After each round a "How the pot was split" panel says who paid
+  whom, with payments between two winners netted off, and what went back unmatched.
+- **Watching is free, playing needs a name.** Anyone can watch the table; a clear "You're only
+  watching" box asks for a pirate name before you can bet.
 - Ideas to build next: a daily head-to-head on Hole of the Day (same pieces for everyone, a board
   of who got the Masterpiece); and *carpentry poker*: two pieces in your hand,
   the holes on the table, then shared pieces dealt like a flop, turn and river, with betting
