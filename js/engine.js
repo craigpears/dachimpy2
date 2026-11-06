@@ -630,11 +630,12 @@
     return best;
   }
 
-  // Chance each hole is finished from `draws` pieces off the pile, by playing it out many times.
-  function tableChances(holes, draws, sims = 3000) {
+  /* Chance each hole is finished from `draws` more pieces off the pile, by playing it out many
+     times, starting from `start` (a table part-way through) or a fresh table. */
+  function tableChances(holes, draws, sims = 3000, start = null) {
     const wins = holes.map(() => 0);
     for (let n = 0; n < sims; n++) {
-      const st = tableState(holes);
+      const st = start ? start.map((s) => ({ ...s, placed: s.placed.slice() })) : tableState(holes);
       for (let d = 0; d < draws; d++) tableDraw(holes, st, weightedLetter());
       st.forEach((s, i) => { if (s.done) wins[i]++; });
     }

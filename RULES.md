@@ -33,6 +33,12 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
   turn up?" Betting across several holes at once is more fun than one hole at a time.
 - **The trail builds up the toolbox**: one piece at the first ports, two at Tarpot Reef,
   three (the real puzzle) at Kraken's Maw and in Hole of the Day.
+- **One purse for the whole site.** Earn doubloons from Masterpieces (voyage, Hole of the Day)
+  and right answers; spend them on bets. Every bet is priced against the player (about an 8%
+  edge), and the house refuses bets that are too likely. Gambling alone should slowly lose.
+- **In-play betting is the fun bit** (like blackjack): pieces come one at a time, prices move,
+  and you can add bets between pieces. Holes that don't get finished are "bodged".
+- **Which pair fits?** is exactly right for teaching two-piece finishes; build more games in that style.
 - **Odds as bookmaker's prices** ("3 to 1", "evens"), worked out from the real chance, not
   from the rarity label.
 - Dropped ideas: *Commit or wait* (not interesting).

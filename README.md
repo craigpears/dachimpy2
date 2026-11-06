@@ -6,7 +6,7 @@ A static, game-like tutorial for the Puzzle Pirates carpentry puzzle. It isn't a
 
 - **The voyage**: a trail of five ports. It starts at the very end of a hole (ten squares, two pieces), and each port moves the start further out. Holes are grown outward from a good two-piece finish. On some ports a dashed outline shows that finish, so you learn to work from the outside in to reach it. From Tarpot Reef on you hold two pieces, and the one you don't play stays for later. Every hole ends with three draws for the last piece and a doubloon bet.
 - **Hole of the Day**: one 20-square hole, the same for everyone that day (seeded from the date), with a shareable result grid.
-- **Harbour games**: *Place your bets* (four holes share four draws off one pile; back the ones you think get finished), plus *Which pair fits?* and *Which gap?* quick-fire quizzes.
+- **Harbour games**: *Place your bets* (four holes share five pieces off one pile, drawn one at a time; bet between pieces as the prices move), plus *Which pair fits?* and *Which gap?* quick-fire quizzes.
 - **Workshop**: the timber guide, the named two-piece holes (Top-Notch, Dogleg, Dome…), and a hole lab that solves any hole you draw.
 
 ## Running it
@@ -17,7 +17,7 @@ There's no build step. Open `index.html`, or serve the folder:
 python -m http.server 8642
 ```
 
-Then put the folder on GitHub Pages or any static host.
+It's hosted on GitHub Pages straight from the `main` branch: https://craigpears.github.io/dachimpy2/
 
 ## Code
 
@@ -27,6 +27,6 @@ Then put the folder on GitHub Pages or any static host.
 
 Puzzle facts and design rules agreed in playtests live in [RULES.md](RULES.md).
 
-Progress is stored in each player's own browser (`localStorage`).
+One purse of doubloons runs across the whole site: Masterpieces and right answers earn them, bets (always priced slightly against you) spend them. Progress is stored in each player's own browser (`localStorage`).
 
 Rules, draw weights and the two-piece hole names come from YPPedia's [Carpentry](https://yppedia.puzzlepirates.com/Carpentry) page and Hawkings' [Carpentry tutorial](https://yppedia.puzzlepirates.com/Carpentry_tutorial).
