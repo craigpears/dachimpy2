@@ -543,7 +543,9 @@ svg.map { display: block; width: 100%; height: auto; }
 .t-mine:empty { display: none; }
 .mine-tag { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 8px; border-radius: 10px; background: #e0a92a; color: #2b1d05; font-weight: 700; font-size: 17px; }
 .harbour .t-backed p { margin: 0 0 4px; }
-.t-share { font-size: 15px; color: var(--muted); }
+.t-share { font-size: 16px; font-weight: 600; }
+.harbour .carry { font-size: 16px; }
+.h-yours { font-weight: 600; }
 .harbour .t-stake { justify-content: space-between; }
 .h-bar { flex-basis: 100%; height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
 .h-bar i { display: block; width: 0; height: 100%; background: var(--accent); transition: width 0.25s linear; }
@@ -557,10 +559,12 @@ svg.map { display: block; width: 100%; height: auto; }
 /* Who's at the table: beside the holes when there's room, above them when there isn't */
 .h-body { container-type: inline-size; }
 .h-layout { display: grid; gap: 18px; }
-@container (min-width: 760px) {
+/* Beside them only when the four holes still fit in a row next to it (the leaderboard keeps its column) */
+@container (min-width: 900px) {
   .h-layout { grid-template-columns: minmax(0, 1fr) 270px; align-items: start; }
   .h-crew { order: 2; position: sticky; top: 96px; }
 }
+@container (max-width: 899px) { .h-crew ul { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); } }
 /* All four holes in one row whenever they fit */
 .h-play { container-type: inline-size; }
 @container (min-width: 600px) { .harbour .table-holes { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; } }
@@ -573,11 +577,6 @@ svg.map { display: block; width: 100%; height: auto; }
 .bet-btn:disabled { opacity: 0.45; cursor: default; box-shadow: none; }
 .bet-btn small { flex-basis: 100%; font-size: 13px; font-weight: 600; }
 .h-rules p { margin: 10px 0 0; }
-/* On wide screens the table's crew takes the right-hand column, in place of the leaderboard */
-@media (min-width: 1240px) {
-  .shell:has(.harbour) { grid-template-columns: 220px minmax(0, 1fr); }
-  .shell:has(.harbour) .lboard { display: none; }
-}
 .h-crew { padding: 14px; background: var(--panel); border: 2px solid #b8860b; border-radius: var(--radius); box-shadow: var(--shadow); }
 .h-crew h2 { font-size: 22px; margin: 0; }
 .h-count { margin: 2px 0 10px; color: var(--muted); font-size: 15px; }

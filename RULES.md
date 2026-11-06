@@ -82,9 +82,15 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 - **Who's at the table must be obvious.** A prominent panel beside the holes (above them on narrow
   screens) lists every pirate at the table, house pirates marked, with what each has on which hole,
   and after the round who won and who lost. Each hole also lists its backers by name.
-- **The table fits on one screen.** All four holes in one row, the crew in its own column on the
-  right (in place of the leaderboard), a short intro with the pot rules folded away, and the page
-  brings the pile into view as the pieces turn over. Betting is one big button per hole.
+- **The table fits on one screen.** All four holes in one row, a short intro with the pot rules
+  folded away, and the page brings the pile into view as the pieces turn over. Betting is one big
+  button per hole. **The leaderboard stays visible at the table**; the crew goes beside the holes
+  only when there's room, otherwise in a strip above them.
+- **Don't call it "the pot" as if you could win it all.** The bar shows "Bets this round" and the
+  rolled-over money separately. Each hole says what you'd win or lose if it wins, counting your other
+  bets. After the round, say why you won what you did: your stake caps what you take from each
+  pirate, other winners on the same hole share it, and the rolled-over money is shared by stake.
+  Odd doubloons go to the winners, not back to the loser.
 - **Stake first, then holes.** The stake is picked separately (5, 10, 15 or 20, as chips above the
   holes), then each hole's button places it. Betting on several holes at once stays: it's fun.
   (Tried and dropped: one hole per round.) The holes you've backed are highlighted.
