@@ -57,6 +57,7 @@
       const next = Math.max(0, this.get() + n);
       store.patch('purse', next);
       this.render();
+      if (window.Social) Social.purseChanged();
       if (n && why) toast(`${n > 0 ? '+' : '−'}${Math.abs(n)}`, why, n > 0);
       return next;
     },
@@ -336,7 +337,7 @@
   // "about 4 times in 10", "about 1 time in 25", in words rather than percentages.
   function timesText(c) {
     if (c >= 0.95) return 'almost every time';
-    if (c >= 0.1) return `about ${Math.round(c * 10)} times in 10`;
+    if (c >= 0.15) return `about ${Math.round(c * 10)} times in 10`;
     if (c > 0) return `about 1 time in ${Math.round(1 / c)}`;
     return 'never';
   }
@@ -1172,6 +1173,7 @@
   document.body.insertAdjacentHTML('afterbegin', R.defs());
   window.addEventListener('hashchange', route);
   route();
+  if (window.Social) Social.start(() => purse.get());
   // Build the remnant atlas in the background so the games start instantly.
   setTimeout(() => C.atlas(), 300);
 })();

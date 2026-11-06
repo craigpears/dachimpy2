@@ -59,4 +59,14 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
   (three draws for each piece still needed), and the grades come from that same number.
 - **Odds as bookmaker's prices** ("3 to 1", "evens"), worked out from the real chance, not
   from the rarity label.
+- **Make it sociable.** Pick a pirate name (letters only, no sign-up) and your purse goes on a
+  leaderboard beside the game. The purse lives in the browser, so the board is an honour system
+  with guard rails (no huge jumps in one go). Only ever show pirate names, never real ones.
+- **Competitive play is capped.** Head-to-head games give everyone the same stake, so a big purse
+  buys no edge. If you run out, you earn your way back in with the quick puzzles first.
+- Ideas to build next, in this order: a daily head-to-head on Hole of the Day (same pieces for
+  everyone, a board of who got the Masterpiece); live betting tables with a join code (everyone
+  sees the same pile and bets at the same time); and *carpentry poker*: two pieces in your hand,
+  the holes on the table, then shared pieces dealt like a flop, turn and river, with betting
+  between each.
 - Dropped ideas: *Commit or wait* (not interesting).

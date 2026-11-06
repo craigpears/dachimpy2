@@ -1,0 +1,16 @@
+# Cloudflare Worker: serves the static site and the leaderboard API (worker/index.js).
+name = "carpentry-primer"
+main = "worker/index.js"
+compatibility_date = "2025-09-01"
+
+# The site's files. Anything listed in .assetsignore stays private.
+[assets]
+directory = "."
+binding = "ASSETS"
+
+# The leaderboard. Create a D1 database called carpentry-primer in the Cloudflare dashboard
+# and paste its ID here. The table is made on first use, so there's nothing else to run.
+[[d1_databases]]
+binding = "DB"
+database_name = "carpentry-primer"
+database_id = "00000000-0000-0000-0000-000000000000"

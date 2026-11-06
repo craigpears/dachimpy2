@@ -17,13 +17,25 @@ There's no build step. Open `index.html`, or serve the folder:
 python -m http.server 8642
 ```
 
-Any static host works: GitHub Pages, Netlify or Cloudflare Pages, with no build command and the repo root as the folder.
+Any static host works: GitHub Pages, Netlify or Cloudflare Pages, with no build command and the repo root as the folder. On a plain static host the leaderboard just stays hidden.
+
+### The leaderboard
+
+The leaderboard needs the Cloudflare Worker in `worker/` and a D1 database (see `wrangler.toml`). The Worker serves the site and a small API: `GET /api/board`, `POST /api/pirates` (pick a name) and `POST /api/purse`. `.assetsignore` keeps the Worker code and notes out of the public site. The table is created on first use.
+
+To run it locally (wrangler 4 needs Node 20 or newer):
+
+```bash
+npx wrangler dev --local
+```
 
 ## Code
 
 - `js/engine.js`: the pentomino shapes, draw weights, an exact-cover solver, hole generation and placement scoring
 - `js/render.js`: SVG boards and pieces
 - `js/app.js`: routing, the voyage, Hole of the Day, the quizzes and the workshop
+- `js/social.js`: pirate names and the leaderboard panel
+- `worker/index.js`: the leaderboard server (Cloudflare Worker + D1)
 
 Puzzle facts and design rules agreed in playtests live in [RULES.md](RULES.md).
 
