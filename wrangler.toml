@@ -9,8 +9,8 @@ directory = "."
 binding = "ASSETS"
 
 # The leaderboard. Create a D1 database called carpentry-primer in the Cloudflare dashboard
-# and paste its ID here. The table is made on first use, so there's nothing else to run.
+# (its ID is below). The table is made on first use, so there's nothing else to run.
 [[d1_databases]]
 binding = "DB"
 database_name = "carpentry-primer"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "f53b7cb9-0282-49bf-b4d8-008629c473f7"
