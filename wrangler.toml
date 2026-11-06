@@ -1,5 +1,5 @@
 # Cloudflare Worker: serves the static site and the leaderboard API (worker/index.js).
-name = "carpentry-primer"
+name = "dachimpy2"
 main = "worker/index.js"
 compatibility_date = "2025-09-01"
 
