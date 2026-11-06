@@ -31,7 +31,7 @@
     return PRICES.filter(([m]) => m <= fair).pop() || null;
   };
   const QUIZ_PAY = 2, DAILY_PAY = 25;
-  const threeDraws = (l) => 1 - (1 - C.WEIGHTS[l] / C.TOTAL_WEIGHT) ** 3;
+  const threeDraws = C.threeDraws;
 
   // Ten-square remnants on a five-step scale, from roomy to dead.
   const FLEX = [[0.13, 5, 'Roomy'], [0.09, 4, 'Comfortable'], [0.05, 3, 'Fair'], [0.02, 2, 'Tight'], [1e-9, 1, 'Long shot'], [-1, 0, 'Dead end']];
@@ -281,6 +281,26 @@
   const TAGS = { best: 'Best', good: 'Good', tight: 'Tight', risky: 'Risky', dead: 'Dead end' };
   const SHARE = { best: '🟩', good: '🟨', tight: '🟧', risky: '🟥', dead: '⬛' };
 
+  // "about 4 times in 10", "about 1 time in 25", in words rather than percentages.
+  function timesText(c) {
+    if (c >= 0.95) return 'almost every time';
+    if (c >= 0.1) return `about ${Math.round(c * 10)} times in 10`;
+    if (c > 0) return `about 1 time in ${Math.round(1 / c)}`;
+    return 'never';
+  }
+
+  // The plain odds behind a grade.
+  function oddsLine(o) {
+    const c = C.finishChance(o.rest, o.held);
+    return c >= 1 ? 'Finishes for sure' : `Finishes ${timesText(c)}`;
+  }
+
+  // Why the green option beat yours, in the same plain odds.
+  function whyBetter(o, best) {
+    const a = C.finishChance(o.rest, o.held), b = C.finishChance(best.rest, best.held);
+    return `Yours finishes ${timesText(a)}; the green one ${b >= 1 ? 'every time' : timesText(b)}.`;
+  }
+
   // What a placement leaves behind, in the words a carpenter would use.
   function leavesText(o, minRagged) {
     const info = o.info;
@@ -297,6 +317,7 @@
     else text = 'Leaves ragged edges';
     return text + (o.held.length ? `<br><span class="keeps">Keeps ${o.held.map(an).join(' and ')}</span>` : '');
   }
+  const optionNote = (o, minRagged) => `${leavesText(o, minRagged)}<br><span class="odds-line">${oddsLine(o)}</span>`;
 
   /* opts: size, deal (pieces per step), storm, bet (purse to wager from or null),
            header() -> html, onDone(result), seed (for the daily), replay ([choice indexes]), onChoice(i) */
@@ -330,7 +351,7 @@
             <p class="label">${many ? 'Your toolbox' : 'Dealt to you'}</p>${R.toolbox(deal.letters)}
             ${deal.pickOne ? '<p class="hint small">Pick one to play. The other goes back on the pile.</p>'
               : many ? `<p class="hint small">Play one. The ${deal.letters.length > 2 ? 'others stay' : 'other stays'} in your toolbox for later.</p>` : ''}
-            ${deal.skipped ? `<p class="hint small">${plural(deal.skipped, 'piece')} went into your other holes first.</p>` : ''}
+            ${deal.skipped ? `<p class="hint small">${deal.skipped >= 12 ? 'A few pieces' : plural(deal.skipped, 'piece')} went into your other holes first.</p>` : ''}
             ${target() ? '<p class="hint small"><span class="target-key"></span> A good finish hides inside. Work from the outside in to reach it.</p>' : ''}
             <p class="squares"><b>${remaining.length}</b> squares to go</p>${trail()}
           </div>
@@ -367,7 +388,7 @@
         b.disabled = true;
         b.classList.add('g-' + x.grade);
         if (j === i) b.classList.add('chosen');
-        $('.opt-note', b).innerHTML = `<span class="tag-grade ${x.grade}">${TAGS[x.grade]}</span><span class="leaves">${leavesText(x, +el.dataset.minRagged)}</span>`;
+        $('.opt-note', b).innerHTML = `<span class="tag-grade ${x.grade}">${TAGS[x.grade]}</span><span class="leaves">${optionNote(x, +el.dataset.minRagged)}</span>`;
       });
       $('.hole-wrap', el).innerHTML = boardHtml(true);
       $('.run-side .trail', el).outerHTML = trail();
@@ -380,7 +401,7 @@
       const bestOpt = deal.options.find((x) => x.grade === 'best');
       fb.innerHTML = `<div class="verdict ${good ? 'good' : o.grade === 'tight' ? 'ok' : 'bad'}">${pickOne(LINES[o.grade])}</div>
         ${o.name ? `<p>That leaves a <b>${o.name}</b>, one of the classic two-piece finishes.</p>` : ''}
-        ${o.grade !== 'best' ? `<p class="hint">The green option was stronger${bestOpt && bestOpt.name ? `: it leaves a <b>${bestOpt.name}</b>` : ''}.</p>` : ''}
+        ${o.grade !== 'best' && bestOpt ? `<p class="hint">The green option was stronger${bestOpt.name ? `: it leaves a <b>${bestOpt.name}</b>` : ''}. ${whyBetter(o, bestOpt)}</p>` : ''}
         <button class="btn next">${o.grade === 'dead' ? 'See the damage' : 'Next piece'} <kbd>Enter</kbd></button>
         ${good ? '<span class="auto"><i></i></span>' : ''}`;
       $('.next', fb).addEventListener('click', advance);
@@ -418,7 +439,7 @@
           <div class="hole-wrap big">${boardHtml(fresh)}</div>
           <div class="run-side">
             <p class="label">The last gap needs</p>
-            <div class="need">${R.piece(gap, remaining, { cell: 18 })}<div><b>${an(gap)}</b><br><span class="hint">About 1 in ${oneIn(gap)} pieces is ${an(gap)}</span></div></div>
+            <div class="need">${R.piece(gap, remaining, { cell: 18 })}<div><b>${an(gap)}</b><br><span class="hint">About 1 in ${oneIn(gap)} pieces is ${an(gap)}.<br>With three draws, one turns up ${timesText(threeDraws(gap))}.</span></div></div>
             ${trail()}
           </div>
         </div>
@@ -528,7 +549,7 @@
   function dailyPage() {
     const n = today();
     const saved = store.get().daily || {};
-    const mine = saved.day === n && saved.v === 3 ? saved : { day: n, v: 3, choices: [] };
+    const mine = saved.day === n && saved.v === 4 ? saved : { day: n, v: 4, choices: [] };
     const streak = store.get().dailyStreak || { last: 0, count: 0 };
 
     const header = () => `<header class="run-bar"><span class="eyebrow">Hole of the Day</span><b>#${n}</b>

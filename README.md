@@ -17,7 +17,7 @@ There's no build step. Open `index.html`, or serve the folder:
 python -m http.server 8642
 ```
 
-It's hosted on GitHub Pages straight from the `main` branch: https://craigpears.github.io/dachimpy2/
+Any static host works: GitHub Pages, Netlify or Cloudflare Pages, with no build command and the repo root as the folder.
 
 ## Code
 

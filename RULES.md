@@ -39,6 +39,8 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 - **In-play betting is the fun bit** (like blackjack): pieces come one at a time, prices move,
   and you can add bets between pieces. Holes that don't get finished are "bodged".
 - **Which pair fits?** is exactly right for teaching two-piece finishes; build more games in that style.
+- **Say why a move is risky in plain odds.** Every option shows "Finishes about N times in 10"
+  (three draws for each piece still needed), and the grades come from that same number.
 - **Odds as bookmaker's prices** ("3 to 1", "evens"), worked out from the real chance, not
   from the rarity label.
 - Dropped ideas: *Commit or wait* (not interesting).

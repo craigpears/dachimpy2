@@ -464,23 +464,36 @@
     return null;
   }
 
-  // How good a remnant is when you also keep the `held` pieces in the toolbox for it.
-  function holdScore(info, held) {
-    if (!held.length) return info.odds;
-    if (info.gap !== undefined) return held.includes(info.gap) ? 1 : info.odds;
-    let best = info.odds;
-    for (const h of new Set(held)) {
-      let withHeld = 0;
-      for (const c of info.combos) {
-        const i = c.letters.indexOf(h);
-        if (i < 0) continue;
-        const partner = c.letters[1 - i];
-        if (held.filter((x, j) => j !== held.indexOf(h)).includes(partner)) return 1;
-        withHeld += comboOdds([partner]);
-      }
-      best = Math.max(best, withHeld);
+  const threeDraws = (l) => 1 - (1 - prob(l)) ** 3;
+
+  /* How often a remnant gets finished, under one simple rule: you get three draws to find each
+     piece you need, and you put it where it does most good. Pieces you're holding can go in at
+     once. This is the number the grades and the "N times in 10" lines come from. */
+  const chanceMemo = new Map();
+  function finishChance(cells, held = []) {
+    if (!cells.length) return 1;
+    if (cells.length === 5) {
+      const g = identify(cells);
+      return !g ? 0 : held.includes(g) ? 1 : threeDraws(g);
     }
-    return best;
+    if (components(cells).some((n) => n % 5)) return 0;
+    const k = canonical(cells).key + '|' + held.slice().sort().join('');
+    if (chanceMemo.has(k)) return chanceMemo.get(k);
+    let best = 0;
+    for (const h of new Set(held)) {
+      const rest = held.slice();
+      rest.splice(rest.indexOf(h), 1);
+      for (const p of placements(cells, h)) best = Math.max(best, finishChance(minus(cells, p), rest));
+    }
+    let pu = 0, ev = 0;
+    for (const l of LETTERS) {
+      let v = 0;
+      for (const p of placements(cells, l)) v = Math.max(v, finishChance(minus(cells, p), held));
+      if (v > 0) { pu += prob(l); ev += prob(l) * v; }
+    }
+    const result = Math.max(best, pu ? (1 - (1 - pu) ** 3) * (ev / pu) : 0);
+    chanceMemo.set(k, result);
+    return result;
   }
 
   // Deal a piece; storms flatten the odds so awkward pieces turn up more.
@@ -561,7 +574,7 @@
         const held = keep ? letters.slice() : [];
         if (keep) held.splice(held.indexOf(letter), 1);
         const info = finishInfo(rest);
-        all.push({ letter, piece: p, rest, held, contact, info, score: holdScore(info, held), name: nameOf(rest), neck: hasNeck(rest), ragged: ragged(rest) });
+        all.push({ letter, piece: p, rest, held, contact, info, score: finishChance(rest, held), name: nameOf(rest), neck: hasNeck(rest), ragged: ragged(rest) });
       }
     }
     if (all.length < min) return null;
@@ -674,7 +687,7 @@
     prob, key, unkey, parseRows, normalize, bbox, canonical, identify, isConnected, perimeter,
     solve, combos, comboOdds, pairStats, placements, minus, grainSafe, byWeight,
     atlas, compactAtlas, shuffle, pick,
-    finishInfo, genHole, pickCore, dealLetter, NAMED, nameOf, hasNeck, ragged, dealStep, stepOptions, weightedLetter, useSeed,
+    finishInfo, finishChance, threeDraws, genHole, pickCore, dealLetter, NAMED, nameOf, hasNeck, ragged, dealStep, stepOptions, weightedLetter, useSeed,
     genPairQuiz, genRemnantQuiz, genPlaceQuiz, genNameQuiz,
     tableHole, tableState, tableDraw, tableChances, genBetTable,
   };
