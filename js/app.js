@@ -61,8 +61,7 @@
       return next;
     },
     render() {
-      const el = document.getElementById('purse-n');
-      if (el) el.textContent = this.get();
+      document.querySelectorAll('#purse-n, .purse-live').forEach((el) => { el.textContent = this.get(); });
     },
   };
 
@@ -131,6 +130,8 @@
 
   // ---------- quiz runner (harbour games) ----------
   let keyHandler = null;
+  let onLeave = null; // run once when the route changes, e.g. to hand back stakes not yet played
+  window.addEventListener('pagehide', () => { if (onLeave) { const f = onLeave; onLeave = null; f(); } });
   document.addEventListener('keydown', (e) => {
     if (keyHandler && !e.ctrlKey && !e.metaKey && !e.altKey && !/input|textarea/i.test(e.target.tagName)) keyHandler(e);
   });
@@ -170,7 +171,7 @@
       s.total++;
       if (right) { s.right++; s.streak++; s.best = Math.max(s.best, s.streak); } else s.streak = 0;
       store.patch(d.id, s);
-      if (right) purse.add(QUIZ_PAY, 'Right answer');
+      if (right) purse.add(d.pay ? d.pay(q) : QUIZ_PAY, 'Right answer');
 
       el.querySelectorAll('.opt').forEach((b, j) => {
         b.disabled = true;
@@ -195,6 +196,7 @@
       else if (answered && (e.key === 'Enter' || e.key === ' ')) { next(); e.preventDefault(); }
     };
     next();
+    return { next };
   }
 
   function quizPage(d) {
@@ -204,12 +206,33 @@
           <p class="eyebrow">Harbour games</p>
           <h1>${d.title}</h1>
           <p class="lede">${d.lede}</p>
+          ${d.controls ? d.controls() : ''}
           <div class="drill-score"></div>
         </header>
         <section class="drill"></section>
       </article>`;
-    runQuiz($('.drill', main), d);
+    const quiz = runQuiz($('.drill', main), d);
+    if (d.bindControls) d.bindControls(main, quiz);
   }
+
+  // Percentages are kept for the odds working, where the sums need them.
+  const pct = (x) => (x >= 0.995 ? '100%' : x > 0 && x < 0.01 ? 'under 1%' : `${Math.round(x * 100)}%`);
+
+  // One gap's odds, step by step: first piece in, then the last gap.
+  function workingHtml(o, n) {
+    const w = C.finishWorking(o.cells);
+    if (!w.starters.length) return `<div class="work"><h4>Gap ${n}: 0%</h4><p>No piece fits in it cleanly.</p></div>`;
+    return `<div class="work"><h4>Gap ${n}: ${pct(w.chance)}</h4>
+      <table><thead><tr><th>First piece</th><th>Turns up</th><th>Leaves a gap for</th><th>Found in 3 draws</th></tr></thead><tbody>
+      ${w.starters.map((x) => `<tr><td>${letterChip(x.letter)}</td><td>1 in ${oneIn(x.letter)}</td><td>${letterChip(x.leaves)}</td><td>${pct(x.then)}</td></tr>`).join('')}
+      </tbody></table>
+      <p>Between them, the first pieces are ${pct(w.share)} of the pile, so three draws find one ${pct(w.first)} of the time.
+        On average the last gap is then found ${pct(w.then)} of the time.</p>
+      <p class="sum">${pct(w.first)} × ${pct(w.then)} = <b>${pct(w.chance)}</b></p></div>`;
+  }
+
+  const PAIR_MAX = 4; // five-piece holes are slow to grow and have too many answers
+  const pairSize = () => Math.min(PAIR_MAX, Math.max(2, store.get().pairSize || 2));
 
   const QUIZZES = {
     name: {
@@ -223,11 +246,27 @@
 
     pair: {
       id: 'pair', title: 'Which pair fits?',
-      lede: 'Ten squares left. Exactly one of these pairs drops in cleanly. Turn and flip them in your head.',
+      lede: 'Exactly one of these sets of pieces drops into the hole cleanly. Turn and flip them in your head. Slide for bigger holes: they pay more.',
       layout: 'pairs',
-      gen: C.genPairQuiz,
-      prompt: (q) => `<div class="hole-wrap">${R.board(q.cells, [], { cell: 40 })}</div>`,
-      options: (q) => q.options.map((o) => `<span class="pair-tray">${[...o.name].map((l) => R.piece(l, C.pick(C.ORIENTS_BY_LETTER[l]).cells, { cell: 15 })).join('')}</span>`),
+      gen: () => C.genPairQuiz(pairSize()),
+      // Two pieces pay 1 doubloon, and every extra piece adds another.
+      pay: (q) => q.size - 1,
+      controls: () => `<label class="size-pick">Pieces to finish it
+          <input type="range" min="2" max="${PAIR_MAX}" step="1" value="${pairSize()}">
+          <b class="size-n"></b><span class="size-pay"></span></label>`,
+      bindControls: (root, quiz) => {
+        const input = $('.size-pick input', root);
+        const show = () => {
+          $('.size-n', root).textContent = input.value;
+          $('.size-pay', root).innerHTML = `pays ${coin(input.value - 1)}`;
+        };
+        show();
+        input.addEventListener('input', show);
+        input.addEventListener('change', () => { store.patch('pairSize', +input.value); quiz.next(); });
+      },
+      prompt: (q) => `<div class="hole-wrap">${R.board(q.cells, [], { cell: q.size > 3 ? 34 : 40 })}</div>
+        <p class="ask">Which ${q.size === 2 ? 'pair' : `${q.size} pieces`} fill${q.size === 2 ? 's' : ''} it?</p>`,
+      options: (q) => q.options.map((o) => `<span class="pair-tray">${[...o.name].map((l) => R.piece(l, C.pick(C.ORIENTS_BY_LETTER[l]).cells, { cell: q.size > 3 ? 10 : q.size > 2 ? 12 : 15 })).join('')}</span>`),
       grade: (q, i) => (q.options[i].correct ? 'masterpiece' : 'sloppy'),
       annotate: (q, j) => comboChip(q.options[j].name),
       // Drop the right pair into the hole so you see how it goes.
@@ -239,9 +278,10 @@
       explain: (q) => {
         const ans = q.options.find((o) => o.correct).name;
         const others = q.stats.combos.filter((c) => c.name !== ans);
+        const set = q.size === 2 ? 'pair' : 'set';
         return others.length
-          ? `<p class="also">${plural(others.length, 'other pair')} would also have done it:</p>${fillsGallery(others)}`
-          : '<p class="also">That was the only pair that fits.</p>';
+          ? `<p class="also">${plural(others.length, `other ${set}`)} would also have done it:</p>${fillsGallery(others)}`
+          : `<p class="also">That was the only ${set} that fits.</p>`;
       },
     },
 
@@ -252,18 +292,23 @@
       prompt: () => '',
       options: (q) => q.options.map((o) => R.board(o.cells, [], { cell: 26 })),
       grade: (q, i) => {
-        const o = q.options[i], best = Math.max(...q.options.map((x) => x.stats.pairOdds));
-        if (o.correct) return 'masterpiece';
-        if (o.stats.pairOdds === 0) return 'pig';
-        return o.stats.pairOdds >= best * 0.6 ? 'craft' : 'fair';
+        const c = C.finishChance(q.options[i].cells), best = Math.max(...q.options.map((x) => C.finishChance(x.cells)));
+        if (q.options[i].correct) return 'masterpiece';
+        if (c === 0) return 'pig';
+        return c >= best * 0.6 ? 'craft' : 'fair';
       },
       annotate: (q, j) => {
         const s = q.options[j].stats;
-        return `<span class="flex">${flexBadge(s.pairOdds)}</span>${s.useful.length ? chips(s.useful) : ''}`;
+        return `<span class="pct-line"><b>${pct(C.finishChance(q.options[j].cells))}</b> finished</span>${s.useful.length ? chips(s.useful) : ''}`;
       },
-      explain: (q) => {
+      explain: (q, i) => {
         const best = q.options.find((o) => o.correct);
+        const shown = [...new Set([q.options[i], best])];
         return `<p>The best gap can be finished by ${plural(best.stats.combos.length, 'different pair')}:</p>${fillsGallery(best.stats.combos)}
+          <details class="working"><summary>How the odds are worked out</summary>
+            <p class="hint">You get three draws to find a piece that fits, and three more for the last gap.</p>
+            ${shown.map((o) => workingHtml(o, q.options.indexOf(o) + 1)).join('')}
+          </details>
           <p class="hint">Look for gaps that <b>P</b>, <b>F</b> and <b>Y</b> can finish. They're the pieces you see most.</p>`;
       },
     },
@@ -618,11 +663,13 @@
     const pendingTotal = () => pending.reduce((a, b) => a + b, 0);
     const backed = (i) => bets[i].reduce((a, b) => a + b.amt, 0);
     const returns = (i) => bets[i].reduce((a, b) => a + Math.round(b.amt * (1 + b.mult)), 0);
+    // When two holes need the same piece, the one with more riding on it gets it.
+    const order = () => holes.map((_, i) => i).sort((a, b) => backed(b) + pending[b] - backed(a) - pending[a] || a - b);
     const holeBoard = (i, fresh) => R.board(state[i].rest, state[i].placed.map((p, j) => ({ ...p, fresh: fresh && j === state[i].placed.length - 1 })), { cell: 22, labels: false });
 
     // Price every open hole for the pieces still to come. A longer run than the generator's keeps the house edge honest.
     function reprice() {
-      const chances = C.tableChances(holes, drawsLeft, 3000, state);
+      const chances = C.tableChances(holes, drawsLeft, 3000, state, order());
       prices = holes.map((_, i) => (state[i].done || !drawsLeft ? null : priceFor(chances[i])));
     }
 
@@ -631,17 +678,17 @@
         <header class="page-head">
           <p class="eyebrow">Harbour games</p>
           <h1>Place your bets</h1>
-          <p class="lede">Four holes, one pile of timber. ${TABLE_DRAWS} pieces come off the pile, one at a time. Each goes into the first hole it finishes, A before B; otherwise it starts a two-piece hole, or it's a spare. Bet before every piece: the prices move as the holes fill.</p>
+          <p class="lede">Four holes, one pile of timber. ${TABLE_DRAWS} pieces come off the pile, one at a time. Each goes into a hole it finishes; otherwise it starts a two-piece hole, or it's a spare. A piece only fills one hole, so if two holes need the same piece, it goes to the one with more of your money on it. Bet before every piece: the prices move as the holes fill.</p>
         </header>
         ${topUp ? '<p class="hint">Your purse ran dry, so the quartermaster spots you 10 doubloons. Masterpieces on the voyage and in Hole of the Day earn far more.</p>' : ''}
-        <div class="purse-bar"><span>Betting now ${coin('<span class="staked-n">0</span>')}</span><span class="hint">The house always keeps a small edge. Masterpieces are how you really earn.</span></div>
+        <div class="purse-bar bet-purse"><span>Your purse ${coin(`<span class="purse-live">${purse.get()}</span>`)}</span><span>On this piece ${coin('<span class="staked-n">0</span>')}</span><span class="hint">The house always keeps a small edge. Masterpieces are how you really earn.</span></div>
         <div class="table-holes">${holes.map((h, i) => `
           <div class="tcard" data-i="${i}">
             <div class="t-head"><span class="t-name">${HOLE_NAMES[i]}</span><span class="t-price"></span></div>
             <div class="hole-wrap t-board">${holeBoard(i)}</div>
             <div class="t-needs"></div>
             <div class="t-stake"><button class="sbtn minus" aria-label="Take ${STAKE_STEP} off ${HOLE_NAMES[i]}">−</button>
-              <span class="t-amt">${coin('<span>0</span>')}</span>
+              <span class="t-amt">${coin('<span class="amt-n">0</span>')}</span>
               <button class="sbtn plus" aria-label="Add ${STAKE_STEP} on ${HOLE_NAMES[i]}">+${STAKE_STEP}</button></div>
             <div class="t-backed hint small"></div>
             <div class="t-result"></div>
@@ -660,8 +707,8 @@
         const c = cards[i], st = state[i], price = prices[i];
         $('.t-price', c).innerHTML = st.done ? '' : price ? `pays <b>${price[1]}</b>` : drawsLeft ? 'No bets: too likely' : '';
         $('.t-needs', c).innerHTML = needsText(h, st);
-        $('.t-stake', c).hidden = !price;
-        $('.t-amt span', c).textContent = pending[i];
+        $('.t-stake', c).hidden = !price && !pending[i];
+        $('.amt-n', c).textContent = pending[i];
         c.classList.toggle('backed', backed(i) + pending[i] > 0);
         $('.t-backed', c).innerHTML = bets[i].length && !st.done && drawsLeft
           ? `Backed ${coin(backed(i))} · returns ${coin(returns(i))} if finished` : '';
@@ -672,12 +719,17 @@
       d.innerHTML = `Draw piece ${TABLE_DRAWS - drawsLeft + 1} of ${TABLE_DRAWS} <kbd>Enter</kbd>`;
     }
 
+    // Stakes leave the purse as you place them, so the purse always shows what you have left.
     function setStake(i, d) {
-      if (busy || !prices[i]) return;
-      const free = purse.get() - pendingTotal();
-      pending[i] = Math.max(0, pending[i] + Math.min(d, free));
+      if (busy || (!prices[i] && d > 0)) return;
+      const step = Math.max(-pending[i], Math.min(d, purse.get()));
+      if (!step) return;
+      pending[i] += step;
+      purse.add(-step);
+      reprice();
       paint();
     }
+    onLeave = () => { if (pendingTotal()) purse.add(pendingTotal()); };
     cards.forEach((c, i) => {
       $('.plus', c).addEventListener('click', () => setStake(i, STAKE_STEP));
       $('.minus', c).addEventListener('click', () => setStake(i, -STAKE_STEP));
@@ -687,9 +739,11 @@
       if (busy || !drawsLeft) return;
       busy = true;
       // Lock in this round's stakes at the prices showing now.
-      const stake = pendingTotal();
-      holes.forEach((_, i) => { if (pending[i]) bets[i].push({ amt: pending[i], mult: prices[i][0] }); pending[i] = 0; });
-      if (stake) purse.add(-stake);
+      // A stake on a hole the bookie has stopped pricing goes back to the purse.
+      holes.forEach((_, i) => {
+        if (pending[i]) { if (prices[i]) bets[i].push({ amt: pending[i], mult: prices[i][0] }); else purse.add(pending[i]); }
+        pending[i] = 0;
+      });
       main.querySelectorAll('.sbtn').forEach((b) => { b.disabled = true; });
       $('.draw', main).disabled = true;
 
@@ -698,7 +752,7 @@
       const card = main.querySelector(`.card[data-i="${n}"]`);
       $('.front', card).innerHTML = R.piece(l, null, { cell: 12, box: 70 }) + `<span>${l}</span>`;
       card.classList.add('flipped');
-      const i = C.tableDraw(holes, state, l);
+      const i = C.tableDraw(holes, state, l, order());
       drawsLeft--;
       setTimeout(() => {
         const cap = card.parentElement.querySelector('.card-cap');
@@ -712,7 +766,7 @@
             $('.t-board', cards[i]).classList.add('glow');
             const win = returns(i);
             $('.t-result', cards[i]).innerHTML = `<span class="tag-grade best">Finished</span>${win ? ` ${coin('+' + (win - backed(i)))}` : ''}`;
-            if (win) purse.add(win, `Hole ${HOLE_NAMES[i]} finished`);
+            if (win) purse.add(win, `Hole ${HOLE_NAMES[i]} pays out, stake back included`);
           }
         }
         reprice();
@@ -1095,6 +1149,7 @@
   function route() {
     const path = location.hash.replace(/^#/, '') || '/';
     keyHandler = null;
+    if (onLeave) { const f = onLeave; onLeave = null; f(); }
     C.useSeed(null);
     purse.render();
     const port = path.match(/^\/port\/(\w+)$/);

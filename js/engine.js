@@ -296,24 +296,30 @@
 
   // ---------- drill generators ----------
 
-  // "Which pair fills this?" — one valid pair among four options.
-  function genPairQuiz() {
-    const pool = compactAtlas().filter((s) => s.combos.length >= 1);
-    const shape = pick(pool);
-    const cells = randomPose(shape.cells);
-    const stats = pairStats(cells);
-    const valid = new Set(stats.combos.map((c) => c.name));
-    const answer = pick(stats.combos);
+  // "Which pieces fill this?" — one valid set of `size` pieces among four options.
+  function genPairQuiz(size = 2) {
+    let cells, list;
+    if (size === 2) cells = randomPose(pick(compactAtlas()).cells);
+    // Bigger holes: skip any with so many ways to fill them that the near-misses run out.
+    do {
+      if (size > 2) cells = genHole(size).hole;
+      list = combos(cells);
+    } while (size > 2 && (!list.length || list.length > 12));
+    const stats = size === 2 ? pairStats(cells) : { combos: list };
+    const valid = new Set(list.map((c) => c.name));
+    const answer = pick(list);
     const distractors = new Set();
     let guard = 0;
     while (distractors.size < 3 && guard++ < 500) {
-      // Mostly near-misses: keep one of the right pieces and swap the other.
-      const a = rng() < 0.7 ? pick(answer.letters) : weightedLetter();
-      const name = [a, weightedLetter()].sort(byWeight).join('');
+      // Mostly near-misses: keep all but one of the right pieces and swap that one.
+      const letters = answer.letters.slice();
+      letters.splice(rand(letters.length), 1);
+      const keep = rng() < 0.7 || size > 2 ? letters : letters.map(() => weightedLetter());
+      const name = [...keep, weightedLetter()].sort(byWeight).join('');
       if (!valid.has(name)) distractors.add(name);
     }
     const options = shuffle([answer.name, ...distractors]).map((name) => ({ name, correct: valid.has(name) }));
-    return { cells, stats, options };
+    return { cells, stats, options, size };
   }
 
   // "Which remnant would you rather leave?" — three remnants, one clearly most flexible.
@@ -496,6 +502,25 @@
     return result;
   }
 
+  /* The sum behind finishChance for a ten-square gap with nothing held, step by step:
+     which pieces can go in first, the gap each leaves, and how the two chances multiply. */
+  function finishWorking(cells) {
+    const starters = [];
+    for (const l of LETTERS) {
+      let leaves = null, then = 0;
+      for (const p of placements(cells, l)) {
+        const g = identify(minus(cells, p));
+        if (g && threeDraws(g) > then) { leaves = g; then = threeDraws(g); }
+      }
+      if (leaves) starters.push({ letter: l, leaves, then });
+    }
+    starters.sort((a, b) => byWeight(a.letter, b.letter));
+    const share = starters.reduce((s, x) => s + prob(x.letter), 0);
+    const first = 1 - (1 - share) ** 3;
+    const then = share ? starters.reduce((s, x) => s + prob(x.letter) * x.then, 0) / share : 0;
+    return { starters, share, first, then, chance: first * then };
+  }
+
   // Deal a piece; storms flatten the odds so awkward pieces turn up more.
   function dealLetter(storm) {
     if (!storm) return weightedLetter();
@@ -621,9 +646,11 @@
   const tableState = (holes) => holes.map((h) => ({ need: h.gap || null, rest: h.cells, placed: [], done: false }));
 
   /* Where a drawn piece goes: first into a gap it finishes, otherwise into the untouched
-     two-piece hole where it leaves the commonest gap. Returns the hole index, or -1 for a spare. */
-  function tableDraw(holes, state, l) {
-    let i = state.findIndex((s) => !s.done && s.need === l);
+     two-piece hole where it leaves the commonest gap. If two gaps need the same piece, it goes
+     to the one earliest in `order` (the table puts the hole with most money on it first).
+     Returns the hole index, or -1 for a spare. */
+  function tableDraw(holes, state, l, order = null) {
+    let i = (order || state.map((_, j) => j)).find((j) => !state[j].done && state[j].need === l) ?? -1;
     if (i >= 0) {
       const s = state[i];
       s.placed.push({ letter: l, cells: s.rest });
@@ -645,11 +672,11 @@
 
   /* Chance each hole is finished from `draws` more pieces off the pile, by playing it out many
      times, starting from `start` (a table part-way through) or a fresh table. */
-  function tableChances(holes, draws, sims = 3000, start = null) {
+  function tableChances(holes, draws, sims = 3000, start = null, order = null) {
     const wins = holes.map(() => 0);
     for (let n = 0; n < sims; n++) {
       const st = start ? start.map((s) => ({ ...s, placed: s.placed.slice() })) : tableState(holes);
-      for (let d = 0; d < draws; d++) tableDraw(holes, st, weightedLetter());
+      for (let d = 0; d < draws; d++) tableDraw(holes, st, weightedLetter(), order);
       st.forEach((s, i) => { if (s.done) wins[i]++; });
     }
     return wins.map((w) => w / sims);
@@ -688,7 +715,7 @@
     solve, combos, comboOdds, pairStats, placements, minus, grainSafe, byWeight,
     atlas, compactAtlas, shuffle, pick,
     finishInfo, finishChance, threeDraws, genHole, pickCore, dealLetter, NAMED, nameOf, hasNeck, ragged, dealStep, stepOptions, weightedLetter, useSeed,
-    genPairQuiz, genRemnantQuiz, genPlaceQuiz, genNameQuiz,
+    finishWorking, genPairQuiz, genRemnantQuiz, genPlaceQuiz, genNameQuiz,
     tableHole, tableState, tableDraw, tableChances, genBetTable,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

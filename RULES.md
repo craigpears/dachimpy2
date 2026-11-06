@@ -21,7 +21,9 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 - **It's a game, not a tutorial.** Short, quick-fire, with a journey and a daily puzzle.
 - **Words over percentages.** Don't fill the screen with numbers. Grades, meters and rarity
   words are fine. When rarity is shown, also say how often a piece turns up as "about 1 in X"
-  pieces. Never decimals or percentages.
+  pieces. No decimals or percentages in the main play. **Exception:** *Which gap?* is about
+  the actual sums, so it shows a percentage on each gap and the full working ("97% × 37% = 36%")
+  in a fold-out panel.
 - **Every choice must be a real choice.** Never show a single option. If one piece has only
   one sensible spot, offer two pieces to pick from instead.
 - **Options must be plausible.** No obviously bad moves: every option hugs the edge and strands
@@ -39,6 +41,13 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 - **In-play betting is the fun bit** (like blackjack): pieces come one at a time, prices move,
   and you can add bets between pieces. Holes that don't get finished are "bodged".
 - **Which pair fits?** is exactly right for teaching two-piece finishes; build more games in that style.
+  A slider sets how many pieces finish the hole (2 to 4; five-piece holes are too slow to build
+  and have too many answers). A right answer pays one doubloon for two pieces, plus one more for
+  each extra piece.
+- **Place your bets: no "A before B".** A piece only fills one hole, but the order mustn't feel
+  arbitrary. If two holes need the same piece, it goes to the one with more of your money on it,
+  and the prices are worked out with that rule. Stakes leave the purse as you place them, and
+  the purse is shown on the page, not just in the corner.
 - **Say why a move is risky in plain odds.** Every option shows "Finishes about N times in 10"
   (three draws for each piece still needed), and the grades come from that same number.
 - **Odds as bookmaker's prices** ("3 to 1", "evens"), worked out from the real chance, not
