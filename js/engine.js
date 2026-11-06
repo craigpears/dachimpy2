@@ -430,35 +430,57 @@
     return pick(compactAtlas().filter((s) => s.pairOdds >= 0.06)).cells;
   }
 
-  /* Deal for the next step. With a two-slot toolbox the piece you didn't play (`held`)
-     stays and one fresh piece joins it. A few random deals first; if none can be placed
-     usefully the player would have spent them on other holes, so fall back to one that helps. */
-  function dealStep(cells, count = 1, storm = false, held = null) {
-    const base = held ? [held] : [];
-    const fresh = () => Array.from({ length: count - base.length }, () => dealLetter(storm));
+  /* Deal for the next step. The toolbox holds `count` pieces: the ones you didn't play
+     (`held`) stay and fresh pieces top it up. A few random deals first; if none can be placed
+     usefully the player would have spent them on other holes, so fall back to one that helps.
+     Deals with at least two real choices are preferred over ones with a single move. */
+  function dealStep(cells, count = 1, storm = false, held = []) {
+    const base = held.slice(0, count - 1);
+    const fresh = (n) => Array.from({ length: n }, () => dealLetter(storm));
     for (let t = 0; t < 12; t++) {
-      const letters = base.concat(fresh());
+      const letters = base.concat(fresh(count - base.length));
       const options = stepOptions(cells, letters);
       if (options) return { letters, options, skipped: t };
     }
-    for (const l of shuffle(finishInfo(cells).useful)) {
-      const letters = (held ? [held, l] : [l, ...fresh().slice(1)]).slice(0, count);
+    const useful = shuffle(finishInfo(cells).useful);
+    for (const l of useful) {
+      const letters = base.concat(l, fresh(count - base.length - 1));
+      const options = stepOptions(cells, letters);
+      if (options) return { letters, options, skipped: 12 };
+    }
+    // A single piece with only one sensible spot is no choice at all: offer a second piece instead.
+    if (count === 1) {
+      for (const l of useful) for (const m of useful) {
+        if (m === l) continue;
+        const options = stepOptions(cells, [l, m], 2, false);
+        if (options) return { letters: [l, m], options, skipped: 12, pickOne: true };
+      }
+    }
+    for (const l of useful) {
+      const letters = base.concat(l, fresh(count - base.length - 1));
       const options = stepOptions(cells, letters, 1);
       if (options) return { letters, options, skipped: 12 };
     }
     return null;
   }
 
-  // How good a remnant is when you also keep `held` in the toolbox for it.
+  // How good a remnant is when you also keep the `held` pieces in the toolbox for it.
   function holdScore(info, held) {
-    if (!held) return info.odds;
-    if (info.gap !== undefined) return info.gap === held ? 1 : info.odds;
-    let withHeld = 0;
-    for (const c of info.combos) {
-      const i = c.letters.indexOf(held);
-      if (i >= 0) withHeld += comboOdds(c.letters.filter((_, j) => j !== i));
+    if (!held.length) return info.odds;
+    if (info.gap !== undefined) return held.includes(info.gap) ? 1 : info.odds;
+    let best = info.odds;
+    for (const h of new Set(held)) {
+      let withHeld = 0;
+      for (const c of info.combos) {
+        const i = c.letters.indexOf(h);
+        if (i < 0) continue;
+        const partner = c.letters[1 - i];
+        if (held.filter((x, j) => j !== held.indexOf(h)).includes(partner)) return 1;
+        withHeld += comboOdds([partner]);
+      }
+      best = Math.max(best, withHeld);
     }
-    return Math.max(withHeld, info.odds);
+    return best;
   }
 
   // Deal a piece; storms flatten the odds so awkward pieces turn up more.
@@ -470,7 +492,7 @@
   }
 
   const GRADES = [[0.95, 'best'], [0.6, 'good'], [0.25, 'tight'], [1e-12, 'risky'], [-1, 'dead']];
-  const gradeOf = (score, best) => (score <= 0 ? 'dead' : GRADES.find(([t]) => score / best >= t)[1]);
+  const gradeOf = (score, best) => (score <= 0 ? 'dead' : (GRADES.find(([t]) => score / best >= t) || [0, 'risky'])[1]);
 
   // The two-piece finishes named in Hawkings' Carpentry tutorial on YPPedia.
   const NAMED = [
@@ -523,7 +545,7 @@
 
   /* Up to three placements that all look like sensible moves (they hug the edge and strand
      no squares), chosen so they differ in how well they set up the finish. */
-  function stepOptions(cells, letters, min = 2) {
+  function stepOptions(cells, letters, min = 2, keep = true) {
     const inHole = new Set(cells.map(([r, c]) => key(r, c)));
     const all = [];
     for (const letter of [...new Set(letters)]) {
@@ -536,7 +558,8 @@
           const k = key(r + dr, c + dc);
           if (!inHole.has(k) || (!restSet.has(k) && !p.some(([pr, pc]) => pr === r + dr && pc === c + dc))) contact++;
         }
-        const held = letters.length > 1 ? (letters[0] === letter ? letters[1] : letters[0]) : null;
+        const held = keep ? letters.slice() : [];
+        if (keep) held.splice(held.indexOf(letter), 1);
         const info = finishInfo(rest);
         all.push({ letter, piece: p, rest, held, contact, info, score: holdScore(info, held), name: nameOf(rest), neck: hasNeck(rest), ragged: ragged(rest) });
       }
@@ -565,6 +588,78 @@
     return shuffle(chosen);
   }
 
+  // ---------- the betting table: several holes, one pile ----------
+  /* A table hole is either a last gap (five squares, one piece) or a two-piece hole (ten squares).
+     For a two-piece hole we note, for each piece that can go in first, where it goes and which
+     gap it leaves, preferring the gap for the commonest partner. */
+  function tableHole(cells) {
+    if (cells.length === 5) return { cells, gap: identify(cells) };
+    const first = {};
+    for (const c of combos(cells)) {
+      for (const p of c.tilings[0]) {
+        const other = c.tilings[0].find((q) => q !== p);
+        const cur = first[p.letter];
+        if (!cur || WEIGHTS[other.letter] > WEIGHTS[cur.partner]) first[p.letter] = { piece: p.cells, rest: other.cells, partner: other.letter };
+      }
+    }
+    return { cells, first, name: nameOf(cells), useful: Object.keys(first).sort(byWeight) };
+  }
+
+  const tableState = (holes) => holes.map((h) => ({ need: h.gap || null, rest: h.cells, placed: [], done: false }));
+
+  /* Where a drawn piece goes: first into a gap it finishes, otherwise into the untouched
+     two-piece hole where it leaves the commonest gap. Returns the hole index, or -1 for a spare. */
+  function tableDraw(holes, state, l) {
+    let i = state.findIndex((s) => !s.done && s.need === l);
+    if (i >= 0) {
+      const s = state[i];
+      s.placed.push({ letter: l, cells: s.rest });
+      s.rest = []; s.need = null; s.done = true;
+      return i;
+    }
+    let best = -1;
+    holes.forEach((h, j) => {
+      const f = h.first && !state[j].placed.length && h.first[l];
+      if (f && (best < 0 || WEIGHTS[f.partner] > WEIGHTS[holes[best].first[l].partner])) best = j;
+    });
+    if (best >= 0) {
+      const f = holes[best].first[l], s = state[best];
+      s.placed.push({ letter: l, cells: f.piece });
+      s.rest = f.rest; s.need = f.partner;
+    }
+    return best;
+  }
+
+  // Chance each hole is finished from `draws` pieces off the pile, by playing it out many times.
+  function tableChances(holes, draws, sims = 3000) {
+    const wins = holes.map(() => 0);
+    for (let n = 0; n < sims; n++) {
+      const st = tableState(holes);
+      for (let d = 0; d < draws; d++) tableDraw(holes, st, weightedLetter());
+      st.forEach((s, i) => { if (s.done) wins[i]++; });
+    }
+    return wins.map((w) => w / sims);
+  }
+
+  /* Four holes whose chances are close enough that the choice is a real one: a mix of last gaps
+     (all needing different pieces) and two-piece holes. */
+  function genBetTable(draws = 4, count = 4) {
+    const pairs = compactAtlas().filter((s) => s.pairOdds >= 0.05);
+    let fallback = null;
+    for (let t = 0; t < 40; t++) {
+      const nPairs = 1 + rand(2);
+      const letters = shuffle(LETTERS.filter((l) => l !== 'I' && l !== 'X')).slice(0, count - nPairs);
+      const holes = shuffle(letters.map((l) => tableHole(randomPose(pick(ORIENTS_BY_LETTER[l]).cells)))
+        .concat(Array.from({ length: nPairs }, () => tableHole(randomPose(pick(pairs).cells)))));
+      const chances = tableChances(holes, draws, 1500);
+      const lo = Math.min(...chances), hi = Math.max(...chances);
+      holes.forEach((h, i) => { h.chance = chances[i]; });
+      if (lo >= 0.12 && hi <= 0.72 && hi - lo <= 0.45) return holes;
+      if (!fallback || hi - lo < fallback.spread) fallback = { holes, spread: hi - lo };
+    }
+    return fallback.holes;
+  }
+
   // "Name that piece" warm-up.
   function genNameQuiz() {
     const letter = weightedLetter();
@@ -580,5 +675,6 @@
     atlas, compactAtlas, shuffle, pick,
     finishInfo, genHole, pickCore, dealLetter, NAMED, nameOf, hasNeck, ragged, dealStep, stepOptions, weightedLetter, useSeed,
     genPairQuiz, genRemnantQuiz, genPlaceQuiz, genNameQuiz,
+    tableHole, tableState, tableDraw, tableChances, genBetTable,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

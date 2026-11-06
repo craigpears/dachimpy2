@@ -343,7 +343,7 @@ svg.board { display: block; max-width: 100%; height: auto; }
 .tag-grade.risky { background: #c8483a; } .tag-grade.dead { background: #3a3a3a; }
 .leaves { display: block; }
 .auto { display: block; height: 3px; background: var(--line); border-radius: 2px; margin-top: 12px; overflow: hidden; max-width: 220px; }
-.auto i { display: block; height: 100%; background: var(--good); animation: auto 1.4s linear forwards; }
+.auto i { display: block; height: 100%; background: var(--good); animation: auto 3.5s linear forwards; }
 @keyframes auto { from { width: 0; } to { width: 100%; } }
 
 .need { display: flex; gap: 14px; align-items: center; padding: 10px 14px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); width: max-content; }
@@ -415,3 +415,25 @@ svg.map { display: block; width: 100%; height: auto; }
 .target-key { display: inline-block; width: 22px; height: 0; border-top: 3px dashed #d9a520; vertical-align: middle; margin-right: 4px; }
 .keeps { font-size: 13px; color: var(--muted); }
 .classic-body h3 { margin: 0 0 2px; }
+
+/* Place your bets: four holes, one pile */
+.table-holes { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-bottom: 18px; }
+.tcard { display: flex; flex-direction: column; gap: 6px; padding: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); transition: border-color 0.2s, box-shadow 0.2s; }
+.tcard.backed { border-color: #b8860b; box-shadow: inset 0 0 0 1px #b8860b; }
+.tcard.done { background: var(--good-bg); }
+.t-head { display: flex; justify-content: space-between; align-items: baseline; }
+.t-name { font-family: 'Alegreya', serif; font-size: 22px; font-weight: 700; }
+.t-price { font-size: 14px; }
+.t-board { display: flex; justify-content: center; align-items: center; min-height: 140px; }
+.t-board svg { max-width: 100%; height: auto; }
+.t-need { margin: 0; }
+.tcard .hint.small { margin: 0; }
+.t-stake { display: flex; align-items: center; gap: 10px; margin-top: auto; padding-top: 6px; }
+.t-amt { min-width: 3.2em; text-align: center; }
+.sbtn { min-width: 40px; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel-2); cursor: pointer; font: inherit; color: inherit; }
+.sbtn:hover:not(:disabled) { border-color: #b8860b; }
+.sbtn:disabled { opacity: 0.5; cursor: default; }
+.t-result:empty { display: none; }
+.card-slot { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.card-cap { min-height: 1.4em; font-size: 14px; }
+@media (max-width: 520px) { .table-holes { grid-template-columns: 1fr 1fr; gap: 10px; } .t-board { min-height: 110px; } .cards { gap: 8px; } .card { width: 72px; height: 96px; } }
