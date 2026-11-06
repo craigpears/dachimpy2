@@ -701,6 +701,42 @@
     return fallback.holes;
   }
 
+  /* The harbour table's pot, poker style: from each pirate you can only win as much as you put on
+     the winning hole. Winners get that stake back. Everyone else's money is shared out in layers,
+     like side pots: the first 5 of it between every winner who put in at least 5, the next 5
+     between those who put in at least 10, and so on. Whatever no winner matched goes back to its
+     owner, and money rolled over from earlier rounds goes to the winners by stake.
+     bets: [{ who, hole, amt }]. Returns a Map of who -> doubloons they get back. */
+  function potPayout(bets, hole, carry = 0) {
+    const staked = new Map(), on = new Map();
+    bets.forEach((b) => {
+      staked.set(b.who, (staked.get(b.who) || 0) + b.amt);
+      if (b.hole === hole) on.set(b.who, (on.get(b.who) || 0) + b.amt);
+    });
+    const back = new Map([...staked.keys()].map((w) => [w, 0]));
+    if (!on.size) return back; // nobody won: it all rolls over
+    const give = (who, n) => back.set(who, back.get(who) + n);
+    const levels = [...new Set(on.values())].sort((a, b) => a - b);
+    const winStake = [...on.values()].reduce((a, b) => a + b, 0);
+    on.forEach((w, who) => give(who, w + Math.floor(carry * w / winStake)));
+    staked.forEach((s, who) => {
+      const lose = s - (on.get(who) || 0);
+      let prev = 0;
+      levels.forEach((l) => {
+        const part = Math.min(lose, l) - Math.min(lose, prev);
+        prev = l;
+        if (part <= 0) return;
+        const takers = [...on.keys()].filter((w) => w !== who && on.get(w) >= l);
+        if (!takers.length) return give(who, part);
+        const each = Math.floor(part / takers.length);
+        takers.forEach((w) => give(w, each));
+        give(who, part - each * takers.length); // odd doubloons go back
+      });
+      give(who, lose - Math.min(lose, prev)); // more than any winner matched
+    });
+    return back;
+  }
+
   // "Name that piece" warm-up.
   function genNameQuiz() {
     const letter = weightedLetter();
@@ -716,6 +752,6 @@
     atlas, compactAtlas, shuffle, pick,
     finishInfo, finishChance, threeDraws, genHole, pickCore, dealLetter, NAMED, nameOf, hasNeck, ragged, dealStep, stepOptions, weightedLetter, useSeed,
     finishWorking, genPairQuiz, genRemnantQuiz, genPlaceQuiz, genNameQuiz,
-    tableHole, tableState, tableDraw, tableChances, genBetTable,
+    tableHole, tableState, tableDraw, tableChances, genBetTable, potPayout,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

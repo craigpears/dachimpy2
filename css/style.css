@@ -377,6 +377,25 @@ svg.board { display: block; max-width: 100%; height: auto; }
 .daily-card .hint { margin: 0; }
 .share { font: 18px/1.5 ui-monospace, Consolas, monospace; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; white-space: pre-wrap; }
 
+/* The landing page's two steps: earn doubloons, then bet them against other pirates */
+.start { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; margin-bottom: 26px; }
+@media (max-width: 760px) { .start { grid-template-columns: minmax(0, 1fr); } }
+.step { display: flex; flex-direction: column; padding: 18px 20px; border-radius: var(--radius); background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.step h2 { margin: 2px 0 6px; font-size: 25px; }
+.step > p { margin: 0 0 12px; }
+.face-off { color: var(--ink); text-decoration: none; border: 2px solid #b8860b; background: linear-gradient(140deg, var(--panel), var(--ok-bg)); }
+.face-off:hover { border-color: var(--accent); }
+.face-off .btn { margin-top: auto; align-self: flex-start; }
+.earn-links { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+.earn { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 10px; align-items: center; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); text-decoration: none; }
+.earn:hover { border-color: #b8860b; }
+.earn i { grid-row: span 2; font-style: normal; font-size: 22px; }
+.earn b { font-size: 17px; }
+.earn span { font-size: 14px; color: var(--muted); }
+.h-broke { margin: 12px 0 18px; padding: 14px 16px; border-radius: var(--radius); border: 2px solid var(--bad); background: var(--bad-bg); }
+.h-broke h3 { margin: 0 0 4px; font-size: 21px; }
+.h-broke p { margin: 0 0 10px; }
+
 /* ---------- voyage ---------- */
 .purse-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; margin-bottom: 12px; font-size: 17px; }
 .purse-bar .btn { margin-left: auto; }
@@ -521,6 +540,23 @@ svg.map { display: block; width: 100%; height: auto; }
 @container (min-width: 760px) {
   .h-layout { grid-template-columns: minmax(0, 1fr) 270px; align-items: start; }
   .h-crew { order: 2; position: sticky; top: 96px; }
+}
+/* All four holes in one row whenever they fit */
+.h-play { container-type: inline-size; }
+@container (min-width: 600px) { .harbour .table-holes { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; } }
+.harbour .tcard { padding: 10px; }
+.harbour .t-board { min-height: 120px; }
+.h-rules { max-width: 760px; margin-top: 8px; }
+.bet-btn { width: 100%; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 6px; padding: 10px 8px; border-radius: 10px;
+  border: 2px solid #b8860b; background: #e0a92a; color: #2b1d05; font: 700 17px var(--sans, inherit); cursor: pointer; box-shadow: var(--shadow); }
+.bet-btn:hover:not(:disabled) { background: #f0bb3a; }
+.bet-btn:disabled { opacity: 0.45; cursor: default; box-shadow: none; }
+.bet-btn small { flex-basis: 100%; font-size: 13px; font-weight: 600; }
+.h-rules p { margin: 10px 0 0; }
+/* On wide screens the table's crew takes the right-hand column, in place of the leaderboard */
+@media (min-width: 1240px) {
+  .shell:has(.harbour) { grid-template-columns: 220px minmax(0, 1fr); }
+  .shell:has(.harbour) .lboard { display: none; }
 }
 .h-crew { padding: 14px; background: var(--panel); border: 2px solid #b8860b; border-radius: var(--radius); box-shadow: var(--shadow); }
 .h-crew h2 { font-size: 22px; margin: 0; }

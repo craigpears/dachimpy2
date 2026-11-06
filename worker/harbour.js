@@ -1,7 +1,8 @@
 /* The harbour table: one shared betting round for everyone online, on the clock.
    Each round: 20 seconds to bet, then five pieces come off the pile for everyone at once.
-   All stakes go into one pot. If more than one hole gets finished, the rarest one takes it:
-   its backers split the pot by stake. If nobody backed a finished hole, the pot rolls over.
+   All stakes go into one pot. If more than one hole gets finished, the rarest one takes it, and
+   it's paid out poker style (Carp.potPayout): from each pirate you can only win as much as you
+   put on that hole. If nobody backed a finished hole, the pot rolls over.
    A few house pirates bet every round, so there's always a pot and someone to beat. */
 import '../js/engine.js';
 import TABLES from './tables.json';
@@ -69,15 +70,17 @@ export function potHole(holes, finished, totals) {
 async function settle(db, round) {
   if (round.settled || Date.now() < startOf(round.n) + SETTLE_MS) return round;
   const holes = TABLES[round.tbl], draws = JSON.parse(round.draws);
-  const { results: bets } = await db.prepare('SELECT id, hole, amt FROM bets WHERE n = ?').bind(round.n).all();
+  const { results: bets } = await db.prepare('SELECT id, pirate, hole, amt FROM bets WHERE n = ? ORDER BY id').bind(round.n).all();
   const totals = holeTotals(holes, bets);
   const { finished } = playOut(holes, draws, totals);
   const pot = round.carry + bets.reduce((a, b) => a + b.amt, 0);
   const paid = potHole(holes, finished, totals);
-  const winners = bets.filter((b) => b.hole === paid);
-  const winStake = winners.reduce((a, b) => a + b.amt, 0);
-  const stmts = winners.map((b) => db.prepare('UPDATE bets SET won = ? WHERE id = ?').bind(Math.floor(pot * b.amt / winStake), b.id));
-  const rollover = winStake ? 0 : pot;
+  // What each pirate gets back is written on their first bet of the round.
+  const back = C.potPayout(bets.map((b) => ({ who: b.pirate, hole: b.hole, amt: b.amt })), paid, round.carry);
+  const first = new Map();
+  bets.forEach((b) => { if (!first.has(b.pirate)) first.set(b.pirate, b.id); });
+  const stmts = [...back].filter(([, n]) => n).map(([who, n]) => db.prepare('UPDATE bets SET won = ? WHERE id = ?').bind(n, first.get(who)));
+  const rollover = paid < 0 ? pot : 0;
   stmts.push(db.prepare('UPDATE rounds SET settled = 1, finished = ?, pot = ?, rollover = ? WHERE n = ? AND settled = 0')
     .bind(JSON.stringify(finished), pot, rollover, round.n));
   await db.batch(stmts);

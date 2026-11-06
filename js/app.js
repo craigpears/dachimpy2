@@ -174,7 +174,7 @@
       store.patch(d.id, s);
       // Every harbour game pays into the one purse.
       const earn = d.pay ? d.pay(q, rating) : right ? QUIZ_PAY : 0;
-      if (earn) purse.add(earn, right ? 'Right answer' : 'Close call');
+      if (earn) purse.add(earn, earn < 0 ? 'Wrong answer' : right ? 'Right answer' : 'Close call');
 
       el.querySelectorAll('.opt').forEach((b, j) => {
         b.disabled = true;
@@ -256,11 +256,13 @@
       lede: 'Exactly one of these sets of pieces drops into the hole cleanly. Turn and flip them in your head. Bigger holes are harder and pay far more.',
       layout: 'pairs',
       gen: () => C.genPairQuiz(pairSize()),
-      pay: (q, rating) => (rating === 'masterpiece' ? PAIR_PAY[q.size] : 0),
+      // A wrong answer costs what a right one pays, so guessing loses doubloons.
+      pay: (q, rating) => (rating === 'masterpiece' ? 1 : -1) * PAIR_PAY[q.size],
+      payNote: () => 'A wrong answer costs as much as a right one pays, so don’t guess.',
       // How many pieces finish the hole: three big buttons, each with its pay.
       controls: () => `<div class="size-pick" role="radiogroup" aria-label="Pieces to finish the hole">
           ${[2, 3, 4].map((n) => `<button type="button" class="size-opt" role="radio" aria-checked="${n === pairSize()}" data-n="${n}">
-            <b>${n} pieces</b><span class="size-word">${['', '', 'Easy', 'Tricky', 'Hard'][n]}</span><span class="size-pay">pays ${coin(PAIR_PAY[n])}</span></button>`).join('')}
+            <b>${n} pieces</b><span class="size-word">${['', '', 'Easy', 'Tricky', 'Hard'][n]}</span><span class="size-pay">wins or loses ${coin(PAIR_PAY[n])}</span></button>`).join('')}
         </div>`,
       bindControls: (root, quiz) => {
         root.querySelectorAll('.size-opt').forEach((b) => b.addEventListener('click', () => {
@@ -296,9 +298,9 @@
       gen: C.genRemnantQuiz,
       prompt: () => '',
       options: (q) => q.options.map((o) => R.board(o.cells, [], { cell: 26 })),
-      // The best gap pays 2; a close second, nearly as likely to finish, still pays 1.
-      pay: (q, rating) => ({ masterpiece: QUIZ_PAY, craft: 1 }[rating] || 0),
-      payNote: () => `The best gap pays ${coin(QUIZ_PAY)}, a close second ${coin(1)}`,
+      // The best gap pays 2; a close second, nearly as likely to finish, still pays 1. Anything worse costs 2.
+      pay: (q, rating) => ({ masterpiece: QUIZ_PAY, craft: 1 }[rating] || -QUIZ_PAY),
+      payNote: () => `The best gap pays ${coin(QUIZ_PAY)}, a close second ${coin(1)}, and anything worse costs ${coin(QUIZ_PAY)}`,
       grade: (q, i) => {
         const c = C.finishChance(q.options[i].cells), best = Math.max(...q.options.map((x) => C.finishChance(x.cells)));
         if (q.options[i].correct) return 'masterpiece';
@@ -870,6 +872,15 @@
     </svg>`;
   }
 
+  // Where to earn doubloons, best payers first. On the landing page, and wherever a purse runs dry.
+  const EARN = [
+    { href: '#/games/pair', icon: '◧', name: 'Which pair fits?', pays: `up to ${coin(PAIR_PAY[4])} a puzzle` },
+    { href: '#/daily', icon: '☀', name: 'Hole of the Day', pays: `${coin(DAILY_PAY)} for a Masterpiece` },
+    { href: '#/games/remnant', icon: '◨', name: 'Which gap?', pays: `${coin(QUIZ_PAY)} a puzzle` },
+    { href: '#/', icon: '⚓', name: 'The voyage', pays: 'Masterpieces pay, more on a streak' },
+  ];
+  const earnLinks = (skip) => `<div class="earn-links">${EARN.filter((e) => e.href !== skip).map((e) => `<a class="earn" href="${e.href}"><i>${e.icon}</i><b>${e.name}</b><span>${e.pays}</span></a>`).join('')}</div>`;
+
   function home() {
     const v = voyage();
     const n = today();
@@ -883,6 +894,18 @@
           <h1>Fill the hull, one hole at a time.</h1>
           <p class="lede">Each piece you're dealt goes into the hole, and you choose where. Fill a hole with no wasted squares and it's a Masterpiece.</p>
         </header>
+        <section class="start">
+          <div class="step">
+            <p class="eyebrow">Step 1</p><h2>Earn doubloons</h2>
+            <p>${purse.get() < 5 ? '<b>Your purse is empty.</b> ' : ''}Quick puzzles fill your purse, and the harder ones pay far more.</p>
+            ${earnLinks('#/')}
+          </div>
+          <a class="step face-off" href="#/games/table">
+            <p class="eyebrow">Step 2</p><h2>Face off at the harbour table</h2>
+            <p>Bet your doubloons against other pirates, with a new round every 45 seconds. The richest pirates top the leaderboard.</p>
+            <span class="btn">Take a seat →</span>
+          </a>
+        </section>
         <a class="daily-card" href="#/daily">
           <div><p class="eyebrow">Hole of the Day #${n}</p>
           <h3>${dailyDone ? (daily.result.masterpiece ? 'Masterpiece! Come back tomorrow.' : 'Done for today. Come back tomorrow.') : 'Today\'s hole is waiting.'}</h3>
@@ -1165,7 +1188,9 @@
         <header class="page-head">
           <p class="eyebrow">Harbour games</p>
           <h1>Harbour table</h1>
-          <p class="lede">Everyone online plays the same table. You've 20 seconds to back the holes you think will get finished, then ${TABLE_DRAWS} pieces come off the pile for everyone. All the stakes go into one pot. If more than one hole gets finished, the rarest one with money on it takes the lot, and its backers split it. If nobody backed a finished hole, the pot rolls over to the next round.</p>
+          <p class="lede">Everyone online plays the same table. Back the holes you think will get finished, then watch ${TABLE_DRAWS} pieces come off the pile.</p>
+          <details class="working h-rules"><summary>How the pot works</summary>
+            <p>You've 20 seconds to bet. If more than one hole gets finished, the rarest one with money on it wins. Like poker, you can only win as much from each pirate as you put on the winning hole, so a bigger stake can win more. If nobody backed a finished hole, the pot rolls over to the next round.</p></details>
         </header>
         <div class="h-body"><p class="hint">Pulling up a chair…</p></div>
       </article>`;
@@ -1209,6 +1234,7 @@
           <div class="b-row"><input id="h-name" name="name" maxlength="16" placeholder="Pirate name" autocomplete="nickname" required><button class="btn sm">Join</button></div>
           <p class="b-err" role="alert"></p></form>`}
         <p class="h-note"></p>
+        <div class="h-broke" hidden><h3>Your purse is empty</h3><p>Earn some doubloons, then come back to face the other pirates.</p>${earnLinks()}</div>
         <div class="h-layout">
         <aside class="h-crew"><h2>At the table</h2><p class="h-count"></p><ul></ul></aside>
         <div class="h-play">
@@ -1217,10 +1243,9 @@
             <div class="t-head"><span class="t-name">${HOLE_NAMES[i]}</span><span class="t-rank r${rank(i)}">${RANKS[rank(i)]}</span></div>
             <div class="hole-wrap t-board">${holeBoard(i)}</div>
             <div class="t-needs">${needsText(h, state[i])}<p class="t-odds">From ${TABLE_DRAWS} pieces: finished ${timesText(h.chance)}</p></div>
-            <div class="t-stake"><span class="t-amt">${coin('<span class="amt-n">0</span>')}</span>
-              <button class="sbtn plus" aria-label="Put ${view.stakeStep} on ${HOLE_NAMES[i]}">+${view.stakeStep}</button></div>
             <div class="t-backed"></div>
             <div class="t-result"></div>
+            <div class="t-stake"><button class="bet-btn plus"></button></div>
           </div>`).join('')}</div>
         <div class="draw-zone">
           <div class="cards">${Array.from({ length: TABLE_DRAWS }, (_, i) => `<div class="card-slot"><div class="card" data-i="${i}"><div class="card-in"><div class="face back"></div><div class="face front"></div></div></div><span class="card-cap"></span></div>`).join('')}</div>
@@ -1248,28 +1273,30 @@
       view.holes.forEach((h, i) => {
         const c = cards[i], total = view.totals[i], mine = view.mine[i];
         c.classList.toggle('backed', mine > 0);
-        $('.amt-n', c).textContent = mine;
+        $('.plus', c).innerHTML = `<span>${mine ? `Bet ${coin(view.stakeStep)} more` : `Bet ${coin(view.stakeStep)} on ${HOLE_NAMES[i]}`}</span>${mine ? `<small>yours: ${mine}</small>` : ''}`;
         $('.t-stake', c).hidden = !open || !me;
         $('.plus', c).disabled = staked + view.stakeStep > view.cap || purse.get() < view.stakeStep;
-        // Your share if this hole takes the pot: the whole pot, split by stake.
-        const share = mine ? Math.floor(view.pot * mine / total) : Math.floor((view.pot + view.stakeStep) * view.stakeStep / (total + view.stakeStep));
+        // What you'd collect if this hole takes the pot, worked out the way the server pays.
+        const who = me ? me.name : ' you', bets = view.bets.map((b) => ({ who: b.name, hole: b.hole, amt: b.amt }));
+        if (!mine) bets.push({ who, hole: i, amt: view.stakeStep });
+        const get = C.potPayout(bets, i, view.carry).get(who) || 0;
         const backers = view.bets.filter((b) => b.hole === i).sort((a, b) => b.amt - a.amt);
         $('.t-backed', c).innerHTML = `<p>On this hole ${coin(total)}</p>`
           + (backers.length ? `<ul class="backers">${backers.map((b) => `<li class="${b.bot ? 'bot' : ''}${isMe(b.name) ? ' me' : ''}">${isMe(b.name) ? 'You' : esc(b.name)} ${coin(b.amt)}</li>`).join('')}</ul>` : '')
-          + (open ?`<p class="t-share">${mine ? `If ${HOLE_NAMES[i]} takes the pot, you get about ${coin(share)}` : `${view.stakeStep} here wins about ${coin(share)} if ${HOLE_NAMES[i]} takes the pot`}</p>` : '');
+          + (open ?`<p class="t-share">${mine ? `If ${HOLE_NAMES[i]} wins, you collect about ${coin(get)}` : `${view.stakeStep} here: you'd collect about ${coin(get)} if ${HOLE_NAMES[i]} wins`}</p>` : '');
       });
       let note = '';
       if (!me) note = 'You can watch, but you need a pirate name to bet.';
-      else if (purse.get() < view.stakeStep && !staked) note = 'Your purse is empty. Earn doubloons on the voyage or in the quick puzzles to get back to the table.';
-      else if (open) note = `Bets are final. You can stake up to ${coin(view.cap)} a round${staked ? `, and you've staked ${coin(staked)}` : ''}.`;
+      else if (open) note = `Bets are final. From each pirate you can win as much as you put on the winning hole, so stake more to win more. Up to ${coin(view.cap)} a round${staked ? `; you've staked ${coin(staked)}` : ''}.`;
       $('.h-note', body).innerHTML = note;
+      $('.h-broke', body).hidden = !(me && open && !staked && purse.get() < view.stakeStep);
       paintCrew();
     }
 
     // Everyone at the table, what they've got on which hole, and once it's settled, who won.
     function paintCrew() {
       const open = t() < view.betMs, res = view.result;
-      const crew = [...view.crew].sort((a, b) => (res ? b.won - a.won : 0) || isMe(b.name) - isMe(a.name) || a.bot - b.bot || b.staked - a.staked);
+      const crew = [...view.crew].sort((a, b) => (res ? b.won - b.staked - a.won + a.staked : 0) || isMe(b.name) - isMe(a.name) || a.bot - b.bot || b.staked - a.staked);
       const people = crew.filter((c) => !c.bot).length;
       $('.h-count', body).textContent = `${people ? plural(people, 'pirate') : 'No pirates'} and ${plural(crew.length - people, 'house pirate')}`;
       const mark = (i) => (res && res.hole === i ? ' paid' : state[i].done ? ' done' : res ? ' bodged' : '');
@@ -1281,7 +1308,7 @@
           ? holes.map((b) => `<span class="hb${mark(b.hole)}"><b>${HOLE_NAMES[b.hole]}</b> ${coin(b.amt)}</span>`).join('')
           : `<span class="hint">${open ? (c.bot ? 'Thinking…' : 'Watching') : 'Sat this one out'}</span>`;
         const net = c.won - c.staked;
-        const out = res && c.staked ? `<span class="h-out ${net > 0 ? 'up' : net < 0 ? 'down' : ''}">${c.won ? `Won ${coin(c.won)}` : `Lost ${coin(c.staked)}`}</span>` : '';
+        const out = res && c.staked ? `<span class="h-out ${net > 0 ? 'up' : net < 0 ? 'down' : ''}">${net > 0 ? `Won ${coin(net)}` : net < 0 ? `Lost ${coin(-net)}` : 'Even'}</span>` : '';
         return `<li class="seat${c.bot ? ' bot' : ''}${isMe(c.name) ? ' me' : ''}${bump ? ' bump' : ''}${res && c.won ? ' winner' : ''}">
           <span class="s-face" style="--h:${hue(c.name)}">${esc(c.name.replace(/^Cap'n /, '')[0])}</span>
           <span class="who"><span class="nm"><b>${isMe(c.name) ? 'You' : esc(c.name)}</b>${c.bot ? '<small>House</small>' : ''}</span><span class="what">${what}${out}</span></span></li>`;
@@ -1329,7 +1356,7 @@
       if (!res) { resultShown = false; return; }
       const cards = body.querySelectorAll('.tcard');
       view.holes.forEach((_, i) => {
-        if (i === res.hole) $('.t-result', cards[i]).innerHTML = '<span class="tag-grade best">Takes the pot</span>';
+        if (i === res.hole) $('.t-result', cards[i]).innerHTML = '<span class="tag-grade best">Winning hole</span>';
         if (state[i].done) return;
         $('.t-result', cards[i]).innerHTML = '<span class="tag-grade risky">Bodged</span>';
         if (view.mine[i]) shake($('.t-board', cards[i]));
@@ -1338,12 +1365,14 @@
       const staked = view.mine.reduce((a, b) => a + b, 0);
       const won = r ? r.won : 0, net = won - staked;
       const fin = res.finished.map((i) => HOLE_NAMES[i]);
-      const paid = view.crew.filter((c) => c.won).sort((a, b) => b.won - a.won).map((c) => `${isMe(c.name) ? 'you' : esc(c.name)} ${coin(c.won)}`);
+      const paid = view.crew.filter((c) => c.won > c.staked).sort((a, b) => b.won - b.staked - a.won + a.staked)
+        .map((c) => `${isMe(c.name) ? 'you' : esc(c.name)} won ${coin(c.won - c.staked)}`);
+      const refunds = view.crew.some((c) => c.won && c.won < c.staked);
       paintCrew();
       const box = $('.settle', body);
       box.hidden = false;
-      box.innerHTML = `<div class="verdict ${net > 0 ? 'good' : net < 0 ? 'bad' : 'ok'}">${!staked ? 'You sat this one out.' : net > 0 ? `You won ${coin(won)}!` : won ? `You got ${coin(won)} back.` : `You lost ${coin(staked)}.`}</div>
-        <p>${fin.length ? `Finished: <b>${fin.join(', ')}</b>.` : 'Nothing got finished.'} ${res.rollover ? `Nobody backed a finished hole, so the pot of ${coin(res.rollover)} rolls over to the next round.` : `${HOLE_NAMES[res.hole]} ${res.finished.length > 1 ? 'was the rarest finished hole with money on it, so it took' : 'took'} the pot of ${coin(res.pot)}: ${paid.join(', ')}.`}</p>
+      box.innerHTML = `<div class="verdict ${net > 0 ? 'good' : net < 0 ? 'bad' : 'ok'}">${!staked ? 'You sat this one out.' : net > 0 ? `You won ${coin(net)}!` : !net ? 'You broke even.' : `You lost ${coin(-net)}.${won ? ` ${coin(won)} of your stake came back to you.` : ''}`}</div>
+        <p>${fin.length ? `Finished: <b>${fin.join(', ')}</b>.` : 'Nothing got finished.'} ${res.rollover ? `Nobody backed a finished hole, so the pot of ${coin(res.rollover)} rolls over to the next round.` : `${HOLE_NAMES[res.hole]} ${res.finished.length > 1 ? 'was the rarest finished hole with money on it, so it won' : 'won'}: ${paid.join(', ') || 'nobody came out ahead'}.${refunds ? ' Stakes bigger than any winner matched went back to their owners.' : ''}`}</p>
         <p class="hint next-in"></p>`;
     }
 
@@ -1363,6 +1392,11 @@
       } else if (now < view.settleMs) clock.innerHTML = 'Pieces coming off the pile';
       else clock.innerHTML = `Next round in <b>${secs(view.roundMs - now)}s</b>`;
       $('.h-bar i', body).style.width = `${now < view.betMs ? 100 * (view.betMs - now) / view.betMs : 0}%`;
+      // As the first piece turns over, bring the pile into view so nobody misses the reveal.
+      if (view.draws && !flipped && now >= view.flipAt[0] - 1200 && now < view.settleMs) {
+        const zone = $('.draw-zone', body), r = zone.getBoundingClientRect();
+        if (r.bottom > innerHeight || r.top < 0) zone.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      }
       if (view.draws) while (flipped < view.draws.length && now >= view.flipAt[flipped]) { flip(flipped++); paintCrew(); }
       if (view.draws && now >= view.settleMs && !resultShown) showResult();
       const ni = $('.next-in', body);

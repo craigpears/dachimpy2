@@ -43,13 +43,18 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 - **Which pair fits?** is exactly right for teaching two-piece finishes; build more games in that style.
   Three big buttons above the puzzle (not a small slider) set how many pieces finish the hole (2 to 4; five-piece holes are too slow to build
   and have too many answers). Harder holes must feel properly rewarded, so the pay climbs steeply:
-  2 pieces pay 1, 3 pieces 4, 4 pieces 10.
+  2 pieces pay 1, 3 pieces 4, 4 pieces 10. **Guessing must not pay:** a wrong answer costs as
+  much as a right one pays (in *Which gap?* anything worse than a close second costs 2).
 - **Place your bets: no "A before B".** A piece only fills one hole, but the order mustn't feel
   arbitrary. If two holes need the same piece, it goes to the one with more of your money on it,
   and the prices are worked out with that rule. Stakes leave the purse as you place them, and
   the purse is shown on the page, not just in the corner.
 - **Every hole on the betting table shows its odds**, two-piece holes too: how often a starting
   piece turns up ("about 1 in 2 pieces") and how often it gets finished from the pieces left.
+- **Earn, then face off.** The landing page leads with two steps: earn doubloons (the puzzles,
+  best payers first, with what each pays), then bet them against other pirates at the harbour
+  table. The menu groups them the same way ("Earn doubloons", "Bet them"). When your purse is
+  empty at the table, a clear box sends you to the puzzles.
 - **Every game feeds the one purse**, and its page shows your purse and what it pays.
   *Which gap?* pays 2 for the best gap and 1 for a close second.
 - **No looping animations.** The bobbing ship and spinning ring on the map hurt to watch. Movement
@@ -66,15 +71,20 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
   buys no edge. If you run out, you earn your way back in with the quick puzzles first.
 - **The harbour table is player against player.** One shared round every 45 seconds: 20 seconds
   to bet, then five pieces for everyone. No bookie's prices: all stakes go in one pot. If more than one
-  hole gets finished, the rarest one with money on it takes the whole pot, split by stake among
-  its backers (so a crowded easy hole pays little, a long shot pays big); if nobody backed a
-  finished hole, the pot rolls over. Each hole is labelled Rarest … Likeliest. House pirates
+  hole gets finished, the rarest one with money on it wins. Payouts are **poker style**: from each
+  pirate you can only win as much as you put on the winning hole (bet 5 against their 10 and you
+  win at most 5 of it), so a bigger stake is worth more. It's shared out in layers like side pots,
+  and stakes no winner matched go back to their owners. If nobody backed a finished hole, the pot
+  rolls over. Each hole is labelled Rarest … Likeliest. House pirates
   (Cap'n Bones, One-Eyed Peg, Barnacle Bill) bet every round so there's always a pot. Stakes are
   capped at 20 a round, bets are final, and the pieces stay secret on the server until betting
   closes. The solo table against the bookie stays as *Practice bets*.
 - **Who's at the table must be obvious.** A prominent panel beside the holes (above them on narrow
   screens) lists every pirate at the table, house pirates marked, with what each has on which hole,
   and after the round who won and who lost. Each hole also lists its backers by name.
+- **The table fits on one screen.** All four holes in one row, the crew in its own column on the
+  right (in place of the leaderboard), a short intro with the pot rules folded away, and the page
+  brings the pile into view as the pieces turn over. Betting is one big button per hole.
 - Ideas to build next: a daily head-to-head on Hole of the Day (same pieces for everyone, a board
   of who got the Masterpiece); and *carpentry poker*: two pieces in your hand,
   the holes on the table, then shared pieces dealt like a flop, turn and river, with betting
