@@ -41,7 +41,7 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 - **In-play betting is the fun bit** (like blackjack): pieces come one at a time, prices move,
   and you can add bets between pieces. Holes that don't get finished are "bodged".
 - **Which pair fits?** is exactly right for teaching two-piece finishes; build more games in that style.
-  A slider sets how many pieces finish the hole (2 to 4; five-piece holes are too slow to build
+  Three big buttons above the puzzle (not a small slider) set how many pieces finish the hole (2 to 4; five-piece holes are too slow to build
   and have too many answers). Harder holes must feel properly rewarded, so the pay climbs steeply:
   2 pieces pay 1, 3 pieces 4, 4 pieces 10.
 - **Place your bets: no "A before B".** A piece only fills one hole, but the order mustn't feel

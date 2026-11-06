@@ -253,22 +253,21 @@
 
     pair: {
       id: 'pair', title: 'Which pair fits?',
-      lede: 'Exactly one of these sets of pieces drops into the hole cleanly. Turn and flip them in your head. Slide for bigger holes: they pay more.',
+      lede: 'Exactly one of these sets of pieces drops into the hole cleanly. Turn and flip them in your head. Bigger holes are harder and pay far more.',
       layout: 'pairs',
       gen: () => C.genPairQuiz(pairSize()),
       pay: (q, rating) => (rating === 'masterpiece' ? PAIR_PAY[q.size] : 0),
-      controls: () => `<label class="size-pick">Pieces to finish it
-          <input type="range" min="2" max="${PAIR_MAX}" step="1" value="${pairSize()}">
-          <b class="size-n"></b><span class="size-pay"></span></label>`,
+      // How many pieces finish the hole: three big buttons, each with its pay.
+      controls: () => `<div class="size-pick" role="radiogroup" aria-label="Pieces to finish the hole">
+          ${[2, 3, 4].map((n) => `<button type="button" class="size-opt" role="radio" aria-checked="${n === pairSize()}" data-n="${n}">
+            <b>${n} pieces</b><span class="size-word">${['', '', 'Easy', 'Tricky', 'Hard'][n]}</span><span class="size-pay">pays ${coin(PAIR_PAY[n])}</span></button>`).join('')}
+        </div>`,
       bindControls: (root, quiz) => {
-        const input = $('.size-pick input', root);
-        const show = () => {
-          $('.size-n', root).textContent = input.value;
-          $('.size-pay', root).innerHTML = `pays ${coin(PAIR_PAY[input.value])}`;
-        };
-        show();
-        input.addEventListener('input', show);
-        input.addEventListener('change', () => { store.patch('pairSize', +input.value); quiz.next(); });
+        root.querySelectorAll('.size-opt').forEach((b) => b.addEventListener('click', () => {
+          root.querySelectorAll('.size-opt').forEach((x) => x.setAttribute('aria-checked', x === b));
+          store.patch('pairSize', +b.dataset.n);
+          quiz.next();
+        }));
       },
       prompt: (q) => `<div class="hole-wrap">${R.board(q.cells, [], { cell: q.size > 3 ? 34 : 40 })}</div>
         <p class="ask">Which ${q.size === 2 ? 'pair' : `${q.size} pieces`} fill${q.size === 2 ? 's' : ''} it?</p>`,
