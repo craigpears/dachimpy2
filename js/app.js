@@ -1,0 +1,878 @@
+/* Voyage, Hole of the Day, harbour games and the workshop. Hash-routed so it stays static. */
+(function () {
+  'use strict';
+  const C = window.Carp, R = window.Render;
+  const $ = (sel, el = document) => el.querySelector(sel);
+  const main = $('#main');
+
+  // ---------- small helpers ----------
+  const letterChip = (l) => `<span class="lchip" style="--pc: var(--p-${l})">${l}</span>`;
+  const an = (l) => ('FLNXI'.includes(l) ? 'an ' : 'a ') + letterChip(l);
+  const comboChip = (name) => `<span class="combo">${[...name].map(letterChip).join('<span class="plus">+</span>')}</span>`;
+  const chips = (letters) => `<span class="chips">${letters.map(letterChip).join('')}</span>`;
+  const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+  const pickOne = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const coin = (n) => `<span class="coin" aria-hidden="true"></span><b>${n}</b>`;
+
+  // How often each piece turns up, in words, and what a bet on it pays.
+  const RARITY = {
+    P: ['very common', 1], F: ['common', 2], Y: ['common', 2], T: ['uncommon', 3], N: ['uncommon', 3], L: ['uncommon', 3],
+    W: ['rare', 5], U: ['rare', 5], V: ['rare', 5], Z: ['rare', 5], X: ['very rare', 8], I: ['very rare', 8],
+  };
+  const payoutText = (m) => (m === 1 ? 'evens' : `${m} to 1`);
+
+  // Ten-square remnants on a five-step scale, from roomy to dead.
+  const FLEX = [[0.13, 5, 'Roomy'], [0.09, 4, 'Comfortable'], [0.05, 3, 'Fair'], [0.02, 2, 'Tight'], [1e-9, 1, 'Long shot'], [-1, 0, 'Dead end']];
+  const flexOf = (odds) => FLEX.find(([t]) => odds >= t);
+  const meter = (level) => `<span class="meter" data-l="${level}">${'<i></i>'.repeat(5)}</span>`;
+  const flexBadge = (odds) => { const [, lvl, word] = flexOf(odds); return `${meter(lvl)}<span class="flex-word">${word}</span>`; };
+
+  const store = {
+    get() { try { return JSON.parse(localStorage.getItem('carp.v1')) || {}; } catch { return {}; } },
+    set(v) { try { localStorage.setItem('carp.v1', JSON.stringify(v)); } catch { /* storage unavailable */ } },
+    patch(k, v) { const s = this.get(); s[k] = v; this.set(s); },
+  };
+
+  function shake(el) {
+    if (!el) return;
+    el.classList.remove('shake');
+    void el.offsetWidth;
+    el.classList.add('shake');
+  }
+
+  const RATINGS = {
+    masterpiece: { text: 'A Masterpiece!', cls: 'good' },
+    craft: { text: 'Craftsmanship.', cls: 'ok' },
+    fair: { text: 'A Fair Job.', cls: 'ok' },
+    sloppy: { text: 'Sloppy Work.', cls: 'bad' },
+    pig: { text: "A Pig's Breakfast!", cls: 'bad' },
+  };
+
+  const PIECE_NOTES = {
+    P: 'The workhorse. You will see more P than anything else, so build your finishes around it.',
+    F: 'Looks awkward, but it hugs ragged edges well.',
+    Y: 'Long-grained, so keep it lying flat if you want the Grain bonus.',
+    T: 'Good for a notch with a stem sticking out.',
+    N: 'Long-grained. Slides into staggered steps.',
+    L: 'Long-grained. Reliable for edges and corners.',
+    W: 'A staircase. Symmetric, so it never costs Grain.',
+    U: 'Caps two nubs at once.',
+    V: 'A big corner. Symmetric, so Grain is free.',
+    Z: 'Spend it early while holes are still roomy.',
+    X: 'Rigid. Never leave a gap that only an X can fill.',
+    I: 'The rarest piece. Lay it along long straight edges early. Never wait for one.',
+  };
+
+  // Every finishing pair for a remnant, drawn as small boards.
+  function fillsGallery(combos, opts = {}) {
+    if (!combos.length) return `<p class="dead-note">Nothing fits. This one can't be a Masterpiece.</p>`;
+    return `<div class="fills">${combos.map((c) => `
+      <figure class="fill${opts.highlight === c.name ? ' hl' : ''}">
+        ${R.board([], c.tilings[0], { cell: opts.cell || 15, frame: 0, labels: false })}
+        <figcaption>${comboChip(c.name)}</figcaption>
+      </figure>`).join('')}</div>`;
+  }
+
+  // "Holding a P? An L, Y, T, V or Z finishes it."
+  function partners(combos) {
+    const useful = [...new Set(combos.flatMap((c) => c.letters))].sort(C.byWeight);
+    return useful.map((a) => {
+      const set = new Set();
+      for (const c of combos) {
+        const [x, y] = c.letters;
+        if (x === a) set.add(y); else if (y === a) set.add(x);
+      }
+      return { letter: a, partners: [...set].sort(C.byWeight) };
+    });
+  }
+
+  // ---------- quiz runner (harbour games) ----------
+  let keyHandler = null;
+  document.addEventListener('keydown', (e) => {
+    if (keyHandler && !e.ctrlKey && !e.metaKey && !e.altKey && !/input|textarea/i.test(e.target.tagName)) keyHandler(e);
+  });
+
+  /* A quiz supplies gen(), prompt(q), options(q) -> [html], grade(q, i) -> rating key,
+     and optionally annotate(q, j), explain(q, i) and onAnswer(q, i, el). */
+  function runQuiz(el, d) {
+    let q, answered;
+    const stats = () => (store.get()[d.id] || { streak: 0, best: 0, right: 0, total: 0 });
+    const scoreEl = () => $('.drill-score', el.parentElement);
+
+    function scoreline() {
+      const s = stats();
+      return `<span>Streak <b>${s.streak}</b></span><span>Best <b>${s.best}</b></span>`;
+    }
+
+    function next() {
+      q = d.gen();
+      answered = false;
+      el.innerHTML = `
+        <div class="q-prompt">${d.prompt(q)}</div>
+        <div class="options ${d.layout || 'grid'}">${d.options(q).map((html, i) => `
+          <button class="opt" data-i="${i}"><span class="opt-key">${i + 1}</span>
+            <span class="opt-body">${html}</span><span class="opt-note"></span></button>`).join('')}
+        </div>
+        <div class="feedback" hidden></div>`;
+      el.querySelectorAll('.opt').forEach((b) => b.addEventListener('click', () => answer(+b.dataset.i)));
+      if (scoreEl()) scoreEl().innerHTML = scoreline();
+    }
+
+    function answer(i) {
+      if (answered) return;
+      answered = true;
+      const rating = d.grade(q, i);
+      const right = rating === 'masterpiece';
+      const s = stats();
+      s.total++;
+      if (right) { s.right++; s.streak++; s.best = Math.max(s.best, s.streak); } else s.streak = 0;
+      store.patch(d.id, s);
+
+      el.querySelectorAll('.opt').forEach((b, j) => {
+        b.disabled = true;
+        b.classList.add(d.grade(q, j) === 'masterpiece' ? 'is-right' : 'is-wrong');
+        if (j === i) b.classList.add('chosen');
+        $('.opt-note', b).innerHTML = d.annotate ? d.annotate(q, j) : '';
+      });
+      if (d.onAnswer) d.onAnswer(q, i, el);
+      if (!right) { shake($('.q-prompt', el)); shake(el.querySelector('.opt.chosen')); }
+      const fb = $('.feedback', el);
+      const r = RATINGS[rating];
+      fb.hidden = false;
+      fb.innerHTML = `<div class="verdict ${r.cls}">${r.text}</div>${d.explain ? d.explain(q, i) : ''}
+        <button class="btn next">Next <kbd>Enter</kbd></button>`;
+      $('.next', fb).addEventListener('click', next);
+      if (scoreEl()) scoreEl().innerHTML = scoreline();
+    }
+
+    keyHandler = (e) => {
+      const n = parseInt(e.key, 10);
+      if (!answered && n >= 1 && n <= el.querySelectorAll('.opt').length) { answer(n - 1); e.preventDefault(); }
+      else if (answered && (e.key === 'Enter' || e.key === ' ')) { next(); e.preventDefault(); }
+    };
+    next();
+  }
+
+  function quizPage(d) {
+    main.innerHTML = `
+      <article class="drill-page">
+        <header class="page-head">
+          <p class="eyebrow">Harbour games</p>
+          <h1>${d.title}</h1>
+          <p class="lede">${d.lede}</p>
+          <div class="drill-score"></div>
+        </header>
+        <section class="drill"></section>
+      </article>`;
+    runQuiz($('.drill', main), d);
+  }
+
+  const QUIZZES = {
+    name: {
+      id: 'name', layout: 'letters',
+      gen: C.genNameQuiz,
+      prompt: (q) => `<div class="solo-piece">${R.piece(q.letter, q.cells, { cell: 30, pad: 4 })}</div><p class="ask">Which piece is this?</p>`,
+      options: (q) => q.options.map((l) => `<span class="big-letter">${l}</span>`),
+      grade: (q, i) => (q.options[i] === q.letter ? 'masterpiece' : 'sloppy'),
+      explain: (q) => `<p>${letterChip(q.letter)} <b>${q.letter}</b> is ${RARITY[q.letter][0]}. ${PIECE_NOTES[q.letter]}</p>`,
+    },
+
+    pair: {
+      id: 'pair', title: 'Which pair fits?',
+      lede: 'Ten squares left. Exactly one of these pairs drops in cleanly. Turn and flip them in your head.',
+      layout: 'pairs',
+      gen: C.genPairQuiz,
+      prompt: (q) => `<div class="hole-wrap">${R.board(q.cells, [], { cell: 40 })}</div>`,
+      options: (q) => q.options.map((o) => `<span class="pair-tray">${[...o.name].map((l) => R.piece(l, C.pick(C.ORIENTS_BY_LETTER[l]).cells, { cell: 15 })).join('')}</span>`),
+      grade: (q, i) => (q.options[i].correct ? 'masterpiece' : 'sloppy'),
+      annotate: (q, j) => comboChip(q.options[j].name),
+      // Drop the right pair into the hole so you see how it goes.
+      onAnswer: (q, i, el) => {
+        const ans = q.options.find((o) => o.correct).name;
+        const combo = q.stats.combos.find((c) => c.name === ans);
+        $('.hole-wrap', el).innerHTML = R.board(q.cells, combo.tilings[0].map((p) => ({ ...p, fresh: true })), { cell: 40 });
+      },
+      explain: (q) => {
+        const ans = q.options.find((o) => o.correct).name;
+        const others = q.stats.combos.filter((c) => c.name !== ans);
+        return others.length
+          ? `<p class="also">${plural(others.length, 'other pair')} would also have done it:</p>${fillsGallery(others)}`
+          : '<p class="also">That was the only pair that fits.</p>';
+      },
+    },
+
+    remnant: {
+      id: 'remnant', title: 'Which gap would you rather leave?',
+      lede: "You can steer a hole towards any of these endings. Pick the one you're most likely to finish cleanly.",
+      gen: C.genRemnantQuiz,
+      prompt: () => '',
+      options: (q) => q.options.map((o) => R.board(o.cells, [], { cell: 26 })),
+      grade: (q, i) => {
+        const o = q.options[i], best = Math.max(...q.options.map((x) => x.stats.pairOdds));
+        if (o.correct) return 'masterpiece';
+        if (o.stats.pairOdds === 0) return 'pig';
+        return o.stats.pairOdds >= best * 0.6 ? 'craft' : 'fair';
+      },
+      annotate: (q, j) => {
+        const s = q.options[j].stats;
+        return `<span class="flex">${flexBadge(s.pairOdds)}</span>${s.useful.length ? chips(s.useful) : ''}`;
+      },
+      explain: (q) => {
+        const best = q.options.find((o) => o.correct);
+        return `<p>The best gap can be finished by ${plural(best.stats.combos.length, 'different pair')}:</p>${fillsGallery(best.stats.combos)}
+          <p class="hint">Look for gaps that <b>P</b>, <b>F</b> and <b>Y</b> can finish. They're the pieces you see most.</p>`;
+      },
+    },
+  };
+
+  // ---------- the hole run: fill a whole hole, one dealt piece at a time ----------
+  const LINES = {
+    best: ['Shipshape!', 'Lovely work.', "That's the spot."],
+    good: ['Solid.', 'Good enough to sail.', 'Nicely done.'],
+    tight: ['Getting tight…', 'Hmm, that boxes you in.'],
+    risky: ['Living dangerously!', "You'll need some luck now."],
+    dead: ['Dead end! Nothing fits what\'s left.'],
+  };
+  const TAGS = { best: 'Best', good: 'Good', tight: 'Tight', risky: 'Risky', dead: 'Dead end' };
+  const SHARE = { best: '🟩', good: '🟨', tight: '🟧', risky: '🟥', dead: '⬛' };
+
+  // What a placement leaves behind, in the words a carpenter would use.
+  function leavesText(o, minRagged) {
+    const info = o.info;
+    if (info.gap !== undefined) {
+      if (!info.gap) return 'Leaves a gap no piece fits';
+      return `Leaves a gap for ${an(info.gap)}${o.held === info.gap ? ", and you're holding one!" : ''}`;
+    }
+    let text;
+    if (!info.ways) text = 'Nothing can finish it';
+    else if (o.name) text = `Leaves a <b>${o.name}</b>`;
+    else if (o.rest.length === 10) text = `Finished by ${chips(info.useful)}`;
+    else if (o.neck) text = 'Cuts a bottleneck';
+    else if (o.ragged <= minRagged) text = 'Keeps it square';
+    else text = 'Leaves ragged edges';
+    return text + (o.held ? `<br><span class="keeps">Keeps ${an(o.held)}</span>` : '');
+  }
+
+  /* opts: size, deal (pieces per step), storm, bet (purse to wager from or null),
+           header() -> html, onDone(result), seed (for the daily), replay ([choice indexes]), onChoice(i) */
+  function holeRun(el, opts) {
+    if (opts.seed != null) C.useSeed(opts.seed);
+    const grown = C.genHole(opts.size, opts.core ? C.pickCore() : null);
+    const hole = grown.hole;
+    let remaining = hole, placed = [], steps = [], deal = null, chosen = false;
+    let held = null; // with a two-slot toolbox, the piece you didn't play stays
+    const replay = (opts.replay || []).slice();
+    let autoTimer = null;
+    // Training wheels: outline the good ten-square finish hiding inside the hole.
+    const target = () => (opts.hint && grown.core && remaining.length > 10 ? grown.core : null);
+
+    const boardHtml = (fresh) => R.board(remaining, placed.map((p, i) => ({ ...p, fresh: fresh && i === placed.length - 1 })), { cell: 38, labels: false, target: target() });
+    const trail = () => `<div class="trail">${steps.map((g) => `<span class="pip ${g}" title="${TAGS[g]}"></span>`).join('')}</div>`;
+
+    function step(freshBoard) {
+      chosen = false;
+      if (remaining.length === 5) return drawStage(freshBoard);
+      deal = C.dealStep(remaining, opts.deal || 1, opts.storm, held);
+      if (!deal) { steps.push('dead'); return deadEnd(); }
+      if (replay.length) return choose(replay.shift(), true);
+      const many = deal.letters.length > 1;
+      const minRagged = Math.min(...deal.options.map((o) => o.ragged));
+      el.innerHTML = `
+        ${opts.header()}
+        <div class="run-top">
+          <div class="hole-wrap big">${boardHtml(freshBoard)}</div>
+          <div class="run-side">
+            <p class="label">${many ? 'Your toolbox' : 'Dealt to you'}</p>${R.toolbox(deal.letters)}
+            ${many ? '<p class="hint small">Play one. The other stays in your toolbox for later.</p>' : ''}
+            ${deal.skipped ? `<p class="hint small">${plural(deal.skipped, 'piece')} went into your other holes first.</p>` : ''}
+            ${target() ? '<p class="hint small"><span class="target-key"></span> A good finish hides inside. Work from the outside in to reach it.</p>' : ''}
+            <p class="squares"><b>${remaining.length}</b> squares to go</p>${trail()}
+          </div>
+        </div>
+        <p class="ask">${many ? 'Which piece, and where?' : `Where does the ${letterChip(deal.letters[0])} go?`}</p>
+        <div class="options run-opts">${deal.options.map((o, i) => `
+          <button class="opt" data-i="${i}"><span class="opt-key">${i + 1}</span>
+            <span class="opt-body">${R.board(o.rest, placed.concat({ letter: o.letter, cells: o.piece, fresh: true }), { cell: 20, labels: false, target: target() })}</span>
+            <span class="opt-note"></span></button>`).join('')}
+        </div>
+        <div class="feedback" hidden></div>`;
+      el.querySelectorAll('.opt').forEach((b) => b.addEventListener('click', () => choose(+b.dataset.i)));
+      el.dataset.minRagged = minRagged;
+      keyHandler = (e) => {
+        const n = parseInt(e.key, 10);
+        if (!chosen && n >= 1 && n <= deal.options.length) { choose(n - 1); e.preventDefault(); }
+        else if (chosen && (e.key === 'Enter' || e.key === ' ')) { advance(); e.preventDefault(); }
+      };
+    }
+
+    function choose(i, silent) {
+      if (chosen) return;
+      chosen = true;
+      const o = deal.options[i];
+      steps.push(o.grade);
+      placed = placed.concat({ letter: o.letter, cells: o.piece });
+      remaining = o.rest;
+      held = o.held;
+      if (!silent && opts.onChoice) opts.onChoice(i);
+      if (silent) return o.grade === 'dead' ? deadEnd(true) : step();
+
+      el.querySelectorAll('.opt').forEach((b, j) => {
+        const x = deal.options[j];
+        b.disabled = true;
+        b.classList.add('g-' + x.grade);
+        if (j === i) b.classList.add('chosen');
+        $('.opt-note', b).innerHTML = `<span class="tag-grade ${x.grade}">${TAGS[x.grade]}</span><span class="leaves">${leavesText(x, +el.dataset.minRagged)}</span>`;
+      });
+      $('.hole-wrap', el).innerHTML = boardHtml(true);
+      $('.run-side .trail', el).outerHTML = trail();
+      $('.squares', el).innerHTML = `<b>${remaining.length}</b> squares to go`;
+      if (o.grade === 'dead' || o.grade === 'risky') shake($('.hole-wrap', el));
+
+      const fb = $('.feedback', el);
+      fb.hidden = false;
+      const good = o.grade === 'best' || o.grade === 'good';
+      const bestOpt = deal.options.find((x) => x.grade === 'best');
+      fb.innerHTML = `<div class="verdict ${good ? 'good' : o.grade === 'tight' ? 'ok' : 'bad'}">${pickOne(LINES[o.grade])}</div>
+        ${o.name ? `<p>That leaves a <b>${o.name}</b>, one of the classic two-piece finishes.</p>` : ''}
+        ${o.grade !== 'best' ? `<p class="hint">The green option was stronger${bestOpt && bestOpt.name ? `: it leaves a <b>${bestOpt.name}</b>` : ''}.</p>` : ''}
+        <button class="btn next">${o.grade === 'dead' ? 'See the damage' : 'Next piece'} <kbd>Enter</kbd></button>
+        ${good ? '<span class="auto"><i></i></span>' : ''}`;
+      $('.next', fb).addEventListener('click', advance);
+      // Quick-fire: good moves roll straight on.
+      if (good) autoTimer = setTimeout(advance, 1400);
+    }
+
+    function advance() {
+      clearTimeout(autoTimer);
+      if (!chosen) return;
+      if (steps[steps.length - 1] === 'dead') deadEnd(); else step(true);
+    }
+
+    function deadEnd() {
+      const result = { masterpiece: false, steps, hole, placed, remaining, dead: true };
+      el.innerHTML = `${opts.header()}
+        <div class="run-top"><div class="hole-wrap big">${boardHtml()}</div>
+          <div class="run-side"><div class="verdict bad">Dead end.</div>
+          <p>No piece can fill what's left exactly. You'd have to overlap with extra pieces, so this hole won't be a Masterpiece.</p>${trail()}</div></div>
+        <button class="btn next">Carry on <kbd>Enter</kbd></button>`;
+      shake($('.hole-wrap', el));
+      finish(result);
+    }
+
+    function drawStage(fresh) {
+      const gap = C.identify(remaining);
+      if (held === gap) return savedFinish(gap);
+      const [rarity, mult] = RARITY[gap];
+      const purse = opts.bet ? opts.bet() : null;
+      let stake = 0;
+      el.innerHTML = `
+        ${opts.header()}
+        <div class="run-top">
+          <div class="hole-wrap big">${boardHtml(fresh)}</div>
+          <div class="run-side">
+            <p class="label">The last gap needs</p>
+            <div class="need">${R.piece(gap, remaining, { cell: 18 })}<div><b>${an(gap)}</b><br><span class="hint">${rarity}</span></div></div>
+            ${trail()}
+          </div>
+        </div>
+        <div class="draw-zone">
+          <p class="ask">You get three draws. Will ${an(gap)} turn up?</p>
+          ${purse != null ? `
+            <div class="bet">
+              <p class="label">Bet your doubloons · pays ${payoutText(mult)}</p>
+              <div class="stakes">${[0, 5, 10, 25].filter((v) => v <= purse).map((v) => `<button class="stake${v === 0 ? ' on' : ''}" data-v="${v}">${v ? coin(v) : 'No bet'}</button>`).join('')}
+              ${purse > 0 ? `<button class="stake" data-v="${purse}">All in · ${coin(purse)}</button>` : ''}</div>
+            </div>` : ''}
+          <div class="cards">${[0, 1, 2].map((i) => `<div class="card" data-i="${i}"><div class="card-in"><div class="face back"></div><div class="face front"></div></div></div>`).join('')}</div>
+          <button class="btn draw">Draw! <kbd>Enter</kbd></button>
+        </div>`;
+      el.querySelectorAll('.stake').forEach((b) => b.addEventListener('click', () => {
+        stake = +b.dataset.v;
+        el.querySelectorAll('.stake').forEach((x) => x.classList.toggle('on', x === b));
+      }));
+      let drawing = false;
+      const go = () => { if (!drawing) { drawing = true; draw(gap, () => stake, mult); } };
+      $('.draw', el).addEventListener('click', go);
+      keyHandler = (e) => { if (e.key === 'Enter' || e.key === ' ') { go(); e.preventDefault(); } };
+    }
+
+    // You kept exactly the piece the last gap needs: no draw, no bet, just drop it in.
+    function savedFinish(gap) {
+      C.useSeed(null);
+      placed = placed.concat({ letter: gap, cells: remaining });
+      const gapCells = remaining;
+      remaining = [];
+      el.innerHTML = `${opts.header()}
+        <div class="run-top"><div class="hole-wrap big glow">${R.board(remaining, placed.map((p, i) => ({ ...p, fresh: i === placed.length - 1 })), { cell: 38, labels: false })}</div>
+          <div class="run-side"><div class="verdict good">A Masterpiece!</div>
+          <p>You saved ${an(gap)} for exactly this gap. No waiting, no luck needed.</p>
+          <p class="hint">This is the habit the best carpenters have: keep the common piece and spend the awkward ones early.</p>${trail()}</div></div>
+        <button class="btn next">Carry on <kbd>Enter</kbd></button>`;
+      finish({ masterpiece: true, steps, hole, placed, remaining, drawsUsed: 0, betDelta: 0, gapCells });
+    }
+
+    function draw(gap, getStake, mult) {
+      const stake = getStake();
+      $('.draw', el).disabled = true;
+      el.querySelectorAll('.stake').forEach((b) => { b.disabled = true; });
+      const draws = [0, 1, 2].map(() => C.dealLetter(false));
+      const hitAt = draws.indexOf(gap);
+      const shown = hitAt === -1 ? 3 : hitAt + 1;
+      C.useSeed(null);
+      let i = 0;
+      const flipNext = () => {
+        const card = el.querySelector(`.card[data-i="${i}"]`);
+        const l = draws[i];
+        $('.front', card).innerHTML = R.piece(l, null, { cell: 12, box: 70 }) + `<span>${l}</span>`;
+        card.classList.add('flipped');
+        if (l === gap) card.classList.add('hit');
+        i++;
+        if (i < shown) setTimeout(flipNext, 650);
+        else setTimeout(() => settle(hitAt !== -1, stake, mult, hitAt), 700);
+      };
+      setTimeout(flipNext, 200);
+    }
+
+    function settle(hit, stake, mult, hitAt) {
+      const gapCells = remaining;
+      if (hit) {
+        placed = placed.concat({ letter: C.identify(gapCells), cells: gapCells });
+        remaining = [];
+        $('.hole-wrap', el).innerHTML = boardHtml(true);
+        $('.hole-wrap', el).classList.add('glow');
+      } else {
+        shake($('.hole-wrap', el));
+        el.querySelectorAll('.card').forEach((c) => c.classList.add('miss'));
+      }
+      const won = stake ? (hit ? stake * mult : -stake) : 0;
+      const zone = $('.draw-zone', el);
+      zone.insertAdjacentHTML('beforeend', `<div class="settle">
+        <div class="verdict ${hit ? 'good' : 'bad'}">${hit ? 'A Masterpiece!' : 'No luck.'}</div>
+        <p>${hit ? `It turned up on draw ${hitAt + 1}.` : `No ${letterChip(C.identify(gapCells))} in three draws. The hole sat too long, so you'd finish it with extra pieces.`}
+        ${stake ? (hit ? ` Your bet pays ${coin('+' + won)}.` : ` You lose your ${coin(stake)}.`) : ''}</p>
+        <button class="btn next">Carry on <kbd>Enter</kbd></button></div>`);
+      finish({ masterpiece: hit, steps, hole, placed, remaining, drawsUsed: hit ? hitAt + 1 : 3, betDelta: won });
+    }
+
+    function finish(result) {
+      C.useSeed(null);
+      const btn = el.querySelector('.next');
+      const done = () => { keyHandler = null; opts.onDone(result); };
+      btn.addEventListener('click', done);
+      keyHandler = (e) => { if (e.key === 'Enter' || e.key === ' ') { done(); e.preventDefault(); } };
+      if (opts.onFinish) opts.onFinish(result);
+    }
+
+    step();
+  }
+
+  // ---------- Hole of the Day ----------
+  const EPOCH = Date.UTC(2026, 10, 1);
+  function today() {
+    const d = new Date();
+    return Math.floor((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - EPOCH) / 864e5) + 1;
+  }
+
+  function shareText(n, r) {
+    const end = r.dead ? '⬛ dead end' : r.masterpiece ? `⭐ Masterpiece on draw ${r.drawsUsed}` : '💨 missed the draw';
+    return `Hole of the Day #${n}\n${r.steps.map((g) => SHARE[g]).join('')} ${end}`;
+  }
+
+  function dailyPage() {
+    const n = today();
+    const saved = store.get().daily || {};
+    const mine = saved.day === n ? saved : { day: n, choices: [] };
+    const streak = store.get().dailyStreak || { last: 0, count: 0 };
+
+    const header = () => `<header class="run-bar"><span class="eyebrow">Hole of the Day</span><b>#${n}</b>
+      <span class="hint">Same hole for everyone today</span></header>`;
+
+    function showResult(r) {
+      const text = shareText(n, r);
+      main.innerHTML = `<article class="daily-done">
+        ${header()}
+        <div class="run-top">
+          <div class="hole-wrap big ${r.masterpiece ? 'glow' : ''}">${R.board(r.remaining, r.placed, { cell: 38, labels: false })}</div>
+          <div class="run-side">
+            <div class="verdict ${r.masterpiece ? 'good' : 'bad'}">${r.masterpiece ? 'A Masterpiece!' : r.dead ? 'Dead end.' : 'So close.'}</div>
+            <pre class="share">${text}</pre>
+            <button class="btn copy">Copy result</button>
+            <p class="hint">Daily streak <b>${streak.count}</b> · a new hole tomorrow.</p>
+          </div>
+        </div>
+        <p><a class="btn ghost" href="#/">Set sail on the voyage →</a></p>
+      </article>`;
+      $('.copy', main).addEventListener('click', async (e) => {
+        try { await navigator.clipboard.writeText(text); e.target.textContent = 'Copied!'; } catch { e.target.textContent = 'Select the text to copy'; }
+      });
+    }
+
+    if (mine.result) return showResult(mine.result);
+
+    main.innerHTML = `<article><section class="run"></section></article>`;
+    holeRun($('.run', main), {
+      size: 4, deal: 2, core: true, seed: 7919 * n + 13, header, replay: mine.choices,
+      onChoice: (i) => { mine.choices.push(i); store.patch('daily', mine); },
+      onFinish: (r) => {
+        mine.result = { masterpiece: r.masterpiece, steps: r.steps, dead: !!r.dead, drawsUsed: r.drawsUsed, placed: r.placed, remaining: r.remaining };
+        store.patch('daily', mine);
+        const s = store.get().dailyStreak || { last: 0, count: 0 };
+        if (s.last !== n) store.patch('dailyStreak', { last: n, count: r.masterpiece ? (s.last === n - 1 ? s.count + 1 : 1) : 0 });
+      },
+      onDone: () => dailyPage(),
+    });
+  }
+
+  // ---------- the voyage ----------
+  /* The trail starts at the very end of a hole and works backwards: each port moves the
+     start one piece further out from a good two-piece finish. */
+  const PORTS = [
+    { id: 'quay', name: 'Driftwood Quay', size: 2, deal: 1, core: true, x: 110, y: 250,
+      tip: "We start at the very end of a hole: ten squares, two pieces. Place the first so the gap left over is a shape you'll see often. A P-shaped gap is the best of all." },
+    { id: 'bay', name: 'Barnacle Bay', size: 3, deal: 1, core: true, hint: true, x: 285, y: 115,
+      tip: "Same endings, one piece further back. The dashed outline marks a good finish hiding in the hole. Fill the outside so that shape is what's left." },
+    { id: 'reef', name: 'Tarpot Reef', size: 3, deal: 2, core: true, x: 460, y: 245,
+      tip: "Now you hold two pieces, and the one you don't play stays for later. Put the awkward piece into the odd corner and keep the P for the finish. If you're holding exactly what the last gap needs, it's a Masterpiece with no luck needed." },
+    { id: 'strait', name: 'Gullwing Strait', size: 4, deal: 2, core: true, hint: true, x: 635, y: 110,
+      tip: 'Twenty squares, two steps back. The outline returns to show you where you are heading. Square off the hole from the outside in, and don\'t cut across it.' },
+    { id: 'maw', name: "Kraken's Maw", size: 4, deal: 2, storm: true, x: 805, y: 235,
+      tip: "Storm timber: X, I and their friends turn up far more often. No outlines. Spend the awkward pieces in the odd corners while the hole is big, and keep your P close." },
+  ];
+  const HOLES_PER_PORT = 3;
+
+  function voyage() {
+    return Object.assign({ purse: 20, unlocked: 1, stars: {}, streak: 0 }, store.get().voyage || {});
+  }
+  const saveVoyage = (v) => store.patch('voyage', v);
+
+  function mapSvg(v) {
+    const pts = PORTS.map((p) => [p.x, p.y]);
+    let d = `M${pts[0][0]} ${pts[0][1]}`;
+    for (let i = 1; i < pts.length; i++) {
+      const [x0, y0] = pts[i - 1], [x1, y1] = pts[i];
+      d += ` C${x0 + 80} ${y0}, ${x1 - 80} ${y1}, ${x1} ${y1}`;
+    }
+    const cur = Math.min(v.unlocked, PORTS.length) - 1;
+    return `<svg class="map" viewBox="0 0 900 340" role="img" aria-label="Voyage map">
+      <rect width="900" height="340" rx="16" class="sea"/>
+      ${Array.from({ length: 14 }, (_, i) => `<path class="wave" d="M${(i * 137) % 860 + 10} ${(i * 71) % 300 + 20}q8 -6 16 0t16 0"/>`).join('')}
+      <path d="${d}" class="route"/>
+      ${PORTS.map((p, i) => {
+        const open = i < v.unlocked, stars = v.stars[p.id] || 0;
+        return `<a href="${open ? '#/port/' + p.id : '#/'}" class="isle ${open ? 'open' : 'locked'}${i === cur ? ' current' : ''}" aria-label="${p.name}">
+          ${i === cur ? `<circle cx="${p.x}" cy="${p.y}" r="44" class="ring"/>` : ''}
+          <ellipse cx="${p.x}" cy="${p.y + 6}" rx="40" ry="20" class="sand"/>
+          <ellipse cx="${p.x - 4}" cy="${p.y}" rx="26" ry="13" class="grass"/>
+          <text x="${p.x}" y="${p.y + 46}" class="isle-name">${open ? p.name : '???'}</text>
+          <text x="${p.x}" y="${p.y + 64}" class="isle-stars">${open ? '★'.repeat(stars) + '☆'.repeat(HOLES_PER_PORT - stars) : ''}</text>
+        </a>`;
+      }).join('')}
+      <g class="ship" transform="translate(${PORTS[cur].x - 10} ${PORTS[cur].y - 54})">
+        <path d="M-14 14h40l-7 9h-26z" class="hull"/><path d="M5 -10v24h17z" class="sail"/><path d="M3 -4v18h-14z" class="sail"/>
+      </g>
+    </svg>`;
+  }
+
+  function home() {
+    const v = voyage();
+    const n = today();
+    const daily = store.get().daily;
+    const dailyDone = daily && daily.day === n && daily.result;
+    const next = PORTS[Math.min(v.unlocked, PORTS.length) - 1];
+    main.innerHTML = `
+      <article class="home">
+        <header class="page-head">
+          <p class="eyebrow">A carpentry primer</p>
+          <h1>Fill the hull, one hole at a time.</h1>
+          <p class="lede">Each piece you're dealt goes into the hole, and you choose where. Fill a hole with no wasted squares and it's a Masterpiece.</p>
+        </header>
+        <a class="daily-card" href="#/daily">
+          <div><p class="eyebrow">Hole of the Day #${n}</p>
+          <h3>${dailyDone ? (daily.result.masterpiece ? 'Masterpiece! Come back tomorrow.' : 'Done for today. Come back tomorrow.') : 'Today\'s hole is waiting.'}</h3>
+          <p class="hint">One 20-square hole, the same for everyone. Share your result.</p></div>
+          <span class="btn">${dailyDone ? 'See result' : 'Play'}</span>
+        </a>
+        <section class="voyage-wrap">
+          <div class="purse-bar"><span>Purse ${coin(v.purse)}</span><span>Masterpiece streak <b>${v.streak}</b></span>
+            <a class="btn" href="#/port/${next.id}">Sail to ${next.name} →</a></div>
+          <div class="map-wrap">${mapSvg(v)}</div>
+          <p class="hint">Three holes at every port. Finish the last piece and bet doubloons on it turning up. <button class="linkish reset">Start a new voyage</button></p>
+        </section>
+      </article>`;
+    $('.reset', main).addEventListener('click', () => {
+      if (confirm('Start the voyage again from Driftwood Quay? Your purse and stars will be reset.')) { store.patch('voyage', null); home(); }
+    });
+  }
+
+  function portPage(id) {
+    const idx = PORTS.findIndex((p) => p.id === id);
+    const port = PORTS[idx];
+    const v = voyage();
+    if (!port || idx >= v.unlocked) { location.hash = '#/'; return; }
+    const results = [];
+
+    const header = () => {
+      const cur = voyage();
+      return `<header class="run-bar"><a href="#/" class="back">← Map</a><b>${port.name}</b>
+        <span class="holes">${Array.from({ length: HOLES_PER_PORT }, (_, i) => `<span class="hdot ${results[i] ? (results[i].masterpiece ? 'won' : 'lost') : i === results.length ? 'now' : ''}"></span>`).join('')}</span>
+        <span>Purse ${coin(cur.purse)}</span><span>Streak <b>${cur.streak}</b></span></header>`;
+    };
+
+    main.innerHTML = `<article class="port-intro">
+      <p class="eyebrow">Port ${idx + 1} of ${PORTS.length}</p><h1>${port.name}</h1>
+      <div class="mentor"><div class="mentor-face" aria-hidden="true">⚓</div><blockquote><p>${port.tip}</p><cite>The old shipwright</cite></blockquote></div>
+      <p class="hint">${HOLES_PER_PORT} holes of ${port.size * 5} squares${port.deal > 1 ? ', with two pieces in your toolbox each turn' : ''}.</p>
+      <button class="btn begin">Start puzzling <kbd>Enter</kbd></button></article>`;
+    const begin = () => playHole();
+    $('.begin', main).addEventListener('click', begin);
+    keyHandler = (e) => { if (e.key === 'Enter') { begin(); e.preventDefault(); } };
+
+    function playHole() {
+      main.innerHTML = '<article><section class="run"></section></article>';
+      holeRun($('.run', main), {
+        size: port.size, deal: port.deal, storm: port.storm, core: port.core, hint: port.hint, header,
+        bet: () => voyage().purse,
+        onFinish: (r) => {
+          const cur = voyage();
+          cur.purse = Math.max(0, cur.purse + (r.betDelta || 0));
+          if (r.masterpiece) {
+            cur.streak++;
+            const reward = 5 * port.size + 2 * (cur.streak - 1);
+            cur.purse += reward;
+            r.reward = reward;
+          } else cur.streak = 0;
+          saveVoyage(cur);
+          results.push(r);
+        },
+        onDone: () => (results.length < HOLES_PER_PORT ? playHole() : portDone()),
+      });
+    }
+
+    function portDone() {
+      const cur = voyage();
+      const stars = results.filter((r) => r.masterpiece).length;
+      cur.stars[port.id] = Math.max(cur.stars[port.id] || 0, stars);
+      cur.unlocked = Math.max(cur.unlocked, Math.min(idx + 2, PORTS.length));
+      saveVoyage(cur);
+      const nextPort = PORTS[idx + 1];
+      main.innerHTML = `<article class="port-done">
+        <p class="eyebrow">${port.name}</p>
+        <h1>${['Back to the drawing board.', 'One Masterpiece.', 'Two Masterpieces!', 'A clean sweep!'][stars]}</h1>
+        <div class="big-stars">${'★'.repeat(stars)}<span>${'☆'.repeat(HOLES_PER_PORT - stars)}</span></div>
+        <div class="done-holes">${results.map((r) => `<figure>${R.board(r.remaining, r.placed, { cell: 16, labels: false })}
+          <figcaption>${r.steps.map((g) => SHARE[g]).join('')} ${r.masterpiece ? '⭐' : r.dead ? '⬛' : '💨'}${r.reward ? ` ${coin('+' + r.reward)}` : ''}</figcaption></figure>`).join('')}</div>
+        <p>Purse ${coin(cur.purse)}</p>
+        <p class="actions">${nextPort ? `<a class="btn" href="#/port/${nextPort.id}">Sail to ${nextPort.name} →</a>` : '<span class="verdict good">You sailed the whole voyage!</span>'}
+          <a class="btn ghost" href="#/port/${port.id}" data-again>Replay ${port.name}</a> <a class="btn ghost" href="#/">Map</a></p>
+      </article>`;
+      $('[data-again]', main).addEventListener('click', (e) => { e.preventDefault(); portPage(port.id); });
+    }
+  }
+
+  // ---------- workshop ----------
+  // The named two-piece finishes (names from Hawkings' tutorial), with our own notes.
+  const NOTES = {
+    'Top-Notch': 'The best of them. Seven pairs fit, and almost all of them use a P.',
+    Dogleg: 'Nearly as good. Hold a P and another P, an L or a U finishes it.',
+    Dome: 'Every finish needs a P. It also gives a stray W somewhere useful to go.',
+    'Middle-Notch': 'P and F, the two most common pieces, are the usual finish.',
+    Animal: 'Two Ps is the realistic finish. Worth leaving if you already hold a U or V.',
+    Offset: 'Mostly pairs of the same piece: two Ps, or two Ns if they come in a run.',
+    'Lazy Animal': 'Two Ps, or F + Y if you want a break from all those Ps.',
+    'The Ship': 'Two Ps, with Y + V or N + T as backups if you already hold the odd piece.',
+    'The Rectangle': 'Two Ps or two Ls. Only go for two Is if you already have both.',
+  };
+  const CLASSIC = C.NAMED.map((n) => ({ ...n, note: NOTES[n.name] }));
+
+  function piecesPage() {
+    const sorted = C.LETTERS.slice().sort(C.byWeight);
+    main.innerHTML = `
+      <article>
+        <header class="page-head"><p class="eyebrow">Workshop</p><h1>Timber guide</h1>
+          <p class="lede">Carpentry uses the twelve five-square pieces, each named after a letter. Some turn up far more often than others. The longer the bar, the more often you'll see it.</p></header>
+        <div class="gallery">${sorted.map((l) => `
+          <div class="pcard">
+            <div class="pcard-art">${R.piece(l, null, { cell: 20, box: 110, labels: false })}</div>
+            <div class="pcard-body"><h3>${letterChip(l)} <span class="rarity">${RARITY[l][0]}</span></h3>
+            <span class="odds-bar"><i style="width:${(C.WEIGHTS[l] / 22) * 100}%"></i></span>
+            <p>${PIECE_NOTES[l]}</p></div>
+          </div>`).join('')}</div>
+        <section class="drill-page">
+          <header class="page-head"><h2>Warm-up: name that piece</h2><div class="drill-score"></div></header>
+          <section class="drill"></section>
+        </section>
+      </article>`;
+    runQuiz($('.drill', main), QUIZZES.name);
+  }
+
+  function twoPiecePage() {
+    main.innerHTML = `
+      <article>
+        <header class="page-head"><p class="eyebrow">Workshop</p><h1>Two-piece holes</h1>
+          <p class="lede">When ten squares are left, two pieces finish the hole. Carpenters give the best ten-square shapes names, and steer every hole towards one of them. Tap a pair to see how it fits.</p></header>
+        <div class="classics">${CLASSIC.map((c, i) => {
+          const cells = C.parseRows(c.rows);
+          const stats = C.pairStats(cells);
+          const hold = partners(stats.combos).slice(0, 2);
+          return `<div class="classic" data-i="${i}">
+            <div class="classic-board">${R.board(cells, stats.combos[0].tilings[0], { cell: 30, labels: false })}</div>
+            <div class="classic-body">
+              <h3>${c.name}</h3>
+              <span class="flex">${flexBadge(stats.pairOdds)}</span>
+              <div class="combo-pick">${stats.combos.map((cb, j) => `<button class="cbtn${j === 0 ? ' on' : ''}" data-j="${j}">${comboChip(cb.name)}</button>`).join('')}</div>
+              <p>${c.note}</p>
+              <p class="hint">${hold.map((h) => `Holding ${an(h.letter)}? ${chips(h.partners)} finishes it.`).join('<br>')}</p>
+            </div></div>`;
+        }).join('')}</div>
+        <aside class="tipbox"><b>The habit to build:</b> keep the hole square so it collapses into one of these shapes, and hang on to your P. Place the second-to-last piece only once its partner is in your toolbox. Play your other holes in the meantime.</aside>
+        <p class="credit">Shape names come from Master Carpenter Hawkings' <a href="https://yppedia.puzzlepirates.com/Carpentry_tutorial" target="_blank" rel="noopener">Carpentry tutorial</a> on YPPedia.</p>
+        <p><a class="btn" href="#/games/pair">Try: Which pair fits? →</a></p>
+      </article>`;
+
+    main.querySelectorAll('.classic').forEach((el) => {
+      const cells = C.parseRows(CLASSIC[+el.dataset.i].rows);
+      const stats = C.pairStats(cells);
+      el.querySelectorAll('.cbtn').forEach((b) => b.addEventListener('click', () => {
+        el.querySelectorAll('.cbtn').forEach((x) => x.classList.toggle('on', x === b));
+        $('.classic-board', el).innerHTML = R.board(cells, stats.combos[+b.dataset.j].tilings[0].map((p) => ({ ...p, fresh: true })), { cell: 30, labels: false });
+      }));
+    });
+  }
+
+  // ---------- hole lab ----------
+  const LAB_ROWS = 6, LAB_COLS = 8;
+  let labCells = new Set();
+  let painting = null; // true while adding squares, false while erasing
+  window.addEventListener('pointerup', () => { if (painting !== null) { painting = null; labUpdate(); } });
+
+  function labPage() {
+    main.innerHTML = `
+      <article>
+        <header class="page-head"><p class="eyebrow">Workshop</p><h1>Hole lab</h1>
+          <p class="lede">Paint a hole by clicking or dragging. The lab shows every way to finish it with whole pieces, so you can check a tricky gap you met in the game.</p></header>
+        <div class="lab">
+          <div class="lab-left">
+            <div class="lab-grid" style="--cols:${LAB_COLS}">${Array.from({ length: LAB_ROWS * LAB_COLS }, (_, i) => `<button class="lc" data-r="${Math.floor(i / LAB_COLS)}" data-c="${i % LAB_COLS}" aria-label="Square"></button>`).join('')}</div>
+            <div class="lab-tools">
+              <button class="btn ghost sm" data-act="clear">Clear</button>
+              <button class="btn ghost sm" data-act="random">Random gap</button>
+            </div>
+          </div>
+          <div class="lab-out" aria-live="polite"></div>
+        </div>
+        <section>
+          <h2>Gaps worth knowing</h2>
+          <div class="atlas-tabs"><button class="cbtn on" data-a="best">Easiest to finish</button><button class="cbtn" data-a="trap">Traps</button></div>
+          <div class="atlas" aria-live="polite"><p class="hint">Planing timber…</p></div>
+        </section>
+      </article>`;
+
+    const grid = $('.lab-grid', main);
+    const paint = (b) => {
+      const k = C.key(+b.dataset.r, +b.dataset.c);
+      if (painting) labCells.add(k); else labCells.delete(k);
+      b.classList.toggle('on', painting);
+    };
+    grid.addEventListener('pointerdown', (e) => {
+      const b = e.target.closest('.lc'); if (!b) return;
+      e.preventDefault();
+      painting = !b.classList.contains('on');
+      paint(b);
+    });
+    grid.addEventListener('pointerover', (e) => {
+      const b = e.target.closest('.lc');
+      if (b && painting !== null && e.buttons) paint(b);
+    });
+    main.querySelector('.lab-tools').addEventListener('click', (e) => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.act === 'clear') labLoad([]);
+      if (b.dataset.act === 'random') labLoad(C.pick(C.compactAtlas()).cells);
+    });
+
+    let atlasMode = 'best';
+    const drawAtlas = () => {
+      const ca = C.compactAtlas();
+      const list = atlasMode === 'best'
+        ? ca.slice().sort((a, b) => b.pairOdds - a.pairOdds).slice(0, 12)
+        : ca.filter((s) => s.combos.every((c) => c.letters.some((l) => C.WEIGHTS[l] <= 4))).sort((a, b) => a.pairOdds - b.pairOdds).slice(0, 12);
+      $('.atlas', main).innerHTML = (atlasMode === 'trap' ? '<p class="hint">Every way to finish these needs a rare piece. Steer clear.</p>' : '') +
+        `<div class="atlas-grid">${list.map((s, i) => `<button class="atlas-item" data-i="${i}">${R.board(s.cells, [], { cell: 14, frame: 0 })}
+          ${chips(s.useful)}</button>`).join('')}</div>`;
+      $('.atlas', main).querySelectorAll('.atlas-item').forEach((b) => b.addEventListener('click', () => {
+        labLoad(list[+b.dataset.i].cells);
+        main.querySelector('.lab').scrollIntoView({ behavior: 'smooth' });
+      }));
+    };
+    main.querySelectorAll('.atlas-tabs .cbtn').forEach((b) => b.addEventListener('click', () => {
+      atlasMode = b.dataset.a;
+      main.querySelectorAll('.atlas-tabs .cbtn').forEach((x) => x.classList.toggle('on', x === b));
+      drawAtlas();
+    }));
+    setTimeout(drawAtlas, 30);
+
+    labLoad(labCells.size ? [...labCells].map(C.unkey) : C.parseRows(CLASSIC[0].rows));
+  }
+
+  function labLoad(cells) {
+    const b = cells.length ? C.bbox(cells) : { h: 0, w: 0, r0: 0, c0: 0 };
+    const dr = Math.floor((LAB_ROWS - b.h) / 2) - b.r0, dc = Math.floor((LAB_COLS - b.w) / 2) - b.c0;
+    labCells = new Set(cells.map(([r, c]) => C.key(r + dr, c + dc)));
+    main.querySelectorAll('.lab-grid .lc').forEach((el) => el.classList.toggle('on', labCells.has(C.key(+el.dataset.r, +el.dataset.c))));
+    labUpdate();
+  }
+
+  function labUpdate() {
+    const out = $('.lab-out', main);
+    if (!out) return;
+    const cells = [...labCells].map(C.unkey);
+    const n = cells.length;
+    let html = `<p class="count"><b>${plural(n, 'square')}</b>${n && n % 5 === 0 ? ` · ${plural(n / 5, 'piece')} to finish` : ''}</p>`;
+    if (!n) html += '<p class="hint">Paint some squares to make a hole.</p>';
+    else if (n % 5) html += `<p>Pieces cover five squares each, so this can't be finished cleanly. Add ${5 - (n % 5)} or remove ${n % 5}.</p>`;
+    else if (n > 25) html += '<p>Keep it to 25 squares or fewer.</p>';
+    else if (n === 5) {
+      const l = C.identify(cells);
+      html += l ? `<p>One ${letterChip(l)} finishes it (${RARITY[l][0]}).</p>` : `<p>No single piece fits.${C.isConnected(cells) ? ' Only putty could save it.' : ''}</p>`;
+    } else if (n === 10) {
+      const stats = C.pairStats(cells);
+      html += `<p class="flex">${flexBadge(stats.pairOdds)}</p>${fillsGallery(stats.combos, { cell: 16 })}`;
+      if (stats.combos.length) html += `<ul class="holding">${partners(stats.combos).map((h) => `<li>Holding ${an(h.letter)}? ${chips(h.partners)}</li>`).join('')}</ul>`;
+    } else {
+      const list = C.combos(cells);
+      html += list.length
+        ? `<p>${plural(list.length, 'different set')} of pieces can finish it. The likeliest are first.</p>
+           <div class="fills">${list.slice(0, 18).map((c) => `<figure class="fill">${R.board([], c.tilings[0], { cell: 13, frame: 0, labels: false })}
+           <figcaption>${comboChip(c.name)}</figcaption></figure>`).join('')}</div>`
+        : '<p class="dead-note">No set of whole pieces fills this exactly.</p>';
+    }
+    out.innerHTML = html;
+  }
+
+  // ---------- router ----------
+  const ROUTES = {
+    '/': home,
+    '/daily': dailyPage,
+    '/games/pair': () => quizPage(QUIZZES.pair),
+    '/games/remnant': () => quizPage(QUIZZES.remnant),
+    '/pieces': piecesPage,
+    '/two-piece': twoPiecePage,
+    '/lab': labPage,
+  };
+
+  function route() {
+    const path = location.hash.replace(/^#/, '') || '/';
+    keyHandler = null;
+    C.useSeed(null);
+    const port = path.match(/^\/port\/(\w+)$/);
+    if (port) portPage(port[1]); else (ROUTES[path] || home)();
+    const navPath = port ? '/' : path;
+    document.querySelectorAll('.nav a').forEach((a) => a.classList.toggle('on', a.getAttribute('href') === '#' + navPath));
+    window.scrollTo(0, 0);
+  }
+
+  document.body.insertAdjacentHTML('afterbegin', R.defs());
+  window.addEventListener('hashchange', route);
+  route();
+  // Build the remnant atlas in the background so the games start instantly.
+  setTimeout(() => C.atlas(), 300);
+})();
