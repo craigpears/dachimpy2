@@ -30,6 +30,8 @@
     const fair = (1 - chance) / Math.max(chance, 1e-6) * 0.92;
     return PRICES.filter(([m]) => m <= fair).pop() || null;
   };
+  // A tote price (winnings per doubloon staked) in the same words, rounded down to a price people know.
+  const toteText = (r) => (r <= 0 ? 'only your stake back' : r >= 20 ? `${Math.floor(r)} to 1` : (PRICES.filter(([m]) => m <= r).pop() || [0, 'less than 1 to 5'])[1]);
   const QUIZ_PAY = 2, DAILY_PAY = 25;
   const threeDraws = C.threeDraws;
 
@@ -1191,8 +1193,9 @@
           <p class="lede">Everyone online plays the same table. Pick a stake, back the holes you think will get finished, then watch ${TABLE_DRAWS} pieces come off the pile.</p>
           <details class="working h-rules"><summary>How the pot works</summary>
             <p>You've 20 seconds to bet, up to 20 a round across as many holes as you like. If more than one hole gets finished, the rarest one with money on it wins.</p>
-            <p><b>You don't win the whole pot.</b> Like poker, you can only win as much from each pirate as you put on the winning hole: bet 5 and you take at most 5 from each of them, however much they bet. If other pirates backed the winning hole too, you share that with them. Whatever no winner matched goes back to its owner. So a bigger stake can win more.</p>
-            <p><b>Rolled over:</b> if nobody backed a finished hole, nobody wins and every stake rolls over to the next round. Next round's winners share that rolled-over money on top of what they win, split by how much each put on the winning hole.</p></details>
+            <p><b>The winners share the whole pot, by stake.</b> Everyone who backed the winning hole splits the pot by how much each put on it. Put 10 of the 40 on that hole and you get a quarter of the pot. Alone on it, you take the lot. So a hole few pirates back pays big, and money you spread over other holes feeds whoever wins.</p>
+            <p>Each hole shows what it pays right now, like a bookmaker's price. It changes as pirates bet.</p>
+            <p><b>Rolled over:</b> if nobody backed a finished hole, nobody wins and the whole pot rolls over into the next round's pot.</p></details>
         </header>
         <div class="h-body"><p class="hint">Pulling up a chair…</p></div>
       </article>`;
@@ -1228,8 +1231,7 @@
       body.innerHTML = `
         <div class="purse-bar bet-purse">
           <span>Your purse ${coin(`<span class="purse-live">${purse.get()}</span>`)}</span>
-          <span>Bets this round ${coin('<span class="pot-n">0</span>')}</span>
-          <span class="carry"></span>
+          <span>Pot ${coin('<span class="pot-n">0</span>')}<span class="carry"></span></span>
           <span class="clock"></span>
           <span class="h-bar"><i></i></span>
         </div>
@@ -1285,8 +1287,8 @@
         b.setAttribute('aria-checked', String(+b.dataset.n === stake));
         b.disabled = !can.includes(+b.dataset.n);
       });
-      $('.pot-n', body).textContent = view.pot - view.carry;
-      $('.carry', body).innerHTML = view.carry ? `+ ${coin(view.carry)} rolled over, shared by this round's winners` : '';
+      $('.pot-n', body).textContent = view.pot;
+      $('.carry', body).innerHTML = view.carry ? ` (${coin(view.carry)} of it rolled over)` : '';
       view.holes.forEach((h, i) => {
         const c = cards[i], total = view.totals[i], mine = view.mine[i];
         c.classList.toggle('backed', mine > 0);
@@ -1303,12 +1305,15 @@
         const outcome = net > 0 ? `win ${coin(net)}` : net < 0 ? `lose ${coin(-net)}` : 'break even';
         const share = !open || !me || (!mine && !picking) ? ''
           : `If ${HOLE_NAMES[i]} wins, you${mine ? '' : '’d'} ${outcome} as things stand`;
-        $('.t-backed', c).innerHTML = `<p>On this hole ${coin(total)}</p>`
+        // The tote price: what each doubloon on this hole wins if it takes the pot (with your stake added, if you're picking).
+        const add = picking && !mine ? stake : 0;
+        const price = total + add ? `Pays ${toteText((view.pot + add) / (total + add) - 1)}` : 'Nobody on it yet';
+        $('.t-backed', c).innerHTML = `<p class="t-price">${price}</p><p>On this hole ${coin(total)}</p>`
           + (backers.length ? `<ul class="backers">${backers.map((b) => `<li class="${b.bot ? 'bot' : ''}${isMe(b.name) ? ' me' : ''}">${isMe(b.name) ? 'You' : esc(b.name)} ${coin(b.amt)}</li>`).join('')}</ul>` : '')
           + (share ? `<p class="t-share">${share}</p>` : '');
       });
       let note = '';
-      if (me && open) note = `Bets are final. From each pirate you can win as much as you put on the winning hole, so a bigger stake can win more.${staked ? ` You've staked ${coin(staked)} of ${coin(view.cap)} this round.` : ` Up to ${coin(view.cap)} a round.`}`;
+      if (me && open) note = `Bets are final. Whoever backed the winning hole shares the whole pot by stake, so a hole few pirates back pays big.${staked ? ` You've staked ${coin(staked)} of ${coin(view.cap)} this round.` : ` Up to ${coin(view.cap)} a round.`}`;
       $('.h-note', body).innerHTML = note;
       $('.h-broke', body).hidden = !(me && open && !staked && !can.length);
       paintCrew();
@@ -1389,53 +1394,37 @@
       const fin = res.finished.map((i) => HOLE_NAMES[i]);
       const paid = view.crew.filter((c) => c.won > c.staked).sort((a, b) => b.won - b.staked - a.won + a.staked)
         .map((c) => `${isMe(c.name) ? 'you' : esc(c.name)} won ${coin(c.won - c.staked)}`);
-      const refunds = view.crew.some((c) => c.won && c.won < c.staked);
       paintCrew();
       const box = $('.settle', body);
       box.hidden = false;
-      box.innerHTML = `<div class="verdict ${net > 0 ? 'good' : net < 0 ? 'bad' : 'ok'}">${!staked ? 'You sat this one out.' : net > 0 ? `You won ${coin(net)}!` : !net ? 'You broke even.' : `You lost ${coin(-net)}.${won ? ` ${coin(won)} of your stake came back to you.` : ''}`}</div>
-        <p>${fin.length ? `Finished: <b>${fin.join(', ')}</b>.` : 'Nothing got finished.'} ${res.rollover ? `Nobody backed a finished hole, so nobody wins: all ${coin(res.rollover)} rolls over, and next round's winners share it on top of what they win.` : `${HOLE_NAMES[res.hole]} ${res.finished.length > 1 ? 'was the rarest finished hole with money on it, so it won' : 'won'}: ${paid.join(', ') || 'nobody came out ahead'}.${refunds ? ' Stakes bigger than any winner matched went back to their owners.' : ''}`}</p>
+      box.innerHTML = `<div class="verdict ${net > 0 ? 'good' : net < 0 ? 'bad' : 'ok'}">${!staked ? 'You sat this one out.' : net > 0 ? `You won ${coin(net)}!` : !net ? 'You broke even.' : `You lost ${coin(-net)}.${won ? ` Your share of the pot was ${coin(won)}, less than you staked.` : ''}`}</div>
+        <p>${fin.length ? `Finished: <b>${fin.join(', ')}</b>.` : 'Nothing got finished.'} ${res.rollover ? `Nobody backed a finished hole, so nobody wins: the whole pot of ${coin(res.rollover)} rolls over into the next round.` : `${HOLE_NAMES[res.hole]} ${res.finished.length > 1 ? 'was the rarest finished hole with money on it, so it won' : 'won'}: ${paid.join(', ') || 'nobody came out ahead'}.`}</p>
         ${res.rollover ? '' : splitText(res.hole)}
         <p class="hint next-in"></p>`;
+      // Show the whole pot for a moment, then break it into the winners' shares.
+      setTimeout(() => { const bar = $('.ps-bar', box); if (bar) bar.classList.add('split'); }, 900);
     }
 
-    /* How the pot was shared out, pirate by pirate: what each loser paid to whom. Worked out
-       with the same sums the server pays with. */
+    /* How the pot was shared out, as a picture: every stake goes in, then the pot (one bar) breaks
+       into each winner's share. Worked out with the same sums the server pays with. */
     function splitText(hole) {
-      const flows = [], bets = view.bets.map((b) => ({ who: b.name, hole: b.hole, amt: b.amt }));
-      C.potPayout(bets, hole, view.carry, flows);
-      const nm = (w) => (w === null ? 'The rolled-over pot' : isMe(w) ? 'You' : esc(w));
-      const to = (w) => (isMe(w) ? 'you' : esc(w));
-      // Two winners who each lost a little on other holes pay each other; show only the difference.
-      const pair = new Map();
-      flows.forEach((f) => { const k = JSON.stringify([f.from, f.to]); pair.set(k, (pair.get(k) || 0) + f.n); });
-      const net = [];
-      pair.forEach((n, k) => {
-        const [from, dest] = JSON.parse(k), rev = pair.get(JSON.stringify([dest, from])) || 0;
-        if (n > rev) net.push({ from, to: dest, n: n - rev });
-      });
-      const staked = (w) => view.bets.filter((b) => b.name === w).reduce((a, b) => a + b.amt, 0);
-      const on = (w) => view.bets.filter((b) => b.name === w && b.hole === hole).reduce((a, b) => a + b.amt, 0);
-      const lines = [...new Set([...flows.map((f) => f.from), ...view.bets.map((b) => b.name)])].map((w) => {
-        const out = net.filter((f) => f.from === w);
-        const kept = w === null ? 0 : staked(w) - on(w) - flows.filter((f) => f.from === w).reduce((a, f) => a + f.n, 0);
-        if (!out.length && !kept) return '';
-        const parts = out.map((f) => `${coin(f.n)} to ${to(f.to)}`).join(', ');
-        if (w === null) return `<li>The ${coin(view.carry)} rolled over from earlier rounds went to the winners${out.length > 1 ? `, by how much each put on ${HOLE_NAMES[hole]}` : ''}: ${parts}.</li>`;
-        if (!parts) return `<li><b>${nm(w)}</b> got ${coin(kept)} back from other holes: no other winner put enough on ${HOLE_NAMES[hole]} to take it.</li>`;
-        return `<li><b>${nm(w)}</b> paid ${parts}.${kept ? ` ${coin(kept)} was more than any winner matched, so it went back.` : ''}</li>`;
-      }).filter(Boolean);
-      const winners = view.bets.filter((b) => b.hole === hole).map((b) => `${to(b.name)} ${coin(b.amt)}`);
-      // Why you won what you won, and not the whole pot.
-      const me = Social.me(), mineOn = me ? on(me.name) : 0;
-      const got = (fromChest) => flows.filter((f) => isMe(f.to) && (f.from === null) === fromChest).reduce((a, f) => a + f.n, 0);
-      const took = got(false), chest = got(true);
-      const others = [...new Set(view.bets.filter((b) => b.hole === hole && !isMe(b.name)).map((b) => esc(b.name)))];
-      const sharing = others.length ? `, and ${others.join(' and ')} ${others.length > 1 ? 'were' : 'was'} on ${HOLE_NAMES[hole]} too, so you shared each pirate's money with them` : '';
-      const yours = mineOn ? `<p class="h-yours">You had ${coin(mineOn)} on ${HOLE_NAMES[hole]}, so you could take at most ${coin(mineOn)} from each other pirate${sharing}. That came to ${coin(took)}.${chest ? ` On top of that you got ${coin(chest)} of the ${coin(view.carry)} rolled over${chest < view.carry ? `, shared with the other winners by stake` : ''}.` : ''}</p>` : '';
-      return `<div class="h-split"><h3>How the pot was split</h3>${yours}
-        <p>Everyone on ${HOLE_NAMES[hole]} got their stake back (${winners.join(', ')}). Each winner can take up to what they put on ${HOLE_NAMES[hole]} from every other pirate, and winners share what they take.</p>
-        ${lines.length ? `<ul>${lines.join('')}</ul>` : '<p>Nobody else had money down, so there was nothing to take.</p>'}</div>`;
+      const back = C.potPayout(view.bets.map((b) => ({ who: b.name, hole: b.hole, amt: b.amt })), hole, view.carry);
+      const pot = view.result.pot, onHole = view.totals[hole], H = HOLE_NAMES[hole];
+      const on = new Map();
+      view.bets.filter((b) => b.hole === hole).forEach((b) => on.set(b.name, (on.get(b.name) || 0) + b.amt));
+      const gcd = (a, b) => (b ? gcd(b, a % b) : a);
+      const frac = (a) => (a === onHole ? 'the lot' : `${a / gcd(a, onHole)}/${onHole / gcd(a, onHole)}`);
+      const name = (w) => (isMe(w) ? 'You' : esc(w));
+      const chips = [...view.bets].sort((a, b) => (b.hole === hole) - (a.hole === hole) || a.hole - b.hole)
+        .map((b) => `<span class="ps-chip${b.hole === hole ? ' win' : ''}">${name(b.name)} ${coin(b.amt)} on ${HOLE_NAMES[b.hole]}</span>`)
+        .concat(view.carry ? [`<span class="ps-chip">Rolled over ${coin(view.carry)}</span>`] : []);
+      const segs = [...on].sort((a, b) => b[1] - a[1]).map(([w, amt]) =>
+        `<div class="ps-seg${isMe(w) ? ' me' : ''}" style="flex-grow:${back.get(w) || 1}"><b>${name(w)}</b><span>${frac(amt)} · ${coin(back.get(w) || 0)}</span></div>`);
+      return `<div class="h-split"><h3>How the pot was split</h3>
+        <p class="ps-step">Everything bet goes in the pot:</p>
+        <div class="ps-chips">${chips.join('')}</div>
+        <p class="ps-step">The pot is shared by stake on ${H}${on.size > 1 ? ` (${[...on].map(([w, a]) => `${name(w)} ${coin(a)}`).join(', ')})` : ''}:</p>
+        <div class="ps-bar"><div class="ps-whole">Pot ${coin(pot)}</div>${segs.join('')}</div></div>`;
     }
 
     function tick() {

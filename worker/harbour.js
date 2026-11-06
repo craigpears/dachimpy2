@@ -1,8 +1,8 @@
 /* The harbour table: one shared betting round for everyone online, on the clock.
    Each round: 20 seconds to bet, then five pieces come off the pile for everyone at once.
    Pirates can back several holes, up to 20 a round. All stakes go into one pot. If more than one hole gets finished, the rarest one takes it, and
-   it's paid out poker style (Carp.potPayout): from each pirate you can only win as much as you
-   put on that hole. If nobody backed a finished hole, the pot rolls over.
+   its backers share the whole pot by stake, like a horse-racing tote (Carp.potPayout). If
+   nobody backed a finished hole, the pot rolls over.
    A few house pirates bet every round, so there's always a pot and someone to beat. */
 import '../js/engine.js';
 import TABLES from './tables.json';

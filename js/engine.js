@@ -716,46 +716,23 @@
     return fallback.holes;
   }
 
-  /* The harbour table's pot, poker style: from each pirate you can only win as much as you put on
-     the winning hole. Winners get that stake back. Everyone else's money is shared out in layers,
-     like side pots: the first 5 of it between every winner who put in at least 5, the next 5
-     between those who put in at least 10, and so on. Whatever no winner matched goes back to its
-     owner, and money rolled over from earlier rounds goes to the winners by stake (no limit on that).
-     bets: [{ who, hole, amt }]. Returns a Map of who -> doubloons they get back.
-     Pass a flows array to have each doubloon that changes hands logged in it as { from, to, n }. */
-  function potPayout(bets, hole, carry = 0, flows = null) {
-    const staked = new Map(), on = new Map();
+  /* The harbour table's pot, shared like a horse-racing tote: everyone who backed the winning
+     hole shares the whole pot (every stake, plus anything rolled over), by how much each put on
+     that hole. Odd doubloons go to the biggest stakes, one each.
+     bets: [{ who, hole, amt }]. Returns a Map of who -> doubloons they get back. */
+  function potPayout(bets, hole, carry = 0) {
+    const on = new Map();
+    let pot = carry;
     bets.forEach((b) => {
-      staked.set(b.who, (staked.get(b.who) || 0) + b.amt);
+      pot += b.amt;
       if (b.hole === hole) on.set(b.who, (on.get(b.who) || 0) + b.amt);
     });
-    const back = new Map([...staked.keys()].map((w) => [w, 0]));
+    const back = new Map(bets.map((b) => [b.who, 0]));
     if (!on.size) return back; // nobody won: it all rolls over
-    const give = (who, n, from = who) => {
-      back.set(who, back.get(who) + n);
-      if (flows && n && from !== who) flows.push({ from, to: who, n });
-    };
-    const levels = [...new Set(on.values())].sort((a, b) => a - b);
     const winStake = [...on.values()].reduce((a, b) => a + b, 0);
-    let chest = carry;
-    on.forEach((w, who) => { give(who, w); const c = Math.floor(carry * w / winStake); chest -= c; give(who, c, null); });
-    // Odd doubloons of the rolled-over pot go to the biggest stake on the winning hole.
-    if (chest) give([...on].sort((a, b) => b[1] - a[1])[0][0], chest, null);
-    staked.forEach((s, who) => {
-      const lose = s - (on.get(who) || 0);
-      let prev = 0;
-      levels.forEach((l) => {
-        const part = Math.min(lose, l) - Math.min(lose, prev);
-        prev = l;
-        if (part <= 0) return;
-        const takers = [...on.keys()].filter((w) => w !== who && on.get(w) >= l);
-        if (!takers.length) return give(who, part);
-        const each = Math.floor(part / takers.length), odd = part - each * takers.length;
-        // Odd doubloons go to the winners with the biggest stakes, one each.
-        takers.sort((a, b) => on.get(b) - on.get(a)).forEach((w, k) => give(w, each + (k < odd ? 1 : 0), who));
-      });
-      give(who, lose - Math.min(lose, prev)); // more than any winner matched
-    });
+    let left = pot;
+    on.forEach((w, who) => { const n = Math.floor(pot * w / winStake); back.set(who, n); left -= n; });
+    [...on].sort((a, b) => b[1] - a[1]).forEach(([who], k) => { if (k < left) back.set(who, back.get(who) + 1); });
     return back;
   }
 

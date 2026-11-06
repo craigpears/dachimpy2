@@ -76,12 +76,14 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 - **Competitive play is capped.** Head-to-head games give everyone the same stake, so a big purse
   buys no edge. If you run out, you earn your way back in with the quick puzzles first.
 - **The harbour table is player against player.** One shared round every 45 seconds: 20 seconds
-  to bet, then five pieces for everyone. No bookie's prices: all stakes go in one pot. If more than one
-  hole gets finished, the rarest one with money on it wins. Payouts are **poker style**: from each
-  pirate you can only win as much as you put on the winning hole (bet 5 against their 10 and you
-  win at most 5 of it), so a bigger stake is worth more. It's shared out in layers like side pots,
-  and stakes no winner matched go back to their owners. If nobody backed a finished hole, the pot
-  rolls over. Each hole is labelled Rarest … Likeliest. House pirates
+  to bet, then five pieces for everyone. No bookie: all stakes go in one pot. If more than one
+  hole gets finished, the rarest one with money on it wins. **The winners share the whole pot by
+  stake**, like a horse-racing tote: put 10 of the 40 on the winning hole and you get a quarter.
+  Every other bet is lost, so spreading money over every hole has a real cost, and a hole few
+  pirates back pays big. Each hole shows its live tote price ("pays 3 to 1"). (Tried and dropped:
+  poker-style side pots, where you could only win your own stake from each pirate. Nobody could
+  follow the split, and losing bets often came straight back, so covering every hole was free.)
+  If nobody backed a finished hole, the whole pot rolls over into the next round's pot. Each hole is labelled Rarest … Likeliest. House pirates
   (Cap'n Bones, One-Eyed Peg, Barnacle Bill) bet every round so there's always a pot. Stakes are
   capped at 20 a round, bets are final, and the pieces stay secret on the server until betting
   closes. The solo table against the bookie stays as *Practice bets*.
@@ -92,16 +94,15 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
   folded away, and the page brings the pile into view as the pieces turn over. Betting is one big
   button per hole. **The leaderboard stays visible at the table**; the crew goes beside the holes
   only when there's room, otherwise in a strip above them.
-- **Don't call it "the pot" as if you could win it all.** The bar shows "Bets this round" and the
-  rolled-over money separately. Each hole says what you'd win or lose if it wins, counting your other
-  bets. After the round, say why you won what you did: your stake caps what you take from each
-  pirate, other winners on the same hole share it, and the rolled-over money is shared by stake.
-  Odd doubloons go to the winners, not back to the loser.
+- **Say plainly what you can win.** Each hole shows its price and what you'd win or lose if it
+  wins, counting your other bets. After the round, the split panel lists each winner's stake on the
+  hole and their share of the pot.
 - **Stake first, then holes.** The stake is picked separately (5, 10, 15 or 20, as chips above the
   holes), then each hole's button places it. Betting on several holes at once stays: it's fun.
   (Tried and dropped: one hole per round.) The holes you've backed are highlighted.
-- **Show how the split worked.** After each round a "How the pot was split" panel says who paid
-  whom, with payments between two winners netted off, and what went back unmatched.
+- **Show how the split worked, as a picture.** After each round a "How the pot was split" panel
+  lists every stake that went in (the winning hole's highlighted), then shows the pot as one bar
+  that breaks into each winner's share, labelled with name, fraction ("1/2") and doubloons.
 - **Watching is free, playing needs a name.** Anyone can watch the table; a clear "You're only
   watching" box asks for a pirate name before you can bet.
 - Ideas to build next: a daily head-to-head on Hole of the Day (same pieces for everyone, a board
