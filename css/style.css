@@ -423,11 +423,13 @@ svg.map { display: block; width: 100%; height: auto; }
 .tcard.done { background: var(--good-bg); }
 .t-head { display: flex; justify-content: space-between; align-items: baseline; }
 .t-name { font-family: 'Alegreya', serif; font-size: 22px; font-weight: 700; }
-.t-price { font-size: 14px; }
+.t-price { font-size: 17px; }
 .t-board { display: flex; justify-content: center; align-items: center; min-height: 140px; }
 .t-board svg { max-width: 100%; height: auto; }
 .t-need { margin: 0; }
-.tcard .hint.small { margin: 0; }
+.tcard .hint.small { margin: 0; font-size: 15px; }
+.t-odds { margin: 2px 0 0; font-size: 15px; font-weight: 600; }
+.tcard .t-backed { font-size: 16px; color: var(--ink); }
 .t-stake { display: flex; align-items: center; gap: 10px; margin-top: auto; padding-top: 6px; }
 .t-amt { min-width: 3.2em; text-align: center; }
 .sbtn { min-width: 40px; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel-2); cursor: pointer; font: inherit; color: inherit; }

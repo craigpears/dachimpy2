@@ -48,6 +48,9 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
   arbitrary. If two holes need the same piece, it goes to the one with more of your money on it,
   and the prices are worked out with that rule. Stakes leave the purse as you place them, and
   the purse is shown on the page, not just in the corner.
+- **Every hole on the betting table shows its odds**, two-piece holes too: how often a starting
+  piece turns up ("about 1 in 2 pieces") and how often it gets finished from the pieces left.
+- **Keep text readable.** Nothing that matters (stakes, returns, odds) in tiny hint text.
 - **Say why a move is risky in plain odds.** Every option shows "Finishes about N times in 10"
   (three draws for each piece still needed), and the grades come from that same number.
 - **Odds as bookmaker's prices** ("3 to 1", "evens"), worked out from the real chance, not

@@ -646,8 +646,10 @@
   function needsText(h, st) {
     if (st.done) return '<p class="t-need">Finished!</p>';
     if (st.need) return `<p class="t-need">Needs ${an(st.need)}</p><p class="hint small">About 1 in ${oneIn(st.need)} pieces</p>`;
+    // Between them, how often a piece that can start it turns up.
+    const starts = Math.round(C.TOTAL_WEIGHT / h.useful.reduce((a, l) => a + C.WEIGHTS[l], 0));
     return `<p class="t-need">${h.name ? `A <b>${h.name}</b>` : 'Ten squares'}: two pieces</p>
-      <p class="hint small">Starts with ${chips(h.useful)}</p>`;
+      <p class="hint small">Starts with ${chips(h.useful)}: about 1 in ${starts} pieces, then needs the one that fits what's left</p>`;
   }
 
   /* Like in-play betting: five pieces come off the pile one at a time, and before each one you
@@ -659,7 +661,7 @@
     const state = C.tableState(holes);
     const bets = holes.map(() => []); // placed bets: { amt, mult }
     const pending = holes.map(() => 0); // stakes you're adding before the next piece
-    let drawsLeft = TABLE_DRAWS, prices = [], busy = false;
+    let drawsLeft = TABLE_DRAWS, prices = [], chances = [], busy = false;
     const pendingTotal = () => pending.reduce((a, b) => a + b, 0);
     const backed = (i) => bets[i].reduce((a, b) => a + b.amt, 0);
     const returns = (i) => bets[i].reduce((a, b) => a + Math.round(b.amt * (1 + b.mult)), 0);
@@ -669,7 +671,7 @@
 
     // Price every open hole for the pieces still to come. A longer run than the generator's keeps the house edge honest.
     function reprice() {
-      const chances = C.tableChances(holes, drawsLeft, 3000, state, order());
+      chances = C.tableChances(holes, drawsLeft, 3000, state, order());
       prices = holes.map((_, i) => (state[i].done || !drawsLeft ? null : priceFor(chances[i])));
     }
 
@@ -706,7 +708,8 @@
       holes.forEach((h, i) => {
         const c = cards[i], st = state[i], price = prices[i];
         $('.t-price', c).innerHTML = st.done ? '' : price ? `pays <b>${price[1]}</b>` : drawsLeft ? 'No bets: too likely' : '';
-        $('.t-needs', c).innerHTML = needsText(h, st);
+        $('.t-needs', c).innerHTML = needsText(h, st)
+          + (!st.done && drawsLeft ? `<p class="t-odds">From the ${plural(drawsLeft, 'piece')} left: finished ${timesText(chances[i])}</p>` : '');
         $('.t-stake', c).hidden = !price && !pending[i];
         $('.amt-n', c).textContent = pending[i];
         c.classList.toggle('backed', backed(i) + pending[i] > 0);
