@@ -510,6 +510,9 @@ function frameState(f) {
 }
 // Every spot a piece could go in a frame: covering at least one empty square of it, clear of the
 // pieces already there. Squares off the frame are allowed; `over` counts them.
+// The stairs' tread line: the top row of column c (beyond either end, it carries straight on). A
+// piece may stick up at most one square above it, so the stairs stay climbable with a hop.
+const stepTop = (f, c) => (f.si === 0 ? ramp.n - 1 - c : c);
 function frameFits(cells) {
   const out = [], b = C.bbox(cells);
   for (const f of frames()) {
@@ -521,7 +524,7 @@ function frameFits(cells) {
       let over = 0, ok = true;
       for (const [r, c] of cells) {
         const kk = k(r + dr, c + dc);
-        if (f.occ.has(kk)) { ok = false; break; }
+        if (f.occ.has(kk) || (f.kind === 'stair' && r + dr < stepTop(f, c + dc) - 1)) { ok = false; break; }
         if (!f.set.has(kk)) over++;
       }
       if (!ok) continue;
@@ -565,7 +568,7 @@ function placeFrame(t, by, hand) {
     undo.hpAfter = 0;
     burst(new THREE.Vector3(piece.cx, piece.cy + 0.15, piece.cz), '#e8c890', 8, 2);
     if (f.filled.size === f.cells.length) finishFrame(f);
-    else if (piece.over && by === myId()) toast('It sticks out over the frame: the spare gets sawn off', false, true);
+    else if (piece.over && by === myId() && f.kind !== 'stair') toast('It sticks out over the frame: the spare gets sawn off', false, true);
   });
   refill(hand.from);
 }
@@ -613,6 +616,19 @@ function finishFrame(f, quiet = false) {
   f.label.remove();
   if (lastPlaced?.frame === f) lastPlaced = null;
   let waste = 0;
+  const j = ramp.jobs[f.i];
+  if (f.kind === 'stair') {
+    // Stairs stay exactly as built, bits sticking out and all: you walk on the tops of the pieces.
+    j.tops = new Map();
+    for (const kk of f.occ) { const [r, c] = kk.split(',').map(Number); if (!(j.tops.get(c) <= r)) j.tops.set(c, r); }
+    j.up = true;
+    if (!quiet) {
+      if (f.pieces.some((p) => p.over) || f.scrapCells.length) toast('The stairs are up, just as you built them');
+      else { G.gold += PAY.master; updateStats(); toast(`Shipshape stairs! Not a square out of place (+${PAY.master})`); }
+    }
+    jobDone(j, quiet);
+    return;
+  }
   for (const p of f.pieces) {
     const kept = [], old = p.group.children[p.group.children.length - 1];
     p.shape.forEach((cell, i) => {
@@ -630,8 +646,6 @@ function finishFrame(f, quiet = false) {
     if (waste || f.scrapCells.length) toast(waste ? `Sawn to fit: ${waste} square${waste > 1 ? 's' : ''} of offcuts` : 'Patched with offcuts: it\'ll do');
     else { G.gold += PAY.master; updateStats(); toast(`Shipshape! Not a scrap wasted (+${PAY.master})`); }
   }
-  const j = ramp.jobs[f.i];
-  if (f.kind === 'stair') { j.up = true; jobDone(j, quiet); return; }
   const g = f.group, p0 = g.position.clone(), p1 = new THREE.Vector3(p0.x, ramp.T - 0.05, -0.85);
   const land = () => {
     g.position.copy(p1);
@@ -682,6 +696,7 @@ function jobDone(j, quiet) {
 // How high the floor is here: the wall-walk, the stairs, or the ground. `pad` widens the stairs'
 // footprint a little, so you bump into their side instead of walking into them. Stairs still
 // being built are in the way.
+const hv = new THREE.Vector3();
 function heightAt(x, z, pad = 0) {
   if (!ramp) return 0;
   for (const j of ramp.jobs) {
@@ -690,8 +705,13 @@ function heightAt(x, z, pad = 0) {
       continue;
     }
     const [x0, x1] = ramp.stairs[j.si ? 1 : 0];
-    if (x < x0 - pad || x > x1 + pad || z < ramp.zTop - 0.05 || z > ramp.zBot + pad) continue;
-    if (j.up) return Math.max(0, Math.min(ramp.T, ramp.T * (ramp.zBot - z) / ramp.run + ramp.T / (2 * ramp.n)));
+    if (x < x0 - pad || x > x1 + pad) continue;
+    if (j.up && j.tops) {
+      const r = j.tops.get(Math.floor(j.frame.group.worldToLocal(hv.set(x, 0, z)).x / S));
+      if (r !== undefined) return Math.max(0, ramp.T * (1 - r / ramp.n));
+      continue;
+    }
+    if (z < ramp.zTop - 0.05 || z > ramp.zBot + pad) continue;
     if (j.frame) return 99;
   }
   return 0;
@@ -796,7 +816,8 @@ const cannon = (() => {
 })();
 
 // ---------- game state ----------
-const pirate = Object.assign(makePirate(), { x: 0, z: 8, bonkT: 0, h: 0 });
+const pirate = Object.assign(makePirate(), { x: 0, z: 8, bonkT: 0, h: 0, hs: 0, hop: null });
+const STEP = 0.62, HOP = 1.2;   // metres: walked up / hopped up (a stair square is about 0.53)
 const view = { yaw: 0, pitch: 0, zoom: 1 };   // the player's own turn, tilt and zoom of the camera
 pirate.g.rotation.y = Math.PI;
 scene.add(pirate.g);
@@ -945,7 +966,7 @@ function labelFor(h) {
 }
 function frameLabel(f) {
   const left = f.open;
-  const need = left.length === 5 && f.exact ? `needs ${an(C.identify(left))}` : f.exact ? `room for ${left.length / 5} more pieces` : `${left.length} squares left: any piece, the spare's sawn off`;
+  const need = left.length === 5 && f.exact ? `needs ${an(C.identify(left))}` : f.exact ? `room for ${left.length / 5} more pieces` : f.kind === 'stair' ? `${left.length} squares left: any piece will do` : `${left.length} squares left: any piece, the spare's sawn off`;
   return ['label deck', `${f.kind === 'stair' ? 'Stairs up to the wall' : 'Wall-walk frame'}<small>${need}</small>`];
 }
 function updateStats() {
@@ -1759,7 +1780,7 @@ function prompt() {
   } else if (!carry && canTakeBack()) t = `Space: take the ${lastPlaced.letter} back off`;
   else if (carry) {
     const more = target?.count > 1 ? ` · Tab: other spots (${target.count})` : '';
-    if (target?.frame) t = !target.ok ? 'Walk closer to fit it there' : target.over ? `Space: fit it in the frame (it sticks out: the spare gets sawn off)${more}` : `Space: fit the ${carry.letter} in the ${target.frame.kind === 'stair' ? 'stairs' : 'wall-walk frame'}${more}`;
+    if (target?.frame) t = !target.ok ? 'Walk closer to fit it there' : target.over ? (target.frame.kind === 'stair' ? `Space: fit the ${carry.letter} in the stairs (it sticks out, and stays that way)${more}` : `Space: fit it in the frame (it sticks out: the spare gets sawn off)${more}`) : `Space: fit the ${carry.letter} in the ${target.frame.kind === 'stair' ? 'stairs' : 'wall-walk frame'}${more}`;
     else if (target?.ok && target.patch) t = `Space: nail it on behind (one more layer for them to hack through)${more}`;
     else if (target?.ok && !target.over) t = `Space: fit the ${carry.letter} here${more}`;
     else if (target?.ok) t = `Space: board it over (weak, no Masterpiece)${more}`;
@@ -2272,14 +2293,22 @@ function update(dt) {
     nz = Math.max(pirate.h > 1 ? -0.3 : bounds.z0, Math.min(bounds.z1, nz));
     // Up and down the stairs, but no walking into their side or off the edge of the rampart.
     const pad = pirate.h < 0.05 ? 0.28 : 0;
-    const okAt = (x, z) => Math.abs(heightAt(x, z, pad) - pirate.h) <= 0.4;
+    // A step of one square you walk up; two, you hop up (stairs built with bits sticking out).
+    const okAt = (x, z) => Math.abs(heightAt(x, z, pad) - pirate.h) <= HOP;
     if (!okAt(nx, nz)) { if (okAt(nx, oz)) nz = oz; else if (okAt(ox, nz)) nx = ox; else { nx = ox; nz = oz; } }
     pirate.x = nx; pirate.z = nz;
+    const was = pirate.h;
     pirate.h = heightAt(nx, nz);
+    if (pirate.h - was > STEP) pirate.hop = { t: 0, a: pirate.hs, b: pirate.h };
     faceTo(pirate, wx, wz, dt * 1.2);
   }
   animateWalk(pirate, moving, dt);
-  pirate.g.position.y += pirate.h;
+  if (pirate.hop) {
+    const hp = pirate.hop, u = Math.min(1, (hp.t += dt / 0.3));
+    pirate.hs = hp.a + (hp.b - hp.a) * u + Math.sin(Math.PI * u) * 0.35;
+    if (u >= 1) pirate.hop = null;
+  } else pirate.hs += (pirate.h - pirate.hs) * Math.min(1, dt * 16);
+  pirate.g.position.y += pirate.hs;
   pirate.g.position.x = pirate.x;
   pirate.g.position.z = pirate.z;
   if (carry) {

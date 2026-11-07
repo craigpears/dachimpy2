@@ -164,8 +164,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **The stairs (end stretches):** a frame standing upright at the end of the den, a stepped
     stringer from the floor up to the walk. You fit pieces into it like a hole in the wall, and the
     pieces are the steps. Half-built stairs are in the way; you can't walk through them.
-  - **Any piece will do:** a piece may stick out over the frame's edge, and the spare is sawn off
-    when it's full.
+  - **Any piece will do:** a piece may stick out over the frame's edge. On the walk the spare is
+    sawn off when it's full (it has to lie flat on the wall).
+  - **The stairs stay exactly as built, never changed by magic.** Nothing's sawn off: bits sticking
+    out stay, and you walk on the real tops of the pieces. A one-square step you walk up; a
+    two-square one you hop up. So the stairs stay climbable, a piece can't stick up more than one
+    square above the tread line.
   - **Never stuck:** a gap that none of the pieces to hand can reach any more is plugged with
     offcuts.
   - **Shipshape:** every frame's shape can be filled exactly. A frame filled with nothing sawn off
