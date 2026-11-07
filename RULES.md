@@ -230,6 +230,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   holds steady: once the ghost snaps somewhere it stays until you clearly point somewhere better,
   rather than flicking between two spots. This is easier snapping, not auto-play: the piece is never
   turned for you (below).
+  **Pointing into the hole means fit it in the hole.** At first, covering the pointed square won
+  even if that meant hanging over the stone, and the user saw the ghost sitting off to the side of
+  the hole. The ghost was showing the true spot, but the spot was wrong. Now a clean fit nearby beats
+  boarding over while you point into a hole or frame. To board over, point at the stone beside it.
 - **One breach doesn't let everyone in; the wall you kept strong pays off.** Raiders used to make
   for any open gap along the whole wall (or else the weakest hole), so once one hole went, the
   whole wave poured through it. Now each raider attacks the hole in front of where they come up to

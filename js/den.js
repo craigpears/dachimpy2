@@ -3077,7 +3077,10 @@ function pickSpot(list, at) {
     const m = at(o), R = Math.floor(m.fr), Cc = Math.floor(m.fc);
     const covers = carry.cells.some(([r, c]) => r + o.dr === R && c + o.dc === Cc);
     const cx = o.frame ? o.gc : o.fc, cy = o.frame ? o.gr : o.fr;
-    return (covers ? 0 : 0.9) + 0.5 * Math.hypot(cx - m.fc, cy - m.fr) + (o.over ? 0.35 : 0);
+    // Pointing into the hole (or frame) means fit it in there: a clean fit nearby beats one that
+    // hangs over the stone. Pointing at the stone beside it is how you board over.
+    const inside = o.frame ? o.frame.set.has(k(R, Cc)) : wall.cellHole.has(k(R, Cc));
+    return (covers ? 0 : 0.9) + 0.5 * Math.hypot(cx - m.fc, cy - m.fr) + (o.over ? (inside ? 1.2 : 0.35) : 0);
   };
   let best = null, bs = Infinity, kept = null, ks = Infinity;
   for (const o of list) {
