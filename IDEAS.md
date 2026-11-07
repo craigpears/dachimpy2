@@ -168,6 +168,11 @@ Where it's got to (7 Nov 2026):
   fights raiders at the wall until it crumbles, and goes dormant to be won again. Flip side for
   later: raiders could bring their own golem to the wall, a boss the crew has to beat the same
   way.
+- **Then the user's take: make it a boss fight, and let it pause the raid.** A big standoff in
+  the middle of the open, "almost heroic", rather than any old one-on-one. Being a boss fight is
+  what makes the pause fit the pacing, and the golem's size makes big boards in proportion.
+  Still open: whose golem it is (the raiders' boss, the den's to win over, or the raiders' golem
+  turning to your side once beaten).
 - **(Dropped) A duel at the wall:** a raider with a sword (later waves only, see the user's idea that early
   waves have none) squares up at a breach or the gate. A pirate walks up and takes them on, and
   both play real Swordfight. Your board stands upright beside you, the way a hole stands in the

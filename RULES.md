@@ -126,6 +126,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   because a two-minute duel while raiders hack through the wall is "really disjointed". A slow
   puzzle has to pay off big instead: that's why the user came to the golem, one puzzle that makes
   something able to fight a crowd, not just one raider.
+  **Except a boss fight.** A Swordfight against a golem is a big standoff in the open, "almost
+  heroic", not "any old one-on-one", so there it makes sense for the rest of the raid to pause.
+  The golem's size also makes big Swordfight boards look in proportion.
 
 - **A pirate mends a den wall.** Pieces sit on three crates (the toolbox); you carry them over and
   fit them into holes in a stone wall. Same pieces, weights and Masterpiece rule as the main game.
