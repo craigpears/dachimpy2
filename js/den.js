@@ -978,6 +978,19 @@ addEventListener('keydown', (e) => {
 addEventListener('keyup', (e) => keys.delete(e.key.toLowerCase()));
 addEventListener('blur', () => keys.clear());
 const ray = new THREE.Raycaster(), wallPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+/* Where the pointer is on the wall grid, at depth z. Boards behind a hole stand out from the stone
+   towards you, and the camera looks down on them, so a board is matched to the pointer at its own
+   depth, or it'd snap a square or two away from where you're pointing. */
+function mouseAt(z) {
+  if (!z || !mouse.ray) return mouse;
+  let m = mouse.at.get(z);
+  if (!m) {
+    const p = new THREE.Vector3();
+    m = mouse.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 0, 1), -z), p) ? { fc: p.x / S + wall.W / 2, fr: wall.H - p.y / S } : mouse;
+    mouse.at.set(z, m);
+  }
+  return m;
+}
 renderer.domElement.addEventListener('mousemove', (e) => {
   ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1), camera);
   const p = new THREE.Vector3();
@@ -992,7 +1005,7 @@ renderer.domElement.addEventListener('mousemove', (e) => {
   if (best) { mouse = best; mouseMode = true; return; }
   if (!ray.ray.intersectPlane(wallPlane, p)) { mouse = null; return; }
   const fc = p.x / S + wall.W / 2, fr = wall.H - p.y / S;
-  mouse = fc >= -1 && fc <= wall.W + 1 && fr >= -1 && fr <= wall.H + 1 ? { fc, fr } : null;
+  mouse = fc >= -1 && fc <= wall.W + 1 && fr >= -1 && fr <= wall.H + 1 ? { fc, fr, ray: ray.ray.clone(), at: new Map() } : null;
   if (mouse) mouseMode = true;
 });
 addEventListener('mousemove', (e) => { cursor = { x: e.clientX, y: e.clientY }; });
@@ -1693,7 +1706,7 @@ function aim() {
   const b = C.bbox(carry.cells);
   if (mouseMode && mouse) {
     if (pirate.z > WALL_Z + 2.5) return;
-    const d = (o) => Math.hypot(o.fc - mouse.fc, o.fr - mouse.fr) + (o.over ? 0.35 : 0);
+    const d = (o) => { const m = mouseAt(o.patch ? patchZ(o.layer) : 0); return Math.hypot(o.fc - m.fc, o.fr - m.fr) + (o.over ? 0.35 : 0); };
     list.sort((a, z) => d(a) - d(z));
     const best = list[0];
     if (best && d(best) <= 1.8) target = { ...best, ok: reach(best), far: !reach(best) };
@@ -2411,6 +2424,6 @@ newGame();
 requestAnimationFrame(frame);
 
 // For poking at it from the console.
-window.den = { net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+window.den = { camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };

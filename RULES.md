@@ -194,6 +194,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   while you carry a piece, every mended hole with room shows a pulsing outline on the den side
   where the next layer goes, its label says "room for a layer behind", and once every hole is
   mended the prompt sends you there. (Grading those layers is in IDEAS.md.)
+- **Snapping goes where you point.** Boards behind a hole snapped a square or two off, so you
+  couldn't line one up: the pointer was read on the stone face while the boards stand out towards
+  you. Every spot is matched to the pointer at its own depth.
 - **Future ideas live in [IDEAS.md](IDEAS.md).** When the user brain-dumps ideas for later, note
   them there rather than building them.
 - **There's always something to do with a junk piece.** Holding three useless pieces with nothing
