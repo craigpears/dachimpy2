@@ -854,6 +854,14 @@ const powderTex = (() => {
   t.colorSpace = THREE.SRGBColorSpace;
   return t;
 })();
+// A soft glow under each store, so it shines out from the deck.
+const glowTex = canvasTex(64, 64, (x) => {
+  const gr = x.createRadialGradient(32, 32, 4, 32, 32, 32);
+  gr.addColorStop(0, 'rgba(255,248,220,1)'); gr.addColorStop(0.55, 'rgba(255,236,170,0.55)'); gr.addColorStop(1, 'rgba(255,230,150,0)');
+  x.fillStyle = gr; x.fillRect(0, 0, 64, 64);
+});
+const glowGeo = new THREE.PlaneGeometry(S * 1.05, S * 1.05).rotateX(-Math.PI / 2);
+const glowMat = new THREE.MeshBasicMaterial({ map: glowTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.4, toneMapped: false, fog: false });
 function storeMesh(kind) {
   const g = new THREE.Group(), body = new THREE.Group();
   g.add(body);
@@ -904,7 +912,20 @@ function storeMesh(kind) {
     body.add(lean);
     g.userData.face = true;
   }
-  return ink(g);
+  // Lit from within a little, so the colours stay bold whatever the light.
+  body.traverse((m) => {
+    if (!m.isMesh || !m.material.isMeshStandardMaterial) return;
+    m.material.emissive.copy(m.material.color);
+    m.material.emissiveIntensity = 0.35;
+    if (m.material.map) m.material.emissiveMap = m.material.map;
+  });
+  body.scale.setScalar(1.15);
+  body.position.y *= 1.15;
+  const glow = new THREE.Mesh(glowGeo, glowMat);
+  glow.userData.ink = true;
+  glow.position.y = 0.006;
+  g.add(glow);
+  return ink(g, 0.03);
 }
 const arrowGeo = (pts) => {
   const s = new THREE.Shape();
@@ -916,12 +937,18 @@ const arrowGeo = (pts) => {
 };
 const arrowOut = arrowGeo([[-0.1, -0.245], [0.1, -0.245], [0.1, 0], [0.245, 0], [0, 0.265], [-0.245, 0], [-0.1, 0]]);
 const arrowIn = arrowGeo([[-0.055, -0.2], [0.055, -0.2], [0.055, 0.045], [0.15, 0.045], [0, 0.2], [-0.15, 0.045], [-0.055, 0.045]]);
-// Mine Gunnery blue; a crewmate's in their own colour.
-function arrowMesh(edge, fill, opacity = 1) {
-  const g = new THREE.Group(), o = { transparent: opacity < 1, opacity, depthWrite: opacity === 1 };
-  const out = new THREE.Mesh(arrowOut, new THREE.MeshBasicMaterial({ color: edge, ...o }));
-  g.add(out);
-  if (fill) { const inn = new THREE.Mesh(arrowIn, new THREE.MeshBasicMaterial({ color: fill, ...o })); inn.position.y = 0.004; g.add(inn); }
+// As in Gunnery: a bold yellow arrow with a dark edge, on a square lit up yellow underneath. A
+// crewmate's is in their own colour.
+const arrowTile = new THREE.PlaneGeometry(S * 0.94, S * 0.94).rotateX(-Math.PI / 2);
+function arrowMesh(col = '#ffd23a', opacity = 1) {
+  const g = new THREE.Group(), o = { transparent: true, depthWrite: false, toneMapped: false, fog: false };   // (true colours, not washed out by the light or the haze)
+  const tile = new THREE.Mesh(arrowTile, new THREE.MeshBasicMaterial({ color: col, opacity: 0.55 * opacity, ...o }));
+  const out = new THREE.Mesh(arrowOut, new THREE.MeshBasicMaterial({ color: '#2a1a06', opacity, ...o }));
+  const inn = new THREE.Mesh(arrowIn, new THREE.MeshBasicMaterial({ color: col, opacity, ...o }));
+  out.position.y = 0.004;
+  inn.position.y = 0.008;
+  out.renderOrder = 1; inn.renderOrder = 2;
+  g.add(tile, out, inn);
   return g;
 }
 // A gun as Gunnery draws it: a long bright iron barrel lying on the deck, three squares long, on a
@@ -1051,7 +1078,7 @@ function makeGunDeck() {
   gd.cursor.material = new THREE.LineBasicMaterial({ color: '#ffffff' });
   gd.cursor.rotation.x = -Math.PI / 2;
   gd.cursor.visible = false;
-  gd.ghost = arrowMesh('#1d4fb8', null, 0.55);
+  gd.ghost = arrowMesh('#ffd23a', 0.5);
   gd.ghost.visible = false;
   group.add(gd.cursor, gd.ghost);
   if (!guest()) setCrates(pickCrates());
@@ -1363,7 +1390,7 @@ function chalk(r, c, dir, by = myId()) {
 }
 function putArrow(r, c, dir, by, t = performance.now()) {
   const ci = by === myId() ? -1 : net.crew.get(by)?.ci ?? -1;
-  const m = ci >= 0 ? arrowMesh(new THREE.Color(CREW_COLOURS[ci]).multiplyScalar(0.55), new THREE.Color(CREW_COLOURS[ci]).lerp(new THREE.Color('#ffffff'), 0.55)) : arrowMesh('#1d4fb8', '#d7ecff');
+  const m = arrowMesh(ci >= 0 ? CREW_COLOURS[ci] : '#ffd23a');
   m.position.copy(gdAt(r, c, 0.02));
   m.rotation.y = -dir * Math.PI / 2;
   gd.group.add(m);
@@ -2553,6 +2580,7 @@ function prompt() {
   const el = $('prompt');
   if (el.textContent !== t) el.textContent = t;
   $('gunhelp').classList.toggle('on', onGunDeck());
+  if (onGunDeck()) $('intro').classList.add('off');   // (nothing over the board)
 }
 
 // ---------- the crew: playing together ----------
@@ -3246,7 +3274,12 @@ function buildAll(upTo = ramp.jobs.length - 1) {
 }
 
 newGame();
-if (new URLSearchParams(location.search).get('try') === 'gundeck') buildAll();
+// ?try=all (or ?try=gundeck): everything built, and you start up on the gun tower.
+if (['all', 'gundeck'].includes(new URLSearchParams(location.search).get('try'))) {
+  buildAll();
+  Object.assign(pirate, { x: gd.x0 + GD.cols * S / 2, z: gd.z0 + (GD.rows - 0.5) * S, h: ramp.T });
+  $('intro').classList.add('off');
+}
 requestAnimationFrame(frame);
 
 // For poking at it from the console.

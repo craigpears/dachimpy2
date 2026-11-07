@@ -215,7 +215,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **Playability and readability above anything.** Making things look better in 3D tends to make
     them harder to pick out, so push contrast and boldness as far as it will go: bold black
     outlines round the stores, crates, guns and barrel as Gunnery draws them; the deck toned down
-    close to Gunnery's deck brown so everything on it stands out; arrows big, bold and blue.
+    close to Gunnery's deck brown so everything on it stands out; stores a size up, lit from within
+    a little and with a soft glow under each; arrows big and bold. Colours on the board are drawn true
+    (not washed out by the scene's light or haze).
   - **Where and how big:** built last, after the whole rampart: a square platform jutting out from
     the wall over the gate like a bastion, **the size of a Gunnery board, 13 by 13**. One square of
     a carpentry piece is one square of the board. It's built of ordinary pieces in three frames
@@ -244,13 +246,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **The look:** bright silver guns three squares long, a red gunwale with a gold rail, light-wood
     crates of shot and rum, the barrel on its side; shot bright iron, powder a red bag with a flame
     on it, wad a white puff, the bucket bright tin with blue water, leaning so you see its side.
-    Arrows: mine Gunnery blue with a pale fill, a crewmate's in their colour. Gun labels show the
+    **Arrows are yellow, as in Gunnery** (not blue: the user corrected this): a bold yellow arrow
+    with a dark edge on a square lit up yellow underneath; a crewmate's in their own colour. Gun labels show the
     store each wants next as a picture; "Loaded!" in Puzzle Pirates yellow and red. A key to the
     stores shows while you're on the tower.
   - **The mouse works as in Gunnery:** click a plank to chalk the arrow the ghost shows, drag the
     way you want it to point, the wheel turns it (it never zooms on the tower), click an arrow to
     turn it, right-click to rub it out. Space chalks the plank ahead of you, Q/E turn it.
-  - **To try it straight away:** `den.html?try=gundeck` starts with the rampart and gun tower built.
+  - **To try it straight away:** `den.html?try=all` (or `?try=gundeck`) starts with the rampart and
+    gun tower built and you up on the tower, for the user's own testing.
 - **Future ideas live in [IDEAS.md](IDEAS.md).** When the user brain-dumps ideas for later, note
   them there rather than building them.
 - **There's always something to do with a junk piece.** Holding three useless pieces with nothing
