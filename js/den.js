@@ -484,16 +484,17 @@ const frameMat = mat('#4a3220', { roughness: 1 });
 const railMat = mat('#8a5a30', { map: woodTex });
 const railGeo = [new THREE.BoxGeometry(0.06, S + 0.06, 0.07), new THREE.BoxGeometry(S + 0.06, 0.06, 0.07)];
 const frames = () => (ramp ? ramp.secs.filter((s) => s.frame && !s.frame.done).map((s) => s.frame) : []);
-function openFrame(si) {
+function openFrame(si, shape = null) {
   const s = ramp.secs[si];
+  if (s.frame || s.built) return s.frame;   // one frame per stretch
   // Clear of the stairs and torches at the ends.
   const lo = s.x0 + (si === 0 ? 2.4 : 0.4), hi = s.x1 - (si === 2 ? 2.4 : 0.4);
-  let shape = null;
   for (let i = 0; i < 400 && !shape; i++) {
     const c = C.normalize(C.genHole(i < 250 ? 4 : 3).hole), b = C.bbox(c);
     if (b.h <= 4 && b.w * S <= hi - lo) shape = c;
   }
   if (!shape) { buildSection(si); return null; }
+  if (isHost()) send('all', { t: 'frame', si, cells: shape });
   const b = C.bbox(shape), x0 = (lo + hi) / 2 - b.w * S / 2;
   // Laid flat: the frame's rows run from the wall towards the den, its "front" faces up.
   const g = new THREE.Group();
@@ -518,7 +519,7 @@ function openFrame(si) {
   den.add(g);
   const label = document.createElement('div');
   $('labels').append(label);
-  const f = s.frame = { si, x0, z0: FRAME_Z, cells: shape, b, set, occ: new Set(), filled: new Set(), pieces: [], group: g, label, sig: '', done: false };
+  const f = s.frame = { si, x0, z0: FRAME_Z, cells: shape, b, set, occ: new Set(), filled: new Set(), pieces: [], scrapCells: [], group: g, label, sig: '', done: false };
   frameState(f);
   burst(new THREE.Vector3(x0 + b.w * S / 2, 0.3, FRAME_Z + b.h * S / 2), '#e8c890', 18, 3);
   return f;
@@ -549,23 +550,30 @@ function frameFits(cells) {
   }
   return out;
 }
-function placeFrame(t) {
-  const f = t.frame, b = C.bbox(carry.cells);
-  const g = pieceGroup(carry.cells, woodMat(carry.letter));
-  const from = f.group.worldToLocal(carry.group.position.clone());
-  const to = new THREE.Vector3(t.dc * S, -t.dr * S, 0.1);
-  const off = new THREE.Vector3(-b.w * S / 2, b.h * S / 2, 0);
-  scene.remove(carry.group);
+// A piece lying in a frame, where it ends up (no flying in): for placing, and for a joiner's copy.
+function putFramePiece(f, i) {
+  const g = pieceGroup(i.shape, woodMat(i.letter));
+  g.position.set(i.dc * S, -i.dr * S, 0.1);
   f.group.add(g);
-  const pile = carry.from;
-  const keys = carry.cells.map(([r, c]) => k(r + t.dr, c + t.dc));
-  keys.forEach((kk) => { f.occ.add(kk); if (f.set.has(kk)) f.filled.add(kk); });
-  const piece = { group: g, cells: keys, shape: carry.cells, over: t.over, cx: t.cx, cz: t.cz };
-  const undo = { frame: f, letter: carry.letter, shape: carry.cells, piece, hpAfter: null };
-  carry = null;
+  const cells = i.shape.map(([r, c]) => k(r + i.dr, c + i.dc));
+  cells.forEach((kk) => { f.occ.add(kk); if (f.set.has(kk)) f.filled.add(kk); });
+  const b = C.bbox(i.shape);
+  const piece = { group: g, cells, shape: i.shape, over: i.over, cx: f.x0 + (i.dc + b.w / 2) * S, cz: f.z0 + (i.dr + b.h / 2) * S, by: i.by, info: i, undo: null };
   f.pieces.push(piece);
-  lastPlaced = undo;
+  return piece;
+}
+function placeFrame(t, by, hand) {
+  const f = t.frame;
+  const info = { letter: hand.letter, shape: hand.cells, dr: t.dr, dc: t.dc, over: t.over, by };
+  const from = f.group.worldToLocal(hand.group.position.clone());
+  scene.remove(hand.group);
+  if (hand === carry) carry = null;
+  const piece = putFramePiece(f, info), g = piece.group, to = g.position.clone(), b = C.bbox(info.shape);
+  const off = new THREE.Vector3(-b.w * S / 2, b.h * S / 2, 0);
+  const undo = piece.undo = { frame: f, letter: info.letter, shape: info.shape, piece, hpAfter: null };
+  if (by === myId()) lastPlaced = undo;
   frameState(f);
+  if (isHost()) send('all', { t: 'place', frame: f.si, ...info });
   tween(0.32, (s) => {
     g.position.lerpVectors(from.clone().add(off), to, 1 - (1 - s) ** 3);
     g.position.z += Math.sin(s * Math.PI) * 0.6;
@@ -573,11 +581,11 @@ function placeFrame(t) {
     g.position.copy(to);
     if (!f.pieces.includes(piece)) return;
     undo.hpAfter = 0;
-    burst(new THREE.Vector3(t.cx, 0.15, t.cz), '#e8c890', 8, 2);
+    burst(new THREE.Vector3(piece.cx, 0.15, piece.cz), '#e8c890', 8, 2);
     if (f.filled.size === f.cells.length) finishFrame(f);
-    else if (piece.over) toast('It sticks out over the frame: the spare gets sawn off', false, true);
+    else if (piece.over && by === myId()) toast('It sticks out over the frame: the spare gets sawn off', false, true);
   });
-  refill(pile);
+  refill(hand.from);
 }
 /* You can never get stuck: a gap in a frame that none of the pieces to hand (carried or on the
    crates) could reach any more, walled in by the pieces round it, gets plugged with offcuts. It
@@ -589,16 +597,21 @@ function plugGaps(f) {
   const orients = C.ORIENTS.filter((o) => have.has(o.letter));
   const reachable = (r0, c0) => orients.some((o) => o.cells.some(([pr, pc]) => o.cells.every(([r, c]) => !f.occ.has(k(r - pr + r0, c - pc + c0)))));
   const dead = f.open.filter(([r, c]) => !reachable(r, c));
-  for (const [r, c] of dead) {
+  if (!dead.length) return 0;
+  plugCells(f, dead);
+  if (isHost()) send('all', { t: 'plug', si: f.si, cells: dead });
+  return dead.length;
+}
+function plugCells(f, cells) {
+  for (const [r, c] of cells) {
     f.occ.add(k(r, c)); f.filled.add(k(r, c));
+    f.scrapCells.push([r, c]);
     const m = mesh(scrapGeo, scrapMat);
     m.position.set((c + 0.5) * S, -(r + 0.5) * S, 0.02);
     f.group.add(m);
-    f.scraps = (f.scraps || 0) + 1;
     burst(new THREE.Vector3(f.x0 + (c + 0.5) * S, 0.2, f.z0 + (r + 0.5) * S), '#f0d9a8', 6, 2);
   }
-  if (dead.length) frameState(f);
-  return dead.length;
+  frameState(f);
 }
 // Checked whenever the crates are dealt afresh.
 function checkGaps() {
@@ -611,6 +624,7 @@ function checkGaps() {
 }
 // The frame's full: saw off what sticks out, then hoist the deck up onto the wall.
 function finishFrame(f) {
+  if (f.done) return;
   f.done = true;
   f.label.remove();
   if (lastPlaced?.frame === f) lastPlaced = null;
@@ -628,7 +642,7 @@ function finishFrame(f) {
     old.visible = false;
     p.group.add(outline(kept, 0.002, '#4a2a12'));
   }
-  if (waste || f.scraps) toast(waste ? `Sawn to fit: ${waste} square${waste > 1 ? 's' : ''} of offcuts` : 'Patched with offcuts: it\'ll do');
+  if (waste || f.scrapCells.length) toast(waste ? `Sawn to fit: ${waste} square${waste > 1 ? 's' : ''} of offcuts` : 'Patched with offcuts: it\'ll do');
   else { G.gold += PAY.master; updateStats(); toast(`Shipshape! Not a scrap wasted (+${PAY.master})`); }
   const g = f.group, p0 = g.position.clone(), p1 = new THREE.Vector3(p0.x, ramp.T - 0.05, -0.85);
   const ease = (u) => (u < 0.5 ? 2 * u * u : 1 - (-2 * u + 2) ** 2 / 2);
@@ -638,11 +652,12 @@ function finishFrame(f) {
     g.position.z = p0.z + (p1.z - p0.z) * ease(Math.max(0, (u - 0.35) / 0.65));
   }, () => { den.remove(g); buildSection(f.si); }));
 }
-function buildSection(si) {
+function buildSection(si, quiet = false) {
   const s = ramp.secs[si];
   if (s.built) return;
   s.built = true;
   s.g.visible = true;
+  if (quiet) return;
   tween(0.5, (t) => { s.g.scale.y = 0.01 + 0.99 * (1 - (1 - t) ** 3); s.g.position.y = ramp.T * (1 - s.g.scale.y) * 0.98; }, () => { s.g.scale.y = 1; s.g.position.y = 0; });
   for (let i = 0; i < 3; i++) burst(new THREE.Vector3(s.x0 + Math.random() * (s.x1 - s.x0), ramp.T, 0), '#e8c890', 12, 3);
   toast(ramp.secs.every((x) => x.built) ? 'The whole rampart is up!' : 'Rampart built: climb up and throw from the wall!');
@@ -768,6 +783,7 @@ let ghost = null, ghostKey = '', target = null, cycle = 0, shake = 0;
 let mouse = null, mouseMode = false, topView = false;
 
 function newGame() {
+  if (guest()) return send('host', { t: 'again' });
   raiders.splice(0).forEach((r) => { scene.remove(r.m.g); r.mark.remove(); });
   if (carry) { scene.remove(carry.group); carry = null; }
   ghostKey = ''; ghost = null;
@@ -778,6 +794,7 @@ function newGame() {
   $('end').classList.remove('on');
   $('intro').classList.remove('off');
   updateStats();
+  if (isHost()) sendSync('all', true);
 }
 
 // ---------- the rules: where a piece can go, and what a hole needs now ----------
@@ -838,6 +855,7 @@ function relining() {
   for (const h of wall.holes) boardsOf(h).forEach((p, i) => {
     if (p.layer !== i) {
       p.layer = i;
+      if (p.info) p.info.layer = i;
       const z0 = p.group.position.z, z1 = patchZ(i);
       p.base.z = z1;
       tween(0.25, (s) => { p.group.position.z = z0 + (z1 - z0) * s; });
@@ -897,6 +915,7 @@ function updateStats() {
 
 // ---------- input ----------
 addEventListener('keydown', (e) => {
+  if (e.target instanceof HTMLInputElement) return;
   const key = e.key.toLowerCase();
   if ([' ', 'tab', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) e.preventDefault();
   if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) { keys.add(key); mouseMode = false; }
@@ -1013,6 +1032,7 @@ function clickedFoe(mx, my, cap = 90) {
 let cursor = null, aimed = null;
 const aimFoe = () => (cursor && clickedFoe(cursor.x, cursor.y, 160)) || anyFoe();
 function act() {
+  if (net.pending || net.asking) return;   // waiting to hear back about the last one
   const f = focus();
   if (pirate.h > 0.3) { if (carry && onRampart() && aimFoe()) throwAt(aimFoe()); return; }
   if (f.kind === 'pile') {
@@ -1027,6 +1047,7 @@ function act() {
 function pickUp(p) {
   $('intro').classList.add('off');
   lastPlaced = null;
+  if (guest()) { net.asking = true; return send('host', { t: 'crate', i: piles.indexOf(p) }); }
   const m = woodMat(p.letter).clone();
   m.transparent = true;
   carry = { letter: p.letter, cells: p.cells, from: p, mat: m, group: centred(p.cells, m), lift: 0 };
@@ -1041,6 +1062,12 @@ function pickUp(p) {
 }
 function putBack() {
   const p = carry.from;
+  if (guest()) {
+    send('host', { t: 'putback', i: piles.indexOf(p), letter: carry.letter, cells: carry.cells });
+    scene.remove(carry.group);
+    carry = null;
+    return;
+  }
   p.letter = carry.letter; p.cells = carry.cells;
   scene.remove(carry.group);
   carry = null;
@@ -1058,35 +1085,54 @@ function turn(fn, dir) {
   carry.flipT = dir ? 1 : 0;
   cycle = 0;
 }
-function place(t) {
-  if (t.frame) return placeFrame(t);
-  const h = wall.holes[t.hole];
-  const cells = carry.cells.map(([r, c]) => [r + t.dr, c + t.dc]);
-  const over = t.over > 0;
-  const g = pieceGroup(carry.cells, woodMat(carry.letter));
-  const from = carry.group.position.clone();
-  // A clean fit sits flush in the hole; a board nailed over the stone sticks out in front of it.
-  const to = new THREE.Vector3(X(t.dc), Y(t.dr), t.patch ? patchZ(t.layer) : over ? WOOD_D - 0.12 : -0.04);
-  const b = C.bbox(carry.cells);
-  const off = new THREE.Vector3(-b.w * S / 2, b.h * S / 2, 0);
-  scene.remove(carry.group);
+/* Fitting a piece: yours (from your hands), or a crewmate's (`by`, with `hand` made at their
+   head). A guest asks the host first; the piece waits in the air until the answer comes. */
+function place(t, by = myId(), hand = carry) {
+  if (guest() && hand === carry) {
+    net.pending = carry;
+    carry = null;
+    return send('host', { t: 'place', hole: t.hole, frame: t.frame?.si, dr: t.dr, dc: t.dc, patch: !!t.patch, letter: hand.letter, shape: hand.cells, pile: piles.indexOf(hand.from) });
+  }
+  return t.frame ? placeFrame(t, by, hand) : placeWall(t, by, hand);
+}
+// A piece in the wall, where it ends up: a clean fit sits flush in the hole; a board nailed over
+// the stone sticks out in front of it; boards behind stack up on the den side.
+function putPiece(h, i) {
+  const over = i.over > 0;
+  const g = pieceGroup(i.shape, woodMat(i.letter));
+  const to = new THREE.Vector3(X(i.dc), Y(i.dr), i.patch ? patchZ(i.layer) : over ? WOOD_D - 0.12 : -0.04);
+  g.position.copy(to);
   wallGroup.add(g);
-  const pile = carry.from;
-  const undo = { h, letter: carry.letter, shape: carry.cells, prev: { status: h.status, hp: h.hp, maxHp: h.maxHp }, boarded: G.boarded, hpAfter: null };
-  carry = null;
-  if (t.patch) cells.forEach(([r, c]) => wall.lining[t.layer].add(k(r, c)));
-  else cells.forEach(([r, c]) => { wall.wood.add(k(r, c)); if (h.set.has(k(r, c))) h.filled.add(k(r, c)); });
-  const piece = { group: g, cells: cells.map(([r, c]) => k(r, c)), over, patch: !!t.patch, base: to.clone(), cx: to.x + b.w * S / 2 };
-  if (t.patch) Object.assign(piece, { layer: t.layer, hp: HP.patch });
+  const cells = i.shape.map(([r, c]) => k(r + i.dr, c + i.dc));
+  if (i.patch) cells.forEach((kk) => wall.lining[i.layer].add(kk));
+  else cells.forEach((kk) => { wall.wood.add(kk); if (h.set.has(kk)) h.filled.add(kk); });
+  const b = C.bbox(i.shape);
+  const piece = { group: g, cells, over, patch: !!i.patch, base: to.clone(), cx: to.x + b.w * S / 2, by: i.by, info: i, undo: null };
+  if (i.patch) Object.assign(piece, { layer: i.layer, hp: HP.patch });
   h.pieces.push(piece);
-  undo.piece = piece;
-  lastPlaced = undo;
+  return piece;
+}
+function placeWall(t, by, hand) {
+  const h = wall.holes[t.hole];
+  const info = { letter: hand.letter, shape: hand.cells, dr: t.dr, dc: t.dc, over: t.over, patch: !!t.patch, layer: t.layer ?? 0, by };
+  const from = hand.group.position.clone();
+  scene.remove(hand.group);
+  if (hand === carry) carry = null;
+  const undo = { h, letter: info.letter, shape: info.shape, prev: { status: h.status, hp: h.hp, maxHp: h.maxHp }, boarded: G.boarded, hpAfter: null };
+  const piece = undo.piece = putPiece(h, info);
+  piece.undo = undo;
+  if (by === myId()) lastPlaced = undo;
+  if (isHost()) send('all', { t: 'place', hole: t.hole, ...info });
+  const g = piece.group, to = piece.base.clone(), b = C.bbox(info.shape);
+  const off = new THREE.Vector3(-b.w * S / 2, b.h * S / 2, 0);
   const wasExact = h.exact;
+  h.busy = (h.busy || 0) + 1;
   tween(0.32, (s) => {
     const e = 1 - (1 - s) ** 3;
     g.position.lerpVectors(from.clone().add(off), to, e);
     g.position.z += Math.sin(s * Math.PI) * 0.6;
   }, () => {
+    h.busy--;
     g.position.copy(to);
     if (!h.pieces.includes(piece)) return;   // knocked out while it was flying in
     if (piece.patch) {
@@ -1100,9 +1146,9 @@ function place(t) {
     if (h.status === 'open') { h.hp += HP.piece; h.maxHp = h.hp; }
     undo.hpAfter = h.hp;
     if (h.status === 'master' && lastPlaced === undo) lastPlaced = null;   // a Masterpiece is never a misclick
-    if (h.status === 'open' && wasExact && !h.exact) { shake = 0.3; toast('No Masterpiece in that hole now · Space: take it back', true); }
+    if (by === myId() && h.status === 'open' && wasExact && !h.exact) { shake = 0.3; toast('No Masterpiece in that hole now · Space: take it back', true); }
   });
-  refill(pile);
+  refill(hand.from);
 }
 /* Taking back a misplaced piece: with empty hands at the wall, the last piece you put up comes
    back off, as it was, so you can nudge it into the right spot. Not once it's made a Masterpiece,
@@ -1118,35 +1164,46 @@ function canTakeBack() {
   return Math.abs(u.piece.cx - pirate.x) <= REACH + 0.6;
 }
 function takeBack() {
-  const u = lastPlaced, piece = u.piece;
+  const u = lastPlaced, where = u.frame || u.h;
   lastPlaced = null;
-  if (u.frame) {
-    const f = u.frame, b = C.bbox(u.shape);
-    f.pieces.pop();
-    piece.cells.forEach((kk) => { f.occ.delete(kk); f.filled.delete(kk); });
-    frameState(f);
-    const at = piece.group.localToWorld(new THREE.Vector3(b.w * S / 2, -b.h * S / 2, 0));
-    f.group.remove(piece.group);
-    return holdPiece(u.letter, u.shape, null, at);
+  if (guest()) return send('host', { t: 'takeback', hole: u.frame ? undefined : wall.holes.indexOf(where), frame: u.frame?.si });
+  unplace(where, u.piece.by, true);
+}
+// Off comes the last piece in a hole or frame, put back as it was before. Whoever put it there
+// gets it back in their hands.
+function unplace(where, by, mine = by === myId()) {
+  const piece = where.pieces[where.pieces.length - 1];
+  if (!piece || piece.by !== by) return;
+  const u = piece.undo, b = C.bbox(piece.info.shape), frame = !!where.occ;
+  where.pieces.pop();
+  let at;
+  if (frame) {
+    piece.cells.forEach((kk) => { where.occ.delete(kk); where.filled.delete(kk); });
+    frameState(where);
+    at = piece.group.localToWorld(new THREE.Vector3(b.w * S / 2, -b.h * S / 2, 0));
+    where.group.remove(piece.group);
+  } else {
+    const h = where;
+    if (piece.patch) relining();
+    else {
+      piece.cells.forEach((kk) => { wall.wood.delete(kk); h.filled.delete(kk); });
+      if (u && u.hpAfter !== null) {
+        const dmg = Math.max(0, u.hpAfter - h.hp);
+        if (h.status === 'boarded') { G.gold -= PAY.boarded; G.boarded = u.boarded; }
+        h.status = u.prev.status;
+        h.maxHp = u.prev.maxHp;
+        h.hp = Math.max(0, u.prev.hp - dmg);
+      }
+    }
+    updateHole(h);
+    at = new THREE.Vector3();
+    piece.group.getWorldPosition(at);
+    at.x += b.w * S / 2; at.y -= b.h * S / 2;
+    wallGroup.remove(piece.group);
   }
-  const h = u.h;
-  h.pieces.pop();
-  if (piece.patch) relining();
-  else {
-    piece.cells.forEach((kk) => { wall.wood.delete(kk); h.filled.delete(kk); });
-    const dmg = Math.max(0, u.hpAfter - h.hp);
-    if (h.status === 'boarded') { G.gold -= PAY.boarded; G.boarded = u.boarded; }
-    h.status = u.prev.status;
-    h.maxHp = u.prev.maxHp;
-    h.hp = Math.max(0, u.prev.hp - dmg);
-  }
-  updateHole(h);
-  const at = new THREE.Vector3();
-  piece.group.getWorldPosition(at);
-  const b = C.bbox(u.shape);
-  at.x += b.w * S / 2; at.y -= b.h * S / 2;
-  wallGroup.remove(piece.group);
-  holdPiece(u.letter, u.shape, null, at);
+  if (lastPlaced?.piece === piece) lastPlaced = null;
+  if (isHost()) send('all', { t: 'unplace', hole: frame ? undefined : wall.holes.indexOf(where), frame: frame ? where.si : undefined, by });
+  if (mine) holdPiece(piece.info.letter, piece.info.shape, null, at);
 }
 // Into your hands, lifting from `at`: a piece from a crate (`from`), or one taken back off.
 function holdPiece(letter, cells, from, at) {
@@ -1162,7 +1219,7 @@ function holdPiece(letter, cells, from, at) {
   ghostKey = null;
 }
 function refill(p) {
-  if (!p) return;   // a piece taken back off the wall has no crate to refill
+  if (!p || guest()) return;   // a piece taken back off the wall has no crate to refill; the host deals
   setTimeout(() => {
     deal(p); showPile(p);
     checkGaps();
@@ -1171,13 +1228,17 @@ function refill(p) {
   }, 450);
 }
 // Hurl the carried piece at a raider. It always flies true, but the piece is spent.
-function throwAt(r) {
-  const g = carry.group, pile = carry.from, color = WOOD[carry.letter];
-  carry.mat.opacity = 1; carry.mat.depthWrite = true;
-  carry = null;
+function throwAt(r, hand = carry, by = myId()) {
+  const g = hand.group, pile = hand.from, color = WOOD[hand.letter];
+  if (hand.mat) { hand.mat.opacity = 1; hand.mat.depthWrite = true; }
+  if (hand === carry) carry = null;
   r.targeted = true;
-  pirate.bonkT = 0.3;
-  pirate.g.rotation.y = Math.atan2(r.x - pirate.x, r.z - pirate.z);
+  if (by === myId()) {
+    pirate.bonkT = 0.3;
+    pirate.g.rotation.y = Math.atan2(r.x - pirate.x, r.z - pirate.z);
+    if (guest()) send('host', { t: 'throw', rid: r.id, letter: hand.letter, shape: hand.cells, pile: piles.indexOf(pile) });
+  }
+  if (isHost()) send('all', { t: 'throw', rid: r.id, letter: hand.letter, shape: hand.cells, by });
   const from = g.position.clone(), d = Math.hypot(r.x - from.x, r.z - from.z);
   const to = new THREE.Vector3(r.x, 1.1, r.z);
   const over = !r.inside, dur = 0.25 + d * 0.05 + (over ? 0.3 : 0);
@@ -1208,18 +1269,19 @@ function throwAt(r) {
 function hit(r, from, color) {
   burst(new THREE.Vector3(r.x, 1.1, r.z), color, 22, 4.5);
   r.targeted = false;
-  if (r.state === 'down' || r.gone) return;
+  if (guest() || r.state === 'down' || r.gone) return;   // the host says what happened to them
   const dx = r.x - from.x, dz = r.z - from.z, n = Math.hypot(dx, dz) || 1;
   r.state = 'down'; r.t = 0; r.outside = !r.inside;
   r.kv = new THREE.Vector3(dx / n * 5.5, 5, dz / n * 5.5);
   G.bonked++;
   G.gold += PAY.bonk;
   burst(new THREE.Vector3(r.x, 1.6, r.z), '#ffe27a', 12, 3);
-  if (r.loot) { G.gold += PAY.steal; r.loot.visible = false; r.loot = null; toast('Thwack! Loot recovered'); } else toast('Thwack!');
+  if (r.loot) { G.gold += PAY.steal; r.loot.visible = false; r.loot = null; say('Thwack! Loot recovered'); } else say('Thwack!');
   shake = 0.35;
   updateStats();
 }
 function breakHole(h) {
+  if (isHost()) send('all', { t: 'break', hole: wall.holes.indexOf(h) });
   const boards = boardsOf(h);
   h.pieces.filter((p) => !p.patch).forEach(({ group: g, cells }) => {
     cells.forEach((kk) => wall.wood.delete(kk));
@@ -1238,6 +1300,7 @@ function breakHole(h) {
   toast(boards.length ? 'Through the hole! Only the boards behind it hold them now' : 'They broke through!', true);
 }
 function breakBoard(h, p) {
+  if (isHost()) send('all', { t: 'unboard', hole: wall.holes.indexOf(h), i: h.pieces.indexOf(p) });
   h.pieces = h.pieces.filter((x) => x !== p);
   const g = p.group, p0 = g.position.clone(), v = new THREE.Vector3((Math.random() - 0.5) * 2, 1.5 + Math.random(), 2.5 + Math.random());
   tween(0.8, (s) => { g.position.set(p0.x + v.x * s, p0.y + v.y * s - 9 * s * s, p0.z + v.z * s); g.rotation.x = s * 3; }, () => wallGroup.remove(g));
@@ -1296,19 +1359,33 @@ function pickHole(x) {
   const strength = (h) => h.hp + boardsOf(h).reduce((s, p) => s + p.hp, 0);
   return wall.holes.slice().sort((a, b) => strength(a) - strength(b) || near(a, b))[0];
 }
-function spawnRaider() {
-  const m = makePirate({ shirt: ['#1f2433', ['#59607a', '#2f6b4f', '#6b2f5e'][rand(3)]], scarf: ['#2b2b2b', '#3a4a8a', '#7a1f1f'][rand(3)], trousers: '#5a4636', patch: Math.random() < 0.5, beard: ['#222', '#7a4a1a', '#999'][rand(3)], sword: true });
+const SHIRTS = ['#59607a', '#2f6b4f', '#6b2f5e'], SCARVES = ['#2b2b2b', '#3a4a8a', '#7a1f1f'], BEARDS = ['#222', '#7a4a1a', '#999'];
+let raiderSeq = 0;
+function makeRaider(look, id, x, z) {
+  const [sh, sc, pt, bd] = look;
+  const m = makePirate({ shirt: ['#1f2433', SHIRTS[sh]], scarf: SCARVES[sc], trousers: '#5a4636', patch: !!pt, beard: BEARDS[bd], sword: true });
   m.g.scale.setScalar(0.82);
   const xr = addXray(m.g);
-  const x = (Math.random() - 0.5) * wall.W * S * 0.9;
-  const r = { m, xr, x, z: -14, state: 'approach', hole: pickHole(x), t: 0, stamina: RAIDER_STAMINA, hitT: 0.5, slot: (Math.random() - 0.5) * 1.2, inside: false, loot: null };
-  m.g.position.set(r.x, 0, r.z);
+  const r = { id, look, m, xr, x, z, state: 'approach', hole: null, t: 0, stamina: RAIDER_STAMINA, hitT: 0.5, slot: 0, inside: false, loot: null };
+  m.g.position.set(x, 0, z);
   scene.add(m.g);
   r.mark = document.createElement('div');
   r.mark.className = 'mark';
   r.mark.textContent = '⚔';
   $('labels').append(r.mark);
   raiders.push(r);
+  return r;
+}
+function spawnRaider() {
+  const x = (Math.random() - 0.5) * wall.W * S * 0.9;
+  const r = makeRaider([rand(3), rand(3), Math.random() < 0.5 ? 1 : 0, rand(3)], ++raiderSeq, x, -14);
+  r.hole = pickHole(x);
+  r.slot = (Math.random() - 0.5) * 1.2;
+}
+function giveLoot(r) {
+  r.loot = mesh(new THREE.SphereGeometry(0.16, 10, 8), mat('#e8b23a', { metalness: 0.7, roughness: 0.3 }));
+  r.loot.position.set(0, -0.5, 0.1);
+  r.m.arms[0].add(r.loot);
 }
 function moveTo(r, tx, tz, speed, dt) {
   const dx = tx - r.x, dz = tz - r.z, d = Math.hypot(dx, dz);
@@ -1369,10 +1446,8 @@ function updateRaider(r, dt) {
       if (!moving) {
         G.gold -= PAY.steal; G.stolen++;
         updateStats();
-        toast(`A raider stole ${PAY.steal} doubloons!`, true);
-        r.loot = mesh(new THREE.SphereGeometry(0.16, 10, 8), mat('#e8b23a', { metalness: 0.7, roughness: 0.3 }));
-        r.loot.position.set(0, -0.5, 0.1);
-        r.m.arms[0].add(r.loot);
+        say(`A raider stole ${PAY.steal} doubloons!`, true);
+        giveLoot(r);
         r.state = 'flee';
       }
       break;
@@ -1405,6 +1480,9 @@ function updateRaider(r, dt) {
       break;
     }
   }
+  raiderPose(r, moving, dt);
+}
+function raiderPose(r, moving, dt) {
   if (r.state !== 'climb' && r.state !== 'climbOut' && r.state !== 'down') {
     const swing = animateWalk(r.m, moving, dt, 12);
     if (r.state === 'attack' || r.state === 'hackOut') {
@@ -1442,6 +1520,7 @@ function fireCannon() {
   return false;
 }
 function shoot(cells) {
+  if (isHost()) send('all', { t: 'shoot', cells });
   const from = cannon.localToWorld(cannon.userData.muzzle.clone());
   const b = C.bbox(cells);
   const to = new THREE.Vector3(X(b.c0) + b.w * S / 2, Y(b.r0) - b.h * S / 2, -STONE_D);
@@ -1454,13 +1533,14 @@ function shoot(cells) {
     ball.position.y += Math.sin(s * Math.PI) * 4;
   }, () => {
     scene.remove(ball);
-    blast(cells);
+    if (!guest()) blast(cells);
   });
 }
-function blast(cells) {
+function blast(cells, told = false) {
   // Anything mended or opened there while the ball was in the air wins: skip those squares.
-  cells = cells.filter(([r, c]) => wall.stoneAt.has(k(r, c)) && !wall.wood.has(k(r, c)));
-  if (cells.length % 5 || !C.isConnected(cells)) return;
+  if (!told) cells = cells.filter(([r, c]) => wall.stoneAt.has(k(r, c)) && !wall.wood.has(k(r, c)));
+  if (!told && (cells.length % 5 || !C.isConnected(cells))) return;
+  if (isHost()) send('all', { t: 'blast', cells });
   const zero = new THREE.Matrix4().makeScale(0, 0, 0);
   const at = new THREE.Vector3();
   cells.forEach(([r, c]) => {
@@ -1488,11 +1568,11 @@ function blast(cells) {
 function startWave() {
   G.wave++;
   G.phase = 'wave';
-  G.toSpawn = 1 + G.wave;
+  G.toSpawn = Math.round((1 + G.wave) * (1 + 0.5 * (crewSize() - 1)));
   G.spawnT = 0.5;
   G.cannonT = G.wave >= 2 ? 8 : Infinity;
-  if (G.wave >= 2 && !cannon.visible) { cannon.visible = true; toast('They brought a cannon!', true); }
-  else toast(`Wave ${G.wave}: raiders!`, true);
+  if (G.wave >= 2 && !cannon.visible) { cannon.visible = true; say('They brought a cannon!', true); }
+  else say(`Wave ${G.wave}: raiders!`, true);
   $('intro').classList.add('off');
   updateStats();
 }
@@ -1509,8 +1589,8 @@ function updateWaves(dt) {
   if (!G.toSpawn && !raiders.length) {
     G.phase = 'calm'; G.phaseT = CALM_SECS;
     const si = SECTION_ORDER[G.wave - 1];
-    if (si !== undefined && !ramp.secs[si].built && openFrame(si)) toast(`Wave ${G.wave} beaten off! Timber's come: build the rampart in its frame`);
-    else toast(`Wave ${G.wave} beaten off!`);
+    if (si !== undefined && !ramp.secs[si].built && !ramp.secs[si].frame && openFrame(si)) say(`Wave ${G.wave} beaten off! Timber's come: build the rampart in its frame`);
+    else say(`Wave ${G.wave} beaten off!`);
   }
 }
 function banner() {
@@ -1525,6 +1605,9 @@ function banner() {
 function checkEnd() {
   if (G.over || G.gold > 0) return;
   G.over = true;
+  endScreen();
+}
+function endScreen() {
   $('end-text').textContent = `They emptied the chest in wave ${G.wave}. You built ${G.masters} Masterpiece${G.masters === 1 ? '' : 's'}, boarded over ${G.boarded} hole${G.boarded === 1 ? '' : 's'} and knocked out ${G.bonked} raider${G.bonked === 1 ? '' : 's'}.`;
   setTimeout(() => $('end').classList.add('on'), 900);
 }
@@ -1621,16 +1704,468 @@ function prompt() {
   if (el.textContent !== t) el.textContent = t;
 }
 
+// ---------- the crew: playing together ----------
+/* Co-op: up to four pirates defend one den, all doing the same jobs. One browser (the first in)
+   runs the raiders, deals the crates and tells the others what happens; that's only whose computer
+   does the sums. Each pirate walks themself and asks it before taking from a crate or fitting a
+   piece, so two can't take the same piece or fill the same spot. If it leaves, the next carries on. */
+const CREW_COLOURS = ['#2a6fb8', '#2f8a4a', '#8a2fb8', '#c07a1f'];
+const net = { ws: null, id: null, host: false, code: '', name: '', crew: new Map(), pending: null, asking: false, holds: new Map(), meAt: 0, snapAt: 0 };
+const online = () => !!(net.ws && net.id);
+const guest = () => online() && !net.host;
+const isHost = () => online() && net.host;
+const myId = () => net.id || 'me';
+const crewSize = () => (online() ? 1 + net.crew.size : 1);
+function send(to, msg) { if (net.ws?.readyState === 1) net.ws.send(JSON.stringify({ ...msg, to })); }
+// News everyone should hear: shown here and passed to the crew.
+function say(text, bad = false, warn = false) { toast(text, bad, warn); if (isHost()) send('all', { t: 'toast', text, bad, warn }); }
+const r2 = (n) => Math.round(n * 100) / 100;
+const pileSig = (p) => (p.letter ? p.letter + JSON.stringify(p.cells) : '');
+const pilesOut = () => piles.map((p) => (p.letter ? [p.letter, p.cells] : null));
+function pilesIn(list) {
+  list.forEach((d, i) => {
+    const p = piles[i];
+    if ((d ? d[0] + JSON.stringify(d[1]) : '') === pileSig(p)) return;
+    const fresh = d && !p.letter;
+    p.letter = d ? d[0] : null;
+    p.cells = d ? d[1] : null;
+    showPile(p);
+    if (fresh && p.group) { const g = p.group, s0 = g.scale.x; tween(0.3, (s) => g.scale.setScalar(s0 * (1 - (1 - s) ** 3))); }
+  });
+}
+
+// Crewmates: a pirate in their own colours, with their name over their head.
+function addMate(id, name) {
+  if (id === net.id || net.crew.has(id)) return;
+  const used = new Set([...net.crew.values()].map((m) => m.ci));
+  const ci = [0, 1, 2, 3].find((i) => !used.has(i)) ?? 0, col = CREW_COLOURS[ci];
+  const m = makePirate({ shirt: ['#f4efe4', col], scarf: col, beard: ['#3a2a1a', '#222', '#7a4a1a', '#999'][ci] });
+  m.g.position.set(0, 0, 8);
+  scene.add(m.g);
+  const tag = document.createElement('div');
+  tag.className = 'tag';
+  tag.textContent = name;
+  tag.style.borderColor = col;
+  $('tags').append(tag);
+  net.crew.set(id, { id, name, ci, col, m, tag, x: 0, z: 8, h: 0, tx: 0, tz: 8, th: 0, ry: Math.PI, mv: false, c: '', cg: null, bonkT: 0 });
+  crewLine();
+}
+function dropMate(id) {
+  const mt = net.crew.get(id);
+  if (!mt) return;
+  scene.remove(mt.m.g);
+  if (mt.cg) scene.remove(mt.cg);
+  mt.tag.remove();
+  net.crew.delete(id);
+  crewLine();
+}
+function mateCarry(mt, c) {
+  const sig = c ? c[0] + JSON.stringify(c[1]) : '';
+  if (sig === mt.c) return;
+  mt.c = sig;
+  if (mt.cg) scene.remove(mt.cg);
+  mt.cg = null;
+  if (!c) return;
+  mt.cg = centred(c[1], woodMat(c[0]));
+  mt.cg.scale.setScalar(0.55);
+  scene.add(mt.cg);
+}
+function updateMates(dt) {
+  for (const mt of net.crew.values()) {
+    const a = Math.min(1, dt * 12), g = mt.m.g;
+    mt.x += (mt.tx - mt.x) * a; mt.z += (mt.tz - mt.z) * a; mt.h += (mt.th - mt.h) * a;
+    let d = mt.ry - g.rotation.y;
+    d = Math.atan2(Math.sin(d), Math.cos(d));
+    g.rotation.y += d * a;
+    animateWalk(mt.m, mt.mv, dt);
+    g.position.set(mt.x, g.position.y + mt.h, mt.z);
+    if (mt.cg) {
+      mt.m.arms.forEach((arm, i) => { arm.rotation.x = -2.75; arm.rotation.z = i ? 0.25 : -0.25; });
+      mt.cg.position.set(mt.x, 2.15 + g.position.y, mt.z + 0.05);
+    } else mt.m.arms.forEach((arm) => { arm.rotation.z = 0; });
+    if (mt.bonkT > 0) { mt.bonkT -= dt; mt.m.arms[1].rotation.x = -2.6 + (0.3 - mt.bonkT) * 9; }
+    v3.set(mt.x, 2.5 + mt.h + (mt.cg ? 0.6 : 0), mt.z).project(camera);
+    mt.tag.style.display = v3.z > 1 ? 'none' : '';
+    mt.tag.style.left = `${(v3.x + 1) / 2 * innerWidth}px`;
+    mt.tag.style.top = `${(1 - v3.y) / 2 * innerHeight}px`;
+  }
+}
+// The piece a crewmate is using, appearing at their head (or ours, waiting in the air).
+function handAt(by, letter, cells, from = null) {
+  if (by === myId() && net.pending) { const p = net.pending; net.pending = null; return p; }
+  const mt = net.crew.get(by), src = mt || pirate;
+  const g = centred(cells, woodMat(letter));
+  g.position.set(src.x, 2.15 + (src.h || 0), src.z);
+  g.scale.setScalar(0.55);
+  scene.add(g);
+  if (mt) { mateCarry(mt, null); mt.bonkT = 0.3; }
+  return { letter, cells, from, group: g };
+}
+// Our piece back in our hands (the host said no, or the crew's gone).
+function regain(why) {
+  const p = net.pending;
+  net.pending = null;
+  net.asking = false;
+  if (!p) return;
+  const at = p.group.position.clone();
+  scene.remove(p.group);
+  holdPiece(p.letter, p.cells, p.from, at);
+  if (why) toast(why, true);
+}
+
+function sendMe() {
+  send('all', { t: 'me', x: r2(pirate.x), z: r2(pirate.z), h: r2(pirate.h), ry: r2(pirate.g.rotation.y), mv: pirate.moving ? 1 : 0, c: carry ? [carry.letter, carry.cells] : null });
+}
+function snapshot() {
+  send('all', {
+    t: 'snap', g: { ...G }, p: pilesOut(), s: ramp.secs.map((s) => (s.built ? 1 : 0)), cv: cannon.visible ? 1 : 0,
+    h: wall.holes.map((h) => [r2(h.hp), h.maxHp, h.status, h.pieces.length, boardsOf(h).map((p) => r2(p.hp))]),
+    r: raiders.map((r) => [r.id, r2(r.x), r2(r.z), r2(r.m.g.position.y), r2(r.m.g.rotation.y), r2(r.m.g.rotation.x), r2(r.m.g.scale.x), r.state, r.inside ? 1 : 0, r.loot ? 1 : 0, wall.holes.indexOf(r.hole), r2(r.slot), r.look]),
+  });
+}
+function applySnap(m) {
+  const was = G.over;
+  Object.assign(G, m.g);
+  if (G.over && !was) endScreen();
+  if (G.wave > 0) $('intro').classList.add('off');
+  updateStats();
+  pilesIn(m.p);
+  m.s.forEach((b, si) => { if (b && !ramp.secs[si].built) buildSection(si); });
+  cannon.visible = !!m.cv;
+  m.h.forEach(([hp, maxHp, status, n, bh], i) => {
+    const h = wall.holes[i];
+    if (!h || h.busy || h.pieces.length !== n) return;   // something's on its way: wait for it
+    if (h.status !== status) { h.status = status; h.sig = ''; }
+    h.hp = hp; h.maxHp = maxHp;
+    boardsOf(h).forEach((p, j) => { if (bh[j] !== undefined) p.hp = bh[j]; });
+  });
+  const seen = new Set();
+  for (const [id, x, z, y, ry, rx, sc, state, inside, loot, hi, slot, look] of m.r) {
+    seen.add(id);
+    let r = raiders.find((o) => o.id === id);
+    if (!r) { r = makeRaider(look, id, x, z); r.m.g.rotation.y = ry; }
+    Object.assign(r, { nx: x, nz: z, ny: y, nry: ry, nrx: rx, nsc: sc, inside: !!inside, hole: wall.holes[hi] || r.hole, slot });
+    if (r.state !== state) { r.state = state; r.t = 0; }
+    if (loot && !r.loot) giveLoot(r);
+    else if (!loot && r.loot) { r.loot.removeFromParent(); r.loot = null; }
+  }
+  for (let i = raiders.length - 1; i >= 0; i--) {
+    if (seen.has(raiders[i].id)) continue;
+    scene.remove(raiders[i].m.g);
+    raiders[i].mark.remove();
+    raiders.splice(i, 1);
+  }
+}
+function followRaider(r, dt) {
+  if (r.nx === undefined) return;
+  const a = Math.min(1, dt * 10), g = r.m.g, ox = r.x, oz = r.z;
+  r.t += dt;
+  r.x += (r.nx - r.x) * a;
+  r.z += (r.nz - r.z) * a;
+  if (['climb', 'climbOut', 'down'].includes(r.state)) {
+    g.position.y += (r.ny - g.position.y) * a;
+    g.rotation.x = r.nrx;
+    g.scale.setScalar(r.nsc);
+  } else { g.rotation.x = 0; g.scale.setScalar(0.82); }
+  let d = r.nry - g.rotation.y;
+  d = Math.atan2(Math.sin(d), Math.cos(d));
+  g.rotation.y += d * a;
+  if ((r.state === 'attack' || r.state === 'hackOut') && r.hole) {
+    r.hitT -= dt;
+    if (r.hitT <= 0) {
+      r.hitT = 0.7;
+      burst(new THREE.Vector3(holeX(r.hole) + r.slot * 0.5, Math.min(holeMidY(r.hole), 1.4), r.state === 'hackOut' ? 0.6 : 0.25), '#c98a45', 4, 2);
+      r.hole.jig = 0.15;
+    }
+  }
+  raiderPose(r, Math.hypot(r.x - ox, r.z - oz) > dt * 0.4, dt);
+}
+
+// Everything a pirate joining needs to see the den as it is now.
+function sendSync(to, fresh = false) {
+  send(to, {
+    t: 'sync', fresh, g: { ...G }, W: wall.W, H: wall.H, gate: wall.gateCols, cv: cannon.visible ? 1 : 0, p: pilesOut(),
+    holes: wall.holes.map((h) => ({ cells: h.cells, status: h.status, hp: h.hp, maxHp: h.maxHp, pieces: h.pieces.map((p) => p.info), boards: boardsOf(h).map((p) => p.hp) })),
+    built: ramp.secs.map((s) => s.built),
+    frames: ramp.secs.map((s) => (s.frame && !s.frame.done ? { cells: s.frame.cells, pieces: s.frame.pieces.map((p) => p.info), scraps: s.frame.scrapCells } : null)),
+  });
+}
+function applySync(s) {
+  raiders.splice(0).forEach((r) => { scene.remove(r.m.g); r.mark.remove(); });
+  if (carry) { scene.remove(carry.group); carry = null; }
+  if (net.pending) { scene.remove(net.pending.group); net.pending = null; }
+  net.asking = false;
+  lastPlaced = null; target = null; ghost = null; ghostKey = '';
+  Object.assign(G, s.g);
+  $('labels').replaceChildren();
+  wall = { W: s.W, H: s.H, holes: [], cellHole: new Map(), wood: new Set(), lining: Array.from({ length: MAX_PATCHES }, () => new Set()), gate: new Set(), gateCols: s.gate, stoneAt: new Map() };
+  for (let r = 1; r < s.H; r++) for (let c = s.gate.c0; c <= s.gate.c1; c++) wall.gate.add(k(r, c));
+  s.holes.forEach((d) => registerHole(d.cells));
+  buildWall();
+  wall.holes.forEach((h, i) => {
+    const d = s.holes[i];
+    holeVisuals(h);
+    d.pieces.forEach((info) => putPiece(h, info));
+    Object.assign(h, { status: d.status, hp: d.hp, maxHp: d.maxHp });
+    boardsOf(h).forEach((p, j) => { p.hp = d.boards[j] ?? HP.patch; });
+    h.open = rest(h);
+    h.exact = h.status === 'open' && h.open.length % 5 === 0 && C.solve(h.open, 1).length > 0;
+    h.sig = '';
+  });
+  relining();
+  s.built.forEach((b, si) => { if (b) buildSection(si, true); });
+  s.frames.forEach((d, si) => {
+    if (!d) return;
+    const f = openFrame(si, d.cells);
+    d.pieces.forEach((info) => putFramePiece(f, info));
+    if (d.scraps.length) plugCells(f, d.scraps);
+    frameState(f);
+  });
+  cannon.visible = !!s.cv;
+  pilesIn(s.p);
+  if (s.fresh) { Object.assign(pirate, { x: 0, z: 8, h: 0 }); $('intro').classList.remove('off'); }
+  if (G.over) endScreen(); else $('end').classList.remove('on');
+  updateStats();
+}
+// The host's gone: this browser runs the den now (or, cut off, carries on alone).
+function becomeHost() {
+  net.host = true;
+  for (const r of raiders) { r.t = 0; r.hitT = 0.5; r.targeted = false; if (r.state === 'down') r.gone = true; }
+  if (G.cannonT == null) G.cannonT = G.wave >= 2 ? 8 : Infinity;
+  if (G.spawnT == null) G.spawnT = 1;
+  raiderSeq = Math.max(raiderSeq, 0, ...raiders.map((r) => r.id));
+  net.holds.clear();
+  regain();
+  piles.forEach((p) => { if (!p.letter && carry?.from !== p) refill(p); });
+}
+
+// The host's side: the crew asking for things.
+function hostPlace(m) {
+  const pile = piles[m.pile] || null;
+  const list = m.frame != null ? frameFits(m.shape).filter((o) => o.frame.si === m.frame) : fits(m.shape).concat(patchFits(m.shape)).filter((o) => o.hole === m.hole);
+  const t = list.find((o) => o.dr === m.dr && o.dc === m.dc && !!o.patch === !!m.patch);
+  if (!t) return send(m.from, { t: 'grant', letter: m.letter, cells: m.shape, pile: m.pile, why: 'Someone got there first' });
+  net.holds.delete(m.from);
+  place(t, m.from, handAt(m.from, m.letter, m.shape, pile));
+}
+function hostThrow(m) {
+  net.holds.delete(m.from);
+  const hand = handAt(m.from, m.letter, m.shape, piles[m.pile] || null);
+  const r = raiders.find((o) => o.id === m.rid);
+  if (r && !r.gone) throwAt(r, hand, m.from);
+  else { scene.remove(hand.group); refill(hand.from); }
+}
+const slotOf = (m) => (m.frame != null ? ramp.secs[m.frame]?.frame : wall.holes[m.hole]);
+
+function onNet(m) {
+  const mt = net.crew.get(m.from);
+  switch (m.t) {
+    case 'welcome':
+      net.id = m.id;
+      net.host = m.host === m.id;
+      m.crew.forEach((c) => addMate(c.id, c.name));
+      crewPanel(false);
+      history.replaceState(null, '', `?crew=${net.code}`);
+      if (net.host) newGame();
+      crewLine();
+      break;
+    case 'full': lobbyMsg('That crew is full: four pirates already.'); break;
+    case 'join':
+      addMate(m.id, m.name);
+      toast(`${m.name} came aboard!`);
+      if (net.host) sendSync(m.id);
+      break;
+    case 'leave': {
+      const who = net.crew.get(m.id)?.name;
+      dropMate(m.id);
+      if (who) toast(`${who} left the crew`, false, true);
+      if (net.host) {
+        const pi = net.holds.get(m.id);
+        net.holds.delete(m.id);
+        if (pi !== undefined && !piles[pi].letter) refill(piles[pi]);
+      } else if (m.host === net.id) becomeHost();
+      break;
+    }
+    case 'me':
+      if (!mt) return;
+      Object.assign(mt, { tx: m.x, tz: m.z, th: m.h, ry: m.ry, mv: !!m.mv });
+      mateCarry(mt, m.c);
+      break;
+    case 'toast': toast(m.text, m.bad, m.warn); break;
+    // From the host: what happened.
+    case 'snap': if (!net.host) applySnap(m); break;
+    case 'sync': if (!net.host) applySync(m); break;
+    case 'grant':
+      if (net.host) break;
+      if (net.pending) { regain(m.why); break; }
+      net.asking = false;
+      if (m.letter && !carry) {
+        const p = piles[m.pile];
+        holdPiece(m.letter, m.cells, p, p.group ? p.group.position.clone() : new THREE.Vector3(p.x, 0.76, p.z));
+        if (p.group) scene.remove(p.group);
+        p.group = null; p.letter = null;
+      }
+      break;
+    case 'place':
+      if (net.host) hostPlace(m);
+      else {
+        const t = { ...m, frame: m.frame != null ? ramp.secs[m.frame].frame : undefined };
+        if (t.frame || wall.holes[m.hole]) place(t, m.by, handAt(m.by, m.letter, m.shape));
+      }
+      break;
+    case 'unplace': if (!net.host && slotOf(m)) unplace(slotOf(m), m.by); break;
+    case 'throw':
+      if (net.host) hostThrow(m);
+      else if (m.by !== net.id) {
+        const r = raiders.find((o) => o.id === m.rid), hand = handAt(m.by, m.letter, m.shape);
+        if (r) throwAt(r, hand, m.by); else scene.remove(hand.group);
+      }
+      break;
+    case 'break': if (!net.host && wall.holes[m.hole]) breakHole(wall.holes[m.hole]); break;
+    case 'unboard': { const h = wall.holes[m.hole]; if (!net.host && h?.pieces[m.i]) breakBoard(h, h.pieces[m.i]); break; }
+    case 'shoot': if (!net.host) shoot(m.cells); break;
+    case 'blast': if (!net.host) blast(m.cells, true); break;
+    case 'frame': if (!net.host && !ramp.secs[m.si].frame && !ramp.secs[m.si].built) openFrame(m.si, m.cells); break;
+    case 'plug': {
+      const f = ramp.secs[m.si]?.frame;
+      if (net.host || !f || f.done) break;
+      plugCells(f, m.cells);
+      toast('A gap none of your pieces can reach: plugged with offcuts', false, true);
+      if (f.filled.size === f.cells.length) finishFrame(f);
+      break;
+    }
+    // To the host: the crew asking.
+    case 'crate': {
+      if (!net.host) break;
+      const p = piles[m.i];
+      if (p?.letter && !net.holds.has(m.from)) {
+        send(m.from, { t: 'grant', letter: p.letter, cells: p.cells, pile: m.i });
+        net.holds.set(m.from, m.i);
+        if (p.group) scene.remove(p.group);
+        p.group = null; p.letter = null;
+      } else send(m.from, { t: 'grant' });
+      break;
+    }
+    case 'putback': {
+      if (!net.host) break;
+      const p = piles[m.i];
+      if (p && !p.letter) { p.letter = m.letter; p.cells = m.cells; showPile(p); }
+      net.holds.delete(m.from);
+      break;
+    }
+    case 'takeback': {
+      const where = net.host && slotOf(m), p = where?.pieces[where.pieces.length - 1];
+      if (p && p.by === m.from && p.undo?.hpAfter != null && !(where.occ ? where.done : !p.patch && where.status === 'master')) unplace(where, m.from, false);
+      break;
+    }
+    case 'again': if (net.host && G.over) newGame(); break;
+  }
+}
+
+// ---------- joining a crew ----------
+const CREW_CODE = 'ABCDEFGHJKLMNPQRSTUVWXYZ', PIRATE_NAME = /^[A-Za-z]{3,16}$/;
+const store = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch { /* storage unavailable */ } } };
+function savedName() {
+  const own = store.get('carp.den.name');
+  if (own) return own;
+  try { return JSON.parse(store.get('carp.pirate'))?.name || ''; } catch { return ''; }
+}
+function lobbyMsg(text, calm = false) { const el = $('crew-err'); el.textContent = text; el.classList.toggle('calm', calm); }
+function crewPanel(on) {
+  $('crew').classList.toggle('on', on);
+  if (!on) return;
+  lobbyMsg('');
+  $('crew-name').value ||= savedName();
+  ($('crew-name').value ? $('crew-code') : $('crew-name')).focus();
+}
+function crewLine() {
+  const el = $('crew-line');
+  el.replaceChildren();
+  $('crew-btn').hidden = online();
+  if (!online()) return;
+  const add = (tag, text, cls) => { const e = document.createElement(tag); e.textContent = text; if (cls) e.className = cls; el.append(e); return e; };
+  add('span', 'Crew ');
+  add('b', net.code);
+  add('span', ': ');
+  add('span', `${net.name} (you)`);
+  for (const mt of net.crew.values()) { add('span', ', '); add('span', mt.name).style.color = mt.col; }
+  const copy = add('button', 'Copy invite link', 'mini');
+  copy.onclick = () => {
+    const link = `${location.origin}${location.pathname}?crew=${net.code}`;
+    navigator.clipboard?.writeText(link).then(() => { copy.textContent = 'Copied!'; }, () => { copy.textContent = link; });
+  };
+  add('button', 'Leave', 'mini').onclick = leaveCrew;
+}
+// On narrower screens the wave banner sits under the panel, however tall the crew line makes it.
+new ResizeObserver(([e]) => document.documentElement.style.setProperty('--hud-h', `${e.target.offsetHeight}px`)).observe(document.querySelector('.hud'));
+function joinCrew(code, name) {
+  if (!PIRATE_NAME.test(name)) return lobbyMsg('Your pirate name: 3 to 16 letters, no spaces.');
+  if (!/^[A-Z]{4}$/.test(code)) return lobbyMsg('A crew code is four letters.');
+  store.set('carp.den.name', name);
+  if (net.ws) leaveCrew();
+  const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/api/crew/${code}?name=${encodeURIComponent(name)}`);
+  Object.assign(net, { ws, code, name: name[0].toUpperCase() + name.slice(1).toLowerCase(), host: false, id: null });
+  lobbyMsg('Hailing the crew…', true);
+  ws.onmessage = (e) => { if (net.ws !== ws) return; let m; try { m = JSON.parse(e.data); } catch { return; } onNet(m); };
+  ws.onclose = () => { if (net.ws === ws) lostCrew(); };
+}
+function lostCrew(quiet = false) {
+  const was = online();
+  net.ws = null;
+  net.id = null;
+  [...net.crew.keys()].forEach(dropMate);
+  if (was && !net.host) becomeHost();   // carry on with the den as it stands
+  net.host = false;
+  net.holds.clear();
+  regain();
+  crewLine();
+  if (quiet) return;
+  if (was) toast('Lost touch with the crew: carrying on alone', true);
+  else lobbyMsg("Couldn't reach the crew. Crews need the live site, not a plain file preview.");
+}
+function leaveCrew() {
+  const ws = net.ws;
+  lostCrew(true);
+  ws?.close();
+  history.replaceState(null, '', location.pathname);
+}
+$('crew-btn').onclick = () => crewPanel(true);
+$('crew-close').onclick = () => crewPanel(false);
+$('crew-start').onclick = () => joinCrew(Array.from({ length: 4 }, () => CREW_CODE[rand(CREW_CODE.length)]).join(''), $('crew-name').value.trim());
+$('crew-join').onclick = () => joinCrew($('crew-code').value.trim().toUpperCase(), $('crew-name').value.trim());
+$('crew-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('crew-join').click(); });
+{
+  const code = new URLSearchParams(location.search).get('crew')?.toUpperCase();
+  if (code && /^[A-Z]{4}$/.test(code)) {
+    $('crew-code').value = code;
+    if (PIRATE_NAME.test(savedName())) setTimeout(() => joinCrew(code, savedName()), 0);
+    else crewPanel(true);
+  }
+}
+
 // ---------- main loop ----------
-const clock = new THREE.Clock();
 const camAt = new THREE.Vector3(0, 7.4, 14.2), camLook = new THREE.Vector3(0, 1.8, 3.6);
 camera.position.copy(camAt);
 const v3 = new THREE.Vector3(), L0 = new THREE.Vector3(), L1 = new THREE.Vector3();
+/* Each tick runs the game on in small steps. Alone, a pause (another tab) stops the clock. In a
+   crew it doesn't: the den goes on for everyone, so when the browser stops drawing a tab in the
+   background, a timer keeps it ticking (as often as the browser lets it) and catches up. */
+let lastT = performance.now();
+function tick() {
+  const now = performance.now();
+  let left = Math.min(online() ? 1.5 : 0.05, (now - lastT) / 1000);
+  lastT = now;
+  while (left > 1e-4) { const d = Math.min(0.05, left); update(d); left -= d; }
+  if (!online()) return;
+  if (now - net.meAt > 80) { net.meAt = now; sendMe(); }
+  if (net.host && now - net.snapAt > 100) { net.snapAt = now; snapshot(); }
+}
 function frame() {
-  update(Math.min(clock.getDelta(), 0.05));
+  tick();
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }
+setInterval(() => { if (online() && performance.now() - lastT > 250) tick(); }, 200);
 function update(dt) {
   // Walk.
   let mx = 0, mz = 0;
@@ -1640,7 +2175,7 @@ function update(dt) {
     if (keys.has('w') || keys.has('arrowup')) mz--;
     if (keys.has('s') || keys.has('arrowdown')) mz++;
   }
-  const moving = !!(mx || mz);
+  const moving = pirate.moving = !!(mx || mz);
   // Turn the view.
   if (keys.has('z')) view.yaw = Math.min(1.3, view.yaw + dt * 1.4);
   if (keys.has('c')) view.yaw = Math.max(-1.3, view.yaw - dt * 1.4);
@@ -1689,7 +2224,11 @@ function update(dt) {
     carry.mat.depthWrite = carry.mat.opacity > 0.9;
   }
 
-  if (!G.over) {
+  if (guest()) {
+    // The host runs the raiders; here they just follow what it says.
+    if (G.phase !== 'wave' && !G.over) G.phaseT = Math.max(0, G.phaseT - dt);
+    raiders.forEach((r) => followRaider(r, dt));
+  } else if (!G.over) {
     updateWaves(dt);
     for (let i = raiders.length - 1; i >= 0; i--) {
       const r = raiders[i];
@@ -1742,6 +2281,7 @@ function update(dt) {
   if (shake > 0) { camera.position.x += (Math.random() - 0.5) * shake * 0.5; camera.position.y += (Math.random() - 0.5) * shake * 0.5; shake = Math.max(0, shake - dt); }
   camLook.lerp(look, Math.min(1, dt * 3));
   camera.lookAt(camLook);
+  updateMates(dt);
 
   // A marker over every raider inside the den, pinned to the screen edge when they're out of view.
   aimed = carry ? aimFoe() : null;
@@ -1794,6 +2334,6 @@ newGame();
 requestAnimationFrame(frame);
 
 // For poking at it from the console.
-window.den = { buildSection, openFrame, frameFits, frames, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+window.den = { net, onNet, sendSync, joinCrew, leaveCrew, buildSection, openFrame, frameFits, frames, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };

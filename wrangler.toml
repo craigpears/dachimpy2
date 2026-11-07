@@ -14,3 +14,13 @@ binding = "ASSETS"
 binding = "DB"
 database_name = "carpentry-primer"
 database_id = "f53b7cb9-0282-49bf-b4d8-008629c473f7"
+
+# The Pirate Den's co-op crews: one small room per crew code (worker/crew.js). SQLite-backed
+# Durable Objects are on the free plan, so there's nothing to switch on in the dashboard.
+[[durable_objects.bindings]]
+name = "CREW"
+class_name = "DenCrew"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["DenCrew"]

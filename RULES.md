@@ -155,6 +155,16 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   off or plugged is Shipshape and pays a bonus. Then the finished deck is hoisted up onto the wall.
 - **Up on the wall must stay bright.** The fog keeps its distance from the camera and the view
   brightens as it rises; looking down from the rampart went murky otherwise.
+- **Co-op crews: everyone collaborates, nobody gives orders.** Up to four pirates defend one den
+  together. No sign-up: a pirate name (3 to 16 letters) and a four-letter crew code, shared as an
+  invite link. Every pirate does every job equally. One browser quietly runs the raiders and deals
+  the crates, but that's only whose computer does the sums: never call it a captain or show any
+  hierarchy. If it leaves, the next pirate in carries on; if your link drops, you carry on alone with
+  the den as it was. Only pirate names are ever shown, never real ones.
+- **In a crew, things can't be taken twice.** Taking from a crate or fitting a piece is checked
+  first, so two pirates can't take the same piece or fill the same spot; whoever loses gets their
+  piece back ("Someone got there first"). Waves get bigger with more pirates (half as many again for
+  each extra pirate). Crewmates wear their own colours with their name over their head.
 - **Keep the pirate-den feel, not medieval.** The rampart is a ship's deck with a rope rail and
   the Jolly Roger, not stone battlements.
 - **There's always something to do with a junk piece.** Holding three useless pieces with nothing

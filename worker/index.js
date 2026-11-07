@@ -4,6 +4,7 @@
    guard rails: names are letters only, and a purse can't leap by more than a big win at once.
    The shared betting table lives in harbour.js. */
 import * as harbour from './harbour.js';
+export { DenCrew } from './crew.js';
 
 const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS pirates (
@@ -82,6 +83,9 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (!url.pathname.startsWith('/api/')) return env.ASSETS.fetch(request);
+    // The Pirate Den's co-op: /api/crew/CODE opens a WebSocket to that crew's room.
+    const crew = url.pathname.match(/^\/api\/crew\/([A-Z]{4})$/);
+    if (crew) return env.CREW.get(env.CREW.idFromName(crew[1])).fetch(request);
     try {
       await ensureSchema(env.DB);
       const route = `${request.method} ${url.pathname}`;
