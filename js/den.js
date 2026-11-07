@@ -39,6 +39,12 @@ const PAY = { master: 10, boarded: 2, bonk: 3, steal: 10, turned: 5, clean: 10 }
    RUBBLE seconds of hacking before anyone can climb through. (It used to fire every 9-20 seconds,
    straight through, and a raider was in two seconds later: nothing you did kept them out.) */
 const CANNON_AIM = 8, CANNON_GAP = 22, RUBBLE = 10;
+/* Raiders walk in, they don't jump in: only a gap two squares wide and three tall, down at the floor,
+   lets them through (DOOR_W by DOOR_H). Any smaller or higher empty hole is a weak spot: WEAK seconds
+   of hacking at the stone round it and it gives way into a bigger hole they can walk through (still
+   whole pieces' worth of squares, so it can be mended). The user: hopping through a five-square gap
+   high up the wall was "weird and dumb". */
+const DOOR_W = 2, DOOR_H = 3, WEAK = 8;
 const BUILD_SECS = 75, CALM_SECS = 20;
 const RAIDER_DPS = 1, RAIDER_STAMINA = 16;
 /* How fast raiders chop through wood, the main thing to balance. They start slow and build up wave
@@ -288,19 +294,34 @@ function newWall() {
 }
 
 function registerHole(cells) {
-  const h = { cells, b: C.bbox(cells), set: new Set(cells.map(([r, c]) => k(r, c))), filled: new Set(), pieces: [], status: 'open', hp: 0, maxHp: 1, size: cells.length / 5, jig: 0, sig: '' };
+  const h = { cells, b: C.bbox(cells), set: new Set(cells.map(([r, c]) => k(r, c))), filled: new Set(), pieces: [], status: 'open', hp: 0, maxHp: 1, size: cells.length / 5, jig: 0, sig: '', weak: WEAK };
+  h.door = doorOf(h);
   const i = wall.holes.push(h) - 1;
   cells.forEach(([r, c]) => wall.cellHole.set(k(r, c), i));
   return h;
 }
+function holeOutline(h) {
+  if (h.vis) wallGroup.remove(h.vis);
+  h.vis = outline(h.cells, 0.02, '#ffd58a');
+  h.vis.position.set(X(0), Y(0), 0);
+  wallGroup.add(h.vis);
+}
 function holeVisuals(h) {
-  const g = new THREE.Group();
-  const line = outline(h.cells, 0.02, '#ffd58a');
-  line.position.set(X(0), Y(0), 0);
-  g.add(line);
-  wallGroup.add(g);
+  holeOutline(h);
   h.label = document.createElement('div');
   $('labels').append(h.label);
+}
+// The column a raider can walk in at (the left of a gap DOOR_W wide and DOOR_H tall at the foot of
+// the wall), nearest the middle of the hole; null if there's none.
+function doorOf(h) {
+  const H = wall.H, mid = h.b.c0 + h.b.w / 2;
+  let best = null;
+  for (let c = h.b.c0; c + DOOR_W - 1 <= h.b.c1; c++) {
+    let ok = true;
+    for (let r = H - DOOR_H; r < H && ok; r++) for (let x = c; x < c + DOOR_W; x++) if (!h.set.has(k(r, x))) ok = false;
+    if (ok && (best === null || Math.abs(c + DOOR_W / 2 - mid) < Math.abs(best + DOOR_W / 2 - mid))) best = c;
+  }
+  return best;
 }
 
 let stones = null, back = null;
@@ -2164,7 +2185,7 @@ function nextLayer(h) {
 }
 const boardsOf = (h) => h.pieces.filter((p) => p.patch).sort((a, b) => a.layer - b.layer);
 // How full the strength bar is: the hole's own wood, or once that's gone, the board they're on.
-const barFrac = (h) => (h.rubble > 0 && !h.pieces.length ? h.rubble / RUBBLE : h.status !== 'open' || h.pieces.some((p) => !p.patch) ? h.hp / h.maxHp : (boardsOf(h)[0]?.hp ?? 0) / HP.patch);
+const barFrac = (h) => (weakSpot(h) ? h.weak / WEAK : h.rubble > 0 && !h.pieces.length ? h.rubble / RUBBLE : h.status !== 'open' || h.pieces.some((p) => !p.patch) ? h.hp / h.maxHp : (boardsOf(h)[0]?.hp ?? 0) / HP.patch);
 function labelFor(h) {
   const atk = h.attackers ? `<em>⚔ ${h.attackers} raider${h.attackers > 1 ? 's' : ''} at it</em>` : '';
   const boards = boardsOf(h).length, bs = boards > 1 ? 's' : '';
@@ -2175,7 +2196,9 @@ function labelFor(h) {
   if (boards) return ['label weak', `Hacked open: ${boards} board${bs} hold${boards > 1 ? '' : 's'}<small>they must get through each one</small><i class="bar"><b></b></i>${atk}`];
   if (h.rubble > 0 && !h.pieces.length) return ['label bad', `Fresh breach, full of rubble<small>mend it before they clear it!</small><i class="bar"><b></b></i>${atk}`];
   const left = h.open;
-  const breach = h.pieces.length ? `<i class="bar part"><b></b></i>${atk}` : h.attackers ? `<em>⚔ raiders can climb in!</em>` : '';
+  const breach = h.pieces.length ? `<i class="bar part"><b></b></i>${atk}`
+    : passable(h) ? `<em>${h.attackers ? '⚔ raiders can walk in!' : 'wide open: raiders can walk in'}</em>`
+    : h.attackers || h.weak < WEAK ? `<small>too small to walk through: they're hacking it wider</small><i class="bar"><b></b></i>${atk}` : '';
   if (!h.exact) return ['label bad', `No Masterpiece now<small>board it over to close it</small>${breach}`];
   if (left.length === 5) return ['label', `Needs ${an(C.identify(left))}${breach}`];
   if (left.length === 10) {
@@ -2730,8 +2753,94 @@ const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.max(0, s) % 60).padStart
 function tween(dur, step, done) { tweens.push({ t: 0, dur, step, done }); }
 
 // ---------- raiders ----------
-// Only an empty hole can be climbed through; anything with wood in it has to be hacked open first.
-const passable = (h) => h.status === 'open' && !h.pieces.length && !(h.rubble > 0);
+// Only an empty hole with a gap at the floor big enough to walk through lets raiders in; anything
+// with wood in it has to be hacked open first, and a smaller or higher one hacked wider (WEAK).
+const bareHole = (h) => h.status === 'open' && !h.pieces.length && !(h.rubble > 0);
+const passable = (h) => bareHole(h) && (h.door != null || !!h.hop);
+const weakSpot = (h) => bareHole(h) && !passable(h);
+const doorX = (h) => (h.door != null ? X(h.door) + DOOR_W * S / 2 : holeX(h));
+/* The squares a weak spot gives way into: a gap DOOR_W wide down to the floor below the hole, plus a
+   few more next to it so the whole thing is still whole pieces' worth and can be filled exactly.
+   Only solid stone, kept a square clear of the gate, the other holes and the stairs at the ends. */
+function widenCells(h) {
+  const H = wall.H;
+  const free = (r, c) => {
+    const kk = k(r, c);
+    if (h.set.has(kk) || r < 1 || r >= H || c < 3 || c > wall.W - 4 || !wall.stoneAt.has(kk) || wall.wood.has(kk)) return false;
+    for (let a = -1; a <= 1; a++) for (let z = -1; z <= 1; z++) {
+      const nk = k(r + a, c + z), o = wall.cellHole.get(nk);
+      if (wall.gate.has(nk) || (o !== undefined && wall.holes[o] !== h)) return false;
+    }
+    return true;
+  };
+  // Left-hand columns of the gap to try, under the hole's lowest squares first.
+  const starts = [];
+  for (let a = h.b.c0 - 1; a <= h.b.c1; a++) starts.push(a);
+  const lowAt = (x) => h.cells.reduce((m, [r, c]) => (c === x ? Math.max(m, r) : m), -1);
+  starts.sort((a, z) => Math.max(lowAt(z), lowAt(z + 1)) - Math.max(lowAt(a), lowAt(a + 1)) || Math.random() - 0.5);
+  for (let tries = 0; tries < 30; tries++) {
+    const a = starts[tries % starts.length], add = new Set();
+    let good = lowAt(a) >= 0 || lowAt(a + 1) >= 0;
+    for (let x = a; good && x < a + DOOR_W; x++) {
+      const low = lowAt(x);
+      for (let r = Math.min(H - DOOR_H, low + 1); r < H; r++) {
+        if (h.set.has(k(r, x))) continue;
+        if (!free(r, x)) { good = false; break; }
+        add.add(k(r, x));
+      }
+    }
+    if (!good) continue;
+    let need = (5 - (h.set.size + add.size) % 5) % 5;
+    while (need > 0) {
+      const opts = [];
+      for (const kk of add) {
+        const [r, c] = kk.split(',').map(Number);
+        for (const [dr, dc] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+          const nk = k(r + dr, c + dc);
+          if (!add.has(nk) && free(r + dr, c + dc)) opts.push([r + dr, c + dc, r + dr + Math.random() * 2.5]);
+        }
+      }
+      if (!opts.length) break;
+      opts.sort((p, q) => q[2] - p[2]);
+      add.add(k(opts[0][0], opts[0][1]));
+      need--;
+    }
+    if (need) continue;
+    const added = [...add].map((kk) => kk.split(',').map(Number));
+    if (C.solve([...h.cells, ...added], 1).length) return added;
+  }
+  return null;
+}
+// The weak spot gives way: the stone round it falls out and it's a gap they can walk through.
+function widen(h, cells) {
+  if (isHost()) send('all', { t: 'widen', hole: wall.holes.indexOf(h), cells });
+  if (!cells.length) { h.hop = true; return; }   // no room to widen it: they squeeze through as it is
+  const zero = new THREE.Matrix4().makeScale(0, 0, 0), i = wall.holes.indexOf(h);
+  for (const [r, c] of cells) {
+    const kk = k(r, c), si = wall.stoneAt.get(kk);
+    if (si !== undefined) { stones.setMatrixAt(si, zero); wall.stoneAt.delete(kk); }
+    wall.cellHole.set(kk, i);
+    h.set.add(kk);
+    h.cells.push([r, c]);
+    const chunk = rock(X(c) + S / 2, Y(r) - S / 2, -STONE_D / 2, 0.2);
+    scene.add(chunk);
+    const v = new THREE.Vector3((Math.random() - 0.5) * 2, 1 + Math.random() * 1.5, 1.5 + Math.random() * 2.5), p0 = chunk.position.clone();
+    tween(0.9, (s) => { chunk.position.set(p0.x + v.x * s, Math.max(0.1, p0.y + v.y * s - 9 * s * s), p0.z + v.z * s); }, () => setTimeout(() => scene.remove(chunk), 4000));
+  }
+  stones.instanceMatrix.needsUpdate = true;
+  h.b = C.bbox(h.cells);
+  h.size = h.cells.length / 5;
+  h.door = doorOf(h);
+  if (h.door == null) h.hop = true;
+  if (h.next) { wallGroup.remove(h.next); h.next = null; }
+  if (h.rubbleG) { wallGroup.remove(h.rubbleG); h.rubbleG = null; }
+  holeOutline(h);
+  wallBack();
+  updateHole(h);
+  burst(new THREE.Vector3(doorX(h), 0.8, 0.3), '#9a8a7a', 26, 4);
+  shake = 0.5;
+  toast('They hacked it wide enough to walk through! Get pieces in it', true);
+}
 /* Each raider goes for the hole in front of where they come up to the wall, not the weakest one
    along the whole of it: a breach only draws the raiders close to it (GAP_PULL metres). So one hole
    broken doesn't let the whole wave in, and the parts of the wall you've kept strong hold their own
@@ -2783,7 +2892,7 @@ function updateRaider(r, dt) {
   r.t += dt;
   switch (r.state) {
     case 'approach': {
-      moving = !moveTo(r, holeX(h) + r.slot, -1.15, 2.2, dt);
+      moving = !moveTo(r, passable(h) ? doorX(h) : holeX(h) + r.slot, -1.15, 2.2, dt);
       if (!moving) { r.state = passable(h) ? 'climb' : 'attack'; r.t = 0; }
       break;
     }
@@ -2800,28 +2909,32 @@ function updateRaider(r, dt) {
       const boards = boardsOf(h), fill = h.pieces.some((p) => !p.patch);
       const board = out ? boards[boards.length - 1] || null : fill ? null : boards[0];
       const rub = !out && h.rubble > 0 && !h.pieces.length;   // a fresh breach: clear the rubble first
-      const hack = hackRate() * dt;
-      if (rub) { h.rubble -= hack; rubbleShow(h); } else if (board) board.hp -= hack; else h.hp -= hack;
+      const hack = hackRate() * dt, weak = weakSpot(h);   // weak: an empty hole they can't walk through
+      if (weak) h.weak -= hack; else if (rub) { h.rubble -= hack; rubbleShow(h); } else if (board) board.hp -= hack; else h.hp -= hack;
       r.m.arms[1].rotation.x = -1.8 + Math.sin(r.t * 9) * 1.1;
       r.hitT -= dt;
       if (r.hitT <= 0) {
         r.hitT = 0.7;
-        burst(new THREE.Vector3(holeX(h) + r.slot * 0.5, Math.min(holeMidY(h), 1.4), out ? 0.6 : 0.25), '#c98a45', 4, 2);
+        burst(new THREE.Vector3(holeX(h) + r.slot * 0.5, Math.min(holeMidY(h), 1.4), out ? 0.6 : 0.25), weak ? '#9a8a7a' : '#c98a45', 4, 2);
         h.jig = 0.15;
       }
-      if (rub) { if (r.stamina <= 0) turnedAway(r); }
+      if (weak) { if (h.weak <= 0) widen(h, widenCells(h) || []); else if (!out && r.stamina <= 0) turnedAway(r); }
+      else if (rub) { if (r.stamina <= 0) turnedAway(r); }
       else if (board && board.hp <= 0) breakBoard(h, board);
       else if (!board && h.hp <= 0) breakHole(h);
       else if (r.stamina <= 0) { if (out) r.state = 'leave'; else turnedAway(r); }
       break;
     }
     case 'climb': case 'climbOut': {
-      // Up over the sill and through the hole (or back out again).
-      const s = Math.min(1, r.t / 1.3), into = r.state === 'climb';
+      // Walking in through the gap (or back out again). Only a hole that couldn't be widened is
+      // hopped through, up over the sill.
+      const walk = h.door != null, into = r.state === 'climb';
+      const s = Math.min(1, r.t / (walk ? 1 : 1.3));
       const z0 = into ? -1.15 : 1.2, z1 = into ? 1.2 : -1.15;
       r.z = z0 + (z1 - z0) * s;
-      r.x += (holeX(h) - r.x) * Math.min(1, dt * 5);
-      r.m.g.position.y = Math.sin(s * Math.PI) * (holeFootY(h) + 0.25);
+      r.x += (doorX(h) - r.x) * Math.min(1, dt * 5);
+      r.m.g.position.y = walk ? 0 : Math.sin(s * Math.PI) * (holeFootY(h) + 0.25);
+      moving = walk;
       faceTo(r.m, 0, into ? 1 : -1, dt);
       r.inside = r.z > 0.3;
       if (s >= 1) { r.state = into ? 'raid' : 'leave'; r.t = 0; r.inside = into; if (into && !guest()) G.waveIn++; }
@@ -2841,7 +2954,7 @@ function updateRaider(r, dt) {
     }
     case 'flee': {
       if (!passable(h)) { const gap = wall.holes.filter(passable).sort((a, b) => Math.abs(holeX(a) - r.x) - Math.abs(holeX(b) - r.x))[0]; if (gap) r.hole = gap; }
-      moving = !moveTo(r, holeX(r.hole), 1.2, 2.8, dt);
+      moving = !moveTo(r, passable(r.hole) ? doorX(r.hole) : holeX(r.hole), 1.2, 2.8, dt);
       if (!moving) { r.state = passable(r.hole) ? 'climbOut' : 'hackOut'; r.t = 0; }
       break;
     }
@@ -2870,7 +2983,8 @@ function updateRaider(r, dt) {
   raiderPose(r, moving, dt);
 }
 function raiderPose(r, moving, dt) {
-  if (r.state !== 'climb' && r.state !== 'climbOut' && r.state !== 'down') {
+  const hop = (r.state === 'climb' || r.state === 'climbOut') && !moving;
+  if (!hop && r.state !== 'down') {
     const swing = animateWalk(r.m, moving, dt, 12);
     if (r.state === 'attack' || r.state === 'hackOut') {
       r.m.legs.forEach((l) => { l.rotation.x = 0; });
@@ -3343,7 +3457,7 @@ function sendMe() {
 function snapshot() {
   send('all', {
     t: 'snap', g: { ...G }, p: pilesOut(), cv: cannon.visible ? 1 : 0, gd: gunOut(),
-    h: wall.holes.map((h) => [r2(h.hp), h.maxHp, h.status, h.pieces.length, boardsOf(h).map((p) => r2(p.hp)), r2(h.rubble || 0)]),
+    h: wall.holes.map((h) => [r2(h.hp), h.maxHp, h.status, h.pieces.length, boardsOf(h).map((p) => r2(p.hp)), r2(h.rubble || 0), r2(h.weak)]),
     r: raiders.map((r) => [r.id, r2(r.x), r2(r.z), r2(r.m.g.position.y), r2(r.m.g.rotation.y), r2(r.m.g.rotation.x), r2(r.m.g.scale.x), r.state, r.inside ? 1 : 0, r.loot ? 1 : 0, wall.holes.indexOf(r.hole), r2(r.slot), r.look]),
   });
 }
@@ -3356,9 +3470,10 @@ function applySnap(m) {
   pilesIn(m.p);
   gunIn(m.gd);
   cannon.visible = !!m.cv;
-  m.h.forEach(([hp, maxHp, status, n, bh, rub], i) => {
+  m.h.forEach(([hp, maxHp, status, n, bh, rub, weak], i) => {
     const h = wall.holes[i];
     if (!h) return;
+    if (weak !== undefined) h.weak = weak;
     if (h.rubble !== rub) { h.rubble = rub; rubbleShow(h); }
     if (h.busy || h.pieces.length !== n) return;   // something's on its way: wait for it
     if (h.status !== status) { h.status = status; h.sig = ''; }
@@ -3400,7 +3515,7 @@ function followRaider(r, dt) {
     r.hitT -= dt;
     if (r.hitT <= 0) {
       r.hitT = 0.7;
-      burst(new THREE.Vector3(holeX(r.hole) + r.slot * 0.5, Math.min(holeMidY(r.hole), 1.4), r.state === 'hackOut' ? 0.6 : 0.25), '#c98a45', 4, 2);
+      burst(new THREE.Vector3(holeX(r.hole) + r.slot * 0.5, Math.min(holeMidY(r.hole), 1.4), r.state === 'hackOut' ? 0.6 : 0.25), weakSpot(r.hole) ? '#9a8a7a' : '#c98a45', 4, 2);
       r.hole.jig = 0.15;
     }
   }
@@ -3411,7 +3526,7 @@ function followRaider(r, dt) {
 function sendSync(to, fresh = false) {
   send(to, {
     t: 'sync', fresh, g: { ...G }, W: wall.W, H: wall.H, gate: wall.gateCols, cv: cannon.visible ? 1 : 0, p: pilesOut(),
-    holes: wall.holes.map((h) => ({ cells: h.cells, status: h.status, hp: h.hp, maxHp: h.maxHp, pieces: h.pieces.map((p) => p.info), boards: boardsOf(h).map((p) => p.hp) })),
+    holes: wall.holes.map((h) => ({ cells: h.cells, status: h.status, hp: h.hp, maxHp: h.maxHp, weak: h.weak, hop: h.hop ? 1 : 0, pieces: h.pieces.map((p) => p.info), boards: boardsOf(h).map((p) => p.hp) })),
     next: ramp.next,
     gd: gunOut(),
     den: denLook,
@@ -3434,7 +3549,7 @@ function applySync(s) {
     const d = s.holes[i];
     holeVisuals(h);
     d.pieces.forEach((info) => putPiece(h, info));
-    Object.assign(h, { status: d.status, hp: d.hp, maxHp: d.maxHp });
+    Object.assign(h, { status: d.status, hp: d.hp, maxHp: d.maxHp, weak: d.weak ?? WEAK, hop: !!d.hop });
     boardsOf(h).forEach((p, j) => { p.hp = d.boards[j] ?? HP.patch; });
     h.open = rest(h);
     h.exact = h.status === 'open' && h.open.length % 5 === 0 && C.solve(h.open, 1).length > 0;
@@ -3563,6 +3678,7 @@ function onNet(m) {
     case 'unboard': { const h = wall.holes[m.hole]; if (!net.host && h?.pieces[m.i]) breakBoard(h, h.pieces[m.i]); break; }
     case 'shoot': if (!net.host) shoot(m.cells); break;
     case 'blast': if (!net.host) blast(m.cells, true); break;
+    case 'widen': if (!net.host && wall.holes[m.hole]) widen(wall.holes[m.hole], m.cells); break;
     case 'frame': if (!net.host) openJob(m.fi, m.cells); break;
     // To the host: the crew asking.
     case 'crate': {
@@ -4295,6 +4411,6 @@ if (['all', 'gundeck'].includes(new URLSearchParams(location.search).get('try'))
 requestAnimationFrame(frame);
 
 // For poking at it from the console.
-window.den = { tune, HP, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+window.den = { tune, HP, widenCells, widen, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };

@@ -122,9 +122,26 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   hole ("boarded over"). That always closes the hole, but it's a botch: weak and pays little. A hole
   filled exactly is a Masterpiece: strong, and pays well.
 - **Masterpieces make the wall strong.** Raiders hack at mended holes: a boarded hole falls fast, a
-  Masterpiece holds. Only a completely empty hole lets raiders straight in; any wood at all (even
-  one piece in an unfinished hole) has to be hacked through with swords first. No magic jumping
-  through a hole that has wood in it. A thief whose way out has been mended hacks out from inside.
+  Masterpiece holds. Any wood at all (even one piece in an unfinished hole) has to be hacked
+  through with swords first. No magic jumping through a hole that has wood in it. A thief whose way
+  out has been mended hacks out from inside.
+- **Raiders walk in, they don't jump in.** The user found raiders hopping through tiny gaps high up
+  the wall "weird and dumb". Only an empty hole with a gap at the foot of the wall two squares wide
+  and three tall lets them walk through. A smaller or higher empty hole is a **weak spot**: they
+  hack at the stone round it (8 seconds of hacking, like one piece) until it gives way into a bigger
+  hole down to the floor, and walk in. The bigger hole is still whole pieces' worth of squares and
+  can always be filled exactly, so the crew can mend it; one piece in the gap stops them again.
+  Every wall's holes start off the floor, so every hole is a weak spot until it's widened. The
+  user liked it: it's an incentive to fill gaps early and close them off.
+- **Every bit of mending counts; it's never all or nothing.** The user: partly filling a hole or a
+  sloppy job should still turn a few raiders away, and when they do get through there's always
+  something you can do. Tested 7 Nov 2026 (simulated waves with no cannon, nobody throwing):
+  - *Nothing mended:* every raider gets in, the first after about 15 seconds.
+  - *One piece in each hole:* all of wave 1 turned away, about 60% of wave 3, a quarter of wave 5.
+  - *Boarded over (sloppy):* all of wave 1 turned away, about a quarter of waves 3 and 5.
+  - *Masterpieces:* every raider turned away, waves 1 to 5.
+  - *Mending during the wave* (one piece every 8 seconds, gaps they can walk through first): wave 5
+    went from 9 of 12 raiders getting in to 2 of 12.
 - **Throw pieces at raiders, don't bonk them.** A plain bonk was underwhelming. The carried piece
   is the weapon: it hurls at a raider, who goes flying. It costs the piece.
 - **A thrown piece takes a while to come back.** Otherwise you could stand and pelt raiders
@@ -250,7 +267,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   for any open gap along the whole wall (or else the weakest hole), so once one hole went, the
   whole wave poured through it. Now each raider attacks the hole in front of where they come up to
   the wall, and only switches to a breach within about 3 m. Raiders at a Masterpiece mostly tire
-  and leave. (Making them need a gap they can walk through is in IDEAS.md.)
+  and leave. (They now also need a gap they can walk through: see "Raiders walk in" above.)
 - **The gun tower (after Gunnery): it must be instantly recognisable as Gunnery.** The user knows
   the puzzle well, and the first tries missed it: stores bounced into the guns by themselves, the
   deck was too small, the pieces were tiny and hard to tell apart, the bucket and the arrows
@@ -411,7 +428,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **It aims first, for 8 seconds**, the spot glowing red on both faces of the wall with a
     countdown ("Their cannon's aiming here!"). A hit from the gun tower spoils its aim.
   - **A fresh breach is choked with rubble**: raiders must hack 10 seconds of it clear before they
-    can climb through, and a piece fitted into it clears it. Its label says so.
+    can climb through, and a piece fitted into it clears it. Its label says so. (Cleared, it's
+    like any other hole: if it's too small or high to walk through, they hack it wider first.)
   - **A raider who tires at your wall is turned away**: +5 doubloons, a cheer, and a "Turned away"
     count on the HUD. Each wave ends with how many you turned away and how many got in, and a wave
     where not one got in pays +10 more (the user wanted more reward for blocking them off).
