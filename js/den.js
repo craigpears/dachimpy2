@@ -1212,10 +1212,11 @@ function gunTick() {
   });
   const gone = [];
   gd.stores.forEach((s, i) => {
-    s.pr = s.r; s.pc = s.c;
+    s.pr = s.r; s.pc = s.c; s.bump = null;
     const w = want[i];
     if (!w) return;
-    if (back.has(i)) { s.dir = (w.d + 2) % 4; return; }
+    // Turned back: it bumps up against what's there and bounces off, rather than stopping dead.
+    if (back.has(i)) { s.bump = w.d; s.bumpA = gd.stores.some((o) => o.r === w.r && o.c === w.c) ? 0.12 : 0.34; s.dir = (w.d + 2) % 4; return; }
     s.r = w.r; s.c = w.c; s.dir = w.d;
     if (w.gun) { loadGun(w.gun, s.kind); gone.push(s); }
   });
@@ -1325,7 +1326,7 @@ function updateGunDeck(dt) {
   if (!gd) return;
   if (!guest()) {
     gd.tickT += dt / GD.tick;
-    if (gd.tickT >= 1) { gd.tickT = 0; gunTick(); }
+    if (gd.tickT >= 1) { gd.tickT = Math.min(gd.tickT - 1, 0.5); gunTick(); }
     // A loaded gun with something to fire at is run out over its lane (once the lane's clear) and
     // swung onto the target; it fires once it's on.
     gd.guns.forEach((g, i) => {
@@ -1342,7 +1343,12 @@ function updateGunDeck(dt) {
   for (const s of gd.stores) {
     const was = s.m.position.clone();
     s.m.position.lerpVectors(gdAt(s.pr, s.pc), gdAt(s.r, s.c), u);
-    s.m.rotation.y = -s.dir * Math.PI / 2;
+    // A bump: up against the store in the way, and back.
+    if (s.bump != null) { const b = Math.sin(u * Math.PI) * (s.bumpA ?? 0.2) * S; s.m.position.x += DC[s.bump] * b; s.m.position.z += DR[s.bump] * b; }
+    // It swings round to its new way smoothly, not in a snap.
+    const face = s.bump != null && u < 0.5 ? s.bump : s.dir;
+    s.yaw = s.yaw == null ? -face * Math.PI / 2 : s.yaw + wrapA(-face * Math.PI / 2 - s.yaw) * Math.min(1, dt * 14);
+    s.m.rotation.y = s.yaw;
     // Shot rolls; the rest slide with a little jostle.
     const moved = was.distanceTo(s.m.position), body = s.m.userData.body;
     if (s.kind === 'shot') body.rotation.x -= moved / 0.2;
@@ -1463,13 +1469,20 @@ const gunOut = () => gd && {
 function gunIn(d) {
   if (!d || !gd) return;
   if (d.cr && JSON.stringify(d.cr) !== gd.crateSig) setCrates(d.cr);
-  const seen = new Set();
+  const seen = new Set(), stepped = new Set();
   for (const [id, ki, r, c, dir] of d.s) {
     seen.add(id);
     const s = gd.stores.find((o) => o.id === id);
     if (!s) { addStore(id, KINDS[ki], r, c, dir); continue; }
-    if (s.r !== r || s.c !== c) { s.pr = s.r; s.pc = s.c; s.r = r; s.c = c; gd.tickT = 0; }
+    if (s.r !== r || s.c !== c) { s.pr = s.r; s.pc = s.c; s.r = r; s.c = c; s.bump = null; stepped.add(s); }
+    else if (dir === (s.dir + 2) % 4) { s.bump = s.dir; stepped.add(s); }
     s.dir = dir;
+  }
+  // A new beat. The ones that didn't move stay where they are, not jumping back to where they last
+  // came from to roll in again.
+  if (stepped.size) {
+    gd.tickT = 0;
+    for (const s of gd.stores) if (!stepped.has(s)) { s.pr = s.r; s.pc = s.c; s.bump = null; }
   }
   for (const s of gd.stores.slice()) if (!seen.has(s.id)) { s.pr = s.r; s.pc = s.c; dropStore(s, true); }
   d.g.forEach(([st, out, want], i) => { const g = gd.guns[i]; if (g) { g.state = st; g.out = !!out; g.want = want || 0; } });
