@@ -180,6 +180,9 @@ answers most of the 3-on-1 questions without inventing anything:
   at a time rather than splitting attacks, so the golem should turn to whoever it's hitting, and
   the others get time to build big chains (YPPedia notes teaming lets some players build their
   chains unhindered).
+- **Getting to the golem (the user, 7 Nov):** the fight is out in the open, so pirates need to
+  be able to walk out through the front gates to confront it. Or the golem smashes the gates open
+  and the fight comes to them. Undecided; either way it's part of the first test.
 - **NPPs don't take attacks the way players do** (bigger attacks still hurt more), so how the
   golem's board takes three pirates' attacks can be tuned without breaking faith.
 
