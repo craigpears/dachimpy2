@@ -207,38 +207,46 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   the wall, and only switches to a breach within about 3 m. Raiders at a Masterpiece mostly tire
   and leave. (Making them need a gap they can walk through is in IDEAS.md.)
 - **The gun tower (after Gunnery): it must be instantly recognisable as Gunnery.** The user knows
-  the puzzle well, and the first try missed it: stores bounced into the guns by themselves, the deck
-  was too small for four guns, the pieces were tiny and the bucket unreadable. So: pay attention to
-  the specifics of the real puzzle, and the graphics must look like Puzzle Pirates, not some other
-  3D game. But it must still make sense in the den: the gun you load is the gun that fires, and
-  you see it fire.
-  - **Where:** built last, after the whole rampart. The next wave beaten off brings timber for a
-    gun tower, a square platform (14 by 10 squares) jutting out from the wall over the gate like a
-    bastion. Its frame is laid on the den floor in **big timbers** (each piece covers a square twice
-    the size each way, 7 pieces in all) and hauled up and out over the wall. You walk out onto it
+  the puzzle well, and the first tries missed it: stores bounced into the guns by themselves, the
+  deck was too small, the pieces were tiny and hard to tell apart, the bucket and the arrows
+  unreadable, and the guns faced the wrong way for the puzzle. So: pay attention to the specifics
+  of the real puzzle, and the graphics must look like Puzzle Pirates, not some other 3D game. But
+  it must still make sense in the den: the gun you load is the gun that fires, and you see it fire.
+  - **Playability and readability above anything.** Making things look better in 3D tends to make
+    them harder to pick out, so push contrast and boldness as far as it will go: bold black
+    outlines round the stores, crates, guns and barrel as Gunnery draws them; the deck toned down
+    close to Gunnery's deck brown so everything on it stands out; arrows big, bold and blue.
+  - **Where and how big:** built last, after the whole rampart: a square platform jutting out from
+    the wall over the gate like a bastion, **the size of a Gunnery board, 13 by 13**. One square of
+    a carpentry piece is one square of the board. It's built of ordinary pieces in three frames
+    (5, 5 and 3 rows, from the wall out), laid on the den floor and hauled up and out over the wall
+    one after another. The deck still shows the pieces you laid, toned down. You walk out onto it
     from the wall-walk; the camera then looks down on the whole board, like the Gunnery screen.
   - **The rules are Gunnery's:** a barrel in the middle rolls stores out each way in turn till
     there are two of each on deck; one used, another comes. A store rolls straight; blocked it
     turns right, else left, else back; two that meet both turn back. Arrows steer them, three each,
     the oldest going when you chalk a fourth. Guns load powder, wad, shot; a bucket swabs a fired or
-    fouled gun; the wrong store fouls it. **A store only goes into a gun off an arrow pointing into
-    its inner end;** otherwise the gun's an obstacle. Your body is an obstacle too.
-  - **The guns:** four, lying against the gunwale: two at the front, one on each side (firing
-    along the wall at raiders hacking at it, like a bastion's flanking guns). A loaded gun is run out
-    through its port, **swings on its carriage to aim** at anything in a wide arc, fires from its
-    own muzzle, and recoils back in, square to the board again. They go for raiders at the wall
-    first, then those coming in, then the cannon, and don't all fire at the same raider. Every gun
-    is worth loading.
-  - **The board:** no crates round the barrel in the middle, more out towards the edges, never side
-    by side, making pockets that trap a store and loops that bring stores back past a gun. Each new
-    board is tried out (stores rolling with no arrows) to pick one where about two guns sit on a
-    loop of their own and the rest take more work: as in Gunnery, it's easy to load two, harder to
-    load all four, and making loops (or freestyling) is the core of it.
+    fouled gun; the wrong store fouls it. Your body is an obstacle too.
+  - **The guns lie as in Gunnery: two down each side, muzzle out, with a lane between the muzzle
+    and the gunwale.** You load a gun by guiding stores in front of it and in: **a store only goes
+    in off an arrow in the lane pointing into the muzzle**; otherwise the gun's an obstacle. (The
+    user: pieces going in front of the cannons and being guided in is key to recognising it.)
+  - **Firing:** a loaded gun with something to shoot at is run out over its lane (once the lane's
+    clear; while out it blocks the lane) with its muzzle through the port, **swivels on the port**
+    to aim, forwards at the raiders coming in and their cannon or back along the wall at those
+    hacking at it, fires from its own muzzle and recoils back in, square again. They don't all fire
+    at the same raider. Every gun is worth loading.
+  - **The board:** no crates round the barrel in the middle, none in the lanes, more out towards
+    the edges, never side by side, making pockets that trap a store and loops that bring stores back
+    past a gun. Each new board is tried out (stores rolling with no arrows) to pick one where about
+    two guns sit on a loop of their own and the rest take more work: as in Gunnery, it's easy to
+    load two, harder to load all four, and making loops (or freestyling) is the core of it.
   - **The look:** bright silver guns three squares long, a red gunwale with a gold rail, light-wood
-    crates of shot and rum, the barrel on its side; shot grey, powder a red bag with a flame on it,
-    wad a white puff, the bucket bright tin with blue water. Gun labels show the store each wants
-    next as a picture; "Loaded!" in Puzzle Pirates yellow and red. A key to the stores shows while
-    you're on the tower.
+    crates of shot and rum, the barrel on its side; shot bright iron, powder a red bag with a flame
+    on it, wad a white puff, the bucket bright tin with blue water, leaning so you see its side.
+    Arrows: mine Gunnery blue with a pale fill, a crewmate's in their colour. Gun labels show the
+    store each wants next as a picture; "Loaded!" in Puzzle Pirates yellow and red. A key to the
+    stores shows while you're on the tower.
   - **The mouse works as in Gunnery:** click a plank to chalk the arrow the ghost shows, drag the
     way you want it to point, the wheel turns it (it never zooms on the tower), click an arrow to
     turn it, right-click to rub it out. Space chalks the plank ahead of you, Q/E turn it.
