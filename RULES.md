@@ -222,7 +222,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   along the wall; taking one back works from as far. The user: no value in having to walk closer.
   (With the keyboard, stand at the wall as before: it decides between the wall and the frames on the
   floor behind you.)
-- **The pirate walks a touch quicker** (5 m/s, was 4.6).
+- **The pirate walks a touch quicker** (5.4 m/s; was 4.6, then 5). The user and a friend both
+  wanted the pace a bit quicker.
+- **The piece goes where you point.** The user and a friend found it hard to put pieces where they
+  wanted. With the mouse, the spot chosen is one that covers the square under the pointer (then the
+  one centred nearest it, and a clean fit before boarding over), from a little further off too. It
+  holds steady: once the ghost snaps somewhere it stays until you clearly point somewhere better,
+  rather than flicking between two spots. This is easier snapping, not auto-play: the piece is never
+  turned for you (below).
 - **One breach doesn't let everyone in; the wall you kept strong pays off.** Raiders used to make
   for any open gap along the whole wall (or else the weakest hole), so once one hole went, the
   whole wave poured through it. Now each raider attacks the hole in front of where they come up to

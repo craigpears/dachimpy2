@@ -22,7 +22,7 @@ const WOOD_D = 0.5;      // depth of a wooden piece
 const STONE_D = 0.7;
 const REACH = 2.4;       // how far along the wall the pirate can reach
 const WALL_Z = 2.7;      // how close to the wall the pirate must stand to fit a piece
-const SPEED = 5;           // (a touch quicker than the 4.6 it was: the user)
+const SPEED = 5.4;         // (4.6, then 5, now 5.4: the user and a friend wanted the pace a bit quicker)
 // Seconds of one raider hacking at it at full speed (piece: each piece in an unfinished hole; patch:
 // a board nailed on behind). A piece was 4: a half-mended hole fell in seconds and early waves were
 // lost anyway; at 8, every piece you get in counts. (Balance tests in RULES.md.)
@@ -3064,6 +3064,32 @@ function fatOutline(cells, z, color, t = 0.045) {
   }
   return g;
 }
+/* Easier snapping with the mouse (the user, and a friend: it was hard to put pieces where they
+   wanted). A spot covering the square under the pointer comes first, then the one centred
+   nearest it; a clean fit before boarding over. And it holds steady: once the ghost has snapped
+   somewhere it stays there till you clearly point somewhere better, rather than flicking between
+   two. Nothing turns the piece for you (that was tried and dropped). */
+let aimKeep = '';
+function pickSpot(list, at) {
+  const shape = carry.cells.map(String).join(';');
+  const key = (o) => `${o.frame ? o.frame.i : 'w'}|${o.hole ?? ''}|${o.patch ? o.layer : ''}|${o.dr},${o.dc}|${shape}`;
+  const score = (o) => {
+    const m = at(o), R = Math.floor(m.fr), Cc = Math.floor(m.fc);
+    const covers = carry.cells.some(([r, c]) => r + o.dr === R && c + o.dc === Cc);
+    const cx = o.frame ? o.gc : o.fc, cy = o.frame ? o.gr : o.fr;
+    return (covers ? 0 : 0.9) + 0.5 * Math.hypot(cx - m.fc, cy - m.fr) + (o.over ? 0.35 : 0);
+  };
+  let best = null, bs = Infinity, kept = null, ks = Infinity;
+  for (const o of list) {
+    const sc = score(o);
+    if (sc < bs) { bs = sc; best = o; }
+    if (aimKeep && key(o) === aimKeep) { kept = o; ks = sc; }
+  }
+  if (kept && ks <= bs + 0.4) best = kept, bs = ks;
+  if (!best || bs > 2.2) { aimKeep = ''; return null; }
+  aimKeep = key(best);
+  return best;
+}
 function aim() {
   target = null;
   if (!carry || pirate.h > 0.3) return;
@@ -3071,9 +3097,8 @@ function aim() {
   const fd = (o) => Math.hypot(o.cx - pirate.x, o.cz - pirate.z);
   // Pointing at a rampart frame: the spot nearest the pointer.
   if (mouseMode && mouse?.frame) {
-    const d = (o) => Math.hypot(o.gc - mouse.fc, o.gr - mouse.fr) + (o.over ? 0.35 : 0);
-    const mine = fl.filter((o) => o.frame === mouse.frame).sort((a, z) => d(a) - d(z));
-    if (mine[0] && d(mine[0]) <= 1.8) target = { ...mine[0], ok: fd(mine[0]) <= REACH + 1.2, far: fd(mine[0]) > REACH + 1.2 };
+    const best = pickSpot(fl.filter((o) => o.frame === mouse.frame), () => mouse);
+    if (best) target = { ...best, ok: fd(best) <= REACH + 1.2, far: fd(best) > REACH + 1.2 };
     return;
   }
   if (pirate.z > WALL_Z + 2.5 && !fl.length) return;
@@ -3085,10 +3110,8 @@ function aim() {
   const b = C.bbox(carry.cells);
   if (mouseMode && mouse) {
     if (pirate.z > WALL_Z + 2.5) return;
-    const d = (o) => { const m = mouseAt(o.patch ? patchZ(o.layer, wall.holes[o.hole]) - PATCH_D / 2 : 0); return Math.hypot(o.fc - m.fc, o.fr - m.fr) + (o.over ? 0.35 : 0); };
-    list.sort((a, z) => d(a) - d(z));
-    const best = list[0];
-    if (best && d(best) <= 1.8) target = { ...best, ok: mReach(best), far: !mReach(best) };
+    const best = pickSpot(list, (o) => mouseAt(o.patch ? patchZ(o.layer, wall.holes[o.hole]) - PATCH_D / 2 : 0));
+    if (best) target = { ...best, ok: mReach(best), far: !mReach(best) };
     else target = { dr: Math.round(mouse.fr - b.h / 2), dc: Math.round(mouse.fc - b.w / 2), ok: false };
   } else if (!mouseMode) {
     // Everything in reach: a walk frame on the floor when stood back from the wall, the stairs
