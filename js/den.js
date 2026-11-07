@@ -1965,8 +1965,19 @@ function showPile(p) {
 }
 /* The toolbox along the bottom of the screen: what's on each crate, so you can plan your next
    piece from the wall instead of walking back to look (the user: "so that it runs a bit faster").
-   Only to see: you still walk over to fetch one. Left to right as the crates stand. */
+   The crates are numbered 1, 2, 3, left to right as they stand, and pressing the number (or
+   clicking the tile) takes that crate's piece into your hands wherever you are. */
 const toolEls = [];
+const cratesInOrder = () => [...piles].sort((a, z) => a.x - z.x);
+function takeCrate(j) {
+  const p = cratesInOrder()[j];
+  if (!p || G.over || deco.on || onGunDeck() || net.pending || net.asking) return;
+  if (carry && carry.from === p) return putBack();
+  if (!p.letter) return toast(p.wait > 0.3 ? `Crate ${j + 1} is restocking` : `Crate ${j + 1}'s piece has been taken`, false, true);
+  if (carry && !carry.from) return toast('Your hands are full: fit that piece first', false, true);
+  if (carry) putBack();
+  pickUp(p);
+}
 // One whole piece, drawn the main game's way (js/render.js), in the den's wood colours.
 function pieceSvg(letter, cells) {
   const b = C.bbox(cells), cs = Math.min(11, Math.floor(42 / b.h), Math.floor(54 / b.w));
@@ -1980,18 +1991,24 @@ function toolbox() {
     box.insertAdjacentHTML('afterbegin', window.Render.defs());   // (the grain patterns)
     for (const [l, c] of Object.entries(WOOD)) box.style.setProperty(`--p-${l}`, c);
   }
-  if (!toolEls.length) for (let i = 0; i < piles.length; i++) { const el = document.createElement('div'); box.append(el); toolEls.push({ el, sig: '' }); }
-  [...piles].sort((a, z) => a.x - z.x).forEach((p, j) => {
+  if (!toolEls.length) for (let i = 0; i < piles.length; i++) {
+    const el = document.createElement('div');
+    el.addEventListener('click', () => takeCrate(i));
+    box.append(el);
+    toolEls.push({ el, sig: '' });
+  }
+  cratesInOrder().forEach((p, j) => {
     const t = toolEls[j], mine = carry && carry.from === p;
     const state = p.letter ? 'piece' : mine ? 'hand' : p.wait > 0.3 ? 'wait' : 'taken';
     const sig = `${state}|${p.letter}|${p.cells}|${mine ? carry.cells : ''}|${state === 'wait' ? Math.ceil(p.wait) : ''}`;
     if (sig !== t.sig) {
       t.sig = sig;
       t.el.className = `tool ${state}`;
-      t.el.innerHTML = state === 'piece' ? `${pieceSvg(p.letter, p.cells)}<span>${p.letter}</span>`
-        : state === 'hand' ? `${pieceSvg(carry.letter, carry.cells)}<span>In hand</span>`
-        : state === 'wait' ? `<span>Restocking<br>${Math.ceil(p.wait)}s</span><i><b></b></i>`
-        : '<span>Taken</span>';
+      const n = `<kbd>${j + 1}</kbd>`;
+      t.el.innerHTML = state === 'piece' ? `${pieceSvg(p.letter, p.cells)}<span>${n}</span>`
+        : state === 'hand' ? `${pieceSvg(carry.letter, carry.cells)}<span>${n} in hand</span>`
+        : state === 'wait' ? `<span>${n} restocking<br>${Math.ceil(p.wait)}s</span><i><b></b></i>`
+        : `<span>${n} taken</span>`;
     }
     if (state === 'wait') t.el.querySelector('b').style.width = `${Math.min(1, 1 - p.wait / (p.waitFull || restockSecs())) * 100}%`;
   });
@@ -2249,6 +2266,7 @@ addEventListener('keydown', (e) => {
   else if (key === 'f' && carry) turn(flip, 0);
   else if (key === 'tab') cycle++;
   else if (key === 'b') decoMode(true);
+  else if (['1', '2', '3'].includes(key)) takeCrate(Number(key) - 1);
   else if (key === 'backspace' && canTakeBack()) takeBack();
   else if ((key === 'shift' || key === 'r') && carry && aimFoe()) throwAt(aimFoe());
   else if (key === 'v') Object.assign(view, { yaw: 0, pitch: 0, zoom: 1 });

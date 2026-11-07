@@ -31,6 +31,9 @@
     .pc-fill { fill: var(--pc); }
     .pc-edge { fill: none; stroke: var(--pc-edge); stroke-width: 1.4; stroke-linecap: square; }
     .tool.piece span { color: var(--ink); font-size: 14px; }
+    .tool { pointer-events: auto; cursor: pointer; }
+    .tool:hover { border-color: #8a6a44; }
+    .tool kbd { font: 700 12px 'Alegreya Sans'; color: var(--ink); background: #3b2a1b; border: 1px solid #6b4e32; border-radius: 4px; padding: 0 5px; }
     .tool.hand { border-color: var(--gold); color: var(--gold); }
     .tool.hand svg { opacity: 0.45; }
     .tool.wait i { display: block; width: 46px; height: 6px; background: #3b2a1b; border-radius: 3px; overflow: hidden; }
@@ -147,8 +150,8 @@
   <div class="intro" id="intro">Raiders are coming! Grab a piece from a crate and mend the wall.<br>Fill a hole exactly for a strong <b>Masterpiece</b>.</div>
   <div class="dock" id="dock">
   <div class="prompt" id="prompt"></div>
-  <div class="toolbox" id="toolbox" title="What's on each crate"><span class="cap">Crates</span></div>
-  <div class="keys"><kbd>WASD</kbd> walk · <kbd>Space</kbd> or click: pick up / fit · <kbd>Q</kbd><kbd>E</kbd> turn · <kbd>F</kbd> flip · <kbd>Tab</kbd> next spot · <kbd>Shift</kbd> or click a raider: throw · <kbd>Z</kbd><kbd>C</kbd> or right-drag: turn the view, all the way round · <kbd>B</kbd> decorate · <kbd>P</kbd> pause · wheel: turn the piece at a hole, or zoom (<kbd>-</kbd><kbd>=</kbd>)</div>
+  <div class="toolbox" id="toolbox" title="Press 1, 2 or 3 (or click) to take that crate's piece"><span class="cap">Crates</span></div>
+  <div class="keys"><kbd>WASD</kbd> walk · <kbd>Space</kbd> or click: pick up / fit · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd>: take a crate's piece · <kbd>Q</kbd><kbd>E</kbd> turn · <kbd>F</kbd> flip · <kbd>Tab</kbd> next spot · <kbd>Shift</kbd> or click a raider: throw · <kbd>Z</kbd><kbd>C</kbd> or right-drag: turn the view, all the way round · <kbd>B</kbd> decorate · <kbd>P</kbd> pause · wheel: turn the piece at a hole, or zoom (<kbd>-</kbd><kbd>=</kbd>)</div>
   </div>
   <div class="credit">Puzzle Pirates™ © 2001–2026 Grey Havens, LLC, created by Three Rings Design.<br>An unofficial fan project, not affiliated with or endorsed by them.</div>
   <div class="gunhelp" id="gunhelp"></div>

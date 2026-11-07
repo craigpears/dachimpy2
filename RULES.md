@@ -160,8 +160,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **You can see the toolbox from anywhere.** A strip along the bottom of the screen shows what's on
   each crate, left to right as they stand: the piece in its wood colour, "In hand" for the one you
   took, a restocking bar, or "Taken" when a crewmate has it. So you can plan your next piece from
-  the wall rather than walking back to look (the user: "so that it runs a bit faster"). It's only
-  to see: you still walk over to fetch a piece. It's hidden on the gun tower and while decorating.
+  the wall rather than walking back to look (the user: "so that it runs a bit faster"). It's
+  hidden on the gun tower and while decorating.
+  **And you take pieces from it with 1, 2, 3.** The crates are numbered left to right, and each
+  tile shows its number rather than the piece's letter (the user: "instead of showing T, U, F, it
+  should show like 1, 2, 3"). Pressing the number, or clicking the tile, takes that crate's piece
+  into your hands from anywhere in the den, no walking back (the user chose anywhere over only by
+  the crates). Holding another crate's piece, it swaps; the same number again puts it back. Not
+  while you're holding a piece lifted out of a frame (fit that first).
   Each piece is drawn the way the main game draws its pieces (`js/render.js`): one solid piece with
   its grain and only its outside edge, in the den's wood colour. (A first try drew separate little
   squares; the user: "why are they in squares just joint from each other instead of one piece?"
