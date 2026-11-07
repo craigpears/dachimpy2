@@ -143,16 +143,30 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   at the wall can only be hit from up there; it's what makes a Masterpiece pay off: while it holds,
   you go up and knock the raiders off it. The view swings up high to look down at them. Keep it out
   of the way (not in front of the gate), and the full length of the wall.
-- **The rampart is built, a stretch at a time, as the reward for beating a wave.** After waves 1, 2
-  and 3, timber arrives for one stretch (left with its stairs, then right, then the middle). You can
-  only walk on stretches that are built.
+- **The rampart is built a stretch at a time, as the reward for beating a wave.** Order: left
+  stretch, then right, then the middle.
+  - **One frame at a time.** When a wave is beaten off and nothing is still being built, timber
+    arrives for the next stretch. Its frames come one after another, each only when the last is
+    done, so there's never more than one to get on with. The second frame appearing before the
+    first was done felt rushed.
+  - **Walk only on what's built.** You can only walk where the walk's pieces actually are.
 - **It's built by carpentry, piece by piece, not by magic.** A footing hole opening in the wall was
-  bizarre, and a stretch popping up was too easy. Instead a frame (a puzzle shape of about four
-  pieces) is laid out on the den floor in front of the stretch. You lay pieces in it one at a time and
-  they stay there, so you watch it come together. A piece may stick out over the frame's edge, so
-  any piece will do; the spare is sawn off when it's full. A gap that none of the pieces to hand can
-  reach any more is plugged with offcuts, so you can't get stuck. A frame filled with nothing sawn
-  off or plugged is Shipshape and pays a bonus. Then the finished deck is hoisted up onto the wall.
+  bizarre, and a stretch popping up was too easy. A finished frame then turning into a ready-made
+  rampart was magic too. **Every part of the rampart is the pieces you fitted, and they stay those
+  pieces.** Nothing turns into anything else, and nothing is added that you didn't build.
+  - **The walk:** a frame laid flat on the den floor in front of the stretch. It's two full rows the
+    width of the stretch, so the stretches join up, plus a ragged third row. You lay pieces in it one
+    at a time and watch it come together. When it's full the crew haul it up on ropes, pieces and
+    all, and lay it along the top of the wall.
+  - **The stairs (end stretches):** a frame standing upright at the end of the den, a stepped
+    stringer from the floor up to the walk. You fit pieces into it like a hole in the wall, and the
+    pieces are the steps. Half-built stairs are in the way; you can't walk through them.
+  - **Any piece will do:** a piece may stick out over the frame's edge, and the spare is sawn off
+    when it's full.
+  - **Never stuck:** a gap that none of the pieces to hand can reach any more is plugged with
+    offcuts.
+  - **Shipshape:** every frame's shape can be filled exactly. A frame filled with nothing sawn off
+    or plugged is Shipshape and pays a bonus.
 - **Up on the wall must stay bright.** The fog keeps its distance from the camera and the view
   brightens as it rises; looking down from the rampart went murky otherwise.
 - **Co-op crews: everyone collaborates, nobody gives orders.** Up to four pirates defend one den
@@ -165,8 +179,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   first, so two pirates can't take the same piece or fill the same spot; whoever loses gets their
   piece back ("Someone got there first"). Waves get bigger with more pirates (half as many again for
   each extra pirate). Crewmates wear their own colours with their name over their head.
-- **Keep the pirate-den feel, not medieval.** The rampart is a ship's deck with a rope rail and
-  the Jolly Roger, not stone battlements.
+- **Keep the pirate-den feel, not medieval.** The rampart is a timber walk like a ship's deck, not
+  stone battlements. Any rail, flag or trim on it has to be built from pieces as well, or left off.
+- **Future ideas live in [IDEAS.md](IDEAS.md).** When the user brain-dumps ideas for later, note
+  them there rather than building them.
 - **There's always something to do with a junk piece.** Holding three useless pieces with nothing
   to do was frustrating. Any mended hole (Masterpiece or boarded) takes boards nailed on behind it,
   on the den side, up to three deep, damaged or not. They're a second (third, fourth) layer:

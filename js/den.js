@@ -371,7 +371,7 @@ function buildWall() {
     scenery.push(rock(-half - 2.2 - Math.random(), 0.4, z, 1 + Math.random() * 0.8));
     scenery.push(rock(half + 2.2 + Math.random(), 0.4, z, 1 + Math.random() * 0.8));
   }
-  scenery.push(makeRampart());
+  makeRampart();
   scenery.push(torch(-half + 1.75, ramp.zBot + 0.3), torch(half - 1.75, ramp.zBot + 0.3), torch(X(wall.gateCols.c0) - 0.5, 1), torch(X(wall.gateCols.c1 + 1) + 0.5, 1));
   // Out beyond the wall: a rocky rise for the raiders' cannon.
   const cx = half * 0.45;
@@ -391,122 +391,94 @@ function buildWall() {
   piles.forEach(showPile);
 }
 
-/* The rampart: a plank walk along the top of the wall, like a ship's deck behind a rail, with stairs up from the
-   den at either end. Up there the pirate can see over the wall and throw pieces down on the
-   raiders hacking at it. */
+/* The rampart: a walk along the top of the wall, with stairs up from the den at either end. Up
+   there the pirate can see over the wall and throw pieces down on the raiders hacking at it. None
+   of it is there to start with: every plank of the walk and every step of the stairs is a carpentry
+   piece the crew fits into a frame, and it stays that piece. Nothing turns into anything else. */
 let ramp = null;
+const STAIR_W = 1.1;
 function makeRampart() {
-  const half = wall.W * S / 2, T = wall.H * S + 0.38, zTop = 0.45, run = T, zBot = zTop + run;
-  const n = Math.max(8, Math.round(T / 0.24)), sw = 1.1;
-  // Three stretches, each built separately (left, right, then middle); the stairs come with the end ones.
+  const half = wall.W * S / 2, T = wall.H * S + 0.38, n = wall.H + 1, zTop = 0.25, run = n * S, zBot = zTop + run;
   const cuts = [0, Math.round(wall.W / 3), Math.round(wall.W * 2 / 3), wall.W];
-  const secs = [0, 1, 2].map((i) => ({ c0: cuts[i], c1: cuts[i + 1] - 1, x0: X(cuts[i]), x1: X(cuts[i + 1]), built: false, g: new THREE.Group() }));
-  ramp = { T, half, zTop, zBot, run, n, secs, stairs: [[-half + 0.2, -half + 0.2 + sw], [half - 0.2 - sw, half - 0.2]] };
-  const g = new THREE.Group();
-  const secAt = (x) => secs.find((s) => x >= s.x0 - 0.01 && x <= s.x1 + 0.01) || secs[2];
-  const plank = mat('#6b4426', { map: woodTex }), post = mat('#4a2f1a', { map: woodTex }), rope = mat('#c9a66b', { roughness: 1 });
-  for (const s of secs) {
-    s.g.visible = false;
-    g.add(s.g);
-    const deck = mesh(new THREE.BoxGeometry(s.x1 - s.x0, 0.1, 1.3), plank);
-    deck.position.set((s.x0 + s.x1) / 2, T - 0.05, -0.2);
-    const top = mesh(new THREE.BoxGeometry(s.x1 - s.x0 - 0.1, 0.08, 0.14), post);
-    top.position.set((s.x0 + s.x1) / 2, T + 0.82, -0.75);
-    s.g.add(deck, top);
-  }
-  // A ship's rail along the outer edge: posts, a timber top rail and a sagging rope between.
-  for (let x = -half + 0.25; x <= half - 0.2; x += 1.2) {
-    const p = mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.8, 8), post);
-    p.position.set(x, T + 0.4, -0.75);
-    secAt(x).g.add(p);
-    if (x + 1.2 <= half - 0.2) {
-      const r = mesh(new THREE.TorusGeometry(0.6, 0.025, 5, 16, Math.PI), rope, false);
-      r.rotation.z = Math.PI;
-      r.scale.y = 0.35;
-      r.position.set(x + 0.6, T + 0.55, -0.75);
-      secAt(x + 0.6).g.add(r);
-    }
-  }
-  // A coil of rope, and the Jolly Roger flying at each end.
-  const coil = mesh(new THREE.TorusGeometry(0.18, 0.06, 6, 16), rope);
-  coil.rotation.x = Math.PI / 2;
-  coil.position.set(-half * 0.1, T + 0.06, 0.25);
-  secs[1].g.add(coil);
-  const flagTex = canvasTex(64, 44, (c, w, h) => {
-    c.fillStyle = '#111'; c.fillRect(0, 0, w, h);
-    c.fillStyle = '#f2ead8';
-    c.beginPath(); c.arc(32, 18, 9, 0, Math.PI * 2); c.fill();
-    c.fillRect(27, 24, 10, 6);
-    c.lineWidth = 4; c.strokeStyle = '#f2ead8';
-    c.beginPath(); c.moveTo(16, 30); c.lineTo(48, 40); c.moveTo(48, 30); c.lineTo(16, 40); c.stroke();
-    c.fillStyle = '#111'; c.fillRect(27, 15, 4, 4); c.fillRect(33, 15, 4, 4);
-  });
-  for (const sx of [-1, 1]) {
-    const x = sx * (half - 1.6);
-    const pole = mesh(new THREE.CylinderGeometry(0.04, 0.05, 2.2, 8), post);
-    pole.position.set(x, T + 1.1, -0.62);
-    const flag = mesh(new THREE.PlaneGeometry(0.9, 0.6), new THREE.MeshStandardMaterial({ map: flagTex, side: THREE.DoubleSide, roughness: 1 }), false);
-    flag.position.set(x + sx * 0.47, T + 1.9, -0.62);
-    if (sx < 0) flag.scale.x = -1;
-    secs[sx < 0 ? 0 : 2].g.add(pole, flag);
-  }
-  // Stairs up from the den floor at each end, against the side of the cave.
-  ramp.stairs.forEach(([x0, x1], si) => {
-    const sg = secs[si ? 2 : 0].g;
-    for (let i = 0; i < n; i++) {
-      const h = T * (i + 1) / n;
-      const step = mesh(new THREE.BoxGeometry(x1 - x0, h, run / n + 0.01), plank);
-      step.position.set((x0 + x1) / 2, h / 2, zBot - (i + 0.5) * run / n);
-      sg.add(step);
-    }
-    const rx = Math.abs(x0) < Math.abs(x1) ? x0 + 0.05 : x1 - 0.05;
-    const len = Math.hypot(run, T);
-    const rail = mesh(new THREE.BoxGeometry(0.07, 0.07, len), post);
-    rail.position.set(rx, T / 2 + 0.85, zTop + run / 2);
-    rail.rotation.x = Math.atan2(T, run);
-    sg.add(rail);
-    [zBot - 0.1, zTop + 0.1].forEach((z, i) => {
-      const p = mesh(new THREE.BoxGeometry(0.1, 0.95, 0.1), post);
-      p.position.set(rx, (i ? T : 0) + 0.47, z);
-      sg.add(p);
-    });
-  });
-  return g;
+  const secs = [0, 1, 2].map((i) => ({ c0: cuts[i], c1: cuts[i + 1] - 1, x0: X(cuts[i]), x1: X(cuts[i + 1]) }));
+  // What gets built, in order: an end stretch's walk and then its stairs, the other end's, the middle walk last.
+  const jobs = [[0, 'deck'], [0, 'stair'], [2, 'deck'], [2, 'stair'], [1, 'deck']].map(([si, kind], i) => ({ i, si, kind, frame: null, up: false }));
+  ramp = { T, half, n, zTop, zBot, run, secs, jobs, next: 0, stairs: [[-half + 0.2, -half + 0.2 + STAIR_W], [half - 0.2 - STAIR_W, half - 0.2]] };
 }
-/* Building the rampart: after each of the first three waves, timber arrives for one stretch and a
-   frame is laid out on the den floor in front of it: a carpentry puzzle lying flat. Lay pieces in
-   it one at a time; they stay where you put them. A piece may stick out over the edge (so any piece
-   will do), and the spare is sawn off when the frame's full. Then the finished deck is hoisted up
-   onto the wall. */
-const SECTION_ORDER = [0, 2, 1];
+/* Building it. After a wave is beaten off, timber arrives for one stretch, and its frames come one
+   at a time: the next only once the last is done, so there's never more than one to get on with.
+   - The walk: a frame laid flat on the den floor in front of the wall. Lay pieces in it one at a
+     time. A piece may stick out over the edge (so any piece will do); the spare is sawn off when
+     the frame's full. Then the crew haul it up on ropes, pieces and all, and it's laid along the
+     top of the wall. You walk on the very pieces you laid.
+   - The stairs: a frame standing upright at the end of the den, a stepped stringer from the floor
+     up to the walk. Fit pieces into it like a hole in the wall; they're the steps. */
 const FRAME_Z = WALL_Z + 0.25;   // just behind where you stand to mend the wall
 const frameMat = mat('#4a3220', { roughness: 1 });
 const railMat = mat('#8a5a30', { map: woodTex });
 const railGeo = [new THREE.BoxGeometry(0.06, S + 0.06, 0.07), new THREE.BoxGeometry(S + 0.06, 0.06, 0.07)];
-const frames = () => (ramp ? ramp.secs.filter((s) => s.frame && !s.frame.done).map((s) => s.frame) : []);
-function openFrame(si, shape = null) {
-  const s = ramp.secs[si];
-  if (s.frame || s.built) return s.frame;   // one frame per stretch
-  // Clear of the stairs and torches at the ends.
-  const lo = s.x0 + (si === 0 ? 2.4 : 0.4), hi = s.x1 - (si === 2 ? 2.4 : 0.4);
-  for (let i = 0; i < 400 && !shape; i++) {
-    const c = C.normalize(C.genHole(i < 250 ? 4 : 3).hole), b = C.bbox(c);
-    if (b.h <= 4 && b.w * S <= hi - lo) shape = c;
+const ropeMat = new THREE.LineBasicMaterial({ color: '#d8b77a' });
+const frames = () => (ramp ? ramp.jobs.filter((j) => j.frame && !j.frame.done).map((j) => j.frame) : []);
+const stairsUp = () => !!ramp && ramp.jobs.some((j) => j.kind === 'stair' && j.up);
+// A point on a frame, from its grid (columns across, rows down), `z` out from its face.
+const frameAt = (f, c, r, z = 0) => f.group.localToWorld(new THREE.Vector3(c * S, -r * S, z));
+// The walk: two full rows along the top of the wall, so the stretches join up, and a ragged third
+// overhanging the den side (clear of where the stairs come up) to make a puzzle of it.
+function deckShape(si) {
+  const s = ramp.secs[si], w = s.c1 - s.c0 + 1, base = [];
+  for (let r = 0; r < 2; r++) for (let c = 0; c < w; c++) base.push([r, c]);
+  const cols = [...Array(w).keys()].filter((c) => !(si === 0 && c < 3) && !(si === 2 && c >= w - 3));
+  let extra = (5 - (2 * w) % 5) % 5;
+  if (extra < 2 && extra + 5 <= cols.length) extra += 5;
+  if (extra > cols.length) extra = 0;
+  for (let i = 0; i < 60; i++) {
+    const cells = base.concat(C.shuffle(cols.slice()).slice(0, extra).map((c) => [2, c]));
+    if (C.solve(cells, 1).length) return cells;
   }
-  if (!shape) { buildSection(si); return null; }
-  if (isHost()) send('all', { t: 'frame', si, cells: shape });
-  const b = C.bbox(shape), x0 = (lo + hi) / 2 - b.w * S / 2;
-  // Laid flat: the frame's rows run from the wall towards the den, its "front" faces up.
+  return base;
+}
+// The stairs: a stepped band three squares deep, from the walk at the wall down to the den floor.
+// Column 0 is at the bottom of the left stairs, and at the top of the right ones.
+// Thickened under the top, or trimmed at the foot, so it can be filled with not a scrap wasted.
+function stairShape(si) {
+  const n = ramp.n, band = [], under = [];
+  for (let c = 0; c < n; c++) {
+    const top = si === 0 ? n - 1 - c : c;
+    for (let r = top; r <= Math.min(n - 1, top + 2); r++) band.push({ cell: [r, c], s: top });
+    if (top + 3 <= n - 1) under.push({ cell: [top + 3, c], s: top });
+  }
+  band.sort((a, b) => a.s - b.s || a.cell[0] - b.cell[0]);
+  under.sort((a, b) => a.s - b.s);
+  const m = band.length % 5, tries = m ? [band.concat(under.slice(0, 5 - m)), band.slice(0, band.length - m)] : [band];
+  const cells = (list) => list.map((o) => o.cell);
+  return cells(tries.find((t) => C.solve(cells(t), 1).length) || band);
+}
+function openJob(i, shape = null) {
+  const j = ramp.jobs[i];
+  if (!j || j.frame) return j?.frame || null;
+  ramp.next = Math.max(ramp.next, i + 1);
+  const stair = j.kind === 'stair';
+  shape ||= stair ? stairShape(j.si) : deckShape(j.si);
+  if (isHost()) send('all', { t: 'frame', fi: i, cells: shape });
   const g = new THREE.Group();
-  g.position.set(x0, 0, FRAME_Z);
-  g.rotation.x = -Math.PI / 2;
+  if (!stair) {
+    // Laid flat: the rows run from the wall towards the den, the face is up.
+    g.position.set(ramp.secs[j.si].x0, 0, FRAME_Z);
+    g.rotation.x = -Math.PI / 2;
+  } else {
+    // Stood on end against the side of the cave, facing into the den.
+    const [xa, xb] = ramp.stairs[j.si ? 1 : 0];
+    if (j.si === 0) { g.position.set(xb, ramp.T, ramp.zBot); g.rotation.y = Math.PI / 2; }
+    else { g.position.set(xa, ramp.T, ramp.zTop); g.rotation.y = -Math.PI / 2; }
+    g.scale.y = ramp.T / (ramp.n * S);
+  }
   const set = new Set(shape.map(([r, c]) => k(r, c)));
   for (const [r, c] of shape) {
     const p = mesh(cellPlane, frameMat, false);
     p.receiveShadow = true;
-    p.position.set((c + 0.5) * S, -(r + 0.5) * S, 0.012);
+    p.position.set((c + 0.5) * S, -(r + 0.5) * S, stair ? -STAIR_W - 0.01 : 0.012);
     g.add(p);
-    // A low timber rail round the edge, so it reads as a frame to fill.
+    // A timber rail round the edge, so it reads as a frame to fill.
     for (const [a, z] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
       if (set.has(k(r + a, c + z))) continue;
       const rail = mesh(railGeo[a ? 1 : 0], railMat);
@@ -517,11 +489,18 @@ function openFrame(si, shape = null) {
   g.add(outline(shape, 0.075, '#9fe0ff'));
   g.userData.scenery = true;
   den.add(g);
+  g.updateMatrixWorld(true);
   const label = document.createElement('div');
   $('labels').append(label);
-  const f = s.frame = { si, x0, z0: FRAME_Z, cells: shape, b, set, occ: new Set(), filled: new Set(), pieces: [], scrapCells: [], group: g, label, sig: '', done: false };
+  const b = C.bbox(shape);
+  const f = j.frame = {
+    i, si: j.si, kind: j.kind, cells: shape, b, set, occ: new Set(), filled: new Set(), pieces: [], scrapCells: [], group: g, label, sig: '', done: false,
+    pz: stair ? 0 : 0.1, zs: stair ? STAIR_W / WOOD_D : 1,
+    plane: new THREE.Plane().setFromNormalAndCoplanarPoint(g.getWorldDirection(new THREE.Vector3()), g.getWorldPosition(new THREE.Vector3())),
+  };
+  f.mid = frameAt(f, b.w / 2, b.h / 2, stair ? 0.4 : 0.7);
   frameState(f);
-  burst(new THREE.Vector3(x0 + b.w * S / 2, 0.3, FRAME_Z + b.h * S / 2), '#e8c890', 18, 3);
+  burst(frameAt(f, b.w / 2, b.h / 2, 0.3), '#e8c890', 18, 3);
   return f;
 }
 function frameState(f) {
@@ -529,8 +508,8 @@ function frameState(f) {
   f.exact = f.open.length % 5 === 0 && C.solve(f.open, 1).length > 0;
   f.sig = '';
 }
-// Every spot a piece could lie in a frame: covering at least one empty square of it, clear of
-// the pieces already there. Squares off the frame are allowed; `over` counts them.
+// Every spot a piece could go in a frame: covering at least one empty square of it, clear of the
+// pieces already there. Squares off the frame are allowed; `over` counts them.
 function frameFits(cells) {
   const out = [], b = C.bbox(cells);
   for (const f of frames()) {
@@ -545,20 +524,23 @@ function frameFits(cells) {
         if (f.occ.has(kk)) { ok = false; break; }
         if (!f.set.has(kk)) over++;
       }
-      if (ok) out.push({ frame: f, dr, dc, over, cx: f.x0 + (dc + b.w / 2) * S, cz: f.z0 + (dr + b.h / 2) * S });
+      if (!ok) continue;
+      const gc = dc + b.w / 2, gr = dr + b.h / 2, w = frameAt(f, gc, gr);
+      out.push({ frame: f, dr, dc, over, gc, gr, cx: w.x, cy: w.y, cz: w.z });
     }
   }
   return out;
 }
-// A piece lying in a frame, where it ends up (no flying in): for placing, and for a joiner's copy.
+// A piece in a frame, where it ends up (no flying in): for placing, and for a joiner's copy.
 function putFramePiece(f, i) {
   const g = pieceGroup(i.shape, woodMat(i.letter));
-  g.position.set(i.dc * S, -i.dr * S, 0.1);
+  g.position.set(i.dc * S, -i.dr * S, f.pz);
+  g.scale.z = f.zs;
   f.group.add(g);
   const cells = i.shape.map(([r, c]) => k(r + i.dr, c + i.dc));
   cells.forEach((kk) => { f.occ.add(kk); if (f.set.has(kk)) f.filled.add(kk); });
-  const b = C.bbox(i.shape);
-  const piece = { group: g, cells, shape: i.shape, over: i.over, cx: f.x0 + (i.dc + b.w / 2) * S, cz: f.z0 + (i.dr + b.h / 2) * S, by: i.by, info: i, undo: null };
+  const b = C.bbox(i.shape), w = frameAt(f, i.dc + b.w / 2, i.dr + b.h / 2);
+  const piece = { group: g, cells, shape: i.shape, over: i.over, cx: w.x, cy: w.y, cz: w.z, by: i.by, info: i, undo: null };
   f.pieces.push(piece);
   return piece;
 }
@@ -573,7 +555,7 @@ function placeFrame(t, by, hand) {
   const undo = piece.undo = { frame: f, letter: info.letter, shape: info.shape, piece, hpAfter: null };
   if (by === myId()) lastPlaced = undo;
   frameState(f);
-  if (isHost()) send('all', { t: 'place', frame: f.si, ...info });
+  if (isHost()) send('all', { t: 'place', frame: f.i, ...info });
   tween(0.32, (s) => {
     g.position.lerpVectors(from.clone().add(off), to, 1 - (1 - s) ** 3);
     g.position.z += Math.sin(s * Math.PI) * 0.6;
@@ -581,7 +563,7 @@ function placeFrame(t, by, hand) {
     g.position.copy(to);
     if (!f.pieces.includes(piece)) return;
     undo.hpAfter = 0;
-    burst(new THREE.Vector3(piece.cx, 0.15, piece.cz), '#e8c890', 8, 2);
+    burst(new THREE.Vector3(piece.cx, piece.cy + 0.15, piece.cz), '#e8c890', 8, 2);
     if (f.filled.size === f.cells.length) finishFrame(f);
     else if (piece.over && by === myId()) toast('It sticks out over the frame: the spare gets sawn off', false, true);
   });
@@ -599,7 +581,7 @@ function plugGaps(f) {
   const dead = f.open.filter(([r, c]) => !reachable(r, c));
   if (!dead.length) return 0;
   plugCells(f, dead);
-  if (isHost()) send('all', { t: 'plug', si: f.si, cells: dead });
+  if (isHost()) send('all', { t: 'plug', fi: f.i, cells: dead });
   return dead.length;
 }
 function plugCells(f, cells) {
@@ -607,9 +589,10 @@ function plugCells(f, cells) {
     f.occ.add(k(r, c)); f.filled.add(k(r, c));
     f.scrapCells.push([r, c]);
     const m = mesh(scrapGeo, scrapMat);
-    m.position.set((c + 0.5) * S, -(r + 0.5) * S, 0.02);
+    m.position.set((c + 0.5) * S, -(r + 0.5) * S, f.kind === 'stair' ? -STAIR_W / 2 : 0.02);
+    if (f.kind === 'stair') m.scale.z = STAIR_W / 0.16;
     f.group.add(m);
-    burst(new THREE.Vector3(f.x0 + (c + 0.5) * S, 0.2, f.z0 + (r + 0.5) * S), '#f0d9a8', 6, 2);
+    burst(frameAt(f, c + 0.5, r + 0.5, 0.2), '#f0d9a8', 6, 2);
   }
   frameState(f);
 }
@@ -622,8 +605,9 @@ function checkGaps() {
     if (f.filled.size === f.cells.length) finishFrame(f);
   }
 }
-// The frame's full: saw off what sticks out, then hoist the deck up onto the wall.
-function finishFrame(f) {
+// The frame's full: saw off what sticks out. A walk is then hauled up onto the wall; stairs are
+// done where they stand. `quiet` is for a joiner catching up: no sawdust, no pay, no waiting.
+function finishFrame(f, quiet = false) {
   if (f.done) return;
   f.done = true;
   f.label.remove();
@@ -636,41 +620,79 @@ function finishFrame(f) {
       waste++;
       const m = p.group.children[i], at = new THREE.Vector3();
       m.getWorldPosition(at);
-      burst(at.setY(0.2), '#f0d9a8', 10, 2.5);
+      if (!quiet) burst(at, '#f0d9a8', 10, 2.5);
       m.visible = false;
     });
     old.visible = false;
     p.group.add(outline(kept, 0.002, '#4a2a12'));
   }
-  if (waste || f.scrapCells.length) toast(waste ? `Sawn to fit: ${waste} square${waste > 1 ? 's' : ''} of offcuts` : 'Patched with offcuts: it\'ll do');
-  else { G.gold += PAY.master; updateStats(); toast(`Shipshape! Not a scrap wasted (+${PAY.master})`); }
+  if (!quiet) {
+    if (waste || f.scrapCells.length) toast(waste ? `Sawn to fit: ${waste} square${waste > 1 ? 's' : ''} of offcuts` : 'Patched with offcuts: it\'ll do');
+    else { G.gold += PAY.master; updateStats(); toast(`Shipshape! Not a scrap wasted (+${PAY.master})`); }
+  }
+  const j = ramp.jobs[f.i];
+  if (f.kind === 'stair') { j.up = true; jobDone(j, quiet); return; }
   const g = f.group, p0 = g.position.clone(), p1 = new THREE.Vector3(p0.x, ramp.T - 0.05, -0.85);
+  const land = () => {
+    g.position.copy(p1);
+    g.updateMatrixWorld(true);
+    Object.assign(j, { up: true, x0: p1.x, z0: p1.z, set: f.set });
+    jobDone(j, quiet);
+  };
+  if (quiet) { land(); return; }
+  // Hauled up on four ropes from a block over the wall: up first, then in over the top.
+  const top = new THREE.Vector3(p0.x + f.b.w * S / 2, ramp.T + 2.4, -0.3);
+  const block = mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.14, 12), railMat);
+  block.rotation.x = Math.PI / 2;
+  block.position.copy(top);
+  const pos = new Float32Array(24), geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const ropes = new THREE.LineSegments(geo, ropeMat);
+  ropes.frustumCulled = false;
+  den.add(block, ropes);
+  const corners = [[0, 0], [f.b.w, 0], [0, f.b.h], [f.b.w, f.b.h]];
+  const rig = () => {
+    g.updateMatrixWorld(true);
+    corners.forEach(([c, r], n) => { const w = frameAt(f, c, r, 0.1); pos.set([top.x, top.y, top.z, w.x, w.y, w.z], n * 6); });
+    geo.attributes.position.needsUpdate = true;
+  };
+  rig();
   const ease = (u) => (u < 0.5 ? 2 * u * u : 1 - (-2 * u + 2) ** 2 / 2);
-  tween(0.9, () => {}, () => tween(1.5, (u) => {
-    // Up first, then in over the top of the wall.
-    g.position.y = p0.y + (p1.y - p0.y) * ease(Math.min(1, u * 1.6));
-    g.position.z = p0.z + (p1.z - p0.z) * ease(Math.max(0, (u - 0.35) / 0.65));
-  }, () => { den.remove(g); buildSection(f.si); }));
+  tween(0.9, rig, () => tween(2.2, (u) => {
+    g.position.y = p0.y + (p1.y - p0.y) * ease(Math.min(1, u * 1.5));
+    g.position.z = p0.z + (p1.z - p0.z) * ease(Math.max(0, (u - 0.4) / 0.6));
+    rig();
+  }, () => {
+    land();
+    burst(new THREE.Vector3(top.x, ramp.T, 0), '#e8c890', 16, 3);
+    tween(0.6, () => {}, () => den.remove(block, ropes));
+  }));
 }
-function buildSection(si, quiet = false) {
-  const s = ramp.secs[si];
-  if (s.built) return;
-  s.built = true;
-  s.g.visible = true;
+// A frame's done. The rest of the same stretch comes straight away; the next stretch's timber
+// comes when the next wave's beaten off.
+function jobDone(j, quiet) {
   if (quiet) return;
-  tween(0.5, (t) => { s.g.scale.y = 0.01 + 0.99 * (1 - (1 - t) ** 3); s.g.position.y = ramp.T * (1 - s.g.scale.y) * 0.98; }, () => { s.g.scale.y = 1; s.g.position.y = 0; });
-  for (let i = 0; i < 3; i++) burst(new THREE.Vector3(s.x0 + Math.random() * (s.x1 - s.x0), ramp.T, 0), '#e8c890', 12, 3);
-  toast(ramp.secs.every((x) => x.built) ? 'The whole rampart is up!' : 'Rampart built: climb up and throw from the wall!');
+  const stretch = ramp.jobs.filter((o) => o.si === j.si);
+  const msg = ramp.jobs.every((o) => o.up) ? 'The whole rampart is up!'
+    : stretch.every((o) => o.up) ? 'That stretch is up: climb the stairs and throw from the wall!'
+    : 'The walk\'s up on the wall. Now build the stairs to it';
+  setTimeout(() => toast(msg), 1500);
+  if (!guest() && ramp.jobs[ramp.next]?.si === j.si) openJob(ramp.next);
 }
-const builtAt = (x) => ramp.secs.some((s) => s.built && x >= s.x0 - 0.01 && x <= s.x1 + 0.01);
 // How high the floor is here: the wall-walk, the stairs, or the ground. `pad` widens the stairs'
-// footprint a little, so you bump into their side instead of walking into them.
+// footprint a little, so you bump into their side instead of walking into them. Stairs still
+// being built are in the way.
 function heightAt(x, z, pad = 0) {
   if (!ramp) return 0;
-  if (z <= ramp.zTop && Math.abs(x) <= ramp.half && builtAt(x)) return ramp.T;
-  for (const [si, [x0, x1]] of ramp.stairs.entries()) {
-    if (!ramp.secs[si ? 2 : 0].built) continue;
-    if (x >= x0 - pad && x <= x1 + pad && z < ramp.zBot + pad) return Math.max(0, Math.min(ramp.T, ramp.T * (ramp.zBot - z) / ramp.run + ramp.T / (2 * ramp.n)));
+  for (const j of ramp.jobs) {
+    if (j.kind === 'deck') {
+      if (j.up && j.set.has(k(Math.floor((z - j.z0) / S), Math.floor((x - j.x0) / S)))) return ramp.T;
+      continue;
+    }
+    const [x0, x1] = ramp.stairs[j.si ? 1 : 0];
+    if (x < x0 - pad || x > x1 + pad || z < ramp.zTop - 0.05 || z > ramp.zBot + pad) continue;
+    if (j.up) return Math.max(0, Math.min(ramp.T, ramp.T * (ramp.zBot - z) / ramp.run + ramp.T / (2 * ramp.n)));
+    if (j.frame) return 99;
   }
   return 0;
 }
@@ -903,7 +925,7 @@ function labelFor(h) {
 function frameLabel(f) {
   const left = f.open;
   const need = left.length === 5 && f.exact ? `needs ${an(C.identify(left))}` : f.exact ? `room for ${left.length / 5} more pieces` : `${left.length} squares left: any piece, the spare's sawn off`;
-  return ['label deck', `Rampart frame<small>${need}</small>`];
+  return ['label deck', `${f.kind === 'stair' ? 'Stairs up to the wall' : 'Wall-walk frame'}<small>${need}</small>`];
 }
 function updateStats() {
   $('s-gold').textContent = Math.max(0, G.gold);
@@ -934,12 +956,19 @@ addEventListener('keydown', (e) => {
 });
 addEventListener('keyup', (e) => keys.delete(e.key.toLowerCase()));
 addEventListener('blur', () => keys.clear());
-const ray = new THREE.Raycaster(), wallPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0), floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+const ray = new THREE.Raycaster(), wallPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 renderer.domElement.addEventListener('mousemove', (e) => {
   ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1), camera);
   const p = new THREE.Vector3();
-  const nearFrame = (f) => p.x > f.x0 - 1.2 && p.x < f.x0 + f.b.w * S + 1.2 && p.z < f.z0 + f.b.h * S + 1.2;
-  if (pirate.h < 0.3 && ray.ray.intersectPlane(floorPlane, p) && p.z > WALL_Z - 0.3 && frames().some(nearFrame)) { mouse = { floor: true, x: p.x, z: p.z }; mouseMode = true; return; }
+  // A rampart frame you're pointing at (the nearest, if one's in front of another), else the wall.
+  let best = null;
+  if (pirate.h < 0.3) for (const f of frames()) {
+    if (!ray.ray.intersectPlane(f.plane, p)) continue;
+    const l = f.group.worldToLocal(p.clone()), fc = l.x / S, fr = -l.y / S, d = p.distanceTo(ray.ray.origin);
+    if (fc < -1.2 || fc > f.b.w + 1.2 || fr < -1.2 || fr > f.b.h + 1.2) continue;
+    if (!best || d < best.d) best = { d, frame: f, fc, fr };
+  }
+  if (best) { mouse = best; mouseMode = true; return; }
   if (!ray.ray.intersectPlane(wallPlane, p)) { mouse = null; return; }
   const fc = p.x / S + wall.W / 2, fr = wall.H - p.y / S;
   mouse = fc >= -1 && fc <= wall.W + 1 && fr >= -1 && fr <= wall.H + 1 ? { fc, fr } : null;
@@ -1091,7 +1120,7 @@ function place(t, by = myId(), hand = carry) {
   if (guest() && hand === carry) {
     net.pending = carry;
     carry = null;
-    return send('host', { t: 'place', hole: t.hole, frame: t.frame?.si, dr: t.dr, dc: t.dc, patch: !!t.patch, letter: hand.letter, shape: hand.cells, pile: piles.indexOf(hand.from) });
+    return send('host', { t: 'place', hole: t.hole, frame: t.frame?.i, dr: t.dr, dc: t.dc, patch: !!t.patch, letter: hand.letter, shape: hand.cells, pile: piles.indexOf(hand.from) });
   }
   return t.frame ? placeFrame(t, by, hand) : placeWall(t, by, hand);
 }
@@ -1166,7 +1195,7 @@ function canTakeBack() {
 function takeBack() {
   const u = lastPlaced, where = u.frame || u.h;
   lastPlaced = null;
-  if (guest()) return send('host', { t: 'takeback', hole: u.frame ? undefined : wall.holes.indexOf(where), frame: u.frame?.si });
+  if (guest()) return send('host', { t: 'takeback', hole: u.frame ? undefined : wall.holes.indexOf(where), frame: u.frame?.i });
   unplace(where, u.piece.by, true);
 }
 // Off comes the last piece in a hole or frame, put back as it was before. Whoever put it there
@@ -1202,7 +1231,7 @@ function unplace(where, by, mine = by === myId()) {
     wallGroup.remove(piece.group);
   }
   if (lastPlaced?.piece === piece) lastPlaced = null;
-  if (isHost()) send('all', { t: 'unplace', hole: frame ? undefined : wall.holes.indexOf(where), frame: frame ? where.si : undefined, by });
+  if (isHost()) send('all', { t: 'unplace', hole: frame ? undefined : wall.holes.indexOf(where), frame: frame ? where.i : undefined, by });
   if (mine) holdPiece(piece.info.letter, piece.info.shape, null, at);
 }
 // Into your hands, lifting from `at`: a piece from a crate (`from`), or one taken back off.
@@ -1588,8 +1617,8 @@ function updateWaves(dt) {
   if (G.cannonT <= 0) { fireCannon(); G.cannonT = Math.max(9, 22 - 2 * G.wave); }
   if (!G.toSpawn && !raiders.length) {
     G.phase = 'calm'; G.phaseT = CALM_SECS;
-    const si = SECTION_ORDER[G.wave - 1];
-    if (si !== undefined && !ramp.secs[si].built && !ramp.secs[si].frame && openFrame(si)) say(`Wave ${G.wave} beaten off! Timber's come: build the rampart in its frame`);
+    // Timber for the next stretch, once nothing's still being built.
+    if (!frames().length && !ramp.jobs.some((j) => j.frame && !j.up) && openJob(ramp.next)) say(`Wave ${G.wave} beaten off! Timber's come: build the rampart in its frame`);
     else say(`Wave ${G.wave} beaten off!`);
   }
 }
@@ -1621,41 +1650,41 @@ const ghostMats = {
 function aim() {
   target = null;
   if (!carry || pirate.h > 0.3) return;
-  // A rampart frame on the floor, when you're stood back from the wall (or pointing at it).
-  if (frames().length && (mouseMode ? mouse?.floor : pirate.z > WALL_Z)) {
-    const fl = frameFits(carry.cells);
-    const dist = (o) => Math.hypot(o.cx - pirate.x, o.cz - pirate.z);
-    if (mouseMode) {
-      const d = (o) => Math.hypot(o.cx - mouse.x, o.cz - mouse.z) / S + (o.over ? 0.35 : 0);
-      fl.sort((a, z) => d(a) - d(z));
-      if (fl[0] && d(fl[0]) <= 1.8) target = { ...fl[0], ok: dist(fl[0]) <= REACH, far: dist(fl[0]) > REACH };
-    } else {
-      const near = fl.filter((o) => dist(o) <= REACH).sort((a, z) => a.over - z.over || dist(a) - dist(z));
-      if (near.length) target = { ...near[cycle % near.length], ok: true, count: near.length };
-    }
+  const fl = frames().length ? frameFits(carry.cells) : [];
+  const fd = (o) => Math.hypot(o.cx - pirate.x, o.cz - pirate.z);
+  // Pointing at a rampart frame: the spot nearest the pointer.
+  if (mouseMode && mouse?.frame) {
+    const d = (o) => Math.hypot(o.gc - mouse.fc, o.gr - mouse.fr) + (o.over ? 0.35 : 0);
+    const mine = fl.filter((o) => o.frame === mouse.frame).sort((a, z) => d(a) - d(z));
+    if (mine[0] && d(mine[0]) <= 1.8) target = { ...mine[0], ok: fd(mine[0]) <= REACH, far: fd(mine[0]) > REACH };
     return;
   }
-  if (pirate.z > WALL_Z + 2.5 || mouse?.floor) return;
-  const list = fits(carry.cells).concat(patchFits(carry.cells));
-  const b = C.bbox(carry.cells);
+  if (pirate.z > WALL_Z + 2.5 && !fl.length) return;
   const reach = (o) => Math.abs(o.cx - pirate.x) <= REACH && pirate.z <= WALL_Z;
+  const list = pirate.z <= WALL_Z + 2.5 ? fits(carry.cells).concat(patchFits(carry.cells)) : [];
+  const b = C.bbox(carry.cells);
   if (mouseMode && mouse) {
+    if (pirate.z > WALL_Z + 2.5) return;
     const d = (o) => Math.hypot(o.fc - mouse.fc, o.fr - mouse.fr) + (o.over ? 0.35 : 0);
     list.sort((a, z) => d(a) - d(z));
     const best = list[0];
     if (best && d(best) <= 1.8) target = { ...best, ok: reach(best), far: !reach(best) };
     else target = { dr: Math.round(mouse.fr - b.h / 2), dc: Math.round(mouse.fc - b.w / 2), ok: false };
-  } else if (pirate.z <= WALL_Z) {
-    // Clean fits first, nearest first; then the ways to board it over.
-    const near = list.filter(reach).sort((a, z) => (a.over > 0) - (z.over > 0) || !!a.patch - !!z.patch || Math.abs(a.cx - pirate.x) - Math.abs(z.cx - pirate.x) || a.over - z.over);
+  } else if (!mouseMode) {
+    // Everything in reach: a walk frame on the floor when stood back from the wall, the stairs
+    // when stood beside them, the holes when at the wall. Clean fits first, nearest first; then
+    // the ways to board it over.
+    const nf = fl.filter((o) => fd(o) <= REACH && (o.frame.kind === 'stair' || pirate.z > WALL_Z));
+    const dd = (o) => (o.frame ? fd(o) : Math.abs(o.cx - pirate.x));
+    const near = list.filter(reach).concat(nf).sort((a, z) => (a.over > 0) - (z.over > 0) || !!a.patch - !!z.patch || dd(a) - dd(z) || a.over - z.over);
     if (near.length) target = { ...near[cycle % near.length], ok: true, count: near.length };
   }
 }
 function drawGhost() {
   const kind = !target ? '' : !target.ok ? 'no' : target.over ? 'over' : 'ok';
   const f = target?.frame;
-  const gz = f ? 0.16 : target?.patch ? patchZ(target.layer) + 0.07 : kind === 'over' ? 0.45 : 0.08;
-  const want = target && carry ? `${f ? f.si : 'w'}|${carry.cells.map((x) => x.join()).join(';')}|${target.dr},${target.dc}|${kind}|${gz}` : '';
+  const gz = f ? (f.kind === 'stair' ? 0.08 : 0.16) : target?.patch ? patchZ(target.layer) + 0.07 : kind === 'over' ? 0.45 : 0.08;
+  const want = target && carry ? `${f ? f.i : 'w'}|${carry.cells.map((x) => x.join()).join(';')}|${target.dr},${target.dc}|${kind}|${gz}` : '';
   if (want === ghostKey) return;
   ghostKey = want;
   if (ghost) { ghost.parent?.remove(ghost); ghost = null; }
@@ -1684,14 +1713,14 @@ function prompt() {
   } else if (!carry && canTakeBack()) t = `Space: take the ${lastPlaced.letter} back off`;
   else if (carry) {
     const more = target?.count > 1 ? ` · Tab: other spots (${target.count})` : '';
-    if (target?.frame) t = !target.ok ? 'Walk closer to lay it there' : target.over ? `Space: lay it in the frame (it sticks out: the spare gets sawn off)${more}` : `Space: lay the ${carry.letter} in the rampart frame${more}`;
+    if (target?.frame) t = !target.ok ? 'Walk closer to fit it there' : target.over ? `Space: fit it in the frame (it sticks out: the spare gets sawn off)${more}` : `Space: fit the ${carry.letter} in the ${target.frame.kind === 'stair' ? 'stairs' : 'wall-walk frame'}${more}`;
     else if (target?.ok && target.patch) t = `Space: nail it on behind (one more layer for them to hack through)${more}`;
     else if (target?.ok && !target.over) t = `Space: fit the ${carry.letter} here${more}`;
     else if (target?.ok) t = `Space: board it over (weak, no Masterpiece)${more}`;
     else if (target?.far) t = 'Walk closer to fit it there';
     else if (pirate.z <= WALL_Z || (mouseMode && mouse)) t = `The ${carry.letter} won't go there · Q/E turn · F flip`;
     else t = `Carry the ${carry.letter} to a hole`;
-  } else t = frames().some((f) => pirate.x > f.x0 - 1 && pirate.x < f.x0 + f.b.w * S + 1 && pirate.z > WALL_Z) ? 'Fetch pieces to build the rampart in its frame' : 'Fetch a piece from the piles';
+  } else t = frames().length && pirate.z > WALL_Z ? 'Fetch pieces to build the rampart in its frame' : 'Fetch a piece from the piles';
   const hacking = raiders.some(atWall);
   if (onRampart()) {
     if (!carry) t = 'Bring a piece up here to throw at the raiders';
@@ -1699,7 +1728,7 @@ function prompt() {
     else t = hacking ? 'Walk along to get in range' : 'Up on the rampart · watch for raiders at the wall';
   } else if (pirate.h > 0.3) t = carry ? 'Up the stairs to the rampart' : 'Up to the rampart';
   else if (loose) t = carry ? `${f.kind === 'pile' || target?.ok ? t + ' · ' : ''}Shift or click: throw the ${carry.letter} at the raider!` : 'A raider is in the den! Grab a piece to throw at them';
-  else if (hacking && carry && !target?.ok && ramp.secs.some((x) => x.built)) t += ' · or take it up the rampart and throw it';
+  else if (hacking && carry && !target?.ok && stairsUp()) t += ' · or take it up the rampart and throw it';
   const el = $('prompt');
   if (el.textContent !== t) el.textContent = t;
 }
@@ -1818,7 +1847,7 @@ function sendMe() {
 }
 function snapshot() {
   send('all', {
-    t: 'snap', g: { ...G }, p: pilesOut(), s: ramp.secs.map((s) => (s.built ? 1 : 0)), cv: cannon.visible ? 1 : 0,
+    t: 'snap', g: { ...G }, p: pilesOut(), cv: cannon.visible ? 1 : 0,
     h: wall.holes.map((h) => [r2(h.hp), h.maxHp, h.status, h.pieces.length, boardsOf(h).map((p) => r2(p.hp))]),
     r: raiders.map((r) => [r.id, r2(r.x), r2(r.z), r2(r.m.g.position.y), r2(r.m.g.rotation.y), r2(r.m.g.rotation.x), r2(r.m.g.scale.x), r.state, r.inside ? 1 : 0, r.loot ? 1 : 0, wall.holes.indexOf(r.hole), r2(r.slot), r.look]),
   });
@@ -1830,7 +1859,6 @@ function applySnap(m) {
   if (G.wave > 0) $('intro').classList.add('off');
   updateStats();
   pilesIn(m.p);
-  m.s.forEach((b, si) => { if (b && !ramp.secs[si].built) buildSection(si); });
   cannon.visible = !!m.cv;
   m.h.forEach(([hp, maxHp, status, n, bh], i) => {
     const h = wall.holes[i];
@@ -1886,8 +1914,8 @@ function sendSync(to, fresh = false) {
   send(to, {
     t: 'sync', fresh, g: { ...G }, W: wall.W, H: wall.H, gate: wall.gateCols, cv: cannon.visible ? 1 : 0, p: pilesOut(),
     holes: wall.holes.map((h) => ({ cells: h.cells, status: h.status, hp: h.hp, maxHp: h.maxHp, pieces: h.pieces.map((p) => p.info), boards: boardsOf(h).map((p) => p.hp) })),
-    built: ramp.secs.map((s) => s.built),
-    frames: ramp.secs.map((s) => (s.frame && !s.frame.done ? { cells: s.frame.cells, pieces: s.frame.pieces.map((p) => p.info), scraps: s.frame.scrapCells } : null)),
+    next: ramp.next,
+    jobs: ramp.jobs.map((j) => (j.frame ? { cells: j.frame.cells, pieces: j.frame.pieces.map((p) => p.info), scraps: j.frame.scrapCells, done: j.frame.done } : null)),
   });
 }
 function applySync(s) {
@@ -1913,14 +1941,16 @@ function applySync(s) {
     h.sig = '';
   });
   relining();
-  s.built.forEach((b, si) => { if (b) buildSection(si, true); });
-  s.frames.forEach((d, si) => {
+  // The rampart as built so far: every piece of it, where it is.
+  s.jobs.forEach((d, i) => {
     if (!d) return;
-    const f = openFrame(si, d.cells);
+    const f = openJob(i, d.cells);
     d.pieces.forEach((info) => putFramePiece(f, info));
     if (d.scraps.length) plugCells(f, d.scraps);
     frameState(f);
+    if (d.done) finishFrame(f, true);
   });
+  ramp.next = s.next;
   cannon.visible = !!s.cv;
   pilesIn(s.p);
   if (s.fresh) { Object.assign(pirate, { x: 0, z: 8, h: 0 }); $('intro').classList.remove('off'); }
@@ -1942,7 +1972,7 @@ function becomeHost() {
 // The host's side: the crew asking for things.
 function hostPlace(m) {
   const pile = piles[m.pile] || null;
-  const list = m.frame != null ? frameFits(m.shape).filter((o) => o.frame.si === m.frame) : fits(m.shape).concat(patchFits(m.shape)).filter((o) => o.hole === m.hole);
+  const list = m.frame != null ? frameFits(m.shape).filter((o) => o.frame.i === m.frame) : fits(m.shape).concat(patchFits(m.shape)).filter((o) => o.hole === m.hole);
   const t = list.find((o) => o.dr === m.dr && o.dc === m.dc && !!o.patch === !!m.patch);
   if (!t) return send(m.from, { t: 'grant', letter: m.letter, cells: m.shape, pile: m.pile, why: 'Someone got there first' });
   net.holds.delete(m.from);
@@ -1955,7 +1985,7 @@ function hostThrow(m) {
   if (r && !r.gone) throwAt(r, hand, m.from);
   else { scene.remove(hand.group); refill(hand.from); }
 }
-const slotOf = (m) => (m.frame != null ? ramp.secs[m.frame]?.frame : wall.holes[m.hole]);
+const slotOf = (m) => (m.frame != null ? ramp.jobs[m.frame]?.frame : wall.holes[m.hole]);
 
 function onNet(m) {
   const mt = net.crew.get(m.from);
@@ -2009,7 +2039,7 @@ function onNet(m) {
     case 'place':
       if (net.host) hostPlace(m);
       else {
-        const t = { ...m, frame: m.frame != null ? ramp.secs[m.frame].frame : undefined };
+        const t = { ...m, frame: m.frame != null ? ramp.jobs[m.frame]?.frame : undefined };
         if (t.frame || wall.holes[m.hole]) place(t, m.by, handAt(m.by, m.letter, m.shape));
       }
       break;
@@ -2025,9 +2055,9 @@ function onNet(m) {
     case 'unboard': { const h = wall.holes[m.hole]; if (!net.host && h?.pieces[m.i]) breakBoard(h, h.pieces[m.i]); break; }
     case 'shoot': if (!net.host) shoot(m.cells); break;
     case 'blast': if (!net.host) blast(m.cells, true); break;
-    case 'frame': if (!net.host && !ramp.secs[m.si].frame && !ramp.secs[m.si].built) openFrame(m.si, m.cells); break;
+    case 'frame': if (!net.host) openJob(m.fi, m.cells); break;
     case 'plug': {
-      const f = ramp.secs[m.si]?.frame;
+      const f = ramp.jobs[m.fi]?.frame;
       if (net.host || !f || f.done) break;
       plugCells(f, m.cells);
       toast('A gap none of your pieces can reach: plugged with offcuts', false, true);
@@ -2323,7 +2353,7 @@ function update(dt) {
   for (const f of frames()) {
     const [cls, html] = frameLabel(f);
     if (f.sig !== cls + html) { f.sig = cls + html; f.label.className = cls; f.label.innerHTML = html; }
-    v3.set(f.x0 + f.b.w * S / 2, 0.7, f.z0 + f.b.h * S / 2).project(camera);
+    v3.copy(f.mid).project(camera);
     f.label.style.left = `${(v3.x + 1) / 2 * innerWidth}px`;
     f.label.style.top = `${(1 - v3.y) / 2 * innerHeight}px`;
     f.label.style.display = v3.z > 1 ? 'none' : '';
@@ -2334,6 +2364,6 @@ newGame();
 requestAnimationFrame(frame);
 
 // For poking at it from the console.
-window.den = { net, onNet, sendSync, joinCrew, leaveCrew, buildSection, openFrame, frameFits, frames, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+window.den = { net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };
