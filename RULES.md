@@ -239,6 +239,16 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     to aim, forwards at the raiders coming in and their cannon or back along the wall at those
     hacking at it, fires from its own muzzle and recoils back in, square again. They don't all fire
     at the same raider. Every gun is worth loading.
+  - **One raider, one gun.** Two loaded guns on one side both ran out at the same raider, then one
+    hauled back in; the user found the lunge and back-off weird. A gun now claims its target and
+    keeps it till it fires, and the others only pick from who's left (or the raiders' cannon). With
+    nothing left to aim at, a loaded gun stays in.
+  - **What's in a gun shows in the gun, as in Puzzle Pirates.** The user: whatever's loaded should
+    visibly show in the cannon. An open trough along the top of each barrel holds a little copy of
+    each store rammed in: powder by the breech, then the wad, then the shot by the muzzle, each
+    popping in as it's loaded. The trough glows when it's ready to fire, goes red when fouled, and a
+    fired gun smokes until it's swabbed. The gun's label hangs out over its gunport so it never
+    hides the barrel.
   - **The board:** no crates round the barrel in the middle, none in the lanes, more out towards
     the edges, never side by side, making pockets that trap a store and loops that bring stores back
     past a gun. Each new board is tried out (stores rolling with no arrows) to pick one where about
@@ -257,8 +267,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **The mouse works as in Gunnery:** click a plank to chalk the arrow the ghost shows, drag the
     way you want it to point, the wheel turns it (it never zooms on the tower), click an arrow to
     turn it, right-click to rub it out. Space chalks the plank ahead of you, Q/E turn it.
-  - **To try it straight away:** `den.html?try=all` (or `?try=gundeck`) starts with the rampart and
-    gun tower built and you up on the tower, for the user's own testing.
+  - **To try it straight away:** `den.html?try=all` (or `?try=gundeck`) starts with the rampart,
+    gun tower and house built and you up on the tower, for the user's own testing. It must load
+    fast: it once took about a minute, because the engine's solver works row by row and a long,
+    thin frame (the tower's 3-row strip, a wall-walk) sent it backtracking for ages. The den's copy
+    of the solver turns wide frames on their side and solves them column by column (a millisecond),
+    which also stops the game stalling when a new wall-walk frame is laid out.
 - **Making it yours (pirate looks and the den's dress).** The user wants players to be able to make
   it all their own, and the general feel must match the rest of the den. Code: `js/den-look.js`
   (the pirate builder, dyes, familiars, flag drawing) and the "dressing" and "decorating"
@@ -275,6 +289,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     little forward under them.
   - **Familiars** (YPPedia: Familiar): a parrot (two colours), a monkey (natural colours only, as in
     the game) or an octopus, on the shoulder, each with a little life (bobbing, flapping, tail).
+  - **The shack stays small and open at the back.** The user loves its size ("it gives it a lot of
+    character") and having no back is essential to see inside and decorate it: "a cheap, simple
+    lean-to thing". Don't add a back wall. The camera follows you right to the back of the den
+    where it stands (it used to stop short).
   - **The house is built like everything else.** The user: "you should build it in a carpentry
     style way, the same as you build the decks: you put something on the ground and it starts
     hoisting it into the side of a house". You ask for it (Den tab, Build a house), and its four
@@ -288,7 +306,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     barrel, a ghost of it follows the pointer, wheel or Q/E turns it, click puts it down,
     right-click takes one down. A ring shows green (fine), red (not there) or amber (one's here).
     Never in front of the wall (z < 5.2, where you mend and build), on a frame, in the house or by
-    the crates. Up to 24 things. They stay put game after game.
+    the crates. Up to 24 things. They stay put game after game. **It must be obvious how to start:**
+    the user couldn't find it in the Your pirate panel, so it has its own **Decorate** button next
+    to Your pirate (it reads "Done decorating" while you're at it) and the **B** key.
   - **Flags are yours to design:** emblem (skull and crossbones, skull and cutlasses, anchor,
     kraken, bleeding heart), cloth pattern (plain, border, stripes, hoist band) and three dyes. The
     den's own flags (over the gate, on the gun tower's outer corners, on the house roof) fly your
@@ -305,7 +325,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   keep nailing more on. Boards may cover the hole's wood and the stone round it, but not another hole
   or the gate. Clean fits and boarding over come first when choosing a spot; boards behind come last.
 - **The camera can be turned and zoomed:** Z/C or right-drag to turn and tilt, -/= to zoom, V to
-  reset. Walking follows the way the camera faces. Q/E turn the piece, right-click flips it.
+  reset. **It turns all the way round**, so you can see the outside of the wall (the user wants
+  that, especially for decorating it); moonlight from outside lights the wall's outer face.
+  Walking follows the way the camera faces. Q/E turn the piece, right-click flips it.
 - **The wheel turns the piece whenever it's showing a spot to fit** (that's what it was for first);
   only otherwise does it zoom.
 - **Throwing at a raider is the only way to discard.** No scrap fire, no bin: a piece you don't
@@ -318,5 +340,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   waits 75 seconds and starts small.
 - **The den has a gate** and raiders attack from the far side of the wall, with swords and (from
   wave 2) a cannon that blasts fresh holes. Keep repairing.
+- **A hole is open right through the wall.** The user likes the empty holes, a "nice incomplete
+  wall": no backing behind them that looks like cladding or boarding. The dark behind the stones
+  (hiding the gaps between them) has the holes cut out of it, including fresh ones from the cannon.
 - **You must be able to see the raiders.** Behind the wall they show as red silhouettes through
   the stone; labels over each hole show its strength and who's attacking it.

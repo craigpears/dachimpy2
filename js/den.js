@@ -8,7 +8,15 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, cleanDesign, designOf, drawFlag, dyeHex, DYES, SKIN, HAIR, FUR, PARTS, FLAGS, PATTERNS, DECOR, MAX_DECOR, twoColours } from './den-look.js';
 
-const C = window.Carp;
+/* The main puzzle's engine, but searching a wide frame column by column (by turning it on its
+   side): row by row, a long thin strip like a wall-walk can take the solver a minute; this way,
+   a millisecond. Pentominoes turned on their side are still the same pentominoes. */
+const C = { ...window.Carp, solve(cells, limit) {
+  const b = window.Carp.bbox(cells);
+  if (b.w <= b.h) return window.Carp.solve(cells, limit);
+  const T = (cs) => cs.map(([r, c]) => [c, r]);
+  return window.Carp.solve(T(cells), limit).map((t) => t.map((p) => ({ letter: p.letter, cells: T(p.cells) })));
+} };
 const S = 0.55;          // one carpentry square, in metres
 const WOOD_D = 0.5;      // depth of a wooden piece
 const STONE_D = 0.7;
@@ -50,6 +58,10 @@ sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
 Object.assign(sun.shadow.camera, { left: -16, right: 16, top: 14, bottom: -14, near: 1, far: 45 });
 scene.add(sun);
+// Moonlight from outside, so the outer face of the wall shows when you turn the view round.
+const moon = new THREE.DirectionalLight('#a9bce0', 1.1);
+moon.position.set(4, 10, -14);
+scene.add(moon);
 
 // Keep the view wide enough to see a good stretch of wall, whatever shape the window is.
 function fitCamera() {
@@ -223,7 +235,7 @@ scene.add(wallGroup);
 const stoneGeo = new RoundedBoxGeometry(S * 0.97, S * 0.95, STONE_D, 2, 0.06);
 const X = (c) => (c - wall.W / 2) * S;     // left edge of column c
 const Y = (r) => (wall.H - r) * S;         // top edge of row r
-const holeBackMat = mat('#5a3a22', { roughness: 1 });
+const backMat = mat('#120b07', { roughness: 1 });
 const cellPlane = new THREE.PlaneGeometry(S, S);
 
 function lastGap() {
@@ -263,11 +275,6 @@ function registerHole(cells) {
 }
 function holeVisuals(h) {
   const g = new THREE.Group();
-  for (const [r, c] of h.cells) {
-    const p = mesh(cellPlane, holeBackMat, false);
-    p.position.set(X(c) + S / 2, Y(r) - S / 2, -STONE_D - 0.01);
-    g.add(p);
-  }
   const line = outline(h.cells, 0.02, '#ffd58a');
   line.position.set(X(0), Y(0), 0);
   g.add(line);
@@ -276,7 +283,24 @@ function holeVisuals(h) {
   $('labels').append(h.label);
 }
 
-let stones = null;
+let stones = null, back = null;
+/* Dark behind the stones, to hide the gaps between them, but not behind a hole: a hole is open
+   right through, so you see out to the raiders until it's mended. */
+function wallBack() {
+  if (back) { wallGroup.remove(back); back.geometry.dispose(); }
+  const pos = [];
+  for (let r = 0; r < wall.H; r++) for (let c = 0; c < wall.W; c++) {
+    if (wall.cellHole.has(k(r, c))) continue;
+    const x0 = X(c), x1 = X(c + 1), y0 = Y(r + 1), y1 = Y(r);
+    pos.push(x0, y0, 0, x1, y0, 0, x1, y1, 0, x0, y0, 0, x1, y1, 0, x0, y1, 0);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  geo.computeVertexNormals();
+  back = mesh(geo, backMat, false);
+  back.position.z = -STONE_D - 0.02;
+  wallGroup.add(back);
+}
 function buildWall() {
   wallGroup.clear();
   den.children.filter((o) => o.userData.scenery).forEach((o) => den.remove(o));
@@ -302,9 +326,7 @@ function buildWall() {
     cap.position.set(X(c) + S, Y(0) + S * 0.25, -STONE_D / 2 + 0.03);
     wallGroup.add(cap);
   }
-  const back = mesh(new THREE.PlaneGeometry(W * S, H * S), mat('#120b07', { roughness: 1 }), false);
-  back.position.set(0, H * S / 2, -STONE_D - 0.02);
-  wallGroup.add(back);
+  wallBack();
   wallGroup.add(makeGate());
   // Cave walls down both sides of the den, and rock piles where the wall meets them.
   const half = W * S / 2;
@@ -1107,7 +1129,44 @@ function gunMesh() {
   const knob = mesh(new THREE.SphereGeometry(0.075, 10, 8), dark);
   knob.position.set(0, 0.3, 0.98);
   g.add(mouth, cap, knob);
+  // An open trough along the top, where you see what's been rammed in (gunLoad).
+  const trough = mesh(new RoundedBoxGeometry(0.22, 0.04, 1.3, 2, 0.015), mat('#161210', { roughness: 1 }));
+  trough.position.set(0, 0.5, 0);
+  g.userData.trough = trough;
+  g.add(trough);
   return ink(g, 0.018);
+}
+/* What's in a gun, there to see as on the Gunnery board: powder rammed in deepest, by the breech,
+   then the wad, then the shot by the muzzle, each a little copy of the store that went in. The
+   trough goes red when the gun's fouled, and a fired gun smokes until it's swabbed out. */
+const LOAD_AT = { powder: 0.46, wad: 0.02, shot: -0.46 }, LOAD_S = 0.72;
+const LOADS = { empty: [], dirty: [], powder: ['powder'], wad: ['powder', 'wad'], loaded: ['powder', 'wad', 'shot'] };
+function gunLoad(g, dt) {
+  if (g.state === 'dirty' && (g.smokeT = (g.smokeT ?? 0) - dt) < 0) {
+    g.smokeT = 0.45;
+    burst(g.g.localToWorld(new THREE.Vector3(0, 0.32, -0.8)), '#7d7873', 2, 0.5);
+  }
+  if (g.shown === g.state) return;
+  const first = g.shown === undefined;
+  g.shown = g.state;
+  g.load ||= {};
+  const want = LOADS[g.state] ?? Object.keys(g.load);   // fouled: what was in stays in
+  for (const kind of ['powder', 'wad', 'shot']) {
+    const m = g.load[kind], on = want.includes(kind);
+    if (m && !on) { g.g.remove(m); delete g.load[kind]; }
+    if (!m && on) {
+      const it = storeMesh(kind);
+      it.children.filter((o) => o.material === glowMat).forEach((o) => it.remove(o));
+      it.position.set(0, 0.47, LOAD_AT[kind]);
+      g.g.add(it);
+      g.load[kind] = it;
+      if (first) it.scale.setScalar(LOAD_S);
+      else tween(0.35, (u) => it.scale.setScalar(LOAD_S * (u < 0.7 ? u / 0.7 * 1.25 : 1.25 - (u - 0.7) / 0.3 * 0.25)));
+    }
+  }
+  const tm = g.g.userData.trough.material;
+  tm.color.set({ fouled: '#8a1c12', dirty: '#3c3936' }[g.state] || '#161210');
+  tm.emissive.set(g.state === 'fouled' ? '#5a0d06' : g.state === 'loaded' ? '#4a3208' : '#000000');
 }
 // A light-wood crate, as on the Gunnery board, open and full of shot or bundled red stores, or shut.
 function crateMesh(i) {
@@ -1392,13 +1451,15 @@ function gunSwing(g, x, z) {
   const from = gdAt(...g.port), a = wrapA(Math.atan2(-(x - from.x), -(z - from.z)) - gunBase(g));
   return Math.abs(a) <= GUN_ARC ? a : null;
 }
-function gunTarget(g) {
+function gunTarget(g, taken = new Set()) {
   const from = gdAt(...g.port);
   let best = null, bd = Infinity;
   for (const r of raiders) {
     if (r.inside || r.gone || r.state === 'down' || !['approach', 'attack', 'hackOut'].includes(r.state) || r.z > -0.9 || r.z < -11) continue;
     if (gunSwing(g, r.x, r.z) === null || r.shotT > performance.now()) continue;   // (another gun's shot is on its way)
-    const d = Math.hypot(r.x - from.x, r.z - from.z) + (r.state === 'approach' ? 6 : 0);
+    if (taken.has(r) && g.tgt !== r) continue;   // another gun's swinging onto them
+    // (Sticking with the one it's already swinging onto, rather than lurching between two.)
+    const d = Math.hypot(r.x - from.x, r.z - from.z) + (r.state === 'approach' ? 6 : 0) - (g.tgt === r ? 4 : 0);
     if (d < bd && d < 22) { bd = d; best = r; }
   }
   if (best) {
@@ -1452,13 +1513,23 @@ function updateGunDeck(dt) {
     if (gd.tickT >= 1) { gd.tickT = Math.min(gd.tickT - 1, 0.5); gunTick(); }
     // A loaded gun with something to fire at is run out over its lane (once the lane's clear) and
     // swung onto the target; it fires once it's on.
-    gd.guns.forEach((g, i) => {
+    // Guns already onto a raider keep them; the rest pick from who's left, so two guns don't both
+    // run out at one raider and one then haul back in.
+    const taken = new Set();
+    gd.guns.forEach((g) => { if (g.state !== 'loaded') g.tgt = null; else if (g.tgt) taken.add(g.tgt); });
+    const order = gd.guns.map((g, i) => i).sort((a, b) => !!gd.guns[b].tgt - !!gd.guns[a].tgt);
+    order.forEach((i) => {
+      const g = gd.guns[i];
       if (g.state !== 'loaded') return;
-      const t = gunTarget(g);
+      if (g.tgt) taken.delete(g.tgt);
+      const t = gunTarget(g, taken);
+      g.tgt = t?.r || null;
+      if (g.tgt) taken.add(g.tgt);
       g.out = !!t && (g.out || !storeAt(...g.port));
       g.want = t ? gunSwing(g, t.x, t.z) : 0;
       if ((g.waitT -= dt) > 0 || !t || Math.abs(g.aim - g.want) > 0.06 || g.slide < 1) return;
       if (t.r) t.r.shotT = performance.now() + 2500;
+      g.tgt = null;
       fireGun(i, t.x, t.z, t.cannon);
     });
   } else gd.tickT = Math.min(1, gd.tickT + dt / GD.tick);
@@ -1478,6 +1549,7 @@ function updateGunDeck(dt) {
     else body.rotation.z = Math.sin((s.spin += moved * 9)) * 0.08;
   }
   for (const g of gd.guns) {
+    gunLoad(g, dt);
     // Hauled out slowly by the crew, then swung onto its target; the recoil throws it back in fast,
     // and it's swung back square to be loaded again.
     g.slide = g.out ? Math.min(1, g.slide + dt * 1.6) : Math.max(0, g.slide - dt * 5);
@@ -1506,8 +1578,9 @@ function gunLabels() {
       g.label.className = `label gun ${cls}`;
       g.label.innerHTML = want ? `<small>${g.state === 'fouled' ? 'Fouled! needs' : g.state === 'dirty' ? 'Fired: needs' : 'needs'}</small>${STORE_ICON[want]}${STORE_NAME[want]}` : text;
     }
-    v3.copy(g.g.position);
-    v3.y += 0.75;
+    // Out over its gunport, so it doesn't hide what's in the barrel.
+    v3.copy(gdAt(...g.port, 0.5));
+    v3.x += DC[g.d] * S * 1.1; v3.z += DR[g.d] * S * 1.1;
     v3.project(camera);
     g.label.style.left = `${(v3.x + 1) / 2 * innerWidth}px`;
     g.label.style.top = `${(1 - v3.y) / 2 * innerHeight}px`;
@@ -1885,7 +1958,7 @@ addEventListener('keydown', (e) => {
   if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) { keys.add(key); mouseMode = false; }
   if (key === 'z' || key === 'c') keys.add(key);
   if (deco.on) {
-    if (key === 'escape') decoMode(false);
+    if (key === 'escape' || key === 'b') decoMode(false);
     else if (key === 'q' || key === 'e') decoTurn(key === 'e' ? 1 : -1);
     return;
   }
@@ -1896,6 +1969,7 @@ addEventListener('keydown', (e) => {
   else if ((key === 'q' || key === 'e') && onGunDeck()) turnArrowAhead(key === 'e' ? 1 : 3);
   else if (key === 'f' && carry) turn(flip, 0);
   else if (key === 'tab') cycle++;
+  else if (key === 'b') decoMode(true);
   else if (key === 'backspace' && canTakeBack()) takeBack();
   else if ((key === 'shift' || key === 'r') && carry && aimFoe()) throwAt(aimFoe());
   else if (key === 'v') Object.assign(view, { yaw: 0, pitch: 0, zoom: 1 });
@@ -1964,7 +2038,7 @@ addEventListener('mousemove', (e) => {
   const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
   if (Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true;
   if (!drag.moved) return;
-  view.yaw = Math.max(-1.3, Math.min(1.3, view.yaw - dx * 0.006));
+  view.yaw -= dx * 0.006;
   view.pitch = Math.max(-0.35, Math.min(0.9, view.pitch + dy * 0.004));
   drag.x = e.clientX; drag.y = e.clientY;
 });
@@ -2590,6 +2664,7 @@ function blast(cells, told = false) {
   });
   stones.instanceMatrix.needsUpdate = true;
   const h = registerHole(cells);
+  wallBack();
   holeVisuals(h);
   updateHole(h);
   burst(at, '#9a8a7a', 26, 4.5);
@@ -3267,6 +3342,7 @@ function decoFree(x, z, k) {
 function decoMode(on) {
   deco.on = on;
   $('deco').classList.toggle('on', on);
+  $('deco-btn').textContent = on ? 'Done decorating' : 'Decorate';
   document.querySelector('.keys').style.display = on ? 'none' : '';
   if (!on) { if (deco.ghost) deco.group.remove(deco.ghost); deco.ghost = null; if (deco.ring) deco.ring.visible = false; deco.at = null; return; }
   if (carry) putBack();
@@ -3485,7 +3561,7 @@ function dressRows() {
     const hs = ramp?.jobs.filter((j) => j.kind === 'house') || [], building = hs.find((j) => j.frame && !j.up);
     const hr = row('House');
     if (hs.length && hs.every((j) => j.up)) hr.append(el('b', 'state', 'Built!'));
-    else if (building) hr.append(el('b', 'state', `Building the ${HOUSE_PART[building.part]} (${building.part + 1} of 4)`));
+    else if (building) hr.append(el('b', 'state', `Building the ${HOUSE_PART[building.part]} (${hs.indexOf(building) + 1} of ${hs.length})`));
     else { const b = el('button', 'mini', 'Build a house'); b.onclick = () => { startHouse(); dressPanel(false); }; hr.append(b); }
     const pr = row('Paint');
     swatch(pr, DYES, D.paint, den('paint'), 'Walls', 'Bare wood');
@@ -3513,6 +3589,7 @@ function applyDen(D, mine = false) {
   if (online()) send('all', { t: 'den', den: denLook });
 }
 $('look-btn').onclick = () => dressPanel(true);
+$('deco-btn').onclick = (e) => { e.currentTarget.blur(); decoMode(!deco.on); };
 $('dress-done').onclick = () => dressPanel(false);
 $('dress-rand').onclick = () => { myLook = randomLook(); lookChanged(); };
 $('dress').addEventListener('click', (e) => { if (e.target === $('dress')) dressPanel(false); else if (!e.target.closest('#palette')) palette(null); });
@@ -3552,8 +3629,8 @@ function update(dt) {
   }
   const moving = pirate.moving = !!(mx || mz);
   // Turn the view.
-  if (keys.has('z')) view.yaw = Math.min(1.3, view.yaw + dt * 1.4);
-  if (keys.has('c')) view.yaw = Math.max(-1.3, view.yaw - dt * 1.4);
+  if (keys.has('z')) view.yaw += dt * 1.4;
+  if (keys.has('c')) view.yaw -= dt * 1.4;
   if (moving) {
     // Walk the way the camera faces.
     const n = Math.hypot(mx, mz), cy = Math.cos(view.yaw), sy = Math.sin(view.yaw);
@@ -3648,8 +3725,9 @@ function update(dt) {
 
   /* Camera follows the pirate, looking at the wall and a little over it. Up on the rampart it
      swings up high to look down over the wall at the raiders. The player can turn it (Z/C or
-     right-drag) and tilt it (right-drag). */
-  const cz = Math.min(pirate.z, 7.5), u = ramp ? Math.min(1, pirate.h / ramp.T) : 0;
+     right-drag) all the way round, to see the outside of the wall, and tilt it (right-drag). It
+     follows you right to the back of the den, where your house is. */
+  const cz = pirate.z, u = ramp ? Math.min(1, pirate.h / ramp.T) : 0;
   topView = u > 0.7;
   L0.set(pirate.x * 0.55, 1.8, cz - 3.4);
   L1.set(pirate.x, 0.5, -2.6);

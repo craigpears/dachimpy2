@@ -124,6 +124,12 @@ Ideas to carry on with:
   user wanted **cladding on the walls that don't get attacked** (the cave sides), built from
   frames like the house, then painted.
 - **Banners on walls**, hung on the house or the cladding, not just on their own posts.
+- **Decorate the outside of the wall.** You can now turn the view all the way round to see the
+  wall's outer face (lit by moonlight), and the user wants that "especially as we get to being
+  able to decorate it": flags and banners hung on the outer face, a skull over the gate, maybe
+  spikes along the top. Decorate mode only places things on the den floor so far.
+- **The shack is small, open-backed and staying that way** (the user loves it: "a lot of
+  character"). Things to put in it should suit its size: a hammock, a sea chest, a lantern hook.
 - **Move what you've put up** (pick it up and put it down again) rather than take down and redo.
 - **Inside the house:** furniture placed the same way, as in a YPP house.
 - **More clothes:** coats in more cuts, sashes, the rest of the YPPedia hat list (Bicorne,
@@ -133,6 +139,9 @@ Ideas to carry on with:
 - **Houses that stay:** the house and rampart go with each new game, though the decorations stay.
   A den you keep between visits would want them kept too.
 - **The camera indoors:** walk into the house and its near wall hides you. Fade it out then.
+- **The main puzzle's solver** (`js/engine.js`) works row by row, which is very slow on long thin
+  shapes (a 3 by 15 strip took about a minute). The den's copy turns wide shapes on their side
+  first. If the main site ever solves long strips, do the same there.
 
 ## A public den anyone can drop into
 
