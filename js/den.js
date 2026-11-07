@@ -2361,7 +2361,7 @@ function putBack() {
   carry = null;
   showPile(p);
 }
-function turn(fn, dir) {
+function turn(fn, dir, auto = false) {
   carry.cells = fn(carry.cells);
   const old = carry.group;
   const g = centred(carry.cells, carry.mat);
@@ -2371,6 +2371,8 @@ function turn(fn, dir) {
   carry.group = g;
   carry.spin = dir ? dir * Math.PI / 2 : 0;
   carry.flipT = dir ? 1 : 0;
+  if (auto) return;
+  carry.manual = true;   // only your own turns count
   cycle = 0;
 }
 /* Fitting a piece: yours (from your hands), or a crewmate's (`by`, with `hand` made at their
@@ -3016,16 +3018,35 @@ function fatOutline(cells, z, color, t = 0.045) {
   }
   return g;
 }
+/* Where the piece you're carrying would go, and which way round. It turns itself: every way the
+   piece can turn is tried, and the best fit wins (nearest the pointer, or nearest you; a clean fit
+   before boarding over), the piece in your hands swinging round to match. The user wanted the pace
+   quicker, without stopping to turn things. Once you've turned it yourself (Q/E/F, the wheel), fits
+   the way you're holding it come first; it only turns again where that way won't go. */
+const shapeKey = (cells) => cells.map(String).sort().join(';');
+function turnsOf(cells, letter) {
+  const cur = shapeKey(cells), seen = new Set([cur]), out = [{ cells, key: cur }];
+  for (const o of C.ORIENTS_BY_LETTER[letter] || []) {
+    const n = C.normalize(o.cells), key = shapeKey(n);
+    if (!seen.has(key)) { seen.add(key); out.push({ cells: n, key }); }
+  }
+  return out;
+}
 function aim() {
   target = null;
   if (!carry || pirate.h > 0.3) return;
-  const fl = frames().length ? frameFits(carry.cells) : [];
+  const turns = turnsOf(carry.cells, carry.letter), cur = turns[0].key;
+  const each = (fn) => turns.flatMap((o) => fn(o.cells).map((t) => ({ ...t, cells: o.cells, turned: o.key !== cur })));
+  // Turning costs a little (so it doesn't swing between two equal fits), more once you've chosen.
+  const pen = (o) => (o.turned ? (carry.manual ? 0.9 : 0.05) : 0);
+  const fl = frames().length ? each(frameFits) : [];
   const fd = (o) => Math.hypot(o.cx - pirate.x, o.cz - pirate.z);
+  const take = (t) => { if (t?.cells && t.turned) turnTo(t.cells); return t; };
   // Pointing at a rampart frame: the spot nearest the pointer.
   if (mouseMode && mouse?.frame) {
-    const d = (o) => Math.hypot(o.gc - mouse.fc, o.gr - mouse.fr) + (o.over ? 0.35 : 0);
+    const d = (o) => Math.hypot(o.gc - mouse.fc, o.gr - mouse.fr) + (o.over ? 0.35 : 0) + pen(o);
     const mine = fl.filter((o) => o.frame === mouse.frame).sort((a, z) => d(a) - d(z));
-    if (mine[0] && d(mine[0]) <= 1.8) target = { ...mine[0], ok: fd(mine[0]) <= REACH + 1.2, far: fd(mine[0]) > REACH + 1.2 };
+    if (mine[0] && d(mine[0]) <= 1.8) target = take({ ...mine[0], ok: fd(mine[0]) <= REACH + 1.2, far: fd(mine[0]) > REACH + 1.2 });
     return;
   }
   if (pirate.z > WALL_Z + 2.5 && !fl.length) return;
@@ -3033,25 +3054,30 @@ function aim() {
   // With the mouse, if it shows you where it'd go, you can put it there: from as far back as the
   // preview shows (the user: no value in having to walk closer), and a bit further along the wall.
   const mReach = (o) => Math.abs(o.cx - pirate.x) <= REACH + 1.2 && pirate.z <= WALL_Z + 2.5;
-  const list = pirate.z <= WALL_Z + 2.5 ? fits(carry.cells).concat(patchFits(carry.cells)) : [];
+  const list = pirate.z <= WALL_Z + 2.5 ? each(fits).concat(each(patchFits)) : [];
   const b = C.bbox(carry.cells);
   if (mouseMode && mouse) {
     if (pirate.z > WALL_Z + 2.5) return;
-    const d = (o) => { const m = mouseAt(o.patch ? patchZ(o.layer, wall.holes[o.hole]) - PATCH_D / 2 : 0); return Math.hypot(o.fc - m.fc, o.fr - m.fr) + (o.over ? 0.35 : 0); };
+    const d = (o) => { const m = mouseAt(o.patch ? patchZ(o.layer, wall.holes[o.hole]) - PATCH_D / 2 : 0); return Math.hypot(o.fc - m.fc, o.fr - m.fr) + (o.over ? 0.35 : 0) + pen(o); };
     list.sort((a, z) => d(a) - d(z));
     const best = list[0];
-    if (best && d(best) <= 1.8) target = { ...best, ok: mReach(best), far: !mReach(best) };
+    if (best && d(best) <= 1.8) target = take({ ...best, ok: mReach(best), far: !mReach(best) });
     else target = { dr: Math.round(mouse.fr - b.h / 2), dc: Math.round(mouse.fc - b.w / 2), ok: false };
   } else if (!mouseMode) {
     // Everything in reach: a walk frame on the floor when stood back from the wall, the stairs
     // when stood beside them, the holes when at the wall. Clean fits first, nearest first; then
-    // the ways to board it over.
+    // the ways to board it over. Once you've turned it yourself, your way round first.
     const nf = fl.filter((o) => fd(o) <= REACH && (o.frame.kind === 'stair' || pirate.z > WALL_Z));
     const dd = (o) => (o.frame ? fd(o) : Math.abs(o.cx - pirate.x));
-    const near = list.filter(reach).concat(nf).sort((a, z) => (a.over > 0) - (z.over > 0) || !!a.patch - !!z.patch || dd(a) - dd(z) || a.over - z.over);
-    if (near.length) target = { ...near[cycle % near.length], ok: true, count: near.length };
+    // (Sorted the same whichever way it's held right now, so Tab steps through them in a fixed order.)
+    const mine = (o) => (carry.manual && o.turned ? 1 : 0), sk = (o) => shapeKey(o.cells);
+    const near = list.filter(reach).concat(nf).sort((a, z) => mine(a) - mine(z) || (a.over > 0) - (z.over > 0) || !!a.patch - !!z.patch || dd(a) - dd(z) || a.over - z.over || (sk(a) < sk(z) ? -1 : sk(a) > sk(z) ? 1 : 0) || a.dr - z.dr || a.dc - z.dc);
+    if (near.length) target = take({ ...near[cycle % near.length], ok: true, count: near.length });
   }
 }
+// The carried piece swung round to a new way by itself (it doesn't count as your choice, and
+// leaves Tab where it was).
+function turnTo(cells) { turn(() => cells, 0, true); }
 function drawGhost() {
   const kind = !target ? '' : !target.ok ? 'no' : target.patch ? 'layer' : target.over ? 'over' : 'ok';
   const f = target?.frame;

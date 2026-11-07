@@ -353,6 +353,13 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   reset. **It turns all the way round**, so you can see the outside of the wall (the user wants
   that, especially for decorating it); moonlight from outside lights the wall's outer face.
   Walking follows the way the camera faces. Q/E turn the piece, right-click flips it.
+- **The piece turns itself to fit.** The user wanted a quicker pace, without stopping to turn
+  things (the stairs above all): wherever you point (or, with the keyboard, the nearest spot in
+  reach), every way the piece can turn is tried and the best fit wins, a clean fit before boarding
+  over, and the piece in your hands swings round to match. It works for the holes, boards behind,
+  the rampart, stairs, gun tower and house frames. Tab steps through the other spots and ways
+  round. Turning it yourself (Q/E/F, the wheel) still works, and then your way round comes first;
+  it only turns again where that way won't go.
 - **The wheel turns the piece whenever it's showing a spot to fit** (that's what it was for first);
   only otherwise does it zoom.
 - **Throwing at a raider is the only way to discard.** No scrap fire, no bin: a piece you don't
