@@ -184,6 +184,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   each extra pirate). Crewmates wear their own colours with their name over their head.
 - **Keep the pirate-den feel, not medieval.** The rampart is a timber walk like a ship's deck, not
   stone battlements. Any rail, flag or trim on it has to be built from pieces as well, or left off.
+- **Some jobs want accuracy, some want speed.** The user loves the variety: the stairs are rapid
+  speed carpentry (any piece will do, just throw them in), while the wall holes and the wall-walk
+  reward care. Keep that mix when adding jobs.
+- **Keep the opening message short.** The first-screen instructions covered the crates so you
+  couldn't start. One or two lines at most, clear of the crates; the prompts and toasts teach
+  the rest (boarding over, nailing on behind, the rampart) as it comes up.
 - **Future ideas live in [IDEAS.md](IDEAS.md).** When the user brain-dumps ideas for later, note
   them there rather than building them.
 - **There's always something to do with a junk piece.** Holding three useless pieces with nothing

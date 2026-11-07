@@ -22,6 +22,36 @@ wants to do the carpentry properly. The 3D version is the fun extra; it loses so
 of its mechanics and the quick pace (gunning especially), so both should work together on the
 same job. Build later, but design every new job so it maps cleanly onto its 2D puzzle.
 
+## Raiders need a real gap to get in (rethink, wanted soon)
+
+The user finds it weird and dumb that raiders seem to hop through tiny gaps, even five-square ones
+high up the wall, as if by magic. Today any empty hole counts as a way in, whatever its size or
+height. What they want:
+
+- **They walk through, not jump through:** a raider only gets in through an opening big enough to
+  walk through: down at floor level, and roughly two squares wide by three tall.
+- **A smaller gap makes the wall weaker, not open:** raiders go for it and hack it wider (it falls
+  faster than whole stone), so leaving gaps still costs you, but nobody just waltzes in.
+
+A possible way to build it: a hole a raider can't fit through is a weak spot with low strength;
+hacked through, it becomes a breach that is a bigger, floor-level carpentry hole (still made of
+whole pieces' worth of squares, still solvable), which the crew then mends.
+
+## Grades for the layers behind a hole
+
+Nailing junk pieces on behind a mended hole should reward good work, the way the hole does:
+
+- **Fill a section properly and it's stronger:** e.g. a layer that runs top to bottom of the hole
+  and at least a certain width, packed solid, counts as a Masterpiece layer.
+- **More than one grade:** carpentry has levels below Masterpiece (the user remembers "good
+  work"; check YPPedia for the real names), so a decent but imperfect layer could be a middle
+  grade, stronger than loose boards but weaker than a Masterpiece.
+
+## Feel: turning a piece when you're close
+
+Turning the piece when you're close to the wall still feels a bit off to the user, though they
+can't yet say how. Worth a playtest to pin down (which way it turns, where the ghost jumps to).
+
 ## The rampart, built more like real carpentry
 
 Building on what's there now (the walk and its stairs are made of pieces that stay pieces):

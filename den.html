@@ -45,7 +45,7 @@
     .toast { position: fixed; top: 18%; left: 50%; transform: translateX(-50%); font: 700 34px 'Alegreya', serif; color: var(--gold); text-shadow: 0 2px 0 #000, 0 0 18px rgba(0,0,0,.8); pointer-events: none; opacity: 0; transition: opacity .3s; }
     .toast.on { opacity: 1; }
     .toast.bad { color: var(--bad); }
-    .intro { position: fixed; top: 52%; left: 50%; transform: translateX(-50%); background: var(--panel); border: 1px solid var(--gold); border-radius: 10px; padding: 12px 18px; text-align: center; font-size: 18px; line-height: 1.4; transition: opacity .6s; pointer-events: none; }
+    .intro { position: fixed; top: 45%; left: 50%; transform: translateX(-50%); background: var(--panel); border: 1px solid var(--gold); border-radius: 10px; padding: 12px 18px; text-align: center; font-size: 18px; line-height: 1.4; transition: opacity .6s; pointer-events: none; }
     .intro.off { opacity: 0; }
     .end { position: fixed; inset: 0; display: none; place-items: center; background: rgba(10, 6, 3, .55); }
     .end.on { display: grid; }
@@ -83,7 +83,7 @@
   </div>
   <div class="banner calm" id="banner"></div>
   <div class="prompt" id="prompt"></div>
-  <div class="intro" id="intro">Raiders are coming! Mend the holes in the den wall before they arrive.<br>A hole filled exactly is a <b>Masterpiece</b>: strong. Nail a piece over the stone<br>to <b>board it over</b>: quick, but weak.<br>A piece that fits nowhere can be nailed on <b>behind</b> a mended hole: one more layer to hack through,<br>or thrown at a raider who gets in. Beat off a wave and timber arrives:<br>build a stretch of rampart, its walk and its stairs, piece by piece, to pelt them from the top of the wall.</div>
+  <div class="intro" id="intro">Raiders are coming! Grab a piece from a crate and mend the wall.<br>Fill a hole exactly for a strong <b>Masterpiece</b>.</div>
   <div class="keys"><kbd>WASD</kbd> walk · <kbd>Space</kbd> or click: pick up / fit · <kbd>Q</kbd><kbd>E</kbd> turn · <kbd>F</kbd> flip · <kbd>Tab</kbd> next spot · <kbd>Shift</kbd> or click a raider: throw · <kbd>Z</kbd><kbd>C</kbd> or right-drag: turn the view · wheel: turn the piece at a hole, or zoom (<kbd>-</kbd><kbd>=</kbd>)</div>
   <div class="credit">Puzzle Pirates™ © 2001–2026 Grey Havens, LLC, created by Three Rings Design.<br>An unofficial fan project, not affiliated with or endorsed by them.</div>
   <div class="toast" id="toast"></div>
