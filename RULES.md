@@ -150,6 +150,16 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   them flat with a thrown piece. The first time in a wave it says "Through, but winded: knock them
   flat!" (kept short: a long line filled a phone screen). One who walked in through a gap someone
   left open arrives fresh.
+- **A wall giving way hits the ones hacking at it.** The user found three raiders bursting a hole
+  together and walking straight in: "there doesn't seem to be any win for it". Three at once open
+  it three times as fast, so each had barely tired (at wave 5, about 15% tired, a second's pause
+  inside). Now when the last of a hole's wood or stone goes, every raider hacking it reels back
+  dazed for 3 seconds (swaying, yellow sparks round the head), and stone that gives way chokes the
+  new gap with fallen rubble (5 seconds of one raider's hacking) they must clear first, which tires
+  them further. Plug the gap while it's choked and they're back to hacking wood. At wave 5, three
+  raiders on one small hole now take about 8 seconds from the wall giving way to heading for the
+  chest, where it was about 2. Dazed raiders at the wall can be hit from the rampart, and the gun
+  tower aims at them too. Raiders hacking a hole with a doorway stand in the doorway.
 - **Throw pieces at raiders, don't bonk them.** A plain bonk was underwhelming. The carried piece
   is the weapon: it hurls at a raider, who goes flying. It costs the piece.
 - **A thrown piece takes a while to come back.** Otherwise you could stand and pelt raiders

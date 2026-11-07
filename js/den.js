@@ -52,6 +52,11 @@ const RAIDER_DPS = 1, RAIDER_STAMINA = 16;
    then go for the chest slower (up to TIRED_SLOW slower). The user wanted hacking through to weaken
    the wave, and a window to deal with them when they do get in. */
 const WINDED = 6, TIRED_SLOW = 0.4;
+/* A wall giving way hits the ones hacking at it. When the last of a hole's wood or stone goes, the
+   raiders at it reel back dazed for DAZE seconds, and stone that gives way chokes the new gap with
+   FALLEN seconds of rubble to clear. The user: three raiders burst a hole together and walked straight
+   in, barely tired, "there doesn't seem to be any win for it". */
+const DAZE = 3, FALLEN = 5;
 /* How fast raiders chop through wood, the main thing to balance. They start slow and build up wave
    by wave (start: the first wave's fraction of full speed; step: how much more each wave). To try
    other speeds without editing: den.html?hack=0.8 (a multiplier on all of it), or in the console
@@ -1680,7 +1685,7 @@ function gunTarget(g, taken = new Set()) {
   const from = gdAt(...g.port);
   let best = null, bd = Infinity;
   for (const r of raiders) {
-    if (r.inside || r.gone || r.state === 'down' || !['approach', 'attack', 'hackOut'].includes(r.state) || r.z > -0.9 || r.z < -11) continue;
+    if (r.inside || r.gone || r.state === 'down' || !['approach', 'attack', 'hackOut', 'dazed'].includes(r.state) || r.z > -0.9 || r.z < -11) continue;
     if (gunSwing(g, r.x, r.z) === null || r.shotT > performance.now()) continue;   // (another gun's shot is on its way)
     if (taken.has(r) && g.tgt !== r) continue;   // another gun's swinging onto them
     // (Sticking with the one it's already swinging onto, rather than lurching between two.)
@@ -2394,7 +2399,7 @@ function focus() {
 const THROW_RANGE = 10;
 const free = (r) => r.state !== 'down' && !r.targeted;
 const foe = () => nearest(raiders.filter((r) => r.inside && free(r)), THROW_RANGE);
-const atWall = (r) => !r.inside && free(r) && (r.state === 'attack' || (r.state === 'approach' && r.z > -6));
+const atWall = (r) => !r.inside && free(r) && (r.state === 'attack' || r.state === 'dazed' || (r.state === 'approach' && r.z > -6));
 const outsideFoe = () => (onRampart() ? nearest(raiders.filter(atWall), THROW_RANGE + 3) : null);
 const anyFoe = () => foe() || outsideFoe();
 // The throwable raider nearest a point on screen (within `cap` pixels), measured to the whole body
@@ -2673,7 +2678,7 @@ function throwAt(r, hand = carry, by = myId()) {
     // Over the wall: aim where the raider will be when it lands (at the foot of the wall at the
     // nearest), and lob high enough to clear the whole thickness of the wall on the way.
     if (r.state === 'approach') {
-      const tx = holeX(r.hole) + r.slot, dx = tx - r.x, dz = -1.15 - r.z, n = Math.hypot(dx, dz);
+      const tx = passable(r.hole) ? doorX(r.hole) : hackX(r.hole, r.slot), dx = tx - r.x, dz = -1.15 - r.z, n = Math.hypot(dx, dz);
       const step = Math.min(n, 2.2 * dur);
       if (n > 0) to.set(r.x + dx / n * step, 1.1, r.z + dz / n * step);
     }
@@ -2723,6 +2728,7 @@ function breakHole(h) {
   updateHole(h);
   burst(new THREE.Vector3(holeX(h), holeMidY(h), 0.3), '#c98a45', 24, 4);
   shake = 0.5;
+  reel(h);
   toast(boards.length ? 'Through the hole! Only the boards behind it hold them now' : 'They broke through!', true);
 }
 function breakBoard(h, p) {
@@ -2734,6 +2740,7 @@ function breakBoard(h, p) {
   updateHole(h);
   burst(new THREE.Vector3(holeX(h), holeMidY(h), patchZ(0, h)), '#c98a45', 16, 3.5);
   shake = 0.3;
+  reel(h);
   toast(h.pieces.length ? 'They hacked through a board!' : 'They broke through!', true);
 }
 const holeX = (h) => X(h.b.c0) + h.b.w * S / 2;
@@ -2782,6 +2789,9 @@ const bareHole = (h) => h.status === 'open' && !h.pieces.length && !(h.rubble > 
 const passable = (h) => bareHole(h) && (h.door != null || !!h.hop);
 const weakSpot = (h) => bareHole(h) && !passable(h);
 const doorX = (h) => (h.door != null ? X(h.door) + DOOR_W * S / 2 : holeX(h));
+// Where a raider stands to hack at a hole: in its doorway if it has one (rubble or wood in it), else
+// spread along the hole.
+const hackX = (h, slot) => (h.door != null ? doorX(h) + slot * 0.4 : holeX(h) + slot);
 /* The squares a weak spot gives way into: a gap DOOR_W wide down to the floor below the hole, plus a
    few more next to it so the whole thing is still whole pieces' worth and can be filled exactly.
    Only solid stone, kept a square clear of the gate, the other holes and the stairs at the ends. */
@@ -2857,12 +2867,20 @@ function widen(h, cells) {
   if (h.door == null) h.hop = true;
   if (h.next) { wallGroup.remove(h.next); h.next = null; }
   if (h.rubbleG) { wallGroup.remove(h.rubbleG); h.rubbleG = null; }
+  h.rubble = FALLEN;   // the stone that fell, choking the gap
+  rubbleShow(h);
   holeOutline(h);
   wallBack();
   updateHole(h);
   burst(new THREE.Vector3(doorX(h), 0.8, 0.3), '#9a8a7a', 26, 4);
   shake = 0.5;
-  toast('They hacked it wide enough to walk through! Get pieces in it', true);
+  reel(h);
+  toast('The wall gave way, but the stone dazed them: plug it!', true);
+}
+// The raiders hacking at a hole when it gives way reel back from it, dazed.
+function reel(h) {
+  if (guest() || h.pieces.length) return;
+  for (const r of raiders) if (r.hole === h && r.state === 'attack') { r.state = 'dazed'; r.t = 0; r.hitT = 0.2; }
 }
 /* Each raider goes for the hole in front of where they come up to the wall, not the weakest one
    along the whole of it: a breach only draws the raiders close to it (GAP_PULL metres). So one hole
@@ -2915,7 +2933,7 @@ function updateRaider(r, dt) {
   r.t += dt;
   switch (r.state) {
     case 'approach': {
-      moving = !moveTo(r, passable(h) ? doorX(h) : holeX(h) + r.slot, -1.15, 2.2, dt);
+      moving = !moveTo(r, passable(h) ? doorX(h) : hackX(h, r.slot), -1.15, 2.2, dt);
       if (!moving) { r.state = passable(h) ? 'climb' : 'attack'; r.t = 0; }
       break;
     }
@@ -2938,7 +2956,7 @@ function updateRaider(r, dt) {
       r.hitT -= dt;
       if (r.hitT <= 0) {
         r.hitT = 0.7;
-        burst(new THREE.Vector3(holeX(h) + r.slot * 0.5, Math.min(holeMidY(h), 1.4), out ? 0.6 : 0.25), weak ? '#9a8a7a' : '#c98a45', 4, 2);
+        burst(new THREE.Vector3(hackX(h, r.slot * 0.5), Math.min(holeMidY(h), 1.4), out ? 0.6 : 0.25), weak ? '#9a8a7a' : '#c98a45', 4, 2);
         h.jig = 0.15;
       }
       if (weak) { if (h.weak <= 0) widen(h, widenCells(h) || []); else if (!out && r.stamina <= 0) turnedAway(r); }
@@ -2971,6 +2989,13 @@ function updateRaider(r, dt) {
           }
         }
       }
+      break;
+    }
+    case 'dazed': {
+      // Knocked reeling by the wall coming down on them: they stagger back, then go again.
+      if (r.t < 1) r.z = Math.max(-2.2, r.z - 1.1 * dt);
+      faceTo(r.m, 0, 1, dt);
+      if (r.t >= DAZE) { r.state = 'approach'; r.t = 0; }
       break;
     }
     case 'winded': {
@@ -3033,7 +3058,16 @@ function raiderPose(r, moving, dt) {
     r.hitT -= dt;
     if (r.hitT <= 0) { r.hitT = 0.7; burst(new THREE.Vector3(r.x, 1.15, r.z + 0.35), '#dfe8ee', 2, 0.7); }
   } else if (r.state !== 'down') g.rotation.x = 0;
-  if (!hop && r.state !== 'down' && r.state !== 'winded') {
+  if (r.state === 'dazed') {
+    // Swaying on the spot, arms hanging, sparks of the knock round their head.
+    animateWalk(r.m, false, dt, 12);
+    r.m.legs.forEach((l) => { l.rotation.x = 0; });
+    r.m.arms.forEach((a) => { a.rotation.x = 0.2; });
+    g.rotation.z = Math.sin(r.t * 4.5) * 0.16;
+    r.hitT -= dt;
+    if (r.hitT <= 0) { r.hitT = 0.45; burst(new THREE.Vector3(r.x, 1.75, r.z), '#ffd45a', 3, 0.8); }
+  } else g.rotation.z = 0;
+  if (!hop && r.state !== 'down' && r.state !== 'winded' && r.state !== 'dazed') {
     const swing = animateWalk(r.m, moving, dt, 12);
     if (r.state === 'attack' || r.state === 'hackOut') {
       r.m.legs.forEach((l) => { l.rotation.x = 0; });
@@ -3088,7 +3122,8 @@ function rubbleShow(h) {
   if (!h.rubbleG) {
     if (!(h.rubble > 0)) return;
     h.rubbleG = new THREE.Group();
-    for (const [r, c] of h.cells) for (let i = 0; i < 2; i++) {
+    // Bottom row first, so a part-cleared pile sits on the ground and goes from the top.
+    for (const [r, c] of [...h.cells].sort((a, b) => b[0] - a[0])) for (let i = 0; i < 2; i++) {
       const b = rock(X(c) + S * (0.25 + Math.random() * 0.5), Y(r) - S * (0.3 + Math.random() * 0.5), -STONE_D * (0.25 + Math.random() * 0.5), 0.17 + Math.random() * 0.06);
       h.rubbleG.add(b);
     }
@@ -3565,7 +3600,7 @@ function followRaider(r, dt) {
     r.hitT -= dt;
     if (r.hitT <= 0) {
       r.hitT = 0.7;
-      burst(new THREE.Vector3(holeX(r.hole) + r.slot * 0.5, Math.min(holeMidY(r.hole), 1.4), r.state === 'hackOut' ? 0.6 : 0.25), weakSpot(r.hole) ? '#9a8a7a' : '#c98a45', 4, 2);
+      burst(new THREE.Vector3(hackX(r.hole, r.slot * 0.5), Math.min(holeMidY(r.hole), 1.4), r.state === 'hackOut' ? 0.6 : 0.25), weakSpot(r.hole) ? '#9a8a7a' : '#c98a45', 4, 2);
       r.hole.jig = 0.15;
     }
   }
@@ -4372,7 +4407,7 @@ function update(dt) {
   aimed = carry ? aimFoe() : null;
   renderer.domElement.style.cursor = carry && cursor && clickedFoe(cursor.x, cursor.y, pirate.h > 0.3 ? 1e4 : 90) ? 'crosshair' : '';
   for (const r of raiders) {
-    const show = r === aimed || (r.state !== 'down' && (r.inside || (topView && !r.gone && ['approach', 'attack'].includes(r.state) && r.z > -6)));
+    const show = r === aimed || (r.state !== 'down' && (r.inside || (topView && !r.gone && ['approach', 'attack', 'dazed'].includes(r.state) && r.z > -6)));
     r.mark.classList.toggle('aim', r === aimed);
     r.mark.style.display = show ? '' : 'none';
     if (!show) continue;
@@ -4390,7 +4425,7 @@ function update(dt) {
   // Hole labels float above each hole, with a strength bar for mended ones.
   nextMat.opacity = 0.22 + 0.2 * Math.sin(performance.now() / 260);
   for (const h of wall.holes) {
-    h.attackers = raiders.filter((r) => r.hole === h && ['approach', 'attack', 'hackOut'].includes(r.state)).length;
+    h.attackers = raiders.filter((r) => r.hole === h && ['approach', 'attack', 'hackOut', 'dazed'].includes(r.state)).length;
     const [cls, html] = labelFor(h);
     nextLayer(h);
     if (h.sig !== cls + html) { h.sig = cls + html; h.label.className = cls; h.label.innerHTML = html; }

@@ -29,11 +29,11 @@ the site (`.assetsignore` skips `*.md`).
 - **Holding the wall.** The cannon now aims before it fires, breaches fill with rubble, and
   turning raiders away pays (RULES.md: "Keeping them out must be possible"). Since 7 Nov raiders
   also need a gap they can walk through and arrive winded after hacking one (RULES.md: "Raiders
-  walk in", "Getting through costs them"). Not yet tried by the user. Watch for: once one gap is
-  opened, every raider nearby pours through it, and a single piece in it only holds two or three
-  of them off for a few seconds. If that feels too all-or-nothing, a widened gap could be choked
-  with its fallen stone for a few seconds, like a cannon breach. If it still feels hopeless or too
-  easy, see "Holding the wall" in IDEAS.md.
+  walk in", "Getting through costs them"), and a hole giving way dazes the raiders at it and
+  chokes the gap with rubble (RULES.md: "A wall giving way hits the ones hacking at it"). The user
+  has tried the gaps but not yet the dazing. Watch for: once one gap is opened, every raider
+  nearby pours through it, and a single piece in it only holds two or three of them off for a few
+  seconds. If it still feels hopeless or too easy, see "Holding the wall" in IDEAS.md.
 
 ## Spotted along the way (not asked for)
 
