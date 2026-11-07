@@ -133,6 +133,8 @@ Ideas to carry on with:
   day (a sunset, a storm) would fit too.
 - **More of the gun tower to dress:** what's in the crates (shot, rum, fruit, treasure), the deck's
   colour, the guns themselves (bronze, black iron, gilded), the barrel.
+- **Your den's preview** shows your flag on every tab; the Shack tab could show the shack itself
+  (painted as you choose), and the Den tab the landscape.
 - **The shack is small, open-backed and staying that way** (the user loves it: "a lot of
   character"). Things to put in it should suit its size: a hammock, a sea chest, a lantern hook.
 - **Move what you've put up** (pick it up and put it down again) rather than take down and redo.

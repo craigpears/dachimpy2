@@ -379,6 +379,7 @@ function buildWall() {
   piles.forEach(showPile);
   rebuildDecor();
   applyBiome(true);
+  makePlot();
 }
 
 /* The rampart: a walk along the top of the wall, with stairs up from the den at either end. Up
@@ -778,6 +779,7 @@ function raiseHouse(f, j, quiet) {
     houseWalls(j.part);
     paintHouse();
     if (ramp.jobs.every((o) => o.kind !== 'house' || o.up)) houseDone();
+    plotShow();
     jobDone(j, quiet);
   };
   if (quiet) { land(); return; }
@@ -820,12 +822,21 @@ function houseWalls(part) {
 }
 // Painted, if you like: each piece keeps a hint of its own timber, so you still see how it's built.
 const houseMats = {};
-const houseMat = (l, c) => (c === 'none' ? woodMat(l) : (houseMats[l + c] ||= mat(new THREE.Color(WOOD[l] || '#b08a5a').lerp(new THREE.Color(dyeHex(c)), 0.62), { map: woodTex, roughness: 0.75 })));
+const houseMat = (l, c) => (c === 'none' ? woodMat(l) : (houseMats[l + c] ||= mat(new THREE.Color(WOOD[l] || '#b08a5a').lerp(new THREE.Color(dyeHex(c)), 0.5), { map: woodTex, roughness: 0.75 })));
+/* It's your little shack, and it's made of carpentry pieces: you must see them (the user). Each piece
+   gets a bold dark edge on both faces, quieter than the frames' white, and the paint lets each
+   piece's own timber show through. */
 function paintHouse() {
   if (!ramp) return;
   for (const j of ramp.jobs) {
     if (j.kind !== 'house' || !j.up) continue;
-    for (const pc of j.frame.pieces) pc.group.traverse((m) => { if (m.isMesh) m.material = houseMat(pc.info.letter, j.part === 3 ? denLook.roof : denLook.paint); });
+    for (const pc of j.frame.pieces) {
+      pc.group.traverse((m) => { if (m.isMesh && !m.userData.edge) m.material = houseMat(pc.info.letter, j.part === 3 ? denLook.roof : denLook.paint); });
+      if (!pc.edged) {
+        pc.edged = true;
+        for (const z of [0.012, -WOOD_D - 0.012]) { const e = fatOutline(pc.info.shape, z, '#24130a', 0.045); e.traverse((m) => { m.userData.edge = true; }); pc.group.add(e); }
+      }
+    }
   }
 }
 // All up: your flag on the roof.
@@ -840,10 +851,55 @@ function startHouse() {
   if (guest()) { send('host', { t: 'build' }); return; }
   const first = ramp.jobs.find((j) => j.kind === 'house');
   if (first.frame) return;
-  if (frames().length || ramp.jobs.some((j) => j.frame && !j.up)) { toast('Finish the frame you\'re on first, then the timber for a house comes', false, true); return; }
   openJob(first.i);
-  say('Timber for a house! Its frames go by the cave wall, on the left');
+  say('Timber for your shack! Fill its frame on the floor, and it\'s hoisted into place');
+  plotShow();
 }
+/* The shack's plot, marked out on the floor from the start (the user: it was hidden in a menu; walk
+   into the corner and it should be clear you can build there): pegs and a line round where it
+   goes, and a sign. Walk in and Space starts it; once it's up, Space there dresses it. */
+let plot = null;
+const houseState = () => { const hs = ramp?.jobs.filter((j) => j.kind === 'house') || []; return !hs.length ? 'none' : hs.every((j) => j.up) ? 'built' : hs.some((j) => j.frame) ? 'building' : 'plot'; };
+function makePlot() {
+  plot = new THREE.Group();
+  plot.userData.scenery = true;
+  const xf = houseXF(), xb = xf - WOOD_D - HOUSE.depth * S, line = mat('#e6d3a6', { roughness: 1 }), peg = mat('#6b4426', { map: woodTex });
+  const bar = (x0, z0, x1, z1) => { const b = mesh(new THREE.BoxGeometry(Math.abs(x1 - x0) + 0.1, 0.04, Math.abs(z1 - z0) + 0.1), line, false); b.position.set((x0 + x1) / 2, 0.025, (z0 + z1) / 2); plot.add(b); };
+  // Chalked over, so the plot stands out on the floor.
+  const fill = mesh(new THREE.PlaneGeometry(xf - xb, HOUSE_Z1 - HOUSE_Z0), new THREE.MeshBasicMaterial({ color: '#f2e2b8', transparent: true, opacity: 0.16, depthWrite: false }), false);
+  fill.rotation.x = -Math.PI / 2;
+  fill.position.set((xf + xb) / 2, 0.015, (HOUSE_Z0 + HOUSE_Z1) / 2);
+  plot.add(fill);
+  bar(xb, HOUSE_Z0, xf, HOUSE_Z0); bar(xb, HOUSE_Z1, xf, HOUSE_Z1); bar(xb, HOUSE_Z0, xb, HOUSE_Z1);
+  bar(xf, HOUSE_Z0, xf, HOUSE_Z0 + 1.0); bar(xf, HOUSE_Z1 - 2.2, xf, HOUSE_Z1);   // (a gap where the door goes)
+  for (const [x, z] of [[xb, HOUSE_Z0], [xb, HOUSE_Z1], [xf, HOUSE_Z0], [xf, HOUSE_Z1]]) { const p = mesh(new THREE.CylinderGeometry(0.04, 0.05, 0.4, 6), peg); p.position.set(x, 0.2, z); plot.add(p); }
+  // A sign on a post: "Your shack".
+  const cv = document.createElement('canvas'); cv.width = 256; cv.height = 96;
+  const g = cv.getContext('2d');
+  g.fillStyle = '#7a5230'; g.fillRect(0, 0, 256, 96); g.strokeStyle = '#3a2412'; g.lineWidth = 8; g.strokeRect(4, 4, 248, 88);
+  g.fillStyle = '#f3e3c0'; g.font = 'bold 40px Alegreya, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('Your shack', 128, 50);
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
+  const post = mesh(new THREE.CylinderGeometry(0.06, 0.07, 1.5, 8), peg);
+  post.position.set(xf + 0.7, 0.75, HOUSE_Z1 + 0.45);   // (clear of where its frames lie)
+  const board = mesh(new THREE.BoxGeometry(1.3, 0.49, 0.06), [peg, peg, peg, peg, mat('#ffffff', { map: tex, emissive: '#3a2a18', emissiveMap: tex }), mat('#ffffff', { map: tex })]);
+  board.position.set(xf + 0.7, 1.45, HOUSE_Z1 + 0.45);
+  board.rotation.y = Math.PI / 2;
+  plot.add(post, board);
+  plot.userData.sign = board;
+  den.add(plot);
+  plotShow();
+}
+// The lines go once the timber's come (its frame lies on the floor there); the sign stays.
+function plotShow() {
+  if (!plot) return;
+  const st = houseState();
+  plot.children.forEach((o) => { o.visible = o === plot.userData.sign || o.geometry?.type === 'CylinderGeometry' && o.position.y > 0.5 ? st !== 'built' : st === 'plot'; });
+}
+const atPlot = () => {
+  if (!ramp || pirate.h > 0.3) return false;
+  const xf = houseXF();
+  return pirate.x < xf + 1.6 && pirate.z > HOUSE_Z0 - 0.8 && pirate.z < HOUSE_Z1 + 0.8;
+};
 
 // ---------- Jolly Roger flags ----------
 // One flag for the whole den, drawn from your choices; every pole flies it.
@@ -2128,7 +2184,7 @@ function labelFor(h) {
 function frameLabel(f) {
   const left = f.open;
   const need = left.length === 5 && f.exact ? `needs ${an(C.identify(left))}` : f.exact ? `room for ${left.length / 5} more pieces` : f.kind === 'stair' ? `${left.length} squares left: any piece will do` : `${left.length} squares left: any piece, the spare's sawn off`;
-  return ['label deck', `${{ stair: 'Stairs up to the wall', gun: `Gun tower frame (${['back', 'middle', 'front'][f.part]})`, house: `Your house: the ${HOUSE_PART[f.part]}` }[f.kind] || 'Wall-walk frame'}<small>${need}</small>`];
+  return ['label deck', `${{ stair: 'Stairs up to the wall', gun: `Gun tower frame (${['back', 'middle', 'front'][f.part]})`, house: `Your shack: the ${HOUSE_PART[f.part]}` }[f.kind] || 'Wall-walk frame'}<small>${need}</small>`];
 }
 function updateStats() {
   $('s-gold').textContent = Math.max(0, G.gold);
@@ -2329,6 +2385,8 @@ function act() {
     if (carry && carry.from === p && !p.letter) return putBack();
     if (carry && p.letter && carry.from) { putBack(); return pickUp(p); }
   } else if (!carry && canTakeBack()) return takeBack();
+  else if (!carry && atPlot() && houseState() === 'plot') return startHouse();
+  else if (!carry && atPlot() && houseState() === 'built') return dressPanel(true, 'den', 'house');
   else if (carry && target?.ok) return place(target);
   else if (carry && target) shake = 0.2;
 }
@@ -2966,7 +3024,7 @@ function updateWaves(dt) {
     let tally = G.waveTurned || G.waveIn ? ` ${G.waveTurned} turned away at the wall, ${G.waveIn} got in.` : '';
     if (!G.waveIn && G.waveTurned) { G.gold += PAY.clean; updateStats(); tally = ` Not one got in! (+${PAY.clean})`; }
     // Timber for the next stretch, once nothing's still being built.
-    const f = !frames().length && !ramp.jobs.some((j) => j.frame && !j.up) && ramp.jobs[ramp.next]?.kind !== 'house' && openJob(ramp.next);
+    const f = !frames().some((o) => o.kind !== 'house') && !ramp.jobs.some((j) => j.kind !== 'house' && j.frame && !j.up) && ramp.jobs[ramp.next]?.kind !== 'house' && openJob(ramp.next);
     if (f) say(`Wave ${G.wave} beaten off!${tally} Timber's come: ${f.kind === 'gun' ? 'build a gun tower in its frame' : 'build the rampart in its frame'}`);
     else say(`Wave ${G.wave} beaten off!${tally}`);
   }
@@ -3120,7 +3178,10 @@ function prompt() {
     else if (pirate.z <= WALL_Z || (mouseMode && mouse)) t = `The ${carry.letter} won't go there · Q/E turn · F flip`;
     else if (wall.holes.every((h) => h.status !== 'open')) t = `Carry the ${carry.letter} to the wall: nail it on behind a mended hole`;
     else t = `Carry the ${carry.letter} to a hole`;
-  } else t = frames().length && pirate.z > WALL_Z ? `Fetch pieces to build the ${{ gun: 'gun tower', house: 'house' }[frames()[0]?.kind] || 'rampart'} in its frame` : 'Fetch a piece from the piles';
+  } else if (atPlot() && houseState() === 'plot') t = 'Space: build your shack here';
+  else if (atPlot() && houseState() === 'built') t = 'Space: paint and dress your shack';
+  else if (atPlot() && houseState() === 'building') t = 'Fetch pieces for your shack\'s frame';
+  else t = frames().length && pirate.z > WALL_Z ? `Fetch pieces to build the ${{ gun: 'gun tower', house: 'shack' }[(frames().find((o) => o.kind !== 'house') || frames()[0]).kind] || 'rampart'} in its frame` : 'Fetch a piece from the piles';
   const hacking = raiders.some(atWall);
   if (onGunDeck() && !carry) {
     const n = myArrows().length;
@@ -3730,7 +3791,7 @@ function decoSaved() {
   deco.ghost = null;
 }
 $('deco-done').onclick = () => decoMode(false);
-$('deco-flag').onclick = () => { decoMode(false); dress.tab = 'den'; dressPanel(true); };
+$('deco-flag').onclick = () => { decoMode(false); dressPanel(true, 'den', 'flag'); };
 
 // ---------- dressing your pirate, and your den ----------
 /* "Your pirate": a turning preview of your pirate, with what to wear chosen from Puzzle Pirates'
@@ -3771,20 +3832,26 @@ function dressFrame(now) {
   dressT = now;
   const cv = $('dress-cv'), w = cv.clientWidth, h = cv.clientHeight;
   if (cv.width !== Math.round(w * dress.r.getPixelRatio())) { dress.r.setSize(w, h, false); dress.cam.aspect = w / h; dress.cam.updateProjectionMatrix(); }
-  const fam = myLook.fam !== 'none';
-  dress.cam.position.set(fam ? -0.2 : 0, 1.4, 4.5);
-  dress.cam.lookAt(fam ? -0.1 : 0, 1.02, 0);
+  const fam = myLook.fam !== 'none', denMode = dress.mode === 'den';
+  // Your den: no pirate, a closer look at your flag.
+  dress.model.g.visible = !denMode;
+  if (denMode) { dress.cam.position.set(-0.1, 1.75, 2.6); dress.cam.lookAt(-0.35, 1.75, -0.9); }
+  else { dress.cam.position.set(fam ? -0.2 : 0, 1.4, 4.5); dress.cam.lookAt(fam ? -0.1 : 0, 1.02, 0); }
   if (dress.drag == null) dress.yaw += dt * 0.35;
   dress.model.g.rotation.y = dress.yaw;
   familiarTick(dress.model.fam, dt);
   dress.r.render(dress.scene, dress.cam);
   requestAnimationFrame(dressFrame);
 }
-function dressPanel(on) {
+function dressPanel(on, mode = 'pirate', tab = null) {
   dress.open = on;
   $('dress').classList.toggle('on', on);
   palette(null);
   if (!on) return;
+  dress.mode = mode;
+  if (tab || !dressTabsFor[mode].some(([id]) => id === dress.tab)) dress.tab = tab || dressTabsFor[mode][0][0];
+  $('dress-title').textContent = mode === 'den' ? 'Your den' : 'Your pirate';
+  $('dress-rand').style.display = mode === 'den' ? 'none' : '';
   keys.clear();
   dressInit();
   dressModel();
@@ -3811,10 +3878,12 @@ function palette(btn, pal, cur, set, none) {
   box.style.left = `${Math.max(8, Math.min(host.width - 250, r.left - host.left - 100))}px`;
   box.style.top = `${r.bottom - host.top + 6}px`;
 }
-const dressTabs = [['pirate', 'Pirate'], ['clothes', 'Clothes'], ['familiar', 'Familiar'], ['den', 'Den']];
+// Two panels in one box: Your pirate (looks), and Your den (the user: the pirate's no place for the
+// den's things), with the flag, the den itself and the shack.
+const dressTabsFor = { pirate: [['pirate', 'Pirate'], ['clothes', 'Clothes'], ['familiar', 'Familiar']], den: [['flag', 'Flag'], ['den', 'Den'], ['house', 'Shack']] };
 function dressRows() {
   const tabs = $('dress-tabs');
-  tabs.replaceChildren(...dressTabs.map(([id, name]) => { const b = el('button', 'tab' + (dress.tab === id ? ' on' : ''), name); b.onclick = () => { dress.tab = id; palette(null); dressRows(); }; return b; }));
+  tabs.replaceChildren(...dressTabsFor[dress.mode || 'pirate'].map(([id, name]) => { const b = el('button', 'tab' + (dress.tab === id ? ' on' : ''), name); b.onclick = () => { dress.tab = id; palette(null); dressRows(); }; return b; }));
   const box = $('dress-rows');
   box.replaceChildren();
   const L = myLook;
@@ -3864,6 +3933,13 @@ function dressRows() {
     box.append(el('p', 'note', 'A familiar rides on your shoulder. In Puzzle Pirates they were rare prizes.'));
   } else {
     const D = denLook, den = (k) => (v) => { denLook = cleanDen({ ...denLook, [k]: v }); applyDen(denLook, true); };
+    const decorate = () => {
+      const dr = row('Decorate');
+      const db = el('button', 'mini', 'Put things up round the den');
+      db.onclick = () => { dressPanel(false); decoMode(true); };
+      dr.append(db);
+    };
+    if (dress.tab === 'flag') {
     box.append(el('h3', '', 'Your flag'));
     const fr = row('Emblem');
     chooser(fr, FLAGS, D.flag, den('flag'));
@@ -3872,29 +3948,32 @@ function dressRows() {
     chooser(pr0, PATTERNS, D.pat, den('pat'));
     swatch(pr0, DYES, D.flagCol, den('flagCol'), 'Cloth');
     if (D.pat !== 'plain') swatch(pr0, DYES, D.flagCol3, den('flagCol3'), 'Pattern');
-    box.append(el('p', 'note', 'Flown over the gate, on the gun tower and on your house. Flags and banners you put up yourself keep the design they had.'));
-    const dr = row('Decorate');
-    const db = el('button', 'mini', 'Put things up round the den');
-    db.onclick = () => { dressPanel(false); decoMode(true); };
-    dr.append(db);
-    box.append(el('h3', '', 'Your den'));
+    box.append(el('p', 'note', 'Flown over the gate, on the gun tower and on your shack. Flags and banners you put up yourself keep the design they had.'));
+    decorate();
+    } else if (dress.tab === 'den') {
+    box.append(el('h3', '', 'Where it is'));
     chooser(row('Landscape'), BIOMES, D.biome, den('biome'));
+    box.append(el('h3', '', 'The gun tower'));
     const tw = row('Gun tower');
     swatch(tw, DYES, D.gunwale, den('gunwale'), 'Gunwale', 'Gunnery red');
     swatch(tw, DYES, D.rail, den('rail'), 'Rail', 'Gunnery gold');
     swatch(tw, DYES, D.crates, den('crates'), 'Crates', 'Light wood');
     tw.append(el('small', '', 'gunwale · rail · crates'));
-    box.append(el('h3', '', 'Your house'));
+    decorate();
+    } else {
+    box.append(el('h3', '', 'Your shack'));
     const hs = ramp?.jobs.filter((j) => j.kind === 'house') || [], building = hs.find((j) => j.frame && !j.up);
-    const hr = row('House');
+    const hr = row('Shack');
     if (hs.length && hs.every((j) => j.up)) hr.append(el('b', 'state', 'Built!'));
     else if (building) hr.append(el('b', 'state', `Building the ${HOUSE_PART[building.part]} (${hs.indexOf(building) + 1} of ${hs.length})`));
-    else { const b = el('button', 'mini', 'Build a house'); b.onclick = () => { startHouse(); dressPanel(false); }; hr.append(b); }
+    else { const b = el('button', 'mini', 'Start building'); b.onclick = () => { startHouse(); dressPanel(false); }; hr.append(b); }
     const pr = row('Paint');
     swatch(pr, DYES, D.paint, den('paint'), 'Walls', 'Bare wood');
     swatch(pr, DYES, D.roof, den('roof'), 'Roof', 'Bare wood');
     pr.append(el('small', '', 'walls · roof'));
-    box.append(el('p', 'note', 'Built from pieces like everything else: each part laid on the floor, filled, and hoisted into place.'));
+    box.append(el('p', 'note', 'Its plot is marked out in the far left corner: walk in to start it, or to dress it once it\'s up. Built from pieces like everything else: each part laid on the floor, filled, and hoisted into place.'));
+    decorate();
+    }
   }
 }
 function lookChanged() {
@@ -3917,7 +3996,8 @@ function applyDen(D, mine = false) {
   if (dress.open) dressRows();
   if (online()) send('all', { t: 'den', den: denLook });
 }
-$('look-btn').onclick = () => dressPanel(true);
+$('look-btn').onclick = () => dressPanel(true, 'pirate');
+$('den-btn').onclick = () => dressPanel(true, 'den');
 $('deco-btn').onclick = (e) => { e.currentTarget.blur(); decoMode(!deco.on); };
 $('dress-done').onclick = () => dressPanel(false);
 $('dress-rand').onclick = () => { myLook = randomLook(); lookChanged(); };

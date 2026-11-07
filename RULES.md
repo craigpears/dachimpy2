@@ -292,7 +292,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **Making it yours (pirate looks and the den's dress).** The user wants players to be able to make
   it all their own, and the general feel must match the rest of the den. Code: `js/den-look.js`
   (the pirate builder, dyes, familiars, flag drawing) and the "dressing" and "decorating"
-  sections of `js/den.js`. Opened with the **Your pirate** button.
+  sections of `js/den.js`. **Two panels, two buttons:** **Your pirate** (Pirate, Clothes,
+  Familiar) and **Your den** (Flag, Den, Shack). The user: Your pirate is no place for the den's
+  things; that's a separate concept. (Your den shows your flag where Your pirate shows the pirate.)
   - **Pirates:** male or female, dressed from the real Puzzle Pirates tailor (YPPedia's clothing
     names: Tricorne, Feathered hat, Captain's hat, Sleeping hat, Striped shirt with vest,
     Swashbuckler's jacket, Corset, Stripy knickers, Pantaloons, Kilt, Long dress bottom, Buckle shoes,
@@ -311,12 +313,19 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     where it stands (it used to stop short).
   - **The house is built like everything else.** The user: "you should build it in a carpentry
     style way, the same as you build the decks: you put something on the ground and it starts
-    hoisting it into the side of a house". You ask for it (Den tab, Build a house), and its four
-    parts (front wall with a door and window, two side walls, a lean-to roof) come one at a time
-    as frames laid on the floor by the cave wall on the left. Fill each, it's sawn to fit, then
-    hoisted on ropes and swung into place. Its timber never comes on its own after a wave. You can
-    paint the walls and the roof any dye; each piece keeps a hint of its own timber, so you still
-    see how it was built.
+    hoisting it into the side of a house". Its four parts (front wall with a door and window, two
+    side walls, a lean-to roof) come one at a time as frames laid on the floor by the cave wall on
+    the left. Fill each, it's sawn to fit, then hoisted on ropes and swung into place. Its timber
+    never comes on its own after a wave, and building it never holds up the rampart's timber.
+  - **The shack's plot is there from the start, and it's obvious what to do.** The user loved
+    building it but it was hidden in a menu: "you should be able to walk into that corner and it'd
+    be clear that there's an action". Its footprint is chalked out on the floor in the far left
+    corner, with pegs, a line round it and a "Your shack" sign. Walk in: "Space: build your shack
+    here". Once it's up, the same spot says "Space: paint and dress your shack" and opens Your den
+    at the Shack tab.
+  - **You see the carpentry pieces it's made of.** "It's my little shack. It's made of carpentry
+    pieces" (if not as blatantly as the frames). Each piece has a bold dark edge on both faces, and
+    paint (walls and roof, any dye) lets each piece's own timber show through.
   - **Decorating is placing things yourself, as in a Puzzle Pirates house:** "just having flags
     appear isn't what you want". Decorate mode: pick a Jolly Roger, a banner, a lantern or a rum
     barrel, a ghost of it follows the pointer, wheel or Q/E turns it, click puts it down,
@@ -339,7 +348,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     ground and rock, big trees, ferns at the foot of the cave rocks). The user asked for "something
     simple for right now". Only the look changes, never the play: trees stand out past the raiders'
     cannon, beyond the wall's ends and behind the cave rocks, and ferns never go where the house is.
-    These are on the Den tab under "Your den", kept and shared with the rest of the den's dress.
+    These are on Your den's Den tab, kept and shared with the rest of the den's dress.
 - **Future ideas live in [IDEAS.md](IDEAS.md).** When the user brain-dumps ideas for later, note
   them there rather than building them.
 - **There's always something to do with a junk piece.** Holding three useless pieces with nothing
