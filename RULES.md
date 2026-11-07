@@ -121,6 +121,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   end. The user turned down a clay golem built from smashed Swordfight blocks, with breakers won
   from kills, as "too far away from the sword fighting puzzle", and said this goes for all of them.
   A new job's look (a golem, a forge) can be a skin, never a change to the rules.
+- **Nothing pauses the raid.** The den is quick-paced, so a job can't stop the action for a long
+  one-on-one. The user turned down Swordfight duels at the wall (as in some Puzzle Pirates scenes)
+  because a two-minute duel while raiders hack through the wall is "really disjointed". A slow
+  puzzle has to pay off big instead: that's why the user came to the golem, one puzzle that makes
+  something able to fight a crowd, not just one raider.
 
 - **A pirate mends a den wall.** Pieces sit on three crates (the toolbox); you carry them over and
   fit them into holes in a stone wall. Same pieces, weights and Masterpiece rule as the main game.

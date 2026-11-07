@@ -153,7 +153,14 @@ Where it's got to (7 Nov 2026):
   stacked in a yard, with smashed clay coming to life as soldiers (later, one golem built up from
   what you smash, coloured by what each colour gave it). The user found it "too far away from the
   sword fighting puzzle": breakers come in the drop stream, and smashes attack an opponent.
-- **A duel at the wall:** a raider with a sword (later waves only, see the user's idea that early
+- **Dropped too: duels at the wall** (below), for pacing. The den is quick, and a two-minute duel
+  while raiders hack through is "really disjointed". The user's reason for the golem: a slower
+  puzzle with a higher impact, done once to make something that fights a crowd, not one raider.
+  What's wanted is both: the real puzzle, and that payoff. A proposal (7 Nov) is the golem's
+  mould as the opponent's board: your smashes send their sprinkles into a mould standing in the
+  den, raiders send sprinkles back onto your board, and when the mould is full the golem breaks
+  out and wades into the raiders at the wall. Not yet agreed.
+- **(Dropped) A duel at the wall:** a raider with a sword (later waves only, see the user's idea that early
   waves have none) squares up at a breach or the gate. A pirate walks up and takes them on, and
   both play real Swordfight. Your board stands upright beside you, the way a hole stands in the
   wall, so its size suits the den; the raider's board stands on their side, played by the
