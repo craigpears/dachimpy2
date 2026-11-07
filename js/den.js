@@ -2111,6 +2111,8 @@ addEventListener('keydown', (e) => {
   if (e.target instanceof HTMLInputElement) return;
   if (dress.open) { if (e.key === 'Escape') dressPanel(false); return; }
   const key = e.key.toLowerCase();
+  if (paused) { if (['p', ' ', 'escape', 'enter'].includes(key)) { e.preventDefault(); setPaused(false); } return; }
+  if (key === 'p' && !deco.on) { setPaused(true); return; }
   if ([' ', 'tab', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) e.preventDefault();
   if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) { keys.add(key); mouseMode = false; }
   if (key === 'z' || key === 'c') keys.add(key);
@@ -3769,8 +3771,23 @@ let deckView = 0;
    crew it doesn't: the den goes on for everyone, so when the browser stops drawing a tab in the
    background, a timer keeps it ticking (as often as the browser lets it) and catches up. */
 let lastT = performance.now();
+/* Pause (the button, or P): everything stops, raiders, timers and stores alike. Only on your own:
+   with a crew the raiders don't wait for anyone. It also pauses when you switch away from the tab. */
+let paused = false;
+function setPaused(on) {
+  if (on && (online() || G.over)) { if (online()) toast('No pausing with a crew: the raiders don\'t wait for anyone', true); return; }
+  paused = on;
+  keys.clear();
+  $('paused').classList.toggle('on', on);
+  $('pause-btn').textContent = on ? 'Carry on' : 'Pause';
+}
+$('pause-btn').onclick = (e) => { e.currentTarget.blur(); setPaused(!paused); };
+$('resume').onclick = () => setPaused(false);
+document.addEventListener('visibilitychange', () => { if (document.hidden && !online() && !G.over) setPaused(true); });
 function tick() {
   const now = performance.now();
+  if (paused && online()) setPaused(false);
+  if (paused) { lastT = now; return; }
   let left = Math.min(online() ? 1.5 : 0.05, (now - lastT) / 1000);
   lastT = now;
   while (left > 1e-4) { const d = Math.min(0.05, left); update(d); left -= d; }

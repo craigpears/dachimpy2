@@ -345,6 +345,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   you fit it, board it over, nail it on behind a mended hole, or lay it in a rampart frame.
 - **You must see what's happening in the den.** Raiders inside get a ⚔ marker, pinned to the edge
   of the screen when they're out of view (gold when carrying loot). The view widens on narrow screens.
+- **You can pause.** A Pause button by Your pirate, or P (P, Space, Enter or Esc carries on).
+  Everything stops: raiders, the wave timer, the Gunnery stores. It also pauses by itself when you
+  switch away from the tab. Only when playing on your own: with a crew the raiders don't wait.
 - **Give enough time to build.** A piece takes about ten seconds to fetch and fit, so the first wave
   waits 75 seconds and starts small.
 - **The den has a gate** and raiders attack from the far side of the wall, with swords and (from
