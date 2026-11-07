@@ -1422,12 +1422,14 @@ function tween(dur, step, done) { tweens.push({ t: 0, dur, step, done }); }
 // ---------- raiders ----------
 // Only an empty hole can be climbed through; anything with wood in it has to be hacked open first.
 const passable = (h) => h.status === 'open' && !h.pieces.length;
+/* Each raider goes for the hole in front of where they come up to the wall, not the weakest one
+   along the whole of it: a breach only draws the raiders close to it (GAP_PULL metres). So one hole
+   broken doesn't let the whole wave in, and the parts of the wall you've kept strong hold their own
+   raiders off till they tire. */
+const GAP_PULL = 3;
+const gapNear = (x) => wall.holes.filter((h) => passable(h) && Math.abs(holeX(h) - x) <= GAP_PULL).sort((a, b) => Math.abs(holeX(a) - x) - Math.abs(holeX(b) - x))[0];
 function pickHole(x) {
-  const near = (a, b) => Math.abs(holeX(a) - x) - Math.abs(holeX(b) - x);
-  const gaps = wall.holes.filter(passable);
-  if (gaps.length) return gaps.sort(near)[0];
-  const strength = (h) => h.hp + boardsOf(h).reduce((s, p) => s + p.hp, 0);
-  return wall.holes.slice().sort((a, b) => strength(a) - strength(b) || near(a, b))[0];
+  return gapNear(x) || wall.holes.slice().sort((a, b) => Math.abs(holeX(a) - x) - Math.abs(holeX(b) - x))[0];
 }
 const SHIRTS = ['#59607a', '#2f6b4f', '#6b2f5e'], SCARVES = ['#2b2b2b', '#3a4a8a', '#7a1f1f'], BEARDS = ['#222', '#7a4a1a', '#999'];
 let raiderSeq = 0;
@@ -1479,6 +1481,8 @@ function updateRaider(r, dt) {
       // Hacking at the wood in a hole: from outside to get in, or from inside to get back out.
       const out = r.state === 'hackOut';
       if (passable(h)) { r.state = out ? 'climbOut' : 'climb'; r.t = 0; break; }
+      const gap = !out && gapNear(r.x);   // the hole next along's been broken open: in that way
+      if (gap) { r.hole = gap; r.slot = (Math.random() - 0.5) * 1.2; r.state = 'approach'; break; }
       faceTo(r.m, 0, out ? -1 : 1, dt);
       if (!out) r.stamina -= dt;
       // From outside: the hole's own wood, then the boards behind it, nearest first. A thief

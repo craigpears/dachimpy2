@@ -197,6 +197,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **Snapping goes where you point.** Boards behind a hole snapped a square or two off, so you
   couldn't line one up: the pointer was read on the stone face while the boards stand out towards
   you. Every spot is matched to the pointer at its own depth.
+- **One breach doesn't let everyone in; the wall you kept strong pays off.** Raiders used to make
+  for any open gap along the whole wall (or else the weakest hole), so once one hole went, the
+  whole wave poured through it. Now each raider attacks the hole in front of where they come up to
+  the wall, and only switches to a breach within about 3 m. Raiders at a Masterpiece mostly tire
+  and leave. (Making them need a gap they can walk through is in IDEAS.md.)
 - **Future ideas live in [IDEAS.md](IDEAS.md).** When the user brain-dumps ideas for later, note
   them there rather than building them.
 - **There's always something to do with a junk piece.** Holding three useless pieces with nothing
