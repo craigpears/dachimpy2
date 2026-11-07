@@ -15,6 +15,13 @@ the site (`.assetsignore` skips `*.md`).
   - **A smaller gap makes the wall weaker, not open:** raiders go for it and hack it wider (it
     falls faster than whole stone), so leaving gaps still costs you, but nobody just waltzes in.
 
+  Tested 7 Nov 2026 (two waves simulated, nobody mending): **a gap left in a part-mended hole no
+  longer lets them in.** Any wood in a hole means they hack it all out first, and only then climb
+  through. **But an empty hole of any size or height still does.** Every wall has one single-piece
+  hole (5 squares), often up off the floor. Three raiders sent at one whose bottom was 1.1 m up all
+  hopped through it, stole and climbed back out. The user hadn't seen it in a while, probably
+  because that hole is usually the first one mended.
+
   A possible way to build it: a hole a raider can't fit through is a weak spot with low strength;
   hacked through, it becomes a breach that is a bigger, floor-level carpentry hole (still made of
   whole pieces' worth of squares, still solvable), which the crew then mends.
