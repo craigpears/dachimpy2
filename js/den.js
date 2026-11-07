@@ -1941,15 +1941,19 @@ function showPile(p) {
    piece from the wall instead of walking back to look (the user: "so that it runs a bit faster").
    Only to see: you still walk over to fetch one. Left to right as the crates stand. */
 const toolEls = [];
-function pieceSvg(cells) {
+// One whole piece, drawn the main game's way (js/render.js), in the den's wood colours.
+function pieceSvg(letter, cells) {
   const b = C.bbox(cells), cs = Math.min(11, Math.floor(42 / b.h), Math.floor(54 / b.w));
-  const r = cells.map(([y, x]) => `<rect x="${(x - b.c0) * cs + 0.5}" y="${(y - b.r0) * cs + 0.5}" width="${cs - 1}" height="${cs - 1}" rx="1.5"/>`).join('');
-  return `<svg viewBox="0 0 ${b.w * cs} ${b.h * cs}" width="${b.w * cs}" height="${b.h * cs}">${r}</svg>`;
+  return window.Render.piece(letter, cells, { cell: cs, pad: 1 });
 }
 function toolbox() {
   const box = $('toolbox');
   box.hidden = onGunDeck();
   if (box.hidden) return;
+  if (!toolEls.length) {
+    box.insertAdjacentHTML('afterbegin', window.Render.defs());   // (the grain patterns)
+    for (const [l, c] of Object.entries(WOOD)) box.style.setProperty(`--p-${l}`, c);
+  }
   if (!toolEls.length) for (let i = 0; i < piles.length; i++) { const el = document.createElement('div'); box.append(el); toolEls.push({ el, sig: '' }); }
   [...piles].sort((a, z) => a.x - z.x).forEach((p, j) => {
     const t = toolEls[j], mine = carry && carry.from === p;
@@ -1958,11 +1962,10 @@ function toolbox() {
     if (sig !== t.sig) {
       t.sig = sig;
       t.el.className = `tool ${state}`;
-      t.el.innerHTML = state === 'piece' ? `${pieceSvg(p.cells)}<span>${p.letter}</span>`
-        : state === 'hand' ? `${pieceSvg(carry.cells)}<span>In hand</span>`
+      t.el.innerHTML = state === 'piece' ? `${pieceSvg(p.letter, p.cells)}<span>${p.letter}</span>`
+        : state === 'hand' ? `${pieceSvg(carry.letter, carry.cells)}<span>In hand</span>`
         : state === 'wait' ? `<span>Restocking<br>${Math.ceil(p.wait)}s</span><i><b></b></i>`
         : '<span>Taken</span>';
-      if (state === 'piece') t.el.querySelector('svg').style.fill = WOOD[p.letter];
     }
     if (state === 'wait') t.el.querySelector('b').style.width = `${Math.min(1, 1 - p.wait / (p.waitFull || restockSecs())) * 100}%`;
   });

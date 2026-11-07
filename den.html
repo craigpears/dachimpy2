@@ -26,10 +26,13 @@
     .toolbox[hidden] { display: none; }
     .toolbox .cap { font-size: 12px; font-weight: 700; color: var(--dim); writing-mode: vertical-rl; transform: rotate(180deg); letter-spacing: 1px; }
     .tool { width: 62px; height: 64px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border-radius: 7px; background: #1f150d; border: 1px solid #4a3522; color: var(--dim); font-size: 12px; font-weight: 700; line-height: 1.1; text-align: center; }
-    .tool svg { stroke: #2a1a0c; stroke-width: 1; }
+    /* Pieces drawn as in the main game (js/render.js): one solid piece, grain, outside edge only. */
+    .toolbox { --grain: rgba(58, 33, 12, 0.3); --pc-edge: rgba(30, 18, 8, 0.9); }
+    .pc-fill { fill: var(--pc); }
+    .pc-edge { fill: none; stroke: var(--pc-edge); stroke-width: 1.4; stroke-linecap: square; }
     .tool.piece span { color: var(--ink); font-size: 14px; }
     .tool.hand { border-color: var(--gold); color: var(--gold); }
-    .tool.hand svg { fill: var(--gold); opacity: 0.5; }
+    .tool.hand svg { opacity: 0.45; }
     .tool.wait i { display: block; width: 46px; height: 6px; background: #3b2a1b; border-radius: 3px; overflow: hidden; }
     .tool.wait b { display: block; height: 100%; width: 0; background: #ffc46b; }
     .tool.taken { opacity: 0.6; }
@@ -183,6 +186,7 @@
   </div></div>
 
   <script src="js/engine.js"></script>
+  <script src="js/render.js"></script>
   <script type="importmap">
     { "imports": {
       "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",

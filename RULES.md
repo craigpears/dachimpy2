@@ -137,6 +137,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   took, a restocking bar, or "Taken" when a crewmate has it. So you can plan your next piece from
   the wall rather than walking back to look (the user: "so that it runs a bit faster"). It's only
   to see: you still walk over to fetch a piece. It's hidden on the gun tower and while decorating.
+  Each piece is drawn the way the main game draws its pieces (`js/render.js`): one solid piece with
+  its grain and only its outside edge, in the den's wood colour. (A first try drew separate little
+  squares; the user: "why are they in squares just joint from each other instead of one piece?"
+  No new art styles: reuse the game's own.)
 - **Throwing has its own controls.** Shift (next to WASD; R was too far away) or clicking on a raider. Space
   and plain clicks only pick up and fit, so you can fight beside the crates or the wall without
   fitting by mistake. Up on the rampart Space throws too, since there's nothing to fit there.
