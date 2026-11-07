@@ -8,6 +8,37 @@ The thread through all of them: each Puzzle Pirates puzzle should feel like *tha
 in the 3D den, the way the rampart frames feel like carpentry. Nothing should magically appear or
 transform; things are made from pieces you can see, and stay as those pieces.
 
+**Biggest principle: democratised, team effort.** One plague of Puzzle Pirates is that it gets
+elitist: everyone wants to drive the ship and fire the guns, and a few get to. Here every pirate
+should have agency and a real say in how things go, and no job should belong to one person. It's
+already a team game in Puzzle Pirates; this should be even more so.
+
+## The rampart, built more like real carpentry
+
+Building on what's there now (the walk and its stairs are made of pieces that stay pieces):
+
+- **Base first, then supports, then planks:** the base is laid on the floor as it is now.
+  Then supports go up from it, and then the planking runs up and along the supports, so you can
+  walk on it.
+- **Pieces suit jobs:** rarer pieces like the M make good cross braces, so the supports are
+  built from M's going up. P's make good surface pieces for the planking. People can still fit
+  any piece however they like; that's just what works well.
+- **Freeform, and what you built is what you get:** if you leave gaps, it's harder to walk up and
+  you're more likely to fall off. The realism matters: it's what we actually built, holes and
+  all, not some magical thing.
+
+## Ship setting, and the other puzzles (long term)
+
+- **Bring in more puzzles:** Bilge and Rumble too, eventually. How Rumble would work here is still
+  to figure out.
+- **Maybe move it all onto a ship,** with raiders attacking in rowboats. A ship makes it easy to
+  add bilging, duty navigating and the rest.
+- **Gunnery with real aim:** aim the cannons at particular ports on an enemy ship, so there's a
+  fun part of gunnery beyond loading.
+- **Keep it democratised:** everyone gets a turn at the fun jobs (see the principle above).
+
+For now the den is the first version, and that works.
+
 ## Gun deck (inspired by Gunnery)
 
 Reference: https://yppedia.puzzlepirates.com/Gunnery
@@ -35,6 +66,10 @@ Proposed design (not yet agreed):
   silence the raiders' cannon for a while.
 - **3D twist:** pirates standing on the deck are obstacles, so stores bounce off them: your body
   is a fourth arrow.
+- **Get close to chalk:** you have to be near a plank to chalk an arrow on it, so you're out among
+  the rolling stores.
+- **Knocked flying:** get hit by a flying cannonball and it does something really funny: you're
+  knocked clean off the rampart and have to walk back up again.
 - **Co-op:** one shared deck; the host's browser runs the rolling.
 
 The user liked this. Their follow-up:

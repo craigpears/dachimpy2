@@ -39,6 +39,9 @@
     .mark.aim { outline: 3px dashed #fff; outline-offset: 4px; box-shadow: 0 0 16px 5px rgba(255, 255, 255, .7); transform: translate(-50%, -100%) scale(1.3); z-index: 1; }
     .mark.off.aim { transform: translate(-50%, -50%) scale(1.4); }
     @media (max-width: 1150px) { .banner { top: calc(var(--hud-h, 64px) + 22px); font-size: 16px; } }
+    .credit { position: fixed; top: 8px; right: 12px; max-width: 290px; text-align: right; font-size: 11px; line-height: 1.35; color: var(--dim); opacity: 0.75; pointer-events: none; }
+    @media (max-width: 1150px) { .credit { font-size: 10px; max-width: 200px; } }
+    @media (max-width: 620px) { .credit { top: auto; bottom: 2px; left: 0; right: 0; max-width: none; text-align: center; } .credit br { display: none; } .keys { bottom: 36px; } .prompt { bottom: 80px; } }
     .toast { position: fixed; top: 18%; left: 50%; transform: translateX(-50%); font: 700 34px 'Alegreya', serif; color: var(--gold); text-shadow: 0 2px 0 #000, 0 0 18px rgba(0,0,0,.8); pointer-events: none; opacity: 0; transition: opacity .3s; }
     .toast.on { opacity: 1; }
     .toast.bad { color: var(--bad); }
@@ -82,6 +85,7 @@
   <div class="prompt" id="prompt"></div>
   <div class="intro" id="intro">Raiders are coming! Mend the holes in the den wall before they arrive.<br>A hole filled exactly is a <b>Masterpiece</b>: strong. Nail a piece over the stone<br>to <b>board it over</b>: quick, but weak.<br>A piece that fits nowhere can be nailed on <b>behind</b> a mended hole: one more layer to hack through,<br>or thrown at a raider who gets in. Beat off a wave and timber arrives:<br>build a stretch of rampart, its walk and its stairs, piece by piece, to pelt them from the top of the wall.</div>
   <div class="keys"><kbd>WASD</kbd> walk · <kbd>Space</kbd> or click: pick up / fit · <kbd>Q</kbd><kbd>E</kbd> turn · <kbd>F</kbd> flip · <kbd>Tab</kbd> next spot · <kbd>Shift</kbd> or click a raider: throw · <kbd>Z</kbd><kbd>C</kbd> or right-drag: turn the view · wheel: turn the piece at a hole, or zoom (<kbd>-</kbd><kbd>=</kbd>)</div>
+  <div class="credit">Puzzle Pirates™ © 2001–2026 Grey Havens, LLC, created by Three Rings Design.<br>An unofficial fan project, not affiliated with or endorsed by them.</div>
   <div class="toast" id="toast"></div>
   <div class="end" id="end"><div><h2>The den's been plundered!</h2><p id="end-text"></p><button id="again">Defend it again</button></div></div>
   <div id="labels"></div>
