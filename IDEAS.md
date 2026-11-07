@@ -1,8 +1,9 @@
 # Pirate Den: future design ideas
 
-Ideas the user has brain-dumped for later. Nothing here is built yet. When one gets built, move
-its rules into [RULES.md](RULES.md) and delete it from here. Not published with the site
-(`.assetsignore` skips `*.md`).
+The user's unrefined ideas for later: new puzzles, new features, the long-term picture. Nothing
+here is built or agreed yet. Fixes and quality-of-life changes the user has asked for go in
+[TODO.md](TODO.md) instead. When an idea gets built, move its rules into [RULES.md](RULES.md) and
+delete it from here. Not published with the site (`.assetsignore` skips `*.md`).
 
 The thread through all of them: each Puzzle Pirates puzzle should feel like *that puzzle* played
 in the 3D den, the way the rampart frames feel like carpentry. Nothing should magically appear or
@@ -32,28 +33,6 @@ seeing it, with the depth coming after.
 
 **Always more piratey.** Keep looking for ways to give it a more piratey feel.
 
-## Raiders need a real gap to get in (rethink, wanted soon)
-
-The user finds it weird and dumb that raiders seem to hop through tiny gaps, even five-square ones
-high up the wall, as if by magic. Today any empty hole counts as a way in, whatever its size or
-height. What they want:
-
-- **They walk through, not jump through:** a raider only gets in through an opening big enough to
-  walk through: down at floor level, and roughly two squares wide by three tall.
-- **A smaller gap makes the wall weaker, not open:** raiders go for it and hack it wider (it falls
-  faster than whole stone), so leaving gaps still costs you, but nobody just waltzes in.
-
-A possible way to build it: a hole a raider can't fit through is a weak spot with low strength;
-hacked through, it becomes a breach that is a bigger, floor-level carpentry hole (still made of
-whole pieces' worth of squares, still solvable), which the crew then mends.
-
-## Covering a hole must cost the raiders (wanted soon)
-
-Right now there's no reward for even just covering a hole: raiders bash through a boarded one in
-a few seconds, so it feels like nothing. Getting through the wall should **cost them**: a covered
-hole should hold them up long enough to matter, and hacking through should weaken the wave in some
-way (they lose raiders, or time, or arrive spent). Goes with the walk-through gap rethink above.
-
 ## Treasure maps from fallen raiders
 
 Now and then a raider you knock out drops a **treasure map**: a quick little event. Go out of the
@@ -70,11 +49,6 @@ Nailing junk pieces on behind a mended hole should reward good work, the way the
 - **More than one grade:** carpentry has levels below Masterpiece (the user remembers "good
   work"; check YPPedia for the real names), so a decent but imperfect layer could be a middle
   grade, stronger than loose boards but weaker than a Masterpiece.
-
-## Feel: turning a piece when you're close
-
-Turning the piece when you're close to the wall still feels a bit off to the user, though they
-can't yet say how. Worth a playtest to pin down (which way it turns, where the ghost jumps to).
 
 ## The rampart, built more like real carpentry
 
@@ -118,9 +92,6 @@ Done, 7 Nov 2026: male and female pirates in YPP clothes and dyes, familiars, th
 Decorate mode (flags, banners, lanterns, rum barrels), a house built from pieces and painted.
 Gunnery stores also bump and bounce now instead of stopping dead when they meet.
 
-Not checked yet: the look and den messages between two real crewmates (only tried solo), and the
-house on a narrow den (the left-hand pile could crowd its floor frames if the den is small).
-
 Ideas to carry on with:
 - **More to put up:** a clothes line, a rowing boat, palm trees in tubs, a ship's wheel, treasure
   piles, a Puzzle Pirates-style trophy shelf. And more parts of the den to build from pieces: the
@@ -136,8 +107,6 @@ Ideas to carry on with:
   day (a sunset, a storm) would fit too.
 - **More of the gun tower to dress:** what's in the crates (shot, rum, fruit, treasure), the deck's
   colour, the guns themselves (bronze, black iron, gilded), the barrel.
-- **Your den's preview** shows your flag on every tab; the Shack tab could show the shack itself
-  (painted as you choose), and the Den tab the landscape.
 - **The shack is small, open-backed and staying that way** (the user loves it: "a lot of
   character"). Things to put in it should suit its size: a hammock, a sea chest, a lantern hook.
 - **Move what you've put up** (pick it up and put it down again) rather than take down and redo.
@@ -148,41 +117,17 @@ Ideas to carry on with:
   fits here; for now everything is free to try.
 - **Houses that stay:** the house and rampart go with each new game, though the decorations stay.
   A den you keep between visits would want them kept too.
-- **The camera indoors:** walk into the house and its near wall hides you. Fade it out then.
 - **The main puzzle's solver** (`js/engine.js`) works row by row, which is very slow on long thin
   shapes (a 3 by 15 strip took about a minute). The den's copy turns wide shapes on their side
   first. If the main site ever solves long strips, do the same there.
 
 ## Holding the wall: what's next
 
-The first fix is in (RULES.md: "Keeping them out must be possible"): the cannon aims first and
-fires a few times a wave, fresh breaches are full of rubble, and turning raiders away pays. Not
-yet tried by the user. Ideas if it still feels hopeless or too easy:
+Ideas if keeping raiders out still feels hopeless or too easy once the user has tried the
+first fix (TODO.md has the playtest):
 - **Raiders who get in should be catchable**: they walk to the chest; a crewmate standing in the
   way could block them, and a thrown piece already knocks them flat.
 - **Repairs between waves**: Masterpieces could heal a little in the calm (the user's call).
-- **Wave sizes for a crew** may need retuning with the cannon change; only solo was tested.
-
-## A public den anyone can drop into
-
-The user wants the den you land in by default to be a public one, not solo: a friendly, open den
-where anyone can drop in, with no cap on numbers. Private crews with a four-letter code can stay
-alongside it.
-
-Things to work out:
-
-- **No cap:** the crew room is limited to four at present (`MAX_CREW` in `worker/crew.js`), and
-  the first pirate's browser runs the raiders for everyone. With many pirates, that browser's
-  upload and the size of each message grow, so the snapshots would need trimming. Pirates far
-  away could be sent less often.
-- **Raiders scale with the crew** (half again per extra pirate), so a big drop-in crowd needs a
-  sensible ceiling on wave size, or a different scaling.
-- **Drop-in, drop-out:** someone arriving mid-wave just appears and starts mending. Nobody's
-  progress depends on who's there, so a pirate leaving never spoils it for the rest.
-- **Solo stays possible:** keep a way to play alone (a "Play alone" button), even if public is the
-  default.
-- **Moderation:** pirate names are letters only already, but an open room may want a way to hide
-  a pirate who's being a nuisance.
 
 ## Clay soldiers (inspired by Swordfight)
 

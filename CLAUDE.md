@@ -9,3 +9,8 @@ copy: `node_modules/node/bin/node.exe node_modules/wrangler/bin/wrangler.js dev 
 files from subfolders, so don't use it.
 
 Read [RULES.md](RULES.md) before changing gameplay or wording, and add to it whenever the user corrects a rule or gives design feedback.
+
+Pirate Den notes: [TODO.md](TODO.md) holds the fixes and quality-of-life changes the user has asked for
+(agreed; just do them), and [IDEAS.md](IDEAS.md) holds their unrefined ideas for new puzzles and features.
+Keep the two apart: when the user mentions a fix or tweak, add it to TODO.md; when they brain-dump a new idea,
+add it to IDEAS.md.
