@@ -144,17 +144,26 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   you go up and knock the raiders off it. The view swings up high to look down at them. Keep it out
   of the way (not in front of the gate), and the full length of the wall.
 - **The rampart is built, a stretch at a time, as the reward for beating a wave.** After waves 1, 2
-  and 3, timber arrives for one stretch (left with its stairs, then right, then the middle) and a
-  footing opens in the top of the wall above it: a pale timber-backed hole, labelled "Rampart
-  footing". Fill it like any hole (exactly or boarded over) and that stretch goes up. Raiders leave
-  footings alone. You can only walk on stretches that are built.
+  and 3, timber arrives for one stretch (left with its stairs, then right, then the middle). You can
+  only walk on stretches that are built.
+- **It's built by carpentry, piece by piece, not by magic.** A footing hole opening in the wall was
+  bizarre, and a stretch popping up was too easy. Instead a frame (a puzzle shape of about four
+  pieces) is laid out on the den floor in front of the stretch. You lay pieces in it one at a time and
+  they stay there, so you watch it come together. A piece may stick out over the frame's edge, so
+  any piece will do; the spare is sawn off when it's full. A gap that none of the pieces to hand can
+  reach any more is plugged with offcuts, so you can't get stuck. A frame filled with nothing sawn
+  off or plugged is Shipshape and pays a bonus. Then the finished deck is hoisted up onto the wall.
 - **Up on the wall must stay bright.** The fog keeps its distance from the camera and the view
   brightens as it rises; looking down from the rampart went murky otherwise.
 - **Keep the pirate-den feel, not medieval.** The rampart is a ship's deck with a rope rail and
   the Jolly Roger, not stone battlements.
-- **Damaged holes can be patched.** A Masterpiece or boarded hole that's been hacked at takes
-  another board nailed over the front, which wins back strength (up to three deep). The label says
-  so when it's damaged.
+- **There's always something to do with a junk piece.** Holding three useless pieces with nothing
+  to do was frustrating. Any mended hole (Masterpiece or boarded) takes boards nailed on behind it,
+  on the den side, up to three deep, damaged or not. They're a second (third, fourth) layer:
+  raiders hack through the hole's own wood first, then each board in turn, one at a time, and only
+  get in once the last is gone. While boards hold a hacked-open hole, it can't be refilled; you can
+  keep nailing more on. Boards may cover the hole's wood and the stone round it, but not another hole
+  or the gate. Clean fits and boarding over come first when choosing a spot; boards behind come last.
 - **The camera can be turned and zoomed:** Z/C or right-drag to turn and tilt, -/= to zoom, V to
   reset. Walking follows the way the camera faces. Q/E turn the piece, right-click flips it.
 - **The wheel turns the piece whenever it's showing a spot to fit** (that's what it was for first);
@@ -162,7 +171,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **Throwing at a raider is the only way to discard.** No scrap fire, no bin: a piece you don't
   want (often a rare one) can only be got rid of by throwing it at an enemy pirate, which deals a
   fresh piece onto that crate. Swapping at the crates just puts it back. With no raiders about,
-  you fit it or board it over.
+  you fit it, board it over, nail it on behind a mended hole, or lay it in a rampart frame.
 - **You must see what's happening in the den.** Raiders inside get a ⚔ marker, pinned to the edge
   of the screen when they're out of view (gold when carrying loot). The view widens on narrow screens.
 - **Give enough time to build.** A piece takes about ten seconds to fetch and fit, so the first wave

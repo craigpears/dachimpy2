@@ -282,7 +282,6 @@ const stoneGeo = new RoundedBoxGeometry(S * 0.97, S * 0.95, STONE_D, 2, 0.06);
 const X = (c) => (c - wall.W / 2) * S;     // left edge of column c
 const Y = (r) => (wall.H - r) * S;         // top edge of row r
 const holeBackMat = mat('#5a3a22', { roughness: 1 });
-const deckBackMat = mat('#a07448', { map: woodTex, roughness: 1 });   // behind a rampart footing: fresh timber
 const cellPlane = new THREE.PlaneGeometry(S, S);
 
 function lastGap() {
@@ -305,7 +304,7 @@ function newWall() {
     return cells;
   });
   $('labels').replaceChildren();
-  wall = { W: col + 1, H, holes: [], cellHole: new Map(), wood: new Set(), gate: new Set(), gateCols: gate, stoneAt: new Map() };
+  wall = { W: col + 1, H, holes: [], cellHole: new Map(), wood: new Set(), lining: Array.from({ length: MAX_PATCHES }, () => new Set()), gate: new Set(), gateCols: gate, stoneAt: new Map() };
   for (let r = 1; r < H; r++) for (let c = gate.c0; c <= gate.c1; c++) wall.gate.add(k(r, c));
   placed.forEach((cells) => registerHole(cells));
   buildWall();
@@ -321,11 +320,11 @@ function registerHole(cells) {
 function holeVisuals(h) {
   const g = new THREE.Group();
   for (const [r, c] of h.cells) {
-    const p = mesh(cellPlane, h.kind ? deckBackMat : holeBackMat, false);
+    const p = mesh(cellPlane, holeBackMat, false);
     p.position.set(X(c) + S / 2, Y(r) - S / 2, -STONE_D - 0.01);
     g.add(p);
   }
-  const line = outline(h.cells, 0.02, h.kind ? '#9fe0ff' : '#ffd58a');
+  const line = outline(h.cells, 0.02, '#ffd58a');
   line.position.set(X(0), Y(0), 0);
   g.add(line);
   wallGroup.add(g);
@@ -474,39 +473,170 @@ function makeRampart() {
   });
   return g;
 }
-/* Building the rampart: after each of the first three waves, timber arrives for one stretch, and a
-   footing (a two-piece hole) opens in the top of the wall above it. Fill it, exactly or boarded
-   over, and that stretch of wall-walk goes up. Raiders leave footings alone. */
+/* Building the rampart: after each of the first three waves, timber arrives for one stretch and a
+   frame is laid out on the den floor in front of it: a carpentry puzzle lying flat. Lay pieces in
+   it one at a time; they stay where you put them. A piece may stick out over the edge (so any piece
+   will do), and the spare is sawn off when the frame's full. Then the finished deck is hoisted up
+   onto the wall. */
 const SECTION_ORDER = [0, 2, 1];
-function addFooting(si) {
+const FRAME_Z = WALL_Z + 0.25;   // just behind where you stand to mend the wall
+const frameMat = mat('#4a3220', { roughness: 1 });
+const railMat = mat('#8a5a30', { map: woodTex });
+const railGeo = [new THREE.BoxGeometry(0.06, S + 0.06, 0.07), new THREE.BoxGeometry(S + 0.06, 0.06, 0.07)];
+const frames = () => (ramp ? ramp.secs.filter((s) => s.frame && !s.frame.done).map((s) => s.frame) : []);
+function openFrame(si) {
   const s = ramp.secs[si];
-  for (let tries = 0; tries < 400; tries++) {
-    const shape = tries < 300 ? C.genHole(2).hole : lastGap();
-    const b = C.bbox(shape);
-    if (b.w > s.c1 - s.c0 - 1 || b.h > wall.H - 2) continue;
-    const c0 = s.c0 + 1 + rand(s.c1 - s.c0 - b.w), r0 = tries < 200 ? 0 : rand(2);
-    const cells = shape.map(([r, c]) => [r + r0, c + c0]);
-    const clear = cells.every(([r, c]) => {
-      if (c < 1 || c > wall.W - 2 || !wall.stoneAt.has(k(r, c))) return false;
-      for (let a = -1; a <= 1; a++) for (let z = -1; z <= 1; z++) {
-        const kk = k(r + a, c + z);
-        if (wall.cellHole.has(kk) || wall.gate.has(kk) || wall.wood.has(kk)) return false;
-      }
-      return true;
-    });
-    if (!clear) continue;
-    const zero = new THREE.Matrix4().makeScale(0, 0, 0);
-    cells.forEach(([r, c]) => { stones.setMatrixAt(wall.stoneAt.get(k(r, c)), zero); wall.stoneAt.delete(k(r, c)); });
-    stones.instanceMatrix.needsUpdate = true;
-    const h = registerHole(cells);
-    h.kind = 'deck'; h.sec = si;
-    holeVisuals(h);
-    updateHole(h);
-    burst(new THREE.Vector3(holeX(h), holeMidY(h), 0.3), '#e8c890', 16, 3);
-    return h;
+  // Clear of the stairs and torches at the ends.
+  const lo = s.x0 + (si === 0 ? 2.4 : 0.4), hi = s.x1 - (si === 2 ? 2.4 : 0.4);
+  let shape = null;
+  for (let i = 0; i < 400 && !shape; i++) {
+    const c = C.normalize(C.genHole(i < 250 ? 4 : 3).hole), b = C.bbox(c);
+    if (b.h <= 4 && b.w * S <= hi - lo) shape = c;
   }
-  buildSection(si);   // nowhere to put a footing: the stretch just goes up
-  return null;
+  if (!shape) { buildSection(si); return null; }
+  const b = C.bbox(shape), x0 = (lo + hi) / 2 - b.w * S / 2;
+  // Laid flat: the frame's rows run from the wall towards the den, its "front" faces up.
+  const g = new THREE.Group();
+  g.position.set(x0, 0, FRAME_Z);
+  g.rotation.x = -Math.PI / 2;
+  const set = new Set(shape.map(([r, c]) => k(r, c)));
+  for (const [r, c] of shape) {
+    const p = mesh(cellPlane, frameMat, false);
+    p.receiveShadow = true;
+    p.position.set((c + 0.5) * S, -(r + 0.5) * S, 0.012);
+    g.add(p);
+    // A low timber rail round the edge, so it reads as a frame to fill.
+    for (const [a, z] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+      if (set.has(k(r + a, c + z))) continue;
+      const rail = mesh(railGeo[a ? 1 : 0], railMat);
+      rail.position.set((c + 0.5 + z * 0.5) * S, -(r + 0.5 + a * 0.5) * S, 0.035);
+      g.add(rail);
+    }
+  }
+  g.add(outline(shape, 0.075, '#9fe0ff'));
+  g.userData.scenery = true;
+  den.add(g);
+  const label = document.createElement('div');
+  $('labels').append(label);
+  const f = s.frame = { si, x0, z0: FRAME_Z, cells: shape, b, set, occ: new Set(), filled: new Set(), pieces: [], group: g, label, sig: '', done: false };
+  frameState(f);
+  burst(new THREE.Vector3(x0 + b.w * S / 2, 0.3, FRAME_Z + b.h * S / 2), '#e8c890', 18, 3);
+  return f;
+}
+function frameState(f) {
+  f.open = f.cells.filter(([r, c]) => !f.filled.has(k(r, c)));
+  f.exact = f.open.length % 5 === 0 && C.solve(f.open, 1).length > 0;
+  f.sig = '';
+}
+// Every spot a piece could lie in a frame: covering at least one empty square of it, clear of
+// the pieces already there. Squares off the frame are allowed; `over` counts them.
+function frameFits(cells) {
+  const out = [], b = C.bbox(cells);
+  for (const f of frames()) {
+    const seen = new Set();
+    for (const [er, ec] of f.open) for (const [pr, pc] of cells) {
+      const dr = er - pr, dc = ec - pc;
+      if (seen.has(k(dr, dc))) continue;
+      seen.add(k(dr, dc));
+      let over = 0, ok = true;
+      for (const [r, c] of cells) {
+        const kk = k(r + dr, c + dc);
+        if (f.occ.has(kk)) { ok = false; break; }
+        if (!f.set.has(kk)) over++;
+      }
+      if (ok) out.push({ frame: f, dr, dc, over, cx: f.x0 + (dc + b.w / 2) * S, cz: f.z0 + (dr + b.h / 2) * S });
+    }
+  }
+  return out;
+}
+function placeFrame(t) {
+  const f = t.frame, b = C.bbox(carry.cells);
+  const g = pieceGroup(carry.cells, woodMat(carry.letter));
+  const from = f.group.worldToLocal(carry.group.position.clone());
+  const to = new THREE.Vector3(t.dc * S, -t.dr * S, 0.1);
+  const off = new THREE.Vector3(-b.w * S / 2, b.h * S / 2, 0);
+  scene.remove(carry.group);
+  f.group.add(g);
+  const pile = carry.from;
+  const keys = carry.cells.map(([r, c]) => k(r + t.dr, c + t.dc));
+  keys.forEach((kk) => { f.occ.add(kk); if (f.set.has(kk)) f.filled.add(kk); });
+  const piece = { group: g, cells: keys, shape: carry.cells, over: t.over, cx: t.cx, cz: t.cz };
+  const undo = { frame: f, letter: carry.letter, shape: carry.cells, piece, hpAfter: null };
+  carry = null;
+  f.pieces.push(piece);
+  lastPlaced = undo;
+  frameState(f);
+  tween(0.32, (s) => {
+    g.position.lerpVectors(from.clone().add(off), to, 1 - (1 - s) ** 3);
+    g.position.z += Math.sin(s * Math.PI) * 0.6;
+  }, () => {
+    g.position.copy(to);
+    if (!f.pieces.includes(piece)) return;
+    undo.hpAfter = 0;
+    burst(new THREE.Vector3(t.cx, 0.15, t.cz), '#e8c890', 8, 2);
+    if (f.filled.size === f.cells.length) finishFrame(f);
+    else if (piece.over) toast('It sticks out over the frame: the spare gets sawn off', false, true);
+  });
+  refill(pile);
+}
+/* You can never get stuck: a gap in a frame that none of the pieces to hand (carried or on the
+   crates) could reach any more, walled in by the pieces round it, gets plugged with offcuts. It
+   costs the Shipshape bonus. */
+const scrapMat = mat('#b08a5a', { map: woodTex });
+const scrapGeo = new THREE.BoxGeometry(S * 0.96, S * 0.96, 0.16);
+function plugGaps(f) {
+  const have = new Set([carry?.letter, ...piles.map((p) => p.letter)].filter(Boolean));
+  const orients = C.ORIENTS.filter((o) => have.has(o.letter));
+  const reachable = (r0, c0) => orients.some((o) => o.cells.some(([pr, pc]) => o.cells.every(([r, c]) => !f.occ.has(k(r - pr + r0, c - pc + c0)))));
+  const dead = f.open.filter(([r, c]) => !reachable(r, c));
+  for (const [r, c] of dead) {
+    f.occ.add(k(r, c)); f.filled.add(k(r, c));
+    const m = mesh(scrapGeo, scrapMat);
+    m.position.set((c + 0.5) * S, -(r + 0.5) * S, 0.02);
+    f.group.add(m);
+    f.scraps = (f.scraps || 0) + 1;
+    burst(new THREE.Vector3(f.x0 + (c + 0.5) * S, 0.2, f.z0 + (r + 0.5) * S), '#f0d9a8', 6, 2);
+  }
+  if (dead.length) frameState(f);
+  return dead.length;
+}
+// Checked whenever the crates are dealt afresh.
+function checkGaps() {
+  for (const f of frames()) {
+    if (!plugGaps(f)) continue;
+    if (lastPlaced?.frame === f) lastPlaced = null;
+    toast('A gap none of your pieces can reach: plugged with offcuts', false, true);
+    if (f.filled.size === f.cells.length) finishFrame(f);
+  }
+}
+// The frame's full: saw off what sticks out, then hoist the deck up onto the wall.
+function finishFrame(f) {
+  f.done = true;
+  f.label.remove();
+  if (lastPlaced?.frame === f) lastPlaced = null;
+  let waste = 0;
+  for (const p of f.pieces) {
+    const kept = [], old = p.group.children[p.group.children.length - 1];
+    p.shape.forEach((cell, i) => {
+      if (f.set.has(p.cells[i])) { kept.push(cell); return; }
+      waste++;
+      const m = p.group.children[i], at = new THREE.Vector3();
+      m.getWorldPosition(at);
+      burst(at.setY(0.2), '#f0d9a8', 10, 2.5);
+      m.visible = false;
+    });
+    old.visible = false;
+    p.group.add(outline(kept, 0.002, '#4a2a12'));
+  }
+  if (waste || f.scraps) toast(waste ? `Sawn to fit: ${waste} square${waste > 1 ? 's' : ''} of offcuts` : 'Patched with offcuts: it\'ll do');
+  else { G.gold += PAY.master; updateStats(); toast(`Shipshape! Not a scrap wasted (+${PAY.master})`); }
+  const g = f.group, p0 = g.position.clone(), p1 = new THREE.Vector3(p0.x, ramp.T - 0.05, -0.85);
+  const ease = (u) => (u < 0.5 ? 2 * u * u : 1 - (-2 * u + 2) ** 2 / 2);
+  tween(0.9, () => {}, () => tween(1.5, (u) => {
+    // Up first, then in over the top of the wall.
+    g.position.y = p0.y + (p1.y - p0.y) * ease(Math.min(1, u * 1.6));
+    g.position.z = p0.z + (p1.z - p0.z) * ease(Math.max(0, (u - 0.35) / 0.65));
+  }, () => { den.remove(g); buildSection(f.si); }));
 }
 function buildSection(si) {
   const s = ramp.secs[si];
@@ -659,7 +789,7 @@ function fits(cells) {
   const out = [], seen = new Set();
   const b = C.bbox(cells);
   wall.holes.forEach((h, hi) => {
-    if (h.status !== 'open') return;
+    if (h.status !== 'open' || h.pieces.some((p) => p.patch)) return;
     for (const [er, ec] of rest(h)) for (const [pr, pc] of cells) {
       const dr = er - pr, dc = ec - pc;
       if (seen.has(k(dr, dc))) continue;
@@ -677,37 +807,48 @@ function fits(cells) {
   });
   return out;
 }
-/* Patching: a mended hole that's been hacked at can take another board nailed over the front,
-   which wins back some of its strength. It may cover the hole's own wood and the stone round it,
-   but nothing belonging to another hole or the gate. Up to MAX_PATCHES deep. */
+/* Boards behind: any mended hole can take a piece nailed over it on the den side, a second (and
+   third, fourth) layer that raiders must hack through one at a time after the hole itself. So a
+   piece that fits nowhere still has a use. A board may cover the hole's own wood and the stone round
+   it, but nothing of another hole, the gate, or another board in the same layer. */
 const patchZ = (layer) => WOOD_D - 0.12 + 0.14 * (layer + 1);
 function patchFits(cells) {
   const out = [], b = C.bbox(cells);
   wall.holes.forEach((h, hi) => {
-    if (h.kind || h.status === 'open' || h.hp > h.maxHp - 1) return;
-    const layer = h.pieces.filter((p) => p.patch).length;
-    if (layer >= MAX_PATCHES) return;
-    const own = new Set(h.pieces.flatMap((p) => p.cells)), seen = new Set();
+    const layer = boardsOf(h).length;
+    if ((h.status === 'open' && !layer) || layer >= MAX_PATCHES) return;
+    const own = new Set(h.pieces.filter((p) => !p.patch).flatMap((p) => p.cells)), seen = new Set();
     for (const [er, ec] of h.cells) for (const [pr, pc] of cells) {
       const dr = er - pr, dc = ec - pc;
       if (seen.has(k(dr, dc))) continue;
       seen.add(k(dr, dc));
       const ok = cells.every(([r, c]) => {
         const R = r + dr, Cc = c + dc, kk = k(R, Cc), ho = wall.cellHole.get(kk);
-        return R >= 0 && R < wall.H && Cc >= 0 && Cc < wall.W && !wall.gate.has(kk) && (ho === undefined || ho === hi) && (!wall.wood.has(kk) || own.has(kk));
+        return R >= 0 && R < wall.H && Cc >= 0 && Cc < wall.W && !wall.gate.has(kk) && (ho === undefined || ho === hi) && (!wall.wood.has(kk) || own.has(kk)) && !wall.lining[layer].has(kk);
       });
       if (ok) out.push({ dr, dc, hole: hi, over: 1, patch: true, layer, cx: X(dc) + b.w * S / 2, cy: Y(dr) - b.h * S / 2, fr: dr + b.h / 2, fc: dc + b.w / 2 });
     }
   });
   return out;
 }
+// Number each hole's boards from the stone outwards again (after one's broken or taken off), and
+// note which squares each layer covers.
+function relining() {
+  wall.lining.forEach((s) => s.clear());
+  for (const h of wall.holes) boardsOf(h).forEach((p, i) => {
+    if (p.layer !== i) {
+      p.layer = i;
+      const z0 = p.group.position.z, z1 = patchZ(i);
+      p.base.z = z1;
+      tween(0.25, (s) => { p.group.position.z = z0 + (z1 - z0) * s; });
+    }
+    p.cells.forEach((kk) => wall.lining[i].add(kk));
+  });
+}
 const an = (l) => ('AEFILMNORSX'.includes(l) ? 'an ' : 'a ') + l;
 function updateHole(h) {
   const left = rest(h);
-  if (!left.length && h.status === 'open' && h.kind) {
-    h.status = 'built';
-    buildSection(h.sec);
-  } else if (!left.length && h.status === 'open') {
+  if (!left.length && h.status === 'open') {
     const master = !h.pieces.some((p) => p.over);
     h.status = master ? 'master' : 'boarded';
     h.hp = h.maxHp = HP[h.status];
@@ -720,16 +861,17 @@ function updateHole(h) {
   h.sig = '';
   updateStats();
 }
+const boardsOf = (h) => h.pieces.filter((p) => p.patch).sort((a, b) => a.layer - b.layer);
+// How full the strength bar is: the hole's own wood, or once that's gone, the board they're on.
+const barFrac = (h) => (h.status !== 'open' || h.pieces.some((p) => !p.patch) ? h.hp / h.maxHp : (boardsOf(h)[0]?.hp ?? 0) / HP.patch);
 function labelFor(h) {
   const atk = h.attackers ? `<em>⚔ ${h.attackers} raider${h.attackers > 1 ? 's' : ''} at it</em>` : '';
-  if (h.kind) {
-    if (h.status === 'built') return ['label gone', ''];
-    const left = h.open, need = left.length === 5 && h.exact ? `needs ${an(C.identify(left))}` : `${left.length / 5} pieces${h.exact ? '' : ': board it over'}`;
-    return ['label deck', `Rampart footing<small>${need}</small>`];
-  }
-  const hurt = h.hp < h.maxHp * 0.8 && h.pieces.filter((p) => p.patch).length < MAX_PATCHES ? '<small>damaged: nail a piece over it</small>' : '';
-  if (h.status === 'master') return ['label done', `★ Masterpiece${hurt}<i class="bar"><b></b></i>${atk}`];
-  if (h.status === 'boarded') return ['label weak', `Boarded over: weak${hurt}<i class="bar"><b></b></i>${atk}`];
+  const boards = boardsOf(h).length, bs = boards > 1 ? 's' : '';
+  const behind = boards ? ` · ${boards} board${bs} behind` : '';
+  const hurt = h.hp < h.maxHp * 0.8 && boards < MAX_PATCHES ? '<small>damaged: nail a board on behind it</small>' : '';
+  if (h.status === 'master') return ['label done', `★ Masterpiece${behind}${hurt}<i class="bar"><b></b></i>${atk}`];
+  if (h.status === 'boarded') return ['label weak', `Boarded over: weak${behind}${hurt}<i class="bar"><b></b></i>${atk}`];
+  if (boards) return ['label weak', `Hacked open: ${boards} board${bs} hold${boards > 1 ? '' : 's'}<small>they must get through each one</small><i class="bar"><b></b></i>${atk}`];
   const left = h.open;
   const breach = h.pieces.length ? `<i class="bar part"><b></b></i>${atk}` : h.attackers ? `<em>⚔ raiders can climb in!</em>` : '';
   if (!h.exact) return ['label bad', `No Masterpiece now<small>board it over to close it</small>${breach}`];
@@ -739,6 +881,11 @@ function labelFor(h) {
     return ['label', `Two pieces<small>${list.slice(0, 3).join(' · ')}${list.length > 3 ? ' · …' : ''}</small>${breach}`];
   }
   return ['label', `${left.length / 5} pieces${breach}`];
+}
+function frameLabel(f) {
+  const left = f.open;
+  const need = left.length === 5 && f.exact ? `needs ${an(C.identify(left))}` : f.exact ? `room for ${left.length / 5} more pieces` : `${left.length} squares left: any piece, the spare's sawn off`;
+  return ['label deck', `Rampart frame<small>${need}</small>`];
 }
 function updateStats() {
   $('s-gold').textContent = Math.max(0, G.gold);
@@ -768,10 +915,12 @@ addEventListener('keydown', (e) => {
 });
 addEventListener('keyup', (e) => keys.delete(e.key.toLowerCase()));
 addEventListener('blur', () => keys.clear());
-const ray = new THREE.Raycaster(), wallPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+const ray = new THREE.Raycaster(), wallPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0), floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 renderer.domElement.addEventListener('mousemove', (e) => {
   ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1), camera);
   const p = new THREE.Vector3();
+  const nearFrame = (f) => p.x > f.x0 - 1.2 && p.x < f.x0 + f.b.w * S + 1.2 && p.z < f.z0 + f.b.h * S + 1.2;
+  if (pirate.h < 0.3 && ray.ray.intersectPlane(floorPlane, p) && p.z > WALL_Z - 0.3 && frames().some(nearFrame)) { mouse = { floor: true, x: p.x, z: p.z }; mouseMode = true; return; }
   if (!ray.ray.intersectPlane(wallPlane, p)) { mouse = null; return; }
   const fc = p.x / S + wall.W / 2, fr = wall.H - p.y / S;
   mouse = fc >= -1 && fc <= wall.W + 1 && fr >= -1 && fr <= wall.H + 1 ? { fc, fr } : null;
@@ -910,6 +1059,7 @@ function turn(fn, dir) {
   cycle = 0;
 }
 function place(t) {
+  if (t.frame) return placeFrame(t);
   const h = wall.holes[t.hole];
   const cells = carry.cells.map(([r, c]) => [r + t.dr, c + t.dc]);
   const over = t.over > 0;
@@ -924,8 +1074,10 @@ function place(t) {
   const pile = carry.from;
   const undo = { h, letter: carry.letter, shape: carry.cells, prev: { status: h.status, hp: h.hp, maxHp: h.maxHp }, boarded: G.boarded, hpAfter: null };
   carry = null;
-  cells.forEach(([r, c]) => { wall.wood.add(k(r, c)); if (h.set.has(k(r, c))) h.filled.add(k(r, c)); });
+  if (t.patch) cells.forEach(([r, c]) => wall.lining[t.layer].add(k(r, c)));
+  else cells.forEach(([r, c]) => { wall.wood.add(k(r, c)); if (h.set.has(k(r, c))) h.filled.add(k(r, c)); });
   const piece = { group: g, cells: cells.map(([r, c]) => k(r, c)), over, patch: !!t.patch, base: to.clone(), cx: to.x + b.w * S / 2 };
+  if (t.patch) Object.assign(piece, { layer: t.layer, hp: HP.patch });
   h.pieces.push(piece);
   undo.piece = piece;
   lastPlaced = undo;
@@ -938,16 +1090,16 @@ function place(t) {
     g.position.copy(to);
     if (!h.pieces.includes(piece)) return;   // knocked out while it was flying in
     if (piece.patch) {
-      h.hp = Math.min(h.maxHp, h.hp + HP.patch);
       undo.hpAfter = h.hp;
       burst(new THREE.Vector3(to.x + b.w * S / 2, to.y - b.h * S / 2, to.z + 0.1), '#ffe0a0', 10, 2.5);
-      toast('Patched: stronger again');
+      const n = boardsOf(h).length;
+      toast(`Nailed on behind: ${n === 1 ? 'one more layer' : `${n} layers`} to hack through`);
       return;
     }
     updateHole(h);
     if (h.status === 'open') { h.hp += HP.piece; h.maxHp = h.hp; }
     undo.hpAfter = h.hp;
-    if ((h.status === 'master' || h.status === 'built') && lastPlaced === undo) lastPlaced = null;   // a Masterpiece is never a misclick
+    if (h.status === 'master' && lastPlaced === undo) lastPlaced = null;   // a Masterpiece is never a misclick
     if (h.status === 'open' && wasExact && !h.exact) { shake = 0.3; toast('No Masterpiece in that hole now · Space: take it back', true); }
   });
   refill(pile);
@@ -959,18 +1111,30 @@ function place(t) {
 let lastPlaced = null;
 function canTakeBack() {
   const u = lastPlaced;
-  if (!u || carry || u.hpAfter === null || pirate.h > 0.3 || pirate.z > WALL_Z) return false;
-  if (u.h.pieces[u.h.pieces.length - 1] !== u.piece || u.h.status === 'master' || u.h.status === 'built') return false;
+  if (!u || carry || u.hpAfter === null || pirate.h > 0.3) return false;
+  if (u.frame) return !u.frame.done && u.frame.pieces[u.frame.pieces.length - 1] === u.piece && Math.hypot(u.piece.cx - pirate.x, u.piece.cz - pirate.z) <= REACH + 0.6;
+  if (pirate.z > WALL_Z) return false;
+  if (u.h.pieces[u.h.pieces.length - 1] !== u.piece || (!u.piece.patch && u.h.status === 'master')) return false;
   return Math.abs(u.piece.cx - pirate.x) <= REACH + 0.6;
 }
 function takeBack() {
-  const u = lastPlaced, h = u.h, piece = u.piece;
+  const u = lastPlaced, piece = u.piece;
   lastPlaced = null;
+  if (u.frame) {
+    const f = u.frame, b = C.bbox(u.shape);
+    f.pieces.pop();
+    piece.cells.forEach((kk) => { f.occ.delete(kk); f.filled.delete(kk); });
+    frameState(f);
+    const at = piece.group.localToWorld(new THREE.Vector3(b.w * S / 2, -b.h * S / 2, 0));
+    f.group.remove(piece.group);
+    return holdPiece(u.letter, u.shape, null, at);
+  }
+  const h = u.h;
   h.pieces.pop();
-  piece.cells.forEach((kk) => { wall.wood.delete(kk); h.filled.delete(kk); });
-  const dmg = Math.max(0, u.hpAfter - h.hp);
-  if (piece.patch) h.hp = Math.max(1, h.hp - HP.patch);
+  if (piece.patch) relining();
   else {
+    piece.cells.forEach((kk) => { wall.wood.delete(kk); h.filled.delete(kk); });
+    const dmg = Math.max(0, u.hpAfter - h.hp);
     if (h.status === 'boarded') { G.gold -= PAY.boarded; G.boarded = u.boarded; }
     h.status = u.prev.status;
     h.maxHp = u.prev.maxHp;
@@ -982,9 +1146,13 @@ function takeBack() {
   const b = C.bbox(u.shape);
   at.x += b.w * S / 2; at.y -= b.h * S / 2;
   wallGroup.remove(piece.group);
-  const m = woodMat(u.letter).clone();
+  holdPiece(u.letter, u.shape, null, at);
+}
+// Into your hands, lifting from `at`: a piece from a crate (`from`), or one taken back off.
+function holdPiece(letter, cells, from, at) {
+  const m = woodMat(letter).clone();
   m.transparent = true;
-  carry = { letter: u.letter, cells: u.shape, from: null, mat: m, group: centred(u.shape, m), lift: 0 };
+  carry = { letter, cells, from, mat: m, group: centred(cells, m), lift: 0 };
   const g = carry.group;
   g.position.copy(at);
   g.rotation.x = -Math.PI / 2;
@@ -997,6 +1165,7 @@ function refill(p) {
   if (!p) return;   // a piece taken back off the wall has no crate to refill
   setTimeout(() => {
     deal(p); showPile(p);
+    checkGaps();
     const g = p.group, s0 = g.scale.x;
     tween(0.3, (s) => g.scale.setScalar(s0 * (1 - (1 - s) ** 3)));
   }, 450);
@@ -1051,20 +1220,32 @@ function hit(r, from, color) {
   updateStats();
 }
 function breakHole(h) {
-  h.pieces.forEach(({ group: g, cells }) => {
+  const boards = boardsOf(h);
+  h.pieces.filter((p) => !p.patch).forEach(({ group: g, cells }) => {
     cells.forEach((kk) => wall.wood.delete(kk));
-    const v = new THREE.Vector3((Math.random() - 0.5) * 2, 2 + Math.random(), 2.5 + Math.random() * 1.5);
+    // With boards behind it, the wood falls out the far side instead of into the den.
+    const v = new THREE.Vector3((Math.random() - 0.5) * 2, 2 + Math.random(), (boards.length ? -1 : 1) * (2.5 + Math.random() * 1.5));
     const p0 = g.position.clone();
     tween(0.8, (s) => { g.position.set(p0.x + v.x * s, p0.y + v.y * s - 9 * s * s, p0.z + v.z * s); g.rotation.x = s * 3; }, () => wallGroup.remove(g));
   });
-  h.pieces = [];
+  h.pieces = boards;
   h.filled.clear();
   h.status = 'open';
   h.hp = 0;
   updateHole(h);
   burst(new THREE.Vector3(holeX(h), holeMidY(h), 0.3), '#c98a45', 24, 4);
   shake = 0.5;
-  toast('They broke through!', true);
+  toast(boards.length ? 'Through the hole! Only the boards behind it hold them now' : 'They broke through!', true);
+}
+function breakBoard(h, p) {
+  h.pieces = h.pieces.filter((x) => x !== p);
+  const g = p.group, p0 = g.position.clone(), v = new THREE.Vector3((Math.random() - 0.5) * 2, 1.5 + Math.random(), 2.5 + Math.random());
+  tween(0.8, (s) => { g.position.set(p0.x + v.x * s, p0.y + v.y * s - 9 * s * s, p0.z + v.z * s); g.rotation.x = s * 3; }, () => wallGroup.remove(g));
+  relining();
+  updateHole(h);
+  burst(new THREE.Vector3(holeX(h), holeMidY(h), patchZ(0)), '#c98a45', 16, 3.5);
+  shake = 0.3;
+  toast(h.pieces.length ? 'They hacked through a board!' : 'They broke through!', true);
 }
 const holeX = (h) => X(h.b.c0) + h.b.w * S / 2;
 const holeMidY = (h) => Y(h.b.r0) - h.b.h * S / 2;
@@ -1107,12 +1288,13 @@ function tween(dur, step, done) { tweens.push({ t: 0, dur, step, done }); }
 
 // ---------- raiders ----------
 // Only an empty hole can be climbed through; anything with wood in it has to be hacked open first.
-const passable = (h) => h.status === 'open' && !h.pieces.length && !h.kind;
+const passable = (h) => h.status === 'open' && !h.pieces.length;
 function pickHole(x) {
   const near = (a, b) => Math.abs(holeX(a) - x) - Math.abs(holeX(b) - x);
   const gaps = wall.holes.filter(passable);
   if (gaps.length) return gaps.sort(near)[0];
-  return wall.holes.filter((h) => !h.kind).sort((a, b) => a.hp - b.hp || near(a, b))[0];
+  const strength = (h) => h.hp + boardsOf(h).reduce((s, p) => s + p.hp, 0);
+  return wall.holes.slice().sort((a, b) => strength(a) - strength(b) || near(a, b))[0];
 }
 function spawnRaider() {
   const m = makePirate({ shirt: ['#1f2433', ['#59607a', '#2f6b4f', '#6b2f5e'][rand(3)]], scarf: ['#2b2b2b', '#3a4a8a', '#7a1f1f'][rand(3)], trousers: '#5a4636', patch: Math.random() < 0.5, beard: ['#222', '#7a4a1a', '#999'][rand(3)], sword: true });
@@ -1152,7 +1334,11 @@ function updateRaider(r, dt) {
       if (passable(h)) { r.state = out ? 'climbOut' : 'climb'; r.t = 0; break; }
       faceTo(r.m, 0, out ? -1 : 1, dt);
       if (!out) r.stamina -= dt;
-      h.hp -= RAIDER_DPS * dt;
+      // From outside: the hole's own wood, then the boards behind it, nearest first. A thief
+      // inside hacks the other way.
+      const boards = boardsOf(h), fill = h.pieces.some((p) => !p.patch);
+      const board = out ? boards[boards.length - 1] || null : fill ? null : boards[0];
+      if (board) board.hp -= RAIDER_DPS * dt; else h.hp -= RAIDER_DPS * dt;
       r.m.arms[1].rotation.x = -1.8 + Math.sin(r.t * 9) * 1.1;
       r.hitT -= dt;
       if (r.hitT <= 0) {
@@ -1160,7 +1346,8 @@ function updateRaider(r, dt) {
         burst(new THREE.Vector3(holeX(h) + r.slot * 0.5, Math.min(holeMidY(h), 1.4), out ? 0.6 : 0.25), '#c98a45', 4, 2);
         h.jig = 0.15;
       }
-      if (h.hp <= 0) { breakHole(h); r.state = out ? 'climbOut' : 'climb'; r.t = 0; }
+      if (board && board.hp <= 0) breakBoard(h, board);
+      else if (!board && h.hp <= 0) breakHole(h);
       else if (r.stamina <= 0) r.state = 'leave';
       break;
     }
@@ -1322,7 +1509,7 @@ function updateWaves(dt) {
   if (!G.toSpawn && !raiders.length) {
     G.phase = 'calm'; G.phaseT = CALM_SECS;
     const si = SECTION_ORDER[G.wave - 1];
-    if (si !== undefined && !ramp.secs[si].built && addFooting(si)) toast(`Wave ${G.wave} beaten off! Timber for the rampart: fill its footing`);
+    if (si !== undefined && !ramp.secs[si].built && openFrame(si)) toast(`Wave ${G.wave} beaten off! Timber's come: build the rampart in its frame`);
     else toast(`Wave ${G.wave} beaten off!`);
   }
 }
@@ -1350,7 +1537,22 @@ const ghostMats = {
 };
 function aim() {
   target = null;
-  if (!carry || pirate.z > WALL_Z + 2.5 || pirate.h > 0.3) return;
+  if (!carry || pirate.h > 0.3) return;
+  // A rampart frame on the floor, when you're stood back from the wall (or pointing at it).
+  if (frames().length && (mouseMode ? mouse?.floor : pirate.z > WALL_Z)) {
+    const fl = frameFits(carry.cells);
+    const dist = (o) => Math.hypot(o.cx - pirate.x, o.cz - pirate.z);
+    if (mouseMode) {
+      const d = (o) => Math.hypot(o.cx - mouse.x, o.cz - mouse.z) / S + (o.over ? 0.35 : 0);
+      fl.sort((a, z) => d(a) - d(z));
+      if (fl[0] && d(fl[0]) <= 1.8) target = { ...fl[0], ok: dist(fl[0]) <= REACH, far: dist(fl[0]) > REACH };
+    } else {
+      const near = fl.filter((o) => dist(o) <= REACH).sort((a, z) => a.over - z.over || dist(a) - dist(z));
+      if (near.length) target = { ...near[cycle % near.length], ok: true, count: near.length };
+    }
+    return;
+  }
+  if (pirate.z > WALL_Z + 2.5 || mouse?.floor) return;
   const list = fits(carry.cells).concat(patchFits(carry.cells));
   const b = C.bbox(carry.cells);
   const reach = (o) => Math.abs(o.cx - pirate.x) <= REACH && pirate.z <= WALL_Z;
@@ -1362,17 +1564,18 @@ function aim() {
     else target = { dr: Math.round(mouse.fr - b.h / 2), dc: Math.round(mouse.fc - b.w / 2), ok: false };
   } else if (pirate.z <= WALL_Z) {
     // Clean fits first, nearest first; then the ways to board it over.
-    const near = list.filter(reach).sort((a, z) => (a.over > 0) - (z.over > 0) || Math.abs(a.cx - pirate.x) - Math.abs(z.cx - pirate.x) || a.over - z.over);
+    const near = list.filter(reach).sort((a, z) => (a.over > 0) - (z.over > 0) || !!a.patch - !!z.patch || Math.abs(a.cx - pirate.x) - Math.abs(z.cx - pirate.x) || a.over - z.over);
     if (near.length) target = { ...near[cycle % near.length], ok: true, count: near.length };
   }
 }
 function drawGhost() {
   const kind = !target ? '' : !target.ok ? 'no' : target.over ? 'over' : 'ok';
-  const gz = target?.patch ? patchZ(target.layer) + 0.07 : kind === 'over' ? 0.45 : 0.08;
-  const want = target && carry ? `${carry.cells.map((x) => x.join()).join(';')}|${target.dr},${target.dc}|${kind}|${gz}` : '';
+  const f = target?.frame;
+  const gz = f ? 0.16 : target?.patch ? patchZ(target.layer) + 0.07 : kind === 'over' ? 0.45 : 0.08;
+  const want = target && carry ? `${f ? f.si : 'w'}|${carry.cells.map((x) => x.join()).join(';')}|${target.dr},${target.dc}|${kind}|${gz}` : '';
   if (want === ghostKey) return;
   ghostKey = want;
-  if (ghost) { wallGroup.remove(ghost); ghost = null; }
+  if (ghost) { ghost.parent?.remove(ghost); ghost = null; }
   if (!want) return;
   const g = new THREE.Group();
   const geo = new THREE.BoxGeometry(S * 0.98, S * 0.98, 0.12);
@@ -1382,8 +1585,8 @@ function drawGhost() {
     g.add(b);
   }
   g.add(outline(carry.cells, gz + 0.07, kind === 'no' ? '#ffd0c8' : '#fff4d0'));
-  g.position.set(X(target.dc), Y(target.dr), 0);
-  wallGroup.add(g);
+  if (f) { g.position.set(target.dc * S, -target.dr * S, 0); f.group.add(g); }
+  else { g.position.set(X(target.dc), Y(target.dr), 0); wallGroup.add(g); }
   ghost = g;
 }
 function prompt() {
@@ -1398,13 +1601,14 @@ function prompt() {
   } else if (!carry && canTakeBack()) t = `Space: take the ${lastPlaced.letter} back off`;
   else if (carry) {
     const more = target?.count > 1 ? ` · Tab: other spots (${target.count})` : '';
-    if (target?.ok && target.patch) t = `Space: nail it over the damaged hole (stronger)${more}`;
+    if (target?.frame) t = !target.ok ? 'Walk closer to lay it there' : target.over ? `Space: lay it in the frame (it sticks out: the spare gets sawn off)${more}` : `Space: lay the ${carry.letter} in the rampart frame${more}`;
+    else if (target?.ok && target.patch) t = `Space: nail it on behind (one more layer for them to hack through)${more}`;
     else if (target?.ok && !target.over) t = `Space: fit the ${carry.letter} here${more}`;
     else if (target?.ok) t = `Space: board it over (weak, no Masterpiece)${more}`;
     else if (target?.far) t = 'Walk closer to fit it there';
     else if (pirate.z <= WALL_Z || (mouseMode && mouse)) t = `The ${carry.letter} won't go there · Q/E turn · F flip`;
     else t = `Carry the ${carry.letter} to a hole`;
-  } else t = 'Fetch a piece from the piles';
+  } else t = frames().some((f) => pirate.x > f.x0 - 1 && pirate.x < f.x0 + f.b.w * S + 1 && pirate.z > WALL_Z) ? 'Fetch pieces to build the rampart in its frame' : 'Fetch a piece from the piles';
   const hacking = raiders.some(atWall);
   if (onRampart()) {
     if (!carry) t = 'Bring a piece up here to throw at the raiders';
@@ -1564,7 +1768,7 @@ function update(dt) {
     const [cls, html] = labelFor(h);
     if (h.sig !== cls + html) { h.sig = cls + html; h.label.className = cls; h.label.innerHTML = html; }
     const bar = h.label.querySelector('.bar b');
-    if (bar) bar.style.width = `${Math.max(0, h.hp / h.maxHp) * 100}%`;
+    if (bar) bar.style.width = `${Math.max(0, barFrac(h)) * 100}%`;
     // From up on the wall, labels sit on the den side so they don't hide the raiders.
     if (topView) v3.set(holeX(h), 0, 2.2).project(camera); else v3.set(holeX(h), Y(h.b.r0) + 0.15, 0.1).project(camera);
     h.label.style.left = `${(v3.x + 1) / 2 * innerWidth}px`;
@@ -1576,12 +1780,20 @@ function update(dt) {
       if (!h.jig) h.pieces.forEach((p) => { p.group.position.x = p.base.x; });
     }
   }
+  for (const f of frames()) {
+    const [cls, html] = frameLabel(f);
+    if (f.sig !== cls + html) { f.sig = cls + html; f.label.className = cls; f.label.innerHTML = html; }
+    v3.set(f.x0 + f.b.w * S / 2, 0.7, f.z0 + f.b.h * S / 2).project(camera);
+    f.label.style.left = `${(v3.x + 1) / 2 * innerWidth}px`;
+    f.label.style.top = `${(1 - v3.y) / 2 * innerHeight}px`;
+    f.label.style.display = v3.z > 1 ? 'none' : '';
+  }
 }
 
 newGame();
 requestAnimationFrame(frame);
 
 // For poking at it from the console.
-window.den = { buildSection, addFooting, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+window.den = { buildSection, openFrame, frameFits, frames, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };
