@@ -13,6 +13,15 @@ elitist: everyone wants to drive the ship and fire the guns, and a few get to. H
 should have agency and a real say in how things go, and no job should belong to one person. It's
 already a team game in Puzzle Pirates; this should be even more so.
 
+**Second principle: true to the 2D puzzles, with a 2D mode.** Every job in the den should stay as
+true to the original 2D puzzle as it can, the way a wall hole is still a carpentry hole you can see
+whole. That means any job could have a **2D mode**: a pirate switches into the classic flat
+puzzle (old-school carpentry on a hole, old-school gunning on a gun deck), while crewmates still
+see their work happening in 3D. You can dial the complexity up there too, for someone who just
+wants to do the carpentry properly. The 3D version is the fun extra; it loses some depth because
+of its mechanics and the quick pace (gunning especially), so both should work together on the
+same job. Build later, but design every new job so it maps cleanly onto its 2D puzzle.
+
 ## The rampart, built more like real carpentry
 
 Building on what's there now (the walk and its stairs are made of pieces that stay pieces):
