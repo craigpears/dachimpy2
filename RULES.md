@@ -116,6 +116,12 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 
 Unlisted for now: reachable only by its URL until the user says to put it in the nav.
 
+- **Every puzzle stays high fidelity to the original.** Small tweaks are fine, but the puzzle's own
+  rules come over as they are; the 3D only decides where the board stands and who is on the other
+  end. The user turned down a clay golem built from smashed Swordfight blocks, with breakers won
+  from kills, as "too far away from the sword fighting puzzle", and said this goes for all of them.
+  A new job's look (a golem, a forge) can be a skin, never a change to the rules.
+
 - **A pirate mends a den wall.** Pieces sit on three crates (the toolbox); you carry them over and
   fit them into holes in a stone wall. Same pieces, weights and Masterpiece rule as the main game.
 - **You can never get stuck.** Like real carpentry, a piece may be nailed over the stone around a

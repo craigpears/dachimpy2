@@ -26,6 +26,10 @@ The user sees the 2D mode as the place for a quicker pace, too: pieces turning t
 was tried in 3D and dropped as cheapening the puzzle ("that is probably where the 2D mode comes
 in... that will really help just speed it up a bit").
 
+**The puzzle itself comes over as it is.** Every puzzle should be high fidelity to the
+original, small tweaks aside: the 3D decides only where the board stands and who's on the other
+end, never the rules (RULES.md has the user's words).
+
 **Third principle: fun and obvious from the first minute.** One of the user's main goals: make it
 more fun and intuitive straight off than Puzzle Pirates ever was. Keep the crew and group vibes,
 but it must be quick and easy to get into. Every new job should be playable within seconds of
@@ -129,36 +133,39 @@ first fix (TODO.md has the playtest):
   way could block them, and a thrown piece already knocks them flat.
 - **Repairs between waves**: Masterpieces could heal a little in the calm (the user's call).
 
-## Clay soldiers (inspired by Swordfight)
+## Swordfight: duels at the wall
 
-Reference: https://yppedia.puzzlepirates.com/Swordfight
+Reference: https://yppedia.puzzlepirates.com/Swordfight (read it properly before building: drop
+patterns per sword, board size, how sprinkles count down).
 
-In the puzzle, coloured blocks drop in pairs. Lumps of one colour, two by two or bigger, fuse into
-big blocks. A breaker of the same colour smashes everything touching it in that colour, and the
-bigger the blocks smashed, the harder the attack on your opponent. A drop can be two blocks, two
-breakers, or one of each.
+In the puzzle, coloured blocks drop in pairs; either piece can be a block or a breaker. Lumps of
+one colour, two by two or bigger, fuse into big blocks. A breaker smashes the touching blocks of
+its colour, and big blocks and chains hit harder. Your smashes bury your opponent's board in
+sprinkles (junk that counts down and turns into blocks), and theirs bury yours. Fill to the top
+and you lose.
 
-The user's problem: how do you attack the raiders coming at you without it looking weird and
-artificial?
+The user's problem: how do you fight the raiders without it looking weird and artificial, and
+without fighters that are out of scale with everything else?
 
-The idea:
+Where it's got to (7 Nov 2026):
 
-- **Raiders drop them:** when you knock out a raider inside the den, they drop a block or a
-  breaker (or one of each, as in Swordfight). They're rare, a prize, not an endless supply like
-  the carpentry crates.
-- **The yard:** at the back of the den is a box (a yard or tray) where you build with them. You
-  stack blocks in 3D, so same-coloured blocks grow into big blocks, and set breakers to smash
-  them, Swordfight style.
-- **Clay soldiers:** the blocks are clay, and a breaker brings what it smashes to life as little
-  clay-crafted soldiers who march off and swordfight the raiders. That answers "how do you get
-  from a block to a soldier?" for anyone who doesn't know the puzzle.
-- **Bigger combos, stronger soldiers:** bigger blocks and longer chains make stronger
-  defenders, which keeps the Swordfight feel. A chain is one breaker setting off others.
-- **Open questions:**
-  - how colours map to soldiers (kinds, or just strength?);
-  - whether a breaker can be thrown like a carpentry piece;
-  - how big the yard is;
-  - whether soldiers crumble back to clay after a while.
+- **Dropped: clay soldiers and a golem.** The first idea had raiders drop blocks and breakers,
+  stacked in a yard, with smashed clay coming to life as soldiers (later, one golem built up from
+  what you smash, coloured by what each colour gave it). The user found it "too far away from the
+  sword fighting puzzle": breakers come in the drop stream, and smashes attack an opponent.
+- **A duel at the wall:** a raider with a sword (later waves only, see the user's idea that early
+  waves have none) squares up at a breach or the gate. A pirate walks up and takes them on, and
+  both play real Swordfight. Your board stands upright beside you, the way a hole stands in the
+  wall, so its size suits the den; the raider's board stands on their side, played by the
+  computer.
+- **The fight follows the puzzle:** each smash is a lunge, harder the bigger it is; their attacks
+  hit you and drop sprinkles on your board. Top out and you're knocked flat and they get past;
+  they top out and they're knocked out.
+- **Brawls:** Swordfight brawls let several fighters per side each pick who to attack (check
+  YPPedia). Any pirate can take a board against a raider, and several can gang up on a big one.
+- **A way to hold the wall:** plug the hole with carpentry, or stand in it and fight.
+- **Open questions:** whether the rest of a wave waits while a duel is on; what a raider's sword
+  (its drop pattern) is; whether a golem or a forge could stay as a look only.
 
 ## The bigger picture: from a den to a pirate world (long term)
 
@@ -180,9 +187,11 @@ The user's brain-dump (7 Nov 2026), for much later:
 - **Quests for looks:** personalised clothing and dyes, found by hunting ingredients out in the
   forest, with rarer ones for better things.
 - **Stronger opponents** further on.
-- **Rumble, as boxers:** like the Swordfight clay soldiers, Rumble could spawn troops of your
-  own, but boxers: big brawlers in boxing mode, like the heavies in Team Fortress 2. How the
-  puzzle maps onto them is still to work out.
+- **Rumble, as boxers:** Rumble could spawn troops of your own, but boxers: big brawlers in
+  boxing mode, like the heavies in Team Fortress 2. How the puzzle maps onto them is still to work
+  out. Since the Swordfight clay soldiers were dropped for being too far from the puzzle, Rumble
+  probably wants the same treatment as the Swordfight duels: the real puzzle, with a fight on
+  either side of it.
 - **Fill out the place:** trees, and water behind the den, so it feels like a pirate den on the
   coast. They attack from land now, but the sea is right there.
 - **Ships and voyages:** later, build ships and sail off on voyages for resources: the full Puzzle
