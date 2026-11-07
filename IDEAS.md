@@ -109,18 +109,30 @@ For now the den is the first version, and that works.
 - **2D mode:** play the deck as the classic flat Gunnery board while the crew watch it in 3D (see
   the second principle at the top).
 
-## Pirate looks (soon)
+## Making it yours: what's next (the first version is in; its rules are in RULES.md)
 
-The user wants this "soonish": players will ask for it.
+Done, 7 Nov 2026: male and female pirates in YPP clothes and dyes, familiars, the flag designer,
+Decorate mode (flags, banners, lanterns, rum barrels), a house built from pieces and painted.
+Gunnery stores also bump and bounce now instead of stopping dead when they meet.
 
-- **Choose your pirate:** a female pirate as well as the current one, chosen when you name your
-  pirate.
-- **Change the outfit a bit:** coat colour, hat (tricorn, bandana, none), hair, perhaps a sash
-  or an eyepatch. Simple parts on the same body, so it stays cheap to draw.
-- **Saved:** kept with the pirate name in localStorage, so it's there next time.
-- **In a crew:** sent in the `me` packets (or on joining), so crewmates see your look and not just
-  a crew colour. The crew colour could stay as a sash or the name tag, so you can still tell
-  pirates apart at a glance.
+Not checked yet: the look and den messages between two real crewmates (only tried solo), and the
+house on a narrow den (the left-hand pile could crowd its floor frames if the den is small).
+
+Ideas to carry on with:
+- **More to put up:** a clothes line, a rowing boat, palm trees in tubs, a ship's wheel, treasure
+  piles, a Puzzle Pirates-style trophy shelf. And more parts of the den to build from pieces: the
+  user wanted **cladding on the walls that don't get attacked** (the cave sides), built from
+  frames like the house, then painted.
+- **Banners on walls**, hung on the house or the cladding, not just on their own posts.
+- **Move what you've put up** (pick it up and put it down again) rather than take down and redo.
+- **Inside the house:** furniture placed the same way, as in a YPP house.
+- **More clothes:** coats in more cuts, sashes, the rest of the YPPedia hat list (Bicorne,
+  Musketeer hat, Turban...), hatted familiars, and more familiars (bat, dragon, lobster).
+- **Earn them:** the user's later idea of quests for looks (rare dyes and familiars found or won)
+  fits here; for now everything is free to try.
+- **Houses that stay:** the house and rampart go with each new game, though the decorations stay.
+  A den you keep between visits would want them kept too.
+- **The camera indoors:** walk into the house and its near wall hides you. Fade it out then.
 
 ## A public den anyone can drop into
 

@@ -187,7 +187,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   piece back ("Someone got there first"). Waves get bigger with more pirates (half as many again for
   each extra pirate). Crewmates wear their own colours with their name over their head.
 - **Keep the pirate-den feel, not medieval.** The rampart is a timber walk like a ship's deck, not
-  stone battlements. Any rail, flag or trim on it has to be built from pieces as well, or left off.
+  stone battlements. Any rail or trim on it has to be built from pieces as well, or left off. (Flags
+  are the exception, since the user asked for them: Jolly Rogers you design yourself, see below.)
 - **Some jobs want accuracy, some want speed.** The user loves the variety: the stairs are rapid
   speed carpentry (any piece will do, just throw them in), while the wall holes and the wall-walk
   reward care. Keep that mix when adding jobs.
@@ -258,6 +259,42 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     turn it, right-click to rub it out. Space chalks the plank ahead of you, Q/E turn it.
   - **To try it straight away:** `den.html?try=all` (or `?try=gundeck`) starts with the rampart and
     gun tower built and you up on the tower, for the user's own testing.
+- **Making it yours (pirate looks and the den's dress).** The user wants players to be able to make
+  it all their own, and the general feel must match the rest of the den. Code: `js/den-look.js`
+  (the pirate builder, dyes, familiars, flag drawing) and the "dressing" and "decorating"
+  sections of `js/den.js`. Opened with the **Your pirate** button.
+  - **Pirates:** male or female, dressed from the real Puzzle Pirates tailor (YPPedia's clothing
+    names: Tricorne, Feathered hat, Captain's hat, Sleeping hat, Striped shirt with vest,
+    Swashbuckler's jacket, Corset, Stripy knickers, Pantaloons, Kilt, Long dress bottom, Buckle shoes,
+    Curled boots and so on) in the tailor's standard palette of 27 dyes (YPPedia: Clothing palette).
+    Skin, hair style and colour, beard, eyepatch, earring. Kept in localStorage (`carp.den.look`),
+    and crewmates see it (a `look` message; anything received is cleaned against the lists). The
+    crew colour stays on the name tag. "Surprise me" picks a random outfit.
+  - **Whatever you wear on your feet must always show.** The user couldn't see the feet of a pirate
+    in a long dress. So skirts stop above the ankle, aren't wide at the hem, and the feet come a
+    little forward under them.
+  - **Familiars** (YPPedia: Familiar): a parrot (two colours), a monkey (natural colours only, as in
+    the game) or an octopus, on the shoulder, each with a little life (bobbing, flapping, tail).
+  - **The house is built like everything else.** The user: "you should build it in a carpentry
+    style way, the same as you build the decks: you put something on the ground and it starts
+    hoisting it into the side of a house". You ask for it (Den tab, Build a house), and its four
+    parts (front wall with a door and window, two side walls, a lean-to roof) come one at a time
+    as frames laid on the floor by the cave wall on the left. Fill each, it's sawn to fit, then
+    hoisted on ropes and swung into place. Its timber never comes on its own after a wave. You can
+    paint the walls and the roof any dye; each piece keeps a hint of its own timber, so you still
+    see how it was built.
+  - **Decorating is placing things yourself, as in a Puzzle Pirates house:** "just having flags
+    appear isn't what you want". Decorate mode: pick a Jolly Roger, a banner, a lantern or a rum
+    barrel, a ghost of it follows the pointer, wheel or Q/E turns it, click puts it down,
+    right-click takes one down. A ring shows green (fine), red (not there) or amber (one's here).
+    Never in front of the wall (z < 5.2, where you mend and build), on a frame, in the house or by
+    the crates. Up to 24 things. They stay put game after game.
+  - **Flags are yours to design:** emblem (skull and crossbones, skull and cutlasses, anchor,
+    kraken, bleeding heart), cloth pattern (plain, border, stripes, hoist band) and three dyes. The
+    den's own flags (over the gate, on the gun tower's outer corners, on the house roof) fly your
+    current design; ones you put up keep the design they had. The den's dress (flag, paint,
+    decorations) is kept in localStorage (`carp.den.den`) and shared with the crew (a `den`
+    message, and in the sync a joiner gets).
 - **Future ideas live in [IDEAS.md](IDEAS.md).** When the user brain-dumps ideas for later, note
   them there rather than building them.
 - **There's always something to do with a junk piece.** Holding three useless pieces with nothing

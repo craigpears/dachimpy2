@@ -81,6 +81,43 @@
     .crew .row label { flex: 1; margin: 0; }
     .crew .err { color: var(--bad); min-height: 1.3em; margin: 10px 0 0; }
     .crew .err.calm { color: var(--dim); }
+    .dress { position: fixed; inset: 0; display: none; place-items: center; background: rgba(10, 6, 3, .55); z-index: 6; }
+    .dress.on { display: grid; }
+    .dress-box { position: relative; display: flex; gap: 16px; background: #2a1d13; border: 2px solid var(--gold); border-radius: 12px; padding: 16px 18px; width: min(680px, calc(100vw - 32px)); box-sizing: border-box; max-height: calc(100vh - 32px); overflow: auto; }
+    .dress-view { flex: 0 0 240px; text-align: center; }
+    .dress-view canvas { width: 240px; height: 320px; display: block; border-radius: 10px; background: radial-gradient(circle at 50% 40%, #4a3524, #1a110b 75%); cursor: grab; touch-action: none; }
+    .dress-view small { color: var(--dim); font-size: 13px; }
+    .dress-side { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .dress h2 { margin: 0 0 8px; font: 700 26px 'Alegreya', serif; color: var(--gold); }
+    .dress .tabs { display: flex; gap: 4px; margin-bottom: 10px; flex-wrap: wrap; }
+    .dress .tab { font-size: 15px; padding: 5px 12px; border-radius: 6px; background: #3b2a1b; color: var(--ink); border: 1px solid #6b4e32; }
+    .dress .tab.on { background: var(--gold); color: #2a1d13; border-color: var(--gold); }
+    .dress .drow { display: flex; align-items: center; gap: 8px; min-height: 38px; flex-wrap: wrap; }
+    .dress .lab { flex: 0 0 76px; font-weight: 700; color: var(--dim); }
+    .dress .pick { display: inline-flex; align-items: center; gap: 4px; }
+    .dress .pick b { min-width: 158px; text-align: center; font-weight: 700; }
+    .dress .arr { font-size: 20px; line-height: 1; padding: 3px 10px 5px; border-radius: 6px; background: #3b2a1b; color: var(--gold); border: 1px solid #6b4e32; }
+    .dress .sw { width: 26px; height: 26px; padding: 0; border-radius: 50%; border: 2px solid #1a120b; box-shadow: 0 0 0 1px #6b4e32; flex: 0 0 auto; }
+    .dress .sw.cur { box-shadow: 0 0 0 2px var(--gold); }
+    .dress .sw.none { background: repeating-linear-gradient(45deg, #c98a45 0 4px, #a8683a 4px 8px); }
+    .dress .tog { font-size: 15px; padding: 3px 14px; background: #3b2a1b; color: var(--dim); border: 1px solid #6b4e32; }
+    .dress .tog.on { background: var(--gold); color: #2a1d13; }
+    .dress .state { color: var(--gold); }
+    .dress .drow small { color: var(--dim); }
+    .dress .note { color: var(--dim); font-size: 14px; margin: 4px 0 8px; line-height: 1.35; }
+    .dress-foot { margin-top: auto; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .dress h3 { margin: 10px 0 2px; font: 700 17px 'Alegreya', serif; color: var(--gold); }
+    .deco { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); display: none; background: var(--panel); border: 1px solid var(--gold); border-radius: 10px; padding: 8px 12px; text-align: center; width: max-content; max-width: calc(100vw - 32px); box-sizing: border-box; }
+    .deco.on { display: block; }
+    .deco h3 { margin: 0 0 6px; font: 700 18px 'Alegreya', serif; color: var(--gold); }
+    .deco .tools { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; }
+    .deco .tab { font-size: 15px; padding: 5px 12px; border-radius: 6px; background: #3b2a1b; color: var(--ink); border: 1px solid #6b4e32; }
+    .deco .tab.on { background: var(--gold); color: #2a1d13; border-color: var(--gold); }
+    .deco .tip { color: var(--dim); font-size: 14px; margin: 6px 0 2px; min-height: 1.3em; }
+    .deco .foot { display: flex; gap: 8px; justify-content: center; align-items: center; color: var(--dim); font-size: 13px; }
+    .palette { position: absolute; display: none; grid-template-columns: repeat(7, 26px); gap: 6px; padding: 10px; background: #1a120b; border: 1px solid var(--gold); border-radius: 10px; z-index: 1; }
+    .palette.on { display: grid; }
+    @media (max-width: 640px) { .dress-box { flex-direction: column; align-items: center; } .dress-view { flex: none; } .dress-view canvas { width: 200px; height: 240px; } .dress-side { width: 100%; } .dress .pick b { min-width: 120px; } }
   </style>
 </head>
 <body>
@@ -88,7 +125,7 @@
     <h1>The Pirate Den</h1>
     <div class="stats"><span>Chest <b id="s-gold">50</b></span><span>Wave <b id="s-wave">0</b></span><span>★ <b id="s-master">0</b></span><span>Boarded <b id="s-board">0</b></span></div>
     <div class="crew-line" id="crew-line"></div>
-    <button class="mini" id="crew-btn">Play with a crew</button>
+    <button class="mini" id="look-btn">Your pirate</button><button class="mini" id="crew-btn">Play with a crew</button>
   </div>
   <div class="banner calm" id="banner"></div>
   <div class="prompt" id="prompt"></div>
@@ -109,6 +146,23 @@
     <div class="row"><label>Crew code <input id="crew-code" maxlength="4" autocomplete="off" spellcheck="false"></label><button id="crew-join">Join</button></div>
     <p class="err" id="crew-err"></p>
     <button class="link" id="crew-close">Not now</button>
+  </div></div>
+
+  <div class="deco" id="deco">
+    <h3>Decorate the den</h3>
+    <div class="tools" id="deco-tools"></div>
+    <div class="tip" id="deco-tip">Point where it goes, then click · wheel or Q/E turns it · right-click one to take it down</div>
+    <div class="foot"><span id="deco-count"></span><button class="mini" id="deco-flag">Flag designer</button><button class="mini" id="deco-done">Done</button></div>
+  </div>
+  <div class="dress" id="dress"><div class="dress-box">
+    <div class="dress-view"><canvas id="dress-cv"></canvas><small>Drag to turn</small></div>
+    <div class="dress-side">
+      <h2>Your pirate</h2>
+      <div class="tabs" id="dress-tabs"></div>
+      <div id="dress-rows"></div>
+      <div class="dress-foot"><button class="mini" id="dress-rand">Surprise me</button><button id="dress-done">Done</button></div>
+    </div>
+    <div class="palette" id="palette"></div>
   </div></div>
 
   <script src="js/engine.js"></script>

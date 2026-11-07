@@ -6,6 +6,7 @@
    ("boarded over"): that always closes it, but the patch is weak and pays less. */
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, cleanDesign, designOf, drawFlag, dyeHex, DYES, SKIN, HAIR, FUR, PARTS, FLAGS, PATTERNS, DECOR, MAX_DECOR, twoColours } from './den-look.js';
 
 const C = window.Carp;
 const S = 0.55;          // one carpentry square, in metres
@@ -22,6 +23,11 @@ const RAIDER_DPS = 1, RAIDER_STAMINA = 16;
 const k = (r, c) => r + ',' + c;
 const rand = (n) => Math.floor(Math.random() * n);
 const $ = (id) => document.getElementById(id);
+// Kept in this browser: how your pirate looks, and how your den's dressed.
+const saved = (key) => { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } };
+const keep = (key, v) => { try { localStorage.setItem(key, JSON.stringify(v)); } catch { /* storage unavailable */ } };
+let myLook = cleanLook(saved('carp.den.look'));
+let denLook = cleanDen(saved('carp.den.den'));
 
 // ---------- renderer, scene, lights ----------
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -150,88 +156,24 @@ function addXray(group, m = xrayMat) {
 }
 
 // ---------- pirates: ours, and the raiders ----------
+/* Ours and our crewmates' wear what they chose (den-look.js). Raiders and the gunner are still
+   described the old way, in a few colours. */
 function makePirate(o = {}) {
+  if (o.look) return dressPirate(o.look, o);
   const { shirt = ['#f4efe4', '#b8322a'], scarf = '#c0392b', trousers = '#34395a', beard = '#5a3418', patch = true, sword = false } = o;
-  const g = new THREE.Group();
-  const skin = mat('#f0bf8e'), pants = mat(trousers), boot = mat('#2a1b12'), red = mat(scarf), black = mat('#1d1a18');
-  const gold = mat('#e8b23a', { metalness: 0.7, roughness: 0.3 });
-  const top = mat('#ffffff', { map: stripes(...shirt) });
-  const legs = [-1, 1].map((s) => {
-    const hip = new THREE.Group();
-    hip.position.set(0.13 * s, 0.72, 0);
-    const leg = mesh(new THREE.CylinderGeometry(0.095, 0.085, 0.58, 10), pants);
-    leg.position.y = -0.29;
-    const b = mesh(new RoundedBoxGeometry(0.18, 0.15, 0.3, 2, 0.05), boot);
-    b.position.set(0, -0.62, 0.05);
-    hip.add(leg, b);
-    g.add(hip);
-    return hip;
-  });
-  const body = new THREE.Group();
-  body.position.y = 0.72;
-  g.add(body);
-  const torso = mesh(new THREE.CylinderGeometry(0.24, 0.29, 0.62, 16), top);
-  torso.position.y = 0.33;
-  const belt = mesh(new THREE.CylinderGeometry(0.295, 0.295, 0.08, 16), black);
-  belt.position.y = 0.06;
-  const buckle = mesh(new THREE.BoxGeometry(0.11, 0.09, 0.03), gold);
-  buckle.position.set(0, 0.06, 0.29);
-  const head = mesh(new THREE.SphereGeometry(0.25, 20, 16), skin);
-  head.position.y = 0.9;
-  const nose = mesh(new THREE.SphereGeometry(0.055, 10, 8), skin);
-  nose.position.set(0, 0.87, 0.245);
-  const eye = mesh(new THREE.SphereGeometry(0.035, 8, 6), black, false);
-  eye.position.set(0.085, 0.95, 0.215);
-  body.add(torso, belt, buckle, head, nose, eye);
-  if (patch) {
-    const pt = mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.03, 14), black, false);
-    pt.rotation.x = Math.PI / 2 - 0.35;
-    pt.position.set(-0.09, 0.95, 0.215);
-    const strap = mesh(new THREE.TorusGeometry(0.252, 0.012, 6, 32), black, false);
-    strap.rotation.set(Math.PI / 2 - 0.25, 0.35, 0);
-    strap.position.y = 0.96;
-    body.add(pt, strap);
-  } else {
-    const e2 = eye.clone();
-    e2.position.x = -0.085;
-    body.add(e2);
-  }
-  const bandana = mesh(new THREE.SphereGeometry(0.262, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2.3), red);
-  bandana.position.y = 0.93;
-  bandana.rotation.x = -0.18;
-  const knot = mesh(new THREE.SphereGeometry(0.07, 10, 8), red);
-  knot.position.set(0, 1.0, -0.25);
-  const tail = mesh(new THREE.BoxGeometry(0.07, 0.2, 0.03), red);
-  tail.position.set(0.04, 0.88, -0.28); tail.rotation.z = 0.3;
-  const bd = mesh(new THREE.SphereGeometry(0.17, 14, 10, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), mat(beard));
-  bd.position.set(0, 0.82, 0.07);
-  const ring = mesh(new THREE.TorusGeometry(0.04, 0.012, 6, 16), gold, false);
-  ring.position.set(0.25, 0.83, 0);
-  ring.rotation.y = Math.PI / 2;
-  body.add(bandana, knot, tail, bd, ring);
-  const arms = [-1, 1].map((s) => {
-    const sh = new THREE.Group();
-    sh.position.set(0.31 * s, 0.58, 0);
-    const arm = mesh(new THREE.CylinderGeometry(0.07, 0.065, 0.48, 10), top);
-    arm.position.y = -0.24;
-    const hand = mesh(new THREE.SphereGeometry(0.075, 10, 8), skin);
-    hand.position.y = -0.5;
-    sh.add(arm, hand);
-    body.add(sh);
-    return sh;
-  });
-  if (sword) {
-    const blade = mesh(new THREE.BoxGeometry(0.04, 0.05, 0.62), mat('#d8dde2', { metalness: 0.8, roughness: 0.25 }));
-    blade.position.set(0, -0.52, 0.34);
-    const guard = mesh(new THREE.BoxGeometry(0.16, 0.05, 0.04), gold);
-    guard.position.set(0, -0.52, 0.04);
-    arms[1].add(blade, guard);
-  }
-  g.traverse((x) => { if (x.isMesh) x.castShadow = true; });
-  return { g, legs, arms, body, phase: 0 };
+  return dressPirate({ body: 'm', top: 'striped', topCol: shirt[1], topCol2: shirt[0], hat: 'bandana', hatCol: scarf, legs: 'pants', legsCol: trousers, feetCol: '#2a1b12', hair: 'short', hairCol: beard, beard: 'full', patch, earring: true, fam: 'none' }, { sword });
+}
+// Change what a pirate already in the den is wearing, keeping where they are.
+function wearLook(p, look) {
+  const np = dressPirate(look), old = p.g;
+  np.g.position.copy(old.position); np.g.rotation.copy(old.rotation); np.g.scale.copy(old.scale);
+  old.parent?.add(np.g);
+  old.parent?.remove(old);
+  Object.assign(p, { g: np.g, legs: np.legs, arms: np.arms, body: np.body, fam: np.fam, look: np.look });
 }
 function animateWalk(p, moving, dt, speed = 11) {
   p.phase = moving ? p.phase + dt * speed : 0;
+  familiarTick(p.fam, dt);
   const swing = moving ? Math.sin(p.phase) : 0;
   p.legs[0].rotation.x = swing * 0.6;
   p.legs[1].rotation.x = -swing * 0.6;
@@ -370,7 +312,7 @@ function buildWall() {
   for (let i = 0; i < 9; i++) scenery.push(rock(-half - 0.6 - Math.random() * 1.2, Math.random() * H * S, -0.3, 0.7 + Math.random() * 0.6));
   for (let i = 0; i < 9; i++) scenery.push(rock(half + 0.6 + Math.random() * 1.2, Math.random() * H * S, -0.3, 0.7 + Math.random() * 0.6));
   for (let z = -14; z < 13; z += 1.4) {
-    scenery.push(rock(-half - 2.2 - Math.random(), 0.4, z, 1 + Math.random() * 0.8));
+    scenery.push(rock(-half - 2.2 - Math.random() - (z > HOUSE_Z0 - 1.5 && z < HOUSE_Z1 + 1.5 ? 1.4 : 0), 0.4, z, 1 + Math.random() * 0.8));
     scenery.push(rock(half + 2.2 + Math.random(), 0.4, z, 1 + Math.random() * 0.8));
   }
   makeRampart();
@@ -385,12 +327,18 @@ function buildWall() {
   // Props inside: three crates for the piles, a fire barrel, the treasure chest.
   piles.forEach((p, i) => { p.x = (i - 1) * Math.min(3.4, half * 0.42); p.z = 6.9; p.crate.position.set(p.x, 0.32, p.z); scenery.push(p.crate); });
   barrel.position.set(half - 1.4, 0, 7.6);
-  chest.position.set(-half + 1.8, 0, 8.4);
+  chest.position.set(half - 1.7, 0, 9.7);
   scenery.push(barrel, chest);
+  for (const x of [X(wall.gateCols.c0) - 0.3, X(wall.gateCols.c1 + 1) + 0.3]) {
+    const fp = flagpole(1.8);
+    fp.position.set(x, Y(0) + S * 0.5, -STONE_D / 2);
+    scenery.push(fp);
+  }
   scenery.forEach((o) => { o.userData.scenery = true; den.add(o); });
   bounds = { x: half - 0.35, z0: 0.55, z1: 10.5 };
   obstacles = [...piles.map((p) => ({ x: p.x, z: p.z, r: 0.75 })), { x: barrel.position.x, z: barrel.position.z, r: 0.55 }, { x: chest.position.x, z: chest.position.z, r: 0.75 }];
   piles.forEach(showPile);
+  rebuildDecor();
 }
 
 /* The rampart: a walk along the top of the wall, with stairs up from the den at either end. Up
@@ -404,7 +352,7 @@ function makeRampart() {
   const cuts = [0, Math.round(wall.W / 3), Math.round(wall.W * 2 / 3), wall.W];
   const secs = [0, 1, 2].map((i) => ({ c0: cuts[i], c1: cuts[i + 1] - 1, x0: X(cuts[i]), x1: X(cuts[i + 1]) }));
   // What gets built, in order: an end stretch's walk and then its stairs, the other end's, the middle walk last.
-  const jobs = [[0, 'deck'], [0, 'stair'], [2, 'deck'], [2, 'stair'], [1, 'deck'], [3, 'gun', 0], [3, 'gun', 1], [3, 'gun', 2]].map(([si, kind, part], i) => ({ i, si, kind, part, frame: null, up: false }));
+  const jobs = [[0, 'deck'], [0, 'stair'], [2, 'deck'], [2, 'stair'], [1, 'deck'], [3, 'gun', 0], [3, 'gun', 1], [3, 'gun', 2], [4, 'house', 0], [4, 'house', 1], [4, 'house', 2], [4, 'house', 3]].map(([si, kind, part], i) => ({ i, si, kind, part, frame: null, up: false }));
   gd = null;
   ramp = { T, half, n, zTop, zBot, run, secs, jobs, next: 0, stairs: [[-half + 0.2, -half + 0.2 + STAIR_W], [half - 0.2 - STAIR_W, half - 0.2]] };
 }
@@ -459,12 +407,17 @@ function stairShape(si) {
 function openJob(i, shape = null) {
   const j = ramp.jobs[i];
   if (!j || j.frame) return j?.frame || null;
-  ramp.next = Math.max(ramp.next, i + 1);
+  if (j.kind !== 'house') ramp.next = Math.max(ramp.next, i + 1);
   const stair = j.kind === 'stair';
-  shape ||= stair ? stairShape(j.si) : j.kind === 'gun' ? gunShape(j.part) : deckShape(j.si);
+  shape ||= stair ? stairShape(j.si) : j.kind === 'gun' ? gunShape(j.part) : j.kind === 'house' ? houseShape(j.part) : deckShape(j.si);
   if (isHost()) send('all', { t: 'frame', fi: i, cells: shape });
   const g = new THREE.Group();
-  if (!stair) {
+  if (j.kind === 'house') {
+    // Laid flat on the floor in front of where the house goes, face up.
+    const flat = housePose(-1);
+    g.position.copy(flat.p);
+    g.quaternion.copy(flat.q);
+  } else if (!stair) {
     // Laid flat: the rows run from the wall towards the den, the face is up.
     g.position.set(j.kind === 'gun' ? gunX0() : ramp.secs[j.si].x0, 0, j.kind === 'gun' ? GUN_FRAME_Z : FRAME_Z);
     g.rotation.x = -Math.PI / 2;
@@ -649,6 +602,7 @@ function finishFrame(f, quiet = false) {
     if (waste || f.scrapCells.length) toast(waste ? `Sawn to fit: ${waste} square${waste > 1 ? 's' : ''} of offcuts` : 'Patched with offcuts: it\'ll do');
     else { G.gold += PAY.master; updateStats(); toast(`Shipshape! Not a scrap wasted (+${PAY.master})`); }
   }
+  if (j.kind === 'house') { raiseHouse(f, j, quiet); return; }
   const g = f.group, p0 = g.position.clone(), p1 = new THREE.Vector3(p0.x, ramp.T - 0.05, j.kind === 'gun' ? gunZ0() + partR0(j.part) * S : -0.85);
   const land = () => {
     g.position.copy(p1);
@@ -692,9 +646,15 @@ function finishFrame(f, quiet = false) {
 // comes when the next wave's beaten off.
 function jobDone(j, quiet) {
   if (quiet) return;
+  if (j.kind === 'house') {
+    const nx = ramp.jobs[j.i + 1];
+    setTimeout(() => toast(nx?.kind === 'house' ? `The ${HOUSE_PART[j.part]}'s up! Now the ${HOUSE_PART[nx.part]}` : 'Your house is built!'), 1500);
+    if (!guest() && nx?.kind === 'house') openJob(nx.i);
+    return;
+  }
   const stretch = ramp.jobs.filter((o) => o.si === j.si);
   const msg = j.kind === 'gun' ? (j.part === GD.parts.length - 1 ? 'The gun tower\'s up! Walk out onto it from the wall' : 'That part of the gun tower\'s up. Now the next')
-    : ramp.jobs.every((o) => o.up || o.kind === 'gun') ? 'The whole rampart is up!'
+    : ramp.jobs.every((o) => o.up || o.kind === 'gun' || o.kind === 'house') ? 'The whole rampart is up!'
     : stretch.every((o) => o.up) ? 'That stretch is up: climb the stairs and throw from the wall!'
     : 'The walk\'s up on the wall. Now build the stairs to it';
   setTimeout(() => toast(msg), 1500);
@@ -708,6 +668,7 @@ const hv = new THREE.Vector3();
 function heightAt(x, z, pad = 0, from = 99) {
   if (!ramp) return 0;
   for (const j of ramp.jobs) {
+    if (j.kind === 'house') continue;
     if (j.kind !== 'stair') {
       if (j.up && j.set.has(k(Math.floor((z - j.z0) / S), Math.floor((x - j.x0) / S)))) {
         if (j.kind === 'gun' && from < ramp.T - HOP) continue;
@@ -728,6 +689,162 @@ function heightAt(x, z, pad = 0, from = 99) {
   return 0;
 }
 const onRampart = () => ramp && pirate.h > ramp.T - 0.15;
+
+// ---------- your house ----------
+/* A little house at the back of the den, against the cave wall on the left: a front wall with a
+   door and a window, two side walls and a lean-to roof. Built as everything here is built: each
+   part's frame laid on the floor, filled with pieces, sawn to fit, then hoisted on ropes and set in
+   place. You only get one when you ask for it (Your pirate, Den), as it's yours to dress. */
+const HOUSE = { cols: 7, front: 5, back: 7, depth: 4 };
+const HOUSE_PART = ['front wall', 'side wall', 'other side wall', 'roof'];
+const HOUSE_Z1 = 10.3, HOUSE_Z0 = HOUSE_Z1 - HOUSE.cols * S;
+const houseXF = () => -ramp.half + 1.7;   // the face of the front wall
+function houseShape(part) {
+  const cells = [];
+  if (part === 0) {
+    for (let r = 0; r < HOUSE.front; r++) for (let c = 0; c < HOUSE.cols; c++) {
+      if ((c === 2 || c === 3) && r >= 1) continue;   // the door
+      if (c === 5 && (r === 1 || r === 2)) continue;  // the window
+      cells.push([r, c]);
+    }
+  } else if (part === 3) {
+    for (let r = 0; r < 6; r++) for (let c = 0; c < HOUSE.cols; c++) if (!(r === 0 && (c === 0 || c === HOUSE.cols - 1))) cells.push([r, c]);
+  } else {
+    // Stepped down from the back (tall, against the rock) to the front, under the roof's slope.
+    const hs = part === 1 ? [7, 7, 6, 5] : [5, 6, 7, 7];
+    hs.forEach((h, c) => { for (let r = HOUSE.back - h; r < HOUSE.back; r++) cells.push([r, c]); });
+  }
+  return cells;
+}
+const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+const basis = (x, y) => new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(x, y, new THREE.Vector3().crossVectors(x, y)));
+// Where a part goes (its top-left corner, and which way it faces). Part -1: laid flat on the floor.
+function housePose(part) {
+  const xf = houseXF(), xb = xf - WOOD_D - HOUSE.depth * S;
+  if (part === -1) return { p: V3(xf + 0.3, 0, HOUSE_Z1 - 0.05), q: basis(V3(0, 0, -1), V3(-1, 0, 0)) };
+  if (part === 0) return { p: V3(xf, HOUSE.front * S, HOUSE_Z1), q: basis(V3(0, 0, -1), V3(0, 1, 0)) };
+  if (part === 1) return { p: V3(xb, HOUSE.back * S, HOUSE_Z1), q: basis(V3(1, 0, 0), V3(0, 1, 0)) };
+  if (part === 2) return { p: V3(xf - WOOD_D, HOUSE.back * S, HOUSE_Z0), q: basis(V3(-1, 0, 0), V3(0, 1, 0)) };
+  const up = V3(xb - xf, (HOUSE.back - HOUSE.front) * S, 0).normalize(), q = basis(V3(0, 0, -1), up);
+  return { p: V3(xb, HOUSE.back * S, HOUSE_Z1).add(V3(0, 0, 1).applyQuaternion(q).multiplyScalar(0.42)), q };
+}
+function raiseHouse(f, j, quiet) {
+  const g = f.group, to = housePose(j.part);
+  const land = () => {
+    g.position.copy(to.p);
+    g.quaternion.copy(to.q);
+    g.updateMatrixWorld(true);
+    j.up = true;
+    houseWalls(j.part);
+    paintHouse();
+    if (ramp.jobs.every((o) => o.kind !== 'house' || o.up)) houseDone();
+    jobDone(j, quiet);
+  };
+  if (quiet) { land(); return; }
+  const p0 = g.position.clone(), q0 = g.quaternion.clone();
+  const mid = to.p.clone().add(V3(0, -HOUSE.front * S / 2, 0).applyQuaternion(to.q)), top = mid.clone().setY(HOUSE.back * S + 2.6);
+  const block = mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.14, 12), railMat);
+  block.rotation.x = Math.PI / 2;
+  block.position.copy(top);
+  const pos = new Float32Array(24), geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const ropes = new THREE.LineSegments(geo, ropeMat);
+  ropes.frustumCulled = false;
+  den.add(block, ropes);
+  const corners = [[0, 0], [f.b.w, 0], [0, f.b.h], [f.b.w, f.b.h]];
+  const rig = () => {
+    g.updateMatrixWorld(true);
+    corners.forEach(([c, r], n) => { const w = frameAt(f, c, r, 0.1); pos.set([top.x, top.y, top.z, w.x, w.y, w.z], n * 6); });
+    geo.attributes.position.needsUpdate = true;
+  };
+  rig();
+  const ease = (u) => (u < 0.5 ? 2 * u * u : 1 - (-2 * u + 2) ** 2 / 2);
+  tween(0.9, rig, () => tween(2.6, (u) => {
+    const e = ease(u);
+    g.position.lerpVectors(p0, to.p, e);
+    g.position.y += Math.sin(e * Math.PI) * 1.4;
+    g.quaternion.slerpQuaternions(q0, to.q, ease(Math.min(1, u * 1.25)));
+    rig();
+  }, () => {
+    land();
+    burst(mid, '#e8c890', 16, 3);
+    tween(0.6, () => {}, () => den.remove(block, ropes));
+  }));
+}
+// You can't walk through a wall that's up (only in at the door).
+function houseWalls(part) {
+  const xf = houseXF(), xb = xf - WOOD_D - HOUSE.depth * S, add = (x, z) => obstacles.push({ x, z, r: 0.3, house: true });
+  if (part === 0) for (let c = 0; c < HOUSE.cols; c++) { if (c !== 2 && c !== 3) add(xf - 0.25, HOUSE_Z1 - (c + 0.5) * S); }
+  if (part === 1) for (let c = 0; c < HOUSE.depth; c++) add(xb + (c + 0.5) * S, HOUSE_Z1 - 0.25);
+  if (part === 2) for (let c = 0; c < HOUSE.depth; c++) add(xb + (c + 0.5) * S, HOUSE_Z0 + 0.25);
+}
+// Painted, if you like: each piece keeps a hint of its own timber, so you still see how it's built.
+const houseMats = {};
+const houseMat = (l, c) => (c === 'none' ? woodMat(l) : (houseMats[l + c] ||= mat(new THREE.Color(WOOD[l] || '#b08a5a').lerp(new THREE.Color(dyeHex(c)), 0.62), { map: woodTex, roughness: 0.75 })));
+function paintHouse() {
+  if (!ramp) return;
+  for (const j of ramp.jobs) {
+    if (j.kind !== 'house' || !j.up) continue;
+    for (const pc of j.frame.pieces) pc.group.traverse((m) => { if (m.isMesh) m.material = houseMat(pc.info.letter, j.part === 3 ? denLook.roof : denLook.paint); });
+  }
+}
+// All up: your flag on the roof.
+function houseDone() {
+  const fp = flagpole(1.6), xb = houseXF() - WOOD_D - HOUSE.depth * S;
+  fp.position.set(xb + 0.35, HOUSE.back * S + 0.45, HOUSE_Z1 - 0.4);
+  fp.userData.scenery = true;
+  den.add(fp);
+}
+function startHouse() {
+  if (!ramp) return;
+  if (guest()) { send('host', { t: 'build' }); return; }
+  const first = ramp.jobs.find((j) => j.kind === 'house');
+  if (first.frame) return;
+  if (frames().length || ramp.jobs.some((j) => j.frame && !j.up)) { toast('Finish the frame you\'re on first, then the timber for a house comes', false, true); return; }
+  openJob(first.i);
+  say('Timber for a house! Its frames go by the cave wall, on the left');
+}
+
+// ---------- Jolly Roger flags ----------
+// One flag for the whole den, drawn from your choices; every pole flies it.
+const flagCanvas = document.createElement('canvas');
+flagCanvas.width = 200; flagCanvas.height = 128;
+const flagTex = new THREE.CanvasTexture(flagCanvas);
+flagTex.colorSpace = THREE.SRGBColorSpace;
+function redrawFlag() { drawFlag(flagCanvas.getContext('2d'), 200, 128, denLook); flagTex.needsUpdate = true; }
+redrawFlag();
+const flagMat = new THREE.MeshStandardMaterial({ map: flagTex, side: THREE.DoubleSide, roughness: 0.9 });
+// A flag or banner you've put up keeps the design it had then.
+const designMats = new Map();
+function designMat(D, tall = false) {
+  const key = JSON.stringify(D) + tall;
+  if (!designMats.has(key)) designMats.set(key, new THREE.MeshStandardMaterial({ map: canvasTex(tall ? 128 : 200, tall ? 200 : 128, (x, w, h) => drawFlag(x, w, h, D)), side: THREE.DoubleSide, roughness: 0.9 }));
+  return designMats.get(key);
+}
+let flags = [];
+function flagpole(h = 2, m = flagMat) {
+  const g = new THREE.Group();
+  const pole = mesh(new THREE.CylinderGeometry(0.035, 0.045, h, 8), mat('#5b3a20', { map: woodTex }));
+  pole.position.y = h / 2;
+  const ball = mesh(new THREE.SphereGeometry(0.07, 10, 8), mat('#e8b23a', { metalness: 0.7, roughness: 0.3 }));
+  ball.position.y = h + 0.05;
+  const geo = new THREE.PlaneGeometry(1, 0.64, 14, 2).translate(0.5, 0, 0);
+  const cloth = mesh(geo, m);
+  cloth.position.y = h - 0.34;
+  g.add(pole, ball, cloth);
+  flags.push({ g, geo, base: geo.attributes.position.array.slice(), t: Math.random() * 6 });
+  return g;
+}
+// (Poles thrown away with an old den are forgotten.)
+function waveFlags(dt) {
+  flags = flags.filter((f) => { let o = f.g; while (o.parent) o = o.parent; return o === scene || o === dress.scene; });
+  for (const f of flags) {
+    f.t += dt;
+    const pa = f.geo.attributes.position;
+    for (let i = 0; i < pa.count; i++) { const x = f.base[i * 3]; pa.setZ(i, Math.sin(x * 5 - f.t * 4.5) * 0.09 * x); pa.setY(i, f.base[i * 3 + 1] - x * x * 0.04); }
+    pa.needsUpdate = true;
+  }
+}
 
 // ---------- the gun tower (after Gunnery) ----------
 /* The rampart's last job: a gun tower, a big square platform jutting out from the wall over the
@@ -1086,6 +1203,12 @@ function makeGunDeck() {
     if (isPort(r, c, d)) { piece(0.08, 0.04, red, 0.1); continue; }
     piece(0.34, 0.17, red, 0.1);
     piece(0.04, 0.36, gold, 0.13);
+  }
+  // Your Jolly Rogers on its two outer corners.
+  for (const x of [x0 + 0.12, x0 + w - 0.12]) {
+    const fp = flagpole(2.2);
+    fp.position.set(x, ramp.T + 0.05, z0 + 0.12);
+    group.add(fp);
   }
   // Where the pointer is on the deck: a ring, and a ghost of the arrow a click would chalk.
   gd.cursor = outline([[0, 0]], 0, '#ffffff');
@@ -1592,7 +1715,7 @@ const cannon = (() => {
 })();
 
 // ---------- game state ----------
-const pirate = Object.assign(makePirate(), { x: 0, z: 8, bonkT: 0, h: 0, hs: 0, hop: null });
+const pirate = Object.assign(makePirate({ look: myLook }), { x: 0, z: 8, bonkT: 0, h: 0, hs: 0, hop: null });
 const STEP = 0.62, HOP = 1.2;   // metres: walked up / hopped up (a stair square is about 0.53)
 const view = { yaw: 0, pitch: 0, zoom: 1 };   // the player's own turn, tilt and zoom of the camera
 pirate.g.rotation.y = Math.PI;
@@ -1743,7 +1866,7 @@ function labelFor(h) {
 function frameLabel(f) {
   const left = f.open;
   const need = left.length === 5 && f.exact ? `needs ${an(C.identify(left))}` : f.exact ? `room for ${left.length / 5} more pieces` : f.kind === 'stair' ? `${left.length} squares left: any piece will do` : `${left.length} squares left: any piece, the spare's sawn off`;
-  return ['label deck', `${{ stair: 'Stairs up to the wall', gun: `Gun tower frame (${['back', 'middle', 'front'][f.part]})` }[f.kind] || 'Wall-walk frame'}<small>${need}</small>`];
+  return ['label deck', `${{ stair: 'Stairs up to the wall', gun: `Gun tower frame (${['back', 'middle', 'front'][f.part]})`, house: `Your house: the ${HOUSE_PART[f.part]}` }[f.kind] || 'Wall-walk frame'}<small>${need}</small>`];
 }
 function updateStats() {
   $('s-gold').textContent = Math.max(0, G.gold);
@@ -1756,10 +1879,16 @@ function updateStats() {
 // ---------- input ----------
 addEventListener('keydown', (e) => {
   if (e.target instanceof HTMLInputElement) return;
+  if (dress.open) { if (e.key === 'Escape') dressPanel(false); return; }
   const key = e.key.toLowerCase();
   if ([' ', 'tab', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) e.preventDefault();
   if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) { keys.add(key); mouseMode = false; }
   if (key === 'z' || key === 'c') keys.add(key);
+  if (deco.on) {
+    if (key === 'escape') decoMode(false);
+    else if (key === 'q' || key === 'e') decoTurn(key === 'e' ? 1 : -1);
+    return;
+  }
   if (e.repeat || G.over) return;
   if (key === ' ' || key === 'enter') act();
   else if (key === 'q' && carry) turn(rotCCW, 1);
@@ -1797,6 +1926,7 @@ function mouseAt(z) {
   return m;
 }
 renderer.domElement.addEventListener('mousemove', (e) => {
+  if (deco.on) { decoMove(e); return; }
   ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1), camera);
   const p = new THREE.Vector3();
   // A rampart frame you're pointing at (the nearest, if one's in front of another), else the wall.
@@ -1820,6 +1950,7 @@ document.addEventListener('mouseleave', () => { cursor = null; });
 // camera; a right click without dragging flips the piece.
 let drag = null;
 renderer.domElement.addEventListener('mousedown', (e) => {
+  if (deco.on) { if (e.button === 2) drag = { x: e.clientX, y: e.clientY, moved: false, deco: e }; else decoClick(e); return; }
   if (e.button === 2) { drag = { x: e.clientX, y: e.clientY, moved: false }; return; }
   if (e.button !== 0 || G.over) return;
   // Up on the rampart there's nothing to fit, so a click anywhere throws at the raider nearest it.
@@ -1840,6 +1971,7 @@ addEventListener('mousemove', (e) => {
 addEventListener('mouseup', (e) => {
   if (e.button === 0 && gd?.press) chalkRelease(e.clientX, e.clientY);
   if (e.button !== 2 || !drag) return;
+  if (drag.deco) { if (!drag.moved) decoClick(drag.deco); drag = null; return; }
   if (!drag.moved && carry && !G.over) turn(flip, 0);
   else if (!drag.moved && !carry && onGunDeck() && (gd.hover = deckCellAt(e.clientX, e.clientY)) && gd.arrows.has(k(...gd.hover))) chalk(...gd.hover, -1);
   drag = null;
@@ -1847,6 +1979,11 @@ addEventListener('mouseup', (e) => {
 // The wheel turns the piece while it's showing a spot to fit it, or your chalk on the gun deck; otherwise it zooms.
 let wheelAcc = 0, wheelT = 0;
 renderer.domElement.addEventListener('wheel', (e) => {
+  if (deco.on) {
+    wheelAcc += e.deltaY;
+    if (Math.abs(wheelAcc) >= 40) { decoTurn(wheelAcc > 0 ? 1 : -1); wheelAcc = 0; }
+    return;
+  }
   // On the gun deck the wheel turns your chalk, as in Gunnery, and never zooms.
   if (!carry && onGunDeck() && !G.over) {
     wheelAcc += e.deltaY;
@@ -2485,7 +2622,7 @@ function updateWaves(dt) {
   if (!G.toSpawn && !raiders.length) {
     G.phase = 'calm'; G.phaseT = CALM_SECS;
     // Timber for the next stretch, once nothing's still being built.
-    const f = !frames().length && !ramp.jobs.some((j) => j.frame && !j.up) && openJob(ramp.next);
+    const f = !frames().length && !ramp.jobs.some((j) => j.frame && !j.up) && ramp.jobs[ramp.next]?.kind !== 'house' && openJob(ramp.next);
     if (f) say(`Wave ${G.wave} beaten off! Timber's come: ${f.kind === 'gun' ? 'build a gun tower in its frame' : 'build the rampart in its frame'}`);
     else say(`Wave ${G.wave} beaten off!`);
   }
@@ -2582,7 +2719,7 @@ function prompt() {
   } else if (!carry && canTakeBack()) t = `Space: take the ${lastPlaced.letter} back off`;
   else if (carry) {
     const more = target?.count > 1 ? ` · Tab: other spots (${target.count})` : '';
-    if (target?.frame) t = !target.ok ? 'Walk closer to fit it there' : target.over ? (target.frame.kind === 'stair' ? `Space: fit the ${carry.letter} in the stairs (it sticks out, and stays that way)${more}` : `Space: fit it in the frame (it sticks out: the spare gets sawn off)${more}`) : `Space: fit the ${carry.letter} in the ${{ stair: 'stairs', gun: 'gun tower frame' }[target.frame.kind] || 'wall-walk frame'}${more}`;
+    if (target?.frame) t = !target.ok ? 'Walk closer to fit it there' : target.over ? (target.frame.kind === 'stair' ? `Space: fit the ${carry.letter} in the stairs (it sticks out, and stays that way)${more}` : `Space: fit it in the frame (it sticks out: the spare gets sawn off)${more}`) : `Space: fit the ${carry.letter} in the ${{ stair: 'stairs', gun: 'gun tower frame', house: 'house frame' }[target.frame.kind] || 'wall-walk frame'}${more}`;
     else if (target?.ok && target.patch) t = `Space: nail it on behind (one more layer for them to hack through)${more}`;
     else if (target?.ok && !target.over) t = `Space: fit the ${carry.letter} here${more}`;
     else if (target?.ok) t = `Space: board it over (weak, no Masterpiece)${more}`;
@@ -2590,7 +2727,7 @@ function prompt() {
     else if (pirate.z <= WALL_Z || (mouseMode && mouse)) t = `The ${carry.letter} won't go there · Q/E turn · F flip`;
     else if (wall.holes.every((h) => h.status !== 'open')) t = `Carry the ${carry.letter} to the wall: nail it on behind a mended hole`;
     else t = `Carry the ${carry.letter} to a hole`;
-  } else t = frames().length && pirate.z > WALL_Z ? `Fetch pieces to build the ${frames()[0]?.kind === 'gun' ? 'gun tower' : 'rampart'} in its frame` : 'Fetch a piece from the piles';
+  } else t = frames().length && pirate.z > WALL_Z ? `Fetch pieces to build the ${{ gun: 'gun tower', house: 'house' }[frames()[0]?.kind] || 'rampart'} in its frame` : 'Fetch a piece from the piles';
   const hacking = raiders.some(atWall);
   if (onGunDeck() && !carry) {
     const n = myArrows().length;
@@ -2794,6 +2931,7 @@ function sendSync(to, fresh = false) {
     holes: wall.holes.map((h) => ({ cells: h.cells, status: h.status, hp: h.hp, maxHp: h.maxHp, pieces: h.pieces.map((p) => p.info), boards: boardsOf(h).map((p) => p.hp) })),
     next: ramp.next,
     gd: gunOut(),
+    den: denLook,
     jobs: ramp.jobs.map((j) => (j.frame ? { cells: j.frame.cells, pieces: j.frame.pieces.map((p) => p.info), scraps: j.frame.scrapCells, done: j.frame.done } : null)),
   });
 }
@@ -2830,6 +2968,7 @@ function applySync(s) {
     if (d.done) finishFrame(f, true);
   });
   ramp.next = s.next;
+  if (s.den) applyDen(cleanDen(s.den));
   gunIn(s.gd);
   cannon.visible = !!s.cv;
   pilesIn(s.p);
@@ -2874,6 +3013,7 @@ function onNet(m) {
       net.id = m.id;
       net.host = m.host === m.id;
       m.crew.forEach((c) => addMate(c.id, c.name));
+      send('all', { t: 'look', look: myLook });
       crewPanel(false);
       history.replaceState(null, '', `?crew=${net.code}`);
       if (net.host) newGame();
@@ -2882,6 +3022,7 @@ function onNet(m) {
     case 'full': lobbyMsg('That crew is full: four pirates already.'); break;
     case 'join':
       addMate(m.id, m.name);
+      send(m.id, { t: 'look', look: myLook });
       toast(`${m.name} came aboard!`);
       if (net.host) sendSync(m.id);
       break;
@@ -2902,6 +3043,9 @@ function onNet(m) {
       mateCarry(mt, m.c);
       break;
     case 'toast': toast(m.text, m.bad, m.warn); break;
+    case 'look': if (mt) wearLook(mt.m, cleanLook(m.look)); break;
+    case 'den': applyDen(cleanDen(m.den)); break;
+    case 'build': if (net.host) startHouse(); break;
     // From the host: what happened.
     case 'snap': if (!net.host) applySnap(m); break;
     case 'sync': if (!net.host) applySync(m); break;
@@ -3054,6 +3198,324 @@ $('crew-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('cr
     else crewPanel(true);
   }
 }
+
+// ---------- decorating the den ----------
+/* As in a Puzzle Pirates house: pick something (a Jolly Roger, a banner, a lantern, a rum barrel),
+   point where it goes, turn it with the wheel or Q/E, click to put it down; right-click one to take
+   it away. Flags and banners fly the design you've drawn up in the flag designer at the time. They
+   stay where you put them, game after game, and the crew sees them too. Never in front of the wall
+   (that's where you mend it and build) nor on a frame or by the crates. */
+const deco = { on: false, tool: 'flag', rot: 0, at: null, ok: false, ghost: null, ring: null, group: new THREE.Group() };
+scene.add(deco.group);
+const DECO_Z0 = 5.2;   // nothing in front of this: the mending, the frames
+function decorMesh(it) {
+  const g = new THREE.Group();
+  if (it.k === 'flag') g.add(flagpole(2.1, designMat(it.d)));
+  else if (it.k === 'banner') {
+    const post = mesh(new THREE.CylinderGeometry(0.045, 0.055, 2.2, 8), mat('#5b3a20', { map: woodTex }));
+    post.position.y = 1.1;
+    const bar = mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.8, 8), mat('#5b3a20', { map: woodTex }));
+    bar.rotation.z = Math.PI / 2;
+    bar.position.set(0, 2.1, 0.06);
+    const cloth = mesh(new THREE.PlaneGeometry(0.66, 1.03), designMat(it.d, true));
+    cloth.position.set(0, 1.56, 0.08);
+    const knobs = [-1, 1].map((sx) => { const b = mesh(new THREE.SphereGeometry(0.045, 8, 6), mat('#e8b23a', { metalness: 0.7, roughness: 0.3 })); b.position.set(0.42 * sx, 2.1, 0.06); return b; });
+    g.add(post, bar, cloth, ...knobs);
+  } else if (it.k === 'lantern') {
+    const post = mesh(new THREE.CylinderGeometry(0.045, 0.06, 1.7, 8), mat('#3a2616', { map: woodTex }));
+    post.position.y = 0.85;
+    const arm = mesh(new THREE.BoxGeometry(0.05, 0.05, 0.42), mat('#3a2616'));
+    arm.position.set(0, 1.66, 0.19);
+    const glass = mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.22, 6), new THREE.MeshStandardMaterial({ color: '#ffcf6a', emissive: '#ffae35', emissiveIntensity: 1.6 }), false);
+    glass.position.set(0, 1.45, 0.36);
+    const lid = mesh(new THREE.ConeGeometry(0.14, 0.1, 6), mat('#2b2b2b', { metalness: 0.6 }));
+    lid.position.set(0, 1.61, 0.36);
+    g.add(post, arm, glass, lid);
+  } else {
+    const b = mesh(new THREE.CylinderGeometry(0.34, 0.3, 0.75, 16), mat('#7a4c28', { map: woodTex }));
+    b.position.y = 0.375;
+    const hoop = mat('#2b2b2b', { metalness: 0.6 });
+    [0.12, 0.63].forEach((y) => { const h = mesh(new THREE.TorusGeometry(0.33, 0.02, 6, 24), hoop); h.rotation.x = Math.PI / 2; h.position.y = y; g.add(h); });
+    const tap = mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.12, 6), mat('#e8b23a', { metalness: 0.7, roughness: 0.3 }));
+    tap.rotation.x = Math.PI / 2;
+    tap.position.set(0, 0.2, 0.36);
+    g.add(b, tap);
+  }
+  g.position.set(it.x, 0, it.z);
+  g.rotation.y = it.r * Math.PI / 2;
+  return g;
+}
+const decorR = (it) => (it.k === 'barrel' ? 0.38 : 0.18);
+function rebuildDecor() {
+  deco.group.clear();
+  for (const it of denLook.decor) if (Math.abs(it.x) < bounds.x + 0.3) deco.group.add(decorMesh(it));
+  obstacles = obstacles.filter((o) => !o.deco).concat(denLook.decor.map((it) => ({ x: it.x, z: it.z, r: decorR(it), deco: true })));
+}
+// Is this a good spot? In the den, back from the wall, clear of everything else.
+function decoFree(x, z, k) {
+  if (Math.abs(x) > bounds.x - 0.1 || z < DECO_Z0 || z > bounds.z1) return false;
+  const r = k === 'barrel' ? 0.38 : 0.18;
+  if (Math.hypot(x - pirate.x, z - pirate.z) < r + 0.35) return false;
+  for (const o of obstacles) if (Math.hypot(x - o.x, z - o.z) < o.r + r + 0.15) return false;
+  if (ramp && x < houseXF() + 0.2 && z > HOUSE_Z0 - 0.3) return false;
+  for (const f of frames()) {
+    const l = f.group.worldToLocal(new THREE.Vector3(x, 0, z));
+    if (l.x > -0.4 && l.x < f.b.w * S + 0.4 && l.y < 0.4 && l.y > -f.b.h * S - 0.4 && Math.abs(l.z) < 1) return false;
+  }
+  return true;
+}
+function decoMode(on) {
+  deco.on = on;
+  $('deco').classList.toggle('on', on);
+  document.querySelector('.keys').style.display = on ? 'none' : '';
+  if (!on) { if (deco.ghost) deco.group.remove(deco.ghost); deco.ghost = null; if (deco.ring) deco.ring.visible = false; deco.at = null; return; }
+  if (carry) putBack();
+  if (!deco.ring) {
+    deco.ring = new THREE.Mesh(new THREE.RingGeometry(0.42, 0.5, 32).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#7dff7a', transparent: true, opacity: 0.8, depthWrite: false }));
+    scene.add(deco.ring);
+  }
+  decoBar();
+}
+function decoBar() {
+  const box = $('deco-tools');
+  box.replaceChildren(...DECOR.map(([id, name]) => {
+    const b = el('button', 'tab' + (deco.tool === id ? ' on' : ''), name);
+    b.onclick = () => { deco.tool = id; decoGhost(); decoBar(); };
+    return b;
+  }));
+  $('deco-count').textContent = `${denLook.decor.length} of ${MAX_DECOR} put up`;
+}
+function decoGhost() {
+  if (deco.ghost) deco.group.remove(deco.ghost);
+  deco.ghost = null;
+  if (!deco.at) return;
+  deco.ghost = decorMesh({ k: deco.tool, x: deco.at.x, z: deco.at.z, r: deco.rot, d: designOf(denLook) });
+  deco.ghost.traverse((m) => { if (m.isMesh) m.castShadow = false; });
+  deco.group.add(deco.ghost);
+}
+function decoPoint(e) {
+  ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1), camera);
+  const p = new THREE.Vector3();
+  if (!ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), p)) return null;
+  // Lined up on half squares, so things stand in neat rows.
+  return { x: Math.round(p.x / (S / 2)) * S / 2, z: Math.round(p.z / (S / 2)) * S / 2 };
+}
+function decoMove(e) {
+  const at = decoPoint(e);
+  deco.at = at;
+  if (!at) { decoGhost(); deco.ring.visible = false; return; }
+  const near = decoNear(at);
+  deco.ok = !near && denLook.decor.length < MAX_DECOR && decoFree(at.x, at.z, deco.tool);
+  deco.ring.visible = true;
+  deco.ring.position.set(near ? near.x : at.x, 0.03, near ? near.z : at.z);
+  deco.ring.material.color.set(near ? '#ffb84a' : deco.ok ? '#7dff7a' : '#ff5a4a');
+  if (near) { if (deco.ghost) deco.group.remove(deco.ghost); deco.ghost = null; } else decoGhost();
+  $('deco-tip').textContent = near ? 'Right-click to take it down' : !deco.ok ? (denLook.decor.length >= MAX_DECOR ? 'That\'s all there\'s room for: take something down first' : 'Not there: keep clear of the wall, the frames and the crates') : 'Click to put it here · wheel or Q/E turns it';
+}
+const decoNear = (at) => denLook.decor.find((it) => Math.hypot(it.x - at.x, it.z - at.z) < 0.45);
+function decoClick(e) {
+  const at = decoPoint(e);
+  if (!at) return;
+  const near = decoNear(at);
+  if (e.button === 2) {
+    if (near) { denLook = { ...denLook, decor: denLook.decor.filter((it) => it !== near) }; decoSaved(); }
+    return;
+  }
+  if (e.button !== 0 || near || !decoFree(at.x, at.z, deco.tool) || denLook.decor.length >= MAX_DECOR) return;
+  const it = { k: deco.tool, x: at.x, z: at.z, r: deco.rot, ...(deco.tool === 'flag' || deco.tool === 'banner' ? { d: designOf(denLook) } : {}) };
+  denLook = { ...denLook, decor: [...denLook.decor, it] };
+  decoSaved();
+  burst(new THREE.Vector3(at.x, 0.3, at.z), '#e8c890', 10, 2);
+}
+function decoTurn(d) { deco.rot = (deco.rot + d + 4) % 4; decoGhost(); }
+function decoSaved() {
+  applyDen(denLook, true);
+  decoBar();
+  deco.ghost = null;
+}
+$('deco-done').onclick = () => decoMode(false);
+$('deco-flag').onclick = () => { decoMode(false); dress.tab = 'den'; dressPanel(true); };
+
+// ---------- dressing your pirate, and your den ----------
+/* "Your pirate": a turning preview of your pirate, with what to wear chosen from Puzzle Pirates'
+   own tailor in its dyes, a familiar for your shoulder, and the den's flag and house paint. Kept
+   in this browser; crewmates see your look, and the den's dress is shared by the crew. */
+const dress = { open: false, tab: 'pirate', r: null, scene: null, cam: null, model: null, yaw: 0.6, drag: null };
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+function dressInit() {
+  if (dress.r) return;
+  const cv = $('dress-cv');
+  dress.r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true });
+  dress.r.setPixelRatio(Math.min(devicePixelRatio, 2));
+  dress.r.toneMapping = THREE.ACESFilmicToneMapping;
+  dress.scene = new THREE.Scene();
+  dress.scene.add(new THREE.HemisphereLight('#ffe6c4', '#3a2616', 1.3));
+  const l = new THREE.DirectionalLight('#ffd9a8', 1.9);
+  l.position.set(-2, 4, 3);
+  dress.scene.add(l);
+  const ground = new THREE.Mesh(new THREE.CircleGeometry(1.15, 40), mat('#4a3524'));
+  ground.rotation.x = -Math.PI / 2;
+  const fp = flagpole(2.1);
+  fp.position.set(-0.9, 0, -0.9);
+  dress.scene.add(ground, fp);
+  dress.cam = new THREE.PerspectiveCamera(30, 1, 0.1, 30);
+  cv.addEventListener('pointerdown', (e) => { dress.drag = e.clientX; cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener('pointermove', (e) => { if (dress.drag == null) return; dress.yaw += (e.clientX - dress.drag) * 0.012; dress.drag = e.clientX; });
+  cv.addEventListener('pointerup', () => { dress.drag = null; });
+}
+function dressModel() {
+  if (dress.model) dress.scene.remove(dress.model.g);
+  dress.model = dressPirate(myLook);
+  dress.scene.add(dress.model.g);
+}
+let dressT = 0;
+function dressFrame(now) {
+  if (!dress.open) return;
+  const dt = Math.min(0.05, (now - (dressT || now)) / 1000);
+  dressT = now;
+  const cv = $('dress-cv'), w = cv.clientWidth, h = cv.clientHeight;
+  if (cv.width !== Math.round(w * dress.r.getPixelRatio())) { dress.r.setSize(w, h, false); dress.cam.aspect = w / h; dress.cam.updateProjectionMatrix(); }
+  const fam = myLook.fam !== 'none';
+  dress.cam.position.set(fam ? -0.2 : 0, 1.4, 4.5);
+  dress.cam.lookAt(fam ? -0.1 : 0, 1.02, 0);
+  if (dress.drag == null) dress.yaw += dt * 0.35;
+  dress.model.g.rotation.y = dress.yaw;
+  familiarTick(dress.model.fam, dt);
+  dress.r.render(dress.scene, dress.cam);
+  requestAnimationFrame(dressFrame);
+}
+function dressPanel(on) {
+  dress.open = on;
+  $('dress').classList.toggle('on', on);
+  palette(null);
+  if (!on) return;
+  keys.clear();
+  dressInit();
+  dressModel();
+  dressRows();
+  dressT = 0;
+  requestAnimationFrame(dressFrame);
+}
+// A colour chooser: the dye swatches in a little pop-up by the swatch you clicked.
+function palette(btn, pal, cur, set, none) {
+  const box = $('palette');
+  box.replaceChildren();
+  box.classList.toggle('on', !!btn);
+  if (!btn) return;
+  const opts = (none ? [['none', none]] : []).concat(Object.keys(pal).map((n) => [n, n]));
+  for (const [id, name] of opts) {
+    const b = el('button', 'sw' + (id === cur ? ' cur' : '') + (id === 'none' ? ' none' : ''));
+    b.title = name;
+    b.setAttribute('aria-label', name);
+    if (id !== 'none') b.style.background = pal[id];
+    b.onclick = () => { palette(null); set(id); };
+    box.append(b);
+  }
+  const r = btn.getBoundingClientRect(), host = $('dress').firstElementChild.getBoundingClientRect();
+  box.style.left = `${Math.max(8, Math.min(host.width - 250, r.left - host.left - 100))}px`;
+  box.style.top = `${r.bottom - host.top + 6}px`;
+}
+const dressTabs = [['pirate', 'Pirate'], ['clothes', 'Clothes'], ['familiar', 'Familiar'], ['den', 'Den']];
+function dressRows() {
+  const tabs = $('dress-tabs');
+  tabs.replaceChildren(...dressTabs.map(([id, name]) => { const b = el('button', 'tab' + (dress.tab === id ? ' on' : ''), name); b.onclick = () => { dress.tab = id; palette(null); dressRows(); }; return b; }));
+  const box = $('dress-rows');
+  box.replaceChildren();
+  const L = myLook;
+  const row = (label) => { const r = el('div', 'drow'); r.append(el('span', 'lab', label)); box.append(r); return r; };
+  const chooser = (r, list, cur, set) => {
+    const i = Math.max(0, list.findIndex(([id]) => id === cur)), w = el('span', 'pick');
+    const prev = el('button', 'arr', '‹'), next = el('button', 'arr', '›');
+    prev.setAttribute('aria-label', 'Previous'); next.setAttribute('aria-label', 'Next');
+    prev.onclick = () => set(list[(i - 1 + list.length) % list.length][0]);
+    next.onclick = () => set(list[(i + 1) % list.length][0]);
+    w.append(prev, el('b', '', list[i][1]), next);
+    r.append(w);
+  };
+  const swatch = (r, pal, cur, set, title, none) => {
+    const b = el('button', 'sw' + (cur === 'none' ? ' none' : ''));
+    if (cur !== 'none') b.style.background = pal[cur];
+    b.title = `${title}: ${cur === 'none' ? none : cur}`;
+    b.setAttribute('aria-label', b.title);
+    b.onclick = (e) => { e.stopPropagation(); palette(b, pal, cur, set, none); };
+    r.append(b);
+  };
+  const toggle = (r, on, set) => { const b = el('button', 'tog' + (on ? ' on' : ''), on ? 'Yes' : 'No'); b.onclick = () => set(!on); r.append(b); };
+  const look = (k) => (v) => { myLook = cleanLook({ ...myLook, [k]: v }); lookChanged(); };
+  const slot = (label, k) => {
+    const r = row(label);
+    chooser(r, PARTS[k][L.body], L[k], look(k));
+    if (k === 'fam' && L.fam === 'none') return;
+    const pal = k === 'fam' && L.fam === 'monkey' ? FUR : DYES;
+    swatch(r, pal, L[k + 'Col'], look(k + 'Col'), 'Colour');
+    if (twoColours(L, k)) swatch(r, DYES, L[k + 'Col2'], look(k + 'Col2'), 'Second colour');
+  };
+  if (dress.tab === 'pirate') {
+    chooser(row('Pirate'), [['m', 'Male'], ['f', 'Female']], L.body, look('body'));
+    const sk = row('Skin');
+    SKIN.forEach((c, i) => { const b = el('button', 'sw' + (i === L.skin ? ' cur' : '')); b.style.background = c; b.title = 'Skin'; b.setAttribute('aria-label', `Skin ${i + 1}`); b.onclick = () => look('skin')(i); sk.append(b); });
+    const hr = row('Hair');
+    chooser(hr, PARTS.hair[L.body], L.hair, look('hair'));
+    swatch(hr, HAIR, L.hairCol, look('hairCol'), 'Hair colour');
+    if (L.body === 'm') chooser(row('Beard'), PARTS.beard.m, L.beard, look('beard'));
+    toggle(row('Eyepatch'), L.patch, look('patch'));
+    toggle(row('Earring'), L.earring, look('earring'));
+  } else if (dress.tab === 'clothes') {
+    slot('Hat', 'hat'); slot('Top', 'top'); slot('Legs', 'legs'); slot('Feet', 'feet');
+    box.append(el('p', 'note', 'Clothes and dyes from the Puzzle Pirates tailor.'));
+  } else if (dress.tab === 'familiar') {
+    slot('Familiar', 'fam');
+    box.append(el('p', 'note', 'A familiar rides on your shoulder. In Puzzle Pirates they were rare prizes.'));
+  } else {
+    const D = denLook, den = (k) => (v) => { denLook = cleanDen({ ...denLook, [k]: v }); applyDen(denLook, true); };
+    box.append(el('h3', '', 'Your flag'));
+    const fr = row('Emblem');
+    chooser(fr, FLAGS, D.flag, den('flag'));
+    swatch(fr, DYES, D.flagCol2, den('flagCol2'), 'Emblem');
+    const pr0 = row('Cloth');
+    chooser(pr0, PATTERNS, D.pat, den('pat'));
+    swatch(pr0, DYES, D.flagCol, den('flagCol'), 'Cloth');
+    if (D.pat !== 'plain') swatch(pr0, DYES, D.flagCol3, den('flagCol3'), 'Pattern');
+    box.append(el('p', 'note', 'Flown over the gate, on the gun tower and on your house. Flags and banners you put up yourself keep the design they had.'));
+    const dr = row('Decorate');
+    const db = el('button', 'mini', 'Put things up round the den');
+    db.onclick = () => { dressPanel(false); decoMode(true); };
+    dr.append(db);
+    box.append(el('h3', '', 'Your house'));
+    const hs = ramp?.jobs.filter((j) => j.kind === 'house') || [], building = hs.find((j) => j.frame && !j.up);
+    const hr = row('House');
+    if (hs.length && hs.every((j) => j.up)) hr.append(el('b', 'state', 'Built!'));
+    else if (building) hr.append(el('b', 'state', `Building the ${HOUSE_PART[building.part]} (${building.part + 1} of 4)`));
+    else { const b = el('button', 'mini', 'Build a house'); b.onclick = () => { startHouse(); dressPanel(false); }; hr.append(b); }
+    const pr = row('Paint');
+    swatch(pr, DYES, D.paint, den('paint'), 'Walls', 'Bare wood');
+    swatch(pr, DYES, D.roof, den('roof'), 'Roof', 'Bare wood');
+    pr.append(el('small', '', 'walls · roof'));
+    box.append(el('p', 'note', 'Built from pieces like everything else: each part laid on the floor, filled, and hoisted into place.'));
+  }
+}
+function lookChanged() {
+  keep('carp.den.look', myLook);
+  wearLook(pirate, myLook);
+  if (dress.open) { dressModel(); dressRows(); }
+  if (online()) send('all', { t: 'look', look: myLook });
+}
+// The den's dress: the flag every pole flies, and the house's paint. `mine`: chosen here, so kept
+// and passed to the crew.
+function applyDen(D, mine = false) {
+  denLook = D;
+  redrawFlag();
+  paintHouse();
+  rebuildDecor();
+  if (!mine) return;
+  keep('carp.den.den', denLook);
+  if (dress.open) dressRows();
+  if (online()) send('all', { t: 'den', den: denLook });
+}
+$('look-btn').onclick = () => dressPanel(true);
+$('dress-done').onclick = () => dressPanel(false);
+$('dress-rand').onclick = () => { myLook = randomLook(); lookChanged(); };
+$('dress').addEventListener('click', (e) => { if (e.target === $('dress')) dressPanel(false); else if (!e.target.closest('#palette')) palette(null); });
 
 // ---------- main loop ----------
 const camAt = new THREE.Vector3(0, 7.4, 14.2), camLook = new THREE.Vector3(0, 1.8, 3.6);
@@ -3215,6 +3677,7 @@ function update(dt) {
   camLook.lerp(look, Math.min(1, dt * 3));
   camera.lookAt(camLook);
   updateMates(dt);
+  waveFlags(dt);
 
   // A marker over every raider inside the den, pinned to the screen edge when they're out of view.
   aimed = carry ? aimFoe() : null;
@@ -3308,6 +3771,6 @@ if (['all', 'gundeck'].includes(new URLSearchParams(location.search).get('try'))
 requestAnimationFrame(frame);
 
 // For poking at it from the console.
-window.den = { get gd() { return gd; }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+window.den = { decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };
