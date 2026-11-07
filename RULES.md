@@ -206,24 +206,43 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   whole wave poured through it. Now each raider attacks the hole in front of where they come up to
   the wall, and only switches to a breach within about 3 m. Raiders at a Masterpiece mostly tire
   and leave. (Making them need a gap they can walk through is in IDEAS.md.)
-- **The gun deck (after Gunnery).** Built last, after the whole rampart: the next wave beaten
-  off brings timber for a big frame (four rows by eight, over the gate, joined to the walk's two
-  rows), filled on the floor and hauled up like the walk. The user's steer: just picking up stores
-  and dropping them in a cannon misses the spirit; it needs the routing and steering.
-  - **Stores roll out of a powder barrel** in the middle (powder, wad, shot, buckets), each way
-    round in turn, up to six on deck at once. They roll straight on; blocked, they turn right
-    (left if they can't, back if neither); two that would meet both turn back.
-  - **Steer them:** chalk arrows on the planks, three each (the oldest goes when you chalk a
-    fourth). Space chalks the plank in front of you, pointing the way you face; Q/E turn it;
-    click a plank in reach to chalk it (click again to turn it, right-click to rub it out). You
-    have to be close: you're out among the rolling stores. Your body is an obstacle too.
-  - **Four guns along the wall edge** take powder, then wad, then shot, and fire by themselves at
-    the raiders at the wall in front (leading ones still walking in), or at their cannon, which
-    goes quiet for a while. Then a gun needs a bucket; the wrong store fouls it, and a bucket
-    cleans that too. Loaded guns wait for a target, so you can load up between waves.
-  - **Self-contained:** the barrel holds what it holds (refilled each wave), and a hatch in each
-    back corner drops strays back into it. The host's browser runs the rolling.
-  - **To try it straight away:** `den.html?try=gundeck` starts with the rampart and gun deck built.
+- **The gun tower (after Gunnery): it must be instantly recognisable as Gunnery.** The user knows
+  the puzzle well, and the first try missed it: stores bounced into the guns by themselves, the deck
+  was too small for four guns, the pieces were tiny and the bucket unreadable. So: pay attention to
+  the specifics of the real puzzle, and the graphics must look like Puzzle Pirates, not some other
+  3D game. But it must still make sense in the den: the gun you load is the gun that fires, and
+  you see it fire.
+  - **Where:** built last, after the whole rampart. The next wave beaten off brings timber for a
+    gun tower, a square platform (14 by 10 squares) jutting out from the wall over the gate like a
+    bastion. Its frame is laid on the den floor in **big timbers** (each piece covers a square twice
+    the size each way, 7 pieces in all) and hauled up and out over the wall. You walk out onto it
+    from the wall-walk; the camera then looks down on the whole board, like the Gunnery screen.
+  - **The rules are Gunnery's:** a barrel in the middle rolls stores out each way in turn till
+    there are two of each on deck; one used, another comes. A store rolls straight; blocked it
+    turns right, else left, else back; two that meet both turn back. Arrows steer them, three each,
+    the oldest going when you chalk a fourth. Guns load powder, wad, shot; a bucket swabs a fired or
+    fouled gun; the wrong store fouls it. **A store only goes into a gun off an arrow pointing into
+    its inner end;** otherwise the gun's an obstacle. Your body is an obstacle too.
+  - **The guns:** four, lying against the gunwale: two at the front, one on each side (firing
+    along the wall at raiders hacking at it, like a bastion's flanking guns). A loaded gun is run out
+    through its port, **swings on its carriage to aim** at anything in a wide arc, fires from its
+    own muzzle, and recoils back in, square to the board again. They go for raiders at the wall
+    first, then those coming in, then the cannon, and don't all fire at the same raider. Every gun
+    is worth loading.
+  - **The board:** no crates round the barrel in the middle, more out towards the edges, never side
+    by side, making pockets that trap a store and loops that bring stores back past a gun. Each new
+    board is tried out (stores rolling with no arrows) to pick one where about two guns sit on a
+    loop of their own and the rest take more work: as in Gunnery, it's easy to load two, harder to
+    load all four, and making loops (or freestyling) is the core of it.
+  - **The look:** bright silver guns three squares long, a red gunwale with a gold rail, light-wood
+    crates of shot and rum, the barrel on its side; shot grey, powder a red bag with a flame on it,
+    wad a white puff, the bucket bright tin with blue water. Gun labels show the store each wants
+    next as a picture; "Loaded!" in Puzzle Pirates yellow and red. A key to the stores shows while
+    you're on the tower.
+  - **The mouse works as in Gunnery:** click a plank to chalk the arrow the ghost shows, drag the
+    way you want it to point, the wheel turns it (it never zooms on the tower), click an arrow to
+    turn it, right-click to rub it out. Space chalks the plank ahead of you, Q/E turn it.
+  - **To try it straight away:** `den.html?try=gundeck` starts with the rampart and gun tower built.
 - **Future ideas live in [IDEAS.md](IDEAS.md).** When the user brain-dumps ideas for later, note
   them there rather than building them.
 - **There's always something to do with a junk piece.** Holding three useless pieces with nothing

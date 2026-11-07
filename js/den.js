@@ -296,7 +296,9 @@ function newWall() {
   const H = Math.max(6, Math.max(...dims.map((d) => d.h)) + 2);
   let col = 3, gate = null;   // room at each end for the stairs up to the wall-walk
   const placed = shapes.map((s, i) => {
-    if (i === 2) { gate = { c0: col, c1: col + 3 }; col += 6; }
+    // The gate, with room round it for the gun tower (fourteen squares wide), so its side guns
+    // can fire along the wall at the raiders at the holes.
+    if (i === 2) { col += 3; gate = { c0: col, c1: col + 3 }; col += 9; }
     const d = dims[i];
     const top = 1 + rand(H - 1 - d.h);
     const cells = s.map(([r, c]) => [r + top, c + col]);
@@ -381,7 +383,7 @@ function buildWall() {
   cannon.visible = false;
   scenery.push(mound, cannon);
   // Props inside: three crates for the piles, a fire barrel, the treasure chest.
-  piles.forEach((p, i) => { p.x = (i - 1) * Math.min(3.4, half * 0.42); p.z = 6.3; p.crate.position.set(p.x, 0.32, p.z); scenery.push(p.crate); });
+  piles.forEach((p, i) => { p.x = (i - 1) * Math.min(3.4, half * 0.42); p.z = 6.9; p.crate.position.set(p.x, 0.32, p.z); scenery.push(p.crate); });
   barrel.position.set(half - 1.4, 0, 7.6);
   chest.position.set(-half + 1.8, 0, 8.4);
   scenery.push(barrel, chest);
@@ -464,8 +466,9 @@ function openJob(i, shape = null) {
   const g = new THREE.Group();
   if (!stair) {
     // Laid flat: the rows run from the wall towards the den, the face is up.
-    g.position.set(j.kind === 'gun' ? X(gunC0()) : ramp.secs[j.si].x0, 0, FRAME_Z);
+    g.position.set(j.kind === 'gun' ? X(gunC0()) : ramp.secs[j.si].x0, 0, j.kind === 'gun' ? GUN_FRAME_Z : FRAME_Z);
     g.rotation.x = -Math.PI / 2;
+    if (j.kind === 'gun') g.scale.set(2, 2, 1);   // big timbers
   } else {
     // Stood on end against the side of the cave, facing into the den.
     const [xa, xb] = ramp.stairs[j.si ? 1 : 0];
@@ -495,7 +498,7 @@ function openJob(i, shape = null) {
   $('labels').append(label);
   const b = C.bbox(shape);
   const f = j.frame = {
-    i, si: j.si, kind: j.kind, cells: shape, b, set, occ: new Set(), filled: new Set(), pieces: [], scrapCells: [], group: g, label, sig: '', done: false,
+    i, si: j.si, kind: j.kind, cells: shape, b, set, cs: j.kind === 'gun' ? 2 * S : S, occ: new Set(), filled: new Set(), pieces: [], scrapCells: [], group: g, label, sig: '', done: false,
     pz: stair ? 0 : 0.1, zs: stair ? STAIR_W / WOOD_D : 1,
     plane: new THREE.Plane().setFromNormalAndCoplanarPoint(g.getWorldDirection(new THREE.Vector3()), g.getWorldPosition(new THREE.Vector3())),
   };
@@ -647,17 +650,17 @@ function finishFrame(f, quiet = false) {
     if (waste || f.scrapCells.length) toast(waste ? `Sawn to fit: ${waste} square${waste > 1 ? 's' : ''} of offcuts` : 'Patched with offcuts: it\'ll do');
     else { G.gold += PAY.master; updateStats(); toast(`Shipshape! Not a scrap wasted (+${PAY.master})`); }
   }
-  const g = f.group, p0 = g.position.clone(), p1 = new THREE.Vector3(p0.x, ramp.T - 0.05, j.kind === 'gun' ? -0.85 + 2 * S : -0.85);
+  const g = f.group, p0 = g.position.clone(), p1 = new THREE.Vector3(p0.x, ramp.T - 0.05, j.kind === 'gun' ? -0.85 - GD.rows * S : -0.85);
   const land = () => {
     g.position.copy(p1);
     g.updateMatrixWorld(true);
-    Object.assign(j, { up: true, x0: p1.x, z0: p1.z, set: f.set });
+    Object.assign(j, { up: true, x0: p1.x, z0: p1.z, set: f.set, cs: f.cs });
     if (j.kind === 'gun') makeGunDeck();
     jobDone(j, quiet);
   };
   if (quiet) { land(); return; }
   // Hauled up on four ropes from a block over the wall: up first, then in over the top.
-  const top = new THREE.Vector3(p0.x + f.b.w * S / 2, ramp.T + 2.4, -0.3);
+  const top = new THREE.Vector3(p0.x + f.b.w * f.cs / 2, ramp.T + 2.4, -0.3);
   const block = mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.14, 12), railMat);
   block.rotation.x = Math.PI / 2;
   block.position.copy(top);
@@ -689,7 +692,7 @@ function finishFrame(f, quiet = false) {
 function jobDone(j, quiet) {
   if (quiet) return;
   const stretch = ramp.jobs.filter((o) => o.si === j.si);
-  const msg = j.kind === 'gun' ? 'The gun deck\'s up! Chalk arrows to roll the stores into the guns'
+  const msg = j.kind === 'gun' ? 'The gun tower\'s up! Walk out onto it from the wall'
     : ramp.jobs.every((o) => o.up || o.kind === 'gun') ? 'The whole rampart is up!'
     : stretch.every((o) => o.up) ? 'That stretch is up: climb the stairs and throw from the wall!'
     : 'The walk\'s up on the wall. Now build the stairs to it';
@@ -700,11 +703,16 @@ function jobDone(j, quiet) {
 // footprint a little, so you bump into their side instead of walking into them. Stairs still
 // being built are in the way.
 const hv = new THREE.Vector3();
-function heightAt(x, z, pad = 0) {
+// `from` is the height you're at: down on the floor, a deck overhead is no floor of yours.
+function heightAt(x, z, pad = 0, from = 99) {
   if (!ramp) return 0;
   for (const j of ramp.jobs) {
     if (j.kind !== 'stair') {
-      if (j.up && j.set.has(k(Math.floor((z - j.z0) / S), Math.floor((x - j.x0) / S)))) return ramp.T;
+      const cs = j.cs || S;
+      if (j.up && j.set.has(k(Math.floor((z - j.z0) / cs), Math.floor((x - j.x0) / cs)))) {
+        if (j.kind === 'gun' && from < ramp.T - HOP) continue;
+        return ramp.T;
+      }
       continue;
     }
     const [x0, x1] = ramp.stairs[j.si ? 1 : 0];
@@ -721,42 +729,58 @@ function heightAt(x, z, pad = 0) {
 }
 const onRampart = () => ramp && pirate.h > ramp.T - 0.15;
 
-// ---------- the gun deck (after Gunnery) ----------
-/* The rampart's last job: a big deck over the gate, built in a frame on the floor and hauled up
-   behind the walk like the rest. On it, Gunnery. A powder barrel rolls out stores (powder, wad,
-   shot, buckets), each way round in turn. A store rolls straight on; blocked, it turns right (left
-   if it can't, back if neither), and two that would meet both turn back. Pirates steer them with
-   chalk arrows on the planks (three each; chalk a fourth and your oldest is rubbed out) and by
-   standing in the way: a body is an obstacle. A gun takes powder, then wad, then shot, and fires
-   by itself at the raiders at the wall, or at their cannon. Then it wants a bucket to swab it out;
-   the wrong store fouls it, and a bucket cleans that too. The stores are what's in the barrel,
-   refilled each wave, and a hatch in each back corner drops strays back down into it. */
-const GD = { cols: 8, rows: 6, tick: 0.42, cap: 6, stock: 24, emit: 1.2, arrows: 3, reach: 2.7 };
-const KINDS = ['powder', 'wad', 'shot', 'bucket'];
-const DR = [-1, 0, 1, 0], DC = [0, 1, 0, -1];   // north (out over the wall), east, south, west
-const GUN_SAYS = {
-  empty: ['', 'Powder'], powder: ['', 'Wad'], wad: ['', 'Shot'], loaded: ['done', 'Loaded!'],
-  dirty: ['weak', 'Bucket'], fouled: ['bad', 'Fouled!'],
+// ---------- the gun tower (after Gunnery) ----------
+/* The rampart's last job: a gun tower, a big square platform jutting out from the wall over the
+   gate, like a bastion. Its frame is laid on the den floor in big timbers and hauled up and out over
+   the wall; you walk out onto it from the wall-walk. On it, Gunnery, kept as close to the puzzle as
+   we can, so a Puzzle Pirates hand knows it at a glance.
+   - A powder barrel in the middle rolls out the stores (powder, wad, shot and buckets), each way
+     round in turn, till there are two of each on deck. Use one and another comes out.
+   - A store rolls straight on. Blocked (a crate, a gun, the barrel, the gunwale, a pirate standing
+     there), it turns right; left if it can't; back if neither. Two that meet both turn back.
+   - Chalk arrows steer them: a store rolling onto one turns the way it points. Three each; chalk a
+     fourth and your oldest is rubbed out.
+   - Four guns lie against the gunwale: two at the front, firing out at the raiders coming in and at
+     their cannon, and one on each side, firing along the wall at the raiders hacking at it. As in
+     Gunnery, stores go in at a gun's inner end, and only off an arrow pointing into it; otherwise
+     the gun's just in the way. Powder, wad, then shot. Loaded, it's run out through its port, fires,
+     and the recoil brings it back in. Then it wants a bucket to swab it; the wrong store fouls it,
+     and a bucket cleans that too.
+   - Crates lashed about the deck make the board: the middle round the barrel kept clear, more out
+     towards the edges, making pockets to trap a store in and loops that bring stores back past a
+     gun. Each new board is tried out (stores rolling with no arrows) so a couple of guns sit on a
+     loop of their own and the rest take more work, as on a good Gunnery board. */
+const GD = {
+  cols: 14, rows: 10, tick: 0.36, each: 2, emit: 0.7, arrows: 3, crates: 15,
+  // Each gun: the gunwale square its muzzle's in, and the way it faces. It lies three squares in
+  // from there; the fourth is where stores go in.
+  guns: [{ port: [0, 3], d: 0 }, { port: [0, 10], d: 0 }, { port: [6, 0], d: 3 }, { port: [6, 13], d: 1 }],
 };
+const GUN_FRAME_Z = 0.6;   // the tower's frame is laid on the floor right up against the gate
+const KINDS = ['powder', 'wad', 'shot', 'bucket'];
+const DR = [-1, 0, 1, 0], DC = [0, 1, 0, -1];   // north (out from the wall), east, south, west
+// What each gun shows: its look, the words, and the store it wants next.
+const GUN_SAYS = {
+  empty: ['', 'Powder', 'powder'], powder: ['', 'Wad', 'wad'], wad: ['', 'Shot', 'shot'], loaded: ['done', 'Loaded!', ''],
+  dirty: ['weak', 'Swab it', 'bucket'], fouled: ['bad', 'Fouled!', 'bucket'],
+};
+// Little pictures of the stores, for the labels and the key.
+const STORE_ICON = {
+  powder: '<svg viewBox="0 0 20 20"><circle cx="10" cy="10.5" r="7.5" fill="#c42d1f" stroke="#5a0f08" stroke-width=".8"/><path d="M10 4.5c2.5 3 3.5 4.5 2 7.5 1.5-.5 2-1.5 2-2.5 1 2.5-.5 5.5-4 5.5s-5-3-3.5-6c0 1.5.8 2.3 1.6 2.5-1.2-2.6.6-4.8 1.9-7z" fill="#ffb21a"/></svg>',
+  wad: '<svg viewBox="0 0 20 20"><g fill="#f1ede4" stroke="#8a8478" stroke-width=".8"><circle cx="7" cy="12" r="4.5"/><circle cx="13" cy="12" r="4.5"/><circle cx="10" cy="7.5" r="4.5"/></g></svg>',
+  shot: '<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="#6b7178" stroke="#30343a" stroke-width=".8"/><circle cx="7.5" cy="7.5" r="2.2" fill="#d6dbe0"/></svg>',
+  bucket: '<svg viewBox="0 0 20 20"><path d="M4 3.5a6 5 0 0 1 12 0" fill="none" stroke="#3b4248" stroke-width="1.3"/><path d="M3.5 6h13l-2 11h-9z" fill="#dfe5e9" stroke="#3b4248" stroke-width=".8"/><ellipse cx="10" cy="6" rx="6.5" ry="1.6" fill="#2f86d6"/></svg>',
+};
+const STORE_NAME = { powder: 'Powder', wad: 'Wad', shot: 'Shot', bucket: 'Bucket' };
+$('gunhelp').innerHTML = `<h3>Load each gun</h3>${['powder', 'wad', 'shot'].map((kd, i) => `${i + 1}. ${STORE_ICON[kd]}${STORE_NAME[kd]}<br>`).join('')}Fired or fouled? ${STORE_ICON.bucket}Bucket<small>Stores go in at a gun's inner end, off an arrow pointing into it.</small>`;
 let gd = null;
-const gunC0 = () => wall.gateCols.c0 - 2;
-// The deck's frame: the four rows behind the walk's two, over the gate (less any of the walk's
-// ragged third row already there), trimmed at the back corners to whole pieces that fit.
+const gunC0 = () => wall.gateCols.c0 - 5;
+// The tower's frame, in big timbers. It's too big to lay plank by plank, so in this frame each
+// piece covers a square twice the size each way.
 function gunShape() {
-  const x0 = X(gunC0()), z0 = -0.85 + 2 * S, cells = [];
-  for (let r = 0; r < GD.rows - 2; r++) for (let c = 0; c < GD.cols; c++) {
-    if (r === 0 && heightAt(x0 + (c + 0.5) * S, z0 + 0.5 * S) > ramp.T - 0.1) continue;
-    cells.push([r, c]);
-  }
-  const back = GD.rows - 3, has = (list, r, c) => list.some(([a, b]) => a === r && b === c);
-  for (let m = cells.length % 5; m <= 8; m += 5) {
-    for (let a = 0; a <= m; a++) {
-      const cut = [...Array(a).keys()].map((i) => [back, i]).concat([...Array(m - a).keys()].map((i) => [back, GD.cols - 1 - i]));
-      const left = cells.filter(([r, c]) => !has(cut, r, c));
-      if (left.length % 5 === 0 && C.isConnected(left) && C.solve(left, 1).length) return left;
-    }
-  }
-  return cells.slice(0, cells.length - (cells.length % 5));
+  const cells = [];
+  for (let r = 0; r < GD.rows / 2; r++) for (let c = 0; c < GD.cols / 2; c++) cells.push([r, c]);
+  return cells;
 }
 const gdCell = (x, z) => {
   if (!gd) return null;
@@ -766,100 +790,289 @@ const gdCell = (x, z) => {
 // (The planks' top is 5cm above the height you walk at.)
 const gdAt = (r, c, y = 0) => new THREE.Vector3(gd.x0 + (c + 0.5) * S, ramp.T + 0.05 + y, gd.z0 + (r + 0.5) * S);
 const onGunDeck = () => !!gd && onRampart() && !!gdCell(pirate.x, pirate.z);
+const isBarrel = (r, c) => gd.barrel[0] === r && gd.barrel[1] === c;
+// A gun's squares, counted in from its port: 0-2 it lies on, 3 is where stores go in.
+const gunSq = (g, i) => [g.port[0] - DR[g.d] * i, g.port[1] - DC[g.d] * i];
+// Where a gun's carriage sits: run in on its squares, or run out through its port.
+const gunPos = (g) => gdAt(...gunSq(g, 1 - 0.8 * g.slide));
+const gunCells = (guns = gd.guns) => new Map(guns.flatMap((g) => [0, 1, 2].map((i) => [k(...gunSq(g, i)), g])));
+// Where you can't walk or chalk: a crate, the barrel, a gun.
+const gdSolid = (r, c) => isBarrel(r, c) || gd.crateSet.has(k(r, c)) || gd.gunSet.has(k(r, c));
+function deckBlocks(x, z) {
+  if (!gd) return false;
+  return [[0, 0], [-1, -1], [1, -1], [-1, 1], [1, 1]].some(([a, b]) => { const cell = gdCell(x + a * 0.17, z + b * 0.17); return cell && gdSolid(...cell); });
+}
+
+// ----- the look of it: Gunnery's, in the round -----
+const powderTex = (() => {
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = 64;
+  const x = cv.getContext('2d');
+  x.fillStyle = '#c42d1f';
+  x.fillRect(0, 0, 64, 64);
+  x.fillStyle = '#ffb21a';
+  x.beginPath();
+  x.moveTo(32, 8); x.bezierCurveTo(44, 22, 48, 30, 41, 44); x.bezierCurveTo(47, 42, 49, 37, 49, 32); x.bezierCurveTo(55, 44, 47, 58, 32, 58);
+  x.bezierCurveTo(17, 58, 10, 45, 17, 33); x.bezierCurveTo(17, 40, 21, 44, 25, 45); x.bezierCurveTo(19, 33, 26, 20, 32, 8);
+  x.fill();
+  x.fillStyle = '#ffe36b';
+  x.beginPath(); x.ellipse(32, 46, 6, 9, 0, 0, Math.PI * 2); x.fill();
+  const t = new THREE.CanvasTexture(cv);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+})();
 function storeMesh(kind) {
-  const col = { powder: '#8a2a1f', wad: '#d8c9a0', shot: '#1b1b1b', bucket: '#7d8b94' }[kind];
-  const m = mat(col, kind === 'shot' ? { metalness: 0.6, roughness: 0.4 } : kind === 'powder' ? { map: woodTex } : {});
-  const g = new THREE.Group();
-  let b;
-  if (kind === 'powder') {
-    b = mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.24, 12), m);
-    b.position.y = 0.12;
-    const band = mesh(new THREE.TorusGeometry(0.133, 0.015, 5, 16), mat('#2b2b2b'));
-    band.rotation.x = Math.PI / 2;
-    band.position.y = 0.12;
-    g.add(band);
+  const g = new THREE.Group(), body = new THREE.Group();
+  g.add(body);
+  g.userData.body = body;
+  if (kind === 'shot') {
+    body.add(mesh(new THREE.SphereGeometry(0.2, 20, 14), mat('#6b7178', { metalness: 0.75, roughness: 0.28 })));
+    body.position.y = 0.2;
+  } else if (kind === 'powder') {
+    // A round red bag of powder, with the flame on it.
+    const bag = mesh(new THREE.SphereGeometry(0.2, 18, 12), mat('#c42d1f', { roughness: 0.8 }));
+    bag.scale.y = 0.72;
+    const badge = mesh(new THREE.CircleGeometry(0.15, 20), new THREE.MeshStandardMaterial({ map: powderTex, roughness: 0.8 }));
+    badge.rotation.x = -Math.PI / 2;
+    badge.position.y = 0.146;
+    const neck = mesh(new THREE.TorusGeometry(0.07, 0.025, 6, 14), mat('#5a0f08'));
+    neck.rotation.x = Math.PI / 2;
+    neck.position.set(0, 0.11, 0.13);
+    body.add(bag, badge);
+    body.position.y = 0.145;
   } else if (kind === 'wad') {
-    b = mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.08, 12), m);
-    b.position.y = 0.04;
-  } else if (kind === 'shot') {
-    b = mesh(new THREE.SphereGeometry(0.12, 12, 10), m);
-    b.position.y = 0.12;
+    // A puff of old rag and oakum.
+    const wm = mat('#f1ede4', { roughness: 1 });
+    for (const [x, y, z, r] of [[0, 0.12, 0, 0.14], [0.11, 0.1, 0.05, 0.11], [-0.11, 0.1, 0.05, 0.11], [0.02, 0.1, -0.12, 0.11], [0, 0.22, 0.02, 0.1], [-0.07, 0.09, -0.09, 0.1], [0.08, 0.09, -0.07, 0.09]]) {
+      const s = mesh(new THREE.IcosahedronGeometry(r, 1), wm);
+      s.position.set(x, y, z);
+      body.add(s);
+    }
   } else {
-    b = mesh(new THREE.CylinderGeometry(0.13, 0.1, 0.2, 12, 1, true), new THREE.MeshStandardMaterial({ color: col, side: THREE.DoubleSide }));
-    b.position.y = 0.1;
-    const bot = mesh(new THREE.CircleGeometry(0.1, 12), m);
-    bot.rotation.x = -Math.PI / 2;
-    bot.position.y = 0.005;
-    g.add(bot);
+    // A bright tin bucket of water to swab the gun out.
+    const tin = { color: '#dfe5e9', metalness: 0.5, roughness: 0.3 };
+    const side = mesh(new THREE.CylinderGeometry(0.19, 0.15, 0.28, 18, 1, true), new THREE.MeshStandardMaterial({ ...tin, side: THREE.DoubleSide }));
+    side.position.y = 0.14;
+    const floor = mesh(new THREE.CircleGeometry(0.15, 18), mat(tin.color, tin));
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = 0.01;
+    const water = mesh(new THREE.CircleGeometry(0.178, 18), mat('#2f86d6', { roughness: 0.15 }));
+    water.rotation.x = -Math.PI / 2;
+    water.position.y = 0.24;
+    const hoopM = mat('#3b4248', { metalness: 0.6 });
+    [[0.05, 0.159], [0.26, 0.186]].forEach(([y, r]) => { const h = mesh(new THREE.TorusGeometry(r, 0.013, 5, 24), hoopM); h.rotation.x = Math.PI / 2; h.position.y = y; body.add(h); });
+    const handle = mesh(new THREE.TorusGeometry(0.185, 0.013, 5, 20, Math.PI), hoopM);
+    handle.position.y = 0.27;
+    handle.rotation.x = -0.35;
+    body.add(side, floor, water, handle);
   }
-  g.add(b);
   return g;
 }
 const arrowGeo = (() => {
   const s = new THREE.Shape();
-  s.moveTo(-0.06, -0.18); s.lineTo(0.06, -0.18); s.lineTo(0.06, 0.02); s.lineTo(0.16, 0.02); s.lineTo(0, 0.21); s.lineTo(-0.16, 0.02); s.lineTo(-0.06, 0.02); s.closePath();
+  s.moveTo(-0.075, -0.23); s.lineTo(0.075, -0.23); s.lineTo(0.075, 0.01); s.lineTo(0.2, 0.01); s.lineTo(0, 0.25); s.lineTo(-0.2, 0.01); s.lineTo(-0.075, 0.01); s.closePath();
   const geo = new THREE.ShapeGeometry(s);
   geo.rotateX(-Math.PI / 2);   // lying on the planks, pointing north (-z)
   return geo;
 })();
+// A gun as Gunnery draws it: a long bright iron barrel lying on the deck, three squares long, on a
+// low carriage. Muzzle to the north; centred on its middle square.
+function gunMesh() {
+  const g = new THREE.Group();
+  const iron = mat('#b4bcc4', { metalness: 0.65, roughness: 0.3 }), dark = mat('#3a3f45', { metalness: 0.6, roughness: 0.4 });
+  const wood = mat('#5b3a20', { map: woodTex });
+  const bed = mesh(new RoundedBoxGeometry(0.44, 0.1, 1.2, 2, 0.03), wood);
+  bed.position.set(0, 0.06, 0.1);
+  g.add(bed);
+  [-1, 1].forEach((sx) => [-0.35, 0.5].forEach((z) => { const w = mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.06, 12), wood); w.rotation.z = Math.PI / 2; w.position.set(0.24 * sx, 0.09, z); g.add(w); }));
+  const tube = mesh(new THREE.CylinderGeometry(0.17, 0.22, 1.5, 22), iron);
+  tube.rotation.x = -Math.PI / 2;   // its narrow end, the muzzle, to the north
+  tube.position.set(0, 0.3, 0);
+  g.add(tube);
+  // Reinforcing rings, the muzzle's swell, and the breech knob at the inner end.
+  [[-0.72, 0.19, 0.035], [-0.2, 0.2, 0.025], [0.3, 0.215, 0.03], [0.72, 0.225, 0.04]].forEach(([z, r, t]) => { const ring = mesh(new THREE.TorusGeometry(r, t, 8, 24), iron); ring.position.set(0, 0.3, z); g.add(ring); });
+  const mouth = mesh(new THREE.CircleGeometry(0.11, 16), mat('#0a0a0a'));
+  mouth.position.set(0, 0.3, -0.756);
+  mouth.rotation.y = Math.PI;
+  const cap = mesh(new THREE.SphereGeometry(0.2, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), iron);
+  cap.rotation.x = Math.PI / 2;
+  cap.position.set(0, 0.3, 0.75);
+  const knob = mesh(new THREE.SphereGeometry(0.075, 10, 8), dark);
+  knob.position.set(0, 0.3, 0.98);
+  g.add(mouth, cap, knob);
+  return g;
+}
+// A light-wood crate, as on the Gunnery board, open and full of shot or bundled red stores, or shut.
+function crateMesh(i) {
+  const g = new THREE.Group();
+  const light = mat('#c9a06a', { map: woodTex }), edge = mat('#6b4426');
+  const box = mesh(new THREE.BoxGeometry(0.5, 0.26, 0.5), light);
+  box.position.y = 0.13;
+  g.add(box);
+  // Dark frame round the top, like the board's outlines.
+  [[0, 0.24, 0.5, 0.06], [0, -0.24, 0.5, 0.06], [0.24, 0, 0.06, 0.5], [-0.24, 0, 0.06, 0.5]].forEach(([x, z, w, d]) => { const b = mesh(new THREE.BoxGeometry(w, 0.04, d), edge); b.position.set(x, 0.27, z); g.add(b); });
+  const fill = i % 3;
+  if (fill === 0) {
+    const ball = new THREE.SphereGeometry(0.085, 10, 8), m = mat('#8a9097', { metalness: 0.6, roughness: 0.35 });
+    for (const [x, z] of [[-0.1, -0.1], [0.1, -0.1], [-0.1, 0.1], [0.1, 0.1]]) { const b = mesh(ball, m); b.position.set(x, 0.27, z); g.add(b); }
+    const top = mesh(ball, m); top.position.set(0, 0.38, 0); g.add(top);
+  } else if (fill === 1) {
+    // Bottles of rum, red wax on the corks.
+    const glass = mat('#2f6b3a', { roughness: 0.2, metalness: 0.1 }), wax = mat('#c42d1f');
+    for (const [x, z] of [[-0.1, -0.1], [0.1, -0.1], [-0.1, 0.1], [0.1, 0.1]]) {
+      const b = mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.16, 10), glass); b.position.set(x, 0.3, z);
+      const top = mesh(new THREE.CylinderGeometry(0.03, 0.04, 0.07, 8), wax); top.position.set(x, 0.41, z);
+      g.add(b, top);
+    }
+  } else {
+    [-0.12, 0, 0.12].forEach((x) => { const s = mesh(new THREE.BoxGeometry(0.11, 0.02, 0.44), light); s.position.set(x, 0.265, 0); g.add(s); });
+  }
+  return g;
+}
 function makeGunDeck() {
   if (gd || !ramp) return;
-  const x0 = X(gunC0()), z0 = -0.85, cells = new Set();
+  const x0 = X(gunC0()), z0 = -0.85 - GD.rows * S, cells = new Set();
   for (let r = 0; r < GD.rows; r++) for (let c = 0; c < GD.cols; c++) if (heightAt(x0 + (c + 0.5) * S, z0 + (r + 0.5) * S) > ramp.T - 0.1) cells.add(k(r, c));
   const group = new THREE.Group();
   group.userData.scenery = true;
   den.add(group);
-  gd = { x0, z0, cells, group, stores: [], arrows: new Map(), stock: GD.stock, emitT: 1, dirI: 0, tickT: 0, seq: 0, hover: null, guns: [], hatches: [] };
+  gd = { x0, z0, cells, group, stores: [], arrows: new Map(), emitT: 0.4, dirI: 0, tickT: 0, seq: 0, hover: null, pen: 0, press: null, guns: [], crates: [], crateSet: new Set(), crateMeshes: [], crateSig: '' };
   const nearest = (r, c) => [...cells].map((kk) => kk.split(',').map(Number)).sort((a, b) => Math.hypot(a[0] - r, a[1] - c) - Math.hypot(b[0] - r, b[1] - c))[0];
-  gd.barrel = nearest(3, 4);
-  for (const [r, c] of [[GD.rows - 1, 0], [GD.rows - 1, GD.cols - 1]]) {
-    const h = nearest(r, c);
-    if (!gd.hatches.some(([a, b]) => a === h[0] && b === h[1])) gd.hatches.push(h);
-  }
-  // The barrel, the hatches and the guns.
+  gd.barrel = nearest(GD.rows / 2, GD.cols / 2 - 1);
+  // The powder barrel, on its side in the middle, as on the Gunnery board.
   const bg = new THREE.Group();
-  const keg = mesh(new THREE.CylinderGeometry(0.27, 0.23, 0.6, 16), mat('#6a4326', { map: woodTex }));
-  keg.position.y = 0.3;
-  bg.add(keg);
-  [0.1, 0.5].forEach((y) => { const h = mesh(new THREE.TorusGeometry(0.262, 0.018, 6, 24), mat('#2b2b2b', { metalness: 0.6 })); h.rotation.x = Math.PI / 2; h.position.y = y; bg.add(h); });
+  const keg = mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.5, 18), mat('#7a4c28', { map: woodTex }));
+  const bulge = mesh(new THREE.SphereGeometry(0.25, 18, 12), mat('#7a4c28', { map: woodTex }));
+  bulge.scale.set(1, 0.95, 1);
+  [-0.17, 0.17].forEach((y) => { const h = mesh(new THREE.TorusGeometry(0.235, 0.02, 6, 24), mat('#2b2b2b', { metalness: 0.6 })); h.rotation.x = Math.PI / 2; h.position.y = y; keg.add(h); });
+  const ends = mat('#a3743f', { map: woodTex });
+  [-0.25, 0.25].forEach((y) => { const e = mesh(new THREE.CircleGeometry(0.2, 18), ends); e.rotation.x = y > 0 ? -Math.PI / 2 : Math.PI / 2; e.position.y = y + Math.sign(y) * 0.002; keg.add(e); });
+  keg.add(bulge);
+  keg.rotation.set(0, 0, Math.PI / 2);
+  const tilt = new THREE.Group();
+  tilt.add(keg);
+  tilt.rotation.y = 0.5;
+  tilt.position.y = 0.24;
+  bg.add(tilt);
   bg.position.copy(gdAt(...gd.barrel));
   group.add(bg);
-  gd.hatches.forEach(([r, c]) => {
-    const hm = mesh(new THREE.BoxGeometry(S * 0.8, 0.03, S * 0.8), mat('#1e130a'));
-    hm.position.copy(gdAt(r, c, 0.015));
-    const rim = outline([[0, 0]], 0, '#c8a060');
-    rim.rotation.x = -Math.PI / 2;
-    rim.position.copy(gdAt(r, c, 0.035)).add(new THREE.Vector3(-S / 2, 0, -S / 2));
-    group.add(hm, rim);
-  });
-  const iron = mat('#26282b', { metalness: 0.7, roughness: 0.4 }), wood = mat('#5b3a20', { map: woodTex });
-  for (const c of [0, 2, 5, 7]) {
-    const g = new THREE.Group();
-    const carriage = mesh(new RoundedBoxGeometry(0.42, 0.2, 0.5, 2, 0.03), wood);
-    carriage.position.y = 0.12;
-    const tube = mesh(new THREE.CylinderGeometry(0.09, 0.13, 0.85, 12), iron);
-    tube.rotation.x = -Math.PI / 2 + 0.12;
-    tube.position.set(0, 0.3, -0.18);
-    g.add(carriage, tube);
-    g.position.copy(gdAt(0, c));
-    group.add(g);
-    const label = document.createElement('div');
-    $('labels').append(label);
-    gd.guns.push({ r: 0, c, state: 'empty', g, tube, label, sig: '', recoil: 0, waitT: 0 });
+  for (const { port, d } of GD.guns) {
+    const g = { port, d, state: 'empty', out: false, slide: 0, aim: 0, want: 0, g: gunMesh(), label: document.createElement('div'), sig: '', waitT: 0 };
+    g.g.rotation.y = -d * Math.PI / 2;
+    g.g.position.copy(gdAt(...gunSq(g, 1)));
+    group.add(g.g);
+    $('labels').append(g.label);
+    gd.guns.push(g);
   }
-  gd.stockLabel = document.createElement('div');
-  gd.stockLabel.className = 'label';
-  $('labels').append(gd.stockLabel);
-  // Where the pointer is on the deck, ringed when it's close enough to chalk.
+  gd.gunSet = new Set(gunCells().keys());
+  // Legs down to the ground outside, under the tower's front and sides, braced across.
+  const legM = mat('#4f321b', { map: woodTex }), w = GD.cols * S, dz = GD.rows * S;
+  for (const [x, z] of [[0.2, 0.2], [w / 2, 0.2], [w - 0.2, 0.2], [0.2, dz / 2], [w - 0.2, dz / 2]]) {
+    const leg = mesh(new THREE.BoxGeometry(0.26, ramp.T, 0.26), legM);
+    leg.position.set(x0 + x, ramp.T / 2, z0 + z);
+    group.add(leg);
+  }
+  for (const [ax, bx] of [[0.2, w / 2], [w / 2, w - 0.2]]) {
+    const brace = mesh(new THREE.BoxGeometry(Math.hypot(bx - ax, ramp.T * 0.6), 0.12, 0.1), legM);
+    brace.position.set(x0 + (ax + bx) / 2, ramp.T * 0.5, z0 + 0.2);
+    brace.rotation.z = Math.atan2(ramp.T * 0.6, bx - ax);
+    group.add(brace);
+  }
+  // The gunwale round the three open sides, red with a gold rail as on a Puzzle Pirates ship, open
+  // at the gunports; a low sill along the back where it meets the wall-walk.
+  const red = mat('#a3271c', { roughness: 0.7 }), gold = mat('#d9b23a', { metalness: 0.4, roughness: 0.4 });
+  const isPort = (r, c, d) => GD.guns.some((o) => o.port[0] === r && o.port[1] === c && o.d === d);
+  for (let r = 0; r < GD.rows; r++) for (let c = 0; c < GD.cols; c++) for (let d = 0; d < 4; d++) {
+    if (!cells.has(k(r, c)) || cells.has(k(r + DR[d], c + DC[d]))) continue;
+    const along = d % 2 === 0, at = gdAt(r, c).add(new THREE.Vector3(DC[d] * (S / 2 - 0.05), 0, DR[d] * (S / 2 - 0.05)));
+    const piece = (h, y, m, t) => { const b = mesh(new THREE.BoxGeometry(along ? S + 0.001 : t, h, along ? t : S + 0.001), m); b.position.copy(at); b.position.y += y; group.add(b); };
+    if (d === 2) { piece(0.05, 0.025, gold, 0.1); continue; }
+    if (isPort(r, c, d)) { piece(0.08, 0.04, red, 0.1); continue; }
+    piece(0.34, 0.17, red, 0.1);
+    piece(0.04, 0.36, gold, 0.13);
+  }
+  // Where the pointer is on the deck: a ring, and a ghost of the arrow a click would chalk.
   gd.cursor = outline([[0, 0]], 0, '#ffffff');
   gd.cursor.material = new THREE.LineBasicMaterial({ color: '#ffffff' });
   gd.cursor.rotation.x = -Math.PI / 2;
   gd.cursor.visible = false;
-  group.add(gd.cursor);
+  gd.ghost = new THREE.Mesh(arrowGeo, new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.4, depthWrite: false }));
+  gd.ghost.visible = false;
+  group.add(gd.cursor, gd.ghost);
+  if (!guest()) setCrates(pickCrates());
 }
-const gunAt = (r, c) => gd.guns.find((g) => g.r === r && g.c === c);
-const isHatch = (r, c) => gd.hatches.some(([a, b]) => a === r && b === c);
-const isBarrel = (r, c) => gd.barrel[0] === r && gd.barrel[1] === c;
+/* How stores roll on a board with no arrows: from every square and heading, follow the rules till
+   it repeats. A gun is on a loop when some loop rolls a store past the square where it goes in (one
+   arrow there then loads it, time after time). */
+function loopsOf(blocked) {
+  const next = (r, c, d) => {
+    for (const t of [0, 1, 3, 2]) { const nd = (d + t) % 4; if (!blocked(r + DR[nd], c + DC[nd])) return [r + DR[nd], c + DC[nd], nd]; }
+    return [r, c, d];
+  };
+  const loops = [], done = new Set();
+  for (const kk of gd.cells) {
+    const [r0, c0] = kk.split(',').map(Number);
+    if (blocked(r0, c0)) continue;
+    for (let d0 = 0; d0 < 4; d0++) {
+      let st = [r0, c0, d0];
+      const path = new Map();
+      while (!done.has(st.join()) && !path.has(st.join())) { path.set(st.join(), path.size); st = next(...st); }
+      if (!done.has(st.join())) {
+        const from = path.get(st.join()), loop = [...path.keys()].slice(from).map((s) => s.split(',').map(Number));
+        loops.push({ len: loop.length, cells: new Set(loop.map(([r, c]) => k(r, c))) });
+      }
+      for (const s of path.keys()) done.add(s);
+    }
+  }
+  return loops;
+}
+// Lash the crates about the deck: none round the barrel in the middle, more out towards the edges;
+// none on a gun or where stores go into one, none side by side, and none walling off any of it.
+// Of the boards tried, the one closest to a good Gunnery board: two guns on a loop of their own.
+function pickCrates() {
+  const [br, bc] = gd.barrel, guns = gunCells();
+  const ban = new Set();
+  for (const g of gd.guns) for (let i = 0; i <= 4; i++) ban.add(k(...gunSq(g, i)));
+  const cand = [...gd.cells].filter((kk) => {
+    const [r, c] = kk.split(',').map(Number);
+    return !ban.has(kk) && Math.max(Math.abs(r - br), Math.abs(c - bc)) > 2;
+  });
+  // Weighted towards the edges.
+  const weight = (kk) => { const [r, c] = kk.split(',').map(Number); return 1 + Math.max(Math.abs(r - br) / (GD.rows / 2), Math.abs(c - bc) / (GD.cols / 2)) * 3; };
+  let best = null, bestScore = -Infinity;
+  for (let t = 0; t < 160; t++) {
+    const pick = new Set(), pool = cand.slice();
+    while (pick.size < GD.crates && pool.length) {
+      let x = Math.random() * pool.reduce((a, kk) => a + weight(kk), 0), i = 0;
+      while ((x -= weight(pool[i])) > 0 && i < pool.length - 1) i++;
+      const kk = pool.splice(i, 1)[0], [r, c] = kk.split(',').map(Number);
+      if (![0, 1, 2, 3].some((d) => pick.has(k(r + DR[d], c + DC[d])))) pick.add(kk);
+    }
+    const blocked = (r, c) => !gd.cells.has(k(r, c)) || pick.has(k(r, c)) || guns.has(k(r, c)) || (r === br && c === bc);
+    // Everything still joined up.
+    const open = [...gd.cells].filter((kk) => !blocked(...kk.split(',').map(Number)));
+    const seen = new Set([open[0]]), todo = [open[0]];
+    while (todo.length) {
+      const [r, c] = todo.pop().split(',').map(Number);
+      for (let d = 0; d < 4; d++) { const n = k(r + DR[d], c + DC[d]); if (!blocked(r + DR[d], c + DC[d]) && !seen.has(n)) { seen.add(n); todo.push(n); } }
+    }
+    if (seen.size !== open.length) continue;
+    // Which guns sit on a short loop of their own, with no arrows down.
+    const loops = loopsOf(blocked).filter((l) => l.len <= 30);
+    const onLoop = gd.guns.filter((g) => loops.some((l) => l.cells.has(k(...gunSq(g, 3))))).length;
+    const score = -Math.abs(onLoop - 2) * 10 + Math.random();
+    if (score > bestScore) { bestScore = score; best = pick; }
+    if (onLoop === 2 && t > 20) break;
+  }
+  return [...(best || [])].map((kk) => kk.split(',').map(Number));
+}
+function setCrates(list) {
+  gd.crateMeshes.forEach((m) => gd.group.remove(m));
+  gd.crates = list;
+  gd.crateSig = JSON.stringify(list);
+  gd.crateSet = new Set(list.map(([r, c]) => k(r, c)));
+  gd.crateMeshes = list.map(([r, c], i) => { const m = crateMesh(i); m.position.copy(gdAt(r, c)); m.rotation.y = ((i * 7) % 5 - 2) * 0.03; gd.group.add(m); return m; });
+}
 // Squares with a pirate standing on them: a body's an obstacle too.
 function gdBodies() {
   const out = new Set(), add = (x, z, h) => { if (h > ramp.T - 0.3) { const cell = gdCell(x, z); if (cell) out.add(k(...cell)); } };
@@ -867,16 +1080,22 @@ function gdBodies() {
   if (online()) for (const mt of net.crew.values()) add(mt.tx ?? 0, mt.tz ?? 0, mt.th ?? 0);
   return out;
 }
+const storeAt = (r, c) => gd.stores.some((o) => o.r === r && o.c === c);
 function gunTick() {
   const bodies = gdBodies();
-  const free = (r, c) => gd.cells.has(k(r, c)) && !isBarrel(r, c) && !bodies.has(k(r, c));
+  const blocked = (r, c) => !gd.cells.has(k(r, c)) || gdSolid(r, c) || bodies.has(k(r, c));
   // Where each store wants to go.
   const want = gd.stores.map((s) => {
     const a = gd.arrows.get(k(s.r, s.c));
-    if (a) s.dir = a.dir;
+    if (a) {
+      s.dir = a.dir;
+      // Into a gun: only off an arrow pointing into its inner end.
+      const g = gd.guns.find((o) => k(...gunSq(o, 3)) === k(s.r, s.c) && a.dir === o.d);
+      if (g && g.state !== 'loaded') return { d: a.dir, r: s.r + DR[a.dir], c: s.c + DC[a.dir], gun: g };
+    }
     for (const t of [0, 1, 3, 2]) {
       const d = (s.dir + t) % 4, r = s.r + DR[d], c = s.c + DC[d];
-      if (free(r, c)) return { d, r, c };
+      if (!blocked(r, c)) return { d, r, c };
     }
     return null;
   });
@@ -901,19 +1120,17 @@ function gunTick() {
     if (!w) return;
     if (back.has(i)) { s.dir = (w.d + 2) % 4; return; }
     s.r = w.r; s.c = w.c; s.dir = w.d;
-    const g = gunAt(s.r, s.c);
-    if (g) { loadGun(g, s.kind); gone.push(s); }
-    else if (isHatch(s.r, s.c)) { gd.stock++; gone.push(s); }
+    if (w.gun) { loadGun(w.gun, s.kind); gone.push(s); }
   });
   for (const s of gone) dropStore(s, true);
-  // The barrel rolls out the next store, each way round in turn.
+  // The barrel rolls out another of whatever's short, each way round in turn.
   gd.emitT -= GD.tick;
-  if (gd.emitT <= 0 && gd.stock > 0 && gd.stores.length < GD.cap) {
+  const short = KINDS.filter((kd) => gd.stores.filter((s) => s.kind === kd).length < GD.each);
+  if (gd.emitT <= 0 && short.length) {
     for (let t = 0; t < 4; t++) {
       const d = gd.dirI++ % 4, r = gd.barrel[0] + DR[d], c = gd.barrel[1] + DC[d];
-      if (!free(r, c) || gunAt(r, c) || isHatch(r, c) || gd.stores.some((o) => o.r === r && o.c === c)) continue;
-      addStore(++gd.seq, KINDS[rand(4)], r, c, d, gd.barrel[0], gd.barrel[1]);
-      gd.stock--;
+      if (blocked(r, c) || storeAt(r, c)) continue;
+      addStore(++gd.seq, short[rand(short.length)], r, c, d, gd.barrel[0], gd.barrel[1]);
       gd.emitT = GD.emit;
       break;
     }
@@ -923,16 +1140,16 @@ function addStore(id, kind, r, c, dir, pr = r, pc = c) {
   const m = storeMesh(kind);
   m.position.copy(gdAt(pr, pc));
   gd.group.add(m);
-  const s = { id, kind, r, c, dir, pr, pc, m };
+  const s = { id, kind, r, c, dir, pr, pc, m, spin: 0 };
   gd.stores.push(s);
   return s;
 }
 function dropStore(s, roll = false) {
   gd.stores.splice(gd.stores.indexOf(s), 1);
   if (!roll) { gd.group.remove(s.m); return; }
-  // Roll on into the gun (or down the hatch) before it goes.
-  const from = gdAt(s.pr, s.pc), to = gdAt(s.r, s.c, isHatch(s.r, s.c) ? -0.3 : 0.15), grp = gd.group;
-  tween(GD.tick, (u) => s.m.position.lerpVectors(from, to, u), () => grp.remove(s.m));
+  // Roll on into the gun's inner end before it goes.
+  const from = gdAt(s.pr, s.pc), to = gdAt(s.r, s.c, 0.2), grp = gd.group;
+  tween(GD.tick, (u) => { s.m.position.lerpVectors(from, to, u); s.m.scale.setScalar(1 - 0.7 * u); }, () => grp.remove(s.m));
 }
 function loadGun(g, kind) {
   const next = { empty: 'powder', powder: 'wad', wad: 'shot' }[g.state];
@@ -940,18 +1157,28 @@ function loadGun(g, kind) {
   if (kind === 'bucket') g.state = 'empty';
   else if (kind === next) g.state = kind === 'shot' ? 'loaded' : kind;
   else g.state = 'fouled';
-  burst(gdAt(g.r, g.c, 0.35), kind === 'bucket' ? '#9fd0ff' : g.state === 'fouled' ? '#ff7a5c' : '#f0d9a8', 8, 2);
+  burst(gdAt(...gunSq(g, 2), 0.45), kind === 'bucket' ? '#9fd0ff' : g.state === 'fouled' ? '#ff7a5c' : '#f0d9a8', 8, 2);
   if (g.state === 'fouled' && was !== 'fouled') say('A gun\'s fouled! Roll a bucket into it', false, true);
-  if (g.state === 'loaded') g.waitT = 0.5;
+  if (g.state === 'loaded') { g.waitT = 0.9; say('Loaded!'); }
 }
-// A loaded gun fires by itself at the nearest raider out at the wall in front of it, else at their cannon.
+// A loaded gun swings on its carriage to aim, anywhere in an arc round the way it faces, and
+// fires by itself: at the raiders at the wall first, then those coming in, then their cannon.
+const GUN_ARC = 1.25;   // radians either side
+const gunBase = (g) => -g.d * Math.PI / 2;
+const wrapA = (a) => Math.atan2(Math.sin(a), Math.cos(a));
+// The swing that points gun g at (x, z), or null if that's out of its arc.
+function gunSwing(g, x, z) {
+  const from = gdAt(...gunSq(g, 1)), a = wrapA(Math.atan2(-(x - from.x), -(z - from.z)) - gunBase(g));
+  return Math.abs(a) <= GUN_ARC ? a : null;
+}
 function gunTarget(g) {
-  const from = gdAt(g.r, g.c);
-  let best = null, bd = 7;
+  const from = gdAt(...g.port);
+  let best = null, bd = Infinity;
   for (const r of raiders) {
-    if (r.inside || r.gone || r.state === 'down' || !['approach', 'attack', 'hackOut'].includes(r.state) || r.z > -0.9 || r.z < -9) continue;
-    const d = Math.abs(r.x - from.x) + Math.max(0, -r.z - 4) * 0.4;
-    if (d < bd) { bd = d; best = r; }
+    if (r.inside || r.gone || r.state === 'down' || !['approach', 'attack', 'hackOut'].includes(r.state) || r.z > -0.9 || r.z < -11) continue;
+    if (gunSwing(g, r.x, r.z) === null || r.shotT > performance.now()) continue;   // (another gun's shot is on its way)
+    const d = Math.hypot(r.x - from.x, r.z - from.z) + (r.state === 'approach' ? 6 : 0);
+    if (d < bd && d < 22) { bd = d; best = r; }
   }
   if (best) {
     // Lead a raider still on the way in: aim where they'll be when the ball comes down.
@@ -960,21 +1187,27 @@ function gunTarget(g) {
       const dur = 0.5 + Math.hypot(x - from.x, z - from.z) * 0.035, tx = holeX(best.hole) + best.slot - x, tz = -1.15 - z, n = Math.hypot(tx, tz);
       if (n > 0) { const step = Math.min(n, 2.2 * dur); x += tx / n * step; z += tz / n * step; }
     }
-    return { x, z };
+    return { x, z, r: best };
   }
-  if (cannon.visible && G.phase === 'wave' && G.cannonT < 20) return { x: cannon.position.x, z: cannon.position.z, cannon: true };
+  if (cannon.visible && G.phase === 'wave' && G.cannonT < 20 && gunSwing(g, cannon.position.x, cannon.position.z) !== null) return { x: cannon.position.x, z: cannon.position.z, cannon: true };
   return null;
 }
 function fireGun(i, tx, tz, atCannon) {
   const g = gd.guns[i];
   if (isHost()) send('all', { t: 'gfire', i, x: r2(tx), z: r2(tz), cn: atCannon ? 1 : 0 });
   g.state = 'dirty';
-  g.recoil = 1;
-  const from = gdAt(g.r, g.c, 0.35).add(new THREE.Vector3(0, 0, -0.6)), to = new THREE.Vector3(tx, 0.4, tz);
+  // Out of its own muzzle, pointed at the target; the recoil brings it back in.
+  g.aim = gunSwing(g, tx, tz) ?? g.aim;
+  g.slide = 1;
+  g.g.rotation.y = gunBase(g) + g.aim;
+  g.g.position.copy(gunPos(g));
+  g.g.updateMatrixWorld(true);
+  g.out = false;
+  const from = g.g.localToWorld(new THREE.Vector3(0, 0.3, -0.85)), to = new THREE.Vector3(tx, 0.4, tz);
   burst(from, '#ffcf6a', 14, 3);
   burst(from, '#cfc6b8', 10, 1.5);
   shake = Math.max(shake, 0.25);
-  const ball = mesh(new THREE.SphereGeometry(0.15, 12, 10), mat('#1a1a1a', { metalness: 0.6 }));
+  const ball = mesh(new THREE.SphereGeometry(0.17, 12, 10), mat('#3a3f45', { metalness: 0.6 }));
   scene.add(ball);
   const d = from.distanceTo(to), dur = 0.5 + d * 0.035;
   tween(dur, (s) => {
@@ -996,56 +1229,70 @@ function updateGunDeck(dt) {
   if (!guest()) {
     gd.tickT += dt / GD.tick;
     if (gd.tickT >= 1) { gd.tickT = 0; gunTick(); }
+    // A loaded gun is run out through its port and swung onto a target; it fires once it's on.
     gd.guns.forEach((g, i) => {
-      if (g.state !== 'loaded' || (g.waitT -= dt) > 0) return;
+      if (g.state !== 'loaded') return;
+      g.out = true;
       const t = gunTarget(g);
-      if (t) fireGun(i, t.x, t.z, t.cannon);
+      g.want = t ? gunSwing(g, t.x, t.z) : 0;
+      if ((g.waitT -= dt) > 0 || !t || Math.abs(g.aim - g.want) > 0.06 || g.slide < 1) return;
+      if (t.r) t.r.shotT = performance.now() + 2500;
+      fireGun(i, t.x, t.z, t.cannon);
     });
   } else gd.tickT = Math.min(1, gd.tickT + dt / GD.tick);
   const u = Math.min(1, gd.tickT);
   for (const s of gd.stores) {
+    const was = s.m.position.clone();
     s.m.position.lerpVectors(gdAt(s.pr, s.pc), gdAt(s.r, s.c), u);
     s.m.rotation.y = -s.dir * Math.PI / 2;
+    // Shot rolls; the rest slide with a little jostle.
+    const moved = was.distanceTo(s.m.position), body = s.m.userData.body;
+    if (s.kind === 'shot') body.rotation.x -= moved / 0.2;
+    else body.rotation.z = Math.sin((s.spin += moved * 9)) * 0.08;
   }
   for (const g of gd.guns) {
-    g.recoil = Math.max(0, g.recoil - dt * 3);
-    g.tube.position.z = -0.18 + g.recoil * 0.25;
+    // Hauled out slowly by the crew and swung onto its target; the recoil throws it back in fast,
+    // and it's swung back square to be loaded again.
+    g.slide = g.out ? Math.min(1, g.slide + dt * 1.6) : Math.max(0, g.slide - dt * 5);
+    const want = g.out ? g.want ?? 0 : 0;
+    g.aim += Math.max(-dt * 1.4, Math.min(dt * 1.4, want - g.aim));
+    g.g.rotation.y = gunBase(g) + g.aim;
+    g.g.position.copy(gunPos(g));
   }
-  gd.cursor.visible = false;
+  gd.cursor.visible = gd.ghost.visible = false;
   if (gd.hover && onGunDeck() && !carry) {
-    const [r, c] = gd.hover, at = gdAt(r, c, 0.03);
-    gd.cursor.position.set(at.x - S / 2, at.y, at.z - S / 2);
-    gd.cursor.material.color.set(Math.hypot(at.x - pirate.x, at.z - pirate.z) <= GD.reach ? '#ffffff' : '#ff7a5c');
-    gd.cursor.visible = true;
+    const [r, c] = gd.hover, at = gdAt(r, c, 0.03), a = gd.arrows.get(k(r, c));
+    if (canChalk(r, c)) {
+      gd.cursor.position.set(at.x - S / 2, at.y, at.z - S / 2);
+      gd.cursor.visible = true;
+      if (!a) { gd.ghost.position.copy(at); gd.ghost.rotation.y = -gd.pen * Math.PI / 2; gd.ghost.visible = true; }
+    }
   }
 }
-// Labels over the guns, and what's left in the barrel.
+// Labels over the guns: what each wants next.
 function gunLabels() {
   if (!gd) return;
-  const place = (el, at) => {
-    v3.copy(at).project(camera);
-    el.style.left = `${(v3.x + 1) / 2 * innerWidth}px`;
-    el.style.top = `${(1 - v3.y) / 2 * innerHeight}px`;
-    el.style.display = v3.z > 1 ? 'none' : '';
-  };
   for (const g of gd.guns) {
-    const [cls, text] = GUN_SAYS[g.state], sig = cls + text;
+    const [cls, text, want] = GUN_SAYS[g.state], sig = cls + text;
     if (g.sig !== sig) {
       g.sig = sig;
       g.label.className = `label gun ${cls}`;
-      g.label.innerHTML = g.state === 'loaded' ? text : `<small>${g.state === 'fouled' ? 'needs a bucket' : 'needs'}</small>${text}`;
+      g.label.innerHTML = want ? `<small>${g.state === 'fouled' ? 'Fouled! needs' : g.state === 'dirty' ? 'Fired: needs' : 'needs'}</small>${STORE_ICON[want]}${STORE_NAME[want]}` : text;
     }
-    place(g.label, gdAt(g.r, g.c, gd.guns.indexOf(g) % 2 ? 1.25 : 0.7));
+    v3.copy(g.g.position);
+    v3.y += 0.75;
+    v3.project(camera);
+    g.label.style.left = `${(v3.x + 1) / 2 * innerWidth}px`;
+    g.label.style.top = `${(1 - v3.y) / 2 * innerHeight}px`;
+    g.label.style.display = v3.z > 1 || pirate.h < 1 ? 'none' : '';   // only once you're up on the wall
   }
-  const t = `Powder barrel · ${gd.stock} left`;
-  if (gd.stockLabel.textContent !== t) gd.stockLabel.textContent = t;
-  place(gd.stockLabel, gdAt(...gd.barrel, 0.9));
 }
 // Chalking: an arrow on a plank, pointing one of the four ways. Chalk where one is and it turns
 // to point your way; chalk the same way again and it's rubbed out.
 const myArrows = (by = myId()) => [...gd.arrows.values()].filter((a) => a.by === by);
+const canChalk = (r, c) => gd.cells.has(k(r, c)) && !gdSolid(r, c);
 function chalk(r, c, dir, by = myId()) {
-  if (!gd || !gd.cells.has(k(r, c)) || isBarrel(r, c) || gunAt(r, c) || isHatch(r, c)) return false;
+  if (!gd || !canChalk(r, c)) return false;
   if (guest() && by === myId()) { send('host', { t: 'chalk', r, c, dir }); return true; }
   const kk = k(r, c), old = gd.arrows.get(kk);
   if (old) { gd.group.remove(old.m); gd.arrows.delete(kk); if (dir < 0 || (old.dir === dir && old.by === by)) return true; }
@@ -1057,8 +1304,8 @@ function chalk(r, c, dir, by = myId()) {
 }
 function putArrow(r, c, dir, by, t = performance.now()) {
   const ci = by === myId() ? -1 : net.crew.get(by)?.ci ?? -1;
-  const col = ci >= 0 ? new THREE.Color(CREW_COLOURS[ci]).lerp(new THREE.Color('#ffffff'), 0.55) : new THREE.Color('#f4efe4');
-  const m = new THREE.Mesh(arrowGeo, new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.9 }));
+  const col = ci >= 0 ? new THREE.Color(CREW_COLOURS[ci]).lerp(new THREE.Color('#ffffff'), 0.45) : new THREE.Color('#fbf6ea');
+  const m = new THREE.Mesh(arrowGeo, new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.92 }));
   m.position.copy(gdAt(r, c, 0.02));
   m.rotation.y = -dir * Math.PI / 2;
   gd.group.add(m);
@@ -1080,24 +1327,45 @@ function turnArrowAhead(t) {
   const a = me && gd.arrows.get(k(me[0] + DR[d], me[1] + DC[d]));
   if (a) chalk(a.r, a.c, (a.dir + t) % 4);
 }
-// A click on a plank in reach: a new arrow points away from you; click one and it turns a
-// quarter clockwise.
-function chalkClick(r, c) {
-  const at = gdAt(r, c);
-  if (Math.hypot(at.x - pirate.x, at.z - pirate.z) > GD.reach) { toast('Get closer to chalk there', false, true); return; }
-  const old = gd.arrows.get(k(r, c));
-  const dx = at.x - pirate.x, dz = at.z - pirate.z;
-  const away = Math.abs(dx) > Math.abs(dz) ? (dx > 0 ? 1 : 3) : (dz < 0 ? 0 : 2);
-  if (!chalk(r, c, old ? (old.dir + 1) % 4 : away)) shake = 0.15;
+/* The mouse, as in Gunnery: click a plank to chalk an arrow pointing the way the ghost arrow shows
+   (the wheel turns it), or drag from the plank the way you want it to point. Click an arrow to turn
+   it a quarter clockwise; the wheel over one turns it too. Right-click rubs one out. */
+function screenDir(r, c, dx, dy) {
+  const p0 = gdAt(r, c).project(camera);
+  let best = 0, bd = -Infinity;
+  for (let d = 0; d < 4; d++) {
+    const p = gdAt(r + DR[d], c + DC[d]).project(camera), sx = p.x - p0.x, sy = p0.y - p.y, n = Math.hypot(sx, sy) || 1;
+    const dot = (sx * dx + sy * dy) / n;
+    if (dot > bd) { bd = dot; best = d; }
+  }
+  return best;
+}
+function chalkRelease(x, y) {
+  const pr = gd.press;
+  gd.press = null;
+  if (!pr) return;
+  const dx = x - pr.x, dy = y - pr.y, old = gd.arrows.get(k(pr.r, pr.c));
+  let dir;
+  if (Math.hypot(dx, dy) > 14) dir = screenDir(pr.r, pr.c, dx, dy);
+  else dir = old ? (old.dir + 1) % 4 : gd.pen;
+  if (old && old.dir === dir) return;
+  gd.pen = dir;
+  if (!chalk(pr.r, pr.c, dir)) shake = 0.15;
+}
+function wheelDeck(step) {
+  gd.pen = (gd.pen + step + 4) % 4;
+  const a = gd.hover && gd.arrows.get(k(...gd.hover));
+  if (a) { chalk(a.r, a.c, (a.dir + step + 4) % 4); gd.pen = (a.dir + step + 4) % 4; }
 }
 const gunOut = () => gd && {
   s: gd.stores.map((s) => [s.id, KINDS.indexOf(s.kind), s.r, s.c, s.dir]),
-  g: gd.guns.map((g) => g.state),
+  g: gd.guns.map((g) => [g.state, g.out ? 1 : 0, r2(g.want || 0)]),
   a: [...gd.arrows.values()].map((a) => [a.r, a.c, a.dir, a.by]),
-  k: gd.stock,
+  cr: gd.crates,
 };
 function gunIn(d) {
   if (!d || !gd) return;
+  if (d.cr && JSON.stringify(d.cr) !== gd.crateSig) setCrates(d.cr);
   const seen = new Set();
   for (const [id, ki, r, c, dir] of d.s) {
     seen.add(id);
@@ -1107,14 +1375,13 @@ function gunIn(d) {
     s.dir = dir;
   }
   for (const s of gd.stores.slice()) if (!seen.has(s.id)) { s.pr = s.r; s.pc = s.c; dropStore(s, true); }
-  d.g.forEach((st, i) => { if (gd.guns[i]) gd.guns[i].state = st; });
+  d.g.forEach(([st, out, want], i) => { const g = gd.guns[i]; if (g) { g.state = st; g.out = !!out; g.want = want || 0; } });
   const want = new Map(d.a.map(([r, c, dir, by]) => [k(r, c), { r, c, dir, by }]));
   for (const [kk, a] of gd.arrows) {
     const w = want.get(kk);
     if (!w || w.dir !== a.dir || w.by !== a.by) { gd.group.remove(a.m); gd.arrows.delete(kk); }
   }
   for (const [kk, w] of want) if (!gd.arrows.has(kk)) putArrow(w.r, w.c, w.dir, w.by);
-  gd.stock = d.k;
 }
 
 function makeGate() {
@@ -1366,7 +1633,7 @@ function labelFor(h) {
 function frameLabel(f) {
   const left = f.open;
   const need = left.length === 5 && f.exact ? `needs ${an(C.identify(left))}` : f.exact ? `room for ${left.length / 5} more pieces` : f.kind === 'stair' ? `${left.length} squares left: any piece will do` : `${left.length} squares left: any piece, the spare's sawn off`;
-  return ['label deck', `${{ stair: 'Stairs up to the wall', gun: 'Gun deck frame' }[f.kind] || 'Wall-walk frame'}<small>${need}</small>`];
+  return ['label deck', `${{ stair: 'Stairs up to the wall', gun: 'Gun tower frame (big timbers)' }[f.kind] || 'Wall-walk frame'}<small>${need}</small>`];
 }
 function updateStats() {
   $('s-gold').textContent = Math.max(0, G.gold);
@@ -1399,6 +1666,13 @@ addEventListener('keydown', (e) => {
 addEventListener('keyup', (e) => keys.delete(e.key.toLowerCase()));
 addEventListener('blur', () => keys.clear());
 const ray = new THREE.Raycaster(), wallPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+// The gun deck square under the pointer, if you're up there.
+function deckCellAt(x, y) {
+  if (!gd || pirate.h < 0.3) return null;
+  ray.setFromCamera(new THREE.Vector2(x / innerWidth * 2 - 1, -y / innerHeight * 2 + 1), camera);
+  const p = new THREE.Vector3();
+  return ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), -(ramp.T + 0.05)), p) ? gdCell(p.x, p.z) : null;
+}
 /* Where the pointer is on the wall grid, at depth z. Boards behind a hole stand out from the stone
    towards you, and the camera looks down on them, so a board is matched to the pointer at its own
    depth, or it'd snap a square or two away from where you're pointing. */
@@ -1424,7 +1698,7 @@ renderer.domElement.addEventListener('mousemove', (e) => {
     if (!best || d < best.d) best = { d, frame: f, fc, fr };
   }
   if (best) { mouse = best; mouseMode = true; return; }
-  if (gd) gd.hover = pirate.h > 0.3 && ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), -ramp.T), p) ? gdCell(p.x, p.z) : null;
+  if (gd) { gd.hover = deckCellAt(e.clientX, e.clientY); ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1), camera); }
   if (!ray.ray.intersectPlane(wallPlane, p)) { mouse = null; return; }
   const fc = p.x / S + wall.W / 2, fr = wall.H - p.y / S;
   mouse = fc >= -1 && fc <= wall.W + 1 && fr >= -1 && fr <= wall.H + 1 ? { fc, fr, ray: ray.ray.clone(), at: new Map() } : null;
@@ -1441,7 +1715,7 @@ renderer.domElement.addEventListener('mousedown', (e) => {
   // Up on the rampart there's nothing to fit, so a click anywhere throws at the raider nearest it.
   const r = carry && clickedFoe(e.clientX, e.clientY, pirate.h > 0.3 ? 1e4 : 90);
   if (r) throwAt(r);
-  else if (!carry && gd?.hover && onGunDeck()) chalkClick(...gd.hover);
+  else if (!carry && onGunDeck() && (gd.hover = deckCellAt(e.clientX, e.clientY))) gd.press = { r: gd.hover[0], c: gd.hover[1], x: e.clientX, y: e.clientY };
   else act();
 });
 addEventListener('mousemove', (e) => {
@@ -1454,14 +1728,23 @@ addEventListener('mousemove', (e) => {
   drag.x = e.clientX; drag.y = e.clientY;
 });
 addEventListener('mouseup', (e) => {
+  if (e.button === 0 && gd?.press) chalkRelease(e.clientX, e.clientY);
   if (e.button !== 2 || !drag) return;
   if (!drag.moved && carry && !G.over) turn(flip, 0);
-  else if (!drag.moved && !carry && gd?.hover && onGunDeck() && gd.arrows.has(k(...gd.hover))) chalk(...gd.hover, -1);
+  else if (!drag.moved && !carry && onGunDeck() && (gd.hover = deckCellAt(e.clientX, e.clientY)) && gd.arrows.has(k(...gd.hover))) chalk(...gd.hover, -1);
   drag = null;
 });
-// The wheel turns the piece while it's showing a spot to fit it; otherwise it zooms.
+// The wheel turns the piece while it's showing a spot to fit it, or your chalk on the gun deck; otherwise it zooms.
 let wheelAcc = 0, wheelT = 0;
 renderer.domElement.addEventListener('wheel', (e) => {
+  // On the gun deck the wheel turns your chalk, as in Gunnery, and never zooms.
+  if (!carry && onGunDeck() && !G.over) {
+    wheelAcc += e.deltaY;
+    const now = performance.now();
+    gd.hover = deckCellAt(e.clientX, e.clientY);
+    if (Math.abs(wheelAcc) >= 40 && now - wheelT > 110) { wheelDeck(wheelAcc > 0 ? 1 : -1); wheelAcc = 0; wheelT = now; }
+    return;
+  }
   if (carry && target && !G.over) {
     wheelAcc += e.deltaY;
     const now = performance.now();
@@ -2074,7 +2357,6 @@ function startWave() {
   G.toSpawn = Math.round((1 + G.wave) * (1 + 0.5 * (crewSize() - 1)));
   G.spawnT = 0.5;
   G.cannonT = G.wave >= 2 ? 8 : Infinity;
-  if (gd) gd.stock = Math.max(gd.stock, GD.stock);   // fresh stores for the guns
   if (G.wave >= 2 && !cannon.visible) { cannon.visible = true; say('They brought a cannon!', true); }
   else say(`Wave ${G.wave}: raiders!`, true);
   $('intro').classList.add('off');
@@ -2094,7 +2376,7 @@ function updateWaves(dt) {
     G.phase = 'calm'; G.phaseT = CALM_SECS;
     // Timber for the next stretch, once nothing's still being built.
     const f = !frames().length && !ramp.jobs.some((j) => j.frame && !j.up) && openJob(ramp.next);
-    if (f) say(`Wave ${G.wave} beaten off! Timber's come: ${f.kind === 'gun' ? 'build a gun deck in its frame' : 'build the rampart in its frame'}`);
+    if (f) say(`Wave ${G.wave} beaten off! Timber's come: ${f.kind === 'gun' ? 'build a gun tower in its frame' : 'build the rampart in its frame'}`);
     else say(`Wave ${G.wave} beaten off!`);
   }
 }
@@ -2190,7 +2472,7 @@ function prompt() {
   } else if (!carry && canTakeBack()) t = `Space: take the ${lastPlaced.letter} back off`;
   else if (carry) {
     const more = target?.count > 1 ? ` · Tab: other spots (${target.count})` : '';
-    if (target?.frame) t = !target.ok ? 'Walk closer to fit it there' : target.over ? (target.frame.kind === 'stair' ? `Space: fit the ${carry.letter} in the stairs (it sticks out, and stays that way)${more}` : `Space: fit it in the frame (it sticks out: the spare gets sawn off)${more}`) : `Space: fit the ${carry.letter} in the ${{ stair: 'stairs', gun: 'gun deck frame' }[target.frame.kind] || 'wall-walk frame'}${more}`;
+    if (target?.frame) t = !target.ok ? 'Walk closer to fit it there' : target.over ? (target.frame.kind === 'stair' ? `Space: fit the ${carry.letter} in the stairs (it sticks out, and stays that way)${more}` : `Space: fit it in the frame (it sticks out: the spare gets sawn off)${more}`) : `Space: fit the ${carry.letter} in the ${{ stair: 'stairs', gun: 'gun tower frame' }[target.frame.kind] || 'wall-walk frame'}${more}`;
     else if (target?.ok && target.patch) t = `Space: nail it on behind (one more layer for them to hack through)${more}`;
     else if (target?.ok && !target.over) t = `Space: fit the ${carry.letter} here${more}`;
     else if (target?.ok) t = `Space: board it over (weak, no Masterpiece)${more}`;
@@ -2202,7 +2484,7 @@ function prompt() {
   const hacking = raiders.some(atWall);
   if (onGunDeck() && !carry) {
     const n = myArrows().length;
-    t = `Space: chalk an arrow ahead, the way you face · Q/E turn it · or click a plank (${n}/${GD.arrows} arrows)`;
+    t = `Chalk arrows to steer the stores into the guns: click a plank · wheel turns · right-click rubs out (${n}/${GD.arrows})`;
   } else if (onRampart()) {
     if (!carry) t = 'Bring a piece up here to throw at the raiders';
     else if (outsideFoe()) t = `Space, Shift or click a raider: throw the ${carry.letter} down on them!`;
@@ -2212,6 +2494,7 @@ function prompt() {
   else if (hacking && carry && !target?.ok && stairsUp()) t += ' · or take it up the rampart and throw it';
   const el = $('prompt');
   if (el.textContent !== t) el.textContent = t;
+  $('gunhelp').classList.toggle('on', onGunDeck());
 }
 
 // ---------- the crew: playing together ----------
@@ -2664,7 +2947,8 @@ $('crew-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('cr
 // ---------- main loop ----------
 const camAt = new THREE.Vector3(0, 7.4, 14.2), camLook = new THREE.Vector3(0, 1.8, 3.6);
 camera.position.copy(camAt);
-const v3 = new THREE.Vector3(), L0 = new THREE.Vector3(), L1 = new THREE.Vector3();
+const v3 = new THREE.Vector3(), L0 = new THREE.Vector3(), L1 = new THREE.Vector3(), L2 = new THREE.Vector3();
+let deckView = 0;
 /* Each tick runs the game on in small steps. Alone, a pause (another tab) stops the clock. In a
    crew it doesn't: the den goes on for everyone, so when the browser stops drawing a tab in the
    background, a timer keeps it ticking (as often as the browser lets it) and catches up. */
@@ -2704,19 +2988,21 @@ function update(dt) {
     const ox = pirate.x, oz = pirate.z;
     let nx = pirate.x + wx * SPEED * dt, nz = pirate.z + wz * SPEED * dt;
     for (const o of obstacles) {
+      if (o.low && pirate.h > 1) continue;
       const dx = nx - o.x, dz = nz - o.z, d = Math.hypot(dx, dz), min = o.r + 0.3;
       if (d < min && d > 0) { nx = o.x + dx / d * min; nz = o.z + dz / d * min; }
     }
     nx = Math.max(-bounds.x, Math.min(bounds.x, nx));
-    nz = Math.max(pirate.h > 1 ? -0.3 : bounds.z0, Math.min(bounds.z1, nz));
+    nz = Math.max(pirate.h > 1 ? (gd ? gd.z0 + 0.2 : -0.3) : bounds.z0, Math.min(bounds.z1, nz));
     // Up and down the stairs, but no walking into their side or off the edge of the rampart.
     const pad = pirate.h < 0.05 ? 0.28 : 0;
     // A step of one square you walk up; two, you hop up (stairs built with bits sticking out).
-    const okAt = (x, z) => Math.abs(heightAt(x, z, pad) - pirate.h) <= HOP;
+    const stuck = deckBlocks(ox, oz);   // (a gun run out right by you: you can always step clear)
+    const okAt = (x, z) => Math.abs(heightAt(x, z, pad, pirate.h) - pirate.h) <= HOP && (pirate.h < ramp.T - 0.3 || stuck || !deckBlocks(x, z));
     if (!okAt(nx, nz)) { if (okAt(nx, oz)) nz = oz; else if (okAt(ox, nz)) nx = ox; else { nx = ox; nz = oz; } }
     pirate.x = nx; pirate.z = nz;
     const was = pirate.h;
-    pirate.h = heightAt(nx, nz);
+    pirate.h = heightAt(nx, nz, 0, pirate.h);
     if (pirate.h - was > STEP) pirate.hop = { t: 0, a: pirate.hs, b: pirate.h };
     faceTo(pirate, wx, wz, dt * 1.2);
   }
@@ -2795,8 +3081,17 @@ function update(dt) {
   L0.set(pirate.x * 0.55, 1.8, cz - 3.4);
   L1.set(pirate.x, 0.5, -2.6);
   const look = L0.lerp(L1, u);
-  const dist = (12 + (17 - 12) * u) * view.zoom;
-  const tilt = Math.max(0.2, Math.min(1.45, 0.486 + (1.4 - 0.486) * u + view.pitch));
+  let dist = (12 + (17 - 12) * u) * view.zoom;
+  let tilt = Math.max(0.2, Math.min(1.45, 0.486 + (1.4 - 0.486) * u + view.pitch));
+  deckView += ((onGunDeck() ? 1 : 0) - deckView) * Math.min(1, dt * 2.5);
+  if (gd && deckView > 0.001) {
+    L2.set(gd.x0 + GD.cols * S / 2, ramp.T, gd.z0 + GD.rows * S * 0.5);
+    look.lerp(L2, deckView);
+    // Close enough that the tower fills the screen, with the wall either side of it in view.
+    const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect);
+    dist += (Math.max((GD.cols * S / 2 + 2.2) / Math.tan(hh), (GD.rows * S / 2 + 1.2) / Math.tan(vh)) * view.zoom - dist) * deckView;
+    tilt += (Math.max(0.6, Math.min(1.45, 1.1 + view.pitch)) - tilt) * deckView;
+  }
   v3.set(Math.sin(view.yaw) * Math.cos(tilt), Math.sin(tilt), Math.cos(view.yaw) * Math.cos(tilt)).multiplyScalar(dist).add(look);
   camAt.lerp(v3, Math.min(1, dt * 3));
   camera.position.copy(camAt);
@@ -2842,6 +3137,7 @@ function update(dt) {
     if (topView) v3.set(holeX(h), 0, 2.2).project(camera); else v3.set(holeX(h), Y(h.b.r0) + 0.15, 0.1).project(camera);
     h.label.style.left = `${(v3.x + 1) / 2 * innerWidth}px`;
     h.label.style.top = `${(1 - v3.y) / 2 * innerHeight}px`;
+    h.label.style.display = deckView > 0.5 ? 'none' : '';   // out of the way while you're gunning
     // A patch under attack shudders.
     if (h.jig > 0) {
       h.jig = Math.max(0, h.jig - dt);
@@ -2894,6 +3190,6 @@ if (new URLSearchParams(location.search).get('try') === 'gundeck') buildAll(5);
 requestAnimationFrame(frame);
 
 // For poking at it from the console.
-window.den = { get gd() { return gd; }, buildAll, chalk, gunTick, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+window.den = { get gd() { return gd; }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };
