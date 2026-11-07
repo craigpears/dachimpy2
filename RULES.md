@@ -122,7 +122,16 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   hole ("boarded over"). That always closes the hole, but it's a botch: weak and pays little. A hole
   filled exactly is a Masterpiece: strong, and pays well.
 - **Masterpieces make the wall strong.** Raiders hack at mended holes: a boarded hole falls fast, a
-  Masterpiece holds. Open holes let raiders straight in to steal from the chest; bonk them.
+  Masterpiece holds. Only a completely empty hole lets raiders straight in; any wood at all (even
+  one piece in an unfinished hole) has to be hacked through with swords first. No magic jumping
+  through a hole that has wood in it. A thief whose way out has been mended hacks out from inside.
+- **Throw pieces at raiders, don't bonk them.** A plain bonk was underwhelming. The carried piece
+  is the weapon: R (or Space, when there's nowhere to fit it) hurls it at the nearest raider in the
+  den, who goes flying. It costs the piece.
+- **You must see what's happening in the den.** Raiders inside get a ⚔ marker, pinned to the edge
+  of the screen when they're out of view (gold when carrying loot). The view widens on narrow screens.
+- **Give enough time to build.** A piece takes about ten seconds to fetch and fit, so the first wave
+  waits 75 seconds and starts small.
 - **The den has a gate** and raiders attack from the far side of the wall, with swords and (from
   wave 2) a cannon that blasts fresh holes. Keep repairing.
 - **You must be able to see the raiders.** Behind the wall they show as red silhouettes through

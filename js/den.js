@@ -14,8 +14,9 @@ const STONE_D = 0.7;
 const REACH = 2.4;       // how far along the wall the pirate can reach
 const WALL_Z = 2.7;      // how close to the wall the pirate must stand to fit a piece
 const SPEED = 4.6;
-const HP = { master: 45, boarded: 10 };   // seconds of one raider hacking at it
-const PAY = { master: 10, boarded: 2, bonk: 3, steal: 15, scrap: 1 };
+const HP = { master: 45, boarded: 10, piece: 4 };   // seconds of one raider hacking at it (piece: each piece in an unfinished hole)
+const PAY = { master: 10, boarded: 2, bonk: 3, steal: 10, scrap: 1 };
+const BUILD_SECS = 75, CALM_SECS = 20;
 const RAIDER_DPS = 1, RAIDER_STAMINA = 16;
 const k = (r, c) => r + ',' + c;
 const rand = (n) => Math.floor(Math.random() * n);
@@ -43,11 +44,16 @@ sun.shadow.mapSize.set(2048, 2048);
 Object.assign(sun.shadow.camera, { left: -16, right: 16, top: 14, bottom: -14, near: 1, far: 45 });
 scene.add(sun);
 
-addEventListener('resize', () => {
+// Keep the view wide enough to see a good stretch of wall, whatever shape the window is.
+function fitCamera() {
   camera.aspect = innerWidth / innerHeight;
+  const hfov = 64 * Math.PI / 180;
+  camera.fov = Math.min(80, Math.max(45, 2 * Math.atan(Math.tan(hfov / 2) / camera.aspect) * 180 / Math.PI));
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
-});
+}
+addEventListener('resize', fitCamera);
+fitCamera();
 
 // ---------- materials and little helpers ----------
 const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.85, ...o });
@@ -489,10 +495,10 @@ let ghost = null, ghostKey = '', target = null, cycle = 0, shake = 0;
 let mouse = null, mouseMode = false;
 
 function newGame() {
-  raiders.splice(0).forEach((r) => scene.remove(r.m.g));
+  raiders.splice(0).forEach((r) => { scene.remove(r.m.g); r.mark.remove(); });
   if (carry) { scene.remove(carry.group); carry = null; }
   ghostKey = ''; ghost = null;
-  Object.assign(G, { gold: 50, wave: 0, phase: 'build', phaseT: 40, toSpawn: 0, spawnT: 0, cannonT: 0, masters: 0, boarded: 0, bonked: 0, stolen: 0, over: false });
+  Object.assign(G, { gold: 60, wave: 0, phase: 'build', phaseT: BUILD_SECS, toSpawn: 0, spawnT: 0, cannonT: 0, masters: 0, boarded: 0, bonked: 0, stolen: 0, over: false });
   piles.forEach(deal);
   newWall();
   Object.assign(pirate, { x: 0, z: 7 });
@@ -549,7 +555,7 @@ function labelFor(h) {
   if (h.status === 'master') return ['label done', `★ Masterpiece<i class="bar"><b></b></i>${atk}`];
   if (h.status === 'boarded') return ['label weak', `Boarded over: weak<i class="bar"><b></b></i>${atk}`];
   const left = h.open;
-  const breach = h.attackers ? `<em>⚔ raiders can climb in!</em>` : '';
+  const breach = h.pieces.length ? `<i class="bar part"><b></b></i>${atk}` : h.attackers ? `<em>⚔ raiders can climb in!</em>` : '';
   if (!h.exact) return ['label bad', `No Masterpiece now<small>board it over to close it</small>${breach}`];
   if (left.length === 5) return ['label', `Needs ${an(C.identify(left))}${breach}`];
   if (left.length === 10) {
@@ -577,6 +583,7 @@ addEventListener('keydown', (e) => {
   else if (key === 'e' && carry) turn(rotCW, -1);
   else if (key === 'f' && carry) turn(flip, 0);
   else if (key === 'tab') cycle++;
+  else if (key === 'r' && carry && foe()) throwAt(foe());
 });
 addEventListener('keyup', (e) => keys.delete(e.key.toLowerCase()));
 addEventListener('blur', () => keys.clear());
@@ -601,16 +608,16 @@ function nearest(list, r) {
   return best;
 }
 function focus() {
-  const foe = nearest(raiders.filter((r) => r.inside && r.state !== 'down'), 1.6);
-  if (foe) return { kind: 'bonk', foe };
   const p = nearest(piles, 1.55);
   if (p) return { kind: 'pile', p };
   if (nearest([{ x: barrel.position.x, z: barrel.position.z }], 1.35)) return { kind: 'barrel' };
   return { kind: 'wall' };
 }
+// The raider a thrown piece would hit: the nearest one loose in the den.
+const THROW_RANGE = 10;
+const foe = () => nearest(raiders.filter((r) => r.inside && r.state !== 'down' && !r.targeted), THROW_RANGE);
 function act() {
   const f = focus();
-  if (f.kind === 'bonk') return bonk(f.foe);
   if (f.kind === 'pile') {
     const p = f.p;
     if (!carry && p.letter) return pickUp(p);
@@ -618,6 +625,7 @@ function act() {
     if (carry && p.letter) { putBack(); return pickUp(p); }
   } else if (f.kind === 'barrel' && carry) return scrap();
   else if (carry && target?.ok) return place(target);
+  else if (carry && foe()) return throwAt(foe());
   else if (carry && target) shake = 0.2;
 }
 function pickUp(p) {
@@ -679,6 +687,7 @@ function place(t) {
     g.position.copy(to);
     if (!h.pieces.includes(piece)) return;   // knocked out while it was flying in
     updateHole(h);
+    if (h.status === 'open') { h.hp += HP.piece; h.maxHp = h.hp; }
     if (h.status === 'open' && wasExact && !h.exact) { shake = 0.3; toast('No Masterpiece in that hole now', true); }
   });
   refill(pile);
@@ -699,14 +708,36 @@ function scrap() {
   tween(0.4, (s) => { g.position.lerpVectors(from, to, s); g.position.y += Math.sin(s * Math.PI) * 0.8; g.scale.setScalar(0.55 * (1 - s)); }, () => scene.remove(g));
   refill(pile);
 }
-function bonk(r) {
+// Hurl the carried piece at a raider. It always flies true, but the piece is spent.
+function throwAt(r) {
+  const g = carry.group, pile = carry.from, color = WOOD[carry.letter];
+  carry.mat.opacity = 1; carry.mat.depthWrite = true;
+  carry = null;
+  r.targeted = true;
   pirate.bonkT = 0.3;
+  pirate.g.rotation.y = Math.atan2(r.x - pirate.x, r.z - pirate.z);
+  const from = g.position.clone(), d = Math.hypot(r.x - from.x, r.z - from.z);
+  const to = new THREE.Vector3();
+  tween(0.25 + d * 0.05, (s) => {
+    to.set(r.x, 1.1, r.z);
+    g.position.lerpVectors(from, to, s);
+    g.position.y += Math.sin(s * Math.PI) * (0.5 + d * 0.12);
+    g.rotation.x = s * 9; g.rotation.z = s * 5;
+  }, () => { scene.remove(g); hit(r, from, color); });
+  refill(pile);
+}
+function hit(r, from, color) {
+  burst(new THREE.Vector3(r.x, 1.1, r.z), color, 22, 4.5);
+  r.targeted = false;
+  if (r.state === 'down' || r.gone) return;
+  const dx = r.x - from.x, dz = r.z - from.z, n = Math.hypot(dx, dz) || 1;
   r.state = 'down'; r.t = 0;
+  r.kv = new THREE.Vector3(dx / n * 5.5, 5, dz / n * 5.5);
   G.bonked++;
   G.gold += PAY.bonk;
-  if (r.loot) { G.gold += PAY.steal; r.loot.visible = false; r.loot = null; toast('Got the loot back!'); } else toast('Bonk!');
-  burst(new THREE.Vector3(r.x, 1.4, r.z), '#ffe27a', 14, 2.5);
-  shake = 0.15;
+  burst(new THREE.Vector3(r.x, 1.6, r.z), '#ffe27a', 12, 3);
+  if (r.loot) { G.gold += PAY.steal; r.loot.visible = false; r.loot = null; toast('Thwack! Loot recovered'); } else toast('Thwack!');
+  shake = 0.35;
   updateStats();
 }
 function breakHole(h) {
@@ -765,10 +796,13 @@ const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.max(0, s) % 60).padStart
 function tween(dur, step, done) { tweens.push({ t: 0, dur, step, done }); }
 
 // ---------- raiders ----------
+// Only an empty hole can be climbed through; anything with wood in it has to be hacked open first.
+const passable = (h) => h.status === 'open' && !h.pieces.length;
 function pickHole(x) {
-  const open = wall.holes.filter((h) => h.status === 'open');
-  if (open.length) return open.sort((a, b) => Math.abs(holeX(a) - x) - Math.abs(holeX(b) - x))[0];
-  return wall.holes.slice().sort((a, b) => a.hp - b.hp)[0];
+  const near = (a, b) => Math.abs(holeX(a) - x) - Math.abs(holeX(b) - x);
+  const gaps = wall.holes.filter(passable);
+  if (gaps.length) return gaps.sort(near)[0];
+  return wall.holes.slice().sort((a, b) => a.hp - b.hp || near(a, b))[0];
 }
 function spawnRaider() {
   const m = makePirate({ shirt: ['#1f2433', ['#59607a', '#2f6b4f', '#6b2f5e'][rand(3)]], scarf: ['#2b2b2b', '#3a4a8a', '#7a1f1f'][rand(3)], trousers: '#5a4636', patch: Math.random() < 0.5, beard: ['#222', '#7a4a1a', '#999'][rand(3)], sword: true });
@@ -778,6 +812,10 @@ function spawnRaider() {
   const r = { m, xr, x, z: -14, state: 'approach', hole: pickHole(x), t: 0, stamina: RAIDER_STAMINA, hitT: 0.5, slot: (Math.random() - 0.5) * 1.2, inside: false, loot: null };
   m.g.position.set(r.x, 0, r.z);
   scene.add(m.g);
+  r.mark = document.createElement('div');
+  r.mark.className = 'mark';
+  r.mark.textContent = '⚔';
+  $('labels').append(r.mark);
   raiders.push(r);
 }
 function moveTo(r, tx, tz, speed, dt) {
@@ -795,22 +833,24 @@ function updateRaider(r, dt) {
   switch (r.state) {
     case 'approach': {
       moving = !moveTo(r, holeX(h) + r.slot, -1.15, 2.2, dt);
-      if (!moving) { r.state = h.status === 'open' ? 'climb' : 'attack'; r.t = 0; }
+      if (!moving) { r.state = passable(h) ? 'climb' : 'attack'; r.t = 0; }
       break;
     }
-    case 'attack': {
-      if (h.status === 'open') { r.state = 'climb'; r.t = 0; break; }
-      faceTo(r.m, 0, 1, dt);
-      r.stamina -= dt;
+    case 'attack': case 'hackOut': {
+      // Hacking at the wood in a hole: from outside to get in, or from inside to get back out.
+      const out = r.state === 'hackOut';
+      if (passable(h)) { r.state = out ? 'climbOut' : 'climb'; r.t = 0; break; }
+      faceTo(r.m, 0, out ? -1 : 1, dt);
+      if (!out) r.stamina -= dt;
       h.hp -= RAIDER_DPS * dt;
       r.m.arms[1].rotation.x = -1.8 + Math.sin(r.t * 9) * 1.1;
       r.hitT -= dt;
       if (r.hitT <= 0) {
         r.hitT = 0.7;
-        burst(new THREE.Vector3(holeX(h) + r.slot * 0.5, Math.min(holeMidY(h), 1.4), 0.25), '#c98a45', 4, 2);
+        burst(new THREE.Vector3(holeX(h) + r.slot * 0.5, Math.min(holeMidY(h), 1.4), out ? 0.6 : 0.25), '#c98a45', 4, 2);
         h.jig = 0.15;
       }
-      if (h.hp <= 0) { breakHole(h); r.state = 'climb'; r.t = 0; }
+      if (h.hp <= 0) { breakHole(h); r.state = out ? 'climbOut' : 'climb'; r.t = 0; }
       else if (r.stamina <= 0) r.state = 'leave';
       break;
     }
@@ -841,8 +881,9 @@ function updateRaider(r, dt) {
       break;
     }
     case 'flee': {
-      moving = !moveTo(r, holeX(h), 1.2, 2.8, dt);
-      if (!moving) { r.state = 'climbOut'; r.t = 0; }
+      if (!passable(h)) { const gap = wall.holes.filter(passable).sort((a, b) => Math.abs(holeX(a) - r.x) - Math.abs(holeX(b) - r.x))[0]; if (gap) r.hole = gap; }
+      moving = !moveTo(r, holeX(r.hole), 1.2, 2.8, dt);
+      if (!moving) { r.state = passable(r.hole) ? 'climbOut' : 'hackOut'; r.t = 0; }
       break;
     }
     case 'leave': {
@@ -852,16 +893,24 @@ function updateRaider(r, dt) {
       break;
     }
     case 'down': {
-      r.m.g.rotation.x = Math.max(-Math.PI / 2, -r.t * 6);
-      r.m.g.position.y = 0.1;
-      if (r.t > 1) r.m.g.scale.setScalar(Math.max(0.001, 0.82 * (1 - (r.t - 1) * 2)));
-      if (r.t > 1.5) r.gone = true;
+      // Sent flying: up, spinning, a bounce, then flat out and gone.
+      const v = r.kv || new THREE.Vector3();
+      const g = r.m.g;
+      v.y -= 14 * dt;
+      r.x = Math.max(-bounds.x, Math.min(bounds.x, r.x + v.x * dt));
+      r.z = Math.max(0.6, Math.min(bounds.z1, r.z + v.z * dt));
+      g.position.y = Math.max(0, g.position.y + v.y * dt);
+      if (g.position.y <= 0 && v.y < 0) { v.x *= 0.4; v.z *= 0.4; v.y = Math.abs(v.y) > 3 ? -v.y * 0.3 : 0; }
+      if (g.position.y > 0.05) g.rotation.y += dt * 10;
+      g.rotation.x = Math.max(-Math.PI / 2, -r.t * 4);
+      if (r.t > 1.4) g.scale.setScalar(Math.max(0.001, 0.82 * (1 - (r.t - 1.4) * 2.5)));
+      if (r.t > 1.8) r.gone = true;
       break;
     }
   }
   if (r.state !== 'climb' && r.state !== 'climbOut' && r.state !== 'down') {
     const swing = animateWalk(r.m, moving, dt, 12);
-    if (r.state === 'attack') {
+    if (r.state === 'attack' || r.state === 'hackOut') {
       r.m.legs.forEach((l) => { l.rotation.x = 0; });
       r.m.arms[1].rotation.x = -1.8 + Math.sin(r.t * 9) * 1.1;
     } else r.m.arms[1].rotation.x = moving ? swing * 0.5 : -0.4;
@@ -942,7 +991,7 @@ function blast(cells) {
 function startWave() {
   G.wave++;
   G.phase = 'wave';
-  G.toSpawn = 2 + 2 * G.wave;
+  G.toSpawn = 1 + G.wave;
   G.spawnT = 0.5;
   G.cannonT = G.wave >= 2 ? 8 : Infinity;
   if (G.wave >= 2 && !cannon.visible) { cannon.visible = true; toast('They brought a cannon!', true); }
@@ -960,7 +1009,7 @@ function updateWaves(dt) {
   if (G.toSpawn > 0 && G.spawnT <= 0) { spawnRaider(); G.toSpawn--; G.spawnT = Math.max(2.5, 7 - G.wave); }
   G.cannonT -= dt;
   if (G.cannonT <= 0) { fireCannon(); G.cannonT = Math.max(9, 22 - 2 * G.wave); }
-  if (!G.toSpawn && !raiders.length) { G.phase = 'calm'; G.phaseT = 15; toast(`Wave ${G.wave} beaten off!`); }
+  if (!G.toSpawn && !raiders.length) { G.phase = 'calm'; G.phaseT = CALM_SECS; toast(`Wave ${G.wave} beaten off!`); }
 }
 function banner() {
   const el = $('banner');
@@ -974,7 +1023,7 @@ function banner() {
 function checkEnd() {
   if (G.over || G.gold > 0) return;
   G.over = true;
-  $('end-text').textContent = `They emptied the chest in wave ${G.wave}. You built ${G.masters} Masterpiece${G.masters === 1 ? '' : 's'}, boarded over ${G.boarded} hole${G.boarded === 1 ? '' : 's'} and bonked ${G.bonked} raider${G.bonked === 1 ? '' : 's'}.`;
+  $('end-text').textContent = `They emptied the chest in wave ${G.wave}. You built ${G.masters} Masterpiece${G.masters === 1 ? '' : 's'}, boarded over ${G.boarded} hole${G.boarded === 1 ? '' : 's'} and knocked out ${G.bonked} raider${G.bonked === 1 ? '' : 's'}.`;
   setTimeout(() => $('end').classList.add('on'), 900);
 }
 
@@ -1024,8 +1073,8 @@ function drawGhost() {
 function prompt() {
   const f = focus();
   let t = '';
-  if (f.kind === 'bonk') t = 'Space: bonk the raider!';
-  else if (f.kind === 'pile') {
+  const loose = foe();
+  if (f.kind === 'pile') {
     if (!carry && f.p.letter) t = `Space: pick up the ${f.p.letter}`;
     else if (carry && carry.from === f.p && !f.p.letter) t = `Space: put the ${carry.letter} back`;
     else if (carry && f.p.letter) t = `Space: swap the ${carry.letter} for the ${f.p.letter}`;
@@ -1038,6 +1087,12 @@ function prompt() {
     else if (pirate.z <= WALL_Z || (mouseMode && mouse)) t = `The ${carry.letter} won't go there · Q/E turn · F flip`;
     else t = `Carry the ${carry.letter} to a hole`;
   } else t = 'Fetch a piece from the piles';
+  if (loose && carry && f.kind === 'pile') t += ` · R: throw it at the raider!`;
+  else if (loose && f.kind !== 'pile') {
+    if (!carry) t = 'A raider is in the den! Grab a piece to throw at them';
+    else if (target?.ok) t = `Space: fit it · R: throw the ${carry.letter} at the raider!`;
+    else t = `R: throw the ${carry.letter} at the raider!`;
+  }
   const el = $('prompt');
   if (el.textContent !== t) el.textContent = t;
 }
@@ -1103,7 +1158,7 @@ function update(dt) {
     for (let i = raiders.length - 1; i >= 0; i--) {
       const r = raiders[i];
       updateRaider(r, dt);
-      if (r.gone) { scene.remove(r.m.g); raiders.splice(i, 1); }
+      if (r.gone) { scene.remove(r.m.g); r.mark.remove(); raiders.splice(i, 1); }
     }
     checkEnd();
   }
@@ -1138,9 +1193,25 @@ function update(dt) {
   camLook.lerp(v3.set(pirate.x * 0.55, 1.8, cz - 3.4), Math.min(1, dt * 3));
   camera.lookAt(camLook);
 
+  // A marker over every raider inside the den, pinned to the screen edge when they're out of view.
+  for (const r of raiders) {
+    const show = r.inside && r.state !== 'down';
+    r.mark.style.display = show ? '' : 'none';
+    if (!show) continue;
+    v3.set(r.x, 1.9, r.z).project(camera);
+    let sx = (v3.x + 1) / 2 * innerWidth, sy = (1 - v3.y) / 2 * innerHeight;
+    const off = v3.z > 1 || sx < 0 || sx > innerWidth || sy < 0 || sy > innerHeight;
+    sx = Math.min(innerWidth - 28, Math.max(28, sx));
+    sy = Math.min(innerHeight - 90, Math.max(70, sy));
+    r.mark.style.left = `${sx}px`;
+    r.mark.style.top = `${sy}px`;
+    r.mark.classList.toggle('off', off);
+    r.mark.classList.toggle('loot', !!r.loot);
+  }
+
   // Hole labels float above each hole, with a strength bar for mended ones.
   for (const h of wall.holes) {
-    h.attackers = raiders.filter((r) => r.hole === h && (r.state === 'approach' || r.state === 'attack')).length;
+    h.attackers = raiders.filter((r) => r.hole === h && ['approach', 'attack', 'hackOut'].includes(r.state)).length;
     const [cls, html] = labelFor(h);
     if (h.sig !== cls + html) { h.sig = cls + html; h.label.className = cls; h.label.innerHTML = html; }
     const bar = h.label.querySelector('.bar b');
