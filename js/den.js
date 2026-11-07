@@ -2066,12 +2066,19 @@ function updateHole(h) {
 }
 /* While you're carrying a piece, every mended hole with room for another layer shows where it'd
    go: its outline on the den side, gently pulsing, like a frame waiting to be filled. */
-const nextMat = new THREE.LineBasicMaterial({ color: '#9fe0ff', transparent: true });
+// (A thin line was too faint to make out: the user couldn't see what shape it was. So the hole's
+// squares are filled in a pulsing light blue, with a bold outline.)
+const nextMat = new THREE.MeshBasicMaterial({ color: '#5fcfff', transparent: true, opacity: 0.3, depthWrite: false, toneMapped: false });
 function nextLayer(h) {
   const layer = boardsOf(h).length, show = !!carry && pirate.h < 0.3 && h.status !== 'open' && layer < MAX_PATCHES;
   if (show && h.next?.parent !== wallGroup) {
-    h.next = outline(h.cells, 0, '#9fe0ff');
-    h.next.material = nextMat;
+    h.next = new THREE.Group();
+    for (const [r, c] of h.cells) {
+      const p = new THREE.Mesh(cellPlane, nextMat);
+      p.position.set((c + 0.5) * S, -(r + 0.5) * S, 0);
+      h.next.add(p);
+    }
+    h.next.add(fatOutline(h.cells, 0.01, '#bdeeff', 0.05));
     wallGroup.add(h.next);
   }
   if (!h.next) return;
@@ -2965,7 +2972,29 @@ const ghostMats = {
   ok: new THREE.MeshBasicMaterial({ color: '#7dff7a', transparent: true, opacity: 0.45, depthWrite: false }),
   over: new THREE.MeshBasicMaterial({ color: '#ffb84a', transparent: true, opacity: 0.5, depthWrite: false }),
   no: new THREE.MeshBasicMaterial({ color: '#ff5a4a', transparent: true, opacity: 0.4, depthWrite: false }),
+  // A board nailed on behind a mended hole: the green of "it goes here", bolder than the blue of
+  // the layer it's going on (wood-coloured, it got lost against the wood in the hole).
+  layer: new THREE.MeshBasicMaterial({ color: '#6dff6a', transparent: true, opacity: 0.6, depthWrite: false, toneMapped: false }),
 };
+// An outline drawn with thin bars rather than a line, so it reads at any distance.
+const fatMats = {};
+function fatOutline(cells, z, color, t = 0.045) {
+  const set = new Set(cells.map(([r, c]) => k(r, c))), g = new THREE.Group();
+  const m = (fatMats[color] ||= new THREE.MeshBasicMaterial({ color, toneMapped: false }));
+  const bar = (x0, y0, x1, y1) => {
+    const b = new THREE.Mesh(new THREE.BoxGeometry(Math.abs(x1 - x0) + t, Math.abs(y1 - y0) + t, t), m);
+    b.position.set((x0 + x1) / 2, (y0 + y1) / 2, z);
+    g.add(b);
+  };
+  for (const [r, c] of cells) {
+    const x0 = c * S, x1 = (c + 1) * S, y0 = -r * S, y1 = -(r + 1) * S;
+    if (!set.has(k(r - 1, c))) bar(x0, y0, x1, y0);
+    if (!set.has(k(r + 1, c))) bar(x0, y1, x1, y1);
+    if (!set.has(k(r, c - 1))) bar(x0, y0, x0, y1);
+    if (!set.has(k(r, c + 1))) bar(x1, y0, x1, y1);
+  }
+  return g;
+}
 function aim() {
   target = null;
   if (!carry || pirate.h > 0.3) return;
@@ -3000,13 +3029,13 @@ function aim() {
   }
 }
 function drawGhost() {
-  const kind = !target ? '' : !target.ok ? 'no' : target.over ? 'over' : 'ok';
+  const kind = !target ? '' : !target.ok ? 'no' : target.patch ? 'layer' : target.over ? 'over' : 'ok';
   const f = target?.frame;
   const gz = f ? (f.kind === 'stair' ? 0.08 : 0.16) : target?.patch ? patchZ(target.layer) + 0.07 : kind === 'over' ? 0.45 : 0.08;
   const want = target && carry ? `${f ? f.i : 'w'}|${carry.cells.map((x) => x.join()).join(';')}|${target.dr},${target.dc}|${kind}|${gz}` : '';
   if (want === ghostKey) return;
   ghostKey = want;
-  if (ghost) { ghost.parent?.remove(ghost); ghost = null; }
+  if (ghost) { ghost.parent?.remove(ghost); ghost.traverse((o) => o.geometry?.dispose()); ghost = null; }
   if (!want) return;
   const g = new THREE.Group();
   const geo = new THREE.BoxGeometry(S * 0.98, S * 0.98, 0.12);
@@ -3015,7 +3044,7 @@ function drawGhost() {
     b.position.set((c + 0.5) * S, -(r + 0.5) * S, gz);
     g.add(b);
   }
-  g.add(outline(carry.cells, gz + 0.07, kind === 'no' ? '#ffd0c8' : '#fff4d0'));
+  g.add(fatOutline(carry.cells, gz + 0.07, kind === 'no' ? '#ffd0c8' : kind === 'layer' ? '#e8fbff' : '#fff4d0', f ? 0.03 : 0.04));
   if (f) { g.position.set(target.dc * S, -target.dr * S, 0); f.group.add(g); }
   else { g.position.set(X(target.dc), Y(target.dr), 0); wallGroup.add(g); }
   ghost = g;
@@ -4044,7 +4073,7 @@ function update(dt) {
   }
 
   // Hole labels float above each hole, with a strength bar for mended ones.
-  nextMat.opacity = 0.55 + 0.45 * Math.sin(performance.now() / 260);
+  nextMat.opacity = 0.22 + 0.2 * Math.sin(performance.now() / 260);
   for (const h of wall.holes) {
     h.attackers = raiders.filter((r) => r.hole === h && ['approach', 'attack', 'hackOut'].includes(r.state)).length;
     const [cls, html] = labelFor(h);

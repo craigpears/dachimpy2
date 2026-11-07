@@ -199,6 +199,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   while you carry a piece, every mended hole with room shows a pulsing outline on the den side
   where the next layer goes, its label says "room for a layer behind", and once every hole is
   mended the prompt sends you there. (Grading those layers is in IDEAS.md.)
+  **And it must be easy to see.** A thin outline was too faint: the user could see "it's trying to
+  draw a second shape" but couldn't make anything out. So the layer's squares are filled in a
+  pulsing light blue with a bold outline (bars, not a hairline), and the board you're about to
+  nail on is a green ghost with a bold white outline (wood-coloured, it got lost against the wood
+  in the hole). Every ghost gets the bold outline.
 - **Snapping goes where you point.** Boards behind a hole snapped a square or two off, so you
   couldn't line one up: the pointer was read on the stone face while the boards stand out towards
   you. Every spot is matched to the pointer at its own depth.
