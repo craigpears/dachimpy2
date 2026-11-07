@@ -315,6 +315,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     current design; ones you put up keep the design they had. The den's dress (flag, paint,
     decorations) is kept in localStorage (`carp.den.den`) and shared with the crew (a `den`
     message, and in the sync a joiner gets).
+  - **Even the silly things are yours to change.** The user wants to decorate everything, "just all
+    silly things": the gun tower's gunwale, rail and crates take any dye (or Gunnery's own red,
+    gold and light wood); painted crates keep a hint of their wood.
+  - **Pick your landscape:** a barren cave (as it started), a seaside hideout (sand, sandstone,
+    palms, the sea and its surf out beyond where the raiders land) or a jungle hideout (mossy
+    ground and rock, big trees, ferns at the foot of the cave rocks). The user asked for "something
+    simple for right now". Only the look changes, never the play: trees stand out past the raiders'
+    cannon, beyond the wall's ends and behind the cave rocks, and ferns never go where the house is.
+    These are on the Den tab under "Your den", kept and shared with the rest of the den's dress.
 - **Future ideas live in [IDEAS.md](IDEAS.md).** When the user brain-dumps ideas for later, note
   them there rather than building them.
 - **There's always something to do with a junk piece.** Holding three useless pieces with nothing
@@ -339,7 +348,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **Give enough time to build.** A piece takes about ten seconds to fetch and fit, so the first wave
   waits 75 seconds and starts small.
 - **The den has a gate** and raiders attack from the far side of the wall, with swords and (from
-  wave 2) a cannon that blasts fresh holes. Keep repairing.
+  wave 2) a cannon that blasts fresh holes. Keep repairing. **The cannon stands well back** (16 m
+  out, behind where the raiders gather): with the gun tower jutting out, the user found it too far
+  forward at 10.5 m.
 - **A hole is open right through the wall.** The user likes the empty holes, a "nice incomplete
   wall": no backing behind them that looks like cladding or boarding. The dark behind the stones
   (hiding the gaps between them) has the holes cut out of it, including fresh ones from the cannon.

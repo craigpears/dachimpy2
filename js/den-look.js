@@ -461,7 +461,10 @@ export const PATTERNS = [['plain', 'Plain'], ['border', 'Border'], ['stripes', '
 export const DECOR = [['flag', 'Jolly Roger'], ['banner', 'Banner'], ['lantern', 'Lantern'], ['barrel', 'Rum barrel']];
 export const MAX_DECOR = 24;
 const DESIGN = { flag: 'skull', flagCol: 'black', flagCol2: 'white', flagCol3: 'red', pat: 'plain' };
-export const DEFAULT_DEN = { ...DESIGN, paint: 'none', roof: 'maroon', decor: [] };
+// Where the den is: the barren cave it started as, a seaside hideout or a jungle one.
+export const BIOMES = [['barren', 'Barren cave'], ['seaside', 'Seaside hideout'], ['jungle', 'Jungle hideout']];
+// The gun tower's paint: gunwale, rail and crates ('none' is Gunnery's own red, gold and light wood).
+export const DEFAULT_DEN = { ...DESIGN, paint: 'none', roof: 'maroon', gunwale: 'none', rail: 'none', crates: 'none', biome: 'barren', decor: [] };
 // A flag's design: its emblem, pattern and three colours.
 export function cleanDesign(o) {
   const src = o && typeof o === 'object' ? o : {}, D = { ...DESIGN };
@@ -473,7 +476,8 @@ export function cleanDesign(o) {
 export const designOf = (D) => ({ flag: D.flag, flagCol: D.flagCol, flagCol2: D.flagCol2, flagCol3: D.flagCol3, pat: D.pat });
 export function cleanDen(o) {
   const src = o && typeof o === 'object' ? o : {}, D = { ...DEFAULT_DEN, ...cleanDesign(src) };
-  for (const kk of ['paint', 'roof']) if (src[kk] === 'none' || DYES[src[kk]]) D[kk] = src[kk];
+  for (const kk of ['paint', 'roof', 'gunwale', 'rail', 'crates']) if (src[kk] === 'none' || DYES[src[kk]]) D[kk] = src[kk];
+  if (BIOMES.some(([id]) => id === src.biome)) D.biome = src.biome;
   const num = (v, a, b) => (typeof v === 'number' && isFinite(v) ? Math.max(a, Math.min(b, v)) : null);
   D.decor = (Array.isArray(src.decor) ? src.decor : []).slice(0, MAX_DECOR).map((it) => {
     if (!it || !DECOR.some(([id]) => id === it.k)) return null;

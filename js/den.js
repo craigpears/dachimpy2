@@ -6,7 +6,7 @@
    ("boarded over"): that always closes it, but the patch is weak and pays less. */
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, cleanDesign, designOf, drawFlag, dyeHex, DYES, SKIN, HAIR, FUR, PARTS, FLAGS, PATTERNS, DECOR, MAX_DECOR, twoColours } from './den-look.js';
+import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, cleanDesign, designOf, drawFlag, dyeHex, DYES, SKIN, HAIR, FUR, PARTS, FLAGS, PATTERNS, DECOR, MAX_DECOR, BIOMES, twoColours } from './den-look.js';
 
 /* The main puzzle's engine, but searching a wide frame column by column (by turning it on its
    side): row by row, a long thin strip like a wall-walk can take the solver a minute; this way,
@@ -51,7 +51,8 @@ scene.background = new THREE.Color('#1a110b');
 scene.fog = new THREE.Fog('#1a110b', 20, 38);
 const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 100);
 
-scene.add(new THREE.HemisphereLight('#ffe6c4', '#3a2616', 0.9));
+const hemi = new THREE.HemisphereLight('#ffe6c4', '#3a2616', 0.9);
+scene.add(hemi);
 const sun = new THREE.DirectionalLight('#ffd9a8', 1.6);
 sun.position.set(-5, 12, 9);
 sun.castShadow = true;
@@ -341,9 +342,9 @@ function buildWall() {
   scenery.push(torch(-half + 1.75, ramp.zBot + 0.3), torch(half - 1.75, ramp.zBot + 0.3), torch(X(wall.gateCols.c0) - 0.5, 1), torch(X(wall.gateCols.c1 + 1) + 0.5, 1));
   // Out beyond the wall: a rocky rise for the raiders' cannon.
   const cx = half * 0.45;
-  const mound = rock(cx, -0.4, -10.5, 1.8);
+  const mound = rock(cx, -0.4, -16, 1.8);
   mound.scale.set(1.4, 0.5, 1.2);
-  cannon.position.set(cx, 0.6, -10.5);
+  cannon.position.set(cx, 0.6, -16);
   cannon.visible = false;
   scenery.push(mound, cannon);
   // Props inside: three crates for the piles, a fire barrel, the treasure chest.
@@ -361,6 +362,7 @@ function buildWall() {
   obstacles = [...piles.map((p) => ({ x: p.x, z: p.z, r: 0.75 })), { x: barrel.position.x, z: barrel.position.z, r: 0.55 }, { x: chest.position.x, z: chest.position.z, r: 0.75 }];
   piles.forEach(showPile);
   rebuildDecor();
+  applyBiome(true);
 }
 
 /* The rampart: a walk along the top of the wall, with stairs up from the den at either end. Up
@@ -858,6 +860,149 @@ function flagpole(h = 2, m = flagMat) {
   return g;
 }
 // (Poles thrown away with an old den are forgotten.)
+// ---------- the landscape ----------
+/* Where the den is, your choice (Your pirate, Den): the barren cave it started as, a seaside
+   hideout (sand, sandstone, palms, the sea out beyond where the raiders come from) or a jungle one
+   (moss, mossy rock, big trees and ferns). Only the look changes, never the play: the props stand
+   outside the wall's ends, out past the raiders' cannon and behind the cave rocks. */
+const BIOME = {
+  barren: { sky: '#1a110b', ground: '#7a5c3d', dots: ['40,26,14', '170,135,95'], rocks: ['#5d5048', '#6b5c50', '#4f443d', '#73655a'], hemi: ['#ffe6c4', '#3a2616'] },
+  seaside: { sky: '#2b4a5f', ground: '#c4a172', dots: ['120,90,50', '245,232,200'], rocks: ['#9c8566', '#b09878', '#85704f', '#bfa886'], hemi: ['#fff0dc', '#5e5038'] },
+  jungle: { sky: '#12231a', ground: '#5b5a30', dots: ['30,45,15', '120,150,60'], rocks: ['#4c5944', '#5a6a4b', '#3e4a37', '#677858'], hemi: ['#eaffd6', '#24321a'] },
+};
+const biomeGroup = new THREE.Group();
+scene.add(biomeGroup);
+let biomeId = null, sea = null;
+const seaTex = canvasTex(128, 128, (g, w, h) => {
+  g.fillStyle = '#2f7896'; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 40; i++) { g.fillStyle = `rgba(200,235,245,${0.1 + Math.random() * 0.25})`; g.fillRect(Math.random() * w, Math.random() * h, 8 + Math.random() * 22, 2); }
+});
+seaTex.wrapS = seaTex.wrapT = THREE.RepeatWrapping;
+seaTex.repeat.set(16, 8);
+const trunkMat = mat('#7d5b38', { map: woodTex });
+const leafMats = ['#3f8a3a', '#2f7432', '#4f9a3c'].map((c) => mat(c, { side: THREE.DoubleSide, flatShading: true }));
+const canopyMats = ['#2f6b2a', '#3b7d2f', '#275a26'].map((c) => mat(c, { flatShading: true }));
+// A palm frond (or, low down, a fern's): a long leaf that droops from its base.
+function frond(len, wid, droop, m) {
+  const geo = new THREE.PlaneGeometry(wid, len, 1, 6).translate(0, len / 2, 0), pos = geo.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const t = pos.getY(i) / len;
+    pos.setZ(i, -t * t * droop);
+    pos.setX(i, pos.getX(i) * (1 - t * 0.85));
+  }
+  geo.computeVertexNormals();
+  return mesh(geo, m, false);
+}
+function plume(n, len, wid, droop, tilt) {
+  const g = new THREE.Group();
+  for (let i = 0; i < n; i++) {
+    const f = frond(len * (0.85 + Math.random() * 0.3), wid, droop, leafMats[rand(3)]);
+    const arm = new THREE.Group();
+    f.rotation.x = -tilt;
+    arm.add(f);
+    arm.rotation.y = (i / n) * Math.PI * 2 + Math.random() * 0.4;
+    g.add(arm);
+  }
+  return g;
+}
+function palm(x, z, sc) {
+  const g = new THREE.Group();
+  const top = new THREE.Vector3((Math.random() - 0.5) * 1.6, 4.4, (Math.random() - 0.5) * 1.6);
+  const curve = new THREE.QuadraticBezierCurve3(new THREE.Vector3(), new THREE.Vector3(0, 2.6, 0), top);
+  g.add(mesh(new THREE.TubeGeometry(curve, 10, 0.15, 7), trunkMat));
+  const crown = plume(8, 2.2, 0.55, 0.9, 1.05);
+  crown.position.copy(top);
+  g.add(crown);
+  const nutM = mat('#5a3d1e');
+  for (let i = 0; i < 3; i++) {
+    const nut = mesh(new THREE.SphereGeometry(0.13, 8, 6), nutM, false);
+    nut.position.copy(top).add(new THREE.Vector3(Math.cos(i * 2.1) * 0.18, -0.15, Math.sin(i * 2.1) * 0.18));
+    g.add(nut);
+  }
+  g.position.set(x, 0, z);
+  g.scale.setScalar(sc);
+  return g;
+}
+function jungleTree(x, z, sc) {
+  const g = new THREE.Group(), h = 4.2 + Math.random() * 1.5;
+  const trunk = mesh(new THREE.CylinderGeometry(0.2, 0.34, h, 8), trunkMat);
+  trunk.position.y = h / 2;
+  g.add(trunk);
+  for (let i = 0; i < 4; i++) {
+    const b = mesh(new THREE.IcosahedronGeometry(1.1 + Math.random() * 0.6, 0), canopyMats[rand(3)], false);
+    b.position.set((Math.random() - 0.5) * 1.6, h + (Math.random() - 0.3) * 0.9, (Math.random() - 0.5) * 1.6);
+    b.scale.y = 0.75;
+    g.add(b);
+  }
+  g.position.set(x, 0, z);
+  g.scale.setScalar(sc);
+  return g;
+}
+function fern(x, z, sc) {
+  const g = plume(7, 0.9, 0.3, 0.35, 1.0);
+  g.position.set(x, 0.05, z);
+  g.scale.setScalar(sc);
+  return g;
+}
+// Spots for trees: out past the raiders' cannon, beyond the wall's two ends, and behind the
+// cave rocks down both sides of the den.
+function treeSpots(half) {
+  const spots = [], cx = half * 0.45;
+  for (let x = -half - 12; x <= half + 12; x += 2.6 + Math.random() * 1.4) if (Math.abs(x - cx) > 3) spots.push([x, -19 - Math.random() * 2]);
+  for (const sx of [-1, 1]) {
+    for (let z = -14; z < -1; z += 2.6 + Math.random()) spots.push([sx * (half + 4.8 + Math.random() * 3), z]);
+    for (let z = 0; z < 14; z += 2.8 + Math.random()) spots.push([sx * (half + 5 + Math.random() * 2.5), z]);
+  }
+  return spots;
+}
+function drawGround(B) {
+  const cv = groundTex.image, g = cv.getContext('2d'), w = cv.width, h = cv.height;
+  g.fillStyle = B.ground; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 900; i++) {
+    g.fillStyle = `rgba(${B.dots[Math.random() < 0.5 ? 0 : 1]}, ${Math.random() * 0.25})`;
+    const sz = 2 + Math.random() * 6;
+    g.fillRect(Math.random() * w, Math.random() * h, sz, sz);
+  }
+  groundTex.needsUpdate = true;
+}
+function applyBiome(force = false) {
+  const id = BIOME[denLook.biome] ? denLook.biome : 'barren', B = BIOME[id];
+  if (!force && id === biomeId) return;
+  if (id !== biomeId) {
+    scene.background.set(B.sky);
+    scene.fog.color.set(B.sky);
+    hemi.color.set(B.hemi[0]); hemi.groundColor.set(B.hemi[1]);
+    rockMats.forEach((m, i) => m.color.set(B.rocks[i]));
+    drawGround(B);
+  }
+  biomeId = id;
+  biomeGroup.clear();
+  sea = null;
+  if (!wall) return;
+  const half = wall.W * S / 2;
+  if (id === 'seaside') {
+    // The sea, beyond the sand where the raiders land, with a line of surf.
+    sea = mesh(new THREE.PlaneGeometry(220, 90), mat('#ffffff', { map: seaTex, roughness: 0.25, metalness: 0.1, emissive: '#0d2a36' }), false);
+    sea.rotation.x = -Math.PI / 2;
+    sea.position.set(0, -0.03, -21 - 45);
+    const surf = mesh(new THREE.PlaneGeometry(220, 0.7), new THREE.MeshBasicMaterial({ color: '#e8f4f2', transparent: true, opacity: 0.7, depthWrite: false }), false);
+    surf.rotation.x = -Math.PI / 2;
+    surf.position.set(0, 0.01, -21.2);
+    biomeGroup.add(sea, surf);
+    for (const [x, z] of treeSpots(half)) biomeGroup.add(palm(x, z, 0.85 + Math.random() * 0.35));
+  } else if (id === 'jungle') {
+    for (const [x, z] of treeSpots(half)) biomeGroup.add(jungleTree(x, z, 0.85 + Math.random() * 0.4));
+    // Ferns along the foot of the cave rocks inside the den, clear of the house.
+    for (const sx of [-1, 1]) for (let z = 1; z < 12.5; z += 1.3 + Math.random()) {
+      if (sx < 0 && z > HOUSE_Z0 - 1 && z < HOUSE_Z1 + 1) continue;
+      biomeGroup.add(fern(sx * (half + 0.5 + Math.random() * 0.8), z, 0.8 + Math.random() * 0.5));
+    }
+    for (const sx of [-1, 1]) for (let z = -12; z < -1; z += 1.6 + Math.random()) biomeGroup.add(fern(sx * (half + 1 + Math.random() * 2), z, 1 + Math.random() * 0.5));
+  }
+}
+function biomeTick(dt) {
+  if (sea) { seaTex.offset.x += dt * 0.004; seaTex.offset.y = Math.sin(performance.now() / 2400) * 0.01; }
+}
 function waveFlags(dt) {
   flags = flags.filter((f) => { let o = f.g; while (o.parent) o = o.parent; return o === scene || o === dress.scene; });
   for (const f of flags) {
@@ -1169,9 +1314,21 @@ function gunLoad(g, dt) {
   tm.emissive.set(g.state === 'fouled' ? '#5a0d06' : g.state === 'loaded' ? '#4a3208' : '#000000');
 }
 // A light-wood crate, as on the Gunnery board, open and full of shot or bundled red stores, or shut.
+// The gun tower's paint, shared so it can be changed (paintTower): gunwale, rail, crates.
+const towerMat = { gunwale: mat('#a3271c', { roughness: 0.7 }), rail: mat('#d9b23a', { metalness: 0.4, roughness: 0.4 }), crates: mat('#c9a06a', { map: woodTex }) };
+const TOWER_OWN = { gunwale: '#a3271c', rail: '#d9b23a', crates: '#c9a06a' };
+function paintTower() {
+  for (const kk of ['gunwale', 'rail', 'crates']) {
+    const dye = denLook[kk], c = new THREE.Color(TOWER_OWN[kk]);
+    // Painted crates keep a little of their wood; the gunwale and rail take the dye as it is.
+    if (dye !== 'none') c.set(kk === 'crates' ? c.lerp(new THREE.Color(dyeHex(dye)), 0.75) : dyeHex(dye));
+    towerMat[kk].color.copy(c);
+  }
+}
+paintTower();
 function crateMesh(i) {
   const g = new THREE.Group();
-  const light = mat('#c9a06a', { map: woodTex }), edge = mat('#6b4426');
+  const light = towerMat.crates, edge = mat('#6b4426');
   const box = mesh(new THREE.BoxGeometry(0.5, 0.26, 0.5), light);
   box.position.y = 0.13;
   g.add(box);
@@ -1252,7 +1409,7 @@ function makeGunDeck() {
   }
   // The gunwale round the three open sides, red with a gold rail as on a Puzzle Pirates ship, open
   // at the gunports; a low sill along the back where it meets the wall-walk.
-  const red = mat('#a3271c', { roughness: 0.7 }), gold = mat('#d9b23a', { metalness: 0.4, roughness: 0.4 });
+  const red = towerMat.gunwale, gold = towerMat.rail;
   const isPort = (r, c, d) => GD.guns.some((o) => o.port[0] === r && o.port[1] === c && o.d === d);
   for (let r = 0; r < GD.rows; r++) for (let c = 0; c < GD.cols; c++) for (let d = 0; d < 4; d++) {
     if (!cells.has(k(r, c)) || cells.has(k(r + DR[d], c + DC[d]))) continue;
@@ -3557,6 +3714,13 @@ function dressRows() {
     const db = el('button', 'mini', 'Put things up round the den');
     db.onclick = () => { dressPanel(false); decoMode(true); };
     dr.append(db);
+    box.append(el('h3', '', 'Your den'));
+    chooser(row('Landscape'), BIOMES, D.biome, den('biome'));
+    const tw = row('Gun tower');
+    swatch(tw, DYES, D.gunwale, den('gunwale'), 'Gunwale', 'Gunnery red');
+    swatch(tw, DYES, D.rail, den('rail'), 'Rail', 'Gunnery gold');
+    swatch(tw, DYES, D.crates, den('crates'), 'Crates', 'Light wood');
+    tw.append(el('small', '', 'gunwale · rail · crates'));
     box.append(el('h3', '', 'Your house'));
     const hs = ramp?.jobs.filter((j) => j.kind === 'house') || [], building = hs.find((j) => j.frame && !j.up);
     const hr = row('House');
@@ -3582,6 +3746,8 @@ function applyDen(D, mine = false) {
   denLook = D;
   redrawFlag();
   paintHouse();
+  paintTower();
+  applyBiome();
   rebuildDecor();
   if (!mine) return;
   keep('carp.den.den', denLook);
@@ -3756,6 +3922,7 @@ function update(dt) {
   camera.lookAt(camLook);
   updateMates(dt);
   waveFlags(dt);
+  biomeTick(dt);
 
   // A marker over every raider inside the den, pinned to the screen edge when they're out of view.
   aimed = carry ? aimFoe() : null;

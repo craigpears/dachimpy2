@@ -128,6 +128,11 @@ Ideas to carry on with:
   wall's outer face (lit by moonlight), and the user wants that "especially as we get to being
   able to decorate it": flags and banners hung on the outer face, a skull over the gate, maybe
   spikes along the top. Decorate mode only places things on the den floor so far.
+- **More landscapes and more to each:** snowy north, a volcano island, a swamp; a jetty and a
+  rowing boat on the seaside one, parrots in the jungle trees, waves that lap. Weather and time of
+  day (a sunset, a storm) would fit too.
+- **More of the gun tower to dress:** what's in the crates (shot, rum, fruit, treasure), the deck's
+  colour, the guns themselves (bronze, black iron, gilded), the barrel.
 - **The shack is small, open-backed and staying that way** (the user loves it: "a lot of
   character"). Things to put in it should suit its size: a hammock, a sea chest, a lantern hook.
 - **Move what you've put up** (pick it up and put it down again) rather than take down and redo.
