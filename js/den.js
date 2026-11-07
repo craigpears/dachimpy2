@@ -491,7 +491,7 @@ function openJob(i, shape = null) {
   $('labels').append(label);
   const b = C.bbox(shape);
   const f = j.frame = {
-    i, si: j.si, kind: j.kind, part: j.part, cells: shape, b, set, occ: new Set(), filled: new Set(), pieces: [], scrapCells: [], group: g, label, sig: '', done: false,
+    i, si: j.si, kind: j.kind, part: j.part, cells: shape, b, set, occ: new Set(), filled: new Set(), pieces: [], group: g, label, sig: '', done: false,
     pz: stair ? 0 : 0.1, zs: stair ? STAIR_W / WOOD_D : 1,
     plane: new THREE.Plane().setFromNormalAndCoplanarPoint(g.getWorldDirection(new THREE.Vector3()), g.getWorldPosition(new THREE.Vector3())),
   };
@@ -569,42 +569,9 @@ function placeFrame(t, by, hand) {
   });
   refill(hand.from);
 }
-/* You can never get stuck: a gap in a frame that none of the pieces to hand (carried or on the
-   crates) could reach any more, walled in by the pieces round it, gets plugged with offcuts. It
-   costs the Shipshape bonus. */
-const scrapMat = mat('#b08a5a', { map: woodTex });
-const scrapGeo = new THREE.BoxGeometry(S * 0.96, S * 0.96, 0.16);
-function plugGaps(f) {
-  const have = new Set([carry?.letter, ...piles.map((p) => p.letter)].filter(Boolean));
-  const orients = C.ORIENTS.filter((o) => have.has(o.letter));
-  const reachable = (r0, c0) => orients.some((o) => o.cells.some(([pr, pc]) => o.cells.every(([r, c]) => !f.occ.has(k(r - pr + r0, c - pc + c0)))));
-  const dead = f.open.filter(([r, c]) => !reachable(r, c));
-  if (!dead.length) return 0;
-  plugCells(f, dead);
-  if (isHost()) send('all', { t: 'plug', fi: f.i, cells: dead });
-  return dead.length;
-}
-function plugCells(f, cells) {
-  for (const [r, c] of cells) {
-    f.occ.add(k(r, c)); f.filled.add(k(r, c));
-    f.scrapCells.push([r, c]);
-    const m = mesh(scrapGeo, scrapMat);
-    m.position.set((c + 0.5) * S, -(r + 0.5) * S, f.kind === 'stair' ? -STAIR_W / 2 : 0.02);
-    if (f.kind === 'stair') m.scale.z = STAIR_W / 0.16;
-    f.group.add(m);
-    burst(frameAt(f, c + 0.5, r + 0.5, 0.2), '#f0d9a8', 6, 2);
-  }
-  frameState(f);
-}
-// Checked whenever the crates are dealt afresh.
-function checkGaps() {
-  for (const f of frames()) {
-    if (!plugGaps(f)) continue;
-    if (lastPlaced?.frame === f) lastPlaced = null;
-    toast('A gap none of your pieces can reach: plugged with offcuts', false, true);
-    if (f.filled.size === f.cells.length) finishFrame(f);
-  }
-}
+/* A gap in a frame is yours to sort out: nothing fills it for you (the user: "if there's a gap,
+   that's it, that's broken. That's the point of it being a puzzle"). Lift pieces back out to undo
+   it: any piece in a frame that isn't finished yet (liftable, lift). */
 // The frame's full: saw off what sticks out. A walk is then hauled up onto the wall; stairs are
 // done where they stand. `quiet` is for a joiner catching up: no sawdust, no pay, no waiting.
 function finishFrame(f, quiet = false) {
@@ -620,7 +587,7 @@ function finishFrame(f, quiet = false) {
     for (const kk of f.occ) { const [r, c] = kk.split(',').map(Number); if (!(j.tops.get(c) <= r)) j.tops.set(c, r); }
     j.up = true;
     if (!quiet) {
-      if (f.pieces.some((p) => p.over) || f.scrapCells.length) toast('The stairs are up, just as you built them');
+      if (f.pieces.some((p) => p.over)) toast('The stairs are up, just as you built them');
       else { G.gold += PAY.master; updateStats(); toast(`Shipshape stairs! Not a square out of place (+${PAY.master})`); }
     }
     jobDone(j, quiet);
@@ -640,7 +607,7 @@ function finishFrame(f, quiet = false) {
     p.group.add(outline(kept, 0.002, '#4a2a12'));
   }
   if (!quiet) {
-    if (waste || f.scrapCells.length) toast(waste ? `Sawn to fit: ${waste} square${waste > 1 ? 's' : ''} of offcuts` : 'Patched with offcuts: it\'ll do');
+    if (waste) toast(`Sawn to fit: ${waste} square${waste > 1 ? 's' : ''} of offcuts`);
     else { G.gold += PAY.master; updateStats(); toast(`Shipshape! Not a scrap wasted (+${PAY.master})`); }
   }
   if (j.kind === 'house') { raiseHouse(f, j, quiet); return; }
@@ -2384,7 +2351,8 @@ function act() {
     if (!carry && p.letter) return pickUp(p);
     if (carry && carry.from === p && !p.letter) return putBack();
     if (carry && p.letter && carry.from) { putBack(); return pickUp(p); }
-  } else if (!carry && canTakeBack()) return takeBack();
+  } else if (!carry && liftable()) return lift(liftable());
+  else if (!carry && canTakeBack()) return takeBack();
   else if (!carry && atPlot() && houseState() === 'plot') return startHouse();
   else if (!carry && atPlot() && houseState() === 'built') return dressPanel(true, 'den', 'house');
   else if (carry && target?.ok) return place(target);
@@ -2512,6 +2480,24 @@ function canTakeBack() {
   if (u.h.pieces[u.h.pieces.length - 1] !== u.piece || (!u.piece.patch && u.h.status === 'master')) return false;
   return Math.abs(u.piece.cx - pirate.x) <= REACH + 1.2;
 }
+// A piece in an unfinished frame you could lift back out: the one under the pointer, or (keyboard)
+// the nearest within reach. Anyone's, as everyone builds together.
+function liftable() {
+  if (carry || pirate.h > 0.3) return null;
+  if (mouseMode) {
+    const m = mouse?.frame && mouse;
+    if (!m || m.frame.done) return null;
+    const kk = k(Math.floor(m.fr), Math.floor(m.fc)), pi = m.frame.pieces.findIndex((p) => p.cells.includes(kk));
+    return pi < 0 || Math.hypot(m.frame.pieces[pi].cx - pirate.x, m.frame.pieces[pi].cz - pirate.z) > REACH + 1.2 ? null : { f: m.frame, pi };
+  }
+  let best = null, bd = REACH;
+  for (const f of frames()) f.pieces.forEach((p, pi) => { const d = Math.hypot(p.cx - pirate.x, p.cz - pirate.z); if (d < bd && (f.kind === 'stair' || pirate.z > WALL_Z)) { bd = d; best = { f, pi }; } });
+  return best;
+}
+function lift(l) {
+  if (guest()) return send('host', { t: 'takeback', frame: l.f.i, pi: l.pi });
+  unplace(l.f, myId(), true, l.pi);
+}
 function takeBack() {
   const u = lastPlaced, where = u.frame || u.h;
   lastPlaced = null;
@@ -2519,12 +2505,14 @@ function takeBack() {
   unplace(where, u.piece.by, true);
 }
 // Off comes the last piece in a hole or frame, put back as it was before. Whoever put it there
-// gets it back in their hands.
-function unplace(where, by, mine = by === myId()) {
-  const piece = where.pieces[where.pieces.length - 1];
-  if (!piece || piece.by !== by) return;
-  const u = piece.undo, b = C.bbox(piece.info.shape), frame = !!where.occ;
-  where.pieces.pop();
+// gets it back in their hands. From a frame, any piece can be lifted (`pi`), by anyone: it goes
+// into the hands of whoever lifted it (`by`).
+function unplace(where, by, mine = by === myId(), pi = null) {
+  const frame = !!where.occ, at0 = pi != null && frame ? pi : where.pieces.length - 1;
+  const piece = where.pieces[at0];
+  if (!piece || (pi == null && piece.by !== by) || (frame && where.done)) return;
+  const u = piece.undo, b = C.bbox(piece.info.shape);
+  where.pieces.splice(at0, 1);
   let at;
   if (frame) {
     piece.cells.forEach((kk) => { where.occ.delete(kk); where.filled.delete(kk); });
@@ -2551,7 +2539,7 @@ function unplace(where, by, mine = by === myId()) {
     wallGroup.remove(piece.group);
   }
   if (lastPlaced?.piece === piece) lastPlaced = null;
-  if (isHost()) send('all', { t: 'unplace', hole: frame ? undefined : wall.holes.indexOf(where), frame: frame ? where.i : undefined, by });
+  if (isHost()) send('all', { t: 'unplace', hole: frame ? undefined : wall.holes.indexOf(where), frame: frame ? where.i : undefined, by, pi: pi ?? undefined });
   if (mine) holdPiece(piece.info.letter, piece.info.shape, null, at);
 }
 // Into your hands, lifting from `at`: a piece from a crate (`from`), or one taken back off.
@@ -2578,7 +2566,6 @@ function refill(p, secs = 0.45) {
     p.wait = 0;
     if (p.letter || carry?.from === p) return;   // dealt afresh meanwhile (a new game)
     deal(p); showPile(p);
-    checkGaps();
     const g = p.group, s0 = g.scale.x;
     tween(0.3, (s) => g.scale.setScalar(s0 * (1 - (1 - s) ** 3)));
   }, secs * 1000);
@@ -3167,7 +3154,8 @@ function prompt() {
     else if (carry && f.p.letter && carry.from) t = `Space: swap the ${carry.letter} for the ${f.p.letter}`;
     else if (carry && f.p.letter) t = `Fit the ${carry.letter} again, or throw it at a raider`;
     else if (!f.p.letter && f.p.wait > 0.3) t = 'This crate\'s restocking: a thrown piece is timber gone';
-  } else if (!carry && canTakeBack()) t = `Space: take the ${lastPlaced.letter} back off`;
+  } else if (!carry && liftable()) { const l = liftable(); t = `Space: lift the ${l.f.pieces[l.pi].info.letter} back out of the frame`; }
+  else if (!carry && canTakeBack()) t = `Space: take the ${lastPlaced.letter} back off`;
   else if (carry) {
     const more = target?.count > 1 ? ` · Tab: other spots (${target.count})` : '';
     if (target?.frame) t = !target.ok ? 'Walk closer to fit it there' : target.over ? (target.frame.kind === 'stair' ? `Space: fit the ${carry.letter} in the stairs (it sticks out, and stays that way)${more}` : `Space: fit it in the frame (it sticks out: the spare gets sawn off)${more}`) : `Space: fit the ${carry.letter} in the ${{ stair: 'stairs', gun: 'gun tower frame', house: 'house frame' }[target.frame.kind] || 'wall-walk frame'}${more}`;
@@ -3388,7 +3376,7 @@ function sendSync(to, fresh = false) {
     next: ramp.next,
     gd: gunOut(),
     den: denLook,
-    jobs: ramp.jobs.map((j) => (j.frame ? { cells: j.frame.cells, pieces: j.frame.pieces.map((p) => p.info), scraps: j.frame.scrapCells, done: j.frame.done } : null)),
+    jobs: ramp.jobs.map((j) => (j.frame ? { cells: j.frame.cells, pieces: j.frame.pieces.map((p) => p.info), done: j.frame.done } : null)),
   });
 }
 function applySync(s) {
@@ -3419,7 +3407,6 @@ function applySync(s) {
     if (!d) return;
     const f = openJob(i, d.cells);
     d.pieces.forEach((info) => putFramePiece(f, info));
-    if (d.scraps.length) plugCells(f, d.scraps);
     frameState(f);
     if (d.done) finishFrame(f, true);
   });
@@ -3523,7 +3510,7 @@ function onNet(m) {
         if (t.frame || wall.holes[m.hole]) place(t, m.by, handAt(m.by, m.letter, m.shape));
       }
       break;
-    case 'unplace': if (!net.host && slotOf(m)) unplace(slotOf(m), m.by); break;
+    case 'unplace': if (!net.host && slotOf(m)) unplace(slotOf(m), m.by, undefined, m.pi ?? null); break;
     case 'throw':
       if (net.host) hostThrow(m);
       else if (m.by !== net.id) {
@@ -3538,14 +3525,6 @@ function onNet(m) {
     case 'shoot': if (!net.host) shoot(m.cells); break;
     case 'blast': if (!net.host) blast(m.cells, true); break;
     case 'frame': if (!net.host) openJob(m.fi, m.cells); break;
-    case 'plug': {
-      const f = ramp.jobs[m.fi]?.frame;
-      if (net.host || !f || f.done) break;
-      plugCells(f, m.cells);
-      toast('A gap none of your pieces can reach: plugged with offcuts', false, true);
-      if (f.filled.size === f.cells.length) finishFrame(f);
-      break;
-    }
     // To the host: the crew asking.
     case 'crate': {
       if (!net.host) break;
@@ -3566,6 +3545,7 @@ function onNet(m) {
       break;
     }
     case 'takeback': {
+      if (net.host && m.pi != null && slotOf(m)?.occ) { unplace(slotOf(m), m.from, false, m.pi); break; }   // lifted out of a frame
       const where = net.host && slotOf(m), p = where?.pieces[where.pieces.length - 1];
       if (p && p.by === m.from && p.undo?.hpAfter != null && !(where.occ ? where.done : !p.patch && where.status === 'master')) unplace(where, m.from, false);
       break;

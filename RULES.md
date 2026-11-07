@@ -170,10 +170,13 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     out stay, and you walk on the real tops of the pieces. A one-square step you walk up; a
     two-square one you hop up. So the stairs stay climbable, a piece can't stick up more than one
     square above the tread line.
-  - **Never stuck:** a gap that none of the pieces to hand can reach any more is plugged with
-    offcuts.
+  - **A gap is never filled for you.** (Gaps no piece could reach used to be plugged with
+    offcuts; the user: "if there's a gap, that's it, that's broken. That's the point of it being a
+    puzzle. You've got to make the things fit.") The way out is to lift pieces back out: any piece
+    in a frame that isn't finished, anyone's, by pointing at it (or standing by it, with the
+    keyboard) and pressing Space or clicking. It goes into your hands.
   - **Shipshape:** every frame's shape can be filled exactly. A frame filled with nothing sawn off
-    or plugged is Shipshape and pays a bonus.
+    is Shipshape and pays a bonus.
 - **Up on the wall must stay bright.** The fog keeps its distance from the camera and the view
   brightens as it rises; looking down from the rampart went murky otherwise.
 - **Co-op crews: everyone collaborates, nobody gives orders.** Up to four pirates defend one den
