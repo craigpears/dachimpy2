@@ -402,7 +402,8 @@ function makeRampart() {
   const cuts = [0, Math.round(wall.W / 3), Math.round(wall.W * 2 / 3), wall.W];
   const secs = [0, 1, 2].map((i) => ({ c0: cuts[i], c1: cuts[i + 1] - 1, x0: X(cuts[i]), x1: X(cuts[i + 1]) }));
   // What gets built, in order: an end stretch's walk and then its stairs, the other end's, the middle walk last.
-  const jobs = [[0, 'deck'], [0, 'stair'], [2, 'deck'], [2, 'stair'], [1, 'deck']].map(([si, kind], i) => ({ i, si, kind, frame: null, up: false }));
+  const jobs = [[0, 'deck'], [0, 'stair'], [2, 'deck'], [2, 'stair'], [1, 'deck'], [3, 'gun']].map(([si, kind], i) => ({ i, si, kind, frame: null, up: false }));
+  gd = null;
   ramp = { T, half, n, zTop, zBot, run, secs, jobs, next: 0, stairs: [[-half + 0.2, -half + 0.2 + STAIR_W], [half - 0.2 - STAIR_W, half - 0.2]] };
 }
 /* Building it. After a wave is beaten off, timber arrives for one stretch, and its frames come one
@@ -458,12 +459,12 @@ function openJob(i, shape = null) {
   if (!j || j.frame) return j?.frame || null;
   ramp.next = Math.max(ramp.next, i + 1);
   const stair = j.kind === 'stair';
-  shape ||= stair ? stairShape(j.si) : deckShape(j.si);
+  shape ||= stair ? stairShape(j.si) : j.kind === 'gun' ? gunShape() : deckShape(j.si);
   if (isHost()) send('all', { t: 'frame', fi: i, cells: shape });
   const g = new THREE.Group();
   if (!stair) {
     // Laid flat: the rows run from the wall towards the den, the face is up.
-    g.position.set(ramp.secs[j.si].x0, 0, FRAME_Z);
+    g.position.set(j.kind === 'gun' ? X(gunC0()) : ramp.secs[j.si].x0, 0, FRAME_Z);
     g.rotation.x = -Math.PI / 2;
   } else {
     // Stood on end against the side of the cave, facing into the den.
@@ -646,11 +647,12 @@ function finishFrame(f, quiet = false) {
     if (waste || f.scrapCells.length) toast(waste ? `Sawn to fit: ${waste} square${waste > 1 ? 's' : ''} of offcuts` : 'Patched with offcuts: it\'ll do');
     else { G.gold += PAY.master; updateStats(); toast(`Shipshape! Not a scrap wasted (+${PAY.master})`); }
   }
-  const g = f.group, p0 = g.position.clone(), p1 = new THREE.Vector3(p0.x, ramp.T - 0.05, -0.85);
+  const g = f.group, p0 = g.position.clone(), p1 = new THREE.Vector3(p0.x, ramp.T - 0.05, j.kind === 'gun' ? -0.85 + 2 * S : -0.85);
   const land = () => {
     g.position.copy(p1);
     g.updateMatrixWorld(true);
     Object.assign(j, { up: true, x0: p1.x, z0: p1.z, set: f.set });
+    if (j.kind === 'gun') makeGunDeck();
     jobDone(j, quiet);
   };
   if (quiet) { land(); return; }
@@ -687,7 +689,8 @@ function finishFrame(f, quiet = false) {
 function jobDone(j, quiet) {
   if (quiet) return;
   const stretch = ramp.jobs.filter((o) => o.si === j.si);
-  const msg = ramp.jobs.every((o) => o.up) ? 'The whole rampart is up!'
+  const msg = j.kind === 'gun' ? 'The gun deck\'s up! Chalk arrows to roll the stores into the guns'
+    : ramp.jobs.every((o) => o.up || o.kind === 'gun') ? 'The whole rampart is up!'
     : stretch.every((o) => o.up) ? 'That stretch is up: climb the stairs and throw from the wall!'
     : 'The walk\'s up on the wall. Now build the stairs to it';
   setTimeout(() => toast(msg), 1500);
@@ -700,7 +703,7 @@ const hv = new THREE.Vector3();
 function heightAt(x, z, pad = 0) {
   if (!ramp) return 0;
   for (const j of ramp.jobs) {
-    if (j.kind === 'deck') {
+    if (j.kind !== 'stair') {
       if (j.up && j.set.has(k(Math.floor((z - j.z0) / S), Math.floor((x - j.x0) / S)))) return ramp.T;
       continue;
     }
@@ -717,6 +720,402 @@ function heightAt(x, z, pad = 0) {
   return 0;
 }
 const onRampart = () => ramp && pirate.h > ramp.T - 0.15;
+
+// ---------- the gun deck (after Gunnery) ----------
+/* The rampart's last job: a big deck over the gate, built in a frame on the floor and hauled up
+   behind the walk like the rest. On it, Gunnery. A powder barrel rolls out stores (powder, wad,
+   shot, buckets), each way round in turn. A store rolls straight on; blocked, it turns right (left
+   if it can't, back if neither), and two that would meet both turn back. Pirates steer them with
+   chalk arrows on the planks (three each; chalk a fourth and your oldest is rubbed out) and by
+   standing in the way: a body is an obstacle. A gun takes powder, then wad, then shot, and fires
+   by itself at the raiders at the wall, or at their cannon. Then it wants a bucket to swab it out;
+   the wrong store fouls it, and a bucket cleans that too. The stores are what's in the barrel,
+   refilled each wave, and a hatch in each back corner drops strays back down into it. */
+const GD = { cols: 8, rows: 6, tick: 0.42, cap: 6, stock: 24, emit: 1.2, arrows: 3, reach: 2.7 };
+const KINDS = ['powder', 'wad', 'shot', 'bucket'];
+const DR = [-1, 0, 1, 0], DC = [0, 1, 0, -1];   // north (out over the wall), east, south, west
+const GUN_SAYS = {
+  empty: ['', 'Powder'], powder: ['', 'Wad'], wad: ['', 'Shot'], loaded: ['done', 'Loaded!'],
+  dirty: ['weak', 'Bucket'], fouled: ['bad', 'Fouled!'],
+};
+let gd = null;
+const gunC0 = () => wall.gateCols.c0 - 2;
+// The deck's frame: the four rows behind the walk's two, over the gate (less any of the walk's
+// ragged third row already there), trimmed at the back corners to whole pieces that fit.
+function gunShape() {
+  const x0 = X(gunC0()), z0 = -0.85 + 2 * S, cells = [];
+  for (let r = 0; r < GD.rows - 2; r++) for (let c = 0; c < GD.cols; c++) {
+    if (r === 0 && heightAt(x0 + (c + 0.5) * S, z0 + 0.5 * S) > ramp.T - 0.1) continue;
+    cells.push([r, c]);
+  }
+  const back = GD.rows - 3, has = (list, r, c) => list.some(([a, b]) => a === r && b === c);
+  for (let m = cells.length % 5; m <= 8; m += 5) {
+    for (let a = 0; a <= m; a++) {
+      const cut = [...Array(a).keys()].map((i) => [back, i]).concat([...Array(m - a).keys()].map((i) => [back, GD.cols - 1 - i]));
+      const left = cells.filter(([r, c]) => !has(cut, r, c));
+      if (left.length % 5 === 0 && C.isConnected(left) && C.solve(left, 1).length) return left;
+    }
+  }
+  return cells.slice(0, cells.length - (cells.length % 5));
+}
+const gdCell = (x, z) => {
+  if (!gd) return null;
+  const c = Math.floor((x - gd.x0) / S), r = Math.floor((z - gd.z0) / S);
+  return gd.cells.has(k(r, c)) ? [r, c] : null;
+};
+// (The planks' top is 5cm above the height you walk at.)
+const gdAt = (r, c, y = 0) => new THREE.Vector3(gd.x0 + (c + 0.5) * S, ramp.T + 0.05 + y, gd.z0 + (r + 0.5) * S);
+const onGunDeck = () => !!gd && onRampart() && !!gdCell(pirate.x, pirate.z);
+function storeMesh(kind) {
+  const col = { powder: '#8a2a1f', wad: '#d8c9a0', shot: '#1b1b1b', bucket: '#7d8b94' }[kind];
+  const m = mat(col, kind === 'shot' ? { metalness: 0.6, roughness: 0.4 } : kind === 'powder' ? { map: woodTex } : {});
+  const g = new THREE.Group();
+  let b;
+  if (kind === 'powder') {
+    b = mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.24, 12), m);
+    b.position.y = 0.12;
+    const band = mesh(new THREE.TorusGeometry(0.133, 0.015, 5, 16), mat('#2b2b2b'));
+    band.rotation.x = Math.PI / 2;
+    band.position.y = 0.12;
+    g.add(band);
+  } else if (kind === 'wad') {
+    b = mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.08, 12), m);
+    b.position.y = 0.04;
+  } else if (kind === 'shot') {
+    b = mesh(new THREE.SphereGeometry(0.12, 12, 10), m);
+    b.position.y = 0.12;
+  } else {
+    b = mesh(new THREE.CylinderGeometry(0.13, 0.1, 0.2, 12, 1, true), new THREE.MeshStandardMaterial({ color: col, side: THREE.DoubleSide }));
+    b.position.y = 0.1;
+    const bot = mesh(new THREE.CircleGeometry(0.1, 12), m);
+    bot.rotation.x = -Math.PI / 2;
+    bot.position.y = 0.005;
+    g.add(bot);
+  }
+  g.add(b);
+  return g;
+}
+const arrowGeo = (() => {
+  const s = new THREE.Shape();
+  s.moveTo(-0.06, -0.18); s.lineTo(0.06, -0.18); s.lineTo(0.06, 0.02); s.lineTo(0.16, 0.02); s.lineTo(0, 0.21); s.lineTo(-0.16, 0.02); s.lineTo(-0.06, 0.02); s.closePath();
+  const geo = new THREE.ShapeGeometry(s);
+  geo.rotateX(-Math.PI / 2);   // lying on the planks, pointing north (-z)
+  return geo;
+})();
+function makeGunDeck() {
+  if (gd || !ramp) return;
+  const x0 = X(gunC0()), z0 = -0.85, cells = new Set();
+  for (let r = 0; r < GD.rows; r++) for (let c = 0; c < GD.cols; c++) if (heightAt(x0 + (c + 0.5) * S, z0 + (r + 0.5) * S) > ramp.T - 0.1) cells.add(k(r, c));
+  const group = new THREE.Group();
+  group.userData.scenery = true;
+  den.add(group);
+  gd = { x0, z0, cells, group, stores: [], arrows: new Map(), stock: GD.stock, emitT: 1, dirI: 0, tickT: 0, seq: 0, hover: null, guns: [], hatches: [] };
+  const nearest = (r, c) => [...cells].map((kk) => kk.split(',').map(Number)).sort((a, b) => Math.hypot(a[0] - r, a[1] - c) - Math.hypot(b[0] - r, b[1] - c))[0];
+  gd.barrel = nearest(3, 4);
+  for (const [r, c] of [[GD.rows - 1, 0], [GD.rows - 1, GD.cols - 1]]) {
+    const h = nearest(r, c);
+    if (!gd.hatches.some(([a, b]) => a === h[0] && b === h[1])) gd.hatches.push(h);
+  }
+  // The barrel, the hatches and the guns.
+  const bg = new THREE.Group();
+  const keg = mesh(new THREE.CylinderGeometry(0.27, 0.23, 0.6, 16), mat('#6a4326', { map: woodTex }));
+  keg.position.y = 0.3;
+  bg.add(keg);
+  [0.1, 0.5].forEach((y) => { const h = mesh(new THREE.TorusGeometry(0.262, 0.018, 6, 24), mat('#2b2b2b', { metalness: 0.6 })); h.rotation.x = Math.PI / 2; h.position.y = y; bg.add(h); });
+  bg.position.copy(gdAt(...gd.barrel));
+  group.add(bg);
+  gd.hatches.forEach(([r, c]) => {
+    const hm = mesh(new THREE.BoxGeometry(S * 0.8, 0.03, S * 0.8), mat('#1e130a'));
+    hm.position.copy(gdAt(r, c, 0.015));
+    const rim = outline([[0, 0]], 0, '#c8a060');
+    rim.rotation.x = -Math.PI / 2;
+    rim.position.copy(gdAt(r, c, 0.035)).add(new THREE.Vector3(-S / 2, 0, -S / 2));
+    group.add(hm, rim);
+  });
+  const iron = mat('#26282b', { metalness: 0.7, roughness: 0.4 }), wood = mat('#5b3a20', { map: woodTex });
+  for (const c of [0, 2, 5, 7]) {
+    const g = new THREE.Group();
+    const carriage = mesh(new RoundedBoxGeometry(0.42, 0.2, 0.5, 2, 0.03), wood);
+    carriage.position.y = 0.12;
+    const tube = mesh(new THREE.CylinderGeometry(0.09, 0.13, 0.85, 12), iron);
+    tube.rotation.x = -Math.PI / 2 + 0.12;
+    tube.position.set(0, 0.3, -0.18);
+    g.add(carriage, tube);
+    g.position.copy(gdAt(0, c));
+    group.add(g);
+    const label = document.createElement('div');
+    $('labels').append(label);
+    gd.guns.push({ r: 0, c, state: 'empty', g, tube, label, sig: '', recoil: 0, waitT: 0 });
+  }
+  gd.stockLabel = document.createElement('div');
+  gd.stockLabel.className = 'label';
+  $('labels').append(gd.stockLabel);
+  // Where the pointer is on the deck, ringed when it's close enough to chalk.
+  gd.cursor = outline([[0, 0]], 0, '#ffffff');
+  gd.cursor.material = new THREE.LineBasicMaterial({ color: '#ffffff' });
+  gd.cursor.rotation.x = -Math.PI / 2;
+  gd.cursor.visible = false;
+  group.add(gd.cursor);
+}
+const gunAt = (r, c) => gd.guns.find((g) => g.r === r && g.c === c);
+const isHatch = (r, c) => gd.hatches.some(([a, b]) => a === r && b === c);
+const isBarrel = (r, c) => gd.barrel[0] === r && gd.barrel[1] === c;
+// Squares with a pirate standing on them: a body's an obstacle too.
+function gdBodies() {
+  const out = new Set(), add = (x, z, h) => { if (h > ramp.T - 0.3) { const cell = gdCell(x, z); if (cell) out.add(k(...cell)); } };
+  add(pirate.x, pirate.z, pirate.h);
+  if (online()) for (const mt of net.crew.values()) add(mt.tx ?? 0, mt.tz ?? 0, mt.th ?? 0);
+  return out;
+}
+function gunTick() {
+  const bodies = gdBodies();
+  const free = (r, c) => gd.cells.has(k(r, c)) && !isBarrel(r, c) && !bodies.has(k(r, c));
+  // Where each store wants to go.
+  const want = gd.stores.map((s) => {
+    const a = gd.arrows.get(k(s.r, s.c));
+    if (a) s.dir = a.dir;
+    for (const t of [0, 1, 3, 2]) {
+      const d = (s.dir + t) % 4, r = s.r + DR[d], c = s.c + DC[d];
+      if (free(r, c)) return { d, r, c };
+    }
+    return null;
+  });
+  // Two that would meet, or swap places, both turn back; one rolling into a store that's staying
+  // put turns back too.
+  const back = new Set();
+  for (let i = 0; i < want.length; i++) for (let j = i + 1; j < want.length; j++) {
+    const a = want[i], b = want[j], s = gd.stores[i], o = gd.stores[j];
+    if (!a || !b) continue;
+    if ((a.r === b.r && a.c === b.c) || (a.r === o.r && a.c === o.c && b.r === s.r && b.c === s.c)) { back.add(i); back.add(j); }
+  }
+  for (let pass = 0; pass < 4; pass++) gd.stores.forEach((s, i) => {
+    const w = want[i];
+    if (!w || back.has(i)) return;
+    const j = gd.stores.findIndex((o) => o.r === w.r && o.c === w.c);
+    if (j >= 0 && (!want[j] || back.has(j))) back.add(i);
+  });
+  const gone = [];
+  gd.stores.forEach((s, i) => {
+    s.pr = s.r; s.pc = s.c;
+    const w = want[i];
+    if (!w) return;
+    if (back.has(i)) { s.dir = (w.d + 2) % 4; return; }
+    s.r = w.r; s.c = w.c; s.dir = w.d;
+    const g = gunAt(s.r, s.c);
+    if (g) { loadGun(g, s.kind); gone.push(s); }
+    else if (isHatch(s.r, s.c)) { gd.stock++; gone.push(s); }
+  });
+  for (const s of gone) dropStore(s, true);
+  // The barrel rolls out the next store, each way round in turn.
+  gd.emitT -= GD.tick;
+  if (gd.emitT <= 0 && gd.stock > 0 && gd.stores.length < GD.cap) {
+    for (let t = 0; t < 4; t++) {
+      const d = gd.dirI++ % 4, r = gd.barrel[0] + DR[d], c = gd.barrel[1] + DC[d];
+      if (!free(r, c) || gunAt(r, c) || isHatch(r, c) || gd.stores.some((o) => o.r === r && o.c === c)) continue;
+      addStore(++gd.seq, KINDS[rand(4)], r, c, d, gd.barrel[0], gd.barrel[1]);
+      gd.stock--;
+      gd.emitT = GD.emit;
+      break;
+    }
+  }
+}
+function addStore(id, kind, r, c, dir, pr = r, pc = c) {
+  const m = storeMesh(kind);
+  m.position.copy(gdAt(pr, pc));
+  gd.group.add(m);
+  const s = { id, kind, r, c, dir, pr, pc, m };
+  gd.stores.push(s);
+  return s;
+}
+function dropStore(s, roll = false) {
+  gd.stores.splice(gd.stores.indexOf(s), 1);
+  if (!roll) { gd.group.remove(s.m); return; }
+  // Roll on into the gun (or down the hatch) before it goes.
+  const from = gdAt(s.pr, s.pc), to = gdAt(s.r, s.c, isHatch(s.r, s.c) ? -0.3 : 0.15), grp = gd.group;
+  tween(GD.tick, (u) => s.m.position.lerpVectors(from, to, u), () => grp.remove(s.m));
+}
+function loadGun(g, kind) {
+  const next = { empty: 'powder', powder: 'wad', wad: 'shot' }[g.state];
+  const was = g.state;
+  if (kind === 'bucket') g.state = 'empty';
+  else if (kind === next) g.state = kind === 'shot' ? 'loaded' : kind;
+  else g.state = 'fouled';
+  burst(gdAt(g.r, g.c, 0.35), kind === 'bucket' ? '#9fd0ff' : g.state === 'fouled' ? '#ff7a5c' : '#f0d9a8', 8, 2);
+  if (g.state === 'fouled' && was !== 'fouled') say('A gun\'s fouled! Roll a bucket into it', false, true);
+  if (g.state === 'loaded') g.waitT = 0.5;
+}
+// A loaded gun fires by itself at the nearest raider out at the wall in front of it, else at their cannon.
+function gunTarget(g) {
+  const from = gdAt(g.r, g.c);
+  let best = null, bd = 7;
+  for (const r of raiders) {
+    if (r.inside || r.gone || r.state === 'down' || !['approach', 'attack', 'hackOut'].includes(r.state) || r.z > -0.9 || r.z < -9) continue;
+    const d = Math.abs(r.x - from.x) + Math.max(0, -r.z - 4) * 0.4;
+    if (d < bd) { bd = d; best = r; }
+  }
+  if (best) {
+    // Lead a raider still on the way in: aim where they'll be when the ball comes down.
+    let x = best.x, z = best.z;
+    if (best.state === 'approach' && best.hole) {
+      const dur = 0.5 + Math.hypot(x - from.x, z - from.z) * 0.035, tx = holeX(best.hole) + best.slot - x, tz = -1.15 - z, n = Math.hypot(tx, tz);
+      if (n > 0) { const step = Math.min(n, 2.2 * dur); x += tx / n * step; z += tz / n * step; }
+    }
+    return { x, z };
+  }
+  if (cannon.visible && G.phase === 'wave' && G.cannonT < 20) return { x: cannon.position.x, z: cannon.position.z, cannon: true };
+  return null;
+}
+function fireGun(i, tx, tz, atCannon) {
+  const g = gd.guns[i];
+  if (isHost()) send('all', { t: 'gfire', i, x: r2(tx), z: r2(tz), cn: atCannon ? 1 : 0 });
+  g.state = 'dirty';
+  g.recoil = 1;
+  const from = gdAt(g.r, g.c, 0.35).add(new THREE.Vector3(0, 0, -0.6)), to = new THREE.Vector3(tx, 0.4, tz);
+  burst(from, '#ffcf6a', 14, 3);
+  burst(from, '#cfc6b8', 10, 1.5);
+  shake = Math.max(shake, 0.25);
+  const ball = mesh(new THREE.SphereGeometry(0.15, 12, 10), mat('#1a1a1a', { metalness: 0.6 }));
+  scene.add(ball);
+  const d = from.distanceTo(to), dur = 0.5 + d * 0.035;
+  tween(dur, (s) => {
+    ball.position.lerpVectors(from, to, s);
+    ball.position.y += Math.sin(s * Math.PI) * (1.5 + d * 0.12);
+  }, () => {
+    scene.remove(ball);
+    burst(to, '#ffb85a', 26, 5);
+    burst(to, '#7a6a5a', 16, 3.5);
+    if (guest()) return;
+    if (atCannon) { G.cannonT = Math.max(G.cannonT, 25); say('A hit on their cannon! It\'s quiet for a while'); return; }
+    let n = 0;
+    for (const r of raiders) if (!r.inside && r.state !== 'down' && !r.gone && Math.hypot(r.x - tx, r.z - tz) < 1.8) { hit(r, from, '#3a3a3a'); n++; }
+    if (n > 1) say(`Broadside! ${n} raiders bowled over`);
+  });
+}
+function updateGunDeck(dt) {
+  if (!gd) return;
+  if (!guest()) {
+    gd.tickT += dt / GD.tick;
+    if (gd.tickT >= 1) { gd.tickT = 0; gunTick(); }
+    gd.guns.forEach((g, i) => {
+      if (g.state !== 'loaded' || (g.waitT -= dt) > 0) return;
+      const t = gunTarget(g);
+      if (t) fireGun(i, t.x, t.z, t.cannon);
+    });
+  } else gd.tickT = Math.min(1, gd.tickT + dt / GD.tick);
+  const u = Math.min(1, gd.tickT);
+  for (const s of gd.stores) {
+    s.m.position.lerpVectors(gdAt(s.pr, s.pc), gdAt(s.r, s.c), u);
+    s.m.rotation.y = -s.dir * Math.PI / 2;
+  }
+  for (const g of gd.guns) {
+    g.recoil = Math.max(0, g.recoil - dt * 3);
+    g.tube.position.z = -0.18 + g.recoil * 0.25;
+  }
+  gd.cursor.visible = false;
+  if (gd.hover && onGunDeck() && !carry) {
+    const [r, c] = gd.hover, at = gdAt(r, c, 0.03);
+    gd.cursor.position.set(at.x - S / 2, at.y, at.z - S / 2);
+    gd.cursor.material.color.set(Math.hypot(at.x - pirate.x, at.z - pirate.z) <= GD.reach ? '#ffffff' : '#ff7a5c');
+    gd.cursor.visible = true;
+  }
+}
+// Labels over the guns, and what's left in the barrel.
+function gunLabels() {
+  if (!gd) return;
+  const place = (el, at) => {
+    v3.copy(at).project(camera);
+    el.style.left = `${(v3.x + 1) / 2 * innerWidth}px`;
+    el.style.top = `${(1 - v3.y) / 2 * innerHeight}px`;
+    el.style.display = v3.z > 1 ? 'none' : '';
+  };
+  for (const g of gd.guns) {
+    const [cls, text] = GUN_SAYS[g.state], sig = cls + text;
+    if (g.sig !== sig) {
+      g.sig = sig;
+      g.label.className = `label gun ${cls}`;
+      g.label.innerHTML = g.state === 'loaded' ? text : `<small>${g.state === 'fouled' ? 'needs a bucket' : 'needs'}</small>${text}`;
+    }
+    place(g.label, gdAt(g.r, g.c, gd.guns.indexOf(g) % 2 ? 1.25 : 0.7));
+  }
+  const t = `Powder barrel · ${gd.stock} left`;
+  if (gd.stockLabel.textContent !== t) gd.stockLabel.textContent = t;
+  place(gd.stockLabel, gdAt(...gd.barrel, 0.9));
+}
+// Chalking: an arrow on a plank, pointing one of the four ways. Chalk where one is and it turns
+// to point your way; chalk the same way again and it's rubbed out.
+const myArrows = (by = myId()) => [...gd.arrows.values()].filter((a) => a.by === by);
+function chalk(r, c, dir, by = myId()) {
+  if (!gd || !gd.cells.has(k(r, c)) || isBarrel(r, c) || gunAt(r, c) || isHatch(r, c)) return false;
+  if (guest() && by === myId()) { send('host', { t: 'chalk', r, c, dir }); return true; }
+  const kk = k(r, c), old = gd.arrows.get(kk);
+  if (old) { gd.group.remove(old.m); gd.arrows.delete(kk); if (dir < 0 || (old.dir === dir && old.by === by)) return true; }
+  if (dir < 0) return true;
+  const mine = myArrows(by).sort((a, b) => a.t - b.t);
+  while (mine.length >= GD.arrows) { const o = mine.shift(); gd.group.remove(o.m); gd.arrows.delete(k(o.r, o.c)); }
+  putArrow(r, c, dir, by);
+  return true;
+}
+function putArrow(r, c, dir, by, t = performance.now()) {
+  const ci = by === myId() ? -1 : net.crew.get(by)?.ci ?? -1;
+  const col = ci >= 0 ? new THREE.Color(CREW_COLOURS[ci]).lerp(new THREE.Color('#ffffff'), 0.55) : new THREE.Color('#f4efe4');
+  const m = new THREE.Mesh(arrowGeo, new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.9 }));
+  m.position.copy(gdAt(r, c, 0.02));
+  m.rotation.y = -dir * Math.PI / 2;
+  gd.group.add(m);
+  gd.arrows.set(k(r, c), { r, c, dir, by, t, m });
+}
+const facing = () => {
+  const ry = pirate.g.rotation.y, fx = Math.sin(ry), fz = Math.cos(ry);
+  return Math.abs(fx) > Math.abs(fz) ? (fx > 0 ? 1 : 3) : (fz < 0 ? 0 : 2);
+};
+// Space on the deck: an arrow on the plank in front of you, pointing the way you face.
+function chalkAhead() {
+  const me = gdCell(pirate.x, pirate.z), d = facing();
+  if (!me) return;
+  if (!chalk(me[0] + DR[d], me[1] + DC[d], d)) shake = 0.15;
+}
+// Q/E on the deck: turn the arrow in front of you.
+function turnArrowAhead(t) {
+  const me = gdCell(pirate.x, pirate.z), d = facing();
+  const a = me && gd.arrows.get(k(me[0] + DR[d], me[1] + DC[d]));
+  if (a) chalk(a.r, a.c, (a.dir + t) % 4);
+}
+// A click on a plank in reach: a new arrow points away from you; click one and it turns a
+// quarter clockwise.
+function chalkClick(r, c) {
+  const at = gdAt(r, c);
+  if (Math.hypot(at.x - pirate.x, at.z - pirate.z) > GD.reach) { toast('Get closer to chalk there', false, true); return; }
+  const old = gd.arrows.get(k(r, c));
+  const dx = at.x - pirate.x, dz = at.z - pirate.z;
+  const away = Math.abs(dx) > Math.abs(dz) ? (dx > 0 ? 1 : 3) : (dz < 0 ? 0 : 2);
+  if (!chalk(r, c, old ? (old.dir + 1) % 4 : away)) shake = 0.15;
+}
+const gunOut = () => gd && {
+  s: gd.stores.map((s) => [s.id, KINDS.indexOf(s.kind), s.r, s.c, s.dir]),
+  g: gd.guns.map((g) => g.state),
+  a: [...gd.arrows.values()].map((a) => [a.r, a.c, a.dir, a.by]),
+  k: gd.stock,
+};
+function gunIn(d) {
+  if (!d || !gd) return;
+  const seen = new Set();
+  for (const [id, ki, r, c, dir] of d.s) {
+    seen.add(id);
+    const s = gd.stores.find((o) => o.id === id);
+    if (!s) { addStore(id, KINDS[ki], r, c, dir); continue; }
+    if (s.r !== r || s.c !== c) { s.pr = s.r; s.pc = s.c; s.r = r; s.c = c; gd.tickT = 0; }
+    s.dir = dir;
+  }
+  for (const s of gd.stores.slice()) if (!seen.has(s.id)) { s.pr = s.r; s.pc = s.c; dropStore(s, true); }
+  d.g.forEach((st, i) => { if (gd.guns[i]) gd.guns[i].state = st; });
+  const want = new Map(d.a.map(([r, c, dir, by]) => [k(r, c), { r, c, dir, by }]));
+  for (const [kk, a] of gd.arrows) {
+    const w = want.get(kk);
+    if (!w || w.dir !== a.dir || w.by !== a.by) { gd.group.remove(a.m); gd.arrows.delete(kk); }
+  }
+  for (const [kk, w] of want) if (!gd.arrows.has(kk)) putArrow(w.r, w.c, w.dir, w.by);
+  gd.stock = d.k;
+}
 
 function makeGate() {
   const { c0, c1 } = wall.gateCols;
@@ -967,7 +1366,7 @@ function labelFor(h) {
 function frameLabel(f) {
   const left = f.open;
   const need = left.length === 5 && f.exact ? `needs ${an(C.identify(left))}` : f.exact ? `room for ${left.length / 5} more pieces` : f.kind === 'stair' ? `${left.length} squares left: any piece will do` : `${left.length} squares left: any piece, the spare's sawn off`;
-  return ['label deck', `${f.kind === 'stair' ? 'Stairs up to the wall' : 'Wall-walk frame'}<small>${need}</small>`];
+  return ['label deck', `${{ stair: 'Stairs up to the wall', gun: 'Gun deck frame' }[f.kind] || 'Wall-walk frame'}<small>${need}</small>`];
 }
 function updateStats() {
   $('s-gold').textContent = Math.max(0, G.gold);
@@ -988,6 +1387,7 @@ addEventListener('keydown', (e) => {
   if (key === ' ' || key === 'enter') act();
   else if (key === 'q' && carry) turn(rotCCW, 1);
   else if (key === 'e' && carry) turn(rotCW, -1);
+  else if ((key === 'q' || key === 'e') && onGunDeck()) turnArrowAhead(key === 'e' ? 1 : 3);
   else if (key === 'f' && carry) turn(flip, 0);
   else if (key === 'tab') cycle++;
   else if (key === 'backspace' && canTakeBack()) takeBack();
@@ -1024,6 +1424,7 @@ renderer.domElement.addEventListener('mousemove', (e) => {
     if (!best || d < best.d) best = { d, frame: f, fc, fr };
   }
   if (best) { mouse = best; mouseMode = true; return; }
+  if (gd) gd.hover = pirate.h > 0.3 && ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), -ramp.T), p) ? gdCell(p.x, p.z) : null;
   if (!ray.ray.intersectPlane(wallPlane, p)) { mouse = null; return; }
   const fc = p.x / S + wall.W / 2, fr = wall.H - p.y / S;
   mouse = fc >= -1 && fc <= wall.W + 1 && fr >= -1 && fr <= wall.H + 1 ? { fc, fr, ray: ray.ray.clone(), at: new Map() } : null;
@@ -1039,7 +1440,9 @@ renderer.domElement.addEventListener('mousedown', (e) => {
   if (e.button !== 0 || G.over) return;
   // Up on the rampart there's nothing to fit, so a click anywhere throws at the raider nearest it.
   const r = carry && clickedFoe(e.clientX, e.clientY, pirate.h > 0.3 ? 1e4 : 90);
-  if (r) throwAt(r); else act();
+  if (r) throwAt(r);
+  else if (!carry && gd?.hover && onGunDeck()) chalkClick(...gd.hover);
+  else act();
 });
 addEventListener('mousemove', (e) => {
   if (!drag || !(e.buttons & 2)) return;
@@ -1053,6 +1456,7 @@ addEventListener('mousemove', (e) => {
 addEventListener('mouseup', (e) => {
   if (e.button !== 2 || !drag) return;
   if (!drag.moved && carry && !G.over) turn(flip, 0);
+  else if (!drag.moved && !carry && gd?.hover && onGunDeck() && gd.arrows.has(k(...gd.hover))) chalk(...gd.hover, -1);
   drag = null;
 });
 // The wheel turns the piece while it's showing a spot to fit it; otherwise it zooms.
@@ -1118,7 +1522,11 @@ const aimFoe = () => (cursor && clickedFoe(cursor.x, cursor.y, 160)) || anyFoe()
 function act() {
   if (net.pending || net.asking) return;   // waiting to hear back about the last one
   const f = focus();
-  if (pirate.h > 0.3) { if (carry && onRampart() && aimFoe()) throwAt(aimFoe()); return; }
+  if (pirate.h > 0.3) {
+    if (carry && onRampart() && aimFoe()) throwAt(aimFoe());
+    else if (!carry && onGunDeck()) chalkAhead();
+    return;
+  }
   if (f.kind === 'pile') {
     const p = f.p;
     if (!carry && p.letter) return pickUp(p);
@@ -1666,6 +2074,7 @@ function startWave() {
   G.toSpawn = Math.round((1 + G.wave) * (1 + 0.5 * (crewSize() - 1)));
   G.spawnT = 0.5;
   G.cannonT = G.wave >= 2 ? 8 : Infinity;
+  if (gd) gd.stock = Math.max(gd.stock, GD.stock);   // fresh stores for the guns
   if (G.wave >= 2 && !cannon.visible) { cannon.visible = true; say('They brought a cannon!', true); }
   else say(`Wave ${G.wave}: raiders!`, true);
   $('intro').classList.add('off');
@@ -1684,7 +2093,8 @@ function updateWaves(dt) {
   if (!G.toSpawn && !raiders.length) {
     G.phase = 'calm'; G.phaseT = CALM_SECS;
     // Timber for the next stretch, once nothing's still being built.
-    if (!frames().length && !ramp.jobs.some((j) => j.frame && !j.up) && openJob(ramp.next)) say(`Wave ${G.wave} beaten off! Timber's come: build the rampart in its frame`);
+    const f = !frames().length && !ramp.jobs.some((j) => j.frame && !j.up) && openJob(ramp.next);
+    if (f) say(`Wave ${G.wave} beaten off! Timber's come: ${f.kind === 'gun' ? 'build a gun deck in its frame' : 'build the rampart in its frame'}`);
     else say(`Wave ${G.wave} beaten off!`);
   }
 }
@@ -1780,7 +2190,7 @@ function prompt() {
   } else if (!carry && canTakeBack()) t = `Space: take the ${lastPlaced.letter} back off`;
   else if (carry) {
     const more = target?.count > 1 ? ` · Tab: other spots (${target.count})` : '';
-    if (target?.frame) t = !target.ok ? 'Walk closer to fit it there' : target.over ? (target.frame.kind === 'stair' ? `Space: fit the ${carry.letter} in the stairs (it sticks out, and stays that way)${more}` : `Space: fit it in the frame (it sticks out: the spare gets sawn off)${more}`) : `Space: fit the ${carry.letter} in the ${target.frame.kind === 'stair' ? 'stairs' : 'wall-walk frame'}${more}`;
+    if (target?.frame) t = !target.ok ? 'Walk closer to fit it there' : target.over ? (target.frame.kind === 'stair' ? `Space: fit the ${carry.letter} in the stairs (it sticks out, and stays that way)${more}` : `Space: fit it in the frame (it sticks out: the spare gets sawn off)${more}`) : `Space: fit the ${carry.letter} in the ${{ stair: 'stairs', gun: 'gun deck frame' }[target.frame.kind] || 'wall-walk frame'}${more}`;
     else if (target?.ok && target.patch) t = `Space: nail it on behind (one more layer for them to hack through)${more}`;
     else if (target?.ok && !target.over) t = `Space: fit the ${carry.letter} here${more}`;
     else if (target?.ok) t = `Space: board it over (weak, no Masterpiece)${more}`;
@@ -1790,7 +2200,10 @@ function prompt() {
     else t = `Carry the ${carry.letter} to a hole`;
   } else t = frames().length && pirate.z > WALL_Z ? 'Fetch pieces to build the rampart in its frame' : 'Fetch a piece from the piles';
   const hacking = raiders.some(atWall);
-  if (onRampart()) {
+  if (onGunDeck() && !carry) {
+    const n = myArrows().length;
+    t = `Space: chalk an arrow ahead, the way you face · Q/E turn it · or click a plank (${n}/${GD.arrows} arrows)`;
+  } else if (onRampart()) {
     if (!carry) t = 'Bring a piece up here to throw at the raiders';
     else if (outsideFoe()) t = `Space, Shift or click a raider: throw the ${carry.letter} down on them!`;
     else t = hacking ? 'Walk along to get in range' : 'Up on the rampart · watch for raiders at the wall';
@@ -1917,7 +2330,7 @@ function sendMe() {
 }
 function snapshot() {
   send('all', {
-    t: 'snap', g: { ...G }, p: pilesOut(), cv: cannon.visible ? 1 : 0,
+    t: 'snap', g: { ...G }, p: pilesOut(), cv: cannon.visible ? 1 : 0, gd: gunOut(),
     h: wall.holes.map((h) => [r2(h.hp), h.maxHp, h.status, h.pieces.length, boardsOf(h).map((p) => r2(p.hp))]),
     r: raiders.map((r) => [r.id, r2(r.x), r2(r.z), r2(r.m.g.position.y), r2(r.m.g.rotation.y), r2(r.m.g.rotation.x), r2(r.m.g.scale.x), r.state, r.inside ? 1 : 0, r.loot ? 1 : 0, wall.holes.indexOf(r.hole), r2(r.slot), r.look]),
   });
@@ -1929,6 +2342,7 @@ function applySnap(m) {
   if (G.wave > 0) $('intro').classList.add('off');
   updateStats();
   pilesIn(m.p);
+  gunIn(m.gd);
   cannon.visible = !!m.cv;
   m.h.forEach(([hp, maxHp, status, n, bh], i) => {
     const h = wall.holes[i];
@@ -1985,6 +2399,7 @@ function sendSync(to, fresh = false) {
     t: 'sync', fresh, g: { ...G }, W: wall.W, H: wall.H, gate: wall.gateCols, cv: cannon.visible ? 1 : 0, p: pilesOut(),
     holes: wall.holes.map((h) => ({ cells: h.cells, status: h.status, hp: h.hp, maxHp: h.maxHp, pieces: h.pieces.map((p) => p.info), boards: boardsOf(h).map((p) => p.hp) })),
     next: ramp.next,
+    gd: gunOut(),
     jobs: ramp.jobs.map((j) => (j.frame ? { cells: j.frame.cells, pieces: j.frame.pieces.map((p) => p.info), scraps: j.frame.scrapCells, done: j.frame.done } : null)),
   });
 }
@@ -2021,6 +2436,7 @@ function applySync(s) {
     if (d.done) finishFrame(f, true);
   });
   ramp.next = s.next;
+  gunIn(s.gd);
   cannon.visible = !!s.cv;
   pilesIn(s.p);
   if (s.fresh) { Object.assign(pirate, { x: 0, z: 8, h: 0 }); $('intro').classList.remove('off'); }
@@ -2122,6 +2538,8 @@ function onNet(m) {
       }
       break;
     case 'break': if (!net.host && wall.holes[m.hole]) breakHole(wall.holes[m.hole]); break;
+    case 'gfire': if (!net.host && gd?.guns[m.i]) fireGun(m.i, m.x, m.z, !!m.cn); break;
+    case 'chalk': if (net.host && gd) chalk(m.r, m.c, m.dir, m.from); break;
     case 'unboard': { const h = wall.holes[m.hole]; if (!net.host && h?.pieces[m.i]) breakBoard(h, h.pieces[m.i]); break; }
     case 'shoot': if (!net.host) shoot(m.cells); break;
     case 'blast': if (!net.host) blast(m.cells, true); break;
@@ -2332,6 +2750,7 @@ function update(dt) {
     carry.mat.depthWrite = carry.mat.opacity > 0.9;
   }
 
+  if (!G.over) updateGunDeck(dt);
   if (guest()) {
     // The host runs the raiders; here they just follow what it says.
     if (G.phase !== 'wave' && !G.over) G.phaseT = Math.max(0, G.phaseT - dt);
@@ -2443,6 +2862,7 @@ function update(dt) {
     p.label.style.top = `${(1 - v3.y) / 2 * innerHeight}px`;
     if (v3.z > 1) p.label.style.display = 'none';
   }
+  gunLabels();
   for (const f of frames()) {
     const [cls, html] = frameLabel(f);
     if (f.sig !== cls + html) { f.sig = cls + html; f.label.className = cls; f.label.innerHTML = html; }
@@ -2453,10 +2873,27 @@ function update(dt) {
   }
 }
 
+/* A shortcut for trying things out (den.html?try=gundeck): the whole rampart and the gun deck
+   already built, with the pieces a crew might have used, so you can go straight up and play it. */
+function buildAll(upTo) {
+  for (let i = 0; i <= upTo; i++) {
+    const f = openJob(i);
+    if (!f) continue;
+    for (const p of C.solve(f.cells, 1)[0] || []) {
+      const r0 = Math.min(...p.cells.map((x) => x[0])), c0 = Math.min(...p.cells.map((x) => x[1]));
+      putFramePiece(f, { letter: p.letter, shape: C.normalize(p.cells), dr: r0, dc: c0, over: 0, by: myId() });
+    }
+    frameState(f);
+    finishFrame(f, true);
+  }
+  ramp.next = upTo + 1;
+}
+
 newGame();
+if (new URLSearchParams(location.search).get('try') === 'gundeck') buildAll(5);
 requestAnimationFrame(frame);
 
 // For poking at it from the console.
-window.den = { camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+window.den = { get gd() { return gd; }, buildAll, chalk, gunTick, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };

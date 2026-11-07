@@ -78,46 +78,13 @@ Building on what's there now (the walk and its stairs are made of pieces that st
 
 For now the den is the first version, and that works.
 
-## Gun deck (inspired by Gunnery)
+## Gun deck: what's left (the deck itself is built; its rules are in RULES.md)
 
-Reference: https://yppedia.puzzlepirates.com/Gunnery
-
-In the puzzle, pieces (bucket, shot, powder, wad) leave a barrel in four directions. They travel
-straight, turn right at an obstacle (left if they can't, back if neither), and two that meet both
-turn back. You steer them with up to three arrows (the oldest goes when you place a fourth). A gun
-is loaded powder, then wad, then shot. A bucket cleans it after firing or after a wrong load.
-
-The user's steer: simply picking up wad, powder and shot and dropping them in a cannon doesn't
-catch the spirit of the puzzle. It needs the routing and steering, the way the frames catch
-carpentry.
-
-Proposed design (not yet agreed):
-
-- **Build it:** after wave 3, a bigger frame is built from pieces and hoisted onto the middle of
-  the wall as a gun deck, about 7×5 planks with two guns.
-- **Stores roll:** a powder barrel in the middle of the deck rolls out kegs, wads, shot and
-  buckets (two of each on deck at once). They follow the turn-right rule.
-- **Steer them:** a pirate chalks up to three arrows on the planks, either by standing on a plank
-  and facing a way, or by clicking a plank and turning the arrow with the wheel.
-- **Load and fire:** powder, wad, shot into a gun's breech. A wrong order fouls the gun until a
-  bucket rolls in, and a gun needs a bucket after each shot. Loaded guns fire by themselves at
-  raiders at the wall in their arc. The shot knocks down everyone near where it lands, and can
-  silence the raiders' cannon for a while.
-- **3D twist:** pirates standing on the deck are obstacles, so stores bounce off them: your body
-  is a fourth arrow.
-- **Get close to chalk:** you have to be near a plank to chalk an arrow on it, so you're out among
-  the rolling stores.
-- **Knocked flying:** get hit by a flying cannonball and it does something really funny: you're
-  knocked clean off the rampart and have to walk back up again.
-- **Co-op:** one shared deck; the host's browser runs the rolling.
-
-The user liked this. Their follow-up:
-
-- **Bigger:** make the deck bigger, with more guns and more stores coming out of the barrel.
-- **Self-contained:** keep the stores to what the deck holds, not an endless supply, so the gun
-  deck stays its own puzzle.
-- **Upgrades are for later:** no levels yet. Upgrading the gun deck (more guns, a faster barrel)
-  is a future thought.
+- **Knocked flying:** get hit by their cannonball up on the wall and you're knocked clean off the
+  rampart, comically, and have to walk back up.
+- **Upgrades, later:** more guns, a faster barrel. No levels yet.
+- **2D mode:** play the deck as the classic flat Gunnery board while the crew watch it in 3D (see
+  the second principle at the top).
 
 ## Pirate looks (soon)
 

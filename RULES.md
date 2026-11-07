@@ -206,6 +206,24 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   whole wave poured through it. Now each raider attacks the hole in front of where they come up to
   the wall, and only switches to a breach within about 3 m. Raiders at a Masterpiece mostly tire
   and leave. (Making them need a gap they can walk through is in IDEAS.md.)
+- **The gun deck (after Gunnery).** Built last, after the whole rampart: the next wave beaten
+  off brings timber for a big frame (four rows by eight, over the gate, joined to the walk's two
+  rows), filled on the floor and hauled up like the walk. The user's steer: just picking up stores
+  and dropping them in a cannon misses the spirit; it needs the routing and steering.
+  - **Stores roll out of a powder barrel** in the middle (powder, wad, shot, buckets), each way
+    round in turn, up to six on deck at once. They roll straight on; blocked, they turn right
+    (left if they can't, back if neither); two that would meet both turn back.
+  - **Steer them:** chalk arrows on the planks, three each (the oldest goes when you chalk a
+    fourth). Space chalks the plank in front of you, pointing the way you face; Q/E turn it;
+    click a plank in reach to chalk it (click again to turn it, right-click to rub it out). You
+    have to be close: you're out among the rolling stores. Your body is an obstacle too.
+  - **Four guns along the wall edge** take powder, then wad, then shot, and fire by themselves at
+    the raiders at the wall in front (leading ones still walking in), or at their cannon, which
+    goes quiet for a while. Then a gun needs a bucket; the wrong store fouls it, and a bucket
+    cleans that too. Loaded guns wait for a target, so you can load up between waves.
+  - **Self-contained:** the barrel holds what it holds (refilled each wave), and a hatch in each
+    back corner drops strays back into it. The host's browser runs the rolling.
+  - **To try it straight away:** `den.html?try=gundeck` starts with the rampart and gun deck built.
 - **Future ideas live in [IDEAS.md](IDEAS.md).** When the user brain-dumps ideas for later, note
   them there rather than building them.
 - **There's always something to do with a junk piece.** Holding three useless pieces with nothing
