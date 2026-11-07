@@ -206,7 +206,18 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   in the hole). Every ghost gets the bold outline.
 - **Snapping goes where you point.** Boards behind a hole snapped a square or two off, so you
   couldn't line one up: the pointer was read on the stone face while the boards stand out towards
-  you. Every spot is matched to the pointer at its own depth.
+  you. Every spot is matched to the pointer at its own depth. **And the preview must sit on the hole from
+  any angle.** The user found the real cause of it still looking off: the boards behind were
+  full-depth pieces standing half a metre out, so from the camera's angle the ghost showed about
+  half a square below the hole. Boards behind are now planks (14 cm) right against the hole (or
+  against a piece boarded over it), each layer in front of the last, and the ghost and the blue
+  layer hint sit there too.
+- **If it shows you where a piece would go, you can put it there.** With the mouse, you can fit a
+  piece from as far back as the preview shows (2.5 m further back than before) and a little further
+  along the wall; taking one back works from as far. The user: no value in having to walk closer.
+  (With the keyboard, stand at the wall as before: it decides between the wall and the frames on the
+  floor behind you.)
+- **The pirate walks a touch quicker** (5 m/s, was 4.6).
 - **One breach doesn't let everyone in; the wall you kept strong pays off.** Raiders used to make
   for any open gap along the whole wall (or else the weakest hole), so once one hole went, the
   whole wave poured through it. Now each raider attacks the hole in front of where they come up to

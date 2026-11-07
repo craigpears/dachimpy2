@@ -22,7 +22,7 @@ const WOOD_D = 0.5;      // depth of a wooden piece
 const STONE_D = 0.7;
 const REACH = 2.4;       // how far along the wall the pirate can reach
 const WALL_Z = 2.7;      // how close to the wall the pirate must stand to fit a piece
-const SPEED = 4.6;
+const SPEED = 5;           // (a touch quicker than the 4.6 it was: the user)
 // Seconds of one raider hacking at it at full speed (piece: each piece in an unfinished hole; patch:
 // a board nailed on behind). A piece was 4: a half-mended hole fell in seconds and early waves were
 // lost anyway; at 8, every piece you get in counts. (Balance tests in RULES.md.)
@@ -2023,7 +2023,14 @@ function fits(cells) {
    third, fourth) layer that raiders must hack through one at a time after the hole itself. So a
    piece that fits nowhere still has a use. A board may cover the hole's own wood and the stone round
    it, but nothing of another hole, the gate, or another board in the same layer. */
-const patchZ = (layer) => WOOD_D - 0.12 + 0.14 * (layer + 1);
+/* Boards nailed on behind a hole are planks (PATCH_D thick) right up against it: against the stone,
+   or in front of a piece boarded over it, which stands proud. Each layer goes on in front of the
+   last. patchZ is a layer's front face. (They used to be full-depth pieces standing half a metre
+   out, and from the camera's angle the ghost showed half a square below the hole it was for: the
+   user saw it as not snapping to the right place.) */
+const PATCH_D = 0.14;
+const patchBase = (h) => (h?.pieces.some((p) => p.over && !p.patch) ? WOOD_D - 0.12 : 0.02);
+const patchZ = (layer, h) => patchBase(h) + PATCH_D * (layer + 1);
 function patchFits(cells) {
   const out = [], b = C.bbox(cells);
   wall.holes.forEach((h, hi) => {
@@ -2051,7 +2058,7 @@ function relining() {
     if (p.layer !== i) {
       p.layer = i;
       if (p.info) p.info.layer = i;
-      const z0 = p.group.position.z, z1 = patchZ(i);
+      const z0 = p.group.position.z, z1 = patchZ(i, h);
       p.base.z = z1;
       tween(0.25, (s) => { p.group.position.z = z0 + (z1 - z0) * s; });
     }
@@ -2094,7 +2101,7 @@ function nextLayer(h) {
   }
   if (!h.next) return;
   h.next.visible = show;
-  if (show) h.next.position.set(X(0), Y(0), patchZ(layer) + 0.07);
+  if (show) h.next.position.set(X(0), Y(0), patchZ(layer, h) - PATCH_D + 0.01);   // where the board's back will go
 }
 const boardsOf = (h) => h.pieces.filter((p) => p.patch).sort((a, b) => a.layer - b.layer);
 // How full the strength bar is: the hole's own wood, or once that's gone, the board they're on.
@@ -2381,7 +2388,8 @@ function place(t, by = myId(), hand = carry) {
 function putPiece(h, i) {
   const over = i.over > 0;
   const g = pieceGroup(i.shape, woodMat(i.letter));
-  const to = new THREE.Vector3(X(i.dc), Y(i.dr), i.patch ? patchZ(i.layer) : over ? WOOD_D - 0.12 : -0.04);
+  if (i.patch) g.scale.z = PATCH_D / WOOD_D;
+  const to = new THREE.Vector3(X(i.dc), Y(i.dr), i.patch ? patchZ(i.layer, h) : over ? WOOD_D - 0.12 : -0.04);
   g.position.copy(to);
   wallGroup.add(g);
   const cells = i.shape.map(([r, c]) => k(r + i.dr, c + i.dc));
@@ -2439,10 +2447,10 @@ let lastPlaced = null;
 function canTakeBack() {
   const u = lastPlaced;
   if (!u || carry || u.hpAfter === null || pirate.h > 0.3) return false;
-  if (u.frame) return !u.frame.done && u.frame.pieces[u.frame.pieces.length - 1] === u.piece && Math.hypot(u.piece.cx - pirate.x, u.piece.cz - pirate.z) <= REACH + 0.6;
-  if (pirate.z > WALL_Z) return false;
+  if (u.frame) return !u.frame.done && u.frame.pieces[u.frame.pieces.length - 1] === u.piece && Math.hypot(u.piece.cx - pirate.x, u.piece.cz - pirate.z) <= REACH + 1.2;
+  if (pirate.z > WALL_Z + 2.5) return false;   // (as far back as you can put one)
   if (u.h.pieces[u.h.pieces.length - 1] !== u.piece || (!u.piece.patch && u.h.status === 'master')) return false;
-  return Math.abs(u.piece.cx - pirate.x) <= REACH + 0.6;
+  return Math.abs(u.piece.cx - pirate.x) <= REACH + 1.2;
 }
 function takeBack() {
   const u = lastPlaced, where = u.frame || u.h;
@@ -2594,7 +2602,7 @@ function breakBoard(h, p) {
   tween(0.8, (s) => { g.position.set(p0.x + v.x * s, p0.y + v.y * s - 9 * s * s, p0.z + v.z * s); g.rotation.x = s * 3; }, () => wallGroup.remove(g));
   relining();
   updateHole(h);
-  burst(new THREE.Vector3(holeX(h), holeMidY(h), patchZ(0)), '#c98a45', 16, 3.5);
+  burst(new THREE.Vector3(holeX(h), holeMidY(h), patchZ(0, h)), '#c98a45', 16, 3.5);
   shake = 0.3;
   toast(h.pieces.length ? 'They hacked through a board!' : 'They broke through!', true);
 }
@@ -3017,19 +3025,22 @@ function aim() {
   if (mouseMode && mouse?.frame) {
     const d = (o) => Math.hypot(o.gc - mouse.fc, o.gr - mouse.fr) + (o.over ? 0.35 : 0);
     const mine = fl.filter((o) => o.frame === mouse.frame).sort((a, z) => d(a) - d(z));
-    if (mine[0] && d(mine[0]) <= 1.8) target = { ...mine[0], ok: fd(mine[0]) <= REACH, far: fd(mine[0]) > REACH };
+    if (mine[0] && d(mine[0]) <= 1.8) target = { ...mine[0], ok: fd(mine[0]) <= REACH + 1.2, far: fd(mine[0]) > REACH + 1.2 };
     return;
   }
   if (pirate.z > WALL_Z + 2.5 && !fl.length) return;
   const reach = (o) => Math.abs(o.cx - pirate.x) <= REACH && pirate.z <= WALL_Z;
+  // With the mouse, if it shows you where it'd go, you can put it there: from as far back as the
+  // preview shows (the user: no value in having to walk closer), and a bit further along the wall.
+  const mReach = (o) => Math.abs(o.cx - pirate.x) <= REACH + 1.2 && pirate.z <= WALL_Z + 2.5;
   const list = pirate.z <= WALL_Z + 2.5 ? fits(carry.cells).concat(patchFits(carry.cells)) : [];
   const b = C.bbox(carry.cells);
   if (mouseMode && mouse) {
     if (pirate.z > WALL_Z + 2.5) return;
-    const d = (o) => { const m = mouseAt(o.patch ? patchZ(o.layer) : 0); return Math.hypot(o.fc - m.fc, o.fr - m.fr) + (o.over ? 0.35 : 0); };
+    const d = (o) => { const m = mouseAt(o.patch ? patchZ(o.layer, wall.holes[o.hole]) - PATCH_D / 2 : 0); return Math.hypot(o.fc - m.fc, o.fr - m.fr) + (o.over ? 0.35 : 0); };
     list.sort((a, z) => d(a) - d(z));
     const best = list[0];
-    if (best && d(best) <= 1.8) target = { ...best, ok: reach(best), far: !reach(best) };
+    if (best && d(best) <= 1.8) target = { ...best, ok: mReach(best), far: !mReach(best) };
     else target = { dr: Math.round(mouse.fr - b.h / 2), dc: Math.round(mouse.fc - b.w / 2), ok: false };
   } else if (!mouseMode) {
     // Everything in reach: a walk frame on the floor when stood back from the wall, the stairs
@@ -3044,7 +3055,7 @@ function aim() {
 function drawGhost() {
   const kind = !target ? '' : !target.ok ? 'no' : target.patch ? 'layer' : target.over ? 'over' : 'ok';
   const f = target?.frame;
-  const gz = f ? (f.kind === 'stair' ? 0.08 : 0.16) : target?.patch ? patchZ(target.layer) + 0.07 : kind === 'over' ? 0.45 : 0.08;
+  const gz = f ? (f.kind === 'stair' ? 0.08 : 0.16) : target?.patch ? patchZ(target.layer, wall.holes[target.hole]) - 0.06 : kind === 'over' ? WOOD_D - 0.18 : 0.08;
   const want = target && carry ? `${f ? f.i : 'w'}|${carry.cells.map((x) => x.join()).join(';')}|${target.dr},${target.dc}|${kind}|${gz}` : '';
   if (want === ghostKey) return;
   ghostKey = want;
