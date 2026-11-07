@@ -723,7 +723,14 @@ function makeGate() {
 
 // ---------- piles (the toolbox), fire barrel, chest, cannon ----------
 const crateGeo = new RoundedBoxGeometry(1.2, 0.64, 1.2, 2, 0.04);
-const piles = [0, 1, 2].map(() => ({ x: 0, z: 0, letter: null, cells: null, group: null, crate: mesh(crateGeo, mat('#7a5230', { map: woodTex })) }));
+const piles = [0, 1, 2].map(() => {
+  const label = document.createElement('div');
+  label.className = 'label weak';
+  label.innerHTML = 'Restocking<span class="bar part"><b></b></span>';
+  label.style.display = 'none';
+  $('labels').append(label);
+  return { x: 0, z: 0, letter: null, cells: null, group: null, wait: 0, label, crate: mesh(crateGeo, mat('#7a5230', { map: woodTex })) };
+});
 function deal(p) {
   p.letter = C.weightedLetter();
   p.cells = C.normalize(C.pick(C.ORIENTS_BY_LETTER[p.letter]).cells);
@@ -1247,14 +1254,21 @@ function holdPiece(letter, cells, from, at) {
   tween(0.25, (t) => { if (carry?.group === g) carry.lift = t; });
   ghostKey = null;
 }
-function refill(p) {
+/* A crate restocks itself after a piece is used. Fitting one is quick; a thrown piece is timber
+   gone for good, so that crate takes RESTOCK seconds, or you could stand and pelt raiders forever. */
+const RESTOCK = 8;
+function refill(p, secs = 0.45) {
   if (!p || guest()) return;   // a piece taken back off the wall has no crate to refill; the host deals
-  setTimeout(() => {
+  p.wait = secs;
+  clearTimeout(p.timer);
+  p.timer = setTimeout(() => {
+    p.wait = 0;
+    if (p.letter || carry?.from === p) return;   // dealt afresh meanwhile (a new game)
     deal(p); showPile(p);
     checkGaps();
     const g = p.group, s0 = g.scale.x;
     tween(0.3, (s) => g.scale.setScalar(s0 * (1 - (1 - s) ** 3)));
-  }, 450);
+  }, secs * 1000);
 }
 // Hurl the carried piece at a raider. It always flies true, but the piece is spent.
 function throwAt(r, hand = carry, by = myId()) {
@@ -1293,7 +1307,7 @@ function throwAt(r, hand = carry, by = myId()) {
     g.position.y += Math.sin(s * Math.PI) * arc;
     g.rotation.x = s * 9; g.rotation.z = s * 5;
   }, () => { scene.remove(g); hit(r, from, color); });
-  refill(pile);
+  refill(pile, RESTOCK);
 }
 function hit(r, from, color) {
   burst(new THREE.Vector3(r.x, 1.1, r.z), color, 22, 4.5);
@@ -1710,6 +1724,7 @@ function prompt() {
     else if (carry && carry.from === f.p && !f.p.letter) t = `Space: put the ${carry.letter} back`;
     else if (carry && f.p.letter && carry.from) t = `Space: swap the ${carry.letter} for the ${f.p.letter}`;
     else if (carry && f.p.letter) t = `Fit the ${carry.letter} again, or throw it at a raider`;
+    else if (!f.p.letter && f.p.wait > 0.3) t = 'This crate\'s restocking: a thrown piece is timber gone';
   } else if (!carry && canTakeBack()) t = `Space: take the ${lastPlaced.letter} back off`;
   else if (carry) {
     const more = target?.count > 1 ? ` · Tab: other spots (${target.count})` : '';
@@ -1750,10 +1765,12 @@ function send(to, msg) { if (net.ws?.readyState === 1) net.ws.send(JSON.stringif
 function say(text, bad = false, warn = false) { toast(text, bad, warn); if (isHost()) send('all', { t: 'toast', text, bad, warn }); }
 const r2 = (n) => Math.round(n * 100) / 100;
 const pileSig = (p) => (p.letter ? p.letter + JSON.stringify(p.cells) : '');
-const pilesOut = () => piles.map((p) => (p.letter ? [p.letter, p.cells] : null));
+// An empty crate goes as the seconds left till it restocks (if it's a while), so the crew see it.
+const pilesOut = () => piles.map((p) => (p.letter ? [p.letter, p.cells] : p.wait > 1 ? r2(p.wait) : null));
 function pilesIn(list) {
   list.forEach((d, i) => {
     const p = piles[i];
+    if (typeof d === 'number') { p.wait = d; d = null; } else if (!d) p.wait = 0;
     if ((d ? d[0] + JSON.stringify(d[1]) : '') === pileSig(p)) return;
     const fresh = d && !p.letter;
     p.letter = d ? d[0] : null;
@@ -2349,6 +2366,19 @@ function update(dt) {
       h.pieces.forEach((p) => { p.group.position.x = p.base.x + (Math.random() - 0.5) * h.jig * 0.4; });
       if (!h.jig) h.pieces.forEach((p) => { p.group.position.x = p.base.x; });
     }
+  }
+  // A crate restocking after a throw shows how long it's got to go.
+  for (const p of piles) {
+    if (p.wait > 0) p.wait = Math.max(0, p.wait - dt);
+    const show = !p.letter && p.wait > 0.3 && carry?.from !== p;
+    p.label.style.display = show ? '' : 'none';
+    if (!show) continue;
+    p.label.firstChild.textContent = `Restocking · ${Math.ceil(p.wait)}s`;
+    p.label.querySelector('.bar b').style.width = `${Math.min(1, 1 - p.wait / RESTOCK) * 100}%`;
+    v3.set(p.x, 1.2, p.z).project(camera);
+    p.label.style.left = `${(v3.x + 1) / 2 * innerWidth}px`;
+    p.label.style.top = `${(1 - v3.y) / 2 * innerHeight}px`;
+    if (v3.z > 1) p.label.style.display = 'none';
   }
   for (const f of frames()) {
     const [cls, html] = frameLabel(f);

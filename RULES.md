@@ -127,6 +127,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   through a hole that has wood in it. A thief whose way out has been mended hacks out from inside.
 - **Throw pieces at raiders, don't bonk them.** A plain bonk was underwhelming. The carried piece
   is the weapon: it hurls at a raider, who goes flying. It costs the piece.
+- **A thrown piece takes a while to come back.** Otherwise you could stand and pelt raiders
+  forever. The crate you threw from takes 8 seconds to restock (it shows a "Restocking" bar);
+  fitting a piece still restocks its crate at once.
 - **Throwing has its own controls.** Shift (next to WASD; R was too far away) or clicking on a raider. Space
   and plain clicks only pick up and fit, so you can fight beside the crates or the wall without
   fitting by mistake. Up on the rampart Space throws too, since there's nothing to fit there.
