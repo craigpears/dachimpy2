@@ -345,13 +345,29 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   you fit it, board it over, nail it on behind a mended hole, or lay it in a rampart frame.
 - **You must see what's happening in the den.** Raiders inside get a ⚔ marker, pinned to the edge
   of the screen when they're out of view (gold when carrying loot). The view widens on narrow screens.
+- **Keeping them out must be possible, and must feel worth it.** The user found it demoralising
+  that raiders got in "no matter what": there seemed no point stopping them. The cause was the
+  raiders' cannon, firing every 9-20 seconds from wave 2, each shot an open hole a raider was
+  through two seconds later; nobody can mend that fast. (Tested: with every hole a Masterpiece and
+  nothing else done, six raiders still got in over waves 2 and 3.) Now:
+  - **The cannon has a few shots a wave** (one in wave 2, two in wave 3, three after), the first
+    about 20 seconds in, 22 seconds apart.
+  - **It aims first, for 8 seconds**, the spot glowing red on both faces of the wall with a
+    countdown ("Their cannon's aiming here!"). A hit from the gun tower spoils its aim.
+  - **A fresh breach is choked with rubble**: raiders must hack 10 seconds of it clear before they
+    can climb through, and a piece fitted into it clears it. Its label says so.
+  - **A raider who tires at your wall is turned away**: +3 doubloons, a cheer, and a "Turned away"
+    count on the HUD. Each wave ends with how many you turned away and how many got in.
+  - (Tested: a steady solo player fitting a piece every 10 seconds lost nothing in three waves
+    and turned nine raiders away. Holes still wear down wave on wave, so boards behind matter.)
 - **You can pause.** A Pause button by Your pirate, or P (P, Space, Enter or Esc carries on).
   Everything stops: raiders, the wave timer, the Gunnery stores. It also pauses by itself when you
   switch away from the tab. Only when playing on your own: with a crew the raiders don't wait.
 - **Give enough time to build.** A piece takes about ten seconds to fetch and fit, so the first wave
   waits 75 seconds and starts small.
 - **The den has a gate** and raiders attack from the far side of the wall, with swords and (from
-  wave 2) a cannon that blasts fresh holes. Keep repairing. **The cannon stands well back** (16 m
+  wave 2) a cannon that blasts fresh holes (a few a wave, aimed first; see above). Keep
+  repairing. **The cannon stands well back** (16 m
   out, behind where the raiders gather): with the gun tower jutting out, the user found it too far
   forward at 10.5 m.
 - **A hole is open right through the wall.** The user likes the empty holes, a "nice incomplete

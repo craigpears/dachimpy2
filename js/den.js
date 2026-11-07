@@ -25,7 +25,12 @@ const WALL_Z = 2.7;      // how close to the wall the pirate must stand to fit a
 const SPEED = 4.6;
 const HP = { master: 45, boarded: 10, piece: 4, patch: 12 };   // seconds of one raider hacking at it (piece: each piece in an unfinished hole; patch: a board nailed over a damaged one)
 const MAX_PATCHES = 3;
-const PAY = { master: 10, boarded: 2, bonk: 3, steal: 10 };
+const PAY = { master: 10, boarded: 2, bonk: 3, steal: 10, turned: 3 };
+/* The cannon: a few shots a wave (one in wave 2, two in wave 3, three after), each aimed for
+   CANNON_AIM seconds first with the spot shown red on the wall, and a fresh breach is choked with
+   RUBBLE seconds of hacking before anyone can climb through. (It used to fire every 9-20 seconds,
+   straight through, and a raider was in two seconds later: nothing you did kept them out.) */
+const CANNON_AIM = 8, CANNON_GAP = 22, RUBBLE = 10;
 const BUILD_SECS = 75, CALM_SECS = 20;
 const RAIDER_DPS = 1, RAIDER_STAMINA = 16;
 const k = (r, c) => r + ',' + c;
@@ -1628,7 +1633,7 @@ function gunTarget(g, taken = new Set()) {
     }
     return { x, z, r: best };
   }
-  if (cannon.visible && G.phase === 'wave' && G.cannonT < 20 && gunSwing(g, cannon.position.x, cannon.position.z) !== null) return { x: cannon.position.x, z: cannon.position.z, cannon: true };
+  if (cannon.visible && G.phase === 'wave' && (G.aim || (G.cannonShots > 0 && G.cannonT < 12)) && gunSwing(g, cannon.position.x, cannon.position.z) !== null) return { x: cannon.position.x, z: cannon.position.z, cannon: true };
   return null;
 }
 function fireGun(i, tx, tz, atCannon) {
@@ -1657,7 +1662,7 @@ function fireGun(i, tx, tz, atCannon) {
     burst(to, '#ffb85a', 26, 5);
     burst(to, '#7a6a5a', 16, 3.5);
     if (guest()) return;
-    if (atCannon) { G.cannonT = Math.max(G.cannonT, 25); say('A hit on their cannon! It\'s quiet for a while'); return; }
+    if (atCannon) { const spoilt = !!G.aim; G.aim = null; G.cannonT = Math.max(G.cannonT, 25); say(spoilt ? 'A hit on their cannon! Its aim\'s spoilt' : 'A hit on their cannon! It\'s quiet for a while'); return; }
     let n = 0;
     for (const r of raiders) if (!r.inside && r.state !== 'down' && !r.gone && Math.hypot(r.x - tx, r.z - tz) < 1.8) { hit(r, from, '#3a3a3a'); n++; }
     if (n > 1) say(`Broadside! ${n} raiders bowled over`);
@@ -1966,7 +1971,7 @@ function newGame() {
   raiders.splice(0).forEach((r) => { scene.remove(r.m.g); r.mark.remove(); });
   if (carry) { scene.remove(carry.group); carry = null; }
   ghostKey = ''; ghost = null;
-  Object.assign(G, { gold: 60, wave: 0, phase: 'build', phaseT: BUILD_SECS, toSpawn: 0, spawnT: 0, cannonT: 0, masters: 0, boarded: 0, bonked: 0, stolen: 0, over: false });
+  Object.assign(G, { gold: 60, wave: 0, phase: 'build', phaseT: BUILD_SECS, toSpawn: 0, spawnT: 0, cannonT: 0, cannonShots: 0, aim: null, masters: 0, boarded: 0, bonked: 0, stolen: 0, turned: 0, waveTurned: 0, waveIn: 0, over: false });
   piles.forEach(deal);
   newWall();
   Object.assign(pirate, { x: 0, z: 8, h: 0 });
@@ -2044,6 +2049,7 @@ function relining() {
 }
 const an = (l) => ('AEFILMNORSX'.includes(l) ? 'an ' : 'a ') + l;
 function updateHole(h) {
+  if (h.rubble > 0 && h.pieces.length) { h.rubble = 0; rubbleShow(h); }   // mended over the rubble
   const left = rest(h);
   if (!left.length && h.status === 'open') {
     const master = !h.pieces.some((p) => p.over);
@@ -2074,7 +2080,7 @@ function nextLayer(h) {
 }
 const boardsOf = (h) => h.pieces.filter((p) => p.patch).sort((a, b) => a.layer - b.layer);
 // How full the strength bar is: the hole's own wood, or once that's gone, the board they're on.
-const barFrac = (h) => (h.status !== 'open' || h.pieces.some((p) => !p.patch) ? h.hp / h.maxHp : (boardsOf(h)[0]?.hp ?? 0) / HP.patch);
+const barFrac = (h) => (h.rubble > 0 && !h.pieces.length ? h.rubble / RUBBLE : h.status !== 'open' || h.pieces.some((p) => !p.patch) ? h.hp / h.maxHp : (boardsOf(h)[0]?.hp ?? 0) / HP.patch);
 function labelFor(h) {
   const atk = h.attackers ? `<em>⚔ ${h.attackers} raider${h.attackers > 1 ? 's' : ''} at it</em>` : '';
   const boards = boardsOf(h).length, bs = boards > 1 ? 's' : '';
@@ -2083,6 +2089,7 @@ function labelFor(h) {
   if (h.status === 'master') return ['label done', `★ Masterpiece${behind}${hurt}<i class="bar"><b></b></i>${atk}`];
   if (h.status === 'boarded') return ['label weak', `Boarded over: weak${behind}${hurt}<i class="bar"><b></b></i>${atk}`];
   if (boards) return ['label weak', `Hacked open: ${boards} board${bs} hold${boards > 1 ? '' : 's'}<small>they must get through each one</small><i class="bar"><b></b></i>${atk}`];
+  if (h.rubble > 0 && !h.pieces.length) return ['label bad', `Fresh breach, full of rubble<small>mend it before they clear it!</small><i class="bar"><b></b></i>${atk}`];
   const left = h.open;
   const breach = h.pieces.length ? `<i class="bar part"><b></b></i>${atk}` : h.attackers ? `<em>⚔ raiders can climb in!</em>` : '';
   if (!h.exact) return ['label bad', `No Masterpiece now<small>board it over to close it</small>${breach}`];
@@ -2103,6 +2110,7 @@ function updateStats() {
   $('s-wave').textContent = G.wave;
   $('s-master').textContent = G.masters;
   $('s-board').textContent = G.boarded;
+  $('s-turned').textContent = G.turned || 0;
   chestHeap.scale.y = 0.08 + 0.5 * Math.min(1, Math.max(0, G.gold) / 60);
 }
 
@@ -2613,7 +2621,7 @@ function tween(dur, step, done) { tweens.push({ t: 0, dur, step, done }); }
 
 // ---------- raiders ----------
 // Only an empty hole can be climbed through; anything with wood in it has to be hacked open first.
-const passable = (h) => h.status === 'open' && !h.pieces.length;
+const passable = (h) => h.status === 'open' && !h.pieces.length && !(h.rubble > 0);
 /* Each raider goes for the hole in front of where they come up to the wall, not the weakest one
    along the whole of it: a breach only draws the raiders close to it (GAP_PULL metres). So one hole
    broken doesn't let the whole wave in, and the parts of the wall you've kept strong hold their own
@@ -2681,7 +2689,8 @@ function updateRaider(r, dt) {
       // inside hacks the other way.
       const boards = boardsOf(h), fill = h.pieces.some((p) => !p.patch);
       const board = out ? boards[boards.length - 1] || null : fill ? null : boards[0];
-      if (board) board.hp -= RAIDER_DPS * dt; else h.hp -= RAIDER_DPS * dt;
+      const rub = !out && h.rubble > 0 && !h.pieces.length;   // a fresh breach: clear the rubble first
+      if (rub) { h.rubble -= RAIDER_DPS * dt; rubbleShow(h); } else if (board) board.hp -= RAIDER_DPS * dt; else h.hp -= RAIDER_DPS * dt;
       r.m.arms[1].rotation.x = -1.8 + Math.sin(r.t * 9) * 1.1;
       r.hitT -= dt;
       if (r.hitT <= 0) {
@@ -2689,9 +2698,10 @@ function updateRaider(r, dt) {
         burst(new THREE.Vector3(holeX(h) + r.slot * 0.5, Math.min(holeMidY(h), 1.4), out ? 0.6 : 0.25), '#c98a45', 4, 2);
         h.jig = 0.15;
       }
-      if (board && board.hp <= 0) breakBoard(h, board);
+      if (rub) { if (r.stamina <= 0) turnedAway(r); }
+      else if (board && board.hp <= 0) breakBoard(h, board);
       else if (!board && h.hp <= 0) breakHole(h);
-      else if (r.stamina <= 0) r.state = 'leave';
+      else if (r.stamina <= 0) { if (out) r.state = 'leave'; else turnedAway(r); }
       break;
     }
     case 'climb': case 'climbOut': {
@@ -2703,7 +2713,7 @@ function updateRaider(r, dt) {
       r.m.g.position.y = Math.sin(s * Math.PI) * (holeFootY(h) + 0.25);
       faceTo(r.m, 0, into ? 1 : -1, dt);
       r.inside = r.z > 0.3;
-      if (s >= 1) { r.state = into ? 'raid' : 'leave'; r.t = 0; r.inside = into; }
+      if (s >= 1) { r.state = into ? 'raid' : 'leave'; r.t = 0; r.inside = into; if (into && !guest()) G.waveIn++; }
       break;
     }
     case 'raid': {
@@ -2764,7 +2774,12 @@ function raiderPose(r, moving, dt) {
 
 // ---------- the cannon ----------
 function fireCannon() {
-  // Find a patch of solid stone, away from the gate and other holes, for a new hole.
+  const cells = cannonSpot();
+  if (cells) shoot(cells);
+  return !!cells;
+}
+// A patch of solid stone, away from the gate and other holes, for a new hole.
+function cannonSpot() {
   for (let tries = 0; tries < 200; tries++) {
     const shape = Math.random() < 0.6 ? lastGap() : C.genHole(2).hole;
     const b = C.bbox(shape);
@@ -2780,10 +2795,65 @@ function fireCannon() {
       return true;
     });
     if (!clear) continue;
-    shoot(cells);
-    return true;
+    return cells;
   }
-  return false;
+  return null;
+}
+// A raider who tires at your wall before getting through gives up: that's the wall doing its job.
+function turnedAway(r) {
+  r.state = 'leave';
+  if (guest()) return;
+  G.turned++; G.waveTurned++;
+  G.gold += PAY.turned;
+  updateStats();
+  burst(new THREE.Vector3(r.x, 1.6, r.z), '#ffd45a', 12, 2.5);
+  say(`Turned away! They couldn't get through (+${PAY.turned})`);
+}
+// Rubble in a fresh breach: a heap of broken stone that thins as the raiders clear it.
+function rubbleShow(h) {
+  if (!h.rubbleG) {
+    if (!(h.rubble > 0)) return;
+    h.rubbleG = new THREE.Group();
+    for (const [r, c] of h.cells) for (let i = 0; i < 2; i++) {
+      const b = rock(X(c) + S * (0.25 + Math.random() * 0.5), Y(r) - S * (0.3 + Math.random() * 0.5), -STONE_D * (0.25 + Math.random() * 0.5), 0.17 + Math.random() * 0.06);
+      h.rubbleG.add(b);
+    }
+    wallGroup.add(h.rubbleG);
+  }
+  const on = h.rubble > 0 && !h.pieces.length, n = h.rubbleG.children.length, keep = on ? Math.ceil(n * h.rubble / RUBBLE) : 0;
+  h.rubbleG.children.forEach((b, i) => { b.visible = i < keep; });
+}
+// Where the cannon's aiming: the squares glow red on both faces of the wall, with a countdown.
+const aimMat = new THREE.MeshBasicMaterial({ color: '#ff3a24', transparent: true, opacity: 0.5, depthWrite: false, side: THREE.DoubleSide });
+let aimMark = null;
+function showAim() {
+  const A = G.aim;
+  if (aimMark && (!A || aimMark.userData.key !== JSON.stringify(A.cells))) { wallGroup.remove(aimMark); aimMark.userData.label.remove(); aimMark = null; }
+  if (!A) return;
+  if (!aimMark) {
+    aimMark = new THREE.Group();
+    for (const [r, c] of A.cells) for (const z of [0.08, -STONE_D - 0.08]) {
+      const p = new THREE.Mesh(cellPlane, aimMat);
+      p.position.set(X(c) + S / 2, Y(r) - S / 2, z);
+      aimMark.add(p);
+    }
+    const line = outline(A.cells, 0.09, '#ff6a4a');
+    line.position.set(X(0), Y(0), 0);
+    aimMark.add(line);
+    aimMark.userData.key = JSON.stringify(A.cells);
+    aimMark.userData.label = document.createElement('div');
+    wallGroup.add(aimMark);
+  }
+  const lab = aimMark.userData.label;
+  if (!lab.isConnected) $('labels').append(lab);
+  aimMat.opacity = 0.35 + 0.3 * Math.abs(Math.sin(performance.now() / 180));
+  const b = C.bbox(A.cells);
+  v3.set(X(b.c0) + b.w * S / 2, Y(b.r0) + 0.2, 0.1).project(camera);
+  lab.className = 'label bad';
+  lab.innerHTML = `Their cannon's aiming here! <b>${Math.max(1, Math.ceil(A.t))}</b><small>${gd ? 'shoot their cannon from the gun tower to spoil it' : 'get pieces ready to mend the breach'}</small>`;
+  lab.style.left = `${(v3.x + 1) / 2 * innerWidth}px`;
+  lab.style.top = `${(1 - v3.y) / 2 * innerHeight}px`;
+  lab.style.display = v3.z > 1 ? 'none' : '';
 }
 function shoot(cells) {
   if (isHost()) send('all', { t: 'shoot', cells });
@@ -2823,12 +2893,14 @@ function blast(cells, told = false) {
   });
   stones.instanceMatrix.needsUpdate = true;
   const h = registerHole(cells);
+  h.rubble = RUBBLE;
+  rubbleShow(h);
   wallBack();
   holeVisuals(h);
   updateHole(h);
   burst(at, '#9a8a7a', 26, 4.5);
   shake = 0.6;
-  toast('Cannon fire! A new hole', true);
+  toast('Cannon fire! A breach, choked with rubble: mend it before they clear it', true);
 }
 
 // ---------- waves ----------
@@ -2837,7 +2909,10 @@ function startWave() {
   G.phase = 'wave';
   G.toSpawn = Math.round((1 + G.wave) * (1 + 0.5 * (crewSize() - 1)));
   G.spawnT = 0.5;
-  G.cannonT = G.wave >= 2 ? 8 : Infinity;
+  G.cannonShots = G.wave >= 2 ? Math.min(3, G.wave - 1) : 0;
+  G.cannonT = 20;
+  G.aim = null;
+  G.waveTurned = G.waveIn = 0;
   if (G.wave >= 2 && !cannon.visible) { cannon.visible = true; say('They brought a cannon!', true); }
   else say(`Wave ${G.wave}: raiders!`, true);
   $('intro').classList.add('off');
@@ -2851,14 +2926,19 @@ function updateWaves(dt) {
   }
   G.spawnT -= dt;
   if (G.toSpawn > 0 && G.spawnT <= 0) { spawnRaider(); G.toSpawn--; G.spawnT = Math.max(2.5, 7 - G.wave); }
-  G.cannonT -= dt;
-  if (G.cannonT <= 0) { fireCannon(); G.cannonT = Math.max(9, 22 - 2 * G.wave); }
+  if (G.aim) {
+    if ((G.aim.t -= dt) <= 0) { const cells = G.aim.cells; G.aim = null; G.cannonShots--; G.cannonT = CANNON_GAP; shoot(cells); }
+  } else if (G.cannonShots > 0 && (G.cannonT -= dt) <= 0) {
+    const cells = cannonSpot();
+    if (cells) { G.aim = { cells, t: CANNON_AIM }; say('Their cannon\'s aiming at the wall: see the red!', true); } else G.cannonT = 5;
+  }
   if (!G.toSpawn && !raiders.length) {
-    G.phase = 'calm'; G.phaseT = CALM_SECS;
+    G.phase = 'calm'; G.phaseT = CALM_SECS; G.aim = null;
+    const tally = G.waveTurned || G.waveIn ? ` ${G.waveTurned} turned away at the wall, ${G.waveIn} got in.` : '';
     // Timber for the next stretch, once nothing's still being built.
     const f = !frames().length && !ramp.jobs.some((j) => j.frame && !j.up) && ramp.jobs[ramp.next]?.kind !== 'house' && openJob(ramp.next);
-    if (f) say(`Wave ${G.wave} beaten off! Timber's come: ${f.kind === 'gun' ? 'build a gun tower in its frame' : 'build the rampart in its frame'}`);
-    else say(`Wave ${G.wave} beaten off!`);
+    if (f) say(`Wave ${G.wave} beaten off!${tally} Timber's come: ${f.kind === 'gun' ? 'build a gun tower in its frame' : 'build the rampart in its frame'}`);
+    else say(`Wave ${G.wave} beaten off!${tally}`);
   }
 }
 function banner() {
@@ -3096,7 +3176,7 @@ function sendMe() {
 function snapshot() {
   send('all', {
     t: 'snap', g: { ...G }, p: pilesOut(), cv: cannon.visible ? 1 : 0, gd: gunOut(),
-    h: wall.holes.map((h) => [r2(h.hp), h.maxHp, h.status, h.pieces.length, boardsOf(h).map((p) => r2(p.hp))]),
+    h: wall.holes.map((h) => [r2(h.hp), h.maxHp, h.status, h.pieces.length, boardsOf(h).map((p) => r2(p.hp)), r2(h.rubble || 0)]),
     r: raiders.map((r) => [r.id, r2(r.x), r2(r.z), r2(r.m.g.position.y), r2(r.m.g.rotation.y), r2(r.m.g.rotation.x), r2(r.m.g.scale.x), r.state, r.inside ? 1 : 0, r.loot ? 1 : 0, wall.holes.indexOf(r.hole), r2(r.slot), r.look]),
   });
 }
@@ -3109,9 +3189,11 @@ function applySnap(m) {
   pilesIn(m.p);
   gunIn(m.gd);
   cannon.visible = !!m.cv;
-  m.h.forEach(([hp, maxHp, status, n, bh], i) => {
+  m.h.forEach(([hp, maxHp, status, n, bh, rub], i) => {
     const h = wall.holes[i];
-    if (!h || h.busy || h.pieces.length !== n) return;   // something's on its way: wait for it
+    if (!h) return;
+    if (h.rubble !== rub) { h.rubble = rub; rubbleShow(h); }
+    if (h.busy || h.pieces.length !== n) return;   // something's on its way: wait for it
     if (h.status !== status) { h.status = status; h.sig = ''; }
     h.hp = hp; h.maxHp = maxHp;
     boardsOf(h).forEach((p, j) => { if (bh[j] !== undefined) p.hp = bh[j]; });
@@ -3940,6 +4022,7 @@ function update(dt) {
   updateMates(dt);
   waveFlags(dt);
   biomeTick(dt);
+  showAim();
 
   // A marker over every raider inside the den, pinned to the screen edge when they're out of view.
   aimed = carry ? aimFoe() : null;

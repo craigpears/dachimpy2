@@ -148,6 +148,17 @@ Ideas to carry on with:
   shapes (a 3 by 15 strip took about a minute). The den's copy turns wide shapes on their side
   first. If the main site ever solves long strips, do the same there.
 
+## Holding the wall: what's next
+
+The first fix is in (RULES.md: "Keeping them out must be possible"): the cannon aims first and
+fires a few times a wave, fresh breaches are full of rubble, and turning raiders away pays. Not
+yet tried by the user. Ideas if it still feels hopeless or too easy:
+- **Raiders who get in should be catchable**: they walk to the chest; a crewmate standing in the
+  way could block them, and a thrown piece already knocks them flat.
+- **Repairs between waves**: Masterpieces could heal a little in the calm (the user's call).
+- **A wave that holds pays a bonus** ("Not one got in! +10").
+- **Wave sizes for a crew** may need retuning with the cannon change; only solo was tested.
+
 ## A public den anyone can drop into
 
 The user wants the den you land in by default to be a public one, not solo: a friendly, open den
