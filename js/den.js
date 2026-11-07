@@ -1937,6 +1937,36 @@ function showPile(p) {
   scene.add(g);
   p.group = g;
 }
+/* The toolbox along the bottom of the screen: what's on each crate, so you can plan your next
+   piece from the wall instead of walking back to look (the user: "so that it runs a bit faster").
+   Only to see: you still walk over to fetch one. Left to right as the crates stand. */
+const toolEls = [];
+function pieceSvg(cells) {
+  const b = C.bbox(cells), cs = Math.min(11, Math.floor(42 / b.h), Math.floor(54 / b.w));
+  const r = cells.map(([y, x]) => `<rect x="${(x - b.c0) * cs + 0.5}" y="${(y - b.r0) * cs + 0.5}" width="${cs - 1}" height="${cs - 1}" rx="1.5"/>`).join('');
+  return `<svg viewBox="0 0 ${b.w * cs} ${b.h * cs}" width="${b.w * cs}" height="${b.h * cs}">${r}</svg>`;
+}
+function toolbox() {
+  const box = $('toolbox');
+  box.hidden = onGunDeck();
+  if (box.hidden) return;
+  if (!toolEls.length) for (let i = 0; i < piles.length; i++) { const el = document.createElement('div'); box.append(el); toolEls.push({ el, sig: '' }); }
+  [...piles].sort((a, z) => a.x - z.x).forEach((p, j) => {
+    const t = toolEls[j], mine = carry && carry.from === p;
+    const state = p.letter ? 'piece' : mine ? 'hand' : p.wait > 0.3 ? 'wait' : 'taken';
+    const sig = `${state}|${p.letter}|${p.cells}|${mine ? carry.cells : ''}|${state === 'wait' ? Math.ceil(p.wait) : ''}`;
+    if (sig !== t.sig) {
+      t.sig = sig;
+      t.el.className = `tool ${state}`;
+      t.el.innerHTML = state === 'piece' ? `${pieceSvg(p.cells)}<span>${p.letter}</span>`
+        : state === 'hand' ? `${pieceSvg(carry.cells)}<span>In hand</span>`
+        : state === 'wait' ? `<span>Restocking<br>${Math.ceil(p.wait)}s</span><i><b></b></i>`
+        : '<span>Taken</span>';
+      if (state === 'piece') t.el.querySelector('svg').style.fill = WOOD[p.letter];
+    }
+    if (state === 'wait') t.el.querySelector('b').style.width = `${Math.min(1, 1 - p.wait / (p.waitFull || restockSecs())) * 100}%`;
+  });
+}
 const barrel = (() => {
   const g = new THREE.Group();
   const b = mesh(new THREE.CylinderGeometry(0.42, 0.36, 0.9, 16), mat('#6a4326', { map: woodTex }));
@@ -3710,7 +3740,7 @@ function decoMode(on) {
   deco.on = on;
   $('deco').classList.toggle('on', on);
   $('deco-btn').textContent = on ? 'Done decorating' : 'Decorate';
-  document.querySelector('.keys').style.display = on ? 'none' : '';
+  $('dock').style.display = on ? 'none' : '';
   if (!on) { if (deco.ghost) deco.group.remove(deco.ghost); deco.ghost = null; if (deco.ring) deco.ring.visible = false; deco.at = null; return; }
   if (carry) putBack();
   if (!deco.ring) {
@@ -4222,6 +4252,7 @@ function update(dt) {
     p.label.style.top = `${(1 - v3.y) / 2 * innerHeight}px`;
     if (v3.z > 1) p.label.style.display = 'none';
   }
+  toolbox();
   gunLabels();
   for (const f of frames()) {
     const [cls, html] = frameLabel(f);

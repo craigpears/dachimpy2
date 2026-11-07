@@ -16,10 +16,23 @@
     .hud p { margin: 0 0 8px; color: var(--dim); line-height: 1.35; }
     .stats { display: flex; gap: 14px; flex-wrap: wrap; font-weight: 700; }
     .stats span b { color: var(--gold); }
-    .keys { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); background: var(--panel); border-radius: 8px; padding: 6px 12px; color: var(--dim); font-size: 14px; width: max-content; max-width: calc(100vw - 32px); text-align: center; line-height: 1.6; }
+    /* Along the bottom, stacked so nothing overlaps at any width: the prompt, the toolbox, the keys. */
+    .dock { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; width: max-content; max-width: calc(100vw - 32px); pointer-events: none; }
+    .keys { background: var(--panel); border-radius: 8px; padding: 6px 12px; color: var(--dim); font-size: 14px; max-width: 100%; box-sizing: border-box; text-align: center; line-height: 1.6; }
     .keys kbd { font: 700 13px 'Alegreya Sans'; color: var(--ink); background: #3b2a1b; border: 1px solid #6b4e32; border-radius: 4px; padding: 0 5px; }
-    .prompt { position: fixed; bottom: 58px; left: 50%; transform: translateX(-50%); background: var(--panel); border: 1px solid var(--gold); border-radius: 8px; padding: 8px 16px; font-size: 18px; font-weight: 700; white-space: nowrap; }
+    .prompt { background: var(--panel); border: 1px solid var(--gold); border-radius: 8px; padding: 8px 16px; font-size: 18px; font-weight: 700; white-space: nowrap; }
     .prompt:empty { display: none; }
+    .toolbox { display: flex; gap: 6px; align-items: center; background: var(--panel); border: 1px solid #5a412a; border-radius: 10px; padding: 5px 8px; }
+    .toolbox[hidden] { display: none; }
+    .toolbox .cap { font-size: 12px; font-weight: 700; color: var(--dim); writing-mode: vertical-rl; transform: rotate(180deg); letter-spacing: 1px; }
+    .tool { width: 62px; height: 64px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border-radius: 7px; background: #1f150d; border: 1px solid #4a3522; color: var(--dim); font-size: 12px; font-weight: 700; line-height: 1.1; text-align: center; }
+    .tool svg { stroke: #2a1a0c; stroke-width: 1; }
+    .tool.piece span { color: var(--ink); font-size: 14px; }
+    .tool.hand { border-color: var(--gold); color: var(--gold); }
+    .tool.hand svg { fill: var(--gold); opacity: 0.5; }
+    .tool.wait i { display: block; width: 46px; height: 6px; background: #3b2a1b; border-radius: 3px; overflow: hidden; }
+    .tool.wait b { display: block; height: 100%; width: 0; background: #ffc46b; }
+    .tool.taken { opacity: 0.6; }
     .label { position: fixed; transform: translate(-50%, -100%); pointer-events: none; background: var(--panel); border-radius: 6px; padding: 3px 9px; font-size: 15px; font-weight: 700; white-space: nowrap; border: 1px solid #5a412a; }
     .label.done { color: var(--gold); border-color: var(--gold); }
     .label.bad { color: var(--bad); border-color: var(--bad); }
@@ -50,7 +63,7 @@
     @media (max-width: 1150px) { .banner { top: calc(var(--hud-h, 64px) + 22px); font-size: 16px; } }
     .credit { position: fixed; top: 8px; right: 12px; max-width: 290px; text-align: right; font-size: 11px; line-height: 1.35; color: var(--dim); opacity: 0.75; pointer-events: none; }
     @media (max-width: 1150px) { .credit { font-size: 10px; max-width: 200px; } }
-    @media (max-width: 620px) { .credit { top: auto; bottom: 2px; left: 0; right: 0; max-width: none; text-align: center; } .credit br { display: none; } .keys { bottom: 36px; } .prompt { bottom: 80px; } }
+    @media (max-width: 620px) { .credit { top: auto; bottom: 2px; left: 0; right: 0; max-width: none; text-align: center; } .credit br { display: none; } .dock { bottom: 30px; } }
     .toast { position: fixed; top: 18%; left: 50%; transform: translateX(-50%); font: 700 34px 'Alegreya', serif; color: var(--gold); text-shadow: 0 2px 0 #000, 0 0 18px rgba(0,0,0,.8); pointer-events: none; opacity: 0; transition: opacity .3s; }
     .toast.on { opacity: 1; }
     .toast.bad { color: var(--bad); }
@@ -128,9 +141,12 @@
     <button class="mini" id="look-btn">Your pirate</button><button class="mini" id="den-btn" title="Your flag, the landscape, the gun tower and your shack">Your den</button><button class="mini" id="deco-btn" title="Put up flags, banners, lanterns and barrels round the den (B)">Decorate</button><button class="mini" id="pause-btn" title="Pause (P)">Pause</button><button class="mini" id="crew-btn">Play with a crew</button>
   </div>
   <div class="banner calm" id="banner"></div>
-  <div class="prompt" id="prompt"></div>
   <div class="intro" id="intro">Raiders are coming! Grab a piece from a crate and mend the wall.<br>Fill a hole exactly for a strong <b>Masterpiece</b>.</div>
+  <div class="dock" id="dock">
+  <div class="prompt" id="prompt"></div>
+  <div class="toolbox" id="toolbox" title="What's on each crate"><span class="cap">Crates</span></div>
   <div class="keys"><kbd>WASD</kbd> walk · <kbd>Space</kbd> or click: pick up / fit · <kbd>Q</kbd><kbd>E</kbd> turn · <kbd>F</kbd> flip · <kbd>Tab</kbd> next spot · <kbd>Shift</kbd> or click a raider: throw · <kbd>Z</kbd><kbd>C</kbd> or right-drag: turn the view, all the way round · <kbd>B</kbd> decorate · <kbd>P</kbd> pause · wheel: turn the piece at a hole, or zoom (<kbd>-</kbd><kbd>=</kbd>)</div>
+  </div>
   <div class="credit">Puzzle Pirates™ © 2001–2026 Grey Havens, LLC, created by Three Rings Design.<br>An unofficial fan project, not affiliated with or endorsed by them.</div>
   <div class="gunhelp" id="gunhelp"></div>
   <div class="toast" id="toast"></div>

@@ -7,9 +7,6 @@ the site (`.assetsignore` skips `*.md`).
 
 ## Asked for
 
-- **See the toolbox from the wall.** Show what's on the three crates along the bottom of the
-  screen, so you can plan your next piece while you're at a hole instead of walking back to look.
-  The user (7 Nov 2026): "so that it runs a bit faster".
 - **Raiders need a real gap to get in.** The user finds it weird and dumb that raiders hop
   through tiny gaps, even five-square ones high up the wall, as if by magic. Today any empty hole
   counts as a way in, whatever its size or height. What they want:

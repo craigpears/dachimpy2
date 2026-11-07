@@ -132,6 +132,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   each crewmate (5.2 with four), and shows a "Restocking" bar; fitting a piece still restocks its
   crate at once. (It was 8: the user found it close but a touch slow, more so with more pirates.
   Marginal changes only.)
+- **You can see the toolbox from anywhere.** A strip along the bottom of the screen shows what's on
+  each crate, left to right as they stand: the piece in its wood colour, "In hand" for the one you
+  took, a restocking bar, or "Taken" when a crewmate has it. So you can plan your next piece from
+  the wall rather than walking back to look (the user: "so that it runs a bit faster"). It's only
+  to see: you still walk over to fetch a piece. It's hidden on the gun tower and while decorating.
 - **Throwing has its own controls.** Shift (next to WASD; R was too far away) or clicking on a raider. Space
   and plain clicks only pick up and fit, so you can fight beside the crates or the wall without
   fitting by mistake. Up on the rampart Space throws too, since there's nothing to fit there.
