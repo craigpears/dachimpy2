@@ -111,3 +111,19 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
   between each; and *crew carpentry*: a co-op Hole of the Day where the crew take turns round a
   circle, each picking one of the dealt pieces, and the whole crew shares the grade and the pay.
 - Dropped ideas: *Commit or wait* (not interesting).
+
+## Pirate Den (3D prototype, `den.html`)
+
+Unlisted for now: reachable only by its URL until the user says to put it in the nav.
+
+- **A pirate mends a den wall.** Pieces sit on three crates (the toolbox); you carry them over and
+  fit them into holes in a stone wall. Same pieces, weights and Masterpiece rule as the main game.
+- **You can never get stuck.** Like real carpentry, a piece may be nailed over the stone around a
+  hole ("boarded over"). That always closes the hole, but it's a botch: weak and pays little. A hole
+  filled exactly is a Masterpiece: strong, and pays well.
+- **Masterpieces make the wall strong.** Raiders hack at mended holes: a boarded hole falls fast, a
+  Masterpiece holds. Open holes let raiders straight in to steal from the chest; bonk them.
+- **The den has a gate** and raiders attack from the far side of the wall, with swords and (from
+  wave 2) a cannon that blasts fresh holes. Keep repairing.
+- **You must be able to see the raiders.** Behind the wall they show as red silhouettes through
+  the stone; labels over each hole show its strength and who's attacking it.
