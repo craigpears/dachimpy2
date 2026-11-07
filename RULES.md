@@ -130,6 +130,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **Throwing has its own controls.** Shift (next to WASD; R was too far away) or clicking on a raider. Space
   and plain clicks only pick up and fit, so you can fight beside the crates or the wall without
   fitting by mistake. Up on the rampart Space throws too, since there's nothing to fit there.
+- **Throws go where you point.** Shift, Space on the rampart, and clicks all hit the raider by the
+  mouse pointer (its body or its ⚔ marker, even pinned to the screen edge), not just the nearest;
+  only with nobody near the pointer does it pick the nearest. That raider's marker gets a white
+  dashed ring, and the pointer turns to a crosshair over a raider you can hit.
+- **Misplaced pieces can be taken back.** Placing one square too high was a frustrating misclick.
+  With empty hands at the wall, Space (or Backspace) takes the last piece you put up back off, the
+  same way round, so you can fit it properly. Not once it's made a Masterpiece, once another
+  piece has gone on, or once you've picked up a new piece from the crates. A boarded-over hole you
+  undo goes back to open and gives back its pay; damage the hole took meanwhile stays.
 - **The rampart: a walk along the top of the whole wall,** with stairs up at both ends. Raiders hacking
   at the wall can only be hit from up there; it's what makes a Masterpiece pay off: while it holds,
   you go up and knock the raiders off it. The view swings up high to look down at them. Keep it out

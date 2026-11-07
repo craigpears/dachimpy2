@@ -698,7 +698,8 @@ addEventListener('keydown', (e) => {
   else if (key === 'e' && carry) turn(rotCW, -1);
   else if (key === 'f' && carry) turn(flip, 0);
   else if (key === 'tab') cycle++;
-  else if ((key === 'shift' || key === 'r') && carry && anyFoe()) throwAt(anyFoe());
+  else if (key === 'backspace' && canTakeBack()) takeBack();
+  else if ((key === 'shift' || key === 'r') && carry && aimFoe()) throwAt(aimFoe());
   else if (key === 'v') Object.assign(view, { yaw: 0, pitch: 0, zoom: 1 });
   else if (key === '-' || key === '_') view.zoom = Math.min(2, view.zoom * 1.15);
   else if (key === '=' || key === '+') view.zoom = Math.max(0.55, view.zoom / 1.15);
@@ -714,13 +715,16 @@ renderer.domElement.addEventListener('mousemove', (e) => {
   mouse = fc >= -1 && fc <= wall.W + 1 && fr >= -1 && fr <= wall.H + 1 ? { fc, fr } : null;
   if (mouse) mouseMode = true;
 });
+addEventListener('mousemove', (e) => { cursor = { x: e.clientX, y: e.clientY }; });
+document.addEventListener('mouseleave', () => { cursor = null; });
 // Left click: throw at the raider you clicked on, otherwise pick up / fit. Right-drag turns the
 // camera; a right click without dragging flips the piece.
 let drag = null;
 renderer.domElement.addEventListener('mousedown', (e) => {
   if (e.button === 2) { drag = { x: e.clientX, y: e.clientY, moved: false }; return; }
   if (e.button !== 0 || G.over) return;
-  const r = carry && clickedFoe(e.clientX, e.clientY);
+  // Up on the rampart there's nothing to fit, so a click anywhere throws at the raider nearest it.
+  const r = carry && clickedFoe(e.clientX, e.clientY, pirate.h > 0.3 ? 1e4 : 90);
   if (r) throwAt(r); else act();
 });
 addEventListener('mousemove', (e) => {
@@ -760,31 +764,44 @@ const foe = () => nearest(raiders.filter((r) => r.inside && free(r)), THROW_RANG
 const atWall = (r) => !r.inside && free(r) && (r.state === 'attack' || (r.state === 'approach' && r.z > -6));
 const outsideFoe = () => (onRampart() ? nearest(raiders.filter(atWall), THROW_RANGE + 3) : null);
 const anyFoe = () => foe() || outsideFoe();
-// The raider under the mouse, if a piece could reach them from here.
-function clickedFoe(mx, my) {
-  let best = null, bd = 60;
+// The throwable raider nearest a point on screen (within `cap` pixels), measured to the whole body
+// from feet to the ⚔ marker, so clicking the marker or the raider both count.
+const toScreen = (x, y, z) => { v3.set(x, y, z).project(camera); return v3.z > 1 ? null : [(v3.x + 1) / 2 * innerWidth, (1 - v3.y) / 2 * innerHeight]; };
+function clickedFoe(mx, my, cap = 90) {
+  let best = null, bd = cap;
   for (const r of raiders) {
     if (!(r.inside ? free(r) : onRampart() && atWall(r))) continue;
-    if (Math.hypot(r.x - pirate.x, r.z - pirate.z) > THROW_RANGE + 3) continue;
-    v3.set(r.x, 1, r.z).project(camera);
-    const d = Math.hypot((v3.x + 1) / 2 * innerWidth - mx, (1 - v3.y) / 2 * innerHeight - my);
+    if (Math.hypot(r.x - pirate.x, r.z - pirate.z) > (r.inside ? THROW_RANGE : THROW_RANGE + 3)) continue;
+    // The ⚔ marker counts too, even pinned to the screen edge for a raider out of view.
+    let d = r.mark.style.display === 'none' || !r.mark.style.left ? 1e9 : Math.hypot(parseFloat(r.mark.style.left) - mx, parseFloat(r.mark.style.top) - 17 - my);
+    const a = toScreen(r.x, 0.1, r.z), b = toScreen(r.x, 2.3, r.z);
+    if (a && b) {
+      const ex = b[0] - a[0], ey = b[1] - a[1], t = Math.max(0, Math.min(1, ((mx - a[0]) * ex + (my - a[1]) * ey) / (ex * ex + ey * ey || 1)));
+      d = Math.min(d, Math.hypot(a[0] + ex * t - mx, a[1] + ey * t - my));
+    }
     if (d < bd) { bd = d; best = r; }
   }
   return best;
 }
+// Who Shift (or Space on the rampart) throws at: the raider by the mouse pointer if there is one,
+// otherwise the nearest. Worked out every frame and ringed in gold so you can see it.
+let cursor = null, aimed = null;
+const aimFoe = () => (cursor && clickedFoe(cursor.x, cursor.y, 160)) || anyFoe();
 function act() {
   const f = focus();
-  if (pirate.h > 0.3) { if (carry && onRampart() && anyFoe()) throwAt(anyFoe()); return; }
+  if (pirate.h > 0.3) { if (carry && onRampart() && aimFoe()) throwAt(aimFoe()); return; }
   if (f.kind === 'pile') {
     const p = f.p;
     if (!carry && p.letter) return pickUp(p);
     if (carry && carry.from === p && !p.letter) return putBack();
-    if (carry && p.letter) { putBack(); return pickUp(p); }
-  } else if (carry && target?.ok) return place(target);
+    if (carry && p.letter && carry.from) { putBack(); return pickUp(p); }
+  } else if (!carry && canTakeBack()) return takeBack();
+  else if (carry && target?.ok) return place(target);
   else if (carry && target) shake = 0.2;
 }
 function pickUp(p) {
   $('intro').classList.add('off');
+  lastPlaced = null;
   const m = woodMat(p.letter).clone();
   m.transparent = true;
   carry = { letter: p.letter, cells: p.cells, from: p, mat: m, group: centred(p.cells, m), lift: 0 };
@@ -829,10 +846,13 @@ function place(t) {
   scene.remove(carry.group);
   wallGroup.add(g);
   const pile = carry.from;
+  const undo = { h, letter: carry.letter, shape: carry.cells, prev: { status: h.status, hp: h.hp, maxHp: h.maxHp }, boarded: G.boarded, hpAfter: null };
   carry = null;
   cells.forEach(([r, c]) => { wall.wood.add(k(r, c)); if (h.set.has(k(r, c))) h.filled.add(k(r, c)); });
-  const piece = { group: g, cells: cells.map(([r, c]) => k(r, c)), over, patch: !!t.patch, base: to.clone() };
+  const piece = { group: g, cells: cells.map(([r, c]) => k(r, c)), over, patch: !!t.patch, base: to.clone(), cx: to.x + b.w * S / 2 };
   h.pieces.push(piece);
+  undo.piece = piece;
+  lastPlaced = undo;
   const wasExact = h.exact;
   tween(0.32, (s) => {
     const e = 1 - (1 - s) ** 3;
@@ -843,17 +863,62 @@ function place(t) {
     if (!h.pieces.includes(piece)) return;   // knocked out while it was flying in
     if (piece.patch) {
       h.hp = Math.min(h.maxHp, h.hp + HP.patch);
+      undo.hpAfter = h.hp;
       burst(new THREE.Vector3(to.x + b.w * S / 2, to.y - b.h * S / 2, to.z + 0.1), '#ffe0a0', 10, 2.5);
       toast('Patched: stronger again');
       return;
     }
     updateHole(h);
     if (h.status === 'open') { h.hp += HP.piece; h.maxHp = h.hp; }
-    if (h.status === 'open' && wasExact && !h.exact) { shake = 0.3; toast('No Masterpiece in that hole now', true); }
+    undo.hpAfter = h.hp;
+    if (h.status === 'master' && lastPlaced === undo) lastPlaced = null;   // a Masterpiece is never a misclick
+    if (h.status === 'open' && wasExact && !h.exact) { shake = 0.3; toast('No Masterpiece in that hole now · Space: take it back', true); }
   });
   refill(pile);
 }
+/* Taking back a misplaced piece: with empty hands at the wall, the last piece you put up comes
+   back off, as it was, so you can nudge it into the right spot. Not once it's made a Masterpiece,
+   once anything has gone on top of it, or once you've picked up another piece. Damage the hole took
+   meanwhile stays taken. */
+let lastPlaced = null;
+function canTakeBack() {
+  const u = lastPlaced;
+  if (!u || carry || u.hpAfter === null || pirate.h > 0.3 || pirate.z > WALL_Z) return false;
+  if (u.h.pieces[u.h.pieces.length - 1] !== u.piece || u.h.status === 'master') return false;
+  return Math.abs(u.piece.cx - pirate.x) <= REACH + 0.6;
+}
+function takeBack() {
+  const u = lastPlaced, h = u.h, piece = u.piece;
+  lastPlaced = null;
+  h.pieces.pop();
+  piece.cells.forEach((kk) => { wall.wood.delete(kk); h.filled.delete(kk); });
+  const dmg = Math.max(0, u.hpAfter - h.hp);
+  if (piece.patch) h.hp = Math.max(1, h.hp - HP.patch);
+  else {
+    if (h.status === 'boarded') { G.gold -= PAY.boarded; G.boarded = u.boarded; }
+    h.status = u.prev.status;
+    h.maxHp = u.prev.maxHp;
+    h.hp = Math.max(0, u.prev.hp - dmg);
+  }
+  updateHole(h);
+  const at = new THREE.Vector3();
+  piece.group.getWorldPosition(at);
+  const b = C.bbox(u.shape);
+  at.x += b.w * S / 2; at.y -= b.h * S / 2;
+  wallGroup.remove(piece.group);
+  const m = woodMat(u.letter).clone();
+  m.transparent = true;
+  carry = { letter: u.letter, cells: u.shape, from: null, mat: m, group: centred(u.shape, m), lift: 0 };
+  const g = carry.group;
+  g.position.copy(at);
+  g.rotation.x = -Math.PI / 2;
+  g.scale.setScalar(0.38);
+  scene.add(g);
+  tween(0.25, (t) => { if (carry?.group === g) carry.lift = t; });
+  ghostKey = null;
+}
 function refill(p) {
+  if (!p) return;   // a piece taken back off the wall has no crate to refill
   setTimeout(() => {
     deal(p); showPile(p);
     const g = p.group, s0 = g.scale.x;
@@ -1247,8 +1312,10 @@ function prompt() {
   if (f.kind === 'pile') {
     if (!carry && f.p.letter) t = `Space: pick up the ${f.p.letter}`;
     else if (carry && carry.from === f.p && !f.p.letter) t = `Space: put the ${carry.letter} back`;
-    else if (carry && f.p.letter) t = `Space: swap the ${carry.letter} for the ${f.p.letter}`;
-  } else if (carry) {
+    else if (carry && f.p.letter && carry.from) t = `Space: swap the ${carry.letter} for the ${f.p.letter}`;
+    else if (carry && f.p.letter) t = `Fit the ${carry.letter} again, or throw it at a raider`;
+  } else if (!carry && canTakeBack()) t = `Space: take the ${lastPlaced.letter} back off`;
+  else if (carry) {
     const more = target?.count > 1 ? ` · Tab: other spots (${target.count})` : '';
     if (target?.ok && target.patch) t = `Space: nail it over the damaged hole (stronger)${more}`;
     else if (target?.ok && !target.over) t = `Space: fit the ${carry.letter} here${more}`;
@@ -1387,8 +1454,11 @@ function update(dt) {
   camera.lookAt(camLook);
 
   // A marker over every raider inside the den, pinned to the screen edge when they're out of view.
+  aimed = carry ? aimFoe() : null;
+  renderer.domElement.style.cursor = carry && cursor && clickedFoe(cursor.x, cursor.y, pirate.h > 0.3 ? 1e4 : 90) ? 'crosshair' : '';
   for (const r of raiders) {
-    const show = r.state !== 'down' && (r.inside || (topView && !r.gone && ['approach', 'attack'].includes(r.state) && r.z > -6));
+    const show = r === aimed || (r.state !== 'down' && (r.inside || (topView && !r.gone && ['approach', 'attack'].includes(r.state) && r.z > -6)));
+    r.mark.classList.toggle('aim', r === aimed);
     r.mark.style.display = show ? '' : 'none';
     if (!show) continue;
     v3.set(r.x, 1.9, r.z).project(camera);
@@ -1426,6 +1496,6 @@ newGame();
 requestAnimationFrame(frame);
 
 // For poking at it from the console.
-window.den = { get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+window.den = { takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };
