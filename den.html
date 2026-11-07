@@ -16,7 +16,7 @@
     .hud p { margin: 0 0 8px; color: var(--dim); line-height: 1.35; }
     .stats { display: flex; gap: 14px; flex-wrap: wrap; font-weight: 700; }
     .stats span b { color: var(--gold); }
-    .keys { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); background: var(--panel); border-radius: 8px; padding: 6px 12px; color: var(--dim); font-size: 14px; white-space: nowrap; }
+    .keys { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); background: var(--panel); border-radius: 8px; padding: 6px 12px; color: var(--dim); font-size: 14px; width: max-content; max-width: calc(100vw - 32px); text-align: center; line-height: 1.6; }
     .keys kbd { font: 700 13px 'Alegreya Sans'; color: var(--ink); background: #3b2a1b; border: 1px solid #6b4e32; border-radius: 4px; padding: 0 5px; }
     .prompt { position: fixed; bottom: 58px; left: 50%; transform: translateX(-50%); background: var(--panel); border: 1px solid var(--gold); border-radius: 8px; padding: 8px 16px; font-size: 18px; font-weight: 700; white-space: nowrap; }
     .prompt:empty { display: none; }
@@ -56,8 +56,8 @@
   </div>
   <div class="banner calm" id="banner"></div>
   <div class="prompt" id="prompt"></div>
-  <div class="intro" id="intro">Raiders are coming! Mend the holes in the den wall before they arrive.<br>A hole filled exactly is a <b>Masterpiece</b>: strong. Nail a piece over the stone<br>to <b>board it over</b>: quick, but weak.<br>Throw pieces at raiders, inside the den or over the wall:<br>it's the only way to get rid of one you don't want.</div>
-  <div class="keys"><kbd>WASD</kbd> walk · <kbd>Space</kbd> pick up / fit · <kbd>R</kbd> throw · <kbd>Q</kbd><kbd>E</kbd> turn · <kbd>F</kbd> flip · <kbd>Tab</kbd> next spot · or aim with the mouse and click</div>
+  <div class="intro" id="intro">Raiders are coming! Mend the holes in the den wall before they arrive.<br>A hole filled exactly is a <b>Masterpiece</b>: strong. Nail a piece over the stone<br>to <b>board it over</b>: quick, but weak.<br>Throw pieces at raiders who get in, or climb the rampart and pelt them at the wall:<br>it's the only way to get rid of a piece you don't want.</div>
+  <div class="keys"><kbd>WASD</kbd> walk · <kbd>Space</kbd> or click: pick up / fit · <kbd>Q</kbd><kbd>E</kbd> turn · <kbd>F</kbd> flip · <kbd>Tab</kbd> next spot · <kbd>Shift</kbd> or click a raider: throw · <kbd>Z</kbd><kbd>C</kbd> or right-drag: turn the view · wheel or <kbd>-</kbd><kbd>=</kbd>: zoom</div>
   <div class="toast" id="toast"></div>
   <div class="end" id="end"><div><h2>The den's been plundered!</h2><p id="end-text"></p><button id="again">Defend it again</button></div></div>
   <div id="labels"></div>

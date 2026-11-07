@@ -126,9 +126,21 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   one piece in an unfinished hole) has to be hacked through with swords first. No magic jumping
   through a hole that has wood in it. A thief whose way out has been mended hacks out from inside.
 - **Throw pieces at raiders, don't bonk them.** A plain bonk was underwhelming. The carried piece
-  is the weapon: R (or Space, when there's nowhere to fit it) hurls it at the nearest raider in the
-  den, who goes flying. It costs the piece. R can also lob it over the wall at a raider hacking at
-  it (or about to).
+  is the weapon: it hurls at a raider, who goes flying. It costs the piece.
+- **Throwing has its own controls.** Shift (next to WASD; R was too far away) or clicking on a raider. Space
+  and plain clicks only pick up and fit, so you can fight beside the crates or the wall without
+  fitting by mistake. Up on the rampart Space throws too, since there's nothing to fit there.
+- **The rampart: a walk along the top of the whole wall,** with stairs up at both ends. Raiders hacking
+  at the wall can only be hit from up there; it's what makes a Masterpiece pay off: while it holds,
+  you go up and knock the raiders off it. The view swings up high to look down at them. Keep it out
+  of the way (not in front of the gate), and the full length of the wall.
+- **Keep the pirate-den feel, not medieval.** The rampart is a ship's deck with a rope rail and
+  the Jolly Roger, not stone battlements.
+- **Damaged holes can be patched.** A Masterpiece or boarded hole that's been hacked at takes
+  another board nailed over the front, which wins back strength (up to three deep). The label says
+  so when it's damaged.
+- **The camera can be turned and zoomed:** Z/C or right-drag to turn and tilt, wheel or -/= to zoom,
+  V to reset. Walking follows the way the camera faces. Q/E turn the piece, right-click flips it.
 - **Throwing at a raider is the only way to discard.** No scrap fire, no bin: a piece you don't
   want (often a rare one) can only be got rid of by throwing it at an enemy pirate, which deals a
   fresh piece onto that crate. Swapping at the crates just puts it back. With no raiders about,
