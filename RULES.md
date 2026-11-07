@@ -245,7 +245,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     load two, harder to load all four, and making loops (or freestyling) is the core of it.
   - **The look:** bright silver guns three squares long, a red gunwale with a gold rail, light-wood
     crates of shot and rum, the barrel on its side; shot bright iron, powder a red bag with a flame
-    on it, wad a white puff, the bucket bright tin with blue water, leaning so you see its side.
+    on it, wad a white puff, the bucket **drawn flat, as Gunnery draws it**
+    (a tin pail with blue water, its handle and swab, always facing you: the 3D one looked bizarre).
+    Crates sit square to the board, never angled: a puzzle has to read at a glance, so where 3D
+    and readability pull apart, go for Gunnery's flat, 2D feel.
     **Arrows are yellow, as in Gunnery** (not blue: the user corrected this): a bold yellow arrow
     with a dark edge on a square lit up yellow underneath; a crewmate's in their own colour. Gun labels show the
     store each wants next as a picture; "Loaded!" in Puzzle Pirates yellow and red. A key to the

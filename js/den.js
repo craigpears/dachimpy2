@@ -773,7 +773,7 @@ const STORE_ICON = {
   powder: '<svg viewBox="0 0 20 20"><circle cx="10" cy="10.5" r="7.5" fill="#c42d1f" stroke="#5a0f08" stroke-width=".8"/><path d="M10 4.5c2.5 3 3.5 4.5 2 7.5 1.5-.5 2-1.5 2-2.5 1 2.5-.5 5.5-4 5.5s-5-3-3.5-6c0 1.5.8 2.3 1.6 2.5-1.2-2.6.6-4.8 1.9-7z" fill="#ffb21a"/></svg>',
   wad: '<svg viewBox="0 0 20 20"><g fill="#f1ede4" stroke="#8a8478" stroke-width=".8"><circle cx="7" cy="12" r="4.5"/><circle cx="13" cy="12" r="4.5"/><circle cx="10" cy="7.5" r="4.5"/></g></svg>',
   shot: '<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="#6b7178" stroke="#30343a" stroke-width=".8"/><circle cx="7.5" cy="7.5" r="2.2" fill="#d6dbe0"/></svg>',
-  bucket: '<svg viewBox="0 0 20 20"><path d="M4 3.5a6 5 0 0 1 12 0" fill="none" stroke="#3b4248" stroke-width="1.3"/><path d="M3.5 6h13l-2 11h-9z" fill="#dfe5e9" stroke="#3b4248" stroke-width=".8"/><ellipse cx="10" cy="6" rx="6.5" ry="1.6" fill="#2f86d6"/></svg>',
+  bucket: '<svg viewBox="0 0 20 20"><path d="M4 7.5C4 1 16 1 16 7.5" fill="none" stroke="#1a1208" stroke-width="1.3"/><path d="M11.5 7.5l5-6" stroke="#1a1208" stroke-width="2.2" stroke-linecap="round"/><path d="M11.5 7.5l5-6" stroke="#a86c32" stroke-width="1" stroke-linecap="round"/><path d="M3 7.5h14l-2 10.5H5z" fill="#dfe5e9" stroke="#1a1208" stroke-width=".9" stroke-linejoin="round"/><ellipse cx="10" cy="7.5" rx="7" ry="2" fill="#2f86d6" stroke="#1a1208" stroke-width=".8"/></svg>',
 };
 const STORE_NAME = { powder: 'Powder', wad: 'Wad', shot: 'Shot', bucket: 'Bucket' };
 $('gunhelp').innerHTML = `<h3>Load each gun</h3>${['powder', 'wad', 'shot'].map((kd, i) => `${i + 1}. ${STORE_ICON[kd]}${STORE_NAME[kd]}<br>`).join('')}Fired or fouled? ${STORE_ICON.bucket}Bucket<small>Stores go in at a gun's muzzle, off an arrow in front of it pointing in.</small>`;
@@ -854,6 +854,36 @@ const powderTex = (() => {
   t.colorSpace = THREE.SRGBColorSpace;
   return t;
 })();
+// Gunnery's bucket, drawn flat: a tin pail seen from a little above, blue water in it, its handle
+// up and the swab standing in it, all with a bold dark outline.
+const bucketTex = canvasTex(128, 128, (x) => {
+  const ink = '#1a1208';
+  x.lineCap = x.lineJoin = 'round';
+  const line = (w, c, f) => { x.strokeStyle = c; x.lineWidth = w; x.beginPath(); f(); x.stroke(); };
+  // The handle, behind.
+  const handle = () => { x.moveTo(24, 46); x.bezierCurveTo(26, 2, 102, 2, 104, 46); };
+  line(9, ink, handle); line(4, '#8d99a3', handle);
+  // The swab's staff, standing up out of it.
+  const staff = () => { x.moveTo(74, 46); x.lineTo(108, 6); };
+  line(14, ink, staff); line(7, '#a86c32', staff);
+  // The pail.
+  const body = () => { x.moveTo(20, 46); x.lineTo(34, 116); x.quadraticCurveTo(64, 126, 94, 116); x.lineTo(108, 46); x.closePath(); };
+  const tin = x.createLinearGradient(20, 0, 108, 0);
+  tin.addColorStop(0, '#8a96a0'); tin.addColorStop(0.3, '#ffffff'); tin.addColorStop(0.65, '#d3dae0'); tin.addColorStop(1, '#78838d');
+  x.beginPath(); body(); x.fillStyle = tin; x.fill();
+  line(6, ink, body);
+  for (const y of [72, 100]) line(4, '#4b5560', () => { x.moveTo(24 + (y - 46) * 0.2, y); x.quadraticCurveTo(64, y + 9, 104 - (y - 46) * 0.2, y); });
+  // Its rim and the water in it.
+  const ell = (rx, ry, fill) => { x.beginPath(); x.ellipse(64, 46, rx, ry, 0, 0, Math.PI * 2); x.fillStyle = fill; x.fill(); };
+  ell(47, 15, ink); ell(42, 11.5, '#eef2f5');
+  const water = x.createLinearGradient(0, 38, 0, 54);
+  water.addColorStop(0, '#2f86d6'); water.addColorStop(1, '#8fd0f6');
+  ell(35, 8, water);
+  line(3, 'rgba(255,255,255,0.85)', () => x.ellipse(56, 46, 18, 3.5, 0, Math.PI * 1.1, Math.PI * 1.7));
+  // The staff where it goes into the water, in front.
+  const dip = () => { x.moveTo(74, 46); x.lineTo(84, 34); };
+  line(14, ink, dip); line(7, '#a86c32', dip);
+});
 // A soft glow under each store, so it shines out from the deck.
 const glowTex = canvasTex(64, 64, (x) => {
   const gr = x.createRadialGradient(32, 32, 4, 32, 32, 32);
@@ -890,27 +920,11 @@ function storeMesh(kind) {
       body.add(s);
     }
   } else {
-    // A bright tin bucket of water to swab the gun out.
-    const tin = { color: '#dfe5e9', metalness: 0.5, roughness: 0.3 };
-    const side = mesh(new THREE.CylinderGeometry(0.19, 0.15, 0.28, 18, 1, true), new THREE.MeshStandardMaterial({ ...tin, side: THREE.DoubleSide }));
-    side.position.y = 0.14;
-    const floor = mesh(new THREE.CircleGeometry(0.15, 18), mat(tin.color, tin));
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = 0.01;
-    const water = mesh(new THREE.CircleGeometry(0.178, 18), mat('#2f86d6', { roughness: 0.15 }));
-    water.rotation.x = -Math.PI / 2;
-    water.position.y = 0.24;
-    const hoopM = mat('#3b4248', { metalness: 0.6 });
-    [[0.05, 0.159], [0.26, 0.186]].forEach(([y, r]) => { const h = mesh(new THREE.TorusGeometry(r, 0.013, 5, 24), hoopM); h.rotation.x = Math.PI / 2; h.position.y = y; body.add(h); });
-    const handle = mesh(new THREE.TorusGeometry(0.185, 0.013, 5, 20, Math.PI), hoopM);
-    handle.position.y = 0.27;
-    handle.rotation.x = -0.35;
-    const lean = new THREE.Group();
-    lean.add(side, floor, water, handle);
-    lean.rotation.x = -0.6;
-    lean.position.y = 0.08;
-    body.add(lean);
-    g.userData.face = true;
+    // A bucket of water and a swab to clean the gun out, drawn flat as in Gunnery.
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: bucketTex, toneMapped: false, fog: false }));
+    sp.scale.set(0.5, 0.5, 1);
+    sp.position.y = 0.23;
+    body.add(sp);
   }
   // Lit from within a little, so the colours stay bold whatever the light.
   body.traverse((m) => {
@@ -1153,7 +1167,7 @@ function setCrates(list) {
   gd.crates = list;
   gd.crateSig = JSON.stringify(list);
   gd.crateSet = new Set(list.map(([r, c]) => k(r, c)));
-  gd.crateMeshes = list.map(([r, c], i) => { const m = crateMesh(i); m.position.copy(gdAt(r, c)); m.rotation.y = ((i * 7) % 5 - 2) * 0.03; gd.group.add(m); return m; });
+  gd.crateMeshes = list.map(([r, c], i) => { const m = crateMesh(i); m.position.copy(gdAt(r, c)); gd.group.add(m); return m; });
 }
 // Squares with a pirate standing on them: a body's an obstacle too.
 function gdBodies() {
@@ -1329,8 +1343,6 @@ function updateGunDeck(dt) {
     const was = s.m.position.clone();
     s.m.position.lerpVectors(gdAt(s.pr, s.pc), gdAt(s.r, s.c), u);
     s.m.rotation.y = -s.dir * Math.PI / 2;
-    // (A bucket always shows you its side.)
-    if (s.m.userData.face) s.m.userData.body.rotation.y = Math.atan2(camera.position.x - s.m.position.x, camera.position.z - s.m.position.z) - s.m.rotation.y;
     // Shot rolls; the rest slide with a little jostle.
     const moved = was.distanceTo(s.m.position), body = s.m.userData.body;
     if (s.kind === 'shot') body.rotation.x -= moved / 0.2;
