@@ -47,6 +47,11 @@ const CANNON_AIM = 8, CANNON_GAP = 22, RUBBLE = 10;
 const DOOR_W = 2, DOOR_H = 3, WEAK = 8;
 const BUILD_SECS = 75, CALM_SECS = 20;
 const RAIDER_DPS = 1, RAIDER_STAMINA = 16;
+/* Getting through costs them: a raider who spent their strength hacking a way in arrives winded.
+   They stop just inside to catch their breath (up to WINDED seconds, the more tired the longer) and
+   then go for the chest slower (up to TIRED_SLOW slower). The user wanted hacking through to weaken
+   the wave, and a window to deal with them when they do get in. */
+const WINDED = 6, TIRED_SLOW = 0.4;
 /* How fast raiders chop through wood, the main thing to balance. They start slow and build up wave
    by wave (start: the first wave's fraction of full speed; step: how much more each wave). To try
    other speeds without editing: den.html?hack=0.8 (a multiplier on all of it), or in the console
@@ -2937,12 +2942,28 @@ function updateRaider(r, dt) {
       moving = walk;
       faceTo(r.m, 0, into ? 1 : -1, dt);
       r.inside = r.z > 0.3;
-      if (s >= 1) { r.state = into ? 'raid' : 'leave'; r.t = 0; r.inside = into; if (into && !guest()) G.waveIn++; }
+      if (s >= 1) {
+        r.state = into ? 'raid' : 'leave'; r.t = 0; r.inside = into;
+        if (into) {
+          if (!guest()) G.waveIn++;
+          r.tired = Math.min(1, Math.max(0, 1 - r.stamina / RAIDER_STAMINA));
+          if (r.tired > 0.15) {
+            r.state = 'winded';
+            if (!G.windSaid) { G.windSaid = true; say('Through, but winded: knock them flat!', true, true); }
+          }
+        }
+      }
+      break;
+    }
+    case 'winded': {
+      // Bent double, getting their breath back, just inside the wall.
+      faceTo(r.m, 0, 1, dt);
+      if (r.t >= WINDED * r.tired) { r.state = 'raid'; r.t = 0; }
       break;
     }
     case 'raid': {
       const c = chest.position;
-      moving = !moveTo(r, c.x + 0.9, c.z - 0.2, 2.5, dt);
+      moving = !moveTo(r, c.x + 0.9, c.z - 0.2, 2.5 * (1 - TIRED_SLOW * (r.tired || 0)), dt);
       if (!moving) {
         G.gold -= PAY.steal; G.stolen++;
         updateStats();
@@ -2954,7 +2975,7 @@ function updateRaider(r, dt) {
     }
     case 'flee': {
       if (!passable(h)) { const gap = wall.holes.filter(passable).sort((a, b) => Math.abs(holeX(a) - r.x) - Math.abs(holeX(b) - r.x))[0]; if (gap) r.hole = gap; }
-      moving = !moveTo(r, passable(r.hole) ? doorX(r.hole) : holeX(r.hole), 1.2, 2.8, dt);
+      moving = !moveTo(r, passable(r.hole) ? doorX(r.hole) : holeX(r.hole), 1.2, 2.8 * (1 - TIRED_SLOW * (r.tired || 0)), dt);
       if (!moving) { r.state = passable(r.hole) ? 'climbOut' : 'hackOut'; r.t = 0; }
       break;
     }
@@ -2984,7 +3005,17 @@ function updateRaider(r, dt) {
 }
 function raiderPose(r, moving, dt) {
   const hop = (r.state === 'climb' || r.state === 'climbOut') && !moving;
-  if (!hop && r.state !== 'down') {
+  const g = r.m.g;
+  if (r.state === 'winded') {
+    // Hands on knees, puffing: leaning forward, the lean rising and falling with each breath.
+    animateWalk(r.m, false, dt, 12);
+    r.m.legs.forEach((l) => { l.rotation.x = 0; });
+    r.m.arms.forEach((a) => { a.rotation.x = -0.75; });
+    g.rotation.x = 0.38 + Math.sin(r.t * 7) * 0.05;
+    r.hitT -= dt;
+    if (r.hitT <= 0) { r.hitT = 0.7; burst(new THREE.Vector3(r.x, 1.15, r.z + 0.35), '#dfe8ee', 2, 0.7); }
+  } else if (r.state !== 'down') g.rotation.x = 0;
+  if (!hop && r.state !== 'down' && r.state !== 'winded') {
     const swing = animateWalk(r.m, moving, dt, 12);
     if (r.state === 'attack' || r.state === 'hackOut') {
       r.m.legs.forEach((l) => { l.rotation.x = 0; });
@@ -3138,6 +3169,7 @@ function startWave() {
   G.cannonT = 20;
   G.aim = null;
   G.waveTurned = G.waveIn = 0;
+  G.windSaid = false;
   if (G.wave >= 2 && !cannon.visible) { cannon.visible = true; say('They brought a cannon!', true); }
   else say(`Wave ${G.wave}: raiders!`, true);
   $('intro').classList.add('off');

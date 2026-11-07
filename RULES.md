@@ -142,6 +142,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - *Masterpieces:* every raider turned away, waves 1 to 5.
   - *Mending during the wave* (one piece every 8 seconds, gaps they can walk through first): wave 5
     went from 9 of 12 raiders getting in to 2 of 12.
+- **Getting through costs them: they arrive winded.** Covering a hole felt like nothing, and the
+  user wanted hacking through to weaken the wave. A raider's strength (16 seconds of hacking) runs
+  down as they hack; one who's used much of it comes through bent double, hands on knees, puffing,
+  and stands just inside the wall catching their breath (up to 6 seconds, the more tired the
+  longer). Then they go for the chest and back out up to 40% slower. That's the window to knock
+  them flat with a thrown piece. The first time in a wave it says "Through, but winded: knock them
+  flat!" (kept short: a long line filled a phone screen). One who walked in through a gap someone
+  left open arrives fresh.
 - **Throw pieces at raiders, don't bonk them.** A plain bonk was underwhelming. The carried piece
   is the weapon: it hurls at a raider, who goes flying. It costs the piece.
 - **A thrown piece takes a while to come back.** Otherwise you could stand and pelt raiders

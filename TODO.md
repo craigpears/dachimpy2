@@ -7,16 +7,6 @@ the site (`.assetsignore` skips `*.md`).
 
 ## Asked for
 
-- **Covering a hole must cost the raiders.** Covering a hole felt like nothing: raiders bashed
-  through a boarded one in seconds. Chopping is slower now, early on especially (RULES.md:
-  "Raiders always have swords"), and raiders now need a gap they can walk through (RULES.md:
-  "Raiders walk in"). The user also wants hacking through to weaken the wave in some way (they
-  lose raiders, or time, or arrive spent). Not done yet: a raider who spends most of their
-  stamina hacking through still walks in fresh. The 7 Nov balance test (RULES.md: "Every bit of
-  mending counts") found partial and sloppy mending turns away all of wave 1 but only a quarter
-  of wave 5 without help, and that once one gap is opened the raiders nearby all pour through it.
-  Ideas: raiders arrive tired (slower, easier to knock flat), or a widened gap is choked with the
-  fallen stone for a few seconds, like a cannon breach.
 - **Land in the public den by default.** The user asked where the public lobby went (it was
   talked about but never built). The den you land in should be a public one anyone can drop into,
   with no cap on numbers. Private crews with a four-letter code stay alongside it. To work out:
@@ -37,8 +27,13 @@ the site (`.assetsignore` skips `*.md`).
 - **Turning a piece close to the wall feels off.** The user can't yet say how (which way it
   turns? where the ghost jumps to?). The snapping changes of 7 Nov may have helped; ask again.
 - **Holding the wall.** The cannon now aims before it fires, breaches fill with rubble, and
-  turning raiders away pays (RULES.md: "Keeping them out must be possible"). Not yet tried by the
-  user. If it still feels hopeless or too easy, see "Holding the wall" in IDEAS.md.
+  turning raiders away pays (RULES.md: "Keeping them out must be possible"). Since 7 Nov raiders
+  also need a gap they can walk through and arrive winded after hacking one (RULES.md: "Raiders
+  walk in", "Getting through costs them"). Not yet tried by the user. Watch for: once one gap is
+  opened, every raider nearby pours through it, and a single piece in it only holds two or three
+  of them off for a few seconds. If that feels too all-or-nothing, a widened gap could be choked
+  with its fallen stone for a few seconds, like a cannon breach. If it still feels hopeless or too
+  easy, see "Holding the wall" in IDEAS.md.
 
 ## Spotted along the way (not asked for)
 
