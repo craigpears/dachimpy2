@@ -190,6 +190,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **Keep the opening message short.** The first-screen instructions covered the crates so you
   couldn't start. One or two lines at most, clear of the crates; the prompts and toasts teach
   the rest (boarding over, nailing on behind, the rampart) as it comes up.
+- **The layer behind must invite you.** The user didn't feel prompted to build a second layer. So
+  while you carry a piece, every mended hole with room shows a pulsing outline on the den side
+  where the next layer goes, its label says "room for a layer behind", and once every hole is
+  mended the prompt sends you there. (Grading those layers is in IDEAS.md.)
 - **Future ideas live in [IDEAS.md](IDEAS.md).** When the user brain-dumps ideas for later, note
   them there rather than building them.
 - **There's always something to do with a junk piece.** Holding three useless pieces with nothing

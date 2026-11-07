@@ -908,6 +908,20 @@ function updateHole(h) {
   h.sig = '';
   updateStats();
 }
+/* While you're carrying a piece, every mended hole with room for another layer shows where it'd
+   go: its outline on the den side, gently pulsing, like a frame waiting to be filled. */
+const nextMat = new THREE.LineBasicMaterial({ color: '#9fe0ff', transparent: true });
+function nextLayer(h) {
+  const layer = boardsOf(h).length, show = !!carry && pirate.h < 0.3 && h.status !== 'open' && layer < MAX_PATCHES;
+  if (show && h.next?.parent !== wallGroup) {
+    h.next = outline(h.cells, 0, '#9fe0ff');
+    h.next.material = nextMat;
+    wallGroup.add(h.next);
+  }
+  if (!h.next) return;
+  h.next.visible = show;
+  if (show) h.next.position.set(X(0), Y(0), patchZ(layer) + 0.07);
+}
 const boardsOf = (h) => h.pieces.filter((p) => p.patch).sort((a, b) => a.layer - b.layer);
 // How full the strength bar is: the hole's own wood, or once that's gone, the board they're on.
 const barFrac = (h) => (h.status !== 'open' || h.pieces.some((p) => !p.patch) ? h.hp / h.maxHp : (boardsOf(h)[0]?.hp ?? 0) / HP.patch);
@@ -915,7 +929,7 @@ function labelFor(h) {
   const atk = h.attackers ? `<em>⚔ ${h.attackers} raider${h.attackers > 1 ? 's' : ''} at it</em>` : '';
   const boards = boardsOf(h).length, bs = boards > 1 ? 's' : '';
   const behind = boards ? ` · ${boards} board${bs} behind` : '';
-  const hurt = h.hp < h.maxHp * 0.8 && boards < MAX_PATCHES ? '<small>damaged: nail a board on behind it</small>' : '';
+  const hurt = h.hp < h.maxHp * 0.8 && boards < MAX_PATCHES ? '<small>damaged: nail a board on behind it</small>' : carry && boards < MAX_PATCHES ? `<small>room for ${boards ? 'another' : 'a'} layer behind</small>` : '';
   if (h.status === 'master') return ['label done', `★ Masterpiece${behind}${hurt}<i class="bar"><b></b></i>${atk}`];
   if (h.status === 'boarded') return ['label weak', `Boarded over: weak${behind}${hurt}<i class="bar"><b></b></i>${atk}`];
   if (boards) return ['label weak', `Hacked open: ${boards} board${bs} hold${boards > 1 ? '' : 's'}<small>they must get through each one</small><i class="bar"><b></b></i>${atk}`];
@@ -1734,6 +1748,7 @@ function prompt() {
     else if (target?.ok) t = `Space: board it over (weak, no Masterpiece)${more}`;
     else if (target?.far) t = 'Walk closer to fit it there';
     else if (pirate.z <= WALL_Z || (mouseMode && mouse)) t = `The ${carry.letter} won't go there · Q/E turn · F flip`;
+    else if (wall.holes.every((h) => h.status !== 'open')) t = `Carry the ${carry.letter} to the wall: nail it on behind a mended hole`;
     else t = `Carry the ${carry.letter} to a hole`;
   } else t = frames().length && pirate.z > WALL_Z ? 'Fetch pieces to build the rampart in its frame' : 'Fetch a piece from the piles';
   const hacking = raiders.some(atWall);
@@ -2350,9 +2365,11 @@ function update(dt) {
   }
 
   // Hole labels float above each hole, with a strength bar for mended ones.
+  nextMat.opacity = 0.55 + 0.45 * Math.sin(performance.now() / 260);
   for (const h of wall.holes) {
     h.attackers = raiders.filter((r) => r.hole === h && ['approach', 'attack', 'hackOut'].includes(r.state)).length;
     const [cls, html] = labelFor(h);
+    nextLayer(h);
     if (h.sig !== cls + html) { h.sig = cls + html; h.label.className = cls; h.label.innerHTML = html; }
     const bar = h.label.querySelector('.bar b');
     if (bar) bar.style.width = `${Math.max(0, barFrac(h)) * 100}%`;
