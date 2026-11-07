@@ -21,6 +21,9 @@ see their work happening in 3D. You can dial the complexity up there too, for so
 wants to do the carpentry properly. The 3D version is the fun extra; it loses some depth because
 of its mechanics and the quick pace (gunning especially), so both should work together on the
 same job. Build later, but design every new job so it maps cleanly onto its 2D puzzle.
+The user sees the 2D mode as the place for a quicker pace, too: pieces turning themselves to fit
+was tried in 3D and dropped as cheapening the puzzle ("that is probably where the 2D mode comes
+in... that will really help just speed it up a bit").
 
 **Third principle: fun and obvious from the first minute.** One of the user's main goals: make it
 more fun and intuitive straight off than Puzzle Pirates ever was. Keep the crew and group vibes,

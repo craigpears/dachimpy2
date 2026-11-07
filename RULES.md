@@ -128,8 +128,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **Throw pieces at raiders, don't bonk them.** A plain bonk was underwhelming. The carried piece
   is the weapon: it hurls at a raider, who goes flying. It costs the piece.
 - **A thrown piece takes a while to come back.** Otherwise you could stand and pelt raiders
-  forever. The crate you threw from takes 8 seconds to restock (it shows a "Restocking" bar);
-  fitting a piece still restocks its crate at once.
+  forever. The crate you threw from takes 7 seconds to restock on your own, about 0.6 less for
+  each crewmate (5.2 with four), and shows a "Restocking" bar; fitting a piece still restocks its
+  crate at once. (It was 8: the user found it close but a touch slow, more so with more pirates.
+  Marginal changes only.)
 - **Throwing has its own controls.** Shift (next to WASD; R was too far away) or clicking on a raider. Space
   and plain clicks only pick up and fit, so you can fight beside the crates or the wall without
   fitting by mistake. Up on the rampart Space throws too, since there's nothing to fit there.
@@ -365,13 +367,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   reset. **It turns all the way round**, so you can see the outside of the wall (the user wants
   that, especially for decorating it); moonlight from outside lights the wall's outer face.
   Walking follows the way the camera faces. Q/E turn the piece, right-click flips it.
-- **The piece turns itself to fit.** The user wanted a quicker pace, without stopping to turn
-  things (the stairs above all): wherever you point (or, with the keyboard, the nearest spot in
-  reach), every way the piece can turn is tried and the best fit wins, a clean fit before boarding
-  over, and the piece in your hands swings round to match. It works for the holes, boards behind,
-  the rampart, stairs, gun tower and house frames. Tab steps through the other spots and ways
-  round. Turning it yourself (Q/E/F, the wheel) still works, and then your way round comes first;
-  it only turns again where that way won't go.
+- **You turn the pieces yourself; nothing turns them for you.** Making the carried piece turn
+  itself to the best fit was tried and dropped: the user felt it cheapens the puzzle. Speeding the
+  carpentry up belongs to a 2D mode instead (IDEAS.md).
 - **The wheel turns the piece whenever it's showing a spot to fit** (that's what it was for first);
   only otherwise does it zoom.
 - **Throwing at a raider is the only way to discard.** No scrap fire, no bin: a piece you don't
