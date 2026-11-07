@@ -133,7 +133,7 @@ first fix (TODO.md has the playtest):
   way could block them, and a thrown piece already knocks them flat.
 - **Repairs between waves**: Masterpieces could heal a little in the calm (the user's call).
 
-## Swordfight: duels at the wall
+## Swordfight: the golem boss
 
 Reference: https://yppedia.puzzlepirates.com/Swordfight (read it properly before building: drop
 patterns per sword, board size, how sprinkles count down).
@@ -144,48 +144,20 @@ its colour, and big blocks and chains hit harder. Your smashes bury your opponen
 sprinkles (junk that counts down and turns into blocks), and theirs bury yours. Fill to the top
 and you lose.
 
-The user's problem: how do you fight the raiders without it looking weird and artificial, and
-without fighters that are out of scale with everything else?
+Where it's got to (7 Nov 2026), kept simple on purpose (the user: don't make it multi-step):
 
-Where it's got to (7 Nov 2026):
+- **A golem boss, fought in a real Swordfight.** A big standoff in the open, almost heroic, so
+  it's fine for the raid to pause for it, and the golem's size makes its big board look right.
+- **One pirate can do the swordfight** (start there), but it's a team thing: **crewmates help
+  from their own jobs.** A cannon shot from the gun tower that hits the golem drops black blocks
+  onto its board, which makes it more plausible to beat. That help must be easy to see: the shot
+  lands, and the blocks appear on the board.
+- **The puzzle should feel real:** the board is the real Swordfight board, standing big beside
+  the golem where everyone can see it.
 
-- **Dropped: clay soldiers and a golem.** The first idea had raiders drop blocks and breakers,
-  stacked in a yard, with smashed clay coming to life as soldiers (later, one golem built up from
-  what you smash, coloured by what each colour gave it). The user found it "too far away from the
-  sword fighting puzzle": breakers come in the drop stream, and smashes attack an opponent.
-- **Dropped too: duels at the wall** (below), for pacing. The den is quick, and a two-minute duel
-  while raiders hack through is "really disjointed". The user's reason for the golem: a slower
-  puzzle with a higher impact, done once to make something that fights a crowd, not one raider.
-  What's wanted is both: the real puzzle, and that payoff. A proposal (7 Nov) is the golem's
-  mould as the opponent's board: your smashes send their sprinkles into a mould standing in the
-  den, raiders send sprinkles back onto your board, and when the mould is full the golem breaks
-  out and wades into the raiders at the wall. Not yet agreed.
-- **The user's lean (7 Nov): the golem is a tough opponent you beat in a Swordfight.** It's an
-  opponent board that fights back, harder than any raider, and beating it (topping it out) wins
-  the golem for the crew. Thought through so far: a dormant golem in the den with its board on
-  show; any pirate can step up and fight it, and several at once, brawl style, all burying the
-  same golem; losing just knocks you back while the raid carries on; once beaten it kneels, then
-  fights raiders at the wall until it crumbles, and goes dormant to be won again. Flip side for
-  later: raiders could bring their own golem to the wall, a boss the crew has to beat the same
-  way.
-- **Then the user's take: make it a boss fight, and let it pause the raid.** A big standoff in
-  the middle of the open, "almost heroic", rather than any old one-on-one. Being a boss fight is
-  what makes the pause fit the pacing, and the golem's size makes big boards in proportion.
-  Still open: whose golem it is (the raiders' boss, the den's to win over, or the raiders' golem
-  turning to your side once beaten).
-- **(Dropped) A duel at the wall:** a raider with a sword (later waves only, see the user's idea that early
-  waves have none) squares up at a breach or the gate. A pirate walks up and takes them on, and
-  both play real Swordfight. Your board stands upright beside you, the way a hole stands in the
-  wall, so its size suits the den; the raider's board stands on their side, played by the
-  computer.
-- **The fight follows the puzzle:** each smash is a lunge, harder the bigger it is; their attacks
-  hit you and drop sprinkles on your board. Top out and you're knocked flat and they get past;
-  they top out and they're knocked out.
-- **Brawls:** Swordfight brawls let several fighters per side each pick who to attack (check
-  YPPedia). Any pirate can take a board against a raider, and several can gang up on a big one.
-- **A way to hold the wall:** plug the hole with carpentry, or stand in it and fight.
-- **Open questions:** whether the rest of a wave waits while a duel is on; what a raider's sword
-  (its drop pattern) is; whether a golem or a forge could stay as a look only.
+Tried and dropped along the way: clay soldiers or a golem built from smashed blocks, with
+breakers won from kills ("too far away from the sword fighting puzzle"); one-on-one duels at the
+wall (too slow for the raid, "really disjointed").
 
 ## The bigger picture: from a den to a pirate world (long term)
 
@@ -210,8 +182,8 @@ The user's brain-dump (7 Nov 2026), for much later:
 - **Rumble, as boxers:** Rumble could spawn troops of your own, but boxers: big brawlers in
   boxing mode, like the heavies in Team Fortress 2. How the puzzle maps onto them is still to work
   out. Since the Swordfight clay soldiers were dropped for being too far from the puzzle, Rumble
-  probably wants the same treatment as the Swordfight duels: the real puzzle, with a fight on
-  either side of it.
+  probably wants the same treatment as the Swordfight golem: the real puzzle, with the fight
+  around it shown in 3D.
 - **Fill out the place:** trees, and water behind the den, so it feels like a pirate den on the
   coast. They attack from land now, but the sea is right there.
 - **Ships and voyages:** later, build ships and sail off on voyages for resources: the full Puzzle
