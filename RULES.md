@@ -220,6 +220,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **If it shows you where a piece would go, you can put it there.** With the mouse, you can fit a
   piece from as far back as the preview shows (2.5 m further back than before) and a little further
   along the wall; taking one back works from as far. The user: no value in having to walk closer.
+  **That reaches the next hole along** (6 m with the mouse, measured to the piece): holes come in
+  pairs about 4 m apart, and from in front of either you can fit a piece in the other. The user:
+  "you can place it on adjacent holes. You don't need to walk right up to them." Not across the gate.
   (With the keyboard, stand at the wall as before: it decides between the wall and the frames on the
   floor behind you.)
 - **The pirate walks a touch quicker** (5.4 m/s; was 4.6, then 5). The user and a friend both

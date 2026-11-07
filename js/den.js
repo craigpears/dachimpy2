@@ -21,6 +21,9 @@ const S = 0.55;          // one carpentry square, in metres
 const WOOD_D = 0.5;      // depth of a wooden piece
 const STONE_D = 0.7;
 const REACH = 2.4;       // how far along the wall the pirate can reach
+// With the mouse, further: the next hole along, from in front of either one (the user: you
+// shouldn't have to walk right up to each). Holes come in pairs about 4 m apart; not across the gate.
+const MREACH = 6;
 const WALL_Z = 2.7;      // how close to the wall the pirate must stand to fit a piece
 const SPEED = 5.4;         // (4.6, then 5, now 5.4: the user and a friend wanted the pace a bit quicker)
 // Seconds of one raider hacking at it at full speed (piece: each piece in an unfinished hole; patch:
@@ -2476,7 +2479,7 @@ function canTakeBack() {
   if (u.frame) return !u.frame.done && u.frame.pieces[u.frame.pieces.length - 1] === u.piece && Math.hypot(u.piece.cx - pirate.x, u.piece.cz - pirate.z) <= REACH + 1.2;
   if (pirate.z > WALL_Z + 2.5) return false;   // (as far back as you can put one)
   if (u.h.pieces[u.h.pieces.length - 1] !== u.piece || (!u.piece.patch && u.h.status === 'master')) return false;
-  return Math.abs(u.piece.cx - pirate.x) <= REACH + 1.2;
+  return Math.abs(u.piece.cx - pirate.x) <= MREACH;
 }
 // A piece in an unfinished frame you could lift back out: the one under the pointer, or (keyboard)
 // the nearest within reach. Anyone's, as everyone builds together.
@@ -3107,8 +3110,8 @@ function aim() {
   if (pirate.z > WALL_Z + 2.5 && !fl.length) return;
   const reach = (o) => Math.abs(o.cx - pirate.x) <= REACH && pirate.z <= WALL_Z;
   // With the mouse, if it shows you where it'd go, you can put it there: from as far back as the
-  // preview shows (the user: no value in having to walk closer), and a bit further along the wall.
-  const mReach = (o) => Math.abs(o.cx - pirate.x) <= REACH + 1.2 && pirate.z <= WALL_Z + 2.5;
+  // preview shows (the user: no value in having to walk closer), and as far as the next hole along.
+  const mReach = (o) => Math.abs(o.cx - pirate.x) <= MREACH && pirate.z <= WALL_Z + 2.5;
   const list = pirate.z <= WALL_Z + 2.5 ? fits(carry.cells).concat(patchFits(carry.cells)) : [];
   const b = C.bbox(carry.cells);
   if (mouseMode && mouse) {

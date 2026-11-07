@@ -161,7 +161,6 @@ yet tried by the user. Ideas if it still feels hopeless or too easy:
 - **Raiders who get in should be catchable**: they walk to the chest; a crewmate standing in the
   way could block them, and a thrown piece already knocks them flat.
 - **Repairs between waves**: Masterpieces could heal a little in the calm (the user's call).
-- **A wave that holds pays a bonus** ("Not one got in! +10").
 - **Wave sizes for a crew** may need retuning with the cannon change; only solo was tested.
 
 ## A public den anyone can drop into
