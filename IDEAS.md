@@ -154,6 +154,10 @@ Where it's got to (7 Nov 2026), kept simple on purpose (the user: don't make it 
   lands, and the blocks appear on the board.
 - **The puzzle should feel real:** the board is the real Swordfight board, standing big beside
   the golem where everyone can see it.
+- **Swords falling from the sky, as animation only.** The user loves the idea of seeing attacks
+  as swords raining down onto the board they hit, both ways, for a dramatic swordfight, without
+  touching the puzzle itself. With several pirates, each has their own board, in a ring round
+  the golem, all sending swords down on it: three on one.
 
 Tried and dropped along the way: clay soldiers or a golem built from smashed blocks, with
 breakers won from kills ("too far away from the sword fighting puzzle"); one-on-one duels at the
