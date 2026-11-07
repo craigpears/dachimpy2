@@ -15,7 +15,7 @@ const REACH = 2.4;       // how far along the wall the pirate can reach
 const WALL_Z = 2.7;      // how close to the wall the pirate must stand to fit a piece
 const SPEED = 4.6;
 const HP = { master: 45, boarded: 10, piece: 4 };   // seconds of one raider hacking at it (piece: each piece in an unfinished hole)
-const PAY = { master: 10, boarded: 2, bonk: 3, steal: 10, scrap: 1 };
+const PAY = { master: 10, boarded: 2, bonk: 3, steal: 10 };
 const BUILD_SECS = 75, CALM_SECS = 20;
 const RAIDER_DPS = 1, RAIDER_STAMINA = 16;
 const k = (r, c) => r + ',' + c;
@@ -378,7 +378,7 @@ function buildWall() {
   cannon.position.set(cx, 0.6, -10.5);
   cannon.visible = false;
   scenery.push(mound, cannon);
-  // Props inside: three crates for the piles, a scrap fire, the treasure chest.
+  // Props inside: three crates for the piles, a fire barrel, the treasure chest.
   piles.forEach((p, i) => { p.x = (i - 1) * Math.min(3.4, half * 0.42); p.z = 5.6; p.crate.position.set(p.x, 0.32, p.z); scenery.push(p.crate); });
   barrel.position.set(half - 1.4, 0, 7.6);
   chest.position.set(-half + 1.8, 0, 8.4);
@@ -412,7 +412,7 @@ function makeGate() {
   return g;
 }
 
-// ---------- piles (the toolbox), scrap fire, chest, cannon ----------
+// ---------- piles (the toolbox), fire barrel, chest, cannon ----------
 const crateGeo = new RoundedBoxGeometry(1.2, 0.64, 1.2, 2, 0.04);
 const piles = [0, 1, 2].map(() => ({ x: 0, z: 0, letter: null, cells: null, group: null, crate: mesh(crateGeo, mat('#7a5230', { map: woodTex })) }));
 function deal(p) {
@@ -583,7 +583,7 @@ addEventListener('keydown', (e) => {
   else if (key === 'e' && carry) turn(rotCW, -1);
   else if (key === 'f' && carry) turn(flip, 0);
   else if (key === 'tab') cycle++;
-  else if (key === 'r' && carry && foe()) throwAt(foe());
+  else if (key === 'r' && carry && anyFoe()) throwAt(anyFoe());
 });
 addEventListener('keyup', (e) => keys.delete(e.key.toLowerCase()));
 addEventListener('blur', () => keys.clear());
@@ -610,12 +610,15 @@ function nearest(list, r) {
 function focus() {
   const p = nearest(piles, 1.55);
   if (p) return { kind: 'pile', p };
-  if (nearest([{ x: barrel.position.x, z: barrel.position.z }], 1.35)) return { kind: 'barrel' };
   return { kind: 'wall' };
 }
-// The raider a thrown piece would hit: the nearest one loose in the den.
+/* The raider a thrown piece would hit: the nearest one loose in the den, or else (R only) one at the
+   wall outside, lobbed over the top. Throwing at a raider is the only way to get rid of a piece. */
 const THROW_RANGE = 10;
-const foe = () => nearest(raiders.filter((r) => r.inside && r.state !== 'down' && !r.targeted), THROW_RANGE);
+const free = (r) => r.state !== 'down' && !r.targeted;
+const foe = () => nearest(raiders.filter((r) => r.inside && free(r)), THROW_RANGE);
+const outsideFoe = () => nearest(raiders.filter((r) => !r.inside && free(r) && (r.state === 'attack' || (r.state === 'approach' && r.z > -6))), THROW_RANGE + 2);
+const anyFoe = () => foe() || outsideFoe();
 function act() {
   const f = focus();
   if (f.kind === 'pile') {
@@ -623,8 +626,7 @@ function act() {
     if (!carry && p.letter) return pickUp(p);
     if (carry && carry.from === p && !p.letter) return putBack();
     if (carry && p.letter) { putBack(); return pickUp(p); }
-  } else if (f.kind === 'barrel' && carry) return scrap();
-  else if (carry && target?.ok) return place(target);
+  } else if (carry && target?.ok) return place(target);
   else if (carry && foe()) return throwAt(foe());
   else if (carry && target) shake = 0.2;
 }
@@ -699,15 +701,6 @@ function refill(p) {
     tween(0.3, (s) => g.scale.setScalar(s0 * (1 - (1 - s) ** 3)));
   }, 450);
 }
-function scrap() {
-  const g = carry.group, from = g.position.clone(), to = barrel.position.clone().setY(1.1);
-  const pile = carry.from;
-  carry = null;
-  G.gold -= PAY.scrap;
-  updateStats();
-  tween(0.4, (s) => { g.position.lerpVectors(from, to, s); g.position.y += Math.sin(s * Math.PI) * 0.8; g.scale.setScalar(0.55 * (1 - s)); }, () => scene.remove(g));
-  refill(pile);
-}
 // Hurl the carried piece at a raider. It always flies true, but the piece is spent.
 function throwAt(r) {
   const g = carry.group, pile = carry.from, color = WOOD[carry.letter];
@@ -717,11 +710,28 @@ function throwAt(r) {
   pirate.bonkT = 0.3;
   pirate.g.rotation.y = Math.atan2(r.x - pirate.x, r.z - pirate.z);
   const from = g.position.clone(), d = Math.hypot(r.x - from.x, r.z - from.z);
-  const to = new THREE.Vector3();
-  tween(0.25 + d * 0.05, (s) => {
-    to.set(r.x, 1.1, r.z);
+  const to = new THREE.Vector3(r.x, 1.1, r.z);
+  const over = !r.inside, dur = 0.25 + d * 0.05 + (over ? 0.3 : 0);
+  let arc = 0.5 + d * 0.12;
+  if (over) {
+    // Over the wall: aim where the raider will be when it lands (at the foot of the wall at the
+    // nearest), and lob high enough to clear the whole thickness of the wall on the way.
+    if (r.state === 'approach') {
+      const tx = holeX(r.hole) + r.slot, dx = tx - r.x, dz = -1.15 - r.z, n = Math.hypot(dx, dz);
+      const step = Math.min(n, 2.2 * dur);
+      if (n > 0) to.set(r.x + dx / n * step, 1.1, r.z + dz / n * step);
+    }
+    to.z = Math.min(to.z, -1.15);
+    const top = wall.H * S + 0.6;
+    for (let s = 0.02; s < 1; s += 0.02) {
+      const z = from.z + (to.z - from.z) * s;
+      if (Math.abs(z) < 0.9) arc = Math.max(arc, (top - (from.y + (to.y - from.y) * s)) / Math.sin(Math.PI * s));
+    }
+  }
+  tween(dur, (s) => {
+    if (!over) to.set(r.x, 1.1, r.z);
     g.position.lerpVectors(from, to, s);
-    g.position.y += Math.sin(s * Math.PI) * (0.5 + d * 0.12);
+    g.position.y += Math.sin(s * Math.PI) * arc;
     g.rotation.x = s * 9; g.rotation.z = s * 5;
   }, () => { scene.remove(g); hit(r, from, color); });
   refill(pile);
@@ -731,7 +741,7 @@ function hit(r, from, color) {
   r.targeted = false;
   if (r.state === 'down' || r.gone) return;
   const dx = r.x - from.x, dz = r.z - from.z, n = Math.hypot(dx, dz) || 1;
-  r.state = 'down'; r.t = 0;
+  r.state = 'down'; r.t = 0; r.outside = !r.inside;
   r.kv = new THREE.Vector3(dx / n * 5.5, 5, dz / n * 5.5);
   G.bonked++;
   G.gold += PAY.bonk;
@@ -898,7 +908,7 @@ function updateRaider(r, dt) {
       const g = r.m.g;
       v.y -= 14 * dt;
       r.x = Math.max(-bounds.x, Math.min(bounds.x, r.x + v.x * dt));
-      r.z = Math.max(0.6, Math.min(bounds.z1, r.z + v.z * dt));
+      r.z = r.outside ? Math.max(-15, Math.min(-0.8, r.z + v.z * dt)) : Math.max(0.6, Math.min(bounds.z1, r.z + v.z * dt));
       g.position.y = Math.max(0, g.position.y + v.y * dt);
       if (g.position.y <= 0 && v.y < 0) { v.x *= 0.4; v.z *= 0.4; v.y = Math.abs(v.y) > 3 ? -v.y * 0.3 : 0; }
       if (g.position.y > 0.05) g.rotation.y += dt * 10;
@@ -1078,8 +1088,7 @@ function prompt() {
     if (!carry && f.p.letter) t = `Space: pick up the ${f.p.letter}`;
     else if (carry && carry.from === f.p && !f.p.letter) t = `Space: put the ${carry.letter} back`;
     else if (carry && f.p.letter) t = `Space: swap the ${carry.letter} for the ${f.p.letter}`;
-  } else if (f.kind === 'barrel') t = carry ? `Space: burn the ${carry.letter} (costs ${PAY.scrap} doubloon)` : 'The scrap fire, for pieces you can\'t use';
-  else if (carry) {
+  } else if (carry) {
     const more = target?.count > 1 ? ` · Tab: other spots (${target.count})` : '';
     if (target?.ok && !target.over) t = `Space: fit the ${carry.letter} here${more}`;
     else if (target?.ok) t = `Space: board it over (weak, no Masterpiece)${more}`;
@@ -1087,6 +1096,8 @@ function prompt() {
     else if (pirate.z <= WALL_Z || (mouseMode && mouse)) t = `The ${carry.letter} won't go there · Q/E turn · F flip`;
     else t = `Carry the ${carry.letter} to a hole`;
   } else t = 'Fetch a piece from the piles';
+  const atWall = !loose && carry && outsideFoe();
+  if (atWall) t += ` · R: throw it over the wall`;
   if (loose && carry && f.kind === 'pile') t += ` · R: throw it at the raider!`;
   else if (loose && f.kind !== 'pile') {
     if (!carry) t = 'A raider is in the den! Grab a piece to throw at them';

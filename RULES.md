@@ -127,7 +127,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   through a hole that has wood in it. A thief whose way out has been mended hacks out from inside.
 - **Throw pieces at raiders, don't bonk them.** A plain bonk was underwhelming. The carried piece
   is the weapon: R (or Space, when there's nowhere to fit it) hurls it at the nearest raider in the
-  den, who goes flying. It costs the piece.
+  den, who goes flying. It costs the piece. R can also lob it over the wall at a raider hacking at
+  it (or about to).
+- **Throwing at a raider is the only way to discard.** No scrap fire, no bin: a piece you don't
+  want (often a rare one) can only be got rid of by throwing it at an enemy pirate, which deals a
+  fresh piece onto that crate. Swapping at the crates just puts it back. With no raiders about,
+  you fit it or board it over.
 - **You must see what's happening in the den.** Raiders inside get a ⚔ marker, pinned to the edge
   of the screen when they're out of view (gold when carrying loot). The view widens on narrow screens.
 - **Give enough time to build.** A piece takes about ten seconds to fetch and fit, so the first wave
