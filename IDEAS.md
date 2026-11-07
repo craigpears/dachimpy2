@@ -160,6 +160,14 @@ Where it's got to (7 Nov 2026):
   mould as the opponent's board: your smashes send their sprinkles into a mould standing in the
   den, raiders send sprinkles back onto your board, and when the mould is full the golem breaks
   out and wades into the raiders at the wall. Not yet agreed.
+- **The user's lean (7 Nov): the golem is a tough opponent you beat in a Swordfight.** It's an
+  opponent board that fights back, harder than any raider, and beating it (topping it out) wins
+  the golem for the crew. Thought through so far: a dormant golem in the den with its board on
+  show; any pirate can step up and fight it, and several at once, brawl style, all burying the
+  same golem; losing just knocks you back while the raid carries on; once beaten it kneels, then
+  fights raiders at the wall until it crumbles, and goes dormant to be won again. Flip side for
+  later: raiders could bring their own golem to the wall, a boss the crew has to beat the same
+  way.
 - **(Dropped) A duel at the wall:** a raider with a sword (later waves only, see the user's idea that early
   waves have none) squares up at a breach or the gate. A pirate walks up and takes them on, and
   both play real Swordfight. Your board stands upright beside you, the way a hole stands in the
