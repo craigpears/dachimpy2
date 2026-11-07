@@ -22,6 +22,13 @@ wants to do the carpentry properly. The 3D version is the fun extra; it loses so
 of its mechanics and the quick pace (gunning especially), so both should work together on the
 same job. Build later, but design every new job so it maps cleanly onto its 2D puzzle.
 
+**Third principle: fun and obvious from the first minute.** One of the user's main goals: make it
+more fun and intuitive straight off than Puzzle Pirates ever was. Keep the crew and group vibes,
+but it must be quick and easy to get into. Every new job should be playable within seconds of
+seeing it, with the depth coming after.
+
+**Always more piratey.** Keep looking for ways to give it a more piratey feel.
+
 ## Raiders need a real gap to get in (rethink, wanted soon)
 
 The user finds it weird and dumb that raiders seem to hop through tiny gaps, even five-square ones
@@ -36,6 +43,20 @@ height. What they want:
 A possible way to build it: a hole a raider can't fit through is a weak spot with low strength;
 hacked through, it becomes a breach that is a bigger, floor-level carpentry hole (still made of
 whole pieces' worth of squares, still solvable), which the crew then mends.
+
+## Covering a hole must cost the raiders (wanted soon)
+
+Right now there's no reward for even just covering a hole: raiders bash through a boarded one in
+a few seconds, so it feels like nothing. Getting through the wall should **cost them**: a covered
+hole should hold them up long enough to matter, and hacking through should weaken the wave in some
+way (they lose raiders, or time, or arrive spent). Goes with the walk-through gap rethink above.
+
+## Treasure maps from fallen raiders
+
+Now and then a raider you knock out drops a **treasure map**: a quick little event. Go out of the
+gates and find the buried treasure, and dig it up with the treasure hauling puzzle somehow. Short
+and sweet, not a long expedition. In the bigger picture, follow the spirit of Puzzle Pirates:
+more things you go and do as a group activity.
 
 ## Grades for the layers behind a hole
 
@@ -78,11 +99,13 @@ Building on what's there now (the walk and its stairs are made of pieces that st
 
 For now the den is the first version, and that works.
 
-## Gun deck: what's left (the deck itself is built; its rules are in RULES.md)
+## Gun tower: what's left (the tower itself is built; its rules are in RULES.md)
 
 - **Knocked flying:** get hit by their cannonball up on the wall and you're knocked clean off the
   rampart, comically, and have to walk back up.
 - **Upgrades, later:** more guns, a faster barrel. No levels yet.
+- **Crew guns facing in?** The user wondered about two guns facing into the den for raiders who
+  get through. Left out for now (throwing pieces covers that), but could come back.
 - **2D mode:** play the deck as the classic flat Gunnery board while the crew watch it in 3D (see
   the second principle at the top).
 
