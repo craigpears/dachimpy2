@@ -143,13 +143,22 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   at the wall can only be hit from up there; it's what makes a Masterpiece pay off: while it holds,
   you go up and knock the raiders off it. The view swings up high to look down at them. Keep it out
   of the way (not in front of the gate), and the full length of the wall.
+- **The rampart is built, a stretch at a time, as the reward for beating a wave.** After waves 1, 2
+  and 3, timber arrives for one stretch (left with its stairs, then right, then the middle) and a
+  footing opens in the top of the wall above it: a pale timber-backed hole, labelled "Rampart
+  footing". Fill it like any hole (exactly or boarded over) and that stretch goes up. Raiders leave
+  footings alone. You can only walk on stretches that are built.
+- **Up on the wall must stay bright.** The fog keeps its distance from the camera and the view
+  brightens as it rises; looking down from the rampart went murky otherwise.
 - **Keep the pirate-den feel, not medieval.** The rampart is a ship's deck with a rope rail and
   the Jolly Roger, not stone battlements.
 - **Damaged holes can be patched.** A Masterpiece or boarded hole that's been hacked at takes
   another board nailed over the front, which wins back strength (up to three deep). The label says
   so when it's damaged.
-- **The camera can be turned and zoomed:** Z/C or right-drag to turn and tilt, wheel or -/= to zoom,
-  V to reset. Walking follows the way the camera faces. Q/E turn the piece, right-click flips it.
+- **The camera can be turned and zoomed:** Z/C or right-drag to turn and tilt, -/= to zoom, V to
+  reset. Walking follows the way the camera faces. Q/E turn the piece, right-click flips it.
+- **The wheel turns the piece whenever it's showing a spot to fit** (that's what it was for first);
+  only otherwise does it zoom.
 - **Throwing at a raider is the only way to discard.** No scrap fire, no bin: a piece you don't
   want (often a rare one) can only be got rid of by throwing it at an enemy pirate, which deals a
   fresh piece onto that crate. Swapping at the crates just puts it back. With no raiders about,

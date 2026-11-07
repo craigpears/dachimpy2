@@ -282,6 +282,7 @@ const stoneGeo = new RoundedBoxGeometry(S * 0.97, S * 0.95, STONE_D, 2, 0.06);
 const X = (c) => (c - wall.W / 2) * S;     // left edge of column c
 const Y = (r) => (wall.H - r) * S;         // top edge of row r
 const holeBackMat = mat('#5a3a22', { roughness: 1 });
+const deckBackMat = mat('#a07448', { map: woodTex, roughness: 1 });   // behind a rampart footing: fresh timber
 const cellPlane = new THREE.PlaneGeometry(S, S);
 
 function lastGap() {
@@ -320,11 +321,11 @@ function registerHole(cells) {
 function holeVisuals(h) {
   const g = new THREE.Group();
   for (const [r, c] of h.cells) {
-    const p = mesh(cellPlane, holeBackMat, false);
+    const p = mesh(cellPlane, h.kind ? deckBackMat : holeBackMat, false);
     p.position.set(X(c) + S / 2, Y(r) - S / 2, -STONE_D - 0.01);
     g.add(p);
   }
-  const line = outline(h.cells, 0.02, '#ffd58a');
+  const line = outline(h.cells, 0.02, h.kind ? '#9fe0ff' : '#ffd58a');
   line.position.set(X(0), Y(0), 0);
   g.add(line);
   wallGroup.add(g);
@@ -398,33 +399,40 @@ let ramp = null;
 function makeRampart() {
   const half = wall.W * S / 2, T = wall.H * S + 0.38, zTop = 0.45, run = T, zBot = zTop + run;
   const n = Math.max(8, Math.round(T / 0.24)), sw = 1.1;
-  ramp = { T, half, zTop, zBot, run, n, stairs: [[-half + 0.2, -half + 0.2 + sw], [half - 0.2 - sw, half - 0.2]] };
+  // Three stretches, each built separately (left, right, then middle); the stairs come with the end ones.
+  const cuts = [0, Math.round(wall.W / 3), Math.round(wall.W * 2 / 3), wall.W];
+  const secs = [0, 1, 2].map((i) => ({ c0: cuts[i], c1: cuts[i + 1] - 1, x0: X(cuts[i]), x1: X(cuts[i + 1]), built: false, g: new THREE.Group() }));
+  ramp = { T, half, zTop, zBot, run, n, secs, stairs: [[-half + 0.2, -half + 0.2 + sw], [half - 0.2 - sw, half - 0.2]] };
   const g = new THREE.Group();
+  const secAt = (x) => secs.find((s) => x >= s.x0 - 0.01 && x <= s.x1 + 0.01) || secs[2];
   const plank = mat('#6b4426', { map: woodTex }), post = mat('#4a2f1a', { map: woodTex }), rope = mat('#c9a66b', { roughness: 1 });
-  const deck = mesh(new THREE.BoxGeometry(half * 2, 0.1, 1.3), plank);
-  deck.position.set(0, T - 0.05, -0.2);
-  g.add(deck);
+  for (const s of secs) {
+    s.g.visible = false;
+    g.add(s.g);
+    const deck = mesh(new THREE.BoxGeometry(s.x1 - s.x0, 0.1, 1.3), plank);
+    deck.position.set((s.x0 + s.x1) / 2, T - 0.05, -0.2);
+    const top = mesh(new THREE.BoxGeometry(s.x1 - s.x0 - 0.1, 0.08, 0.14), post);
+    top.position.set((s.x0 + s.x1) / 2, T + 0.82, -0.75);
+    s.g.add(deck, top);
+  }
   // A ship's rail along the outer edge: posts, a timber top rail and a sagging rope between.
   for (let x = -half + 0.25; x <= half - 0.2; x += 1.2) {
     const p = mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.8, 8), post);
     p.position.set(x, T + 0.4, -0.75);
-    g.add(p);
+    secAt(x).g.add(p);
     if (x + 1.2 <= half - 0.2) {
       const r = mesh(new THREE.TorusGeometry(0.6, 0.025, 5, 16, Math.PI), rope, false);
       r.rotation.z = Math.PI;
       r.scale.y = 0.35;
       r.position.set(x + 0.6, T + 0.55, -0.75);
-      g.add(r);
+      secAt(x + 0.6).g.add(r);
     }
   }
-  const top = mesh(new THREE.BoxGeometry(half * 2 - 0.3, 0.08, 0.14), post);
-  top.position.set(0, T + 0.82, -0.75);
-  g.add(top);
   // A coil of rope, and the Jolly Roger flying at each end.
   const coil = mesh(new THREE.TorusGeometry(0.18, 0.06, 6, 16), rope);
   coil.rotation.x = Math.PI / 2;
-  coil.position.set(-half * 0.2, T + 0.06, 0.25);
-  g.add(coil);
+  coil.position.set(-half * 0.1, T + 0.06, 0.25);
+  secs[1].g.add(coil);
   const flagTex = canvasTex(64, 44, (c, w, h) => {
     c.fillStyle = '#111'; c.fillRect(0, 0, w, h);
     c.fillStyle = '#f2ead8';
@@ -441,36 +449,82 @@ function makeRampart() {
     const flag = mesh(new THREE.PlaneGeometry(0.9, 0.6), new THREE.MeshStandardMaterial({ map: flagTex, side: THREE.DoubleSide, roughness: 1 }), false);
     flag.position.set(x + sx * 0.47, T + 1.9, -0.62);
     if (sx < 0) flag.scale.x = -1;
-    g.add(pole, flag);
+    secs[sx < 0 ? 0 : 2].g.add(pole, flag);
   }
   // Stairs up from the den floor at each end, against the side of the cave.
-  for (const [x0, x1] of ramp.stairs) {
+  ramp.stairs.forEach(([x0, x1], si) => {
+    const sg = secs[si ? 2 : 0].g;
     for (let i = 0; i < n; i++) {
       const h = T * (i + 1) / n;
       const step = mesh(new THREE.BoxGeometry(x1 - x0, h, run / n + 0.01), plank);
       step.position.set((x0 + x1) / 2, h / 2, zBot - (i + 0.5) * run / n);
-      g.add(step);
+      sg.add(step);
     }
     const rx = Math.abs(x0) < Math.abs(x1) ? x0 + 0.05 : x1 - 0.05;
     const len = Math.hypot(run, T);
     const rail = mesh(new THREE.BoxGeometry(0.07, 0.07, len), post);
     rail.position.set(rx, T / 2 + 0.85, zTop + run / 2);
     rail.rotation.x = Math.atan2(T, run);
-    g.add(rail);
+    sg.add(rail);
     [zBot - 0.1, zTop + 0.1].forEach((z, i) => {
       const p = mesh(new THREE.BoxGeometry(0.1, 0.95, 0.1), post);
       p.position.set(rx, (i ? T : 0) + 0.47, z);
-      g.add(p);
+      sg.add(p);
     });
-  }
+  });
   return g;
 }
+/* Building the rampart: after each of the first three waves, timber arrives for one stretch, and a
+   footing (a two-piece hole) opens in the top of the wall above it. Fill it, exactly or boarded
+   over, and that stretch of wall-walk goes up. Raiders leave footings alone. */
+const SECTION_ORDER = [0, 2, 1];
+function addFooting(si) {
+  const s = ramp.secs[si];
+  for (let tries = 0; tries < 400; tries++) {
+    const shape = tries < 300 ? C.genHole(2).hole : lastGap();
+    const b = C.bbox(shape);
+    if (b.w > s.c1 - s.c0 - 1 || b.h > wall.H - 2) continue;
+    const c0 = s.c0 + 1 + rand(s.c1 - s.c0 - b.w), r0 = tries < 200 ? 0 : rand(2);
+    const cells = shape.map(([r, c]) => [r + r0, c + c0]);
+    const clear = cells.every(([r, c]) => {
+      if (c < 1 || c > wall.W - 2 || !wall.stoneAt.has(k(r, c))) return false;
+      for (let a = -1; a <= 1; a++) for (let z = -1; z <= 1; z++) {
+        const kk = k(r + a, c + z);
+        if (wall.cellHole.has(kk) || wall.gate.has(kk) || wall.wood.has(kk)) return false;
+      }
+      return true;
+    });
+    if (!clear) continue;
+    const zero = new THREE.Matrix4().makeScale(0, 0, 0);
+    cells.forEach(([r, c]) => { stones.setMatrixAt(wall.stoneAt.get(k(r, c)), zero); wall.stoneAt.delete(k(r, c)); });
+    stones.instanceMatrix.needsUpdate = true;
+    const h = registerHole(cells);
+    h.kind = 'deck'; h.sec = si;
+    holeVisuals(h);
+    updateHole(h);
+    burst(new THREE.Vector3(holeX(h), holeMidY(h), 0.3), '#e8c890', 16, 3);
+    return h;
+  }
+  buildSection(si);   // nowhere to put a footing: the stretch just goes up
+  return null;
+}
+function buildSection(si) {
+  const s = ramp.secs[si];
+  if (s.built) return;
+  s.built = true;
+  s.g.visible = true;
+  tween(0.5, (t) => { s.g.scale.y = 0.01 + 0.99 * (1 - (1 - t) ** 3); s.g.position.y = ramp.T * (1 - s.g.scale.y) * 0.98; }, () => { s.g.scale.y = 1; s.g.position.y = 0; });
+  for (let i = 0; i < 3; i++) burst(new THREE.Vector3(s.x0 + Math.random() * (s.x1 - s.x0), ramp.T, 0), '#e8c890', 12, 3);
+  toast(ramp.secs.every((x) => x.built) ? 'The whole rampart is up!' : 'Rampart built: climb up and throw from the wall!');
+}
+const builtAt = (x) => ramp.secs.some((s) => s.built && x >= s.x0 - 0.01 && x <= s.x1 + 0.01);
 // How high the floor is here: the wall-walk, the stairs, or the ground. `pad` widens the stairs'
 // footprint a little, so you bump into their side instead of walking into them.
 function heightAt(x, z, pad = 0) {
   if (!ramp) return 0;
-  if (z <= ramp.zTop && Math.abs(x) <= ramp.half) return ramp.T;
-  for (const [x0, x1] of ramp.stairs) {
+  if (z <= ramp.zTop && Math.abs(x) <= ramp.half && builtAt(x)) return ramp.T;
+  for (const [si, [x0, x1]] of ramp.stairs.entries()) {
+    if (!ramp.secs[si ? 2 : 0].built) continue;
     if (x >= x0 - pad && x <= x1 + pad && z < ramp.zBot + pad) return Math.max(0, Math.min(ramp.T, ramp.T * (ramp.zBot - z) / ramp.run + ramp.T / (2 * ramp.n)));
   }
   return 0;
@@ -630,7 +684,7 @@ const patchZ = (layer) => WOOD_D - 0.12 + 0.14 * (layer + 1);
 function patchFits(cells) {
   const out = [], b = C.bbox(cells);
   wall.holes.forEach((h, hi) => {
-    if (h.status === 'open' || h.hp > h.maxHp - 1) return;
+    if (h.kind || h.status === 'open' || h.hp > h.maxHp - 1) return;
     const layer = h.pieces.filter((p) => p.patch).length;
     if (layer >= MAX_PATCHES) return;
     const own = new Set(h.pieces.flatMap((p) => p.cells)), seen = new Set();
@@ -650,7 +704,10 @@ function patchFits(cells) {
 const an = (l) => ('AEFILMNORSX'.includes(l) ? 'an ' : 'a ') + l;
 function updateHole(h) {
   const left = rest(h);
-  if (!left.length && h.status === 'open') {
+  if (!left.length && h.status === 'open' && h.kind) {
+    h.status = 'built';
+    buildSection(h.sec);
+  } else if (!left.length && h.status === 'open') {
     const master = !h.pieces.some((p) => p.over);
     h.status = master ? 'master' : 'boarded';
     h.hp = h.maxHp = HP[h.status];
@@ -665,6 +722,11 @@ function updateHole(h) {
 }
 function labelFor(h) {
   const atk = h.attackers ? `<em>⚔ ${h.attackers} raider${h.attackers > 1 ? 's' : ''} at it</em>` : '';
+  if (h.kind) {
+    if (h.status === 'built') return ['label gone', ''];
+    const left = h.open, need = left.length === 5 && h.exact ? `needs ${an(C.identify(left))}` : `${left.length / 5} pieces${h.exact ? '' : ': board it over'}`;
+    return ['label deck', `Rampart footing<small>${need}</small>`];
+  }
   const hurt = h.hp < h.maxHp * 0.8 && h.pieces.filter((p) => p.patch).length < MAX_PATCHES ? '<small>damaged: nail a piece over it</small>' : '';
   if (h.status === 'master') return ['label done', `★ Masterpiece${hurt}<i class="bar"><b></b></i>${atk}`];
   if (h.status === 'boarded') return ['label weak', `Boarded over: weak${hurt}<i class="bar"><b></b></i>${atk}`];
@@ -741,7 +803,21 @@ addEventListener('mouseup', (e) => {
   if (!drag.moved && carry && !G.over) turn(flip, 0);
   drag = null;
 });
-renderer.domElement.addEventListener('wheel', (e) => { view.zoom = Math.max(0.55, Math.min(2, view.zoom * (e.deltaY > 0 ? 1.1 : 1 / 1.1))); }, { passive: true });
+// The wheel turns the piece while it's showing a spot to fit it; otherwise it zooms.
+let wheelAcc = 0, wheelT = 0;
+renderer.domElement.addEventListener('wheel', (e) => {
+  if (carry && target && !G.over) {
+    wheelAcc += e.deltaY;
+    const now = performance.now();
+    if (Math.abs(wheelAcc) >= 40 && now - wheelT > 110) {
+      if (wheelAcc > 0) turn(rotCW, -1); else turn(rotCCW, 1);
+      wheelAcc = 0; wheelT = now;
+    }
+    return;
+  }
+  wheelAcc = 0;
+  view.zoom = Math.max(0.55, Math.min(2, view.zoom * (e.deltaY > 0 ? 1.1 : 1 / 1.1)));
+}, { passive: true });
 renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
 $('again').onclick = () => newGame();
 
@@ -871,7 +947,7 @@ function place(t) {
     updateHole(h);
     if (h.status === 'open') { h.hp += HP.piece; h.maxHp = h.hp; }
     undo.hpAfter = h.hp;
-    if (h.status === 'master' && lastPlaced === undo) lastPlaced = null;   // a Masterpiece is never a misclick
+    if ((h.status === 'master' || h.status === 'built') && lastPlaced === undo) lastPlaced = null;   // a Masterpiece is never a misclick
     if (h.status === 'open' && wasExact && !h.exact) { shake = 0.3; toast('No Masterpiece in that hole now · Space: take it back', true); }
   });
   refill(pile);
@@ -884,7 +960,7 @@ let lastPlaced = null;
 function canTakeBack() {
   const u = lastPlaced;
   if (!u || carry || u.hpAfter === null || pirate.h > 0.3 || pirate.z > WALL_Z) return false;
-  if (u.h.pieces[u.h.pieces.length - 1] !== u.piece || u.h.status === 'master') return false;
+  if (u.h.pieces[u.h.pieces.length - 1] !== u.piece || u.h.status === 'master' || u.h.status === 'built') return false;
   return Math.abs(u.piece.cx - pirate.x) <= REACH + 0.6;
 }
 function takeBack() {
@@ -1031,12 +1107,12 @@ function tween(dur, step, done) { tweens.push({ t: 0, dur, step, done }); }
 
 // ---------- raiders ----------
 // Only an empty hole can be climbed through; anything with wood in it has to be hacked open first.
-const passable = (h) => h.status === 'open' && !h.pieces.length;
+const passable = (h) => h.status === 'open' && !h.pieces.length && !h.kind;
 function pickHole(x) {
   const near = (a, b) => Math.abs(holeX(a) - x) - Math.abs(holeX(b) - x);
   const gaps = wall.holes.filter(passable);
   if (gaps.length) return gaps.sort(near)[0];
-  return wall.holes.slice().sort((a, b) => a.hp - b.hp || near(a, b))[0];
+  return wall.holes.filter((h) => !h.kind).sort((a, b) => a.hp - b.hp || near(a, b))[0];
 }
 function spawnRaider() {
   const m = makePirate({ shirt: ['#1f2433', ['#59607a', '#2f6b4f', '#6b2f5e'][rand(3)]], scarf: ['#2b2b2b', '#3a4a8a', '#7a1f1f'][rand(3)], trousers: '#5a4636', patch: Math.random() < 0.5, beard: ['#222', '#7a4a1a', '#999'][rand(3)], sword: true });
@@ -1243,7 +1319,12 @@ function updateWaves(dt) {
   if (G.toSpawn > 0 && G.spawnT <= 0) { spawnRaider(); G.toSpawn--; G.spawnT = Math.max(2.5, 7 - G.wave); }
   G.cannonT -= dt;
   if (G.cannonT <= 0) { fireCannon(); G.cannonT = Math.max(9, 22 - 2 * G.wave); }
-  if (!G.toSpawn && !raiders.length) { G.phase = 'calm'; G.phaseT = CALM_SECS; toast(`Wave ${G.wave} beaten off!`); }
+  if (!G.toSpawn && !raiders.length) {
+    G.phase = 'calm'; G.phaseT = CALM_SECS;
+    const si = SECTION_ORDER[G.wave - 1];
+    if (si !== undefined && !ramp.secs[si].built && addFooting(si)) toast(`Wave ${G.wave} beaten off! Timber for the rampart: fill its footing`);
+    else toast(`Wave ${G.wave} beaten off!`);
+  }
 }
 function banner() {
   const el = $('banner');
@@ -1331,7 +1412,7 @@ function prompt() {
     else t = hacking ? 'Walk along to get in range' : 'Up on the rampart · watch for raiders at the wall';
   } else if (pirate.h > 0.3) t = carry ? 'Up the stairs to the rampart' : 'Up to the rampart';
   else if (loose) t = carry ? `${f.kind === 'pile' || target?.ok ? t + ' · ' : ''}Shift or click: throw the ${carry.letter} at the raider!` : 'A raider is in the den! Grab a piece to throw at them';
-  else if (hacking && carry && !target?.ok) t += ' · or take it up the rampart and throw it';
+  else if (hacking && carry && !target?.ok && ramp.secs.some((x) => x.built)) t += ' · or take it up the rampart and throw it';
   const el = $('prompt');
   if (el.textContent !== t) el.textContent = t;
 }
@@ -1449,6 +1530,11 @@ function update(dt) {
   v3.set(Math.sin(view.yaw) * Math.cos(tilt), Math.sin(tilt), Math.cos(view.yaw) * Math.cos(tilt)).multiplyScalar(dist).add(look);
   camAt.lerp(v3, Math.min(1, dt * 3));
   camera.position.copy(camAt);
+  // The fog starts beyond what you're looking at, so a high or zoomed-out view doesn't go murky.
+  const camD = camAt.distanceTo(camLook);
+  scene.fog.near = camD + 6; scene.fog.far = camD + 24;
+  // Looking down from the wall you see more of the floor the torches don't reach: brighten it up.
+  renderer.toneMappingExposure = 1 + 0.45 * u;
   if (shake > 0) { camera.position.x += (Math.random() - 0.5) * shake * 0.5; camera.position.y += (Math.random() - 0.5) * shake * 0.5; shake = Math.max(0, shake - dt); }
   camLook.lerp(look, Math.min(1, dt * 3));
   camera.lookAt(camLook);
@@ -1496,6 +1582,6 @@ newGame();
 requestAnimationFrame(frame);
 
 // For poking at it from the console.
-window.den = { takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+window.den = { buildSection, addFooting, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };
