@@ -361,8 +361,22 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     countdown ("Their cannon's aiming here!"). A hit from the gun tower spoils its aim.
   - **A fresh breach is choked with rubble**: raiders must hack 10 seconds of it clear before they
     can climb through, and a piece fitted into it clears it. Its label says so.
-  - **A raider who tires at your wall is turned away**: +3 doubloons, a cheer, and a "Turned away"
-    count on the HUD. Each wave ends with how many you turned away and how many got in.
+  - **A raider who tires at your wall is turned away**: +5 doubloons, a cheer, and a "Turned away"
+    count on the HUD. Each wave ends with how many you turned away and how many got in, and a wave
+    where not one got in pays +10 more (the user wanted more reward for blocking them off).
+  - **Raiders always have swords.** (Swordless early waves were tried and dropped: the user
+    prefers to balance how quickly they chop through.)
+  - **How fast they chop is the balance.** They start slow and build up: 55% of full speed in wave
+    1, 15% more each wave, full from wave 4. Each piece in an unfinished hole takes 8 seconds of
+    full-speed hacking (it was 4, and a half-mended hole fell in seconds). To experiment:
+    `den.html?hack=0.8` scales all hacking; in the console, `den.tune` (hack, start, step) and
+    `den.HP` (master, boarded, piece, patch) change it live.
+  - **Balance tests** (a test player getting one random piece every 12 seconds, best of three,
+    fitting it exactly if it can, else boarding over, else nailing it on behind; four waves, three
+    runs each; chest at the end, starting from 60): full speed from wave 1 with pieces at 4, lost
+    in wave 3 every time; the slow start alone, lost in wave 3 or 4; pieces at 8 alone, survived
+    with 2-16 left; slow start with pieces at 6, 16-60; **slow start with pieces at 8 (now),
+    35-131**, wave 1 usually held completely and wave 4 a real fight.
   - (Tested: a steady solo player fitting a piece every 10 seconds lost nothing in three waves
     and turned nine raiders away. Holes still wear down wave on wave, so boards behind matter.)
 - **You can pause.** A Pause button by Your pirate, or P (P, Space, Enter or Esc carries on).

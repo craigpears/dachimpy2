@@ -23,9 +23,14 @@ const STONE_D = 0.7;
 const REACH = 2.4;       // how far along the wall the pirate can reach
 const WALL_Z = 2.7;      // how close to the wall the pirate must stand to fit a piece
 const SPEED = 4.6;
-const HP = { master: 45, boarded: 10, piece: 4, patch: 12 };   // seconds of one raider hacking at it (piece: each piece in an unfinished hole; patch: a board nailed over a damaged one)
+// Seconds of one raider hacking at it at full speed (piece: each piece in an unfinished hole; patch:
+// a board nailed on behind). A piece was 4: a half-mended hole fell in seconds and early waves were
+// lost anyway; at 8, every piece you get in counts. (Balance tests in RULES.md.)
+const HP = { master: 45, boarded: 10, piece: 8, patch: 12 };
 const MAX_PATCHES = 3;
-const PAY = { master: 10, boarded: 2, bonk: 3, steal: 10, turned: 3 };
+// Keeping them out pays well: each raider turned away at the wall, and more for a wave where not
+// one got in (the user wanted more of a reward for blocking them off).
+const PAY = { master: 10, boarded: 2, bonk: 3, steal: 10, turned: 5, clean: 10 };
 /* The cannon: a few shots a wave (one in wave 2, two in wave 3, three after), each aimed for
    CANNON_AIM seconds first with the spot shown red on the wall, and a fresh breach is choked with
    RUBBLE seconds of hacking before anyone can climb through. (It used to fire every 9-20 seconds,
@@ -33,6 +38,12 @@ const PAY = { master: 10, boarded: 2, bonk: 3, steal: 10, turned: 3 };
 const CANNON_AIM = 8, CANNON_GAP = 22, RUBBLE = 10;
 const BUILD_SECS = 75, CALM_SECS = 20;
 const RAIDER_DPS = 1, RAIDER_STAMINA = 16;
+/* How fast raiders chop through wood, the main thing to balance. They start slow and build up wave
+   by wave (start: the first wave's fraction of full speed; step: how much more each wave). To try
+   other speeds without editing: den.html?hack=0.8 (a multiplier on all of it), or in the console
+   den.tune.hack / den.tune.start / den.tune.step. */
+const tune = { hack: Number(new URLSearchParams(location.search).get('hack')) || 1, start: 0.55, step: 0.15 };
+const hackRate = () => RAIDER_DPS * tune.hack * Math.min(1, tune.start + tune.step * Math.max(0, G.wave - 1));
 const k = (r, c) => r + ',' + c;
 const rand = (n) => Math.floor(Math.random() * n);
 const $ = (id) => document.getElementById(id);
@@ -2697,7 +2708,8 @@ function updateRaider(r, dt) {
       const boards = boardsOf(h), fill = h.pieces.some((p) => !p.patch);
       const board = out ? boards[boards.length - 1] || null : fill ? null : boards[0];
       const rub = !out && h.rubble > 0 && !h.pieces.length;   // a fresh breach: clear the rubble first
-      if (rub) { h.rubble -= RAIDER_DPS * dt; rubbleShow(h); } else if (board) board.hp -= RAIDER_DPS * dt; else h.hp -= RAIDER_DPS * dt;
+      const hack = hackRate() * dt;
+      if (rub) { h.rubble -= hack; rubbleShow(h); } else if (board) board.hp -= hack; else h.hp -= hack;
       r.m.arms[1].rotation.x = -1.8 + Math.sin(r.t * 9) * 1.1;
       r.hitT -= dt;
       if (r.hitT <= 0) {
@@ -2941,7 +2953,8 @@ function updateWaves(dt) {
   }
   if (!G.toSpawn && !raiders.length) {
     G.phase = 'calm'; G.phaseT = CALM_SECS; G.aim = null;
-    const tally = G.waveTurned || G.waveIn ? ` ${G.waveTurned} turned away at the wall, ${G.waveIn} got in.` : '';
+    let tally = G.waveTurned || G.waveIn ? ` ${G.waveTurned} turned away at the wall, ${G.waveIn} got in.` : '';
+    if (!G.waveIn && G.waveTurned) { G.gold += PAY.clean; updateStats(); tally = ` Not one got in! (+${PAY.clean})`; }
     // Timber for the next stretch, once nothing's still being built.
     const f = !frames().length && !ramp.jobs.some((j) => j.frame && !j.up) && ramp.jobs[ramp.next]?.kind !== 'house' && openJob(ramp.next);
     if (f) say(`Wave ${G.wave} beaten off!${tally} Timber's come: ${f.kind === 'gun' ? 'build a gun tower in its frame' : 'build the rampart in its frame'}`);
@@ -4145,6 +4158,6 @@ if (['all', 'gundeck'].includes(new URLSearchParams(location.search).get('try'))
 requestAnimationFrame(frame);
 
 // For poking at it from the console.
-window.den = { decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+window.den = { tune, HP, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };
