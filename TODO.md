@@ -40,6 +40,11 @@ the site (`.assetsignore` skips `*.md`).
   distance for placing a piece in the wall. The user: "we were meant to remove that so you can
   place from anywhere". Fitting a piece into the wall should work wherever you're standing.
 
+- **The walk frame runs you out of rare pieces (8 Nov):** the long thin frame needs the rarer
+  pieces and they run out fast. The user would rather build it squarer than change the odds ("a
+  more faithful depiction of carpentry"): one squarish frame to fill, which is then sliced two or
+  three times when it's hoisted, the slices laid end to end along the top of the wall as the walk.
+
 ## Needs a playtest to pin down
 
 - **Turning a piece close to the wall feels off.** The user can't yet say how (which way it
