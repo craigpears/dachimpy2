@@ -31,11 +31,6 @@ the site (`.assetsignore` skips `*.md`).
   of the arrows, not move the character". So up close it should be a mode of its own, where WASD
   turns the arrow, and Esc leaves it.
 
-- **Smaller buttons, and a menu (8 Nov):** the buttons along the top are all "a bit big" (the
-  Cheats one especially); put them in a menu. In the cheat menu, drop "+100 gold" and "Finish this
-  frame" (keep "Mend every hole" and "Beat this wave"), and the stages per frame (left walk frame,
-  left stairs...) puzzled the user, who thought the walk frame was going to be one big piece.
-
 ## Needs a playtest to pin down
 
 - **Turning a piece close to the wall feels off.** The user can't yet say how (which way it

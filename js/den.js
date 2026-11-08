@@ -4517,6 +4517,11 @@ function applyDen(D, mine = false) {
   if (dress.open) dressRows();
   if (online()) send('all', { t: 'den', den: denLook });
 }
+// The den's buttons sit in one small menu; picking one (or clicking anywhere else) folds it away.
+const menuShow = (on) => { $('menu-list').hidden = !on; $('menu-btn').setAttribute('aria-expanded', on); };
+$('menu-btn').onclick = (e) => { e.currentTarget.blur(); menuShow($('menu-list').hidden); };
+addEventListener('pointerdown', (e) => { if (!e.target.closest('.menu')) menuShow(false); });
+$('menu-list').addEventListener('click', (e) => { if (e.target.closest('button')) { e.target.closest('button').blur(); menuShow(false); } });
 $('look-btn').onclick = () => dressPanel(true, 'pirate');
 $('den-btn').onclick = () => dressPanel(true, 'den');
 $('deco-btn').onclick = (e) => { e.currentTarget.blur(); decoMode(!deco.on); };
@@ -4842,7 +4847,8 @@ function fillFrame(f) {
 // [name, the last rampart job already built, waves already beaten off]. Each stretch's timber comes
 // after a wave, as in play: the left walk after wave 1, the right after 2, the middle after 3, the
 // gun tower after 4.
-const STAGES = [['The start', -1, 0], ['Left walk frame', -1, 1], ['Left stairs', 0, 1], ['Right walk frame', 1, 2], ['Right stairs', 2, 2], ['Middle walk', 3, 3], ['Gun tower', 4, 4], ['Everything built', 7, 5]];
+// A stage lands you as its stretch's timber arrives, the walk frame first, then its stairs.
+const STAGES = [['The start', -1, 0], ['Left stretch', -1, 1], ['Right stretch', 1, 2], ['Middle walk', 3, 3], ['Gun tower', 4, 4], ['Everything built', 7, 5]];
 const cheats = { open: false };
 function skipTo(s) {
   const [, upTo, wave] = STAGES[s];
@@ -4859,13 +4865,6 @@ function skipTo(s) {
   updateStats();
   toast(wave ? `Skipped to: ${STAGES[s][0]} (after wave ${wave})` : 'A fresh den');
 }
-function cheatFrame() {
-  const f = frames().sort((a, b) => a.mid.distanceTo(pirate3()) - b.mid.distanceTo(pirate3()))[0];
-  if (!f) return toast('No frame out to finish', true);
-  if (!fillFrame(f)) return toast('No pieces would finish that frame: lift one out and try again', true);
-  finishFrame(f);
-}
-const pirate3 = () => new THREE.Vector3(pirate.x, pirate.h, pirate.z);
 function cheatMend() {
   let n = 0;
   for (const h of wall.holes) {
@@ -4892,12 +4891,10 @@ function cheatShack() {
   toast('Your shack is built!');
 }
 const CHEATS = [
-  ['Finish this frame', cheatFrame],
   ['Beat this wave', cheatBeat],
   ['Next wave now', () => (G.phase === 'wave' ? toast('A wave\'s on: beat it first', true) : startWave())],
   ['Mend every hole', cheatMend],
   ['Build the shack', cheatShack],
-  ['+100 gold', () => { G.gold += 100; updateStats(); }],
 ];
 function cheatPanel(on) {
   if (on && online()) { toast('Cheats are for playing alone', true); return; }
@@ -4914,7 +4911,7 @@ const cheatButtons = (el, list) => $(el).replaceChildren(...list.map(([name], i)
 }));
 cheatButtons('cheat-stages', STAGES);
 cheatButtons('cheat-now', CHEATS);
-$('cheat-btn').onclick = (e) => { e.currentTarget.blur(); cheatPanel(!cheats.open); };
+$('cheat-btn').onclick = () => cheatPanel(!cheats.open);
 $('cheats-close').onclick = () => cheatPanel(false);
 
 newGame();

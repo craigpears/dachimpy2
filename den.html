@@ -84,7 +84,13 @@
     .end h2 { margin: 0 0 8px; font: 700 30px 'Alegreya', serif; color: var(--gold); }
     .end p { color: var(--dim); font-size: 18px; margin: 0 0 16px; }
     button { font: 700 18px 'Alegreya Sans'; color: #2a1d13; background: var(--gold); border: 0; border-radius: 8px; padding: 10px 20px; cursor: pointer; }
-    button.mini { font-size: 14px; padding: 3px 10px; border-radius: 6px; margin: 6px 6px 0 0; }
+    button.mini { font-size: 13px; padding: 2px 9px; border-radius: 6px; margin: 6px 6px 0 0; }
+    /* The den's buttons, folded into one small menu under the stats. */
+    .menu { position: relative; display: inline-block; }
+    .menu-list { position: absolute; top: 100%; left: 0; margin-top: 4px; display: flex; flex-direction: column; min-width: 150px; background: #2a1d13; border: 1px solid var(--gold); border-radius: 8px; padding: 4px; z-index: 4; }
+    .menu-list[hidden], .menu-list button[hidden] { display: none; }
+    .menu-list button { background: none; color: var(--ink); font-size: 15px; font-weight: 500; padding: 5px 10px; border-radius: 5px; text-align: left; }
+    .menu-list button:hover { background: #3b2a1b; color: var(--gold); }
     button.link { background: none; color: var(--dim); text-decoration: underline; padding: 6px; }
     .crew-line { margin-top: 6px; font-size: 15px; color: var(--dim); max-width: 360px; }
     .crew-line b { color: var(--gold); letter-spacing: 1px; }
@@ -103,9 +109,11 @@
     .crew .row label { flex: 1; margin: 0; }
     .crew .err { color: var(--bad); min-height: 1.3em; margin: 10px 0 0; }
     .crew .err.calm { color: var(--dim); }
-    .cheats > div { max-width: 420px; }
-    .cheats .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 0 0 14px; }
-    .cheats .grid button { font-size: 15px; padding: 7px 8px; }
+    .cheats > div { max-width: 340px; padding: 14px 18px; }
+    .cheats h2 { font-size: 22px; }
+    .cheats p { font-size: 14px; margin-bottom: 8px; }
+    .cheats .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 0 0 10px; }
+    .cheats .grid button { font-size: 13px; padding: 4px 6px; border-radius: 6px; }
     .dress { position: fixed; inset: 0; display: none; place-items: center; background: rgba(10, 6, 3, .55); z-index: 6; }
     .dress.on { display: grid; }
     .dress-box { position: relative; display: flex; gap: 16px; background: #2a1d13; border: 2px solid var(--gold); border-radius: 12px; padding: 16px 18px; width: min(680px, calc(100vw - 32px)); box-sizing: border-box; max-height: calc(100vh - 32px); overflow: auto; }
@@ -150,7 +158,9 @@
     <h1>The Pirate Den</h1>
     <div class="stats"><span>Chest <b id="s-gold">50</b></span><span>Wave <b id="s-wave">0</b></span><span>★ <b id="s-master">0</b></span><span>Boarded <b id="s-board">0</b></span><span title="Raiders who gave up at your wall">Turned away <b id="s-turned">0</b></span></div>
     <div class="crew-line" id="crew-line"></div>
-    <button class="mini" id="look-btn">Your pirate</button><button class="mini" id="den-btn" title="Your flag, the landscape, the gun tower and your shack">Your den</button><button class="mini" id="deco-btn" title="Put up flags, banners, lanterns and barrels round the den (B)">Decorate</button><button class="mini" id="pause-btn" title="Pause (P)">Pause</button><button class="mini" id="crew-btn">Play with a crew</button><button class="mini" id="cheat-btn" title="Skip to a stage, or skip what's in front of you (`)">Cheats</button>
+    <div class="menu"><button class="mini" id="menu-btn" aria-expanded="false">☰ Menu</button>
+      <div class="menu-list" id="menu-list" hidden><button id="look-btn">Your pirate</button><button id="den-btn" title="Your flag, the landscape, the gun tower and your shack">Your den</button><button id="deco-btn" title="Put up flags, banners, lanterns and barrels round the den (B)">Decorate</button><button id="pause-btn" title="Pause (P)">Pause</button><button id="crew-btn">Play with a crew</button><button id="cheat-btn" title="Skip to a stage, or skip the wave (`)">Cheats</button></div>
+    </div>
   </div>
   <div class="banner calm" id="banner"></div>
   <div class="intro" id="intro">Raiders are coming! Grab a piece from a crate and mend the wall.<br>Fill a hole exactly for a strong <b>Masterpiece</b>.</div>
@@ -170,7 +180,7 @@
     <h2>Cheats</h2>
     <p>For trying things out. Skip to a stage: the den starts afresh, built up to there.</p>
     <div class="grid" id="cheat-stages"></div>
-    <p>Or skip what's in front of you:</p>
+    <p>Or skip ahead now:</p>
     <div class="grid" id="cheat-now"></div>
     <button class="link" id="cheats-close">Close</button>
   </div></div>
