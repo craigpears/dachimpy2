@@ -36,6 +36,10 @@ the site (`.assetsignore` skips `*.md`).
   like it gets thrown at them". A fresh piece should hold them off for a while, with its own share
   of the hole's strength. (How long it should last to pin down with the user.)
 
+- **You still have to be close to the wall to fit a piece (8 Nov):** there's still a minimum
+  distance for placing a piece in the wall. The user: "we were meant to remove that so you can
+  place from anywhere". Fitting a piece into the wall should work wherever you're standing.
+
 ## Needs a playtest to pin down
 
 - **Turning a piece close to the wall feels off.** The user can't yet say how (which way it
