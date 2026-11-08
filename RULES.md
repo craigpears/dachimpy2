@@ -329,6 +329,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **A click only ever fits the piece there,** never throws it at a raider showing through the
     hole (it did, so clicks seemed not to work). Boards behind are fitted the same way.
   - **No Tab "next spot":** the user found it "annoying and useless".
+  - **Not by itself on a frame.** Frames lie on the floor right where you stand to mend the wall, so
+    standing on or by one, the view doesn't come on by itself: along the right-hand walk frame it
+    kept switching on, and the camera changed while the user was trying to start on the frame.
+    The arrow keys still take you to the wall from there.
 - **The pirate walks a touch quicker** (5.4 m/s; was 4.6, then 5). The user and a friend both
   wanted the pace a bit quicker.
 - **The piece goes where you point.** The user and a friend found it hard to put pieces where they
@@ -479,12 +483,25 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **Future ideas live in [IDEAS.md](IDEAS.md).** When the user brain-dumps ideas for later, note
   them there rather than building them.
 - **There's always something to do with a junk piece.** Holding three useless pieces with nothing
-  to do was frustrating. Any mended hole (Masterpiece or boarded) takes boards nailed on behind it,
-  on the den side, up to three deep, damaged or not. They're a second (third, fourth) layer:
-  raiders hack through the hole's own wood first, then each board in turn, one at a time, and only
-  get in once the last is gone. While boards hold a hacked-open hole, it can't be refilled; you can
-  keep nailing more on. Boards may cover the hole's wood and the stone round it, but not another hole
-  or the gate. Clean fits and boarding over come first when choosing a spot; boards behind come last.
+  to do was frustrating. Any mended hole (Masterpiece or boarded) takes layers behind it, on the
+  den side, up to three deep, damaged or not. Raiders hack through the hole's own wood first, then
+  each layer in turn, and only get in once the last is gone.
+  - **A layer is the hole again, and its pieces slot together.** (Each piece used to be a layer of
+    its own: the user placed one, then another that fitted perfectly beside it, and it started a
+    third.) A layer's opening is the hole's shape; you fill it a piece at a time like the hole, and
+    only once it's full does the next one open in front of it.
+  - **Studwork shows where it goes:** once a hole's mended, a timber frame a square wide goes up
+    round it on the den side, with the opening edged in dark wood, and the part still to fill glows
+    blue while you hold a piece (the user: "some kind of wooden studwork structure outlining where
+    the second layer goes, with material between the holes").
+  - **Same grades as the hole:** filled exactly, a Masterpiece layer (as strong as a Masterpiece,
+    and paid the same); a piece may hang over onto the studwork, but then the layer's only boarded
+    over. Unfinished, each piece adds its share. It comes apart a piece at a time, last in first.
+  - **You add to the outermost layer.** A layer raiders have knocked pieces out of from the far
+    side can't be reached once there's another in front of it.
+  - **Each layer has its own bar** under the hole's on its label (amber while it's unfinished), so
+    boarding behind a damaged hole shows (the user saw "no visible difference to the healthbar").
+  Clean fits and boarding over come first when choosing a spot; layers behind come last.
 - **The camera can be turned and zoomed:** Z/C or right-drag to turn and tilt, -/= to zoom, V to
   reset. **It turns all the way round**, so you can see the outside of the wall (the user wants
   that, especially for decorating it); moonlight from outside lights the wall's outer face.

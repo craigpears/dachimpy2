@@ -22,16 +22,6 @@ the site (`.assetsignore` skips `*.md`).
   - **Moderation:** pirate names are letters only already, but an open room may want a way to hide
     a pirate who's being a nuisance.
 
-- **Boards behind should slot together into one layer (8 Nov):** place a piece behind and it starts
-  a second layer; place another that fits perfectly beside it and it starts a third. Pieces that
-  fit together should go in the same layer. And show where the layer goes: a wooden studwork
-  frame outlining the second layer, with material between the holes once the whole first layer is
-  filled.
-- **Boarding behind a damaged hole doesn't show on its health bar (8 Nov):** the bar looks the
-  same with or without boards behind. It should show the extra strength the layers behind add.
-- **Awkward camera changes at the right-hand wall-walk frame (8 Nov):** working on the walk frame
-  on the right side, the camera keeps changing while you're trying to start the puzzle (probably
-  the whole-wall view switching on and off, as the frame lies on the floor in front of the wall).
 - **No puzzle mode at the stairs (8 Nov):** the stairs frame has no "snap to puzzle" view like the
   front wall's, where the camera goes straight on and the keys move the piece. (Same question as
   "the second stage" below: the frames want it too.)
@@ -49,6 +39,11 @@ the site (`.assetsignore` skips `*.md`).
   the keys yet (WASD moves the piece, arrows jump hole to hole, since 8 Nov). Still to ask: should
   it come on by itself when you walk up with a piece; the same view for the rampart and house
   frames ("the second stage")?
+- **Layers behind (8 Nov), not yet tried by the user.** A layer is now the hole's shape again,
+  filled piece by piece in a timber surround, and a full one is as strong as a Masterpiece and pays
+  the same. Watch for: holes three layers deep being too strong, or the pay too generous; the
+  surround looking right (only a square wide round each hole: the user may have meant a whole timber
+  lining between the holes, once every hole's first layer is done).
 - **Wood a piece at a time, and roomier raid holes (8 Nov), not yet tried by the user.** Watch
   for: refilling a knocked-out piece being too easy a way to hold a hole forever, and cannon
   breaches feeling too big now.
