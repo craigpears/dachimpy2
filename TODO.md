@@ -82,6 +82,15 @@ the site (`.assetsignore` skips `*.md`).
   will if you let me rotate it first". You should be able to hold the piece over the gap and turn
   it there, whether or not it fits the way it's facing.
 
+- **The Swordfight board looks forced in (8 Nov):** seen in a demo, the user isn't "feeling the
+  graphics on the board": the pieces are "very small compared to what I would be used to", and it
+  "doesn't really feel like it fits the 3D vibe". The carpentry "really blends in well with the
+  front wall and the floor"; the board "just feels like it's been forced in. There's nothing
+  natural looking about it. It's very glaring." It should be part of the den, built in its style,
+  with pieces as big as you'd expect to play with. (How, to pin down with the user.) On the way the
+  pieces come: you collect them, so you have some say over their order. That's a change from the
+  real puzzle, but the user thinks it's "kind of okay. It adds a bit of an element of difference."
+
 ## Needs a playtest to pin down
 
 - **Swordfight at the sword rack (8 Nov), not yet tried by the user.** Beaten raiders drop sword
