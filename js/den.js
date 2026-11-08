@@ -2393,6 +2393,8 @@ addEventListener('keydown', (e) => {
   if (e.target instanceof HTMLInputElement) return;
   if (dress.open) { if (e.key === 'Escape') dressPanel(false); return; }
   const key = e.key.toLowerCase();
+  if (cheats.open) { if (key === 'escape' || key === '`') cheatPanel(false); return; }
+  if (key === '`' && !deco.on && !paused) { cheatPanel(true); return; }
   if (paused) { if (['p', ' ', 'escape', 'enter'].includes(key)) { e.preventDefault(); setPaused(false); } return; }
   if (key === 'p' && !deco.on) { setPaused(true); return; }
   if ([' ', 'tab', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) e.preventDefault();
@@ -4547,7 +4549,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden && !on
 function tick() {
   const now = performance.now();
   if (paused && online()) setPaused(false);
-  if (paused) { lastT = now; return; }
+  if (paused || cheats.open) { lastT = now; return; }
   let left = Math.min(online() ? 1.5 : 0.05, (now - lastT) / 1000);
   lastT = now;
   while (left > 1e-4) { const d = Math.min(0.05, left); update(d); left -= d; }
@@ -4795,17 +4797,125 @@ function buildAll(upTo = ramp.jobs.length - 1) {
   for (let i = 0; i <= upTo; i++) {
     const f = openJob(i);
     if (!f) continue;
-    let sol = C.solve(f.cells, 1)[0];
-    for (let n = 1; n <= 4 && !sol; n++) sol = C.solve(f.cells.concat([...Array(n).keys()].map((c) => [f.b.h, c])), 1)[0];
-    for (const p of sol || []) {
-      const r0 = Math.min(...p.cells.map((x) => x[0])), c0 = Math.min(...p.cells.map((x) => x[1]));
-      putFramePiece(f, { letter: p.letter, shape: C.normalize(p.cells), dr: r0, dc: c0, over: 0, by: myId() });
-    }
-    frameState(f);
+    fillFrame(f);
     finishFrame(f, true);
   }
   ramp.next = upTo + 1;
 }
+// Pieces that cover these squares, any that'll do: an exact fit if there is one, else hanging over
+// onto a few `spare` squares, grown out from the edge.
+function tileFor(cells, spare) {
+  const own = new Set(cells.map(([r, c]) => k(r, c)));
+  let sol = C.solve(cells, 1)[0];
+  for (let n = 1; n <= 4 && !sol; n++) for (let t = 0; t < 40 && !sol; t++) {
+    const have = new Set(own), add = [];
+    for (let m = 0; m < n; m++) {
+      const edge = spare.filter(([r, c]) => !have.has(k(r, c)) && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([a, b]) => have.has(k(r + a, c + b))));
+      if (!edge.length) break;
+      const p = edge[rand(edge.length)];
+      have.add(k(p[0], p[1]));
+      add.push(p);
+    }
+    if (add.length === n) sol = C.solve(cells.concat(add), 1)[0];
+  }
+  return (sol || []).map((p) => ({ letter: p.letter, shape: C.normalize(p.cells), dr: Math.min(...p.cells.map((x) => x[0])), dc: Math.min(...p.cells.map((x) => x[1])), over: p.cells.filter(([r, c]) => !own.has(k(r, c))).length }));
+}
+// Fill what's left of a frame (stairs may only stick up a square above the treads, as by hand).
+function fillFrame(f) {
+  frameState(f);
+  if (!f.open.length) return true;
+  const spare = [];
+  for (let r = -1; r <= f.b.h; r++) for (let c = -1; c <= f.b.w; c++) {
+    const kk = k(r, c);
+    if (!f.set.has(kk) && !f.occ.has(kk) && (f.kind !== 'stair' || r >= stepTop(f, c) - 1)) spare.push([r, c]);
+  }
+  const ps = tileFor(f.open, spare);
+  if (!ps.length) return false;
+  for (const i of ps) putFramePiece(f, { ...i, by: myId() });
+  frameState(f);
+  return true;
+}
+
+/* The cheat menu (` or the Cheats button), for trying things out: jump to any stage of the den
+   without playing the waves before it, or skip what's in front of you. Playing alone only: with a
+   crew, everyone's game would have to follow. */
+// [name, the last rampart job already built, waves already beaten off]. Each stretch's timber comes
+// after a wave, as in play: the left walk after wave 1, the right after 2, the middle after 3, the
+// gun tower after 4.
+const STAGES = [['The start', -1, 0], ['Left walk frame', -1, 1], ['Left stairs', 0, 1], ['Right walk frame', 1, 2], ['Right stairs', 2, 2], ['Middle walk', 3, 3], ['Gun tower', 4, 4], ['Everything built', 7, 5]];
+const cheats = { open: false };
+function skipTo(s) {
+  const [, upTo, wave] = STAGES[s];
+  if (wm) exitWall();
+  if (deco.on) decoMode(false);
+  newGame();
+  if (upTo >= 0) buildAll(upTo);
+  if (wave) {
+    Object.assign(G, { wave, phase: 'calm', phaseT: CALM_SECS });
+    if (wave >= 2) cannon.visible = true;
+    if (upTo < 7) openJob(upTo + 1);
+    $('intro').classList.add('off');
+  }
+  updateStats();
+  toast(wave ? `Skipped to: ${STAGES[s][0]} (after wave ${wave})` : 'A fresh den');
+}
+function cheatFrame() {
+  const f = frames().sort((a, b) => a.mid.distanceTo(pirate3()) - b.mid.distanceTo(pirate3()))[0];
+  if (!f) return toast('No frame out to finish', true);
+  if (!fillFrame(f)) return toast('No pieces would finish that frame: lift one out and try again', true);
+  finishFrame(f);
+}
+const pirate3 = () => new THREE.Vector3(pirate.x, pirate.h, pirate.z);
+function cheatMend() {
+  let n = 0;
+  for (const h of wall.holes) {
+    if (h.busy) continue;
+    if (h.status !== 'open') { if (h.hp < h.maxHp) { h.hp = h.maxHp; h.sig = ''; n++; } continue; }
+    const ps = tileFor(rest(h), ringOf(h).filter(([r, c]) => !wall.wood.has(k(r, c))));
+    if (!ps.length) continue;
+    for (const i of ps) putPiece(h, { ...i, patch: false, layer: 0, by: myId() });
+    updateHole(h);
+    n++;
+  }
+  toast(n ? 'The wall\'s mended' : 'Nothing to mend', !n);
+}
+function cheatBeat() {
+  if (G.phase !== 'wave') return toast('No wave on just now', true);
+  raiders.splice(0).forEach((r) => { scene.remove(r.m.g); r.mark.remove(); });
+  Object.assign(G, { toSpawn: 0, aim: null, cannonShots: 0 });   // and it's over on the next frame, timber and all
+}
+function cheatShack() {
+  const hs = ramp.jobs.filter((j) => j.kind === 'house' && !j.up);
+  if (!hs.length) return toast('Your shack\'s already built', true);
+  for (const j of hs) { const f = openJob(j.i); fillFrame(f); finishFrame(f, true); }
+  plotShow();
+  toast('Your shack is built!');
+}
+const CHEATS = [
+  ['Finish this frame', cheatFrame],
+  ['Beat this wave', cheatBeat],
+  ['Next wave now', () => (G.phase === 'wave' ? toast('A wave\'s on: beat it first', true) : startWave())],
+  ['Mend every hole', cheatMend],
+  ['Build the shack', cheatShack],
+  ['+100 gold', () => { G.gold += 100; updateStats(); }],
+];
+function cheatPanel(on) {
+  if (on && online()) { toast('Cheats are for playing alone', true); return; }
+  if (on && G.over) return;
+  cheats.open = on;
+  keys.clear();
+  $('cheats').classList.toggle('on', on);
+}
+const cheatButtons = (el, list) => $(el).replaceChildren(...list.map(([name], i) => {
+  const b = document.createElement('button');
+  b.textContent = name;
+  b.onclick = () => { cheatPanel(false); (el === 'cheat-stages' ? skipTo : (j) => CHEATS[j][1]())(i); };
+  return b;
+}));
+cheatButtons('cheat-stages', STAGES);
+cheatButtons('cheat-now', CHEATS);
+$('cheat-btn').onclick = (e) => { e.currentTarget.blur(); cheatPanel(!cheats.open); };
+$('cheats-close').onclick = () => cheatPanel(false);
 
 newGame();
 // ?try=all (or ?try=gundeck): everything built, and you start up on the gun tower.
@@ -4817,6 +4927,6 @@ if (['all', 'gundeck'].includes(new URLSearchParams(location.search).get('try'))
 requestAnimationFrame(frame);
 
 // For poking at it from the console.
-window.den = { tune, HP, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };

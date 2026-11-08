@@ -418,6 +418,16 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     thin frame (the tower's 3-row strip, a wall-walk) sent it backtracking for ages. The den's copy
     of the solver turns wide frames on their side and solves them column by column (a millisecond),
     which also stops the game stalling when a new wall-walk frame is laid out.
+- **The cheat menu, for trying things out** (the Cheats button, or the backtick key). The user asked
+  for a way to skip stages. It pauses the game while it's open. Playing alone only, as with a crew
+  everyone's game would have to follow.
+  - **Skip to a stage:** the start, each rampart frame in turn (left walk, left stairs, right walk,
+    right stairs, middle walk), the gun tower, or everything built. The den starts afresh, built
+    up to there, just after the wave that would have brought that frame's timber (the left walk
+    after wave 1, the right after 2, the middle after 3, the gun tower after 4).
+  - **Or skip what's in front of you:** finish the nearest frame (with whatever pieces fit, then
+    hauled up as if you'd done it), beat this wave (its timber comes as usual), next wave now,
+    mend every hole (Masterpieces where they'll go, damage repaired), build the shack, +100 gold.
 - **Making it yours (pirate looks and the den's dress).** The user wants players to be able to make
   it all their own, and the general feel must match the rest of the den. Code: `js/den-look.js`
   (the pirate builder, dyes, familiars, flag drawing) and the "dressing" and "decorating"
