@@ -27,8 +27,8 @@ the site (`.assetsignore` skips `*.md`).
   "the second stage" below: the frames want it too.)
 - **Bigger frames, more on the go (8 Nov):** the wall-walk frame is very slim, with not much room
   to be creative. The user wants to get to "bigger investment pieces", and to have more than one
-  thing on the go at once (they remembered three), though not rushed. How exactly is to agree with
-  the user first (RULES.md still says one frame at a time).
+  thing on the go at once (they remembered three), though not rushed. **The user chose wider walk
+  frames** (8 Nov): more rows, so there's room to be creative; still one frame at a time.
 
 ## Needs a playtest to pin down
 
