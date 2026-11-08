@@ -160,6 +160,24 @@ gunning":
 - **Built 8 Nov** as the sword rack (RULES.md, "Swordfight at the sword rack"): the real puzzle,
   with what a break sends mustering soldiers. Still open: with a crew; strikes from the raiders
   (only sprinkles so far); whether soldiers should march out of the gate.
+- **Rethinking it after the demo (8 Nov).** The board on a sign "feels like it's been forced in"
+  (TODO.md), and setting it into a wall "doesn't really make sense". The user wants "really natural
+  and like brilliant ideas for this". Their own:
+  - **Sprinkles build a barrier:** breaking loose pieces could send something to fall "to build an
+    extra barrier ... on this side of the wall", helping block the breach the way "full of rubble"
+    does after a fresh breach.
+  - **Soldiers from fused blocks, not sprinkles:** "you'd have to do a combo, like a fuse block to
+    get a soldier, and obviously combo for multiples".
+  - **Claude's suggestion (not agreed yet), the armoury stack:** the board is a real stack of
+    weapon crates in a corner of the den, built in the den's own timber, at about the size of its
+    crates. Each colour is a crate of one weapon (the four swords). A hoist on a beam lowers each
+    pair, which is how it "falls" in 3D, and you turn it on the rope. A breaker bursts the crates it
+    touches. Loose crates (sprinkles) are carried off and stacked as a barricade just inside the
+    nearest breach, which raiders have to hack through like rubble. A fused block is a big chest
+    of swords that arms a soldier from the shack, and bigger blocks and chains arm more of them.
+    Attack blocks are crates nailed shut with iron bands. Still to work out: a 13-high stack at
+    crate size is far taller than the wall (a tall hoist frame as a landmark, like the gun tower;
+    smaller crates; or a shorter board).
 
 ## Swordfight: the golem boss
 
