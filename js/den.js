@@ -4551,11 +4551,6 @@ function applyDen(D, mine = false) {
   if (dress.open) dressRows();
   if (online()) send('all', { t: 'den', den: denLook });
 }
-// The den's buttons sit in one small menu; picking one (or clicking anywhere else) folds it away.
-const menuShow = (on) => { $('menu-list').hidden = !on; $('menu-btn').setAttribute('aria-expanded', on); };
-$('menu-btn').onclick = (e) => { e.currentTarget.blur(); menuShow($('menu-list').hidden); };
-addEventListener('pointerdown', (e) => { if (!e.target.closest('.menu')) menuShow(false); });
-$('menu-list').addEventListener('click', (e) => { if (e.target.closest('button')) { e.target.closest('button').blur(); menuShow(false); } });
 $('look-btn').onclick = () => dressPanel(true, 'pirate');
 $('den-btn').onclick = () => dressPanel(true, 'den');
 $('deco-btn').onclick = (e) => { e.currentTarget.blur(); decoMode(!deco.on); };

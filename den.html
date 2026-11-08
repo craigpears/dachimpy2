@@ -84,15 +84,9 @@
     .end h2 { margin: 0 0 8px; font: 700 30px 'Alegreya', serif; color: var(--gold); }
     .end p { color: var(--dim); font-size: 18px; margin: 0 0 16px; }
     button { font: 700 18px 'Alegreya Sans'; color: #2a1d13; background: var(--gold); border: 0; border-radius: 8px; padding: 10px 20px; cursor: pointer; }
-    button.mini { font-size: 13px; padding: 2px 9px; border-radius: 6px; margin: 6px 6px 0 0; }
-    /* The den's buttons, folded into one small menu under the stats. */
-    .menu { position: relative; display: inline-block; }
-    /* Big enough to hit easily (the user: "hit area is tiny"), though the text stays small. */
-    #menu-btn { font-size: 15px; padding: 8px 16px; min-height: 40px; }
-    .menu-list { position: absolute; top: 100%; left: 0; margin-top: 4px; display: flex; flex-direction: column; min-width: 200px; background: #2a1d13; border: 1px solid var(--gold); border-radius: 8px; padding: 4px; z-index: 4; }
-    .menu-list[hidden], .menu-list button[hidden] { display: none; }
-    .menu-list button { background: none; color: var(--ink); font-size: 16px; font-weight: 500; padding: 10px 14px; min-height: 42px; border-radius: 5px; text-align: left; }
-    .menu-list button:hover { background: #3b2a1b; color: var(--gold); }
+    /* The den's buttons in a row under the stats, all in view so they're easy to find (the user tried
+       them folded into a menu and wanted them back where they could see them). */
+    button.mini { font-size: 14px; padding: 6px 12px; border-radius: 6px; margin: 6px 6px 0 0; }
     button.link { background: none; color: var(--dim); text-decoration: underline; padding: 6px; }
     .crew-line { margin-top: 6px; font-size: 15px; color: var(--dim); max-width: 360px; }
     .crew-line b { color: var(--gold); letter-spacing: 1px; }
@@ -160,9 +154,7 @@
     <h1>The Pirate Den</h1>
     <div class="stats"><span>Chest <b id="s-gold">50</b></span><span>Wave <b id="s-wave">0</b></span><span>★ <b id="s-master">0</b></span><span>Boarded <b id="s-board">0</b></span><span title="Raiders who gave up at your wall">Turned away <b id="s-turned">0</b></span></div>
     <div class="crew-line" id="crew-line"></div>
-    <div class="menu"><button class="mini" id="menu-btn" aria-expanded="false">☰ Menu</button>
-      <div class="menu-list" id="menu-list" hidden><button id="look-btn">Your pirate</button><button id="den-btn" title="Your flag, the landscape, the gun tower and your shack">Your den</button><button id="deco-btn" title="Put up flags, banners, lanterns and barrels round the den (B)">Decorate</button><button id="pause-btn" title="Pause (P)">Pause</button><button id="crew-btn">Play with a crew</button><button id="cheat-btn" title="Skip to a stage, or skip the wave (`)">Cheats</button></div>
-    </div>
+    <button class="mini" id="look-btn">Your pirate</button><button class="mini" id="den-btn" title="Your flag, the landscape, the gun tower and your shack">Your den</button><button class="mini" id="deco-btn" title="Put up flags, banners, lanterns and barrels round the den (B)">Decorate</button><button class="mini" id="pause-btn" title="Pause (P)">Pause</button><button class="mini" id="crew-btn">Play with a crew</button><button class="mini" id="cheat-btn" title="Skip to a stage, or skip the wave (`)">Cheats</button>
   </div>
   <div class="banner calm" id="banner"></div>
   <div class="intro" id="intro">Raiders are coming! Grab a piece from a crate and mend the wall.<br>Fill a hole exactly for a strong <b>Masterpiece</b>.</div>

@@ -426,11 +426,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     thin frame (the tower's 3-row strip, a wall-walk) sent it backtracking for ages. The den's copy
     of the solver turns wide frames on their side and solves them column by column (a millisecond),
     which also stops the game stalling when a new wall-walk frame is laid out.
-- **The den's buttons sit in one small menu** (☰ Menu, top left, under the stats): your pirate,
-  your den, decorate, pause, play with a crew, cheats. A row of them was "a bit big" (8 Nov). It
-  folds away when you pick one or click elsewhere. Small text, but each button big enough to hit
-  easily (about 40 pixels tall): shrunk right down, the user found the "hit area is tiny".
-- **The cheat menu, for trying things out** (in the menu, or the backtick key). The user asked
+- **The den's buttons sit in a row, all in view** (top left, under the stats): your pirate, your
+  den, decorate, pause, play with a crew, cheats. Discoverable matters more than tidy: folded into
+  a ☰ menu (8 Nov), the user missed seeing them, as they use your pirate, your den, decorate and
+  the cheats a lot. Small text, but big enough to hit easily (shrunk right down, the "hit area is
+  tiny").
+- **The cheat menu, for trying things out** (the Cheats button, or the backtick key). The user asked
   for a way to skip stages. It pauses the game while it's open. Playing alone only, as with a crew
   everyone's game would have to follow. Kept small: little buttons, few of them.
   - **Skip to a stage:** the start, the walk, the right stairs, the gun tower, or everything
