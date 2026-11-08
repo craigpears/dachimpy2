@@ -463,20 +463,23 @@ const frames = () => (ramp ? ramp.jobs.filter((j) => j.frame && !j.frame.done).m
 const stairsUp = () => !!ramp && ramp.jobs.some((j) => j.kind === 'stair' && j.up);
 // A point on a frame, from its grid (columns across, rows down), `z` out from its face.
 const frameAt = (f, c, r, z = 0) => f.group.localToWorld(new THREE.Vector3(c * S, -r * S, z));
-// The walk: two full rows along the top of the wall, so the stretches join up, and a ragged third
-// overhanging the den side (clear of where the stairs come up) to make a puzzle of it.
+// The walk: three full rows along the top of the wall (two over the stone, so the stretches join
+// up, and one over the den side), and a ragged fourth overhanging the den, all clear of where the
+// stairs come up. (It was two rows and a ragged third: the user found it "very slim", with not much
+// room to be creative, and wanted bigger pieces of work to invest in.)
 function deckShape(si) {
   const s = ramp.secs[si], w = s.c1 - s.c0 + 1, base = [];
-  for (let r = 0; r < 2; r++) for (let c = 0; c < w; c++) base.push([r, c]);
-  const cols = [...Array(w).keys()].filter((c) => !(si === 0 && c < 3) && !(si === 2 && c >= w - 3));
-  let extra = (5 - (2 * w) % 5) % 5;
-  if (extra < 2 && extra + 5 <= cols.length) extra += 5;
+  const clear = (c) => !(si === 0 && c < 3) && !(si === 2 && c >= w - 3);
+  for (let r = 0; r < 3; r++) for (let c = 0; c < w; c++) if (r < 2 || clear(c)) base.push([r, c]);
+  const cols = [...Array(w).keys()].filter(clear);
+  let extra = (5 - base.length % 5) % 5;
+  while (extra < 5 && extra + 5 <= cols.length) extra += 5;   // a ragged edge of five squares at least
   if (extra > cols.length) extra = 0;
   for (let i = 0; i < 60; i++) {
-    const cells = base.concat(C.shuffle(cols.slice()).slice(0, extra).map((c) => [2, c]));
+    const cells = base.concat(C.shuffle(cols.slice()).slice(0, extra).map((c) => [3, c]));
     if (C.solve(cells, 1).length) return cells;
   }
-  return base;
+  return base.length % 5 ? base.slice(0, base.length - base.length % 5) : base;
 }
 // The stairs: a stepped band three squares deep, from the walk at the wall down to the den floor.
 // Column 0 is at the bottom of the left stairs, and at the top of the right ones.

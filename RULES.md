@@ -248,8 +248,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   bizarre, and a stretch popping up was too easy. A finished frame then turning into a ready-made
   rampart was magic too. **Every part of the rampart is the pieces you fitted, and they stay those
   pieces.** Nothing turns into anything else, and nothing is added that you didn't build.
-  - **The walk:** a frame laid flat on the den floor in front of the stretch. It's two full rows the
-    width of the stretch, so the stretches join up, plus a ragged third row. You lay pieces in it one
+  - **The walk:** a frame laid flat on the den floor in front of the stretch. It's three full rows the
+    width of the stretch, so the stretches join up, plus a ragged fourth row overhanging the den
+    (about 9 pieces a stretch). It was two rows and a ragged third: the user found it "very slim",
+    with not much room to be creative, and chose wider walk frames over several frames at once. You lay pieces in it one
     at a time and watch it come together. When it's full the crew haul it up on ropes, pieces and
     all, and lay it along the top of the wall.
   - **The stairs (end stretches):** a frame standing upright at the end of the den, a stepped

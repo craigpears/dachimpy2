@@ -25,11 +25,6 @@ the site (`.assetsignore` skips `*.md`).
 - **No puzzle mode at the stairs (8 Nov):** the stairs frame has no "snap to puzzle" view like the
   front wall's, where the camera goes straight on and the keys move the piece. (Same question as
   "the second stage" below: the frames want it too.)
-- **Bigger frames, more on the go (8 Nov):** the wall-walk frame is very slim, with not much room
-  to be creative. The user wants to get to "bigger investment pieces", and to have more than one
-  thing on the go at once (they remembered three), though not rushed. **The user chose wider walk
-  frames** (8 Nov): more rows, so there's room to be creative; still one frame at a time.
-
 ## Needs a playtest to pin down
 
 - **Turning a piece close to the wall feels off.** The user can't yet say how (which way it
@@ -39,6 +34,9 @@ the site (`.assetsignore` skips `*.md`).
   the keys yet (WASD moves the piece, arrows jump hole to hole, since 8 Nov). Still to ask: should
   it come on by itself when you walk up with a piece; the same view for the rampart and house
   frames ("the second stage")?
+- **Wider walk frames (8 Nov), not yet tried by the user.** Three full rows and a ragged fourth
+  (9 pieces a stretch, was about 7). Could go a row deeper if it's still too slim: the walk then
+  overhangs the den further, and starts to hide the top of the wall in the whole-wall view.
 - **Layers behind (8 Nov), not yet tried by the user.** A layer is now the hole's shape again,
   filled piece by piece in a timber surround, and a full one is as strong as a Masterpiece and pays
   the same. Watch for: holes three layers deep being too strong, or the pay too generous; the
