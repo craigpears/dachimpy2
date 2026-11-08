@@ -32,6 +32,9 @@ the site (`.assetsignore` skips `*.md`).
 - **Awkward camera changes at the right-hand wall-walk frame (8 Nov):** working on the walk frame
   on the right side, the camera keeps changing while you're trying to start the puzzle (probably
   the whole-wall view switching on and off, as the frame lies on the floor in front of the wall).
+- **No puzzle mode at the stairs (8 Nov):** the stairs frame has no "snap to puzzle" view like the
+  front wall's, where the camera goes straight on and the keys move the piece. (Same question as
+  "the second stage" below: the frames want it too.)
 - **Bigger frames, more on the go (8 Nov):** the wall-walk frame is very slim, with not much room
   to be creative. The user wants to get to "bigger investment pieces", and to have more than one
   thing on the go at once (they remembered three), though not rushed. How exactly is to agree with
