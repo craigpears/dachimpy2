@@ -82,6 +82,15 @@ the site (`.assetsignore` skips `*.md`).
   will if you let me rotate it first". You should be able to hold the piece over the gap and turn
   it there, whether or not it fits the way it's facing.
 
+- **Overwhelmed by wave 8 (8 Nov), a balance issue:** the user: "By wave 8 I haven't got any more
+  effective ways of dealing with raiders yet so I get overwhelmed and it's hard to fill in the
+  square shaped holes". Each wave brings one more raider than the last (nine by wave 8, solo), while
+  the defences only grow as the rampart's parts get built (walk, stairs, other stairs, gun tower),
+  and the holes raids make are the roomiest that fit, squarish three-piece ones. Which way to go
+  (to pin down with the user): fewer raiders as the waves climb, something new to fight back with
+  by the middle waves, smaller holes while you're under pressure, or some help with the deal in
+  later waves too.
+
 ## Needs a playtest to pin down
 
 - **Turning a piece close to the wall feels off.** The user can't yet say how (which way it
