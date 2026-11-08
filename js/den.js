@@ -6,10 +6,11 @@
    ("boarded over"): that always closes it, but the patch is weak and pays less. */
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { FairDeal, turnWide } from './den-deal.js';
 import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, cleanDesign, designOf, drawFlag, dyeHex, DYES, SKIN, HAIR, FUR, PARTS, FLAGS, PATTERNS, DECOR, MAX_DECOR, BIOMES, twoColours } from './den-look.js';
 
-// The main puzzle's engine, turned for wide shapes (see turnWide in den-deal.js).
-const C = window.DenDeal.turnWide(window.Carp);
+// The main puzzle's engine, turned for wide shapes (see turnWide in src/den-deal.ts).
+const C = turnWide(window.Carp);
 /* An exact tiling with a mix of pieces, as a crew would really fill it: the solver always reaches
    for the P first, so a frame filled by it (the cheat stages) came out nearly all Ps. Each square
    tries the pieces used least so far first, in a shuffled order. Null if it's taking too long. */
@@ -2220,11 +2221,11 @@ const piles = [0, 1, 2].map(() => {
   return { x: 0, z: 0, letter: null, cells: null, group: null, wait: 0, label, crate: mesh(crateGeo, mat('#7a5230', { map: woodTex })) };
 });
 /* The first wave is dealt fair: the crates hand out the pieces that finish the holes as
-   Masterpieces (FairDeal, in den-deal.js, with its tests). But only for mending the first wall:
+   Masterpieces (FairDeal, src/den-deal.ts, with its tests). But only for mending the first wall:
    once every hole of the first wall is done (fairOver) the deal is the usual one, even when the
    raiders knock pieces out in wave 1. */
 const fairDeal = () => !G.fairOver && (G.wave === 0 || (G.wave === 1 && G.phase === 'wave'));
-const fair = new window.DenDeal.FairDeal(C);
+const fair = new FairDeal(C);
 // What the fair deal is handed: what's left of each open hole, and what's on the crates and in your hands.
 const dealHoles = () => wall.holes.map((h) => (h.status === 'open' ? rest(h) : []));
 function dealHave() {

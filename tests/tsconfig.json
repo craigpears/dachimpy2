@@ -1,0 +1,6 @@
+{
+  // Type-checks the tests along with src/ (`npm run check`); Vitest itself runs them without checking.
+  "extends": "../tsconfig.json",
+  "compilerOptions": { "noEmit": true, "rootDir": "..", "types": ["node"], "allowJs": false },
+  "include": ["../src", "."]
+}

@@ -1,0 +1,16 @@
+{
+  // The TypeScript parts of the site: src/*.ts, compiled into js/ (which is what's served) by `npm run build`.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM"],
+    "strict": true,
+    "rootDir": "src",
+    "outDir": "js",
+    "newLine": "lf",
+    "skipLibCheck": true,
+    "types": []
+  },
+  "include": ["src"]
+}

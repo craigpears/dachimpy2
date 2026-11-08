@@ -11,3 +11,6 @@ package-lock.json
 *.md
 tools
 tests
+src
+tsconfig.json
+.vscode

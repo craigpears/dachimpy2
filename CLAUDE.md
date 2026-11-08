@@ -8,10 +8,13 @@ copy: `node_modules/node/bin/node.exe node_modules/wrangler/bin/wrangler.js dev 
 `npm i --no-save --no-package-lock node@22 wrangler@4`; node_modules is ignored). Wrangler 3 on Windows serves no
 files from subfolders, so don't use it.
 
-Pirate Den: `den.html`, `js/den.js` (the game), `js/den-look.js` (looks), `js/den-deal.js` (the fair deal, a plain
-script like engine.js). Tests: `npm test` (Node's built-in runner, `tests/*.test.js`, no browser); they're not
-published (`.assetsignore`). When the user describes something going wrong in a part that has tests, add a
-test for it.
+Pirate Den: `den.html`, `js/den.js` (the game), `js/den-look.js` (looks). Parts pulled out of den.js are
+TypeScript in `src/` (so far `src/den-deal.ts`, the fair deal; `src/engine.d.ts` types the engine), compiled into
+`js/` by `npm run build`; the compiled `js/*.js` is committed, since the site deploys the files as they are. Never
+edit a compiled file by hand. Tests: Vitest, `tests/*.test.ts` (`npm test`, or `npm run test:watch`;
+`npm run check` type-checks them). `tests/build.test.ts` fails if `js/` is out of date with `src/`. Tests, `src/`
+and configs aren't published (`.assetsignore`). When the user describes something going wrong in a part that has
+tests, add a test for it, named after what they saw, with the date.
 
 Read [RULES.md](RULES.md) before changing gameplay or wording, and add to it whenever the user corrects a rule or gives design feedback.
 

@@ -46,13 +46,14 @@ the site (`.assetsignore` skips `*.md`).
   some holes, test what pieces are generated", so they can describe the scenarios they run into
   and have each one become a test. The same for working out layouts (the wall's holes, the frames,
   the walk), "their own little classes ... that you can put tests around", for quality control.
-  Tests that run without the browser, from the command line. **Started 8 Nov:** the fair deal is
-  done (its own file, `js/den-deal.js`, with twelve tests in `tests/deal.test.js`, run with
-  `npm test`). Still to do: the layouts (the wall's holes, the frames, the walk).
-  The user, after that first go (Node's own bare test runner): they mean "an actual framework, not
-  just some plain JavaScript", and "an architectural review" first. They're most at home as a C#
-  back-end developer, and C# would be ideal where it can go (the server side). Which stack to pin
-  down with the user.
+  Tests that run without the browser, from the command line. The user wanted "an actual
+  framework, not just some plain JavaScript" (they're most at home in C#), and chose TypeScript
+  with Vitest. **Started 8 Nov:** the fair deal is done, in TypeScript (`src/den-deal.ts`), with
+  73 Vitest tests (`npm test`). Still to do: the architectural review the user asked for (what's
+  tangled in den.js, how to split it, in what order), then the layouts (the wall's holes, the
+  frames, the walk). Found on the way: tested on any holes the engine makes, the fair deal asks
+  for fewer rare pieces than dealing at random but still 17%; the den's own walls are roomier, so
+  test with the den's wall maker once it's pulled out.
 
 - **The fair deal's pieces fit, but never lead to a Masterpiece (8 Nov):** even after the "hole
   nearest done first" fix, the user is "getting pieces that I guess technically fit, but would not
