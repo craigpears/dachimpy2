@@ -22,6 +22,24 @@ the site (`.assetsignore` skips `*.md`).
   - **Moderation:** pirate names are letters only already, but an open room may want a way to hide
     a pirate who's being a nuisance.
 
+- **Puzzle mode keys (8 Nov):** in puzzle mode WASD is "pure" piece moving (a square at a time),
+  the arrows jump hole to hole, and you leave by fitting the piece or pressing Esc. Clicks there
+  don't work (left click should fit, never throw at a raider showing through the hole).
+- **Not getting the right pieces at the start (8 Nov):** the opening wall keeps its simple 1, 2
+  and 3-piece holes, but the user still often had nothing that fit. Pick its shapes for the common
+  pieces too.
+- **The shack sign reads "Your hack" (8 Nov):** the S is hidden behind something. And there's no
+  obvious call to action: the user clicked it by accident and couldn't work out what happened.
+- **Boards behind should slot together into one layer (8 Nov):** place a piece behind and it starts
+  a second layer; place another that fits perfectly beside it and it starts a third. Pieces that
+  fit together should go in the same layer. And show where the layer goes: a wooden studwork
+  frame outlining the second layer, with material between the holes once the whole first layer is
+  filled.
+- **Bigger frames, more on the go (8 Nov):** the wall-walk frame is very slim, with not much room
+  to be creative. The user wants to get to "bigger investment pieces", and to have more than one
+  thing on the go at once (they remembered three), though not rushed. How exactly is to agree with
+  the user first (RULES.md still says one frame at a time).
+
 ## Needs a playtest to pin down
 
 - **Turning a piece close to the wall feels off.** The user can't yet say how (which way it
