@@ -646,6 +646,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   waits 75 seconds and starts small. **But no longer than it takes:** the first wave comes as soon
   as you've completed all the holes (the user), 3 seconds after the last one so you see it done,
   with "The wall's mended!" on the banner.
+- **Keep the raids big and heavy; give a longer breather instead.** By wave 8 the user was
+  overwhelmed (nine raiders, square three-piece holes still open), but didn't want smaller holes or
+  fewer raiders: "You need that for the feel of the puzzle ... I like the bigger, heavy raids, and
+  especially the cannon and the chaos, and having to pay attention to the wall." So the calm
+  between waves is 40 seconds (it was 20), time to catch up on the wall and the frames.
 - **The den has a gate** and raiders attack from the far side of the wall, with swords and (from
   wave 2) a cannon that blasts fresh holes (a few a wave, aimed first; see above). Keep
   repairing. **The cannon stands well back** (16 m

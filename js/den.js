@@ -69,7 +69,12 @@ const CANNON_AIM = 8, CANNON_GAP = 22, RUBBLE = 10;
    whole pieces' worth of squares, so it can be mended). The user: hopping through a five-square gap
    high up the wall was "weird and dumb". */
 const DOOR_W = 2, DOOR_H = 3, WEAK = 8;
-const BUILD_SECS = 75, CALM_SECS = 20, WALL_DONE_SECS = 3;
+/* The calm between waves is long enough to catch up: by wave 8 the user was overwhelmed, with nine
+   raiders and the big three-piece holes still open. They wanted the raids kept big and heavy ("I
+   like the bigger, heavy raids, and especially the cannon and the chaos") and the holes roomy ("You
+   need that for the feel of the puzzle"), so the breather between them got longer instead (it was
+   20 seconds). */
+const BUILD_SECS = 75, CALM_SECS = 40, WALL_DONE_SECS = 3;
 const RAIDER_DPS = 1, RAIDER_STAMINA = 16;
 /* Getting through costs them: a raider who spent their strength hacking a way in arrives winded.
    They stop just inside to catch their breath (up to WINDED seconds, the more tired the longer) and

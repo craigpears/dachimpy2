@@ -82,16 +82,11 @@ the site (`.assetsignore` skips `*.md`).
   will if you let me rotate it first". You should be able to hold the piece over the gap and turn
   it there, whether or not it fits the way it's facing.
 
-- **Overwhelmed by wave 8 (8 Nov), a balance issue:** the user: "By wave 8 I haven't got any more
-  effective ways of dealing with raiders yet so I get overwhelmed and it's hard to fill in the
-  square shaped holes". Each wave brings one more raider than the last (nine by wave 8, solo), while
-  the defences only grow as the rampart's parts get built (walk, stairs, other stairs, gun tower),
-  and the holes raids make are the roomiest that fit, squarish three-piece ones. Which way to go
-  (to pin down with the user): fewer raiders as the waves climb, something new to fight back with
-  by the middle waves, smaller holes while you're under pressure, or some help with the deal in
-  later waves too.
-
 ## Needs a playtest to pin down
+
+- **The longer calm between waves (8 Nov), not yet tried by the user.** 40 seconds now (it was
+  20), after being overwhelmed by wave 8; the raids stay as big. Watch for: still overwhelmed late
+  on (then perhaps longer still, or longer only as the waves climb), or the calm dragging early on.
 
 - **Turning a piece close to the wall feels off.** The user can't yet say how (which way it
   turns? where the ghost jumps to?). The snapping changes of 7 Nov may have helped, and since 8 Nov
