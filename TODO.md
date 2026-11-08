@@ -40,10 +40,6 @@ the site (`.assetsignore` skips `*.md`).
   distance for placing a piece in the wall. The user: "we were meant to remove that so you can
   place from anywhere". Fitting a piece into the wall should work wherever you're standing.
 
-- **The fair deal hands out far too many X's (8 Nov):** the right pieces came, but 5 of 13 were
-  the cross, one of the rarest: "That feels very broken." The fair deal should still deal mostly
-  the common pieces, with a rare one only when a hole really needs it.
-
 ## Needs a playtest to pin down
 
 - **Turning a piece close to the wall feels off.** The user can't yet say how (which way it
@@ -64,7 +60,9 @@ the site (`.assetsignore` skips `*.md`).
   crates deal the pieces that finish the holes as Masterpieces. Watch for: it feeling too easy or
   too obvious. (First wave only, the user's choice: from wave 2 the deal is random again.) Since
   8 Nov it also stops once the first wall's done, and doesn't re-deal a piece you used elsewhere
-  (the user got four W's in a row building a frame); check it no longer feels stuck on.
+  (the user got four W's in a row building a frame); check it no longer feels stuck on. Also
+  since 8 Nov: it plans all the holes together, and keeps to the usual odds (five crosses in
+  thirteen pieces before); check the mix feels natural, not too many P's.
 - **Layers behind (8 Nov), not yet tried by the user.** A layer is now the hole's shape again,
   filled piece by piece in a timber surround, and a full one is as strong as a Masterpiece and pays
   the same. Watch for: holes three layers deep being too strong, or the pay too generous; the

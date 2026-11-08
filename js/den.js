@@ -2261,19 +2261,31 @@ function neededLetters() {
   const perm = (a, i) => { if (i === a.length) { orders.push(a.slice()); return; } for (let j = i; j < a.length; j++) { [a[i], a[j]] = [a[j], a[i]]; perm(a, i + 1); [a[i], a[j]] = [a[j], a[i]]; } };
   if (ways.length <= 5) perm([...ways.keys()], 0);
   else for (let t = 0; t < 60; t++) orders.push(C.shuffle([...ways.keys()]));
-  let best = null;
+  /* And at the usual odds: picking evenly among the ways of finishing a hole, a way needing a cross
+     came up as often as one needing a P (the user got five crosses in thirteen pieces: "That feels
+     very broken"). So among the ways that use most of what you've got, one is picked with the
+     chance of being dealt the pieces it still needs, and of the plans missing fewest pieces the
+     likeliest is kept. A rare piece comes when the holes really need one. */
+  // (Softened, square roots of the odds: weighted fully, a plan full of P's was so much likelier
+  // that half of what came was P's, against about a quarter dealt at random.)
+  const odds = (ls) => ls.reduce((o, x) => o * Math.sqrt(C.WEIGHTS[x] / 94), 1);
+  let best = null, bestOdds = 0;
   for (const order of orders) {
     const pool = have.slice(), need = [];
     for (const hi of order) {
-      let pick = null, most = -1;
-      for (const l of C.shuffle(ways[hi])) {
-        const q = pool.slice();
-        const use = l.filter((x) => { const i = q.indexOf(x); return i >= 0 && q.splice(i, 1); }).length;
-        if (use > most) { most = use; pick = l; }
+      let most = -1, cands = [];
+      for (const l of ways[hi]) {
+        const q = pool.slice(), miss = l.filter((x) => { const i = q.indexOf(x); if (i < 0) return true; q.splice(i, 1); return false; });
+        const use = l.length - miss.length;
+        if (use > most) { most = use; cands = []; }
+        if (use === most) cands.push({ l, o: odds(miss) });
       }
-      for (const x of pick) { const i = pool.indexOf(x); if (i >= 0) pool.splice(i, 1); else need.push(x); }
+      let x = Math.random() * cands.reduce((s, c) => s + c.o, 0), pick = cands[cands.length - 1].l;
+      for (const c of cands) { x -= c.o; if (x < 0) { pick = c.l; break; } }
+      for (const y of pick) { const i = pool.indexOf(y); if (i >= 0) pool.splice(i, 1); else need.push(y); }
     }
-    if (!best || need.length < best.length) best = need;
+    const o = odds(need);
+    if (!best || need.length < best.length || (need.length === best.length && o > bestOdds)) { best = need; bestOdds = o; }
   }
   const need = best || [];
   for (const l of G.fairSkip || []) { const i = need.indexOf(l); if (i >= 0) need.splice(i, 1); }

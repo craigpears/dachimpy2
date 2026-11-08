@@ -225,6 +225,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   P while two holes needed a Y and an N. Now it tries the holes in every order and keeps the plan
   missing fewest pieces. (A careless test player, any piece in any clean spot: eight games out of
   eight finished all four holes as Masterpieces in eight pieces.)
+  **And it keeps to the usual odds: a rare piece only when the holes really need one.** Picking
+  evenly among the ways of finishing a hole, a way that needs a cross came up as often as one that
+  needs a P, and the user got five crosses in thirteen pieces: "That feels very broken." Now each
+  way is picked with the chance of being dealt the pieces it still needs (softened, square roots
+  of the odds: weighted fully, half of what came was P's), and of the plans missing fewest pieces
+  the likeliest is kept. (On the same half-built walls, rare pieces went from 11% of what it asked
+  for to 2%. Seven test walls all finished as Masterpieces: P's 39%, F's 20%, Y's 16%, and the odd
+  V, W or Z.)
 - **Throw pieces at raiders, don't bonk them.** A plain bonk was underwhelming. The carried piece
   is the weapon: it hurls at a raider, who goes flying. It costs the piece.
 - **A thrown piece takes a while to come back.** Otherwise you could stand and pelt raiders
