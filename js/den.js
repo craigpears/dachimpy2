@@ -8,15 +8,8 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, cleanDesign, designOf, drawFlag, dyeHex, DYES, SKIN, HAIR, FUR, PARTS, FLAGS, PATTERNS, DECOR, MAX_DECOR, BIOMES, twoColours } from './den-look.js';
 
-/* The main puzzle's engine, but searching a wide frame column by column (by turning it on its
-   side): row by row, a long thin strip like a wall-walk can take the solver a minute; this way,
-   a millisecond. Pentominoes turned on their side are still the same pentominoes. */
-const C = { ...window.Carp, solve(cells, limit) {
-  const b = window.Carp.bbox(cells);
-  if (b.w <= b.h) return window.Carp.solve(cells, limit);
-  const T = (cs) => cs.map(([r, c]) => [c, r]);
-  return window.Carp.solve(T(cells), limit).map((t) => t.map((p) => ({ letter: p.letter, cells: T(p.cells) })));
-} };
+// The main puzzle's engine, turned for wide shapes (see turnWide in den-deal.js).
+const C = window.DenDeal.turnWide(window.Carp);
 /* An exact tiling with a mix of pieces, as a crew would really fill it: the solver always reaches
    for the P first, so a frame filled by it (the cheat stages) came out nearly all Ps. Each square
    tries the pieces used least so far first, in a shuffled order. Null if it's taking too long. */
@@ -743,7 +736,7 @@ function putFramePiece(f, i) {
 function placeFrame(t, by, hand) {
   const f = t.frame;
   const info = { letter: hand.letter, shape: hand.cells, dr: t.dr, dc: t.dc, over: t.over, by };
-  if (hand.fair) (G.fairSkip ||= []).push({ l: hand.letter, n: 3 });   // dealt for the wall, used here: see fairDeal
+  if (hand.fair) fair.holdBack(hand.letter);   // dealt for the wall, used here: see FairDeal.holdBack
   const from = f.group.worldToLocal(hand.group.position.clone());
   scene.remove(hand.group);
   if (hand === carry) carry = null;
@@ -2227,90 +2220,24 @@ const piles = [0, 1, 2].map(() => {
   return { x: 0, z: 0, letter: null, cells: null, group: null, wait: 0, label, crate: mesh(crateGeo, mat('#7a5230', { map: woodTex })) };
 });
 /* The first wave is dealt fair: the crates hand out the pieces that finish the holes as
-   Masterpieces, not whatever comes. The user, left needing three F's and an L that never came with
-   only a T in the toolbox: "This first wave definitely needs to be perfectly considered." Each deal
-   looks again at what's left of every open hole (so a piece put somewhere else, or knocked out,
-   just changes the plan), picks the way of finishing each that uses the most of what's already on
-   the crates or in your hands, and deals one of the pieces still missing. Once nothing's missing
-   (or a hole can't be finished exactly any more) it deals as usual. */
-/* But only for mending the first wall, and never round and round. The user, building a frame with
-   the fair deal still on: "four M pieces in a row ... and so many U pieces. The favourable pieces
-   thing seems to be stuck on." A piece dealt fair that goes into a frame instead is held back for
-   the next three deals (fairSkip), or the wall's missing W would keep coming back; and once every
-   hole of the first wall is done (fairOver) the deal is the usual one, even when the raiders knock
-   pieces out in wave 1. (Held back for good, as it first was, a thrown L meant the hole needing an L
-   never got one; and a thrown piece isn't held back at all: the hole still needs it.) */
+   Masterpieces (FairDeal, in den-deal.js, with its tests). But only for mending the first wall:
+   once every hole of the first wall is done (fairOver) the deal is the usual one, even when the
+   raiders knock pieces out in wave 1. */
 const fairDeal = () => !G.fairOver && (G.wave === 0 || (G.wave === 1 && G.phase === 'wave'));
-function neededPlan() {
+const fair = new window.DenDeal.FairDeal(C);
+// What the fair deal is handed: what's left of each open hole, and what's on the crates and in your hands.
+const dealHoles = () => wall.holes.map((h) => (h.status === 'open' ? rest(h) : []));
+function dealHave() {
   const have = piles.map((q) => q.letter).filter(Boolean);
   if (carry?.letter) have.push(carry.letter);
-  // Each hole's ways of finishing, as the pieces they take (one entry per different set).
-  const ways = [];
-  for (const h of wall.holes) {
-    const left = h.status === 'open' ? rest(h) : [];
-    if (!left.length || left.length % 5) continue;
-    const seen = new Map();
-    for (const sol of C.solve(left, 200)) { const l = sol.map((p) => p.letter).sort(); seen.set(l.join(''), l); }
-    if (seen.size) ways.push([...seen.values()]);
-  }
-  /* The holes are planned together, not one at a time: planned in turn, an earlier hole could
-     take one of the two W's you had for the hole you're mending, and a third W got dealt (the
-     user: "it was deciding I needed another M before realising I'd already finished that first
-     hole"). So: try the holes in every order (a few dozen at most), each taking the way that uses
-     most of what's left on the crates and in your hands, and keep the plan missing fewest pieces. */
-  const orders = [];
-  const perm = (a, i) => { if (i === a.length) { orders.push(a.slice()); return; } for (let j = i; j < a.length; j++) { [a[i], a[j]] = [a[j], a[i]]; perm(a, i + 1); [a[i], a[j]] = [a[j], a[i]]; } };
-  if (ways.length <= 5) perm([...ways.keys()], 0);
-  else for (let t = 0; t < 60; t++) orders.push(C.shuffle([...ways.keys()]));
-  /* And at the usual odds: picking evenly among the ways of finishing a hole, a way needing a cross
-     came up as often as one needing a P (the user got five crosses in thirteen pieces: "That feels
-     very broken"). So among the ways that use most of what you've got, one is picked with the
-     chance of being dealt the pieces it still needs, and of the plans missing fewest pieces the
-     likeliest is kept. A rare piece comes when the holes really need one. */
-  // (Softened, square roots of the odds: weighted fully, a plan full of P's was so much likelier
-  // that half of what came was P's, against about a quarter dealt at random.)
-  const odds = (ls) => ls.reduce((o, x) => o * Math.sqrt(C.WEIGHTS[x] / 94), 1);
-  let best = null, bestOdds = 0;
-  for (const order of orders) {
-    const pool = have.slice(), need = [];
-    for (const hi of order) {
-      let most = -1, cands = [];
-      for (const l of ways[hi]) {
-        const q = pool.slice(), miss = l.filter((x) => { const i = q.indexOf(x); if (i < 0) return true; q.splice(i, 1); return false; });
-        const use = l.length - miss.length;
-        if (use > most) { most = use; cands = []; }
-        if (use === most) cands.push({ l, o: odds(miss) });
-      }
-      let x = Math.random() * cands.reduce((s, c) => s + c.o, 0), pick = cands[cands.length - 1].l;
-      for (const c of cands) { x -= c.o; if (x < 0) { pick = c.l; break; } }
-      for (const y of pick) { const i = pool.indexOf(y); if (i >= 0) pool.splice(i, 1); else need.push({ l: y, h: hi }); }
-    }
-    const o = odds(need.map((n) => n.l));
-    if (!best || need.length < best.length || (need.length === best.length && o > bestOdds)) { best = need; bestOdds = o; }
-  }
-  const need = best || [];
-  for (const s of G.fairSkip || []) { const i = need.findIndex((n) => n.l === s.l); if (i >= 0) need.splice(i, 1); }
-  return need;
+  return have;
 }
-const neededLetters = () => neededPlan().map((n) => n.l);
-/* And the hole nearest done first. Picking any of the missing pieces, the user needing just an L to
-   finish a hole got three or four P's meant for the others: "it certainly does not seem to have been
-   looking at him being like, right, he needs this piece". So the deal is for the hole with fewest
-   pieces still to come. */
-function fairPick() {
-  const need = neededPlan();
-  if (!need.length) return null;
-  const left = new Map();
-  for (const n of need) left.set(n.h, (left.get(n.h) || 0) + 1);
-  const fewest = Math.min(...left.values());
-  return C.pick(need.filter((n) => left.get(n.h) === fewest)).l;
-}
+const neededLetters = () => fair.plan(dealHoles(), dealHave()).map((n) => n.l);
+const fairPick = () => fair.pick(dealHoles(), dealHave());
 function deal(p) {
-  const fair = wall && fairDeal() ? fairPick() : null;
-  // A piece held back after going into a frame (fairSkip) comes back after a few deals.
-  if (G.fairSkip?.length) G.fairSkip = G.fairSkip.filter((s) => --s.n > 0);
-  p.letter = fair || C.weightedLetter();
-  p.fair = !!fair;
+  const l = fair.next(wall && fairDeal() ? dealHoles() : [], dealHave());
+  p.letter = l || C.weightedLetter();
+  p.fair = !!l;
   p.cells = C.normalize(C.pick(C.ORIENTS_BY_LETTER[p.letter]).cells);
 }
 function showPile(p) {
@@ -2453,7 +2380,8 @@ function newGame() {
   raiders.splice(0).forEach((r) => { scene.remove(r.m.g); r.mark.remove(); });
   if (carry) { scene.remove(carry.group); carry = null; }
   ghostKey = ''; ghost = null;
-  Object.assign(G, { gold: 60, wave: 0, phase: 'build', phaseT: BUILD_SECS, toSpawn: 0, spawnT: 0, cannonT: 0, cannonShots: 0, aim: null, masters: 0, boarded: 0, bonked: 0, stolen: 0, turned: 0, waveTurned: 0, waveIn: 0, over: false, fairOver: false, fairSkip: [] });
+  Object.assign(G, { gold: 60, wave: 0, phase: 'build', phaseT: BUILD_SECS, toSpawn: 0, spawnT: 0, cannonT: 0, cannonShots: 0, aim: null, masters: 0, boarded: 0, bonked: 0, stolen: 0, turned: 0, waveTurned: 0, waveIn: 0, over: false, fairOver: false });
+  fair.reset();
   piles.forEach((p) => { p.letter = null; });
   newWall();
   piles.forEach(deal);   // after the wall, so the first deals finish its holes

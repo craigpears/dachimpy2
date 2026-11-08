@@ -46,7 +46,9 @@ the site (`.assetsignore` skips `*.md`).
   some holes, test what pieces are generated", so they can describe the scenarios they run into
   and have each one become a test. The same for working out layouts (the wall's holes, the frames,
   the walk), "their own little classes ... that you can put tests around", for quality control.
-  Tests that run without the browser, from the command line.
+  Tests that run without the browser, from the command line. **Started 8 Nov:** the fair deal is
+  done (its own file, `js/den-deal.js`, with twelve tests in `tests/deal.test.js`, run with
+  `npm test`). Still to do: the layouts (the wall's holes, the frames, the walk).
 
 ## Needs a playtest to pin down
 

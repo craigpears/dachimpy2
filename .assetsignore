@@ -10,3 +10,4 @@ package-lock.json
 .assetsignore
 *.md
 tools
+tests

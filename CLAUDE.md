@@ -8,6 +8,11 @@ copy: `node_modules/node/bin/node.exe node_modules/wrangler/bin/wrangler.js dev 
 `npm i --no-save --no-package-lock node@22 wrangler@4`; node_modules is ignored). Wrangler 3 on Windows serves no
 files from subfolders, so don't use it.
 
+Pirate Den: `den.html`, `js/den.js` (the game), `js/den-look.js` (looks), `js/den-deal.js` (the fair deal, a plain
+script like engine.js). Tests: `npm test` (Node's built-in runner, `tests/*.test.js`, no browser); they're not
+published (`.assetsignore`). When the user describes something going wrong in a part that has tests, add a
+test for it.
+
 Read [RULES.md](RULES.md) before changing gameplay or wording, and add to it whenever the user corrects a rule or gives design feedback.
 
 Pirate Den notes: [TODO.md](TODO.md) holds the fixes and quality-of-life changes the user has asked for

@@ -1,0 +1,7 @@
+{
+  "name": "carpentry-primer",
+  "private": true,
+  "scripts": {
+    "test": "node --test"
+  }
+}
