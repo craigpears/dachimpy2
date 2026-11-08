@@ -428,7 +428,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     which also stops the game stalling when a new wall-walk frame is laid out.
 - **The den's buttons sit in one small menu** (☰ Menu, top left, under the stats): your pirate,
   your den, decorate, pause, play with a crew, cheats. A row of them was "a bit big" (8 Nov). It
-  folds away when you pick one or click elsewhere.
+  folds away when you pick one or click elsewhere. Small text, but each button big enough to hit
+  easily (about 40 pixels tall): shrunk right down, the user found the "hit area is tiny".
 - **The cheat menu, for trying things out** (in the menu, or the backtick key). The user asked
   for a way to skip stages. It pauses the game while it's open. Playing alone only, as with a crew
   everyone's game would have to follow. Kept small: little buttons, few of them.

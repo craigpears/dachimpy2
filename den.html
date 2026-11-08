@@ -87,9 +87,11 @@
     button.mini { font-size: 13px; padding: 2px 9px; border-radius: 6px; margin: 6px 6px 0 0; }
     /* The den's buttons, folded into one small menu under the stats. */
     .menu { position: relative; display: inline-block; }
-    .menu-list { position: absolute; top: 100%; left: 0; margin-top: 4px; display: flex; flex-direction: column; min-width: 150px; background: #2a1d13; border: 1px solid var(--gold); border-radius: 8px; padding: 4px; z-index: 4; }
+    /* Big enough to hit easily (the user: "hit area is tiny"), though the text stays small. */
+    #menu-btn { font-size: 15px; padding: 8px 16px; min-height: 40px; }
+    .menu-list { position: absolute; top: 100%; left: 0; margin-top: 4px; display: flex; flex-direction: column; min-width: 200px; background: #2a1d13; border: 1px solid var(--gold); border-radius: 8px; padding: 4px; z-index: 4; }
     .menu-list[hidden], .menu-list button[hidden] { display: none; }
-    .menu-list button { background: none; color: var(--ink); font-size: 15px; font-weight: 500; padding: 5px 10px; border-radius: 5px; text-align: left; }
+    .menu-list button { background: none; color: var(--ink); font-size: 16px; font-weight: 500; padding: 10px 14px; min-height: 42px; border-radius: 5px; text-align: left; }
     .menu-list button:hover { background: #3b2a1b; color: var(--gold); }
     button.link { background: none; color: var(--dim); text-decoration: underline; padding: 6px; }
     .crew-line { margin-top: 6px; font-size: 15px; color: var(--dim); max-width: 360px; }
@@ -112,8 +114,8 @@
     .cheats > div { max-width: 340px; padding: 14px 18px; }
     .cheats h2 { font-size: 22px; }
     .cheats p { font-size: 14px; margin-bottom: 8px; }
-    .cheats .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 0 0 10px; }
-    .cheats .grid button { font-size: 13px; padding: 4px 6px; border-radius: 6px; }
+    .cheats .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 0 0 10px; }
+    .cheats .grid button { font-size: 14px; padding: 8px 6px; min-height: 38px; border-radius: 6px; }
     .dress { position: fixed; inset: 0; display: none; place-items: center; background: rgba(10, 6, 3, .55); z-index: 6; }
     .dress.on { display: grid; }
     .dress-box { position: relative; display: flex; gap: 16px; background: #2a1d13; border: 2px solid var(--gold); border-radius: 12px; padding: 16px 18px; width: min(680px, calc(100vw - 32px)); box-sizing: border-box; max-height: calc(100vh - 32px); overflow: auto; }
