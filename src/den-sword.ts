@@ -6,8 +6,11 @@
    the raid goes ("attackers are coming and you just choose which ways to deal with them"): a
    sword-fighting piece from each raider beaten, landing inside the den, and the pieces "spawn little
    soldiers so they would help you defend. So obviously they'd end up sword fighting". The puzzle is
-   the real one; what a break would send at an opponent musters soldiers instead: a soldier for every
-   sprinkle, a bigger, tougher champion for every sword. */
+   the real one; what a break would send at an opponent goes to the raid instead. Since 8 Nov, after
+   a demo (the user: "you'd have to do a combo, like a fuse block to get a soldier, and obviously
+   combo for multiples", and sprinkles to "build an extra barrier ... on this side of the wall"): a
+   fused block broken arms soldiers, as many as the chain's link, and sprinkles are crates stacked as
+   a barricade inside the breach that needs it most. */
 
 import { Board } from './swordfight.js';
 import type { Pair, Result, Strike } from './swordfight.js';
@@ -36,16 +39,57 @@ export const SWORD = {
 /** A soldier to send out: how many blows it can take, and how big it stands. */
 export interface Recruit { hp: number; size: number; sword?: Strike }
 
-/** The soldiers a break musters: one (two blows) for each sprinkle, and a champion for each sword,
-    as tough as the sword is big (a 1x4, the smallest, takes four blows). */
+/** The soldiers a break arms: only fused blocks do it (a big chest of swords bursting open). Each
+    one broken arms a soldier, or two on the second link of a chain, three on the third, and so on.
+    A bigger block makes tougher, bigger soldiers: the smallest (2x2) takes three blows. Loose pieces
+    arm nobody: their sprinkles go to the barricades (see shareCrates). */
 export function muster(res: Result): Recruit[] {
   const out: Recruit[] = [];
-  for (const s of res.strikes) {
-    const area = s.w * s.h;
-    out.push({ hp: area, size: Math.min(1.6, 1 + area / 20), sword: s });
+  for (const link of res.links) for (const s of link.strikes) {
+    const base = (s.w * s.h) / link.chain;   // the block's own size: toSword grew it by the chain
+    const hp = Math.min(6, 2 + Math.floor(base / 4)), size = Math.min(1.5, 1 + Math.max(0, base - 4) / 16);
+    for (let i = 0; i < link.chain; i++) out.push({ hp, size, sword: s });
   }
-  for (let i = 0; i < res.sprinkles; i++) out.push({ hp: 2, size: 1 });
   return out;
+}
+
+/** The barricades: crates piled just inside a breach, which raiders have to hack through before
+    they can walk in, as they do rubble. */
+export const BARRICADE = {
+  /** Seconds of a raider's hacking each crate holds out (the den's raiders hack faster wave by wave). */
+  CRATE: 2.5,
+  /** Crates one breach can take. */
+  MAX: 6,
+} as const;
+
+/** A hole in the wall, as the barricades see it. */
+export interface Breach {
+  /** A gap raiders can walk through right now (or could, but for the crates). */
+  open: boolean;
+  /** Raiders hacking at it. */
+  attackers: number;
+  /** What's left of what's in it, 0 (nothing) to 1 (whole). */
+  strength: number;
+  /** Crates already there. */
+  crates: number;
+}
+
+/** Where a break's sprinkles go: one crate at a time to the breach that needs it most (open gaps
+    first, then the ones being hacked hardest, then the weakest), counting the crates it's already
+    had. Returns how many each breach gets; crates with nowhere to go are lost. */
+export function shareCrates(breaches: Breach[], n: number): number[] {
+  const got = breaches.map(() => 0);
+  const need = (b: Breach, i: number) => (b.open ? 3 : 0) + b.attackers + (1 - b.strength) - (b.crates + got[i]) * 0.75;
+  for (let k = 0; k < n; k++) {
+    let best = -1;
+    breaches.forEach((b, i) => {
+      if (b.crates + got[i] >= BARRICADE.MAX) return;
+      if (best < 0 || need(b, i) > need(breaches[best], best)) best = i;
+    });
+    if (best < 0) break;
+    got[best]++;
+  }
+  return got;
 }
 
 /** What happened at the rack this frame. */

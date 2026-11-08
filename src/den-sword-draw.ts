@@ -1,17 +1,15 @@
-/* Pirate Den: how Swordfight looks. TypeScript, compiled to js/den-sword-draw.js. Draws the board
-   at the sword rack (onto a canvas den.js shows in 3D) and the sword pieces lying on the floor.
+/* Pirate Den: how Swordfight looks. TypeScript, compiled to js/den-sword-draw.js. Paints what goes on
+   the crates of the armoury stack (den.js builds the crates themselves in 3D).
 
-   In the spirit of the real puzzle's pieces (drawn fresh here, not copied): every colour has its
-   own sword. Red a dagger with a skull for a pommel, yellow a broadsword, green a machete, blue a
-   sabre with a hand guard. A block is a glossy bevelled tile with its sword pressed into it; a
-   breaker is the sword itself, with no tile; a fused block is one big tile with one big sword;
-   attack blocks are silver tiles, opaque and then see-through, with only the sword's outline.
-   The user, of a first go with plain coloured squares and rings: it "really does not look like
-   sword fighting pieces to me". */
+   Since 8 Nov the board is a stack of weapon crates under a hoist, not a picture on a sign (the
+   user, of the sign: "it just feels like it's been forced in. There's nothing natural looking about
+   it"). In the spirit of the real puzzle's pieces (drawn fresh here, not copied): every colour has
+   its own sword. Red a dagger with a skull for a pommel, yellow a broadsword, green a machete, blue
+   a sabre with a hand guard. A block is a crate of that colour with its sword stencilled on; a
+   breaker is the sword itself, bare and glowing; a fused block is a big chest with one big sword;
+   attack blocks are crates nailed shut with iron bands. */
 
-import { ENTRY, H, W } from './swordfight.js';
-import type { Colour, Gem } from './swordfight.js';
-import type { SwordRack } from './den-sword.js';
+import type { Colour } from './swordfight.js';
 
 type Ctx = CanvasRenderingContext2D;
 
@@ -22,16 +20,6 @@ export const PALETTE: Record<Colour, { base: string; light: string; dark: string
   2: { base: '#2c9a1c', light: '#93ef6c', dark: '#0d4408' },
   3: { base: '#2b6bd6', light: '#8cc4ff', dark: '#0b2c6a' },
 };
-
-function roundRect(x: Ctx, X: number, Y: number, w: number, h: number, r: number): void {
-  x.beginPath();
-  x.moveTo(X + r, Y);
-  x.arcTo(X + w, Y, X + w, Y + h, r);
-  x.arcTo(X + w, Y + h, X, Y + h, r);
-  x.arcTo(X, Y + h, X, Y, r);
-  x.arcTo(X, Y, X + w, Y, r);
-  x.closePath();
-}
 
 /** A colour's sword, point down, filling the box (X, Y, w, h). `fill` null draws only the outline. */
 export function drawSword(x: Ctx, c: Colour, X: number, Y: number, w: number, h: number, fill: string | CanvasGradient | null, line: string): void {
@@ -116,79 +104,21 @@ export function drawBreaker(x: Ctx, c: Colour, X: number, Y: number, s: number):
   drawSword(x, c, X + s * 0.02, Y + s * 0.01, s * 0.96, s * 0.98, g, '#140d08');
 }
 
-/** A tile: a glossy bevelled block (w by h squares of size s), with its sword pressed into it.
-    `grey`: an attack block, silver (2 opaque, 1 see-through). */
-export function drawTile(x: Ctx, c: Colour, X: number, Y: number, w: number, h: number, grey = 0): void {
-  const pal = PALETTE[c], r = Math.min(w, h) * 0.16;
-  x.save();
-  if (grey === 1) x.globalAlpha = 0.6;
-  const g = x.createLinearGradient(X, Y, X + w, Y + h);
-  if (grey) { g.addColorStop(0, '#f4f4f2'); g.addColorStop(0.5, '#b9b8b4'); g.addColorStop(1, '#6f6e6a'); }
-  else { g.addColorStop(0, pal.light); g.addColorStop(0.45, pal.base); g.addColorStop(1, pal.dark); }
-  roundRect(x, X + 1, Y + 1, w - 2, h - 2, r);
-  x.fillStyle = g; x.fill();
-  x.lineWidth = 1.5; x.strokeStyle = '#140d08'; x.stroke();
-  // The bevel: a highlight round the top and left, a shadow round the bottom and right.
-  roundRect(x, X + 3, Y + 3, w - 6, h - 6, r * 0.8);
-  x.lineWidth = Math.max(1.5, Math.min(w, h) * 0.06);
-  x.strokeStyle = grey ? '#ffffff55' : `${pal.light}66`; x.stroke();
-  // The sword, pressed in: a shade of the tile, outlined darker.
-  const sw = Math.min(w, h * 0.62), sh = h * 0.9;
-  if (grey) drawSword(x, c, X + (w - sw) / 2, Y + (h - sh) / 2, sw, sh, null, '#8b8a86');
-  else drawSword(x, c, X + (w - sw) / 2, Y + (h - sh) / 2, sw, sh, `${pal.light}99`, `${pal.dark}cc`);
-  x.restore();
+/** A crate's front: its colour's sword stencilled on in paint, on a clear canvas to lay over the
+    wood. `faded`: an attack crate turning back, its paint dulled under the bands. */
+export function drawStencil(cv: HTMLCanvasElement, c: Colour, faded = false): void {
+  const x = cv.getContext('2d')!, s = cv.width, pal = PALETTE[c];
+  x.clearRect(0, 0, s, cv.height);
+  x.globalAlpha = faded ? 0.45 : 1;
+  const g = x.createLinearGradient(0, 0, s, s);
+  g.addColorStop(0, '#fff8e6'); g.addColorStop(0.5, pal.light); g.addColorStop(1, pal.base);
+  drawSword(x, c, s * 0.2, s * 0.06, s * 0.6, s * 0.88, g, pal.dark);
+  x.globalAlpha = 1;
 }
 
-/** One piece: a block's tile, or a breaker's sword. */
-export function drawGem(x: Ctx, g: Gem, X: number, Y: number, s: number): void {
-  if (g.breaker && !g.grey) drawBreaker(x, g.c, X, Y, s);
-  else drawTile(x, g.c, X, Y, s, s, g.grey ?? 0);
-}
-
-/** The board at the sword rack, with the pieces waiting down the side. Square size `P` pixels; the
-    canvas should be (W + 3) * P + 24 wide and H * P + 24 high. */
-export function drawRack(cv: HTMLCanvasElement, rack: SwordRack, P: number): void {
-  const x = cv.getContext('2d')!, ox = 12, oy = 12, b = rack.board;
-  x.fillStyle = '#1b130d'; x.fillRect(0, 0, cv.width, cv.height);
-  const bg = x.createLinearGradient(0, oy, 0, oy + H * P);
-  bg.addColorStop(0, '#2e2620'); bg.addColorStop(1, '#17110c');
-  x.fillStyle = bg; x.fillRect(ox, oy, W * P, H * P);
-  // The fourth column, where the pairs come in: lose it and you've lost.
-  x.fillStyle = '#ffffff0c'; x.fillRect(ox + ENTRY * P, oy, P, H * P);
-  x.strokeStyle = '#ffffff10'; x.lineWidth = 1;
-  for (let c = 1; c < W; c++) { x.beginPath(); x.moveTo(ox + c * P, oy); x.lineTo(ox + c * P, oy + H * P); x.stroke(); }
-  const at = (r: number, c: number): [number, number] => [ox + c * P, oy + (H - 1 - r) * P];
-  for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
-    const g = b.grid[r][c];
-    if (g && g.fuse === undefined) drawGem(x, g, ...at(r, c), P);
-  }
-  for (const id of b.fusedIds()) {
-    const f = b.fusedBox(id), g = b.grid[f.r0][f.c0]!, [px, py] = at(f.r0 + f.h - 1, f.c0);
-    drawTile(x, g.c, px, py, f.w * P, f.h * P);
-  }
-  const f = b.falling;
-  if (f) b.fallingCells().forEach(([r, c], i) => { if (r < H) drawGem(x, { c: f.pair[i].c, breaker: f.pair[i].breaker || undefined }, ...at(r, c), P); });
-  x.strokeStyle = '#6b4a2e'; x.lineWidth = 3; x.strokeRect(ox - 1.5, oy - 1.5, W * P + 3, H * P + 3);
-  // Down the side: the pieces you've picked up, next first.
-  const sx = ox + W * P + P * 0.6;
-  x.fillStyle = '#e8dcc0'; x.font = `bold ${Math.round(P * 0.42)}px sans-serif`; x.fillText('Next', sx, oy + P * 0.4);
-  rack.queue.slice(0, 5).forEach((pair, i) => {
-    const y = oy + P * 0.7 + i * (P * 2 + 8);
-    drawGem(x, { c: pair[1].c, breaker: pair[1].breaker || undefined }, sx, y, P);
-    drawGem(x, { c: pair[0].c, breaker: pair[0].breaker || undefined }, sx, y + P, P);
-  });
-  if (rack.queue.length > 5) { x.fillStyle = '#e8dcc0'; x.fillText(`+${rack.queue.length - 5}`, sx, oy + P * 0.7 + 5 * (P * 2 + 8) + P * 0.3); }
-  if (!f && !rack.queue.length) {
-    x.fillStyle = '#e8dcc0cc'; x.font = `bold ${Math.round(P * 0.42)}px sans-serif`; x.textAlign = 'center';
-    ['Beat raiders', 'for sword', 'pieces'].forEach((t, i) => x.fillText(t, ox + (W * P) / 2, oy + (H * P) / 2 - P * 0.6 + i * P * 0.6));
-    x.textAlign = 'start';
-  }
-}
-
-/** A sword piece as it lies on the den floor: the pair, one above the other, on a canvas of its own. */
-export function drawPair(cv: HTMLCanvasElement, pair: [Gem, Gem]): void {
-  const x = cv.getContext('2d')!, s = cv.width;
+/** A breaker: the bare sword, glowing, on a clear canvas. */
+export function drawBlade(cv: HTMLCanvasElement, c: Colour): void {
+  const x = cv.getContext('2d')!;
   x.clearRect(0, 0, cv.width, cv.height);
-  drawGem(x, pair[1], 0, 0, s);
-  drawGem(x, pair[0], 0, s, s);
+  drawBreaker(x, c, 0, 0, cv.width);
 }

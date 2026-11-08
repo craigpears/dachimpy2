@@ -137,21 +137,38 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   to choose up front: the user, "attackers are coming and you just choose which ways to deal with
   them. Similar to how you can defend with carp or jump to the gun turret later" (8 Nov; the idea
   came from the Age of Apes tutorial's choice of three mini-games).
-- **Swordfight at the sword rack: soldiers to hold the breaches (8 Nov).** Each raider beaten
-  (knocked flat, by a thrown piece, the guns or a soldier; or turned away at the wall) drops a
-  sword piece, a Swordfight pair, that lands inside the den; walk over it to pick it up (eight at
-  most). At the sword rack, on the left of the den, Space plays them on a real Swordfight board,
-  by the real rules (6 by 13, pairs in at the top of the fourth column, fusing, breakers, chains;
-  lose the fourth column and the board clears, with the pieces you had). A pair only comes in while
-  you're at the rack; nothing pauses the raid. What a break would send at an opponent musters
-  soldiers instead: one for each sprinkle, a bigger, tougher champion for each sword, ten at most.
-  Soldiers go for raiders loose in the den and stand just inside the gaps in the wall (or behind
-  the holes being hacked), and a raider coming through a gap they hold stops to fight them; they
-  don't go out over the wall. A raider who gets in while you're at the rack buries your board in
-  sprinkles. Playing alone only so far. **The pieces look like Swordfight's:** each colour its own
-  sword (red a skull dagger, yellow a broadsword, green a machete, blue a sabre), a block a glossy
-  tile with its sword pressed in, a breaker the sword alone, attack blocks silver; plain coloured
-  squares and rings "really does not look like sword fighting pieces" (the user).
+- **Swordfight at the armoury hoist: soldiers and barricades (8 Nov).** Each raider beaten
+  (knocked flat, by a thrown piece, the guns or a soldier; or turned away at the wall) drops their
+  weapons: a pair of crates, a Swordfight pair, that lands inside the den. Walk over it to pick it
+  up (eight at most). At the armoury hoist, against the left of the den, Space at the winch plays
+  them on a real Swordfight board, by the real rules (6 by 13, pairs in at the top of the fourth
+  column, fusing, breakers, chains; stack up into the red stripes at the top of the fourth column
+  and the stack topples, with the crates you had). A pair only comes in while you're at the
+  winch; nothing pauses the raid. What a break would send at an opponent goes to the raid instead:
+  - **Chests arm soldiers.** Only a fused block (2x2 or bigger, a big chest of swords) arms
+    anyone: a soldier for each one broken, two for each on the second link of a chain, three on
+    the third, and so on; bigger blocks make tougher, bigger soldiers; ten at most. The user: "you'd
+    have to do a combo, like a fuse block to get a soldier, and obviously combo for multiples".
+    Soldiers go for raiders loose in the den and stand just inside the gaps in the wall (or behind
+    the holes being hacked), and a raider coming through a gap they hold stops to fight them; they
+    don't go out over the wall.
+  - **Loose crates barricade the breaches.** Each sprinkle is a crate thrown from the hoist to the
+    breach that needs it most (open gaps first, then the hole hacked hardest, then the weakest,
+    spreading out over several), and piled just inside it, six at most. Raiders must hack through
+    a barricade before they can walk in, as they do rubble (each crate holds out 2.5 seconds of
+    hacking), and arrive winded. The user: sprinkles should "build an extra barrier ... on this side
+    of the wall", like the rubble in a fresh breach.
+  - A raider who gets in while you're at the winch nails crates shut on your stack (sprinkles, as
+    an opponent's attack would). Playing alone only so far.
+  **It's part of the den, not a picture:** the board is a real stack of weapon crates under a timber
+  hoist, at the den's scale; each pair is lowered on the rope and turns on it, and the crates
+  you've brought wait on a landing at the top. Each colour is a crate of one weapon (red a skull
+  dagger, yellow a broadsword, green a machete, blue a sabre, stencilled on), a breaker the bare
+  sword glowing, a fused block a big chest with brass corners, attack blocks crates nailed shut
+  with iron bands. The hoist stands side on to the usual view, so it hides nothing; at the winch the
+  camera turns to face it. The board on a sign before it "just feels like it's been forced in.
+  There's nothing natural looking about it. It's very glaring" (the user), and setting it into a
+  wall "doesn't really make sense".
 
 - **A pirate mends a den wall.** Pieces sit on three crates (the toolbox); you carry them over and
   fit them into holes in a stone wall. Same pieces, weights and Masterpiece rule as the main game.

@@ -7,9 +7,9 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { FairDeal, turnWide } from './den-deal.js';
-import { randomPair, W as SW, H as SH } from './swordfight.js';
-import { muster, SwordRack, Barracks, SWORD } from './den-sword.js';
-import { drawRack, drawPair, PALETTE } from './den-sword-draw.js';
+import { randomPair, W as SW, H as SH, ENTRY as SENTRY } from './swordfight.js';
+import { muster, shareCrates, BARRICADE, SwordRack, Barracks, SWORD } from './den-sword.js';
+import { drawStencil, drawBlade, PALETTE } from './den-sword-draw.js';
 import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, cleanDesign, designOf, drawFlag, dyeHex, DYES, SKIN, HAIR, FUR, PARTS, FLAGS, PATTERNS, DECOR, MAX_DECOR, BIOMES, twoColours } from './den-look.js';
 
 // The main puzzle's engine, turned for wide shapes (see turnWide in src/den-deal.ts).
@@ -459,11 +459,11 @@ function buildWall() {
   }
   scenery.forEach((o) => { o.userData.scenery = true; den.add(o); });
   bounds = { x: half - 0.35, z0: 0.55, z1: 10.5 };
-  // The sword rack: on the left, between the stairs and the crates.
-  sword.x = -half * 0.55; sword.z = 4.6;
+  // The armoury stack: against the left of the den, just in from the stairs, facing in.
+  sword.x = -half + 1.75; sword.z = 3.2;
   sword.group.position.set(sword.x, 0, sword.z);
   obstacles = [...piles.map((p) => ({ x: p.x, z: p.z, r: 0.75 })), { x: barrel.position.x, z: barrel.position.z, r: 0.55 }, { x: chest.position.x, z: chest.position.z, r: 0.75 },
-    ...[-0.5, 0, 0.5].map((f) => ({ x: sword.x + f * sword.w, z: sword.z, r: 0.45 }))];
+    ...[-0.5, -0.25, 0, 0.25, 0.5].map((f) => ({ x: sword.x, z: sword.z + f * sword.w, r: 0.4 })), { x: sword.x, z: sword.z + sword.w / 2 + 0.15, r: 0.3 }];
   piles.forEach(showPile);
   rebuildDecor();
   applyBiome(true);
@@ -1142,7 +1142,7 @@ function plotLabel() {
   const html = st === 'plot' ? 'Your shack: build it here<small>walk in and press Space (or click) and timber comes for it</small>'
     : st === 'built' ? 'Your shack<small>walk in and press Space (or click) to paint and dress it</small>' : '';
   const near = Math.hypot(pirate.x - x, pirate.z - z) < 7;
-  if (!html || !near || wm || deco.on || deckView > 0.5 || pirate.h > 0.3) { lab.style.display = 'none'; return; }
+  if (!html || !near || wm || deco.on || deckView > 0.5 || swordView > 0.5 || pirate.h > 0.3) { lab.style.display = 'none'; return; }
   if (lab.innerHTML !== html) { lab.className = 'label deck'; lab.innerHTML = html; }
   v3.set(xf + 0.7, 2.05, HOUSE_Z1 + 0.45).project(camera);   // over the sign, kept on screen
   const half = lab.offsetWidth / 2 + 10;
@@ -2399,54 +2399,211 @@ let wm = null, wmBlock = null, wallView = 0, wmLinger = 0;
    isn't there.)
    The rules and the soldiers are src/den-sword.ts (SwordRack, Barracks), the looks
    src/den-sword-draw.ts, the puzzle src/swordfight.ts; here, only the 3D and the wiring to the raid. */
-const SWORD_PX = 48, SWORD_DROPS = 12;
+const SWORD_DROPS = 12;
 const rack = new SwordRack(), barracks = new Barracks();
+/* The armoury stack (8 Nov): the board is a real stack of weapon crates against the left of the den,
+   under a timber hoist, at the den's own scale. The user, of the board on a sign before it: "it just
+   feels like it's been forced in. There's nothing natural looking about it". Each pair is lowered on
+   the hoist's rope, and turns on it; the crates you've brought wait on a landing at the top. The
+   stack faces into the den (its group is turned a quarter), so from the usual view it's side on and
+   hides nothing; at the winch the camera turns to face it. Layout in the group's own terms: column c
+   at x = (c - W/2 + 0.5) * CR, row r at y = y0 + (r + 0.5) * CR, the crates' fronts towards +z. */
+const CR = 0.45, CRATE = 0.41;
 const sword = {
-  on: false, dirty: true, drops: [], figures: new Map(), x: -6.4, z: 4.6, y0: 0.45, w: 1, h: 1,
-  group: new THREE.Group(), canvas: document.createElement('canvas'), tex: null,
+  on: false, dirty: true, drops: [], figures: new Map(), x: -10, z: 3.2, y0: 0.14, w: SW * CR, h: SH * CR,
+  group: new THREE.Group(), crates: new Map(), pair: null, pairKey: null, next: new THREE.Group(), nextKey: '',
+  rope: null, trolley: null, drum: null, top: 0,
 };
+sword.top = sword.y0 + sword.h + 0.75;
 let swordView = 0;
+const cellAt = (r, c, v = new THREE.Vector3()) => v.set((c - SW / 2 + 0.5) * CR, sword.y0 + (r + 0.5) * CR, 0);
+// What goes on the crates: painted swords, bare blades, the crates' wood, the iron bands. Made once.
+const crateLook = { stencil: {}, faded: {}, blade: {}, wood: {}, box: new THREE.BoxGeometry(CRATE, CRATE, CRATE), plane: new THREE.PlaneGeometry(1, 1) };
 {
-  const cv = sword.canvas;
-  cv.width = (SW + 3) * SWORD_PX + 24; cv.height = SH * SWORD_PX + 24;
-  sword.tex = new THREE.CanvasTexture(cv);
-  sword.tex.colorSpace = THREE.SRGBColorSpace;
-  sword.tex.anisotropy = 4;
-  const sq = 0.2;   // one Swordfight square, in metres
-  sword.w = cv.width / SWORD_PX * sq; sword.h = cv.height / SWORD_PX * sq;
-  const { w: pw, h: ph, y0 } = sword;
-  const face = new THREE.Mesh(new THREE.PlaneGeometry(pw, ph), new THREE.MeshBasicMaterial({ map: sword.tex, toneMapped: false }));
-  face.position.set(0, y0 + ph / 2, 0.06);
-  const back = mesh(new THREE.BoxGeometry(pw + 0.2, ph + 0.2, 0.1), mat('#4a3020'));
-  back.position.set(0, y0 + ph / 2, 0);
-  sword.group.add(face, back);
-  for (const sx of [-1, 1]) {
-    const post = mesh(new THREE.BoxGeometry(0.14, y0 + ph + 0.35, 0.14), mat('#3a2416'));
-    post.position.set(sx * (pw / 2 + 0.12), (y0 + ph + 0.35) / 2, 0);
-    // A cutlass hung on top of each post: it's the sword rack.
-    const blade = mesh(new THREE.BoxGeometry(0.05, 0.5, 0.02), mat('#cfd8e6', { metalness: 0.8, roughness: 0.3 }));
-    blade.position.set(sx * (pw / 2 + 0.12), y0 + ph + 0.55, 0.05);
-    blade.rotation.z = sx * 0.5;
-    sword.group.add(post, blade);
+  const tex = (draw) => { const cv = document.createElement('canvas'); cv.width = cv.height = 128; draw(cv); const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; };
+  for (const c of [0, 1, 2, 3]) {
+    crateLook.stencil[c] = new THREE.MeshStandardMaterial({ map: tex((cv) => drawStencil(cv, c)), transparent: true, roughness: 0.6, depthWrite: false });
+    crateLook.faded[c] = new THREE.MeshStandardMaterial({ map: tex((cv) => drawStencil(cv, c, true)), transparent: true, roughness: 0.6, depthWrite: false });
+    crateLook.blade[c] = new THREE.MeshBasicMaterial({ map: tex((cv) => drawBlade(cv, c)), transparent: true, side: THREE.DoubleSide, depthWrite: false, toneMapped: false });
+    crateLook.wood[c] = mat(PALETTE[c].base, { map: woodTex, roughness: 0.65 });
   }
-  scene.add(sword.group);
+  crateLook.grey = mat('#9a9690', { map: woodTex, roughness: 0.8 });
+  crateLook.iron = mat('#3b3d42', { metalness: 0.7, roughness: 0.45 });
+  crateLook.brass = mat('#c8a050', { metalness: 0.8, roughness: 0.35 });
+}
+// One crate (w by h squares: a fused block is one big chest), or a breaker's bare blade. Geometry
+// that isn't shared is marked so crateGone frees it.
+function armsCrate(g, w = 1, h = 1) {
+  const grp = new THREE.Group(), bw = w * CR - (CR - CRATE), bh = h * CR - (CR - CRATE);
+  const own = (geo) => { geo.userData.own = true; return geo; };
+  if (g.breaker && !g.grey) {
+    const blade = new THREE.Mesh(crateLook.plane, crateLook.blade[g.c]);
+    blade.scale.set(CR * 1.05, CR * 1.05, 1);
+    blade.renderOrder = 2;
+    grp.add(blade);
+    return grp;
+  }
+  const box = mesh(w === 1 && h === 1 ? crateLook.box : own(new THREE.BoxGeometry(bw, bh, CRATE)), g.grey === 2 ? crateLook.grey : crateLook.wood[g.c]);
+  grp.add(box);
+  if (g.grey !== 2) {
+    const s = Math.min(bw, bh) * 0.92;
+    const face = new THREE.Mesh(crateLook.plane, g.grey ? crateLook.faded[g.c] : crateLook.stencil[g.c]);
+    face.scale.set(s, h > w ? Math.min(bh * 0.92, s * 1.6) : s, 1);
+    face.position.z = CRATE / 2 + 0.003;
+    grp.add(face);
+  }
+  if (g.grey) for (const y of [-0.3, 0.3]) {   // nailed shut: iron bands round it
+    const band = mesh(own(new THREE.BoxGeometry(bw + 0.012, 0.035, CRATE + 0.012)), crateLook.iron, false);
+    band.position.y = y * bh;
+    grp.add(band);
+  }
+  if (w > 1 || h > 1) for (const sx of [-1, 1]) for (const sy of [-1, 1]) {   // a chest: brass corners
+    const k = mesh(own(new THREE.BoxGeometry(0.1, 0.1, CRATE + 0.014)), crateLook.brass, false);
+    k.position.set(sx * (bw / 2 - 0.04), sy * (bh / 2 - 0.04), 0);
+    grp.add(k);
+  }
+  return grp;
+}
+const crateSig = (g) => `${g.c}${g.breaker && !g.grey ? 'b' : ''}${g.grey || ''}`;
+function crateGone(m) { m.parent?.remove(m); m.traverse((o) => { if (o.geometry?.userData.own) o.geometry.dispose(); }); }
+{
+  // The hoist: two posts and a beam over the stack, plank backing, a plinth, a winch, a trolley and
+  // rope, and the landing the crates wait on.
+  const grp = sword.group, { w, h, y0, top } = sword, beam = mat('#5a3a22', { map: woodTex, roughness: 0.9 }), dark = mat('#3e2716', { map: woodTex, roughness: 1 });
+  const add = (geo, m, x, y, z, shadow = true) => { const o = mesh(geo, m, shadow); o.position.set(x, y, z); grp.add(o); return o; };
+  for (const sx of [-1, 1]) {
+    add(new THREE.BoxGeometry(0.18, top + 0.1, 0.18), beam, sx * (w / 2 + 0.13), (top + 0.1) / 2, 0);
+    add(new THREE.BoxGeometry(0.36, 0.12, 0.6), dark, sx * (w / 2 + 0.13), 0.06, 0.05);   // its foot
+    const knee = add(new THREE.BoxGeometry(0.1, 0.7, 0.1), beam, sx * (w / 2 - 0.1), top - 0.28, 0);
+    knee.rotation.z = sx * 0.75;
+  }
+  add(new THREE.BoxGeometry(w + 0.9, 0.2, 0.24), beam, 0, top + 0.05, 0);
+  add(new THREE.BoxGeometry(w + 0.1, h + 0.1, 0.06), dark, 0, y0 + h / 2, -CRATE / 2 - 0.05);
+  for (let i = 1; i < 4; i++) add(new THREE.BoxGeometry(w + 0.1, 0.1, 0.05), beam, 0, y0 + h * i / 4, -CRATE / 2 - 0.01, false);
+  add(new THREE.BoxGeometry(w + 0.36, y0, CRATE + 0.2), beam, 0, y0 / 2, 0.05);
+  // The top of the fourth column, where the crates come in: red warning stripes painted on the
+  // planks. Stack up to it and you've lost.
+  const stripesTex = canvasTex(64, 128, (x, w, h) => {
+    x.strokeStyle = '#c0301e'; x.lineWidth = 9;
+    for (let i = -h; i < w + h; i += 22) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i + h * 0.5, h); x.stroke(); }
+    x.lineWidth = 5; x.strokeRect(2.5, 2.5, w - 5, h - 5);
+  });
+  const warn = add(new THREE.PlaneGeometry(CR, CR * 2), new THREE.MeshStandardMaterial({ map: stripesTex, transparent: true, opacity: 0.7, roughness: 1 }), cellAt(0, SENTRY).x, y0 + (SH - 1) * CR, -CRATE / 2 - 0.015, false);
+  warn.receiveShadow = false;
+  // The winch on the near post, where you stand to work it.
+  sword.drum = add(new THREE.CylinderGeometry(0.13, 0.13, 0.3, 12), beam, -w / 2 - 0.13, 1.0, 0.3);
+  sword.drum.rotation.x = Math.PI / 2;
+  const crank = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.28), crateLook.iron);
+  crank.position.set(0, 0.17, 0.12); sword.drum.add(crank);
+  // The trolley along the beam, and its rope.
+  sword.trolley = add(new THREE.BoxGeometry(0.3, 0.14, 0.34), crateLook.iron, 0, top - 0.12, 0);
+  sword.rope = add(new THREE.CylinderGeometry(0.018, 0.018, 1, 6), mat('#c9b48a', { roughness: 1 }), 0, 0, 0, false);
+  // The landing at the top right, where the crates you've brought wait their turn.
+  add(new THREE.BoxGeometry(1.05, 0.07, CRATE + 0.1), beam, w / 2 + 0.66, y0 + h - 2 * CR - 0.04, 0);
+  const strut = add(new THREE.BoxGeometry(0.08, 0.9, 0.08), beam, w / 2 + 0.5, y0 + h - 2 * CR - 0.4, 0);
+  strut.rotation.z = 0.7;
+  grp.add(sword.next);
+  grp.rotation.y = Math.PI / 2;
+  scene.add(grp);
 }
 const swordHere = () => !online() && !G.over;
-const atSword = () => swordHere() && pirate.h < 0.05 && Math.abs(pirate.x - sword.x) < 1.6 && pirate.z > sword.z && pirate.z - sword.z < 2.2;
+// At the winch: in front of the stack, near it.
+const atSword = () => swordHere() && pirate.h < 0.05 && pirate.x - sword.x > 0.3 && pirate.x - sword.x < 2.4 && Math.abs(pirate.z - sword.z) < sword.w / 2 + 0.9;
+// Where the winch is, in the den's terms.
+const winchAt = () => ({ x: sword.x + 0.3, z: sword.z + sword.w / 2 + 0.13 });
 
-// A beaten raider's sword piece flies over (or across) the den and lands on the floor inside.
+/* The stack's crates, kept in step with the board: one per piece (a fused block, one chest), moving
+   to where it now sits; a crate broken bursts where it was. */
+function stackSync() {
+  const b = rack.board, live = new Map(), inGrid = new Set();
+  for (let r = 0; r < SH; r++) for (let c = 0; c < SW; c++) {
+    const g = b.grid[r][c];
+    if (!g) continue;
+    inGrid.add(g);
+    if (g.fuse === undefined) live.set(g, { g, at: cellAt(r, c), sig: crateSig(g) });
+  }
+  for (const id of b.fusedIds()) {
+    const f = b.fusedBox(id), g = b.grid[f.r0][f.c0];
+    const at = cellAt(f.r0, f.c0).add(new THREE.Vector3((f.w - 1) * CR / 2, (f.h - 1) * CR / 2, 0));
+    live.set('f' + id, { g, at, sig: `${crateSig(g)}${f.w}x${f.h}`, w: f.w, h: f.h });
+  }
+  for (const [key, m] of sword.crates) {
+    const L = live.get(key);
+    if (L && L.sig === m.userData.sig) continue;
+    // Gone from the stack altogether: broken open, so it bursts. (Otherwise it's joined a chest, or
+    // changed look, and a new one takes its place.)
+    const broken = !L && (typeof key === 'string' ? !b.fusedIds().includes(Number(key.slice(1))) : !inGrid.has(key));
+    if (broken) burst(m.getWorldPosition(new THREE.Vector3()), PALETTE[m.userData.c].light, m.userData.big ? 22 : 7, 3);
+    crateGone(m); sword.crates.delete(key);
+  }
+  for (const [key, L] of live) {
+    let m = sword.crates.get(key);
+    if (!m) {
+      m = armsCrate(L.g, L.w, L.h);
+      Object.assign(m.userData, { sig: L.sig, c: L.g.c, big: !!L.w });
+      m.position.copy(L.at);
+      sword.group.add(m);
+      sword.crates.set(key, m);
+    }
+    m.userData.to = L.at;
+  }
+  // The crates waiting on the landing: the next three pairs.
+  const nk = rack.queue.slice(0, 3).map((p) => p.map(crateSig).join('')).join('|');
+  if (nk !== sword.nextKey) {
+    sword.nextKey = nk;
+    [...sword.next.children].forEach(crateGone);
+    rack.queue.slice(0, 3).forEach((pair, i) => pair.forEach((p, j) => {
+      const m = armsCrate({ c: p.c, breaker: p.breaker });
+      m.scale.setScalar(0.62);
+      m.position.set(sword.w / 2 + 0.37 + i * 0.29, sword.y0 + sword.h - 2 * CR + 0.13 + j * 0.27, 0);
+      sword.next.add(m);
+    }));
+  }
+}
+// The pair on the rope: crates made when it comes in, moved smoothly to where the board has it.
+function pairSync(dt) {
+  const b = rack.board, f = b.falling;
+  if ((f?.pair || null) !== sword.pairKey) {
+    if (sword.pair) crateGone(sword.pair);
+    sword.pair = null; sword.pairKey = f?.pair || null;
+    if (f) {
+      sword.pair = new THREE.Group();
+      sword.pair.userData.parts = f.pair.map((p) => { const m = armsCrate({ c: p.c, breaker: p.breaker }); sword.pair.add(m); return m; });
+      const cells = b.fallingCells();
+      cellAt(...cells[0], sword.pair.position);
+      cells.forEach(([r, c], i) => sword.pair.userData.parts[i].position.copy(cellAt(r, c).sub(sword.pair.position)));
+      sword.group.add(sword.pair);
+    }
+  }
+  const k = Math.min(1, dt * 14);
+  let hookY = sword.top - 0.7, hookX = sword.trolley.position.x;
+  if (f) {
+    const cells = b.fallingCells(), base = cellAt(...cells[0]);
+    sword.pair.position.lerp(base, k);
+    cells.forEach(([r, c], i) => sword.pair.userData.parts[i].position.lerp(cellAt(r, c).sub(base), k));
+    // The rope comes down to the top of the pair, over its middle.
+    const parts = sword.pair.userData.parts.map((m) => m.position.clone().add(sword.pair.position));
+    hookX = (parts[0].x + parts[1].x) / 2;
+    hookY = Math.max(parts[0].y, parts[1].y) + CRATE / 2;
+  }
+  sword.trolley.position.x += (hookX - sword.trolley.position.x) * k;
+  const y1 = sword.top - 0.2, len = Math.max(0.05, y1 - hookY);
+  sword.rope.scale.y = len;
+  sword.rope.position.set(sword.trolley.position.x, y1 - len / 2, 0);
+  sword.rope.visible = len > 0.06;
+  if (f) sword.drum.rotation.y += 1.5 * dt;
+  for (const m of sword.crates.values()) if (m.userData.to) m.position.lerp(m.userData.to, Math.min(1, dt * 9));
+}
+
+// A beaten raider's weapons: a pair of crates flies over (or across) the den and lands on the floor inside.
 function swordDrop(r) {
   if (!swordHere()) return;
   const pair = randomPair();
-  const cv = document.createElement('canvas');
-  cv.width = 64; cv.height = 128;
-  drawPair(cv, pair.map((p) => ({ c: p.c, breaker: p.breaker || undefined })));
-  const tex = new THREE.CanvasTexture(cv);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  const g = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, toneMapped: false }));
-  g.scale.set(0.3, 0.6, 1);
+  const g = new THREE.Group();
+  pair.forEach((p, i) => { const m = armsCrate({ c: p.c, breaker: p.breaker }); m.position.y = (i + 0.5) * CR; g.add(m); });
+  g.scale.setScalar(0.6);
   const from = new THREE.Vector3(r.x, 1.4, r.z);
-  const to = new THREE.Vector3(Math.max(-bounds.x + 0.8, Math.min(bounds.x - 0.8, r.x + (Math.random() - 0.5) * 2)), 0.45, r.inside ? Math.max(1.4, Math.min(bounds.z1 - 0.8, r.z)) : 1.6 + Math.random() * 1.6);
+  const to = new THREE.Vector3(Math.max(-bounds.x + 0.8, Math.min(bounds.x - 0.8, r.x + (Math.random() - 0.5) * 2)), 0, r.inside ? Math.max(1.4, Math.min(bounds.z1 - 0.8, r.z)) : 1.6 + Math.random() * 1.6);
   g.position.copy(from);
   scene.add(g);
   const d = { pair, g, x: to.x, z: to.z, landed: false, t: Math.random() * 6 };
@@ -2454,17 +2611,19 @@ function swordDrop(r) {
   if (sword.drops.length > SWORD_DROPS) dropGone(sword.drops.shift());
   const arc = r.inside ? 1.5 : wall.H * S + 1.2;
   tween(r.inside ? 0.6 : 1, (s) => { g.position.lerpVectors(from, to, s); g.position.y += Math.sin(s * Math.PI) * arc; }, () => { d.landed = true; });
-  if (!G.swordSaid) { G.swordSaid = true; say('A sword piece! Pick it up and take it to the sword rack', false, true); }
+  if (!G.swordSaid) { G.swordSaid = true; say('Weapons! Pick up the crates and take them to the armoury hoist', false, true); }
 }
-function dropGone(d) { scene.remove(d.g); d.g.material.map.dispose(); d.g.material.dispose(); }
+function dropGone(d) { crateGone(d.g); }
 
 function swordEnter() {
   sword.on = true;
   keys.clear();
-  Object.assign(pirate, { x: sword.x + sword.w / 2 + 0.55, z: sword.z + 0.7 });
-  pirate.g.rotation.y = Math.PI * 1.25;
+  const w = winchAt();
+  Object.assign(pirate, { x: w.x + 0.2, z: w.z + 0.5 });   // beside the winch, clear of the stack
+  pirate.g.rotation.y = Math.atan2(w.x - pirate.x, w.z - pirate.z);
   $('intro').classList.add('off');
 }
+
 // At the rack the keys play the board, as in the real puzzle: left and right move, up and down turn.
 function swordKey(key, e) {
   if (key === 'escape') { sword.on = false; return true; }
@@ -2474,15 +2633,66 @@ function swordKey(key, e) {
   return key === 'tab';
 }
 const CHAINS = ['', '', 'Double! ', 'Triple! ', 'Bingo! ', 'Donkey! ', 'Vegas! '];
+/* A break: chests of swords (fused blocks) arm soldiers, who come out from the stack; loose crates
+   (sprinkles) are thrown to the breaches that need them most and piled inside as barricades. */
 function swordLanded(res) {
   sword.dirty = true;
   if (!res.links.length) return;
   const name = CHAINS[Math.min(res.links.length, 6)], recruits = muster(res);
-  const came = barracks.enlist(recruits, sword.x, sword.z + 0.9);
+  const came = barracks.enlist(recruits, sword.x + 0.9, sword.z);
   came.forEach(addFigure);
-  burst(new THREE.Vector3(sword.x, sword.y0 + sword.h, sword.z + 0.2), '#e8eef6', 10 + came.length * 4, 3);
-  if (!came.length) say(recruits.length ? `The barracks are full: ${SWORD.MAX_SOLDIERS} soldiers at most` : `${name}Broken, but too small to send anyone`);
-  else say(`${name}${came.length === 1 ? 'A soldier' : `${came.length} soldiers`} to the wall!${res.strikes.length ? ' (a sword makes a champion)' : ''}`);
+  const crates = barricade(res.sprinkles);
+  const bits = [];
+  if (came.length) bits.push(`${came.length === 1 ? 'a soldier' : `${came.length} soldiers`} armed`);
+  else if (recruits.length) bits.push(`the barracks are full (${SWORD.MAX_SOLDIERS} soldiers at most)`);
+  if (crates) bits.push(`${crates} crate${crates > 1 ? 's' : ''} to barricade the breach${crates > 1 ? 'es' : ''}`);
+  const msg = bits.join(', ') || 'broken, but too few to send anything: break a chest (2x2 or bigger) for soldiers';
+  say(`${name}${msg[0].toUpperCase()}${msg.slice(1)}!`);
+}
+// Sprinkles to the barricades: each crate thrown from the hoist to the breach that needs it most.
+function barricade(n) {
+  if (!n) return 0;
+  const holes = wall.holes;
+  const got = shareCrates(holes.map((h) => ({ open: gapOpen(h), attackers: h.attackers || 0, strength: Math.max(0, Math.min(1, barFrac(h))), crates: Math.ceil((h.barricade || 0) / BARRICADE.CRATE) })), n);
+  let sent = 0;
+  got.forEach((k, i) => {
+    if (!k) return;
+    const h = holes[i];
+    sent += k;
+    const from = new THREE.Vector3(sword.x, sword.top, sword.z), to = new THREE.Vector3(doorX(h), 0.4, 0.4);
+    for (let j = 0; j < k; j++) {
+      const m = armsCrate({ c: rand(4) });
+      m.scale.setScalar(0.8);
+      m.position.copy(from);
+      scene.add(m);
+      tween(0.8 + j * 0.15, (t) => { m.position.lerpVectors(from, to, t); m.position.y += Math.sin(t * Math.PI) * 3; m.rotation.x = t * 6; }, () => {
+        crateGone(m);
+        h.barricade = Math.min(BARRICADE.MAX * BARRICADE.CRATE, (h.barricade || 0) + BARRICADE.CRATE);
+        barricadeShow(h);
+      });
+    }
+  });
+  return sent;
+}
+/* A barricade: crates piled just inside a hole, at its foot, that raiders must hack through before
+   they can walk in, as they do rubble. h.barricade is how much is left, in seconds of hacking. */
+function barricadeShow(h) {
+  const n = Math.ceil(Math.max(0, h.barricade || 0) / BARRICADE.CRATE - 1e-6);
+  if (!h.barG) {
+    if (!n) return;
+    h.barG = new THREE.Group();
+    wallGroup.add(h.barG);
+  }
+  const kids = h.barG.children;
+  while (kids.length > n) crateGone(kids[kids.length - 1]);
+  while (kids.length < n) {
+    const i = kids.length, m = armsCrate({ c: rand(4) });
+    m.scale.setScalar(1.15);
+    // Two side by side, three high, a little askew.
+    m.position.set(doorX(h) + ((i % 2) - 0.5) * 0.52, 0.24 + Math.floor(i / 2) * 0.48, 0.32 + (Math.random() - 0.5) * 0.06);
+    m.rotation.y = (Math.random() - 0.5) * 0.25;
+    h.barG.add(m);
+  }
 }
 
 // The soldiers, in blue and white. Barracks moves them; this poses their figures to match.
@@ -2539,7 +2749,7 @@ function swordTick(dt) {
   if (sword.on && (carry || pirate.h > 0.05)) sword.on = false;
   if (sword.on) {
     const n = rack.tick(dt);
-    if (n.lost) say('Your Swordfight board filled up: lost, and cleared', true);
+    if (n.lost) say('The stack reached the red: it toppled, crates and all', true);
     if (n.landed) swordLanded(n.landed);
     if (n.changed) sword.dirty = true;
   }
@@ -2548,31 +2758,35 @@ function swordTick(dt) {
     const d = sword.drops[i];
     if (!d.landed) continue;
     d.t += dt;
-    d.g.position.set(d.x, 0.45 + Math.sin(d.t * 3) * 0.06, d.z);
+    d.g.position.set(d.x, 0.08 + Math.abs(Math.sin(d.t * 3)) * 0.12, d.z);
+    d.g.rotation.y += dt * 1.2;
     if (pirate.h > 0.3 || Math.hypot(pirate.x - d.x, pirate.z - d.z) > 0.9) continue;
-    if (!rack.take(d.pair)) { if (!G.queueSaid) { G.queueSaid = true; say(`You can carry ${SWORD.QUEUE} sword pieces: play some at the sword rack`); } continue; }
+    if (!rack.take(d.pair)) { if (!G.queueSaid) { G.queueSaid = true; say(`You can carry ${SWORD.QUEUE} pairs of crates: stack some at the armoury hoist`); } continue; }
     burst(new THREE.Vector3(d.x, 0.5, d.z), PALETTE[d.pair[0].c].base, 6, 2);
     dropGone(d);
     sword.drops.splice(i, 1);
     sword.dirty = true;
   }
-  barracks.tick(dt, raiders, guardSpots(), { x: sword.x, z: sword.z + 1.6 }).forEach(swordNews);
+  barracks.tick(dt, raiders, guardSpots(), { x: sword.x + 1.8, z: sword.z }).forEach(swordNews);
   for (const [s, m] of sword.figures) poseFigure(s, m, dt);
   for (const s of barracks.sweep()) { scene.remove(sword.figures.get(s)?.g); sword.figures.delete(s); }
-  if (sword.dirty) { sword.dirty = false; drawRack(sword.canvas, rack, SWORD_PX); sword.tex.needsUpdate = true; }
+  if (sword.dirty) { sword.dirty = false; stackSync(); }
+  pairSync(dt);
 }
 function swordReset() {
   rack.reset(); barracks.reset();
   sword.on = false; sword.dirty = true;
   sword.drops.splice(0).forEach(dropGone);
+  for (const m of sword.crates.values()) crateGone(m);
+  sword.crates.clear();
   for (const m of sword.figures.values()) scene.remove(m.g);
   sword.figures.clear();
 }
 function swordPrompt() {
-  const n = rack.pieces, of = `${n} sword piece${n === 1 ? '' : 's'}`;
-  if (sword.on) return n ? `Swordfight · A/D or arrows move · W/S or Q/E turn · Space drops · Esc: walk (${of})` : 'Out of sword pieces: beat raiders for more · Esc: walk';
+  const n = rack.pieces, of = `${n} pair${n === 1 ? '' : 's'} of crates`;
+  if (sword.on) return n ? `The hoist · A/D or arrows move · W/S or Q/E turn · Space drops · Esc: walk (${of})` : 'No crates left: beat raiders for more · Esc: walk';
   if (carry || !atSword()) return '';
-  return n ? `Space: swordfight at the rack (${of}): breaks send soldiers` : 'The sword rack: beat raiders for sword pieces, then break them here for soldiers';
+  return n ? `Space: work the hoist (${of}): chests arm soldiers, loose crates barricade the breaches` : 'The armoury: beaten raiders drop crates of weapons; stack them here to arm soldiers';
 }
 
 function newGame() {
@@ -2793,7 +3007,7 @@ function nextLayer(h) {
 }
 const boardsOf = (h) => h.pieces.filter((p) => p.patch).sort((a, b) => a.layer - b.layer);
 // How full the strength bar is: the hole's own wood, or once that's gone, the board they're on.
-const barFrac = (h) => (weakSpot(h) ? h.weak / WEAK : h.rubble > 0 && !h.pieces.length ? h.rubble / RUBBLE : h.hp / h.maxHp);
+const barFrac = (h) => (gapOpen(h) && h.barricade > 0 ? h.barricade / (BARRICADE.MAX * BARRICADE.CRATE) : weakSpot(h) ? h.weak / WEAK : h.rubble > 0 && !h.pieces.length ? h.rubble / RUBBLE : h.hp / h.maxHp);
 /* A bar under the hole's own for each layer behind it, so boarding behind a damaged hole shows (the
    user: "no visible difference to the healthbar"). An unfinished layer's bar is amber. */
 const layBars = (h) => h.lay.map((L) => `<i class="bar lay${L.status === 'open' ? ' part' : ''}"><b></b></i>`).join('');
@@ -2812,6 +3026,7 @@ function labelFor(h) {
   if (h.rubble > 0 && !h.pieces.length) return ['label bad', `Fresh breach, full of rubble<small>mend it before they clear it!</small><i class="bar"><b></b></i>${atk}`];
   const left = h.open;
   const breach = h.pieces.length ? `<i class="bar part"><b></b></i>${layBars(h)}${atk}`
+    : gapOpen(h) && h.barricade > 0 ? `<small>barricaded with crates: they must hack through</small><i class="bar"><b></b></i>${atk}`
     : passable(h) ? `<em>${h.attackers ? '⚔ raiders can walk in!' : 'wide open: raiders can walk in'}</em>`
     : h.attackers || h.weak < WEAK ? `<small>too small to walk through: they're hacking it wider</small><i class="bar"><b></b></i>${atk}` : '';
   if (!h.exact) return ['label bad', `No Masterpiece now<small>board it over to close it</small>${breach}`];
@@ -3444,8 +3659,10 @@ function tween(dur, step, done) { tweens.push({ t: 0, dur, step, done }); }
 // Only an empty hole with a gap at the floor big enough to walk through lets raiders in; anything
 // with wood in it has to be hacked open first, and a smaller or higher one hacked wider (WEAK).
 const bareHole = (h) => h.status === 'open' && !h.pieces.length && !(h.rubble > 0);
-const passable = (h) => bareHole(h) && (h.door != null || !!h.hop);
-const weakSpot = (h) => bareHole(h) && !passable(h);
+// A gap raiders could walk through; passable unless crates are piled in it (the armoury's barricades).
+const gapOpen = (h) => bareHole(h) && (h.door != null || !!h.hop);
+const passable = (h) => gapOpen(h) && !(h.barricade > 0);
+const weakSpot = (h) => bareHole(h) && !gapOpen(h);
 const doorX = (h) => (h.door != null ? X(h.door) + DOOR_W * S / 2 : holeX(h));
 // Where a raider stands to hack at a hole: in its doorway if it has one (rubble or wood in it), else
 // spread along the hole.
@@ -3613,8 +3830,9 @@ function updateRaider(r, dt) {
       const fill = h.pieces.some((p) => !p.patch), li = !h.lay.length ? -1 : out ? h.lay.length - 1 : fill ? -1 : 0;
       const board = li >= 0 ? h.lay[li] : null;
       const rub = !out && h.rubble > 0 && !h.pieces.length;   // a fresh breach: clear the rubble first
+      const barr = gapOpen(h) && h.barricade > 0;   // a gap with crates piled in it: through those first
       const hack = hackRate() * dt, weak = weakSpot(h);   // weak: an empty hole they can't walk through
-      if (weak) h.weak -= hack; else if (rub) { h.rubble -= hack; rubbleShow(h); } else if (board) board.hp -= hack; else h.hp -= hack;
+      if (barr) { h.barricade -= hack; barricadeShow(h); } else if (weak) h.weak -= hack; else if (rub) { h.rubble -= hack; rubbleShow(h); } else if (board) board.hp -= hack; else h.hp -= hack;
       r.m.arms[1].rotation.x = -1.8 + Math.sin(r.t * 9) * 1.1;
       r.hitT -= dt;
       if (r.hitT <= 0) {
@@ -3622,7 +3840,8 @@ function updateRaider(r, dt) {
         burst(new THREE.Vector3(hackX(h, r.slot * 0.5), Math.min(holeMidY(h), 1.4), out ? 0.6 : 0.25), weak ? '#9a8a7a' : '#c98a45', 4, 2);
         h.jig = 0.15;
       }
-      if (weak) { if (h.weak <= 0) widen(h, widenCells(h) || []); else if (!out && r.stamina <= 0) turnedAway(r); }
+      if (barr) { if (h.barricade <= 0) { h.barricade = 0; barricadeShow(h); } else if (!out && r.stamina <= 0) turnedAway(r); }
+      else if (weak) { if (h.weak <= 0) widen(h, widenCells(h) || []); else if (!out && r.stamina <= 0) turnedAway(r); }
       else if (rub) { if (r.stamina <= 0) turnedAway(r); }
       else if (board && board.hp <= layerNextOut(h, li)) dropBoard(h, li, out);
       else if (!board && h.hp <= 0) breakHole(h);
@@ -3647,7 +3866,7 @@ function updateRaider(r, dt) {
         if (into) {
           if (!guest()) G.waveIn++;
           // At the sword rack, a raider getting in hits your board like an opponent's attack.
-          if (sword.on && rack.hitBy(2)) { sword.dirty = true; say('A raider\'s in: sprinkles on your board!', true, true); }
+          if (sword.on && rack.hitBy(2)) { sword.dirty = true; say('A raider\'s in: crates nailed shut on your stack!', true, true); }
           r.tired = Math.min(1, Math.max(0, 1 - r.stamina / RAIDER_STAMINA));
           if (r.tired > 0.15) {
             r.state = 'winded';
@@ -5178,11 +5397,13 @@ function update(dt) {
   swordView += ((sword.on ? 1 : 0) - swordView) * Math.min(1, dt * 3);
   if (swordView > 0.001) {
     const vh = camera.fov * Math.PI / 360;
-    L2.set(sword.x, sword.y0 + sword.h / 2, sword.z);
+    const tall = sword.top + 0.3;   // the whole hoist, floor to beam
+    L2.set(sword.x, tall / 2, sword.z - 0.25);
     look.lerp(L2, swordView);
-    dist += (sword.h / (0.94 * Math.tan(vh)) - dist) * swordView;
-    tilt += (0.1 - tilt) * swordView;
-    yaw *= 1 - swordView;
+    dist += (tall / (1.7 * Math.tan(vh)) - dist) * swordView;
+    tilt += (0.08 - tilt) * swordView;
+    const y0 = Math.atan2(Math.sin(yaw), Math.cos(yaw));   // turned to face the stack
+    yaw = y0 + (Math.PI / 2 - y0) * swordView;
   }
   v3.set(Math.sin(yaw) * Math.cos(tilt), Math.sin(tilt), Math.cos(yaw) * Math.cos(tilt)).multiplyScalar(dist).add(look);
   camAt.lerp(v3, Math.min(1, dt * 3));
@@ -5394,6 +5615,6 @@ if (['all', 'gundeck'].includes(new URLSearchParams(location.search).get('try'))
 requestAnimationFrame(frame);
 
 // For poking at it from the console.
-window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, newGame, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, barricade, barricadeShow, newGame, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };

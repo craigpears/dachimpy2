@@ -82,22 +82,18 @@ the site (`.assetsignore` skips `*.md`).
   will if you let me rotate it first". You should be able to hold the piece over the gap and turn
   it there, whether or not it fits the way it's facing.
 
-- **The Swordfight board looks forced in (8 Nov):** seen in a demo, the user isn't "feeling the
-  graphics on the board": the pieces are "very small compared to what I would be used to", and it
-  "doesn't really feel like it fits the 3D vibe". The carpentry "really blends in well with the
-  front wall and the floor"; the board "just feels like it's been forced in. There's nothing
-  natural looking about it. It's very glaring." It should be part of the den, built in its style,
-  with pieces as big as you'd expect to play with. (How, to pin down with the user.) On the way the
-  pieces come: you collect them, so you have some say over their order. That's a change from the
-  real puzzle, but the user thinks it's "kind of okay. It adds a bit of an element of difference."
-
 ## Needs a playtest to pin down
 
-- **Swordfight at the sword rack (8 Nov), not yet tried by the user.** Beaten raiders drop sword
-  pieces; play them at the rack on the left of the den; breaks send soldiers to the gaps. Watch
-  for: too few pieces to get going (one per raider beaten), or so many soldiers the wall stops
-  mattering; soldiers too weak or too strong (a soldier takes two blows, a raider two); the board
-  big enough to play from where the camera puts it; the pieces reading as Swordfight's.
+- **Swordfight at the armoury hoist (8 Nov), not yet tried by the user.** Rebuilt after the
+  first demo: the board is a stack of weapon crates under a tall timber hoist on the left of the
+  den; chests (fused blocks) arm soldiers, more with combos; loose crates go to barricade the
+  breaches (RULES.md). The user wanted "to see what it feels like ... it's hard to say without
+  seeing". Watch for: whether the stack now feels part of the den, and the crates big enough from
+  where the camera puts it (it frames the whole hoist, 7 m high); too few soldiers now only chests
+  arm them (one per chest, the first demo's six from one break looked too strong); barricades too
+  strong or too weak (a crate holds 2.5 seconds of hacking, six at most per breach); the crates
+  dropped on the floor being mistaken for barricade crates; the order you pick crates up giving you
+  a say in what comes next (the user: "kind of okay. It adds a bit of an element of difference").
 
 - **The longer calm between waves (8 Nov), not yet tried by the user.** 40 seconds now (it was
   20), after being overwhelmed by wave 8; the raids stay as big. Watch for: still overwhelmed late

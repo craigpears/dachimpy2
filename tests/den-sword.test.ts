@@ -1,7 +1,7 @@
 /* Swordfight in the den: the sword rack and the soldiers (src/den-sword.ts). */
 import { describe, expect, it } from 'vitest';
-import { Barracks, muster, SWORD, SwordRack } from '../src/den-sword';
-import type { Foe } from '../src/den-sword';
+import { BARRICADE, Barracks, muster, shareCrates, SWORD, SwordRack } from '../src/den-sword';
+import type { Breach, Foe } from '../src/den-sword';
 import { toSword } from '../src/swordfight';
 import type { Pair } from '../src/swordfight';
 
@@ -19,22 +19,59 @@ function fight(b: Barracks, foes: Foe[], secs: number, spots = [] as { x: number
 }
 
 describe('muster', () => {
-  it('a soldier for every sprinkle', () => {
-    expect(muster({ links: [], sprinkles: 3, strikes: [] })).toEqual([
-      { hp: 2, size: 1 }, { hp: 2, size: 1 }, { hp: 2, size: 1 },
-    ]);
+  const link = (chain: number, ...strikes: ReturnType<typeof toSword>[]) => ({ chain, broken: 0, sprinkles: 0, strikes });
+
+  // The user, after the demo (8 Nov): "you'd have to do a combo, like a fuse block to get a soldier,
+  // and obviously combo for multiples".
+  it('loose pieces arm nobody: only a fused block makes a soldier (8 Nov)', () => {
+    expect(muster({ links: [{ chain: 1, broken: 6, sprinkles: 3, strikes: [] }], sprinkles: 3, strikes: [] })).toEqual([]);
+    const [one, ...rest] = muster({ links: [link(1, toSword(2, 2))], sprinkles: 0, strikes: [toSword(2, 2)] });
+    expect(rest).toEqual([]);
+    expect(one.hp).toBe(3);
+    expect(one.size).toBe(1);
   });
 
-  it('a champion for every sword, as tough as the sword is big', () => {
-    const [small] = muster({ links: [], sprinkles: 0, strikes: [toSword(2, 2)] });
-    const [big] = muster({ links: [], sprinkles: 0, strikes: [toSword(3, 3, 2)] });
-    expect(small.hp).toBe(4);
+  it('a combo arms more of them: two for each block on the second link, three on the third (8 Nov)', () => {
+    const res = { links: [link(1, toSword(2, 2)), link(2, toSword(2, 2, 2)), link(3, toSword(2, 2, 3))], sprinkles: 0, strikes: [] };
+    expect(muster(res)).toHaveLength(1 + 2 + 3);
+  });
+
+  it('a bigger block makes tougher, bigger soldiers, but not by the chain', () => {
+    const [small] = muster({ links: [link(1, toSword(2, 2))], sprinkles: 0, strikes: [] });
+    const [big] = muster({ links: [link(1, toSword(4, 4))], sprinkles: 0, strikes: [] });
+    const [chained] = muster({ links: [link(3, toSword(2, 2, 3))], sprinkles: 0, strikes: [] });
     expect(big.hp).toBeGreaterThan(small.hp);
     expect(big.size).toBeGreaterThan(small.size);
+    expect(chained).toEqual({ ...small, sword: chained.sword });
   });
 
   it('nothing broken, nobody comes', () => {
     expect(muster({ links: [], sprinkles: 0, strikes: [] })).toEqual([]);
+  });
+});
+
+describe('shareCrates', () => {
+  const breach = (o: Partial<Breach> = {}): Breach => ({ open: false, attackers: 0, strength: 1, crates: 0, ...o });
+
+  // The user (8 Nov): sprinkles should "build an extra barrier ... on this side of the wall", like
+  // the rubble in a fresh breach.
+  it('crates go to the gap raiders can walk through (8 Nov)', () => {
+    expect(shareCrates([breach({ attackers: 1, strength: 0.4 }), breach({ open: true })], 2)).toEqual([0, 2]);
+  });
+
+  it('then to the hole being hacked hardest, then the weakest', () => {
+    expect(shareCrates([breach({ attackers: 1 }), breach({ attackers: 3 })], 1)).toEqual([0, 1]);
+    expect(shareCrates([breach({ strength: 0.9 }), breach({ strength: 0.2 })], 1)).toEqual([0, 1]);
+  });
+
+  it('a big break spreads over several breaches rather than piling all on one', () => {
+    const got = shareCrates([breach({ open: true }), breach({ open: true })], 6);
+    expect(got).toEqual([3, 3]);
+  });
+
+  it('a breach takes six crates at most; the rest are lost', () => {
+    expect(shareCrates([breach({ open: true, crates: 4 })], 5)).toEqual([BARRICADE.MAX - 4]);
+    expect(shareCrates([], 3)).toEqual([]);
   });
 });
 

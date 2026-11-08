@@ -36,7 +36,7 @@ npx wrangler dev --local
 - `js/render.js`: SVG boards and pieces
 - `js/app.js`: routing, the voyage, Hole of the Day, the quizzes and the workshop
 - `js/social.js`: pirate names and the leaderboard panel
-- `src/*.ts`: TypeScript parts of the Pirate Den (the fair deal; Swordfight and its soldiers), compiled into `js/` with `npm run build`; tests in `tests/` with Vitest (`npm test`)
+- `src/*.ts`: TypeScript parts of the Pirate Den (the fair deal; Swordfight, its soldiers and barricades), compiled into `js/` with `npm run build`; tests in `tests/` with Vitest (`npm test`)
 - `worker/index.js`: the leaderboard server (Cloudflare Worker + D1)
 
 Puzzle facts and design rules agreed in playtests live in [RULES.md](RULES.md).

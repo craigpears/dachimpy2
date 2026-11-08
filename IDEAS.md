@@ -168,7 +168,10 @@ gunning":
     does after a fresh breach.
   - **Soldiers from fused blocks, not sprinkles:** "you'd have to do a combo, like a fuse block to
     get a soldier, and obviously combo for multiples".
-  - **Claude's suggestion (not agreed yet), the armoury stack:** the board is a real stack of
+  - **Claude's suggestion, the armoury stack** (the user: "implement your idea. Let's just kind of
+    see what it feels like"; **built 8 Nov**, with the user's two ideas, RULES.md "Swordfight at
+    the armoury hoist"; the stack stands full height under a tall hoist; soldiers come out from the
+    stack, not the shack, since the shack may not be built yet): the board is a real stack of
     weapon crates in a corner of the den, built in the den's own timber, at about the size of its
     crates. Each colour is a crate of one weapon (the four swords). A hoist on a beam lowers each
     pair, which is how it "falls" in 3D, and you turn it on the rope. A breaker bursts the crates it
