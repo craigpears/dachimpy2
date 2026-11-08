@@ -27,6 +27,8 @@ the site (`.assetsignore` skips `*.md`).
   fit together should go in the same layer. And show where the layer goes: a wooden studwork
   frame outlining the second layer, with material between the holes once the whole first layer is
   filled.
+- **Boarding behind a damaged hole doesn't show on its health bar (8 Nov):** the bar looks the
+  same with or without boards behind. It should show the extra strength the layers behind add.
 - **Bigger frames, more on the go (8 Nov):** the wall-walk frame is very slim, with not much room
   to be creative. The user wants to get to "bigger investment pieces", and to have more than one
   thing on the go at once (they remembered three), though not rushed. How exactly is to agree with
