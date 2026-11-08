@@ -26,6 +26,11 @@ the site (`.assetsignore` skips `*.md`).
   front wall's, where the camera goes straight on and the keys move the piece. (Same question as
   "the second stage" below: the frames want it too.)
 
+- **WASD walks you off the gun tower's arrows (8 Nov):** on the Gunnery deck, when you're close
+  enough to chalk arrows, WASD still moves the pirate. The user: "WASD should change the direction
+  of the arrows, not move the character". So up close it should be a mode of its own, where WASD
+  turns the arrow, and Esc leaves it.
+
 ## Needs a playtest to pin down
 
 - **Turning a piece close to the wall feels off.** The user can't yet say how (which way it
