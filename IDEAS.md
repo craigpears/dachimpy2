@@ -145,6 +145,19 @@ first fix (TODO.md has the playtest):
   way could block them, and a thrown piece already knocks them flat.
 - **Repairs between waves**: Masterpieces could heal a little in the calm (the user's call).
 
+## Swordfight soldiers, and choosing your mini-game (8 Nov)
+
+The user wants to get on to "something bigger". Like the tutorial in Age of Apes, where "they have
+like 3 mini games, and you get to choose between them": the den should give that choice of how
+to defend. Swordfight is the one to bring in next, since it "would come in naturally quicker than
+gunning":
+- **A sword-fighting piece from each raider beaten,** falling inside the den (or some other way of
+  getting them; the user likes it as a reward).
+- **The pieces spawn little soldiers** who help defend, and end up sword fighting the raiders.
+- Still to square with the rule that every puzzle stays faithful (RULES.md): clay soldiers built
+  from smashed Swordfight blocks were turned down on 7 Nov as "too far away from the sword
+  fighting puzzle".
+
 ## Swordfight: the golem boss
 
 Reference: https://yppedia.puzzlepirates.com/Swordfight (still to read before building: the
