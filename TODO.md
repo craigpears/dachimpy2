@@ -26,6 +26,11 @@ the site (`.assetsignore` skips `*.md`).
   front wall's, where the camera goes straight on and the keys move the piece. (Same question as
   "the second stage" below: the frames want it too.)
 
+- **A cheat menu to skip stages (8 Nov):** for trying things out, a menu that jumps straight to any
+  stage of the den (each rampart frame, the gun tower, the shack) without playing the waves before
+  it, plus quick skips: finish this frame, beat this wave, start the next wave now, mend every
+  hole, more gold.
+
 ## Needs a playtest to pin down
 
 - **Turning a piece close to the wall feels off.** The user can't yet say how (which way it
