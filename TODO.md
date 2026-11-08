@@ -54,6 +54,33 @@ the site (`.assetsignore` skips `*.md`).
   back-end developer, and C# would be ideal where it can go (the server side). Which stack to pin
   down with the user.
 
+- **The fair deal's pieces fit, but never lead to a Masterpiece (8 Nov):** even after the "hole
+  nearest done first" fix, the user is "getting pieces that I guess technically fit, but would not
+  in any way ever lead to a masterpiece", and suspects the deal's idea of what fits is off. To look
+  at with real examples once the tests are in place: a way to save the holes and crates as they
+  were when a bad piece came, so it can become a test. (Worth checking: the deal knows a piece fits
+  some way of finishing the hole, but not that you'll put it in the one spot that does.)
+
+- **The walk frame once the wall's all filled (8 Nov):** the user: "the walk should appear once you
+  are safe and have filled in all the holes, so you can work on that while they try in a futile
+  attempt to get in". So the walk's frame comes as soon as every hole is mended, mid-wave or not.
+
+- **A dazed raider behind a hole wastes your piece (8 Nov):** walk up to fill a hole with a dazed
+  raider behind it and you've "no choice but to throw it", which wastes the piece you need, "then
+  it only dazes them for enough time for you to pick up the next thing and repeat the dazing, you
+  make no progress". You should be able to fit the piece in the hole instead of throwing it (or the
+  daze should last long enough to fit one). (Which, to pin down with the user.)
+
+- **Keyboard-moved piece jumps back to the mouse (8 Nov):** move the piece with the keys over to
+  the right of the mouse cursor and fit it, then pick up the next piece, and it starts at the mouse
+  cursor instead of where you fitted the last one. It should start where the last one went.
+
+- **The last pieces of a frame won't go in until turned (8 Nov):** nearly done with a frame, the
+  wall-walk's say, "it's really hard to fit the last pieces if they need rotating or something, it
+  just stops giving you the option to place the pieces ... it is telling me it won't fit.. well it
+  will if you let me rotate it first". You should be able to hold the piece over the gap and turn
+  it there, whether or not it fits the way it's facing.
+
 ## Needs a playtest to pin down
 
 - **Turning a piece close to the wall feels off.** The user can't yet say how (which way it
