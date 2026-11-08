@@ -213,8 +213,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   **It's only for mending the first wall, and it never goes round and round.** Building a frame
   with it still on, the user got "four M pieces in a row ... and so many U pieces. The favourable
   pieces thing seems to be stuck on." Each piece the wall was missing went into the frame, so the
-  next deal brought the same piece again. So a piece dealt fair that goes anywhere but the wall (a
-  frame, or thrown at a raider) isn't dealt fair again, and once every hole of the first wall is
+  next deal brought the same piece again. So a piece dealt fair that goes into a frame is held
+  back for the next three deals, and once every hole of the first wall is
   done the deal is the usual one for good, even when raiders knock pieces out in wave 1. (Building
   only the shack from a new game: each piece the wall needed came once, at most twice, then the
   usual deal.)
@@ -225,6 +225,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   P while two holes needed a Y and an N. Now it tries the holes in every order and keeps the plan
   missing fewest pieces. (A careless test player, any piece in any clean spot: eight games out of
   eight finished all four holes as Masterpieces in eight pieces.)
+  **The hole nearest done comes first.** Needing only an L to finish a hole, the user got three or
+  four P's meant for other holes: "it certainly does not seem to have been looking at him being
+  like, right, he needs this piece". Now the deal is for the hole with fewest pieces still to come.
+  (It also used to hold a piece back for good once one dealt fair was thrown or put in a frame, so
+  a thrown L meant no hole ever got an L. Now a thrown piece isn't held back, the hole still needs
+  it, and one put in a frame is held back for three deals only.)
   **And it keeps to the usual odds: a rare piece only when the holes really need one.** Picking
   evenly among the ways of finishing a hole, a way that needs a cross came up as often as one that
   needs a P, and the user got five crosses in thirteen pieces: "That feels very broken." Now each

@@ -743,7 +743,7 @@ function putFramePiece(f, i) {
 function placeFrame(t, by, hand) {
   const f = t.frame;
   const info = { letter: hand.letter, shape: hand.cells, dr: t.dr, dc: t.dc, over: t.over, by };
-  if (hand.fair) (G.fairSkip ||= []).push(hand.letter);   // dealt for the wall, used here: see fairDeal
+  if (hand.fair) (G.fairSkip ||= []).push({ l: hand.letter, n: 3 });   // dealt for the wall, used here: see fairDeal
   const from = f.group.worldToLocal(hand.group.position.clone());
   scene.remove(hand.group);
   if (hand === carry) carry = null;
@@ -2235,12 +2235,13 @@ const piles = [0, 1, 2].map(() => {
    (or a hole can't be finished exactly any more) it deals as usual. */
 /* But only for mending the first wall, and never round and round. The user, building a frame with
    the fair deal still on: "four M pieces in a row ... and so many U pieces. The favourable pieces
-   thing seems to be stuck on." A piece dealt fair that goes somewhere other than the wall (a frame,
-   or thrown) isn't dealt fair again (fairSkip), or the wall's missing W would keep coming back; and
-   once every hole of the first wall is done (fairOver) the deal is the usual one, even when the
-   raiders knock pieces out in wave 1. */
+   thing seems to be stuck on." A piece dealt fair that goes into a frame instead is held back for
+   the next three deals (fairSkip), or the wall's missing W would keep coming back; and once every
+   hole of the first wall is done (fairOver) the deal is the usual one, even when the raiders knock
+   pieces out in wave 1. (Held back for good, as it first was, a thrown L meant the hole needing an L
+   never got one; and a thrown piece isn't held back at all: the hole still needs it.) */
 const fairDeal = () => !G.fairOver && (G.wave === 0 || (G.wave === 1 && G.phase === 'wave'));
-function neededLetters() {
+function neededPlan() {
   const have = piles.map((q) => q.letter).filter(Boolean);
   if (carry?.letter) have.push(carry.letter);
   // Each hole's ways of finishing, as the pieces they take (one entry per different set).
@@ -2282,19 +2283,34 @@ function neededLetters() {
       }
       let x = Math.random() * cands.reduce((s, c) => s + c.o, 0), pick = cands[cands.length - 1].l;
       for (const c of cands) { x -= c.o; if (x < 0) { pick = c.l; break; } }
-      for (const y of pick) { const i = pool.indexOf(y); if (i >= 0) pool.splice(i, 1); else need.push(y); }
+      for (const y of pick) { const i = pool.indexOf(y); if (i >= 0) pool.splice(i, 1); else need.push({ l: y, h: hi }); }
     }
-    const o = odds(need);
+    const o = odds(need.map((n) => n.l));
     if (!best || need.length < best.length || (need.length === best.length && o > bestOdds)) { best = need; bestOdds = o; }
   }
   const need = best || [];
-  for (const l of G.fairSkip || []) { const i = need.indexOf(l); if (i >= 0) need.splice(i, 1); }
+  for (const s of G.fairSkip || []) { const i = need.findIndex((n) => n.l === s.l); if (i >= 0) need.splice(i, 1); }
   return need;
 }
+const neededLetters = () => neededPlan().map((n) => n.l);
+/* And the hole nearest done first. Picking any of the missing pieces, the user needing just an L to
+   finish a hole got three or four P's meant for the others: "it certainly does not seem to have been
+   looking at him being like, right, he needs this piece". So the deal is for the hole with fewest
+   pieces still to come. */
+function fairPick() {
+  const need = neededPlan();
+  if (!need.length) return null;
+  const left = new Map();
+  for (const n of need) left.set(n.h, (left.get(n.h) || 0) + 1);
+  const fewest = Math.min(...left.values());
+  return C.pick(need.filter((n) => left.get(n.h) === fewest)).l;
+}
 function deal(p) {
-  const need = wall && fairDeal() ? neededLetters() : [];
-  p.letter = need.length ? C.pick(need) : C.weightedLetter();
-  p.fair = need.length > 0;
+  const fair = wall && fairDeal() ? fairPick() : null;
+  // A piece held back after going into a frame (fairSkip) comes back after a few deals.
+  if (G.fairSkip?.length) G.fairSkip = G.fairSkip.filter((s) => --s.n > 0);
+  p.letter = fair || C.weightedLetter();
+  p.fair = !!fair;
   p.cells = C.normalize(C.pick(C.ORIENTS_BY_LETTER[p.letter]).cells);
 }
 function showPile(p) {
@@ -3131,7 +3147,6 @@ function refill(p, secs = 0.45) {
 // Hurl the carried piece at a raider. It always flies true, but the piece is spent.
 function throwAt(r, hand = carry, by = myId()) {
   const g = hand.group, pile = hand.from, color = WOOD[hand.letter];
-  if (hand.fair) (G.fairSkip ||= []).push(hand.letter);   // dealt for the wall, thrown instead: see fairDeal
   if (hand.mat) { hand.mat.opacity = 1; hand.mat.depthWrite = true; }
   if (hand === carry) carry = null;
   r.targeted = true;
@@ -5229,6 +5244,6 @@ if (['all', 'gundeck'].includes(new URLSearchParams(location.search).get('try'))
 requestAnimationFrame(frame);
 
 // For poking at it from the console.
-window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, newGame, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, newGame, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };

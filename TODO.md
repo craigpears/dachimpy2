@@ -40,6 +40,14 @@ the site (`.assetsignore` skips `*.md`).
   distance for placing a piece in the wall. The user: "we were meant to remove that so you can
   place from anywhere". Fitting a piece into the wall should work wherever you're standing.
 
+- **Pull the tricky parts out into their own tested pieces (8 Nov):** the den's code is getting
+  more complicated, all in one long file with few separate parts. The user: the fair deal "is
+  definitely worthy of a class that's got some proper automated tests around it. Like, here are
+  some holes, test what pieces are generated", so they can describe the scenarios they run into
+  and have each one become a test. The same for working out layouts (the wall's holes, the frames,
+  the walk), "their own little classes ... that you can put tests around", for quality control.
+  Tests that run without the browser, from the command line.
+
 ## Needs a playtest to pin down
 
 - **Turning a piece close to the wall feels off.** The user can't yet say how (which way it
@@ -62,7 +70,7 @@ the site (`.assetsignore` skips `*.md`).
   8 Nov it also stops once the first wall's done, and doesn't re-deal a piece you used elsewhere
   (the user got four W's in a row building a frame); check it no longer feels stuck on. Also
   since 8 Nov: it plans all the holes together, and keeps to the usual odds (five crosses in
-  thirteen pieces before); check the mix feels natural, not too many P's.
+  thirteen pieces before); check the mix feels natural, not too many P's; and (since 8 Nov) that the piece finishing a hole comes first.
 - **Layers behind (8 Nov), not yet tried by the user.** A layer is now the hole's shape again,
   filled piece by piece in a timber surround, and a full one is as strong as a Masterpiece and pays
   the same. Watch for: holes three layers deep being too strong, or the pay too generous; the
