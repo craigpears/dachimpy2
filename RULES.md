@@ -206,7 +206,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   finishing them all as Masterpieces, picking the way that uses most of what's already on the crates
   or in your hands. It looks afresh every deal, so a piece put somewhere else or knocked out just
   changes the plan. Once nothing's missing, or a hole can't be finished exactly any more, it deals
-  at random as usual, and from wave 2 on it's all random. (The same test: dealt at random, all
+  at random as usual, and from wave 2 on it's all random: asked whether to keep it on past wave 1,
+  the user said first wave only. (The same test: dealt at random, all
   eight games got stuck after 3 to 7 pieces with nothing on the crates that fits cleanly; dealt
   fair, five games out of five finished all four holes as Masterpieces in eight pieces.)
 - **Throw pieces at raiders, don't bonk them.** A plain bonk was underwhelming. The carried piece
