@@ -49,9 +49,10 @@ the site (`.assetsignore` skips `*.md`).
   the keys yet (WASD moves the piece, arrows jump hole to hole, since 8 Nov). Still to ask: should
   it come on by itself when you walk up with a piece; the same view for the rampart and house
   frames ("the second stage")?
-- **Wider walk frames (8 Nov), not yet tried by the user.** Three full rows and a ragged fourth
-  (9 pieces a stretch, was about 7). Could go a row deeper if it's still too slim: the walk then
-  overhangs the den further, and starts to hide the top of the wall in the whole-wall view.
+- **The walk as one big frame (8 Nov), not yet tried by the user.** About 30 pieces in one go,
+  with a stepped edge three to five rows deep for room for every kind of piece. Watch for: it
+  taking too long for one wave's timber (it could come as two halves), and the deeper bits of the
+  walk hiding the top of the wall in the whole-wall view.
 - **Layers behind (8 Nov), not yet tried by the user.** A layer is now the hole's shape again,
   filled piece by piece in a timber surround, and a full one is as strong as a Masterpiece and pays
   the same. Watch for: holes three layers deep being too strong, or the pay too generous; the

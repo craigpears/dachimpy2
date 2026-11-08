@@ -17,6 +17,36 @@ const C = { ...window.Carp, solve(cells, limit) {
   const T = (cs) => cs.map(([r, c]) => [c, r]);
   return window.Carp.solve(T(cells), limit).map((t) => t.map((p) => ({ letter: p.letter, cells: T(p.cells) })));
 } };
+/* An exact tiling with a mix of pieces, as a crew would really fill it: the solver always reaches
+   for the P first, so a frame filled by it (the cheat stages) came out nearly all Ps. Each square
+   tries the pieces used least so far first, in a shuffled order. Null if it's taking too long. */
+function mixedTiling(cells) {
+  const b = C.bbox(cells), flip = b.w > b.h, T = (cs) => cs.map(([r, c]) => [c, r]);
+  const order = (flip ? T(cells) : cells).slice().sort((a, z) => a[0] - z[0] || a[1] - z[1]);
+  const free = new Set(order.map(([r, c]) => k(r, c))), used = {}, cur = [];
+  let nodes = 0;
+  const rec = () => {
+    if (++nodes > 20000) return false;
+    const f = order.find(([r, c]) => free.has(k(r, c)));
+    if (!f) return true;
+    const os = window.Carp.ORIENTS.map((o) => [o, (used[o.letter] || 0) + Math.random() * 2]).sort((a, z) => a[1] - z[1]);
+    for (const [o] of os) {
+      const dr = f[0] - o.cells[0][0], dc = f[1] - o.cells[0][1], placed = o.cells.map(([r, c]) => [r + dr, c + dc]);
+      if (!placed.every(([r, c]) => free.has(k(r, c)))) continue;
+      placed.forEach(([r, c]) => free.delete(k(r, c)));
+      used[o.letter] = (used[o.letter] || 0) + 1;
+      cur.push({ letter: o.letter, cells: placed });
+      if (rec()) return true;
+      cur.pop();
+      used[o.letter]--;
+      placed.forEach(([r, c]) => free.add(k(r, c)));
+      if (nodes > 20000) return false;
+    }
+    return false;
+  };
+  if (cells.length % 5 || !rec()) return null;
+  return cur.map((p) => ({ letter: p.letter, cells: flip ? T(p.cells) : p.cells }));
+}
 const S = 0.55;          // one carpentry square, in metres
 const WOOD_D = 0.5;      // depth of a wooden piece
 const STONE_D = 0.7;
@@ -439,14 +469,14 @@ let ramp = null;
 const STAIR_W = 1.1;
 function makeRampart() {
   const half = wall.W * S / 2, T = wall.H * S + 0.38, n = wall.H + 1, zTop = 0.25, run = n * S, zBot = zTop + run;
-  const cuts = [0, Math.round(wall.W / 3), Math.round(wall.W * 2 / 3), wall.W];
-  const secs = [0, 1, 2].map((i) => ({ c0: cuts[i], c1: cuts[i + 1] - 1, x0: X(cuts[i]), x1: X(cuts[i + 1]) }));
-  // What gets built, in order: an end stretch's walk and then its stairs, the other end's, the middle walk last.
-  const jobs = [[0, 'deck'], [0, 'stair'], [2, 'deck'], [2, 'stair'], [1, 'deck'], [3, 'gun', 0], [3, 'gun', 1], [3, 'gun', 2], [4, 'house', 0], [4, 'house', 1], [4, 'house', 2], [4, 'house', 3]].map(([si, kind, part], i) => ({ i, si, kind, part, frame: null, up: false }));
+  // What gets built, in order: the whole walk in one frame and then the left stairs up to it, the
+  // right stairs, the gun tower, and the shack whenever you ask for it. `si`: which timber it comes
+  // with (the stairs' 0 and 2 are also which end they're at).
+  const jobs = [[0, 'deck'], [0, 'stair'], [2, 'stair'], [3, 'gun', 0], [3, 'gun', 1], [3, 'gun', 2], [4, 'house', 0], [4, 'house', 1], [4, 'house', 2], [4, 'house', 3]].map(([si, kind, part], i) => ({ i, si, kind, part, frame: null, up: false }));
   gd = null;
-  ramp = { T, half, n, zTop, zBot, run, secs, jobs, next: 0, stairs: [[-half + 0.2, -half + 0.2 + STAIR_W], [half - 0.2 - STAIR_W, half - 0.2]] };
+  ramp = { T, half, n, zTop, zBot, run, jobs, next: 0, stairs: [[-half + 0.2, -half + 0.2 + STAIR_W], [half - 0.2 - STAIR_W, half - 0.2]] };
 }
-/* Building it. After a wave is beaten off, timber arrives for one stretch, and its frames come one
+/* Building it. After a wave is beaten off, timber arrives for the next part, and its frames come one
    at a time: the next only once the last is done, so there's never more than one to get on with.
    - The walk: a frame laid flat on the den floor in front of the wall. Lay pieces in it one at a
      time. A piece may stick out over the edge (so any piece will do); the spare is sawn off when
@@ -463,23 +493,27 @@ const frames = () => (ramp ? ramp.jobs.filter((j) => j.frame && !j.frame.done).m
 const stairsUp = () => !!ramp && ramp.jobs.some((j) => j.kind === 'stair' && j.up);
 // A point on a frame, from its grid (columns across, rows down), `z` out from its face.
 const frameAt = (f, c, r, z = 0) => f.group.localToWorld(new THREE.Vector3(c * S, -r * S, z));
-// The walk: three full rows along the top of the wall (two over the stone, so the stretches join
-// up, and one over the den side), and a ragged fourth overhanging the den, all clear of where the
-// stairs come up. (It was two rows and a ragged third: the user found it "very slim", with not much
-// room to be creative, and wanted bigger pieces of work to invest in.)
-function deckShape(si) {
-  const s = ramp.secs[si], w = s.c1 - s.c0 + 1, base = [];
-  const clear = (c) => !(si === 0 && c < 3) && !(si === 2 && c >= w - 3);
-  for (let r = 0; r < 3; r++) for (let c = 0; c < w; c++) if (r < 2 || clear(c)) base.push([r, c]);
-  const cols = [...Array(w).keys()].filter(clear);
-  let extra = (5 - base.length % 5) % 5;
-  while (extra < 5 && extra + 5 <= cols.length) extra += 5;   // a ragged edge of five squares at least
-  if (extra > cols.length) extra = 0;
-  for (let i = 0; i < 60; i++) {
-    const cells = base.concat(C.shuffle(cols.slice()).slice(0, extra).map((c) => [3, c]));
-    if (C.solve(cells, 1).length) return cells;
+/* The walk: one big frame the length of the wall (the user wanted it "one big piece", not a stretch
+   at a time). Two full rows over the stone, then out over the den clear of where the stairs come up,
+   with an edge that steps in and out: three, four or five rows deep in runs of two to five squares.
+   (A strip three rows deep with a ragged fourth only took "long thin straight" pieces like the P: the
+   user wanted room for every kind of piece.) It's always one that can be filled with not a scrap
+   wasted. */
+function deckShape() {
+  const W = wall.W, clear = (c) => c >= 3 && c < W - 3;
+  for (let t = 0; t < 400; t++) {
+    const cells = [];
+    let d = 3 + rand(3), run = 0;
+    for (let c = 0; c < W; c++) {
+      if (clear(c) && run-- <= 0) { d = [3, 4, 5].filter((x) => x !== d)[rand(2)]; run = 1 + rand(4); }
+      const deep = clear(c) ? d : 2;
+      for (let r = 0; r < deep; r++) cells.push([r, c]);
+    }
+    if (cells.length % 5 === 0 && C.solve(cells, 1).length) return cells;
   }
-  return base.length % 5 ? base.slice(0, base.length - base.length % 5) : base;
+  const cells = [];
+  for (let c = 0; c < W; c++) for (let r = 0; r < (clear(c) ? 4 : 2); r++) cells.push([r, c]);
+  return cells.length % 5 ? cells.slice(0, cells.length - cells.length % 5) : cells;
 }
 // The stairs: a stepped band three squares deep, from the walk at the wall down to the den floor.
 // Column 0 is at the bottom of the left stairs, and at the top of the right ones.
@@ -502,7 +536,7 @@ function openJob(i, shape = null) {
   if (!j || j.frame) return j?.frame || null;
   if (j.kind !== 'house') ramp.next = Math.max(ramp.next, i + 1);
   const stair = j.kind === 'stair';
-  shape ||= stair ? stairShape(j.si) : j.kind === 'gun' ? gunShape(j.part) : j.kind === 'house' ? houseShape(j.part) : deckShape(j.si);
+  shape ||= stair ? stairShape(j.si) : j.kind === 'gun' ? gunShape(j.part) : j.kind === 'house' ? houseShape(j.part) : deckShape();
   if (isHost()) send('all', { t: 'frame', fi: i, cells: shape });
   const g = new THREE.Group();
   if (j.kind === 'house') {
@@ -512,7 +546,7 @@ function openJob(i, shape = null) {
     g.quaternion.copy(flat.q);
   } else if (!stair) {
     // Laid flat: the rows run from the wall towards the den, the face is up.
-    g.position.set(j.kind === 'gun' ? gunX0() : ramp.secs[j.si].x0, 0, j.kind === 'gun' ? GUN_FRAME_Z : FRAME_Z);
+    g.position.set(j.kind === 'gun' ? gunX0() : X(0), 0, j.kind === 'gun' ? GUN_FRAME_Z : FRAME_Z);
     g.rotation.x = -Math.PI / 2;
   } else {
     // Stood on end against the side of the cave, facing into the den.
@@ -702,8 +736,8 @@ function finishFrame(f, quiet = false) {
     tween(0.6, () => {}, () => den.remove(block, ropes));
   }));
 }
-// A frame's done. The rest of the same stretch comes straight away; the next stretch's timber
-// comes when the next wave's beaten off.
+// A frame's done. The rest of the same timber comes straight away (the left stairs after the walk);
+// the next lot comes when the next wave's beaten off.
 function jobDone(j, quiet) {
   if (quiet) return;
   if (j.kind === 'house') {
@@ -715,7 +749,7 @@ function jobDone(j, quiet) {
   const stretch = ramp.jobs.filter((o) => o.si === j.si);
   const msg = j.kind === 'gun' ? (j.part === GD.parts.length - 1 ? 'The gun tower\'s up! Walk out onto it from the wall' : 'That part of the gun tower\'s up. Now the next')
     : ramp.jobs.every((o) => o.up || o.kind === 'gun' || o.kind === 'house') ? 'The whole rampart is up!'
-    : stretch.every((o) => o.up) ? 'That stretch is up: climb the stairs and throw from the wall!'
+    : stretch.every((o) => o.up) ? 'The stairs are up: climb them and throw from the wall!'
     : 'The walk\'s up on the wall. Now build the stairs to it';
   setTimeout(() => toast(msg), 1500);
   if (!guest() && ramp.jobs[ramp.next]?.si === j.si) openJob(ramp.next);
@@ -3462,7 +3496,7 @@ function updateWaves(dt) {
     G.phase = 'calm'; G.phaseT = CALM_SECS; G.aim = null;
     let tally = G.waveTurned || G.waveIn ? ` ${G.waveTurned} turned away at the wall, ${G.waveIn} got in.` : '';
     if (!G.waveIn && G.waveTurned) { G.gold += PAY.clean; updateStats(); tally = ` Not one got in! (+${PAY.clean})`; }
-    // Timber for the next stretch, once nothing's still being built.
+    // Timber for the next part, once nothing's still being built.
     const f = !frames().some((o) => o.kind !== 'house') && !ramp.jobs.some((j) => j.kind !== 'house' && j.frame && !j.up) && ramp.jobs[ramp.next]?.kind !== 'house' && openJob(ramp.next);
     if (f) say(`Wave ${G.wave} beaten off!${tally} Timber's come: ${f.kind === 'gun' ? 'build a gun tower in its frame' : 'build the rampart in its frame'}`);
     else say(`Wave ${G.wave} beaten off!${tally}`);
@@ -4811,7 +4845,7 @@ function buildAll(upTo = ramp.jobs.length - 1) {
 // onto a few `spare` squares, grown out from the edge.
 function tileFor(cells, spare) {
   const own = new Set(cells.map(([r, c]) => k(r, c)));
-  let sol = C.solve(cells, 1)[0];
+  let sol = mixedTiling(cells) || C.solve(cells, 1)[0];
   for (let n = 1; n <= 4 && !sol; n++) for (let t = 0; t < 40 && !sol; t++) {
     const have = new Set(own), add = [];
     for (let m = 0; m < n; m++) {
@@ -4821,7 +4855,7 @@ function tileFor(cells, spare) {
       have.add(k(p[0], p[1]));
       add.push(p);
     }
-    if (add.length === n) sol = C.solve(cells.concat(add), 1)[0];
+    if (add.length === n) sol = mixedTiling(cells.concat(add)) || C.solve(cells.concat(add), 1)[0];
   }
   return (sol || []).map((p) => ({ letter: p.letter, shape: C.normalize(p.cells), dr: Math.min(...p.cells.map((x) => x[0])), dc: Math.min(...p.cells.map((x) => x[1])), over: p.cells.filter(([r, c]) => !own.has(k(r, c))).length }));
 }
@@ -4844,11 +4878,10 @@ function fillFrame(f) {
 /* The cheat menu (` or the Cheats button), for trying things out: jump to any stage of the den
    without playing the waves before it, or skip what's in front of you. Playing alone only: with a
    crew, everyone's game would have to follow. */
-// [name, the last rampart job already built, waves already beaten off]. Each stretch's timber comes
-// after a wave, as in play: the left walk after wave 1, the right after 2, the middle after 3, the
-// gun tower after 4.
-// A stage lands you as its stretch's timber arrives, the walk frame first, then its stairs.
-const STAGES = [['The start', -1, 0], ['Left stretch', -1, 1], ['Right stretch', 1, 2], ['Middle walk', 3, 3], ['Gun tower', 4, 4], ['Everything built', 7, 5]];
+// [name, the last rampart job already built, waves already beaten off]. Each part's timber comes
+// after a wave, as in play: the walk (then the left stairs) after wave 1, the right stairs after 2,
+// the gun tower after 3. A stage lands you as its timber arrives.
+const STAGES = [['The start', -1, 0], ['The walk', -1, 1], ['Right stairs', 1, 2], ['Gun tower', 2, 3], ['Everything built', 5, 4]];
 const cheats = { open: false };
 function skipTo(s) {
   const [, upTo, wave] = STAGES[s];
@@ -4859,7 +4892,7 @@ function skipTo(s) {
   if (wave) {
     Object.assign(G, { wave, phase: 'calm', phaseT: CALM_SECS });
     if (wave >= 2) cannon.visible = true;
-    if (upTo < 7) openJob(upTo + 1);
+    if (ramp.jobs[upTo + 1]?.kind !== 'house') openJob(upTo + 1);
     $('intro').classList.add('off');
   }
   updateStats();

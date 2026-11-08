@@ -237,10 +237,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   at the wall can only be hit from up there; it's what makes a Masterpiece pay off: while it holds,
   you go up and knock the raiders off it. The view swings up high to look down at them. Keep it out
   of the way (not in front of the gate), and the full length of the wall.
-- **The rampart is built a stretch at a time, as the reward for beating a wave.** Order: left
-  stretch, then right, then the middle.
+- **The rampart is built a part at a time, as the reward for beating a wave.** Order: the whole
+  walk (then the left stairs straight after it), the right stairs, then the gun tower.
   - **One frame at a time.** When a wave is beaten off and nothing is still being built, timber
-    arrives for the next stretch. Its frames come one after another, each only when the last is
+    arrives for the next part. Its frames come one after another, each only when the last is
     done, so there's never more than one to get on with. The second frame appearing before the
     first was done felt rushed.
   - **Walk only on what's built.** You can only walk where the walk's pieces actually are.
@@ -248,13 +248,16 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   bizarre, and a stretch popping up was too easy. A finished frame then turning into a ready-made
   rampart was magic too. **Every part of the rampart is the pieces you fitted, and they stay those
   pieces.** Nothing turns into anything else, and nothing is added that you didn't build.
-  - **The walk:** a frame laid flat on the den floor in front of the stretch. It's three full rows the
-    width of the stretch, so the stretches join up, plus a ragged fourth row overhanging the den
-    (about 9 pieces a stretch). It was two rows and a ragged third: the user found it "very slim",
-    with not much room to be creative, and chose wider walk frames over several frames at once. You lay pieces in it one
-    at a time and watch it come together. When it's full the crew haul it up on ropes, pieces and
+  - **The walk: one big frame,** the length of the wall, laid flat on the den floor in front of it
+    (about 30 pieces). The user wanted it "one big piece", not a stretch at a time. Two full rows
+    over the stone, then out over the den clear of where the stairs come up, with an edge that
+    steps in and out: three, four or five rows deep in runs of two to five squares. It can always
+    be filled with not a scrap wasted. History: two rows and a ragged third was "very slim", with
+    not much room to be creative; three and a ragged fourth was still "long thin straight holes
+    that only fit the P": the user wants room for every kind of piece. You lay pieces in it one at
+    a time and watch it come together. When it's full the crew haul it up on ropes, pieces and
     all, and lay it along the top of the wall.
-  - **The stairs (end stretches):** a frame standing upright at the end of the den, a stepped
+  - **The stairs (at each end):** a frame standing upright at the end of the den, a stepped
     stringer from the floor up to the walk. You fit pieces into it like a hole in the wall, and the
     pieces are the steps. Half-built stairs are in the way; you can't walk through them.
   - **Any piece will do:** a piece may stick out over the frame's edge. On the walk the spare is
@@ -424,10 +427,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **The cheat menu, for trying things out** (in the menu, or the backtick key). The user asked
   for a way to skip stages. It pauses the game while it's open. Playing alone only, as with a crew
   everyone's game would have to follow. Kept small: little buttons, few of them.
-  - **Skip to a stage:** the start, each stretch of the rampart (left, right, middle walk), the gun
-    tower, or everything built. The den starts afresh, built up to there, just as that stretch's
-    timber arrives (the left after wave 1, the right after 2, the middle after 3, the gun tower
-    after 4). Not a stage per frame: that puzzled the user.
+  - **Skip to a stage:** the start, the walk, the right stairs, the gun tower, or everything
+    built. The den starts afresh, built up to there, just as that part's timber arrives (the walk
+    after wave 1, the right stairs after 2, the gun tower after 3). Not a stage per frame: that
+    puzzled the user. What it builds is filled with a mix of all the pieces, as a crew would: the
+    plain solver's fill was nearly all Ps.
   - **Or skip ahead now:** beat this wave (its timber comes as usual), next wave now, mend every
     hole (Masterpieces where they'll go, damage repaired), build the shack. No "finish this frame"
     or "+100 gold": the user found them no help.
