@@ -443,7 +443,7 @@ function buildWall() {
   cannon.visible = false;
   scenery.push(mound, cannon);
   // Props inside: three crates for the piles, a fire barrel, the treasure chest.
-  piles.forEach((p, i) => { p.x = (i - 1) * Math.min(3.4, half * 0.42); p.z = 6.9; p.crate.position.set(p.x, 0.32, p.z); scenery.push(p.crate); });
+  piles.forEach((p, i) => { p.x = (i - 1) * Math.min(3.4, half * 0.42); p.z = 8; p.crate.position.set(p.x, 0.32, p.z); scenery.push(p.crate); });
   barrel.position.set(half - 1.4, 0, 7.6);
   chest.position.set(half - 1.7, 0, 9.7);
   scenery.push(barrel, chest);
@@ -484,7 +484,9 @@ function makeRampart() {
      top of the wall. You walk on the very pieces you laid.
    - The stairs: a frame standing upright at the end of the den, a stepped stringer from the floor
      up to the walk. Fit pieces into it like a hole in the wall; they're the steps. */
-const FRAME_Z = WALL_Z + 0.25;   // just behind where you stand to mend the wall
+// Well back from where you stand to mend the wall: just behind it, the walk frame took the pieces
+// meant for the wall (the user: "the walk frame gets the focus").
+const FRAME_Z = WALL_Z + 1.6;
 const frameMat = mat('#4a3220', { roughness: 1 });
 const railMat = mat('#8a5a30', { map: woodTex });
 const railGeo = [new THREE.BoxGeometry(0.06, S + 0.06, 0.07), new THREE.BoxGeometry(S + 0.06, 0.06, 0.07)];
@@ -494,42 +496,51 @@ const stairsUp = () => !!ramp && ramp.jobs.some((j) => j.kind === 'stair' && j.u
 // A point on a frame, from its grid (columns across, rows down), `z` out from its face.
 const frameAt = (f, c, r, z = 0) => f.group.localToWorld(new THREE.Vector3(c * S, -r * S, z));
 /* The walk: one big frame the length of the wall (the user wanted it "one big piece", not a stretch
-   at a time). Two full rows over the stone, then out over the den clear of where the stairs come up,
-   with an edge that steps in and out: three, four or five rows deep in runs of two to five squares.
-   (A strip three rows deep with a ragged fourth only took "long thin straight" pieces like the P: the
-   user wanted room for every kind of piece.) It's always one that can be filled with not a scrap
-   wasted. */
+   at a time). Two full rows over the stone, then out over the den clear of where the stairs come up.
+   Its edge isn't square: runs three or four rows deep, with single squares jutting out here and
+   there. As on a Puzzle Pirates hole, that's where the rare pieces go, an X or a W, and still leave
+   plenty of frame to finish cleanly (the user: a "long thin straight" strip only took pieces like
+   the P). It's always one that can be filled with not a scrap wasted. */
 function deckShape() {
   const W = wall.W, clear = (c) => c >= 3 && c < W - 3;
   for (let t = 0; t < 400; t++) {
-    const cells = [];
-    let d = 3 + rand(3), run = 0;
+    const depth = [];
+    let d = 3 + rand(2), run = 0;
     for (let c = 0; c < W; c++) {
-      if (clear(c) && run-- <= 0) { d = [3, 4, 5].filter((x) => x !== d)[rand(2)]; run = 1 + rand(4); }
-      const deep = clear(c) ? d : 2;
-      for (let r = 0; r < deep; r++) cells.push([r, c]);
+      if (clear(c) && run-- <= 0) { d = 7 - d; run = 2 + rand(5); }
+      depth.push(clear(c) ? d : 2);
     }
+    // A square jutting out from a level stretch, never two side by side.
+    for (let c = 4; c < W - 4; c++) {
+      if (depth[c - 1] === depth[c] && depth[c + 1] === depth[c] && Math.random() < 0.55) { depth[c]++; c++; }
+    }
+    const cells = [];
+    depth.forEach((dp, c) => { for (let r = 0; r < dp; r++) cells.push([r, c]); });
     if (cells.length % 5 === 0 && C.solve(cells, 1).length) return cells;
   }
   const cells = [];
   for (let c = 0; c < W; c++) for (let r = 0; r < (clear(c) ? 4 : 2); r++) cells.push([r, c]);
   return cells.length % 5 ? cells.slice(0, cells.length - cells.length % 5) : cells;
 }
-// The stairs: a stepped band three squares deep, from the walk at the wall down to the den floor.
-// Column 0 is at the bottom of the left stairs, and at the top of the right ones.
-// Thickened under the top, or trimmed at the foot, so it can be filled with not a scrap wasted.
+/* The stairs: solid, from the treads right down to the den floor, so the stepped edge is all corners
+   for the odd pieces to tuck into. (A band three squares deep held only four pieces, with room for
+   an X in one spot in five.) Column 0 is at the bottom of the left stairs, and at the top of the
+   right ones. A few squares are left out at the back of the floor under the top step, where nobody
+   treads, so it can be filled with not a scrap wasted. */
 function stairShape(si) {
-  const n = ramp.n, band = [], under = [];
+  const n = ramp.n, cells = [], spare = [];
   for (let c = 0; c < n; c++) {
     const top = si === 0 ? n - 1 - c : c;
-    for (let r = top; r <= Math.min(n - 1, top + 2); r++) band.push({ cell: [r, c], s: top });
-    if (top + 3 <= n - 1) under.push({ cell: [top + 3, c], s: top });
+    for (let r = top; r < n; r++) { cells.push([r, c]); if (r >= top + 2) spare.push({ cell: [r, c], top }); }
   }
-  band.sort((a, b) => a.s - b.s || a.cell[0] - b.cell[0]);
-  under.sort((a, b) => a.s - b.s);
-  const m = band.length % 5, tries = m ? [band.concat(under.slice(0, 5 - m)), band.slice(0, band.length - m)] : [band];
-  const cells = (list) => list.map((o) => o.cell);
-  return cells(tries.find((t) => C.solve(cells(t), 1).length) || band);
+  const m = cells.length % 5;
+  spare.sort((a, b) => b.cell[0] - a.cell[0] || a.top - b.top);
+  for (let t = 0; t < 40; t++) {
+    const gone = new Set((t ? C.shuffle(spare.slice(0, m + 4)) : spare).slice(0, m).map((o) => k(...o.cell)));
+    const out = cells.filter(([r, c]) => !gone.has(k(r, c)));
+    if (C.solve(out, 1).length) return out;
+  }
+  return cells.slice(0, cells.length - m);
 }
 function openJob(i, shape = null) {
   const j = ramp.jobs[i];
@@ -1187,7 +1198,7 @@ const GD = {
   // Each gun: the lane square in front of its muzzle, and the way it faces (out). It lies on the
   // three squares in from there.
   guns: [{ port: [3, 0], d: 3 }, { port: [9, 0], d: 3 }, { port: [3, 12], d: 1 }, { port: [9, 12], d: 1 }],
-  parts: [5, 5, 3],   // the tower's frames, rows in each, from the wall out
+  parts: [4, 5, 4],   // the tower's frames, rows in each, from the wall out (more or less: see gunShape)
 };
 const GUN_FRAME_Z = 0.6;   // the tower's frames are laid on the floor right up against the gate
 const KINDS = ['powder', 'wad', 'shot', 'bucket'];
@@ -1212,11 +1223,36 @@ const gunX0 = () => X(wall.gateCols.c0) + ((wall.gateCols.c1 - wall.gateCols.c0 
 const gunZ0 = () => -0.85 - GD.rows * S;
 // Its frames, from the wall out: the first row of each, on the board.
 const partR0 = (part) => GD.rows - GD.parts.slice(0, part + 1).reduce((a, b) => a + b, 0);
-function gunShape(part) {
-  const cells = [];
-  for (let r = 0; r < GD.parts[part]; r++) for (let c = 0; c < GD.cols; c++) cells.push([r, c]);
+/* Each part of the tower must fill exactly, with room for the rare pieces. The whole board is 169
+   squares, not a whole number of pieces, so two squares come off each back corner, against the wall
+   (165). And where two parts meet, the one nearer the wall gives three single squares of its edge
+   row to the next: that makes each part whole pieces, and the frames lock together with squares
+   jutting out, where an X or a W fits. (Square 13-wide strips, the front one 3 rows of 39 squares,
+   could never be filled exactly at all.) `give[i]`: the columns part i hands on. Read back from the
+   parts already laid, for a pirate who took over running the den partway. */
+const GUN_NOTCH = new Set(['12,0', '12,1', '12,11', '12,12']);
+function gunPlan() {
+  if (ramp.gunPlan) return ramp.gunPlan;
+  const laid = (p) => ramp.jobs.find((j) => j.kind === 'gun' && j.part === p)?.frame;
+  const seen = [0, 1].map((p) => laid(p) && new Set([...Array(GD.cols).keys()].filter((c) => !laid(p).set.has(k(0, c)))));
+  const singles = () => { const out = new Set(); while (out.size < 3) { const c = 1 + rand(GD.cols - 2); if (!out.has(c - 1) && !out.has(c + 1)) out.add(c); } return out; };
+  for (let t = 0; t < 60; t++) {
+    const give = [seen[0] || singles(), seen[1] || singles()];
+    if ([0, 1, 2].every((p) => C.solve(partCells(p, give), 1).length)) return (ramp.gunPlan = give);
+  }
+  return (ramp.gunPlan = [seen[0] || new Set([2, 6, 10]), seen[1] || new Set([2, 6, 10])]);
+}
+// Part p's squares, its rows counted from its own first row on the board.
+function partCells(p, give) {
+  const r0 = partR0(p), r1 = r0 + GD.parts[p] - 1, cells = [];
+  for (let r = r0; r <= r1 + 1; r++) for (let c = 0; c < GD.cols; c++) {
+    if (GUN_NOTCH.has(k(r, c))) continue;
+    const mine = r === r0 ? !(p < 2 && give[p].has(c)) : r <= r1 ? true : p > 0 && give[p - 1].has(c);
+    if (mine) cells.push([r - r0, c]);
+  }
   return cells;
 }
+const gunShape = (part) => partCells(part, gunPlan());
 const gdCell = (x, z) => {
   if (!gd) return null;
   const c = Math.floor((x - gd.x0) / S), r = Math.floor((z - gd.z0) / S);
@@ -3682,7 +3718,8 @@ function aim() {
     // Everything in reach: a walk frame on the floor when stood back from the wall, the stairs
     // when stood beside them, the holes when at the wall. Clean fits first, nearest first; then
     // the ways to board it over.
-    const nf = fl.filter((o) => fd(o) <= REACH && (o.frame.kind === 'stair' || pirate.z > WALL_Z));
+    // (The walk frame lies well back: only once you've stepped back to it, not from the wall.)
+    const nf = fl.filter((o) => fd(o) <= REACH && (o.frame.kind === 'stair' || pirate.z > WALL_Z + (o.frame.kind === 'deck' ? 1.2 : 0)));
     const dd = (o) => (o.frame ? fd(o) : Math.abs(o.cx - pirate.x));
     const near = list.filter(reach).concat(nf).sort((a, z) => (a.over > 0) - (z.over > 0) || !!a.patch - !!z.patch || dd(a) - dd(z) || a.over - z.over);
     if (near.length) target = { ...near[cycle % near.length], ok: true, count: near.length };
@@ -4218,7 +4255,7 @@ $('crew-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('cr
    (that's where you mend it and build) nor on a frame or by the crates. */
 const deco = { on: false, tool: 'flag', rot: 0, at: null, ok: false, ghost: null, ring: null, group: new THREE.Group() };
 scene.add(deco.group);
-const DECO_Z0 = 5.2;   // nothing in front of this: the mending, the frames
+const DECO_Z0 = 7.2;   // nothing in front of this: the mending, the walk frame
 function decorMesh(it) {
   const g = new THREE.Group();
   if (it.k === 'flag') g.add(flagpole(2.1, designMat(it.d)));

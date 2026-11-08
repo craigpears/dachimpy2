@@ -248,17 +248,21 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   bizarre, and a stretch popping up was too easy. A finished frame then turning into a ready-made
   rampart was magic too. **Every part of the rampart is the pieces you fitted, and they stay those
   pieces.** Nothing turns into anything else, and nothing is added that you didn't build.
-  - **The walk: one big frame,** the length of the wall, laid flat on the den floor in front of it
-    (about 30 pieces). The user wanted it "one big piece", not a stretch at a time. Two full rows
-    over the stone, then out over the den clear of where the stairs come up, with an edge that
-    steps in and out: three, four or five rows deep in runs of two to five squares. It can always
-    be filled with not a scrap wasted. History: two rows and a ragged third was "very slim", with
+  - **The walk: one big frame,** the length of the wall, laid flat on the den floor (about 30
+    pieces). The user wanted it "one big piece", not a stretch at a time. Two full rows over the
+    stone, then out over the den clear of where the stairs come up, three or four rows deep in
+    runs, with single squares jutting out of the edge (see "Room for the rare pieces"). It can
+    always be filled with not a scrap wasted. **It lies well back from the wall** (1.6 m behind
+    where you stand to mend it, the crates behind it), and you only fit pieces in it once you've
+    stepped back to it: just behind you, it kept taking the pieces meant for the wall (the user:
+    "the walk frame gets the focus"). History: two rows and a ragged third was "very slim", with
     not much room to be creative; three and a ragged fourth was still "long thin straight holes
     that only fit the P": the user wants room for every kind of piece. You lay pieces in it one at
     a time and watch it come together. When it's full the crew haul it up on ropes, pieces and
     all, and lay it along the top of the wall.
-  - **The stairs (at each end):** a frame standing upright at the end of the den, a stepped
-    stringer from the floor up to the walk. You fit pieces into it like a hole in the wall, and the
+  - **The stairs (at each end):** a frame standing upright at the end of the den, solid from the
+    treads down to the floor (a band three squares deep held only four pieces, with room for an X
+    in one spot in five). You fit pieces into it like a hole in the wall, and the
     pieces are the steps. Half-built stairs are in the way; you can't walk through them.
   - **Any piece will do:** a piece may stick out over the frame's edge. On the walk the spare is
     sawn off when it's full (it has to lie flat on the wall).
@@ -266,7 +270,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     a W in a corner early on and still have "plenty of hole left for you to work towards one of
     the common two-hole finishes". Frames too slim for that (the user, 8 Nov: "there's nowhere to
     put things like those rarer weird cross shapes or M pieces ... without messing up the hole")
-    make the shipshape finish a matter of luck.
+    make the shipshape finish a matter of luck. **The fix is the edge, not just the size:** "making
+    it a bit less square". A Puzzle Pirates hole has "lots of little single tile things jutting
+    out, and that's where the rarer pieces fit in". So frames have single squares jutting out (the
+    walk's den-side edge, the gun tower's parts where they meet), or a stepped edge (the stairs).
+    Measured: an X or W goes in cleanly at about half the spots tried, against 2 in 16 for an X in
+    the old walk stretches.
   - **The stairs stay exactly as built, never changed by magic.** Nothing's sawn off: bits sticking
     out stay, and you walk on the real tops of the pieces. A one-square step you walk up; a
     two-square one you hop up. So the stairs stay climbable, a piece can't stick up more than one
@@ -374,9 +383,13 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     (not washed out by the scene's light or haze).
   - **Where and how big:** built last, after the whole rampart: a square platform jutting out from
     the wall over the gate like a bastion, **the size of a Gunnery board, 13 by 13**. One square of
-    a carpentry piece is one square of the board. It's built of ordinary pieces in three frames
-    (5, 5 and 3 rows, from the wall out), laid on the den floor and hauled up and out over the wall
-    one after another. The deck still shows the pieces you laid, toned down. You walk out onto it
+    a carpentry piece is one square of the board, less two squares off each back corner where it
+    meets the wall (169 squares isn't a whole number of pieces; 165 is). It's built of ordinary
+    pieces in three frames (4, 5 and 4 rows, from the wall out), laid on the den floor and hauled
+    up and out over the wall one after another. Where two meet, the nearer one hands three single
+    squares of its edge to the next, so each fills exactly and they lock together with squares
+    jutting out. (It was 5, 5 and 3 square rows: the front one, 39 squares, could never be filled
+    exactly.) The deck still shows the pieces you laid, toned down. You walk out onto it
     from the wall-walk; the camera then looks down on the whole board, like the Gunnery screen.
   - **The rules are Gunnery's:** a barrel in the middle rolls stores out each way in turn till
     there are two of each on deck; one used, another comes. A store rolls straight; blocked it
