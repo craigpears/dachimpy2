@@ -1,7 +1,8 @@
 /* Swordfight in the den: the sword rack and the soldiers (src/den-sword.ts). */
 import { describe, expect, it } from 'vitest';
-import { BARRICADE, Barracks, muster, rewardPair, shareCrates, SWORD, SwordRack } from '../src/den-sword';
-import type { Breach, Foe } from '../src/den-sword';
+import { Barracks, Lumber, muster, planRepair, REPAIR, rewardPair, SWORD, SwordRack } from '../src/den-sword';
+import type { Foe, Mend } from '../src/den-sword';
+import { carp, hole } from './helpers';
 import { toSword } from '../src/swordfight';
 import type { Pair } from '../src/swordfight';
 
@@ -50,28 +51,64 @@ describe('muster', () => {
   });
 });
 
-describe('shareCrates', () => {
-  const breach = (o: Partial<Breach> = {}): Breach => ({ open: false, attackers: 0, strength: 1, crates: 0, ...o });
+describe('repairs', () => {
+  const mend = (rest: ReturnType<typeof hole>, o: Partial<Mend> = {}): Mend => ({ rest, open: false, attackers: 0, strength: 1, ...o });
+  const key = (cells: [number, number][]) => cells.map(([r, c]) => `${r},${c}`).sort().join(' ');
 
-  // The user (8 Nov): sprinkles should "build an extra barrier ... on this side of the wall", like
-  // the rubble in a fresh breach.
-  it('crates go to the gap raiders can walk through (8 Nov)', () => {
-    expect(shareCrates([breach({ attackers: 1, strength: 0.4 }), breach({ open: true })], 2)).toEqual([0, 2]);
+  // The user (8 Nov), on barricade crates piled on the ground: "this is confusing. Maybe you have to
+  // do a certain number and it actually fills in a hole a bit ... more of like a permanent wall
+  // repair for sprinkling."
+  it('loose crates pile up as planks till there are enough to mend a piece of a hole (8 Nov)', () => {
+    const l = new Lumber();
+    l.add(REPAIR.CRATES - 1);
+    expect(l.ready).toBe(false);
+    l.add(2);
+    expect(l.ready).toBe(true);
+    l.use();
+    expect(l.crates).toBe(1);
   });
 
-  it('then to the hole being hacked hardest, then the weakest', () => {
-    expect(shareCrates([breach({ attackers: 1 }), breach({ attackers: 3 })], 1)).toEqual([0, 1]);
-    expect(shareCrates([breach({ strength: 0.9 }), breach({ strength: 0.2 })], 1)).toEqual([0, 1]);
+  it('planks waiting with no hole to mend are kept, up to a few pieces\' worth', () => {
+    const l = new Lumber();
+    l.add(100);
+    expect(l.crates).toBe(REPAIR.CRATES * REPAIR.KEEP);
   });
 
-  it('a big break spreads over several breaches rather than piling all on one', () => {
-    const got = shareCrates([breach({ open: true }), breach({ open: true })], 6);
-    expect(got).toEqual([3, 3]);
+  it('a repair is a whole piece\'s worth, leaving the rest of the hole finishable as a Masterpiece', () => {
+    // Ten squares: a P and another piece, or several other ways. Whatever it planks, the rest is a piece.
+    const h = hole('###.', '####', '###.');
+    const plan = planRepair([mend(h)], carp)!;
+    expect(plan.hole).toBe(0);
+    expect(plan.piece.cells).toHaveLength(5);
+    const used = new Set(plan.piece.cells.map(([r, c]) => `${r},${c}`));
+    const left = h.filter(([r, c]) => !used.has(`${r},${c}`));
+    expect(left).toHaveLength(5);
+    expect(carp.solve(left, 1)).toHaveLength(1);
   });
 
-  it('a breach takes six crates at most; the rest are lost', () => {
-    expect(shareCrates([breach({ open: true, crates: 4 })], 5)).toEqual([BARRICADE.MAX - 4]);
-    expect(shareCrates([], 3)).toEqual([]);
+  it('it mends from the bottom of the hole, where raiders come through', () => {
+    // Two I's, one on top of the other: the lower one goes first.
+    const h = hole('#####', '#####');
+    expect(key(planRepair([mend(h)], carp)!.piece.cells)).toBe(key([[1, 0], [1, 1], [1, 2], [1, 3], [1, 4]]));
+  });
+
+  it('it goes to a gap raiders can walk through first, then the hole hacked hardest, then the weakest', () => {
+    const a = hole('#####'), b = hole('#####');
+    expect(planRepair([mend(a, { attackers: 2 }), mend(b, { open: true })], carp)!.hole).toBe(1);
+    expect(planRepair([mend(a, { attackers: 1 }), mend(b, { attackers: 3 })], carp)!.hole).toBe(1);
+    expect(planRepair([mend(a, { strength: 0.2 }), mend(b, { strength: 0.9 })], carp)!.hole).toBe(0);
+  });
+
+  it('a hole that can\'t be finished exactly any more still gets a piece that fits in it', () => {
+    const h = hole('######', '#.....');   // seven squares: no exact finish
+    const plan = planRepair([mend(h)], carp)!;
+    const set = new Set(h.map(([r, c]) => `${r},${c}`));
+    expect(plan.piece.cells.every(([r, c]) => set.has(`${r},${c}`))).toBe(true);
+  });
+
+  it('nothing to mend: no repair', () => {
+    expect(planRepair([], carp)).toBeNull();
+    expect(planRepair([mend(hole('####'))], carp)).toBeNull();
   });
 });
 

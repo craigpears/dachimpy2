@@ -10,7 +10,7 @@ files from subfolders, so don't use it.
 
 Pirate Den: `den.html`, `js/den.js` (the game), `js/den-look.js` (looks). Parts pulled out of den.js are
 TypeScript in `src/`: `den-deal.ts` (the fair deal), `swordfight.ts` (the Swordfight puzzle, knowing nothing of
-the den), `den-sword.ts` (the armoury hoist, the soldiers and the barricades, as plain data), `den-sword-draw.ts`
+the den), `den-sword.ts` (the armoury hoist, the soldiers and the wall repairs, as plain data), `den-sword-draw.ts`
 (what's painted on Swordfight's crates); `engine.d.ts` types the engine. den.js keeps only the 3D and the wiring; new features follow the same
 split: rules and decisions in a tested TypeScript part, den.js drawing them. Compiled into `js/` by
 `npm run build`; the compiled `js/*.js` is committed, since the site deploys the files as they are. Never edit a

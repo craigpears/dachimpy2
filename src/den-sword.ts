@@ -8,12 +8,15 @@
    soldiers so they would help you defend. So obviously they'd end up sword fighting". The puzzle is
    the real one; what a break would send at an opponent goes to the raid instead. Since 8 Nov, after
    a demo (the user: "you'd have to do a combo, like a fuse block to get a soldier, and obviously
-   combo for multiples", and sprinkles to "build an extra barrier ... on this side of the wall"): a
-   fused block broken arms soldiers, as many as the chain's link, and sprinkles are crates stacked as
-   a barricade inside the breach that needs it most. */
+   combo for multiples"): a fused block broken arms soldiers, as many as the chain's link. Sprinkles
+   are loose crates broken up for planks, and every few crates' planks mend a piece's worth of a
+   hole for good (the user, 8 Nov, finding barricade crates piled on the ground confusing: "maybe
+   you have to do a certain number and it actually fills in a hole a bit ... more of like a
+   permanent wall repair for sprinkling"). */
 
 import { Board } from './swordfight.js';
 import type { Colour, Pair, Result, Strike } from './swordfight.js';
+import type { Cell, Engine, Placed } from './engine';
 
 /** The numbers to tune. */
 export const SWORD = {
@@ -42,7 +45,7 @@ export interface Recruit { hp: number; size: number; sword?: Strike }
 /** The soldiers a break arms: only fused blocks do it (a big chest of swords bursting open). Each
     one broken arms a soldier, or two on the second link of a chain, three on the third, and so on.
     A bigger block makes tougher, bigger soldiers: the smallest (2x2) takes three blows. Loose pieces
-    arm nobody: their sprinkles go to the barricades (see shareCrates). */
+    arm nobody: their sprinkles are planks for repairs (see Lumber and planRepair). */
 export function muster(res: Result): Recruit[] {
   const out: Recruit[] = [];
   for (const link of res.links) for (const s of link.strikes) {
@@ -53,43 +56,65 @@ export function muster(res: Result): Recruit[] {
   return out;
 }
 
-/** The barricades: crates piled just inside a breach, which raiders have to hack through before
-    they can walk in, as they do rubble. */
-export const BARRICADE = {
-  /** Seconds of a raider's hacking each crate holds out (the den's raiders hack faster wave by wave). */
-  CRATE: 2.5,
-  /** Crates one breach can take. */
-  MAX: 6,
+/** Repairs: loose crates broken on the hoist are broken up for planks, and every REPAIR.CRATES
+    crates' worth mends a piece's worth of a hole for good, nailed in as a piece would be. */
+export const REPAIR = {
+  /** Loose crates (sprinkles) to a piece's worth of planks. */
+  CRATES: 4,
+  /** Planks kept waiting while no hole needs them: this many pieces' worth at most. */
+  KEEP: 3,
 } as const;
 
-/** A hole in the wall, as the barricades see it. */
-export interface Breach {
-  /** A gap raiders can walk through right now (or could, but for the crates). */
+/** The planks broken out of loose crates, waiting by the hoist till there's a piece's worth. */
+export class Lumber {
+  crates = 0;
+  /** Crates broken up; any past what can be kept are lost. */
+  add(n: number): void { this.crates = Math.min(REPAIR.CRATES * REPAIR.KEEP, this.crates + n); }
+  /** Is there a piece's worth? */
+  get ready(): boolean { return this.crates >= REPAIR.CRATES; }
+  /** Use a piece's worth. */
+  use(): void { this.crates = Math.max(0, this.crates - REPAIR.CRATES); }
+  reset(): void { this.crates = 0; }
+}
+
+/** A hole in the wall, as the repairs see it. */
+export interface Mend {
+  /** Squares still to fill. */
+  rest: Cell[];
+  /** A gap raiders can walk through right now. */
   open: boolean;
   /** Raiders hacking at it. */
   attackers: number;
   /** What's left of what's in it, 0 (nothing) to 1 (whole). */
   strength: number;
-  /** Crates already there. */
-  crates: number;
 }
 
-/** Where a break's sprinkles go: one crate at a time to the breach that needs it most (open gaps
-    first, then the ones being hacked hardest, then the weakest), counting the crates it's already
-    had. Returns how many each breach gets; crates with nowhere to go are lost. */
-export function shareCrates(breaches: Breach[], n: number): number[] {
-  const got = breaches.map(() => 0);
-  const need = (b: Breach, i: number) => (b.open ? 3 : 0) + b.attackers + (1 - b.strength) - (b.crates + got[i]) * 0.75;
-  for (let k = 0; k < n; k++) {
-    let best = -1;
-    breaches.forEach((b, i) => {
-      if (b.crates + got[i] >= BARRICADE.MAX) return;
-      if (best < 0 || need(b, i) > need(breaches[best], best)) best = i;
-    });
-    if (best < 0) break;
-    got[best]++;
+/** Where the next piece's worth of planks goes: the hole that needs it most (a gap raiders can
+    walk through first, then the one hacked hardest, then the weakest; the nearest done if it's a
+    tie), and in it, a piece lying in the hole that leaves the rest still finishable exactly, so a
+    Masterpiece is still there to be made; lowest down first, where raiders come through. A hole
+    that can't be finished exactly any more just gets any piece that fits, lowest down. Null if no
+    hole has room for one. Rows count down the wall (row 0 at the top). */
+export function planRepair(holes: Mend[], carp: Engine): { hole: number; piece: Placed } | null {
+  const need = (m: Mend) => (m.open ? 3 : 0) + m.attackers + (1 - m.strength);
+  const order = holes.map((m, i) => i).filter((i) => holes[i].rest.length >= 5)
+    .sort((a, b) => need(holes[b]) - need(holes[a]) || holes[a].rest.length - holes[b].rest.length);
+  const low = (p: Placed) => p.cells.reduce((t, [r]) => t + r, 0);
+  const lowest = (ps: Placed[]) => ps.reduce<Placed | null>((best, p) => (!best || low(p) > low(best) ? p : best), null);
+  for (const i of order) {
+    const rest = holes[i].rest;
+    if (rest.length % 5 === 0) {
+      const ways = carp.solve(rest, 12).flat();
+      if (ways.length) return { hole: i, piece: lowest(ways)! };
+    }
+    const set = new Set(rest.map(([r, c]) => `${r},${c}`)), fits: Placed[] = [];
+    for (const l of carp.LETTERS) for (const o of carp.ORIENTS_BY_LETTER[l]) for (const [er, ec] of rest) {
+      const [pr, pc] = o.cells[0], cells = o.cells.map(([r, c]): Cell => [r - pr + er, c - pc + ec]);
+      if (cells.every(([r, c]) => set.has(`${r},${c}`))) fits.push({ letter: l, cells });
+    }
+    if (fits.length) return { hole: i, piece: lowest(fits)! };
   }
-  return got;
+  return null;
 }
 
 /** A Masterpiece's reward: a pair with a breaker in it (a block underneath, a breaker on top, any

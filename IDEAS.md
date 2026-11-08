@@ -181,8 +181,8 @@ gunning":
     weapon crates in a corner of the den, built in the den's own timber, at about the size of its
     crates. Each colour is a crate of one weapon (the four swords). A hoist on a beam lowers each
     pair, which is how it "falls" in 3D, and you turn it on the rope. A breaker bursts the crates it
-    touches. Loose crates (sprinkles) are carried off and stacked as a barricade just inside the
-    nearest breach, which raiders have to hack through like rubble. A fused block is a big chest
+    touches. Loose crates (sprinkles) were first stacked as a barricade inside the nearest breach; since
+    8 Nov they're broken up for planks that mend a piece of a hole for good (built: RULES.md). A fused block is a big chest
     of swords that arms a soldier from the shack, and bigger blocks and chains arm more of them.
     Attack blocks are crates nailed shut with iron bands. Still to work out: a 13-high stack at
     crate size is far taller than the wall (a tall hoist frame as a landmark, like the gun tower;

@@ -82,22 +82,17 @@ the site (`.assetsignore` skips `*.md`).
   will if you let me rotate it first". You should be able to hold the piece over the gap and turn
   it there, whether or not it fits the way it's facing.
 
-- **Loose crates should repair the wall, not pile up (8 Nov):** "It says three sprinkles to the
-  barricades, but I just see blocks on the ground ... this is confusing. Maybe you have to do a
-  certain number and it actually fills in a hole a bit ... more of like a permanent wall repair
-  for sprinkling." (How many crates a square, and which hole, to pin down with the user.)
-
 ## Needs a playtest to pin down
 
 - **Swordfight at the armoury hoist (8 Nov), not yet tried by the user.** Rebuilt after the
   first demo: the board is a stack of weapon crates under a tall timber hoist on the left of the
-  den; chests (fused blocks) arm soldiers, more with combos; loose crates go to barricade the
-  breaches (RULES.md). The user wanted "to see what it feels like ... it's hard to say without
+  den; chests (fused blocks) arm soldiers, more with combos; loose crates are broken up for
+  planks that mend the wall a piece at a time (RULES.md). The user wanted "to see what it feels like ... it's hard to say without
   seeing". Watch for: whether the stack now feels part of the den, and the crates big enough from
   where the camera puts it (it frames the whole hoist, 7 m high); too few soldiers now only chests
-  arm them (one per chest, the first demo's six from one break looked too strong); barricades too
-  strong or too weak (a crate holds 2.5 seconds of hacking, six at most per breach); the crates
-  dropped on the floor being mistaken for barricade crates; the order you pick crates up giving you
+  arm them (one per chest, the first demo's six from one break looked too strong); repairs coming too often
+  or too seldom (4 loose crates a piece's worth), and planks finishing a hole as a Masterpiece
+  paying a breaker that makes more planks; the order you pick crates up giving you
   a say in what comes next (the user: "kind of okay. It adds a bit of an element of difference").
   Since 8 Nov Masterpieces also pay a breaker pair, sent to the front of the queue: watch for
   that making the stack too easy, or too many breakers piling up on a well-mended wall.

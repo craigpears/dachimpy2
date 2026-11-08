@@ -8,7 +8,7 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { FairDeal, turnWide } from './den-deal.js';
 import { randomPair, W as SW, H as SH, ENTRY as SENTRY } from './swordfight.js';
-import { muster, shareCrates, rewardPair, BARRICADE, SwordRack, Barracks, SWORD } from './den-sword.js';
+import { muster, planRepair, rewardPair, Lumber, REPAIR, SwordRack, Barracks, SWORD } from './den-sword.js';
 import { drawStencil, drawBlade, PALETTE } from './den-sword-draw.js';
 import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, cleanDesign, designOf, drawFlag, dyeHex, DYES, SKIN, HAIR, FUR, PARTS, FLAGS, PATTERNS, DECOR, MAX_DECOR, BIOMES, twoColours } from './den-look.js';
 
@@ -2326,7 +2326,7 @@ function armsTile(box) {
   if (!armsEl) {
     armsEl = document.createElement('div');
     armsEl.className = 'tool arms';
-    armsEl.title = 'Crates of weapons for the armoury hoist, on the left of the den: stack them there to arm soldiers and barricade the breaches';
+    armsEl.title = 'Crates of weapons for the armoury hoist, on the left of the den: stack them there to arm soldiers and break loose crates up for planks to mend the wall';
     box.append(armsEl);
   }
   const q = rack.queue, show = swordHere() && q.length > 0;
@@ -2664,7 +2664,7 @@ function smash(m) {
 /* A pair lands: if it breaks anything, the chain plays out a link at a time (the user, 8 Nov: "it
    needs the breaking animation, not just to magically break"). The stack as it stood before each
    link: what's about to break shakes, then smashes, and what was on it drops into the gap. Only when
-   it's all done does the break send its soldiers and barricades. No new pair comes in meanwhile. */
+   it's all done does the break send its soldiers and planks. No new pair comes in meanwhile. */
 const BREAK_HOLD = 0.4;   // seconds the doomed crates shake before they go
 function swordBreak(res) {
   if (!res.links.length) return swordLanded(res);
@@ -2744,65 +2744,103 @@ function swordKey(key, e) {
 }
 const CHAINS = ['', '', 'Double! ', 'Triple! ', 'Bingo! ', 'Donkey! ', 'Vegas! '];
 /* A break: chests of swords (fused blocks) arm soldiers, who come out from the stack; loose crates
-   (sprinkles) are thrown to the breaches that need them most and piled inside as barricades. */
+   (sprinkles) are broken up for planks, thrown onto the lumber pile by the hoist, and every
+   REPAIR.CRATES crates' worth mends a piece of a hole for good (repairAll). */
 function swordLanded(res) {
   sword.dirty = true;
   if (!res.links.length) return;
   const name = CHAINS[Math.min(res.links.length, 6)], recruits = muster(res);
   const came = barracks.enlist(recruits, sword.x + 0.9, sword.z);
   came.forEach(addFigure);
-  const crates = barricade(res.sprinkles);
+  const n = toLumber(res.sprinkles);
   const bits = [];
   if (came.length) bits.push(`${came.length === 1 ? 'a soldier' : `${came.length} soldiers`} armed`);
   else if (recruits.length) bits.push(`the barracks are full (${SWORD.MAX_SOLDIERS} soldiers at most)`);
-  if (crates) bits.push(`${crates} crate${crates > 1 ? 's' : ''} to barricade the breach${crates > 1 ? 'es' : ''}`);
-  const msg = bits.join(', ') || 'broken, but too few to send anything: break a chest (2x2 or bigger) for soldiers';
+  if (n) bits.push(`${n} crate${n > 1 ? 's' : ''} broken up for planks${lumber.ready ? ': enough to mend a piece of the wall' : ` (${lumber.crates} of ${REPAIR.CRATES} to mend a piece of the wall)`}`);
+  const msg = bits.join(', ') || 'broken, but too few to send anything: break a chest (2x2 or bigger) for soldiers, or loose crates in twos for planks';
   say(`${name}${msg[0].toUpperCase()}${msg.slice(1)}!`);
 }
-// Sprinkles to the barricades: each crate thrown from the hoist to the breach that needs it most.
-function barricade(n) {
+/* The lumber pile, at the foot of the hoist on the wall side: loose crates broken on the stack are
+   thrown onto it as planks, and once there's a piece's worth it's nailed into the hole that needs
+   it most (planRepair: the gap raiders can walk through first; lowest down; leaving the rest of the
+   hole finishable as a Masterpiece). The user (8 Nov), on the barricades this replaced: "maybe you
+   have to do a certain number and it actually fills in a hole a bit ... more of like a permanent
+   wall repair for sprinkling." */
+const lumber = new Lumber();
+const pileAt = () => new THREE.Vector3(sword.x + 0.15, 0, sword.z - sword.w / 2 - 0.5);
+function toLumber(n) {
   if (!n) return 0;
-  const holes = wall.holes;
-  const got = shareCrates(holes.map((h) => ({ open: gapOpen(h), attackers: h.attackers || 0, strength: Math.max(0, Math.min(1, barFrac(h))), crates: Math.ceil((h.barricade || 0) / BARRICADE.CRATE) })), n);
-  let sent = 0;
-  got.forEach((k, i) => {
-    if (!k) return;
-    const h = holes[i];
-    sent += k;
-    const from = new THREE.Vector3(sword.x, sword.top, sword.z), to = new THREE.Vector3(doorX(h), 0.4, 0.4);
-    for (let j = 0; j < k; j++) {
-      const m = armsCrate({ c: rand(4) });
-      m.scale.setScalar(0.8);
-      m.position.copy(from);
-      scene.add(m);
-      tween(0.8 + j * 0.15, (t) => { m.position.lerpVectors(from, to, t); m.position.y += Math.sin(t * Math.PI) * 3; m.rotation.x = t * 6; }, () => {
-        crateGone(m);
-        h.barricade = Math.min(BARRICADE.MAX * BARRICADE.CRATE, (h.barricade || 0) + BARRICADE.CRATE);
-        barricadeShow(h);
-      });
-    }
-  });
-  return sent;
+  lumber.add(n);
+  const from = new THREE.Vector3(sword.x, sword.top - 0.4, sword.z), to = pileAt().add(new THREE.Vector3(0, 0.3, 0));
+  sword.inFlight = (sword.inFlight || 0) + n;
+  for (let j = 0; j < n; j++) {
+    const c = rand(4), m = armsCrate({ c });
+    Object.assign(m.userData, { c, gems: [] });
+    m.scale.setScalar(0.8);
+    m.position.copy(from);
+    scene.add(m);
+    tween(0.7 + j * 0.12, (t) => { m.position.lerpVectors(from, to, t); m.position.y += Math.sin(t * Math.PI) * 1.2; m.rotation.x = t * 5; }, () => {
+      smash(m);   // broken up for planks
+      crateGone(m);
+      sword.inFlight--;
+      pileShow();
+      if (!sword.inFlight) repairAll();
+    });
+  }
+  return n;
 }
-/* A barricade: crates piled just inside a hole, at its foot, that raiders must hack through before
-   they can walk in, as they do rubble. h.barricade is how much is left, in seconds of hacking. */
-function barricadeShow(h) {
-  const n = Math.ceil(Math.max(0, h.barricade || 0) / BARRICADE.CRATE - 1e-6);
-  if (!h.barG) {
-    if (!n) return;
-    h.barG = new THREE.Group();
-    wallGroup.add(h.barG);
+// The pile: each crate's planks two by two, crossed over the last, like a stack of timber.
+function pileShow() {
+  const n = Math.max(0, lumber.crates - (sword.inFlight || 0));
+  if (!sword.pile) { sword.pile = new THREE.Group(); scene.add(sword.pile); }
+  sword.pile.position.copy(pileAt());
+  const kids = sword.pile.children, geo = crateLook.board ||= new THREE.BoxGeometry(0.72, 0.07, 0.16);
+  while (kids.length > n * 2) sword.pile.remove(kids[kids.length - 1]);
+  while (kids.length < n * 2) {
+    const i = kids.length, layer = Math.floor(i / 2), b = mesh(geo, plankMat);
+    b.position.set(0, 0.04 + layer * 0.072, 0);
+    b.rotation.y = (layer % 2 ? Math.PI / 2 : 0) + (Math.random() - 0.5) * 0.15;
+    b.translateZ((i % 2 ? 1 : -1) * 0.15);
+    sword.pile.add(b);
   }
-  const kids = h.barG.children;
-  while (kids.length > n) crateGone(kids[kids.length - 1]);
-  while (kids.length < n) {
-    const i = kids.length, m = armsCrate({ c: rand(4) });
-    m.scale.setScalar(1.15);
-    // Two side by side, three high, a little askew.
-    m.position.set(doorX(h) + ((i % 2) - 0.5) * 0.52, 0.24 + Math.floor(i / 2) * 0.48, 0.32 + (Math.random() - 0.5) * 0.06);
-    m.rotation.y = (Math.random() - 0.5) * 0.25;
-    h.barG.add(m);
+  sword.pile.visible = swordHere();
+}
+// A hole as the repairs see it. Only open holes with nothing on its way in and no boards behind.
+const mendOf = (h) => ({
+  rest: h.status === 'open' && !h.busy && !h.pieces.some((p) => p.patch) ? rest(h) : [],
+  open: passable(h), attackers: h.attackers || 0, strength: Math.max(0, Math.min(1, barFrac(h))),
+});
+function repairAll() {
+  if (!swordHere()) return;
+  while (lumber.ready) {
+    const plan = planRepair(wall.holes.map(mendOf), C);
+    if (!plan) break;
+    lumber.use();
+    repair(wall.holes[plan.hole], plan.piece);
   }
+  pileShow();
+}
+// A piece's worth of planks, flown from the pile and nailed in, as if you'd fitted it.
+function repair(h, pc) {
+  const b = C.bbox(pc.cells);
+  const info = { letter: pc.letter, shape: C.normalize(pc.cells), dr: b.r0, dc: b.c0, over: 0, patch: false, layer: 0, by: myId(), planks: true };
+  const piece = putPiece(h, info), g = piece.group, to = piece.base.clone(), from = pileAt().add(new THREE.Vector3(-b.w * S / 2, 0.4 + b.h * S / 2, 0));
+  g.position.copy(from);
+  h.busy = (h.busy || 0) + 1;
+  tween(1, (t) => {
+    const e = t * t * (3 - 2 * t);
+    g.position.lerpVectors(from, to, e);
+    g.position.y += Math.sin(t * Math.PI) * 2.2;
+    g.position.z += Math.sin(t * Math.PI) * 0.6;
+  }, () => {
+    h.busy--;
+    g.position.copy(to);
+    if (!h.pieces.includes(piece)) return;
+    burst(new THREE.Vector3(to.x + b.w * S / 2, to.y - b.h * S / 2, 0.3), '#e8d0a8', 14, 2.5);
+    updateHole(h);
+    if (h.status === 'open') { h.hp += HP.piece; h.maxHp = h.hp; }
+    if (h.status === 'open') say('Planks from the armoury: a piece of the wall mended!');
+  });
 }
 
 // The soldiers, in blue and white. Barracks moves them; this poses their figures to match.
@@ -2855,7 +2893,10 @@ function guardSpots() {
 function swordTick(dt) {
   sword.group.visible = !online();
   document.body.classList.toggle('swordfight', sword.on);
-  if (!swordHere()) { sword.on = false; if (sword.pack) sword.pack.visible = false; return; }
+  if (!swordHere()) { sword.on = false; if (sword.pack) sword.pack.visible = false; if (sword.pile) sword.pile.visible = false; return; }
+  if (sword.pile) { sword.pile.position.copy(pileAt()); sword.pile.visible = true; }
+  // Planks waiting for a hole that needs them (one broken open again, say): looked at every second.
+  if (lumber.ready && !sword.inFlight && (sword.repT = (sword.repT || 0) - dt) <= 0) { sword.repT = 1; repairAll(); }
   if (sword.on && (carry || pirate.h > 0.05)) sword.on = false;
   if (sword.show) showTick(dt);
   else if (sword.on) {
@@ -2923,6 +2964,7 @@ function packSync() {
 function swordReset() {
   rack.reset(); barracks.reset();
   sword.on = false; sword.dirty = true; sword.show = null;
+  lumber.reset(); sword.inFlight = 0; pileShow();
   sword.drops.splice(0).forEach(dropGone);
   for (const m of sword.crates.values()) crateGone(m);
   sword.crates.clear();
@@ -2934,7 +2976,7 @@ function swordPrompt() {
   const n = rack.pieces, of = `${n} pair${n === 1 ? '' : 's'} of crates`;
   if (sword.on) return n ? `The hoist · A/D or arrows move · W/S or Q/E turn · Space drops · Esc: walk (${of})` : 'No crates left: beat raiders for more · Esc: walk';
   if (carry || !atSword()) return '';
-  return n ? `Space: work the hoist (${of}): chests arm soldiers, loose crates barricade the breaches` : 'The armoury: beaten raiders drop crates of weapons; stack them here to arm soldiers';
+  return n ? `Space: work the hoist (${of}): chests arm soldiers, loose crates make planks to mend the wall` : 'The armoury: beaten raiders drop crates of weapons; stack them here to arm soldiers';
 }
 
 function newGame() {
@@ -3163,7 +3205,7 @@ function nextLayer(h) {
 }
 const boardsOf = (h) => h.pieces.filter((p) => p.patch).sort((a, b) => a.layer - b.layer);
 // How full the strength bar is: the hole's own wood, or once that's gone, the board they're on.
-const barFrac = (h) => (gapOpen(h) && h.barricade > 0 ? h.barricade / (BARRICADE.MAX * BARRICADE.CRATE) : weakSpot(h) ? h.weak / WEAK : h.rubble > 0 && !h.pieces.length ? h.rubble / RUBBLE : h.hp / h.maxHp);
+const barFrac = (h) => (weakSpot(h) ? h.weak / WEAK : h.rubble > 0 && !h.pieces.length ? h.rubble / RUBBLE : h.hp / h.maxHp);
 /* A bar under the hole's own for each layer behind it, so boarding behind a damaged hole shows (the
    user: "no visible difference to the healthbar"). An unfinished layer's bar is amber. */
 const layBars = (h) => h.lay.map((L) => `<i class="bar lay${L.status === 'open' ? ' part' : ''}"><b></b></i>`).join('');
@@ -3182,7 +3224,6 @@ function labelFor(h) {
   if (h.rubble > 0 && !h.pieces.length) return ['label bad', `Fresh breach, full of rubble<small>mend it before they clear it!</small><i class="bar"><b></b></i>${atk}`];
   const left = h.open;
   const breach = h.pieces.length ? `<i class="bar part"><b></b></i>${layBars(h)}${atk}`
-    : gapOpen(h) && h.barricade > 0 ? `<small>barricaded with crates: they must hack through</small><i class="bar"><b></b></i>${atk}`
     : passable(h) ? `<em>${h.attackers ? '⚔ raiders can walk in!' : 'wide open: raiders can walk in'}</em>`
     : h.attackers || h.weak < WEAK ? `<small>too small to walk through: they're hacking it wider</small><i class="bar"><b></b></i>${atk}` : '';
   if (!h.exact) return ['label bad', `No Masterpiece now<small>board it over to close it</small>${breach}`];
@@ -3478,11 +3519,26 @@ function place(t, by = myId(), hand = carry) {
   }
   return t.frame ? placeFrame(t, by, hand) : placeWall(t, by, hand);
 }
+/* Planks from the armoury's broken crates, nailed into a hole as a piece's worth of repair: two
+   boards a square, weathered paler than the timber, with nail heads at the ends. */
+const plankMat = mat('#ffffff', { roughness: 0.85, map: canvasTex(64, 64, (g, w, h) => {
+  g.fillStyle = '#a98c66'; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 18; i++) {
+    g.strokeStyle = `rgba(80, 52, 28, ${0.15 + Math.random() * 0.2})`;
+    g.lineWidth = 1;
+    const y = Math.random() * h;
+    g.beginPath(); g.moveTo(0, y); g.lineTo(w, y + (Math.random() - 0.5) * 3); g.stroke();
+  }
+  g.fillStyle = 'rgba(50, 30, 14, 0.85)';
+  g.fillRect(0, h / 2 - 1.5, w, 3);
+  g.fillStyle = '#3a3a3e';
+  for (const y of [h / 4, h * 3 / 4]) for (const x of [7, w - 7]) { g.beginPath(); g.arc(x, y, 2.5, 0, Math.PI * 2); g.fill(); }
+}) });
 // A piece in the wall, where it ends up: a clean fit sits flush in the hole; a board nailed over
 // the stone sticks out in front of it; boards behind stack up on the den side.
 function putPiece(h, i) {
   const over = i.over > 0;
-  const g = pieceGroup(i.shape, woodMat(i.letter));
+  const g = pieceGroup(i.shape, i.planks ? plankMat : woodMat(i.letter));
   if (i.patch) g.scale.z = PATCH_D / WOOD_D;
   const to = new THREE.Vector3(X(i.dc), Y(i.dr), i.patch ? patchZ(i.layer, h) : over ? WOOD_D - 0.12 : -0.04);
   g.position.copy(to);
@@ -3815,10 +3871,8 @@ function tween(dur, step, done) { tweens.push({ t: 0, dur, step, done }); }
 // Only an empty hole with a gap at the floor big enough to walk through lets raiders in; anything
 // with wood in it has to be hacked open first, and a smaller or higher one hacked wider (WEAK).
 const bareHole = (h) => h.status === 'open' && !h.pieces.length && !(h.rubble > 0);
-// A gap raiders could walk through; passable unless crates are piled in it (the armoury's barricades).
-const gapOpen = (h) => bareHole(h) && (h.door != null || !!h.hop);
-const passable = (h) => gapOpen(h) && !(h.barricade > 0);
-const weakSpot = (h) => bareHole(h) && !gapOpen(h);
+const passable = (h) => bareHole(h) && (h.door != null || !!h.hop);
+const weakSpot = (h) => bareHole(h) && !passable(h);
 const doorX = (h) => (h.door != null ? X(h.door) + DOOR_W * S / 2 : holeX(h));
 // Where a raider stands to hack at a hole: in its doorway if it has one (rubble or wood in it), else
 // spread along the hole.
@@ -3986,9 +4040,8 @@ function updateRaider(r, dt) {
       const fill = h.pieces.some((p) => !p.patch), li = !h.lay.length ? -1 : out ? h.lay.length - 1 : fill ? -1 : 0;
       const board = li >= 0 ? h.lay[li] : null;
       const rub = !out && h.rubble > 0 && !h.pieces.length;   // a fresh breach: clear the rubble first
-      const barr = gapOpen(h) && h.barricade > 0;   // a gap with crates piled in it: through those first
       const hack = hackRate() * dt, weak = weakSpot(h);   // weak: an empty hole they can't walk through
-      if (barr) { h.barricade -= hack; barricadeShow(h); } else if (weak) h.weak -= hack; else if (rub) { h.rubble -= hack; rubbleShow(h); } else if (board) board.hp -= hack; else h.hp -= hack;
+      if (weak) h.weak -= hack; else if (rub) { h.rubble -= hack; rubbleShow(h); } else if (board) board.hp -= hack; else h.hp -= hack;
       r.m.arms[1].rotation.x = -1.8 + Math.sin(r.t * 9) * 1.1;
       r.hitT -= dt;
       if (r.hitT <= 0) {
@@ -3996,8 +4049,7 @@ function updateRaider(r, dt) {
         burst(new THREE.Vector3(hackX(h, r.slot * 0.5), Math.min(holeMidY(h), 1.4), out ? 0.6 : 0.25), weak ? '#9a8a7a' : '#c98a45', 4, 2);
         h.jig = 0.15;
       }
-      if (barr) { if (h.barricade <= 0) { h.barricade = 0; barricadeShow(h); } else if (!out && r.stamina <= 0) turnedAway(r); }
-      else if (weak) { if (h.weak <= 0) widen(h, widenCells(h) || []); else if (!out && r.stamina <= 0) turnedAway(r); }
+      if (weak) { if (h.weak <= 0) widen(h, widenCells(h) || []); else if (!out && r.stamina <= 0) turnedAway(r); }
       else if (rub) { if (r.stamina <= 0) turnedAway(r); }
       else if (board && board.hp <= layerNextOut(h, li)) dropBoard(h, li, out);
       else if (!board && h.hp <= 0) breakHole(h);
@@ -5771,6 +5823,6 @@ if (['all', 'gundeck'].includes(new URLSearchParams(location.search).get('try'))
 requestAnimationFrame(frame);
 
 // For poking at it from the console.
-window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, swordReward, swordBreak, barricade, barricadeShow, newGame, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, swordReward, swordBreak, lumber, toLumber, repairAll, newGame, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };

@@ -137,7 +137,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   to choose up front: the user, "attackers are coming and you just choose which ways to deal with
   them. Similar to how you can defend with carp or jump to the gun turret later" (8 Nov; the idea
   came from the Age of Apes tutorial's choice of three mini-games).
-- **Swordfight at the armoury hoist: soldiers and barricades (8 Nov).** Each raider beaten
+- **Swordfight at the armoury hoist: soldiers and wall repairs (8 Nov).** Each raider beaten
   (knocked flat, by a thrown piece, the guns or a soldier; or turned away at the wall) drops their
   weapons: a pair of crates, a Swordfight pair, that lands inside the den. Walk over it to pick it
   up (eight at most). At the armoury hoist, against the left of the den, Space at the winch plays
@@ -152,12 +152,19 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     Soldiers go for raiders loose in the den and stand just inside the gaps in the wall (or behind
     the holes being hacked), and a raider coming through a gap they hold stops to fight them; they
     don't go out over the wall.
-  - **Loose crates barricade the breaches.** Each sprinkle is a crate thrown from the hoist to the
-    breach that needs it most (open gaps first, then the hole hacked hardest, then the weakest,
-    spreading out over several), and piled just inside it, six at most. Raiders must hack through
-    a barricade before they can walk in, as they do rubble (each crate holds out 2.5 seconds of
-    hacking), and arrive winded. The user: sprinkles should "build an extra barrier ... on this side
-    of the wall", like the rubble in a fresh breach.
+  - **Loose crates mend the wall, for good.** Each sprinkle is a loose crate broken up for planks,
+    thrown onto the lumber pile at the foot of the hoist (on the wall side); every 4 crates' worth
+    is nailed into a hole as a piece's worth of planks (a pentomino's shape, pale boards with nail
+    heads), as if you'd fitted that piece, and stays. It goes to the hole that needs it most (a gap
+    raiders can walk through first, then the one hacked hardest, then the weakest; the nearest done
+    if it's a tie), lowest down, and always where the rest of the hole can still be finished
+    exactly, so a Masterpiece is still there to be made (and if the planks finish it, it is one,
+    breaker and all). Planks with no hole to mend wait on the pile, three pieces' worth at most.
+    The break's message says how many crates went for planks and how near the next repair is. The
+    user, on the barricades this replaced (crates piled inside the breaches): "It says three
+    sprinkles to the barricades, but I just see blocks on the ground ... this is confusing. Maybe
+    you have to do a certain number and it actually fills in a hole a bit ... more of like a
+    permanent wall repair for sprinkling."
   - **Masterpieces pay in breakers.** A Masterpiece (a hole, a layer behind one, or a frame built
     without waste) also pays a pair of crates with a breaker in it, flown straight to the hoist's
     landing as the next pair down (onto the floor by you if your hands are full). Once per
@@ -183,7 +190,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   them and it's like, okay, well, now what?" A break plays out a link of the chain at a time: what's
   about to break shakes and swells, then smashes into flying planks (a breaker's blade just
   flashes), and what was on it drops into the gap, faster as it falls; only then does the break
-  send its soldiers and barricades, and the next pair waits till it's done. The user: "it needs the
+  send its soldiers and planks, and the next pair waits till it's done. The user: "it needs the
   breaking animation, not just to magically break."
 
 - **A pirate mends a den wall.** Pieces sit on three crates (the toolbox); you carry them over and
