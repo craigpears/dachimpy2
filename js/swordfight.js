@@ -56,6 +56,17 @@ export class Board {
         this.falling = null;
     }
     at(r, c) { return this.grid[r]?.[c] ?? null; }
+    /** Every piece on the board where it stands now, bottom row first. */
+    snap() {
+        const out = [];
+        for (let r = 0; r < H; r++)
+            for (let c = 0; c < W; c++) {
+                const g = this.grid[r][c];
+                if (g)
+                    out.push(g.fuse === undefined ? { g, r, c } : { g, r, c, fuse: g.fuse });
+            }
+        return out;
+    }
     open(r, c) { return c >= 0 && c < W && r >= 0 && r < H && !this.grid[r][c]; }
     /** The squares the falling pair covers: the first piece's, then the second's. */
     fallingCells(f = this.falling) {
@@ -290,7 +301,7 @@ export class Board {
                 }
             if (!regions.length)
                 return res;
-            const link = { chain, broken: 0, sprinkles: 0, strikes: [] };
+            const link = { chain, broken: 0, sprinkles: 0, strikes: [], before: this.snap() };
             for (const region of regions) {
                 // One sprinkle for every two loose pieces broken (rounded down), counted region by region;
                 // a sword for each fused block.

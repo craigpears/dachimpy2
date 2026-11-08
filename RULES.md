@@ -175,9 +175,24 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   camera turns to face it. The board on a sign before it "just feels like it's been forced in.
   There's nothing natural looking about it. It's very glaring" (the user), and setting it into a
   wall "doesn't really make sense".
+  **You can see what you're carrying, and see things break (8 Nov).** The crates you've picked up
+  ride on your back, lashed to a carrying frame (the next three pairs, as they'll come down), and a
+  tile beside the crates in the toolbox shows the next few pairs, breakers glowing, and how many you
+  have; picking one up says how many and where they go. The user: "it doesn't really have any
+  indication, visual or otherwise, that you're carrying any breakers. You just kind of walk into
+  them and it's like, okay, well, now what?" A break plays out a link of the chain at a time: what's
+  about to break shakes and swells, then smashes into flying planks (a breaker's blade just
+  flashes), and what was on it drops into the gap, faster as it falls; only then does the break
+  send its soldiers and barricades, and the next pair waits till it's done. The user: "it needs the
+  breaking animation, not just to magically break."
 
 - **A pirate mends a den wall.** Pieces sit on three crates (the toolbox); you carry them over and
   fit them into holes in a stone wall. Same pieces, weights and Masterpiece rule as the main game.
+  Every piece on a crate, and the one held overhead, has a bold dark edge on both faces, so its
+  shape reads from above on its crate and from behind over your head; held over a spot it fits,
+  it goes only half see-through. The user (8 Nov): "you can't see the pieces on the crates or above
+  your head when you're placing them so much anymore. That seems to have gone backwards." (A new
+  game had also left the first three crates looking empty.)
 - **You can never get stuck.** Like real carpentry, a piece may be nailed over the stone around a
   hole ("boarded over"). That always closes the hole, but it's a botch: weak and pays little. A hole
   filled exactly is a Masterpiece: strong, and pays well.

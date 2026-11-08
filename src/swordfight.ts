@@ -30,8 +30,13 @@ export type Pair = [Piece, Piece];
 /** A sword sent at the other side: a fused block's worth. */
 export interface Strike { w: number; h: number; vertical: boolean }
 
-/** What one link of a chain broke and sent. */
-export interface Link { chain: number; broken: number; sprinkles: number; strikes: Strike[] }
+/** One piece where it stood at some moment, and the fused block it was part of then. */
+export interface Placed { g: Gem; r: number; c: number; fuse?: number }
+
+/** What one link of a chain broke and sent. `before` is the stack just before it broke (every
+    piece where it stood, fused as it was then), so the den can show a chain a link at a time: what
+    breaks is what's in `before` and gone by the next link's `before` (or the board after). */
+export interface Link { chain: number; broken: number; sprinkles: number; strikes: Strike[]; before: Placed[] }
 
 /** What a pair's landing set off: every link, and the attacks added up. */
 export interface Result { links: Link[]; sprinkles: number; strikes: Strike[] }
@@ -76,6 +81,16 @@ export class Board {
   }
 
   at(r: number, c: number): Gem | null { return this.grid[r]?.[c] ?? null; }
+
+  /** Every piece on the board where it stands now, bottom row first. */
+  snap(): Placed[] {
+    const out: Placed[] = [];
+    for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
+      const g = this.grid[r][c];
+      if (g) out.push(g.fuse === undefined ? { g, r, c } : { g, r, c, fuse: g.fuse });
+    }
+    return out;
+  }
   private open(r: number, c: number): boolean { return c >= 0 && c < W && r >= 0 && r < H && !this.grid[r][c]; }
 
   /** The squares the falling pair covers: the first piece's, then the second's. */
@@ -269,7 +284,7 @@ export class Board {
         regions.push(region);
       }
       if (!regions.length) return res;
-      const link: Link = { chain, broken: 0, sprinkles: 0, strikes: [] };
+      const link: Link = { chain, broken: 0, sprinkles: 0, strikes: [], before: this.snap() };
       for (const region of regions) {
         // One sprinkle for every two loose pieces broken (rounded down), counted region by region;
         // a sword for each fused block.

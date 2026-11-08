@@ -82,6 +82,11 @@ the site (`.assetsignore` skips `*.md`).
   will if you let me rotate it first". You should be able to hold the piece over the gap and turn
   it there, whether or not it fits the way it's facing.
 
+- **Loose crates should repair the wall, not pile up (8 Nov):** "It says three sprinkles to the
+  barricades, but I just see blocks on the ground ... this is confusing. Maybe you have to do a
+  certain number and it actually fills in a hole a bit ... more of like a permanent wall repair
+  for sprinkling." (How many crates a square, and which hole, to pin down with the user.)
+
 ## Needs a playtest to pin down
 
 - **Swordfight at the armoury hoist (8 Nov), not yet tried by the user.** Rebuilt after the

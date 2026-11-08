@@ -212,10 +212,14 @@ function outline(cells, z, color) {
   geo.setAttribute('position', new THREE.Float32BufferAttribute(p, 3));
   return new THREE.LineSegments(geo, new THREE.LineBasicMaterial({ color }));
 }
-// The same piece, centred on its own origin (for carrying and for the piles).
+// The same piece, centred on its own origin (for carrying and for the piles), with a bold dark edge
+// on both faces, so its shape reads from above on a crate and from behind when held overhead (the
+// user, 8 Nov: "you can't see the pieces on the crates or above your head ... so much anymore").
+const PILE_SC = 0.45;   // a piece's size on its crate
 function centred(cells, m) {
   const b = C.bbox(cells);
   const inner = pieceGroup(cells, m);
+  inner.add(fatOutline(cells, 0.004, '#2e1808', 0.05), fatOutline(cells, -WOOD_D - 0.004, '#2e1808', 0.05));
   inner.position.set(-b.w * S / 2, b.h * S / 2, WOOD_D / 2);
   const g = new THREE.Group();
   g.add(inner);
@@ -2259,7 +2263,7 @@ function showPile(p) {
   if (!p.letter) return;
   const g = centred(p.cells, woodMat(p.letter));
   g.rotation.x = -Math.PI / 2;
-  g.scale.setScalar(0.38);
+  g.scale.setScalar(PILE_SC);
   g.position.set(p.x, 0.76, p.z);
   scene.add(g);
   p.group = g;
@@ -2313,6 +2317,25 @@ function toolbox() {
     }
     if (state === 'wait') t.el.querySelector('b').style.width = `${Math.min(1, 1 - p.wait / (p.waitFull || restockSecs())) * 100}%`;
   });
+  armsTile(box);
+}
+/* Beside the crates: the crates of weapons you're carrying for the armoury hoist, the next few
+   pairs as they'll come down (bottom one first), breakers glowing, and how many you have. */
+let armsEl = null, armsSig = '';
+function armsTile(box) {
+  if (!armsEl) {
+    armsEl = document.createElement('div');
+    armsEl.className = 'tool arms';
+    armsEl.title = 'Crates of weapons for the armoury hoist, on the left of the den: stack them there to arm soldiers and barricade the breaches';
+    box.append(armsEl);
+  }
+  const q = rack.queue, show = swordHere() && q.length > 0;
+  armsEl.hidden = !show;
+  const sig = show ? q.slice(0, 4).map((p) => p.map(crateSig).join('')).join('|') + q.length : '';
+  if (sig === armsSig) return;
+  armsSig = sig;
+  const box1 = (g) => g.breaker ? `<b class="brk" style="--c:${PALETTE[g.c].base}"></b>` : `<b style="--c:${PALETTE[g.c].base}"></b>`;
+  armsEl.innerHTML = `<div class="q">${q.slice(0, 4).map((p) => `<i>${p.map(box1).join('')}</i>`).join('')}</div><span>${q.length} for the hoist</span>`;
 }
 const barrel = (() => {
   const g = new THREE.Group();
@@ -2512,40 +2535,41 @@ const atSword = () => swordHere() && pirate.h < 0.05 && pirate.x - sword.x > 0.3
 // Where the winch is, in the den's terms.
 const winchAt = () => ({ x: sword.x + 0.3, z: sword.z + sword.w / 2 + 0.13 });
 
-/* The stack's crates, kept in step with the board: one per piece (a fused block, one chest), moving
-   to where it now sits; a crate broken bursts where it was. */
-function stackSync() {
-  const b = rack.board, live = new Map(), inGrid = new Set();
-  for (let r = 0; r < SH; r++) for (let c = 0; c < SW; c++) {
-    const g = b.grid[r][c];
-    if (!g) continue;
-    inGrid.add(g);
-    if (g.fuse === undefined) live.set(g, { g, at: cellAt(r, c), sig: crateSig(g) });
+/* The stack's crates, kept in step with the stack as it stands (the board now, or as it stood
+   before a link of a chain broke: see swordBreak): one per piece (a fused block, one chest), falling
+   to where it now sits; a crate broken smashes where it was. */
+function stackSync(snap = rack.board.snap()) {
+  const live = new Map(), here = new Set(snap.map((p) => p.g)), boxes = new Map();
+  for (const p of snap) {
+    if (p.fuse === undefined) { live.set(p.g, { g: p.g, gems: [p.g], at: cellAt(p.r, p.c), sig: crateSig(p.g) }); continue; }
+    const b = boxes.get(p.fuse);
+    if (!b) boxes.set(p.fuse, { g: p.g, gems: [p.g], r0: p.r, c0: p.c, r1: p.r, c1: p.c });
+    else { b.gems.push(p.g); b.r0 = Math.min(b.r0, p.r); b.c0 = Math.min(b.c0, p.c); b.r1 = Math.max(b.r1, p.r); b.c1 = Math.max(b.c1, p.c); }
   }
-  for (const id of b.fusedIds()) {
-    const f = b.fusedBox(id), g = b.grid[f.r0][f.c0];
-    const at = cellAt(f.r0, f.c0).add(new THREE.Vector3((f.w - 1) * CR / 2, (f.h - 1) * CR / 2, 0));
-    live.set('f' + id, { g, at, sig: `${crateSig(g)}${f.w}x${f.h}`, w: f.w, h: f.h });
+  for (const [id, b] of boxes) {
+    const w = b.c1 - b.c0 + 1, h = b.r1 - b.r0 + 1;
+    const at = cellAt(b.r0, b.c0).add(new THREE.Vector3((w - 1) * CR / 2, (h - 1) * CR / 2, 0));
+    live.set('f' + id, { g: b.g, gems: b.gems, at, sig: `${crateSig(b.g)}${w}x${h}`, w, h });
   }
   for (const [key, m] of sword.crates) {
     const L = live.get(key);
     if (L && L.sig === m.userData.sig) continue;
-    // Gone from the stack altogether: broken open, so it bursts. (Otherwise it's joined a chest, or
+    // Gone from the stack altogether: broken open, so it smashes. (Otherwise it's joined a chest, or
     // changed look, and a new one takes its place.)
-    const broken = !L && (typeof key === 'string' ? !b.fusedIds().includes(Number(key.slice(1))) : !inGrid.has(key));
-    if (broken) burst(m.getWorldPosition(new THREE.Vector3()), PALETTE[m.userData.c].light, m.userData.big ? 22 : 7, 3);
+    if (m.userData.gems.every((g) => !here.has(g))) smash(m);
     crateGone(m); sword.crates.delete(key);
   }
   for (const [key, L] of live) {
     let m = sword.crates.get(key);
     if (!m) {
       m = armsCrate(L.g, L.w, L.h);
-      Object.assign(m.userData, { sig: L.sig, c: L.g.c, big: !!L.w });
+      Object.assign(m.userData, { sig: L.sig, c: L.g.c, big: !!L.w, grey: !!L.g.grey, blade: !!L.g.breaker && !L.g.grey, gems: L.gems });
       m.position.copy(L.at);
       sword.group.add(m);
       sword.crates.set(key, m);
     }
     m.userData.to = L.at;
+    m.userData.doomed = false;
   }
   // The crates waiting on the landing: the next three pairs.
   const nk = rack.queue.slice(0, 3).map((p) => p.map(crateSig).join('')).join('|');
@@ -2592,7 +2616,68 @@ function pairSync(dt) {
   sword.rope.position.set(sword.trolley.position.x, y1 - len / 2, 0);
   sword.rope.visible = len > 0.06;
   if (f) sword.drum.rotation.y += 1.5 * dt;
-  for (const m of sword.crates.values()) if (m.userData.to) m.position.lerp(m.userData.to, Math.min(1, dt * 9));
+  // The stack's crates drop into gaps under them as things do, faster and faster; the ones about to
+  // break shake and swell first.
+  const now = performance.now() / 1000;
+  for (const m of sword.crates.values()) {
+    const u = m.userData, to = u.to;
+    if (!to) continue;
+    if (m.position.y > to.y + 0.002) {
+      u.vy = (u.vy || 0) - 22 * dt;
+      m.position.y = Math.max(to.y, m.position.y + u.vy * dt);
+    } else { m.position.y = to.y; u.vy = 0; }
+    m.position.x += (to.x - m.position.x) * Math.min(1, dt * 14);
+    m.position.z = to.z;
+    if (u.doomed) {
+      m.position.x = to.x + Math.sin(now * 70) * 0.025;
+      m.scale.setScalar(1 + 0.1 * Math.abs(Math.sin(now * 16)));
+    } else if (m.scale.x !== 1) m.scale.setScalar(1);
+  }
+}
+const stackStill = () => [...sword.crates.values()].every((m) => !m.userData.to || m.position.y <= m.userData.to.y + 0.002);
+/* A crate broken open: it bursts into planks that fly off and fall away, with a puff of its colour
+   (a breaker, being a bare blade, just flashes). */
+function smash(m) {
+  const at = m.getWorldPosition(new THREE.Vector3()), u = m.userData;
+  burst(at, PALETTE[u.c].light, u.blade ? 14 : u.big ? 22 : 8, 3);
+  if (u.blade) return;
+  const plank = crateLook.plank ||= new THREE.BoxGeometry(CRATE * 0.95, CRATE * 0.2, 0.04);
+  const n = u.big ? 12 : 5, look = u.grey ? crateLook.grey : crateLook.wood[u.c], spread = u.big ? CR : CR / 2;
+  for (let i = 0; i < n; i++) {
+    const s = mesh(plank, look, false);
+    const p0 = at.clone().add(new THREE.Vector3((Math.random() - 0.5) * spread, (Math.random() - 0.5) * spread, (Math.random() - 0.5) * spread));
+    const v = p0.clone().sub(at).setY(0).normalize().multiplyScalar(1.2 + Math.random() * 1.6);
+    v.y = 1.5 + Math.random() * 2;
+    const spin = new THREE.Vector3(Math.random() * 14 - 7, Math.random() * 14 - 7, Math.random() * 14 - 7), r0 = new THREE.Euler(Math.random() * 3, Math.random() * 3, Math.random() * 3);
+    s.position.copy(p0);
+    s.rotation.copy(r0);
+    scene.add(s);
+    const life = 0.7 + Math.random() * 0.3;
+    tween(life, (k) => {
+      const t = k * life;
+      s.position.set(p0.x + v.x * t, p0.y + v.y * t - 6 * t * t, p0.z + v.z * t);
+      s.rotation.set(r0.x + spin.x * t, r0.y + spin.y * t, r0.z + spin.z * t);
+      s.scale.setScalar(k < 0.7 ? 1 : 1 - (k - 0.7) / 0.3);
+    }, () => scene.remove(s));
+  }
+}
+/* A pair lands: if it breaks anything, the chain plays out a link at a time (the user, 8 Nov: "it
+   needs the breaking animation, not just to magically break"). The stack as it stood before each
+   link: what's about to break shakes, then smashes, and what was on it drops into the gap. Only when
+   it's all done does the break send its soldiers and barricades. No new pair comes in meanwhile. */
+const BREAK_HOLD = 0.4;   // seconds the doomed crates shake before they go
+function swordBreak(res) {
+  if (!res.links.length) return swordLanded(res);
+  sword.show = { states: res.links.map((l) => l.before), i: -1, t: 0, res };
+}
+function showTick(dt) {
+  const S = sword.show;
+  if (S.i >= 0 && !(stackStill() && (S.t += dt) >= BREAK_HOLD)) return;
+  S.i++; S.t = 0;
+  if (S.i >= S.states.length) { sword.show = null; swordLanded(S.res); return; }
+  stackSync(S.states[S.i]);
+  const next = new Set((S.states[S.i + 1] || rack.board.snap()).map((p) => p.g));
+  for (const m of sword.crates.values()) m.userData.doomed = m.userData.gems.every((g) => !next.has(g));
 }
 
 // A beaten raider's weapons: a pair of crates flies over (or across) the den and lands on the floor inside.
@@ -2654,7 +2739,7 @@ function swordKey(key, e) {
   if (key === 'escape') { sword.on = false; return true; }
   const moves = { arrowleft: () => rack.move(-1), a: () => rack.move(-1), arrowright: () => rack.move(1), d: () => rack.move(1), arrowup: () => rack.turn(-1), w: () => rack.turn(-1), q: () => rack.turn(-1), arrowdown: () => rack.turn(1), s: () => rack.turn(1), e: () => rack.turn(1) };
   if (moves[key]) { moves[key](); sword.dirty = true; return true; }
-  if (key === ' ' || key === 'enter') { const res = !e.repeat && rack.drop(); if (res) swordLanded(res); return true; }
+  if (key === ' ' || key === 'enter') { const res = !e.repeat && !sword.show && rack.drop(); if (res) swordBreak(res); return true; }
   return key === 'tab';
 }
 const CHAINS = ['', '', 'Double! ', 'Triple! ', 'Bingo! ', 'Donkey! ', 'Vegas! '];
@@ -2770,12 +2855,13 @@ function guardSpots() {
 function swordTick(dt) {
   sword.group.visible = !online();
   document.body.classList.toggle('swordfight', sword.on);
-  if (!swordHere()) { sword.on = false; return; }
+  if (!swordHere()) { sword.on = false; if (sword.pack) sword.pack.visible = false; return; }
   if (sword.on && (carry || pirate.h > 0.05)) sword.on = false;
-  if (sword.on) {
+  if (sword.show) showTick(dt);
+  else if (sword.on) {
     const n = rack.tick(dt);
     if (n.lost) say('The stack reached the red: it toppled, crates and all', true);
-    if (n.landed) swordLanded(n.landed);
+    if (n.landed) swordBreak(n.landed);
     if (n.changed) sword.dirty = true;
   }
   // Pieces on the floor: bobbing, and picked up by walking over them.
@@ -2788,6 +2874,10 @@ function swordTick(dt) {
     if (pirate.h > 0.3 || Math.hypot(pirate.x - d.x, pirate.z - d.z) > 0.9) continue;
     if (!rack.take(d.pair)) { if (!G.queueSaid) { G.queueSaid = true; say(`You can carry ${SWORD.QUEUE} pairs of crates: stack some at the armoury hoist`); } continue; }
     burst(new THREE.Vector3(d.x, 0.5, d.z), PALETTE[d.pair[0].c].base, 6, 2);
+    // Say what you've got and where it goes (the user, 8 Nov: "you just kind of walk into them and
+    // it's like, okay, well, now what?").
+    const n = rack.queue.length, brk = d.pair.some((g) => g.breaker);
+    toast(`${brk ? 'A breaker! ' : ''}Crates on your back: ${n} of ${SWORD.QUEUE} pairs · stack them at the armoury hoist, on the left`);
     dropGone(d);
     sword.drops.splice(i, 1);
     sword.dirty = true;
@@ -2795,15 +2885,48 @@ function swordTick(dt) {
   barracks.tick(dt, raiders, guardSpots(), { x: sword.x + 1.8, z: sword.z }).forEach(swordNews);
   for (const [s, m] of sword.figures) poseFigure(s, m, dt);
   for (const s of barracks.sweep()) { scene.remove(sword.figures.get(s)?.g); sword.figures.delete(s); }
-  if (sword.dirty) { sword.dirty = false; stackSync(); }
+  if (sword.dirty && !sword.show) { sword.dirty = false; stackSync(); }
   pairSync(dt);
+  packSync();
+}
+/* The crates you're carrying for the hoist, strapped on your back: the next three pairs, each pair
+   one on the other as it'll come down the rope, a breaker's bare blade sticking up. */
+function packSync() {
+  const q = rack.queue, pk = sword.pack ||= new THREE.Group();
+  if (!pk.parent) scene.add(pk);
+  const key = q.slice(0, 3).map((p) => p.map(crateSig).join('')).join('|');
+  if (key !== sword.packKey) {
+    sword.packKey = key;
+    [...pk.children].forEach(crateGone);
+    const n = Math.min(3, q.length);
+    // A carrying frame they're lashed to: a board up the back with a strap round the crates.
+    const frame = mesh(new THREE.BoxGeometry(0.22 * n + 0.04, 0.5, 0.03), crateLook.packWood ||= mat('#4a3020', { map: woodTex }), false);
+    frame.geometry.userData.own = true;
+    frame.position.set(0, 0.16, -0.13);
+    const strap = mesh(new THREE.BoxGeometry(0.22 * n + 0.06, 0.04, 0.26), crateLook.strap ||= mat('#2a1a10'), false);
+    strap.geometry.userData.own = true;
+    strap.position.set(0, 0.1, -0.02);
+    pk.add(frame, strap);
+    q.slice(0, 3).forEach((pair, i) => pair.forEach((g, j) => {
+      const m = armsCrate({ c: g.c, breaker: g.breaker });
+      m.scale.setScalar(0.5);
+      m.position.set((i - (n - 1) / 2) * 0.22, j * 0.21, 0);
+      pk.add(m);
+    }));
+  }
+  pk.visible = q.length > 0 && !sword.on;
+  if (!pk.visible) return;
+  pirate.g.updateMatrixWorld();
+  pirate.g.localToWorld(pk.position.set(0, 0.98, -0.4));
+  pk.rotation.set(0, pirate.g.rotation.y + Math.PI, 0);
 }
 function swordReset() {
   rack.reset(); barracks.reset();
-  sword.on = false; sword.dirty = true;
+  sword.on = false; sword.dirty = true; sword.show = null;
   sword.drops.splice(0).forEach(dropGone);
   for (const m of sword.crates.values()) crateGone(m);
   sword.crates.clear();
+  sword.packKey = null;
   for (const m of sword.figures.values()) scene.remove(m.g);
   sword.figures.clear();
 }
@@ -2824,7 +2947,8 @@ function newGame() {
   swordReset();
   piles.forEach((p) => { p.letter = null; });
   newWall();
-  piles.forEach(deal);   // after the wall, so the first deals finish its holes
+  // After the wall, so the first deals finish its holes; and shown, since the wall drew the crates empty.
+  piles.forEach((p) => { deal(p); showPile(p); });
   Object.assign(pirate, { x: 0, z: 8, h: 0 });
   $('end').classList.remove('on');
   $('intro').classList.remove('off');
@@ -3312,7 +3436,7 @@ function pickUp(p) {
   const g = carry.group;
   g.position.copy(p.group.position);
   g.rotation.x = -Math.PI / 2;
-  g.scale.setScalar(0.38);
+  g.scale.setScalar(PILE_SC);
   scene.add(g);
   scene.remove(p.group);
   p.group = null; p.letter = null;
@@ -3500,7 +3624,7 @@ function holdPiece(letter, cells, from, at) {
   const g = carry.group;
   g.position.copy(at);
   g.rotation.x = -Math.PI / 2;
-  g.scale.setScalar(0.38);
+  g.scale.setScalar(PILE_SC);
   scene.add(g);
   tween(0.25, (t) => { if (carry?.group === g) carry.lift = t; });
   ghostKey = null;
@@ -5343,14 +5467,14 @@ function update(dt) {
   if (carry) {
     const g = carry.group, l = carry.lift ?? 1;
     v3.set(pirate.x, 2.15 + pirate.g.position.y, pirate.z + 0.05);
-    if (l < 1) { g.position.lerp(v3, Math.min(1, l * 1.6 + 0.2)); g.rotation.x = -Math.PI / 2 * (1 - l); g.scale.setScalar(0.38 + 0.17 * l); }
+    if (l < 1) { g.position.lerp(v3, Math.min(1, l * 1.6 + 0.2)); g.rotation.x = -Math.PI / 2 * (1 - l); g.scale.setScalar(PILE_SC + (0.55 - PILE_SC) * l); }
     else { g.position.copy(v3); g.rotation.x = 0; g.scale.setScalar(0.55); }
     if (carry.spin) { carry.spin *= Math.max(0, 1 - dt * 14); if (Math.abs(carry.spin) < 0.01) carry.spin = 0; }
     if (carry.flipT !== undefined && carry.flipT < 1) carry.flipT = Math.min(1, carry.flipT + dt * 6);
     g.rotation.z = carry.spin || 0;
     g.rotation.y = carry.flipT < 1 ? Math.PI * (1 - carry.flipT) : 0;
-    // See-through while aiming, so it doesn't hide the hole you're fitting it into.
-    carry.mat.opacity += ((target ? 0.3 : 1) - carry.mat.opacity) * Math.min(1, dt * 10);
+    // Half see-through while aiming, so it doesn't hide the hole you're fitting it into (its edge stays solid).
+    carry.mat.opacity += ((target ? 0.5 : 1) - carry.mat.opacity) * Math.min(1, dt * 10);
     carry.mat.depthWrite = carry.mat.opacity > 0.9;
   }
 
@@ -5647,6 +5771,6 @@ if (['all', 'gundeck'].includes(new URLSearchParams(location.search).get('try'))
 requestAnimationFrame(frame);
 
 // For poking at it from the console.
-window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, swordReward, barricade, barricadeShow, newGame, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, swordReward, swordBreak, barricade, barricadeShow, newGame, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };

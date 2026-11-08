@@ -19,12 +19,12 @@ function fight(b: Barracks, foes: Foe[], secs: number, spots = [] as { x: number
 }
 
 describe('muster', () => {
-  const link = (chain: number, ...strikes: ReturnType<typeof toSword>[]) => ({ chain, broken: 0, sprinkles: 0, strikes });
+  const link = (chain: number, ...strikes: ReturnType<typeof toSword>[]) => ({ chain, broken: 0, sprinkles: 0, strikes, before: [] });
 
   // The user, after the demo (8 Nov): "you'd have to do a combo, like a fuse block to get a soldier,
   // and obviously combo for multiples".
   it('loose pieces arm nobody: only a fused block makes a soldier (8 Nov)', () => {
-    expect(muster({ links: [{ chain: 1, broken: 6, sprinkles: 3, strikes: [] }], sprinkles: 3, strikes: [] })).toEqual([]);
+    expect(muster({ links: [{ chain: 1, broken: 6, sprinkles: 3, strikes: [], before: [] }], sprinkles: 3, strikes: [] })).toEqual([]);
     const [one, ...rest] = muster({ links: [link(1, toSword(2, 2))], sprinkles: 0, strikes: [toSword(2, 2)] });
     expect(rest).toEqual([]);
     expect(one.hp).toBe(3);

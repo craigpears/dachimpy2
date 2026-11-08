@@ -198,6 +198,35 @@ describe('attacks', () => {
     expect(res.links[1].sprinkles).toBe(2 * 2);   // the blue breaker and four blues: 2, doubled
   });
 
+  it('crates break by magic: a chain keeps the stack as it stood before each link, to show it break (8 Nov)', () => {
+    const b = board(
+      'B.....',
+      'r.....',
+      'R.....',
+      'bbbb..',
+    );
+    const blue = b.at(3, 0)!;
+    const res = b.resolve();
+    const at = (l: number) => res.links[l].before.map((p) => `${CODE[p.g.c]}${p.r}${p.c}`).sort();
+    // Before the first link: the reds still there, the blue breaker up on top of them.
+    expect(at(0)).toEqual(['b00', 'b01', 'b02', 'b03', 'b30', 'r10', 'r20']);
+    // Before the second: the reds gone and the blue breaker fallen onto the blues, the same piece.
+    expect(at(1)).toEqual(['b00', 'b01', 'b02', 'b03', 'b10']);
+    expect(res.links[1].before.find((p) => p.r === 1)!.g).toBe(blue);
+  });
+
+  it('a fused block is kept as fused in the stack before a break', () => {
+    const b = board(
+      'gg....',
+      'ggG...',
+    );
+    const res = b.resolve();
+    const before = res.links[0].before;
+    expect(before.filter((p) => p.fuse !== undefined)).toHaveLength(4);
+    expect(new Set(before.filter((p) => p.fuse !== undefined).map((p) => p.fuse)).size).toBe(1);
+    expect(before.find((p) => p.g.breaker)!.fuse).toBeUndefined();
+  });
+
   it('a chain makes a sword longer along its longest side', () => {
     expect(toSword(2, 2, 2)).toEqual({ w: 2, h: 4, vertical: true });
     expect(toSword(3, 2, 2)).toEqual({ w: 6, h: 2, vertical: false });
