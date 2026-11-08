@@ -274,9 +274,9 @@ const Y = (r) => (wall.H - r) * S;         // top edge of row r
 const backMat = mat('#120b07', { roughness: 1 });
 const cellPlane = new THREE.PlaneGeometry(S, S);
 
+// A one-piece hole, for a common piece (P, F, Y, T, N or L): see roomyShapes.
 function lastGap() {
-  let l;
-  do l = C.weightedLetter(); while (l === 'I' || l === 'X');
+  const l = C.weightedLetter(['W', 'U', 'V', 'Z', 'X', 'I']);
   return C.pick(C.ORIENTS_BY_LETTER[l]).cells;
 }
 
@@ -285,7 +285,8 @@ function lastGap() {
    real puzzle fresh holes keep coming, so there's always room to dump an awkward piece; here the wall
    is fixed, and small breaches that only a W or a U could finish left the user stuck ("a lot of
    shapes that I can never really fill"). The wall you start with stays small and simple: the user
-   likes that opening. (A test of a player who always picks the most flexible spot: random 1- and
+   likes that opening, so it keeps its 1, 2 and 3-piece holes, but they're picked the same way: with
+   random ones the user still "wasn't getting the right pieces a lot at the start". (A test of a player who always picks the most flexible spot: random 1- and
    2-piece breaches left them with no piece that fits about 4 draws in every piece placed; 3-piece
    breaches picked this way, about 1.5.) */
 const COMMON = new Set(['P', 'F', 'Y', 'T', 'N', 'L']);
@@ -295,7 +296,7 @@ function roomyShapes(n, tries = 8) {
 }
 
 function newWall() {
-  const shapes = C.shuffle([1, 2, 2, 3]).map((n) => (n === 1 ? lastGap() : C.genHole(n).hole));
+  const shapes = C.shuffle([1, 2, 2, 3]).map((n) => (n === 1 ? lastGap() : roomyShapes(n, 6)[0] || C.genHole(n).hole));
   const dims = shapes.map((s) => C.bbox(s));
   const H = Math.max(6, Math.max(...dims.map((d) => d.h)) + 2);
   let col = 3, gate = null;   // room at each end for the stairs up to the wall-walk
@@ -867,7 +868,7 @@ function startHouse() {
   const first = ramp.jobs.find((j) => j.kind === 'house');
   if (first.frame) return;
   openJob(first.i);
-  say('Timber for your shack! Fill its frame on the floor, and it\'s hoisted into place');
+  say('Timber for your shack! Its frame\'s on the floor here: fill it with pieces from the crates, and it\'s hoisted into place');
   plotShow();
 }
 /* The shack's plot, marked out on the floor from the start (the user: it was hidden in a menu; walk
@@ -894,13 +895,15 @@ function makePlot() {
   g.fillStyle = '#7a5230'; g.fillRect(0, 0, 256, 96); g.strokeStyle = '#3a2412'; g.lineWidth = 8; g.strokeRect(4, 4, 248, 88);
   g.fillStyle = '#f3e3c0'; g.font = 'bold 40px Alegreya, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('Your shack', 128, 50);
   const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
-  const post = mesh(new THREE.CylinderGeometry(0.06, 0.07, 1.5, 8), peg);
-  post.position.set(xf + 0.7, 0.75, HOUSE_Z1 + 0.45);   // (clear of where its frames lie)
+  // The post stops under the board: running up through it, it hid the S ("Your hack", the user).
+  const post = mesh(new THREE.CylinderGeometry(0.06, 0.07, 1.2, 8), peg);
+  post.position.set(xf + 0.7, 0.6, HOUSE_Z1 + 0.45);   // (clear of where its frames lie)
   const board = mesh(new THREE.BoxGeometry(1.3, 0.49, 0.06), [peg, peg, peg, peg, mat('#ffffff', { map: tex, emissive: '#3a2a18', emissiveMap: tex }), mat('#ffffff', { map: tex })]);
   board.position.set(xf + 0.7, 1.45, HOUSE_Z1 + 0.45);
-  board.rotation.y = Math.PI / 2;
+  board.rotation.y = Math.PI / 4;   // turned to the den, where you look at it from
   plot.add(post, board);
   plot.userData.sign = board;
+  plot.userData.label = document.createElement('div');
   den.add(plot);
   plotShow();
 }
@@ -909,6 +912,24 @@ function plotShow() {
   if (!plot) return;
   const st = houseState();
   plot.children.forEach((o) => { o.visible = o === plot.userData.sign || o.geometry?.type === 'CylinderGeometry' && o.position.y > 0.5 ? st !== 'built' : st === 'plot'; });
+}
+/* What the plot's for, over it like a hole's label (the user clicked it by accident and couldn't
+   work out what had happened: there was no call to action). Shown when you're near. */
+function plotLabel() {
+  const lab = plot?.userData.label;
+  if (!lab) return;
+  if (!lab.isConnected) $('labels').append(lab);
+  const st = houseState(), xf = ramp ? houseXF() : 0, x = xf - HOUSE.depth * S / 2, z = (HOUSE_Z0 + HOUSE_Z1) / 2;
+  const html = st === 'plot' ? 'Your shack: build it here<small>walk in and press Space (or click) and timber comes for it</small>'
+    : st === 'built' ? 'Your shack<small>walk in and press Space (or click) to paint and dress it</small>' : '';
+  const near = Math.hypot(pirate.x - x, pirate.z - z) < 7;
+  if (!html || !near || wm || deco.on || deckView > 0.5 || pirate.h > 0.3) { lab.style.display = 'none'; return; }
+  if (lab.innerHTML !== html) { lab.className = 'label deck'; lab.innerHTML = html; }
+  v3.set(xf + 0.7, 2.05, HOUSE_Z1 + 0.45).project(camera);   // over the sign, kept on screen
+  const half = lab.offsetWidth / 2 + 10;
+  lab.style.left = `${Math.max(half, Math.min(innerWidth - half, (v3.x + 1) / 2 * innerWidth))}px`;
+  lab.style.top = `${(1 - v3.y) / 2 * innerHeight}px`;
+  lab.style.display = v3.z > 1 ? 'none' : '';
 }
 const atPlot = () => {
   if (!ramp || pirate.h > 0.3) return false;
@@ -2098,12 +2119,13 @@ const raiders = [];
 let ghost = null, ghostKey = '', target = null, cycle = 0, shake = 0;
 let mouse = null, mouseMode = false, topView = false;
 /* Puzzle mode at the wall: walk up to it with a piece and the camera pulls back to show the whole
-   wall, every hole at once, as near the real puzzle's board as the den gets. The arrow keys move the
-   piece a square at a time, always the way they point on screen, over all the holes; the pirate
-   walks along under it by themself. Space fits it, 1 2 3 take the next piece, and you stay at the
-   wall till Esc (or WASD) takes you back to walking. The user: running the pirate from hole to hole
-   was too much effort, and left/right went different ways depending on the camera. */
-let wm = null, wmBlock = null, wallView = 0;
+   wall, every hole at once, as near the real puzzle's board as the den gets. WASD moves the piece a
+   square at a time, always the way the key points on screen, and the arrows jump it hole to hole;
+   the pirate walks along under it by themself. Space or a click fits it, and that's you back to
+   walking, as is Esc (the view stays a moment, so taking the next piece with 1 2 3 carries on).
+   The user: running the pirate from hole to hole was too much effort, left/right went different
+   ways depending on the camera, and in this mode WASD should be "pure" piece moving. */
+let wm = null, wmBlock = null, wallView = 0, wmLinger = 0;
 
 function newGame() {
   if (guest()) return send('host', { t: 'again' });
@@ -2280,14 +2302,22 @@ addEventListener('keydown', (e) => {
   if (key === 'p' && !deco.on) { setPaused(true); return; }
   if ([' ', 'tab', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) e.preventDefault();
   const arrow = { arrowleft: [0, -1], arrowright: [0, 1], arrowup: [-1, 0], arrowdown: [1, 0] }[key];
-  // Puzzle mode at the wall: the arrows move the piece (held down, they keep going).
-  if (arrow && !deco.on && !G.over && (wm || (carry && canWallMode() && !nearFrame()))) {
-    if (!wm) enterWall();
+  const step = { a: [0, -1], d: [0, 1], w: [-1, 0], s: [1, 0] }[key];
+  // Puzzle mode at the wall: WASD moves the piece a square (held down, it keeps going), the arrows
+  // jump it to the next hole that way, Esc walks off.
+  if (wm && !deco.on && !G.over) {
+    if (key === 'escape') { exitWall(); return; }
+    if (step || arrow) {
+      mouseMode = false;
+      if (carry && step) { wm.r += step[0]; wm.c += step[1]; clampCursor(); }
+      else if (carry && !e.repeat) jumpHole(arrow);
+      return;
+    }
+  } else if (arrow && !deco.on && !G.over && carry && canWallMode() && !nearFrame()) {
+    enterWall();
     mouseMode = false;
-    if (carry) { wm.r += arrow[0]; wm.c += arrow[1]; clampCursor(); }
     return;
   }
-  if (wm && (key === 'escape' || (['w', 'a', 's', 'd'].includes(key) && !e.repeat))) { exitWall(); if (key === 'escape') return; }
   if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) { keys.add(key); mouseMode = false; }
   if (key === 'z' || key === 'c') keys.add(key);
   if (deco.on) {
@@ -2338,7 +2368,7 @@ renderer.domElement.addEventListener('mousemove', (e) => {
   const p = new THREE.Vector3();
   // A rampart frame you're pointing at (the nearest, if one's in front of another), else the wall.
   let best = null;
-  if (pirate.h < 0.3) for (const f of frames()) {
+  if (pirate.h < 0.3 && !wm) for (const f of frames()) {
     if (!ray.ray.intersectPlane(f.plane, p)) continue;
     const l = f.group.worldToLocal(p.clone()), fc = l.x / S, fr = -l.y / S, d = p.distanceTo(ray.ray.origin);
     if (fc < -1.2 || fc > f.b.w + 1.2 || fr < -1.2 || fr > f.b.h + 1.2) continue;
@@ -2361,7 +2391,8 @@ renderer.domElement.addEventListener('mousedown', (e) => {
   if (e.button === 2) { drag = { x: e.clientX, y: e.clientY, moved: false }; return; }
   if (e.button !== 0 || G.over) return;
   // Up on the rampart there's nothing to fit, so a click anywhere throws at the raider nearest it.
-  const r = carry && clickedFoe(e.clientX, e.clientY, pirate.h > 0.3 ? 1e4 : 90);
+  // In puzzle mode a click only ever fits the piece (raiders show through the holes, so it used to throw).
+  const r = carry && !wm && clickedFoe(e.clientX, e.clientY, pirate.h > 0.3 ? 1e4 : 90);
   if (r) throwAt(r);
   else if (!carry && onGunDeck() && (gd.hover = deckCellAt(e.clientX, e.clientY))) gd.press = { r: gd.hover[0], c: gd.hover[1], x: e.clientX, y: e.clientY };
   else act();
@@ -3416,7 +3447,27 @@ function enterWall() {
 }
 function exitWall() {
   wm = null;
+  wmLinger = 0;
   wmBlock = carry || null;   // don't pull you straight back in while you walk off with that piece
+}
+// The arrows: to the next hole that way (along the wall for left and right), to the best spot the
+// piece has in it, or over the middle of it if it won't go in.
+function jumpHole([dr, dc]) {
+  const b = C.bbox(carry.cells), cx = wm.c + b.w / 2, cy = wm.r + b.h / 2;
+  const mid = (h) => [h.b.r0 + h.b.h / 2, h.b.c0 + h.b.w / 2];
+  const inside = (h) => cy >= h.b.r0 && cy <= h.b.r1 + 1 && cx >= h.b.c0 && cx <= h.b.c1 + 1;
+  let best = null, bd = Infinity;
+  wall.holes.forEach((h, i) => {
+    if (inside(h)) return;
+    const [hy, hx] = mid(h), along = dc ? (hx - cx) * dc : (hy - cy) * dr, side = dc ? Math.abs(hy - cy) : Math.abs(hx - cx);
+    if (along <= 0.5) return;
+    const d = along + side * 0.5;
+    if (d < bd) { bd = d; best = i; }
+  });
+  if (best === null) { shake = 0.08; return; }
+  const h = wall.holes[best], [hy, hx] = mid(h);
+  const s = wallSpots().filter((o) => o.hole === best).sort((a, z) => spotRank(a) - spotRank(z) || Math.hypot(a.fr - hy, a.fc - hx) - Math.hypot(z.fr - hy, z.fc - hx))[0];
+  if (s) { wm.r = s.dr; wm.c = s.dc; } else { wm.r = Math.round(hy - b.h / 2); wm.c = Math.round(hx - b.w / 2); clampCursor(); }
 }
 // Which way to walk to stand below the piece, a step back from the wall.
 function wallWalk() {
@@ -3509,7 +3560,7 @@ function prompt() {
   } else if (!carry && liftable()) { const l = liftable(); t = `Space: lift the ${l.f.pieces[l.pi].info.letter} back out of the frame`; }
   else if (!carry && canTakeBack()) t = `Space: take the ${lastPlaced.letter} back off`;
   else if (wm) {
-    const keysTip = ' · arrows move it · Q/E turn · F flip · Esc: walk';
+    const keysTip = ' · WASD move it · arrows: next hole · Q/E turn · F flip · Esc: walk';
     if (!carry) t = '1, 2, 3: take a crate\'s piece · Esc: walk';
     else if (target?.ok && target.patch) t = `Space: nail it on behind${keysTip}`;
     else if (target?.ok && !target.over) t = `Space: fit the ${carry.letter} here${keysTip}`;
@@ -4395,6 +4446,9 @@ function update(dt) {
   }
   // Puzzle mode at the wall: in when you come up to it with a piece, out on leaving it.
   if (wmBlock && (wmBlock !== carry || pirate.z > WALL_Z + 3)) wmBlock = null;
+  // Fitting the piece is the end of it (the view stays a moment, for the next piece).
+  if (wm && !carry && !net.pending) { wm = null; wmLinger = 1.5; }
+  wmLinger = mx || mz || !canWallMode() ? 0 : Math.max(0, wmLinger - dt);
   if (wm && (!canWallMode() || pirate.h > 0.05)) wm = null;
   else if (!wm && carry && !wmBlock && !mx && !mz && canWallMode() && !nearFrame() && wallSpots().length) enterWall();
   const auto = wm && !mx && !mz ? wallWalk() : null;
@@ -4515,7 +4569,7 @@ function update(dt) {
     tilt += (Math.max(0.6, Math.min(1.45, 1.1 + view.pitch)) - tilt) * deckView;
   }
   // Puzzle mode at the wall: straight on to the whole wall, every hole in view at once.
-  wallView += ((wm ? 1 : 0) - wallView) * Math.min(1, dt * 3);
+  wallView += ((wm || wmLinger > 0 ? 1 : 0) - wallView) * Math.min(1, dt * 3);
   let yaw = view.yaw;
   if (wallView > 0.001) {
     const W2 = wall.W * S / 2, H2 = wall.H * S / 2;
@@ -4597,6 +4651,7 @@ function update(dt) {
   }
   toolbox();
   gunLabels();
+  plotLabel();
   for (const f of frames()) {
     const [cls, html] = frameLabel(f);
     if (f.sig !== cls + html) { f.sig = cls + html; f.label.className = cls; f.label.innerHTML = html; }

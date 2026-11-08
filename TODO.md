@@ -22,14 +22,6 @@ the site (`.assetsignore` skips `*.md`).
   - **Moderation:** pirate names are letters only already, but an open room may want a way to hide
     a pirate who's being a nuisance.
 
-- **Puzzle mode keys (8 Nov):** in puzzle mode WASD is "pure" piece moving (a square at a time),
-  the arrows jump hole to hole, and you leave by fitting the piece or pressing Esc. Clicks there
-  don't work (left click should fit, never throw at a raider showing through the hole).
-- **Not getting the right pieces at the start (8 Nov):** the opening wall keeps its simple 1, 2
-  and 3-piece holes, but the user still often had nothing that fit. Pick its shapes for the common
-  pieces too.
-- **The shack sign reads "Your hack" (8 Nov):** the S is hidden behind something. And there's no
-  obvious call to action: the user clicked it by accident and couldn't work out what happened.
 - **Boards behind should slot together into one layer (8 Nov):** place a piece behind and it starts
   a second layer; place another that fits perfectly beside it and it starts a third. Pieces that
   fit together should go in the same layer. And show where the layer goes: a wooden studwork
@@ -45,10 +37,10 @@ the site (`.assetsignore` skips `*.md`).
 - **Turning a piece close to the wall feels off.** The user can't yet say how (which way it
   turns? where the ghost jumps to?). The snapping changes of 7 Nov may have helped, and since 8 Nov
   the whole-wall puzzle mode (arrows move the piece by screen direction); ask again.
-- **Puzzle mode at the wall (8 Nov), not yet tried by the user.** Things to ask: is the whole-wall
-  view close enough to read the holes on their screen; should it come on by itself when you walk up
-  with a piece, or only on an arrow key; should arrows jump hole to hole as well as a square at a
-  time; the same view for the rampart and house frames ("the second stage")?
+- **Puzzle mode at the wall (8 Nov).** The user likes the zoom and the control, but hasn't tried
+  the keys yet (WASD moves the piece, arrows jump hole to hole, since 8 Nov). Still to ask: should
+  it come on by itself when you walk up with a piece; the same view for the rampart and house
+  frames ("the second stage")?
 - **Wood a piece at a time, and roomier raid holes (8 Nov), not yet tried by the user.** Watch
   for: refilling a knocked-out piece being too easy a way to hold a hole forever, and cannon
   breaches feeling too big now.

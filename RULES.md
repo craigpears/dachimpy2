@@ -195,6 +195,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   and L. A weak spot hacked wider gives way the same way. (A test of a player who always picks the
   most flexible spot: random 1- and 2-piece breaches left them with no piece that fits about 4
   draws for every piece placed; 3-piece breaches picked this way, about 1.5.)
+  **The first wall keeps its sizes but is picked the same way.** The user was still "not getting
+  the right pieces a lot at the start". Its one-piece hole is for a P, F, Y, T, N or L, and its two
+  and three-piece holes are the best of six for the common pieces. (Same test, the whole opening
+  wall: 3.2 stuck draws per piece placed with random shapes, 2.0 now.)
 - **Throw pieces at raiders, don't bonk them.** A plain bonk was underwhelming. The carried piece
   is the weapon: it hurls at a raider, who goes flying. It costs the piece.
 - **A thrown piece takes a while to come back.** Otherwise you could stand and pelt raiders
@@ -313,12 +317,18 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **Puzzle mode at the wall: the whole wall at once.** The user wanted it closer to Puzzle Pirates:
   working on all four holes, moving between them with ease rather than running the pirate about,
   "a hybrid of the 2D version" once you're at the wall. Walk up to the wall with a piece (or press
-  an arrow there) and the camera pulls back, straight on, to show the whole wall. The arrow keys
-  move the piece a square at a time, always the way they point on screen (they used to depend on
-  the camera angle); the pirate walks along under it, a step back so they don't hide the hole.
-  Space fits it, 1 2 3 take the next piece, Q/E/F turn and flip, and you stay there till Esc (or
-  WASD) takes you back to walking. Boards behind mended holes are fitted the same way. The mouse
-  works there too. **No Tab "next spot":** the user found it "annoying and useless".
+  an arrow there) and the camera pulls back, straight on, to show the whole wall. The pirate walks
+  along under the piece by themself, a step back so they don't hide the hole (the user likes the
+  zoom, and finds "seeing him walk back and forth while you're just effortlessly doing things"
+  funny).
+  - **WASD is pure piece moving there:** a square at a time, always the way the key points on
+    screen. **The arrows jump hole to hole** (to the best spot the piece has in the next hole that
+    way, or over its middle if it won't go in). Q/E/F turn and flip.
+  - **You leave by fitting the piece or by Esc.** Fitting it ends it, but the view stays a moment,
+    so taking the next piece with 1 2 3 there carries straight on.
+  - **A click only ever fits the piece there,** never throws it at a raider showing through the
+    hole (it did, so clicks seemed not to work). Boards behind are fitted the same way.
+  - **No Tab "next spot":** the user found it "annoying and useless".
 - **The pirate walks a touch quicker** (5.4 m/s; was 4.6, then 5). The user and a friend both
   wanted the pace a bit quicker.
 - **The piece goes where you point.** The user and a friend found it hard to put pieces where they
@@ -436,6 +446,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     corner, with pegs, a line round it and a "Your shack" sign. Walk in: "Space: build your shack
     here". Once it's up, the same spot says "Space: paint and dress your shack" and opens Your den
     at the Shack tab.
+    **A label over the sign says so before you walk in** ("Your shack: build it here", walk in and
+    press Space or click), as the holes have. The user clicked it by accident and couldn't work out
+    what had happened. The sign's post stops under the board: running up through it, it hid the S,
+    and the sign read "Your hack". The sign is turned to face into the den.
   - **You see the carpentry pieces it's made of.** "It's my little shack. It's made of carpentry
     pieces" (if not as blatantly as the frames). Each piece has a bold dark edge on both faces, and
     paint (walls and roof, any dye) lets each piece's own timber show through.
