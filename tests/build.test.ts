@@ -19,6 +19,13 @@ describe('the compiled js/', () => {
     expect(errors.map((d) => ts.flattenDiagnosticMessageText(d.messageText, '\n'))).toEqual([]);
   });
 
+  // The browser loads these as they are: an import without its .js is a file it can't find, and the
+  // whole den fails to start (8 Nov: './swordfight').
+  it.each([...out.entries()].map(([f, text]) => [relative(root, f), text]))('%s imports whole file names', (_file, text) => {
+    const bad = [...text.matchAll(/^\s*(?:import|export)[^;]*?from\s+['"](\.[^'"]*)['"]/gm)].map((m) => m[1]).filter((p) => !p.endsWith('.js'));
+    expect(bad).toEqual([]);
+  });
+
   it.each([...out.keys()].map((f) => relative(root, f)))('%s is up to date (run npm run build)', (file) => {
     const lf = (s: string) => s.replace(/\r\n/g, '\n');
     expect(lf(readFileSync(join(root, file), 'utf8'))).toBe(lf(out.get(resolve(root, file)) ?? ''));

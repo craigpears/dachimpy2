@@ -154,9 +154,12 @@ gunning":
 - **A sword-fighting piece from each raider beaten,** falling inside the den (or some other way of
   getting them; the user likes it as a reward).
 - **The pieces spawn little soldiers** who help defend, and end up sword fighting the raiders.
-- Still to square with the rule that every puzzle stays faithful (RULES.md): clay soldiers built
-  from smashed Swordfight blocks were turned down on 7 Nov as "too far away from the sword
-  fighting puzzle".
+- **No picker: a natural choice.** The user: "attackers are coming and you just choose which ways
+  to deal with them. Similar to how you can defend with carp or jump to the gun turret later. All
+  options are there and you naturally choose between them."
+- **Built 8 Nov** as the sword rack (RULES.md, "Swordfight at the sword rack"): the real puzzle,
+  with what a break sends mustering soldiers. Still open: with a crew; strikes from the raiders
+  (only sprinkles so far); whether soldiers should march out of the gate.
 
 ## Swordfight: the golem boss
 

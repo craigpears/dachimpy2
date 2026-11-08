@@ -133,6 +133,25 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   swordfighter against the golem), the rest of the crew should be able to help from their own
   jobs: a cannon shot that hits the golem drops black blocks onto its board. The help has to be
   easy to see, so the puzzle feels real. Keep these ideas simple, not multi-step.
+- **Every way of fighting the raid is there at once; you choose as you go.** No picker, no mode
+  to choose up front: the user, "attackers are coming and you just choose which ways to deal with
+  them. Similar to how you can defend with carp or jump to the gun turret later" (8 Nov; the idea
+  came from the Age of Apes tutorial's choice of three mini-games).
+- **Swordfight at the sword rack: soldiers to hold the breaches (8 Nov).** Each raider beaten
+  (knocked flat, by a thrown piece, the guns or a soldier; or turned away at the wall) drops a
+  sword piece, a Swordfight pair, that lands inside the den; walk over it to pick it up (eight at
+  most). At the sword rack, on the left of the den, Space plays them on a real Swordfight board,
+  by the real rules (6 by 13, pairs in at the top of the fourth column, fusing, breakers, chains;
+  lose the fourth column and the board clears, with the pieces you had). A pair only comes in while
+  you're at the rack; nothing pauses the raid. What a break would send at an opponent musters
+  soldiers instead: one for each sprinkle, a bigger, tougher champion for each sword, ten at most.
+  Soldiers go for raiders loose in the den and stand just inside the gaps in the wall (or behind
+  the holes being hacked), and a raider coming through a gap they hold stops to fight them; they
+  don't go out over the wall. A raider who gets in while you're at the rack buries your board in
+  sprinkles. Playing alone only so far. **The pieces look like Swordfight's:** each colour its own
+  sword (red a skull dagger, yellow a broadsword, green a machete, blue a sabre), a block a glossy
+  tile with its sword pressed in, a breaker the sword alone, attack blocks silver; plain coloured
+  squares and rings "really does not look like sword fighting pieces" (the user).
 
 - **A pirate mends a den wall.** Pieces sit on three crates (the toolbox); you carry them over and
   fit them into holes in a stone wall. Same pieces, weights and Masterpiece rule as the main game.

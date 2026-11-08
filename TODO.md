@@ -84,6 +84,12 @@ the site (`.assetsignore` skips `*.md`).
 
 ## Needs a playtest to pin down
 
+- **Swordfight at the sword rack (8 Nov), not yet tried by the user.** Beaten raiders drop sword
+  pieces; play them at the rack on the left of the den; breaks send soldiers to the gaps. Watch
+  for: too few pieces to get going (one per raider beaten), or so many soldiers the wall stops
+  mattering; soldiers too weak or too strong (a soldier takes two blows, a raider two); the board
+  big enough to play from where the camera puts it; the pieces reading as Swordfight's.
+
 - **The longer calm between waves (8 Nov), not yet tried by the user.** 40 seconds now (it was
   20), after being overwhelmed by wave 8; the raids stay as big. Watch for: still overwhelmed late
   on (then perhaps longer still, or longer only as the waves climb), or the calm dragging early on.

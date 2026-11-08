@@ -7,6 +7,9 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { FairDeal, turnWide } from './den-deal.js';
+import { randomPair, W as SW, H as SH } from './swordfight.js';
+import { muster, SwordRack, Barracks, SWORD } from './den-sword.js';
+import { drawRack, drawPair, PALETTE } from './den-sword-draw.js';
 import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, cleanDesign, designOf, drawFlag, dyeHex, DYES, SKIN, HAIR, FUR, PARTS, FLAGS, PATTERNS, DECOR, MAX_DECOR, BIOMES, twoColours } from './den-look.js';
 
 // The main puzzle's engine, turned for wide shapes (see turnWide in src/den-deal.ts).
@@ -456,7 +459,11 @@ function buildWall() {
   }
   scenery.forEach((o) => { o.userData.scenery = true; den.add(o); });
   bounds = { x: half - 0.35, z0: 0.55, z1: 10.5 };
-  obstacles = [...piles.map((p) => ({ x: p.x, z: p.z, r: 0.75 })), { x: barrel.position.x, z: barrel.position.z, r: 0.55 }, { x: chest.position.x, z: chest.position.z, r: 0.75 }];
+  // The sword rack: on the left, between the stairs and the crates.
+  sword.x = -half * 0.55; sword.z = 4.6;
+  sword.group.position.set(sword.x, 0, sword.z);
+  obstacles = [...piles.map((p) => ({ x: p.x, z: p.z, r: 0.75 })), { x: barrel.position.x, z: barrel.position.z, r: 0.55 }, { x: chest.position.x, z: chest.position.z, r: 0.75 },
+    ...[-0.5, 0, 0.5].map((f) => ({ x: sword.x + f * sword.w, z: sword.z, r: 0.45 }))];
   piles.forEach(showPile);
   rebuildDecor();
   applyBiome(true);
@@ -2381,6 +2388,193 @@ let mouse = null, mouseMode = false, topView = false;
    ways depending on the camera, and in this mode WASD should be "pure" piece moving. */
 let wm = null, wmBlock = null, wallView = 0, wmLinger = 0;
 
+// ---------- Swordfight: soldiers to hold the breaches ----------
+/* Another way to fight the raids, there alongside mending the wall and the gun tower: the user wants
+   "attackers are coming and you just choose which ways to deal with them". Each raider beaten (knocked
+   flat, or turned away at the wall) drops a sword piece, a Swordfight pair, that lands inside the
+   den; walk over it to pick it up. At the sword rack you play them on a real Swordfight board, and
+   what a break would send at an opponent musters soldiers instead, who go for the raiders in the den
+   and stand in the gaps in the wall. Raiders who get in while you're at the board bury it in
+   sprinkles, as an opponent's attacks would. (Playing alone only, for now: with a crew the rack
+   isn't there.)
+   The rules and the soldiers are src/den-sword.ts (SwordRack, Barracks), the looks
+   src/den-sword-draw.ts, the puzzle src/swordfight.ts; here, only the 3D and the wiring to the raid. */
+const SWORD_PX = 48, SWORD_DROPS = 12;
+const rack = new SwordRack(), barracks = new Barracks();
+const sword = {
+  on: false, dirty: true, drops: [], figures: new Map(), x: -6.4, z: 4.6, y0: 0.45, w: 1, h: 1,
+  group: new THREE.Group(), canvas: document.createElement('canvas'), tex: null,
+};
+let swordView = 0;
+{
+  const cv = sword.canvas;
+  cv.width = (SW + 3) * SWORD_PX + 24; cv.height = SH * SWORD_PX + 24;
+  sword.tex = new THREE.CanvasTexture(cv);
+  sword.tex.colorSpace = THREE.SRGBColorSpace;
+  sword.tex.anisotropy = 4;
+  const sq = 0.2;   // one Swordfight square, in metres
+  sword.w = cv.width / SWORD_PX * sq; sword.h = cv.height / SWORD_PX * sq;
+  const { w: pw, h: ph, y0 } = sword;
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(pw, ph), new THREE.MeshBasicMaterial({ map: sword.tex, toneMapped: false }));
+  face.position.set(0, y0 + ph / 2, 0.06);
+  const back = mesh(new THREE.BoxGeometry(pw + 0.2, ph + 0.2, 0.1), mat('#4a3020'));
+  back.position.set(0, y0 + ph / 2, 0);
+  sword.group.add(face, back);
+  for (const sx of [-1, 1]) {
+    const post = mesh(new THREE.BoxGeometry(0.14, y0 + ph + 0.35, 0.14), mat('#3a2416'));
+    post.position.set(sx * (pw / 2 + 0.12), (y0 + ph + 0.35) / 2, 0);
+    // A cutlass hung on top of each post: it's the sword rack.
+    const blade = mesh(new THREE.BoxGeometry(0.05, 0.5, 0.02), mat('#cfd8e6', { metalness: 0.8, roughness: 0.3 }));
+    blade.position.set(sx * (pw / 2 + 0.12), y0 + ph + 0.55, 0.05);
+    blade.rotation.z = sx * 0.5;
+    sword.group.add(post, blade);
+  }
+  scene.add(sword.group);
+}
+const swordHere = () => !online() && !G.over;
+const atSword = () => swordHere() && pirate.h < 0.05 && Math.abs(pirate.x - sword.x) < 1.6 && pirate.z > sword.z && pirate.z - sword.z < 2.2;
+
+// A beaten raider's sword piece flies over (or across) the den and lands on the floor inside.
+function swordDrop(r) {
+  if (!swordHere()) return;
+  const pair = randomPair();
+  const cv = document.createElement('canvas');
+  cv.width = 64; cv.height = 128;
+  drawPair(cv, pair.map((p) => ({ c: p.c, breaker: p.breaker || undefined })));
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const g = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, toneMapped: false }));
+  g.scale.set(0.3, 0.6, 1);
+  const from = new THREE.Vector3(r.x, 1.4, r.z);
+  const to = new THREE.Vector3(Math.max(-bounds.x + 0.8, Math.min(bounds.x - 0.8, r.x + (Math.random() - 0.5) * 2)), 0.45, r.inside ? Math.max(1.4, Math.min(bounds.z1 - 0.8, r.z)) : 1.6 + Math.random() * 1.6);
+  g.position.copy(from);
+  scene.add(g);
+  const d = { pair, g, x: to.x, z: to.z, landed: false, t: Math.random() * 6 };
+  sword.drops.push(d);
+  if (sword.drops.length > SWORD_DROPS) dropGone(sword.drops.shift());
+  const arc = r.inside ? 1.5 : wall.H * S + 1.2;
+  tween(r.inside ? 0.6 : 1, (s) => { g.position.lerpVectors(from, to, s); g.position.y += Math.sin(s * Math.PI) * arc; }, () => { d.landed = true; });
+  if (!G.swordSaid) { G.swordSaid = true; say('A sword piece! Pick it up and take it to the sword rack', false, true); }
+}
+function dropGone(d) { scene.remove(d.g); d.g.material.map.dispose(); d.g.material.dispose(); }
+
+function swordEnter() {
+  sword.on = true;
+  keys.clear();
+  Object.assign(pirate, { x: sword.x + sword.w / 2 + 0.55, z: sword.z + 0.7 });
+  pirate.g.rotation.y = Math.PI * 1.25;
+  $('intro').classList.add('off');
+}
+// At the rack the keys play the board, as in the real puzzle: left and right move, up and down turn.
+function swordKey(key, e) {
+  if (key === 'escape') { sword.on = false; return true; }
+  const moves = { arrowleft: () => rack.move(-1), a: () => rack.move(-1), arrowright: () => rack.move(1), d: () => rack.move(1), arrowup: () => rack.turn(-1), w: () => rack.turn(-1), q: () => rack.turn(-1), arrowdown: () => rack.turn(1), s: () => rack.turn(1), e: () => rack.turn(1) };
+  if (moves[key]) { moves[key](); sword.dirty = true; return true; }
+  if (key === ' ' || key === 'enter') { const res = !e.repeat && rack.drop(); if (res) swordLanded(res); return true; }
+  return key === 'tab';
+}
+const CHAINS = ['', '', 'Double! ', 'Triple! ', 'Bingo! ', 'Donkey! ', 'Vegas! '];
+function swordLanded(res) {
+  sword.dirty = true;
+  if (!res.links.length) return;
+  const name = CHAINS[Math.min(res.links.length, 6)], recruits = muster(res);
+  const came = barracks.enlist(recruits, sword.x, sword.z + 0.9);
+  came.forEach(addFigure);
+  burst(new THREE.Vector3(sword.x, sword.y0 + sword.h, sword.z + 0.2), '#e8eef6', 10 + came.length * 4, 3);
+  if (!came.length) say(recruits.length ? `The barracks are full: ${SWORD.MAX_SOLDIERS} soldiers at most` : `${name}Broken, but too small to send anyone`);
+  else say(`${name}${came.length === 1 ? 'A soldier' : `${came.length} soldiers`} to the wall!${res.strikes.length ? ' (a sword makes a champion)' : ''}`);
+}
+
+// The soldiers, in blue and white. Barracks moves them; this poses their figures to match.
+const SOLDIER_LOOK = { shirt: ['#f2ead8', '#1f4e8a'], scarf: '#1f4e8a', trousers: '#e6dcc4', beard: '#3a2414', patch: false, sword: true };
+function addFigure(s) {
+  const m = makePirate(SOLDIER_LOOK);
+  m.sc = 0.72 * s.size;
+  m.g.scale.setScalar(m.sc);
+  m.g.position.set(s.x, 0, s.z);
+  scene.add(m.g);
+  sword.figures.set(s, m);
+}
+function poseFigure(s, m, dt) {
+  if (s.state === 'down') {
+    m.g.rotation.x = Math.max(-Math.PI / 2, -s.downT * 4);
+    if (s.downT > 1.2) m.g.scale.setScalar(Math.max(0.001, m.sc * (1 - (s.downT - 1.2) * 2.5)));
+    return;
+  }
+  faceTo(m, s.fx, s.fz, dt);
+  const swing = animateWalk(m, s.moving, dt, 13);
+  if (s.fighting) { m.legs.forEach((l) => { l.rotation.x = 0; }); m.arms[1].rotation.x = -1.8 + Math.sin(performance.now() / 85) * 1.1; }
+  else m.arms[1].rotation.x = s.moving ? swing * 0.5 : -0.4;
+  m.g.position.x = s.x; m.g.position.z = s.z;
+}
+function swordNews(n) {
+  if (n.kind === 'blow') burst(new THREE.Vector3(n.x, 1.1, n.z), '#e8eef6', 5, 2);
+  else if (n.kind === 'knock') hit(n.foe, new THREE.Vector3(n.by.x, 1, n.by.z), '#cfd8e6');
+}
+// A raider a soldier has squared up to stops where they are and fights back (from updateRaider).
+function raiderDuel(r, dt) {
+  const { fighting, news } = barracks.duel(r, dt);
+  news.forEach(swordNews);
+  if (!fighting) return false;
+  const s = r.duel || r;
+  faceTo(r.m, s.x - r.x, s.z - r.z, dt);
+  animateWalk(r.m, false, dt, 12);
+  r.m.legs.forEach((l) => { l.rotation.x = 0; });
+  r.m.arms[1].rotation.x = -1.8 + Math.sin(performance.now() / 95 + 1) * 1.1;
+  r.m.g.position.x = r.x; r.m.g.position.z = r.z;
+  return true;
+}
+// Where soldiers stand with nobody to fight: just inside the gaps in the wall, or else the holes
+// being hacked at.
+function guardSpots() {
+  const gaps = wall.holes.filter(passable);
+  if (gaps.length) return gaps.map((h) => ({ x: doorX(h), z: 0.95 }));
+  return wall.holes.filter((h) => h.attackers > 0).map((h) => ({ x: holeX(h), z: 0.95 }));
+}
+
+function swordTick(dt) {
+  sword.group.visible = !online();
+  document.body.classList.toggle('swordfight', sword.on);
+  if (!swordHere()) { sword.on = false; return; }
+  if (sword.on && (carry || pirate.h > 0.05)) sword.on = false;
+  if (sword.on) {
+    const n = rack.tick(dt);
+    if (n.lost) say('Your Swordfight board filled up: lost, and cleared', true);
+    if (n.landed) swordLanded(n.landed);
+    if (n.changed) sword.dirty = true;
+  }
+  // Pieces on the floor: bobbing, and picked up by walking over them.
+  for (let i = sword.drops.length - 1; i >= 0; i--) {
+    const d = sword.drops[i];
+    if (!d.landed) continue;
+    d.t += dt;
+    d.g.position.set(d.x, 0.45 + Math.sin(d.t * 3) * 0.06, d.z);
+    if (pirate.h > 0.3 || Math.hypot(pirate.x - d.x, pirate.z - d.z) > 0.9) continue;
+    if (!rack.take(d.pair)) { if (!G.queueSaid) { G.queueSaid = true; say(`You can carry ${SWORD.QUEUE} sword pieces: play some at the sword rack`); } continue; }
+    burst(new THREE.Vector3(d.x, 0.5, d.z), PALETTE[d.pair[0].c].base, 6, 2);
+    dropGone(d);
+    sword.drops.splice(i, 1);
+    sword.dirty = true;
+  }
+  barracks.tick(dt, raiders, guardSpots(), { x: sword.x, z: sword.z + 1.6 }).forEach(swordNews);
+  for (const [s, m] of sword.figures) poseFigure(s, m, dt);
+  for (const s of barracks.sweep()) { scene.remove(sword.figures.get(s)?.g); sword.figures.delete(s); }
+  if (sword.dirty) { sword.dirty = false; drawRack(sword.canvas, rack, SWORD_PX); sword.tex.needsUpdate = true; }
+}
+function swordReset() {
+  rack.reset(); barracks.reset();
+  sword.on = false; sword.dirty = true;
+  sword.drops.splice(0).forEach(dropGone);
+  for (const m of sword.figures.values()) scene.remove(m.g);
+  sword.figures.clear();
+}
+function swordPrompt() {
+  const n = rack.pieces, of = `${n} sword piece${n === 1 ? '' : 's'}`;
+  if (sword.on) return n ? `Swordfight · A/D or arrows move · W/S or Q/E turn · Space drops · Esc: walk (${of})` : 'Out of sword pieces: beat raiders for more · Esc: walk';
+  if (carry || !atSword()) return '';
+  return n ? `Space: swordfight at the rack (${of}): breaks send soldiers` : 'The sword rack: beat raiders for sword pieces, then break them here for soldiers';
+}
+
 function newGame() {
   if (guest()) return send('host', { t: 'again' });
   raiders.splice(0).forEach((r) => { scene.remove(r.m.g); r.mark.remove(); });
@@ -2388,6 +2582,7 @@ function newGame() {
   ghostKey = ''; ghost = null;
   Object.assign(G, { gold: 60, wave: 0, phase: 'build', phaseT: BUILD_SECS, toSpawn: 0, spawnT: 0, cannonT: 0, cannonShots: 0, aim: null, masters: 0, boarded: 0, bonked: 0, stolen: 0, turned: 0, waveTurned: 0, waveIn: 0, over: false, fairOver: false });
   fair.reset();
+  swordReset();
   piles.forEach((p) => { p.letter = null; });
   newWall();
   piles.forEach(deal);   // after the wall, so the first deals finish its holes
@@ -2651,6 +2846,8 @@ addEventListener('keydown', (e) => {
   if (paused) { if (['p', ' ', 'escape', 'enter'].includes(key)) { e.preventDefault(); setPaused(false); } return; }
   if (key === 'p' && !deco.on) { setPaused(true); return; }
   if ([' ', 'tab', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) e.preventDefault();
+  // At the sword rack, the keys play the Swordfight board, as in the real puzzle.
+  if (sword.on && !deco.on && !G.over && swordKey(key, e)) return;
   const arrow = { arrowleft: [0, -1], arrowright: [0, 1], arrowup: [-1, 0], arrowdown: [1, 0] }[key];
   const step = { a: [0, -1], d: [0, 1], w: [-1, 0], s: [1, 0] }[key];
   // Puzzle mode at the wall: WASD moves the piece a square (held down, it keeps going), the arrows
@@ -2839,6 +3036,7 @@ let cursor = null, aimed = null;
 const aimFoe = () => (cursor && clickedFoe(cursor.x, cursor.y, 160)) || anyFoe();
 function act() {
   if (net.pending || net.asking) return;   // waiting to hear back about the last one
+  if (!carry && atSword() && rack.pieces) return swordEnter();
   const f = focus();
   if (pirate.h > 0.3) {
     if (carry && onRampart() && aimFoe()) throwAt(aimFoe());
@@ -3392,6 +3590,7 @@ function moveTo(r, tx, tz, speed, dt) {
   return false;
 }
 function updateRaider(r, dt) {
+  if (r.duel && raiderDuel(r, dt)) return;
   const h = r.hole;
   let moving = false;
   r.t += dt;
@@ -3447,6 +3646,8 @@ function updateRaider(r, dt) {
         r.state = into ? 'raid' : 'leave'; r.t = 0; r.inside = into;
         if (into) {
           if (!guest()) G.waveIn++;
+          // At the sword rack, a raider getting in hits your board like an opponent's attack.
+          if (sword.on && rack.hitBy(2)) { sword.dirty = true; say('A raider\'s in: sprinkles on your board!', true, true); }
           r.tired = Math.min(1, Math.max(0, 1 - r.stamina / RAIDER_STAMINA));
           if (r.tired > 0.15) {
             r.state = 'winded';
@@ -3582,6 +3783,8 @@ function turnedAway(r) {
   if (guest()) return;
   G.turned++; G.waveTurned++;
   G.gold += PAY.turned;
+  r.swordDropped = true;
+  swordDrop(r);
   updateStats();
   burst(new THREE.Vector3(r.x, 1.6, r.z), '#ffd45a', 12, 2.5);
   say(`Turned away! They couldn't get through (+${PAY.turned})`);
@@ -3979,6 +4182,7 @@ function prompt() {
   } else if (pirate.h > 0.3) t = carry ? 'Up the stairs to the rampart' : 'Up to the rampart';
   else if (loose) t = carry ? `${f.kind === 'pile' || target?.ok ? t + ' · ' : ''}Shift or click: throw the ${carry.letter} at the raider!` : 'A raider is in the den! Grab a piece to throw at them';
   else if (hacking && carry && !target?.ok && stairsUp()) t += ' · or take it up the rampart and throw it';
+  t = swordPrompt() || t;
   const el = $('prompt');
   if (el.textContent !== t) el.textContent = t;
   $('gunhelp').classList.toggle('on', onGunDeck());
@@ -4900,6 +5104,7 @@ function update(dt) {
   }
 
   if (!G.over) updateGunDeck(dt);
+  swordTick(dt);
   if (guest()) {
     // The host runs the raiders; here they just follow what it says.
     if (G.phase !== 'wave' && !G.over) G.phaseT = Math.max(0, G.phaseT - dt);
@@ -4908,6 +5113,7 @@ function update(dt) {
     updateWaves(dt);
     for (let i = raiders.length - 1; i >= 0; i--) {
       const r = raiders[i];
+      if (r.state === 'down' && !r.swordDropped) { r.swordDropped = true; swordDrop(r); }
       updateRaider(r, dt);
       if (r.gone) { scene.remove(r.m.g); r.mark.remove(); raiders.splice(i, 1); }
     }
@@ -4968,6 +5174,16 @@ function update(dt) {
     tilt += (0.36 - tilt) * wallView;   // high enough to see over the pirate's head
     yaw = Math.atan2(Math.sin(view.yaw), Math.cos(view.yaw)) * (1 - wallView);
   }
+  // At the sword rack: straight on to the board, close enough to play it.
+  swordView += ((sword.on ? 1 : 0) - swordView) * Math.min(1, dt * 3);
+  if (swordView > 0.001) {
+    const vh = camera.fov * Math.PI / 360;
+    L2.set(sword.x, sword.y0 + sword.h / 2, sword.z);
+    look.lerp(L2, swordView);
+    dist += (sword.h / (0.94 * Math.tan(vh)) - dist) * swordView;
+    tilt += (0.1 - tilt) * swordView;
+    yaw *= 1 - swordView;
+  }
   v3.set(Math.sin(yaw) * Math.cos(tilt), Math.sin(tilt), Math.cos(yaw) * Math.cos(tilt)).multiplyScalar(dist).add(look);
   camAt.lerp(v3, Math.min(1, dt * 3));
   camera.position.copy(camAt);
@@ -5017,7 +5233,7 @@ function update(dt) {
     if (topView) v3.set(holeX(h), 0, 2.2).project(camera); else v3.set(holeX(h), Y(h.b.r0) + 0.15, 0.1).project(camera);
     h.label.style.left = `${(v3.x + 1) / 2 * innerWidth}px`;
     h.label.style.top = `${(1 - v3.y) / 2 * innerHeight}px`;
-    h.label.style.display = deckView > 0.5 ? 'none' : '';   // out of the way while you're gunning
+    h.label.style.display = deckView > 0.5 || swordView > 0.5 ? 'none' : '';   // out of the way while you're gunning or swordfighting
     // A patch under attack shudders.
     if (h.jig > 0) {
       h.jig = Math.max(0, h.jig - dt);
@@ -5047,7 +5263,7 @@ function update(dt) {
     v3.copy(f.mid).project(camera);
     f.label.style.left = `${(v3.x + 1) / 2 * innerWidth}px`;
     f.label.style.top = `${(1 - v3.y) / 2 * innerHeight}px`;
-    f.label.style.display = v3.z > 1 ? 'none' : '';
+    f.label.style.display = v3.z > 1 || swordView > 0.5 ? 'none' : '';
   }
 }
 
@@ -5178,6 +5394,6 @@ if (['all', 'gundeck'].includes(new URLSearchParams(location.search).get('try'))
 requestAnimationFrame(frame);
 
 // For poking at it from the console.
-window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, newGame, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, newGame, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };
