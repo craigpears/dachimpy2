@@ -40,6 +40,10 @@ the site (`.assetsignore` skips `*.md`).
   distance for placing a piece in the wall. The user: "we were meant to remove that so you can
   place from anywhere". Fitting a piece into the wall should work wherever you're standing.
 
+- **The fair deal hands out far too many X's (8 Nov):** the right pieces came, but 5 of 13 were
+  the cross, one of the rarest: "That feels very broken." The fair deal should still deal mostly
+  the common pieces, with a rare one only when a hole really needs it.
+
 ## Needs a playtest to pin down
 
 - **Turning a piece close to the wall feels off.** The user can't yet say how (which way it
