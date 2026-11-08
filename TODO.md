@@ -40,6 +40,19 @@ the site (`.assetsignore` skips `*.md`).
   distance for placing a piece in the wall. The user: "we were meant to remove that so you can
   place from anywhere". Fitting a piece into the wall should work wherever you're standing.
 
+- **Room for the rare pieces (8 Nov):** the frames are so slim there's nowhere to put an X or a W
+  without spoiling the shipshape finish. In the main puzzle, a hole of about 10 pieces has room to
+  put a rare piece in a corner early on and still have "plenty of hole left for you to work
+  towards one of the common two-hole finishes". Frames want that room. (How: to agree with the
+  user.) Measured 8 Nov, the share of spots where an X (or W, U, Z) goes in and the rest can still
+  be filled exactly:
+  - the old walk stretches: X 2 of 16 spots;
+  - the new one-frame walk: about half (more than a 5-piece hole in the main puzzle);
+  - the stairs: only 4 pieces in all; X 1 of 5 spots, Z none;
+  - the gun tower's first two parts (5 by 13): about 9 in 10;
+  - the gun tower's front part (3 by 13 = 39 squares) can never be filled exactly at all, as 39
+    isn't a multiple of 5. Nor can the whole 13 by 13 tower (169).
+
 ## Needs a playtest to pin down
 
 - **Turning a piece close to the wall feels off.** The user can't yet say how (which way it

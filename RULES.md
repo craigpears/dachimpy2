@@ -262,6 +262,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     pieces are the steps. Half-built stairs are in the way; you can't walk through them.
   - **Any piece will do:** a piece may stick out over the frame's edge. On the walk the spare is
     sawn off when it's full (it has to lie flat on the wall).
+  - **Room for the rare pieces, as in the main puzzle.** A big hole there leaves room to put an X or
+    a W in a corner early on and still have "plenty of hole left for you to work towards one of
+    the common two-hole finishes". Frames too slim for that (the user, 8 Nov: "there's nowhere to
+    put things like those rarer weird cross shapes or M pieces ... without messing up the hole")
+    make the shipshape finish a matter of luck.
   - **The stairs stay exactly as built, never changed by magic.** Nothing's sawn off: bits sticking
     out stay, and you walk on the real tops of the pieces. A one-square step you walk up; a
     two-square one you hop up. So the stairs stay climbable, a piece can't stick up more than one
