@@ -49,6 +49,10 @@ the site (`.assetsignore` skips `*.md`).
   Tests that run without the browser, from the command line. **Started 8 Nov:** the fair deal is
   done (its own file, `js/den-deal.js`, with twelve tests in `tests/deal.test.js`, run with
   `npm test`). Still to do: the layouts (the wall's holes, the frames, the walk).
+  The user, after that first go (Node's own bare test runner): they mean "an actual framework, not
+  just some plain JavaScript", and "an architectural review" first. They're most at home as a C#
+  back-end developer, and C# would be ideal where it can go (the server side). Which stack to pin
+  down with the user.
 
 ## Needs a playtest to pin down
 
