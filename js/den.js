@@ -2079,18 +2079,39 @@ const fairDeal = () => !G.fairOver && (G.wave === 0 || (G.wave === 1 && G.phase 
 function neededLetters() {
   const have = piles.map((q) => q.letter).filter(Boolean);
   if (carry?.letter) have.push(carry.letter);
-  const need = [];
+  // Each hole's ways of finishing, as the pieces they take (one entry per different set).
+  const ways = [];
   for (const h of wall.holes) {
     const left = h.status === 'open' ? rest(h) : [];
     if (!left.length || left.length % 5) continue;
-    let best = null, most = -1;
-    for (const sol of C.shuffle(C.solve(left, 200))) {
-      const pool = have.slice();
-      const use = sol.filter((p) => { const i = pool.indexOf(p.letter); return i >= 0 && pool.splice(i, 1); }).length;
-      if (use > most) { most = use; best = sol; }
-    }
-    for (const p of best || []) { const i = have.indexOf(p.letter); if (i >= 0) have.splice(i, 1); else need.push(p.letter); }
+    const seen = new Map();
+    for (const sol of C.solve(left, 200)) { const l = sol.map((p) => p.letter).sort(); seen.set(l.join(''), l); }
+    if (seen.size) ways.push([...seen.values()]);
   }
+  /* The holes are planned together, not one at a time: planned in turn, an earlier hole could
+     take one of the two W's you had for the hole you're mending, and a third W got dealt (the
+     user: "it was deciding I needed another M before realising I'd already finished that first
+     hole"). So: try the holes in every order (a few dozen at most), each taking the way that uses
+     most of what's left on the crates and in your hands, and keep the plan missing fewest pieces. */
+  const orders = [];
+  const perm = (a, i) => { if (i === a.length) { orders.push(a.slice()); return; } for (let j = i; j < a.length; j++) { [a[i], a[j]] = [a[j], a[i]]; perm(a, i + 1); [a[i], a[j]] = [a[j], a[i]]; } };
+  if (ways.length <= 5) perm([...ways.keys()], 0);
+  else for (let t = 0; t < 60; t++) orders.push(C.shuffle([...ways.keys()]));
+  let best = null;
+  for (const order of orders) {
+    const pool = have.slice(), need = [];
+    for (const hi of order) {
+      let pick = null, most = -1;
+      for (const l of C.shuffle(ways[hi])) {
+        const q = pool.slice();
+        const use = l.filter((x) => { const i = q.indexOf(x); return i >= 0 && q.splice(i, 1); }).length;
+        if (use > most) { most = use; pick = l; }
+      }
+      for (const x of pick) { const i = pool.indexOf(x); if (i >= 0) pool.splice(i, 1); else need.push(x); }
+    }
+    if (!best || need.length < best.length) best = need;
+  }
+  const need = best || [];
   for (const l of G.fairSkip || []) { const i = need.indexOf(l); if (i >= 0) need.splice(i, 1); }
   return need;
 }

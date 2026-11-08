@@ -218,6 +218,13 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   done the deal is the usual one for good, even when raiders knock pieces out in wave 1. (Building
   only the shack from a new game: each piece the wall needed came once, at most twice, then the
   usual deal.)
+  **It plans every hole together, counting what's in your hands and on the crates.** Planned one
+  hole at a time, an earlier hole could take one of the two W's meant for the hole you were
+  mending, and a third W got dealt that was no use once that hole was done (the user: "it was
+  deciding I needed another M before realising I'd already finished that first hole"), or P after
+  P while two holes needed a Y and an N. Now it tries the holes in every order and keeps the plan
+  missing fewest pieces. (A careless test player, any piece in any clean spot: eight games out of
+  eight finished all four holes as Masterpieces in eight pieces.)
 - **Throw pieces at raiders, don't bonk them.** A plain bonk was underwhelming. The carried piece
   is the weapon: it hurls at a raider, who goes flying. It costs the piece.
 - **A thrown piece takes a while to come back.** Otherwise you could stand and pelt raiders
