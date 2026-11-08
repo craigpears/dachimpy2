@@ -25,6 +25,7 @@ the site (`.assetsignore` skips `*.md`).
 - **No puzzle mode at the stairs (8 Nov):** the stairs frame has no "snap to puzzle" view like the
   front wall's, where the camera goes straight on and the keys move the piece. (Same question as
   "the second stage" below: the frames want it too.)
+
 ## Needs a playtest to pin down
 
 - **Turning a piece close to the wall feels off.** The user can't yet say how (which way it
