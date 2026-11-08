@@ -280,6 +280,20 @@ function lastGap() {
   return C.pick(C.ORIENTS_BY_LETTER[l]).cells;
 }
 
+/* Holes made during a raid (cannon breaches, and weak spots hacked wider) are shaped for the common
+   pieces: of a few candidates, the one with the most ways to fill it from P, F, Y, T, N and L. In the
+   real puzzle fresh holes keep coming, so there's always room to dump an awkward piece; here the wall
+   is fixed, and small breaches that only a W or a U could finish left the user stuck ("a lot of
+   shapes that I can never really fill"). The wall you start with stays small and simple: the user
+   likes that opening. (A test of a player who always picks the most flexible spot: random 1- and
+   2-piece breaches left them with no piece that fits about 4 draws in every piece placed; 3-piece
+   breaches picked this way, about 1.5.) */
+const COMMON = new Set(['P', 'F', 'Y', 'T', 'N', 'L']);
+const commonWays = (cells) => C.solve(cells, 400).filter((t) => t.every((p) => COMMON.has(p.letter))).length;
+function roomyShapes(n, tries = 8) {
+  return Array.from({ length: tries }, () => C.genHole(n).hole).map((s) => ({ s, w: commonWays(s) })).filter((o) => o.w > 0).sort((a, b) => b.w - a.w).map((o) => o.s);
+}
+
 function newWall() {
   const shapes = C.shuffle([1, 2, 2, 3]).map((n) => (n === 1 ? lastGap() : C.genHole(n).hole));
   const dims = shapes.map((s) => C.bbox(s));
@@ -2083,6 +2097,13 @@ const sparks = [];
 const raiders = [];
 let ghost = null, ghostKey = '', target = null, cycle = 0, shake = 0;
 let mouse = null, mouseMode = false, topView = false;
+/* Puzzle mode at the wall: walk up to it with a piece and the camera pulls back to show the whole
+   wall, every hole at once, as near the real puzzle's board as the den gets. The arrow keys move the
+   piece a square at a time, always the way they point on screen, over all the holes; the pirate
+   walks along under it by themself. Space fits it, 1 2 3 take the next piece, and you stay at the
+   wall till Esc (or WASD) takes you back to walking. The user: running the pirate from hole to hole
+   was too much effort, and left/right went different ways depending on the camera. */
+let wm = null, wmBlock = null, wallView = 0;
 
 function newGame() {
   if (guest()) return send('host', { t: 'again' });
@@ -2108,7 +2129,9 @@ function fits(cells) {
   const out = [], seen = new Set();
   const b = C.bbox(cells);
   wall.holes.forEach((h, hi) => {
-    if (h.status !== 'open' || h.pieces.some((p) => p.patch)) return;
+    // With boards nailed on behind, only the part of the hole they don't cover can be reached.
+    if (h.status !== 'open') return;
+    const boarded = h.pieces.some((p) => p.patch);
     for (const [er, ec] of rest(h)) for (const [pr, pc] of cells) {
       const dr = er - pr, dc = ec - pc;
       if (seen.has(k(dr, dc))) continue;
@@ -2116,7 +2139,7 @@ function fits(cells) {
       let over = 0, ok = true;
       for (const [r, c] of cells) {
         const R = r + dr, Cc = c + dc, kk = k(R, Cc);
-        if (R < 0 || R >= wall.H || Cc < 0 || Cc >= wall.W || wall.gate.has(kk) || wall.wood.has(kk)) { ok = false; break; }
+        if (R < 0 || R >= wall.H || Cc < 0 || Cc >= wall.W || wall.gate.has(kk) || wall.wood.has(kk) || (boarded && wall.lining.some((s) => s.has(kk)))) { ok = false; break; }
         const ho = wall.cellHole.get(kk);
         if (ho === undefined) over++;
         else if (ho !== hi) { ok = false; break; }
@@ -2220,7 +2243,7 @@ function labelFor(h) {
   const hurt = h.hp < h.maxHp * 0.8 && boards < MAX_PATCHES ? '<small>damaged: nail a board on behind it</small>' : carry && boards < MAX_PATCHES ? `<small>room for ${boards ? 'another' : 'a'} layer behind</small>` : '';
   if (h.status === 'master') return ['label done', `★ Masterpiece${behind}${hurt}<i class="bar"><b></b></i>${atk}`];
   if (h.status === 'boarded') return ['label weak', `Boarded over: weak${behind}${hurt}<i class="bar"><b></b></i>${atk}`];
-  if (boards) return ['label weak', `Hacked open: ${boards} board${bs} hold${boards > 1 ? '' : 's'}<small>they must get through each one</small><i class="bar"><b></b></i>${atk}`];
+  if (boards && !ownWood(h).length) return ['label weak', `Hacked open: ${boards} board${bs} hold${boards > 1 ? '' : 's'}<small>they must get through each one</small><i class="bar"><b></b></i>${atk}`];
   if (h.rubble > 0 && !h.pieces.length) return ['label bad', `Fresh breach, full of rubble<small>mend it before they clear it!</small><i class="bar"><b></b></i>${atk}`];
   const left = h.open;
   const breach = h.pieces.length ? `<i class="bar part"><b></b></i>${atk}`
@@ -2256,6 +2279,15 @@ addEventListener('keydown', (e) => {
   if (paused) { if (['p', ' ', 'escape', 'enter'].includes(key)) { e.preventDefault(); setPaused(false); } return; }
   if (key === 'p' && !deco.on) { setPaused(true); return; }
   if ([' ', 'tab', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) e.preventDefault();
+  const arrow = { arrowleft: [0, -1], arrowright: [0, 1], arrowup: [-1, 0], arrowdown: [1, 0] }[key];
+  // Puzzle mode at the wall: the arrows move the piece (held down, they keep going).
+  if (arrow && !deco.on && !G.over && (wm || (carry && canWallMode() && !nearFrame()))) {
+    if (!wm) enterWall();
+    mouseMode = false;
+    if (carry) { wm.r += arrow[0]; wm.c += arrow[1]; clampCursor(); }
+    return;
+  }
+  if (wm && (key === 'escape' || (['w', 'a', 's', 'd'].includes(key) && !e.repeat))) { exitWall(); if (key === 'escape') return; }
   if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) { keys.add(key); mouseMode = false; }
   if (key === 'z' || key === 'c') keys.add(key);
   if (deco.on) {
@@ -2269,7 +2301,6 @@ addEventListener('keydown', (e) => {
   else if (key === 'e' && carry) turn(rotCW, -1);
   else if ((key === 'q' || key === 'e') && onGunDeck()) turnArrowAhead(key === 'e' ? 1 : 3);
   else if (key === 'f' && carry) turn(flip, 0);
-  else if (key === 'tab') cycle++;
   else if (key === 'b') decoMode(true);
   else if (['1', '2', '3'].includes(key)) takeCrate(Number(key) - 1);
   else if (key === 'backspace' && canTakeBack()) takeBack();
@@ -2485,6 +2516,7 @@ function turn(fn, dir) {
   carry.spin = dir ? dir * Math.PI / 2 : 0;
   carry.flipT = dir ? 1 : 0;
   cycle = 0;
+  clampCursor();
 }
 /* Fitting a piece: yours (from your hands), or a crewmate's (`by`, with `hand` made at their
    head). A guest asks the host first; the piece waits in the air until the answer comes. */
@@ -2731,6 +2763,32 @@ function breakHole(h) {
   reel(h);
   toast(boards.length ? 'Through the hole! Only the boards behind it hold them now' : 'They broke through!', true);
 }
+/* A hole's wood comes out a piece at a time, the last one put in first (as in the real puzzle, where
+   a neglected hole loses its most recently placed piece). Each piece holds an equal share of the
+   hole's strength, so a Masterpiece of three pieces loses one every 15 seconds of hacking. The gap a
+   piece leaves is too small to walk through, so there's a chance to put one back; doing that
+   finishes the hole again, and only the share that fell is made good. The user found a whole hole's
+   wood falling out in one go frustrating. */
+const ownWood = (h) => h.pieces.filter((p) => !p.patch);
+const nextOut = (h) => { const n = ownWood(h).length; return n > 1 ? h.maxHp * (n - 1) / n : 0; };
+function dropPiece(h) {
+  const own = ownWood(h), p = own[own.length - 1];
+  if (own.length <= 1) return breakHole(h);
+  if (isHost()) send('all', { t: 'drop', hole: wall.holes.indexOf(h) });
+  h.pieces = h.pieces.filter((x) => x !== p);
+  p.cells.forEach((kk) => { wall.wood.delete(kk); h.filled.delete(kk); });
+  const g = p.group, p0 = g.position.clone(), out = boardsOf(h).length ? -1 : 1;
+  const v = new THREE.Vector3((Math.random() - 0.5) * 2, 2 + Math.random(), out * (2.5 + Math.random() * 1.5));
+  tween(0.8, (s) => { g.position.set(p0.x + v.x * s, p0.y + v.y * s - 9 * s * s, p0.z + v.z * s); g.rotation.x = s * 3; }, () => wallGroup.remove(g));
+  h.maxHp *= (own.length - 1) / own.length;
+  h.hp = Math.min(h.hp, h.maxHp);
+  h.status = 'open';
+  if (lastPlaced?.piece === p) lastPlaced = null;
+  updateHole(h);
+  burst(new THREE.Vector3(p.cx, holeMidY(h), 0.3), '#c98a45', 16, 3.5);
+  shake = 0.3;
+  toast(`They knocked ${an(p.info.letter)} out! Put one back before they're through`, true);
+}
 function breakBoard(h, p) {
   if (isHost()) send('all', { t: 'unboard', hole: wall.holes.indexOf(h), i: h.pieces.indexOf(p) });
   h.pieces = h.pieces.filter((x) => x !== p);
@@ -2811,6 +2869,8 @@ function widenCells(h) {
   for (let a = h.b.c0 - 1; a <= h.b.c1; a++) starts.push(a);
   const lowAt = (x) => h.cells.reduce((m, [r, c]) => (c === x ? Math.max(m, r) : m), -1);
   starts.sort((a, z) => Math.max(lowAt(z), lowAt(z + 1)) - Math.max(lowAt(a), lowAt(a + 1)) || Math.random() - 0.5);
+  // Of the ways it could give way, the one the common pieces fill best (see roomyShapes).
+  let best = null, bestW = -1;
   for (let tries = 0; tries < 30; tries++) {
     const a = starts[tries % starts.length], add = new Set();
     let good = lowAt(a) >= 0 || lowAt(a + 1) >= 0;
@@ -2840,9 +2900,11 @@ function widenCells(h) {
     }
     if (need) continue;
     const added = [...add].map((kk) => kk.split(',').map(Number));
-    if (C.solve([...h.cells, ...added], 1).length) return added;
+    if (!C.solve([...h.cells, ...added], 1).length) continue;
+    const w = commonWays([...h.cells, ...added]);
+    if (w > bestW) { best = added; bestW = w; }
   }
-  return null;
+  return best;
 }
 // The weak spot gives way: the stone round it falls out and it's a gap they can walk through.
 function widen(h, cells) {
@@ -2963,6 +3025,7 @@ function updateRaider(r, dt) {
       else if (rub) { if (r.stamina <= 0) turnedAway(r); }
       else if (board && board.hp <= 0) breakBoard(h, board);
       else if (!board && h.hp <= 0) breakHole(h);
+      else if (!board && h.hp <= nextOut(h)) dropPiece(h);
       else if (r.stamina <= 0) { if (out) r.state = 'leave'; else turnedAway(r); }
       break;
     }
@@ -3087,23 +3150,27 @@ function fireCannon() {
   return !!cells;
 }
 // A patch of solid stone, away from the gate and other holes, for a new hole.
+// The roomiest breach that fits anywhere: three pieces if there's the stone for it, else two, else a
+// single common piece (a P, F or Y, never a W or a U). Stone between the holes is short, so most
+// walls only have room for the smaller ones in places.
 function cannonSpot() {
-  for (let tries = 0; tries < 200; tries++) {
-    const shape = Math.random() < 0.6 ? lastGap() : C.genHole(2).hole;
-    const b = C.bbox(shape);
-    if (b.h > wall.H - 1 || b.w > wall.W - 2) continue;
-    const r0 = 1 + rand(wall.H - b.h), c0 = 3 + rand(wall.W - b.w - 5);
-    const cells = shape.map(([r, c]) => [r + r0, c + c0]);
-    const clear = cells.every(([r, c]) => {
-      if (r >= wall.H || c < 3 || c > wall.W - 4 || !wall.stoneAt.has(k(r, c))) return false;
-      for (let a = -1; a <= 1; a++) for (let z = -1; z <= 1; z++) {
-        const kk = k(r + a, c + z);
-        if (wall.cellHole.has(kk) || wall.gate.has(kk) || wall.wood.has(kk)) return false;
-      }
-      return true;
-    });
-    if (!clear) continue;
-    return cells;
+  const singles = C.shuffle(['P', 'P', 'F', 'Y']).map((l) => C.pick(C.ORIENTS_BY_LETTER[l]).cells);
+  const shapes = [...roomyShapes(3).slice(0, 4), ...roomyShapes(2, 6).slice(0, 4), ...singles];
+  const clear = ([r, c]) => {
+    if (r >= wall.H || c < 3 || c > wall.W - 4 || !wall.stoneAt.has(k(r, c))) return false;
+    for (let a = -1; a <= 1; a++) for (let z = -1; z <= 1; z++) {
+      const kk = k(r + a, c + z);
+      if (wall.cellHole.has(kk) || wall.gate.has(kk) || wall.wood.has(kk)) return false;
+    }
+    return true;
+  };
+  for (const shape of shapes) {
+    const b = C.bbox(shape), spots = [];
+    for (let r0 = 1; r0 + b.h <= wall.H; r0++) for (let c0 = 3; c0 + b.w <= wall.W - 3; c0++) {
+      const cells = shape.map(([r, c]) => [r + r0, c + c0]);
+      if (cells.every(clear)) spots.push(cells);
+    }
+    if (spots.length) return C.pick(spots);
   }
   return null;
 }
@@ -3328,9 +3395,56 @@ function pickSpot(list, at) {
   aimKeep = key(best);
   return best;
 }
+// ---- puzzle mode at the wall (see `wm`) ----
+const wallSpots = () => (carry ? fits(carry.cells).concat(patchFits(carry.cells)) : []);
+const nearFrame = () => !!carry && frames().length > 0 && frameFits(carry.cells).some((o) => Math.hypot(o.cx - pirate.x, o.cz - pirate.z) <= REACH + 1.2);
+const spotRank = (o) => (o.patch ? 1 : o.over ? 2 : 0);   // a clean fit, then a board behind, then boarding over
+const canWallMode = () => pirate.h < 0.05 && !deco.on && !G.over && pirate.z <= WALL_Z + 2.5 && wall.holes.length > 0;
+function clampCursor() {
+  if (!wm || !carry) return;
+  const b = C.bbox(carry.cells);
+  wm.r = Math.max(0, Math.min(wall.H - b.h, wm.r));
+  wm.c = Math.max(0, Math.min(wall.W - b.w, wm.c));
+}
+function enterWall() {
+  const spots = wallSpots().sort((a, z) => spotRank(a) - spotRank(z) || Math.abs(a.cx - pirate.x) - Math.abs(z.cx - pirate.x));
+  const s = (target && !target.frame && target.ok ? target : null) || spots[0];
+  const h = s ? null : wall.holes.slice().sort((a, z) => Math.abs(holeX(a) - pirate.x) - Math.abs(holeX(z) - pirate.x))[0];
+  wm = s ? { r: s.dr, c: s.dc } : { r: h.b.r0, c: h.b.c0 };
+  for (const a of ['arrowup', 'arrowdown', 'arrowleft', 'arrowright']) keys.delete(a);
+  clampCursor();
+}
+function exitWall() {
+  wm = null;
+  wmBlock = carry || null;   // don't pull you straight back in while you walk off with that piece
+}
+// Which way to walk to stand below the piece, a step back from the wall.
+function wallWalk() {
+  const b = carry ? C.bbox(carry.cells) : null;
+  const tx = !b ? pirate.x : X(target && !target.frame ? target.dc : wm.c) + b.w * S / 2;
+  const dx = Math.max(-bounds.x + 1.6, Math.min(bounds.x - 1.6, tx)) - pirate.x, dz = WALL_Z + 0.9 - pirate.z;   // a step back, so they don't hide the hole
+  const n = Math.hypot(dx, dz);
+  return n > 0.12 ? { wx: dx / n, wz: dz / n, slow: Math.min(1, n * 2) } : null;
+}
 function aim() {
   target = null;
   if (!carry || pirate.h > 0.3) return;
+  if (wm) {
+    // Anywhere on the wall, no walking needed: a clean fit at the piece's square first, then a board
+    // on behind, then boarding it over. With the mouse, wherever it points, and the keys carry on
+    // from there.
+    const list = wallSpots();
+    if (mouseMode && mouse && !mouse.frame) {
+      const best = pickSpot(list, (o) => mouseAt(o.patch ? patchZ(o.layer, wall.holes[o.hole]) - PATCH_D / 2 : 0));
+      const b = C.bbox(carry.cells);
+      if (best) { target = { ...best, ok: true }; wm.r = best.dr; wm.c = best.dc; }
+      else { wm.r = Math.round(mouse.fr - b.h / 2); wm.c = Math.round(mouse.fc - b.w / 2); clampCursor(); target = { dr: wm.r, dc: wm.c, ok: false }; }
+      return;
+    }
+    const here = list.filter((o) => o.dr === wm.r && o.dc === wm.c).sort((a, z) => spotRank(a) - spotRank(z) || (a.layer ?? 0) - (z.layer ?? 0));
+    target = here.length ? { ...here[0], ok: true } : { dr: wm.r, dc: wm.c, ok: false };
+    return;
+  }
   const fl = frames().length ? frameFits(carry.cells) : [];
   const fd = (o) => Math.hypot(o.cx - pirate.x, o.cz - pirate.z);
   // Pointing at a rampart frame: the spot nearest the pointer.
@@ -3394,8 +3508,15 @@ function prompt() {
     else if (!f.p.letter && f.p.wait > 0.3) t = 'This crate\'s restocking: a thrown piece is timber gone';
   } else if (!carry && liftable()) { const l = liftable(); t = `Space: lift the ${l.f.pieces[l.pi].info.letter} back out of the frame`; }
   else if (!carry && canTakeBack()) t = `Space: take the ${lastPlaced.letter} back off`;
-  else if (carry) {
-    const more = target?.count > 1 ? ` · Tab: other spots (${target.count})` : '';
+  else if (wm) {
+    const keysTip = ' · arrows move it · Q/E turn · F flip · Esc: walk';
+    if (!carry) t = '1, 2, 3: take a crate\'s piece · Esc: walk';
+    else if (target?.ok && target.patch) t = `Space: nail it on behind${keysTip}`;
+    else if (target?.ok && !target.over) t = `Space: fit the ${carry.letter} here${keysTip}`;
+    else if (target?.ok) t = `Space: board it over (weak, no Masterpiece)${keysTip}`;
+    else t = `The ${carry.letter} won't go there${keysTip}`;
+  } else if (carry) {
+    const more = '';
     if (target?.frame) t = !target.ok ? 'Walk closer to fit it there' : target.over ? (target.frame.kind === 'stair' ? `Space: fit the ${carry.letter} in the stairs (it sticks out, and stays that way)${more}` : `Space: fit it in the frame (it sticks out: the spare gets sawn off)${more}`) : `Space: fit the ${carry.letter} in the ${{ stair: 'stairs', gun: 'gun tower frame', house: 'house frame' }[target.frame.kind] || 'wall-walk frame'}${more}`;
     else if (target?.ok && target.patch) t = `Space: nail it on behind (one more layer for them to hack through)${more}`;
     else if (target?.ok && !target.over) t = `Space: fit the ${carry.letter} here${more}`;
@@ -3758,6 +3879,7 @@ function onNet(m) {
       }
       break;
     case 'break': if (!net.host && wall.holes[m.hole]) breakHole(wall.holes[m.hole]); break;
+    case 'drop': if (!net.host && wall.holes[m.hole]) dropPiece(wall.holes[m.hole]); break;
     case 'gfire': if (!net.host && gd?.guns[m.i]) fireGun(m.i, m.x, m.z, !!m.cn); break;
     case 'chalk': if (net.host && gd) chalk(m.r, m.c, m.dir, m.from); break;
     case 'unboard': { const h = wall.holes[m.hole]; if (!net.host && h?.pieces[m.i]) breakBoard(h, h.pieces[m.i]); break; }
@@ -4271,16 +4393,21 @@ function update(dt) {
     if (keys.has('w') || keys.has('arrowup')) mz--;
     if (keys.has('s') || keys.has('arrowdown')) mz++;
   }
-  const moving = pirate.moving = !!(mx || mz);
+  // Puzzle mode at the wall: in when you come up to it with a piece, out on leaving it.
+  if (wmBlock && (wmBlock !== carry || pirate.z > WALL_Z + 3)) wmBlock = null;
+  if (wm && (!canWallMode() || pirate.h > 0.05)) wm = null;
+  else if (!wm && carry && !wmBlock && !mx && !mz && canWallMode() && !nearFrame() && wallSpots().length) enterWall();
+  const auto = wm && !mx && !mz ? wallWalk() : null;
+  const moving = pirate.moving = !!(mx || mz || auto);
   // Turn the view.
   if (keys.has('z')) view.yaw += dt * 1.4;
   if (keys.has('c')) view.yaw -= dt * 1.4;
   if (moving) {
-    // Walk the way the camera faces.
-    const n = Math.hypot(mx, mz), cy = Math.cos(view.yaw), sy = Math.sin(view.yaw);
-    const wx = (mx * cy + mz * sy) / n, wz = (-mx * sy + mz * cy) / n;
-    const ox = pirate.x, oz = pirate.z;
-    let nx = pirate.x + wx * SPEED * dt, nz = pirate.z + wz * SPEED * dt;
+    // Walk the way the camera faces (or, at the wall, to stand under the piece).
+    const n = Math.hypot(mx, mz) || 1, cy = Math.cos(view.yaw), sy = Math.sin(view.yaw);
+    const wx = auto ? auto.wx : (mx * cy + mz * sy) / n, wz = auto ? auto.wz : (-mx * sy + mz * cy) / n;
+    const ox = pirate.x, oz = pirate.z, sp = SPEED * (auto ? auto.slow : 1);
+    let nx = pirate.x + wx * sp * dt, nz = pirate.z + wz * sp * dt;
     for (const o of obstacles) {
       if (o.low && pirate.h > 1) continue;
       const dx = nx - o.x, dz = nz - o.z, d = Math.hypot(dx, dz), min = o.r + 0.3;
@@ -4387,7 +4514,19 @@ function update(dt) {
     dist += (Math.max((GD.cols * S / 2 + 2.2) / Math.tan(hh), (GD.rows * S / 2 + 1.2) / Math.tan(vh)) * view.zoom - dist) * deckView;
     tilt += (Math.max(0.6, Math.min(1.45, 1.1 + view.pitch)) - tilt) * deckView;
   }
-  v3.set(Math.sin(view.yaw) * Math.cos(tilt), Math.sin(tilt), Math.cos(view.yaw) * Math.cos(tilt)).multiplyScalar(dist).add(look);
+  // Puzzle mode at the wall: straight on to the whole wall, every hole in view at once.
+  wallView += ((wm ? 1 : 0) - wallView) * Math.min(1, dt * 3);
+  let yaw = view.yaw;
+  if (wallView > 0.001) {
+    const W2 = wall.W * S / 2, H2 = wall.H * S / 2;
+    const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect);
+    L2.set(0, H2 + 0.2, 0.6);
+    look.lerp(L2, wallView);
+    dist += (Math.max((W2 + 0.5) / Math.tan(hh), (H2 + 1.4) / Math.tan(vh)) * Math.min(1, view.zoom) + 1 - dist) * wallView;
+    tilt += (0.36 - tilt) * wallView;   // high enough to see over the pirate's head
+    yaw = Math.atan2(Math.sin(view.yaw), Math.cos(view.yaw)) * (1 - wallView);
+  }
+  v3.set(Math.sin(yaw) * Math.cos(tilt), Math.sin(tilt), Math.cos(yaw) * Math.cos(tilt)).multiplyScalar(dist).add(look);
   camAt.lerp(v3, Math.min(1, dt * 3));
   camera.position.copy(camAt);
   // The fog starts beyond what you're looking at, so a high or zoomed-out view doesn't go murky.
@@ -4496,6 +4635,6 @@ if (['all', 'gundeck'].includes(new URLSearchParams(location.search).get('try'))
 requestAnimationFrame(frame);
 
 // For poking at it from the console.
-window.den = { tune, HP, widenCells, widen, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+window.den = { tune, HP, widenCells, widen, dropPiece, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };

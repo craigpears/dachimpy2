@@ -25,7 +25,15 @@ the site (`.assetsignore` skips `*.md`).
 ## Needs a playtest to pin down
 
 - **Turning a piece close to the wall feels off.** The user can't yet say how (which way it
-  turns? where the ghost jumps to?). The snapping changes of 7 Nov may have helped; ask again.
+  turns? where the ghost jumps to?). The snapping changes of 7 Nov may have helped, and since 8 Nov
+  the whole-wall puzzle mode (arrows move the piece by screen direction); ask again.
+- **Puzzle mode at the wall (8 Nov), not yet tried by the user.** Things to ask: is the whole-wall
+  view close enough to read the holes on their screen; should it come on by itself when you walk up
+  with a piece, or only on an arrow key; should arrows jump hole to hole as well as a square at a
+  time; the same view for the rampart and house frames ("the second stage")?
+- **Wood a piece at a time, and roomier raid holes (8 Nov), not yet tried by the user.** Watch
+  for: refilling a knocked-out piece being too easy a way to hold a hole forever, and cannon
+  breaches feeling too big now.
 - **Holding the wall.** The cannon now aims before it fires, breaches fill with rubble, and
   turning raiders away pays (RULES.md: "Keeping them out must be possible"). Since 7 Nov raiders
   also need a gap they can walk through and arrive winded after hacking one (RULES.md: "Raiders

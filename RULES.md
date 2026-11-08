@@ -178,6 +178,23 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   raiders on one small hole now take about 8 seconds from the wall giving way to heading for the
   chest, where it was about 2. Dazed raiders at the wall can be hit from the rampart, and the gun
   tower aims at them too. Raiders hacking a hole with a doorway stand in the doorway.
+- **Wood comes out a piece at a time.** The user found a hole's wood all coming off in one go
+  frustrating, boards behind a Masterpiece or not, and liked the chance to "push back and refix it"
+  when part of it goes but leaves a gap too small to walk through. As in the real puzzle (a neglected
+  hole loses its most recently placed piece), the last piece put in falls out first. Each piece
+  holds an equal share of the hole's strength (a three-piece Masterpiece loses one about every 15
+  seconds of one raider's hacking). The gap a piece leaves needs that piece again, and refilling it
+  finishes the hole as before. Any wood left still keeps them out. You can refill the front of a
+  hole with boards behind it wherever no board covers it.
+- **Holes made in a raid are roomy and fit the common pieces; the first wall stays small.** The user
+  kept getting shapes they could never fill, with nowhere to dump the awkward pieces: in the real
+  puzzle fresh holes keep coming, but the wall is fixed. They like the opening wall's simple 1, 2
+  and 3-piece holes, so only holes made during a raid changed. A cannon breach is the roomiest that
+  fits (three pieces if there's the stone for it, else two, else a single P, F or Y, never a W or a
+  U), and of a few candidate shapes it's the one with the most ways to fill it from P, F, Y, T, N
+  and L. A weak spot hacked wider gives way the same way. (A test of a player who always picks the
+  most flexible spot: random 1- and 2-piece breaches left them with no piece that fits about 4
+  draws for every piece placed; 3-piece breaches picked this way, about 1.5.)
 - **Throw pieces at raiders, don't bonk them.** A plain bonk was underwhelming. The carried piece
   is the weapon: it hurls at a raider, who goes flying. It costs the piece.
 - **A thrown piece takes a while to come back.** Otherwise you could stand and pelt raiders
@@ -293,6 +310,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   "you can place it on adjacent holes. You don't need to walk right up to them." Not across the gate.
   (With the keyboard, stand at the wall as before: it decides between the wall and the frames on the
   floor behind you.)
+- **Puzzle mode at the wall: the whole wall at once.** The user wanted it closer to Puzzle Pirates:
+  working on all four holes, moving between them with ease rather than running the pirate about,
+  "a hybrid of the 2D version" once you're at the wall. Walk up to the wall with a piece (or press
+  an arrow there) and the camera pulls back, straight on, to show the whole wall. The arrow keys
+  move the piece a square at a time, always the way they point on screen (they used to depend on
+  the camera angle); the pirate walks along under it, a step back so they don't hide the hole.
+  Space fits it, 1 2 3 take the next piece, Q/E/F turn and flip, and you stay there till Esc (or
+  WASD) takes you back to walking. Boards behind mended holes are fitted the same way. The mouse
+  works there too. **No Tab "next spot":** the user found it "annoying and useless".
 - **The pirate walks a touch quicker** (5.4 m/s; was 4.6, then 5). The user and a friend both
   wanted the pace a bit quicker.
 - **The piece goes where you point.** The user and a friend found it hard to put pieces where they
