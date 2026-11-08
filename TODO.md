@@ -56,7 +56,9 @@ the site (`.assetsignore` skips `*.md`).
   behind it, making fetching slower; the solid stairs looking odd.
 - **The first wave dealt fair (8 Nov), not yet tried by the user.** Until wave 1 is beaten, the
   crates deal the pieces that finish the holes as Masterpieces. Watch for: it feeling too easy or
-  too obvious. (First wave only, the user's choice: from wave 2 the deal is random again.)
+  too obvious. (First wave only, the user's choice: from wave 2 the deal is random again.) Since
+  8 Nov it also stops once the first wall's done, and doesn't re-deal a piece you used elsewhere
+  (the user got four W's in a row building a frame); check it no longer feels stuck on.
 - **Layers behind (8 Nov), not yet tried by the user.** A layer is now the hole's shape again,
   filled piece by piece in a timber surround, and a full one is as strong as a Masterpiece and pays
   the same. Watch for: holes three layers deep being too strong, or the pay too generous; the

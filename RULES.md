@@ -210,6 +210,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   the user said first wave only. (The same test: dealt at random, all
   eight games got stuck after 3 to 7 pieces with nothing on the crates that fits cleanly; dealt
   fair, five games out of five finished all four holes as Masterpieces in eight pieces.)
+  **It's only for mending the first wall, and it never goes round and round.** Building a frame
+  with it still on, the user got "four M pieces in a row ... and so many U pieces. The favourable
+  pieces thing seems to be stuck on." Each piece the wall was missing went into the frame, so the
+  next deal brought the same piece again. So a piece dealt fair that goes anywhere but the wall (a
+  frame, or thrown at a raider) isn't dealt fair again, and once every hole of the first wall is
+  done the deal is the usual one for good, even when raiders knock pieces out in wave 1. (Building
+  only the shack from a new game: each piece the wall needed came once, at most twice, then the
+  usual deal.)
 - **Throw pieces at raiders, don't bonk them.** A plain bonk was underwhelming. The carried piece
   is the weapon: it hurls at a raider, who goes flying. It costs the piece.
 - **A thrown piece takes a while to come back.** Otherwise you could stand and pelt raiders

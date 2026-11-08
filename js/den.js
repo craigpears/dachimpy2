@@ -644,6 +644,7 @@ function putFramePiece(f, i) {
 function placeFrame(t, by, hand) {
   const f = t.frame;
   const info = { letter: hand.letter, shape: hand.cells, dr: t.dr, dc: t.dc, over: t.over, by };
+  if (hand.fair) (G.fairSkip ||= []).push(hand.letter);   // dealt for the wall, used here: see fairDeal
   const from = f.group.worldToLocal(hand.group.position.clone());
   scene.remove(hand.group);
   if (hand === carry) carry = null;
@@ -2068,7 +2069,13 @@ const piles = [0, 1, 2].map(() => {
    just changes the plan), picks the way of finishing each that uses the most of what's already on
    the crates or in your hands, and deals one of the pieces still missing. Once nothing's missing
    (or a hole can't be finished exactly any more) it deals as usual. */
-const fairDeal = () => G.wave === 0 || (G.wave === 1 && G.phase === 'wave');
+/* But only for mending the first wall, and never round and round. The user, building a frame with
+   the fair deal still on: "four M pieces in a row ... and so many U pieces. The favourable pieces
+   thing seems to be stuck on." A piece dealt fair that goes somewhere other than the wall (a frame,
+   or thrown) isn't dealt fair again (fairSkip), or the wall's missing W would keep coming back; and
+   once every hole of the first wall is done (fairOver) the deal is the usual one, even when the
+   raiders knock pieces out in wave 1. */
+const fairDeal = () => !G.fairOver && (G.wave === 0 || (G.wave === 1 && G.phase === 'wave'));
 function neededLetters() {
   const have = piles.map((q) => q.letter).filter(Boolean);
   if (carry?.letter) have.push(carry.letter);
@@ -2084,11 +2091,13 @@ function neededLetters() {
     }
     for (const p of best || []) { const i = have.indexOf(p.letter); if (i >= 0) have.splice(i, 1); else need.push(p.letter); }
   }
+  for (const l of G.fairSkip || []) { const i = need.indexOf(l); if (i >= 0) need.splice(i, 1); }
   return need;
 }
 function deal(p) {
   const need = wall && fairDeal() ? neededLetters() : [];
   p.letter = need.length ? C.pick(need) : C.weightedLetter();
+  p.fair = need.length > 0;
   p.cells = C.normalize(C.pick(C.ORIENTS_BY_LETTER[p.letter]).cells);
 }
 function showPile(p) {
@@ -2231,7 +2240,7 @@ function newGame() {
   raiders.splice(0).forEach((r) => { scene.remove(r.m.g); r.mark.remove(); });
   if (carry) { scene.remove(carry.group); carry = null; }
   ghostKey = ''; ghost = null;
-  Object.assign(G, { gold: 60, wave: 0, phase: 'build', phaseT: BUILD_SECS, toSpawn: 0, spawnT: 0, cannonT: 0, cannonShots: 0, aim: null, masters: 0, boarded: 0, bonked: 0, stolen: 0, turned: 0, waveTurned: 0, waveIn: 0, over: false });
+  Object.assign(G, { gold: 60, wave: 0, phase: 'build', phaseT: BUILD_SECS, toSpawn: 0, spawnT: 0, cannonT: 0, cannonShots: 0, aim: null, masters: 0, boarded: 0, bonked: 0, stolen: 0, turned: 0, waveTurned: 0, waveIn: 0, over: false, fairOver: false, fairSkip: [] });
   piles.forEach((p) => { p.letter = null; });
   newWall();
   piles.forEach(deal);   // after the wall, so the first deals finish its holes
@@ -2707,7 +2716,7 @@ function pickUp(p) {
   if (guest()) { net.asking = true; return send('host', { t: 'crate', i: piles.indexOf(p) }); }
   const m = woodMat(p.letter).clone();
   m.transparent = true;
-  carry = { letter: p.letter, cells: p.cells, from: p, mat: m, group: centred(p.cells, m), lift: 0 };
+  carry = { letter: p.letter, cells: p.cells, from: p, fair: p.fair, mat: m, group: centred(p.cells, m), lift: 0 };
   const g = carry.group;
   g.position.copy(p.group.position);
   g.rotation.x = -Math.PI / 2;
@@ -2725,7 +2734,7 @@ function putBack() {
     carry = null;
     return;
   }
-  p.letter = carry.letter; p.cells = carry.cells;
+  p.letter = carry.letter; p.cells = carry.cells; p.fair = carry.fair;
   scene.remove(carry.group);
   carry = null;
   showPile(p);
@@ -2925,6 +2934,7 @@ function refill(p, secs = 0.45) {
 // Hurl the carried piece at a raider. It always flies true, but the piece is spent.
 function throwAt(r, hand = carry, by = myId()) {
   const g = hand.group, pile = hand.from, color = WOOD[hand.letter];
+  if (hand.fair) (G.fairSkip ||= []).push(hand.letter);   // dealt for the wall, thrown instead: see fairDeal
   if (hand.mat) { hand.mat.opacity = 1; hand.mat.depthWrite = true; }
   if (hand === carry) carry = null;
   r.targeted = true;
@@ -3542,6 +3552,7 @@ function startWave() {
   updateStats();
 }
 function updateWaves(dt) {
+  if (!G.fairOver && wall.holes.every((h) => h.status !== 'open')) G.fairOver = true;   // see fairDeal
   if (G.phase !== 'wave') {
     // The first wave comes as soon as every hole's mended (the user), with a beat to see it done.
     if (G.phase === 'build' && G.phaseT > WALL_DONE_SECS && wall.holes.every((h) => h.status !== 'open')) {
