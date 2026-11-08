@@ -75,7 +75,7 @@ const CANNON_AIM = 8, CANNON_GAP = 22, RUBBLE = 10;
    whole pieces' worth of squares, so it can be mended). The user: hopping through a five-square gap
    high up the wall was "weird and dumb". */
 const DOOR_W = 2, DOOR_H = 3, WEAK = 8;
-const BUILD_SECS = 75, CALM_SECS = 20;
+const BUILD_SECS = 75, CALM_SECS = 20, WALL_DONE_SECS = 3;
 const RAIDER_DPS = 1, RAIDER_STAMINA = 16;
 /* Getting through costs them: a raider who spent their strength hacking a way in arrives winded.
    They stop just inside to catch their breath (up to WINDED seconds, the more tired the longer) and
@@ -3543,6 +3543,11 @@ function startWave() {
 }
 function updateWaves(dt) {
   if (G.phase !== 'wave') {
+    // The first wave comes as soon as every hole's mended (the user), with a beat to see it done.
+    if (G.phase === 'build' && G.phaseT > WALL_DONE_SECS && wall.holes.every((h) => h.status !== 'open')) {
+      G.phaseT = WALL_DONE_SECS;
+      say('The wall\'s mended! Here they come…', true);
+    }
     G.phaseT -= dt;
     if (G.phaseT <= 0) startWave();
     return;
@@ -3568,7 +3573,7 @@ function updateWaves(dt) {
 function banner() {
   const el = $('banner');
   let t, cls = 'banner calm';
-  if (G.phase === 'build') t = `Raiders attack in ${fmt(Math.ceil(G.phaseT))}: mend the wall!`;
+  if (G.phase === 'build') t = wall.holes.every((h) => h.status !== 'open') ? `The wall's mended! Raiders attack in ${fmt(Math.ceil(G.phaseT))}` : `Raiders attack in ${fmt(Math.ceil(G.phaseT))}: mend the wall!`;
   else if (G.phase === 'calm') t = `Wave ${G.wave} beaten off · next wave in ${fmt(Math.ceil(G.phaseT))}`;
   else { t = `Wave ${G.wave} · ${G.toSpawn + raiders.filter((r) => r.state !== 'down').length} raiders`; cls = 'banner'; }
   if (el.textContent !== t) el.textContent = t;

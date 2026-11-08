@@ -601,7 +601,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   Everything stops: raiders, the wave timer, the Gunnery stores. It also pauses by itself when you
   switch away from the tab. Only when playing on your own: with a crew the raiders don't wait.
 - **Give enough time to build.** A piece takes about ten seconds to fetch and fit, so the first wave
-  waits 75 seconds and starts small.
+  waits 75 seconds and starts small. **But no longer than it takes:** the first wave comes as soon
+  as you've completed all the holes (the user), 3 seconds after the last one so you see it done,
+  with "The wall's mended!" on the banner.
 - **The den has a gate** and raiders attack from the far side of the wall, with swords and (from
   wave 2) a cannon that blasts fresh holes (a few a wave, aimed first; see above). Keep
   repairing. **The cannon stands well back** (16 m
