@@ -31,6 +31,11 @@ the site (`.assetsignore` skips `*.md`).
   of the arrows, not move the character". So up close it should be a mode of its own, where WASD
   turns the arrow, and Esc leaves it.
 
+- **A piece fitted into a hole under attack has no strength (8 Nov):** fit a piece into a hole
+  raiders are hacking at and it goes straight away: "it doesn't seem to have any health, it's more
+  like it gets thrown at them". A fresh piece should hold them off for a while, with its own share
+  of the hole's strength. (How long it should last to pin down with the user.)
+
 ## Needs a playtest to pin down
 
 - **Turning a piece close to the wall feels off.** The user can't yet say how (which way it
