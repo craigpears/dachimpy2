@@ -158,6 +158,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     a barricade before they can walk in, as they do rubble (each crate holds out 2.5 seconds of
     hacking), and arrive winded. The user: sprinkles should "build an extra barrier ... on this side
     of the wall", like the rubble in a fresh breach.
+  - **Masterpieces pay in breakers.** A Masterpiece (a hole, a layer behind one, or a frame built
+    without waste) also pays a pair of crates with a breaker in it, flown straight to the hoist's
+    landing as the next pair down (onto the floor by you if your hands are full). Once per
+    Masterpiece: taking a piece back and fitting it again doesn't pay twice, but a hole broken open
+    and mended again does. The gold is still paid, since it's what the raiders steal. The user:
+    gold "is fairly meaningless. So getting a reward like some breakers would be a lot better".
   - A raider who gets in while you're at the winch nails crates shut on your stack (sprinkles, as
     an opponent's attack would). Playing alone only so far.
   **It's part of the den, not a picture:** the board is a real stack of weapon crates under a timber

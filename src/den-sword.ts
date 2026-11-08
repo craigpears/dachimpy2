@@ -13,7 +13,7 @@
    a barricade inside the breach that needs it most. */
 
 import { Board } from './swordfight.js';
-import type { Pair, Result, Strike } from './swordfight.js';
+import type { Colour, Pair, Result, Strike } from './swordfight.js';
 
 /** The numbers to tune. */
 export const SWORD = {
@@ -92,6 +92,14 @@ export function shareCrates(breaches: Breach[], n: number): number[] {
   return got;
 }
 
+/** A Masterpiece's reward: a pair with a breaker in it (a block underneath, a breaker on top, any
+    colours). The user (8 Nov): "the whole getting some gold thing is fairly meaningless. So getting
+    a reward like some breakers would be a lot better than gold." */
+export function rewardPair(random: () => number = Math.random): Pair {
+  const colour = () => Math.min(3, Math.floor(random() * 4)) as Colour;
+  return [{ c: colour(), breaker: false }, { c: colour(), breaker: true }];
+}
+
 /** What happened at the rack this frame. */
 export interface RackNews { landed?: Result; lost?: boolean; changed?: boolean }
 
@@ -111,6 +119,14 @@ export class SwordRack {
   take(pair: Pair): boolean {
     if (this.queue.length >= SWORD.QUEUE) return false;
     this.queue.push(pair);
+    return true;
+  }
+
+  /** A reward (see rewardPair): straight to the front of the queue, so it's the next pair down.
+      False if your hands are full (den.js leaves it on the floor instead). */
+  give(pair: Pair): boolean {
+    if (this.queue.length >= SWORD.QUEUE) return false;
+    this.queue.unshift(pair);
     return true;
   }
 

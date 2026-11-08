@@ -75,6 +75,13 @@ export function shareCrates(breaches, n) {
     }
     return got;
 }
+/** A Masterpiece's reward: a pair with a breaker in it (a block underneath, a breaker on top, any
+    colours). The user (8 Nov): "the whole getting some gold thing is fairly meaningless. So getting
+    a reward like some breakers would be a lot better than gold." */
+export function rewardPair(random = Math.random) {
+    const colour = () => Math.min(3, Math.floor(random() * 4));
+    return [{ c: colour(), breaker: false }, { c: colour(), breaker: true }];
+}
 /** The sword rack: the Swordfight board, the pieces you've picked up and not yet played (a pair
     comes in only while you're at the rack), and the falling pair's timer. */
 export class SwordRack {
@@ -89,6 +96,14 @@ export class SwordRack {
         if (this.queue.length >= SWORD.QUEUE)
             return false;
         this.queue.push(pair);
+        return true;
+    }
+    /** A reward (see rewardPair): straight to the front of the queue, so it's the next pair down.
+        False if your hands are full (den.js leaves it on the floor instead). */
+    give(pair) {
+        if (this.queue.length >= SWORD.QUEUE)
+            return false;
+        this.queue.unshift(pair);
         return true;
     }
     /** A frame at the rack: the next pair comes in, and falls a row every SWORD.FALL seconds. If it

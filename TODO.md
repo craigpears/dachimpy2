@@ -94,6 +94,8 @@ the site (`.assetsignore` skips `*.md`).
   strong or too weak (a crate holds 2.5 seconds of hacking, six at most per breach); the crates
   dropped on the floor being mistaken for barricade crates; the order you pick crates up giving you
   a say in what comes next (the user: "kind of okay. It adds a bit of an element of difference").
+  Since 8 Nov Masterpieces also pay a breaker pair, sent to the front of the queue: watch for
+  that making the stack too easy, or too many breakers piling up on a well-mended wall.
 
 - **The longer calm between waves (8 Nov), not yet tried by the user.** 40 seconds now (it was
   20), after being overwhelmed by wave 8; the raids stay as big. Watch for: still overwhelmed late

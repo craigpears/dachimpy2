@@ -8,7 +8,7 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { FairDeal, turnWide } from './den-deal.js';
 import { randomPair, W as SW, H as SH, ENTRY as SENTRY } from './swordfight.js';
-import { muster, shareCrates, BARRICADE, SwordRack, Barracks, SWORD } from './den-sword.js';
+import { muster, shareCrates, rewardPair, BARRICADE, SwordRack, Barracks, SWORD } from './den-sword.js';
 import { drawStencil, drawBlade, PALETTE } from './den-sword-draw.js';
 import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, cleanDesign, designOf, drawFlag, dyeHex, DYES, SKIN, HAIR, FUR, PARTS, FLAGS, PATTERNS, DECOR, MAX_DECOR, BIOMES, twoColours } from './den-look.js';
 
@@ -791,7 +791,7 @@ function finishFrame(f, quiet = false) {
     j.up = true;
     if (!quiet) {
       if (f.pieces.some((p) => p.over)) toast('The stairs are up, just as you built them');
-      else { G.gold += PAY.master; updateStats(); toast(`Shipshape stairs! Not a square out of place (+${PAY.master})`); }
+      else { G.gold += PAY.master; updateStats(); toast(`Shipshape stairs! Not a square out of place (+${PAY.master})`); swordReward(new THREE.Vector3(pirate.x, 1.5, pirate.z), 'shipshape stairs'); }
     }
     jobDone(j, quiet);
     return;
@@ -811,7 +811,7 @@ function finishFrame(f, quiet = false) {
   }
   if (!quiet) {
     if (waste) toast(`Sawn to fit: ${waste} square${waste > 1 ? 's' : ''} of offcuts`);
-    else { G.gold += PAY.master; updateStats(); toast(`Shipshape! Not a scrap wasted (+${PAY.master})`); }
+    else { G.gold += PAY.master; updateStats(); toast(`Shipshape! Not a scrap wasted (+${PAY.master})`); swordReward(new THREE.Vector3(pirate.x, 1.5, pirate.z), 'shipshape frame'); }
   }
   if (j.kind === 'house') { raiseHouse(f, j, quiet); return; }
   if (j.kind === 'deck') { sliceDeck(f, j, quiet); return; }
@@ -2596,12 +2596,15 @@ function pairSync(dt) {
 }
 
 // A beaten raider's weapons: a pair of crates flies over (or across) the den and lands on the floor inside.
-function swordDrop(r) {
-  if (!swordHere()) return;
-  const pair = randomPair();
+const cratePair = (pair) => {
   const g = new THREE.Group();
   pair.forEach((p, i) => { const m = armsCrate({ c: p.c, breaker: p.breaker }); m.position.y = (i + 0.5) * CR; g.add(m); });
   g.scale.setScalar(0.6);
+  return g;
+};
+function swordDrop(r, pair = randomPair()) {
+  if (!swordHere()) return;
+  const g = cratePair(pair);
   const from = new THREE.Vector3(r.x, 1.4, r.z);
   const to = new THREE.Vector3(Math.max(-bounds.x + 0.8, Math.min(bounds.x - 0.8, r.x + (Math.random() - 0.5) * 2)), 0, r.inside ? Math.max(1.4, Math.min(bounds.z1 - 0.8, r.z)) : 1.6 + Math.random() * 1.6);
   g.position.copy(from);
@@ -2614,6 +2617,28 @@ function swordDrop(r) {
   if (!G.swordSaid) { G.swordSaid = true; say('Weapons! Pick up the crates and take them to the armoury hoist', false, true); }
 }
 function dropGone(d) { crateGone(d.g); }
+/* A Masterpiece's reward: a pair with a breaker in it, flown from where you earned it straight to
+   the hoist's landing, the next to come down (or onto the floor by you, if your hands are full).
+   The user (8 Nov): gold for a Masterpiece "is fairly meaningless ... getting a reward like some
+   breakers would be a lot better than gold". The gold is still paid: it's what the raiders steal. */
+function swordReward(from, what) {
+  if (!swordHere()) return;
+  const pair = rewardPair(), g = cratePair(pair);
+  const to = sword.group.localToWorld(new THREE.Vector3(sword.w / 2 + 0.37, sword.y0 + sword.h - 2 * CR + 0.13, 0));
+  g.position.copy(from);
+  scene.add(g);
+  tween(1.4, (t) => { g.position.lerpVectors(from, to, t); g.position.y += Math.sin(t * Math.PI) * 2.5; g.rotation.y = t * 7; }, () => {
+    crateGone(g);
+    if (rack.give(pair)) {
+      sword.dirty = true;
+      burst(to, PALETTE[pair[1].c].light, 12, 2.5);
+      say(`A breaker for your ${what}! It's next down at the armoury hoist`, false, true);
+    } else {
+      swordDrop({ x: pirate.x, z: pirate.z, inside: true }, pair);
+      say(`A breaker for your ${what}! (Your hands are full: it's on the floor by you)`, false, true);
+    }
+  });
+}
 
 function swordEnter() {
   sword.on = true;
@@ -2904,7 +2929,10 @@ function layerAdd(h, i) {
   L.status = master ? 'master' : 'boarded';
   L.hp = L.maxHp = HP[L.status];
   G.gold += PAY[L.status];
-  if (master) { G.masters++; toast('Masterpiece layer! Another one opens in front of it'); }
+  if (master) {
+    G.masters++; toast('Masterpiece layer! Another one opens in front of it');
+    if (!L.rewarded) { L.rewarded = true; swordReward(new THREE.Vector3(holeX(h), holeMidY(h), 0.6), 'Masterpiece layer'); }
+  }
   else { G.boarded++; toast('Layer boarded over: it\'ll hold, but not for long', false, true); }
   layerPieces(h, i).forEach(({ group }) => group.traverse((o) => {
     if (!o.isMesh) return;
@@ -2972,7 +3000,11 @@ function updateHole(h) {
     h.status = master ? 'master' : 'boarded';
     h.hp = h.maxHp = HP[h.status];
     G.gold += PAY[h.status];
-    if (master) { G.masters++; masterpiece(h); }
+    if (master) {
+      G.masters++; masterpiece(h);
+      // A breaker for it, once: taking a piece back and fitting it again doesn't pay twice.
+      if (!h.rewarded) { h.rewarded = true; swordReward(new THREE.Vector3(holeX(h), holeMidY(h), 0.4), 'Masterpiece'); }
+    }
     else { G.boarded++; toast(`Boarded over: it'll hold, but not for long`, false, true); }
   }
   h.open = left;
@@ -3556,7 +3588,7 @@ function breakHole(h) {
   });
   h.pieces = boards;
   h.filled.clear();
-  h.status = 'open';
+  h.status = 'open'; h.rewarded = false;   // mend it again as a Masterpiece and it pays again
   h.hp = 0;
   updateHole(h);
   burst(new THREE.Vector3(holeX(h), holeMidY(h), 0.3), '#c98a45', 24, 4);
@@ -5615,6 +5647,6 @@ if (['all', 'gundeck'].includes(new URLSearchParams(location.search).get('try'))
 requestAnimationFrame(frame);
 
 // For poking at it from the console.
-window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, barricade, barricadeShow, newGame, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, swordReward, barricade, barricadeShow, newGame, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };

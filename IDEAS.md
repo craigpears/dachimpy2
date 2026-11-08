@@ -172,7 +172,8 @@ gunning":
     fills in another nice gap is when you get rewards for things like masterpieces, because, you
     know, the whole getting some gold thing is fairly meaningless. So getting a reward like some
     breakers would be a lot better than gold." So a Masterpiece (and perhaps other good carpentry)
-    pays in Swordfight pieces, breakers above all, which ties mending the wall to the hoist.
+    pays in Swordfight pieces, breakers above all, which ties mending the wall to the hoist. **Built
+    8 Nov** (RULES.md, "Masterpieces pay in breakers").
   - **Claude's suggestion, the armoury stack** (the user: "implement your idea. Let's just kind of
     see what it feels like"; **built 8 Nov**, with the user's two ideas, RULES.md "Swordfight at
     the armoury hoist"; the stack stands full height under a tall hoist; soldiers come out from the

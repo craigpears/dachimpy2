@@ -1,6 +1,6 @@
 /* Swordfight in the den: the sword rack and the soldiers (src/den-sword.ts). */
 import { describe, expect, it } from 'vitest';
-import { BARRICADE, Barracks, muster, shareCrates, SWORD, SwordRack } from '../src/den-sword';
+import { BARRICADE, Barracks, muster, rewardPair, shareCrates, SWORD, SwordRack } from '../src/den-sword';
 import type { Breach, Foe } from '../src/den-sword';
 import { toSword } from '../src/swordfight';
 import type { Pair } from '../src/swordfight';
@@ -75,7 +75,33 @@ describe('shareCrates', () => {
   });
 });
 
+describe('rewardPair', () => {
+  // The user (8 Nov): gold for a Masterpiece "is fairly meaningless ... getting a reward like some
+  // breakers would be a lot better than gold".
+  it('a Masterpiece pays a pair with a breaker in it, in any colours (8 Nov)', () => {
+    let i = 0;
+    const seq = [0, 0.99, 0.3, 0.6, 0.5, 0.1];
+    const seen = new Set<number>();
+    for (let k = 0; k < 3; k++) {
+      const p = rewardPair(() => seq[i++ % seq.length]);
+      expect(p.some((x) => x.breaker)).toBe(true);
+      p.forEach((x) => { expect(x.c).toBeGreaterThanOrEqual(0); expect(x.c).toBeLessThanOrEqual(3); seen.add(x.c); });
+    }
+    expect(seen.size).toBeGreaterThan(1);
+  });
+});
+
 describe('SwordRack', () => {
+  it('a reward jumps the queue, so it comes down next, unless your hands are full', () => {
+    const r = new SwordRack();
+    r.take(pair(0, 1)); r.take(pair(2, 3));
+    const prize = rewardPair(() => 0.5);
+    expect(r.give(prize)).toBe(true);
+    expect(r.queue[0]).toBe(prize);
+    while (r.take(pair())) { /* fill up */ }
+    expect(r.give(rewardPair())).toBe(false);
+  });
+
   it('holds the sword pieces you pick up, up to eight', () => {
     const r = new SwordRack();
     for (let i = 0; i < 10; i++) r.take(pair());
