@@ -443,9 +443,12 @@ function buildWall() {
   cannon.visible = false;
   scenery.push(mound, cannon);
   // Props inside: three crates for the piles, a fire barrel, the treasure chest.
-  piles.forEach((p, i) => { p.x = (i - 1) * Math.min(3.4, half * 0.42); p.z = 8; p.crate.position.set(p.x, 0.32, p.z); scenery.push(p.crate); });
-  barrel.position.set(half - 1.4, 0, 7.6);
-  chest.position.set(half - 1.7, 0, 9.7);
+  // (The right of the den is kept clear for the walk's frame: see deckStrips. In a narrow den the
+  // crates shift left to make room, and the barrel and chest stand behind them.)
+  const gap = Math.min(3.4, half * 0.42), shift = Math.min(0, deckLeft() - 1 - gap);
+  piles.forEach((p, i) => { p.x = (i - 1) * gap + shift; p.z = 8; p.crate.position.set(p.x, 0.32, p.z); scenery.push(p.crate); });
+  barrel.position.set(shift - gap / 2, 0, 9.9);
+  chest.position.set(shift + gap / 2, 0, 9.85);
   scenery.push(barrel, chest);
   for (const x of [X(wall.gateCols.c0) - 0.3, X(wall.gateCols.c1 + 1) + 0.3]) {
     const fp = flagpole(1.8);
@@ -495,32 +498,73 @@ const frames = () => (ramp ? ramp.jobs.filter((j) => j.frame && !j.frame.done).m
 const stairsUp = () => !!ramp && ramp.jobs.some((j) => j.kind === 'stair' && j.up);
 // A point on a frame, from its grid (columns across, rows down), `z` out from its face.
 const frameAt = (f, c, r, z = 0) => f.group.localToWorld(new THREE.Vector3(c * S, -r * S, z));
-/* The walk: one big frame the length of the wall (the user wanted it "one big piece", not a stretch
-   at a time). Two full rows over the stone, then out over the den clear of where the stairs come up.
-   Its edge isn't square: runs three or four rows deep, with single squares jutting out here and
-   there. As on a Puzzle Pirates hole, that's where the rare pieces go, an X or a W, and still leave
-   plenty of frame to finish cleanly (the user: a "long thin straight" strip only took pieces like
-   the P). It's always one that can be filled with not a scrap wasted. */
-function deckShape() {
-  const W = wall.W, clear = (c) => c >= 3 && c < W - 3;
-  for (let t = 0; t < 400; t++) {
-    const depth = [];
-    let d = 3 + rand(2), run = 0;
-    for (let c = 0; c < W; c++) {
-      if (clear(c) && run-- <= 0) { d = 7 - d; run = 2 + rand(5); }
-      depth.push(clear(c) ? d : 2);
-    }
-    // A square jutting out from a level stretch, never two side by side.
-    for (let c = 4; c < W - 4; c++) {
-      if (depth[c - 1] === depth[c] && depth[c + 1] === depth[c] && Math.random() < 0.55) { depth[c]++; c++; }
-    }
-    const cells = [];
-    depth.forEach((dp, c) => { for (let r = 0; r < dp; r++) cells.push([r, c]); });
-    if (cells.length % 5 === 0 && C.solve(cells, 1).length) return cells;
+/* The walk: built in one squarish frame, then sawn into lengths that go up end to end. One long
+   thin frame the length of the wall ran you out of the rare pieces it needed; the user would rather
+   build it square, "a more faithful depiction of carpentry": "one square, but then when it gets
+   hoisted ... it almost gets like sliced in the middle 2 or 3 times". So the walk's length is cut
+   into strips (eleven or twelve squares each, four on most walls), three squares deep: two over the
+   stone, one out over the den, and only two at the ends, clear of where the stairs come up. In the
+   frame they lie side by side with straight cuts between them. The first lies turned round, so its
+   den side is the frame's outer edge, with single squares jutting out of it where the rare pieces
+   go, an X or a W; the last has its den side on the other outer edge. A square or two is bitten out
+   of each edge to make the count come right for each half of the frame. It's always one that can be filled with not a scrap
+   wasted. The frame lies on the floor at the right of the den, the strips running back from the
+   wall (deckPose). */
+const DECK_D = 3;
+function deckStrips() {
+  const W = wall.W, n = Math.max(2, Math.ceil(W / 12)), out = [];
+  for (let s = 0, a = 0; s < n; s++) {
+    const w = Math.floor(W / n) + (s < W % n ? 1 : 0);
+    out.push({ a, w, R: 1 + DECK_D * s, turned: s === 0 });
+    a += w;
   }
-  const cells = [];
-  for (let c = 0; c < W; c++) for (let r = 0; r < (clear(c) ? 4 : 2); r++) cells.push([r, c]);
-  return cells.length % 5 ? cells.slice(0, cells.length - cells.length % 5) : cells;
+  return out;
+}
+const deckRows = () => 1 + DECK_D * deckStrips().length;
+const deckLeft = () => wall.W * S / 2 - 0.45 - deckRows() * S;
+// Where the frame lies: rows across the den from deckLeft, columns running back from the far end.
+// (Its near end well back from where you stand to mend the wall: see FRAME_Z. A twelve-square
+// strip runs a little past where you can walk to, still in reach.)
+const deckPose = () => ({ p: V3(deckLeft(), 0, Math.max(10.45, FRAME_Z + 0.05 + Math.max(...deckStrips().map((o) => o.w)) * S)), q: basis(V3(0, 0, -1), V3(-1, 0, 0)) });
+// Where a square of the walk [row out from the wall, column along it] lies in the frame.
+function deckToFrame(r, c, st = deckStrips()) {
+  const o = st.find((x) => c >= x.a && c < x.a + x.w) || st[st.length - 1];
+  return o.turned ? [o.R + DECK_D - 1 - r, o.w - 1 - (c - o.a)] : [o.R + r, c - o.a];
+}
+// n columns from `cols`, no two side by side (null if there's no room for that many).
+function apart(cols, n) {
+  const got = [];
+  for (const c of C.shuffle(cols)) if (got.length < n && !got.some((g) => Math.abs(g - c) < 2)) got.push(c);
+  return got.length === n ? got : null;
+}
+function deckShape() {
+  const W = wall.W, st = deckStrips(), first = st[0], last = st[st.length - 1];
+  // The frame's two halves, either side of the middle cut: each is made to be filled on its own,
+  // which is quick to check (the whole frame at once can take seconds).
+  const m = Math.ceil(st.length / 2), cut = st[m].a, half = (c) => (c < cut ? 0 : 1);
+  const base = [];
+  for (let c = 0; c < W; c++) for (let r = 0; r < (c >= 3 && c < W - 3 ? DECK_D : 2); r++) base.push([r, c]);
+  const count = [0, 0];
+  for (const [, c] of base) count[half(c)]++;
+  const range = (lo, hi) => Array.from({ length: Math.max(0, hi - lo) }, (_, i) => lo + i);
+  // Spots on an edge for n squares, apart if there's room, else any.
+  const some = (cols, n) => apart(cols, n) || (cols.length >= n ? C.shuffle(cols).slice(0, n) : null);
+  let cells = null;
+  for (let t = 0; t < 60; t++) {
+    // The first half: squares jutting out (and maybe one bitten out) to make its count come right.
+    const nj = 1 + rand(3), nb0 = (count[0] + nj) % 5;
+    const top = range(4, first.w - 1), juts = apart(top, nj);
+    const bites0 = juts && some(top.filter((c) => !juts.some((j) => Math.abs(j - c) < 2)), nb0);
+    // The second half: squares bitten out of the last strip's den side.
+    const bites1 = some(range(last.a + 1, W - 4), count[1] % 5);
+    if (!juts || !bites0 || !bites1) continue;
+    const gone = new Set([...bites0, ...bites1].map((c) => k(DECK_D - 1, c)));
+    cells = base.filter(([r, c]) => !gone.has(k(r, c))).concat(juts.map((c) => [DECK_D, c]));
+    const halves = [[], []];
+    for (const [r, c] of cells) halves[half(c)].push(deckToFrame(r, c, st));
+    if (halves.every((h) => tileable(h))) return cells;
+  }
+  return cells || base.slice(0, base.length - base.length % 5);
 }
 /* The stairs: solid, from the treads right down to the den floor, so the stepped edge is all corners
    for the odd pieces to tuck into. (A band three squares deep held only four pieces, with room for
@@ -549,8 +593,15 @@ function openJob(i, shape = null) {
   const stair = j.kind === 'stair';
   shape ||= stair ? stairShape(j.si) : j.kind === 'gun' ? gunShape(j.part) : j.kind === 'house' ? houseShape(j.part) : deckShape();
   if (isHost()) send('all', { t: 'frame', fi: i, cells: shape });
+  // The walk's shape is the walk itself; its frame has the strips side by side (see deckShape).
+  const walk = j.kind === 'deck' ? shape : null;
+  if (walk) { const st = deckStrips(); shape = walk.map(([r, c]) => deckToFrame(r, c, st)); }
   const g = new THREE.Group();
-  if (j.kind === 'house') {
+  if (walk) {
+    const dp = deckPose();
+    g.position.copy(dp.p);
+    g.quaternion.copy(dp.q);
+  } else if (j.kind === 'house') {
     // Laid flat on the floor in front of where the house goes, face up.
     const flat = housePose(-1);
     g.position.copy(flat.p);
@@ -588,7 +639,7 @@ function openJob(i, shape = null) {
   $('labels').append(label);
   const b = C.bbox(shape);
   const f = j.frame = {
-    i, si: j.si, kind: j.kind, part: j.part, cells: shape, b, set, occ: new Set(), filled: new Set(), pieces: [], group: g, label, sig: '', done: false,
+    i, si: j.si, kind: j.kind, part: j.part, cells: shape, walk, b, set, occ: new Set(), filled: new Set(), pieces: [], group: g, label, sig: '', done: false,
     pz: stair ? 0 : 0.1, zs: stair ? STAIR_W / WOOD_D : 1,
     plane: new THREE.Plane().setFromNormalAndCoplanarPoint(g.getWorldDirection(new THREE.Vector3()), g.getWorldPosition(new THREE.Vector3())),
   };
@@ -597,9 +648,57 @@ function openJob(i, shape = null) {
   burst(frameAt(f, b.w / 2, b.h / 2, 0.3), '#e8c890', 18, 3);
   return f;
 }
+/* Can these squares be filled exactly? For the frames: the solver's plain search could take
+   seconds on the square walk frame, so this one gives up on a line as soon as the empty squares
+   split into a pocket that isn't a multiple of five (it can never be filled), which rules out
+   nearly every dead end at once. Past `budget` steps it says no. */
+const ORIENTS = Object.values(C.ORIENTS_BY_LETTER).flat().map((o) => o.cells.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]));
+function tileable(cells, budget = 20000) {
+  if (cells.length % 5) return false;
+  if (!cells.length) return true;
+  // A grid with a border of blocked squares round it: 1 free, 0 not.
+  const b = C.bbox(cells), w = b.w + 8, h = b.h + 8, at = (r, c) => (r - b.r0 + 4) * w + (c - b.c0 + 4);
+  const free = new Uint8Array(w * h), mark = new Int32Array(w * h), stack = new Int32Array(w * h);
+  const order = cells.map(([r, c]) => at(r, c)).sort((x, y) => x - y);
+  for (const i of order) free[i] = 1;
+  const shapes = ORIENTS.map((o) => o.map(([r, c]) => (r - o[0][0]) * w + (c - o[0][1])));
+  const nb = [1, -1, w, -w];
+  let steps = 0, stamp = 0;
+  const pocketsOk = () => {
+    stamp++;
+    for (const s0 of order) {
+      if (!free[s0] || mark[s0] === stamp) continue;
+      let n = 0, top = 0;
+      stack[top++] = s0; mark[s0] = stamp;
+      while (top) {
+        const x = stack[--top];
+        n++;
+        for (const d of nb) { const y = x + d; if (free[y] && mark[y] !== stamp) { mark[y] = stamp; stack[top++] = y; } }
+      }
+      if (n % 5) return false;
+    }
+    return true;
+  };
+  const rec = (from) => {
+    if (++steps > budget) return false;
+    let i = from;
+    while (i < order.length && !free[order[i]]) i++;
+    if (i === order.length) return true;
+    const f = order[i];
+    for (const sh of shapes) {
+      if (!sh.every((o) => free[f + o])) continue;
+      for (const o of sh) free[f + o] = 0;
+      if (pocketsOk() && rec(i + 1)) return true;
+      for (const o of sh) free[f + o] = 1;
+      if (steps > budget) return false;
+    }
+    return false;
+  };
+  return rec(0);
+}
 function frameState(f) {
   f.open = f.cells.filter(([r, c]) => !f.filled.has(k(r, c)));
-  f.exact = f.open.length % 5 === 0 && C.solve(f.open, 1).length > 0;
+  f.exact = f.open.length % 5 === 0 && tileable(f.open);
   f.sig = '';
 }
 // Every spot a piece could go in a frame: covering at least one empty square of it, clear of the
@@ -709,6 +808,7 @@ function finishFrame(f, quiet = false) {
     else { G.gold += PAY.master; updateStats(); toast(`Shipshape! Not a scrap wasted (+${PAY.master})`); }
   }
   if (j.kind === 'house') { raiseHouse(f, j, quiet); return; }
+  if (j.kind === 'deck') { sliceDeck(f, j, quiet); return; }
   const g = f.group, p0 = g.position.clone(), p1 = new THREE.Vector3(p0.x, ramp.T - 0.05, j.kind === 'gun' ? gunZ0() + partR0(j.part) * S : -0.85);
   const land = () => {
     g.position.copy(p1);
@@ -747,6 +847,70 @@ function finishFrame(f, quiet = false) {
     burst(new THREE.Vector3(top.x, ramp.T, 0), '#e8c890', 16, 3);
     tween(0.6, () => {}, () => den.remove(block, ropes));
   }));
+}
+/* The walk's frame is full: saw it along the cuts into its strips, and up they go onto the wall one
+   after another, end to end. Pieces that lie across a cut are sawn through with it. */
+function sliceDeck(f, j, quiet) {
+  const st = deckStrips(), g = f.group;
+  const stripOf = (kk) => Math.min(st.length - 1, Math.max(0, Math.floor((+kk.split(',')[0] - 1) / DECK_D)));
+  // The frame itself is cleared away (its backing, rails and outline): only the timber goes up.
+  for (const ch of [...g.children]) if (!f.pieces.some((p) => p.group === ch)) g.remove(ch);
+  // A strip's group, set so that inside it the squares sit as they will on the wall.
+  const strips = st.map((o) => {
+    const sg = new THREE.Group();
+    if (o.turned) { sg.position.set((o.a + o.w) * S, -(o.R + DECK_D) * S, 0); sg.rotation.z = Math.PI; }
+    else sg.position.set(-o.a * S, -o.R * S, 0);
+    g.add(sg);
+    return sg;
+  });
+  g.updateMatrixWorld(true);
+  for (const p of f.pieces) {
+    const meshes = p.shape.map((_, i) => p.group.children[i]), parts = new Map();
+    p.shape.forEach((cell, i) => {
+      if (!f.set.has(p.cells[i])) return;   // sawn off already
+      const s = stripOf(p.cells[i]);
+      if (!parts.has(s)) parts.set(s, []);
+      parts.get(s).push(i);
+    });
+    for (const [s, idx] of parts) {
+      const ol = outline(idx.map((i) => p.shape[i]), 0.002, '#4a2a12');
+      p.group.add(ol);
+      p.group.updateMatrixWorld(true);
+      strips[s].attach(ol);
+      for (const i of idx) strips[s].attach(meshes[i]);
+    }
+    p.group.visible = false;
+  }
+  const walkPos = V3(X(0), ramp.T - 0.05, -0.85), walkQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI / 2, 0, 0));
+  const land = () => {
+    // The frame's group becomes the walk, with the strips laid end to end in it.
+    g.position.copy(walkPos);
+    g.quaternion.copy(walkQ);
+    for (const sg of strips) { g.add(sg); sg.position.set(0, 0, 0); sg.quaternion.identity(); }
+    g.updateMatrixWorld(true);
+    Object.assign(j, { up: true, x0: walkPos.x, z0: walkPos.z, set: new Set(f.walk.map(([r, c]) => k(r, c))) });
+    jobDone(j, quiet);
+  };
+  if (quiet) { land(); return; }
+  // Sawdust along each cut, then the lengths are lifted up and over, one after another.
+  for (const o of st.slice(1)) for (let c = 0; c <= o.w; c += 2) burst(frameAt(f, c, o.R, 0.3), '#f0d9a8', 6, 2);
+  setTimeout(() => toast(`Sawn into ${st.length} lengths. Up they go onto the wall!`), 900);
+  let left = strips.length;
+  strips.forEach((sg, n) => setTimeout(() => {
+    den.attach(sg);
+    const p0 = sg.position.clone(), q0 = sg.quaternion.clone();
+    tween(1.7, (u) => {
+      const e = u < 0.5 ? 2 * u * u : 1 - (-2 * u + 2) ** 2 / 2;
+      sg.position.lerpVectors(p0, walkPos, e);
+      sg.position.y += Math.sin(u * Math.PI) * 2.2;
+      sg.quaternion.slerpQuaternions(q0, walkQ, e);
+    }, () => {
+      sg.position.copy(walkPos);
+      sg.quaternion.copy(walkQ);
+      burst(V3(X(st[n].a + st[n].w / 2), ramp.T, -0.3), '#e8c890', 12, 3);
+      if (--left === 0) land();
+    });
+  }, 1200 + n * 750));
 }
 // A frame's done. The rest of the same timber comes straight away (the left stairs after the walk);
 // the next lot comes when the next wave's beaten off.
@@ -4050,7 +4214,7 @@ function sendSync(to, fresh = false) {
     next: ramp.next,
     gd: gunOut(),
     den: denLook,
-    jobs: ramp.jobs.map((j) => (j.frame ? { cells: j.frame.cells, pieces: j.frame.pieces.map((p) => p.info), done: j.frame.done } : null)),
+    jobs: ramp.jobs.map((j) => (j.frame ? { cells: j.frame.walk || j.frame.cells, pieces: j.frame.pieces.map((p) => p.info), done: j.frame.done } : null)),
   });
 }
 function applySync(s) {

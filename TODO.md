@@ -40,11 +40,6 @@ the site (`.assetsignore` skips `*.md`).
   distance for placing a piece in the wall. The user: "we were meant to remove that so you can
   place from anywhere". Fitting a piece into the wall should work wherever you're standing.
 
-- **The walk frame runs you out of rare pieces (8 Nov):** the long thin frame needs the rarer
-  pieces and they run out fast. The user would rather build it squarer than change the odds ("a
-  more faithful depiction of carpentry"): one squarish frame to fill, which is then sliced two or
-  three times when it's hoisted, the slices laid end to end along the top of the wall as the walk.
-
 ## Needs a playtest to pin down
 
 - **Turning a piece close to the wall feels off.** The user can't yet say how (which way it
@@ -54,11 +49,13 @@ the site (`.assetsignore` skips `*.md`).
   the keys yet (WASD moves the piece, arrows jump hole to hole, since 8 Nov). Still to ask: should
   it come on by itself when you walk up with a piece; the same view for the rampart and house
   frames ("the second stage")?
-- **The walk as one big frame (8 Nov), not yet tried by the user.** About 30 pieces in one go,
-  with single squares jutting out of its edge for the rare pieces; likewise solid stairs and gun
-  tower parts that lock together. Watch for: it taking too long for one wave's timber (it could
-  come as two halves); the walk frame now well back from the wall, and the crates further back
-  behind it, making fetching slower; the solid stairs looking odd.
+- **The walk as one square frame, sawn into lengths (8 Nov), not yet tried by the user.** About
+  24 pieces in an 11 by 13 frame at the right of the den, sawn into four lengths that go up end
+  to end. Watch for: still running out of the right pieces near the end (a simulated build wasted
+  half as many deals as the long frame, but the last few pieces still need particular shapes; if
+  so, the user's other idea was odds that favour the pieces the frame needs); the frame at the
+  right of the den, and the barrel and chest behind the crates, looking right; the strips'
+  flight up onto the wall. Also still to try: the solid stairs and gun tower parts.
 - **The first wave dealt fair (8 Nov), not yet tried by the user.** Until wave 1 is beaten, the
   crates deal the pieces that finish the holes as Masterpieces. Watch for: it feeling too easy or
   too obvious. (First wave only, the user's choice: from wave 2 the deal is random again.) Since

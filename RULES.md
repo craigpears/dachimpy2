@@ -274,18 +274,28 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   bizarre, and a stretch popping up was too easy. A finished frame then turning into a ready-made
   rampart was magic too. **Every part of the rampart is the pieces you fitted, and they stay those
   pieces.** Nothing turns into anything else, and nothing is added that you didn't build.
-  - **The walk: one big frame,** the length of the wall, laid flat on the den floor (about 30
-    pieces). The user wanted it "one big piece", not a stretch at a time. Two full rows over the
-    stone, then out over the den clear of where the stairs come up, three or four rows deep in
-    runs, with single squares jutting out of the edge (see "Room for the rare pieces"). It can
-    always be filled with not a scrap wasted. **It lies well back from the wall** (1.6 m behind
-    where you stand to mend it, the crates behind it), and you only fit pieces in it once you've
-    stepped back to it: just behind you, it kept taking the pieces meant for the wall (the user:
-    "the walk frame gets the focus"). History: two rows and a ragged third was "very slim", with
-    not much room to be creative; three and a ragged fourth was still "long thin straight holes
-    that only fit the P": the user wants room for every kind of piece. You lay pieces in it one at
-    a time and watch it come together. When it's full the crew haul it up on ropes, pieces and
-    all, and lay it along the top of the wall.
+  - **The walk: one big square frame, sawn into lengths** (about 24 pieces). The user wanted it
+    "one big piece", not a stretch at a time, but one long thin frame the length of the wall ran
+    you out of the rare pieces it needed. Rather than change the odds, the user wanted it built
+    square, "a more faithful depiction of carpentry": "one square, but then when it gets hoisted
+    ... it almost gets like sliced in the middle 2 or 3 times". So the walk's length is cut into
+    strips (four on most walls, eleven or twelve squares long), three squares deep: two over the
+    stone and one out over the den, only two at the ends, clear of where the stairs come up. In
+    the frame the strips lie side by side with straight cuts between them, about 11 by 13 squares.
+    The outer strips' den sides are the frame's two outer edges: single squares jut out of one
+    (see "Room for the rare pieces") and a square or two is bitten out to make the count come
+    right. It can always be filled with not a scrap wasted. When it's full it's sawn along the
+    cuts (pieces lying across a cut are sawn through) and the lengths go up onto the wall one
+    after another, end to end. (In a simulated build with crates dealt at random, the square frame
+    wasted about half the deals the long one did: about 48 against 107. Most of what's left is at
+    the very end, when only one or two shapes will do.) **It lies on the floor at the right of the
+    den,** the strips running back from the wall, its near end well back from where you mend the
+    wall, so you only fit pieces in it once you've stepped back to it: just behind you, it kept
+    taking the pieces meant for the wall (the user: "the walk frame gets the focus"). A square
+    frame is too big for the floor between the wall and the crates, and the user chose the right
+    side: the barrel and chest stand behind the crates, and in a narrow den the crates shift left.
+    History: two rows and a ragged third was "very slim", with not much room to be creative;
+    three and a ragged fourth was still "long thin straight holes that only fit the P".
   - **The stairs (at each end):** a frame standing upright at the end of the den, solid from the
     treads down to the floor (a band three squares deep held only four pieces, with room for an X
     in one spot in five). You fit pieces into it like a hole in the wall, and the
@@ -464,7 +474,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     fast: it once took about a minute, because the engine's solver works row by row and a long,
     thin frame (the tower's 3-row strip, a wall-walk) sent it backtracking for ages. The den's copy
     of the solver turns wide frames on their side and solves them column by column (a millisecond),
-    which also stops the game stalling when a new wall-walk frame is laid out.
+    which also stops the game stalling when a new wall-walk frame is laid out. The square walk
+    frame is too big for either way round (a fresh one could take ten seconds to check), so the
+    frames are checked with a search of their own that gives up on a line as soon as the empty
+    squares split into a pocket that isn't a multiple of five: a few milliseconds.
 - **The den's buttons sit in a row, all in view** (top left, under the stats): your pirate, your
   den, decorate, pause, play with a crew, cheats. Discoverable matters more than tidy: folded into
   a ☰ menu (8 Nov), the user missed seeing them, as they use your pirate, your den, decorate and
