@@ -2061,8 +2061,34 @@ const piles = [0, 1, 2].map(() => {
   $('labels').append(label);
   return { x: 0, z: 0, letter: null, cells: null, group: null, wait: 0, label, crate: mesh(crateGeo, mat('#7a5230', { map: woodTex })) };
 });
+/* The first wave is dealt fair: the crates hand out the pieces that finish the holes as
+   Masterpieces, not whatever comes. The user, left needing three F's and an L that never came with
+   only a T in the toolbox: "This first wave definitely needs to be perfectly considered." Each deal
+   looks again at what's left of every open hole (so a piece put somewhere else, or knocked out,
+   just changes the plan), picks the way of finishing each that uses the most of what's already on
+   the crates or in your hands, and deals one of the pieces still missing. Once nothing's missing
+   (or a hole can't be finished exactly any more) it deals as usual. */
+const fairDeal = () => G.wave === 0 || (G.wave === 1 && G.phase === 'wave');
+function neededLetters() {
+  const have = piles.map((q) => q.letter).filter(Boolean);
+  if (carry?.letter) have.push(carry.letter);
+  const need = [];
+  for (const h of wall.holes) {
+    const left = h.status === 'open' ? rest(h) : [];
+    if (!left.length || left.length % 5) continue;
+    let best = null, most = -1;
+    for (const sol of C.shuffle(C.solve(left, 200))) {
+      const pool = have.slice();
+      const use = sol.filter((p) => { const i = pool.indexOf(p.letter); return i >= 0 && pool.splice(i, 1); }).length;
+      if (use > most) { most = use; best = sol; }
+    }
+    for (const p of best || []) { const i = have.indexOf(p.letter); if (i >= 0) have.splice(i, 1); else need.push(p.letter); }
+  }
+  return need;
+}
 function deal(p) {
-  p.letter = C.weightedLetter();
+  const need = wall && fairDeal() ? neededLetters() : [];
+  p.letter = need.length ? C.pick(need) : C.weightedLetter();
   p.cells = C.normalize(C.pick(C.ORIENTS_BY_LETTER[p.letter]).cells);
 }
 function showPile(p) {
@@ -2206,8 +2232,9 @@ function newGame() {
   if (carry) { scene.remove(carry.group); carry = null; }
   ghostKey = ''; ghost = null;
   Object.assign(G, { gold: 60, wave: 0, phase: 'build', phaseT: BUILD_SECS, toSpawn: 0, spawnT: 0, cannonT: 0, cannonShots: 0, aim: null, masters: 0, boarded: 0, bonked: 0, stolen: 0, turned: 0, waveTurned: 0, waveIn: 0, over: false });
-  piles.forEach(deal);
+  piles.forEach((p) => { p.letter = null; });
   newWall();
+  piles.forEach(deal);   // after the wall, so the first deals finish its holes
   Object.assign(pirate, { x: 0, z: 8, h: 0 });
   $('end').classList.remove('on');
   $('intro').classList.remove('off');
@@ -4989,6 +5016,6 @@ if (['all', 'gundeck'].includes(new URLSearchParams(location.search).get('try'))
 requestAnimationFrame(frame);
 
 // For poking at it from the console.
-window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, newGame, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };

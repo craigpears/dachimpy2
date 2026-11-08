@@ -54,6 +54,9 @@ the site (`.assetsignore` skips `*.md`).
   tower parts that lock together. Watch for: it taking too long for one wave's timber (it could
   come as two halves); the walk frame now well back from the wall, and the crates further back
   behind it, making fetching slower; the solid stairs looking odd.
+- **The first wave dealt fair (8 Nov), not yet tried by the user.** Until wave 1 is beaten, the
+  crates deal the pieces that finish the holes as Masterpieces. Watch for: it feeling too easy or
+  too obvious, and whether the same help is wanted after wave 1 (for the holes the cannon makes).
 - **Layers behind (8 Nov), not yet tried by the user.** A layer is now the hole's shape again,
   filled piece by piece in a timber surround, and a full one is as strong as a Masterpiece and pays
   the same. Watch for: holes three layers deep being too strong, or the pay too generous; the

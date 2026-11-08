@@ -199,6 +199,16 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   the right pieces a lot at the start". Its one-piece hole is for a P, F, Y, T, N or L, and its two
   and three-piece holes are the best of six for the common pieces. (Same test, the whole opening
   wall: 3.2 stuck draws per piece placed with random shapes, 2.0 now.)
+- **The first wave is dealt fair: the crates bring the pieces that finish its holes.** Even so, the
+  user was left needing three F's and an L that never came, with only a T in the toolbox: "This
+  first wave definitely needs to be perfectly considered." So from a new game until wave 1 is beaten,
+  each deal looks at what's left of every open hole and deals a piece still missing from a way of
+  finishing them all as Masterpieces, picking the way that uses most of what's already on the crates
+  or in your hands. It looks afresh every deal, so a piece put somewhere else or knocked out just
+  changes the plan. Once nothing's missing, or a hole can't be finished exactly any more, it deals
+  at random as usual, and from wave 2 on it's all random. (The same test: dealt at random, all
+  eight games got stuck after 3 to 7 pieces with nothing on the crates that fits cleanly; dealt
+  fair, five games out of five finished all four holes as Masterpieces in eight pieces.)
 - **Throw pieces at raiders, don't bonk them.** A plain bonk was underwhelming. The carried piece
   is the weapon: it hurls at a raider, who goes flying. It costs the piece.
 - **A thrown piece takes a while to come back.** Otherwise you could stand and pelt raiders

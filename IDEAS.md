@@ -37,13 +37,6 @@ seeing it, with the depth coming after.
 
 **Always more piratey.** Keep looking for ways to give it a more piratey feel.
 
-## Fair first holes
-
-- **The first small holes can always be done perfectly (8 Nov).** Every small hole the den starts
-  with must be solvable exactly, as a Masterpiece, with the pieces you're dealt at the start. To pin
-  down with the user: "the pieces you get initially" as the crates' first few deals in order, or
-  just the kinds of piece; and whether one set of pieces must do every hole, or each hole on its own.
-
 ## Treasure maps from fallen raiders
 
 Now and then a raider you knock out drops a **treasure map**: a quick little event. Go out of the
