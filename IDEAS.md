@@ -241,7 +241,11 @@ moving. It gives such a nostalgia." What's next:
   to dodge ("that's classic Puzzle Pirates"), so a race works single-player too, and scales up
   to other players later. Getting hit (by a turret, say) needn't be traditional damage: maybe it
   **dazes you for a few turns**, and you work it off by **Carpentry or Bilge** (patching the hole,
-  pumping her out) to get going again. "We'll have to figure out exactly."
+  pumping her out) to get going again. "We'll have to figure out exactly." **Dazed it is, for the
+  proof of concept** (the user, 9 Nov): "much more almost Mario Kart-esque, but it keeps it
+  faster paced, while keeping the puzzles key". And it's something players do to each other:
+  swing in behind somebody pulling ahead, shoot them, and they're dazed while they do a bit of
+  puzzling, then they set sail again. Nobody's knocked out of the race.
 - **Gunnery at sea, faster than Puzzle Pirates, on timing (9 Nov).** In Puzzle Pirates a round
   of Battle Navigation plays every 35 seconds or so, in four slots, and you know just where a ship
   coming at you will move. The user would like it faster paced: load the guns (on a ship or the
