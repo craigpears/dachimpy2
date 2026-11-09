@@ -77,6 +77,12 @@ the site (`.assetsignore` skips `*.md`).
   clearly while you build it. (Since the last update the stairs are on the right and the armoury
   hoist on the left, which may already have fixed this: check once the new version's live.)
 
+- **The wall in two courses (9 Nov):** the user chose "try with 2 wall courses. Let's see how that
+  works" (IDEAS.md, "The wall in two courses"). A low hole and a high hole each side of the gate,
+  so the wall's holes sit two up, two down like the real puzzle's, in the 3D wall itself (no
+  overlay). The wall taller, the walk higher, the stairs longer; Q/W/A/S go up and down as well
+  as sideways. What a high hole is for to settle in the build, then try with the user.
+
 ## Needs a playtest to pin down
 
 - **Swordfight at the armoury hoist (8 Nov), not yet tried by the user.** Rebuilt after the

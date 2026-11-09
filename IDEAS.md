@@ -85,7 +85,7 @@ goes into the puzzle (as Bilge's does), with the den still showing round it. **T
 keys are in** (RULES.md, "The Carpentry view", 9 Nov). Still to work out with the user: what Carpentry does today that the real puzzle doesn't (walking a piece up to the wall,
 carrying, throwing), and what of that stays.
 
-### The wall in two courses (9 Nov, to decide with the user)
+### The wall in two courses (9 Nov; the user chose to try two courses: TODO.md)
 
 A flat board over the den, the holes in two rows, was tried and dropped as "forced" and "detached"
 (RULES.md). The user: an overlay "suggests there's a deeper design problem whereby however I've
@@ -228,6 +228,30 @@ Ideas to carry on with:
 - **The main puzzle's solver** (`js/engine.js`) works row by row, which is very slow on long thin
   shapes (a 3 by 15 strip took about a minute). The den's copy turns wide shapes on their side
   first. If the main site ever solves long strips, do the same there.
+
+## Mods you make yourself, with an AI (9 Nov, a big one)
+
+Puzzle Pirates players love making things their own (their clothes, their looks). The user wants
+the den "fundamentally customizable in every single way, with modularity points for all those
+things", and not by asking for features: "we've got AI nowadays. You don't need to put a request in
+to say, can you add this hat? ... Go build it yourself." Describe what you want ("do you want
+penguins to be your bodyguards that get spawned and go and attack the enemy with wet fishes? Or do
+you want a cheeky monkey that's going to lay banana peels that trips them up?") and plug it in.
+- **Bring your own AI:** the den doesn't pay for anyone's AI credits. Instead it gives you
+  instructions to copy into your favourite LLM (Claude, ChatGPT): the context ("here's a soldier.
+  They do this and this"), the interface a mod has to follow ("this is what our customization
+  endpoint looks like"), and the default code as an example ("go change it however you want").
+- **Modding points for everything:** familiars, bodyguards, the soldiers, accessories for the house
+  and the wall, how the wall looks, and the rest.
+- **Compatible with the core game:** "in a way that's compatible with the core gameplay, but at
+  least aesthetically do whatever you want". A mod can change how things look freely; how far it
+  can change what they do (penguins that really slow raiders, banana peels that trip them) needs
+  limits, so the puzzles stay the puzzles and a crew stays fair.
+- **To work out:** what a mod is (a small script against a typed interface, with the den's own
+  familiars and soldiers rewritten as the first mods, so they're the examples); keeping it safe (a
+  mod someone pastes in runs in a sandbox, can't reach your browser's data or the network, and a
+  broken one just falls back to the default); sharing mods with your crew (a crewmate's penguins
+  in your den); and a page in the game that hands you the instructions, ready to copy.
 
 ## Holding the wall: what's next
 
