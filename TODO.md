@@ -97,6 +97,11 @@ the site (`.assetsignore` skips `*.md`).
   Since 8 Nov Masterpieces also pay a breaker pair, sent to the front of the queue: watch for
   that making the stack too easy, or too many breakers piling up on a well-mended wall.
 
+- **The cove (9 Nov), not yet seen by the user.** Raiders row in to a beach, and their cannon is
+  on a ship out in the cove (RULES.md, "A cove"). Watch for: the cove only showing when you turn
+  or tilt the view, or go up on the wall (the usual camera frames the wall, as before); the ship
+  too dark or too faint in the barren den's night; a row of beached boats looking cluttered.
+
 - **The longer calm between waves (8 Nov), not yet tried by the user.** 40 seconds now (it was
   20), after being overwhelmed by wave 8; the raids stay as big. Watch for: still overwhelmed late
   on (then perhaps longer still, or longer only as the waves climb), or the calm dragging early on.

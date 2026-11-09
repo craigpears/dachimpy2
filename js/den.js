@@ -115,7 +115,7 @@ document.body.prepend(renderer.domElement);
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color('#1a110b');
-scene.fog = new THREE.Fog('#1a110b', 20, 38);
+scene.fog = new THREE.Fog('#1a110b', 24, 52);   // (far enough to make out the raiders' ship in the cove)
 const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 100);
 
 const hemi = new THREE.HemisphereLight('#ffe6c4', '#3a2616', 0.9);
@@ -275,9 +275,14 @@ function faceTo(p, dx, dz, dt) {
 // ---------- the den: floor, rocks, torches, props ----------
 const den = new THREE.Group();
 scene.add(den);
-const floor = mesh(new THREE.PlaneGeometry(70, 50), mat('#ffffff', { map: groundTex, roughness: 1 }), false);
+/* The den is in a cove: out beyond the wall a beach, and the sea from SHORE out, where the raiders'
+   ship lies at anchor and their rowboats come in (the user, 9 Nov: "they're rowing in little
+   rowboats onto the beach of your pirate hideout, and the cannon is actually a ship off in the
+   distance ... like you're in, you know, a cove of some kind"). */
+const SHORE = -15;
+const floor = mesh(new THREE.PlaneGeometry(70, 29 - SHORE), mat('#ffffff', { map: groundTex, roughness: 1 }), false);
 floor.rotation.x = -Math.PI / 2;
-floor.position.z = 4;
+floor.position.z = (29 + SHORE) / 2;
 den.add(floor);
 const rockMats = ['#5d5048', '#6b5c50', '#4f443d', '#73655a'].map((c) => mat(c, { flatShading: true }));
 function rock(x, y, z, s) {
@@ -441,13 +446,12 @@ function buildWall() {
   }
   makeRampart();
   scenery.push(torch(-half + 1.75, ramp.zBot + 0.3), torch(half - 1.75, ramp.zBot + 0.3), torch(X(wall.gateCols.c0) - 0.5, 1), torch(X(wall.gateCols.c1 + 1) + 0.5, 1));
-  // Out beyond the wall: a rocky rise for the raiders' cannon.
+  // Out in the cove, the raiders' ship at anchor, broadside on; from wave 2 it runs out a cannon.
   const cx = half * 0.45;
-  const mound = rock(cx, -0.4, -16, 1.8);
-  mound.scale.set(1.4, 0.5, 1.2);
-  cannon.position.set(cx, 0.6, -16);
+  ship.position.set(cx, 0, SHIP_Z);
+  cannon.position.set(cx + 0.6, SHIP_DECK, SHIP_Z + 0.75);
   cannon.visible = false;
-  scenery.push(mound, cannon);
+  scenery.push(ship, cannon);
   // Props inside: three crates for the piles, a fire barrel, the treasure chest.
   // (The right of the den is kept clear for the walk's frame: see deckStrips. In a narrow den the
   // crates shift left to make room, and the barrel and chest stand behind them.)
@@ -1194,7 +1198,7 @@ function flagpole(h = 2, m = flagMat) {
 /* Where the den is, your choice (Your pirate, Den): the barren cave it started as, a seaside
    hideout (sand, sandstone, palms, the sea out beyond where the raiders come from) or a jungle one
    (moss, mossy rock, big trees and ferns). Only the look changes, never the play: the props stand
-   outside the wall's ends, out past the raiders' cannon and behind the cave rocks. */
+   outside the wall's ends and behind the cave rocks. Every one is in a cove, with the sea beyond. */
 const BIOME = {
   barren: { sky: '#1a110b', ground: '#7a5c3d', dots: ['40,26,14', '170,135,95'], rocks: ['#5d5048', '#6b5c50', '#4f443d', '#73655a'], hemi: ['#ffe6c4', '#3a2616'] },
   seaside: { sky: '#2b4a5f', ground: '#c4a172', dots: ['120,90,50', '245,232,200'], rocks: ['#9c8566', '#b09878', '#85704f', '#bfa886'], hemi: ['#fff0dc', '#5e5038'] },
@@ -1274,11 +1278,10 @@ function fern(x, z, sc) {
   g.scale.setScalar(sc);
   return g;
 }
-// Spots for trees: out past the raiders' cannon, beyond the wall's two ends, and behind the
-// cave rocks down both sides of the den.
+// Spots for trees: beyond the wall's two ends down to the shore, and behind the cave rocks down
+// both sides of the den.
 function treeSpots(half) {
-  const spots = [], cx = half * 0.45;
-  for (let x = -half - 12; x <= half + 12; x += 2.6 + Math.random() * 1.4) if (Math.abs(x - cx) > 3) spots.push([x, -19 - Math.random() * 2]);
+  const spots = [];
   for (const sx of [-1, 1]) {
     for (let z = -14; z < -1; z += 2.6 + Math.random()) spots.push([sx * (half + 4.8 + Math.random() * 3), z]);
     for (let z = 0; z < 14; z += 2.8 + Math.random()) spots.push([sx * (half + 5 + Math.random() * 2.5), z]);
@@ -1310,15 +1313,22 @@ function applyBiome(force = false) {
   sea = null;
   if (!wall) return;
   const half = wall.W * S / 2;
+  // Every den's in a cove: the sea beyond the beach where the raiders land, with a line of surf.
+  sea = mesh(new THREE.PlaneGeometry(220, 90), mat('#ffffff', { map: seaTex, roughness: 0.25, metalness: 0.1, emissive: '#0d2a36' }), false);
+  sea.rotation.x = -Math.PI / 2;
+  sea.position.set(0, -0.03, SHORE - 45);
+  const surf = mesh(new THREE.PlaneGeometry(220, 0.7), new THREE.MeshBasicMaterial({ color: '#e8f4f2', transparent: true, opacity: 0.7, depthWrite: false }), false);
+  surf.rotation.x = -Math.PI / 2;
+  surf.position.set(0, 0.01, SHORE - 0.2);
+  biomeGroup.add(sea, surf);
+  // A strip of sand up from the water, fading into the den's own ground (the seaside's is all sand).
+  if (id !== 'seaside') {
+    const sand = mesh(new THREE.PlaneGeometry(70, 6), new THREE.MeshStandardMaterial({ color: '#c4a172', roughness: 1, transparent: true, depthWrite: false, alphaMap: sandFade }), false);
+    sand.rotation.x = -Math.PI / 2;
+    sand.position.set(0, 0.005, SHORE + 3);
+    biomeGroup.add(sand);
+  }
   if (id === 'seaside') {
-    // The sea, beyond the sand where the raiders land, with a line of surf.
-    sea = mesh(new THREE.PlaneGeometry(220, 90), mat('#ffffff', { map: seaTex, roughness: 0.25, metalness: 0.1, emissive: '#0d2a36' }), false);
-    sea.rotation.x = -Math.PI / 2;
-    sea.position.set(0, -0.03, -21 - 45);
-    const surf = mesh(new THREE.PlaneGeometry(220, 0.7), new THREE.MeshBasicMaterial({ color: '#e8f4f2', transparent: true, opacity: 0.7, depthWrite: false }), false);
-    surf.rotation.x = -Math.PI / 2;
-    surf.position.set(0, 0.01, -21.2);
-    biomeGroup.add(sea, surf);
     for (const [x, z] of treeSpots(half)) biomeGroup.add(palm(x, z, 0.85 + Math.random() * 0.35));
   } else if (id === 'jungle') {
     for (const [x, z] of treeSpots(half)) biomeGroup.add(jungleTree(x, z, 0.85 + Math.random() * 0.4));
@@ -1332,7 +1342,14 @@ function applyBiome(force = false) {
 }
 function biomeTick(dt) {
   if (sea) { seaTex.offset.x += dt * 0.004; seaTex.offset.y = Math.sin(performance.now() / 2400) * 0.01; }
+  shipTick(dt);
 }
+// The beach strip's fade: solid at the water's edge, gone by the top.
+const sandFade = canvasTex(4, 64, (g, w, h) => {
+  const gr = g.createLinearGradient(0, 0, 0, h);
+  gr.addColorStop(0, '#000'); gr.addColorStop(0.55, '#888'); gr.addColorStop(1, '#fff');
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+});
 function waveFlags(dt) {
   flags = flags.filter((f) => { let o = f.g; while (o.parent) o = o.parent; return o === scene || o === dress.scene; });
   for (const f of flags) {
@@ -2385,6 +2402,145 @@ const cannon = (() => {
   return g;
 })();
 
+/* The raiders' ship, at anchor out in the cove, broadside on to the den: a dark hull with a gold
+   stripe and gunports, a raised stern with a lantern, two masts with their sails braced round so
+   they show, and a black flag. Their cannon stands on its deck (see buildWall). */
+const SHIP_Z = -24, SHIP_DECK = 1.05;
+const pirateFlagMat = new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, roughness: 0.9, map: canvasTex(200, 128, (g, w, h) => {
+  g.fillStyle = '#111'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#eee8dc'; g.strokeStyle = '#eee8dc'; g.lineWidth = 12; g.lineCap = 'round';
+  g.beginPath(); g.moveTo(w / 2 - 38, h / 2 - 20); g.lineTo(w / 2 + 38, h / 2 + 38); g.moveTo(w / 2 + 38, h / 2 - 20); g.lineTo(w / 2 - 38, h / 2 + 38); g.stroke();
+  g.beginPath(); g.arc(w / 2, h / 2 - 8, 26, 0, Math.PI * 2); g.fill();
+  g.fillStyle = '#111'; g.beginPath(); g.arc(w / 2 - 9, h / 2 - 10, 6, 0, Math.PI * 2); g.arc(w / 2 + 9, h / 2 - 10, 6, 0, Math.PI * 2); g.fill();
+}) });
+// A hull seen from above (bow to +x), stood up: `len` long, `beam` wide, `deep` from keel to deck.
+function hullGeo(len, beam, deep, bow = 0.22) {
+  const sh = new THREE.Shape(), l = len / 2, b = beam / 2;
+  sh.moveTo(-l, -b * 0.85); sh.lineTo(l - len * bow, -b);
+  sh.quadraticCurveTo(l, -b * 0.6, l + len * 0.04, 0);
+  sh.quadraticCurveTo(l, b * 0.6, l - len * bow, b);
+  sh.lineTo(-l, b * 0.85); sh.closePath();
+  return new THREE.ExtrudeGeometry(sh, { depth: deep, bevelEnabled: false }).rotateX(-Math.PI / 2);
+}
+const ship = (() => {
+  const g = new THREE.Group(), hullM = mat('#3d2716', { map: woodTex }), deckM = mat('#8a6a48', { map: woodTex });
+  const hull = mesh(hullGeo(8.5, 2.6, 1.9), hullM);
+  hull.position.y = SHIP_DECK - 1.9;
+  const deck = mesh(hullGeo(8.3, 2.45, 0.05), deckM);
+  deck.position.y = SHIP_DECK - 0.02;
+  g.add(hull, deck);
+  // The gold stripe along the near side, with its gunports.
+  const stripe = mesh(new THREE.BoxGeometry(6.4, 0.22, 0.05), mat('#c8962e'));
+  stripe.position.set(-0.6, SHIP_DECK - 0.45, 1.13);
+  g.add(stripe);
+  for (let i = 0; i < 5; i++) {
+    const port = mesh(new THREE.BoxGeometry(0.26, 0.24, 0.06), mat('#120b07'), false);
+    port.position.set(-3 + i * 1.3, SHIP_DECK - 0.45, 1.15);
+    g.add(port);
+  }
+  // The raised stern, and a lantern.
+  const stern = mesh(new THREE.BoxGeometry(1.8, 0.8, 2.2), hullM);
+  stern.position.set(-3.35, SHIP_DECK + 0.4, 0);
+  const lamp = mesh(new THREE.SphereGeometry(0.13, 10, 8), new THREE.MeshBasicMaterial({ color: '#ffcf6a' }), false);
+  lamp.position.set(-4.35, SHIP_DECK + 1.05, 0);
+  const glow = new THREE.PointLight('#ffb347', 6, 7, 1.6);
+  glow.position.copy(lamp.position);
+  g.add(stern, lamp, glow);
+  // Two masts, sails braced round, and the flag on the main.
+  const sailM = mat('#e6dcc6', { side: THREE.DoubleSide, roughness: 0.95 }), spar = mat('#4a2f1a', { map: woodTex });
+  for (const [x, h] of [[1.7, 5.2], [-0.9, 6.2]]) {
+    const mast = mesh(new THREE.CylinderGeometry(0.07, 0.1, h, 8), spar);
+    mast.position.set(x, SHIP_DECK + h / 2, 0);
+    g.add(mast);
+    for (const [y, w, ht] of [[h * 0.42, 2.6, 1.7], [h * 0.8, 1.9, 1.15]]) {
+      const geo = new THREE.PlaneGeometry(w, ht, 8, 4), pos = geo.attributes.position;
+      for (let i = 0; i < pos.count; i++) pos.setZ(i, Math.cos(pos.getX(i) / w * Math.PI) * 0.28 * (0.6 + 0.4 * Math.cos(pos.getY(i) / ht * Math.PI)));
+      geo.computeVertexNormals();
+      const sail = mesh(geo, sailM, false), yard = mesh(new THREE.CylinderGeometry(0.04, 0.04, w + 0.3, 6), spar, false);
+      const arm = new THREE.Group();
+      sail.position.y = -ht / 2;
+      yard.rotation.z = Math.PI / 2;
+      arm.add(sail, yard);
+      arm.position.set(x, SHIP_DECK + y + ht / 2, 0);
+      arm.rotation.y = Math.PI / 2 - 0.55;   // braced round, so they show broadside on
+      g.add(arm);
+    }
+  }
+  const fl = flagpole(0.9, pirateFlagMat);
+  fl.position.set(-0.9, SHIP_DECK + 6.15, 0);
+  fl.scale.setScalar(1.3);
+  g.add(fl);
+  return g;
+})();
+// The ship rides the swell, and their cannon with it; boats afloat bob.
+function shipTick() {
+  const t = performance.now() / 1000, y = Math.sin(t * 0.9) * 0.07;
+  ship.position.y = y;
+  ship.rotation.x = Math.sin(t * 0.7) * 0.02;
+  ship.rotation.z = Math.sin(t * 0.55) * 0.015;
+  cannon.position.y = SHIP_DECK + y;
+  for (const b of boats) b.g.position.y = b.beached ? 0 : Math.sin(t * 2.1 + b.g.position.x) * 0.05 - 0.06;
+}
+
+/* Rowboats: each raider rows in from the ship in one (state 'row'), runs it up the beach and jumps
+   out. It waits there, and takes them back out if they leave (turned away, or off with the loot:
+   state 'rowOff'); left empty, it drifts back off to the ship. The host and crew alike draw them
+   from the raiders' state, so a crewmate's den shows them too. */
+const BOAT_FROM = SHIP_Z + 2.4, BEACH = SHORE + 0.15;
+const boats = [];
+const boatHullM = mat('#6e4a2c', { map: woodTex }), oarM = mat('#a07c52', { map: woodTex });
+function rowboat() {
+  const g = new THREE.Group();
+  const hull = mesh(hullGeo(1.7, 0.82, 0.34, 0.3), boatHullM);
+  hull.rotation.y = -Math.PI / 2;   // bow towards the beach (+z)
+  const seat = mesh(new THREE.BoxGeometry(0.78, 0.04, 0.2), oarM, false);
+  seat.position.y = 0.3;
+  g.add(hull, seat);
+  g.userData.oars = [-1, 1].map((sx) => {
+    const pivot = new THREE.Group(), oar = mesh(new THREE.CylinderGeometry(0.025, 0.025, 1.3, 6), oarM, false);
+    oar.rotation.z = Math.PI / 2 - 0.35 * sx;
+    oar.position.x = sx * 0.55;
+    pivot.add(oar);
+    pivot.position.set(sx * 0.38, 0.36, 0.05);
+    g.add(pivot);
+    return pivot;
+  });
+  scene.add(g);
+  const b = { g, beached: false };
+  boats.push(b);
+  return b;
+}
+// A raider in a boat: seated on its thwart and pulling at the oars, the boat carried along with them.
+// False once they're out of it (it stays where it is, run up the beach).
+function inBoat(r) {
+  if (r.state !== 'row' && r.state !== 'rowOff') { if (r.boat) r.boat.beached = true; return false; }
+  const b = r.boat ||= rowboat();
+  b.beached = false;
+  b.g.position.x = r.x; b.g.position.z = r.z;
+  b.g.rotation.y = r.state === 'rowOff' ? Math.PI : 0;
+  const g = r.m.g, pull = Math.sin(r.t * 5.5);
+  g.position.set(r.x, b.g.position.y + 0.22, r.z);
+  g.rotation.x = 0; g.rotation.z = 0;
+  r.m.legs.forEach((l) => { l.rotation.x = -1.3; });
+  r.m.arms.forEach((a) => { a.rotation.x = -0.9 + pull * 0.45; });
+  b.g.userData.oars.forEach((o, i) => { o.rotation.y = (i ? 1 : -1) * pull * 0.45; o.rotation.x = Math.cos(r.t * 5.5) * 0.12; });
+  r.xr.forEach((x) => { x.visible = false; });
+  return true;
+}
+// A raider gone (knocked out, rowed off, or the den reset): their boat, if it's still on the beach,
+// pushes off empty back to the ship.
+function raiderOut(r, now = false) {
+  scene.remove(r.m.g); r.mark.remove();
+  const b = r.boat;
+  if (!b) return;
+  if (now || r.state === 'rowOff') return dropBoat(b);
+  b.beached = false;
+  const from = b.g.position.clone();
+  b.g.rotation.y = Math.PI;
+  tween(5, (t) => { b.g.position.z = from.z + (BOAT_FROM - from.z) * t; b.g.scale.setScalar(1 - Math.max(0, t - 0.7) / 0.3 * 0.99); }, () => dropBoat(b));
+}
+function dropBoat(b) { scene.remove(b.g); const i = boats.indexOf(b); if (i >= 0) boats.splice(i, 1); }
+
 // ---------- game state ----------
 const pirate = Object.assign(makePirate({ look: myLook }), { x: 0, z: 8, bonkT: 0, h: 0, hs: 0, hop: null });
 const STEP = 0.62, HOP = 1.2;   // metres: walked up / hopped up (a stair square is about 0.53)
@@ -2980,7 +3136,7 @@ function swordPrompt() {
 
 function newGame() {
   if (guest()) return send('host', { t: 'again' });
-  raiders.splice(0).forEach((r) => { scene.remove(r.m.g); r.mark.remove(); });
+  raiders.splice(0).forEach((r) => raiderOut(r, true)); boats.splice(0).forEach((b) => scene.remove(b.g));
   if (carry) { scene.remove(carry.group); carry = null; }
   ghostKey = ''; ghost = null;
   Object.assign(G, { gold: 60, wave: 0, phase: 'build', phaseT: BUILD_SECS, toSpawn: 0, spawnT: 0, cannonT: 0, cannonShots: 0, aim: null, masters: 0, boarded: 0, bonked: 0, stolen: 0, turned: 0, waveTurned: 0, waveIn: 0, over: false, fairOver: false });
@@ -4001,7 +4157,8 @@ function makeRaider(look, id, x, z) {
 }
 function spawnRaider() {
   const x = (Math.random() - 0.5) * wall.W * S * 0.9;
-  const r = makeRaider([rand(3), rand(3), Math.random() < 0.5 ? 1 : 0, rand(3)], ++raiderSeq, x, -14);
+  const r = makeRaider([rand(3), rand(3), Math.random() < 0.5 ? 1 : 0, rand(3)], ++raiderSeq, x, BOAT_FROM);
+  r.state = 'row';
   r.hole = pickHole(x);
   r.slot = (Math.random() - 0.5) * 1.2;
 }
@@ -4024,6 +4181,17 @@ function updateRaider(r, dt) {
   let moving = false;
   r.t += dt;
   switch (r.state) {
+    case 'row': {
+      // Rowing in from the ship, then out onto the sand.
+      moving = !moveTo(r, r.x, BEACH, 2.8, dt);
+      if (!moving) { r.state = 'approach'; r.t = 0; r.z = BEACH + 0.6; }
+      break;
+    }
+    case 'rowOff': {
+      moving = !moveTo(r, r.x, BOAT_FROM, 2.4, dt);
+      if (!moving) r.gone = true;
+      break;
+    }
     case 'approach': {
       moving = !moveTo(r, passable(h) ? doorX(h) : hackX(h, r.slot), -1.15, 2.2, dt);
       if (!moving) { r.state = passable(h) ? 'climb' : 'attack'; r.t = 0; }
@@ -4118,9 +4286,11 @@ function updateRaider(r, dt) {
       break;
     }
     case 'leave': {
+      // Back down the beach to their boat, and away (with no boat, they just go).
       r.inside = false;
-      moving = !moveTo(r, r.x, -15, 2.4, dt);
-      if (!moving) r.gone = true;
+      const b = r.boat && boats.includes(r.boat) ? r.boat.g.position : null;
+      moving = !moveTo(r, b ? b.x : r.x, b ? b.z + 0.6 : SHORE, 2.4, dt);
+      if (!moving) { if (b) { r.state = 'rowOff'; r.t = 0; r.x = b.x; r.z = b.z; } else r.gone = true; }
       break;
     }
     case 'down': {
@@ -4129,7 +4299,7 @@ function updateRaider(r, dt) {
       const g = r.m.g;
       v.y -= 14 * dt;
       r.x = Math.max(-bounds.x, Math.min(bounds.x, r.x + v.x * dt));
-      r.z = r.outside ? Math.max(-15, Math.min(-0.8, r.z + v.z * dt)) : Math.max(0.6, Math.min(bounds.z1, r.z + v.z * dt));
+      r.z = r.outside ? Math.max(SHORE, Math.min(-0.8, r.z + v.z * dt)) : Math.max(0.6, Math.min(bounds.z1, r.z + v.z * dt));
       g.position.y = Math.max(0, g.position.y + v.y * dt);
       if (g.position.y <= 0 && v.y < 0) { v.x *= 0.4; v.z *= 0.4; v.y = Math.abs(v.y) > 3 ? -v.y * 0.3 : 0; }
       if (g.position.y > 0.05) g.rotation.y += dt * 10;
@@ -4142,6 +4312,7 @@ function updateRaider(r, dt) {
   raiderPose(r, moving, dt);
 }
 function raiderPose(r, moving, dt) {
+  if (inBoat(r)) return;
   const hop = (r.state === 'climb' || r.state === 'climbOut') && !moving;
   const g = r.m.g;
   if (r.state === 'winded') {
@@ -4324,7 +4495,7 @@ function startWave() {
   G.aim = null;
   G.waveTurned = G.waveIn = 0;
   G.windSaid = false;
-  if (G.wave >= 2 && !cannon.visible) { cannon.visible = true; say('They brought a cannon!', true); }
+  if (G.wave >= 2 && !cannon.visible) { cannon.visible = true; say('Their ship\'s run out a cannon!', true); }
   else say(`Wave ${G.wave}: raiders!`, true);
   $('intro').classList.add('off');
   updateStats();
@@ -4770,8 +4941,7 @@ function applySnap(m) {
   }
   for (let i = raiders.length - 1; i >= 0; i--) {
     if (seen.has(raiders[i].id)) continue;
-    scene.remove(raiders[i].m.g);
-    raiders[i].mark.remove();
+    raiderOut(raiders[i]);
     raiders.splice(i, 1);
   }
 }
@@ -4812,7 +4982,7 @@ function sendSync(to, fresh = false) {
   });
 }
 function applySync(s) {
-  raiders.splice(0).forEach((r) => { scene.remove(r.m.g); r.mark.remove(); });
+  raiders.splice(0).forEach((r) => raiderOut(r, true)); boats.splice(0).forEach((b) => scene.remove(b.g));
   if (carry) { scene.remove(carry.group); carry = null; }
   if (net.pending) { scene.remove(net.pending.group); net.pending = null; }
   net.asking = false;
@@ -5544,7 +5714,7 @@ function update(dt) {
       const r = raiders[i];
       if (r.state === 'down' && !r.swordDropped) { r.swordDropped = true; swordDrop(r); }
       updateRaider(r, dt);
-      if (r.gone) { scene.remove(r.m.g); r.mark.remove(); raiders.splice(i, 1); }
+      if (r.gone) { raiderOut(r); raiders.splice(i, 1); }
     }
     checkEnd();
   }
@@ -5782,7 +5952,7 @@ function cheatMend() {
 }
 function cheatBeat() {
   if (G.phase !== 'wave') return toast('No wave on just now', true);
-  raiders.splice(0).forEach((r) => { scene.remove(r.m.g); r.mark.remove(); });
+  raiders.splice(0).forEach((r) => raiderOut(r, true)); boats.splice(0).forEach((b) => scene.remove(b.g));
   Object.assign(G, { toSpawn: 0, aim: null, cannonShots: 0 });   // and it's over on the next frame, timber and all
 }
 function cheatShack() {

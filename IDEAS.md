@@ -88,6 +88,21 @@ Building on what's there now (the walk and its stairs are made of pieces that st
   add bilging, duty navigating and the rest.
 - **Gunnery with real aim:** aim the cannons at particular ports on an enemy ship, so there's a
   fun part of gunnery beyond loading.
+- **The Kraken (9 Nov, someone's idea the user liked):** "it'd be really great to get like the
+  Kraken in here." The user wants to think about how the den could become "a lot more ship-based"
+  without starting again. A first step is in (raiders row in to a beach, their cannon is a ship
+  offshore: RULES.md, "A cove"). The user's thoughts so far (9 Nov):
+  - **Tentacles bashing the wall:** "similar concept to the cannon, except a bit more dialed up".
+    It rises out of the cove and its tentacles smash at the wall; you rebuild the wall to hold it
+    off.
+  - **Any puzzle can beat it:** the user first thought it fitted Gunnery, but "that goes against
+    ... my idea of saying, you know, you can use any puzzle to defeat it when it comes". So the
+    guns fire at it, the soldiers fight it, and mending the wall keeps it out, each its own way
+    of helping.
+  - **Soldiers going outside, for this and generally:** "making it so that the doors open and you
+    can go and fight on the beach". The gate opens and the armoury's soldiers march out onto the
+    beach to fight raiders there, and to help attack the Kraken.
+  (How strong it is, how often it comes, and what beating it pays: to work out.)
 - **Keep it democratised:** everyone gets a turn at the fun jobs (see the principle above).
 
 For now the den is the first version, and that works.

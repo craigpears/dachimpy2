@@ -122,6 +122,17 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   pressured fight against defeat. The user (9 Nov): "there's not as much of a worry about making
   things too easy ... progression is fun. It's to be expected. ... we can add more challenging
   elements later." So when a change could go either way, keep it simple and on the easy side.
+- **A cove (9 Nov).** The den should feel like a pirate hideout in a cove, a step towards the
+  more ship-based den the user would like (without starting again). Whatever the landscape, out
+  beyond the wall is a beach and the sea. The raiders row in from their ship in little rowboats,
+  one each, run them up the beach and walk up to the wall; a raider who gives up (or gets away
+  with the loot) walks back to their boat and rows off, and a boat left empty drifts back out.
+  Their cannon is on the deck of their ship, anchored broadside on out in the cove (dark hull,
+  gold stripe, two masts, black flag), run out from wave 2 ("Their ship's run out a cannon!").
+  Only the look changed: raiders land about where they used to appear, so a wave's timing is
+  about the same (a few seconds' rowing first). The user: "instead of them just walking over ...
+  they're rowing in little rowboats onto the beach of your pirate hideout, and the cannon is
+  actually a ship off in the distance".
 - **Every puzzle stays high fidelity to the original.** Small tweaks are fine, but the puzzle's own
   rules come over as they are; the 3D only decides where the board stands and who is on the other
   end. The user turned down a clay golem built from smashed Swordfight blocks, with breakers won
