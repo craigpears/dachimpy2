@@ -552,11 +552,13 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     the sea already has (the trade winds, rocks and the bumps on them, the lock, the turret and
     being dazed, the duty puzzles), each changing how one of those plays for you, and a new
     mechanic only where it earns its place. From a brainstorm, the ones the user liked:
-    - **Oars, a longship:** she can go where there's no wind, by a new puzzle of her own (rowing,
-      not a copy of any existing game's): "absolutely make it meaningful". The one fitting so far
-      that should bring a really new puzzle.
-    - **A big bilge pump:** "just funny", and best for getting through the canals: the locks pump
-      up faster (Bilge is already how a lock fills).
+    - **Oars, a longship:** she can go where there's no wind: "absolutely make it meaningful". But
+      no new puzzle for rowing ("we've already got sailing"): the Sailing duty puzzle drives the
+      oars as it does the sails. A good addition, and a choice: oars or cannons, you give one up
+      for the other.
+    - **More bilge pumps:** to get through the canals faster: the locks pump up quicker (Bilge is
+      already how a lock fills). A giant one is "just funny", but not too Wacky Races.
+    - **More cannons:** load them (Gunnery), daze a rival, reload; the guns against the oars.
     - **A ram on the bow:** bump a rival to daze them ("certainly the ram ship"); bump a rock and
       it's you that's dazed.
     - **A grappling hook:** hook a rock to whip round a corner tighter, or hook a rival to be towed
@@ -567,7 +569,14 @@ Building on what's there now (the walk and its stairs are made of pieces that st
       Puzzle Pirates every ship goes the same places.)
     - **Jettisoning ballast** for a burst of speed: fine, and familiar, the way Puzzle Pirates
       already has the double forward and chain shot.
-    - Not fog and lanterns: "probably getting too many mechanics there".
+    - Not fog and lanterns: "probably getting too many mechanics there", and clearing the way is
+      already the Navigation duty puzzle finding the hidden routes.
+    The shallow draught is the kind the user likes best: everyone racing in the same water, and a
+    plausible advantage. And the lock is a quick shortcut for whoever'll pump it.
+    **Puzzle-driven, eventually:** every fitting works through a puzzle in the end (Sailing for
+    the oars and sails, Bilge at the locks, Gunnery for the guns, Navigation for the hidden ways).
+    A first race could be a demo, one player, with no puzzling behind it, but that's the
+    direction. Not too wacky: "I don't think I want to go too Wacky Races".
 
 For now the den is the first version, and that works.
 
