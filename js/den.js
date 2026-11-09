@@ -13,7 +13,7 @@ import { drawStencil, drawBlade, PALETTE } from './den-sword-draw.js';
 import { Bilge, W as BW, H as BH } from './bilge.js';
 import { KEYS as VIEW_KEYS, nextHole, holeKey, quarters, centreOn, clampTo, nextBoard, arrowStep } from './den-carp-view.js';
 import { afterWave, countingDown } from './den-raids.js';
-import { SAIL, Sea, Helm, Guns, broadside } from './den-sail.js';
+import { SAIL, LAY, Sea, Helm, Guns, Turret, broadside } from './den-sail.js';
 import { MAP, mapAfter, canPickUp, canRead, RUMOUR, WAYS, X_AT } from './den-map.js';
 import { twoCourses, isHigh, gateTop, lowMiddle, isSky } from './den-wall.js';
 import { BILGE, Tide, HIGH, LOW, shoreAt, worth, barrelsFor, onRocks, rocksBare, oddsFor, blastHits } from './den-bilge.js';
@@ -4199,13 +4199,21 @@ function cineTick(dt) {
    yourself, played ahead of the pilot's. The board's squares are there but not drawn; the square
    you're pointing at shows faintly, and the course ahead is dotted on the water. Rocks stand out
    of the sea as stacks (you can see them from the den too). Sail back to her mooring to go ashore.
-   She has a gun each side: Q fires the port gun, E the starboard, as she sails, at the rocks. */
+   She has a gun each side: Q fires the port gun, E the starboard, as she sails, at the rocks.
+   The sea has its lay (LAY in src/den-sail.ts): a trade wind out to a junction, the loop round and
+   home, and a canal to a lock up a cliff into a hidden cove; a turret on a rock shoots at her, and
+   a hit dazes her till you bilge her out, on a little Bilge board on her deck. The lock's worked
+   the same way, from a board on the quay beside it. */
 const SEA_X0 = -SAIL.COLS * SAIL.CELL / 2;
 const seaX = (c) => SEA_X0 + (c + 0.5) * SAIL.CELL, seaZ = (r) => SAIL.Z0 - (r + 0.5) * SAIL.CELL;
 const SLOOP_DECK = 0.75;
-const sail = { on: false, sea: new Sea(9), helm: null, g: null, rocks: null, pin: null, hover: null, dots: [], sig: '', hudSig: '', seen: false, heel: 0, bumpT: 0, guns: new Guns(), rockAt: new Map() };
+const sail = { on: false, sea: new Sea(9), helm: null, g: null, rocks: null, pin: null, hover: null, dots: [], sig: '', hudSig: '', seen: false, heel: 0, bumpT: 0, guns: new Guns(), rockAt: new Map(), world: null, turret: null, shots: [], riding: false, said: {} };
 sail.helm = new Helm(sail.sea);
-let sailView = 0;
+sail.turret = new Turret(LAY.TURRET);
+let sailView = 0, holdView = 0;
+// The hidden cove's water is a lock's lift above the sea; the cliff stands above that.
+const LIFT = 1.6, CLIFF_H = 3.4;
+const liftAt = (c, r) => LIFT * (sail.sea.isLock(c, r) ? sail.helm.level : sail.sea.level(c, r));
 // Her, smaller than their ship: one mast, a square sail and a topsail, a bowsprit, a tiller at the
 // stern, weathered planks, and your own flag at the masthead.
 function sloopMesh() {
@@ -4238,6 +4246,7 @@ function sloopMesh() {
     arm.position.set(0.35, SLOOP_DECK + y + ht / 2, 0);
     arm.rotation.y = Math.PI / 2 - 0.45;   // square across her, braced round a little so they show from the side too
     g.add(arm);
+    (g.userData.sails ||= []).push(arm);
   }
   const fl = flagpole(0.6, flagMat);
   fl.position.set(0.35, SLOOP_DECK + 4.15, 0);
@@ -4261,6 +4270,7 @@ function sloopMesh() {
 function seaRocks() {
   const g = new THREE.Group();
   for (const id of sail.sea.rocks) {
+    if (sail.sea.cliff.has(id)) continue;   // (the cliff's drawn with the cove: seaWorld)
     const [c, r] = id.split(',').map(Number), x = seaX(c), z = seaZ(r), here = [];
     for (let i = 0; i < 3; i++) here.push(rock(x + (Math.random() - 0.5) * 2.2, 0.2 + Math.random() * 0.4, z + (Math.random() - 0.5) * 2.2, 0.9 + Math.random() * 0.8));
     g.add(...here);
@@ -4268,6 +4278,107 @@ function seaRocks() {
   }
   scene.add(g);
   return g;
+}
+/* The lay of the sea: the trade winds as streaks of white water racing along their lanes, a yellow
+   buoy at the junction, the cliff with the hidden cove's water up behind it, the lock in its gap
+   (its chamber's water rising and falling, a pair of gates at each end), and the turret, a stone
+   tower on its rock with a gun on top. */
+function seaWorld() {
+  const W = { g: new THREE.Group(), lanes: [], gates: {}, chamber: null, turret: null, gun: null };
+  for (const { at: [c, r], d, n } of LAY.LANES) {
+    const tex = canvasTex(64, 128, (g, w, h) => {
+      g.clearRect(0, 0, w, h);
+      g.strokeStyle = 'rgba(240,250,252,0.95)'; g.lineCap = 'round';
+      for (let i = 0; i < 9; i++) { const x = 6 + Math.random() * 52, y = Math.random() * h, l = 18 + Math.random() * 30; g.lineWidth = 2 + Math.random() * 3; g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + l); g.stroke(); }
+    });
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(1, n * 1.5);
+    const L = n * SAIL.CELL, m = mesh(new THREE.PlaneGeometry(SAIL.CELL * 0.85, L).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.6, depthWrite: false, fog: false }), false);
+    const DCx = [0, 1, 0, -1][d], DRx = [1, 0, -1, 0][d], mid = (n - 1) / 2;
+    m.position.set(seaX(c + DCx * mid), 0.07, seaZ(r + DRx * mid));
+    m.rotation.y = -d * Math.PI / 2;
+    m.renderOrder = 2;
+    W.g.add(m);
+    W.lanes.push(tex);
+    // A faint blue band under the streaks, so the lane reads from afar.
+    const band = mesh(new THREE.PlaneGeometry(SAIL.CELL * 0.95, L).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#7fd0ea', transparent: true, opacity: 0.18, depthWrite: false, fog: false }), false);
+    band.position.copy(m.position).setY(0.065);
+    band.rotation.y = m.rotation.y;
+    band.renderOrder = 2;
+    W.g.add(band);
+  }
+  // The junction's buoy, yellow, at the corner of the square.
+  const [jc, jr] = LAY.JUNCTION, buoy = mesh(new THREE.CylinderGeometry(0.3, 0.42, 0.8, 12), mat('#e8b52a', { roughness: 0.6 }));
+  buoy.position.set(seaX(jc) - SAIL.CELL * 0.42, 0.25, seaZ(jr) + SAIL.CELL * 0.42);
+  const top = mesh(new THREE.ConeGeometry(0.25, 0.5, 4), mat('#2a2a2a'));
+  top.position.set(buoy.position.x, 0.9, buoy.position.z);
+  W.g.add(buoy, top);
+  W.buoy = buoy;
+  // The cliff: blocks of rock, flat-topped and grassy, round the cove (and past the board's edge).
+  const { c0, c1, r0, r1 } = LAY.COVE, cliffAt = new Set(sail.sea.cliff);
+  for (let r = r0 - 1; r <= r1 + 1; r++) cliffAt.add(`${c0 - 1},${r}`);
+  for (let c = c0 - 1; c <= c1 + 1; c++) cliffAt.add(`${c},${r1 + 1}`);
+  const stone = mat('#6b6158', { flatShading: true, roughness: 0.95 }), grass = mat('#5f7d3a', { roughness: 1 });
+  for (const id of cliffAt) {
+    const [c, r] = id.split(',').map(Number), x = seaX(c), z = seaZ(r);
+    const b = mesh(new THREE.BoxGeometry(SAIL.CELL, CLIFF_H + 1, SAIL.CELL), stone);
+    b.position.set(x, (CLIFF_H - 1) / 2, z);
+    const t = mesh(new THREE.BoxGeometry(SAIL.CELL * 0.98, 0.12, SAIL.CELL * 0.98), grass);
+    t.position.set(x, CLIFF_H + 0.06, z);
+    W.g.add(b, t);
+    for (let i = 0; i < 2; i++) W.g.add(rock(x + (Math.random() - 0.5) * 3, CLIFF_H * (0.3 + Math.random() * 0.5), z + (Math.random() - 0.5) * 3, 0.8 + Math.random() * 0.7));
+  }
+  // The cove's water, up behind the cliff.
+  const coveM = mat('#2f86b0', { roughness: 0.3, transparent: true, opacity: 0.88, emissive: '#0f3f5e' });
+  const cw = (c1 - c0 + 1) * SAIL.CELL, cd = (r1 - r0 + 1) * SAIL.CELL;
+  const cove = mesh(new THREE.PlaneGeometry(cw, cd).rotateX(-Math.PI / 2), coveM, false);
+  cove.position.set(seaX((c0 + c1) / 2), LIFT + 0.05, seaZ((r0 + r1) / 2));
+  W.g.add(cove);
+  // A strip of sand at the back of the cove, and an old pump on it (the map's "hidden cove with an
+  // old bilge pump").
+  const sand = mesh(new THREE.BoxGeometry(cw, 0.3, 1.6), mat('#c9a874', { roughness: 1 }));
+  sand.position.set(cove.position.x, LIFT + 0.1, seaZ(r1) - SAIL.CELL / 2 + 0.8);
+  W.g.add(sand);
+  const pumpG = new THREE.Group(), pw = mat('#6a5038', { map: woodTex });
+  const post = mesh(new THREE.BoxGeometry(0.35, 1.2, 0.35), pw); post.position.y = 0.6;
+  const handle = mesh(new THREE.BoxGeometry(1.1, 0.08, 0.08), pw); handle.position.set(0.3, 1.2, 0); handle.rotation.z = 0.35;
+  const spout = mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.4, 6), mat('#4a4f55', { metalness: 0.5 })); spout.rotation.z = Math.PI / 2; spout.position.set(-0.3, 0.9, 0);
+  pumpG.add(post, handle, spout);
+  pumpG.position.set(seaX(c0 + 1), LIFT + 0.25, sand.position.z);
+  W.g.add(pumpG);
+  // The lock: its chamber's water, and a pair of gates at each end, hung on the cliff either side.
+  const [lc, lr] = LAY.LOCK;
+  W.chamber = mesh(new THREE.PlaneGeometry(SAIL.CELL, SAIL.CELL).rotateX(-Math.PI / 2), coveM, false);
+  W.chamber.position.set(seaX(lc), 0.05, seaZ(lr));
+  W.g.add(W.chamber);
+  const gateM = mat('#5b3a20', { map: woodTex }), iron = mat('#3a3f45', { metalness: 0.6, roughness: 0.4 });
+  for (const [end, sx] of [['sea', 1], ['cove', -1]]) {
+    const leaves = [];
+    for (const sz of [-1, 1]) {
+      const hinge = new THREE.Group();
+      hinge.position.set(seaX(lc) + sx * SAIL.CELL / 2, 0, seaZ(lr) + sz * SAIL.CELL / 2);
+      const leaf = mesh(new THREE.BoxGeometry(0.28, CLIFF_H + 0.2, SAIL.CELL / 2), gateM);
+      leaf.position.set(0, (CLIFF_H + 0.2) / 2 - 0.4, -sz * SAIL.CELL / 4);
+      for (const y of [0.4, 1.6, 2.8]) { const band = mesh(new THREE.BoxGeometry(0.32, 0.1, SAIL.CELL / 2), iron, false); band.position.set(0, y, -sz * SAIL.CELL / 4); hinge.add(band); }
+      hinge.add(leaf);
+      hinge.userData.sz = sz;
+      W.g.add(hinge);
+      leaves.push(hinge);
+    }
+    W.gates[end] = { leaves, sx, open: 1 };
+  }
+  // The turret: a round stone tower on its rock, crenellated, a gun on top that turns to aim.
+  const [tc, tr] = LAY.TURRET, tower = new THREE.Group(), ts = mat('#8a8178', { flatShading: true });
+  const body = mesh(new THREE.CylinderGeometry(1.15, 1.35, 3.2, 12), ts); body.position.y = 1.6;
+  tower.add(body);
+  for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2, m = mesh(new THREE.BoxGeometry(0.4, 0.45, 0.4), ts); m.position.set(Math.cos(a) * 1.0, 3.4, Math.sin(a) * 1.0); m.rotation.y = -a; tower.add(m); }
+  const gun = gunMesh(); gun.scale.setScalar(0.85); gun.position.y = 3.2;
+  tower.add(gun);
+  tower.position.set(seaX(tc), 0, seaZ(tr));
+  W.g.add(tower);
+  W.turret = tower; W.gun = gun;
+  scene.add(W.g);
+  return W;
 }
 // The pin: a red buoy with a little pennant, riding the swell.
 function pinMesh() {
@@ -4323,6 +4434,11 @@ function sailReset() {
   if (sail.on) { sail.on = false; document.body.classList.remove('sailing'); }
   sail.helm = new Helm(sail.sea);
   sail.guns = new Guns();
+  sail.turret = new Turret(LAY.TURRET);
+  sail.shots.forEach((v) => { scene.remove(v.ball, v.ring); });
+  sail.shots = [];
+  sail.said = {};
+  holdShut();
   sailView = 0;
 }
 // A shot out of her side, from where she is right now: it flies straight out and comes down in the
@@ -4355,8 +4471,155 @@ function sailFire(side) {
       const x0 = r.position.x, z0 = r.position.z;
       tween(0.4, (u) => { const k = Math.sin(u * Math.PI * 6) * 0.12 * (1 - u); r.position.x = x0 + k; r.position.z = z0 - k; }, () => { r.position.x = x0; r.position.z = z0; });
     }
-    toast('A hit on the rocks!');
+    if (hit[0] === LAY.TURRET[0] && hit[1] === LAY.TURRET[1]) { sail.turret.silence(); toast('A hit on the turret! That\'s quietened it for a while'); }
+    else toast('A hit on the rocks!');
   });
+}
+
+/* Bilging at sea (the user, 9 Nov: a hit "would daze you for a few turns ... you have to do some
+   carpentry or bilging to kind of undaze yourself"; and the lock, "you have to do a lot of bilging
+   to open and close the canals"). The real Bilge board, small: dazed, it lies on her deck, her
+   sails struck, the water she's shipped over its bottom rows; at the lock, it's on the quay beside
+   it. Each move pumps as much as it's worth (as on the beach), till she's pumped out or the lock's
+   up; then it's gone and she sails on. */
+const HOLD_SQ = 0.2, QUAY_SQ = 0.45;
+const hold = { mode: null, board: null, group: null, pieces: null, meshes: new Map(), queue: [], holdT: 0, shown: null, cur: { r: 5, c: 2 }, water: null, cursor: null };
+const holdX = (c) => c - (BW - 1) / 2, holdZ = (r) => r - (BH - 1) / 2;
+// What there is to bilge just now, if anything: her ('daze') or the lock ('up').
+const holdWanted = () => { if (!sail.on) return null; const h = sail.helm.held(); return h === 'daze' || h === 'up' ? h : null; };
+const holdRows = () => (hold.mode === 'daze' ? 3 + Math.min(6, sail.helm.shipped * 2) : 3 + (1 - sail.helm.level) * 6);
+function holdMake() {
+  const g = new THREE.Group();
+  const bedTex = canvasTex(BW * 32, BH * 32, (x, cw, ch) => {
+    x.fillStyle = '#5a4128'; x.fillRect(0, 0, cw, ch);
+    for (let y = 0; y < ch; y += 16) { x.fillStyle = y % 32 ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.05)'; x.fillRect(0, y, cw, 15); }
+    x.strokeStyle = 'rgba(20,12,6,0.45)'; x.lineWidth = 1.5;
+    for (let i = 0; i <= cw; i += 32) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, ch); x.stroke(); }
+    for (let i = 0; i <= ch; i += 32) { x.beginPath(); x.moveTo(0, i); x.lineTo(cw, i); x.stroke(); }
+  });
+  const bed = mesh(new THREE.PlaneGeometry(BW + 0.3, BH + 0.3).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ map: bedTex, roughness: 1 }), false);
+  bed.position.y = 0.005;
+  g.add(bed);
+  hold.pieces = new THREE.Group();
+  g.add(hold.pieces);
+  hold.water = mesh(new THREE.PlaneGeometry(BW + 0.3, 1).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#2a6fd8', transparent: true, opacity: 0.4, depthWrite: false }), false);
+  hold.water.renderOrder = 4;
+  g.add(hold.water);
+  hold.cursor = new THREE.Group();
+  const orange = new THREE.MeshBasicMaterial({ color: '#f39a2b' }), t = 0.07, len = 0.28;
+  const bar = (x, z, sx, sz) => { const m = mesh(new THREE.BoxGeometry(sx, 0.03, sz), orange, false); m.position.set(x, 0.07, z); hold.cursor.add(m); };
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) { bar(sx * (1 - len / 2), sz / 2, len, t); bar(sx, sz * (0.5 - len / 2), t, len); }
+  for (const sz of [-1, 1]) bar(0, sz * (0.5 - len / 2), t, len);
+  g.add(hold.cursor);
+  hold.group = g;
+}
+function holdOpen(mode) {
+  if (!hold.group) holdMake();
+  hold.board = new Bilge(Math.random, oddsFor(0));
+  for (const m of hold.meshes.values()) hold.pieces.remove(m);
+  hold.meshes.clear();
+  hold.queue = []; hold.shown = null; hold.cur = { r: 5, c: 2 };
+  const g = hold.group;
+  if (mode === 'daze') {
+    // On her deck, its top row toward her bow, seen from her stern.
+    sail.g.add(g);
+    g.position.set(0.05, SLOOP_DECK + 0.03, 0);
+    g.rotation.set(0, -Math.PI / 2, 0);
+    g.scale.setScalar(HOLD_SQ);
+  } else {
+    // On the quay on the den side of the lock, its top row toward the sea.
+    scene.add(g);
+    g.position.set(seaX(LAY.LOCK[0]), CLIFF_H + 0.15, (seaZ(LAY.LOCK[1] - 1) + seaZ(LAY.LOCK[1] - 2)) / 2);
+    g.rotation.set(0, 0, 0);
+    g.scale.setScalar(QUAY_SQ);
+  }
+  hold.mode = mode;
+  sail.g.userData.sails.forEach((a) => { a.visible = mode !== 'daze'; });
+  for (const side of ['L', 'R']) sail.g.userData.guns[side].visible = mode !== 'daze';
+  keys.clear();
+}
+function holdShut() {
+  if (hold.group) hold.group.removeFromParent();
+  hold.mode = null;
+  if (sail.g) { sail.g.userData.sails.forEach((a) => { a.visible = true; }); for (const side of ['L', 'R']) sail.g.userData.guns[side].visible = true; }
+}
+function holdKey(key) {
+  const mv = { arrowleft: [0, -1], a: [0, -1], arrowright: [0, 1], d: [0, 1], arrowup: [-1, 0], w: [-1, 0], arrowdown: [1, 0], s: [1, 0] }[key];
+  if (mv) { hold.cur.r = Math.max(0, Math.min(BH - 1, hold.cur.r + mv[0])); hold.cur.c = Math.max(0, Math.min(BW - 2, hold.cur.c + mv[1])); return true; }
+  if (key === ' ' || key === 'enter') { holdSwap(); return true; }
+  return key === 'q' || key === 'e' || key === 'h';
+}
+function holdHover(x, y) {
+  if (!hold.group) return;
+  ray.setFromCamera(new THREE.Vector2(x / innerWidth * 2 - 1, -y / innerHeight * 2 + 1), camera);
+  hold.group.updateMatrixWorld(true);
+  const o = new THREE.Vector3().setFromMatrixPosition(hold.group.matrixWorld), n = new THREE.Vector3(0, 1, 0).transformDirection(hold.group.matrixWorld);
+  const p = new THREE.Vector3();
+  if (!ray.ray.intersectPlane(new THREE.Plane().setFromNormalAndCoplanarPoint(n, o), p)) return;
+  hold.group.worldToLocal(p);
+  hold.cur.c = Math.max(0, Math.min(BW - 2, Math.round(p.x + (BW - 1) / 2 - 0.5)));
+  hold.cur.r = Math.max(0, Math.min(BH - 1, Math.round(p.z + (BH - 1) / 2)));
+}
+function holdSwap() {
+  if (!hold.mode || hold.queue.length) return;
+  const { r, c } = hold.cur, b = hold.board, rows = holdRows();
+  b.water = Math.round(rows);
+  const m = b.swap(r, c);
+  if (!m.moved) {
+    for (const bit of [b.grid[r][c], b.grid[r][c + 1]]) if (bit?.s === 'crab') { const mm = hold.meshes.get(bit.id); if (mm) mm.userData.jig = 0.6; }
+    return;
+  }
+  hold.queue.push(...m.stages);
+  hold.holdT = 0;
+  const to = sail.helm.pump(worth(m, rows));
+  if (m.combo) toast(m.combo);
+  if (to === 'daze' && !sail.helm.dazed()) toast('Pumped out! She sails on');
+  if (to === 'lock' && sail.helm.held() !== 'up') toast('The lock\'s full: the top gates open');
+}
+function holdTick(dt) {
+  const want = holdWanted();
+  if (want !== hold.mode) { holdShut(); if (want) holdOpen(want); }
+  if (!hold.mode) return;
+  const b = hold.board;
+  if (!hold.shown) {
+    hold.shown = b.snap();
+    for (let r = 0; r < BH; r++) for (let c = 0; c < BW; c++) { const bit = hold.shown[r][c], m = bitMesh(bit); m.position.set(holdX(c), 0.01, holdZ(r)); hold.pieces.add(m); hold.meshes.set(bit.id, m); }
+  }
+  // A move a step at a time, as on the beach: what's cleared washes away, the rest float up.
+  hold.holdT += dt;
+  let moving = false;
+  for (const m of hold.meshes.values()) if (m.userData.tz !== undefined && Math.abs(m.position.z - m.userData.tz) + Math.abs(m.position.x - m.userData.tx) > 0.02) moving = true;
+  if (hold.queue.length && hold.holdT > 0.18 && !moving) {
+    const st = hold.queue.shift();
+    hold.holdT = 0;
+    for (const id of st.cleared) {
+      const m = hold.meshes.get(id);
+      if (!m) continue;
+      burst(m.getWorldPosition(new THREE.Vector3()).setY(m.getWorldPosition(new THREE.Vector3()).y + 0.2), '#dff3f6', 4, 1.2);
+      hold.pieces.remove(m);
+      hold.meshes.delete(id);
+    }
+    hold.shown = st.grid;
+    const fresh = Array(BW).fill(0);
+    for (let r = 0; r < BH; r++) for (let c = 0; c < BW; c++) {
+      const bit = st.grid[r][c];
+      let m = hold.meshes.get(bit.id);
+      if (!m) { m = bitMesh(bit); m.position.set(holdX(c), 0.01, holdZ(BH + fresh[c]++)); hold.pieces.add(m); hold.meshes.set(bit.id, m); }
+      m.userData.tx = holdX(c); m.userData.tz = holdZ(r);
+    }
+  }
+  for (const m of hold.meshes.values()) {
+    const tx = m.userData.tx ?? m.position.x, tz = m.userData.tz ?? m.position.z;
+    const dx = tx - m.position.x, dz = tz - m.position.z, d = Math.hypot(dx, dz);
+    if (d > 1e-3) { const k = Math.min(1, 6 * dt / d); m.position.x += dx * k; m.position.z += dz * k; }
+    m.visible = m.position.z < holdZ(BH - 1) + 0.6;   // (new ones come in from under the bottom edge)
+    if (m.userData.jig > 0) { m.userData.jig -= dt; m.rotation.y = Math.sin(m.userData.jig * 40) * 0.4; } else m.rotation.y = 0;
+  }
+  // The water over the bottom rows: what's still to pump.
+  const rows = Math.min(BH, holdRows());
+  hold.water.scale.z = rows;
+  hold.water.position.set(0, 0.042, (BH / 2) - rows / 2);
+  hold.cursor.position.set((holdX(hold.cur.c) + holdX(hold.cur.c + 1)) / 2, 0, holdZ(hold.cur.r));
 }
 // The square of the board under the pointer (fractional: the middle of a square is whole).
 function seaCellAt(x, y) {
@@ -4366,15 +4629,18 @@ function seaCellAt(x, y) {
   return { c: (p.x - SEA_X0) / SAIL.CELL - 0.5, r: (SAIL.Z0 - p.z) / SAIL.CELL - 0.5 };
 }
 function sailClick(x, y) {
+  if (hold.mode) { holdHover(x, y); holdSwap(); return; }
   const at = seaCellAt(x, y);
   if (!at) return;
   if (!sail.helm.drop(at.c, at.r)) toast('She\'s there already', true);
 }
 function sailHover(x, y) {
+  if (hold.mode) { holdHover(x, y); sail.hover = null; return; }
   const at = seaCellAt(x, y);
   sail.hover = at && sail.sea.open(Math.round(at.c), Math.round(at.r)) ? [Math.round(at.c), Math.round(at.r)] : null;
 }
 function sailKey(key) {
+  if (hold.mode && holdKey(key)) return;
   const m = { w: 'F', arrowup: 'F', a: 'L', arrowleft: 'L', d: 'R', arrowright: 'R' }[key];
   if (m) { if (!sail.helm.put(m)) toast('That\'s a turn\'s worth put in already', true); return; }
   if (key === 'q' || key === 'e') return sailFire(key === 'q' ? 'L' : 'R');
@@ -4391,7 +4657,10 @@ function sailKey(key) {
 function sailPrompt() {
   if (nearSloop()) return 'Space: board the old sloop';
   if (!sail.on) return '';
-  const h = sail.helm;
+  const h = sail.helm, held = h.held();
+  if (held === 'daze') return 'Dazed! Holed and shipping water · bilge her out to sail on: arrows or mouse move · Space or click swaps';
+  if (held === 'up') return 'In the lock · bilge on the quay to pump it up, and the top gates open: arrows or mouse move · Space or click swaps';
+  if (held === 'down') return 'The lock\'s draining down to the sea';
   if (atHome() && h.slot < 0 && !h.next().length) return 'At her mooring · Space: go ashore · click the sea to drop a pin';
   if (h.pin) return 'Under way to the pin';
   if (h.slot >= 0) return 'Under way';
@@ -4412,21 +4681,92 @@ function sailHud() {
     + `<div class="turn"><span>Next</span>${toks(next, (i) => (i < mineN ? 'mine' : ''))}</div>${gun('R', 'E')}</div>`
     + '<div class="help">Click the sea: drop a pin · <kbd>W</kbd> <kbd>A</kbd> <kbd>D</kbd>: forward, left, right yourself · <kbd>S</kbd>: take one back · <kbd>Q</kbd> <kbd>E</kbd>: fire port, starboard · <kbd>Esc</kbd>: pull up the pin · <kbd>H</kbd>: head home · wheel: zoom</div>';
 }
+// The turret's shots in the air: the ball on its arc, and a red ring on the water where it'll land,
+// so you can see it coming and get out from under it.
+const ringGeo = new THREE.RingGeometry(1.2, 1.55, 28).rotateX(-Math.PI / 2);
+function turretFire(to) {
+  const W = sail.world;
+  W.turret.updateMatrixWorld(true);
+  const from = W.gun.localToWorld(V3(0, 0.3, -0.85));
+  burst(from, '#ffcf6a', 14, 3); burst(from, '#cfc6b8', 10, 1.8);
+  const ball = mesh(new THREE.SphereGeometry(0.16, 10, 8), mat('#2a2d31', { metalness: 0.6 }));
+  const ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: '#e0412e', transparent: true, opacity: 0.85, depthWrite: false, fog: false }));
+  ring.position.set(seaX(to[0]), 0.1 + liftAt(...to), seaZ(to[1]));
+  ring.renderOrder = 3;
+  scene.add(ball, ring);
+  sail.shots.push({ to, t: 0, from, ball, ring });
+}
+function turretLand(to, hit) {
+  const i = sail.shots.findIndex((v) => v.to[0] === to[0] && v.to[1] === to[1]);
+  const v = i >= 0 ? sail.shots.splice(i, 1)[0] : null;
+  if (v) scene.remove(v.ball, v.ring);
+  const at = V3(seaX(to[0]), 0.3 + liftAt(...to), seaZ(to[1]));
+  if (!hit) { burst(at, '#e6f3f6', 20, 4); burst(at, '#9cc8d4', 10, 2.5); return; }
+  sail.helm.hit();
+  burst(at.setY(at.y + 0.8), '#ffb85a', 18, 4); burst(at, '#5a4630', 16, 3.5); burst(at, '#e6f3f6', 10, 3);
+  shake = Math.max(shake, 0.45);
+  toast('Hit! She\'s holed and shipping water: bilge her out to sail on', true);
+}
 function sailTick(dt) {
   sail.rocks ||= seaRocks();
+  sail.world ||= seaWorld();
   sail.g ||= (() => { const g = sloopMesh(); scene.add(g); return g; })();
   const show = sail.on || sloopHome();
   if (sail.g.visible !== show) sail.g.visible = show;
   if (show && !sail.seen && !sail.on && G.phase === 'peace' && !cine && !chart.on) { sail.seen = true; toast('Their ship\'s making sail, and there\'s an old sloop left at anchor in the cove: walk down to her'); }
   if (!show) return;
-  const h = sail.helm;
+  const h = sail.helm, W = sail.world;
+  // The trade winds race along their lanes.
+  for (const tex of W.lanes) tex.offset.y -= dt * 2.2;
   if (sail.on) {
+    const heldWas = h.held();
     for (const e of h.tick(dt)) {
       if (e.kind === 'move' && e.bump) sail.bumpT = SAIL.MOVE * 0.45;   // (felt as she hits)
       if (e.kind === 'arrive' && atHome()) toast('Back at her mooring: Space to go ashore');
+      if (e.kind === 'push') {
+        if (!sail.riding) { sail.riding = true; if (!sail.said.wind) { sail.said.wind = true; toast('The trade winds have her!'); } }
+        burst(V3(seaX(e.from.c), 0.3 + liftAt(e.from.c, e.from.r), seaZ(e.from.r)), '#e6f3f6', 5, 2);
+      }
+      if (e.kind === 'move') sail.riding = false;
+    }
+    if (sail.riding && !(h.cur && h.cur.m === 'W')) {
+      sail.riding = false;
+      const [jc, jr] = LAY.JUNCTION;
+      if (h.pose.c === jc && h.pose.r === jr && !sail.said.junction) { sail.said.junction = true; toast('The junction: right rides the winds round and home, left\'s the canal to the lock, on is open sea'); }
+    }
+    const held = h.held();
+    if (held === 'up' && heldWas !== 'up' && !sail.said.lock) { sail.said.lock = true; toast('The lock: bilge on the quay to pump it up to the cove'); }
+    if (sail.sea.level(h.pose.c, h.pose.r) === 1 && !sail.said.cove) { sail.said.cove = true; toast('The hidden cove, up behind the cliff: an old bilge pump on the sand'); }
+    // The turret shoots at her when she's in reach (not while she's dazed, or in the lock).
+    for (const e of sail.turret.tick(dt, held ? null : h.now())) {
+      if (e.kind === 'fire') turretFire(e.to);
+      else turretLand(e.to, e.hit);
     }
     if (sail.bumpT > 0 && (sail.bumpT -= dt) <= 0) { shake = 0.3; toast('Bump! Rocks', true); }
     sail.guns.tick(dt);
+  }
+  holdTick(dt);
+  // The turret's shots on their way; its gun turned on her; smoking while it's quiet.
+  for (const v of sail.shots) {
+    v.t += dt;
+    const u = Math.min(1, v.t / SAIL.FLIGHT), to = V3(seaX(v.to[0]), 0.3 + liftAt(...v.to), seaZ(v.to[1]));
+    v.ball.position.lerpVectors(v.from, to, u);
+    v.ball.position.y += Math.sin(u * Math.PI) * 4;
+    v.ring.material.opacity = 0.5 + 0.4 * Math.sin(v.t * 14);
+  }
+  {
+    const p = h.now(), tw = W.turret.position, dx = seaX(p.c) - tw.x, dz = seaZ(p.r) - tw.z;
+    if (sail.on) W.gun.rotation.y += (Math.atan2(-dx, -dz) - W.gun.rotation.y + Math.PI * 3) % (Math.PI * 2) - Math.PI > 0 ? Math.min(dt * 2, ((Math.atan2(-dx, -dz) - W.gun.rotation.y + Math.PI * 3) % (Math.PI * 2)) - Math.PI) : Math.max(-dt * 2, ((Math.atan2(-dx, -dz) - W.gun.rotation.y + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
+    if (sail.turret.quiet > 0 && (W.smokeT = (W.smokeT ?? 0) - dt) < 0) { W.smokeT = 0.25; burst(V3(tw.x, 3.8, tw.z), '#6f6a66', 2, 0.6); }
+  }
+  // The lock: its chamber's water at its level; each pair of gates open when she can pass that end.
+  const lockY = h.level * LIFT;
+  W.chamber.position.y = lockY + 0.05;
+  W.chamber.visible = lockY > 0.02;
+  for (const [end, gt] of Object.entries(W.gates)) {
+    const open = end === 'sea' ? h.level < 0.01 : h.level > 0.99;
+    gt.open += ((open ? 1 : 0) - gt.open) * Math.min(1, dt * 2.5);
+    for (const lf of gt.leaves) lf.rotation.y = gt.open * lf.userData.sz * gt.sx * Math.PI / 2 * -1;
   }
   // A gun that's fired kicks back in and runs out again as it's loaded, smoking at first.
   for (const side of ['L', 'R']) {
@@ -4438,9 +4778,10 @@ function sailTick(dt) {
     }
   }
   // Her, riding the swell, heeling into her turns.
-  const t = performance.now() / 1000, p = h.now(), turning = h.cur && h.cur.m !== 'F' && !h.cur.bump && h.t < SAIL.MOVE;
+  const t = performance.now() / 1000, p = h.now(), turning = h.cur && (h.cur.m === 'L' || h.cur.m === 'R') && !h.cur.bump && h.t < SAIL.MOVE;
   sail.heel += ((turning ? (h.cur.m === 'L' ? -0.13 : 0.13) : 0) - sail.heel) * Math.min(1, dt * 4);
-  sail.g.position.set(seaX(p.c), Math.sin(t * 0.9) * 0.06, seaZ(p.r));
+  sail.low = (sail.low ?? 0) + ((h.dazed() ? -0.3 : 0) - (sail.low ?? 0)) * Math.min(1, dt * 2);
+  sail.g.position.set(seaX(p.c), liftAt(Math.round(p.c), Math.round(p.r)) + sail.low + Math.sin(t * 0.9) * 0.06, seaZ(p.r));
   sail.g.rotation.y = Math.PI / 2 - p.a * Math.PI / 2;
   sail.g.rotation.x = sail.heel + Math.sin(t * 0.7) * 0.02;
   sail.g.rotation.z = Math.sin(t * 0.55) * 0.02;
@@ -4452,24 +4793,27 @@ function sailTick(dt) {
     pirate.g.rotation.set(0, Math.atan2(Math.cos(yaw), -Math.sin(yaw)), 0);
     animateWalk(pirate, false, dt);
     pirate.g.position.y = at.y;
-  }
+    sail.stars ||= (() => { const g = new THREE.Group(), m = new THREE.MeshBasicMaterial({ color: '#ffe066' }); for (let i = 0; i < 3; i++) { const s = mesh(new THREE.OctahedronGeometry(0.12, 0), m, false); s.position.set(Math.cos(i * 2.1) * 0.4, 0, Math.sin(i * 2.1) * 0.4); g.add(s); } scene.add(g); return g; })();
+    sail.stars.visible = h.dazed();
+    if (h.dazed()) { sail.stars.position.set(at.x, at.y + 2.15, at.z); sail.stars.rotation.y += dt * 4; }
+  } else if (sail.stars) sail.stars.visible = false;
   // The pin, and the course to it dotted on the water.
   sail.pin ||= pinMesh();
   sail.pin.visible = sail.on && !!h.pin;
-  if (h.pin) sail.pin.position.set(seaX(h.pin[0]), Math.sin(t * 1.3) * 0.08, seaZ(h.pin[1]));
+  if (h.pin) sail.pin.position.set(seaX(h.pin[0]), liftAt(...h.pin) + Math.sin(t * 1.3) * 0.08, seaZ(h.pin[1]));
   const sig = sail.on ? `${JSON.stringify(h.after())}${h.slot}${h.course().join('')}${h.mine.length}` : '';
   if (sig !== sail.sig) {
     sail.sig = sig;
     sail.dots.forEach((d) => { d.visible = false; });
     if (sail.on) {
       const pts = [];
-      let q = h.cur ? h.cur.to : h.pose;
+      let q = h.cur ? (h.rides.length ? h.rides[h.rides.length - 1] : h.cur.to) : h.pose;
       if (h.slot >= 0) { pts.push([q, false]); for (let i = h.slot + 1; i < h.turn.length; i++) { q = sail.sea.sail(q, h.turn[i]).to; pts.push([q, false]); } }
       h.course().slice(0, 16).forEach((m, i) => { q = sail.sea.sail(q, m).to; pts.push([q, i < h.mine.length]); });
       pts.forEach(([at, mine], i) => {
         const d = sail.dots[i] ||= (() => { const o = new THREE.Mesh(dotGeo, dotMat); o.renderOrder = 3; scene.add(o); return o; })();
         d.material = mine ? dotMine : dotMat;
-        d.position.set(seaX(at.c), 0.09, seaZ(at.r));
+        d.position.set(seaX(at.c), 0.09 + LIFT * sail.sea.level(at.c, at.r), seaZ(at.r));
         d.visible = true;
       });
     }
@@ -7442,6 +7786,20 @@ function update(dt) {
     dist += (26 * view.zoom - dist) * sailView;
     tilt += (Math.max(0.3, Math.min(1.45, 0.78 + view.pitch)) - tilt) * sailView;
   }
+  // Bilging at sea: down onto the little board, from her stern (on her deck) or the den side (the quay).
+  holdView += ((hold.mode ? 1 : 0) - holdView) * Math.min(1, dt * 3);
+  if (holdView > 0.001 && hold.group?.parent) {
+    const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect), sq = hold.group.scale.x;
+    hold.group.getWorldPosition(L2);
+    look.lerp(L2, holdView);
+    dist += (Math.max((BH * sq / 2 + 0.5 * sq * 4) / Math.tan(vh), (BW * sq / 2 + sq * 2) / Math.tan(hh)) * 1.15 * view.zoom - dist) * holdView;
+    tilt += (1.2 - tilt) * holdView;
+    const ry = sail.g.rotation.y, want = hold.mode === 'daze' ? Math.atan2(-Math.cos(ry), Math.sin(ry)) : 0;
+    const y0 = Math.atan2(Math.sin(yaw), Math.cos(yaw));
+    let d = want - y0;
+    d = Math.atan2(Math.sin(d), Math.cos(d));
+    yaw = y0 + d * holdView;
+  }
   // The cutscene's own shots.
   if (cine) cineCam = cine.cam;
   cineView += ((cine ? 1 : 0) - cineView) * Math.min(1, dt * 2.5);
@@ -7654,7 +8012,7 @@ function cheatSail() {
   phaseWas = 'peace';   // (no cutscene)
   ship.visible = cannon.visible = false; ship.position.x = ship.userData.home + SHIP_GONE + 1;
   sail.seen = true;
-  sail.helm = new Helm(sail.sea);
+  sailReset();
   board();
 }
 const CHEATS = [

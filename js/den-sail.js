@@ -44,6 +44,45 @@ export const SAIL = {
         again after firing. */
     RANGE: 3,
     RELOAD: 3,
+    /** Seconds a square of trade wind takes to sweep her along: "just insanely quick wind tiles". */
+    PUSH: 0.28,
+    /** The lock: moves' worth of Bilge to raise her (see Helm.pump), and seconds it takes to drain
+        down by itself. */
+    LOCK_WORK: 4,
+    DRAIN: 2,
+    /** The turret: how far it reaches (squares, any way), seconds between shots, how long a shot is
+        in the air (time to get out from under it), and how long a hit from her guns quiets it. */
+    TURRET_RANGE: 3,
+    TURRET_RELOAD: 4,
+    FLIGHT: 1.4,
+    QUIET: 10,
+    /** Water a hit puts in her, in moves' worth of Bilge: a quick bit of puzzling and she sails on. */
+    HIT: 3,
+};
+/* The lay of the sea (the user, 9 Nov: "just really go for it. Add some shipping lanes ... where
+   you've got a fork in the road ... some kind of a lock and canal ... if you want to switch from one
+   route to the other one, you know, there's a bit of a cliff. You have to go up a lock").
+
+   A trade wind runs out from near the mooring (A) and drops her at a junction, "just like a normal
+   square", to choose: right onto the wind that sweeps her across (B) and round back in towards the
+   cove (C), a loop; left along a canal to a lock in a cliff, up into a hidden cove behind it; or on
+   out to open sea. Rocks stand along the lanes' sides, and a turret on a rock between them shoots
+   at her. */
+export const LAY = {
+    /** The trade winds: where each starts, the way it blows, and how many squares long. */
+    LANES: [
+        { at: [9, 2], d: 0, n: 8 },
+        { at: [10, 11], d: 1, n: 3 },
+        { at: [13, 11], d: 2, n: 9 },
+    ],
+    JUNCTION: [9, 10],
+    CANAL: [[8, 11], [7, 11], [6, 11]],
+    LOCK: [5, 11],
+    /** The hidden cove: up behind the cliff, its water a lock's lift above the sea. */
+    COVE: { c0: 0, c1: 4, r0: 9, r1: 13 },
+    TURRET: [11, 6],
+    /** Rocks along the lanes' sides ("some craziness to the journey"). */
+    SIDES: [[8, 5], [10, 8], [12, 4], [14, 8], [11, 13]],
 };
 /** Across and out for each way she can face. */
 const DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
@@ -73,22 +112,63 @@ export class Sea {
     cols = SAIL.COLS;
     rows = SAIL.ROWS;
     rocks = new Set();
-    constructor(seed = 1) {
+    /** The trade winds: the way each lane square blows (see LAY). */
+    wind = new Map();
+    /** The cliff round the hidden cove (rocks too), the cove's water, the lock, the turret's rock. */
+    cliff = new Set();
+    cove = new Set();
+    lock = null;
+    turret = null;
+    junction = null;
+    /** Squares the scattered rocks keep off: the lanes and everything round them. */
+    keep = new Set();
+    /** A sea of scattered rocks; with `lay`, the lanes, the lock and the cove too (LAY). */
+    constructor(seed = 1, lay = true) {
+        if (lay)
+            this.lay();
         for (let tries = 0; tries < 50; tries++) {
             this.scatter(dice(seed + tries * 7919));
             if (this.allReachable())
                 return;
         }
-        this.rocks.clear(); // (never seen: a clear sea, rather than a stuck one)
+        this.scatter(() => 1); // (never seen: no scattered rocks, rather than a stuck sea)
+    }
+    lay() {
+        const near = (c, r) => { for (let a = -1; a <= 1; a++)
+            for (let b = -1; b <= 1; b++)
+                this.keep.add(key(c + a, r + b)); };
+        for (const { at: [c, r], d, n } of LAY.LANES)
+            for (let i = 0; i < n; i++) {
+                const x = c + DC[d] * i, y = r + DR[d] * i;
+                this.wind.set(key(x, y), d);
+                near(x, y);
+            }
+        for (const [c, r] of [LAY.JUNCTION, [LAY.JUNCTION[0], LAY.JUNCTION[1] + 1], ...LAY.CANAL, LAY.TURRET])
+            near(c, r);
+        const { c0, c1, r0, r1 } = LAY.COVE;
+        for (let c = c0; c <= c1; c++)
+            for (let r = r0; r <= r1; r++)
+                this.cove.add(key(c, r));
+        for (let r = r0 - 1; r <= r1; r++)
+            if (r !== LAY.LOCK[1])
+                this.cliff.add(key(c1 + 1, r));
+        for (let c = c0; c <= c1; c++)
+            this.cliff.add(key(c, r0 - 1));
+        for (let c = c0; c <= c1 + 2; c++)
+            for (let r = r0 - 2; r <= r1; r++)
+                this.keep.add(key(c, r));
+        this.lock = [...LAY.LOCK];
+        this.turret = [...LAY.TURRET];
+        this.junction = [...LAY.JUNCTION];
     }
     scatter(roll) {
-        this.rocks.clear();
+        this.rocks = new Set([...this.cliff, ...LAY.SIDES.filter(() => this.wind.size).map(([c, r]) => key(c, r)), ...(this.turret ? [key(...this.turret)] : [])]);
         const H = SAIL.HOME;
         for (let n = 0; n < SAIL.CLUMPS; n++) {
             let c = Math.floor(roll() * this.cols), r = 2 + Math.floor(roll() * (this.rows - 2));
             const size = 1 + Math.floor(roll() * 3);
             for (let i = 0; i < size; i++) {
-                if (Math.abs(c - H.c) > 2 || r > 3)
+                if ((Math.abs(c - H.c) > 2 || r > 3) && !this.keep.has(key(c, r)) && c < this.cols && r < this.rows)
                     this.rocks.add(key(c, r));
                 if (roll() < 0.5)
                     c += roll() < 0.5 ? -1 : 1;
@@ -99,6 +179,32 @@ export class Sea {
             }
         }
     }
+    /** The way the trade wind blows on this square, if it's a lane. */
+    windAt(c, r) { return this.wind.get(key(c, r)); }
+    isLock(c, r) { return !!this.lock && this.lock[0] === c && this.lock[1] === r; }
+    /** The water's level here: the sea's 0, the hidden cove's 1 (the lock's is the helm's). */
+    level(c, r) { return this.cove.has(key(c, r)) ? 1 : 0; }
+    /** Swept along by the trade winds from here, a square at a time, facing the way it blows, till
+        she's off the lane (or would hit something). */
+    ride(p) {
+        const out = [];
+        let at = p;
+        for (let d = this.windAt(at.c, at.r); d !== undefined && out.length < 64; d = this.windAt(at.c, at.r)) {
+            const c = at.c + DC[d], r = at.r + DR[d];
+            if (!this.open(c, r))
+                break;
+            at = { c, r, d };
+            out.push(at);
+        }
+        return out;
+    }
+    /** A move and what the wind does after it. */
+    move(p, m) {
+        const { cells, to } = path(p, m);
+        if (cells.every(([c, r]) => this.open(c, r)))
+            return { to, bump: false, ride: this.ride(to) };
+        return { to: { c: p.c, r: p.r, d: to.d }, bump: true, ride: [] };
+    }
     /** On the board and not a rock. */
     open(c, r) {
         return c >= 0 && c < this.cols && r >= 0 && r < this.rows && !this.rocks.has(key(c, r));
@@ -108,10 +214,8 @@ export class Sea {
         rock (or off the edge of the board) and she stays put; a turn that's blocked turns her where
         she is. */
     sail(p, m) {
-        const { cells, to } = path(p, m);
-        if (cells.every(([c, r]) => this.open(c, r)))
-            return { to, bump: false };
-        return { to: { c: p.c, r: p.r, d: to.d }, bump: true };
+        const { to, bump, ride } = this.move(p, m);
+        return { to: ride.length ? ride[ride.length - 1] : to, bump };
     }
     /** The pilot: the fewest moves from here to that square (facing any way), never sailing into a
         rock, though a turn that's blocked can turn her where she is (facing the shore at the board's
@@ -177,8 +281,8 @@ export class Sea {
             const next = [];
             for (const p of edge)
                 for (const m of ['F', 'L', 'R']) {
-                    const { cells, to } = path(p, m), s = `${to.c},${to.r},${to.d}`;
-                    if (!cells.every(([x, y]) => this.open(x, y)) || seen.has(s))
+                    const { to, bump } = this.sail(p, m), s = `${to.c},${to.r},${to.d}`;
+                    if (bump || seen.has(s))
                         continue;
                     seen.add(s);
                     got.add(key(to.c, to.r));
@@ -186,9 +290,10 @@ export class Sea {
                 }
             edge = next;
         }
+        // (She can't stop on a lane: the wind always sweeps her on.)
         for (let c = 0; c < this.cols; c++)
             for (let r = 0; r < this.rows; r++)
-                if (this.open(c, r) && !got.has(key(c, r)))
+                if (this.open(c, r) && this.windAt(c, r) === undefined && !got.has(key(c, r)))
                     return false;
         return true;
     }
@@ -221,8 +326,14 @@ export class Helm {
     turn = [];
     slot = -1;
     t = 0;
-    /** The move being sailed just now. */
+    /** What's being sailed just now: a move, or a square of trade wind ('W') sweeping her on. */
     cur = null;
+    /** The squares of trade wind still to come after it. */
+    rides = [];
+    /** The lock's water: 0 the sea's level, 1 the hidden cove's. */
+    level = 0;
+    /** Water a hit's put in her, in moves' worth of Bilge: she's dazed till it's pumped out. */
+    shipped = 0;
     wait = 0;
     constructor(sea, pose = SAIL.HOME) {
         this.sea = sea;
@@ -232,8 +343,8 @@ export class Helm {
     after() {
         if (this.slot < 0)
             return { ...this.pose };
-        let p = this.cur ? this.cur.to : this.pose;
-        for (let i = this.slot + 1; i < this.turn.length; i++)
+        let p = this.cur ? (this.rides.length ? this.rides[this.rides.length - 1] : this.cur.to) : this.pose;
+        for (let i = this.slot + (this.cur ? 1 : 0); i < this.turn.length; i++)
             p = this.sea.sail(p, this.turn[i]).to;
         return { ...p };
     }
@@ -271,69 +382,194 @@ export class Helm {
     }
     /** Take back the last move you put in. */
     unput() { return this.mine.pop(); }
-    /** Pull up the pin and forget your moves: she stops when this turn's done. */
-    stop() { this.pin = null; this.mine = []; }
+    /** Pull up the pin and forget your moves: she stops when this turn's done (or straight away,
+        if she's waiting at the lock). */
+    stop() {
+        this.pin = null;
+        this.mine = [];
+        if (!this.cur && this.slot >= 0) {
+            this.turn = [];
+            this.slot = -1;
+            this.wait = SAIL.BREAK;
+        }
+    }
     /** Nothing playing and nothing to play. */
     idle() { return this.slot < 0 && !this.next().length; }
+    dazed() { return this.shipped > 1e-9; }
+    /** Hit (by the turret, say): water in her, and she's dazed till it's pumped out. She finishes
+        the move she's on (or the trade wind's ride), then waits. */
+    hit() { this.shipped += SAIL.HIT; }
+    /** What she's waiting on, if anything. */
+    held() {
+        if (this.dazed())
+            return 'daze';
+        if (this.slot >= 0 && !this.cur)
+            return this.gate(this.turn[this.slot]);
+        return null;
+    }
+    /** A move of Bilge's worth: pumps her out if she's dazed, or the lock up if she's waiting on it.
+        What it went to. */
+    pump(w) {
+        if (this.dazed()) {
+            this.shipped = Math.max(0, this.shipped - w);
+            return 'daze';
+        }
+        if (this.held() === 'up') {
+            this.level = Math.min(1, this.level + w / SAIL.LOCK_WORK);
+            return 'lock';
+        }
+        return null;
+    }
+    /** Whether the lock's in the way of this move: through its gates only when its water's at the
+        level of the other side. */
+    gate(m) {
+        if (!this.sea.lock)
+            return null;
+        const { cells } = path(this.pose, m);
+        if (!cells.every(([c, r]) => this.sea.open(c, r)))
+            return null; // (she'll only bump)
+        const seq = [[this.pose.c, this.pose.r], ...cells];
+        for (let i = 0; i + 1 < seq.length; i++) {
+            const a = this.sea.isLock(...seq[i]), b = this.sea.isLock(...seq[i + 1]);
+            if (a === b)
+                continue;
+            const want = this.sea.level(...(a ? seq[i + 1] : seq[i]));
+            if (Math.abs(this.level - want) > 1e-6)
+                return want > this.level ? 'up' : 'down';
+        }
+        return null;
+    }
     /** Where she is right now, for drawing (see poseAt). */
     now() {
         if (!this.cur)
             return { c: this.pose.c, r: this.pose.r, a: this.pose.d };
-        return poseAt(this.cur.from, this.cur.m, Math.min(1, this.t / SAIL.MOVE), this.cur.bump);
+        const { from, to, m } = this.cur;
+        if (m === 'W') {
+            const u = Math.min(1, this.t / SAIL.PUSH), turn = ((to.d - from.d + 6) % 4) - 2;
+            return { c: from.c + (to.c - from.c) * u, r: from.r + (to.r - from.r) * u, a: from.d + turn * Math.min(1, u * 1.5) };
+        }
+        return poseAt(from, m, Math.min(1, this.t / SAIL.MOVE), this.cur.bump);
     }
     tick(dt) {
         const out = [];
         let left = dt;
-        while (left > 0) {
-            if (this.slot < 0) {
-                // Between turns: the breather, then the next turn, if there's anything to play.
-                const use = Math.min(left, Math.max(0, this.wait));
-                this.wait -= use;
+        for (let guard = 0; left > 1e-12 && guard < 1000; guard++) {
+            if (this.cur) {
+                // A move or a square of wind, then (after the last of the wind) the pause. Dazed, she
+                // holds once the move's sailed; the wind sweeps her on regardless.
+                const cur = this.cur, dur = cur.m === 'W' ? SAIL.PUSH : SAIL.MOVE;
+                const span = dur + (this.rides.length ? 0 : SAIL.PAUSE), hold = this.dazed() && !this.rides.length;
+                if (hold && cur.done)
+                    break;
+                const use = hold ? Math.min(left, Math.max(0, dur - this.t)) : Math.min(left, span - this.t);
+                this.t += use;
                 left -= use;
-                if (this.wait > 1e-9)
-                    break;
-                const moves = this.next();
-                if (!moves.length)
-                    break;
-                this.mine.splice(0, Math.min(this.mine.length, moves.length));
-                this.turn = moves;
-                this.slot = 0;
-                this.t = 0;
-                out.push({ kind: 'turn', moves: [...moves] });
-                this.begin(out);
-                continue;
-            }
-            const span = SAIL.MOVE + SAIL.PAUSE, use = Math.min(left, span - this.t);
-            const was = this.t;
-            this.t += use;
-            left -= use;
-            if (was < SAIL.MOVE && this.t >= SAIL.MOVE && this.cur) {
-                // The move's sailed.
-                this.pose = { ...this.cur.to };
-                if (this.pin && this.pose.c === this.pin[0] && this.pose.r === this.pin[1]) {
-                    this.pin = null;
-                    out.push({ kind: 'arrive', at: { ...this.pose } });
+                if (!cur.done && this.t >= dur - 1e-9) {
+                    cur.done = true;
+                    this.pose = { ...cur.to };
+                    if (this.pin && this.pose.c === this.pin[0] && this.pose.r === this.pin[1]) {
+                        this.pin = null;
+                        out.push({ kind: 'arrive', at: { ...this.pose } });
+                    }
                 }
-            }
-            if (this.t >= span - 1e-9) {
+                if (this.t < span - 1e-9)
+                    continue;
+                this.t = 0;
+                if (this.rides.length) {
+                    const to = this.rides.shift();
+                    this.cur = { m: 'W', from: { ...this.pose }, to, bump: false };
+                    out.push({ kind: 'push', from: { ...this.pose }, to: { ...to } });
+                    continue;
+                }
                 this.cur = null;
                 this.slot++;
-                this.t = 0;
                 if (this.slot >= this.turn.length) {
                     this.slot = -1;
                     this.turn = [];
                     this.wait = SAIL.BREAK;
                 }
-                else
-                    this.begin(out);
+                continue;
             }
+            if (this.slot >= 0) {
+                // The next move of the turn, unless she's dazed or waiting on the lock.
+                if (this.dazed())
+                    break;
+                const g = this.gate(this.turn[this.slot]);
+                if (g === 'up')
+                    break;
+                if (g === 'down') {
+                    const use = Math.min(left, this.level * SAIL.DRAIN);
+                    this.level -= use / SAIL.DRAIN;
+                    left -= use;
+                    if (this.level > 1e-6)
+                        break;
+                    this.level = 0;
+                    continue;
+                }
+                this.begin(out);
+                continue;
+            }
+            // Between turns: the breather, then the next turn, if there's anything to play.
+            const use = Math.min(left, Math.max(0, this.wait));
+            this.wait -= use;
+            left -= use;
+            if (this.wait > 1e-9 || this.dazed())
+                break;
+            const moves = this.next();
+            if (!moves.length)
+                break;
+            this.mine.splice(0, Math.min(this.mine.length, moves.length));
+            this.turn = moves;
+            this.slot = 0;
+            this.t = 0;
+            out.push({ kind: 'turn', moves: [...moves] });
         }
         return out;
     }
     begin(out) {
-        const m = this.turn[this.slot], { to, bump } = this.sea.sail(this.pose, m);
+        const m = this.turn[this.slot], { to, bump, ride } = this.sea.move(this.pose, m);
         this.cur = { m, from: { ...this.pose }, to, bump };
+        this.rides = ride;
+        this.t = 0;
         out.push({ kind: 'move', i: this.slot, m, from: { ...this.pose }, to: { ...to }, bump });
+    }
+}
+export class Turret {
+    at;
+    /** Seconds till it can fire again, and till it's over being hit. */
+    wait = 1;
+    quiet = 0;
+    /** Shots in the air: where each comes down, and when. */
+    shots = [];
+    constructor(at) {
+        this.at = at;
+    }
+    /** Within its reach (squares, any way). */
+    reaches(c, r) { return Math.max(Math.abs(c - this.at[0]), Math.abs(r - this.at[1])) <= SAIL.TURRET_RANGE; }
+    /** Hit by her guns: quiet for a while. */
+    silence() { this.quiet = SAIL.QUIET; }
+    /** `ship`: where she is now (Helm.now), or null when it shouldn't shoot at her (she's not out,
+        or she's dazed already). */
+    tick(dt, ship) {
+        const out = [];
+        this.quiet = Math.max(0, this.quiet - dt);
+        this.wait = Math.max(0, this.wait - dt);
+        for (const s of this.shots)
+            s.t -= dt;
+        for (const s of this.shots.filter((x) => x.t <= 1e-9)) {
+            const hit = !!ship && Math.round(ship.c) === s.to[0] && Math.round(ship.r) === s.to[1];
+            out.push({ kind: 'land', to: s.to, hit });
+        }
+        this.shots = this.shots.filter((x) => x.t > 1e-9);
+        if (ship && this.quiet <= 0 && this.wait <= 0) {
+            const to = [Math.round(ship.c), Math.round(ship.r)];
+            if (this.reaches(...to)) {
+                this.shots.push({ to, t: SAIL.FLIGHT });
+                this.wait = SAIL.TURRET_RELOAD;
+                out.push({ kind: 'fire', to });
+            }
+        }
+        return out;
     }
 }
 /** A shot out of that side from where she is now (see Helm.now: mid-move counts from the square
