@@ -167,6 +167,16 @@
     .palette { position: absolute; display: none; grid-template-columns: repeat(7, 26px); gap: 6px; padding: 10px; background: #1a120b; border: 1px solid var(--gold); border-radius: 10px; z-index: 1; }
     .palette.on { display: grid; }
     @media (max-width: 640px) { .dress-box { flex-direction: column; align-items: center; } .dress-view { flex: none; } .dress-view canvas { width: 200px; height: 240px; } .dress-side { width: 100%; } .dress .pick b { min-width: 120px; } }
+    /* The captain's map cutscene: black bars top and bottom, the den's own buttons and keys out of
+       the way, and speech bubbles over the pirates. */
+    .cine-bar { position: fixed; left: 0; right: 0; height: 0; background: #000; z-index: 30; pointer-events: none; transition: height .6s ease; overflow: hidden; }
+    .cine-bar.top { top: 0; }
+    .cine-bar.bot { bottom: 0; display: flex; align-items: center; justify-content: flex-end; padding-right: 22px; color: #bfae8a; font-size: 14px; }
+    body.cine .cine-bar { height: 10vh; }
+    .hud, .dock, .banner, .credit { transition: opacity .4s; }
+    body.cine .hud, body.cine .dock, body.cine .banner, body.cine .intro, body.cine .credit, body.cine .toast { opacity: 0; pointer-events: none; }
+    .label.say { font: 700 21px 'Alegreya', serif; color: #2a1a0c; background: #f6ecd2; border: 2px solid #2a1a0c; border-radius: 16px; padding: 4px 14px; margin-top: -12px; }
+    .label.say::after { content: ''; position: absolute; left: 50%; bottom: -11px; margin-left: -9px; border: 9px solid transparent; border-top-color: #2a1a0c; border-bottom: 0; }
   </style>
 </head>
 <body>
@@ -182,7 +192,7 @@
   <div class="boards" id="boards" title="Tab: on to the next thing being built"></div>
   <div class="prompt" id="prompt"></div>
   <div class="toolbox" id="toolbox" title="Press 1, 2 or 3 (or click) to take that crate's piece"><span class="cap">Crates</span></div>
-  <div class="keys"><kbd>WASD</kbd> walk · <kbd>Space</kbd> or click: pick up / fit · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd>: take a crate's piece · <kbd>Q</kbd><kbd>E</kbd> turn · <kbd>F</kbd> flip · <kbd>Tab</kbd>: Carpentry view (arrows move · <kbd>X</kbd><kbd>C</kbd> turn · <kbd>Z</kbd> flip · <kbd>Q</kbd><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd> holes · <kbd>Tab</kbd> next · <kbd>Esc</kbd> walks off) · <kbd>Shift</kbd> or click a raider: throw · <kbd>Z</kbd><kbd>C</kbd> or right-drag: turn the view, all the way round · <kbd>B</kbd> decorate · <kbd>P</kbd> pause · <kbd>`</kbd> cheats · wheel: turn the piece you carry, or zoom (<kbd>-</kbd><kbd>=</kbd>)</div>
+  <div class="keys"><kbd>WASD</kbd> walk · <kbd>Space</kbd> or click: pick up / fit · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd>: take a crate's piece · <kbd>Q</kbd><kbd>E</kbd> turn · <kbd>F</kbd> flip · <kbd>Tab</kbd>: Carpentry view (arrows move · <kbd>X</kbd><kbd>C</kbd> turn · <kbd>Z</kbd> flip · <kbd>Q</kbd><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd> holes · <kbd>Tab</kbd> next · <kbd>Esc</kbd> walks off) · <kbd>Shift</kbd> or click a raider: throw · <kbd>Z</kbd><kbd>C</kbd> or right-drag: turn the view, all the way round · <kbd>B</kbd> decorate · <kbd>M</kbd> the captain's map, once you have it · <kbd>P</kbd> pause · <kbd>`</kbd> cheats · wheel: turn the piece you carry, or zoom (<kbd>-</kbd><kbd>=</kbd>)</div>
   </div>
   <div class="credit">Puzzle Pirates™ © 2001–2026 Grey Havens, LLC, created by Three Rings Design.<br>An unofficial fan project, not affiliated with or endorsed by them.</div>
   <div class="gunhelp" id="gunhelp"></div>
@@ -190,6 +200,7 @@
   <div class="end" id="paused"><div><h2>Paused</h2><p>The raiders will wait. Press <b>P</b> or <b>Space</b> to carry on.</p><button id="resume">Carry on</button></div></div>
   <div class="end" id="end"><div><h2>The den's been plundered!</h2><p id="end-text"></p><button id="again">Defend it again</button></div></div>
   <div id="labels"></div>
+  <div class="cine-bar top"></div><div class="cine-bar bot">Space: skip</div>
   <div id="tags"></div>
   <div class="crew cheats" id="cheats"><div>
     <h2>Cheats</h2>

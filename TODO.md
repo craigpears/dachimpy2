@@ -103,6 +103,11 @@ the site (`.assetsignore` skips `*.md`).
 
 ## Needs a playtest to pin down
 
+- **The captain's map and its cutscene (9 Nov), not yet seen by the user.** (RULES.md, "The
+  captain's map".) Watch: whether the cutscene's timing and camera feel right (about ten
+  seconds), whether the map reads well from where the camera looks down on it, and whether M is
+  a good key for it.
+
 - **Towers, a lower middle and a night sky (9 Nov), not yet seen by the user.** (RULES.md, "You
   can see out to sea".) Watch for: whether enough of the beach shows from where you usually
   stand; the step down from the towers to the middle; the walk and gun tower spanning the middle

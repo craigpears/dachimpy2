@@ -51,31 +51,53 @@ more things you go and do as a group activity.
   challenge him first). That's a Rumble, with animated punches going back and forth between the
   two little avatars each time you send one.
 
-## The captain's map, up the cliffs to an X (9 Nov, the next big feature)
+## The captain's map, out to sea to his hideout (9 Nov, the next big feature)
 
-The user, liking "Raids you choose": the reward for beating the third wave is a **treasure map**,
-leading up the rocks behind the den to an X marks the spot. "I want that pirate hideout feel, not
-a city feel." It's a big feature, so it's built a bit or two at a time ("pick one or two bits to do
-at a time so that we can compress and come back later on"). In order:
+The user, liking "Raids you choose": the reward for beating the third wave is a **treasure map**
+to an X marks the spot. It's a big feature, so it's built a bit or two at a time ("pick one or two
+bits to do at a time so that we can compress and come back later on"). At first the X was up the
+rocks behind the den ("I want that pirate hideout feel, not a city feel"); then, the same day, it
+moved **out to sea**: "it feels weird going backwards ... it would be better if you can go
+forward". You **row out to his hideout**, which gives it "a bit more of a PvP feel": the reverse,
+"a mirror of this kind of siege", with you the raider this time. In order:
 
-1. **The siege ends after three waves; soldiers are capped at a handful.** Started 9 Nov (TODO.md).
-2. **The map.** Beating wave 3, their captain leaves it behind as he sails off (pinned to the gate
-   with his dagger, say, or dropped by the last boat on the beach). Pick it up and it opens as a
-   scrap of parchment: the den, the paths up the cliffs behind, an X. **The map shows the
-   choices** (the user, 9 Nov): "we hear there's some secret treasure here, guarded by a fearsome
-   enemy", with the ways to him marked around it: a gunning platform here, a secret bilge pump
-   station there, a path up for a straight sword fight. You pick your way from the map.
-3. **The way up the rocks.** Behind the den, ledges, ladders and a rope bridge or two, climbing up
-   into the cliff, hideout-style (see "A little town up the cliffs"): somewhere to walk, with the
-   den below and the sea beyond.
-4. **X marks the spot, and the dig.** Digging needs to be a puzzle, and a believable one: no
-   puzzle "randomly in the middle of an open area". Treasure Haul doesn't fit (the user: "it feels
-   like it breaks the immersion"). Ideas to choose from:
+1. **The siege ends after three waves; soldiers are capped at a handful.** Built 9 Nov.
+2. **The map, and a cheesy little cutscene** (being built 9 Nov, TODO.md). Beat wave 3 and the
+   camera cuts to the beach: their captain shakes his fist, "We'll be back!", runs for his boat,
+   and a map falls out of his coat. Your pirate walks out through the gate on their own, picks it
+   up ("A map!") and opens it out on the sand. The user: "a short, cheesy one, but that would be
+   fantastic". **The map shows the choices**: "we hear there's some secret treasure here, guarded
+   by a fearsome enemy", with your cove at the bottom, the sea, and his island at the top, and the
+   ways in marked on it:
+   - *By sea, with the guns:* come at him in a ship and shoot up his defences ("that makes the
+     gunnery deck more natural, because you're out in your ship");
+   - *Land and swordfight him* on his beach;
+   - *Round the corner:* "bypass his defenses, go around the corner into some cove", where the
+     map says there's "some hidden undiscovered bilge pump": flood him out.
+3. **A pile of scrolls, not just the one map (the user, 9 Nov):** "imagine like having a pile of
+   scrolls and he's trying to figure out what's on all of them". The captain drops a bundle, and
+   each scroll opens something different, so you're "not just going necessarily straight":
+   - the map to **his hideout** (the next part of the story);
+   - a map to an **island to forage** on the way, or the **capybara rescue** (see "Side quests
+     that leave friends about the den");
+   - a chart showing **a hidden cove** with something in it (a plant, the bilge pump);
+   - **plans for building**: the gun platform, say, so building it is unlocked by the plans you
+     found, not handed out.
+   And meanwhile you can stay home and do up your hideout instead. **This is why the den wants
+   side quests**: the story's path is there, but you choose when, and what else you do first.
+4. **Getting there.** How you cross the sea: in the raiders' rowboats, or the abandoned sloop in
+   the harbour (which also goes with 6). To pin down.
+5. **Sneaking in for the loot, and aggro (the user, 9 Nov):** a way that's closer to Treasure
+   Haul: the map shows "there's this spot where they buried their treasure", and you sneak onto
+   his island **without a direct confrontation** and steal some of it. Doing that builds up
+   **aggravation**: the more you take, the angrier they get, and that's what brings on further
+   raids at your den. (So the raids that come "when the world gives a reason" have one: your own
+   thieving.) Digging still needs to be believable where it happens (the user, earlier: Treasure
+   Haul "breaks the immersion" in the middle of a hillside):
    - *Digging, Foraging-style:* in Puzzle Pirates, Foraging is digging up goods on an island, so
-     digging through earth, roots and rocks down to the chest is what it was made for.
-   - *On the way up:* clearing brush and fallen rocks off the path (Foraging again), or rigging a
-     rope bridge across a gap (Rigging; the cliff town already wants rope bridges).
-5. **The owner: Dalnoth, guarding his treasure, and your choice of how to get past him.** The
+     digging down to the chest is what it was made for;
+   - *Clearing the way:* brush and fallen rocks (Foraging again), or a rope bridge (Rigging).
+6. **The owner: Dalnoth, guarding his treasure, and your choice of how to get past him.** The
    user's friend's pirate, **Dalnoth** of Emerald (YPPedia: Dalnoth; senior officer of Rootbeer
    Flotillas, flag Illusion, once of Hunter Ocean; the "Hunter Champion" the user remembered is the
    Champion familiar he won there). His portrait, for his likeness: a horned helmet (pale, gold
@@ -86,14 +108,14 @@ at a time so that we can compress and come back later on"). In order:
    choices are left open** (the user: "I like that principle. Like, leave the choices open"), one
    for each puzzle the den has:
    - *Swordfight him* (it's in the den already; Rumble later);
-   - *Gunning:* a gun deck up in the cliffs, and you shoot him off it (or the rocks above him);
+   - *Gunning:* from your ship (or a gun platform, built from plans you found), shoot him off it;
    - *Bilge:* pump water into where he's sitting and flood him out, so the treasure washes out
      onto the ground;
    - (and maybe *Carpentry*, the den's own puzzle: shore up or build something to get at him.)
    Story order still to settle: whether you dig before or after you get past him.
    - **His monkey is yours (the user's favourite bit, "to rub it in"):** beaten, he runs off, but
      his white monkey stays: you're the champion now, so it hops onto your shoulder. That's what
-     makes him so furious he comes back (6).
+     makes him so furious he comes back (7).
    - **Familiars are earned, not chosen:** so the Your pirate panel stops letting you just pick a
      familiar; you get them by winning them, as Dalnoth won his (a Champion familiar in Puzzle
      Pirates). Dalnoth's white monkey is the first. (Today the panel offers a parrot, a monkey or
@@ -101,7 +123,7 @@ at a time so that we can compress and come back later on"). In order:
      settle with the user when it's built.)
    - *Sword or Rumble, your choice (later):* players love one and hate the other, so let them pick
      which they fight with (as "choosing your mini-game" already says for the soldiers).
-6. **Dalnoth comes back for it.** A big famous pirate robbed of his treasure gets very grouchy and
+7. **Dalnoth comes back for it.** A big famous pirate robbed of his treasure gets very grouchy and
    very angry, and comes back with his crew: that's what brings on the next round of raids,
    naturally. And again, two ways to meet him:
    - *Dig in at the den:* fortify the hideout, build gun towers, build up your soldiers, and fight

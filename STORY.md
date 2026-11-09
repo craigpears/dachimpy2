@@ -41,6 +41,12 @@ in time the den becomes the thing itself (TODO.md, "Split the den off").
   won, as in Puzzle Pirates, not picked from a list.
 - **A hideout, not a city.** Lodgings dug into the cliff, ladders and rope bridges, a den behind a
   wall in a cove. Small and characterful, never a sprawling town.
+- **Forward, not back.** The story goes outward: out of the den and across the sea to raid the
+  ones who raided you, not back up behind the den ("it feels weird going backwards").
+- **The story's path is there, but not a straight line.** Side quests along the way (the scrolls,
+  the capybara, foraging), or staying home to build: you choose when to take the next step.
+- **Little cutscenes, short and cheesy,** for the story's big beats: the camera cuts to what's
+  happening, and Space always skips.
 - **Not overpowered.** Building on (more guns, more rampart) is fine as long as it doesn't make
   the game trivial; armies start small (a handful of soldiers) and grow as the den grows.
 - **Better together.** In the spirit of Puzzle Pirates, a crew helps each other's puzzles, visibly,
@@ -62,14 +68,19 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    - Your **shack** can be built whenever you like, in its plot at the back.
 3. ✓ **They sail off, and the den's quiet.** Beat wave 3 and their captain calls it off: "We'll be
    back!" No countdown after that.
-4. · **The captain's map.** Left behind as they sail: "we hear there's some secret treasure here,
-   guarded by a fearsome enemy". It shows the cliffs behind the den, an X, and the ways to it: a
-   gunning platform, a secret bilge pump station, a path up for a straight sword fight.
-5. · **Up the cliffs.** Ledges, ladders, rope bridges into the rock behind the den. Believable
-   puzzles on the way (clearing the path, rigging a bridge) and a dig at the X.
+4. ✓ **The captain's map.** A short, cheesy cutscene: their captain shakes his fist on the beach,
+   "We'll be back!", runs for his boat, and a map falls out of his coat; your pirate walks out
+   and picks it up. "We hear there's some secret treasure here, guarded by a fearsome enemy." It
+   shows his island across the sea, and the ways in: by ship with the guns, land and swordfight,
+   or round to a hidden cove with an old bilge pump.
+5. · **Out to sea, to his hideout.** Forward, not back: you go and raid him, "a mirror of this
+   kind of siege". And not necessarily straight there: the captain drops a pile of scrolls (maps
+   to an island to forage, the capybara rescue, plans for the gun platform), and you can stay
+   home and do up the den first. Or sneak onto his island for some of his buried loot, without a
+   fight; every theft angers them more, and that's what brings the raids back.
 6. · **Dalnoth, guarding his treasure.** A big famous pirate, sitting on his chest with his monkey
    and his tankard. Get past him your way: swordfight him, shoot him off from the gun platform, or
-   pump water in and flood him out so the treasure washes onto the ground. He runs off, but his
+   pump water in from the hidden cove and flood him out so the treasure washes onto the ground. He runs off, but his
    white monkey stays: you're the champion now, and it hops onto your shoulder. (Familiars are
    earned, not picked from a list; this is your first.)
 7. · **Dalnoth comes back, furious.** Robbed of his treasure and his monkey, he returns with his crew, and that
@@ -87,7 +98,9 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
 | Mend the wall | The first wave comes (with a beat to see it done) |
 | Beat wave 1 | Timber for the walk, then the stairs |
 | Beat wave 2 | Timber for the gun tower |
-| Beat wave 3 | The siege is over: calm. (To come: the captain's map) |
+| Beat wave 3 | The siege is over: calm, and the captain's map (a cutscene) |
+| Find the scrolls (to come) | Maps to side quests, plans for building (the gun platform) |
+| Steal his buried loot (to come) | Gold, and his crew's anger: raids come back |
 | Break fused chests at the armoury | Soldiers, up to a handful (more as the den grows: to come) |
 | Break loose crates | Planks that mend the wall for good |
 | Walk into the plot | Your shack, built the same way, any time |

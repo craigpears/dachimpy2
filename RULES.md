@@ -130,6 +130,25 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   explore": "do a few waves". What brings raiders back later is to come (IDEAS.md, "Raids you
   choose" and "The captain's map"); for now only the cheat's "Next wave now" does, the ship back
   at anchor, and the den goes quiet again once it's beaten. Rules: `src/den-raids.ts`.
+- **The captain's map, and the cheesy cutscene that brings it (9 Nov).** Beat the third wave and
+  a short cutscene plays (the user: "I want a little cutscene, so they're not just sailing off in
+  the distance ... a short, cheesy one"), black bars top and bottom, the den's buttons and keys
+  out of the way: their captain, in his red coat and hat on the beach, shakes his fist at your wall
+  ("We'll be back!"), runs for his boat and rows off, and a rolled-up map tumbles out of his coat
+  onto the sand. Then your pirate walks out through the gate on their own, picks it up ("A
+  map!") and opens it out on the sand in front of them, the camera looking down on it. Whatever
+  you had in hand goes back on its crate first. **Space or Esc skips it**, and then the map's left
+  lying on the beach, "A map?" over it, for you to walk out and pick up with Space. **M** opens
+  it again wherever you're standing on the ground; M, Esc, Space or a click rolls it up. The map
+  goes to **his island across the sea**, not back up the cliffs ("it feels weird going backwards
+  ... it would be better if you can go forward"): your cove at the bottom, his island at the top
+  with the X, the captain's scrawl ("we hear there's some secret treasure here, guarded by a
+  fearsome enemy"), and **one way in for each puzzle** (leave the choices open): come at him by
+  sea and shoot up his defences from your ship (Gunning), land on his beach and fight him for it
+  (Swordfight), or round to a hidden cove with "some hidden undiscovered bilge pump" (Bilge). In
+  a crew, whoever picks it up, everyone can open it. Skipping straight to a stage after the
+  siege (the cheats) leaves it lying there, with no cutscene; the cheat "The captain's map scene"
+  plays it again. Nothing out at sea yet (IDEAS.md). Rules: `src/den-map.ts`.
 - **You can see out to sea (9 Nov).** The taller wall shut the view in: "it just feels like I'm
   staring at a wall. It's lost some of the chop. I don't feel like there's any background to look
   at. I don't know why it's so black. Rather like there's supposed to be a sea over there." So:

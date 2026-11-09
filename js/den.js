@@ -13,6 +13,7 @@ import { drawStencil, drawBlade, PALETTE } from './den-sword-draw.js';
 import { Bilge, W as BW, H as BH } from './bilge.js';
 import { KEYS as VIEW_KEYS, nextHole, holeKey, quarters, centreOn, clampTo, nextBoard, arrowStep } from './den-carp-view.js';
 import { afterWave, countingDown } from './den-raids.js';
+import { MAP, mapAfter, canPickUp, canRead, RUMOUR, WAYS, X_AT } from './den-map.js';
 import { twoCourses, isHigh, gateTop, lowMiddle, isSky } from './den-wall.js';
 import { BILGE, Tide, HIGH, LOW, shoreAt, worth, barrelsFor, onRocks, rocksBare, oddsFor, blastHits } from './den-bilge.js';
 import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, cleanDesign, designOf, drawFlag, dyeHex, DYES, SKIN, HAIR, FUR, PARTS, FLAGS, PATTERNS, DECOR, MAX_DECOR, BIOMES, twoColours } from './den-look.js';
@@ -2366,7 +2367,7 @@ function towerLegs() {
 const selfXray = new THREE.MeshBasicMaterial({ color: '#ffd45a', transparent: true, opacity: 0.5, depthFunc: THREE.GreaterDepth, depthWrite: false });
 function selfSeen() {
   if (pirate.xrG !== pirate.g) { pirate.xrG = pirate.g; pirate.xr = addXray(pirate.g, selfXray); }
-  const on = outside();
+  const on = outside() && !cine && !chart.on;   // (not in the cutscene, or over the map: the camera's out front then)
   if (pirate.xrOn !== on) { pirate.xrOn = on; pirate.xr.forEach((x) => { x.visible = on; }); }
 }
 
@@ -3658,15 +3659,426 @@ function bilgeReset() {
   bilge.barrels = [];
 }
 
+// ---------- the captain's map ----------
+/* Left on the beach when the siege is over (src/den-map.ts). Beat the last wave and a short, cheesy
+   cutscene plays (the user, 9 Nov: "I want a little cutscene, so they're not just sailing off in the
+   distance ... You automatically walk out, pick up the treasure map"): their captain, on the beach,
+   shakes his fist ("We'll be back!") and runs for his boat, and a map falls out of his coat; then
+   your pirate walks out through the gate, picks it up and opens it out on the sand in front of them,
+   the camera looking down on it. Space or Esc skips the cutscene (the map's left lying on the beach,
+   to walk out and pick up). M opens it again wherever you are; M, Esc or Space rolls it up. */
+const MAP_W = 1.3, MAP_D = 0.92;
+const chart = { on: false, open: 0, g: null, paper: null, rolls: null, tex: null, scroll: null, label: null, yaw: 0 };
+let mapView = 0, cineView = 0, cine = null, cineCam = null, mapWas = 'none', phaseWas = 'build';
+const mapSpot = () => ({ x: (wall?.door?.cx ?? 0) + MAP.DX, z: MAP.Z });
+const nearMap = () => outside() && !carry && !cine && canPickUp(G.map, pirate.x - mapSpot().x, pirate.z - mapSpot().z);
+
+// The map rolled up and tied with a red ribbon, as it lies on the sand.
+function scrollMesh() {
+  const g = new THREE.Group();
+  const roll = mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.5, 14), mat('#e6d2a0', { roughness: 0.9 }));
+  roll.rotation.z = Math.PI / 2;
+  const tie = mesh(new THREE.TorusGeometry(0.064, 0.013, 6, 16), mat('#a3271c'), false);
+  tie.rotation.y = Math.PI / 2;
+  g.add(roll, tie);
+  return g;
+}
+
+/* The map itself, drawn in ink on old parchment: your cove at the bottom, the sea, his island at the
+   top with the X, and the three ways in. Drawn the first time it's opened (the fonts are in by then). */
+function mapTexture() {
+  const w = 1024, h = Math.round(w * MAP_D / MAP_W), cv = document.createElement('canvas');
+  cv.width = w; cv.height = h;
+  const g = cv.getContext('2d');
+  let seed = 11;
+  const rnd = () => (seed = seed * 16807 % 2147483647) / 2147483647;
+  const P = (u, v) => [u * w, v * h];
+  const INK = '#4a2c14', PAPER = '#e9d4a2';
+  // A ragged, burnt edge.
+  const edge = [], side = (x0, y0, x1, y1, n) => { for (let i = 0; i < n; i++) { const t = i / n; edge.push([x0 + (x1 - x0) * t + (rnd() - 0.5) * 12, y0 + (y1 - y0) * t + (rnd() - 0.5) * 12]); } };
+  const m = 16;
+  side(m, m, w - m, m, 26); side(w - m, m, w - m, h - m, 18); side(w - m, h - m, m, h - m, 26); side(m, h - m, m, m, 18);
+  g.beginPath(); edge.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.closePath();
+  const bg = g.createRadialGradient(w / 2, h / 2, h * 0.2, w / 2, h / 2, w * 0.62);
+  bg.addColorStop(0, '#f0ddae'); bg.addColorStop(0.72, '#dcc08a'); bg.addColorStop(1, '#a3763e');
+  g.fillStyle = bg; g.fill();
+  g.save(); g.clip();
+  g.lineWidth = 14; g.strokeStyle = 'rgba(80,42,14,.5)'; g.stroke();
+  for (let i = 0; i < 8; i++) { g.fillStyle = `rgba(140,95,45,${0.04 + rnd() * 0.06})`; g.beginPath(); g.arc(rnd() * w, rnd() * h, 20 + rnd() * 60, 0, 7); g.fill(); }
+  // The sea: little waves all over the middle.
+  g.strokeStyle = 'rgba(52,72,84,.5)'; g.lineWidth = 2;
+  const wave = (x, y) => { g.beginPath(); g.moveTo(x - 13, y); g.quadraticCurveTo(x - 6.5, y - 6, x, y); g.quadraticCurveTo(x + 6.5, y + 6, x + 13, y); g.stroke(); };
+  for (let i = 0; i < 40; i++) wave(40 + rnd() * (w - 80), h * (0.31 + rnd() * 0.46));
+  const blob = (cu, cv2, ru, rv, n, jag, fill) => {
+    g.beginPath();
+    for (let i = 0; i <= n; i++) {
+      const a = i / n * Math.PI * 2, r = i === n ? 1 : 1 + (rnd() - 0.5) * jag;
+      const [x, y] = P(cu + Math.cos(a) * ru * r, cv2 + Math.sin(a) * rv * r);
+      if (i) g.lineTo(x, y); else g.moveTo(x, y);
+    }
+    g.closePath(); g.fillStyle = fill; g.fill(); g.strokeStyle = INK; g.lineWidth = 3; g.stroke();
+  };
+  // His island, with the hidden cove bitten out of its east end.
+  blob(0.5, 0.16, 0.31, 0.12, 40, 0.18, '#d6b778');
+  blob(0.79, 0.19, 0.045, 0.045, 14, 0.2, PAPER);
+  g.strokeStyle = 'rgba(74,44,20,.45)'; g.lineWidth = 2;
+  for (let i = 0; i < 34; i++) {
+    const a = rnd() * Math.PI * 2, [x, y] = P(0.5 + Math.cos(a) * 0.25, 0.16 + Math.sin(a) * 0.085);
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * 12, y + Math.sin(a) * 8); g.stroke();
+  }
+  // Palms.
+  const palmAt = (u, v) => {
+    const [x, y] = P(u, v);
+    g.strokeStyle = INK; g.lineWidth = 2.5;
+    g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + 4, y - 14, x + 2, y - 26); g.stroke();
+    for (const a of [-2.6, -2, -1.2, -0.5]) { g.beginPath(); g.moveTo(x + 2, y - 26); g.quadraticCurveTo(x + 2 + Math.cos(a) * 12, y - 30 + Math.sin(a) * 4, x + 2 + Math.cos(a) * 20, y - 22 + Math.sin(a) * 6); g.stroke(); }
+  };
+  palmAt(0.31, 0.15); palmAt(0.36, 0.09); palmAt(0.68, 0.1); palmAt(0.42, 0.21);
+  // His defences: little towers along the front, cannon pointing out to sea.
+  for (const u of [0.32, 0.4, 0.6, 0.68]) {
+    const [x, y] = P(u, 0.245);
+    g.fillStyle = '#b89a6a'; g.strokeStyle = INK; g.lineWidth = 2.5;
+    g.fillRect(x - 9, y - 22, 18, 22); g.strokeRect(x - 9, y - 22, 18, 22);
+    for (let i = 0; i < 3; i++) g.strokeRect(x - 9 + i * 6, y - 27, 5, 5);
+    g.beginPath(); g.moveTo(x, y - 8); g.lineTo(x + (u < 0.5 ? -8 : 8), y + 6); g.lineWidth = 4; g.stroke();
+  }
+  // The dotted ways: up his beach to the X, and across from your cove.
+  const path = (pts) => { g.beginPath(); pts.forEach(([u, v], i) => { const [x, y] = P(u, v); if (i) g.lineTo(x, y); else g.moveTo(x, y); }); g.stroke(); };
+  g.setLineDash([6, 7]); g.lineWidth = 2.5; g.strokeStyle = INK;
+  path([[0.5, 0.27], [0.47, 0.21], [0.5, 0.155]]);
+  g.strokeStyle = '#7a2414'; g.lineWidth = 3;
+  path([[0.47, 0.82], [0.42, 0.66], [0.3, 0.52], [0.24, 0.45]]);                     // out to sea, with the guns
+  path([[0.5, 0.82], [0.52, 0.62], [0.51, 0.42], [0.5, 0.29]]);                       // straight over, to land
+  path([[0.53, 0.82], [0.75, 0.66], [0.93, 0.48], [0.92, 0.27], [0.83, 0.2]]);       // round the back, to the cove
+  g.setLineDash([]);
+  // The ship, and her shot arcing at the towers.
+  {
+    const [x, y] = P(0.22, 0.43);
+    g.strokeStyle = INK; g.fillStyle = '#b07a43'; g.lineWidth = 2.5;
+    g.beginPath(); g.moveTo(x - 30, y - 6); g.lineTo(x + 30, y - 6); g.lineTo(x + 20, y + 8); g.lineTo(x - 22, y + 8); g.closePath(); g.fill(); g.stroke();
+    g.beginPath(); g.moveTo(x, y - 6); g.lineTo(x, y - 52); g.stroke();
+    g.fillStyle = '#f3e6c4'; g.beginPath(); g.moveTo(x + 2, y - 48); g.quadraticCurveTo(x + 26, y - 30, x + 2, y - 12); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = '#222'; g.fillRect(x - 1, y - 60, 14, 9);
+    g.setLineDash([3, 6]); g.strokeStyle = 'rgba(74,44,20,.8)'; g.lineWidth = 2;
+    for (const [u2, bend] of [[0.32, -60], [0.4, -40]]) { const [tx, ty] = P(u2, 0.235); g.beginPath(); g.moveTo(x + 18, y - 12); g.quadraticCurveTo((x + tx) / 2, Math.min(y, ty) + bend, tx, ty); g.stroke(); }
+    g.setLineDash([]);
+  }
+  // Crossed swords below his beach.
+  {
+    const [x, y] = P(0.5, 0.33);
+    g.strokeStyle = INK; g.lineWidth = 3;
+    for (const s of [-1, 1]) {
+      g.beginPath(); g.moveTo(x - 16 * s, y + 16); g.lineTo(x + 14 * s, y - 14); g.stroke();
+      g.beginPath(); g.moveTo(x - 11 * s - 5, y + 7 - 5 * s); g.lineTo(x - 11 * s + 5, y + 7 + 5 * s); g.stroke();
+    }
+  }
+  // The old pump in the hidden cove.
+  {
+    const [x, y] = P(0.79, 0.19);
+    g.strokeStyle = INK; g.fillStyle = '#8a8f96'; g.lineWidth = 2.5;
+    g.fillRect(x - 6, y - 14, 12, 18); g.strokeRect(x - 6, y - 14, 12, 18);
+    g.beginPath(); g.moveTo(x, y - 14); g.lineTo(x + 14, y - 22); g.stroke();
+    g.beginPath(); g.moveTo(x + 6, y - 2); g.lineTo(x + 14, y - 2); g.lineTo(x + 14, y + 6); g.stroke();
+  }
+  // X marks the spot, and a little doodle of whoever's there: horned helmet, black beard, tankard, "?".
+  {
+    const [x, y] = P(...X_AT);
+    g.strokeStyle = '#b3201a'; g.lineWidth = 7; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(x - 16, y - 16); g.lineTo(x + 16, y + 16); g.moveTo(x + 16, y - 16); g.lineTo(x - 16, y + 16); g.stroke();
+    g.lineCap = 'butt';
+    const hx = x + 62, hy = y + 4;
+    g.strokeStyle = INK; g.lineWidth = 2.5; g.fillStyle = '#efe6cf';
+    g.beginPath(); g.arc(hx, hy, 13, Math.PI, 0); g.closePath(); g.fill(); g.stroke();
+    for (const s of [-1, 1]) { g.beginPath(); g.moveTo(hx + 11 * s, hy - 6); g.quadraticCurveTo(hx + 24 * s, hy - 10, hx + 22 * s, hy - 26); g.stroke(); }
+    g.fillStyle = '#222'; g.beginPath(); g.arc(hx, hy + 12, 11, 0, Math.PI); g.fill();
+    g.fillStyle = '#d9a93a'; g.fillRect(hx + 20, hy + 2, 12, 16); g.strokeRect(hx + 20, hy + 2, 12, 16);
+    g.fillStyle = '#fff'; g.beginPath(); g.arc(hx + 26, hy + 1, 6, Math.PI, 0); g.fill();
+    g.fillStyle = INK; g.font = 'bold 30px Alegreya, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('?', hx + 46, hy + 4);
+  }
+  // Your cove at the bottom: its coast, the wall and its gate.
+  g.beginPath(); g.moveTo(0, h * 0.86);
+  for (let i = 0; i <= 20; i++) { const u = i / 20, [x, y] = P(u, 0.86 - Math.sin(u * Math.PI) * 0.05 + (rnd() - 0.5) * 0.012); g.lineTo(x, y); }
+  g.lineTo(w, h); g.lineTo(0, h); g.closePath(); g.fillStyle = '#d6b778'; g.fill(); g.strokeStyle = INK; g.lineWidth = 3; g.stroke();
+  {
+    const [x, y] = P(0.5, 0.86);
+    g.fillStyle = '#9b9488'; g.strokeStyle = INK; g.lineWidth = 2.5;
+    g.fillRect(x - 60, y - 2, 120, 12); g.strokeRect(x - 60, y - 2, 120, 12);
+    for (let i = 0; i < 7; i++) g.strokeRect(x - 60 + i * 18, y - 8, 9, 6);
+    g.fillStyle = '#5b3a20'; g.fillRect(x - 9, y - 2, 18, 12);
+  }
+  // Words, with a halo of parchment so they read over the waves.
+  const write = (text, u, v, font, col = INK, align = 'center') => {
+    const [x, y] = P(u, v);
+    g.font = font; g.textAlign = align; g.textBaseline = 'middle';
+    g.lineWidth = 6; g.strokeStyle = 'rgba(236,216,166,.9)'; g.lineJoin = 'round'; g.strokeText(text, x, y);
+    g.fillStyle = col; g.fillText(text, x, y);
+  };
+  const wrap = (text, max, font) => {
+    g.font = font;
+    const out = [];
+    let line = '';
+    for (const word of text.split(' ')) { const t = line ? `${line} ${word}` : word; if (g.measureText(t).width > max && line) { out.push(line); line = word; } else line = t; }
+    out.push(line);
+    return out;
+  };
+  const NOTE = 'italic 22px Alegreya, serif';
+  for (const wy of WAYS) {
+    write(wy.label, wy.at[0], wy.at[1], 'bold 27px Alegreya, serif', '#5a1a0c');
+    wrap(wy.note, 250, NOTE).forEach((ln, i) => write(ln, wy.at[0], wy.at[1] + 0.045 + i * 0.038, NOTE));
+  }
+  write('Yer den', 0.5, 0.94, 'bold 26px Alegreya, serif');
+  // What the captain scrawled, bottom left; a compass, bottom right.
+  const SCRAWL = 'italic 23px Alegreya, serif';
+  wrap(`"${RUMOUR}"`, 330, SCRAWL).forEach((ln, i) => write(ln, 0.04, 0.66 + i * 0.045, SCRAWL, '#3a2210', 'left'));
+  {
+    const [x, y] = P(0.88, 0.7);
+    g.strokeStyle = INK; g.fillStyle = INK; g.lineWidth = 2;
+    g.beginPath(); g.arc(x, y, 30, 0, 7); g.stroke();
+    for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) {
+      g.beginPath(); g.moveTo(x + dx * 40, y + dy * 40); g.lineTo(x + dy * 7, y - dx * 7); g.lineTo(x - dy * 7, y + dx * 7); g.closePath();
+      if (dy === -1) g.fill(); else g.stroke();
+    }
+    write('N', 0.88, 0.7 - 0.09, 'bold 22px Alegreya, serif');
+  }
+  g.restore();
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 8;
+  return tex;
+}
+
+// The map, opened out: the parchment between two rolls, unrolling towards you.
+function mapMake() {
+  chart.tex ||= mapTexture();
+  const g = new THREE.Group();
+  chart.paper = mesh(new THREE.PlaneGeometry(MAP_W, MAP_D), new THREE.MeshStandardMaterial({ map: chart.tex, transparent: true, alphaTest: 0.4, roughness: 0.95, emissive: '#6a5a40', emissiveMap: chart.tex, side: THREE.DoubleSide }), false);
+  chart.paper.rotation.x = -Math.PI / 2;
+  chart.paper.receiveShadow = true;
+  const rollM = mat('#e2cc98', { roughness: 0.9 });
+  chart.rolls = [0, 1].map(() => { const r = mesh(new THREE.CylinderGeometry(0.035, 0.035, MAP_W + 0.04, 12), rollM); r.rotation.z = Math.PI / 2; g.add(r); return r; });
+  g.add(chart.paper);
+  chart.g = g;
+  scene.add(g);
+}
+function mapLayout(t) {
+  const u = Math.max(0.001, t), d = u * MAP_D;
+  chart.paper.scale.y = u;
+  chart.paper.position.set(0, 0.012, -MAP_D / 2 + d / 2);
+  chart.tex.repeat.set(1, u); chart.tex.offset.set(0, 1 - u);   // (the top of the map first)
+  const fat = 1 + (1 - t) * 0.9;
+  chart.rolls[0].position.set(0, 0.035, -MAP_D / 2);
+  chart.rolls[1].position.set(0, 0.035 * fat, -MAP_D / 2 + d);
+  chart.rolls[1].scale.set(fat, 1, fat);
+}
+function openMap() {
+  if (!canRead(G.map) || chart.on || carry || pirate.h > 0.05 || wm || sword.on || bilge.on || deco.on || cine || G.over) return;
+  keys.clear();
+  const ry = pirate.g.rotation.y;
+  if (!chart.g) mapMake();
+  chart.g.position.set(pirate.x + Math.sin(ry) * 0.95, 0, pirate.z + Math.cos(ry) * 0.95);
+  chart.g.rotation.y = chart.yaw = ry + Math.PI;   // its top away from you
+  chart.on = true;
+  chart.open = 0;
+  chart.g.visible = true;
+  $('intro').classList.add('off');
+}
+function mapKey(key) {
+  if (['escape', 'm', ' ', 'enter'].includes(key)) chart.on = false;
+  return true;   // (nothing else while you're reading it: no walking off with it open)
+}
+// Picked up: yours (and your crew's: anyone can open it after).
+function takeMap() {
+  if (guest()) send('host', { t: 'map' });
+  G.map = 'found';
+  if (chart.scroll) chart.scroll.visible = false;
+  toast('Their captain\'s map! Three ways in, marked. M or Esc rolls it up; M opens it again any time');
+  openMap();
+}
+function mapPrompt() {
+  if (cine) return 'Space: skip';
+  if (chart.on) return 'The captain\'s map · M, Esc or Space: roll it up';
+  if (nearMap()) return 'Space: pick up the map';
+  return '';
+}
+
+/* "A map?" over the scroll while it's lying there, so it catches your eye from the den. */
+function mapLabel() {
+  const lab = chart.label ||= document.createElement('div');
+  if (!lab.isConnected) $('labels').append(lab);
+  const s = mapSpot();
+  if (G.map !== 'lying' || cine || wm || deco.on || sword.on || bilge.on || chart.on || Math.hypot(pirate.x - s.x, pirate.z - s.z) > MAP.SEEN || nearMap()) { lab.style.display = 'none'; return; }
+  const html = 'A map?<small>dropped on the beach: walk up and press Space</small>';
+  if (lab.innerHTML !== html) { lab.className = 'label done'; lab.innerHTML = html; }
+  v3.set(s.x, 0.9, s.z).project(camera);
+  lab.style.left = `${(v3.x + 1) / 2 * innerWidth}px`;
+  lab.style.top = `${(1 - v3.y) / 2 * innerHeight}px`;
+  lab.style.display = v3.z > 1 ? 'none' : '';
+}
+
+function mapTick(dt) {
+  if (!guest()) G.map = mapAfter(G.map, G.phase);
+  // The siege beaten just now (not skipped to): the cutscene.
+  if (G.map === 'lying' && mapWas === 'none' && phaseWas === 'wave' && !G.over) cineStart();
+  mapWas = G.map ?? 'none'; phaseWas = G.phase;
+  // The scroll on the sand (the cutscene moves it itself).
+  const lying = G.map === 'lying';
+  if (lying && !chart.scroll) { chart.scroll = scrollMesh(); scene.add(chart.scroll); }
+  if (chart.scroll && !cine) {
+    chart.scroll.visible = lying;
+    if (lying) { const s = mapSpot(); chart.scroll.position.set(s.x, 0.06, s.z); chart.scroll.rotation.set(0, 0.5, 0); }
+  }
+  mapLabel();
+  // The map open: rolled up again if you've something else to do.
+  if (chart.on && (carry || pirate.h > 0.05 || wm || G.over)) chart.on = false;
+  chart.open = Math.max(0, Math.min(1, chart.open + (chart.on ? 1.6 : -2.4) * dt));
+  if (chart.g) {
+    mapLayout(chart.open * chart.open * (3 - 2 * chart.open));
+    if (!chart.on && chart.open <= 0) chart.g.visible = false;
+  }
+  cineTick(dt);
+}
+function mapReset() {
+  chart.on = false; chart.open = 0;
+  if (chart.g) chart.g.visible = false;
+  cineEnd(true);
+  mapWas = 'none'; phaseWas = 'build';
+}
+
+// ---------- the cutscene: their captain's parting shot ----------
+const CAPTAIN = cleanLook({ body: 'm', top: 'captain', topCol: 'maroon', topCol2: 'gold', hat: 'captain', hatCol: 'black', hatCol2: 'gold', legs: 'pants', legsCol: 'black', feetCol: 'black', hair: 'long', hairCol: 'black', beard: 'full', patch: true, earring: true, fam: 'none' });
+function bubble(text) {
+  const el = document.createElement('div');
+  el.className = 'label say';
+  el.textContent = text;
+  el.style.display = 'none';
+  $('labels').append(el);
+  return el;
+}
+function bubbleAt(el, on, x, y, z) {
+  if (!on) { el.style.display = 'none'; return; }
+  v3.set(x, y, z).project(camera);
+  el.style.left = `${(v3.x + 1) / 2 * innerWidth}px`;
+  el.style.top = `${(1 - v3.y) / 2 * innerHeight}px`;
+  el.style.display = v3.z > 1 ? 'none' : '';
+}
+// Walks o (anything with x and z) towards (tx, tz), p's legs going; true once there.
+function stepTo(o, p, tx, tz, speed, dt) {
+  const dx = tx - o.x, dz = tz - o.z, d = Math.hypot(dx, dz);
+  if (d < 0.05 || !speed) { animateWalk(p, false, dt); return true; }
+  const s = Math.min(d, speed * dt);
+  o.x += dx / d * s; o.z += dz / d * s;
+  faceTo(p, dx, dz, dt);
+  animateWalk(p, true, dt, speed * 3.4);
+  return false;
+}
+function cineStart() {
+  // Whatever you were doing is put down: out of the puzzles, the piece in hand back on its crate.
+  if (wm) exitWall();
+  if (deco.on) decoMode(false);
+  sword.on = false; bilge.on = false; chart.on = false;
+  if (carry) { if (carry.from && !carry.from.letter) putBack(); else { scene.remove(carry.group); carry = null; } }
+  keys.clear();
+  const s = mapSpot(), bz = Math.max(shoreZ() + 0.5, s.z - 6.5);
+  const cap = makePirate({ look: CAPTAIN });
+  cap.g.scale.setScalar(1.1);
+  scene.add(cap.g);
+  const boat = rowboat();
+  boats.splice(boats.indexOf(boat), 1);   // (his own: the raids don't touch it)
+  boat.g.position.set(s.x - 1.4, 0, bz);
+  boat.g.rotation.y = Math.PI;   // bow out to sea, ready to go
+  if (!chart.scroll) { chart.scroll = scrollMesh(); scene.add(chart.scroll); }
+  chart.scroll.visible = false;
+  // You, just inside the gate (the camera's on him, so nobody sees you put there).
+  Object.assign(pirate, { x: wall.door.cx, z: 1.5, h: 0, hs: 0, hop: null });
+  pirate.g.rotation.y = Math.PI;
+  cine = {
+    t: 0, cap, at: { x: s.x - 1.4, z: bz + 0.9 }, stand: { x: s.x - 0.2, z: s.z - 1.5 }, boat, bz, drop: null, got: 0,
+    says: bubble('We\'ll be back!'), mine: bubble('A map!'), cam: { look: V3(0, 1, 0), dist: 5, tilt: 0.4, yaw: 0 },
+  };
+  cap.g.position.set(cine.at.x, 0, cine.at.z);
+  document.body.classList.add('cine');
+  $('intro').classList.add('off');
+}
+function cineEnd(skip) {
+  if (!cine) return;
+  const c = cine;
+  cine = null;
+  scene.remove(c.cap.g);
+  scene.remove(c.boat.g);
+  c.says.remove(); c.mine.remove();
+  document.body.classList.remove('cine');
+  pirate.arms.forEach((a) => { a.rotation.x = 0; });
+  if (!skip) takeMap();
+}
+function cineTick(dt) {
+  if (!cine) return;
+  const c = cine, t = (c.t += dt), cap = c.cap, at = c.at, s = mapSpot();
+  // Him: up from his boat, a fist shaken at your wall, then a run for it and off he rows.
+  if (t < 1.3) stepTo(at, cap, c.stand.x, c.stand.z, 3, dt);
+  else if (t < 3.5) {
+    animateWalk(cap, false, dt);
+    faceTo(cap, 0, 1, dt);   // at the wall
+    cap.arms[1].rotation.x = -2.7 + Math.sin(t * 22) * 0.35;
+    cap.arms[0].rotation.x = 0.3;
+    cap.g.position.y = Math.abs(Math.sin(t * 11)) * 0.08;   // hopping mad
+  } else if (t < 5) {
+    c.drop ||= { t: 0, from: V3(at.x, 1.2, at.z) };
+    stepTo(at, cap, c.boat.g.position.x, c.bz + 0.1, 4.2, dt);
+  } else {
+    // In the boat, pulling for the ship; boat and all dwindle off into the distance.
+    const u = Math.min(1, (t - 5) / 4), pull = Math.sin(t * 5.5);
+    c.boat.g.position.z = c.bz + (BOAT_FROM - c.bz) * u;
+    cap.g.position.set(c.boat.g.position.x, 0.22, c.boat.g.position.z);
+    cap.g.rotation.y = Math.PI;
+    cap.legs.forEach((l) => { l.rotation.x = -1.3; });
+    cap.arms.forEach((a) => { a.rotation.x = -0.9 + pull * 0.45; });
+    c.boat.g.userData.oars.forEach((o, i) => { o.rotation.y = (i ? 1 : -1) * pull * 0.45; });
+    if (u > 0.6) { const k = 1 - (u - 0.6) / 0.4 * 0.95; c.boat.g.scale.setScalar(k); cap.g.scale.setScalar(1.1 * k); }
+    at.x = cap.g.position.x; at.z = cap.g.position.z;
+  }
+  if (t < 5) cap.g.position.set(at.x, cap.g.position.y, at.z);
+  // The map, tumbling out of his coat as he turns to run, bouncing once on the sand.
+  if (c.drop && !c.got) {
+    const u = Math.min(1, (c.drop.t += dt) / 0.8), sc = chart.scroll;
+    sc.visible = true;
+    const hop = u < 0.75 ? Math.sin(u / 0.75 * Math.PI) * 0.9 : Math.sin((u - 0.75) / 0.25 * Math.PI) * 0.15;
+    sc.position.set(c.drop.from.x + (s.x - c.drop.from.x) * u, Math.max(0.06, c.drop.from.y * (1 - u) + hop), c.drop.from.z + (s.z - c.drop.from.z) * u);
+    sc.rotation.set(u < 1 ? t * 9 : 0, 0.5, 0);
+  }
+  bubbleAt(c.says, t > 1.4 && t < 3.6, at.x, 2.6, at.z);
+  // You: out through the gate to the map, and pick it up.
+  const by = { x: s.x + 0.1, z: s.z + 0.8 }, gx = wall.door.cx;
+  if (t > 5.4) {
+    if (pirate.z > -1.4) stepTo(pirate, pirate, gx, -1.6, 2.6, dt);
+    else if (stepTo(pirate, pirate, by.x, by.z, 2.6, dt)) {
+      faceTo(pirate, 0, -1, dt * 2);
+      c.got ||= t;
+      const u = Math.min(1, (t - c.got) / 0.5);
+      pirate.arms.forEach((a) => { a.rotation.x = -1.3 * u; });
+      chart.scroll.position.set(pirate.x, 0.06 + u * 0.95, pirate.z - 0.45 * u);
+      chart.scroll.rotation.set(0, 0, 0);
+      if (u >= 1 && !c.sparkled) { c.sparkled = true; burst(chart.scroll.position.clone(), '#ffd23a', 16, 2.2); }
+    }
+    pirate.g.position.x = pirate.x; pirate.g.position.z = pirate.z;
+  }
+  bubbleAt(c.mine, c.got && t - c.got > 0.4, pirate.x, 2.4, pirate.z);
+  // The camera: on him from the beach by the wall, then on you coming out.
+  const cam = c.cam;
+  if (t < 5.4) { cam.look.set(at.x * 0.6 + s.x * 0.4, 0.9, Math.min(at.z, s.z - 1.5) - 1.2); cam.dist = 4.6 + Math.max(0, t - 4) * 1.8; cam.tilt = 0.45; cam.yaw = 0.25; }   // (from out on the sand, clear of the wall)
+  else { cam.look.set(pirate.x, 1.0, pirate.z); cam.dist = c.got ? 3.4 : 5; cam.tilt = c.got ? 0.5 : 0.36; cam.yaw = Math.PI - 0.45; }
+  if (c.got && t - c.got > 1.6) cineEnd(false);
+}
+
 function newGame() {
   if (guest()) return send('host', { t: 'again' });
   raiders.splice(0).forEach((r) => raiderOut(r, true)); boats.splice(0).forEach((b) => scene.remove(b.g));
   if (carry) { scene.remove(carry.group); carry = null; }
   ghostKey = ''; ghost = null;
-  Object.assign(G, { gold: 60, wave: 0, phase: 'build', phaseT: BUILD_SECS, toSpawn: 0, spawnT: 0, cannonT: 0, cannonShots: 0, aim: null, masters: 0, boarded: 0, bonked: 0, stolen: 0, turned: 0, waveTurned: 0, waveIn: 0, over: false, fairOver: false });
+  Object.assign(G, { gold: 60, wave: 0, phase: 'build', phaseT: BUILD_SECS, toSpawn: 0, spawnT: 0, cannonT: 0, cannonShots: 0, aim: null, masters: 0, boarded: 0, bonked: 0, stolen: 0, turned: 0, waveTurned: 0, waveIn: 0, over: false, fairOver: false, map: 'none' });
   fair.reset();
   swordReset();
   bilgeReset();
+  mapReset();
   piles.forEach((p) => { p.letter = null; });
   newWall();
   // After the wall, so the first deals finish its holes; and shown, since the wall drew the crates empty.
@@ -3937,6 +4349,9 @@ addEventListener('keydown', (e) => {
   if (cheats.open) { if (key === 'escape' || key === '`') cheatPanel(false); return; }
   if (key === '`' && !deco.on && !paused) { cheatPanel(true); return; }
   if (paused) { if (['p', ' ', 'escape', 'enter'].includes(key)) { e.preventDefault(); setPaused(false); } return; }
+  // The cutscene: Space or Esc skips it; nothing else.
+  if (cine) { if ([' ', 'escape', 'enter'].includes(key)) { e.preventDefault(); if (!e.repeat) cineEnd(true); } return; }
+  if (chart.on && !deco.on) { e.preventDefault(); mapKey(key); return; }
   if (key === 'p' && !deco.on) { setPaused(true); return; }
   if ([' ', 'tab', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) e.preventDefault();
   // At the sword rack, the keys play the Swordfight board, as in the real puzzle.
@@ -3970,6 +4385,7 @@ addEventListener('keydown', (e) => {
   else if ((key === 'q' || key === 'e') && onGunDeck()) turnArrowAhead(key === 'e' ? 1 : 3);
   else if (key === 'f' && carry) turn(flip, 0);
   else if (key === 'b') decoMode(true);
+  else if (key === 'm') openMap();
   else if (['1', '2', '3'].includes(key)) takeCrate(Number(key) - 1);
   else if (key === 'backspace' && canTakeBack()) takeBack();
   else if ((key === 'shift' || key === 'r') && carry && aimFoe()) throwAt(aimFoe());
@@ -4030,7 +4446,8 @@ let drag = null;
 renderer.domElement.addEventListener('mousedown', (e) => {
   if (deco.on) { if (e.button === 2) drag = { x: e.clientX, y: e.clientY, moved: false, deco: e }; else decoClick(e); return; }
   if (e.button === 2) { drag = { x: e.clientX, y: e.clientY, moved: false }; return; }
-  if (e.button !== 0 || G.over) return;
+  if (e.button !== 0 || G.over || cine) return;
+  if (chart.on) { chart.on = false; return; }
   if (bilge.on) { bilgeHover(e.clientX, e.clientY); bilgeSwap(); return; }
   // In the Carpentry view a click only ever fits the piece (or, empty-handed, lifts one out of a frame).
   if (wm) {
@@ -4143,7 +4560,8 @@ function clickedFoe(mx, my, cap = 90, out = true) {
 let cursor = null, aimed = null;
 const aimFoe = () => (cursor && clickedFoe(cursor.x, cursor.y, 160)) || anyFoe();
 function act() {
-  if (net.pending || net.asking) return;   // waiting to hear back about the last one
+  if (net.pending || net.asking || cine) return;   // waiting to hear back about the last one (or watching)
+  if (nearMap()) return takeMap();
   if (!carry && atSword() && rack.pieces) return swordEnter();
   if (!carry && atBilge()) return bilgeEnter();
   const f = focus();
@@ -5129,7 +5547,7 @@ function updateWaves(dt) {
     // Timber for the next part, once nothing's still being built.
     const f = !frames().some((o) => o.kind !== 'house') && !ramp.jobs.some((j) => j.kind !== 'house' && j.frame && !j.up) && ramp.jobs[ramp.next]?.kind !== 'house' && openJob(ramp.next);
     const timber = f ? ` Timber's come: ${f.kind === 'gun' ? 'build a gun tower in its frame' : 'build the rampart in its frame'}` : '';
-    if (G.phase === 'peace') say(`Wave ${G.wave} beaten off!${tally} Their captain's had enough: "We'll be back!" They're making sail. The den's yours: build, roam, puzzle.${timber}`);
+    if (G.phase === 'peace') say(`Wave ${G.wave} beaten off!${tally} That's the siege over: they're making sail. The den's yours: build, roam, puzzle.${timber}`);
     else say(`Wave ${G.wave} beaten off!${tally}${timber}`);
   }
 }
@@ -5530,7 +5948,8 @@ function prompt() {
   else if (loose) t = carry ? `${f.kind === 'pile' || target?.ok ? t + ' · ' : ''}Shift or click: throw the ${carry.letter} at the raider!` : 'A raider is in the den! Grab a piece to throw at them';
   else if (carry && outsideFoe() && !target?.ok) t += ` · Shift or click a raider: lob it over the wall`;
   if (outside()) t = !carry ? 'Out on the beach · back in through the gate' : loose ? `Shift or click: throw the ${carry.letter} at the raider!` : `Out on the beach · back in through the gate to fit the ${carry.letter}`;
-  t = bilgePrompt() || swordPrompt() || t;
+  if (canRead(G.map) && !carry && !wm && pirate.h < 0.05 && !t.startsWith('Space')) t += " · M: the captain's map";
+  t = mapPrompt() || bilgePrompt() || swordPrompt() || t;
   const el = $('prompt');
   if (el.textContent !== t) el.textContent = t;
   $('gunhelp').classList.toggle('on', onGunDeck());
@@ -5840,6 +6259,7 @@ function onNet(m) {
     case 'look': if (mt) wearLook(mt.m, cleanLook(m.look)); break;
     case 'den': applyDen(cleanDen(m.den)); break;
     case 'build': if (net.host) startHouse(); break;
+    case 'map': if (net.host && G.map !== 'found') { G.map = 'found'; say("A crewmate's picked up the captain's map: press M to have a look"); } break;
     // From the host: what happened.
     case 'snap': if (!net.host) applySnap(m); break;
     case 'sync': if (!net.host) applySync(m); break;
@@ -6517,6 +6937,8 @@ function update(dt) {
     if (s.userData.life <= 0) { scene.remove(s); sparks.splice(i, 1); }
   }
 
+  mapTick(dt);
+
   /* Camera follows the pirate, looking at the wall and a little over it. Up on the rampart it
      swings up high to look down over the wall at the raiders. The player can turn it (Z/C or
      right-drag) all the way round, to see the outside of the wall, and tilt it (right-drag). It
@@ -6574,6 +6996,31 @@ function update(dt) {
     tilt += (1.3 - tilt) * bilgeView;
     const y0 = Math.atan2(Math.sin(yaw), Math.cos(yaw));
     yaw = y0 + ((y0 >= 0 ? Math.PI : -Math.PI) - y0) * bilgeView;
+  }
+  // Reading the map: looking down on it from over your shoulder.
+  mapView += ((chart.on ? 1 : 0) - mapView) * Math.min(1, dt * 3);
+  if (mapView > 0.001 && chart.g) {
+    const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect);
+    L2.set(chart.g.position.x, 0, chart.g.position.z);
+    look.lerp(L2, mapView);
+    dist += (Math.max((MAP_D / 2 + 0.1) / Math.tan(vh), (MAP_W / 2 + 0.1) / Math.tan(hh)) * view.zoom - dist) * mapView;
+    tilt += (1.3 - tilt) * mapView;
+    const y0 = Math.atan2(Math.sin(yaw), Math.cos(yaw));
+    let d = chart.yaw - y0;
+    d = Math.atan2(Math.sin(d), Math.cos(d));
+    yaw = y0 + d * mapView;
+  }
+  // The cutscene's own shots.
+  if (cine) cineCam = cine.cam;
+  cineView += ((cine ? 1 : 0) - cineView) * Math.min(1, dt * 2.5);
+  if (cineView > 0.001 && cineCam) {
+    look.lerp(cineCam.look, cineView);
+    dist += (cineCam.dist - dist) * cineView;
+    tilt += (cineCam.tilt - tilt) * cineView;
+    const y0 = Math.atan2(Math.sin(yaw), Math.cos(yaw));
+    let d = cineCam.yaw - y0;
+    d = Math.atan2(Math.sin(d), Math.cos(d));
+    yaw = y0 + d * cineView;
   }
   v3.set(Math.sin(yaw) * Math.cos(tilt), Math.sin(tilt), Math.cos(yaw) * Math.cos(tilt)).multiplyScalar(dist).add(look);
   camAt.lerp(v3, Math.min(1, dt * 3));
@@ -6751,6 +7198,14 @@ function cheatBeat() {
   raiders.splice(0).forEach((r) => raiderOut(r, true)); boats.splice(0).forEach((b) => scene.remove(b.g));
   Object.assign(G, { toSpawn: 0, aim: null, cannonShots: 0 });   // and it's over on the next frame, timber and all
 }
+// Plays the siege's end again: the cutscene, the map dropped and picked up.
+function cheatMapScene() {
+  if (guest()) return toast("Only the crew's host can do that", true);
+  if (cine) return;
+  raiders.splice(0).forEach((r) => raiderOut(r, true)); boats.splice(0).forEach((b) => scene.remove(b.g));
+  Object.assign(G, { phase: 'peace', map: 'none', wave: Math.max(G.wave, 3), toSpawn: 0, aim: null, cannonShots: 0 });
+  mapWas = 'none'; phaseWas = 'wave';   // (as if the last wave had just been beaten)
+}
 function cheatShack() {
   const hs = ramp.jobs.filter((j) => j.kind === 'house' && !j.up);
   if (!hs.length) return toast('Your shack\'s already built', true);
@@ -6763,6 +7218,7 @@ const CHEATS = [
   ['Next wave now', () => (G.phase === 'wave' ? toast('A wave\'s on: beat it first', true) : startWave())],
   ['Mend every hole', cheatMend],
   ['Build the shack', cheatShack],
+  ["The captain's map scene", cheatMapScene],
 ];
 function cheatPanel(on) {
   if (on && online()) { toast('Cheats are for playing alone', true); return; }
