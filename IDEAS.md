@@ -85,7 +85,7 @@ goes into the puzzle (as Bilge's does), with the den still showing round it. **T
 keys are in** (RULES.md, "The Carpentry view", 9 Nov). Still to work out with the user: what Carpentry does today that the real puzzle doesn't (walking a piece up to the wall,
 carrying, throwing), and what of that stays.
 
-### The wall in two courses (9 Nov; the user chose to try two courses: TODO.md)
+### The wall in two courses (9 Nov; built: RULES.md, "The wall in two courses")
 
 A flat board over the den, the holes in two rows, was tried and dropped as "forced" and "detached"
 (RULES.md). The user: an overlay "suggests there's a deeper design problem whereby however I've
@@ -252,6 +252,20 @@ you want a cheeky monkey that's going to lay banana peels that trips them up?") 
   mod someone pastes in runs in a sandbox, can't reach your browser's data or the network, and a
   broken one just falls back to the default); sharing mods with your crew (a crewmate's penguins
   in your den); and a page in the game that hands you the instructions, ready to copy.
+
+- **The commercial side (9 Nov, for the bigger commercial ideas list):** a marketplace where
+  players sell the familiars (and the rest) they've made, charging doubloons for each sale; the den
+  takes a cut, bigger for more extravagant ones, plus a margin on top for any AI usage it runs for
+  them.
+- **Familiars stay special and earned:** "you shouldn't just be able to create any old familiar
+  that you want. Like, you should have to really earn and pay for that, whether that's through
+  game achievements or whatever." And nobody gets someone else's for free: "you don't want to be
+  like, oh look, someone's seen my dragon, then you can just go copy it for free". So making one
+  takes an achievement, and what you've made is yours to sell or keep.
+- **A fully moddable game:** beyond looks, whole modded versions. "Keep the core puzzles, use the
+  core puzzles how you want, but ... add your own mod of, like, a specific scenario and fun twist
+  that you want to do." The core is the puzzles and the enemy spawning; a mod builds its own
+  scenario round them.
 
 ## Holding the wall: what's next
 
