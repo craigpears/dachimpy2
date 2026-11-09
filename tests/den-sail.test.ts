@@ -264,9 +264,36 @@ describe('sailing: the lock up the cliff into the hidden cove (9 Nov)', () => {
     expect(h.pump(SAIL.LOCK_WORK / 2)).toBe('lock');
     expect(h.held()).toBe('up');
     h.pump(SAIL.LOCK_WORK / 2);
-    expect(h.held()).toBeNull();
+    expect(h.held()).toBe('gates');
     run(h, 3);
     expect([h.pose.c, h.pose.r]).toEqual([lc - 1, lr]);
+  });
+
+  it('the top gates were still swinging open as she sailed through (9 Nov): she waits for the gates, up and down', () => {
+    const h = new Helm(new Sea(9), canal);
+    h.put('F'); h.put('F');
+    run(h, 4);
+    h.pump(SAIL.LOCK_WORK);
+    expect(h.held()).toBe('gates');
+    run(h, SAIL.GATES - 0.15);
+    expect(h.cur).toBeNull();
+    expect([h.pose.c, h.pose.r]).toEqual([lc, lr]);
+    run(h, 0.3);
+    expect(h.held()).toBeNull();
+    expect(h.cur?.m).toBe('F');
+    // Back down: drained, then the bottom gates swing open before she sails out to sea.
+    const d = new Helm(new Sea(9), { c: lc - 1, r: lr, d: 1 });
+    d.level = 1;
+    d.put('F'); d.put('F');
+    for (let t = 0; t < 10 && d.level > 0; t += 0.05) d.tick(0.05);
+    expect([d.pose.c, d.pose.r]).toEqual([lc, lr]);
+    expect(d.level).toBe(0);
+    expect(d.held()).toBe('gates');
+    expect(d.cur).toBeNull();
+    run(d, SAIL.GATES - 0.15);
+    expect(d.cur).toBeNull();
+    run(d, 0.3);
+    expect(d.cur?.m).toBe('F');
   });
 
   it('coming back down, the lock drains by itself and lets her out', () => {

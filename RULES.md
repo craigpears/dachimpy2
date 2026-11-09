@@ -185,9 +185,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       open sea.
     - **The canal and the lock:** a narrow canal between rocks to a lock at the foot of a cliff.
       Sail into the lock and she waits; nothing happens on its own. Bilge on the quay pumps it up
-      (a few good swaps' worth), the top gates open and she sails on into the hidden cove behind
+      (a few good swaps' worth), the top gates swing open and, once they're open, she sails on into the hidden cove behind
       the cliff, its water higher, an old bilge pump on the sand. Coming back down, the lock drains
-      by itself in a couple of seconds and lets her out. Esc while she waits lets her off. The
+      by itself in a couple of seconds, and she waits for the gates again before she sails out. Esc while she waits lets her off. The
       pilot finds the way into the cove through the lock. (A shortcut that costs puzzle work, not
       reflexes: IDEAS.md, "Locks on a canal".)
     - **The turret:** a gun on a rock between the lanes. While she's within three squares it fires

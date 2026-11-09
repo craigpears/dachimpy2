@@ -57,6 +57,9 @@ export const SAIL = {
       down by itself. */
   LOCK_WORK: 4,
   DRAIN: 2,
+  /** Seconds the gates take to swing open once the lock's full (or drained), before she sails on
+      through them. */
+  GATES: 0.8,
   /** The turret: how far it reaches (squares, any way), seconds between shots, how long a shot is
       in the air (time to get out from under it), and how long a hit from her guns quiets it. */
   TURRET_RANGE: 3,
@@ -308,8 +311,8 @@ export type SailEvent =
   | { kind: 'arrive'; at: Pose };
 
 /** What she's waiting on, if anything: dazed by a hit (pump her out), or at the lock, for it to be
-    pumped up to the cove's level, or to drain down to the sea's. */
-export type Held = 'daze' | 'up' | 'down' | null;
+    pumped up to the cove's level, or to drain down to the sea's, or for its gates to swing open. */
+export type Held = 'daze' | 'up' | 'down' | 'gates' | null;
 
 /** The helm: where she is, where she's headed, and the clock that plays the turns. */
 export class Helm {
@@ -330,6 +333,8 @@ export class Helm {
   level = 0;
   /** Water a hit's put in her, in moves' worth of Bilge: she's dazed till it's pumped out. */
   shipped = 0;
+  /** Seconds till the lock's gates are open, after it's filled or drained. */
+  gates = 0;
   private wait = 0;
 
   constructor(public sea: Sea, pose: Pose = SAIL.HOME) { this.pose = { ...pose }; }
@@ -392,7 +397,7 @@ export class Helm {
   /** What she's waiting on, if anything. */
   held(): Held {
     if (this.dazed()) return 'daze';
-    if (this.slot >= 0 && !this.cur) return this.gate(this.turn[this.slot]);
+    if (this.slot >= 0 && !this.cur) return this.gate(this.turn[this.slot]) ?? (this.gates > 1e-9 ? 'gates' : null);
     return null;
   }
 
@@ -400,7 +405,11 @@ export class Helm {
       What it went to. */
   pump(w: number): 'daze' | 'lock' | null {
     if (this.dazed()) { this.shipped = Math.max(0, this.shipped - w); return 'daze'; }
-    if (this.held() === 'up') { this.level = Math.min(1, this.level + w / SAIL.LOCK_WORK); return 'lock'; }
+    if (this.held() === 'up') {
+      this.level = Math.min(1, this.level + w / SAIL.LOCK_WORK);
+      if (this.level >= 1) this.gates = SAIL.GATES;   // full: the top gates swing open
+      return 'lock';
+    }
     return null;
   }
 
@@ -471,6 +480,15 @@ export class Helm {
           this.level -= use / SAIL.DRAIN; left -= use;
           if (this.level > 1e-6) break;
           this.level = 0;
+          this.gates = SAIL.GATES;   // drained: the bottom gates swing open
+          continue;
+        }
+        if (this.gates > 1e-9) {
+          // The gates swinging open before she sails through.
+          const use = Math.min(left, this.gates);
+          this.gates -= use; left -= use;
+          if (this.gates > 1e-9) break;
+          this.gates = 0;
           continue;
         }
         this.begin(out);
@@ -479,6 +497,7 @@ export class Helm {
       // Between turns: the breather, then the next turn, if there's anything to play.
       const use = Math.min(left, Math.max(0, this.wait));
       this.wait -= use; left -= use;
+      this.gates = Math.max(0, this.gates - use);
       if (this.wait > 1e-9 || this.dazed()) break;
       const moves = this.next();
       if (!moves.length) break;
