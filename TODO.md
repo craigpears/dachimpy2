@@ -141,7 +141,9 @@ the site (`.assetsignore` skips `*.md`).
   you play it. The pieces showed twice, on the crate on deck and in the 1, 2, 3 tray along the
   bottom ("why have you got it twice"), and the ship's controls stayed up while you patched:
   "simplify. It's a very cluttered user interface. Just simplify it, standardize it." One tray,
-  as ashore, and nothing of the sailing bar while you patch.
+  as ashore, and nothing of the sailing bar while you patch. And the new row there "you can't
+  even click it or use the buttons. It's just kind of a bit pointless": whatever's on screen
+  should work as it does ashore, or not be there.
 
 ## Needs a playtest to pin down
 
