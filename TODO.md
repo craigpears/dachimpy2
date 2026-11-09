@@ -100,7 +100,11 @@ the site (`.assetsignore` skips `*.md`).
   dazed by the turret was over "way too quickly. Like, you know, one fix and it was done", and
   bilging felt wrong for it: "what do you mean bilge? I've been hit by a cannonball, not water
   bucket." So a hit holes her and you patch the hole by Carpentry on deck, a whole hole to fill,
-  before she sails on. Bilge stays at the lock, where pumping water makes sense.
+  before she sails on. Bilge stays at the lock, where pumping water makes sense. (Carpentry and
+  Bilge "have got to go together", as in Puzzle Pirates, "but I think the primary one needs to be
+  carpentry".) The board on deck was "the wrong way around" too: it should read the right way up.
+  And once she's patched, the turret shouldn't fire again at once, "literally before you can do
+  anything about it": give her a moment to get going.
 
 - **The lock's Bilge board is upside down, and there's no pump to see (9 Nov):** going up the
   lock, "the bilge puzzle looks like it's upside down", and "we need a visible pumping action
