@@ -64,6 +64,35 @@ cliff, rope bridges between, and all the lodgings up in the rock, not spread out
 Follow that aesthetic. (Goes with the side quests and exploring: places to go, not just a wall to
 hold.)
 
+## Raids you choose: a quick siege to start, then calm (9 Nov)
+
+The user likes the quick intro, under attack from the start, but after a few waves the raids
+should become more opt-in, built into the world, so "you're not constantly under pressure and you
+feel free to go explore, roam, and do different puzzles". (Goes with "Raiders getting through
+mustn't end the game" in TODO.md.) A first sketch, to talk through:
+
+- **The opening siege, then they sail off.** The first three waves stay as now (the dealt-fair
+  first wave, the cannon from wave 2, the walk's timber as the reward). Beat wave 3 and their
+  captain calls it off: the ship hauls its boats in and sails out of the cove, "We'll be back!".
+  The den goes calm, and the timer goes.
+- **After that, raids are something you see coming and something you can call on.**
+  - *A sail on the horizon:* a raid comes because of something in the world, never a clock: your
+    chest getting fat, your infamy from pillaging at sea, a treasure you dug up that someone wants
+    back. The ship shows out at sea and anchors in the cove before anyone lands (a few minutes'
+    warning), so you can come home, or not.
+  - *The bell on the gate (or a beacon on the tower):* ring it to call a raid on when you want
+    one. That's the way to the rewards only raids give (the rampart's timber, treasure maps from
+    fallen raiders, soldiers' pay), and to a harder raid each time, like choosing a quest.
+  - *A good wall puts them off:* a ship that sees Masterpieces all along the wall may sail on
+    past, so mending is how you buy yourself time to roam.
+- **While you're away, the den holds or pays.** Raiders who land with nobody home go for the
+  chest and take a share of it (plundered, not the game over); soldiers from the armoury and any
+  friends about the den (the capybara, the monkey on the gate) put up a fight. Coming home to a
+  raid in progress is its own little moment.
+- **To check:** today the rampart's frames arrive as the reward for beating a wave, so the
+  building needs feeding another way once raids are opt-in (timber from called raids, from the
+  shipwright, from side quests).
+
 ## Raiding other dens (9 Nov, eventually a crew thing)
 
 - **Go raiding:** a group of you jump out of the ship and storm up the beach to raid or loot

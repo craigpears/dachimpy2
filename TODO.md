@@ -86,7 +86,8 @@ the site (`.assetsignore` skips `*.md`).
   in, because the den should let you go off on side quests, row out to the ship and explore: "I
   don't want the game to be ending because you decided to go exploring." Getting plundered should
   cost you something without ending everything. (What the consequence is instead: to pin down
-  with the user.)
+  with the user. A first sketch, with raids becoming opt-in after an opening siege, is in
+  IDEAS.md, "Raids you choose".)
 
 - **Your pirate glows yellow on the beach with nothing in the way (9 Nov):** "the player goes
   yellow as if you are behind something while on the beach, even if nothing is obstructing the
