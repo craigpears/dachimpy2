@@ -88,6 +88,11 @@ the site (`.assetsignore` skips `*.md`).
   cost you something without ending everything. (What the consequence is instead: to pin down
   with the user.)
 
+- **Your pirate glows yellow on the beach with nothing in the way (9 Nov):** "the player goes
+  yellow as if you are behind something while on the beach, even if nothing is obstructing the
+  view." The gold outline should only show when something really hides your pirate from the
+  camera.
+
 ## Needs a playtest to pin down
 
 - **Towers, a lower middle and a night sky (9 Nov), not yet seen by the user.** (RULES.md, "You
