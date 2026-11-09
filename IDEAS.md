@@ -104,7 +104,13 @@ forward". You **row out to his hideout**, which gives it "a bit more of a PvP fe
    believable but less handy, the platform could stand **out in the middle of the sea, reached
    along a rope bridge** (the user, 9 Nov: "it would make it feel a bit more real, because ...
    why would there be a shipping route passing by a pirate cave?"); but they want it "quick and
-   accessible for now", so the cliff path first. Digging still needs to be believable where it happens (the user, earlier: Treasure
+   accessible for now", so the cliff path first. **Or freeform, built where you like** (the user,
+   9 Nov, thinking on: "a bit more of a freeform world"): the lane runs clearly further out, and
+   you **build rope bridges out across the rocks** (the ones you sail round now) to make the cove
+   "more explorable or navigable", then **build your own gun platform out near the trading
+   lanes**, wherever you choose, a more creative hideout. Clearing the way on land the same way:
+   cut back the forest by Foraging's equivalent. So the den spreads out as you build, rather than
+   having its places set for you. Digging still needs to be believable where it happens (the user, earlier: Treasure
    Haul "breaks the immersion" in the middle of a hillside):
    - *Digging, Foraging-style:* in Puzzle Pirates, Foraging is digging up goods on an island, so
      digging down to the chest is what it was made for;
