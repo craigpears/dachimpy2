@@ -37,7 +37,8 @@ in time the den becomes the thing itself (TODO.md, "Split the den off").
   explore, roam, and do different puzzles".
 - **Unlocked by doing, not handed out.** Each new part arrives as the result of something you did
   (beat a wave and the timber comes; beat the siege and they leave a map). Nothing appears by
-  magic: everything you build is the pieces you fitted.
+  magic: everything you build is the pieces you fitted. The same goes for prizes: familiars are
+  won, as in Puzzle Pirates, not picked from a list.
 - **A hideout, not a city.** Lodgings dug into the cliff, ladders and rope bridges, a den behind a
   wall in a cove. Small and characterful, never a sprawling town.
 - **Not overpowered.** Building on (more guns, more rampart) is fine as long as it doesn't make
@@ -68,8 +69,10 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    puzzles on the way (clearing the path, rigging a bridge) and a dig at the X.
 6. · **Dalnoth, guarding his treasure.** A big famous pirate, sitting on his chest with his monkey
    and his tankard. Get past him your way: swordfight him, shoot him off from the gun platform, or
-   pump water in and flood him out so the treasure washes onto the ground.
-7. · **Dalnoth comes back, furious.** Robbed of his treasure, he returns with his crew, and that
+   pump water in and flood him out so the treasure washes onto the ground. He runs off, but his
+   white monkey stays: you're the champion now, and it hops onto your shoulder. (Familiars are
+   earned, not picked from a list; this is your first.)
+7. · **Dalnoth comes back, furious.** Robbed of his treasure and his monkey, he returns with his crew, and that
    brings on the next round. Your choice again: dig in at the den (fortify, more guns, more
    soldiers, fight him on the beaches), or find the abandoned sloop in the harbour, fix her up and
    see him off at sea on a Battle Navigation board.
@@ -88,3 +91,4 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
 | Break fused chests at the armoury | Soldiers, up to a handful (more as the den grows: to come) |
 | Break loose crates | Planks that mend the wall for good |
 | Walk into the plot | Your shack, built the same way, any time |
+| Get past Dalnoth (to come) | His treasure, and his white monkey on your shoulder |

@@ -90,9 +90,15 @@ at a time so that we can compress and come back later on"). In order:
    - *Bilge:* pump water into where he's sitting and flood him out, so the treasure washes out
      onto the ground;
    - (and maybe *Carpentry*, the den's own puzzle: shore up or build something to get at him.)
-   Story order still to settle: whether you dig before or after you get past him. Beaten, he could
-   become one of the friends who hang about the den (see "Side quests that leave friends about the
-   den").
+   Story order still to settle: whether you dig before or after you get past him.
+   - **His monkey is yours (the user's favourite bit, "to rub it in"):** beaten, he runs off, but
+     his white monkey stays: you're the champion now, so it hops onto your shoulder. That's what
+     makes him so furious he comes back (6).
+   - **Familiars are earned, not chosen:** so the Your pirate panel stops letting you just pick a
+     familiar; you get them by winning them, as Dalnoth won his (a Champion familiar in Puzzle
+     Pirates). Dalnoth's white monkey is the first. (Today the panel offers a parrot, a monkey or
+     an octopus to anyone: RULES.md, "Familiars". What happens to a familiar already picked: to
+     settle with the user when it's built.)
    - *Sword or Rumble, your choice (later):* players love one and hate the other, so let them pick
      which they fight with (as "choosing your mini-game" already says for the soldiers).
 6. **Dalnoth comes back for it.** A big famous pirate robbed of his treasure gets very grouchy and
