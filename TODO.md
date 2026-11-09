@@ -68,6 +68,10 @@ the site (`.assetsignore` skips `*.md`).
   make no progress". You should be able to fit the piece in the hole instead of throwing it (or the
   daze should last long enough to fit one). (Which, to pin down with the user.)
 
+- **Waiting soldiers block the Swordfight board (9 Nov):** soldiers with nobody to fight "stand
+  in a spot that obscures the swordfighting board". They should wait somewhere clear of the
+  armoury hoist's view, so the stack is never hidden behind them.
+
 ## Needs a playtest to pin down
 
 - **Swordfight at the armoury hoist (8 Nov), not yet tried by the user.** Rebuilt after the
