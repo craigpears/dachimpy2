@@ -102,13 +102,14 @@ the site (`.assetsignore` skips `*.md`).
   quicker in a good wind, slower in a light one, dead in the water in a calm, and gets nothing
   sailing straight into it; oars move her steadily whatever the wind, slower than a good wind.
 
-- **A crane up the cliff, a second way into the hidden cove (9 Nov):** "I really do think we need
-  the Wacky Races stuff, like the crane thing ... I just really love the idea. I want to see what
-  it looks and feels like ... could I go somewhere to the side of a cliff and like construct a
-  crane to get in?" A first go of IDEAS.md's "haul her over": sail to a ledge at the foot of the
-  cove's cliff, build a crane there by Carpentry, and it hauls her up the cliff and swings her
-  down into the cove (and back down again later). The lock (Bilge) and the crane (Carpentry) are
-  two ways in, so you choose the puzzle you'd rather play.
+- **A crane up a cliff, to somewhere of its own (9 Nov):** "I really do think we need the Wacky
+  Races stuff, like the crane thing ... I just really love the idea. I want to see what it looks
+  and feels like ... could I go somewhere to the side of a cliff and like construct a crane to get
+  in?", built "with like the carpentry puzzle". A first go of IDEAS.md's "haul her over": sail to
+  a ledge at the foot of a cliff, build a crane there by Carpentry, and it hauls her up and swings
+  her down into somewhere else: "there should be a different kind of section next to it. So I
+  don't want ... the lock the same thing as the crane." Not the lock's hidden cove, then, but a
+  place of its own. (What that place is: to pin down with the user.)
 
 - **Something worth finding in the hidden cove: treasure (9 Nov):** the canal and the cove "would
   be great, but ... it needs a point of interest in here, even if it's a little like treasure
