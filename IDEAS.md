@@ -66,6 +66,16 @@ Nailing junk pieces on behind a mended hole should reward good work, the way the
     rampart with the gun tower; and how a layer's shape is chosen (a fresh hole cut to fit inside
     the framing, perhaps bigger than the hole in front?).
 
+## Carpentry as close to the puzzle as Bilge (9 Nov)
+
+The user, after trying Bilge: "some of the ideas this way I'd like to get carpentry closer to is
+something like this, where it's like, yeah, this is like really close one-to-one with the puzzle
+that you can still kind of see what's going on, but it just plays like the puzzle." So the wall's
+holes, the frames and the rest should play like Puzzle Pirates' Carpentry itself, in a view that
+goes into the puzzle (as Bilge's does), with the den still showing round it. To work out with the
+user: what Carpentry does today that the real puzzle doesn't (walking a piece up to the wall,
+carrying, throwing), and what of that stays.
+
 ## The rampart, built more like real carpentry
 
 Building on what's there now (the walk and its stairs are made of pieces that stay pieces):
@@ -124,8 +134,11 @@ Building on what's there now (the walk and its stairs are made of pieces that st
   more of an exploring, questing side: "Treasure maps from fallen raiders" above.)
 - **Bilging the shallows: what's next (the first version is in, 9 Nov; its rules are in RULES.md,
   "Bilging the shallows").** Still open:
-  - **Crews:** it's solo only, like Swordfight; in a crew the tide stays put. In the real puzzle
-    several pirates bilge at once, each on their own board, all pumping the one ship.
+  - **Crews: a shared board (9 Nov).** It's solo only for now, like Swordfight; in a crew the tide
+    stays put. The user sees it as collaborative: "multiple people could come and play at the same
+    time. So it's kind of a shared board and it's visible ... it's a lot more interactive". To work
+    out: one board everyone swaps on (each with their own cursor), or a board each side by side in
+    the shallows, all pumping the one tide (as the real puzzle does on a ship).
   - **Barrels:** they go off by themselves as a raider comes by. The user also wondered about
     setting them off yourself, and they should be useful against the Kraken.
   - **The Kraken and the tide:** shallow water it can't come into, so bilging pushes it out

@@ -190,6 +190,13 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   end. The user turned down a clay golem built from smashed Swordfight blocks, with breakers won
   from kills, as "too far away from the sword fighting puzzle", and said this goes for all of them.
   A new job's look (a golem, a forge) can be a skin, never a change to the rules.
+- **Bilge is the model to aim for (9 Nov).** The user loved it most for being "so faithful and
+  close": "really close one-to-one with the puzzle ... it just plays like the puzzle. It's not like
+  a dumbed down version at all", while you can still see what's going on in the den. They loved
+  how it "goes into that different view" (from the sea end, the board filling the screen, the den
+  behind it), and that the board is out in the world, visible to everyone: "it's not just somebody
+  standing at a post. You can see somebody puzzling." Carpentry should move closer to this (see
+  IDEAS.md, "Carpentry as close to the puzzle as Bilge").
 - **Nothing pauses the raid.** The den is quick-paced, so a job can't stop the action for a long
   one-on-one. The user turned down Swordfight duels at the wall (as in some Puzzle Pirates scenes)
   because a two-minute duel while raiders hack through the wall is "really disjointed". A slow
