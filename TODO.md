@@ -96,6 +96,18 @@ the site (`.assetsignore` skips `*.md`).
   the primer goes. (How, where it's hosted, and what of the primer's engine the den still needs,
   to pin down with the user when it's time.)
 
+- **Sailing, a first go (9 Nov):** "can you do a proof of concept for ... how you end up getting a
+  ship? So a ship, I guess, would just be waiting in the cove". A Battle Navigation feel: drop a pin
+  where you want to go and she sails there herself, a turn every 5 or 10 seconds, "left, pauses,
+  right, pauses, forward, forward", "the fact that you chart the waypoints out gives it the speed".
+  Destinations don't matter yet.
+
+- **Don't get pulled into puzzles just by walking past (9 Nov):** "while I'm trying to walk around,
+  it feels like you get dragged into puzzles far too easily. Like, you should have to actively
+  interact with something ... I'm just being pulled into everything now." A puzzle should start
+  only when you choose it (Space, or a click), "maybe the front wall could be a bit of an
+  exception".
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map

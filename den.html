@@ -23,6 +23,20 @@
     .keys kbd { font: 700 13px 'Alegreya Sans'; color: var(--ink); background: #3b2a1b; border: 1px solid #6b4e32; border-radius: 4px; padding: 0 5px; }
     .prompt { background: var(--panel); border: 1px solid var(--gold); border-radius: 8px; padding: 8px 16px; font-size: 18px; font-weight: 700; white-space: nowrap; }
     .prompt:empty { display: none; }
+    /* At sea: Battle Navigation's move tokens (this turn, then the next), and none of the den's crates or keys. */
+    .sailhud { display: none; flex-direction: column; align-items: center; gap: 6px; background: var(--panel); border: 1px solid #5a412a; border-radius: 10px; padding: 8px 14px; }
+    body.sailing .sailhud { display: flex; }
+    body.sailing .toolbox, body.sailing .boards, body.sailing .keys, body.sailing .intro, body.sailing .gunhelp, body.sailing #labels, body.sailing .banner { display: none; }
+    .sailhud .turns { display: flex; gap: 18px; align-items: center; }
+    .sailhud .turn { display: flex; gap: 5px; align-items: center; }
+    .sailhud .turn > span { font: 700 13px 'Alegreya Sans'; color: var(--dim); margin-right: 3px; }
+    .sailhud .tok { width: 34px; height: 34px; border-radius: 6px; border: 1px solid #6b4e32; background: #2a1c11; display: grid; place-items: center; font: 700 22px/1 'Alegreya Sans'; color: #f3ecdc; }
+    .sailhud .tok.mine { color: var(--gold); border-color: var(--gold); }
+    .sailhud .tok.now { background: #f3ecdc; color: #2a1c11; border-color: #fff; }
+    .sailhud .tok.done { opacity: .35; }
+    .sailhud .tok.empty { opacity: .3; }
+    .sailhud .help { color: var(--dim); font-size: 14px; text-align: center; }
+    .sailhud .help kbd { font: 700 13px 'Alegreya Sans'; color: var(--ink); background: #3b2a1b; border: 1px solid #6b4e32; border-radius: 4px; padding: 0 5px; }
     /* The Carpentry view's tabs: everything being built, the one you're on lit, a tick where your piece fits. */
     .boards { display: flex; gap: 8px; align-items: center; pointer-events: auto; background: var(--panel); border: 1px solid #5a412a; border-radius: 10px; padding: 6px 10px; }
     .boards:empty { display: none; }
@@ -195,6 +209,7 @@
   <div class="intro" id="intro">Raiders are coming! Grab a piece from a crate and mend the wall.<br>Fill a hole exactly for a strong <b>Masterpiece</b>.</div>
   <div class="dock" id="dock">
   <div class="boards" id="boards" title="Tab: on to the next thing being built"></div>
+  <div class="sailhud" id="sailhud"></div>
   <div class="prompt" id="prompt"></div>
   <div class="toolbox" id="toolbox" title="Press 1, 2 or 3 (or click) to take that crate's piece"><span class="cap">Crates</span></div>
   <div class="keys"><kbd>WASD</kbd> walk · <kbd>Space</kbd> or click: pick up / fit · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd>: take a crate's piece · <kbd>Q</kbd><kbd>E</kbd> turn · <kbd>F</kbd> flip · <kbd>Tab</kbd>: Carpentry view (arrows move · <kbd>X</kbd><kbd>C</kbd> turn · <kbd>Z</kbd> flip · <kbd>Q</kbd><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd> holes · <kbd>Tab</kbd> next · <kbd>Esc</kbd> walks off) · <kbd>Shift</kbd> or click a raider: throw · <kbd>Z</kbd><kbd>C</kbd> or right-drag: turn the view, all the way round · <kbd>B</kbd> decorate · <kbd>M</kbd> the captain's map, once you have it · <kbd>P</kbd> pause · <kbd>`</kbd> cheats · wheel: turn the piece you carry, or zoom (<kbd>-</kbd><kbd>=</kbd>)</div>

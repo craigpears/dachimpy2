@@ -13,6 +13,7 @@ import { drawStencil, drawBlade, PALETTE } from './den-sword-draw.js';
 import { Bilge, W as BW, H as BH } from './bilge.js';
 import { KEYS as VIEW_KEYS, nextHole, holeKey, quarters, centreOn, clampTo, nextBoard, arrowStep } from './den-carp-view.js';
 import { afterWave, countingDown } from './den-raids.js';
+import { SAIL, Sea, Helm } from './den-sail.js';
 import { MAP, mapAfter, canPickUp, canRead, RUMOUR, WAYS, X_AT } from './den-map.js';
 import { twoCourses, isHigh, gateTop, lowMiddle, isSky } from './den-wall.js';
 import { BILGE, Tide, HIGH, LOW, shoreAt, worth, barrelsFor, onRocks, rocksBare, oddsFor, blastHits } from './den-bilge.js';
@@ -3877,7 +3878,7 @@ function mapLayout(t) {
   chart.rolls[1].scale.set(fat, 1, fat);
 }
 function openMap() {
-  if (!canRead(G.map) || chart.on || carry || pirate.h > 0.05 || wm || sword.on || bilge.on || deco.on || cine || G.over) return;
+  if (!canRead(G.map) || chart.on || sail.on || carry || pirate.h > 0.05 || wm || sword.on || bilge.on || deco.on || cine || G.over) return;
   keys.clear();
   const ry = pirate.g.rotation.y;
   if (!chart.g) mapMake();
@@ -4128,11 +4129,237 @@ function cineTick(dt) {
   if (c.got && t - c.got > 1.6) cineEnd(false);
 }
 
+// ---------- sailing: the old sloop in the cove ----------
+/* A first go at sailing (the user, 9 Nov: "how you end up getting a ship? ... a ship would just be
+   waiting in the cove"). Once the siege is over and their ship's gone, there's an old sloop left
+   at anchor off the left of the beach. Walk down to the water by her and board, and the camera
+   pulls out over the sea: click the water to drop a pin, and she sails there herself on Battle
+   Navigation's moves, a turn at a time (src/den-sail.ts). W, A, D put in a forward, left or right
+   yourself, played ahead of the pilot's. The board's squares are there but not drawn; the square
+   you're pointing at shows faintly, and the course ahead is dotted on the water. Rocks stand out
+   of the sea as stacks (you can see them from the den too). Sail back to her mooring to go ashore. */
+const SEA_X0 = -SAIL.COLS * SAIL.CELL / 2;
+const seaX = (c) => SEA_X0 + (c + 0.5) * SAIL.CELL, seaZ = (r) => SAIL.Z0 - (r + 0.5) * SAIL.CELL;
+const SLOOP_DECK = 0.75;
+const sail = { on: false, sea: new Sea(9), helm: null, g: null, rocks: null, pin: null, hover: null, dots: [], sig: '', hudSig: '', seen: false, heel: 0, bumpT: 0 };
+sail.helm = new Helm(sail.sea);
+let sailView = 0;
+// Her, smaller than their ship: one mast, a square sail and a topsail, a bowsprit, a tiller at the
+// stern, weathered planks, and your own flag at the masthead.
+function sloopMesh() {
+  const g = new THREE.Group(), hullM = mat('#5e4128', { map: woodTex }), deckM = mat('#9a7a55', { map: woodTex }), spar = mat('#4a2f1a', { map: woodTex });
+  const hull = mesh(hullGeo(4.4, 1.7, 1.3), hullM);
+  hull.position.y = SLOOP_DECK - 1.3;
+  const deck = mesh(hullGeo(4.25, 1.55, 0.05), deckM);
+  deck.position.y = SLOOP_DECK - 0.02;
+  const stripe = mesh(hullGeo(4.46, 1.74, 0.1), mat('#d8c9a0'));
+  stripe.position.y = SLOOP_DECK - 0.32;
+  g.add(hull, deck, stripe);
+  const stern = mesh(new THREE.BoxGeometry(0.9, 0.35, 1.45), hullM);
+  stern.position.set(-1.65, SLOOP_DECK + 0.17, 0);
+  const tiller = mesh(new THREE.BoxGeometry(0.7, 0.05, 0.05), spar);
+  tiller.position.set(-1.6, SLOOP_DECK + 0.5, 0);
+  const sprit = mesh(new THREE.CylinderGeometry(0.035, 0.05, 1.4, 6), spar);
+  sprit.rotation.z = -Math.PI / 2 + 0.25; sprit.position.set(2.6, SLOOP_DECK + 0.2, 0);
+  const mast = mesh(new THREE.CylinderGeometry(0.06, 0.08, 4.2, 8), spar);
+  mast.position.set(0.35, SLOOP_DECK + 2.1, 0);
+  g.add(stern, tiller, sprit, mast);
+  const sailM = mat('#e9dfc8', { side: THREE.DoubleSide, roughness: 0.95 });
+  for (const [y, w, ht] of [[1.45, 2, 1.6], [3.1, 1.4, 0.9]]) {
+    const geo = new THREE.PlaneGeometry(w, ht, 8, 4), pos = geo.attributes.position;
+    for (let i = 0; i < pos.count; i++) pos.setZ(i, Math.cos(pos.getX(i) / w * Math.PI) * 0.22 * (0.6 + 0.4 * Math.cos(pos.getY(i) / ht * Math.PI)));
+    geo.computeVertexNormals();
+    const cloth = mesh(geo, sailM, false), yard = mesh(new THREE.CylinderGeometry(0.035, 0.035, w + 0.25, 6), spar, false);
+    cloth.position.y = -ht / 2; yard.rotation.z = Math.PI / 2;
+    const arm = new THREE.Group();
+    arm.add(cloth, yard);
+    arm.position.set(0.35, SLOOP_DECK + y + ht / 2, 0);
+    arm.rotation.y = Math.PI / 2 - 0.45;   // square across her, braced round a little so they show from the side too
+    g.add(arm);
+  }
+  const fl = flagpole(0.6, flagMat);
+  fl.position.set(0.35, SLOOP_DECK + 4.15, 0);
+  g.add(fl);
+  g.rotation.order = 'YXZ';   // (turned to her heading, then heeled over about her own length)
+  return g;
+}
+// The rocks: sea stacks, a clump of boulders on each square.
+function seaRocks() {
+  const g = new THREE.Group();
+  for (const id of sail.sea.rocks) {
+    const [c, r] = id.split(',').map(Number), x = seaX(c), z = seaZ(r);
+    for (let i = 0; i < 3; i++) g.add(rock(x + (Math.random() - 0.5) * 2.2, 0.2 + Math.random() * 0.4, z + (Math.random() - 0.5) * 2.2, 0.9 + Math.random() * 0.8));
+  }
+  scene.add(g);
+  return g;
+}
+// The pin: a red buoy with a little pennant, riding the swell.
+function pinMesh() {
+  const g = new THREE.Group(), red = mat('#c8372a', { roughness: 0.6 }), white = mat('#f3ecdc');
+  const buoy = mesh(new THREE.CylinderGeometry(0.28, 0.4, 0.7, 12), red);
+  buoy.position.y = 0.2;
+  const band = mesh(new THREE.CylinderGeometry(0.33, 0.35, 0.16, 12), white);
+  band.position.y = 0.25;
+  const staff = mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.3, 6), mat('#4a2f1a'));
+  staff.position.y = 1.15;
+  const pennant = mesh(new THREE.ConeGeometry(0.22, 0.6, 3).rotateZ(-Math.PI / 2), red);
+  pennant.scale.set(1, 1, 0.15); pennant.position.set(0.3, 1.6, 0);
+  g.add(buoy, band, staff, pennant);
+  scene.add(g);
+  return g;
+}
+const dotMat = new THREE.MeshBasicMaterial({ color: '#f3ecdc', transparent: true, opacity: 0.7, depthWrite: false, fog: false });
+const dotMine = new THREE.MeshBasicMaterial({ color: '#ffd23a', transparent: true, opacity: 0.75, depthWrite: false, fog: false });
+const dotGeo = new THREE.CircleGeometry(0.32, 14).rotateX(-Math.PI / 2);
+const hoverMat = new THREE.MeshBasicMaterial({ color: '#f3ecdc', transparent: true, opacity: 0.12, depthWrite: false, fog: false });
+const TOK = { F: '↑', L: '↰', R: '↱' };
+
+const sloopHome = () => G.phase === 'peace' && !online() && !ship.visible;
+const atHome = () => { const p = sail.helm.pose, H = SAIL.HOME; return p.c === H.c && p.r === H.r; };
+const nearSloop = () => !sail.on && sail.g?.visible && atHome() && sail.helm.slot < 0 && outside() && !carry && !cine
+  && Math.abs(pirate.x - seaX(SAIL.HOME.c)) < 2.6 && pirate.z < shoreZ() + 2.4;
+// Aboard: whatever you had in hand back on its crate, and the camera out over the sea.
+function board() {
+  if (wm) exitWall();
+  if (deco.on) decoMode(false);
+  sword.on = false; bilge.on = false; chart.on = false;
+  if (carry) { if (carry.from && !carry.from.letter) putBack(); else { scene.remove(carry.group); carry = null; } }
+  keys.clear();
+  sail.on = true;
+  pirate.h = pirate.hs = 0; pirate.hop = null;
+  document.body.classList.add('sailing');
+  $('intro').classList.add('off');
+  toast('Aboard! Click the sea to drop a pin, and she\'ll sail there');
+}
+// Ashore, at her mooring: you hop down onto the beach by her.
+function ashore() {
+  sail.on = false;
+  sail.helm.stop();
+  document.body.classList.remove('sailing');
+  Object.assign(pirate, { x: seaX(SAIL.HOME.c) + 0.6, z: shoreZ() + 0.7, h: 0, hs: 0, hop: null });
+  pirate.g.rotation.set(0, 0, 0);
+  keys.clear();
+}
+function sailReset() {
+  if (sail.on) { sail.on = false; document.body.classList.remove('sailing'); }
+  sail.helm = new Helm(sail.sea);
+  sailView = 0;
+}
+// The square of the board under the pointer (fractional: the middle of a square is whole).
+function seaCellAt(x, y) {
+  ray.setFromCamera(new THREE.Vector2(x / innerWidth * 2 - 1, -y / innerHeight * 2 + 1), camera);
+  const p = new THREE.Vector3();
+  if (!ray.ray.intersectPlane(groundPlane, p)) return null;
+  return { c: (p.x - SEA_X0) / SAIL.CELL - 0.5, r: (SAIL.Z0 - p.z) / SAIL.CELL - 0.5 };
+}
+function sailClick(x, y) {
+  const at = seaCellAt(x, y);
+  if (!at) return;
+  if (!sail.helm.drop(at.c, at.r)) toast('She\'s there already', true);
+}
+function sailHover(x, y) {
+  const at = seaCellAt(x, y);
+  sail.hover = at && sail.sea.open(Math.round(at.c), Math.round(at.r)) ? [Math.round(at.c), Math.round(at.r)] : null;
+}
+function sailKey(key) {
+  const m = { w: 'F', arrowup: 'F', a: 'L', arrowleft: 'L', d: 'R', arrowright: 'R' }[key];
+  if (m) { if (!sail.helm.put(m)) toast('That\'s a turn\'s worth put in already', true); return; }
+  if (key === 's' || key === 'arrowdown' || key === 'backspace') sail.helm.unput();
+  else if (key === 'escape') { sail.helm.stop(); toast('Pin pulled up: she\'ll stop when this turn\'s done'); }
+  else if (key === 'h') { sail.helm.drop(SAIL.HOME.c, SAIL.HOME.r); if (sail.helm.pin) toast('Heading home to the cove'); }
+  else if ((key === ' ' || key === 'enter') && atHome() && sail.helm.slot < 0) ashore();
+  else if (key === 'z' || key === 'c') keys.add(key);
+  else if (key === 'p') setPaused(true);
+  else if (key === 'v') Object.assign(view, { yaw: 0, pitch: 0, zoom: 1 });
+  else if (key === '-' || key === '_') view.zoom = Math.min(2, view.zoom * 1.15);
+  else if (key === '=' || key === '+') view.zoom = Math.max(0.55, view.zoom / 1.15);
+}
+function sailPrompt() {
+  if (nearSloop()) return 'Space: board the old sloop';
+  if (!sail.on) return '';
+  const h = sail.helm;
+  if (atHome() && h.slot < 0 && !h.next().length) return 'At her mooring · Space: go ashore · click the sea to drop a pin';
+  if (h.pin) return 'Under way to the pin';
+  if (h.slot >= 0) return 'Under way';
+  return 'Click the sea to drop a pin, or put in moves with W A D';
+}
+// This turn's tokens (the one being sailed lit) and the next turn's, yours in gold.
+function sailHud() {
+  const h = sail.helm, mineN = h.mine.length;
+  const now = h.slot >= 0 ? h.turn : [], next = h.next();
+  const sig = `${now.join('')}|${h.slot}|${next.join('')}|${mineN}`;
+  if (sig === sail.hudSig) return;
+  sail.hudSig = sig;
+  const toks = (list, cls) => Array.from({ length: SAIL.SLOTS }, (_, i) => (list[i] ? `<b class="tok ${cls(i)}">${TOK[list[i]]}</b>` : '<b class="tok empty"></b>')).join('');
+  $('sailhud').innerHTML = `<div class="turns"><div class="turn"><span>This turn</span>${toks(now, (i) => (i < h.slot ? 'done' : i === h.slot ? 'now' : ''))}</div>`
+    + `<div class="turn"><span>Next</span>${toks(next, (i) => (i < mineN ? 'mine' : ''))}</div></div>`
+    + '<div class="help">Click the sea: drop a pin · <kbd>W</kbd> <kbd>A</kbd> <kbd>D</kbd>: forward, left, right yourself · <kbd>S</kbd>: take one back · <kbd>Esc</kbd>: pull up the pin · <kbd>H</kbd>: head home · wheel: zoom</div>';
+}
+function sailTick(dt) {
+  sail.rocks ||= seaRocks();
+  sail.g ||= (() => { const g = sloopMesh(); scene.add(g); return g; })();
+  const show = sail.on || sloopHome();
+  if (sail.g.visible !== show) sail.g.visible = show;
+  if (show && !sail.seen && !sail.on && G.phase === 'peace') { sail.seen = true; if (!cine) toast('Their ship\'s gone, and there\'s an old sloop left at anchor in the cove'); }
+  if (!show) return;
+  const h = sail.helm;
+  if (sail.on) {
+    for (const e of h.tick(dt)) {
+      if (e.kind === 'move' && e.bump) sail.bumpT = SAIL.MOVE * 0.45;   // (felt as she hits)
+      if (e.kind === 'arrive' && atHome()) toast('Back at her mooring: Space to go ashore');
+    }
+    if (sail.bumpT > 0 && (sail.bumpT -= dt) <= 0) { shake = 0.3; toast('Bump! Rocks', true); }
+  }
+  // Her, riding the swell, heeling into her turns.
+  const t = performance.now() / 1000, p = h.now(), turning = h.cur && h.cur.m !== 'F' && !h.cur.bump && h.t < SAIL.MOVE;
+  sail.heel += ((turning ? (h.cur.m === 'L' ? -0.13 : 0.13) : 0) - sail.heel) * Math.min(1, dt * 4);
+  sail.g.position.set(seaX(p.c), Math.sin(t * 0.9) * 0.06, seaZ(p.r));
+  sail.g.rotation.y = Math.PI / 2 - p.a * Math.PI / 2;
+  sail.g.rotation.x = sail.heel + Math.sin(t * 0.7) * 0.02;
+  sail.g.rotation.z = Math.sin(t * 0.55) * 0.02;
+  if (sail.on) {
+    // You, at the tiller, facing her bow.
+    const at = sail.g.localToWorld(V3(-1.15, SLOOP_DECK, 0)), yaw = sail.g.rotation.y;
+    pirate.x = at.x; pirate.z = at.z;
+    pirate.g.position.copy(at);
+    pirate.g.rotation.set(0, Math.atan2(Math.cos(yaw), -Math.sin(yaw)), 0);
+    animateWalk(pirate, false, dt);
+    pirate.g.position.y = at.y;
+  }
+  // The pin, and the course to it dotted on the water.
+  sail.pin ||= pinMesh();
+  sail.pin.visible = sail.on && !!h.pin;
+  if (h.pin) sail.pin.position.set(seaX(h.pin[0]), Math.sin(t * 1.3) * 0.08, seaZ(h.pin[1]));
+  const sig = sail.on ? `${JSON.stringify(h.after())}${h.slot}${h.course().join('')}${h.mine.length}` : '';
+  if (sig !== sail.sig) {
+    sail.sig = sig;
+    sail.dots.forEach((d) => { d.visible = false; });
+    if (sail.on) {
+      const pts = [];
+      let q = h.cur ? h.cur.to : h.pose;
+      if (h.slot >= 0) { pts.push([q, false]); for (let i = h.slot + 1; i < h.turn.length; i++) { q = sail.sea.sail(q, h.turn[i]).to; pts.push([q, false]); } }
+      h.course().slice(0, 16).forEach((m, i) => { q = sail.sea.sail(q, m).to; pts.push([q, i < h.mine.length]); });
+      pts.forEach(([at, mine], i) => {
+        const d = sail.dots[i] ||= (() => { const o = new THREE.Mesh(dotGeo, dotMat); o.renderOrder = 3; scene.add(o); return o; })();
+        d.material = mine ? dotMine : dotMat;
+        d.position.set(seaX(at.c), 0.09, seaZ(at.r));
+        d.visible = true;
+      });
+    }
+  }
+  // The square you're pointing at, faintly.
+  sail.hoverG ||= (() => { const o = new THREE.Mesh(new THREE.PlaneGeometry(SAIL.CELL * 0.96, SAIL.CELL * 0.96).rotateX(-Math.PI / 2), hoverMat); o.renderOrder = 3; scene.add(o); return o; })();
+  sail.hoverG.visible = sail.on && !!sail.hover;
+  if (sail.hover) sail.hoverG.position.set(seaX(sail.hover[0]), 0.08, seaZ(sail.hover[1]));
+  if (sail.on) sailHud();
+}
+
 function newGame() {
   if (guest()) return send('host', { t: 'again' });
   raiders.splice(0).forEach((r) => raiderOut(r, true)); boats.splice(0).forEach((b) => scene.remove(b.g));
   if (carry) { scene.remove(carry.group); carry = null; }
   ghostKey = ''; ghost = null;
+  sailReset(); sail.seen = false;
   Object.assign(G, { gold: 60, wave: 0, phase: 'build', phaseT: BUILD_SECS, toSpawn: 0, spawnT: 0, cannonT: 0, cannonShots: 0, aim: null, masters: 0, boarded: 0, bonked: 0, stolen: 0, turned: 0, waveTurned: 0, waveIn: 0, over: false, fairOver: false, map: 'none' });
   fair.reset();
   swordReset();
@@ -4411,6 +4638,8 @@ addEventListener('keydown', (e) => {
   // The cutscene: Space or Esc skips it; nothing else.
   if (cine) { if ([' ', 'escape', 'enter'].includes(key)) { e.preventDefault(); if (!e.repeat) cineEnd(true); } return; }
   if (chart.on && !deco.on) { e.preventDefault(); mapKey(key); return; }
+  // At sea: the helm's keys, and the view's.
+  if (sail.on) { e.preventDefault(); if (!e.repeat) sailKey(key); return; }
   if (key === 'p' && !deco.on) { setPaused(true); return; }
   if ([' ', 'tab', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) e.preventDefault();
   // At the sword rack, the keys play the Swordfight board, as in the real puzzle.
@@ -4478,6 +4707,7 @@ function mouseAt(z) {
 renderer.domElement.addEventListener('mousemove', (e) => {
   if (wm && keyAt) { if (Math.hypot(e.clientX - keyAt.x, e.clientY - keyAt.y) < 24) return; keyAt = null; }
   if (deco.on) { decoMove(e); return; }
+  if (sail.on) { sailHover(e.clientX, e.clientY); return; }
   if (bilge.on) { bilgeHover(e.clientX, e.clientY); return; }
   ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1), camera);
   const p = new THREE.Vector3();
@@ -4506,6 +4736,7 @@ renderer.domElement.addEventListener('mousedown', (e) => {
   if (deco.on) { if (e.button === 2) drag = { x: e.clientX, y: e.clientY, moved: false, deco: e }; else decoClick(e); return; }
   if (e.button === 2) { drag = { x: e.clientX, y: e.clientY, moved: false }; return; }
   if (e.button !== 0 || G.over || cine) return;
+  if (sail.on) { sailClick(e.clientX, e.clientY); return; }
   if (chart.on) { chart.on = false; return; }
   if (bilge.on) { bilgeHover(e.clientX, e.clientY); bilgeSwap(); return; }
   // In the Carpentry view a click only ever fits the piece (or, empty-handed, lifts one out of a frame).
@@ -4621,6 +4852,7 @@ const aimFoe = () => (cursor && clickedFoe(cursor.x, cursor.y, 160)) || anyFoe()
 function act() {
   if (net.pending || net.asking || cine) return;   // waiting to hear back about the last one (or watching)
   if (nearMap()) return takeMap();
+  if (nearSloop()) return board();
   if (!carry && atSword() && rack.pieces) return swordEnter();
   if (!carry && atBilge()) return bilgeEnter();
   const f = focus();
@@ -6008,7 +6240,7 @@ function prompt() {
   else if (carry && outsideFoe() && !target?.ok) t += ` · Shift or click a raider: lob it over the wall`;
   if (outside()) t = !carry ? 'Out on the beach · back in through the gate' : loose ? `Shift or click: throw the ${carry.letter} at the raider!` : `Out on the beach · back in through the gate to fit the ${carry.letter}`;
   if (canRead(G.map) && !carry && !wm && pirate.h < 0.05 && !t.startsWith('Space')) t += " · M: the captain's map";
-  t = mapPrompt() || bilgePrompt() || swordPrompt() || t;
+  t = sailPrompt() || mapPrompt() || bilgePrompt() || swordPrompt() || t;
   const el = $('prompt');
   if (el.textContent !== t) el.textContent = t;
   $('gunhelp').classList.toggle('on', onGunDeck());
@@ -6997,6 +7229,7 @@ function update(dt) {
   }
 
   mapTick(dt);
+  sailTick(dt);
 
   /* Camera follows the pirate, looking at the wall and a little over it. Up on the rampart it
      swings up high to look down over the wall at the raiders. The player can turn it (Z/C or
@@ -7068,6 +7301,14 @@ function update(dt) {
     let d = chart.yaw - y0;
     d = Math.atan2(Math.sin(d), Math.cos(d));
     yaw = y0 + d * mapView;
+  }
+  // At sea: following her from behind and above, out over the water (turn and zoom as ever).
+  sailView += ((sail.on ? 1 : 0) - sailView) * Math.min(1, dt * 2);
+  if (sailView > 0.001 && sail.g) {
+    L2.set(sail.g.position.x, 0.6, sail.g.position.z - 2);
+    look.lerp(L2, sailView);
+    dist += (26 * view.zoom - dist) * sailView;
+    tilt += (Math.max(0.3, Math.min(1.45, 0.78 + view.pitch)) - tilt) * sailView;
   }
   // The cutscene's own shots.
   if (cine) cineCam = cine.cam;
@@ -7272,12 +7513,25 @@ function cheatShack() {
   plotShow();
   toast('Your shack is built!');
 }
+// The siege over and their ship gone, and you aboard the old sloop.
+function cheatSail() {
+  if (sail.on) return toast('Already at sea', true);
+  if (wm) exitWall();
+  raiders.splice(0).forEach((r) => raiderOut(r, true)); boats.splice(0).forEach((b) => scene.remove(b.g));
+  Object.assign(G, { phase: 'peace', wave: Math.max(G.wave, 3), toSpawn: 0, aim: null, cannonShots: 0 });
+  phaseWas = 'peace';   // (no cutscene)
+  ship.visible = cannon.visible = false; ship.position.x = ship.userData.home + SHIP_GONE + 1;
+  sail.seen = true;
+  sail.helm = new Helm(sail.sea);
+  board();
+}
 const CHEATS = [
   ['Beat this wave', cheatBeat],
   ['Next wave now', () => (G.phase === 'wave' ? toast('A wave\'s on: beat it first', true) : startWave())],
   ['Mend every hole', cheatMend],
   ['Build the shack', cheatShack],
   ["The captain's map scene", cheatMapScene],
+  ['Go sailing', cheatSail],
 ];
 function cheatPanel(on) {
   if (on && online()) { toast('Cheats are for playing alone', true); return; }
@@ -7308,6 +7562,6 @@ requestAnimationFrame(frame);
 
 // For poking at it from the console.
 window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, swordReward, swordBreak, lumber, toLumber, repairAll, newGame, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
-  bilge, tide, bilgeEnter, bilgeSwap, dredge,
+  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, board, ashore,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };
