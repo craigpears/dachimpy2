@@ -95,11 +95,6 @@ the site (`.assetsignore` skips `*.md`).
   "we don't care about that at this point". Later: the den becomes the site (or its own repo), and
   the primer goes. (How, where it's hosted, and what of the primer's engine the den still needs,
   to pin down with the user when it's time.)
-- **Shallows, and her oars out to get over them (9 Nov):** a few squares of shallow water on the
-  sloop's sea, for visual diversity (IDEAS.md, "Shallow and deep water"): they look shallow, she
-  "really slows down" in them, and she runs her oars out to get over. A small first go, no puzzle
-  behind it; bigger ships needing deep water come later.
-
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map

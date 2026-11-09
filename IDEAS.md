@@ -591,8 +591,16 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     deep. Even that's partly the map's job already: bigger ships are more squares wide, and a gap
     one square wide keeps them out. What shallows do add is **visual diversity**: a few squares of
     shallow water where ships "really slow down", and a small ship gets her oars out to get over
-    it, "especially as bigger ships come in later" (they'd need the deep water). A first go is
-    in TODO.md.
+    it, "especially as bigger ships come in later" (they'd need the deep water). On hold: "it
+    still just seems forced".
+    **Weather is where oars make sense (9 Nov):** the wind can drop. Under sail she's quicker, but
+    when the wind drops a ship that's all sails is "dead in the water until the wind picks back
+    up again", and under sail you "can't go against the wind". Oars keep her moving either way:
+    slower than a good wind, but never stuck. So the trade-off is a real one, sails for speed or
+    oars to be sure, and it comes from the sea itself rather than a tile made for it. (How the
+    wind's shown, how often it drops or turns, and how that sits with Battle Navigation's moves
+    and the trade winds: to shape with the user. Goes with "Weather and time of day", under
+    landscapes.)
 
 For now the den is the first version, and that works.
 
