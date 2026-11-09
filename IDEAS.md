@@ -249,6 +249,11 @@ smaller ship round the back**:
 - **Small ships, small loads:** only a small ship can get in close enough to row the goods ashore
   to the beach, so you can only carry a limited amount. That gives the small ships something
   they're best at (goes with "ship types with real trade-offs", further down).
+- **A smuggling race (9 Nov):** where the racing idea (the shipping lanes, above) comes in. Everyone's
+  hanging about at an island with the same idea, contraband in the hold, all trying to get it to
+  another island first, so it's a race for the profits. The PvP race then has a reason, and the
+  trade-offs show: the small ships slip through the shortcuts and onto the back beach, the big
+  ones carry more but have to keep to the main lane.
 
 Ties in with trading and commodities (none in the den yet), the shipping lanes, blockades, and the
 safe waters and the wilds. "I'm sure I could flesh that out more": to shape with the user.
