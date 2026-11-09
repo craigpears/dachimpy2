@@ -183,8 +183,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     - **The trade winds:** runs of wind squares, streaked on the water. Sail onto one and it sweeps
       her along a square at a time, quickly (about a quarter of a second a square), turning her
       the way it blows round a corner: "The trade winds have her!" She can't stop on a lane, so a
-      pin dropped on one goes to water beside it; the pilot takes a lane when it's quicker. A lane
-      runs out from off the beach to a junction.
+      pin dropped on one means "ride this lane": the pin moves to where the wind drops her off,
+      she sails onto the lane there or upwind of it, and arrives when the wind sets her down (9
+      Nov: "I don't seem to be able to drop a pin onto the lanes"). The pilot picks the quickest
+      way by the clock, a ride on the wind quick but not free, so she takes a lane when it saves
+      time and never rides the loop round to save a move (it was "going crazy around them"). A
+      lane runs out from off the beach to a junction.
     - **The junction:** at the lane's end it drops her off "just like a normal square": right rides
       the winds across and back in towards home (a loop), left is the canal to the lock, on is
       open sea.
@@ -204,16 +208,23 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       at the square she's on; the shot takes about a second and a half to come down, a red ring
       on the water marking where. Still there, she's hit; gone, it splashes down ("you can shoot,
       but there's no guarantee"). It loads four seconds between shots, and a hit on it from her
-      guns quietens it ten seconds. It holds fire while she's dazed or at the lock, and for five
+      guns quietens it ten seconds. The third hit wrecks it for good, a shot fired riding the
+      winds counting too ("plenty of people are going to try and see if they can time it"): the gun
+      topples, the battlements fly off and the tower sinks to a smoking stump, and a chest floats
+      free by the wreck. Sailing over it wins nothing; it's to be hauled up by puzzle (see "Every
+      reward is won by a puzzle"). It holds fire while she's dazed or at the lock, and for five
       seconds once she's patched, so she can get going (9 Nov: it fired again "literally before
       you can do anything about it").
     - **Dazed, not damaged:** a hit holes her ("Hit! She's holed: patch her to sail on"): she
       finishes the move she's on (or the wind's ride), then waits till you patch the hole in her
       deck by Carpentry, a whole hole to fill, with the wall's rules (a piece covers at least one
-      open square and nothing already fitted, and may rest on the deck round it). Her timber
-      crate stands by the hole with three pieces on its lid, dealt fair and restocked as you use
-      them; the Carpentry view's keys and the mouse work as at the wall, and the camera looks down
-      from her stern with the board the right way up. Then "Patched! She sails on." Carpentry, not
+      open square and nothing already fitted, and may rest on the deck round it). The pieces are
+      offered in the same tray along the bottom as ashore, a bit bigger, and you click them there
+      or use the Carpentry view's keys, as at the wall; nothing lies on deck, and the sailing bar
+      is hidden while you patch ("simplify. It's a very cluttered user interface. Just simplify
+      it, standardize it"). The deal is fair every time and there's no walking to the crates. The
+      camera looks almost straight down, the hole at least as big on screen as a wall hole ("it
+      hurts my eyes ... a bit tiny") and sitting just above the tray, not far up the screen. Then "Patched! She sails on." Carpentry, not
       Bilge (the user, 9 Nov: "what do you mean bilge? I've been hit by a cannonball", and bilging
       it out was "one fix and it was done"); Carpentry and Bilge "have got to go together", as in
       Puzzle Pirates, "but the primary one needs to be carpentry". Nobody's sunk or knocked out

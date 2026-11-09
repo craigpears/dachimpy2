@@ -78,6 +78,9 @@ export const SAIL = {
       soon as you finish the puzzle, the cannon starts shooting at you again ... literally before
       you can do anything about it"). */
   GRACE: 5,
+  /** Hits from her guns that wreck the turret for good (each one short of it quiets it QUIET
+      seconds; the user, 9 Nov: "it obviously needs to be destructible"). */
+  WRECK: 3,
   /** The hole a hit knocks in her deck when nothing says what shape (den.js makes a fresh one each
       hit): three pieces' worth, patched by Carpentry (src/den-patch.ts). */
   HOLE: [[0, 1], [0, 2], [1, 0], [1, 1], [1, 2], [1, 3], [2, 0], [2, 1], [2, 2], [2, 3], [3, 1], [3, 2], [3, 3], [4, 2], [4, 3]] as Cell[],
@@ -112,6 +115,11 @@ export const LAY = {
 /** Across and out for each way she can face. */
 const DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
 const key = (c: number, r: number) => `${c},${r}`;
+/** What the pilot weighs a course by: the seconds it takes to sail. A move is a move's sailing, its
+    pause and its share of the turn's breather; a square of trade wind is a quick push. (Counting
+    moves alone made the wind free, so she'd ride the whole loop round to save a move: 9 Nov, "the
+    autopilot is going crazy around them".) */
+const COST_MOVE = SAIL.MOVE + SAIL.PAUSE + SAIL.BREAK / SAIL.SLOTS, COST_PUSH = SAIL.PUSH;
 
 /** The squares a move passes through (one for forward, two for a turn), and how she ends up. */
 export function path(p: Pose, m: Move): { cells: [number, number][]; to: Pose } {
@@ -234,49 +242,158 @@ export class Sea {
     return { to: ride.length ? ride[ride.length - 1] : to, bump };
   }
 
-  /** The pilot: the fewest moves from here to that square (facing any way), never sailing into a
-      rock, though a turn that's blocked can turn her where she is (facing the shore at the board's
-      edge, that's the only way round). Null if there's no way there. */
-  plot(from: Pose, c: number, r: number): Move[] | null {
-    if (!this.open(c, r)) return null;
-    if (from.c === c && from.r === r) return [];
-    const seen = new Map<string, { prev: string | null; m: Move | null }>();
-    const id = (p: Pose) => `${p.c},${p.r},${p.d}`;
-    let edge: Pose[] = [from];
-    seen.set(id(from), { prev: null, m: null });
-    while (edge.length) {
-      const next: Pose[] = [];
-      for (const p of edge) {
-        for (const m of ['F', 'L', 'R'] as Move[]) {
-          const { to } = this.sail(p, m);
-          if (seen.has(id(to))) continue;
-          seen.set(id(to), { prev: id(p), m });
-          if (to.c === c && to.r === r) {
-            const moves: Move[] = [];
-            for (let at: string | null = id(to); at; at = seen.get(at)!.prev) { const s = seen.get(at)!; if (s.m) moves.unshift(s.m); }
-            return moves;
-          }
-          next.push(to);
-        }
-      }
-      edge = next;
-    }
-    return null;
+  /** Where the trade wind sweeping her on from this lane square drops her off (the square itself,
+      if it isn't a lane). */
+  dropOff(c: number, r: number): [number, number] {
+    const d = this.windAt(c, r);
+    if (d === undefined) return [c, r];
+    const ride = this.ride({ c, r, d }), end = ride[ride.length - 1];
+    return end ? [end.c, end.r] : [c, r];
   }
 
-  /** Where a pin dropped here lands: the nearest open square you can get to (off the board, or on
-      a rock, it moves to the nearest that's open). */
-  pinAt(c: number, r: number, from: Pose = SAIL.HOME): [number, number] | null {
+  /** The lane squares she can sail onto to be swept over this one: it, and every square upwind of
+      it on the same wind. */
+  private boarding(k: [number, number]): Set<string> {
+    const out = new Set<string>();
+    for (const [id, d] of this.wind) {
+      const [c, r] = id.split(',').map(Number);
+      if ((c === k[0] && r === k[1]) || this.ride({ c, r, d }).some((p) => p.c === k[0] && p.r === k[1])) out.add(id);
+    }
+    return out;
+  }
+
+  private plots = new Map<string, Move[] | null>();
+
+  /** The pilot: the quickest way from here to that square (facing any way), never sailing into a
+      rock, though a turn that's blocked can turn her where she is (facing the shore at the board's
+      edge, that's the only way round). Quickest by the clock, not the fewest moves: a ride on the
+      trade wind is quick but not free, so she takes a lane when it saves time and never rides the
+      loop round just to save a move. With `via` (a lane square), she gets there by riding that
+      lane: onto it at that square or upwind of it, and the wind carries her to the pin. Null if
+      there's no way there. */
+  plot(from: Pose, c: number, r: number, via: [number, number] | null = null): Move[] | null {
+    if (!this.open(c, r)) return null;
+    if (!via && from.c === c && from.r === r) return [];
+    const memo = `${from.c},${from.r},${from.d}|${c},${r}|${via ?? ''}|${this.rocks.size},${this.wind.size}`;
+    if (!this.plots.has(memo)) {
+      if (this.plots.size > 256) this.plots.clear();
+      this.plots.set(memo, this.quickest(from, c, r, via ? this.boarding(via) : null));
+    }
+    const got = this.plots.get(memo);
+    return got ? [...got] : null;
+  }
+
+  /** Where each move takes her from each pose (worked out as needed, and again if the rocks or
+      the winds change): the pose she ends up in, her squares of wind, whether she bumped, and the
+      square the move itself ended on (before the wind). Poses are numbered ((c * rows + r) * 4 + d). */
+  private edges = new Map<number, { end: number; ride: number; bump: boolean; on: number }[]>();
+  private edgesFor = '';
+  private from(id: number) {
+    const sig = `${this.rocks.size},${this.wind.size}`;
+    if (sig !== this.edgesFor) { this.edges.clear(); this.edgesFor = sig; }
+    let got = this.edges.get(id);
+    if (!got) {
+      const p: Pose = { c: Math.floor(id / 4 / this.rows), r: Math.floor(id / 4) % this.rows, d: id % 4 };
+      got = (['F', 'L', 'R'] as Move[]).map((m) => {
+        const { to, bump, ride } = this.move(p, m), end = ride.length ? ride[ride.length - 1] : to;
+        return { end: (end.c * this.rows + end.r) * 4 + end.d, ride: ride.length, bump, on: to.c * this.rows + to.r };
+      });
+      this.edges.set(id, got);
+    }
+    return got;
+  }
+
+  /** Dijkstra over where she can be and the way she faces, by the seconds it takes. */
+  private quickest(from: Pose, c: number, r: number, boards: Set<string> | null): Move[] | null {
+    const N = this.cols * this.rows * 4, MOVES: Move[] = ['F', 'L', 'R'];
+    const best = new Float64Array(N).fill(Infinity), prev = new Int32Array(N).fill(-1), how = new Int8Array(N), done = new Uint8Array(N);
+    const board = new Uint8Array(this.cols * this.rows);
+    if (boards) for (const k of boards) { const [x, y] = k.split(',').map(Number); board[x * this.rows + y] = 1; }
+    const goalSq = c * this.rows + r;
+    // A little heap of [seconds, order found, pose], quickest (then first found) on top.
+    const heap: [number, number, number][] = [];
+    const less = (x: [number, number, number], y: [number, number, number]) => x[0] < y[0] - 1e-9 || (Math.abs(x[0] - y[0]) <= 1e-9 && x[1] < y[1]);
+    const push = (e: [number, number, number]) => {
+      heap.push(e);
+      for (let i = heap.length - 1; i > 0;) {
+        const j = (i - 1) >> 1;
+        if (!less(e, heap[j])) break;
+        heap[i] = heap[j]; heap[j] = e; i = j;
+      }
+    };
+    const pop = () => {
+      const top = heap[0], last = heap.pop()!;
+      if (heap.length) {
+        heap[0] = last;
+        for (let i = 0; ;) {
+          const a = 2 * i + 1, b = a + 1;
+          let k = i;
+          if (a < heap.length && less(heap[a], heap[k])) k = a;
+          if (b < heap.length && less(heap[b], heap[k])) k = b;
+          if (k === i) break;
+          [heap[i], heap[k]] = [heap[k], heap[i]]; i = k;
+        }
+      }
+      return top;
+    };
+    let n = 0, goal: { cost: number; at: number; m: number } | null = null;
+    const s0 = (from.c * this.rows + from.r) * 4 + from.d;
+    best[s0] = 0; push([0, n++, s0]);
+    while (heap.length) {
+      const [t, , at] = pop();
+      if (goal && t >= goal.cost - 1e-9) break;
+      if (done[at]) continue;
+      done[at] = 1;
+      const out = this.from(at);
+      for (let m = 0; m < out.length; m++) {
+        const e = out[m], cost = t + COST_MOVE + e.ride * COST_PUSH;
+        if (e.end >> 2 === goalSq && (!boards || (!e.bump && board[e.on]))) {
+          if (!goal || cost < goal.cost - 1e-9) goal = { cost, at, m };
+          continue;
+        }
+        if (done[e.end] || best[e.end] <= cost + 1e-9) continue;
+        best[e.end] = cost; prev[e.end] = at; how[e.end] = m;
+        push([cost, n++, e.end]);
+      }
+    }
+    if (!goal) return null;
+    const moves: Move[] = [MOVES[goal.m]];
+    for (let at = goal.at; prev[at] >= 0; at = prev[at]) moves.unshift(MOVES[how[at]]);
+    return moves;
+  }
+
+  /** Where a pin dropped here lands, and the lane she rides to get there, if any. Dropped on a trade
+      wind it means "ride this lane": the pin goes to where the wind drops her off (the lane's end,
+      or the junction), and she gets there by riding it. Otherwise it's the nearest open square she
+      can get to and stop in (off the board, or on a rock, it moves to the nearest that's open). */
+  pinFor(c: number, r: number, from: Pose = SAIL.HOME): { at: [number, number]; via: [number, number] | null } | null {
     const cc = Math.max(0, Math.min(this.cols - 1, Math.round(c))), rr = Math.max(0, Math.min(this.rows - 1, Math.round(r)));
+    if (this.windAt(cc, rr) !== undefined) {
+      const at = this.dropOff(cc, rr), via: [number, number] = [cc, rr];
+      if (this.plot(from, ...at, via)) return { at, via };
+    }
     for (let ring = 0; ring < Math.max(this.cols, this.rows); ring++) {
       const near: [number, number][] = [];
       for (let dc = -ring; dc <= ring; dc++) for (let dr = -ring; dr <= ring; dr++) {
         if (Math.max(Math.abs(dc), Math.abs(dr)) === ring) near.push([cc + dc, rr + dr]);
       }
       near.sort((a, b) => Math.hypot(a[0] - c, a[1] - r) - Math.hypot(b[0] - c, b[1] - r));
-      for (const [x, y] of near) if (this.open(x, y) && this.plot(from, x, y)) return [x, y];
+      for (const [x, y] of near) if (this.open(x, y) && this.windAt(x, y) === undefined && this.plot(from, x, y)) return { at: [x, y], via: null };
     }
     return null;
+  }
+  /** Just where the pin lands (see pinFor). */
+  pinAt(c: number, r: number, from: Pose = SAIL.HOME): [number, number] | null { return this.pinFor(c, r, from)?.at ?? null; }
+
+  /** Where the chest floats free of a wreck at `at` (the turret's rock): the nearest square of open
+      sea beside it, off the lanes, that she can sail to (nearer the cove first). */
+  chestAt(at: [number, number]): [number, number] | null {
+    const near: [number, number][] = [];
+    for (let c = 0; c < this.cols; c++) for (let r = 0; r < this.rows; r++) {
+      if (this.open(c, r) && this.windAt(c, r) === undefined && !this.level(c, r) && !this.isLock(c, r)) near.push([c, r]);
+    }
+    near.sort((a, b) => Math.hypot(a[0] - at[0], a[1] - at[1]) - Math.hypot(b[0] - at[0], b[1] - at[1]) || a[1] - b[1] || a[0] - b[0]);
+    return near.find(([c, r]) => this.plot(SAIL.HOME, c, r)) ?? null;
   }
 
   private allReachable(): boolean {
@@ -340,6 +457,8 @@ export class Helm {
   pose: Pose;
   /** The pin: the square she's sailing for, if any. */
   pin: [number, number] | null = null;
+  /** The lane square the pin was dropped on, if it was: she rides that lane to the pin. */
+  via: [number, number] | null = null;
   /** Moves you've put in yourself, played before the pilot's. */
   mine: Move[] = [];
   /** The turn being played: its moves, which one's on, and how far into it. */
@@ -376,7 +495,7 @@ export class Helm {
   course(): Move[] {
     let p = this.after();
     for (const m of this.mine) p = this.sea.sail(p, m).to;
-    const pilot = this.pin ? this.sea.plot(p, ...this.pin) ?? [] : [];
+    const pilot = this.pin ? this.sea.plot(p, ...this.pin, this.via) ?? [] : [];
     return [...this.mine, ...pilot];
   }
 
@@ -385,14 +504,18 @@ export class Helm {
 
   private woken() { if (this.slot < 0 && this.wait <= 0) this.wait = SAIL.WAKE; }
 
-  /** Drop the pin (near where you pointed: see Sea.pinAt). */
+  /** Drop the pin (near where you pointed: see Sea.pinFor). On a trade wind, it goes to where the
+      wind will drop her off, and she rides that lane to get there. */
   drop(c: number, r: number): [number, number] | null {
-    const at = this.sea.pinAt(c, r, this.after());
-    if (!at) return null;
-    this.pin = at;
-    if (at[0] === this.after().c && at[1] === this.after().r && !this.mine.length) this.pin = null;
+    const got = this.sea.pinFor(c, r, this.after());
+    if (!got) return null;
+    this.pin = got.at; this.via = got.via;
+    // On the lane she's riding already, ahead of her: she's on her way there.
+    const v = got.via, riding = this.cur ? [this.cur.to, ...this.rides] : [];
+    if (v && this.rides.length + (this.cur?.m === 'W' ? 1 : 0) > 0 && riding.some((p) => p.c === v[0] && p.r === v[1])) this.via = null;
+    if (!this.via && got.at[0] === this.after().c && got.at[1] === this.after().r && !this.mine.length) this.pin = null;
     else this.woken();
-    return at;
+    return got.at;
   }
 
   /** Put in a move yourself (up to a turn's worth ahead). */
@@ -407,7 +530,7 @@ export class Helm {
   /** Pull up the pin and forget your moves: she stops when this turn's done (or straight away,
       if she's waiting at the lock). */
   stop() {
-    this.pin = null; this.mine = [];
+    this.pin = null; this.via = null; this.mine = [];
     if (!this.cur && this.slot >= 0) { this.turn = []; this.slot = -1; this.wait = SAIL.BREAK; }
   }
 
@@ -488,7 +611,8 @@ export class Helm {
         if (!cur.done && this.t >= dur - 1e-9) {
           cur.done = true;
           this.pose = { ...cur.to };
-          if (this.pin && this.pose.c === this.pin[0] && this.pose.r === this.pin[1]) { this.pin = null; out.push({ kind: 'arrive', at: { ...this.pose } }); }
+          // (Riding a lane to the pin, she's there when the wind drops her off on it.)
+          if (this.pin && this.pose.c === this.pin[0] && this.pose.r === this.pin[1] && (!this.via || cur.m === 'W')) { this.pin = null; this.via = null; out.push({ kind: 'arrive', at: { ...this.pose } }); }
         }
         if (this.t < span - 1e-9) continue;
         this.t = 0;
@@ -556,7 +680,10 @@ export class Helm {
    bilging to kind of undaze yourself"). On a rock between the lanes, it shoots at the square she's
    on whenever she's in reach; the shot's in the air a while, so a ship under way (above all on the
    trade wind) is often gone by the time it comes down: "you can shoot, but there's no guarantee".
-   A hit from her own guns on its rock quiets it for a while. */
+   A hit from her own guns on its rock quiets it for a while, and a few wreck it for good, a chest
+   floating free of the wreck, to be hauled up: "plenty of people are going to try and see if they can time it to
+   shoot it as they're swinging by in the winds, and then you should certainly get some reward for
+   that" (the user, 9 Nov). */
 
 export type TurretEvent = { kind: 'fire'; to: [number, number] } | { kind: 'land'; to: [number, number]; hit: boolean };
 
@@ -566,17 +693,32 @@ export class Turret {
   quiet = 0;
   /** Shots in the air: where each comes down, and when. */
   shots: { to: [number, number]; t: number }[] = [];
+  /** Hits from her guns so far; wrecked, silent for good, at SAIL.WRECK. */
+  hits = 0;
+  wrecked = false;
+  /** The square where a chest floats free of the wreck. Nothing's won by sailing over it: it's to
+      be hauled up by puzzle (the user, 9 Nov: "you need to have to haul it up ... You need
+      puzzles"), Treasure Haul, not wired in yet. */
+  chest: [number, number] | null = null;
 
   constructor(public at: [number, number]) {}
 
   /** Within its reach (squares, any way). */
   reaches(c: number, r: number): boolean { return Math.max(Math.abs(c - this.at[0]), Math.abs(r - this.at[1])) <= SAIL.TURRET_RANGE; }
 
-  /** Hit by her guns: quiet for a while. */
-  silence() { this.quiet = SAIL.QUIET; }
+  /** Hit by her guns: quiet for a while or, the SAIL.WRECK-th hit, wrecked, and a chest floats free
+      of it (on the open water by it in `sea`). What the hit did (null if it's a wreck already). */
+  hit(sea?: Sea): 'quiet' | 'wrecked' | null {
+    if (this.wrecked) return null;
+    if (++this.hits < SAIL.WRECK) { this.quiet = SAIL.QUIET; return 'quiet'; }
+    this.wrecked = true; this.quiet = 0;
+    this.chest = sea ? sea.chestAt(this.at) : null;
+    return 'wrecked';
+  }
 
   /** `ship`: where she is now (Helm.now), or null when it shouldn't shoot at her (she's not out,
-      or Helm.spared: dazed, at the lock, or just patched). */
+      or Helm.spared: dazed, at the lock, or just patched). A wreck never fires (its last shots in
+      the air still come down). */
 
   tick(dt: number, ship: { c: number; r: number } | null): TurretEvent[] {
     const out: TurretEvent[] = [];
@@ -588,7 +730,7 @@ export class Turret {
       out.push({ kind: 'land', to: s.to, hit });
     }
     this.shots = this.shots.filter((x) => x.t > 1e-9);
-    if (ship && this.quiet <= 0 && this.wait <= 0) {
+    if (ship && !this.wrecked && this.quiet <= 0 && this.wait <= 0) {
       const to: [number, number] = [Math.round(ship.c), Math.round(ship.r)];
       if (this.reaches(...to)) {
         this.shots.push({ to, t: SAIL.FLIGHT });

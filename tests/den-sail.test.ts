@@ -247,9 +247,82 @@ describe('sailing: the trade winds ("just insanely quick wind tiles", 9 Nov)', (
     expect(t).toBeLessThan(SAIL.WAKE + SAIL.MOVE + LAY.LANES[0].n * SAIL.PUSH + 0.2);
   });
 
-  it('a pin dropped on a lane goes to water she can stop in', () => {
-    const s = new Sea(9), at = s.pinAt(ac, ar + 3)!;
-    expect(s.windAt(...at)).toBeUndefined();
+  // Sails to the pin, a frame at a time: the squares she was on, the seconds it took, and the
+  // squares the wind swept her over.
+  const voyage = (h: Helm, secs = 120) => {
+    const been: string[] = [], swept: string[] = [];
+    let t = 0;
+    for (; h.pin && t < secs; t += 0.05) {
+      for (const e of h.tick(0.05)) {
+        if (e.kind === 'move') been.push(`${e.to.c},${e.to.r}`);
+        if (e.kind === 'push') { been.push(`${e.to.c},${e.to.r}`); swept.push(`${e.to.c},${e.to.r}`); }
+      }
+    }
+    return { been, swept, t };
+  };
+
+  it(`couldn't drop a pin onto the lanes (9 Nov)`, () => {
+    // "I don't seem to be able to drop a pin onto the lanes." A pin on a lane means "ride this
+    // lane": it goes to where the wind will drop her off, and she gets there by riding it, over the
+    // square you dropped it on.
+    const s = new Sea(9);
+    let h = new Helm(s);
+    expect(h.drop(ac, ar + 3)).toEqual([jc, jr]);
+    expect(h.pin).toEqual([jc, jr]);
+    let v = voyage(h);
+    expect(h.pin).toBeNull();
+    expect([h.pose.c, h.pose.r]).toEqual([jc, jr]);
+    expect(v.swept).toContain(`${ac},${ar + 4}`);
+    // On the loop's far lane, she's dropped off at its end, back in towards the cove.
+    const C = LAY.LANES[2], end: [number, number] = [C.at[0], C.at[1] - C.n];
+    h = new Helm(s);
+    expect(h.drop(C.at[0], C.at[1] - 4)).toEqual(end);
+    v = voyage(h);
+    expect([h.pose.c, h.pose.r]).toEqual(end);
+    expect(v.swept).toContain(`${C.at[0]},${C.at[1] - 4}`);
+    // Even when she's sitting where the lane drops her off: she goes round and rides it.
+    h = new Helm(s, { c: jc, r: jr, d: 0 });
+    expect(h.drop(ac, ar + 2)).toEqual([jc, jr]);
+    v = voyage(h);
+    expect([h.pose.c, h.pose.r]).toEqual([jc, jr]);
+    expect(v.swept).toContain(`${ac},${ar + 3}`);
+    // And on the lane she's riding already, ahead of her, she just carries on.
+    h = new Helm(s, { c: ac, r: ar - 1, d: 0 });
+    h.put('F');
+    run(h, SAIL.WAKE + SAIL.MOVE + SAIL.PUSH * 2);
+    expect(h.cur?.m).toBe('W');
+    h.drop(ac, ar + 6);
+    expect(h.course()).toEqual([]);
+    run(h, 5);
+    expect([h.pose.c, h.pose.r]).toEqual([jc, jr]);
+    expect(h.pin).toBeNull();
+  });
+
+  it('the autopilot is going crazy around them (9 Nov)', () => {
+    // "The autopilot is going crazy around them." The pilot counted moves and the wind was free,
+    // so for a pin out beyond the loop's far lane she sailed onto the first lane, out to the
+    // junction, all the way round the loop back in near the beach, and out again. Now the wind's
+    // quick but not free, and she sails straight there.
+    const s = new Sea(9), C = LAY.LANES[2], h = new Helm(s);
+    h.drop(15, 8);
+    const v = voyage(h);
+    expect([h.pose.c, h.pose.r]).toEqual([15, 8]);
+    expect(v.swept).toEqual([]);
+    expect(v.been.filter((id) => s.windAt(...(id.split(',').map(Number) as [number, number])) === C.d)).toEqual([]);
+    expect(v.t).toBeLessThan(24);
+    // Anywhere she's sent, she sails what she plotted, with no dithering on the way: no more moves
+    // than planned, and there.
+    for (let c = 0; c < s.cols; c++) for (let r = 0; r < s.rows; r++) {
+      if (!s.open(c, r) || s.windAt(c, r) !== undefined || s.level(c, r) || s.isLock(c, r)) continue;
+      const g = new Helm(s);
+      if (!g.drop(c, r) || !g.pin) continue;
+      const plan = g.course().length;
+      let moves = 0;
+      for (let t = 0; g.pin && t < 200; t += 0.05) moves += g.tick(0.05).filter((e) => e.kind === 'move').length;
+      expect(g.pin).toBeNull();
+      expect([g.pose.c, g.pose.r]).toEqual([c, r]);
+      expect(moves).toBe(plan);
+    }
   });
 });
 
@@ -388,7 +461,7 @@ describe('sailing: the turret, and being dazed (9 Nov: "keeps it faster paced, b
     t.tick(1, at);
     expect(t.tick(SAIL.TURRET_RELOAD - 0.1, at).some((e) => e.kind === 'fire')).toBe(false);
     expect(t.tick(0.2, at).some((e) => e.kind === 'fire')).toBe(true);
-    t.silence();
+    t.hit();
     expect(t.tick(SAIL.QUIET - 0.1, at).some((e) => e.kind === 'fire')).toBe(false);
     expect(t.tick(0.2, null).some((e) => e.kind === 'fire')).toBe(false);
     expect(t.tick(0.1, at).some((e) => e.kind === 'fire')).toBe(true);
@@ -441,6 +514,66 @@ describe('sailing: the turret, and being dazed (9 Nov: "keeps it faster paced, b
     expect(h.dazed()).toBe(false);
     expect(shoot(SAIL.GRACE - 0.2).some((e) => e.kind === 'fire')).toBe(false);
     expect(shoot(0.4).some((e) => e.kind === 'fire')).toBe(true);   // (she's still in reach)
+  });
+
+  it(`"it obviously needs to be destructible" (9 Nov): a few hits wreck it for good`, () => {
+    const s = new Sea(9), t = new Turret(LAY.TURRET), at = { c: LAY.TURRET[0] - 2, r: LAY.TURRET[1] };
+    // Short of the wreck, a hit only quiets it a while, as before.
+    for (let i = 1; i < SAIL.WRECK; i++) {
+      expect(t.hit(s)).toBe('quiet');
+      expect(t.tick(SAIL.QUIET - 0.1, at).some((e) => e.kind === 'fire')).toBe(false);
+      expect(t.tick(0.2, at).some((e) => e.kind === 'fire')).toBe(true);
+    }
+    expect(SAIL.WRECK).toBe(3);
+    expect(t.hit(s)).toBe('wrecked');
+    expect(t.wrecked).toBe(true);
+    // Its last shot in the air still comes down, but it never fires again.
+    const ev = t.tick(60, at);
+    expect(ev.some((e) => e.kind === 'fire')).toBe(false);
+    expect(ev.some((e) => e.kind === 'land')).toBe(true);
+    expect(t.tick(60, at)).toEqual([]);
+    expect(t.hit(s)).toBeNull();
+  });
+
+  it('a wrecked turret leaves a floating chest (9 Nov), on open water by it', () => {
+    // (To be hauled up by puzzle, not picked up by sailing over it: "you need to have to haul it
+    // up ... You need puzzles".)
+    const s = new Sea(9), t = new Turret(LAY.TURRET);
+    expect(t.chest).toBeNull();
+    for (let i = 0; i < SAIL.WRECK; i++) t.hit(s);
+    const chest = t.chest!;
+    expect(chest).toEqual(s.chestAt(LAY.TURRET));
+    expect(Math.max(Math.abs(chest[0] - LAY.TURRET[0]), Math.abs(chest[1] - LAY.TURRET[1]))).toBe(1);
+    expect(s.open(...chest)).toBe(true);
+    expect(s.windAt(...chest)).toBeUndefined();
+    // She can sail there, and stop on it.
+    const h = new Helm(s);
+    expect(h.drop(...chest)).toEqual(chest);
+    for (let k = 0; k < 2400 && h.pin; k++) h.tick(0.05);
+    expect([h.pose.c, h.pose.r]).toEqual(chest);
+    expect(t.chest).toEqual(chest);   // (still there: nothing's hauled up by sailing over it)
+  });
+
+  it('a shot timed as she swings by on the trade winds hits the turret', () => {
+    // "plenty of people are going to try and see if they can time it to shoot it as they're
+    // swinging by in the winds": on either lane past it, there's a moment a broadside reaches it.
+    const s = new Sea(9);
+    // Onto the first lane, out past it; and onto the loop, back in past it on its far lane.
+    const [ac, ar] = LAY.LANES[0].at, [bc, br] = LAY.LANES[1].at;
+    for (const from of [{ c: ac, r: ar - 1, d: 0 }, { c: bc - 1, r: br, d: 1 }]) {
+      const h = new Helm(s, from), side = 'R';
+      h.put('F');
+      let hit = false, rode = false;
+      for (let k = 0; k < 400 && !hit; k++) {
+        h.tick(0.02);
+        if (h.cur?.m !== 'W') continue;
+        rode = true;
+        const shot = broadside(s, h.now(), side);
+        hit = !!shot.hit && shot.hit[0] === LAY.TURRET[0] && shot.hit[1] === LAY.TURRET[1];
+      }
+      expect(rode).toBe(true);
+      expect(hit).toBe(true);
+    }
   });
 
   it('dazed on the trade wind, the wind still carries her to the end of the lane', () => {

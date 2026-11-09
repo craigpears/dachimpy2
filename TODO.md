@@ -120,40 +120,11 @@ the site (`.assetsignore` skips `*.md`).
   (Treasure Haul's real home is a wreck, so it goes at the clifftop lagoon's wreck, the crane's
   place; the cove keeps a chest of its own on the beach. How you get that one: to pin down.)
 
-- **Can't drop a pin on the trade winds, and the pilot goes crazy round them (9 Nov):** "I don't
-  seem to be able to drop a pin onto the lanes. The autopilot is going crazy around them." A pin
-  dropped on a lane should take her onto it and ride it (say, to where the wind drops her off),
-  and the pilot should sail sensibly near the lanes, never circling or dithering at their edges.
-  (What a pin on a lane means exactly: to pin down with the user.)
-
-- **Knock the turret out, and a reward for it (9 Nov):** the turret "obviously needs to be
-  destructible, because plenty of people are going to try and see if they can time it to shoot it
-  as they're swinging by in the winds, and then you should certainly get some reward for that".
-  So a few hits from her guns wreck it (a hit now only quiets it for a while), the timing shot
-  from the trade winds counts, and wrecking it gives a reward: a chest floats free of the wreck,
-  and you haul it up. Not by sailing over it: that was "not Puzzle Pirates' spirit at all ...
-  you need to have to haul it up ... You need puzzles." So she stops by the chest and Treasure
-  Haul brings it aboard (wired with the lagoon's wreck). And the turret's destruction "does not
-  look very satisfying": give the wreck more of a moment. (What's in it, and whether the turret's
-  rebuilt later: to pin down with the user.)
-
-- **Patching her deck should play like Carpentry ashore (9 Nov):** "the mechanics of the
-  carpentry puzzle on the ship seem a bit off. Like, why is the tool tray different than on land?
-  ... It just felt a bit weird and off." The pieces, the tray they're offered in and the way you
-  take and fit them should be the same as at the den's wall, so it's the one Carpentry wherever
-  you play it. The pieces showed twice, on the crate on deck and in the 1, 2, 3 tray along the
-  bottom ("why have you got it twice"), and the ship's controls stayed up while you patched:
-  "simplify. It's a very cluttered user interface. Just simplify it, standardize it." One tray,
-  as ashore, and nothing of the sailing bar while you patch. And the new row there "you can't
-  even click it or use the buttons. It's just kind of a bit pointless": whatever's on screen
-  should work as it does ashore, or not be there. (Pinned down: the three pieces lying on deck
-  can't be clicked, so they go; the row of moves isn't needed while you patch; keep the tray
-  along the bottom as on land, where you can click them, "make it a bit bigger".) And the patch
-  itself is hard to look at: "it hurts my eyes ... maybe the angle needs to be a bit more, or the
-  scale of it. It's a bit tiny, and it's making my head hurt": a steeper look down at it, and
-  the hole as big on screen as a wall hole is ashore. "Looking a bit better", but the hole sits far
-  above the tray: "your eyes really have to go down to the bottom of the screen to see it". Keep
-  them close together.
+- **Haul up the wrecked turret's chest by puzzle (9 Nov):** three hits now wreck the turret and
+  a chest floats free, but sailing over it was "not Puzzle Pirates' spirit at all ... you need to
+  have to haul it up ... You need puzzles." So she stops by the chest and Treasure Haul brings it
+  aboard (wired with the lagoon's wreck), paying into the den's doubloons. (What's in it, and
+  whether the turret's rebuilt later: to pin down with the user.)
 
 - **Split den.js up, so features can be worked on side by side (9 Nov, technical):** the sea's
   features had to wait in a queue because they all change the one big file, den.js (over 8,000

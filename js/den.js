@@ -2445,8 +2445,8 @@ function takeCrate(j) {
   pickUp(p);
 }
 // One whole piece, drawn the main game's way (js/render.js), in the den's wood colours.
-function pieceSvg(letter, cells) {
-  const b = C.bbox(cells), cs = Math.min(11, Math.floor(42 / b.h), Math.floor(54 / b.w));
+function pieceSvg(letter, cells, big = false) {
+  const b = C.bbox(cells), cs = big ? Math.min(14, Math.floor(58 / b.h), Math.floor(74 / b.w)) : Math.min(11, Math.floor(42 / b.h), Math.floor(54 / b.w));
   return window.Render.piece(letter, cells, { cell: cs, pad: 1 });
 }
 function toolbox() {
@@ -2463,18 +2463,18 @@ function toolbox() {
     box.append(el);
     toolEls.push({ el, sig: '' });
   }
-  // (At sea, patching her deck, they're the ship's crate's: patchOpen.)
-  const hand = patch.on ? patch.hand : carry;
+  // (At sea, patching her deck, they're the ship's timber, a bit bigger: patchOpen.)
+  const hand = patch.on ? patch.hand : carry, big = patch.on;
   (patch.on ? patch.slots : cratesInOrder()).forEach((p, j) => {
     const t = toolEls[j], mine = hand && hand.from === p;
     const state = p.letter ? 'piece' : mine ? 'hand' : p.wait > 0.3 ? 'wait' : 'taken';
-    const sig = `${state}|${p.letter}|${p.cells}|${mine ? hand.cells : ''}|${state === 'wait' ? Math.ceil(p.wait) : ''}`;
+    const sig = `${big}|${state}|${p.letter}|${p.cells}|${mine ? hand.cells : ''}|${state === 'wait' ? Math.ceil(p.wait) : ''}`;
     if (sig !== t.sig) {
       t.sig = sig;
       t.el.className = `tool ${state}`;
       const n = `<kbd>${j + 1}</kbd>`;
-      t.el.innerHTML = state === 'piece' ? `${pieceSvg(p.letter, p.cells)}<span>${n}</span>`
-        : state === 'hand' ? `${pieceSvg(hand.letter, hand.cells)}<span>${n} in hand</span>`
+      t.el.innerHTML = state === 'piece' ? `${pieceSvg(p.letter, p.cells, big)}<span>${n}</span>`
+        : state === 'hand' ? `${pieceSvg(hand.letter, hand.cells, big)}<span>${n} in hand</span>`
         : state === 'wait' ? `<span>${n} restocking<br>${Math.ceil(p.wait)}s</span><i><b></b></i>`
         : `<span>${n} taken</span>`;
     }
@@ -4367,7 +4367,8 @@ function seaWorld() {
   W.pump.rotation.y = -Math.PI / 2 + 0.7;   // (its spout out over the lock, its handle clear of the board)
   W.pump.position.set(seaX(LAY.LOCK[0]) + 1.7, CLIFF_H + 0.12, seaZ(LAY.LOCK[1]) + SAIL.CELL / 2 + 0.6);
   W.g.add(W.pump);
-  W.gush = mesh(new THREE.CylinderGeometry(0.13, 0.2, 1, 8, 1, true), new THREE.MeshBasicMaterial({ color: '#9fd4ec', transparent: true, opacity: 0.75, depthWrite: false }), false);
+  // (thick and bright enough to read from the quay's camera, up over the board)
+  W.gush = mesh(new THREE.CylinderGeometry(0.3, 0.45, 1, 10, 1, true), new THREE.MeshBasicMaterial({ color: '#cdeefa', transparent: true, opacity: 0.9, depthWrite: false, side: THREE.DoubleSide, fog: false }), false);
   W.gush.visible = false;
   W.g.add(W.gush);
   // The lock: its chamber's water, and a pair of gates at each end. She's longer than a square, so
@@ -4403,14 +4404,63 @@ function seaWorld() {
   const [tc, tr] = LAY.TURRET, tower = new THREE.Group(), ts = mat('#8a8178', { flatShading: true });
   const body = mesh(new THREE.CylinderGeometry(1.15, 1.35, 3.2, 12), ts); body.position.y = 1.6;
   tower.add(body);
-  for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2, m = mesh(new THREE.BoxGeometry(0.4, 0.45, 0.4), ts); m.position.set(Math.cos(a) * 1.0, 3.4, Math.sin(a) * 1.0); m.rotation.y = -a; tower.add(m); }
+  const merlons = [];
+  for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2, m = mesh(new THREE.BoxGeometry(0.4, 0.45, 0.4), ts); m.position.set(Math.cos(a) * 1.0, 3.4, Math.sin(a) * 1.0); m.rotation.y = -a; tower.add(m); merlons.push(m); }
   const gun = gunMesh(); gun.scale.setScalar(0.85); gun.position.y = 3.2;
   tower.add(gun);
   tower.position.set(seaX(tc), 0, seaZ(tr));
   W.g.add(tower);
-  W.turret = tower; W.gun = gun;
+  // Its wreck (see turretLook): a broken stump, scorched, its stones and gun tumbled round it.
+  const scorch = mat('#3e3935', { flatShading: true }), ruin = new THREE.Group();
+  // (tall enough to stand up out of its rock, its top broken off jagged, embers glowing in it)
+  const stump = mesh(new THREE.CylinderGeometry(1.05, 1.35, 2.3, 10), scorch); stump.position.y = 1.15;
+  ruin.add(stump);
+  for (let i = 0; i < 6; i++) { const a = i / 10 * Math.PI * 2 + 0.3, ht = 0.3 + ((i * 7) % 5) * 0.16, b = mesh(new THREE.BoxGeometry(0.42, ht, 0.42), i % 2 ? ts : scorch); b.position.set(Math.cos(a) * 0.95, 2.3 + ht / 2, Math.sin(a) * 0.95); b.rotation.y = -a; ruin.add(b); }
+  const ember = new THREE.MeshBasicMaterial({ color: '#ff8a2a' });
+  for (let i = 0; i < 5; i++) { const e = mesh(new THREE.BoxGeometry(0.22, 0.12, 0.22), ember, false); e.position.set(Math.cos(i * 1.9) * 0.5, 2.32, Math.sin(i * 1.9) * 0.5); e.rotation.y = i; ruin.add(e); }
+  for (let i = 0; i < 9; i++) { const a = i * 2.4, k = 1.5 + (i % 3) * 0.35, b = mesh(new THREE.BoxGeometry(0.5, 0.45, 0.5), i % 3 ? ts : scorch); b.position.set(Math.cos(a) * k, 0.7 + (i % 2) * 0.2, Math.sin(a) * k); b.rotation.set(i * 0.7, i * 1.3, i * 0.4); ruin.add(b); }
+  const barrel = gunMesh(); barrel.scale.setScalar(0.75); barrel.position.set(1.4, 0.9, 0.7); barrel.rotation.set(0.5, 0.9, 1.2); ruin.add(barrel);
+  ruin.visible = false;
+  tower.add(ruin);
+  W.turret = tower; W.gun = gun; W.intact = [body, ...merlons, gun]; W.ruin = ruin; W.wrecked = false;
   scene.add(W.g);
   return W;
+}
+// The turret standing, or its wreck.
+function turretLook(W, wrecked) {
+  W.wrecked = wrecked;
+  W.fall = undefined;
+  for (const o of W.intact) { o.visible = !wrecked; if (o.userData.home) { o.position.copy(o.userData.home); o.rotation.copy(o.userData.turn); } }
+  W.turret.children[0].scale.y = 1;
+  W.ruin.visible = wrecked;
+}
+// Wrecked, it comes down: its gun topples off the top and splashes down, its battlements fly
+// apart, the tower shudders and sinks into its rock, then there's the smoking stump.
+function turretFall(W, dt) {
+  const T = 1.4, u = Math.min(1, (W.fall += dt) / T), tw = W.turret.position;
+  for (const o of W.intact) if (!o.userData.home) { o.userData.home = o.position.clone(); o.userData.turn = o.rotation.clone(); }
+  const body = W.turret.children[0];
+  body.scale.y = 1 - 0.45 * u * u;
+  body.position.x = Math.sin(W.fall * 40) * 0.08 * (1 - u);
+  W.intact.forEach((o, i) => {
+    if (o === body) return;
+    const h = o.userData.home, a = Math.atan2(h.z, h.x) || i;
+    o.position.set(h.x + Math.cos(a) * u * 2.5, h.y + 1.6 * u - 5.2 * u * u, h.z + Math.sin(a) * u * 2.5);
+    o.rotation.set(o.userData.turn.x + u * 3, o.userData.turn.y, o.userData.turn.z + u * (o === W.gun ? 1.6 : 2.5));
+  });
+  if ((W.smokeT = (W.smokeT ?? 0) - dt) < 0) { W.smokeT = 0.08; burst(V3(tw.x, 2 + Math.random(), tw.z), '#3f3a37', 4, 1.6); }
+  if (u >= 1) { burst(V3(tw.x + 2, 0.3, tw.z + 1), '#e6f3f6', 18, 3.5); burst(V3(tw.x, 1.5, tw.z), '#8a8178', 16, 3); turretLook(W, true); }
+}
+// The chest floating free of the wreck: a little sea chest, banded, bobbing on the water.
+function floatChestMesh() {
+  const g = new THREE.Group(), wood = mat('#6e4a2a', { map: woodTex }), band = mat('#c9a43a', { metalness: 0.6, roughness: 0.4 });
+  const box = mesh(new THREE.BoxGeometry(1.1, 0.6, 0.75), wood); box.position.y = 0.15;
+  const lid = mesh(new THREE.CylinderGeometry(0.375, 0.375, 1.1, 10, 1, false, 0, Math.PI), wood); lid.rotation.z = Math.PI / 2; lid.position.y = 0.45;
+  for (const x of [-0.35, 0.35]) { const b = mesh(new THREE.BoxGeometry(0.08, 0.66, 0.8), band, false); b.position.set(x, 0.15, 0); g.add(b); }
+  const lock = mesh(new THREE.BoxGeometry(0.18, 0.2, 0.06), band, false); lock.position.set(0, 0.35, 0.39);
+  g.add(box, lid, lock);
+  scene.add(g);
+  return g;
 }
 /* An old bilge pump: a post, a spout out of one side and a handle out of the other, pivoted at the
    top of the post so it can be worked (userData.arm; the spout's mouth is userData.mouth). */
@@ -4483,6 +4533,7 @@ function sailReset() {
   sail.helm = new Helm(sail.sea);
   sail.guns = new Guns();
   sail.turret = new Turret(LAY.TURRET);
+  if (sail.world) turretLook(sail.world, false);
   sail.shots.forEach((v) => { scene.remove(v.ball, v.ring); });
   sail.shots = [];
   sail.said = {};
@@ -4490,6 +4541,20 @@ function sailReset() {
   if (patch.on) patchShut();
   patchClear();
   sailView = 0;
+}
+// A hit on the turret from her guns: quietened a while or, the third, wrecked, a chest floating
+// free of it (src/den-sail.ts, Turret.hit).
+function turretHit(at) {
+  const t = sail.turret, what = t.hit(sail.sea), left = SAIL.WRECK - t.hits;
+  if (what === 'quiet') return toast(`A hit on the turret! That's quietened it for a while (${left} more to wreck it)`);
+  if (!what) return toast('A hit on the wreck!');
+  // Its moment: a blast of fire, smoke and stone, and the tower comes down (see turretFall).
+  const W = sail.world, tw = W.turret.position;
+  burst(V3(tw.x, 3.4, tw.z), '#ffb85a', 36, 6); burst(V3(tw.x, 3, tw.z), '#ff7a2a', 20, 4.5); burst(V3(tw.x, 2.5, tw.z), '#3f3a37', 30, 4);
+  burst(V3(tw.x, 2, tw.z), '#8a8178', 24, 5.5); burst(at, '#e6f3f6', 16, 4);
+  W.fall = 0;
+  shake = Math.max(shake, 0.6);
+  toast('The turret\'s wrecked! And a chest has floated free of it');
 }
 // A shot out of her side, from where she is right now: it flies straight out and comes down in the
 // sea, or on the first rock in its way (src/den-sail.ts, broadside). Then that gun loads again.
@@ -4521,7 +4586,7 @@ function sailFire(side) {
       const x0 = r.position.x, z0 = r.position.z;
       tween(0.4, (u) => { const k = Math.sin(u * Math.PI * 6) * 0.12 * (1 - u); r.position.x = x0 + k; r.position.z = z0 - k; }, () => { r.position.x = x0; r.position.z = z0; });
     }
-    if (hit[0] === LAY.TURRET[0] && hit[1] === LAY.TURRET[1]) { sail.turret.silence(); toast('A hit on the turret! That\'s quietened it for a while'); }
+    if (hit[0] === LAY.TURRET[0] && hit[1] === LAY.TURRET[1]) turretHit(to);
     else toast('A hit on the rocks!');
   });
 }
@@ -4575,12 +4640,14 @@ function holdOpen(mode) {
   g.rotation.set(0, 0, 0);
   g.scale.setScalar(QUAY_SQ);
   hold.mode = mode;
+  document.body.classList.add('quay');   // (the sailing bar out of the way while you bilge)
   keys.clear();
 }
 function holdShut() {
   if (hold.group) hold.group.removeFromParent();
   hold.mode = null;
   hold.queue = [];
+  document.body.classList.remove('quay');
 }
 /* A Bilge piece on the quay's board. The pieces are drawn the right way up for the beach's board,
    which you look at from the sea; the quay's you look at from the den side, so they're turned the
@@ -4678,11 +4745,13 @@ function holdTick(dt) {
    sails struck, till you've patched it by Carpentry, as the wall's holes are mended (the rules are
    src/den-patch.ts): a piece goes over at least one open square, clear of what's in already, and
    may rest on the deck round the hole. You can't walk off to the den's crates at sea, so the
-   pieces are to hand in the ship's timber crate beside the hole: three, 1, 2 and 3 on the toolbox
-   as in the den, each restocked as it's used, dealt fair (as for the first wall) so the hole can be
-   finished. Played with the Carpentry view's own keys (src/den-carp-view.ts), looking down on it
+   pieces are offered in the same tray as ashore, 1, 2 and 3 along the bottom (clicked or pressed,
+   a bit bigger here), each restocked as it's used, dealt fair (as for the first wall) so the hole
+   can be finished. The ship's timber crate stands by the hole as scenery, nothing on its lid (the
+   user, 9 Nov: the pieces shown twice, on the lid and in the tray, was "a very cluttered user
+   interface ... simplify it, standardize it"); the sailing bar's hidden while you patch. Played with the Carpentry view's own keys (src/den-carp-view.ts), looking down on it
    from her stern, its top row toward her bow, as the wall's Carpentry reads. */
-const patch = { on: false, hole: null, group: null, face: null, wood: null, ghost: null, ghostKey: '', crate: null, crateSig: '', slots: [], hand: null, r: 0, c: 0, sq: 0.2, keyAt: null, fair: new FairDeal(C) };
+const patch = { on: false, hole: null, group: null, face: null, wood: null, ghost: null, ghostKey: '', crate: null, slots: [], hand: null, r: 0, c: 0, sq: 0.2, keyAt: null, fair: new FairDeal(C) };
 const PATCH_W = 1.3;   // metres across her deck the board may take, at most
 let patchView = 0;
 // A fresh hole for a hit: shaped for the common pieces, as the wall's are.
@@ -4699,7 +4768,7 @@ function patchClear() {
 }
 function patchOpen(hole) {
   patchClear();
-  Object.assign(patch, { on: true, hole, hand: null, ghostKey: '', crateSig: '', keyAt: null });
+  Object.assign(patch, { on: true, hole, hand: null, ghostKey: '', keyAt: null });
   const b = hole.board, sq = patch.sq = Math.min(0.22, PATCH_W / b.w);
   // In cell space (rows down, as pieceGroup draws them), laid flat on her deck, the top row toward
   // her bow and the board's middle where the deck's is.
@@ -4727,16 +4796,13 @@ function patchOpen(hole) {
   patch.wood = new THREE.Group();
   face.add(patch.wood);
   sail.g.add(g);
-  // The ship's timber crate, between the hole and her stern, three pieces on its lid.
+  // The ship's timber crate, between the hole and her stern (scenery: the pieces are in the tray).
   if (!patch.crate) {
     const c = patch.crate = new THREE.Group(), box = mesh(new THREE.BoxGeometry(0.4, 0.26, 0.9), mat('#7a5634', { map: woodTex }));
     box.position.y = 0.13;
     const band = mesh(new THREE.BoxGeometry(0.42, 0.04, 0.92), mat('#3a3f45', { metalness: 0.6, roughness: 0.4 }), false);
     band.position.y = 0.2;
     c.add(box, band);
-    c.userData.lid = new THREE.Group();
-    c.userData.lid.position.y = 0.27;
-    c.add(c.userData.lid);
     c.position.set(-0.95, SLOOP_DECK, 0);
   }
   sail.g.add(patch.crate);
@@ -4880,21 +4946,6 @@ function patchTick(dt) {
     if (p.wait > 0) p.wait -= dt;
     if (!p.letter && patch.hand?.from !== p && p.wait <= 0) patchDeal(p);
   }
-  // The pieces on the crate's lid, in a row from port to starboard, 1 to 3.
-  const sig = patch.slots.map((p) => `${p.letter}${p.cells}`).join('|');
-  if (sig !== patch.crateSig) {
-    patch.crateSig = sig;
-    const lid = patch.crate.userData.lid;
-    lid.clear();
-    patch.slots.forEach((p, j) => {
-      if (!p.letter) return;
-      const g = centred(p.cells, woodMat(p.letter)), b = C.bbox(p.cells);
-      g.rotation.set(-Math.PI / 2, 0, -Math.PI / 2);
-      g.scale.setScalar(0.24 / (Math.max(b.w, b.h) * S));
-      g.position.set(0, 0.02, (j - 1) * 0.28);
-      lid.add(g);
-    });
-  }
   // Where the piece in hand would go: green, amber resting on the deck, red if it won't go.
   const hand = patch.hand, f = hand && patch.hole.fit(hand.cells, patch.r, patch.c);
   const kind = !hand ? '' : !f ? 'no' : f.over ? 'over' : 'ok';
@@ -4925,6 +4976,7 @@ function sailClick(x, y) {
   const at = seaCellAt(x, y);
   if (!at) return;
   if (!sail.helm.drop(at.c, at.r)) toast('She\'s there already', true);
+  else if (sail.helm.via) toast('She\'ll ride the trade winds: the pin\'s where they drop her off');
 }
 function sailHover(x, y) {
   if (patch.on) { patchHover(x, y); sail.hover = null; return; }
@@ -5058,7 +5110,17 @@ function sailTick(dt) {
   {
     const p = h.now(), tw = W.turret.position, dx = seaX(p.c) - tw.x, dz = seaZ(p.r) - tw.z;
     if (sail.on) W.gun.rotation.y += (Math.atan2(-dx, -dz) - W.gun.rotation.y + Math.PI * 3) % (Math.PI * 2) - Math.PI > 0 ? Math.min(dt * 2, ((Math.atan2(-dx, -dz) - W.gun.rotation.y + Math.PI * 3) % (Math.PI * 2)) - Math.PI) : Math.max(-dt * 2, ((Math.atan2(-dx, -dz) - W.gun.rotation.y + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
-    if (sail.turret.quiet > 0 && (W.smokeT = (W.smokeT ?? 0) - dt) < 0) { W.smokeT = 0.25; burst(V3(tw.x, 3.8, tw.z), '#6f6a66', 2, 0.6); }
+    if (W.fall !== undefined) turretFall(W, dt);
+    else if (sail.turret.wrecked !== W.wrecked) turretLook(W, sail.turret.wrecked);
+    if (sail.turret.wrecked) { if ((W.smokeT = (W.smokeT ?? 0) - dt) < 0) { W.smokeT = 0.14; burst(V3(tw.x + 0.2, 2.8, tw.z), '#3f3a37', 4, 0.9); } }
+    else if (sail.turret.quiet > 0 && (W.smokeT = (W.smokeT ?? 0) - dt) < 0) { W.smokeT = 0.25; burst(V3(tw.x, 3.8, tw.z), '#6f6a66', 2, 0.6); }
+    // The wreck's chest, bobbing on the water till she hauls it aboard.
+    const ch = sail.turret.chest;
+    if (ch) sail.chestG ||= floatChestMesh();
+    if (sail.chestG) {
+      sail.chestG.visible = !!ch;
+      if (ch) { const tt = performance.now() / 1000; sail.chestG.position.set(seaX(ch[0]), 0.05 + Math.sin(tt * 1.6) * 0.1, seaZ(ch[1])); sail.chestG.rotation.set(Math.sin(tt * 1.1) * 0.08, 0.4 + Math.sin(tt * 0.5) * 0.2, Math.sin(tt * 1.3) * 0.08); }
+    }
   }
   // The quay pump: its handle down and up again with each stroke, and water gushing from its spout
   // into the lock while it's rising.
@@ -7858,15 +7920,21 @@ let deckView = 0, beachView = 0, viewCam = null;
 /* The Carpentry view's camera: straight on to the board, close enough to puzzle in. On the wall, a
    stretch of it round the piece, its whole height; on a frame on the floor, looking down on it from
    the side its rows run from; on the stairs, square on to their face. */
+// How far the wall's Carpentry view stands back from the wall: the whole wall, all four holes, if
+// it'll fit (it's two courses now: about 17 m); else a stretch. (Zooming out doesn't shrink it.)
+function wallViewDist() {
+  const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect);
+  const W2 = wall.W * S / 2, H2 = wall.H * S / 2, win = W2 <= 10 ? W2 : 7.5;
+  return { dist: Math.max((H2 + 0.9) / Math.tan(vh), (win + 0.9) / Math.tan(hh)) * Math.min(1, view.zoom) + 1, win, W2, H2 };
+}
 function puzzleCam() {
   const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect);
   const fit = (w, h, m) => Math.max((h / 2 + m) / Math.tan(vh), (w / 2 + m) / Math.tan(hh));
   if (!wm.f) {
-    // The whole wall, all four holes, if it'll fit (it's two courses now: about 17 m); else a stretch.
-    const W2 = wall.W * S / 2, H2 = wall.H * S / 2, win = W2 <= 10 ? W2 : 7.5;
+    const { dist, win, W2, H2 } = wallViewDist();
     const b = carry ? C.bbox(carry.cells) : { w: 0 };
     const cx = Math.max(-W2 + win, Math.min(W2 - win, X(wm.c) + b.w * S / 2));
-    return { look: V3(cx, H2, 0.3), dist: fit(win * 2, H2 * 2, 0.9) * Math.min(1, view.zoom) + 1, tilt: 0.2, yaw: 0 };
+    return { look: V3(cx, H2, 0.3), dist, tilt: 0.2, yaw: 0 };
   }
   const f = wm.f, mid = frameAt(f, f.b.c0 + f.b.w / 2, f.b.r0 + f.b.h / 2), w = f.b.w * S, h = f.b.h * S * Math.abs(f.group.scale.y);
   if (f.kind === 'stair') return { look: mid, dist: fit(w, h, 0.9) * view.zoom, tilt: 0.14, yaw: Math.atan2(Math.sign(-mid.x) || 1, 0) };
@@ -8127,15 +8195,27 @@ function update(dt) {
     const y0 = Math.atan2(Math.sin(yaw), Math.cos(yaw));
     yaw = y0 + (Math.atan2(Math.sin(-y0), Math.cos(-y0))) * holdView;
   }
-  // Patching her deck: down onto the hole from her stern, its top row toward her bow, the crate
-  // of timber in view below it.
+  // Patching her deck: looking almost straight down onto the hole from over her stern, its top row
+  // toward her bow, its squares as big on screen as the wall's are in its Carpentry view (the user,
+  // 9 Nov: it was "a bit tiny, and it's making my head hurt"; zooming out at sea doesn't shrink it),
+  // and sitting just above the tray along the bottom ("your eyes really have to go down to the
+  // bottom of the screen to see it").
   patchView += ((patch.on ? 1 : 0) - patchView) * Math.min(1, dt * 3);
   if (patchView > 0.001 && patch.group?.parent && patch.hole) {
     const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect), sq = patch.sq, b = patch.hole.board;
-    L2.copy(sail.g.localToWorld(V3(-0.2, SLOOP_DECK, 0)));
+    const far = Math.min(wallViewDist().dist * sq / S, Math.max((b.h * sq / 2 + 0.3) / Math.tan(vh), (b.w * sq / 2 + 0.3) / Math.tan(hh)) * 1.6);
+    // The board's middle, and the dock's top (the prompt and tray): the board's stern edge goes just
+    // above it, the view slid toward her bow to bring it down there.
+    patch.face.updateMatrixWorld(true);
+    const mid = patch.face.localToWorld(V3((b.c0 + b.w / 2) * S, -(b.r0 + b.h / 2) * S, 0));
+    if (!(patch.dockT > 0) || (patch.dockAt = (patch.dockAt ?? 0) - dt) < 0) { patch.dockAt = 0.5; patch.dockT = $('dock').getBoundingClientRect().top; }
+    const halfM = far * Math.tan(vh), yb = -1 + 2 * (innerHeight - patch.dockT + 14) / innerHeight;
+    const yc = Math.min(0, yb + (b.h * sq / 2) / halfM);
+    const bow = V3(Math.cos(sail.g.rotation.y), 0, -Math.sin(sail.g.rotation.y));
+    L2.copy(mid).addScaledVector(bow, -yc * halfM);
     look.lerp(L2, patchView);
-    dist += (Math.max((b.h * sq / 2 + 0.75) / Math.tan(vh), (b.w * sq / 2 + sq * 2) / Math.tan(hh)) * 1.15 * view.zoom - dist) * patchView;
-    tilt += (1.2 - tilt) * patchView;
+    dist += (far - dist) * patchView;
+    tilt += (1.45 - tilt) * patchView;
     const ry = sail.g.rotation.y, want = Math.atan2(-Math.cos(ry), Math.sin(ry));
     const y0 = Math.atan2(Math.sin(yaw), Math.cos(yaw));
     let d = want - y0;
@@ -8394,7 +8474,7 @@ if (['all', 'gundeck'].includes(new URLSearchParams(location.search).get('try'))
 requestAnimationFrame(frame);
 
 // For poking at it from the console.
-window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, swordReward, swordBreak, lumber, toLumber, repairAll, newGame, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, swordReward, swordBreak, lumber, toLumber, repairAll, newGame, raiders, G, get carry() { return carry; }, get patch() { return patch; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
   bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, hold, holdSwap, board, ashore, patch, patchKey, patchPlace, deckHoleShape,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };
