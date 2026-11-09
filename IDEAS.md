@@ -214,9 +214,10 @@ moving. It gives such a nostalgia." What's next:
   you off "just like a normal square", so you choose to turn left, turn right or carry on (or
   steer off on your own); the lanes meet at those crossings, so a long trip is a few wild rides
   with a choice at each stop.
-  **Racing, one day (9 Nov, "to be idealist"):** the user has joked the lanes are "like Mario
-  Kart times 20", and by the time they're built, with wind, whirlpools, rocks and stops, it's
-  close enough to a racing game to race other players down them: PvP racing on the trade winds.
+  **Racing, one day (9 Nov; PvP races are Umami's idea, a friend's pirate):** the user has joked
+  the lanes are "like Mario Kart times 20", and by the time they're built, with wind, whirlpools,
+  rocks and stops, it's close enough to a racing game to race other players down them: PvP
+  racing on the trade winds.
   (A race of our own, not a copy of any racing game; and still a puzzle game first, so whatever
   decides a race should come back to the puzzles, the Sailing tokens say. To shape with the user,
   with the wilds and crews.) **Shortcuts, and ships that really scale:** take the main lane and
