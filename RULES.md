@@ -184,21 +184,35 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       the winds across and back in towards home (a loop), left is the canal to the lock, on is
       open sea.
     - **The canal and the lock:** a narrow canal between rocks to a lock at the foot of a cliff.
-      Sail into the lock and she waits; nothing happens on its own. Bilge on the quay pumps it up
-      (a few good swaps' worth), the top gates swing open and, once they're open, she sails on into the hidden cove behind
-      the cliff, its water higher, an old bilge pump on the sand. Coming back down, the lock drains
-      by itself in a couple of seconds, and she waits for the gates again before she sails out. Esc while she waits lets her off. The
-      pilot finds the way into the cove through the lock. (A shortcut that costs puzzle work, not
-      reflexes: IDEAS.md, "Locks on a canal".)
+      Sail into the lock and she waits; nothing happens on its own. Bilge on the quay pumps it up,
+      a proper go of it (about sixteen moves' worth), not "way too quickly": the lock's water rises
+      a step with every clearing and she rises with it ("you should see the line of water
+      gradually going up"), and a real pump stands on the quay by the board, its handle working
+      and water gushing into the lock as you bilge ("we need the actual bilge pump"). The board
+      reads the right way up from the quay (9 Nov: it looked "upside down"). Once it's full the
+      top gates swing open and, once they're open, she sails on into the hidden cove behind the
+      cliff, its water higher, an old bilge pump on the sand. Coming back down, the lock drains by
+      itself in a couple of seconds, and she waits for the gates again before she sails out. Esc
+      while she waits lets her off. The pilot finds the way into the cove through the lock. (A
+      shortcut that costs puzzle work, not reflexes: IDEAS.md, "Locks on a canal".)
     - **The turret:** a gun on a rock between the lanes. While she's within three squares it fires
       at the square she's on; the shot takes about a second and a half to come down, a red ring
       on the water marking where. Still there, she's hit; gone, it splashes down ("you can shoot,
-      but there's no guarantee"). It loads four seconds between shots and holds fire while she's
-      dazed, and a hit on it from her guns quietens it ten seconds.
-    - **Dazed, not damaged:** a hit dazes her ("Hit! She's holed and shipping water"): she finishes
-      the move she's on (or the wind's ride), then waits till you bilge her out on deck, a few
-      good swaps' worth: "Pumped out! She sails on." Nobody's sunk or knocked out (the user: "it
-      keeps it faster paced, but while keeping the puzzles key").
+      but there's no guarantee"). It loads four seconds between shots, and a hit on it from her
+      guns quietens it ten seconds. It holds fire while she's dazed or at the lock, and for five
+      seconds once she's patched, so she can get going (9 Nov: it fired again "literally before
+      you can do anything about it").
+    - **Dazed, not damaged:** a hit holes her ("Hit! She's holed: patch her to sail on"): she
+      finishes the move she's on (or the wind's ride), then waits till you patch the hole in her
+      deck by Carpentry, a whole hole to fill, with the wall's rules (a piece covers at least one
+      open square and nothing already fitted, and may rest on the deck round it). Her timber
+      crate stands by the hole with three pieces on its lid, dealt fair and restocked as you use
+      them; the Carpentry view's keys and the mouse work as at the wall, and the camera looks down
+      from her stern with the board the right way up. Then "Patched! She sails on." Carpentry, not
+      Bilge (the user, 9 Nov: "what do you mean bilge? I've been hit by a cannonball", and bilging
+      it out was "one fix and it was done"); Carpentry and Bilge "have got to go together", as in
+      Puzzle Pirates, "but the primary one needs to be carpentry". Nobody's sunk or knocked out
+      ("it keeps it faster paced, but while keeping the puzzles key"). Rules: `src/den-patch.ts`.
   - **Ashore:** sail back to her mooring and Space puts you on the beach beside her.
   - Alone only for now (no crews at sea yet). No tokens to earn yet, no destinations: those are
     IDEAS.md ("Sailing between places, for real"). Rules: `src/den-sail.ts`.

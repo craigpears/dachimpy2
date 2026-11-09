@@ -96,23 +96,6 @@ the site (`.assetsignore` skips `*.md`).
   the primer goes. (How, where it's hosted, and what of the primer's engine the den still needs,
   to pin down with the user when it's time.)
 
-- **A hit's a hole to patch, not water to bilge, and it takes a proper patch (9 Nov):** being
-  dazed by the turret was over "way too quickly. Like, you know, one fix and it was done", and
-  bilging felt wrong for it: "what do you mean bilge? I've been hit by a cannonball, not water
-  bucket." So a hit holes her and you patch the hole by Carpentry on deck, a whole hole to fill,
-  before she sails on. Bilge stays at the lock, where pumping water makes sense. (Carpentry and
-  Bilge "have got to go together", as in Puzzle Pirates, "but I think the primary one needs to be
-  carpentry".) The board on deck was "the wrong way around" too: it should read the right way up.
-  And once she's patched, the turret shouldn't fire again at once, "literally before you can do
-  anything about it": give her a moment to get going.
-
-- **The lock's Bilge board is upside down, and there's no pump to see (9 Nov):** going up the
-  lock, "the bilge puzzle looks like it's upside down", and "we need a visible pumping action
-  going on as well. We need the actual bilge pump": a real pump on the quay by the board, its
-  handle working as you bilge, water gushing into the lock. And it filled "way too quickly": the
-  same as the patch, it should take a proper go, "you should see the line of water gradually
-  going up as you clear a few bilging pieces".
-
 - **Try the wind, and oars (9 Nov):** "try it. We'll see how it feels, whether it's
   overcomplicated or not." A first go of IDEAS.md's "Weather is where oars make sense" on the
   sloop's sea: a wind with a direction and a strength that drops and picks up; under sail she's

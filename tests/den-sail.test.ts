@@ -1,8 +1,20 @@
 import { describe, expect, it } from 'vitest';
 import { SAIL, LAY, Sea, Helm, Guns, Turret, broadside, path, poseAt, type Move, type Pose } from '../src/den-sail';
+import { PATCH, type DeckHole } from '../src/den-patch';
+import { carp } from './helpers';
+import { worth } from '../src/den-bilge';
+import type { Move as BilgeMove } from '../src/bilge';
+import type { Cell } from '../src/engine';
 
 const clearSea = () => { const s = new Sea(1, false); s.rocks.clear(); return s; };
 const run = (h: Helm, secs: number, step = 0.05) => { const ev = []; for (let t = 0; t < secs; t += step) ev.push(...h.tick(step)); return ev; };
+// A piece of a tiling: its squares at the top left, and where its top-left goes.
+const at = (cells: Cell[]): [number, number] => [Math.min(...cells.map((p) => p[0])), Math.min(...cells.map((p) => p[1]))];
+const norm = (cells: Cell[]): Cell[] => { const [r0, c0] = at(cells); return cells.map(([r, c]): Cell => [r - r0, c - c0]); };
+// The lock's water up to what's been pumped in, a frame at a time.
+const rise = (h: Helm) => { for (let i = 0; i < 300 && h.held() === 'up'; i++) h.tick(1 / 60); };
+// Patch a hole the way it's meant to be filled.
+const fill = (hole: DeckHole) => { for (const p of carp.solve(hole.open(), 1)[0]) expect(hole.put(p.letter, norm(p.cells), ...at(p.cells))).toBe(true); };
 
 describe('sailing: the moves (Battle Navigation\'s, 9 Nov)', () => {
   const p: Pose = { c: 5, r: 5, d: 0 };   // facing out to sea
@@ -262,8 +274,10 @@ describe('sailing: the lock up the cliff into the hidden cove (9 Nov)', () => {
     run(h, 10);
     expect([h.pose.c, h.pose.r]).toEqual([lc, lr]);   // nothing happens on its own
     expect(h.pump(SAIL.LOCK_WORK / 2)).toBe('lock');
+    run(h, 2);
     expect(h.held()).toBe('up');
     h.pump(SAIL.LOCK_WORK / 2);
+    rise(h);
     expect(h.held()).toBe('gates');
     run(h, 3);
     expect([h.pose.c, h.pose.r]).toEqual([lc - 1, lr]);
@@ -274,6 +288,7 @@ describe('sailing: the lock up the cliff into the hidden cove (9 Nov)', () => {
     h.put('F'); h.put('F');
     run(h, 4);
     h.pump(SAIL.LOCK_WORK);
+    rise(h);
     expect(h.held()).toBe('gates');
     run(h, SAIL.GATES - 0.15);
     expect(h.cur).toBeNull();
@@ -294,6 +309,33 @@ describe('sailing: the lock up the cliff into the hidden cove (9 Nov)', () => {
     expect(d.cur).toBeNull();
     run(d, 0.3);
     expect(d.cur?.m).toBe('F');
+  });
+
+  it('the lock filled in a few bilging pieces (9 Nov)', () => {
+    // "way too quickly", like the daze: "you should see the line of water gradually going up as
+    // you clear a few bilging pieces".
+    const three: BilgeMove = { moved: true, lines: [3], combo: '', cleared: 3, chain: 0, crabs: 0, puffer: false, jelly: false, stages: [] };
+    const w = worth(three, 6), h = new Helm(new Sea(9), canal);
+    h.put('F'); h.put('F');
+    run(h, 4);
+    expect(h.held()).toBe('up');
+    // As many pieces cleared as used to fill it, and it's well short.
+    for (let i = 0; i < 5; i++) { h.pump(w); run(h, 1.5); }
+    expect(h.level).toBeLessThan(0.3);
+    expect(h.held()).toBe('up');
+    // Each clear lifts the water a step: smoothly, never all at once, and there within a second.
+    const before = h.level;
+    h.pump(w);
+    h.tick(1 / 60);
+    expect(h.level).toBeGreaterThan(before);
+    expect(h.level - before).toBeLessThan(w / SAIL.LOCK_WORK / 2);
+    run(h, 1);
+    expect(h.level).toBeCloseTo(before + w / SAIL.LOCK_WORK, 6);
+    // A proper go of Bilge: about twenty plain threes, tens of seconds of play.
+    let n = 6;
+    while (h.held() === 'up' && n < 100) { h.pump(w); run(h, 1.5); n++; }
+    expect(n).toBeGreaterThanOrEqual(15);
+    expect(h.level).toBe(1);
   });
 
   it('coming back down, the lock drains by itself and lets her out', () => {
@@ -352,7 +394,7 @@ describe('sailing: the turret, and being dazed (9 Nov: "keeps it faster paced, b
     expect(t.tick(0.1, at).some((e) => e.kind === 'fire')).toBe(true);
   });
 
-  it(`a hit dazes her: she finishes the move she's on, then waits till she's pumped out ("they can set sail again")`, () => {
+  it(`a hit dazes her: she finishes the move she's on, then waits till the hole in her deck's patched`, () => {
     const h = new Helm(clearSea());
     h.drop(SAIL.HOME.c, 10);
     h.tick(SAIL.WAKE + 0.3);
@@ -360,15 +402,49 @@ describe('sailing: the turret, and being dazed (9 Nov: "keeps it faster paced, b
     expect(h.held()).toBe('daze');
     run(h, 10);
     expect(h.pose.r).toBe(1);   // the move she was on, and no more
-    expect(h.pump(1)).toBe('daze');
+    expect(h.pump(5)).toBeNull();   // (no bilging her out)
     expect(h.dazed()).toBe(true);
-    h.pump(SAIL.HIT);
+    fill(h.hole!);
+    expect(h.dazed()).toBe(false);
     expect(h.held()).toBeNull();
     run(h, 3);
     expect(h.pose.r).toBeGreaterThan(1);
   });
 
+  it('the daze was over in one fix, and bilging a cannonball hit felt wrong (9 Nov)', () => {
+    // "way too quickly. Like, you know, one fix and it was done": a hole is a whole hole to fill,
+    // three pieces' worth, and pumping does nothing for it ("I've been hit by a cannonball, not
+    // water bucket").
+    const h = new Helm(clearSea());
+    h.hit();
+    expect(h.hole!.cells.length).toBe(5 * PATCH.PIECES);
+    for (let i = 0; i < 20; i++) h.pump(10);
+    expect(h.dazed()).toBe(true);
+    const [first, ...rest] = carp.solve(h.hole!.cells, 1)[0];
+    h.hole!.put(first.letter, norm(first.cells), ...at(first.cells));
+    expect(h.dazed()).toBe(true);   // one fix isn't it
+    for (const p of rest) h.hole!.put(p.letter, norm(p.cells), ...at(p.cells));
+    expect(h.dazed()).toBe(false);
+    // A hit knocks in a fresh hole; a second hit while she's holed doesn't make it worse.
+    h.hit(); const hole = h.hole;
+    h.hit();
+    expect(h.hole).toBe(hole);
+  });
+  it('the turret fired again the moment she was patched (9 Nov)', () => {
+    // "As soon as you finish the puzzle, the cannon starts shooting at you again ... literally
+    // before you can do anything about it." So it holds fire a while once she's patched.
+    const h = new Helm(clearSea(), { c: 6, r: 6, d: 0 }), t = new Turret([6, 8]);
+    const shoot = (secs: number) => { const ev = []; for (let s = 0; s < secs; s += 0.05) { h.tick(0.05); ev.push(...t.tick(0.05, h.spared() ? null : h.now())); } return ev; };
+    h.hit();
+    expect(shoot(20).some((e) => e.kind === 'fire')).toBe(false);   // dazed: no shots
+    fill(h.hole!);
+    expect(h.dazed()).toBe(false);
+    expect(shoot(SAIL.GRACE - 0.2).some((e) => e.kind === 'fire')).toBe(false);
+    expect(shoot(0.4).some((e) => e.kind === 'fire')).toBe(true);   // (she's still in reach)
+  });
+
   it('dazed on the trade wind, the wind still carries her to the end of the lane', () => {
+
     const [ac, ar] = LAY.LANES[0].at, h = new Helm(new Sea(9), { c: ac, r: ar - 1, d: 0 });
     h.put('F');
     h.tick(SAIL.WAKE + SAIL.MOVE + 0.1);

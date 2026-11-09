@@ -14,6 +14,8 @@ import { Bilge, W as BW, H as BH } from './bilge.js';
 import { KEYS as VIEW_KEYS, nextHole, holeKey, quarters, centreOn, clampTo, nextBoard, arrowStep } from './den-carp-view.js';
 import { afterWave, countingDown } from './den-raids.js';
 import { SAIL, LAY, Sea, Helm, Guns, Turret, broadside } from './den-sail.js';
+import { PATCH } from './den-patch.js';
+
 import { MAP, mapAfter, canPickUp, canRead, RUMOUR, WAYS, X_AT } from './den-map.js';
 import { twoCourses, isHigh, gateTop, lowMiddle, isSky } from './den-wall.js';
 import { BILGE, Tide, HIGH, LOW, shoreAt, worth, barrelsFor, onRocks, rocksBare, oddsFor, blastHits } from './den-bilge.js';
@@ -2432,6 +2434,7 @@ function showPile(p) {
 const toolEls = [];
 const cratesInOrder = () => [...piles].sort((a, z) => a.x - z.x);
 function takeCrate(j) {
+  if (patch.on) return patchTake(j);
   const p = cratesInOrder()[j];
   if (!p || G.over || deco.on || onGunDeck() || net.pending || net.asking) return;
   if (carry && carry.from === p) return putBack();
@@ -2448,7 +2451,7 @@ function pieceSvg(letter, cells) {
 }
 function toolbox() {
   const box = $('toolbox');
-  box.hidden = onGunDeck();
+  box.hidden = onGunDeck() && !patch.on;
   if (box.hidden) return;
   if (!toolEls.length) {
     box.insertAdjacentHTML('afterbegin', window.Render.defs());   // (the grain patterns)
@@ -2460,16 +2463,18 @@ function toolbox() {
     box.append(el);
     toolEls.push({ el, sig: '' });
   }
-  cratesInOrder().forEach((p, j) => {
-    const t = toolEls[j], mine = carry && carry.from === p;
+  // (At sea, patching her deck, they're the ship's crate's: patchOpen.)
+  const hand = patch.on ? patch.hand : carry;
+  (patch.on ? patch.slots : cratesInOrder()).forEach((p, j) => {
+    const t = toolEls[j], mine = hand && hand.from === p;
     const state = p.letter ? 'piece' : mine ? 'hand' : p.wait > 0.3 ? 'wait' : 'taken';
-    const sig = `${state}|${p.letter}|${p.cells}|${mine ? carry.cells : ''}|${state === 'wait' ? Math.ceil(p.wait) : ''}`;
+    const sig = `${state}|${p.letter}|${p.cells}|${mine ? hand.cells : ''}|${state === 'wait' ? Math.ceil(p.wait) : ''}`;
     if (sig !== t.sig) {
       t.sig = sig;
       t.el.className = `tool ${state}`;
       const n = `<kbd>${j + 1}</kbd>`;
       t.el.innerHTML = state === 'piece' ? `${pieceSvg(p.letter, p.cells)}<span>${n}</span>`
-        : state === 'hand' ? `${pieceSvg(carry.letter, carry.cells)}<span>${n} in hand</span>`
+        : state === 'hand' ? `${pieceSvg(hand.letter, hand.cells)}<span>${n} in hand</span>`
         : state === 'wait' ? `<span>${n} restocking<br>${Math.ceil(p.wait)}s</span><i><b></b></i>`
         : `<span>${n} taken</span>`;
     }
@@ -4202,8 +4207,8 @@ function cineTick(dt) {
    She has a gun each side: Q fires the port gun, E the starboard, as she sails, at the rocks.
    The sea has its lay (LAY in src/den-sail.ts): a trade wind out to a junction, the loop round and
    home, and a canal to a lock up a cliff into a hidden cove; a turret on a rock shoots at her, and
-   a hit dazes her till you bilge her out, on a little Bilge board on her deck. The lock's worked
-   the same way, from a board on the quay beside it. */
+   a hit holes her deck: she's dazed till you patch it by Carpentry (patchOpen). The lock's worked
+   by Bilge, from a board on the quay beside it, an old pump at its head (holdOpen). */
 const SEA_X0 = -SAIL.COLS * SAIL.CELL / 2;
 const seaX = (c) => SEA_X0 + (c + 0.5) * SAIL.CELL, seaZ = (r) => SAIL.Z0 - (r + 0.5) * SAIL.CELL;
 const SLOOP_DECK = 0.75;
@@ -4254,7 +4259,7 @@ function sloopMesh() {
   const fl = flagpole(0.6, flagMat);
   fl.position.set(0.35, SLOOP_DECK + 4.15, 0);
   g.add(fl);
-  g.userData.rig = [mast, fl];   // (struck, with her sails, while you bilge her out on deck)
+  g.userData.rig = [mast, fl];   // (struck, with her sails, while you patch a hole in her deck)
   // A gun each side, a smaller copy of the gun tower's, muzzle out over her side (port is her left).
   g.userData.guns = {};
   // Staggered, so they read as two guns and not one beam across her.
@@ -4351,13 +4356,20 @@ function seaWorld() {
   const sand = mesh(new THREE.BoxGeometry(cw, 0.3, 1.6), mat('#c9a874', { roughness: 1 }));
   sand.position.set(cove.position.x, LIFT + 0.1, seaZ(r1) - SAIL.CELL / 2 + 0.8);
   W.g.add(sand);
-  const pumpG = new THREE.Group(), pw = mat('#6a5038', { map: woodTex });
-  const post = mesh(new THREE.BoxGeometry(0.35, 1.2, 0.35), pw); post.position.y = 0.6;
-  const handle = mesh(new THREE.BoxGeometry(1.1, 0.08, 0.08), pw); handle.position.set(0.3, 1.2, 0); handle.rotation.z = 0.35;
-  const spout = mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.4, 6), mat('#4a4f55', { metalness: 0.5 })); spout.rotation.z = Math.PI / 2; spout.position.set(-0.3, 0.9, 0);
-  pumpG.add(post, handle, spout);
+  const pumpG = pumpMesh();
   pumpG.position.set(seaX(c0 + 1), LIFT + 0.25, sand.position.z);
   W.g.add(pumpG);
+  // And one on the quay by the lock, at the head of its Bilge board, its spout out over the lock
+  // (the user, 9 Nov: "we need a visible pumping action going on as well. We need the actual bilge
+  // pump"): its handle works as you bilge, and water gushes from it into the lock as it fills.
+  W.pump = pumpMesh();
+  W.pump.scale.setScalar(1.8);
+  W.pump.rotation.y = -Math.PI / 2 + 0.7;   // (its spout out over the lock, its handle clear of the board)
+  W.pump.position.set(seaX(LAY.LOCK[0]) + 1.7, CLIFF_H + 0.12, seaZ(LAY.LOCK[1]) + SAIL.CELL / 2 + 0.6);
+  W.g.add(W.pump);
+  W.gush = mesh(new THREE.CylinderGeometry(0.13, 0.2, 1, 8, 1, true), new THREE.MeshBasicMaterial({ color: '#9fd4ec', transparent: true, opacity: 0.75, depthWrite: false }), false);
+  W.gush.visible = false;
+  W.g.add(W.gush);
   // The lock: its chamber's water, and a pair of gates at each end. She's longer than a square, so
   // its walls run on past the cliff each way, as stone piers, and the gates hang at their ends.
   W.chamber = mesh(new THREE.PlaneGeometry(LOCK_GATE_X * 2, SAIL.CELL).rotateX(-Math.PI / 2), coveM, false);
@@ -4400,6 +4412,22 @@ function seaWorld() {
   scene.add(W.g);
   return W;
 }
+/* An old bilge pump: a post, a spout out of one side and a handle out of the other, pivoted at the
+   top of the post so it can be worked (userData.arm; the spout's mouth is userData.mouth). */
+function pumpMesh() {
+  const g = new THREE.Group(), pw = mat('#6a5038', { map: woodTex });
+  const post = mesh(new THREE.BoxGeometry(0.35, 1.2, 0.35), pw); post.position.y = 0.6;
+  const arm = new THREE.Group(); arm.position.set(0.05, 1.2, 0); arm.rotation.z = 0.35;
+  const handle = mesh(new THREE.BoxGeometry(1.1, 0.08, 0.08), pw); handle.position.x = 0.3;
+  arm.add(handle);
+  const spout = mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.4, 6), mat('#4a4f55', { metalness: 0.5 })); spout.rotation.z = Math.PI / 2; spout.position.set(-0.3, 0.9, 0);
+  g.add(post, arm, spout);
+  g.userData.arm = arm;
+  g.userData.mouth = V3(-0.5, 0.9, 0);
+  return g;
+}
+// A stroke of the quay pump's handle, as a clear's pumped into the lock.
+function pumpStroke() { const p = sail.world?.pump; if (p) p.userData.stroke = 1; }
 // The pin: a red buoy with a little pennant, riding the swell.
 function pinMesh() {
   const g = new THREE.Group(), red = mat('#c8372a', { roughness: 0.6 }), white = mat('#f3ecdc');
@@ -4459,6 +4487,8 @@ function sailReset() {
   sail.shots = [];
   sail.said = {};
   holdShut();
+  if (patch.on) patchShut();
+  patchClear();
   sailView = 0;
 }
 // A shot out of her side, from where she is right now: it flies straight out and comes down in the
@@ -4496,18 +4526,17 @@ function sailFire(side) {
   });
 }
 
-/* Bilging at sea (the user, 9 Nov: a hit "would daze you for a few turns ... you have to do some
-   carpentry or bilging to kind of undaze yourself"; and the lock, "you have to do a lot of bilging
-   to open and close the canals"). The real Bilge board, small: dazed, it lies on her deck, her
-   sails struck, the water she's shipped over its bottom rows; at the lock, it's on the quay beside
-   it. Each move pumps as much as it's worth (as on the beach), till she's pumped out or the lock's
-   up; then it's gone and she sails on. */
-const HOLD_SQ = 0.2, QUAY_SQ = 0.45;
+/* Bilging at the lock (the user, 9 Nov: "you have to do a lot of bilging to open and close the
+   canals"). The real Bilge board on the quay beside it, and an old bilge pump at its head. Each
+   clear pumps its share of what the move's worth (as on the beach) as it washes away, the pump's
+   handle working and water gushing from its spout into the lock, till the lock's up; then it's
+   gone and she sails on. (A hit at sea is a hole in her deck, patched by Carpentry: patchOpen.) */
+const QUAY_SQ = 0.45;
 const hold = { mode: null, board: null, group: null, pieces: null, meshes: new Map(), queue: [], holdT: 0, shown: null, cur: { r: 5, c: 2 }, water: null, cursor: null };
 const holdX = (c) => c - (BW - 1) / 2, holdZ = (r) => r - (BH - 1) / 2;
-// What there is to bilge just now, if anything: her ('daze') or the lock ('up').
-const holdWanted = () => { if (!sail.on) return null; const h = sail.helm.held(); return h === 'daze' || h === 'up' ? h : null; };
-const holdRows = () => (hold.mode === 'daze' ? 3 + Math.min(6, sail.helm.shipped * 2) : 3 + (1 - sail.helm.level) * 6);
+// What there is to bilge just now, if anything: the lock ('up').
+const holdWanted = () => (sail.on && sail.helm.held() === 'up' ? 'up' : null);
+const holdRows = () => 3 + (1 - sail.helm.level) * 6;
 function holdMake() {
   const g = new THREE.Group();
   const bedTex = canvasTex(BW * 32, BH * 32, (x, cw, ch) => {
@@ -4539,29 +4568,29 @@ function holdOpen(mode) {
   for (const m of hold.meshes.values()) hold.pieces.remove(m);
   hold.meshes.clear();
   hold.queue = []; hold.shown = null; hold.cur = { r: 5, c: 2 };
+  // On the quay on the den side of the lock, its top row toward the sea, seen from the den side.
   const g = hold.group;
-  if (mode === 'daze') {
-    // On her deck, its top row toward her bow, seen from her stern.
-    sail.g.add(g);
-    g.position.set(0.05, SLOOP_DECK + 0.03, 0);
-    g.rotation.set(0, -Math.PI / 2, 0);
-    g.scale.setScalar(HOLD_SQ);
-  } else {
-    // On the quay on the den side of the lock, its top row toward the sea.
-    scene.add(g);
-    g.position.set(seaX(LAY.LOCK[0]), CLIFF_H + 0.15, (seaZ(LAY.LOCK[1] - 1) + seaZ(LAY.LOCK[1] - 2)) / 2);
-    g.rotation.set(0, 0, 0);
-    g.scale.setScalar(QUAY_SQ);
-  }
+  scene.add(g);
+  g.position.set(seaX(LAY.LOCK[0]), CLIFF_H + 0.15, (seaZ(LAY.LOCK[1] - 1) + seaZ(LAY.LOCK[1] - 2)) / 2);
+  g.rotation.set(0, 0, 0);
+  g.scale.setScalar(QUAY_SQ);
   hold.mode = mode;
-  for (const o of [...sail.g.userData.sails, ...sail.g.userData.rig]) o.visible = mode !== 'daze';
-  for (const side of ['L', 'R']) sail.g.userData.guns[side].visible = mode !== 'daze';
   keys.clear();
 }
 function holdShut() {
   if (hold.group) hold.group.removeFromParent();
   hold.mode = null;
-  if (sail.g) { for (const o of [...sail.g.userData.sails, ...sail.g.userData.rig]) o.visible = true; for (const side of ['L', 'R']) sail.g.userData.guns[side].visible = true; }
+  hold.queue = [];
+}
+/* A Bilge piece on the quay's board. The pieces are drawn the right way up for the beach's board,
+   which you look at from the sea; the quay's you look at from the den side, so they're turned the
+   other way round here, or they read upside down (the user, 9 Nov: "the bilge puzzle looks like
+   it's upside down"). Their shadows fall the same way as on the beach, down and to the left. */
+function holdBit(bit) {
+  const m = bitMesh(bit);
+  m.userData.face.rotation.z = 0;
+  m.children[0].position.set(-0.05, 0.012, -0.05);
+  return m;
 }
 function holdKey(key) {
   const mv = { arrowleft: [0, -1], a: [0, -1], arrowright: [0, 1], d: [0, 1], arrowup: [-1, 0], w: [-1, 0], arrowdown: [1, 0], s: [1, 0] }[key];
@@ -4589,12 +4618,12 @@ function holdSwap() {
     for (const bit of [b.grid[r][c], b.grid[r][c + 1]]) if (bit?.s === 'crab') { const mm = hold.meshes.get(bit.id); if (mm) mm.userData.jig = 0.6; }
     return;
   }
-  hold.queue.push(...m.stages);
+  // What the move's worth, pumped a share at a time as each clear washes away (holdTick), so the
+  // lock's water rises a step with each.
+  const w = worth(m, rows), n = m.stages.reduce((a, st) => a + st.cleared.length, 0) || 1;
+  hold.queue.push(...m.stages.map((st) => ({ ...st, w: w * st.cleared.length / n })));
   hold.holdT = 0;
-  const to = sail.helm.pump(worth(m, rows));
   if (m.combo) toast(m.combo);
-  if (to === 'daze' && !sail.helm.dazed()) toast('Pumped out! She sails on');
-  if (to === 'lock' && sail.helm.held() !== 'up') toast('The lock\'s full: the top gates open');
 }
 function holdTick(dt) {
   const want = holdWanted();
@@ -4603,7 +4632,7 @@ function holdTick(dt) {
   const b = hold.board;
   if (!hold.shown) {
     hold.shown = b.snap();
-    for (let r = 0; r < BH; r++) for (let c = 0; c < BW; c++) { const bit = hold.shown[r][c], m = bitMesh(bit); m.position.set(holdX(c), 0.01, holdZ(r)); hold.pieces.add(m); hold.meshes.set(bit.id, m); }
+    for (let r = 0; r < BH; r++) for (let c = 0; c < BW; c++) { const bit = hold.shown[r][c], m = holdBit(bit); m.position.set(holdX(c), 0.01, holdZ(r)); hold.pieces.add(m); hold.meshes.set(bit.id, m); }
   }
   // A move a step at a time, as on the beach: what's cleared washes away, the rest float up.
   hold.holdT += dt;
@@ -4612,6 +4641,7 @@ function holdTick(dt) {
   if (hold.queue.length && hold.holdT > 0.18 && !moving) {
     const st = hold.queue.shift();
     hold.holdT = 0;
+    if (st.w > 0 && sail.helm.pump(st.w)) pumpStroke();
     for (const id of st.cleared) {
       const m = hold.meshes.get(id);
       if (!m) continue;
@@ -4624,7 +4654,8 @@ function holdTick(dt) {
     for (let r = 0; r < BH; r++) for (let c = 0; c < BW; c++) {
       const bit = st.grid[r][c];
       let m = hold.meshes.get(bit.id);
-      if (!m) { m = bitMesh(bit); m.position.set(holdX(c), 0.01, holdZ(BH + fresh[c]++)); hold.pieces.add(m); hold.meshes.set(bit.id, m); }
+      if (!m) { m = holdBit(bit); m.position.set(holdX(c), 0.01, holdZ(BH + fresh[c]++)); hold.pieces.add(m); hold.meshes.set(bit.id, m); }
+
       m.userData.tx = holdX(c); m.userData.tz = holdZ(r);
     }
   }
@@ -4641,6 +4672,246 @@ function holdTick(dt) {
   hold.water.position.set(0, 0.042, (BH / 2) - rows / 2);
   hold.cursor.position.set((holdX(hold.cur.c) + holdX(hold.cur.c + 1)) / 2, 0, holdZ(hold.cur.r));
 }
+/* A hole in her deck (the user, 9 Nov: being dazed by a hit was over "way too quickly. Like, you
+   know, one fix and it was done", and bilging was wrong for it: "what do you mean bilge? I've been
+   hit by a cannonball, not water bucket"). A hit knocks a hole in her deck and she's dazed, her
+   sails struck, till you've patched it by Carpentry, as the wall's holes are mended (the rules are
+   src/den-patch.ts): a piece goes over at least one open square, clear of what's in already, and
+   may rest on the deck round the hole. You can't walk off to the den's crates at sea, so the
+   pieces are to hand in the ship's timber crate beside the hole: three, 1, 2 and 3 on the toolbox
+   as in the den, each restocked as it's used, dealt fair (as for the first wall) so the hole can be
+   finished. Played with the Carpentry view's own keys (src/den-carp-view.ts), looking down on it
+   from her stern, its top row toward her bow, as the wall's Carpentry reads. */
+const patch = { on: false, hole: null, group: null, face: null, wood: null, ghost: null, ghostKey: '', crate: null, crateSig: '', slots: [], hand: null, r: 0, c: 0, sq: 0.2, keyAt: null, fair: new FairDeal(C) };
+const PATCH_W = 1.3;   // metres across her deck the board may take, at most
+let patchView = 0;
+// A fresh hole for a hit: shaped for the common pieces, as the wall's are.
+const deckHoleShape = () => roomyShapes(PATCH.PIECES, 6)[0] || C.genHole(PATCH.PIECES).hole;
+function struck(on) {
+  if (!sail.g) return;
+  for (const o of [...sail.g.userData.sails, ...sail.g.userData.rig]) o.visible = !on;
+  for (const side of ['L', 'R']) sail.g.userData.guns[side].visible = !on;
+}
+// The last patch's planks off her deck (a new hole, or a new voyage).
+function patchClear() {
+  if (patch.group) { patch.group.removeFromParent(); patch.group.traverse((o) => { if (o.geometry && o.geometry !== cellBox) o.geometry.dispose(); }); }
+  patch.group = patch.face = patch.wood = null;
+}
+function patchOpen(hole) {
+  patchClear();
+  Object.assign(patch, { on: true, hole, hand: null, ghostKey: '', crateSig: '', keyAt: null });
+  const b = hole.board, sq = patch.sq = Math.min(0.22, PATCH_W / b.w);
+  // In cell space (rows down, as pieceGroup draws them), laid flat on her deck, the top row toward
+  // her bow and the board's middle where the deck's is.
+  const g = patch.group = new THREE.Group();
+  g.position.set(0.05, SLOOP_DECK + 0.03, 0);
+  g.rotation.y = -Math.PI / 2;
+  g.scale.setScalar(sq / S);
+  const flatG = new THREE.Group();
+  flatG.rotation.x = -Math.PI / 2;
+  g.add(flatG);
+  const face = patch.face = new THREE.Group();
+  face.position.set(-(b.c0 + b.w / 2) * S, (b.r0 + b.h / 2) * S, 0);
+  flatG.add(face);
+  // The hole: dark water down through it, splintered planks round its edge (the wall's hole colour).
+  const dark = new THREE.MeshBasicMaterial({ color: '#0d1a20' }), sqGeo = new THREE.PlaneGeometry(S, S);
+  for (const [r, c] of hole.cells) { const m = new THREE.Mesh(sqGeo, dark); m.position.set((c + 0.5) * S, -(r + 0.5) * S, 0.01); face.add(m); }
+  patch.rim = outline(hole.cells, 0.03, '#ffd58a');
+  face.add(patch.rim);
+  // The deck round it a piece may rest on, chalked.
+  const all = [];
+  for (let r = b.r0; r < b.r0 + b.h; r++) for (let c = b.c0; c < b.c0 + b.w; c++) all.push([r, c]);
+  patch.chalk = outline(all, 0.02, '#e9dfc8');
+  patch.chalk.material.transparent = true; patch.chalk.material.opacity = 0.45;
+  face.add(patch.chalk);
+  patch.wood = new THREE.Group();
+  face.add(patch.wood);
+  sail.g.add(g);
+  // The ship's timber crate, between the hole and her stern, three pieces on its lid.
+  if (!patch.crate) {
+    const c = patch.crate = new THREE.Group(), box = mesh(new THREE.BoxGeometry(0.4, 0.26, 0.9), mat('#7a5634', { map: woodTex }));
+    box.position.y = 0.13;
+    const band = mesh(new THREE.BoxGeometry(0.42, 0.04, 0.92), mat('#3a3f45', { metalness: 0.6, roughness: 0.4 }), false);
+    band.position.y = 0.2;
+    c.add(box, band);
+    c.userData.lid = new THREE.Group();
+    c.userData.lid.position.y = 0.27;
+    c.add(c.userData.lid);
+    c.position.set(-0.95, SLOOP_DECK, 0);
+  }
+  sail.g.add(patch.crate);
+  patch.slots = [0, 1, 2].map(() => ({ letter: null, cells: null, fair: false, wait: 0, waitFull: 0.45 }));
+  patch.slots.forEach(patchDeal);
+  const q = quarters(hole.open());
+  [patch.r, patch.c] = centreOn(q.ul || q.ur || q.dl || q.dr, 1, 1);
+  struck(true);
+  document.body.classList.add('patching');
+  keys.clear();
+}
+// Patched (or ashore): the crate and the ghost go, her sails go up again; the patch stays in her deck.
+function patchShut() {
+  patch.on = false;
+  patch.hand = null;
+  patch.crate?.removeFromParent();
+  if (patch.ghost) { patch.ghost.removeFromParent(); patch.ghost = null; }
+  patch.ghostKey = '';
+  if (patch.rim) { patch.rim.removeFromParent(); patch.chalk.removeFromParent(); patch.rim = patch.chalk = null; }
+  struck(false);
+  document.body.classList.remove('patching');
+}
+// A slot of the crate dealt a piece: fair, for what's left of the hole, while there's a way.
+function patchDeal(p) {
+  const have = [...patch.slots.map((s) => s.letter), patch.hand?.letter].filter(Boolean);
+  const l = patch.fair.next(patch.hole.done() ? [] : [patch.hole.open()], have);
+  p.letter = l || C.weightedLetter();
+  p.fair = !!l;
+  p.cells = C.normalize(C.pick(C.ORIENTS_BY_LETTER[p.letter]).cells);
+}
+// Where the piece in hand is (or would start): its middle, on the board.
+function patchMid() {
+  if (patch.hand) { const b = C.bbox(patch.hand.cells); return [patch.r + b.h / 2, patch.c + b.w / 2]; }
+  const q = quarters(patch.hole.open());
+  return q.ul || q.ur || q.dl || q.dr || [patch.hole.board.r0 + patch.hole.board.h / 2, patch.hole.board.c0 + patch.hole.board.w / 2];
+}
+function patchClamp() {
+  const b = C.bbox(patch.hand.cells);
+  [patch.r, patch.c] = clampTo(patch.r, patch.c, b.h, b.w, patch.hole.board, false);
+}
+// The piece centred near a point: on the nearest spot it fits there, if one's close (a flush fit first).
+function patchSnap(p, near = 2.6) {
+  const b = C.bbox(patch.hand.cells), d = (s) => Math.hypot(s.r + b.h / 2 - p[0], s.c + b.w / 2 - p[1]);
+  const best = patch.hole.fits(patch.hand.cells).filter((s) => d(s) < near).sort((a, z) => (a.over > 0) - (z.over > 0) || d(a) - d(z))[0];
+  if (best) { patch.r = best.r; patch.c = best.c; } else [patch.r, patch.c] = centreOn(p, b.h, b.w);
+  patchClamp();
+}
+function patchTake(j) {
+  const p = patch.slots[j];
+  if (!p) return;
+  if (patch.hand?.from === p) return patchPutBack();
+  if (!p.letter) return toast(`Crate ${j + 1} is restocking`, false, true);
+  if (patch.hand && !patch.hand.from) return toast('Your hands are full: fit that piece first', false, true);
+  const mid = patchMid();
+  if (patch.hand) patchPutBack();
+  patch.hand = { letter: p.letter, cells: p.cells, from: p };
+  p.letter = null;
+  patchSnap(mid, 1.5);
+}
+function patchPutBack() {
+  const h = patch.hand, p = h.from;
+  p.letter = h.letter; p.cells = h.cells;
+  patch.hand = null;
+}
+// Turned or flipped about its middle, so it turns where it is.
+function patchTurn(fn) {
+  const mid = patchMid();
+  patch.hand.cells = fn(patch.hand.cells);
+  const b = C.bbox(patch.hand.cells);
+  [patch.r, patch.c] = centreOn(mid, b.h, b.w);
+  patchClamp();
+}
+function patchPlace() {
+  const hand = patch.hand, hole = patch.hole;
+  if (!hand) return;
+  if (!hole.put(hand.letter, hand.cells, patch.r, patch.c)) { shake = 0.2; return; }
+  const laid = hole.laid[hole.laid.length - 1];
+  // Fitted flush in the hole, or resting proud on the deck round it.
+  const g = pieceGroup(hand.cells, woodMat(hand.letter));
+  g.position.set(patch.c * S, -patch.r * S, laid.over ? 0.3 : 0.05);
+  patch.wood.add(g);
+  const b = C.bbox(hand.cells), at = patch.face.localToWorld(V3((patch.c + b.w / 2) * S, -(patch.r + b.h / 2) * S, 0.4));
+  burst(at, '#e8c890', 8, 1.2);
+  if (hand.from) hand.from.wait = hand.from.waitFull;   // the crate restocks
+  patch.hand = null;
+  if (hole.done()) {
+    burst(at, '#f0d9a8', 14, 2);
+    toast(hole.over() ? 'Patched, boarded over! She sails on' : 'Patched! She sails on');
+  }
+}
+// Backspace: the last piece back out of the hole into your hands, to fit again.
+function patchTakeBack() {
+  if (patch.hand && !patch.hand.from) return toast('Your hands are full: fit that piece first', false, true);
+  const l = patch.hole.laid.length ? patch.hole.laid[patch.hole.laid.length - 1] : null;
+  if (!l) return;
+  if (patch.hand) patchPutBack();
+  patch.hole.takeBack();
+  const g = patch.wood.children[patch.wood.children.length - 1];
+  if (g) patch.wood.remove(g);
+  const r0 = Math.min(...l.cells.map((p) => p[0])), c0 = Math.min(...l.cells.map((p) => p[1]));
+  patch.hand = { letter: l.letter, cells: l.cells.map(([r, c]) => [r - r0, c - c0]), from: null };
+  patch.r = r0; patch.c = c0;
+}
+// The Carpentry view's keys (Esc is left to the helm: it pulls up the pin).
+function patchKey(key, e) {
+  const a = VIEW_KEYS[key];
+  if (!a || a.kind === 'leave') return false;
+  if (e.repeat && a.kind !== 'move') return true;
+  if (['move', 'turn', 'flip', 'jump'].includes(a.kind)) patch.keyAt = cursor ? { ...cursor } : { x: -1e4, y: -1e4 };
+  const hand = patch.hand;
+  switch (a.kind) {
+    case 'move': if (hand) { patch.r += a.dr; patch.c += a.dc; patchClamp(); } break;
+    case 'turn': if (hand) patchTurn(a.dir > 0 ? rotCW : rotCCW); break;
+    case 'flip': if (hand) patchTurn(flip); break;
+    case 'jump': if (hand) { const q = quarters(patch.hole.open())[a.corner]; if (q) patchSnap(q); else shake = 0.08; } break;
+    case 'take': patchTake(a.i); break;
+    case 'place': if (hand) patchPlace(); else patchTakeBack(); break;
+    case 'undo': patchTakeBack(); break;
+  }
+  return true;
+}
+// The pointer moves the piece, centred on it (onto a fit close by), once it's really moved since a key.
+function patchHover(x, y) {
+  if (!patch.hand || !patch.face) return;
+  if (patch.keyAt) { if (Math.hypot(x - patch.keyAt.x, y - patch.keyAt.y) < 24) return; patch.keyAt = null; }
+  ray.setFromCamera(new THREE.Vector2(x / innerWidth * 2 - 1, -y / innerHeight * 2 + 1), camera);
+  patch.face.updateMatrixWorld(true);
+  const o = new THREE.Vector3().setFromMatrixPosition(patch.face.matrixWorld), n = new THREE.Vector3(0, 0, 1).transformDirection(patch.face.matrixWorld);
+  const p = new THREE.Vector3();
+  if (!ray.ray.intersectPlane(new THREE.Plane().setFromNormalAndCoplanarPoint(n, o), p)) return;
+  patch.face.worldToLocal(p);
+  const at = [-p.y / S, p.x / S], b = C.bbox(patch.hand.cells);
+  const [r, c] = centreOn(at, b.h, b.w);
+  if (patch.hole.fit(patch.hand.cells, r, c)) { patch.r = r; patch.c = c; patchClamp(); } else patchSnap(at, 1.2);
+}
+function patchTick(dt) {
+  const want = sail.on && sail.helm.dazed() ? sail.helm.hole : null;
+  if (want !== (patch.on ? patch.hole : null)) { if (patch.on) patchShut(); if (want) patchOpen(want); }
+  if (!patch.on) return;
+  for (const p of patch.slots) {
+    if (p.wait > 0) p.wait -= dt;
+    if (!p.letter && patch.hand?.from !== p && p.wait <= 0) patchDeal(p);
+  }
+  // The pieces on the crate's lid, in a row from port to starboard, 1 to 3.
+  const sig = patch.slots.map((p) => `${p.letter}${p.cells}`).join('|');
+  if (sig !== patch.crateSig) {
+    patch.crateSig = sig;
+    const lid = patch.crate.userData.lid;
+    lid.clear();
+    patch.slots.forEach((p, j) => {
+      if (!p.letter) return;
+      const g = centred(p.cells, woodMat(p.letter)), b = C.bbox(p.cells);
+      g.rotation.set(-Math.PI / 2, 0, -Math.PI / 2);
+      g.scale.setScalar(0.24 / (Math.max(b.w, b.h) * S));
+      g.position.set(0, 0.02, (j - 1) * 0.28);
+      lid.add(g);
+    });
+  }
+  // Where the piece in hand would go: green, amber resting on the deck, red if it won't go.
+  const hand = patch.hand, f = hand && patch.hole.fit(hand.cells, patch.r, patch.c);
+  const kind = !hand ? '' : !f ? 'no' : f.over ? 'over' : 'ok';
+  const want2 = hand ? `${hand.cells.map((x) => x.join()).join(';')}|${patch.r},${patch.c}|${kind}` : '';
+  if (want2 !== patch.ghostKey) {
+    patch.ghostKey = want2;
+    if (patch.ghost) { patch.ghost.removeFromParent(); patch.ghost.traverse((o) => o.geometry?.dispose()); patch.ghost = null; }
+    if (hand) {
+      const g = new THREE.Group(), geo = new THREE.BoxGeometry(S * 0.98, S * 0.98, 0.12), gz = 0.16;
+      for (const [r, c] of hand.cells) { const m = new THREE.Mesh(geo, ghostMats[kind]); m.position.set((c + 0.5) * S, -(r + 0.5) * S, gz); g.add(m); }
+      g.add(fatOutline(hand.cells, gz + 0.07, kind === 'no' ? '#ffd0c8' : '#fff4d0', 0.05));
+      g.position.set(patch.c * S, -patch.r * S, 0);
+      patch.face.add(g);
+      patch.ghost = g;
+    }
+  }
+}
 // The square of the board under the pointer (fractional: the middle of a square is whole).
 function seaCellAt(x, y) {
   ray.setFromCamera(new THREE.Vector2(x / innerWidth * 2 - 1, -y / innerHeight * 2 + 1), camera);
@@ -4649,12 +4920,14 @@ function seaCellAt(x, y) {
   return { c: (p.x - SEA_X0) / SAIL.CELL - 0.5, r: (SAIL.Z0 - p.z) / SAIL.CELL - 0.5 };
 }
 function sailClick(x, y) {
+  if (patch.on) { patch.keyAt = null; patchHover(x, y); if (patch.hand) patchPlace(); return; }
   if (hold.mode) { holdHover(x, y); holdSwap(); return; }
   const at = seaCellAt(x, y);
   if (!at) return;
   if (!sail.helm.drop(at.c, at.r)) toast('She\'s there already', true);
 }
 function sailHover(x, y) {
+  if (patch.on) { patchHover(x, y); sail.hover = null; return; }
   if (hold.mode) { holdHover(x, y); sail.hover = null; return; }
   const at = seaCellAt(x, y);
   sail.hover = at && sail.sea.open(Math.round(at.c), Math.round(at.r)) ? [Math.round(at.c), Math.round(at.r)] : null;
@@ -4678,7 +4951,12 @@ function sailPrompt() {
   if (nearSloop()) return 'Space: board the old sloop';
   if (!sail.on) return '';
   const h = sail.helm, held = h.held();
-  if (held === 'daze') return 'Dazed! Holed and shipping water · bilge her out to sail on: arrows or mouse move · Space or click swaps';
+  if (held === 'daze') {
+    const hd = patch.hand, f = hd && patch.hole?.fit(hd.cells, patch.r, patch.c);
+    const tips = ' · arrows or mouse move · X/C turn · Z flip · Q/W/A/S: its corners · Backspace: the last piece back out';
+    if (!hd) return 'Holed! Patch her deck to sail on · 1, 2, 3: a piece from the crate' + tips;
+    return (f ? `Space or click: fit the ${hd.letter}${f.over ? ' (it rests on the deck: boarded over)' : ''}` : `The ${hd.letter} won't go there`) + tips;
+  }
   if (held === 'up') return 'In the lock · bilge on the quay to pump it up, and the top gates open: arrows or mouse move · Space or click swaps';
   if (held === 'down') return 'The lock\'s draining down to the sea';
   if (held === 'gates') return 'The lock gates are swinging open';
@@ -4723,10 +5001,10 @@ function turretLand(to, hit) {
   if (v) scene.remove(v.ball, v.ring);
   const at = V3(seaX(to[0]), 0.3 + liftAt(...to), seaZ(to[1]));
   if (!hit) { burst(at, '#e6f3f6', 20, 4); burst(at, '#9cc8d4', 10, 2.5); return; }
-  sail.helm.hit();
+  sail.helm.hit(deckHoleShape());
   burst(at.setY(at.y + 0.8), '#ffb85a', 18, 4); burst(at, '#5a4630', 16, 3.5); burst(at, '#e6f3f6', 10, 3);
   shake = Math.max(shake, 0.45);
-  toast('Hit! She\'s holed and shipping water: bilge her out to sail on', true);
+  toast('Hit! She\'s holed: patch her to sail on', true);
 }
 function sailTick(dt) {
   sail.rocks ||= seaRocks();
@@ -4757,9 +5035,10 @@ function sailTick(dt) {
     }
     const held = h.held();
     if (held === 'up' && heldWas !== 'up' && !sail.said.lock) { sail.said.lock = true; toast('The lock: bilge on the quay to pump it up to the cove'); }
+    if (held === 'gates' && heldWas === 'up') toast('The lock\'s full: the top gates open');
     if (sail.sea.level(h.pose.c, h.pose.r) === 1 && !sail.said.cove) { sail.said.cove = true; toast('The hidden cove, up behind the cliff: an old bilge pump on the sand'); }
     // The turret shoots at her when she's in reach (not while she's dazed, or in the lock).
-    for (const e of sail.turret.tick(dt, held ? null : h.now())) {
+    for (const e of sail.turret.tick(dt, h.spared() ? null : h.now())) {
       if (e.kind === 'fire') turretFire(e.to);
       else turretLand(e.to, e.hit);
     }
@@ -4767,6 +5046,7 @@ function sailTick(dt) {
     sail.guns.tick(dt);
   }
   holdTick(dt);
+  patchTick(dt);
   // The turret's shots on their way; its gun turned on her; smoking while it's quiet.
   for (const v of sail.shots) {
     v.t += dt;
@@ -4780,8 +5060,25 @@ function sailTick(dt) {
     if (sail.on) W.gun.rotation.y += (Math.atan2(-dx, -dz) - W.gun.rotation.y + Math.PI * 3) % (Math.PI * 2) - Math.PI > 0 ? Math.min(dt * 2, ((Math.atan2(-dx, -dz) - W.gun.rotation.y + Math.PI * 3) % (Math.PI * 2)) - Math.PI) : Math.max(-dt * 2, ((Math.atan2(-dx, -dz) - W.gun.rotation.y + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
     if (sail.turret.quiet > 0 && (W.smokeT = (W.smokeT ?? 0) - dt) < 0) { W.smokeT = 0.25; burst(V3(tw.x, 3.8, tw.z), '#6f6a66', 2, 0.6); }
   }
+  // The quay pump: its handle down and up again with each stroke, and water gushing from its spout
+  // into the lock while it's rising.
+  {
+    const P = W.pump, s = P.userData.stroke ?? 0;
+    P.userData.stroke = Math.max(0, s - dt * 2.5);
+    P.userData.arm.rotation.z = 0.35 - 0.75 * Math.sin(Math.PI * (1 - P.userData.stroke)) * (P.userData.stroke > 0 ? 1 : 0);
+    const rising = sail.on && h.fill > h.level + 1e-4;
+    W.gush.visible = rising;
+    if (rising) {
+      P.updateMatrixWorld(true);
+      const m = P.localToWorld(P.userData.mouth.clone()), y1 = h.level * LIFT + 0.05;
+      W.gush.scale.set(1, Math.max(0.1, m.y - y1), 1);
+      W.gush.position.set(m.x, (m.y + y1) / 2, m.z - 0.08);
+      if ((W.gushT = (W.gushT ?? 0) - dt) < 0) { W.gushT = 0.12; burst(V3(m.x, y1 + 0.05, m.z - 0.1), '#e6f3f6', 3, 1.6); burst(m, '#9fd4ec', 1, 0.8); }
+    }
+  }
   // The lock: its chamber's water at its level; each pair of gates open when she can pass that end.
   const lockY = h.level * LIFT;
+
   W.chamber.position.y = lockY + 0.05;
   W.chamber.visible = lockY > 0.02;
   for (const [end, gt] of Object.entries(W.gates)) {
@@ -4811,14 +5108,14 @@ function sailTick(dt) {
   if (sail.on) {
     // You, at the tiller, facing her bow (up on her stern, beside it, while the board's on her deck,
     // so you're not stood on it, nor between it and the camera).
-    const deck = hold.mode === 'daze', at = sail.g.localToWorld(deck ? V3(-1.7, SLOOP_DECK + 0.35, 0.45) : V3(-1.15, SLOOP_DECK, 0)), yaw = sail.g.rotation.y;
+    const deck = patch.on, at = sail.g.localToWorld(deck ? V3(-1.7, SLOOP_DECK + 0.35, 0.45) : V3(-1.15, SLOOP_DECK, 0)), yaw = sail.g.rotation.y;
     pirate.x = at.x; pirate.z = at.z;
     pirate.g.position.copy(at);
     pirate.g.rotation.set(0, Math.atan2(Math.cos(yaw), -Math.sin(yaw)), 0);
     animateWalk(pirate, false, dt);
     pirate.g.position.y = at.y;
     sail.stars ||= (() => { const g = new THREE.Group(), m = new THREE.MeshBasicMaterial({ color: '#ffe066' }); for (let i = 0; i < 3; i++) { const s = mesh(new THREE.OctahedronGeometry(0.12, 0), m, false); s.position.set(Math.cos(i * 2.1) * 0.4, 0, Math.sin(i * 2.1) * 0.4); g.add(s); } scene.add(g); return g; })();
-    sail.stars.visible = h.dazed() && holdView < 0.5;   // (not in your face over the board)
+    sail.stars.visible = h.dazed() && patchView < 0.5;   // (not in your face over the board)
     if (h.dazed()) { sail.stars.position.set(at.x, at.y + 2.15, at.z); sail.stars.rotation.y += dt * 4; }
   } else if (sail.stars) sail.stars.visible = false;
   // The pin, and the course to it dotted on the water.
@@ -5134,7 +5431,7 @@ addEventListener('keydown', (e) => {
   if (cine) { if ([' ', 'escape', 'enter'].includes(key)) { e.preventDefault(); if (!e.repeat) cineEnd(true); } return; }
   if (chart.on && !deco.on) { e.preventDefault(); mapKey(key); return; }
   // At sea: the helm's keys, and the view's.
-  if (sail.on) { e.preventDefault(); if (!e.repeat) sailKey(key); return; }
+  if (sail.on) { e.preventDefault(); if (patch.on && patchKey(key, e)) return; if (!e.repeat) sailKey(key); return; }
   if (key === 'p' && !deco.on) { setPaused(true); return; }
   if ([' ', 'tab', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) e.preventDefault();
   // At the sword rack, the keys play the Swordfight board, as in the real puzzle.
@@ -5263,7 +5560,8 @@ addEventListener('mouseup', (e) => {
   if (e.button === 0 && gd?.press) chalkRelease(e.clientX, e.clientY);
   if (e.button !== 2 || !drag) return;
   if (drag.deco) { if (!drag.moved) decoClick(drag.deco); drag = null; return; }
-  if (!drag.moved && carry && !G.over) turn(flip, 0);
+  if (!drag.moved && patch.on && patch.hand) patchTurn(flip);
+  else if (!drag.moved && carry && !G.over) turn(flip, 0);
   else if (!drag.moved && !carry && onGunDeck() && (gd.hover = deckCellAt(e.clientX, e.clientY)) && gd.arrows.has(k(...gd.hover))) chalk(...gd.hover, -1);
   drag = null;
 });
@@ -5282,6 +5580,12 @@ renderer.domElement.addEventListener('wheel', (e) => {
     const now = performance.now();
     gd.hover = deckCellAt(e.clientX, e.clientY);
     if (Math.abs(wheelAcc) >= 40 && now - wheelT > 110) { wheelDeck(wheelAcc > 0 ? 1 : -1); wheelAcc = 0; wheelT = now; }
+    return;
+  }
+  if (patch.on && patch.hand) {
+    wheelAcc += e.deltaY;
+    const now = performance.now();
+    if (Math.abs(wheelAcc) >= 40 && now - wheelT > 110) { patchTurn(wheelAcc > 0 ? rotCW : rotCCW); wheelAcc = 0; wheelT = now; }
     return;
   }
   if (carry && !G.over) {
@@ -7810,22 +8114,33 @@ function update(dt) {
     dist += (26 * view.zoom - dist) * sailView;
     tilt += (Math.max(0.3, Math.min(1.45, 0.78 + view.pitch)) - tilt) * sailView;
   }
-  // Bilging at sea: down onto the little board, from her stern (on her deck) or the den side (the quay).
+  // Bilging at the lock: down onto the board on the quay from the den side, drawn back to take in
+  // the lock beyond it and the pump, so you see her rise as you pump.
   holdView += ((hold.mode ? 1 : 0) - holdView) * Math.min(1, dt * 3);
   if (holdView > 0.001 && hold.group?.parent) {
     const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect), sq = hold.group.scale.x;
     hold.group.getWorldPosition(L2);
-    // (on the quay, drawn back to take in the lock beyond it too, so you see her rise as you pump)
-    const quay = hold.mode === 'up';
-    if (quay) L2.lerp(V3(seaX(LAY.LOCK[0]), L2.y, seaZ(LAY.LOCK[1])), 0.12);
+    L2.lerp(V3(seaX(LAY.LOCK[0]), L2.y, seaZ(LAY.LOCK[1])), 0.12);
     look.lerp(L2, holdView);
-    dist += (Math.max((BH * sq / 2 + 0.5 * sq * 4) / Math.tan(vh), (BW * sq / 2 + sq * 2) / Math.tan(hh)) * (quay ? 1.75 : 1.15) * view.zoom - dist) * holdView;
+    dist += (Math.max((BH * sq / 2 + 0.5 * sq * 4) / Math.tan(vh), (BW * sq / 2 + sq * 2) / Math.tan(hh)) * 1.75 * view.zoom - dist) * holdView;
     tilt += (1.2 - tilt) * holdView;
-    const ry = sail.g.rotation.y, want = hold.mode === 'daze' ? Math.atan2(-Math.cos(ry), Math.sin(ry)) : 0;
+    const y0 = Math.atan2(Math.sin(yaw), Math.cos(yaw));
+    yaw = y0 + (Math.atan2(Math.sin(-y0), Math.cos(-y0))) * holdView;
+  }
+  // Patching her deck: down onto the hole from her stern, its top row toward her bow, the crate
+  // of timber in view below it.
+  patchView += ((patch.on ? 1 : 0) - patchView) * Math.min(1, dt * 3);
+  if (patchView > 0.001 && patch.group?.parent && patch.hole) {
+    const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect), sq = patch.sq, b = patch.hole.board;
+    L2.copy(sail.g.localToWorld(V3(-0.2, SLOOP_DECK, 0)));
+    look.lerp(L2, patchView);
+    dist += (Math.max((b.h * sq / 2 + 0.75) / Math.tan(vh), (b.w * sq / 2 + sq * 2) / Math.tan(hh)) * 1.15 * view.zoom - dist) * patchView;
+    tilt += (1.2 - tilt) * patchView;
+    const ry = sail.g.rotation.y, want = Math.atan2(-Math.cos(ry), Math.sin(ry));
     const y0 = Math.atan2(Math.sin(yaw), Math.cos(yaw));
     let d = want - y0;
     d = Math.atan2(Math.sin(d), Math.cos(d));
-    yaw = y0 + d * holdView;
+    yaw = y0 + d * patchView;
   }
   // The cutscene's own shots.
   if (cine) cineCam = cine.cam;
@@ -8080,6 +8395,6 @@ requestAnimationFrame(frame);
 
 // For poking at it from the console.
 window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, swordReward, swordBreak, lumber, toLumber, repairAll, newGame, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
-  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, hold, holdSwap, board, ashore,
+  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, hold, holdSwap, board, ashore, patch, patchKey, patchPlace, deckHoleShape,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };

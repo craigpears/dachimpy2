@@ -16,6 +16,7 @@
    as in Battle Navigation). A turn plays up to four moves, one after another with a pause between,
    then a breather before the next. You drop a pin and the pilot works out the moves to get there;
    you can put in moves yourself as well (they're played first), for when you want to steer. */
+import { DeckHole } from './den-patch.js';
 export const SAIL = {
     /** The board: squares across and out to sea. */
     COLS: 16,
@@ -47,9 +48,14 @@ export const SAIL = {
     /** Seconds a square of trade wind takes to sweep her along: "just insanely quick wind tiles". */
     PUSH: 0.28,
     /** The lock: moves' worth of Bilge to raise her (see Helm.pump), and seconds it takes to drain
-        down by itself. */
-    LOCK_WORK: 4,
+        down by itself. A proper go of Bilge, tens of seconds of good play: at four it "filled way
+        too quickly" (the user, 9 Nov), "you should see the line of water gradually going up as you
+        clear a few bilging pieces". */
+    LOCK_WORK: 16,
     DRAIN: 2,
+    /** The lock's water rising to what's been pumped (see lockRise): at least this much of the lift a
+        second, quicker the further it has to go, so each clear lifts it a step you can see. */
+    RISE: 0.15,
     /** Seconds the gates take to swing open once the lock's full (or drained), before she sails on
         through them. */
     GATES: 0.8,
@@ -59,8 +65,13 @@ export const SAIL = {
     TURRET_RELOAD: 4,
     FLIGHT: 1.4,
     QUIET: 10,
-    /** Water a hit puts in her, in moves' worth of Bilge: a quick bit of puzzling and she sails on. */
-    HIT: 3,
+    /** Seconds the turret holds fire once she's patched, so she can get going (the user, 9 Nov: "as
+        soon as you finish the puzzle, the cannon starts shooting at you again ... literally before
+        you can do anything about it"). */
+    GRACE: 5,
+    /** The hole a hit knocks in her deck when nothing says what shape (den.js makes a fresh one each
+        hit): three pieces' worth, patched by Carpentry (src/den-patch.ts). */
+    HOLE: [[0, 1], [0, 2], [1, 0], [1, 1], [1, 2], [1, 3], [2, 0], [2, 1], [2, 2], [2, 3], [3, 1], [3, 2], [3, 3], [4, 2], [4, 3]],
 };
 /* The lay of the sea (the user, 9 Nov: "just really go for it. Add some shipping lanes ... where
    you've got a fork in the road ... some kind of a lock and canal ... if you want to switch from one
@@ -317,6 +328,12 @@ export function poseAt(p, m, u, bump = false) {
     const x = -DC[side], y = -DR[side], th = (m === 'L' ? 1 : -1) * e * Math.PI / 2;
     return { c: mc + x * Math.cos(th) - y * Math.sin(th), r: mr + x * Math.sin(th) + y * Math.cos(th), a };
 }
+/** The lock's water, rising (or falling) towards where it's headed: a step at a time as each clear
+    is pumped in, smoothly, never in one jump, and there within a second or so. */
+export function lockRise(level, to, dt) {
+    const d = to - level, step = Math.max(SAIL.RISE * dt, Math.abs(d) * Math.min(1, dt * 3));
+    return Math.abs(d) <= step ? to : level + Math.sign(d) * step;
+}
 /** The helm: where she is, where she's headed, and the clock that plays the turns. */
 export class Helm {
     sea;
@@ -335,10 +352,14 @@ export class Helm {
     rides = [];
     /** The lock's water: 0 the sea's level, 1 the hidden cove's. */
     level = 0;
-    /** Water a hit's put in her, in moves' worth of Bilge: she's dazed till it's pumped out. */
-    shipped = 0;
+    /** What's been pumped into the lock: the water rises to it as she waits (lockRise). */
+    fill = 0;
+    /** The hole the last hit knocked in her deck: she's dazed till it's patched. */
+    hole = null;
     /** Seconds till the lock's gates are open, after it's filled or drained. */
     gates = 0;
+    /** Seconds the turret still holds fire after she's patched (SAIL.GRACE). */
+    grace = 0;
     wait = 0;
     constructor(sea, pose = SAIL.HOME) {
         this.sea = sea;
@@ -400,10 +421,17 @@ export class Helm {
     }
     /** Nothing playing and nothing to play. */
     idle() { return this.slot < 0 && !this.next().length; }
-    dazed() { return this.shipped > 1e-9; }
-    /** Hit (by the turret, say): water in her, and she's dazed till it's pumped out. She finishes
-        the move she's on (or the trade wind's ride), then waits. */
-    hit() { this.shipped += SAIL.HIT; }
+    /** Holed, and the hole not yet patched. */
+    dazed() { return !!this.hole && !this.hole.done(); }
+    /** Hit (by the turret, say): a hole in her deck, and she's dazed till it's patched. She finishes
+        the move she's on (or the trade wind's ride), then waits. (A hit while she's holed already
+        does nothing more: the turret holds fire then anyway.) */
+    hit(cells = SAIL.HOLE) { if (!this.dazed()) {
+        this.hole = new DeckHole(cells);
+        this.grace = SAIL.GRACE;
+    } }
+    /** Not to be shot at just now: held up (dazed, or at the lock), or just patched and getting going. */
+    spared() { return !!this.held() || this.grace > 1e-9; }
     /** What she's waiting on, if anything. */
     held() {
         if (this.dazed())
@@ -412,17 +440,10 @@ export class Helm {
             return this.gate(this.turn[this.slot]) ?? (this.gates > 1e-9 ? 'gates' : null);
         return null;
     }
-    /** A move of Bilge's worth: pumps her out if she's dazed, or the lock up if she's waiting on it.
-        What it went to. */
+    /** A move of Bilge's worth: pumps the lock up if she's waiting on it. What it went to. */
     pump(w) {
-        if (this.dazed()) {
-            this.shipped = Math.max(0, this.shipped - w);
-            return 'daze';
-        }
         if (this.held() === 'up') {
-            this.level = Math.min(1, this.level + w / SAIL.LOCK_WORK);
-            if (this.level >= 1)
-                this.gates = SAIL.GATES; // full: the top gates swing open
+            this.fill = Math.min(1, Math.max(this.fill, this.level) + w / SAIL.LOCK_WORK);
             return 'lock';
         }
         return null;
@@ -460,6 +481,16 @@ export class Helm {
     tick(dt) {
         const out = [];
         let left = dt;
+        // Holed, the turret's grace waits for the patch; then it runs down.
+        this.grace = this.dazed() ? SAIL.GRACE : Math.max(0, this.grace - dt);
+        // The lock's water rising to what's been pumped in; full, the top gates swing open.
+        if (this.fill > this.level + 1e-9) {
+            this.level = lockRise(this.level, this.fill, dt);
+            if (this.level >= 1 - 1e-9) {
+                this.level = this.fill = 1;
+                this.gates = SAIL.GATES;
+            }
+        }
         for (let guard = 0; left > 1e-12 && guard < 1000; guard++) {
             if (this.cur) {
                 // A move or a square of wind, then (after the last of the wind) the pause. Dazed, she
@@ -508,6 +539,7 @@ export class Helm {
                     const use = Math.min(left, this.level * SAIL.DRAIN);
                     this.level -= use / SAIL.DRAIN;
                     left -= use;
+                    this.fill = Math.min(this.fill, this.level);
                     if (this.level > 1e-6)
                         break;
                     this.level = 0;
@@ -568,7 +600,7 @@ export class Turret {
     /** Hit by her guns: quiet for a while. */
     silence() { this.quiet = SAIL.QUIET; }
     /** `ship`: where she is now (Helm.now), or null when it shouldn't shoot at her (she's not out,
-        or she's dazed already). */
+        or Helm.spared: dazed, at the lock, or just patched). */
     tick(dt, ship) {
         const out = [];
         this.quiet = Math.max(0, this.quiet - dt);
