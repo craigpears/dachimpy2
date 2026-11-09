@@ -68,6 +68,16 @@ the site (`.assetsignore` skips `*.md`).
   make no progress". You should be able to fit the piece in the hole instead of throwing it (or the
   daze should last long enough to fit one). (Which, to pin down with the user.)
 
+- **Carpentry: everything's obscured, and switching should be seamless (9 Nov):** "we really
+  need to fix that bug right now that everything's really obscured. If you need to, just make the
+  whole area a bit deeper because we're adding more stuff in." In the Carpentry view it should be
+  "a lot more 2D"; no minimum distance when you're on a part of the puzzle, "you should just be
+  able to place pieces"; and moving between the wall, the stairs and the big platform being built
+  should be seamless, like Carpentry's four holes: "here's a piece that would be useful on the
+  stairs. Let's put them on the stairs ... You shouldn't have to exit, go to something else, go in
+  it." Also: one staircase, on the right, "so you don't have to overstretch the starting area.
+  So you can have sword fighting board on the left, stairs on the right for the ramparts to go up."
+
 ## Needs a playtest to pin down
 
 - **Swordfight at the armoury hoist (8 Nov), not yet tried by the user.** Rebuilt after the
