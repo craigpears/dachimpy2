@@ -131,7 +131,10 @@ the site (`.assetsignore` skips `*.md`).
   as they're swinging by in the winds, and then you should certainly get some reward for that".
   So a few hits from her guns wreck it (a hit now only quiets it for a while), the timing shot
   from the trade winds counts, and wrecking it gives a reward: a chest floats free of the wreck,
-  and you sail over it to pick it up (the user, 9 Nov). (What's in it, and whether the turret's
+  and you haul it up. Not by sailing over it: that was "not Puzzle Pirates' spirit at all ...
+  you need to have to haul it up ... You need puzzles." So she stops by the chest and Treasure
+  Haul brings it aboard (wired with the lagoon's wreck). And the turret's destruction "does not
+  look very satisfying": give the wreck more of a moment. (What's in it, and whether the turret's
   rebuilt later: to pin down with the user.)
 
 - **Patching her deck should play like Carpentry ashore (9 Nov):** "the mechanics of the

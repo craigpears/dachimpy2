@@ -131,6 +131,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   on a frame for its Carpentry view (Space still fits a piece there in 3D). The one exception, as
   the user suggested ("maybe the front wall could be a bit of an exception"): stopping at the wall
   with a piece in hand still brings up the wall's view.
+- **Every reward is won by a puzzle, never just picked up (9 Nov).** A chest from the wrecked
+  turret that you sailed over to collect was "not Puzzle Pirates' spirit at all. Like, you need to
+  have to haul it up. It's just mandatory. It's the Puzzle Pirates way. You need puzzles." So
+  treasure is hauled up by Treasure Haul (the turret's chest, the lagoon's wreck), and any new
+  reward comes through a puzzle too, one of the few the den already has where it fits.
 - **Sailing, a first go (9 Nov).** The user: "can you do a proof of concept for ... how you end up
   getting a ship? ... a ship would just be waiting in the cove", with Battle Navigation's feel:
   "drop a pin, like a destination point, but it almost like auto moves ... it still moves like a
