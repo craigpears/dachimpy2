@@ -77,6 +77,15 @@ the site (`.assetsignore` skips `*.md`).
   clearly while you build it. (Since the last update the stairs are on the right and the armoury
   hoist on the left, which may already have fixed this: check once the new version's live.)
 
+- **The Carpentry board by keyboard is unreliable (9 Nov):** the user: "there's definitely big
+  control issues ... this needs a lot more quality control for keyboard use. A lot of it."
+  - 1, 2 and 3 don't swap the piece once you're holding one ("It's not letting me switch").
+  - The arrows are inconsistent: from the bottom right of the top-left hole, down and up worked,
+    then left, but right didn't; it seemed blocked by a piece already placed "instead of skipping
+    over it". The piece should move a square wherever the arrow says, over anything on the board.
+  - Switching between the wall, the stairs and the walk should work from the keyboard too (not one
+    board for all of them, the user isn't sure about that, but easy to switch).
+
 ## Needs a playtest to pin down
 
 - **Swordfight at the armoury hoist (8 Nov), not yet tried by the user.** Rebuilt after the
