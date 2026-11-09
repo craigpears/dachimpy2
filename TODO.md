@@ -123,6 +123,12 @@ the site (`.assetsignore` skips `*.md`).
   down into the cove (and back down again later). The lock (Bilge) and the crane (Carpentry) are
   two ways in, so you choose the puzzle you'd rather play.
 
+- **Something worth finding in the hidden cove: treasure (9 Nov):** the canal and the cove "would
+  be great, but ... it needs a point of interest in here, even if it's a little like treasure
+  chest on this little beach in the cove. You need to be able to go in here and do some treasure
+  hauling or something." So: step ashore in the cove, and Puzzle Pirates' Treasure Haul brings up
+  the treasure, played by its real rules (checked first), with a believable reason for it there.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
