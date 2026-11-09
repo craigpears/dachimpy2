@@ -536,6 +536,14 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     rethinking.
   - **Ship types with real trade-offs:** harder to sink against faster, and so on. Today it's
     the big war brig or nothing, and a fast ship on a blockade board just gets sunk.
+    **Fit her out, Wacky Races style (9 Nov):** specialist ships with real meaning, a fit with the
+    racing on the trade winds: one built for top speed, one quicker off the mark, one with a
+    cannon that's a bit slower but can daze the others, one with a crane to haul her up a cliff
+    (above, "haul her over"), one with a navigation post to find the hidden routes (the
+    Navigation duty puzzle, above). Not one thing or the other, necessarily: you configure your
+    ship, adding a crane or a navigation post, each with its cost. "I'm sure we can come up with
+    other ideas." (What the fittings are, what each costs her, and how many she takes: to shape
+    with the user. A racer of our own, not a copy of any game's karts or cars.)
 
 For now the den is the first version, and that works.
 
