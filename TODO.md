@@ -148,7 +148,9 @@ the site (`.assetsignore` skips `*.md`).
   along the bottom as on land, where you can click them, "make it a bit bigger".) And the patch
   itself is hard to look at: "it hurts my eyes ... maybe the angle needs to be a bit more, or the
   scale of it. It's a bit tiny, and it's making my head hurt": a steeper look down at it, and
-  the hole as big on screen as a wall hole is ashore.
+  the hole as big on screen as a wall hole is ashore. "Looking a bit better", but the hole sits far
+  above the tray: "your eyes really have to go down to the bottom of the screen to see it". Keep
+  them close together.
 
 - **Split den.js up, so features can be worked on side by side (9 Nov, technical):** the sea's
   features had to wait in a queue because they all change the one big file, den.js (over 8,000
