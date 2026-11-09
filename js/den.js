@@ -11,7 +11,7 @@ import { randomPair, W as SW, H as SH, ENTRY as SENTRY } from './swordfight.js';
 import { muster, planRepair, rewardPair, Lumber, REPAIR, SwordRack, Barracks, SWORD } from './den-sword.js';
 import { drawStencil, drawBlade, PALETTE } from './den-sword-draw.js';
 import { Bilge, W as BW, H as BH } from './bilge.js';
-import { KEYS as VIEW_KEYS, nextHole, quarters, centreOn, clampTo, nextBoard, arrowStep } from './den-carp-view.js';
+import { KEYS as VIEW_KEYS, nextHole, holeKey, quarters, centreOn, clampTo, nextBoard, arrowStep } from './den-carp-view.js';
 import { twoCourses, isHigh, gateTop, lowMiddle, isSky } from './den-wall.js';
 import { BILGE, Tide, HIGH, LOW, shoreAt, worth, barrelsFor, onRocks, rocksBare, oddsFor, blastHits } from './den-bilge.js';
 import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, cleanDesign, designOf, drawFlag, dyeHex, DYES, SKIN, HAIR, FUR, PARTS, FLAGS, PATTERNS, DECOR, MAX_DECOR, BIOMES, twoColours } from './den-look.js';
@@ -6593,7 +6593,10 @@ function update(dt) {
   nextMat.opacity = 0.22 + 0.2 * Math.sin(performance.now() / 260);
   for (const h of wall.holes) {
     h.attackers = raiders.filter((r) => r.hole === h && ['approach', 'ladder', 'attack', 'hackOut', 'dazed'].includes(r.state)).length;
-    const [cls, html] = labelFor(h);
+    const [cls, body] = labelFor(h);
+    // In the Carpentry view, the key that sends the piece here (Puzzle Pirates' Q/W/A/S).
+    const g = wall.gateCols, hk = wm && !wm.f ? holeKey([h.b.r0 + h.b.h / 2, h.b.c0 + h.b.w / 2], [wall.H / 2, (g.c0 + g.c1 + 1) / 2]) : '';
+    const html = hk ? `<kbd class="hk">${hk}</kbd>${body}` : body;
     nextLayer(h);
     if (h.sig !== cls + html) { h.sig = cls + html; h.label.className = cls; h.label.innerHTML = html; }
     const bar = h.label.querySelector('.bar:not(.lay) b');

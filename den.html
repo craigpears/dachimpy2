@@ -19,6 +19,7 @@
     /* Along the bottom, stacked so nothing overlaps at any width: the prompt, the toolbox, the keys. */
     .dock { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; width: max-content; max-width: calc(100vw - 32px); pointer-events: none; }
     .keys { background: var(--panel); border-radius: 8px; padding: 6px 12px; color: var(--dim); font-size: 14px; max-width: 100%; box-sizing: border-box; text-align: center; line-height: 1.6; }
+    .label kbd.hk { display: inline-block; font: 700 14px 'Alegreya Sans'; color: var(--ink); background: #3b2a1b; border: 1px solid #c9a35c; border-radius: 4px; padding: 0 6px; margin-right: 6px; }
     .keys kbd { font: 700 13px 'Alegreya Sans'; color: var(--ink); background: #3b2a1b; border: 1px solid #6b4e32; border-radius: 4px; padding: 0 5px; }
     .prompt { background: var(--panel); border: 1px solid var(--gold); border-radius: 8px; padding: 8px 16px; font-size: 18px; font-weight: 700; white-space: nowrap; }
     .prompt:empty { display: none; }

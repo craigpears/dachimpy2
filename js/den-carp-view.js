@@ -72,6 +72,14 @@ export function nextHole(holes, at, corner, cur, split) {
         return nearest(inCorner);
     return nearest(sideOk);
 }
+/** The key that sends the piece to a hole (Q, W, A or S, as the keyboard's little square matches
+    the holes' layout), shown on the hole in the Carpentry view. The user (9 Nov) pressed W and S
+    for up and down, as when walking, and the piece leapt to the top-right and bottom-right holes:
+    they wanted the real game's keys kept ("we want to be completely faithful to the Puzzle Pirate
+    controls"), so the holes say which key is theirs. */
+export function holeKey([r, c], split) {
+    return r < split[0] ? (c < split[1] ? 'Q' : 'W') : (c < split[1] ? 'A' : 'S');
+}
 /** On a frame (one big space): its four quarters, as the real board's four holes. Each is the
     middle of the squares still empty in that quarter of the frame, or null if it's all filled. */
 export function quarters(open) {

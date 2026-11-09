@@ -1,7 +1,7 @@
 /* The Carpentry view's keys and jumps (9 Nov): Puzzle Pirates' own Carpentry keys, as YPPedia
    gives them, on the wall and the frames. */
 import { describe, expect, it } from 'vitest';
-import { KEYS, arrowStep, centreOn, clampTo, nextBoard, nextHole, quarters } from '../src/den-carp-view';
+import { KEYS, arrowStep, centreOn, clampTo, holeKey, nextBoard, nextHole, quarters } from '../src/den-carp-view';
 import type { Pt } from '../src/den-carp-view';
 
 describe('the keys are the real Carpentry keys', () => {
@@ -47,6 +47,13 @@ describe('jumping between holes on the wall', () => {
     const more: Pt[] = [...holes, [2, 9]];
     expect(nextHole(more, [3, 5], 'ul', 0, split)).toBe(4);
     expect(nextHole(more, [2, 9], 'ul', 4, split)).toBe(0);
+  });
+  it(`W from the bottom-left hole goes to the top-right, S to the bottom-right, as in the real game; each hole shows its key (9 Nov: "I was just working in the bottom left hole, pressed up, and I ended up in the top right")`, () => {
+    expect(nextHole(holes, [8, 5], KEYS.w.kind === 'jump' ? KEYS.w.corner : 'ul', 1, split)).toBe(2);
+    expect(nextHole(holes, [3, 20], KEYS.s.kind === 'jump' ? KEYS.s.corner : 'ul', 2, split)).toBe(3);
+    expect(holes.map((p) => holeKey(p, split))).toEqual(['Q', 'A', 'W', 'S']);
+    // A cannon breach answers to its corner's key too.
+    expect(holeKey([2, 9], split)).toBe('Q');
   });
   it('a corner with no hole: the nearest on that side', () => {
     expect(nextHole([[8, 5], [3, 20]], [3, 20], 'ul', 1, split)).toBe(0);

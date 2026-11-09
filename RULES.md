@@ -232,6 +232,13 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     that corner; on a frame, that quarter of it), Space puts it in. Backspace takes the last
     piece back off (the real puzzle lets you adjust your last piece). E and F still turn and flip.
     The mouse works too: point and click.
+  - **The keys stay exactly the real game's, and each hole shows its key (9 Nov).** The user
+    pressed W and S for up and down, as when walking, and the piece leapt to the top-right and
+    bottom-right holes ("I was just working in the bottom left hole, pressed up, and I ended up in
+    the top right"); D did nothing, so "left and right" seemed dead. Told it's Puzzle Pirates' own
+    Q/W/A/S (a little square on the keyboard, like the four holes), they chose: "we want to be
+    completely faithful to the Puzzle Pirate controls." So in the Carpentry view each hole's label
+    starts with its key (Q and A on the left of the gate, W and S on the right).
   - **Nothing in the way, and switching is seamless (9 Nov).** The user: "everything's really
     obscured", and moving between the wall, the stairs and the platform should be like Carpentry's
     four holes, with no going out and back in. So: a row of tabs over the prompt names everything
