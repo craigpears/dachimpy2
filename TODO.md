@@ -139,6 +139,13 @@ the site (`.assetsignore` skips `*.md`).
   and the pilot should sail sensibly near the lanes, never circling or dithering at their edges.
   (What a pin on a lane means exactly: to pin down with the user.)
 
+- **Knock the turret out, and a reward for it (9 Nov):** the turret "obviously needs to be
+  destructible, because plenty of people are going to try and see if they can time it to shoot it
+  as they're swinging by in the winds, and then you should certainly get some reward for that".
+  So a few hits from her guns wreck it (a hit now only quiets it for a while), the timing shot
+  from the trade winds counts, and wrecking it gives a reward. (What the reward is, and whether
+  the turret's rebuilt later: to pin down with the user.)
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
