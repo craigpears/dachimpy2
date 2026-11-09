@@ -144,19 +144,6 @@ first fix (TODO.md has the playtest):
 - **Raiders who get in should be catchable**: they walk to the chest; a crewmate standing in the
   way could block them, and a thrown piece already knocks them flat.
 - **Repairs between waves**: Masterpieces could heal a little in the calm (the user's call).
-- **Throw pieces over the wall, so blocking holes matters (9 Nov).** The user: "maybe being able
-  to throw pieces over the wall could make blocking off the holes etc. more meaningful, right now
-  it is a bit demotivating when it's so easy to just kill them as they come in." So the fight
-  should be at the wall, not inside: knock raiders off while they hack, before they're through,
-  and the ones who do get in should be harder to deal with, so a hole left open costs you. Today
-  you can already lob a piece down on raiders at the wall, but only from up on the rampart; on the
-  ground a thrown piece knocks a raider flat as soon as they step through. To work out with the
-  user:
-  - Throwing over the wall from the den floor (a high lob over the top at the raiders hacking
-    outside), or keep it to the rampart and make the rampart quicker to reach?
-  - What makes the ones inside harder: a thrown piece only staggers them, they take two hits,
-    they're quick once in, or throws inside take longer to come back than throws over the wall?
-  - Whether a raider knocked off the wall outside should pay more than one knocked flat inside.
 
 ## Swordfight soldiers, and choosing your mini-game (8 Nov)
 

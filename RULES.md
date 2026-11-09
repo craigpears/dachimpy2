@@ -116,6 +116,12 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 
 Unlisted for now: reachable only by its URL until the user says to put it in the nav.
 
+- **A puzzle game, not an action game.** The raiders are there for a bit of interest and a bit of
+  pressure, so you can't ignore things altogether; the emphasis is always on wanting to finish the
+  puzzle in front of you (the next section to build, the next Gunnery load). It mustn't be a
+  pressured fight against defeat. The user (9 Nov): "there's not as much of a worry about making
+  things too easy ... progression is fun. It's to be expected. ... we can add more challenging
+  elements later." So when a change could go either way, keep it simple and on the easy side.
 - **Every puzzle stays high fidelity to the original.** Small tweaks are fine, but the puzzle's own
   rules come over as they are; the 3D only decides where the board stands and who is on the other
   end. The user turned down a clay golem built from smashed Swordfight blocks, with breakers won
@@ -332,6 +338,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   mouse pointer (its body or its ⚔ marker, even pinned to the screen edge), not just the nearest;
   only with nobody near the pointer does it pick the nearest. That raider's marker gets a white
   dashed ring, and the pointer turns to a crosshair over a raider you can hit.
+  **Over the wall from anywhere (9 Nov).** Raiders hacking at the wall outside can be hit from the
+  den floor too, not just the rampart: the piece is lobbed high over the top. With a piece in hand
+  their ⚔ markers show, and the prompt says "Shift or click a raider: lob it over the wall". (The
+  user, after finding raiders who get in too easy to knock flat: "just being able to lob over the
+  wall is fine ... don't make it overly complicated.") A click on a spot the piece fits still fits
+  it, even with a raider showing through the hole; Shift throws.
 - **Misplaced pieces can be taken back.** Placing one square too high was a frustrating misclick.
   With empty hands at the wall, Space (or Backspace) takes the last piece you put up back off, the
   same way round, so you can fit it properly. Not once it's made a Masterpiece, once another
@@ -676,7 +688,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **Keeping them out must be possible, and must feel worth it.** The user found it demoralising
   that raiders got in "no matter what": there seemed no point stopping them. (The other side of it,
   9 Nov: it's "a bit demotivating when it's so easy to just kill them as they come in", since then
-  blocking off the holes doesn't matter either. Ideas in IDEAS.md, "Throw pieces over the wall".) The cause was the
+  blocking off the holes doesn't matter either. So now you can lob a piece over the wall from the
+  den floor: see "Throws go where you point". Raiders inside stay as easy: it's a puzzle game.) The cause was the
   raiders' cannon, firing every 9-20 seconds from wave 2, each shot an open hole a raider was
   through two seconds later; nobody can mend that fast. (Tested: with every hole a Masterpiece and
   nothing else done, six raiders still got in over waves 2 and 3.) Now:

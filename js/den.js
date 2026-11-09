@@ -505,7 +505,6 @@ const railMat = mat('#8a5a30', { map: woodTex });
 const railGeo = [new THREE.BoxGeometry(0.06, S + 0.06, 0.07), new THREE.BoxGeometry(S + 0.06, 0.06, 0.07)];
 const ropeMat = new THREE.LineBasicMaterial({ color: '#d8b77a' });
 const frames = () => (ramp ? ramp.jobs.filter((j) => j.frame && !j.frame.done).map((j) => j.frame) : []);
-const stairsUp = () => !!ramp && ramp.jobs.some((j) => j.kind === 'stair' && j.up);
 // A point on a frame, from its grid (columns across, rows down), `z` out from its face.
 const frameAt = (f, c, r, z = 0) => f.group.localToWorld(new THREE.Vector3(c * S, -r * S, z));
 /* The walk: built in one squarish frame, then sawn into lengths that go up end to end. One long
@@ -3350,8 +3349,9 @@ renderer.domElement.addEventListener('mousedown', (e) => {
   if (e.button === 2) { drag = { x: e.clientX, y: e.clientY, moved: false }; return; }
   if (e.button !== 0 || G.over) return;
   // Up on the rampart there's nothing to fit, so a click anywhere throws at the raider nearest it.
-  // In puzzle mode a click only ever fits the piece (raiders show through the holes, so it used to throw).
-  const r = carry && !wm && clickedFoe(e.clientX, e.clientY, pirate.h > 0.3 ? 1e4 : 90);
+  // In puzzle mode a click only ever fits the piece (raiders show through the holes, so it used to throw),
+  // and so does one on a spot the piece fits: a raider outside showing through that hole waits for Shift.
+  const r = carry && !wm && clickedFoe(e.clientX, e.clientY, pirate.h > 0.3 ? 1e4 : 90, pirate.h > 0.3 || !target?.ok);
   if (r) throwAt(r);
   else if (!carry && onGunDeck() && (gd.hover = deckCellAt(e.clientX, e.clientY))) gd.press = { r: gd.hover[0], c: gd.hover[1], x: e.clientX, y: e.clientY };
   else act();
@@ -3415,21 +3415,23 @@ function focus() {
   if (p) return { kind: 'pile', p };
   return { kind: 'wall' };
 }
-/* The raider a thrown piece would hit: the nearest one loose in the den, or else (R only) one at the
-   wall outside, lobbed over the top. Throwing at a raider is the only way to get rid of a piece. */
+/* The raider a thrown piece would hit: the nearest one loose in the den, or else one at the wall
+   outside, lobbed over the top (from the rampart or the den floor alike: the user, 9 Nov, "just being
+   able to lob over the wall is fine"). Throwing at a raider is the only way to get rid of a piece. */
 const THROW_RANGE = 10;
 const free = (r) => r.state !== 'down' && !r.targeted;
 const foe = () => nearest(raiders.filter((r) => r.inside && free(r)), THROW_RANGE);
 const atWall = (r) => !r.inside && free(r) && (r.state === 'attack' || r.state === 'dazed' || (r.state === 'approach' && r.z > -6));
-const outsideFoe = () => (onRampart() ? nearest(raiders.filter(atWall), THROW_RANGE + 3) : null);
+const outsideFoe = () => nearest(raiders.filter(atWall), THROW_RANGE + 3);
 const anyFoe = () => foe() || outsideFoe();
 // The throwable raider nearest a point on screen (within `cap` pixels), measured to the whole body
-// from feet to the ⚔ marker, so clicking the marker or the raider both count.
+// from feet to the ⚔ marker, so clicking the marker or the raider both count. `out` false leaves out
+// the ones outside the wall.
 const toScreen = (x, y, z) => { v3.set(x, y, z).project(camera); return v3.z > 1 ? null : [(v3.x + 1) / 2 * innerWidth, (1 - v3.y) / 2 * innerHeight]; };
-function clickedFoe(mx, my, cap = 90) {
+function clickedFoe(mx, my, cap = 90, out = true) {
   let best = null, bd = cap;
   for (const r of raiders) {
-    if (!(r.inside ? free(r) : onRampart() && atWall(r))) continue;
+    if (!(r.inside ? free(r) : out && atWall(r))) continue;
     if (Math.hypot(r.x - pirate.x, r.z - pirate.z) > (r.inside ? THROW_RANGE : THROW_RANGE + 3)) continue;
     // The ⚔ marker counts too, even pinned to the screen edge for a raider out of view.
     let d = r.mark.style.display === 'none' || !r.mark.style.left ? 1e9 : Math.hypot(parseFloat(r.mark.style.left) - mx, parseFloat(r.mark.style.top) - 17 - my);
@@ -4608,7 +4610,7 @@ function prompt() {
     else t = hacking ? 'Walk along to get in range' : 'Up on the rampart · watch for raiders at the wall';
   } else if (pirate.h > 0.3) t = carry ? 'Up the stairs to the rampart' : 'Up to the rampart';
   else if (loose) t = carry ? `${f.kind === 'pile' || target?.ok ? t + ' · ' : ''}Shift or click: throw the ${carry.letter} at the raider!` : 'A raider is in the den! Grab a piece to throw at them';
-  else if (hacking && carry && !target?.ok && stairsUp()) t += ' · or take it up the rampart and throw it';
+  else if (carry && outsideFoe() && !target?.ok) t += ` · Shift or click a raider: lob it over the wall`;
   t = swordPrompt() || t;
   const el = $('prompt');
   if (el.textContent !== t) el.textContent = t;
@@ -5629,11 +5631,12 @@ function update(dt) {
   biomeTick(dt);
   showAim();
 
-  // A marker over every raider inside the den, pinned to the screen edge when they're out of view.
+  // A marker over every raider inside the den, pinned to the screen edge when they're out of view; and,
+  // with a piece in hand, over the ones at the wall outside you could lob it at.
   aimed = carry ? aimFoe() : null;
-  renderer.domElement.style.cursor = carry && cursor && clickedFoe(cursor.x, cursor.y, pirate.h > 0.3 ? 1e4 : 90) ? 'crosshair' : '';
+  renderer.domElement.style.cursor = carry && cursor && clickedFoe(cursor.x, cursor.y, pirate.h > 0.3 ? 1e4 : 90, pirate.h > 0.3 || !target?.ok) ? 'crosshair' : '';
   for (const r of raiders) {
-    const show = r === aimed || (r.state !== 'down' && (r.inside || (topView && !r.gone && ['approach', 'attack', 'dazed'].includes(r.state) && r.z > -6)));
+    const show = r === aimed || (r.state !== 'down' && (r.inside || (carry && !wm && atWall(r)) || (topView && !r.gone && ['approach', 'attack', 'dazed'].includes(r.state) && r.z > -6)));
     r.mark.classList.toggle('aim', r === aimed);
     r.mark.style.display = show ? '' : 'none';
     if (!show) continue;
