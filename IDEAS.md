@@ -219,7 +219,13 @@ moving. It gives such a nostalgia." What's next:
   close enough to a racing game to race other players down them: PvP racing on the trade winds.
   (A race of our own, not a copy of any racing game; and still a puzzle game first, so whatever
   decides a race should come back to the puzzles, the Sailing tokens say. To shape with the user,
-  with the wilds and crews.)
+  with the wilds and crews.) **Shortcuts, and ships that really scale:** take the main lane and
+  dodge the bigger ships in it, or cut through the side ways, narrow runs a single square wide
+  that only a small ship fits. Bigger ships would **really be bigger on the board**, say two
+  squares wide, needing bigger gaps ("I've always loved the idea of ... the ships in the game
+  actually properly scaling"; in Puzzle Pirates every ship takes one square). How a two-square
+  ship moves and turns: to work out. "Any kind of PvP racing would be hilarious." Goes with
+  smuggling's small ships at the back beaches, and "ship types with real trade-offs".
 - **Gunnery at sea, faster than Puzzle Pirates, on timing (9 Nov).** In Puzzle Pirates a round
   of Battle Navigation plays every 35 seconds or so, in four slots, and you know just where a ship
   coming at you will move. The user would like it faster paced: load the guns (on a ship or the
