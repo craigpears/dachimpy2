@@ -249,6 +249,18 @@ moving. It gives such a nostalgia." What's next:
   swing in behind somebody pulling ahead, shoot them, and they're dazed while they do a bit of
   puzzling, then they set sail again. Nobody's knocked out of the race. (A first go: a turret whose hits
   daze the sloop till she's bilged out: RULES.md.)
+- **Getting her past what blocks the way: haul her over (9 Nov).** From the Vikings TV series,
+  where they haul the longships up a cliff with cranes, and the Ottoman siege of Constantinople,
+  where they dragged their ships overland on logs to get round the chain across the harbour. On
+  the sea: an obstruction in the way (a chain across a harbour mouth, a cliff, a neck of land),
+  and the way past is to take her out of the water and haul her: a crane up a cliff, or chop
+  down a forest, lay the logs as rollers, find something to grease them with (oil, tallow), and
+  drag her across. "I'm sure we could sneak some of those mechanics in there", though the
+  user's own worry is that the full chain of steps might be "going a bit too far". Like the
+  lock, a way past that costs puzzle work, not reflexes: Carpentry to build the crane or the
+  rollers, something to fell the trees, something to heave her (which puzzles, and how much of
+  the chain of steps to keep: to shape with the user). A chain across a harbour on its own would
+  be a good obstruction too, for this or for a raid on the captain's island.
 - **Gunnery at sea, faster than Puzzle Pirates, on timing (9 Nov).** In Puzzle Pirates a round
   of Battle Navigation plays every 35 seconds or so, in four slots, and you know just where a ship
   coming at you will move. The user would like it faster paced: load the guns (on a ship or the
