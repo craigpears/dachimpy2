@@ -102,6 +102,12 @@ the site (`.assetsignore` skips `*.md`).
   or tilt the view, or go up on the wall (the usual camera frames the wall, as before); the ship
   too dark or too faint in the barren den's night; a row of beached boats looking cluttered.
 
+- **The gate and the beach (9 Nov), not yet tried by the user.** Walk up and it opens; out on the
+  beach you can throw straight at raiders (RULES.md, "The gate opens"). Watch for: the camera out
+  there (it looks down over the wall; the gold outline shows you under the gun tower); the gate
+  opening every time you work near it inside; throwing from the beach being too easy a way to
+  thin the raiders out. Not tried with a crew (a crewmate by the gate opens it for you too).
+
 - **The longer calm between waves (8 Nov), not yet tried by the user.** 40 seconds now (it was
   20), after being overwhelmed by wave 8; the raids stay as big. Watch for: still overwhelmed late
   on (then perhaps longer still, or longer only as the waves climb), or the calm dragging early on.

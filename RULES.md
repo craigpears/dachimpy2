@@ -133,6 +133,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   about the same (a few seconds' rowing first). The user: "instead of them just walking over ...
   they're rowing in little rowboats onto the beach of your pirate hideout, and the cannon is
   actually a ship off in the distance".
+- **The gate opens, and you can walk out onto the beach (9 Nov).** The user: "go implement opening
+  the gate ... be able to walk through the gate". Walk up to the gate, from either side, and the
+  drawbar slides back into the wall and the two leaves swing in; it shuts again once nobody's by
+  it. Through it, the whole beach is yours, down to the water's edge (round the gun tower's legs,
+  under its deck). It's only for pirates: the raiders never go for it (it's only ever open while
+  someone's stood by it). Out there you can't fit pieces (you mend the wall from inside), but you
+  can throw them straight at raiders on the sand, no lob. The camera looks down over the wall at
+  you, and you show as a gold outline through anything in the way. This is the first step
+  towards fighting on the beach (soldiers going out, the Kraken: IDEAS.md).
 - **Every puzzle stays high fidelity to the original.** Small tweaks are fine, but the puzzle's own
   rules come over as they are; the 3D only decides where the board stands and who is on the other
   end. The user turned down a clay golem built from smashed Swordfight blocks, with breakers won

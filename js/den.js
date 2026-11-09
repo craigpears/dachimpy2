@@ -397,7 +397,7 @@ function wallBack() {
   if (back) { wallGroup.remove(back); back.geometry.dispose(); }
   const pos = [];
   for (let r = 0; r < wall.H; r++) for (let c = 0; c < wall.W; c++) {
-    if (wall.cellHole.has(k(r, c))) continue;
+    if (wall.cellHole.has(k(r, c)) || wall.gate.has(k(r, c))) continue;
     const x0 = X(c), x1 = X(c + 1), y0 = Y(r + 1), y1 = Y(r);
     pos.push(x0, y0, 0, x1, y0, 0, x1, y1, 0, x0, y0, 0, x1, y1, 0, x0, y1, 0);
   }
@@ -954,7 +954,9 @@ function heightAt(x, z, pad = 0, from = 99) {
     if (j.kind === 'house') continue;
     if (j.kind !== 'stair') {
       if (j.up && j.set.has(k(Math.floor((z - j.z0) / S), Math.floor((x - j.x0) / S)))) {
-        if (j.kind === 'gun' && from < ramp.T - HOP) continue;
+        // Down on the floor you walk under the tower, and under the wall-walk through the gate.
+        const gateway = j.kind === 'deck' && wall.door && Math.abs(x - wall.door.cx) < wall.door.w / 2;
+        if ((j.kind === 'gun' || gateway) && from < ramp.T - HOP) continue;
         return ramp.T;
       }
       continue;
@@ -2219,27 +2221,77 @@ function gunIn(d) {
   for (const [kk, w] of want) if (!gd.arrows.has(kk)) putArrow(w.r, w.c, w.dir, w.by);
 }
 
+/* The gate (9 Nov): two leaves hung at the sides, barred inside with a drawbar. Walk up to it and
+   the bar slides back into the wall and the leaves swing in; walk through and out onto the beach.
+   It shuts again once nobody's by it. Only for pirates: the raiders never try it (it's only open
+   while you're stood in it). */
 function makeGate() {
   const { c0, c1 } = wall.gateCols;
   const w = (c1 - c0 + 1) * S, h = (wall.H - 1) * S;
   const g = new THREE.Group();
   const plankMat = mat('#5b3a20', { map: woodTex });
-  for (let i = 0; i < 6; i++) {
-    const p = mesh(new THREE.BoxGeometry(w / 6 - 0.02, h, 0.22), plankMat);
-    p.position.set(-w / 2 + (i + 0.5) * w / 6, h / 2, -0.25);
-    g.add(p);
-  }
   const iron = mat('#2a2a2a', { metalness: 0.6, roughness: 0.5 });
-  [0.2, 0.5, 0.82].forEach((t) => { const b = mesh(new THREE.BoxGeometry(w, 0.1, 0.05), iron); b.position.set(0, h * t, -0.12); g.add(b); });
+  const leaves = [-1, 1].map((side) => {
+    const leaf = new THREE.Group();
+    leaf.position.set(side * w / 2, 0, -0.25);   // on its hinges
+    for (let i = 0; i < 3; i++) {
+      const p = mesh(new THREE.BoxGeometry(w / 6 - 0.02, h, 0.22), plankMat);
+      p.position.set(-side * (i + 0.5) * w / 6, h / 2, 0);
+      leaf.add(p);
+    }
+    [0.2, 0.5, 0.82].forEach((t) => { const b = mesh(new THREE.BoxGeometry(w / 2 - 0.02, 0.1, 0.05), iron); b.position.set(-side * w / 4, h * t, 0.13); leaf.add(b); });
+    const ring = mesh(new THREE.TorusGeometry(0.08, 0.02, 6, 16), iron);
+    ring.position.set(-side * (w / 2 - 0.18), h * 0.36, 0.17);
+    leaf.add(ring);
+    g.add(leaf);
+    return leaf;
+  });
   const bar = mesh(new THREE.BoxGeometry(w + 0.5, 0.16, 0.14), mat('#3e2614', { map: woodTex }));
   bar.position.set(0, h * 0.5, -0.02);
-  const ringL = mesh(new THREE.TorusGeometry(0.08, 0.02, 6, 16), iron);
-  ringL.position.set(-0.18, h * 0.36, -0.08);
-  const ringR = ringL.clone();
-  ringR.position.x = 0.18;
-  g.add(bar, ringL, ringR);
+  g.add(bar);
   g.position.set(X(c0) + w / 2, 0, 0);
+  wall.door = { g, leaves, bar, w, cx: X(c0) + w / 2, open: 0 };
   return g;
+}
+const outside = () => pirate.h < 0.3 && pirate.z < -0.2;   // out on the beach
+const GATE_IN = 0.55, GATE_OUT = -STONE_D - 0.3;   // the wall's thickness, and a pirate's width either side
+// Through the wall only by the gateway, and only once the gate's open.
+function throughGate(ox, oz, nx, nz) {
+  if (nz >= GATE_IN || nz <= GATE_OUT) return [nx, nz];
+  const d = wall.door, g0 = d ? d.cx - d.w / 2 + 0.3 : 0, g1 = d ? d.cx + d.w / 2 - 0.3 : 0;
+  if (oz < GATE_IN && oz > GATE_OUT) return [Math.max(g0, Math.min(g1, nx)), nz];   // in the gateway
+  if (d && nx > g0 && nx < g1 && d.open > 0.8) return [nx, nz];
+  return [nx, oz >= GATE_IN ? GATE_IN : GATE_OUT];
+}
+// Open while any pirate's by it, inside or out; the bar first, then the leaves.
+function gateTick(dt) {
+  const d = wall.door;
+  if (!d) return;
+  const by = (p) => p.h < 0.3 && Math.abs(p.x - d.cx) < d.w / 2 + 1.2 && Math.abs(p.z) < 3;
+  const want = by(pirate) || [...net.crew.values()].some(by);
+  d.open = Math.max(0, Math.min(1, d.open + (want ? 2.6 : -1.4) * dt));
+  const b = Math.min(1, d.open / 0.3), l = Math.max(0, (d.open - 0.3) / 0.7);
+  d.bar.position.x = b * (d.w + 0.45);
+  d.bar.position.z = -0.02 - b * 0.07;
+  const a = 1.7 * l * l * (3 - 2 * l);
+  d.leaves[0].rotation.y = -a;
+  d.leaves[1].rotation.y = a;
+}
+// The gun tower's legs, and the braces across its front: in your way out on the beach.
+function towerLegs() {
+  if (!gd) return [];
+  if (gd.legs) return gd.legs;
+  const w = GD.cols * S, dz = GD.rows * S, out = [];
+  for (const [x, z] of [[0.2, 0.2], [w / 2, 0.2], [w - 0.2, 0.2], [0.2, dz / 2], [w - 0.2, dz / 2]]) out.push({ x: gd.x0 + x, z: gd.z0 + z, r: 0.18, low: true });
+  for (let x = 0.5; x < w - 0.3; x += 0.4) out.push({ x: gd.x0 + x, z: gd.z0 + 0.2, r: 0.12, low: true });
+  return (gd.legs = out);
+}
+// Out on the beach under the tower or behind the wall, you still see where you are.
+const selfXray = new THREE.MeshBasicMaterial({ color: '#ffd45a', transparent: true, opacity: 0.5, depthFunc: THREE.GreaterDepth, depthWrite: false });
+function selfSeen() {
+  if (pirate.xrG !== pirate.g) { pirate.xrG = pirate.g; pirate.xr = addXray(pirate.g, selfXray); }
+  const on = outside();
+  if (pirate.xrOn !== on) { pirate.xrOn = on; pirate.xr.forEach((x) => { x.visible = on; }); }
 }
 
 // ---------- piles (the toolbox), fire barrel, chest, cannon ----------
@@ -3576,9 +3628,11 @@ function focus() {
    able to lob over the wall is fine"). Throwing at a raider is the only way to get rid of a piece. */
 const THROW_RANGE = 10;
 const free = (r) => r.state !== 'down' && !r.targeted;
-const foe = () => nearest(raiders.filter((r) => r.inside && free(r)), THROW_RANGE);
+// Out on the beach, the raiders out there are yours to throw at, straight.
+const onBeach = (r) => !r.inside && free(r) && r.z < -0.3 && !['row', 'rowOff', 'climb', 'climbOut'].includes(r.state);
+const foe = () => nearest(raiders.filter((r) => (outside() ? onBeach(r) : r.inside) && free(r)), THROW_RANGE);
 const atWall = (r) => !r.inside && free(r) && (r.state === 'attack' || r.state === 'dazed' || (r.state === 'approach' && r.z > -6));
-const outsideFoe = () => nearest(raiders.filter(atWall), THROW_RANGE + 3);
+const outsideFoe = () => (outside() ? null : nearest(raiders.filter(atWall), THROW_RANGE + 3));
 const anyFoe = () => foe() || outsideFoe();
 // The throwable raider nearest a point on screen (within `cap` pixels), measured to the whole body
 // from feet to the ⚔ marker, so clicking the marker or the raider both count. `out` false leaves out
@@ -3587,8 +3641,8 @@ const toScreen = (x, y, z) => { v3.set(x, y, z).project(camera); return v3.z > 1
 function clickedFoe(mx, my, cap = 90, out = true) {
   let best = null, bd = cap;
   for (const r of raiders) {
-    if (!(r.inside ? free(r) : out && atWall(r))) continue;
-    if (Math.hypot(r.x - pirate.x, r.z - pirate.z) > (r.inside ? THROW_RANGE : THROW_RANGE + 3)) continue;
+    if (!(outside() ? onBeach(r) : r.inside ? free(r) : out && atWall(r))) continue;
+    if (Math.hypot(r.x - pirate.x, r.z - pirate.z) > (r.inside || outside() ? THROW_RANGE : THROW_RANGE + 3)) continue;
     // The ⚔ marker counts too, even pinned to the screen edge for a raider out of view.
     let d = r.mark.style.display === 'none' || !r.mark.style.left ? 1e9 : Math.hypot(parseFloat(r.mark.style.left) - mx, parseFloat(r.mark.style.top) - 17 - my);
     const a = toScreen(r.x, 0.1, r.z), b = toScreen(r.x, 2.3, r.z);
@@ -3875,7 +3929,7 @@ function throwAt(r, hand = carry, by = myId()) {
   if (isHost()) send('all', { t: 'throw', rid: r.id, letter: hand.letter, shape: hand.cells, by });
   const from = g.position.clone(), d = Math.hypot(r.x - from.x, r.z - from.z);
   const to = new THREE.Vector3(r.x, 1.1, r.z);
-  const over = !r.inside, dur = 0.25 + d * 0.05 + (over ? 0.3 : 0);
+  const over = !r.inside && from.z > -0.3, dur = 0.25 + d * 0.05 + (over ? 0.3 : 0);   // (from the beach, straight at them)
   let arc = 0.5 + d * 0.12;
   if (over) {
     // Over the wall: aim where the raider will be when it lands (at the foot of the wall at the
@@ -4342,7 +4396,7 @@ function raiderPose(r, moving, dt) {
   }
   r.m.g.position.x = r.x;
   r.m.g.position.z = r.z;
-  const behind = r.z < -0.1 && !topView;   // from up on the wall you can see them for real
+  const behind = r.z < -0.1 && !topView && !outside();   // from up on the wall you can see them for real
   r.xr.forEach((x) => { x.visible = behind; });
 }
 
@@ -4620,7 +4674,7 @@ const onFrame = () => frames().some((f) => {
   return fc > -m && fc < f.b.w + m && fr > -m && fr < f.b.h + m;
 });
 const spotRank = (o) => (o.patch ? 1 : o.over ? 2 : 0);   // a clean fit, then a board behind, then boarding over
-const canWallMode = () => pirate.h < 0.05 && !deco.on && !G.over && pirate.z <= WALL_Z + 2.5 && wall.holes.length > 0;
+const canWallMode = () => pirate.h < 0.05 && !deco.on && !G.over && pirate.z > 0 && pirate.z <= WALL_Z + 2.5 && wall.holes.length > 0;
 function clampCursor() {
   if (!wm || !carry) return;
   const b = C.bbox(carry.cells);
@@ -4669,7 +4723,7 @@ function wallWalk() {
 }
 function aim() {
   target = null;
-  if (!carry || pirate.h > 0.3) return;
+  if (!carry || pirate.h > 0.3 || outside()) return;
   if (wm) {
     // Anywhere on the wall, no walking needed: a clean fit at the piece's square first, then a board
     // on behind, then boarding it over. With the mouse, wherever it points, and the keys carry on
@@ -4782,6 +4836,7 @@ function prompt() {
   } else if (pirate.h > 0.3) t = carry ? 'Up the stairs to the rampart' : 'Up to the rampart';
   else if (loose) t = carry ? `${f.kind === 'pile' || target?.ok ? t + ' · ' : ''}Shift or click: throw the ${carry.letter} at the raider!` : 'A raider is in the den! Grab a piece to throw at them';
   else if (carry && outsideFoe() && !target?.ok) t += ` · Shift or click a raider: lob it over the wall`;
+  if (outside()) t = !carry ? 'Out on the beach · back in through the gate' : loose ? `Shift or click: throw the ${carry.letter} at the raider!` : `Out on the beach · back in through the gate to fit the ${carry.letter}`;
   t = swordPrompt() || t;
   const el = $('prompt');
   if (el.textContent !== t) el.textContent = t;
@@ -5591,7 +5646,7 @@ $('dress').addEventListener('click', (e) => { if (e.target === $('dress')) dress
 const camAt = new THREE.Vector3(0, 7.4, 14.2), camLook = new THREE.Vector3(0, 1.8, 3.6);
 camera.position.copy(camAt);
 const v3 = new THREE.Vector3(), L0 = new THREE.Vector3(), L1 = new THREE.Vector3(), L2 = new THREE.Vector3();
-let deckView = 0;
+let deckView = 0, beachView = 0;
 /* Each tick runs the game on in small steps. Alone, a pause (another tab) stops the clock. In a
    crew it doesn't: the den goes on for everyone, so when the browser stops drawing a tab in the
    background, a timer keeps it ticking (as often as the browser lets it) and catches up. */
@@ -5653,13 +5708,14 @@ function update(dt) {
     const wx = auto ? auto.wx : (mx * cy + mz * sy) / n, wz = auto ? auto.wz : (-mx * sy + mz * cy) / n;
     const ox = pirate.x, oz = pirate.z, sp = SPEED * (auto ? auto.slow : 1);
     let nx = pirate.x + wx * sp * dt, nz = pirate.z + wz * sp * dt;
-    for (const o of obstacles) {
+    for (const o of pirate.z < 0 ? obstacles.concat(towerLegs()) : obstacles) {
       if (o.low && pirate.h > 1) continue;
       const dx = nx - o.x, dz = nz - o.z, d = Math.hypot(dx, dz), min = o.r + 0.3;
       if (d < min && d > 0) { nx = o.x + dx / d * min; nz = o.z + dz / d * min; }
     }
     nx = Math.max(-bounds.x, Math.min(bounds.x, nx));
-    nz = Math.max(pirate.h > 1 ? (gd ? gd.z0 + 0.2 : -0.3) : bounds.z0, Math.min(bounds.z1, nz));
+    nz = Math.max(pirate.h > 1 ? (gd ? gd.z0 + 0.2 : -0.3) : SHORE + 0.4, Math.min(bounds.z1, nz));
+    if (pirate.h <= 1) [nx, nz] = throughGate(ox, oz, nx, nz);
     // Up and down the stairs, but no walking into their side or off the edge of the rampart.
     const pad = pirate.h < 0.05 ? 0.28 : 0;
     // A step of one square you walk up; two, you hop up (stairs built with bits sticking out).
@@ -5752,6 +5808,8 @@ function update(dt) {
   const look = L0.lerp(L1, u);
   let dist = (12 + (17 - 12) * u) * view.zoom;
   let tilt = Math.max(0.2, Math.min(1.45, 0.486 + (1.4 - 0.486) * u + view.pitch));
+  beachView += ((outside() ? 1 : 0) - beachView) * Math.min(1, dt * 2.5);
+  tilt += (Math.max(0.2, Math.min(1.45, 0.95 + view.pitch)) - tilt) * beachView;
   deckView += ((onGunDeck() ? 1 : 0) - deckView) * Math.min(1, dt * 2.5);
   if (gd && deckView > 0.001) {
     L2.set(gd.x0 + GD.cols * S / 2, ramp.T, gd.z0 + GD.rows * S * 0.5);
@@ -5799,6 +5857,8 @@ function update(dt) {
   updateMates(dt);
   waveFlags(dt);
   biomeTick(dt);
+  gateTick(dt);
+  selfSeen();
   showAim();
 
   // A marker over every raider inside the den, pinned to the screen edge when they're out of view; and,
@@ -5806,7 +5866,7 @@ function update(dt) {
   aimed = carry ? aimFoe() : null;
   renderer.domElement.style.cursor = carry && cursor && clickedFoe(cursor.x, cursor.y, pirate.h > 0.3 ? 1e4 : 90, pirate.h > 0.3 || !target?.ok) ? 'crosshair' : '';
   for (const r of raiders) {
-    const show = r === aimed || (r.state !== 'down' && (r.inside || (carry && !wm && atWall(r)) || (topView && !r.gone && ['approach', 'attack', 'dazed'].includes(r.state) && r.z > -6)));
+    const show = r === aimed || (r.state !== 'down' && (r.inside || (carry && !wm && (outside() ? onBeach(r) : atWall(r))) || (topView && !r.gone && ['approach', 'attack', 'dazed'].includes(r.state) && r.z > -6)));
     r.mark.classList.toggle('aim', r === aimed);
     r.mark.style.display = show ? '' : 'none';
     if (!show) continue;
