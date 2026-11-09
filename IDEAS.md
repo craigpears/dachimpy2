@@ -100,7 +100,11 @@ forward". You **row out to his hideout**, which gives it "a bit more of a PvP fe
    discoverable ... once things calm down ... you should be able to go back up some path up the
    cliffs to get to the gunnery deck"), looking down on the shipping lane. The gun tower over the
    gate then matters less for the fighting and becomes more of a nice rampart, more cosmetic
-   ("that carpentry building idea will just be ... for a bit of a nice ramparts"). Digging still needs to be believable where it happens (the user, earlier: Treasure
+   ("that carpentry building idea will just be ... for a bit of a nice ramparts"). Or, more
+   believable but less handy, the platform could stand **out in the middle of the sea, reached
+   along a rope bridge** (the user, 9 Nov: "it would make it feel a bit more real, because ...
+   why would there be a shipping route passing by a pirate cave?"); but they want it "quick and
+   accessible for now", so the cliff path first. Digging still needs to be believable where it happens (the user, earlier: Treasure
    Haul "breaks the immersion" in the middle of a hillside):
    - *Digging, Foraging-style:* in Puzzle Pirates, Foraging is digging up goods on an island, so
      digging down to the chest is what it was made for;
@@ -200,7 +204,10 @@ moving. It gives such a nostalgia." What's next:
   move you a square, whirlpools spin you round, as in Battle Navigation. How much a bash costs
   (damage, lost time, spilled cargo), whether you can steer at all once you're in, and where the
   lanes run (between the places on the captain's map, the gun platform over one: above): to
-  shape with the user.)
+  shape with the user.) **Junctions (9 Nov):** at certain decision points along a lane it drops
+  you off "just like a normal square", so you choose to turn left, turn right or carry on (or
+  steer off on your own); the lanes meet at those crossings, so a long trip is a few wild rides
+  with a choice at each stop.
 - **Gunnery at sea, faster than Puzzle Pirates, on timing (9 Nov).** In Puzzle Pirates a round
   of Battle Navigation plays every 35 seconds or so, in four slots, and you know just where a ship
   coming at you will move. The user would like it faster paced: load the guns (on a ship or the
@@ -209,6 +216,24 @@ moving. It gives such a nostalgia." What's next:
   still than four slots a turn. (A first go is the sloop's two guns firing at the rocks as she
   sails: RULES.md. Moving targets, loading her guns by Gunnery, and how a hit tells: to shape with
   the user.)
+
+## Smuggling: taxes, embargoes and the back beaches (9 Nov)
+
+Something to give a reason "to either steal or smuggle". Each island has its **main port**, but
+also **beaches all round it**, so even if an island's blockaded you can still **sneak in with a
+smaller ship round the back**:
+
+- **Taxes and embargoes:** an island might tax its goods, or put an embargo on one, rum say. Buy
+  rum cheap on one island ("or making it yourself"; Distilling is a Puzzle Pirates puzzle), sail
+  it over and sell it through a hidden beach for a big profit, without paying the taxes.
+- **Dodging the patrols:** the authorities patrol the coast, so you might run into them and have
+  to fight off a bigger ship, or run.
+- **Small ships, small loads:** only a small ship can get in close enough to row the goods ashore
+  to the beach, so you can only carry a limited amount. That gives the small ships something
+  they're best at (goes with "ship types with real trade-offs", further down).
+
+Ties in with trading and commodities (none in the den yet), the shipping lanes, blockades, and the
+safe waters and the wilds. "I'm sure I could flesh that out more": to shape with the user.
 
 ## Safe waters, and the wilds: high risk, high reward (9 Nov, a pipe dream)
 

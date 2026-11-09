@@ -101,7 +101,8 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    brings on the next round. Your choice again: dig in at the den (fortify, more guns, more
    soldiers, fight him on the beaches), or find the abandoned sloop in the harbour, fix her up and
    see him off at sea on a Battle Navigation board.
-8. · **And on from there:** life on the sea (a kraken to sail round), safe waters and the
+8. · **And on from there:** life on the sea (a kraken to sail round, trade winds to ride,
+   smuggling rum past the patrols onto a back beach), safe waters and the
    risky wilds beyond, side quests that leave friends about the den, raids that come when the
    world gives a reason (a sail on the horizon) or when you ring the bell, a den that grows (bigger
    barracks, a bigger army), a crew of real players, and one day raiding other dens.
