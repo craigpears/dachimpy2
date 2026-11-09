@@ -1320,21 +1320,27 @@ function applyBiome(force = false) {
   if (!wall) return;
   const half = wall.W * S / 2;
   // Every den's in a cove: the sea beyond the beach where the raiders land, with a line of surf.
-  sea = mesh(new THREE.PlaneGeometry(220, 90), mat('#ffffff', { map: seaTex, roughness: 0.25, metalness: 0.1, emissive: '#0d2a36' }), false);
+  // The sea is see-through, clearest at its edge, over a sandy bed that falls away into the deep:
+  // as the tide goes out you see the water draw back off the sand (and off the bilge board).
+  sea = mesh(new THREE.PlaneGeometry(220, 90), mat('#ffffff', { map: seaTex, roughness: 0.45, metalness: 0, emissive: '#1f6c9e', transparent: true, alphaMap: seaFade, depthWrite: false }), false);
   sea.rotation.x = -Math.PI / 2;
-  sea.position.set(0, -0.03, SHORE - 45);
-  const surf = mesh(new THREE.PlaneGeometry(220, 0.7), new THREE.MeshBasicMaterial({ color: '#e8f4f2', transparent: true, opacity: 0.7, depthWrite: false }), false);
+  sea.position.set(0, 0.05, SHORE - 45);
+  sea.renderOrder = 1;
+  const surf = mesh(new THREE.PlaneGeometry(220, 0.5), new THREE.MeshBasicMaterial({ color: '#e8f4f2', transparent: true, opacity: 0.55, depthWrite: false }), false);
   surf.rotation.x = -Math.PI / 2;
-  surf.position.set(0, 0.01, SHORE - 0.2);
-  biomeGroup.add(sea, surf);
-  shoreParts = [[sea, -45], [surf, -0.2]];
+  surf.position.set(0, 0.055, SHORE - 0.15);
+  surf.renderOrder = 2;
+  const bed = mesh(new THREE.PlaneGeometry(220, 100), new THREE.MeshStandardMaterial({ map: seabedTex, roughness: 1, polygonOffset: true, polygonOffsetFactor: -1 }), false);
+  bed.rotation.x = -Math.PI / 2;
+  bed.position.set(0, 0.003, HIGH - 50);
+  biomeGroup.add(sea, surf, bed);
+  shoreParts = [[sea, -45], [surf, -0.15]];
   // A strip of sand up from the water, fading into the den's own ground (the seaside's is all sand).
   if (id !== 'seaside') {
     const sand = mesh(new THREE.PlaneGeometry(70, 6), new THREE.MeshStandardMaterial({ color: '#c4a172', roughness: 1, transparent: true, depthWrite: false, alphaMap: sandFade }), false);
     sand.rotation.x = -Math.PI / 2;
-    sand.position.set(0, 0.005, SHORE + 3);
+    sand.position.set(0, 0.008, HIGH + 3);
     biomeGroup.add(sand);
-    shoreParts.push([sand, 3]);
   }
   if (id === 'seaside') {
     for (const [x, z] of treeSpots(half)) biomeGroup.add(palm(x, z, 0.85 + Math.random() * 0.35));
@@ -1354,6 +1360,18 @@ function biomeTick(dt) {
   for (const [m, off] of shoreParts) m.position.z = sz + off;
   shipTick(dt);
 }
+// The sea's see-through edge: half clear where it meets the sand, deep blue further out.
+const seaFade = canvasTex(4, 128, (g, w, h) => {
+  const gr = g.createLinearGradient(0, h, 0, 0);
+  gr.addColorStop(0, '#a0a0a0'); gr.addColorStop(0.12, '#c4c4c4'); gr.addColorStop(0.3, '#ececec'); gr.addColorStop(1, '#ffffff');
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+});
+// The seabed: sand at the top of the beach, wet sand where the tide goes, then down into the deep.
+const seabedTex = canvasTex(4, 256, (g, w, h) => {
+  const gr = g.createLinearGradient(0, h, 0, 0);
+  gr.addColorStop(0, '#c4a172'); gr.addColorStop(0.06, '#a98a5e'); gr.addColorStop(0.12, '#8a7a58'); gr.addColorStop(0.2, '#4f6e66'); gr.addColorStop(0.4, '#2a4c58'); gr.addColorStop(1, '#183444');
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+});
 // The beach strip's fade: solid at the water's edge, gone by the top.
 const sandFade = canvasTex(4, 64, (g, w, h) => {
   const gr = g.createLinearGradient(0, 0, 0, h);
@@ -3219,61 +3237,102 @@ scene.add(bilge.group);
 bilge.group.add(bilge.pieces);
 const cellX = (c) => bilge.x0 + (BW - 0.5 - c) * BILGE.SQ;
 const cellZ = (r) => BILGE.Z0 - (r + 0.5) * BILGE.SQ;
-// The pieces: seven kinds, each its own colour and mark, as flat as shells and stones in the water.
-const BITS = [['#2f86d6', 'ring'], ['#3fb54a', 'square'], ['#e3c22a', 'triangle'], ['#d8432f', 'diamond'], ['#9a52c7', 'star'], ['#f08a2a', 'cross'], ['#3cc6c0', 'drop']];
-function bitFace(col, mark) {
+/* The pieces, drawn after Puzzle Pirates' own (the user, 9 Nov: "the graphics need to match Puzzle
+   Pirates ... it's supposed to be in the water"): seven glassy pieces all in the sea's colours, each
+   its own shape and pattern (two octagons, two spheres, a square, a rounded square and a pentagon),
+   lying flat in the shallows; the crab orange, the pufferfish a yellow fish, the jellyfish a cyan
+   and pink cap with purple tentacles. */
+const BITS = [
+  ['#7cc6f2', 'octagon', 'scallops'], ['#1e7d7a', 'octagon', 'swirl'], ['#1a9ae0', 'circle', 'wave'], ['#a6e2cf', 'circle', 'ripples'],
+  ['#2147b8', 'square', 'diagonals'], ['#6f84a8', 'rounded', 'waves'], ['#2fb5c4', 'pentagon', 'stripes'],
+];
+function shapePath(g, shape, c, r) {
+  g.beginPath();
+  if (shape === 'circle') g.arc(c, c, r, 0, Math.PI * 2);
+  else if (shape === 'octagon') for (let i = 0; i < 8; i++) { const a = Math.PI / 8 + i * Math.PI / 4, rr = r / Math.cos(Math.PI / 8) * 0.97; g.lineTo(c + Math.cos(a) * rr, c + Math.sin(a) * rr); }
+  else if (shape === 'pentagon') for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + i * 2 * Math.PI / 5, rr = r * 1.08; g.lineTo(c + Math.cos(a) * rr, c + 8 + Math.sin(a) * rr); }
+  else if (shape === 'square') g.rect(c - r * 0.92, c - r * 0.92, r * 1.84, r * 1.84);
+  else g.roundRect(c - r * 0.95, c - r * 0.95, r * 1.9, r * 1.9, r * 0.38);
+  g.closePath();
+}
+const shade = (hex, f) => { const n = parseInt(hex.slice(1), 16), ch = (s) => Math.max(0, Math.min(255, Math.round(((n >> s) & 255) * f))); return `rgb(${ch(16)},${ch(8)},${ch(0)})`; };
+function bitFace(col, shape, pat) {
   return canvasTex(128, 128, (g, w) => {
-    const c = w / 2;
-    const grd = g.createRadialGradient(c - 18, c - 22, 6, c, c, c);
-    grd.addColorStop(0, '#ffffff'); grd.addColorStop(0.18, col); grd.addColorStop(1, col);
-    g.fillStyle = grd; g.beginPath(); g.arc(c, c, c - 2, 0, Math.PI * 2); g.fill();
-    g.lineWidth = 6; g.strokeStyle = 'rgba(0,0,0,0.35)'; g.stroke();
-    g.fillStyle = 'rgba(255,255,255,0.85)'; g.strokeStyle = 'rgba(255,255,255,0.85)'; g.lineWidth = 10;
-    g.beginPath();
-    if (mark === 'ring') { g.arc(c, c, 26, 0, Math.PI * 2); g.stroke(); return; }
-    if (mark === 'square') g.rect(c - 24, c - 24, 48, 48);
-    else if (mark === 'triangle') { g.moveTo(c, c - 30); g.lineTo(c + 28, c + 22); g.lineTo(c - 28, c + 22); }
-    else if (mark === 'diamond') { g.moveTo(c, c - 32); g.lineTo(c + 24, c); g.lineTo(c, c + 32); g.lineTo(c - 24, c); }
-    else if (mark === 'star') for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? 13 : 32; g.lineTo(c + Math.cos(a) * rr, c + Math.sin(a) * rr); }
-    else if (mark === 'cross') { g.rect(c - 10, c - 30, 20, 60); g.rect(c - 30, c - 10, 60, 20); }
-    else if (mark === 'drop') { g.moveTo(c, c - 32); g.quadraticCurveTo(c + 30, c + 6, c, c + 28); g.quadraticCurveTo(c - 30, c + 6, c, c - 32); }
-    g.closePath(); g.fill();
+    const c = w / 2, r = 54;
+    // The body: glassy, lit from the top left, dark at the rim.
+    shapePath(g, shape, c, r);
+    const body = g.createRadialGradient(c - 22, c - 26, 4, c, c, r * 1.3);
+    body.addColorStop(0, shade(col, 1.45)); body.addColorStop(0.45, col); body.addColorStop(1, shade(col, 0.55));
+    g.fillStyle = body; g.fill();
+    // Its pattern, lighter, kept inside the shape.
+    g.save(); g.clip();
+    g.strokeStyle = shade(col, 1.6); g.fillStyle = shade(col, 1.5); g.lineWidth = 7; g.lineCap = 'round';
+    if (pat === 'scallops') for (let y = 22; y < 120; y += 22) for (let x = -10; x < 140; x += 26) { g.beginPath(); g.arc(x + (y / 22 % 2) * 13, y, 11, Math.PI, 0); g.stroke(); }
+    else if (pat === 'swirl') { for (const s of [-1, 1]) { g.beginPath(); g.arc(c + s * 18, c - s * 4, 22, s > 0 ? Math.PI * 0.2 : Math.PI * 1.2, s > 0 ? Math.PI * 1.3 : Math.PI * 2.3); g.stroke(); } }
+    else if (pat === 'wave') { g.lineWidth = 10; g.beginPath(); g.arc(c - 4, c + 6, 26, Math.PI * 0.9, Math.PI * 2.05); g.stroke(); g.beginPath(); g.arc(c + 18, c + 4, 10, Math.PI, Math.PI * 2.2); g.stroke(); }
+    else if (pat === 'ripples') for (const rr of [16, 30, 44]) { g.beginPath(); g.arc(c + 6, c + 10, rr, Math.PI * 1.05, Math.PI * 1.75); g.stroke(); }
+    else if (pat === 'diagonals') for (let x = -60; x < 160; x += 24) { g.beginPath(); for (let t = 0; t <= 1; t += 0.1) g.lineTo(x + t * 70 + Math.sin(t * 9) * 6, 10 + t * 110); g.stroke(); }
+    else if (pat === 'waves') for (let y = 28; y < 120; y += 22) { g.beginPath(); for (let x = 0; x <= 128; x += 6) g.lineTo(x, y + Math.sin(x / 9) * 5); g.stroke(); }
+    else if (pat === 'stripes') for (let y = 30; y < 120; y += 20) { g.beginPath(); g.moveTo(0, y); g.bezierCurveTo(40, y - 10, 80, y + 10, 128, y); g.stroke(); }
+    g.restore();
+    // A dark outline, and a white gleam.
+    shapePath(g, shape, c, r);
+    g.lineWidth = 5; g.strokeStyle = shade(col, 0.35); g.stroke();
+    g.fillStyle = 'rgba(255,255,255,0.85)';
+    g.beginPath(); g.ellipse(c + 26, c - 30, 9, 6, -0.6, 0, Math.PI * 2); g.fill();
   });
 }
 const specialFace = {
   crab: () => canvasTex(128, 128, (g) => {
-    g.fillStyle = '#e0dccf'; g.beginPath(); g.arc(64, 64, 62, 0, Math.PI * 2); g.fill();
-    g.strokeStyle = '#a3321e'; g.lineWidth = 7;
-    for (const s of [-1, 1]) for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(64 + s * 22, 66 + i * 9); g.lineTo(64 + s * 48, 74 + i * 14); g.stroke(); }
-    g.fillStyle = '#c8442a';
-    for (const s of [-1, 1]) { g.beginPath(); g.arc(64 + s * 34, 34, 13, 0, Math.PI * 2); g.fill(); }
-    g.beginPath(); g.ellipse(64, 68, 30, 22, 0, 0, Math.PI * 2); g.fill();
-    g.fillStyle = '#fff'; for (const s of [-1, 1]) { g.beginPath(); g.arc(64 + s * 9, 50, 6, 0, Math.PI * 2); g.fill(); }
-    g.fillStyle = '#111'; for (const s of [-1, 1]) { g.beginPath(); g.arc(64 + s * 9, 50, 3, 0, Math.PI * 2); g.fill(); }
+    g.strokeStyle = '#7a3e08'; g.lineWidth = 7; g.lineCap = 'round';
+    for (const s of [-1, 1]) for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(64 + s * 26, 78 + i * 8); g.lineTo(64 + s * 50, 92 + i * 12); g.stroke(); }
+    g.fillStyle = '#e8901e'; g.strokeStyle = '#6a3606'; g.lineWidth = 4;
+    for (const s of [-1, 1]) {
+      g.beginPath(); g.moveTo(64 + s * 30, 66); g.lineTo(64 + s * 44, 34); g.stroke();
+      g.beginPath(); g.ellipse(64 + s * 44, 26, 14, 18, s * 0.3, 0, Math.PI * 2); g.fill(); g.stroke();
+      g.fillStyle = '#fff'; g.beginPath(); g.ellipse(64 + s * 40, 18, 3, 9, s * 0.3, 0, Math.PI * 2); g.fill(); g.fillStyle = '#e8901e';
+    }
+    g.beginPath(); g.ellipse(64, 78, 36, 24, 0, 0, Math.PI * 2); g.fill(); g.stroke();
+    for (const s of [-1, 1]) { g.fillStyle = '#fff'; g.beginPath(); g.arc(64 + s * 11, 66, 7, 0, Math.PI * 2); g.fill(); g.fillStyle = '#111'; g.beginPath(); g.arc(64 + s * 11, 67, 3.5, 0, Math.PI * 2); g.fill(); }
   }),
   puffer: () => canvasTex(128, 128, (g) => {
-    g.fillStyle = '#d9e7ee'; g.beginPath(); g.arc(64, 64, 62, 0, Math.PI * 2); g.fill();
-    g.strokeStyle = '#8a6a1a'; g.lineWidth = 4;
-    for (let i = 0; i < 16; i++) { const a = i * Math.PI / 8; g.beginPath(); g.moveTo(64 + Math.cos(a) * 30, 64 + Math.sin(a) * 30); g.lineTo(64 + Math.cos(a) * 46, 64 + Math.sin(a) * 46); g.stroke(); }
-    g.fillStyle = '#f2c43a'; g.beginPath(); g.arc(64, 64, 32, 0, Math.PI * 2); g.fill();
-    g.fillStyle = '#fff'; for (const s of [-1, 1]) { g.beginPath(); g.arc(64 + s * 12, 56, 8, 0, Math.PI * 2); g.fill(); }
-    g.fillStyle = '#111'; for (const s of [-1, 1]) { g.beginPath(); g.arc(64 + s * 12, 56, 4, 0, Math.PI * 2); g.fill(); }
-    g.beginPath(); g.arc(64, 76, 6, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#f2d23a'; g.strokeStyle = '#6a5a10'; g.lineWidth = 4;
+    g.beginPath(); g.moveTo(112, 64); g.lineTo(124, 48); g.lineTo(124, 80); g.closePath(); g.fill(); g.stroke();
+    g.beginPath(); g.ellipse(64, 64, 50, 24, 0, 0, Math.PI * 2); g.fill(); g.stroke();
+    g.fillStyle = '#fbf3c0'; g.beginPath(); g.ellipse(60, 74, 36, 10, 0, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = '#a08a20'; g.lineWidth = 2; for (let x = 38; x < 96; x += 7) { g.beginPath(); g.moveTo(x, 68); g.lineTo(x + 3, 76); g.stroke(); }
+    g.fillStyle = '#fff'; g.beginPath(); g.arc(30, 58, 8, 0, Math.PI * 2); g.fill(); g.fillStyle = '#111'; g.beginPath(); g.arc(28, 58, 4, 0, Math.PI * 2); g.fill();
   }),
   jelly: () => canvasTex(128, 128, (g) => {
-    g.fillStyle = '#e6e2f2'; g.beginPath(); g.arc(64, 64, 62, 0, Math.PI * 2); g.fill();
-    g.strokeStyle = '#c05bb0'; g.lineWidth = 5;
-    for (let i = 0; i < 5; i++) { g.beginPath(); g.moveTo(40 + i * 12, 68); g.quadraticCurveTo(34 + i * 12, 88, 42 + i * 12, 108); g.stroke(); }
-    g.fillStyle = '#e07ad0'; g.beginPath(); g.arc(64, 68, 32, Math.PI, 0); g.closePath(); g.fill();
-    g.fillStyle = 'rgba(255,255,255,0.6)'; g.beginPath(); g.arc(54, 54, 8, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = '#6a58c8'; g.lineWidth = 9; g.lineCap = 'round';
+    for (let i = 0; i < 5; i++) { g.beginPath(); g.moveTo(36 + i * 14, 66); g.quadraticCurveTo(28 + i * 14, 92, 38 + i * 14, 118); g.stroke(); }
+    g.fillStyle = '#3ad8e0'; g.strokeStyle = '#106a78'; g.lineWidth = 4;
+    g.beginPath(); g.arc(64, 66, 46, Math.PI, 0); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = '#f070c8'; for (const [x, y, r] of [[48, 44, 9], [74, 36, 8], [84, 56, 7], [56, 60, 6]]) { g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); }
+    g.fillStyle = 'rgba(255,255,255,0.75)'; g.beginPath(); g.ellipse(46, 34, 10, 5, -0.5, 0, Math.PI * 2); g.fill();
   }),
 };
-const bitLook = { geo: new THREE.CylinderGeometry(0.42, 0.44, 0.12, 28), side: mat('#efe6d2', { roughness: 0.6 }), faces: BITS.map(([col, mark]) => mat('#ffffff', { map: bitFace(col, mark), roughness: 0.45 })), special: {} };
+// Each piece lies flat, face up, the right way up as you look back at the den from the sea end, with
+// a soft shadow under it.
+const bitLook = {
+  geo: new THREE.PlaneGeometry(0.92, 0.92),
+  faces: BITS.map(([col, shape, pat]) => new THREE.MeshStandardMaterial({ map: bitFace(col, shape, pat), alphaTest: 0.5, roughness: 0.25, metalness: 0.05 })),
+  special: {},
+  shadow: new THREE.MeshBasicMaterial({ map: canvasTex(64, 64, (g) => { const gr = g.createRadialGradient(32, 32, 4, 32, 32, 31); gr.addColorStop(0, 'rgba(0,0,0,0.45)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); }), transparent: true, depthWrite: false }),
+};
 function bitMesh(b) {
-  const face = b.s ? (bitLook.special[b.s] ||= mat('#ffffff', { map: specialFace[b.s](), roughness: 0.5 })) : bitLook.faces[b.k];
-  const m = mesh(bitLook.geo, [bitLook.side, face, bitLook.side], false);
-  m.rotation.y = -Math.PI / 2;   // the mark the right way up, seen from the sea end
-  return m;
+  const face = b.s ? (bitLook.special[b.s] ||= new THREE.MeshStandardMaterial({ map: specialFace[b.s](), alphaTest: 0.5, roughness: 0.4 })) : bitLook.faces[b.k];
+  const g = new THREE.Group();
+  const m = new THREE.Mesh(bitLook.geo, face);
+  m.rotation.set(-Math.PI / 2, 0, Math.PI);
+  m.position.y = 0.022;   // (layers: the board's sand 0.012, the pieces, the board's water 0.042, the sea 0.05)
+  const sh = new THREE.Mesh(bitLook.geo, bitLook.shadow);
+  sh.rotation.x = -Math.PI / 2;
+  sh.position.set(-0.05, 0.012, 0.05);
+  sh.scale.setScalar(1.05);
+  g.add(sh, m);
+  g.userData.face = m;
+  return g;
 }
 
 // Laid out with the wall: to the right of the gun tower, the rocks out past high tide's mark.
@@ -3286,11 +3345,24 @@ function bilgePlace(half) {
   bilge.meshes.clear();
   bilge.shown = null;
   const L = BH * BILGE.SQ, cx = bilge.x0 + w / 2, cz = BILGE.Z0 - L / 2;
-  // Darker, wet sand under the board, and driftwood stakes down both sides.
-  const bed = mesh(new THREE.PlaneGeometry(w + 0.3, L + 0.2), mat('#6e5a40', { roughness: 1 }), false);
+  // Wet sand under the board, its squares faintly marked, and driftwood stakes down both sides.
+  const bedTex = canvasTex(BW * 32, BH * 32, (g, cw, ch) => {
+    g.fillStyle = '#a3865c'; g.fillRect(0, 0, cw, ch);
+    for (let i = 0; i < 400; i++) { g.fillStyle = `rgba(60,40,20,${Math.random() * 0.12})`; g.fillRect(Math.random() * cw, Math.random() * ch, 2, 2); }
+    g.strokeStyle = 'rgba(70,50,28,0.35)'; g.lineWidth = 1.5;
+    for (let x = 0; x <= cw; x += 32) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, ch); g.stroke(); }
+    for (let y = 0; y <= ch; y += 32) { g.beginPath(); g.moveTo(0, y); g.lineTo(cw, y); g.stroke(); }
+  });
+  const bed = mesh(new THREE.PlaneGeometry(w, L), new THREE.MeshStandardMaterial({ map: bedTex, roughness: 1 }), false);
   bed.rotation.x = -Math.PI / 2;
   bed.position.set(cx, 0.012, cz);
   bilge.group.add(bed);
+  // The water over the board's wet rows, the deep clear blue of the real puzzle's (under the sea's
+  // own surface, which runs on over it).
+  bilge.water = mesh(new THREE.PlaneGeometry(w, 1), new THREE.MeshBasicMaterial({ color: '#2a6fd8', transparent: true, opacity: 0.36, depthWrite: false }), false);
+  bilge.water.rotation.x = -Math.PI / 2;
+  bilge.water.renderOrder = 1;
+  bilge.group.add(bilge.water);
   const stakeM = mat('#6a5038', { map: woodTex });
   for (const sx of [-1, 1]) for (let i = 0; i <= BH; i += 2) {
     const st = mesh(new THREE.CylinderGeometry(0.07, 0.09, 0.9, 6), stakeM);
@@ -3298,18 +3370,16 @@ function bilgePlace(half) {
     st.rotation.z = (Math.random() - 0.5) * 0.2;
     bilge.group.add(st);
   }
-  // The water over the board's wet rows: clear enough to see the pieces under it.
-  bilge.water = mesh(new THREE.PlaneGeometry(w + 0.6, 1), new THREE.MeshStandardMaterial({ color: '#1f6f8f', transparent: true, opacity: 0.42, roughness: 0.15, metalness: 0.1, depthWrite: false }), false);
-  bilge.water.rotation.x = -Math.PI / 2;
-  bilge.group.add(bilge.water);
-  // The cursor: a gold frame round two squares side by side.
+  // The cursor, as in the real puzzle: orange brackets at the corners of the two squares, and
+  // ticks between them.
   bilge.cursor = new THREE.Group();
-  const gold = new THREE.MeshBasicMaterial({ color: '#ffd45a' });
-  for (const [x, z, sx, sz] of [[0, -0.5, 2, 0.08], [0, 0.5, 2, 0.08], [-1, 0, 0.08, 1], [1, 0, 0.08, 1]]) {
-    const b = mesh(new THREE.BoxGeometry(sx * BILGE.SQ, 0.06, sz * BILGE.SQ), gold, false);
-    b.position.set(x * BILGE.SQ, 0.16, z * BILGE.SQ);
-    bilge.cursor.add(b);
+  const orange = new THREE.MeshBasicMaterial({ color: '#f39a2b' }), q = BILGE.SQ, t = 0.07, len = 0.28;
+  const bar = (x, z, sx, sz) => { const m = mesh(new THREE.BoxGeometry(sx, 0.03, sz), orange, false); m.position.set(x, 0.07, z); bilge.cursor.add(m); };
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    bar(sx * (q - len / 2), sz * q / 2, len, t);
+    bar(sx * q, sz * (q / 2 - len / 2), t, len);
   }
+  for (const sz of [-1, 1]) bar(0, sz * (q / 2 - len / 2), t, len);
   bilge.group.add(bilge.cursor);
   // Sharp rocks and barnacled stones beyond high tide's mark, bare when the tide's out.
   bilge.rocks = [];
@@ -3435,7 +3505,7 @@ function bilgeTick(dt) {
   b.odds = oddsFor(G.wave);
   if (!bilge.shown) {
     bilge.shown = b.snap();
-    for (let r = 0; r < BH; r++) for (let c = 0; c < BW; c++) { const bit = bilge.shown[r][c], m = bitMesh(bit); m.position.set(cellX(c), 0.07, cellZ(r)); bilge.pieces.add(m); bilge.meshes.set(bit.id, m); }
+    for (let r = 0; r < BH; r++) for (let c = 0; c < BW; c++) { const bit = bilge.shown[r][c], m = bitMesh(bit); m.position.set(cellX(c), 0.01, cellZ(r)); bilge.pieces.add(m); bilge.meshes.set(bit.id, m); }
   }
   // A move a step at a time: what's cleared washes away, then the rest float up.
   bilge.holdT += dt;
@@ -3459,7 +3529,7 @@ function bilgeTick(dt) {
       if (!m) {
         // New pieces wash in from the sea end, below the board, and float up into place.
         m = bitMesh(bit);
-        m.position.set(cellX(c), 0.0, cellZ(BH + fresh[c]++));
+        m.position.set(cellX(c), 0.01, cellZ(BH + fresh[c]++));
         bilge.pieces.add(m);
         bilge.meshes.set(bit.id, m);
       }
@@ -3473,14 +3543,14 @@ function bilgeTick(dt) {
     const wet = m.position.z < sz, sp = (wet ? 3.5 : 7) * dt;
     const dx = tx - m.position.x, dz = tz - m.position.z, d = Math.hypot(dx, dz);
     if (d > 1e-3) { const k = Math.min(1, sp / d); m.position.x += dx * k; m.position.z += dz * k; }
-    m.position.y = wet ? -0.015 + Math.sin(now * 2 + id) * 0.012 : 0.07;
-    if (m.userData.jig > 0) { m.userData.jig -= dt; m.rotation.y = -Math.PI / 2 + Math.sin(m.userData.jig * 40) * 0.4; } else m.rotation.y = -Math.PI / 2;
+    m.rotation.y = wet ? Math.sin(now * 1.3 + id) * 0.04 : 0;   // a little sway under the water
+    if (m.userData.jig > 0) { m.userData.jig -= dt; m.rotation.y = Math.sin(m.userData.jig * 40) * 0.4; }
   }
-  // The water over the board, its edge the sea's.
-  const end = BILGE.Z0 - BH * BILGE.SQ - 0.6, len = Math.max(0.01, sz - end);
+  // The board's water, its edge the sea's.
+  const end = BILGE.Z0 - BH * BILGE.SQ, len = Math.max(0.001, sz - end);
   bilge.water.scale.y = len;
-  bilge.water.position.set(bilge.x0 + BW * BILGE.SQ / 2, 0.06, end + len / 2);
-  bilge.water.visible = len > 0.02;
+  bilge.water.position.set(bilge.x0 + BW * BILGE.SQ / 2, 0.042, end + len / 2);
+  bilge.water.visible = len > 0.01;
   bilge.cursor.visible = bilge.on;
   bilge.cursor.position.set((cellX(bilge.cur.c) + cellX(bilge.cur.c + 1)) / 2, 0, cellZ(bilge.cur.r));
   // Rocks bared by the tide; the first time, say what they're for.

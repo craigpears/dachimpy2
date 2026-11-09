@@ -174,6 +174,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **Powder barrels:** two lines at once dredges one up, a Bingo two, more three (six on the beach
     at most). It's rolled up the beach to the foot of the wall by a hole, and blows up the next
     raider who comes by, knocking flat every raider within a couple of metres.
+  - **The look matches Puzzle Pirates' bilge (the user, 9 Nov: "the graphics need to match Puzzle
+    Pirates ... it's supposed to be in the water ... semi-transparent water underneath it, around
+    it ... so you can see the water receding").** Seven glassy pieces in the sea's colours, each
+    its own shape and pattern (two octagons, two spheres, a square, a rounded square, a pentagon);
+    an orange crab, a yellow pufferfish, a cyan and pink jellyfish; orange corner brackets for the
+    cursor. They lie flat on wet sand marked into squares, and the rows under water show through a
+    deep clear blue, as in the real puzzle. The sea everywhere is see-through, clearest at its
+    edge, over a sandy bed that falls away into the deep, so you watch it draw back off the sand.
   - **Solo only for now,** like Swordfight: in a crew there's no board and the sea stays about
     where it always was.
   The numbers are in src/den-bilge.ts (tests/den-bilge.test.ts).

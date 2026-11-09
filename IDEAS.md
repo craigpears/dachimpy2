@@ -102,6 +102,11 @@ Building on what's there now (the walk and its stairs are made of pieces that st
   - **Soldiers going outside, for this and generally:** "making it so that the doors open and you
     can go and fight on the beach". The gate opens and the armoury's soldiers march out onto the
     beach to fight raiders there, and to help attack the Kraken.
+  - **Every way of fighting works on it (9 Nov):** "you should certainly be able to do all the usual
+    things like throw carpentry pieces at it, which do a bit of damage". And at the armoury hoist,
+    a choice: "create soldiers or target the Kraken". Swords sent at it should be seen: "3D swords
+    flying at the Kraken ... dropping down on its head", tied to the den's physics: the hoist
+    swings round and drops them on its head ("just ridiculous, but still funny").
   (How strong it is, how often it comes, and what beating it pays: to work out.)
   - **A thicker wall keeps it out (9 Nov):** "this will probably be a good point where ... the
     sprinkles really come in, or the multiple layers of the wall". Once the wall's fully mended,
@@ -176,6 +181,10 @@ Ideas to carry on with:
   first. If the main site ever solves long strips, do the same there.
 
 ## Holding the wall: what's next
+
+- **The same physics for everyone (9 Nov):** "If raiders can get through a hole, so should you be
+  able to." A gap in the wall raiders can walk through, you can walk through too (out onto the
+  beach and back), and the other way round: wherever you can't go, neither can they.
 
 Ideas if keeping raiders out still feels hopeless or too easy once the user has tried the
 first fix (TODO.md has the playtest):
