@@ -82,6 +82,12 @@ the site (`.assetsignore` skips `*.md`).
   since then the gate's five rows tall under a beam, in a lower middle between towers. Check
   whether it still looks wrong.)
 
+- **Raiders getting through mustn't end the game (9 Nov):** rethink what happens when raiders get
+  in, because the den should let you go off on side quests, row out to the ship and explore: "I
+  don't want the game to be ending because you decided to go exploring." Getting plundered should
+  cost you something without ending everything. (What the consequence is instead: to pin down
+  with the user.)
+
 ## Needs a playtest to pin down
 
 - **Towers, a lower middle and a night sky (9 Nov), not yet seen by the user.** (RULES.md, "You

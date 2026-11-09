@@ -56,6 +56,14 @@ more things you go and do as a group activity.
 Little side quests, like rescuing a capybara by dredging out a reef (a friend's idea). The friend
 you rescue then hangs around your den, so finished quests add up into a den full of characters.
 
+## A little town up the cliffs (9 Nov)
+
+More of a little town behind the den and in front of it, with the feel of a new pirate
+city-builder the user loves (name to find): a real pirate hideout built up into the sides of the
+cliff, rope bridges between, and all the lodgings up in the rock, not spread out across an island.
+Follow that aesthetic. (Goes with the side quests and exploring: places to go, not just a wall to
+hold.)
+
 ## Raiding other dens (9 Nov, eventually a crew thing)
 
 - **Go raiding:** a group of you jump out of the ship and storm up the beach to raid or loot
