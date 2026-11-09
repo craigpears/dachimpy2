@@ -89,6 +89,12 @@ the site (`.assetsignore` skips `*.md`).
   with the user. A first sketch, with raids becoming opt-in after an opening siege, is in
   IDEAS.md, "Raids you choose".)
 
+- **The old sloop should be there straight away (9 Nov):** after the map scene "I'm sat here quite
+  a while waiting for his sloop to sail off" before the old sloop turns up. Their ship sailing off
+  "should be a background feature as soon as he's rowed back", and the old sloop should appear
+  sooner and in a more natural place. (The cut-off text was an old copy cached: fine after a hard
+  refresh.)
+
 - **Split the den off from the Carpentry primer (9 Nov, not yet):** "we need to separate this code
   at some point from this carpentry primer thing, because this is obviously far more interesting
   ... I think that can just be removed and just focus on the pirate then. It has evolved." But
