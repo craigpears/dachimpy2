@@ -206,14 +206,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     as before ... I'm certainly not getting that more 2D isometric view"). The arrow keys with a
     piece do the same. After Esc it stays off until you walk a few steps or take another piece.
     Pointing at a frame with the mouse, the piece goes in wherever it is, however far away.
-  - **The camera goes straight on to it,** like a 2D board: the wall square on, a stretch of it
-    round the piece, its whole height; a frame on the floor from above, its rows running up the
+  - **The camera goes straight on to it,** like a 2D board: the wall square on, the whole of it
+    (a stretch round the piece if it's ever too long); a frame on the floor from above, its rows running up the
     screen; the stairs square on to their face. Your pirate walks along to stand by the piece,
     out of the way, so others see you building.
   - **Puzzle Pirates' own Carpentry keys** (YPPedia "Carpentry", read 9 Nov): 1-3 take a crate's
     piece (the toolbox), the arrows move it a square, X and C turn it, Z flips it, Q/W/A/S centre
-    it over the upper-left, upper-right, lower-left and lower-right holes (on the wall, the nearest
-    hole that way; on a frame, that quarter of it), Space puts it in. Backspace takes the last
+    it over the upper-left, upper-right, lower-left and lower-right holes (on the wall, the real
+    four: the high and low holes left and right of the gate, going on round any cannon breach in
+    that corner; on a frame, that quarter of it), Space puts it in. Backspace takes the last
     piece back off (the real puzzle lets you adjust your last piece). E and F still turn and flip.
     The mouse works too: point and click.
   - **Nothing in the way, and switching is seamless (9 Nov).** The user: "everything's really
@@ -234,12 +235,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     3D world. This one feels a lot more detached", and "don't create a separate overlay. I think
     that's bad. That just suggests there's a deeper design problem". The wall-walk's view, where you
     see the full 3D world and nothing's blocked, is the model. If the wall needs to be closer to the
-    real puzzle, change the wall itself (see IDEAS.md, "The wall in two courses").
+    real puzzle, change the wall itself: done, "The wall in two courses" below.
   - **The keys must be dependable (9 Nov).** The user, playing by keyboard: "this needs a lot more
     quality control for keyboard use. A lot of it." So, tested key by key:
     - Left and right move a square while the piece is over a hole's columns, and off them jump
       straight on to the next hole that way, over the bare stone and the gate ("it just blocks me
-      instead of skipping over it"). Up and down move a square.
+      instead of skipping over it"). Since the two courses (9 Nov), left and right keep to the
+      piece's course (high or low), and up and down work the same way between the holes of the
+      piece's side: a square at a time over the stone between, never off the end of a hole into
+      bare stone.
     - Q/W/A/S never send the piece back to the hole it's already at (it did, with the piece a little
       right of its hole's middle: "it isn't jumping").
     - A hand resting on the mouse doesn't undo key moves: after a key, the mouse takes over again
@@ -350,6 +354,20 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   can always be filled exactly, so the crew can mend it; one piece in the gap stops them again.
   Every wall's holes start off the floor, so every hole is a weak spot until it's widened. The
   user liked it: it's an incentive to fill gaps early and close them off.
+- **The wall in two courses (9 Nov).** The wall was one long row of holes, so no view showed them
+  all and the piece crossed bare stone to get anywhere; a flat board over it was "forced" (see
+  "Immersive, never an overlay"). The user: "Try with 2 wall courses. Let's see how that works."
+  So the wall itself is the real puzzle's board: a high hole over a low one each side of the gate,
+  four holes two up and two down, a row of stone between them and under the low one
+  (`src/den-wall.ts`). It's nine or ten rows tall (5 m, it was six), about 17 m long (it was
+  about 24), so the Carpentry view shows the whole of it. Holes lie on their side (wider than tall)
+  to keep it low.
+  - **High holes: raiders bring ladders.** Raiders going for a high hole lean a ladder under it
+    and climb up; from there they hack its wood, or if it's open, climb straight in and drop down
+    inside. There's no stone to hack wider first (that's the low holes), so an open high hole is
+    the one to mend first. A raider dazed on a ladder falls off and climbs again. Raiders split
+    between a side's high and low hole at chance; an open hole draws the raiders near it, as
+    before. A cannon breach in the top half of the wall is a high hole too.
 - **Every bit of mending counts; it's never all or nothing.** The user: partly filling a hole or a
   sloppy job should still turn a few raiders away, and when they do get through there's always
   something you can do. Tested 7 Nov 2026 (simulated waves with no cannon, nobody throwing):
@@ -517,9 +535,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     side: the barrel and chest stand behind the crates, and in a narrow den the crates shift left.
     History: two rows and a ragged third was "very slim", with not much room to be creative;
     three and a ragged fourth was still "long thin straight holes that only fit the P".
-  - **The stairs (at each end):** a frame standing upright at the end of the den, solid from the
-    treads down to the floor (a band three squares deep held only four pieces, with room for an X
-    in one spot in five). You fit pieces into it like a hole in the wall, and the
+  - **The stairs (at each end):** a frame standing upright at the end of the den, a stringer four
+    squares deep under the treads. (Solid down to the floor until 9 Nov: a band three squares deep
+    held only four pieces, with room for an X in one spot in five. With the wall in two courses
+    the stairs are half as tall again and solid ones took twice the pieces, about 15; four deep,
+    they take six or seven, about what they did.) You fit pieces into it like a hole in the wall, and the
     pieces are the steps. Half-built stairs are in the way; you can't walk through them.
   - **Any piece will do:** a piece may stick out over the frame's edge. On the walk the spare is
     sawn off when it's full (it has to lie flat on the wall).

@@ -77,12 +77,6 @@ the site (`.assetsignore` skips `*.md`).
   clearly while you build it. (Since the last update the stairs are on the right and the armoury
   hoist on the left, which may already have fixed this: check once the new version's live.)
 
-- **The wall in two courses (9 Nov):** the user chose "try with 2 wall courses. Let's see how that
-  works" (IDEAS.md, "The wall in two courses"). A low hole and a high hole each side of the gate,
-  so the wall's holes sit two up, two down like the real puzzle's, in the 3D wall itself (no
-  overlay). The wall taller, the walk higher, the stairs longer; Q/W/A/S go up and down as well
-  as sideways. What a high hole is for to settle in the build, then try with the user.
-
 ## Needs a playtest to pin down
 
 - **Swordfight at the armoury hoist (8 Nov), not yet tried by the user.** Rebuilt after the
@@ -136,6 +130,14 @@ the site (`.assetsignore` skips `*.md`).
   Q/W/A/S always leave the hole you're at, a resting hand on the mouse no longer undoes key moves,
   Shift+Tab goes back, the tabs are a clearer bar. Watch for: the arrows' jump to the next hole
   feeling abrupt, and anything else the keys do that surprises.
+- **The wall in two courses (9 Nov), not yet tried by the user.** (RULES.md, "The wall in two
+  courses".) Watch for: open high holes being too easy a way in (no stone to hack first, so most
+  raiders go for them while they're open); the ladders reading clearly from inside the den; the
+  hole labels for the low holes sitting over the stone between the courses; the gate now tall and
+  narrow (nine rows high, still four wide); the stairs as a stringer four deep (a band three deep
+  was turned down before for holding too few pieces: this one holds six or seven); the wall-walk
+  and gun tower half as high again (5 m); the Carpentry view taking in the whole wall (the holes
+  small on a narrow window?).
 - **The walk as one square frame, sawn into lengths (8 Nov), not yet tried by the user.** About
   24 pieces in an 11 by 13 frame at the right of the den, sawn into four lengths that go up end
   to end. Watch for: still running out of the right pieces near the end (a simulated build wasted

@@ -64,22 +64,28 @@ export type Pt = [number, number];
 const LEFT = (c: Corner) => c === 'ul' || c === 'dl';
 const UP = (c: Corner) => c === 'ul' || c === 'ur';
 
-/** On the wall (holes all along it): the hole the corner key sends the piece to, from where it is
-    now. Left keys look left, right keys right; of those, ones on the same level (up or down) as the
-    key come first, then the nearest. Never `cur`, the hole the piece is at already (the user, 9 Nov:
-    with the piece a little right of its hole's middle, Q took it back to that same hole, so "it
-    isn't jumping"). Null if there's nothing that way. */
-export function nextHole(holes: Pt[], at: Pt, corner: Corner, cur: number | null = null): number | null {
-  let best: number | null = null, bd = Infinity;
-  holes.forEach(([r, c], i) => {
-    if (i === cur) return;
-    const dc = c - at[1], dr = r - at[0];
-    if (LEFT(corner) ? dc > -0.5 : dc < 0.5) return;
-    const wrongLevel = UP(corner) ? dr > 0.5 : dr < -0.5;
-    const d = Math.abs(dc) + Math.abs(dr) * 0.5 + (wrongLevel ? 1000 : 0);
-    if (d < bd) { bd = d; best = i; }
-  });
-  return best;
+/** On the wall: the hole a corner key sends the piece to. The wall is the real board's four
+    holes in two courses either side of the gate (src/den-wall.ts), so Q goes to the high hole
+    left of the gate, W the high one right of it, A and S the low ones; `split` is the wall's
+    middle, [row, column], between the courses and at the gate. Cannon breaches add more holes to a
+    corner: then the key goes on round them, nearest first. Never `cur`, the hole the piece is at
+    already (the user, 9 Nov: Q took the piece back to the hole it was at, so "it isn't jumping"),
+    unless it's the only one there; if the corner has none, the nearest on that side. Null if
+    there's nowhere else to go. */
+export function nextHole(holes: Pt[], at: Pt, corner: Corner, cur: number | null, split: Pt): number | null {
+  const sideOk = ([, c]: Pt) => (LEFT(corner) ? c < split[1] : c >= split[1]);
+  const inCorner = (p: Pt) => sideOk(p) && (UP(corner) ? p[0] < split[0] : p[0] >= split[0]);
+  const nearest = (ok: (p: Pt) => boolean): number | null => {
+    let best: number | null = null, bd = Infinity;
+    holes.forEach((p, i) => {
+      if (i === cur || !ok(p)) return;
+      const d = Math.hypot(p[0] - at[0], p[1] - at[1]);
+      if (d < bd) { bd = d; best = i; }
+    });
+    return best;
+  };
+  if (holes.some(inCorner)) return nearest(inCorner);
+  return nearest(sideOk);
 }
 
 /** On a frame (one big space): its four quarters, as the real board's four holes. Each is the

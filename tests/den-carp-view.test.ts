@@ -24,25 +24,33 @@ describe('the keys are the real Carpentry keys', () => {
 });
 
 describe('jumping between holes on the wall', () => {
-  // Holes along the wall: two high, two low, left to right.
-  const holes: Pt[] = [[3, 5], [8, 12], [3, 20], [8, 28]];
-  it('goes to the nearest hole that way, the one on the key\'s level first', () => {
-    expect(nextHole(holes, [5, 16], 'ul')).toBe(0);
-    expect(nextHole(holes, [5, 16], 'dl')).toBe(1);
-    expect(nextHole(holes, [5, 16], 'ur')).toBe(2);
-    expect(nextHole(holes, [5, 16], 'dr')).toBe(3);
+  // The wall in two courses: a high hole over a low one each side of the gate (column 12), the
+  // courses split at row 5.5.
+  const split: [number, number] = [5.5, 12];
+  const holes: Pt[] = [[3, 5], [8, 5], [3, 20], [8, 20]];
+  it(`Q, W, A and S go to the real puzzle's four holes, wherever the piece is (9 Nov: "Try with 2 wall courses")`, () => {
+    for (const at of [[3, 5], [8, 20], [5, 13]] as Pt[]) {
+      expect(nextHole(holes, at, 'ul', null, split)).toBe(0);
+      expect(nextHole(holes, at, 'dl', null, split)).toBe(1);
+      expect(nextHole(holes, at, 'ur', null, split)).toBe(2);
+      expect(nextHole(holes, at, 'dr', null, split)).toBe(3);
+    }
   });
-  it('takes the other level if there\'s none on the key\'s level that way', () => {
-    expect(nextHole(holes, [5, 24], 'ur')).toBe(3);
+  it('goes straight up and down a side, low hole to high hole', () => {
+    expect(nextHole(holes, [8, 5], 'ul', 1, split)).toBe(0);
+    expect(nextHole(holes, [3, 20], 'dr', 2, split)).toBe(3);
   });
-  it('Q goes on to the next hole left, even with the piece right of its own hole\'s middle (9 Nov: "it isn\'t jumping")', () => {
-    // The piece at hole 2 (middle column 20), its own middle at column 20.5: hole 2 isn't "left".
-    expect(nextHole(holes, [3, 20.5], 'ul', 2)).toBe(0);
-    expect(nextHole(holes, [3, 20.5], 'dl', 2)).toBe(1);
+  it(`never back to the hole the piece is at (9 Nov: "it isn't jumping")`, () => {
+    expect(nextHole(holes, [3, 5.5], 'ul', 0, split)).toBeNull();
   });
-  it('goes nowhere if there\'s no hole that way', () => {
-    expect(nextHole(holes, [5, 2], 'ul')).toBeNull();
-    expect(nextHole(holes, [5, 30], 'dr')).toBeNull();
+  it('goes on round a cannon breach in the same corner, nearest first', () => {
+    const more: Pt[] = [...holes, [2, 9]];
+    expect(nextHole(more, [3, 5], 'ul', 0, split)).toBe(4);
+    expect(nextHole(more, [2, 9], 'ul', 4, split)).toBe(0);
+  });
+  it('a corner with no hole: the nearest on that side', () => {
+    expect(nextHole([[8, 5], [3, 20]], [3, 20], 'ul', 1, split)).toBe(0);
+    expect(nextHole([[8, 5]], [8, 5], 'ur', 0, split)).toBeNull();
   });
 });
 
