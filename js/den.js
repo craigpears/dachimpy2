@@ -2487,13 +2487,13 @@ function armsTile(box) {
     armsEl.title = 'Crates of weapons for the armoury hoist, on the left of the den: stack them there to arm soldiers and break loose crates up for planks to mend the wall';
     box.append(armsEl);
   }
-  const q = rack.queue, show = swordHere() && q.length > 0;
+  const q = rack.pack, show = swordHere() && q.length > 0;
   armsEl.hidden = !show;
   const sig = show ? q.slice(0, 4).map((p) => p.map(crateSig).join('')).join('|') + q.length : '';
   if (sig === armsSig) return;
   armsSig = sig;
   const box1 = (g) => g.breaker ? `<b class="brk" style="--c:${PALETTE[g.c].base}"></b>` : `<b style="--c:${PALETTE[g.c].base}"></b>`;
-  armsEl.innerHTML = `<div class="q">${q.slice(0, 4).map((p) => `<i>${p.map(box1).join('')}</i>`).join('')}</div><span>${q.length} for the hoist</span>`;
+  armsEl.innerHTML = `<div class="q">${q.slice(0, 4).map((p) => `<i>${p.map(box1).join('')}</i>`).join('')}</div><span>${q.length} on your back</span>`;
 }
 const barrel = (() => {
   const g = new THREE.Group();
@@ -2756,6 +2756,10 @@ const rack = new SwordRack(), barracks = new Barracks();
    hides nothing; at the winch the camera turns to face it. Layout in the group's own terms: column c
    at x = (c - W/2 + 0.5) * CR, row r at y = y0 + (r + 0.5) * CR, the crates' fronts towards +z. */
 const CR = 0.45, CRATE = 0.41;
+// The armoury's shelves: a pair's spot along a shelf, and each shelf's height (the top one's where the
+// old landing was, the rest below it).
+const SHELF_DX = 0.29, SHELF_DY = 0.62;
+const shelfY = (i) => 0.14 + SH * CR - 2 * CR + 0.13 - i * SHELF_DY;
 const sword = {
   on: false, dirty: true, drops: [], figures: new Map(), x: -10, z: 3.2, y0: 0.14, w: SW * CR, h: SH * CR,
   group: new THREE.Group(), crates: new Map(), pair: null, pairKey: null, next: new THREE.Group(), nextKey: '',
@@ -2845,16 +2849,21 @@ function crateGone(m) { m.parent?.remove(m); m.traverse((o) => { if (o.geometry?
   // The trolley along the beam, and its rope.
   sword.trolley = add(new THREE.BoxGeometry(0.3, 0.14, 0.34), crateLook.iron, 0, top - 0.12, 0);
   sword.rope = add(new THREE.CylinderGeometry(0.018, 0.018, 1, 6), mat('#c9b48a', { roughness: 1 }), 0, 0, 0, false);
-  // The landing at the top right, where the crates you've brought wait their turn.
-  add(new THREE.BoxGeometry(1.05, 0.07, CRATE + 0.1), beam, w / 2 + 0.66, y0 + h - 2 * CR - 0.04, 0);
-  const strut = add(new THREE.BoxGeometry(0.08, 0.9, 0.08), beam, w / 2 + 0.5, y0 + h - 2 * CR - 0.4, 0);
-  strut.rotation.z = 0.7;
+  // The shelves at the right, where the crates you've dropped off wait their turn, the top one
+  // next down; they fill up shelf by shelf as you bring more (the user, 9 Nov: "you should see the
+  // collection really building up").
+  const shelves = SWORD.STORE / SWORD.SHELF, sw = SWORD.SHELF * SHELF_DX + 0.14, sx0 = w / 2 + 0.23 + sw / 2 - 0.07;
+  for (let i = 0; i < shelves; i++) add(new THREE.BoxGeometry(sw, 0.07, CRATE + 0.1), beam, sx0, shelfY(i) - 0.17, 0);
+  const postH = shelfY(0) - 0.13;
+  add(new THREE.BoxGeometry(0.1, postH, 0.1), beam, sx0 + sw / 2 + 0.02, postH / 2, 0);
+  add(new THREE.BoxGeometry(0.3, 0.1, 0.5), dark, sx0 + sw / 2 + 0.02, 0.05, 0);
   grp.add(sword.next);
   grp.rotation.y = Math.PI / 2;
   scene.add(grp);
 }
 const swordHere = () => !online() && !G.over;
 // At the winch: in front of the stack, near it.
+const nearHoist = () => swordHere() && pirate.h < 0.05 && pirate.x - sword.x > -0.5 && pirate.x - sword.x < 3.2 && Math.abs(pirate.z - sword.z) < sword.w / 2 + 1.6;
 const atSword = () => swordHere() && pirate.h < 0.05 && pirate.x - sword.x > 0.3 && pirate.x - sword.x < 2.4 && Math.abs(pirate.z - sword.z) < sword.w / 2 + 0.9;
 // Where the winch is, in the den's terms.
 const winchAt = () => ({ x: sword.x + 0.3, z: sword.z + sword.w / 2 + 0.13 });
@@ -2895,15 +2904,15 @@ function stackSync(snap = rack.board.snap()) {
     m.userData.to = L.at;
     m.userData.doomed = false;
   }
-  // The crates waiting on the landing: the next three pairs.
-  const nk = rack.queue.slice(0, 3).map((p) => p.map(crateSig).join('')).join('|');
+  // The crates waiting on the shelves, every one of them, the next down first.
+  const nk = rack.queue.map((p) => p.map(crateSig).join('')).join('|');
   if (nk !== sword.nextKey) {
     sword.nextKey = nk;
     [...sword.next.children].forEach(crateGone);
-    rack.queue.slice(0, 3).forEach((pair, i) => pair.forEach((p, j) => {
+    rack.queue.forEach((pair, i) => pair.forEach((p, j) => {
       const m = armsCrate({ c: p.c, breaker: p.breaker });
       m.scale.setScalar(0.62);
-      m.position.set(sword.w / 2 + 0.37 + i * 0.29, sword.y0 + sword.h - 2 * CR + 0.13 + j * 0.27, 0);
+      m.position.set(sword.w / 2 + 0.37 + (i % SWORD.SHELF) * SHELF_DX, shelfY(Math.floor(i / SWORD.SHELF)) + j * 0.27, 0);
       sword.next.add(m);
     }));
   }
@@ -3027,13 +3036,13 @@ function swordDrop(r, pair = randomPair()) {
 }
 function dropGone(d) { crateGone(d.g); }
 /* A Masterpiece's reward: a pair with a breaker in it, flown from where you earned it straight to
-   the hoist's landing, the next to come down (or onto the floor by you, if your hands are full).
+   the armoury's top shelf, the next to come down (or onto the floor by you, if the shelves are full).
    The user (8 Nov): gold for a Masterpiece "is fairly meaningless ... getting a reward like some
    breakers would be a lot better than gold". The gold is still paid: it's what the raiders steal. */
 function swordReward(from, what) {
   if (!swordHere()) return;
   const pair = rewardPair(), g = cratePair(pair);
-  const to = sword.group.localToWorld(new THREE.Vector3(sword.w / 2 + 0.37, sword.y0 + sword.h - 2 * CR + 0.13, 0));
+  const to = sword.group.localToWorld(new THREE.Vector3(sword.w / 2 + 0.37, shelfY(0), 0));
   g.position.copy(from);
   scene.add(g);
   tween(1.4, (t) => { g.position.lerpVectors(from, to, t); g.position.y += Math.sin(t * Math.PI) * 2.5; g.rotation.y = t * 7; }, () => {
@@ -3044,7 +3053,7 @@ function swordReward(from, what) {
       say(`A breaker for your ${what}! It's next down at the armoury hoist`, false, true);
     } else {
       swordDrop({ x: pirate.x, z: pirate.z, inside: true }, pair);
-      say(`A breaker for your ${what}! (Your hands are full: it's on the floor by you)`, false, true);
+      say(`A breaker for your ${what}! (The armoury's shelves are full: it's on the floor by you)`, false, true);
     }
   });
 }
@@ -3225,7 +3234,7 @@ function swordTick(dt) {
   if (sword.show) showTick(dt);
   else if (sword.on) {
     const n = rack.tick(dt);
-    if (n.lost) say('The stack reached the red: it toppled, crates and all', true);
+    if (n.lost) say('The stack reached the red and toppled (the crates on the shelves are safe)', true);
     if (n.landed) swordBreak(n.landed);
     if (n.changed) sword.dirty = true;
   }
@@ -3237,15 +3246,25 @@ function swordTick(dt) {
     d.g.position.set(d.x, 0.08 + Math.abs(Math.sin(d.t * 3)) * 0.12, d.z);
     d.g.rotation.y += dt * 1.2;
     if (pirate.h > 0.3 || Math.hypot(pirate.x - d.x, pirate.z - d.z) > 0.9) continue;
-    if (!rack.take(d.pair)) { if (!G.queueSaid) { G.queueSaid = true; say(`You can carry ${SWORD.QUEUE} pairs of crates: stack some at the armoury hoist`); } continue; }
+    if (!rack.take(d.pair)) { if (!G.queueSaid) { G.queueSaid = true; say(`You can carry ${SWORD.PACK} pairs of crates: drop them off at the armoury hoist, on the left`); } continue; }
     burst(new THREE.Vector3(d.x, 0.5, d.z), PALETTE[d.pair[0].c].base, 6, 2);
     // Say what you've got and where it goes (the user, 8 Nov: "you just kind of walk into them and
     // it's like, okay, well, now what?").
-    const n = rack.queue.length, brk = d.pair.some((g) => g.breaker);
-    toast(`${brk ? 'A breaker! ' : ''}Crates on your back: ${n} of ${SWORD.QUEUE} pairs · stack them at the armoury hoist, on the left`);
+    const n = rack.pack.length, brk = d.pair.some((g) => g.breaker);
+    toast(`${brk ? 'A breaker! ' : ''}Crates on your back: ${n} of ${SWORD.PACK} pairs · walk them over to the armoury hoist, on the left`);
     dropGone(d);
     sword.drops.splice(i, 1);
     sword.dirty = true;
+  }
+  // Walk up to the hoist and what's on your back goes onto its shelves, no key needed (the user,
+  // 9 Nov: "you should be able to just drop them off, like by going near the armory").
+  if (rack.pack.length && nearHoist()) {
+    const n = rack.unload();
+    if (n) {
+      sword.dirty = true;
+      burst(sword.group.localToWorld(new THREE.Vector3(sword.w / 2 + 0.8, shelfY(Math.floor((rack.queue.length - 1) / SWORD.SHELF)), 0.3)), '#ffd23a', 12, 2);
+      toast(`${n} pair${n === 1 ? '' : 's'} of crates onto the armoury's shelves (${rack.queue.length} there) · Space at the winch to play them`);
+    } else if (!G.shelfSaid) { G.shelfSaid = true; say('The armoury\'s shelves are full: play some at the winch first', true); }
   }
   barracks.tick(dt, raiders, guardSpots(), { x: sword.x + 1.8, z: sword.z }).forEach(swordNews);
   for (const [s, m] of sword.figures) poseFigure(s, m, dt);
@@ -3254,10 +3273,10 @@ function swordTick(dt) {
   pairSync(dt);
   packSync();
 }
-/* The crates you're carrying for the hoist, strapped on your back: the next three pairs, each pair
-   one on the other as it'll come down the rope, a breaker's bare blade sticking up. */
+/* The crates you're carrying for the hoist, strapped on your back: the first three pairs, each pair
+   one on the other, a breaker's bare blade sticking up. */
 function packSync() {
-  const q = rack.queue, pk = sword.pack ||= new THREE.Group();
+  const q = rack.pack, pk = sword.pack ||= new THREE.Group();
   if (!pk.parent) scene.add(pk);
   const key = q.slice(0, 3).map((p) => p.map(crateSig).join('')).join('|');
   if (key !== sword.packKey) {
@@ -3300,7 +3319,7 @@ function swordPrompt() {
   const n = rack.pieces, of = `${n} pair${n === 1 ? '' : 's'} of crates`;
   if (sword.on) return n ? `The hoist · A/D or arrows move · W/S or Q/E turn · Space drops · Esc: walk (${of})` : 'No crates left: beat raiders for more · Esc: walk';
   if (carry || !atSword()) return '';
-  return n ? `Space: work the hoist (${of}): chests arm soldiers, loose crates make planks to mend the wall` : 'The armoury: beaten raiders drop crates of weapons; stack them here to arm soldiers';
+  return n ? `Space: work the hoist (${of} on the shelves): chests arm soldiers, loose crates make planks to mend the wall` : 'The armoury: beaten raiders drop crates of weapons; bring them here to arm soldiers';
 }
 
 // ---------- bilging the shallows (after Bilge) ----------

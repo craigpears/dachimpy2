@@ -129,26 +129,45 @@ describe('rewardPair', () => {
 });
 
 describe('SwordRack', () => {
-  it('a reward jumps the queue, so it comes down next, unless your hands are full', () => {
-    const r = new SwordRack();
-    r.take(pair(0, 1)); r.take(pair(2, 3));
+  const stocked = (n: number) => { const r = new SwordRack(); for (let i = 0; i < n; i++) { r.take(pair()); r.unload(); } return r; };
+
+  it('a reward jumps the queue, so it comes down next, unless the shelves are full', () => {
+    const r = stocked(2);
     const prize = rewardPair(() => 0.5);
     expect(r.give(prize)).toBe(true);
     expect(r.queue[0]).toBe(prize);
-    while (r.take(pair())) { /* fill up */ }
-    expect(r.give(rewardPair())).toBe(false);
+    const full = stocked(SWORD.STORE);
+    expect(full.give(rewardPair())).toBe(false);
   });
 
-  it('holds the sword pieces you pick up, up to eight', () => {
+  it('you carry the sword pieces you pick up on your back, up to eight', () => {
     const r = new SwordRack();
     for (let i = 0; i < 10; i++) r.take(pair());
-    expect(r.pieces).toBe(SWORD.QUEUE);
+    expect(r.pack).toHaveLength(SWORD.PACK);
     expect(r.take(pair())).toBe(false);
+    expect(r.pieces).toBe(0);   // (none at the hoist yet)
+  });
+
+  it(`dropped off just by walking up to the armoury, onto shelves that hold far more ("you shouldn't have to press space", 9 Nov)`, () => {
+    const r = new SwordRack();
+    for (let i = 0; i < SWORD.PACK; i++) r.take(pair());
+    expect(r.unload()).toBe(SWORD.PACK);
+    expect(r.pack).toHaveLength(0);
+    expect(r.pieces).toBe(SWORD.PACK);
+    for (let i = 0; i < SWORD.PACK; i++) r.take(pair());
+    r.unload();
+    expect(r.queue).toHaveLength(SWORD.PACK * 2);
+    expect(SWORD.STORE).toBeGreaterThan(SWORD.PACK * 2);
+    // Full shelves leave the rest on your back.
+    const full = stocked(SWORD.STORE);
+    full.take(pair());
+    expect(full.unload()).toBe(0);
+    expect(full.pack).toHaveLength(1);
   });
 
   it('brings in the next pair, which falls a row every 0.6 seconds', () => {
     const r = new SwordRack();
-    r.take(pair());
+    r.take(pair()); r.unload();
     expect(r.tick(0.01).changed).toBe(true);
     const row = r.board.falling!.r;
     r.tick(0.5);
@@ -160,19 +179,18 @@ describe('SwordRack', () => {
   it('Space drops it straight down, and says what broke', () => {
     const r = new SwordRack();
     r.board.grid[0][3] = { c: 0 };
-    r.take([{ c: 0, breaker: true }, { c: 2, breaker: false }]);
+    r.take([{ c: 0, breaker: true }, { c: 2, breaker: false }]); r.unload();
     r.tick(0.01);
     const res = r.drop()!;
     expect(res.links[0].broken).toBe(2);
     expect(r.pieces).toBe(0);
   });
 
-  it('a full fourth column loses the fight: the board and the pieces clear', () => {
-    const r = new SwordRack();
+  it('a full fourth column loses the fight: the board clears, the shelves keep their crates', () => {
+    const r = stocked(2);
     for (let row = 0; row < 12; row++) r.board.grid[row][3] = { c: (row % 2) as 0 };
-    r.take(pair()); r.take(pair());
     expect(r.tick(0.01).lost).toBe(true);
-    expect(r.pieces).toBe(0);
+    expect(r.pieces).toBe(2);
     expect(r.board.grid.flat().some(Boolean)).toBe(false);
   });
 

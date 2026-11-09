@@ -22,8 +22,14 @@ import type { Cell, Engine, Placed } from './engine';
 export const SWORD = {
   /** Seconds for the falling pair to drop a row. */
   FALL: 0.6,
-  /** Sword pieces you can carry, waiting to be played. */
-  QUEUE: 8,
+  /** Sword pieces you can carry on your back. */
+  PACK: 8,
+  /** Pairs the armoury's shelves hold, waiting to be played: dropped off just by walking up to the
+      hoist (the user, 9 Nov: "you should be able to just drop them off, like by going near the
+      armory. You shouldn't have to press space ... you should see the collection really building
+      up"). Six shelves of four. */
+  STORE: 24,
+  SHELF: 4,
   /** Soldiers in the den at once, to start with: a handful. The user (9 Nov): "make sure there's
       only so many soldiers you can have ... limited to a handful at the start, but can be upgraded
       ... as you build more of a pirate den", to "build a little army up later" (Barracks.cap). */
@@ -134,36 +140,49 @@ export interface RackNews { landed?: Result; lost?: boolean; changed?: boolean }
     comes in only while you're at the rack), and the falling pair's timer. */
 export class SwordRack {
   readonly board: Board;
+  /** The pairs on the armoury's shelves, next down first. */
   queue: Pair[] = [];
+  /** The pairs on your back. */
+  pack: Pair[] = [];
   private fallT = 0;
 
   constructor(random: () => number = Math.random) { this.board = new Board(random); }
 
-  /** Pieces still to play: the ones waiting, and the one falling. */
+  /** Pieces at the hoist still to play: the ones on the shelves, and the one falling. */
   get pieces(): number { return this.queue.length + (this.board.falling ? 1 : 0); }
 
-  /** Pick up a sword piece. False if your hands are full. */
+  /** Pick up a sword piece, onto your back. False if you're carrying all you can. */
   take(pair: Pair): boolean {
-    if (this.queue.length >= SWORD.QUEUE) return false;
-    this.queue.push(pair);
+    if (this.pack.length >= SWORD.PACK) return false;
+    this.pack.push(pair);
     return true;
   }
 
-  /** A reward (see rewardPair): straight to the front of the queue, so it's the next pair down.
-      False if your hands are full (den.js leaves it on the floor instead). */
+  /** At the hoist: everything on your back onto the shelves (as much as there's room for). How
+      many pairs went up. */
+  unload(): number {
+    const n = Math.min(this.pack.length, SWORD.STORE - this.queue.length);
+    this.queue.push(...this.pack.splice(0, n));
+    return n;
+  }
+
+  /** A reward (see rewardPair): straight onto the shelves at the front, so it's the next pair down.
+      False if the shelves are full (den.js leaves it on the floor instead). */
   give(pair: Pair): boolean {
-    if (this.queue.length >= SWORD.QUEUE) return false;
+    if (this.queue.length >= SWORD.STORE) return false;
     this.queue.unshift(pair);
     return true;
   }
 
   /** A frame at the rack: the next pair comes in, and falls a row every SWORD.FALL seconds. If it
-      can't come in (the fourth column's full), the fight's lost: the board clears, and the pieces with it. */
+      can't come in (the fourth column's full), the fight's lost: the stack topples and the board
+      clears (the crates still on the shelves are kept: with a whole store up there, losing it all
+      would be too harsh). */
   tick(dt: number): RackNews {
     const b = this.board;
     if (!b.falling) {
       if (!this.queue.length) return {};
-      if (!b.spawn(this.queue[0])) { this.reset(); return { lost: true, changed: true }; }
+      if (!b.spawn(this.queue[0])) { b.clear(); this.fallT = 0; return { lost: true, changed: true }; }
       this.queue.shift();
       this.fallT = 0;
       return { changed: true };
@@ -187,7 +206,7 @@ export class SwordRack {
   /** An attack from the raid: sprinkles on the board. */
   hitBy(sprinkles: number): number { return this.board.receive(sprinkles); }
 
-  reset(): void { this.board.clear(); this.queue = []; this.fallT = 0; }
+  reset(): void { this.board.clear(); this.queue = []; this.pack = []; this.fallT = 0; }
 }
 
 /** A raider, as the soldiers see one. (den.js's raiders carry much more; this is all that matters here.) */

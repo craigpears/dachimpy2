@@ -18,8 +18,14 @@ import { Board } from './swordfight.js';
 export const SWORD = {
     /** Seconds for the falling pair to drop a row. */
     FALL: 0.6,
-    /** Sword pieces you can carry, waiting to be played. */
-    QUEUE: 8,
+    /** Sword pieces you can carry on your back. */
+    PACK: 8,
+    /** Pairs the armoury's shelves hold, waiting to be played: dropped off just by walking up to the
+        hoist (the user, 9 Nov: "you should be able to just drop them off, like by going near the
+        armory. You shouldn't have to press space ... you should see the collection really building
+        up"). Six shelves of four. */
+    STORE: 24,
+    SHELF: 4,
     /** Soldiers in the den at once, to start with: a handful. The user (9 Nov): "make sure there's
         only so many soldiers you can have ... limited to a handful at the start, but can be upgraded
         ... as you build more of a pirate den", to "build a little army up later" (Barracks.cap). */
@@ -113,35 +119,48 @@ export function rewardPair(random = Math.random) {
     comes in only while you're at the rack), and the falling pair's timer. */
 export class SwordRack {
     board;
+    /** The pairs on the armoury's shelves, next down first. */
     queue = [];
+    /** The pairs on your back. */
+    pack = [];
     fallT = 0;
     constructor(random = Math.random) { this.board = new Board(random); }
-    /** Pieces still to play: the ones waiting, and the one falling. */
+    /** Pieces at the hoist still to play: the ones on the shelves, and the one falling. */
     get pieces() { return this.queue.length + (this.board.falling ? 1 : 0); }
-    /** Pick up a sword piece. False if your hands are full. */
+    /** Pick up a sword piece, onto your back. False if you're carrying all you can. */
     take(pair) {
-        if (this.queue.length >= SWORD.QUEUE)
+        if (this.pack.length >= SWORD.PACK)
             return false;
-        this.queue.push(pair);
+        this.pack.push(pair);
         return true;
     }
-    /** A reward (see rewardPair): straight to the front of the queue, so it's the next pair down.
-        False if your hands are full (den.js leaves it on the floor instead). */
+    /** At the hoist: everything on your back onto the shelves (as much as there's room for). How
+        many pairs went up. */
+    unload() {
+        const n = Math.min(this.pack.length, SWORD.STORE - this.queue.length);
+        this.queue.push(...this.pack.splice(0, n));
+        return n;
+    }
+    /** A reward (see rewardPair): straight onto the shelves at the front, so it's the next pair down.
+        False if the shelves are full (den.js leaves it on the floor instead). */
     give(pair) {
-        if (this.queue.length >= SWORD.QUEUE)
+        if (this.queue.length >= SWORD.STORE)
             return false;
         this.queue.unshift(pair);
         return true;
     }
     /** A frame at the rack: the next pair comes in, and falls a row every SWORD.FALL seconds. If it
-        can't come in (the fourth column's full), the fight's lost: the board clears, and the pieces with it. */
+        can't come in (the fourth column's full), the fight's lost: the stack topples and the board
+        clears (the crates still on the shelves are kept: with a whole store up there, losing it all
+        would be too harsh). */
     tick(dt) {
         const b = this.board;
         if (!b.falling) {
             if (!this.queue.length)
                 return {};
             if (!b.spawn(this.queue[0])) {
-                this.reset();
+                b.clear();
+                this.fallT = 0;
                 return { lost: true, changed: true };
             }
             this.queue.shift();
@@ -166,7 +185,7 @@ export class SwordRack {
     }
     /** An attack from the raid: sprinkles on the board. */
     hitBy(sprinkles) { return this.board.receive(sprinkles); }
-    reset() { this.board.clear(); this.queue = []; this.fallT = 0; }
+    reset() { this.board.clear(); this.queue = []; this.pack = []; this.fallT = 0; }
 }
 /** Who a soldier can reach: raiders in the den, and ones coming in through a gap. */
 export const reachable = (r) => !r.gone && r.state !== 'down' && (r.inside || r.state === 'climb' || r.state === 'winded');
