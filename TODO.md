@@ -102,6 +102,11 @@ the site (`.assetsignore` skips `*.md`).
   bucket." So a hit holes her and you patch the hole by Carpentry on deck, a whole hole to fill,
   before she sails on. Bilge stays at the lock, where pumping water makes sense.
 
+- **The lock's Bilge board is upside down, and there's no pump to see (9 Nov):** going up the
+  lock, "the bilge puzzle looks like it's upside down", and "we need a visible pumping action
+  going on as well. We need the actual bilge pump": a real pump on the quay by the board, its
+  handle working as you bilge, water gushing into the lock.
+
 - **Try the wind, and oars (9 Nov):** "try it. We'll see how it feels, whether it's
   overcomplicated or not." A first go of IDEAS.md's "Weather is where oars make sense" on the
   sloop's sea: a wind with a direction and a strength that drops and picks up; under sail she's
