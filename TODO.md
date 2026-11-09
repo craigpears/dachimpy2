@@ -22,10 +22,6 @@ the site (`.assetsignore` skips `*.md`).
   - **Moderation:** pirate names are letters only already, but an open room may want a way to hide
     a pirate who's being a nuisance.
 
-- **No puzzle mode at the stairs (8 Nov):** the stairs frame has no "snap to puzzle" view like the
-  front wall's, where the camera goes straight on and the keys move the piece. (Same question as
-  "the second stage" below: the frames want it too.)
-
 - **WASD walks you off the gun tower's arrows (8 Nov):** on the Gunnery deck, when you're close
   enough to chalk arrows, WASD still moves the pirate. The user: "WASD should change the direction
   of the arrows, not move the character". So up close it should be a mode of its own, where WASD
@@ -72,16 +68,6 @@ the site (`.assetsignore` skips `*.md`).
   make no progress". You should be able to fit the piece in the hole instead of throwing it (or the
   daze should last long enough to fit one). (Which, to pin down with the user.)
 
-- **Keyboard-moved piece jumps back to the mouse (8 Nov):** move the piece with the keys over to
-  the right of the mouse cursor and fit it, then pick up the next piece, and it starts at the mouse
-  cursor instead of where you fitted the last one. It should start where the last one went.
-
-- **The last pieces of a frame won't go in until turned (8 Nov):** nearly done with a frame, the
-  wall-walk's say, "it's really hard to fit the last pieces if they need rotating or something, it
-  just stops giving you the option to place the pieces ... it is telling me it won't fit.. well it
-  will if you let me rotate it first". You should be able to hold the piece over the gap and turn
-  it there, whether or not it fits the way it's facing.
-
 ## Needs a playtest to pin down
 
 - **Swordfight at the armoury hoist (8 Nov), not yet tried by the user.** Rebuilt after the
@@ -123,10 +109,12 @@ the site (`.assetsignore` skips `*.md`).
 - **Turning a piece close to the wall feels off.** The user can't yet say how (which way it
   turns? where the ghost jumps to?). The snapping changes of 7 Nov may have helped, and since 8 Nov
   the whole-wall puzzle mode (arrows move the piece by screen direction); ask again.
-- **Puzzle mode at the wall (8 Nov).** The user likes the zoom and the control, but hasn't tried
-  the keys yet (WASD moves the piece, arrows jump hole to hole, since 8 Nov). Still to ask: should
-  it come on by itself when you walk up with a piece; the same view for the rampart and house
-  frames ("the second stage")?
+- **The Carpentry view (9 Nov), not yet tried by the user.** (RULES.md, "The Carpentry view".)
+  Tab from anywhere on the den floor goes straight on to the wall or a frame, with Puzzle Pirates'
+  own keys; it stays on between pieces. Watch for: the wall's stretch of view (15 m round the
+  piece) too close or too far; the stairs' frame hard to read (dark on the dark cave wall); the
+  pirate in the way; Q/W/A/S on a long wall (the nearest hole that way, up or down first); still
+  coming on by itself when you walk up to the wall with a piece (and staying on: Esc to walk).
 - **The walk as one square frame, sawn into lengths (8 Nov), not yet tried by the user.** About
   24 pieces in an 11 by 13 frame at the right of the den, sawn into four lengths that go up end
   to end. Watch for: still running out of the right pieces near the end (a simulated build wasted

@@ -66,14 +66,23 @@ Nailing junk pieces on behind a mended hole should reward good work, the way the
     rampart with the gun tower; and how a layer's shape is chosen (a fresh hole cut to fit inside
     the framing, perhaps bigger than the hole in front?).
 
+## A quick tour for pirates dropping in (9 Nov)
+
+"Some kind of intro that gives you a high level idea of what the phases are ... a walkthrough ...
+a tour, because, you know, people are just going to be quickly dropping into this." Not a
+tutorial, "just kind of a quick, here's what happens, here's how it plays", tabbing through a few
+stages: mend the wall, build the ramparts so you get a gunnery deck to defend from, the build to
+push them back, and the rest. Especially for things like the gun deck, "which are quite hidden at
+the start". And easy to skip straight away.
+
 ## Carpentry as close to the puzzle as Bilge (9 Nov)
 
 The user, after trying Bilge: "some of the ideas this way I'd like to get carpentry closer to is
 something like this, where it's like, yeah, this is like really close one-to-one with the puzzle
 that you can still kind of see what's going on, but it just plays like the puzzle." So the wall's
 holes, the frames and the rest should play like Puzzle Pirates' Carpentry itself, in a view that
-goes into the puzzle (as Bilge's does), with the den still showing round it. To work out with the
-user: what Carpentry does today that the real puzzle doesn't (walking a piece up to the wall,
+goes into the puzzle (as Bilge's does), with the den still showing round it. **The view and the
+keys are in** (RULES.md, "The Carpentry view", 9 Nov). Still to work out with the user: what Carpentry does today that the real puzzle doesn't (walking a piece up to the wall,
 carrying, throwing), and what of that stays.
 
 ## The rampart, built more like real carpentry
@@ -135,7 +144,8 @@ Building on what's there now (the walk and its stairs are made of pieces that st
 - **Bilging the shallows: what's next (the first version is in, 9 Nov; its rules are in RULES.md,
   "Bilging the shallows").** Still open:
   - **Crews: a shared board (9 Nov).** It's solo only for now, like Swordfight; in a crew the tide
-    stays put. The user sees it as collaborative: "multiple people could come and play at the same
+    stays put. Decided (9 Nov): one shared board everyone swaps on, "just to keep it simple". The
+    user sees it as collaborative: "multiple people could come and play at the same
     time. So it's kind of a shared board and it's visible ... it's a lot more interactive". To work
     out: one board everyone swaps on (each with their own cursor), or a board each side by side in
     the shallows, all pumping the one tide (as the real puzzle does on a ship).
@@ -144,6 +154,11 @@ Building on what's there now (the walk and its stairs are made of pieces that st
   - **The Kraken and the tide:** shallow water it can't come into, so bilging pushes it out
     (the user, 9 Nov).
   - **Buried things beyond rocks:** a half-sunk wreck, say, uncovered at low tide.
+  - **Bilge your way out to their ship (9 Nov):** "maybe you start with the water all the way to
+    the top, and if you get down far enough ... the enemy ship is basically anchored at the bottom
+    of the bilge board, so that lets you go and board the enemy, attack the enemy ship or
+    something, and that's what gets you like a nice progression into seafaring." (Goes with the
+    pet Kraken, and the den becoming more ship-based.)
 - **Keep it democratised:** everyone gets a turn at the fun jobs (see the principle above).
 
 For now the den is the first version, and that works.

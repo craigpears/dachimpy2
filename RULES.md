@@ -190,6 +190,31 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   end. The user turned down a clay golem built from smashed Swordfight blocks, with breakers won
   from kills, as "too far away from the sword fighting puzzle", and said this goes for all of them.
   A new job's look (a golem, a forge) can be a skin, never a change to the rules.
+- **The Carpentry view (9 Nov).** The user, after Bilge: "have a 3D mode, but when you're
+  puzzling, like I just don't think you can beat 2D, especially like the biggest critique and
+  feedback I've got is people like to use keyboard controls, and this 3D experience is just not very
+  good. Yeah, it's fun, but it's not good for puzzling and keyboard control." Not a separate
+  screen: "to make it really feel like, oh, look, I can put things on the stairs. I can put things
+  on the wall or the deck or ramparts". Swordfight is already close ("you kind of zoom in and you
+  get that same effect"). So:
+  - **Tab, from anywhere on the den floor,** goes into the Carpentry view on the nearest thing
+    being built (the wall if you're by it); Tab again goes on to the next (the wall, then each
+    frame: the wall-walk, the stairs, the gun tower's parts, your shack); Esc walks off. Walking up
+    to the wall with a piece still brings it on by itself.
+  - **The camera goes straight on to it,** like a 2D board: the wall square on, a stretch of it
+    round the piece, its whole height; a frame on the floor from above, its rows running up the
+    screen; the stairs square on to their face. Your pirate walks along to stand by the piece,
+    out of the way, so others see you building.
+  - **Puzzle Pirates' own Carpentry keys** (YPPedia "Carpentry", read 9 Nov): 1-3 take a crate's
+    piece (the toolbox), the arrows move it a square, X and C turn it, Z flips it, Q/W/A/S centre
+    it over the upper-left, upper-right, lower-left and lower-right holes (on the wall, the nearest
+    hole that way; on a frame, that quarter of it), Space puts it in. Backspace takes the last
+    piece back off (the real puzzle lets you adjust your last piece). E and F still turn and flip.
+    The mouse works too: point and click.
+  - **It stays on between pieces,** and the next piece starts where the last one went. A piece can
+    be held anywhere over the board and turned there, whether it fits or not, and put in from
+    anywhere in the view, no walking.
+  The rules for the keys and jumps are in src/den-carp-view.ts (tests/den-carp-view.test.ts).
 - **Bilge is the model to aim for (9 Nov).** The user loved it most for being "so faithful and
   close": "really close one-to-one with the puzzle ... it just plays like the puzzle. It's not like
   a dumbed down version at all", while you can still see what's going on in the den. They loved

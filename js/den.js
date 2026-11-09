@@ -11,6 +11,7 @@ import { randomPair, W as SW, H as SH, ENTRY as SENTRY } from './swordfight.js';
 import { muster, planRepair, rewardPair, Lumber, REPAIR, SwordRack, Barracks, SWORD } from './den-sword.js';
 import { drawStencil, drawBlade, PALETTE } from './den-sword-draw.js';
 import { Bilge, W as BW, H as BH } from './bilge.js';
+import { KEYS as VIEW_KEYS, nextHole, quarters, centreOn, clampTo, nextBoard } from './den-carp-view.js';
 import { BILGE, Tide, HIGH, LOW, shoreAt, worth, barrelsFor, onRocks, rocksBare, oddsFor, blastHits } from './den-bilge.js';
 import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, cleanDesign, designOf, drawFlag, dyeHex, DYES, SKIN, HAIR, FUR, PARTS, FLAGS, PATTERNS, DECOR, MAX_DECOR, BIOMES, twoColours } from './den-look.js';
 
@@ -3864,17 +3865,13 @@ addEventListener('keydown', (e) => {
   if (sword.on && !deco.on && !G.over && swordKey(key, e)) return;
   if (bilge.on && !deco.on && !G.over && bilgeKey(key, e)) return;
   const arrow = { arrowleft: [0, -1], arrowright: [0, 1], arrowup: [-1, 0], arrowdown: [1, 0] }[key];
-  const step = { a: [0, -1], d: [0, 1], w: [-1, 0], s: [1, 0] }[key];
-  // Puzzle mode at the wall: WASD moves the piece a square (held down, it keeps going), the arrows
-  // jump it to the next hole that way, Esc walks off.
+  // The Carpentry view: Puzzle Pirates' own Carpentry keys (src/den-carp-view.ts). Tab goes into it
+  // from anywhere on the den floor.
   if (wm && !deco.on && !G.over) {
-    if (key === 'escape') { exitWall(); return; }
-    if (step || arrow) {
-      mouseMode = false;
-      if (carry && step) { wm.r += step[0]; wm.c += step[1]; clampCursor(); }
-      else if (carry && !e.repeat) jumpHole(arrow);
-      return;
-    }
+    if (viewKey(key, e)) return;
+  } else if (key === 'tab' && !deco.on && !G.over && !e.repeat && pirate.h < 0.05 && !outside() && !sword.on && !bilge.on) {
+    enterView();
+    return;
   } else if (arrow && !deco.on && !G.over && carry && canWallMode() && !nearFrame()) {
     enterWall();
     mouseMode = false;
@@ -3931,13 +3928,14 @@ renderer.domElement.addEventListener('mousemove', (e) => {
   const p = new THREE.Vector3();
   // A rampart frame you're pointing at (the nearest, if one's in front of another), else the wall.
   let best = null;
-  if (pirate.h < 0.3 && !wm) for (const f of frames()) {
+  if (pirate.h < 0.3 && (!wm || wm.f)) for (const f of wm?.f ? [wm.f] : frames()) {
     if (!ray.ray.intersectPlane(f.plane, p)) continue;
     const l = f.group.worldToLocal(p.clone()), fc = l.x / S, fr = -l.y / S, d = p.distanceTo(ray.ray.origin);
     if (fc < -1.2 || fc > f.b.w + 1.2 || fr < -1.2 || fr > f.b.h + 1.2) continue;
     if (!best || d < best.d) best = { d, frame: f, fc, fr };
   }
   if (best) { mouse = best; mouseMode = true; return; }
+  if (wm?.f) { mouse = null; return; }   // (in a frame's view, only the frame)
   if (gd) { gd.hover = deckCellAt(e.clientX, e.clientY); ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1), camera); }
   if (!ray.ray.intersectPlane(wallPlane, p)) { mouse = null; return; }
   const fc = p.x / S + wall.W / 2, fr = wall.H - p.y / S;
@@ -3954,6 +3952,13 @@ renderer.domElement.addEventListener('mousedown', (e) => {
   if (e.button === 2) { drag = { x: e.clientX, y: e.clientY, moved: false }; return; }
   if (e.button !== 0 || G.over) return;
   if (bilge.on) { bilgeHover(e.clientX, e.clientY); bilgeSwap(); return; }
+  // In the Carpentry view a click only ever fits the piece (or, empty-handed, lifts one out of a frame).
+  if (wm) {
+    if (carry && target?.ok) place(target);
+    else if (carry) shake = 0.2;
+    else if (liftable()) lift(liftable());
+    return;
+  }
   // Up on the rampart there's nothing to fit, so a click anywhere throws at the raider nearest it.
   // In puzzle mode a click only ever fits the piece (raiders show through the holes, so it used to throw),
   // and so does one on a spot the piece fits: a raider outside showing through that hole waits for Shift.
@@ -4209,10 +4214,10 @@ let lastPlaced = null;
 function canTakeBack() {
   const u = lastPlaced;
   if (!u || carry || u.hpAfter === null || pirate.h > 0.3) return false;
-  if (u.frame) return !u.frame.done && u.frame.pieces[u.frame.pieces.length - 1] === u.piece && Math.hypot(u.piece.cx - pirate.x, u.piece.cz - pirate.z) <= REACH + 1.2;
-  if (pirate.z > WALL_Z + 2.5) return false;   // (as far back as you can put one)
+  if (u.frame) return !u.frame.done && u.frame.pieces[u.frame.pieces.length - 1] === u.piece && (!!wm || Math.hypot(u.piece.cx - pirate.x, u.piece.cz - pirate.z) <= REACH + 1.2);
+  if (!wm && pirate.z > WALL_Z + 2.5) return false;   // (as far back as you can put one)
   if (u.h.pieces[u.h.pieces.length - 1] !== u.piece || (!u.piece.patch && u.h.status === 'master') || (u.piece.patch && u.h.lay[u.piece.layer]?.status === 'master')) return false;
-  return Math.abs(u.piece.cx - pirate.x) <= MREACH;
+  return !!wm || Math.abs(u.piece.cx - pirate.x) <= MREACH;
 }
 // A piece in an unfinished frame you could lift back out: the one under the pointer, or (keyboard)
 // the nearest within reach. Anyone's, as everyone builds together.
@@ -5081,17 +5086,90 @@ const onFrame = () => frames().some((f) => {
 });
 const spotRank = (o) => (o.patch ? 1 : o.over ? 2 : 0);   // a clean fit, then a board behind, then boarding over
 const canWallMode = () => pirate.h < 0.05 && !deco.on && !G.over && pirate.z > 0 && pirate.z <= WALL_Z + 2.5 && wall.holes.length > 0;
+// Keeps the piece on the board: on the wall, inside it; on a frame, touching it (it may hang over).
 function clampCursor() {
   if (!wm || !carry) return;
-  const b = C.bbox(carry.cells);
-  wm.r = Math.max(0, Math.min(wall.H - b.h, wm.r));
-  wm.c = Math.max(0, Math.min(wall.W - b.w, wm.c));
+  const b = C.bbox(carry.cells), box = wm.f ? wm.f.b : { r0: 0, c0: 0, h: wall.H, w: wall.W };
+  [wm.r, wm.c] = clampTo(wm.r, wm.c, b.h, b.w, box, !!wm.f);
+}
+/* The Carpentry view (the user, 9 Nov: "when you're puzzling, like I just don't think you can beat
+   2D ... people like to use keyboard controls"): straight on to whatever you're building, the wall
+   or a frame, played with Puzzle Pirates' own Carpentry keys (src/den-carp-view.ts). It stays on
+   while you fetch the next piece with 1-3, and the next piece starts where the last went. */
+const viewBoards = () => [...(wall.holes.length ? ['wall'] : []), ...frames()];
+const viewOk = () => pirate.h < 0.05 && !deco.on && !G.over && !outside() && (wm.f ? frames().includes(wm.f) : wall.holes.length > 0);
+function enterView() {
+  // The nearest thing being built: the wall if you're by it, else the nearest frame.
+  const fs = frames().slice().sort((a, z) => Math.hypot(a.mid.x - pirate.x, a.mid.z - pirate.z) - Math.hypot(z.mid.x - pirate.x, z.mid.z - pirate.z));
+  const byWall = wall.holes.length && (pirate.z <= WALL_Z + 2.5 || !fs.length);
+  const nearF = fs.length && Math.hypot(fs[0].mid.x - pirate.x, fs[0].mid.z - pirate.z) < 4.5;
+  viewOn(nearF && !(byWall && pirate.z <= WALL_Z + 1) ? fs[0] : byWall ? 'wall' : fs[0] || null);
+  mouseMode = false;
+}
+function viewOn(b) {
+  if (!b) return;
+  if (b === 'wall') return enterWall();
+  const q = quarters(b.open), p = q.ul || q.ur || q.dl || q.dr || [b.b.r0, b.b.c0];
+  const bb = carry ? C.bbox(carry.cells) : { h: 1, w: 1 };
+  const [r, c] = centreOn(p, bb.h, bb.w);
+  wm = { f: b, r, c };
+  if (carry) frameSnap(p);
+  clampCursor();
+}
+// Tab: on to the next thing being built.
+function nextView() {
+  const nb = nextBoard(viewBoards(), wm.f || 'wall');
+  if (nb) viewOn(nb);
+}
+// A frame's "up" on the floor (or the stairs' face): which way is up the screen in its view.
+const upQ = new THREE.Quaternion();
+function frameUp(f) {
+  const v = new THREE.Vector3(0, 1, 0).applyQuaternion(f.group.getWorldQuaternion(upQ));
+  v.y = 0;
+  return v.lengthSq() < 1e-6 ? v.set(0, 0, -1) : v.normalize();
+}
+// On a frame, the best spot for the piece near a point: a clean fit if one's close, else centred there.
+function frameSnap(p) {
+  const b = C.bbox(carry.cells), f = wm.f;
+  const near = frameFits(carry.cells).filter((o) => o.frame === f && Math.hypot(o.gr - p[0], o.gc - p[1]) < 2.6)
+    .sort((a, z) => (a.over > 0) - (z.over > 0) || Math.hypot(a.gr - p[0], a.gc - p[1]) - Math.hypot(z.gr - p[0], z.gc - p[1]));
+  if (near.length) { wm.r = near[0].dr; wm.c = near[0].dc; } else [wm.r, wm.c] = centreOn(p, b.h, b.w);
+  clampCursor();
+}
+// Q, W, A, S: on the wall the next hole that way; on a frame, that quarter of it.
+function jumpCorner(corner) {
+  const b = C.bbox(carry.cells), at = [wm.r + b.h / 2, wm.c + b.w / 2];
+  if (wm.f) {
+    const p = quarters(wm.f.open)[corner];
+    if (!p) { shake = 0.08; return; }
+    return frameSnap(p);
+  }
+  const i = nextHole(wall.holes.map((h) => [h.b.r0 + h.b.h / 2, h.b.c0 + h.b.w / 2]), at, corner);
+  if (i === null) { shake = 0.08; return; }
+  toHole(i);
+}
+function viewKey(key, e) {
+  const a = VIEW_KEYS[key];
+  if (!a) return false;
+  if (a.kind === 'move' || a.kind === 'jump' || a.kind === 'turn' || a.kind === 'flip') mouseMode = false;
+  switch (a.kind) {
+    case 'leave': exitWall(); break;
+    case 'move': if (carry) { wm.r += a.dr; wm.c += a.dc; clampCursor(); } break;
+    case 'turn': if (carry) turn(a.dir > 0 ? rotCW : rotCCW, -a.dir); break;
+    case 'flip': if (carry) turn(flip, 0); break;
+    case 'jump': if (carry && !e.repeat) jumpCorner(a.corner); break;
+    case 'take': if (!e.repeat) { takeCrate(a.i); clampCursor(); } break;
+    case 'place': if (!e.repeat) { if (carry && target?.ok) place(target); else if (carry) shake = 0.2; else if (canTakeBack()) takeBack(); } break;
+    case 'next': if (!e.repeat) nextView(); break;
+    case 'undo': if (!e.repeat && canTakeBack()) takeBack(); break;
+  }
+  return true;
 }
 function enterWall() {
   const spots = wallSpots().sort((a, z) => spotRank(a) - spotRank(z) || Math.abs(a.cx - pirate.x) - Math.abs(z.cx - pirate.x));
   const s = (target && !target.frame && target.ok ? target : null) || spots[0];
   const h = s ? null : wall.holes.slice().sort((a, z) => Math.abs(holeX(a) - pirate.x) - Math.abs(holeX(z) - pirate.x))[0];
-  wm = s ? { r: s.dr, c: s.dc } : { r: h.b.r0, c: h.b.c0 };
+  wm = s ? { f: null, r: s.dr, c: s.dc } : { f: null, r: h.b.r0, c: h.b.c0 };
   for (const a of ['arrowup', 'arrowdown', 'arrowleft', 'arrowright']) keys.delete(a);
   clampCursor();
 }
@@ -5102,25 +5180,27 @@ function exitWall() {
 }
 // The arrows: to the next hole that way (along the wall for left and right), to the best spot the
 // piece has in it, or over the middle of it if it won't go in.
-function jumpHole([dr, dc]) {
-  const b = C.bbox(carry.cells), cx = wm.c + b.w / 2, cy = wm.r + b.h / 2;
-  const mid = (h) => [h.b.r0 + h.b.h / 2, h.b.c0 + h.b.w / 2];
-  const inside = (h) => cy >= h.b.r0 && cy <= h.b.r1 + 1 && cx >= h.b.c0 && cx <= h.b.c1 + 1;
-  let best = null, bd = Infinity;
-  wall.holes.forEach((h, i) => {
-    if (inside(h)) return;
-    const [hy, hx] = mid(h), along = dc ? (hx - cx) * dc : (hy - cy) * dr, side = dc ? Math.abs(hy - cy) : Math.abs(hx - cx);
-    if (along <= 0.5) return;
-    const d = along + side * 0.5;
-    if (d < bd) { bd = d; best = i; }
-  });
-  if (best === null) { shake = 0.08; return; }
+function toHole(best) {
+  const b = C.bbox(carry.cells), mid = (h) => [h.b.r0 + h.b.h / 2, h.b.c0 + h.b.w / 2];
   const h = wall.holes[best], [hy, hx] = mid(h);
   const s = wallSpots().filter((o) => o.hole === best).sort((a, z) => spotRank(a) - spotRank(z) || Math.hypot(a.fr - hy, a.fc - hx) - Math.hypot(z.fr - hy, z.fc - hx))[0];
   if (s) { wm.r = s.dr; wm.c = s.dc; } else { wm.r = Math.round(hy - b.h / 2); wm.c = Math.round(hx - b.w / 2); clampCursor(); }
 }
 // Which way to walk to stand below the piece, a step back from the wall.
 function wallWalk() {
+  if (wm?.f) {
+    const f = wm.f, b = carry ? C.bbox(carry.cells) : { h: 1, w: 1 };
+    let tx, tz;
+    if (f.kind === 'stair') {
+      // Beside the foot of the stairs, out of the way of the view.
+      const e0 = frameAt(f, f.b.c0, f.b.r1), e1 = frameAt(f, f.b.c0 + f.b.w, f.b.r1);
+      tx = f.mid.x + (Math.sign(-f.mid.x) || 1) * 0.9; tz = Math.max(e0.z, e1.z) + 0.8;
+    }
+    else { const p = frameAt(f, wm.c + b.w / 2, f.b.r1 + 2.6); tx = p.x; tz = p.z; }   // off its near edge, below the piece
+    const dx = Math.max(-bounds.x + 0.5, Math.min(bounds.x - 0.5, tx)) - pirate.x, dz = Math.max(bounds.z0 + 0.2, Math.min(bounds.z1 - 0.2, tz)) - pirate.z;
+    const n = Math.hypot(dx, dz);
+    return n > 0.25 ? { wx: dx / n, wz: dz / n, slow: Math.min(1, n * 2) } : null;
+  }
   const b = carry ? C.bbox(carry.cells) : null;
   const tx = !b ? pirate.x : X(target && !target.frame ? target.dc : wm.c) + b.w * S / 2;
   const dx = Math.max(-bounds.x + 1.6, Math.min(bounds.x - 1.6, tx)) - pirate.x, dz = WALL_Z + 0.9 - pirate.z;   // a step back, so they don't hide the hole
@@ -5130,6 +5210,19 @@ function wallWalk() {
 function aim() {
   target = null;
   if (!carry || pirate.h > 0.3 || outside()) return;
+  if (wm?.f) {
+    // A frame's view: the spot the piece is over, wherever that is on the frame, no walking needed.
+    const f = wm.f, list = frameFits(carry.cells).filter((o) => o.frame === f), b = C.bbox(carry.cells);
+    if (mouseMode && mouse?.frame === f) {
+      const best = pickSpot(list, () => mouse);
+      if (best) { target = { ...best, ok: true }; wm.r = best.dr; wm.c = best.dc; }
+      else { wm.r = Math.round(mouse.fr - b.h / 2); wm.c = Math.round(mouse.fc - b.w / 2); clampCursor(); target = { frame: f, dr: wm.r, dc: wm.c, ok: false }; }
+      return;
+    }
+    const here = list.find((o) => o.dr === wm.r && o.dc === wm.c);
+    target = here ? { ...here, ok: true } : { frame: f, dr: wm.r, dc: wm.c, ok: false };
+    return;
+  }
   if (wm) {
     // Anywhere on the wall, no walking needed: a clean fit at the piece's square first, then a board
     // on behind, then boarding it over. With the mouse, wherever it points, and the keys carry on
@@ -5211,8 +5304,10 @@ function prompt() {
   } else if (!carry && liftable()) { const l = liftable(); t = `Space: lift the ${l.f.pieces[l.pi].info.letter} back out of the frame`; }
   else if (!carry && canTakeBack()) t = `Space: take the ${lastPlaced.letter} back off`;
   else if (wm) {
-    const keysTip = ' · WASD move it · arrows: next hole · Q/E turn · F flip · Esc: walk';
-    if (!carry) t = '1, 2, 3: take a crate\'s piece · Esc: walk';
+    const keysTip = ' · arrows move · X/C turn · Z flip · Q/W/A/S: holes · Tab: next · Esc: walk';
+    const what = wm.f ? ({ stair: 'The stairs', gun: 'The gun tower frame', house: 'Your shack\'s frame', deck: 'The wall-walk frame' }[wm.f.kind] || 'The frame') : 'The wall';
+    if (!carry) t = `${what} · 1, 2, 3: take a crate's piece · Tab: next · Esc: walk`;
+    else if (target?.ok && target.frame) t = `Space: fit the ${carry.letter}${target.over ? ' (it sticks out: the spare gets sawn off)' : ''}${keysTip}`;
     else if (target?.ok && target.patch) t = `Space: nail it on behind${keysTip}`;
     else if (target?.ok && !target.over) t = `Space: fit the ${carry.letter} here${keysTip}`;
     else if (target?.ok) t = `Space: board it over (weak, no Masterpiece)${keysTip}`;
@@ -6052,7 +6147,24 @@ $('dress').addEventListener('click', (e) => { if (e.target === $('dress')) dress
 const camAt = new THREE.Vector3(0, 7.4, 14.2), camLook = new THREE.Vector3(0, 1.8, 3.6);
 camera.position.copy(camAt);
 const v3 = new THREE.Vector3(), L0 = new THREE.Vector3(), L1 = new THREE.Vector3(), L2 = new THREE.Vector3();
-let deckView = 0, beachView = 0;
+let deckView = 0, beachView = 0, viewCam = null;
+/* The Carpentry view's camera: straight on to the board, close enough to puzzle in. On the wall, a
+   stretch of it round the piece, its whole height; on a frame on the floor, looking down on it from
+   the side its rows run from; on the stairs, square on to their face. */
+function puzzleCam() {
+  const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect);
+  const fit = (w, h, m) => Math.max((h / 2 + m) / Math.tan(vh), (w / 2 + m) / Math.tan(hh));
+  if (!wm.f) {
+    const W2 = wall.W * S / 2, H2 = wall.H * S / 2, win = Math.min(W2, 7.5);
+    const b = carry ? C.bbox(carry.cells) : { w: 0 };
+    const cx = Math.max(-W2 + win, Math.min(W2 - win, X(wm.c) + b.w * S / 2));
+    return { look: V3(cx, H2 + 0.2, 0.6), dist: fit(win * 2, H2 * 2, 0.9) * Math.min(1, view.zoom) + 1, tilt: 0.36, yaw: 0 };
+  }
+  const f = wm.f, mid = frameAt(f, f.b.c0 + f.b.w / 2, f.b.r0 + f.b.h / 2), w = f.b.w * S, h = f.b.h * S * Math.abs(f.group.scale.y);
+  if (f.kind === 'stair') return { look: mid, dist: fit(w, h, 0.9) * view.zoom, tilt: 0.14, yaw: Math.atan2(Math.sign(-mid.x) || 1, 0) };
+  const up = frameUp(f);
+  return { look: mid, dist: fit(w, h, 0.8) * view.zoom, tilt: 1.3, yaw: Math.atan2(-up.x, -up.z) };
+}
 /* Each tick runs the game on in small steps. Alone, a pause (another tab) stops the clock. In a
    crew it doesn't: the den goes on for everyone, so when the browser stops drawing a tab in the
    background, a timer keeps it ticking (as often as the browser lets it) and catches up. */
@@ -6099,9 +6211,10 @@ function update(dt) {
   // Puzzle mode at the wall: in when you come up to it with a piece, out on leaving it.
   if (wmBlock && (wmBlock !== carry || pirate.z > WALL_Z + 3)) wmBlock = null;
   // Fitting the piece is the end of it (the view stays a moment, for the next piece).
-  if (wm && !carry && !net.pending) { wm = null; wmLinger = 1.5; }
   wmLinger = mx || mz || !canWallMode() ? 0 : Math.max(0, wmLinger - dt);
-  if (wm && (!canWallMode() || pirate.h > 0.05)) wm = null;
+  // A frame finished while you were on it: on to the next thing being built.
+  if (wm?.f && !frames().includes(wm.f)) { const nb = viewBoards()[0]; if (nb) viewOn(nb); else wm = null; }
+  if (wm && !viewOk()) wm = null;
   else if (!wm && carry && !wmBlock && !mx && !mz && canWallMode() && !nearFrame() && !onFrame() && wallSpots().length) enterWall();
   const auto = wm && !mx && !mz ? wallWalk() : null;
   const moving = pirate.moving = !!(mx || mz || auto);
@@ -6229,14 +6342,15 @@ function update(dt) {
   // Puzzle mode at the wall: straight on to the whole wall, every hole in view at once.
   wallView += ((wm || wmLinger > 0 ? 1 : 0) - wallView) * Math.min(1, dt * 3);
   let yaw = view.yaw;
-  if (wallView > 0.001) {
-    const W2 = wall.W * S / 2, H2 = wall.H * S / 2;
-    const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect);
-    L2.set(0, H2 + 0.2, 0.6);
-    look.lerp(L2, wallView);
-    dist += (Math.max((W2 + 0.5) / Math.tan(hh), (H2 + 1.4) / Math.tan(vh)) * Math.min(1, view.zoom) + 1 - dist) * wallView;
-    tilt += (0.36 - tilt) * wallView;   // high enough to see over the pirate's head
-    yaw = Math.atan2(Math.sin(view.yaw), Math.cos(view.yaw)) * (1 - wallView);
+  if (wm) viewCam = puzzleCam();
+  if (wallView > 0.001 && viewCam) {
+    look.lerp(viewCam.look, wallView);
+    dist += (viewCam.dist - dist) * wallView;
+    tilt += (viewCam.tilt - tilt) * wallView;
+    const y0 = Math.atan2(Math.sin(view.yaw), Math.cos(view.yaw));
+    let d = viewCam.yaw - y0;
+    d = Math.atan2(Math.sin(d), Math.cos(d));
+    yaw = y0 + d * wallView;
   }
   // At the sword rack: straight on to the board, close enough to play it.
   swordView += ((sword.on ? 1 : 0) - swordView) * Math.min(1, dt * 3);
