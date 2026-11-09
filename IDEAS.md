@@ -93,7 +93,9 @@ forward". You **row out to his hideout**, which gives it "a bit more of a PvP fe
    his island **without a direct confrontation** and steal some of it. Doing that builds up
    **aggravation**: the more you take, the angrier they get, and that's what brings on further
    raids at your den. (So the raids that come "when the world gives a reason" have one: your own
-   thieving.) Digging still needs to be believable where it happens (the user, earlier: Treasure
+   thieving.) Another way to stir up aggro (the user, 9 Nov, "if we somehow manage to figure it
+   out"): the den evolves so the gun platform sits **over a busy shipping lane**, and you can
+   take shots at passing ships; that makes people angry enough to come and attack you. Digging still needs to be believable where it happens (the user, earlier: Treasure
    Haul "breaks the immersion" in the middle of a hillside):
    - *Digging, Foraging-style:* in Puzzle Pirates, Foraging is digging up goods on an island, so
      digging down to the chest is what it was made for;

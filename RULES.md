@@ -171,10 +171,16 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **The captain's map, and the cheesy cutscene that brings it (9 Nov).** Beat the third wave and
   a short cutscene plays (the user: "I want a little cutscene, so they're not just sailing off in
   the distance ... a short, cheesy one"), black bars top and bottom, the den's buttons and keys
-  out of the way: their captain, **Dalnoth**, on the beach, shakes his fist at your wall ("We'll
-  be back! *hic*"), runs for his boat and rows off, and a rolled-up map tumbles out of his coat
-  onto the sand. Then your pirate walks out through the gate on their own, picks it up ("A
-  map!") and opens it out on the sand in front of them, the camera looking down on it. Whatever
+  out of the way: their captain, **Dalnoth**, is at their cannon on the ship's deck (not just
+  appearing on the beach: "it feels just a bit forced how he just magically appears. Like maybe he
+  should be the one like manning the cannon on the boat"), hops over the side into his rowboat and
+  rows in, stomps up the beach and shakes his fist at your wall ("We'll be back! *hic*", the shot
+  high enough that his bubble's in it: it was cut off), runs for his boat, and a rolled-up map
+  tumbles out of his coat onto the sand. Then a good long shot of him rowing back out to the ship
+  ("a few more seconds of him rowing away on the boat would be good"), the ship held at anchor
+  till he's aboard, and only then your pirate walks out through the gate on their own, picks it
+  up ("A map!") and opens it out on the sand in front of them, the camera looking down on it.
+  About seventeen seconds in all. The den's labels stay out of the cutscene. Whatever
   you had in hand goes back on its crate first. **Space or Esc skips it**, and then the map's left
   lying on the beach, "A map?" over it, for you to walk out and pick up with Space. **M** opens
   it again wherever you're standing on the ground; M, Esc, Space or a click rolls it up. **While
@@ -390,8 +396,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     him out. The user: "I like that principle. Like, leave the choices open."
 - **Swordfight at the armoury hoist: soldiers and wall repairs (8 Nov).** Each raider beaten
   (knocked flat, by a thrown piece, the guns or a soldier; or turned away at the wall) drops their
-  weapons: a pair of crates, a Swordfight pair, that lands inside the den. Walk over it to pick it
-  up (eight at most). At the armoury hoist, against the left of the den, Space at the winch plays
+  weapons: a pair of crates, a Swordfight pair, that lands inside the den. Walk over it to pick it up: it goes on your back (eight pairs at most). **Walk up to the hoist
+  and they come off your back onto its shelves by themselves,** no key needed (the user, 9 Nov:
+  "you should be able to just drop them off, like by going near the armory. You shouldn't have to
+  press space"): six shelves of four on its right-hand side, the top one next down, **filling up
+  as you bring more** ("you should see the collection really building up"). If the stack topples,
+  the board clears but the shelves keep their crates. At the armoury hoist, against the left of the den, Space at the winch plays
   them on a real Swordfight board, by the real rules (6 by 13, pairs in at the top of the fourth
   column, fusing, breakers, chains; stack up into the red stripes at the top of the fourth column
   and the stack topples, with the crates you had). A pair only comes in while you're at the
@@ -436,9 +446,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   There's nothing natural looking about it. It's very glaring" (the user), and setting it into a
   wall "doesn't really make sense".
   **You can see what you're carrying, and see things break (8 Nov).** The crates you've picked up
-  ride on your back, lashed to a carrying frame (the next three pairs, as they'll come down), and a
-  tile beside the crates in the toolbox shows the next few pairs, breakers glowing, and how many you
-  have; picking one up says how many and where they go. The user: "it doesn't really have any
+  ride on your back, lashed to a carrying frame (the first three pairs), and a
+  tile beside the crates in the toolbox shows the first few, breakers glowing, and how many are on
+  your back; picking one up says how many and where they go. The user: "it doesn't really have any
   indication, visual or otherwise, that you're carrying any breakers. You just kind of walk into
   them and it's like, okay, well, now what?" A break plays out a link of the chain at a time: what's
   about to break shakes and swells, then smashes into flying planks (a breaker's blade just

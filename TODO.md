@@ -96,18 +96,6 @@ the site (`.assetsignore` skips `*.md`).
   the primer goes. (How, where it's hosted, and what of the primer's engine the den still needs,
   to pin down with the user when it's time.)
 
-- **Drop crates off at the armoury just by walking up (9 Nov):** "if you have only got 8 pieces in
-  your pack, you know, you should be able to just drop them off, like by going near the armory. You
-  shouldn't have to press space to get in it. You should visibly see them stacking up a bit more on
-  the right. So I love how you've got the one shelf, but yeah, you should see the collection really
-  building up."
-
-- **Dalnoth's cutscene (9 Nov):** his speech bubble's cut off ("when you zoom into Dalnoth, you
-  can't actually see his speech bubble. It gets cut out"); "a few more seconds of him rowing away
-  on the boat would be good"; and "it feels just a bit forced how he just magically appears. Like
-  maybe he should be the one like manning the cannon on the boat. That would be a bit more
-  natural."
-
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map

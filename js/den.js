@@ -2628,6 +2628,7 @@ const SHIP_GONE = 46;
 function shipSail(dt) {
   const home = ship.userData.home, out = G.phase === 'peace';
   if (!out) { if (ship.position.x !== home) shipHome(); return; }
+  if (cine) return;   // (held at anchor till their captain's back aboard)
   if (!ship.visible) return;
   const run = ship.position.x - home;
   ship.position.x += dt * Math.min(2.4, 0.15 + run * 0.12);
@@ -4053,6 +4054,13 @@ function stepTo(o, p, tx, tz, speed, dt) {
   animateWalk(p, true, dt, speed * 3.4);
   return false;
 }
+/* The cutscene's beats, in seconds from the start. The user (9 Nov): "it feels just a bit forced
+   how he just magically appears. Like maybe he should be the one like manning the cannon on the
+   boat", and "a few more seconds of him rowing away on the boat would be good". So: him at their
+   cannon on deck; over the side into his rowboat; rowing in; up the beach; the rant; the run for
+   it (the map falling out of his coat); a good long row back out to the ship; then you, out
+   through the gate to pick it up. */
+const CINE = { deck: 1.4, jump: 2.1, row: 5.3, walk: 6.5, rant: 8.7, run: 10.1, off: 7, you: 13.4 };
 function cineStart() {
   // Whatever you were doing is put down: out of the puzzles, the piece in hand back on its crate.
   if (wm) exitWall();
@@ -4064,20 +4072,23 @@ function cineStart() {
   const cap = dalnoth();
   cap.g.scale.setScalar(1.1);
   scene.add(cap.g);
+  // His rowboat, waiting under the ship's side (his own: the raids don't touch it).
   const boat = rowboat();
-  boats.splice(boats.indexOf(boat), 1);   // (his own: the raids don't touch it)
-  boat.g.position.set(s.x - 1.4, 0, bz);
-  boat.g.rotation.y = Math.PI;   // bow out to sea, ready to go
+  boats.splice(boats.indexOf(boat), 1);
+  const from = { x: ship.position.x - 1.2, z: BOAT_FROM }, land = { x: s.x - 1.4, z: bz };
+  boat.g.position.set(from.x, 0, from.z);
   if (!chart.scroll) { chart.scroll = scrollMesh(); scene.add(chart.scroll); }
   chart.scroll.visible = false;
   // You, just inside the gate (the camera's on him, so nobody sees you put there).
   Object.assign(pirate, { x: wall.door.cx, z: 1.5, h: 0, hs: 0, hop: null });
   pirate.g.rotation.y = Math.PI;
+  // Him: on deck, at their cannon.
+  const deck = { x: ship.position.x + 0.1, z: SHIP_Z + 0.15 };
   cine = {
-    t: 0, cap, at: { x: s.x - 1.4, z: bz + 0.9 }, stand: { x: s.x - 0.2, z: s.z - 1.5 }, boat, bz, drop: null, got: 0,
-    says: bubble('We\'ll be back! *hic*'), mine: bubble('A map!'), cam: { look: V3(0, 1, 0), dist: 5, tilt: 0.4, yaw: 0 },
+    t: 0, cap, at: { ...deck }, deck, from, land, stand: { x: s.x - 0.2, z: s.z - 1.5 }, boat, bz, drop: null, got: 0,
+    says: bubble('We\'ll be back! *hic*'), mine: bubble('A map!'), cam: { look: V3(deck.x, SHIP_DECK + 1, deck.z), dist: 7, tilt: 0.32, yaw: 0.3 },
   };
-  cap.g.position.set(cine.at.x, 0, cine.at.z);
+  cap.g.position.set(deck.x, SHIP_DECK, deck.z);
   document.body.classList.add('cine');
   $('intro').classList.add('off');
 }
@@ -4092,35 +4103,57 @@ function cineEnd(skip) {
   pirate.arms.forEach((a) => { a.rotation.x = 0; });
   if (!skip) takeMap();
 }
+// Him in his boat, pulling at the oars, the boat heading for (tx, tz).
+function cineRow(c, t, u, a, b) {
+  const e = u * u * (3 - 2 * u), g = c.boat.g, cap = c.cap, pull = Math.sin(t * 5.5);
+  g.position.set(a.x + (b.x - a.x) * e, Math.sin(t * 2.1) * 0.05 - 0.06, a.z + (b.z - a.z) * e);
+  g.rotation.y = Math.atan2(b.x - a.x, b.z - a.z);
+  cap.g.position.set(g.position.x, g.position.y + 0.22, g.position.z);
+  cap.g.rotation.set(0, g.rotation.y, 0);
+  cap.legs.forEach((l) => { l.rotation.x = -1.3; });
+  cap.arms.forEach((a2) => { a2.rotation.x = -0.9 + pull * 0.45; a2.rotation.z = 0; });
+  g.userData.oars.forEach((o, i) => { o.rotation.y = (i ? 1 : -1) * pull * 0.45; o.rotation.x = Math.cos(t * 5.5) * 0.12; });
+  c.at.x = g.position.x; c.at.z = g.position.z;
+}
 function cineTick(dt) {
   if (!cine) return;
-  const c = cine, t = (c.t += dt), cap = c.cap, at = c.at, s = mapSpot();
-  // Him: up from his boat, a fist shaken at your wall, then a run for it and off he rows.
-  if (t < 1.3) stepTo(at, cap, c.stand.x, c.stand.z, 3, dt);
-  else if (t < 3.5) {
+  const c = cine, t = (c.t += dt), cap = c.cap, at = c.at, s = mapSpot(), T = CINE, bg = c.boat.g;
+  if (t < T.deck) {
+    // At their cannon, looking over at your wall.
+    animateWalk(cap, false, dt);
+    faceTo(cap, 0, 1, dt);
+    cap.g.position.set(at.x, SHIP_DECK + Math.sin(performance.now() / 1000 * 0.9) * 0.07, at.z);
+  } else if (t < T.jump) {
+    // Over the side and down into his boat.
+    const u = (t - T.deck) / (T.jump - T.deck);
+    at.x = c.deck.x + (c.from.x - c.deck.x) * u; at.z = c.deck.z + (c.from.z - c.deck.z) * u;
+    cap.g.position.set(at.x, SHIP_DECK * (1 - u) + 0.16 * u + Math.sin(u * Math.PI) * 0.8, at.z);
+    cap.arms.forEach((a) => { a.rotation.x = -2.6; });
+  } else if (t < T.row) {
+    cineRow(c, t, (t - T.jump) / (T.row - T.jump), c.from, c.land);
+  } else if (t < T.walk) {
+    // Out of the boat and up the beach.
+    bg.position.y = 0;
+    stepTo(at, cap, c.stand.x, c.stand.z, 3, dt);
+    cap.g.position.set(at.x, 0, at.z);
+  } else if (t < T.rant) {
     animateWalk(cap, false, dt);
     faceTo(cap, 0, 1, dt);   // at the wall
     cap.arms[1].rotation.x = -2.7 + Math.sin(t * 22) * 0.35;
-    cap.g.position.y = Math.abs(Math.sin(t * 11)) * 0.08;   // hopping mad
     cap.arms[0].rotation.x = -0.5 + Math.sin(t * 22) * 0.12;   // (the ale slopping)
     cap.arms[0].rotation.z = 0.25;
-  } else if (t < 5) {
+    cap.g.position.set(at.x, Math.abs(Math.sin(t * 11)) * 0.08, at.z);   // hopping mad
+  } else if (t < T.run) {
     c.drop ||= { t: 0, from: V3(at.x, 1.2, at.z) };
-    stepTo(at, cap, c.boat.g.position.x, c.bz + 0.1, 4.2, dt);
+    stepTo(at, cap, c.land.x, c.land.z + 0.1, 4.2, dt);
+    cap.g.position.set(at.x, 0, at.z);
   } else {
-    // In the boat, pulling for the ship; boat and all dwindle off into the distance.
-    const u = Math.min(1, (t - 5) / 4), pull = Math.sin(t * 5.5);
-    c.boat.g.position.z = c.bz + (BOAT_FROM - c.bz) * u;
-    cap.g.position.set(c.boat.g.position.x, 0.22, c.boat.g.position.z);
-    cap.g.rotation.y = Math.PI;
-    cap.legs.forEach((l) => { l.rotation.x = -1.3; });
-    cap.arms.forEach((a) => { a.rotation.x = -0.9 + pull * 0.45; });
-    c.boat.g.userData.oars.forEach((o, i) => { o.rotation.y = (i ? 1 : -1) * pull * 0.45; });
-    if (u > 0.6) { const k = 1 - (u - 0.6) / 0.4 * 0.95; c.boat.g.scale.setScalar(k); cap.g.scale.setScalar(1.1 * k); }
-    at.x = cap.g.position.x; at.z = cap.g.position.z;
+    // A good long pull back out to the ship, boat and all dwindling as he gets there.
+    const u = Math.min(1, (t - T.run) / T.off);
+    cineRow(c, t, u, c.land, c.from);
+    if (u > 0.75) { const k = 1 - (u - 0.75) / 0.25 * 0.95; bg.scale.setScalar(k); cap.g.scale.setScalar(1.1 * k); }
   }
-  if (t < 5) cap.g.position.set(at.x, cap.g.position.y, at.z);
-  cap.g.rotation.z = t < 5 ? Math.sin(t * 2.3) * 0.09 : 0;   // (a bit unsteady on his feet)
+  cap.g.rotation.z = t >= T.row && t < T.run ? Math.sin(t * 2.3) * 0.09 : 0;   // (a bit unsteady on his feet)
   // The map, tumbling out of his coat as he turns to run, bouncing once on the sand.
   if (c.drop && !c.got) {
     const u = Math.min(1, (c.drop.t += dt) / 0.8), sc = chart.scroll;
@@ -4129,10 +4162,10 @@ function cineTick(dt) {
     sc.position.set(c.drop.from.x + (s.x - c.drop.from.x) * u, Math.max(0.06, c.drop.from.y * (1 - u) + hop), c.drop.from.z + (s.z - c.drop.from.z) * u);
     sc.rotation.set(u < 1 ? t * 9 : 0, 0.5, 0);
   }
-  bubbleAt(c.says, t > 1.4 && t < 3.6, at.x, 2.6, at.z);
+  bubbleAt(c.says, t > T.walk + 0.1 && t < T.rant + 0.2, at.x, 2.6, at.z);
   // You: out through the gate to the map, and pick it up.
   const by = { x: s.x + 0.1, z: s.z + 0.8 }, gx = wall.door.cx;
-  if (t > 5.4) {
+  if (t > T.you) {
     if (pirate.z > -1.4) stepTo(pirate, pirate, gx, -1.6, 2.6, dt);
     else if (stepTo(pirate, pirate, by.x, by.z, 2.6, dt)) {
       faceTo(pirate, 0, -1, dt * 2);
@@ -4146,9 +4179,13 @@ function cineTick(dt) {
     pirate.g.position.x = pirate.x; pirate.g.position.z = pirate.z;
   }
   bubbleAt(c.mine, c.got && t - c.got > 0.4, pirate.x, 2.4, pirate.z);
-  // The camera: on him from the beach by the wall, then on you coming out.
+  // The camera: on him at the cannon, following his boat in, on the beach for the rant (high enough
+  // that his bubble's in the shot), following him back out, then on you coming out.
   const cam = c.cam;
-  if (t < 5.4) { cam.look.set(at.x * 0.6 + s.x * 0.4, 0.9, Math.min(at.z, s.z - 1.5) - 1.2); cam.dist = 4.6 + Math.max(0, t - 4) * 1.8; cam.tilt = 0.45; cam.yaw = 0.25; }   // (from out on the sand, clear of the wall)
+  if (t < T.jump) { cam.look.set(c.deck.x, SHIP_DECK + 1, c.deck.z); cam.dist = 7; cam.tilt = 0.32; cam.yaw = 0.3; }
+  else if (t < T.row) { cam.look.set(bg.position.x, 0.8, bg.position.z); cam.dist = 7.5; cam.tilt = 0.38; cam.yaw = 0.3; }
+  else if (t < T.run + 0.6) { cam.look.set(at.x * 0.6 + s.x * 0.4, 1.6, Math.min(at.z, s.z - 1.5) - 1.2); cam.dist = 6; cam.tilt = 0.4; cam.yaw = 0.25; }   // (from out on the sand, clear of the wall)
+  else if (t < T.you) { cam.look.set(bg.position.x * 0.6 + c.from.x * 0.4, 0.8, bg.position.z * 0.6 + c.from.z * 0.4); cam.dist = 8 + (t - T.run) * 0.8; cam.tilt = 0.36; cam.yaw = -0.35; }   // (their ship in the shot, where he's heading)
   else { cam.look.set(pirate.x, 1.0, pirate.z); cam.dist = c.got ? 3.4 : 5; cam.tilt = c.got ? 0.5 : 0.36; cam.yaw = Math.PI - 0.45; }
   if (c.got && t - c.got > 1.6) cineEnd(false);
 }

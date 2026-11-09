@@ -78,9 +78,9 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    - Your **shack** can be built whenever you like, in its plot at the back.
 3. ✓ **They sail off, and the den's quiet.** Beat wave 3 and their captain, Dalnoth himself,
    calls it off: "We'll be back! *hic*" No countdown after that.
-4. ✓ **The captain's map.** A short, cheesy cutscene: Dalnoth shakes his fist on the beach,
-   "We'll be back!", runs for his boat, and a map falls out of his coat; your pirate walks out
-   and picks it up. "We hear there's some secret treasure here, guarded by a fearsome enemy." It
+4. ✓ **The captain's map.** A short, cheesy cutscene: Dalnoth leaves his cannon on deck, rows
+   in, shakes his fist on the beach, "We'll be back!", runs for his boat, and a map falls out of
+   his coat; he rows back out to his ship, and your pirate walks out and picks it up. "We hear there's some secret treasure here, guarded by a fearsome enemy." It
    shows his island across the sea, and the ways in: by ship with the guns, land and swordfight,
    or round to a hidden cove with an old bilge pump.
 5. · **Out to sea, to his hideout.** Forward, not back: you go and raid him, "a mirror of this
