@@ -46,10 +46,14 @@ const LEFT = (c) => c === 'ul' || c === 'dl';
 const UP = (c) => c === 'ul' || c === 'ur';
 /** On the wall (holes all along it): the hole the corner key sends the piece to, from where it is
     now. Left keys look left, right keys right; of those, ones on the same level (up or down) as the
-    key come first, then the nearest. Null if there's nothing that way. */
-export function nextHole(holes, at, corner) {
+    key come first, then the nearest. Never `cur`, the hole the piece is at already (the user, 9 Nov:
+    with the piece a little right of its hole's middle, Q took it back to that same hole, so "it
+    isn't jumping"). Null if there's nothing that way. */
+export function nextHole(holes, at, corner, cur = null) {
     let best = null, bd = Infinity;
     holes.forEach(([r, c], i) => {
+        if (i === cur)
+            return;
         const dc = c - at[1], dr = r - at[0];
         if (LEFT(corner) ? dc > -0.5 : dc < 0.5)
             return;
@@ -100,4 +104,16 @@ export function nextBoard(boards, cur) {
         return null;
     const i = cur === null ? -1 : boards.indexOf(cur);
     return boards[(i + 1) % boards.length];
+}
+/** Left and right on the wall (the user, 9 Nov: "it just blocks me instead of skipping over it"):
+    a square at a time while the piece (`w` wide, its left at column `c`) stays over a hole's
+    stretch; off it, straight on to the next hole that way, over the bare stone and the gate
+    between. 'step': move a square; a number: the hole to jump to; null: there's none that way. */
+export function along(zones, c, w, dir) {
+    const over = (z, at) => at < z.c1 && at + w > z.c0;
+    if (zones.some((z) => over(z, c + dir)))
+        return 'step';
+    const ahead = zones.filter((z) => !over(z, c) && (dir > 0 ? z.c0 > c : z.c1 < c + w))
+        .sort((a, z) => (dir > 0 ? a.c0 - z.c0 : z.c1 - a.c1))[0];
+    return ahead ? ahead.i : null;
 }

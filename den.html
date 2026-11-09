@@ -23,14 +23,15 @@
     .prompt { background: var(--panel); border: 1px solid var(--gold); border-radius: 8px; padding: 8px 16px; font-size: 18px; font-weight: 700; white-space: nowrap; }
     .prompt:empty { display: none; }
     /* The Carpentry view's tabs: everything being built, the one you're on lit, a tick where your piece fits. */
-    .boards { display: flex; gap: 6px; pointer-events: auto; }
+    .boards { display: flex; gap: 8px; align-items: center; pointer-events: auto; background: var(--panel); border: 1px solid #5a412a; border-radius: 10px; padding: 6px 10px; }
     .boards:empty { display: none; }
-    .boards button { font: 700 14px 'Alegreya Sans'; color: var(--dim); background: var(--panel); border: 1px solid #5a412a; border-radius: 7px; padding: 4px 10px; cursor: pointer; }
-    .boards button:hover { border-color: #8a6a44; color: var(--ink); }
-    .boards button.on { color: var(--ink); border-color: var(--gold); }
+    .boards .tabkey { font: 700 15px 'Alegreya Sans'; color: var(--dim); margin-right: 2px; }
+    .boards .tabkey kbd { font: inherit; color: var(--ink); background: #3a2a1c; border: 1px solid #6a4e32; border-radius: 5px; padding: 1px 7px; }
+    .boards button { font: 700 17px 'Alegreya Sans'; color: var(--ink); background: #3a2a1c; border: 1px solid #6a4e32; border-radius: 8px; padding: 6px 14px; cursor: pointer; }
+    .boards button:hover { border-color: var(--gold); }
+    .boards button.on { color: #2a1d13; background: var(--gold); border-color: var(--gold); }
     .boards .fit { color: #9fe08a; }
-    /* The wall's Carpentry board: the holes in two rows, like the real puzzle, over the den. */
-    .carp-board { position: fixed; display: none; background: rgba(28, 19, 12, 0.9); border: 1px solid var(--gold); border-radius: 10px; z-index: 1; cursor: pointer; }
+    .boards button.on .fit { color: #1f5a12; }
     .toolbox { display: flex; gap: 6px; align-items: center; background: var(--panel); border: 1px solid #5a412a; border-radius: 10px; padding: 5px 8px; }
     .toolbox[hidden] { display: none; }
     body.swordfight .toolbox { display: none; }   /* at the sword rack: the crates are no use there */

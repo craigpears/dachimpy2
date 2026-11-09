@@ -12,7 +12,7 @@ Pirate Den: `den.html`, `js/den.js` (the game), `js/den-look.js` (looks). Parts 
 TypeScript in `src/`: `den-deal.ts` (the fair deal), `swordfight.ts` (the Swordfight puzzle, knowing nothing of
 the den), `den-sword.ts` (the armoury hoist, the soldiers and the wall repairs, as plain data), `den-sword-draw.ts`
 (what's painted on Swordfight's crates), `bilge.ts` (the Bilge puzzle, knowing nothing of the den),
-`den-bilge.ts` (the tide, the rocks and the powder barrels), `den-carp-view.ts` (the Carpentry view's keys and jumps); `den-carp-board.ts` (the wall's Carpentry board, the holes in two rows); `engine.d.ts` types the engine. den.js keeps only the 3D and the wiring; new features follow the same
+`den-bilge.ts` (the tide, the rocks and the powder barrels), `den-carp-view.ts` (the Carpentry view's keys and jumps); `engine.d.ts` types the engine. den.js keeps only the 3D and the wiring; new features follow the same
 split: rules and decisions in a tested TypeScript part, den.js drawing them. Compiled into `js/` by
 `npm run build`; the compiled `js/*.js` is committed, since the site deploys the files as they are. Never edit a
 compiled file by hand. Relative imports in `src/` need the `.js` ending (`'./swordfight.js'`): the browser loads

@@ -1,7 +1,7 @@
 /* The Carpentry view's keys and jumps (9 Nov): Puzzle Pirates' own Carpentry keys, as YPPedia
    gives them, on the wall and the frames. */
 import { describe, expect, it } from 'vitest';
-import { KEYS, centreOn, clampTo, nextBoard, nextHole, quarters } from '../src/den-carp-view';
+import { KEYS, along, centreOn, clampTo, nextBoard, nextHole, quarters } from '../src/den-carp-view';
 import type { Pt } from '../src/den-carp-view';
 
 describe('the keys are the real Carpentry keys', () => {
@@ -34,6 +34,11 @@ describe('jumping between holes on the wall', () => {
   });
   it('takes the other level if there\'s none on the key\'s level that way', () => {
     expect(nextHole(holes, [5, 24], 'ur')).toBe(3);
+  });
+  it('Q goes on to the next hole left, even with the piece right of its own hole\'s middle (9 Nov: "it isn\'t jumping")', () => {
+    // The piece at hole 2 (middle column 20), its own middle at column 20.5: hole 2 isn't "left".
+    expect(nextHole(holes, [3, 20.5], 'ul', 2)).toBe(0);
+    expect(nextHole(holes, [3, 20.5], 'dl', 2)).toBe(1);
   });
   it('goes nowhere if there\'s no hole that way', () => {
     expect(nextHole(holes, [5, 2], 'ul')).toBeNull();
@@ -75,5 +80,31 @@ describe('Tab goes on to the next thing being built', () => {
     expect(nextBoard(['wall', 'stairs', 'walk'], 'walk')).toBe('wall');
     expect(nextBoard(['wall'], null)).toBe('wall');
     expect(nextBoard([], null)).toBeNull();
+  });
+  it('switching between the wall, the stairs and the walk works by keyboard both ways (9 Nov: "you should certainly be able to switch between them, including using the keyboard")', () => {
+    const list = ['wall', 'walk', 'stairs'];
+    expect(nextBoard(list, 'walk')).toBe('stairs');
+    expect(nextBoard([...list].reverse(), 'walk')).toBe('wall');   // Shift+Tab
+    expect(nextBoard([...list].reverse(), 'wall')).toBe('stairs');
+  });
+});
+
+describe('the arrows along the wall skip the bare stone between holes', () => {
+  // Two holes with stone round them (columns 3-10 and 12-18), then the gate, then one at 30-37.
+  const zones = [{ i: 0, c0: 3, c1: 10 }, { i: 1, c0: 12, c1: 18 }, { i: 2, c0: 30, c1: 37 }];
+  it('moves a square while the piece is over a hole or the stone just round it', () => {
+    expect(along(zones, 5, 2, 1)).toBe('step');
+    expect(along(zones, 4, 2, -1)).toBe('step');
+  });
+  it('a piece that would only cover bare stone jumps on to the next hole instead of being blocked (9 Nov: "it just blocks me instead of skipping over it")', () => {
+    expect(along(zones, 17, 2, 1)).toBe(2);   // (over the gate next)
+    expect(along(zones, 28, 3, -1)).toBe(1);
+  });
+  it('jumps even a narrow strip of stone between two holes', () => {
+    expect(along(zones, 9, 2, 1)).toBe(1);
+  });
+  it('goes nowhere past the last hole', () => {
+    expect(along(zones, 36, 2, 1)).toBeNull();
+    expect(along(zones, 2, 2, -1)).toBeNull();
   });
 });

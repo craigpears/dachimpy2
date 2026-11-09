@@ -77,15 +77,6 @@ the site (`.assetsignore` skips `*.md`).
   clearly while you build it. (Since the last update the stairs are on the right and the armoury
   hoist on the left, which may already have fixed this: check once the new version's live.)
 
-- **The Carpentry board by keyboard is unreliable (9 Nov):** the user: "there's definitely big
-  control issues ... this needs a lot more quality control for keyboard use. A lot of it."
-  - 1, 2 and 3 don't swap the piece once you're holding one ("It's not letting me switch").
-  - The arrows are inconsistent: from the bottom right of the top-left hole, down and up worked,
-    then left, but right didn't; it seemed blocked by a piece already placed "instead of skipping
-    over it". The piece should move a square wherever the arrow says, over anything on the board.
-  - Switching between the wall, the stairs and the walk should work from the keyboard too (not one
-    board for all of them, the user isn't sure about that, but easy to switch).
-
 ## Needs a playtest to pin down
 
 - **Swordfight at the armoury hoist (8 Nov), not yet tried by the user.** Rebuilt after the
@@ -135,9 +126,10 @@ the site (`.assetsignore` skips `*.md`).
   pirate in the way (they stand beside the piece now); the tabs over the prompt (ticks where the
   piece fits); one staircase on the right, and the den 4 m deeper; Q/W/A/S on a long wall (the nearest hole that way, up or down first); still
   coming on by itself when you walk up to the wall with a piece (and staying on: Esc to walk).
-  Since 9 Nov the wall's view is a flat Carpentry board, the holes in two rows: watch for the
-  board covering too much of the den (raiders coming unseen), the squares too small on a small
-  screen, and the jump from the board's tile to the real hole feeling disconnected.
+  Since 9 Nov (after the user's keyboard test): left and right skip the bare stone between holes,
+  Q/W/A/S always leave the hole you're at, a resting hand on the mouse no longer undoes key moves,
+  Shift+Tab goes back, the tabs are a clearer bar. Watch for: the arrows' jump to the next hole
+  feeling abrupt, and anything else the keys do that surprises.
 - **The walk as one square frame, sawn into lengths (8 Nov), not yet tried by the user.** About
   24 pieces in an 11 by 13 frame at the right of the den, sawn into four lengths that go up end
   to end. Watch for: still running out of the right pieces near the end (a simulated build wasted

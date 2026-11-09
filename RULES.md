@@ -225,22 +225,29 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     head is hidden while the ghost shows where it goes. It works from up on the rampart too,
     without walking anywhere. The den is 4 m deeper (to make room for all that's built), the
     wall-walk's frame and your shack at the back.
-  - **At the wall it's the real puzzle's board (9 Nov).** The user: "you don't want to move a
-    piece 4 to the right over all the holes"; with 4 or 5 holes "you should see 2 rows". It
-    "doesn't need to map one-on-one to the physical reality ... the 3D view is for the fun part,
-    the 2D is for that." (A taller wall was thought of and dropped: it would hide what's behind.)
-    So the wall's view is a flat board over the den: every hole there's something to fit in gets a
-    tile of its own (the hole and two squares of stone round it, to board over), the tiles in two
-    rows, left to right in the order the holes run along the wall, two to a column. Q/W/A/S go to
-    the tiles as the real puzzle's four holes; the arrows move the piece a square across the board,
-    gaps and all. What you fit on the board goes into the real hole in the 3D wall (the 3D ghost
-    shows where), and your pirate goes to it. A mended hole's tile shows the layer being built, in
-    its timber surround. The mouse works on the board too: the piece follows it (snapping to a spot
-    close by), a click fits it, the wheel turns it, a right click flips it. The layout is in
-    src/den-carp-board.ts (tests/den-carp-board.test.ts). The frames keep the camera view.
   - **It stays on between pieces,** and the next piece starts where the last one went. A piece can
     be held anywhere over the board and turned there, whether it fits or not, and put in from
     anywhere in the view, no walking.
+  - **Immersive, never an overlay (9 Nov).** A flat Carpentry board drawn over the den at the wall
+    (the holes in two rows) was tried and dropped the same day. The user: "I can't even see the wall
+    now ... The wall one feels very forced ... I want it to feel more immersive, like you're in the
+    3D world. This one feels a lot more detached", and "don't create a separate overlay. I think
+    that's bad. That just suggests there's a deeper design problem". The wall-walk's view, where you
+    see the full 3D world and nothing's blocked, is the model. If the wall needs to be closer to the
+    real puzzle, change the wall itself (see IDEAS.md, "The wall in two courses").
+  - **The keys must be dependable (9 Nov).** The user, playing by keyboard: "this needs a lot more
+    quality control for keyboard use. A lot of it." So, tested key by key:
+    - Left and right move a square while the piece is over a hole's columns, and off them jump
+      straight on to the next hole that way, over the bare stone and the gate ("it just blocks me
+      instead of skipping over it"). Up and down move a square.
+    - Q/W/A/S never send the piece back to the hole it's already at (it did, with the piece a little
+      right of its hole's middle: "it isn't jumping").
+    - A hand resting on the mouse doesn't undo key moves: after a key, the mouse takes over again
+      only once it has really moved.
+    - 1-3 swap the piece in your hands for that crate's; for the same letter, a note says so (or it
+      looks as if nothing happened).
+    - Tab and Shift+Tab go round everything being built, both ways; the tabs sit in a bar of their
+      own, the one you're on in gold, with "Tab next" beside them.
   The rules for the keys and jumps are in src/den-carp-view.ts (tests/den-carp-view.test.ts).
 - **Bilge is the model to aim for (9 Nov).** The user loved it most for being "so faithful and
   close": "really close one-to-one with the puzzle ... it just plays like the puzzle. It's not like
