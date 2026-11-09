@@ -129,6 +129,12 @@ the site (`.assetsignore` skips `*.md`).
   hauling or something." So: step ashore in the cove, and Puzzle Pirates' Treasure Haul brings up
   the treasure, played by its real rules (checked first), with a believable reason for it there.
 
+- **Can't drop a pin on the trade winds, and the pilot goes crazy round them (9 Nov):** "I don't
+  seem to be able to drop a pin onto the lanes. The autopilot is going crazy around them." A pin
+  dropped on a lane should take her onto it and ride it (say, to where the wind drops her off),
+  and the pilot should sail sensibly near the lanes, never circling or dithering at their edges.
+  (What a pin on a lane means exactly: to pin down with the user.)
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
