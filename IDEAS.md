@@ -232,6 +232,11 @@ moving. It gives such a nostalgia." What's next:
   raise or lower your ship before the gates open. A shortcut that costs puzzle work, not
   reflexes, which keeps a race a puzzle game (and Bilge pumping water somewhere it believably
   needs pumping, as at the den's tide).
+  **The Navigation duty puzzle (9 Nov):** bring Puzzle Pirates' Navigation duty puzzle into the
+  races, so that, in concept, doing it well lets you find the shortcuts and hidden routes (how:
+  "I don't quite know how that could work"). Check the real puzzle's rules before shaping it. Then
+  each way through a race has its own puzzle: Sailing for speed on the open lane, Bilge at the
+  locks, Navigation to find the hidden way.
 - **Gunnery at sea, faster than Puzzle Pirates, on timing (9 Nov).** In Puzzle Pirates a round
   of Battle Navigation plays every 35 seconds or so, in four slots, and you know just where a ship
   coming at you will move. The user would like it faster paced: load the guns (on a ship or the
