@@ -145,7 +145,10 @@ the site (`.assetsignore` skips `*.md`).
   even click it or use the buttons. It's just kind of a bit pointless": whatever's on screen
   should work as it does ashore, or not be there. (Pinned down: the three pieces lying on deck
   can't be clicked, so they go; the row of moves isn't needed while you patch; keep the tray
-  along the bottom as on land, where you can click them, "make it a bit bigger".)
+  along the bottom as on land, where you can click them, "make it a bit bigger".) And the patch
+  itself is hard to look at: "it hurts my eyes ... maybe the angle needs to be a bit more, or the
+  scale of it. It's a bit tiny, and it's making my head hurt": a steeper look down at it, and
+  the hole as big on screen as a wall hole is ashore.
 
 ## Needs a playtest to pin down
 
