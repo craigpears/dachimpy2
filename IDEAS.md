@@ -227,6 +227,11 @@ moving. It gives such a nostalgia." What's next:
   actually properly scaling"; in Puzzle Pirates every ship takes one square). How a two-square
   ship moves and turns: to work out. "Any kind of PvP racing would be hilarious." Goes with
   smuggling's small ships at the back beaches, and "ship types with real trade-offs".
+  **Locks on a canal (9 Nov, "a weird idea"):** a canal through the land as a shortcut, with
+  locks you have to work through: lots of Bilge to pump them, filling and emptying each lock to
+  raise or lower your ship before the gates open. A shortcut that costs puzzle work, not
+  reflexes, which keeps a race a puzzle game (and Bilge pumping water somewhere it believably
+  needs pumping, as at the den's tide).
 - **Gunnery at sea, faster than Puzzle Pirates, on timing (9 Nov).** In Puzzle Pirates a round
   of Battle Navigation plays every 35 seconds or so, in four slots, and you know just where a ship
   coming at you will move. The user would like it faster paced: load the guns (on a ship or the
