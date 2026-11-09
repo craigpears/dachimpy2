@@ -133,13 +133,16 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **The captain's map, and the cheesy cutscene that brings it (9 Nov).** Beat the third wave and
   a short cutscene plays (the user: "I want a little cutscene, so they're not just sailing off in
   the distance ... a short, cheesy one"), black bars top and bottom, the den's buttons and keys
-  out of the way: their captain, in his red coat and hat on the beach, shakes his fist at your wall
-  ("We'll be back!"), runs for his boat and rows off, and a rolled-up map tumbles out of his coat
+  out of the way: their captain, **Dalnoth**, on the beach, shakes his fist at your wall ("We'll
+  be back! *hic*"), runs for his boat and rows off, and a rolled-up map tumbles out of his coat
   onto the sand. Then your pirate walks out through the gate on their own, picks it up ("A
   map!") and opens it out on the sand in front of them, the camera looking down on it. Whatever
   you had in hand goes back on its crate first. **Space or Esc skips it**, and then the map's left
   lying on the beach, "A map?" over it, for you to walk out and pick up with Space. **M** opens
-  it again wherever you're standing on the ground; M, Esc, Space or a click rolls it up. The map
+  it again wherever you're standing on the ground; M, Esc, Space or a click rolls it up. **While
+  it's open, only the map shows** (the user, 9 Nov: the crates and the piece instructions "ruin
+  the immersion"): the buttons, the crates, the keys and the labels fade away, leaving a quiet
+  "M, Esc or Space: roll it up" at the bottom. The map
   goes to **his island across the sea**, not back up the cliffs ("it feels weird going backwards
   ... it would be better if you can go forward"): your cove at the bottom, his island at the top
   with the X, the captain's scrawl ("we hear there's some secret treasure here, guarded by a
@@ -149,6 +152,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   a crew, whoever picks it up, everyone can open it. Skipping straight to a stage after the
   siege (the cheats) leaves it lying there, with no cutscene; the cheat "The captain's map scene"
   plays it again. Nothing out at sea yet (IDEAS.md). Rules: `src/den-map.ts`.
+  - **Dalnoth looks like Dalnoth (9 Nov).** The first go, a captain in a red coat and hat, "really
+    does not look very much like Dalnoth": he's drawn from his portrait on YPPedia (his pirate
+    page was down), not from memory. Dark skin and a big black beard, a silver helmet with gold
+    bands, a nose guard, white horns and yellow fur at the sides, gold earrings, a long yellow coat
+    with gold buttons over a white shirt, a white sash, yellow breeches and stockings, a frothy
+    pewter tankard in his right hand (the ale slopping as he rants, and a bit unsteady on his
+    feet), and his white monkey on his left shoulder. (In the portrait the one on his shoulder is
+    his black Hunter Archetype familiar; the white monkey is the Champion one, the one that comes
+    to you.) **Any real pirate drawn in the den: check their portrait first.**
 - **You can see out to sea (9 Nov).** The taller wall shut the view in: "it just feels like I'm
   staring at a wall. It's lost some of the chop. I don't feel like there's any background to look
   at. I don't know why it's so black. Rather like there's supposed to be a sea over there." So:
@@ -182,7 +194,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   under its deck). It's only for pirates: the raiders never go for it (it's only ever open while
   someone's stood by it). Out there you can't fit pieces (you mend the wall from inside), but you
   can throw them straight at raiders on the sand, no lob. The camera looks down over the wall at
-  you, and you show as a gold outline through anything in the way. This is the first step
+  you, and you show as a gold outline through anything in the way, **and only where something's
+  really in the way** (9 Nov: "the character shouldn't have a yellow silhouette if you can
+  actually see him"). His own arms and legs never count: in plain view on the sand he's just
+  himself. The raiders' red silhouettes work the same way. This is the first step
   towards fighting on the beach (soldiers going out, the Kraken: IDEAS.md).
 - **Bilging the shallows (9 Nov).** The user: "can you bilge out the ocean? ... reveals some like
   obstacles they have to pass over that hurts and damages them ... but it gradually comes back over

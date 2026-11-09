@@ -96,15 +96,10 @@ the site (`.assetsignore` skips `*.md`).
   the primer goes. (How, where it's hosted, and what of the primer's engine the den still needs,
   to pin down with the user when it's time.)
 
-- **Your pirate glows yellow on the beach with nothing in the way (9 Nov):** "the player goes
-  yellow as if you are behind something while on the beach, even if nothing is obstructing the
-  view." The gold outline should only show when something really hides your pirate from the
-  camera.
-
 ## Needs a playtest to pin down
 
-- **The captain's map and its cutscene (9 Nov), not yet seen by the user.** (RULES.md, "The
-  captain's map".) Watch: whether the cutscene's timing and camera feel right (about ten
+- **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
+  "is great"; Dalnoth redrawn from his portrait and the map's view cleared, not yet seen. Watch: whether the cutscene's timing and camera feel right (about ten
   seconds), whether the map reads well from where the camera looks down on it, and whether M is
   a good key for it.
 

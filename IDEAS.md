@@ -63,7 +63,7 @@ forward". You **row out to his hideout**, which gives it "a bit more of a PvP fe
 
 1. **The siege ends after three waves; soldiers are capped at a handful.** Built 9 Nov.
 2. **The map, and a cheesy little cutscene** (being built 9 Nov, TODO.md). Beat wave 3 and the
-   camera cuts to the beach: their captain shakes his fist, "We'll be back!", runs for his boat,
+   camera cuts to the beach: their captain (Dalnoth) shakes his fist, "We'll be back!", runs for his boat,
    and a map falls out of his coat. Your pirate walks out through the gate on their own, picks it
    up ("A map!") and opens it out on the sand. The user: "a short, cheesy one, but that would be
    fantastic". **The map shows the choices**: "we hear there's some secret treasure here, guarded
@@ -85,8 +85,9 @@ forward". You **row out to his hideout**, which gives it "a bit more of a PvP fe
      found, not handed out.
    And meanwhile you can stay home and do up your hideout instead. **This is why the den wants
    side quests**: the story's path is there, but you choose when, and what else you do first.
-4. **Getting there.** How you cross the sea: in the raiders' rowboats, or the abandoned sloop in
-   the harbour (which also goes with 6). To pin down.
+4. **Getting there: you really sail it (the user, 9 Nov).** How you cross the sea: in the raiders'
+   rowboats, or the abandoned sloop in the harbour (which also goes with 7). However you go, the
+   crossing is played, not skipped: see "Sailing between places, for real" below.
 5. **Sneaking in for the loot, and aggro (the user, 9 Nov):** a way that's closer to Treasure
    Haul: the map shows "there's this spot where they buried their treasure", and you sneak onto
    his island **without a direct confrontation** and steal some of it. Doing that builds up
@@ -102,8 +103,10 @@ forward". You **row out to his hideout**, which gives it "a bit more of a PvP fe
    Flotillas, flag Illusion, once of Hunter Ocean; the "Hunter Champion" the user remembered is the
    Champion familiar he won there). His portrait, for his likeness: a horned helmet (pale, gold
    trim), a big black beard, a long yellow coat and yellow trousers with a white sash, a frothy
-   tankard of ale in his hand, a monkey on his shoulder (the user: his white monkey; it looks dark
-   in the portrait, so check). Painted as a bit of a drunk. Keep it simple: you stumble on him
+   tankard of ale in his hand, a familiar on his shoulder (checked 9 Nov: the dark one in the
+   portrait is his black Hunter Archetype familiar; his white monkey is the Hunter Champion one,
+   and that's the one the den gives him). He's also the captain who leads the opening siege and
+   drops the map (built 9 Nov). Painted as a bit of a drunk. Keep it simple: you stumble on him
    sitting on his chest, guarding it well, "Oi, what are you doing with my treasure?". Then **the
    choices are left open** (the user: "I like that principle. Like, leave the choices open"), one
    for each puzzle the den has:
@@ -135,10 +138,65 @@ forward". You **row out to his hideout**, which gives it "a bit more of a PvP fe
 overpowered. Soldiers are limited to a handful at the start, and building up the den (bigger
 barracks, say) lets you build "a little army up later".
 
+## Sailing between places, for real (9 Nov)
+
+The user would "really love ... actually navigating to these areas, being very more Puzzle
+Pirates": like Pillaging or Atlantis, where "you're always in an environment". Going from your den
+to another place (his hideout, a side-quest island, another den) means **sailing there on a real
+board**, never a jump cut:
+
+- **Puzzle Pirates' sailing, in 3D.** You see your ship on the sea and put in its moves: forward,
+  left, right, as in Battle Navigation. The grid's still there underneath, but not drawn as
+  obvious squares; it's the sea.
+- **Tokens from sailing.** You generate the move tokens by working (the Sailing puzzle, as on a
+  real ship), so the crossing is still a puzzle: "you actually sail, generate tokens, and it's a
+  bit more of an active" thing.
+- **Hazards, simple to start:** a few rocks at first; whirlpools and wind (the Battle Navigation
+  board's own) later.
+- **Arrivals you can see:** the beach coming up, then landing; sailing up to a den, its gun
+  turrets and walls in view.
+- **Balanced so it doesn't take forever** to cross the board.
+- **An auto-set destination, eventually:** pick where to go and the moves are generated for you
+  ("you get somebody else to sail for you"), still with the same feel of watching her go; you
+  take over and put in forward, left and right yourself when hazards or trouble show up.
+
+(Goes with the gunnery deck at sea, the sloop, and raiding other dens. A big one: to shape with
+the user before building.)
+
 ## Side quests that leave friends about the den (9 Nov)
 
 Little side quests, like rescuing a capybara by dredging out a reef (a friend's idea). The friend
 you rescue then hangs around your den, so finished quests add up into a den full of characters.
+
+## Zoom in on what you're doing, like the captain's map (9 Nov)
+
+The user liked how the camera zooms in onto the captain's map and back out again: you're still in
+the world, but what you're looking at fills the view. "We need that zoom in thing a bit more."
+It's also the answer to crowding: with lots of people in one space, the building puzzles get
+tricky (pirates in the way, frames on top of each other), and a zoomed-in view means "more dense
+things in one space". So more puzzles could open the same way: walk up, the camera swoops down
+onto your frame or hole or crates, the rest of the den falls away around the edges, and it swoops
+back out when you're done. (The wall, the pumps and the armoury already lean in a bit; this goes
+further, the map's way. Which ones, and how close: to try out.)
+
+## The vampire in the coffin: rapid Carpentry, with funny cutscenes (9 Nov)
+
+The user loves "the idea of funny cutscenes", and remembered Puzzle Pirates' vampire thing, where
+you do Carpentry on the coffins (to check how it went there). A setup for a really funny one:
+you're plundering somewhere (his hideout's hold, a crypt on a side-quest island), you open a
+coffin, and **a vampire sits up**. You both scream at each other comically, "ah! ah!", and you
+slam the lid and **quickly nail it back down** while he tries to get back out. So it's
+**Carpentry, the rapid version**: a row of coffins, lids bumping, and you patch each one before he
+bursts it, to keep him in long enough to plunder the stuff.
+
+- *A funny cutscene at the start* (short and cheesy, Space skips, like the captain's map).
+- *Funny animations all through:* the lid rattling, fingers poking out of a gap, your pirate
+  panicking and hammering faster and faster.
+- *Still a puzzle, not an action game:* the pace comes from the lids, but it's the real Carpentry
+  pieces and keys, and a lid you lose just pops open (he groans and sits back down), never a game
+  over.
+- Where it goes in the story: maybe one of the ways in (or one of the scrolls). "Who knows?
+  Maybe that could be one of the things."
 
 ## A little town up the cliffs (9 Nov)
 

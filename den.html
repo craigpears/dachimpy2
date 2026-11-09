@@ -175,6 +175,11 @@
     body.cine .cine-bar { height: 10vh; }
     .hud, .dock, .banner, .credit { transition: opacity .4s; }
     body.cine .hud, body.cine .dock, body.cine .banner, body.cine .intro, body.cine .credit, body.cine .toast { opacity: 0; pointer-events: none; }
+    /* Reading the captain's map: nothing but the map (the user, 9 Nov: the crates and the piece
+       instructions "ruin the immersion"), and a quiet line on how to roll it up. */
+    body.reading .hud, body.reading .dock, body.reading .banner, body.reading .intro, body.reading .credit, body.reading .toast, body.reading .gunhelp, body.reading #labels { opacity: 0; pointer-events: none; }
+    .map-hint { position: fixed; left: 0; right: 0; bottom: 18px; text-align: center; color: #e8dcc0; font: 15px 'Alegreya', serif; text-shadow: 0 1px 3px #000; opacity: 0; pointer-events: none; transition: opacity .4s; z-index: 20; }
+    body.reading .map-hint { opacity: .85; }
     .label.say { font: 700 21px 'Alegreya', serif; color: #2a1a0c; background: #f6ecd2; border: 2px solid #2a1a0c; border-radius: 16px; padding: 4px 14px; margin-top: -12px; }
     .label.say::after { content: ''; position: absolute; left: 50%; bottom: -11px; margin-left: -9px; border: 9px solid transparent; border-top-color: #2a1a0c; border-bottom: 0; }
   </style>
@@ -200,7 +205,7 @@
   <div class="end" id="paused"><div><h2>Paused</h2><p>The raiders will wait. Press <b>P</b> or <b>Space</b> to carry on.</p><button id="resume">Carry on</button></div></div>
   <div class="end" id="end"><div><h2>The den's been plundered!</h2><p id="end-text"></p><button id="again">Defend it again</button></div></div>
   <div id="labels"></div>
-  <div class="cine-bar top"></div><div class="cine-bar bot">Space: skip</div>
+  <div class="map-hint"><kbd>M</kbd>, <kbd>Esc</kbd> or <kbd>Space</kbd>: roll it up</div><div class="cine-bar top"></div><div class="cine-bar bot">Space: skip</div>
   <div id="tags"></div>
   <div class="crew cheats" id="cheats"><div>
     <h2>Cheats</h2>

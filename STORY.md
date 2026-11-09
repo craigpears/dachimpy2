@@ -46,13 +46,18 @@ in time the den becomes the thing itself (TODO.md, "Split the den off").
 - **The story's path is there, but not a straight line.** Side quests along the way (the scrolls,
   the capybara, foraging), or staying home to build: you choose when to take the next step.
 - **Little cutscenes, short and cheesy,** for the story's big beats: the camera cuts to what's
-  happening, and Space always skips.
+  happening, and Space always skips. The user loves funny ones (a vampire sitting up in his
+  coffin, both of you screaming: IDEAS.md).
+- **Always in the world, even between places.** You sail from one place to the next on a real
+  board, as in Pillaging or Atlantis, never a jump cut; and when you look closely at something
+  (the map), the camera zooms in onto it and the den's buttons get out of the way.
 - **Not overpowered.** Building on (more guns, more rampart) is fine as long as it doesn't make
   the game trivial; armies start small (a handful of soldiers) and grow as the den grows.
 - **Better together.** In the spirit of Puzzle Pirates, a crew helps each other's puzzles, visibly,
   and drops in and out without spoiling anyone's game.
 - **Characters from the user's world.** Real Puzzle Pirates pirates, by their pirate names only,
-  drawn from their pirate pages, with affection (Dalnoth, a bit of a drunk).
+  drawn from their pirate pages, with affection (Dalnoth, a bit of a drunk). Check the portrait
+  before drawing them: a first guess "always seems to be so far off".
 
 ## The story so far, and where it goes
 
@@ -66,15 +71,16 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    - Beat wave 1: timber for the **walk** along the top of the wall, then the **stairs** up to it.
    - Wave 2: their ship runs out a **cannon**; beat it and timber comes for the **gun tower**.
    - Your **shack** can be built whenever you like, in its plot at the back.
-3. ✓ **They sail off, and the den's quiet.** Beat wave 3 and their captain calls it off: "We'll be
-   back!" No countdown after that.
-4. ✓ **The captain's map.** A short, cheesy cutscene: their captain shakes his fist on the beach,
+3. ✓ **They sail off, and the den's quiet.** Beat wave 3 and their captain, Dalnoth himself,
+   calls it off: "We'll be back! *hic*" No countdown after that.
+4. ✓ **The captain's map.** A short, cheesy cutscene: Dalnoth shakes his fist on the beach,
    "We'll be back!", runs for his boat, and a map falls out of his coat; your pirate walks out
    and picks it up. "We hear there's some secret treasure here, guarded by a fearsome enemy." It
    shows his island across the sea, and the ways in: by ship with the guns, land and swordfight,
    or round to a hidden cove with an old bilge pump.
 5. · **Out to sea, to his hideout.** Forward, not back: you go and raid him, "a mirror of this
-   kind of siege". And not necessarily straight there: the captain drops a pile of scrolls (maps
+   kind of siege". And you really sail there, on a board in 3D, putting in forward, left and
+   right, past rocks, the beach coming up as you land. And not necessarily straight there: the captain drops a pile of scrolls (maps
    to an island to forage, the capybara rescue, plans for the gun platform), and you can stay
    home and do up the den first. Or sneak onto his island for some of his buried loot, without a
    fight; every theft angers them more, and that's what brings the raids back.

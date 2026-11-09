@@ -272,12 +272,18 @@ const rotCCW = (cells) => C.normalize(cells.map(([r, c]) => [-c, r]));
 const flip = (cells) => C.normalize(cells.map(([r, c]) => [r, -c]));
 
 // Seen through the wall: raiders behind stone show as a red silhouette, so you always know where they are.
-const xrayMat = new THREE.MeshBasicMaterial({ color: '#ff3b2a', transparent: true, opacity: 0.6, depthFunc: THREE.GreaterDepth, depthWrite: false });
+/* Only what's really in the way counts, never the figure's own arms and legs (the user, 9 Nov: "the
+   character shouldn't have a yellow silhouette if you can actually see him"). So the silhouette
+   is drawn with the solid things, after the den but before the figure itself: it's tested against
+   the wall and the towers alone, and the figure then paints over it wherever it's in plain view.
+   (Custom blending keeps it see-through while it's drawn in that first, solid pass.) */
+const xrMat = (color, opacity) => new THREE.MeshBasicMaterial({ color, transparent: false, opacity, blending: THREE.CustomBlending, blendSrc: THREE.SrcAlphaFactor, blendDst: THREE.OneMinusSrcAlphaFactor, depthFunc: THREE.GreaterDepth, depthWrite: false });
+const xrayMat = xrMat('#ff3b2a', 0.6);
 function addXray(group, m = xrayMat) {
   const list = [];
   group.traverse((o) => { if (o.isMesh) list.push(o); });
   const xr = [];
-  for (const o of list) { const s = new THREE.Mesh(o.geometry, m); s.renderOrder = 5; o.add(s); xr.push(s); }
+  for (const o of list) { if (!o.renderOrder) o.renderOrder = 6; const s = new THREE.Mesh(o.geometry, m); s.renderOrder = 5; o.add(s); xr.push(s); }
   return xr;
 }
 
@@ -2364,7 +2370,7 @@ function towerLegs() {
   return (gd.legs = out);
 }
 // Out on the beach under the tower or behind the wall, you still see where you are.
-const selfXray = new THREE.MeshBasicMaterial({ color: '#ffd45a', transparent: true, opacity: 0.5, depthFunc: THREE.GreaterDepth, depthWrite: false });
+const selfXray = xrMat('#ffd45a', 0.5);
 function selfSeen() {
   if (pirate.xrG !== pirate.g) { pirate.xrG = pirate.g; pirate.xr = addXray(pirate.g, selfXray); }
   const on = outside() && !cine && !chart.on;   // (not in the cutscene, or over the map: the camera's out front then)
@@ -2528,7 +2534,7 @@ const cannon = (() => {
   gunner.g.rotation.y = -0.3;
   g.add(tube, carriage, gunner.g);
   g.userData.muzzle = new THREE.Vector3(0, 1.0, 0.9);
-  addXray(g, new THREE.MeshBasicMaterial({ color: '#ff8a3a', transparent: true, opacity: 0.45, depthFunc: THREE.GreaterDepth, depthWrite: false }));
+  addXray(g, xrMat('#ff8a3a', 0.45));
   return g;
 })();
 
@@ -3891,7 +3897,6 @@ function takeMap() {
   if (guest()) send('host', { t: 'map' });
   G.map = 'found';
   if (chart.scroll) chart.scroll.visible = false;
-  toast('Their captain\'s map! Three ways in, marked. M or Esc rolls it up; M opens it again any time');
   openMap();
 }
 function mapPrompt() {
@@ -3931,6 +3936,7 @@ function mapTick(dt) {
   // The map open: rolled up again if you've something else to do.
   if (chart.on && (carry || pirate.h > 0.05 || wm || G.over)) chart.on = false;
   chart.open = Math.max(0, Math.min(1, chart.open + (chart.on ? 1.6 : -2.4) * dt));
+  document.body.classList.toggle('reading', chart.on);   // (only the map while you read it)
   if (chart.g) {
     mapLayout(chart.open * chart.open * (3 - 2 * chart.open));
     if (!chart.on && chart.open <= 0) chart.g.visible = false;
@@ -3945,7 +3951,58 @@ function mapReset() {
 }
 
 // ---------- the cutscene: their captain's parting shot ----------
-const CAPTAIN = cleanLook({ body: 'm', top: 'captain', topCol: 'maroon', topCol2: 'gold', hat: 'captain', hatCol: 'black', hatCol2: 'gold', legs: 'pants', legsCol: 'black', feetCol: 'black', hair: 'long', hairCol: 'black', beard: 'full', patch: true, earring: true, fam: 'none' });
+/* Their captain is Dalnoth (the user, 9 Nov: "really does not look very much like Dalnoth"), drawn
+   from his portrait on YPPedia: dark skin and a big black beard, a silver horned helmet with gold
+   bands and yellow fur at the sides, gold earrings, a long yellow coat with gold buttons over a
+   white shirt, a white sash, yellow breeches and stockings, a frothy pewter tankard in his right
+   hand, and a familiar on his left shoulder (here his white monkey: the Champion one he won, which
+   comes to you when you beat him). A bit of a drunk. */
+const CAPTAIN = cleanLook({ body: 'm', skin: 5, top: 'coat', topCol: 'gold', topCol2: 'gold', hat: 'none', legs: 'pants', legsCol: 'gold', feet: 'boots', feetCol: 'gold', hair: 'bald', hairCol: 'black', beard: 'full', patch: false, earring: false, fam: 'monkey', famCol: 'cream' });
+function dalnoth() {
+  const cap = makePirate({ look: CAPTAIN }), b = cap.body, hr = 0.25;
+  const steel = mat('#d4d7dc', { metalness: 0.6, roughness: 0.35 }), gilt = mat('#e0a92a', { metalness: 0.5, roughness: 0.4 });
+  const ivory = mat('#f2ead8', { roughness: 0.6 }), fur = mat('#f4c21c'), white = mat('#f6f2ea'), beard = mat('#1f1a17');
+  const pewter = mat('#b9bec4', { metalness: 0.7, roughness: 0.3 }), foam = mat('#fff6d8');
+  const at = (m, x, y, z) => { m.position.set(x, y, z); b.add(m); return m; };
+  // The helmet: a steel dome, a gold rim, gold bands over the top and down his nose, a spike.
+  at(mesh(new THREE.SphereGeometry(hr + 0.025, 20, 10, 0, Math.PI * 2, 0, Math.PI * 0.5), steel), 0, 1.0, 0).scale.y = 0.75;
+  at(mesh(new THREE.TorusGeometry(hr + 0.025, 0.026, 6, 28), gilt), 0, 1.0, 0).rotation.x = Math.PI / 2;
+  const band = at(mesh(new THREE.TorusGeometry(hr + 0.03, 0.022, 6, 20, Math.PI), gilt), 0, 1.0, 0);
+  band.rotation.y = Math.PI / 2; band.scale.y = 0.75;
+  at(mesh(new THREE.TorusGeometry(hr + 0.03, 0.02, 6, 20, Math.PI), gilt), 0, 1.0, 0).scale.y = 0.75;
+  at(mesh(new THREE.BoxGeometry(0.045, 0.12, 0.025), gilt), 0, 0.95, hr + 0.015);
+  at(mesh(new THREE.ConeGeometry(0.035, 0.09, 8), steel), 0, 1.0 + hr * 0.75 + 0.05, 0);
+  for (const s of [-1, 1]) {
+    // Horns, curling up and out, and a yellow tuft of fur where each one meets the helmet.
+    at(mesh(new THREE.ConeGeometry(0.07, 0.24, 10), ivory), s * 0.32, 1.1, 0).rotation.z = -s * 1.0;
+    at(mesh(new THREE.ConeGeometry(0.046, 0.22, 10), ivory), s * 0.447, 1.27, 0).rotation.z = -s * 0.25;
+    at(mesh(new THREE.SphereGeometry(0.075, 10, 8), fur), s * 0.27, 1.03, 0.02).scale.set(1, 1.2, 1.3);
+    // Gold rings in both ears.
+    at(mesh(new THREE.TorusGeometry(0.04, 0.012, 6, 16), gilt), s * hr, 0.83, 0).rotation.y = Math.PI / 2;
+  }
+  // A bigger, bushier beard than most, up the sides of his face.
+  at(mesh(new THREE.SphereGeometry(0.2, 14, 10, 0, Math.PI * 2, Math.PI / 2.3, Math.PI / 1.8), beard), 0, 0.84, 0.06).scale.set(1.08, 1.15, 1);
+  // His white sash, knotted at the side with the ends hanging.
+  at(mesh(new THREE.CylinderGeometry(0.335, 0.335, 0.11, 18), white), 0, 0.1, 0.02);
+  at(mesh(new THREE.BoxGeometry(0.09, 0.3, 0.04), white), 0.17, -0.08, 0.3).rotation.z = 0.12;
+  // The tankard, frothing over.
+  const tk = new THREE.Group();
+  tk.add(mesh(new THREE.CylinderGeometry(0.075, 0.08, 0.17, 14), pewter));
+  const froth = mesh(new THREE.SphereGeometry(0.085, 12, 8), foam);
+  froth.position.y = 0.09; froth.scale.y = 0.55; tk.add(froth);
+  const drip = mesh(new THREE.CapsuleGeometry(0.022, 0.07, 4, 8), foam);
+  drip.position.set(0.05, 0.04, 0.05); tk.add(drip);
+  const handle = mesh(new THREE.TorusGeometry(0.05, 0.014, 6, 12, Math.PI), pewter);
+  handle.position.x = -0.08; handle.rotation.z = Math.PI / 2; tk.add(handle);
+  tk.position.set(0, -0.56, 0.1);
+  cap.arms[0].add(tk);
+  // His monkey on his other shoulder, and white.
+  if (cap.fam) {
+    cap.fam.g.position.x *= -1;
+    cap.fam.g.traverse((o) => { if (o.isMesh && o.material.color?.getHexString() === 'e9dcc0') o.material = mat('#f7f5f0'); });
+  }
+  return cap;
+}
 function bubble(text) {
   const el = document.createElement('div');
   el.className = 'label say';
@@ -3979,7 +4036,7 @@ function cineStart() {
   if (carry) { if (carry.from && !carry.from.letter) putBack(); else { scene.remove(carry.group); carry = null; } }
   keys.clear();
   const s = mapSpot(), bz = Math.max(shoreZ() + 0.5, s.z - 6.5);
-  const cap = makePirate({ look: CAPTAIN });
+  const cap = dalnoth();
   cap.g.scale.setScalar(1.1);
   scene.add(cap.g);
   const boat = rowboat();
@@ -3993,7 +4050,7 @@ function cineStart() {
   pirate.g.rotation.y = Math.PI;
   cine = {
     t: 0, cap, at: { x: s.x - 1.4, z: bz + 0.9 }, stand: { x: s.x - 0.2, z: s.z - 1.5 }, boat, bz, drop: null, got: 0,
-    says: bubble('We\'ll be back!'), mine: bubble('A map!'), cam: { look: V3(0, 1, 0), dist: 5, tilt: 0.4, yaw: 0 },
+    says: bubble('We\'ll be back! *hic*'), mine: bubble('A map!'), cam: { look: V3(0, 1, 0), dist: 5, tilt: 0.4, yaw: 0 },
   };
   cap.g.position.set(cine.at.x, 0, cine.at.z);
   document.body.classList.add('cine');
@@ -4019,8 +4076,9 @@ function cineTick(dt) {
     animateWalk(cap, false, dt);
     faceTo(cap, 0, 1, dt);   // at the wall
     cap.arms[1].rotation.x = -2.7 + Math.sin(t * 22) * 0.35;
-    cap.arms[0].rotation.x = 0.3;
     cap.g.position.y = Math.abs(Math.sin(t * 11)) * 0.08;   // hopping mad
+    cap.arms[0].rotation.x = -0.5 + Math.sin(t * 22) * 0.12;   // (the ale slopping)
+    cap.arms[0].rotation.z = 0.25;
   } else if (t < 5) {
     c.drop ||= { t: 0, from: V3(at.x, 1.2, at.z) };
     stepTo(at, cap, c.boat.g.position.x, c.bz + 0.1, 4.2, dt);
@@ -4037,6 +4095,7 @@ function cineTick(dt) {
     at.x = cap.g.position.x; at.z = cap.g.position.z;
   }
   if (t < 5) cap.g.position.set(at.x, cap.g.position.y, at.z);
+  cap.g.rotation.z = t < 5 ? Math.sin(t * 2.3) * 0.09 : 0;   // (a bit unsteady on his feet)
   // The map, tumbling out of his coat as he turns to run, bouncing once on the sand.
   if (c.drop && !c.got) {
     const u = Math.min(1, (c.drop.t += dt) / 0.8), sc = chart.scroll;
@@ -5461,7 +5520,7 @@ function shoot(cells) {
   const to = new THREE.Vector3(X(b.c0) + b.w * S / 2, Y(b.r0) - b.h * S / 2, -STONE_D);
   burst(from, '#ffcf6a', 10, 2);
   const ball = mesh(new THREE.SphereGeometry(0.18, 12, 10), mat('#1a1a1a', { metalness: 0.6 }));
-  addXray(ball, new THREE.MeshBasicMaterial({ color: '#ff8a3a', transparent: true, opacity: 0.6, depthFunc: THREE.GreaterDepth, depthWrite: false }));
+  addXray(ball, xrMat('#ff8a3a', 0.6));
   scene.add(ball);
   tween(1.1, (s) => {
     ball.position.lerpVectors(from, to, s);
