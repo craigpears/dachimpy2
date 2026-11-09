@@ -105,7 +105,9 @@ the site (`.assetsignore` skips `*.md`).
 - **The lock's Bilge board is upside down, and there's no pump to see (9 Nov):** going up the
   lock, "the bilge puzzle looks like it's upside down", and "we need a visible pumping action
   going on as well. We need the actual bilge pump": a real pump on the quay by the board, its
-  handle working as you bilge, water gushing into the lock.
+  handle working as you bilge, water gushing into the lock. And it filled "way too quickly": the
+  same as the patch, it should take a proper go, "you should see the line of water gradually
+  going up as you clear a few bilging pieces".
 
 - **Try the wind, and oars (9 Nov):** "try it. We'll see how it feels, whether it's
   overcomplicated or not." A first go of IDEAS.md's "Weather is where oars make sense" on the
