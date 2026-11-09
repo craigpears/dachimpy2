@@ -143,7 +143,9 @@ the site (`.assetsignore` skips `*.md`).
   "simplify. It's a very cluttered user interface. Just simplify it, standardize it." One tray,
   as ashore, and nothing of the sailing bar while you patch. And the new row there "you can't
   even click it or use the buttons. It's just kind of a bit pointless": whatever's on screen
-  should work as it does ashore, or not be there.
+  should work as it does ashore, or not be there. (Pinned down: the three pieces lying on deck
+  can't be clicked, so they go; the row of moves isn't needed while you patch; keep the tray
+  along the bottom as on land, where you can click them, "make it a bit bigger".)
 
 ## Needs a playtest to pin down
 
