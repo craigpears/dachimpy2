@@ -95,6 +95,19 @@ the site (`.assetsignore` skips `*.md`).
   "we don't care about that at this point". Later: the den becomes the site (or its own repo), and
   the primer goes. (How, where it's hosted, and what of the primer's engine the den still needs,
   to pin down with the user when it's time.)
+
+- **A hit's a hole to patch, not water to bilge, and it takes a proper patch (9 Nov):** being
+  dazed by the turret was over "way too quickly. Like, you know, one fix and it was done", and
+  bilging felt wrong for it: "what do you mean bilge? I've been hit by a cannonball, not water
+  bucket." So a hit holes her and you patch the hole by Carpentry on deck, a whole hole to fill,
+  before she sails on. Bilge stays at the lock, where pumping water makes sense.
+
+- **Try the wind, and oars (9 Nov):** "try it. We'll see how it feels, whether it's
+  overcomplicated or not." A first go of IDEAS.md's "Weather is where oars make sense" on the
+  sloop's sea: a wind with a direction and a strength that drops and picks up; under sail she's
+  quicker in a good wind, slower in a light one, dead in the water in a calm, and gets nothing
+  sailing straight into it; oars move her steadily whatever the wind, slower than a good wind.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
