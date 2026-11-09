@@ -2,7 +2,7 @@
    how that works": a high hole over a low one each side of the gate, like the real puzzle's four. */
 import { describe, expect, it } from 'vitest';
 import { carp, hole } from './helpers';
-import { END, GAP, GATE, MIN_H, flat, gateTop, isHigh, twoCourses } from '../src/den-wall';
+import { END, GAP, GATE, MID, MIN_H, flat, gateTop, isHigh, isSky, lowMiddle, twoCourses } from '../src/den-wall';
 import type { Cell } from '../src/den-wall';
 
 const seeded = (seed: number) => { let a = seed; return () => (a = (a * 16807) % 2147483647) / 2147483647; };
@@ -87,5 +87,20 @@ describe('the gate', () => {
     expect(9 - gateTop(9)).toBe(5);
     expect(10 - gateTop(10)).toBe(5);
     expect(gateTop(6)).toBe(1);
+  });
+});
+
+describe('towers either side, the middle lower', () => {
+  it.each(walls.map((w, i) => [i, w]))(`wall %i: the middle round the gate is lower, the holes in the towers (9 Nov: "it just feels like I'm staring at a wall")`, (_, { laid }) => {
+    const m = lowMiddle(laid.H, laid.gate);
+    expect(laid.H - m.top).toBe(MID.rows);
+    // Stone over the gate's beam, and no hole up in the open sky.
+    expect(m.top).toBeLessThan(gateTop(laid.H));
+    for (const cells of laid.holes) for (const [r, c] of cells) expect(isSky(m, r, c)).toBe(false);
+    // The towers keep at least a column of full-height stone between their holes and the middle.
+    for (const cells of laid.holes) {
+      const b = box(cells);
+      expect(b.c1 < m.c0 - 1 || b.c0 > m.c1 + 1).toBe(true);
+    }
   });
 });

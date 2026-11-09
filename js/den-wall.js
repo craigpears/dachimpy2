@@ -25,6 +25,21 @@ export const GATE = { before: 5, w: 4, after: 5, h: 5 };
     up the taller wall's whole height it looked stretched (the user, 9 Nov: "it just feels very
     stretched now"). */
 export const gateTop = (H) => Math.max(1, H - GATE.h);
+/** The curtain round the gate stands lower than the stretches with the holes either side, which
+    rise like towers. The user (9 Nov), on the taller wall: "it just feels like I'm staring at a
+    wall ... I want to be able to see the beach", and "this would actually be better suited to
+    having like towers ... if the middle was a bit lower, then that fixes the problem where you
+    can see the beach a bit better, but ultimately also where the gunning platform would
+    eventually go". `rows`: the middle's height, the one-course wall's six; `side`: columns of it
+    either side of the gate (the rest of the stone between the gate and the holes stays full
+    height, so the holes keep a tower's stone round them). */
+export const MID = { rows: 6, side: 3 };
+/** The low middle: its columns, c0 to c1 inclusive, and its top row (above it, open sky). */
+export function lowMiddle(H, gate) {
+    return { c0: gate.c0 - MID.side, c1: gate.c1 + MID.side, top: Math.max(0, H - MID.rows) };
+}
+/** Whether a square of the wall is open sky, above the low middle. */
+export const isSky = (m, r, c) => c >= m.c0 && c <= m.c1 && r < m.top;
 const bbox = (cells) => {
     const rs = cells.map((p) => p[0]), cs = cells.map((p) => p[1]);
     const r0 = Math.min(...rs), c0 = Math.min(...cs);

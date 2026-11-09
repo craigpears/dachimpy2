@@ -122,6 +122,21 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   pressured fight against defeat. The user (9 Nov): "there's not as much of a worry about making
   things too easy ... progression is fun. It's to be expected. ... we can add more challenging
   elements later." So when a change could go either way, keep it simple and on the easy side.
+- **You can see out to sea (9 Nov).** The taller wall shut the view in: "it just feels like I'm
+  staring at a wall. It's lost some of the chop. I don't feel like there's any background to look
+  at. I don't know why it's so black. Rather like there's supposed to be a sea over there." So:
+  - **Towers either side, the middle lower** (the user's own thought: "better suited to having
+    like towers ... if the middle was a bit lower, then that fixes the problem where you can see
+    the beach a bit better, but ultimately also where the gunning platform would eventually go").
+    The stretches with the holes stand full height; the curtain round the gate (three columns
+    either side of it) is the old six rows, a row of stone over the gate's beam. Over it you see
+    the beach, the sea and the raiders' ship. Once built, the wall-walk and the gun tower span
+    it on their posts, like a timber gallery between the towers, and the beach still shows under
+    them. No hole or breach in the low middle (`lowMiddle`, src/den-wall.ts).
+  - **A night sky over the sea**, not a flat near-black: dark overhead, lighter down to a horizon
+    glow, with the moon (where the moonlight comes from) and stars, coloured to the landscape.
+    The fog takes the horizon's colour and starts further off, so the sea out to the ship shows
+    and then fades into the sky.
 - **A cove (9 Nov).** The den should feel like a pirate hideout in a cove, a step towards the
   more ship-based den the user would like (without starting again). Whatever the landscape, out
   beyond the wall is a beach and the sea. The raiders row in from their ship in little rowboats,

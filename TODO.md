@@ -77,16 +77,17 @@ the site (`.assetsignore` skips `*.md`).
   clearly while you build it. (Since the last update the stairs are on the right and the armoury
   hoist on the left, which may already have fixed this: check once the new version's live.)
 
-- **You can't see the beach; it feels like staring at a wall (9 Nov):** over the taller wall, "I
-  don't like that you can't really see the beach ... it just feels like I'm staring at a wall.
-  It's lost some of the chop. I don't feel like there's any background to look at. I don't know
-  why it's so black. Rather like there's supposed to be a sea over there." Their thought: towers
-  either side with the middle lower, which shows the beach and is where the gun platform goes.
-  "Just experiment with the aesthetics because I want to be able to see the beach." Also: "the
-  bottom of the gate is missing now ... it was a lot better" (to pin down: the gate's now five rows
-  under a beam).
+- **The bottom of the gate looks missing (9 Nov):** "I feel like the bottom of the gate is missing
+  now. I don't know what it was like before, but it was a lot better." (To pin down with the user:
+  since then the gate's five rows tall under a beam, in a lower middle between towers. Check
+  whether it still looks wrong.)
 
 ## Needs a playtest to pin down
+
+- **Towers, a lower middle and a night sky (9 Nov), not yet seen by the user.** (RULES.md, "You
+  can see out to sea".) Watch for: whether enough of the beach shows from where you usually
+  stand; the step down from the towers to the middle; the walk and gun tower spanning the middle
+  on posts; the sky's colours in each landscape; the ship looking too close or big now it shows.
 
 - **Swordfight at the armoury hoist (8 Nov), not yet tried by the user.** Rebuilt after the
   first demo: the board is a stack of weapon crates under a tall timber hoist on the left of the

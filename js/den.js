@@ -12,7 +12,7 @@ import { muster, planRepair, rewardPair, Lumber, REPAIR, SwordRack, Barracks, SW
 import { drawStencil, drawBlade, PALETTE } from './den-sword-draw.js';
 import { Bilge, W as BW, H as BH } from './bilge.js';
 import { KEYS as VIEW_KEYS, nextHole, quarters, centreOn, clampTo, nextBoard, arrowStep } from './den-carp-view.js';
-import { twoCourses, isHigh, gateTop } from './den-wall.js';
+import { twoCourses, isHigh, gateTop, lowMiddle, isSky } from './den-wall.js';
 import { BILGE, Tide, HIGH, LOW, shoreAt, worth, barrelsFor, onRocks, rocksBare, oddsFor, blastHits } from './den-bilge.js';
 import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, cleanDesign, designOf, drawFlag, dyeHex, DYES, SKIN, HAIR, FUR, PARTS, FLAGS, PATTERNS, DECOR, MAX_DECOR, BIOMES, twoColours } from './den-look.js';
 
@@ -135,6 +135,41 @@ scene.add(sun);
 const moon = new THREE.DirectionalLight('#a9bce0', 1.1);
 moon.position.set(4, 10, -14);
 scene.add(moon);
+/* The night sky over the sea: dark overhead, lighter down to the horizon, with the moon and
+   stars. It was a flat near-black, and the sea faded into it (the user, 9 Nov: "I don't feel like
+   there's any background to look at. I don't know why it's so black. Rather like there's supposed
+   to be a sea over there"). The fog takes the horizon's colour, so the far sea fades into the
+   sky's glow. The dome follows the camera. */
+const skyDome = new THREE.Mesh(new THREE.SphereGeometry(90, 32, 16), new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false, depthWrite: false }));
+skyDome.renderOrder = -2;
+scene.add(skyDome);
+{
+  const dir = moon.position.clone().normalize();
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(2.6, 32), new THREE.MeshBasicMaterial({ color: '#f6f1dc', fog: false, depthWrite: false }));
+  const glow = new THREE.Mesh(new THREE.CircleGeometry(7, 32), new THREE.MeshBasicMaterial({ color: '#c9d6f0', transparent: true, opacity: 0.12, fog: false, depthWrite: false }));
+  for (const [m, d] of [[glow, 86], [disc, 85]]) { m.position.copy(dir).multiplyScalar(d); m.lookAt(0, 0, 0); m.renderOrder = -1; skyDome.add(m); }
+  const pts = [];
+  for (let i = 0; i < 420; i++) {
+    const y = 0.12 + Math.random() * 0.88, a = Math.random() * Math.PI * 2, r = Math.sqrt(1 - y * y);
+    pts.push(Math.cos(a) * r * 84, y * 84, Math.sin(a) * r * 84);
+  }
+  const stars = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(pts, 3)), new THREE.PointsMaterial({ color: '#e8ecff', size: 1.6, sizeAttenuation: false, fog: false, transparent: true, opacity: 0.8, depthWrite: false }));
+  stars.renderOrder = -1;
+  skyDome.add(stars);
+}
+function paintSky(zenith, horizon) {
+  const geo = skyDome.geometry, pos = geo.attributes.position, top = new THREE.Color(zenith), low = new THREE.Color(horizon), c = new THREE.Color();
+  const cols = new Float32Array(pos.count * 3);
+  for (let i = 0; i < pos.count; i++) {
+    const t = pos.getY(i) / 90;
+    if (t >= 0) c.copy(low).lerp(top, Math.pow(t, 0.45));
+    else c.copy(low).multiplyScalar(Math.max(0.4, 1 + t * 2));   // below the horizon, the dark sea
+    cols.set([c.r, c.g, c.b], i * 3);
+  }
+  geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+  scene.background.set(horizon);
+  scene.fog.color.set(horizon);
+}
 
 // Keep the view wide enough to see a good stretch of wall, whatever shape the window is.
 function fitCamera() {
@@ -354,6 +389,7 @@ function newWall() {
   $('labels').replaceChildren();
   wall = { W, H, holes: [], cellHole: new Map(), wood: new Set(), lining: Array.from({ length: MAX_PATCHES }, () => new Set()), gate: new Set(), gateCols: gate, stoneAt: new Map() };
   for (let r = gateTop(H); r < H; r++) for (let c = gate.c0; c <= gate.c1; c++) wall.gate.add(k(r, c));
+  wall.mid = lowMiddle(H, gate);
   laid.holes.forEach((cells) => registerHole(cells));
   buildWall();
   wall.holes.forEach((h) => { holeVisuals(h); updateHole(h); });
@@ -396,11 +432,14 @@ function doorOf(h) {
 let stones = null, back = null;
 /* Dark behind the stones, to hide the gaps between them, but not behind a hole: a hole is open
    right through, so you see out to the raiders until it's mended. */
+const sky = (r, c) => !!wall.mid && isSky(wall.mid, r, c);
+// The top row of stone in a column (lower over the middle).
+const colTop = (c) => (wall.mid && c >= wall.mid.c0 && c <= wall.mid.c1 ? wall.mid.top : 0);
 function wallBack() {
   if (back) { wallGroup.remove(back); back.geometry.dispose(); }
   const pos = [];
   for (let r = 0; r < wall.H; r++) for (let c = 0; c < wall.W; c++) {
-    if (wall.cellHole.has(k(r, c)) || wall.gate.has(k(r, c))) continue;
+    if (wall.cellHole.has(k(r, c)) || wall.gate.has(k(r, c)) || sky(r, c)) continue;
     const x0 = X(c), x1 = X(c + 1), y0 = Y(r + 1), y1 = Y(r);
     pos.push(x0, y0, 0, x1, y0, 0, x1, y1, 0, x0, y0, 0, x1, y1, 0, x0, y1, 0);
   }
@@ -416,7 +455,7 @@ function buildWall() {
   den.children.filter((o) => o.userData.scenery).forEach((o) => den.remove(o));
   const { W, H } = wall;
   const spots = [];
-  for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) if (!wall.cellHole.has(k(r, c)) && !wall.gate.has(k(r, c))) spots.push([r, c]);
+  for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) if (!wall.cellHole.has(k(r, c)) && !wall.gate.has(k(r, c)) && !sky(r, c)) spots.push([r, c]);
   stones = new THREE.InstancedMesh(stoneGeo, mat('#ffffff', { roughness: 0.95 }), spots.length);
   stones.castShadow = stones.receiveShadow = true;
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), col = new THREE.Color();
@@ -430,11 +469,14 @@ function buildWall() {
     wall.stoneAt.set(k(r, c), i);
   });
   wallGroup.add(stones);
-  // A top course of flat capstones.
-  for (let c = 0; c < W; c += 2) {
-    const cap = mesh(new RoundedBoxGeometry(S * 2 - 0.03, S * 0.5, STONE_D + 0.12, 2, 0.05), mat('#4c443d'));
-    cap.position.set(X(c) + S, Y(0) + S * 0.25, -STONE_D / 2 + 0.03);
+  // A top course of flat capstones, stepping down over the low middle.
+  const capMat = mat('#4c443d');
+  for (let c = 0; c < W;) {
+    const n = c + 1 < W && colTop(c + 1) === colTop(c) ? 2 : 1;
+    const cap = mesh(new RoundedBoxGeometry(S * n - 0.03, S * 0.5, STONE_D + 0.12, 2, 0.05), capMat);
+    cap.position.set(X(c) + S * n / 2, Y(colTop(c)) + S * 0.25, -STONE_D / 2 + 0.03);
     wallGroup.add(cap);
+    c += n;
   }
   wallBack();
   wallGroup.add(makeGate());
@@ -465,7 +507,7 @@ function buildWall() {
   scenery.push(barrel, chest);
   for (const x of [X(wall.gateCols.c0) - 0.3, X(wall.gateCols.c1 + 1) + 0.3]) {
     const fp = flagpole(1.8);
-    fp.position.set(x, Y(0) + S * 0.5, -STONE_D / 2);
+    fp.position.set(x, Y(colTop(wall.gateCols.c0)) + S * 0.5, -STONE_D / 2);
     scenery.push(fp);
   }
   scenery.forEach((o) => { o.userData.scenery = true; den.add(o); });
@@ -1211,9 +1253,9 @@ function flagpole(h = 2, m = flagMat) {
    (moss, mossy rock, big trees and ferns). Only the look changes, never the play: the props stand
    outside the wall's ends and behind the cave rocks. Every one is in a cove, with the sea beyond. */
 const BIOME = {
-  barren: { sky: '#1a110b', ground: '#7a5c3d', dots: ['40,26,14', '170,135,95'], rocks: ['#5d5048', '#6b5c50', '#4f443d', '#73655a'], hemi: ['#ffe6c4', '#3a2616'] },
-  seaside: { sky: '#2b4a5f', ground: '#c4a172', dots: ['120,90,50', '245,232,200'], rocks: ['#9c8566', '#b09878', '#85704f', '#bfa886'], hemi: ['#fff0dc', '#5e5038'] },
-  jungle: { sky: '#12231a', ground: '#5b5a30', dots: ['30,45,15', '120,150,60'], rocks: ['#4c5944', '#5a6a4b', '#3e4a37', '#677858'], hemi: ['#eaffd6', '#24321a'] },
+  barren: { sky: '#120d0c', horizon: '#3b5263', ground: '#7a5c3d', dots: ['40,26,14', '170,135,95'], rocks: ['#5d5048', '#6b5c50', '#4f443d', '#73655a'], hemi: ['#ffe6c4', '#3a2616'] },
+  seaside: { sky: '#1b3348', horizon: '#6f9cb8', ground: '#c4a172', dots: ['120,90,50', '245,232,200'], rocks: ['#9c8566', '#b09878', '#85704f', '#bfa886'], hemi: ['#fff0dc', '#5e5038'] },
+  jungle: { sky: '#0b1712', horizon: '#33595a', ground: '#5b5a30', dots: ['30,45,15', '120,150,60'], rocks: ['#4c5944', '#5a6a4b', '#3e4a37', '#677858'], hemi: ['#eaffd6', '#24321a'] },
 };
 const biomeGroup = new THREE.Group();
 scene.add(biomeGroup);
@@ -1313,8 +1355,7 @@ function applyBiome(force = false) {
   const id = BIOME[denLook.biome] ? denLook.biome : 'barren', B = BIOME[id];
   if (!force && id === biomeId) return;
   if (id !== biomeId) {
-    scene.background.set(B.sky);
-    scene.fog.color.set(B.sky);
+    paintSky(B.sky, B.horizon);
     hemi.color.set(B.hemi[0]); hemi.groundColor.set(B.hemi[1]);
     rockMats.forEach((m, i) => m.color.set(B.rocks[i]));
     drawGround(B);
@@ -3635,7 +3676,7 @@ function fits(cells) {
       let over = 0, ok = true;
       for (const [r, c] of cells) {
         const R = r + dr, Cc = c + dc, kk = k(R, Cc);
-        if (R < 0 || R >= wall.H || Cc < 0 || Cc >= wall.W || wall.gate.has(kk) || wall.wood.has(kk) || (boarded && wall.lining.some((s) => s.has(kk)))) { ok = false; break; }
+        if (R < 0 || R >= wall.H || Cc < 0 || Cc >= wall.W || wall.gate.has(kk) || sky(R, Cc) || wall.wood.has(kk) || (boarded && wall.lining.some((s) => s.has(kk)))) { ok = false; break; }
         const ho = wall.cellHole.get(kk);
         if (ho === undefined) over++;
         else if (ho !== hi) { ok = false; break; }
@@ -4898,7 +4939,7 @@ function cannonSpot() {
   const shapes = [...roomyShapes(3).slice(0, 4), ...roomyShapes(2, 6).slice(0, 4), ...singles];
   const clear = ([r, c]) => {
     if (r >= wall.H || c < 3 || c > wall.W - 4 || !wall.stoneAt.has(k(r, c))) return false;
-    if (c >= wall.gateCols.c0 - 1 && c <= wall.gateCols.c1 + 1) return false;   // (nor in the stone over the gate)
+    if (c >= wall.mid.c0 - 1 && c <= wall.mid.c1 + 1) return false;   // (nor in the low middle round the gate)
     for (let a = -1; a <= 1; a++) for (let z = -1; z <= 1; z++) {
       const kk = k(r + a, c + z);
       if (wall.cellHole.has(kk) || wall.gate.has(kk) || wall.wood.has(kk)) return false;
@@ -5673,6 +5714,7 @@ function applySync(s) {
   $('labels').replaceChildren();
   wall = { W: s.W, H: s.H, holes: [], cellHole: new Map(), wood: new Set(), lining: Array.from({ length: MAX_PATCHES }, () => new Set()), gate: new Set(), gateCols: s.gate, stoneAt: new Map() };
   for (let r = gateTop(s.H); r < s.H; r++) for (let c = s.gate.c0; c <= s.gate.c1; c++) wall.gate.add(k(r, c));
+  wall.mid = lowMiddle(s.H, s.gate);
   s.holes.forEach((d) => registerHole(d.cells));
   buildWall();
   wall.holes.forEach((h, i) => {
@@ -6513,7 +6555,8 @@ function update(dt) {
   camera.position.copy(camAt);
   // The fog starts beyond what you're looking at, so a high or zoomed-out view doesn't go murky.
   const camD = camAt.distanceTo(camLook);
-  scene.fog.near = camD + 6; scene.fog.far = camD + 24;
+  scene.fog.near = camD + 10; scene.fog.far = camD + 45;
+  skyDome.position.copy(camera.position);
   // Looking down from the wall you see more of the floor the torches don't reach: brighten it up.
   renderer.toneMappingExposure = 1 + 0.45 * u;
   if (shake > 0) { camera.position.x += (Math.random() - 0.5) * shake * 0.5; camera.position.y += (Math.random() - 0.5) * shake * 0.5; shake = Math.max(0, shake - dt); }
