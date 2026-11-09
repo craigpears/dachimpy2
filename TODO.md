@@ -115,6 +115,14 @@ the site (`.assetsignore` skips `*.md`).
   quicker in a good wind, slower in a light one, dead in the water in a calm, and gets nothing
   sailing straight into it; oars move her steadily whatever the wind, slower than a good wind.
 
+- **A crane up the cliff, a second way into the hidden cove (9 Nov):** "I really do think we need
+  the Wacky Races stuff, like the crane thing ... I just really love the idea. I want to see what
+  it looks and feels like ... could I go somewhere to the side of a cliff and like construct a
+  crane to get in?" A first go of IDEAS.md's "haul her over": sail to a ledge at the foot of the
+  cove's cliff, build a crane there by Carpentry, and it hauls her up the cliff and swings her
+  down into the cove (and back down again later). The lock (Bilge) and the crane (Carpentry) are
+  two ways in, so you choose the puzzle you'd rather play.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
