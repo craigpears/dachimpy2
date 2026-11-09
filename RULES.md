@@ -172,6 +172,33 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     as it loads, three seconds; the two guns load apart. Shown either side of the tokens, lit when
     loaded and filling as they load. The rocks don't break (as in Puzzle Pirates). A first go:
     loading them by Gunnery, and things worth shooting that move, are IDEAS.md ("Gunnery at sea").
+  - **The trade winds, a lock and a turret (9 Nov).** The user: "just really go for it. Add some
+    shipping lanes ... a fork in the road ... some kind of a lock and canal ... there's a bit of a
+    cliff. You have to go up a lock". A first go of IDEAS.md's shipping lanes, on her sea:
+    - **The trade winds:** runs of wind squares, streaked on the water. Sail onto one and it sweeps
+      her along a square at a time, quickly (about a quarter of a second a square), turning her
+      the way it blows round a corner: "The trade winds have her!" She can't stop on a lane, so a
+      pin dropped on one goes to water beside it; the pilot takes a lane when it's quicker. A lane
+      runs out from off the beach to a junction.
+    - **The junction:** at the lane's end it drops her off "just like a normal square": right rides
+      the winds across and back in towards home (a loop), left is the canal to the lock, on is
+      open sea.
+    - **The canal and the lock:** a narrow canal between rocks to a lock at the foot of a cliff.
+      Sail into the lock and she waits; nothing happens on its own. Bilge on the quay pumps it up
+      (a few good swaps' worth), the top gates open and she sails on into the hidden cove behind
+      the cliff, its water higher, an old bilge pump on the sand. Coming back down, the lock drains
+      by itself in a couple of seconds and lets her out. Esc while she waits lets her off. The
+      pilot finds the way into the cove through the lock. (A shortcut that costs puzzle work, not
+      reflexes: IDEAS.md, "Locks on a canal".)
+    - **The turret:** a gun on a rock between the lanes. While she's within three squares it fires
+      at the square she's on; the shot takes about a second and a half to come down, a red ring
+      on the water marking where. Still there, she's hit; gone, it splashes down ("you can shoot,
+      but there's no guarantee"). It loads four seconds between shots and holds fire while she's
+      dazed, and a hit on it from her guns quietens it ten seconds.
+    - **Dazed, not damaged:** a hit dazes her ("Hit! She's holed and shipping water"): she finishes
+      the move she's on (or the wind's ride), then waits till you bilge her out on deck, a few
+      good swaps' worth: "Pumped out! She sails on." Nobody's sunk or knocked out (the user: "it
+      keeps it faster paced, but while keeping the puzzles key").
   - **Ashore:** sail back to her mooring and Space puts you on the beach beside her.
   - Alone only for now (no crews at sea yet). No tokens to earn yet, no destinations: those are
     IDEAS.md ("Sailing between places, for real"). Rules: `src/den-sail.ts`.

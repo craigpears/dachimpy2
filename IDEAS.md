@@ -213,7 +213,8 @@ moving. It gives such a nostalgia." What's next:
   shape with the user.) **Junctions (9 Nov):** at certain decision points along a lane it drops
   you off "just like a normal square", so you choose to turn left, turn right or carry on (or
   steer off on your own); the lanes meet at those crossings, so a long trip is a few wild rides
-  with a choice at each stop.
+  with a choice at each stop. (A first go is built: one lane out to one junction, a loop home and
+  a canal: RULES.md.)
   **Racing, one day (9 Nov; PvP races are Umami's idea, a friend's pirate):** the user has joked
   the lanes are "like Mario Kart times 20", and by the time they're built, with wind, whirlpools,
   rocks and stops, it's close enough to a racing game to race other players down them: PvP
@@ -231,7 +232,8 @@ moving. It gives such a nostalgia." What's next:
   locks you have to work through: lots of Bilge to pump them, filling and emptying each lock to
   raise or lower your ship before the gates open. A shortcut that costs puzzle work, not
   reflexes, which keeps a race a puzzle game (and Bilge pumping water somewhere it believably
-  needs pumping, as at the den's tide).
+  needs pumping, as at the den's tide). (A first go: one lock up a cliff into a hidden cove,
+  pumped by Bilge: RULES.md.)
   **The Navigation duty puzzle (9 Nov):** bring Puzzle Pirates' Navigation duty puzzle into the
   races, so that, in concept, doing it well lets you find the shortcuts and hidden routes (how:
   "I don't quite know how that could work"). Check the real puzzle's rules before shaping it. Then
@@ -245,14 +247,15 @@ moving. It gives such a nostalgia." What's next:
   proof of concept** (the user, 9 Nov): "much more almost Mario Kart-esque, but it keeps it
   faster paced, while keeping the puzzles key". And it's something players do to each other:
   swing in behind somebody pulling ahead, shoot them, and they're dazed while they do a bit of
-  puzzling, then they set sail again. Nobody's knocked out of the race.
+  puzzling, then they set sail again. Nobody's knocked out of the race. (A first go: a turret whose hits
+  daze the sloop till she's bilged out: RULES.md.)
 - **Gunnery at sea, faster than Puzzle Pirates, on timing (9 Nov).** In Puzzle Pirates a round
   of Battle Navigation plays every 35 seconds or so, in four slots, and you know just where a ship
   coming at you will move. The user would like it faster paced: load the guns (on a ship or the
   gun platform), then watch ships moving quickly by and time your shots, "you can shoot, but
   there's no guarantee", since ships are always moving and have far more chances to move or hold
   still than four slots a turn. (A first go is the sloop's two guns firing at the rocks as she
-  sails: RULES.md. Moving targets, loading her guns by Gunnery, and how a hit tells: to shape with
+  sails, and at a turret that fires back: RULES.md. Moving targets, loading her guns by Gunnery, and how a hit tells: to shape with
   the user.)
 
 ## Smuggling: taxes, embargoes and the back beaches (9 Nov)

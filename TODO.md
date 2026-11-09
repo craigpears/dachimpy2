@@ -96,14 +96,6 @@ the site (`.assetsignore` skips `*.md`).
   the primer goes. (How, where it's hosted, and what of the primer's engine the den still needs,
   to pin down with the user when it's time.)
 
-- **Trade winds, a lock up to a hidden cove, and a turret that dazes her (9 Nov):** "just really
-  go for it. Add some shipping lanes ... a fork in the road ... some kind of a lock and canal ...
-  there's a bit of a cliff. You have to go up a lock", and a turret: being hit dazes you "while
-  they do a bit of puzzling, but they can set sail again". A first go on the sloop's sea: a lane
-  out to a junction, right round a loop back home, left along a canal to a lock you pump up by
-  Bilge into a cove behind a cliff; a turret on a rock between the lanes; a hit dazes her till you
-  pump her out by Bilge.
-
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
