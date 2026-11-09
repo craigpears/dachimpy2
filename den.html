@@ -22,6 +22,13 @@
     .keys kbd { font: 700 13px 'Alegreya Sans'; color: var(--ink); background: #3b2a1b; border: 1px solid #6b4e32; border-radius: 4px; padding: 0 5px; }
     .prompt { background: var(--panel); border: 1px solid var(--gold); border-radius: 8px; padding: 8px 16px; font-size: 18px; font-weight: 700; white-space: nowrap; }
     .prompt:empty { display: none; }
+    /* The Carpentry view's tabs: everything being built, the one you're on lit, a tick where your piece fits. */
+    .boards { display: flex; gap: 6px; pointer-events: auto; }
+    .boards:empty { display: none; }
+    .boards button { font: 700 14px 'Alegreya Sans'; color: var(--dim); background: var(--panel); border: 1px solid #5a412a; border-radius: 7px; padding: 4px 10px; cursor: pointer; }
+    .boards button:hover { border-color: #8a6a44; color: var(--ink); }
+    .boards button.on { color: var(--ink); border-color: var(--gold); }
+    .boards .fit { color: #9fe08a; }
     .toolbox { display: flex; gap: 6px; align-items: center; background: var(--panel); border: 1px solid #5a412a; border-radius: 10px; padding: 5px 8px; }
     .toolbox[hidden] { display: none; }
     body.swordfight .toolbox { display: none; }   /* at the sword rack: the crates are no use there */
@@ -168,6 +175,7 @@
   <div class="banner calm" id="banner"></div>
   <div class="intro" id="intro">Raiders are coming! Grab a piece from a crate and mend the wall.<br>Fill a hole exactly for a strong <b>Masterpiece</b>.</div>
   <div class="dock" id="dock">
+  <div class="boards" id="boards" title="Tab: on to the next thing being built"></div>
   <div class="prompt" id="prompt"></div>
   <div class="toolbox" id="toolbox" title="Press 1, 2 or 3 (or click) to take that crate's piece"><span class="cap">Crates</span></div>
   <div class="keys"><kbd>WASD</kbd> walk · <kbd>Space</kbd> or click: pick up / fit · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd>: take a crate's piece · <kbd>Q</kbd><kbd>E</kbd> turn · <kbd>F</kbd> flip · <kbd>Tab</kbd>: Carpentry view (arrows move · <kbd>X</kbd><kbd>C</kbd> turn · <kbd>Z</kbd> flip · <kbd>Q</kbd><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd> holes · <kbd>Tab</kbd> next · <kbd>Esc</kbd> walks off) · <kbd>Shift</kbd> or click a raider: throw · <kbd>Z</kbd><kbd>C</kbd> or right-drag: turn the view, all the way round · <kbd>B</kbd> decorate · <kbd>P</kbd> pause · <kbd>`</kbd> cheats · wheel: turn the piece at a hole, or zoom (<kbd>-</kbd><kbd>=</kbd>)</div>

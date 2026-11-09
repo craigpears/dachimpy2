@@ -54,7 +54,8 @@ const REACH = 2.4;       // how far along the wall the pirate can reach
 // With the mouse, further: the next hole along, from in front of either one (the user: you
 // shouldn't have to walk right up to each). Holes come in pairs about 4 m apart; not across the gate.
 const MREACH = 6;
-const WALL_Z = 2.7;      // how close to the wall the pirate must stand to fit a piece
+const WALL_Z = 2.7;
+const DEN_BACK = 14.5;   // how far back the den goes (10.5 till 9 Nov: deeper, for more to build)      // how close to the wall the pirate must stand to fit a piece
 const SPEED = 5.4;         // (4.6, then 5, now 5.4: the user and a friend wanted the pace a bit quicker)
 // Seconds of one raider hacking at it at full speed (piece: each piece in an unfinished hole; patch:
 // a board nailed on behind). A piece was 4: a half-mended hole fell in seconds and early waves were
@@ -444,7 +445,7 @@ function buildWall() {
   const scenery = [];
   for (let i = 0; i < 9; i++) scenery.push(rock(-half - 0.6 - Math.random() * 1.2, Math.random() * H * S, -0.3, 0.7 + Math.random() * 0.6));
   for (let i = 0; i < 9; i++) scenery.push(rock(half + 0.6 + Math.random() * 1.2, Math.random() * H * S, -0.3, 0.7 + Math.random() * 0.6));
-  for (let z = -14; z < 13; z += 1.4) {
+  for (let z = -14; z < DEN_BACK + 2.5; z += 1.4) {
     scenery.push(rock(-half - 2.2 - Math.random() - (z > HOUSE_Z0 - 1.5 && z < HOUSE_Z1 + 1.5 ? 1.4 : 0), 0.4, z, 1 + Math.random() * 0.8));
     scenery.push(rock(half + 2.2 + Math.random(), 0.4, z, 1 + Math.random() * 0.8));
   }
@@ -470,7 +471,7 @@ function buildWall() {
     scenery.push(fp);
   }
   scenery.forEach((o) => { o.userData.scenery = true; den.add(o); });
-  bounds = { x: half - 0.35, z0: 0.55, z1: 10.5 };
+  bounds = { x: half - 0.35, z0: 0.55, z1: DEN_BACK };
   // The armoury stack: against the left of the den, just in from the stairs, facing in.
   sword.x = -half + 1.75; sword.z = 3.2;
   sword.group.position.set(sword.x, 0, sword.z);
@@ -483,7 +484,9 @@ function buildWall() {
   makePlot();
 }
 
-/* The rampart: a walk along the top of the wall, with stairs up from the den at either end. Up
+/* The rampart: a walk along the top of the wall, with stairs up from the den at the right-hand end
+   (the armoury hoist has the left: the user, 9 Nov, "sword fighting board on the left, stairs on the
+   right for the ramparts to go up", so the start of the den isn't overstretched). Up
    there the pirate can see over the wall and throw pieces down on the raiders hacking at it. None
    of it is there to start with: every plank of the walk and every step of the stairs is a carpentry
    piece the crew fits into a frame, and it stays that piece. Nothing turns into anything else. */
@@ -491,10 +494,10 @@ let ramp = null;
 const STAIR_W = 1.1;
 function makeRampart() {
   const half = wall.W * S / 2, T = wall.H * S + 0.38, n = wall.H + 1, zTop = 0.25, run = n * S, zBot = zTop + run;
-  // What gets built, in order: the whole walk in one frame and then the left stairs up to it, the
-  // right stairs, the gun tower, and the shack whenever you ask for it. `si`: which timber it comes
-  // with (the stairs' 0 and 2 are also which end they're at).
-  const jobs = [[0, 'deck'], [0, 'stair'], [2, 'stair'], [3, 'gun', 0], [3, 'gun', 1], [3, 'gun', 2], [4, 'house', 0], [4, 'house', 1], [4, 'house', 2], [4, 'house', 3]].map(([si, kind, part], i) => ({ i, si, kind, part, frame: null, up: false }));
+  // What gets built, in order: the whole walk in one frame and then the stairs up to it, the gun
+  // tower, and the shack whenever you ask for it. `si`: which timber it comes with; `end`: which end
+  // of the den stairs are at (0 left, 1 right).
+  const jobs = [[0, 'deck'], [0, 'stair', 0, 1], [3, 'gun', 0], [3, 'gun', 1], [3, 'gun', 2], [4, 'house', 0], [4, 'house', 1], [4, 'house', 2], [4, 'house', 3]].map(([si, kind, part, end], i) => ({ i, si, kind, part, end: end ?? 0, frame: null, up: false }));
   gd = null;
   ramp = { T, half, n, zTop, zBot, run, jobs, next: 0, stairs: [[-half + 0.2, -half + 0.2 + STAIR_W], [half - 0.2 - STAIR_W, half - 0.2]] };
 }
@@ -543,7 +546,7 @@ const deckLeft = () => wall.W * S / 2 - 0.45 - deckRows() * S;
 // Where the frame lies: rows across the den from deckLeft, columns running back from the far end.
 // (Its near end well back from where you stand to mend the wall: see FRAME_Z. A twelve-square
 // strip runs a little past where you can walk to, still in reach.)
-const deckPose = () => ({ p: V3(deckLeft(), 0, Math.max(10.45, FRAME_Z + 0.05 + Math.max(...deckStrips().map((o) => o.w)) * S)), q: basis(V3(0, 0, -1), V3(-1, 0, 0)) });
+const deckPose = () => ({ p: V3(deckLeft(), 0, Math.max(DEN_BACK - 0.05, FRAME_Z + 0.05 + Math.max(...deckStrips().map((o) => o.w)) * S)), q: basis(V3(0, 0, -1), V3(-1, 0, 0)) });
 // Where a square of the walk [row out from the wall, column along it] lies in the frame.
 function deckToFrame(r, c, st = deckStrips()) {
   const o = st.find((x) => c >= x.a && c < x.a + x.w) || st[st.length - 1];
@@ -609,7 +612,7 @@ function openJob(i, shape = null) {
   if (!j || j.frame) return j?.frame || null;
   if (j.kind !== 'house') ramp.next = Math.max(ramp.next, i + 1);
   const stair = j.kind === 'stair';
-  shape ||= stair ? stairShape(j.si) : j.kind === 'gun' ? gunShape(j.part) : j.kind === 'house' ? houseShape(j.part) : deckShape();
+  shape ||= stair ? stairShape(j.end) : j.kind === 'gun' ? gunShape(j.part) : j.kind === 'house' ? houseShape(j.part) : deckShape();
   if (isHost()) send('all', { t: 'frame', fi: i, cells: shape });
   // The walk's shape is the walk itself; its frame has the strips side by side (see deckShape).
   const walk = j.kind === 'deck' ? shape : null;
@@ -630,8 +633,8 @@ function openJob(i, shape = null) {
     g.rotation.x = -Math.PI / 2;
   } else {
     // Stood on end against the side of the cave, facing into the den.
-    const [xa, xb] = ramp.stairs[j.si ? 1 : 0];
-    if (j.si === 0) { g.position.set(xb, ramp.T, ramp.zBot); g.rotation.y = Math.PI / 2; }
+    const [xa, xb] = ramp.stairs[j.end];
+    if (j.end === 0) { g.position.set(xb, ramp.T, ramp.zBot); g.rotation.y = Math.PI / 2; }
     else { g.position.set(xa, ramp.T, ramp.zTop); g.rotation.y = -Math.PI / 2; }
     g.scale.y = ramp.T / (ramp.n * S);
   }
@@ -657,7 +660,7 @@ function openJob(i, shape = null) {
   $('labels').append(label);
   const b = C.bbox(shape);
   const f = j.frame = {
-    i, si: j.si, kind: j.kind, part: j.part, cells: shape, walk, b, set, occ: new Set(), filled: new Set(), pieces: [], group: g, label, sig: '', done: false,
+    i, si: j.si, end: j.end, kind: j.kind, part: j.part, cells: shape, walk, b, set, occ: new Set(), filled: new Set(), pieces: [], group: g, label, sig: '', done: false,
     pz: stair ? 0 : 0.1, zs: stair ? STAIR_W / WOOD_D : 1,
     plane: new THREE.Plane().setFromNormalAndCoplanarPoint(g.getWorldDirection(new THREE.Vector3()), g.getWorldPosition(new THREE.Vector3())),
   };
@@ -723,7 +726,7 @@ function frameState(f) {
 // pieces already there. Squares off the frame are allowed; `over` counts them.
 // The stairs' tread line: the top row of column c (beyond either end, it carries straight on). A
 // piece may stick up at most one square above it, so the stairs stay climbable with a hop.
-const stepTop = (f, c) => (f.si === 0 ? ramp.n - 1 - c : c);
+const stepTop = (f, c) => (f.end === 0 ? ramp.n - 1 - c : c);
 function frameFits(cells) {
   const out = [], b = C.bbox(cells);
   for (const f of frames()) {
@@ -930,7 +933,7 @@ function sliceDeck(f, j, quiet) {
     });
   }, 1200 + n * 750));
 }
-// A frame's done. The rest of the same timber comes straight away (the left stairs after the walk);
+// A frame's done. The rest of the same timber comes straight away (the stairs after the walk);
 // the next lot comes when the next wave's beaten off.
 function jobDone(j, quiet) {
   if (quiet) return;
@@ -966,7 +969,7 @@ function heightAt(x, z, pad = 0, from = 99) {
       }
       continue;
     }
-    const [x0, x1] = ramp.stairs[j.si ? 1 : 0];
+    const [x0, x1] = ramp.stairs[j.end];
     if (x < x0 - pad || x > x1 + pad) continue;
     if (j.up && j.tops) {
       const r = j.tops.get(Math.floor(j.frame.group.worldToLocal(hv.set(x, 0, z)).x / S));
@@ -987,7 +990,7 @@ const onRampart = () => ramp && pirate.h > ramp.T - 0.15;
    place. You only get one when you ask for it (Your pirate, Den), as it's yours to dress. */
 const HOUSE = { cols: 7, front: 5, back: 7, depth: 4 };
 const HOUSE_PART = ['front wall', 'side wall', 'other side wall', 'roof'];
-const HOUSE_Z1 = 10.3, HOUSE_Z0 = HOUSE_Z1 - HOUSE.cols * S;
+const HOUSE_Z1 = DEN_BACK - 0.2, HOUSE_Z0 = HOUSE_Z1 - HOUSE.cols * S;
 const houseXF = () => -ramp.half + 1.7;   // the face of the front wall
 function houseShape(part) {
   const cells = [];
@@ -1348,7 +1351,7 @@ function applyBiome(force = false) {
   } else if (id === 'jungle') {
     for (const [x, z] of treeSpots(half)) biomeGroup.add(jungleTree(x, z, 0.85 + Math.random() * 0.4));
     // Ferns along the foot of the cave rocks inside the den, clear of the house.
-    for (const sx of [-1, 1]) for (let z = 1; z < 12.5; z += 1.3 + Math.random()) {
+    for (const sx of [-1, 1]) for (let z = 1; z < DEN_BACK + 2; z += 1.3 + Math.random()) {
       if (sx < 0 && z > HOUSE_Z0 - 1 && z < HOUSE_Z1 + 1) continue;
       biomeGroup.add(fern(sx * (half + 0.5 + Math.random() * 0.8), z, 0.8 + Math.random() * 0.5));
     }
@@ -3869,7 +3872,7 @@ addEventListener('keydown', (e) => {
   // from anywhere on the den floor.
   if (wm && !deco.on && !G.over) {
     if (viewKey(key, e)) return;
-  } else if (key === 'tab' && !deco.on && !G.over && !e.repeat && pirate.h < 0.05 && !outside() && !sword.on && !bilge.on) {
+  } else if (key === 'tab' && !deco.on && !G.over && !e.repeat && !onGunDeck() && !outside() && !sword.on && !bilge.on) {
     enterView();
     return;
   } else if (arrow && !deco.on && !G.over && carry && canWallMode() && !nearFrame()) {
@@ -4213,7 +4216,7 @@ function placeWall(t, by, hand) {
 let lastPlaced = null;
 function canTakeBack() {
   const u = lastPlaced;
-  if (!u || carry || u.hpAfter === null || pirate.h > 0.3) return false;
+  if (!u || carry || u.hpAfter === null || (!wm && pirate.h > 0.3)) return false;
   if (u.frame) return !u.frame.done && u.frame.pieces[u.frame.pieces.length - 1] === u.piece && (!!wm || Math.hypot(u.piece.cx - pirate.x, u.piece.cz - pirate.z) <= REACH + 1.2);
   if (!wm && pirate.z > WALL_Z + 2.5) return false;   // (as far back as you can put one)
   if (u.h.pieces[u.h.pieces.length - 1] !== u.piece || (!u.piece.patch && u.h.status === 'master') || (u.piece.patch && u.h.lay[u.piece.layer]?.status === 'master')) return false;
@@ -5097,7 +5100,7 @@ function clampCursor() {
    or a frame, played with Puzzle Pirates' own Carpentry keys (src/den-carp-view.ts). It stays on
    while you fetch the next piece with 1-3, and the next piece starts where the last went. */
 const viewBoards = () => [...(wall.holes.length ? ['wall'] : []), ...frames()];
-const viewOk = () => pirate.h < 0.05 && !deco.on && !G.over && !outside() && (wm.f ? frames().includes(wm.f) : wall.holes.length > 0);
+const viewOk = () => !deco.on && !G.over && !outside() && !onGunDeck() && (wm.f ? frames().includes(wm.f) : wall.holes.length > 0);
 function enterView() {
   // The nearest thing being built: the wall if you're by it, else the nearest frame.
   const fs = frames().slice().sort((a, z) => Math.hypot(a.mid.x - pirate.x, a.mid.z - pirate.z) - Math.hypot(z.mid.x - pirate.x, z.mid.z - pirate.z));
@@ -5108,6 +5111,7 @@ function enterView() {
 }
 function viewOn(b) {
   if (!b) return;
+  $('intro').classList.add('off');
   if (b === 'wall') return enterWall();
   const q = quarters(b.open), p = q.ul || q.ur || q.dl || q.dr || [b.b.r0, b.b.c0];
   const bb = carry ? C.bbox(carry.cells) : { h: 1, w: 1 };
@@ -5147,6 +5151,26 @@ function jumpCorner(corner) {
   const i = nextHole(wall.holes.map((h) => [h.b.r0 + h.b.h / 2, h.b.c0 + h.b.w / 2]), at, corner);
   if (i === null) { shake = 0.08; return; }
   toHole(i);
+}
+const boardName = (b) => (b === 'wall' ? 'The wall' : { stair: 'Stairs', deck: 'Wall-walk', house: 'Your shack' }[b.kind] || (b.kind === 'gun' ? `Gun tower (${['back', 'middle', 'front'][b.part] || 'part'})` : 'Frame'));
+const boardFits = (b) => !!carry && (b === 'wall' ? wallSpots().some((o) => !o.over && !o.patch) : frameFits(carry.cells).some((o) => o.frame === b && !o.over));
+let boardsT = 0, boardsSig = '';
+function boardsHud(dt) {
+  const el = $('boards');
+  if (!wm) { if (boardsSig) { boardsSig = ''; el.replaceChildren(); } return; }
+  if ((boardsT -= dt) > 0) return;
+  boardsT = 0.3;
+  const list = viewBoards(), cur = wm.f || 'wall';
+  const sig = list.map((b) => `${boardName(b)}|${b === cur}|${boardFits(b)}`).join(';');
+  if (sig === boardsSig) return;
+  boardsSig = sig;
+  el.replaceChildren(...list.map((b) => {
+    const btn = document.createElement('button');
+    btn.className = b === cur ? 'on' : '';
+    btn.innerHTML = `${boardName(b)}${boardFits(b) ? ' <span class="fit" title="The piece in your hands fits here">✓</span>' : ''}`;
+    btn.onclick = (ev) => { ev.currentTarget.blur(); viewOn(b); boardsT = 0; };
+    return btn;
+  }));
 }
 function viewKey(key, e) {
   const a = VIEW_KEYS[key];
@@ -5188,6 +5212,7 @@ function toHole(best) {
 }
 // Which way to walk to stand below the piece, a step back from the wall.
 function wallWalk() {
+  if (pirate.h > 0.05) return null;   // (up on the rampart you puzzle from where you stand)
   if (wm?.f) {
     const f = wm.f, b = carry ? C.bbox(carry.cells) : { h: 1, w: 1 };
     let tx, tz;
@@ -5202,14 +5227,16 @@ function wallWalk() {
     return n > 0.25 ? { wx: dx / n, wz: dz / n, slow: Math.min(1, n * 2) } : null;
   }
   const b = carry ? C.bbox(carry.cells) : null;
-  const tx = !b ? pirate.x : X(target && !target.frame ? target.dc : wm.c) + b.w * S / 2;
-  const dx = Math.max(-bounds.x + 1.6, Math.min(bounds.x - 1.6, tx)) - pirate.x, dz = WALL_Z + 0.9 - pirate.z;   // a step back, so they don't hide the hole
+  // Beside the piece, close to the wall, so they never stand between you and it.
+  const px = !b ? pirate.x : X(target && !target.frame ? target.dc : wm.c) + b.w * S / 2;
+  const side = px > bounds.x - 2.5 ? -1 : 1, tx = !b ? pirate.x : px + side * (b.w * S / 2 + 0.75);
+  const dx = Math.max(-bounds.x + 1.2, Math.min(bounds.x - 1.2, tx)) - pirate.x, dz = (b ? 1.2 : WALL_Z + 0.9) - pirate.z;
   const n = Math.hypot(dx, dz);
   return n > 0.12 ? { wx: dx / n, wz: dz / n, slow: Math.min(1, n * 2) } : null;
 }
 function aim() {
   target = null;
-  if (!carry || pirate.h > 0.3 || outside()) return;
+  if (!carry || (!wm && pirate.h > 0.3) || outside()) return;
   if (wm?.f) {
     // A frame's view: the spot the piece is over, wherever that is on the frame, no walking needed.
     const f = wm.f, list = frameFits(carry.cells).filter((o) => o.frame === f), b = C.bbox(carry.cells);
@@ -6158,7 +6185,7 @@ function puzzleCam() {
     const W2 = wall.W * S / 2, H2 = wall.H * S / 2, win = Math.min(W2, 7.5);
     const b = carry ? C.bbox(carry.cells) : { w: 0 };
     const cx = Math.max(-W2 + win, Math.min(W2 - win, X(wm.c) + b.w * S / 2));
-    return { look: V3(cx, H2 + 0.2, 0.6), dist: fit(win * 2, H2 * 2, 0.9) * Math.min(1, view.zoom) + 1, tilt: 0.36, yaw: 0 };
+    return { look: V3(cx, H2, 0.3), dist: fit(win * 2, H2 * 2, 0.9) * Math.min(1, view.zoom) + 1, tilt: 0.2, yaw: 0 };
   }
   const f = wm.f, mid = frameAt(f, f.b.c0 + f.b.w / 2, f.b.r0 + f.b.h / 2), w = f.b.w * S, h = f.b.h * S * Math.abs(f.group.scale.y);
   if (f.kind === 'stair') return { look: mid, dist: fit(w, h, 0.9) * view.zoom, tilt: 0.14, yaw: Math.atan2(Math.sign(-mid.x) || 1, 0) };
@@ -6265,6 +6292,7 @@ function update(dt) {
   // The carried piece: held overhead, facing the wall's way so you can see how it'll go in.
   if (carry) {
     const g = carry.group, l = carry.lift ?? 1;
+    g.visible = !wm;
     v3.set(pirate.x, 2.15 + pirate.g.position.y, pirate.z + 0.05);
     if (l < 1) { g.position.lerp(v3, Math.min(1, l * 1.6 + 0.2)); g.rotation.x = -Math.PI / 2 * (1 - l); g.scale.setScalar(PILE_SC + (0.55 - PILE_SC) * l); }
     else { g.position.copy(v3); g.rotation.x = 0; g.scale.setScalar(0.55); }
@@ -6297,6 +6325,7 @@ function update(dt) {
   aim();
   drawGhost();
   prompt();
+  boardsHud(dt);
   banner();
 
   // Tweens and sparks.
@@ -6510,9 +6539,8 @@ function fillFrame(f) {
    without playing the waves before it, or skip what's in front of you. Playing alone only: with a
    crew, everyone's game would have to follow. */
 // [name, the last rampart job already built, waves already beaten off]. Each part's timber comes
-// after a wave, as in play: the walk (then the left stairs) after wave 1, the right stairs after 2,
-// the gun tower after 3. A stage lands you as its timber arrives.
-const STAGES = [['The start', -1, 0], ['The walk', -1, 1], ['Right stairs', 1, 2], ['Gun tower', 2, 3], ['Everything built', 5, 4]];
+// after a wave, as in play: the walk (then the stairs) after wave 1, the gun tower after 2. A stage lands you as its timber arrives.
+const STAGES = [['The start', -1, 0], ['The walk', -1, 1], ['Gun tower', 1, 2], ['Everything built', 4, 3]];
 const cheats = { open: false };
 function skipTo(s) {
   const [, upTo, wave] = STAGES[s];

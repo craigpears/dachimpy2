@@ -211,6 +211,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     hole that way; on a frame, that quarter of it), Space puts it in. Backspace takes the last
     piece back off (the real puzzle lets you adjust your last piece). E and F still turn and flip.
     The mouse works too: point and click.
+  - **Nothing in the way, and switching is seamless (9 Nov).** The user: "everything's really
+    obscured", and moving between the wall, the stairs and the platform should be like Carpentry's
+    four holes, with no going out and back in. So: a row of tabs over the prompt names everything
+    being built, the one you're on lit and a tick on each one the piece in your hands fits
+    cleanly; click one (or Tab) to go straight to it, piece and all. Your pirate stands beside the
+    piece (at the wall) or off the frame's near edge, never in front, and the piece over their
+    head is hidden while the ghost shows where it goes. It works from up on the rampart too,
+    without walking anywhere. The den is 4 m deeper (to make room for all that's built), the
+    wall-walk's frame and your shack at the back.
   - **It stays on between pieces,** and the next piece starts where the last one went. A piece can
     be held anywhere over the board and turned there, whether it fits or not, and put in from
     anywhere in the view, no walking.
@@ -444,12 +453,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   same way round, so you can fit it properly. Not once it's made a Masterpiece, once another
   piece has gone on, or once you've picked up a new piece from the crates. A boarded-over hole you
   undo goes back to open and gives back its pay; damage the hole took meanwhile stays.
-- **The rampart: a walk along the top of the whole wall,** with stairs up at both ends. Raiders hacking
+- **The rampart: a walk along the top of the whole wall,** with stairs up at the right-hand end
+  (both ends till 9 Nov: the user wanted the armoury hoist's end of the den kept clear, "sword
+  fighting board on the left, stairs on the right for the ramparts to go up"). Raiders hacking
   at the wall can only be hit from up there; it's what makes a Masterpiece pay off: while it holds,
   you go up and knock the raiders off it. The view swings up high to look down at them. Keep it out
   of the way (not in front of the gate), and the full length of the wall.
 - **The rampart is built a part at a time, as the reward for beating a wave.** Order: the whole
-  walk (then the left stairs straight after it), the right stairs, then the gun tower.
+  walk (then the stairs straight after it), then the gun tower.
   - **One frame at a time.** When a wave is beaten off and nothing is still being built, timber
     arrives for the next part. Its frames come one after another, each only when the last is
     done, so there's never more than one to get on with. The second frame appearing before the
@@ -671,9 +682,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **The cheat menu, for trying things out** (the Cheats button, or the backtick key). The user asked
   for a way to skip stages. It pauses the game while it's open. Playing alone only, as with a crew
   everyone's game would have to follow. Kept small: little buttons, few of them.
-  - **Skip to a stage:** the start, the walk, the right stairs, the gun tower, or everything
-    built. The den starts afresh, built up to there, just as that part's timber arrives (the walk
-    after wave 1, the right stairs after 2, the gun tower after 3). Not a stage per frame: that
+  - **Skip to a stage:** the start, the walk, the gun tower, or everything built. The den starts
+    afresh, built up to there, just as that part's timber arrives (the walk after wave 1, the gun
+    tower after 2). Not a stage per frame: that
     puzzled the user. What it builds is filled with a mix of all the pieces, as a crew would: the
     plain solver's fill was nearly all Ps.
   - **Or skip ahead now:** beat this wave (its timber comes as usual), next wave now, mend every
