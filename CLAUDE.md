@@ -28,3 +28,10 @@ Pirate Den notes: [TODO.md](TODO.md) holds the fixes and quality-of-life changes
 (agreed; just do them), and [IDEAS.md](IDEAS.md) holds their unrefined ideas for new puzzles and features.
 Keep the two apart: when the user mentions a fix or tweak, add it to TODO.md; when they brain-dump a new idea,
 add it to IDEAS.md.
+
+Keeping context lean: the den is big, so hand off work that would flood the main session to subagents with a
+self-contained brief (what to read, what done looks like, what to report back, in a few hundred words). In
+particular, browser checks (screenshots are costly) go to a subagent that checks, fixes what is plainly off,
+runs the build and tests, and leaves changes uncommitted; the main session reviews the diff, commits and pushes.
+Small edits, notes files and anything a few tool calls settle stay in the main session, where the context is.
+When a feature has independent parts, give each to its own subagent; when they touch the same files, do them in turn.
