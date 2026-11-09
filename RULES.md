@@ -304,6 +304,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   to choose up front: the user, "attackers are coming and you just choose which ways to deal with
   them. Similar to how you can defend with carp or jump to the gun turret later" (8 Nov; the idea
   came from the Age of Apes tutorial's choice of three mini-games).
+  - **The same goes for quests: leave the choices open (9 Nov).** An obstacle on a side quest (a
+    pirate guarding his treasure, say) can be got past with any of the den's puzzles, each in its
+    own believable way: swordfight him, shoot him off from a gun deck, or bilge water in to flood
+    him out. The user: "I like that principle. Like, leave the choices open."
 - **Swordfight at the armoury hoist: soldiers and wall repairs (8 Nov).** Each raider beaten
   (knocked flat, by a thrown piece, the guns or a soldier; or turned away at the wall) drops their
   weapons: a pair of crates, a Swordfight pair, that lands inside the den. Walk over it to pick it

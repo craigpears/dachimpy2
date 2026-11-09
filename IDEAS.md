@@ -51,6 +51,55 @@ more things you go and do as a group activity.
   challenge him first). That's a Rumble, with animated punches going back and forth between the
   two little avatars each time you send one.
 
+## The captain's map, up the cliffs to an X (9 Nov, the next big feature)
+
+The user, liking "Raids you choose": the reward for beating the third wave is a **treasure map**,
+leading up the rocks behind the den to an X marks the spot. "I want that pirate hideout feel, not
+a city feel." It's a big feature, so it's built a bit or two at a time ("pick one or two bits to do
+at a time so that we can compress and come back later on"). In order:
+
+1. **The siege ends after three waves; soldiers are capped at a handful.** Started 9 Nov (TODO.md).
+2. **The map.** Beating wave 3, their captain leaves it behind as he sails off (pinned to the gate
+   with his dagger, say, or dropped by the last boat on the beach). Pick it up and it opens as a
+   scrap of parchment: the den, the paths up the cliffs behind, an X. **The map shows the
+   choices** (the user, 9 Nov): "we hear there's some secret treasure here, guarded by a fearsome
+   enemy", with the ways to him marked around it: a gunning platform here, a secret bilge pump
+   station there, a path up for a straight sword fight. You pick your way from the map.
+3. **The way up the rocks.** Behind the den, ledges, ladders and a rope bridge or two, climbing up
+   into the cliff, hideout-style (see "A little town up the cliffs"): somewhere to walk, with the
+   den below and the sea beyond.
+4. **X marks the spot, and the dig.** Digging needs to be a puzzle, and a believable one: no
+   puzzle "randomly in the middle of an open area". Treasure Haul doesn't fit (the user: "it feels
+   like it breaks the immersion"). Ideas to choose from:
+   - *Digging, Foraging-style:* in Puzzle Pirates, Foraging is digging up goods on an island, so
+     digging through earth, roots and rocks down to the chest is what it was made for.
+   - *On the way up:* clearing brush and fallen rocks off the path (Foraging again), or rigging a
+     rope bridge across a gap (Rigging; the cliff town already wants rope bridges).
+5. **The owner: Dalnoth, guarding his treasure, and your choice of how to get past him.** The
+   user's friend's pirate, **Dalnoth** of Emerald (YPPedia: Dalnoth; senior officer of Rootbeer
+   Flotillas, flag Illusion, once of Hunter Ocean; the "Hunter Champion" the user remembered is the
+   Champion familiar he won there). His portrait, for his likeness: a horned helmet (pale, gold
+   trim), a big black beard, a long yellow coat and yellow trousers with a white sash, a frothy
+   tankard of ale in his hand, a monkey on his shoulder (the user: his white monkey; it looks dark
+   in the portrait, so check). Painted as a bit of a drunk. Keep it simple: you stumble on him
+   sitting on his chest, guarding it well, "Oi, what are you doing with my treasure?". Then **the
+   choices are left open** (the user: "I like that principle. Like, leave the choices open"), one
+   for each puzzle the den has:
+   - *Swordfight him* (it's in the den already; Rumble later);
+   - *Gunning:* a gun deck up in the cliffs, and you shoot him off it (or the rocks above him);
+   - *Bilge:* pump water into where he's sitting and flood him out, so the treasure washes out
+     onto the ground;
+   - (and maybe *Carpentry*, the den's own puzzle: shore up or build something to get at him.)
+   Story order still to settle: whether you dig before or after you get past him. Beaten, he could
+   become one of the friends who hang about the den (see "Side quests that leave friends about the
+   den").
+   - *Sword or Rumble, your choice (later):* players love one and hate the other, so let them pick
+     which they fight with (as "choosing your mini-game" already says for the soldiers).
+
+**Balance, alongside:** building on with the rampart and guns is fine as long as it isn't
+overpowered. Soldiers are limited to a handful at the start, and building up the den (bigger
+barracks, say) lets you build "a little army up later".
+
 ## Side quests that leave friends about the den (9 Nov)
 
 Little side quests, like rescuing a capybara by dredging out a reef (a friend's idea). The friend
