@@ -544,6 +544,9 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     ship, adding a crane or a navigation post, each with its cost. "I'm sure we can come up with
     other ideas." (What the fittings are, what each costs her, and how many she takes: to shape
     with the user. A racer of our own, not a copy of any game's karts or cars.)
+    "The really wacky thinking": a **taller mast** gives you better vision over where the shortcuts
+    are, to navigate through them (with the navigation post). The user wants more wacky ship ideas
+    like this, Puzzle Pirates-inspired, and knows they'd "have to have a lot of balancing".
 
 For now the den is the first version, and that works.
 
