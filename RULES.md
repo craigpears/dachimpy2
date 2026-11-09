@@ -674,7 +674,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **You must see what's happening in the den.** Raiders inside get a ⚔ marker, pinned to the edge
   of the screen when they're out of view (gold when carrying loot). The view widens on narrow screens.
 - **Keeping them out must be possible, and must feel worth it.** The user found it demoralising
-  that raiders got in "no matter what": there seemed no point stopping them. The cause was the
+  that raiders got in "no matter what": there seemed no point stopping them. (The other side of it,
+  9 Nov: it's "a bit demotivating when it's so easy to just kill them as they come in", since then
+  blocking off the holes doesn't matter either. Ideas in IDEAS.md, "Throw pieces over the wall".) The cause was the
   raiders' cannon, firing every 9-20 seconds from wave 2, each shot an open hole a raider was
   through two seconds later; nobody can mend that fast. (Tested: with every hole a Masterpiece and
   nothing else done, six raiders still got in over waves 2 and 3.) Now:
