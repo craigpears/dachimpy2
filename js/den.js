@@ -4251,6 +4251,7 @@ function sloopMesh() {
   const fl = flagpole(0.6, flagMat);
   fl.position.set(0.35, SLOOP_DECK + 4.15, 0);
   g.add(fl);
+  g.userData.rig = [mast, fl];   // (struck, with her sails, while you bilge her out on deck)
   // A gun each side, a smaller copy of the gun tower's, muzzle out over her side (port is her left).
   g.userData.guns = {};
   // Staggered, so they read as two guns and not one beam across her.
@@ -4326,6 +4327,8 @@ function seaWorld() {
     const t = mesh(new THREE.BoxGeometry(SAIL.CELL * 0.98, 0.12, SAIL.CELL * 0.98), grass);
     t.position.set(x, CLIFF_H + 0.06, z);
     W.g.add(b, t);
+    // (none on the quay by the lock, where its Bilge board lies: holdOpen)
+    if (c === LAY.LOCK[0] && (r === LAY.LOCK[1] - 1 || r === LAY.LOCK[1] - 2)) continue;
     for (let i = 0; i < 2; i++) W.g.add(rock(x + (Math.random() - 0.5) * 3, CLIFF_H * (0.3 + Math.random() * 0.5), z + (Math.random() - 0.5) * 3, 0.8 + Math.random() * 0.7));
   }
   // The cove's water, up behind the cliff.
@@ -4534,14 +4537,14 @@ function holdOpen(mode) {
     g.scale.setScalar(QUAY_SQ);
   }
   hold.mode = mode;
-  sail.g.userData.sails.forEach((a) => { a.visible = mode !== 'daze'; });
+  for (const o of [...sail.g.userData.sails, ...sail.g.userData.rig]) o.visible = mode !== 'daze';
   for (const side of ['L', 'R']) sail.g.userData.guns[side].visible = mode !== 'daze';
   keys.clear();
 }
 function holdShut() {
   if (hold.group) hold.group.removeFromParent();
   hold.mode = null;
-  if (sail.g) { sail.g.userData.sails.forEach((a) => { a.visible = true; }); for (const side of ['L', 'R']) sail.g.userData.guns[side].visible = true; }
+  if (sail.g) { for (const o of [...sail.g.userData.sails, ...sail.g.userData.rig]) o.visible = true; for (const side of ['L', 'R']) sail.g.userData.guns[side].visible = true; }
 }
 function holdKey(key) {
   const mv = { arrowleft: [0, -1], a: [0, -1], arrowright: [0, 1], d: [0, 1], arrowup: [-1, 0], w: [-1, 0], arrowdown: [1, 0], s: [1, 0] }[key];
@@ -4683,13 +4686,13 @@ function sailHud() {
 }
 // The turret's shots in the air: the ball on its arc, and a red ring on the water where it'll land,
 // so you can see it coming and get out from under it.
-const ringGeo = new THREE.RingGeometry(1.2, 1.55, 28).rotateX(-Math.PI / 2);
+const ringGeo = new THREE.RingGeometry(1.5, 1.9, 32).rotateX(-Math.PI / 2);   // (wide enough to show round her hull)
 function turretFire(to) {
   const W = sail.world;
   W.turret.updateMatrixWorld(true);
   const from = W.gun.localToWorld(V3(0, 0.3, -0.85));
   burst(from, '#ffcf6a', 14, 3); burst(from, '#cfc6b8', 10, 1.8);
-  const ball = mesh(new THREE.SphereGeometry(0.16, 10, 8), mat('#2a2d31', { metalness: 0.6 }));
+  const ball = mesh(new THREE.SphereGeometry(0.24, 10, 8), mat('#2a2d31', { metalness: 0.6 }));
   const ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: '#e0412e', transparent: true, opacity: 0.85, depthWrite: false, fog: false }));
   ring.position.set(seaX(to[0]), 0.1 + liftAt(...to), seaZ(to[1]));
   ring.renderOrder = 3;
@@ -4766,7 +4769,9 @@ function sailTick(dt) {
   for (const [end, gt] of Object.entries(W.gates)) {
     const open = end === 'sea' ? h.level < 0.01 : h.level > 0.99;
     gt.open += ((open ? 1 : 0) - gt.open) * Math.min(1, dt * 2.5);
-    for (const lf of gt.leaves) lf.rotation.y = gt.open * lf.userData.sz * gt.sx * Math.PI / 2 * -1;
+    // (both pairs swing open towards the cove, the high side, as a lock's mitre gates do: the sea
+    // pair back into the chamber, against its walls, the cove pair into the cove)
+    for (const lf of gt.leaves) lf.rotation.y = gt.open * lf.userData.sz * Math.PI / 2;
   }
   // A gun that's fired kicks back in and runs out again as it's loaded, smoking at first.
   for (const side of ['L', 'R']) {
@@ -4786,15 +4791,16 @@ function sailTick(dt) {
   sail.g.rotation.x = sail.heel + Math.sin(t * 0.7) * 0.02;
   sail.g.rotation.z = Math.sin(t * 0.55) * 0.02;
   if (sail.on) {
-    // You, at the tiller, facing her bow.
-    const at = sail.g.localToWorld(V3(-1.15, SLOOP_DECK, 0)), yaw = sail.g.rotation.y;
+    // You, at the tiller, facing her bow (up on her stern, beside it, while the board's on her deck,
+    // so you're not stood on it, nor between it and the camera).
+    const deck = hold.mode === 'daze', at = sail.g.localToWorld(deck ? V3(-1.7, SLOOP_DECK + 0.35, 0.45) : V3(-1.15, SLOOP_DECK, 0)), yaw = sail.g.rotation.y;
     pirate.x = at.x; pirate.z = at.z;
     pirate.g.position.copy(at);
     pirate.g.rotation.set(0, Math.atan2(Math.cos(yaw), -Math.sin(yaw)), 0);
     animateWalk(pirate, false, dt);
     pirate.g.position.y = at.y;
     sail.stars ||= (() => { const g = new THREE.Group(), m = new THREE.MeshBasicMaterial({ color: '#ffe066' }); for (let i = 0; i < 3; i++) { const s = mesh(new THREE.OctahedronGeometry(0.12, 0), m, false); s.position.set(Math.cos(i * 2.1) * 0.4, 0, Math.sin(i * 2.1) * 0.4); g.add(s); } scene.add(g); return g; })();
-    sail.stars.visible = h.dazed();
+    sail.stars.visible = h.dazed() && holdView < 0.5;   // (not in your face over the board)
     if (h.dazed()) { sail.stars.position.set(at.x, at.y + 2.15, at.z); sail.stars.rotation.y += dt * 4; }
   } else if (sail.stars) sail.stars.visible = false;
   // The pin, and the course to it dotted on the water.
@@ -7791,8 +7797,11 @@ function update(dt) {
   if (holdView > 0.001 && hold.group?.parent) {
     const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect), sq = hold.group.scale.x;
     hold.group.getWorldPosition(L2);
+    // (on the quay, drawn back to take in the lock beyond it too, so you see her rise as you pump)
+    const quay = hold.mode === 'up';
+    if (quay) L2.lerp(V3(seaX(LAY.LOCK[0]), L2.y, seaZ(LAY.LOCK[1])), 0.12);
     look.lerp(L2, holdView);
-    dist += (Math.max((BH * sq / 2 + 0.5 * sq * 4) / Math.tan(vh), (BW * sq / 2 + sq * 2) / Math.tan(hh)) * 1.15 * view.zoom - dist) * holdView;
+    dist += (Math.max((BH * sq / 2 + 0.5 * sq * 4) / Math.tan(vh), (BW * sq / 2 + sq * 2) / Math.tan(hh)) * (quay ? 1.75 : 1.15) * view.zoom - dist) * holdView;
     tilt += (1.2 - tilt) * holdView;
     const ry = sail.g.rotation.y, want = hold.mode === 'daze' ? Math.atan2(-Math.cos(ry), Math.sin(ry)) : 0;
     const y0 = Math.atan2(Math.sin(yaw), Math.cos(yaw));
@@ -8053,6 +8062,6 @@ requestAnimationFrame(frame);
 
 // For poking at it from the console.
 window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, swordReward, swordBreak, lumber, toLumber, repairAll, newGame, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
-  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, board, ashore,
+  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, hold, holdSwap, board, ashore,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };
