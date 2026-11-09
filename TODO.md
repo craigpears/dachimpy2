@@ -119,7 +119,8 @@ the site (`.assetsignore` skips `*.md`).
   turns? where the ghost jumps to?). The snapping changes of 7 Nov may have helped, and since 8 Nov
   the whole-wall puzzle mode (arrows move the piece by screen direction); ask again.
 - **The Carpentry view (9 Nov), not yet tried by the user.** (RULES.md, "The Carpentry view".)
-  Tab from anywhere on the den floor goes straight on to the wall or a frame, with Puzzle Pirates'
+  Tab from anywhere on the den floor goes straight on to the wall or a frame (and since 9 Nov it comes
+  on by itself at a frame you bring a piece to), with Puzzle Pirates'
   own keys; it stays on between pieces. Watch for: the wall's stretch of view (15 m round the
   piece) too close or too far; the stairs' frame hard to read (dark on the dark cave wall); the
   pirate in the way (they stand beside the piece now); the tabs over the prompt (ticks where the

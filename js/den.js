@@ -3875,8 +3875,9 @@ addEventListener('keydown', (e) => {
   } else if (key === 'tab' && !deco.on && !G.over && !e.repeat && !onGunDeck() && !outside() && !sword.on && !bilge.on) {
     enterView();
     return;
-  } else if (arrow && !deco.on && !G.over && carry && canWallMode() && !nearFrame()) {
-    enterWall();
+  } else if (arrow && !deco.on && !G.over && carry && pirate.h < 0.05 && !outside() && (frameHere() || canWallMode())) {
+    const f = frameHere();
+    if (f) viewOn(f); else enterWall();
     mouseMode = false;
     return;
   }
@@ -5076,17 +5077,28 @@ function pickSpot(list, at) {
 }
 // ---- puzzle mode at the wall (see `wm`) ----
 const wallSpots = () => (carry ? fits(carry.cells).concat(patchFits(carry.cells)) : []);
-const nearFrame = () => !!carry && frames().length > 0 && frameFits(carry.cells).some((o) => Math.hypot(o.cx - pirate.x, o.cz - pirate.z) <= REACH + 1.2);
-/* Standing on (or right by) a frame on the floor: you're there to build it, so the whole-wall view
-   doesn't come on by itself (it did along the right-hand walk frame, and the camera kept changing
-   while the user was trying to start on it). The arrow keys still take you to the wall. */
+/* Standing on (or right by) a frame on the floor, or with a spot for your piece on one in reach:
+   you're there to build it, so that frame's Carpentry view comes on (the user, 9 Nov, carrying a
+   piece to the walk frame: "I'm still seeing the same view as before ... I'm certainly not getting
+   that more 2D isometric view"). Never the whole wall's from there. */
 const footV = new THREE.Vector3();
-const onFrame = () => frames().some((f) => {
+const frameUnder = () => frames().find((f) => {
   if (f.done) return false;
   if (f.kind === 'stair') return Math.hypot(f.mid.x - pirate.x, f.mid.z - pirate.z) < 2.5;
   const l = f.group.worldToLocal(footV.set(pirate.x, f.mid.y, pirate.z)), m = 1.4 / S, fc = l.x / S, fr = -l.y / S;
   return fc > -m && fc < f.b.w + m && fr > -m && fr < f.b.h + m;
-});
+}) || null;
+const onFrame = () => !!frameUnder();
+function frameHere() {
+  const f = frameUnder();
+  if (f || !carry || !frames().length) return f;
+  let best = null, bd = REACH + 1.2;
+  for (const o of frameFits(carry.cells)) {
+    const d = Math.hypot(o.cx - pirate.x, o.cz - pirate.z);
+    if (d < bd) { bd = d; best = o.frame; }
+  }
+  return best;
+}
 const spotRank = (o) => (o.patch ? 1 : o.over ? 2 : 0);   // a clean fit, then a board behind, then boarding over
 const canWallMode = () => pirate.h < 0.05 && !deco.on && !G.over && pirate.z > 0 && pirate.z <= WALL_Z + 2.5 && wall.holes.length > 0;
 // Keeps the piece on the board: on the wall, inside it; on a frame, touching it (it may hang over).
@@ -5200,7 +5212,7 @@ function enterWall() {
 function exitWall() {
   wm = null;
   wmLinger = 0;
-  wmBlock = carry || null;   // don't pull you straight back in while you walk off with that piece
+  wmBlock = carry ? { c: carry, x: pirate.x, z: pirate.z } : null;   // don't pull you straight back in while you walk off with that piece
 }
 // The arrows: to the next hole that way (along the wall for left and right), to the best spot the
 // piece has in it, or over the middle of it if it won't go in.
@@ -5271,7 +5283,7 @@ function aim() {
   // Pointing at a rampart frame: the spot nearest the pointer.
   if (mouseMode && mouse?.frame) {
     const best = pickSpot(fl.filter((o) => o.frame === mouse.frame), () => mouse);
-    if (best) target = { ...best, ok: fd(best) <= REACH + 1.2, far: fd(best) > REACH + 1.2 };
+    if (best) target = { ...best, ok: true };
     return;
   }
   if (pirate.z > WALL_Z + 2.5 && !fl.length) return;
@@ -6236,13 +6248,17 @@ function update(dt) {
     if (keys.has('s') || keys.has('arrowdown')) mz++;
   }
   // Puzzle mode at the wall: in when you come up to it with a piece, out on leaving it.
-  if (wmBlock && (wmBlock !== carry || pirate.z > WALL_Z + 3)) wmBlock = null;
+  if (wmBlock && (wmBlock.c !== carry || Math.hypot(pirate.x - wmBlock.x, pirate.z - wmBlock.z) > 3)) wmBlock = null;
   // Fitting the piece is the end of it (the view stays a moment, for the next piece).
   wmLinger = mx || mz || !canWallMode() ? 0 : Math.max(0, wmLinger - dt);
   // A frame finished while you were on it: on to the next thing being built.
   if (wm?.f && !frames().includes(wm.f)) { const nb = viewBoards()[0]; if (nb) viewOn(nb); else wm = null; }
   if (wm && !viewOk()) wm = null;
-  else if (!wm && carry && !wmBlock && !mx && !mz && canWallMode() && !nearFrame() && !onFrame() && wallSpots().length) enterWall();
+  else if (!wm && carry && !wmBlock && !mx && !mz && pirate.h < 0.05 && !deco.on && !G.over && !outside()) {
+    const f = frameHere();
+    if (f) viewOn(f);
+    else if (canWallMode() && wallSpots().length) enterWall();
+  }
   const auto = wm && !mx && !mz ? wallWalk() : null;
   const moving = pirate.moving = !!(mx || mz || auto);
   // Turn the view.

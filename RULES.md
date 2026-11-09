@@ -199,8 +199,13 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   get that same effect"). So:
   - **Tab, from anywhere on the den floor,** goes into the Carpentry view on the nearest thing
     being built (the wall if you're by it); Tab again goes on to the next (the wall, then each
-    frame: the wall-walk, the stairs, the gun tower's parts, your shack); Esc walks off. Walking up
-    to the wall with a piece still brings it on by itself.
+    frame: the wall-walk, the stairs, the gun tower's parts, your shack); Esc walks off. Bringing a
+    piece to anything being built brings it on by itself: stop by the wall and it's the wall's
+    view; stop on or beside a frame (or with a spot for the piece on one in reach) and it's that
+    frame's, never the wall's (the user, 9 Nov, at the walk frame: "I'm still seeing the same view
+    as before ... I'm certainly not getting that more 2D isometric view"). The arrow keys with a
+    piece do the same. After Esc it stays off until you walk a few steps or take another piece.
+    Pointing at a frame with the mouse, the piece goes in wherever it is, however far away.
   - **The camera goes straight on to it,** like a 2D board: the wall square on, a stretch of it
     round the piece, its whole height; a frame on the floor from above, its rows running up the
     screen; the stairs square on to their face. Your pirate walks along to stand by the piece,
