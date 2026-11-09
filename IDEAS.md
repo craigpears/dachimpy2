@@ -547,6 +547,27 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     "The really wacky thinking": a **taller mast** gives you better vision over where the shortcuts
     are, to navigate through them (with the navigation post). The user wants more wacky ship ideas
     like this, Puzzle Pirates-inspired, and knows they'd "have to have a lot of balancing".
+    **Cohesion first (the user, 9 Nov):** "they do need to have some kind of cohesion to them. Not
+    just let's create a new mechanic for every ship." So the fittings work through the few things
+    the sea already has (the trade winds, rocks and the bumps on them, the lock, the turret and
+    being dazed, the duty puzzles), each changing how one of those plays for you, and a new
+    mechanic only where it earns its place. From a brainstorm, the ones the user liked:
+    - **Oars, a longship:** she can go where there's no wind, by a new puzzle of her own (rowing,
+      not a copy of any existing game's): "absolutely make it meaningful". The one fitting so far
+      that should bring a really new puzzle.
+    - **A big bilge pump:** "just funny", and best for getting through the canals: the locks pump
+      up faster (Bilge is already how a lock fills).
+    - **A ram on the bow:** bump a rival to daze them ("certainly the ram ship"); bump a rock and
+      it's you that's dazed.
+    - **A grappling hook:** hook a rock to whip round a corner tighter, or hook a rival to be towed
+      ("I love those sort of things").
+    - **A shallow draught:** over sandbanks and shoals the others can't cross ("I don't mind some
+      of the things like getting over some of the sandbanks"). (Real enough: flat-bottomed,
+      shallow-draught boats do cross shallows; pinning it on the dhow was only a guess, since in
+      Puzzle Pirates every ship goes the same places.)
+    - **Jettisoning ballast** for a burst of speed: fine, and familiar, the way Puzzle Pirates
+      already has the double forward and chain shot.
+    - Not fog and lanterns: "probably getting too many mechanics there".
 
 For now the den is the first version, and that works.
 

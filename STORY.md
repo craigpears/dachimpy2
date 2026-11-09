@@ -39,6 +39,10 @@ in time the den becomes the thing itself (TODO.md, "Split the den off").
   (beat a wave and the timber comes; beat the siege and they leave a map). Nothing appears by
   magic: everything you build is the pieces you fitted. The same goes for prizes: familiars are
   won, as in Puzzle Pirates, not picked from a list.
+- **A few mechanics, used many ways.** New things build on what's already there (the wind, the
+  rocks, the lock, being dazed, the duty puzzles) rather than each bringing a mechanic of its own:
+  "they do need to have some kind of cohesion to them. Not just let's create a new mechanic for
+  every ship." A brand new mechanic, or a new puzzle, has to earn its place.
 - **A hideout, not a city.** Lodgings dug into the cliff, ladders and rope bridges, a den behind a
   wall in a cove. Small and characterful, never a sprawling town.
 - **Forward, not back.** The story goes outward: out of the den and across the sea to raid the
