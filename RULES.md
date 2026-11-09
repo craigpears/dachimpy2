@@ -122,6 +122,44 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   pressured fight against defeat. The user (9 Nov): "there's not as much of a worry about making
   things too easy ... progression is fun. It's to be expected. ... we can add more challenging
   elements later." So when a change could go either way, keep it simple and on the easy side.
+- **You choose your puzzles; walking past never pulls you in (9 Nov).** The user: "while I'm
+  trying to walk around, it feels like you get dragged into puzzles far too easily. Like, you
+  should have to actively interact with something ... I'm just being pulled into everything now."
+  So every puzzle starts only when you ask for it: Space at the sword rack, the pumps, the map and
+  the sloop; Space on the gun tower to take charge of the guns (walking across it no longer swings
+  the camera round and starts Gunnery; Esc, or walking off it, steps back); Tab or the arrow keys
+  on a frame for its Carpentry view (Space still fits a piece there in 3D). The one exception, as
+  the user suggested ("maybe the front wall could be a bit of an exception"): stopping at the wall
+  with a piece in hand still brings up the wall's view.
+- **Sailing, a first go (9 Nov).** The user: "can you do a proof of concept for ... how you end up
+  getting a ship? ... a ship would just be waiting in the cove", with Battle Navigation's feel:
+  "drop a pin, like a destination point, but it almost like auto moves ... it still moves like a
+  Puzzle Pirate ship. So it goes left, pauses, right, pauses, forward, forward ... the fact that you
+  chart the waypoints out gives it the speed." Steering it by hand with W, A and D, they loved it:
+  "it gives you the very Puzzle Pirate feel of moving. It gives such a nostalgia." So:
+  - **The old sloop:** once the siege is over and their ship has sailed out of the cove, an old
+    sloop is left at anchor off the left of the beach (one mast, a square sail and topsail, your
+    own flag at the masthead). Walk down to the water by her and Space boards her.
+  - **The board:** a grid of sea out from the cove, there underneath but never drawn; only the
+    square you point at shows, faintly. A few rocks stand out of the water as sea stacks (seen
+    from the den too). The water round her mooring is always clear, and every open square can be
+    reached.
+  - **Battle Navigation's moves:** forward is a square ahead; left and right are a square ahead
+    and a square to that side, ending up facing that way, sailed as a quarter circle (she heels
+    into the turn). Forward into a rock or the board's edge, she bumps and stays put; a blocked
+    turn turns her on the spot.
+  - **Turns:** up to four moves a turn, one at a time with a pause after each, then a breather:
+    about seven seconds a turn ("5 or 10 seconds"). Crossing the whole board takes well under a
+    minute. Shown along the bottom as Battle Navigation's tokens: this turn's (the one being sailed
+    lit) and the next turn's.
+  - **The pin and the pilot:** click the sea to drop a pin (a red buoy); the pilot works out the
+    fewest moves there round the rocks, and the course is dotted on the water. A pin on a rock or
+    off the board goes to the nearest open water. W, A and D put in a forward, left or right
+    yourself, played ahead of the pilot's (in gold; up to a turn's worth ahead); S takes one back;
+    Esc pulls up the pin; H heads home. A turn under way always finishes.
+  - **Ashore:** sail back to her mooring and Space puts you on the beach beside her.
+  - Alone only for now (no crews at sea yet). No tokens to earn yet, no destinations: those are
+    IDEAS.md ("Sailing between places, for real"). Rules: `src/den-sail.ts`.
 - **A quick siege to start, then calm (9 Nov).** The first three waves come as they always have,
   each counting down after the last. Beat the third and their captain calls it off ("We'll be
   back!") and the ship sails out of the cove, its cannon with it. The den's quiet after that: no
@@ -257,11 +295,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **Tab, from anywhere on the den floor,** goes into the Carpentry view on the nearest thing
     being built (the wall if you're by it); Tab again goes on to the next (the wall, then each
     frame: the wall-walk, the stairs, the gun tower's parts, your shack); Esc walks off. Bringing a
-    piece to anything being built brings it on by itself: stop by the wall and it's the wall's
-    view; stop on or beside a frame (or with a spot for the piece on one in reach) and it's that
-    frame's, never the wall's (the user, 9 Nov, at the walk frame: "I'm still seeing the same view
-    as before ... I'm certainly not getting that more 2D isometric view"). The arrow keys with a
-    piece do the same. After Esc it stays off until you walk a few steps or take another piece.
+    piece to the wall and stopping there brings the wall's view on by itself; a frame's comes on
+    when you ask (Tab, or the arrow keys with a piece), since being pulled in just by standing on
+    one was too much (see "You choose your puzzles"). It's always that frame's, never the wall's
+    (the user, 9 Nov, at the walk frame: "I'm still seeing the same view as before ... I'm
+    certainly not getting that more 2D isometric view"). After Esc it stays off until you walk a few steps or take another piece.
     Pointing at a frame with the mouse, the piece goes in wherever it is, however far away.
   - **The camera goes straight on to it,** like a 2D board: the wall square on, the whole of it
     (a stretch round the piece if it's ever too long); a frame on the floor from above, its rows running up the

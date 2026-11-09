@@ -53,6 +53,11 @@ in time the den becomes the thing itself (TODO.md, "Split the den off").
   (the map), the camera zooms in onto it and the den's buttons get out of the way.
 - **Not overpowered.** Building on (more guns, more rampart) is fine as long as it doesn't make
   the game trivial; armies start small (a handful of soldiers) and grow as the den grows.
+- **You choose your puzzles.** Walking about the den never drags you into one: you start a
+  puzzle when you want to (Space, Tab), the wall with a piece in hand being the one exception.
+- **Safe waters, then the wilds (a long way off).** The story's places are safe for light
+  adventures; out in the wilds the rewards are higher and so is the risk: krakens, monsters, and
+  other players (IDEAS.md).
 - **Better together.** In the spirit of Puzzle Pirates, a crew helps each other's puzzles, visibly,
   and drops in and out without spoiling anyone's game.
 - **Characters from the user's world.** Real Puzzle Pirates pirates, by their pirate names only,
@@ -80,7 +85,9 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    or round to a hidden cove with an old bilge pump.
 5. · **Out to sea, to his hideout.** Forward, not back: you go and raid him, "a mirror of this
    kind of siege". And you really sail there, on a board in 3D, putting in forward, left and
-   right, past rocks, the beach coming up as you land. And not necessarily straight there: the captain drops a pile of scrolls (maps
+   right, past rocks, the beach coming up as you land (▶ a first go is built: once their ship's
+   gone there's an old sloop at anchor in the cove; board her, drop a pin and she sails there on
+   Battle Navigation's moves, or steer her yourself). And not necessarily straight there: the captain drops a pile of scrolls (maps
    to an island to forage, the capybara rescue, plans for the gun platform), and you can stay
    home and do up the den first. Or sneak onto his island for some of his buried loot, without a
    fight; every theft angers them more, and that's what brings the raids back.
@@ -93,7 +100,8 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    brings on the next round. Your choice again: dig in at the den (fortify, more guns, more
    soldiers, fight him on the beaches), or find the abandoned sloop in the harbour, fix her up and
    see him off at sea on a Battle Navigation board.
-8. · **And on from there:** side quests that leave friends about the den, raids that come when the
+8. · **And on from there:** life on the sea (a kraken to sail round), safe waters and the
+   risky wilds beyond, side quests that leave friends about the den, raids that come when the
    world gives a reason (a sail on the horizon) or when you ring the bell, a den that grows (bigger
    barracks, a bigger army), a crew of real players, and one day raiding other dens.
 
@@ -104,7 +112,7 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
 | Mend the wall | The first wave comes (with a beat to see it done) |
 | Beat wave 1 | Timber for the walk, then the stairs |
 | Beat wave 2 | Timber for the gun tower |
-| Beat wave 3 | The siege is over: calm, and the captain's map (a cutscene) |
+| Beat wave 3 | The siege is over: calm, and the captain's map (a cutscene); their ship gone, an old sloop left in the cove |
 | Find the scrolls (to come) | Maps to side quests, plans for building (the gun platform) |
 | Steal his buried loot (to come) | Gold, and his crew's anger: raids come back |
 | Break fused chests at the armoury | Soldiers, up to a handful (more as the den grows: to come) |

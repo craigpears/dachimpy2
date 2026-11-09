@@ -163,6 +163,37 @@ board**, never a jump cut:
 (Goes with the gunnery deck at sea, the sloop, and raiding other dens. A big one: to shape with
 the user before building.)
 
+**A first go is built (9 Nov; RULES.md, "Sailing, a first go"):** the old sloop in the cove, the
+hidden board, Battle Navigation's moves a turn at a time, a pin and a pilot, a few rocks, and W A
+D to steer yourself. The user, steering her by hand: "it gives you the very Puzzle Pirate feel of
+moving. It gives such a nostalgia." What's next:
+
+- **Filling up the tokens** ("obviously you need the thing of filling up tokens"): the moves you
+  put in have to be earned, as on a real ship, by Sailing (the puzzle). And how hard that is
+  depends on where you are (the user, 9 Nov): **on the open sea it's easy and quick**, so getting
+  about is light; **getting towards battle areas it becomes a lot closer to Puzzle Pirates**, a
+  real Battle Navigation feel ("the wind is ... quite milder" out in the open).
+- **Fixing her up first:** she's an old wreck left behind ("an abandoned sloop": STORY.md, step
+  7), so maybe she needs patching by Carpentry before she'll sail, like the wall.
+- **Places to sail to:** Dalnoth's island, the side-quest islands, other dens, with the beach and
+  their walls and turrets coming up as you arrive.
+- **Life on the sea, to make it feel alive:** "just things like just to make the environment feel
+  a bit more alive", as the universe is built out. The first the user thought of: **a Kraken**,
+  drawn on the captain's map too, that you sail past on the way to Dalnoth; it attacks you if you
+  come too close. Unlocked later, not in the first voyages.
+- **Crews at sea:** for now she's sailed alone.
+
+## Safe waters, and the wilds: high risk, high reward (9 Nov, a pipe dream)
+
+The user, "probably me just getting more into real pipe dreaming stuff": player versus player
+should mean something. **Safe story areas** where you do light adventures, and then, like
+RuneScape's Wilderness, **the wilds, with the higher rewards and the higher risk**: out there
+there are krakens and monsters to get past to whatever you're after, and **anywhere in the wilds
+you might be attacked by another player** ("there's never really anywhere I want you to be able
+to go and not be at risk of a player versus player attack" there). Goes with sailing (the open
+sea easy, battle waters closer to real Battle Navigation: above), raiding other dens, and crews.
+To shape with the user much later.
+
 ## Side quests that leave friends about the den (9 Nov)
 
 Little side quests, like rescuing a capybara by dredging out a reef (a friend's idea). The friend

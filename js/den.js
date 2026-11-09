@@ -1533,7 +1533,12 @@ const gdCell = (x, z) => {
 };
 // (The planks' top is 5cm above the height you walk at.)
 const gdAt = (r, c, y = 0) => new THREE.Vector3(gd.x0 + (c + 0.5) * S, ramp.T + 0.05 + y, gd.z0 + (r + 0.5) * S);
-const onGunDeck = () => !!gd && onRampart() && !!gdCell(pirate.x, pirate.z);
+/* Standing on the gun tower, and playing it: walking across it doesn't start Gunnery (the user, 9
+   Nov: "you get dragged into puzzles far too easily ... you should have to actively interact with
+   something"). Space takes charge of the guns; Esc, or walking off, steps back. */
+const atGunDeck = () => !!gd && onRampart() && !!gdCell(pirate.x, pirate.z);
+let gunOn = false;
+const onGunDeck = () => gunOn && atGunDeck();
 const isBarrel = (r, c) => gd.barrel[0] === r && gd.barrel[1] === c;
 // A gun's squares, counted in from the gunwale: 0 is the lane in front of its muzzle, where stores
 // go in; it lies on 1-3, muzzle on 1.
@@ -4645,6 +4650,7 @@ addEventListener('keydown', (e) => {
   // At the sword rack, the keys play the Swordfight board, as in the real puzzle.
   if (sword.on && !deco.on && !G.over && swordKey(key, e)) return;
   if (bilge.on && !deco.on && !G.over && bilgeKey(key, e)) return;
+  if (key === 'escape' && onGunDeck()) { gunOn = false; return; }
   const arrow = { arrowleft: [0, -1], arrowright: [0, 1], arrowup: [-1, 0], arrowdown: [1, 0] }[key];
   // The Carpentry view: Puzzle Pirates' own Carpentry keys (src/den-carp-view.ts). Tab goes into it
   // from anywhere on the den floor.
@@ -4859,6 +4865,7 @@ function act() {
   if (pirate.h > 0.3) {
     if (carry && onRampart() && aimFoe()) throwAt(aimFoe());
     else if (!carry && onGunDeck()) chalkAhead();
+    else if (!carry && atGunDeck()) { gunOn = true; keys.clear(); }
     return;
   }
   if (f.kind === 'pile') {
@@ -6230,14 +6237,16 @@ function prompt() {
   const hacking = raiders.some(atWall);
   if (onGunDeck() && !carry) {
     const n = myArrows().length;
-    t = `Chalk arrows to steer the stores into the guns: click a plank · wheel turns · right-click rubs out (${n}/${GD.arrows})`;
-  } else if (onRampart()) {
+    t = `Chalk arrows to steer the stores into the guns: click a plank · wheel turns · right-click rubs out (${n}/${GD.arrows}) · Esc: step back`;
+  } else if (atGunDeck() && !carry) t = 'The gun tower · Space: take charge of the guns';
+  else if (onRampart()) {
     if (!carry) t = 'Bring a piece up here to throw at the raiders';
     else if (outsideFoe()) t = `Space, Shift or click a raider: throw the ${carry.letter} down on them!`;
     else t = hacking ? 'Walk along to get in range' : 'Up on the rampart · watch for raiders at the wall';
   } else if (pirate.h > 0.3) t = carry ? 'Up the stairs to the rampart' : 'Up to the rampart';
   else if (loose) t = carry ? `${f.kind === 'pile' || target?.ok ? t + ' · ' : ''}Shift or click: throw the ${carry.letter} at the raider!` : 'A raider is in the den! Grab a piece to throw at them';
   else if (carry && outsideFoe() && !target?.ok) t += ` · Shift or click a raider: lob it over the wall`;
+  if (carry && !wm && frameHere() && t.startsWith('Space')) t += ' · Tab: the Carpentry view';
   if (outside()) t = !carry ? 'Out on the beach · back in through the gate' : loose ? `Shift or click: throw the ${carry.letter} at the raider!` : `Out on the beach · back in through the gate to fit the ${carry.letter}`;
   if (canRead(G.map) && !carry && !wm && pirate.h < 0.05 && !t.startsWith('Space')) t += " · M: the captain's map";
   t = sailPrompt() || mapPrompt() || bilgePrompt() || swordPrompt() || t;
@@ -7121,9 +7130,9 @@ function update(dt) {
   if (wm?.f && !frames().includes(wm.f)) { const nb = viewBoards()[0]; if (nb) viewOn(nb); else wm = null; }
   if (wm && !viewOk()) wm = null;
   else if (!wm && carry && !wmBlock && !mx && !mz && pirate.h < 0.05 && !deco.on && !G.over && !outside()) {
-    const f = frameHere();
-    if (f) viewOn(f);
-    else if (canWallMode() && wallSpots().length) enterWall();
+    // (Only the wall: on a frame, Tab or the arrows open its view. The user, 9 Nov: "you should have
+    // to actively interact with something. Maybe the front wall could be a bit of an exception".)
+    if (!frameHere() && canWallMode() && wallSpots().length) enterWall();
   }
   const auto = wm && !mx && !mz ? wallWalk() : null;
   const moving = pirate.moving = !!(mx || mz || auto);
@@ -7187,6 +7196,7 @@ function update(dt) {
     carry.mat.depthWrite = carry.mat.opacity > 0.9;
   }
 
+  if (gunOn && !atGunDeck()) gunOn = false;
   if (!G.over) updateGunDeck(dt);
   swordTick(dt);
   bilgeTick(dt);
@@ -7556,6 +7566,7 @@ newGame();
 if (['all', 'gundeck'].includes(new URLSearchParams(location.search).get('try'))) {
   buildAll();
   Object.assign(pirate, { x: gd.x0 + GD.cols * S / 2, z: gd.z0 + (GD.rows - 0.5) * S, h: ramp.T });
+  gunOn = true;
   $('intro').classList.add('off');
 }
 requestAnimationFrame(frame);
