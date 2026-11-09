@@ -137,9 +137,13 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   Puzzle Pirate ship. So it goes left, pauses, right, pauses, forward, forward ... the fact that you
   chart the waypoints out gives it the speed." Steering it by hand with W, A and D, they loved it:
   "it gives you the very Puzzle Pirate feel of moving. It gives such a nostalgia." So:
-  - **The old sloop:** once the siege is over and their ship has sailed out of the cove, an old
-    sloop is left at anchor off the left of the beach (one mast, a square sail and topsail, your
-    own flag at the masthead). Walk down to the water by her and Space boards her.
+  - **The old sloop:** from the moment the siege is over she's at anchor close in off the left of
+    the beach, broadside on so you see her from the beach (one mast, a square sail and topsail,
+    your own flag at the masthead): there in the cutscene behind Dalnoth, and there when you've
+    read his map. Their ship makes sail in the background once he's rowed back aboard, quickly;
+    nothing waits on it (the user, 9 Nov: "I'm sat here quite a while waiting for his sloop to sail
+    off ... That should be a background feature as soon as he's rowed back", and she should be "in
+    a more natural place"). Walk down to the water by her and Space boards her.
   - **The board:** a grid of sea out from the cove, there underneath but never drawn; only the
     square you point at shows, faintly. A few rocks stand out of the water as sea stacks (seen
     from the den too). The water round her mooring is always clear, and every open square can be

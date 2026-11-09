@@ -29,11 +29,13 @@ export const SAIL = {
   ROWS: 14,
   /** A square, in metres (the sloop's about one long). */
   CELL: 4,
-  /** Where the board starts, out from the wall (metres; the wall's at 0, out is -): just past the
-      lowest tide, so the sloop's always afloat. */
-  Z0: -19,
-  /** Her mooring: just off the left of the beach, bows out to sea. */
-  HOME: { c: 6, r: 0, d: 0 } as Pose,
+  /** Where the board starts, out from the wall (metres; the wall's at 0, out is -): at the lowest
+      tide's edge, so the sloop's moored close in, where you see her from the beach (the user, 9
+      Nov: she should be "in a more natural place"), and still always afloat. */
+  Z0: -17,
+  /** Her mooring: just off the left of the beach, broadside on, bows along the shore toward the
+      middle of the cove. */
+  HOME: { c: 6, r: 0, d: 1 } as Pose,
   /** Moves in a turn, as in Battle Navigation. */
   SLOTS: 4,
   /** Seconds a move takes to sail, the pause after it, and the breather between turns: about
@@ -116,8 +118,9 @@ export class Sea {
     return { to: { c: p.c, r: p.r, d: to.d }, bump: true };
   }
 
-  /** The pilot: the fewest moves from here to that square (facing any way), never touching a rock.
-      Null if there's no way there. */
+  /** The pilot: the fewest moves from here to that square (facing any way), never sailing into a
+      rock, though a turn that's blocked can turn her where she is (facing the shore at the board's
+      edge, that's the only way round). Null if there's no way there. */
   plot(from: Pose, c: number, r: number): Move[] | null {
     if (!this.open(c, r)) return null;
     if (from.c === c && from.r === r) return [];
@@ -129,8 +132,8 @@ export class Sea {
       const next: Pose[] = [];
       for (const p of edge) {
         for (const m of ['F', 'L', 'R'] as Move[]) {
-          const { cells, to } = path(p, m);
-          if (!cells.every(([x, y]) => this.open(x, y)) || seen.has(id(to))) continue;
+          const { to } = this.sail(p, m);
+          if (seen.has(id(to))) continue;
           seen.set(id(to), { prev: id(p), m });
           if (to.c === c && to.r === r) {
             const moves: Move[] = [];

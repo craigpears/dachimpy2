@@ -130,6 +130,16 @@ describe('sailing: the turns ("left, pauses, right, pauses, forward, forward", 9
     expect([h.pose.c, h.pose.r]).toEqual([SAIL.HOME.c, 6]);
   });
 
+  it(`the pilot can still get her away when she's turned to face the shore (9 Nov)`, () => {
+    // Moored broadside, a right turn at her mooring is blocked by the beach and turns her on the
+    // spot to face it; the pilot used to give up there, a turn on the spot not counting as a move.
+    const sea = clearSea(), h = new Helm(sea, { c: SAIL.HOME.c, r: 0, d: 2 });
+    expect(sea.plot(h.pose, SAIL.HOME.c, 6)).not.toBeNull();
+    h.drop(SAIL.HOME.c, 6);
+    run(h, 40);
+    expect([h.pose.c, h.pose.r]).toEqual([SAIL.HOME.c, 6]);
+  });
+
   it('sits still with nothing to do, and wakes promptly when told', () => {
     const h = new Helm(clearSea());
     expect(run(h, 5)).toEqual([]);

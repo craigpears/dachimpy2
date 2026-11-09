@@ -85,8 +85,8 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    or round to a hidden cove with an old bilge pump.
 5. · **Out to sea, to his hideout.** Forward, not back: you go and raid him, "a mirror of this
    kind of siege". And you really sail there, on a board in 3D, putting in forward, left and
-   right, past rocks, the beach coming up as you land (▶ a first go is built: once their ship's
-   gone there's an old sloop at anchor in the cove; board her, drop a pin and she sails there on
+   right, past rocks, the beach coming up as you land (▶ a first go is built: once the siege is
+   over there's an old sloop at anchor in the cove; board her, drop a pin and she sails there on
    Battle Navigation's moves, or steer her yourself). And not necessarily straight there: the captain drops a pile of scrolls (maps
    to an island to forage, the capybara rescue, plans for the gun platform), and you can stay
    home and do up the den first. Or sneak onto his island for some of his buried loot, without a
@@ -112,7 +112,7 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
 | Mend the wall | The first wave comes (with a beat to see it done) |
 | Beat wave 1 | Timber for the walk, then the stairs |
 | Beat wave 2 | Timber for the gun tower |
-| Beat wave 3 | The siege is over: calm, and the captain's map (a cutscene); their ship gone, an old sloop left in the cove |
+| Beat wave 3 | The siege is over: calm, and the captain's map (a cutscene); their ship sails off, and an old sloop's left in the cove |
 | Find the scrolls (to come) | Maps to side quests, plans for building (the gun platform) |
 | Steal his buried loot (to come) | Gold, and his crew's anger: raids come back |
 | Break fused chests at the armoury | Soldiers, up to a handful (more as the den grows: to come) |

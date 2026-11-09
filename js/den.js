@@ -2631,7 +2631,7 @@ function shipSail(dt) {
   if (cine) return;   // (held at anchor till their captain's back aboard)
   if (!ship.visible) return;
   const run = ship.position.x - home;
-  ship.position.x += dt * Math.min(2.4, 0.15 + run * 0.12);
+  ship.position.x += dt * Math.min(3, 0.4 + run * 0.2);
   cannon.position.x = ship.position.x + 0.6;
   if (run > SHIP_GONE) { ship.visible = false; cannon.visible = false; }
 }
@@ -4275,7 +4275,10 @@ const dotGeo = new THREE.CircleGeometry(0.32, 14).rotateX(-Math.PI / 2);
 const hoverMat = new THREE.MeshBasicMaterial({ color: '#f3ecdc', transparent: true, opacity: 0.12, depthWrite: false, fog: false });
 const TOK = { F: '↑', L: '↰', R: '↱' };
 
-const sloopHome = () => G.phase === 'peace' && !online() && !ship.visible;
+// The old sloop's at anchor in the cove from the moment the siege is over, while their ship makes
+// sail in the background (the user, 9 Nov: "I'm sat here quite a while waiting for his sloop to sail
+// off ... That should be a background feature as soon as he's rowed back").
+const sloopHome = () => G.phase === 'peace' && !online();
 const atHome = () => { const p = sail.helm.pose, H = SAIL.HOME; return p.c === H.c && p.r === H.r; };
 const nearSloop = () => !sail.on && sail.g?.visible && atHome() && sail.helm.slot < 0 && outside() && !carry && !cine
   && Math.abs(pirate.x - seaX(SAIL.HOME.c)) < 2.6 && pirate.z < shoreZ() + 2.4;
@@ -4361,7 +4364,7 @@ function sailTick(dt) {
   sail.g ||= (() => { const g = sloopMesh(); scene.add(g); return g; })();
   const show = sail.on || sloopHome();
   if (sail.g.visible !== show) sail.g.visible = show;
-  if (show && !sail.seen && !sail.on && G.phase === 'peace') { sail.seen = true; if (!cine) toast('Their ship\'s gone, and there\'s an old sloop left at anchor in the cove'); }
+  if (show && !sail.seen && !sail.on && G.phase === 'peace' && !cine && !chart.on) { sail.seen = true; toast('Their ship\'s making sail, and there\'s an old sloop left at anchor in the cove: walk down to her'); }
   if (!show) return;
   const h = sail.helm;
   if (sail.on) {
