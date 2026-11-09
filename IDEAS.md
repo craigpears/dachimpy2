@@ -184,6 +184,18 @@ moving. It gives such a nostalgia." What's next:
   drawn on the captain's map too, that you sail past on the way to Dalnoth; it attacks you if you
   come too close. Unlocked later, not in the first voyages.
 - **Crews at sea:** for now she's sailed alone.
+- **Shipping lanes: the trade winds, a wild ride (9 Nov, "a fantastic, incredible idea").** In
+  Puzzle Pirates, Battle Navigation's wind tiles push you along. A lane is a souped-up run of
+  them, "just insanely quick wind tiles", the fast way between places. But it mustn't be a dull
+  conveyor: "it's got to be an interesting journey", with rocks along its sides and whirlpools
+  in it, "some craziness to the journey". Sail onto the trade winds and they take over ("it will
+  just like spin you. The autopilot will take over"), whirling you round and flinging you on,
+  with "some fear of ... a bit of bashing on the rocks on the way": go for **"the crazy captain
+  vibe"**. (A fit with what's there: the hidden board already has rocks and bumps; wind tiles
+  move you a square, whirlpools spin you round, as in Battle Navigation. How much a bash costs
+  (damage, lost time, spilled cargo), whether you can steer at all once you're in, and where the
+  lanes run (between the places on the captain's map, the gun platform over one: above): to
+  shape with the user.)
 
 ## Safe waters, and the wilds: high risk, high reward (9 Nov, a pipe dream)
 
