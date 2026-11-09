@@ -586,6 +586,13 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     sweeps, the long oars real warships ran out through their ports in a calm. Every ship keeps
     her guns, but while the sweeps are out the guns at those ports can't fire, so in a calm you
     choose, moment to moment, to row or to fight.)
+    **Shallow and deep water is what's left of it (9 Nov):** "the only thing that really makes
+    sense is that you can have bigger ships that need a bigger draft", so just shallow water and
+    deep. Even that's partly the map's job already: bigger ships are more squares wide, and a gap
+    one square wide keeps them out. What shallows do add is **visual diversity**: a few squares of
+    shallow water where ships "really slow down", and a small ship gets her oars out to get over
+    it, "especially as bigger ships come in later" (they'd need the deep water). A first go is
+    in TODO.md.
 
 For now the den is the first version, and that works.
 
