@@ -238,12 +238,18 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     real puzzle, change the wall itself: done, "The wall in two courses" below.
   - **The keys must be dependable (9 Nov).** The user, playing by keyboard: "this needs a lot more
     quality control for keyboard use. A lot of it." So, tested key by key:
-    - Left and right move a square while the piece is over a hole's columns, and off them jump
-      straight on to the next hole that way, over the bare stone and the gate ("it just blocks me
-      instead of skipping over it"). Since the two courses (9 Nov), left and right keep to the
-      piece's course (high or low), and up and down work the same way between the holes of the
-      piece's side: a square at a time over the stone between, never off the end of a hole into
-      bare stone.
+    - **An arrow always moves the piece, and never further than it must** (the user, 9 Nov: "you
+      should always be able to go left and right and move to the next available spot"; the piece
+      seemed "to be jumping two spaces and going right to the bottom", sent to the next hole's best
+      fit). A square at a time while the piece touches a hole (overhanging its edges counts); off
+      it, over the bare stone and the gate ("it just blocks me instead of skipping over it") to the
+      first spot touching the next hole in line with it, its row kept (left and right keep to its
+      course, high or low; up and down work the same way between a side's two holes); with no hole
+      in line that way, a plain square on, right to the wall's edge. Never a diagonal jump, never
+      to a fit it chose for you: that's what Q/W/A/S are for (`arrowStep`, src/den-carp-view.ts).
+    - **You can always turn and flip the piece, fit or no fit** (the user, 9 Nov: "It not fitting
+      should not stop you flipping it"). It turns where it is, about its middle (turning it round
+      and round doesn't walk it off), and the wheel turns any piece you carry (see below).
     - Q/W/A/S never send the piece back to the hole it's already at (it did, with the piece a little
       right of its hole's middle: "it isn't jumping").
     - A hand resting on the mouse doesn't undo key moves: after a key, the mouse takes over again
@@ -362,6 +368,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   (`src/den-wall.ts`). It's nine or ten rows tall (5 m, it was six), about 17 m long (it was
   about 24), so the Carpentry view shows the whole of it. Holes lie on their side (wider than tall)
   to keep it low.
+  - **The gate stays five rows tall** (2.75 m, as on the six-row wall), under a beam with stone
+    over it. Run up the taller wall's full height it "just feels very stretched now". No cannon
+    breach opens in the stone over it.
   - **High holes: raiders bring ladders.** Raiders going for a high hole lean a ladder under it
     and climb up; from there they hack its wood, or if it's open, climb straight in and drop down
     inside. There's no stone to hack wider first (that's the low holes), so an open high hole is
@@ -828,8 +837,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **You turn the pieces yourself; nothing turns them for you.** Making the carried piece turn
   itself to the best fit was tried and dropped: the user felt it cheapens the puzzle. Speeding the
   carpentry up belongs to a 2D mode instead (IDEAS.md).
-- **The wheel turns the piece whenever it's showing a spot to fit** (that's what it was for first);
-  only otherwise does it zoom.
+- **The wheel turns any piece you're carrying,** whether or not it has a spot to fit (it used to
+  turn only a piece showing a spot, and zoomed otherwise: the user, 9 Nov, "you should always be
+  able to rotate a piece and flip a piece"). Empty-handed, it zooms, and - and = always zoom.
 - **Throwing at a raider is the only way to discard.** No scrap fire, no bin: a piece you don't
   want (often a rare one) can only be got rid of by throwing it at an enemy pirate, which deals a
   fresh piece onto that crate. Swapping at the crates just puts it back. With no raiders about,

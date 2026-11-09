@@ -1,7 +1,7 @@
 /* The Carpentry view's keys and jumps (9 Nov): Puzzle Pirates' own Carpentry keys, as YPPedia
    gives them, on the wall and the frames. */
 import { describe, expect, it } from 'vitest';
-import { KEYS, along, centreOn, clampTo, nextBoard, nextHole, quarters } from '../src/den-carp-view';
+import { KEYS, arrowStep, centreOn, clampTo, nextBoard, nextHole, quarters } from '../src/den-carp-view';
 import type { Pt } from '../src/den-carp-view';
 
 describe('the keys are the real Carpentry keys', () => {
@@ -97,22 +97,44 @@ describe('Tab goes on to the next thing being built', () => {
   });
 });
 
-describe('the arrows along the wall skip the bare stone between holes', () => {
-  // Two holes with stone round them (columns 3-10 and 12-18), then the gate, then one at 30-37.
-  const zones = [{ i: 0, c0: 3, c1: 10 }, { i: 1, c0: 12, c1: 18 }, { i: 2, c0: 30, c1: 37 }];
-  it('moves a square while the piece is over a hole or the stone just round it', () => {
-    expect(along(zones, 5, 2, 1)).toBe('step');
-    expect(along(zones, 4, 2, -1)).toBe('step');
+describe('the arrows on the wall always move the piece, never further than they must', () => {
+  // The wall in two courses, 31 by 9, the gate at columns 13-16: a high hole over a low one each
+  // side (as laid in a game the user played on 9 Nov).
+  const wall = { H: 9, W: 31 };
+  const holes = [
+    { r0: 1, c0: 3, h: 3, w: 4 }, { r0: 6, c0: 3, h: 3, w: 4 },
+    { r0: 1, c0: 23, h: 3, w: 3 }, { r0: 5, c0: 21, h: 4, w: 5 },
+  ];
+  const F = { h: 3, w: 3 };
+  const go = (r: number, c: number, dr: number, dc: number, piece = F) => arrowStep(holes, { r, c }, piece, wall, dr, dc);
+  it(`left and right go to the next spot, not two squares on and down to the bottom (9 Nov: "it seems to be jumping two spaces and going right to the bottom")`, () => {
+    // Off the left low hole, over the gate: to the first spot touching the right low hole, same row.
+    expect(go(6, 6, 0, 1)).toEqual({ r: 6, c: 19 });
+    expect(go(6, 19, 0, 1)).toEqual({ r: 6, c: 20 });
+    // And back: the first spot touching the left low hole, not its best fit.
+    expect(go(6, 19, 0, -1)).toEqual({ r: 6, c: 6 });
   });
-  it('a piece that would only cover bare stone jumps on to the next hole instead of being blocked (9 Nov: "it just blocks me instead of skipping over it")', () => {
-    expect(along(zones, 17, 2, 1)).toBe(2);   // (over the gate next)
-    expect(along(zones, 28, 3, -1)).toBe(1);
+  it('a square at a time while the piece touches a hole, overhanging its edges', () => {
+    expect(go(6, 3, 0, 1)).toEqual({ r: 6, c: 4 });
+    expect(go(6, 3, 0, -1)).toEqual({ r: 6, c: 2 });
+    expect(go(6, 1, 0, -1)).toEqual({ r: 6, c: 0 });
   });
-  it('jumps even a narrow strip of stone between two holes', () => {
-    expect(along(zones, 9, 2, 1)).toBe(1);
+  it(`never stuck: past the last hole it goes on to the wall's edge (9 Nov: "you should always be able to go left and right")`, () => {
+    expect(go(6, 25, 0, 1)).toEqual({ r: 6, c: 26 });
+    expect(go(6, 28, 0, 1)).toBeNull();   // the edge
+    expect(go(6, 0, 0, -1)).toBeNull();
   });
-  it('goes nowhere past the last hole', () => {
-    expect(along(zones, 36, 2, 1)).toBeNull();
-    expect(along(zones, 2, 2, -1)).toBeNull();
+  it('keeps to its course: the next high hole from a high one, not the low one under it', () => {
+    expect(go(1, 6, 0, 1)).toEqual({ r: 1, c: 21 });   // the high right hole starts at 23
+  });
+  it('up and down: a square while over a hole, then over the stone to the hole above or below', () => {
+    expect(go(6, 3, -1, 0)).toEqual({ r: 5, c: 3 });
+    expect(go(4, 3, -1, 0)).toEqual({ r: 3, c: 3 });   // touching the high hole's foot
+    expect(go(1, 3, -1, 0)).toEqual({ r: 0, c: 3 });
+    expect(go(0, 3, -1, 0)).toBeNull();
+  });
+  it('never a diagonal jump: with no hole in line, a plain square on', () => {
+    expect(go(0, 9, 0, 1, { h: 1, w: 2 })).toEqual({ r: 0, c: 10 });
+    expect(go(6, 0, -1, 0)).toEqual({ r: 5, c: 0 });   // beside the low hole, not shifted onto it
   });
 });

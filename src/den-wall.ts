@@ -17,7 +17,7 @@ export interface Laid {
   /** Columns and rows of stone. Row 0 is the top course (under the capstones), row H-1 the foot. */
   W: number;
   H: number;
-  /** The gate's columns, c0 to c1 inclusive, from the second row to the foot. */
+  /** The gate's columns, c0 to c1 inclusive, from row gateTop(H) to the foot. */
   gate: { c0: number; c1: number };
   /** High left, low left, high right, low right. */
   holes: Cell[][];
@@ -32,7 +32,11 @@ export const END = 3;
 export const GAP = 1;
 /** Round the gate: room for the gun tower (fourteen squares wide), so its side guns fire along
     the wall at the raiders at the holes. Stone before the gate, the gate, stone after it. */
-export const GATE = { before: 5, w: 4, after: 5 };
+export const GATE = { before: 5, w: 4, after: 5, h: 5 };
+/** The gate's top row: five rows tall (2.75 m), as on the one-course wall, with stone over it. Run
+    up the taller wall's whole height it looked stretched (the user, 9 Nov: "it just feels very
+    stretched now"). */
+export const gateTop = (H: number): number => Math.max(1, H - GATE.h);
 
 const bbox = (cells: Cell[]) => {
   const rs = cells.map((p) => p[0]), cs = cells.map((p) => p[1]);

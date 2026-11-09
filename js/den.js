@@ -11,8 +11,8 @@ import { randomPair, W as SW, H as SH, ENTRY as SENTRY } from './swordfight.js';
 import { muster, planRepair, rewardPair, Lumber, REPAIR, SwordRack, Barracks, SWORD } from './den-sword.js';
 import { drawStencil, drawBlade, PALETTE } from './den-sword-draw.js';
 import { Bilge, W as BW, H as BH } from './bilge.js';
-import { KEYS as VIEW_KEYS, nextHole, quarters, centreOn, clampTo, nextBoard, along } from './den-carp-view.js';
-import { twoCourses, isHigh } from './den-wall.js';
+import { KEYS as VIEW_KEYS, nextHole, quarters, centreOn, clampTo, nextBoard, arrowStep } from './den-carp-view.js';
+import { twoCourses, isHigh, gateTop } from './den-wall.js';
 import { BILGE, Tide, HIGH, LOW, shoreAt, worth, barrelsFor, onRocks, rocksBare, oddsFor, blastHits } from './den-bilge.js';
 import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, cleanDesign, designOf, drawFlag, dyeHex, DYES, SKIN, HAIR, FUR, PARTS, FLAGS, PATTERNS, DECOR, MAX_DECOR, BIOMES, twoColours } from './den-look.js';
 
@@ -353,7 +353,7 @@ function newWall() {
   const { W, H, gate } = laid;
   $('labels').replaceChildren();
   wall = { W, H, holes: [], cellHole: new Map(), wood: new Set(), lining: Array.from({ length: MAX_PATCHES }, () => new Set()), gate: new Set(), gateCols: gate, stoneAt: new Map() };
-  for (let r = 1; r < H; r++) for (let c = gate.c0; c <= gate.c1; c++) wall.gate.add(k(r, c));
+  for (let r = gateTop(H); r < H; r++) for (let c = gate.c0; c <= gate.c1; c++) wall.gate.add(k(r, c));
   laid.holes.forEach((cells) => registerHole(cells));
   buildWall();
   wall.holes.forEach((h) => { holeVisuals(h); updateHole(h); });
@@ -2258,9 +2258,13 @@ function gunIn(d) {
    while you're stood in it). */
 function makeGate() {
   const { c0, c1 } = wall.gateCols;
-  const w = (c1 - c0 + 1) * S, h = (wall.H - 1) * S;
+  const w = (c1 - c0 + 1) * S, h = (wall.H - gateTop(wall.H)) * S;
   const g = new THREE.Group();
   const plankMat = mat('#5b3a20', { map: woodTex });
+  // A beam over the gateway, the stone of the wall above it.
+  const lintel = mesh(new THREE.BoxGeometry(w + 0.5, 0.26, STONE_D + 0.1), mat('#4a2e18', { map: woodTex }));
+  lintel.position.set(0, h + 0.1, -STONE_D / 2);
+  g.add(lintel);
   const iron = mat('#2a2a2a', { metalness: 0.6, roughness: 0.5 });
   const leaves = [-1, 1].map((side) => {
     const leaf = new THREE.Group();
@@ -3998,7 +4002,8 @@ addEventListener('mouseup', (e) => {
   else if (!drag.moved && !carry && onGunDeck() && (gd.hover = deckCellAt(e.clientX, e.clientY)) && gd.arrows.has(k(...gd.hover))) chalk(...gd.hover, -1);
   drag = null;
 });
-// The wheel turns the piece while it's showing a spot to fit it, or your chalk on the gun deck; otherwise it zooms.
+// The wheel turns the piece you're carrying, fit or no fit (the user, 9 Nov: "you should always be able to
+// rotate a piece"), or your chalk on the gun deck; otherwise it zooms (- and = zoom too).
 let wheelAcc = 0, wheelT = 0;
 renderer.domElement.addEventListener('wheel', (e) => {
   if (deco.on) {
@@ -4014,7 +4019,7 @@ renderer.domElement.addEventListener('wheel', (e) => {
     if (Math.abs(wheelAcc) >= 40 && now - wheelT > 110) { wheelDeck(wheelAcc > 0 ? 1 : -1); wheelAcc = 0; wheelT = now; }
     return;
   }
-  if (carry && target && !G.over) {
+  if (carry && !G.over) {
     wheelAcc += e.deltaY;
     const now = performance.now();
     if (Math.abs(wheelAcc) >= 40 && now - wheelT > 110) {
@@ -4127,7 +4132,11 @@ function putBack() {
   showPile(p);
 }
 function turn(fn, dir) {
+  // On a board, about its middle, so it turns where it is (kept while you only turn and flip, so
+  // turning round and round doesn't walk it off).
+  const b0 = C.bbox(carry.cells), mid = wm && (wm.mid?.r === wm.r && wm.mid?.c === wm.c ? wm.mid.p : [wm.r + b0.h / 2, wm.c + b0.w / 2]);
   carry.cells = fn(carry.cells);
+  if (wm) { const b = C.bbox(carry.cells); [wm.r, wm.c] = centreOn(mid, b.h, b.w); clampCursor(); wm.mid = { r: wm.r, c: wm.c, p: mid }; }
   const old = carry.group;
   const g = centred(carry.cells, carry.mat);
   g.position.copy(old.position);
@@ -4889,6 +4898,7 @@ function cannonSpot() {
   const shapes = [...roomyShapes(3).slice(0, 4), ...roomyShapes(2, 6).slice(0, 4), ...singles];
   const clear = ([r, c]) => {
     if (r >= wall.H || c < 3 || c > wall.W - 4 || !wall.stoneAt.has(k(r, c))) return false;
+    if (c >= wall.gateCols.c0 - 1 && c <= wall.gateCols.c1 + 1) return false;   // (nor in the stone over the gate)
     for (let a = -1; a <= 1; a++) for (let z = -1; z <= 1; z++) {
       const kk = k(r + a, c + z);
       if (wall.cellHole.has(kk) || wall.gate.has(kk) || wall.wood.has(kk)) return false;
@@ -5220,8 +5230,9 @@ function jumpCorner(corner) {
     if (!p) { shake = 0.08; return; }
     return frameSnap(p);
   }
-  // The hole the piece is at: the one its columns overlap most.
-  const cover = (h) => Math.min(wm.c + b.w, h.b.c0 + h.b.w) - Math.max(wm.c, h.b.c0);
+  // The hole the piece is at: the one it covers most.
+  const span = (a0, a1, b0, b1) => Math.max(0, Math.min(a1, b1) - Math.max(a0, b0));
+  const cover = (h) => span(wm.c, wm.c + b.w, h.b.c0, h.b.c0 + h.b.w) * span(wm.r, wm.r + b.h, h.b.r0, h.b.r0 + h.b.h);
   const cur = wall.holes.reduce((m, h, j) => (cover(h) > 0 && (m < 0 || cover(h) > cover(wall.holes[m])) ? j : m), -1);
   const g = wall.gateCols, split = [wall.H / 2, (g.c0 + g.c1 + 1) / 2];
   const i = nextHole(wall.holes.map((h) => [h.b.r0 + h.b.h / 2, h.b.c0 + h.b.w / 2]), at, corner, cur < 0 ? null : cur, split);
@@ -5257,7 +5268,7 @@ function viewKey(key, e) {
   if (a.kind === 'move' || a.kind === 'jump' || a.kind === 'turn' || a.kind === 'flip' || a.kind === 'take') { mouseMode = false; keyAt = cursor ? { ...cursor } : { x: -1e4, y: -1e4 }; }
   switch (a.kind) {
     case 'leave': exitWall(); break;
-    case 'move': if (carry) { if (!wm.f && skipAlong(a.dc || a.dr, !a.dc)) break; wm.r += a.dr; wm.c += a.dc; clampCursor(); } break;
+    case 'move': if (carry) { if (!wm.f) wallArrow(a.dr, a.dc); else { wm.r += a.dr; wm.c += a.dc; clampCursor(); } } break;
     case 'turn': if (carry) turn(a.dir > 0 ? rotCW : rotCCW, -a.dir); break;
     case 'flip': if (carry) turn(flip, 0); break;
     case 'jump': if (carry && !e.repeat) jumpCorner(a.corner); break;
@@ -5289,29 +5300,14 @@ function toHole(best) {
   const s = wallSpots().filter((o) => o.hole === best).sort((a, z) => spotRank(a) - spotRank(z) || Math.hypot(a.fr - hy, a.fc - hx) - Math.hypot(z.fr - hy, z.fc - hx))[0];
   if (s) { wm.r = s.dr; wm.c = s.dc; } else { wm.r = Math.round(hy - b.h / 2); wm.c = Math.round(hx - b.w / 2); clampCursor(); }
 }
-/* The arrows on the wall: a square at a time while the piece is over a hole (every spot it could
-   go in that hole, boarding over included, is); off it, straight on to the next hole that way,
-   over the bare stone between and the gate (the user, 9 Nov: "it just blocks me instead of
-   skipping over it"). Left and right keep to the piece's course, high or low (a high hole and the
-   low one under it share columns); up and down go between the holes of the piece's side. False:
-   move a square as usual. */
-function skipAlong(dir, rows = false) {
+/* The arrows on the wall (src/den-carp-view.ts, arrowStep): always a move, never further than it
+   must: a square at a time while the piece touches a hole, over the stone and the gate to the
+   nearest spot on the next hole, and on to the wall's edge past the last. */
+function wallArrow(dr, dc) {
   const b = C.bbox(carry.cells);
-  const live = wall.holes.map((h, i) => ({ i, h })).filter(({ h }) => h.status === 'open' || curLayer(h) >= 0);
-  let to;
-  if (rows) {
-    const zones = live.filter(({ h }) => h.b.c0 < wm.c + b.w && h.b.c0 + h.b.w > wm.c).map(({ i, h }) => ({ i, c0: h.b.r0, c1: h.b.r0 + h.b.h }));
-    if (!zones.length) return false;   // over bare stone, clear of every hole: just move
-    to = along(zones, wm.r, b.h, dir);
-  } else {
-    const high = wm.r + b.h / 2 < wall.H / 2, zone = ({ i, h }) => ({ i, c0: h.b.c0, c1: h.b.c0 + h.b.w });
-    to = along(live.filter(({ h }) => h.high === high).map(zone), wm.c, b.w, dir);
-    if (to === null) to = along(live.map(zone), wm.c, b.w, dir);   // none in this course that way: the other's
-  }
-  if (to === 'step') return false;
-  if (to === null) shake = 0.08;   // the last hole that way
-  else toHole(to);
-  return true;
+  const live = wall.holes.filter((h) => h.status === 'open' || curLayer(h) >= 0).map((h) => h.b);
+  const to = arrowStep(live, { r: wm.r, c: wm.c }, b, wall, dr, dc);
+  if (to) { wm.r = to.r; wm.c = to.c; } else shake = 0.08;   // the wall's edge
 }
 // Which way to walk to stand below the piece, a step back from the wall.
 function wallWalk() {
@@ -5676,7 +5672,7 @@ function applySync(s) {
   Object.assign(G, s.g);
   $('labels').replaceChildren();
   wall = { W: s.W, H: s.H, holes: [], cellHole: new Map(), wood: new Set(), lining: Array.from({ length: MAX_PATCHES }, () => new Set()), gate: new Set(), gateCols: s.gate, stoneAt: new Map() };
-  for (let r = 1; r < s.H; r++) for (let c = s.gate.c0; c <= s.gate.c1; c++) wall.gate.add(k(r, c));
+  for (let r = gateTop(s.H); r < s.H; r++) for (let c = s.gate.c0; c <= s.gate.c1; c++) wall.gate.add(k(r, c));
   s.holes.forEach((d) => registerHole(d.cells));
   buildWall();
   wall.holes.forEach((h, i) => {

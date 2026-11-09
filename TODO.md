@@ -77,6 +77,15 @@ the site (`.assetsignore` skips `*.md`).
   clearly while you build it. (Since the last update the stairs are on the right and the armoury
   hoist on the left, which may already have fixed this: check once the new version's live.)
 
+- **You can't see the beach; it feels like staring at a wall (9 Nov):** over the taller wall, "I
+  don't like that you can't really see the beach ... it just feels like I'm staring at a wall.
+  It's lost some of the chop. I don't feel like there's any background to look at. I don't know
+  why it's so black. Rather like there's supposed to be a sea over there." Their thought: towers
+  either side with the middle lower, which shows the beach and is where the gun platform goes.
+  "Just experiment with the aesthetics because I want to be able to see the beach." Also: "the
+  bottom of the gate is missing now ... it was a lot better" (to pin down: the gate's now five rows
+  under a beam).
+
 ## Needs a playtest to pin down
 
 - **Swordfight at the armoury hoist (8 Nov), not yet tried by the user.** Rebuilt after the

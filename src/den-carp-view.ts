@@ -125,18 +125,43 @@ export function nextBoard<T>(boards: T[], cur: T | null): T | null {
   return boards[(i + 1) % boards.length];
 }
 
-/** A hole's stretch of the wall, as far as moving along it goes: its columns, and the stone just
-    round it. `i`: which hole. */
-export interface Zone { i: number; c0: number; c1: number }
+/** A rectangle of squares: a hole's bounding box, or the piece's. */
+export interface Box { r0: number; c0: number; h: number; w: number }
 
-/** Left and right on the wall (the user, 9 Nov: "it just blocks me instead of skipping over it"):
-    a square at a time while the piece (`w` wide, its left at column `c`) stays over a hole's
-    stretch; off it, straight on to the next hole that way, over the bare stone and the gate
-    between. 'step': move a square; a number: the hole to jump to; null: there's none that way. */
-export function along(zones: Zone[], c: number, w: number, dir: 1 | -1): 'step' | number | null {
-  const over = (z: Zone, at: number) => at < z.c1 && at + w > z.c0;
-  if (zones.some((z) => over(z, c + dir))) return 'step';
-  const ahead = zones.filter((z) => !over(z, c) && (dir > 0 ? z.c0 > c : z.c1 < c + w))
-    .sort((a, z) => (dir > 0 ? a.c0 - z.c0 : z.c1 - a.c1))[0];
-  return ahead ? ahead.i : null;
+/** The arrows on the wall. The user (9 Nov): "you should always be able to go left and right and
+    move to the next available spot"; the piece "seems to be jumping two spaces and going right to
+    the bottom, presumably because the game has decided that's the only place it can fit" (it went
+    to the next hole's best fit). So an arrow always moves the piece, and never further than it
+    must:
+    - a square that way, if the piece still touches a hole there (some of it over the hole's box);
+    - else, over the bare stone and the gate, to the nearest spot touching the next hole in line
+      with it that way (in its course, going left or right), keeping its row (its column, going up
+      or down): never a diagonal jump;
+    - else, with no hole in line that way, a square on, to the wall's edge (null at the edge).
+    `at` is the piece's top-left; `piece` its height and width; `wall` the wall's rows and columns. */
+export function arrowStep(holes: Box[], at: { r: number; c: number }, piece: { h: number; w: number }, wall: { H: number; W: number }, dr: number, dc: number): { r: number; c: number } | null {
+  if (!dc && !dr) return null;
+  // Going up or down is going left or right with rows and columns swapped.
+  if (!dc) {
+    const t = arrowStep(holes.map((b) => ({ r0: b.c0, c0: b.r0, h: b.w, w: b.h })), { r: at.c, c: at.r }, { h: piece.w, w: piece.h }, { H: wall.W, W: wall.H }, 0, dr);
+    return t && { r: t.c, c: t.r };
+  }
+  const dir = Math.sign(dc), maxC = wall.W - piece.w;
+  const c1 = at.c + dir;
+  if (c1 < 0 || c1 > maxC) return null;
+  const rowsMeet = (b: Box, r: number) => r < b.r0 + b.h && r + piece.h > b.r0;
+  const colsMeet = (b: Box, c: number) => c < b.c0 + b.w && c + piece.w > b.c0;
+  if (holes.some((b) => rowsMeet(b, at.r) && colsMeet(b, c1))) return { r: at.r, c: c1 };
+  // The nearest spot touching the next hole in line with the piece (in its course, going left or
+  // right), its row kept: never a diagonal jump.
+  let best: number | null = null;
+  for (const b of holes) {
+    if (!rowsMeet(b, at.r)) continue;
+    const lo = Math.max(0, b.c0 - piece.w + 1), hi = Math.min(maxC, b.c0 + b.w - 1);
+    const c = dir > 0 ? Math.max(lo, c1) : Math.min(hi, c1);
+    if (c < lo || c > hi) continue;   // behind the piece
+    if (best === null || Math.abs(c - at.c) < Math.abs(best - at.c)) best = c;
+  }
+  if (best !== null) return { r: at.r, c: best };
+  return { r: at.r, c: c1 };
 }

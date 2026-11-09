@@ -2,7 +2,7 @@
    how that works": a high hole over a low one each side of the gate, like the real puzzle's four. */
 import { describe, expect, it } from 'vitest';
 import { carp, hole } from './helpers';
-import { END, GAP, GATE, MIN_H, flat, isHigh, twoCourses } from '../src/den-wall';
+import { END, GAP, GATE, MIN_H, flat, gateTop, isHigh, twoCourses } from '../src/den-wall';
 import type { Cell } from '../src/den-wall';
 
 const seeded = (seed: number) => { let a = seed; return () => (a = (a * 16807) % 2147483647) / 2147483647; };
@@ -79,5 +79,13 @@ describe('which holes are high', () => {
   it('its middle above the wall\'s middle: raiders need ladders for it', () => {
     expect(isHigh([[1, 0], [3, 0]], 9)).toBe(true);
     expect(isHigh([[5, 0], [7, 0]], 9)).toBe(false);
+  });
+});
+
+describe('the gate', () => {
+  it(`stays five rows tall on the taller wall, with stone over it (9 Nov: "it just feels very stretched now")`, () => {
+    expect(9 - gateTop(9)).toBe(5);
+    expect(10 - gateTop(10)).toBe(5);
+    expect(gateTop(6)).toBe(1);
   });
 });
