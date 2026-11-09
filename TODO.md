@@ -77,14 +77,6 @@ the site (`.assetsignore` skips `*.md`).
   clearly while you build it. (Since the last update the stairs are on the right and the armoury
   hoist on the left, which may already have fixed this: check once the new version's live.)
 
-- **The wall's Carpentry view laid out like the real puzzle (9 Nov):** at the wall the view still
-  shows the wall as it is, holes strung out along it, so you move a piece "4 to the right over all
-  the holes". The user: with 4 or 5 holes "you should see 2 rows". It "doesn't need to map one-on-one
-  to the physical reality ... we care about the playability and the accessibility for different
-  controls, like the 3D view is for the fun part, the 2D is for that". (A taller wall was thought
-  of and dropped: it would hide what's behind.) So the view at the wall is a 2D Carpentry board,
-  the holes in two rows, and what you fit there goes into the real hole in the 3D wall.
-
 ## Needs a playtest to pin down
 
 - **Swordfight at the armoury hoist (8 Nov), not yet tried by the user.** Rebuilt after the
@@ -134,6 +126,9 @@ the site (`.assetsignore` skips `*.md`).
   pirate in the way (they stand beside the piece now); the tabs over the prompt (ticks where the
   piece fits); one staircase on the right, and the den 4 m deeper; Q/W/A/S on a long wall (the nearest hole that way, up or down first); still
   coming on by itself when you walk up to the wall with a piece (and staying on: Esc to walk).
+  Since 9 Nov the wall's view is a flat Carpentry board, the holes in two rows: watch for the
+  board covering too much of the den (raiders coming unseen), the squares too small on a small
+  screen, and the jump from the board's tile to the real hole feeling disconnected.
 - **The walk as one square frame, sawn into lengths (8 Nov), not yet tried by the user.** About
   24 pieces in an 11 by 13 frame at the right of the den, sawn into four lengths that go up end
   to end. Watch for: still running out of the right pieces near the end (a simulated build wasted

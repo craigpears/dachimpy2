@@ -11,7 +11,8 @@ import { randomPair, W as SW, H as SH, ENTRY as SENTRY } from './swordfight.js';
 import { muster, planRepair, rewardPair, Lumber, REPAIR, SwordRack, Barracks, SWORD } from './den-sword.js';
 import { drawStencil, drawBlade, PALETTE } from './den-sword-draw.js';
 import { Bilge, W as BW, H as BH } from './bilge.js';
-import { KEYS as VIEW_KEYS, nextHole, quarters, centreOn, clampTo, nextBoard } from './den-carp-view.js';
+import { KEYS as VIEW_KEYS, quarters, centreOn, clampTo, nextBoard } from './den-carp-view.js';
+import { layout as boardLayout, pieceToWall, toBoard, toWall, cornerTile, tileAt } from './den-carp-board.js';
 import { BILGE, Tide, HIGH, LOW, shoreAt, worth, barrelsFor, onRocks, rocksBare, oddsFor, blastHits } from './den-bilge.js';
 import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, cleanDesign, designOf, drawFlag, dyeHex, DYES, SKIN, HAIR, FUR, PARTS, FLAGS, PATTERNS, DECOR, MAX_DECOR, BIOMES, twoColours } from './den-look.js';
 
@@ -3939,7 +3940,7 @@ renderer.domElement.addEventListener('mousemove', (e) => {
     if (!best || d < best.d) best = { d, frame: f, fc, fr };
   }
   if (best) { mouse = best; mouseMode = true; return; }
-  if (wm?.f) { mouse = null; return; }   // (in a frame's view, only the frame)
+  if (wm) { mouse = null; return; }   // (in a frame's view, only the frame; at the wall, the board takes it)
   if (gd) { gd.hover = deckCellAt(e.clientX, e.clientY); ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1), camera); }
   if (!ray.ray.intersectPlane(wallPlane, p)) { mouse = null; return; }
   const fc = p.x / S + wall.W / 2, fr = wall.H - p.y / S;
@@ -5104,8 +5105,43 @@ const canWallMode = () => pirate.h < 0.05 && !deco.on && !G.over && pirate.z > 0
 // Keeps the piece on the board: on the wall, inside it; on a frame, touching it (it may hang over).
 function clampCursor() {
   if (!wm || !carry) return;
-  const b = C.bbox(carry.cells), box = wm.f ? wm.f.b : { r0: 0, c0: 0, h: wall.H, w: wall.W };
-  [wm.r, wm.c] = clampTo(wm.r, wm.c, b.h, b.w, box, !!wm.f);
+  const b = C.bbox(carry.cells);
+  if (wm.f) { [wm.r, wm.c] = clampTo(wm.r, wm.c, b.h, b.w, wm.f.b, true); return; }
+  const { L } = wallBoard();
+  if (wm.R === undefined) fromWall();
+  [wm.R, wm.C] = clampTo(wm.R, wm.C, b.h, b.w, { r0: 0, c0: 0, h: L.H, w: L.W }, false);
+  toWallPos();
+}
+/* The wall's Carpentry board (src/den-carp-board.ts): every hole there's something to fit in, each
+   in a tile of its own, in two rows like the real puzzle (the user, 9 Nov: with 4 or 5 holes "you
+   should see 2 rows"; it "doesn't need to map one-on-one to the physical reality"). The piece moves
+   about the board (wm.R, wm.C, in board squares); wm.r, wm.c and wm.hole are where that is on the
+   real wall, so the ghost, the camera and your pirate follow it there. */
+const BOARD_M = 2;   // squares of stone round each hole on its tile, to board over
+const boardHoles = () => wall.holes.map((h, i) => ({ h, i })).filter(({ h }) => h.status === 'open' || curLayer(h) >= 0);
+let wb = null;
+function wallBoard() {
+  const hs = boardHoles();
+  const sig = `${wall.H},${wall.W}|` + hs.map(({ h, i }) => `${i}:${h.b.r0},${h.b.c0},${h.b.h},${h.b.w}`).join(';');
+  if (wb?.sig !== sig) {
+    wb = { sig, L: boardLayout(hs.map(({ h }) => h.b), BOARD_M, 1, { h: wall.H, w: wall.W }), idx: hs.map(({ i }) => i) };
+    if (wm && !wm.f && wm.R !== undefined) { wm.R = undefined; if (carry) clampCursor(); }
+  }
+  return wb;
+}
+// Board square from the wall square (wm.r, wm.c) in hole wm.hole (or the nearest on the board).
+function fromWall() {
+  const { L, idx } = wallBoard();
+  let n = idx.indexOf(wm.hole);
+  if (n < 0) n = idx.map((hi, j) => [Math.abs(holeX(wall.holes[hi]) - X(wm.c)), j]).sort((a, z) => a[0] - z[0])[0]?.[1] ?? -1;
+  if (n < 0) { wm.R = 0; wm.C = 0; return; }
+  [wm.R, wm.C] = toBoard(L.tiles[n], wm.r, wm.c);
+}
+function toWallPos() {
+  const { L, idx } = wallBoard(), b = carry ? C.bbox(carry.cells) : { h: 1, w: 1 };
+  const p = pieceToWall(L, wm.R, wm.C, b.h, b.w);
+  if (!p) return;
+  wm.r = p.r; wm.c = p.c; wm.tile = p.tile; wm.hole = idx[p.tile];
 }
 /* The Carpentry view (the user, 9 Nov: "when you're puzzling, like I just don't think you can beat
    2D ... people like to use keyboard controls"): straight on to whatever you're building, the wall
@@ -5160,9 +5196,9 @@ function jumpCorner(corner) {
     if (!p) { shake = 0.08; return; }
     return frameSnap(p);
   }
-  const i = nextHole(wall.holes.map((h) => [h.b.r0 + h.b.h / 2, h.b.c0 + h.b.w / 2]), at, corner);
-  if (i === null) { shake = 0.08; return; }
-  toHole(i);
+  const { idx } = wallBoard(), n = cornerTile(wallBoard().L, wm.tile ?? 0, corner);
+  if (n === null) { shake = 0.08; return; }
+  toHole(idx[n]);
 }
 const boardName = (b) => (b === 'wall' ? 'The wall' : { stair: 'Stairs', deck: 'Wall-walk', house: 'Your shack' }[b.kind] || (b.kind === 'gun' ? `Gun tower (${['back', 'middle', 'front'][b.part] || 'part'})` : 'Frame'));
 const boardFits = (b) => !!carry && (b === 'wall' ? wallSpots().some((o) => !o.over && !o.patch) : frameFits(carry.cells).some((o) => o.frame === b && !o.over));
@@ -5184,13 +5220,168 @@ function boardsHud(dt) {
     return btn;
   }));
 }
+/* Drawing the wall's board: a canvas over the den, the tiles in two rows. Stone round each hole, the
+   hole dark where it's still open, pieces in it in their own timber; a layer being built shows its
+   timber surround. The piece in your hands shows where it is, bright where it fits. */
+const boardCv = document.createElement('canvas');
+boardCv.className = 'carp-board';
+document.body.append(boardCv);
+const boardG = boardCv.getContext('2d');
+let boardPx = 0, boardAt = { x: 0, y: 0 };
+const stoneShade = (r, c) => ['#8a7f72', '#82776a', '#7c7165', '#867b6e'][((r * 7 + c * 13) % 4 + 4) % 4];
+function drawBoard() {
+  const on = !!(wm && !wm.f && wall);
+  boardCv.style.display = on ? 'block' : 'none';
+  if (!on) return;
+  const { L, idx } = wallBoard();
+  if (!L.tiles.length) return;
+  // As big as fits between the top bar and the dock.
+  const top = 96, bottom = 250, pad = 14;
+  const availW = innerWidth - 32 - pad * 2, availH = Math.max(120, innerHeight - top - bottom) - pad * 2;
+  const sq = Math.max(10, Math.min(46, Math.floor(availW / L.W), Math.floor(availH / L.H)));
+  const w = L.W * sq + pad * 2, h = L.H * sq + pad * 2, dpr = devicePixelRatio || 1;
+  if (boardCv.width !== Math.round(w * dpr) || boardCv.height !== Math.round(h * dpr)) {
+    boardCv.width = Math.round(w * dpr); boardCv.height = Math.round(h * dpr);
+    boardCv.style.width = `${w}px`; boardCv.style.height = `${h}px`;
+  }
+  boardCv.style.left = `${Math.round((innerWidth - w) / 2)}px`;
+  boardCv.style.top = `${Math.round(top + Math.max(0, (Math.max(120, innerHeight - top - bottom) - h) / 2))}px`;
+  boardPx = sq; boardAt = { x: pad, y: pad };
+  const g = boardG;
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, w, h);
+  // Whose wood is where: every piece in the wall (and in each layer), by square.
+  const woodAt = new Map(), layerAt = new Map();
+  wall.holes.forEach((hh) => hh.pieces.forEach((pc) => {
+    const col = pc.info?.planks ? '#a98c66' : WOOD[pc.info?.letter] || '#b08a5a';
+    for (const kk of pc.cells) (pc.patch ? layerAt : woodAt).set(pc.patch ? `${pc.layer}|${kk}` : kk, { col, pc });
+  }));
+  const cellPath = (x, y) => g.rect(x, y, sq, sq);
+  L.tiles.forEach((t, n) => {
+    const hi = idx[n], hole = wall.holes[hi], open = hole.status === 'open', layer = open ? -1 : curLayer(hole);
+    const ring = layer >= 0 ? new Set(ringOf(hole).map(([r, c]) => k(r, c))) : null;
+    const x0 = pad + t.C0 * sq, y0 = pad + t.R0 * sq;
+    const pieceOf = new Map();
+    for (let R = 0; R < t.H; R++) for (let Cc = 0; Cc < t.W; Cc++) {
+      const [r, c] = toWall(t, t.R0 + R, t.C0 + Cc), kk = k(r, c), x = x0 + Cc * sq, y = y0 + R * sq;
+      const inWall = r >= 0 && r < wall.H && c >= 0 && c < wall.W;
+      let fill, wood = null;
+      if (!inWall) fill = 'rgba(20, 14, 9, 0.55)';
+      else if (layer >= 0) {
+        wood = layerAt.get(`${layer}|${kk}`);
+        if (wood) fill = wood.col;
+        else if (hole.set.has(kk)) fill = '#1a110b';
+        else if (ring.has(kk)) fill = (r + c) % 2 ? '#7a5634' : '#6f4e2f';
+        else fill = '#4a443d';
+      } else {
+        wood = woodAt.get(kk);
+        if (wood) fill = wood.col;
+        else if (hole.set.has(kk)) fill = '#1a110b';
+        else if (wall.gate.has(kk) || wall.cellHole.has(kk)) fill = '#3a332c';
+        else fill = stoneShade(r, c);
+      }
+      g.fillStyle = fill;
+      g.fillRect(x, y, sq, sq);
+      if (wood) pieceOf.set(`${R},${Cc}`, wood.pc);
+      else if (inWall && fill !== '#1a110b') { g.strokeStyle = 'rgba(0,0,0,0.18)'; g.lineWidth = 1; g.strokeRect(x + 0.5, y + 0.5, sq - 1, sq - 1); }
+    }
+    // The edges of each piece and of the hole.
+    g.lineWidth = Math.max(1.5, sq * 0.07);
+    g.strokeStyle = 'rgba(40, 22, 10, 0.95)';
+    g.beginPath();
+    for (const [key, pc] of pieceOf) {
+      const [R, Cc] = key.split(',').map(Number), x = x0 + Cc * sq, y = y0 + R * sq;
+      if (pieceOf.get(`${R - 1},${Cc}`) !== pc) { g.moveTo(x, y); g.lineTo(x + sq, y); }
+      if (pieceOf.get(`${R + 1},${Cc}`) !== pc) { g.moveTo(x, y + sq); g.lineTo(x + sq, y + sq); }
+      if (pieceOf.get(`${R},${Cc - 1}`) !== pc) { g.moveTo(x, y); g.lineTo(x, y + sq); }
+      if (pieceOf.get(`${R},${Cc + 1}`) !== pc) { g.moveTo(x + sq, y); g.lineTo(x + sq, y + sq); }
+    }
+    g.stroke();
+    g.strokeStyle = '#ffd58a';
+    g.lineWidth = Math.max(1.5, sq * 0.06);
+    g.beginPath();
+    for (const [r, c] of hole.cells) {
+      const [R, Cc] = toBoard(t, r, c), x = pad + Cc * sq, y = pad + R * sq;
+      if (!hole.set.has(k(r - 1, c))) { g.moveTo(x, y); g.lineTo(x + sq, y); }
+      if (!hole.set.has(k(r + 1, c))) { g.moveTo(x, y + sq); g.lineTo(x + sq, y + sq); }
+      if (!hole.set.has(k(r, c - 1))) { g.moveTo(x, y); g.lineTo(x, y + sq); }
+      if (!hole.set.has(k(r, c + 1))) { g.moveTo(x + sq, y); g.lineTo(x + sq, y + sq); }
+    }
+    g.stroke();
+    // The tile's frame: gold for the one the piece is over.
+    g.lineWidth = n === wm.tile ? 3 : 1.5;
+    g.strokeStyle = n === wm.tile ? '#e0a92a' : '#5a412a';
+    g.strokeRect(x0 - 1.5, y0 - 1.5, t.W * sq + 3, t.H * sq + 3);
+    if (layer >= 0) {
+      g.font = `700 ${Math.max(10, Math.round(sq * 0.36))}px 'Alegreya Sans', sans-serif`;
+      g.fillStyle = '#e8fbff';
+      g.fillText(`Layer ${layer + 1}`, x0 + 4, y0 + Math.max(11, sq * 0.42));
+    }
+  });
+  // The piece in your hands.
+  if (carry && wm.R !== undefined) {
+    const kind = !target ? 'no' : !target.ok ? 'no' : target.patch ? 'layer' : target.over ? 'over' : 'ok';
+    const edge = { ok: '#fff4d0', over: '#ffcf7a', layer: '#e8fbff', no: '#ff8f80' }[kind];
+    const set = new Set(carry.cells.map(([r, c]) => k(r, c)));
+    g.globalAlpha = kind === 'no' ? 0.55 : 0.9;
+    g.fillStyle = WOOD[carry.letter] || '#c98a45';
+    for (const [r, c] of carry.cells) g.fillRect(pad + (wm.C + c) * sq, pad + (wm.R + r) * sq, sq, sq);
+    if (kind === 'no') { g.fillStyle = 'rgba(255, 90, 70, 0.35)'; for (const [r, c] of carry.cells) g.fillRect(pad + (wm.C + c) * sq, pad + (wm.R + r) * sq, sq, sq); }
+    g.globalAlpha = 1;
+    g.strokeStyle = edge;
+    g.lineWidth = Math.max(2, sq * 0.1);
+    g.beginPath();
+    for (const [r, c] of carry.cells) {
+      const x = pad + (wm.C + c) * sq, y = pad + (wm.R + r) * sq;
+      if (!set.has(k(r - 1, c))) { g.moveTo(x, y); g.lineTo(x + sq, y); }
+      if (!set.has(k(r + 1, c))) { g.moveTo(x, y + sq); g.lineTo(x + sq, y + sq); }
+      if (!set.has(k(r, c - 1))) { g.moveTo(x, y); g.lineTo(x, y + sq); }
+      if (!set.has(k(r, c + 1))) { g.moveTo(x + sq, y); g.lineTo(x + sq, y + sq); }
+    }
+    g.stroke();
+  }
+}
+// The mouse on the board: the piece follows it (snapping to a spot it fits, if one's close), a
+// click puts it in, the wheel turns it, a right click flips it.
+function boardSquare(e) {
+  const r = boardCv.getBoundingClientRect();
+  return [(e.clientY - r.top - boardAt.y) / boardPx, (e.clientX - r.left - boardAt.x) / boardPx];
+}
+boardCv.addEventListener('mousemove', (e) => {
+  if (!wm || wm.f || !carry) return;
+  const [R, Cc] = boardSquare(e), { L, idx } = wallBoard(), b = C.bbox(carry.cells);
+  wm.R = Math.round(R - b.h / 2); wm.C = Math.round(Cc - b.w / 2);
+  clampCursor();
+  const n = tileAt(L, R, Cc);
+  if (n >= 0) {
+    const [r, c] = toWall(L.tiles[n], R - b.h / 2, Cc - b.w / 2);
+    const near = wallSpots().filter((o) => o.hole === idx[n]).map((o) => ({ o, d: Math.hypot(o.dr - r, o.dc - c) + spotRank(o) * 0.3 })).sort((a, z) => a.d - z.d)[0];
+    if (near && near.d < 1.6) { wm.hole = idx[n]; wm.r = near.o.dr; wm.c = near.o.dc; fromWall(); clampCursor(); }
+  }
+  mouseMode = false;
+});
+boardCv.addEventListener('mousedown', (e) => {
+  e.preventDefault();
+  if (!wm || wm.f || G.over) return;
+  if (e.button === 2) { if (carry) turn(flip, 0); return; }
+  if (e.button !== 0) return;
+  aim();
+  if (carry && target?.ok) place(target);
+  else if (carry) shake = 0.2;
+  else if (canTakeBack()) takeBack();
+});
+boardCv.addEventListener('contextmenu', (e) => e.preventDefault());
+boardCv.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  if (carry && wm && !wm.f) turn(e.deltaY > 0 ? rotCW : rotCCW, e.deltaY > 0 ? -1 : 1);
+}, { passive: false });
 function viewKey(key, e) {
   const a = VIEW_KEYS[key];
   if (!a) return false;
   if (a.kind === 'move' || a.kind === 'jump' || a.kind === 'turn' || a.kind === 'flip') mouseMode = false;
   switch (a.kind) {
     case 'leave': exitWall(); break;
-    case 'move': if (carry) { wm.r += a.dr; wm.c += a.dc; clampCursor(); } break;
+    case 'move': if (carry) { if (wm.f) { wm.r += a.dr; wm.c += a.dc; } else { wm.R += a.dr; wm.C += a.dc; } clampCursor(); } break;
     case 'turn': if (carry) turn(a.dir > 0 ? rotCW : rotCCW, -a.dir); break;
     case 'flip': if (carry) turn(flip, 0); break;
     case 'jump': if (carry && !e.repeat) jumpCorner(a.corner); break;
@@ -5205,8 +5396,9 @@ function enterWall() {
   const spots = wallSpots().sort((a, z) => spotRank(a) - spotRank(z) || Math.abs(a.cx - pirate.x) - Math.abs(z.cx - pirate.x));
   const s = (target && !target.frame && target.ok ? target : null) || spots[0];
   const h = s ? null : wall.holes.slice().sort((a, z) => Math.abs(holeX(a) - pirate.x) - Math.abs(holeX(z) - pirate.x))[0];
-  wm = s ? { f: null, r: s.dr, c: s.dc } : { f: null, r: h.b.r0, c: h.b.c0 };
+  wm = s ? { f: null, r: s.dr, c: s.dc, hole: s.hole } : { f: null, r: h.b.r0, c: h.b.c0, hole: wall.holes.indexOf(h) };
   for (const a of ['arrowup', 'arrowdown', 'arrowleft', 'arrowright']) keys.delete(a);
+  fromWall();
   clampCursor();
 }
 function exitWall() {
@@ -5220,7 +5412,10 @@ function toHole(best) {
   const b = C.bbox(carry.cells), mid = (h) => [h.b.r0 + h.b.h / 2, h.b.c0 + h.b.w / 2];
   const h = wall.holes[best], [hy, hx] = mid(h);
   const s = wallSpots().filter((o) => o.hole === best).sort((a, z) => spotRank(a) - spotRank(z) || Math.hypot(a.fr - hy, a.fc - hx) - Math.hypot(z.fr - hy, z.fc - hx))[0];
-  if (s) { wm.r = s.dr; wm.c = s.dc; } else { wm.r = Math.round(hy - b.h / 2); wm.c = Math.round(hx - b.w / 2); clampCursor(); }
+  if (s) { wm.r = s.dr; wm.c = s.dc; } else { wm.r = Math.round(hy - b.h / 2); wm.c = Math.round(hx - b.w / 2); }
+  wm.hole = best;
+  fromWall();
+  clampCursor();
 }
 // Which way to walk to stand below the piece, a step back from the wall.
 function wallWalk() {
@@ -5263,18 +5458,10 @@ function aim() {
     return;
   }
   if (wm) {
-    // Anywhere on the wall, no walking needed: a clean fit at the piece's square first, then a board
-    // on behind, then boarding it over. With the mouse, wherever it points, and the keys carry on
-    // from there.
-    const list = wallSpots();
-    if (mouseMode && mouse && !mouse.frame) {
-      const best = pickSpot(list, (o) => mouseAt(o.patch ? patchZ(o.layer, wall.holes[o.hole]) - PATCH_D / 2 : 0));
-      const b = C.bbox(carry.cells);
-      if (best) { target = { ...best, ok: true }; wm.r = best.dr; wm.c = best.dc; }
-      else { wm.r = Math.round(mouse.fr - b.h / 2); wm.c = Math.round(mouse.fc - b.w / 2); clampCursor(); target = { dr: wm.r, dc: wm.c, ok: false }; }
-      return;
-    }
-    const here = list.filter((o) => o.dr === wm.r && o.dc === wm.c).sort((a, z) => spotRank(a) - spotRank(z) || (a.layer ?? 0) - (z.layer ?? 0));
+    // On the wall's board, no walking needed: a clean fit at the piece's square first, then a board
+    // on behind, then boarding it over.
+    if (wm.R === undefined) clampCursor();
+    const here = wallSpots().filter((o) => o.dr === wm.r && o.dc === wm.c && o.hole === wm.hole).sort((a, z) => spotRank(a) - spotRank(z) || (a.layer ?? 0) - (z.layer ?? 0));
     target = here.length ? { ...here[0], ok: true } : { dr: wm.r, dc: wm.c, ok: false };
     return;
   }
@@ -6342,6 +6529,7 @@ function update(dt) {
   drawGhost();
   prompt();
   boardsHud(dt);
+  drawBoard();
   banner();
 
   // Tweens and sparks.

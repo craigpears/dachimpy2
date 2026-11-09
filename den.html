@@ -29,6 +29,8 @@
     .boards button:hover { border-color: #8a6a44; color: var(--ink); }
     .boards button.on { color: var(--ink); border-color: var(--gold); }
     .boards .fit { color: #9fe08a; }
+    /* The wall's Carpentry board: the holes in two rows, like the real puzzle, over the den. */
+    .carp-board { position: fixed; display: none; background: rgba(28, 19, 12, 0.9); border: 1px solid var(--gold); border-radius: 10px; z-index: 1; cursor: pointer; }
     .toolbox { display: flex; gap: 6px; align-items: center; background: var(--panel); border: 1px solid #5a412a; border-radius: 10px; padding: 5px 8px; }
     .toolbox[hidden] { display: none; }
     body.swordfight .toolbox { display: none; }   /* at the sword rack: the crates are no use there */

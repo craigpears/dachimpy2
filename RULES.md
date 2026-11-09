@@ -225,6 +225,19 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     head is hidden while the ghost shows where it goes. It works from up on the rampart too,
     without walking anywhere. The den is 4 m deeper (to make room for all that's built), the
     wall-walk's frame and your shack at the back.
+  - **At the wall it's the real puzzle's board (9 Nov).** The user: "you don't want to move a
+    piece 4 to the right over all the holes"; with 4 or 5 holes "you should see 2 rows". It
+    "doesn't need to map one-on-one to the physical reality ... the 3D view is for the fun part,
+    the 2D is for that." (A taller wall was thought of and dropped: it would hide what's behind.)
+    So the wall's view is a flat board over the den: every hole there's something to fit in gets a
+    tile of its own (the hole and two squares of stone round it, to board over), the tiles in two
+    rows, left to right in the order the holes run along the wall, two to a column. Q/W/A/S go to
+    the tiles as the real puzzle's four holes; the arrows move the piece a square across the board,
+    gaps and all. What you fit on the board goes into the real hole in the 3D wall (the 3D ghost
+    shows where), and your pirate goes to it. A mended hole's tile shows the layer being built, in
+    its timber surround. The mouse works on the board too: the piece follows it (snapping to a spot
+    close by), a click fits it, the wheel turns it, a right click flips it. The layout is in
+    src/den-carp-board.ts (tests/den-carp-board.test.ts). The frames keep the camera view.
   - **It stays on between pieces,** and the next piece starts where the last one went. A piece can
     be held anywhere over the board and turned there, whether it fits or not, and put in from
     anywhere in the view, no walking.
