@@ -109,13 +109,16 @@ the site (`.assetsignore` skips `*.md`).
   a ledge at the foot of a cliff, build a crane there by Carpentry, and it hauls her up and swings
   her down into somewhere else: "there should be a different kind of section next to it. So I
   don't want ... the lock the same thing as the crane." Not the lock's hidden cove, then, but a
-  place of its own. (What that place is: to pin down with the user.)
+  place of its own: a clifftop lagoon (the user, 9 Nov), a still lake up on the headland with an
+  old wreck sunk in it, where Treasure Haul brings up the treasure.
 
 - **Something worth finding in the hidden cove: treasure (9 Nov):** the canal and the cove "would
   be great, but ... it needs a point of interest in here, even if it's a little like treasure
   chest on this little beach in the cove. You need to be able to go in here and do some treasure
   hauling or something." So: step ashore in the cove, and Puzzle Pirates' Treasure Haul brings up
   the treasure, played by its real rules (checked first), with a believable reason for it there.
+  (Treasure Haul's real home is a wreck, so it goes at the clifftop lagoon's wreck, the crane's
+  place; the cove keeps a chest of its own on the beach. How you get that one: to pin down.)
 
 - **Can't drop a pin on the trade winds, and the pilot goes crazy round them (9 Nov):** "I don't
   seem to be able to drop a pin onto the lanes. The autopilot is going crazy around them." A pin
