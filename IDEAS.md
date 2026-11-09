@@ -95,7 +95,12 @@ forward". You **row out to his hideout**, which gives it "a bit more of a PvP fe
    raids at your den. (So the raids that come "when the world gives a reason" have one: your own
    thieving.) Another way to stir up aggro (the user, 9 Nov, "if we somehow manage to figure it
    out"): the den evolves so the gun platform sits **over a busy shipping lane**, and you can
-   take shots at passing ships; that makes people angry enough to come and attack you. Digging still needs to be believable where it happens (the user, earlier: Treasure
+   take shots at passing ships; that makes people angry enough to come and attack you. The
+   platform would be **up the cliffs, found on foot** (the user, 9 Nov: "I like gunning to be more
+   discoverable ... once things calm down ... you should be able to go back up some path up the
+   cliffs to get to the gunnery deck"), looking down on the shipping lane. The gun tower over the
+   gate then matters less for the fighting and becomes more of a nice rampart, more cosmetic
+   ("that carpentry building idea will just be ... for a bit of a nice ramparts"). Digging still needs to be believable where it happens (the user, earlier: Treasure
    Haul "breaks the immersion" in the middle of a hillside):
    - *Digging, Foraging-style:* in Puzzle Pirates, Foraging is digging up goods on an island, so
      digging down to the chest is what it was made for;
@@ -196,6 +201,14 @@ moving. It gives such a nostalgia." What's next:
   (damage, lost time, spilled cargo), whether you can steer at all once you're in, and where the
   lanes run (between the places on the captain's map, the gun platform over one: above): to
   shape with the user.)
+- **Gunnery at sea, faster than Puzzle Pirates, on timing (9 Nov).** In Puzzle Pirates a round
+  of Battle Navigation plays every 35 seconds or so, in four slots, and you know just where a ship
+  coming at you will move. The user would like it faster paced: load the guns (on a ship or the
+  gun platform), then watch ships moving quickly by and time your shots, "you can shoot, but
+  there's no guarantee", since ships are always moving and have far more chances to move or hold
+  still than four slots a turn. (A first go is the sloop's two guns firing at the rocks as she
+  sails: RULES.md. Moving targets, loading her guns by Gunnery, and how a hit tells: to shape with
+  the user.)
 
 ## Safe waters, and the wilds: high risk, high reward (9 Nov, a pipe dream)
 

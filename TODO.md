@@ -96,6 +96,11 @@ the site (`.assetsignore` skips `*.md`).
   the primer goes. (How, where it's hosted, and what of the primer's engine the den still needs,
   to pin down with the user when it's time.)
 
+- **A gun each side on the old sloop (9 Nov):** "Can you just maybe add just some gunnery to
+  this? ... in Puzzle Pirates, the sloop can shoot both sides, so a gun on each, gun port on each
+  side, so you can go along and shoot the rocks." Start simple: a gun at a port each side, fired
+  as she sails, with the shot's timing yours ("you have to time it"), and rocks to shoot at.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
