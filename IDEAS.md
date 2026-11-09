@@ -237,6 +237,11 @@ moving. It gives such a nostalgia." What's next:
   "I don't quite know how that could work"). Check the real puzzle's rules before shaping it. Then
   each way through a race has its own puzzle: Sailing for speed on the open lane, Bilge at the
   locks, Navigation to find the hidden way.
+  **Dodging, and what a hit does (9 Nov):** enemy ships, monsters and gun turrets along the way
+  to dodge ("that's classic Puzzle Pirates"), so a race works single-player too, and scales up
+  to other players later. Getting hit (by a turret, say) needn't be traditional damage: maybe it
+  **dazes you for a few turns**, and you work it off by **Carpentry or Bilge** (patching the hole,
+  pumping her out) to get going again. "We'll have to figure out exactly."
 - **Gunnery at sea, faster than Puzzle Pirates, on timing (9 Nov).** In Puzzle Pirates a round
   of Battle Navigation plays every 35 seconds or so, in four slots, and you know just where a ship
   coming at you will move. The user would like it faster paced: load the guns (on a ship or the
