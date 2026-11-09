@@ -72,6 +72,11 @@ the site (`.assetsignore` skips `*.md`).
   in a spot that obscures the swordfighting board". They should wait somewhere clear of the
   armoury hoist's view, so the stack is never hidden behind them.
 
+- **The Swordfight board hides the stairs being built (9 Nov):** "the swordfighting board
+  obscures the stairs while you are building them". You should be able to see the stairs' frame
+  clearly while you build it. (Since the last update the stairs are on the right and the armoury
+  hoist on the left, which may already have fixed this: check once the new version's live.)
+
 ## Needs a playtest to pin down
 
 - **Swordfight at the armoury hoist (8 Nov), not yet tried by the user.** Rebuilt after the
