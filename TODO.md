@@ -130,6 +130,12 @@ the site (`.assetsignore` skips `*.md`).
   and you sail over it to pick it up (the user, 9 Nov). (What's in it, and whether the turret's
   rebuilt later: to pin down with the user.)
 
+- **Patching her deck should play like Carpentry ashore (9 Nov):** "the mechanics of the
+  carpentry puzzle on the ship seem a bit off. Like, why is the tool tray different than on land?
+  ... It just felt a bit weird and off." The pieces, the tray they're offered in and the way you
+  take and fit them should be the same as at the den's wall, so it's the one Carpentry wherever
+  you play it. (What exactly felt off beyond the tray: to pin down with the user.)
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
