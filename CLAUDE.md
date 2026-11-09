@@ -12,7 +12,7 @@ Pirate Den: `den.html`, `js/den.js` (the game), `js/den-look.js` (looks). Parts 
 TypeScript in `src/`: `den-deal.ts` (the fair deal), `swordfight.ts` (the Swordfight puzzle, knowing nothing of
 the den), `den-sword.ts` (the armoury hoist, the soldiers and the wall repairs, as plain data), `den-sword-draw.ts`
 (what's painted on Swordfight's crates), `bilge.ts` (the Bilge puzzle, knowing nothing of the den),
-`den-bilge.ts` (the tide, the rocks and the powder barrels), `den-carp-view.ts` (the Carpentry view's keys and jumps); `den-wall.ts` (the wall's holes, in two courses); `engine.d.ts` types the engine. den.js keeps only the 3D and the wiring; new features follow the same
+`den-bilge.ts` (the tide, the rocks and the powder barrels), `den-carp-view.ts` (the Carpentry view's keys and jumps); `den-raids.ts` (when the raids come: the opening siege, then calm); `den-wall.ts` (the wall's holes, in two courses); `engine.d.ts` types the engine. den.js keeps only the 3D and the wiring; new features follow the same
 split: rules and decisions in a tested TypeScript part, den.js drawing them. Compiled into `js/` by
 `npm run build`; the compiled `js/*.js` is committed, since the site deploys the files as they are. Never edit a
 compiled file by hand. Relative imports in `src/` need the `.js` ending (`'./swordfight.js'`): the browser loads
@@ -21,7 +21,8 @@ them as they are (a test checks). Tests: Vitest, `tests/*.test.ts` (`npm test`, 
 and configs aren't published (`.assetsignore`). When the user describes something going wrong in a part that has
 tests, add a test for it, named after what they saw, with the date.
 
-Read [RULES.md](RULES.md) before changing gameplay or wording, and add to it whenever the user corrects a rule or gives design feedback.
+Read [STORY.md](STORY.md) for the den's story, its progression and the principles behind them, and keep it
+up to date as the story grows. Read [RULES.md](RULES.md) before changing gameplay or wording, and add to it whenever the user corrects a rule or gives design feedback.
 
 Pirate Den notes: [TODO.md](TODO.md) holds the fixes and quality-of-life changes the user has asked for
 (agreed; just do them), and [IDEAS.md](IDEAS.md) holds their unrefined ideas for new puzzles and features.

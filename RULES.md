@@ -122,6 +122,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   pressured fight against defeat. The user (9 Nov): "there's not as much of a worry about making
   things too easy ... progression is fun. It's to be expected. ... we can add more challenging
   elements later." So when a change could go either way, keep it simple and on the easy side.
+- **A quick siege to start, then calm (9 Nov).** The first three waves come as they always have,
+  each counting down after the last. Beat the third and their captain calls it off ("We'll be
+  back!") and the ship sails out of the cove, its cannon with it. The den's quiet after that: no
+  countdown, so you're free to build, roam and puzzle. The user liked the quick intro under attack
+  but wanted raids "more opt-in ... so you're not constantly under pressure and you feel free to go
+  explore": "do a few waves". What brings raiders back later is to come (IDEAS.md, "Raids you
+  choose" and "The captain's map"); for now only the cheat's "Next wave now" does, the ship back
+  at anchor, and the den goes quiet again once it's beaten. Rules: `src/den-raids.ts`.
 - **You can see out to sea (9 Nov).** The taller wall shut the view in: "it just feels like I'm
   staring at a wall. It's lost some of the chop. I don't feel like there's any background to look
   at. I don't know why it's so black. Rather like there's supposed to be a sea over there." So:
@@ -318,7 +326,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   winch; nothing pauses the raid. What a break would send at an opponent goes to the raid instead:
   - **Chests arm soldiers.** Only a fused block (2x2 or bigger, a big chest of swords) arms
     anyone: a soldier for each one broken, two for each on the second link of a chain, three on
-    the third, and so on; bigger blocks make tougher, bigger soldiers; ten at most. The user: "you'd
+    the third, and so on; bigger blocks make tougher, bigger soldiers; five at most to start with
+    (ten till 9 Nov: the user wanted "only so many soldiers ... limited to a handful at the start,
+    but can be upgraded ... as you build more of a pirate den", to "build a little army up later"). The user: "you'd
     have to do a combo, like a fuse block to get a soldier, and obviously combo for multiples".
     Soldiers go for raiders loose in the den and stand just inside the gaps in the wall (or behind
     the holes being hacked), and a raider coming through a gap they hold stops to fight them; they

@@ -12,6 +12,7 @@ import { muster, planRepair, rewardPair, Lumber, REPAIR, SwordRack, Barracks, SW
 import { drawStencil, drawBlade, PALETTE } from './den-sword-draw.js';
 import { Bilge, W as BW, H as BH } from './bilge.js';
 import { KEYS as VIEW_KEYS, nextHole, holeKey, quarters, centreOn, clampTo, nextBoard, arrowStep } from './den-carp-view.js';
+import { afterWave, countingDown } from './den-raids.js';
 import { twoCourses, isHigh, gateTop, lowMiddle, isSky } from './den-wall.js';
 import { BILGE, Tide, HIGH, LOW, shoreAt, worth, barrelsFor, onRocks, rocksBare, oddsFor, blastHits } from './den-bilge.js';
 import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, cleanDesign, designOf, drawFlag, dyeHex, DYES, SKIN, HAIR, FUR, PARTS, FLAGS, PATTERNS, DECOR, MAX_DECOR, BIOMES, twoColours } from './den-look.js';
@@ -493,8 +494,7 @@ function buildWall() {
   scenery.push(torch(-half + 1.75, ramp.zBot + 0.3), torch(half - 1.75, ramp.zBot + 0.3), torch(X(wall.gateCols.c0) - 0.5, 1), torch(X(wall.gateCols.c1 + 1) + 0.5, 1));
   // Out in the cove, the raiders' ship at anchor, broadside on; from wave 2 it runs out a cannon.
   const cx = half * 0.45;
-  ship.position.set(cx, 0, SHIP_Z);
-  cannon.position.set(cx + 0.6, SHIP_DECK, SHIP_Z + 0.75);
+  shipHome(cx);
   cannon.visible = false;
   scenery.push(ship, cannon);
   // Props inside: three crates for the piles, a fire barrel, the treasure chest.
@@ -2601,8 +2601,29 @@ const ship = (() => {
   g.add(fl);
   return g;
 })();
+// At anchor in the cove (`x`, or where it was), in sight.
+function shipHome(x = ship.userData.home) {
+  ship.userData.home = x;
+  ship.position.set(x, 0, SHIP_Z);
+  ship.visible = true;
+  cannon.position.set(x + 0.6, SHIP_DECK, SHIP_Z + 0.75);
+}
+/* Once the opening siege is beaten (src/den-raids.ts), their captain makes sail: the ship gathers
+   way, bow first, out of the cove and off into the murk, and their cannon with it. Every den sails
+   it from its own phase, so a crewmate's goes too. */
+const SHIP_GONE = 46;
+function shipSail(dt) {
+  const home = ship.userData.home, out = G.phase === 'peace';
+  if (!out) { if (ship.position.x !== home) shipHome(); return; }
+  if (!ship.visible) return;
+  const run = ship.position.x - home;
+  ship.position.x += dt * Math.min(2.4, 0.15 + run * 0.12);
+  cannon.position.x = ship.position.x + 0.6;
+  if (run > SHIP_GONE) { ship.visible = false; cannon.visible = false; }
+}
 // The ship rides the swell, and their cannon with it; boats afloat bob.
-function shipTick() {
+function shipTick(dt) {
+  shipSail(dt);
   const t = performance.now() / 1000, y = Math.sin(t * 0.9) * 0.07;
   ship.position.y = y;
   ship.rotation.x = Math.sin(t * 0.7) * 0.02;
@@ -3045,7 +3066,7 @@ function swordLanded(res) {
   const n = toLumber(res.sprinkles);
   const bits = [];
   if (came.length) bits.push(`${came.length === 1 ? 'a soldier' : `${came.length} soldiers`} armed`);
-  else if (recruits.length) bits.push(`the barracks are full (${SWORD.MAX_SOLDIERS} soldiers at most)`);
+  else if (recruits.length) bits.push(`the barracks are full (${barracks.cap} soldiers at most)`);
   if (n) bits.push(`${n} crate${n > 1 ? 's' : ''} broken up for planks${lumber.ready ? ': enough to mend a piece of the wall' : ` (${lumber.crates} of ${REPAIR.CRATES} to mend a piece of the wall)`}`);
   const msg = bits.join(', ') || 'broken, but too few to send anything: break a chest (2x2 or bigger) for soldiers, or loose crates in twos for planks';
   say(`${name}${msg[0].toUpperCase()}${msg.slice(1)}!`);
@@ -5074,6 +5095,7 @@ function startWave() {
   G.aim = null;
   G.waveTurned = G.waveIn = 0;
   G.windSaid = false;
+  if (!ship.visible || ship.position.x !== ship.userData.home) shipHome();   // a raid called on, once they'd sailed off
   if (G.wave >= 2 && !cannon.visible) { cannon.visible = true; say('Their ship\'s run out a cannon!', true); }
   else say(`Wave ${G.wave}: raiders!`, true);
   $('intro').classList.add('off');
@@ -5081,6 +5103,7 @@ function startWave() {
 }
 function updateWaves(dt) {
   if (!G.fairOver && wall.holes.every((h) => h.status !== 'open')) G.fairOver = true;   // see fairDeal
+  if (G.phase === 'peace') return;   // the siege is over: nobody's coming
   if (G.phase !== 'wave') {
     // The first wave comes as soon as every hole's mended (the user), with a beat to see it done.
     if (G.phase === 'build' && G.phaseT > WALL_DONE_SECS && wall.holes.every((h) => h.status !== 'open')) {
@@ -5100,13 +5123,14 @@ function updateWaves(dt) {
     if (cells) { G.aim = { cells, t: CANNON_AIM }; say('Their cannon\'s aiming at the wall: see the red!', true); } else G.cannonT = 5;
   }
   if (!G.toSpawn && !raiders.length) {
-    G.phase = 'calm'; G.phaseT = CALM_SECS; G.aim = null;
+    G.phase = afterWave(G.wave); G.phaseT = CALM_SECS; G.aim = null;
     let tally = G.waveTurned || G.waveIn ? ` ${G.waveTurned} turned away at the wall, ${G.waveIn} got in.` : '';
     if (!G.waveIn && G.waveTurned) { G.gold += PAY.clean; updateStats(); tally = ` Not one got in! (+${PAY.clean})`; }
     // Timber for the next part, once nothing's still being built.
     const f = !frames().some((o) => o.kind !== 'house') && !ramp.jobs.some((j) => j.kind !== 'house' && j.frame && !j.up) && ramp.jobs[ramp.next]?.kind !== 'house' && openJob(ramp.next);
-    if (f) say(`Wave ${G.wave} beaten off!${tally} Timber's come: ${f.kind === 'gun' ? 'build a gun tower in its frame' : 'build the rampart in its frame'}`);
-    else say(`Wave ${G.wave} beaten off!${tally}`);
+    const timber = f ? ` Timber's come: ${f.kind === 'gun' ? 'build a gun tower in its frame' : 'build the rampart in its frame'}` : '';
+    if (G.phase === 'peace') say(`Wave ${G.wave} beaten off!${tally} Their captain's had enough: "We'll be back!" They're making sail. The den's yours: build, roam, puzzle.${timber}`);
+    else say(`Wave ${G.wave} beaten off!${tally}${timber}`);
   }
 }
 function banner() {
@@ -5114,6 +5138,7 @@ function banner() {
   let t, cls = 'banner calm';
   if (G.phase === 'build') t = wall.holes.every((h) => h.status !== 'open') ? `The wall's mended! Raiders attack in ${fmt(Math.ceil(G.phaseT))}` : `Raiders attack in ${fmt(Math.ceil(G.phaseT))}: mend the wall!`;
   else if (G.phase === 'calm') t = `Wave ${G.wave} beaten off · next wave in ${fmt(Math.ceil(G.phaseT))}`;
+  else if (G.phase === 'peace') t = 'The raiders have sailed off · the den\'s quiet';
   else { t = `Wave ${G.wave} · ${G.toSpawn + raiders.filter((r) => r.state !== 'down').length} raiders`; cls = 'banner'; }
   if (el.textContent !== t) el.textContent = t;
   if (el.className !== cls) el.className = cls;
@@ -6456,7 +6481,7 @@ function update(dt) {
   bilgeTick(dt);
   if (guest()) {
     // The host runs the raiders; here they just follow what it says.
-    if (G.phase !== 'wave' && !G.over) G.phaseT = Math.max(0, G.phaseT - dt);
+    if (countingDown(G.phase) && !G.over) G.phaseT = Math.max(0, G.phaseT - dt);
     raiders.forEach((r) => followRaider(r, dt));
   } else if (!G.over) {
     updateWaves(dt);
@@ -6699,8 +6724,9 @@ function skipTo(s) {
   newGame();
   if (upTo >= 0) buildAll(upTo);
   if (wave) {
-    Object.assign(G, { wave, phase: 'calm', phaseT: CALM_SECS });
+    Object.assign(G, { wave, phase: afterWave(wave), phaseT: CALM_SECS });
     if (wave >= 2) cannon.visible = true;
+    if (G.phase === 'peace') { ship.visible = cannon.visible = false; ship.position.x = ship.userData.home + SHIP_GONE + 1; }   // long gone
     if (ramp.jobs[upTo + 1]?.kind !== 'house') openJob(upTo + 1);
     $('intro').classList.add('off');
   }

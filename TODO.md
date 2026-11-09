@@ -89,13 +89,12 @@ the site (`.assetsignore` skips `*.md`).
   with the user. A first sketch, with raids becoming opt-in after an opening siege, is in
   IDEAS.md, "Raids you choose".)
 
-- **The siege ends after three waves, then calm (9 Nov):** the user liked the "Raids you choose"
-  sketch: "do a few waves". Beat the third wave and the raiders sail off; no more countdown, so
-  you're free to roam. (The first bit of "The captain's map" in IDEAS.md.)
-
-- **Soldiers: a handful at the start (9 Nov):** "make sure there's only so many soldiers you can
-  have ... limited to a handful at the start, but can be upgraded ... as you build more of a
-  pirate den". Ten at once is too many to start with.
+- **Split the den off from the Carpentry primer (9 Nov, not yet):** "we need to separate this code
+  at some point from this carpentry primer thing, because this is obviously far more interesting
+  ... I think that can just be removed and just focus on the pirate then. It has evolved." But
+  "we don't care about that at this point". Later: the den becomes the site (or its own repo), and
+  the primer goes. (How, where it's hosted, and what of the primer's engine the den still needs,
+  to pin down with the user when it's time.)
 
 - **Your pirate glows yellow on the beach with nothing in the way (9 Nov):** "the player goes
   yellow as if you are behind something while on the beach, even if nothing is obstructing the

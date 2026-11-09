@@ -24,8 +24,10 @@ export const SWORD = {
   FALL: 0.6,
   /** Sword pieces you can carry, waiting to be played. */
   QUEUE: 8,
-  /** Soldiers in the den at once. */
-  MAX_SOLDIERS: 10,
+  /** Soldiers in the den at once, to start with: a handful. The user (9 Nov): "make sure there's
+      only so many soldiers you can have ... limited to a handful at the start, but can be upgraded
+      ... as you build more of a pirate den", to "build a little army up later" (Barracks.cap). */
+  START_SOLDIERS: 5,
   /** Blows a raider takes. */
   RAIDER_HP: 2,
   /** Seconds between a soldier's blows, and between a raider's. */
@@ -234,10 +236,12 @@ export const reachable = (r: Foe): boolean => !r.gone && r.state !== 'down' && (
 /** The soldiers: who each goes for, where they stand when there's nobody to fight, and the duels. */
 export class Barracks {
   soldiers: Soldier[] = [];
+  /** How many soldiers the den can hold at once: a handful, till building up the den raises it. */
+  cap: number = SWORD.START_SOLDIERS;
 
   /** New soldiers at (x, z), as many as there's room for. Returns the ones that came. */
   enlist(recruits: Recruit[], x: number, z: number): Soldier[] {
-    const room = Math.max(0, SWORD.MAX_SOLDIERS - this.up().length);
+    const room = Math.max(0, this.cap - this.up().length);
     const out = recruits.slice(0, room).map((rc, i): Soldier => ({
       x: x + ((i % 3) - 1) * 0.5, z: z + Math.floor(i / 3) * 0.4, hp: rc.hp, maxHp: rc.hp, size: rc.size,
       state: 'up', foe: null, fx: 0, fz: -1, moving: false, fighting: false, downT: 0, hitT: 0.4, retT: 0,

@@ -95,6 +95,13 @@ at a time so that we can compress and come back later on"). In order:
    den").
    - *Sword or Rumble, your choice (later):* players love one and hate the other, so let them pick
      which they fight with (as "choosing your mini-game" already says for the soldiers).
+6. **Dalnoth comes back for it.** A big famous pirate robbed of his treasure gets very grouchy and
+   very angry, and comes back with his crew: that's what brings on the next round of raids,
+   naturally. And again, two ways to meet him:
+   - *Dig in at the den:* fortify the hideout, build gun towers, build up your soldiers, and fight
+     him on the beaches (the den as it plays now, against a tougher raid);
+   - *Take to the sea:* "we heard there's an abandoned sloop" in the harbour: fix her up, crew her,
+     and see him off on a Battle Navigation board before he ever lands.
 
 **Balance, alongside:** building on with the rampart and guns is fine as long as it isn't
 overpowered. Soldiers are limited to a handful at the start, and building up the den (bigger

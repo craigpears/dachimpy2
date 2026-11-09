@@ -184,10 +184,13 @@ describe('SwordRack', () => {
 });
 
 describe('Barracks', () => {
-  it('never more than ten soldiers', () => {
+  it('only a handful of soldiers at the start, "but can be upgraded" (9 Nov)', () => {
     const b = new Barracks();
-    expect(b.enlist(Array(14).fill({ hp: 2, size: 1 }), 0, 5)).toHaveLength(SWORD.MAX_SOLDIERS);
+    expect(SWORD.START_SOLDIERS).toBe(5);
+    expect(b.enlist(Array(14).fill({ hp: 2, size: 1 }), 0, 5)).toHaveLength(5);
     expect(b.enlist([{ hp: 2, size: 1 }], 0, 5)).toHaveLength(0);
+    b.cap = 8;
+    expect(b.enlist(Array(5).fill({ hp: 2, size: 1 }), 0, 5)).toHaveLength(3);
   });
 
   it('a soldier runs a raider down in the den and knocks them flat (8 Nov)', () => {
