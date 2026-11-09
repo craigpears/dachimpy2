@@ -142,6 +142,41 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   can throw them straight at raiders on the sand, no lob. The camera looks down over the wall at
   you, and you show as a gold outline through anything in the way. This is the first step
   towards fighting on the beach (soldiers going out, the Kraken: IDEAS.md).
+- **Bilging the shallows (9 Nov).** The user: "can you bilge out the ocean? ... reveals some like
+  obstacles they have to pass over that hurts and damages them ... but it gradually comes back over
+  time"; better than the mine idea "because it helps everything stay focused on this one area"; it
+  should feel real, "almost like the bilge pieces are in the water. So when you kind of clear
+  something and it moves, that piece of water recedes"; and combos could dredge up "an explosive
+  barrel ... you can blow up as people go past". So:
+  - **The board** is the real Bilge (YPPedia, read 9 Nov): 6 wide by 12 high, seven kinds, a
+    two-square cursor that swaps side by side (any swap, even one that clears nothing), three or
+    more in a row or column clear, pieces float up and new ones come in at the bottom, chains;
+    crabs (can't be moved, cleared as a bonus when they come up out of the water), pufferfish
+    (swapped, it clears itself and the eight round it) and jellyfish (swapped with a piece, clears
+    every piece of that kind); the combo names Good, Great, Arrr!, Har!, Yarrr!, Bingo!, Sea
+    Donkey!, Vegas!. Specials come in as the raids go on: pufferfish from wave 2, crabs 3,
+    jellyfish 4 (in the real puzzle, with your standing). Tests: tests/bilge.test.ts.
+  - **Where:** it lies in the shallows to the right of the gun tower, a metre a square, its top
+    row on the sand 8 m out from the wall and running out into the sea, with stakes down its sides.
+    Space by its top end to play; Esc to walk. You see it as in the real puzzle, from the sea end
+    looking back at the den: row 0 at the top of the screen, the water at the bottom. Arrows (or
+    WASD) and Space, or the mouse and a click.
+  - **The water is the tide.** The board's water line is the sea's edge all along the beach, so
+    clearing pieces draws the sea back. It starts at three rows, as the puzzle does; left alone it
+    comes in a row every 30 seconds, up to nine (the top three rows always dry). Each move pumps
+    out as much as it's worth in moves, as the bilging guides reckon it (a three a little under a
+    move, two lines about three, a Bingo about eight; crabs well, more the higher the water; a
+    pufferfish or jellyfish's own clear nothing). A three every three seconds keeps up with it.
+    The raiders row in to wherever the sea's edge is.
+  - **Rocks:** the sand the tide leaves bare past high tide's mark (up to 6 m of it) is strewn with
+    sharp rocks. Raiders landing beyond them have to cross: slowed, and a point of stamina gone for
+    every metre, so they reach the wall tired and give up sooner.
+  - **Powder barrels:** two lines at once dredges one up, a Bingo two, more three (six on the beach
+    at most). It's rolled up the beach to the foot of the wall by a hole, and blows up the next
+    raider who comes by, knocking flat every raider within a couple of metres.
+  - **Solo only for now,** like Swordfight: in a crew there's no board and the sea stays about
+    where it always was.
+  The numbers are in src/den-bilge.ts (tests/den-bilge.test.ts).
 - **Every puzzle stays high fidelity to the original.** Small tweaks are fine, but the puzzle's own
   rules come over as they are; the 3D only decides where the board stands and who is on the other
   end. The user turned down a clay golem built from smashed Swordfight blocks, with breakers won

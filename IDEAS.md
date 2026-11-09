@@ -110,32 +110,22 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     gives a reason to say "right, we really need to make the wall thicker": sprinkle it,
     carpenter it, whichever puzzle you like, all solving the same problem. (Goes with "Grades for
     the layers behind a hole" above.)
-- **Bilging the shallows (9 Nov), "definitely on the list":** a Bilge puzzle out on the beach, which
-  the user prefers to the mine idea because "it helps everything stay focused on this one area".
-  Now you can walk out of the gate (RULES.md), it's somewhere to go and do it. The user's thoughts:
-  - **The shore made shallow:** tweak the look so there are shallows in front of the beach, so
-    bilging them out is plausible. It should feel real, "almost like the bilge pieces are in the
-    water. So when you kind of clear something and it moves, that piece of water recedes."
-  - **What bilging does:** the water drawn back uncovers obstacles on the sand that hurt raiders as
-    they cross; the tide gradually comes back in over time ("that would actually be quite funny").
-    It also pushes the Kraken further out: shallow water it can't come into, so it hits the wall
-    less hard, or can't reach it at all.
-  - **Combos:** perhaps the same kind of rewards as Swordfight's; or, better, a combo dredges up
-    something on the beach: "I don't want to say landmine", but an explosive barrel, which blows
-    up raiders as they go past (or you blow it as they do). Useful against the Kraken later too.
-  - **A first sketch (Claude, 9 Nov, for the user to react to):** keep Bilge's own rules (6 wide,
-    12 tall, swap two side by side, three in a line clear, specials as in the original). The board
-    lies flat in the shallows straight out from the gate, with the wall as "up" and the sea as
-    "down": fresh pieces wash in from the sea, the way Bilge brings them up from below. The pieces
-    are things in the water (shells, stones, weed, bits of wreck), so a clear is them washing
-    away. Bilge's water level is the tide: the bottom rows sit under the water, harder to see, and
-    good bilging pushes the water back, the board's top rows drying out into a wider beach, while
-    slack bilging lets it creep back in. You walk out to the board and play it from a view looking
-    down, like the gun deck. Dry sand you've won shows what's buried there (sharp rocks, a
-    half-sunk wreck), and raiders crossing it are slowed or hurt. A combo's barrel turns up on the
-    sand in front of the board. Still to work out: how wide the dried beach gets and how fast the
-    tide comes back; whether raiders walk across the board itself; how a barrel goes off (on its
-    own as raiders pass, or you or the guns set it off); how a crew shares one board.
+- **Your own pet Kraken, as the reward (9 Nov):** "the most obvious reward ... is to actually have
+  the Kraken yourself. It helps defend you." Beat it and it's yours: it fights for the den, and
+  later for you at sea. The user sees it as a natural next step out of the den: "you start in your
+  little rowboat, but you have your pet Kraken that comes fight", then a ship of your own, and it
+  would make battle navigation more fun ("you're not just controlling your ship"). "You can go
+  plundering ships with your pet Kraken. That would be hilarious." (Alongside treasure maps, for
+  more of an exploring, questing side: "Treasure maps from fallen raiders" above.)
+- **Bilging the shallows: what's next (the first version is in, 9 Nov; its rules are in RULES.md,
+  "Bilging the shallows").** Still open:
+  - **Crews:** it's solo only, like Swordfight; in a crew the tide stays put. In the real puzzle
+    several pirates bilge at once, each on their own board, all pumping the one ship.
+  - **Barrels:** they go off by themselves as a raider comes by. The user also wondered about
+    setting them off yourself, and they should be useful against the Kraken.
+  - **The Kraken and the tide:** shallow water it can't come into, so bilging pushes it out
+    (the user, 9 Nov).
+  - **Buried things beyond rocks:** a half-sunk wreck, say, uncovered at low tide.
 - **Keep it democratised:** everyone gets a turn at the fun jobs (see the principle above).
 
 For now the den is the first version, and that works.

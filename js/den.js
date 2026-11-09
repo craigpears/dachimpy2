@@ -10,6 +10,8 @@ import { FairDeal, turnWide } from './den-deal.js';
 import { randomPair, W as SW, H as SH, ENTRY as SENTRY } from './swordfight.js';
 import { muster, planRepair, rewardPair, Lumber, REPAIR, SwordRack, Barracks, SWORD } from './den-sword.js';
 import { drawStencil, drawBlade, PALETTE } from './den-sword-draw.js';
+import { Bilge, W as BW, H as BH } from './bilge.js';
+import { BILGE, Tide, HIGH, LOW, shoreAt, worth, barrelsFor, onRocks, rocksBare, oddsFor, blastHits } from './den-bilge.js';
 import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, cleanDesign, designOf, drawFlag, dyeHex, DYES, SKIN, HAIR, FUR, PARTS, FLAGS, PATTERNS, DECOR, MAX_DECOR, BIOMES, twoColours } from './den-look.js';
 
 // The main puzzle's engine, turned for wide shapes (see turnWide in src/den-deal.ts).
@@ -279,7 +281,8 @@ scene.add(den);
    ship lies at anchor and their rowboats come in (the user, 9 Nov: "they're rowing in little
    rowboats onto the beach of your pirate hideout, and the cannon is actually a ship off in the
    distance ... like you're in, you know, a cove of some kind"). */
-const SHORE = -15;
+const SHORE = -18;   // as far out as the beach goes (the tide's lowest is a metre short of it)
+let shoreParts = [];   // the sea, its surf and the sand, moved in and out with the tide
 const floor = mesh(new THREE.PlaneGeometry(70, 29 - SHORE), mat('#ffffff', { map: groundTex, roughness: 1 }), false);
 floor.rotation.x = -Math.PI / 2;
 floor.position.z = (29 + SHORE) / 2;
@@ -473,6 +476,7 @@ function buildWall() {
   obstacles = [...piles.map((p) => ({ x: p.x, z: p.z, r: 0.75 })), { x: barrel.position.x, z: barrel.position.z, r: 0.55 }, { x: chest.position.x, z: chest.position.z, r: 0.75 },
     ...[-0.5, -0.25, 0, 0.25, 0.5].map((f) => ({ x: sword.x, z: sword.z + f * sword.w, r: 0.4 })), { x: sword.x, z: sword.z + sword.w / 2 + 0.15, r: 0.3 }];
   piles.forEach(showPile);
+  bilgePlace(half);
   rebuildDecor();
   applyBiome(true);
   makePlot();
@@ -1323,12 +1327,14 @@ function applyBiome(force = false) {
   surf.rotation.x = -Math.PI / 2;
   surf.position.set(0, 0.01, SHORE - 0.2);
   biomeGroup.add(sea, surf);
+  shoreParts = [[sea, -45], [surf, -0.2]];
   // A strip of sand up from the water, fading into the den's own ground (the seaside's is all sand).
   if (id !== 'seaside') {
     const sand = mesh(new THREE.PlaneGeometry(70, 6), new THREE.MeshStandardMaterial({ color: '#c4a172', roughness: 1, transparent: true, depthWrite: false, alphaMap: sandFade }), false);
     sand.rotation.x = -Math.PI / 2;
     sand.position.set(0, 0.005, SHORE + 3);
     biomeGroup.add(sand);
+    shoreParts.push([sand, 3]);
   }
   if (id === 'seaside') {
     for (const [x, z] of treeSpots(half)) biomeGroup.add(palm(x, z, 0.85 + Math.random() * 0.35));
@@ -1344,6 +1350,8 @@ function applyBiome(force = false) {
 }
 function biomeTick(dt) {
   if (sea) { seaTex.offset.x += dt * 0.004; seaTex.offset.y = Math.sin(performance.now() / 2400) * 0.01; }
+  const sz = shoreZ();
+  for (const [m, off] of shoreParts) m.position.z = sz + off;
   shipTick(dt);
 }
 // The beach strip's fade: solid at the water's edge, gone by the top.
@@ -2538,7 +2546,7 @@ function shipTick() {
    out. It waits there, and takes them back out if they leave (turned away, or off with the loot:
    state 'rowOff'); left empty, it drifts back off to the ship. The host and crew alike draw them
    from the raiders' state, so a crewmate's den shows them too. */
-const BOAT_FROM = SHIP_Z + 2.4, BEACH = SHORE + 0.15;
+const BOAT_FROM = SHIP_Z + 2.4;
 const boats = [];
 const boatHullM = mat('#6e4a2c', { map: woodTex }), oarM = mat('#a07c52', { map: woodTex });
 function rowboat() {
@@ -2645,7 +2653,7 @@ const sword = {
   rope: null, trolley: null, drum: null, top: 0,
 };
 sword.top = sword.y0 + sword.h + 0.75;
-let swordView = 0;
+let swordView = 0, bilgeView = 0;
 const cellAt = (r, c, v = new THREE.Vector3()) => v.set((c - SW / 2 + 0.5) * CR, sword.y0 + (r + 0.5) * CR, 0);
 // What goes on the crates: painted swords, bare blades, the crates' wood, the iron bands. Made once.
 const crateLook = { stencil: {}, faded: {}, blade: {}, wood: {}, box: new THREE.BoxGeometry(CRATE, CRATE, CRATE), plane: new THREE.PlaneGeometry(1, 1) };
@@ -3186,6 +3194,322 @@ function swordPrompt() {
   return n ? `Space: work the hoist (${of}): chests arm soldiers, loose crates make planks to mend the wall` : 'The armoury: beaten raiders drop crates of weapons; stack them here to arm soldiers';
 }
 
+// ---------- bilging the shallows (after Bilge) ----------
+/* Out through the gate, on the beach to the right of the gun tower, the Bilge board lies in the
+   shallows (src/bilge.ts, the real puzzle; src/den-bilge.ts, the tide and what it gives). Its top
+   row is the dry sand nearest the wall; it runs out into the sea, and its water line is the sea's
+   edge all along the beach. Bilge well and the tide goes out, the pieces you clear washing away and
+   the water drawing back off the board; leave it and the tide creeps in. Sand the tide leaves bare,
+   past high tide's mark, is strewn with sharp rocks that cut and slow the raiders landing beyond
+   them. Two lines at once or better dredges up a powder barrel, rolled up the beach to a hole, that
+   blows up raiders who come by. Solo only for now, like Swordfight: a crew's tide stays put.
+
+   Seen as in the real puzzle: from the sea end, looking back at the den, row 0 at the top of the
+   screen, the water at the bottom. So column 0 is the one furthest along the beach to the right
+   (on the left of the screen as you look back at the den). */
+const tide = new Tide();
+const bilgeHere = () => !online() && !G.over;
+const shoreZ = () => (online() ? shoreAt(BILGE.CREW_WATER) : tide.shore);
+const beachZ = () => shoreZ() + 0.15;
+const bilge = {
+  board: new Bilge(Math.random, oddsFor(0)), group: new THREE.Group(), pieces: new THREE.Group(), x0: 4, on: false,
+  cur: { r: 0, c: 2 }, shown: null, meshes: new Map(), queue: [], holdT: 0, rocks: [], barrels: [], water: null, cursor: null,
+};
+scene.add(bilge.group);
+bilge.group.add(bilge.pieces);
+const cellX = (c) => bilge.x0 + (BW - 0.5 - c) * BILGE.SQ;
+const cellZ = (r) => BILGE.Z0 - (r + 0.5) * BILGE.SQ;
+// The pieces: seven kinds, each its own colour and mark, as flat as shells and stones in the water.
+const BITS = [['#2f86d6', 'ring'], ['#3fb54a', 'square'], ['#e3c22a', 'triangle'], ['#d8432f', 'diamond'], ['#9a52c7', 'star'], ['#f08a2a', 'cross'], ['#3cc6c0', 'drop']];
+function bitFace(col, mark) {
+  return canvasTex(128, 128, (g, w) => {
+    const c = w / 2;
+    const grd = g.createRadialGradient(c - 18, c - 22, 6, c, c, c);
+    grd.addColorStop(0, '#ffffff'); grd.addColorStop(0.18, col); grd.addColorStop(1, col);
+    g.fillStyle = grd; g.beginPath(); g.arc(c, c, c - 2, 0, Math.PI * 2); g.fill();
+    g.lineWidth = 6; g.strokeStyle = 'rgba(0,0,0,0.35)'; g.stroke();
+    g.fillStyle = 'rgba(255,255,255,0.85)'; g.strokeStyle = 'rgba(255,255,255,0.85)'; g.lineWidth = 10;
+    g.beginPath();
+    if (mark === 'ring') { g.arc(c, c, 26, 0, Math.PI * 2); g.stroke(); return; }
+    if (mark === 'square') g.rect(c - 24, c - 24, 48, 48);
+    else if (mark === 'triangle') { g.moveTo(c, c - 30); g.lineTo(c + 28, c + 22); g.lineTo(c - 28, c + 22); }
+    else if (mark === 'diamond') { g.moveTo(c, c - 32); g.lineTo(c + 24, c); g.lineTo(c, c + 32); g.lineTo(c - 24, c); }
+    else if (mark === 'star') for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? 13 : 32; g.lineTo(c + Math.cos(a) * rr, c + Math.sin(a) * rr); }
+    else if (mark === 'cross') { g.rect(c - 10, c - 30, 20, 60); g.rect(c - 30, c - 10, 60, 20); }
+    else if (mark === 'drop') { g.moveTo(c, c - 32); g.quadraticCurveTo(c + 30, c + 6, c, c + 28); g.quadraticCurveTo(c - 30, c + 6, c, c - 32); }
+    g.closePath(); g.fill();
+  });
+}
+const specialFace = {
+  crab: () => canvasTex(128, 128, (g) => {
+    g.fillStyle = '#e0dccf'; g.beginPath(); g.arc(64, 64, 62, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = '#a3321e'; g.lineWidth = 7;
+    for (const s of [-1, 1]) for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(64 + s * 22, 66 + i * 9); g.lineTo(64 + s * 48, 74 + i * 14); g.stroke(); }
+    g.fillStyle = '#c8442a';
+    for (const s of [-1, 1]) { g.beginPath(); g.arc(64 + s * 34, 34, 13, 0, Math.PI * 2); g.fill(); }
+    g.beginPath(); g.ellipse(64, 68, 30, 22, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#fff'; for (const s of [-1, 1]) { g.beginPath(); g.arc(64 + s * 9, 50, 6, 0, Math.PI * 2); g.fill(); }
+    g.fillStyle = '#111'; for (const s of [-1, 1]) { g.beginPath(); g.arc(64 + s * 9, 50, 3, 0, Math.PI * 2); g.fill(); }
+  }),
+  puffer: () => canvasTex(128, 128, (g) => {
+    g.fillStyle = '#d9e7ee'; g.beginPath(); g.arc(64, 64, 62, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = '#8a6a1a'; g.lineWidth = 4;
+    for (let i = 0; i < 16; i++) { const a = i * Math.PI / 8; g.beginPath(); g.moveTo(64 + Math.cos(a) * 30, 64 + Math.sin(a) * 30); g.lineTo(64 + Math.cos(a) * 46, 64 + Math.sin(a) * 46); g.stroke(); }
+    g.fillStyle = '#f2c43a'; g.beginPath(); g.arc(64, 64, 32, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#fff'; for (const s of [-1, 1]) { g.beginPath(); g.arc(64 + s * 12, 56, 8, 0, Math.PI * 2); g.fill(); }
+    g.fillStyle = '#111'; for (const s of [-1, 1]) { g.beginPath(); g.arc(64 + s * 12, 56, 4, 0, Math.PI * 2); g.fill(); }
+    g.beginPath(); g.arc(64, 76, 6, 0, Math.PI * 2); g.fill();
+  }),
+  jelly: () => canvasTex(128, 128, (g) => {
+    g.fillStyle = '#e6e2f2'; g.beginPath(); g.arc(64, 64, 62, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = '#c05bb0'; g.lineWidth = 5;
+    for (let i = 0; i < 5; i++) { g.beginPath(); g.moveTo(40 + i * 12, 68); g.quadraticCurveTo(34 + i * 12, 88, 42 + i * 12, 108); g.stroke(); }
+    g.fillStyle = '#e07ad0'; g.beginPath(); g.arc(64, 68, 32, Math.PI, 0); g.closePath(); g.fill();
+    g.fillStyle = 'rgba(255,255,255,0.6)'; g.beginPath(); g.arc(54, 54, 8, 0, Math.PI * 2); g.fill();
+  }),
+};
+const bitLook = { geo: new THREE.CylinderGeometry(0.42, 0.44, 0.12, 28), side: mat('#efe6d2', { roughness: 0.6 }), faces: BITS.map(([col, mark]) => mat('#ffffff', { map: bitFace(col, mark), roughness: 0.45 })), special: {} };
+function bitMesh(b) {
+  const face = b.s ? (bitLook.special[b.s] ||= mat('#ffffff', { map: specialFace[b.s](), roughness: 0.5 })) : bitLook.faces[b.k];
+  const m = mesh(bitLook.geo, [bitLook.side, face, bitLook.side], false);
+  m.rotation.y = -Math.PI / 2;   // the mark the right way up, seen from the sea end
+  return m;
+}
+
+// Laid out with the wall: to the right of the gun tower, the rocks out past high tide's mark.
+function bilgePlace(half) {
+  const towerR = gunX0() + GD.cols * S, w = BW * BILGE.SQ;
+  bilge.x0 = Math.min(half - 0.6 - w, Math.max(towerR + 1.2, (towerR + half) / 2 - w / 2));
+  bilge.group.clear();
+  bilge.pieces = new THREE.Group();
+  bilge.group.add(bilge.pieces);
+  bilge.meshes.clear();
+  bilge.shown = null;
+  const L = BH * BILGE.SQ, cx = bilge.x0 + w / 2, cz = BILGE.Z0 - L / 2;
+  // Darker, wet sand under the board, and driftwood stakes down both sides.
+  const bed = mesh(new THREE.PlaneGeometry(w + 0.3, L + 0.2), mat('#6e5a40', { roughness: 1 }), false);
+  bed.rotation.x = -Math.PI / 2;
+  bed.position.set(cx, 0.012, cz);
+  bilge.group.add(bed);
+  const stakeM = mat('#6a5038', { map: woodTex });
+  for (const sx of [-1, 1]) for (let i = 0; i <= BH; i += 2) {
+    const st = mesh(new THREE.CylinderGeometry(0.07, 0.09, 0.9, 6), stakeM);
+    st.position.set(cx + sx * (w / 2 + 0.25), 0.3, BILGE.Z0 - i * BILGE.SQ);
+    st.rotation.z = (Math.random() - 0.5) * 0.2;
+    bilge.group.add(st);
+  }
+  // The water over the board's wet rows: clear enough to see the pieces under it.
+  bilge.water = mesh(new THREE.PlaneGeometry(w + 0.6, 1), new THREE.MeshStandardMaterial({ color: '#1f6f8f', transparent: true, opacity: 0.42, roughness: 0.15, metalness: 0.1, depthWrite: false }), false);
+  bilge.water.rotation.x = -Math.PI / 2;
+  bilge.group.add(bilge.water);
+  // The cursor: a gold frame round two squares side by side.
+  bilge.cursor = new THREE.Group();
+  const gold = new THREE.MeshBasicMaterial({ color: '#ffd45a' });
+  for (const [x, z, sx, sz] of [[0, -0.5, 2, 0.08], [0, 0.5, 2, 0.08], [-1, 0, 0.08, 1], [1, 0, 0.08, 1]]) {
+    const b = mesh(new THREE.BoxGeometry(sx * BILGE.SQ, 0.06, sz * BILGE.SQ), gold, false);
+    b.position.set(x * BILGE.SQ, 0.16, z * BILGE.SQ);
+    bilge.cursor.add(b);
+  }
+  bilge.group.add(bilge.cursor);
+  // Sharp rocks and barnacled stones beyond high tide's mark, bare when the tide's out.
+  bilge.rocks = [];
+  const rockM = mat('#55504a', { flatShading: true, roughness: 0.9 }), barnM = mat('#cfc6b4', { flatShading: true });
+  for (let i = 0; i < 70; i++) {
+    const x = (Math.random() * 2 - 1) * (half + 1), z = HIGH - 0.3 - Math.random() * (HIGH - LOW - 0.3);
+    if (x > bilge.x0 - 0.5 && x < bilge.x0 + w + 0.5) continue;
+    const g = new THREE.Group(), n = 1 + rand(3);
+    for (let j = 0; j < n; j++) {
+      const r = mesh(new THREE.ConeGeometry(0.12 + Math.random() * 0.14, 0.25 + Math.random() * 0.35, 5), j ? barnM : rockM, false);
+      r.position.set((Math.random() - 0.5) * 0.4, 0.1, (Math.random() - 0.5) * 0.4);
+      r.rotation.set((Math.random() - 0.5) * 0.6, Math.random() * 3, (Math.random() - 0.5) * 0.6);
+      g.add(r);
+    }
+    g.position.set(x, 0, z);
+    g.userData.z = z;
+    bilge.rocks.push(g);
+    bilge.group.add(g);
+  }
+  // A crew's den has no board (yet): only the shore where it always was.
+  bilge.group.visible = bilgeHere();
+}
+
+const atBilge = () => bilgeHere() && pirate.h < 0.05 && pirate.x > bilge.x0 - 0.8 && pirate.x < bilge.x0 + BW * BILGE.SQ + 0.8 && pirate.z < BILGE.Z0 + 1.8 && pirate.z > shoreZ();
+function bilgeEnter() {
+  bilge.on = true;
+  keys.clear();
+  Object.assign(pirate, { x: bilge.x0 + BW * BILGE.SQ / 2, z: BILGE.Z0 + 0.7 });   // at the top of the board, looking out over it
+  pirate.g.rotation.y = Math.PI;
+  $('intro').classList.add('off');
+  if (!G.bilgeSaid) { G.bilgeSaid = true; say('Bilge the shallows: three in a row clear, and the tide goes out with every good move', false, true); }
+}
+// The keys play the board, as in the real puzzle: the arrows (or WASD) move the cursor, Space swaps.
+function bilgeKey(key, e) {
+  if (key === 'escape') { bilge.on = false; return true; }
+  const mv = { arrowleft: [0, -1], a: [0, -1], arrowright: [0, 1], d: [0, 1], arrowup: [-1, 0], w: [-1, 0], arrowdown: [1, 0], s: [1, 0] }[key];
+  if (mv) { bilge.cur.r = Math.max(0, Math.min(BH - 1, bilge.cur.r + mv[0])); bilge.cur.c = Math.max(0, Math.min(BW - 2, bilge.cur.c + mv[1])); return true; }
+  if (key === ' ' || key === 'enter') { if (!e.repeat) bilgeSwap(); return true; }
+  return key === 'tab';
+}
+const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+function bilgeHover(x, y) {
+  ray.setFromCamera(new THREE.Vector2(x / innerWidth * 2 - 1, -y / innerHeight * 2 + 1), camera);
+  const p = new THREE.Vector3();
+  if (!ray.ray.intersectPlane(groundPlane, p)) return;
+  // The cursor's two squares either side of the pointer, as in the real puzzle.
+  const fc = BW - (p.x - bilge.x0) / BILGE.SQ, fr = (BILGE.Z0 - p.z) / BILGE.SQ;
+  bilge.cur.c = Math.max(0, Math.min(BW - 2, Math.round(fc - 1)));
+  bilge.cur.r = Math.max(0, Math.min(BH - 1, Math.floor(fr)));
+}
+const bilgeBusy = () => bilge.queue.length > 0;
+function bilgeSwap() {
+  if (bilgeBusy()) return;
+  const { r, c } = bilge.cur, b = bilge.board;
+  b.water = tide.water;
+  const m = b.swap(r, c);
+  if (!m.moved) {
+    // A crab won't budge: it does a little jig.
+    for (const bit of [b.grid[r][c], b.grid[r][c + 1]]) if (bit?.s === 'crab') { const mm = bilge.meshes.get(bit.id); if (mm) mm.userData.jig = 0.6; }
+    return;
+  }
+  bilge.queue.push(...m.stages);
+  bilge.holdT = 0;
+  const w = worth(m, tide.water);
+  tide.pump(w);
+  const nb = barrelsFor(m);
+  for (let i = 0; i < nb; i++) setTimeout(() => dredge(), 500 + i * 450);
+  const bits = [];
+  if (m.combo) bits.push(m.combo);
+  if (m.crabs) bits.push(m.crabs > 1 ? `${m.crabs} crabs up out of the water!` : 'A crab up out of the water!');
+  if (nb) bits.push(nb > 1 ? `${nb} powder barrels dredged up!` : 'A powder barrel dredged up!');
+  if (bits.length) say(`${bits.join(' ')}${w >= 3 ? ' The tide goes out' : ''}`);
+}
+// A powder barrel out of the shallows, rolled up the beach to the foot of the wall by a hole.
+const kegM = { wood: mat('#7a4a26', { map: woodTex }), hoop: mat('#2a2a2a', { metalness: 0.6, roughness: 0.5 }), fuse: mat('#d8c9a0') };
+function dredge() {
+  if (!bilgeHere()) return;
+  const live = bilge.barrels.filter((b) => !b.gone);
+  if (live.length >= BILGE.MAX_BARRELS) return;
+  const holes = wall.holes;
+  let x = 0;
+  for (let t = 0; t < 12; t++) {
+    const h = holes.length ? holes[rand(holes.length)] : null;
+    x = h ? holeX(h) + (Math.random() - 0.5) * 2.4 : (Math.random() - 0.5) * wall.W * S * 0.8;
+    if (live.every((b) => Math.abs(b.x - x) > 1.3)) break;
+  }
+  const z = -2.4 - Math.random() * 0.8;
+  const g = new THREE.Group();
+  const body = mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.62, 14), kegM.wood);
+  body.position.y = 0.31;
+  g.add(body);
+  for (const y of [0.1, 0.52]) { const h = mesh(new THREE.TorusGeometry(0.305, 0.022, 6, 18), kegM.hoop, false); h.rotation.x = Math.PI / 2; h.position.y = y; g.add(h); }
+  const fuse = mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.22, 5), kegM.fuse, false);
+  fuse.position.set(0.08, 0.7, 0); fuse.rotation.z = -0.4;
+  g.add(fuse);
+  const from = new THREE.Vector3(bilge.x0 + BW * BILGE.SQ / 2, 0.4, shoreZ() + 0.5);
+  g.position.copy(from);
+  scene.add(g);
+  const b = { g, x, z, landed: false, gone: false };
+  bilge.barrels.push(b);
+  tween(1.6, (t) => { g.position.set(from.x + (x - from.x) * t, Math.sin(t * Math.PI) * 2.2, from.z + (z - from.z) * t); g.rotation.x = t * 9; }, () => { g.position.set(x, 0, z); g.rotation.set(0, 0, 0); b.landed = true; });
+}
+// A raider coming by sets it off: everyone near is blown flat.
+function blowBarrel(b) {
+  b.gone = true;
+  scene.remove(b.g);
+  const at = new THREE.Vector3(b.x, 0.5, b.z);
+  burst(at, '#ffb21a', 30, 6);
+  burst(at, '#3a3a3a', 18, 3.5);
+  shake = 0.5;
+  const near = blastHits(b, raiders.filter((r) => !r.inside && r.state !== 'down' && r.state !== 'row' && r.state !== 'rowOff'));
+  near.forEach((r) => hit(r, new THREE.Vector3(b.x, 0, b.z), '#ffb21a'));
+  say(near.length > 1 ? `Boom! A powder barrel blew ${near.length} raiders flat!` : 'Boom! A powder barrel blew a raider flat!');
+}
+
+function bilgeTick(dt) {
+  bilge.group.visible = bilgeHere();
+  if (!bilgeHere()) { bilge.on = false; return; }
+  if (bilge.on && (carry || !atBilge())) bilge.on = false;
+  tide.tick(dt);
+  const b = bilge.board, sz = shoreZ();
+  b.water = tide.water;
+  b.odds = oddsFor(G.wave);
+  if (!bilge.shown) {
+    bilge.shown = b.snap();
+    for (let r = 0; r < BH; r++) for (let c = 0; c < BW; c++) { const bit = bilge.shown[r][c], m = bitMesh(bit); m.position.set(cellX(c), 0.07, cellZ(r)); bilge.pieces.add(m); bilge.meshes.set(bit.id, m); }
+  }
+  // A move a step at a time: what's cleared washes away, then the rest float up.
+  bilge.holdT += dt;
+  let moving = false;
+  for (const m of bilge.meshes.values()) if (m.userData.tz !== undefined && Math.abs(m.position.z - m.userData.tz) + Math.abs(m.position.x - m.userData.tx) > 0.02) moving = true;
+  if (bilge.queue.length && bilge.holdT > 0.18 && !moving) {
+    const st = bilge.queue.shift();
+    bilge.holdT = 0;
+    for (const id of st.cleared) {
+      const m = bilge.meshes.get(id);
+      if (!m) continue;
+      burst(m.position.clone().setY(0.3), '#dff3f6', 6, 1.6);
+      bilge.pieces.remove(m);
+      bilge.meshes.delete(id);
+    }
+    bilge.shown = st.grid;
+    const fresh = Array(BW).fill(0);
+    for (let r = 0; r < BH; r++) for (let c = 0; c < BW; c++) {
+      const bit = st.grid[r][c];
+      let m = bilge.meshes.get(bit.id);
+      if (!m) {
+        // New pieces wash in from the sea end, below the board, and float up into place.
+        m = bitMesh(bit);
+        m.position.set(cellX(c), 0.0, cellZ(BH + fresh[c]++));
+        bilge.pieces.add(m);
+        bilge.meshes.set(bit.id, m);
+      }
+      m.userData.tx = cellX(c); m.userData.tz = cellZ(r);
+    }
+  }
+  // Pieces slide to their squares; under the water, more slowly (as in the real puzzle), and bobbing.
+  const now = performance.now() / 1000;
+  for (const [id, m] of bilge.meshes) {
+    const tx = m.userData.tx ?? m.position.x, tz = m.userData.tz ?? m.position.z;
+    const wet = m.position.z < sz, sp = (wet ? 3.5 : 7) * dt;
+    const dx = tx - m.position.x, dz = tz - m.position.z, d = Math.hypot(dx, dz);
+    if (d > 1e-3) { const k = Math.min(1, sp / d); m.position.x += dx * k; m.position.z += dz * k; }
+    m.position.y = wet ? -0.015 + Math.sin(now * 2 + id) * 0.012 : 0.07;
+    if (m.userData.jig > 0) { m.userData.jig -= dt; m.rotation.y = -Math.PI / 2 + Math.sin(m.userData.jig * 40) * 0.4; } else m.rotation.y = -Math.PI / 2;
+  }
+  // The water over the board, its edge the sea's.
+  const end = BILGE.Z0 - BH * BILGE.SQ - 0.6, len = Math.max(0.01, sz - end);
+  bilge.water.scale.y = len;
+  bilge.water.position.set(bilge.x0 + BW * BILGE.SQ / 2, 0.06, end + len / 2);
+  bilge.water.visible = len > 0.02;
+  bilge.cursor.visible = bilge.on;
+  bilge.cursor.position.set((cellX(bilge.cur.c) + cellX(bilge.cur.c + 1)) / 2, 0, cellZ(bilge.cur.r));
+  // Rocks bared by the tide; the first time, say what they're for.
+  for (const g of bilge.rocks) g.visible = g.userData.z > sz + 0.1;
+  if (!G.rocksSaid && rocksBare(sz) > 2 && G.wave > 0) { G.rocksSaid = true; say('The tide\'s out: sharp rocks on the bare sand cut up raiders landing beyond them'); }
+  // Barrels: set off by a raider coming by.
+  for (const br of bilge.barrels) {
+    if (br.gone || !br.landed) continue;
+    if (raiders.some((r) => !r.inside && r.state !== 'down' && r.state !== 'row' && r.state !== 'rowOff' && Math.hypot(r.x - br.x, r.z - br.z) < BILGE.FUSE)) blowBarrel(br);
+  }
+  bilge.barrels = bilge.barrels.filter((br) => !br.gone);
+}
+function bilgePrompt() {
+  if (bilge.on) return `The shallows · arrows or mouse move · Space or click swaps · Esc: walk${bilgeBusy() ? '' : ''}`;
+  if (carry || !atBilge()) return '';
+  return 'Space: bilge the shallows (the tide goes out, baring sharp rocks the raiders have to cross)';
+}
+function bilgeReset() {
+  tide.reset();
+  bilge.on = false;
+  bilge.board = new Bilge(Math.random, oddsFor(0));
+  bilge.queue = [];
+  for (const m of bilge.meshes.values()) bilge.pieces.remove(m);
+  bilge.meshes.clear();
+  bilge.shown = null;
+  bilge.barrels.forEach((b) => scene.remove(b.g));
+  bilge.barrels = [];
+}
+
 function newGame() {
   if (guest()) return send('host', { t: 'again' });
   raiders.splice(0).forEach((r) => raiderOut(r, true)); boats.splice(0).forEach((b) => scene.remove(b.g));
@@ -3194,6 +3518,7 @@ function newGame() {
   Object.assign(G, { gold: 60, wave: 0, phase: 'build', phaseT: BUILD_SECS, toSpawn: 0, spawnT: 0, cannonT: 0, cannonShots: 0, aim: null, masters: 0, boarded: 0, bonked: 0, stolen: 0, turned: 0, waveTurned: 0, waveIn: 0, over: false, fairOver: false });
   fair.reset();
   swordReset();
+  bilgeReset();
   piles.forEach((p) => { p.letter = null; });
   newWall();
   // After the wall, so the first deals finish its holes; and shown, since the wall drew the crates empty.
@@ -3467,6 +3792,7 @@ addEventListener('keydown', (e) => {
   if ([' ', 'tab', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) e.preventDefault();
   // At the sword rack, the keys play the Swordfight board, as in the real puzzle.
   if (sword.on && !deco.on && !G.over && swordKey(key, e)) return;
+  if (bilge.on && !deco.on && !G.over && bilgeKey(key, e)) return;
   const arrow = { arrowleft: [0, -1], arrowright: [0, 1], arrowup: [-1, 0], arrowdown: [1, 0] }[key];
   const step = { a: [0, -1], d: [0, 1], w: [-1, 0], s: [1, 0] }[key];
   // Puzzle mode at the wall: WASD moves the piece a square (held down, it keeps going), the arrows
@@ -3530,6 +3856,7 @@ function mouseAt(z) {
 }
 renderer.domElement.addEventListener('mousemove', (e) => {
   if (deco.on) { decoMove(e); return; }
+  if (bilge.on) { bilgeHover(e.clientX, e.clientY); return; }
   ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1), camera);
   const p = new THREE.Vector3();
   // A rampart frame you're pointing at (the nearest, if one's in front of another), else the wall.
@@ -3556,6 +3883,7 @@ renderer.domElement.addEventListener('mousedown', (e) => {
   if (deco.on) { if (e.button === 2) drag = { x: e.clientX, y: e.clientY, moved: false, deco: e }; else decoClick(e); return; }
   if (e.button === 2) { drag = { x: e.clientX, y: e.clientY, moved: false }; return; }
   if (e.button !== 0 || G.over) return;
+  if (bilge.on) { bilgeHover(e.clientX, e.clientY); bilgeSwap(); return; }
   // Up on the rampart there's nothing to fit, so a click anywhere throws at the raider nearest it.
   // In puzzle mode a click only ever fits the piece (raiders show through the holes, so it used to throw),
   // and so does one on a spot the piece fits: a raider outside showing through that hole waits for Shift.
@@ -3661,6 +3989,7 @@ const aimFoe = () => (cursor && clickedFoe(cursor.x, cursor.y, 160)) || anyFoe()
 function act() {
   if (net.pending || net.asking) return;   // waiting to hear back about the last one
   if (!carry && atSword() && rack.pieces) return swordEnter();
+  if (!carry && atBilge()) return bilgeEnter();
   const f = focus();
   if (pirate.h > 0.3) {
     if (carry && onRampart() && aimFoe()) throwAt(aimFoe());
@@ -4210,7 +4539,9 @@ function makeRaider(look, id, x, z) {
   return r;
 }
 function spawnRaider() {
-  const x = (Math.random() - 0.5) * wall.W * S * 0.9;
+  let x = (Math.random() - 0.5) * wall.W * S * 0.9;
+  const b0 = bilge.x0 - 0.9, b1 = bilge.x0 + BW * BILGE.SQ + 0.9;
+  if (x > b0 && x < b1) x = x - b0 < b1 - x ? b0 : b1;
   const r = makeRaider([rand(3), rand(3), Math.random() < 0.5 ? 1 : 0, rand(3)], ++raiderSeq, x, BOAT_FROM);
   r.state = 'row';
   r.hole = pickHole(x);
@@ -4237,8 +4568,8 @@ function updateRaider(r, dt) {
   switch (r.state) {
     case 'row': {
       // Rowing in from the ship, then out onto the sand.
-      moving = !moveTo(r, r.x, BEACH, 2.8, dt);
-      if (!moving) { r.state = 'approach'; r.t = 0; r.z = BEACH + 0.6; }
+      moving = !moveTo(r, r.x, beachZ(), 2.8, dt);
+      if (!moving) { r.state = 'approach'; r.t = 0; r.z = beachZ() + 0.6; }
       break;
     }
     case 'rowOff': {
@@ -4247,7 +4578,12 @@ function updateRaider(r, dt) {
       break;
     }
     case 'approach': {
-      moving = !moveTo(r, passable(h) ? doorX(h) : hackX(h, r.slot), -1.15, 2.2, dt);
+      const rocky = !guest() && onRocks(r.z, shoreZ());
+      if (rocky) {
+        r.stamina -= BILGE.ROCK_TOLL * 2.2 * BILGE.ROCK_SLOW * dt;
+        if ((r.cutT = (r.cutT || 0) - dt) <= 0) { r.cutT = 0.45; burst(new THREE.Vector3(r.x, 0.3, r.z), '#b8322a', 3, 1.2); }
+      }
+      moving = !moveTo(r, passable(h) ? doorX(h) : hackX(h, r.slot), -1.15, 2.2 * (rocky ? BILGE.ROCK_SLOW : 1), dt);
       if (!moving) { r.state = passable(h) ? 'climb' : 'attack'; r.t = 0; }
       break;
     }
@@ -4343,7 +4679,7 @@ function updateRaider(r, dt) {
       // Back down the beach to their boat, and away (with no boat, they just go).
       r.inside = false;
       const b = r.boat && boats.includes(r.boat) ? r.boat.g.position : null;
-      moving = !moveTo(r, b ? b.x : r.x, b ? b.z + 0.6 : SHORE, 2.4, dt);
+      moving = !moveTo(r, b ? b.x : r.x, b ? b.z + 0.6 : shoreZ(), 2.4, dt);
       if (!moving) { if (b) { r.state = 'rowOff'; r.t = 0; r.x = b.x; r.z = b.z; } else r.gone = true; }
       break;
     }
@@ -4353,7 +4689,7 @@ function updateRaider(r, dt) {
       const g = r.m.g;
       v.y -= 14 * dt;
       r.x = Math.max(-bounds.x, Math.min(bounds.x, r.x + v.x * dt));
-      r.z = r.outside ? Math.max(SHORE, Math.min(-0.8, r.z + v.z * dt)) : Math.max(0.6, Math.min(bounds.z1, r.z + v.z * dt));
+      r.z = r.outside ? Math.max(shoreZ(), Math.min(-0.8, r.z + v.z * dt)) : Math.max(0.6, Math.min(bounds.z1, r.z + v.z * dt));
       g.position.y = Math.max(0, g.position.y + v.y * dt);
       if (g.position.y <= 0 && v.y < 0) { v.x *= 0.4; v.z *= 0.4; v.y = Math.abs(v.y) > 3 ? -v.y * 0.3 : 0; }
       if (g.position.y > 0.05) g.rotation.y += dt * 10;
@@ -4837,7 +5173,7 @@ function prompt() {
   else if (loose) t = carry ? `${f.kind === 'pile' || target?.ok ? t + ' · ' : ''}Shift or click: throw the ${carry.letter} at the raider!` : 'A raider is in the den! Grab a piece to throw at them';
   else if (carry && outsideFoe() && !target?.ok) t += ` · Shift or click a raider: lob it over the wall`;
   if (outside()) t = !carry ? 'Out on the beach · back in through the gate' : loose ? `Shift or click: throw the ${carry.letter} at the raider!` : `Out on the beach · back in through the gate to fit the ${carry.letter}`;
-  t = swordPrompt() || t;
+  t = bilgePrompt() || swordPrompt() || t;
   const el = $('prompt');
   if (el.textContent !== t) el.textContent = t;
   $('gunhelp').classList.toggle('on', onGunDeck());
@@ -5714,7 +6050,7 @@ function update(dt) {
       if (d < min && d > 0) { nx = o.x + dx / d * min; nz = o.z + dz / d * min; }
     }
     nx = Math.max(-bounds.x, Math.min(bounds.x, nx));
-    nz = Math.max(pirate.h > 1 ? (gd ? gd.z0 + 0.2 : -0.3) : SHORE + 0.4, Math.min(bounds.z1, nz));
+    nz = Math.max(pirate.h > 1 ? (gd ? gd.z0 + 0.2 : -0.3) : shoreZ() + 0.4, Math.min(bounds.z1, nz));
     if (pirate.h <= 1) [nx, nz] = throughGate(ox, oz, nx, nz);
     // Up and down the stairs, but no walking into their side or off the edge of the rampart.
     const pad = pirate.h < 0.05 ? 0.28 : 0;
@@ -5760,6 +6096,7 @@ function update(dt) {
 
   if (!G.over) updateGunDeck(dt);
   swordTick(dt);
+  bilgeTick(dt);
   if (guest()) {
     // The host runs the raiders; here they just follow what it says.
     if (G.phase !== 'wave' && !G.over) G.phaseT = Math.max(0, G.phaseT - dt);
@@ -5842,6 +6179,17 @@ function update(dt) {
     tilt += (0.08 - tilt) * swordView;
     const y0 = Math.atan2(Math.sin(yaw), Math.cos(yaw));   // turned to face the stack
     yaw = y0 + (Math.PI / 2 - y0) * swordView;
+  }
+  bilgeView += ((bilge.on ? 1 : 0) - bilgeView) * Math.min(1, dt * 3);
+  if (bilgeView > 0.001) {
+    const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect);
+    // (looking a little seaward of the middle, so the water rows sit clear of the key help at the bottom)
+    L2.set(bilge.x0 + BW * BILGE.SQ / 2, 0, BILGE.Z0 - BH * BILGE.SQ / 2 - 1.3);
+    look.lerp(L2, bilgeView);
+    dist += (Math.max((BH * BILGE.SQ / 2 + 2.2) / Math.tan(vh), (BW * BILGE.SQ / 2 + 1.5) / Math.tan(hh)) * view.zoom - dist) * bilgeView;
+    tilt += (1.3 - tilt) * bilgeView;
+    const y0 = Math.atan2(Math.sin(yaw), Math.cos(yaw));
+    yaw = y0 + ((y0 >= 0 ? Math.PI : -Math.PI) - y0) * bilgeView;
   }
   v3.set(Math.sin(yaw) * Math.cos(tilt), Math.sin(tilt), Math.cos(yaw) * Math.cos(tilt)).multiplyScalar(dist).add(look);
   camAt.lerp(v3, Math.min(1, dt * 3));
@@ -6057,5 +6405,6 @@ requestAnimationFrame(frame);
 
 // For poking at it from the console.
 window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, swordReward, swordBreak, lumber, toLumber, repairAll, newGame, raiders, G, get carry() { return carry; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+  bilge, tide, bilgeEnter, bilgeSwap, dredge,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };

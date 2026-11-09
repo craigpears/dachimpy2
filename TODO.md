@@ -108,6 +108,14 @@ the site (`.assetsignore` skips `*.md`).
   opening every time you work near it inside; throwing from the beach being too easy a way to
   thin the raiders out. Not tried with a crew (a crewmate by the gate opens it for you too).
 
+- **Bilging the shallows (9 Nov), not yet tried by the user.** (RULES.md, "Bilging the
+  shallows".) Watch for: the board being hard to find (it's out on the beach to the right of the
+  gun tower; nothing points you to it yet); the pieces readable from where the camera puts it; the
+  tide coming in too fast or too slow (a row every 30 seconds), and being worth bilging at all;
+  the rocks too harsh or too soft (a point of stamina a metre, up to 6 m); barrels too strong;
+  the sea coming in close at high tide making the raids feel harder for anyone who'd rather not
+  bilge.
+
 - **The longer calm between waves (8 Nov), not yet tried by the user.** 40 seconds now (it was
   20), after being overwhelmed by wave 8; the raids stay as big. Watch for: still overwhelmed late
   on (then perhaps longer still, or longer only as the waves climb), or the calm dragging early on.
