@@ -577,6 +577,15 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     the oars and sails, Bilge at the locks, Gunnery for the guns, Navigation for the hidden ways).
     A first race could be a demo, one player, with no puzzling behind it, but that's the
     direction. Not too wacky: "I don't think I want to go too Wacky Races".
+    **Not just faster (9 Nov):** a fitting that only makes her quicker isn't what the user wants
+    ("rather than just going faster, which I'm not really a fan of"); one that opens up water the
+    others can't use is: "a bit more of a tactical ship". A calm patch where only oars move her
+    at pace is that kind (as the shallow draught is over sandbanks). But not a ship without guns:
+    gunless makes sense in a race, "but I'm not sure how that makes sense in the broader, bigger
+    world. Like, I don't really want a ship without guns." (Proposed, to settle with the user:
+    sweeps, the long oars real warships ran out through their ports in a calm. Every ship keeps
+    her guns, but while the sweeps are out the guns at those ports can't fire, so in a calm you
+    choose, moment to moment, to row or to fight.)
 
 For now the den is the first version, and that works.
 
