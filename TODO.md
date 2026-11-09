@@ -138,7 +138,10 @@ the site (`.assetsignore` skips `*.md`).
   carpentry puzzle on the ship seem a bit off. Like, why is the tool tray different than on land?
   ... It just felt a bit weird and off." The pieces, the tray they're offered in and the way you
   take and fit them should be the same as at the den's wall, so it's the one Carpentry wherever
-  you play it. (What exactly felt off beyond the tray: to pin down with the user.)
+  you play it. The pieces showed twice, on the crate on deck and in the 1, 2, 3 tray along the
+  bottom ("why have you got it twice"), and the ship's controls stayed up while you patched:
+  "simplify. It's a very cluttered user interface. Just simplify it, standardize it." One tray,
+  as ashore, and nothing of the sailing bar while you patch.
 
 ## Needs a playtest to pin down
 
