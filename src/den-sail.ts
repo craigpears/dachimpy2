@@ -47,6 +47,10 @@ export const SAIL = {
   WAKE: 0.5,
   /** Rocks on the board: clumps of one to three squares. */
   CLUMPS: 13,
+  /** Her guns, one each side (see Guns): how many squares a shot carries, and the seconds to load
+      again after firing. */
+  RANGE: 3,
+  RELOAD: 3,
 } as const;
 
 /** Across and out for each way she can face. */
@@ -315,4 +319,42 @@ export class Helm {
     this.cur = { m, from: { ...this.pose }, to, bump };
     out.push({ kind: 'move', i: this.slot, m, from: { ...this.pose }, to: { ...to }, bump });
   }
+}
+
+/* Her guns (the user, 9 Nov: "in Puzzle Pirates, the sloop can shoot both sides, so a gun on each,
+   gun port on each side, so you can go along and shoot the rocks"). Not on a token, as in Battle
+   Navigation, but whenever you fire, as she sails: she never stops moving, so it's your timing
+   that brings a shot on ("you have to time it"). A shot goes straight out of that side, up to
+   RANGE squares, and stops at the first rock. */
+
+/** A side of her: port (her left) or starboard (her right). */
+export type Side = 'L' | 'R';
+
+/** A shot out of that side from where she is now (see Helm.now: mid-move counts from the square
+    and heading she's nearest): the squares it passes over, and the rock it hits, if any. */
+export function broadside(sea: Sea, at: { c: number; r: number; a: number }, side: Side): { cells: [number, number][]; hit: [number, number] | null } {
+  const d = (((Math.round(at.a) + (side === 'R' ? 1 : 3)) % 4) + 4) % 4;
+  const c0 = Math.round(at.c), r0 = Math.round(at.r), cells: [number, number][] = [];
+  for (let k = 1; k <= SAIL.RANGE; k++) {
+    const c = c0 + DC[d] * k, r = r0 + DR[d] * k;
+    cells.push([c, r]);
+    if (sea.isRock(c, r)) return { cells, hit: [c, r] };
+  }
+  return { cells, hit: null };
+}
+
+/** Her two guns: loaded, or loading again after a shot. */
+export class Guns {
+  /** Seconds till each is loaded again (0: loaded). */
+  wait: Record<Side, number> = { L: 0, R: 0 };
+  ready(side: Side): boolean { return this.wait[side] <= 1e-9; }
+  /** Fire it, if it's loaded. */
+  fire(side: Side): boolean {
+    if (!this.ready(side)) return false;
+    this.wait[side] = SAIL.RELOAD;
+    return true;
+  }
+  /** How loaded it is, 0 just fired to 1 ready. */
+  loaded(side: Side): number { return 1 - Math.max(0, this.wait[side]) / SAIL.RELOAD; }
+  tick(dt: number) { for (const k of ['L', 'R'] as Side[]) this.wait[k] = Math.max(0, this.wait[k] - dt); }
 }

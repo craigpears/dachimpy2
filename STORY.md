@@ -87,7 +87,8 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    kind of siege". And you really sail there, on a board in 3D, putting in forward, left and
    right, past rocks, the beach coming up as you land (▶ a first go is built: once the siege is
    over there's an old sloop at anchor in the cove; board her, drop a pin and she sails there on
-   Battle Navigation's moves, or steer her yourself). And not necessarily straight there: the captain drops a pile of scrolls (maps
+   Battle Navigation's moves, or steer her yourself; she has a gun each side to fire at the rocks
+   as you go). And not necessarily straight there: the captain drops a pile of scrolls (maps
    to an island to forage, the capybara rescue, plans for the gun platform), and you can stay
    home and do up the den first. Or sneak onto his island for some of his buried loot, without a
    fight; every theft angers them more, and that's what brings the raids back.

@@ -13,7 +13,7 @@ import { drawStencil, drawBlade, PALETTE } from './den-sword-draw.js';
 import { Bilge, W as BW, H as BH } from './bilge.js';
 import { KEYS as VIEW_KEYS, nextHole, holeKey, quarters, centreOn, clampTo, nextBoard, arrowStep } from './den-carp-view.js';
 import { afterWave, countingDown } from './den-raids.js';
-import { SAIL, Sea, Helm } from './den-sail.js';
+import { SAIL, Sea, Helm, Guns, broadside } from './den-sail.js';
 import { MAP, mapAfter, canPickUp, canRead, RUMOUR, WAYS, X_AT } from './den-map.js';
 import { twoCourses, isHigh, gateTop, lowMiddle, isSky } from './den-wall.js';
 import { BILGE, Tide, HIGH, LOW, shoreAt, worth, barrelsFor, onRocks, rocksBare, oddsFor, blastHits } from './den-bilge.js';
@@ -4198,11 +4198,12 @@ function cineTick(dt) {
    Navigation's moves, a turn at a time (src/den-sail.ts). W, A, D put in a forward, left or right
    yourself, played ahead of the pilot's. The board's squares are there but not drawn; the square
    you're pointing at shows faintly, and the course ahead is dotted on the water. Rocks stand out
-   of the sea as stacks (you can see them from the den too). Sail back to her mooring to go ashore. */
+   of the sea as stacks (you can see them from the den too). Sail back to her mooring to go ashore.
+   She has a gun each side: Q fires the port gun, E the starboard, as she sails, at the rocks. */
 const SEA_X0 = -SAIL.COLS * SAIL.CELL / 2;
 const seaX = (c) => SEA_X0 + (c + 0.5) * SAIL.CELL, seaZ = (r) => SAIL.Z0 - (r + 0.5) * SAIL.CELL;
 const SLOOP_DECK = 0.75;
-const sail = { on: false, sea: new Sea(9), helm: null, g: null, rocks: null, pin: null, hover: null, dots: [], sig: '', hudSig: '', seen: false, heel: 0, bumpT: 0 };
+const sail = { on: false, sea: new Sea(9), helm: null, g: null, rocks: null, pin: null, hover: null, dots: [], sig: '', hudSig: '', seen: false, heel: 0, bumpT: 0, guns: new Guns(), rockAt: new Map() };
 sail.helm = new Helm(sail.sea);
 let sailView = 0;
 // Her, smaller than their ship: one mast, a square sail and a topsail, a bowsprit, a tiller at the
@@ -4241,6 +4242,18 @@ function sloopMesh() {
   const fl = flagpole(0.6, flagMat);
   fl.position.set(0.35, SLOOP_DECK + 4.15, 0);
   g.add(fl);
+  // A gun each side, a smaller copy of the gun tower's, muzzle out over her side (port is her left).
+  g.userData.guns = {};
+  // Staggered, so they read as two guns and not one beam across her.
+  for (const [side, x, z] of [['L', -0.05, -0.5], ['R', -0.7, 0.5]]) {
+    const gun = gunMesh();
+    gun.scale.setScalar(0.6);
+    gun.position.set(x, SLOOP_DECK, z);
+    gun.rotation.y = side === 'L' ? 0 : Math.PI;
+    gun.userData.z = z;
+    g.add(gun);
+    g.userData.guns[side] = gun;
+  }
   g.rotation.order = 'YXZ';   // (turned to her heading, then heeled over about her own length)
   return g;
 }
@@ -4248,8 +4261,10 @@ function sloopMesh() {
 function seaRocks() {
   const g = new THREE.Group();
   for (const id of sail.sea.rocks) {
-    const [c, r] = id.split(',').map(Number), x = seaX(c), z = seaZ(r);
-    for (let i = 0; i < 3; i++) g.add(rock(x + (Math.random() - 0.5) * 2.2, 0.2 + Math.random() * 0.4, z + (Math.random() - 0.5) * 2.2, 0.9 + Math.random() * 0.8));
+    const [c, r] = id.split(',').map(Number), x = seaX(c), z = seaZ(r), here = [];
+    for (let i = 0; i < 3; i++) here.push(rock(x + (Math.random() - 0.5) * 2.2, 0.2 + Math.random() * 0.4, z + (Math.random() - 0.5) * 2.2, 0.9 + Math.random() * 0.8));
+    g.add(...here);
+    sail.rockAt.set(id, here);
   }
   scene.add(g);
   return g;
@@ -4307,7 +4322,41 @@ function ashore() {
 function sailReset() {
   if (sail.on) { sail.on = false; document.body.classList.remove('sailing'); }
   sail.helm = new Helm(sail.sea);
+  sail.guns = new Guns();
   sailView = 0;
+}
+// A shot out of her side, from where she is right now: it flies straight out and comes down in the
+// sea, or on the first rock in its way (src/den-sail.ts, broadside). Then that gun loads again.
+const SIDE_NAME = { L: 'port', R: 'starboard' };
+function sailFire(side) {
+  if (!sail.guns.fire(side)) return toast(`The ${SIDE_NAME[side]} gun's still loading`, true);
+  const { cells, hit } = broadside(sail.sea, sail.helm.now(), side), gun = sail.g.userData.guns[side];
+  sail.g.updateMatrixWorld(true);
+  const from = gun.localToWorld(V3(0, 0.3, -0.85)), end = cells[cells.length - 1];
+  const to = V3(seaX(end[0]), hit ? 1 : 0.05, seaZ(end[1]));
+  burst(from, '#ffcf6a', 12, 3);
+  burst(from, '#cfc6b8', 8, 1.5);
+  shake = Math.max(shake, 0.15);
+  const ball = mesh(new THREE.SphereGeometry(0.13, 10, 8), mat('#3a3f45', { metalness: 0.6 }));
+  scene.add(ball);
+  const d = from.distanceTo(to);
+  tween(0.35 + d * 0.03, (u) => {
+    ball.position.lerpVectors(from, to, u);
+    ball.position.y += Math.sin(u * Math.PI) * (0.8 + d * 0.08);
+  }, () => {
+    scene.remove(ball);
+    if (!hit) { burst(to, '#e6f3f6', 18, 3.5); burst(to, '#9cc8d4', 10, 2.5); return; }
+    burst(to, '#ffb85a', 14, 4);
+    burst(to, '#6b5c50', 18, 4);
+    burst(to, '#e6f3f6', 8, 2.5);
+    shake = Math.max(shake, 0.2);
+    // The stacks there shudder with the hit.
+    for (const r of sail.rockAt.get(`${hit[0]},${hit[1]}`) ?? []) {
+      const x0 = r.position.x, z0 = r.position.z;
+      tween(0.4, (u) => { const k = Math.sin(u * Math.PI * 6) * 0.12 * (1 - u); r.position.x = x0 + k; r.position.z = z0 - k; }, () => { r.position.x = x0; r.position.z = z0; });
+    }
+    toast('A hit on the rocks!');
+  });
 }
 // The square of the board under the pointer (fractional: the middle of a square is whole).
 function seaCellAt(x, y) {
@@ -4328,6 +4377,7 @@ function sailHover(x, y) {
 function sailKey(key) {
   const m = { w: 'F', arrowup: 'F', a: 'L', arrowleft: 'L', d: 'R', arrowright: 'R' }[key];
   if (m) { if (!sail.helm.put(m)) toast('That\'s a turn\'s worth put in already', true); return; }
+  if (key === 'q' || key === 'e') return sailFire(key === 'q' ? 'L' : 'R');
   if (key === 's' || key === 'arrowdown' || key === 'backspace') sail.helm.unput();
   else if (key === 'escape') { sail.helm.stop(); toast('Pin pulled up: she\'ll stop when this turn\'s done'); }
   else if (key === 'h') { sail.helm.drop(SAIL.HOME.c, SAIL.HOME.r); if (sail.helm.pin) toast('Heading home to the cove'); }
@@ -4345,19 +4395,22 @@ function sailPrompt() {
   if (atHome() && h.slot < 0 && !h.next().length) return 'At her mooring · Space: go ashore · click the sea to drop a pin';
   if (h.pin) return 'Under way to the pin';
   if (h.slot >= 0) return 'Under way';
-  return 'Click the sea to drop a pin, or put in moves with W A D';
+  return 'Click the sea to drop a pin, or put in moves with W A D · Q E: fire';
 }
 // This turn's tokens (the one being sailed lit) and the next turn's, yours in gold.
 function sailHud() {
   const h = sail.helm, mineN = h.mine.length;
   const now = h.slot >= 0 ? h.turn : [], next = h.next();
-  const sig = `${now.join('')}|${h.slot}|${next.join('')}|${mineN}`;
+  const load = (side) => Math.round(sail.guns.loaded(side) * 20);
+  const sig = `${now.join('')}|${h.slot}|${next.join('')}|${mineN}|${load('L')}|${load('R')}`;
   if (sig === sail.hudSig) return;
   sail.hudSig = sig;
   const toks = (list, cls) => Array.from({ length: SAIL.SLOTS }, (_, i) => (list[i] ? `<b class="tok ${cls(i)}">${TOK[list[i]]}</b>` : '<b class="tok empty"></b>')).join('');
-  $('sailhud').innerHTML = `<div class="turns"><div class="turn"><span>This turn</span>${toks(now, (i) => (i < h.slot ? 'done' : i === h.slot ? 'now' : ''))}</div>`
-    + `<div class="turn"><span>Next</span>${toks(next, (i) => (i < mineN ? 'mine' : ''))}</div></div>`
-    + '<div class="help">Click the sea: drop a pin · <kbd>W</kbd> <kbd>A</kbd> <kbd>D</kbd>: forward, left, right yourself · <kbd>S</kbd>: take one back · <kbd>Esc</kbd>: pull up the pin · <kbd>H</kbd>: head home · wheel: zoom</div>';
+  // Her guns either side of the tokens, port on the left: lit when loaded, filling as they load.
+  const gun = (side, k) => `<div class="gun${sail.guns.ready(side) ? ' ready' : ''}"><kbd>${k}</kbd>${side === 'L' ? 'Port' : 'Starboard'}<i style="width:${load(side) * 5}%"></i></div>`;
+  $('sailhud').innerHTML = `<div class="turns">${gun('L', 'Q')}<div class="turn"><span>This turn</span>${toks(now, (i) => (i < h.slot ? 'done' : i === h.slot ? 'now' : ''))}</div>`
+    + `<div class="turn"><span>Next</span>${toks(next, (i) => (i < mineN ? 'mine' : ''))}</div>${gun('R', 'E')}</div>`
+    + '<div class="help">Click the sea: drop a pin · <kbd>W</kbd> <kbd>A</kbd> <kbd>D</kbd>: forward, left, right yourself · <kbd>S</kbd>: take one back · <kbd>Q</kbd> <kbd>E</kbd>: fire port, starboard · <kbd>Esc</kbd>: pull up the pin · <kbd>H</kbd>: head home · wheel: zoom</div>';
 }
 function sailTick(dt) {
   sail.rocks ||= seaRocks();
@@ -4373,6 +4426,16 @@ function sailTick(dt) {
       if (e.kind === 'arrive' && atHome()) toast('Back at her mooring: Space to go ashore');
     }
     if (sail.bumpT > 0 && (sail.bumpT -= dt) <= 0) { shake = 0.3; toast('Bump! Rocks', true); }
+    sail.guns.tick(dt);
+  }
+  // A gun that's fired kicks back in and runs out again as it's loaded, smoking at first.
+  for (const side of ['L', 'R']) {
+    const gun = sail.g.userData.guns[side], u = sail.guns.loaded(side);
+    gun.position.z = gun.userData.z * (1 - 0.55 * (1 - u) ** 2);
+    if (u < 0.6 && (gun.userData.smokeT = (gun.userData.smokeT ?? 0) - dt) < 0) {
+      gun.userData.smokeT = 0.3;
+      burst(gun.localToWorld(V3(0, 0.32, -0.8)), '#7d7873', 2, 0.5);
+    }
   }
   // Her, riding the swell, heeling into her turns.
   const t = performance.now() / 1000, p = h.now(), turning = h.cur && h.cur.m !== 'F' && !h.cur.bump && h.t < SAIL.MOVE;

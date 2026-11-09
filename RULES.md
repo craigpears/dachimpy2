@@ -161,6 +161,17 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     off the board goes to the nearest open water. W, A and D put in a forward, left or right
     yourself, played ahead of the pilot's (in gold; up to a turn's worth ahead); S takes one back;
     Esc pulls up the pin; H heads home. A turn under way always finishes.
+  - **Her guns (9 Nov):** a gun each side, as on Puzzle Pirates' sloop ("a gun on each, gun port
+    on each side, so you can go along and shoot the rocks"): smaller copies of the gun tower's,
+    staggered on her deck, muzzles out over her sides. Q fires the port gun (her left), E the
+    starboard, whenever you like as she sails: not on a token as in Battle Navigation, since she's
+    always moving, so it's your timing that brings the shot on ("you have to time it"). A shot
+    goes straight out of that side from the square and heading she's nearest, up to three
+    squares, and stops at the first rock: a burst of rock chips and spray, the stacks shudder, "A
+    hit on the rocks!"; otherwise it splashes down. The gun kicks back, smokes, and runs out again
+    as it loads, three seconds; the two guns load apart. Shown either side of the tokens, lit when
+    loaded and filling as they load. The rocks don't break (as in Puzzle Pirates). A first go:
+    loading them by Gunnery, and things worth shooting that move, are IDEAS.md ("Gunnery at sea").
   - **Ashore:** sail back to her mooring and Space puts you on the beach beside her.
   - Alone only for now (no crews at sea yet). No tokens to earn yet, no destinations: those are
     IDEAS.md ("Sailing between places, for real"). Rules: `src/den-sail.ts`.

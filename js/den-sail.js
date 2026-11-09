@@ -40,6 +40,10 @@ export const SAIL = {
     WAKE: 0.5,
     /** Rocks on the board: clumps of one to three squares. */
     CLUMPS: 13,
+    /** Her guns, one each side (see Guns): how many squares a shot carries, and the seconds to load
+        again after firing. */
+    RANGE: 3,
+    RELOAD: 3,
 };
 /** Across and out for each way she can face. */
 const DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
@@ -331,4 +335,34 @@ export class Helm {
         this.cur = { m, from: { ...this.pose }, to, bump };
         out.push({ kind: 'move', i: this.slot, m, from: { ...this.pose }, to: { ...to }, bump });
     }
+}
+/** A shot out of that side from where she is now (see Helm.now: mid-move counts from the square
+    and heading she's nearest): the squares it passes over, and the rock it hits, if any. */
+export function broadside(sea, at, side) {
+    const d = (((Math.round(at.a) + (side === 'R' ? 1 : 3)) % 4) + 4) % 4;
+    const c0 = Math.round(at.c), r0 = Math.round(at.r), cells = [];
+    for (let k = 1; k <= SAIL.RANGE; k++) {
+        const c = c0 + DC[d] * k, r = r0 + DR[d] * k;
+        cells.push([c, r]);
+        if (sea.isRock(c, r))
+            return { cells, hit: [c, r] };
+    }
+    return { cells, hit: null };
+}
+/** Her two guns: loaded, or loading again after a shot. */
+export class Guns {
+    /** Seconds till each is loaded again (0: loaded). */
+    wait = { L: 0, R: 0 };
+    ready(side) { return this.wait[side] <= 1e-9; }
+    /** Fire it, if it's loaded. */
+    fire(side) {
+        if (!this.ready(side))
+            return false;
+        this.wait[side] = SAIL.RELOAD;
+        return true;
+    }
+    /** How loaded it is, 0 just fired to 1 ready. */
+    loaded(side) { return 1 - Math.max(0, this.wait[side]) / SAIL.RELOAD; }
+    tick(dt) { for (const k of ['L', 'R'])
+        this.wait[k] = Math.max(0, this.wait[k] - dt); }
 }

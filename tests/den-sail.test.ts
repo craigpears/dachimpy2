@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SAIL, Sea, Helm, path, poseAt, type Move, type Pose } from '../src/den-sail';
+import { SAIL, Sea, Helm, Guns, broadside, path, poseAt, type Move, type Pose } from '../src/den-sail';
 
 const clearSea = () => { const s = new Sea(1); s.rocks.clear(); return s; };
 const run = (h: Helm, secs: number, step = 0.05) => { const ev = []; for (let t = 0; t < secs; t += step) ev.push(...h.tick(step)); return ev; };
@@ -157,5 +157,40 @@ describe('sailing: the turns ("left, pauses, right, pauses, forward, forward", 9
     run(h, 20);
     expect(h.pose.r).toBe(SAIL.SLOTS);
     expect(h.idle()).toBe(true);
+  });
+});
+
+describe('sailing: her guns, one each side (9 Nov)', () => {
+  it('a shot goes out of her right side, or her left, as she faces', () => {
+    const s = clearSea(), at = { c: 5, r: 5, a: 0 };   // facing out to sea: her right is across to +c
+    expect(broadside(s, at, 'R').cells).toEqual([[6, 5], [7, 5], [8, 5]]);
+    expect(broadside(s, at, 'L').cells).toEqual([[4, 5], [3, 5], [2, 5]]);
+    expect(broadside(s, { c: 5, r: 5, a: 1 }, 'R').cells[0]).toEqual([5, 4]);   // facing right: her right's back to the cove
+  });
+
+  it(`"go along and shoot the rocks": a shot stops at the first rock in its way`, () => {
+    const s = clearSea();
+    s.rocks.add('7,5'); s.rocks.add('8,5');
+    expect(broadside(s, { c: 5, r: 5, a: 0 }, 'R')).toEqual({ cells: [[6, 5], [7, 5]], hit: [7, 5] });
+    expect(broadside(s, { c: 5, r: 5, a: 0 }, 'L').hit).toBeNull();
+  });
+
+  it('mid-move, it fires from the square and the way she is nearest', () => {
+    const s = clearSea();
+    s.rocks.add('8,6');
+    expect(broadside(s, { c: 5.1, r: 5.7, a: 0.2 }, 'R').hit).toEqual([8, 6]);
+    expect(broadside(s, { c: 5, r: 5, a: -0.8 }, 'R').cells[0]).toEqual([5, 6]);   // turned left from facing out: facing left
+  });
+
+  it('a gun has to load again after a shot; the other side is ready all the same', () => {
+    const g = new Guns();
+    expect(g.fire('L')).toBe(true);
+    expect(g.fire('L')).toBe(false);
+    expect(g.fire('R')).toBe(true);
+    g.tick(SAIL.RELOAD - 0.1);
+    expect(g.ready('L')).toBe(false);
+    expect(g.loaded('L')).toBeGreaterThan(0.9);
+    g.tick(0.1);
+    expect(g.fire('L')).toBe(true);
   });
 });
