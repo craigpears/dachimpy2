@@ -601,6 +601,16 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     wind's shown, how often it drops or turns, and how that sits with Battle Navigation's moves
     and the trade winds: to shape with the user. Goes with "Weather and time of day", under
     landscapes.)
+    **Big ships hit hard, small ships mend fast (9 Nov):** a way to give big and small ships each a
+    purpose. A big ship has more cannons, but the only control you really have is to "fire a full
+    broadside": far more effective against medium and big ships. Against a small ship it's
+    overkill: it's only dazed, "they do a quick puzzle and they're off and away again. And you've
+    just ... used an entire volley to take out a tiny ship." So a small ship's strength is
+    survivability: "they don't have the firepower, but they're fixable", a quick patch (Carpentry,
+    as her deck patch is today) and she's away, or at worst she's knocked down to a raft rather
+    than sunk. A big ship's holes are bigger and slower to patch. (How a broadside is loaded and
+    fired, what "a raft" means in play, and how this sits with "Gunnery with real aim" and
+    "Dazed, not damaged" in RULES.md: to shape with the user.)
 
 For now the den is the first version, and that works.
 
