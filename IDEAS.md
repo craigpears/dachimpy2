@@ -44,6 +44,27 @@ gates and find the buried treasure, and dig it up with the treasure hauling puzz
 and sweet, not a long expedition. In the bigger picture, follow the spirit of Puzzle Pirates:
 more things you go and do as a group activity.
 
+- **A map that sends you somewhere, and a reason to fight (9 Nov):** a quest hints "I heard there's
+  some treasure in the inn": go dig it up. At the inn (or someone's house) a mining-style puzzle
+  digs up the ground, and the treasure's owner, snoozing there minding his own business (the
+  user's "Down Off"; name to check), comes out: "Oi, what are you doing with my treasure?" (or you
+  challenge him first). That's a Rumble, with animated punches going back and forth between the
+  two little avatars each time you send one.
+
+## Side quests that leave friends about the den (9 Nov)
+
+Little side quests, like rescuing a capybara by dredging out a reef (a friend's idea). The friend
+you rescue then hangs around your den, so finished quests add up into a den full of characters.
+
+## Raiding other dens (9 Nov, eventually a crew thing)
+
+- **Go raiding:** a group of you jump out of the ship and storm up the beach to raid or loot
+  another den, an NPC's or a real player's, "really piratey". Something like a blockade or
+  pillaging board to get there. A competitive side too.
+- **No whales:** Puzzle Pirates suffers from people accumulating things for years. Not
+  necessarily a full reset every few weeks (a game of Factorio lasts weeks, then starts over), but
+  something that restores the natural balance. (Whether things persist at all: to work out.)
+
 ## Grades for the layers behind a hole
 
 Nailing junk pieces on behind a mended hole should reward good work, the way the hole does:
@@ -181,6 +202,20 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     something, and that's what gets you like a nice progression into seafaring." (Goes with the
     pet Kraken, and the den becoming more ship-based.)
 - **Keep it democratised:** everyone gets a turn at the fun jobs (see the principle above).
+- **More to do at sea, for a real proof of concept (9 Nov, "more than just a tiny mini game"):**
+  - **A sailing puzzle:** hijack one of the boats on the shore (the tiniest thing with sails, a
+    little sloop, rather than a rowboat) and sail or rig it out.
+  - **Blockades and Atlantis in 3D:** the den should show how they'd work, with adventures to set
+    off on from the beach. Ships carry a few rowboats to launch attacks from, as Atlantis does;
+    grapple an enemy ship and send the soldiers over.
+  - **Pillaging with choices:** board them, or fire round, grape or chain shot, each doing
+    something different. Terrorise a convoy: sink one or two and your infamy grows, so the rest
+    are more likely to surrender. A sunk ship pays less, but builds infamy.
+  - **Everyone on the board:** a few people sail, the rest crew the rowboats or aim the little
+    guns, so everyone contributes. Pets helping too, though 40 pets on a sea monster hunt needs
+    rethinking.
+  - **Ship types with real trade-offs:** harder to sink against faster, and so on. Today it's
+    the big war brig or nothing, and a fast ship on a blockade board just gets sunk.
 
 For now the den is the first version, and that works.
 
@@ -195,6 +230,10 @@ For now the den is the first version, and that works.
   the second principle at the top).
 
 ## Making it yours: what's next (the first version is in; its rules are in RULES.md)
+
+- **Familiars with personality (9 Nov):** a monkey sits on top of the gate; when raiders arrive it
+  panics and runs back to you, and goes back to perch once it's calm. A parrot flies over. And a
+  familiar that helps you fight.
 
 Done, 7 Nov 2026: male and female pirates in YPP clothes and dyes, familiars, the flag designer,
 Decorate mode (flags, banners, lanterns, rum barrels), a house built from pieces and painted.
