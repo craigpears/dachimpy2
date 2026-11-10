@@ -185,6 +185,13 @@ the site (`.assetsignore` skips `*.md`).
   with (or did she?), and she has a cheeky giggle about it: get any closer and there's plenty more
   where that came from. Something like: "Hee hee! Oops. That was a warning shot. Mostly.
   Come any closer and the next ones won't be." (It should land close, splash her, and miss.)
+  **All in, and Bella fires it (10 Nov):** "we've really got to go all in with Dignity's little
+  cutscene. She's got to be very cute. The lavender monkey has got to be involved somehow ... the
+  little monkey is the one that fires the cannon at you. We've got to get these familiars really
+  involved." So Bella, on Dignity's shoulder, hops down to the gun, lights the fuse (or pulls the
+  lanyard) and covers her ears; the warning shot is hers, and Dignity's giggle is at her own
+  monkey's aim as much as at you. Lots of little touches: Bella chattering, a salute, the spyglass.
+  Familiars doing things in scenes is a thread to keep pulling (Dalnoth's monkey too).
   Her look is ready: `makePirate({ look: PIRATES.Dignity })` (RULES.md, "Real pirates are only
   looks"), placed in `js/den/checkpoint.js`, once the checkpoint's current work has landed.
 
