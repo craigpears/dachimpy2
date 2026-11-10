@@ -114,6 +114,11 @@ the site (`.assetsignore` skips `*.md`).
   Pirates shows them, a damage meter and a bilge meter, and on her too (holes, water in her hold).
   Check YPPedia for what bilge does to a ship (slower, say) and how damage sinks one. After the
   lag at the gauntlet is fixed (it's in the same files).
+  **But the deck patch stays (10 Nov):** "abandon getting rid of the carp[entry] on deck when the
+  cannonball hits things ... people like it. It's funny. It's good." A hit still holes her deck and
+  you patch it by Carpentry before she sails on, as now (RULES.md, "Kept because people like
+  them"). Whether damage and bilge still come on top of it, and how sinking works then: to pin down
+  with the user before building any of it.
 
 
 - **The Sailing puzzle, for Kikkit's quest (10 Nov):** Kikkit's penguin quest is next up once the
@@ -159,12 +164,6 @@ the site (`.assetsignore` skips `*.md`).
   slots each side. I don't know if it needs to make the ship a bit wider." Her guns stand in the
   same slots on both sides, each port gun straight across from its starboard twin; widen her a
   little if they'd crowd.
-
-- **No Bilge on the beach (10 Nov):** "I think we've had enough bilging now. Do we really need
-  bilge on the beach anymore? I think that was a bit of an early concept that's not needed now."
-  The beach's Bilge board goes, with what hangs off it: the tide it pumps back, the rocks it bares
-  and the powder barrels it dredges up. The sea's edge stays where it is, and raiders row in to it.
-  Bilge itself stays, one module, played at the locks' quays.
 
 - **Her bow out through the gate as a lock drains (10 Nov):** coming back down through the locks,
   "the front part of the ship is sticking out of the gate when the [lock] is draining." She sits

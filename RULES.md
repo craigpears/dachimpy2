@@ -1006,6 +1006,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   end. The user turned down a clay golem built from smashed Swordfight blocks, with breakers won
   from kills, as "too far away from the sword fighting puzzle", and said this goes for all of them.
   A new job's look (a golem, a forge) can be a skin, never a change to the rules.
+- **Kept because people like them (10 Nov).** Two things nearly cut, kept: Bilge on the beach in
+  the opening siege (the tide, its rocks, the powder barrels: "don't get rid of the bilge on the
+  [beach] ... people like that ... it adds to the scenicness. And the opening of it"), and patching
+  her deck by Carpentry when a cannonball holes her ("people like it. It's funny. It's good"). Ask
+  before taking out anything players already enjoy, however early an idea it was.
 - **Walking off the mended wall (10 Nov).** "Once you finish the last hole, and you've not got a
   piece ... WASD is supposed to move you around. You kind of get stuck having to hit escape, even
   though you've finished the puzzle effectively." A mended hole can still take a patch, so the
