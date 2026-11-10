@@ -166,10 +166,6 @@ the site (`.assetsignore` skips `*.md`).
   occasional raiders come one to three at a time, every 90 to 180 seconds. More of them, to throw
   spare pieces at (how many more, and whether more often or more to a boat, to pin down with the
   user).
-- **The soldiers shouldn't die (10 Nov):** "I'm not sure about the soldiers. Maybe they can go out of
-  the gates, but also, are they going to die? I don't want them to die." Today a soldier who loses
-  a duel falls and is gone for good. Going out is fine; they shouldn't be lost (what happens
-  instead, to pin down with the user).
 - **Nowhere to get rid of a piece you don't want (10 Nov):** "I've got, like, an M piece I need for
   the stairs. I need a rare piece for my shack. I mean, I don't mind that these are kind of things
   you have to really earn over time, I guess. But at the same time, it's a bit frustrating. Like,
