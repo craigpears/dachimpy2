@@ -807,8 +807,11 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     only, the lagoon say: "maybe it should just be refined to be in a certain section ... that
     can have the wind. So you can see the shipwreck. So it's kind of there being tempting, but
     you can't get to it unless you go around the back way. That would be quite cool." A wind dead
-    against her keeps her off the wreck in sight, and the back way round gets her there (whether
-    the oars can beat it: to pin down).
+    against her keeps her off the wreck in sight, and the back way round gets her there. The oars
+    beat it too, but that's never said: a secret for players to work out ("we won't tell anybody
+    that, but they can figure out oars go against the wind"). Only there, never all over the sea:
+    "it should only really apply to this little lagoon area, not everywhere, because otherwise
+    it's irritating."
     Needs the lagoon to be a little board of its own, which it isn't yet (she rests by the wreck).
     **Big ships hit hard, small ships mend fast (9 Nov):** a way to give big and small ships each a
     purpose. A big ship has more cannons, but the only control you really have is to "fire a full
