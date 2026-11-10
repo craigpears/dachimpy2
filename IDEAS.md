@@ -356,7 +356,8 @@ getting through, and that is unlocking a few more side [quests] ... there's alre
 here [before it] ... I think it should be after the checkpoint, off to the right." You come across
 Kikkit off to the right, telling you how she's trying to catch a penguin, and it takes you off
 down that way. (Earlier the same day: "you don't really necessarily need to get through the
-checkpoint for her": superseded.)
+checkpoint for her": superseded.) It suits her: "it kind of fits with her just being out in the
+middle of nowhere on an island trying to figure out some sailing."
 - **A sea that keeps blowing you back:** "just an insane number of ... whirlpools and winds, and
   they always keep blowing you back, like the Snakes and Ladders style." It suits her: "she's
   just a bit loopy crazy." (10 Nov.)
