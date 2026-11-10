@@ -7,21 +7,6 @@ the site (`.assetsignore` skips `*.md`).
 
 ## Asked for
 
-- **Land in the public den by default.** The user asked where the public lobby went (it was
-  talked about but never built). The den you land in should be a public one anyone can drop into,
-  with no cap on numbers. Private crews with a four-letter code stay alongside it. To work out:
-  - **No cap:** the crew room is limited to four at present (`MAX_CREW` in `worker/crew.js`), and
-    the first pirate's browser runs the raiders for everyone. With many pirates, that browser's
-    upload and the size of each message grow, so the snapshots would need trimming. Pirates far
-    away could be sent less often.
-  - **Raiders scale with the crew** (half again per extra pirate), so a big drop-in crowd needs a
-    sensible ceiling on wave size, or a different scaling.
-  - **Drop-in, drop-out:** someone arriving mid-wave just appears and starts mending. Nobody's
-    progress depends on who's there, so a pirate leaving never spoils it for the rest.
-  - **Solo stays possible:** keep a way to play alone (a "Play alone" button).
-  - **Moderation:** pirate names are letters only already, but an open room may want a way to hide
-    a pirate who's being a nuisance.
-
 - **Pull the tricky parts out into their own tested pieces (8 Nov):** the den's code is getting
   more complicated, all in one long file with few separate parts. The user: the fair deal "is
   definitely worthy of a class that's got some proper automated tests around it. Like, here are
@@ -36,21 +21,6 @@ the site (`.assetsignore` skips `*.md`).
   frames, the walk). Found on the way: tested on any holes the engine makes, the fair deal asks
   for fewer rare pieces than dealing at random but still 17%; the den's own walls are roomier, so
   test with the den's wall maker once it's pulled out.
-
-- **The fair deal's pieces fit, but never lead to a Masterpiece (8 Nov):** even after the "hole
-  nearest done first" fix, the user is "getting pieces that I guess technically fit, but would not
-  in any way ever lead to a masterpiece", and suspects the deal's idea of what fits is off. To look
-  at with real examples once the tests are in place: a way to save the holes and crates as they
-  were when a bad piece came, so it can become a test. (Worth checking: the deal knows a piece fits
-  some way of finishing the hole, but not that you'll put it in the one spot that does.) **10 Nov:**
-  that way's built: Cheats, "Copy the deal (for a test)" copies the holes, the crates and whether
-  it's dealt fair just then. Waiting on the user for one of those from a bad deal. (Dealt fair only
-  until wave 1's beaten, as the user chose; after that every deal is at random.)
-
-- **The bottom of the gate looks missing (9 Nov):** "I feel like the bottom of the gate is missing
-  now. I don't know what it was like before, but it was a lot better." (To pin down with the user:
-  since then the gate's five rows tall under a beam, in a lower middle between towers. Check
-  whether it still looks wrong.)
 
 - **Raiders getting through mustn't end the game (9 Nov):** rethink what happens when raiders get
   in, because the den should let you go off on side quests, row out to the ship and explore: "I

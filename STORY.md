@@ -52,6 +52,9 @@ in time the den becomes the thing itself (TODO.md, "Split the den off").
   rocks, the lock, being dazed, the duty puzzles) rather than each bringing a mechanic of its own:
   "they do need to have some kind of cohesion to them. Not just let's create a new mechanic for
   every ship." A brand new mechanic, or a new puzzle, has to earn its place.
+- **Something mechanically original.** A puzzle has to have "something really mechanically
+  original" (the user, 10 Nov): mirror strokes "is really something"; a puzzle that only recolours
+  one we have (four colours for four oars) has "nothing unique about it".
 - **Quick to learn, hard to master.** "The whole point of the Puzzle Pirates puzzles is they need
   an infinite skill curve, like quick to learn, hard to master, Vegas's ... these can't just be
   gimmicks. They need to be meaningful, skill-based mechanics. That's what makes coming up with a
@@ -77,7 +80,8 @@ in time the den becomes the thing itself (TODO.md, "Split the den off").
   adventures; out in the wilds the rewards are higher and so is the risk: krakens, monsters, and
   other players (IDEAS.md).
 - **Better together.** In the spirit of Puzzle Pirates, a crew helps each other's puzzles, visibly,
-  and drops in and out without spoiling anyone's game.
+  and drops in and out without spoiling anyone's game. (Later: for now the den is a solo proof of
+  concept, 10 Nov; IDEAS.md, "Solo for now".)
 - **Characters from the user's world.** Real Puzzle Pirates pirates, by their pirate names only,
   drawn from their pirate pages, with affection (Dalnoth, a bit of a drunk). Check the portrait
   before drawing them: a first guess "always seems to be so far off".
