@@ -755,6 +755,16 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     Quick to learn (pop pieces, the oar swings, she moves), hard to master (building big chains
     while keeping two oars in time). (To test on the same page as mirror strokes, if the user
     wants. To shape with the user.)
+    **Tested (10 Nov):** `oars-test.html` plays it (6 wide, 12 high, pairs dropped where you
+    choose, breakers popping their colour; the flow presses each oar back a little every pair, a
+    pop swings it forward by its size, links counting double, triple and on, so only chains keep
+    an oar going; a stack at the top washes away the top rows rather than ending the game; a crew
+    mode with a bot on starboard). Bots over 20 games of 200 pairs: random made good 2.1 lengths
+    and rowed in circles; greedy 6.6; seeing the next pair 8.8, still spent 42% of the time and
+    rarely chaining, so there's room above it. Steering is clearly a skill; whether it's deep is
+    still open. It reads partly like rowing (swing forward, press back), but solo, colour luck
+    decides unison more than you do. To try next: the wash costs the oars too, a bonus for
+    matched drive, numbers of its own for a crew (much easier: each side gets all the pieces).
     **Weather is where oars make sense (9 Nov):** the wind can drop. Under sail she's quicker, but
     when the wind drops a ship that's all sails is "dead in the water until the wind picks back
     up again", and under sail you "can't go against the wind". Oars keep her moving either way:

@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oars against the water</title>
+<!-- A test page for IDEAS.md's "Oars against the water, a puzzle of its own" (TODO.md, 10 Nov), unlinked like
+     den.html. The rules are src/oar-press.ts (compiled to js/oar-press.js); this page only draws them. -->
+<style>
+  :root { --ink: #222; --mute: #666; --line: #ccc; --bg: #faf8f3; --sea: #cfe3ee; --port: #c0392b; --stbd: #138a7e; --wood: #8b5a2b; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 16px; font: 15px/1.4 system-ui, sans-serif; color: var(--ink); background: var(--bg); }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  p.help { margin: 0 0 10px; color: var(--mute); max-width: 62em; }
+  .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px; }
+  .bar label { cursor: pointer; }
+  button { font: inherit; padding: 4px 10px; cursor: pointer; }
+  .play { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+  .board { text-align: center; }
+  .board h2 { font-size: 14px; margin: 0 0 4px; }
+  .board svg { display: block; background: #fff; border: 1px solid var(--line); cursor: pointer; touch-action: manipulation; user-select: none; }
+  .side { width: 330px; max-width: 100%; }
+  #sea { display: block; width: 100%; height: auto; background: var(--sea); border: 1px solid var(--line); }
+  .oars { display: grid; grid-template-columns: 6.5em 1fr 4.5em; gap: 4px 8px; align-items: center; margin: 10px 0 4px; font-size: 14px; }
+  .meter { height: 10px; background: #eee; position: relative; }
+  .meter i { position: absolute; left: 0; top: 0; height: 100%; width: 0; }
+  .stats { display: grid; grid-template-columns: auto auto; gap: 2px 14px; font-size: 14px; margin: 8px 0; }
+  .stats b { font-weight: 600; text-align: right; }
+  .combo { font-size: 22px; font-weight: 700; min-height: 1.4em; color: #6c3483; transition: opacity .6s; }
+  #timer { height: 4px; background: #e0d6c2; margin-top: 4px; }
+  #timer i { display: block; height: 100%; width: 0; background: var(--wood); }
+  .key { font-size: 13px; color: var(--mute); margin-top: 6px; }
+</style>
+</head>
+<body>
+<h1>Oars against the water</h1>
+<p class="help">Pairs come in from the top as the water's flow. A round breaker pops every piece of its colour it touches, and
+  what falls after can pop more (a chain). The flow presses each oar back a notch a pair: that's the drive, firmer the
+  more of its colours lie on the board. Right back, the oar's spent. A pop swings it forward, further the bigger the pop
+  (a chain counts double, triple...). <span style="color:var(--port)">Red and amber pull port</span>,
+  <span style="color:var(--stbd)">teal and blue starboard</span>: both oars together keep her straight, one alone turns her.
+  Reach the top and the water washes the top rows away.</p>
+<div class="bar">
+  <label><input type="radio" name="mode" value="solo" checked> Solo: one board, colours to a side</label>
+  <label><input type="radio" name="mode" value="crew"> Crew: a board a side (a bot rows starboard)</label>
+  <label title="Off: the pair waits for you. On: it drops itself after a few seconds."><input type="checkbox" id="flow"> Flow timer</label>
+  <button id="again">New run</button>
+  <span id="seed" style="color:var(--mute)"></span>
+</div>
+<div class="play">
+  <div id="boards" class="play"></div>
+  <div class="side">
+    <div class="combo" id="combo"></div>
+    <div id="timer" title="Flow timer"><i></i></div>
+    <svg id="sea" viewBox="-160 -160 320 320"></svg>
+    <div class="oars">
+      <span style="color:var(--port)">Port oar</span><div class="meter" title="How far forward: the stroke left in it"><i id="op" style="background:var(--port)"></i></div><span id="np"></span>
+      <span style="color:var(--port)">firmness</span><div class="meter"><i id="fp" style="background:#e6a59e"></i></div><span id="nfp"></span>
+      <span style="color:var(--stbd)">Starboard oar</span><div class="meter" title="How far forward: the stroke left in it"><i id="os" style="background:var(--stbd)"></i></div><span id="ns"></span>
+      <span style="color:var(--stbd)">firmness</span><div class="meter"><i id="fs" style="background:#97d3cb"></i></div><span id="nfs"></span>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div class="key">← → move · ↑ or X turn · Z turn back · ↓ or Space drop<br>Mouse: point at a column, click to drop, right-click or wheel to turn.</div>
+  </div>
+</div>
+<script type="module">
+import { OAR_PRESS, OarPress, callout } from './js/oar-press.js';
+
+const { W, H } = OAR_PRESS;
+const CELL = 34, TOP = 2, NS = 'http://www.w3.org/2000/svg';
+const FILL = ['#d64541', '#eea320', '#17a398', '#2e6fd8'];
+const SIDE = ['var(--port)', 'var(--stbd)'];
+const LEN = 30; // sea pixels a boat length
+
+const $ = (id) => document.getElementById(id);
+const el = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent?.appendChild(e); return e; };
+const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
+
+let game, crew = false, cur = { col: 2, rot: 0 }, busy = false, flashing = false, svgs = [], trail = [], last = { swing: [0, 0] }, timerAt = 0;
+/** What's drawn, easing toward the game: each oar's travel, her place and heading. */
+const shown = { oar: [0, 0], x: 0, y: 0, h: 0 };
+const aim = { oar: [0, 0] };
+
+function start() {
+  crew = document.querySelector('input[name=mode]:checked').value === 'crew';
+  const seed = Math.floor(Math.random() * 1e6);
+  $('seed').textContent = `seed ${seed}`;
+  game = new OarPress({ seed, crew });
+  cur = { col: 2, rot: 0 }; trail = [[0, 0]]; last = { swing: [0, 0] };
+  Object.assign(shown, { oar: [0, 0], x: 0, y: 0, h: 0 }); aim.oar = [0, 0];
+  $('combo').textContent = '';
+  const box = $('boards'); box.innerHTML = ''; svgs = [];
+  (crew ? ['Port (you)', 'Starboard (bot)'] : ['Port | Starboard']).forEach((name, i) => {
+    const d = document.createElement('div'); d.className = 'board';
+    d.innerHTML = `<h2 style="color:${crew ? SIDE[i] : 'inherit'}">${name}</h2>`;
+    const svg = el('svg', { width: W * CELL, height: (H + TOP) * CELL, viewBox: `0 0 ${W * CELL} ${(H + TOP) * CELL}` }, d);
+    if (i === 0) {
+      svg.addEventListener('mousemove', (e) => { const r = svg.getBoundingClientRect(); setCol(Math.floor((e.clientX - r.left) / CELL)); });
+      svg.addEventListener('click', () => place());
+      svg.addEventListener('contextmenu', (e) => { e.preventDefault(); turn(1); });
+      svg.addEventListener('wheel', (e) => { e.preventDefault(); turn(e.deltaY > 0 ? 1 : -1); }, { passive: false });
+    } else svg.style.cursor = 'default';
+    box.appendChild(d); svgs.push(svg);
+  });
+  timerAt = performance.now();
+  draw(); readouts();
+}
+
+/** The columns the pair's two halves take, and which is lower when it stands up. */
+const cols = (p) => [p.col, p.col + (p.rot === 1 ? 1 : p.rot === 3 ? -1 : 0)];
+function fit(p) {
+  const lo = p.rot === 3 ? 1 : 0, hi = p.rot === 1 ? W - 2 : W - 1;
+  return { ...p, col: Math.max(lo, Math.min(hi, p.col)) };
+}
+const legal = (b, p) => b.placements().some((q) => q.col === p.col && q.rot === p.rot);
+function setCol(c) { const p = fit({ ...cur, col: c }); if (p.col !== cur.col) { cur = p; draw(); } }
+function turn(d) { cur = fit({ ...cur, rot: (cur.rot + d + 4) % 4 }); draw(); }
+
+const yOf = (r) => (H + TOP - 1 - r) * CELL;
+
+function piece(svg, g, x, y, opts = {}) {
+  const grp = el('g', { transform: `translate(${x},${y})`, opacity: opts.ghost ? 0.3 : opts.dim ? 0.45 : 1 }, svg);
+  const fill = opts.lit ? '#fff' : FILL[g.c];
+  if (g.breaker) {
+    el('circle', { cx: CELL / 2, cy: CELL / 2, r: CELL / 2 - 3, fill, stroke: opts.lit ? '#000' : 'rgba(0,0,0,.35)', 'stroke-width': 3 }, grp);
+    el('path', { d: `M${CELL / 2} 9 L${CELL / 2 + 4} ${CELL / 2} L${CELL / 2} ${CELL - 9} L${CELL / 2 - 4} ${CELL / 2} Z`, fill: 'rgba(255,255,255,.85)' }, grp);
+  } else {
+    el('rect', { x: 2, y: 2, width: CELL - 4, height: CELL - 4, rx: 7, fill, stroke: opts.lit ? '#000' : 'none' }, grp);
+    el('path', { d: `M8 ${CELL - 10} q${CELL / 4 - 4} -6 ${CELL / 2 - 8} 0 t${CELL / 2 - 8} 0`, fill: 'none', stroke: 'rgba(255,255,255,.5)', 'stroke-width': 2.5, 'stroke-linecap': 'round' }, grp);
+  }
+}
+
+/** An oar across board i from its rowlock at the foot: steep at the catch, lying flat when it's spent. */
+function oar(svg, side, travel, fromRight) {
+  const a = (75 - 67 * travel) * Math.PI / 180, L = W * CELL * 0.78, y0 = (H + TOP) * CELL - 4;
+  const x0 = fromRight ? W * CELL - 4 : 4, dx = Math.cos(a) * (fromRight ? -1 : 1), dy = -Math.sin(a);
+  const g = el('g', { opacity: 0.8, 'pointer-events': 'none' }, svg);
+  el('line', { x1: x0, y1: y0, x2: x0 + dx * L, y2: y0 + dy * L, stroke: '#5a3a1a', 'stroke-width': 7, 'stroke-linecap': 'round' }, g);
+  el('line', { x1: x0, y1: y0, x2: x0 + dx * L, y2: y0 + dy * L, stroke: '#b07a45', 'stroke-width': 4, 'stroke-linecap': 'round' }, g);
+  const bx = x0 + dx * (L - 14), by = y0 + dy * (L - 14);
+  el('rect', { x: -6, y: -22, width: 12, height: 40, rx: 6, fill: SIDE[side], stroke: '#3b2410', 'stroke-width': 1.5,
+    transform: `translate(${bx},${by}) rotate(${(fromRight ? -1 : 1) * (90 - a * 180 / Math.PI)})` }, g);
+  el('circle', { cx: x0, cy: y0, r: 6, fill: '#444' }, g);
+}
+
+function drawBoard(i, grid, hot = new Set()) {
+  const svg = svgs[i], b = game.boards[i];
+  svg.innerHTML = '';
+  el('rect', { x: 0, y: 0, width: W * CELL, height: TOP * CELL, fill: '#eef4f7' }, svg);
+  el('line', { x1: 0, y1: TOP * CELL, x2: W * CELL, y2: TOP * CELL, stroke: '#9bb', 'stroke-dasharray': '4 4' }, svg);
+  if (!crew) el('line', { x1: W * CELL / 2, y1: TOP * CELL, x2: W * CELL / 2, y2: (H + TOP) * CELL, stroke: '#eee' }, svg);
+  grid.forEach((line, r) => line.forEach((g, c) => { if (g) piece(svg, g, c * CELL, yOf(r), { lit: hot.has(r * W + c) }); }));
+  // The pair to place (and where it will land) on your board; the bot's pair on its own.
+  const p = i === 0 ? cur : null;
+  if (p && !busy) {
+    const [ca, cb] = cols(p), ha = b.height(ca), hb = b.height(cb), [ga, gb] = b.pair;
+    let ra, rb;
+    if (p.rot === 0) { ra = ha; rb = ha + 1; } else if (p.rot === 2) { rb = hb; ra = hb + 1; } else { ra = ha; rb = hb; }
+    const ok = legal(b, p);
+    if (ok) { piece(svg, ga, ca * CELL, yOf(ra), { ghost: true }); piece(svg, gb, cb * CELL, yOf(rb), { ghost: true }); }
+    const top = p.rot === 0 ? [H, H + 1] : p.rot === 2 ? [H + 1, H] : [H, H];
+    piece(svg, ga, ca * CELL, yOf(top[0]), { dim: !ok }); piece(svg, gb, cb * CELL, yOf(top[1]), { dim: !ok });
+    // No room for it there: the pair's dimmed and ringed in red.
+    if (!ok) el('rect', { x: Math.min(ca, cb) * CELL + 1, y: 1, width: (Math.abs(ca - cb) + 1) * CELL - 2, height: TOP * CELL - 2, rx: 6, fill: 'none', stroke: '#c0392b', 'stroke-width': 2.5, 'stroke-dasharray': '5 3' }, svg);
+  }
+  // The next pair, small, top right.
+  const nx = b.next, g2 = el('g', { transform: `translate(${W * CELL - 22},4) scale(.5)`, opacity: 0.8 }, svg);
+  piece(g2, nx[1], 0, 0); piece(g2, nx[0], 0, CELL);
+  el('text', { x: W * CELL - 28, y: 20, 'text-anchor': 'end', 'font-size': 11, fill: '#789' }, svg).textContent = 'next';
+  if (crew) oar(svg, i, shown.oar[i], i === 1);
+  else { oar(svg, 0, shown.oar[0], false); oar(svg, 1, shown.oar[1], true); }
+}
+
+function draw() { game.boards.forEach((b, i) => drawBoard(i, b.grid)); }
+
+/** A simple starboard pirate for the crew: the placement on its own board worth most once landed. */
+function botPick() {
+  const b = game.boards[1], { SWING, CHAIN } = OAR_PRESS;
+  let best = -Infinity, pick = b.placements()[0];
+  for (const p of b.placements()) {
+    const t = b.copy(Math.random), d = t.drop(p);
+    let freed = 0;
+    for (const l of d.links) freed += l.broken.reduce((s, k) => s + k, 0) * (1 + CHAIN * (l.chain - 1));
+    let v = Math.min(game.oar[1], freed * SWING) * 3 - d.washed * 0.2;
+    for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
+      const g = t.grid[r][c]; if (!g || g.breaker) continue;
+      if (t.grid[r][c + 1]?.c === g.c) v += 0.02;
+      if (t.grid[r + 1]?.[c]?.c === g.c) v += 0.02;
+    }
+    for (let c = 0; c < W; c++) if (t.height(c) >= H - 3) v -= 0.3;
+    if (v > best) { best = v; pick = p; }
+  }
+  return pick;
+}
+
+async function place() {
+  if (busy || !legal(game.boards[0], cur)) return;
+  busy = true;
+  const before = game.oar.slice();
+  const ps = crew ? [cur, botPick()] : [cur];
+  const beat = game.step(ps);
+  // Each link of each board's chain, lit then gone.
+  const n = Math.max(...beat.drops.map((d) => d.links.length));
+  flashing = true;
+  for (let k = 0; k < n; k++) {
+    beat.drops.forEach((d, i) => { const l = d.links[k]; if (l) drawBoard(i, l.before, new Set(l.cells.map(({ r, c }) => r * W + c))); });
+    await wait(220);
+  }
+  flashing = false;
+  // The pop swings the oars forward, then the flow presses them back.
+  aim.oar = [0, 1].map((s) => before[s] - beat.swing[s]);
+  if (beat.swing.some((s) => s > 0)) await wait(170);
+  aim.oar = game.oar.slice();
+  trail.push([game.x, game.y]);
+  if (beat.swing.some((s) => s > 0)) last = { swing: beat.swing.slice() };
+  const words = callout(beat);
+  if (words) { const c = $('combo'); c.textContent = words; c.style.opacity = 1; clearTimeout(c.t); c.t = setTimeout(() => { c.style.opacity = 0; }, 1600); }
+  busy = false; timerAt = performance.now();
+  cur = fit(cur);
+  draw(); readouts();
+}
+
+function readouts() {
+  const s = game.stats, deg = ((game.heading * 180 / Math.PI + 540) % 360) - 180;
+  [['op', 'np', 0], ['os', 'ns', 1]].forEach(([m, t, k]) => { $(m).style.width = `${100 * (1 - game.oar[k])}%`; $(t).textContent = game.oar[k] >= 1 ? 'spent' : `${Math.round(100 * (1 - game.oar[k]))}%`; });
+  [['fp', 'nfp', 0], ['fs', 'nfs', 1]].forEach(([m, t, k]) => { const f = game.firmness(k); $(m).style.width = `${100 * f}%`; $(t).textContent = `${game.weight(k)} pcs`; });
+  const rows = [
+    ['Last stroke', `port ${Math.round(100 * last.swing[0])}%, starboard ${Math.round(100 * last.swing[1])}%`],
+    ['Heading', `${deg >= 0 ? '+' : ''}${deg.toFixed(0)}° ${Math.abs(deg) < 3 ? '(on course)' : deg > 0 ? 'to starboard' : 'to port'}`],
+    ['Made good', `${game.y.toFixed(1)} lengths`],
+    ['Rowed', `${s.rowed.toFixed(1)} lengths (${Math.round(100 * game.straightness())}% straight)`],
+    ['Pairs', `${game.beats} (oars spent ${game.beats ? Math.round(50 * (s.spent[0] + s.spent[1]) / game.beats) : 0}% of the time)`],
+    ['Pops', `${s.pops}, ${s.popped} pieces, ${s.unisons} in unison`],
+    ['Chains', `biggest ${s.biggestChain}, ${s.bigChains} of 3+`],
+    ['Washed away', `${s.washed} pieces`],
+  ];
+  $('stats').innerHTML = rows.map(([k, v]) => `<span>${k}</span><b>${v}</b>`).join('');
+}
+
+/** The sea, the course straight up from the start, her wake and the boat, the camera on her. */
+function sea() {
+  const svg = $('sea'); svg.innerHTML = '';
+  const cx = shown.x * LEN, cy = -shown.y * LEN;
+  const g = el('g', { transform: `translate(${-cx},${-cy})` }, svg);
+  const step = 2 * LEN, x0 = Math.floor((cx - 170) / step) * step, y0 = Math.floor((cy - 170) / step) * step;
+  for (let x = x0; x < cx + 170; x += step) el('line', { x1: x, y1: cy - 170, x2: x, y2: cy + 170, stroke: 'rgba(255,255,255,.35)' }, g);
+  for (let y = y0; y < cy + 170; y += step) el('line', { x1: cx - 170, y1: y, x2: cx + 170, y2: y, stroke: 'rgba(255,255,255,.35)' }, g);
+  el('line', { x1: 0, y1: 40, x2: 0, y2: cy - 200, stroke: '#2c5d78', 'stroke-dasharray': '6 6', opacity: 0.5 }, g);
+  el('circle', { cx: 0, cy: 0, r: 4, fill: '#2c5d78' }, g);
+  const pts = trail.map(([x, y]) => `${x * LEN},${-y * LEN}`).concat(`${cx},${cy}`).join(' ');
+  el('polyline', { points: pts, fill: 'none', stroke: '#fff', 'stroke-width': 3, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: 0.85 }, g);
+  const boat = el('g', { transform: `translate(${cx},${cy}) rotate(${shown.h * 180 / Math.PI})` }, g);
+  // Her oars, from the gunwales: forward at the catch, swept aft as they drive.
+  [0, 1].forEach((s) => {
+    const side = s ? 1 : -1, a = (-50 + 100 * shown.oar[s]) * Math.PI / 180;
+    el('line', { x1: side * 5, y1: 0, x2: side * (5 + 20 * Math.cos(a)), y2: 20 * Math.sin(a), stroke: SIDE[s], 'stroke-width': 3, 'stroke-linecap': 'round' }, boat);
+  });
+  el('path', { d: 'M0 -16 C7 -8 7 6 5 13 L-5 13 C-7 6 -7 -8 0 -16 Z', fill: '#8b5a2b', stroke: '#3b2410', 'stroke-width': 1.5 }, boat);
+  el('rect', { x: -3, y: -3, width: 6, height: 5, fill: '#d9b98c' }, boat);
+}
+
+/** Eases what's drawn toward the game each frame; runs the flow timer if it's on. */
+let lastOars = '';
+function frame(t) {
+  const k = 0.18;
+  for (const s of [0, 1]) shown.oar[s] += (aim.oar[s] - shown.oar[s]) * k * 1.6;
+  shown.x += (game.x - shown.x) * k; shown.y += (game.y - shown.y) * k; shown.h += (game.heading - shown.h) * k;
+  const key = shown.oar.map((v) => v.toFixed(3)).join();
+  if (key !== lastOars && !flashing) { lastOars = key; draw(); }
+  sea();
+  const on = $('flow').checked, left = on ? Math.max(0, 1 - (t - timerAt) / 4000) : 0;
+  $('timer').firstElementChild.style.width = `${100 * left}%`;
+  if (on && !busy && t - timerAt > 4000) {
+    if (!legal(game.boards[0], cur)) cur = game.boards[0].placements()[0];
+    place();
+  }
+  requestAnimationFrame(frame);
+}
+
+document.addEventListener('keydown', (e) => {
+  const k = e.key;
+  if (k === 'ArrowLeft') setCol(cur.col - 1);
+  else if (k === 'ArrowRight') setCol(cur.col + 1);
+  else if (k === 'ArrowUp' || k === 'x' || k === 'X') turn(1);
+  else if (k === 'z' || k === 'Z') turn(-1);
+  else if (k === 'ArrowDown' || k === ' ') place();
+  else return;
+  e.preventDefault();
+});
+document.querySelectorAll('input[name=mode]').forEach((r) => r.addEventListener('change', start));
+$('again').addEventListener('click', (e) => { e.currentTarget.blur(); start(); });
+start();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

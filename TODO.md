@@ -96,12 +96,6 @@ the site (`.assetsignore` skips `*.md`).
   the primer goes. (How, where it's hosted, and what of the primer's engine the den still needs,
   to pin down with the user when it's time.)
 
-- **Prototype oars against the water (10 Nov, technical):** "certainly prototype that idea"
-  (IDEAS.md, "Oars against the water"; no crabs). On a test page of its own, outside the den:
-  pieces flow in from the top and pile on the oar, their pressure sweeping it back as the drive;
-  pops swing it forward, bigger pops further; the two oars in time keep her straight. Solo, one
-  board whose colours belong to a side. A little boat showing where she goes.
-
 - **Rowing by port and starboard (10 Nov):** the user loves IDEAS.md's "Port and starboard":
   "absolutely hilarious ... not obviously like a brand new puzzle, but it's certainly a nice twist
   on bilging ... Do that. Absolutely do that." Her oars are rowed by a Bilge board split down the
