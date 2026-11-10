@@ -697,6 +697,12 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     instead: the same idea, clear on both sides at once. Before building it into the den: a
     plain test page, and bots that play it (random, greedy, looking two moves ahead), to see
     whether better play goes much further, as a check on the skill curve. (To shape with the user.)
+    **Tested (10 Nov):** `row-test.html` plays it, beside the plain split board. Bots over 30
+    games of 80 moves: with pull paired by time, mirror strokes has the bigger skill gap (looking
+    two moves ahead goes 9 times as far as greedy, against under 5 on the split board), as the
+    obvious move usually scrambles the other board; paired move by move, no difference. Suggestive,
+    not proof. Rough edges: pull is low (10 to 28 squares in 80 moves), combos big enough for the
+    double Vegas almost never happen, and reading two boards is heavy work.
     The user likes that you haven't full control: "especially if you get like a cascade where it
     then accidentally starts sending you in circles. That would be hilarious. Frustrating but
     funny." And for a crew, just for a laugh: **blindfold rowing**, each pirate's moves mirrored

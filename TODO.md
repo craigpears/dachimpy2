@@ -102,14 +102,6 @@ the site (`.assetsignore` skips `*.md`).
   pops swing it forward, bigger pops further; the two oars in time keep her straight. Solo, one
   board whose colours belong to a side. A little boat showing where she goes.
 
-- **Test mirror strokes on a page of its own (10 Nov, technical):** "definitely test that ... put a
-  test, let's just brainstorm and test the basic idea." IDEAS.md's "Mirror strokes": two Bilge
-  boards, port and starboard, every swap made in mirror on the other. A plain test page outside
-  the den to play it, with a little boat showing where she goes (in circles, when a cascade runs
-  away with one side: "that would be hilarious. Frustrating but funny"), and bots (random, greedy,
-  looking two moves ahead) to see whether better play goes much further, as a check on the skill
-  curve.
-
 - **See her answer the oars as the pull builds (10 Nov):** "I'm not seeing any physical
   difference. Like ... I expect the boat to start, tilt it, angling to one side if I'm just rowing
   one side, and it to actually see some sense of movement." She still moves square by square, but

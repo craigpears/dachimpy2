@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mirror strokes test</title>
+<!-- A test page for IDEAS.md's "Mirror strokes" (TODO.md, 10 Nov), unlinked like den.html. The rules are
+     src/mirror-row.ts (compiled to js/mirror-row.js); this page only draws them. -->
+<style>
+  :root { --ink: #222; --mute: #666; --line: #ccc; --bg: #faf8f3; --sea: #cfe3ee; --wake: #fff; --port: #c0392b; --stbd: #1e8449; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 16px; font: 15px/1.4 system-ui, sans-serif; color: var(--ink); background: var(--bg); }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  p.help { margin: 0 0 12px; color: var(--mute); max-width: 60em; }
+  .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px; }
+  .bar label { cursor: pointer; }
+  button { font: inherit; padding: 4px 10px; cursor: pointer; }
+  .play { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+  .board { text-align: center; }
+  .board h2 { font-size: 14px; margin: 0 0 4px; }
+  .board svg { display: block; background: #fff; border: 1px solid var(--line); cursor: pointer; touch-action: manipulation; }
+  .side { width: 320px; max-width: 100%; }
+  #sea { display: block; width: 100%; height: auto; background: var(--sea); border: 1px solid var(--line); }
+  .pulls { display: grid; grid-template-columns: 6em 1fr 3.5em; gap: 4px 8px; align-items: center; margin: 10px 0; }
+  .meter { height: 10px; background: #eee; }
+  .meter i { display: block; height: 100%; width: 0; }
+  #stats { margin: 6px 0; }
+  #log { list-style: none; padding: 0; margin: 6px 0; min-height: 9em; font-size: 14px; }
+  #log li:first-child { font-weight: 600; }
+  .combo { font-size: 22px; font-weight: 700; min-height: 1.4em; color: #8e44ad; }
+</style>
+</head>
+<body>
+<h1>Mirror strokes</h1>
+<p class="help">Two Bilge boards: port on the left, starboard on the right. Every swap you make on one is made in mirror on
+  the other. Clear on both at once to pull her straight; one side alone turns her. Arrows or the mouse move the
+  cursor, Space or a click swaps.</p>
+<div class="bar">
+  <label><input type="radio" name="kind" value="mirror" checked> Mirror strokes</label>
+  <label><input type="radio" name="kind" value="split"> Plain split board</label>
+  <label title="Off: what one move pulls on one side alone turns her. On: the next move can still even it up, as the den's oars do."><input type="checkbox" id="clocked"> Next move can even it up (as the den's oars)</label>
+  <button id="again">New boards</button>
+  <span id="seed" style="color:var(--mute)"></span>
+</div>
+<div class="play">
+  <div id="boards" class="play"></div>
+  <div class="side">
+    <div class="combo" id="combo"></div>
+    <svg id="sea" viewBox="0 0 300 300"></svg>
+    <div class="pulls">
+      <span style="color:var(--port)">Port</span><div class="meter"><i id="mp" style="background:var(--port)"></i></div><span id="np"></span>
+      <span style="color:var(--stbd)">Starboard</span><div class="meter"><i id="ms" style="background:var(--stbd)"></i></div><span id="ns"></span>
+    </div>
+    <div id="stats"></div>
+    <ul id="log"></ul>
+  </div>
+</div>
+<script type="module">
+import { H, W } from './js/bilge.js';
+import { MirrorRow, SplitRow, mirrorCol, seeded } from './js/mirror-row.js';
+
+const CELL = 34, NS = 'http://www.w3.org/2000/svg';
+const COLOURS = ['#e74c3c', '#f1c40f', '#2ecc71', '#3498db', '#9b59b6', '#e67e22', '#1abc9c'];
+const MARKS = ['●', '▲', '■', '◆', '★', '✚', '♥'];
+const DX = [0, 1, 0, -1], DY = [1, 0, -1, 0];
+
+let row, kind = 'mirror', cur = { r: 6, c: 2 }, busy = false, moves = 0, totals = { port: 0, starboard: 0 }, svgs = [];
+const $ = (id) => document.getElementById(id);
+const el = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent?.appendChild(e); return e; };
+
+function start() {
+  const seed = Math.floor(Math.random() * 1e6), clocked = $('clocked').checked;
+  $('seed').textContent = `seed ${seed}`;
+  row = kind === 'mirror' ? new MirrorRow({ randoms: [seeded(seed), seeded(seed + 1)], clocked }) : new SplitRow({ randoms: [seeded(seed)], clocked });
+  moves = 0; totals = { port: 0, starboard: 0 };
+  $('log').innerHTML = ''; $('combo').textContent = '';
+  const box = $('boards'); box.innerHTML = ''; svgs = [];
+  const names = kind === 'mirror' ? ['Port', 'Starboard'] : ['Port | Starboard'];
+  names.forEach((name, i) => {
+    const d = document.createElement('div'); d.className = 'board';
+    d.innerHTML = `<h2 style="color:${kind === 'split' ? 'inherit' : i ? 'var(--stbd)' : 'var(--port)'}">${name}</h2>`;
+    const svg = el('svg', { width: W * CELL, height: H * CELL, viewBox: `0 0 ${W * CELL} ${H * CELL}` }, d);
+    svg.addEventListener('mousemove', (e) => hover(e, i));
+    svg.addEventListener('click', (e) => { hover(e, i); swap(); });
+    box.appendChild(d); svgs.push(svg);
+  });
+  draw(); sea(); pulls({ port: 0, starboard: 0 });
+}
+
+/** The cursor's column on board i (it's held as port's). */
+const colOn = (i) => (i === 1 ? mirrorCol(cur.c) : cur.c);
+
+function hover(e, i) {
+  if (busy) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const r = Math.max(0, Math.min(H - 1, Math.floor((e.clientY - rect.top) / CELL)));
+  let c = Math.max(0, Math.min(W - 2, Math.floor((e.clientX - rect.left) / CELL - 0.5)));
+  if (i === 1) c = mirrorCol(c);
+  if (r !== cur.r || c !== cur.c) { cur = { r, c }; draw(); }
+}
+
+function drawBoard(i, grid, hot = new Set()) {
+  const svg = svgs[i], b = row.boards[i];
+  svg.innerHTML = '';
+  el('rect', { x: 0, y: (H - b.water) * CELL, width: W * CELL, height: b.water * CELL, fill: '#d6eaf8' }, svg);
+  if (kind === 'split') el('line', { x1: W * CELL / 2, y1: 0, x2: W * CELL / 2, y2: H * CELL, stroke: '#999', 'stroke-dasharray': '4 3' }, svg);
+  grid.forEach((line, r) => line.forEach((bit, c) => {
+    if (!bit) return;
+    const g = el('g', { transform: `translate(${c * CELL},${r * CELL})` }, svg);
+    const lit = hot.has(bit.id);
+    el('rect', { x: 2, y: 2, width: CELL - 4, height: CELL - 4, rx: 6, fill: lit ? '#fff' : COLOURS[bit.k] ?? '#888', stroke: lit ? '#000' : 'none' }, g);
+    const t = el('text', { x: CELL / 2, y: CELL / 2 + 6, 'text-anchor': 'middle', 'font-size': 17, fill: lit ? '#000' : 'rgba(0,0,0,.45)' }, g);
+    t.textContent = bit.s === 'crab' ? '🦀' : MARKS[bit.k] ?? '?';
+  }));
+  el('rect', { x: colOn(i) * CELL + 1, y: cur.r * CELL + 1, width: 2 * CELL - 2, height: CELL - 2, fill: 'none', stroke: '#000', 'stroke-width': 3, rx: 5 }, svg);
+}
+
+function draw() { row.boards.forEach((b, i) => drawBoard(i, b.grid)); }
+
+const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
+
+/** Play each board's move through, step by step: the swap, what goes, what floats up. */
+async function animate(res, before) {
+  const n = Math.max(...res.moves.map((m) => m.stages.length));
+  const prev = before.slice();
+  for (let s = 0; s < n; s++) {
+    let anyClear = false;
+    res.moves.forEach((m, i) => { const st = m.stages[s]; if (st?.cleared.length) { anyClear = true; drawBoard(i, prev[i], new Set(st.cleared)); } });
+    if (anyClear) await wait(160);
+    res.moves.forEach((m, i) => { const st = m.stages[s]; if (st) { prev[i] = st.grid; drawBoard(i, st.grid); } });
+    await wait(90);
+  }
+}
+
+async function swap() {
+  if (busy) return;
+  busy = true;
+  const before = row.boards.map((b) => b.snap());
+  const res = row.swap(cur.r, cur.c);
+  moves++; totals.port += res.pull.port; totals.starboard += res.pull.starboard;
+  await animate(res, before);
+  draw(); sea(); pulls(res.pull);
+  const named = res.combos.filter(Boolean);
+  if (kind === 'mirror' && res.combos.every((x) => x === 'Vegas!')) $('combo').textContent = 'Double Vegas!';
+  else if (kind === 'mirror' && res.combos.every((x) => x === 'Bingo!')) $('combo').textContent = 'Double Bingo!';
+  else $('combo').textContent = named.join(' + ');
+  if (res.pull.port || res.pull.starboard) {
+    const li = document.createElement('li');
+    const who = kind === 'mirror' ? res.combos.map((x, i) => (x || (res.moves[i].cleared ? 'three' : '-'))).join(' / ') : (res.combos[0] || 'three');
+    li.textContent = `${moves}. ${who}: pull ${res.pull.port.toFixed(1)} / ${res.pull.starboard.toFixed(1)}${res.steps.length ? ' → ' + res.steps.join(' ') : ''}`;
+    $('log').prepend(li);
+    while ($('log').children.length > 8) $('log').lastChild.remove();
+  }
+  busy = false;
+}
+
+function pulls(p) {
+  const big = Math.max(4, p.port, p.starboard);
+  $('mp').style.width = `${100 * p.port / big}%`; $('ms').style.width = `${100 * p.starboard / big}%`;
+  $('np').textContent = p.port.toFixed(1); $('ns').textContent = p.starboard.toFixed(1);
+  const c = row.course;
+  $('stats').innerHTML = `Moves ${moves} · up the course <b>${c.y}</b> squares · turned ${c.turned > 0 ? c.turned + ' to starboard' : c.turned < 0 ? -c.turned + ' to port' : 'none'} (quarter turns)${c.circled ? ' · <b>she has rowed a circle!</b>' : ''}<br>
+    Pull in all: port ${totals.port.toFixed(1)}, starboard ${totals.starboard.toFixed(1)}; building: ahead ${row.stroke.ahead.toFixed(1)}, swing ${row.stroke.swing.toFixed(1)}${row.stroke.pending() ? `, waiting ${row.stroke.pending() > 0 ? 'port' : 'starboard'} ${Math.abs(row.stroke.pending()).toFixed(1)}` : ''}`;
+}
+
+/** The sea, top-down: her wake, and her. North (up the page) is the way she started. */
+function sea() {
+  const svg = $('sea'), t = row.course.trail;
+  svg.innerHTML = '';
+  const xs = t.map((p) => p[0]), ys = t.map((p) => -p[1]);
+  const pad = 3, span = Math.max(10, Math.max(...xs) - Math.min(...xs) + 2 * pad, Math.max(...ys) - Math.min(...ys) + 2 * pad);
+  const cx = (Math.max(...xs) + Math.min(...xs)) / 2, cy = (Math.max(...ys) + Math.min(...ys)) / 2;
+  svg.setAttribute('viewBox', `${cx - span / 2} ${cy - span / 2} ${span} ${span}`);
+  for (let x = Math.floor(cx - span / 2); x <= cx + span / 2; x++) el('line', { x1: x, y1: cy - span, x2: x, y2: cy + span, stroke: 'rgba(255,255,255,.35)', 'stroke-width': span / 600 }, svg);
+  for (let y = Math.floor(cy - span / 2); y <= cy + span / 2; y++) el('line', { x1: cx - span, y1: y, x2: cx + span, y2: y, stroke: 'rgba(255,255,255,.35)', 'stroke-width': span / 600 }, svg);
+  el('circle', { cx: 0, cy: 0, r: span / 80, fill: '#555' }, svg);
+  let d = `M0 0`;
+  for (let i = 1; i < t.length; i++) {
+    const [x0, y0, h0] = t[i - 1], [x1, y1, h1] = t[i];
+    if (h0 === h1) d += ` L${x1} ${-y1}`;
+    else d += ` Q${x0 + DX[h0]} ${-(y0 + DY[h0])} ${x1} ${-y1}`;
+  }
+  el('path', { d, fill: 'none', stroke: '#fff', 'stroke-width': span / 90, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: 0.9 }, svg);
+  const [bx, by, bh] = t[t.length - 1], s = 0.5;
+  el('path', { d: `M0 ${-1.2 * s} Q${0.6 * s} ${-0.2 * s} ${0.45 * s} ${s} L${-0.45 * s} ${s} Q${-0.6 * s} ${-0.2 * s} 0 ${-1.2 * s}Z`, fill: '#8b5a2b', stroke: '#3e2a14', 'stroke-width': 0.06, transform: `translate(${bx} ${-by}) rotate(${bh * 90}) scale(${Math.max(1, span / 14)})` }, svg);
+}
+
+addEventListener('keydown', (e) => {
+  if (busy) return;
+  const k = e.key;
+  if (k === 'ArrowUp') cur.r = Math.max(0, cur.r - 1);
+  else if (k === 'ArrowDown') cur.r = Math.min(H - 1, cur.r + 1);
+  else if (k === 'ArrowLeft') cur.c = Math.max(0, cur.c - 1);
+  else if (k === 'ArrowRight') cur.c = Math.min(W - 2, cur.c + 1);
+  else if (k === ' ') { e.preventDefault(); swap(); return; }
+  else return;
+  e.preventDefault(); draw();
+});
+document.querySelectorAll('input[name=kind]').forEach((r) => r.addEventListener('change', () => { kind = r.value; r.blur(); start(); }));
+$('clocked').addEventListener('change', (e) => { e.currentTarget.blur(); start(); });
+$('again').addEventListener('click', (e) => { e.currentTarget.blur(); start(); });
+window.rowTest = { get row() { return row; }, swap: (r, c) => { cur = { r, c }; return swap(); } };
+start();
+</script>
+</body>
+</html>
