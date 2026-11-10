@@ -41,3 +41,14 @@ describe("The walk frame once the wall's all filled (8 Nov)", () => {
     expect(timberComes(null, 'beaten')).toBe(false);
   });
 });
+
+describe('the rampart after the siege', () => {
+  it("the gun tower can still be built after the siege: no waves left to bring its timber (10 Nov)", () => {
+    // "what happened to building the [gun tower]? Have I got no way of doing that now because there
+    // was that triggered after a third wave or something?"
+    expect(afterWave(SIEGE.WAVES)).toBe('peace');
+    expect(timberComes('later', 'peace')).toBe(true);
+    // Not while something's still being built (nextPart is null then), and nothing once all's built.
+    expect(timberComes(null, 'peace')).toBe(false);
+  });
+});

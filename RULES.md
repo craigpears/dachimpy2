@@ -1006,6 +1006,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   end. The user turned down a clay golem built from smashed Swordfight blocks, with breakers won
   from kills, as "too far away from the sword fighting puzzle", and said this goes for all of them.
   A new job's look (a golem, a forge) can be a skin, never a change to the rules.
+- **The rampart's timber after the siege (10 Nov).** "what happened to building the [gun tower]?
+  Have I got no way of doing that now because there was that triggered after a third wave or
+  something?" Each later part's timber came only with a wave beaten off, and only once nothing
+  was still being built: still on the walk when the third wave ended, the stairs and the gun tower
+  never came. Once the siege is over, each part's timber comes as soon as the one before is built
+  (`timberComes`, `src/den-raids.ts`).
 - **Kept because people like them (10 Nov).** Two things nearly cut, kept: Bilge on the beach in
   the opening siege (the tide, its rocks, the powder barrels: "don't get rid of the bilge on the
   [beach] ... people like that ... it adds to the scenicness. And the opening of it"), and patching

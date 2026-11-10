@@ -853,7 +853,12 @@ export function updateWaves(dt) {
     G.phaseT = WALL_DONE_SECS;
     say(`The wall's mended! Here they come…${timber ? ' Timber\'s come: build the rampart in its frame while they try to get in' : ''}`, true);
   } else if (timber) say('The wall\'s mended! Timber\'s come: build the rampart in its frame while they try to get in');
-  if (G.phase === 'peace') return;   // the siege is over: nobody's coming
+  if (G.phase === 'peace') {
+    // The siege is over: nobody's coming, so each part's timber comes once the one before is built.
+    const f = !timber && timberComes(nextPart(), 'peace') && openJob(ramp.next);
+    if (f) say(`Timber's come: ${f.kind === 'gun' ? 'build a gun tower in its frame' : 'build the rampart in its frame'}`);
+    return;
+  }
   if (G.phase !== 'wave') {
     G.phaseT -= dt;
     if (G.phaseT <= 0) startWave();

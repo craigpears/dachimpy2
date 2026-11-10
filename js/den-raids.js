@@ -23,9 +23,12 @@ export const countingDown = (phase) => phase === 'build' || phase === 'calm';
     off. The walk comes as soon as every hole in the wall's mended, mid-wave or not (the user,
     8 Nov: "the walk should appear once you are safe and have filled in all the holes, so you can
     work on that while they try in a futile attempt to get in"), or with a wave beaten off if that
-    comes first. */
+    comes first. Once the siege is over (`peace`), there are no more waves to bring it, so each part
+    comes as soon as the one before is built (the user, 10 Nov: "what happened to building the
+    [gun tower]? Have I got no way of doing that now because there was that triggered after a third
+    wave or something?": still building the walk when the siege ended, the rest never came). */
 export function timberComes(next, why) {
     if (!next)
         return false;
-    return why === 'beaten' || next === 'walk';
+    return why === 'beaten' || why === 'peace' || next === 'walk';
 }
