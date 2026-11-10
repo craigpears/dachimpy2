@@ -67,7 +67,7 @@ describe('sailing: rocks ("just keep it simple as like with a few rocks", 9 Nov)
       // (but a trade wind's squares: she can't stop on a lane, it always sweeps her on)
       for (let c = 0; c < s.cols; c++) for (let r = 0; r < s.rows; r++) if (s.open(c, r)) expect(s.plot(H, c, r) !== null).toBe(s.windAt(c, r) === undefined);
     }
-  });
+  }, 60000);   // (a lot of plotting, on the bigger board)
 
   it('is the same sea for the same seed', () => {
     expect([...new Sea(7).rocks].sort()).toEqual([...new Sea(7).rocks].sort());
@@ -224,9 +224,12 @@ describe('sailing: the trade winds ("just insanely quick wind tiles", 9 Nov)', (
     // Right: onto the wind across and round, back in towards the cove: a loop.
     const right = s.sail(at, 'R').to, C = LAY.LANES[2];
     expect([right.c, right.r]).toEqual([C.at[0], C.at[1] - C.n]);
-    // Left: the canal, towards the lock; on: open sea.
+    // Left: the canal, towards the lock; on: the main shipping lane, out to the imperial checkpoint
+    // (10 Nov), which drops her off short of its guns.
     expect(s.sail(at, 'L')).toEqual({ to: { c: jc - 1, r: jr + 1, d: 3 }, bump: false });
-    expect(s.sail(at, 'F').to).toEqual({ c: jc, r: jr + 1, d: 0 });
+    const D = LAY.LANES[3];
+    expect(D.at).toEqual([jc, jr + 1]);
+    expect(s.sail(at, 'F').to).toEqual({ c: jc, r: jr + 1 + D.n, d: 0 });
   });
 
   it('the wind turns her the way it blows as it carries her round a corner', () => {

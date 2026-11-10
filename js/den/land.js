@@ -759,7 +759,7 @@ const seaTex = canvasTex(128, 128, (g, w, h) => {
   for (let i = 0; i < 40; i++) { g.fillStyle = `rgba(200,235,245,${0.1 + Math.random() * 0.25})`; g.fillRect(Math.random() * w, Math.random() * h, 8 + Math.random() * 22, 2); }
 });
 seaTex.wrapS = seaTex.wrapT = THREE.RepeatWrapping;
-seaTex.repeat.set(16, 8);
+seaTex.repeat.set(16, 8 * 140 / 90);   // (the sea runs 140 m out: as far as the sloop's sea goes, past the checkpoint)
 const trunkMat = mat('#7d5b38', { map: woodTex });
 const leafMats = ['#3f8a3a', '#2f7432', '#4f9a3c'].map((c) => mat(c, { side: THREE.DoubleSide, flatShading: true }));
 const canopyMats = ['#2f6b2a', '#3b7d2f', '#275a26'].map((c) => mat(c, { flatShading: true }));
@@ -862,19 +862,19 @@ export function applyBiome(force = false) {
   // Every den's in a cove: the sea beyond the beach where the raiders land, with a line of surf.
   // The sea is see-through, clearest at its edge, over a sandy bed that falls away into the deep:
   // as the tide goes out you see the water draw back off the sand (and off the bilge board).
-  sea = mesh(new THREE.PlaneGeometry(220, 90), mat('#ffffff', { map: seaTex, roughness: 0.45, metalness: 0, emissive: '#1f6c9e', transparent: true, alphaMap: seaFade, depthWrite: false }), false);
+  sea = mesh(new THREE.PlaneGeometry(220, 140), mat('#ffffff', { map: seaTex, roughness: 0.45, metalness: 0, emissive: '#1f6c9e', transparent: true, alphaMap: seaFade, depthWrite: false }), false);
   sea.rotation.x = -Math.PI / 2;
-  sea.position.set(0, 0.05, SHORE - 45);
+  sea.position.set(0, 0.05, SHORE - 70);
   sea.renderOrder = 1;
   const surf = mesh(new THREE.PlaneGeometry(220, 0.5), new THREE.MeshBasicMaterial({ color: '#e8f4f2', transparent: true, opacity: 0.55, depthWrite: false }), false);
   surf.rotation.x = -Math.PI / 2;
   surf.position.set(0, 0.055, SHORE - 0.15);
   surf.renderOrder = 2;
-  const bed = mesh(new THREE.PlaneGeometry(220, 100), new THREE.MeshStandardMaterial({ map: seabedTex, roughness: 1, polygonOffset: true, polygonOffsetFactor: -1 }), false);
+  const bed = mesh(new THREE.PlaneGeometry(220, 150), new THREE.MeshStandardMaterial({ map: seabedTex, roughness: 1, polygonOffset: true, polygonOffsetFactor: -1 }), false);
   bed.rotation.x = -Math.PI / 2;
-  bed.position.set(0, 0.003, HIGH - 50);
+  bed.position.set(0, 0.003, HIGH - 75);
   biomeGroup.add(sea, surf, bed);
-  shoreParts = [[sea, -45], [surf, -0.15]];
+  shoreParts = [[sea, -70], [surf, -0.15]];
   // A strip of sand up from the water, fading into the den's own ground (the seaside's is all sand).
   if (id !== 'seaside') {
     const sand = mesh(new THREE.PlaneGeometry(70, 6), new THREE.MeshStandardMaterial({ color: '#c4a172', roughness: 1, transparent: true, depthWrite: false, alphaMap: sandFade }), false);
@@ -903,13 +903,14 @@ export function biomeTick(dt) {
 // The sea's see-through edge: half clear where it meets the sand, deep blue further out.
 const seaFade = canvasTex(4, 128, (g, w, h) => {
   const gr = g.createLinearGradient(0, h, 0, 0);
-  gr.addColorStop(0, '#a0a0a0'); gr.addColorStop(0.12, '#c4c4c4'); gr.addColorStop(0.3, '#ececec'); gr.addColorStop(1, '#ffffff');
+  gr.addColorStop(0, '#a0a0a0'); gr.addColorStop(0.12 * 90 / 140, '#c4c4c4'); gr.addColorStop(0.3 * 90 / 140, '#ececec'); gr.addColorStop(1, '#ffffff');
   g.fillStyle = gr; g.fillRect(0, 0, w, h);
 });
 // The seabed: sand at the top of the beach, wet sand where the tide goes, then down into the deep.
 const seabedTex = canvasTex(4, 256, (g, w, h) => {
   const gr = g.createLinearGradient(0, h, 0, 0);
-  gr.addColorStop(0, '#c4a172'); gr.addColorStop(0.06, '#a98a5e'); gr.addColorStop(0.12, '#8a7a58'); gr.addColorStop(0.2, '#4f6e66'); gr.addColorStop(0.4, '#2a4c58'); gr.addColorStop(1, '#183444');
+  const k = 100 / 150;   // (the stops were laid out for a seabed 100 m deep)
+  gr.addColorStop(0, '#c4a172'); gr.addColorStop(0.06 * k, '#a98a5e'); gr.addColorStop(0.12 * k, '#8a7a58'); gr.addColorStop(0.2 * k, '#4f6e66'); gr.addColorStop(0.4 * k, '#2a4c58'); gr.addColorStop(1, '#183444');
   g.fillStyle = gr; g.fillRect(0, 0, w, h);
 });
 // The beach strip's fade: solid at the water's edge, gone by the top.

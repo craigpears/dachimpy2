@@ -22,7 +22,7 @@ import { hullGeo } from './raids.js';
    home, and a canal to a lock up a cliff into a hidden cove; a turret on a rock shoots at her, and
    a hit holes her deck: she's dazed till you patch it by Carpentry (patchOpen). The lock's worked
    by Bilge, from a board on the quay beside it, an old pump at its head (holdOpen). */
-export const SEA_X0 = -SAIL.COLS * SAIL.CELL / 2;
+export const SEA_X0 = SAIL.X0;   // (where it was before the board grew out to the right)
 export const seaX = (c) => SEA_X0 + (c + 0.5) * SAIL.CELL, seaZ = (r) => SAIL.Z0 - (r + 0.5) * SAIL.CELL;
 export const SLOOP_DECK = 0.75;
 export const sail = { on: false, sea: new Sea(9), helm: null, g: null, rocks: null, pin: null, hover: null, dots: [], sig: '', hudSig: '', seen: false, heel: 0, bumpT: 0, guns: new Guns(), rockAt: new Map(), world: null, turret: null, shots: [], riding: false, said: {} };
@@ -93,7 +93,7 @@ export function sloopMesh() {
 export function seaRocks() {
   const g = new THREE.Group();
   for (const id of sail.sea.rocks) {
-    if (sail.sea.cliff.has(id)) continue;   // (the cliff's drawn with the cove: seaWorld)
+    if (sail.sea.cliff.has(id) || sail.sea.works.has(id)) continue;   // (the cliff's drawn with the cove: seaWorld; the checkpoint and the wreck by checkpoint.js)
     const [c, r] = id.split(',').map(Number), x = seaX(c), z = seaZ(r), here = [];
     for (let i = 0; i < 3; i++) here.push(rock(x + (Math.random() - 0.5) * 2.2, 0.2 + Math.random() * 0.4, z + (Math.random() - 0.5) * 2.2, 0.9 + Math.random() * 0.8));
     g.add(...here);

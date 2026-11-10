@@ -11,7 +11,9 @@ import { chart, cine } from './map.js';
 import { SEA_X0, seaX, seaZ, SLOOP_DECK, sail, LIFT, liftAt, sloopMesh, seaRocks, seaWorld, turretLook, turretFall, floatChestMesh, pinMesh, dotMat, dotMine, dotGeo, hoverMat, TOK } from './sea.js';
 import { hold, holdShut, holdKey, holdHover, holdSwap, holdTick, patch, deckHoleShape, patchClear, patchShut, patchPlace, patchHover, patchTick } from './sea-puzzles.js';
 import { online } from './crew.js';
-import { haul, haulShut, haulPrompt, canHaulTurret, haulTurret } from './treasure.js';
+import { haul, haulShut, haulPrompt, canHaulTurret, haulTurret, canHaulWreck, haulWreck } from './treasure.js';
+import { checkpointReset, checkpointTick } from './checkpoint.js';
+import { isCheckpoint } from '../den-checkpoint.js';
 import { deco, decoMode } from './menus.js';
 import { sailView, patchView, setPaused, denLets } from '../den.js';
 import { WIND } from '../den-wind.js';
@@ -53,6 +55,7 @@ export function sailReset() {
   sail.helm = new Helm(sail.sea);
   sail.guns = new Guns();
   sail.turret = new Turret(LAY.TURRET);
+  checkpointReset();
   if (sail.world) turretLook(sail.world, false);
   sail.shots.forEach((v) => { scene.remove(v.ball, v.ring); });
   sail.shots = [];
@@ -111,6 +114,7 @@ function sailFire(side) {
       tween(0.4, (u) => { const k = Math.sin(u * Math.PI * 6) * 0.12 * (1 - u); r.position.x = x0 + k; r.position.z = z0 - k; }, () => { r.position.x = x0; r.position.z = z0; });
     }
     if (hit[0] === LAY.TURRET[0] && hit[1] === LAY.TURRET[1]) turretHit(to);
+    else if (isCheckpoint(sail.sea, ...hit)) toast('A hit on the checkpoint! But a sloop\'s guns don\'t trouble an imperial bastion');
     else toast('A hit on the rocks!');
   });
 }
@@ -150,6 +154,7 @@ export function sailKey(key) {
   else if (key === 'escape') { sail.helm.stop(); toast('Pin pulled up: she\'ll stop when this turn\'s done'); }
   else if (key === 'h') { sail.helm.drop(SAIL.HOME.c, SAIL.HOME.r); if (sail.helm.pin) toast('Heading home to the cove'); }
   else if ((key === ' ' || key === 'enter') && canHaulTurret()) haulTurret();
+  else if ((key === ' ' || key === 'enter') && canHaulWreck()) haulWreck();
   else if ((key === ' ' || key === 'enter') && atHome() && sail.helm.slot < 0) ashore();
   else if (key === 'z' || key === 'c') keys.add(key);
   else if (key === 'p') setPaused(true);
@@ -175,6 +180,7 @@ export function sailPrompt() {
   if (held === 'calm') return 'Becalmed: dead in the water till the wind picks up · O: out oars';
   if (atHome() && h.slot < 0 && !h.next().length) return 'At her mooring · Space: go ashore · click the sea to drop a pin';
   if (canHaulTurret()) return 'The turret\'s chest · Space: haul it aboard (Treasure Haul) · click the sea to drop a pin';
+  if (canHaulWreck()) return 'The old wreck · Space: haul up its treasure (Treasure Haul) · click the sea to drop a pin';
   if (h.slot < 0 && h.headwind()) return 'She can\'t sail to the pin: it\'s dead against the wind · O: out oars and row her there, or wait for it to shift';
   if (h.pin) return h.oars ? 'Rowing to the pin' : 'Under way to the pin';
   if (h.slot >= 0) return 'Under way';
@@ -267,6 +273,7 @@ export function sailTick(dt) {
     if (sail.bumpT > 0 && (sail.bumpT -= dt) <= 0) { worldLets.shake = 0.3; toast('Bump! Rocks', true); }
     sail.guns.tick(dt);
   }
+  checkpointTick(dt);   // (the imperial checkpoint: checkpoint.js)
   holdTick(dt);
   patchTick(dt);
   rowTick(dt, haul.on);

@@ -271,7 +271,8 @@ moving. It gives such a nostalgia." What's next:
   ("it's just a bit weird because, well, you haven't got any bigger ships yet, so you are always
   able to take these little nifty routes"). Goes with "Ship types with real trade-offs" and
   "Shallow and deep water". (Whether the secret cove stays as well, and how a sloop's choice
-  means something before bigger ships come: to shape with the user.)
+  means something before bigger ships come: to shape with the user. A first go of running it,
+  rowing it and going round is built: RULES.md, "The imperial checkpoint".)
   **Bribe your way through (10 Nov):** another way past the checkpoint: haul treasure up from a
   wreck (Treasure Haul; "go blow up a wreck, get some coins or something") and use it to bribe
   your way through. So in a race you'd either do some treasure hauling to buy your way past, or

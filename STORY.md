@@ -99,7 +99,11 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    Battle Navigation's moves, or steer her yourself; she has a gun each side to fire at the rocks
    as you go; trade winds sweep her out to a junction, a canal leads to a lock you pump up by
    Bilge into a hidden cove behind a cliff, and a turret's hits hole her till you patch her by
-   Carpentry; three hits from her guns wreck it, and its chest is hauled up by Treasure Haul).
+   Carpentry; three hits from her guns wreck it, and its chest is hauled up by Treasure Haul; on
+   from the junction the main shipping lane runs to an imperial checkpoint, its guns trained on
+   marks along the way through: run it under sail, row it (small clears walk her into the guns, a
+   Vegas on each side rushes her past), or go round the long way, to an old wreck beyond it whose
+   treasure is hauled up by Treasure Haul; the crane over its headland and a bribe come later).
    The cove is the first step of a journey that grows: from it a crane built by Carpentry hauls
    her up the cliff to a clifftop lagoon, a discovery, with an old wreck to haul treasure from
    ("more of an adventure ... we can have a multi-step thing and gradually build up on it").

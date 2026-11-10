@@ -1,5 +1,5 @@
 // Treasure Haul in the world: the board laid on the water where a chest is to be hauled up, and the
-// wrecked turret's chest hauled aboard the sloop by it.
+// wrecked turret's chest, or the old wreck's beyond the checkpoint, hauled aboard the sloop by it.
 import * as THREE from 'three';
 import { H as TH, W as TW } from '../treasure-haul.js';
 import { Salvage, aboard } from '../den-haul.js';
@@ -414,11 +414,25 @@ function turretSalvage() {
 }
 export const canHaulTurret = () => sail.on && !haul.on && !!turretSalvage()?.canStart(sail.helm);
 export function haulTurret() {
-  const s = turretSalvage();
+  return haulBeside(turretSalvage(), () => { sail.turret.chest = null; sail.salvage = null; });
+}
+// The old wreck beyond the imperial checkpoint (LAY.WRECK, src/den-sail.ts): its treasure's hauled
+// up the same way, stopped beside it. Once it's up, the wreck's bare.
+function wreckSalvage() {
+  const w = sail.sea.wreck;
+  if (!w) return null;
+  return (sail.wreckSalvage ||= new Salvage(w));
+}
+export const canHaulWreck = () => sail.on && !haul.on && !!wreckSalvage()?.canStart(sail.helm);
+export function haulWreck() { return haulBeside(wreckSalvage(), () => {}, true); }
+// Haul a salvage up beside her: the board on the water on its side of her (on her other side with
+// `away`, clear of a wreck that's in the way), the chest it brings up swinging aboard onto her deck.
+// `done` once it's aboard and paid.
+function haulBeside(s, done, away = false) {
   if (!s || !s.canStart(sail.helm)) return false;
   const ry = sail.g.rotation.y, side = V3(Math.sin(ry), 0, Math.cos(ry));   // her own +z: abeam
   const p = sail.helm.pose, to = V3(seaX(s.at[0]) - seaX(p.c), 0, seaZ(s.at[1]) - seaZ(p.r));
-  const k = Math.sign(to.dot(side)) || 1, sq = 0.45;
+  const k = (Math.sign(to.dot(side)) || 1) * (away ? -1 : 1), sq = 0.45;
   const at = V3(seaX(p.c), 0.12 + liftAt(p.c, p.r), seaZ(p.r)).addScaledVector(side, k * (0.85 + 0.35 + TH * sq / 2));
   haulOpen({
     salvage: s, at, yaw: Math.atan2(k * side.x, k * side.z), sq,
@@ -428,8 +442,7 @@ export function haulTurret() {
     onDone: (n) => {
       G.gold += n;
       updateStats();
-      sail.turret.chest = null;
-      sail.salvage = null;
+      done();
       toast(aboard(n));
     },
   });

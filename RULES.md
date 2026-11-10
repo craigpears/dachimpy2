@@ -354,6 +354,54 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       harder on port"). Holed, the board gives way to the deck patch; at the lock, to the quay's
       Bilge; and comes back after. To haul the turret's chest, ship the oars first. Rules:
       `src/den-row.ts`; the board in the world: `js/den/rowing.js`.
+  - **The imperial checkpoint (10 Nov).** The user: "this race idea was the funny one. We absolutely
+    need that. We need our own puzzle where we have to get through the Imperial checkpoint by doing
+    slow row and then fast rowing with the Vegas." And on its guns: they're trained on particular
+    squares; land on one and she's hit, mended by Carpentry, or "build a combo big enough to jump
+    two squares at once and skip the gun's square. Quick small clears keep her moving but walk into
+    the guns; a big combo leaves her sitting still while you build it, but rushes her past."
+    - **The sea grew** to 22 squares across and 26 out (the user wanted "a bit of the map, not just
+      tiny sections"), out to the right and further out to sea; everything that was there is where
+      it was, its scattered rocks the same. The hidden cove's cliff now closes it in behind too.
+    - **The main shipping lane:** on from the junction is a trade wind now, out to the checkpoint;
+      it drops her four squares short of the gate, just out of reach of its guns, facing it.
+    - **The checkpoint:** a line across the sea, closed but for its gate, under a gatehouse of pale
+      stone (two towers and an arch high enough for her mast, crimson banners down them, the
+      Empire's crimson flag with a gold crown and rising sun over it, a boom chain lying slack under
+      the water between its piers). A bastion either side has a gun on it. On its left a headland
+      (cliff), on its right a reef whose far end is open: the long way round. "Pirates aren't
+      welcome", so its guns fire on her, out and back.
+    - **Its guns are trained on marks:** red rings on the water on the way through, three of them:
+      two squares before the gate, the gate itself, two squares beyond. Whenever she's on a mark and
+      its gun is loaded (2.5 seconds between shots) it fires on that square, and the shot's down 0.9
+      seconds later: still there, she's holed (patched by Carpentry, as for the turret); gone, it
+      splashes down. So a square rowed on its own, which she stops on, is hit; two or more rowed at
+      once go straight over the marks between, and a Vegas on each side (ten squares) carries her
+      through the lot at the trade winds' pace. Under sail, a good wind behind her takes each square
+      too quickly to be hit, but her breather between turns comes on the gate (four moves from where
+      the lane drops her), and a wind across her or light airs is slow enough to be hit on every
+      mark. Patched, its guns hold fire five seconds, as the turret's do. Out of their reach she's
+      safe, so you can stop short and build your combo (or row in circles while you do).
+    - **Not to be wrecked or quieted:** a hit from her guns does nothing ("A hit on the checkpoint!
+      But a sloop's guns don't trouble an imperial bastion"). Its guns are what the choice of ways
+      through is about ("Every other way through costs a puzzle"), so shooting them down mustn't be
+      a way through without a puzzle, nor end the choice for good.
+    - **Round the long way:** past the reef's end, out of reach of its guns the whole way, about
+      three times as far as through the gate. (It costs time, not a puzzle, for now; with a wind
+      against one of its legs it's oars or a wait.)
+    - **Said:** coming up to it, "The imperial checkpoint! Its guns are trained on the red rings:
+      stop on one and she's hit. Run it, row it, or go round the long way"; once she's past its
+      last mark, "Through the checkpoint! Not a scratch on her" (or "Holed once, patched, and
+      through"), "Round the checkpoint the long way, out of reach of its guns", and "Back through"
+      or "Back round" coming home.
+    - **The old wreck beyond it:** run aground on a sandbar on the open sea, out of reach of its
+      guns: the reason to get past. Stop beside it and Space hauls its treasure up by Treasure Haul,
+      as for the turret's chest (the board on her other side, clear of the wreck); once it's up the
+      wreck's bare.
+    - **Room left for later:** a ledge at the headland's foot on the near side and a landing beyond
+      it, kept clear, for the crane up and over it; the gatehouse's boom for the bribe. Rules:
+      `src/den-checkpoint.ts` (the lay: LAY.CHECKPOINT in `src/den-sail.ts`); in the world:
+      `js/den/checkpoint.js`.
 - **A quick siege to start, then calm (9 Nov).** The first three waves come as they always have,
   each counting down after the last. Beat the third and their captain calls it off ("We'll be
   back!") and the ship sails out of the cove, its cannon with it. The den's quiet after that: no

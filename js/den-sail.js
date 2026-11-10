@@ -19,11 +19,20 @@
 import { DeckHole } from './den-patch.js';
 import { WIND, moveTime, pointOf, rowTime, upwind } from './den-wind.js';
 export const SAIL = {
-    /** The board: squares across and out to sea. */
-    COLS: 16,
-    ROWS: 14,
+    /** The board: squares across and out to sea. Grown (10 Nov) from 16 by 14 to make room for the
+        imperial checkpoint and the open sea beyond it (the user wanted "a bit of the map, not just
+        tiny sections"): out to the right and further out to sea, everything already there staying
+        put. */
+    COLS: 22,
+    ROWS: 26,
+    /** Where the scattered rocks fall: the board as it was before it grew, so its rocks are the same
+        as ever. The new water is laid out by hand (LAY). */
+    SCATTER: { COLS: 16, ROWS: 14 },
     /** A square, in metres (the sloop's about one long). */
     CELL: 4,
+    /** The board's left edge, in metres across from the den's middle: where it was at 16 squares
+        across, so it grows out to the right. */
+    X0: -32,
     /** Where the board starts, out from the wall (metres; the wall's at 0, out is -): at the lowest
         tide's edge, so the sloop's moored close in, where you see her from the beach (the user, 9
         Nov: she should be "in a more natural place"), and still always afloat. */
@@ -87,11 +96,14 @@ export const SAIL = {
    out to open sea. Rocks stand along the lanes' sides, and a turret on a rock between them shoots
    at her. */
 export const LAY = {
-    /** The trade winds: where each starts, the way it blows, and how many squares long. */
+    /** The trade winds: where each starts, the way it blows, and how many squares long. The last is
+        the main shipping lane, on out from the junction to the imperial checkpoint: it drops her off
+        just out of reach of its guns, facing its gate (see CHECKPOINT). */
     LANES: [
         { at: [9, 2], d: 0, n: 8 },
         { at: [10, 11], d: 1, n: 3 },
         { at: [13, 11], d: 2, n: 9 },
+        { at: [9, 11], d: 0, n: 4 },
     ],
     JUNCTION: [9, 10],
     CANAL: [[8, 11], [7, 11], [6, 11]],
@@ -101,7 +113,38 @@ export const LAY = {
     TURRET: [11, 6],
     /** Rocks along the lanes' sides ("some craziness to the journey"). */
     SIDES: [[8, 5], [10, 8], [12, 4], [14, 8], [11, 13]],
+    /** The imperial checkpoint (10 Nov), across the main shipping lane: a line across the sea at ROW,
+        closed but for its gate (GATE, under a gatehouse whose PIERS stand either side) and the far end
+        of its reef. Its guns stand on bastions either side (GUNS), each trained on squares of the way
+        through (MARKS, src/den-checkpoint.ts). On its left a headland (cliff): the crane up and over
+        it, later, goes from LEDGE on the near side to LANDING beyond, both kept clear. On its right a
+        reef of rocks (REEF, along ROW), its end open: the long way round. */
+    CHECKPOINT: {
+        ROW: 19,
+        GATE: 9,
+        PIERS: [[8, 19], [10, 19]],
+        GUNS: [[7, 19], [11, 19]],
+        HEADLAND: { c0: 0, c1: 6, r0: 18, r1: 20 },
+        REEF: { c0: 12, c1: 19 },
+        LEDGE: [3, 17],
+        LANDING: [3, 21],
+    },
+    /** An old wreck on the open sea beyond the checkpoint, its treasure hauled up by Treasure Haul:
+        the reason to get past. Out of reach of the checkpoint's guns, so she can haul in peace. */
+    WRECK: [5, 24],
+    /** Rocks out on the water the board grew into. */
+    FAR: [[17, 4], [19, 8], [16, 13], [20, 15], [15, 17], [17, 22], [13, 24], [19, 24], [1, 23]],
 };
+/** The squares of the checkpoint's line that are built on (its piers and its guns' bastions), and
+    the headland's: rocks to sail by, drawn by js/den/checkpoint.js, not as sea stacks. */
+export function checkpointWorks() {
+    const K = LAY.CHECKPOINT, out = [...K.PIERS, ...K.GUNS];
+    const { c0, c1, r0, r1 } = K.HEADLAND;
+    for (let c = c0; c <= c1; c++)
+        for (let r = r0; r <= r1; r++)
+            out.push([c, r]);
+    return out;
+}
 /** Across and out for each way she can face. */
 const DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
 const key = (c, r) => `${c},${r}`;
@@ -147,6 +190,11 @@ export class Sea {
     lock = null;
     turret = null;
     junction = null;
+    /** The squares built on (the checkpoint's piers and bastions, its headland) and the wreck's:
+        rocks to sail by, drawn by their own 3D rather than as sea stacks. */
+    works = new Set();
+    /** The old wreck beyond the checkpoint, if laid. */
+    wreck = null;
     /** The wind she sails by (src/den-wind.ts), if there's one. With none, every move takes
         SAIL.MOVE and goes any way. */
     breeze = null;
@@ -184,27 +232,36 @@ export class Sea {
                 this.cliff.add(key(c1 + 1, r));
         for (let c = c0; c <= c1; c++)
             this.cliff.add(key(c, r0 - 1));
+        // (and behind it, now the board runs on out past it: 10 Nov)
+        for (let c = c0; c <= c1 + 1; c++)
+            this.cliff.add(key(c, r1 + 1));
         for (let c = c0; c <= c1 + 2; c++)
             for (let r = r0 - 2; r <= r1; r++)
                 this.keep.add(key(c, r));
         this.lock = [...LAY.LOCK];
         this.turret = [...LAY.TURRET];
         this.junction = [...LAY.JUNCTION];
+        // The checkpoint, its headland and the wreck beyond it (all outside where the rocks scatter).
+        for (const [c, r] of [...checkpointWorks(), LAY.WRECK])
+            this.works.add(key(c, r));
+        this.wreck = [...LAY.WRECK];
     }
     scatter(roll) {
-        this.rocks = new Set([...this.cliff, ...LAY.SIDES.filter(() => this.wind.size).map(([c, r]) => key(c, r)), ...(this.turret ? [key(...this.turret)] : [])]);
-        const H = SAIL.HOME;
+        const laid = this.wind.size > 0, K = LAY.CHECKPOINT;
+        const reef = laid ? Array.from({ length: K.REEF.c1 - K.REEF.c0 + 1 }, (_, i) => key(K.REEF.c0 + i, K.ROW)) : [];
+        this.rocks = new Set([...this.cliff, ...this.works, ...reef, ...[...LAY.SIDES, ...LAY.FAR].filter(() => laid).map(([c, r]) => key(c, r)), ...(this.turret ? [key(...this.turret)] : [])]);
+        const H = SAIL.HOME, COLS = SAIL.SCATTER.COLS, ROWS = SAIL.SCATTER.ROWS;
         for (let n = 0; n < SAIL.CLUMPS; n++) {
-            let c = Math.floor(roll() * this.cols), r = 2 + Math.floor(roll() * (this.rows - 2));
+            let c = Math.floor(roll() * COLS), r = 2 + Math.floor(roll() * (ROWS - 2));
             const size = 1 + Math.floor(roll() * 3);
             for (let i = 0; i < size; i++) {
-                if ((Math.abs(c - H.c) > 2 || r > 3) && !this.keep.has(key(c, r)) && c < this.cols && r < this.rows)
+                if ((Math.abs(c - H.c) > 2 || r > 3) && !this.keep.has(key(c, r)) && c < COLS && r < ROWS)
                     this.rocks.add(key(c, r));
                 if (roll() < 0.5)
                     c += roll() < 0.5 ? -1 : 1;
                 else
                     r += roll() < 0.5 ? -1 : 1;
-                if (c < 0 || c >= this.cols || r < 1 || r >= this.rows)
+                if (c < 0 || c >= COLS || r < 1 || r >= ROWS)
                     break;
             }
         }
