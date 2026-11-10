@@ -123,6 +123,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   den's 3D style, as the gun tower is "instantly recognisable as Gunnery". Check the finished
   board side by side with YPPedia's pictures before calling it done. No placeholder tiles.
 
+- **Messages stay up long enough to read (10 Nov).** The checkpoint's message "vanished very
+  quickly": a longer message stays up longer (about 70 ms a letter, 1.8 to 7 seconds), and one
+  that comes while another is still being read waits its turn instead of wiping it (only the
+  latest waits, so they never pile up). Bad news, a hit, never waits.
+
 - **A puzzle game, not an action game.** The raiders are there for a bit of interest and a bit of
   pressure, so you can't ignore things altogether; the emphasis is always on wanting to finish the
   puzzle in front of you (the next section to build, the next Gunnery load). It mustn't be a

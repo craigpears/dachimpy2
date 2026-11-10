@@ -158,6 +158,13 @@ the site (`.assetsignore` skips `*.md`).
   YPPedia page's pictures, and redraw any piece that doesn't read as the real one (RULES.md, "A
   puzzle's pieces look like the real ones").
 
+- **Park the wind for now (10 Nov):** "I think maybe we need to park the wind idea for now.
+  That's just getting irritating ... like I don't know why if I got arrows pointing to the right
+  all the time, like it's just over the top. I think it's the arrows getting in my way." Turn the
+  weather off, so she sails the same every way (no calms, no irons, no wind changes or their
+  messages), and take away the big arrows by her, the streaks and the wind on the sailing bar.
+  Keep the code, switched off, to refine later (IDEAS.md). The trade winds stay.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map

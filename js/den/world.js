@@ -406,13 +406,35 @@ export function burst(at, color, n, speed) {
   }
 }
 let toastTimer;
+// A toast stays up long enough to read (longer for longer words: 10 Nov, the checkpoint's message
+// "vanished very quickly"), and one that comes while another's still being read waits its turn
+// rather than wiping it; only the latest waiting toast is kept, so they never pile up behind.
+let toastShown = 0, toastRead = 0, toastWaiting = null, toastWait;
+const readMs = (text) => Math.min(4500, Math.max(1200, text.length * 45));
 export function toast(text, bad = false, warn = false) {
+  const now = performance.now();
+  const left = toastShown + toastRead - now;
+  if (!bad && $('toast').classList.contains('on') && left > 0) {   // bad news (a hit) never waits
+    toastWaiting = [text, bad, warn];
+    clearTimeout(toastWait);
+    toastWait = setTimeout(() => { const w = toastWaiting; toastWaiting = null; if (w) showToast(...w); }, left);
+    return;
+  }
+  showToast(text, bad, warn);
+}
+function showToast(text, bad, warn) {
   const t = $('toast');
   t.textContent = text;
   t.className = 'toast on' + (bad ? ' bad' : '');
   t.style.color = warn ? '#ffc46b' : '';
+  toastShown = performance.now();
+  toastRead = readMs(text);
+  if (toastWaiting) {   // something still waiting (a hit cut in): it comes once this one's read
+    clearTimeout(toastWait);
+    toastWait = setTimeout(() => { const w = toastWaiting; toastWaiting = null; if (w) showToast(...w); }, toastRead);
+  }
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('on'), 1800);
+  toastTimer = setTimeout(() => t.classList.remove('on'), Math.min(7000, Math.max(1800, text.length * 70)));
 }
 export const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.max(0, s) % 60).padStart(2, '0')}`;
 export function tween(dur, step, done) { tweens.push({ t: 0, dur, step, done }); }
