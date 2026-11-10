@@ -803,6 +803,12 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     still open. It reads partly like rowing (swing forward, press back), but solo, colour luck
     decides unison more than you do. To try next: the wash costs the oars too, a bonus for
     matched drive, numbers of its own for a crew (much easier: each side gets all the pieces).
+    **Played (10 Nov): "very confusing right now".** "I don't understand what's supposed to be
+    going on"; the oars drawn on the board "doesn't really make sense ... That's just really
+    weird"; and why two oars in different colours, "are the pieces on the board supposed to
+    correspond with the colours of the oars? Maybe we could have 4 colours and 4 oars", so which
+    colour gets popped says which oar pulls: "kind of Swordfight, Bilge-esque ... but linked to
+    the [oars]". To reshape with the user before building again.
     **Weather is where oars make sense (9 Nov):** the wind can drop. Under sail she's quicker, but
     when the wind drops a ship that's all sails is "dead in the water until the wind picks back
     up again", and under sail you "can't go against the wind". Oars keep her moving either way:

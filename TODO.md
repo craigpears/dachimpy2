@@ -229,8 +229,10 @@ the site (`.assetsignore` skips `*.md`).
   be a guy dressed in yellow gold with a Viking helmet". Every real pirate is made by the same
   pirate maker, from pieces of clothing (a horned helmet, a mask, a swashbuckler's jacket, a
   tankard...), and "when you go on to your pirate, you should be able to put any clothing on of
-  these people": every piece any of them wears is in your own pirate's wardrobe too. (Where
-  Dignity turns up in the story: to pin down with the user.)
+  these people": every piece any of them wears is in your own pirate's wardrobe too.
+  Drawn from her portrait (the user, 10 Nov: "go with the portrait photo, because then she's more
+  distinctive"). She's the imperial checkpoint's commander ("She can hang around up there"):
+  standing on the checkpoint, in her own look, a Lieutenant Commander as on her pirate page.
 
 ## Needs a playtest to pin down
 
