@@ -703,6 +703,29 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     onto a mate's board they can't see, "you don't know what you're going to affect on the other
     person's board ... you can just see somebody like clearing, ruining other people's". The
     worry: people would just share screens, which might make it frustrating. Still "a bit funny".
+    **Oars against the water, a puzzle of its own (10 Nov):** "think outside the box a bit more
+    ... what's the analogy for, like, pulling motion". The user's idea, after Puzzle Pirates'
+    Rumble: the oars are drawn on the board, and pieces come in from the top as the water's flow,
+    piling on the oar and pushing it back; popping them clears the space and lets the oar swing
+    forward, "until the normal flow and pressure gradually pushes them back again". So popping is
+    the rowing movement: "the bigger amount you clear in one go, you get a bigger, stronger
+    stroke", and the two oars still have to go in unison or she goes round in circles. Shaped a
+    little:
+    - **The stroke:** the oar lies across the board from its rowlock at the foot. The water's
+      pressure sweeps it back, and that sweep is the drive that moves her. Once it's right back
+      it's spent. A pop frees it to swing forward, as far as the pop was big, ready for the next
+      drive: a small pop, a short stroke; a big chain, a long one.
+    - **Unison:** her heading follows the two oars. Swinging together, she goes straight; one
+      oar driving while the other's spent, she turns. So the skill is building big pops and
+      timing them to land together.
+    - **Catching a crab:** if the pile reaches the top while the oar's still back, she's caught a
+      crab, the real rowing mishap: that oar jams a moment.
+    - **Solo and crew:** in a crew, a board each side, a pirate each. Solo, one board whose
+      colours belong to a side (say warm colours to port, cool to starboard), so which colours
+      you pop is how you steer, and a chain that pops both at once is a stroke in unison.
+    Quick to learn (pop pieces, the oar swings, she moves), hard to master (building big chains
+    while keeping two oars in time). (To test on the same page as mirror strokes, if the user
+    wants. To shape with the user.)
     **Weather is where oars make sense (9 Nov):** the wind can drop. Under sail she's quicker, but
     when the wind drops a ship that's all sails is "dead in the water until the wind picks back
     up again", and under sail you "can't go against the wind". Oars keep her moving either way:
