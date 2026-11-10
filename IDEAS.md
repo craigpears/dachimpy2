@@ -540,6 +540,11 @@ bursts it, to keep him in long enough to plunder the stuff.
   over.
 - Where it goes in the story: maybe one of the ways in (or one of the scrolls). "Who knows?
   Maybe that could be one of the things."
+- **Gravee leads you there (10 Nov):** "I think we need Gravee, she's a sweety. She can be involved
+  in leading you to the vampire lair." Gravee, a real pirate (pirate name only; check her pirate
+  page and portrait before drawing her, and every piece she wears goes in the wardrobe), a sweet
+  guide to the lair: the gentle one who brings you to the coffins. Her familiar, if she has one,
+  a character in the scene too.
 
 ## A little town up the cliffs (9 Nov)
 
