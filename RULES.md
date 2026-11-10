@@ -256,6 +256,37 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **Ashore:** sail back to her mooring and Space puts you on the beach beside her.
   - Alone only for now (no crews at sea yet). No tokens to earn yet, no destinations: those are
     IDEAS.md ("Sailing between places, for real"). Rules: `src/den-sail.ts`.
+  - **The wind, and her oars (a first go, 10 Nov).** The user (9 Nov): "try it. We'll see how it
+    feels, whether it's overcomplicated or not." The wind can drop, and a ship that's all sails is
+    "dead in the water until the wind picks back up again"; under sail you "can't go against the
+    wind"; oars keep her moving either way, slower than a good wind, but never stuck. Not "just
+    going faster". So:
+    - **The wind** blows one of the board's four ways, a good wind, light airs or a calm. A good
+      wind lasts 35 to 55 seconds, then mostly drops to light airs (sometimes it shifts a quarter
+      and blows on instead); light airs last 9 to 14 seconds and die to a calm about half the time,
+      otherwise freshen; a calm lasts 8 to 14 seconds and comes back as light airs, often from a
+      new way, which freshen. She puts out in a good wind blowing across the cove from the left.
+      Shown as faint streaks drifting over the water the way it blows (none in a calm), her flag
+      streaming downwind (limp in a calm), her sails full, slack or hanging, and on the sailing bar
+      at the left: an arrow the way it blows (turned with the view) and "Good wind", "Light airs"
+      or "Calm". A toast as it drops, picks up or shifts.
+    - **Under sail** a move takes 0.7 seconds in a good wind and 1.6 in light airs (the pauses and
+      breather as ever). In a calm she can't make way: the turn waits ("Becalmed"). She never
+      makes a square against the wind: a move that would is "in irons", she makes no way, a turn
+      swinging her head round where she is (as a blocked turn does). Becalmed, she's fair game for
+      the turret.
+    - **The oars:** O, or the button at the right of the sailing bar, runs them out or ships them.
+      Rowing, a move takes 1.15 seconds whatever the wind, any way; her sails are brailed up and
+      two long sweeps a side stroke from her gunwales. A turn under way finishes at the pace it
+      began.
+    - **The pilot** plans by the clock for how she's rigged: under sail, by the wind there is
+      (never a square against it); at the oars, any way. The pin goes where you drop it, wind or
+      no wind. A pin the wind won't let her sail to at all: the pilot runs the oars out ("out
+      oars!"), rows there, and ships them again when she arrives; ship them yourself on the way
+      and it leaves them be, and she waits for the wind to shift. It only ever runs them out
+      between turns, so it never dithers. In a calm it waits, rather than rowing for you: row or
+      wait is your call. The trade winds are currents of their own and sweep her on whatever the
+      weather. Rules: `src/den-wind.ts`.
 - **A quick siege to start, then calm (9 Nov).** The first three waves come as they always have,
   each counting down after the last. Beat the third and their captain calls it off ("We'll be
   back!") and the ship sails out of the cove, its cannon with it. The den's quiet after that: no

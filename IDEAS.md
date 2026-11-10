@@ -667,10 +667,9 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     when the wind drops a ship that's all sails is "dead in the water until the wind picks back
     up again", and under sail you "can't go against the wind". Oars keep her moving either way:
     slower than a good wind, but never stuck. So the trade-off is a real one, sails for speed or
-    oars to be sure, and it comes from the sea itself rather than a tile made for it. (How the
-    wind's shown, how often it drops or turns, and how that sits with Battle Navigation's moves
-    and the trade winds: to shape with the user. Goes with "Weather and time of day", under
-    landscapes.)
+    oars to be sure, and it comes from the sea itself rather than a tile made for it. (A first go
+    is on the sloop's sea, to see how it feels: RULES.md, "The wind, and her oars". Goes with
+    "Weather and time of day", under landscapes.)
     **Big ships hit hard, small ships mend fast (9 Nov):** a way to give big and small ships each a
     purpose. A big ship has more cannons, but the only control you really have is to "fire a full
     broadside": far more effective against medium and big ships. Against a small ship it's

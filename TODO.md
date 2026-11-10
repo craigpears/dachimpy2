@@ -96,12 +96,6 @@ the site (`.assetsignore` skips `*.md`).
   the primer goes. (How, where it's hosted, and what of the primer's engine the den still needs,
   to pin down with the user when it's time.)
 
-- **Try the wind, and oars (9 Nov):** "try it. We'll see how it feels, whether it's
-  overcomplicated or not." A first go of IDEAS.md's "Weather is where oars make sense" on the
-  sloop's sea: a wind with a direction and a strength that drops and picks up; under sail she's
-  quicker in a good wind, slower in a light one, dead in the water in a calm, and gets nothing
-  sailing straight into it; oars move her steadily whatever the wind, slower than a good wind.
-
 - **Rowing by port and starboard (10 Nov):** the user loves IDEAS.md's "Port and starboard":
   "absolutely hilarious ... not obviously like a brand new puzzle, but it's certainly a nice twist
   on bilging ... Do that. Absolutely do that." Her oars are rowed by a Bilge board split down the

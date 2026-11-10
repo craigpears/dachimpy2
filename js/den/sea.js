@@ -2,6 +2,7 @@
 // New things out on the sea are built here. (Split out of den.js.)
 import * as THREE from 'three';
 import { SAIL, LAY, Sea, Helm, Guns, Turret } from '../den-sail.js';
+import { Wind } from '../den-wind.js';
 import { scene, mat, mesh, canvasTex, woodTex, V3, flagMat, flagpole, burst } from './world.js';
 import { rock } from './land.js';
 import { gunMesh } from './gundeck.js';
@@ -25,6 +26,8 @@ export const SEA_X0 = -SAIL.COLS * SAIL.CELL / 2;
 export const seaX = (c) => SEA_X0 + (c + 0.5) * SAIL.CELL, seaZ = (r) => SAIL.Z0 - (r + 0.5) * SAIL.CELL;
 export const SLOOP_DECK = 0.75;
 export const sail = { on: false, sea: new Sea(9), helm: null, g: null, rocks: null, pin: null, hover: null, dots: [], sig: '', hudSig: '', seen: false, heel: 0, bumpT: 0, guns: new Guns(), rockAt: new Map(), world: null, turret: null, shots: [], riding: false, said: {} };
+// The wind she sails by (src/den-wind.ts; drawn in wind.js).
+sail.sea.breeze = new Wind(9);
 sail.helm = new Helm(sail.sea);
 sail.turret = new Turret(LAY.TURRET);
 // The hidden cove's water is a lock's lift above the sea; the cliff stands above that.
