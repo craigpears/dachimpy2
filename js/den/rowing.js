@@ -99,6 +99,10 @@ function rowOpen() {
   sail.rowRate = (side, under) => rowing.board.rate(side, under);
   document.body.classList.add('rowing');   // (the sailing bar out of the way while you row)
   keys.clear();
+  /* How to turn her, the first time the oars go out (the user, 10 Nov: "[turning] on the spot works
+     brilliantly, it's just not very obvious [what] you have to do to achieve it ... if you do a good
+     combo on one side"; "I think a tip maybe would be good"). */
+  if (!rowing.toldTurn) { rowing.toldTurn = true; toast('Oars out! Even clears on both boards row her ahead; a big combo on one side turns her that way'); }
 }
 export function rowShut() {
   rowing.group?.removeFromParent();

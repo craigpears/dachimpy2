@@ -643,6 +643,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       a wreck's treasure, ship the oars first; to load her guns, too (one puzzle at a time). Rules:
       `src/mirror-row.ts` (the puzzle) and `src/den-row.ts` (at sea); in the world:
       `js/den/rowing.js` and the boards' look, `js/den/row-boards.js`.
+    - **How to turn her, told once (10 Nov):** the first time the oars go out: "Oars out! Even
+      clears on both boards row her ahead; a big combo on one side turns her that way." (The user:
+      "[turning] on the spot works brilliantly, it's just not very obvious [what] you have to do to
+      achieve it ... I think a tip maybe would be good.") Turning itself is as it was: hemmed in,
+      she turns where she sits.
   - **The imperial checkpoint (10 Nov).** The user: "this race idea was the funny one. We absolutely
     need that. We need our own puzzle where we have to get through the Imperial checkpoint by doing
     slow row and then fast rowing with the Vegas." And on its guns: they're trained on particular
@@ -993,6 +998,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   with the loot) walks back to their boat and rows off, and a boat left empty drifts back out.
   Their cannon is on the deck of their ship, anchored broadside on out in the cove (dark hull,
   gold stripe, two masts, black flag), run out from wave 2 ("Their ship's run out a cannon!").
+  Dalnoth himself is their gunner, from the first shot (10 Nov: "Surely it should be [Dalnoth] on
+  the ship. That just looks like a guy with like a stripy or dark shirt ... you don't want him to
+  magically change [to Dalnoth] later. You want him to be on the ship shooting the cannon"), so
+  the captain in his cutscene is the one you've seen at their cannon all along.
   Only the look changed: raiders land about where they used to appear, so a wave's timing is
   about the same (a few seconds' rowing first). The user: "instead of them just walking over ...
   they're rowing in little rowboats onto the beach of your pirate hideout, and the cannon is
@@ -1408,6 +1417,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   V, W or Z.)
 - **Throw pieces at raiders, don't bonk them.** A plain bonk was underwhelming. The carried piece
   is the weapon: it hurls at a raider, who goes flying. It costs the piece.
+  You see it leave your hands (10 Nov: "I don't really see it being thrown out of his hands. It
+  just kind of, like, you see his hands move and then nothing else"): over the wall it's lobbed up
+  out of your hands and over the wall's top, a metre or two above it, and down onto them. (It was
+  an even arch, and stood at the wall, two courses high, it went 14 to 56 metres up, out of sight.)
 - **A thrown piece takes a while to come back.** Otherwise you could stand and pelt raiders
   forever. The crate you threw from takes 7 seconds to restock on your own, about 0.6 less for
   each crewmate (5.2 with four), and shows a "Restocking" bar; fitting a piece still restocks its

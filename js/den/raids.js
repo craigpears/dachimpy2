@@ -5,6 +5,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { W as BW } from '../bilge.js';
 import { afterWave, timberComes, STRAGGLERS, STRAGGLERS_GONE, stragglersIn, stragglerCount, stragglerClock, stragglerLine, stragglerBanner, theft } from '../den-raids.js';
 import { BILGE, onRocks } from '../den-bilge.js';
+import { PIRATES } from '../den-look.js';
 import { C, S, STONE_D, PAY, RUBBLE, CANNON_GAP, CANNON_AIM, DOOR_W, DOOR_H, WALL_DONE_SECS, CALM_SECS, RAIDER_STAMINA, WINDED, TIRED_SLOW, FALLEN, DAZE, hackRate, k, rand, $, scene, camera, mat, mesh, canvasTex, woodTex, WOOD, outline, xrMat, addXray, makePirate, animateWalk, faceTo, flagpole, pirate, carry, bounds, G, raiders, shake, topView, burst, toast, fmt, tween, v3, worldLets } from './world.js';
 import { rock, ramp, frames, openJob, outside, chest } from './land.js';
 import { wall, wallGroup, X, Y, cellPlane, commonWays, roomyShapes, registerHole, holeOutline, holeVisuals, doorOf, stones, wallBack, updateHole, updateStats, breakHole, nextOut, dropPiece, layerNextOut, dropBoard, holeX, holeMidY, holeFootY } from './wall.js';
@@ -28,7 +29,12 @@ export const cannon = (() => {
   carriage.position.y = 0.35;
   const wheelM = mat('#3e2614');
   [-1, 1].forEach((s) => [-0.3, 0.35].forEach((z) => { const w = mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.08, 14), wheelM); w.rotation.z = Math.PI / 2; w.position.set(0.4 * s, 0.22, z); g.add(w); }));
-  const gunner = makePirate({ shirt: ['#1f2433', '#59607a'], scarf: '#2b2b2b', patch: false, beard: '#222' });
+  /* Their gunner is Dalnoth himself, their captain, from the first shot (the user, 10 Nov: "Surely
+     it should be [Dalnoth] on the ship. That just looks like a guy with like a stripy or dark shirt
+     ... you don't want him to magically change [to Dalnoth] later. You want him to be on the ship
+     shooting the cannon"). His cutscene (map.js) takes him off it while it plays. */
+  const gunner = makePirate({ look: PIRATES.Dalnoth });
+  g.userData.gunner = gunner.g;
   gunner.g.scale.setScalar(0.85);
   gunner.g.position.set(0.8, 0, -0.5);
   gunner.g.rotation.y = -0.3;
@@ -261,7 +267,7 @@ export function throwAt(r, hand = carry, by = myId()) {
   const from = g.position.clone(), d = Math.hypot(r.x - from.x, r.z - from.z);
   const to = new THREE.Vector3(r.x, 1.1, r.z);
   const over = !r.inside && from.z > -0.3, dur = 0.25 + d * 0.05 + (over ? 0.3 : 0);   // (from the beach, straight at them)
-  let arc = 0.5 + d * 0.12;
+  let arc = 0.5 + d * 0.12, ctl = null;
   if (over) {
     // Over the wall: aim where the raider will be when it lands (at the foot of the wall at the
     // nearest), and lob high enough to clear the whole thickness of the wall on the way.
@@ -271,16 +277,29 @@ export function throwAt(r, hand = carry, by = myId()) {
       if (n > 0) to.set(r.x + dx / n * step, 1.1, r.z + dz / n * step);
     }
     to.z = Math.min(to.z, -1.15);
-    const top = wall.H * S + 0.6;
-    for (let s = 0.02; s < 1; s += 0.02) {
-      const z = from.z + (to.z - from.z) * s;
-      if (Math.abs(z) < 0.9) arc = Math.max(arc, (top - (from.y + (to.y - from.y) * s)) / Math.sin(Math.PI * s));
-    }
+    /* A lob that goes up out of your hands and over the wall's top: a curve pulled up toward a point
+       over the wall (its control point), as low as clears the wall. It was an even arch, lerp plus
+       a sine, which stood right at the wall had to start almost straight up, so it went 14 to 56
+       metres high, out of sight, and only came down beyond it (the user, 10 Nov: "I kind of see it
+       going over the wall a bit, but ... I don't really see it being thrown out of his hands"). Its
+       first 0.6 m out of your hands, as you heave it up, may brush the wall's inner edge. */
+    const top = wall.H * S + 0.6, inner = Math.min(0.9, from.z - 0.6), cx = (from.x + to.x) / 2;
+    const yAt = (s, h) => (1 - s) ** 2 * from.y + 2 * s * (1 - s) * h + s * s * to.y;
+    const zAt = (s) => (1 - s) ** 2 * from.z + s * s * to.z;   // (the control point's over the wall's middle, z = 0)
+    const clears = (h) => { for (let s = 0; s <= 1; s += 0.02) { const z = zAt(s); if (z >= -0.9 && z <= inner && yAt(s, h) < top) return false; } return true; };
+    let lo = Math.max(from.y, to.y) + 0.5 + d * 0.06, hi = lo + 60;
+    if (!clears(lo)) { for (let k = 0; k < 30; k++) { const m = (lo + hi) / 2; if (clears(m)) hi = m; else lo = m; } lo = hi; }
+    ctl = new THREE.Vector3(cx, lo, 0);
   }
   tween(dur, (s) => {
     if (!over) to.set(r.x, 1.1, r.z);
-    g.position.lerpVectors(from, to, s);
-    g.position.y += Math.sin(s * Math.PI) * arc;
+    if (ctl) {
+      const a = (1 - s) ** 2, b = 2 * s * (1 - s), c = s * s;
+      g.position.set(a * from.x + b * ctl.x + c * to.x, a * from.y + b * ctl.y + c * to.y, a * from.z + b * ctl.z + c * to.z);
+    } else {
+      g.position.lerpVectors(from, to, s);
+      g.position.y += Math.sin(s * Math.PI) * arc;
+    }
     g.rotation.x = s * 9; g.rotation.z = s * 5;
   }, () => { scene.remove(g); hit(r, from, color); });
   refill(pile, restockSecs());

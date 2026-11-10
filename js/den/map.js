@@ -8,7 +8,7 @@ import { cine, cinePlay, cineEnd, bubble, bubbleAt, stepTo } from './cine.js';
 import { outside } from './land.js';
 import { wall } from './wall.js';
 import { putBack, exitWall } from './pieces.js';
-import { SHIP_Z, SHIP_DECK, ship, BOAT_FROM, boats, rowboat } from './raids.js';
+import { SHIP_Z, SHIP_DECK, ship, BOAT_FROM, boats, rowboat, cannon } from './raids.js';
 import { sword } from './sword.js';
 import { shoreZ, bilge } from './bilge.js';
 import { sail } from './sea.js';
@@ -417,6 +417,7 @@ function cineStart() {
     tick: dalTick, end: dalEnd,
   };
   cap.g.position.set(deck.x, SHIP_DECK, deck.z);
+  cannon.userData.gunner.visible = false;   // (he's the one at their cannon: raids.js)
   cinePlay(dal);
 }
 // Over (played out, or skipped: js/den/cine.js).
@@ -425,6 +426,7 @@ function dalEnd(skip) {
   dal = null;
   scene.remove(c.cap.g);
   scene.remove(c.boat.g);
+  cannon.userData.gunner.visible = true;   // back aboard, at their cannon as they sail off
   c.says.remove(); c.mine.remove();
   pirate.arms.forEach((a) => { a.rotation.x = 0; });
   if (!skip) takeMap();
