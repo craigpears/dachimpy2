@@ -415,9 +415,14 @@ then "she's definitely a penguin side quest".
   got me past one of the whirlwinds". Not straight back to the start after that ("immediately
   sucked me into the wind and spat me back out again ... would be a bit too harsh"): "there needs
   to be some sense of, oh, I've made progress figuring out part of this." So a smaller combo
-  carries her a little way, far enough to clear one whirlpool, and what you've cleared stays
-  cleared (the next whirlpool or gust sends you back to the last one you got past, not to the
-  island). The big rush is only needed for the last, widest stretch.
+  carries her a little way, far enough to clear one whirlpool: the progress is in working out how
+  it's done. The big rush is only needed for the last, widest stretch.
+- **But blown all the way back to her island (10 Nov):** "I do want it to go all the way back to
+  her island. I don't want progress to sit. That's the funny [part]": every time the wind catches
+  you, you're back on Kikkit's island, and she finds it hilarious, giggling that you got caught in
+  the wind again and coming out with more random nonsense each time. A new line each time,
+  short, so it's a joke and never a wait (Space skips), and now and then, buried in the
+  nonsense, a bit more of the real way through.
 - **Where you find her (10 Nov):** off to the right, "just kind of hanging out on her own on a
   little deserted island with ... all her different familiars hanging around her". She's "a very
   animals person ... the familiar version of a cat lady, just with 20 different familiars all
