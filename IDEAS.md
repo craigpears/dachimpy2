@@ -311,6 +311,13 @@ moving. It gives such a nostalgia." What's next:
   RULES.md. Moving targets, and how a hit tells: to shape with
   the user.)
 
+## Rewards that mean something (10 Nov)
+
+The user likes the clifftop lagoon ("I like the little lagoon"), but its treasure, 32 doubloons,
+is "a bit meh at the moment": money has to be more meaningful, something to spend or show, and
+that comes with the social side eventually (trading, a crew, other players). Way outside the proof
+of concept for now; to figure out later.
+
 ## Smuggling: taxes, embargoes and the back beaches (9 Nov)
 
 Something to give a reason "to either steal or smuggle". Each island has its **main port**, but
