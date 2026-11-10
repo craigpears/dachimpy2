@@ -636,6 +636,24 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   about the same (a few seconds' rowing first). The user: "instead of them just walking over ...
   they're rowing in little rowboats onto the beach of your pirate hideout, and the cannon is
   actually a ship off in the distance".
+  - **Real pirates are only looks, and you can wear anything they wear (10 Nov).** The user: "we
+    shouldn't be drawing Dalnoth. Dalnoth just happens to be a guy dressed in yellow gold with a
+    Viking helmet ... when you go on to your pirate, you should be able to put any clothing on of
+    these people." So every real pirate is a plain look in `PIRATES` (`js/den-look.js`), dressed
+    by the same pirate maker as yours, and every piece any of them wears is a wardrobe item, for
+    both bodies where it makes sense: no pirate-specific drawing anywhere (what's not clothing,
+    like Dalnoth's ale slopping as he rants, stays with the scene that animates him). A new real
+    pirate means new wardrobe items first, then a look. **Dalnoth:** Viking helmet (yellow fur),
+    bushy beard, gold earrings in both ears, a gold Swashbuckler's jacket, a white sash, gold pants
+    and boots, a tankard in his right hand, his white monkey. **Dignity** (her Emerald portrait,
+    checked 10 Nov; the user: "go with the portrait photo, because then she's more distinctive"):
+    tan-brown skin, smiling, wavy blonde hair to her shoulders, an eyepatch over her right eye; a
+    purple Buccaneer jacket with lavender facings, wide cuffs and gold buttons in two rows over a
+    white shirt; a black belt with a big round gold buckle; purple pants; purple Fancy boots with
+    lavender turned-down tops; and Bella, her lavender monkey (a limited-edition monkey colour on
+    YPPedia: what looked like little purple wings in the portrait is her curled tail). She's the
+    imperial checkpoint's commander (TODO.md). The cheat "Real pirates on the beach" stands every
+    one of them outside the gate to look at.
 - **The gate opens, and you can walk out onto the beach (9 Nov).** The user: "go implement opening
   the gate ... be able to walk through the gate". Walk up to the gate, from either side, and the
   drawbar slides back into the wall and the two leaves swing in; it shuts again once nobody's by
@@ -1307,10 +1325,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   Familiar) and **Your den** (Flag, Den, Shack). The user: Your pirate is no place for the den's
   things; that's a separate concept. (Your den shows your flag where Your pirate shows the pirate.)
   - **Pirates:** male or female, dressed from the real Puzzle Pirates tailor (YPPedia's clothing
-    names: Tricorne, Feathered hat, Captain's hat, Sleeping hat, Striped shirt with vest,
-    Swashbuckler's jacket, Corset, Stripy knickers, Pantaloons, Kilt, Long dress bottom, Buckle shoes,
-    Curled boots and so on) in the tailor's standard palette of 27 dyes (YPPedia: Clothing palette).
-    Skin, hair style and colour, beard, eyepatch, earring. Kept in localStorage (`carp.den.look`),
+    names: Tricorne, Feathered hat, Captain's hat, Sleeping hat, Viking helmet, Striped shirt with
+    vest, Swashbuckler's jacket, Buccaneer jacket, Corset, Stripy knickers, Pantaloons, Kilt, Long
+    dress bottom, Buckle shoes, Fancy boots, Curled boots and so on) in the tailor's standard palette
+    of 27 dyes (YPPedia: Clothing palette), plus what the real pirates wear (a sash or a big-buckled
+    belt round the waist, a tankard in hand). Skin, hair style and colour, beard, eyepatch, earrings
+    (none, one, both), a smile. A familiar sits on the left shoulder, as in the portraits; monkeys
+    in YPPedia's natural colours, white and lavender. Kept in localStorage (`carp.den.look`; looks
+    saved before 10 Nov still load),
     and crewmates see it (a `look` message; anything received is cleaned against the lists). The
     crew colour stays on the name tag. "Surprise me" picks a random outfit.
   - **Whatever you wear on your feet must always show.** The user couldn't see the feet of a pirate

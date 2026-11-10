@@ -1,7 +1,7 @@
 // The captain's map, and the cutscene of their captain's parting shot. (Split out of den.js.)
 import * as THREE from 'three';
 import { MAP, mapAfter, canPickUp, canRead, RUMOUR, WAYS, X_AT } from '../den-map.js';
-import { cleanLook } from '../den-look.js';
+import { PIRATES } from '../den-look.js';
 import { $, scene, camera, mat, mesh, makePirate, animateWalk, faceTo, V3, pirate, carry, G, keys, wm, burst, v3, worldLets } from './world.js';
 import { outside } from './land.js';
 import { wall } from './wall.js';
@@ -309,57 +309,10 @@ export function mapReset() {
 
 // ---------- the cutscene: their captain's parting shot ----------
 /* Their captain is Dalnoth (the user, 9 Nov: "really does not look very much like Dalnoth"), drawn
-   from his portrait on YPPedia: dark skin and a big black beard, a silver horned helmet with gold
-   bands and yellow fur at the sides, gold earrings, a long yellow coat with gold buttons over a
-   white shirt, a white sash, yellow breeches and stockings, a frothy pewter tankard in his right
-   hand, and a familiar on his left shoulder (here his white monkey: the Champion one he won, which
-   comes to you when you beat him). A bit of a drunk. */
-const CAPTAIN = cleanLook({ body: 'm', skin: 5, top: 'coat', topCol: 'gold', topCol2: 'gold', hat: 'none', legs: 'pants', legsCol: 'gold', feet: 'boots', feetCol: 'gold', hair: 'bald', hairCol: 'black', beard: 'full', patch: false, earring: false, fam: 'monkey', famCol: 'cream' });
-function dalnoth() {
-  const cap = makePirate({ look: CAPTAIN }), b = cap.body, hr = 0.25;
-  const steel = mat('#d4d7dc', { metalness: 0.6, roughness: 0.35 }), gilt = mat('#e0a92a', { metalness: 0.5, roughness: 0.4 });
-  const ivory = mat('#f2ead8', { roughness: 0.6 }), fur = mat('#f4c21c'), white = mat('#f6f2ea'), beard = mat('#1f1a17');
-  const pewter = mat('#b9bec4', { metalness: 0.7, roughness: 0.3 }), foam = mat('#fff6d8');
-  const at = (m, x, y, z) => { m.position.set(x, y, z); b.add(m); return m; };
-  // The helmet: a steel dome, a gold rim, gold bands over the top and down his nose, a spike.
-  at(mesh(new THREE.SphereGeometry(hr + 0.025, 20, 10, 0, Math.PI * 2, 0, Math.PI * 0.5), steel), 0, 1.0, 0).scale.y = 0.75;
-  at(mesh(new THREE.TorusGeometry(hr + 0.025, 0.026, 6, 28), gilt), 0, 1.0, 0).rotation.x = Math.PI / 2;
-  const band = at(mesh(new THREE.TorusGeometry(hr + 0.03, 0.022, 6, 20, Math.PI), gilt), 0, 1.0, 0);
-  band.rotation.y = Math.PI / 2; band.scale.y = 0.75;
-  at(mesh(new THREE.TorusGeometry(hr + 0.03, 0.02, 6, 20, Math.PI), gilt), 0, 1.0, 0).scale.y = 0.75;
-  at(mesh(new THREE.BoxGeometry(0.045, 0.12, 0.025), gilt), 0, 0.95, hr + 0.015);
-  at(mesh(new THREE.ConeGeometry(0.035, 0.09, 8), steel), 0, 1.0 + hr * 0.75 + 0.05, 0);
-  for (const s of [-1, 1]) {
-    // Horns, curling up and out, and a yellow tuft of fur where each one meets the helmet.
-    at(mesh(new THREE.ConeGeometry(0.07, 0.24, 10), ivory), s * 0.32, 1.1, 0).rotation.z = -s * 1.0;
-    at(mesh(new THREE.ConeGeometry(0.046, 0.22, 10), ivory), s * 0.447, 1.27, 0).rotation.z = -s * 0.25;
-    at(mesh(new THREE.SphereGeometry(0.075, 10, 8), fur), s * 0.27, 1.03, 0.02).scale.set(1, 1.2, 1.3);
-    // Gold rings in both ears.
-    at(mesh(new THREE.TorusGeometry(0.04, 0.012, 6, 16), gilt), s * hr, 0.83, 0).rotation.y = Math.PI / 2;
-  }
-  // A bigger, bushier beard than most, up the sides of his face.
-  at(mesh(new THREE.SphereGeometry(0.2, 14, 10, 0, Math.PI * 2, Math.PI / 2.3, Math.PI / 1.8), beard), 0, 0.84, 0.06).scale.set(1.08, 1.15, 1);
-  // His white sash, knotted at the side with the ends hanging.
-  at(mesh(new THREE.CylinderGeometry(0.335, 0.335, 0.11, 18), white), 0, 0.1, 0.02);
-  at(mesh(new THREE.BoxGeometry(0.09, 0.3, 0.04), white), 0.17, -0.08, 0.3).rotation.z = 0.12;
-  // The tankard, frothing over.
-  const tk = new THREE.Group();
-  tk.add(mesh(new THREE.CylinderGeometry(0.075, 0.08, 0.17, 14), pewter));
-  const froth = mesh(new THREE.SphereGeometry(0.085, 12, 8), foam);
-  froth.position.y = 0.09; froth.scale.y = 0.55; tk.add(froth);
-  const drip = mesh(new THREE.CapsuleGeometry(0.022, 0.07, 4, 8), foam);
-  drip.position.set(0.05, 0.04, 0.05); tk.add(drip);
-  const handle = mesh(new THREE.TorusGeometry(0.05, 0.014, 6, 12, Math.PI), pewter);
-  handle.position.x = -0.08; handle.rotation.z = Math.PI / 2; tk.add(handle);
-  tk.position.set(0, -0.56, 0.1);
-  cap.arms[0].add(tk);
-  // His monkey on his other shoulder, and white.
-  if (cap.fam) {
-    cap.fam.g.position.x *= -1;
-    cap.fam.g.traverse((o) => { if (o.isMesh && o.material.color?.getHexString() === 'e9dcc0') o.material = mat('#f7f5f0'); });
-  }
-  return cap;
-}
+   from his portrait on YPPedia. He's only a look (PIRATES in den-look.js): everything he wears is in
+   the wardrobe, so you can dress as him too. A bit of a drunk: the ale slopping and the unsteady feet
+   are the cutscene's (cineTick). His white monkey's the one that comes to you when you beat him. */
+const dalnoth = () => makePirate({ look: PIRATES.Dalnoth });
 function bubble(text) {
   const el = document.createElement('div');
   el.className = 'label say';

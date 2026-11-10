@@ -9,7 +9,7 @@ copy: `node_modules/node/bin/node.exe node_modules/wrangler/bin/wrangler.js dev 
 files from subfolders, so don't use it.
 
 Pirate Den: `den.html`, `js/den.js` (start-up, input, the main loop and camera, `window.den`), `js/den-look.js`
-(looks), and the 3D in plain hand-written modules in `js/den/`: `world.js` (what every part shares: scene, camera,
+(looks: the wardrobe, and the real pirates, `PIRATES`, as plain looks from it), and the 3D in plain hand-written modules in `js/den/`: `world.js` (what every part shares: scene, camera,
 materials, game state, toast; a `let` another file reassigns goes through its owner's `...Lets` getter/setter object),
 `land.js`, `wall.js`, `pieces.js` (crates, toolbox, Carpentry view), `gundeck.js` (the gun tower, and Gunnery's look on any board), `raids.js`, `sword.js`, `bilge.js`,
 `map.js`, `sea.js` (the sea and sloop's 3D), `sailing.js` (boarding, helm, guns, the sea tick), `wind.js`, `rowing.js` (the rowing board), `treasure.js` (Treasure Haul's board), `foraging.js` (Foraging's look on any board, a container's skin passed in: a crate, or the capybara; played on its own in the unlinked `foraging-test.html`), `sea-guns.js` (Gunnery on her deck: loading her guns), `turret.js` (a destructible gun at sea), `checkpoint.js` (the imperial checkpoint), `lock.js` (a lock on the canal: chamber, gates, quay pump and its Bilge board; each lock an instance), `sea-puzzles.js`

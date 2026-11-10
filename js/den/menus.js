@@ -2,8 +2,8 @@
 // of den.js.)
 import * as THREE from 'three';
 import { afterWave } from '../den-raids.js';
-import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, designOf, DYES, SKIN, HAIR, FUR, PARTS, FLAGS, PATTERNS, DECOR, MAX_DECOR, BIOMES, twoColours } from '../den-look.js';
-import { C, mixedTiling, S, CALM_SECS, k, rand, $, keep, myLook, denLook, scene, camera, mat, mesh, woodTex, wearLook, redrawFlag, designMat, flagpole, pirate, carry, bounds, obstacles, G, keys, raiders, wm, ray, burst, toast, worldLets } from './world.js';
+import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, designOf, DYES, SKIN, HAIR, FUR, PARTS, EARRINGS, PIRATES, FLAGS, PATTERNS, DECOR, MAX_DECOR, BIOMES, twoColours } from '../den-look.js';
+import { C, mixedTiling, S, CALM_SECS, k, rand, $, keep, myLook, denLook, scene, camera, mat, mesh, woodTex, makePirate, wearLook, redrawFlag, designMat, flagpole, pirate, carry, bounds, obstacles, G, keys, raiders, wm, ray, burst, toast, worldLets } from './world.js';
 import { ramp, frames, openJob, frameState, stepTop, putFramePiece, finishFrame, HOUSE_PART, HOUSE_Z0, houseXF, paintHouse, startHouse, plotShow, applyBiome } from './land.js';
 import { wall, rest, ringOf, updateHole, updateStats, putPiece } from './wall.js';
 import { paintTower } from './gundeck.js';
@@ -196,7 +196,7 @@ function dressFrame(now) {
   // Your den: no pirate, a closer look at your flag.
   dress.model.g.visible = !denMode;
   if (denMode) { dress.cam.position.set(-0.1, 1.75, 2.6); dress.cam.lookAt(-0.35, 1.75, -0.9); }
-  else { dress.cam.position.set(fam ? -0.2 : 0, 1.4, 4.5); dress.cam.lookAt(fam ? -0.1 : 0, 1.02, 0); }
+  else { dress.cam.position.set(fam ? 0.2 : 0, 1.4, 4.5); dress.cam.lookAt(fam ? 0.1 : 0, 1.02, 0); }   // (a familiar's on the left shoulder)
   if (dress.drag == null) dress.yaw += dt * 0.35;
   dress.model.g.rotation.y = dress.yaw;
   familiarTick(dress.model.fam, dt);
@@ -270,7 +270,7 @@ export function dressRows() {
   const slot = (label, k) => {
     const r = row(label);
     chooser(r, PARTS[k][L.body], L[k], look(k));
-    if (k === 'fam' && L.fam === 'none') return;
+    if (L[k] === 'none' || k === 'hand') return;   // (nothing to dye; a tankard's pewter)
     const pal = k === 'fam' && L.fam === 'monkey' ? FUR : DYES;
     swatch(r, pal, L[k + 'Col'], look(k + 'Col'), 'Colour');
     if (twoColours(L, k)) swatch(r, DYES, L[k + 'Col2'], look(k + 'Col2'), 'Second colour');
@@ -284,10 +284,11 @@ export function dressRows() {
     swatch(hr, HAIR, L.hairCol, look('hairCol'), 'Hair colour');
     if (L.body === 'm') chooser(row('Beard'), PARTS.beard.m, L.beard, look('beard'));
     toggle(row('Eyepatch'), L.patch, look('patch'));
-    toggle(row('Earring'), L.earring, look('earring'));
+    chooser(row('Earrings'), EARRINGS, L.earring, look('earring'));
+    toggle(row('Smile'), L.smile, look('smile'));
   } else if (dress.tab === 'clothes') {
-    slot('Hat', 'hat'); slot('Top', 'top'); slot('Legs', 'legs'); slot('Feet', 'feet');
-    box.append(el('p', 'note', 'Clothes and dyes from the Puzzle Pirates tailor.'));
+    slot('Hat', 'hat'); slot('Top', 'top'); slot('Waist', 'waist'); slot('Legs', 'legs'); slot('Feet', 'feet'); slot('In hand', 'hand');
+    box.append(el('p', 'note', `Clothes and dyes from the Puzzle Pirates tailor, and everything ${Object.keys(PIRATES).join(' and ')} wear.`));
   } else if (dress.tab === 'familiar') {
     slot('Familiar', 'fam');
     box.append(el('p', 'note', 'A familiar rides on your shoulder. In Puzzle Pirates they were rare prizes.'));
@@ -484,6 +485,20 @@ function cheatDeal() {
   const logged = () => { console.log(json); toast('The deal is in the console (F12): copy it from there'); };
   if (navigator.clipboard) navigator.clipboard.writeText(json).then(said, logged); else logged();
 }
+// The real pirates (PIRATES), stood in a row on the beach outside the gate to look at; again to
+// take them away. (Where each turns up is the story's business: Dalnoth in the map's cutscene.)
+let lineUp = null;
+function cheatPirates() {
+  if (lineUp) { lineUp.forEach((p) => scene.remove(p.g)); lineUp = null; return toast('The real pirates have gone'); }
+  const names = Object.keys(PIRATES);
+  lineUp = names.map((n, i) => {
+    const p = makePirate({ look: PIRATES[n] });
+    p.g.position.set(wall.door.cx + (i - (names.length - 1) / 2) * 1.4, 0, -2.6);
+    scene.add(p.g);
+    return p;
+  });
+  toast(`On the beach: ${names.join(' and ')}`);
+}
 const CHEATS = [
   ['Beat this wave', cheatBeat],
   ['Next wave now', () => (G.phase === 'wave' ? toast('A wave\'s on: beat it first', true) : startWave())],
@@ -491,6 +506,7 @@ const CHEATS = [
   ['Build the shack', cheatShack],
   ["The captain's map scene", cheatMapScene],
   ['Go sailing', cheatSail],
+  ['Real pirates on the beach', cheatPirates],
   ['Copy the deal (for a test)', cheatDeal],
 ];
 export function cheatPanel(on) {

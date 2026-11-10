@@ -14,56 +14,78 @@ export const DYES = {
 };
 export const SKIN = ['#f6d3b0', '#f0bf8e', '#d9a066', '#b57a4a', '#8a5530', '#5c3a22'];
 export const HAIR = { black: '#1f1a17', 'dark brown': '#3b2414', brown: '#6a4020', auburn: '#7f2e16', ginger: '#c4642a', blonde: '#dcb565', grey: '#a09a92', white: '#ece8e0' };
-// Monkeys only come in natural colours (YPPedia: Familiar).
-export const FUR = { brown: '#6b4423', tan: '#ad8047', ginger: '#b5652a', grey: '#8a8a8a', black: '#2a2a2e', cream: '#e9dcc0' };
+// Monkeys only come in natural colours (YPPedia: Monkey), white (a champion's) and a few limited
+// editions (lavender, from a Booch Box). A lavender monkey has a white face and tummy.
+export const FUR = { brown: '#6b4423', tan: '#ad8047', ginger: '#b5652a', grey: '#8a8a8a', black: '#2a2a2e', cream: '#e9dcc0', white: '#f7f5f0', lavender: '#b9a9ea' };
+const FUR_FACE = { lavender: '#fbf8ff' };
 
-// What there is to wear, by body. Each: [id, name, uses a second colour?]
+/* What there is to wear, by body. Each: [id, name, uses a second colour?]. Every piece a real
+   pirate in the den wears (PIRATES, below) is here too, for both bodies where it makes sense, so you
+   can dress as any of them piece by piece (the user, 10 Nov). */
 export const PARTS = {
   hat: {
-    m: [['none', 'No hat'], ['bandana', 'Bandana'], ['tricorne', 'Tricorne'], ['feathered', 'Feathered hat', 1], ['captain', "Captain's hat", 1], ['sleeping', 'Sleeping hat'], ['fez', 'Fez']],
-    f: [['none', 'No hat'], ['bandana', 'Bandana'], ['tricorne', 'Tricorne'], ['feathered', 'Feathered hat', 1], ['captain', "Captain's hat", 1], ['sleeping', 'Sleeping hat'], ['wide', 'Wide-brimmed hat', 1]],
+    m: [['none', 'No hat'], ['bandana', 'Bandana'], ['tricorne', 'Tricorne'], ['feathered', 'Feathered hat', 1], ['captain', "Captain's hat", 1], ['sleeping', 'Sleeping hat'], ['fez', 'Fez'], ['viking', 'Viking helmet']],
+    f: [['none', 'No hat'], ['bandana', 'Bandana'], ['tricorne', 'Tricorne'], ['feathered', 'Feathered hat', 1], ['captain', "Captain's hat", 1], ['sleeping', 'Sleeping hat'], ['wide', 'Wide-brimmed hat', 1], ['viking', 'Viking helmet']],
   },
   hair: {
-    m: [['short', 'Short'], ['ponytail', 'Ponytail'], ['long', 'Long'], ['bald', 'Bald']],
-    f: [['long', 'Long'], ['ponytail', 'Ponytail'], ['bun', 'Bun'], ['braids', 'Braids'], ['short', 'Short']],
+    m: [['short', 'Short'], ['ponytail', 'Ponytail'], ['long', 'Long'], ['wavy', 'Wavy'], ['bald', 'Bald']],
+    f: [['long', 'Long'], ['ponytail', 'Ponytail'], ['bun', 'Bun'], ['braids', 'Braids'], ['wavy', 'Wavy'], ['short', 'Short']],
   },
   beard: {
-    m: [['full', 'Full beard'], ['goatee', 'Goatee'], ['moustache', 'Moustache'], ['long', 'Long beard'], ['none', 'Clean-shaven']],
+    m: [['full', 'Full beard'], ['bushy', 'Bushy beard'], ['goatee', 'Goatee'], ['moustache', 'Moustache'], ['long', 'Long beard'], ['none', 'Clean-shaven']],
     f: [['none', 'None']],
   },
   top: {
-    m: [['striped', 'Striped shirt', 1], ['plain', 'Plain shirt'], ['sash', 'Shirt with sash', 1], ['vest', 'Striped shirt with vest', 1], ['coat', "Swashbuckler's jacket", 1], ['captain', "Captain's jacket", 1]],
-    f: [['striped', 'Striped shirt', 1], ['belt', 'Shirt with belt'], ['corset', 'Corset', 1], ['vest', 'Striped shirt with vest', 1], ['coat', 'Buccaneer jacket', 1], ['captain', "Captain's jacket", 1]],
+    m: [['striped', 'Striped shirt', 1], ['plain', 'Plain shirt'], ['sash', 'Shirt with sash', 1], ['vest', 'Striped shirt with vest', 1], ['swashbuckler', "Swashbuckler's jacket", 1], ['buccaneer', 'Buccaneer jacket', 1], ['captain', "Captain's jacket", 1]],
+    f: [['striped', 'Striped shirt', 1], ['belt', 'Shirt with belt'], ['corset', 'Corset', 1], ['vest', 'Striped shirt with vest', 1], ['buccaneer', 'Buccaneer jacket', 1], ['swashbuckler', "Swashbuckler's jacket", 1], ['captain', "Captain's jacket", 1]],
+  },
+  // Round the waist, over whatever top (a plain belt isn't worn with a corset or a shirt with sash).
+  waist: {
+    m: [['belt', 'Belt'], ['buckle', 'Belt with a big buckle'], ['sash', 'Sash'], ['none', 'Nothing']],
+    f: [['belt', 'Belt'], ['buckle', 'Belt with a big buckle'], ['sash', 'Sash'], ['none', 'Nothing']],
   },
   legs: {
     m: [['pants', 'Pants'], ['patched', 'Patched pants', 1], ['knickers', 'Stripy knickers'], ['pantaloons', 'Pantaloons'], ['kilt', 'Kilt', 1]],
-    f: [['patched', 'Patched pants', 1], ['knickers', 'Stripy knickers'], ['flare', 'Flare pants'], ['long', 'Long dress bottom'], ['short', 'Short dress bottom']],
+    f: [['pants', 'Pants'], ['patched', 'Patched pants', 1], ['knickers', 'Stripy knickers'], ['flare', 'Flare pants'], ['long', 'Long dress bottom'], ['short', 'Short dress bottom']],
   },
   feet: {
-    m: [['boots', 'Boots'], ['shoes', 'Buckle shoes'], ['fancy', 'Fancy boots'], ['curled', 'Curled boots']],
-    f: [['boots', 'Boots'], ['shoes', 'Buckle shoes'], ['fancy', 'Fancy boots'], ['curled', 'Curled slippers']],
+    m: [['boots', 'Boots'], ['shoes', 'Buckle shoes'], ['fancy', 'Fancy boots', 1], ['curled', 'Curled boots']],
+    f: [['boots', 'Boots'], ['shoes', 'Buckle shoes'], ['fancy', 'Fancy boots', 1], ['curled', 'Curled slippers']],
+  },
+  // In the right hand.
+  hand: {
+    m: [['none', 'Nothing'], ['tankard', 'Tankard']],
+    f: [['none', 'Nothing'], ['tankard', 'Tankard']],
   },
   fam: {
     m: [['none', 'No familiar'], ['parrot', 'Parrot', 1], ['monkey', 'Monkey'], ['octopus', 'Octopus']],
     f: [['none', 'No familiar'], ['parrot', 'Parrot', 1], ['monkey', 'Monkey'], ['octopus', 'Octopus']],
   },
 };
+// Earrings: none, one (in the left ear, as ever) or one in each ear.
+export const EARRINGS = [[false, 'None'], [true, 'One'], ['both', 'Both ears']];
 export const DEFAULT_LOOK = {
-  body: 'm', skin: 1, hair: 'short', hairCol: 'brown', beard: 'full', patch: true, earring: true,
-  hat: 'bandana', hatCol: 'red', hatCol2: 'white', top: 'striped', topCol: 'red', topCol2: 'white',
-  legs: 'pants', legsCol: 'navy', legsCol2: 'tan', feet: 'boots', feetCol: 'black', fam: 'none', famCol: 'green', famCol2: 'red',
+  body: 'm', skin: 1, hair: 'short', hairCol: 'brown', beard: 'full', patch: true, earring: true, smile: false,
+  hat: 'bandana', hatCol: 'red', hatCol2: 'white', top: 'striped', topCol: 'red', topCol2: 'white', waist: 'belt', waistCol: 'black',
+  legs: 'pants', legsCol: 'navy', legsCol2: 'tan', feet: 'boots', feetCol: 'black', feetCol2: 'black', hand: 'none', fam: 'none', famCol: 'green', famCol2: 'red',
 };
+const DYE_KEYS = ['hatCol', 'hatCol2', 'topCol', 'topCol2', 'waistCol', 'legsCol', 'legsCol2', 'feetCol', 'feetCol2', 'famCol', 'famCol2'];
+// Saves from before 10 Nov: 'coat' was the Swashbuckler's jacket on a man and the Buccaneer jacket on a woman.
+const OLD_TOP = { m: { coat: 'swashbuckler' }, f: { coat: 'buccaneer' } };
 const FEMALE = { hair: 'long', beard: 'none', top: 'corset', topCol: 'maroon', topCol2: 'gold', legs: 'long', legsCol: 'navy', hatCol: 'red' };
 
 // A look from anywhere (storage, a crewmate) made safe: only things on the lists get through.
 export function cleanLook(o) {
-  const src = o && typeof o === 'object' ? o : {}, body = src.body === 'f' ? 'f' : 'm';
+  const o2 = o && typeof o === 'object' ? o : {}, body = o2.body === 'f' ? 'f' : 'm';
+  const src = { ...o2, top: OLD_TOP[body][o2.top] || o2.top };
   const L = { ...DEFAULT_LOOK, ...(body === 'f' ? FEMALE : {}), body };
   for (const slot of Object.keys(PARTS)) if (PARTS[slot][body].some(([id]) => id === src[slot])) L[slot] = src[slot];
-  for (const kk of ['hatCol', 'hatCol2', 'topCol', 'topCol2', 'legsCol', 'legsCol2', 'feetCol', 'famCol', 'famCol2']) if (DYES[src[kk]]) L[kk] = src[kk];
+  for (const kk of DYE_KEYS) if (DYES[src[kk]]) L[kk] = src[kk];
+  if (!DYES[src.feetCol2]) L.feetCol2 = L.feetCol;   // (fancy boots' tops were the boots' own colour)
   if (HAIR[src.hairCol]) L.hairCol = src.hairCol;
   if (Number.isInteger(src.skin) && SKIN[src.skin]) L.skin = src.skin;
-  for (const kk of ['patch', 'earring']) if (typeof src[kk] === 'boolean') L[kk] = src[kk];
+  for (const kk of ['patch', 'smile']) if (typeof src[kk] === 'boolean') L[kk] = src[kk];
+  if (EARRINGS.some(([v]) => v === src.earring)) L.earring = src.earring;
   if (L.fam === 'monkey' && !FUR[src.famCol]) L.famCol = 'brown';
   if (L.fam === 'monkey' && FUR[src.famCol]) L.famCol = src.famCol;
   return L;
@@ -71,14 +93,38 @@ export function cleanLook(o) {
 const pickOf = (o) => Object.keys(o)[Math.floor(Math.random() * Object.keys(o).length)];
 const pickIn = (list) => list[Math.floor(Math.random() * list.length)][0];
 export function randomLook(body = Math.random() < 0.5 ? 'm' : 'f') {
-  const L = { body, skin: Math.floor(Math.random() * SKIN.length), hairCol: pickOf(HAIR), patch: Math.random() < 0.4, earring: Math.random() < 0.6 };
+  const L = { body, skin: Math.floor(Math.random() * SKIN.length), hairCol: pickOf(HAIR), patch: Math.random() < 0.4, earring: pickIn(EARRINGS), smile: Math.random() < 0.5 };
   for (const slot of Object.keys(PARTS)) L[slot] = pickIn(PARTS[slot][body]);
-  for (const kk of ['hatCol', 'hatCol2', 'topCol', 'topCol2', 'legsCol', 'legsCol2', 'feetCol', 'famCol', 'famCol2']) L[kk] = pickOf(DYES);
+  for (const kk of DYE_KEYS) L[kk] = pickOf(DYES);
   if (L.fam === 'monkey') L.famCol = pickOf(FUR);
   return cleanLook(L);
 }
 export const partName = (look, slot) => PARTS[slot][look.body].find(([id]) => id === look[slot])?.[1] || '';
 export const twoColours = (look, slot) => !!PARTS[slot][look.body].find(([id]) => id === look[slot])?.[2];
+
+/* Real Puzzle Pirates pirates in the den, by their pirate names only, each just a look: all they
+   wear is in the wardrobe above, so nobody's drawn as a one-off (the user, 10 Nov: "Dalnoth just
+   happens to be a guy dressed in yellow gold with a Viking helmet"). Each drawn from their portrait
+   (RULES.md). Put one in the den with makePirate({ look: PIRATES.Dignity }). */
+export const PIRATES = Object.fromEntries(Object.entries({
+  // Dalnoth (his YPPedia portrait, 9 Nov): dark skin and a big black beard, a Viking helmet with
+  // yellow fur, gold earrings, a long gold coat over a white shirt, a white sash, gold breeches and
+  // boots, a frothing tankard, and his white monkey (the Champion one, which comes to you).
+  Dalnoth: {
+    body: 'm', skin: 5, hair: 'bald', hairCol: 'black', beard: 'bushy', patch: false, earring: 'both',
+    hat: 'viking', hatCol: 'gold', top: 'swashbuckler', topCol: 'gold', topCol2: 'gold', waist: 'sash', waistCol: 'white',
+    legs: 'pants', legsCol: 'gold', feet: 'boots', feetCol: 'gold', hand: 'tankard', fam: 'monkey', famCol: 'white',
+  },
+  // Dignity (her Emerald portrait, 10 Nov), the imperial checkpoint's commander: tan-brown skin,
+  // smiling, wavy blonde hair to her shoulders, an eyepatch; a long purple Buccaneer jacket with
+  // lavender facings, wide cuffs and gold buttons over a white shirt, a black belt with a big round
+  // gold buckle, purple pants, purple fancy boots with lavender tops, and Bella, her lavender monkey.
+  Dignity: {
+    body: 'f', skin: 3, hair: 'wavy', hairCol: 'blonde', patch: true, earring: false, smile: true,
+    hat: 'none', top: 'buccaneer', topCol: 'purple', topCol2: 'lavender', waist: 'buckle', waistCol: 'black',
+    legs: 'pants', legsCol: 'purple', feet: 'fancy', feetCol: 'purple', feetCol2: 'lavender', fam: 'monkey', famCol: 'lavender',
+  },
+}).map(([name, look]) => [name, cleanLook(look)]));
 
 // ---------- building one ----------
 const hexOf = (c) => DYES[c] || HAIR[c] || FUR[c] || (/^#[0-9a-f]{6}$/i.test(c) ? c : '#888888');
@@ -125,6 +171,7 @@ const lathe = (pts, scale = 1, from = 0, gap = 0) => new THREE.LatheGeometry(pts
    the hip and shoulder, `body` is everything above the hips. `opts.sword` gives them a cutlass. */
 export function dressPirate(look, opts = {}) {
   const L = { ...DEFAULT_LOOK, ...look }, F = L.body === 'f';
+  L.top = OLD_TOP[L.body]?.[L.top] || L.top;
   const g = new THREE.Group(), body = new THREE.Group();
   body.position.y = 0.72;
   g.add(body);
@@ -134,9 +181,9 @@ export function dressPirate(look, opts = {}) {
   const top = L.topCol, top2 = L.topCol2;
   const shirtM = {
     striped: () => M('#ffffff', { map: stripeTex(top2, top) }), plain: () => M(top), sash: () => M(top), belt: () => M(top),
-    vest: () => M('#ffffff', { map: stripeTex('white', top2) }), coat: () => M('white'), captain: () => M('white'), corset: () => M('white'),
+    vest: () => M('#ffffff', { map: stripeTex('white', top2) }), swashbuckler: () => M('white'), buccaneer: () => M('white'), captain: () => M('white'), corset: () => M('white'),
   }[L.top]?.() || M(top);
-  const coat = L.top === 'coat' || L.top === 'captain';
+  const coat = L.top === 'swashbuckler' || L.top === 'buccaneer' || L.top === 'captain', bucc = L.top === 'buccaneer';
   const sleeveM = coat ? M(top) : shirtM;
 
   // Legs: a thigh and a shin, from the hip, then the feet.
@@ -158,7 +205,9 @@ export function dressPirate(look, opts = {}) {
     const foot = part(new RoundedBoxGeometry(0.18 * thinner, L.feet === 'shoes' ? 0.1 : 0.15, 0.3, 2, 0.045), fc, 0, L.feet === 'shoes' ? -0.645 : -0.62, fz);
     hip.add(foot);
     if (L.feet === 'boots' || L.feet === 'fancy') hip.add(part(new THREE.CylinderGeometry(0.1 * thinner, 0.1 * thinner, 0.24, 10), fc, 0, -0.48));
-    if (L.feet === 'fancy') hip.add(part(new THREE.CylinderGeometry(0.13 * thinner, 0.115 * thinner, 0.08, 12), fc, 0, -0.34));
+    // Fancy boots' wide turned-down tops, in their second colour.
+    // (Low enough on the shin to show under a long coat.)
+    if (L.feet === 'fancy') hip.add(part(new THREE.CylinderGeometry(0.14 * thinner, 0.112 * thinner, 0.12, 12), M(L.feetCol2 || L.feetCol), 0, -0.39));
     if (L.feet === 'shoes') hip.add(part(new THREE.BoxGeometry(0.08, 0.05, 0.02), gold, 0, -0.6, fz + 0.13));
     if (L.feet === 'curled') {
       const curl = part(new THREE.TorusGeometry(0.05, 0.022, 6, 12, Math.PI * 1.3), fc, 0, -0.6, fz + 0.15);
@@ -173,10 +222,25 @@ export function dressPirate(look, opts = {}) {
   const shape = TORSO[L.body];
   const torso = part(lathe(shape), shirtM, 0, 0.02);
   body.add(torso);
-  const belt = () => {
-    body.add(part(new THREE.CylinderGeometry(0.295, 0.295, 0.08, 16), black, 0, 0.07));
-    body.add(part(new THREE.BoxGeometry(0.11, 0.09, 0.03), gold, 0, 0.07, 0.29));
+  // Round the waist: a belt (with a small square buckle or a big round one), a sash knotted at the
+  // side with its ends hanging, or nothing. (A plain belt isn't worn with a corset or shirt with sash.)
+  const wr = shape[0][0], wc = M(L.waistCol);
+  const waist = () => {
+    if (L.waist === 'belt' || L.waist === 'buckle') {
+      body.add(part(new THREE.CylinderGeometry(wr + 0.005, wr + 0.005, 0.08, 16), wc, 0, 0.07));
+      if (L.waist === 'belt') body.add(part(new THREE.BoxGeometry(0.11, 0.09, 0.03), gold, 0, 0.07, wr));
+      else {
+        body.add(part(new THREE.TorusGeometry(0.065, 0.02, 8, 20), gold, 0, 0.07, wr + 0.02));
+        body.add(part(new THREE.BoxGeometry(0.018, 0.1, 0.02), gold, -0.012, 0.07, wr + 0.025));
+      }
+    } else if (L.waist === 'sash') {
+      body.add(part(new THREE.CylinderGeometry(wr + 0.045, wr + 0.045, 0.11, 18), wc, 0, 0.1, 0.02));
+      const end = part(new THREE.BoxGeometry(0.09, 0.3, 0.04), wc, 0.17, -0.08, wr + 0.01);
+      end.rotation.z = 0.12;
+      body.add(end);
+    }
   };
+  if (!(L.waist === 'belt' && (L.top === 'sash' || L.top === 'corset'))) waist();
   if (L.top === 'sash') {
     const sash = part(new THREE.CylinderGeometry(0.3, 0.3, 0.12, 16), M(top2), 0, 0.08);
     sash.rotation.z = 0.08;
@@ -193,7 +257,7 @@ export function dressPirate(look, opts = {}) {
         body.add(lace);
       }
     }
-  } else belt();
+  }
   if (L.top === 'vest') {
     const vest = part(lathe(shape.filter(([, y]) => y >= 0.05), 1.06, 0, 0.42), M(top), 0, 0.02);
     vest.material.side = THREE.DoubleSide;
@@ -204,7 +268,23 @@ export function dressPirate(look, opts = {}) {
     const skirt = part(lathe([[0.31, 0], [0.33, -0.15], [0.37, -0.42]].reverse(), 1, 0, 0.5), M(top), 0, 0.07);
     shell.material.side = skirt.material.side = THREE.DoubleSide;
     body.add(shell, skirt);
-    for (let i = 0; i < 3; i++) for (const s of [-1, 1]) body.add(part(new THREE.SphereGeometry(0.022, 8, 6), L.top === 'captain' ? gold : M(top2), 0.11 * s, 0.2 + i * 0.13, 0.27 - i * 0.012));
+    if (bucc) {
+      // The Buccaneer jacket: facings in its second colour down both edges of the front, widening
+      // into lapels at the chest, with gold buttons in two rows down them.
+      const strip = (pts, sc, a, w) => [a, Math.PI * 2 - a - w].map((from) => {
+        const m = part(new THREE.LatheGeometry(pts.map(([r, y]) => new THREE.Vector2(r * sc, y)), 6, from, w), M(top2, { side: THREE.DoubleSide }), 0, 0.02);
+        body.add(m);
+        return m;
+      });
+      strip(shape.filter(([, y]) => y <= 0.35), 1.08, 0.3, 0.26);
+      strip(shape.filter(([, y]) => y >= 0.3), 1.08, 0.3, 0.42);
+      strip([[0.31, 0], [0.33, -0.15], [0.37, -0.42]].reverse(), 1.01, 0.5, 0.22).forEach((m) => { m.position.y = 0.07; });
+      const rAt = (y) => { for (let i = 1; i < shape.length; i++) if (shape[i][1] >= y) { const [r0, y0] = shape[i - 1], [r1, y1] = shape[i]; return r0 + (r1 - r0) * (y - y0) / (y1 - y0); } return shape[shape.length - 1][0]; };
+      for (let i = 0; i < 4; i++) for (const s of [-1, 1]) {
+        const y = 0.1 + i * 0.11, r = rAt(y - 0.02) * 1.08 + 0.012, a = 0.44;
+        body.add(part(new THREE.SphereGeometry(0.022, 8, 6), gold, Math.sin(a) * r * s, y, Math.cos(a) * r));
+      }
+    } else for (let i = 0; i < 3; i++) for (const s of [-1, 1]) body.add(part(new THREE.SphereGeometry(0.022, 8, 6), L.top === 'captain' ? gold : M(top2), 0.11 * s, 0.2 + i * 0.13, 0.27 - i * 0.012));
     if (L.top === 'captain') {
       for (const s of [-1, 1]) {
         const ep = part(new THREE.SphereGeometry(0.1, 12, 8), gold, 0.27 * s, 0.6, 0);
@@ -234,13 +314,17 @@ export function dressPirate(look, opts = {}) {
     strap.rotation.set(Math.PI / 2 - 0.25, 0.35, 0);
     body.add(pt, strap);
   } else body.add(eye(-0.085));
-  if (F) {
+  if (L.smile) {
+    const smile = part(new THREE.TorusGeometry(0.055, 0.011, 6, 14, Math.PI * 0.8), M(F ? '#b8473f' : '#5a2c22'), 0, F ? 0.83 : 0.835, hr - 0.02);
+    smile.rotation.z = Math.PI * 1.1;
+    body.add(smile);
+  } else if (F) {
     const lips = part(new THREE.SphereGeometry(0.05, 10, 6), M('#b8473f'), 0, 0.815, hr - 0.025);
     lips.scale.set(1, 0.42, 0.5);
     body.add(lips);
   }
-  if (L.earring) {
-    const ring = part(new THREE.TorusGeometry(0.04, 0.012, 6, 16), gold, hr, 0.83, 0);
+  for (const s of L.earring === 'both' ? [1, -1] : L.earring ? [1] : []) {
+    const ring = part(new THREE.TorusGeometry(0.04, 0.012, 6, 16), gold, hr * s, 0.83, 0);
     ring.rotation.y = Math.PI / 2;
     body.add(ring);
   }
@@ -260,6 +344,19 @@ export function dressPirate(look, opts = {}) {
     const tail = part(new THREE.ConeGeometry(0.065, 0.36, 10), hairM, 0, 0.7, -hr - 0.05);
     tail.rotation.x = Math.PI + 0.2;
     body.add(tail);
+  } else if (L.hair === 'wavy') {
+    // Wavy, to the shoulders: full at the sides and back, curling out at the ends.
+    const curtain = part(new THREE.CylinderGeometry(hr + 0.02, hr + 0.05, 0.24, 16, 1, true, Math.PI / 2, Math.PI), hairM, 0, 0.81, -0.01);
+    curtain.material.side = THREE.DoubleSide;
+    body.add(curtain);
+    for (let i = 0; i < 9; i++) {
+      const a = Math.PI / 2 + (i / 8) * Math.PI, r = hr + 0.04;
+      const curl = part(new THREE.SphereGeometry(0.05, 10, 8), hairM, Math.sin(a) * r, 0.7 + (i % 2) * 0.025, Math.cos(a) * r - 0.01);
+      curl.scale.set(1, 0.8, 1);
+      body.add(curl);
+    }
+    // A swept fringe, full on top.
+    for (const s of [-1, 1]) body.add(part(new THREE.SphereGeometry(0.085, 10, 8), hairM, 0.1 * s, 1.08, 0.08));
   } else if (L.hair === 'bun') body.add(part(new THREE.SphereGeometry(0.11, 12, 10), hairM, 0, 1.03, -0.17));
   else if (L.hair === 'braids') {
     for (const s of [-1, 1]) {
@@ -268,7 +365,13 @@ export function dressPirate(look, opts = {}) {
     }
   }
   // A beard, in the same colour.
-  if (L.beard === 'full' || L.beard === 'long') body.add(part(new THREE.SphereGeometry(0.17, 14, 10, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), hairM, 0, 0.82, 0.07));
+  if (L.beard === 'full' || L.beard === 'long' || L.beard === 'bushy') body.add(part(new THREE.SphereGeometry(0.17, 14, 10, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), hairM, 0, 0.82, 0.07));
+  // A bushy beard: bigger, up the sides of the face.
+  if (L.beard === 'bushy') {
+    const bush = part(new THREE.SphereGeometry(0.2, 14, 10, 0, Math.PI * 2, Math.PI / 2.3, Math.PI / 1.8), hairM, 0, 0.84, 0.06);
+    bush.scale.set(1.08, 1.15, 1);
+    body.add(bush);
+  }
   if (L.beard === 'long') {
     const tip = part(new THREE.ConeGeometry(0.12, 0.3, 12), hairM, 0, 0.6, 0.14);
     tip.rotation.x = Math.PI - 0.15;
@@ -335,6 +438,23 @@ export function dressPirate(look, opts = {}) {
     const cord = part(new THREE.CylinderGeometry(0.01, 0.01, 0.16, 5), black, 0.08, 1.22, -0.08);
     cord.rotation.z = 0.9;
     hat.add(cord, part(new THREE.SphereGeometry(0.03, 8, 6), gold, 0.14, 1.17, -0.12));
+  } else if (L.hat === 'viking') {
+    // A steel dome with a gold rim, gold bands over the top and down the nose, a spike, white horns
+    // curling up and out, and a tuft of fur (the hat's colour) where each meets the helmet.
+    const steel = M('#d4d7dc', { metalness: 0.6, roughness: 0.35 }), gilt = M('#e0a92a', { metalness: 0.5, roughness: 0.4 }), ivory = M('#f2ead8', { roughness: 0.6 });
+    const at = (m, x, y, z) => { m.position.set(x, y, z); hat.add(m); return m; };
+    at(part(new THREE.SphereGeometry(hr + 0.025, 20, 10, 0, Math.PI * 2, 0, Math.PI * 0.5), steel), 0, 1.0, 0).scale.y = 0.75;
+    at(part(new THREE.TorusGeometry(hr + 0.025, 0.026, 6, 28), gilt), 0, 1.0, 0).rotation.x = Math.PI / 2;
+    const band = at(part(new THREE.TorusGeometry(hr + 0.03, 0.022, 6, 20, Math.PI), gilt), 0, 1.0, 0);
+    band.rotation.y = Math.PI / 2; band.scale.y = 0.75;
+    at(part(new THREE.TorusGeometry(hr + 0.03, 0.02, 6, 20, Math.PI), gilt), 0, 1.0, 0).scale.y = 0.75;
+    at(part(new THREE.BoxGeometry(0.045, 0.12, 0.025), gilt), 0, 0.95, hr + 0.015);
+    at(part(new THREE.ConeGeometry(0.035, 0.09, 8), steel), 0, 1.0 + hr * 0.75 + 0.05, 0);
+    for (const s of [-1, 1]) {
+      at(part(new THREE.ConeGeometry(0.07, 0.24, 10), ivory), s * (hr + 0.07), 1.1, 0).rotation.z = -s * 1.0;
+      at(part(new THREE.ConeGeometry(0.046, 0.22, 10), ivory), s * (hr + 0.197), 1.27, 0).rotation.z = -s * 0.25;
+      at(part(new THREE.SphereGeometry(0.075, 10, 8), hc), s * (hr + 0.02), 1.03, 0.02).scale.set(1, 1.2, 1.3);
+    }
   }
 
   // Arms, from the shoulder.
@@ -348,7 +468,8 @@ export function dressPirate(look, opts = {}) {
       puff.scale.set(1, 0.9, 1);
       sh.add(puff);
     }
-    if (coat) sh.add(part(new THREE.CylinderGeometry(0.085, 0.085, 0.09, 10), L.top === 'captain' ? gold : M(top2), 0, -0.42));
+    if (bucc) sh.add(part(new THREE.CylinderGeometry(0.1, 0.115, 0.15, 12), M(top2), 0, -0.4));   // (wide cuffs)
+    else if (coat) sh.add(part(new THREE.CylinderGeometry(0.085, 0.085, 0.09, 10), L.top === 'captain' ? gold : M(top2), 0, -0.42));
     sh.add(part(new THREE.SphereGeometry(0.075 * ar, 10, 8), skin, 0, -0.5));
     body.add(sh);
     return sh;
@@ -357,9 +478,22 @@ export function dressPirate(look, opts = {}) {
     const blade = part(new THREE.BoxGeometry(0.04, 0.05, 0.62), M('#d8dde2', { metalness: 0.8, roughness: 0.25 }), 0, -0.52, 0.34);
     arms[1].add(blade, part(new THREE.BoxGeometry(0.16, 0.05, 0.04), gold, 0, -0.52, 0.04));
   }
+  if (L.hand === 'tankard') {
+    // A pewter tankard in the right hand, frothing over.
+    const pewter = M('#b9bec4', { metalness: 0.7, roughness: 0.3 }), foam = M('#fff6d8'), tk = new THREE.Group();
+    tk.add(part(new THREE.CylinderGeometry(0.075, 0.08, 0.17, 14), pewter));
+    const froth = part(new THREE.SphereGeometry(0.085, 12, 8), foam, 0, 0.09);
+    froth.scale.y = 0.55;
+    const handle = part(new THREE.TorusGeometry(0.05, 0.014, 6, 12, Math.PI), pewter, -0.08);
+    handle.rotation.z = Math.PI / 2;
+    tk.add(froth, part(new THREE.CapsuleGeometry(0.022, 0.07, 4, 8), foam, 0.05, 0.04, 0.05), handle);
+    tk.position.set(0, -0.56, 0.1);
+    arms[0].add(tk);
+  }
+  // A familiar rides on the left shoulder, as in Puzzle Pirates' portraits.
   const fam = makeFamiliar(L);
   if (fam) {
-    fam.g.position.set(-(shX + 0.05), 0.6, 0);
+    fam.g.position.set(shX + 0.05, 0.6, 0);
     body.add(fam.g);
   }
   g.traverse((x) => { if (x.isMesh) x.castShadow = true; });
@@ -398,9 +532,14 @@ function makeFamiliar(L) {
     [-1, 1].forEach((s) => g.add(part(new THREE.SphereGeometry(0.018, 6, 5), M('#555'), 0.03 * s, 0.01, 0.03)));
     Object.assign(fam, { head, wings });
   } else if (L.fam === 'monkey') {
-    const fur = M(FUR[L.famCol] || L.famCol), face = M('#e8c9a0');
+    const fur = M(FUR[L.famCol] || L.famCol), face = M(FUR_FACE[L.famCol] || '#e8c9a0');
     const bodyM = part(new THREE.SphereGeometry(0.095, 12, 10), fur, 0, 0.1, 0);
     bodyM.scale.set(1, 1.15, 0.9);
+    if (FUR_FACE[L.famCol]) {
+      const tum = part(new THREE.SphereGeometry(0.07, 10, 8), face, 0, 0.09, 0.04);
+      tum.scale.set(0.9, 1.1, 0.8);
+      g.add(tum);
+    }
     const head = new THREE.Group();
     head.position.set(0, 0.25, 0.02);
     head.add(part(new THREE.SphereGeometry(0.085, 12, 10), fur));
