@@ -115,6 +115,11 @@ the site (`.assetsignore` skips `*.md`).
   players to work out ("we won't tell anybody that, but they can figure out oars go against the
   wind"). Only there: "it should only really apply to this little ... area, not everywhere,
   because otherwise it's irritating."
+  **And a wind before the locks (10 Nov):** "there should be some wind stopping you from getting
+  to the locks on the left as well. Again, it's that Easter egg idea. People have got to figure
+  out that they can use the oars to go past the wind, and that's how they get over there." So the
+  way in to the canal is guarded by a wind too, dead against her under sail; rowing gets her
+  through. Never said anywhere.
 
 - **The way to the locks: found, not shown (10 Nov):** "the hint to the canal is only supposed to
   appear once you get right next to the Imperial checkpoint ... it should be a bit more out of
