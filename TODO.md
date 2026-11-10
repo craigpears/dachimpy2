@@ -117,6 +117,12 @@ the site (`.assetsignore` skips `*.md`).
   (5, for more cascades), the den's look and her rowing in 3D (IDEAS.md, "Fewer kinds, tested").
   Next: mirror strokes as the den's rowing board on the sloop, two boards side by side, with the
   lean and the compass the den's rowing already has.
+  Now, and balanced (the user, 10 Nov, on the den's rowing as it is: "it only took three moves to
+  generate three clears to generate a turn, and it ended up being a turn because I did one on one
+  side and two on the other. So that's basically impossible to go straight"; mirror strokes is
+  "ready enough to be slotted in ... even just that prototype mirrored thing"). Going straight
+  must be something you can aim for: a small lopsidedness rows her straight, and only a clear
+  imbalance turns her.
 
 - **Something worth finding in the hidden cove: treasure (9 Nov):** the canal and the cove "would
   be great, but ... it needs a point of interest in here, even if it's a little like treasure
