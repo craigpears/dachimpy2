@@ -598,6 +598,13 @@ pirate wedding absolutely is a must."
   presents a line of suitors in their finery, bouquets out, "Bachelor number one!" The default
   among them is the groom left over from the last, ill-fated wedding (his bride had a mishap), ready
   to try again. Suitors of every sort, so anyone can find a match; or set up your own.
+- **Happy and cheesy, or dark humour: your choice (10 Nov):** "Maybe the whole mishap of the
+  previous wedding and suggesting the previous groom thing comes in if you choose the kind of darker
+  humour theme or something. So you could choose the happy cheesy or the dark humour ... Depending
+  on what kind of wedding you want to go for." So the tone's chosen first: happy and cheesy (the
+  venue clean and pretty, her welcome all giggles, no mishap, no leftover groom) or dark humour (the
+  wreck, the welcome below, the leftover groom as Bachelor number one). It flavours her lines and
+  what she suggests first; every theme and plot stays open in either.
 - **The welcome, darkly funny (10 Nov):** "when you first turn up ... the last wedding party has
   gone horribly well. Mischievious is there, kind of trying to proposition you, and it's just like,
   yeah, don't pay attention to the blood and guts, yeah, it's fine. We've hired a bit of extra
