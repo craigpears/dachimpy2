@@ -575,8 +575,15 @@ pirate wedding absolutely is a must."
 - **Goes with:** "Side quests that leave friends about the den" (the couple could visit the den
   after), "Inside the house: furniture placed the same way, as in a YPP house" and "More clothes"
   (Making it yours, below).
-- **To pin down with the user:** who's marrying (made-up pirates, or real ones, drawn from their
-  portraits as ever), which venues to offer, the bride's lines and when she says them, the
+- **Mischievous, the bride who keeps marrying (10 Nov):** "Mischievous is a good friend of the game.
+  She's always the romantic sort, let's say that always is marrying. I'm sure she'd be like a
+  volunteer for [it] ... 'That was a fun wedding. Should we have another one?' 'I'd always like to
+  marry so and so as well.' I mean, I don't think she'd object to it. She'd go with that." So the
+  bride is Mischievous, a real pirate (drawn from her portrait, every piece she wears in the
+  wardrobe, as ever), and the quest comes round again: after one wedding she's soon planning the
+  next, to someone new, so you can do it again with another venue and palette.
+- **To pin down with the user:** who she marries each time (made-up pirates, or real ones, drawn
+  from their portraits as ever), which venues to offer, the bride's lines and when she says them, the
   palettes and schemes she offers, and what it pays. Check YPPedia for Puzzle Pirates' own
   weddings and wedding clothes first.
 
