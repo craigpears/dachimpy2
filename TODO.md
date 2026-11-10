@@ -186,6 +186,13 @@ the site (`.assetsignore` skips `*.md`).
   wind's run. The only hint comes at the end of the run, where she sees the checkpoint: "An
   imperial checkpoint... I wonder if there's another way round."
 
+- **A hit on a gun shows on it, not in words (10 Nov):** "there should be some visible damage once
+  you fire a cannonball at one of the turrets. Right now it's just like, oh, read the text to work
+  out that it's been damaged ... I probably shouldn't really be any text. It should just be visible
+  that you've damaged it, and you work out how many shots it takes." So each hit leaves its mark
+  on the gun (chipped stone, a scorched and dented barrel, a battlement knocked off, smoking more
+  as it's worse), and the toasts that count the hits ("2 more to wreck it") go.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
