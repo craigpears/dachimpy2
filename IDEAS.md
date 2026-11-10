@@ -545,6 +545,11 @@ bursts it, to keep him in long enough to plunder the stuff.
   page and portrait before drawing her, and every piece she wears goes in the wardrobe), a sweet
   guide to the lair: the gentle one who brings you to the coffins. Her familiar, if she has one,
   a character in the scene too.
+  **A big portrait collector (10 Nov):** "that needs to be worked into it, you can see she has like
+  seven pages of them" (her gallery: https://emerald.puzzlepirates.com/yoweb/gallery/index.wm?pirate=Gravee).
+  Look through it before drawing her. Ideas: portraits of her lining the walls on the way to the
+  lair (and one of the vampire, whose eyes follow you); she sits you for a new portrait as your
+  reward.
 
 ## A little town up the cliffs (9 Nov)
 
