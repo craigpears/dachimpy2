@@ -162,17 +162,20 @@ the site (`.assetsignore` skips `*.md`).
   the crane, haul her up, and the like), the offer is in the view where you're looking, at the
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
-- **A raider or two more in peace (10 Nov):** "I think maybe one or two more raiders." The
-  occasional raiders come one to three at a time, every 90 to 180 seconds. More of them, to throw
-  spare pieces at (how many more, and whether more often or more to a boat, to pin down with the
-  user).
-- **Nowhere to get rid of a piece you don't want (10 Nov):** "I've got, like, an M piece I need for
-  the stairs. I need a rare piece for my shack. I mean, I don't mind that these are kind of things
-  you have to really earn over time, I guess. But at the same time, it's a bit frustrating. Like,
-  well, how do I get rid of these pieces? ... there's only so far you can really just, like, throw
-  junk at the wall, because there's so much stuff to build." Throwing at a raider is the only way
-  to clear a crate today (RULES: "Throwing at a raider is the only way to discard"). Some way to
-  turn over pieces you can't use (to pin down with the user).
+- **The rare piece a frame's stuck on comes sooner (10 Nov):** a bin, or a rack to keep pieces in,
+  "just feels very uncarpentry like", and the raiders as they come are enough to throw at. Instead:
+  "if you do are stuck on a rare piece ... that becomes a bit more common. Like in my example, I've
+  got one on the stairs ... especially if we're going to have patterns like that where like you
+  absolutely need it". When nothing on the crates or in your hands will go into the frame you're
+  building, and only a rarer piece would, the deal brings that piece more often.
+  Then: "I want you to have to [dump] them ... just take into account a tiny bit more of the
+  context and rare pieces so that it's not completely random, just for enjoyability for this demo."
+  A light touch: still mostly the usual odds.
+- **Can't lift a piece back out of the stairs (10 Nov):** "the stairs only really lets you go one
+  out. Oh no, I can't pick this piece up. Yeah, like I put like another piece in there, but like
+  that I can't use, and then I have one little gap, and there's nothing I can do about it." Any
+  piece in an unfinished frame should lift back out (RULES: "A gap is never filled for you"), but
+  on the stairs it wouldn't.
 
 ## Needs a playtest to pin down
 

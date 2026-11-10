@@ -1879,6 +1879,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   you fit it, board it over, nail it on behind a mended hole, or lay it in a rampart frame; after
   the siege, a raider or two still puts in now and then to throw it at (see "The occasional
   raider after the siege").
+  (10 Nov, asked again what to do with a piece you can't use: a pile to saw it up, or a rack to
+  keep it, "just feels very uncarpentry like", and "even just the small number of raiders as they
+  are is fine". So no bin and no rack; the deal helps instead when a frame's stuck on a rare
+  piece: TODO.md.)
 - **You must see what's happening in the den.** Raiders inside get a ⚔ marker, pinned to the edge
   of the screen when they're out of view (gold when carrying loot). The view widens on narrow screens.
 - **Keeping them out must be possible, and must feel worth it.** The user found it demoralising
