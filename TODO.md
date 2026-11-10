@@ -178,6 +178,15 @@ the site (`.assetsignore` skips `*.md`).
   place that stands out, not something to hunt for. Goes with "No Bilge on the beach", which
   clears that end of the beach.
 
+- **The captain's map matches the sea (10 Nov):** "the map obviously needs updating as well now,
+  because we've added a lot of stuff. Obviously, don't show off the secrets, but certainly, like,
+  even just like the checkpoint or something should, like, the line, it should match up with what
+  is actually on the map at the moment a little bit." The map is drawn from the sea as it is (its
+  lay): the den's cove, the shipping lane, the checkpoint's line across it with its gate, the reef
+  and the headland either side, and the open sea and the wreck beyond, in a hand-drawn captain's
+  style. Nothing secret on it: no canal or locks, no harbour, no lagoon or crane, no islands off
+  the beaten track, nothing about the oars.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
