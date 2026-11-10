@@ -24,6 +24,7 @@ import { MAP_D, MAP_W, chart, mapView, nearMap, openMap, mapKey, takeMap, mapTic
 import { cine, cineCam, cineView, cineEnd, cineTick, cineLets } from './den/cine.js';
 import { dignityTick, dignityReset } from './den/dignity.js';
 import { sail } from './den/sea.js';
+import { landingTick } from './den/landing.js';
 import { nearSloop, board, ashore, sailReset, sailClick, sailHover, sailKey, sailTick } from './den/sailing.js';
 import { patch, deckHoleShape, patchTurn, patchPlace, patchKey } from './den/sea-puzzles.js';
 import { hold, holdSwap } from './den/lock.js';
@@ -683,6 +684,7 @@ function update(dt) {
   updateMates(dt);
   waveFlags(dt);
   biomeTick(dt);
+  landingTick();
   gateTick(dt);
   selfSeen();
   showAim();

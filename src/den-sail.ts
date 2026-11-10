@@ -799,6 +799,13 @@ export class Helm {
     this.pin = null; this.via = null; this.mine = [];
     if (!this.cur && this.slot >= 0) { this.turn = []; this.slot = -1; this.wait = SAIL.BREAK; }
   }
+  /** Brought in to her mooring and made fast, whatever she was doing: no pin, no moves, nothing
+      playing (going ashore from anywhere along the den's beach: src/den-beach.ts). */
+  moor() {
+    this.pin = null; this.via = null; this.mine = []; this.turn = []; this.slot = -1; this.t = 0;
+    this.cur = null; this.rides = []; this.strokes = []; this.wait = 0;
+    this.pose = { ...SAIL.HOME };
+  }
 
   /** Nothing playing and nothing to play. */
   idle(): boolean { return this.slot < 0 && !this.next().length; }

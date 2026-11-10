@@ -9,6 +9,7 @@ import { putBack, exitWall } from './pieces.js';
 import { sword } from './sword.js';
 import { shoreZ, bilge, groundPlane } from './bilge.js';
 import { chart } from './map.js';
+import { canLand } from '../den-beach.js';
 import { cine } from './cine.js';
 import { SEA_X0, seaX, seaZ, SLOOP_DECK, sail, liftAt, sloopMesh, seaRocks, seaWorld, pinMesh, dotMat, dotMine, dotGeo, hoverMat, TOK } from './sea.js';
 import { patch, deckHoleShape, patchClear, patchShut, patchClick, patchHover, patchTick, patchPrompt } from './sea-puzzles.js';
@@ -45,11 +46,12 @@ export function board() {
   $('intro').classList.add('off');
   toast('Aboard! Click the sea to drop a pin, and she\'ll sail there');
 }
-// Ashore, at her mooring: you hop down onto the beach by her.
+// Ashore: from anywhere on the landing along the den's beach (src/den-beach.ts), she's brought in to
+// her mooring and you hop down onto the beach by her.
 export function ashore() {
   sail.on = false;
   gunneryReset();
-  sail.helm.stop();
+  sail.helm.moor();
   document.body.classList.remove('sailing');
   Object.assign(pirate, { x: seaX(SAIL.HOME.c) + 0.6, z: shoreZ() + 0.7, h: 0, hs: 0, hop: null });
   pirate.g.rotation.set(0, 0, 0);
@@ -160,7 +162,7 @@ export function sailKey(key) {
   else if (key === 'escape') { sail.helm.stop(); toast('Pin pulled up: she\'ll stop when this turn\'s done'); }
   else if (key === 'h') { sail.helm.drop(SAIL.HOME.c, SAIL.HOME.r); if (sail.helm.pin) toast('Heading home to the cove'); }
   else if ((key === ' ' || key === 'enter') && canHaulWreck()) haulWreck();
-  else if ((key === ' ' || key === 'enter') && atHome() && sail.helm.slot < 0) ashore();
+  else if ((key === ' ' || key === 'enter') && canLand(sail.helm)) ashore();
   else if (key === 'z' || key === 'c') keys.add(key);
   else if (key === 'p') setPaused(true);
   else if (key === 'v') Object.assign(view, { yaw: 0, pitch: 0, zoom: 1 });
@@ -182,7 +184,7 @@ export function sailPrompt() {
   if (held === 'fill') return 'The lock\'s filling from the canal above';
   if (held === 'gates') return 'The lock gates are swinging open';
   if (held === 'calm') return 'Becalmed: dead in the water till the wind picks up · O: out oars';
-  if (atHome() && h.slot < 0 && !h.next().length) return 'At her mooring · Space: go ashore · click the sea to drop a pin';
+  if (canLand(h)) return h.slot < 0 ? 'Off the den\'s beach · Space: go ashore · click the sea to drop a pin' : 'Under way off the den\'s beach · Space: go ashore';
   if (canHaulWreck()) return 'The old wreck · Space: haul up its treasure (Treasure Haul) · click the sea to drop a pin';
   if (h.slot < 0 && h.headwind()) return headwindPrompt();
   if (h.pin) return h.oars ? 'Rowing to the pin' : 'Under way to the pin';
@@ -226,7 +228,7 @@ export function sailTick(dt) {
     for (const e of h.tick(dt)) {
       windSay(e);
       if (e.kind === 'move' && e.bump && !e.irons) sail.bumpT = e.secs * 0.45;   // (felt as she hits)
-      if (e.kind === 'arrive' && atHome()) toast('Back at her mooring: Space to go ashore');
+      if (e.kind === 'arrive' && canLand(h)) toast('Off the den\'s beach: Space to go ashore');
       if (e.kind === 'push') {
         if (!sail.riding) { sail.riding = true; if (!sail.said.wind) { sail.said.wind = true; toast('The trade winds have her!'); } }
         burst(V3(seaX(e.from.c), 0.3 + liftAt(e.from.c, e.from.r), seaZ(e.from.r)), '#e6f3f6', 5, 2);
