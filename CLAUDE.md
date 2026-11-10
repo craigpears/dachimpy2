@@ -27,10 +27,15 @@ them as they are (a test checks). Tests: Vitest, `tests/*.test.ts` (`npm test`, 
 and configs aren't published (`.assetsignore`). When the user describes something going wrong in a part that has
 tests, add a test for it, named after what they saw, with the date.
 
-No technical debt (the user, 10 Nov): one copy of each puzzle's rules, used everywhere it's played. Gunnery on
-the gun tower and on the sloop, Carpentry on the wall, her deck and the crane, are the same puzzle code with thin
-wrappers for what's drawn round them, never a copy per place. When a puzzle that's still in a js/den file is
-needed somewhere new, move its rules into a TypeScript module in `src/` (like `bilge.ts`) first, then share it.
+Modular, no technical debt (the user, 10 Nov: "we need to make sure I'm not creating spaghetti or just mess"):
+- Each puzzle (Carpentry, Gunnery, Bilge, Swordfight, Treasure Haul, rowing...) is one module with one
+  implementation of its rules, knowing nothing of where it's played, used everywhere it's played. Gunnery on the
+  gun tower and on the sloop, Carpentry on the wall, her deck and the crane, are the same puzzle code with thin
+  wrappers for what's drawn round them, never a copy per place. When a puzzle still in a js/den file is needed
+  somewhere new, move its rules into a TypeScript module in `src/` (like `bilge.ts`) first, then share it.
+- The same goes for the world's objects and scenes (a lock, a gun, a crane, a ship, a place on the sea): each a
+  module of its own that can be reused, not code smeared across files. Introduce this gradually as the world grows:
+  when a change would copy code or tangle two parts together, pull the shared part out first.
 
 Read [STORY.md](STORY.md) for the den's story, its progression and the principles behind them, and keep it
 up to date as the story grows. Read [RULES.md](RULES.md) before changing gameplay or wording, and add to it whenever the user corrects a rule or gives design feedback.
