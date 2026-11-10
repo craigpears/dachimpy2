@@ -697,6 +697,12 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     instead: the same idea, clear on both sides at once. Before building it into the den: a
     plain test page, and bots that play it (random, greedy, looking two moves ahead), to see
     whether better play goes much further, as a check on the skill curve. (To shape with the user.)
+    The user likes that you haven't full control: "especially if you get like a cascade where it
+    then accidentally starts sending you in circles. That would be hilarious. Frustrating but
+    funny." And for a crew, just for a laugh: **blindfold rowing**, each pirate's moves mirrored
+    onto a mate's board they can't see, "you don't know what you're going to affect on the other
+    person's board ... you can just see somebody like clearing, ruining other people's". The
+    worry: people would just share screens, which might make it frustrating. Still "a bit funny".
     **Weather is where oars make sense (9 Nov):** the wind can drop. Under sail she's quicker, but
     when the wind drops a ship that's all sails is "dead in the water until the wind picks back
     up again", and under sail you "can't go against the wind". Oars keep her moving either way:
