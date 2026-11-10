@@ -118,7 +118,7 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    trade winds and the shipping lane out to the imperial checkpoint's line, the cliffs and
    headland on one side and the reef on the other, and beyond it the open sea and an old wreck
    with the X on it, the captain's dotted way out through the gate. Never the secrets (the locks,
-   the hidden cove, the lagoon) nor how to get past: those are yours to find. (It showed his
+   the hidden cove, the lagoon) nor how to get past: those are yours to find. The first time you open it, a short tour walks round it, and a quest list beside it counts what's still out there to find without saying where (10 Nov, for the demo). (It showed his
    island and a way in for each puzzle, one of them the hidden cove, before the sea was built;
    those ways past Dalnoth come back onto it when his hideout's built, step 6.)
 5. · **Out to sea, to his hideout.** Forward, not back: you go and raid him, "a mirror of this

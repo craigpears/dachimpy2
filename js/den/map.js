@@ -14,6 +14,7 @@ import { shoreZ, bilge } from './bilge.js';
 import { sail } from './sea.js';
 import { guest, send } from './crew.js';
 import { deco, decoMode } from './menus.js';
+import { questsTick, touring, tourStep, tourStart, tourMaybe } from './quests.js';
 
 // ---------- the captain's map ----------
 /* Left on the beach when the siege is over (src/den-map.ts). Beat the last wave and a short, cheesy
@@ -313,10 +314,22 @@ export function openMap() {
   chart.open = 0;
   chart.g.visible = true;
   $('intro').classList.add('off');
+  tourMaybe();   // (the first time: a short tour round it, quests.js)
 }
-export function mapKey(key) {
-  if (['escape', 'm', ' ', 'enter'].includes(key)) chart.on = false;
+/* Its keys: while the tour's on, Space, Enter or → for the next step, ← back, Esc skips it (M rolls
+   the map up as ever); else T shows the tour again, and M, Esc, Space or Enter rolls it up. */
+export function mapKey(key, e) {
+  if (touring()) {
+    if (!e?.repeat) tourStep(key);
+    if (key === 'm') chart.on = false;
+  } else if (key === 't') tourStart();
+  else if (['escape', 'm', ' ', 'enter'].includes(key)) chart.on = false;
   return true;   // (nothing else while you're reading it: no walking off with it open)
+}
+// A click on it: the tour's next step, or rolled up.
+export function mapClick() {
+  if (touring()) tourStep('click');
+  else chart.on = false;
 }
 // Picked up: yours (and your crew's: anyone can open it after).
 export function takeMap() {
@@ -367,6 +380,7 @@ export function mapTick(dt) {
     mapLayout(chart.open * chart.open * (3 - 2 * chart.open));
     if (!chart.on && chart.open <= 0) chart.g.visible = false;
   }
+  questsTick({ g: chart.g, w: MAP_W, d: MAP_D, open: chart.open, on: chart.on });   // (its tour and quests over it)
 }
 export function mapReset() {
   chart.on = false; chart.open = 0;

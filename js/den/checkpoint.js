@@ -3,7 +3,8 @@
 import * as THREE from 'three';
 import { LAY, SAIL, canalAt } from '../den-sail.js';
 import { CHECK, Checkpoint, throughSay } from '../den-checkpoint.js';
-import { scene, mat, mesh, canvasTex, woodTex, V3, burst, toast, worldLets, shake, flagpole, warm } from './world.js';
+import { addFind, wayThrough, wayWrecked } from '../den-finds.js';
+import { G, scene, mat, mesh, canvasTex, woodTex, V3, burst, toast, worldLets, shake, flagpole, warm } from './world.js';
 import { rock } from './land.js';
 import { turretMesh, turretView, turretWrecked, turretFire, turretLand, turretShotsTick, turretShotsClear, shotComing } from './turret.js';
 import { hullGeo } from './raids.js';
@@ -166,6 +167,7 @@ export function checkpointReset() {
   turretShotsClear();
   cp.byWreck = false;
   cp.held = [];
+  cp.rowed = false;
   sail.wreckSalvage = null;
 }
 const GUN_NAME = ['left', 'right'];
@@ -183,6 +185,8 @@ export function checkpointShot(hit, at) {
   else if (e.did === null) toast('A hit on the wrecked bastion!');
   else {
     turretWrecked(cp.W.bastions[e.gun], at);   // (its moment: it comes down)
+    const w = wayWrecked(b.silenced());   // (both down: a way past found, for the map's quests: src/den-finds.ts)
+    if (w) G.found = addFind(G.found, w);
     toast(b.silenced() ? 'Both its guns are wrecked! The way through the checkpoint is safe' : `The ${name} bastion's gun is wrecked! Its marks are safe now`);
   }
   return true;
@@ -204,8 +208,12 @@ export function checkpointTick(dt) {
     // Its commander on the gate: her cutscene the first time she's sighted from the cove's side
     // (dignity.js). What's said here waits till it's over, so they don't talk over each other.
     dignityWatch(h.pose);
+    if (h.pose.r === K.ROW && h.pose.c === K.GATE) cp.rowed = h.oars;   // (at the oars in the gate, or under sail)
     for (const e of cp.check.watch(h.pose)) {
       dignityHeard(e);
+      // Which way she got past, for the map's quests (src/den-finds.ts).
+      const way = e.kind === 'through' ? wayThrough(e.how, { oars: cp.rowed, silenced: cp.check.battery.silenced() }) : null;
+      if (way) G.found = addFind(G.found, way);
       // Nothing's said as she sights it: how to get past it is yours to work out (the user, 10 Nov:
       // "I like these just to be hidden gems that you work out").
       if (e.kind === 'sighted') continue;

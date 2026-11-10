@@ -149,6 +149,19 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   said is what's happened (hit, through, the wind's shifted), and how to work a thing once you're
   at it (Space to haul). The one exception agreed: after you've been sunk and rowed home, a small
   note that O gets the oars out (TODO.md, "Sunk at the checkpoint").
+  **And the demo's quest list (10 Nov):** "I just know there's a lot of stuff in here and I want
+  to make it ... discoverable given it's a proof of concept demo." Asked, the user chose the map
+  stage only, and "tease, don't tell": "we can kind of hint at umami, the capybara to rescue ...
+  I like that, that there are little quests ... you've got like the build the shack quest." So the
+  first time you open the captain's map, a five-step tour (skippable with Esc, shown once, T again)
+  walks round it: the den and the sloop at the jetty, the winds and the lane (pins, or steer), the
+  checkpoint ("There's more than one way past it, mind. Which? That's for ye to find"), the wreck
+  and the X, and "there's more off the edges o' this map". Beside the map, a "Quests" scrap: the
+  den's jobs named plainly (the walk, the stairs, the gun tower, yer shack), the X's treasure, and
+  under "Still to find" counts only, worded to give nothing away: ways past the checkpoint (of 4),
+  hidden places (of 2), secret treasure (of 1), a friend to rescue (of 1). Each ticks when done.
+  It says there's something to find, never the way to it, and never that the oars beat the wind.
+  Rules: `src/den-finds.ts`; drawn by `js/den/quests.js`.
 - **A puzzle's pieces look like the real ones (10 Nov).** The user: "the last few puzzles, the
   graphics have been placeholders rather than matching the Puzzle Pirate pieces, so use the actual
   Puzzle Pirate page." Every Puzzle Pirates puzzle in the den draws its pieces after the real ones

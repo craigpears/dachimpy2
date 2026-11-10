@@ -21,7 +21,7 @@ import { piles, fair, neededLetters, fairPick, deal, showPile, takeCrate, toolbo
 import { boats, raiderOut, focus, onBeach, atWall, clickedFoe, cursor, aimed, aimFoe, throwAt, passable, weakSpot, widenCells, widen, spawnRaider, updateRaider, fireCannon, cannonSpot, showAim, startWave, updateWaves, banner, checkEnd, raidsLets } from './den/raids.js';
 import { rack, barracks, sword, atSword, swordBreak, swordDrop, swordReward, swordEnter, swordKey, lumber, toLumber, repairAll, swordTick, swordReset } from './den/sword.js';
 import { tide, shoreZ, bilge, atBilge, bilgeEnter, bilgeKey, bilgeHover, bilgeSwap, dredge, bilgeTick, bilgeReset } from './den/bilge.js';
-import { MAP_D, MAP_W, chart, mapView, nearMap, openMap, mapKey, takeMap, mapTick, mapReset, mapLets } from './den/map.js';
+import { MAP_D, MAP_W, chart, mapView, nearMap, openMap, mapKey, mapClick, takeMap, mapTick, mapReset, mapLets } from './den/map.js';
 import { cine, cineCam, cineView, cineEnd, cineTick, cineLets } from './den/cine.js';
 import { dignityTick, dignityReset } from './den/dignity.js';
 import { sail } from './den/sea.js';
@@ -43,7 +43,7 @@ export function newGame() {
   if (carry) { scene.remove(carry.group); worldLets.carry = null; }
   worldLets.ghostKey = ''; worldLets.ghost = null;
   sailReset(); sail.seen = false;
-  Object.assign(G, { gold: 60, wave: 0, phase: 'build', phaseT: BUILD_SECS, toSpawn: 0, spawnT: 0, cannonT: 0, cannonShots: 0, aim: null, masters: 0, boarded: 0, bonked: 0, stolen: 0, turned: 0, waveTurned: 0, waveIn: 0, over: false, fairOver: false, map: 'none' });
+  Object.assign(G, { gold: 60, wave: 0, phase: 'build', phaseT: BUILD_SECS, toSpawn: 0, spawnT: 0, cannonT: 0, cannonShots: 0, aim: null, masters: 0, boarded: 0, bonked: 0, stolen: 0, turned: 0, waveTurned: 0, waveIn: 0, over: false, fairOver: false, map: 'none', found: [] });
   fair.reset();
   swordReset();
   bilgeReset();
@@ -70,7 +70,7 @@ addEventListener('keydown', (e) => {
   if (paused) { if (['p', ' ', 'escape', 'enter'].includes(key)) { e.preventDefault(); setPaused(false); } return; }
   // The cutscene: Space or Esc skips it; nothing else.
   if (cine) { if ([' ', 'escape', 'enter'].includes(key)) { e.preventDefault(); if (!e.repeat) cineEnd(true); } return; }
-  if (chart.on && !deco.on) { e.preventDefault(); mapKey(key); return; }
+  if (chart.on && !deco.on) { e.preventDefault(); mapKey(key, e); return; }
   // Treasure Haul: its own keys (P still pauses).
   if (haul.on) { e.preventDefault(); if (!haulKey(key, e) && key === 'p' && !e.repeat) setPaused(true); return; }
   // At sea: the helm's keys, and the view's.
@@ -164,7 +164,7 @@ renderer.domElement.addEventListener('mousedown', (e) => {
   if (e.button !== 0 || G.over || cine) return;
   if (haul.on) { haulHover(e.clientX, e.clientY); haulSwap(); return; }
   if (sail.on) { sailClick(e.clientX, e.clientY); return; }
-  if (chart.on) { chart.on = false; return; }
+  if (chart.on) { mapClick(); return; }
   if (bilge.on) { bilgeHover(e.clientX, e.clientY); bilgeSwap(); return; }
   // In the Carpentry view a click only ever fits the piece (or, empty-handed, lifts one out of a frame).
   if (wm) {

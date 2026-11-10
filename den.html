@@ -224,6 +224,30 @@
     body.reading .hud, body.reading .dock, body.reading .banner, body.reading .intro, body.reading .credit, body.reading .toast, body.reading .gunhelp, body.reading #labels { opacity: 0; pointer-events: none; }
     .map-hint { position: fixed; left: 0; right: 0; bottom: 18px; text-align: center; color: #e8dcc0; font: 15px 'Alegreya', serif; text-shadow: 0 1px 3px #000; opacity: 0; pointer-events: none; transition: opacity .4s; z-index: 20; }
     body.reading .map-hint { opacity: .85; }
+    /* The map's quests and its tour (js/den/quests.js): scraps of parchment beside it, in ink. */
+    .map-hint .tour-btn { pointer-events: auto; cursor: pointer; font: 15px 'Alegreya', serif; color: #e8dcc0; background: rgba(42,28,17,.7); border: 1px solid #a3763e; border-radius: 6px; padding: 1px 8px; margin-left: 4px; }
+    .map-hint .tour-btn:hover { color: #fff3c4; border-color: var(--gold); }
+    .quests, .tour-card { position: fixed; z-index: 21; color: #3a2210; background: radial-gradient(ellipse at 50% 40%, #f3e2b6, #dcc08a 75%, #b98c4e); border: 1px solid #7a5428; border-radius: 3px 9px 4px 11px; box-shadow: 0 6px 22px rgba(0,0,0,.55), inset 0 0 18px rgba(120,74,30,.35); font: 500 15px 'Alegreya', serif; opacity: 0; pointer-events: none; transition: opacity .35s; }
+    .quests { top: 14px; right: 14px; width: 250px; padding: 10px 14px 8px; transform: rotate(1.2deg); }
+    .quests.on { opacity: .97; }
+    .quests.lit { box-shadow: 0 0 0 3px #b3201a, 0 0 26px rgba(255,210,58,.8), inset 0 0 18px rgba(120,74,30,.35); }
+    .quests h3 { margin: 0 0 2px; font: 700 21px 'Alegreya', serif; color: #5a1a0c; text-align: center; }
+    .quests h4 { margin: 6px 0 1px; font: italic 700 14px 'Alegreya', serif; color: #6a3a18; border-bottom: 1px solid rgba(90,26,12,.3); }
+    .quests ul { list-style: none; margin: 0; padding: 0; }
+    .quests li { display: flex; gap: 6px; align-items: baseline; line-height: 1.25; margin: 1px 0; }
+    .quests li b { flex: none; display: inline-grid; place-items: center; width: 13px; height: 13px; border: 1.5px solid #4a2c14; border-radius: 2px; font: 700 15px/1 'Alegreya Sans'; color: #1f6b2a; }
+    .quests li.got { color: #6d5a40; }
+    .quests li.got b { border-color: #6d5a40; }
+    .quests li.secret { font-style: italic; }
+    .tour-card { left: 50%; bottom: 48px; width: min(560px, calc(100vw - 32px)); box-sizing: border-box; padding: 12px 20px 8px; transform: translateX(-50%) rotate(-.6deg); cursor: pointer; }
+    .tour-card.high { bottom: auto; top: 14px; }
+    .tour-card.on { opacity: 1; pointer-events: auto; }
+    .tour-card p { margin: 0; font: 500 19px/1.35 'Alegreya', serif; }
+    .tour-card small { display: block; margin-top: 4px; text-align: right; font: italic 13px 'Alegreya', serif; color: #6a3a18; }
+    .tour-ring { position: fixed; z-index: 20; border: 3px solid #b3201a; border-radius: 50%; box-shadow: 0 0 0 2px rgba(255,236,180,.6), 0 0 18px rgba(179,32,26,.6); pointer-events: none; opacity: 0; transition: opacity .3s; }
+    .tour-ring.on { opacity: .9; animation: tour-ring 1.6s ease-in-out infinite; }
+    @keyframes tour-ring { 50% { box-shadow: 0 0 0 5px rgba(255,236,180,.45), 0 0 30px rgba(179,32,26,.85); } }
+    @media (max-width: 760px) { .quests { width: 200px; font-size: 13px; } .quests h3 { font-size: 17px; } .tour-card p { font-size: 16px; } }
     .label.say { font: 700 21px 'Alegreya', serif; color: #2a1a0c; background: #f6ecd2; border: 2px solid #2a1a0c; border-radius: 16px; padding: 4px 14px; margin-top: -12px; }
     .label.say::after { content: ''; position: absolute; left: 50%; bottom: -11px; margin-left: -9px; border: 9px solid transparent; border-top-color: #2a1a0c; border-bottom: 0; }
     .label.say.chat { font-size: 15px; padding: 2px 10px; background: #f3e9ff; border-color: #4a3170; color: #3a2160; }
@@ -253,7 +277,7 @@
   <div class="end" id="paused"><div><h2>Paused</h2><p>The raiders will wait. Press <b>P</b> or <b>Space</b> to carry on.</p><button id="resume">Carry on</button></div></div>
   <div class="end" id="end"><div><h2>The den's been plundered!</h2><p id="end-text"></p><button id="again">Defend it again</button></div></div>
   <div id="labels"></div>
-  <div class="map-hint"><kbd>M</kbd>, <kbd>Esc</kbd> or <kbd>Space</kbd>: roll it up</div><div class="cine-bar top"></div><div class="cine-bar bot">Space: skip</div>
+  <div class="map-hint" id="map-hint"><kbd>M</kbd>, <kbd>Esc</kbd> or <kbd>Space</kbd>: roll it up</div><div class="cine-bar top"></div><div class="cine-bar bot">Space: skip</div>
   <div id="tags"></div>
   <div class="crew cheats" id="cheats"><div>
     <h2>Cheats</h2>
@@ -303,7 +327,7 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.QCFLC74N.js');
+    import(local ? './js/den.js' : './js/den.K63GIO7J.js');
   </script>
 </body>
 </html>

@@ -162,12 +162,6 @@ the site (`.assetsignore` skips `*.md`).
   the crane, haul her up, and the like), the offer is in the view where you're looking, at the
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
-- **An intro that shows what's in the den, for the demo (10 Nov):** "Can you build like that kind of
-  intro thing like I know we've kind of got that map that gives a bit of an intro, but maybe we
-  need more when you get to the start or map stage ... I just know there's a lot of stuff in here
-  and I want to make it ... discoverable given it's a proof of concept demo." (Goes with "A quick
-  tour for pirates dropping in" in IDEAS.md, and against "Hidden gems, never hinted" in RULES:
-  how much to show, to pin down with the user.)
 
 ## Needs a playtest to pin down
 
