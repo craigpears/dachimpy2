@@ -558,12 +558,12 @@ pirate wedding absolutely is a must."
   wardrobe become the puzzle-free heart of one quest, a showcase for them.
 - **The wedding takes in the house idea (10 Nov):** "the wedding thing supersedes the decorate the
   house thing, that encapsulates everything." No separate decorate-their-house quest.
-- **Freeform, with an excited host (10 Nov; the "bride" is now Mischievous as planner, below):** "it definitely needs to be very freeform because the
+- **Freeform, with an excited host (10 Nov; the "bride" is now Mischievious as planner, below):** "it definitely needs to be very freeform because the
   whole point is it's being creative, but I still think you need that kind of almost giggly
   excited bride that tells you how much she loves the outfits ... or compliments you as you're
   designing things. Maybe she asks you questions, you choose some different color palettes ... or
   design schemes." So no score and no brief to meet: you place and dress what you like, and
-  Mischievous reacts as you go, delighted at an outfit, gushing over the arch. She asks you things along
+  Mischievious reacts as you go, delighted at an outfit, gushing over the arch. She asks you things along
   the way (which colour palette, which scheme: say, sunset gold, ocean blues, jungle greens), and
   your answer sets the mood she cheers you on toward, never a rule you can fail.
 - **The wedding itself, and where (10 Nov):** "we definitely would need a cutscene, guest
@@ -575,13 +575,13 @@ pirate wedding absolutely is a must."
 - **Goes with:** "Side quests that leave friends about the den" (the couple could visit the den
   after), "Inside the house: furniture placed the same way, as in a YPP house" and "More clothes"
   (Making it yours, below).
-- **Mischievous, who keeps marrying (10 Nov):** "Mischievous is a good friend of the game.
+- **Mischievious, who keeps marrying (10 Nov):** "Mischievious is a good friend of the game.
   She's always the romantic sort, let's say that always is marrying. I'm sure she'd be like a
   volunteer for [it] ... 'That was a fun wedding. Should we have another one?' 'I'd always like to
   marry so and so as well.' I mean, I don't think she'd object to it. She'd go with that."
-  Mischievous is a real pirate (drawn from her portrait, every piece she wears in the wardrobe, as
+  Mischievious is a real pirate (drawn from her portrait, every piece she wears in the wardrobe, as
   ever), and the quest comes round again: after one wedding she's soon planning the next.
-- **Mischievous runs the venue; you marry whoever you like (10 Nov):** "we've got to be gender
+- **Mischievious runs the venue; you marry whoever you like (10 Nov):** "we've got to be gender
   neutral about it, so maybe recast mischievous more in the wedding planner role than the default.
   Maybe she can be like the default bride, so you turn up and she's kind of ... in charge of the
   venue. And you have the choice between ... let's marry mischievous. But ... you have the choice
@@ -594,12 +594,12 @@ pirate wedding absolutely is a must."
   ready ... as a suitor ... you can have the line of suitors ... pirates and different outfits that
   are all kind of coming at you with bouquets of flowers ... I'm imagining her playing it. She'd be
   like, here are your bachelors. Bachelor number one. You got the blind date style game going on
-  here." So choosing who you marry is a game show: Mischievous offers herself first, and if not,
+  here." So choosing who you marry is a game show: Mischievious offers herself first, and if not,
   presents a line of suitors in their finery, bouquets out, "Bachelor number one!" The default
   among them is the groom left over from the last, ill-fated wedding (his bride had a mishap), ready
   to try again. Suitors of every sort, so anyone can find a match; or set up your own.
 - **The welcome, darkly funny (10 Nov):** "when you first turn up ... the last wedding party has
-  gone horribly well. Mischievous is there, kind of trying to proposition you, and it's just like,
+  gone horribly well. Mischievious is there, kind of trying to proposition you, and it's just like,
   yeah, don't pay attention to the blood and guts, yeah, it's fine. We've hired a bit of extra
   security. The last wedding went a bit bloody and gory, but it's fine. How are you? Would you like
   to get married? ... casually as you do. This stuff happens around here all the time." The venue
@@ -625,7 +625,7 @@ pirate wedding absolutely is a must."
   that, but I do want it to be fun and really show ... I want just a really cheesy animation at the
   end. That would be incredible, even just as a single proof of concept one." A first version
   could be one venue, a couple of themes, one plot, and one gloriously cheesy ending.
-- **To pin down with the user:** which venues and themes to offer first, the plots, Mischievous's
+- **To pin down with the user:** which venues and themes to offer first, the plots, Mischievious's
   lines and when she says them, the palettes she offers, how the portrait is saved and shared, and
   what it pays. Check YPPedia for Puzzle Pirates' own weddings and wedding clothes first.
 

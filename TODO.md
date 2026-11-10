@@ -162,16 +162,16 @@ the site (`.assetsignore` skips `*.md`).
   the crane, haul her up, and the like), the offer is in the view where you're looking, at the
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
-- **Mischievous's wedding, a proof of concept of the whole thing (10 Nov):** "really go for it,
+- **Mischievious's wedding, a proof of concept of the whole thing (10 Nov):** "really go for it,
   really generate me a proof of concept for the whole thing ... have a cheat so we can jump to it
   ... the cheesy ending, pre-generated scenes. This should probably be ... on an island somewhere
-  ... islands can all have their own little thing out there." And of Mischievous: "look for [her]
+  ... islands can all have their own little thing out there." And of Mischievious: "look for [her]
   pirate page, just so you can get her likeness ... Go through her portraits, so you could choose
-  which version of [her] you would like to marry, or something silly." Her Emerald pirate page has
-  two portraits: "Mischief Never Sleeps" (curly black hair, a gold earring, a red-and-black
-  off-the-shoulder dress, her grey squirrel) and "Boo!" (her Halloween costume, 2010: the palace
-  shoppe's red Butterfly mask, bat wings). Built from IDEAS.md's "A Puzzle Pirates wedding": her
-  island out at sea, the wrecked venue and her darkly funny welcome, who you marry (her, in either
+  which version of [her] you would like to marry, or something silly." Her name's Mischievious (with
+  the extra i: "That's not the pirate page you showed, it was missing an i"), on Emerald, a captain
+  and queen; her portrait now a Wanted poster (black hair, a black mask, a magenta dress, her grey
+  squirrel), and 23 pages of portraits in her gallery to pick versions of her from. Built from
+  IDEAS.md's "A Puzzle Pirates wedding": her island out at sea, the wrecked venue and her darkly funny welcome, who you marry (her, in whichever
   portrait's look; the line of suitors, "Bachelor number one" the groom left from last time; or
   someone of your own), the venue, a theme to start from, then decorating and dressing the guests
   freely, the plot, the cheesy cutscene, and a portrait to save, with the set-up kept and a link to
