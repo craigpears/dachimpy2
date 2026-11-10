@@ -117,8 +117,12 @@ the site (`.assetsignore` skips `*.md`).
   **But the deck patch stays (10 Nov):** "abandon getting rid of the carp[entry] on deck when the
   cannonball hits things ... people like it. It's funny. It's good." A hit still holes her deck and
   you patch it by Carpentry before she sails on, as now (RULES.md, "Kept because people like
-  them"). Whether damage and bilge still come on top of it, and how sinking works then: to pin down
-  with the user before building any of it.
+  them"). **The meters are for bigger ships (10 Nov):** "maybe in a sloop you get damaged and you
+  have to patch it up instantly, and then those full damage [and] bilge meter things are bigger ship
+  features that we can discover later" (IDEAS.md, "A bigger ship from the shipwright"): "it gives a
+  bit of personality to this little small sloop." So the sloop keeps the instant patch, and no
+  damage or bilge meters are built for her. Still open: whether a hit can sink the sloop at the
+  checkpoint (and you row home), and how.
 
 
 - **The Sailing puzzle, for Kikkit's quest (10 Nov):** Kikkit's penguin quest is next up once the
@@ -185,6 +189,16 @@ the site (`.assetsignore` skips `*.md`).
   and the headland either side, and the open sea and the wreck beyond, in a hand-drawn captain's
   style. Nothing secret on it: no canal or locks, no harbour, no lagoon or crane, no islands off
   the beaten track, nothing about the oars.
+
+- **Somewhere for the pieces you don't want, building in the den (10 Nov):** playtesting the
+  whole thing through: "building the platform and the stairs and things in the base is really
+  difficult now because you've got no way of wasting pieces. I mean, I can still kind of put stuff
+  on the wall, but ... originally it was the balance, the key was that you could throw things at
+  the enemies, and that was how we got rid of things. So maybe we do need the occasional attacker
+  or something, I don't know, if you're in the base, so that we keep that wastage up." Once the
+  opening siege is over, a piece that won't fit anywhere has nowhere to go. The user's thought: now
+  and then, while you're building in the den, a raider or two to throw them at. (To pin down with
+  the user.)
 
 ## Needs a playtest to pin down
 
