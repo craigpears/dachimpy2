@@ -350,7 +350,14 @@ it should be work." Shaped a little:
 
 ## Kikkit's penguin: five lefts through the whirlpools (10 Nov)
 
-A side quest past the checkpoint, off to the right (the old wreck's off to the left). The user:
+A side quest off to the right (the old wreck's off to the left). Not behind the checkpoint
+(10 Nov): "You don't really necessarily need to get through the checkpoint for her ... I want
+them to just be side quests everywhere." You come across Kikkit off to the right, telling you
+how she's trying to catch a penguin, and it takes you off down that way.
+- **A sea that keeps blowing you back:** "just an insane number of ... whirlpools and winds, and
+  they always keep blowing you back, like the Snakes and Ladders style." It suits her: "she's
+  just a bit loopy crazy." (10 Nov.)
+The user, earlier:
 "Look for the pirate Kikkit as well, we need to make her a penguin in the game somewhere, hehe";
 then "she's definitely a penguin side quest".
 - **Kikkit:** a real pirate on Emerald (checked 10 Nov): captain of Rodrigo's Revenge, of the flag

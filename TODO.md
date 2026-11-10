@@ -139,6 +139,9 @@ the site (`.assetsignore` skips `*.md`).
   home that O gets the oars out any time. Nothing about the wind (the user, 10 Nov: "keep it
   secret ... don't do a big thing ... We want to keep it as the Easter egg, the thing that you
   figure out"). After Dignity's cutscene.
+  The hint moves here too (10 Nov): "I wonder if there's another way round" now plays after
+  you're sunk, not on first sighting the checkpoint ("will probably come after you get sunk").
+  The chain: you see the wind, and work out for yourself that the oars get you past it.
 
 ## Needs a playtest to pin down
 

@@ -66,6 +66,8 @@ in time the den becomes the thing itself (TODO.md, "Split the den off").
   ones who raided you, not back up behind the den ("it feels weird going backwards").
 - **The story's path is there, but not a straight line.** Side quests along the way (the scrolls,
   the capybara, foraging), or staying home to build: you choose when to take the next step.
+  Side quests everywhere, not each locked behind the last (the user, 10 Nov: "I want them to just
+  be side quests everywhere"): Kikkit's penguin is off to the right before the checkpoint.
 - **Little cutscenes, short and cheesy,** for the story's big beats: the camera cuts to what's
   happening, and Space always skips. The user loves funny ones (a vampire sitting up in his
   coffin, both of you screaming: IDEAS.md).
