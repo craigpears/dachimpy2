@@ -96,6 +96,14 @@ the site (`.assetsignore` skips `*.md`).
   the primer goes. (How, where it's hosted, and what of the primer's engine the den still needs,
   to pin down with the user when it's time.)
 
+- **The wind is confusing (10 Nov):** "I like the animation and some of the idea, but it's very
+  confusing." In a strong wind "it was still letting me sail around. I'm not seeing like a big
+  speed difference"; "it's coming up a pop-up saying you can't sail there. Well, it is letting
+  me"; and "it changes quite quickly". So: make the wind plainly matter (a big difference in speed
+  with it behind her, across it, and none into it), only say she can't sail somewhere when she
+  really won't, show it on her when she's in irons, and let a wind last a good while, with warning
+  before it drops or shifts.
+
 - **Rowing by port and starboard (10 Nov):** the user loves IDEAS.md's "Port and starboard":
   "absolutely hilarious ... not obviously like a brand new puzzle, but it's certainly a nice twist
   on bilging ... Do that. Absolutely do that." Her oars are rowed by a Bilge board split down the
