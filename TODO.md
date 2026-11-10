@@ -144,6 +144,13 @@ the site (`.assetsignore` skips `*.md`).
   - **Platforms break first, then pieces:** "that's, I think, how you get the extra", two chains
     going at once, one waiting on the other: a platform clears, what falls sets off a clear,
     which drops onto another platform, and only then do the plain lines go.
+  - **Its look, from the user's screenshot of "a huge multi Vegas" (10 Nov):** 8 wide, about 16
+    tall; the next pair at the top left; two markers over the middle columns where pairs come in.
+    Three balls: yellow knotted rope, white swirled sail, blue wavy water; a pair's halves joined by
+    a little brown peg that stays after they land. Platforms are translucent square tiles with a
+    thin ledge under them: filled, the piece shows inside; empty, coloured corner brackets for the
+    colour it wants. A wave and a ship's sails behind the board. A whole board of interlocked
+    staircases, pairs straddling columns everywhere, is what a run of Vegases looks like.
 
 ## Needs a playtest to pin down
 
