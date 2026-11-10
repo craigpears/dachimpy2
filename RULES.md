@@ -797,7 +797,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   monkey is the one that fires the cannon at you"; and, seeing it: "I love it. The cheeky giggle
   and the spyglass, definitely complete it." She stands on top of the gatehouse's arch, the
   Empire's flag behind her. **The first time you sail within sight of it from the cove's side**
-  (where the trade wind drops you), a cutscene of about twenty seconds, black bars, **Space or
+  (where the trade wind drops you), a cutscene of about twenty-five seconds (every line at a comfortable reading pace, "Look
+  lively!" said on her before the camera goes to Bella: the user, 10 Nov), black bars, **Space or
   Esc skips it**: the camera finds her with her spyglass up, sweeping the horizon; she lowers it
   and starts ("Halt! Imperial checkpoint. State your busi..."), a hand to her forehead ("...oh.
   Pirates. It's always pirates."), then to Bella on her shoulder, pointing her spyglass at you:

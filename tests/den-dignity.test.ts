@@ -88,9 +88,18 @@ describe('her cutscene ("go all in ... Bella fires it", 10 Nov)', () => {
     expect(up(SAYS.giggle)).toBeGreaterThan(3.5);
   });
 
-  it('is short: about twenty seconds ("go all in", 10 Nov)', () => {
+  it("her first lines and Bella's eek at a comfortable reading pace: look lively (10 Nov)", () => {
+    // "when she says, look lively, like you cannot really finish reading that particular frame, and
+    // the eek of the monkey ... It's the stuff is just faster than a comfortable reading pace."
+    const up = (line: string, onHer = false) => { let n = 0; for (let t = 0; t < BEATS.end; t += 0.01) { const s = sceneAt(t); if ((s.says === line || s.chat === line) && (!onHer || s.cam === 'her')) n += 0.01; } return n; };
+    for (const line of [SAYS.halt, SAYS.oh]) expect(up(line)).toBeGreaterThanOrEqual(readSecs(line) - 0.02);
+    expect(up(SAYS.lively, true)).toBeGreaterThanOrEqual(readSecs(SAYS.lively) - 0.02);
+    expect(up(SAYS.eek)).toBeGreaterThanOrEqual(1.1);
+  });
+
+  it('is short: about twenty-five seconds ("go all in", 10 Nov)', () => {
     expect(BEATS.end).toBeGreaterThan(9);
-    expect(BEATS.end).toBeLessThanOrEqual(22);
+    expect(BEATS.end).toBeLessThanOrEqual(27);
     expect(sceneAt(BEATS.end - 0.01).done).toBe(false);
     expect(sceneAt(BEATS.end).done).toBe(true);
   });

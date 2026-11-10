@@ -51,24 +51,26 @@ export const DIGNITY = {
     and its splash; back to Bella at her gun for her proud little pose; then Dignity's giggle, and
     Bella scampering home to her shoulder. The end isn't rushed (the user, 10 Nov: "the giggling
     monkey or her giggling at the end all go by very quickly"): Bella's proud pose and Dignity's
-    giggle get time to land. */
+    giggle get time to land, and her first lines and Bella's chatter are said at a comfortable
+    reading pace ("look lively ... you cannot really finish reading", 10 Nov): "Look lively!" is
+    said on her, before the camera goes to Bella. */
 export const BEATS = {
     lower: 1.7,
     halt: 2.1,
-    oh: 4.2,
-    lively: 6.4,
-    chatter: 6.6,
-    hop: 7.1,
-    salute: 8.7,
-    fuse: 9.2,
-    ears: 10.0,
-    fire: 10.5,
-    splash: 11.65,
-    back: 12.6,
-    proud: 12.6,
-    giggle: 15.0,
-    home: 15.8,
-    end: 21.5,
+    oh: 5.1,
+    lively: 7.9,
+    chatter: 11.1,
+    hop: 12.3,
+    salute: 13.9,
+    fuse: 14.4,
+    ears: 15.2,
+    fire: 15.7,
+    splash: 16.85,
+    back: 17.8,
+    proud: 17.8,
+    giggle: 20.2,
+    home: 21.0,
+    end: 26.7,
 };
 /** Seconds Bella takes to scamper down to the gun (off Dignity's shoulder, along the gatehouse's
     top and a leap down onto the bastion), or back up again. */
@@ -95,11 +97,11 @@ export function sceneAt(t) {
                                 : t < B.home ? ['proud', span(B.proud, B.home)]
                                     : t < B.home + HOP_SECS ? ['home', span(B.home, B.home + HOP_SECS)]
                                         : ['shoulder', 0];
-    const says = beat === 'halt' ? SAYS.halt : beat === 'oh' ? SAYS.oh : beat === 'lively' && t < B.ears ? SAYS.lively
+    const says = beat === 'halt' ? SAYS.halt : beat === 'oh' ? SAYS.oh : beat === 'lively' && t < B.chatter ? SAYS.lively
         : beat === 'giggle' && t > B.giggle + 0.15 ? SAYS.giggle : null;
     const chat = bella === 'chatter' ? SAYS.eek : bella === 'proud' && bu < 0.6 ? SAYS.proud : null;
     const shot = t >= B.fire && t < B.splash ? span(B.fire, B.splash) : null;
-    const cam = t >= B.fire + 0.15 && t < B.back ? 'sloop' : (t >= B.lively && t < B.fire + 0.15) || (t >= B.back && t < B.giggle) ? 'gun' : 'her';
+    const cam = t >= B.fire + 0.15 && t < B.back ? 'sloop' : (t >= B.chatter && t < B.fire + 0.15) || (t >= B.back && t < B.giggle) ? 'gun' : 'her';
     return { beat, u, bella, bu, says, chat, shot, cam, done: t >= B.end };
 }
 /** Where the warning shot comes down, from the gun at `gun` on the sloop at `ship` (metres, on the
