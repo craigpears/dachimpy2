@@ -162,11 +162,6 @@ the site (`.assetsignore` skips `*.md`).
   love that the crane looks like carpentry pieces. It is just such a brilliant thing for the
   puzzle").
 
-- **Dignity at the imperial checkpoint (10 Nov):** she's the imperial checkpoint's commander ("She
-  can hang around up there"): standing on the checkpoint, in her own look, a Lieutenant Commander
-  as on her pirate page. Her look is ready (`PIRATES.Dignity` in `js/den-look.js`, RULES.md "Real
-  pirates are only looks"): `makePirate({ look: PIRATES.Dignity })` in `js/den/checkpoint.js`.
-
 - **Dignity at the checkpoint, and her little cutscene (10 Nov):** "adding [her] as the dutiful
   commander of the imperial checkpost, kind of peering down from the gates ... give her a little
   cutscene similar to Dalnoth ... if you approach an imperial outpost, oh, pirates! Quick, shoot,
@@ -180,8 +175,13 @@ the site (`.assetsignore` skips `*.md`).
   - A gun of hers wrecked: "That was Imperial property!"
   - You get past: "This is going in my report. In very small, very cross handwriting."
   - If you come round by the locks instead: "Nobody uses the canal. Nobody!"
-  (Her look comes from the pirate maker as one ready-made pirate. Waits for the checkpoint's
-  current work and the pirate maker to land.)
+  **The warning shot (10 Nov):** "I need to give it a bit of a cheeky giggle and a win". Wander
+  too close on the trade winds and a shot comes your way: a warning shot, that she meant to miss
+  with (or did she?), and she has a cheeky giggle about it: get any closer and there's plenty more
+  where that came from. Something like: "Hee hee! Oops. That was a warning shot. Mostly.
+  Come any closer and the next ones won't be." (It should land close, splash her, and miss.)
+  Her look is ready: `makePirate({ look: PIRATES.Dignity })` (RULES.md, "Real pirates are only
+  looks"), placed in `js/den/checkpoint.js`, once the checkpoint's current work has landed.
 
 ## Needs a playtest to pin down
 
