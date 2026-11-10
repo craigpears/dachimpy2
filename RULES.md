@@ -164,6 +164,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   at the bottom. I did not see it." When the prompt at the bottom offers something new to do with
   Space (board her, build the crane, haul the wreck), it's bigger, glows, and pulses as it comes
   up. Not the running tips while you carry a piece or play a puzzle, which stay as they were.
+  Each offer pulses the first time it comes up only, and after that just glows (10 Nov: "a lot of
+  like flashing yellow things ... when I'm standing around the carpentry puzzle and the sword
+  fighting, it's really irritating": walking about there, the offer changed every few steps and
+  pulsed each time).
 
 - **A puzzle game, not an action game.** The raiders are there for a bit of interest and a bit of
   pressure, so you can't ignore things altogether; the emphasis is always on wanting to finish the
@@ -435,7 +439,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       "when I've just clicked oars, I see the carpentry pieces for the repairing the damaged
       carpentry puzzle I've just played"). Holed while she rows, the patch comes up with her sails
       and guns still struck.
-  - **Ashore:** sail back to her mooring and Space puts you on the beach beside her.
+  - **Ashore, from anywhere near the beach (10 Nov):** the user: "how to get back to shore is not
+    very obvious ... more squares should have that action. So you get to the general vicinity, not
+    one specific square." The landing is the stretch of water along the den's beach, her mooring
+    in it: the sea's first two rows out, eight squares across. From any square of it, stopped or
+    under way (not holed), Space brings her in to her mooring and puts you on the beach beside
+    her. It stands out from the sea: a post flying your flag at each end, a line of red and white
+    floats along its seaward edge, its water a little lighter, and a short jetty out to her mooring
+    with a torch at its end. Rules: `src/den-beach.ts`; the look: `js/den/landing.js`.
   - Alone only for now (no crews at sea yet). No tokens to earn yet, no destinations: those are
     IDEAS.md ("Sailing between places, for real"). Rules: `src/den-sail.ts`.
   - **The wind, and her oars (a first go, 10 Nov).** **Parked for now (10 Nov).** The user: "I think

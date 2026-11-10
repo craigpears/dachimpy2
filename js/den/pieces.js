@@ -635,6 +635,7 @@ export function drawGhost() {
   else { g.position.set(X(target.dc), Y(target.dr), 0); wallGroup.add(g); }
   worldLets.ghost = g;
 }
+const pulsed = new Set();   // the offers that have pulsed once already (prompt)
 export function prompt() {
   const f = focus();
   let t = '';
@@ -694,7 +695,11 @@ export function prompt() {
     const act = /\bSpace\b/.test(t) && !carry && !/arrows or mouse|click a plank|click swaps|pick up the [A-Z]|pick the [A-Z] back up|put the|swap the/.test(t);
     el.classList.toggle('act', act);
     el.classList.remove('pulse');
-    if (act) { void el.offsetWidth; el.classList.add('pulse'); }
+    // Each offer pulses the first time only (10 Nov: "a lot of like flashing yellow things ... when
+    // I'm standing around the carpentry puzzle and the sword fighting, it's really irritating"):
+    // walking about by the frames and the rack, the offer changes every few steps.
+    const offer = t.replace(/\b(the|a) [A-Z]\b/g, '$1 _').replace(/\d+/g, '#');
+    if (act && !pulsed.has(offer)) { pulsed.add(offer); void el.offsetWidth; el.classList.add('pulse'); }
   }
   $('gunhelp').classList.toggle('on', onGunDeck());
   if (onGunDeck()) $('intro').classList.add('off');   // (nothing over the board)
