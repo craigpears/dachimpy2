@@ -445,6 +445,18 @@ then "she's definitely a penguin side quest".
 (To shape with the user: which puzzle wins the penguin, and what Kikkit gives you for bringing
 one back, if she even remembers asking.)
 
+## Tzz's huge Vegas, on an island of her own (10 Nov)
+
+"Maybe Tzz can be on an island in there showing how she built her huge Vegas? Is that adding too
+many characters, or is it rewarding and shows just how ridiculously far you can get, assuming it
+gives you the right seed to reproduce that insanely huge vegas?" Tzz (name as heard; a real pirate,
+so check her pirate page and portrait first) built the multi-Vegas in the user's screenshot, in a
+competition (a Vegas 5 or 6). Out among Kikkit's whirlpools, a little island of her own where she
+shows how it's done: her board (TODO.md, "Sailing, as the user remembers", for its look) and the
+same deal to try it yourself, piece for piece. Hidden, not on the way (a gem to find), so she
+doesn't crowd Kikkit's scene. Needs the Sailing deal to be seeded, so a deal can be played again
+exactly; the real game's own seed can't be had, so her board is rebuilt in our deal.
+
 ## A bigger ship from the shipwright (10 Nov)
 
 "Later we can figure out how ... you can have some shipbuilding, shipwright quest to ... strengthen
