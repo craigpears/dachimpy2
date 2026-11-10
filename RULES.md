@@ -1058,6 +1058,20 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   was still being built: still on the walk when the third wave ended, the stairs and the gun tower
   never came. Once the siege is over, each part's timber comes as soon as the one before is built
   (`timberComes`, `src/den-raids.ts`).
+- **The occasional raider after the siege (10 Nov).** With the siege over nobody came, and a
+  piece you didn't want had nowhere to go: "building the platform and the stairs and things in the
+  base is really difficult now because you've got no way of wasting pieces ... the key was that
+  you could throw things at the enemies". Agreed: "a bit peaceful, yeah. Definitely the occasional
+  raiders ... It gives it a bit of life, and as you said, a way to throw scrap." So in peace, 90
+  to 180 seconds after the last lot were seen off (the clock only runs while you're in the den:
+  not at sea, in a cutscene or reading the map), a raider or two put in, a boat each, a few
+  seconds apart (45% one, 45% two, 10% three). They row in from where their ship lay and try the wall or the
+  gate like any raider: the tide, the rocks, the soldiers and the gun tower all count, and beating
+  them pays as ever (a doubloon or few, and their weapon crates). One who reaches the chest
+  steals as ever, but never the last doubloon: stragglers can't end the game (`theft`). No siege: the den stays at peace,
+  no cannon, no countdown, no "Wave". As they come: "A boat's putting in: a raider after an easy
+  mark" (the first time adding "Spare pieces? Shift throws"); the banner says how many are ashore; when
+  they're gone, "That's them seen off." (`STRAGGLERS`, `src/den-raids.ts`.)
 - **Kept because people like them (10 Nov).** Two things nearly cut, kept: Bilge on the beach in
   the opening siege (the tide, its rocks, the powder barrels: "don't get rid of the bilge on the
   [beach] ... people like that ... it adds to the scenicness. And the opening of it"), and patching
@@ -1804,7 +1818,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **Throwing at a raider is the only way to discard.** No scrap fire, no bin: a piece you don't
   want (often a rare one) can only be got rid of by throwing it at an enemy pirate, which deals a
   fresh piece onto that crate. Swapping at the crates just puts it back. With no raiders about,
-  you fit it, board it over, nail it on behind a mended hole, or lay it in a rampart frame.
+  you fit it, board it over, nail it on behind a mended hole, or lay it in a rampart frame; after
+  the siege, a raider or two still puts in now and then to throw it at (see "The occasional
+  raider after the siege").
 - **You must see what's happening in the den.** Raiders inside get a ⚔ marker, pinned to the edge
   of the screen when they're out of view (gold when carrying loot). The view widens on narrow screens.
 - **Keeping them out must be possible, and must feel worth it.** The user found it demoralising

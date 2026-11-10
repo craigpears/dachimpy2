@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { W as BW } from '../bilge.js';
-import { afterWave, timberComes } from '../den-raids.js';
+import { afterWave, timberComes, STRAGGLERS, STRAGGLERS_GONE, stragglersIn, stragglerCount, stragglerClock, stragglerLine, stragglerBanner, theft } from '../den-raids.js';
 import { BILGE, onRocks } from '../den-bilge.js';
 import { C, S, STONE_D, PAY, RUBBLE, CANNON_GAP, CANNON_AIM, DOOR_W, DOOR_H, WALL_DONE_SECS, CALM_SECS, RAIDER_STAMINA, WINDED, TIRED_SLOW, FALLEN, DAZE, hackRate, k, rand, $, scene, camera, mat, mesh, canvasTex, woodTex, WOOD, outline, xrMat, addXray, makePirate, animateWalk, faceTo, flagpole, pirate, carry, bounds, G, raiders, shake, topView, burst, toast, fmt, tween, v3, worldLets } from './world.js';
 import { rock, ramp, frames, openJob, outside, chest } from './land.js';
@@ -14,6 +14,9 @@ import { rack, sword, swordDrop, raiderDuel } from './sword.js';
 import { shoreZ, beachZ, bilge } from './bilge.js';
 import { cine } from './cine.js';
 import { guest, isHost, myId, crewSize, send, say } from './crew.js';
+// (Last, so the order the den's modules start up in is as it was: both are in by now.)
+import { sail } from './sea.js';
+import { chart } from './map.js';
 
 export const cannon = (() => {
   const g = new THREE.Group();
@@ -292,7 +295,7 @@ export function hit(r, from, color) {
   G.bonked++;
   G.gold += PAY.bonk;
   burst(new THREE.Vector3(r.x, 1.6, r.z), '#ffe27a', 12, 3);
-  if (r.loot) { G.gold += PAY.steal; r.loot.visible = false; r.loot = null; say('Thwack! Loot recovered'); } else say('Thwack!');
+  if (r.loot) { G.gold += r.took ?? PAY.steal; r.loot.visible = false; r.loot = null; say('Thwack! Loot recovered'); } else say('Thwack!');
   worldLets.shake = 0.35;
   updateStats();
 }
@@ -601,10 +604,14 @@ export function updateRaider(r, dt) {
       const c = chest.position;
       moving = !moveTo(r, c.x + 0.9, c.z - 0.2, 2.5 * (1 - TIRED_SLOW * (r.tired || 0)), dt);
       if (!moving) {
-        G.gold -= PAY.steal; G.stolen++;
-        updateStats();
-        say(`A raider stole ${PAY.steal} doubloons!`, true);
-        giveLoot(r);
+        // (After the siege, never the last doubloon: src/den-raids.ts, theft.)
+        const took = r.took = theft(G.gold, PAY.steal, G.phase);
+        if (took) {
+          G.gold -= took; G.stolen++;
+          updateStats();
+          say(`A raider stole ${took} doubloon${took === 1 ? '' : 's'}!`, true);
+          giveLoot(r);
+        } else say('A raider found the chest all but empty, and left it be');
         r.state = 'flee';
       }
       break;
@@ -854,11 +861,13 @@ export function updateWaves(dt) {
     say(`The wall's mended! Here they come…${timber ? ' Timber\'s come: build the rampart in its frame while they try to get in' : ''}`, true);
   } else if (timber) say('The wall\'s mended! Timber\'s come: build the rampart in its frame while they try to get in');
   if (G.phase === 'peace') {
-    // The siege is over: nobody's coming, so each part's timber comes once the one before is built.
+    // The siege is over: no more waves, so each part's timber comes once the one before is built.
     const f = !timber && timberComes(nextPart(), 'peace') && openJob(ramp.next);
     if (f) say(`Timber's come: ${f.kind === 'gun' ? 'build a gun tower in its frame' : 'build the rampart in its frame'}`);
+    stragglers(dt);
     return;
   }
+  G.strayIn = null; G.strayLeft = 0; G.strayOn = false;   // (the stragglers' clock starts with the peace)
   if (G.phase !== 'wave') {
     G.phaseT -= dt;
     if (G.phaseT <= 0) startWave();
@@ -883,12 +892,32 @@ export function updateWaves(dt) {
     else say(`Wave ${G.wave} beaten off!${tally}${timber}`);
   }
 }
+/* The occasional raider, after the siege (src/den-raids.ts, STRAGGLERS): every couple of minutes
+   or so you're in the den, a boat or two puts in with a raider or two, rarely three, who row in
+   and try the wall as raiders do, the tide, the rocks and the soldiers and all. Something to
+   throw a piece you don't want at (the user, 10 Nov: "a way to throw scrap"). No siege: the den
+   stays at peace, no cannon, no countdown, no wave. The clock stands still while you're at sea,
+   watching a cutscene or reading the map, and while any are about. */
+function stragglers(dt) {
+  if (G.strayLeft > 0) {   // a lot putting in, a boat at a time
+    if ((G.strayT -= dt) <= 0) { spawnRaider(); G.strayLeft--; G.strayT = STRAGGLERS.STAGGER; }
+    return;
+  }
+  if (G.strayOn && !raiders.length) { G.strayOn = false; say(STRAGGLERS_GONE); }
+  if (G.strayIn == null) G.strayIn = stragglersIn(Math.random());
+  if (!stragglerClock({ phase: G.phase, away: sail.on || chart.on || !!cine, raiders: raiders.length })) return;
+  if ((G.strayIn -= dt) > 0) return;
+  const n = stragglerCount(Math.random());
+  Object.assign(G, { strayIn: stragglersIn(Math.random()), strayLeft: n, strayT: 0, strayOn: true });
+  say(stragglerLine(n, !G.straySaid));
+  G.straySaid = true;
+}
 export function banner() {
   const el = $('banner');
   let t, cls = 'banner calm';
   if (G.phase === 'build') t = wall.holes.every((h) => h.status !== 'open') ? `The wall's mended! Raiders attack in ${fmt(Math.ceil(G.phaseT))}` : `Raiders attack in ${fmt(Math.ceil(G.phaseT))}: mend the wall!`;
   else if (G.phase === 'calm') t = `Wave ${G.wave} beaten off · next wave in ${fmt(Math.ceil(G.phaseT))}`;
-  else if (G.phase === 'peace') t = 'The raiders have sailed off · the den\'s quiet';
+  else if (G.phase === 'peace') { const n = raiders.filter((r) => r.state !== 'down').length; t = n ? stragglerBanner(n) : 'The raiders have sailed off · the den\'s quiet'; }
   else { t = `Wave ${G.wave} · ${G.toSpawn + raiders.filter((r) => r.state !== 'down').length} raiders`; cls = 'banner'; }
   if (el.textContent !== t) el.textContent = t;
   if (el.className !== cls) el.className = cls;

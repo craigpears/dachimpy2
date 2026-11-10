@@ -163,18 +163,6 @@ the site (`.assetsignore` skips `*.md`).
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
 
-- **Somewhere for the pieces you don't want, building in the den (10 Nov):** playtesting the
-  whole thing through: "building the platform and the stairs and things in the base is really
-  difficult now because you've got no way of wasting pieces. I mean, I can still kind of put stuff
-  on the wall, but ... originally it was the balance, the key was that you could throw things at
-  the enemies, and that was how we got rid of things. So maybe we do need the occasional attacker
-  or something, I don't know, if you're in the base, so that we keep that wastage up." Once the
-  opening siege is over, a piece that won't fit anywhere has nowhere to go. The user's thought: now
-  and then, while you're building in the den, a raider or two to throw them at. **Agreed (10
-  Nov):** "a bit peaceful, yeah. Definitely the occasional raiders, I think, is still needed. It
-  gives it a bit of life, and as you said, a way to throw scrap." Now and then after the siege, a
-  small boat of a raider or two lands and has a go at the wall: no siege, no cannon, just
-  something to throw your spare pieces at.
 - **How to turn her at the oars isn't obvious (10 Nov):** a friend rowed in from the checkpoint's side and
   on to the capybara: "I think it's quite fun. I'm finding turning left [and] right is fine, but if
   you actually want to like fully spin on the spot ... I ended up just to the right of the lock.

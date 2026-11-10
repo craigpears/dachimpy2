@@ -107,7 +107,10 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    - Wave 2: their ship runs out a **cannon**; beat it and timber comes for the **gun tower**.
    - Your **shack** can be built whenever you like, in its plot at the back.
 3. ✓ **They sail off, and the den's quiet.** Beat wave 3 and their captain, Dalnoth himself,
-   calls it off: "We'll be back! *hic*" No countdown after that.
+   calls it off: "We'll be back! *hic*" No countdown after that. But not dead quiet: every
+   couple of minutes you're in the den, a boat or two puts in with a straggler or two after an
+   easy mark, no siege, just a bit of life and something to throw your spare pieces at ("a way
+   to throw scrap", 10 Nov).
 4. ✓ **The captain's map.** A short, cheesy cutscene: Dalnoth leaves his cannon on deck, rows
    in, shakes his fist on the beach, "We'll be back!", runs for his boat, and a map falls out of
    his coat; he rows back out to his ship, and your pirate walks out and picks it up. "We hear there's some secret treasure here, guarded by a fearsome enemy." It
@@ -173,7 +176,7 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
 | Mend the wall | The first wave comes (with a beat to see it done) |
 | Beat wave 1 | Timber for the walk, then the stairs |
 | Beat wave 2 | Timber for the gun tower |
-| Beat wave 3 | The siege is over: calm, and the captain's map (a cutscene); their ship sails off, and an old sloop's left in the cove |
+| Beat wave 3 | The siege is over: calm, and the captain's map (a cutscene); their ship sails off, and an old sloop's left in the cove; now and then a raider or two still put in, to throw spare pieces at |
 | Find the scrolls (to come) | Maps to side quests, plans for building (the gun platform) |
 | Steal his buried loot (to come) | Gold, and his crew's anger: raids come back |
 | Break fused chests at the armoury | Soldiers, up to a handful (more as the den grows: to come) |
