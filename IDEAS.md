@@ -588,6 +588,16 @@ pirate wedding absolutely is a must."
   to ... configure whoever you want to marry ... marrying a guy, marrying a woman, whatever." So
   she's the planner and host, and the one you marry if you don't choose otherwise; or you set up
   your partner yourself (any pirate, any look, from the wardrobe).
+- **A line of suitors, blind-date style (10 Nov):** "she's the one of like, oh, yeah, I'd really
+  love to [marry you], but yeah, if not, I've got, here we go, I've got this ... I can set you up
+  with this guy ... The last wedding had a ... mishap ... maybe that can be the default guy ... he's
+  ready ... as a suitor ... you can have the line of suitors ... pirates and different outfits that
+  are all kind of coming at you with bouquets of flowers ... I'm imagining her playing it. She'd be
+  like, here are your bachelors. Bachelor number one. You got the blind date style game going on
+  here." So choosing who you marry is a game show: Mischievous offers herself first, and if not,
+  presents a line of suitors in their finery, bouquets out, "Bachelor number one!" The default
+  among them is the groom left over from the last, ill-fated wedding (his bride had a mishap), ready
+  to try again. Suitors of every sort, so anyone can find a match; or set up your own.
 - **The welcome, darkly funny (10 Nov):** "when you first turn up ... the last wedding party has
   gone horribly well. Mischievous is there, kind of trying to proposition you, and it's just like,
   yeah, don't pay attention to the blood and guts, yeah, it's fine. We've hired a bit of extra
