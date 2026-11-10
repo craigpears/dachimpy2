@@ -652,7 +652,7 @@ export function prompt() {
     const keysTip = ' · arrows move · X/C turn · Z flip · Q/W/A/S: holes · Tab: next · Esc: walk';
     const what = wm.f ? ({ stair: 'The stairs', gun: 'The gun tower frame', house: 'Your shack\'s frame', deck: 'The wall-walk frame' }[wm.f.kind] || 'The frame') : 'The wall';
     if (!carry) t = `${what} · 1, 2, 3: take a crate's piece · Tab: next · Esc: walk`;
-    else if (target?.ok && target.frame) t = `Space: fit the ${carry.letter}${target.over ? ' (it sticks out: the spare gets sawn off)' : ''}${keysTip}`;
+    else if (target?.ok && target.frame) t = `Space: fit the ${carry.letter}${target.over ? (target.frame.kind === 'stair' ? ' (it sticks out, and stays that way)' : ' (it sticks out: the spare gets sawn off)') : ''}${keysTip}`;
     else if (target?.ok && target.patch) t = `Space: nail it on behind${keysTip}`;
     else if (target?.ok && !target.over) t = `Space: fit the ${carry.letter} here${keysTip}`;
     else if (target?.ok) t = `Space: board it over (weak, no Masterpiece)${keysTip}`;
