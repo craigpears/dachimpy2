@@ -185,6 +185,11 @@ the site (`.assetsignore` skips `*.md`).
   bit. Like, I kind of see it going over the wall a bit, but like, I don't really see it being
   thrown out of his hands. It just kind of, like, you see his hands move and then nothing else."
   The piece should be seen leaving your hands and arcing over the wall onto the raider.
+- **Walk out along the jetty to her (10 Nov):** "I like the little pier to the side. I feel like I
+  want to actually walk on the pier to the sloop, though. Like, it's just kind of a random pier in
+  the middle of the water at the moment. I want to actually walk to it." The landing's jetty should
+  run from the beach out to her mooring, and you walk along it to board her (and come back along
+  it when you go ashore).
 
 ## Needs a playtest to pin down
 
