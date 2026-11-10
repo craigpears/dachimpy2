@@ -547,9 +547,11 @@ bursts it, to keep him in long enough to plunder the stuff.
   a character in the scene too.
   **A big portrait collector (10 Nov):** "that needs to be worked into it, you can see she has like
   seven pages of them" (her gallery: https://emerald.puzzlepirates.com/yoweb/gallery/index.wm?pirate=Gravee).
-  Look through it before drawing her. Ideas: portraits of her lining the walls on the way to the
-  lair (and one of the vampire, whose eyes follow you); she sits you for a new portrait as your
-  reward.
+  Look through it before drawing her. All agreed by the user (10 Nov: "Absolutely, all of those
+  are absolutely her"): portraits of her lining the walls on the way down to the lair, one of them
+  the vampire's, whose eyes follow you (a warning before he sits up); once you've nailed him back
+  in, she sits you for a portrait of your own, for her collection, as your reward; and she's far
+  more excited about adding you to her collection than worried about the vampire.
 
 ## A little town up the cliffs (9 Nov)
 
