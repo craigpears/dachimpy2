@@ -232,6 +232,11 @@ the site (`.assetsignore` skips `*.md`).
   secret ... don't do a big thing ... We want to keep it as the Easter egg, the thing that you
   figure out"). After Dignity's cutscene.
 
+- **Quicker through the locks, for now (10 Nov):** "tone down how many times you need to get
+  through the locks, just so I can get in there a bit quicker. For now ... Maybe take a third off".
+  Each lock up takes about sixteen moves' worth of Bilge; make it about a third less (eleven), to
+  revisit once the lagoon's been tried. (No cheat needed: "I think it's fine".)
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
