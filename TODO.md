@@ -127,22 +127,15 @@ the site (`.assetsignore` skips `*.md`).
   place, now built; the cove keeps a chest of its own on the beach. How you get that one: to pin
   down.)
 
-- **The checkpoint's guns can be wrecked, her guns loaded by Gunnery, and the turret goes (10 Nov):**
-  the checkpoint's guns should be "just the same as the other one" (the turret): a hit quietens a
-  gun for a while and the third wrecks it, the same toppling and smoking stump, so knocking them
-  out is a way through of its own ("everything should be destructive"). But it costs a puzzle:
-  "we should have to load the guns through the puzzle", so her two guns are loaded by Gunnery
-  (the gun tower's own puzzle, played on her deck) and Q/E fire only a gun that's loaded. And the
-  sea near the den is rebuilt round the checkpoint: "there's no need for that cannon near the
-  turret near the den now, because ... we've got the Imperial checkpoint. That's the evolution of
-  it." So the turret and its chest go; the trade winds run out towards the checkpoint and back
-  home; the canal and the lock stay, as the side adventure.
-
 - **Rescue a capybara at the clifftop lagoon (10 Nov):** the friend's side quest (IDEAS.md, "Side
   quests that leave friends about the den") goes in the lagoon: an animal is trapped there, you
-  rescue it (by a puzzle, as every reward is), click it and it turns up back at the den, "just
-  kind of hanging around near the shack ... as a pet that you found and rescued". The crane
-  being built only for the session is fine for a proof of concept (a refresh starts afresh).
+  rescue it (by a puzzle, as every reward is), click it and it turns up back at the den as "a pet
+  that you found and rescued". A capybara is semi-aquatic, so it has to make sense (the user, 10
+  Nov: "not just hanging around on the land"): it's trapped in the water, not on land (tangled in
+  an old net caught on the wreck, say), and at the den it lives at the water's edge, on the beach
+  and in the cove's shallows near the shack, wading, swimming and sitting in the water as
+  capybaras do. (How exactly it's trapped and freed: to pin down.) The crane being built only for
+  the session is fine for a proof of concept (a refresh starts afresh).
 
 - **The secret way round the checkpoint: a chain of locks (10 Nov):** "make it a bit more of a
   journey ... be more than just the one lock". The canal climbs through several locks ("maybe
