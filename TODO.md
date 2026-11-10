@@ -215,6 +215,9 @@ the site (`.assetsignore` skips `*.md`).
   crane here that's helping you build the crane ... a slight logic issue"): the old hoist goes,
   and the frames go up some other believable way (hauled up by hand on ropes, the foot first,
   then the post raised on it, then the jib).
+  Keep the crane looking like the Carpentry pieces it's built from (the user, 10 Nov: "I do still
+  love that the crane looks like carpentry pieces. It is just such a brilliant thing for the
+  puzzle").
 
 ## Needs a playtest to pin down
 
