@@ -563,6 +563,14 @@ bursts it, to keep him in long enough to plunder the stuff.
     that any pirate can be pictured.
   - **Her definitive proof:** among them, a yeti or abominable-snowman-style picture, the blurry
     proof she's so sure of (from her real gallery).
+  - **The ending: your portrait, scared to death (10 Nov).** "the end of [Gravee's] thing should
+    absolutely be her adding you to her portrait collection when you get scared to death by the
+    vampire. She could just be like, 'Oh, that looks like a perfect portrait moment. Just hold
+    that pose while I paint.' Then you appear pride of place on her portrait wall." So the
+    portrait she paints is of your pirate frozen mid-fright as the vampire sits up (hair on end,
+    mouth open, arms flung up), with Gravee delighted, brush already out. Then it hangs pride of
+    place in her gallery, the one you walked down, among all the others, your own look drawn by
+    the pirate maker in that terrified pose.
 
 ## A little town up the cliffs (9 Nov)
 
