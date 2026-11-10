@@ -168,6 +168,12 @@ the site (`.assetsignore` skips `*.md`).
   the middle of the water at the moment. I want to actually walk to it." The landing's jetty should
   run from the beach out to her mooring, and you walk along it to board her (and come back along
   it when you go ashore).
+- **The soldiers go out and fight them (10 Nov):** "now we've got the soldiers and then these
+  small raids. It breaks the immersion for them to not go out and fight the attackers. It's like,
+  what, you're just going to sit there and let them attack, hack at the wall?" Raiders at the
+  wall, on the beach outside, should be met by the den's soldiers: out through the gate onto the
+  sand to fight them, and back in when they're seen off. (Goes with "Soldiers going outside" in
+  IDEAS.md, under the Kraken.)
 
 ## Needs a playtest to pin down
 
