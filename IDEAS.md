@@ -386,9 +386,12 @@ then "she's definitely a penguin side quest".
   whirlpools, as in Puzzle Pirates' Battle Navigation, swing you round and set you off facing
   another way. So getting through really does take five lefts: "oh, okay, I think she was actually
   right". Her directions are the puzzle's key, if you take them seriously.
-- **The penguin:** found out past the whirlpools, and it "can eventually accompany you": swims
-  along beside her, and lives in the den after (with Umami in the shallows, say), or rides on your
-  shoulder as a familiar. Won by a puzzle, as every reward is (which one: to pin down).
+- **The penguin:** found out past the whirlpools, and won by a puzzle, as every reward is (which
+  one: to pin down). **It goes back to Kikkit (10 Nov):** "by the end ... the penguin needs to go
+  back to her. So when you've completed it, you see her on the island with all her animals and
+  the penguin, and she's just so happy." The ending is that little scene: her island, all her
+  familiars, the penguin among them, and Kikkit overjoyed. (Earlier thought, now set aside: the
+  penguin keeping you company.)
 - **Penguins in the wardrobe too:** "make her a penguin" first meant Kikkit as one; if wanted,
   a penguin body the pirate maker can dress, so anyone can be a penguin.
 - **All in on her craziness (10 Nov):** "really just do the whole craziness of Kikkit ... she's the
