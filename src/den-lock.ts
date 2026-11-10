@@ -200,3 +200,50 @@ export function lieAmong<P extends { c: number; r: number; a: number }>(p: P, sp
   });
   return p;
 }
+
+/* Where a lock's quay Bilge board lies, and which way it's turned (the user, playtesting, 10 Nov:
+   "[pulling] in[to] the locks and the [nose], so you can't see the [bilging] puzzle. Obviously, it
+   should be orientated to the ship or the dock or whatever", and "You can see some of it, but I
+   think some of it's in"). Every lock had its board laid the same: on the bank beside it, nudged a
+   metre toward its high side, its top row out to sea, seen from the den side. Coming back up the two
+   locks through the headland she faces in, so the view had her bow coming at you; and at the lower
+   of the two, its quay only a square long between the sea and the staircase's higher bank, half the
+   board was sunk into that bank. So, for any lock:
+   - Its top row is toward the lock's high side, the way she faces waiting to be pumped up: seen from
+     behind her (js/den.js turns the view to it), it reads the right way up, her bow ahead, never
+     coming at you.
+   - It lies wholly on its quay's own flat ground: the bank square beside the lock, and the next one
+     up or down the canal if that's at the same height (never the sea, nor a higher or lower bank).
+     Nudged toward its high side as ever, room allowing; and where there's only the one square, its
+     squares a little smaller so it fits (the view comes in to suit, so it looks the same). */
+export const QUAY = {
+  /** A square of the board, in metres, at most (as the first lock's always were). */
+  SQ: 0.45,
+  /** From the chamber's edge out to the board's inner edge: the pier, and room for the pump. */
+  IN: 0.88,
+  /** Kept in from the sea's edge or a step in the bank. */
+  EDGE: 0.1,
+  /** Nudged toward the lock's high side, room allowing. */
+  NUDGE: 1,
+} as const;
+
+/** Where a lock's quay board lies: on the bank that way (`side`, a way as `up`), `across` metres out
+    from the lock's middle and `along` metres toward its high side; its squares `sq` metres; its top
+    row toward `face` (a way). */
+export interface QuayBoard { side: number; across: number; along: number; sq: number; face: number }
+
+/** Where lock `s`'s quay board lies (on `cell`-metre squares), a board `w` by `h` squares (its frame
+    in): on its bank toward the den, or on its right-hand bank if it runs out to sea, wholly on the
+    quay's own flat ground. `top(c, r)` is the height of the high ground on a square, or null where
+    there's none (water). */
+export function quayOf(s: LockSpot, cell: number, w: number, h: number, top: (c: number, r: number) => number | null): QuayBoard {
+  const side = s.up % 2 ? 2 : 1, [c, r] = s.at;
+  const qc = c + DC[side], qr = r + DR[side], own = top(qc, qr);
+  const same = (d: number) => { const t = top(qc + d * DC[s.up], qr + d * DR[s.up]); return t !== null && own !== null && Math.abs(t - own) < 1e-6; };
+  // The flat ground along the bank, in metres from the lock's middle toward its high side.
+  const lo = same(-1) ? -1.5 * cell : -cell / 2, hi = same(1) ? 1.5 * cell : cell / 2;
+  const sq = Math.min(QUAY.SQ, (hi - lo - 2 * QUAY.EDGE) / h, (cell - QUAY.IN - QUAY.EDGE) / w);
+  const reach = h * sq / 2;
+  const along = Math.max(lo + QUAY.EDGE + reach, Math.min(hi - QUAY.EDGE - reach, QUAY.NUDGE));
+  return { side, across: cell / 2 + QUAY.IN + w * sq / 2, along, sq, face: s.up };
+}

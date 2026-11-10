@@ -5,7 +5,7 @@
 // puzzle (src/bilge.ts). (The quay's Bilge was in sea-puzzles.js; the lock itself in sea.js.)
 import * as THREE from 'three';
 import { SAIL } from '../den-sail.js';
-import { gatesOf, lieAmong } from '../den-lock.js';
+import { gatesOf, lieAmong, quayOf } from '../den-lock.js';
 import { Bilge, W as BW, H as BH } from '../bilge.js';
 import { worth, oddsFor } from '../den-bilge.js';
 import { scene, camera, mat, mesh, canvasTex, woodTex, V3, keys, ray, burst, toast } from './world.js';
@@ -37,8 +37,11 @@ function lockMesh(spot, i) {
   g.position.set(x, 0, z);
   g.rotation.y = Math.atan2(-hz, hx);   // (local +x along (hx, hz))
   // Its quay: the bank toward the den, or the right-hand bank if it runs out to sea; in the world,
-  // (qx, qz) from its middle.
-  const across = hz === 0, qx = across ? 0 : 1, qz = across ? 1 : 0;
+  // (qx, qz) from its middle. Its Bilge board lies on it, wholly on its own flat ground, its top row
+  // toward the lock's high side, the way she faces waiting to go up (src/den-lock.ts, quayOf: the
+  // user, 10 Nov, couldn't see it, half sunk in the bank at the foot of the headland's two).
+  const q = quayOf(spot, SAIL.CELL, BW + 0.3, BH + 0.3, (qc, qr) => (sail.sea.ground(qc, qr) ? sail.sea.bank(qc, qr) : null));
+  const across = hz === 0, qx = DC[q.side], qz = -DR[q.side];
   const L = { spot, g, top, at: V3(x, top, z), gates: {}, below };
   // Its chamber's water, from its low gates to its high ones.
   L.chamber = mesh(new THREE.PlaneGeometry(at.low + at.high, SAIL.CELL).rotateX(-Math.PI / 2), coveM, false);
@@ -90,11 +93,11 @@ function lockMesh(spot, i) {
   L.gush = mesh(new THREE.CylinderGeometry(0.3, 0.45, 1, 10, 1, true), new THREE.MeshBasicMaterial({ color: '#cdeefa', transparent: true, opacity: 0.9, depthWrite: false, side: THREE.DoubleSide, fog: false }), false);
   L.gush.visible = false;
   scene.add(L.gush);
-  // Where its Bilge board lies on the quay: a lock that runs across has it on the den's side, as
-  // the first one always did; one that runs out, beside it, nudged toward its high side (clear of
-  // the sea at its foot).
-  L.board = across ? L.at.clone().addScaledVector(quay, 1.5 * SAIL.CELL) : L.at.clone().addScaledVector(quay, 4.3).addScaledVector(toHigh, 1);
+  // Where its Bilge board lies on the quay (quayOf, above).
+  L.board = L.at.clone().addScaledVector(quay, q.across).addScaledVector(toHigh, q.along);
   L.board.y = top + 0.15;
+  L.boardSq = q.sq;
+  L.boardYaw = Math.atan2(-DC[q.face], DR[q.face]);   // (its top row, local -z, toward the high side)
   return L;
 }
 export const locks = { all: null };
@@ -145,7 +148,6 @@ export function lockTick(dt) {
    of what the move's worth (as on the beach) as it washes away, the pump's handle working and water
    gushing from its spout into the lock, till the lock's up; then it's gone and she sails on. One
    board, laid on the quay of whichever lock she's waiting in. */
-const QUAY_SQ = 0.45;
 export const hold = { mode: null, lock: null, at: null, board: null, group: null, pieces: null, meshes: new Map(), queue: [], holdT: 0, shown: null, cur: { r: 5, c: 2 }, water: null, cursor: null };
 const holdX = (c) => c - (BW - 1) / 2, holdZ = (r) => r - (BH - 1) / 2;
 // The lock she's waiting in to be pumped up, if she is.
@@ -182,12 +184,12 @@ function holdOpen(lk) {
   for (const m of hold.meshes.values()) hold.pieces.remove(m);
   hold.meshes.clear();
   hold.queue = []; hold.shown = null; hold.cur = { r: 5, c: 2 };
-  // On its quay, its top row toward the sea, seen from the den side.
+  // On its quay, its top row toward the lock's high side, seen from behind her (js/den.js).
   const L = lockWorld()[sail.helm.locks.indexOf(lk)], g = hold.group;
   scene.add(g);
   g.position.copy(L.board);
-  g.rotation.set(0, 0, 0);
-  g.scale.setScalar(QUAY_SQ);
+  g.rotation.set(0, L.boardYaw, 0);
+  g.scale.setScalar(L.boardSq);
   hold.mode = 'up'; hold.lock = lk; hold.at = L.at;
   document.body.classList.add('quay');   // (the sailing bar out of the way while you bilge)
   keys.clear();
@@ -199,9 +201,9 @@ export function holdShut() {
   document.body.classList.remove('quay');
 }
 /* A Bilge piece on the quay's board. The pieces are drawn the right way up for the beach's board,
-   which you look at from the sea; the quay's you look at from the den side, so they're turned the
-   other way round here, or they read upside down (the user, 9 Nov: "the bilge puzzle looks like
-   it's upside down"). Their shadows fall the same way as on the beach, down and to the left. */
+   which you look at from the sea; the quay's you look at from behind her as she waits to go up (from
+   the den side, at the first two), so they're turned the other way round here, or they read upside
+   down (the user, 9 Nov: "the bilge puzzle looks like it's upside down"). Their shadows fall the same way as on the beach, down and to the left. */
 function holdBit(bit) {
   const m = bitMesh(bit);
   m.userData.face.rotation.z = 0;

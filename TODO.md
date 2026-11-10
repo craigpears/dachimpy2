@@ -163,24 +163,6 @@ the site (`.assetsignore` skips `*.md`).
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
 
-- **How to turn her at the oars isn't obvious (10 Nov):** a friend rowed in from the checkpoint's side and
-  on to the capybara: "I think it's quite fun. I'm finding turning left [and] right is fine, but if
-  you actually want to like fully spin on the spot ... I ended up just to the right of the lock.
-  And I can't really spin to get to the left. Like, I can't just keep spamming the port until it
-  turns 90." Then, trying again: "[turning] on the spot works brilliantly, it's just not very
-  obvious [what] you have to do to achieve it. That does work, so yeah, if you do a good combo on
-  one side". So turning works as it is (a big clear on one side turns her that way, and hemmed in
-  she turns where she sits); what's missing is knowing that's how. Something should show you, when
-  the oars go out, that a big combo on one side turns her toward that side. (How, to pin down with
-  the user. An open-water spin on the spot at the oars was tried and kept back, as it changes
-  turns they like.)
-- **The lock's Bilge board hidden as she comes in (10 Nov):** "[pulling] in[to] the locks and the
-  [nose], so you can't see the [bilging] puzzle. Obviously, it should be orientated to the ship or
-  the dock or whatever." Coming into a lock, the board you pump it up with is blocked from view
-  (by her bows, or by facing the wrong way for how you've come in): "You can see some of it, but I
-  think some of it's in" [cut off: inside something, the quay or the lock's side?]. It should face you as you
-  come in, turned to suit her and the lock, and never sit behind her. (Exactly what hides it, to
-  check in the game.)
 - **Walk out along the jetty to her (10 Nov):** "I like the little pier to the side. I feel like I
   want to actually walk on the pier to the sloop, though. Like, it's just kind of a random pier in
   the middle of the water at the moment. I want to actually walk to it." The landing's jetty should

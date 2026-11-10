@@ -350,6 +350,21 @@ export class Sea {
     /** The lock on this square (its number, as LAY.LOCKS), or -1. */
     lockAt(c, r) { return this.locks.findIndex((l) => l.at[0] === c && l.at[1] === r); }
     isLock(c, r) { return this.lockAt(c, r) >= 0; }
+    /** High ground on this square: the cliffs the canal's cut through, or the checkpoint's headland
+        and works. */
+    ground(c, r) { return this.cliff.has(key(c, r)) || this.works.has(key(c, r)); }
+    /** The level the top of high ground on this square stands a bank's height over: the highest water
+        beside it (a lock counted full), and never less than a level, so the cliffs step up the locks
+        with the canal (js/den/sea.js draws them to it: bankTop). */
+    bank(c, r) {
+        let top = 1;
+        for (let a = -1; a <= 1; a++)
+            for (let b = -1; b <= 1; b++) {
+                const i = this.lockAt(c + a, r + b);
+                top = Math.max(top, i >= 0 ? this.locks[i].low + 1 : this.level(c + a, r + b));
+            }
+        return top;
+    }
     /** The water's level here: the sea's 0, a lock's lift up for each lock up the canal (a lock's own
         is its low side's here: how full it is is the helm's, Helm.lockAt). */
     level(c, r) {

@@ -379,6 +379,19 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
         above for her, say), or lying off it, she lies back from its shut gates, bow and stern
         clear of them and their swing, and glides on in as they open (she used to wait on the
         square beside it, her bow through them). Rules: `src/den-lock.ts` (gatesOf, lieAmong).
+      - **The quay's Bilge board, turned to her and wholly on the quay (10 Nov).** The user,
+        playtesting: "[pulling] in[to] the locks and the [nose], so you can't see the [bilging]
+        puzzle. Obviously, it should be orientated to the ship or the dock or whatever", and "You
+        can see some of it, but I think some of it's in". Every lock's board had been laid the same,
+        its top row out to sea, seen from the den side: coming back up the headland's two the view
+        had her bow coming at you, and at the lower of them (its quay only a square long, between
+        the sea and the staircase's higher bank) half the board was sunk in that bank. Now the
+        board's top row is toward the lock's high side, the way she faces waiting to be pumped up,
+        and the view comes round behind her to it, her bow ahead, whichever lock and whichever way
+        she came. It lies wholly on its quay's own flat ground (never a higher bank, never over the
+        sea), nudged toward the high side room allowing; where there's only the one square, its
+        squares are a little smaller to fit, the view coming in to suit, so it looks the same. Rule:
+        `src/den-lock.ts` (quayOf).
       - **The ways past the checkpoint:** run it, row it, fight its guns, or the locks. The reef's
         far end, the long way round that cost only time, is closed now the locks are the way round.
       - **Nothing signposts it:** nothing at the junction, and nothing at the checkpoint either

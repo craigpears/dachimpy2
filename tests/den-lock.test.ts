@@ -1,7 +1,8 @@
 /* A lock (src/den-lock.ts), and the canal's chain of them on the sloop's sea (src/den-sail.ts): the
    secret way round the imperial checkpoint (the user, 10 Nov). */
 import { describe, expect, it } from 'vitest';
-import { LOCK, Lock, ends, lockCost, gatesOf, lieAmong, lieClear, HER, GATES } from '../src/den-lock';
+import { LOCK, Lock, ends, lockCost, gatesOf, lieAmong, lieClear, HER, GATES, quayOf, QUAY } from '../src/den-lock';
+import { W as BW, H as BH } from '../src/bilge';
 import { LAY, Sea, Helm, SAIL, type Move, type Pose } from '../src/den-sail';
 import { Checkpoint, CHECK } from '../src/den-checkpoint';
 import { stilled } from './helpers';
@@ -427,5 +428,57 @@ describe('"the front part of the ship is sticking out of the gate when the [lock
     expect(was).toBe(C);
     // In it, she lies as she is.
     expect(lieClear(0, 1, g, { low: 0, high: 0 })).toBe(0);
+  });
+});
+
+/* The user, playtesting (10 Nov): "[pulling] in[to] the locks and the [nose], so you can't see the
+   [bilging] puzzle. Obviously, it should be orientated to the ship or the dock or whatever", and
+   "You can see some of it, but I think some of it's in". Coming back up through the headland, the
+   view had her bow coming at you, and at the lower of the two, half the board was sunk in the
+   staircase's higher bank. */
+describe('the lock\'s Bilge board hidden as she comes in (10 Nov)', () => {
+  const C = SAIL.CELL, w = BW + 0.3, h = BH + 0.3;
+  const DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
+  const top = (c: number, r: number) => (sea.ground(c, r) ? sea.bank(c, r) : null);
+  const boards = sea.locks.map((s) => quayOf(s, C, w, h, top));
+
+  it('every lock\'s board lies wholly on its own quay, never sunk in a higher bank nor out over the sea', () => {
+    sea.locks.forEach((s, i) => {
+      const q = boards[i], [c, r] = s.at, own = top(c + DC[q.side], r + DR[q.side]);
+      expect(own, `lock ${i}'s quay`).not.toBeNull();
+      // Every bit of the board (its frame in), on a square of high ground at the quay's own height.
+      const e = 1e-6, A = h * q.sq / 2 - e, X = w * q.sq / 2 - e;
+      for (let u = -1; u <= 1; u += 0.25) for (let v = -1; v <= 1; v += 0.25) {
+        const along = q.along + u * A, across = q.across + v * X;
+        const a = Math.round(along / C), x = Math.round(across / C);
+        const sc = c + a * DC[s.up] + x * DC[q.side], sr = r + a * DR[s.up] + x * DR[q.side];
+        expect(top(sc, sr), `lock ${i}'s board at ${along.toFixed(2)} along, ${across.toFixed(2)} across: square ${sc},${sr}`).toBe(own);
+      }
+      // Off the chamber's edge, clear of the pier and the pump; and still a good size (the view comes
+      // in to suit it).
+      expect(q.across - w * q.sq / 2).toBeGreaterThanOrEqual(C / 2 + QUAY.IN - 1e-9);
+      expect(q.sq).toBeGreaterThan(0.3);
+      expect(q.sq).toBeLessThanOrEqual(QUAY.SQ);
+    });
+    // Where there's room, it's where it always was: the first lock's, as before.
+    expect(boards[0]).toMatchObject({ side: 1, along: QUAY.NUDGE, sq: QUAY.SQ });
+    expect(boards[0].across).toBeCloseTo(4.3, 1);
+    // The lower of the headland's staircase: only the one square of quay at its height, between the
+    // sea and the upper lock's higher bank, and the board fits on it.
+    const low = sea.locks.findIndex((s) => gatesOf(s, sea.locks, C).above >= 0);
+    expect(low).toBeGreaterThanOrEqual(0);
+    expect(boards[low].sq).toBeLessThan(QUAY.SQ);
+  });
+
+  it('turned to her: its top row toward the way she faces waiting to be pumped up, whichever lock, whichever way she came', () => {
+    sea.locks.forEach((s, i) => {
+      const [lc, lr] = ends(s).low, helm = new Helm(sea, { c: lc, r: lr, d: s.up });
+      helm.put('F'); helm.put('F');
+      for (let t = 0; !helm.working() && t < 60; t += 0.05) helm.tick(0.05);
+      expect(helm.working(), `lock ${i}`).toBe(helm.locks[i]);
+      expect(helm.pose.d).toBe(boards[i].face);
+    });
+    // Both ways round: out, up the first two facing out to sea; back, up the headland's two facing in.
+    expect(new Set(boards.map((b) => b.face))).toEqual(new Set([0, 2]));
   });
 });

@@ -553,8 +553,10 @@ function update(dt) {
     dist += (26 * view.zoom - dist) * sailView;
     tilt += (Math.max(0.3, Math.min(1.45, 0.78 + view.pitch)) - tilt) * sailView;
   }
-  // Bilging at a lock: down onto the board on its quay from the den side, drawn back to take in
-  // the lock beside it and the pump, so you see her rise as you pump (js/den/lock.js).
+  // Bilging at a lock: down onto the board on its quay from behind her, the way she faces waiting to
+  // go up (its top row's way: the user, 10 Nov, coming back up through the headland, had her bow
+  // coming at you and couldn't see the board), drawn back to take in the lock beside it and the pump,
+  // so you see her rise as you pump (js/den/lock.js).
   holdView += ((hold.mode ? 1 : 0) - holdView) * Math.min(1, dt * 3);
   if (holdView > 0.001 && hold.group?.parent) {
     const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect), sq = hold.group.scale.x;
@@ -564,7 +566,9 @@ function update(dt) {
     dist += (Math.max((BH * sq / 2 + 0.5 * sq * 4) / Math.tan(vh), (BW * sq / 2 + sq * 2) / Math.tan(hh)) * 1.75 * view.zoom - dist) * holdView;
     tilt += (1.2 - tilt) * holdView;
     const y0 = Math.atan2(Math.sin(yaw), Math.cos(yaw));
-    yaw = y0 + (Math.atan2(Math.sin(-y0), Math.cos(-y0))) * holdView;
+    let d = hold.group.rotation.y - y0;
+    d = Math.atan2(Math.sin(d), Math.cos(d));
+    yaw = y0 + d * holdView;
   }
   // Patching her deck: looking almost straight down onto the hole from over her stern, its top row
   // toward her bow, its squares as big on screen as the wall's are in its Carpentry view (the user,

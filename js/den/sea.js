@@ -41,15 +41,8 @@ export const COVE_Y = LIFT * LAY.COVE.level;
 // The water's height on a square: the sea's, the canal's, or a lock's as it is just now.
 export const liftAt = (c, r) => LIFT * (sail.helm.lockAt(c, r)?.height() ?? sail.sea.level(c, r));
 // The top of the cliff on a square: BANK over the highest water beside it (a lock counted full), and
-// never below CLIFF_H.
-export function bankTop(c, r) {
-  let top = 1;
-  for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) {
-    const i = sail.sea.lockAt(c + a, r + b), lv = i >= 0 ? sail.sea.locks[i].low + 1 : sail.sea.level(c + a, r + b);
-    top = Math.max(top, lv);
-  }
-  return LIFT * top + BANK;
-}
+// never below CLIFF_H (src/den-sail.ts, Sea.bank).
+export const bankTop = (c, r) => LIFT * sail.sea.bank(c, r) + BANK;
 // Her, smaller than their ship: one mast, a square sail and a topsail, a bowsprit, a tiller at the
 // stern, weathered planks, and your own flag at the masthead. Beamy enough for her two rowers to sit
 // side by side, each at their own sweep (the user, 10 Nov: "make the ship a little wider so the
