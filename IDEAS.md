@@ -555,6 +555,9 @@ bursts it, to keep him in long enough to plunder the stuff.
   **The endless gallery (10 Nov):** you see your pirate and Gravee walking down past them, on and on:
   "oh, it's just past my portraits", then "how many portraits? We've been walking quite a long
   way. Just got to go through this giant gallery." A running gag, and a long walk of frames.
+  Never tedious (10 Nov): "you wouldn't want to make it too tedious, but eventually you just start
+  zooming along": a few steps at walking pace, then the camera whizzes along the rest at speed, frames
+  blurring past, to show just how far it goes.
   - **Config-driven:** the gallery is a list of portraits, each a pirate drawn by the pirate maker
     from a look (as the real pirates are), so adding a picture is adding an entry, and it shows off
     that any pirate can be pictured.
