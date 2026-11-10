@@ -663,6 +663,27 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     with "that one pirate ... going like crazy" at the oars. "A real team building puzzle", and
     "absolutely hilarious". Goes with the race idea and "Better together" in STORY.md. (The rowing
     rules are being built to take a side from either board, so this can come later.)
+    **Taking rowing further from Bilge (10 Nov):** the user loves the split board ("quite
+    unique") and keeping two sides, or two people, in sync, "I think we need to build on that",
+    but wants it further from plain Bilge. Ideas, each building on the sync:
+    - **Benches across the keel:** each row of the board is a bench with a rower each side. A line
+      across the middle (both seats of a bench) is both rowers pulling together: straight ahead,
+      the best pull. A line on one side only turns her. The board's shape is the steering.
+    - **Mirror strokes:** the halves mirror each other; a swap on one side makes the mirrored swap
+      on the other. Each move works both sides, so you hunt for the move that clears on both. In a
+      crew, your move is mirrored onto your mate's board: you help or hinder each other.
+    - **Catching a crab:** a real rowing term (an oar blade caught in the water, jerking the rower
+      off his stroke), and Bilge already has crabs. On the rowing board a crab jams that side's oar
+      till it's cleared, so she swerves. A pun with a real mechanic behind it.
+    - **The drum:** a galley drummer beats the stroke, a count of moves. What each side clears
+      within a beat counts together; in step on the beat is a full stroke. In a crew, a third
+      pirate could drum (the coxswain), calling "port two!" for a bonus when it's matched.
+    - **Currents and shoals pull the board:** a current across her bow tips the pieces to one
+      side, so you row harder on the other to hold straight; over a shoal the channel bends and the
+      pull changes. The sea itself shapes the puzzle.
+    - **Tired arms:** each side tires as it works and recovers as it rests, so leaning on one side
+      can't carry her; balance is rewarded without a timer.
+    (A first pick to try: benches across the keel, with catching a crab. To shape with the user.)
     **Weather is where oars make sense (9 Nov):** the wind can drop. Under sail she's quicker, but
     when the wind drops a ship that's all sails is "dead in the water until the wind picks back
     up again", and under sail you "can't go against the wind". Oars keep her moving either way:
