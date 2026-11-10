@@ -20,7 +20,9 @@ import { piles, fair, neededLetters, fairPick, deal, showPile, takeCrate, toolbo
 import { boats, raiderOut, focus, onBeach, atWall, clickedFoe, cursor, aimed, aimFoe, throwAt, passable, weakSpot, widenCells, widen, spawnRaider, updateRaider, fireCannon, cannonSpot, showAim, startWave, updateWaves, banner, checkEnd, raidsLets } from './den/raids.js';
 import { rack, barracks, sword, atSword, swordBreak, swordDrop, swordReward, swordEnter, swordKey, lumber, toLumber, repairAll, swordTick, swordReset } from './den/sword.js';
 import { tide, shoreZ, bilge, atBilge, bilgeEnter, bilgeKey, bilgeHover, bilgeSwap, dredge, bilgeTick, bilgeReset } from './den/bilge.js';
-import { MAP_D, MAP_W, chart, cine, mapView, cineCam, cineView, nearMap, openMap, mapKey, takeMap, mapTick, mapReset, cineEnd, mapLets } from './den/map.js';
+import { MAP_D, MAP_W, chart, mapView, nearMap, openMap, mapKey, takeMap, mapTick, mapReset, mapLets } from './den/map.js';
+import { cine, cineCam, cineView, cineEnd, cineTick, cineLets } from './den/cine.js';
+import { dignityTick, dignityReset } from './den/dignity.js';
 import { sail } from './den/sea.js';
 import { nearSloop, board, ashore, sailReset, sailClick, sailHover, sailKey, sailTick } from './den/sailing.js';
 import { patch, deckHoleShape, patchTurn, patchPlace, patchKey } from './den/sea-puzzles.js';
@@ -43,6 +45,7 @@ export function newGame() {
   swordReset();
   bilgeReset();
   mapReset();
+  dignityReset();
   piles.forEach((p) => { p.letter = null; });
   newWall();
   // After the wall, so the first deals finish its holes; and shown, since the wall drew the crates empty.
@@ -462,7 +465,9 @@ function update(dt) {
   }
 
   mapTick(dt);
+  cineTick(dt);   // (a cutscene playing: js/den/cine.js)
   sailTick(dt);
+  dignityTick(dt, sail.on ? sail.helm.pose : null);   // (the checkpoint's commander, on its gate)
   haulTick(dt);
 
   /* Camera follows the pirate, looking at the wall and a little over it. Up on the rampart it
@@ -637,8 +642,8 @@ function update(dt) {
     yaw = y0 + d * craneView;
   }
   // The cutscene's own shots.
-  if (cine) mapLets.cineCam = cine.cam;
-  mapLets.cineView += ((cine ? 1 : 0) - cineView) * Math.min(1, dt * 2.5);
+  if (cine) cineLets.cineCam = cine.cam;
+  cineLets.cineView += ((cine ? 1 : 0) - cineView) * Math.min(1, dt * 2.5);
   if (cineView > 0.001 && cineCam) {
     look.lerp(cineCam.look, cineView);
     dist += (cineCam.dist - dist) * cineView;

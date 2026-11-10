@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { MAP, mapAfter, canPickUp, canRead, RUMOUR, WAYS, X_AT } from '../den-map.js';
 import { PIRATES } from '../den-look.js';
 import { $, scene, camera, mat, mesh, makePirate, animateWalk, faceTo, V3, pirate, carry, G, keys, wm, burst, v3, worldLets } from './world.js';
+import { cine, cinePlay, cineEnd, bubble, bubbleAt, stepTo } from './cine.js';
 import { outside } from './land.js';
 import { wall } from './wall.js';
 import { putBack, exitWall } from './pieces.js';
@@ -23,13 +24,12 @@ import { deco, decoMode } from './menus.js';
    to walk out and pick up). M opens it again wherever you are; M, Esc or Space rolls it up. */
 export const MAP_W = 1.3, MAP_D = 0.92;
 export const chart = { on: false, open: 0, g: null, paper: null, rolls: null, tex: null, scroll: null, label: null, yaw: 0 };
-export let mapView = 0, cineView = 0, cine = null, cineCam = null, mapWas = 'none', phaseWas = 'build';
+export let mapView = 0, mapWas = 'none', phaseWas = 'build';
+let dal = null;   // his cutscene, while it plays
 
 // Other parts of the den assign to these lets through this, as an imported binding can't be assigned.
 export const mapLets = {
   get mapView() { return mapView; }, set mapView(v) { mapView = v; },
-  get cineCam() { return cineCam; }, set cineCam(v) { cineCam = v; },
-  get cineView() { return cineView; }, set cineView(v) { cineView = v; },
   get mapWas() { return mapWas; }, set mapWas(v) { mapWas = v; },
   get phaseWas() { return phaseWas; }, set phaseWas(v) { phaseWas = v; },
 };
@@ -298,12 +298,11 @@ export function mapTick(dt) {
     mapLayout(chart.open * chart.open * (3 - 2 * chart.open));
     if (!chart.on && chart.open <= 0) chart.g.visible = false;
   }
-  cineTick(dt);
 }
 export function mapReset() {
   chart.on = false; chart.open = 0;
   if (chart.g) chart.g.visible = false;
-  cineEnd(true);
+  if (dal) cineEnd(true);
   mapWas = 'none'; phaseWas = 'build';
 }
 
@@ -313,31 +312,6 @@ export function mapReset() {
    the wardrobe, so you can dress as him too. A bit of a drunk: the ale slopping and the unsteady feet
    are the cutscene's (cineTick). His white monkey's the one that comes to you when you beat him. */
 const dalnoth = () => makePirate({ look: PIRATES.Dalnoth });
-function bubble(text) {
-  const el = document.createElement('div');
-  el.className = 'label say';
-  el.textContent = text;
-  el.style.display = 'none';
-  $('labels').append(el);
-  return el;
-}
-function bubbleAt(el, on, x, y, z) {
-  if (!on) { el.style.display = 'none'; return; }
-  v3.set(x, y, z).project(camera);
-  el.style.left = `${(v3.x + 1) / 2 * innerWidth}px`;
-  el.style.top = `${(1 - v3.y) / 2 * innerHeight}px`;
-  el.style.display = v3.z > 1 ? 'none' : '';
-}
-// Walks o (anything with x and z) towards (tx, tz), p's legs going; true once there.
-function stepTo(o, p, tx, tz, speed, dt) {
-  const dx = tx - o.x, dz = tz - o.z, d = Math.hypot(dx, dz);
-  if (d < 0.05 || !speed) { animateWalk(p, false, dt); return true; }
-  const s = Math.min(d, speed * dt);
-  o.x += dx / d * s; o.z += dz / d * s;
-  faceTo(p, dx, dz, dt);
-  animateWalk(p, true, dt, speed * 3.4);
-  return false;
-}
 /* The cutscene's beats, in seconds from the start. The user (9 Nov): "it feels just a bit forced
    how he just magically appears. Like maybe he should be the one like manning the cannon on the
    boat", and "a few more seconds of him rowing away on the boat would be good". So: him at their
@@ -368,22 +342,21 @@ function cineStart() {
   pirate.g.rotation.y = Math.PI;
   // Him: on deck, at their cannon.
   const deck = { x: ship.position.x + 0.1, z: SHIP_Z + 0.15 };
-  cine = {
+  dal = {
     t: 0, cap, at: { ...deck }, deck, from, land, stand: { x: s.x - 0.2, z: s.z - 1.5 }, boat, bz, drop: null, got: 0,
     says: bubble('We\'ll be back! *hic*'), mine: bubble('A map!'), cam: { look: V3(deck.x, SHIP_DECK + 1, deck.z), dist: 7, tilt: 0.32, yaw: 0.3 },
+    tick: dalTick, end: dalEnd,
   };
   cap.g.position.set(deck.x, SHIP_DECK, deck.z);
-  document.body.classList.add('cine');
-  $('intro').classList.add('off');
+  cinePlay(dal);
 }
-export function cineEnd(skip) {
-  if (!cine) return;
-  const c = cine;
-  cine = null;
+// Over (played out, or skipped: js/den/cine.js).
+function dalEnd(skip) {
+  const c = dal;
+  dal = null;
   scene.remove(c.cap.g);
   scene.remove(c.boat.g);
   c.says.remove(); c.mine.remove();
-  document.body.classList.remove('cine');
   pirate.arms.forEach((a) => { a.rotation.x = 0; });
   if (!skip) takeMap();
 }
@@ -399,9 +372,8 @@ function cineRow(c, t, u, a, b) {
   g.userData.oars.forEach((o, i) => { o.rotation.y = (i ? 1 : -1) * pull * 0.45; o.rotation.x = Math.cos(t * 5.5) * 0.12; });
   c.at.x = g.position.x; c.at.z = g.position.z;
 }
-function cineTick(dt) {
-  if (!cine) return;
-  const c = cine, t = (c.t += dt), cap = c.cap, at = c.at, s = mapSpot(), T = CINE, bg = c.boat.g;
+function dalTick(dt) {
+  const c = dal, t = (c.t += dt), cap = c.cap, at = c.at, s = mapSpot(), T = CINE, bg = c.boat.g;
   if (t < T.deck) {
     // At their cannon, looking over at your wall.
     animateWalk(cap, false, dt);

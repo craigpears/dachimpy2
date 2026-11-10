@@ -287,7 +287,7 @@ export function wearLook(p, look) {
   np.g.position.copy(old.position); np.g.rotation.copy(old.rotation); np.g.scale.copy(old.scale);
   old.parent?.add(np.g);
   old.parent?.remove(old);
-  Object.assign(p, { g: np.g, legs: np.legs, arms: np.arms, body: np.body, fam: np.fam, look: np.look });
+  Object.assign(p, { g: np.g, legs: np.legs, arms: np.arms, body: np.body, fam: np.fam, look: np.look, held: np.held });
 }
 export function animateWalk(p, moving, dt, speed = 11) {
   p.phase = moving ? p.phase + dt * speed : 0;

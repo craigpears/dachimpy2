@@ -11,6 +11,10 @@ export const DYES = {
   lavender: '#d9b0ff', 'light blue': '#a8f2ff', 'light green': '#669619', lime: '#3fd837', lemon: '#fffbbf', magenta: '#c9227b',
   maroon: '#9e171b', mint: '#90ffb9', navy: '#434ca2', orange: '#f57c09', peach: '#ffd5a8', persimmon: '#ff5300', pink: '#fe79a4',
   purple: '#6104ad', red: '#d72c22', rose: '#ffc4d6', tan: '#ad8047', violet: '#bf3bc4', white: '#f6f2ea', yellow: '#f8ff35',
+  // Limited editions real pirates wear: named as on YPPedia (Clothing palette), coloured as the game
+  // draws them, sampled from a portrait (the wiki's swatches aren't faithful): Dignity's coat
+  // (shadow) and its facings (atlantean), from hers (10 Nov).
+  shadow: '#674c7b', atlantean: '#afb8fe',
 };
 export const SKIN = ['#f6d3b0', '#f0bf8e', '#d9a066', '#b57a4a', '#8a5530', '#5c3a22'];
 export const HAIR = { black: '#1f1a17', 'dark brown': '#3b2414', brown: '#6a4020', auburn: '#7f2e16', ginger: '#c4642a', blonde: '#dcb565', grey: '#a09a92', white: '#ece8e0' };
@@ -54,8 +58,8 @@ export const PARTS = {
   },
   // In the right hand.
   hand: {
-    m: [['none', 'Nothing'], ['tankard', 'Tankard']],
-    f: [['none', 'Nothing'], ['tankard', 'Tankard']],
+    m: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass']],
+    f: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass']],
   },
   fam: {
     m: [['none', 'No familiar'], ['parrot', 'Parrot', 1], ['monkey', 'Monkey'], ['octopus', 'Octopus']],
@@ -116,13 +120,16 @@ export const PIRATES = Object.fromEntries(Object.entries({
     legs: 'pants', legsCol: 'gold', feet: 'boots', feetCol: 'gold', hand: 'tankard', fam: 'monkey', famCol: 'white',
   },
   // Dignity (her Emerald portrait, 10 Nov), the imperial checkpoint's commander: tan-brown skin,
-  // smiling, wavy blonde hair to her shoulders, an eyepatch; a long purple Buccaneer jacket with
-  // lavender facings, wide cuffs and gold buttons over a white shirt, a black belt with a big round
-  // gold buckle, purple pants, purple fancy boots with lavender tops, and Bella, her lavender monkey.
+  // smiling, wavy blonde hair loose to her shoulders, an eyepatch; a long Buccaneer jacket in shadow
+  // (a dusky purple) with atlantean (pale periwinkle) facings, wide cuffs and gold buttons over a
+  // white shirt, a black belt with a big round gold buckle, shadow pants, shadow fancy boots with
+  // atlantean tops, and Bella, her lavender monkey. (Shadow and atlantean are real Puzzle Pirates
+  // dyes, sampled against her portrait: 10 Nov.)
+  // And her brass spyglass, for peering out from the checkpoint's gate (10 Nov).
   Dignity: {
     body: 'f', skin: 3, hair: 'wavy', hairCol: 'blonde', patch: true, earring: false, smile: true,
-    hat: 'none', top: 'buccaneer', topCol: 'purple', topCol2: 'lavender', waist: 'buckle', waistCol: 'black',
-    legs: 'pants', legsCol: 'purple', feet: 'fancy', feetCol: 'purple', feetCol2: 'lavender', fam: 'monkey', famCol: 'lavender',
+    hat: 'none', top: 'buccaneer', topCol: 'shadow', topCol2: 'atlantean', waist: 'buckle', waistCol: 'black',
+    legs: 'pants', legsCol: 'shadow', feet: 'fancy', feetCol: 'shadow', feetCol2: 'atlantean', hand: 'spyglass', fam: 'monkey', famCol: 'lavender',
   },
 }).map(([name, look]) => [name, cleanLook(look)]));
 
@@ -345,18 +352,49 @@ export function dressPirate(look, opts = {}) {
     tail.rotation.x = Math.PI + 0.2;
     body.add(tail);
   } else if (L.hair === 'wavy') {
-    // Wavy, to the shoulders: full at the sides and back, curling out at the ends.
-    const curtain = part(new THREE.CylinderGeometry(hr + 0.02, hr + 0.05, 0.24, 16, 1, true, Math.PI / 2, Math.PI), hairM, 0, 0.81, -0.01);
-    curtain.material.side = THREE.DoubleSide;
-    body.add(curtain);
-    for (let i = 0; i < 9; i++) {
-      const a = Math.PI / 2 + (i / 8) * Math.PI, r = hr + 0.04;
-      const curl = part(new THREE.SphereGeometry(0.05, 10, 8), hairM, Math.sin(a) * r, 0.7 + (i % 2) * 0.025, Math.cos(a) * r - 0.01);
-      curl.scale.set(1, 0.8, 1);
-      body.add(curl);
+    // Wavy, loose and full to the shoulders, framing the face (the user, 10 Nov: "nice, long kind of
+    // hair", not "straight long hair gathered at the back", no "bumps" or "pigtails"; and then "it
+    // needs a bit more"): volume at the crown, a fall of hair open only at the face, separate wavy
+    // locks falling past the shoulders, two framing the face, and a fringe swept to one side.
+    const ends = 0.66, open = 0.82;   // (where the fall ends; half the gap at the face, either side of ahead)
+    const crown = part(new THREE.SphereGeometry(hr + 0.045, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.5), hairM, 0, 0.93, -0.03);
+    crown.scale.set(1.04, 0.85, 1.06);
+    crown.rotation.x = -0.35;
+    body.add(crown);
+    const prof = [[hr - 0.02, 1.08], [hr + 0.035, 0.98], [hr + 0.06, 0.87], [hr + 0.075, 0.76], [hr + 0.08, ends]].map(([r, y]) => new THREE.Vector2(r, y));
+    const geo = new THREE.LatheGeometry(prof, 32, open, Math.PI * 2 - 2 * open), pos = geo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i), a = Math.atan2(x, z), drop = Math.max(0, (0.98 - y) / (0.98 - ends));
+      const k = 1 + drop * 0.08 * Math.sin(a * 7 + y * 16);
+      pos.setXYZ(i, x * k, y - (y < ends + 1e-4 ? 0.03 + 0.025 * Math.sin(a * 9) : 0), z * k);
     }
-    // A swept fringe, full on top.
-    for (const s of [-1, 1]) body.add(part(new THREE.SphereGeometry(0.085, 10, 8), hairM, 0.1 * s, 1.08, 0.08));
+    geo.computeVertexNormals();
+    hairM.side = THREE.DoubleSide;
+    body.add(part(geo, hairM, 0, 0, -0.01));
+    // A lock: thick at its root, tapering, waving as it falls.
+    const lock = (a, len, w, y0, out = 0.07) => {
+      const lp = [[0.001, 0], [w * 0.8, -0.03], [w, -len * 0.3], [w * 0.75, -len * 0.7], [0.012, -len]].map(([r, y]) => new THREE.Vector2(r, y));
+      const lg = new THREE.LatheGeometry(lp, 7), q = lg.attributes.position;
+      for (let i = 0; i < q.count; i++) q.setX(i, q.getX(i) + 0.03 * Math.sin(q.getY(i) * 15 + a * 3));   // (its wave)
+      lg.computeVertexNormals();
+      const at = new THREE.Group(), m = part(lg, hairM);
+      at.position.set(Math.sin(a) * (hr + out), y0, Math.cos(a) * (hr + out) - 0.01);
+      at.rotation.y = a;   // (facing out from her head)
+      m.rotation.x = -0.18;   // (leaning out a little as it falls)
+      at.add(m);
+      body.add(at);
+    };
+    [[1.3, 0.3], [1.85, 0.36], [2.45, 0.34], [3.14, 0.38], [3.8, 0.34], [4.4, 0.36], [4.98, 0.3]].forEach(([a, len]) => lock(a, len, 0.05, 0.8));
+    for (const s2 of [-1, 1]) lock(s2 * 0.95, 0.22, 0.06, 0.86, 0.03);   // (framing her face: short, full, not tails)
+    // The fringe, swept across from a side part, and a lock of it falling past one temple.
+    const fringe = part(new THREE.SphereGeometry(0.085, 12, 8), hairM, 0.03, 1.07, 0.1);
+    fringe.scale.set(2.1, 0.75, 1.15);
+    fringe.rotation.z = -0.22;
+    body.add(fringe);
+    const sweep = part(new THREE.SphereGeometry(0.06, 10, 8), hairM, 0.15, 0.98, 0.15);
+    sweep.scale.set(0.8, 1.5, 0.9);
+    sweep.rotation.z = 0.35;
+    body.add(sweep);
   } else if (L.hair === 'bun') body.add(part(new THREE.SphereGeometry(0.11, 12, 10), hairM, 0, 1.03, -0.17));
   else if (L.hair === 'braids') {
     for (const s of [-1, 1]) {
@@ -478,6 +516,7 @@ export function dressPirate(look, opts = {}) {
     const blade = part(new THREE.BoxGeometry(0.04, 0.05, 0.62), M('#d8dde2', { metalness: 0.8, roughness: 0.25 }), 0, -0.52, 0.34);
     arms[1].add(blade, part(new THREE.BoxGeometry(0.16, 0.05, 0.04), gold, 0, -0.52, 0.04));
   }
+  let held = null;   // what's in the right hand, if anything
   if (L.hand === 'tankard') {
     // A pewter tankard in the right hand, frothing over.
     const pewter = M('#b9bec4', { metalness: 0.7, roughness: 0.3 }), foam = M('#fff6d8'), tk = new THREE.Group();
@@ -489,6 +528,25 @@ export function dressPirate(look, opts = {}) {
     tk.add(froth, part(new THREE.CapsuleGeometry(0.022, 0.07, 4, 8), foam, 0.05, 0.04, 0.05), handle);
     tk.position.set(0, -0.56, 0.1);
     arms[0].add(tk);
+    held = tk;
+  } else if (L.hand === 'spyglass') {
+    // A brass spyglass in the right hand, drawn out: a narrow eyepiece, a leather grip, a wide end
+    // with a rim. Along its own +z from where it's held (the eyepiece behind), carried pointing down
+    // and forward; a scene raises it to an eye by turning the arm and it (`held`).
+    const brass = M('#c9a13c', { metalness: 0.75, roughness: 0.3 }), leather = M('#5a3420', { roughness: 0.8 }), glass = M('#9fd3e6', { metalness: 0.2, roughness: 0.1 });
+    const sp = new THREE.Group(), seg = (r0, r1, len, z, m) => { const c = part(new THREE.CylinderGeometry(r1, r0, len, 14), m, 0, 0, z); c.rotation.x = Math.PI / 2; sp.add(c); };
+    seg(0.022, 0.022, 0.1, -0.12, brass);    // the eyepiece
+    seg(0.026, 0.026, 0.012, -0.068, brass);
+    seg(0.032, 0.032, 0.12, 0.0, leather);   // the grip
+    seg(0.036, 0.036, 0.016, 0.066, brass);
+    seg(0.036, 0.042, 0.2, 0.17, brass);     // the wide end
+    seg(0.05, 0.05, 0.03, 0.28, brass);      // its rim
+    const lens = part(new THREE.CircleGeometry(0.042, 14), glass, 0, 0, 0.296);
+    sp.add(lens);
+    sp.position.set(0, -0.56, 0.04);
+    sp.rotation.x = 1.0;
+    arms[0].add(sp);
+    held = sp;
   }
   // A familiar rides on the left shoulder, as in Puzzle Pirates' portraits.
   const fam = makeFamiliar(L);
@@ -497,7 +555,7 @@ export function dressPirate(look, opts = {}) {
     body.add(fam.g);
   }
   g.traverse((x) => { if (x.isMesh) x.castShadow = true; });
-  return { g, legs, arms, body, phase: 0, fam, look: L };
+  return { g, legs, arms, body, phase: 0, fam, look: L, held };
 }
 
 // ---------- familiars ----------
@@ -550,14 +608,30 @@ function makeFamiliar(L) {
       const ear = part(new THREE.SphereGeometry(0.035, 8, 6), face, 0.088 * s, 0.01, 0);
       ear.scale.z = 0.5;
       head.add(ear);
-      head.add(part(new THREE.SphereGeometry(0.013, 6, 5), black, 0.03 * s, 0.012, 0.088));
+      head.add(part(new THREE.SphereGeometry(0.018, 8, 6), black, 0.032 * s, 0.014, 0.083));
+      head.add(part(new THREE.SphereGeometry(0.006, 5, 4), white, 0.036 * s, 0.021, 0.099));   // (a glint)
     });
+    // A little mouth, shut; a scene opens it (chattering).
+    const mouth = part(new THREE.SphereGeometry(0.016, 8, 6), M('#4a2233'), 0, -0.042, 0.079);
+    mouth.scale.set(1.3, 0.3, 0.5);
+    head.add(mouth);
     const curve = new THREE.CatmullRomCurve3([[0, 0.04, -0.08], [0, -0.1, -0.17], [0.05, -0.28, -0.16], [0, -0.38, -0.07], [-0.05, -0.32, -0.02]].map((p) => new THREE.Vector3(...p)));
     const tailG = new THREE.Group();
     tailG.add(part(new THREE.TubeGeometry(curve, 24, 0.016, 6), fur));
     [-1, 1].forEach((s) => g.add(part(new THREE.SphereGeometry(0.035, 8, 6), fur, 0.055 * s, 0.03, 0.07)));
+    // Little arms from the shoulders, paws folded on the tummy; a scene can move them (familiars do
+    // things in the scenes: the user, 10 Nov). [0] is the monkey's right, as a pirate's arms.
+    const arms = [-1, 1].map((s) => {
+      const a = new THREE.Group();
+      a.position.set(0.075 * s, 0.16, 0.03);
+      a.add(part(new THREE.CapsuleGeometry(0.019, 0.06, 4, 8), fur, 0, -0.045, 0));
+      a.add(part(new THREE.SphereGeometry(0.024, 8, 6), face, 0, -0.09, 0));
+      a.rotation.set(-0.75, 0, -0.35 * s);
+      g.add(a);
+      return a;
+    });
     g.add(bodyM, head, tailG);
-    Object.assign(fam, { head, tail: tailG });
+    Object.assign(fam, { head, tail: tailG, arms, mouth });
   } else if (L.fam === 'octopus') {
     const c = M(L.famCol);
     const mantle = part(new THREE.SphereGeometry(0.1, 14, 12), c, 0, 0.19, -0.01);

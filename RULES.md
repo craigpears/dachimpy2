@@ -627,8 +627,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       guns: the reason to get past. Stop beside it and Space hauls its treasure up by Treasure Haul,
       (the board on her other side, clear of the wreck); once it's up the
       wreck's bare.
-    - **Room left for later:** the gatehouse's boom for the bribe, and the top of the gatehouse's
-      arch over the gate for Dignity, its commander, to stand on (still clear: nothing's put there). (A crane up and over its headland
+    - **Room left for later:** the gatehouse's boom for the bribe. (The top of the gatehouse's arch
+      is where Dignity, its commander, stands: "Dignity at the checkpoint".) (A crane up and over its headland
       had room kept for it, till the crane went to the hidden cove and the locks became the way
       round.) Rules:
       `src/den-checkpoint.ts` (the lay: LAY.CHECKPOINT in `src/den-sail.ts`); in the world:
@@ -750,13 +750,60 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     bushy beard, gold earrings in both ears, a gold Swashbuckler's jacket, a white sash, gold pants
     and boots, a tankard in his right hand, his white monkey. **Dignity** (her Emerald portrait,
     checked 10 Nov; the user: "go with the portrait photo, because then she's more distinctive"):
-    tan-brown skin, smiling, wavy blonde hair to her shoulders, an eyepatch over her right eye; a
-    purple Buccaneer jacket with lavender facings, wide cuffs and gold buttons in two rows over a
-    white shirt; a black belt with a big round gold buckle; purple pants; purple Fancy boots with
-    lavender turned-down tops; and Bella, her lavender monkey (a limited-edition monkey colour on
-    YPPedia: what looked like little purple wings in the portrait is her curled tail). She's the
-    imperial checkpoint's commander (TODO.md). The cheat "Real pirates on the beach" stands every
-    one of them outside the gate to look at.
+    tan-brown skin, smiling, wavy blonde hair loose to her shoulders, an eyepatch over her right
+    eye; a Buccaneer jacket in shadow (a dusky purple) with atlantean (pale periwinkle) facings,
+    wide cuffs and gold buttons in two rows over a white shirt; a black belt with a big round gold
+    buckle; shadow pants; shadow Fancy boots with atlantean turned-down tops; a brass spyglass in
+    her right hand (a wardrobe item: "In hand"); and Bella, her lavender monkey (a limited-edition
+    monkey colour on YPPedia: what looked like little purple wings in the portrait is her curled
+    tail). She's the imperial checkpoint's commander ("Dignity at the checkpoint", below). The
+    cheat "Real pirates on the beach" stands every one of them outside the gate to look at.
+    - **Faithful to the portrait (10 Nov).** Her hair: "nice, long kind of hair ... instead of
+      like just straight long hair gathered at the back ... why has she got bumps? Or it looks like
+      she's got more kind of pigtails", and then "I know like most of the style in this game is
+      simple, but ... it needs a bit more". So Wavy hair (the item itself, for anyone who wears it)
+      hangs loose and full to the shoulders, open only at the face: volume at the crown, separate
+      wavy locks falling past the shoulders, two short ones framing the face, and a fringe swept
+      from a side part. Her colours: "is it definitely that colour?", and "those colours that she's
+      got in the portrait and her general look are Puzzle Pirate colours, so ... if we haven't got
+      them in the game, they're missing." **The palette is Puzzle Pirates' own, and a colour a real
+      pirate wears that's missing from it is a gap to fill, not a reason to change their look.**
+      Dye names come from YPPedia (Clothing palette); their colours are sampled from the game's
+      own portraits (a flat mid-tone of the garment), since the wiki's swatches aren't faithful.
+      Added so far: shadow and atlantean, from Dignity's portrait.
+- **Dignity at the checkpoint, and her little cutscene (10 Nov).** "Adding [her] as the dutiful
+  commander of the imperial checkpost, kind of peering down from the gates ... give her a little
+  cutscene similar to Dalnoth ... come up with something witty for her"; "I need to give it a bit
+  of a cheeky giggle and a win"; "we've really got to go all in with Dignity's little cutscene.
+  She's got to be very cute. The lavender monkey has got to be involved somehow ... the little
+  monkey is the one that fires the cannon at you"; and, seeing it: "I love it. The cheeky giggle
+  and the spyglass, definitely complete it." She stands on top of the gatehouse's arch, the
+  Empire's flag behind her. **The first time you sail within sight of it from the cove's side**
+  (where the trade wind drops you), a cutscene of about sixteen seconds, black bars, **Space or
+  Esc skips it**: the camera finds her with her spyglass up, sweeping the horizon; she lowers it
+  and starts ("Halt! Imperial checkpoint. State your busi..."), a hand to her forehead ("...oh.
+  Pirates. It's always pirates."), then to Bella on her shoulder, pointing her spyglass at you:
+  "Look lively! And do try to hit them this time." Bella chatters ("Eek eek!") and scampers down,
+  **to one of the checkpoint's own guns** ("can you actually make the monkey pop to the actual
+  cannons that shoot at you? Having a fake little cannon at the top seems ... try and keep it
+  more real to what actually fires at you"): the bastion gun on Dignity's left (the other if it's
+  wrecked), in quick monkey bounds along the gatehouse's top, off the tower and down onto the
+  bastion ("why does the monkey look like he's zip wiring in slow motion down?"). On its breech
+  she salutes, lights the fuse with a little linstock, covers her ears, and the warning shot
+  comes from that gun's muzzle, the camera following it out to the sloop: it lands just short of
+  her bow, a column of water and spray over her deck, and misses. Back to Bella's proud little
+  pose on the gun (a fist pumped, "Eek!"), then Dignity's giggle, a hand to her mouth: "Hee hee!
+  Oops. That was a warning shot. Mostly. Come any closer and the next ones won't be.", wagging
+  her spyglass at you as Bella scampers back up to her shoulder. What the checkpoint has to say
+  (but its hint) waits till the cutscene's over. After it, **a line over her head as things
+  happen, each said once**: a stroke short of its guns' first mark, "One more stroke and I'll have
+  to shoot. There'll be paperwork. I hate paperwork."; a gun of hers wrecked, "That was Imperial
+  property!"; through her gate, either way, "This is going in my report. In very small, very cross
+  handwriting."; out round her by the locks, "Nobody uses the canal. Nobody!" (that one even if
+  she never saw you sail up, and then there's no cutscene after). Between times she peers out with
+  her spyglass now and then and turns to watch you. The cheat "Dignity's scene" plays it again
+  (sailing out first). Rules: `src/den-dignity.ts`; in the world: `js/den/dignity.js`; the
+  cutscene machinery every scene shares (Dalnoth's too): `js/den/cine.js`.
 - **You can see out to sea (9 Nov).** The taller wall shut the view in: "it just feels like I'm
   staring at a wall. It's lost some of the chop. I don't feel like there's any background to look
   at. I don't know why it's so black. Rather like there's supposed to be a sea over there." So:

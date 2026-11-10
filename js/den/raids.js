@@ -12,7 +12,7 @@ import { gd } from './gundeck.js';
 import { piles, restockSecs, refill } from './pieces.js';
 import { rack, sword, swordDrop, raiderDuel } from './sword.js';
 import { shoreZ, beachZ, bilge } from './bilge.js';
-import { cine } from './map.js';
+import { cine } from './cine.js';
 import { guest, isHost, myId, crewSize, send, say } from './crew.js';
 
 export const cannon = (() => {

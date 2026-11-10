@@ -9,7 +9,11 @@ import { wall, rest, ringOf, updateHole, updateStats, putPiece } from './wall.js
 import { paintTower } from './gundeck.js';
 import { putBack, exitWall, dealNow } from './pieces.js';
 import { cannon, ship, SHIP_GONE, boats, raiderOut, startWave } from './raids.js';
-import { cine, mapWas, phaseWas, mapLets } from './map.js';
+import { mapWas, phaseWas, mapLets } from './map.js';
+import { cine } from './cine.js';
+import { dignityScene } from './dignity.js';
+import { DIGNITY } from '../den-dignity.js';
+import { LAY } from '../den-sail.js';
 import { sail } from './sea.js';
 import { board, sailReset } from './sailing.js';
 import { online, guest, myId, send } from './crew.js';
@@ -477,6 +481,17 @@ function cheatSail() {
   sailReset();
   board();
 }
+/* Dignity's cutscene at the imperial checkpoint, again (js/den/dignity.js): out to sea first if you're
+   not, and the sloop put where the trade wind drops her, facing its gate. */
+function cheatDignity() {
+  if (cine) return;
+  if (!sail.on) cheatSail();
+  const h = sail.helm, K = LAY.CHECKPOINT;
+  h.stop();
+  Object.assign(h, { cur: null, rides: [], turn: [], slot: -1, strokes: [], pose: { c: K.GATE, r: K.ROW - DIGNITY.SPOT, d: 0 } });
+  sail.riding = false;
+  dignityScene();
+}
 /* The deal as it stands, copied to paste into a message: a crate's piece that fits but could never
    make a Masterpiece becomes a test of the fair deal from it (src/den-deal.ts; TODO.md, 8 Nov). */
 function cheatDeal() {
@@ -506,6 +521,7 @@ const CHEATS = [
   ['Build the shack', cheatShack],
   ["The captain's map scene", cheatMapScene],
   ['Go sailing', cheatSail],
+  ["Dignity's scene", cheatDignity],
   ['Real pirates on the beach', cheatPirates],
   ['Copy the deal (for a test)', cheatDeal],
 ];

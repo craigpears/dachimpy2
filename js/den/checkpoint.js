@@ -10,6 +10,8 @@ import { hullGeo } from './raids.js';
 import { seaX, seaZ, sail, CLIFF_H, bankTop } from './sea.js';
 import { deckHoleShape } from './sea-puzzles.js';
 import { canHaulWreck } from './treasure.js';
+import { dignityWatch, dignityHeard } from './dignity.js';
+import { cine } from './cine.js';
 
 /* The user (10 Nov): "We need our own puzzle where we have to get through the Imperial checkpoint
    by doing slow row and then fast rowing with the Vegas." The main shipping lane, a trade wind on
@@ -26,7 +28,7 @@ import { canHaulWreck } from './treasure.js';
    On its left a headland, the canal's last two locks cut down through it (lock.js): the secret way
    round. On its right a reef, out to the edge of the sea. Beyond it, an old wreck on the open sea, its treasure hauled up by
    Treasure Haul (treasure.js). */
-export const cp = { check: new Checkpoint(), W: null, byWreck: false };
+export const cp = { check: new Checkpoint(), W: null, byWreck: false, held: [] };
 const K = LAY.CHECKPOINT, GATE_Z = seaZ(K.ROW), ARCH_Y = 6.4;
 const stone = () => mat('#d3c9b2', { flatShading: true, roughness: 0.9 });
 const CRIMSON = '#9e1b24', GOLD = '#e0b53a';
@@ -160,6 +162,7 @@ export function checkpointReset() {
   cp.check = new Checkpoint();
   turretShotsClear();
   cp.byWreck = false;
+  cp.held = [];
   sail.wreckSalvage = null;
 }
 const GUN_NAME = ['left', 'right'];
@@ -169,6 +172,7 @@ const GUN_NAME = ['left', 'right'];
 export function checkpointShot(hit, at) {
   const e = cp.check.shot(...hit), b = cp.check.battery;
   if (!e) return false;
+  dignityHeard(e);   // ("That was Imperial property!": dignity.js)
   const fight = e.first ? ' It\'s a fight now: its guns are on her' : '';
   if (e.on === 'gatehouse') { toast(`A hit on the gatehouse! Solid stone: aim for the bastions' guns.${fight}`); return true; }
   const name = GUN_NAME[e.gun] ?? '';
@@ -194,13 +198,17 @@ export function checkpointTick(dt) {
       cp.check.holed();
       toast(e.aimed ? 'Hit! She\'s holed: patch her to sail on' : 'Hit! That gun had her on its mark: patch her to sail on', true);
     }
+    // Its commander on the gate: her cutscene the first time she's sighted from the cove's side
+    // (dignity.js). What's said here (but the hint) waits till it's over, so they don't talk over each other.
+    dignityWatch(h.pose);
     for (const e of cp.check.watch(h.pose)) {
+      dignityHeard(e);
       // (from the den's side, the hint first, and this waits its turn after it)
-      if (e.kind === 'sighted') toast('The checkpoint\'s guns are trained on the red rings: stop on one and she\'s hit. Run it, row it, or knock its guns out');
-      else if (e.kind === 'hint') toast(HINT);
-      else if (e.kind === 'calm') toast('Out of sight of the checkpoint: its guns go back to their marks');
-      else toast(throughSay(e));
+      const say = e.kind === 'sighted' ? 'The checkpoint\'s guns are trained on the red rings: stop on one and she\'s hit. Run it, row it, or knock its guns out'
+        : e.kind === 'hint' ? HINT : e.kind === 'calm' ? 'Out of sight of the checkpoint: its guns go back to their marks' : throughSay(e);
+      if (cine && e.kind !== 'hint') cp.held.push(say); else toast(say);   // (the hint as ever: it's to move)
     }
+    if (!cine && cp.held.length) for (const say of cp.held.splice(0)) toast(say);
     const by = canHaulWreck();
     if (by && !cp.byWreck) toast('By the old wreck: Space to haul up its treasure');
     cp.byWreck = by;

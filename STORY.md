@@ -129,7 +129,7 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    onto the sea beyond it, never seen (nothing signposts it; only, sighting the checkpoint, "An
    imperial checkpoint... I wonder if there's another way round"); beyond it an old wreck whose
    treasure is hauled up by Treasure Haul, in sight from the checkpoint's side but a wind dead
-   against her there, so the locks are the way in to it; a bribe comes later. The turret near the den that came first is gone: the checkpoint is "the evolution of
+   against her there, so the locks are the way in to it; a bribe comes later. Its commander, Dignity, peers down from its gate: the first time you sail up, a little cutscene, and her monkey Bella fires the warning shot from one of its guns. The turret near the den that came first is gone: the checkpoint is "the evolution of
    it"). Up at the top of the locks, down an arm off the clifftop canal the locks don't lead you
    along, is a hidden cove, an Easter egg you find by wandering off, an old bilge pump on its
    sand (for later: flooding Dalnoth out). The cove is the first step of a journey that grows (▶
