@@ -193,6 +193,12 @@ the site (`.assetsignore` skips `*.md`).
   on the gun (chipped stone, a scorched and dented barrel, a battlement knocked off, smoking more
   as it's worse), and the toasts that count the hits ("2 more to wreck it") go.
 
+- **Which way on from a lock (10 Nov):** "The lock's very confusing. Like it just looks like you're
+  staring at a cliff once you go through the first run. There's no indication that you have to
+  turn right." Out of a lock the way on must be plain to see: she comes out facing the canal, or
+  the canal's water, banks and the next lock's gates are in view ahead and lead the eye round the
+  turn, never a blank cliff.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
