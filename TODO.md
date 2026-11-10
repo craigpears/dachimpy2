@@ -74,7 +74,11 @@ the site (`.assetsignore` skips `*.md`).
   module of its own to reuse later (the foraging island), with the capybara as the container
   stuck high on the lagoon's bank in reeds, roots and mud; cleared down off the board's foot it
   splashes into the water and swims to her. The capybara is called Umami (the user, 10 Nov: "for
-  fun ... since he requested it"). The crane being built only for
+  fun ... since he requested it"). Tried on the test page (10 Nov): "Looks good"; go ahead and wire
+  it in. Two fixes: never stuck ("as long as we've got enough pieces so that you don't get stuck ...
+  as long as you can get through eventually if you make a mistake"), and his going off ("a really
+  weird animation of the capybara going off ... it wasn't just the animal itself. It was some
+  background pieces got caught up in it": only Umami should leave, the bank stays). The crane being built only for
   the session is fine for a proof of concept (a refresh starts afresh).
 
 - **The puzzles' pieces checked against the real ones (10 Nov):** "the last few puzzles, the
