@@ -86,6 +86,9 @@ in time the den becomes the thing itself (TODO.md, "Split the den off").
   drawn from their pirate pages, with affection (Dalnoth, a bit of a drunk; Dignity, the imperial
   checkpoint's commander). Check the portrait before drawing them: a first guess "always seems to
   be so far off". Each is just a look from the same wardrobe as yours, so you can dress as them.
+  Their familiars are characters too, and do things in the scenes (the user, 10 Nov: "We've got
+  to get these familiars really involved"): Dignity's lavender monkey, Bella, fires her warning
+  shot.
 
 ## The story so far, and where it goes
 
