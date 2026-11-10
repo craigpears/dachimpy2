@@ -116,6 +116,13 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 
 Unlisted for now: reachable only by its URL until the user says to put it in the nav.
 
+- **A puzzle's pieces look like the real ones (10 Nov).** The user: "the last few puzzles, the
+  graphics have been placeholders rather than matching the Puzzle Pirate pieces, so use the actual
+  Puzzle Pirate page." Every Puzzle Pirates puzzle in the den draws its pieces after the real ones
+  on its YPPedia page (colour, shape and the markings that tell them apart at a glance), in the
+  den's 3D style, as the gun tower is "instantly recognisable as Gunnery". Check the finished
+  board side by side with YPPedia's pictures before calling it done. No placeholder tiles.
+
 - **A puzzle game, not an action game.** The raiders are there for a bit of interest and a bit of
   pressure, so you can't ignore things altogether; the emphasis is always on wanting to finish the
   puzzle in front of you (the next section to build, the next Gunnery load). It mustn't be a

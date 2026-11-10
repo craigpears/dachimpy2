@@ -152,6 +152,12 @@ the site (`.assetsignore` skips `*.md`).
   its wreck and the rescued animal, branches off after the second or third lock, off the track the
   locks lead you along, "almost more like an Easter egg" you find by wandering off.
 
+- **The puzzles' pieces checked against the real ones (10 Nov):** "the last few puzzles, the
+  graphics have been placeholders rather than matching the Puzzle Pirate pieces". Compare each
+  puzzle already in the den (Treasure Haul above all, and Bilge, Swordfight and Gunnery) with its
+  YPPedia page's pictures, and redraw any piece that doesn't read as the real one (RULES.md, "A
+  puzzle's pieces look like the real ones").
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
