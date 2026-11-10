@@ -259,34 +259,83 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **The wind, and her oars (a first go, 10 Nov).** The user (9 Nov): "try it. We'll see how it
     feels, whether it's overcomplicated or not." The wind can drop, and a ship that's all sails is
     "dead in the water until the wind picks back up again"; under sail you "can't go against the
-    wind"; oars keep her moving either way, slower than a good wind, but never stuck. Not "just
-    going faster". So:
-    - **The wind** blows one of the board's four ways, a good wind, light airs or a calm. A good
-      wind lasts 35 to 55 seconds, then mostly drops to light airs (sometimes it shifts a quarter
-      and blows on instead); light airs last 9 to 14 seconds and die to a calm about half the time,
-      otherwise freshen; a calm lasts 8 to 14 seconds and comes back as light airs, often from a
-      new way, which freshen. She puts out in a good wind blowing across the cove from the left.
-      Shown as faint streaks drifting over the water the way it blows (none in a calm), her flag
-      streaming downwind (limp in a calm), her sails full, slack or hanging, and on the sailing bar
-      at the left: an arrow the way it blows (turned with the view) and "Good wind", "Light airs"
-      or "Calm". A toast as it drops, picks up or shifts.
-    - **Under sail** a move takes 0.7 seconds in a good wind and 1.6 in light airs (the pauses and
-      breather as ever). In a calm she can't make way: the turn waits ("Becalmed"). She never
-      makes a square against the wind: a move that would is "in irons", she makes no way, a turn
-      swinging her head round where she is (as a blocked turn does). Becalmed, she's fair game for
-      the turret.
-    - **The oars:** O, or the button at the right of the sailing bar, runs them out or ships them.
-      Rowing, a move takes 1.15 seconds whatever the wind, any way; her sails are brailed up and
-      two long sweeps a side stroke from her gunwales. A turn under way finishes at the pace it
-      began.
-    - **The pilot** plans by the clock for how she's rigged: under sail, by the wind there is
-      (never a square against it); at the oars, any way. The pin goes where you drop it, wind or
-      no wind. A pin the wind won't let her sail to at all: the pilot runs the oars out ("out
-      oars!"), rows there, and ships them again when she arrives; ship them yourself on the way
-      and it leaves them be, and she waits for the wind to shift. It only ever runs them out
-      between turns, so it never dithers. In a calm it waits, rather than rowing for you: row or
-      wait is your call. The trade winds are currents of their own and sweep her on whatever the
-      weather. Rules: `src/den-wind.ts`.
+    wind"; oars keep her moving either way, never stuck. Not "just going faster". Made plainer the
+    same day (the user: "I like the animation and some of the idea, but it's very confusing"):
+    - **The wind** blows one of the board's four ways, a good wind, light airs or a calm, and lasts
+      a good while ("it changes quite quickly"): a good wind 2 to 3 minutes, then mostly drops to
+      light airs (sometimes it shifts a quarter and blows on instead); light airs last 20 to 30
+      seconds and die to a calm about half the time, otherwise freshen; a calm lasts 15 to 25
+      seconds and comes back as light airs, often from a new way, which freshen. Every change is
+      seen coming: 8 seconds before it, a toast ("The wind's easing: it'll drop soon", "The wind's
+      backing round: soon it'll blow from the left"), and the streaks and her flag ease toward
+      what's coming. She puts out in a good wind blowing across the cove from the left.
+    - **Easy to read at a glance:** two big white arrows on the water either side of her, drifting
+      the way it blows (fainter in light airs, gone in a calm, and gone while she rows); faint
+      streaks over the water; her flag streaming downwind (limp in a calm); her sails full, slack or
+      hanging; and on the sailing bar at the left, an arrow the way it blows (turned with the view),
+      how strong ("Good wind", "Light airs", "Calm") and how she lies to it ("behind her: fastest",
+      "across her: slower", "dead ahead: in irons").
+    - **Under sail, how she lies to it is what matters** ("I'm not seeing like a big speed
+      difference"): with the wind behind her a move takes 0.4 seconds, across it 1.2 (three times
+      as long), and in light airs everything takes 2.2 times as long; a turn takes the mean of its
+      two headings. The pause after a quick move is shorter too (the pause scales with the square of
+      the move's time, full after a second's move), so running before the wind a turn's worth takes
+      well under half as long as across it. In a calm she can't make way: the turn waits
+      ("Becalmed"), and the token on the bar isn't lit while she waits. She never makes a square
+      against the wind: a move that would is "in irons", she makes no way, a turn swinging her head
+      round where she is (as a blocked turn does), and it shows on her: her sails shake and flog
+      while it lasts, and it's said ("In irons! Her bow's into the wind: she makes no way"). Becalmed,
+      she's fair game for the turret.
+    - **The pilot** plans by the clock, under sail by the wind there is (never a square against it,
+      and the quicker headings preferred). The pin goes where you drop it, wind or no wind. A pin
+      the wind won't let her sail to at all, she waits, and says so once ("She can't sail to the
+      pin: it's dead against the wind. O: out oars and row her there, or wait for it to shift"); the
+      pilot never runs the oars out for her any more (the user: "it's coming up a pop-up saying you
+      can't sail there. Well, it is letting me"). Only say she can't when she really won't. The
+      trade winds are currents of their own and sweep her on whatever the weather. Rules:
+      `src/den-wind.ts`.
+    - **The oars:** O, or the button at the right of the sailing bar, runs them out; while they're
+      out she's rowed by the port-and-starboard board, below. Esc (or O) ships them again, and she
+      sails on to the pin, if there is one, by the wind. Running them out or shipping them, the rest
+      of a turn under way goes after the move she's on (it was planned for the other rig).
+  - **Rowing by port and starboard (10 Nov).** The user, on IDEAS.md's "Port and starboard":
+    "absolutely hilarious ... not obviously like a brand new puzzle, but it's certainly a nice twist
+    on bilging ... Do that." Solo for now: "a full bilge board, obviously with the rowing kind of
+    graphics on each side".
+    - **The board:** the real Bilge board (its every rule; src/rowing.ts) laid along her deck while
+      her oars are out, its top row toward her bow, and you look down it from over her stern, the sea
+      ahead beyond it, the camera turning with her so the board stays put. Its left half is her port
+      oars and its right half starboard: port's planking washed red and starboard's green, a dark
+      kingplank down the middle, PORT and STARBOARD painted across the bow end, a rower in a striped
+      shirt (red for port, green for starboard) on each gunwale working that side's two sweeps. Its
+      three water rows, at the stern end, never move: the sea she sits in (crabs still come up out of
+      it). While you row her mast, sails and guns are struck out of the way (the guns run in: Q and E
+      say so), and the sailing bar's hidden, as for the deck patch. Arrows or the mouse move the
+      cursor, Space or a click swaps.
+    - **What it rows:** what a move clears pulls that side's oars, as hard as the move's worth (the
+      bilging guides' reckoning: a three 1, a Good 1.5 up to a Bingo 8, a Sea Donkey 12 and a Vegas
+      15; a chain's link 0.5, a crab 2), shared by where its pieces were. Pull on one side waits up to
+      3 seconds for the other: what's matched drives her ahead, what's still unmatched turns her
+      (harder on port swings her bows to starboard, as at the oars), near-even counting as straight.
+      Every 3 of pull is a square: forward, left or right, as on Battle Navigation's tokens. So even
+      work rows her straight, and one-sided work turns her ("you just end up rowing in circles"). A
+      half glows its colour while its pull waits for the other side, and flashes as it pulls.
+    - **How quick:** she rows the squares straight away, no breather between turns. One square on
+      its own takes 1.15 seconds; a pile of them waiting goes quicker, each taking 1.15 seconds over
+      the size of the pile, as quick as the trade winds at most (0.28 seconds a square), the whole
+      pile at the pace of its biggest. No cap on how many squares a big clear is worth ("that's the
+      point of Vegas"): a Vegas shared across both sides is five squares straight ahead at the trade
+      winds' pace, "she's flying!"; a Vegas on one side spins her round in circles.
+    - **The rowers** stroke as hard as their side's been pulling lately (fading over a couple of
+      seconds): steady while she's under way, and "like crazy" after a big clear on that side (4 or
+      more of pull: a two-line combo on one side, or a Bingo shared), bouncing on the gunwale, their
+      sweeps thrashing and throwing spray, and it's said ("The port rower's going like crazy!").
+    - **Pins and the pilot:** the board is the steering while the oars are out, so the pilot doesn't
+      row for her. A pin stays where you dropped it, a buoy to row for, and goes when she gets there;
+      the prompt says which way it lies and which side to pull harder ("the pin's to starboard: pull
+      harder on port"). Holed, the board gives way to the deck patch; at the lock, to the quay's
+      Bilge; and comes back after. To haul the turret's chest, ship the oars first. Rules:
+      `src/den-row.ts`; the board in the world: `js/den/rowing.js`.
 - **A quick siege to start, then calm (9 Nov).** The first three waves come as they always have,
   each counting down after the last. Beat the third and their captain calls it off ("We'll be
   back!") and the ship sails out of the cove, its cannon with it. The den's quiet after that: no

@@ -29,7 +29,7 @@
     body.sailing .toolbox, body.sailing .boards, body.sailing .keys, body.sailing .intro, body.sailing .gunhelp, body.sailing #labels, body.sailing .banner { display: none; }
     body.sailing.patching .toolbox { display: flex; }   /* patching her deck: the same tray as ashore, a bit bigger */
     body.sailing.patching .tool { width: 84px; height: 86px; font-size: 13px; }
-    body.sailing.patching .sailhud, body.sailing.quay .sailhud, body.hauling .sailhud { display: none; }   /* (nothing but the puzzle while you patch her, bilge at the lock, or haul) */
+    body.sailing.patching .sailhud, body.sailing.quay .sailhud, body.hauling .sailhud, body.sailing.rowing .sailhud { display: none; }   /* (nothing but the puzzle while you patch her, bilge at the lock, haul, or row) */
     .sailhud .turns { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; align-items: center; }
     .sailhud .gun { position: relative; overflow: hidden; height: 34px; padding: 0 10px; border-radius: 6px; border: 1px solid #6b4e32; background: #2a1c11; display: flex; gap: 6px; align-items: center; font: 700 14px 'Alegreya Sans'; color: var(--dim); }
     .sailhud .gun.ready { color: #f3ecdc; border-color: var(--gold); }
@@ -41,6 +41,8 @@
     .sailhud .wind.s2 { border-color: #9fd4ec; }
     .sailhud .wind.s1 b { color: #6f97a6; }
     .sailhud .wind.s0 { color: var(--dim); }
+    .sailhud .wind span { display: flex; flex-direction: column; line-height: 1.05; }
+    .sailhud .wind i { font: 600 11px 'Alegreya Sans'; font-style: normal; color: #cfe6ee; }
     .sailhud .oars { pointer-events: auto; cursor: pointer; height: 34px; padding: 0 10px; border-radius: 6px; border: 1px solid #6b4e32; background: #2a1c11; display: flex; gap: 6px; align-items: center; font: 700 14px 'Alegreya Sans'; color: var(--dim); }
     .sailhud .oars.on { color: #f3ecdc; border-color: var(--gold); background: #4a3420; }
     .sailhud .oars kbd { font: 700 13px 'Alegreya Sans'; color: var(--ink); background: #3b2a1b; border: 1px solid #6b4e32; border-radius: 4px; padding: 0 5px; }

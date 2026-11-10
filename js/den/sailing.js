@@ -16,6 +16,7 @@ import { deco, decoMode } from './menus.js';
 import { sailView, patchView, setPaused, denLets } from '../den.js';
 import { WIND } from '../den-wind.js';
 import { windTick, windSay, windHud, oarsHud, windSig, rowToggle } from './wind.js';
+import { rowing, rowShut, rowKey, rowHover, rowSwap, rowTick, rowPrompt } from './rowing.js';
 
 // The old sloop's at anchor in the cove from the moment the siege is over, while their ship makes
 // sail in the background (the user, 9 Nov: "I'm sat here quite a while waiting for his sloop to sail
@@ -57,6 +58,8 @@ export function sailReset() {
   sail.shots = [];
   sail.said = {};
   holdShut();
+  rowShut();
+  rowing.board = null;
   if (haul.on) haulShut();
   sail.salvage = null;
   if (patch.on) patchShut();
@@ -121,6 +124,7 @@ function seaCellAt(x, y) {
 export function sailClick(x, y) {
   if (patch.on) { patch.keyAt = null; patchHover(x, y); if (patch.hand) patchPlace(); return; }
   if (hold.mode) { holdHover(x, y); holdSwap(); return; }
+  if (rowing.on) { rowHover(x, y); rowSwap(); return; }
   const at = seaCellAt(x, y);
   if (!at) return;
   if (!sail.helm.drop(at.c, at.r)) toast('She\'s there already', true);
@@ -129,11 +133,15 @@ export function sailClick(x, y) {
 export function sailHover(x, y) {
   if (patch.on) { patchHover(x, y); sail.hover = null; return; }
   if (hold.mode) { holdHover(x, y); sail.hover = null; return; }
+  if (rowing.on) { rowHover(x, y); sail.hover = null; return; }
   const at = seaCellAt(x, y);
   sail.hover = at && sail.sea.open(Math.round(at.c), Math.round(at.r)) ? [Math.round(at.c), Math.round(at.r)] : null;
 }
 export function sailKey(key) {
   if (hold.mode && holdKey(key)) return;
+  // Rowing: the board's keys; Esc or O ships the oars.
+  if (rowing.on && (key === 'escape' || key === 'o')) return rowToggle();
+  if (rowing.on && rowKey(key)) return;
   const m = { w: 'F', arrowup: 'F', a: 'L', arrowleft: 'L', d: 'R', arrowright: 'R' }[key];
   if (m) { if (!sail.helm.put(m)) toast('That\'s a turn\'s worth put in already', true); return; }
   if (key === 'q' || key === 'e') return sailFire(key === 'q' ? 'L' : 'R');
@@ -153,6 +161,7 @@ export function sailPrompt() {
   if (nearSloop()) return 'Space: board the old sloop';
   if (!sail.on) return '';
   if (haul.on) return haulPrompt();
+  if (rowing.on) return rowPrompt();
   const h = sail.helm, held = h.held();
   if (held === 'daze') {
     const hd = patch.hand, f = hd && patch.hole?.fit(hd.cells, patch.r, patch.c);
@@ -166,7 +175,7 @@ export function sailPrompt() {
   if (held === 'calm') return 'Becalmed: dead in the water till the wind picks up · O: out oars';
   if (atHome() && h.slot < 0 && !h.next().length) return 'At her mooring · Space: go ashore · click the sea to drop a pin';
   if (canHaulTurret()) return 'The turret\'s chest · Space: haul it aboard (Treasure Haul) · click the sea to drop a pin';
-  if (h.slot < 0 && h.headwind()) return 'She can\'t sail there against the wind · O: out oars, or wait for it to shift';
+  if (h.slot < 0 && h.headwind()) return 'She can\'t sail to the pin: it\'s dead against the wind · O: out oars and row her there, or wait for it to shift';
   if (h.pin) return h.oars ? 'Rowing to the pin' : 'Under way to the pin';
   if (h.slot >= 0) return 'Under way';
   return 'Click the sea to drop a pin, or put in moves with W A D · Q E: fire';
@@ -176,14 +185,15 @@ function sailHud() {
   const h = sail.helm, mineN = h.mine.length;
   const now = h.slot >= 0 ? h.turn : [], next = h.next();
   const load = (side) => Math.round(sail.guns.loaded(side) * 20);
-  const sig = `${now.join('')}|${h.slot}|${next.join('')}|${mineN}|${load('L')}|${load('R')}|${windSig()}`;
+  const lit = h.lit();   // (lit only while it's being sailed: not while she waits, becalmed, say)
+  const sig = `${now.join('')}|${lit}|${h.slot}|${next.join('')}|${mineN}|${load('L')}|${load('R')}|${windSig()}`;
   if (sig === sail.hudSig) return;
   sail.hudSig = sig;
   const toks = (list, cls) => Array.from({ length: SAIL.SLOTS }, (_, i) => (list[i] ? `<b class="tok ${cls(i)}">${TOK[list[i]]}</b>` : '<b class="tok empty"></b>')).join('');
   // Her guns either side of the tokens, port on the left: lit when loaded, filling as they load.
   const gun = (side, k) => `<div class="gun${sail.guns.ready(side) ? ' ready' : ''}"><kbd>${k}</kbd>${side === 'L' ? 'Port' : 'Starboard'}<i style="width:${load(side) * 5}%"></i></div>`;
   // The wind, at the left end, and the oars at the right (wind.js).
-  $('sailhud').innerHTML = `<div class="turns">${windHud()}${gun('L', 'Q')}<div class="turn"><span>This turn</span>${toks(now, (i) => (i < h.slot ? 'done' : i === h.slot ? 'now' : ''))}</div>`
+  $('sailhud').innerHTML = `<div class="turns">${windHud()}${gun('L', 'Q')}<div class="turn"><span>This turn</span>${toks(now, (i) => (i < h.slot ? 'done' : i === lit ? 'now' : ''))}</div>`
     + `<div class="turn"><span>Next</span>${toks(next, (i) => (i < mineN ? 'mine' : ''))}</div>${gun('R', 'E')}${oarsHud()}</div>`
     + '<div class="help">Click the sea: drop a pin · <kbd>W</kbd> <kbd>A</kbd> <kbd>D</kbd>: forward, left, right yourself · <kbd>S</kbd>: take one back · <kbd>Q</kbd> <kbd>E</kbd>: fire port, starboard · <kbd>O</kbd>: oars out or in · <kbd>Esc</kbd>: pull up the pin · <kbd>H</kbd>: head home · wheel: zoom</div>';
 }
@@ -259,6 +269,7 @@ export function sailTick(dt) {
   }
   holdTick(dt);
   patchTick(dt);
+  rowTick(dt, haul.on);
   // The turret's shots on their way; its gun turned on her; smoking while it's quiet.
   for (const v of sail.shots) {
     v.t += dt;
@@ -330,7 +341,7 @@ export function sailTick(dt) {
   if (sail.on) {
     // You, at the tiller, facing her bow (up on her stern, beside it, while the board's on her deck,
     // so you're not stood on it, nor between it and the camera).
-    const deck = patch.on, at = sail.g.localToWorld(deck ? V3(-1.7, SLOOP_DECK + 0.35, 0.45) : V3(-1.15, SLOOP_DECK, 0)), yaw = sail.g.rotation.y;
+    const deck = patch.on || rowing.on, at = sail.g.localToWorld(deck ? V3(-1.7, SLOOP_DECK + 0.35, 0.45) : V3(-1.15, SLOOP_DECK, 0)), yaw = sail.g.rotation.y;
     pirate.x = at.x; pirate.z = at.z;
     pirate.g.position.copy(at);
     pirate.g.rotation.set(0, Math.atan2(Math.cos(yaw), -Math.sin(yaw)), 0);

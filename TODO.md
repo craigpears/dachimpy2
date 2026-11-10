@@ -102,6 +102,14 @@ the site (`.assetsignore` skips `*.md`).
   pops swing it forward, bigger pops further; the two oars in time keep her straight. Solo, one
   board whose colours belong to a side. A little boat showing where she goes.
 
+- **Test mirror strokes on a page of its own (10 Nov, technical):** "definitely test that ... put a
+  test, let's just brainstorm and test the basic idea." IDEAS.md's "Mirror strokes": two Bilge
+  boards, port and starboard, every swap made in mirror on the other. A plain test page outside
+  the den to play it, with a little boat showing where she goes (in circles, when a cascade runs
+  away with one side: "that would be hilarious. Frustrating but funny"), and bots (random, greedy,
+  looking two moves ahead) to see whether better play goes much further, as a check on the skill
+  curve.
+
 - **Rowing by port and starboard (10 Nov):** the user loves IDEAS.md's "Port and starboard":
   "absolutely hilarious ... not obviously like a brand new puzzle, but it's certainly a nice twist
   on bilging ... Do that. Absolutely do that." Her oars are rowed by a Bilge board split down the

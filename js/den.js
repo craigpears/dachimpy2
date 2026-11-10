@@ -26,6 +26,7 @@ import { seaX, seaZ, sail } from './den/sea.js';
 import { nearSloop, board, ashore, sailReset, sailClick, sailHover, sailKey, sailTick } from './den/sailing.js';
 import { hold, holdSwap, patch, deckHoleShape, patchTurn, patchPlace, patchKey } from './den/sea-puzzles.js';
 import { haul, haulKey, haulHover, haulSwap, haulTick, haulCam, haulTurret } from './den/treasure.js';
+import { rowing, rowCam, rowPull } from './den/rowing.js';
 import { net, online, guest, isHost, send, updateMates, sendMe, snapshot, followRaider, sendSync, onNet, joinCrew, leaveCrew } from './den/crew.js';
 import { deco, decoMode, decoMove, decoClick, decoTurn, dress, dressPanel, dressRows, lookChanged, applyDen, buildAll, tileFor, fillFrame, cheats, skipTo, cheatPanel } from './den/menus.js';
 
@@ -261,7 +262,7 @@ export let sailView = 0, holdView = 0, haulView = 0;
 export const denLets = {
   get sailView() { return sailView; }, set sailView(v) { sailView = v; },
 };
-export let patchView = 0;
+export let patchView = 0, rowView = 0;
 /* The Carpentry view's camera: straight on to the board, close enough to puzzle in. On the wall, a
    stretch of it round the piece, its whole height; on a frame on the floor, looking down on it from
    the side its rows run from; on the stairs, square on to their face. */
@@ -568,6 +569,19 @@ function update(dt) {
     d = Math.atan2(Math.sin(d), Math.cos(d));
     yaw = y0 + d * patchView;
   }
+  // Rowing: from over her stern down along the board on her deck, the sea ahead beyond it, turned
+  // with her as she turns (js/den/rowing.js).
+  rowView += ((rowing.on ? 1 : 0) - rowView) * Math.min(1, dt * 3);
+  if (rowView > 0.001 && rowing.group?.parent) {
+    const rc = rowCam();
+    look.lerp(rc.look, rowView);
+    dist += (rc.dist * view.zoom - dist) * rowView;
+    tilt += (rc.tilt - tilt) * rowView;
+    const y0 = Math.atan2(Math.sin(yaw), Math.cos(yaw));
+    let d = rc.yaw - y0;
+    d = Math.atan2(Math.sin(d), Math.cos(d));
+    yaw = y0 + d * rowView;
+  }
   // Treasure Haul: down onto the board from beyond it, looking back toward whoever's hauling.
   haulView += ((haul.on ? 1 : 0) - haulView) * Math.min(1, dt * 3);
   if (haulView > 0.001 && haul.group?.parent) {
@@ -593,7 +607,7 @@ function update(dt) {
     yaw = y0 + d * cineView;
   }
   v3.set(Math.sin(yaw) * Math.cos(tilt), Math.sin(tilt), Math.cos(yaw) * Math.cos(tilt)).multiplyScalar(dist).add(look);
-  camAt.lerp(v3, Math.min(1, dt * 3));
+  camAt.lerp(v3, Math.min(1, dt * (3 + 9 * rowView)));   // (held close while rowing: she can fly along)
   camera.position.copy(camAt);
   // The fog starts beyond what you're looking at, so a high or zoomed-out view doesn't go murky.
   const camD = camAt.distanceTo(camLook);
@@ -602,7 +616,7 @@ function update(dt) {
   // Looking down from the wall you see more of the floor the torches don't reach: brighten it up.
   renderer.toneMappingExposure = 1 + 0.45 * u;
   if (shake > 0) { camera.position.x += (Math.random() - 0.5) * shake * 0.5; camera.position.y += (Math.random() - 0.5) * shake * 0.5; worldLets.shake = Math.max(0, shake - dt); }
-  camLook.lerp(look, Math.min(1, dt * 3));
+  camLook.lerp(look, Math.min(1, dt * (3 + 9 * rowView)));
   camera.lookAt(camLook);
   updateMates(dt);
   waveFlags(dt);
@@ -693,7 +707,7 @@ if (['all', 'gundeck'].includes(new URLSearchParams(location.search).get('try'))
 requestAnimationFrame(frame);
 
 // For poking at it from the console.
-window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { worldLets.myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, swordReward, swordBreak, lumber, toLumber, repairAll, newGame, raiders, G, get carry() { return carry; }, get patch() { return patch; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
+window.den = { rowing, rowPull, tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { worldLets.myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, swordReward, swordBreak, lumber, toLumber, repairAll, newGame, raiders, G, get carry() { return carry; }, get patch() { return patch; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
   bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, hold, holdSwap, board, ashore, patch, patchKey, patchPlace, deckHoleShape, haul, haulSwap, haulTurret,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };
