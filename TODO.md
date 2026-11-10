@@ -174,10 +174,6 @@ the site (`.assetsignore` skips `*.md`).
     colour it wants. A wave and a ship's sails behind the board. A whole board of interlocked
     staircases, pairs straddling columns everywhere, is what a run of Vegases looks like.
 
-- **Laggy running the checkpoint's gauntlet (10 Nov):** "It goes a bit laggy. If you just try
-  running the gauntlet and getting through the gate at the moment." Find what's slow there (its
-  guns' shots, splashes, Dignity's lines, the wind) and make it smooth.
-
 - **Something to show people, tonight's goal (10 Nov):** once we reach a stopping point, likely after
   Kikkit's sailing quest: "some kind of advertising material ... the fully built den, the imperial
   checkpoint, the sailing around, the rowing puzzle ... just marketing material to show people what

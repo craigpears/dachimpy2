@@ -119,6 +119,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **Your pirate stays where you turn them (10 Nov).** In the pirate maker your pirate turns slowly
   on their own, but once you drag them round they stay put (the user: "it keeps rotating. I can't
   make it stay. That's really frustrating ... if you drag it, it should stick"), till it's next opened.
+- **No stutter when something's first drawn (10 Nov).** Running the checkpoint's gauntlet "goes a bit
+  laggy": the first shot, splash and hit each froze the game a tenth of a second while its shader was
+  built. So shaders are built ahead in the background (`warm()` in world.js, called when a place is
+  built, and for anything made before it's shown), the driver isn't asked for each shader's error
+  log, and shots and splashes share one shape and material, freed or reused, never made afresh.
 - **Only the cheats asked for (10 Nov).** Of "Copy the deal" and "Real pirates on the beach": "What
   on earth is this ...?", "I never asked for that cheat." The cheats menu holds only what the
   user asked for (the stages, and skips to get to a scene). A tool for checking my own work stays
