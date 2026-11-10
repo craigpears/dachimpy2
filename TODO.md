@@ -142,6 +142,12 @@ the site (`.assetsignore` skips `*.md`).
   checked on YPPedia, as a module knowing nothing of the den, tested and with bots; its Vegas (or
   whatever its real big combo is) sends her a long run forward in one go (IDEAS.md, "Kikkit's
   penguin").
+  **Playable whenever you like at sea (10 Nov):** "same principle with sailing as well. You should
+  be able to jump into the sailing puzzle whenever you want to, and that gives you, like the
+  doubles ... it allows you to basically go really, really fast, and like in one go, like a trade
+  winds, kind of, just jump multiple tiles". Like Carpentry for damage, Bilge for the bilge and O
+  for the oars: a key takes you into it anywhere at sea, and each combo sends her its run of
+  squares in one go, as the trade winds carry her. Not only at Kikkit's whirlpools.
 
 - **Sailing, as the user remembers playing it (10 Nov):** the module (`src/sailing.ts`, built 10
   Nov) filled its gaps with guesses; the user's memory of the real game:
