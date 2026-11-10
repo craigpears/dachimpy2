@@ -194,6 +194,13 @@ the site (`.assetsignore` skips `*.md`).
   whole thing through: "building the platform and the stairs and things in the base is really
   difficult now because you've got no way of wasting pieces. I mean, I can still kind of put stuff
   on the wall, but ... originally it was the balance, the key was that you could throw things at
+- **Turning on the spot under oars (10 Nov):** a friend rowed in from the checkpoint's side and
+  on to the capybara: "I think it's quite fun. I'm finding turning left [and] right is fine, but if
+  you actually want to like fully spin on the spot ... I ended up just to the right of the lock.
+  And I can't really spin to get to the left. Like, I can't just keep spamming the port until it
+  turns 90." Under oars every turn is a sailing turn, a square forward and round, so she can't
+  turn where she is. Pulling hard on one side should turn her round where she sits, a quarter at
+  a time, as oars can, so you can face her the way you want in a tight spot.
   the enemies, and that was how we got rid of things. So maybe we do need the occasional attacker
   or something, I don't know, if you're in the base, so that we keep that wastage up." Once the
   opening siege is over, a piece that won't fit anywhere has nowhere to go. The user's thought: now
