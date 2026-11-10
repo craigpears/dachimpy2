@@ -141,9 +141,12 @@ the site (`.assetsignore` skips `*.md`).
     of a colour with the third hanging over to the side, so each clear drops the overhang onto the
     next. The bots never made one, so either they don't know the staircase or a rule's off: a bot
     that builds staircases should make Vegases, and a test should show one built that way.
-  - **Platforms break first, then pieces:** "that's, I think, how you get the extra", two chains
-    going at once, one waiting on the other: a platform clears, what falls sets off a clear,
-    which drops onto another platform, and only then do the plain lines go.
+  - **Platforms break last:** at first "platforms break first, then pieces", then, looking at the
+    screenshot, "it's the opposite of what I said, where the platforms break last. So it waits to
+    do kind of the platform break." The line clears chain on (down the left-hand side in the
+    screenshot, a Vegas 5 or 6 from a competition) and a filled platform only clears once they've
+    run out: "it gets like a Vegas before it's even cleared the first platform and then kind of
+    chains down from there."
   - **Its look, from the user's screenshot of "a huge multi Vegas" (10 Nov):** 8 wide, about 16
     tall; the next pair at the top left; two markers over the middle columns where pairs come in.
     Three balls: yellow knotted rope, white swirled sail, blue wavy water; a pair's halves joined by
