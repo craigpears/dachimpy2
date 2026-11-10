@@ -110,7 +110,10 @@ the site (`.assetsignore` skips `*.md`).
   her down into somewhere else: "there should be a different kind of section next to it. So I
   don't want ... the lock the same thing as the crane." Not the lock's hidden cove, then, but a
   place of its own: a clifftop lagoon (the user, 9 Nov), a still lake up on the headland with an
-  old wreck sunk in it, where Treasure Haul brings up the treasure.
+  old wreck sunk in it, where Treasure Haul brings up the treasure. Rethought (10 Nov): the
+  crane might be better as the way round an imperial checkpoint on the main shipping lane, up the
+  cliff to bypass its guns (IDEAS.md, "An imperial checkpoint"). Which it is: to pin down with the
+  user before it's built.
 
 - **Something worth finding in the hidden cove: treasure (9 Nov):** the canal and the cove "would
   be great, but ... it needs a point of interest in here, even if it's a little like treasure

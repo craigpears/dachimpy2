@@ -261,6 +261,17 @@ moving. It gives such a nostalgia." What's next:
   rollers, something to fell the trees, something to heave her (which puzzles, and how much of
   the chain of steps to keep: to shape with the user). A chain across a harbour on its own would
   be a good obstruction too, for this or for a raid on the captain's island.
+  **An imperial checkpoint, and the ways round it (10 Nov):** the main shipping lane runs
+  through a checkpoint, manned (to start with, just a couple of the gun turrets the sea already
+  has): "obviously ... you're pirates, so they're not going to be very friendly to you". The
+  choice is presented to you: run it, go round, or build a crane to go up the cliff and bypass
+  it. That's where the crane makes sense ("I don't really see how having a lock would make
+  sense" there). The snag the user sees: "you're only in a sloop at the moment", and a sloop can
+  always slip round by the little side ways, so the choice only bites once bigger ships can't
+  ("it's just a bit weird because, well, you haven't got any bigger ships yet, so you are always
+  able to take these little nifty routes"). Goes with "Ship types with real trade-offs" and
+  "Shallow and deep water". (Whether the secret cove stays as well, and how a sloop's choice
+  means something before bigger ships come: to shape with the user.)
 - **Gunnery at sea, faster than Puzzle Pirates, on timing (9 Nov).** In Puzzle Pirates a round
   of Battle Navigation plays every 35 seconds or so, in four slots, and you know just where a ship
   coming at you will move. The user would like it faster paced: load the guns (on a ship or the
