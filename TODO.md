@@ -177,6 +177,15 @@ the site (`.assetsignore` skips `*.md`).
   wind"). Only there: "it should only really apply to this little ... area, not everywhere,
   because otherwise it's irritating."
 
+- **The way to the locks: found, not shown (10 Nov):** "the hint to the canal is only supposed to
+  appear once you get right next to the Imperial checkpoint ... it should be a bit more out of
+  sight, really, because it's supposed to be more of an Easter egg. It shouldn't be like right
+  there for you to see. You should have to sail around to find it a bit ... even if it's just a
+  few, like, slightly out of the main viewport, doesn't need to be far." So the junction no longer
+  points out the canal, and its mouth is tucked a little away, just out of view from the trade
+  wind's run. The only hint comes at the end of the run, where she sees the checkpoint: "An
+  imperial checkpoint... I wonder if there's another way round."
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
