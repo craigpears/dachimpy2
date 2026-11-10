@@ -178,6 +178,21 @@ the site (`.assetsignore` skips `*.md`).
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
 
+- **One Carpentry, so a piece you've placed can be picked up everywhere (10 Nov):** building the
+  crane: "if I botch on the building the crane, like, is this not supposed to be like the same?
+  That's what I mean by there should be one modular mechanic. So the idea that you can pick up a
+  piece like that you've just placed should be in that core module. So why can I not do it here
+  when I can do it in the other areas?" On the wall you click a piece in an unfinished frame to lift
+  it back into your hands; on the crane and her deck patch only Backspace takes the last one back.
+  Carpentry's frame (what's laid, fitting, lifting any piece back out, sawing, done) becomes one
+  module in src/, and the wall's frames, the deck patch and the crane all use it, with the same
+  keys and clicks everywhere: click a placed piece to pick it up, wherever you're building.
+- **Her guns in matching pairs (10 Nov):** "it really bugs me that the cannons are not aligned
+  with each other. Like, they should be just cannons on opposite sides of the ship, but in the same
+  slots each side. I don't know if it needs to make the ship a bit wider." Her guns stand in the
+  same slots on both sides, each port gun straight across from its starboard twin; widen her a
+  little if they'd crowd.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
