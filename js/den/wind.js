@@ -10,8 +10,11 @@
 // of her, drifting downwind, so the way it blows reads at a glance; on the bar, how she lies to it
 // (behind her, across, dead ahead); her sails shaking and flogging while she's in irons; and the
 // streaks and flag easing toward what's coming in the WARN seconds before a change.
+// Parked (10 Nov, the user: "I think it's the arrows getting in my way"): while WEATHER.parked
+// there are no arrows, no streaks and no wind on the bar, nothing's said of it, and her flag and
+// sails show a steady fair wind, the flag streaming aft whichever way she heads.
 import * as THREE from 'three';
-import { STRENGTH, WIND, pointOf } from '../den-wind.js';
+import { STRENGTH, WIND, WEATHER, pointOf } from '../den-wind.js';
 import { SAIL } from '../den-sail.js';
 import { scene, mesh, mat, woodTex, canvasTex, burst, toast, view } from './world.js';
 import { sail, seaX, seaZ, SLOOP_DECK } from './sea.js';
@@ -74,6 +77,7 @@ function arrows() {
 // How strong it looks: what it is, easing toward what's coming over the warning before a change.
 const OP = [0, 0.22, 0.45], FLAG = [-1.35, -0.45, 0];
 function looks(w, table) {
+  if (WEATHER.parked) return table[w.s];   // (a steady good wind: nothing coming)
   const u = Math.max(0, Math.min(1, 1 - w.left / WIND.WARN));
   return table[w.s] + (table[w.coming.s] - table[w.s]) * u;
 }
@@ -84,19 +88,19 @@ export function windTick(dt) {
   sail.streaks ||= streaks();
   sail.sweeps ||= sweeps(g);
   sail.arrows ||= arrows();
-  const S = sail.streaks, k = Math.min(1, dt * 1.5), t = performance.now() / 1000;
+  const P = WEATHER.parked, S = sail.streaks, k = Math.min(1, dt * 1.5), t = performance.now() / 1000;
   // The streaks: fainter and slower the lighter it blows, gone in a calm; turning with the wind.
   const want = Math.PI / 2 * -w.d;
   if (S.a === null) S.a = want;
   S.a += (Math.atan2(Math.sin(want - S.a), Math.cos(want - S.a))) * Math.min(1, dt * 1.2);
   S.m.rotation.y = S.a;
-  S.op += ((sail.on ? looks(w, OP) : 0) - S.op) * k;
+  S.op += ((sail.on && !P ? looks(w, OP) : 0) - S.op) * k;
   // The arrows either side of her, under sail (at the oars the wind's nothing to her).
   {
     const A = sail.arrows, wa = Math.atan2(DR[w.d], DC[w.d]);
     if (A.a === null) A.a = wa;
     A.a += Math.atan2(Math.sin(wa - A.a), Math.cos(wa - A.a)) * Math.min(1, dt * 2);
-    A.m.opacity += ((sail.on && !h.oars ? looks(w, [0, 0.3, 0.5]) : 0) - A.m.opacity) * k;
+    A.m.opacity += ((sail.on && !h.oars && !P ? looks(w, [0, 0.3, 0.5]) : 0) - A.m.opacity) * k;
     A.g.visible = A.m.opacity > 0.01;
     A.t = (A.t + dt * [0, 0.5, 1.3][w.s]) % 1;
     const fx = Math.cos(A.a), fz = -Math.sin(A.a), drift = (A.t - 0.5) * 3;
@@ -111,7 +115,7 @@ export function windTick(dt) {
   // Her flag streams downwind (limp in a calm): its pole's turned so the cloth points the way the
   // wind blows, in the world, whichever way she's heading.
   const fl = g.userData.rig[1], cloth = fl.children[2];
-  const yaw = Math.atan2(DR[w.d], DC[w.d]) - g.rotation.y;
+  const yaw = P ? 0 : Math.atan2(DR[w.d], DC[w.d]) - g.rotation.y;   // (parked, the wind's always behind her)
   fl.userData.yaw = (fl.userData.yaw ?? yaw) + Math.atan2(Math.sin(yaw - (fl.userData.yaw ?? yaw)), Math.cos(yaw - (fl.userData.yaw ?? yaw))) * Math.min(1, dt * 3);
   fl.rotation.y = fl.userData.yaw;
   cloth.rotation.z += (looks(w, FLAG) - cloth.rotation.z) * k;
@@ -158,6 +162,7 @@ export function windTick(dt) {
 // What the wind does, said as it happens (the sailing bar shows it all the while).
 export function windSay(e) {
   const h = sail.helm;
+  if (WEATHER.parked) return;   // (no weather to speak of; and parked, there's never a headwind or irons)
   // Said ahead of a change, so it's never a surprise (10 Nov: "it changes quite quickly").
   if (e.kind === 'warn') {
     if (e.s < e.was.s) return toast(e.s ? 'The wind\'s easing: it\'ll drop soon' : 'The wind\'s dying away: a calm\'s coming');
@@ -184,14 +189,14 @@ const POINT = { run: 'behind her: fastest', reach: 'across her: slower', into: '
 const heading = () => ((Math.round(sail.helm.now().a) % 4) + 4) % 4;
 export function windHud() {
   const w = sail.sea.breeze;
-  if (!w) return '';
+  if (!w || WEATHER.parked) return '';
   const deg = Math.round(w.d * 90 + view.yaw * 180 / Math.PI);
   const how = sail.helm.oars || !w.s ? '' : `<i>${POINT[pointOf(heading(), w.d)]}</i>`;
   return `<div class="wind s${w.s}" title="The wind: the way it blows, and how strong"><b style="transform:rotate(${deg}deg)">${w.s ? '↑' : '·'}</b><span>${STRENGTH[w.s]}${how}</span></div>`;
 }
 export const oarsHud = () => `<button class="oars${sail.helm.oars ? ' on' : ''}" id="oars-btn" title="Run out the oars, or ship them (O)"><kbd>O</kbd>${sail.helm.oars ? 'Rowing' : 'Oars'}</button>`;
-export const windSig = () => { const w = sail.sea.breeze; return w ? `${w.d}${w.s}${Math.round(view.yaw * 36)}${sail.helm.oars}${heading()}` : ''; };
+export const windSig = () => { const w = sail.sea.breeze; return WEATHER.parked ? `${sail.helm.oars}` : w ? `${w.d}${w.s}${Math.round(view.yaw * 36)}${sail.helm.oars}${heading()}` : ''; };
 export function rowToggle() {
   const on = sail.helm.row();
-  toast(on ? 'Out oars! Bilge the board to row her: the left half pulls her port oars, the right half starboard' : 'Oars in: she sails by the wind');
+  toast(on ? 'Out oars! Bilge the board to row her: the left half pulls her port oars, the right half starboard' : (WEATHER.parked ? 'Oars in: she sails on' : 'Oars in: she sails by the wind'));
 }

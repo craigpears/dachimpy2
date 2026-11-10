@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { WIND, Wind, moveTime, pointOf, rowTime, upwind, type Strength } from '../src/den-wind';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { WEATHER, WIND, Wind, moveTime, pointOf, rowTime, upwind, type Strength } from '../src/den-wind';
 import { SAIL, Sea, Helm, type Move, type SailEvent } from '../src/den-sail';
 
 // An open sea (no rocks, no lanes) with a wind on it: this way, this strong, and for a long while.
@@ -7,6 +7,12 @@ const windySea = (d = 1, s: Strength = 2) => { const sea = new Sea(1, false); se
 const run = (h: Helm, secs: number, step = 0.05) => { const ev: SailEvent[] = []; for (let t = 0; t < secs; t += step) ev.push(...h.tick(step)); return ev; };
 // Where she is after each move she's sailed.
 const moves = (ev: SailEvent[]) => ev.filter((e) => e.kind === 'move') as Extract<SailEvent, { kind: 'move' }>[];
+
+// The wind's parked for now (10 Nov); these are its rules when it's turned back on, so they run
+// with it on, and the parked ones below turn it off again.
+const parked = WEATHER.parked;
+beforeEach(() => { WEATHER.parked = false; });
+afterEach(() => { WEATHER.parked = parked; });
 
 describe('the wind (9 Nov: "try it. We\'ll see how it feels, whether it\'s overcomplicated or not")', () => {
   it('a good wind drops, sometimes to a calm, and picks up again; it only ever shifts a quarter', () => {
@@ -267,5 +273,74 @@ describe('the pilot and the wind', () => {
     const sea = new Sea(1, false);
     expect(sea.moveSecs()).toBe(SAIL.MOVE);
     expect(sea.moveSecs(true)).toBe(SAIL.MOVE);
+  });
+});
+
+describe('the wind parked (10 Nov: "I think maybe we need to park the wind idea for now. That\'s just getting irritating")', () => {
+  beforeEach(() => { WEATHER.parked = true; });
+
+  it('it\'s parked as things stand, and turning it back on brings the weather back', () => {
+    expect(parked).toBe(true);
+    WEATHER.parked = false;
+    const w = new Wind(1); w.set(1, 0, 1e9);
+    expect([w.s, upwind(3, 1), moveTime(2, false, 'reach')]).toEqual([0, true, WIND.REACH]);
+  });
+
+  it('a steady good wind: it never drops or shifts, so nothing\'s ever said of it', () => {
+    const w = new Wind(7);
+    const ev: unknown[] = [];
+    for (let t = 0; t < 3600; t += 0.5) ev.push(...w.tick(0.5));
+    expect(ev).toEqual([]);
+    expect([w.d, w.s]).toEqual([WIND.START.d, 2]);
+    w.set(1, 0);   // (a calm can't be had even by asking)
+    expect(w.s).toBe(2);
+    expect(new Wind(1, 2, 1).s).toBe(2);
+  });
+
+  it('under sail she goes the same every way, at a good wind\'s pace with it behind her; at the oars as ever', () => {
+    for (const s of [0, 1, 2] as Strength[]) for (const p of ['run', 'reach', 'into'] as const) expect(moveTime(s, false, p)).toBe(WIND.RUN);
+    for (const s of [0, 1, 2] as Strength[]) expect(moveTime(s, true)).toBe(WIND.OARS);
+    for (let d = 0; d < 4; d++) { expect(upwind(d, 1)).toBe(false); expect(pointOf(d, 1)).toBe('run'); }
+  });
+
+  it('"no irons": every way she heads, a move takes her on, the same time every way', () => {
+    const sea = windySea(1);
+    for (let d = 0; d < 4; d++) for (const m of ['F', 'L', 'R'] as Move[]) {
+      const p = { c: 8, r: 5, d };
+      expect(sea.irons(p, m)).toBe(false);
+      expect(sea.move(p, m)).toMatchObject({ bump: false });
+      expect(sea.moveSecs(false, p, m)).toBe(WIND.RUN);
+    }
+  });
+
+  it('no calm: put out in what was a calm, she sails straight to the pin', () => {
+    const sea = windySea(1, 0), h = new Helm(sea, { c: 8, r: 3, d: 0 });
+    h.drop(8, 9);
+    const ev = run(h, 10);
+    expect([h.pose.c, h.pose.r, h.pin]).toEqual([8, 9, null]);
+    expect(h.becalmed()).toBe(false);
+    expect(ev.filter((e) => e.kind === 'wind' || e.kind === 'warn')).toEqual([]);
+  });
+
+  it('a pin anywhere is sailed to, never "dead against the wind"', () => {
+    const sea = windySea(0), h = new Helm(sea, { c: 8, r: 8, d: 2 });
+    expect(sea.plot({ c: 8, r: 8, d: 0 }, 8, 2)).not.toBeNull();
+    h.drop(8, 3);
+    const ev = run(h, 10);
+    expect(ev.filter((e) => e.kind === 'headwind')).toEqual([]);
+    expect(h.headwind()).toBe(false);
+    expect([h.pose.c, h.pose.r, h.oars]).toEqual([8, 3, false]);
+  });
+
+  it('a turn\'s worth takes as long whichever way the wind was set to blow', () => {
+    const turn = (blows: number) => {
+      const h = new Helm(windySea(blows, 2), { c: 8, r: 2, d: 0 });
+      for (let i = 0; i < 4; i++) h.put('F');
+      let t = 0;
+      for (; t < 30 && h.pose.r < 6; t += 0.01) h.tick(0.01);
+      return t;
+    };
+    const behind = turn(0);
+    for (const blows of [1, 2, 3]) expect(turn(blows)).toBeCloseTo(behind, 1);
   });
 });

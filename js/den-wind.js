@@ -21,7 +21,16 @@
    coming up a pop-up saying you can't sail there. Well, it is letting me": the pilot used to run
    the oars out and row her there itself; now she only says she can't when she really won't. And
    "it changes quite quickly": a good wind lasts a couple of minutes or more, and every change is
-   seen coming, WIND.WARN seconds ahead (a 'warn' event; the flag and streaks ease). */
+   seen coming, WIND.WARN seconds ahead (a 'warn' event; the flag and streaks ease).
+
+   Parked (10 Nov, the user: "I think maybe we need to park the wind idea for now. That's just
+   getting irritating"): while WEATHER.parked, she sails the same every way, at a good wind's pace
+   with it behind her; no calms, no light airs, no irons, no changes, so nothing to say. The code's
+   kept to refine later (IDEAS.md): set WEATHER.parked false and it all comes back as it was. */
+/** The one switch: the weather's parked. Under sail she goes WIND.RUN every way, the wind never
+    changes (a steady good wind), and js/den/wind.js draws no arrows, streaks or wind on the bar.
+    The oars and the trade winds are as ever. */
+export const WEATHER = { parked: true };
 export const WIND = {
     /** Seconds a move takes to sail in a good wind with the wind behind her, and across it. Into it
         she makes no way at all. (A move used to take 0.7 s in a good wind whichever way she went.) */
@@ -54,16 +63,21 @@ export const WIND = {
 /** The names for a strength, as on the sailing bar. */
 export const STRENGTH = ['Calm', 'Light airs', 'Good wind'];
 /** Whether a step that way (one of the board's four) goes against a wind blowing `blows`. */
-export function upwind(step, blows) { return step === (blows + 2) % 4; }
-/** How she lies to a wind blowing `blows`, heading that way. */
+export function upwind(step, blows) { return !WEATHER.parked && step === (blows + 2) % 4; }
+/** How she lies to a wind blowing `blows`, heading that way (parked, always as if it's behind her). */
 export function pointOf(heading, blows) {
+    if (WEATHER.parked)
+        return 'run';
     return heading === blows ? 'run' : upwind(heading, blows) ? 'into' : 'reach';
 }
 /** Seconds a move takes: at the oars (a square on its own), or under sail in this strength of wind,
-    lying to it so (Infinity in a calm, or into the wind: she can't make way). */
+    lying to it so (Infinity in a calm, or into the wind: she can't make way). Parked, under sail
+    every move takes a good wind's pace with it behind her. */
 export function moveTime(s, oars, point = 'reach') {
     if (oars)
         return WIND.OARS;
+    if (WEATHER.parked)
+        return WIND.RUN;
     if (s === 0 || point === 'into')
         return Infinity;
     const t = point === 'run' ? WIND.RUN : WIND.REACH;
@@ -88,7 +102,8 @@ function dice(seed) {
     left), how strong, and how long till it changes. A good wind drops to light airs, and they
     either freshen again or die to a calm; a calm comes back as light airs (often from a new way),
     and they freshen to a good wind. Now and then a good wind shifts a quarter and blows on. What
-    it does next is settled as each spell begins (`coming`), so it can be told WARN seconds ahead. */
+    it does next is settled as each spell begins (`coming`), so it can be told WARN seconds ahead.
+    Parked (WEATHER), it's a good wind that never changes. */
 export class Wind {
     d;
     s;
@@ -104,7 +119,7 @@ export class Wind {
     constructor(seed = 1, d = WIND.START.d, s = WIND.START.s) {
         this.roll = dice(seed);
         this.d = d;
-        this.s = s;
+        this.s = WEATHER.parked ? 2 : s;
         this.left = this.spell(s);
         this.plan();
     }
@@ -135,13 +150,15 @@ export class Wind {
     /** Set it (a cheat, or a test): this way, this strong, for this long (a spell's worth if not said). */
     set(d, s, left) {
         this.d = ((d % 4) + 4) % 4;
-        this.s = s;
+        this.s = WEATHER.parked ? 2 : s;
         this.rising = false;
         this.left = left ?? this.spell(s);
         this.plan();
     }
     tick(dt) {
         const out = [];
+        if (WEATHER.parked)
+            return out; // (a steady good wind: no changes, nothing to say)
         this.left -= dt;
         if (!this.warned && this.left <= WIND.WARN && this.left > 0) {
             this.warned = true;
