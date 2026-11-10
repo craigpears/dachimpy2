@@ -260,7 +260,8 @@ moving. It gives such a nostalgia." What's next:
   lock, a way past that costs puzzle work, not reflexes: Carpentry to build the crane or the
   rollers, something to fell the trees, something to heave her (which puzzles, and how much of
   the chain of steps to keep: to shape with the user). A chain across a harbour on its own would
-  be a good obstruction too, for this or for a raid on the captain's island.
+  be a good obstruction too, for this or for a raid on the captain's island. (A first go: a crane
+  built by Carpentry on a ledge in the hidden cove, up the cliff into a clifftop lagoon: RULES.md.)
   **An imperial checkpoint, and the ways round it (10 Nov):** the main shipping lane runs
   through a checkpoint, manned (to start with, just a couple of the gun turrets the sea already
   has): "obviously ... you're pirates, so they're not going to be very friendly to you". The

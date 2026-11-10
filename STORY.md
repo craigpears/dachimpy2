@@ -104,9 +104,12 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    marks along the way through: run it under sail, row it (small clears walk her into the guns, a
    Vegas on each side rushes her past), or go round the long way, to an old wreck beyond it whose
    treasure is hauled up by Treasure Haul; the crane over its headland and a bribe come later).
-   The cove is the first step of a journey that grows: from it a crane built by Carpentry hauls
-   her up the cliff to a clifftop lagoon, a discovery, with an old wreck to haul treasure from
-   ("more of an adventure ... we can have a multi-step thing and gradually build up on it").
+   The cove is the first step of a journey that grows (▶ its next step is built): at the foot of
+   its left-hand cliff there's an old smugglers' ledge, and a crane you build there by Carpentry,
+   foot, post and jib, hauls her up the cliff and swings her down into a clifftop lagoon, a
+   discovery, still and reedy, an old wreck sunk in it whose treasure is hauled up by Treasure
+   Haul; and lowers her back down whenever you like ("more of an adventure ... we can have a
+   multi-step thing and gradually build up on it"; more steps to come along the way).
    And not necessarily straight there: the captain drops a pile of scrolls (maps
    to an island to forage, the capybara rescue, plans for the gun platform), and you can stay
    home and do up the den first. Or sneak onto his island for some of his buried loot, without a
@@ -139,4 +142,5 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
 | Break fused chests at the armoury | Soldiers, up to a handful (more as the den grows: to come) |
 | Break loose crates | Planks that mend the wall for good |
 | Walk into the plot | Your shack, built the same way, any time |
+| Build the crane at the hidden cove's ledge | Her way up the cliff to the clifftop lagoon, and its wreck's treasure (by Treasure Haul) |
 | Get past Dalnoth (to come) | His treasure, and his white monkey on your shoulder |

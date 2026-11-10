@@ -82,7 +82,7 @@ function bastion(c, r) {
   return { g, gun };
 }
 // The wreck: an old ship run onto a sandbar, listing, her masts snapped, ribs showing at her stern.
-function wreckMesh() {
+export function wreckMesh() {
   const g = new THREE.Group(), rot = mat('#4a3a2c', { map: woodTex, roughness: 1 }), dark = mat('#2e2620', { map: woodTex });
   const hull = mesh(hullGeo(6, 2.2, 1.8), rot); hull.position.y = -1.4;
   const deck = mesh(hullGeo(5.4, 1.9, 0.06), mat('#6e5a44', { map: woodTex })); deck.position.y = 0.35;

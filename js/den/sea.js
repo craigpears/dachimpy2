@@ -137,10 +137,10 @@ export function seaWorld() {
   top.position.set(buoy.position.x, 0.9, buoy.position.z);
   W.g.add(buoy, top);
   W.buoy = buoy;
-  // The cliff: blocks of rock, flat-topped and grassy, round the cove (and past the board's edge).
+  // The cliff: blocks of rock, flat-topped and grassy, round the cove. (Its left-hand side, past the
+  // board's edge, is the headland the crane stands on and the lagoon lies up on: crane.js.)
   const { c0, c1, r0, r1 } = LAY.COVE, cliffAt = new Set(sail.sea.cliff);
-  for (let r = r0 - 1; r <= r1 + 1; r++) cliffAt.add(`${c0 - 1},${r}`);
-  for (let c = c0 - 1; c <= c1 + 1; c++) cliffAt.add(`${c},${r1 + 1}`);
+  for (let c = c0; c <= c1 + 1; c++) cliffAt.add(`${c},${r1 + 1}`);
   const stone = mat('#6b6158', { flatShading: true, roughness: 0.95 }), grass = mat('#5f7d3a', { roughness: 1 });
   for (const id of cliffAt) {
     const [c, r] = id.split(',').map(Number), x = seaX(c), z = seaZ(r);

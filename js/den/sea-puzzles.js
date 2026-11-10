@@ -174,7 +174,12 @@ export function holdTick(dt) {
    user, 9 Nov: the pieces shown twice, on the lid and in the tray, was "a very cluttered user
    interface ... simplify it, standardize it"); the sailing bar's hidden while you patch. Played with the Carpentry view's own keys (src/den-carp-view.ts), looking down on it
    from her stern, its top row toward her bow, as the wall's Carpentry reads. */
-export const patch = { on: false, hole: null, group: null, face: null, wood: null, ghost: null, ghostKey: '', crate: null, slots: [], hand: null, r: 0, c: 0, sq: 0.2, keyAt: null, fair: new FairDeal(C) };
+export const patch = { on: false, hole: null, group: null, face: null, wood: null, ghost: null, ghostKey: '', crate: null, slots: [], hand: null, r: 0, c: 0, sq: 0.2, keyAt: null, fair: new FairDeal(C), away: null };
+/* The same Carpentry, the same tray and keys, for a frame somewhere other than her deck: the crane's
+   frames on the cliff's ledge (crane.js). `patch.away` is { hole() (the frame to fill, or null), sq
+   (metres a square), mount(g) (puts the board's group in the world), dress(face, frame) (draws the
+   frame under the pieces), done(frame) (it's full) }. Its board and pieces are the crane's to keep:
+   they're left where they are when it's shut. */
 const PATCH_W = 1.3;   // metres across her deck the board may take, at most
 // A fresh hole for a hit: shaped for the common pieces, as the wall's are.
 export const deckHoleShape = () => roomyShapes(PATCH.PIECES, 6)[0] || C.genHole(PATCH.PIECES).hole;
@@ -188,10 +193,10 @@ export function patchClear() {
   if (patch.group) { patch.group.removeFromParent(); patch.group.traverse((o) => { if (o.geometry && o.geometry !== cellBox) o.geometry.dispose(); }); }
   patch.group = patch.face = patch.wood = null;
 }
-function patchOpen(hole) {
-  patchClear();
-  Object.assign(patch, { on: true, hole, hand: null, ghostKey: '', keyAt: null });
-  const b = hole.board, sq = patch.sq = Math.min(0.22, PATCH_W / b.w);
+function patchOpen(hole, away = null) {
+  if (!away) patchClear();
+  Object.assign(patch, { on: true, hole, hand: null, ghostKey: '', keyAt: null, at: away });
+  const b = hole.board, sq = patch.sq = away ? away.sq : Math.min(0.22, PATCH_W / b.w);
   // In cell space (rows down, as pieceGroup draws them), laid flat on her deck, the top row toward
   // her bow and the board's middle where the deck's is.
   const g = patch.group = new THREE.Group();
@@ -205,8 +210,11 @@ function patchOpen(hole) {
   face.position.set(-(b.c0 + b.w / 2) * S, (b.r0 + b.h / 2) * S, 0);
   flatG.add(face);
   // The hole: dark water down through it, splintered planks round its edge (the wall's hole colour).
-  const dark = new THREE.MeshBasicMaterial({ color: '#0d1a20' }), sqGeo = new THREE.PlaneGeometry(S, S);
-  for (const [r, c] of hole.cells) { const m = new THREE.Mesh(sqGeo, dark); m.position.set((c + 0.5) * S, -(r + 0.5) * S, 0.01); face.add(m); }
+  if (away) away.dress(face, hole);
+  else {
+    const dark = new THREE.MeshBasicMaterial({ color: '#0d1a20' }), sqGeo = new THREE.PlaneGeometry(S, S);
+    for (const [r, c] of hole.cells) { const m = new THREE.Mesh(sqGeo, dark); m.position.set((c + 0.5) * S, -(r + 0.5) * S, 0.01); face.add(m); }
+  }
   patch.rim = outline(hole.cells, 0.03, '#ffd58a');
   face.add(patch.rim);
   // The deck round it a piece may rest on, chalked.
@@ -217,6 +225,7 @@ function patchOpen(hole) {
   face.add(patch.chalk);
   patch.wood = new THREE.Group();
   face.add(patch.wood);
+  if (away) { away.mount(g); finishOpen(); return; }
   sail.g.add(g);
   // The ship's timber crate, between the hole and her stern (scenery: the pieces are in the tray).
   if (!patch.crate) {
@@ -228,11 +237,15 @@ function patchOpen(hole) {
     c.position.set(-0.95, SLOOP_DECK, 0);
   }
   sail.g.add(patch.crate);
+  struck(true);
+  finishOpen();
+}
+// The tray dealt, the piece's starting spot, and the sailing bar out of the way.
+function finishOpen() {
   patch.slots = [0, 1, 2].map(() => ({ letter: null, cells: null, fair: false, wait: 0, waitFull: 0.45 }));
   patch.slots.forEach(patchDeal);
-  const q = quarters(hole.open());
+  const q = quarters(patch.hole.open());
   [patch.r, patch.c] = centreOn(q.ul || q.ur || q.dl || q.dr, 1, 1);
-  struck(true);
   document.body.classList.add('patching');
   keys.clear();
 }
@@ -244,6 +257,8 @@ export function patchShut() {
   if (patch.ghost) { patch.ghost.removeFromParent(); patch.ghost = null; }
   patch.ghostKey = '';
   if (patch.rim) { patch.rim.removeFromParent(); patch.chalk.removeFromParent(); patch.rim = patch.chalk = null; }
+  // (a frame away from her deck is the crane's: its board stays where it is, and isn't cleared with hers)
+  if (patch.at) { patch.group = patch.face = patch.wood = null; patch.at = null; }
   struck(false);
   document.body.classList.remove('patching');
 }
@@ -304,7 +319,7 @@ export function patchPlace() {
   const laid = hole.laid[hole.laid.length - 1];
   // Fitted flush in the hole, or resting proud on the deck round it.
   const g = pieceGroup(hand.cells, woodMat(hand.letter));
-  g.position.set(patch.c * S, -patch.r * S, laid.over ? 0.3 : 0.05);
+  g.position.set(patch.c * S, -patch.r * S, laid.over && !patch.at ? 0.3 : 0.05);   // (in a frame it lies flat, sticking out)
   patch.wood.add(g);
   const b = C.bbox(hand.cells), at = patch.face.localToWorld(V3((patch.c + b.w / 2) * S, -(patch.r + b.h / 2) * S, 0.4));
   burst(at, '#e8c890', 8, 1.2);
@@ -312,7 +327,8 @@ export function patchPlace() {
   patch.hand = null;
   if (hole.done()) {
     burst(at, '#f0d9a8', 14, 2);
-    toast(hole.over() ? 'Patched, boarded over! She sails on' : 'Patched! She sails on');
+    if (patch.at) patch.at.done(hole);
+    else toast(hole.over() ? 'Patched, boarded over! She sails on' : 'Patched! She sails on');
   }
 }
 // Backspace: the last piece back out of the hole into your hands, to fit again.
@@ -361,8 +377,9 @@ export function patchHover(x, y) {
   if (patch.hole.fit(patch.hand.cells, r, c)) { patch.r = r; patch.c = c; patchClamp(); } else patchSnap(at, 1.2);
 }
 export function patchTick(dt) {
-  const want = sail.on && sail.helm.dazed() ? sail.helm.hole : null;
-  if (want !== (patch.on ? patch.hole : null)) { if (patch.on) patchShut(); if (want) patchOpen(want); }
+  const away = !sail.helm.dazed() && patch.away?.hole() ? patch.away : null;
+  const want = sail.on && sail.helm.dazed() ? sail.helm.hole : sail.on && away ? away.hole() : null;
+  if (want !== (patch.on ? patch.hole : null)) { if (patch.on) patchShut(); if (want) patchOpen(want, want === sail.helm.hole ? null : away); }
   if (!patch.on) return;
   for (const p of patch.slots) {
     if (p.wait > 0) p.wait -= dt;

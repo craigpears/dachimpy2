@@ -19,6 +19,7 @@ import { sailView, patchView, setPaused, denLets } from '../den.js';
 import { WIND } from '../den-wind.js';
 import { windTick, windSay, windHud, oarsHud, windSig, rowToggle } from './wind.js';
 import { rowing, rowShut, rowKey, rowHover, rowSwap, rowTick, rowPrompt, rowShown } from './rowing.js';
+import { craneKey, cranePrompt, craneHolds, craneTick, craneReset, craneWorld } from './crane.js';
 
 // The old sloop's at anchor in the cove from the moment the siege is over, while their ship makes
 // sail in the background (the user, 9 Nov: "I'm sat here quite a while waiting for his sloop to sail
@@ -67,6 +68,7 @@ export function sailReset() {
   sail.salvage = null;
   if (patch.on) patchShut();
   patchClear();
+  craneReset();
   denLets.sailView = 0;
 }
 // A hit on the turret from her guns: quietened a while or, the third, wrecked, a chest floating
@@ -129,6 +131,7 @@ export function sailClick(x, y) {
   if (patch.on) { patch.keyAt = null; patchHover(x, y); if (patch.hand) patchPlace(); return; }
   if (hold.mode) { holdHover(x, y); holdSwap(); return; }
   if (rowing.on) { rowHover(x, y); rowSwap(); return; }
+  if (craneHolds()) return;   // (up in the lagoon, or on her way: no pins)
   const at = seaCellAt(x, y);
   if (!at) return;
   if (!sail.helm.drop(at.c, at.r)) toast('She\'s there already', true);
@@ -138,11 +141,13 @@ export function sailHover(x, y) {
   if (patch.on) { patchHover(x, y); sail.hover = null; return; }
   if (hold.mode) { holdHover(x, y); sail.hover = null; return; }
   if (rowing.on) { rowHover(x, y); sail.hover = null; return; }
+  if (craneHolds()) { sail.hover = null; return; }
   const at = seaCellAt(x, y);
   sail.hover = at && sail.sea.open(Math.round(at.c), Math.round(at.r)) ? [Math.round(at.c), Math.round(at.r)] : null;
 }
 export function sailKey(key) {
   if (hold.mode && holdKey(key)) return;
+  if (craneKey(key)) return;   // (the crane at the ledge, and the lagoon: crane.js)
   // Rowing: the board's keys; Esc or O ships the oars.
   if (rowing.on && (key === 'escape' || key === 'o')) return rowToggle();
   if (rowing.on && rowKey(key)) return;
@@ -167,6 +172,8 @@ export function sailPrompt() {
   if (!sail.on) return '';
   if (haul.on) return haulPrompt();
   if (rowing.on) return rowPrompt();
+  const cp = cranePrompt();
+  if (cp) return cp;
   const h = sail.helm, held = h.held();
   if (held === 'daze') {
     const hd = patch.hand, f = hd && patch.hole?.fit(hd.cells, patch.r, patch.c);
@@ -232,6 +239,7 @@ function turretLand(to, hit) {
 export function sailTick(dt) {
   sail.rocks ||= seaRocks();
   sail.world ||= seaWorld();
+  craneWorld();   // (the headland on the cove's left, the ledge and the lagoon: crane.js)
   sail.g ||= (() => { const g = sloopMesh(); scene.add(g); return g; })();
   const show = sail.on || sloopHome();
   if (sail.g.visible !== show) sail.g.visible = show;
@@ -384,6 +392,7 @@ export function sailTick(dt) {
   sail.hoverG.visible = sail.on && !!sail.hover;
   if (sail.hover) sail.hoverG.position.set(seaX(sail.hover[0]), 0.08, seaZ(sail.hover[1]));
   windTick(dt);
+  craneTick(dt);   // (after she's drawn where the helm has her: up the cliff, the crane has her)
   if (sail.on) sailHud();
 }
 // The oars' button on the sailing bar (on mousedown: the bar's redrawn as the tokens change, so a

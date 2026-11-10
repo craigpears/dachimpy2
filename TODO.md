@@ -118,29 +118,14 @@ the site (`.assetsignore` skips `*.md`).
   Next: mirror strokes as the den's rowing board on the sloop, two boards side by side, with the
   lean and the compass the den's rowing already has.
 
-- **A crane up a cliff, to somewhere of its own (9 Nov):** "I really do think we need the Wacky
-  Races stuff, like the crane thing ... I just really love the idea. I want to see what it looks
-  and feels like ... could I go somewhere to the side of a cliff and like construct a crane to get
-  in?", built "with like the carpentry puzzle". A first go of IDEAS.md's "haul her over": sail to
-  a ledge at the foot of a cliff, build a crane there by Carpentry, and it hauls her up and swings
-  her down into somewhere else: "there should be a different kind of section next to it. So I
-  don't want ... the lock the same thing as the crane." Not the lock's hidden cove, then, but a
-  place of its own: a clifftop lagoon (the user, 9 Nov), a still lake up on the headland with an
-  old wreck sunk in it, where Treasure Haul brings up the treasure. Pinned down (10 Nov,
-  after a change of mind): the lagoon is a discovery at the end of a journey of several steps,
-  "more of an adventure": the canal, Bilge to fill the lock up into the hidden cove, then from the
-  cove a crane built by Carpentry hauls her up the cliff, and at the top the lagoon with its wreck
-  and Treasure Haul. "We can have a multi-step thing and gradually build up on it", so later steps
-  can be added along the way. (The imperial checkpoint, with a crane round it, stays an idea in
-  IDEAS.md for later.)
-
 - **Something worth finding in the hidden cove: treasure (9 Nov):** the canal and the cove "would
   be great, but ... it needs a point of interest in here, even if it's a little like treasure
   chest on this little beach in the cove. You need to be able to go in here and do some treasure
   hauling or something." So: step ashore in the cove, and Puzzle Pirates' Treasure Haul brings up
   the treasure, played by its real rules (checked first), with a believable reason for it there.
-  (Treasure Haul's real home is a wreck, so it goes at the clifftop lagoon's wreck, the crane's
-  place; the cove keeps a chest of its own on the beach. How you get that one: to pin down.)
+  (Treasure Haul's real home is a wreck, so it went at the clifftop lagoon's wreck, the crane's
+  place, now built; the cove keeps a chest of its own on the beach. How you get that one: to pin
+  down.)
 
 - **The checkpoint's guns can be wrecked, her guns loaded by Gunnery, and the turret goes (10 Nov):**
   the checkpoint's guns should be "just the same as the other one" (the turret): a hit quietens a

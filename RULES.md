@@ -238,7 +238,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       cutlasses, the gold cross and the tan eight-sided coin with a crowned head; an octagon ruby
       and an emerald-cut emerald; an iron-bound lattice chest with a big padlock; a red and yellow
       cursor; coins hauled fly up the board toward her. Rules: `src/den-haul.ts`; the board
-      in the world: `js/den/treasure.js`, ready for the clifftop lagoon's wreck.
+      in the world: `js/den/treasure.js`, used for the clifftop lagoon's wreck too.
     - **Dazed, not damaged:** a hit holes her ("Hit! She's holed: patch her to sail on"): she
       finishes the move she's on (or the wind's ride), then waits till you patch the hole in her
       deck by Carpentry, a whole hole to fill, with the wall's rules (a piece covers at least one
@@ -402,6 +402,50 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       it, kept clear, for the crane up and over it; the gatehouse's boom for the bribe. Rules:
       `src/den-checkpoint.ts` (the lay: LAY.CHECKPOINT in `src/den-sail.ts`); in the world:
       `js/den/checkpoint.js`.
+  - **A crane up the cliff, to a clifftop lagoon (10 Nov).** The user (9 Nov): "could I go somewhere
+    to the side of a cliff and like construct a crane to get in?", built "with like the carpentry
+    puzzle", and somewhere of its own: "I don't want ... the lock the same thing as the crane." The
+    next step of her journey (canal, lock, hidden cove), "more of an adventure ... we can have a
+    multi-step thing and gradually build up on it":
+    - **The headland and the ledge:** the hidden cove's left-hand side is a headland now, taller
+      than the cove's walls, off the board's left edge. At its foot, on the cove's middle row, a
+      ledge is cut into the rock: an old smugglers' landing, their hoist rotting on the clifftop
+      above it (a post, an arm out over the ledge, a block and rope, a little windlass), far too
+      small to lift a ship. The first time she stops in the cove it's pointed out.
+    - **Building the crane:** stop her on the ledge's square (oars shipped) and she's warped in
+      alongside it; Space builds a crane by Carpentry, a part at a time: its foot, its post and its
+      jib, about four pieces each, thirteen in all. Each part's frame is laid on the ledge and
+      filled with the deck patch's tray (1, 2, 3, dealt fair), keys and mouse, the camera looking
+      down on it from over the cove, her mast struck and you ashore on the ledge by it. The den's
+      frame rules: a piece covers an empty square, clear of the pieces in, and may stick out over
+      the edge (here up to two squares); Backspace takes the last piece back out; Esc leaves the
+      frame on the ledge as it is, to come back to. Single squares jut out of each frame for the
+      rare pieces (the post's are its tenons). Full, it's sawn to fit (what sticks out falls away
+      as sawdust; "Shipshape!" if nothing did), the old hoist hauls it up the cliff on four ropes
+      and it goes into its place on the clifftop; then the next frame's laid. The crane is the
+      pieces you fitted, nothing by magic: the foot flat on the clifftop, the post standing on it,
+      the jib angled up from its top. Once it's whole the old hoist's windlass and block are rigged
+      on it, its rope run from the windlass up the post and out along the jib, a hook under the
+      tip. Space skips watching a part go up.
+    - **Hauling her up:** "Under the crane · Space: haul her up the cliff". A short, cheesy moment
+      (about ten seconds, black bars, Space or Esc skips): you leap up to the windlass ("Up she
+      comes!"), the hook comes down and slings go round her, you wind her up out of the water
+      dripping ("Heave!" "Ho!"), her mast and sails struck, the jib swings her round over the
+      clifftop ("Easy... easy..."), she's lowered into the lagoon ("Mind her paint!"), and you leap
+      down onto her deck ("Wheee!") as she's warped out from under the jib: "Ooh, a lagoon!"
+    - **The clifftop lagoon:** a still lake up on the headland, unlike the lock or the cove: dark
+      green and glassy, clear enough to see down to its bed, fringed with reeds and bulrushes, lily
+      pads (a few in flower) on it, boulders round its shore. She isn't sailed there (it's off the
+      board): she rests by an old wreck sunk in it, its snapped mast out of the water. Space hauls
+      up its treasure by Treasure Haul, the board on the water over the wreck, as for the other
+      chests; once it's up the wreck's bare.
+    - **Never stuck:** H (or Space, once the treasure's up) lowers her back down the same way, into
+      the cove alongside the ledge, and she sails on from there. No pins, moves, oars or guns up in
+      the lagoon. Once built the crane stays built (a new game starts without it).
+    - **Room left for later:** the lagoon's other shores (a stream out over the headland, say) and
+      the headland itself, for the steps that come after. Rules: `src/den-crane.ts`; in the world:
+      `js/den/crane.js` (its frames are played with the deck patch's Carpentry: `patch.away` in
+      `js/den/sea-puzzles.js`).
 - **A quick siege to start, then calm (9 Nov).** The first three waves come as they always have,
   each counting down after the last. Beat the third and their captain calls it off ("We'll be
   back!") and the ship sails out of the cove, its cannon with it. The den's quiet after that: no

@@ -27,6 +27,7 @@ import { nearSloop, board, ashore, sailReset, sailClick, sailHover, sailKey, sai
 import { hold, holdSwap, patch, deckHoleShape, patchTurn, patchPlace, patchKey } from './den/sea-puzzles.js';
 import { haul, haulKey, haulHover, haulSwap, haulTick, haulCam, haulTurret } from './den/treasure.js';
 import { rowing, rowCam, rowPull } from './den/rowing.js';
+import { crane, craneCam } from './den/crane.js';
 import { net, online, guest, isHost, send, updateMates, sendMe, snapshot, followRaider, sendSync, onNet, joinCrew, leaveCrew } from './den/crew.js';
 import { deco, decoMode, decoMove, decoClick, decoTurn, dress, dressPanel, dressRows, lookChanged, applyDen, buildAll, tileFor, fillFrame, cheats, skipTo, cheatPanel } from './den/menus.js';
 
@@ -263,6 +264,7 @@ export const denLets = {
   get sailView() { return sailView; }, set sailView(v) { sailView = v; },
 };
 export let patchView = 0, rowView = 0;
+let craneView = 0, craneShot = null;
 /* The Carpentry view's camera: straight on to the board, close enough to puzzle in. On the wall, a
    stretch of it round the piece, its whole height; on a frame on the floor, looking down on it from
    the side its rows run from; on the stairs, square on to their face. */
@@ -524,7 +526,7 @@ function update(dt) {
   // At sea: following her from behind and above, out over the water (turn and zoom as ever).
   sailView += ((sail.on ? 1 : 0) - sailView) * Math.min(1, dt * 2);
   if (sailView > 0.001 && sail.g) {
-    L2.set(sail.g.position.x, 0.6, sail.g.position.z - 2);
+    L2.set(sail.g.position.x, Math.max(0.6, sail.g.position.y - 1), sail.g.position.z - 2);   // (up in the clifftop lagoon, looking at her there)
     look.lerp(L2, sailView);
     dist += (26 * view.zoom - dist) * sailView;
     tilt += (Math.max(0.3, Math.min(1.45, 0.78 + view.pitch)) - tilt) * sailView;
@@ -558,12 +560,13 @@ function update(dt) {
     if (!(patch.dockT > 0) || (patch.dockAt = (patch.dockAt ?? 0) - dt) < 0) { patch.dockAt = 0.5; patch.dockT = $('dock').getBoundingClientRect().top; }
     const halfM = far * Math.tan(vh), yb = -1 + 2 * (innerHeight - patch.dockT + 14) / innerHeight;
     const yc = Math.min(0, yb + (b.h * sq / 2) / halfM);
-    const bow = V3(Math.cos(sail.g.rotation.y), 0, -Math.sin(sail.g.rotation.y));
+    // (up the board: toward her bow on her deck; toward the cliff on the crane's ledge)
+    const bow = V3(0, 1, 0).transformDirection(patch.face.matrixWorld).setY(0).normalize();
     L2.copy(mid).addScaledVector(bow, -yc * halfM);
     look.lerp(L2, patchView);
     dist += (far - dist) * patchView;
     tilt += (1.45 - tilt) * patchView;
-    const ry = sail.g.rotation.y, want = Math.atan2(-Math.cos(ry), Math.sin(ry));
+    const want = Math.atan2(-bow.x, -bow.z);
     const y0 = Math.atan2(Math.sin(yaw), Math.cos(yaw));
     let d = want - y0;
     d = Math.atan2(Math.sin(d), Math.cos(d));
@@ -593,6 +596,19 @@ function update(dt) {
     let d = hc.yaw - y0;
     d = Math.atan2(Math.sin(d), Math.cos(d));
     yaw = y0 + d * haulView;
+  }
+  // The crane: watching a part of it go up, or her hauled up the cliff and down (js/den/crane.js).
+  const kc = craneCam();
+  if (kc) craneShot = kc;
+  craneView += ((kc ? 1 : 0) - craneView) * Math.min(1, dt * 2.5);
+  if (craneView > 0.001 && craneShot) {
+    look.lerp(craneShot.look, craneView);
+    dist += (craneShot.dist - dist) * craneView;
+    tilt += (craneShot.tilt - tilt) * craneView;
+    const y0 = Math.atan2(Math.sin(yaw), Math.cos(yaw));
+    let d = craneShot.yaw - y0;
+    d = Math.atan2(Math.sin(d), Math.cos(d));
+    yaw = y0 + d * craneView;
   }
   // The cutscene's own shots.
   if (cine) mapLets.cineCam = cine.cam;
@@ -708,6 +724,6 @@ requestAnimationFrame(frame);
 
 // For poking at it from the console.
 window.den = { rowing, rowPull, tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { worldLets.myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, swordReward, swordBreak, lumber, toLumber, repairAll, newGame, raiders, G, get carry() { return carry; }, get patch() { return patch; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
-  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, hold, holdSwap, board, ashore, patch, patchKey, patchPlace, deckHoleShape, haul, haulSwap, haulTurret,
+  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, hold, holdSwap, board, ashore, patch, patchKey, patchPlace, deckHoleShape, haul, haulSwap, haulTurret, crane,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };
