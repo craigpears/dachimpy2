@@ -237,6 +237,19 @@ the site (`.assetsignore` skips `*.md`).
   Each lock up takes about sixteen moves' worth of Bilge; make it about a third less (eleven), to
   revisit once the lagoon's been tried. (No cheat needed: "I think it's fine".)
 
+- **Kikkit, as a penguin (10 Nov):** "Look for the pirate Kikkit as well, we need to make her a
+  penguin in the game somewhere, hehe". Her Emerald pirate page (checked 10 Nov): captain of the
+  crew Rodrigo's Revenge, of the flag Egotistical Englishman, and an Admiral in the Aimuari Island
+  Navy (the same navy as Dignity, who's a Lieutenant Commander: Kikkit outranks her); twenty
+  familiars. Her portrait: black curly hair crowned with red roses, an eyepatch, gold hoop
+  earrings, her tongue out, blue swirling tattoos on her arms and middle, a red top tied at the
+  front, a red wristband, a ragged black skirt on a belt with a gold buckle, bare feet, a stone
+  jug marked XXX in her hand, and a little ghost familiar at her shoulder. As a penguin: a penguin
+  wearing her look (the rose crown, eyepatch, earrings, tattoos, skirt, the XXX jug, the ghost).
+  Made the modular way: a penguin is a body the pirate maker can dress, like the male and female
+  ones, so her clothes are wardrobe items and anyone could be a penguin too. (Where she turns up:
+  to pin down with the user.)
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
