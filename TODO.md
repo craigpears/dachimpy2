@@ -134,7 +134,12 @@ the site (`.assetsignore` skips `*.md`).
   Nov: "not just hanging around on the land"): it's trapped in the water, not on land (tangled in
   an old net caught on the wreck, say), and at the den it lives at the water's edge, on the beach
   and in the cove's shallows near the shack, wading, swimming and sitting in the water as
-  capybaras do. (How exactly it's trapped and freed: to pin down.) The crane being built only for
+  capybaras do. Freed by Foraging (the user, 10 Nov: "Definitely foraging ... it's got the same
+  kind of logic as treasure haul, but like reversed, and it fits the scene better. And we want
+  foraging later anyway"): Puzzle Pirates' real Foraging, played by its real rules, built as one
+  module of its own to reuse later (the foraging island), with the capybara as the container
+  stuck high on the lagoon's bank in reeds, roots and mud; cleared down off the board's foot it
+  splashes into the water and swims to her. The crane being built only for
   the session is fine for a proof of concept (a refresh starts afresh).
 
 - **The secret way round the checkpoint: a chain of locks (10 Nov):** "make it a bit more of a
