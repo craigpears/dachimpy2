@@ -74,6 +74,7 @@ function patchOpen(hole, away = null) {
   patch.wood = new THREE.Group();
   face.add(patch.wood);
   if (away) { away.mount(g); finishOpen(); return; }
+  g.userData.deckPatch = true;   // (under the rowing board while she rows: rowing.js hides it)
   sail.g.add(g);
   // The ship's timber crate, between the hole and her stern (scenery: the pieces are in the tray).
   if (!patch.crate) {

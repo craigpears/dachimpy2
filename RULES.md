@@ -337,6 +337,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       it out was "one fix and it was done"); Carpentry and Bilge "have got to go together", as in
       Puzzle Pirates, "but the primary one needs to be carpentry". Nobody's sunk or knocked out
       ("it keeps it faster paced, but while keeping the puzzles key"). Rules: `src/den-patch.ts`.
+    - **Nothing of the patch over the rowing board (10 Nov):** once she's patched, none of it shows
+      while she rows: not the tray, the pieces, the ghost, nor the planks fitted in her deck, which lie
+      under the board (the user: "when I've just clicked oars, I see the carpentry pieces for the
+      repairing the damaged carpentry puzzle I've just played"). Holed while she rows, the patch comes
+      up with her sails and guns still struck.
   - **Ashore:** sail back to her mooring and Space puts you on the beach beside her.
   - Alone only for now (no crews at sea yet). No tokens to earn yet, no destinations: those are
     IDEAS.md ("Sailing between places, for real"). Rules: `src/den-sail.ts`.

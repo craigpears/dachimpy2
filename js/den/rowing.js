@@ -10,6 +10,7 @@ import { scene, camera, mat, mesh, canvasTex, woodTex, makePirate, V3, keys, ray
 import { bitMesh } from './bilge.js';
 import { sail, SLOOP_DECK } from './sea.js';
 import { SAIL } from '../den-sail.js';
+import { patch } from './sea-puzzles.js';
 
 /* TODO.md, "Rowing by port and starboard" (the user, 10 Nov: "a full bilge board, obviously with the
    rowing kind of graphics on each side"). Run her oars out (O) and the real Bilge board is laid
@@ -111,6 +112,13 @@ function struck(on) {
   for (const o of [...sail.g.userData.sails, ...sail.g.userData.rig]) o.visible = !on;
   for (const side of ['L', 'R']) sail.g.userData.guns[side].visible = !on;
 }
+/* The planks patched into her deck lie under the board while she rows: hidden, or they'd poke up
+   through it (the user, 10 Nov: "when I've just clicked oars, I see the carpentry pieces for the
+   repairing the damaged carpentry puzzle I've just played"). Every patch on her deck, not just the
+   last: a crane frame since leaves an older patch's planks unknown to patch.group. */
+function underBoard(hide) {
+  for (const o of sail.g?.children ?? []) if (o.userData.deckPatch) o.visible = !hide;
+}
 // A Bilge piece on it, turned to read the right way up from her stern (as on the quay's board).
 function rowBit(bit) {
   const m = bitMesh(bit);
@@ -133,6 +141,7 @@ function rowOpen() {
   if (!rowing.rowers.length) rowing.rowers = rowersMake();
   for (const r of rowing.rowers) sail.g.add(r.seat);
   struck(true);
+  underBoard(true);
   sail.rowRate = (side, under) => rowing.board.rate(side, under);
   document.body.classList.add('rowing');   // (the sailing bar out of the way while you row)
   keys.clear();
@@ -140,7 +149,8 @@ function rowOpen() {
 export function rowShut() {
   rowing.group?.removeFromParent();
   for (const r of rowing.rowers) r.seat.removeFromParent();
-  if (rowing.on) struck(false);
+  // (holed while rowing, the deck patch has just struck her sails and guns: they stay down for it)
+  if (rowing.on) { struck(patch.on && !patch.at); underBoard(false); }
   rowing.on = false;
   rowing.queue = [];
   sail.rowRate = null;
