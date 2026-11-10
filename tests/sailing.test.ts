@@ -2,7 +2,7 @@
    2026), and the den's run forward for a chain (the user, 10 Nov). */
 import { describe, expect, it } from 'vitest';
 import { BOOCH_PENALTY, COLOURS, COLOUR_NAMES, DIFFICULTY, H, RUN_TABLE, SPAWN, Sailing, TOP_FREE, W, chainName, multiplier, runFor } from '../src/sailing';
-import type { Pair, Piece, Platform } from '../src/sailing';
+import type { Drop, Pair, Piece, Platform, Sail } from '../src/sailing';
 import { seeded } from '../src/mirror-row';
 
 let ids = 10000;
@@ -42,7 +42,7 @@ describe('the board', () => {
     expect(s.grid.every((r) => r.length === 8)).toBe(true);
     expect([...s.pair, ...s.next].every((c) => c >= 0 && c < 3)).toBe(true);
   });
-  it('deals platforms that fit, keep the top clear, never touch, and have at least two targets', () => {
+  it('deals platforms that fit, keep the top clear, never touch, and have a target or more', () => {
     for (let seed = 1; seed <= 40; seed++) {
       const s = new Sailing(seeded(seed));
       expect(s.platforms.length).toBeGreaterThan(0);
@@ -50,7 +50,7 @@ describe('the board', () => {
         expect(p.r).toBeGreaterThanOrEqual(TOP_FREE);
         expect(p.r + p.h).toBeLessThanOrEqual(H);
         expect(p.c + p.w).toBeLessThanOrEqual(W);
-        expect(p.targets.length).toBeGreaterThanOrEqual(2);
+        expect(p.targets.length).toBeGreaterThanOrEqual(1);
         for (const q of s.platforms) if (q !== p)
           expect(p.r <= q.r + q.h && q.r <= p.r + p.h && p.c <= q.c + q.w && q.c <= p.c + p.w).toBe(false);
       }
@@ -64,14 +64,26 @@ describe('the board', () => {
       }));
     }
   });
-  it('deals the same board from the same seed, and more platforms as the difficulty rises', () => {
+  it('deals the same board from the same seed', () => {
     expect(new Sailing(seeded(7)).platforms).toEqual(new Sailing(seeded(7)).platforms);
-    const count = (d: number) => {
-      let n = 0;
-      for (let seed = 1; seed <= 20; seed++) { const s = new Sailing(seeded(seed)); s.difficulty = d; s.deal(); n += s.platforms.length; }
-      return n;
+  });
+  it('more and a little bigger platforms as it gets harder: "you may start with 2 or 3, you end up with 4 or 5 and more ... doesn\'t get drastically bigger" (the user, 10 Nov)', () => {
+    const dealt = (d: number) => {
+      const counts: number[] = [], sizes: number[] = [];
+      for (let seed = 1; seed <= 40; seed++) {
+        const s = new Sailing(seeded(seed));
+        s.difficulty = d; s.deal();
+        counts.push(s.platforms.length);
+        for (const p of s.platforms) sizes.push(p.w * p.h);
+      }
+      return { counts, size: sizes.reduce((a, b) => a + b, 0) / sizes.length, biggest: Math.max(...sizes) };
     };
-    expect(count(4)).toBeGreaterThan(count(1));
+    const easy = dealt(DIFFICULTY.START), hard = dealt(DIFFICULTY.MAX);
+    expect(easy.counts.every((n) => n === 2 || n === 3)).toBe(true);
+    expect(hard.counts.every((n) => n >= 4)).toBe(true);
+    expect(hard.counts.some((n) => n >= 5)).toBe(true);
+    expect(hard.size).toBeGreaterThan(easy.size);
+    expect(hard.biggest).toBeLessThanOrEqual(12);
   });
 });
 
@@ -80,18 +92,32 @@ describe('dropping a pair', () => {
     expect(game([], [], [0, 1]).moves().length).toBe(7 * 2 + 8 * 2);
     expect(game([], [], [2, 2]).moves().length).toBe(7 + 8);
   });
-  it('comes in along the top from the middle: a piece up there blocks the way past it', () => {
-    const s = game([], [], [0, 1]);
-    s.grid[0][1] = { id: ids++, c: 2 };
-    expect(s.moves().some((m) => m.col <= 1)).toBe(false);
+  it('comes in from the middle: a wall to the top shuts off the columns past it', () => {
+    const s = game(Array.from({ length: H }, () => '..1.....'), [], [0, 1]);
+    expect(s.moves().length).toBeGreaterThan(0);
+    expect(s.moves().some((m) => m.col <= 2)).toBe(false);
     expect(s.drop(0, 1).dropped).toBe(false);
-    expect(s.moves().some((m) => m.col === 2)).toBe(true);
+  });
+  it('is steered as it falls, so it slides in under a ledge (YPPedia: moved "while it is still falling")', () => {
+    // A ledge over columns 0-2, two rows up: dropped straight, a pair stops on it; steered, it goes under.
+    const s = game([], [plat(13, 0, 3, 1, [[13, 0, 2]])], [0, 1]);
+    expect(s.straight(1, 1)).toEqual({ col: 1, turn: 1, row: 12 });
+    expect(s.moves()).toContainEqual({ col: 1, turn: 1, row: 14 });
+    s.drop(1, 1, 14);
+    expect(draw(s, H - 2)).toEqual(['.0......', '.1......']);
+    expect(s.drop(0, 0, 14).dropped).toBe(false);   // the next pair can't get there: no room under
   });
   it('turns: 0 as it comes, 1 the first over the second, 2 swapped, 3 the second over the first', () => {
-    expect(game([], [], [0, 1]).entry({ col: 2, turn: 0 })).toEqual([[0, 2, 0], [0, 3, 1]]);
-    expect(game([], [], [0, 1]).entry({ col: 2, turn: 1 })).toEqual([[0, 2, 0], [1, 2, 1]]);
-    expect(game([], [], [0, 1]).entry({ col: 2, turn: 2 })).toEqual([[0, 2, 1], [0, 3, 0]]);
-    expect(game([], [], [0, 1]).entry({ col: 2, turn: 3 })).toEqual([[0, 2, 1], [1, 2, 0]]);
+    expect(game([], [], [0, 1]).cells(0, 2, 0)).toEqual([[0, 2, 0], [0, 3, 1]]);
+    expect(game([], [], [0, 1]).cells(0, 2, 1)).toEqual([[0, 2, 0], [1, 2, 1]]);
+    expect(game([], [], [0, 1]).cells(0, 2, 2)).toEqual([[0, 2, 1], [0, 3, 0]]);
+    expect(game([], [], [0, 1]).cells(0, 2, 3)).toEqual([[0, 2, 1], [1, 2, 0]]);
+  });
+  it('shows the next pair: "obviously not just the single one" (the user, 10 Nov)', () => {
+    const s = new Sailing(seeded(5));
+    const next = s.next;
+    s.drop(...([s.moves()[0]].map((m) => [m.col, m.turn, m.row] as const)[0]));
+    expect(s.pair).toEqual(next);
   });
   it('falls to the bottom, and the next pair comes up', () => {
     const s = game([], [], [0, 1]);
@@ -205,6 +231,69 @@ describe('chains', () => {
     expect(m.stages.map((x) => x.kind)).toEqual(['land', 'platform', 'line', 'line', 'line', 'line', 'line']);
     expect([m.steps, m.name, m.vegas, m.run]).toEqual([6, 'Vegas!!', true, 7]);
     expect(m.mult).toBe(multiplier(6, DIFFICULTY.START));
+  });
+  it('platforms break last: "it waits to do kind of the platform break" (the user, 10 Nov)', () => {
+    // The pair (water over rope) fills the platform's last target with its rope and makes a row of
+    // four water with its water, both at once: the row goes first, then the platform, a Double.
+    const s = game(['..000...', '..212.2.'], [plat(15, 5, 2, 1, [[15, 5, 1], [15, 6, 2]])], [0, 1]);
+    const m = s.drop(5, 1);
+    expect(m.stages.map((x) => x.kind)).toEqual(['land', 'line', 'platform']);
+    expect([m.steps, m.name]).toEqual([2, 'Double']);
+  });
+  it('a chain of lines runs on to a Vegas while a filled platform waits, then carries on from what the platform drops ("a Vegas before it\'s even cleared the first platform and then kind of chains down from there", the user, 10 Nov)', () => {
+    // Column 3 a stack on fixed scaffolds (a-c, every other row): the pair's water makes the bottom row
+    // of four, and each clear drops the stack a row into the next. Its rope fills the platform's last
+    // target at the same time; the platform waits for the six lines, then clears, and the water held
+    // over column 6 falls onto the three below it.
+    const s = game([
+      '........',
+      '...1....',
+      'aaa2....',
+      '...1....',
+      'aaa2....',
+      '...1....',
+      'ccc1....',
+      '...0....',
+      'aaa1....',
+      '...2....',
+      'bbb2....',
+      '...2..0.',
+      '.aa0..1.',
+      '...11.0.',
+      '...11.0.',
+      '...11.0.',
+    ], [plat(12, 5, 2, 1, [[12, 5, 1], [12, 6, 1]])], [0, 1]);
+    expect(s.lines()).toEqual([]);
+    const m = s.drop(4, 0);
+    expect(m.stages.map((x) => x.kind)).toEqual(['land', 'line', 'line', 'line', 'line', 'line', 'line', 'platform', 'line']);
+    expect([m.steps, m.name, m.platforms, m.run]).toEqual([8, 'Vegas!!', 1, 9]);
+  });
+});
+
+/** A game from an ordinary deal (seed 1), played by the staircase bot in tools/sail-bots.mjs: its drops
+    as [column, turn, row], recorded with `tools/sail-bots.mjs record`. Record again if the deal or
+    the pairs change. */
+const STAIRCASE = { seed: 1, drops: [[6, 2, 15], [6, 2, 14], [0, 0, 8], [0, 1, 14], [0, 1, 12], [6, 0, 13], [6, 1, 11], [5, 0, 14], [6, 1, 12], [6, 2, 11], [4, 0, 13], [5, 1, 11], [4, 0, 15], [4, 2, 10], [4, 1, 11], [1, 0, 15], [1, 0, 14], [0, 1, 10], [0, 1, 8], [1, 0, 13], [0, 1, 11], [0, 1, 9], [0, 0, 12], [0, 1, 10], [3, 0, 14], [0, 1, 12], [0, 0, 11], [5, 0, 9], [3, 0, 9], [3, 1, 12], [3, 0, 8], [0, 1, 9], [2, 0, 11], [3, 0, 11], [0, 1, 11], [1, 1, 10], [0, 1, 9], [0, 1, 12], [0, 1, 10], [4, 2, 7], [1, 1, 8], [2, 0, 7], [2, 0, 6], [2, 1, 11], [2, 0, 10], [3, 2, 5], [2, 1, 8], [2, 1, 4], [1, 2, 5], [1, 0, 8], [1, 0, 4], [1, 0, 7], [7, 1, 9], [2, 2, 3], [3, 0, 4]] as [number, Drop['turn'], number][] };
+
+describe('the staircase', () => {
+  it('Vegas 3s and 4s "quite easily": stairs built pair by pair on an ordinary deal set off a Vegas, a column a step (the user, 10 Nov)', () => {
+    const s = new Sailing(seeded(STAIRCASE.seed));
+    expect(s.difficulty).toBe(DIFFICULTY.START);
+    let last: Sail | null = null;
+    for (const [col, turn, row] of STAIRCASE.drops) {
+      last = s.drop(col, turn, row);
+      expect(last.dropped).toBe(true);
+    }
+    expect(last!.steps).toBeGreaterThanOrEqual(6);
+    expect(last!.name).toBe('Vegas!!');
+    // Down the stairs a column a step, from column 3 to 7 (columns 4 and 5 going together once), then
+    // a row of four that the falls made at the bottom: the columns each step cleared three or more from.
+    const stairs = last!.stages.slice(1).map((st, i) => {
+      const count = Array<number>(W).fill(0);
+      last!.stages[i].grid.forEach((r) => r.forEach((x, c) => { if (x && st.cleared.includes(x.id)) count[c]++; }));
+      return count.flatMap((n, c) => (n >= 3 ? [c] : []));
+    });
+    expect(stairs).toEqual([[3], [4], [4, 5], [6], [7], []]);
   });
 });
 

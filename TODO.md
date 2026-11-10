@@ -129,23 +129,8 @@ the site (`.assetsignore` skips `*.md`).
   for the oars: a key takes you into it anywhere at sea, and each combo sends her its run of
   squares in one go, as the trade winds carry her. Not only at Kikkit's whirlpools.
 
-- **Sailing, as the user remembers playing it (10 Nov):** the module (`src/sailing.ts`, built 10
-  Nov) filled its gaps with guesses; the user's memory of the real game:
-  - **You see the next pair**, "obviously not just the single one in the top left somewhere".
-  - **Difficulty is more and bigger platforms:** "you may start with 2 or 3, you end up with 4 or
-    5 and more ... boundaries, so you have to kind of navigate around them. Doesn't get
-    drastically bigger."
-  - **A Vegas is doable, even easy if you know how:** "Vegas is not only doable, I think you end up
-    with like Vegas 3s and 4s quite easily." Four to pop; you build a staircase, pairs stacked two
-    of a colour with the third hanging over to the side, so each clear drops the overhang onto the
-    next. The bots never made one, so either they don't know the staircase or a rule's off: a bot
-    that builds staircases should make Vegases, and a test should show one built that way.
-  - **Platforms break last:** at first "platforms break first, then pieces", then, looking at the
-    screenshot, "it's the opposite of what I said, where the platforms break last. So it waits to
-    do kind of the platform break." The line clears chain on (down the left-hand side in the
-    screenshot, a Vegas 5 or 6 from a competition) and a filled platform only clears once they've
-    run out: "it gets like a Vegas before it's even cleared the first platform and then kind of
-    chains down from there."
+- **Sailing's look, when it's drawn (10 Nov):** (its rules are done: RULES.md, "The Sailing
+  puzzle".)
   - **Its look, from the user's screenshot of "a huge multi Vegas" (10 Nov):** 8 wide, about 16
     tall; the next pair at the top left; two markers over the middle columns where pairs come in.
     Three balls: yellow knotted rope, white swirled sail, blue wavy water; a pair's halves joined by

@@ -6,17 +6,25 @@
    Faithful to the original (RULES.md):
    - The board is 8 wide by 16 high. Row 0 is the top. Three colours: water (blue), rope (yellow),
      wind (white).
-   - Pieces come in joined pairs down the two middle columns (3 and 4). You steer the pair left or
-     right and turn it, then it falls. A pair stays joined after it lands: one half held up keeps the
-     other half hanging beside it. When either half is cleared the other is loose and falls.
+   - Pieces come in joined pairs down the two middle columns (3 and 4), the next pair shown. You steer
+     the pair left and right and turn it while it falls ("increasing the falling speed does not prevent
+     the pair from being moved or rotated while it is still falling"), so it can be slid in under a
+     ledge. A pair stays joined after it lands (the peg between them stays, the user's screenshot, 10
+     Nov): one half held up keeps the other half hanging beside it. When either half is cleared the
+     other is loose and falls.
    - Platforms: rectangles with outlined targets, each wanting a colour. A platform is a shelf across
      its whole width (nothing falls through the gaps between its targets). It's done when every
      target holds a piece of its colour (the other squares may hold anything, or nothing); then the
      pieces in its targets clear and the platform goes.
    - Four or more of a colour in a row or a column clear, fixed square pieces included.
-   - After a drop the board settles in turn: everything falls, done platforms clear (all at once),
-     lines clear (all at once), and round again until nothing moves. Each step that clears something
-     is a step of the chain; things cleared together are one step.
+   - After a drop the board settles in turn: everything falls, lines clear (all at once), and round
+     again; only when no line is left do done platforms clear (all at once), and then round again from
+     what that drops, until nothing moves. Each step that clears something is a step of the chain;
+     things cleared together are one step. Platforms last is the user's memory of the real game (10
+     Nov: "the platforms break last. So it waits to do kind of the platform break"; a competition
+     Vegas "before it's even cleared the first platform and then kind of chains down from there").
+     YPPedia's "Sailing" page, under "Resolution order", says the opposite (platforms, then lines,
+     each round); the user's memory wins.
    - Chain names: 2 Double, 3 Triple, 4 Bingo!, 5 Donkey!, 6 or more Vegas!!. Sailing has a real
      Vegas (unlike Bilge's, which is a combo of lines at once, Sailing's is a chain of six).
    - Scoring, for the whole cascade: in each line step the first four ordinary pieces 1 point each and
@@ -27,11 +35,14 @@
    - A booch: once everything has settled, a piece in the top square of either middle column. 20
      points off, and a fresh board. Clearing every platform deals a fresh board too, a harder one.
 
-   Not on YPPedia, so made up here (say so if it matters): how boards are dealt (how many platforms,
-   their sizes, targets and fixed pieces), how fast difficulty rises and when it resets, whether the
-   next pair is shown, whether the target points are inside the chain's multiplier (here they're not),
-   and steering: a pair is dropped straight down a column it can reach along the top row (no tucking
-   under a ledge while it falls).
+   - Difficulty is more platforms and a little bigger (the user, 10 Nov: "you may start with 2 or 3,
+     you end up with 4 or 5 and more ... boundaries, so you have to kind of navigate around them.
+     Doesn't get drastically bigger"). Platforms come single or in small blocks (the screenshot).
+
+   Not on YPPedia, so made up here (say so if it matters): the exact deal (sizes, how many targets,
+   fixed pieces), how fast difficulty rises and when it resets, whether the target points are inside
+   the chain's multiplier (here they're not), and turning: a pair turns about its first square, with
+   no kick off a wall.
 
    The den's twist (the user, 10 Nov: "set up a Vegas, and go like 7 forwards in one go"): each drop's
    chain is a run straight ahead, in one go (runFor). The real game has nothing like it: there, the
@@ -101,28 +112,29 @@ export class Sailing {
         this.platforms = [];
         this.filled.clear();
     }
-    /** A fresh board for the difficulty: more platforms, targets and fixed pieces as it rises. */
+    /** A fresh board for the difficulty: two or three platforms at first, a couple more each level,
+        a little bigger; fixed pieces from the second level. */
     deal() {
         this.clear();
-        const d = this.difficulty, want = Math.min(6, 2 + d);
-        for (let tries = 0; this.platforms.length < want && tries < 300; tries++) {
-            const h = this.random() < 0.25 ? 2 : 1, w = 2 + Math.floor(this.random() * 3);
+        const d = this.difficulty, want = 1 + d + (this.random() < 0.5 ? 1 : 0);
+        const wide = d >= 3 ? 4 : 3, high = d >= 3 ? 3 : 2;
+        for (let tries = 0; this.platforms.length < want && tries < 400; tries++) {
+            const w = 1 + Math.floor(this.random() * wide), h = this.random() < 0.3 ? 1 + Math.floor(this.random() * high) : 1;
             const c = Math.floor(this.random() * (W - w + 1)), r = TOP_FREE + Math.floor(this.random() * (H - TOP_FREE - h + 1));
             // Not touching another platform, so every shelf is its own.
             if (this.platforms.some((p) => r <= p.r + p.h && p.r <= r + h && c <= p.c + p.w && p.c <= c + w))
                 continue;
             const targets = [];
-            const odds = 0.6 + 0.1 * d;
             for (let rr = r; rr < r + h; rr++)
                 for (let cc = c; cc < c + w; cc++)
-                    if (this.random() < odds)
+                    if (this.random() < 0.85)
                         targets.push({ r: rr, c: cc, colour: Math.floor(this.random() * COLOURS) });
-            if (targets.length < 2)
+            if (!targets.length)
                 continue;
             this.platforms.push({ id: this.nextId++, r, c, w, h, targets });
         }
         // Fixed pieces low down, never over a target (it would be shut in) nor inside a platform.
-        for (let n = 0, tries = 0; n < d && tries < 100; tries++) {
+        for (let n = 0, tries = 0; n < d - 1 && tries < 100; tries++) {
             const r = H - 6 + Math.floor(this.random() * 6), c = Math.floor(this.random() * W);
             if (this.grid[r][c] || this.inPlatform(r, c) || this.platforms.some((p) => p.targets.some((t) => t.c === c && t.r > r)))
                 continue;
@@ -145,42 +157,84 @@ export class Sailing {
     shelf(r, c) {
         return this.platforms.some((p) => r === p.r + p.h - 1 && c >= p.c && c < p.c + p.w);
     }
-    /** The squares the pair comes in at for a drop, [row, col, colour] each; null if it can't get
-        there: it comes in along the top row from the middle columns, which must be clear all the way. */
-    entry(d) {
-        const flat = d.turn === 0 || d.turn === 2;
-        if (d.col < 0 || d.col > (flat ? W - 2 : W - 1))
-            return null;
-        const right = flat ? d.col + 1 : d.col;
-        for (let c = Math.min(d.col, SPAWN[0]); c <= Math.max(right, SPAWN[1]); c++)
-            if (this.grid[0][c])
-                return null;
-        if (!flat && this.grid[1][d.col])
+    /** The squares the pair takes turned `turn` with its first square at (row, col), [row, col, colour]
+        each (turn 0: a then b across; 1: a over b; 2: b then a; 3: b over a); null if off the board. */
+    cells(row, col, turn) {
+        const flat = turn === 0 || turn === 2;
+        if (row < 0 || col < 0 || col > (flat ? W - 2 : W - 1) || row > (flat ? H - 1 : H - 2))
             return null;
         const [a, b] = this.pair;
-        switch (d.turn) {
-            case 0: return [[0, d.col, a], [0, d.col + 1, b]];
-            case 1: return [[0, d.col, a], [1, d.col, b]];
-            case 2: return [[0, d.col, b], [0, d.col + 1, a]];
-            default: return [[0, d.col, b], [1, d.col, a]];
+        switch (turn) {
+            case 0: return [[row, col, a], [row, col + 1, b]];
+            case 1: return [[row, col, a], [row + 1, col, b]];
+            case 2: return [[row, col, b], [row, col + 1, a]];
+            default: return [[row, col, b], [row + 1, col, a]];
         }
     }
-    /** Every drop the pair can make now (a pair of one colour has only two ways round). */
+    /** Can the pair be there: on the board, its squares empty, not split by a shelf? */
+    open(row, col, turn) {
+        const cs = this.cells(row, col, turn);
+        if (!cs || cs.some(([r, c]) => this.grid[r][c]))
+            return false;
+        return (turn === 0 || turn === 2) || !this.shelf(row, col);
+    }
+    /** Can the pair fall a row from there? */
+    sinks(row, col, turn) {
+        const cs = this.cells(row, col, turn);
+        return cs.every(([r, c]) => r + 1 < H && !this.shelf(r, c) && (!this.grid[r + 1][c] || cs.some(([rr, cc]) => rr === r + 1 && cc === c)));
+    }
+    /** Where a pair dropped straight down a column comes to rest: it comes in along the top row from
+        the middle columns, which must be clear all the way. Null if it can't get there. */
+    straight(col, turn) {
+        const flat = turn === 0 || turn === 2;
+        if (!this.cells(0, col, turn))
+            return null;
+        for (let c = Math.min(col, SPAWN[0]); c <= Math.max(flat ? col + 1 : col, SPAWN[1]); c++)
+            if (this.grid[0][c])
+                return null;
+        if (!this.open(0, col, turn))
+            return null;
+        let row = 0;
+        while (this.sinks(row, col, turn))
+            row++;
+        return { col, turn, row };
+    }
+    /** Every place the pair can be steered to and come to rest, sliding and turning as it falls from
+        the middle columns (a pair of one colour has only two ways round). */
     moves() {
         const out = [];
-        const turns = this.pair[0] === this.pair[1] ? [0, 1] : [0, 1, 2, 3];
-        for (const turn of turns)
-            for (let col = 0; col < W; col++)
-                if (this.entry({ col, turn }))
-                    out.push({ col, turn });
-        return out;
+        if (!this.open(0, SPAWN[0], 0))
+            return out;
+        const same = this.pair[0] === this.pair[1];
+        const seen = new Set(), todo = [[0, SPAWN[0], 0]];
+        const id = (r, c, t) => (r * W + c) * 4 + t;
+        seen.add(id(0, SPAWN[0], 0));
+        while (todo.length) {
+            const [r, c, t] = todo.pop();
+            const falls = this.sinks(r, c, t);
+            if (!falls && !(same && t >= 2))
+                out.push({ col: c, turn: t, row: r });
+            const next = [[r, c - 1, t], [r, c + 1, t], [r, c, ((t + 1) % 4)], [r, c, ((t + 3) % 4)]];
+            if (falls)
+                next.push([r + 1, c, t]);
+            for (const [nr, nc, nt] of next) {
+                const k = id(nr, nc, nt);
+                if (nc < 0 || nc >= W || seen.has(k) || !this.open(nr, nc, nt))
+                    continue;
+                seen.add(k);
+                todo.push([nr, nc, nt]);
+            }
+        }
+        return out.sort((p, q) => p.turn - q.turn || p.col - q.col || p.row - q.row);
     }
-    /** Drop the pair, settle the board, and say what it earned. */
-    drop(col, turn = 0) {
+    /** Drop the pair, settle the board, and say what it earned. Without a row, it's dropped straight
+        down the column; with one, it must be a place it can be steered to (moves()). */
+    drop(col, turn = 0, row) {
         const res = { dropped: false, steps: 0, name: '', platforms: 0, lines: 0, cleared: 0, base: 0, mult: 0, points: 0, run: 0, vegas: false, booched: false, boardCleared: false, stages: [] };
-        const cells = this.entry({ col, turn });
-        if (!cells)
+        const at = row === undefined ? this.straight(col, turn) : this.moves().find((m) => m.col === col && m.turn === turn && m.row === row);
+        if (!at)
             return res;
+        const cells = this.cells(at.row, col, turn);
         res.dropped = true;
         this.drops++;
         const a = { id: this.nextId++, c: cells[0][2] }, b = { id: this.nextId++, c: cells[1][2] };
@@ -190,6 +244,7 @@ export class Sailing {
         this.grid[cells[1][0]][cells[1][1]] = b;
         this.pair = this.next;
         this.next = this.newPair();
+        // Lines first, round and round; platforms only once no line is left, then round again.
         let fill = 0, first = true;
         for (;;) {
             this.fall();
@@ -198,46 +253,45 @@ export class Sailing {
                 this.stage(res, 'land', []);
                 first = false;
             }
-            const done = this.platforms.filter((p) => p.targets.every((t) => { const x = this.grid[t.r][t.c]; return !!x && x.c === t.colour; }));
-            if (done.length) {
-                res.steps++;
-                res.platforms += done.length;
-                const ids = [];
-                for (const p of done)
-                    for (const t of p.targets) {
-                        const x = this.grid[t.r][t.c];
-                        res.base += x.fixed ? 5 : 4;
-                        ids.push(x.id);
-                        this.filled.delete(key(p, t));
-                    }
-                this.platforms = this.platforms.filter((p) => !done.includes(p));
-                this.remove(ids);
-                res.cleared += ids.length;
-                this.stage(res, 'platform', ids);
-            }
             const lines = this.lines();
             if (lines.length) {
                 res.steps++;
                 res.lines += lines.length;
-                const cells = new Map();
+                const cs = new Map();
                 for (const l of lines)
                     for (const [r, c] of l)
-                        cells.set(this.grid[r][c].id, this.grid[r][c]);
+                        cs.set(this.grid[r][c].id, this.grid[r][c]);
                 let plain = 0;
-                for (const x of cells.values())
+                for (const x of cs.values())
                     if (x.fixed)
                         res.base += 5;
                     else
                         plain++;
                 res.base += Math.min(4, plain) + 2 * Math.max(0, plain - 4);
-                const ids = [...cells.keys()];
+                const ids = [...cs.keys()];
                 this.remove(ids);
                 fill += this.fills();
                 res.cleared += ids.length;
                 this.stage(res, 'line', ids);
+                continue;
             }
-            if (!done.length && !lines.length)
+            const done = this.platforms.filter((p) => p.targets.every((t) => { const x = this.grid[t.r][t.c]; return !!x && x.c === t.colour; }));
+            if (!done.length)
                 break;
+            res.steps++;
+            res.platforms += done.length;
+            const ids = [];
+            for (const p of done)
+                for (const t of p.targets) {
+                    const x = this.grid[t.r][t.c];
+                    res.base += x.fixed ? 5 : 4;
+                    ids.push(x.id);
+                    this.filled.delete(key(p, t));
+                }
+            this.platforms = this.platforms.filter((p) => !done.includes(p));
+            this.remove(ids);
+            res.cleared += ids.length;
+            this.stage(res, 'platform', ids);
         }
         res.name = chainName(res.steps);
         res.mult = multiplier(res.steps, this.difficulty);

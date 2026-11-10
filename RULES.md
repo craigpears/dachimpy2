@@ -1083,6 +1083,26 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     - Tab and Shift+Tab go round everything being built, both ways; the tabs sit in a bar of their
       own, the one you're on in gold, with "Tab next" beside them.
   The rules for the keys and jumps are in src/den-carp-view.ts (tests/den-carp-view.test.ts).
+- **The Sailing puzzle (10 Nov), as the user remembers playing it.** One module, `src/sailing.ts`,
+  knowing nothing of the den (its bots: `tools/sail-bots.mjs`). Where the module had to guess,
+  the user's memory wins:
+  - **You see the next pair**, "obviously not just the single one in the top left somewhere".
+  - **A pair can be steered as it falls** (YPPedia: "moved or rotated while it is still falling"),
+    so it can come to rest anywhere it can be steered to, under ledges too.
+  - **Difficulty is more and bigger platforms:** "you may start with 2 or 3, you end up with 4 or
+    5 and more ... Doesn't get drastically bigger." Two or three at first, four to six at the top,
+    single or in small blocks, never more than twelve squares.
+  - **A Vegas is doable, even easy if you know how:** "you end up with like Vegas 3s and 4s quite
+    easily." Four to pop, built as a staircase: three of a colour a column, the third's partner
+    hanging over the step below, so each clear drops it onto the next. A test replays a staircase
+    (recorded with `tools/sail-bots.mjs record`) into a Vegas; the staircase bot is the only bot
+    that makes them.
+  - **Platforms break last:** "it's the opposite of what I said, where the platforms break last.
+    So it waits to do kind of the platform break ... it gets like a Vegas before it's even
+    cleared the first platform and then kind of chains down from there." Lines clear and chain
+    first; a filled platform clears only once no lines are left, and its fall can chain on.
+    (YPPedia's "Resolution order" has platforms then lines each round: the user's memory wins
+    here, and the code notes YPPedia's.)
 - **Bilge is the model to aim for (9 Nov).** The user loved it most for being "so faithful and
   close": "really close one-to-one with the puzzle ... it just plays like the puzzle. It's not like
   a dumbed down version at all", while you can still see what's going on in the den. They loved
