@@ -808,7 +808,16 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     weird"; and why two oars in different colours, "are the pieces on the board supposed to
     correspond with the colours of the oars? Maybe we could have 4 colours and 4 oars", so which
     colour gets popped says which oar pulls: "kind of Swordfight, Bilge-esque ... but linked to
-    the [oars]". To reshape with the user before building again.
+    the [oars]".
+    **Shelved (10 Nov):** four colours for four oars has "nothing unique about it"; mirror strokes
+    stays the rowing ("I love the mechanic of the other thing"). This one is "build yourself up
+    with a bit of a weird animation, and it's just confusing". A Rumble-like popping game is no
+    longer a sure thing either. Its test page stays, unlinked, until the user says otherwise.
+    **What was interesting: a drop that nudges (10 Nov).** The pieces looked like compasses at
+    first, and "I almost thought like it was going to push something off to the left, like if
+    you want to nudge something over and drop it in, like that would have been a bit more of a
+    cool mechanic". A seed for a puzzle of its own: what you drop shoves what's there sideways,
+    so you place by pushing as much as by dropping. (To shape with the user.)
     **Weather is where oars make sense (9 Nov):** the wind can drop. Under sail she's quicker, but
     when the wind drops a ship that's all sails is "dead in the water until the wind picks back
     up again", and under sail you "can't go against the wind". Oars keep her moving either way:
