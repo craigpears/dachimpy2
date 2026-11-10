@@ -181,6 +181,18 @@ the site (`.assetsignore` skips `*.md`).
   and the powder barrels it dredges up. The sea's edge stays where it is, and raiders row in to it.
   Bilge itself stays, one module, played at the locks' quays.
 
+- **Her bow out through the gate as a lock drains (10 Nov):** coming back down through the locks,
+  "the front part of the ship is sticking out of the gate when the [lock] is draining." She sits
+  wholly inside the lock's chamber while it drains, clear of its gates, bow and stern.
+- **Back ashore from anywhere near the beach (10 Nov):** "how to get back to shore is not very
+  obvious. I think then it, certainly after you've tidied up bilging, there should be more of
+  [it] appear or something, and like more squares should have that action. So you get to the
+  general vicinity, not one specific square." Now it's only her mooring's one square. Instead,
+  the whole stretch of water along the den's beach takes you ashore (Space there brings her in
+  to her mooring and puts you on the beach), and that stretch can be seen from the sea, a landing
+  place that stands out, not something to hunt for. Goes with "No Bilge on the beach", which
+  clears that end of the beach.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
