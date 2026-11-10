@@ -107,11 +107,13 @@ export function sloopMesh() {
   g.rotation.order = 'YXZ';   // (turned to her heading, then heeled over about her own length)
   return g;
 }
-// The rocks: sea stacks, a clump of boulders on each square.
+// The rocks: sea stacks, a clump of boulders on each square; the harbour's arms at the canal's
+// mouth as rocky spurs out from the cliff (harbourSpur).
 export function seaRocks() {
-  const g = new THREE.Group();
+  const g = new THREE.Group(), harbour = new Set(LAY.HARBOUR.map(([c, r]) => `${c},${r}`));
   for (const id of sail.sea.rocks) {
     if (sail.sea.cliff.has(id) || sail.sea.works.has(id)) continue;   // (the cliff's drawn with the cove: seaWorld; the checkpoint and the wreck by checkpoint.js)
+    if (harbour.has(id)) { const s = harbourSpur(id, harbour); g.add(s.g); sail.rockAt.set(id, s.rocks); continue; }
     const [c, r] = id.split(',').map(Number), x = seaX(c), z = seaZ(r), here = [];
     for (let i = 0; i < 3; i++) here.push(rock(x + (Math.random() - 0.5) * 2.2, 0.2 + Math.random() * 0.4, z + (Math.random() - 0.5) * 2.2, 0.9 + Math.random() * 0.8));
     g.add(...here);
@@ -119,6 +121,41 @@ export function seaRocks() {
   }
   scene.add(g);
   return g;
+}
+/* A square of the harbour's arms (LAY.HARBOUR, 10 Nov: "some protruding rocks, almost like it's a
+   bit of a harbour"): the cliff's own rock running on out from its foot, its top sloping down from
+   just under the clifftop toward the sea and dropping into it at the arm's end, rough-hewn (each
+   corner nudged by where it is, so the squares of an arm meet as one ridge), boulders tumbled
+   round its foot and one on its back. */
+const SPUR = { FOOT: 2.9, FALL: 0.12, LOW: 0.7, END: 0.35, ROUGH: 0.45 };
+const nudge = (x, z, k) => { const s = Math.sin(x * 12.9898 + z * 78.233 + k * 37.719) * 43758.5453; return s - Math.floor(s) - 0.5; };
+function harbourSpur(id, harbour) {
+  const [c, r] = id.split(',').map(Number), S = SAIL.CELL, x0 = seaX(c), z0 = seaZ(r);
+  const face = seaZ(LAY.PLATEAU.r0 - 0.5);   // (the cliff's foot: rows grow out to sea, -z)
+  const end = !harbour.has(`${c},${r - 1}`);   // (nothing further out toward the den: the arm's end)
+  const geo = new THREE.BoxGeometry(S, 1, S, 4, 1, 4), pos = geo.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i) + x0, z = pos.getZ(i) + z0, top = pos.getY(i) > 0, out = z - face;
+    let y = -1;
+    if (top) {
+      y = Math.max(SPUR.LOW, SPUR.FOOT - out * SPUR.FALL) + nudge(x, z, 1) * SPUR.ROUGH;
+      if (end && pos.getZ(i) > S / 2 - 0.01) y = SPUR.END;   // (its end drops into the sea)
+      else if (end && pos.getZ(i) > S / 4 - 0.01) y *= 0.7;
+    }
+    // (rough sides, but tight against the cliff)
+    const dz = out < 0.01 ? -0.3 : nudge(x, z, 2) * SPUR.ROUGH;
+    pos.setXYZ(i, x - x0 + nudge(x, z, 3) * SPUR.ROUGH, y, z - z0 + dz);
+  }
+  geo.computeVertexNormals();
+  const g = new THREE.Group(), body = mesh(geo, stoneM);
+  body.position.set(x0, 0, z0);
+  g.add(body);
+  const rocks = [];
+  const h = Math.max(SPUR.LOW, SPUR.FOOT - (z0 - face) * SPUR.FALL);
+  for (let i = 0; i < 3; i++) rocks.push(rock(x0 + (Math.random() - 0.5) * 3.6, 0.15 + Math.random() * 0.3, z0 + (Math.random() - 0.5) * 3.6, 0.8 + Math.random() * 0.6));
+  rocks.push(rock(x0 + (Math.random() - 0.5) * 1.6, (end ? 0.6 : h) + 0.1, z0 + (Math.random() - 0.5) * 1.6, 0.6 + Math.random() * 0.4));
+  g.add(...rocks);
+  return { g, rocks };
 }
 /* The lay of the sea: the trade winds as streaks of white water racing along their lanes, a yellow
    buoy at the junction, and the high ground the canal's cut through, its cliffs stepping up beside

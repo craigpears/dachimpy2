@@ -184,12 +184,6 @@ the site (`.assetsignore` skips `*.md`).
   same slots on both sides, each port gun straight across from its starboard twin; widen her a
   little if they'd crowd.
 
-- **Into a lock, the oars ship themselves (10 Nov):** "in the locks, it should automatically,
-  once you get through the lock and you figured out the rowing, it should auto switch back to
-  sailing so that it doesn't make it seem like you're having bilge the whole way through." Rowed
-  into a lock, she ships her oars there, so once its gates open she sails on up the canal under
-  sail, not with the rowing boards up again.
-
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map

@@ -68,8 +68,9 @@ describe('sailing: rocks ("just keep it simple as like with a few rocks", 9 Nov)
       // (but a trade wind's squares: she can't stop on a lane, it always sweeps her on; and under
       // sail, not the old wreck's wind zone and the water beyond it, which the wind keeps her out
       // of from this side)
-      // (and the canal, up past its mouth's wind: tests/den-wind.test.ts)
-      const lee = (c: number, r: number) => (r >= LAY.ZONES[0].r0 && c <= LAY.ZONES[0].c1) || s.level(c, r) > 0 || s.isLock(c, r);
+      // (and the canal, up past its mouth's wind, and the harbour that wind fills: tests/den-wind.test.ts)
+      const harbour = s.zoneAt(...LAY.LOCKS[0].at);
+      const lee = (c: number, r: number) => (r >= LAY.ZONES[0].r0 && c <= LAY.ZONES[0].c1) || s.level(c, r) > 0 || s.isLock(c, r) || s.zoneAt(c, r) === harbour;
       for (let c = 0; c < s.cols; c++) for (let r = 0; r < s.rows; r++) if (s.open(c, r)) {
         expect(s.plot(H, c, r, null, true) !== null).toBe(s.windAt(c, r) === undefined);
         if (!lee(c, r)) expect(s.plot(H, c, r) !== null).toBe(s.windAt(c, r) === undefined);

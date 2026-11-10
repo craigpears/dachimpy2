@@ -272,6 +272,7 @@ describe('"staring at a cliff once you go through", "having to bump into the wal
     h.row(true);
     let bumps = 0;
     for (let i = 0; i < out[1] - MOUTH.r; i++) {
+      h.row(true);   // (out again after each lock: she ships them in one, 10 Nov)
       h.stroke(['F']);
       for (let t = 0; t < 300 && (h.strokes.length || h.slot >= 0); t += 0.05) {
         for (const e of h.tick(0.05)) if (e.kind === 'move' && e.bump) bumps++;
@@ -279,6 +280,33 @@ describe('"staring at a cliff once you go through", "having to bump into the wal
       }
     }
     expect([h.pose.c, h.pose.r, bumps]).toEqual([...out, 0]);
+  });
+
+  it('rowed into a lock, she ships her oars and sails on: not rowing the whole way (10 Nov)', () => {
+    // "once you get through the lock and you figured out the rowing, it should auto switch back to
+    // sailing so that it doesn't make it seem like you're having bilge the whole way through."
+    const s = new Sea(9), L = LAY.LOCKS[0], h = new Helm(s, { ...MOUTH });
+    h.row(true);
+    h.stroke(['F', 'F', 'F', 'F']);   // (up the mouth, into the lock, and on out of it)
+    const said: string[] = [];
+    let t = 0;
+    for (; t < 30 && !h.working(); t += 0.05) for (const e of h.tick(0.05)) said.push(e.kind);
+    // Waiting in it to be pumped up, her oars are shipped: the Bilge board's up, not the rowing.
+    expect([h.pose.c, h.pose.r]).toEqual(L.at);
+    expect(h.working()).toBe(h.locks[0]);
+    expect(h.oars).toBe(false);
+    expect(h.strokes).toEqual([]);
+    // Pumped up, the gates open and she makes her move out of it under sail, then waits for you.
+    for (t = 0; t < 120 && h.slot >= 0; t += 0.05) { for (const e of h.tick(0.05)) said.push(e.kind); if (h.working()) h.pump(1); }
+    expect([h.pose.c, h.pose.r]).toEqual(ends(L).high);
+    expect(h.oars).toBe(false);
+    expect(h.idle()).toBe(true);
+    // Nothing said of it (no word of the oars: "Hidden gems, never hinted").
+    expect(said.every((k) => ['turn', 'move', 'push'].includes(k))).toBe(true);
+    // And on up the canal under sail, to the next lock.
+    h.drop(...ends(LAY.LOCKS[1]).low);
+    for (t = 0; t < 30 && h.pin; t += 0.05) h.tick(0.05);
+    expect([h.pose.c, h.pose.r]).toEqual(ends(LAY.LOCKS[1]).low);
   });
 
   it('the side way pushes back: the arm to the hidden cove doubles back off the clifftop, two turns tight together', () => {

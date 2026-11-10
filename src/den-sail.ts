@@ -122,6 +122,19 @@ export const LAY = {
   /** The canal's mouth, at the sea's level: the water up to the first lock, in the high ground's face
       toward the den, out of view from the trade wind's run (kept clear of scattered rocks). */
   CANAL: [[3, 7], [3, 6], [3, 5]] as [number, number][],
+  /** A sheltered harbour at the canal's mouth (10 Nov): rocks jutting out from the cliff's foot
+      either side of it, most of all on its right, the mouth's wind (ZONES) filling the water
+      between them right up to the cliff and the first lock. The user, playtesting the way in: "it
+      just maybe needs a few rocks along the right-hand side so you can't try and, like, sneak around
+      the wind. I mean, you can't, but it kind of feels like you almost can ... almost like it's a
+      bit of a harbour, sheltered area. And like the wind just to expand up to the cliff. At the
+      moment, it's just kind of in the middle of nowhere." Its arms run out from the cliff (row
+      PLATEAU.r0 - 1) toward the den: the left one three squares, the right one four, each two
+      thick at the cliff's foot. Drawn as rocky spurs stepping down from the cliff (js/den/sea.js). */
+  HARBOUR: [
+    [1, 7], [1, 6], [1, 5], [0, 7], [0, 6],
+    [5, 7], [5, 6], [5, 5], [5, 4], [6, 7], [6, 6],
+  ] as [number, number][],
   /** The locks (src/den-lock.ts), in the order she meets them going out, all in one straight line
       out to sea: up the cliff from the canal's mouth, up again to the clifftop, then down through
       the headland beside the checkpoint (each with its high side back toward the den), out onto
@@ -177,7 +190,9 @@ export const LAY = {
       And the canal's mouth (10 Nov: "there should be some wind stopping you from getting to the
       locks on the left as well ... People have got to figure out that they can use the oars to go
       past the wind"): it blows down out of the cut toward the den, so under sail she can't get into
-      the first lock, and coming back down she runs out before it; the oars take her in.
+      the first lock, and coming back down she runs out before it; the oars take her in. It fills
+      the harbour (HARBOUR), wall to wall and up to the cliff, so there's no water beside it that
+      looks like a way round.
       And under the checkpoint's gatehouse (10 Nov: "these checkpoints are supposed to be strong
       things, not things you just casually get through on the first try ... it should be work"):
       its walls take the wind out of her sails, light airs across her, so under sail she ghosts
@@ -185,7 +200,7 @@ export const LAY = {
       src/den-checkpoint.ts); a combo rowed as one still rushes her through. */
   ZONES: [
     { c0: 4, c1: 7, r0: 20, r1: 25, d: 1, s: 2 },
-    { c0: 2, c1: 4, r0: 4, r1: 8, d: 2, s: 2 },
+    { c0: 2, c1: 4, r0: 5, r1: 8, d: 2, s: 2 },
     { c0: 9, c1: 9, r0: 19, r1: 19, d: 1, s: 1 },
   ] as WindZone[],
   /** Rocks out on the water the board grew into. */
@@ -289,6 +304,9 @@ export class Sea {
       near(x, y);
     }
     for (const [c, r] of [LAY.JUNCTION, [LAY.JUNCTION[0], LAY.JUNCTION[1] + 1], ...LAY.CANAL] as [number, number][]) near(c, r);
+    // (and the water round the harbour's arms and in front of it, so its way in is always open and
+    // its arms stand clear, not lost among the scattered rocks)
+    for (const [c, r] of LAY.HARBOUR) near(c, r - 1);
     const { c0, c1, r0, r1, level } = LAY.COVE;
     for (let c = c0; c <= c1; c++) for (let r = r0; r <= r1; r++) { this.cove.add(key(c, r)); this.pounds.set(key(c, r), level); }
     for (const p of LAY.POUNDS) for (const [c, r] of p.at) this.pounds.set(key(c, r), p.level);
@@ -307,7 +325,7 @@ export class Sea {
   private scatter(roll: () => number) {
     const laid = this.wind.size > 0, K = LAY.CHECKPOINT;
     const reef = laid ? Array.from({ length: K.REEF.c1 - K.REEF.c0 + 1 }, (_, i) => key(K.REEF.c0 + i, K.ROW)) : [];
-    this.rocks = new Set([...this.cliff, ...this.works, ...reef, ...[...LAY.SIDES, ...LAY.FAR].filter(() => laid).map(([c, r]) => key(c, r))]);
+    this.rocks = new Set([...this.cliff, ...this.works, ...reef, ...[...LAY.SIDES, ...LAY.FAR, ...LAY.HARBOUR].filter(() => laid).map(([c, r]) => key(c, r))]);
     const H = SAIL.HOME, COLS = SAIL.SCATTER.COLS, ROWS = SAIL.SCATTER.ROWS;
     for (let n = 0; n < SAIL.CLUMPS; n++) {
       let c = Math.floor(roll() * COLS), r = 2 + Math.floor(roll() * (ROWS - 2));
@@ -898,6 +916,7 @@ export class Helm {
         // Bilge), or to drain down or fill from above (by itself), then for its gates.
         if (this.dazed()) break;
         const g = this.gate(this.turn[this.slot]);
+        if (g && (g.need || g.lock.gates > 1e-9) && this.oars && this.sea.isLock(this.pose.c, this.pose.r)) this.ship();
         if (g?.need === 'up') break;
         if (g?.need) { left = g.lock.run(g.need === 'down' ? 0 : 1, left); continue; }
         if (g && g.lock.gates > 1e-9) { left = g.lock.open(left); continue; }
@@ -922,6 +941,19 @@ export class Helm {
       out.push({ kind: 'turn', moves: [...moves] });
     }
     return out;
+  }
+
+  /** Rowed into a lock, she ships her oars there while she waits on it (the user, 10 Nov: "once you
+      get through the lock and you figured out the rowing, it should auto switch back to sailing so
+      that it doesn't make it seem like you're having bilge the whole way through"): the move out
+      of it she's waiting to make stays, and she makes it under sail once its gates open; what else
+      was rowed is let go. Nothing's said. */
+  private ship() {
+    this.oars = false;
+    this.strokes = [];
+    this.pace = WIND.OARS;
+    this.turn = this.turn.slice(0, this.slot + 1);
+    this.told = false;
   }
 
   private begin(out: SailEvent[]) {

@@ -476,3 +476,53 @@ describe('"some wind stopping you from getting to the locks on the left as well"
     expect([d.pose.c, d.pose.r]).toEqual([low[0], low[1] - 1]);
   });
 });
+
+describe('no way to sneak round the wind into the first lock: a sheltered harbour (10 Nov)', () => {
+  // "it just maybe needs a few rocks along the right-hand side so you can't try and, like, sneak
+  // around the wind. I mean, you can't, but it kind of feels like you almost can ... almost like
+  // it's a bit of a harbour, sheltered area. And like the wind just to expand up to the cliff."
+  beforeEach(() => { WEATHER.parked = true; });
+  const game = (seed = 9) => { const s = new Sea(seed); s.breeze = new Wind(9); return s; };
+  const L = LAY.LOCKS[0], { low } = ends(L);
+
+  it('every square beside the mouth\'s wind, on the way in, is rock or cliff (or the canal above): its harbour', () => {
+    for (let seed = 1; seed < 20; seed++) {
+      const s = game(seed), z = s.zoneAt(...L.at)!, inZ = (c: number, r: number) => s.zoneAt(c, r) === z;
+      const walled = (c: number, r: number) => !s.open(c, r) || s.isLock(c, r) || s.level(c, r) > 0;
+      // (its sides, and the cliff at its head; its open end faces the den, downwind)
+      for (let r = z.r0; r <= z.r1; r++) for (const c of [z.c0 - 1, z.c1 + 1]) expect(walled(c, r) || inZ(c, r)).toBe(true);
+      for (let c = z.c0; c <= z.c1; c++) expect(walled(c, z.r1 + 1)).toBe(true);
+      // Its mouth is open water, out of the wind: the way in, toward the den.
+      for (let c = z.c0; c <= z.c1; c++) { expect(s.open(c, z.r0 - 1)).toBe(true); expect(inZ(c, z.r0 - 1)).toBe(false); }
+      // It fills the harbour right up to the cliff: every open square from its mouth to the lock.
+      for (let c = z.c0; c <= z.c1; c++) for (let r = z.r0; r < LAY.PLATEAU.r0; r++) expect(s.open(c, r)).toBe(true);
+      expect(z.r1).toBeGreaterThanOrEqual(LAY.PLATEAU.r0);
+      // Its arms are rocks jutting from the cliff, longest on its right.
+      const arm = (c: number) => LAY.HARBOUR.filter(([x]) => x === c).length;
+      expect(arm(z.c1 + 1)).toBeGreaterThan(arm(z.c0 - 1));
+      for (const [c, r] of LAY.HARBOUR) expect(s.isRock(c, r)).toBe(true);
+    }
+  });
+
+  it('under sail she can\'t get into any of it, from anywhere, not even round its side; at the oars she can', () => {
+    const s = game(), z = s.zoneAt(...L.at)!;
+    for (let c = z.c0; c <= z.c1; c++) for (let r = z.r0; r < LAY.PLATEAU.r0; r++) {
+      expect(s.plot(SAIL.HOME, c, r)).toBeNull();
+      expect(s.plot(SAIL.HOME, c, r, null, true)).not.toBeNull();
+    }
+    // Round its right-hand side and in across the wind: rock.
+    expect(s.open(z.c1 + 2, z.r0)).toBe(true);
+    expect(s.move({ c: z.c1 + 2, r: z.r0, d: 3 }, 'F').bump).toBe(true);
+    // Rowed in from the den, right up the canal into the lock; under sail, no way in.
+    expect(s.plot(SAIL.HOME, ...L.at, null, true)).not.toBeNull();
+    expect(s.plot(SAIL.HOME, ...L.at)).toBeNull();
+  });
+
+  it('the rest of the sea isn\'t cut off: the main lane, the den\'s beach, the way home', () => {
+    const s = game();
+    expect(s.plot(SAIL.HOME, ...LAY.JUNCTION)).not.toBeNull();
+    expect(s.plot({ c: LAY.CHECKPOINT.GATE, r: LAY.CHECKPOINT.ROW - 2, d: 2 }, SAIL.HOME.c, SAIL.HOME.r)).not.toBeNull();
+    // Her way down out of the harbour, before the wind, home.
+    expect(s.plot({ c: low[0], r: low[1], d: (L.up + 2) % 4 }, SAIL.HOME.c, SAIL.HOME.r)).not.toBeNull();
+  });
+});

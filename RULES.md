@@ -321,6 +321,26 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
         blowing down out of the cut toward the den: under sail she can't get into the first lock
         (and the pilot won't take her up the canal), and coming back down she runs out before it.
         The oars take her in. Nothing ever says so.
+        - **A sheltered harbour (10 Nov).** The user, playtesting the way in: "it just maybe needs a
+          few rocks along the right-hand side so you can't try and, like, sneak around the wind. I
+          mean, you can't, but it kind of feels like you almost can ... almost like it's a bit of a
+          harbour, sheltered area. And like the wind just to expand up to the cliff. At the moment,
+          it's just kind of in the middle of nowhere." So two arms of rock jut out from the cliff's
+          foot either side of the mouth (LAY.HARBOUR), the right one the longer (four squares, the
+          left three), each two thick where it meets the cliff, drawn as the cliff's own rock
+          running on out and sloping down into the sea, boulders round its foot. The mouth's wind
+          fills the water between them, wall to wall and right up to the cliff and the lock; its
+          streaks run right up to the rock and the cliff (a zone's streaks fade out only toward
+          open sea). Its open end faces the den, downwind: under sail there's no square of the
+          harbour she can get into, from the front or round either side.
+      - **Into a lock, the oars ship themselves (10 Nov).** The user: "in the locks, it should
+        automatically, once you get through the lock and you figured out the rowing, it should auto
+        switch back to sailing so that it doesn't make it seem like you're having bilge the whole
+        way through." Rowed into a lock, she ships her oars there as she comes to wait on it (to be
+        pumped up, to drain, or for its gates): the move out of it she's waiting to make stays, and
+        she makes it under sail once its gates open; anything else rowed is let go, and the rowing
+        boards don't come back. Then she sails on up the canal. Nothing's said of it (Helm, in
+        `src/den-sail.ts`).
       - **It costs puzzles, not just time:** every lock up is a go of Bilge on its quay, either way
         you go (out, the first two; back, the two through the headland). Going down is free: with
         her in it the lock drains by itself, and a lock left drained that she wants to go down
@@ -439,7 +459,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       wind, but nothing ever says so ("we won't tell anybody that, but they can figure out oars go
       against the wind"): no toast or prompt mentions the oars. Shown plainly but only there: the
       water in it ruffled darker with long white streaks drifting the way it blows, fading out at
-      its edges, and while she's in it her flag streams downwind and her sails answer it (square
+      its edges on the open sea (against rock or cliff they run right up to it), and while she's in it her flag streams downwind and her sails answer it (square
       and full with it behind her, braced round and flatter across it, flogging in irons). No
       arrows. Three so far:
       - **The old wreck's**, beyond the checkpoint to the left, blowing from the left: from the

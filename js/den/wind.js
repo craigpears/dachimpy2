@@ -47,16 +47,27 @@ function streaks() {
 }
 
 // A wind zone's streaks: the same short white dashes, over its water only, running and drifting the
-// way it blows, and fading out toward its edges so it reads as a patch of wind, not a box.
+// way it blows, and fading out toward its edges on the open sea so it reads as a patch of wind, not
+// a box. Against rock, cliff or the canal (the harbour at the canal's mouth, 10 Nov: "like the wind
+// just to expand up to the cliff") they run right up to it.
 function zoneStreaks(z) {
   const S = SAIL.CELL, w = (z.c1 - z.c0 + 1) * S, d = (z.r1 - z.r0 + 1) * S, cx = seaX((z.c0 + z.c1) / 2), cz = seaZ((z.r0 + z.r1) / 2);
   const geo = new THREE.PlaneGeometry(w, d, 24, 24).rotateX(-Math.PI / 2), pos = geo.attributes.position, n = pos.count;
   const uv = geo.attributes.uv, col = new Float32Array(n * 4), fx = DC[z.d], fz = -DR[z.d], TILE = 12, EDGE = 5;
+  // (open sea beyond this square: not rock, cliff, a lock or the canal's water)
+  const sea = sail.sea, open = (c, r) => sea.open(c, r) && !sea.isLock(c, r) && sea.level(c, r) === 0;
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, Math.round(v)));
   for (let i = 0; i < n; i++) {
     const x = pos.getX(i), y = pos.getZ(i);
     // (along the wind is up the texture, where its dashes run, so they drift downwind)
     uv.setXY(i, (x * -fz + y * fx) / TILE, ((cx + x) * fx + (cz + y) * fz) / TILE);
-    const edge = Math.min(w / 2 - Math.abs(x), d / 2 - Math.abs(y)) / EDGE, a = Math.max(0, Math.min(1, edge));
+    // Its square on the board, and how far it is from each edge that has open sea beyond it.
+    const c = clamp((cx + x - SAIL.X0) / S - 0.5, z.c0, z.c1), r = clamp((SAIL.Z0 - cz - y) / S - 0.5, z.r0, z.r1);
+    const gaps = [
+      open(z.c0 - 1, r) ? w / 2 + x : Infinity, open(z.c1 + 1, r) ? w / 2 - x : Infinity,
+      open(c, z.r0 - 1) ? d / 2 - y : Infinity, open(c, z.r1 + 1) ? d / 2 + y : Infinity,   // (out to sea is -z)
+    ];
+    const edge = Math.min(...gaps) / EDGE, a = Math.max(0, Math.min(1, edge));
     col.set([1, 1, 1, a * a * (3 - 2 * a)], i * 4);
   }
   geo.setAttribute('color', new THREE.BufferAttribute(col, 4));
