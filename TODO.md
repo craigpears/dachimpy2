@@ -135,12 +135,9 @@ the site (`.assetsignore` skips `*.md`).
   the treasure, played by its real rules (checked first), with a believable reason for it there.
   (Treasure Haul's real home is a wreck, so it goes at the clifftop lagoon's wreck, the crane's
   place; the cove keeps a chest of its own on the beach. How you get that one: to pin down.)
-
-- **Haul up the wrecked turret's chest by puzzle (9 Nov):** three hits now wreck the turret and
-  a chest floats free, but sailing over it was "not Puzzle Pirates' spirit at all ... you need to
-  have to haul it up ... You need puzzles." So she stops by the chest and Treasure Haul brings it
-  aboard (wired with the lagoon's wreck), paying into the den's doubloons. (What's in it, and
-  whether the turret's rebuilt later: to pin down with the user.)
+- **Treasure Haul should look like Puzzle Pirates' (10 Nov):** "as always, have a double check of
+  the Puzzle Pirates graphics and make it closer": the board, its pieces, the chests and the
+  cursor, checked against the real game's look first.
 
 ## Needs a playtest to pin down
 

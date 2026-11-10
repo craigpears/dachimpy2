@@ -272,6 +272,13 @@ moving. It gives such a nostalgia." What's next:
   able to take these little nifty routes"). Goes with "Ship types with real trade-offs" and
   "Shallow and deep water". (Whether the secret cove stays as well, and how a sloop's choice
   means something before bigger ships come: to shape with the user.)
+  **Bribe your way through (10 Nov):** another way past the checkpoint: haul treasure up from a
+  wreck (Treasure Haul; "go blow up a wreck, get some coins or something") and use it to bribe
+  your way through. So in a race you'd either do some treasure hauling to buy your way past, or
+  run the guns, or take the crane. "That's a way of getting through using treasure haul": the
+  same puzzle as a route as well as a reward, in keeping with "Every other way through costs a
+  puzzle" (RULES.md). (Whether the coins are the den's doubloons or loot of their own, and what a
+  bribe costs: to shape with the user.)
 - **Gunnery at sea, faster than Puzzle Pirates, on timing (9 Nov).** In Puzzle Pirates a round
   of Battle Navigation plays every 35 seconds or so, in four slots, and you know just where a ship
   coming at you will move. The user would like it faster paced: load the guns (on a ship or the
