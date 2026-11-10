@@ -802,6 +802,14 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     oars to be sure, and it comes from the sea itself rather than a tile made for it. (A first go
     is on the sloop's sea, to see how it feels: RULES.md, "The wind, and her oars". Goes with
     "Weather and time of day", under landscapes.)
+    **The wind in one place: a wreck you can see but can't sail to (10 Nov):** with the wind parked
+    across the whole sea ("just getting irritating"), the user would bring it back in one section
+    only, the lagoon say: "maybe it should just be refined to be in a certain section ... that
+    can have the wind. So you can see the shipwreck. So it's kind of there being tempting, but
+    you can't get to it unless you go around the back way. That would be quite cool." A wind dead
+    against her keeps her off the wreck in sight, and the back way round gets her there (whether
+    the oars can beat it: to pin down).
+    Needs the lagoon to be a little board of its own, which it isn't yet (she rests by the wreck).
     **Big ships hit hard, small ships mend fast (9 Nov):** a way to give big and small ships each a
     purpose. A big ship has more cannons, but the only control you really have is to "fire a full
     broadside": far more effective against medium and big ships. Against a small ship it's
