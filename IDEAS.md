@@ -401,6 +401,12 @@ then "she's definitely a penguin side quest".
   "double backflip" is a whirlpool pair that spins her right round twice; the turns she counts
   are the turns the whirlpools make; the penguin in the balaclava is really there, up to
   something, where she said. The funny part is finding out she was right all along.
+- **Her "whoosh" (10 Nov):** her ramble gives away the Vegas without meaning to: "I kind of
+  remember going in the sailing puzzle, doing some sailing, and then whoosh!", with big emphasis,
+  throwing her arms around, "it got really, really big and really sparkly and awesome, and I
+  ended up with a penguin. But then I took a few lefts, too many lefts, and I ended up back on
+  this island", sad face. That's the mechanic, told her way: a big combo, a long rush forward,
+  and the whirlpools' lefts that bring you back.
 - **Where you find her (10 Nov):** off to the right, "just kind of hanging out on her own on a
   little deserted island with ... all her different familiars hanging around her". She's "a very
   animals person ... the familiar version of a cat lady, just with 20 different familiars all

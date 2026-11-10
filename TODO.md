@@ -118,10 +118,6 @@ the site (`.assetsignore` skips `*.md`).
   Carpentry at the checkpoint: "it probably adds a bit more stakes ... you are in a tiny sloop at
   this point, after all."
 
-- **Each starting point in the URL, to share (10 Nov):** "make it so that each starting point is
-  something that I can put into the URL as well, so that I can share that animation with
-  somebody". Every start the cheats offer (and the cutscenes, Dignity's and the map's) gets a link,
-  den.html?at=..., that opens the den straight there.
 
 - **The Sailing puzzle, for Kikkit's quest (10 Nov):** Kikkit's penguin quest is next up once the
   work in hand is done ("that is next up ... I guess you can start some of that now because that

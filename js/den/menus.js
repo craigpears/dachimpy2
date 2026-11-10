@@ -506,16 +506,37 @@ function cheatPirates() {
   });
   toast(`On the beach: ${names.join(' and ')}`);
 }
+// [name, what it does, its link's name if it's a starting point (den.html?at=...)]
 const CHEATS = [
   ['Beat this wave', cheatBeat],
   ['Next wave now', () => (G.phase === 'wave' ? toast('A wave\'s on: beat it first', true) : startWave())],
   ['Mend every hole', cheatMend],
-  ['Build the shack', cheatShack],
-  ["The captain's map scene", cheatMapScene],
-  ['Go sailing', cheatSail],
-  ["Dignity's scene", cheatDignity],
-  ['Real pirates on the beach', cheatPirates],
+  ['Build the shack', cheatShack, 'shack'],
+  ["The captain's map scene", cheatMapScene, 'map-scene'],
+  ['Go sailing', cheatSail, 'sea'],
+  ["Dignity's scene", cheatDignity, 'dignity'],
+  ['Real pirates on the beach', cheatPirates, 'pirates'],
 ];
+/* Every starting point has a link, to share (the user, 10 Nov: "make it so that each starting point
+   is something that I can put into the URL as well, so that I can share that animation with
+   somebody"): den.html?at=dignity, say, opens the den straight into Dignity's scene. Choosing one
+   from the cheats puts its link in the address bar, ready to copy. */
+const STAGE_AT = ['start', 'walk', 'gun-tower', 'built'];
+function linkTo(at) {
+  try {
+    const u = new URL(location.href);
+    u.searchParams.set('at', at);
+    history.replaceState(history.state, '', u);
+  } catch { /* (no address bar to put it in: never mind) */ }
+}
+/** Opens the den at the starting point a link names (?at=...): false if there's none by that name. */
+export function startAt(at) {
+  const s = STAGE_AT.indexOf(at), c = CHEATS.find((x) => x[2] === at);
+  if (s >= 0) skipTo(s);
+  else if (c) c[1]();
+  else return false;
+  return true;
+}
 export function cheatPanel(on) {
   if (on && online()) { toast('Cheats are for playing alone', true); return; }
   if (on && G.over) return;
@@ -526,7 +547,9 @@ export function cheatPanel(on) {
 const cheatButtons = (el, list) => $(el).replaceChildren(...list.map(([name], i) => {
   const b = document.createElement('button');
   b.textContent = name;
-  b.onclick = () => { cheatPanel(false); (el === 'cheat-stages' ? skipTo : (j) => CHEATS[j][1]())(i); };
+  const at = el === 'cheat-stages' ? STAGE_AT[i] : CHEATS[i][2];
+  if (at) b.title = `Link: den.html?at=${at}`;
+  b.onclick = () => { cheatPanel(false); (el === 'cheat-stages' ? skipTo : (j) => CHEATS[j][1]())(i); if (at) linkTo(at); };
   return b;
 }));
 cheatButtons('cheat-stages', STAGES);

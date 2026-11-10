@@ -116,6 +116,12 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 
 Unlisted for now: reachable only by its URL until the user says to put it in the nav.
 
+- **Every starting point has a link, to share (10 Nov).** "Make it so that each starting point is
+  something that I can put into the URL as well, so that I can share that animation with
+  somebody." `den.html?at=` and a name opens the den straight there: the cheats' stages (`start`,
+  `walk`, `gun-tower`, `built`) and their starts and scenes (`shack`, `map-scene`, `sea`,
+  `dignity`, `pirates`). Choosing one from the cheats puts its link in the address bar, and its
+  button's tooltip shows it. A name that isn't one says so. A new scene or start gets a name too.
 - **Hidden gems, never hinted (10 Nov).** The user, of the checkpoint's "I wonder if there's another
   way round" and "Run it, row it, or knock its guns out": "I don't like it giving you a hint as to
   what you can do ... I like these just to be hidden gems that you work out ... make the fact that
