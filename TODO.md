@@ -183,6 +183,18 @@ the site (`.assetsignore` skips `*.md`).
   Her look is ready: `makePirate({ look: PIRATES.Dignity })` (RULES.md, "Real pirates are only
   looks"), placed in `js/den/checkpoint.js`, once the checkpoint's current work has landed.
 
+- **A real chance to get past the checkpoint (10 Nov):** "you need some chance to actually sail
+  through. I think getting hit once or twice is funny, but they hit like there's no opportunity to
+  really get past. I think we said that before a bit. That's just a bit too much going on here."
+  Running the checkpoint should be hard but possible: a hit or two on the way, not one after
+  another, so a bold run past the guns can make it.
+
+- **The rowing board's look: under water, rowers in scale, side by side (10 Nov):** no bilge water
+  line on the rowing boards ("everything should be under the water, really, for this mode"); two
+  little rowers and two oars, "actually lined up", each oar in its rower's hands; the rowers the
+  same size as you ("why are they so mini and you're like a giant on the back of the ship?"); and
+  "make the ship a little wider so the little guys can sit next to each other".
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
