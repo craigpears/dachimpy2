@@ -210,6 +210,22 @@ the site (`.assetsignore` skips `*.md`).
   same size as you ("why are they so mini and you're like a giant on the back of the ship?"); and
   "make the ship a little wider so the little guys can sit next to each other".
 
+- **Rowing needs a look of its own, and a clearer compass (10 Nov):** "I like the feel and the
+  look of the puzzle so far", but "people are just going to get very confused given how visually
+  identical it is to the [Bilging] ... it can have some similarity, but". And "the next move compass
+  is a bit confusing, and like the left right arrows are very tiny on it ... that's really not very
+  clear or intuitive." So rowing gets its own pieces and board, plainly kin to Bilge but not to be
+  mistaken for it, and which way she's about to go reads at a glance, big. Also asked: "didn't we
+  talk about having fewer pieces? ... I see the pentagon piece, so ... isn't that like the 7th?"
+  (The live site still had the old split board, seven kinds; mirror strokes deals five, without
+  the pentagon.)
+
+- **Sunk at the checkpoint, row home (10 Nov):** agreed (IDEAS.md, "Sunk at the checkpoint"):
+  "it should be a short row home ... you've got the trade winds blowing you back, haven't you? So
+  all you need to do is a quick row to get onto the trade winds." Sunk, you bob up in a little
+  rowboat, row by mirror strokes the short way to the trade winds, and they carry you home; the
+  sloop's waiting at the den. After Dignity's cutscene.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
