@@ -218,10 +218,27 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       guns quietens it ten seconds. The third hit wrecks it for good, a shot fired riding the
       winds counting too ("plenty of people are going to try and see if they can time it"): the gun
       topples, the battlements fly off and the tower sinks to a smoking stump, and a chest floats
-      free by the wreck. Sailing over it wins nothing; it's to be hauled up by puzzle (see "Every
+      free by the wreck. Sailing over it wins nothing; it's hauled up by puzzle (see "Every
       reward is won by a puzzle"). It holds fire while she's dazed or at the lock, and for five
       seconds once she's patched, so she can get going (9 Nov: it fired again "literally before
       you can do anything about it").
+    - **Hauling up the turret's chest (10 Nov):** stop her on the chest's square or one beside
+      it and Space starts Treasure Haul (the real puzzle's rules; sailing past or over it never
+      starts it). The board lies on the water alongside her on the chest's side, its top row along
+      her side, and you look down on it from beyond, back toward her, so the treasure rises up the
+      screen toward her. The chest is on the board, at its foot in the middle, with forty coins it
+      spilled round it; no other chests come up, and now and then a ruby or an emerald does (they
+      help raise the chest). Haul the chest to the top row (it swings up onto her deck) and every
+      coin up, and "The chest's aboard! N doubloons": 25, and one more for every 40 points the haul
+      scored, 60 at most. Esc leaves it: the chest stays where it is and its board as you left it,
+      to come back to. The sailing bar's hidden while you haul. Drawn after the real puzzle (the
+      user, 10 Nov: "as always, have a double check of the Puzzle Pirates graphics and make it
+      closer"; YPPedia's screenshots): a rope cargo net hung from her rail, a thin silver frame,
+      ropes down its sides, seaweed at its foot; the olive square-holed coin, the silver crossed
+      cutlasses, the gold cross and the tan eight-sided coin with a crowned head; an octagon ruby
+      and an emerald-cut emerald; an iron-bound lattice chest with a big padlock; a red and yellow
+      cursor; coins hauled fly up the board toward her. Rules: `src/den-haul.ts`; the board
+      in the world: `js/den/treasure.js`, ready for the clifftop lagoon's wreck.
     - **Dazed, not damaged:** a hit holes her ("Hit! She's holed: patch her to sail on"): she
       finishes the move she's on (or the wind's ride), then waits till you patch the hole in her
       deck by Carpentry, a whole hole to fill, with the wall's rules (a piece covers at least one

@@ -149,10 +149,6 @@ the site (`.assetsignore` skips `*.md`).
   the treasure, played by its real rules (checked first), with a believable reason for it there.
   (Treasure Haul's real home is a wreck, so it goes at the clifftop lagoon's wreck, the crane's
   place; the cove keeps a chest of its own on the beach. How you get that one: to pin down.)
-- **Treasure Haul should look like Puzzle Pirates' (10 Nov):** "as always, have a double check of
-  the Puzzle Pirates graphics and make it closer": the board, its pieces, the chests and the
-  cursor, checked against the real game's look first.
-
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map

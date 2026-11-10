@@ -11,6 +11,7 @@ import { chart, cine } from './map.js';
 import { SEA_X0, seaX, seaZ, SLOOP_DECK, sail, LIFT, liftAt, sloopMesh, seaRocks, seaWorld, turretLook, turretFall, floatChestMesh, pinMesh, dotMat, dotMine, dotGeo, hoverMat, TOK } from './sea.js';
 import { hold, holdShut, holdKey, holdHover, holdSwap, holdTick, patch, deckHoleShape, patchClear, patchShut, patchPlace, patchHover, patchTick } from './sea-puzzles.js';
 import { online } from './crew.js';
+import { haul, haulShut, haulPrompt, canHaulTurret, haulTurret } from './treasure.js';
 import { deco, decoMode } from './menus.js';
 import { sailView, patchView, setPaused, denLets } from '../den.js';
 
@@ -53,6 +54,8 @@ export function sailReset() {
   sail.shots = [];
   sail.said = {};
   holdShut();
+  if (haul.on) haulShut();
+  sail.salvage = null;
   if (patch.on) patchShut();
   patchClear();
   denLets.sailView = 0;
@@ -134,6 +137,7 @@ export function sailKey(key) {
   if (key === 's' || key === 'arrowdown' || key === 'backspace') sail.helm.unput();
   else if (key === 'escape') { sail.helm.stop(); toast('Pin pulled up: she\'ll stop when this turn\'s done'); }
   else if (key === 'h') { sail.helm.drop(SAIL.HOME.c, SAIL.HOME.r); if (sail.helm.pin) toast('Heading home to the cove'); }
+  else if ((key === ' ' || key === 'enter') && canHaulTurret()) haulTurret();
   else if ((key === ' ' || key === 'enter') && atHome() && sail.helm.slot < 0) ashore();
   else if (key === 'z' || key === 'c') keys.add(key);
   else if (key === 'p') setPaused(true);
@@ -144,6 +148,7 @@ export function sailKey(key) {
 export function sailPrompt() {
   if (nearSloop()) return 'Space: board the old sloop';
   if (!sail.on) return '';
+  if (haul.on) return haulPrompt();
   const h = sail.helm, held = h.held();
   if (held === 'daze') {
     const hd = patch.hand, f = hd && patch.hole?.fit(hd.cells, patch.r, patch.c);
@@ -155,6 +160,7 @@ export function sailPrompt() {
   if (held === 'down') return 'The lock\'s draining down to the sea';
   if (held === 'gates') return 'The lock gates are swinging open';
   if (atHome() && h.slot < 0 && !h.next().length) return 'At her mooring · Space: go ashore · click the sea to drop a pin';
+  if (canHaulTurret()) return 'The turret\'s chest · Space: haul it aboard (Treasure Haul) · click the sea to drop a pin';
   if (h.pin) return 'Under way to the pin';
   if (h.slot >= 0) return 'Under way';
   return 'Click the sea to drop a pin, or put in moves with W A D · Q E: fire';
@@ -236,6 +242,10 @@ export function sailTick(dt) {
       if (e.kind === 'fire') turretFire(e.to);
       else turretLand(e.to, e.hit);
     }
+    // Stopped by the turret's chest: say how to haul it (only when you're there; never started for you).
+    const byChest = canHaulTurret();
+    if (byChest && !sail.byChest) toast('By the turret\'s chest: Space to haul it aboard');
+    sail.byChest = byChest;
     if (sail.bumpT > 0 && (sail.bumpT -= dt) <= 0) { worldLets.shake = 0.3; toast('Bump! Rocks', true); }
     sail.guns.tick(dt);
   }
@@ -260,7 +270,7 @@ export function sailTick(dt) {
     const ch = sail.turret.chest;
     if (ch) sail.chestG ||= floatChestMesh();
     if (sail.chestG) {
-      sail.chestG.visible = !!ch;
+      sail.chestG.visible = !!ch && !haul.on;   // (while you haul, it's on the board)
       if (ch) { const tt = performance.now() / 1000; sail.chestG.position.set(seaX(ch[0]), 0.05 + Math.sin(tt * 1.6) * 0.1, seaZ(ch[1])); sail.chestG.rotation.set(Math.sin(tt * 1.1) * 0.08, 0.4 + Math.sin(tt * 0.5) * 0.2, Math.sin(tt * 1.3) * 0.08); }
     }
   }

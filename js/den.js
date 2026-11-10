@@ -25,6 +25,7 @@ import { MAP_D, MAP_W, chart, cine, mapView, cineCam, cineView, nearMap, openMap
 import { seaX, seaZ, sail } from './den/sea.js';
 import { nearSloop, board, ashore, sailReset, sailClick, sailHover, sailKey, sailTick } from './den/sailing.js';
 import { hold, holdSwap, patch, deckHoleShape, patchTurn, patchPlace, patchKey } from './den/sea-puzzles.js';
+import { haul, haulKey, haulHover, haulSwap, haulTick, haulCam, haulTurret } from './den/treasure.js';
 import { net, online, guest, isHost, send, updateMates, sendMe, snapshot, followRaider, sendSync, onNet, joinCrew, leaveCrew } from './den/crew.js';
 import { deco, decoMode, decoMove, decoClick, decoTurn, dress, dressPanel, dressRows, lookChanged, applyDen, buildAll, tileFor, fillFrame, cheats, skipTo, cheatPanel } from './den/menus.js';
 
@@ -61,6 +62,8 @@ addEventListener('keydown', (e) => {
   // The cutscene: Space or Esc skips it; nothing else.
   if (cine) { if ([' ', 'escape', 'enter'].includes(key)) { e.preventDefault(); if (!e.repeat) cineEnd(true); } return; }
   if (chart.on && !deco.on) { e.preventDefault(); mapKey(key); return; }
+  // Treasure Haul: its own keys (P still pauses).
+  if (haul.on) { e.preventDefault(); if (!haulKey(key, e) && key === 'p' && !e.repeat) setPaused(true); return; }
   // At sea: the helm's keys, and the view's.
   if (sail.on) { e.preventDefault(); if (patch.on && patchKey(key, e)) return; if (!e.repeat) sailKey(key); return; }
   if (key === 'p' && !deco.on) { setPaused(true); return; }
@@ -117,6 +120,7 @@ function deckCellAt(x, y) {
 renderer.domElement.addEventListener('mousemove', (e) => {
   if (wm && keyAt) { if (Math.hypot(e.clientX - keyAt.x, e.clientY - keyAt.y) < 24) return; worldLets.keyAt = null; }
   if (deco.on) { decoMove(e); return; }
+  if (haul.on) { haulHover(e.clientX, e.clientY); return; }
   if (sail.on) { sailHover(e.clientX, e.clientY); return; }
   if (bilge.on) { bilgeHover(e.clientX, e.clientY); return; }
   ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1), camera);
@@ -146,6 +150,7 @@ renderer.domElement.addEventListener('mousedown', (e) => {
   if (deco.on) { if (e.button === 2) drag = { x: e.clientX, y: e.clientY, moved: false, deco: e }; else decoClick(e); return; }
   if (e.button === 2) { drag = { x: e.clientX, y: e.clientY, moved: false }; return; }
   if (e.button !== 0 || G.over || cine) return;
+  if (haul.on) { haulHover(e.clientX, e.clientY); haulSwap(); return; }
   if (sail.on) { sailClick(e.clientX, e.clientY); return; }
   if (chart.on) { chart.on = false; return; }
   if (bilge.on) { bilgeHover(e.clientX, e.clientY); bilgeSwap(); return; }
@@ -250,7 +255,7 @@ const camAt = new THREE.Vector3(0, 7.4, 14.2), camLook = new THREE.Vector3(0, 1.
 camera.position.copy(camAt);
 export let deckView = 0, beachView = 0, viewCam = null;
 export let swordView = 0, bilgeView = 0;
-export let sailView = 0, holdView = 0;
+export let sailView = 0, holdView = 0, haulView = 0;
 
 // Other parts of the den assign to these lets through this, as an imported binding can't be assigned.
 export const denLets = {
@@ -442,6 +447,7 @@ function update(dt) {
 
   mapTick(dt);
   sailTick(dt);
+  haulTick(dt);
 
   /* Camera follows the pirate, looking at the wall and a little over it. Up on the rampart it
      swings up high to look down over the wall at the raiders. The player can turn it (Z/C or
@@ -562,6 +568,18 @@ function update(dt) {
     d = Math.atan2(Math.sin(d), Math.cos(d));
     yaw = y0 + d * patchView;
   }
+  // Treasure Haul: down onto the board from beyond it, looking back toward whoever's hauling.
+  haulView += ((haul.on ? 1 : 0) - haulView) * Math.min(1, dt * 3);
+  if (haulView > 0.001 && haul.group?.parent) {
+    const hc = haulCam();
+    look.lerp(hc.look, haulView);
+    dist += (hc.dist * view.zoom - dist) * haulView;
+    tilt += (hc.tilt - tilt) * haulView;
+    const y0 = Math.atan2(Math.sin(yaw), Math.cos(yaw));
+    let d = hc.yaw - y0;
+    d = Math.atan2(Math.sin(d), Math.cos(d));
+    yaw = y0 + d * haulView;
+  }
   // The cutscene's own shots.
   if (cine) mapLets.cineCam = cine.cam;
   mapLets.cineView += ((cine ? 1 : 0) - cineView) * Math.min(1, dt * 2.5);
@@ -676,6 +694,6 @@ requestAnimationFrame(frame);
 
 // For poking at it from the console.
 window.den = { tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { worldLets.myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, swordReward, swordBreak, lumber, toLumber, repairAll, newGame, raiders, G, get carry() { return carry; }, get patch() { return patch; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
-  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, hold, holdSwap, board, ashore, patch, patchKey, patchPlace, deckHoleShape,
+  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, hold, holdSwap, board, ashore, patch, patchKey, patchPlace, deckHoleShape, haul, haulSwap, haulTurret,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };

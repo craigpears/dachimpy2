@@ -29,7 +29,7 @@
     body.sailing .toolbox, body.sailing .boards, body.sailing .keys, body.sailing .intro, body.sailing .gunhelp, body.sailing #labels, body.sailing .banner { display: none; }
     body.sailing.patching .toolbox { display: flex; }   /* patching her deck: the same tray as ashore, a bit bigger */
     body.sailing.patching .tool { width: 84px; height: 86px; font-size: 13px; }
-    body.sailing.patching .sailhud, body.sailing.quay .sailhud { display: none; }   /* (nothing but the puzzle while you patch her, or bilge at the lock) */
+    body.sailing.patching .sailhud, body.sailing.quay .sailhud, body.hauling .sailhud { display: none; }   /* (nothing but the puzzle while you patch her, bilge at the lock, or haul) */
     .sailhud .turns { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; align-items: center; }
     .sailhud .gun { position: relative; overflow: hidden; height: 34px; padding: 0 10px; border-radius: 6px; border: 1px solid #6b4e32; background: #2a1c11; display: flex; gap: 6px; align-items: center; font: 700 14px 'Alegreya Sans'; color: var(--dim); }
     .sailhud .gun.ready { color: #f3ecdc; border-color: var(--gold); }

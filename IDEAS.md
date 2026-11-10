@@ -284,6 +284,13 @@ moving. It gives such a nostalgia." What's next:
   the helm steers left and right, "but if somebody starts doing things in sailing or rigging,
   then that can interact", so the crew's puzzles feed her speed and her moves, as the rowing
   board now feeds her oars. ("That's full of ideas here": to shape with the user.)
+  **And in real time, not stored up (10 Nov):** "make it a bit more real-time": the navigator
+  still puts in the moves, left and right, but "instead of them being stored up by the puzzles,
+  you know, the things actually happen when the things happen in the puzzle. So if you clear a
+  platform, the ship actually executes one of its moves", like a gust of wind in real time. The
+  rowing board already works this way (a clear pulls the oars there and then), so sailing could
+  follow it: the crew's clears drive the queued moves as they land. ("I'm just really going out
+  crazy with ideas": to shape with the user.)
 - **Gunnery at sea, faster than Puzzle Pirates, on timing (9 Nov).** In Puzzle Pirates a round
   of Battle Navigation plays every 35 seconds or so, in four slots, and you know just where a ship
   coming at you will move. The user would like it faster paced: load the guns (on a ship or the
