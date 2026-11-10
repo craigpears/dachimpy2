@@ -407,6 +407,14 @@ then "she's definitely a penguin side quest".
   ended up with a penguin. But then I took a few lefts, too many lefts, and I ended up back on
   this island", sad face. That's the mechanic, told her way: a big combo, a long rush forward,
   and the whirlpools' lefts that bring you back.
+- **A fighting chance, and progress you can feel (10 Nov):** "give people a bit of a fighting
+  chance", so you can "accidentally work out, oh, I did a double and it went forward double and
+  got me past one of the whirlwinds". Not straight back to the start after that ("immediately
+  sucked me into the wind and spat me back out again ... would be a bit too harsh"): "there needs
+  to be some sense of, oh, I've made progress figuring out part of this." So a smaller combo
+  carries her a little way, far enough to clear one whirlpool, and what you've cleared stays
+  cleared (the next whirlpool or gust sends you back to the last one you got past, not to the
+  island). The big rush is only needed for the last, widest stretch.
 - **Where you find her (10 Nov):** off to the right, "just kind of hanging out on her own on a
   little deserted island with ... all her different familiars hanging around her". She's "a very
   animals person ... the familiar version of a cat lady, just with 20 different familiars all
