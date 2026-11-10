@@ -57,7 +57,9 @@ export const DIGNITY = {
     "Halt!"; "...oh. Pirates."; "Look lively!" to Bella, who chatters and scampers down to the gun,
     salutes, lights the fuse and covers her ears; the shot (the camera with it, out to the sloop)
     and its splash; back to Bella at her gun for her proud little pose; then Dignity's giggle, and
-    Bella scampering home to her shoulder. */
+    Bella scampering home to her shoulder. The end isn't rushed (the user, 10 Nov: "the giggling
+    monkey or her giggling at the end all go by very quickly"): Bella's proud pose and Dignity's
+    giggle get time to land. */
 export const BEATS = {
   lower: 1.7,
   halt: 2.1,
@@ -70,11 +72,11 @@ export const BEATS = {
   ears: 10.0,
   fire: 10.5,
   splash: 11.65,
-  back: 12.15,
-  proud: 12.15,
-  giggle: 13.15,
-  home: 13.85,
-  end: 17,
+  back: 12.6,
+  proud: 12.6,
+  giggle: 15.0,
+  home: 15.8,
+  end: 21.5,
 } as const;
 
 /** Seconds Bella takes to scamper down to the gun (off Dignity's shoulder, along the gatehouse's

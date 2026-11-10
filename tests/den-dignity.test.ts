@@ -70,15 +70,27 @@ describe('her cutscene ("go all in ... Bella fires it", 10 Nov)', () => {
     expect(said).toEqual([SAYS.halt, SAYS.oh, SAYS.lively, SAYS.giggle]);
   });
 
+  it('the giggling monkey and her giggle at the end don\'t go by too quickly (10 Nov)', () => {
+    // "things like the giggling monkey or her giggling at the end all go by very quickly"
+    let proud = 0, giggle = 0;
+    for (let t = 0; t < BEATS.end; t += 0.01) {
+      const s = sceneAt(t);
+      if (s.bella === 'proud') proud += 0.01;
+      if (s.beat === 'giggle') giggle += 0.01;
+    }
+    expect(proud).toBeGreaterThan(2);
+    expect(giggle).toBeGreaterThan(5.5);
+  });
+
   it('leaves each line up long enough to read', () => {
     const up = (line: string) => { let n = 0; for (let t = 0; t < BEATS.end; t += 0.01) if (sceneAt(t).says === line) n += 0.01; return n; };
     for (const line of [SAYS.halt, SAYS.oh, SAYS.lively]) expect(up(line)).toBeGreaterThan(line.length * 0.04);
     expect(up(SAYS.giggle)).toBeGreaterThan(3.5);
   });
 
-  it('is short: about fifteen seconds ("go all in", 10 Nov)', () => {
+  it('is short: about twenty seconds ("go all in", 10 Nov)', () => {
     expect(BEATS.end).toBeGreaterThan(9);
-    expect(BEATS.end).toBeLessThanOrEqual(17);
+    expect(BEATS.end).toBeLessThanOrEqual(22);
     expect(sceneAt(BEATS.end - 0.01).done).toBe(false);
     expect(sceneAt(BEATS.end).done).toBe(true);
   });

@@ -116,6 +116,9 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 
 Unlisted for now: reachable only by its URL until the user says to put it in the nav.
 
+- **Your pirate stays where you turn them (10 Nov).** In the pirate maker your pirate turns slowly
+  on their own, but once you drag them round they stay put (the user: "it keeps rotating. I can't
+  make it stay. That's really frustrating ... if you drag it, it should stick"), till it's next opened.
 - **Only the cheats asked for (10 Nov).** Of "Copy the deal" and "Real pirates on the beach": "What
   on earth is this ...?", "I never asked for that cheat." The cheats menu holds only what the
   user asked for (the stages, and skips to get to a scene). A tool for checking my own work stays
@@ -794,7 +797,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   monkey is the one that fires the cannon at you"; and, seeing it: "I love it. The cheeky giggle
   and the spyglass, definitely complete it." She stands on top of the gatehouse's arch, the
   Empire's flag behind her. **The first time you sail within sight of it from the cove's side**
-  (where the trade wind drops you), a cutscene of about sixteen seconds, black bars, **Space or
+  (where the trade wind drops you), a cutscene of about twenty seconds, black bars, **Space or
   Esc skips it**: the camera finds her with her spyglass up, sweeping the horizon; she lowers it
   and starts ("Halt! Imperial checkpoint. State your busi..."), a hand to her forehead ("...oh.
   Pirates. It's always pirates."), then to Bella on her shoulder, pointing her spyglass at you:
@@ -807,7 +810,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   she salutes, lights the fuse with a little linstock, covers her ears, and the warning shot
   comes from that gun's muzzle, the camera following it out to the sloop: it lands just short of
   her bow, a column of water and spray over her deck, and misses. Back to Bella's proud little
-  pose on the gun (a fist pumped, "Eek!"), then Dignity's giggle, a hand to her mouth: "Hee hee!
+  pose on the gun (a fist pumped, "Eek!"), then Dignity's giggle (neither rushed: the user, 10 Nov,
+  "the giggling monkey or her giggling at the end all go by very quickly"; Bella's pose holds over
+  two seconds, the giggle over five), a hand to her mouth: "Hee hee!
   Oops. That was a warning shot. Mostly. Come any closer and the next ones won't be.", wagging
   her spyglass at you as Bella scampers back up to her shoulder. What the checkpoint has to say
   waits till the cutscene's over. After it, **a line over her head as things

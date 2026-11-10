@@ -161,7 +161,7 @@ $('deco-flag').onclick = () => { decoMode(false); dressPanel(true, 'den', 'flag'
 /* "Your pirate": a turning preview of your pirate, with what to wear chosen from Puzzle Pirates'
    own tailor in its dyes, a familiar for your shoulder, and the den's flag and house paint. Kept
    in this browser; crewmates see your look, and the den's dress is shared by the crew. */
-export const dress = { open: false, tab: 'pirate', r: null, scene: null, cam: null, model: null, yaw: 0.6, drag: null };
+export const dress = { open: false, tab: 'pirate', r: null, scene: null, cam: null, model: null, yaw: 0.6, drag: null, held: false };
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 function dressInit() {
   if (dress.r) return;
@@ -180,9 +180,12 @@ function dressInit() {
   fp.position.set(-0.9, 0, -0.9);
   dress.scene.add(ground, fp);
   dress.cam = new THREE.PerspectiveCamera(30, 1, 0.1, 30);
-  cv.addEventListener('pointerdown', (e) => { dress.drag = e.clientX; cv.setPointerCapture(e.pointerId); });
+  // Dragged round, your pirate stays where you leave them (the user, 10 Nov: "it keeps rotating. I can't
+  // make it stay"): the slow turn stops till the wardrobe's next opened.
+  cv.addEventListener('pointerdown', (e) => { dress.drag = e.clientX; dress.held = true; cv.setPointerCapture(e.pointerId); });
   cv.addEventListener('pointermove', (e) => { if (dress.drag == null) return; dress.yaw += (e.clientX - dress.drag) * 0.012; dress.drag = e.clientX; });
   cv.addEventListener('pointerup', () => { dress.drag = null; });
+  cv.addEventListener('pointercancel', () => { dress.drag = null; });
 }
 function dressModel() {
   if (dress.model) dress.scene.remove(dress.model.g);
@@ -201,7 +204,7 @@ function dressFrame(now) {
   dress.model.g.visible = !denMode;
   if (denMode) { dress.cam.position.set(-0.1, 1.75, 2.6); dress.cam.lookAt(-0.35, 1.75, -0.9); }
   else { dress.cam.position.set(fam ? 0.2 : 0, 1.4, 4.5); dress.cam.lookAt(fam ? 0.1 : 0, 1.02, 0); }   // (a familiar's on the left shoulder)
-  if (dress.drag == null) dress.yaw += dt * 0.35;
+  if (!dress.held) dress.yaw += dt * 0.35;
   dress.model.g.rotation.y = dress.yaw;
   familiarTick(dress.model.fam, dt);
   dress.r.render(dress.scene, dress.cam);
@@ -209,6 +212,7 @@ function dressFrame(now) {
 }
 export function dressPanel(on, mode = 'pirate', tab = null) {
   dress.open = on;
+  if (on) dress.held = false;
   $('dress').classList.toggle('on', on);
   palette(null);
   if (!on) return;
