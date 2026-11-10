@@ -160,15 +160,6 @@ the site (`.assetsignore` skips `*.md`).
   I've been working on, what it's got in there so far." Screenshots (and short clips, maybe) of each
   part, taken from its starting-point link, with a line on each; pirate names only.
 
-- **A sheltered harbour at the canal's mouth (10 Nov):** playtesting the way into the first
-  lock: "it just maybe needs a few rocks along the right-hand side so you can't try and, like,
-  sneak around the wind. I mean, you can't, but it kind of feels like you almost can. Maybe it just
-  needs some protruding rocks, almost like it's a bit of a harbour, sheltered area. And like the
-  wind just to expand up to the cliff. At the moment, it's just kind of in the middle of nowhere."
-  So rocks jut out from the cliff either side of the canal's mouth, most of all on its right, making
-  a little harbour, and the mouth's wind fills it right up to the cliff and the first lock: no
-  gap beside the wind that looks like a way round it.
-
 - **Start something where you're looking, not at the foot of the screen (10 Nov):** "Still got to
   fix that carpentry hauling up thing. Like, it should be in the middle of the screen where I'm
   looking so that I can click on it and start it. It should not be a space along the bottom ...
@@ -192,6 +183,12 @@ the site (`.assetsignore` skips `*.md`).
   slots each side. I don't know if it needs to make the ship a bit wider." Her guns stand in the
   same slots on both sides, each port gun straight across from its starboard twin; widen her a
   little if they'd crowd.
+
+- **Into a lock, the oars ship themselves (10 Nov):** "in the locks, it should automatically,
+  once you get through the lock and you figured out the rowing, it should auto switch back to
+  sailing so that it doesn't make it seem like you're having bilge the whole way through." Rowed
+  into a lock, she ships her oars there, so once its gates open she sails on up the canal under
+  sail, not with the rowing boards up again.
 
 ## Needs a playtest to pin down
 
