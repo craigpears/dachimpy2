@@ -539,6 +539,34 @@ To shape with the user much later.
 Little side quests, like rescuing a capybara by dredging out a reef (a friend's idea). The friend
 you rescue then hangs around your den, so finished quests add up into a den full of characters.
 
+
+## A Puzzle Pirates wedding: decorating and dressing up as a side quest (10 Nov, "a must")
+
+The user: "we really do need to showcase something here on the more, make, I guess, the decorating
+and fashion stuff, yeah, maybe a bit more central ... one of the side quests, I think, needs to be,
+you know, someone just going decorating crazy. So like they've got a house that they need you to
+decorate or something, or they're ... planning the wedding or puzzle pirate wedding or something,
+and they need you to pick out a bunch of outfits and dress up all the pirates ... there's a puzzle
+pirate wedding, and you've got to do all the furniture, to organise like all the furniture and
+arrangements, dress up all the pirates at the wedding. Oh, people would go absolutely crazy. Puzzle
+pirate wedding absolutely is a must."
+
+- **The quest:** a pirate planning a wedding asks for your help. You lay out the venue (furniture,
+  flowers, banners, the arch, the seating: Decorate mode, the same placing as in the den) and dress
+  every guest, the couple included, from the wardrobe (YPP clothes and dyes, as in Your pirate).
+- **Decorating and fashion made central,** not a side menu: the den's Decorate mode and the
+  wardrobe become the puzzle-free heart of one quest, a showcase for them.
+- **The smaller version the user also floated:** someone "going decorating crazy" with a house they
+  need you to decorate. Could be the same character, or the way in (decorate their house first).
+- **Goes with:** "Side quests that leave friends about the den" (the couple could visit the den
+  after), "Inside the house: furniture placed the same way, as in a YPP house" and "More clothes"
+  (Making it yours, below).
+- **To pin down with the user:** who's marrying (made-up pirates, or real ones, drawn from their
+  portraits as ever), where it's held (a chapel up in "A little town up the cliffs", an island, the
+  den itself), whether there's a brief to meet (a colour scheme, each guest's wishes) or it's free
+  play, how it ends (the wedding itself as a cutscene, the guests reacting), and what it pays. Check
+  YPPedia for Puzzle Pirates' own weddings and wedding clothes first.
+
 ## Zoom in on what you're doing, like the captain's map (9 Nov)
 
 The user liked how the camera zooms in onto the captain's map and back out again: you're still in
