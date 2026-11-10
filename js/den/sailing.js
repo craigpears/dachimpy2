@@ -79,6 +79,7 @@ export function sailReset() {
 const SIDE_NAME = { L: 'port', R: 'starboard' };
 function sailFire(side) {
   const did = sail.guns.fire(side);
+const ballGeo = new THREE.SphereGeometry(0.13, 10, 8), ballMat = mat('#3a3f45', { metalness: 0.6 });   // (every shot's: made afresh, they were never freed)
   if (did === 'empty') return toast(`No shot loaded to ${SIDE_NAME[side]}: G to load her guns by Gunnery`, true);
   if (did === 'running') return toast(`The ${SIDE_NAME[side]} gun's still running out`, true);
   const { cells, hit } = broadside(sail.sea, sail.helm.now(), side), gun = sail.g.userData.guns[side];
@@ -88,7 +89,7 @@ function sailFire(side) {
   burst(from, '#ffcf6a', 12, 3);
   burst(from, '#cfc6b8', 8, 1.5);
   worldLets.shake = Math.max(shake, 0.15);
-  const ball = mesh(new THREE.SphereGeometry(0.13, 10, 8), mat('#3a3f45', { metalness: 0.6 }));
+  const ball = mesh(ballGeo, ballMat);
   scene.add(ball);
   const d = from.distanceTo(to);
   tween(0.35 + d * 0.03, (u) => {

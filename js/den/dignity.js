@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import { LAY } from '../den-sail.js';
 import { SAYS, BEATS, Dignity, sceneAt, missAt, readSecs, fromGate, bellaGun, heard } from '../den-dignity.js';
 import { PIRATES, familiarTick } from '../den-look.js';
-import { scene, mat, mesh, makePirate, V3, burst, worldLets, shake } from './world.js';
+import { scene, mat, mesh, makePirate, V3, burst, worldLets, shake, warm } from './world.js';
 import { seaX, seaZ, sail } from './sea.js';
 import { cp } from './checkpoint.js';
 import { cine, cinePlay, cineEnd, bubble, bubbleAt } from './cine.js';
@@ -40,6 +40,10 @@ function linstock() {
   g.rotation.x = -0.9;
   return g;
 }
+
+// The shot and the column of water it throws up: one of each, for every time the scene plays.
+const ballGeo = new THREE.SphereGeometry(0.13, 10, 8), ballMat = mat('#2a2d31', { metalness: 0.6 });
+const colGeo = new THREE.CylinderGeometry(0.35, 0.75, 1, 12, 1, true), colMat = new THREE.MeshBasicMaterial({ color: '#eef8fb', transparent: true, opacity: 0.85, side: THREE.DoubleSide, depthWrite: false });
 
 const DOWN = V3(0, -1, 0), FWD = V3(0, 0, 1);
 /* A pose for arm i: pointing along `dir` (her body's own frame: +z ahead, +x her left), and her
@@ -98,6 +102,8 @@ function build() {
   W.pose = poses(p);
   W.say = bubble('', document.body, 'wrap');   // (on the page: at sea the den's labels are hidden)
   W.chat = bubble('', document.body, 'chat');
+  // (the shaders for her scene's linstock, shot and splash, built ahead so it plays smoothly: world.js)
+  warm(W.stick, new THREE.Mesh(ballGeo, ballMat), new THREE.Mesh(colGeo, colMat));
   return W;
 }
 const sloopAt = () => (sail.g ? sail.g.position.clone().setY(0) : V3(seaX(GATE.c), 0, seaZ(GATE.r - 4)));
@@ -218,7 +224,7 @@ function playTick(dt) {
     burst(m, '#ffcf6a', 18, 3.2); burst(m, '#cfc6b8', 14, 1.6); burst(m, '#8d8780', 8, 1);
     c.recoil = 0.2;
     worldLets.shake = Math.max(shake, 0.18);
-    c.ball = mesh(new THREE.SphereGeometry(0.13, 10, 8), mat('#2a2d31', { metalness: 0.6 }));
+    c.ball = mesh(ballGeo, ballMat);
     c.from = m;
     scene.add(c.ball);
   }
@@ -236,7 +242,7 @@ function playTick(dt) {
     scene.remove(c.ball); c.ball = null;
     const at = V3(c.miss.x, 0.2, c.miss.z);
     burst(at, '#e6f3f6', 34, 5); burst(at, '#9cc8d4', 18, 3);
-    c.col = mesh(new THREE.CylinderGeometry(0.35, 0.75, 1, 12, 1, true), new THREE.MeshBasicMaterial({ color: '#eef8fb', transparent: true, opacity: 0.85, side: THREE.DoubleSide, depthWrite: false }), false);
+    c.col = mesh(colGeo, colMat, false);
     c.col.position.copy(at); c.colT = 0;
     scene.add(c.col);
     dig.rock = 1;

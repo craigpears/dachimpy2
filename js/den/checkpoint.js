@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { LAY, SAIL, canalAt } from '../den-sail.js';
 import { CHECK, Checkpoint, throughSay } from '../den-checkpoint.js';
-import { scene, mat, mesh, canvasTex, woodTex, V3, burst, toast, worldLets, shake, flagpole } from './world.js';
+import { scene, mat, mesh, canvasTex, woodTex, V3, burst, toast, worldLets, shake, flagpole, warm } from './world.js';
 import { rock } from './land.js';
 import { turretMesh, turretView, turretWrecked, turretFire, turretLand, turretShotsTick, turretShotsClear, shotComing } from './turret.js';
 import { hullGeo } from './raids.js';
@@ -156,6 +156,9 @@ function build() {
   W.wreck = wreckMesh(); W.wreck.position.set(seaX(wc), 0, seaZ(wr)); W.wreck.rotation.y = 0.6;
   W.g.add(W.wreck);
   scene.add(W.g);
+  // Every shader the gauntlet will want (its guns' wrecks, the splashes, the hit and the patch's
+  // board), built now in the background, not mid-run (world.js).
+  warm();
   return W;
 }
 export function checkpointReset() {

@@ -104,6 +104,10 @@ renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
+// (Not asking the driver for each new shader's error log: that alone stalled a frame a tenth of a
+// second the first time anything new was drawn, even with its shader built ahead by warm(). The den
+// has no shaders of its own, only three.js's.)
+renderer.debug.checkShaderErrors = false;
 document.body.prepend(renderer.domElement);
 
 export const scene = new THREE.Scene();
@@ -404,6 +408,17 @@ export function burst(at, color, n, speed) {
     scene.add(s);
     sparks.push(s);
   }
+}
+/* Shaders built ahead, in the background, so nothing drawn for the first time stalls the game while
+   its shader's built (the user, 10 Nov: "it goes a bit laggy" running the checkpoint's gauntlet: its
+   first shot, the splash and the hit each froze it a tenth of a second or more). `objs`: things made
+   but not yet in the scene (a shot, a splash); with none, the whole scene, hidden parts and all (a
+   gun's wreck), and the sparks and chalk lines every effect and board uses. */
+const probes = [new THREE.Mesh(sparkGeo, new THREE.MeshBasicMaterial()), outline([[0, 0]], 0, '#ffffff'), outline([[0, 0]], 0, '#ffffff')];
+probes[2].material.transparent = true;
+export function warm(...objs) {
+  if (!renderer.compileAsync) return;
+  for (const o of objs.length ? objs : [scene, ...probes]) renderer.compileAsync(o, camera, scene).catch(() => {});
 }
 let toastTimer;
 // A toast stays up long enough to read (longer for longer words: 10 Nov, the checkpoint's message

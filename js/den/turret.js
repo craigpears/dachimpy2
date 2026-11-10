@@ -4,7 +4,7 @@
 // and wrecked, the gun topples off, the battlements fly apart and the tower sinks to a scorched,
 // smoking stump. A place puts one down and sets its look (the checkpoint's bastions: checkpoint.js).
 import * as THREE from 'three';
-import { scene, mat, mesh, V3, burst, worldLets, shake, flagpole } from './world.js';
+import { scene, mat, mesh, V3, burst, worldLets, shake, flagpole, warm } from './world.js';
 import { rock } from './land.js';
 import { gunMesh } from './gundeck.js';
 
@@ -34,6 +34,8 @@ export function turretMesh({ stone = '#8a8178', top = 1.15, foot = 1.35, height 
   const barrel = gunMesh(); barrel.scale.setScalar(0.8); barrel.position.set(foot + 0.1, 0.8, 0.8); barrel.rotation.set(0.5, 0.9, 1.2); ruin.add(barrel);
   ruin.visible = false;
   g.add(ruin);
+  // (a shot's ball and ring, its shaders built ahead: its wreck's are, with the scene's)
+  if (!warmed) { warmed = true; warm(new THREE.Mesh(ballGeo, ballMat), new THREE.Mesh(ringGeo, ringMat())); }
   return { g, gun, body, intact, ruin, ty, wrecked: false, fall: undefined, smokeT: 0 };
 }
 
@@ -87,9 +89,18 @@ export function turretView(V, t, dt, aim = null) {
 }
 
 // ----- its shots -----
-const ballGeo = new THREE.SphereGeometry(0.24, 10, 8);
+// (One ball and one ring for every shot, each ring's own see-through material freed as it lands: made
+// afresh and never freed, they piled up with every shot.)
+const ballGeo = new THREE.SphereGeometry(0.24, 10, 8), ballMat = mat('#2a2d31', { metalness: 0.6 });
 const ringGeo = new THREE.RingGeometry(1.5, 1.9, 32).rotateX(-Math.PI / 2);   // (wide enough to show round her hull)
+const ringMat = () => new THREE.MeshBasicMaterial({ color: '#e0412e', transparent: true, opacity: 0.85, depthWrite: false, fog: false });
 const shots = [];
+let warmed = false;
+// A shot's done: off the water, its ring's material freed.
+function gone(v) {
+  scene.remove(v.ball);
+  if (v.ring) { scene.remove(v.ring); v.ring.material.dispose(); }
+}
 /* A shot fired (a 'fire' event from its Turret): out of its muzzle, onto the square `to` (in the world:
    `where`), on an arc; one aimed at her has a red ring on the water where it'll come down, so you can
    see it coming and get out from under it. `owner` tells whose it is when it lands. */
@@ -97,11 +108,11 @@ export function turretFire(V, e, where, owner = V) {
   V.gun.updateMatrixWorld(true);
   const from = V.gun.localToWorld(V3(0, 0.3, -0.85));
   burst(from, '#ffcf6a', 14, 3); burst(from, '#cfc6b8', 10, 1.8);
-  const ball = mesh(ballGeo, mat('#2a2d31', { metalness: 0.6 }));
+  const ball = mesh(ballGeo, ballMat);
   scene.add(ball);
   let ring = null;
   if (e.aimed) {
-    ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: '#e0412e', transparent: true, opacity: 0.85, depthWrite: false, fog: false }));
+    ring = new THREE.Mesh(ringGeo, ringMat());
     ring.position.copy(where).setY(where.y + 0.1);
     ring.renderOrder = 3;
     scene.add(ring);
@@ -112,7 +123,7 @@ export function turretFire(V, e, where, owner = V) {
 export function turretLand(owner, e) {
   const i = shots.findIndex((v) => v.owner === owner && v.to[0] === e.to[0] && v.to[1] === e.to[1]);
   const v = i >= 0 ? shots.splice(i, 1)[0] : null;
-  if (v) scene.remove(v.ball, ...(v.ring ? [v.ring] : []));
+  if (v) gone(v);
   const at = v ? v.at.clone().setY(v.at.y + 0.3) : null;
   if (!at) return;
   if (!e.hit) { burst(at, '#e6f3f6', 20, 4); burst(at, '#9cc8d4', 10, 2.5); return; }
@@ -131,4 +142,4 @@ export function turretShotsTick(dt) {
 }
 export const shotComing = (c, r) => shots.some((v) => v.to[0] === c && v.to[1] === r);
 // Every shot in the air gone (a new game).
-export function turretShotsClear() { for (const v of shots.splice(0)) scene.remove(v.ball, ...(v.ring ? [v.ring] : [])); }
+export function turretShotsClear() { for (const v of shots.splice(0)) gone(v); }
