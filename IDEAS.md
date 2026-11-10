@@ -683,7 +683,20 @@ Building on what's there now (the walk and its stairs are made of pieces that st
       pull changes. The sea itself shapes the puzzle.
     - **Tired arms:** each side tires as it works and recovers as it rests, so leaning on one side
       can't carry her; balance is rewarded without a timer.
-    (A first pick to try: benches across the keel, with catching a crab. To shape with the user.)
+    (Benches across the keel was "confusing": dropped. Mirror strokes "maybe has an idea ... that
+    gets it further than just being a double bilge board", if it has the depth: see below.)
+    **Mirror strokes, thought through for skill (10 Nov):** the test is STORY.md's "Quick to learn,
+    hard to master". Two full Bilge boards side by side, port and starboard, with pieces of their
+    own; every swap you make on one is made in mirror on the other. Quick to learn: "every move
+    rows both sides; clear on both at once to pull straight". Hard to master: a move that sets up
+    a combo on one side scrambles the other, so the skill is reading two boards at once and
+    finding the move good for both, and the top of the curve is a Vegas on each side on the same
+    move (the zoom). Steering adds decisions rather than noise: matched pull drives her ahead,
+    the unmatched part turns her, so on a bending course you sometimes want one side ahead, on
+    purpose. In a crew the mirror goes and the two boards are two pirates, in sync by time
+    instead: the same idea, clear on both sides at once. Before building it into the den: a
+    plain test page, and bots that play it (random, greedy, looking two moves ahead), to see
+    whether better play goes much further, as a check on the skill curve. (To shape with the user.)
     **Weather is where oars make sense (9 Nov):** the wind can drop. Under sail she's quicker, but
     when the wind drops a ship that's all sails is "dead in the water until the wind picks back
     up again", and under sail you "can't go against the wind". Oars keep her moving either way:

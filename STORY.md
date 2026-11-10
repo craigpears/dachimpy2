@@ -43,6 +43,11 @@ in time the den becomes the thing itself (TODO.md, "Split the den off").
   rocks, the lock, being dazed, the duty puzzles) rather than each bringing a mechanic of its own:
   "they do need to have some kind of cohesion to them. Not just let's create a new mechanic for
   every ship." A brand new mechanic, or a new puzzle, has to earn its place.
+- **Quick to learn, hard to master.** "The whole point of the Puzzle Pirates puzzles is they need
+  an infinite skill curve, like quick to learn, hard to master, Vegas's ... these can't just be
+  gimmicks. They need to be meaningful, skill-based mechanics. That's what makes coming up with a
+  new puzzle so hard." A twist on a puzzle earns its place only if it deepens the skill, not just
+  the look.
 - **A hideout, not a city.** Lodgings dug into the cliff, ladders and rope bridges, a den behind a
   wall in a cove. Small and characterful, never a sprawling town.
 - **Forward, not back.** The story goes outward: out of the den and across the sea to raid the
