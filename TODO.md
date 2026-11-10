@@ -139,7 +139,8 @@ the site (`.assetsignore` skips `*.md`).
   foraging later anyway"): Puzzle Pirates' real Foraging, played by its real rules, built as one
   module of its own to reuse later (the foraging island), with the capybara as the container
   stuck high on the lagoon's bank in reeds, roots and mud; cleared down off the board's foot it
-  splashes into the water and swims to her. The crane being built only for
+  splashes into the water and swims to her. The capybara is called Umami (the user, 10 Nov: "for
+  fun ... since he requested it"). The crane being built only for
   the session is fine for a proof of concept (a refresh starts afresh).
 
 - **The secret way round the checkpoint: a chain of locks (10 Nov):** "make it a bit more of a
