@@ -211,6 +211,10 @@ the site (`.assetsignore` skips `*.md`).
   crane mustn't look built (the old hoist reads as a rickety hoist, the crane as empty footings
   or a frame's outline waiting); and stopping there says what to do ("Space: build a crane on the
   ledge to haul her up the cliff").
+  And no crane to build the crane (the user: "If you're building a crane, you've literally got a
+  crane here that's helping you build the crane ... a slight logic issue"): the old hoist goes,
+  and the frames go up some other believable way (hauled up by hand on ropes, the foot first,
+  then the post raised on it, then the jib).
 
 ## Needs a playtest to pin down
 
