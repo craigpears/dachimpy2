@@ -163,16 +163,6 @@ the site (`.assetsignore` skips `*.md`).
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
 
-- **Her guns in matching pairs (10 Nov):** "it really bugs me that the cannons are not aligned
-  with each other. Like, they should be just cannons on opposite sides of the ship, but in the same
-  slots each side. I don't know if it needs to make the ship a bit wider." Her guns stand in the
-  same slots on both sides, each port gun straight across from its starboard twin; widen her a
-  little if they'd crowd.
-
-- **Her bow out through the gate as a lock drains (10 Nov):** coming back down through the locks,
-  "the front part of the ship is sticking out of the gate when the [lock] is draining." She sits
-  wholly inside the lock's chamber while it drains, clear of its gates, bow and stern.
-
 - **Somewhere for the pieces you don't want, building in the den (10 Nov):** playtesting the
   whole thing through: "building the platform and the stairs and things in the base is really
   difficult now because you've got no way of wasting pieces. I mean, I can still kind of put stuff

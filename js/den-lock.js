@@ -114,3 +114,75 @@ export class Lock {
 }
 /** What the pilot reckons going into a lock from water at level `lv` costs (see LOCK.COST_UP). */
 export function lockCost(s, lv) { return lv <= s.low ? LOCK.COST_UP : LOCK.COST_DOWN; }
+/* Where a lock's gates stand, and her clear of them (the user, 10 Nov: "the front part of the ship
+   is sticking out of the gate when the [lock] is draining"). She's longer than a square (js/den/
+   sea.js: her stern 2.2 behind her middle, her bowsprit's tip 3.3 ahead), so a lock's chamber runs
+   on past its square each way, and its gates stand out in the squares either side. Both pairs swing
+   open toward its high side, as a real lock's do: the high pair out of the chamber, the low pair
+   into it. Her bow and stern stay clear of both pairs, shut and swinging, while she's in it:
+   - Its high gates stand GATE_HIGH out from its middle, past her bowsprit's tip.
+   - Its low gates stand a whole square out, at the middle of the square below: swinging into the
+     chamber, a pair any nearer swept through her stern (going up) or brushed her bow (going down).
+   - Two locks a square apart (the two down through the checkpoint's headland) are a staircase: the
+     upper one's low gates are the lower one's high gates, one pair between the two chambers.
+   - Waiting outside a lock for its water (to fill from above, or drain), or simply lying off it,
+     she lies back from its shut gates, her bow (or stern) clear of them and of their swing, and
+     glides on in as they open (lieClear). (Before, she waited on the square beside it, her bow
+     through its gates.) */
+/** Her reach along her length from her middle, as js/den/sea.js draws her: her bowsprit's tip
+    ahead, her stern behind; and her stern's half-width at its corners. */
+export const HER = { BOW: 3.3, STERN: 2.2, STERN_HALF: 1.0 };
+export const GATES = {
+    /** A lock's high gates, metres out from its middle: past her bowsprit's tip as she lies in it. */
+    HIGH: 3.5,
+    /** A gate's thickness. */
+    LEAF: 0.28,
+    /** How far she lies back from a shut gate's face. */
+    CLEAR: 0.3,
+    /** How far from her middle a gate's hinge is, across: half the chamber's width, a leaf's length. */
+    HALF: 2,
+};
+/** Where a lock's gates stand, in metres out from its middle (a square `cell` long): its low pair and
+    its high pair; and the lock whose low gates its high ones are, if it's the lower of a staircase
+    (then it has no high gates of its own). */
+export function gatesOf(s, all, cell) {
+    const [hc, hr] = ends(s).high;
+    const above = all.findIndex((o) => o !== s && ends(o).low[0] === hc && ends(o).low[1] === hr);
+    return { low: cell, high: above >= 0 ? cell : GATES.HIGH, above };
+}
+/** Where she lies along a lock, in metres from its middle (+ toward its high side): `along` where
+    her helm has her, `facing` +1 with her bow toward its high side or -1 toward its low, `at` where
+    its gates stand (gatesOf), and `open` how far each pair has swung open (0 shut, 1 open). Outside
+    it, she keeps her nearer end CLEAR of a shut pair's face, and is let on in only once they're well
+    open (past 60%, by when they've swung clear of her), smoothly. In it, she fits as she is. On a
+    staircase's gates (where her helm has her between its two chambers), she's outside the one her
+    bow's toward. */
+export function lieClear(along, facing, at, open) {
+    const toHigh = facing > 0 ? HER.BOW : HER.STERN, toLow = facing > 0 ? HER.STERN : HER.BOW;
+    const pad = GATES.LEAF / 2 + GATES.CLEAR;
+    const give = (u) => { const k = Math.max(0, Math.min(1, (u - 0.6) / 0.4)); return k * k * (3 - 2 * k) * 4 * at.low; };
+    const eps = 1e-6;
+    if (along > at.high - (facing < 0 ? eps : -eps))
+        return Math.max(along, at.high + pad + toLow - give(open.high));
+    if (along < -at.low + (facing > 0 ? eps : -eps))
+        return Math.min(along, -at.low - pad - toHigh + give(open.low));
+    return along;
+}
+/** Where she's drawn among the locks (`spots`, on a board of `cell`-long squares): her helm's
+    pose `p` (squares; heading `a`: 0 out to sea, 1 right, 2 back in, 3 left), lying clear of every
+    lock's shut gates she's outside of (lieClear). A staircase's shared pair is the upper lock's low
+    gates; `open` answers for them either way. */
+export function lieAmong(p, spots, cell, open) {
+    const d = ((Math.round(p.a) % 4) + 4) % 4;
+    spots.forEach((s, i) => {
+        const [c, r] = s.at, up = s.up, dc = p.c - c, dr = p.r - r;
+        const along = (dc * DC[up] + dr * DR[up]) * cell, across = dc * DR[up] - dr * DC[up];
+        if (Math.abs(across) > 0.5 || Math.abs(along) > 3 * cell || d % 2 !== up % 2)
+            return;
+        const at = gatesOf(s, spots, cell);
+        const to = lieClear(along, d === up ? 1 : -1, at, { low: open(i, 'low'), high: at.above >= 0 ? open(at.above, 'low') : open(i, 'high') });
+        if (to !== along)
+            p = { ...p, c: p.c + (to - along) / cell * DC[up], r: p.r + (to - along) / cell * DR[up] };
+    });
+    return p;
+}

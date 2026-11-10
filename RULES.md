@@ -230,7 +230,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     Esc pulls up the pin; H heads home. A turn under way always finishes.
   - **Her guns (9 Nov):** a gun each side, as on Puzzle Pirates' sloop ("a gun on each, gun port
     on each side, so you can go along and shoot the rocks"): smaller copies of the gun tower's,
-    staggered on her deck, muzzles out over her sides. Q fires the port gun (her left), E the
+    muzzles out over her sides. A matching pair, in the same slot each side, straight across from
+    each other between her mast and the tiller (10 Nov: "it really bugs me that the cannons are not
+    aligned with each other ... they should be just cannons on opposite sides of the ship, but in
+    the same slots each side"; they'd been staggered). She's 2.3 across for it (from 2.0), so the
+    two clear each other even both run in at once; her rowers and their sweeps sit out with her
+    sides. Q fires the port gun (her left), E the
     starboard, whenever you like as she sails: not on a token as in Battle Navigation, since she's
     always moving, so it's your timing that brings the shot on ("you have to time it"). A shot
     goes straight out of that side from the square and heading she's nearest, up to three
@@ -364,6 +369,16 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
         (LAY.LOCKS in `src/den-sail.ts`). Its quay is on its bank toward the den, or on its
         right-hand bank if it runs out to sea. Its banks are rock, so she only ever goes through
         a lock straight.
+      - **She's never through a lock's gates (10 Nov).** The user: "the front part of the ship is
+        sticking out of the gate when the [lock] is draining." She's longer than a square, so a
+        lock's chamber runs on past its square each way: its high gates 3.5 out from its middle
+        (past her bowsprit), its low gates a whole square out (they swing into the chamber, as a
+        real lock's do, and any nearer swept her stern and bow). The two through the headland, a
+        square apart, are a staircase: one pair of gates between the two chambers, opening once
+        the water's the same both sides. Waiting outside a lock for its water (it filling from
+        above for her, say), or lying off it, she lies back from its shut gates, bow and stern
+        clear of them and their swing, and glides on in as they open (she used to wait on the
+        square beside it, her bow through them). Rules: `src/den-lock.ts` (gatesOf, lieAmong).
       - **The ways past the checkpoint:** run it, row it, fight its guns, or the locks. The reef's
         far end, the long way round that cost only time, is closed now the locks are the way round.
       - **Nothing signposts it:** nothing at the junction, and nothing at the checkpoint either

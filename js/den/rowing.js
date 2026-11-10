@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import { CREW, RowBoard, bearing, pullFor, leadFor, leaned, shownAt } from '../den-row.js';
 import { camera, makePirate, V3, keys, burst, toast, worldLets, shake, $ } from './world.js';
 import { sail, SLOOP_DECK } from './sea.js';
-import { SWEEP_X } from './wind.js';
+import { SWEEP_X, SWEEP_Z } from './wind.js';
 import { SAIL } from '../den-sail.js';
 import { patch } from './sea-puzzles.js';
 import { boardsMake, boardsLayout, boardsLay, boardsMove, boardsFlash, boardsJig, boardsBusy, boardsTick, boardsAt, dialHanded, dialTick } from './row-boards.js';
@@ -44,7 +44,7 @@ const THWART = 0.3, HIP = 0.72;   // (the thwart's height on her deck; a pirate'
 function rowersMake() {
   return SIDES.map((side) => {
     const p = makePirate(CREW_LOOK[side]), seat = new THREE.Group();
-    seat.position.set(SWEEP_X[side] + 0.35, SLOOP_DECK, (side === 'port' ? -1 : 1) * 0.42);
+    seat.position.set(SWEEP_X[side] + 0.35, SLOOP_DECK, (side === 'port' ? -1 : 1) * (SWEEP_Z - 0.53));   // (their sweep's loom in reach)
     seat.rotation.y = -Math.PI / 2;   // (facing aft, her stern)
     for (const l of p.legs) l.rotation.x = -1.45;   // (sat, legs out in front)
     seat.add(p.g);

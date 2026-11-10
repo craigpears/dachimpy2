@@ -5,17 +5,19 @@
 // puzzle (src/bilge.ts). (The quay's Bilge was in sea-puzzles.js; the lock itself in sea.js.)
 import * as THREE from 'three';
 import { SAIL } from '../den-sail.js';
+import { gatesOf, lieAmong } from '../den-lock.js';
 import { Bilge, W as BW, H as BH } from '../bilge.js';
 import { worth, oddsFor } from '../den-bilge.js';
 import { scene, camera, mat, mesh, canvasTex, woodTex, V3, keys, ray, burst, toast } from './world.js';
 import { bitMesh } from './bilge.js';
-import { seaX, seaZ, sail, LIFT, BANK, LOCK_GATE_X, coveM, stoneM, grassM, pumpMesh } from './sea.js';
+import { seaX, seaZ, sail, LIFT, BANK, coveM, stoneM, grassM, pumpMesh } from './sea.js';
 
 /* The user (9 Nov): "some kind of a lock and canal ... You have to go up a lock", "we need the
    actual bilge pump"; (10 Nov) "be more than just the one lock". Every lock is built the same: its
    chamber a square of the canal between rock banks, its stone piers running on past the square each
    way (she's longer than a square) with a pair of mitre gates at each end, both pairs swinging open
-   toward its high side as a lock's do. Its quay is on the bank toward the den (or, for a lock that
+   toward its high side as a lock's do, where src/den-lock.ts says (gatesOf: clear of her bow and
+   stern, shut and swinging; two locks a square apart share a pair, a staircase). Its quay is on the bank toward the den (or, for a lock that
    runs out to sea, the right-hand bank), an old pump at the chamber's edge, its spout out over it,
    and the Bilge board laid beside it. Waiting in it to go up, you bilge: each clear pumps its share,
    the pump's handle working, water gushing from its spout, and the chamber's water rising a step
@@ -24,8 +26,11 @@ import { seaX, seaZ, sail, LIFT, BANK, LOCK_GATE_X, coveM, stoneM, grassM, pumpM
 const DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
 const gateM = mat('#5b3a20', { map: woodTex }), ironM = mat('#3a3f45', { metalness: 0.6, roughness: 0.4 });
 // One lock, put down: its group turned so its local +x runs from its low side to its high side.
-function lockMesh(spot) {
-  const [c, r] = spot.at, half = SAIL.CELL / 2, x = seaX(c), z = seaZ(r);
+function lockMesh(spot, i) {
+  const [c, r] = spot.at, half = SAIL.CELL / 2, x = seaX(c), z = seaZ(r), all = sail.sea.locks;
+  // Where its gates stand, out from its middle each way; and, if it's the upper of a staircase, the
+  // lock below, whose high gates its low ones are.
+  const at = gatesOf(spot, all, SAIL.CELL), below = all.findIndex((o) => gatesOf(o, all, SAIL.CELL).above === i);
   // (in the world, a square across is +x and a square out is -z)
   const hx = DC[spot.up], hz = -DR[spot.up], top = LIFT * (spot.low + 1) + BANK;
   const g = new THREE.Group();
@@ -34,13 +39,14 @@ function lockMesh(spot) {
   // Its quay: the bank toward the den, or the right-hand bank if it runs out to sea; in the world,
   // (qx, qz) from its middle.
   const across = hz === 0, qx = across ? 0 : 1, qz = across ? 1 : 0;
-  const L = { spot, g, top, at: V3(x, top, z), gates: {} };
-  // Its chamber's water.
-  L.chamber = mesh(new THREE.PlaneGeometry(LOCK_GATE_X * 2, SAIL.CELL).rotateX(-Math.PI / 2), coveM, false);
+  const L = { spot, g, top, at: V3(x, top, z), gates: {}, below };
+  // Its chamber's water, from its low gates to its high ones.
+  L.chamber = mesh(new THREE.PlaneGeometry(at.low + at.high, SAIL.CELL).rotateX(-Math.PI / 2), coveM, false);
+  L.chamber.position.x = (at.high - at.low) / 2;
   g.add(L.chamber);
-  // Its piers: stone walls either side, on past the square each way.
-  const pierL = LOCK_GATE_X + 0.2 - half;
-  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+  // Its piers: stone walls either side, on past the square each way, a little past its gates.
+  for (const [sx, out] of [[-1, at.low], [1, at.high]]) for (const sz of [-1, 1]) {
+    const pierL = out + 0.2 - half;
     const pier = mesh(new THREE.BoxGeometry(pierL, top + 1, 0.6), stoneM);
     pier.position.set(sx * (half + pierL / 2), (top - 1) / 2, sz * (half + 0.3));
     const cap = mesh(new THREE.BoxGeometry(pierL, 0.12, 0.6), grassM);
@@ -48,13 +54,17 @@ function lockMesh(spot) {
     g.add(pier, cap);
   }
   // A pair of gates at each end, from below its low water to over its high water, swinging open
-  // toward the high side (see lockTick).
-  const y0 = LIFT * spot.low - 0.4, gh = LIFT + 2;
+  // toward the high side (see lockTick); none at its high end if it's the lower of a staircase (the
+  // lock above's low gates are its high ones), and its low ones, if it's the upper, reaching down
+  // below the lower lock's low water too.
   for (const [end, sx] of [['low', -1], ['high', 1]]) {
+    if (end === 'high' && at.above >= 0) continue;
+    const low = end === 'low' && below >= 0 ? all[below].low : spot.low;
+    const y0 = LIFT * low - 0.4, gh = LIFT * (spot.low + 1 - low) + 2;
     const leaves = [];
     for (const sz of [-1, 1]) {
       const hinge = new THREE.Group();
-      hinge.position.set(sx * LOCK_GATE_X, y0, sz * half);
+      hinge.position.set(sx * at[end], y0, sz * half);
       const leaf = mesh(new THREE.BoxGeometry(0.28, gh, half), gateM);
       leaf.position.set(0, gh / 2, -sz * half / 2);
       for (const y of [0.8, 2.0, 3.2]) { const band = mesh(new THREE.BoxGeometry(0.32, 0.1, half), ironM, false); band.position.set(0, y, -sz * half / 2); hinge.add(band); }
@@ -90,6 +100,15 @@ function lockMesh(spot) {
 export const locks = { all: null };
 export function lockWorld() { return (locks.all ||= sail.sea.locks.map(lockMesh)); }
 
+/* Where she's drawn by a lock (js/den/sailing.js draws her where this says): where her helm has her,
+   `p` ({ c, r, a } in squares), but lying back from any lock's shut gates she's outside of, her bow
+   (or stern) clear of them and their swing, and gliding on in as they open (src/den-lock.ts,
+   lieAmong). In a lock she fits as she is. */
+export function lockClear(p) {
+  if (!locks.all) return p;
+  return lieAmong(p, sail.sea.locks, SAIL.CELL, (i, end) => locks.all[i].gates[end]?.open ?? 1);
+}
+
 // A stroke of the quay pump's handle, as a clear's pumped into the lock.
 function pumpStroke(L) { if (L) L.pump.userData.stroke = 1; }
 // Each tick: each lock's water at its level, its gates open at the end she can pass, and the pump
@@ -101,7 +120,9 @@ export function lockTick(dt) {
     L.chamber.position.y = y + 0.05;
     L.chamber.visible = y > 0.02;   // (at the sea's level, it's the sea)
     for (const [end, gt] of Object.entries(L.gates)) {
-      gt.open += ((lk.openAt(end) ? 1 : 0) - gt.open) * Math.min(1, dt * 2.5);
+      // (a staircase's gates open once the water's the same both sides: the lock below full)
+      const open = lk.openAt(end) && (end !== 'low' || L.below < 0 || h.locks[L.below].openAt('high'));
+      gt.open += ((open ? 1 : 0) - gt.open) * Math.min(1, dt * 2.5);
       for (const lf of gt.leaves) lf.rotation.y = -gt.open * lf.userData.sz * Math.PI / 2;
     }
     const P = L.pump, s = P.userData.stroke ?? 0;

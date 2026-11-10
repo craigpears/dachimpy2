@@ -2,6 +2,7 @@
 // (Its locks: lock.js.) (Split out of den.js.)
 import * as THREE from 'three';
 import { SAIL, LAY, Sea, Helm } from '../den-sail.js';
+import { ends, gatesOf } from '../den-lock.js';
 import { Broadside } from '../den-guns.js';
 import { Wind } from '../den-wind.js';
 import { scene, mat, mesh, canvasTex, woodTex, V3, flagMat, flagpole, burst } from './world.js';
@@ -37,9 +38,6 @@ sail.helm = new Helm(sail.sea);
 export const LIFT = 1.6, BANK = 1.8, CLIFF_H = LIFT + BANK;
 // The hidden cove's water, up at the top of the locks (the crane's ledge is just above it: crane.js).
 export const COVE_Y = LIFT * LAY.COVE.level;
-// A lock's gates, out from its middle each way: past her bow, bowsprit and stern, so she fits
-// between them shut (she's 4.4 long and her bowsprit reaches 3.3 ahead; a square's 4).
-export const LOCK_GATE_X = 3.5;
 // The water's height on a square: the sea's, the canal's, or a lock's as it is just now.
 export const liftAt = (c, r) => LIFT * (sail.helm.lockAt(c, r)?.height() ?? sail.sea.level(c, r));
 // The top of the cliff on a square: BANK over the highest water beside it (a lock counted full), and
@@ -55,17 +53,22 @@ export function bankTop(c, r) {
 // Her, smaller than their ship: one mast, a square sail and a topsail, a bowsprit, a tiller at the
 // stern, weathered planks, and your own flag at the masthead. Beamy enough for her two rowers to sit
 // side by side, each at their own sweep (the user, 10 Nov: "make the ship a little wider so the
-// little guys can sit next to each other"): 2 across, from 1.7.
+// little guys can sit next to each other"): 2 across, from 1.7; and for her two guns to stand
+// straight across from each other, clear of each other as they run in (10 Nov: "they should be just
+// cannons on opposite sides of the ship, but in the same slots each side. I don't know if it needs
+// to make the ship a bit wider"): 2.3. (Her length, as a lock holds her: HER in src/den-lock.ts.)
+export const SLOOP_BEAM = 2.3;
 export function sloopMesh() {
   const g = new THREE.Group(), hullM = mat('#5e4128', { map: woodTex }), deckM = mat('#9a7a55', { map: woodTex }), spar = mat('#4a2f1a', { map: woodTex });
-  const hull = mesh(hullGeo(4.4, 2.0, 1.3), hullM);
+  const B = SLOOP_BEAM;
+  const hull = mesh(hullGeo(4.4, B, 1.3), hullM);
   hull.position.y = SLOOP_DECK - 1.3;
-  const deck = mesh(hullGeo(4.25, 1.85, 0.05), deckM);
+  const deck = mesh(hullGeo(4.25, B - 0.15, 0.05), deckM);
   deck.position.y = SLOOP_DECK - 0.02;
-  const stripe = mesh(hullGeo(4.46, 2.04, 0.1), mat('#d8c9a0'));
+  const stripe = mesh(hullGeo(4.46, B + 0.04, 0.1), mat('#d8c9a0'));
   stripe.position.y = SLOOP_DECK - 0.32;
   g.add(hull, deck, stripe);
-  const stern = mesh(new THREE.BoxGeometry(0.9, 0.35, 1.75), hullM);
+  const stern = mesh(new THREE.BoxGeometry(0.9, 0.35, B * 0.87), hullM);
   stern.position.set(-1.65, SLOOP_DECK + 0.17, 0);
   const tiller = mesh(new THREE.BoxGeometry(0.7, 0.05, 0.05), spar);
   tiller.position.set(-1.6, SLOOP_DECK + 0.5, 0);
@@ -92,16 +95,20 @@ export function sloopMesh() {
   fl.position.set(0.35, SLOOP_DECK + 4.15, 0);
   g.add(fl);
   g.userData.rig = [mast, fl];   // (struck, with her sails, while you patch a hole in her deck)
-  // A gun each side, a smaller copy of the gun tower's, muzzle out over her side (port is her left).
+  // A gun each side, a smaller copy of the gun tower's, muzzle out over her side (port is her left):
+  // a matching pair, in the same slot each side, straight across from each other, between her mast
+  // and the tiller. Each runs in and out along its slide (js/den/sailing.js runs it in, by its
+  // userData.z, when it's fired), the slide far enough out from her middle that the two, both run
+  // in at once, still clear each other.
   g.userData.guns = {};
-  // Staggered, so they read as two guns and not one beam across her.
-  for (const [side, x, z] of [['L', -0.05, -0.5], ['R', -0.7, 0.5]]) {
-    const gun = gunMesh();
-    gun.scale.setScalar(0.6);
-    gun.position.set(x, SLOOP_DECK, z);
-    gun.rotation.y = side === 'L' ? 0 : Math.PI;
-    gun.userData.z = z;
-    g.add(gun);
+  for (const side of ['L', 'R']) {
+    const slide = new THREE.Group(), gun = gunMesh();
+    slide.position.set(-0.3, SLOOP_DECK, side === 'L' ? -0.44 : 0.44);
+    slide.rotation.y = side === 'L' ? 0 : Math.PI;   // (its -z out over her side)
+    gun.scale.setScalar(0.55);
+    gun.position.z = gun.userData.z = -0.36;   // (out along it: her muzzle 1.2 from her middle)
+    slide.add(gun);
+    g.add(slide);
     g.userData.guns[side] = gun;
   }
   g.rotation.order = 'YXZ';   // (turned to her heading, then heeled over about her own length)
@@ -211,17 +218,21 @@ export function seaWorld() {
     for (let i = 0; i < 2; i++) W.g.add(rock(x + (Math.random() - 0.5) * 3, top * (0.3 + Math.random() * 0.5), z + (Math.random() - 0.5) * 3, 0.8 + Math.random() * 0.7));
   }
   // The canal's water between the locks, a square at a time at its level (all but the ends of the
-  // locks that reach into it: see LOCK_GATE_X; each lock draws its own chamber).
-  const half = SAIL.CELL / 2, into = LOCK_GATE_X - half;
+  // locks that reach into it, out to their gates: src/den-lock.ts, gatesOf; each lock draws its own
+  // chamber).
+  const half = SAIL.CELL / 2;
   for (const [id, lv] of sail.sea.pounds) {
     if (sail.sea.cove.has(id)) continue;
     const [c, r] = id.split(',').map(Number);
     // (trimmed on each side a lock's end reaches into: x0, x1 across, z0, z1 out)
     let x0 = -half, x1 = half, z0 = -half, z1 = half;
-    for (const { at: [lc, lr] } of sail.sea.locks) {
+    for (const spot of sail.sea.locks) {
+      const { low, high } = ends(spot), at = gatesOf(spot, sail.sea.locks, SAIL.CELL), [lc, lr] = spot.at;
+      const into = (low[0] === c && low[1] === r ? at.low : high[0] === c && high[1] === r ? at.high : half) - half;
       if (lr === r && lc === c - 1) x0 += into; else if (lr === r && lc === c + 1) x1 -= into;
       else if (lc === c && lr === r - 1) z0 += into; else if (lc === c && lr === r + 1) z1 -= into;
     }
+    if (x1 - x0 < 0.01 || z1 - z0 < 0.01) continue;   // (between a staircase's two chambers: all lock)
     const w = mesh(new THREE.PlaneGeometry(x1 - x0, z1 - z0).rotateX(-Math.PI / 2), coveM, false);
     w.position.set(seaX(c) + (x0 + x1) / 2, LIFT * lv + 0.05, seaZ(r) - (z0 + z1) / 2);
     W.g.add(w);

@@ -8,7 +8,7 @@ import { H as TH } from '../treasure-haul.js';
 import { S, scene, camera, mat, mesh, woodTex, woodMat, pieceGroup, V3, basis, pirate, G, burst, toast, outline, v3, animateWalk } from './world.js';
 import { rock } from './land.js';
 import { updateStats } from './wall.js';
-import { seaX, seaZ, SLOOP_DECK, sail, COVE_Y } from './sea.js';
+import { seaX, seaZ, SLOOP_DECK, SLOOP_BEAM, sail, COVE_Y } from './sea.js';
 import { patch, patchPrompt } from './sea-puzzles.js';
 import { haul, haulOpen } from './treasure.js';
 import { wreckMesh } from './checkpoint.js';
@@ -499,7 +499,7 @@ function tripTick(dt) {
   stretch(W.hookRope, tip, W.hook.position.clone().setY(hy + 0.2), 0.03);
   W.slings.forEach((r, n) => {
     r.visible = b.leap >= 1 && b.lower < 1;
-    if (r.visible) stretch(r, W.hook.position.clone().setY(hy - 0.35), sail.g.localToWorld(V3(n & 1 ? 1.3 : -1.3, SLOOP_DECK - 0.4, n & 2 ? 1.02 : -1.02)), 0.025);   // (round her sides: her half-beam's 1)
+    if (r.visible) stretch(r, W.hook.position.clone().setY(hy - 0.35), sail.g.localToWorld(V3(n & 1 ? 1.3 : -1.3, SLOOP_DECK - 0.4, (n & 2 ? 1 : -1) * (SLOOP_BEAM / 2 + 0.02))), 0.025);   // (round her sides, just outside her)
   });
   // You: up to the windlass in a leap, winding (or leaning on the jib as it swings), and a leap
   // down onto her deck at the end.
@@ -534,7 +534,7 @@ function haulLagoon() {
   if (!K().canHaulWreck()) return false;
   const ry = sail.g.rotation.y, side = V3(Math.sin(ry), 0, Math.cos(ry));   // her own +z: abeam
   const to = V3(LAG.x - REST.x, 0, LAG.z - REST.z), k = Math.sign(to.dot(side)) || 1, sq = 0.45;
-  const at = V3(REST.x, WATER + 0.12, REST.z).addScaledVector(side, k * (1.0 + 0.35 + TH * sq / 2));   // (her half-beam, a gap, half the board)
+  const at = V3(REST.x, WATER + 0.12, REST.z).addScaledVector(side, k * (SLOOP_BEAM / 2 + 0.35 + TH * sq / 2));   // (her half-beam, a gap, half the board)
   haulOpen({
     salvage: s, at, yaw: Math.atan2(k * side.x, k * side.z), sq,
     deck: () => sail.g.localToWorld(V3(0.9, SLOOP_DECK + 0.1, 0)),

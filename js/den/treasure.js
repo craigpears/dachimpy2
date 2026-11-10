@@ -5,7 +5,7 @@ import { H as TH, W as TW } from '../treasure-haul.js';
 import { Salvage, aboard } from '../den-haul.js';
 import { scene, camera, mat, mesh, canvasTex, V3, G, keys, ray, burst, toast, tween } from './world.js';
 import { updateStats } from './wall.js';
-import { seaX, seaZ, SLOOP_DECK, sail, liftAt } from './sea.js';
+import { seaX, seaZ, SLOOP_DECK, SLOOP_BEAM, sail, liftAt } from './sea.js';
 
 /* Treasure Haul (src/treasure-haul.ts, the real puzzle; src/den-haul.ts, when you can haul and what
    it pays). The board lies on the water where the chest went down, its top row nearest whoever's
@@ -420,7 +420,7 @@ function haulBeside(s, done, away = false) {
   const ry = sail.g.rotation.y, side = V3(Math.sin(ry), 0, Math.cos(ry));   // her own +z: abeam
   const p = sail.helm.pose, to = V3(seaX(s.at[0]) - seaX(p.c), 0, seaZ(s.at[1]) - seaZ(p.r));
   const k = (Math.sign(to.dot(side)) || 1) * (away ? -1 : 1), sq = 0.45;
-  const at = V3(seaX(p.c), 0.12 + liftAt(p.c, p.r), seaZ(p.r)).addScaledVector(side, k * (0.85 + 0.35 + TH * sq / 2));
+  const at = V3(seaX(p.c), 0.12 + liftAt(p.c, p.r), seaZ(p.r)).addScaledVector(side, k * (SLOOP_BEAM / 2 - 0.15 + 0.35 + TH * sq / 2));   // (as far out from her side as before she was widened)
   haulOpen({
     salvage: s, at, yaw: Math.atan2(k * side.x, k * side.z), sq,
     deck: () => sail.g.localToWorld(V3(0.9, SLOOP_DECK + 0.1, 0)),

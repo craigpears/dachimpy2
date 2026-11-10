@@ -23,7 +23,7 @@ import * as THREE from 'three';
 import { STRENGTH, WIND, WEATHER, pointOf, lie } from '../den-wind.js';
 import { SAIL } from '../den-sail.js';
 import { scene, mesh, mat, woodTex, canvasTex, burst, toast, view, V3 } from './world.js';
-import { sail, seaX, seaZ, SLOOP_DECK } from './sea.js';
+import { sail, seaX, seaZ, SLOOP_DECK, SLOOP_BEAM } from './sea.js';
 
 const DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
 // The way it blows, as you'd say it from the den: from the left, from the sea, and so on.
@@ -100,11 +100,13 @@ function zoneStreaks(z) {
 // on the pull. The two sit side by side on one thwart (the user, 10 Nov: "make the ship a little
 // wider so the little guys can sit next to each other").
 export const SWEEP_X = { port: 0.2, starboard: 0.2 };
+// (its rowlock on her gunwale, out from her middle)
+export const SWEEP_Z = SLOOP_BEAM / 2 - 0.1;
 function sweeps(g) {
   const wood = mat('#7a5634', { map: woodTex }), out = new THREE.Group(), oars = [];
   for (const s of [1, -1]) for (const x of [SWEEP_X[s > 0 ? 'starboard' : 'port']]) {
     const lock = new THREE.Group();
-    lock.position.set(x, SLOOP_DECK + 0.12, s * 0.95);
+    lock.position.set(x, SLOOP_DECK + 0.12, s * SWEEP_Z);
     lock.rotation.y = s > 0 ? 0 : Math.PI;   // (built for her starboard side, turned round for port)
     const arm = new THREE.Group();
     arm.rotation.order = 'YXZ';

@@ -1,7 +1,7 @@
 /* A lock (src/den-lock.ts), and the canal's chain of them on the sloop's sea (src/den-sail.ts): the
    secret way round the imperial checkpoint (the user, 10 Nov). */
 import { describe, expect, it } from 'vitest';
-import { LOCK, Lock, ends, lockCost } from '../src/den-lock';
+import { LOCK, Lock, ends, lockCost, gatesOf, lieAmong, lieClear, HER, GATES } from '../src/den-lock';
 import { LAY, Sea, Helm, SAIL, type Move, type Pose } from '../src/den-sail';
 import { Checkpoint, CHECK } from '../src/den-checkpoint';
 import { stilled } from './helpers';
@@ -342,5 +342,90 @@ describe('"the way to the locks: found, not shown" (10 Nov)', () => {
     // But from on the canal, or to a pin on it, the locks are the way.
     expect(sea.plot({ ...MOUTH }, ...TOP)).not.toBeNull();
     expect(sea.plot({ c: TOP[0], r: TOP[1], d: 0 }, wc - 1, wr)).not.toBeNull();
+  });
+});
+
+describe('"the front part of the ship is sticking out of the gate when the [lock] is draining" (10 Nov)', () => {
+  const C = SAIL.CELL, pad = GATES.LEAF / 2;
+  const at = (i: number) => gatesOf(LAY.LOCKS[i], LAY.LOCKS, C);
+
+  it('in a lock she fits between its gates, bow and stern, whichever way she faces', () => {
+    for (let i = 0; i < LAY.LOCKS.length; i++) {
+      const g = at(i);
+      for (const [toHigh, toLow] of [[HER.BOW, HER.STERN], [HER.STERN, HER.BOW]]) {
+        expect(toHigh + pad).toBeLessThan(g.high);
+        expect(toLow + pad).toBeLessThan(g.low);
+      }
+    }
+  });
+
+  it('its low gates, swinging into the chamber, sweep clear of her stern going up and her bow going down', () => {
+    // (a leaf swings about its hinge on the chamber's wall, GATES.HALF across from her middle)
+    for (let i = 0; i < LAY.LOCKS.length; i++) {
+      const hinge = [-at(i).low, GATES.HALF];
+      const stern = [-HER.STERN, HER.STERN_HALF], bowsprit = [-HER.BOW, 0];
+      for (const [x, z] of [stern, bowsprit]) expect(Math.hypot(x - hinge[0], z - hinge[1])).toBeGreaterThan(Math.hypot(GATES.HALF, pad));   // (a leaf's far corner)
+    }
+  });
+
+  it('the two down through the headland, a square apart, are a staircase: one pair of gates between them', () => {
+    expect(at(3).above).toBe(2);
+    expect(at(3).high + at(2).low).toBe(2 * C);   // (the same pair: the upper's low gates)
+    for (const i of [0, 1, 2]) expect(at(i).above).toBe(-1);
+  });
+
+  it('up the locks and down, and back, she\'s never drawn through a shut gate, waiting or not', () => {
+    const h = new Helm(sea, { ...MOUTH });
+    const open = (i: number, end: 'low' | 'high') => {
+      const g = at(i), lk = h.locks[i];
+      // (a staircase's pair opens once the lower lock's full too)
+      const below = LAY.LOCKS.findIndex((_, j) => at(j).above === i);
+      return lk.openAt(end) && (end === 'high' || below < 0 || h.locks[below].openAt('high')) && !(end === 'high' && g.above >= 0) ? 1 : 0;
+    };
+    let waits = 0, lay = 0;
+    const look = () => {
+      const p = lieAmong(h.now(), LAY.LOCKS, C, open);
+      const d = ((Math.round(p.a) % 4) + 4) % 4;
+      if (Math.abs(p.r - h.now().r) > 1e-9) lay++;
+      LAY.LOCKS.forEach((s, i) => {
+        if (p.c !== s.at[0] || d % 2 !== s.up % 2) return;
+        const along = (p.r - s.at[1]) * (s.up === 0 ? 1 : -1) * C, face = d === s.up ? 1 : -1;
+        const hi = along + (face > 0 ? HER.BOW : HER.STERN), lo = along - (face > 0 ? HER.STERN : HER.BOW), g = at(i);
+        const shut: number[] = [];
+        if (!open(i, 'low')) shut.push(-g.low);
+        if (g.above >= 0 ? !open(g.above, 'low') : !open(i, 'high')) shut.push(g.high);
+        for (const x of shut) expect(x + pad <= lo || x - pad >= hi, `${h.held()} at ${h.pose.r}: lock ${i}'s gates at ${x}, her ${lo}..${hi}`).toBe(true);
+      });
+    };
+    const go = (c: number, r: number) => {
+      h.drop(c, r);
+      for (let t = 0; h.pin && t < 400; t += 0.05) {
+        h.tick(0.05);
+        if (h.held()) waits++;
+        look();
+        const l = h.working();
+        if (l && Math.round(t * 20) % 10 === 0) h.pump(2);
+      }
+      expect(h.pin).toBeNull();
+    };
+    go(...TOP); go(3, 22); go(...TOP); go(MOUTH.c, MOUTH.r);
+    expect(waits).toBeGreaterThan(0);
+    expect(lay).toBeGreaterThan(0);   // (she lay back from a lock's gates at least once: filling from above)
+  });
+
+  it('lying off a lock she\'s let in only as its gates swing well open, gliding, never jumping', () => {
+    const g = { low: C, high: GATES.HIGH };
+    const shut = lieClear(C, -1, g, { low: 0, high: 0 });
+    expect(shut).toBeCloseTo(g.high + pad + GATES.CLEAR + HER.BOW);
+    expect(lieClear(C, -1, g, { low: 0, high: 0.5 })).toBe(shut);
+    let was = shut;
+    for (let u = 0.6; u <= 1.0001; u += 0.02) {
+      const now = lieClear(C, -1, g, { low: 0, high: u });
+      expect(was - now).toBeLessThan(1.2);
+      was = now;
+    }
+    expect(was).toBe(C);
+    // In it, she lies as she is.
+    expect(lieClear(0, 1, g, { low: 0, high: 0 })).toBe(0);
   });
 });

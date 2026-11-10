@@ -13,7 +13,7 @@ import { canLand } from '../den-beach.js';
 import { cine } from './cine.js';
 import { SEA_X0, seaX, seaZ, SLOOP_DECK, sail, liftAt, sloopMesh, seaRocks, seaWorld, pinMesh, dotMat, dotMine, dotGeo, hoverMat, TOK } from './sea.js';
 import { patch, deckHoleShape, patchClear, patchShut, patchClick, patchHover, patchTick, patchPrompt } from './sea-puzzles.js';
-import { hold, holdShut, holdKey, holdHover, holdSwap, holdTick, lockWorld, lockTick, lockSay } from './lock.js';
+import { hold, holdShut, holdKey, holdHover, holdSwap, holdTick, lockWorld, lockTick, lockSay, lockClear } from './lock.js';
 import { online } from './crew.js';
 import { haul, haulShut, haulPrompt, canHaulWreck, haulWreck } from './treasure.js';
 import { checkpointReset, checkpointTick, checkpointShot } from './checkpoint.js';
@@ -263,7 +263,7 @@ export function sailTick(dt) {
     }
   }
   // Her, riding the swell, heeling into her turns.
-  const t = performance.now() / 1000, p = rowShown(h.now()), turning = h.cur && (h.cur.m === 'L' || h.cur.m === 'R') && !h.cur.bump && h.t < h.cur.secs;
+  const t = performance.now() / 1000, p = lockClear(rowShown(h.now())), turning = h.cur && (h.cur.m === 'L' || h.cur.m === 'R') && !h.cur.bump && h.t < h.cur.secs;
   sail.heel += ((turning ? (h.cur.m === 'L' ? -0.13 : 0.13) : 0) - sail.heel) * Math.min(1, dt * 4);
   sail.low = (sail.low ?? 0) + ((h.dazed() ? -0.3 : 0) - (sail.low ?? 0)) * Math.min(1, dt * 2);
   sail.g.position.set(seaX(p.c), liftAt(Math.round(p.c), Math.round(p.r)) + sail.low + Math.sin(t * 0.9) * 0.06, seaZ(p.r));
