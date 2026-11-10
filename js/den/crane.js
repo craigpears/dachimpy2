@@ -1,6 +1,6 @@
 // The crane up the cliff from the hidden cove, and the clifftop lagoon, in 3D: the headland, the
-// ledge at its foot, the smugglers' old hoist, the crane's frames and the crane as it goes up, her
-// trip up and down, and the lagoon with its sunk wreck. (The rules: src/den-crane.ts.)
+// ledge at its foot (somewhere to moor), the crane's footings waiting, its frames and the crane as
+// it goes up, her trip up and down, and the lagoon with its sunk wreck. (The rules: src/den-crane.ts.)
 import * as THREE from 'three';
 import { CRANE, Crane } from '../den-crane.js';
 import { aboard } from '../den-haul.js';
@@ -16,12 +16,16 @@ import { wreckMesh } from './checkpoint.js';
 /* The user (9 Nov): "could I go somewhere to the side of a cliff and like construct a crane to get
    in?", built "with like the carpentry puzzle", to somewhere of its own, not the lock's cove. So the
    hidden cove's left-hand cliff is a headland, taller than the cove's walls, and at its foot there's
-   a ledge cut into the rock: an old smugglers' landing, their hoist rotting on the clifftop above
-   it, far too small to lift a ship. Sail her alongside it and Space builds a crane up there, by
-   Carpentry (the deck patch's tray and keys: sea-puzzles.js), a part at a time: each part's frame is
-   laid on the ledge and filled; full, it's sawn to fit (what sticks out falls away as sawdust), the
-   old hoist hauls it up the cliff, and it goes into its place: its foot, its post, its jib. The
-   crane is the pieces you fitted. Then the old hoist's windlass, block and rope are rigged on it.
+   a ledge cut into the rock: an old smugglers' landing, bollards and rings to moor to, the crane's
+   stone footings waiting on the clifftop above it and the first frame's outline chalked on the
+   ledge. Sail her alongside it and Space builds a crane up there, by Carpentry (the deck patch's
+   tray and keys: sea-puzzles.js), a part at a time: each part's frame is laid on the ledge and
+   filled; full, it's sawn to fit (what sticks out falls away as sawdust), you leap up onto the
+   clifftop and haul it up by hand on ropes, and it goes into its place: the foot laid on the
+   footings, the post raised on it, the jib swung up. The crane is the pieces you fitted. Then its
+   windlass, block and rope are rigged on it. (There was an old smugglers' hoist up there that
+   hauled the frames up, till the user, 10 Nov: "If you're building a crane, you've literally got a
+   crane here that's helping you build the crane".)
    Built, it hauls her up the cliff and swings her round into a still lagoon up on the headland,
    a short, cheesy moment you can skip with Space; and lowers her back down whenever you like.
    In the lagoon an old wreck lies sunk in the clear water, its treasure hauled up by Treasure Haul. */
@@ -48,8 +52,9 @@ const LAG = { x: -46.6, z: POST.z - 0.5, rx: 9.2, rz: 10 };
 // toward the cove, kept to the oval so she's set down clear of it).
 const shoreAt = (a) => (Math.abs(Math.atan2(Math.sin(a), Math.cos(a))) < 0.5 ? 1 : 1 + 0.07 * Math.sin(a * 3 + 1) + 0.05 * Math.sin(a * 5 + 2));
 const shore = (k = 1, n = 64) => Array.from({ length: n }, (_, i) => { const a = i / n * Math.PI * 2, f = shoreAt(a) * k; return [LAG.x + Math.cos(a) * LAG.rx * f, LAG.z - Math.sin(a) * LAG.rz * f]; });
-// The old hoist, on the clifftop beside the ledge: its block out over the ledge.
-const HOIST = V3(-33, HT, LEDGE_Z0 + 0.7), BLOCK = V3(-33.1, HT + 1.9, seaZ(CRANE.LEDGE[1]) + 1);
+// Hauling a frame up by hand: you stand on the clifftop at the back of the ledge's notch, the ropes
+// up over its lip (LIP) to your hands.
+const LIP = V3(LEDGE_X0 - 0.1, HT + 0.08, FRAME_AT.z), HAUL = V3(LEDGE_X0 - 1.0, HT, FRAME_AT.z);
 // Its windlass on the crane: behind the post (on the side away from the jib, toward the camera), and
 // where you stand to work it, in sight (always over the clifftop, however the crane's turned).
 const WINCH = V3(-0.85, FOOT_T, 0.35), STAND = V3(-1.3, FOOT_T, 0.35);
@@ -72,7 +77,7 @@ const rope = (r = 0.035) => { const m = mesh(cyl, ropeM, false); m.userData.r = 
 const ease = (u) => (u <= 0 ? 0 : u >= 1 ? 1 : u * u * (3 - 2 * u));
 const lerpA = (a, b, u) => { const d = Math.atan2(Math.sin(b - a), Math.cos(b - a)); return a + d * u; };
 
-// ---------- the headland, the ledge, the old hoist and the lagoon ----------
+// ---------- the headland, the ledge, the footings and the lagoon ----------
 /* The headland: one block of rock with a grassy top, the cove's left-hand side, taller than the
    cove's walls, with the ledge cut into its foot and the lagoon's basin let into its top. */
 function headland(W) {
@@ -101,7 +106,9 @@ function headland(W) {
     W.g.add(rock(LAG.x + Math.cos(a) * LAG.rx * f, HT - 0.1, LAG.z - Math.sin(a) * LAG.rz * f, 0.6 + (i % 4) * 0.2));
   }
 }
-// The ledge: a shelf of rock at the cliff's foot, a mooring ring in its face.
+/* The ledge: a shelf of rock at the cliff's foot, plainly somewhere to moor (the user, 10 Nov: the
+   place to stop should be plain): two stout bollards along its edge with a rope's coil on one,
+   rope fenders hung down its face, mooring rings. */
 function ledge(W) {
   const w = LEDGE_X1 - LEDGE_X0, d = LEDGE_Z0 - LEDGE_Z1;
   const shelf = mesh(new THREE.BoxGeometry(w, LEDGE_Y + 1, d), stoneM());
@@ -110,29 +117,50 @@ function ledge(W) {
   ring.position.set(LEDGE_X1 + 0.03, LEDGE_Y - 0.2, POST.z + 1.8); ring.rotation.y = Math.PI / 2;
   const ring2 = ring.clone(); ring2.position.z = POST.z - 1.8;
   W.g.add(shelf, ring, ring2);
+  const bollM = mat('#2d2a27', { metalness: 0.4, roughness: 0.6 }), fenderM = mat('#a8875a', { roughness: 1 });
+  for (const s of [1, -1]) {
+    const z = POST.z + s * 2.4, b = new THREE.Group();
+    const stem = mesh(new THREE.CylinderGeometry(0.16, 0.2, 0.55, 10), bollM); stem.position.y = 0.27;
+    const cap = mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.1, 10), bollM); cap.position.y = 0.58;
+    b.add(stem, cap);
+    if (s > 0) { const coil = mesh(new THREE.TorusGeometry(0.22, 0.06, 6, 14).rotateX(Math.PI / 2), ropeM, false); coil.position.y = 0.12; b.add(coil); }
+    b.position.set(LEDGE_X1 - 0.45, LEDGE_Y, z);
+    W.g.add(b);
+    // (a rope fender hung down the ledge's face beside each)
+    const fender = mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.5, 8), fenderM); fender.position.set(LEDGE_X1 + 0.12, LEDGE_Y - 0.45, z - s * 0.8);
+    W.g.add(fender, stretch(rope(0.02), V3(LEDGE_X1 - 0.1, LEDGE_Y + 0.02, z - s * 0.8), V3(LEDGE_X1 + 0.12, LEDGE_Y - 0.2, z - s * 0.8), 0.02));
+  }
 }
-/* The smugglers' old hoist: a post, a brace and an arm out over the ledge, a block at its end with
-   a rope down, and a little windlass at its foot. Too small to lift a ship, but it'll lift a frame. */
-function oldHoist(W) {
-  const g = new THREE.Group();
-  const post = mesh(new THREE.BoxGeometry(0.24, 2.1, 0.24), oldWood); post.position.set(HOIST.x, HT + 1.05, HOIST.z);
-  const arm = mesh(new THREE.BoxGeometry(0.18, 1, 0.18), oldWood);
-  stretch(arm, V3(HOIST.x, HT + 2.05, HOIST.z + 0.2), V3(BLOCK.x, HT + 2.05, BLOCK.z - 0.1)); arm.scale.set(1, arm.scale.y, 1);
-  const brace = mesh(new THREE.BoxGeometry(0.12, 1, 0.12), oldWood);   // (stretched along its length)
-  stretch(brace, V3(HOIST.x, HT + 1.1, HOIST.z), V3(HOIST.x - 0.05, HT + 2.0, HOIST.z - 1.1)); brace.scale.set(1, brace.scale.y, 1);
-  g.add(post, arm, brace);
-  W.block = blockMesh();
-  W.block.position.copy(BLOCK);
-  W.blockHome = BLOCK.clone();
-  W.winch = winchMesh();
-  W.winch.position.set(HOIST.x - 0.9, HT, HOIST.z + 0.4);
-  W.winch.rotation.y = Math.PI / 2;
-  W.winchHome = { p: W.winch.position.clone(), q: W.winch.quaternion.clone() };
-  // Its rope, down from the block to the ledge (and to a frame, while it hauls one up).
-  W.hoistRope = rope(0.03);
-  stretch(W.hoistRope, BLOCK, V3(BLOCK.x, LEDGE_Y + 0.3, BLOCK.z), 0.03);
-  W.hoistRopes = [0, 1, 2, 3].map(() => { const r = rope(0.025); r.visible = false; return r; });
-  W.g.add(g, W.block, W.winch, W.hoistRope, ...W.hoistRopes);
+/* Before it's built: the crane's place waiting, so nothing looks built before it is (the user, 10
+   Nov: "I thought we were constructing this crane"): four squared stone footings set in the
+   clifftop where its foot will go, and on the ledge the first frame's outline chalked out where
+   it'll be laid. Its windlass and block are its own, and come out once it's built (rigCrane); the
+   ropes you haul each frame up by are W.haulRopes. */
+function footings(W) {
+  const pad = new THREE.BoxGeometry(0.5, 0.3, 0.5), padM = mat('#8d8478', { flatShading: true, roughness: 0.9 });
+  W.footings = new THREE.Group();
+  for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const p = mesh(pad, padM); p.position.set(POST.x + x * 0.9, HT + 0.1, POST.z + z * 0.9); W.footings.add(p); }
+  W.g.add(W.footings);
+  // The first frame's outline, chalked on the ledge: rows across the ledge from the cliff, columns along it.
+  const rows = CRANE.PARTS[0].rows, sq = CRANE.SQ, set = new Set(), chalk = mat('#efe9da', { roughness: 1, emissive: '#3a3832' });
+  rows.forEach((row, r) => [...row].forEach((ch, c) => { if (ch === '#') set.add(`${r},${c}`); }));
+  W.outline = new THREE.Group();
+  const at = (r, c) => V3(FRAME_AT.x + (r - rows.length / 2) * sq, LEDGE_Y + 0.02, FRAME_AT.z - (c - rows[0].length / 2) * sq);
+  for (const id of set) {
+    const [r, c] = id.split(',').map(Number);
+    for (const [a, b] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+      if (set.has(`${r + a},${c + b}`)) continue;
+      // (an edge between rows runs along the ledge, one between columns across it)
+      const line = mesh(a ? new THREE.BoxGeometry(0.04, 0.01, sq + 0.04) : new THREE.BoxGeometry(sq + 0.04, 0.01, 0.04), chalk, false);
+      line.position.copy(at(r + 0.5 + a * 0.5, c + 0.5 + b * 0.5));
+      W.outline.add(line);
+    }
+  }
+  W.g.add(W.outline);
+  W.block = blockMesh(); W.block.visible = false;
+  W.winch = winchMesh(); W.winch.visible = false;
+  W.haulRopes = [0, 1, 2, 3, 4].map(() => { const r = rope(0.025); r.visible = false; return r; });
+  W.g.add(W.block, W.winch, ...W.haulRopes);
 }
 function blockMesh() {
   const g = new THREE.Group();
@@ -212,7 +240,7 @@ function lagoon(W) {
 export function craneWorld() {
   if (crane.W) return crane.W;
   const W = crane.W = { g: new THREE.Group() };
-  headland(W); ledge(W); oldHoist(W); lagoon(W);
+  headland(W); ledge(W); footings(W); lagoon(W);
   // The crane's place: its foot on the clifftop, and a turning frame for its post and jib.
   W.root = new THREE.Group(); W.root.position.copy(POST);
   W.slew = new THREE.Group(); W.root.add(W.slew);
@@ -274,8 +302,9 @@ function partPose(i) {
   if (i === 1) return { parent: W.slew, p: V3(0, FOOT_T + 4 * CRANE.SQ, 0.164), q: basis(V3(0, 1, 0), V3(0, 0, 1)) };
   return { parent: W.slew, p: V3(JIB_X, POST_TOP + 0.33, JIB_Z + 0.164), q: basis(V3(c, k, 0), V3(0, 0, 1)) };
 }
-/* The frame's full: sawn to fit, then the old hoist hauls it up the cliff and it goes into its place.
-   A beat at a time (seconds), skipped with Space. */
+/* The frame's full: sawn to fit, then you leap up onto the clifftop and haul it up by hand on ropes,
+   and it goes into its place: the foot laid on its footings, the post raised on it, the jib swung
+   up. A beat at a time (seconds), skipped with Space. */
 const HOIST_T = { saw: 0.8, lift: 2.4, place: 1.6 };
 const HOIST_ALL = HOIST_T.saw + HOIST_T.lift + HOIST_T.place;
 function startHoist(f) {
@@ -318,16 +347,17 @@ function hoistTick(dt) {
     g.position.y += Math.sin(place * Math.PI) * 1.2;
     g.quaternion.slerpQuaternions(h.from.q, h.to.q, place);
   }
-  // The old hoist's ropes to the frame's corners while it's hauled up; its own rope otherwise.
-  const hauling = t > T.saw * 0.6 && place <= 0;
-  W.hoistRope.visible = !hauling;
+  // Ropes from the frame's corners up over the lip to your hands while you haul it up (and steady
+  // it into its place).
+  const hauling = t > T.saw * 0.6 && place < 0.6;
   g.updateMatrixWorld(true);
-  const f = K().frame, bx = f?.board;
-  W.hoistRopes.forEach((r, n) => {
+  const f = K().frame, bx = f?.board, hands = haulHands();
+  W.haulRopes.forEach((r, n) => {
     r.visible = hauling && !!bx;
     if (!r.visible) return;
+    if (n === 4) { stretch(r, LIP, hands, 0.03); return; }
     const cc = (n & 1 ? bx.c0 + bx.w - CRANE.MARGIN : bx.c0 + CRANE.MARGIN), rr = (n & 2 ? bx.r0 + bx.h - CRANE.MARGIN : bx.r0 + CRANE.MARGIN);
-    stretch(r, BLOCK, h.face.localToWorld(V3(cc * S, -rr * S, 0.1)), 0.025);
+    stretch(r, LIP, h.face.localToWorld(V3(cc * S, -rr * S, 0.1)), 0.025);
   });
   if (t < HOIST_ALL) return;
   landPart();
@@ -336,8 +366,7 @@ function hoistTick(dt) {
 function landPart() {
   const h = crane.hoist, W = crane.W;
   crane.hoist = null;
-  W.hoistRope.visible = true;
-  W.hoistRopes.forEach((r) => { r.visible = false; });
+  W.haulRopes.forEach((r) => { r.visible = false; });
   for (const ch of [...h.face.children]) if (ch.userData.backing) h.face.remove(ch);
   h.pose.parent.add(h.g);
   if (crane.ledgeG === h.g) crane.ledgeG = null;
@@ -351,18 +380,17 @@ function landPart() {
   const next = K().build();
   if (next) toast(`The ${PART_NAME[CRANE.PARTS[h.i].name]}'s up! Now its ${PART_NAME[CRANE.PARTS[K().up].name]}`);
 }
-// The old hoist's windlass and block go onto the crane, and its rope's rove from the windlass up
-// the post and out along the jib to the block at its tip, the hook under it.
+// Its windlass and block go onto the crane, and its rope's rove from the windlass up the post and
+// out along the jib to the block at its tip, the hook under it.
 function rigCrane() {
   const W = crane.W;
-  W.slew.add(W.winch); W.winch.position.copy(WINCH); W.winch.rotation.set(0, Math.PI / 2, 0);
-  W.slew.add(W.block); W.block.position.copy(TIP);
+  W.slew.add(W.winch); W.winch.position.copy(WINCH); W.winch.rotation.set(0, Math.PI / 2, 0); W.winch.visible = true;
+  W.slew.add(W.block); W.block.position.copy(TIP); W.block.visible = true;
   W.rig.clear();
   const pts = [V3(WINCH.x, WINCH.y + 0.6, WINCH.z), V3(-0.3, POST_TOP + 0.15, JIB_Z), TIP.clone()];
   for (let i = 0; i + 1 < pts.length; i++) W.rig.add(stretch(rope(0.03), pts[i], pts[i + 1], 0.03));
   W.rig.visible = true;
   W.hook.visible = W.hookRope.visible = true;
-  W.hoistRope.visible = false;
   burst(POST.clone().setY(HT + 3), '#e8c890', 20, 3);
 }
 
@@ -460,7 +488,7 @@ function tripTick(dt) {
   stretch(W.hookRope, tip, W.hook.position.clone().setY(hy + 0.2), 0.03);
   W.slings.forEach((r, n) => {
     r.visible = b.leap >= 1 && b.lower < 1;
-    if (r.visible) stretch(r, W.hook.position.clone().setY(hy - 0.35), sail.g.localToWorld(V3(n & 1 ? 1.3 : -1.3, SLOOP_DECK - 0.4, n & 2 ? 0.8 : -0.8)), 0.025);
+    if (r.visible) stretch(r, W.hook.position.clone().setY(hy - 0.35), sail.g.localToWorld(V3(n & 1 ? 1.3 : -1.3, SLOOP_DECK - 0.4, n & 2 ? 1.02 : -1.02)), 0.025);   // (round her sides: her half-beam's 1)
   });
   // You: up to the windlass in a leap, winding (or leaning on the jib as it swings), and a leap
   // down onto her deck at the end.
@@ -495,7 +523,7 @@ function haulLagoon() {
   if (!K().canHaulWreck()) return false;
   const ry = sail.g.rotation.y, side = V3(Math.sin(ry), 0, Math.cos(ry));   // her own +z: abeam
   const to = V3(LAG.x - REST.x, 0, LAG.z - REST.z), k = Math.sign(to.dot(side)) || 1, sq = 0.45;
-  const at = V3(REST.x, WATER + 0.12, REST.z).addScaledVector(side, k * (0.85 + 0.35 + TH * sq / 2));
+  const at = V3(REST.x, WATER + 0.12, REST.z).addScaledVector(side, k * (1.0 + 0.35 + TH * sq / 2));   // (her half-beam, a gap, half the board)
   haulOpen({
     salvage: s, at, yaw: Math.atan2(k * side.x, k * side.z), sq,
     deck: () => sail.g.localToWorld(V3(0.9, SLOOP_DECK + 0.1, 0)),
@@ -552,13 +580,28 @@ export function cranePrompt() {
   }
   if (K().alongside(sail.helm)) {
     if (K().built()) return 'Under the crane · Space: haul her up the cliff';
-    return K().frame || K().up ? `Alongside the ledge · Space: back to building the crane (its ${PART_NAME[CRANE.PARTS[K().up].name]})` : 'Alongside the old smugglers\' ledge · Space: build a crane up on the clifftop (Carpentry)';
+    return K().frame || K().up ? `Alongside the ledge · Space: back to building the crane (its ${PART_NAME[CRANE.PARTS[K().up].name]})` : 'Alongside the ledge · Space: build a crane on the ledge to haul her up the cliff (Carpentry)';
   }
   return '';
+}
+// Your hands on the ropes while you haul a frame up, on the clifftop at the back of the ledge.
+const haulHands = () => V3(pirate.x + 0.35, HT + 1.0, pirate.z);
+// Hauling a frame up: a leap up from the ledge onto the clifftop as it's sawn, then hand over hand.
+function standHauling() {
+  const h = crane.hoist, u = ease(Math.min(1, h.t / HOIST_T.saw)), t = performance.now() / 1000;
+  const from = V3(LEDGE_X0 + 0.55, LEDGE_Y, LEDGE_Z0 - 0.35), at = new THREE.Vector3().lerpVectors(from, HAUL, u);
+  at.y += Math.sin(u * Math.PI) * 2.2;
+  pirate.x = at.x; pirate.z = at.z;
+  pirate.g.position.copy(at);
+  pirate.g.rotation.set(0, Math.PI / 2, 0);   // (facing out over the cove, the ropes in his hands)
+  const pulling = h.t > HOIST_T.saw && h.t < HOIST_T.saw + HOIST_T.lift;
+  pirate.arms[0].rotation.x = pulling ? -1.3 + Math.sin(t * 8) * 0.5 : -1.1;
+  pirate.arms[1].rotation.x = pulling ? -1.3 - Math.sin(t * 8) * 0.5 : -1.1;
 }
 // You at her tiller, facing her bow; or, while you build, ashore on the ledge at the frame's end, so
 // others see you building (as at the den's frames).
 function standAboard() {
+  if (crane.hoist) return standHauling();
   if (patch.on && patch.at) {
     pirate.x = LEDGE_X0 + 0.55; pirate.z = LEDGE_Z0 - 0.35;
     pirate.g.position.set(pirate.x, LEDGE_Y, pirate.z);
@@ -597,8 +640,9 @@ export function craneTick(dt) {
     sail.g.rotation.y = lerpA(sail.g.rotation.y, alongYaw(), u);
     if (sail.on) standAboard();
   }
-  // The old hoist's rope's taken up while you build under it (it'd hang in your face).
-  crane.W.hoistRope.visible = !K().built() && !(patch.on && patch.at) && !crane.hoist;
+  // The crane's place waiting: its footings (its foot's laid on them, and they stay under it), the
+  // first frame's outline chalked on the ledge till a frame's laid there.
+  W.outline.visible = !K().built() && K().up === 0 && !K().frame && !crane.ledgeG;
   // In the lagoon: she rests out from under the jib, you at her tiller.
   if (K().where === 'lagoon') {
     const t = performance.now() / 1000;
@@ -609,7 +653,7 @@ export function craneTick(dt) {
   // The first time she's stopped in the cove, the ledge is pointed out.
   if (sail.on && !crane.said.ledge && sail.sea.cove.has(`${h.pose.c},${h.pose.r}`) && h.idle() && K().where === 'cove') {
     crane.said.ledge = true;
-    toast('A ledge under the left-hand cliff, an old hoist above it');
+    toast('A ledge under the left-hand cliff, somewhere to moor her: stop alongside it');
   }
 }
 // The camera: on the cliff while a part goes up, and on her trip up and down.
@@ -623,7 +667,7 @@ export function craneCam() {
   // (side on to the crane, so you see the jib swing her round from the cove to the lagoon)
   return { look: V3(-31.5 - 8 * k, HT + 0.5, POST.z), dist: 20, tilt: 0.3 + 0.1 * k, yaw: 0.35 };
 }
-// A new game (or sailing put back): no crane, the old hoist as it was, her back in the cove.
+// A new game (or sailing put back): no crane, its footings waiting, her back in the cove.
 export function craneReset() {
   const W = crane.W;
   if (crane.go) arrive('cove');
@@ -633,11 +677,10 @@ export function craneReset() {
   if (!W) return;
   for (const g of crane.parts) g.removeFromParent();
   crane.parts = [];
-  W.g.add(W.winch); W.winch.position.copy(W.winchHome.p); W.winch.quaternion.copy(W.winchHome.q);
-  W.g.add(W.block); W.block.position.copy(W.blockHome);
+  W.g.add(W.winch); W.winch.visible = false;
+  W.g.add(W.block); W.block.visible = false;
   W.rig.visible = false; W.hook.visible = W.hookRope.visible = false;
-  W.hoistRope.visible = true;
-  W.hoistRopes.forEach((r) => { r.visible = false; });
+  W.haulRopes.forEach((r) => { r.visible = false; });
   // (any frame left on the ledge)
   for (const ch of [...W.g.children]) if (ch.userData.frame) W.g.remove(ch);
 }

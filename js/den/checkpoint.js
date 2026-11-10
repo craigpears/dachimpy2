@@ -194,8 +194,9 @@ export function checkpointTick(dt) {
       cp.check.holed();
       toast(e.aimed ? 'Hit! She\'s holed: patch her to sail on' : 'Hit! That gun had her on its mark: patch her to sail on', true);
     }
-    for (const e of cp.check.watch(h.pose, h.idle(), dt)) {
-      if (e.kind === 'sighted') toast('The imperial checkpoint! Its guns are trained on the red rings: stop on one and she\'s hit. Run it, row it, or knock its guns out');
+    for (const e of cp.check.watch(h.pose)) {
+      // (from the den's side, the hint first, and this waits its turn after it)
+      if (e.kind === 'sighted') toast('The checkpoint\'s guns are trained on the red rings: stop on one and she\'s hit. Run it, row it, or knock its guns out');
       else if (e.kind === 'hint') toast(HINT);
       else if (e.kind === 'calm') toast('Out of sight of the checkpoint: its guns go back to their marks');
       else toast(throughSay(e));

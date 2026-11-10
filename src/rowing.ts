@@ -1,6 +1,7 @@
 /* Rowing: Bilge's board split down the middle into her oars. TypeScript, compiled to js/rowing.js by
-   `npm run build`; tested in tests/rowing.test.ts. Like bilge.ts it knows nothing of the den: the
-   den lays it out, plays the steps it hands out on the sea, and stops her when she runs aground.
+   `npm run build`; tested in tests/rowing.test.ts. Like bilge.ts it knows nothing of the den. It was
+   the den's first rowing board; the den now rows mirror strokes (src/mirror-row.ts), which reckons
+   a move's pull here (pull, ROW), and its bots measure this split board against it.
 
    The user (10 Nov), on IDEAS.md's "Port and starboard": "not obviously like a brand new puzzle,
    but it's certainly a nice twist on bilging ... Do that. Absolutely do that." So it is the real
@@ -9,9 +10,10 @@
      A piece cleared in columns 0-2 pulls on the port oars, one in columns 3-5 on the starboard.
    - A move pulls as hard as it's worth, reckoned as the bilging guides reckon a move (a big combo
      is a big pull), and that pull is shared between the sides by where its pieces were cleared.
-   - Even work drives her straight ahead. More on one side turns her: harder on the port oars swings
-     her bows to starboard (right), harder on starboard swings them to port (left), as in a real
-     rowing boat, where the side pulling harder goes ahead of the other.
+   - Even work drives her straight ahead. More on one side turns her toward that side: harder on
+     the starboard oars (the right) turns her to starboard (right), harder on port to port (left).
+     Real oars do the opposite, but the user (10 Nov): "if you pull on the right-hand side, it
+     should definitely go right".
    - The pull builds up into whole squares of Battle Navigation's moves: forward, left, right.
 
    Rowing will be a team puzzle too, and the heart of a race (the user, 10 Nov): each of two
@@ -45,10 +47,6 @@ export const ROW = {
       bilger makes a move about every three seconds, so one side's move and the next move on the
       other side still pull together. */
   WINDOW: 3,
-  /** The wait on the split board, rowed alone (10 Nov: "I'm not seeing any physical difference"):
-      one pirate makes both sides' moves, so a one-sided move needn't wait as long for the next to
-      even it up before it turns her. */
-  SOLO: 1.5,
   /** Near enough even counts as straight: unmatched pull no more than this share of the pull
       rowed round it (itself, and what was matched in the WINDOW either side) drives her ahead
       rather than turning her. */
@@ -115,15 +113,15 @@ interface Lot { n: number; at: number }
 export class Oars {
   /** Pull built up toward a square forward. */
   ahead = 0;
-  /** Pull built up toward a turn: more than nothing to starboard (port's oars pulled harder), less
-      to port. Turning one way and then the other cancels out, as it would at the oars. */
+  /** Pull built up toward a turn: more than nothing to starboard (starboard's oars pulled harder),
+      less to port. Turning one way and then the other cancels out, as it would at the oars. */
   swing = 0;
   /** Pull on each side still waiting for the other side, oldest first. */
   readonly waiting: Record<Side, Lot[]> = { port: [], starboard: [] };
   /** Pull matched lately (both sides together), to tell near-even from lopsided. */
   private matched: Lot[] = [];
 
-  /** `window`: the seconds pull on one side waits for the other (ROW.WINDOW, or ROW.SOLO). */
+  /** `window`: the seconds pull on one side waits for the other (ROW.WINDOW unless asked). */
   constructor(readonly window: number = ROW.WINDOW) {}
 
   /** Pull on one side's oars. */
@@ -162,7 +160,7 @@ export class Oars {
         const { n, at } = ls.shift()!;
         const round = this.matched.filter((x) => Math.abs(x.at - at) <= this.window).reduce((t, x) => t + x.n, 0);
         if (n <= ROW.EVEN * (n + round)) this.ahead += n;
-        else this.swing += side === 'port' ? n : -n;
+        else this.swing += side === 'starboard' ? n : -n;
       }
     }
     this.matched = this.matched.filter((x) => x.at + 2 * this.window > now);

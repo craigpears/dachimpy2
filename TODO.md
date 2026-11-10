@@ -52,27 +52,6 @@ the site (`.assetsignore` skips `*.md`).
   like crazy. (The rules are built: `src/rowing.ts`. The board, its look and the oars at sea are
   next.)
 
-- **Mirror strokes as the den's rowing board (10 Nov):** the user played `row-test` and loves it
-  ("This is actually quite a good puzzle. I love it."). The test page now has fewer kinds of piece
-  (5, for more cascades), the den's look and her rowing in 3D (IDEAS.md, "Fewer kinds, tested").
-  Next: mirror strokes as the den's rowing board on the sloop, two boards side by side, with the
-  lean and the compass the den's rowing already has.
-  Now, and balanced (the user, 10 Nov, on the den's rowing as it is: "it only took three moves to
-  generate three clears to generate a turn, and it ended up being a turn because I did one on one
-  side and two on the other. So that's basically impossible to go straight"; mirror strokes is
-  "ready enough to be slotted in ... even just that prototype mirrored thing"). Going straight
-  must be something you can aim for: a small lopsidedness rows her straight, and only a clear
-  imbalance turns her.
-  And the turn goes the way you'd expect, not the way real oars do (the user, 10 Nov: "if you pull
-  on the right-hand side, it should definitely go right"): more pull from the right-hand board
-  turns her right, more from the left turns her left.
-  And you can see where you're rowing (the user, 10 Nov: "I know it's like zoomed in is good to
-  see the puzzle, but like I can't see where I'm rowing"): the view keeps the boards big enough
-  to play but shows the water ahead of her too, the rocks, the marks and the next few squares.
-  Then the test page goes (the user, 10 Nov: "remove the mirror strokes test"): once mirror
-  strokes is the den's rowing, the den keeps it and the `row-test` page and its 3D go; the puzzle's
-  module, its tests and its bots stay.
-
 - **Something worth finding in the hidden cove: treasure (9 Nov):** the canal and the cove "would
   be great, but ... it needs a point of interest in here, even if it's a little like treasure
   chest on this little beach in the cove. You need to be able to go in here and do some treasure
@@ -104,68 +83,12 @@ the site (`.assetsignore` skips `*.md`).
   YPPedia page's pictures, and redraw any piece that doesn't read as the real one (RULES.md, "A
   puzzle's pieces look like the real ones").
 
-- **A wind by the old wreck beyond the checkpoint (10 Nov):** the wind, parked everywhere else,
-  blows in one place only: not the lagoon (the user first said so, then: "maybe I didn't mean the
-  lagoon"), but "once you get past the Imperial checkpoint, there's that bit to the left ... where
-  you can have the wind to the left, where I can see a bit of a shipwreck. The one that you can get
-  through by going through the locks, but without going to the lagoon." So the old wreck is in
-  sight beyond the checkpoint, "tempting, but you can't get to it unless you go around the back
-  way": a wind dead against her keeps her off it from the checkpoint side, and the locks' way
-  round brings her in to it. The oars beat the wind too, but that's never said: a secret for
-  players to work out ("we won't tell anybody that, but they can figure out oars go against the
-  wind"). Only there: "it should only really apply to this little ... area, not everywhere,
-  because otherwise it's irritating."
-  **And a wind before the locks (10 Nov):** "there should be some wind stopping you from getting
-  to the locks on the left as well. Again, it's that Easter egg idea. People have got to figure
-  out that they can use the oars to go past the wind, and that's how they get over there." So the
-  way in to the canal is guarded by a wind too, dead against her under sail; rowing gets her
-  through. Never said anywhere.
-
-- **The way to the locks: found, not shown (10 Nov):** "the hint to the canal is only supposed to
-  appear once you get right next to the Imperial checkpoint ... it should be a bit more out of
-  sight, really, because it's supposed to be more of an Easter egg. It shouldn't be like right
-  there for you to see. You should have to sail around to find it a bit ... even if it's just a
-  few, like, slightly out of the main viewport, doesn't need to be far." So the junction no longer
-  points out the canal, and its mouth is tucked a little away, just out of view from the trade
-  wind's run. The only hint comes at the end of the run, where she sees the checkpoint: "An
-  imperial checkpoint... I wonder if there's another way round."
-
 - **A hit on a gun shows on it, not in words (10 Nov):** "there should be some visible damage once
   you fire a cannonball at one of the turrets. Right now it's just like, oh, read the text to work
   out that it's been damaged ... I probably shouldn't really be any text. It should just be visible
   that you've damaged it, and you work out how many shots it takes." So each hit leaves its mark
   on the gun (chipped stone, a scorched and dented barrel, a battlement knocked off, smoking more
   as it's worse), and the toasts that count the hits ("2 more to wreck it") go.
-
-- **Which way on from a lock (10 Nov):** "The lock's very confusing. Like it just looks like you're
-  staring at a cliff once you go through the first run. There's no indication that you have to
-  turn right." Out of a lock the way on must be plain to see: she comes out facing the canal, or
-  the canal's water, banks and the next lock's gates are in view ahead and lead the eye round the
-  turn, never a blank cliff.
-  The same at the second lock (the user: "you are having to bump into the walls to get around this
-  lock system. That does not seem right"): the canal between locks is laid out so she can be
-  steered or rowed through without bumping the banks, every turn a clear one.
-  The locks' way should guide her on naturally; it's the arm off to the hidden cove that takes
-  going against the grain, a bit of bumping and squeezing (STORY.md, "The way on pulls you; the
-  side ways push back").
-
-- **How you get into the lagoon is a puzzle of the wrong kind (10 Nov):** "I don't know how you're
-  supposed to get into this lagoon. It certainly got me puzzled. I can see the crane, and it's
-  saying about a bilge pump. I've got no idea what that bilge pump is supposed to be, but I mean,
-  is it supposed to kind of be what that's you're supposed to move? And I thought we were
-  constructing this crane." In the cove: no talk of the old bilge pump (it's for a later step of
-  the story, flooding Dalnoth out, so it can sit there quietly or wait till then); the place to
-  stop is plain to see (the ledge under the old hoist, somewhere to moor); before it's built the
-  crane mustn't look built (the old hoist reads as a rickety hoist, the crane as empty footings
-  or a frame's outline waiting); and stopping there says what to do ("Space: build a crane on the
-  ledge to haul her up the cliff").
-  And no crane to build the crane (the user: "If you're building a crane, you've literally got a
-  crane here that's helping you build the crane ... a slight logic issue"): the old hoist goes,
-  and the frames go up some other believable way (hauled up by hand on ropes, the foot first,
-  then the post raised on it, then the jib).
-  Keep the crane looking like the Carpentry pieces it's built from (the user, 10 Nov: "I do still
-  love that the crane looks like carpentry pieces. It is just such a brilliant thing for the
-  puzzle").
 
 - **Dignity at the checkpoint, and her little cutscene (10 Nov):** "adding [her] as the dutiful
   commander of the imperial checkpost, kind of peering down from the gates ... give her a little
@@ -195,21 +118,6 @@ the site (`.assetsignore` skips `*.md`).
   Her look is ready: `makePirate({ look: PIRATES.Dignity })` (RULES.md, "Real pirates are only
   looks"), placed in `js/den/checkpoint.js`, once the checkpoint's current work has landed.
 
-- **A real chance to get past the checkpoint (10 Nov):** "you need some chance to actually sail
-  through. I think getting hit once or twice is funny, but they hit like there's no opportunity to
-  really get past. I think we said that before a bit. That's just a bit too much going on here."
-  Running the checkpoint should be hard but possible: a hit or two on the way, not one after
-  another, so a bold run past the guns can make it.
-  Possible, but work (the user, 10 Nov): "you should be able to get through here, but it should
-  be work", strong enough that the side route is worth finding (IDEAS.md, "Sunk at the
-  checkpoint").
-
-- **The rowing board's look: under water, rowers in scale, side by side (10 Nov):** no bilge water
-  line on the rowing boards ("everything should be under the water, really, for this mode"); two
-  little rowers and two oars, "actually lined up", each oar in its rower's hands; the rowers the
-  same size as you ("why are they so mini and you're like a giant on the back of the ship?"); and
-  "make the ship a little wider so the little guys can sit next to each other".
-
 - **Rowing: keep Bilge's water look, lose the compass (10 Nov):** first: "people are just going to
   get very confused given how visually identical it is to the [Bilging]"; then, on second thoughts:
   "I don't like the idea of different pieces ... part I did love of this similarity [to] bilge is
@@ -231,11 +139,6 @@ the site (`.assetsignore` skips `*.md`).
   home that O gets the oars out any time. Nothing about the wind (the user, 10 Nov: "keep it
   secret ... don't do a big thing ... We want to keep it as the Easter egg, the thing that you
   figure out"). After Dignity's cutscene.
-
-- **Quicker through the locks, for now (10 Nov):** "tone down how many times you need to get
-  through the locks, just so I can get in there a bit quicker. For now ... Maybe take a third off".
-  Each lock up takes about sixteen moves' worth of Bilge; make it about a third less (eleven), to
-  revisit once the lagoon's been tried. (No cheat needed: "I think it's fine".)
 
 ## Needs a playtest to pin down
 

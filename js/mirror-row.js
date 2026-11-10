@@ -1,6 +1,7 @@
-/* Mirror strokes, a test (TODO.md, "Test mirror strokes on a page of its own", 10 Nov). TypeScript,
-   compiled to js/mirror-row.js by `npm run build`; tested in tests/mirror-row.test.ts, played on
-   row-test.html and by the bots in tools/row-bots.js. It knows nothing of the den.
+/* Mirror strokes: the den's rowing board (RULES.md, "Rowing by mirror strokes", 10 Nov). TypeScript,
+   compiled to js/mirror-row.js by `npm run build`; tested in tests/mirror-row.test.ts, played on the
+   sloop (src/den-row.ts, js/den/rowing.js) and by the bots in tools/row-bots.mjs. It knows nothing
+   of the den.
 
    IDEAS.md's "Mirror strokes, thought through for skill": two full Bilge boards side by side, port
    on the left and starboard on the right, with pieces of their own; every swap made on one is made
@@ -9,14 +10,12 @@
    W - 2 - c, W - 1 - c on starboard. Each board's cascade runs on its own.
 
    What each board clears is pull for its side, reckoned as rowing.ts reckons a move (ROW: a big
-   combo is a big pull). Matched pull drives her ahead, the unmatched part turns her (port's extra
-   to starboard), as on the split board. Two ways to pair them, to try both:
-   - Stroke: move by move, "clear on both at once to pull straight". What one move pulls on one
-     side alone turns her, and turning one way then the other cancels out.
-   - ClockedOars: rowing.ts's own Oars, as the den rows, with a move every WINDOW seconds, so a
-     one-sided move can still be evened up by the next one.
-   The plain split board (SplitRow) is here too, paired either way, so the two can be played and
-   measured side by side.
+   combo is a big pull). Matched pull drives her ahead, a clear lead on one side turns her toward
+   that side (BALANCE, below). Two ways to pair them:
+   - Stroke: move by move, the den's way: one side's lead waits for the other side's next pull.
+   - ClockedOars: rowing.ts's own Oars, with a move every WINDOW seconds, for the bots to compare.
+   The plain split board (SplitRow) is here too, paired either way, so the bots can measure the two
+   side by side.
 
    Fewer kinds of piece (the user, after playing it, 10 Nov: "because that makes more of a risk for
    cascades and unintended effects"): Bilge's own rules, but each board can be dealt from fewer than
@@ -65,32 +64,70 @@ export function sidePull(before, m) {
 export function copyBilge(b, random) {
     return Object.assign(Object.create(Bilge.prototype), b, { grid: b.snap(), random });
 }
-/** One stroke's pull turned into squares, move by move. */
+/* Balance, so she can row straight (the user, 10 Nov, on the den's first rowing board: "it only took
+   three moves to generate three clears to generate a turn ... one on one side and two on the other.
+   So that's basically impossible to go straight"). Going straight is something to aim for: a small
+   lopsidedness still rows her straight, and only a clear imbalance turns her.
+   - Pull one side has made that the other hasn't yet is that side's lead (Stroke.swing). The other
+     side's next pull catches it up first, and what's caught up drives her ahead: both sides pulled,
+     if not on the same move.
+   - Every bit of pull matched like that also straightens up some of what's left of the lead (KEEL
+     of it, into forward pull too), as her keel holds her straight. So rowed steadily, one side
+     pulling up to 1 + 2 * KEEL times the other never turns her.
+   - Only a lead of TURN turns her: a quarter turn, and it uses the lead up. */
+export const BALANCE = {
+    /** Lead it takes to turn her a quarter: two and a half squares' pull, so a Bingo on one side
+        (8) turns her and three threes on one side don't. From the bots (tools/row-bots.mjs, 10 Nov,
+        30 games of 60 moves, five kinds): at 7.5 a player out to row straight never turns, one who
+        just clears whatever's biggest, never minding the side, turns about every eight moves, and
+        one out to turn her to starboard does it in three or four. At 6 the side-blind player turned
+        every six moves and rowed a circle in three games of four; at 9 a Bingo on one side didn't
+        turn her. */
+    TURN: 7.5,
+    /** Of each bit of pull matched, how much of the lead it straightens up. */
+    KEEL: 0.25,
+};
+/** One stroke's pull turned into squares, move by move. Starboard pulling harder turns her to
+    starboard, port to port (the user, 10 Nov: "if you pull on the right-hand side, it should
+    definitely go right"; real oars do the opposite). */
 export class Stroke {
     /** Pull built up toward a square forward. */
     ahead = 0;
-    /** Pull built up toward a turn: more than nothing to starboard (port pulled harder). */
+    /** One side's lead: pull it's made that the other side hasn't matched yet, more than nothing for
+        starboard (turning her to starboard). */
     swing = 0;
-    /** What a stroke does: how much drives her ahead, and how much turns her (to starboard more than
-        nothing). Near enough even (ROW.EVEN) counts as straight, as on the split board. */
-    static split(p) {
-        const m = Math.min(p.port, p.starboard), u = p.port - p.starboard;
-        if (Math.abs(u) <= ROW.EVEN * (p.port + p.starboard))
-            return { fwd: 2 * m + Math.abs(u), turn: 0 };
-        return { fwd: 2 * m, turn: u };
-    }
     row(p) {
-        const { fwd, turn } = Stroke.split(p);
-        this.ahead += fwd;
-        this.swing += turn;
-        const out = [];
-        while (this.swing >= ROW.STEP) {
-            out.push('R');
-            this.swing -= ROW.STEP;
+        let port = p.port, stbd = p.starboard;
+        // Matched on the move itself, then the side behind catching up the other's lead.
+        const both = Math.min(port, stbd);
+        let fwd = 2 * both;
+        port -= both;
+        stbd -= both;
+        if (this.swing > 0 && port > 0) {
+            const t = Math.min(port, this.swing);
+            fwd += 2 * t;
+            this.swing -= t;
+            port -= t;
         }
-        while (this.swing <= -ROW.STEP) {
+        if (this.swing < 0 && stbd > 0) {
+            const t = Math.min(stbd, -this.swing);
+            fwd += 2 * t;
+            this.swing += t;
+            stbd -= t;
+        }
+        this.swing += stbd - port;
+        // Her keel: what's matched straightens up some of the lead that's left.
+        const k = Math.min(Math.abs(this.swing), BALANCE.KEEL * fwd);
+        this.swing -= Math.sign(this.swing) * k;
+        this.ahead += fwd + k;
+        const out = [];
+        while (this.swing >= BALANCE.TURN) {
+            out.push('R');
+            this.swing -= BALANCE.TURN;
+        }
+        while (this.swing <= -BALANCE.TURN) {
             out.push('L');
-            this.swing += ROW.STEP;
+            this.swing += BALANCE.TURN;
         }
         while (this.ahead >= ROW.STEP) {
             out.push('F');
@@ -99,6 +136,7 @@ export class Stroke {
         return out;
     }
     pending() { return 0; }
+    building() { return { ahead: this.ahead / ROW.STEP, turn: this.swing / BALANCE.TURN }; }
     copy() { return Object.assign(new Stroke(), { ahead: this.ahead, swing: this.swing }); }
 }
 /** rowing.ts's Oars, as the den rows, with a move every WINDOW seconds: pull on one side waits for
@@ -110,8 +148,9 @@ export class ClockedOars {
     get swing() { return this.oars.swing; }
     pending() {
         const sum = (ls) => ls.reduce((t, l) => t + l.n, 0);
-        return sum(this.oars.waiting.port) - sum(this.oars.waiting.starboard);
+        return sum(this.oars.waiting.starboard) - sum(this.oars.waiting.port);
     }
+    building() { return { ahead: this.ahead / ROW.STEP, turn: (this.swing + this.pending()) / ROW.STEP }; }
     row(p) { this.t += ROW.WINDOW; return this.oars.feed(p, this.t); }
     copy() {
         const o = this.oars;

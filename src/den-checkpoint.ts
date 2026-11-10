@@ -26,7 +26,9 @@
    by the locks (the canal's chain of them, cut through the headland beside it: src/den-lock.ts),
    out of its sight the whole way; that costs puzzles too, a go of Bilge at each lock up. Its
    reef's far end, the long way round that cost only time, was closed once the locks were the way
-   round (the user, 10 Nov). Nothing says the locks are there: stop short of it, and a hint.
+   round (the user, 10 Nov). Nothing says the locks are there, only a hint where she sights it at
+   the end of the trade wind's run ("the hint to the canal is only supposed to appear once you get
+   right next to the Imperial checkpoint": the user, 10 Nov).
 
    And its guns can be knocked out, "just the same as" the turret that was (the user, 10 Nov:
    "everything should be destructive"): a hit from her guns on a gun's bastion quietens that gun a
@@ -40,6 +42,12 @@
 import { LAY, type Sea } from './den-sail.js';
 import { Turret } from './den-turret.js';
 
+/* A real chance to get past (the user, 10 Nov: "you need some chance to actually sail through. I
+   think getting hit once or twice is funny, but they hit like there's no opportunity to really get
+   past"): a gun that's hit her holds its fire on its marks till she's out of the checkpoint's sight
+   (its crew cheering, reloading, swabbing out), so running it costs a hit or two at most, one a
+   gun, never one after another. A fight (she's fired on it) is a fight: roused, they fire on her
+   whatever. */
 export const CHECK = {
   /** Seconds a shot takes to come down on a mark (the guns are trained on them: no long flight).
       Longer than she's on a mark rowing two squares as one (about 0.7 s), shorter than she's on one
@@ -52,9 +60,6 @@ export const CHECK = {
   MARKS: [[[9, 17], [9, 21]], [[9, 19]]] as [number, number][][],
   /** How near (squares, any way) of the gate she comes before it's pointed out. */
   SIGHT: 4,
-  /** Seconds she's been stopped short of it, in sight of it, before the hint (after what's said
-      when she sights it has been read). */
-  HINT_AFTER: 4,
   /** Once she's fired on it: how far a gun reaches to fire on her square (squares, any way), how
       long that shot's in the air (time to get out from under it, as the turret's was), and the
       seconds it takes that gun to load again after one. (Each gun's a destructible turret,
@@ -80,8 +85,8 @@ export type ShotAt = ({ on: 'gun'; gun: number; did: 'quiet' | 'wrecked' | null 
 
 /** What she's done at the checkpoint: sighted it, or got to the other side of it (through its gate,
     or round it by the locks), out or back, and how many times she was holed doing it. And, the
-    first time she stops short of it, a hint there's another way ("I wonder if there's a secret
-    way": the user, 10 Nov; not a signpost). */
+    first time she sights it from the den's side, a hint there's another way, said first ("I wonder
+    if there's a secret way": the user, 10 Nov; not a signpost). */
 export type CheckEvent =
   | { kind: 'sighted' }
   | { kind: 'hint' }
@@ -92,6 +97,8 @@ export type CheckEvent =
 /** The checkpoint's guns: a destructible turret (src/den-turret.ts) on each bastion, trained on its
     marks, and only firing on her square once she's fired on it. */
 export class Battery {
+  /** Each gun that's hit her since she came in sight: it holds its fire on its marks. */
+  scored: boolean[] = LAY.CHECKPOINT.GUNS.map(() => false);
   readonly guns: Turret[] = LAY.CHECKPOINT.GUNS.map((at, g) => new Turret({
     at, marks: CHECK.MARKS[g], alert: false, reach: CHECK.REACH,
     flight: CHECK.AIMED, reload: CHECK.AIMED_RELOAD, markFlight: CHECK.FLIGHT, markReload: CHECK.RELOAD,
@@ -122,10 +129,14 @@ export class Battery {
   }
 
   /** `ship`: where she is now (Helm.now), or null when it shouldn't fire on her (she's not out, or
-      Helm.spared: dazed, or just patched). Each gun fires on her when she's on one of its marks;
-      and, once roused, anywhere in its reach. Shots in the air still come down, a wreck's too. */
+      Helm.spared: dazed, or just patched). Each gun fires on her when she's on one of its marks,
+      unless it's hit her already; and, once roused, anywhere in its reach. Shots in the air still
+      come down, a wreck's too. */
   tick(dt: number, ship: { c: number; r: number } | null): GunEvent[] {
-    return this.guns.flatMap((t, gun) => t.tick(dt, ship).map((e) => ({ ...e, gun })));
+    return this.guns.flatMap((t, gun) => t.tick(dt, this.scored[gun] && !t.roused ? null : ship).map((e) => {
+      if (e.kind === 'land' && e.hit) this.scored[gun] = true;
+      return { ...e, gun };
+    }));
   }
 }
 
@@ -138,8 +149,6 @@ export class Checkpoint {
   hits = 0;
   private crossed: number | null = null;
   private sighted = false;
-  private hinted = false;
-  private still = 0;
 
   /** Holed by one of its guns. */
   holed() { this.hits++; }
@@ -156,17 +165,19 @@ export class Checkpoint {
     return g >= 0 ? { on: 'gun', gun: g, did: this.battery.hit(g), first } : { on: 'gatehouse', first };
   }
 
-  /** Her square now (Helm.pose, after each tick, `dt` seconds on): whether she's sighted it, or got
-      through; `idle`, she's stopped there (Helm.idle): stopped short of it in sight of it a while
-      (CHECK.HINT_AFTER), the hint. */
-  watch(p: { c: number; r: number }, idle = false, dt = 0): CheckEvent[] {
+  /** Her square now (Helm.pose, after each tick): whether she's sighted it (from the den's side,
+      the hint first), or got through. */
+  watch(p: { c: number; r: number }): CheckEvent[] {
     const out: CheckEvent[] = [], K = LAY.CHECKPOINT;
     const near = Math.max(Math.abs(p.c - K.GATE), Math.abs(p.r - K.ROW));
-    if (!this.sighted && near <= CHECK.SIGHT) { this.sighted = true; out.push({ kind: 'sighted' }); }
-    this.still = this.sighted && idle && near <= CHECK.SIGHT && this.side === 'near' && p.r < K.ROW ? this.still + dt : 0;
-    if (!this.hinted && this.still >= CHECK.HINT_AFTER) { this.hinted = true; out.push({ kind: 'hint' }); }
+    if (!this.sighted && near <= CHECK.SIGHT) {
+      this.sighted = true;
+      if (this.side === 'near' && p.r < K.ROW) out.push({ kind: 'hint' });
+      out.push({ kind: 'sighted' });
+    }
     if (near > CHECK.SIGHT + 1) {
       this.hits = 0;
+      this.battery.scored.fill(false);
       if (this.battery.roused) { this.battery.roused = false; out.push({ kind: 'calm' }); }
     }
     // Through once she's past every mark (so "not a scratch on her" is so), crossing the line at the
@@ -183,8 +194,9 @@ export class Checkpoint {
   }
 }
 
-/** The hint, stopped short of it the first time: there's another way, but not where. */
-export const HINT = 'Smugglers get past that checkpoint somehow, and not under its guns... I wonder if there\'s a secret way round';
+/** The hint, as she sights it the first time: there's another way, but not where (the user's own
+    words, 10 Nov). */
+export const HINT = 'An imperial checkpoint... I wonder if there\'s another way round';
 
 /** Whether a square is the checkpoint's (its piers, its bastions). */
 export function isCheckpoint(sea: Sea, c: number, r: number): boolean {

@@ -54,31 +54,31 @@ describe('even work goes straight', () => {
     const p = new Oars();
     p.feed({ port: 1, starboard: 2 }, 0);
     p.tick(ROW.WINDOW);
-    expect([p.swing, p.ahead]).toEqual([-1, 2]);
+    expect([p.swing, p.ahead]).toEqual([1, 2]);
   });
 });
 
 describe('one-sided work turns her', () => {
-  it('a three on the port oars swings her to starboard (right), as in a real boat', () => {
+  it('a three on the port oars swings her to port (left): not as a real boat, "if you pull on the right-hand side, it should definitely go right" (10 Nov)', () => {
     // 0 0 1 0 3 4 -> 0 0 0 1 3 4: columns 0-2, port.
     const b = board(['001034']);
     expect(b.swap(0, 2, 0).pull).toEqual({ port: 1, starboard: 0 });
     b.oars.tick(ROW.WINDOW);
-    expect([b.oars.swing, b.oars.ahead]).toEqual([1, 0]);
+    expect([b.oars.swing, b.oars.ahead]).toEqual([-1, 0]);
   });
-  it('a three on the starboard oars swings her to port (left)', () => {
+  it('a three on the starboard oars swings her to starboard (right)', () => {
     const b = board(['430100']);   // -> 4 3 1 0 0 0: columns 3-5
     expect(b.swap(0, 2, 0).pull).toEqual({ port: 0, starboard: 1 });
     b.oars.tick(ROW.WINDOW);
-    expect(b.oars.swing).toBe(-1);
+    expect(b.oars.swing).toBe(1);
   });
-  it('three threes on port make a turn to starboard; three on starboard one to port', () => {
+  it('three threes on port make a turn to port; three on starboard one to starboard', () => {
     const o = new Oars();
     for (const t of [0, 1, 2]) expect(board(['001034'], o).swap(0, 2, t).steps).toEqual([]);
-    expect(o.tick(2 + ROW.WINDOW)).toEqual(['R']);
+    expect(o.tick(2 + ROW.WINDOW)).toEqual(['L']);
     const p = new Oars();
     for (const t of [0, 1, 2]) board(['430100'], p).swap(0, 2, t);
-    expect(p.tick(2 + ROW.WINDOW)).toEqual(['L']);
+    expect(p.tick(2 + ROW.WINDOW)).toEqual(['R']);
   });
   it('the other side matching it in time drives her ahead instead', () => {
     const o = new Oars();
@@ -128,8 +128,8 @@ describe('the pull builds up into whole squares', () => {
     const o = new Oars();
     expect(o.feed({ port: 6, starboard: 1.5 }, 0)).toEqual(['F']);   // 3 matched
     expect(o.tick(ROW.WINDOW - 0.1)).toEqual([]);
-    expect(o.tick(ROW.WINDOW)).toEqual(['R']);                       // 4.5 extra on port
-    expect([o.swing, o.ahead]).toEqual([1.5, 0]);
+    expect(o.tick(ROW.WINDOW)).toEqual(['L']);                       // 4.5 extra on port
+    expect([o.swing, o.ahead]).toEqual([-1.5, 0]);
   });
   it('reset loses what was built up and what was waiting', () => {
     const o = new Oars();
@@ -150,14 +150,14 @@ describe('two boards, a side each (the team way)', () => {
   it('one board alone turns her', () => {
     const o = new Oars();
     board(['001011'], o, 'port').swap(0, 2, 0);
-    expect(o.tick(ROW.WINDOW)).toEqual(['R']);
+    expect(o.tick(ROW.WINDOW)).toEqual(['L']);
   });
   it('out of step, she rows in circles: one way, then the other, and no further ahead', () => {
     const o = new Oars();
     board(['001011'], o, 'port').swap(0, 2, 0);
-    expect(o.tick(ROW.WINDOW)).toEqual(['R']);
+    expect(o.tick(ROW.WINDOW)).toEqual(['L']);
     board(['001011'], o, 'starboard').swap(0, 2, 10);
-    expect(o.tick(10 + ROW.WINDOW)).toEqual(['L']);
+    expect(o.tick(10 + ROW.WINDOW)).toEqual(['R']);
     expect(o.ahead).toBe(0);
   });
 });

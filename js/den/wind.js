@@ -13,10 +13,16 @@
 // Parked (10 Nov, the user: "I think it's the arrows getting in my way"): while WEATHER.parked
 // there are no arrows, no streaks and no wind on the bar, nothing's said of it, and her flag and
 // sails show a steady fair wind, the flag streaming aft whichever way she heads.
+// Wind zones (10 Nov: src/den-wind.ts), a patch of sea with a wind of its own, show it plainly but
+// only there ("it should only really apply to this little ... area"): streaks drifting over its
+// water, fading out at its edges, and her flag and sails answering it while she's in it (the flag
+// streaming downwind, her yards braced round on a reach, flogging in irons). No arrows. The first
+// time it heads her off it's said, and never a word of the oars ("they can figure out oars go
+// against the wind").
 import * as THREE from 'three';
-import { STRENGTH, WIND, WEATHER, pointOf } from '../den-wind.js';
+import { STRENGTH, WIND, WEATHER, pointOf, lie } from '../den-wind.js';
 import { SAIL } from '../den-sail.js';
-import { scene, mesh, mat, woodTex, canvasTex, burst, toast, view } from './world.js';
+import { scene, mesh, mat, woodTex, canvasTex, burst, toast, view, V3 } from './world.js';
 import { sail, seaX, seaZ, SLOOP_DECK } from './sea.js';
 
 const DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
@@ -40,18 +46,59 @@ function streaks() {
   return { m, tex, a: null, op: 0 };
 }
 
-// Two long sweeps a side, run out from her gunwales (port's her left, -z): each swings fore and aft
-// about its rowlock, dipping its blade on the pull.
+// A wind zone's streaks: the same short white dashes, over its water only, running and drifting the
+// way it blows, and fading out toward its edges so it reads as a patch of wind, not a box.
+function zoneStreaks(z) {
+  const S = SAIL.CELL, w = (z.c1 - z.c0 + 1) * S, d = (z.r1 - z.r0 + 1) * S, cx = seaX((z.c0 + z.c1) / 2), cz = seaZ((z.r0 + z.r1) / 2);
+  const geo = new THREE.PlaneGeometry(w, d, 24, 24).rotateX(-Math.PI / 2), pos = geo.attributes.position, n = pos.count;
+  const uv = geo.attributes.uv, col = new Float32Array(n * 4), fx = DC[z.d], fz = -DR[z.d], TILE = 12, EDGE = 5;
+  for (let i = 0; i < n; i++) {
+    const x = pos.getX(i), y = pos.getZ(i);
+    // (along the wind is up the texture, where its dashes run, so they drift downwind)
+    uv.setXY(i, (x * -fz + y * fx) / TILE, ((cx + x) * fx + (cz + y) * fz) / TILE);
+    const edge = Math.min(w / 2 - Math.abs(x), d / 2 - Math.abs(y)) / EDGE, a = Math.max(0, Math.min(1, edge));
+    col.set([1, 1, 1, a * a * (3 - 2 * a)], i * 4);
+  }
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 4));
+  // (long, bold dashes: bolder than the sea's own glints, so the patch reads as wind at a glance)
+  const tex = canvasTex(256, 256, (g, cw, ch) => {
+    g.clearRect(0, 0, cw, ch);
+    g.strokeStyle = 'rgba(248,252,255,1)'; g.lineCap = 'round';
+    for (let i = 0; i < 26; i++) {
+      const x = Math.random() * cw, y = Math.random() * ch, l = 60 + Math.random() * 70;
+      g.lineWidth = 2.6 + Math.random() * 2.4;
+      for (const dy of [0, -ch]) { g.beginPath(); g.moveTo(x, y + dy); g.lineTo(x, y + dy + l); g.stroke(); }   // (wrapping round the tile)
+    }
+  });
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  const m = mesh(geo, new THREE.MeshBasicMaterial({ map: tex, vertexColors: true, transparent: true, opacity: 0.9, depthWrite: false, fog: false }), false);
+  m.position.set(cx, 0.07, cz);
+  m.renderOrder = 3;   // (over the sea, as the trade winds' lanes are, and over its ruffle)
+  // Under them, the water ruffled darker by the wind, as a cat's-paw darkens it, fading out with them.
+  const ruffle = mesh(geo, new THREE.MeshBasicMaterial({ color: '#0b4a6e', vertexColors: true, transparent: true, opacity: 0.3, depthWrite: false, fog: false }), false);
+  ruffle.position.set(cx, 0.065, cz);
+  ruffle.renderOrder = 2;
+  scene.add(ruffle, m);
+  return { m, tex, z };
+}
+
+// One long sweep a side, run out from her gunwales (port's her left, -z), each worked by its own
+// rower (js/den/rowing.js seats them by it, the loom in their hands; the user, 10 Nov: "make sure
+// the little rowing characters and the oars are actually lined up. Maybe just go back to having two
+// little characters and two oars"): each swings fore and aft about its rowlock, dipping its blade
+// on the pull. The two sit side by side on one thwart (the user, 10 Nov: "make the ship a little
+// wider so the little guys can sit next to each other").
+export const SWEEP_X = { port: 0.2, starboard: 0.2 };
 function sweeps(g) {
   const wood = mat('#7a5634', { map: woodTex }), out = new THREE.Group(), oars = [];
-  for (const s of [1, -1]) for (const x of [1.2, -1.1]) {
+  for (const s of [1, -1]) for (const x of [SWEEP_X[s > 0 ? 'starboard' : 'port']]) {
     const lock = new THREE.Group();
-    lock.position.set(x, SLOOP_DECK + 0.12, s * 0.8);
+    lock.position.set(x, SLOOP_DECK + 0.12, s * 0.95);
     lock.rotation.y = s > 0 ? 0 : Math.PI;   // (built for her starboard side, turned round for port)
     const arm = new THREE.Group();
     arm.rotation.order = 'YXZ';
     const shaft = mesh(new THREE.CylinderGeometry(0.03, 0.04, 2.75, 6).rotateX(Math.PI / 2), wood, false);
-    shaft.position.z = 1.2;   // (its loom only just inboard, clear of a board on her deck)
+    shaft.position.z = 0.725;   // (its loom well inboard, in its rower's hands)
     const blade = mesh(new THREE.BoxGeometry(0.26, 0.03, 0.62), wood, false);
     blade.position.z = 2.3;
     arm.add(shaft, blade);
@@ -88,6 +135,11 @@ export function windTick(dt) {
   sail.streaks ||= streaks();
   sail.sweeps ||= sweeps(g);
   sail.arrows ||= arrows();
+  // The zones' streaks drift on whatever the weather, quicker the harder it blows there.
+  sail.zones ||= sail.sea.zones.map(zoneStreaks);
+  for (const Z of sail.zones) Z.tex.offset.y -= dt * [0, 0.08, 0.2][Z.z.s];
+  // The wind she feels where she is: a zone's, or the weather's (felt only when it isn't parked).
+  const at = h.now(), air = sail.sea.airAt(Math.round(at.c), Math.round(at.r)), felt = !!air?.felt && !h.oars;
   const P = WEATHER.parked, S = sail.streaks, k = Math.min(1, dt * 1.5), t = performance.now() / 1000;
   // The streaks: fainter and slower the lighter it blows, gone in a calm; turning with the wind.
   const want = Math.PI / 2 * -w.d;
@@ -115,24 +167,33 @@ export function windTick(dt) {
   // Her flag streams downwind (limp in a calm): its pole's turned so the cloth points the way the
   // wind blows, in the world, whichever way she's heading.
   const fl = g.userData.rig[1], cloth = fl.children[2];
-  const yaw = P ? 0 : Math.atan2(DR[w.d], DC[w.d]) - g.rotation.y;   // (parked, the wind's always behind her)
+  const yaw = air?.felt ? Math.atan2(DR[air.d], DC[air.d]) - g.rotation.y : 0;   // (parked, out of a zone, the wind's always behind her)
   fl.userData.yaw = (fl.userData.yaw ?? yaw) + Math.atan2(Math.sin(yaw - (fl.userData.yaw ?? yaw)), Math.cos(yaw - (fl.userData.yaw ?? yaw))) * Math.min(1, dt * 3);
   fl.rotation.y = fl.userData.yaw;
   cloth.rotation.z += (looks(w, FLAG) - cloth.rotation.z) * k;
   // Her sails: full in a good wind, slack in light airs, hanging in a calm; brailed up while she rows;
-  // shaking and flogging while she's in irons, her bow into the wind.
-  const irons = !h.oars && h.cur?.irons && h.t < h.cur.secs;
+  // shaking and flogging while she's in irons, her bow into the wind. Where the wind's felt, they
+  // answer how she lies to it: square and full with it behind her, braced round and flatter across
+  // it, to catch it from the side it's coming from.
+  const irons = !h.oars && h.cur?.irons && h.t < h.cur.secs, point = felt ? lie(((Math.round(at.a) % 4) + 4) % 4, air) : 'run';
+  let brace = Math.PI / 2 - 0.45;   // (as built: square across her, a little round so they show from the side)
+  if (felt && point === 'reach') {
+    const across = new THREE.Vector3(DC[air.d], 0, -DR[air.d]).applyAxisAngle(V3(0, 1, 0), -g.rotation.y).z;
+    brace = Math.PI / 2 - across * 0.6;
+  } else if (felt) brace = Math.PI / 2;
   for (const arm of g.userData.sails) {
     const c = arm.children[0], ht = c.geometry.parameters.height;
-    const fy = h.oars ? 0.18 : 1, fz = h.oars ? 0.3 : irons ? 0.2 + 0.5 * Math.abs(Math.sin(t * 17 + ht)) : [0.12, 0.6, 1.25][w.s];
+    const full = felt ? (point === 'reach' ? 0.75 : 1.25) * [0.1, 0.5, 1][air.s] : [0.12, 0.6, 1.25][w.s];
+    const fy = h.oars ? 0.18 : 1, fz = h.oars ? 0.3 : irons ? 0.2 + 0.5 * Math.abs(Math.sin(t * 17 + ht)) : full;
     c.scale.y += (fy - c.scale.y) * k; c.scale.z += (fz - c.scale.z) * (irons ? 1 : k);
     c.position.y = -ht * c.scale.y / 2;
     arm.rotation.z = irons ? Math.sin(t * 13 + ht) * 0.08 : arm.rotation.z * (1 - k);
+    arm.rotation.y += (brace - arm.rotation.y) * k;
   }
   // The sweeps: run out (or in) through her sides, stroking while she's under way at the oars, each
   // side as hard as its rower (js/den/rowing.js: going like crazy after a big clear on that side).
   const W = sail.sweeps, moving = h.oars && h.cur && h.cur.m !== 'W' && !h.cur.bump;
-  W.out += ((h.oars ? 1 : 0) - W.out) * Math.min(1, dt * 2.5);
+  W.out += ((h.oars && sail.rowRate ? 1 : 0) - W.out) * Math.min(1, dt * 2.5);   // (in while her rowers are off them: holed, at the lock)
   W.ph ||= { port: 0, starboard: 0 };
   W.rest ||= { port: 1, starboard: 1 };
   W.catchT ||= { port: 0, starboard: 0 };
@@ -162,7 +223,13 @@ export function windTick(dt) {
 // What the wind does, said as it happens (the sailing bar shows it all the while).
 export function windSay(e) {
   const h = sail.helm;
-  if (WEATHER.parked) return;   // (no weather to speak of; and parked, there's never a headwind or irons)
+  // Parked, there's no weather to speak of: only a wind zone heads her off, and that's said once,
+  // and the pin she can't sail to once for each pin, never with a word of the oars.
+  if (WEATHER.parked) {
+    if (e.kind === 'headwind') toast('The wind\'s dead against her there: she can\'t sail to the pin', true);
+    else if (e.kind === 'move' && e.irons && !sail.said.zoneWind) { sail.said.zoneWind = true; toast('The wind\'s dead against her here', true); }
+    return;
+  }
   // Said ahead of a change, so it's never a surprise (10 Nov: "it changes quite quickly").
   if (e.kind === 'warn') {
     if (e.s < e.was.s) return toast(e.s ? 'The wind\'s easing: it\'ll drop soon' : 'The wind\'s dying away: a calm\'s coming');
@@ -183,6 +250,9 @@ export function windSay(e) {
   }
 }
 
+// What the bar's prompt says while she waits on a pin the wind won't let her sail to.
+export const headwindPrompt = () => (WEATHER.parked ? 'The wind\'s dead against her there: she can\'t sail to the pin' : 'She can\'t sail to the pin: it\'s dead against the wind · O: out oars and row her there, or wait for it to shift');
+
 // The wind on the sailing bar: an arrow the way it blows (as you're looking), and how strong; and
 // the oars, out or in (O, or a click).
 const POINT = { run: 'behind her: fastest', reach: 'across her: slower', into: 'dead ahead: in irons' };
@@ -198,5 +268,5 @@ export const oarsHud = () => `<button class="oars${sail.helm.oars ? ' on' : ''}"
 export const windSig = () => { const w = sail.sea.breeze; return WEATHER.parked ? `${sail.helm.oars}` : w ? `${w.d}${w.s}${Math.round(view.yaw * 36)}${sail.helm.oars}${heading()}` : ''; };
 export function rowToggle() {
   const on = sail.helm.row();
-  toast(on ? 'Out oars! Bilge the board to row her: the left half pulls her port oars, the right half starboard' : (WEATHER.parked ? 'Oars in: she sails on' : 'Oars in: she sails by the wind'));
+  toast(on ? 'Out oars! Clear on both boards to row her ahead: more on one side turns her that way' : (WEATHER.parked ? 'Oars in: she sails on' : 'Oars in: she sails by the wind'));
 }

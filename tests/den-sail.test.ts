@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { SAIL, LAY, Sea, Helm, broadside, path, poseAt, type Move, type Pose } from '../src/den-sail';
 import { PATCH, type DeckHole } from '../src/den-patch';
-import { carp } from './helpers';
+import { carp, stilled } from './helpers';
 import { worth } from '../src/den-bilge';
-import { LOCK } from '../src/den-lock';
+import { LOCK, ends } from '../src/den-lock';
 import type { Move as BilgeMove } from '../src/bilge';
 import type { Cell } from '../src/engine';
 
@@ -65,8 +65,15 @@ describe('sailing: rocks ("just keep it simple as like with a few rocks", 9 Nov)
       const s = new Sea(seed), H = SAIL.HOME;
       expect(s.rocks.size).toBeGreaterThan(5);
       for (let r = 0; r <= 3; r++) for (let c = H.c - 2; c <= H.c + 2; c++) expect(s.isRock(c, r)).toBe(false);
-      // (but a trade wind's squares: she can't stop on a lane, it always sweeps her on)
-      for (let c = 0; c < s.cols; c++) for (let r = 0; r < s.rows; r++) if (s.open(c, r)) expect(s.plot(H, c, r) !== null).toBe(s.windAt(c, r) === undefined);
+      // (but a trade wind's squares: she can't stop on a lane, it always sweeps her on; and under
+      // sail, not the old wreck's wind zone and the water beyond it, which the wind keeps her out
+      // of from this side)
+      // (and the canal, up past its mouth's wind: tests/den-wind.test.ts)
+      const lee = (c: number, r: number) => (r >= LAY.ZONES[0].r0 && c <= LAY.ZONES[0].c1) || s.level(c, r) > 0 || s.isLock(c, r);
+      for (let c = 0; c < s.cols; c++) for (let r = 0; r < s.rows; r++) if (s.open(c, r)) {
+        expect(s.plot(H, c, r, null, true) !== null).toBe(s.windAt(c, r) === undefined);
+        if (!lee(c, r)) expect(s.plot(H, c, r) !== null).toBe(s.windAt(c, r) === undefined);
+      }
     }
   }, 60000);   // (a lot of plotting, on the bigger board)
 
@@ -96,7 +103,7 @@ describe('sailing: the pilot ("drop a pin ... it almost like auto moves", 9 Nov)
 
   it('every sea\'s pilot gets from the mooring to the far side', () => {
     for (let seed = 1; seed < 20; seed++) {
-      const s = new Sea(seed), at = s.pinAt(SAIL.HOME.c, s.rows - 1)!, h = new Helm(s);
+      const s = new Sea(seed), at = s.pinAt(LAY.CHECKPOINT.GATE + 3, s.rows - 1)!, h = new Helm(s);
       h.drop(...at);
       run(h, 120);
       expect([h.pose.c, h.pose.r]).toEqual(at);
@@ -332,7 +339,7 @@ describe('sailing: the trade winds ("just insanely quick wind tiles", 9 Nov)', (
     for (let c = 0; c < s.cols; c++) for (let r = 0; r < s.rows; r++) {
       if (!s.open(c, r) || s.windAt(c, r) !== undefined || s.level(c, r) || s.isLock(c, r)) continue;
       const g = new Helm(s);
-      if (!g.drop(c, r) || !g.pin) continue;
+      if (!g.drop(c, r) || !g.pin || g.headwind()) continue;   // (the wreck's wind keeps her off: den-wind.test.ts)
       const plan = g.course().length;
       let moves = 0;
       for (let t = 0; g.pin && t < 200; t += 0.05) moves += g.tick(0.05).filter((e) => e.kind === 'move').length;
@@ -344,21 +351,22 @@ describe('sailing: the trade winds ("just insanely quick wind tiles", 9 Nov)', (
 });
 
 describe('sailing: the first lock, up the cliff from the canal (9 Nov)', () => {
-  // (The lock itself, and the chain of them it's the first of: tests/den-lock.test.ts.)
-  const L = LAY.LOCKS[0], [lc, lr] = L.at, canal: Pose = { c: lc + 1, r: lr, d: 3 };
+  // (The lock itself, and the chain of them it's the first of: tests/den-lock.test.ts. The wind at
+  // the canal's mouth that keeps her out under sail, stilled here: den-wind.test.ts.)
+  // (Below it, the canal's mouth at the sea's level, facing it; above it, the canal a lift up.)
+  const L = LAY.LOCKS[0], [lc, lr] = L.at, { low, high } = ends(L), canal: Pose = { c: low[0], r: low[1], d: L.up };
   const lock = (h: Helm) => h.lockAt(lc, lr)!;
 
   it('the canal behind it is a lock\'s lift up: the lock is the only way in', () => {
-    const s = new Sea(9);
-    expect(s.isRock(lc, lr - 1)).toBe(true);
-    expect(s.isRock(lc, lr + 1)).toBe(true);
+    const s = stilled(new Sea(9)), banks: [number, number][] = L.up % 2 ? [[lc, lr - 1], [lc, lr + 1]] : [[lc - 1, lr], [lc + 1, lr]];
+    for (const b of banks) expect(s.isRock(...b)).toBe(true);
     expect(s.isLock(lc, lr)).toBe(true);
-    expect(s.level(lc - 1, lr)).toBe(1);
-    expect(s.level(lc + 1, lr)).toBe(0);
+    expect(s.level(...high)).toBe(1);
+    expect(s.level(...low)).toBe(0);
   });
 
   it(`"you have to go up a lock": she waits in it while it's pumped up by Bilge, then sails on`, () => {
-    const h = new Helm(new Sea(9), canal);
+    const h = new Helm(stilled(new Sea(9)), canal);
     h.put('F'); h.put('F');
     run(h, 4);
     expect([h.pose.c, h.pose.r]).toEqual([lc, lr]);
@@ -372,11 +380,11 @@ describe('sailing: the first lock, up the cliff from the canal (9 Nov)', () => {
     rise(h);
     expect(h.held()).toBe('gates');
     run(h, 3);
-    expect([h.pose.c, h.pose.r]).toEqual([lc - 1, lr]);
+    expect([h.pose.c, h.pose.r]).toEqual(high);
   });
 
   it('the top gates were still swinging open as she sailed through (9 Nov): she waits for the gates, up and down', () => {
-    const h = new Helm(new Sea(9), canal);
+    const h = new Helm(stilled(new Sea(9)), canal);
     h.put('F'); h.put('F');
     run(h, 4);
     h.pump(LOCK.WORK);
@@ -389,7 +397,7 @@ describe('sailing: the first lock, up the cliff from the canal (9 Nov)', () => {
     expect(h.held()).toBeNull();
     expect(h.cur?.m).toBe('F');
     // Back down: drained, then the bottom gates swing open before she sails out to sea.
-    const d = new Helm(new Sea(9), { c: lc - 1, r: lr, d: 1 });
+    const d = new Helm(stilled(new Sea(9)), { c: high[0], r: high[1], d: (L.up + 2) % 4 });
     lock(d).level = 1;
     d.put('F'); d.put('F');
     for (let t = 0; t < 10 && lock(d).level > 0; t += 0.05) d.tick(0.05);
@@ -407,13 +415,13 @@ describe('sailing: the first lock, up the cliff from the canal (9 Nov)', () => {
     // "way too quickly", like the daze: "you should see the line of water gradually going up as
     // you clear a few bilging pieces".
     const three: BilgeMove = { moved: true, lines: [3], combo: '', cleared: 3, chain: 0, crabs: 0, puffer: false, jelly: false, stages: [] };
-    const w = worth(three, 6), h = new Helm(new Sea(9), canal);
+    const w = worth(three, 6), h = new Helm(stilled(new Sea(9)), canal);
     h.put('F'); h.put('F');
     run(h, 4);
     expect(h.held()).toBe('up');
     // As many pieces cleared as used to fill it, and it's well short.
     for (let i = 0; i < 5; i++) { h.pump(w); run(h, 1.5); }
-    expect(lock(h).level).toBeLessThan(0.3);
+    expect(lock(h).level).toBeLessThan(0.4);
     expect(h.held()).toBe('up');
     // Each clear lifts the water a step: smoothly, never all at once, and there within a second.
     const before = lock(h).level;
@@ -423,34 +431,40 @@ describe('sailing: the first lock, up the cliff from the canal (9 Nov)', () => {
     expect(lock(h).level - before).toBeLessThan(w / LOCK.WORK / 2);
     run(h, 1);
     expect(lock(h).level).toBeCloseTo(before + w / LOCK.WORK, 6);
-    // A proper go of Bilge: about twenty plain threes, tens of seconds of play.
+    // A proper go of Bilge: about fourteen plain threes, tens of seconds of play.
     let n = 6;
     while (h.held() === 'up' && n < 100) { h.pump(w); run(h, 1.5); n++; }
-    expect(n).toBeGreaterThanOrEqual(15);
+    expect(n).toBeGreaterThanOrEqual(11);
     expect(lock(h).level).toBe(1);
   });
 
+  it('"tone down how many times you need to get through the locks ... Maybe take a third off" (10 Nov)', () => {
+    // A third less Bilge to lift her than the sixteen moves' worth it was.
+    expect(LOCK.WORK).toBe(11);
+    expect(LOCK.WORK / 16).toBeCloseTo(2 / 3, 1);
+  });
+
   it('coming back down, the lock drains by itself and lets her out', () => {
-    const h = new Helm(new Sea(9), { c: lc - 1, r: lr, d: 1 });
+    const h = new Helm(stilled(new Sea(9)), { c: high[0], r: high[1], d: (L.up + 2) % 4 });
     lock(h).level = 1;
     h.put('F'); h.put('F');
     run(h, 3);
     expect([h.pose.c, h.pose.r]).toEqual([lc, lr]);
     run(h, LOCK.DRAIN + 3);
-    expect([h.pose.c, h.pose.r]).toEqual([lc + 1, lr]);
+    expect([h.pose.c, h.pose.r]).toEqual(low);
     expect(lock(h).level).toBe(0);
   });
 
   it('the pilot finds the way up through the lock', () => {
-    const s = new Sea(9), h = new Helm(s);
-    h.drop(lc - 1, lr + 1);
+    const s = stilled(new Sea(9)), h = new Helm(s);
+    h.drop(high[0], high[1] + 1);
     for (let t = 0; t < 120 && h.pin; t += 0.05) { h.tick(0.05); if (h.held() === 'up') h.pump(1); }
     expect(h.pin).toBeNull();
     expect(s.level(h.pose.c, h.pose.r)).toBe(1);
   });
 
   it('pulling up the pin while she waits at the lock lets her off', () => {
-    const h = new Helm(new Sea(9), canal);
+    const h = new Helm(stilled(new Sea(9)), canal);
     h.put('F'); h.put('F');
     run(h, 4);
     expect(h.held()).toBe('up');

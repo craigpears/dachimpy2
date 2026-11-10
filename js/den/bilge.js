@@ -116,8 +116,11 @@ const bitLook = {
   special: {},
   shadow: new THREE.MeshBasicMaterial({ map: canvasTex(64, 64, (g) => { const gr = g.createRadialGradient(32, 32, 4, 32, 32, 31); gr.addColorStop(0, 'rgba(0,0,0,0.45)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); }), transparent: true, depthWrite: false }),
 };
+const faceOf = (b) => (b.s ? (bitLook.special[b.s] ||= new THREE.MeshStandardMaterial({ map: specialFace[b.s](), alphaTest: 0.5, roughness: 0.4 })) : bitLook.faces[b.k]);
+// A piece's face as a picture, for boards drawn flat (the rowing boards: js/den/row-boards.js).
+export const bitArt = (b) => faceOf(b).map.image;
 export function bitMesh(b) {
-  const face = b.s ? (bitLook.special[b.s] ||= new THREE.MeshStandardMaterial({ map: specialFace[b.s](), alphaTest: 0.5, roughness: 0.4 })) : bitLook.faces[b.k];
+  const face = faceOf(b);
   const g = new THREE.Group();
   const m = new THREE.Mesh(bitLook.geo, face);
   m.rotation.set(-Math.PI / 2, 0, Math.PI);

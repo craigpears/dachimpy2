@@ -1,10 +1,10 @@
-/* Mirror strokes, a test page's rules (TODO.md, "Test mirror strokes on a page of its own", 10 Nov):
-   two Bilge boards, every swap made in mirror on the other. */
+/* Mirror strokes, the den's rowing board (RULES.md, "Rowing by mirror strokes", 10 Nov): two Bilge
+   boards, every swap made in mirror on the other. */
 import { describe, expect, it } from 'vitest';
 import { H, KINDS, W } from '../src/bilge';
 import type { Bilge, Bit } from '../src/bilge';
 import { NO_SPECIALS } from '../src/bilge';
-import { ClockedOars, Course, KINDS_DEFAULT, KINDS_LEAST, MirrorRow, SplitRow, Stroke, copyBilge, fewer, mirrorCol, rowBilge, seeded } from '../src/mirror-row';
+import { BALANCE, ClockedOars, Course, KINDS_DEFAULT, KINDS_LEAST, MirrorRow, SplitRow, Stroke, copyBilge, fewer, mirrorCol, rowBilge, seeded } from '../src/mirror-row';
 import { ROW } from '../src/rowing';
 
 /** New pieces come in as kinds 0, 1, 2 ... in turn, so they don't line up by chance. */
@@ -63,26 +63,61 @@ describe('matched clears go straight', () => {
   });
 });
 
-describe('one-sided clears turn her', () => {
-  it('a clear on port alone turns her to starboard', () => {
+describe('one-sided clears lean her toward that side', () => {
+  it('a clear on port alone leans her to port', () => {
     const m = mirror(['101145'], []);
     const res = m.swap(0, 0);
     expect(res.pull.port).toBeGreaterThan(0);
     expect(res.pull.starboard).toBe(0);
-    expect(m.stroke.swing).toBeGreaterThan(0);
+    expect(m.stroke.swing).toBeLessThan(0);
+    expect(m.stroke.building().turn).toBeLessThan(0);
   });
-  it('a clear on starboard alone turns her to port', () => {
+  it('a clear on starboard alone leans her to starboard', () => {
     const m = mirror([], ['013343']);
     m.swap(0, 0);
-    expect(m.stroke.swing).toBeLessThan(0);
+    expect(m.stroke.swing).toBeGreaterThan(0);
   });
-  it('three plain threes on port alone is a quarter turn to starboard', () => {
+  it('"if you pull on the right-hand side, it should definitely go right" (10 Nov): a Bingo on starboard turns her to starboard, on port to port', () => {
+    expect(new Stroke().row({ port: 0, starboard: 8 })).toEqual(['R']);
+    expect(new Stroke().row({ port: 8, starboard: 0 })).toEqual(['L']);
+  });
+  it('a Vegas on one side swings her right round', () => {
+    expect(new Stroke().row({ port: 0, starboard: 15 })).toEqual(['R', 'R']);
+  });
+});
+
+describe('balance: going straight is something you can aim for', () => {
+  it(`"one on one side and two on the other ... basically impossible to go straight" (10 Nov): three threes, one port and two starboard, row her ahead and don't turn her`, () => {
     const s = new Stroke();
-    expect(s.row({ port: 3, starboard: 0 })).toEqual(['R']);
+    const steps = [...s.row({ port: 1, starboard: 0 }), ...s.row({ port: 0, starboard: 1 }), ...s.row({ port: 0, starboard: 1 })];
+    expect(steps.filter((x) => x !== 'F')).toEqual([]);
+    expect(s.ahead).toBe(2);
+    expect(s.swing).toBe(1);
   });
-  it('near enough even counts as straight', () => {
-    expect(Stroke.split({ port: 4, starboard: 3 })).toEqual({ fwd: 7, turn: 0 });
-    expect(Stroke.split({ port: 8, starboard: 1 })).toEqual({ fwd: 2, turn: 7 });
+  it(`one side's lead waits for the other side's next pull, and what catches it up drives her ahead`, () => {
+    const s = new Stroke();
+    expect(s.row({ port: 3, starboard: 0 })).toEqual([]);
+    expect(s.row({ port: 0, starboard: 3 })).toEqual(['F', 'F']);
+    expect(s.swing).toBe(0);
+  });
+  it('only a clear lead turns her: TURN, and the turn uses it up', () => {
+    const s = new Stroke();
+    expect(s.row({ port: 0, starboard: BALANCE.TURN - 0.5 })).toEqual([]);
+    expect(s.building().turn).toBeCloseTo((BALANCE.TURN - 0.5) / BALANCE.TURN);
+    expect(s.row({ port: 0, starboard: 0.5 })).toEqual(['R']);
+    expect(s.swing).toBe(0);
+  });
+  it('rowed steadily, one side pulling up to 1 + 2 * KEEL times the other never turns her', () => {
+    const s = new Stroke(), lop = 1 + 2 * BALANCE.KEEL - 0.05, steps: string[] = [];
+    for (let i = 0; i < 200; i++) steps.push(...s.row({ port: 1, starboard: 0 }), ...s.row({ port: 0, starboard: lop }));
+    expect(steps.filter((x) => x !== 'F')).toEqual([]);
+    expect(steps.length).toBeGreaterThan(100);
+  });
+  it('a clear imbalance, two to one, turns her toward the side pulling harder', () => {
+    const s = new Stroke(), steps: string[] = [];
+    for (let i = 0; i < 20; i++) steps.push(...s.row({ port: 1, starboard: 2 }));
+    expect(steps.filter((x) => x !== 'F').length).toBeGreaterThan(0);
+    expect(steps.includes('L')).toBe(false);
   });
   it('four turns the same way is a whole circle', () => {
     const c = new Course();
@@ -92,9 +127,9 @@ describe('one-sided clears turn her', () => {
 });
 
 describe('the two ways of pairing the sides', () => {
-  it('move by move, port then starboard cancels out: nothing ahead, no turn', () => {
+  it('move by move, port then starboard: the second catches up the first, straight ahead', () => {
     const s = new Stroke();
-    expect([...s.row({ port: 3, starboard: 0 }), ...s.row({ port: 0, starboard: 3 })]).toEqual(['R', 'L']);
+    expect([...s.row({ port: 3, starboard: 0 }), ...s.row({ port: 0, starboard: 3 })]).toEqual(['F', 'F']);
   });
   it("as the den's oars do, the next move evens it up: straight ahead", () => {
     const s = new ClockedOars();
@@ -104,15 +139,15 @@ describe('the two ways of pairing the sides', () => {
   it("as the den's oars do, unmatched pull turns her a move later", () => {
     const s = new ClockedOars();
     expect(s.row({ port: 3, starboard: 0 })).toEqual([]);
-    expect(s.pending()).toBe(3);
-    expect(s.row({ port: 0, starboard: 0 })).toEqual(['R']);
+    expect(s.pending()).toBe(-3);
+    expect(s.row({ port: 0, starboard: 0 })).toEqual(['L']);
   });
   it('a copy of the oars goes its own way', () => {
     const s = new ClockedOars();
     s.row({ port: 3, starboard: 0 });
     const c = s.copy();
     c.row({ port: 0, starboard: 3 });
-    expect([s.pending(), c.pending()]).toEqual([3, 0]);
+    expect([s.pending(), c.pending()]).toEqual([-3, 0]);
   });
 });
 

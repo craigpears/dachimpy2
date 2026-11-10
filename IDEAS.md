@@ -791,7 +791,7 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     instead: the same idea, clear on both sides at once. Before building it into the den: a
     plain test page, and bots that play it (random, greedy, looking two moves ahead), to see
     whether better play goes much further, as a check on the skill curve. (To shape with the user.)
-    **Tested (10 Nov):** `row-test.html` plays it, beside the plain split board. Bots over 30
+    **Tested (10 Nov):** a test page played it, beside the plain split board. Bots over 30
     games of 80 moves: with pull paired by time, mirror strokes has the bigger skill gap (looking
     two moves ahead goes 9 times as far as greedy, against under 5 on the split board), as the
     obvious move usually scrambles the other board; paired move by move, no difference. Suggestive,
@@ -812,7 +812,7 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     straight is hard (the user hadn't yet). Wanted: fewer kinds of piece, "because that makes more
     of a risk for cascades and unintended effects", anything to make it more chaotic, better
     graphics, and "the actual 3D thing" (TODO.md).
-    **Fewer kinds, tested (10 Nov):** `row-test` now lets you pick 3 to 7 kinds of piece (Bilge has
+    **Fewer kinds, tested (10 Nov):** the test page let you pick 3 to 7 kinds of piece (Bilge has
     7; 5 is the default now), with the den's look on the boards and her rowing in 3D beside them.
     Bots, 30 games of 80 moves, squares made good by greedy and by looking two moves ahead: 7
     kinds 2.8 and 10.4; 6 kinds 5.7 and 21.2; 5 kinds 15.2 and 40.6; 4 kinds 63.5 and 60.5. At 5,
@@ -820,6 +820,10 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     and a random player rows in circles a quarter of the time; at 4 the cascades do the playing
     and thinking no longer helps. So 5 is the sweet spot. Still no bot ever gets a Vegas on both
     sides at once.
+    **In (10 Nov):** mirror strokes is the den's rowing on the sloop (RULES.md, "Rowing by mirror
+    strokes"): the boards either side of the screen and the sea between them, balanced so going
+    straight is something to aim for, the side pulling harder turning her toward it. The test page
+    is gone; the puzzle's module, its tests and the bots stay.
     **A course like snakes and ladders (10 Nov):** a rowing race round a course where pulling the
     wrong way at the wrong spot sends you into a whirlpool, or a wind that sweeps you "all the way
     back to the start and you've got to row back up again. That would be hilarious." (Goes with

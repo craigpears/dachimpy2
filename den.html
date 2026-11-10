@@ -35,6 +35,9 @@
     body.sailing.patching .tool { width: 84px; height: 86px; font-size: 13px; }
     body.sailing.patching .sailhud, body.sailing.quay .sailhud, body.hauling .sailhud, body.sailing.rowing .sailhud, body.sailing.gunnery .sailhud { display: none; }   /* (nothing but the puzzle while you patch her, bilge at the lock, haul, row or load her guns) */
     body.sailing.gunnery .gunhelp { display: block; }   /* (the stores' key, as on the gun tower) */
+    body.sailing.rowing .dock { max-width: min(40vw, calc(100vw - 32px)); }   /* (rowing: the prompt between the two boards, js/den/row-boards.js) */
+    body.sailing.rowing .prompt { white-space: normal; text-align: center; font-size: 15px; }
+    @media (max-aspect-ratio: 21/20) { body.sailing.rowing .dock { max-width: calc(100vw - 32px); } body.sailing.rowing .prompt { font-size: 13px; padding: 6px 10px; } }   /* (the boards along the bottom, above the prompt) */
     .sailhud .turns { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; align-items: center; }
     .sailhud .gun { position: relative; overflow: hidden; height: 34px; padding: 0 10px; border-radius: 6px; border: 1px solid #6b4e32; background: #2a1c11; display: flex; gap: 6px; align-items: center; font: 700 14px 'Alegreya Sans'; color: var(--dim); }
     .sailhud .gun.ready { color: #f3ecdc; border-color: var(--gold); }
@@ -223,6 +226,9 @@
     body.reading .map-hint { opacity: .85; }
     .label.say { font: 700 21px 'Alegreya', serif; color: #2a1a0c; background: #f6ecd2; border: 2px solid #2a1a0c; border-radius: 16px; padding: 4px 14px; margin-top: -12px; }
     .label.say::after { content: ''; position: absolute; left: 50%; bottom: -11px; margin-left: -9px; border: 9px solid transparent; border-top-color: #2a1a0c; border-bottom: 0; }
+    .label.say.chat { font-size: 15px; padding: 2px 10px; background: #f3e9ff; border-color: #4a3170; color: #3a2160; }
+    .label.say.chat::after { border-top-color: #4a3170; }
+    .label.say.wrap { white-space: normal; width: max-content; max-width: 380px; text-align: center; }
   </style>
 </head>
 <body>

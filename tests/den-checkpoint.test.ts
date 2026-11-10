@@ -4,7 +4,7 @@ import { CHECK, HINT, Checkpoint, isCheckpoint, throughSay, type CheckEvent } fr
 import { LAY, SAIL, Sea, Helm, broadside, type Move, type Pose } from '../src/den-sail';
 import { Wind } from '../src/den-wind';
 import { Salvage } from '../src/den-haul';
-import { carp } from './helpers';
+import { carp, stilled } from './helpers';
 import type { DeckHole } from '../src/den-patch';
 import type { Cell } from '../src/engine';
 
@@ -39,9 +39,11 @@ describe('the lay: the main shipping lane runs out to an imperial checkpoint (10
     expect([SAIL.COLS, SAIL.ROWS]).toEqual([22, 26]);
     // The rocks of the near sea (seed 9: the den's): as before it grew, less the turret's rock, and
     // as the lanes were laid again round the checkpoint (10 Nov); and the cliffs the canal's chain
-    // of locks is cut through, the hidden cove narrower behind the first lock (10 Nov).
-    const was = ['0,8', '1,8', '10,8', '12,12', '12,4', '14,10', '14,8', '14,9', '15,10', '15,9', '2,8', '3,8', '4,8', '5,10', '5,12', '5,13', '5,8', '5,9', '8,5',
-      '3,9', '3,10', '3,11', '3,12', '3,13', '4,9', '4,10'];
+    // of locks is cut through, the hidden cove narrower behind the first lock (10 Nov); then the
+    // locks in one straight line, their mouth tucked away in the cliffs' face toward the den, and
+    // the water by the junction where the canal was let go (a rock off it now) (10 Nov).
+    const was = ['0,8', '1,8', '10,8', '12,12', '12,4', '14,10', '14,8', '14,9', '15,10', '15,9', '2,8', '4,8', '5,10', '5,12', '5,13', '5,8', '5,9', '8,5',
+      '2,9', '2,10', '2,11', '2,12', '2,13', '4,9', '4,10', '4,11', '4,12', '4,13', '5,11', '7,12'];
     const s = new Sea(9), old = [...s.rocks].filter((k) => { const [c, r] = k.split(',').map(Number); return c < 16 && r < 14; }).sort();
     expect(old).toEqual(was.sort());
   });
@@ -109,6 +111,33 @@ describe('"get through the Imperial checkpoint by doing slow row and then fast r
     expect(throughSay({ kind: 'through', how: 'gate', back: false, hits: 0 })).toBe('Through the checkpoint! Not a scratch on her');
   });
 
+  it('"you need some chance to actually sail through" (10 Nov): a hit or two at most, never one after another', () => {
+    // A square rowed at a time, stopping on every mark: each gun has her once, then holds its fire.
+    const cp = new Checkpoint(), h = rowing();
+    const r = run(h, cp, 60, { each: () => { if (!h.strokes.length && h.slot < 0 && !h.dazed() && h.pose.r < 24) h.stroke(['F']); } });
+    expect(r.hits).toBeLessThanOrEqual(K.GUNS.length);
+    expect(h.pose.r).toBe(24);
+    // Sailed by hand a square at a time, as boldly as it gets: the same.
+    const c2 = new Checkpoint(), s = new Helm(new Sea(9), SHORT);
+    const r2 = run(s, c2, 80, { each: () => { if (!s.mine.length && s.slot < 0 && !s.dazed() && s.pose.r < 24) s.put('F'); } });
+    expect(r2.hits).toBeGreaterThanOrEqual(1);
+    expect(r2.hits).toBeLessThanOrEqual(K.GUNS.length);
+    expect(s.pose.r).toBe(24);
+    // "Not things you just casually get through on the first try ... it should be work": a pin
+    // beyond it under sail, the boldest run there is, and the gatehouse's walls take the wind out of
+    // her sails (light airs: LAY.ZONES), so she ghosts through the gate on its gun's mark: a hit,
+    // patched, and through.
+    const c3 = new Checkpoint(), p = new Helm(new Sea(9), SHORT);
+    expect(p.sea.airAt(K.GATE, K.ROW)).toMatchObject({ s: 1, felt: true });
+    p.drop(K.GATE, 23);
+    expect(run(p, c3, 40).hits).toBe(1);
+    expect(p.pose.r).toBe(23);
+    // Out of its sight, and back: its guns are fresh again.
+    expect(c2.battery.scored.some(Boolean)).toBe(true);
+    c2.watch({ c: K.GATE, r: 10 });
+    expect(c2.battery.scored.some(Boolean)).toBe(false);
+  });
+
   it('a big combo leaves her sitting still while you build it: on a mark, she\'s hit', () => {
     const cp = new Checkpoint(), h = rowing(new Sea(9), { c: K.GATE, r: 17, d: 0 });
     const r = run(h, cp, 3, { patch: false });
@@ -144,10 +173,11 @@ describe('running it under sail (10 Nov)', () => {
 describe('or round it by the locks, the secret way (10 Nov)', () => {
   it('up the canal and down through its headland, out of its sight and never a shot fired', () => {
     // (The chain of locks itself: tests/den-lock.test.ts.)
-    const s = new Sea(9), h = new Helm(s, { c: 7, r: 11, d: 3 }), cp = new Checkpoint();
+    const mouth = LAY.CANAL[LAY.CANAL.length - 1], s = stilled(new Sea(9)),   // (its mouth's wind stilled: den-wind.test.ts)
+      h = new Helm(s, { c: mouth[0], r: mouth[1], d: LAY.LOCKS[0].up }), cp = new Checkpoint();
     const pump = () => { if (h.working()) h.pump(0.5); };
     // Pins along the way: up on the clifftop, then beyond, by the wreck.
-    const legs: [number, number][] = [[2, 16], [LAY.WRECK[0] - 1, LAY.WRECK[1]]];
+    const legs: [number, number][] = [[LAY.LOCKS[1].at[0], 16], [LAY.WRECK[0] - 1, LAY.WRECK[1]]];
     let fired = 0;
     const said: CheckEvent[] = [];
     for (const leg of legs) {
@@ -162,20 +192,22 @@ describe('or round it by the locks, the secret way (10 Nov)', () => {
     expect(throughSay({ kind: 'through', how: 'locks', back: false, hits: 0 })).toMatch(/by the locks/);
   });
 
-  it('nothing says where they are: stopped short of it, a hint there\'s another way, once', () => {
-    // "I wonder if there's a secret way": something should hint at it, not a signpost.
-    const cp = new Checkpoint();
-    expect(cp.watch(SHORT, false)).toEqual([{ kind: 'sighted' }]);
-    // (a while after, once what's said on sighting it has been read)
-    expect(cp.watch(SHORT, true, CHECK.HINT_AFTER - 1)).toEqual([]);
-    expect(cp.watch(SHORT, true, 1)).toEqual([{ kind: 'hint' }]);
-    expect(cp.watch(SHORT, true, 10)).toEqual([]);
-    expect(HINT).toMatch(/secret way/);
+  it('the hint to the canal only where she sights it, at the end of the trade wind\'s run, once (10 Nov)', () => {
+    // "the hint to the canal is only supposed to appear once you get right next to the Imperial
+    // checkpoint": nothing on the way, then said first as she sights it, before its guns.
+    const cp = new Checkpoint(), s = new Sea(9), [jc, jr] = LAY.JUNCTION, h = new Helm(s, { c: jc, r: jr - 6, d: 0 });
+    const said: CheckEvent[] = [];
+    h.put('F'); h.put('F');   // (onto the lane to the junction, and on up the main lane)
+    for (let t = 0; t < 10; t += 0.05) { h.tick(0.05); const e = cp.watch(h.pose); if (e.length) expect([h.pose.c, h.pose.r]).toEqual([SHORT.c, SHORT.r]); said.push(...e); }
+    expect(said).toEqual([{ kind: 'hint' }, { kind: 'sighted' }]);
+    expect(cp.watch(SHORT)).toEqual([]);
+    expect(HINT).toBe('An imperial checkpoint... I wonder if there\'s another way round');
     expect(HINT).not.toMatch(/lock|canal|left|right/i);
-    // Not while she's under way through it, nor beyond it.
+    // Not when she comes on it from beyond (round by the locks, say).
     const by = new Checkpoint();
-    by.watch({ c: K.GATE, r: K.ROW + 3 }, false);
-    expect(by.watch({ c: K.GATE, r: K.ROW + 3 }, true, 10)).toEqual([]);
+    const beyond = by.watch({ c: K.GATE, r: K.ROW + 3 });
+    expect(beyond).toContainEqual({ kind: 'sighted' });
+    expect(beyond).not.toContainEqual({ kind: 'hint' });
   });
 });
 

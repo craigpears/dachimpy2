@@ -23,3 +23,7 @@ export function seededDealer(seed = 1): FairDeal {
 /** How many of each. */
 export const count = <T extends string>(xs: (T | null)[]): Partial<Record<T, number>> =>
   xs.reduce((m, x) => (x === null ? m : { ...m, [x]: (m[x] ?? 0) + 1 }), {} as Partial<Record<T, number>>);
+
+/** The sloop's sea without its wind zones (src/den-wind.ts), for the tests of what the winds guard:
+    the locks, say, sailed through under sail (the winds themselves: den-wind.test.ts). */
+export const stilled = <T extends { zones: unknown[] }>(sea: T): T => { sea.zones = []; return sea; };

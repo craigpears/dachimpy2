@@ -19,7 +19,7 @@ import { gunnery, gunneryReset, gunneryToggle, gunneryTick, gunneryKey, gunneryH
 import { deco, decoMode } from './menus.js';
 import { sailView, patchView, setPaused, denLets } from '../den.js';
 import { WIND } from '../den-wind.js';
-import { windTick, windSay, windHud, oarsHud, windSig, rowToggle } from './wind.js';
+import { windTick, windSay, windHud, oarsHud, windSig, rowToggle, headwindPrompt } from './wind.js';
 import { rowing, rowShut, rowKey, rowHover, rowSwap, rowTick, rowPrompt, rowShown } from './rowing.js';
 import { craneKey, cranePrompt, craneHolds, craneTick, craneReset, craneWorld } from './crane.js';
 
@@ -182,7 +182,7 @@ export function sailPrompt() {
   if (held === 'calm') return 'Becalmed: dead in the water till the wind picks up · O: out oars';
   if (atHome() && h.slot < 0 && !h.next().length) return 'At her mooring · Space: go ashore · click the sea to drop a pin';
   if (canHaulWreck()) return 'The old wreck · Space: haul up its treasure (Treasure Haul) · click the sea to drop a pin';
-  if (h.slot < 0 && h.headwind()) return 'She can\'t sail to the pin: it\'s dead against the wind · O: out oars and row her there, or wait for it to shift';
+  if (h.slot < 0 && h.headwind()) return headwindPrompt();
   if (h.pin) return h.oars ? 'Rowing to the pin' : 'Under way to the pin';
   if (h.slot >= 0) return 'Under way';
   return 'Click the sea to drop a pin, or put in moves with W A D · G: load her guns (Gunnery) · Q E: fire';
@@ -233,12 +233,13 @@ export function sailTick(dt) {
     }
     if (sail.riding && !(h.cur && h.cur.m === 'W')) {
       sail.riding = false;
-      const [jc, jr] = LAY.JUNCTION, home = sail.sea.dropOff(...LAY.LANES[2].at);
-      if (h.pose.c === jc && h.pose.r === jr && !sail.said.junction) { sail.said.junction = true; toast('The junction: on, the trade winds carry her out to the imperial checkpoint; left, a canal runs off into the cliffs'); }
+      // (Nothing's said at the junction: the canal's mouth is yours to find. The hint's at the
+      // checkpoint: checkpoint.js.)
+      const home = sail.sea.dropOff(...LAY.LANES[2].at);
       if (h.pose.c === home[0] && h.pose.r === home[1] && !sail.said.home) { sail.said.home = true; toast('The trade winds have carried her home: her mooring\'s just along the shore'); }
     }
     lockSay(h, heldWas, sail.said);   // (the locks: lock.js)
-    if (sail.sea.cove.has(`${h.pose.c},${h.pose.r}`) && !sail.said.cove) { sail.said.cove = true; toast('A hidden cove, tucked away off the canal: an old bilge pump on the sand'); }
+    if (sail.sea.cove.has(`${h.pose.c},${h.pose.r}`) && !sail.said.cove) { sail.said.cove = true; toast('A hidden cove, tucked away off the canal'); }
     if (sail.bumpT > 0 && (sail.bumpT -= dt) <= 0) { worldLets.shake = 0.3; toast('Bump! Rocks', true); }
     sail.guns.tick(dt);
   }

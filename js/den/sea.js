@@ -53,17 +53,19 @@ export function bankTop(c, r) {
   return LIFT * top + BANK;
 }
 // Her, smaller than their ship: one mast, a square sail and a topsail, a bowsprit, a tiller at the
-// stern, weathered planks, and your own flag at the masthead.
+// stern, weathered planks, and your own flag at the masthead. Beamy enough for her two rowers to sit
+// side by side, each at their own sweep (the user, 10 Nov: "make the ship a little wider so the
+// little guys can sit next to each other"): 2 across, from 1.7.
 export function sloopMesh() {
   const g = new THREE.Group(), hullM = mat('#5e4128', { map: woodTex }), deckM = mat('#9a7a55', { map: woodTex }), spar = mat('#4a2f1a', { map: woodTex });
-  const hull = mesh(hullGeo(4.4, 1.7, 1.3), hullM);
+  const hull = mesh(hullGeo(4.4, 2.0, 1.3), hullM);
   hull.position.y = SLOOP_DECK - 1.3;
-  const deck = mesh(hullGeo(4.25, 1.55, 0.05), deckM);
+  const deck = mesh(hullGeo(4.25, 1.85, 0.05), deckM);
   deck.position.y = SLOOP_DECK - 0.02;
-  const stripe = mesh(hullGeo(4.46, 1.74, 0.1), mat('#d8c9a0'));
+  const stripe = mesh(hullGeo(4.46, 2.04, 0.1), mat('#d8c9a0'));
   stripe.position.y = SLOOP_DECK - 0.32;
   g.add(hull, deck, stripe);
-  const stern = mesh(new THREE.BoxGeometry(0.9, 0.35, 1.45), hullM);
+  const stern = mesh(new THREE.BoxGeometry(0.9, 0.35, 1.75), hullM);
   stern.position.set(-1.65, SLOOP_DECK + 0.17, 0);
   const tiller = mesh(new THREE.BoxGeometry(0.7, 0.05, 0.05), spar);
   tiller.position.set(-1.6, SLOOP_DECK + 0.5, 0);

@@ -238,11 +238,13 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       checkpoint, dropping her short of its guns; and another runs back home, from beside where the
       main lane drops her to just off the beach ("The trade winds have carried her home").
     - **The junction:** at the first lane's end it drops her off "just like a normal square": on,
-      the main shipping lane out to the checkpoint; left, a canal off into the cliffs (the chain of
-      locks: below); right, open sea. "Left, a canal runs off into the cliffs", it says, and no more.
-    - **The canal and the lock (the first of a chain: below):** a narrow canal between rocks to a lock at the foot of a cliff.
+      the main shipping lane out to the checkpoint; left or right, open sea. Nothing's said there
+      (the canal's mouth is yours to find: "The way to the locks", below).
+    - **The canal and the lock (the first of a chain: below):** a lock in the foot of a cliff, a little canal up to it.
       Sail into the lock and she waits; nothing happens on its own. Bilge on the quay pumps it up,
-      a proper go of it (about sixteen moves' worth), not "way too quickly": the lock's water rises
+      a proper go of it (about eleven moves' worth: sixteen, till the user, 10 Nov: "tone down how
+      many times you need to get through the locks, just so I can get in there a bit quicker. For
+      now ... Maybe take a third off"; to look at again once the lagoon's been tried), not "way too quickly": the lock's water rises
       a step with every clearing and she rises with it ("you should see the line of water
       gradually going up"), and a real pump stands on the quay by the board, its handle working
       and water gushing into the lock as you bilge ("we need the actual bilge pump"). The board
@@ -264,6 +266,34 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
         checkpoint's headland, out onto the open sea beyond it, by the old wreck. Its cliffs step
         up with its water, a lock's lift at a time. Out of the checkpoint's sight and its guns'
         reach the whole way.
+      - **The way to the locks: found, not shown (10 Nov).** The user: "the hint to the canal is
+        only supposed to appear once you get right next to the Imperial checkpoint ... it should be
+        a bit more out of sight, really, because it's supposed to be more of an Easter egg. It
+        shouldn't be like right there for you to see. You should have to sail around to find it a
+        bit ... even if it's just a few, like, slightly out of the main viewport, doesn't need to be
+        far." So the canal's mouth is in the high ground's face toward the den, off to the left, six
+        squares from the trade wind's run: out of view from the run and the junction (from her
+        mooring it's at the very edge). Nothing at the junction points it out; the only hint comes
+        at the end of the main lane's run, where she sights the checkpoint: "An imperial
+        checkpoint... I wonder if there's another way round" (then what's said of its guns).
+      - **Which way on from a lock (10 Nov).** The user: "The lock's very confusing. Like it just
+        looks like you're staring at a cliff once you go through the first run. There's no
+        indication that you have to turn right", and at the second, "you are having to bump into
+        the walls to get around this lock system. That does not seem right." So the four locks
+        stand in one straight line out to sea, up one channel cut through the cliffs and down
+        through the headland: out of every lock she faces on along the canal, its water, banks and
+        the next lock's gates ahead, never a blank cliff, and she can be steered by hand (W) or
+        rowed all the way up and down without touching a bank.
+      - **The way on pulls you; the side ways push back** (STORY.md): the main way leads straight
+        on; the arm to the hidden cove doubles back off the clifftop canal toward the den, one
+        square wide, two turns tight together, easy to miss.
+      - **The wind at its mouth (10 Nov).** The user: "there should be some wind stopping you from
+        getting to the locks on the left as well. Again, it's that Easter egg idea. People have got
+        to figure out that they can use the oars to go past the wind, and that's how they get over
+        there." A wind zone (see "Wind zones", below) over the canal's mouth and the first lock,
+        blowing down out of the cut toward the den: under sail she can't get into the first lock
+        (and the pilot won't take her up the canal), and coming back down she runs out before it.
+        The oars take her in. Nothing ever says so.
       - **It costs puzzles, not just time:** every lock up is a go of Bilge on its quay, either way
         you go (out, the first two; back, the two through the headland). Going down is free: with
         her in it the lock drains by itself, and a lock left drained that she wants to go down
@@ -278,14 +308,13 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
         a lock straight.
       - **The ways past the checkpoint:** run it, row it, fight its guns, or the locks. The reef's
         far end, the long way round that cost only time, is closed now the locks are the way round.
-      - **Nothing signposts it:** at the junction the canal just "runs off into the cliffs"; and the
-        first time she stops short of the checkpoint, in sight of it, a few seconds after what's
-        said on sighting it: "Smugglers get past that checkpoint somehow, and not under its
-        guns... I wonder if there's a secret way round".
-      - **The pilot** finds its way through the locks to a pin anywhere along them, but reckons a
-        lock up a go of Bilge (about 40 seconds), so from the open sea it never takes you round by
-        the locks: that's yours to find (and from up on the clifftop, on down them is the way). A
-        pin dropped on a lock goes to the water beside it.
+      - **Nothing signposts it:** nothing at the junction, and only the hint where she sights the
+        checkpoint (above).
+      - **The pilot** finds its way through the locks to a pin anywhere along them, reckoning a lock
+        up a go of Bilge (about 28 seconds); and from the open sea to a pin on the open sea it never
+        takes her up a lock at all, even for a pin a wind keeps her from otherwise: the locks are
+        yours to find (once she's on the canal, or the pin is, they're the way). A pin dropped on a
+        lock goes to the water beside it.
       - **Said:** "A lock up the cliff: bilge on the quay to pump her up", then "Another lock: bilge
         on the quay to pump her up again"; "Up on the clifftop: the canal runs on along the top of
         the cliffs"; the first time one drains or fills for her, "Down she goes: the lock drains by
@@ -294,10 +323,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
         the checkpoint by the locks, and they never saw her").
     - **The hidden cove, an Easter egg off the chain (10 Nov):** up on the clifftop, at the top of
       the locks, an arm runs off the clifftop canal, off the way the locks lead you, down to the
-      hidden cove behind the first lock's cliff (narrower now, three squares across), its water the
-      clifftop's, a strip of sand at its back (the den's side) with an old bilge pump on it ("A
-      hidden cove, tucked away off the canal"). The crane's ledge is in it, as before, its
-      headland as far above it as ever.
+      hidden cove beside the first stretches of the canal, a wall of cliff between (two squares
+      across now, 10 Nov), its water the clifftop's, a strip of sand at its back (the den's side)
+      with an old bilge pump on it, left there quietly for a later step of the story and never
+      talked of ("A hidden cove, tucked away off the canal"; the user, 10 Nov: "it's saying about a
+      bilge pump. I've got no idea what that bilge pump is supposed to be"). The crane's ledge is
+      in it, as before, its headland as far above it as ever.
     - **The turret (9 Nov, gone 10 Nov):** a gun on a rock between the lanes, which fired on her
       square while she was in reach and was wrecked by three hits, a chest floating free to be
       hauled up. The checkpoint's guns took its place and its rules (see "The imperial checkpoint").
@@ -342,11 +373,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       it out was "one fix and it was done"); Carpentry and Bilge "have got to go together", as in
       Puzzle Pirates, "but the primary one needs to be carpentry". Nobody's sunk or knocked out
       ("it keeps it faster paced, but while keeping the puzzles key"). Rules: `src/den-patch.ts`.
-    - **Nothing of the patch over the rowing board (10 Nov):** once she's patched, none of it shows
-      while she rows: not the tray, the pieces, the ghost, nor the planks fitted in her deck, which lie
-      under the board (the user: "when I've just clicked oars, I see the carpentry pieces for the
-      repairing the damaged carpentry puzzle I've just played"). Holed while she rows, the patch comes
-      up with her sails and guns still struck.
+    - **Nothing of the patch while she rows (10 Nov):** once she's patched, none of it shows while
+      she rows: not the tray, the pieces, the ghost, nor the planks fitted in her deck (the user:
+      "when I've just clicked oars, I see the carpentry pieces for the repairing the damaged
+      carpentry puzzle I've just played"). Holed while she rows, the patch comes up with her sails
+      and guns still struck.
   - **Ashore:** sail back to her mooring and Space puts you on the beach beside her.
   - Alone only for now (no crews at sea yet). No tokens to earn yet, no destinations: those are
     IDEAS.md ("Sailing between places, for real"). Rules: `src/den-sail.ts`.
@@ -363,6 +394,35 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     "dead in the water until the wind picks back up again"; under sail you "can't go against the
     wind"; oars keep her moving either way, never stuck. Not "just going faster". Made plainer the
     same day (the user: "I like the animation and some of the idea, but it's very confusing"):
+    - **Wind zones: a wind in one place only (10 Nov).** The user, with the weather parked: "once
+      you get past the Imperial checkpoint, there's that bit to the left ... where you can have the
+      wind to the left, where I can see a bit of a shipwreck. The one that you can get through by
+      going through the locks", "tempting, but you can't get to it unless you go around the back
+      way", and "it should only really apply to this little ... area, not everywhere, because
+      otherwise it's irritating". So a wind zone is a patch of sea with a wind of its own, felt
+      whatever the weather, and the wind's own rules hold in it, the same rules as above (one
+      module, `src/den-wind.ts`; each place puts its zones down: LAY.ZONES in `src/den-sail.ts`):
+      she never makes a square against it (in irons: she makes no way, a turn swinging her head
+      round where she is), and how she lies to it sets her pace (behind her 0.4 seconds a square,
+      across her 1.2, light airs 2.2 times as long). The wind she feels on a move is the wind
+      where she's going, so heading into a zone against its wind heads her off at its edge, and
+      out of one she's free. The pilot plans by it: a pin she can't sail to, she waits, and says
+      so once ("The wind's dead against her there: she can't sail to the pin"). The first time a
+      zone heads her off, "The wind's dead against her here". The oars beat it, as they beat any
+      wind, but nothing ever says so ("we won't tell anybody that, but they can figure out oars go
+      against the wind"): no toast or prompt mentions the oars. Shown plainly but only there: the
+      water in it ruffled darker with long white streaks drifting the way it blows, fading out at
+      its edges, and while she's in it her flag streams downwind and her sails answer it (square
+      and full with it behind her, braced round and flatter across it, flogging in irons). No
+      arrows. Three so far:
+      - **The old wreck's**, beyond the checkpoint to the left, blowing from the left: from the
+        checkpoint's side the wreck's in sight but the wind's dead against her; down the locks she
+        comes out beside it with it across her or behind her. It starts a column short of the last
+        lock's foot, so from beside the wreck she can slip out of it westward and back up the locks.
+      - **The canal's mouth**, blowing down out of the cut: see "The wind at its mouth" (the chain
+        of locks).
+      - **Under the checkpoint's gatehouse**, light airs across her: see "A real chance to get
+        past, but work" (the imperial checkpoint).
     - **The wind** blows one of the board's four ways, a good wind, light airs or a calm, and lasts
       a good while ("it changes quite quickly"): a good wind 2 to 3 minutes, then mostly drops to
       light airs (sometimes it shifts a quarter and blows on instead); light airs last 20 to 30
@@ -397,66 +457,104 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       trade winds are currents of their own and sweep her on whatever the weather. Rules:
       `src/den-wind.ts`.
     - **The oars:** O, or the button at the right of the sailing bar, runs them out; while they're
-      out she's rowed by the port-and-starboard board, below. Esc (or O) ships them again, and she
+      out she's rowed by mirror strokes, below. Esc (or O) ships them again, and she
       sails on to the pin, if there is one, by the wind. Running them out or shipping them, the rest
       of a turn under way goes after the move she's on (it was planned for the other rig).
-  - **Rowing by port and starboard (10 Nov).** The user, on IDEAS.md's "Port and starboard":
-    "absolutely hilarious ... not obviously like a brand new puzzle, but it's certainly a nice twist
-    on bilging ... Do that." Solo for now: "a full bilge board, obviously with the rowing kind of
-    graphics on each side".
-    - **The board:** the real Bilge board (its every rule; src/rowing.ts) laid along her deck while
-      her oars are out, its top row toward her bow, and you look down it from over her stern, the sea
-      ahead beyond it, the camera turning with her so the board stays put. Its left half is her port
-      oars and its right half starboard: port's planking washed red and starboard's green, a dark
-      kingplank down the middle, PORT and STARBOARD painted across the bow end, a rower in a striped
-      shirt (red for port, green for starboard) on each gunwale working that side's two sweeps. Its
-      three water rows, at the stern end, never move: the sea she sits in (crabs still come up out of
-      it). While you row her mast, sails and guns are struck out of the way (the guns run in: Q and E
-      say so), and the sailing bar's hidden, as for the deck patch. Arrows or the mouse move the
-      cursor, Space or a click swaps.
-    - **What it rows:** what a move clears pulls that side's oars, as hard as the move's worth (the
+  - **Rowing by mirror strokes (10 Nov).** First the real Bilge board split down the middle, port
+    on the left and starboard on the right (the user, on IDEAS.md's "Port and starboard":
+    "absolutely hilarious ... a nice twist on bilging"); then, after the user played mirror strokes
+    on a page of its own ("This is actually quite a good puzzle. I love it"; "ready enough to be
+    slotted in ... even just that prototype mirrored thing"), mirror strokes is her rowing, and the
+    test page went ("remove the mirror strokes test": its module, tests and bots stay).
+    - **The boards:** two Bilge boards of their own, port's and starboard's, every rule of Bilge
+      but dealt from five kinds of piece rather than seven (for the cascades: "that makes more of a
+      risk for cascades and unintended effects"). Every swap made on one is made in mirror on the
+      other, so setting something up on one side scrambles the other ("Oh god, everything's in
+      reverse"). Arrows or the mouse move the cursor (on either board, mirrored on the other), Space or a
+      click swaps.
+    - **Where they are, and seeing where she's going:** the user, of the one board laid along her
+      deck: "I know it's like zoomed in is good to see the puzzle, but like I can't see where I'm
+      rowing." So the boards stand either side of the screen, port's on the left and starboard's
+      on the right as you look over her bows, each dressed as its side (its planking washed red or
+      green, her sidelights' colours, PORT or STARBOARD across its bow end), and the sea she's
+      rowing through is between them: the view from behind her and above, turned with her, her low
+      in it and the next several squares ahead above her, the rocks and the red rings. In a window
+      too narrow for that, the boards sit side by side along the bottom and the sea's above them.
+      While you row her mast, sails and guns are struck out of the way (the guns run in: Q and E
+      say so), and the sailing bar's hidden, as for the deck patch.
+    - **All under water (10 Nov):** no water line across the boards ("it shouldn't have a bilge
+      line ... everything should be under the water, really, for this mode"): a wash of sea over
+      each whole board, light rippling across it, every piece swaying a little. (The rules keep
+      Bilge's least water, three rows; with no crabs dealt, it makes no difference to play.)
+    - **Her rowers (10 Nov):** two of them, one a side, in striped shirts (red for port, green for
+      starboard), each with one long sweep, its loom in their hands and through its rowlock on the
+      gunwale ("make sure the little rowing characters and the oars are actually lined up. Maybe
+      just go back to having two little characters and two oars"); they lean to the catch and back
+      on the pull in step with it. The same size as you ("why are they so mini and you're like a
+      giant on the back of the ship?"), sat side by side on one thwart facing aft, so she's a little
+      beamier than she was, 2 across rather than 1.7 ("make the ship a little wider so the little
+      guys can sit next to each other"). When they're off the oars (holed, at the lock) the sweeps
+      come in.
+    - **What it rows:** what a board clears pulls that side's oars, as hard as the move's worth (the
       bilging guides' reckoning: a three 1, a Good 1.5 up to a Bingo 8, a Sea Donkey 12 and a Vegas
-      15; a chain's link 0.5, a crab 2), shared by where its pieces were. Pull on one side waits up to
-      1.5 seconds for the other (3 when a team rows a board a side; solo it was 3 too, and a
-      one-sided move turned her too late to see why): what's matched drives her ahead, what's still unmatched turns her
-      (harder on port swings her bows to starboard, as at the oars), near-even counting as straight.
-      Every 3 of pull is a square: forward, left or right, as on Battle Navigation's tokens. So even
-      work rows her straight, and one-sided work turns her ("you just end up rowing in circles"). A
-      half glows its colour while its pull waits for the other side, and flashes as it pulls.
+      15; a chain's link 0.5, a crab 2). Every 3 of matched pull is a square forward, as on Battle
+      Navigation's tokens.
+    - **Balance: going straight is something to aim for.** The user, on the split board: "it only
+      took three moves to generate three clears to generate a turn ... one on one side and two on
+      the other. So that's basically impossible to go straight." So a small lopsidedness still rows
+      her straight, and only a clear imbalance turns her. Pull one side's made that the other
+      hasn't yet is that side's lead; the other side's next pull catches it up first, and what's
+      caught up drives her ahead (both sides pulled, if not on the same move). Each bit of pull
+      matched also straightens up a quarter of what's left of the lead, into forward pull too, as
+      her keel holds her straight: rowed steadily, one side pulling up to one and a half times the
+      other never turns her. Only a lead of 7.5 (two and a half squares' pull) turns her, a quarter
+      turn, and the turn uses it up: three threes on one side don't, a Bingo on one side does, a
+      Vegas on one side swings her half round ("you just end up rowing in circles"). From the bots
+      (tools/row-bots.mjs, 30 games of 60 moves): a player out to row straight never turns, one who
+      clears whatever's biggest, never minding the side, turns about every eight moves, and one out
+      to turn her does it in three or four moves. (At 6 the side-blind player turned every six
+      moves and rowed a circle in most games; at 9 a Bingo on one side didn't turn her.) A board
+      glows its colour while its side's lead waits, and flashes as it pulls. Rules:
+      `src/mirror-row.ts` (BALANCE, Stroke).
+    - **The turn goes the way you'd expect** (the user: "if you pull on the right-hand side, it
+      should definitely go right"): more pull from the right-hand board (starboard) turns her
+      right, more from the left (port) turns her left. Real oars do the opposite; that's not the
+      point here.
     - **She answers the oars as the pull builds (10 Nov).** The user: "I'm not seeing any physical
       difference. Like ... I expect the boat to start, tilt it, angling to one side if I'm just
       rowing one side, and it to actually see some sense of movement." She still moves a whole
       square at a time, but between squares she creeps ahead as forward pull builds (up to 0.3 of a
-      square with a whole square's worth), swings her bows toward the turn that's building (up to a
-      third of a quarter turn) and heels into it, counting pull still waiting on one side as the
-      turn it'll be. When the square's move comes it starts from where she'd crept to and the lean
-      melts into it: never a jump back. The camera keeps square to her heading and follows her
-      creep only halfway, so you see her angle and edge ahead under the board.
-    - **The compass by the board (10 Nov):** "almost a compass that says ... we're about to
+      square with a whole square's worth), swings her bows toward the side that's leading (up to a
+      third of a quarter turn with a whole turn's lead) and heels into it. When the square's move
+      comes it starts from where she'd crept to and the lean melts into it: never a jump back. The
+      camera keeps square to her heading and follows her creep only halfway, so you see her angle
+      and edge ahead.
+    - **The compass by the boards (10 Nov):** "almost a compass that says ... we're about to
       generate a forward move or a left move or a right move ... at a certain point, it should go
-      one way or the other, maybe balance out." A brass-rimmed card in dark wood beside the board's
-      port edge, "NEXT MOVE" under it: its needle swings toward the side she'll turn as one side
-      out-pulls the other (port harder swings it right), straight up when they balance, red marks
+      one way or the other, maybe balance out." A brass-rimmed card in dark wood low beside port's
+      board, "NEXT MOVE" under it: its needle swings toward the side she'll turn as that side's
+      lead grows (starboard leading swings it right), straight up when they balance, red marks
       with ↰ and ↱ where it tips into a turn (the needle goes red past them), ↑ at the top; a gold
       ring round it fills as the next forward square builds. When a square's handed out the card
-      shows its token big (and ×5 for a Vegas's five), then resets.
+      shows its token big (and ×10 for a Vegas on each side), then resets.
     - **How quick:** she rows the squares straight away, no breather between turns. One square on
       its own takes 1.15 seconds; a pile of them waiting goes quicker, each taking 1.15 seconds over
       the size of the pile, as quick as the trade winds at most (0.28 seconds a square), the whole
       pile at the pace of its biggest. No cap on how many squares a big clear is worth ("that's the
-      point of Vegas"): a Vegas shared across both sides is five squares straight ahead at the trade
-      winds' pace, "she's flying!"; a Vegas on one side spins her round in circles.
+      point of Vegas"): a Vegas on each side at once is ten squares straight ahead at the trade
+      winds' pace, "she's flying!".
     - **The rowers** stroke as hard as their side's been pulling lately (fading over a couple of
       seconds): steady while she's under way, and "like crazy" after a big clear on that side (4 or
-      more of pull: a two-line combo on one side, or a Bingo shared), bouncing on the gunwale, their
-      sweeps thrashing and throwing spray, and it's said ("The port rower's going like crazy!").
-    - **Pins and the pilot:** the board is the steering while the oars are out, so the pilot doesn't
-      row for her. A pin stays where you dropped it, a buoy to row for, and goes when she gets there;
-      the prompt says which way it lies and which side to pull harder ("the pin's to starboard: pull
-      harder on port"). Holed, the board gives way to the deck patch; at the lock, to the quay's
-      Bilge; and comes back after. To haul up a wreck's treasure, ship the oars first; to load her
-      guns, too (one board on her deck at a time). Rules:
-      `src/den-row.ts`; the board in the world: `js/den/rowing.js`.
+      more of pull: a two-line combo), bouncing on the gunwale, their sweeps thrashing and throwing
+      spray, and it's said ("The port rower's going like crazy!").
+    - **Pins and the pilot:** the boards are the steering while the oars are out, so the pilot
+      doesn't row for her. A pin stays where you dropped it, a buoy to row for, and goes when she
+      gets there; the prompt says which way it lies and which side to pull harder: the side it's
+      on ("the pin's to starboard: pull harder on starboard"). Holed, the boards give way to the
+      deck patch; at the lock, to the quay's Bilge; and come back after, the same boards. To haul up
+      a wreck's treasure, ship the oars first; to load her guns, too (one puzzle at a time). Rules:
+      `src/mirror-row.ts` (the puzzle) and `src/den-row.ts` (at sea); in the world:
+      `js/den/rowing.js` and the boards' look, `js/den/row-boards.js`.
   - **The imperial checkpoint (10 Nov).** The user: "this race idea was the funny one. We absolutely
     need that. We need our own puzzle where we have to get through the Imperial checkpoint by doing
     slow row and then fast rowing with the Vegas." And on its guns: they're trained on particular
@@ -481,11 +579,23 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       seconds later: still there, she's holed (patched by Carpentry); gone, it
       splashes down. So a square rowed on its own, which she stops on, is hit; two or more rowed at
       once go straight over the marks between, and a Vegas on each side (ten squares) carries her
-      through the lot at the trade winds' pace. Under sail, a good wind behind her takes each square
-      too quickly to be hit, but her breather between turns comes on the gate (four moves from where
-      the lane drops her), and a wind across her or light airs is slow enough to be hit on every
-      mark. Patched, its guns hold fire five seconds, as the turret's did. Out of their reach she's
-      safe, so you can stop short and build your combo (or row in circles while you do).
+      through the lot at the trade winds' pace. Under sail she takes most squares too quickly to be
+      hit, but under the gatehouse its walls take the wind out of her sails (light airs across
+      her: a wind zone, below), so she ghosts through the gate slowly, on its mark (the pilot
+      tacks in to it). Patched, its guns hold fire five seconds, as the turret's did. Out of their
+      reach she's safe, so you can stop short and build your combo (or row in circles while you
+      do).
+    - **A real chance to get past, but work (10 Nov).** The user: "you need some chance to actually
+      sail through. I think getting hit once or twice is funny, but they hit like there's no
+      opportunity to really get past ... That's just a bit too much going on here." And then:
+      "these checkpoints are supposed to be strong things, not things you just casually get
+      through on the first try ... you should be able to get through here, but it should be work",
+      enough that the way round is worth finding. So a gun that's hit her holds its fire on its
+      marks till she's out of the checkpoint's sight (each gun has her once a run: a hit or two at
+      most, never one after another); and a bold run under sail always takes the gate's hit (the
+      light airs under the gatehouse), a patch by Carpentry before she sails on. A combo rowed as
+      one still rushes her past every mark. Once she's fired on it, it's a fight, and they fire on
+      her whatever.
     - **Its guns can be wrecked (10 Nov).** The user: the checkpoint's guns should be "just the same
       as the other one" (the turret): "everything should be destructive", so knocking them out is a
       way through of its own. But it costs a puzzle (see "Every other way through costs a
@@ -507,16 +617,18 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       start out of their reach, so she can stop there and load before a fight.
     - **Or round it by the locks** (the chain of locks, above): the long way round the reef's end
       that was there, costing only time, went (10 Nov).
-    - **Said:** coming up to it, "The imperial checkpoint! Its guns are trained on the red rings:
-      stop on one and she's hit. Run it, row it, or knock its guns out" (and, stopped short of it,
-      the hint at a secret way: above); once she's past its last mark, "Through the checkpoint! Not
+    - **Said:** coming up to it, first the hint, "An imperial checkpoint... I wonder if there's
+      another way round" (from the den's side only), then "The checkpoint's guns are trained on the
+      red rings: stop on one and she's hit. Run it, row it, or knock its guns out"; once she's past
+      its last mark, "Through the checkpoint! Not
       a scratch on her" (or "Holed once, patched, and through"), or round by the locks, and "Back
       through" or "Back round" coming home.
     - **The old wreck beyond it:** run aground on a sandbar on the open sea, out of reach of its
       guns: the reason to get past. Stop beside it and Space hauls its treasure up by Treasure Haul,
       (the board on her other side, clear of the wreck); once it's up the
       wreck's bare.
-    - **Room left for later:** the gatehouse's boom for the bribe. (A crane up and over its headland
+    - **Room left for later:** the gatehouse's boom for the bribe, and the top of the gatehouse's
+      arch over the gate for Dignity, its commander, to stand on (still clear: nothing's put there). (A crane up and over its headland
       had room kept for it, till the crane went to the hidden cove and the locks became the way
       round.) Rules:
       `src/den-checkpoint.ts` (the lay: LAY.CHECKPOINT in `src/den-sail.ts`); in the world:
@@ -528,9 +640,24 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     multi-step thing and gradually build up on it":
     - **The headland and the ledge:** the hidden cove's left-hand side is a headland now, taller
       than the cove's walls, off the board's left edge. At its foot, on the cove's middle row, a
-      ledge is cut into the rock: an old smugglers' landing, their hoist rotting on the clifftop
-      above it (a post, an arm out over the ledge, a block and rope, a little windlass), far too
-      small to lift a ship. The first time she stops in the cove it's pointed out.
+      ledge is cut into the rock: an old smugglers' landing.
+    - **How you get in is plain, not a puzzle of the wrong kind (10 Nov).** The user, in the cove:
+      "I don't know how you're supposed to get into this lagoon. It certainly got me puzzled. I can
+      see the crane, and it's saying about a bilge pump ... And I thought we were constructing this
+      crane." And: "If you're building a crane, you've literally got a crane here that's helping
+      you build the crane. Yeah, it's a slight logic issue." So:
+      - **The place to stop is plain:** the ledge is obviously somewhere to moor, two stout
+        bollards along its edge (a rope's coil on one), rope fenders down its face, mooring rings.
+        The first time she stops in the cove: "A ledge under the left-hand cliff, somewhere to moor
+        her: stop alongside it".
+      - **Nothing looks built before it's built:** no old hoist (it went: a crane helping build the
+        crane). Before you start, the crane's place waits: four squared stone footings set in the
+        clifftop where its foot will go, and the first frame's outline chalked on the ledge where
+        it'll be laid.
+      - **Stopping there says what to do:** "Alongside the ledge · Space: build a crane on the ledge
+        to haul her up the cliff (Carpentry)".
+      - **No bilge pump talk:** the old pump on the cove's sand is for a later step of the story,
+        and sits there quietly.
     - **Building the crane:** stop her on the ledge's square (oars shipped) and she's warped in
       alongside it; Space builds a crane by Carpentry, a part at a time: its foot, its post and its
       jib, about four pieces each, thirteen in all. Each part's frame is laid on the ledge and
@@ -540,12 +667,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       the edge (here up to two squares); Backspace takes the last piece back out; Esc leaves the
       frame on the ledge as it is, to come back to. Single squares jut out of each frame for the
       rare pieces (the post's are its tenons). Full, it's sawn to fit (what sticks out falls away
-      as sawdust; "Shipshape!" if nothing did), the old hoist hauls it up the cliff on four ropes
-      and it goes into its place on the clifftop; then the next frame's laid. The crane is the
-      pieces you fitted, nothing by magic: the foot flat on the clifftop, the post standing on it,
-      the jib angled up from its top. Once it's whole the old hoist's windlass and block are rigged
-      on it, its rope run from the windlass up the post and out along the jib, a hook under the
-      tip. Space skips watching a part go up.
+      as sawdust; "Shipshape!" if nothing did), you leap up onto the clifftop and haul it up by hand
+      on ropes over the lip, hand over hand, and it goes into its place: the foot laid on its
+      footings, the post raised on it, the jib swung up; then the next frame's laid. The crane is
+      the pieces you fitted, nothing by magic, and looks it (the user: "It is just such a brilliant
+      thing for the puzzle"): the foot flat on the clifftop, the post standing on it, the jib
+      angled up from its top. Once it's whole its windlass and block are rigged on it, its rope run
+      from the windlass up the post and out along the jib, a hook under the tip, the slings round
+      her sides when it lifts her. Space skips watching a part go up.
     - **Hauling her up:** "Under the crane · Space: haul her up the cliff". A short, cheesy moment
       (about ten seconds, black bars, Space or Esc skips): you leap up to the windlass ("Up she
       comes!"), the hook comes down and slings go round her, you wind her up out of the water
@@ -610,6 +739,24 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     feet), and his white monkey on his left shoulder. (In the portrait the one on his shoulder is
     his black Hunter Archetype familiar; the white monkey is the Champion one, the one that comes
     to you.) **Any real pirate drawn in the den: check their portrait first.**
+  - **Real pirates are only looks, and you can wear anything they wear (10 Nov).** The user: "we
+    shouldn't be drawing Dalnoth. Dalnoth just happens to be a guy dressed in yellow gold with a
+    Viking helmet ... when you go on to your pirate, you should be able to put any clothing on of
+    these people." So every real pirate is a plain look in `PIRATES` (`js/den-look.js`), dressed
+    by the same pirate maker as yours, and every piece any of them wears is a wardrobe item, for
+    both bodies where it makes sense: no pirate-specific drawing anywhere (what's not clothing,
+    like Dalnoth's ale slopping as he rants, stays with the scene that animates him). A new real
+    pirate means new wardrobe items first, then a look. **Dalnoth:** Viking helmet (yellow fur),
+    bushy beard, gold earrings in both ears, a gold Swashbuckler's jacket, a white sash, gold pants
+    and boots, a tankard in his right hand, his white monkey. **Dignity** (her Emerald portrait,
+    checked 10 Nov; the user: "go with the portrait photo, because then she's more distinctive"):
+    tan-brown skin, smiling, wavy blonde hair to her shoulders, an eyepatch over her right eye; a
+    purple Buccaneer jacket with lavender facings, wide cuffs and gold buttons in two rows over a
+    white shirt; a black belt with a big round gold buckle; purple pants; purple Fancy boots with
+    lavender turned-down tops; and Bella, her lavender monkey (a limited-edition monkey colour on
+    YPPedia: what looked like little purple wings in the portrait is her curled tail). She's the
+    imperial checkpoint's commander (TODO.md). The cheat "Real pirates on the beach" stands every
+    one of them outside the gate to look at.
 - **You can see out to sea (9 Nov).** The taller wall shut the view in: "it just feels like I'm
   staring at a wall. It's lost some of the chop. I don't feel like there's any background to look
   at. I don't know why it's so black. Rather like there's supposed to be a sea over there." So:
@@ -636,24 +783,6 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   about the same (a few seconds' rowing first). The user: "instead of them just walking over ...
   they're rowing in little rowboats onto the beach of your pirate hideout, and the cannon is
   actually a ship off in the distance".
-  - **Real pirates are only looks, and you can wear anything they wear (10 Nov).** The user: "we
-    shouldn't be drawing Dalnoth. Dalnoth just happens to be a guy dressed in yellow gold with a
-    Viking helmet ... when you go on to your pirate, you should be able to put any clothing on of
-    these people." So every real pirate is a plain look in `PIRATES` (`js/den-look.js`), dressed
-    by the same pirate maker as yours, and every piece any of them wears is a wardrobe item, for
-    both bodies where it makes sense: no pirate-specific drawing anywhere (what's not clothing,
-    like Dalnoth's ale slopping as he rants, stays with the scene that animates him). A new real
-    pirate means new wardrobe items first, then a look. **Dalnoth:** Viking helmet (yellow fur),
-    bushy beard, gold earrings in both ears, a gold Swashbuckler's jacket, a white sash, gold pants
-    and boots, a tankard in his right hand, his white monkey. **Dignity** (her Emerald portrait,
-    checked 10 Nov; the user: "go with the portrait photo, because then she's more distinctive"):
-    tan-brown skin, smiling, wavy blonde hair to her shoulders, an eyepatch over her right eye; a
-    purple Buccaneer jacket with lavender facings, wide cuffs and gold buttons in two rows over a
-    white shirt; a black belt with a big round gold buckle; purple pants; purple Fancy boots with
-    lavender turned-down tops; and Bella, her lavender monkey (a limited-edition monkey colour on
-    YPPedia: what looked like little purple wings in the portrait is her curled tail). She's the
-    imperial checkpoint's commander (TODO.md). The cheat "Real pirates on the beach" stands every
-    one of them outside the gate to look at.
 - **The gate opens, and you can walk out onto the beach (9 Nov).** The user: "go implement opening
   the gate ... be able to walk through the gate". Walk up to the gate, from either side, and the
   drawbar slides back into the wall and the two leaves swing in; it shuts again once nobody's by

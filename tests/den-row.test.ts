@@ -1,77 +1,98 @@
-/* The rowing board at sea (TODO.md, "Rowing by port and starboard", 10 Nov): the squares it rows,
+/* The rowing boards at sea (RULES.md, "Rowing by mirror strokes", 10 Nov): the squares they row,
    how quick she goes, her rowers, and which way to pull for the pin. */
 import { describe, expect, it } from 'vitest';
 import { H, KINDS, W } from '../src/bilge';
-import type { Bit } from '../src/bilge';
-import { Oars, ROW } from '../src/rowing';
+import type { Bilge, Bit } from '../src/bilge';
+import { ROW } from '../src/rowing';
+import { BALANCE } from '../src/mirror-row';
 import { CREW, LEAN, RowBoard, bearing, leadFor, leaned, pullFor, shownAt } from '../src/den-row';
 import { poseAt } from '../src/den-sail';
 import { WIND, Wind, rowTime } from '../src/den-wind';
 import { Helm, Sea, type SailEvent } from '../src/den-sail';
 
 const cycle = () => { let i = 0; return () => ((i++ % KINDS) + 0.5) / KINDS; };
-/** A rowing board drawn from the top, as in tests/rowing.test.ts. */
-function board(rows: string[]): RowBoard {
-  const b = new RowBoard({ random: cycle() });
-  let id = 1000;
+/** A board laid from the top, as in tests/mirror-row.test.ts. */
+function lay(b: Bilge, rows: string[], id: number): void {
   for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
     const ch = rows[r]?.[c];
-    const bit: Bit = ch === undefined ? { id: id++, k: (c + 3 * r + 5) % KINDS } : { id: id++, k: Number(ch) };
-    b.rowing.bilge.grid[r][c] = bit;
+    const bit: Bit = { id: id++, k: ch === undefined ? (c + 3 * r + 5) % KINDS : Number(ch) };
+    b.grid[r][c] = bit;
   }
+}
+function boards(port: string[], starboard: string[]): RowBoard {
+  const b = new RowBoard({ randoms: [cycle(), cycle()], kinds: KINDS });
+  lay(b.row.port, port, 1000); lay(b.row.starboard, starboard, 5000);
   return b;
 }
 const sea = () => { const s = new Sea(1, false); s.rocks.clear(); s.breeze = new Wind(1); s.breeze.set(1, 2, 1e9); return s; };
 const run = (h: Helm, secs: number, step = 0.01) => { const ev: SailEvent[] = []; for (let t = 0; t < secs; t += step) ev.push(...h.tick(step)); return ev; };
 
 describe('rowing her', () => {
-  it('a square rowed on its own goes at the oars\' steady pace; a pile of them quicker, up to the trade winds\'', () => {
+  it(`a square rowed on its own goes at the oars' steady pace; a pile of them quicker, up to the trade winds'`, () => {
     expect(rowTime(1)).toBe(WIND.OARS);
     expect(rowTime(2)).toBeCloseTo(WIND.OARS / 2);
     expect(rowTime(20)).toBe(WIND.FAST);
   });
 
+  it('the den rows mirror strokes: a swap on port is made in mirror on starboard', () => {
+    const b = boards(['012345'], ['012345']);
+    b.swap(0, 0);
+    expect(b.row.port.grid[0].map((x) => x!.k)).toEqual([1, 0, 2, 3, 4, 5]);
+    expect(b.row.starboard.grid[0].map((x) => x!.k)).toEqual([0, 1, 2, 3, 5, 4]);
+  });
+
   it('even work rows her straight ahead, straight away', () => {
-    const b = board(['001011']), m = b.swap(0, 2);
-    expect(m.steps).toEqual(['F']);
+    const b = boards(['101145'], ['013343']), m = b.swap(0, 0);
+    expect(m.pull).toEqual({ port: ROW.THREE, starboard: ROW.THREE });
+    const steps = [...m.steps, ...b.pull({ port: 0.5, starboard: 0.5 })];
+    expect(steps).toEqual(['F']);
     const h = new Helm(sea(), { c: 8, r: 3, d: 0 });
     h.row(true);
-    h.stroke(m.steps);
+    h.stroke(steps);
     run(h, WIND.OARS + 0.5);
     expect(h.pose).toEqual({ c: 8, r: 4, d: 0 });
   });
 
   it('a Vegas on each side at once sends her zooming, "the same as traveling on the winds" (10 Nov)', () => {
-    const o = new Oars(), steps = o.feed({ port: ROW.WORTH['Vegas!'] / 2, starboard: ROW.WORTH['Vegas!'] / 2 }, 0);
-    expect(steps).toEqual(['F', 'F', 'F', 'F', 'F']);
+    const steps = new RowBoard().pull({ port: ROW.WORTH['Vegas!'], starboard: ROW.WORTH['Vegas!'] });
+    expect(steps).toEqual(Array(10).fill('F'));
     expect(steps.length).toBeGreaterThanOrEqual(CREW.FLYING);
     const h = new Helm(sea(), { c: 8, r: 2, d: 0 });
     h.row(true);
-    h.stroke(steps);
+    h.stroke(steps.slice(0, 5));
     const ev = run(h, 2.5), secs = ev.filter((e) => e.kind === 'move').map((e) => (e as { secs: number }).secs);
     expect(secs[0]).toBe(WIND.FAST);
     expect(h.pose).toEqual({ c: 8, r: 7, d: 0 });   // five squares in two and a half seconds
   });
 
   it('one-sided rowing turns her: "you just end up rowing in circles" (10 Nov)', () => {
-    const o = new Oars();
-    expect(o.row('port', ROW.WORTH['Vegas!'], 0)).toEqual([]);
-    const steps = o.tick(ROW.WINDOW);
-    expect(steps).toEqual(['R', 'R', 'R', 'R', 'R']);
+    const steps = new RowBoard().pull({ port: 0, starboard: 4 * BALANCE.TURN });
+    expect(steps).toEqual(['R', 'R', 'R', 'R']);
     const h = new Helm(sea(), { c: 8, r: 5, d: 0 });
     h.row(true);
-    h.stroke(steps.slice(0, 4));
+    h.stroke(steps);
     run(h, 4);
     expect(h.pose).toEqual({ c: 8, r: 5, d: 0 });   // right round, back where she was
   });
 
-  it('turns and goes on while the pull on one side waits for the other', () => {
-    const b = new RowBoard();
-    b.rowing.oars.row('starboard', 3, b.t);
-    expect(b.waiting('starboard')).toBe(3);
-    expect(b.tick(ROW.SOLO - 0.1)).toEqual([]);
-    expect(b.tick(0.2)).toEqual(['L']);
-    expect(b.waiting('starboard')).toBe(0);
+  it(`"if you pull on the right-hand side, it should definitely go right" (10 Nov): starboard's board turns her to starboard, port's to port`, () => {
+    const h = new Helm(sea(), { c: 8, r: 5, d: 0 });
+    h.row(true);
+    h.stroke(new RowBoard().pull({ port: 0, starboard: ROW.WORTH['Bingo!'] }));
+    run(h, 2);
+    expect(h.pose.d).toBe(1);   // (heading 1: round to her starboard)
+    const k = new Helm(sea(), { c: 8, r: 5, d: 0 });
+    k.row(true);
+    k.stroke(new RowBoard().pull({ port: ROW.WORTH['Bingo!'], starboard: 0 }));
+    run(k, 2);
+    expect(k.pose.d).toBe(3);
+  });
+
+  it(`"one on one side and two on the other ... basically impossible to go straight" (10 Nov): three clears like that row her on, straight`, () => {
+    const b = new RowBoard(), steps = [{ port: 1, starboard: 0 }, { port: 0, starboard: 1 }, { port: 0, starboard: 1 }].flatMap((p) => b.pull(p));
+    expect(steps.filter((s) => s !== 'F')).toEqual([]);
+    expect(b.waiting('starboard')).toBe(1);
+    expect(b.waiting('port')).toBe(0);
   });
 });
 
@@ -93,9 +114,9 @@ describe('her rowers', () => {
   });
 
   it('each side strokes as hard as it pulled', () => {
-    const b = board(['001011']);
-    b.swap(0, 2);
-    expect(b.lately).toEqual({ port: 1.5, starboard: 1.5 });
+    const b = boards(['101145'], []);
+    b.swap(0, 0);
+    expect(b.lately).toEqual({ port: ROW.THREE, starboard: 0 });
   });
 });
 
@@ -111,35 +132,27 @@ describe('rowing for the pin (the pilot doesn\'t row for her)', () => {
     expect(bearing({ c: 8, r: 5, d: 1 }, [8, 9])).toBe('port');
   });
 
-  it('pull harder on the side away from it, as at the oars', () => {
-    expect([pullFor('starboard'), pullFor('port'), pullFor('ahead'), pullFor('astern'), pullFor('here')]).toEqual(['port', 'starboard', null, 'either', null]);
+  it(`pull harder on the side it's on (10 Nov: "if you pull on the right-hand side, it should definitely go right")`, () => {
+    expect([pullFor('starboard'), pullFor('port'), pullFor('ahead'), pullFor('astern'), pullFor('here')]).toEqual(['starboard', 'port', null, 'either', null]);
   });
 });
 
 describe(`"I'm not seeing any physical difference" (10 Nov): she answers the oars as the pull builds`, () => {
-  it(`rowed alone, a one-sided move turns her after ROW.SOLO, not the team's ROW.WINDOW`, () => {
+  it(`one side's clear swings her bows toward that side at once, and heels her into it`, () => {
     const b = new RowBoard();
-    b.rowing.oars.row('port', ROW.STEP, b.t);
-    expect(ROW.SOLO).toBeLessThan(ROW.WINDOW);
-    expect(b.tick(ROW.SOLO - 0.05)).toEqual([]);
-    expect(b.tick(0.1)).toEqual(['R']);
-  });
-
-  it(`one side's clear swings her bows toward the turn at once, and heels her into it`, () => {
-    const b = new RowBoard();
-    b.rowing.oars.row('port', 1, b.t);
+    b.pull({ port: 0, starboard: 1 });
     const got = b.building(), lead = leadFor(got);
-    expect(got.turn).toBeCloseTo(1 / ROW.STEP);
-    expect(lead.y).toBeGreaterThan(0);   // (port pulling harder: her bows swing to starboard)
+    expect(got.turn).toBeCloseTo(1 / BALANCE.TURN);
+    expect(lead.y).toBeGreaterThan(0);   // (starboard pulling harder: her bows swing to starboard)
     expect(lead.heel).toBeGreaterThan(0);
     const s = new RowBoard();
-    s.rowing.oars.row('starboard', 2, s.t);
+    s.pull({ port: 2, starboard: 0 });
     expect(leadFor(s.building()).y).toBeLessThan(0);
   });
 
   it(`forward pull building creeps her ahead, a fraction of a square, before the square's move`, () => {
     const b = new RowBoard();
-    b.rowing.oars.feed({ port: 0.5, starboard: 0.5 }, b.t);
+    b.pull({ port: 0.5, starboard: 0.5 });
     expect(b.building()).toEqual({ ahead: 1 / ROW.STEP, turn: 0 });
     const lead = leadFor({ ahead: 0.99, turn: 0 });
     expect(lead.f).toBeGreaterThan(0);

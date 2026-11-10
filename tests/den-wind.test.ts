@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { WEATHER, WIND, Wind, moveTime, pointOf, rowTime, upwind, type Strength } from '../src/den-wind';
-import { SAIL, Sea, Helm, type Move, type SailEvent } from '../src/den-sail';
+import { SAIL, LAY, Sea, Helm, type Move, type Pose, type SailEvent } from '../src/den-sail';
+import { ends } from '../src/den-lock';
 
 // An open sea (no rocks, no lanes) with a wind on it: this way, this strong, and for a long while.
 const windySea = (d = 1, s: Strength = 2) => { const sea = new Sea(1, false); sea.rocks.clear(); sea.breeze = new Wind(1); sea.breeze.set(d, s, 1e9); return sea; };
@@ -342,5 +343,136 @@ describe('the wind parked (10 Nov: "I think maybe we need to park the wind idea 
     };
     const behind = turn(0);
     for (const blows of [1, 2, 3]) expect(turn(blows)).toBeCloseTo(behind, 1);
+  });
+});
+
+describe('a wind by the old wreck beyond the checkpoint (10 Nov: "it should only really apply to this little ... area")', () => {
+  // As the game has it: the weather parked, and a wind zone by the wreck (LAY.ZONES).
+  beforeEach(() => { WEATHER.parked = true; });
+  const game = () => { const s = new Sea(9); s.breeze = new Wind(9); return s; };
+  const Z = LAY.ZONES[0], [wc, wr] = LAY.WRECK, BY: [number, number] = [wc - 1, wr];
+  /** Just through the checkpoint's gate, heading on out. */
+  const THROUGH: Pose = { c: LAY.CHECKPOINT.GATE, r: LAY.CHECKPOINT.ROW + 1, d: 0 };
+  /** At the foot of the last lock, come down through the headland. */
+  const FOOT: Pose = { c: ends(LAY.LOCKS[3]).low[0], r: ends(LAY.LOCKS[3]).low[1], d: 0 };
+
+  it('a zone is a patch of sea with a wind of its own, felt whatever the weather; out of it, the weather\'s', () => {
+    const s = game();
+    expect(s.zoneAt(wc, wr)).toEqual(Z);
+    expect(s.airAt(wc + 1, wr)).toEqual({ d: Z.d, s: Z.s, felt: true });
+    expect(s.airAt(SAIL.HOME.c, 5)!.felt).toBe(false);
+    expect(s.zoneAt(LAY.CHECKPOINT.GATE, LAY.CHECKPOINT.ROW + 1)).toBeNull();
+  });
+
+  it('the wind\'s own rules in it, not a copy: behind her she\'s quick, across her slow, into it nowhere', () => {
+    const s = new Sea(1, false);
+    s.rocks.clear();
+    s.zones = [{ c0: 5, c1: 10, r0: 5, r1: 10, d: 1, s: 2 }];
+    expect(s.moveSecs(false, { c: 6, r: 7, d: 1 }, 'F')).toBe(WIND.RUN);
+    expect(s.moveSecs(false, { c: 6, r: 7, d: 0 }, 'F')).toBe(WIND.REACH);
+    expect(s.irons({ c: 8, r: 7, d: 3 }, 'F')).toBe(true);
+    expect(s.move({ c: 8, r: 7, d: 3 }, 'F')).toMatchObject({ bump: true, irons: true, to: { c: 8, r: 7 } });
+    // Heading in from outside counts (it's the wind where she's going), and out of it, none.
+    expect(s.irons({ c: 11, r: 7, d: 3 }, 'F')).toBe(true);
+    expect(s.irons({ c: 5, r: 7, d: 3 }, 'F')).toBe(false);
+    expect(s.irons({ c: 2, r: 7, d: 3 }, 'F')).toBe(false);
+    // A turn whose second leg heads into it.
+    expect(s.irons({ c: 11, r: 6, d: 0 }, 'L')).toBe(true);
+    // The oars beat it.
+    expect(s.irons({ c: 8, r: 7, d: 3 }, 'F', true)).toBe(false);
+    expect(s.move({ c: 8, r: 7, d: 3 }, 'F', true)).toMatchObject({ bump: false, to: { c: 7, r: 7 } });
+  });
+
+  it('"tempting, but you can\'t get to it": from the checkpoint\'s side the wind\'s dead against her', () => {
+    const s = game(), h = new Helm(s, THROUGH);
+    expect(s.plot(THROUGH, ...BY)).toBeNull();
+    expect(s.plot(THROUGH, ...BY, null, true)).not.toBeNull();
+    h.drop(...BY);
+    const ev = run(h, 20);
+    expect(ev.filter((e) => e.kind === 'headwind')).toHaveLength(1);   // (said once)
+    expect(h.headwind()).toBe(true);
+    expect(moves(ev)).toEqual([]);
+    expect(h.oars).toBe(false);   // (the oars are never run out for her, nor hinted at)
+    // Steered by hand, she's headed off at its edge.
+    const m = new Helm(s, { c: Z.c1 + 1, r: wr - 1, d: 0 });
+    m.put('L');
+    const by = moves(run(m, 5));
+    expect(by[0]).toMatchObject({ irons: true, bump: true });
+    expect(m.pose.c).toBe(Z.c1 + 1);
+  });
+
+  it('"unless you go around the back way": down the locks she sails in to it, the wind behind her or across her', () => {
+    const s = game(), plan = s.plot(FOOT, ...BY)!;
+    expect(plan).not.toBeNull();
+    let p = FOOT;
+    for (const m of plan) { expect(s.irons(p, m)).toBe(false); p = s.sail(p, m).to; }
+    const h = new Helm(s, FOOT);
+    h.drop(...BY);
+    run(h, 30);
+    expect([h.pose.c, h.pose.r, h.pin]).toEqual([...BY, null]);
+    // And from beside it, out of it westward and back up the locks under sail.
+    expect(s.plot(h.pose, FOOT.c, FOOT.r)).not.toBeNull();
+  });
+
+  it('the oars beat it, rowed from the checkpoint\'s side (and nothing says so)', () => {
+    const s = game(), h = new Helm(s, { c: Z.c1 + 1, r: wr, d: 3 });
+    h.row(true);
+    h.stroke(['F', 'F']);
+    const ev = run(h, 10);
+    expect(moves(ev).every((e) => !e.bump && !e.irons)).toBe(true);
+    expect(h.pose.c).toBe(Z.c1 - 1);
+  });
+
+  it('only there: everywhere else she sails the same every way, as parked', () => {
+    const s = game();
+    for (let d = 0; d < 4; d++) {
+      const p = { c: 15, r: 10, d };
+      expect(s.irons(p, 'F')).toBe(false);
+      expect(s.moveSecs(false, p, 'F')).toBe(WIND.RUN);
+    }
+  });
+});
+
+describe('"some wind stopping you from getting to the locks on the left as well" (10 Nov)', () => {
+  // "People have got to figure out that they can use the oars to go past the wind, and that's how
+  // they get over there." The same wind zone, put down again at the canal's mouth.
+  beforeEach(() => { WEATHER.parked = true; });
+  const game = () => { const s = new Sea(9); s.breeze = new Wind(9); return s; };
+  const L = LAY.LOCKS[0], { low, high } = ends(L), mouth = LAY.CANAL[LAY.CANAL.length - 1];
+
+  it('it blows down out of the cut, over the mouth and the first lock: only there', () => {
+    const s = game(), z = s.zoneAt(...L.at)!;
+    expect(z).not.toBeNull();
+    expect(z.d).toBe((L.up + 2) % 4);
+    expect(s.zoneAt(...low)).toBe(z);
+    expect(s.zoneAt(...high)).toBeNull();
+    expect(s.zoneAt(...LAY.JUNCTION)).toBeNull();
+    expect(s.zoneAt(SAIL.HOME.c, SAIL.HOME.r)).toBeNull();
+  });
+
+  it('under sail she\'s headed off at the first lock, and the pilot won\'t take her in (said once, no word of the oars)', () => {
+    const s = game(), h = new Helm(s, { c: low[0], r: low[1], d: L.up });
+    expect(s.irons(h.pose, 'F')).toBe(true);
+    h.put('F');
+    expect(moves(run(h, 4))[0]).toMatchObject({ irons: true, bump: true });
+    expect([h.pose.c, h.pose.r]).toEqual(low);
+    const p = new Helm(s);
+    p.drop(...high);
+    expect(run(p, 10).filter((e) => e.kind === 'headwind')).toHaveLength(1);
+    expect(p.oars).toBe(false);
+  });
+
+  it('rowed, she goes in and up; coming back down she sails out before it', () => {
+    const s = game(), h = new Helm(s, { c: mouth[0], r: mouth[1], d: L.up });
+    h.row(true);
+    h.stroke(['F', 'F', 'F']);
+    run(h, 10);
+    expect([h.pose.c, h.pose.r]).toEqual(L.at);
+    const d = new Helm(s, { c: high[0], r: high[1], d: (L.up + 2) % 4 });
+    d.locks[0].level = 1;
+    d.put('F'); d.put('F'); d.put('F');
+    const ev = run(d, 15);
+    expect(moves(ev).some((e) => e.irons)).toBe(false);
+    expect([d.pose.c, d.pose.r]).toEqual([low[0], low[1] - 1]);
   });
 });

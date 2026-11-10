@@ -1,5 +1,5 @@
-/* Bots that row: mirror strokes against the plain split board (TODO.md, "Test mirror strokes on a
-   page of its own", 10 Nov). A check on the skill curve: if better play goes much further, and the
+/* Bots that row: mirror strokes (the den's rowing, RULES.md "Rowing by mirror strokes") against the
+   plain split board, 10 Nov. A check on the skill curve: if better play goes much further, and the
    gap grows with lookahead, there's depth to it.
 
    Run on the compiled js (npm run build first) with Node 22 (Node 18 won't load the site's ES
@@ -16,11 +16,17 @@
    - greedy: the swap worth most now, tried on copies of the boards (it sees the boards, not what
      comes in at the bottom, so the copies get new pieces of their own).
    - two-ply: the swap worth most with the best follow-up after it.
-   "Worth" is how far a stroke takes her up the course (the way she started), rowed as the page rows
-   her, less a square for every quarter turn she's left heading off it. */
+   - naive: the swap that pulls most in all, never minding which side: a player who just clears what
+     they can. Balance is fair if this one goes mostly straight and turns now and then.
+   - turner: wants her round to starboard: the swap that builds most toward a turn that way. How
+     many moves its first turn takes is how hard it is to turn her on purpose.
+   "Worth" is how far a stroke takes her up the course (the way she started), rowed as the den rows
+   her, less a square for every quarter turn she's left heading off it.
 
-import { Course, KINDS_DEFAULT, MirrorRow, SplitRow, seeded } from '../js/mirror-row.js';
-import { ROW } from '../js/rowing.js';
+   Balance (BALANCE in src/mirror-row.ts) can be tried without a build: TURN=6 KEEL=0.25 before the
+   command (environment variables). */
+
+import { BALANCE, Course, KINDS_DEFAULT, MirrorRow, SplitRow, seeded } from '../js/mirror-row.js';
 import { H, W } from '../js/bilge.js';
 
 const GAMES = Number(process.argv[2]) || 40, MOVES = Number(process.argv[3]) || 60;
@@ -28,8 +34,11 @@ const WIDTH = Number(process.argv[4]) || H * (W - 1);
 const ALL = [];
 for (let r = 0; r < H; r++) for (let c = 0; c < W - 1; c++) ALL.push([r, c]);
 
-/** Her heading, as pull turned (to starboard more than nothing), wrapped to a half circle either way. */
-const wrap = (h) => { const full = 4 * ROW.STEP; return ((h + full / 2) % full + full) % full - full / 2; };
+if (process.env.TURN) BALANCE.TURN = Number(process.env.TURN);
+if (process.env.KEEL) BALANCE.KEEL = Number(process.env.KEEL);
+
+/** Her heading in quarter turns (to starboard more than nothing), wrapped to a half circle either way. */
+const wrap = (q) => ((q + 2) % 4 + 4) % 4 - 2;
 /** Squares up the course a quarter turn off it is reckoned to cost (she has to be turned back). */
 const OFF = 1;
 const DY = [1, 0, -1, 0];
@@ -37,11 +46,13 @@ const DY = [1, 0, -1, 0];
 /** Where she stands: how far up the course, pull still building counted as part of a square, less
     for heading off it (pull still waiting for the other side counted as turning her). */
 function standing(st) {
-  const h = st.turned * ROW.STEP + st.oars.swing + st.oars.pending();
-  return st.y + DY[st.heading] * st.oars.ahead / ROW.STEP - OFF * Math.abs(wrap(h)) / ROW.STEP;
+  const b = st.oars.building();
+  return st.y + DY[st.heading] * b.ahead - OFF * Math.abs(wrap(st.turned + b.turn));
 }
+/** How far round to starboard she is, or about to be (the turner's worth). */
+const round = (st) => st.turned + st.oars.building().turn;
 
-/** The state after a stroke of pull p, rowed as the page rows her. */
+/** The state after a stroke of pull p, rowed as the den rows her. */
 function after(st, p) {
   const oars = st.oars.copy();
   const c = Object.assign(new Course(), { x: 0, y: st.y, heading: st.heading, turned: st.turned });
@@ -70,6 +81,23 @@ function best(row, h, rnd) {
 
 const BOTS = {
   random: (row, rnd) => pick(ALL, rnd),
+  naive: (row, rnd) => {
+    let top = -Infinity, at = [];
+    for (const [r, c] of ALL) {
+      const p = row.tryMove(r, c, rnd).pull, v = p.port + p.starboard;
+      if (v > top + 1e-9) { top = v; at = [[r, c]]; } else if (Math.abs(v - top) <= 1e-9) at.push([r, c]);
+    }
+    return pick(at, rnd);
+  },
+  turner: (row, rnd) => {
+    const h = stateOf(row);
+    let top = -Infinity, at = [];
+    for (const [r, c] of ALL) {
+      const v = round(after(h, row.tryMove(r, c, rnd).pull));
+      if (v > top + 1e-9) { top = v; at = [[r, c]]; } else if (Math.abs(v - top) <= 1e-9) at.push([r, c]);
+    }
+    return pick(at, rnd);
+  },
   greedy: (row, rnd) => best(row, stateOf(row), rnd).move,
   'two-ply': (row, rnd) => {
     const h = stateOf(row);
@@ -102,11 +130,14 @@ function play(variant, bot, g) {
   const o = { clocked, kinds: KINDS, odds: ODDS };
   const row = kind === 'mirror' ? new MirrorRow({ randoms: [seeded(1000 + g), seeded(2000 + g)], ...o }) : new SplitRow({ randoms: [seeded(1000 + g)], ...o });
   const rnd = seeded(9000 + g * 7 + bot.length);
-  const s = { ahead: 0, circled: 0, fwd: 0, steps: 0, pull: 0, dBingo: 0, dVegas: 0, big: 0, vegas: 0, chain: 0 };
+  const s = { ahead: 0, circled: 0, fwd: 0, steps: 0, turns: 0, firstR: MOVES, P: 0, S: 0, pull: 0, dBingo: 0, dVegas: 0, big: 0, vegas: 0, chain: 0 };
   for (let i = 0; i < MOVES; i++) {
     const [r, c] = BOTS[bot](row, rnd);
     const res = row.swap(r, c);
     s.fwd += res.steps.filter((x) => x === 'F').length; s.steps += res.steps.length; s.pull += res.pull.port + res.pull.starboard;
+    s.turns += res.steps.filter((x) => x !== 'F').length;
+    s.P += res.pull.port; s.S += res.pull.starboard;
+    if (res.steps.includes('R') && s.firstR === MOVES) s.firstR = i + 1;
     s.big += res.combos.filter((x) => BIG.has(x)).length;
     s.chain += res.moves.reduce((t, m) => t + m.chain, 0);
     s.vegas += res.combos.filter((x) => x === 'Vegas!').length;
@@ -114,6 +145,7 @@ function play(variant, bot, g) {
     if (res.combos.length === 2 && res.combos.every((x) => x === 'Vegas!')) s.dVegas++;
   }
   s.ahead = row.course.y; s.circled = row.course.circled ? 1 : 0;
+  s.lop = s.P + s.S ? Math.abs(s.P - s.S) / (s.P + s.S) : 0;
   return s;
 }
 
@@ -121,11 +153,12 @@ const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;
 const sd = (xs) => { const m = mean(xs); return Math.sqrt(mean(xs.map((x) => (x - m) ** 2))); };
 const f1 = (x) => x.toFixed(1), f2 = (x) => x.toFixed(2);
 
-console.log(`${GAMES} games of ${MOVES} moves a bot; two-ply looks past ${WIDTH} first moves; ${KINDS} kinds of piece${ODDS ? ', with specials' : ''}.\n`);
-console.log('variant        | bot     | ahead (sd)   | circled | F steps  | pull | links | big/game | vegas/game | dbl Bingo+ | dbl Vegas | s/game');
-console.log('---------------|---------|--------------|---------|----------|------|-------|----------|------------|------------|----------|-------');
+console.log(`${GAMES} games of ${MOVES} moves a bot; two-ply looks past ${WIDTH} first moves; ${KINDS} kinds of piece${ODDS ? ', with specials' : ''}; turn at a lead of ${BALANCE.TURN}, keel ${BALANCE.KEEL}.\n`);
+console.log('variant        | bot     | ahead (sd)   | circled | turns | 1st R | lopsided | F steps  | pull | links | big/game | vegas/game | dbl Bingo+ | dbl Vegas | s/game');
+console.log('---------------|---------|--------------|---------|-------|-------|----------|----------|------|-------|----------|------------|------------|----------|-------');
 const out = {};
-for (const kind of VARIANTS) for (const bot of Object.keys(BOTS)) {
+const ONLY = process.env.BOTS?.split(',');
+for (const kind of VARIANTS) for (const bot of Object.keys(BOTS).filter((b) => !ONLY || ONLY.includes(b))) {
   const t0 = Date.now();
   const games = Array.from({ length: GAMES }, (_, g) => play(kind, bot, g));
   const secs = (Date.now() - t0) / 1000 / GAMES;
@@ -133,7 +166,7 @@ for (const kind of VARIANTS) for (const bot of Object.keys(BOTS)) {
   out[`${kind} ${bot}`] = mean(a);
   const sum = (k) => games.reduce((t, x) => t + x[k], 0);
   console.log([kind.padEnd(14), bot.padEnd(7), `${f1(mean(a))} (${f1(sd(a))})`.padEnd(12), `${Math.round(100 * sum('circled') / GAMES)}%`.padEnd(7),
-    `${Math.round(100 * sum('fwd') / Math.max(1, sum('steps')))}%`.padEnd(8), f1(sum('pull') / GAMES).padEnd(4), f1(sum('chain') / GAMES).padEnd(5),
+    f1(sum('turns') / GAMES).padEnd(5), f1(sum('firstR') / GAMES).padEnd(5), `${Math.round(100 * sum('lop') / GAMES)}%`.padEnd(8), `${Math.round(100 * sum('fwd') / Math.max(1, sum('steps')))}%`.padEnd(8), f1(sum('pull') / GAMES).padEnd(4), f1(sum('chain') / GAMES).padEnd(5),
     f2(sum('big') / GAMES).padEnd(8), f2(sum('vegas') / GAMES).padEnd(10),
     kind.startsWith('mirror') ? f2(sum('dBingo') / GAMES).padEnd(10) : '-'.padEnd(10), kind.startsWith('mirror') ? f2(sum('dVegas') / GAMES).padEnd(8) : '-'.padEnd(8), f2(secs)].join(' | '));
 }

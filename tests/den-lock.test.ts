@@ -2,12 +2,18 @@
    secret way round the imperial checkpoint (the user, 10 Nov). */
 import { describe, expect, it } from 'vitest';
 import { LOCK, Lock, ends, lockCost } from '../src/den-lock';
-import { LAY, Sea, Helm, SAIL, type Pose } from '../src/den-sail';
+import { LAY, Sea, Helm, SAIL, type Move, type Pose } from '../src/den-sail';
 import { Checkpoint, CHECK } from '../src/den-checkpoint';
+import { stilled } from './helpers';
 
 const K = LAY.CHECKPOINT;
-const sea = new Sea(9);
+// (Its winds stilled: the one at the canal's mouth keeps her out of it under sail; tests/den-wind.test.ts.)
+const sea = stilled(new Sea(9));
 const key = ([c, r]: [number, number]) => `${c},${r}`;
+/** The canal's mouth at the sea's level, facing the first lock; and up on the clifftop, between the
+    second lock and the third. */
+const MOUTH: Pose = { c: LAY.CANAL[LAY.CANAL.length - 1][0], r: LAY.CANAL[LAY.CANAL.length - 1][1], d: LAY.LOCKS[0].up };
+const TOP: [number, number] = [LAY.LOCKS[1].at[0], 16];
 /** Sail her to the pin, a frame at a time, pumping each lock she waits in to go up (by Bilge, a
     move's worth `w` every so often): where she went, and the locks she was pumped up in. */
 function voyage(h: Helm, secs = 400, w = 2) {
@@ -127,7 +133,7 @@ describe('"be more than just the one lock": a chain of them, the secret way roun
   it('it costs puzzles, not just time: a go of Bilge at each lock up, and the way down drains by itself', () => {
     // From the canal at the sea's level up onto the clifftop, then on down to the sea beyond the
     // checkpoint, at the foot of the last lock.
-    const h = new Helm(sea, { c: 7, r: 11, d: 3 }), out = ends(LAY.LOCKS[3]).low, top: [number, number] = [2, 16];
+    const h = new Helm(sea, { ...MOUTH }), out = ends(LAY.LOCKS[3]).low, top: [number, number] = TOP;
     h.drop(...top);
     const up = voyage(h);
     expect([h.pose.c, h.pose.r]).toEqual(top);
@@ -141,15 +147,15 @@ describe('"be more than just the one lock": a chain of them, the secret way roun
     // And back the same way: up the two that came down, and down the two that went up.
     h.drop(...top);
     expect([...voyage(h).pumped].sort()).toEqual([2, 3]);
-    h.drop(7, 11);
+    h.drop(MOUTH.c, MOUTH.r);
     const home = voyage(h);
-    expect([h.pose.c, h.pose.r]).toEqual([7, 11]);
+    expect([h.pose.c, h.pose.r]).toEqual([MOUTH.c, MOUTH.r]);
     expect([...home.pumped]).toEqual([]);
   });
 
   it('waiting in a lock to go up, nothing happens on its own: it\'s yours to pump', () => {
-    const h = new Helm(sea, { c: 6, r: 11, d: 3 });
-    h.put('F'); h.put('F');
+    const h = new Helm(sea, { ...MOUTH });
+    for (let i = LAY.CANAL.length + 1; i > 0; i--) h.put('F');   // (up the mouth, into the lock, and on)
     for (let t = 0; t < 30; t += 0.05) h.tick(0.05);
     expect([h.pose.c, h.pose.r]).toEqual(LAY.LOCKS[0].at);
     expect(h.held()).toBe('up');
@@ -172,7 +178,7 @@ describe('"be more than just the one lock": a chain of them, the secret way roun
 
 describe('the pilot through the locks', () => {
   it('a pin dropped up on the clifftop finds its way there through the locks', () => {
-    const h = new Helm(sea), [c, r] = [2, 16];
+    const h = new Helm(sea), [c, r] = TOP;
     expect(h.drop(c, r)).toEqual([c, r]);
     voyage(h);
     expect([h.pose.c, h.pose.r]).toEqual([c, r]);
@@ -190,8 +196,8 @@ describe('the pilot through the locks', () => {
     for (const m of p) { at = sea.sail(at, m, true).to; been.push(`${at.c},${at.r}`); }
     expect(been.some((id) => sea.pounds.has(id))).toBe(false);
     // But from up on the clifftop, on down the locks is the way.
-    const q = sea.plot({ c: 2, r: 16, d: 0 }, LAY.WRECK[0] + 1, LAY.WRECK[1], null, true)!;
-    at = { c: 2, r: 16, d: 0 };
+    const q = sea.plot({ c: TOP[0], r: TOP[1], d: 0 }, LAY.WRECK[0] + 1, LAY.WRECK[1], null, true)!;
+    at = { c: TOP[0], r: TOP[1], d: 0 };
     const went: string[] = [];
     for (const m of q) { at = sea.sail(at, m, true).to; went.push(`${at.c},${at.r}`); }
     expect(went).toContain(key(LAY.LOCKS[3].at));
@@ -222,5 +228,91 @@ describe('the hidden cove: an Easter egg off the chain, after the second lock (1
     expect(arm.length).toBeGreaterThan(0);
     for (const id of v.been) expect(sea.cove.has(id)).toBe(false);
     for (const sq of arm) expect(v.been).not.toContain(key(sq));
+  });
+});
+
+describe('"staring at a cliff once you go through", "having to bump into the walls to get around this lock system" (10 Nov)', () => {
+  /** Steer her by hand, a move at a time (as W A D do), pumping each lock she waits in: the squares
+      she went through, and whether she ever bumped. */
+  function steer(h: Helm, list: Move[], secs = 300) {
+    const been: string[] = [];
+    let bumps = 0;
+    for (const m of list) {
+      h.put(m);
+      for (let t = 0; t < secs && (h.mine.length || h.slot >= 0); t += 0.05) {
+        for (const e of h.tick(0.05)) if (e.kind === 'move') { been.push(`${e.to.c},${e.to.r}`); if (e.bump) bumps++; }
+        if (h.working()) h.pump(1);
+      }
+    }
+    return { been, bumps };
+  }
+  const n = (k: number, m: Move = 'F'): Move[] => Array.from({ length: k }, () => m);
+  const out = ends(LAY.LOCKS[3]).low;
+
+  it('out of every lock she faces on along the canal, the next lock\'s gates ahead: one straight line', () => {
+    for (const s of LAY.LOCKS) expect([s.at[0], s.up % 2]).toEqual([MOUTH.c, 0]);
+    // (out of each lock, the way on is straight ahead: water, a lock, or the sea beyond)
+    for (const s of LAY.LOCKS) for (const end of Object.values(ends(s))) expect(sea.open(...end)).toBe(true);
+  });
+
+  it('by hand, straight up the locks and down to the sea beyond, and back, never a bump', () => {
+    const h = new Helm(sea, { ...MOUTH });
+    const up = steer(h, n(out[1] - MOUTH.r));
+    expect([h.pose.c, h.pose.r]).toEqual(out);
+    expect(up.bumps).toBe(0);
+    for (const s of LAY.LOCKS) expect(up.been).toContain(key(s.at));
+    h.pose = { ...h.pose, d: 2 };
+    const back = steer(h, n(out[1] - MOUTH.r));
+    expect([h.pose.c, h.pose.r]).toEqual([MOUTH.c, MOUTH.r]);
+    expect(back.bumps).toBe(0);
+  });
+
+  it('rowed through the same way, the wind at its mouth and all: at the oars, never a bump', () => {
+    const h = new Helm(new Sea(9), { ...MOUTH });
+    h.row(true);
+    let bumps = 0;
+    for (let i = 0; i < out[1] - MOUTH.r; i++) {
+      h.stroke(['F']);
+      for (let t = 0; t < 300 && (h.strokes.length || h.slot >= 0); t += 0.05) {
+        for (const e of h.tick(0.05)) if (e.kind === 'move' && e.bump) bumps++;
+        if (h.working()) h.pump(1);
+      }
+    }
+    expect([h.pose.c, h.pose.r, bumps]).toEqual([...out, 0]);
+  });
+
+  it('the side way pushes back: the arm to the hidden cove doubles back off the clifftop, two turns tight together', () => {
+    // (STORY.md, "The way on pulls you; the side ways push back".) Off the way on, never on it.
+    const arm = LAY.POUNDS[1].at.filter(([c]) => c !== MOUTH.c);
+    expect(arm.length).toBeGreaterThanOrEqual(3);
+    for (const s of LAY.LOCKS) for (const sq of arm) expect(Math.abs(sq[0] - s.at[0]) + Math.abs(sq[1] - s.at[1])).toBeGreaterThan(1);
+    // Turned off the canal into it, and turned again straight away, down into the cove.
+    const h = new Helm(sea, { c: MOUTH.c, r: 14, d: 0 });
+    const v = steer(h, ['L', 'L', 'F']);
+    expect(v.bumps).toBe(0);
+    expect(sea.cove.has(`${h.pose.c},${h.pose.r}`)).toBe(true);
+  });
+});
+
+describe('"the way to the locks: found, not shown" (10 Nov)', () => {
+  it('the canal\'s mouth is in the cliffs\' face toward the den, well off to the side of the trade wind\'s run', () => {
+    const run = LAY.LANES[0].at[0], mouth = LAY.CANAL[0];
+    expect(run - mouth[0]).toBeGreaterThanOrEqual(5);
+    expect(LAY.LOCKS[0].up).toBe(0);   // (facing the den)
+    expect(mouth[1]).toBe(LAY.PLATEAU.r0 - 1);
+    // Nothing at the junction leads there: the water off the junction to the left is open sea.
+    const [jc, jr] = LAY.JUNCTION;
+    for (let c = jc - 3; c < jc; c++) expect(sea.level(c, jr + 1)).toBe(0);
+  });
+
+  it('from the open sea the pilot never takes her up the locks: they\'re yours to find', () => {
+    // Even for a pin she can't otherwise sail to (the old wreck, by its wind: den-wind.test.ts).
+    const [wc, wr] = LAY.WRECK, windy = new Sea(9);
+    windy.zones = windy.zones.filter((z) => z.r0 >= K.ROW);   // (only the wreck's wind)
+    expect(windy.plot(SAIL.HOME, wc - 1, wr)).toBeNull();
+    expect(windy.plot(SAIL.HOME, wc - 1, wr, null, true)).not.toBeNull();
+    // But from on the canal, or to a pin on it, the locks are the way.
+    expect(sea.plot({ ...MOUTH }, ...TOP)).not.toBeNull();
+    expect(sea.plot({ c: TOP[0], r: TOP[1], d: 0 }, wc - 1, wr)).not.toBeNull();
   });
 });

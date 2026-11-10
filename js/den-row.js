@@ -1,17 +1,20 @@
-/* Pirate Den: the rowing board at sea, her oars run out (TODO.md, "Rowing by port and starboard",
-   10 Nov). TypeScript, compiled to js/den-row.js; tested in tests/den-row.test.ts. The puzzle is
-   src/rowing.ts (Bilge's board split down the middle, port on the left, starboard on the right);
-   src/den-sail.ts rows her by the squares it hands out (Helm.stroke), the more of them waiting the
-   quicker (rowTime, src/den-wind.ts); js/den/rowing.js draws it on her deck.
+/* Pirate Den: the rowing board at sea, her oars run out (RULES.md, "Rowing by mirror strokes", 10
+   Nov). TypeScript, compiled to js/den-row.js; tested in tests/den-row.test.ts. The puzzle is
+   src/mirror-row.ts (two Bilge boards, port and starboard, every swap made on one made in mirror on
+   the other), played as it is: this only keeps the clock and the crew round it. src/den-sail.ts
+   rows her by the squares it hands out (Helm.stroke), the more of them waiting the quicker (rowTime,
+   src/den-wind.ts); js/den/rowing.js draws it.
 
-   While her oars are out the board is the steering: the pin stays where you dropped it, a buoy to
+   While her oars are out the boards are the steering: the pin stays where you dropped it, a buoy to
    row for, but the pilot doesn't row for her. So she's told which way the pin lies (bearing), and
-   which side to pull harder to bring her round to it (pullFor).
+   which side to pull harder to bring her round to it (pullFor): the side it's on, since more pull
+   on the right-hand board turns her right (the user, 10 Nov: "if you pull on the right-hand side,
+   it should definitely go right").
 
    The rowers, one each side, stroke as hard as their side's been pulling lately (the user, 10 Nov:
    a big clear makes that side's pirate go "like crazy"; "I want the funny animation"): `lately` is
    each side's pull, fading over a couple of seconds, and a rower's strokes a second follow it. */
-import { Oars, ROW, Rowing } from './rowing.js';
+import { KINDS_DEFAULT, MirrorRow } from './mirror-row.js';
 import { poseAt } from './den-sail.js';
 export const CREW = {
     /** A rower's strokes a second, rowing steady: while she's under way at the oars, or that side's
@@ -28,38 +31,36 @@ export const CREW = {
     /** Squares handed out at once that send her flying: a Vegas shared across both sides is five. */
     FLYING: 4,
 };
-/** A rowing board at sea and its clock: what each move pulls and hands out, the pull each side's
-    had lately, and the time going by (pull on one side waits for the other, src/rowing.ts). */
+/** The rowing boards at sea: mirror strokes, and the pull each side's had lately. */
 export class RowBoard {
-    rowing;
-    /** Seconds since the board was set out (the oars' clock). */
-    t = 0;
+    row;
     lately = { port: 0, starboard: 0 };
-    /** Rowed alone, a one-sided move waits ROW.SOLO for the next to even it up, not ROW.WINDOW. */
-    constructor(o = {}) { this.rowing = new Rowing({ ...o, oars: o.oars ?? new Oars(ROW.SOLO) }); }
-    /** The next square building up, as fractions of a square's pull (ROW.STEP): `ahead` toward a
-        forward (0 to 1), and `turn` toward a turn, more than nothing to starboard (right), less to
-        port (left), counting pull still waiting for the other side as the turn it'll be if nothing
-        evens it up. A whole one (or more) either way and she's about to turn. The compass shows it,
-        and she leans into it (lead). */
-    building() {
-        const o = this.rowing.oars;
-        return { ahead: o.ahead / ROW.STEP, turn: (o.swing + this.waiting('port') - this.waiting('starboard')) / ROW.STEP };
-    }
-    /** A swap on the board (as in Bilge), rowed now. */
+    constructor(o = {}) { this.row = new MirrorRow({ kinds: KINDS_DEFAULT, ...o }); }
+    /** The next square building up, as fractions (Stroke.building): `ahead` toward a forward (0 to
+        1), and `turn` toward a quarter turn, more than nothing to starboard (right), less to port
+        (left). A whole one either way and she turns. The compass shows it, and she leans into it
+        (leadFor). */
+    building() { return this.row.stroke.building(); }
+    /** A swap at (r, c) on the port board, made in mirror on the starboard board, rowed now. */
     swap(r, c) {
-        const m = this.rowing.swap(r, c, this.t);
-        this.lately.port += m.pull.port;
-        this.lately.starboard += m.pull.starboard;
+        const m = this.row.swap(r, c);
+        this.felt(m.pull);
         return m;
     }
-    /** Time going by: the pull lately fades, and pull left waiting too long turns her. */
+    /** Pull as a move on the boards would, without the boards (a debug hook). */
+    pull(p) {
+        const steps = this.row.stroke.row(p);
+        for (const s of steps)
+            this.row.course.go(s);
+        this.felt(p);
+        return steps;
+    }
+    felt(p) { this.lately.port += p.port; this.lately.starboard += p.starboard; }
+    /** Time going by: the pull lately fades. */
     tick(dt) {
-        this.t += dt;
         const k = Math.exp(-dt / CREW.FADE);
         this.lately.port *= k;
         this.lately.starboard *= k;
-        return this.rowing.oars.tick(this.t);
     }
     /** A side's rower's strokes a second (`under`: she's being rowed along just now). */
     rate(side, under) {
@@ -68,8 +69,11 @@ export class RowBoard {
     }
     /** That side's rower is going like crazy. */
     crazy(side) { return this.lately[side] >= CREW.CRAZY; }
-    /** Pull on a side still waiting for the other side to match it. */
-    waiting(side) { return this.rowing.oars.waiting[side].reduce((t, l) => t + l.n, 0); }
+    /** A side's lead: pull it's made that the other side hasn't matched yet. */
+    waiting(side) {
+        const s = this.row.stroke.swing;
+        return Math.max(0, side === 'starboard' ? s : -s);
+    }
 }
 const DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
 /** Which way a square lies from her, as she's heading: there already, ahead (within about a
@@ -85,14 +89,12 @@ export function bearing(p, to) {
         return 'astern';
     return right > 0 ? 'starboard' : 'port';
 }
-/** The side to pull harder to bring her round toward a square: the side away from it, as at the
-    oars (harder on port swings her bows to starboard). Null when it's ahead (pull evenly) or she's
-    there; astern, either side turns her. */
+/** The side to pull harder to bring her round toward a square: the side it's on (harder on
+    starboard turns her to starboard). Null when it's ahead (pull evenly) or she's there; astern,
+    either side turns her. */
 export function pullFor(b) {
-    if (b === 'port')
-        return 'starboard';
-    if (b === 'starboard')
-        return 'port';
+    if (b === 'port' || b === 'starboard')
+        return b;
     return b === 'astern' ? 'either' : null;
 }
 /* Seeing her answer the oars as the pull builds (TODO.md, 10 Nov: "I'm not seeing any physical

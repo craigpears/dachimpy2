@@ -19,7 +19,7 @@
 
 import { DeckHole } from './den-patch.js';
 import { Lock, lockCost, type LockNeed, type LockSpot } from './den-lock.js';
-import { Wind, WIND, moveTime, pointOf, rowTime, upwind, type WindEvent } from './den-wind.js';
+import { Wind, WIND, against, inZone, lie, rowTime, sailTime, weather, zoneAir, type Air, type WindEvent, type WindZone } from './den-wind.js';
 import type { Cell } from './engine';
 
 /** A move, as on Battle Navigation's tokens: forward, left, right. */
@@ -97,7 +97,17 @@ export const SAIL = {
    onto the open sea beyond it. The hidden cove is off it, up at the top, down an arm the locks
    don't lead you along, "almost more like an Easter egg" you find by wandering off. With the
    locks the way round, the reef's far end was closed: the ways past are to run it, row it, fight
-   its guns, or the locks. */
+   its guns, or the locks.
+
+   Then (the user, 10 Nov) the way to the locks is "supposed to be more of an Easter egg. It
+   shouldn't be like right there for you to see. You should have to sail around to find it a bit":
+   the canal's mouth is in the high ground's face toward the den, off to the left, out of view from
+   the trade wind's run, and nothing at the junction points it out. And the locks were "very
+   confusing ... staring at a cliff once you go through", "having to bump into the walls to get
+   around this lock system": so the chain runs straight, up one channel cut through the cliffs and
+   down through the headland, and out of every lock she faces on along the canal, its next lock's
+   gates ahead. The way on pulls you; the side way pushes back (STORY.md): the arm to the hidden
+   cove doubles back off it, narrow, two turns tight together. */
 export const LAY = {
   /** The trade winds: where each starts, the way it blows, and how many squares long. Out from off
       the beach to the junction; on from the junction, the main shipping lane, out to the imperial
@@ -109,29 +119,32 @@ export const LAY = {
     { at: [11, 15], d: 2, n: 13 },
   ] as { at: [number, number]; d: number; n: number }[],
   JUNCTION: [9, 10] as [number, number],
-  /** The canal at the sea's level, left from the junction to the first lock. */
-  CANAL: [[8, 11], [7, 11], [6, 11]] as [number, number][],
-  /** The locks (src/den-lock.ts), in the order she meets them going out: up the cliff from the
-      canal (left), up again to the clifftop (out to sea), then down through the headland beside the
-      checkpoint (each with its high side back toward the den), out onto the sea beyond it. Each
-      lock's banks are rock, so she can only go through it straight. */
+  /** The canal's mouth, at the sea's level: the water up to the first lock, in the high ground's face
+      toward the den, out of view from the trade wind's run (kept clear of scattered rocks). */
+  CANAL: [[3, 7], [3, 6], [3, 5]] as [number, number][],
+  /** The locks (src/den-lock.ts), in the order she meets them going out, all in one straight line
+      out to sea: up the cliff from the canal's mouth, up again to the clifftop, then down through
+      the headland beside the checkpoint (each with its high side back toward the den), out onto
+      the sea beyond it. Each lock's banks are rock, so she can only go through it straight; and out
+      of each she's facing on along the canal. */
   LOCKS: [
-    { at: [5, 11], up: 3, low: 0 },
-    { at: [4, 14], up: 0, low: 1 },
-    { at: [2, 18], up: 2, low: 1 },
-    { at: [2, 20], up: 2, low: 0 },
+    { at: [3, 8], up: 0, low: 0 },
+    { at: [3, 12], up: 0, low: 1 },
+    { at: [3, 18], up: 2, low: 1 },
+    { at: [3, 20], up: 2, low: 0 },
   ] as LockSpot[],
   /** The stretches of canal between the locks (pounds), and their water's level: a lock's lift
-      above the sea; the clifftop's, two (with the arm off it down to the hidden cove, which the
-      locks don't lead you along); and the one between the two locks down through the headland. */
+      above the sea; the clifftop's, two (with the arm off it, doubling back down to the hidden cove,
+      which the locks don't lead you along); and the one between the two locks down through the
+      headland. */
   POUNDS: [
-    { level: 1, at: [[4, 11], [4, 12], [4, 13]] },
-    { level: 2, at: [[4, 15], [3, 15], [2, 15], [2, 16], [2, 17], [1, 15], [1, 14]] },
-    { level: 1, at: [[2, 19]] },
+    { level: 1, at: [[3, 9], [3, 10], [3, 11]] },
+    { level: 2, at: [[3, 13], [3, 14], [3, 15], [3, 16], [3, 17], [2, 15], [1, 15], [1, 14]] },
+    { level: 1, at: [[3, 19]] },
   ] as { level: number; at: [number, number][] }[],
   /** The hidden cove: up on the clifftop, its water at the top of the locks, off the end of the
-      clifftop canal's arm. */
-  COVE: { c0: 0, c1: 2, r0: 9, r1: 13, level: 2 },
+      clifftop canal's arm, beside the canal's first stretches (a wall of cliff between). */
+  COVE: { c0: 0, c1: 1, r0: 9, r1: 13, level: 2 },
   /** The high ground the canal's cut through, the cove's cliffs with it: every square of it that
       isn't the canal's water (or a lock) is cliff. (The checkpoint's headland, beyond it, is its
       own: CHECKPOINT.HEADLAND.) */
@@ -155,6 +168,26 @@ export const LAY = {
   /** An old wreck on the open sea beyond the checkpoint, its treasure hauled up by Treasure Haul:
       the reason to get past. Out of reach of the checkpoint's guns, so she can haul in peace. */
   WRECK: [5, 24] as [number, number],
+  /** Wind zones (src/den-wind.ts): patches of sea with a wind of their own, whatever the weather.
+      The old wreck's (10 Nov): it blows from the left, so from the checkpoint's side, heading for the
+      wreck, she's dead into it ("tempting, but you can't get to it unless you go around the back
+      way"), and down the locks she comes out beside it with it across her or behind her. It starts
+      a column short of the last lock's foot, so from beside the wreck she can slip out of it
+      westward and back up the locks, as well as downwind.
+      And the canal's mouth (10 Nov: "there should be some wind stopping you from getting to the
+      locks on the left as well ... People have got to figure out that they can use the oars to go
+      past the wind"): it blows down out of the cut toward the den, so under sail she can't get into
+      the first lock, and coming back down she runs out before it; the oars take her in.
+      And under the checkpoint's gatehouse (10 Nov: "these checkpoints are supposed to be strong
+      things, not things you just casually get through on the first try ... it should be work"):
+      its walls take the wind out of her sails, light airs across her, so under sail she ghosts
+      through the gate slowly, on its gun's mark, and that gun has her (once a gun:
+      src/den-checkpoint.ts); a combo rowed as one still rushes her through. */
+  ZONES: [
+    { c0: 4, c1: 7, r0: 20, r1: 25, d: 1, s: 2 },
+    { c0: 2, c1: 4, r0: 4, r1: 8, d: 2, s: 2 },
+    { c0: 9, c1: 9, r0: 19, r1: 19, d: 1, s: 1 },
+  ] as WindZone[],
   /** Rocks out on the water the board grew into. */
   FAR: [[17, 4], [19, 8], [16, 13], [20, 15], [15, 17], [17, 22], [13, 24], [19, 24], [1, 23]] as [number, number][],
 };
@@ -230,6 +263,8 @@ export class Sea {
   works = new Set<string>();
   /** The old wreck beyond the checkpoint, if laid. */
   wreck: [number, number] | null = null;
+  /** Patches of sea with a wind of their own (src/den-wind.ts), if laid. */
+  zones: WindZone[] = [];
   /** The wind she sails by (src/den-wind.ts), if there's one. With none, every move takes
       SAIL.MOVE and goes any way. */
   breeze: Wind | null = null;
@@ -266,6 +301,7 @@ export class Sea {
     // The checkpoint, its headland and the wreck beyond it (all outside where the rocks scatter).
     for (const [c, r] of [...checkpointWorks(), LAY.WRECK]) this.works.add(key(c, r));
     this.wreck = [...LAY.WRECK];
+    this.zones = LAY.ZONES.map((z) => ({ ...z }));
   }
 
   private scatter(roll: () => number) {
@@ -312,12 +348,27 @@ export class Sea {
     return out;
   }
 
-  /** Under sail (not at the oars), whether this move would take her a square against the wind:
-      then she's in irons, and makes no way (src/den-wind.ts). */
+  /** The wind zone this square's in, if any. */
+  zoneAt(c: number, r: number): WindZone | null { return this.zones.find((z) => inZone(z, c, r)) ?? null; }
+
+  /** The wind she feels sailing into this square: a zone's, if it's in one, else the weather's
+      (none with neither). */
+  airAt(c: number, r: number): Air | null {
+    const z = this.zoneAt(c, r);
+    return z ? zoneAir(z) : this.breeze ? weather(this.breeze.d, this.breeze.s) : null;
+  }
+
+  /** A move's legs: each square she sails into, the way she's heading as she does, and the wind she
+      feels on it, the wind where she's going (one leg for forward, two for a turn). */
+  private legs(p: Pose, m: Move): { d: number; air: Air | null }[] {
+    const { cells, to } = path(p, m), heads = m === 'F' ? [p.d] : [p.d, to.d];
+    return cells.map(([c, r], i) => ({ d: heads[i], air: this.airAt(c, r) }));
+  }
+
+  /** Under sail (not at the oars), whether this move would take her a square against the wind
+      where she's going: then she's in irons, and makes no way (src/den-wind.ts). */
   irons(p: Pose, m: Move, oars = false): boolean {
-    const w = this.breeze;
-    if (!w || oars) return false;
-    return (m === 'F' ? [p.d] : [p.d, path(p, m).to.d]).some((d) => upwind(d, w.d));
+    return !oars && this.legs(p, m).some(({ d, air }) => !!air && against(d, air));
   }
 
   /** A move and what the trade wind does after it. In irons, or blocked, she stays where she is (a
@@ -334,11 +385,16 @@ export class Sea {
       shared; in a calm, as in light airs, which is what she'll have when it picks up). Without a
       move, a reach's. A move in irons swings her head round in a reach's time. */
   moveSecs(oars = false, p?: Pose, m?: Move): number {
-    if (!this.breeze) return SAIL.MOVE;
-    const s = this.breeze.s === 0 ? 1 : this.breeze.s;
-    if (oars || !p || !m || this.irons(p, m)) return moveTime(s, oars);
-    const legs = m === 'F' ? [p.d] : [p.d, path(p, m).to.d];
-    return legs.reduce((t, d) => t + moveTime(s, false, pointOf(d, this.breeze!.d)), 0) / legs.length;
+    const legs = p && m ? this.legs(p, m) : [], still = this.breeze ? weather(this.breeze.d, this.breeze.s) : null;
+    if (!still && !legs.some((l) => l.air)) return SAIL.MOVE;
+    if (oars) return WIND.OARS;
+    // (in a calm, as in light airs: what she'll have when it picks up)
+    const secs = (a: Air | null, point: 'run' | 'reach' | 'into' = 'reach') => (a ? sailTime(a.s === 0 ? { ...a, s: 1 } : a, point) : SAIL.MOVE);
+    if (!legs.length) return secs(still);
+    // In irons: a reach's time in the wind that heads her off.
+    const head = legs.find(({ d, air }) => !!air && against(d, air));
+    if (head) return secs(head.air);
+    return legs.reduce((t, { d, air }) => t + secs(air, air ? lie(d, air) : 'reach'), 0) / legs.length;
   }
 
   /** On the board and not a rock. */
@@ -383,7 +439,9 @@ export class Sea {
       edge, that's the only way round). Quickest by the clock, not the fewest moves: a ride on the
       trade wind is quick but not free, so she takes a lane when it saves time and never rides the
       loop round just to save a move; and going up a lock costs her a go of Bilge, so she goes
-      through the locks only where they're the way. With `via` (a lane square), she gets there by riding that
+      through the locks only where they're the way. And the locks are yours to find: from the open
+      sea to a pin on the open sea she's never taken up one (going down's fine), only when she's on
+      the canal already or the pin is. With `via` (a lane square), she gets there by riding that
       lane: onto it at that square or upwind of it, and the wind carries her to the pin. Under sail
       (`oars` false), by the wind there is: never a square against it, each move the seconds it
       takes in that wind; at the oars, any way, at the oars' steady pace. Null if there's no way
@@ -394,33 +452,40 @@ export class Sea {
     const memo = `${from.c},${from.r},${from.d}|${c},${r}|${via ?? ''}|${this.rocks.size},${this.wind.size}|${this.rig(oars)}`;
     if (!this.plots.has(memo)) {
       if (this.plots.size > 256) this.plots.clear();
-      this.plots.set(memo, this.quickest(from, c, r, via ? this.boarding(via) : null, oars));
+      const up = this.canal(from.c, from.r) || this.canal(c, r);
+      this.plots.set(memo, this.quickest(from, c, r, via ? this.boarding(via) : null, oars, up));
     }
     const got = this.plots.get(memo);
     return got ? [...got] : null;
   }
 
+  /** Up off the sea: on the canal's water above it, or in a lock. */
+  private canal(c: number, r: number): boolean { return this.level(c, r) > 0 || this.isLock(c, r); }
+
   /** What the moves hang on besides the rocks: under sail, the way the wind blows and how hard; at
       the oars (or with no wind), nothing. */
-  private rig(oars: boolean): string { return !this.breeze ? 'still' : oars ? 'oars' : `sail${this.breeze.d}${this.breeze.s}`; }
+  private rig(oars: boolean): string { return oars ? 'oars' : !this.breeze ? 'still' : `sail${this.breeze.d}${this.breeze.s}`; }
 
   /** Where each move takes her from each pose (worked out as needed, and again if the rocks or
       the winds change; a set for each rig): the pose she ends up in, her squares of trade wind,
       whether she bumped, and the square the move itself ended on (before the trade wind). Poses
       are numbered ((c * rows + r) * 4 + d). */
-  private edges = new Map<string, Map<number, { end: number; ride: number; bump: boolean; on: number; secs: number }[]>>();
+  private edges = new Map<string, Map<number, { end: number; ride: number; bump: boolean; on: number; secs: number; up: boolean }[]>>();
   /** What going into a lock costs her by this move, if it does (src/den-lock.ts, lockCost: Bilge to
-      raise her; down's quick). Into it from the square before it on the move. */
-  private lockToll(p: Pose, m: Move, bump: boolean): number {
-    if (bump || !this.locks.length) return 0;
+      raise her; down's quick), and whether it's up. Into it from the square before it on the move. */
+  private lockToll(p: Pose, m: Move, bump: boolean): { secs: number; up: boolean } {
+    const none = { secs: 0, up: false };
+    if (bump || !this.locks.length) return none;
     const { cells } = path(p, m), [c, r] = cells[cells.length - 1], i = this.lockAt(c, r);
-    if (i < 0) return 0;
+    if (i < 0) return none;
     const [pc, pr] = cells.length > 1 ? cells[0] : [p.c, p.r];
-    return this.isLock(pc, pr) ? 0 : lockCost(this.locks[i], this.level(pc, pr));
+    if (this.isLock(pc, pr)) return none;
+    const lv = this.level(pc, pr);
+    return { secs: lockCost(this.locks[i], lv), up: lv <= this.locks[i].low };
   }
   private edgesFor = '';
   private from(id: number, oars: boolean) {
-    const sig = `${this.rocks.size},${this.wind.size}`;
+    const sig = `${this.rocks.size},${this.wind.size},${this.zones.length}`;
     if (sig !== this.edgesFor) { this.edges.clear(); this.edgesFor = sig; }
     const rig = this.rig(oars);
     let set = this.edges.get(rig);
@@ -430,8 +495,8 @@ export class Sea {
       const p: Pose = { c: Math.floor(id / 4 / this.rows), r: Math.floor(id / 4) % this.rows, d: id % 4 };
       got = (['F', 'L', 'R'] as Move[]).map((m) => {
         const { to, bump, ride } = this.move(p, m, oars), end = ride.length ? ride[ride.length - 1] : to;
-        const secs = this.moveSecs(oars, p, m);
-        return { end: (end.c * this.rows + end.r) * 4 + end.d, ride: ride.length, bump, on: to.c * this.rows + to.r, secs: secs + pauseFor(secs) + this.lockToll(p, m, bump) };
+        const secs = this.moveSecs(oars, p, m), toll = this.lockToll(p, m, bump);
+        return { end: (end.c * this.rows + end.r) * 4 + end.d, ride: ride.length, bump, on: to.c * this.rows + to.r, secs: secs + pauseFor(secs) + toll.secs, up: toll.up };
       });
       set.set(id, got);
     }
@@ -439,8 +504,9 @@ export class Sea {
   }
 
   /** Dijkstra over where she can be and the way she faces, by the seconds it takes (at the oars,
-      or under sail in the wind there is, by how she lies to it on each move). */
-  private quickest(from: Pose, c: number, r: number, boards: Set<string> | null, oars: boolean): Move[] | null {
+      or under sail in the wind there is, by how she lies to it on each move); up a lock only with
+      `up`. */
+  private quickest(from: Pose, c: number, r: number, boards: Set<string> | null, oars: boolean, up: boolean): Move[] | null {
     const N = this.cols * this.rows * 4, MOVES: Move[] = ['F', 'L', 'R'];
     const best = new Float64Array(N).fill(Infinity), prev = new Int32Array(N).fill(-1), how = new Int8Array(N), done = new Uint8Array(N);
     const board = new Uint8Array(this.cols * this.rows);
@@ -483,6 +549,7 @@ export class Sea {
       const out = this.from(at, oars);
       for (let m = 0; m < out.length; m++) {
         const e = out[m], cost = t + e.secs + COST_TURN + e.ride * COST_PUSH;
+        if (e.up && !up) continue;
         if (e.end >> 2 === goalSq && (!boards || (!e.bump && board[e.on]))) {
           if (!goal || cost < goal.cost - 1e-9) goal = { cost, at, m };
           continue;
@@ -677,7 +744,7 @@ export class Helm {
 
   /** A pin she can't sail to in this wind, and the pilot won't row for (you shipped the oars). */
   headwind(): boolean {
-    return !!this.pin && !this.oars && !!this.sea.breeze && !this.mine.length && !this.sea.plot(this.after(), ...this.pin, this.via) && !!this.sea.plot(this.after(), ...this.pin, this.via, true);
+    return !!this.pin && !this.oars && !this.mine.length && !this.sea.plot(this.after(), ...this.pin, this.via) && !!this.sea.plot(this.after(), ...this.pin, this.via, true);
   }
 
   /** What the next turn will play. */

@@ -18,8 +18,10 @@
 
 export const LOCK = {
   /** Moves' worth of Bilge to raise her (see Lock.pump). At four it "filled way too quickly" (the
-      user, 9 Nov). */
-  WORK: 16,
+      user, 9 Nov); at sixteen, a third too long for now (10 Nov: "tone down how many times you need
+      to get through the locks, just so I can get in there a bit quicker. For now ... Maybe take a
+      third off"), to look at again once the lagoon's been tried. */
+  WORK: 11,
   /** Seconds it takes to drain down, or to fill from above, by itself. */
   DRAIN: 2,
   /** Its water rising to what's been pumped (see lockRise): at least this much of the lift a
@@ -30,7 +32,7 @@ export const LOCK = {
   /** What the pilot reckons a lock costs her, in seconds (src/den-sail.ts weighs a course by the
       clock): going up, a go of Bilge; going down, the water running out and the gates. So she never
       goes through locks she has no need to, and the secret way round is yours to find. */
-  COST_UP: 40,
+  COST_UP: 28,
   COST_DOWN: 4,
 } as const;
 

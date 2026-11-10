@@ -115,21 +115,25 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    over there's an old sloop at anchor in the cove; board her, drop a pin and she sails there on
    Battle Navigation's moves, or steer her yourself; she has a gun each side to fire at the rocks
    as you go, loaded by Gunnery played on her deck, the den's own puzzle; trade winds sweep her
-   out from off the beach to a junction, where a canal runs off into the cliffs, and on, the main
-   shipping lane, to an imperial checkpoint, another wind bringing her home; its guns are trained
-   on marks along the way through, a hit holes her till you patch her by Carpentry: run it under
-   sail, row it (small clears walk her into the guns, a Vegas on each side rushes her past), knock
-   its guns out with her own, three hits apiece, a fight once you start it, or find the secret way
-   round: the canal climbs two locks up the cliff, each pumped up by Bilge, runs along the
-   clifftop and comes down two more through the checkpoint's headland, out onto the sea beyond it,
-   never seen (nothing signposts it; stopped short of the checkpoint, "I wonder if there's a secret
-   way round"); beyond it an old wreck whose treasure is hauled up by Treasure Haul; a bribe comes
-   later. The turret near the den that came first is gone: the checkpoint is "the evolution of
+   out from off the beach to a junction, and on, the main shipping lane, to an imperial
+   checkpoint, another wind bringing her home; its guns are trained on marks along the way
+   through, a hit holes her till you patch her by Carpentry, a strong thing that's work to get
+   past but can be done: run it under sail (a hit or two), row it (small clears walk her into the
+   guns, a Vegas on each side rushes her past), knock its guns out with her own, three hits
+   apiece, a fight once you start it, or find the secret way round: tucked away off to the left of
+   the trade wind's run, out of view, a wind blowing down out of its mouth that only the oars beat
+   (nothing ever says so), the canal climbs two locks straight up the cliff, each pumped up by
+   Bilge, runs along the clifftop and comes down two more through the checkpoint's headland, out
+   onto the sea beyond it, never seen (nothing signposts it; only, sighting the checkpoint, "An
+   imperial checkpoint... I wonder if there's another way round"); beyond it an old wreck whose
+   treasure is hauled up by Treasure Haul, in sight from the checkpoint's side but a wind dead
+   against her there, so the locks are the way in to it; a bribe comes later. The turret near the den that came first is gone: the checkpoint is "the evolution of
    it"). Up at the top of the locks, down an arm off the clifftop canal the locks don't lead you
    along, is a hidden cove, an Easter egg you find by wandering off, an old bilge pump on its
-   sand. The cove is the first step of a journey that grows (▶ its next step is built): at the
-   foot of its left-hand cliff there's an old smugglers' ledge, and a crane you build there by Carpentry,
-   foot, post and jib, hauls her up the cliff and swings her down into a clifftop lagoon, a
+   sand (for later: flooding Dalnoth out). The cove is the first step of a journey that grows (▶
+   its next step is built): at the foot of its left-hand cliff there's an old smugglers' ledge to
+   moor at, and a crane you build there by Carpentry, foot, post and jib, each hauled up the cliff
+   by hand, hauls her up the cliff and swings her down into a clifftop lagoon, a
    discovery, still and reedy, an old wreck sunk in it whose treasure is hauled up by Treasure
    Haul; and lowers her back down whenever you like ("more of an adventure ... we can have a
    multi-step thing and gradually build up on it"; more steps to come along the way).
