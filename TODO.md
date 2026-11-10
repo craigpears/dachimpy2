@@ -120,7 +120,9 @@ the site (`.assetsignore` skips `*.md`).
   Sunk only by a real hit (10 Nov): Bella's first shot is the warning (her giggle stays); a gun
   that actually hits you sinks her, and you row home. No more patching a bit of damage with
   Carpentry at the checkpoint: "it probably adds a bit more stakes ... you are in a tiny sloop at
-  this point, after all."
+  this point, after all." Then, unsure (10 Nov): "Part of me likes just being able to get through.
+  Part of me wants her to actually sink you if you get enough damage. I'm really not sure on it."
+  (To pin down: one hit, or enough damage over a run.)
 
 
 - **The Sailing puzzle, for Kikkit's quest (10 Nov):** Kikkit's penguin quest is next up once the
@@ -154,6 +156,10 @@ the site (`.assetsignore` skips `*.md`).
     thin ledge under them: filled, the piece shows inside; empty, coloured corner brackets for the
     colour it wants. A wave and a ship's sails behind the board. A whole board of interlocked
     staircases, pairs straddling columns everywhere, is what a run of Vegases looks like.
+
+- **Laggy running the checkpoint's gauntlet (10 Nov):** "It goes a bit laggy. If you just try
+  running the gauntlet and getting through the gate at the moment." Find what's slow there (its
+  guns' shots, splashes, Dignity's lines, the wind) and make it smooth.
 
 ## Needs a playtest to pin down
 
