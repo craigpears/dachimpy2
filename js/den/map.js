@@ -1,6 +1,7 @@
 // The captain's map, and the cutscene of their captain's parting shot. (Split out of den.js.)
 import * as THREE from 'three';
-import { MAP, mapAfter, canPickUp, canRead, RUMOUR, WAYS, X_AT } from '../den-map.js';
+import { MAP, mapAfter, canPickUp, canRead, RUMOUR, NOTES, X_AT, CHART, ROUTE, SHEET, onMap } from '../den-map.js';
+import { SAIL } from '../den-sail.js';
 import { PIRATES } from '../den-look.js';
 import { $, scene, camera, mat, mesh, makePirate, animateWalk, faceTo, V3, pirate, carry, G, keys, wm, burst, v3, worldLets } from './world.js';
 import { cine, cinePlay, cineEnd, bubble, bubbleAt, stepTo } from './cine.js';
@@ -47,8 +48,11 @@ function scrollMesh() {
   return g;
 }
 
-/* The map itself, drawn in ink on old parchment: your cove at the bottom, the sea, his island at the
-   top with the X, and the three ways in. Drawn the first time it's opened (the fonts are in by then). */
+/* The map itself, drawn in ink on old parchment, from her sea as it is (CHART, from the sea's lay:
+   src/den-map.ts): your cove at the bottom, the trade winds out of it and the shipping lane on to
+   the imperial checkpoint's line, the headland and its cliffs on the left, the reef on the right,
+   and the open sea beyond with the old wreck and the X. Nothing secret: the cliffs are drawn whole.
+   Drawn the first time it's opened (the fonts are in by then). */
 function mapTexture() {
   const w = 1024, h = Math.round(w * MAP_D / MAP_W), cv = document.createElement('canvas');
   cv.width = w; cv.height = h;
@@ -56,7 +60,9 @@ function mapTexture() {
   let seed = 11;
   const rnd = () => (seed = seed * 16807 % 2147483647) / 2147483647;
   const P = (u, v) => [u * w, v * h];
-  const INK = '#4a2c14', PAPER = '#e9d4a2';
+  const Q = (sq) => P(...onMap(sq));   // a square of her sea
+  const cw = (SHEET.U1 - SHEET.U0) / SAIL.COLS * w, ch = (SHEET.V1 - SHEET.V0) / SAIL.ROWS * h;   // (a square, in pixels)
+  const INK = '#4a2c14', LAND = '#d6b778', SAND = '#e2c88e';
   // A ragged, burnt edge.
   const edge = [], side = (x0, y0, x1, y1, n) => { for (let i = 0; i < n; i++) { const t = i / n; edge.push([x0 + (x1 - x0) * t + (rnd() - 0.5) * 12, y0 + (y1 - y0) * t + (rnd() - 0.5) * 12]); } };
   const m = 16;
@@ -68,110 +74,167 @@ function mapTexture() {
   g.save(); g.clip();
   g.lineWidth = 14; g.strokeStyle = 'rgba(80,42,14,.5)'; g.stroke();
   for (let i = 0; i < 8; i++) { g.fillStyle = `rgba(140,95,45,${0.04 + rnd() * 0.06})`; g.beginPath(); g.arc(rnd() * w, rnd() * h, 20 + rnd() * 60, 0, 7); g.fill(); }
-  // The sea: little waves all over the middle.
-  g.strokeStyle = 'rgba(52,72,84,.5)'; g.lineWidth = 2;
-  const wave = (x, y) => { g.beginPath(); g.moveTo(x - 13, y); g.quadraticCurveTo(x - 6.5, y - 6, x, y); g.quadraticCurveTo(x + 6.5, y + 6, x + 13, y); g.stroke(); };
-  for (let i = 0; i < 40; i++) wave(40 + rnd() * (w - 80), h * (0.31 + rnd() * 0.46));
-  const blob = (cu, cv2, ru, rv, n, jag, fill) => {
+  const onLand = (c, r) => CHART.land.some((L) => c >= L.c0 - 0.5 && c <= L.c1 + 0.5 && r >= L.r0 - 0.5 && r <= L.r1 + 0.5) || r < -0.5;
+  // A hand-drawn line through points (pixels), wobbling a little between them.
+  const wobbly = (pts, close, jag = 3) => {
     g.beginPath();
-    for (let i = 0; i <= n; i++) {
-      const a = i / n * Math.PI * 2, r = i === n ? 1 : 1 + (rnd() - 0.5) * jag;
-      const [x, y] = P(cu + Math.cos(a) * ru * r, cv2 + Math.sin(a) * rv * r);
-      if (i) g.lineTo(x, y); else g.moveTo(x, y);
-    }
-    g.closePath(); g.fillStyle = fill; g.fill(); g.strokeStyle = INK; g.lineWidth = 3; g.stroke();
+    pts.forEach(([x, y], i) => {
+      if (!i) { g.moveTo(x, y); return; }
+      const [px, py] = pts[i - 1], n = Math.max(1, Math.round(Math.hypot(x - px, y - py) / 14));
+      for (let k = 1; k <= n; k++) { const t = k / n; g.lineTo(px + (x - px) * t + (k < n ? (rnd() - 0.5) * jag : 0), py + (y - py) * t + (k < n ? (rnd() - 0.5) * jag : 0)); }
+    });
+    if (close) g.closePath();
   };
-  // His island, with the hidden cove bitten out of its east end.
-  blob(0.5, 0.16, 0.31, 0.12, 40, 0.18, '#d6b778');
-  blob(0.79, 0.19, 0.045, 0.045, 14, 0.2, PAPER);
-  g.strokeStyle = 'rgba(74,44,20,.45)'; g.lineWidth = 2;
-  for (let i = 0; i < 34; i++) {
-    const a = rnd() * Math.PI * 2, [x, y] = P(0.5 + Math.cos(a) * 0.25, 0.16 + Math.sin(a) * 0.085);
-    g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * 12, y + Math.sin(a) * 8); g.stroke();
+
+  // The sea: little waves all over it.
+  g.strokeStyle = 'rgba(52,72,84,.45)'; g.lineWidth = 2;
+  const wave = (x, y) => { g.beginPath(); g.moveTo(x - 11, y); g.quadraticCurveTo(x - 5.5, y - 5, x, y); g.quadraticCurveTo(x + 5.5, y + 5, x + 11, y); g.stroke(); };
+  for (let i = 0; i < 70; i++) {
+    const c = -0.5 + rnd() * SAIL.COLS, r = -0.3 + rnd() * SAIL.ROWS;
+    if (!onLand(c, r) && Math.abs(r - CHART.checkpoint.row) > 0.8) wave(...Q([c, r]));
   }
-  // Palms.
-  const palmAt = (u, v) => {
-    const [x, y] = P(u, v);
+
+  // The cliffs on the left, drawn whole as they look from the sea, and the checkpoint's headland on
+  // from them (off the left edge of the sheet, the high ground goes on).
+  {
+    const pts = [[-3, CHART.land[0].r0 - 0.5]];
+    let r = CHART.land[0].r0 - 0.5;
+    for (const L of CHART.land) { pts.push([L.c1 + 0.5, Math.max(r, L.r0 - 0.5)], [L.c1 + 0.5, L.r1 + 0.5]); r = L.r1 + 0.5; }
+    pts.push([-3, r]);
+    // (its corners worn round: each cut back along both sides)
+    const px = pts.map((sq) => Q(sq)).flatMap((p, i, a) => {
+      if (!i || i === a.length - 1) return [p];
+      const cut = (q) => { const d = Math.hypot(q[0] - p[0], q[1] - p[1]), k = Math.min(16, d / 3) / d; return [p[0] + (q[0] - p[0]) * k, p[1] + (q[1] - p[1]) * k]; };
+      return [cut(a[i - 1]), cut(a[i + 1])];
+    });
+    wobbly(px, true, 12);
+    g.fillStyle = LAND; g.fill(); g.strokeStyle = INK; g.lineWidth = 3; g.stroke();
+    // Its face: a cliff's hachures along the edge, down toward the sea.
+    g.strokeStyle = 'rgba(74,44,20,.6)'; g.lineWidth = 2;
+    for (let i = 1; i < px.length - 1; i++) {
+      const [x0, y0] = px[i - 1], [x1, y1] = px[i], len = Math.hypot(x1 - x0, y1 - y0), n = Math.floor(len / 9);
+      const nx = (y1 - y0) / len, ny = -(x1 - x0) / len;   // (pointing into the land)
+      for (let k = 1; k < n; k++) { const t = (k + (rnd() - 0.5) * 0.6) / n, x = x0 + (x1 - x0) * t, y = y0 + (y1 - y0) * t, l = 5 + rnd() * 12; g.beginPath(); g.moveTo(x, y); g.lineTo(x + nx * l, y + ny * l); g.stroke(); }
+    }
+    // High ground: little hills on it.
+    for (let i = 0; i < 9; i++) {
+      const L = CHART.land[i % 2 ? 0 : 1], [x, y] = Q([L.c0 - 0.3 + rnd() * (L.c1 - L.c0 - 0.2), L.r0 + rnd() * (L.r1 - L.r0)]);
+      g.beginPath(); g.moveTo(x - 10, y + 5); g.quadraticCurveTo(x, y - 12, x + 10, y + 5); g.stroke();
+    }
+  }
+
+  // Rocks to steer by: a little clump, and the chart's cross by it.
+  const rockAt = (x, y, s = 1) => {
+    g.fillStyle = '#9b8c78'; g.strokeStyle = INK; g.lineWidth = 2;
+    for (let k = 0; k < 3; k++) {
+      const rx = x + (rnd() - 0.5) * 12 * s, ry = y + (rnd() - 0.5) * 6 * s, rr = (4 + rnd() * 4) * s;
+      g.beginPath(); g.moveTo(rx - rr, ry + rr * 0.5); g.lineTo(rx - rr * 0.4, ry - rr * 0.7); g.lineTo(rx + rr * 0.5, ry - rr * 0.6); g.lineTo(rx + rr, ry + rr * 0.5); g.closePath(); g.fill(); g.stroke();
+    }
+  };
+  for (const sq of CHART.rocks) rockAt(...Q(sq));
+
+  // The trade winds: streaks along each lane, arrows the way it blows.
+  for (const { from, to } of CHART.lanes) {
+    const [x0, y0] = Q(from), [x1, y1] = Q(to), len = Math.hypot(x1 - x0, y1 - y0) + ch;
+    const ux = (x1 - x0) / (len - ch || 1), uy = (y1 - y0) / (len - ch || 1), sx = -uy, sy = ux;
+    const ax = x0 - ux * ch / 2, ay = y0 - uy * ch / 2;   // (from the near edge of its first square)
+    g.strokeStyle = 'rgba(40,74,96,.75)'; g.lineWidth = 2;
+    for (const off of [-9, 9]) {
+      g.setLineDash([10 + rnd() * 6, 7]); g.lineDashOffset = rnd() * 10;
+      g.beginPath();
+      for (let t = 0; t <= len; t += 6) { const wv = Math.sin(t / 9 + off) * 1.6, x = ax + ux * t + sx * (off + wv), y = ay + uy * t + sy * (off + wv); if (t) g.lineTo(x, y); else g.moveTo(x, y); }
+      g.stroke();
+    }
+    g.setLineDash([]); g.lineWidth = 2.5;
+    for (let t = ch * 1.2; t < len - ch * 0.3; t += ch * 2.2) {
+      const x = ax + ux * t, y = ay + uy * t;
+      g.beginPath(); g.moveTo(x - ux * 7 + sx * 7, y - uy * 7 + sy * 7); g.lineTo(x, y); g.lineTo(x - ux * 7 - sx * 7, y - uy * 7 - sy * 7); g.stroke();
+    }
+  }
+
+  // The imperial checkpoint: its line across the sea from the headland to the reef, the bastions
+  // with their guns, the gatehouse over the gate with the Empire's flag, the boom slack under it.
+  const K = CHART.checkpoint;
+  {
+    const [xa, y] = Q([K.from - 0.5, K.row]), [xb] = Q([K.to + 0.5, K.row]), [gx] = Q([K.gate, K.row]);
+    g.fillStyle = '#b8ab92'; g.strokeStyle = INK; g.lineWidth = 2.5;
+    for (const [a, b] of [[xa, gx - cw / 2], [gx + cw / 2, xb]]) { g.fillRect(a, y - 5, b - a, 10); g.strokeRect(a, y - 5, b - a, 10); }
+    g.setLineDash([3, 4]); g.lineWidth = 2; g.beginPath(); g.moveTo(gx - cw / 2, y + 2); g.quadraticCurveTo(gx, y + 9, gx + cw / 2, y + 2); g.stroke(); g.setLineDash([]);
+    for (const c of K.guns) {
+      const [x] = Q([c, K.row]);
+      g.fillStyle = '#b89a6a'; g.lineWidth = 2.5;
+      g.fillRect(x - 13, y - 13, 26, 22); g.strokeRect(x - 13, y - 13, 26, 22);
+      for (let i = 0; i < 4; i++) g.strokeRect(x - 13 + i * 7, y - 18, 5, 5);
+      g.lineWidth = 5; g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + 16); g.stroke();   // (its gun, trained toward the den)
+    }
+    for (const c of K.piers) {
+      const [x] = Q([c, K.row]);
+      g.fillStyle = '#e6dcc4'; g.lineWidth = 2.5;
+      g.fillRect(x - 9, y - 30, 18, 38); g.strokeRect(x - 9, y - 30, 18, 38);
+      for (let i = 0; i < 3; i++) g.strokeRect(x - 9 + i * 6.5, y - 35, 5, 5);
+      g.fillStyle = '#a3271c'; g.fillRect(x - 4, y - 24, 8, 18);   // (a crimson banner down it)
+    }
+    // The arch between the piers, and the flag over it: crimson, a gold crown.
     g.strokeStyle = INK; g.lineWidth = 2.5;
-    g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + 4, y - 14, x + 2, y - 26); g.stroke();
-    for (const a of [-2.6, -2, -1.2, -0.5]) { g.beginPath(); g.moveTo(x + 2, y - 26); g.quadraticCurveTo(x + 2 + Math.cos(a) * 12, y - 30 + Math.sin(a) * 4, x + 2 + Math.cos(a) * 20, y - 22 + Math.sin(a) * 6); g.stroke(); }
-  };
-  palmAt(0.31, 0.15); palmAt(0.36, 0.09); palmAt(0.68, 0.1); palmAt(0.42, 0.21);
-  // His defences: little towers along the front, cannon pointing out to sea.
-  for (const u of [0.32, 0.4, 0.6, 0.68]) {
-    const [x, y] = P(u, 0.245);
-    g.fillStyle = '#b89a6a'; g.strokeStyle = INK; g.lineWidth = 2.5;
-    g.fillRect(x - 9, y - 22, 18, 22); g.strokeRect(x - 9, y - 22, 18, 22);
-    for (let i = 0; i < 3; i++) g.strokeRect(x - 9 + i * 6, y - 27, 5, 5);
-    g.beginPath(); g.moveTo(x, y - 8); g.lineTo(x + (u < 0.5 ? -8 : 8), y + 6); g.lineWidth = 4; g.stroke();
+    g.beginPath(); g.moveTo(gx - cw + 9, y - 22); g.quadraticCurveTo(gx, y - 44, gx + cw - 9, y - 22); g.stroke();
+    g.beginPath(); g.moveTo(gx, y - 33); g.lineTo(gx, y - 62); g.stroke();
+    g.fillStyle = '#a3271c'; g.beginPath(); g.moveTo(gx, y - 62); g.lineTo(gx + 26, y - 57); g.lineTo(gx, y - 50); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = '#d9a93a'; g.beginPath(); g.moveTo(gx + 4, y - 53); g.lineTo(gx + 5, y - 59); g.lineTo(gx + 8, y - 56); g.lineTo(gx + 11, y - 59); g.lineTo(gx + 12, y - 53); g.closePath(); g.fill();
   }
-  // The dotted ways: up his beach to the X, and across from your cove.
-  const path = (pts) => { g.beginPath(); pts.forEach(([u, v], i) => { const [x, y] = P(u, v); if (i) g.lineTo(x, y); else g.moveTo(x, y); }); g.stroke(); };
-  g.setLineDash([6, 7]); g.lineWidth = 2.5; g.strokeStyle = INK;
-  path([[0.5, 0.27], [0.47, 0.21], [0.5, 0.155]]);
-  g.strokeStyle = '#7a2414'; g.lineWidth = 3;
-  path([[0.47, 0.82], [0.42, 0.66], [0.3, 0.52], [0.24, 0.45]]);                     // out to sea, with the guns
-  path([[0.5, 0.82], [0.52, 0.62], [0.51, 0.42], [0.5, 0.29]]);                       // straight over, to land
-  path([[0.53, 0.82], [0.75, 0.66], [0.93, 0.48], [0.92, 0.27], [0.83, 0.2]]);       // round the back, to the cove
-  g.setLineDash([]);
-  // The ship, and her shot arcing at the towers.
+  // The reef, on out to the edge of the sea.
+  for (let c = CHART.reef.from; c <= CHART.reef.to + 1; c += 0.5) { const [x, y] = Q([c, CHART.reef.row + (rnd() - 0.5) * 0.5]); rockAt(x, y, 0.8); }
+
+  // The old wreck, aground on its sandbar: a broken hull, her mast snapped.
   {
-    const [x, y] = P(0.22, 0.43);
-    g.strokeStyle = INK; g.fillStyle = '#b07a43'; g.lineWidth = 2.5;
-    g.beginPath(); g.moveTo(x - 30, y - 6); g.lineTo(x + 30, y - 6); g.lineTo(x + 20, y + 8); g.lineTo(x - 22, y + 8); g.closePath(); g.fill(); g.stroke();
-    g.beginPath(); g.moveTo(x, y - 6); g.lineTo(x, y - 52); g.stroke();
-    g.fillStyle = '#f3e6c4'; g.beginPath(); g.moveTo(x + 2, y - 48); g.quadraticCurveTo(x + 26, y - 30, x + 2, y - 12); g.closePath(); g.fill(); g.stroke();
-    g.fillStyle = '#222'; g.fillRect(x - 1, y - 60, 14, 9);
-    g.setLineDash([3, 6]); g.strokeStyle = 'rgba(74,44,20,.8)'; g.lineWidth = 2;
-    for (const [u2, bend] of [[0.32, -60], [0.4, -40]]) { const [tx, ty] = P(u2, 0.235); g.beginPath(); g.moveTo(x + 18, y - 12); g.quadraticCurveTo((x + tx) / 2, Math.min(y, ty) + bend, tx, ty); g.stroke(); }
-    g.setLineDash([]);
+    const [x, y] = Q(CHART.wreck);
+    g.fillStyle = SAND; g.strokeStyle = 'rgba(74,44,20,.6)'; g.lineWidth = 2;
+    g.beginPath(); g.ellipse(x, y + 5, 50, 15, 0, 0, 7); g.fill(); g.stroke();
+    g.save(); g.translate(x, y); g.rotate(-0.25); g.scale(1.35, 1.35);
+    g.fillStyle = '#8a5a30'; g.strokeStyle = INK; g.lineWidth = 2.5;
+    g.beginPath(); g.moveTo(-26, -4); g.lineTo(14, -4); g.lineTo(6, 8); g.lineTo(-20, 8); g.closePath(); g.fill(); g.stroke();
+    g.beginPath(); g.moveTo(14, -4); g.lineTo(20, -10); g.moveTo(10, 2); g.lineTo(22, 0); g.stroke();   // (her bows stove in)
+    g.beginPath(); g.moveTo(-6, -4); g.lineTo(-2, -24); g.lineTo(8, -30); g.stroke();
+    g.restore();
   }
-  // Crossed swords below his beach.
+
+  // Your cove at the bottom: the shore, the den's wall and its gate, the rocks either side, palms.
   {
-    const [x, y] = P(0.5, 0.33);
-    g.strokeStyle = INK; g.lineWidth = 3;
-    for (const s of [-1, 1]) {
-      g.beginPath(); g.moveTo(x - 16 * s, y + 16); g.lineTo(x + 14 * s, y - 14); g.stroke();
-      g.beginPath(); g.moveTo(x - 11 * s - 5, y + 7 - 5 * s); g.lineTo(x - 11 * s + 5, y + 7 + 5 * s); g.stroke();
+    const pts = [];
+    for (let i = 0; i <= 24; i++) { const c = -1 + i * (SAIL.COLS + 1) / 24; pts.push(Q([c, -0.5 - Math.sin(i / 24 * Math.PI) * 0.4 + (rnd() - 0.5) * 0.25])); }
+    wobbly([...pts, [w + 20, h + 20], [-20, h + 20]], true);
+    g.fillStyle = SAND; g.fill(); g.strokeStyle = INK; g.lineWidth = 3; g.stroke();
+    const [x, y] = Q(CHART.den);
+    g.fillStyle = '#7d7266';
+    for (const s of [-1, 1]) {   // (the cove's rocks round the den)
+      wobbly([[x + s * 66, y + 14], [x + s * 70, y - 8], [x + s * 110, y - 14], [x + s * 150, y + 2], [x + s * 160, y + 30], [x + s * 66, y + 30]], true, 5);
+      g.fill(); g.stroke();
     }
-  }
-  // The old pump in the hidden cove.
-  {
-    const [x, y] = P(0.79, 0.19);
-    g.strokeStyle = INK; g.fillStyle = '#8a8f96'; g.lineWidth = 2.5;
-    g.fillRect(x - 6, y - 14, 12, 18); g.strokeRect(x - 6, y - 14, 12, 18);
-    g.beginPath(); g.moveTo(x, y - 14); g.lineTo(x + 14, y - 22); g.stroke();
-    g.beginPath(); g.moveTo(x + 6, y - 2); g.lineTo(x + 14, y - 2); g.lineTo(x + 14, y + 6); g.stroke();
-  }
-  // X marks the spot, and a little doodle of whoever's there: horned helmet, black beard, tankard, "?".
-  {
-    const [x, y] = P(...X_AT);
-    g.strokeStyle = '#b3201a'; g.lineWidth = 7; g.lineCap = 'round';
-    g.beginPath(); g.moveTo(x - 16, y - 16); g.lineTo(x + 16, y + 16); g.moveTo(x + 16, y - 16); g.lineTo(x - 16, y + 16); g.stroke();
-    g.lineCap = 'butt';
-    const hx = x + 62, hy = y + 4;
-    g.strokeStyle = INK; g.lineWidth = 2.5; g.fillStyle = '#efe6cf';
-    g.beginPath(); g.arc(hx, hy, 13, Math.PI, 0); g.closePath(); g.fill(); g.stroke();
-    for (const s of [-1, 1]) { g.beginPath(); g.moveTo(hx + 11 * s, hy - 6); g.quadraticCurveTo(hx + 24 * s, hy - 10, hx + 22 * s, hy - 26); g.stroke(); }
-    g.fillStyle = '#222'; g.beginPath(); g.arc(hx, hy + 12, 11, 0, Math.PI); g.fill();
-    g.fillStyle = '#d9a93a'; g.fillRect(hx + 20, hy + 2, 12, 16); g.strokeRect(hx + 20, hy + 2, 12, 16);
-    g.fillStyle = '#fff'; g.beginPath(); g.arc(hx + 26, hy + 1, 6, Math.PI, 0); g.fill();
-    g.fillStyle = INK; g.font = 'bold 30px Alegreya, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('?', hx + 46, hy + 4);
-  }
-  // Your cove at the bottom: its coast, the wall and its gate.
-  g.beginPath(); g.moveTo(0, h * 0.86);
-  for (let i = 0; i <= 20; i++) { const u = i / 20, [x, y] = P(u, 0.86 - Math.sin(u * Math.PI) * 0.05 + (rnd() - 0.5) * 0.012); g.lineTo(x, y); }
-  g.lineTo(w, h); g.lineTo(0, h); g.closePath(); g.fillStyle = '#d6b778'; g.fill(); g.strokeStyle = INK; g.lineWidth = 3; g.stroke();
-  {
-    const [x, y] = P(0.5, 0.86);
     g.fillStyle = '#9b9488'; g.strokeStyle = INK; g.lineWidth = 2.5;
     g.fillRect(x - 60, y - 2, 120, 12); g.strokeRect(x - 60, y - 2, 120, 12);
     for (let i = 0; i < 7; i++) g.strokeRect(x - 60 + i * 18, y - 8, 9, 6);
     g.fillStyle = '#5b3a20'; g.fillRect(x - 9, y - 2, 18, 12);
+    const palmAt = (px, py) => {
+      g.strokeStyle = INK; g.lineWidth = 2.5;
+      g.beginPath(); g.moveTo(px, py); g.quadraticCurveTo(px + 4, py - 14, px + 2, py - 26); g.stroke();
+      for (const a of [-2.6, -2, -1.2, -0.5]) { g.beginPath(); g.moveTo(px + 2, py - 26); g.quadraticCurveTo(px + 2 + Math.cos(a) * 12, py - 30 + Math.sin(a) * 4, px + 2 + Math.cos(a) * 20, py - 22 + Math.sin(a) * 6); g.stroke(); }
+    };
+    for (const dx of [-230, -190, 200, 250]) palmAt(x + dx, y + 8 + rnd() * 8);
   }
+
+  // The captain's way, dotted: out of the den, up the winds, to the gate, through it to the X.
+  g.setLineDash([6, 7]); g.strokeStyle = '#7a2414'; g.lineWidth = 3;
+  wobbly(ROUTE.map((sq) => Q(sq)), false, 0);
+  g.stroke(); g.setLineDash([]);
+  // X marks the spot.
+  {
+    const [x, y] = Q(X_AT);
+    g.strokeStyle = '#b3201a'; g.lineWidth = 7; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(x - 14, y - 14); g.lineTo(x + 14, y + 14); g.moveTo(x + 14, y - 14); g.lineTo(x - 14, y + 14); g.stroke();
+    g.lineCap = 'butt';
+  }
+
   // Words, with a halo of parchment so they read over the waves.
-  const write = (text, u, v, font, col = INK, align = 'center') => {
-    const [x, y] = P(u, v);
+  const write = (text, x, y, font, col = INK, align = 'center') => {
     g.font = font; g.textAlign = align; g.textBaseline = 'middle';
     g.lineWidth = 6; g.strokeStyle = 'rgba(236,216,166,.9)'; g.lineJoin = 'round'; g.strokeText(text, x, y);
     g.fillStyle = col; g.fillText(text, x, y);
@@ -184,24 +247,30 @@ function mapTexture() {
     out.push(line);
     return out;
   };
-  const NOTE = 'italic 22px Alegreya, serif';
-  for (const wy of WAYS) {
-    write(wy.label, wy.at[0], wy.at[1], 'bold 27px Alegreya, serif', '#5a1a0c');
-    wrap(wy.note, 250, NOTE).forEach((ln, i) => write(ln, wy.at[0], wy.at[1] + 0.045 + i * 0.038, NOTE));
+  const NOTE = 'italic 21px Alegreya, serif';
+  for (const n of NOTES) {
+    const [x, y] = Q(n.at);
+    if (n.along) {   // (written up along a lane, as on a chart)
+      g.save(); g.translate(x, y); g.rotate(-Math.PI / 2);
+      write(n.label, 0, 0, 'bold 22px Alegreya, serif', '#5a1a0c');
+      g.restore();
+      continue;
+    }
+    write(n.label, x, y, 'bold 25px Alegreya, serif', '#5a1a0c');
+    if (n.note) write(n.note, x, y + 26, NOTE);
   }
-  write('Yer den', 0.5, 0.94, 'bold 26px Alegreya, serif');
   // What the captain scrawled, bottom left; a compass, bottom right.
   const SCRAWL = 'italic 23px Alegreya, serif';
-  wrap(`"${RUMOUR}"`, 330, SCRAWL).forEach((ln, i) => write(ln, 0.04, 0.66 + i * 0.045, SCRAWL, '#3a2210', 'left'));
+  wrap(`"${RUMOUR}"`, 320, SCRAWL).forEach((ln, i) => write(ln, ...P(0.04, 0.6 + i * 0.045), SCRAWL, '#3a2210', 'left'));
   {
-    const [x, y] = P(0.88, 0.7);
+    const [x, y] = P(0.89, 0.66);
     g.strokeStyle = INK; g.fillStyle = INK; g.lineWidth = 2;
     g.beginPath(); g.arc(x, y, 30, 0, 7); g.stroke();
     for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) {
       g.beginPath(); g.moveTo(x + dx * 40, y + dy * 40); g.lineTo(x + dy * 7, y - dx * 7); g.lineTo(x - dy * 7, y + dx * 7); g.closePath();
       if (dy === -1) g.fill(); else g.stroke();
     }
-    write('N', 0.88, 0.7 - 0.09, 'bold 22px Alegreya, serif');
+    write('N', x, y - 62, 'bold 22px Alegreya, serif');
   }
   g.restore();
   const tex = new THREE.CanvasTexture(cv);

@@ -173,15 +173,6 @@ the site (`.assetsignore` skips `*.md`).
   "the front part of the ship is sticking out of the gate when the [lock] is draining." She sits
   wholly inside the lock's chamber while it drains, clear of its gates, bow and stern.
 
-- **The captain's map matches the sea (10 Nov):** "the map obviously needs updating as well now,
-  because we've added a lot of stuff. Obviously, don't show off the secrets, but certainly, like,
-  even just like the checkpoint or something should, like, the line, it should match up with what
-  is actually on the map at the moment a little bit." The map is drawn from the sea as it is (its
-  lay): the den's cove, the shipping lane, the checkpoint's line across it with its gate, the reef
-  and the headland either side, and the open sea and the wreck beyond, in a hand-drawn captain's
-  style. Nothing secret on it: no canal or locks, no harbour, no lagoon or crane, no islands off
-  the beaten track, nothing about the oars.
-
 - **Somewhere for the pieces you don't want, building in the den (10 Nov):** playtesting the
   whole thing through: "building the platform and the stairs and things in the base is really
   difficult now because you've got no way of wasting pieces. I mean, I can still kind of put stuff

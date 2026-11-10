@@ -16,7 +16,21 @@
    at the bottom, the sea, and his island at the top: shoot at him from your ship (the gunnery
    deck, natural at sea), land and sword fight him, or "bypass his defenses, go around the corner
    into some cove" where the map says there's "some hidden undiscovered bilge pump". (The voyage
-   and Dalnoth come next: IDEAS.md, "The captain's map".) */
+   and Dalnoth come next: IDEAS.md, "The captain's map".)
+
+   Then the sea was built, and the map had to match it (the user, 10 Nov: "the map obviously needs
+   updating as well now, because we've added a lot of stuff. Obviously, don't show off the secrets,
+   but certainly, like, even just like the checkpoint or something should, like, the line, it should
+   match up with what is actually on the map at the moment a little bit"). So it's drawn from the
+   sea's own lay (LAY in src/den-sail.ts), square for square: your cove and beach at the bottom, the
+   trade winds out of it and the main shipping lane on to the imperial checkpoint's line across the
+   sea, its gate and guns, the reef out to the right and the headland on the left, and beyond it the
+   open sea and the old wreck, the X on it. The rumour's the same. Nothing secret is on it ("Hidden
+   gems, never hinted", RULES.md): the cliffs are drawn whole, with no canal, locks, harbour or cove
+   cut into them, nothing off the edge of the sea (the lagoon), and no word of the oars or of how to
+   get past the checkpoint: that's yours to find. The ways past Dalnoth himself (sword, gun, flooding
+   him out) come back onto it when his hideout's built (STORY.md). */
+import { LAY, SAIL } from './den-sail.js';
 export const MAP = {
     /** Where it lies on the beach, across from the gate's middle (the pumps are off to the right) and
         out from the wall (metres; the wall's at 0, out is -). */
@@ -39,12 +53,71 @@ export const canPickUp = (state, dx, dz) => state === 'lying' && Math.hypot(dx, 
 export const canRead = (state) => state === 'found';
 /** What the captain scrawled across the top. */
 export const RUMOUR = "We hear there's some secret treasure here, guarded by a fearsome enemy";
-export const WAYS = [
-    { puzzle: 'Gunning', label: 'Come at him by sea', note: 'shoot up his defences from your ship', at: [0.2, 0.49] },
-    { puzzle: 'Swordfight', label: 'Land on his beach', note: 'and fight him for it', at: [0.67, 0.5] },
-    { puzzle: 'Bilge', label: 'A hidden cove', note: "an old bilge pump nobody's found: flood him out", at: [0.81, 0.33] },
+/** The sheet (0 to 1 across from the left, down from the top): the sea's board between U0 and U1
+    across, and between V0 (its far edge, out to sea) and V1 (its near edge, the shore) down. */
+export const SHEET = { U0: 0.02, U1: 0.98, V0: 0.06, V1: 0.78 };
+/** Where a square of the sea falls on the sheet. */
+export function onMap([c, r]) {
+    const S = SHEET;
+    return [S.U0 + (c + 0.5) / SAIL.COLS * (S.U1 - S.U0), S.V1 - (r + 0.5) / SAIL.ROWS * (S.V1 - S.V0)];
+}
+const DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
+/** The den: its gate in the wall, at the den's middle (across, the column the den's middle falls
+    in: SAIL.X0 is the board's left edge), back up the beach from the sea's edge (SAIL.Z0). */
+const DEN = [-SAIL.X0 / SAIL.CELL - 0.5, SAIL.Z0 / SAIL.CELL - 0.5];
+/** What the map shows, all from the sea's lay (LAY). */
+export const CHART = {
+    /** Your den, in its cove at the bottom; the shore's along the board's near edge. */
+    den: DEN,
+    /** The trade winds: out from off the beach, the main shipping lane on to the checkpoint, and home. */
+    lanes: LAY.LANES.map(({ at, d, n }) => ({ from: [...at], to: [at[0] + DC[d] * (n - 1), at[1] + DR[d] * (n - 1)], d })),
+    /** The imperial checkpoint's line across the sea: from the headland's end to the reef, its gate
+        under the gatehouse between its piers, a gun on a bastion either side; and the reef on from it
+        to the edge of the sea. */
+    checkpoint: {
+        row: LAY.CHECKPOINT.ROW,
+        gate: LAY.CHECKPOINT.GATE,
+        piers: LAY.CHECKPOINT.PIERS.map(([c]) => c),
+        guns: LAY.CHECKPOINT.GUNS.map(([c]) => c),
+        from: LAY.CHECKPOINT.HEADLAND.c1 + 1,
+        to: LAY.CHECKPOINT.REEF.c0 - 1,
+    },
+    reef: { row: LAY.CHECKPOINT.ROW, from: LAY.CHECKPOINT.REEF.c0, to: LAY.CHECKPOINT.REEF.c1 },
+    /** The high ground on the left, drawn whole, as it looks from the sea: the cliffs, and the
+        checkpoint's headland on from them (squares, inclusive). Whatever's cut into it isn't shown. */
+    land: [
+        { c0: LAY.PLATEAU.c0, c1: LAY.PLATEAU.c1, r0: LAY.PLATEAU.r0, r1: LAY.PLATEAU.r1 },
+        { ...LAY.CHECKPOINT.HEADLAND },
+    ],
+    /** Rocks to steer by: along the lanes' sides, and out on the far water. (Not the scattered ones,
+        a different sea every game, nor the harbour's.) */
+    rocks: [...LAY.SIDES, ...LAY.FAR].map(([c, r]) => [c, r]),
+    /** The old wreck beyond the checkpoint, the X on it. */
+    wreck: [...LAY.WRECK],
+};
+/** Where the X is: on the old wreck beyond the checkpoint. */
+export const X_AT = [...LAY.WRECK];
+/** The way the captain's dotted it: out of the den, up the trade winds and the shipping lane to
+    the checkpoint's gate, through it and on to the X. (How you get through is for you to find.) */
+export const ROUTE = [
+    DEN,
+    CHART.lanes[0].from,
+    CHART.lanes[0].to,
+    [...LAY.JUNCTION],
+    CHART.lanes[1].to,
+    [LAY.CHECKPOINT.GATE, LAY.CHECKPOINT.ROW],
+    [LAY.CHECKPOINT.GATE, LAY.CHECKPOINT.ROW + 2],
+    [(LAY.CHECKPOINT.GATE + LAY.WRECK[0]) / 2 + 0.5, (LAY.CHECKPOINT.ROW + LAY.WRECK[1]) / 2 + 1.5],
+    X_AT,
 ];
-/** Where the X is: on his island, at the top. */
-export const X_AT = [0.5, 0.13];
-/** Where your den is: its cove, at the bottom, across the sea from him. */
-export const DEN_AT = [0.5, 0.86];
+export const NOTES = [
+    { label: 'Yer den', at: [DEN[0] - 2.2, DEN[1] + 1.5] },
+    { label: 'The trade winds', at: [(CHART.lanes[0].from[0] + CHART.lanes[2].from[0]) / 2, CHART.lanes[0].from[1] + 2.2], along: true },
+    { label: 'Shipping lane', at: [CHART.lanes[1].from[0] - 0.75, LAY.JUNCTION[1] + 4], along: true },
+    { label: 'The Imperial checkpoint', note: 'Pirates not welcome', at: [LAY.CHECKPOINT.REEF.c0 + 4, LAY.CHECKPOINT.ROW - 1.4] },
+    { label: 'Reef', at: [LAY.CHECKPOINT.REEF.c1 - 2, LAY.CHECKPOINT.ROW + 1.1] },
+    { label: 'Headland', at: [(LAY.CHECKPOINT.HEADLAND.c0 + LAY.CHECKPOINT.HEADLAND.c1) / 2, LAY.CHECKPOINT.HEADLAND.r0 + 1] },
+    { label: 'Cliffs', at: [(LAY.PLATEAU.c0 + LAY.PLATEAU.c1) / 2, (LAY.PLATEAU.r0 + LAY.PLATEAU.r1) / 2] },
+    { label: 'The open sea', at: [LAY.CHECKPOINT.REEF.c0 + 3, LAY.CHECKPOINT.ROW + 3.6] },
+    { label: 'An old wreck', note: 'aground on a sandbar', at: [LAY.WRECK[0] + 5.5, LAY.WRECK[1] - 0.2] },
+];

@@ -846,15 +846,35 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   it's open, only the map shows** (the user, 9 Nov: the crates and the piece instructions "ruin
   the immersion"): the buttons, the crates, the keys and the labels fade away, leaving a quiet
   "M, Esc or Space: roll it up" at the bottom. The map
-  goes to **his island across the sea**, not back up the cliffs ("it feels weird going backwards
-  ... it would be better if you can go forward"): your cove at the bottom, his island at the top
-  with the X, the captain's scrawl ("we hear there's some secret treasure here, guarded by a
-  fearsome enemy"), and **one way in for each puzzle** (leave the choices open): come at him by
-  sea and shoot up his defences from your ship (Gunning), land on his beach and fight him for it
-  (Swordfight), or round to a hidden cove with "some hidden undiscovered bilge pump" (Bilge). In
-  a crew, whoever picks it up, everyone can open it. Skipping straight to a stage after the
-  siege (the cheats) leaves it lying there, with no cutscene; the cheat "The captain's map scene"
-  plays it again. Nothing out at sea yet (IDEAS.md). Rules: `src/den-map.ts`.
+  leads out across the sea, not back up the cliffs ("it feels weird going backwards ... it would
+  be better if you can go forward"). In a crew, whoever picks it up, everyone can open it.
+  Skipping straight to a stage after the siege (the cheats) leaves it lying there, with no
+  cutscene; the cheat "The captain's map scene" plays it again. Rules: `src/den-map.ts`.
+  - **The map matches the sea (10 Nov).** The user: "the map obviously needs updating as well
+    now, because we've added a lot of stuff. Obviously, don't show off the secrets, but certainly,
+    like, even just like the checkpoint or something should, like, the line, it should match up
+    with what is actually on the map". (It was a schematic from before the sea: his island at the
+    top, and a way in for each puzzle, one of them "a hidden cove ... an old bilge pump".) It's
+    drawn from the sea's own lay (LAY in `src/den-sail.ts`), square for square, so it stays
+    matching when the sea changes; stretched across, as a hand-drawn chart is, in the same inked
+    parchment style. On it: your den and its beach at the bottom, its wall and gate between the
+    cove's rocks; the trade winds out of the cove and home ("The trade winds", written up between
+    them) and the main shipping lane on from the junction ("Shipping lane"); the imperial
+    checkpoint's line across the sea from the headland to the reef, its gatehouse over the gate
+    with the Empire's crimson flag, the slack boom, a gun on a bastion either side ("The Imperial
+    checkpoint", "Pirates not welcome"); the reef on out to the edge ("Reef"); the cliffs and the
+    headland on the left ("Cliffs", "Headland"); the rocks along the lanes and out on the far
+    water (not the scattered ones, different every game); and beyond the line "The open sea" and
+    "An old wreck", "aground on a sandbar", the X on it. The captain's dotted way runs out of the
+    den, up the winds and the lane, through the gate and on to the X. The captain's scrawl is the
+    same ("we hear there's some secret treasure here, guarded by a fearsome enemy").
+  - **Nothing secret on it** ("Hidden gems, never hinted", above): the cliffs are drawn whole, no
+    canal, locks or hidden cove cut into them; no harbour arms or wind at the canal's mouth (the
+    scrawl sits over that water); nothing off the edge of the sea (the lagoon, its crane); no word
+    of the oars, or of how to get past the checkpoint, only what's there to see. The ways past
+    Dalnoth himself (sword, gun, flooding him out: leave the choices open) come onto it when his
+    hideout's built (STORY.md). A test checks the line and lanes come from the lay and that
+    nothing's drawn on a secret square (`tests/den-map.test.ts`).
   - **Dalnoth looks like Dalnoth (9 Nov).** The first go, a captain in a red coat and hat, "really
     does not look very much like Dalnoth": he's drawn from his portrait on YPPedia (his pirate
     page was down), not from memory. Dark skin and a big black beard, a silver helmet with gold

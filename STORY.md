@@ -111,8 +111,13 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
 4. ✓ **The captain's map.** A short, cheesy cutscene: Dalnoth leaves his cannon on deck, rows
    in, shakes his fist on the beach, "We'll be back!", runs for his boat, and a map falls out of
    his coat; he rows back out to his ship, and your pirate walks out and picks it up. "We hear there's some secret treasure here, guarded by a fearsome enemy." It
-   shows his island across the sea, and the ways in: by ship with the guns, land and swordfight,
-   or round to a hidden cove with an old bilge pump.
+   shows the sea as it is (10 Nov: "it should match up with what is actually on the map"): the
+   trade winds and the shipping lane out to the imperial checkpoint's line, the cliffs and
+   headland on one side and the reef on the other, and beyond it the open sea and an old wreck
+   with the X on it, the captain's dotted way out through the gate. Never the secrets (the locks,
+   the hidden cove, the lagoon) nor how to get past: those are yours to find. (It showed his
+   island and a way in for each puzzle, one of them the hidden cove, before the sea was built;
+   those ways past Dalnoth come back onto it when his hideout's built, step 6.)
 5. · **Out to sea, to his hideout.** Forward, not back: you go and raid him, "a mirror of this
    kind of siege". And you really sail there, on a board in 3D, putting in forward, left and
    right, past rocks, the beach coming up as you land (▶ a first go is built: once the siege is
