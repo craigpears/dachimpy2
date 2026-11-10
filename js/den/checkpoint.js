@@ -2,7 +2,7 @@
 // beside it and the old wreck beyond it. (The rules: src/den-checkpoint.ts.)
 import * as THREE from 'three';
 import { LAY, SAIL, canalAt } from '../den-sail.js';
-import { CHECK, HINT, Checkpoint, throughSay } from '../den-checkpoint.js';
+import { CHECK, Checkpoint, throughSay } from '../den-checkpoint.js';
 import { scene, mat, mesh, canvasTex, woodTex, V3, burst, toast, worldLets, shake, flagpole } from './world.js';
 import { rock } from './land.js';
 import { turretMesh, turretView, turretWrecked, turretFire, turretLand, turretShotsTick, turretShotsClear, shotComing } from './turret.js';
@@ -199,14 +199,15 @@ export function checkpointTick(dt) {
       toast(e.aimed ? 'Hit! She\'s holed: patch her to sail on' : 'Hit! That gun had her on its mark: patch her to sail on', true);
     }
     // Its commander on the gate: her cutscene the first time she's sighted from the cove's side
-    // (dignity.js). What's said here (but the hint) waits till it's over, so they don't talk over each other.
+    // (dignity.js). What's said here waits till it's over, so they don't talk over each other.
     dignityWatch(h.pose);
     for (const e of cp.check.watch(h.pose)) {
       dignityHeard(e);
-      // (from the den's side, the hint first, and this waits its turn after it)
-      const say = e.kind === 'sighted' ? 'The checkpoint\'s guns are trained on the red rings: stop on one and she\'s hit. Run it, row it, or knock its guns out'
-        : e.kind === 'hint' ? HINT : e.kind === 'calm' ? 'Out of sight of the checkpoint: its guns go back to their marks' : throughSay(e);
-      if (cine && e.kind !== 'hint') cp.held.push(say); else toast(say);   // (the hint as ever: it's to move)
+      // Nothing's said as she sights it: how to get past it is yours to work out (the user, 10 Nov:
+      // "I like these just to be hidden gems that you work out").
+      if (e.kind === 'sighted') continue;
+      const say = e.kind === 'calm' ? 'Out of sight of the checkpoint: its guns go back to their marks' : throughSay(e);
+      if (cine) cp.held.push(say); else toast(say);
     }
     if (!cine && cp.held.length) for (const say of cp.held.splice(0)) toast(say);
     const by = canHaulWreck();

@@ -43,13 +43,6 @@ function dealHave() {
   return have;
 }
 export const neededLetters = () => fair.plan(dealHoles(), dealHave()).map((n) => n.l);
-/* The deal as it stands, to make a test of (the cheats' "Copy the deal"): whether it's dealt fair just
-   now, what's left of each open hole, what's on the crates and in your hands (the fair deal's `have`),
-   and which crate's piece came by the fair deal. */
-export const dealNow = () => ({
-  fair: fairDeal(), holes: dealHoles(), have: dealHave(), carry: carry?.letter ?? null,
-  crates: cratesInOrder().map((p) => (p.letter ? { l: p.letter, fair: !!p.fair } : null)),
-});
 export const fairPick = () => fair.pick(dealHoles(), dealHave());
 export function deal(p) {
   const l = fair.next(wall && fairDeal() ? dealHoles() : [], dealHave());

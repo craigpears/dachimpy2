@@ -234,8 +234,7 @@ export function sailTick(dt) {
     }
     if (sail.riding && !(h.cur && h.cur.m === 'W')) {
       sail.riding = false;
-      // (Nothing's said at the junction: the canal's mouth is yours to find. The hint's at the
-      // checkpoint: checkpoint.js.)
+      // (Nothing's said at the junction, nor at the checkpoint: the canal's mouth is yours to find.)
       const home = sail.sea.dropOff(...LAY.LANES[2].at);
       if (h.pose.c === home[0] && h.pose.r === home[1] && !sail.said.home) { sail.said.home = true; toast('The trade winds have carried her home: her mooring\'s just along the shore'); }
     }

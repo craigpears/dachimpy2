@@ -1,6 +1,6 @@
 /* The imperial checkpoint (src/den-checkpoint.ts), on the sloop's sea (src/den-sail.ts). */
 import { describe, expect, it } from 'vitest';
-import { CHECK, HINT, Checkpoint, isCheckpoint, throughSay, type CheckEvent } from '../src/den-checkpoint';
+import { CHECK, Checkpoint, isCheckpoint, throughSay, type CheckEvent } from '../src/den-checkpoint';
 import { LAY, SAIL, Sea, Helm, broadside, type Move, type Pose } from '../src/den-sail';
 import { Wind } from '../src/den-wind';
 import { Salvage } from '../src/den-haul';
@@ -192,22 +192,15 @@ describe('or round it by the locks, the secret way (10 Nov)', () => {
     expect(throughSay({ kind: 'through', how: 'locks', back: false, hits: 0 })).toMatch(/by the locks/);
   });
 
-  it('the hint to the canal only where she sights it, at the end of the trade wind\'s run, once (10 Nov)', () => {
-    // "the hint to the canal is only supposed to appear once you get right next to the Imperial
-    // checkpoint": nothing on the way, then said first as she sights it, before its guns.
+  it('no hint of another way round as she sights it: hidden gems you work out (10 Nov)', () => {
+    // "I don't like it giving you a hint as to what you can do ... I like these just to be hidden
+    // gems that you work out": sighting it from the trade wind's run is all that happens.
     const cp = new Checkpoint(), s = new Sea(9), [jc, jr] = LAY.JUNCTION, h = new Helm(s, { c: jc, r: jr - 6, d: 0 });
     const said: CheckEvent[] = [];
     h.put('F'); h.put('F');   // (onto the lane to the junction, and on up the main lane)
     for (let t = 0; t < 10; t += 0.05) { h.tick(0.05); const e = cp.watch(h.pose); if (e.length) expect([h.pose.c, h.pose.r]).toEqual([SHORT.c, SHORT.r]); said.push(...e); }
-    expect(said).toEqual([{ kind: 'hint' }, { kind: 'sighted' }]);
+    expect(said).toEqual([{ kind: 'sighted' }]);
     expect(cp.watch(SHORT)).toEqual([]);
-    expect(HINT).toBe('An imperial checkpoint... I wonder if there\'s another way round');
-    expect(HINT).not.toMatch(/lock|canal|left|right/i);
-    // Not when she comes on it from beyond (round by the locks, say).
-    const by = new Checkpoint();
-    const beyond = by.watch({ c: K.GATE, r: K.ROW + 3 });
-    expect(beyond).toContainEqual({ kind: 'sighted' });
-    expect(beyond).not.toContainEqual({ kind: 'hint' });
   });
 });
 

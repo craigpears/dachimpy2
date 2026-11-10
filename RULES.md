@@ -116,6 +116,14 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 
 Unlisted for now: reachable only by its URL until the user says to put it in the nav.
 
+- **Hidden gems, never hinted (10 Nov).** The user, of the checkpoint's "I wonder if there's another
+  way round" and "Run it, row it, or knock its guns out": "I don't like it giving you a hint as to
+  what you can do ... I like these just to be hidden gems that you work out ... make the fact that
+  how you can get through and everything else discoverable." Nothing says what you could do to get
+  past something, where a secret way is, or that the oars exist: no hints, no "try this". What's
+  said is what's happened (hit, through, the wind's shifted), and how to work a thing once you're
+  at it (Space to haul). The one exception agreed: after you've been sunk and rowed home, a small
+  note that O gets the oars out (TODO.md, "Sunk at the checkpoint").
 - **A puzzle's pieces look like the real ones (10 Nov).** The user: "the last few puzzles, the
   graphics have been placeholders rather than matching the Puzzle Pirate pieces, so use the actual
   Puzzle Pirate page." Every Puzzle Pirates puzzle in the den draws its pieces after the real ones
@@ -258,7 +266,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       total. Might be swallowing a bit too much", each filled by Bilge, coming back down to rejoin
       the sea beyond the checkpoint: the alternate way round it, "a bit more getting through the
       locks", which makes it more discoverable ("I wonder if there's a secret way"; something
-      should hint at it). The lagoon, its wreck and the rescued animal branch off "after the second
+      then no hint at all: "Hidden gems, never hinted", below). The lagoon, its wreck and the rescued animal branch off "after the second
       or third lock", off the track the locks lead you along, "almost more like an Easter egg" you
       find by wandering off. So:
       - **Two up and two down:** from the first lock the canal climbs a second, up onto the
@@ -273,9 +281,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
         bit ... even if it's just a few, like, slightly out of the main viewport, doesn't need to be
         far." So the canal's mouth is in the high ground's face toward the den, off to the left, six
         squares from the trade wind's run: out of view from the run and the junction (from her
-        mooring it's at the very edge). Nothing at the junction points it out; the only hint comes
-        at the end of the main lane's run, where she sights the checkpoint: "An imperial
-        checkpoint... I wonder if there's another way round" (then what's said of its guns).
+        mooring it's at the very edge). Nothing points it out, at the junction or the checkpoint
+        ("Hidden gems, never hinted", above).
       - **Which way on from a lock (10 Nov).** The user: "The lock's very confusing. Like it just
         looks like you're staring at a cliff once you go through the first run. There's no
         indication that you have to turn right", and at the second, "you are having to bump into
@@ -308,8 +315,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
         a lock straight.
       - **The ways past the checkpoint:** run it, row it, fight its guns, or the locks. The reef's
         far end, the long way round that cost only time, is closed now the locks are the way round.
-      - **Nothing signposts it:** nothing at the junction, and only the hint where she sights the
-        checkpoint (above).
+      - **Nothing signposts it:** nothing at the junction, and nothing at the checkpoint either
+        ("Hidden gems, never hinted", below).
       - **The pilot** finds its way through the locks to a pin anywhere along them, reckoning a lock
         up a go of Bilge (about 28 seconds); and from the open sea to a pin on the open sea it never
         takes her up a lock at all, even for a pin a wind keeps her from otherwise: the locks are
@@ -451,7 +458,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     - **The pilot** plans by the clock, under sail by the wind there is (never a square against it,
       and the quicker headings preferred). The pin goes where you drop it, wind or no wind. A pin
       the wind won't let her sail to at all, she waits, and says so once ("She can't sail to the
-      pin: it's dead against the wind. O: out oars and row her there, or wait for it to shift"); the
+      pin: it's dead against the wind"; nothing about the oars: they're yours to find); the
       pilot never runs the oars out for her any more (the user: "it's coming up a pop-up saying you
       can't sail there. Well, it is letting me"). Only say she can't when she really won't. The
       trade winds are currents of their own and sweep her on whatever the weather. Rules:
@@ -617,9 +624,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       start out of their reach, so she can stop there and load before a fight.
     - **Or round it by the locks** (the chain of locks, above): the long way round the reef's end
       that was there, costing only time, went (10 Nov).
-    - **Said:** coming up to it, first the hint, "An imperial checkpoint... I wonder if there's
-      another way round" (from the den's side only), then "The checkpoint's guns are trained on the
-      red rings: stop on one and she's hit. Run it, row it, or knock its guns out"; once she's past
+    - **Said:** nothing as she comes up to it (no hint of what you can do: "Hidden gems, never
+      hinted", below); once she's past
       its last mark, "Through the checkpoint! Not
       a scratch on her" (or "Holed once, patched, and through"), or round by the locks, and "Back
       through" or "Back round" coming home.
@@ -795,7 +801,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   pose on the gun (a fist pumped, "Eek!"), then Dignity's giggle, a hand to her mouth: "Hee hee!
   Oops. That was a warning shot. Mostly. Come any closer and the next ones won't be.", wagging
   her spyglass at you as Bella scampers back up to her shoulder. What the checkpoint has to say
-  (but its hint) waits till the cutscene's over. After it, **a line over her head as things
+  waits till the cutscene's over. After it, **a line over her head as things
   happen, each said once**: a stroke short of its guns' first mark, "One more stroke and I'll have
   to shoot. There'll be paperwork. I hate paperwork."; a gun of hers wrecked, "That was Imperial
   property!"; through her gate, either way, "This is going in my report. In very small, very cross

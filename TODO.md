@@ -111,13 +111,17 @@ the site (`.assetsignore` skips `*.md`).
   home that O gets the oars out any time. Nothing about the wind (the user, 10 Nov: "keep it
   secret ... don't do a big thing ... We want to keep it as the Easter egg, the thing that you
   figure out"). After Dignity's cutscene.
-  The hint moves here too (10 Nov): "I wonder if there's another way round" now plays after
-  you're sunk, not on first sighting the checkpoint ("will probably come after you get sunk").
-  The chain: you see the wind, and work out for yourself that the oars get you past it.
+  No hint of another way round, here or anywhere (10 Nov; RULES.md, "Hidden gems, never
+  hinted"). The chain: you see the wind, and work out for yourself that the oars get you past it.
   Sunk only by a real hit (10 Nov): Bella's first shot is the warning (her giggle stays); a gun
   that actually hits you sinks her, and you row home. No more patching a bit of damage with
   Carpentry at the checkpoint: "it probably adds a bit more stakes ... you are in a tiny sloop at
   this point, after all."
+
+- **Each starting point in the URL, to share (10 Nov):** "make it so that each starting point is
+  something that I can put into the URL as well, so that I can share that animation with
+  somebody". Every start the cheats offer (and the cutscenes, Dignity's and the map's) gets a link,
+  den.html?at=..., that opens the den straight there.
 
 ## Needs a playtest to pin down
 

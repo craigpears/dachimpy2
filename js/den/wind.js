@@ -237,13 +237,13 @@ export function windSay(e) {
     return toast(`The wind's backing round: soon it'll blow ${windWords(e.d)}`);
   }
   if (e.kind === 'wind') {
-    if (e.s < e.was.s) return toast(e.s ? 'The wind\'s dropping' : `Becalmed!${h.oars ? '' : ' She\'s dead in the water till the wind picks up: O runs out the oars'}`);
+    if (e.s < e.was.s) return toast(e.s ? 'The wind\'s dropping' : (h.oars ? 'Becalmed!' : 'Becalmed! She\'s dead in the water till the wind picks up'));
     if (e.s > e.was.s) return toast(e.s === 2 ? 'The wind\'s picking up' : `A breath of wind, ${windWords(e.d)}`);
     return toast(`The wind's shifted: it blows ${windWords(e.d)} now`);
   }
   // Only when she really won't (10 Nov: "it's coming up a pop-up saying you can't sail there. Well,
   // it is letting me"): the pilot doesn't row for her any more.
-  if (e.kind === 'headwind') return toast('She can\'t sail to the pin: it\'s dead against the wind. O: out oars and row her there, or wait for it to shift', true);
+  if (e.kind === 'headwind') return toast('She can\'t sail to the pin: it\'s dead against the wind', true);
   if (e.kind === 'move' && e.irons) {
     const now = performance.now();
     if (!(now < (sail.said.ironsAt ?? 0))) { sail.said.ironsAt = now + 4000; toast(e.m === 'F' ? 'In irons! Her bow\'s into the wind: she makes no way' : 'In irons: she swings her head round, but can\'t make way into the wind', true); }

@@ -26,9 +26,8 @@
    by the locks (the canal's chain of them, cut through the headland beside it: src/den-lock.ts),
    out of its sight the whole way; that costs puzzles too, a go of Bilge at each lock up. Its
    reef's far end, the long way round that cost only time, was closed once the locks were the way
-   round (the user, 10 Nov). Nothing says the locks are there, only a hint where she sights it at
-   the end of the trade wind's run ("the hint to the canal is only supposed to appear once you get
-   right next to the Imperial checkpoint": the user, 10 Nov).
+   round (the user, 10 Nov). Nothing says the locks are there, nor how to get past it: all yours to
+   find (the user, 10 Nov: "I like these just to be hidden gems that you work out").
 
    And its guns can be knocked out, "just the same as" the turret that was (the user, 10 Nov:
    "everything should be destructive"): a hit from her guns on a gun's bastion quietens that gun a
@@ -136,15 +135,12 @@ export class Checkpoint {
         this.battery.roused = true;
         return g >= 0 ? { on: 'gun', gun: g, did: this.battery.hit(g), first } : { on: 'gatehouse', first };
     }
-    /** Her square now (Helm.pose, after each tick): whether she's sighted it (from the den's side,
-        the hint first), or got through. */
+    /** Her square now (Helm.pose, after each tick): whether she's sighted it, or got through. */
     watch(p) {
         const out = [], K = LAY.CHECKPOINT;
         const near = Math.max(Math.abs(p.c - K.GATE), Math.abs(p.r - K.ROW));
         if (!this.sighted && near <= CHECK.SIGHT) {
             this.sighted = true;
-            if (this.side === 'near' && p.r < K.ROW)
-                out.push({ kind: 'hint' });
             out.push({ kind: 'sighted' });
         }
         if (near > CHECK.SIGHT + 1) {
@@ -169,9 +165,6 @@ export class Checkpoint {
         return out;
     }
 }
-/** The hint, as she sights it the first time: there's another way, but not where (the user's own
-    words, 10 Nov). */
-export const HINT = 'An imperial checkpoint... I wonder if there\'s another way round';
 /** Whether a square is the checkpoint's (its piers, its bastions). */
 export function isCheckpoint(sea, c, r) {
     const K = LAY.CHECKPOINT;

@@ -151,9 +151,8 @@ describe("her lines on the checkpoint's own events (10 Nov)", () => {
     expect(heard({ kind: 'through', how: 'locks', back: false, hits: 0 })).toBe('canal');
     expect(heard({ kind: 'through', how: 'locks', back: true, hits: 0 })).toBe(null);
   });
-  it('nothing for being sighted, the hint or the calm', () => {
+  it('nothing for being sighted or the calm', () => {
     expect(heard({ kind: 'sighted' })).toBe(null);
-    expect(heard({ kind: 'hint' })).toBe(null);
     expect(heard({ kind: 'calm' })).toBe(null);
   });
 });
