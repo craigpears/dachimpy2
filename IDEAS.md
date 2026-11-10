@@ -401,6 +401,12 @@ then "she's definitely a penguin side quest".
   "double backflip" is a whirlpool pair that spins her right round twice; the turns she counts
   are the turns the whirlpools make; the penguin in the balaclava is really there, up to
   something, where she said. The funny part is finding out she was right all along.
+- **Where you find her (10 Nov):** off to the right, "just kind of hanging out on her own on a
+  little deserted island with ... all her different familiars hanging around her". She's "a very
+  animals person ... the familiar version of a cat lady, just with 20 different familiars all
+  around her". Rodrigo among them, and Bubba "definitely". One more the user wants in but not
+  named in the game (the one heard as "CZ Junior"). Each familiar a little character doing its
+  own thing on the island.
 (To shape with the user: which puzzle wins the penguin, and what Kikkit gives you for bringing
 one back, if she even remembers asking.)
 

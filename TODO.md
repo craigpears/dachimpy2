@@ -123,6 +123,13 @@ the site (`.assetsignore` skips `*.md`).
   somebody". Every start the cheats offer (and the cutscenes, Dignity's and the map's) gets a link,
   den.html?at=..., that opens the den straight there.
 
+- **The Sailing puzzle, for Kikkit's quest (10 Nov):** Kikkit's penguin quest is next up once the
+  work in hand is done ("that is next up ... I guess you can start some of that now because that
+  requires the sailing puzzle"). First the Sailing puzzle itself, Puzzle Pirates' own rules
+  checked on YPPedia, as a module knowing nothing of the den, tested and with bots; its Vegas (or
+  whatever its real big combo is) sends her a long run forward in one go (IDEAS.md, "Kikkit's
+  penguin").
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
