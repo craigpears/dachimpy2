@@ -279,6 +279,11 @@ moving. It gives such a nostalgia." What's next:
   same puzzle as a route as well as a reward, in keeping with "Every other way through costs a
   puzzle" (RULES.md). (Whether the coins are the den's doubloons or loot of their own, and what a
   bribe costs: to shape with the user.)
+  **Bring back the crew's puzzles driving the helm (10 Nov):** in Puzzle Pirates, the crew's
+  Sailing and Rigging puzzles are what give the helm its moves. The user would like that back:
+  the helm steers left and right, "but if somebody starts doing things in sailing or rigging,
+  then that can interact", so the crew's puzzles feed her speed and her moves, as the rowing
+  board now feeds her oars. ("That's full of ideas here": to shape with the user.)
 - **Gunnery at sea, faster than Puzzle Pirates, on timing (9 Nov).** In Puzzle Pirates a round
   of Battle Navigation plays every 35 seconds or so, in four slots, and you know just where a ship
   coming at you will move. The user would like it faster paced: load the guns (on a ship or the

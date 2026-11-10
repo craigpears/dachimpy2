@@ -110,7 +110,21 @@ the site (`.assetsignore` skips `*.md`).
   Over a shoal the deep channel twists and you plan your clears to follow it; running aground
   just stops her till you clear her off. The graphics suit rowing rather than bilging ("you'd have
   to update the graphics to suit the rowing theme"). Goes with the wind and oars, and gives the
-  shallows the puzzle they were missing.
+  shallows the puzzle they were missing. For now the single-player version: one full Bilge board,
+  dressed for rowing on each side (10 Nov: "a full bilge board, obviously with the rowing kind of
+  graphics on each side"). No cap on a big clear: "everything should be proportionate, but I
+  guess that's the point of Vegas. I want the funny animation." A Vegas on each side at once
+  sends her zooming at super speed, "the same as traveling on the winds", with her rowers going
+  like crazy. (The rules are built: `src/rowing.ts`. The board, its look and the oars at sea are
+  next.)
+
+- **Row through the imperial checkpoint (10 Nov):** "this race idea was the funny one. We
+  absolutely need that. We need our own puzzle where we have to get through the Imperial
+  checkpoint by doing slow row and then fast rowing with the Vegas." A checkpoint on the main
+  shipping lane, its guns the turrets the sea already has (IDEAS.md, "An imperial checkpoint"):
+  you row her through it by port and starboard, slow and steady under its guns, and a Vegas on
+  each side gets you through at a rush. Running it under sail as well. (The crane round it and
+  the bribe stay ideas for later.)
 
 - **A crane up a cliff, to somewhere of its own (9 Nov):** "I really do think we need the Wacky
   Races stuff, like the crane thing ... I just really love the idea. I want to see what it looks
