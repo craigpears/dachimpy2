@@ -162,12 +162,6 @@ the site (`.assetsignore` skips `*.md`).
   the crane, haul her up, and the like), the offer is in the view where you're looking, at the
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
-- **Show where the stairs' boundary is (10 Nov):** "I can. Yeah, I just had to rearrange it a
-  bit. But yeah, I've gotten there, actually, which makes it more rewarding ... I think it should
-  certainly be clearer what the boundary of the stairs are, because I couldn't figure out really
-  how that I could all rearrange this a bit and then work within the boundary in a more creative
-  way." Show how far a piece may stick out round the stairs frame (its margin), so you can see the
-  room you have to rearrange in.
 
 ## Needs a playtest to pin down
 

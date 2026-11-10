@@ -244,6 +244,49 @@ export function outline(cells, z, color) {
   geo.setAttribute('position', new THREE.Float32BufferAttribute(p, 3));
   return new THREE.LineSegments(geo, new THREE.LineBasicMaterial({ color }));
 }
+/* A frame's room (CarpentryFrame.room, src/carpentry-frame.ts), chalked round it where it's limited:
+   the squares a piece may stick out over faintly tinted, and a dashed chalk line round the edge of
+   all a piece may cover, so you can see what room you have to rearrange in (the user, 10 Nov, on the
+   stairs: "it should certainly be clearer what the boundary of the stairs are"). In cell space, at
+   depth z (the tint at tz); brighter while you've a piece in hand (roomGlow). */
+const ROOM_SHAPES = Object.values(C.ORIENTS_BY_LETTER).flat().map((o) => o.cells);
+const roomLine = new THREE.LineDashedMaterial({ color: '#efe6cf', dashSize: S * 0.2, gapSize: S * 0.13, transparent: true, opacity: 0.4, depthWrite: false });
+const roomTint = new THREE.MeshBasicMaterial({ color: '#efe6cf', transparent: true, opacity: 0.06, depthWrite: false, side: THREE.DoubleSide });
+const roomSq = new THREE.PlaneGeometry(S, S);
+export function roomMarks(carp, z, tz = z) {
+  const g = new THREE.Group();
+  if (!carp.bounded()) return g;
+  const room = carp.room(ROOM_SHAPES);
+  for (const [r, c] of room) {
+    if (carp.isHole(r, c)) continue;
+    const m = new THREE.Mesh(roomSq, roomTint);
+    m.position.set((c + 0.5) * S, -(r + 0.5) * S, tz);
+    m.renderOrder = 1;
+    g.add(m);
+  }
+  // The line goes round the frame and what's in it too, so it's the outer edge of the room.
+  const edge = room.concat(carp.cells, carp.laid.flatMap((p) => p.cells));
+  const line = outline(edge, z, '#efe6cf');
+  line.material.dispose();
+  line.material = roomLine;
+  line.computeLineDistances();
+  line.renderOrder = 1;
+  g.add(line);
+  return g;
+}
+// Swap a frame's chalked room for a fresh one (its pieces moved): `old`'s geometry freed.
+export function redrawRoom(parent, old, carp, z, tz) {
+  if (old) { old.removeFromParent(); old.traverse((o) => { if (o.isLineSegments) o.geometry.dispose(); }); }
+  const g = roomMarks(carp, z, tz);
+  parent.add(g);
+  return g;
+}
+// Brighter with a piece in hand, eased.
+export function roomGlow(holding, dt) {
+  const e = 1 - Math.exp(-dt * 8);
+  roomLine.opacity += ((holding ? 0.85 : 0.4) - roomLine.opacity) * e;
+  roomTint.opacity += ((holding ? 0.14 : 0.06) - roomTint.opacity) * e;
+}
 // The same piece, centred on its own origin (for carrying and for the piles), with a bold dark edge
 // on both faces, so its shape reads from above on a crate and from behind when held overhead (the
 // user, 8 Nov: "you can't see the pieces on the crates or above your head ... so much anymore").

@@ -7,7 +7,7 @@ import { CarpentryFrame } from '../carpentry-frame.js';
 import { HIGH } from '../den-bilge.js';
 import { beachFloor } from '../den-beach.js';
 import { dyeHex } from '../den-look.js';
-import { C, S, WOOD_D, STONE_D, WALL_Z, DEN_BACK, PAY, k, rand, $, denLook, scene, camera, hemi, paintSky, mat, mesh, canvasTex, woodTex, groundTex, WOOD, woodMat, pieceGroup, outline, xrMat, addXray, V3, basis, flags, flagpole, pirate, HOP, carry, obstacles, G, wm, burst, toast, tween, fatOutline, v3, worldLets } from './world.js';
+import { C, S, WOOD_D, STONE_D, WALL_Z, DEN_BACK, PAY, k, rand, $, denLook, scene, camera, hemi, paintSky, mat, mesh, canvasTex, woodTex, groundTex, WOOD, woodMat, pieceGroup, outline, xrMat, addXray, V3, basis, flags, flagpole, pirate, HOP, carry, obstacles, G, wm, burst, toast, tween, fatOutline, v3, worldLets, redrawRoom } from './world.js';
 import { wall, X, cellPlane, updateStats } from './wall.js';
 import { GD, GUN_FRAME_Z, gd, gunX0, gunZ0, partR0, gunShape, makeGunDeck, gundeckLets } from './gundeck.js';
 import { fair, lastPlaced, refill, piecesLets } from './pieces.js';
@@ -299,6 +299,9 @@ export function frameState(f) {
   f.open = f.carp.open();
   f.exact = f.open.length % 5 === 0 && tileable(f.open);
   f.sig = '';
+  // The room a piece has round it, chalked where it's limited (the stairs: not far above the treads).
+  // On the stairs the line's on their face, the tint on the cave wall behind; it goes with the frame.
+  if (f.carp.bounded()) f.room = f.done || f.carp.done() ? (f.room?.removeFromParent(), null) : redrawRoom(f.group, f.room, f.carp, f.kind === 'stair' ? 0.07 : 0.08, f.kind === 'stair' ? -STAIR_W - 0.005 : 0.02);
 }
 // Every spot a piece could go in a frame: covering at least one empty square of it, clear of the
 // pieces already there. Squares off the frame are allowed; `over` counts them.
@@ -361,6 +364,8 @@ export function finishFrame(f, quiet = false) {
   if (f.done) return;
   f.done = true;
   f.label.remove();
+  f.room?.removeFromParent();   // (its chalked room goes with it)
+  f.room = null;
   if (lastPlaced?.frame === f) piecesLets.lastPlaced = null;
   let waste = 0;
   const j = ramp.jobs[f.i];

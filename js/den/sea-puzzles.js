@@ -5,7 +5,7 @@ import { FairDeal } from '../den-deal.js';
 import { KEYS as VIEW_KEYS, quarters, centreOn, clampTo, liftTip, UNDO_TIP } from '../den-carp-view.js';
 import { held } from '../carpentry-frame.js';
 import { PATCH } from '../den-patch.js';
-import { C, S, scene, camera, mat, mesh, woodTex, woodMat, cellBox, pieceGroup, outline, rotCW, rotCCW, flip, V3, keys, shake, ray, burst, toast, fatOutline, worldLets } from './world.js';
+import { C, S, scene, camera, mat, mesh, woodTex, woodMat, cellBox, pieceGroup, outline, rotCW, rotCCW, flip, V3, keys, shake, ray, burst, toast, fatOutline, worldLets, redrawRoom } from './world.js';
 import { roomyShapes } from './wall.js';
 import { ghostMats } from './pieces.js';
 import { cursor } from './raids.js';
@@ -73,12 +73,8 @@ function patchOpen(hole, away = null) {
   }
   patch.rim = outline(hole.cells, 0.03, '#ffd58a');
   face.add(patch.rim);
-  // The deck round it a piece may rest on, chalked.
-  const all = [];
-  for (let r = b.r0; r < b.r0 + b.h; r++) for (let c = b.c0; c < b.c0 + b.w; c++) all.push([r, c]);
-  patch.chalk = outline(all, 0.02, '#e9dfc8');
-  patch.chalk.material.transparent = true; patch.chalk.material.opacity = 0.45;
-  face.add(patch.chalk);
+  // The deck round it a piece may rest on, chalked as every frame's room is (world.js: roomMarks).
+  patch.chalk = redrawRoom(face, null, hole, 0.02, 0.015);
   patch.wood = new THREE.Group();
   face.add(patch.wood);
   if (away) { away.mount(g); finishOpen(); return; }
@@ -114,7 +110,7 @@ export function patchShut() {
   patch.crate?.removeFromParent();
   if (patch.ghost) { patch.ghost.removeFromParent(); patch.ghost = null; }
   patch.ghostKey = '';
-  if (patch.rim) { patch.rim.removeFromParent(); patch.chalk.removeFromParent(); patch.rim = patch.chalk = null; }
+  if (patch.rim) { patch.rim.removeFromParent(); patch.chalk?.removeFromParent(); patch.rim = patch.chalk = null; }
   // (a frame away from her deck is the crane's: its board stays where it is, and isn't cleared with hers)
   if (patch.at) { patch.group = patch.face = patch.wood = null; patch.at = null; }
   struck(false);
@@ -183,6 +179,7 @@ export function patchPlace() {
   burst(at, '#e8c890', 8, 1.2);
   if (hand.from) hand.from.wait = hand.from.waitFull;   // the crate restocks
   patch.hand = null;
+  chalkRoom();
   if (hole.done()) {
     burst(at, '#f0d9a8', 14, 2);
     if (patch.at) patch.at.done(hole);
@@ -203,6 +200,13 @@ function patchLift(i) {
   patch.hand = { letter: h.letter, cells: h.cells, from: null };
   patch.r = h.r; patch.c = h.c;
   patch.lift = -1;
+  chalkRoom();
+}
+// The room chalked afresh as pieces go in and come out; gone once the hole's filled.
+function chalkRoom() {
+  if (!patch.face) return;
+  if (patch.hole.done()) { patch.chalk?.removeFromParent(); patch.chalk = null; }
+  else patch.chalk = redrawRoom(patch.face, patch.chalk, patch.hole, 0.02, 0.015);
 }
 const patchTakeBack = () => patchLift(patch.hole.laid.length - 1);
 // A click on the board: fit the piece in your hands, or pick up the one you're pointing at.

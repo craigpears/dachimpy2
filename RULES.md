@@ -1575,6 +1575,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     puzzle. You've got to make the things fit.") The way out is to lift pieces back out: any piece
     in a frame that isn't finished, anyone's, by pointing at it (or standing by it, with the
     keyboard) and pressing Space or clicking. It goes into your hands.
+  - **You can see the room a piece has (10 Nov).** "it should certainly be clearer what the
+    boundary of the stairs are, because I couldn't figure out really how that I could all rearrange
+    this a bit and then work within the boundary in a more creative way." Where a frame limits how
+    far a piece may stick out (the stairs, her deck patch, the crane), that room is chalked round
+    it: a dashed line at its edge and a faint tint on its squares, the frame's own squares left
+    plain, brighter while you hold a piece. It's exactly what fits (`CarpentryFrame.room`), redrawn
+    as pieces go in and out, and goes when the frame's full. Frames a piece may stick out of any way
+    show none. Having got there by rearranging: "I've gotten there, actually, which makes it more
+    rewarding", so the stairs' rules stay as they were.
   - **One Carpentry everywhere you build (10 Nov).** The user, building the crane: "is this not
     supposed to be like the same? That's what I mean by there should be one modular mechanic. So
     the idea that you can pick up a piece like that you've just placed should be in that core

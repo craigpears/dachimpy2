@@ -13,7 +13,7 @@ import { countingDown } from './den-raids.js';
 import { BILGE } from './den-bilge.js';
 import { beachStep } from './den-beach.js';
 import { cleanLook, cleanDen } from './den-look.js';
-import { C, S, SPEED, HP, BUILD_SECS, tune, k, $, myLook, denLook, renderer, scene, camera, skyDome, PILE_SC, rotCW, rotCCW, flip, animateWalk, faceTo, V3, pirate, HOP, STEP, view, carry, bounds, obstacles, G, keys, tweens, sparks, raiders, ghostKey, ghost, target, shake, mouseMode, mouse, topView, keyAt, wm, wmBlock, wmLinger, wallView, ray, wallPlane, toast, v3, L0, L1, L2, worldLets } from './den/world.js';
+import { C, S, SPEED, HP, BUILD_SECS, tune, k, $, myLook, denLook, renderer, scene, camera, skyDome, PILE_SC, rotCW, rotCCW, flip, animateWalk, faceTo, V3, pirate, HOP, STEP, view, carry, bounds, obstacles, G, keys, tweens, sparks, raiders, ghostKey, ghost, target, shake, mouseMode, mouse, topView, keyAt, wm, wmBlock, wmLinger, wallView, ray, wallPlane, toast, v3, L0, L1, L2, worldLets, roomGlow } from './den/world.js';
 import { ramp, frames, frameAt, openJob, frameState, frameFits, putFramePiece, finishFrame, heightAt, onRampart, startHouse, houseState, plotLabel, atPlot, biomeTick, waveFlags, outside, throughGate, gateTick, towerLegs, selfSeen } from './den/land.js';
 import { wall, X, Y, newWall, doorOf, fits, layerOpen, curLayer, patchFits, nextMat, nextLayer, barFrac, labelFor, frameLabel, updateStats, breakHole, dropPiece, dropBoard, holeX } from './den/wall.js';
 import { GD, gd, gdCell, atGunDeck, gunOn, onGunDeck, gunSq, deckBlocks, loopsOf, gunTick, addStore, updateGunDeck, gunLabels, chalk, chalkAhead, turnArrowAhead, chalkRelease, wheelDeck, pointChalk, gundeckLets } from './den/gundeck.js';
@@ -693,6 +693,7 @@ function update(dt) {
   updateMates(dt);
   waveFlags(dt);
   biomeTick(dt);
+  roomGlow(!!carry || !!(patch.on && patch.hand), dt);   // (a frame's chalked room, brighter with a piece in hand)
   landingTick();
   gateTick(dt);
   selfSeen();

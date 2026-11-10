@@ -94,4 +94,49 @@ describe("Carpentry's frame", () => {
     expect(f.lay('I', flatI).over).toBe(2);
     expect(f.done()).toBe(true);
   });
+
+  /* The user (10 Nov), stuck on a tiny gap in the stairs: "it should certainly be clearer what the
+     boundary of the stairs are". The room drawn round a frame is every square `fit` lets a piece cover. */
+  describe("the stairs' boundary isn't clear (10 Nov)", () => {
+    const every = Object.values(carp.ORIENTS_BY_LETTER).flat().map((o) => o.cells);
+    // The left stairs as the den builds them (js/den/land.js, openJob): a stringer four deep under
+    // the treads; a piece may stick up at most a square above the tread line (carried on past the
+    // foot).
+    const n = 8, top = (c: number) => n - 1 - c;
+    const stairs = () => {
+      const cells: Cell[] = [];
+      for (let c = 0; c < n; c++) for (let r = top(c); r < Math.min(n, top(c) + 4); r++) cells.push([r, c]);
+      return new CarpentryFrame(cells.slice(0, cells.length - cells.length % 5), { allow: (r, c) => r >= top(c) - 1 });
+    };
+    // Every square some piece covers, every way up, in a spot that fits: tried square by square.
+    const byHand = (f: CarpentryFrame) => {
+      const out: string[] = [];
+      for (let r = -8; r < n + 8; r++) for (let c = -8; c < n + 8; c++) {
+        if (every.some((sh) => sh.some(([pr, pc]) => f.fit(sh, r - pr, c - pc)))) out.push(String([r, c]));
+      }
+      return out.sort();
+    };
+
+    it('shows just the squares a piece may cover, as it stands', () => {
+      const f = stairs();
+      expect(f.bounded()).toBe(true);
+      expect(sorted(f.room(every))).toEqual(byHand(f));
+      // Nothing more than a square above the treads: the stairs stay climbable.
+      expect(f.room(every).every(([r, c]) => r >= top(c) - 1)).toBe(true);
+      expect(f.room(every).some(([r, c]) => r === top(c) - 1)).toBe(true);
+      expect(f.room(every).some(([r, c]) => c < 0 && r === n - 1)).toBe(true);   // (on the floor past the foot)
+      // Half built (the bottom step up), still exactly what fits.
+      expect(f.put('I', flatI, 7, 0)).toBe(true);
+      expect(f.put('I', upI, 0, 7)).toBe(true);
+      expect(sorted(f.room(every))).toEqual(byHand(f));
+      expect(f.room(every).some(([r, c]) => f.occupied(r, c))).toBe(false);
+    });
+
+    it('matches the margin where there is one, and is none where a piece may stick out any way', () => {
+      const f = new CarpentryFrame(hole('###', '#..', '###'), { margin: 1 });
+      expect(sorted(f.room(every))).toEqual(byHand(f));
+      expect(f.room(every).every(([r, c]) => r >= -1 && r <= 3 && c >= -1 && c <= 3)).toBe(true);
+      expect(new CarpentryFrame(hole('#####')).bounded()).toBe(false);
+    });
+  });
 });

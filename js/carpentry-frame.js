@@ -13,7 +13,10 @@
    - any piece laid can be lifted back out, not only the last, till the frame's full: its squares
      are freed and the others stay as they are (a gap is never filled for you: lifting pieces back
      out is the way out of one);
-   - full, what sticks out is sawn off (Shipshape when nothing did). */
+   - full, what sticks out is sawn off (Shipshape when nothing did).
+   Where a frame's room is limited (a margin, or squares its place forbids), `room` says which squares
+   a piece may cover, so it can be shown: the user (10 Nov), stuck on the stairs, "it should certainly
+   be clearer what the boundary of the stairs are". */
 const key = (r, c) => `${r},${c}`;
 /** A lifted piece as it goes into your hands. */
 export function held(l) {
@@ -54,8 +57,9 @@ export class CarpentryFrame {
     isHole(r, c) { return this.set.has(key(r, c)); }
     /** Whether a piece (its squares, at the top left) goes with its top-left at r, c: within the
         margin round the frame, clear of the pieces in, and over at least one empty square of it. */
-    fit(shape, r, c) {
-        const t = this.taken(), b = this.box, m = this.margin;
+    fit(shape, r, c) { return this.spot(this.taken(), shape, r, c); }
+    spot(t, shape, r, c) {
+        const b = this.box, m = this.margin;
         let over = 0, inside = 0;
         for (const [pr, pc] of shape) {
             const R = pr + r, Cc = pc + c;
@@ -84,6 +88,35 @@ export class CarpentryFrame {
                     out.push(s);
             }
         return out.sort((a, z) => a.r - z.r || a.c - z.c);
+    }
+    /** A piece's room is limited here: by a margin, or by squares its place forbids. (Where it may
+        stick out any way, there's no boundary to show.) */
+    bounded() { return Number.isFinite(this.margin) || !!this.allow; }
+    /** The frame's room as it stands: every square a piece (any of these shapes: every way up of
+        every piece, say) could cover in a spot it fits now, the frame's own empty squares and all.
+        Exactly what `fit` takes, so what's drawn round a frame is its real boundary. */
+    room(shapes) {
+        const t = this.taken(), open = this.open(), seen = new Set(), out = [];
+        for (const shape of shapes) {
+            const tried = new Set();
+            for (const [er, ec] of open)
+                for (const [pr, pc] of shape) {
+                    const r = er - pr, c = ec - pc;
+                    if (tried.has(key(r, c)))
+                        continue;
+                    tried.add(key(r, c));
+                    if (!this.spot(t, shape, r, c))
+                        continue;
+                    for (const [a, z] of shape) {
+                        const kk = key(a + r, z + c);
+                        if (!seen.has(kk)) {
+                            seen.add(kk);
+                            out.push([a + r, z + c]);
+                        }
+                    }
+                }
+        }
+        return out.sort((a, z) => a[0] - z[0] || a[1] - z[1]);
     }
     /** Fit a piece there, if it goes. */
     put(letter, shape, r, c) {
