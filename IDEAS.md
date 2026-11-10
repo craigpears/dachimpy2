@@ -426,8 +426,10 @@ then "she's definitely a penguin side quest".
   game ties no clear to forward moves, so the den's run is ours: a Double 2 squares, Triple 3,
   Bingo 4, Donkey 5, a Vegas 7 (plus one per step past six). Its bots, from random up to one that
   builds, never made a Vegas in 3000 drops each (the best made a double or better about 7 times in
-  100, a four-step chain at most), so a Vegas is a long, planned build. For the last stretch: a
-  gentler deal, or a lower bar than a full Vegas (to pin down with the user).
+  100, a four-step chain at most), so a Vegas is a long, planned build. But the user (10 Nov): "Vegas
+  is not only doable, I think you end up with like Vegas 3s and 4s quite easily" once you know the
+  staircase, so the bots are missing the technique (TODO.md, "Sailing, as the user remembers"),
+  and a full Vegas stays the bar for the last stretch.
 - **But blown all the way back to her island (10 Nov):** "I do want it to go all the way back to
   her island. I don't want progress to sit. That's the funny [part]": every time the wind catches
   you, you're back on Kikkit's island, and she finds it hilarious, giggling that you got caught in

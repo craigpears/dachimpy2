@@ -130,6 +130,21 @@ the site (`.assetsignore` skips `*.md`).
   whatever its real big combo is) sends her a long run forward in one go (IDEAS.md, "Kikkit's
   penguin").
 
+- **Sailing, as the user remembers playing it (10 Nov):** the module (`src/sailing.ts`, built 10
+  Nov) filled its gaps with guesses; the user's memory of the real game:
+  - **You see the next pair**, "obviously not just the single one in the top left somewhere".
+  - **Difficulty is more and bigger platforms:** "you may start with 2 or 3, you end up with 4 or
+    5 and more ... boundaries, so you have to kind of navigate around them. Doesn't get
+    drastically bigger."
+  - **A Vegas is doable, even easy if you know how:** "Vegas is not only doable, I think you end up
+    with like Vegas 3s and 4s quite easily." Four to pop; you build a staircase, pairs stacked two
+    of a colour with the third hanging over to the side, so each clear drops the overhang onto the
+    next. The bots never made one, so either they don't know the staircase or a rule's off: a bot
+    that builds staircases should make Vegases, and a test should show one built that way.
+  - **Platforms break first, then pieces:** "that's, I think, how you get the extra", two chains
+    going at once, one waiting on the other: a platform clears, what falls sets off a clear,
+    which drops onto another platform, and only then do the plain lines go.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
