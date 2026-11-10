@@ -162,6 +162,21 @@ the site (`.assetsignore` skips `*.md`).
   the crane, haul her up, and the like), the offer is in the view where you're looking, at the
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
+- **A raider or two more in peace (10 Nov):** "I think maybe one or two more raiders." The
+  occasional raiders come one to three at a time, every 90 to 180 seconds. More of them, to throw
+  spare pieces at (how many more, and whether more often or more to a boat, to pin down with the
+  user).
+- **The soldiers shouldn't die (10 Nov):** "I'm not sure about the soldiers. Maybe they can go out of
+  the gates, but also, are they going to die? I don't want them to die." Today a soldier who loses
+  a duel falls and is gone for good. Going out is fine; they shouldn't be lost (what happens
+  instead, to pin down with the user).
+- **Nowhere to get rid of a piece you don't want (10 Nov):** "I've got, like, an M piece I need for
+  the stairs. I need a rare piece for my shack. I mean, I don't mind that these are kind of things
+  you have to really earn over time, I guess. But at the same time, it's a bit frustrating. Like,
+  well, how do I get rid of these pieces? ... there's only so far you can really just, like, throw
+  junk at the wall, because there's so much stuff to build." Throwing at a raider is the only way
+  to clear a crate today (RULES: "Throwing at a raider is the only way to discard"). Some way to
+  turn over pieces you can't use (to pin down with the user).
 
 ## Needs a playtest to pin down
 
