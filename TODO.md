@@ -161,10 +161,6 @@ the site (`.assetsignore` skips `*.md`).
   YPPedia page's pictures, and redraw any piece that doesn't read as the real one (RULES.md, "A
   puzzle's pieces look like the real ones").
 
-- **The patch's pieces show when she rows (10 Nov):** "when I've just clicked oars, I see the
-  carpentry pieces for the repairing the damaged carpentry puzzle I've just played." Once she's
-  patched, nothing of the patch puzzle should show over the rowing board.
-
 - **A wind by the old wreck beyond the checkpoint (10 Nov):** the wind, parked everywhere else,
   blows in one place only: not the lagoon (the user first said so, then: "maybe I didn't mean the
   lagoon"), but "once you get past the Imperial checkpoint, there's that bit to the left ... where
@@ -198,6 +194,9 @@ the site (`.assetsignore` skips `*.md`).
   turn right." Out of a lock the way on must be plain to see: she comes out facing the canal, or
   the canal's water, banks and the next lock's gates are in view ahead and lead the eye round the
   turn, never a blank cliff.
+  The same at the second lock (the user: "you are having to bump into the walls to get around this
+  lock system. That does not seem right"): the canal between locks is laid out so she can be
+  steered or rowed through without bumping the banks, every turn a clear one.
 
 ## Needs a playtest to pin down
 
