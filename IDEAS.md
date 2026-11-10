@@ -635,7 +635,15 @@ Building on what's there now (the walk and its stairs are made of pieces that st
       capstan to turn into line (a Carpentry-like fitting, or a short Bilge round at the bars).
       Slow but sure: good for the very worst shoals, and for a calm.
     (Port and starboard is the pick for cohesion: one mechanic used a new way, and it makes the
-    oars steer rather than just go. To shape with the user.)
+    oars steer rather than just go. The user loved it, 10 Nov: in TODO.md.)
+    **Rowing as a team, and the heart of a race (10 Nov):** "this would make the core of a race
+    puzzle in itself". The split board is for solo; in a crew, each pirate rows one side on a board
+    of their own: "you've got your side and you've got your mate's side". Out of step, "one's
+    outperforming the other, you just end up rowing in circles"; "if you both clear a bingo at the
+    same time, that gets you that good balanced forward momentum". A Vegas on one side is a burst,
+    with "that one pirate ... going like crazy" at the oars. "A real team building puzzle", and
+    "absolutely hilarious". Goes with the race idea and "Better together" in STORY.md. (The rowing
+    rules are being built to take a side from either board, so this can come later.)
     **Weather is where oars make sense (9 Nov):** the wind can drop. Under sail she's quicker, but
     when the wind drops a ship that's all sails is "dead in the water until the wind picks back
     up again", and under sail you "can't go against the wind". Oars keep her moving either way:
