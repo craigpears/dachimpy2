@@ -79,7 +79,13 @@ the site (`.assetsignore` skips `*.md`).
   as long as you can get through eventually if you make a mistake"), and his going off ("a really
   weird animation of the capybara going off ... it wasn't just the animal itself. It was some
   background pieces got caught up in it": only Umami should leave, the bank stays). The crane being built only for
-  the session is fine for a proof of concept (a refresh starts afresh).
+  the session is fine for a proof of concept (a refresh starts afresh). His fall (10 Nov): "why is it
+  so out of sync with the pieces? And it looks very jittery ... ding, ding, ding, ding": in step with
+  the pieces, smooth and slower. Caged while you free him (10 Nov): "being in the cage or being
+  trapped in some way visually makes sense while you're trying to free them. They break free and
+  happily start jumping around." On the board he's shown trapped (a cage, or the net he's tangled
+  in), and once he's cleared off the foot he breaks out of it and bounds about happily before
+  swimming to her.
 
 - **The puzzles' pieces checked against the real ones (10 Nov):** "the last few puzzles, the
   graphics have been placeholders rather than matching the Puzzle Pirate pieces". Compare each
