@@ -133,12 +133,6 @@ the site (`.assetsignore` skips `*.md`).
   seconds), whether the map reads well from where the camera looks down on it, and whether M is
   a good key for it.
 
-- **Dignity's cutscene at the checkpoint (10 Nov).** (RULES.md, "Dignity at the checkpoint".)
-  Seen: "I love it", "she's cute"; her hair, colours and Bella's trip to the real gun redone since,
-  not yet seen. Watch: her new hair and the shadow and atlantean dyes against her portrait;
-  whether Bella's bounds down to the gun read; whether about sixteen seconds is too long; whether
-  her later lines over her head are seen from where the sea's camera usually is.
-
 - **Towers, a lower middle and a night sky (9 Nov), not yet seen by the user.** (RULES.md, "You
   can see out to sea".) Watch for: whether enough of the beach shows from where you usually
   stand; the step down from the towers to the middle; the walk and gun tower spanning the middle
