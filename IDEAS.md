@@ -718,8 +718,7 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     - **Unison:** her heading follows the two oars. Swinging together, she goes straight; one
       oar driving while the other's spent, she turns. So the skill is building big pops and
       timing them to land together.
-    - **Catching a crab:** if the pile reaches the top while the oar's still back, she's caught a
-      crab, the real rowing mishap: that oar jams a moment.
+    - (Catching a crab, an oar jamming when the pile reaches the top: "forget the crabs".)
     - **Solo and crew:** in a crew, a board each side, a pirate each. Solo, one board whose
       colours belong to a side (say warm colours to port, cool to starboard), so which colours
       you pop is how you steer, and a chain that pops both at once is a stroke in unison.

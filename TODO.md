@@ -96,21 +96,11 @@ the site (`.assetsignore` skips `*.md`).
   the primer goes. (How, where it's hosted, and what of the primer's engine the den still needs,
   to pin down with the user when it's time.)
 
-- **The wind is confusing (10 Nov):** "I like the animation and some of the idea, but it's very
-  confusing." In a strong wind "it was still letting me sail around. I'm not seeing like a big
-  speed difference"; "it's coming up a pop-up saying you can't sail there. Well, it is letting
-  me"; and "it changes quite quickly". So: make the wind plainly matter (a big difference in speed
-  with it behind her, across it, and none into it), only say she can't sail somewhere when she
-  really won't, show it on her when she's in irons, and let a wind last a good while, with warning
-  before it drops or shifts.
-
-- **Test mirror strokes on a page of its own (10 Nov, technical):** "definitely test that ... put a
-  test, let's just brainstorm and test the basic idea." IDEAS.md's "Mirror strokes": two Bilge
-  boards, port and starboard, every swap made in mirror on the other. A plain test page outside
-  the den to play it, with a little boat showing where she goes (in circles, when a cascade runs
-  away with one side: "that would be hilarious. Frustrating but funny"), and bots (random, greedy,
-  looking two moves ahead) to see whether better play goes much further, as a check on the skill
-  curve.
+- **Prototype oars against the water (10 Nov, technical):** "certainly prototype that idea"
+  (IDEAS.md, "Oars against the water"; no crabs). On a test page of its own, outside the den:
+  pieces flow in from the top and pile on the oar, their pressure sweeping it back as the drive;
+  pops swing it forward, bigger pops further; the two oars in time keep her straight. Solo, one
+  board whose colours belong to a side. A little boat showing where she goes.
 
 - **Rowing by port and starboard (10 Nov):** the user loves IDEAS.md's "Port and starboard":
   "absolutely hilarious ... not obviously like a brand new puzzle, but it's certainly a nice twist
