@@ -35,6 +35,15 @@
     .sailhud .gun.ready { color: #f3ecdc; border-color: var(--gold); }
     .sailhud .gun i { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--gold); }
     .sailhud .gun kbd { font: 700 13px 'Alegreya Sans'; color: var(--ink); background: #3b2a1b; border: 1px solid #6b4e32; border-radius: 4px; padding: 0 5px; }
+    /* The wind (an arrow the way it blows, and how strong) and the oars (a button: O). */
+    .sailhud .wind { height: 34px; padding: 0 10px 0 6px; border-radius: 6px; border: 1px solid #6b4e32; background: #2a1c11; display: flex; gap: 6px; align-items: center; font: 700 14px 'Alegreya Sans'; color: #f3ecdc; white-space: nowrap; }
+    .sailhud .wind b { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #3b2a1b; font: 700 18px/1 'Alegreya Sans'; color: #9fd4ec; }
+    .sailhud .wind.s2 { border-color: #9fd4ec; }
+    .sailhud .wind.s1 b { color: #6f97a6; }
+    .sailhud .wind.s0 { color: var(--dim); }
+    .sailhud .oars { pointer-events: auto; cursor: pointer; height: 34px; padding: 0 10px; border-radius: 6px; border: 1px solid #6b4e32; background: #2a1c11; display: flex; gap: 6px; align-items: center; font: 700 14px 'Alegreya Sans'; color: var(--dim); }
+    .sailhud .oars.on { color: #f3ecdc; border-color: var(--gold); background: #4a3420; }
+    .sailhud .oars kbd { font: 700 13px 'Alegreya Sans'; color: var(--ink); background: #3b2a1b; border: 1px solid #6b4e32; border-radius: 4px; padding: 0 5px; }
     .sailhud .turn { display: flex; gap: 5px; align-items: center; }
     .sailhud .turn > span { font: 700 13px 'Alegreya Sans'; color: var(--dim); margin-right: 3px; }
     .sailhud .tok { width: 34px; height: 34px; border-radius: 6px; border: 1px solid #6b4e32; background: #2a1c11; display: grid; place-items: center; font: 700 22px/1 'Alegreya Sans'; color: #f3ecdc; }
