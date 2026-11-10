@@ -1050,6 +1050,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **Powder barrels:** two lines at once dredges one up, a Bingo two, more three (six on the beach
     at most). It's rolled up the beach to the foot of the wall by a hole, and blows up the next
     raider who comes by, knocking flat every raider within a couple of metres.
+    You're told, not left to find it (10 Nov: "the exploding barrels thing from like bilging on
+    the tide, if you do a combo, should be a bit more discoverable as well. That's too hidden"):
+    the tip as you first start says two lines in one swap dredges up a powder barrel that blows up
+    raiders who come by, and if you come back to the board without ever having dredged one, it
+    says so once more.
   - **The look matches Puzzle Pirates' bilge (the user, 9 Nov: "the graphics need to match Puzzle
     Pirates ... it's supposed to be in the water ... semi-transparent water underneath it, around
     it ... so you can see the water receding").** Seven glassy pieces in the sea's colours, each

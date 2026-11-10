@@ -186,10 +186,6 @@ the site (`.assetsignore` skips `*.md`).
   the middle of the water at the moment. I want to actually walk to it." The landing's jetty should
   run from the beach out to her mooring, and you walk along it to board her (and come back along
   it when you go ashore).
-- **The powder barrels too hidden (10 Nov):** "the exploding barrels thing from like bilging on the
-  tide, if you do a combo, should be a bit more discoverable as well. That's too hidden." Bilge on
-  the beach should tell you, as you start, that clearing two lines in one swap dredges up a powder
-  barrel for the raiders.
 
 ## Needs a playtest to pin down
 

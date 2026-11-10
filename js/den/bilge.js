@@ -209,7 +209,10 @@ export function bilgeEnter() {
   Object.assign(pirate, { x: bilge.x0 + BW * BILGE.SQ / 2, z: BILGE.Z0 + 0.7 });   // at the top of the board, looking out over it
   pirate.g.rotation.y = Math.PI;
   $('intro').classList.add('off');
-  if (!G.bilgeSaid) { G.bilgeSaid = true; say('Bilge the shallows: three in a row clear, and the tide goes out with every good move', false, true); }
+  /* How it works, as you start (the barrels too, 10 Nov: "too hidden"); and if you come back
+     without ever having dredged one, the barrels once more. */
+  if (!G.bilgeSaid) { G.bilgeSaid = true; say('Bilge the shallows: three in a row clear, and the tide goes out with every good move. Clear two lines in one swap to dredge up a powder barrel: it blows up raiders who come by', false, true); }
+  else if (!G.barrelSaid && !G.barrelDredged) { G.barrelSaid = true; say('Clear two lines in one swap to dredge up a powder barrel for the raiders', false, true); }
 }
 // The keys play the board, as in the real puzzle: the arrows (or WASD) move the cursor, Space swaps.
 export function bilgeKey(key, e) {
@@ -245,6 +248,7 @@ export function bilgeSwap() {
   const w = worth(m, tide.water);
   tide.pump(w);
   const nb = barrelsFor(m);
+  if (nb) G.barrelDredged = true;
   for (let i = 0; i < nb; i++) setTimeout(() => dredge(), 500 + i * 450);
   const bits = [];
   if (m.combo) bits.push(m.combo);
