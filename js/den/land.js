@@ -3,6 +3,7 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { gateTop } from '../den-wall.js';
+import { CarpentryFrame } from '../carpentry-frame.js';
 import { HIGH } from '../den-bilge.js';
 import { dyeHex } from '../den-look.js';
 import { C, S, WOOD_D, STONE_D, WALL_Z, DEN_BACK, PAY, k, rand, $, denLook, scene, camera, hemi, paintSky, mat, mesh, canvasTex, woodTex, groundTex, WOOD, woodMat, pieceGroup, outline, xrMat, addXray, V3, basis, flags, flagpole, pirate, HOP, carry, obstacles, G, wm, burst, toast, tween, fatOutline, v3, worldLets } from './world.js';
@@ -232,7 +233,11 @@ export function openJob(i, shape = null) {
   $('labels').append(label);
   const b = C.bbox(shape);
   const f = j.frame = {
-    i, si: j.si, end: j.end, kind: j.kind, part: j.part, cells: shape, walk, b, set, occ: new Set(), filled: new Set(), pieces: [], group: g, label, sig: '', done: false,
+    i, si: j.si, end: j.end, kind: j.kind, part: j.part, cells: shape, walk, b, set, pieces: [], group: g, label, sig: '', done: false,
+    // Carpentry's frame (src/carpentry-frame.ts): what's laid, what fits, lifting a piece back out,
+    // sawing. A piece may stick out any way; on the stairs, at most a square above the treads.
+    // `pieces` are its pieces as drawn, in the same order as its `laid`.
+    carp: new CarpentryFrame(shape, stair ? { allow: (r, c) => r >= stepTop(f, c) - 1 } : {}),
     pz: stair ? 0 : 0.1, zs: stair ? STAIR_W / WOOD_D : 1,
     plane: new THREE.Plane().setFromNormalAndCoplanarPoint(g.getWorldDirection(new THREE.Vector3()), g.getWorldPosition(new THREE.Vector3())),
   };
@@ -290,7 +295,7 @@ function tileable(cells, budget = 20000) {
   return rec(0);
 }
 export function frameState(f) {
-  f.open = f.cells.filter(([r, c]) => !f.filled.has(k(r, c)));
+  f.open = f.carp.open();
   f.exact = f.open.length % 5 === 0 && tileable(f.open);
   f.sig = '';
 }
@@ -301,22 +306,9 @@ export function frameState(f) {
 export const stepTop = (f, c) => (f.end === 0 ? ramp.n - 1 - c : c);
 export function frameFits(cells) {
   const out = [], b = C.bbox(cells);
-  for (const f of frames()) {
-    const seen = new Set();
-    for (const [er, ec] of f.open) for (const [pr, pc] of cells) {
-      const dr = er - pr, dc = ec - pc;
-      if (seen.has(k(dr, dc))) continue;
-      seen.add(k(dr, dc));
-      let over = 0, ok = true;
-      for (const [r, c] of cells) {
-        const kk = k(r + dr, c + dc);
-        if (f.occ.has(kk) || (f.kind === 'stair' && r + dr < stepTop(f, c + dc) - 1)) { ok = false; break; }
-        if (!f.set.has(kk)) over++;
-      }
-      if (!ok) continue;
-      const gc = dc + b.w / 2, gr = dr + b.h / 2, w = frameAt(f, gc, gr);
-      out.push({ frame: f, dr, dc, over, gc, gr, cx: w.x, cy: w.y, cz: w.z });
-    }
+  for (const f of frames()) for (const { r: dr, c: dc, over } of f.carp.fits(cells)) {
+    const gc = dc + b.w / 2, gr = dr + b.h / 2, w = frameAt(f, gc, gr);
+    out.push({ frame: f, dr, dc, over, gc, gr, cx: w.x, cy: w.y, cz: w.z });
   }
   return out;
 }
@@ -326,8 +318,8 @@ export function putFramePiece(f, i) {
   g.position.set(i.dc * S, -i.dr * S, f.pz);
   g.scale.z = f.zs;
   f.group.add(g);
+  f.carp.lay(i.letter, i.shape.map(([r, c]) => [r + i.dr, c + i.dc]));
   const cells = i.shape.map(([r, c]) => k(r + i.dr, c + i.dc));
-  cells.forEach((kk) => { f.occ.add(kk); if (f.set.has(kk)) f.filled.add(kk); });
   const b = C.bbox(i.shape), w = frameAt(f, i.dc + b.w / 2, i.dr + b.h / 2);
   const piece = { group: g, cells, shape: i.shape, over: i.over, cx: w.x, cy: w.y, cz: w.z, by: i.by, info: i, undo: null };
   f.pieces.push(piece);
@@ -354,7 +346,7 @@ export function placeFrame(t, by, hand) {
     if (!f.pieces.includes(piece)) return;
     undo.hpAfter = 0;
     burst(new THREE.Vector3(piece.cx, piece.cy + 0.15, piece.cz), '#e8c890', 8, 2);
-    if (f.filled.size === f.cells.length) finishFrame(f);
+    if (f.carp.done()) finishFrame(f);
     else if (piece.over && by === myId() && f.kind !== 'stair') toast('It sticks out over the frame: the spare gets sawn off', false, true);
   });
   refill(hand.from);
@@ -374,7 +366,7 @@ export function finishFrame(f, quiet = false) {
   if (f.kind === 'stair') {
     // Stairs stay exactly as built, bits sticking out and all: you walk on the tops of the pieces.
     j.tops = new Map();
-    for (const kk of f.occ) { const [r, c] = kk.split(',').map(Number); if (!(j.tops.get(c) <= r)) j.tops.set(c, r); }
+    for (const [r, c] of f.carp.laid.flatMap((p) => p.cells)) if (!(j.tops.get(c) <= r)) j.tops.set(c, r);
     j.up = true;
     if (!quiet) {
       if (f.pieces.some((p) => p.over)) toast('The stairs are up, just as you built them');
@@ -383,19 +375,19 @@ export function finishFrame(f, quiet = false) {
     jobDone(j, quiet);
     return;
   }
-  for (const p of f.pieces) {
-    const kept = [], old = p.group.children[p.group.children.length - 1];
-    p.shape.forEach((cell, i) => {
-      if (f.set.has(p.cells[i])) { kept.push(cell); return; }
+  const sawn = f.carp.saw();
+  f.pieces.forEach((p, n) => {
+    const old = p.group.children[p.group.children.length - 1], kept = sawn[n].kept.map((i) => p.shape[i]);
+    for (const i of sawn[n].cut) {
       waste++;
       const m = p.group.children[i], at = new THREE.Vector3();
       m.getWorldPosition(at);
       if (!quiet) burst(at, '#f0d9a8', 10, 2.5);
       m.visible = false;
-    });
+    }
     old.visible = false;
     p.group.add(outline(kept, 0.002, '#4a2a12'));
-  }
+  });
   if (!quiet) {
     if (waste) toast(`Sawn to fit: ${waste} square${waste > 1 ? 's' : ''} of offcuts`);
     else { G.gold += PAY.master; updateStats(); toast(`Shipshape! Not a scrap wasted (+${PAY.master})`); swordReward(new THREE.Vector3(pirate.x, 1.5, pirate.z), 'shipshape frame'); }

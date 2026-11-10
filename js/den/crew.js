@@ -373,9 +373,9 @@ export function onNet(m) {
       break;
     }
     case 'takeback': {
-      if (net.host && m.pi != null && slotOf(m)?.occ) { unplace(slotOf(m), m.from, false, m.pi); break; }   // lifted out of a frame
+      if (net.host && m.pi != null && slotOf(m)?.carp) { unplace(slotOf(m), m.from, false, m.pi); break; }   // lifted out of a frame
       const where = net.host && slotOf(m), p = where?.pieces[where.pieces.length - 1];
-      if (p && p.by === m.from && p.undo?.hpAfter != null && !(where.occ ? where.done : !p.patch && where.status === 'master')) unplace(where, m.from, false);
+      if (p && p.by === m.from && p.undo?.hpAfter != null && !(where.carp ? where.done : !p.patch && where.status === 'master')) unplace(where, m.from, false);
       break;
     }
     case 'again': if (net.host && G.over) newGame(); break;

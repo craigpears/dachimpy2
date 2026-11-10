@@ -411,7 +411,7 @@ export function fillFrame(f) {
   const spare = [];
   for (let r = -1; r <= f.b.h; r++) for (let c = -1; c <= f.b.w; c++) {
     const kk = k(r, c);
-    if (!f.set.has(kk) && !f.occ.has(kk) && (f.kind !== 'stair' || r >= stepTop(f, c) - 1)) spare.push([r, c]);
+    if (!f.set.has(kk) && !f.carp.occupied(r, c) && (f.kind !== 'stair' || r >= stepTop(f, c) - 1)) spare.push([r, c]);
   }
   const ps = tileFor(f.open, spare);
   if (!ps.length) return false;

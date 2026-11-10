@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { FairDeal } from '../den-deal.js';
 import { PALETTE } from '../den-sword-draw.js';
-import { KEYS as VIEW_KEYS, nextHole, quarters, centreOn, clampTo, nextBoard, arrowStep } from '../den-carp-view.js';
+import { KEYS as VIEW_KEYS, nextHole, quarters, centreOn, clampTo, nextBoard, arrowStep, liftTip } from '../den-carp-view.js';
 import { canRead } from '../den-map.js';
 import { C, S, WOOD_D, REACH, MREACH, WALL_Z, PAY, k, $, scene, mat, mesh, woodTex, WOOD, woodMat, PILE_SC, centred, rotCW, rotCCW, flip, pirate, carry, bounds, G, keys, raiders, cycle, ghostKey, shake, target, ghost, mouse, mouseMode, keyAt, wm, wmLinger, wmBlock, toast, tween, fatOutline, worldLets } from './world.js';
 import { frames, frameAt, frameState, frameFits, placeFrame, onRampart, houseState, atPlot, outside } from './land.js';
@@ -222,17 +222,19 @@ export function canTakeBack() {
   return !!wm || Math.abs(u.piece.cx - pirate.x) <= MREACH;
 }
 // A piece in an unfinished frame you could lift back out: the one under the pointer, or (keyboard)
-// the nearest within reach. Anyone's, as everyone builds together.
+// the nearest within reach. Anyone's, as everyone builds together. (Any piece in it, not only the
+// last: Carpentry's frame's rule, src/carpentry-frame.ts, the same on her deck and the crane.)
 export function liftable() {
   if (carry || pirate.h > 0.3) return null;
   if (mouseMode) {
     const m = mouse?.frame && mouse;
-    if (!m || m.frame.done) return null;
-    const kk = k(Math.floor(m.fr), Math.floor(m.fc)), pi = m.frame.pieces.findIndex((p) => p.cells.includes(kk));
-    return pi < 0 || Math.hypot(m.frame.pieces[pi].cx - pirate.x, m.frame.pieces[pi].cz - pirate.z) > REACH + 1.2 ? null : { f: m.frame, pi };
+    if (!m || m.frame.done || m.frame.carp.done()) return null;
+    const pi = m.frame.carp.at(Math.floor(m.fr), Math.floor(m.fc));
+    // (In the Carpentry view, anywhere on the frame, as a piece is fitted anywhere on it: no walking.)
+    return pi < 0 || (!wm && Math.hypot(m.frame.pieces[pi].cx - pirate.x, m.frame.pieces[pi].cz - pirate.z) > REACH + 1.2) ? null : { f: m.frame, pi };
   }
   let best = null, bd = REACH;
-  for (const f of frames()) f.pieces.forEach((p, pi) => { const d = Math.hypot(p.cx - pirate.x, p.cz - pirate.z); if (d < bd && (f.kind === 'stair' || pirate.z > WALL_Z)) { bd = d; best = { f, pi }; } });
+  for (const f of frames()) if (!f.carp.done()) f.pieces.forEach((p, pi) => { const d = Math.hypot(p.cx - pirate.x, p.cz - pirate.z); if (d < bd && (f.kind === 'stair' || pirate.z > WALL_Z)) { bd = d; best = { f, pi }; } });
   return best;
 }
 export function lift(l) {
@@ -249,14 +251,14 @@ export function takeBack() {
 // gets it back in their hands. From a frame, any piece can be lifted (`pi`), by anyone: it goes
 // into the hands of whoever lifted it (`by`).
 export function unplace(where, by, mine = by === myId(), pi = null) {
-  const frame = !!where.occ, at0 = pi != null && frame ? pi : where.pieces.length - 1;
+  const frame = !!where.carp, at0 = pi != null && frame ? pi : where.pieces.length - 1;
   const piece = where.pieces[at0];
   if (!piece || (pi == null && piece.by !== by) || (frame && where.done)) return;
+  if (frame && !where.carp.lift(at0)) return;   // (full: it's being sawn)
   const u = piece.undo, b = C.bbox(piece.info.shape);
   where.pieces.splice(at0, 1);
   let at;
   if (frame) {
-    piece.cells.forEach((kk) => { where.occ.delete(kk); where.filled.delete(kk); });
     frameState(where);
     at = piece.group.localToWorld(new THREE.Vector3(b.w * S / 2, -b.h * S / 2, 0));
     where.group.remove(piece.group);
@@ -641,7 +643,7 @@ export function prompt() {
     else if (carry && f.p.letter && carry.from) t = `Space: swap the ${carry.letter} for the ${f.p.letter}`;
     else if (carry && f.p.letter) t = `Fit the ${carry.letter} again, or throw it at a raider`;
     else if (!f.p.letter && f.p.wait > 0.3) t = 'This crate\'s restocking: a thrown piece is timber gone';
-  } else if (!carry && liftable()) { const l = liftable(); t = `Space: lift the ${l.f.pieces[l.pi].info.letter} back out of the frame`; }
+  } else if (!carry && liftable()) { const l = liftable(); t = liftTip(l.f.pieces[l.pi].info.letter); }
   else if (!carry && canTakeBack()) t = `Space: take the ${lastPlaced.letter} back off`;
   else if (wm) {
     const keysTip = ' · arrows move · X/C turn · Z flip · Q/W/A/S: holes · Tab: next · Esc: walk';
@@ -687,7 +689,7 @@ export function prompt() {
     // Something new to do with a key (10 Nov: "it says space, but it's such a tiny little thing at
     // the bottom. I did not see it"): it stands out, and pulses as it comes up.
     // (Not the running tips while you carry a piece or play a puzzle: only somewhere new to do something.)
-    const act = /\bSpace\b/.test(t) && !carry && !/arrows or mouse|click a plank|click swaps|pick up the [A-Z]|put the|swap the/.test(t);
+    const act = /\bSpace\b/.test(t) && !carry && !/arrows or mouse|click a plank|click swaps|pick up the [A-Z]|pick the [A-Z] back up|put the|swap the/.test(t);
     el.classList.toggle('act', act);
     el.classList.remove('pulse');
     if (act) { void el.offsetWidth; el.classList.add('pulse'); }

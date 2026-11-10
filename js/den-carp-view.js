@@ -15,7 +15,9 @@
    - Q, W, A and S centre it over the upper-left, upper-right, lower-left and lower-right holes;
    - Space puts it in.
    The den's own: Tab goes on to the next thing being built, Backspace takes the last piece back
-   off (as the real puzzle lets you adjust the last piece), Esc walks off. E and F turn and flip as
+   off (as the real puzzle lets you adjust the last piece), and with empty hands Space or a click
+   picks up the piece you're pointing at, any of them, to fit again (src/carpentry-frame.ts), Esc
+   walks off. E and F turn and flip as
    they do when walking about. */
 /** The keys, by `KeyboardEvent.key` in lower case. Turning: -1 anticlockwise, 1 clockwise. */
 export const KEYS = {
@@ -42,6 +44,12 @@ export const KEYS = {
     escape: { kind: 'leave' },
     d: { kind: 'none' },
 };
+/** What the prompt says of taking pieces back, in the same words wherever you build (the wall's
+    frames, her deck patch, the crane's frames; the user, 10 Nov: "why can I not do it here when I
+    can do it in the other areas?"). Empty-handed, pointing at a piece you've placed: */
+export const liftTip = (letter) => `Space or click: pick the ${letter} back up`;
+/** And Backspace, any time: */
+export const UNDO_TIP = 'Backspace: the last piece back out';
 const LEFT = (c) => c === 'ul' || c === 'dl';
 const UP = (c) => c === 'ul' || c === 'ur';
 /** On the wall: the hole a corner key sends the piece to. The wall is the real board's four

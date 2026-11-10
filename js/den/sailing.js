@@ -11,7 +11,7 @@ import { shoreZ, bilge, groundPlane } from './bilge.js';
 import { chart } from './map.js';
 import { cine } from './cine.js';
 import { SEA_X0, seaX, seaZ, SLOOP_DECK, sail, liftAt, sloopMesh, seaRocks, seaWorld, pinMesh, dotMat, dotMine, dotGeo, hoverMat, TOK } from './sea.js';
-import { patch, deckHoleShape, patchClear, patchShut, patchPlace, patchHover, patchTick } from './sea-puzzles.js';
+import { patch, deckHoleShape, patchClear, patchShut, patchClick, patchHover, patchTick, patchPrompt } from './sea-puzzles.js';
 import { hold, holdShut, holdKey, holdHover, holdSwap, holdTick, lockWorld, lockTick, lockSay } from './lock.js';
 import { online } from './crew.js';
 import { haul, haulShut, haulPrompt, canHaulWreck, haulWreck } from './treasure.js';
@@ -120,8 +120,8 @@ function seaCellAt(x, y) {
   return { c: (p.x - SEA_X0) / SAIL.CELL - 0.5, r: (SAIL.Z0 - p.z) / SAIL.CELL - 0.5 };
 }
 export function sailClick(x, y) {
-  if (umamiClick(x, y)) return;   // (his board, and poling her along the lagoon's shore: umami.js)
-  if (patch.on) { patch.keyAt = null; patchHover(x, y); if (patch.hand) patchPlace(); return; }
+  if (umamiClick(x, y)) return;   // (his board, and poling her along the lagoon's shore: capybara.js)
+  if (patch.on) { patchClick(x, y); return; }
   if (hold.mode) { holdHover(x, y); holdSwap(); return; }
   if (rowing.on) { rowHover(x, y); rowSwap(); return; }
   if (gunnery.on) { gunneryDown(x, y); return; }
@@ -176,12 +176,7 @@ export function sailPrompt() {
   const cp = umamiPrompt() || cranePrompt();
   if (cp) return cp;
   const h = sail.helm, held = h.held();
-  if (held === 'daze') {
-    const hd = patch.hand, f = hd && patch.hole?.fit(hd.cells, patch.r, patch.c);
-    const tips = ' · arrows or mouse move · X/C turn · Z flip · Q/W/A/S: its corners · Backspace: the last piece back out';
-    if (!hd) return 'Holed! Patch her deck to sail on · 1, 2, 3: a piece from the crate' + tips;
-    return (f ? `Space or click: fit the ${hd.letter}${f.over ? ' (it rests on the deck: boarded over)' : ''}` : `The ${hd.letter} won't go there`) + tips;
-  }
+  if (held === 'daze') return patchPrompt('Holed! Patch her deck to sail on · 1, 2, 3: a piece from the crate', ' (it rests on the deck: boarded over)');
   if (held === 'up') return 'In the lock · bilge on the quay to pump it up, and the top gates open: arrows or mouse move · Space or click swaps';
   if (held === 'down') return 'The lock\'s draining down';
   if (held === 'fill') return 'The lock\'s filling from the canal above';

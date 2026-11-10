@@ -23,8 +23,11 @@
    set down in it, beside an old wreck sunk in its still water, and its treasure is hauled up by
    Treasure Haul (src/den-haul.ts). */
 
+import { CarpentryFrame, type Laid, type Spot } from './carpentry-frame.js';
 import { Salvage } from './den-haul.js';
-import type { Cell, Letter } from './engine';
+import type { Cell } from './engine';
+
+export type { Laid, Spot };
 
 /** A part of the crane: its name, and its frame as rows ('#' a square to fill), as it's laid on the
     ledge: its top row toward the cliff, its columns along the ledge. */
@@ -59,8 +62,6 @@ export const LAGOON = {
   WRECK: [-4, 11] as [number, number],
 };
 
-const key = (r: number, c: number) => `${r},${c}`;
-
 /** A part's frame, as squares [row, column]. */
 export function partCells(i: number): Cell[] {
   const out: Cell[] = [];
@@ -68,75 +69,12 @@ export function partCells(i: number): Cell[] {
   return out;
 }
 
-/** A spot for a piece: its top-left, and how many of its squares stick out over the frame. */
-export interface Spot { r: number; c: number; over: number }
-/** A piece in the frame: its letter, its squares (on the frame), and how many stick out. */
-export interface Laid { letter: Letter; cells: Cell[]; over: number }
-
-/** A part's frame on the ledge, and the pieces fitted into it: the den's frames' rules (a piece
-    covers at least one empty square of it, clear of the pieces in already, and may stick out over
-    its edge, here by up to CRANE.MARGIN squares). It plays like the hole in her deck
-    (src/den-patch.ts), with the same keys, tray and fair deal. */
-export class CraneFrame {
-  readonly cells: Cell[];
-  /** The frame's box and the margin round it, rows and columns. */
-  readonly board: { r0: number; c0: number; h: number; w: number };
-  laid: Laid[] = [];
-  private set: Set<string>;
-
-  constructor(cells: Cell[]) {
-    this.cells = cells.map(([r, c]): Cell => [r, c]);
-    this.set = new Set(this.cells.map(([r, c]) => key(r, c)));
-    const r0 = Math.min(...cells.map((p) => p[0])), c0 = Math.min(...cells.map((p) => p[1]));
-    const h = Math.max(...cells.map((p) => p[0])) - r0 + 1, w = Math.max(...cells.map((p) => p[1])) - c0 + 1, m = CRANE.MARGIN;
-    this.board = { r0: r0 - m, c0: c0 - m, h: h + 2 * m, w: w + 2 * m };
-  }
-
-  private taken(): Set<string> { return new Set(this.laid.flatMap((p) => p.cells.map(([r, c]) => key(r, c)))); }
-  /** The squares of the frame still to fill. */
-  open(): Cell[] { const t = this.taken(); return this.cells.filter(([r, c]) => !t.has(key(r, c))); }
-  /** Every square of it filled. */
-  done(): boolean { return this.open().length === 0; }
-  /** Squares of the pieces in it that stick out over its edge: offcuts, once it's sawn. */
-  over(): number { return this.laid.reduce((n, p) => n + p.over, 0); }
-  /** Filled with nothing sticking out: Shipshape. */
-  shipshape(): boolean { return this.done() && this.over() === 0; }
-  isHole(r: number, c: number): boolean { return this.set.has(key(r, c)); }
-
-  /** Whether a piece (its squares, at the top left) goes with its top-left at r, c: within the
-      margin round the frame, clear of the pieces in, and over at least one empty square of it. */
-  fit(shape: Cell[], r: number, c: number): Spot | null {
-    const t = this.taken(), b = this.board;
-    let over = 0, inside = 0;
-    for (const [pr, pc] of shape) {
-      const R = pr + r, Cc = pc + c;
-      if (R < b.r0 || R >= b.r0 + b.h || Cc < b.c0 || Cc >= b.c0 + b.w || t.has(key(R, Cc))) return null;
-      if (this.set.has(key(R, Cc))) inside++; else over++;
-    }
-    return inside ? { r, c, over } : null;
-  }
-
-  /** Every spot the piece goes. */
-  fits(shape: Cell[]): Spot[] {
-    const out: Spot[] = [], b = this.board;
-    for (let r = b.r0 - 4; r < b.r0 + b.h; r++) for (let c = b.c0 - 4; c < b.c0 + b.w; c++) {
-      const s = this.fit(shape, r, c);
-      if (s) out.push(s);
-    }
-    return out;
-  }
-
-  /** Fit a piece there, if it goes. */
-  put(letter: Letter, shape: Cell[], r: number, c: number): boolean {
-    const s = this.fit(shape, r, c);
-    if (!s) return false;
-    this.laid.push({ letter, cells: shape.map(([pr, pc]): Cell => [pr + r, pc + c]), over: s.over });
-    return true;
-  }
-
-  /** Take the last piece back out, till the frame's full (a gap is never filled for you: lifting
-      pieces back out is the way out of one). */
-  takeBack(): Laid | undefined { return this.done() ? undefined : this.laid.pop(); }
+/** A part's frame on the ledge, and the pieces fitted into it: Carpentry's frame
+    (src/carpentry-frame.ts), as the den's frames and the hole in her deck are, a piece sticking out
+    over its edge by up to CRANE.MARGIN squares. Played with the deck patch's keys, tray and fair
+    deal; any piece fitted can be lifted back out till it's full, as everywhere you build. */
+export class CraneFrame extends CarpentryFrame {
+  constructor(cells: Cell[]) { super(cells, { margin: CRANE.MARGIN }); }
 }
 
 /** Where she is: in the hidden cove, by the ledge, or up in the lagoon. */

@@ -9,7 +9,7 @@ import { S, scene, camera, mat, mesh, woodTex, woodMat, pieceGroup, V3, basis, p
 import { rock } from './land.js';
 import { updateStats } from './wall.js';
 import { seaX, seaZ, SLOOP_DECK, sail, COVE_Y } from './sea.js';
-import { patch } from './sea-puzzles.js';
+import { patch, patchPrompt } from './sea-puzzles.js';
 import { haul, haulOpen } from './treasure.js';
 import { wreckMesh } from './checkpoint.js';
 
@@ -323,15 +323,15 @@ function startHoist(f) {
   if (!g) return;
   const ship = f.shipshape();
   // Sawn to fit: what sticks out over the frame falls away as sawdust.
-  f.laid.forEach((p, n) => {
-    const pg = wood.children[n];
+  f.saw().forEach((s, n) => {
+    const pg = wood.children[n], p = f.laid[n];
     if (!pg) return;
-    const r0 = Math.round(-pg.position.y / S), c0 = Math.round(pg.position.x / S), kept = [];
-    p.cells.forEach(([r, c], j) => {
-      if (f.isHole(r, c)) { kept.push([r - r0, c - c0]); return; }
+    const r0 = Math.round(-pg.position.y / S), c0 = Math.round(pg.position.x / S);
+    const kept = s.kept.map((j) => [p.cells[j][0] - r0, p.cells[j][1] - c0]);
+    for (const j of s.cut) {
       const m = pg.children[j];
       if (m) { burst(m.getWorldPosition(new THREE.Vector3()), '#f0d9a8', 8, 2); m.visible = false; }
-    });
+    }
     pg.children[pg.children.length - 1].visible = false;
     pg.add(outline(kept, 0.002, '#4a2a12'));
   });
@@ -580,10 +580,8 @@ export function cranePrompt() {
   if (!sail.on) return '';
   if (crane.hoist || K().trip) return 'Space: skip';
   if (patch.on && patch.at) {
-    const name = PART_NAME[CRANE.PARTS[K().up].name], hd = patch.hand, f = hd && patch.hole?.fit(hd.cells, patch.r, patch.c);
-    const tips = ' · X/C turn · Z flip · Esc: leave it';
-    if (!hd) return `The crane's ${name} (${K().up + 1} of ${CRANE.PARTS.length}) · 1, 2, 3: a piece · Esc: leave it for now`;
-    return (f ? `Space or click: fit the ${hd.letter}${f.over ? ' (the spare gets sawn off)' : ''}` : `The ${hd.letter} won't go there`) + tips;
+    const name = PART_NAME[CRANE.PARTS[K().up].name];
+    return patchPrompt(`The crane's ${name} (${K().up + 1} of ${CRANE.PARTS.length}) · 1, 2, 3: a piece`, ' (the spare gets sawn off)', ' · Esc: leave it for now');
   }
   if (K().where === 'lagoon') {
     return K().canHaulWreck() ? 'The clifftop lagoon · Space: haul up the wreck\'s treasure · H: lower her down'

@@ -97,6 +97,18 @@ describe('a frame on the ledge', () => {
     fill(f);
     expect(f.takeBack()).toBeUndefined();
   });
+
+  it('a piece you\'ve just placed on the crane can be picked back up, as on the wall (10 Nov)', () => {
+    const f = new CraneFrame(partCells(1));   // the post: 3 rows of 8
+    f.put('I', flatI, 0, 1); f.put('I', flatI, 1, 0); f.put('I', flatI, 2, 1);
+    const others = [f.laid[0], f.laid[2]].map((p) => p.cells.map(String));
+    const i = f.at(1, 2);
+    expect(i).toBe(1);
+    expect(f.lift(i)?.cells).toEqual(flatI.map(([r, c]) => [r + 1, c]));
+    expect(f.laid.map((p) => p.cells.map(String))).toEqual(others);
+    expect(f.open().filter(([r]) => r === 1).length).toBe(8);   // the middle row's free again
+    expect(f.put('I', flatI, 1, 0)).toBe(true);   // and it fits again where it was
+  });
 });
 
 describe('building the crane', () => {

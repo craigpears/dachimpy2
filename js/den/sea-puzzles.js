@@ -2,7 +2,8 @@
 // (Split out of den.js. The quay's Bilge, to work a lock, is the lock's own: lock.js.)
 import * as THREE from 'three';
 import { FairDeal } from '../den-deal.js';
-import { KEYS as VIEW_KEYS, quarters, centreOn, clampTo } from '../den-carp-view.js';
+import { KEYS as VIEW_KEYS, quarters, centreOn, clampTo, liftTip, UNDO_TIP } from '../den-carp-view.js';
+import { held } from '../carpentry-frame.js';
 import { PATCH } from '../den-patch.js';
 import { C, S, scene, camera, mat, mesh, woodTex, woodMat, cellBox, pieceGroup, outline, rotCW, rotCCW, flip, V3, keys, shake, ray, burst, toast, fatOutline, worldLets } from './world.js';
 import { roomyShapes } from './wall.js';
@@ -22,7 +23,7 @@ import { SLOOP_DECK, sail } from './sea.js';
    user, 9 Nov: the pieces shown twice, on the lid and in the tray, was "a very cluttered user
    interface ... simplify it, standardize it"); the sailing bar's hidden while you patch. Played with the Carpentry view's own keys (src/den-carp-view.ts), looking down on it
    from her stern, its top row toward her bow, as the wall's Carpentry reads. */
-export const patch = { on: false, hole: null, group: null, face: null, wood: null, ghost: null, ghostKey: '', crate: null, slots: [], hand: null, r: 0, c: 0, sq: 0.2, keyAt: null, fair: new FairDeal(C), away: null };
+export const patch = { on: false, hole: null, group: null, face: null, wood: null, ghost: null, ghostKey: '', crate: null, slots: [], hand: null, lift: -1, r: 0, c: 0, sq: 0.2, keyAt: null, fair: new FairDeal(C), away: null };
 /* The same Carpentry, the same tray and keys, for a frame somewhere other than her deck: the crane's
    frames on the cliff's ledge (crane.js). `patch.away` is { hole() (the frame to fill, or null), sq
    (metres a square), mount(g) (puts the board's group in the world), dress(face, frame) (draws the
@@ -43,7 +44,7 @@ export function patchClear() {
 }
 function patchOpen(hole, away = null) {
   if (!away) patchClear();
-  Object.assign(patch, { on: true, hole, hand: null, ghostKey: '', keyAt: null, at: away });
+  Object.assign(patch, { on: true, hole, hand: null, lift: -1, ghostKey: '', keyAt: null, at: away });
   const b = hole.board, sq = patch.sq = away ? away.sq : Math.min(0.22, PATCH_W / b.w);
   // In cell space (rows down, as pieceGroup draws them), laid flat on her deck, the top row toward
   // her bow and the board's middle where the deck's is.
@@ -102,6 +103,7 @@ function finishOpen() {
 export function patchShut() {
   patch.on = false;
   patch.hand = null;
+  patch.lift = -1;
   patch.crate?.removeFromParent();
   if (patch.ghost) { patch.ghost.removeFromParent(); patch.ghost = null; }
   patch.ghostKey = '';
@@ -180,18 +182,38 @@ export function patchPlace() {
     else toast(hole.over() ? 'Patched, boarded over! She sails on' : 'Patched! She sails on');
   }
 }
-// Backspace: the last piece back out of the hole into your hands, to fit again.
-function patchTakeBack() {
+/* A piece you've placed, picked back up into your hands to fit again: any of them, as at the den's
+   frames (Carpentry's frame, src/carpentry-frame.ts, lifts it out). Empty-handed, Space or a click
+   picks up the one you're pointing at (patch.lift); Backspace, the last one. A crate's piece in your
+   hands goes back to its crate first. */
+function patchLift(i) {
   if (patch.hand && !patch.hand.from) return toast('Your hands are full: fit that piece first', false, true);
-  const l = patch.hole.laid.length ? patch.hole.laid[patch.hole.laid.length - 1] : null;
-  if (!l) return;
+  if (!patch.hole.laid[i] || patch.hole.done()) return;
   if (patch.hand) patchPutBack();
-  patch.hole.takeBack();
-  const g = patch.wood.children[patch.wood.children.length - 1];
+  const h = held(patch.hole.lift(i));
+  const g = patch.wood.children[i];   // (the pieces' groups, in the order they're laid)
   if (g) patch.wood.remove(g);
-  const r0 = Math.min(...l.cells.map((p) => p[0])), c0 = Math.min(...l.cells.map((p) => p[1]));
-  patch.hand = { letter: l.letter, cells: l.cells.map(([r, c]) => [r - r0, c - c0]), from: null };
-  patch.r = r0; patch.c = c0;
+  patch.hand = { letter: h.letter, cells: h.cells, from: null };
+  patch.r = h.r; patch.c = h.c;
+  patch.lift = -1;
+}
+const patchTakeBack = () => patchLift(patch.hole.laid.length - 1);
+// A click on the board: fit the piece in your hands, or pick up the one you're pointing at.
+export function patchClick(x, y) {
+  patch.keyAt = null;
+  patchHover(x, y);
+  if (patch.hand) patchPlace();
+  else if (patch.lift >= 0) patchLift(patch.lift);
+}
+/* The prompt, the same on her deck and on the crane's frames: `empty` says what you're at, with
+   empty hands; `over` what a piece sticking out means there; `esc` how to leave it, if you can. */
+export function patchPrompt(empty, over, esc = '') {
+  const hd = patch.hand, l = !hd && patch.hole?.laid[patch.lift];
+  if (l) return `${liftTip(l.letter)} · ${UNDO_TIP}${esc}`;
+  if (!hd) return `${empty}${patch.hole?.laid.length ? ` · ${UNDO_TIP}` : ''}${esc}`;
+  const f = patch.hole?.fit(hd.cells, patch.r, patch.c);
+  return (f ? `Space or click: fit the ${hd.letter}${f.over ? over : ''}` : `The ${hd.letter} won't go there`)
+    + ` · arrows or mouse move · X/C turn · Z flip · Q/W/A/S: its corners · ${UNDO_TIP}${esc}`;
 }
 // The Carpentry view's keys (Esc is left to the helm: it pulls up the pin).
 export function patchKey(key, e) {
@@ -206,14 +228,15 @@ export function patchKey(key, e) {
     case 'flip': if (hand) patchTurn(flip); break;
     case 'jump': if (hand) { const q = quarters(patch.hole.open())[a.corner]; if (q) patchSnap(q); else worldLets.shake = 0.08; } break;
     case 'take': patchTake(a.i); break;
-    case 'place': if (hand) patchPlace(); else patchTakeBack(); break;
+    case 'place': if (hand) patchPlace(); else if (patch.lift >= 0) patchLift(patch.lift); else patchTakeBack(); break;
     case 'undo': patchTakeBack(); break;
   }
   return true;
 }
 // The pointer moves the piece, centred on it (onto a fit close by), once it's really moved since a key.
+// Empty-handed, it points at a piece you've placed (patch.lift), to pick it back up.
 export function patchHover(x, y) {
-  if (!patch.hand || !patch.face) return;
+  if (!patch.face) return;
   if (patch.keyAt) { if (Math.hypot(x - patch.keyAt.x, y - patch.keyAt.y) < 24) return; patch.keyAt = null; }
   ray.setFromCamera(new THREE.Vector2(x / innerWidth * 2 - 1, -y / innerHeight * 2 + 1), camera);
   patch.face.updateMatrixWorld(true);
@@ -221,7 +244,9 @@ export function patchHover(x, y) {
   const p = new THREE.Vector3();
   if (!ray.ray.intersectPlane(new THREE.Plane().setFromNormalAndCoplanarPoint(n, o), p)) return;
   patch.face.worldToLocal(p);
-  const at = [-p.y / S, p.x / S], b = C.bbox(patch.hand.cells);
+  const at = [-p.y / S, p.x / S];
+  if (!patch.hand) { patch.lift = patch.hole.done() ? -1 : patch.hole.at(Math.floor(at[0]), Math.floor(at[1])); return; }
+  const b = C.bbox(patch.hand.cells);
   const [r, c] = centreOn(at, b.h, b.w);
   if (patch.hole.fit(patch.hand.cells, r, c)) { patch.r = r; patch.c = c; patchClamp(); } else patchSnap(at, 1.2);
 }

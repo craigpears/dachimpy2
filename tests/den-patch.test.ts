@@ -66,4 +66,15 @@ describe('a hole in her deck', () => {
     expect(d.done()).toBe(true);
     expect(d.takeBack()).toBeUndefined();
   });
+
+  it('a piece you\'ve placed in her deck can be picked back up, any of them, as on the wall (10 Nov)', () => {
+    const d = new DeckHole(hole('###', '###', '###', '###', '###'));
+    d.put('I', upI, 0, 0); d.put('I', upI, 0, 1);
+    const last = d.laid[1].cells.map(String);
+    expect(d.at(2, 0)).toBe(0);
+    expect(d.lift(d.at(2, 0))?.cells).toEqual(upI);
+    expect(d.open().map(String).sort()).toEqual([...upI, ...upI.map(([r, c]): Cell => [r, c + 2])].map(String).sort());
+    expect(d.laid.map((p) => p.cells.map(String))).toEqual([last]);
+    expect(d.put('I', upI, 0, 0)).toBe(true);
+  });
 });
