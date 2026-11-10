@@ -189,6 +189,13 @@ export class SwordRack {
 }
 /** Who a soldier can reach: raiders in the den, and ones coming in through a gap. */
 export const reachable = (r) => !r.gone && r.state !== 'down' && (r.inside || r.state === 'climb' || r.state === 'winded');
+/** Where soldiers with nobody to fight or guard wait: off to the winch's side of the hoist, past
+    where you stand to work it, never in front of the stack. The user (9 Nov): they "stand in a spot
+    that obscures the swordfighting board". Barracks.post lines them up from here, four to a row,
+    each row further along. */
+export function waitSpot(h) {
+    return { x: h.x + 1.4, z: h.z + h.w / 2 + 1.9 };
+}
 /** The soldiers: who each goes for, where they stand when there's nobody to fight, and the duels. */
 export class Barracks {
     soldiers = [];

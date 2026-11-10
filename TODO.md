@@ -22,20 +22,6 @@ the site (`.assetsignore` skips `*.md`).
   - **Moderation:** pirate names are letters only already, but an open room may want a way to hide
     a pirate who's being a nuisance.
 
-- **WASD walks you off the gun tower's arrows (8 Nov):** on the Gunnery deck, when you're close
-  enough to chalk arrows, WASD still moves the pirate. The user: "WASD should change the direction
-  of the arrows, not move the character". So up close it should be a mode of its own, where WASD
-  turns the arrow, and Esc leaves it.
-
-- **A piece fitted into a hole under attack has no strength (8 Nov):** fit a piece into a hole
-  raiders are hacking at and it goes straight away: "it doesn't seem to have any health, it's more
-  like it gets thrown at them". A fresh piece should hold them off for a while, with its own share
-  of the hole's strength. (How long it should last to pin down with the user.)
-
-- **You still have to be close to the wall to fit a piece (8 Nov):** there's still a minimum
-  distance for placing a piece in the wall. The user: "we were meant to remove that so you can
-  place from anywhere". Fitting a piece into the wall should work wherever you're standing.
-
 - **Pull the tricky parts out into their own tested pieces (8 Nov):** the den's code is getting
   more complicated, all in one long file with few separate parts. The user: the fair deal "is
   definitely worthy of a class that's got some proper automated tests around it. Like, here are
@@ -56,26 +42,10 @@ the site (`.assetsignore` skips `*.md`).
   in any way ever lead to a masterpiece", and suspects the deal's idea of what fits is off. To look
   at with real examples once the tests are in place: a way to save the holes and crates as they
   were when a bad piece came, so it can become a test. (Worth checking: the deal knows a piece fits
-  some way of finishing the hole, but not that you'll put it in the one spot that does.)
-
-- **The walk frame once the wall's all filled (8 Nov):** the user: "the walk should appear once you
-  are safe and have filled in all the holes, so you can work on that while they try in a futile
-  attempt to get in". So the walk's frame comes as soon as every hole is mended, mid-wave or not.
-
-- **A dazed raider behind a hole wastes your piece (8 Nov):** walk up to fill a hole with a dazed
-  raider behind it and you've "no choice but to throw it", which wastes the piece you need, "then
-  it only dazes them for enough time for you to pick up the next thing and repeat the dazing, you
-  make no progress". You should be able to fit the piece in the hole instead of throwing it (or the
-  daze should last long enough to fit one). (Which, to pin down with the user.)
-
-- **Waiting soldiers block the Swordfight board (9 Nov):** soldiers with nobody to fight "stand
-  in a spot that obscures the swordfighting board". They should wait somewhere clear of the
-  armoury hoist's view, so the stack is never hidden behind them.
-
-- **The Swordfight board hides the stairs being built (9 Nov):** "the swordfighting board
-  obscures the stairs while you are building them". You should be able to see the stairs' frame
-  clearly while you build it. (Since the last update the stairs are on the right and the armoury
-  hoist on the left, which may already have fixed this: check once the new version's live.)
+  some way of finishing the hole, but not that you'll put it in the one spot that does.) **10 Nov:**
+  that way's built: Cheats, "Copy the deal (for a test)" copies the holes, the crates and whether
+  it's dealt fair just then. Waiting on the user for one of those from a bad deal. (Dealt fair only
+  until wave 1's beaten, as the user chose; after that every deal is at random.)
 
 - **The bottom of the gate looks missing (9 Nov):** "I feel like the bottom of the gate is missing
   now. I don't know what it was like before, but it was a lot better." (To pin down with the user:

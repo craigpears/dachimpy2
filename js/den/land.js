@@ -68,7 +68,8 @@ export function makeRampart() {
   gundeckLets.gd = null;
   ramp = { T, half, n, zTop, zBot, run, jobs, next: 0, stairs: [[-half + 0.2, -half + 0.2 + STAIR_W], [half - 0.2 - STAIR_W, half - 0.2]] };
 }
-/* Building it. After a wave is beaten off, timber arrives for the next part, and its frames come one
+/* Building it. Timber for the walk arrives as soon as every hole's mended, for each later part after
+   a wave is beaten off (timberComes, src/den-raids.ts), and its frames come one
    at a time: the next only once the last is done, so there's never more than one to get on with.
    - The walk: a frame laid flat on the den floor in front of the wall. Lay pieces in it one at a
      time. A piece may stick out over the edge (so any piece will do); the spare is sawn off when

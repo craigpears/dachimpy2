@@ -108,7 +108,8 @@ const gdAt = (r, c, y = 0) => gd.at(r, c, y);
 const bWorld = (b, r, c, y = 0) => b.group.localToWorld(b.at(r, c, y));
 /* Standing on the gun tower, and playing it: walking across it doesn't start Gunnery (the user, 9
    Nov: "you get dragged into puzzles far too easily ... you should have to actively interact with
-   something"). Space takes charge of the guns; Esc, or walking off, steps back. */
+   something"). Space takes charge of the guns, and then WASD points your chalk instead of walking
+   you about (pointChalk); Esc steps back. */
 export const atGunDeck = () => !!gd && onRampart() && !!gdCell(pirate.x, pirate.z);
 export let gunOn = false;
 
@@ -759,6 +760,18 @@ export function chalkRelease(x, y, b = gd) {
   if (old && old.dir === dir) return;
   b.pen = dir;
   if (!chalkOn(b, pr.r, pr.c, dir)) worldLets.shake = 0.15;
+}
+/* WASD (or the arrows), once you've taken charge of the guns: your pirate stays put and the keys
+   point your chalk the way they go on screen (the user, 8 Nov: "WASD should change the direction
+   of the arrows, not move the character"). The arrow under the pointer turns, or else the one in
+   front of you, and the next one you chalk points that way too. Esc steps back. */
+export function pointChalk(dx, dy, b = gd) {
+  const me = gdCell(pirate.x, pirate.z), d = facing();
+  const at = b.hover || (me && [me[0] + DR[d], me[1] + DC[d]]);
+  if (!at) return;
+  const dir = screenDir(b, at[0], at[1], dx, dy), a = b.arrows.get(k(...at));
+  b.pen = dir;
+  if (a && a.dir !== dir && !chalkOn(b, a.r, a.c, dir)) worldLets.shake = 0.15;
 }
 export function wheelDeck(step, b = gd) {
   b.pen = (b.pen + step + 4) % 4;

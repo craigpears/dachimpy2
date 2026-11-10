@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { W as BW } from '../bilge.js';
-import { afterWave } from '../den-raids.js';
+import { afterWave, timberComes } from '../den-raids.js';
 import { BILGE, onRocks } from '../den-bilge.js';
 import { C, S, STONE_D, PAY, RUBBLE, CANNON_GAP, CANNON_AIM, DOOR_W, DOOR_H, WALL_DONE_SECS, CALM_SECS, RAIDER_STAMINA, WINDED, TIRED_SLOW, FALLEN, DAZE, hackRate, k, rand, $, scene, camera, mat, mesh, canvasTex, woodTex, WOOD, outline, xrMat, addXray, makePirate, animateWalk, faceTo, flagpole, pirate, carry, bounds, G, raiders, shake, topView, burst, toast, fmt, tween, v3, worldLets } from './world.js';
 import { rock, ramp, frames, openJob, outside, chest } from './land.js';
@@ -837,15 +837,24 @@ export function startWave() {
   $('intro').classList.add('off');
   updateStats();
 }
+// What timber comes next (src/den-raids.ts, timberComes): nothing while a frame of the rampart's
+// still being filled, nor once only the shack's left.
+function nextPart() {
+  if (!ramp || frames().some((o) => o.kind !== 'house') || ramp.jobs.some((j) => j.kind !== 'house' && j.frame && !j.up)) return null;
+  const j = ramp.jobs[ramp.next];
+  return !j || j.kind === 'house' ? null : j.kind === 'deck' ? 'walk' : 'later';
+}
 export function updateWaves(dt) {
-  if (!G.fairOver && wall.holes.every((h) => h.status !== 'open')) G.fairOver = true;   // see fairDeal
+  const mended = wall.holes.every((h) => h.status !== 'open');
+  if (!G.fairOver && mended) G.fairOver = true;   // see fairDeal
+  const timber = mended && timberComes(nextPart(), 'mended') && openJob(ramp.next);
+  // The first wave comes as soon as every hole's mended (the user), with a beat to see it done.
+  if (G.phase === 'build' && G.phaseT > WALL_DONE_SECS && mended) {
+    G.phaseT = WALL_DONE_SECS;
+    say(`The wall's mended! Here they come…${timber ? ' Timber\'s come: build the rampart in its frame while they try to get in' : ''}`, true);
+  } else if (timber) say('The wall\'s mended! Timber\'s come: build the rampart in its frame while they try to get in');
   if (G.phase === 'peace') return;   // the siege is over: nobody's coming
   if (G.phase !== 'wave') {
-    // The first wave comes as soon as every hole's mended (the user), with a beat to see it done.
-    if (G.phase === 'build' && G.phaseT > WALL_DONE_SECS && wall.holes.every((h) => h.status !== 'open')) {
-      G.phaseT = WALL_DONE_SECS;
-      say('The wall\'s mended! Here they come…', true);
-    }
     G.phaseT -= dt;
     if (G.phaseT <= 0) startWave();
     return;
@@ -863,7 +872,7 @@ export function updateWaves(dt) {
     let tally = G.waveTurned || G.waveIn ? ` ${G.waveTurned} turned away at the wall, ${G.waveIn} got in.` : '';
     if (!G.waveIn && G.waveTurned) { G.gold += PAY.clean; updateStats(); tally = ` Not one got in! (+${PAY.clean})`; }
     // Timber for the next part, once nothing's still being built.
-    const f = !frames().some((o) => o.kind !== 'house') && !ramp.jobs.some((j) => j.kind !== 'house' && j.frame && !j.up) && ramp.jobs[ramp.next]?.kind !== 'house' && openJob(ramp.next);
+    const f = timberComes(nextPart(), 'beaten') && openJob(ramp.next);
     const timber = f ? ` Timber's come: ${f.kind === 'gun' ? 'build a gun tower in its frame' : 'build the rampart in its frame'}` : '';
     if (G.phase === 'peace') say(`Wave ${G.wave} beaten off!${tally} That's the siege over: they're making sail. The den's yours: build, roam, puzzle.${timber}`);
     else say(`Wave ${G.wave} beaten off!${tally}${timber}`);

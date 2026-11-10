@@ -7,7 +7,7 @@ import { C, mixedTiling, S, CALM_SECS, k, rand, $, keep, myLook, denLook, scene,
 import { ramp, frames, openJob, frameState, stepTop, putFramePiece, finishFrame, HOUSE_PART, HOUSE_Z0, houseXF, paintHouse, startHouse, plotShow, applyBiome } from './land.js';
 import { wall, rest, ringOf, updateHole, updateStats, putPiece } from './wall.js';
 import { paintTower } from './gundeck.js';
-import { putBack, exitWall } from './pieces.js';
+import { putBack, exitWall, dealNow } from './pieces.js';
 import { cannon, ship, SHIP_GONE, boats, raiderOut, startWave } from './raids.js';
 import { cine, mapWas, phaseWas, mapLets } from './map.js';
 import { sail } from './sea.js';
@@ -476,6 +476,14 @@ function cheatSail() {
   sailReset();
   board();
 }
+/* The deal as it stands, copied to paste into a message: a crate's piece that fits but could never
+   make a Masterpiece becomes a test of the fair deal from it (src/den-deal.ts; TODO.md, 8 Nov). */
+function cheatDeal() {
+  const json = JSON.stringify(dealNow());
+  const said = () => toast('The deal is copied: paste it into a message and it can become a test');
+  const logged = () => { console.log(json); toast('The deal is in the console (F12): copy it from there'); };
+  if (navigator.clipboard) navigator.clipboard.writeText(json).then(said, logged); else logged();
+}
 const CHEATS = [
   ['Beat this wave', cheatBeat],
   ['Next wave now', () => (G.phase === 'wave' ? toast('A wave\'s on: beat it first', true) : startWave())],
@@ -483,6 +491,7 @@ const CHEATS = [
   ['Build the shack', cheatShack],
   ["The captain's map scene", cheatMapScene],
   ['Go sailing', cheatSail],
+  ['Copy the deal (for a test)', cheatDeal],
 ];
 export function cheatPanel(on) {
   if (on && online()) { toast('Cheats are for playing alone', true); return; }

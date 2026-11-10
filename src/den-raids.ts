@@ -26,3 +26,17 @@ export function afterWave(wave: number): 'calm' | 'peace' {
 
 /** Whether the next wave is counting down: only before the first, and between the siege's waves. */
 export const countingDown = (phase: Phase): boolean => phase === 'build' || phase === 'calm';
+
+/** What timber comes next for the rampart: the walk (the first part), a later part (the stairs,
+    the gun tower), or nothing (all built, or a frame still being filled). */
+export type NextPart = 'walk' | 'later' | null;
+
+/** Whether the next part's timber comes now. A later part comes as the reward for beating a wave
+    off. The walk comes as soon as every hole in the wall's mended, mid-wave or not (the user,
+    8 Nov: "the walk should appear once you are safe and have filled in all the holes, so you can
+    work on that while they try in a futile attempt to get in"), or with a wave beaten off if that
+    comes first. */
+export function timberComes(next: NextPart, why: 'mended' | 'beaten'): boolean {
+  if (!next) return false;
+  return why === 'beaten' || next === 'walk';
+}

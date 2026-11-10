@@ -15,7 +15,7 @@ import { cleanLook, cleanDen } from './den-look.js';
 import { C, S, SPEED, HP, BUILD_SECS, tune, k, $, myLook, denLook, renderer, scene, camera, skyDome, PILE_SC, rotCW, rotCCW, flip, animateWalk, faceTo, V3, pirate, HOP, STEP, view, carry, bounds, obstacles, G, keys, tweens, sparks, raiders, ghostKey, ghost, target, shake, mouseMode, mouse, topView, keyAt, wm, wmBlock, wmLinger, wallView, ray, wallPlane, toast, v3, L0, L1, L2, worldLets } from './den/world.js';
 import { ramp, frames, frameAt, openJob, frameState, frameFits, putFramePiece, finishFrame, heightAt, onRampart, startHouse, houseState, plotLabel, atPlot, biomeTick, waveFlags, outside, throughGate, gateTick, towerLegs, selfSeen } from './den/land.js';
 import { wall, X, Y, newWall, doorOf, fits, layerOpen, curLayer, patchFits, nextMat, nextLayer, barFrac, labelFor, frameLabel, updateStats, breakHole, dropPiece, dropBoard, holeX } from './den/wall.js';
-import { GD, gd, gdCell, atGunDeck, gunOn, onGunDeck, gunSq, deckBlocks, loopsOf, gunTick, addStore, updateGunDeck, gunLabels, chalk, chalkAhead, turnArrowAhead, chalkRelease, wheelDeck, gundeckLets } from './den/gundeck.js';
+import { GD, gd, gdCell, atGunDeck, gunOn, onGunDeck, gunSq, deckBlocks, loopsOf, gunTick, addStore, updateGunDeck, gunLabels, chalk, chalkAhead, turnArrowAhead, chalkRelease, wheelDeck, pointChalk, gundeckLets } from './den/gundeck.js';
 import { piles, fair, neededLetters, fairPick, deal, showPile, takeCrate, toolbox, pickUp, putBack, turn, place, lastPlaced, canTakeBack, liftable, lift, takeBack, restockSecs, wallSpots, onFrame, frameHere, canWallMode, viewBoards, viewOk, enterView, viewOn, frameUp, boardsHud, viewKey, enterWall, wallWalk, aim, drawGhost, prompt } from './den/pieces.js';
 import { boats, raiderOut, focus, onBeach, atWall, clickedFoe, cursor, aimed, aimFoe, throwAt, passable, weakSpot, widenCells, widen, spawnRaider, updateRaider, fireCannon, cannonSpot, showAim, startWave, updateWaves, banner, checkEnd, raidsLets } from './den/raids.js';
 import { rack, barracks, sword, atSword, swordBreak, swordDrop, swordReward, swordEnter, swordKey, lumber, toLumber, repairAll, swordTick, swordReset } from './den/sword.js';
@@ -75,6 +75,9 @@ addEventListener('keydown', (e) => {
   if (sword.on && !deco.on && !G.over && swordKey(key, e)) return;
   if (bilge.on && !deco.on && !G.over && bilgeKey(key, e)) return;
   if (key === 'escape' && onGunDeck()) { gundeckLets.gunOn = false; return; }
+  // In charge of the gun tower's guns, WASD and the arrows point your chalk; you stay put.
+  const way = { w: [0, -1], arrowup: [0, -1], s: [0, 1], arrowdown: [0, 1], a: [-1, 0], arrowleft: [-1, 0], d: [1, 0], arrowright: [1, 0] }[key];
+  if (way && onGunDeck() && !carry && !deco.on) { if (!G.over) pointChalk(...way); return; }
   const arrow = { arrowleft: [0, -1], arrowright: [0, 1], arrowup: [-1, 0], arrowdown: [1, 0] }[key];
   // The Carpentry view: Puzzle Pirates' own Carpentry keys (src/den-carp-view.ts). Tab goes into it
   // from anywhere on the den floor.

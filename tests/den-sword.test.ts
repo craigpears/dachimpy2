@@ -1,6 +1,6 @@
 /* Swordfight in the den: the sword rack and the soldiers (src/den-sword.ts). */
 import { describe, expect, it } from 'vitest';
-import { Barracks, Lumber, muster, planRepair, REPAIR, rewardPair, SWORD, SwordRack } from '../src/den-sword';
+import { Barracks, Lumber, muster, planRepair, REPAIR, rewardPair, SWORD, SwordRack, waitSpot } from '../src/den-sword';
 import type { Foe, Mend } from '../src/den-sword';
 import { carp, hole } from './helpers';
 import { toSword } from '../src/swordfight';
@@ -266,5 +266,28 @@ describe('Barracks', () => {
     b.tick(1, [], [], { x: 0, z: 5 });
     expect(b.sweep(0.5)).toEqual([s]);
     expect(b.soldiers).toEqual([]);
+  });
+});
+
+describe('Waiting soldiers block the Swordfight board (9 Nov)', () => {
+  // The den's hoist: the stack's foot at x -6.775, z 3.2, 2.7 m wide; you stand at the winch on its
+  // +z side, and the camera looks straight on at it from +x.
+  const hoist = { x: -6.775, z: 3.2, w: 2.7 };
+
+  it('with nobody to fight or guard, they wait off to the side, clear of the stack and of you at the winch', () => {
+    const b = new Barracks();
+    b.enlist(Array(b.cap).fill({ hp: 2, size: 1.5 }), hoist.x + 0.9, hoist.z);
+    for (let t = 0; t < 30; t += 0.05) b.tick(0.05, [], [], waitSpot(hoist));
+    for (const s of b.soldiers) {
+      expect(s.moving).toBe(false);
+      // Past the stack's side and the winch, with room for the biggest soldier (and you).
+      expect(s.z - hoist.z).toBeGreaterThan(hoist.w / 2 + 1.2);
+    }
+  });
+
+  it('the spot moves with the hoist', () => {
+    const a = waitSpot(hoist), b = waitSpot({ ...hoist, x: hoist.x + 1, z: hoist.z - 2 });
+    expect(b.x - a.x).toBeCloseTo(1);
+    expect(b.z - a.z).toBeCloseTo(-2);
   });
 });

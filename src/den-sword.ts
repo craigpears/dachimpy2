@@ -252,6 +252,18 @@ export type BarracksNews =
 /** Who a soldier can reach: raiders in the den, and ones coming in through a gap. */
 export const reachable = (r: Foe): boolean => !r.gone && r.state !== 'down' && (r.inside || r.state === 'climb' || r.state === 'winded');
 
+/** The armoury hoist, as the soldiers see it: the middle of the stack's foot (it faces +x, into the
+    den, its width running along z) and how wide it is. The winch is on its +z side. */
+export interface Hoist { x: number; z: number; w: number }
+
+/** Where soldiers with nobody to fight or guard wait: off to the winch's side of the hoist, past
+    where you stand to work it, never in front of the stack. The user (9 Nov): they "stand in a spot
+    that obscures the swordfighting board". Barracks.post lines them up from here, four to a row,
+    each row further along. */
+export function waitSpot(h: Hoist): { x: number; z: number } {
+  return { x: h.x + 1.4, z: h.z + h.w / 2 + 1.9 };
+}
+
 /** The soldiers: who each goes for, where they stand when there's nobody to fight, and the duels. */
 export class Barracks {
   soldiers: Soldier[] = [];

@@ -282,11 +282,11 @@ export function patchFits(cells) {
   });
   return out;
 }
-// A piece just went into layer i: count it in, and if the layer's full, it's done.
+// A piece just landed in layer i: if the layer's full, it's done (its share of the strength came
+// as it went in: see strengthen).
 function layerAdd(h, i) {
   const L = h.lay[i];
-  if (!L || L.status !== 'open') return;
-  if (layerOpen(h, i).length) { L.hp += HP.piece; L.maxHp = L.hp; return; }
+  if (!L || L.status !== 'open' || layerOpen(h, i).length) return;
   const master = layerPieces(h, i).every((p) => !p.over);
   L.status = master ? 'master' : 'boarded';
   L.hp = L.maxHp = HP[L.status];
@@ -477,6 +477,16 @@ export function putPiece(h, i) {
   h.pieces.push(piece);
   return piece;
 }
+/* A piece's share of the hole's strength (or its layer's), from the moment it's in the hole, not
+   once it's flown in and landed: in the meantime raiders hacking at the hole were hacking at
+   nothing and knocked it straight back out (the user, 8 Nov: "it doesn't seem to have any health,
+   it's more like it gets thrown at them"). A piece that finishes it is made good when it lands. */
+export function strengthen(h, piece) {
+  const L = piece.patch ? h.lay[piece.layer] : h;
+  if (L?.status !== 'open') return;
+  L.hp += HP.piece;
+  L.maxHp = L.hp;
+}
 export function placeWall(t, by, hand) {
   const h = wall.holes[t.hole];
   const info = { letter: hand.letter, shape: hand.cells, dr: t.dr, dc: t.dc, over: t.over, patch: !!t.patch, layer: t.layer ?? 0, by };
@@ -486,6 +496,7 @@ export function placeWall(t, by, hand) {
   const undo = { h, letter: info.letter, shape: info.shape, prev: { status: h.status, hp: h.hp, maxHp: h.maxHp }, prevLay: h.lay[info.layer] ? { ...h.lay[info.layer] } : null, boarded: G.boarded, masters: G.masters, hpAfter: null };
   const piece = undo.piece = putPiece(h, info);
   piece.undo = undo;
+  strengthen(h, piece);
   if (by === myId()) piecesLets.lastPlaced = undo;
   if (isHost()) send('all', { t: 'place', hole: t.hole, ...info });
   const g = piece.group, to = piece.base.clone(), b = C.bbox(info.shape);
@@ -508,7 +519,6 @@ export function placeWall(t, by, hand) {
       return;
     }
     updateHole(h);
-    if (h.status === 'open') { h.hp += HP.piece; h.maxHp = h.hp; }
     undo.hpAfter = h.hp;
     if (h.status === 'master' && lastPlaced === undo) piecesLets.lastPlaced = null;   // a Masterpiece is never a misclick
     if (by === myId() && h.status === 'open' && wasExact && !h.exact) { worldLets.shake = 0.3; toast('No Masterpiece in that hole now · Space: take it back', true); }

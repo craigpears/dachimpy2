@@ -143,7 +143,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   should have to actively interact with something ... I'm just being pulled into everything now."
   So every puzzle starts only when you ask for it: Space at the sword rack, the pumps, the map and
   the sloop; Space on the gun tower to take charge of the guns (walking across it no longer swings
-  the camera round and starts Gunnery; Esc, or walking off it, steps back); Tab or the arrow keys
+  the camera round and starts Gunnery; Esc steps back, and while you're in charge WASD points your
+  chalk instead of walking you: see the gun tower); Tab or the arrow keys
   on a frame for its Carpentry view (Space still fits a piece there in 3D). The one exception, as
   the user suggested ("maybe the front wall could be a bit of an exception"): stopping at the wall
   with a piece in hand still brings up the wall's view.
@@ -818,7 +819,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     have to do a combo, like a fuse block to get a soldier, and obviously combo for multiples".
     Soldiers go for raiders loose in the den and stand just inside the gaps in the wall (or behind
     the holes being hacked), and a raider coming through a gap they hold stops to fight them; they
-    don't go out over the wall.
+    don't go out over the wall. With nobody to fight or guard they wait off to the winch's side of
+    the hoist, past where you stand to work it, never in front of the stack (the user, 9 Nov: they
+    "stand in a spot that obscures the swordfighting board"; `waitSpot`, src/den-sword.ts).
   - **Loose crates mend the wall, for good.** Each sprinkle is a loose crate broken up for planks,
     thrown onto the lumber pile at the foot of the hoist (on the wall side); every 4 crates' worth
     is nailed into a hole as a piece's worth of planks (a pentomino's shape, pale boards with nail
@@ -932,7 +935,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   hole loses its most recently placed piece), the last piece put in falls out first. Each piece
   holds an equal share of the hole's strength (a three-piece Masterpiece loses one about every 15
   seconds of one raider's hacking). The gap a piece leaves needs that piece again, and refilling it
-  finishes the hole as before. Any wood left still keeps them out. You can refill the front of a
+  finishes the hole as before. **A piece has its share from the moment it goes in (8 Nov).** Fitted
+  into a hole raiders were hacking at, it went straight back out; the user: "it doesn't seem to have
+  any health, it's more like it gets thrown at them" (its strength only counted once it had flown in,
+  so they were hacking at nothing meanwhile). Now a fresh piece holds them off for its own share (8:
+  about 15 seconds of one raider in the first wave, 8 at full speed). Any wood left still keeps them out. You can refill the front of a
   hole with boards behind it wherever no board covers it.
 - **Holes made in a raid are roomy and fit the common pieces; the first wall stays small.** The user
   kept getting shapes they could never fill, with nowhere to dump the awkward pieces: in the real
@@ -1021,7 +1028,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   their ⚔ markers show, and the prompt says "Shift or click a raider: lob it over the wall". (The
   user, after finding raiders who get in too easy to knock flat: "just being able to lob over the
   wall is fine ... don't make it overly complicated.") A click on a spot the piece fits still fits
-  it, even with a raider showing through the hole; Shift throws.
+  it, even with a raider showing through the hole; Shift throws. (The user, 8 Nov, at a hole with a
+  dazed raider behind it: there was "no choice but to throw it", wasting the piece, and "it only
+  dazes them for enough time for you to pick up the next thing and repeat the dazing, you make no
+  progress". Clicking the hole fits the piece, from anywhere in the den.)
 - **Misplaced pieces can be taken back.** Placing one square too high was a frustrating misclick.
   With empty hands at the wall, Space (or Backspace) takes the last piece you put up back off, the
   same way round, so you can fit it properly. Not once it's made a Masterpiece, once another
@@ -1029,7 +1039,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   undo goes back to open and gives back its pay; damage the hole took meanwhile stays.
 - **The rampart: a walk along the top of the whole wall,** with stairs up at the right-hand end
   (both ends till 9 Nov: the user wanted the armoury hoist's end of the den kept clear, "sword
-  fighting board on the left, stairs on the right for the ramparts to go up"). Raiders hacking
+  fighting board on the left, stairs on the right for the ramparts to go up"). That also keeps the
+  board from hiding the stairs while you build them (the user, 9 Nov: "the swordfighting board
+  obscures the stairs while you are building them"). Raiders hacking
   at the wall can only be hit from up there; it's what makes a Masterpiece pay off: while it holds,
   you go up and knock the raiders off it. The view swings up high to look down at them. Keep it out
   of the way (not in front of the gate), and the full length of the wall.
@@ -1039,6 +1051,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     arrives for the next part. Its frames come one after another, each only when the last is
     done, so there's never more than one to get on with. The second frame appearing before the
     first was done felt rushed.
+  - **The walk comes once the wall's all mended (8 Nov).** The user: "the walk should appear once
+    you are safe and have filled in all the holes, so you can work on that while they try in a
+    futile attempt to get in". So the walk's timber comes as soon as every hole is mended, mid-wave
+    or not (or with a wave beaten off, if that's first); the stairs follow it, and the gun tower
+    still comes for beating a wave off (`timberComes`, src/den-raids.ts).
   - **Walk only on what's built.** You can only walk where the walk's pieces actually are.
 - **It's built by carpentry, piece by piece, not by magic.** A footing hole opening in the wall was
   bizarre, and a stretch popping up was too easy. A finished frame then turning into a ready-made
@@ -1140,7 +1157,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   pairs about 4 m apart, and from in front of either you can fit a piece in the other. The user:
   "you can place it on adjacent holes. You don't need to walk right up to them." Not across the gate.
   (With the keyboard, stand at the wall as before: it decides between the wall and the frames on the
-  floor behind you.)
+  floor behind you.) **Then from anywhere in the den (8 Nov).** There was still a minimum distance;
+  the user: "we were meant to remove that so you can place from anywhere". So with the mouse, point
+  at the wall from anywhere on the den floor and the piece goes in there; with the keyboard, Tab
+  brings up the Carpentry view from anywhere. (Taking one back still wants you by the wall, so an
+  empty-handed click elsewhere never undoes a piece.)
 - **Puzzle mode at the wall: the whole wall at once.** The user wanted it closer to Puzzle Pirates:
   working on all four holes, moving between them with ease rather than running the pirate about,
   "a hybrid of the 2D version" once you're at the wall. Walk up to the wall with a piece (or press
@@ -1249,6 +1270,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **The mouse works as in Gunnery:** click a plank to chalk the arrow the ghost shows, drag the
     way you want it to point, the wheel turns it (it never zooms on the tower), click an arrow to
     turn it, right-click to rub it out. Space chalks the plank ahead of you, Q/E turn it.
+  - **In charge of the guns, WASD points the chalk; it doesn't walk you (8 Nov).** The user, up
+    close on the tower: "WASD should change the direction of the arrows, not move the character".
+    So once you've taken charge (Space) it's a mode of its own: your pirate stays put, and WASD (or
+    the arrow keys) turn the arrow under the pointer, or else the one in front of you, to point
+    that way on screen; the next one you chalk points that way too. Esc steps back.
   - **To try it straight away:** `den.html?try=all` (or `?try=gundeck`) starts with the rampart,
     gun tower and house built and you up on the tower, for the user's own testing. It must load
     fast: it once took about a minute, because the engine's solver works row by row and a long,

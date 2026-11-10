@@ -43,6 +43,13 @@ function dealHave() {
   return have;
 }
 export const neededLetters = () => fair.plan(dealHoles(), dealHave()).map((n) => n.l);
+/* The deal as it stands, to make a test of (the cheats' "Copy the deal"): whether it's dealt fair just
+   now, what's left of each open hole, what's on the crates and in your hands (the fair deal's `have`),
+   and which crate's piece came by the fair deal. */
+export const dealNow = () => ({
+  fair: fairDeal(), holes: dealHoles(), have: dealHave(), carry: carry?.letter ?? null,
+  crates: cratesInOrder().map((p) => (p.letter ? { l: p.letter, fair: !!p.fair } : null)),
+});
 export const fairPick = () => fair.pick(dealHoles(), dealHave());
 export function deal(p) {
   const l = fair.next(wall && fairDeal() ? dealHoles() : [], dealHave());
@@ -589,17 +596,15 @@ export function aim() {
     if (best) worldLets.target = { ...best, ok: true };
     return;
   }
-  if (pirate.z > WALL_Z + 2.5 && !fl.length) return;
   const reach = (o) => Math.abs(o.cx - pirate.x) <= REACH && pirate.z <= WALL_Z;
-  // With the mouse, if it shows you where it'd go, you can put it there: from as far back as the
-  // preview shows (the user: no value in having to walk closer), and as far as the next hole along.
-  const mReach = (o) => Math.abs(o.cx - pirate.x) <= MREACH && pirate.z <= WALL_Z + 2.5;
-  const list = pirate.z <= WALL_Z + 2.5 ? fits(carry.cells).concat(patchFits(carry.cells)) : [];
+  const list = fits(carry.cells).concat(patchFits(carry.cells));
   const b = C.bbox(carry.cells);
   if (mouseMode && mouse) {
-    if (pirate.z > WALL_Z + 2.5) return;
+    /* With the mouse, wherever you're standing in the den: point at the wall and the piece goes in
+       there, no walking up to it (the user, 8 Nov: "we were meant to remove that so you can place
+       from anywhere"). */
     const best = pickSpot(list, (o) => mouseAt(o.patch ? patchZ(o.layer, wall.holes[o.hole]) - PATCH_D / 2 : 0));
-    if (best) worldLets.target = { ...best, ok: mReach(best), far: !mReach(best) };
+    if (best) worldLets.target = { ...best, ok: true };
     else worldLets.target = { dr: Math.round(mouse.fr - b.h / 2), dc: Math.round(mouse.fc - b.w / 2), ok: false };
   } else if (!mouseMode) {
     // Everything in reach: a walk frame on the floor when stood back from the wall, the stairs
@@ -660,7 +665,6 @@ export function prompt() {
     else if (target?.ok && target.patch) t = `Space: nail it on behind (one more layer for them to hack through)${more}`;
     else if (target?.ok && !target.over) t = `Space: fit the ${carry.letter} here${more}`;
     else if (target?.ok) t = `Space: board it over (weak, no Masterpiece)${more}`;
-    else if (target?.far) t = 'Walk closer to fit it there';
     else if (pirate.z <= WALL_Z || (mouseMode && mouse)) t = `The ${carry.letter} won't go there · Q/E turn · F flip`;
     else if (wall.holes.every((h) => h.status !== 'open')) t = `Carry the ${carry.letter} to the wall: nail it on behind a mended hole`;
     else t = `Carry the ${carry.letter} to a hole`;
@@ -671,7 +675,7 @@ export function prompt() {
   const hacking = raiders.some(atWall);
   if (onGunDeck() && !carry) {
     const n = myArrows().length;
-    t = `Chalk arrows to steer the stores into the guns: click a plank · wheel turns · right-click rubs out (${n}/${GD.arrows}) · Esc: step back`;
+    t = `Chalk arrows to steer the stores into the guns: click a plank · WASD or wheel: point it · right-click rubs out (${n}/${GD.arrows}) · Esc: step back`;
   } else if (atGunDeck() && !carry) t = 'The gun tower · Space: take charge of the guns';
   else if (onRampart()) {
     if (!carry) t = 'Bring a piece up here to throw at the raiders';

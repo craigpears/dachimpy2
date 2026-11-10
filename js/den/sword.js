@@ -2,10 +2,10 @@
 // (Split out of den.js.)
 import * as THREE from 'three';
 import { randomPair, W as SW, H as SH, ENTRY as SENTRY } from '../swordfight.js';
-import { muster, planRepair, rewardPair, Lumber, REPAIR, SwordRack, Barracks, SWORD } from '../den-sword.js';
+import { muster, planRepair, rewardPair, waitSpot, Lumber, REPAIR, SwordRack, Barracks, SWORD } from '../den-sword.js';
 import { drawStencil, drawBlade, PALETTE } from '../den-sword-draw.js';
-import { C, S, HP, rand, $, scene, mat, mesh, canvasTex, woodTex, makePirate, animateWalk, faceTo, pirate, carry, bounds, G, keys, raiders, burst, toast, tween } from './world.js';
-import { wall, rest, updateHole, barFrac, plankMat, putPiece, holeX } from './wall.js';
+import { C, S, rand, $, scene, mat, mesh, canvasTex, woodTex, makePirate, animateWalk, faceTo, pirate, carry, bounds, G, keys, raiders, burst, toast, tween } from './world.js';
+import { wall, rest, updateHole, barFrac, plankMat, putPiece, strengthen, holeX } from './wall.js';
 import { hit, passable, doorX } from './raids.js';
 import { online, myId, say } from './crew.js';
 
@@ -431,6 +431,7 @@ function repair(h, pc) {
   const b = C.bbox(pc.cells);
   const info = { letter: pc.letter, shape: C.normalize(pc.cells), dr: b.r0, dc: b.c0, over: 0, patch: false, layer: 0, by: myId(), planks: true };
   const piece = putPiece(h, info), g = piece.group, to = piece.base.clone(), from = pileAt().add(new THREE.Vector3(-b.w * S / 2, 0.4 + b.h * S / 2, 0));
+  strengthen(h, piece);   // (holding from the moment it's in, as a fitted piece does)
   g.position.copy(from);
   h.busy = (h.busy || 0) + 1;
   tween(1, (t) => {
@@ -444,7 +445,6 @@ function repair(h, pc) {
     if (!h.pieces.includes(piece)) return;
     burst(new THREE.Vector3(to.x + b.w * S / 2, to.y - b.h * S / 2, 0.3), '#e8d0a8', 14, 2.5);
     updateHole(h);
-    if (h.status === 'open') { h.hp += HP.piece; h.maxHp = h.hp; }
     if (h.status === 'open') say('Planks from the armoury: a piece of the wall mended!');
   });
 }
@@ -539,7 +539,7 @@ export function swordTick(dt) {
       toast(`${n} pair${n === 1 ? '' : 's'} of crates onto the armoury's shelves (${rack.queue.length} there) · Space at the winch to play them`);
     } else if (!G.shelfSaid) { G.shelfSaid = true; say('The armoury\'s shelves are full: play some at the winch first', true); }
   }
-  barracks.tick(dt, raiders, guardSpots(), { x: sword.x + 1.8, z: sword.z }).forEach(swordNews);
+  barracks.tick(dt, raiders, guardSpots(), waitSpot(sword)).forEach(swordNews);
   for (const [s, m] of sword.figures) poseFigure(s, m, dt);
   for (const s of barracks.sweep()) { scene.remove(sword.figures.get(s)?.g); sword.figures.delete(s); }
   if (sword.dirty && !sword.show) { sword.dirty = false; stackSync(); }
