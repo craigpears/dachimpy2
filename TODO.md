@@ -110,12 +110,13 @@ the site (`.assetsignore` skips `*.md`).
   her down into somewhere else: "there should be a different kind of section next to it. So I
   don't want ... the lock the same thing as the crane." Not the lock's hidden cove, then, but a
   place of its own: a clifftop lagoon (the user, 9 Nov), a still lake up on the headland with an
-  old wreck sunk in it, where Treasure Haul brings up the treasure. Pinned down (10 Nov): the
-  crane is the way round an imperial checkpoint on the main shipping lane (IDEAS.md, "An imperial
-  checkpoint"): run its guns, or build a crane by Carpentry and go up the cliff beside it, "you
-  can naturally do that anywhere". And the hidden cove by the lock stays too: "I don't see why we
-  have to choose." (Proposed: the crane lifts her into the clifftop lagoon, wreck and all, and
-  she's set down again past the checkpoint; to confirm when it's built.)
+  old wreck sunk in it, where Treasure Haul brings up the treasure. Pinned down (10 Nov,
+  after a change of mind): the lagoon is a discovery at the end of a journey of several steps,
+  "more of an adventure": the canal, Bilge to fill the lock up into the hidden cove, then from the
+  cove a crane built by Carpentry hauls her up the cliff, and at the top the lagoon with its wreck
+  and Treasure Haul. "We can have a multi-step thing and gradually build up on it", so later steps
+  can be added along the way. (The imperial checkpoint, with a crane round it, stays an idea in
+  IDEAS.md for later.)
 
 - **Something worth finding in the hidden cove: treasure (9 Nov):** the canal and the cove "would
   be great, but ... it needs a point of interest in here, even if it's a little like treasure

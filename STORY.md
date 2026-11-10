@@ -93,7 +93,11 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    over there's an old sloop at anchor in the cove; board her, drop a pin and she sails there on
    Battle Navigation's moves, or steer her yourself; she has a gun each side to fire at the rocks
    as you go; trade winds sweep her out to a junction, a canal leads to a lock you pump up by
-   Bilge into a hidden cove behind a cliff, and a turret's hits daze her till you bilge her out).
+   Bilge into a hidden cove behind a cliff, and a turret's hits hole her till you patch her by
+   Carpentry; three hits from her guns wreck it, and its chest is hauled up by Treasure Haul).
+   The cove is the first step of a journey that grows: from it a crane built by Carpentry hauls
+   her up the cliff to a clifftop lagoon, a discovery, with an old wreck to haul treasure from
+   ("more of an adventure ... we can have a multi-step thing and gradually build up on it").
    And not necessarily straight there: the captain drops a pile of scrolls (maps
    to an island to forage, the capybara rescue, plans for the gun platform), and you can stay
    home and do up the den first. Or sneak onto his island for some of his buried loot, without a
