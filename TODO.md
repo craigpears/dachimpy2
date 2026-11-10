@@ -201,6 +201,17 @@ the site (`.assetsignore` skips `*.md`).
   going against the grain, a bit of bumping and squeezing (STORY.md, "The way on pulls you; the
   side ways push back").
 
+- **How you get into the lagoon is a puzzle of the wrong kind (10 Nov):** "I don't know how you're
+  supposed to get into this lagoon. It certainly got me puzzled. I can see the crane, and it's
+  saying about a bilge pump. I've got no idea what that bilge pump is supposed to be, but I mean,
+  is it supposed to kind of be what that's you're supposed to move? And I thought we were
+  constructing this crane." In the cove: no talk of the old bilge pump (it's for a later step of
+  the story, flooding Dalnoth out, so it can sit there quietly or wait till then); the place to
+  stop is plain to see (the ledge under the old hoist, somewhere to moor); before it's built the
+  crane mustn't look built (the old hoist reads as a rickety hoist, the crane as empty footings
+  or a frame's outline waiting); and stopping there says what to do ("Space: build a crane on the
+  ledge to haul her up the cliff").
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
