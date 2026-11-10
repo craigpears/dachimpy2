@@ -566,14 +566,19 @@ pirate wedding absolutely is a must."
   bride reacts as you go, delighted at an outfit, gushing over the arch. She asks you things along
   the way (which colour palette, which scheme: say, sunset gold, ocean blues, jungle greens), and
   your answer sets the mood she cheers you on toward, never a rule you can fail.
+- **The wedding itself, and where (10 Nov):** "we definitely would need a cutscene, guest
+  reacting, the whole wedding shot. And you can have options. I think you definitely would need
+  options of where it's held." So it ends with the wedding as a cutscene (the den's cine.js, as
+  Dalnoth's and Dignity's): the couple, the guests you dressed reacting, the place you laid out. And
+  you choose the venue from a few (a chapel in the cliff-top town, a beach, an island, the den, a
+  ship's deck: to pin down).
 - **Goes with:** "Side quests that leave friends about the den" (the couple could visit the den
   after), "Inside the house: furniture placed the same way, as in a YPP house" and "More clothes"
   (Making it yours, below).
 - **To pin down with the user:** who's marrying (made-up pirates, or real ones, drawn from their
-  portraits as ever), where it's held (a chapel up in "A little town up the cliffs", an island, the
-  den itself), whether there's a brief to meet (a colour scheme, each guest's wishes) or it's free
-  play, how it ends (the wedding itself as a cutscene, the guests reacting), and what it pays. Check
-  YPPedia for Puzzle Pirates' own weddings and wedding clothes first.
+  portraits as ever), which venues to offer, the bride's lines and when she says them, the
+  palettes and schemes she offers, and what it pays. Check YPPedia for Puzzle Pirates' own
+  weddings and wedding clothes first.
 
 ## Zoom in on what you're doing, like the captain's map (9 Nov)
 
