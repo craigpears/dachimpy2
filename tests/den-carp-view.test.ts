@@ -1,7 +1,7 @@
 /* The Carpentry view's keys and jumps (9 Nov): Puzzle Pirates' own Carpentry keys, as YPPedia
    gives them, on the wall and the frames. */
 import { describe, expect, it } from 'vitest';
-import { KEYS, arrowStep, centreOn, clampTo, holeKey, nextBoard, nextHole, quarters } from '../src/den-carp-view';
+import { walksOff, KEYS, arrowStep, centreOn, clampTo, holeKey, nextBoard, nextHole, quarters } from '../src/den-carp-view';
 import type { Pt } from '../src/den-carp-view';
 
 describe('the keys are the real Carpentry keys', () => {
@@ -143,5 +143,19 @@ describe('the arrows on the wall always move the piece, never further than they 
   it('never a diagonal jump: with no hole in line, a plain square on', () => {
     expect(go(0, 9, 0, 1, { h: 1, w: 2 })).toEqual({ r: 0, c: 10 });
     expect(go(6, 0, -1, 0)).toEqual({ r: 5, c: 0 });   // beside the low hole, not shifted onto it
+  });
+});
+
+describe('walking off the mended wall', () => {
+  it("not stuck in the view once the last hole's finished: WASD walks (10 Nov)", () => {
+    // "Once you finish the last hole, and you've not got a piece ... WASD is supposed to move you
+    // around. You kind of get stuck having to hit escape"
+    for (const k of ['w', 'a', 's', 'd', 'arrowup', 'arrowleft']) expect(walksOff(k, false, 0)).toBe(true);
+    // Still a hole open, or a piece in your hands: the view's own keys (Q W A S jump, arrows move).
+    expect(walksOff('w', false, 1)).toBe(false);
+    expect(walksOff('w', true, 0)).toBe(false);
+    // Nothing else walks you off: Space, Backspace and the rest are still the view's.
+    expect(walksOff(' ', false, 0)).toBe(false);
+    expect(walksOff('backspace', false, 0)).toBe(false);
   });
 });

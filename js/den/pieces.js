@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { FairDeal } from '../den-deal.js';
 import { PALETTE } from '../den-sword-draw.js';
-import { KEYS as VIEW_KEYS, nextHole, quarters, centreOn, clampTo, nextBoard, arrowStep, liftTip } from '../den-carp-view.js';
+import { KEYS as VIEW_KEYS, nextHole, quarters, centreOn, clampTo, nextBoard, arrowStep, liftTip, walksOff } from '../den-carp-view.js';
 import { canRead } from '../den-map.js';
 import { C, S, WOOD_D, REACH, MREACH, WALL_Z, PAY, k, $, scene, mat, mesh, woodTex, WOOD, woodMat, PILE_SC, centred, rotCW, rotCCW, flip, pirate, carry, bounds, G, keys, raiders, cycle, ghostKey, shake, target, ghost, mouse, mouseMode, keyAt, wm, wmLinger, wmBlock, toast, tween, fatOutline, worldLets } from './world.js';
 import { frames, frameAt, frameState, frameFits, placeFrame, onRampart, houseState, atPlot, outside } from './land.js';
@@ -481,6 +481,8 @@ export function boardsHud(dt) {
   }));
 }
 export function viewKey(key, e) {
+  // The wall all mended and your hands empty: WASD walks you off (src/den-carp-view.ts, walksOff).
+  if (!wm.f && walksOff(key, !!carry, wall.holes.filter((h) => h.status === 'open' || h.lay.some((L) => L.status === 'open')).length)) { exitWall(); return false; }
   const a = VIEW_KEYS[key];
   if (!a) return false;
   if (a.kind === 'move' || a.kind === 'jump' || a.kind === 'turn' || a.kind === 'flip' || a.kind === 'take') { worldLets.mouseMode = false; worldLets.keyAt = cursor ? { ...cursor } : { x: -1e4, y: -1e4 }; }

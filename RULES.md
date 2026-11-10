@@ -1006,6 +1006,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   end. The user turned down a clay golem built from smashed Swordfight blocks, with breakers won
   from kills, as "too far away from the sword fighting puzzle", and said this goes for all of them.
   A new job's look (a golem, a forge) can be a skin, never a change to the rules.
+- **Walking off the mended wall (10 Nov).** "Once you finish the last hole, and you've not got a
+  piece ... WASD is supposed to move you around. You kind of get stuck having to hit escape, even
+  though you've finished the puzzle effectively." A mended hole can still take a patch, so the
+  view held on to you. Now, with no hole left open on the wall and nothing in your hands, WASD and
+  the arrows walk you off it as they do anywhere (`walksOff`, `src/den-carp-view.ts`).
 - **The Carpentry view (9 Nov).** The user, after Bilge: "have a 3D mode, but when you're
   puzzling, like I just don't think you can beat 2D, especially like the biggest critique and
   feedback I've got is people like to use keyboard controls, and this 3D experience is just not very

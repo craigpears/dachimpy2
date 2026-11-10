@@ -60,6 +60,16 @@ export const KEYS: Readonly<Record<string, Action>> = {
   d: { kind: 'none' },
 };
 
+/** Whether a key walks you off the wall's Carpentry view instead (the user, 10 Nov: "Once you
+    finish the last hole, and you've not got a piece ... WASD is supposed to move you around. You
+    kind of get stuck having to hit escape, even though you've finished the puzzle effectively").
+    A mended hole can still take a patch over it, so the view would otherwise hold on to you: with
+    no hole left open and nothing in your hands, WASD (and the arrows) walk, as they do anywhere. */
+export function walksOff(key: string, holding: boolean, openHoles: number): boolean {
+  return !holding && openHoles === 0 && WALK_KEYS.has(key);
+}
+const WALK_KEYS = new Set(['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright']);
+
 /** What the prompt says of taking pieces back, in the same words wherever you build (the wall's
     frames, her deck patch, the crane's frames; the user, 10 Nov: "why can I not do it here when I
     can do it in the other areas?"). Empty-handed, pointing at a piece you've placed: */

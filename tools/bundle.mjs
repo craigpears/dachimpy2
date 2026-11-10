@@ -15,7 +15,8 @@ import { readFileSync, writeFileSync, readdirSync, unlinkSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+// (DEN_ROOT: bundle another checkout of the site, e.g. a clean worktree of what's committed.)
+export const ROOT = process.env.DEN_ROOT || join(dirname(fileURLToPath(import.meta.url)), '..');
 export const OPTIONS = {
   entryPoints: [join(ROOT, 'js/den.js')],
   bundle: true,
