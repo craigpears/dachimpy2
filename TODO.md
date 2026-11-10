@@ -175,6 +175,12 @@ the site (`.assetsignore` skips `*.md`).
   piece like that you've just placed should be in that core module. So why can I not do it here
   when I can do it in the other areas?" On the wall you click a piece in an unfinished frame to lift
   it back into your hands; on the crane and her deck patch only Backspace takes the last one back.
+- **No Bilge on the beach (10 Nov):** "I think we've had enough bilging now. Do we really need
+  bilge on the beach anymore? I think that was a bit of an early concept that's not needed now."
+  The beach's Bilge board goes, with what hangs off it: the tide it pumps back, the rocks it bares
+  and the powder barrels it dredges up. The sea's edge stays where it is, and raiders row in to it.
+  Bilge itself stays, one module, played at the locks' quays.
+
   Carpentry's frame (what's laid, fitting, lifting any piece back out, sawing, done) becomes one
   module in src/, and the wall's frames, the deck patch and the crane all use it, with the same
   keys and clicks everywhere: click a placed piece to pick it up, wherever you're building.
