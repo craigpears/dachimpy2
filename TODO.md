@@ -197,6 +197,9 @@ the site (`.assetsignore` skips `*.md`).
   The same at the second lock (the user: "you are having to bump into the walls to get around this
   lock system. That does not seem right"): the canal between locks is laid out so she can be
   steered or rowed through without bumping the banks, every turn a clear one.
+  The locks' way should guide her on naturally; it's the arm off to the hidden cove that takes
+  going against the grain, a bit of bumping and squeezing (STORY.md, "The way on pulls you; the
+  side ways push back").
 
 ## Needs a playtest to pin down
 
