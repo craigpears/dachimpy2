@@ -102,6 +102,16 @@ the site (`.assetsignore` skips `*.md`).
   quicker in a good wind, slower in a light one, dead in the water in a calm, and gets nothing
   sailing straight into it; oars move her steadily whatever the wind, slower than a good wind.
 
+- **Rowing by port and starboard (10 Nov):** the user loves IDEAS.md's "Port and starboard":
+  "absolutely hilarious ... not obviously like a brand new puzzle, but it's certainly a nice twist
+  on bilging ... Do that. Absolutely do that." Her oars are rowed by a Bilge board split down the
+  middle: the left half is her port oars, the right half starboard. Clears on a side pull those
+  oars; even work keeps her straight, more on one side turns her, so the puzzle is the steering.
+  Over a shoal the deep channel twists and you plan your clears to follow it; running aground
+  just stops her till you clear her off. The graphics suit rowing rather than bilging ("you'd have
+  to update the graphics to suit the rowing theme"). Goes with the wind and oars, and gives the
+  shallows the puzzle they were missing.
+
 - **A crane up a cliff, to somewhere of its own (9 Nov):** "I really do think we need the Wacky
   Races stuff, like the crane thing ... I just really love the idea. I want to see what it looks
   and feels like ... could I go somewhere to the side of a cliff and like construct a crane to get
