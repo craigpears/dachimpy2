@@ -174,6 +174,22 @@ the site (`.assetsignore` skips `*.md`).
   distinctive"). She's the imperial checkpoint's commander ("She can hang around up there"):
   standing on the checkpoint, in her own look, a Lieutenant Commander as on her pirate page.
 
+- **Dignity at the checkpoint, and her little cutscene (10 Nov):** "adding [her] as the dutiful
+  commander of the imperial checkpost, kind of peering down from the gates ... give her a little
+  cutscene similar to Dalnoth ... if you approach an imperial outpost, oh, pirates! Quick, shoot,
+  pirates! ... come up with something witty for her". She stands on the checkpoint's gate, looking
+  down. The first time you sail up, a short, cheesy cutscene like Dalnoth's: the camera finds her
+  peering out with a spyglass, she spots you, and has her say before the guns turn on you. Then a
+  line or two as things happen. Lines to start from (to try on the user):
+  - Spotting you: "Halt! Imperial checkpoint. State your busi... oh. Pirates. It's always pirates."
+    Then to her gunners: "Look lively! And do try to hit them this time."
+  - Coming closer: "One more stroke and I'll have to shoot. There'll be paperwork. I hate paperwork."
+  - A gun of hers wrecked: "That was Imperial property!"
+  - You get past: "This is going in my report. In very small, very cross handwriting."
+  - If you come round by the locks instead: "Nobody uses the canal. Nobody!"
+  (Her look comes from the pirate maker as one ready-made pirate. Waits for the checkpoint's
+  current work and the pirate maker to land.)
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
