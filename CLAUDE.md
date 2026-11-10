@@ -8,7 +8,13 @@ copy: `node_modules/node/bin/node.exe node_modules/wrangler/bin/wrangler.js dev 
 `npm i --no-save --no-package-lock node@22 wrangler@4`; node_modules is ignored). Wrangler 3 on Windows serves no
 files from subfolders, so don't use it.
 
-Pirate Den: `den.html`, `js/den.js` (the game), `js/den-look.js` (looks). Parts pulled out of den.js are
+Pirate Den: `den.html`, `js/den.js` (start-up, input, the main loop and camera, `window.den`), `js/den-look.js`
+(looks), and the 3D in plain hand-written modules in `js/den/`: `world.js` (what every part shares: scene, camera,
+materials, game state, toast; a `let` another file reassigns goes through its owner's `...Lets` getter/setter object),
+`land.js`, `wall.js`, `pieces.js` (crates, toolbox, Carpentry view), `gundeck.js`, `raids.js`, `sword.js`, `bilge.js`,
+`map.js`, `sea.js` (the sea and sloop's 3D), `sailing.js` (boarding, helm, guns, the sea tick), `sea-puzzles.js`
+(quay Bilge, deck patch), `crew.js`, `menus.js`. New features get a file of their own there where they can, so
+work in parallel rarely touches the same file. Parts pulled out of den.js are
 TypeScript in `src/`: `den-deal.ts` (the fair deal), `swordfight.ts` (the Swordfight puzzle, knowing nothing of
 the den), `den-sword.ts` (the armoury hoist, the soldiers and the wall repairs, as plain data), `den-sword-draw.ts`
 (what's painted on Swordfight's crates), `bilge.ts` (the Bilge puzzle, knowing nothing of the den),

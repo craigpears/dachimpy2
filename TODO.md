@@ -129,14 +129,6 @@ the site (`.assetsignore` skips `*.md`).
   aboard (wired with the lagoon's wreck), paying into the den's doubloons. (What's in it, and
   whether the turret's rebuilt later: to pin down with the user.)
 
-- **Split den.js up, so features can be worked on side by side (9 Nov, technical):** the sea's
-  features had to wait in a queue because they all change the one big file, den.js (over 8,000
-  lines): "these things should be more separated". Pull the parts out into files of their own
-  (the sea and the sloop, the den's puzzles on boards, the raids, the HUD), each with a clear
-  edge, so two pieces of work rarely touch the same file. den.js keeps only the start-up and the
-  wiring between them. (Plain JS modules like den-look.js, or TypeScript in src/ like the rules
-  parts: to choose when it's done. Not the primer split, which is still for later.)
-
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
