@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Foraging test</title>
+<!-- A test page for Puzzle Pirates' Foraging, unlinked like den.html and row-test.html (TODO.md, "Rescue a
+     capybara at the clifftop lagoon"). The rules are src/foraging.ts (compiled to js/foraging.js); the board's
+     look is js/den/foraging.js, the same one the den will place. This page only stands it up on its own. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #f6ead2; --dim: #cbb894; --gold: #e0a92a; --panel: rgba(28, 19, 12, 0.86); --edge: #5a412a; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0e1a10; font: 500 16px/1.4 'Alegreya Sans', system-ui, sans-serif; color: var(--ink); }
+  canvas { display: block; }
+  .ui { position: fixed; left: 12px; top: 12px; width: min(330px, calc(100vw - 24px)); background: var(--panel); border: 1px solid var(--edge); border-radius: 10px; padding: 10px 12px; }
+  h1 { font: 700 22px 'Alegreya', serif; color: var(--gold); margin: 0 0 4px; }
+  p { margin: 0 0 8px; color: var(--dim); font-size: 14px; }
+  .row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  button { font: 700 14px 'Alegreya Sans', sans-serif; color: var(--ink); background: #3b2a1b; border: 1px solid #c9a35c; border-radius: 6px; padding: 3px 9px; cursor: pointer; }
+  button.on { background: #6a4a1a; }
+  label { color: var(--dim); font-size: 14px; cursor: pointer; }
+  #stats b { color: var(--gold); }
+  #log { list-style: none; padding: 0; margin: 6px 0 0; font-size: 14px; color: var(--dim); max-height: 9.5em; overflow: hidden; }
+  #log li:first-child { color: var(--ink); font-weight: 700; }
+  #prompt { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); background: var(--panel); border: 1px solid var(--edge); border-radius: 8px; padding: 4px 12px; font-size: 15px; color: var(--dim); white-space: nowrap; max-width: calc(100vw - 24px); overflow: hidden; text-overflow: ellipsis; }
+  #say { position: fixed; left: 0; right: 0; top: 18px; text-align: center; font: 700 30px 'Alegreya', serif; color: #ffd23a; text-shadow: 0 2px 0 #3a2210, 0 0 14px rgba(0,0,0,.6); pointer-events: none; opacity: 0; transition: opacity .5s; }
+  #say.on { opacity: 1; transition: none; }
+  @media (max-width: 700px) { .ui { top: auto; bottom: 48px; } }
+</style>
+</head>
+<body>
+<div class="ui">
+  <h1>Foraging</h1>
+  <p>Puzzle Pirates' Foraging, by its real rules and keys. Arrows or the mouse move the loop; X or a left click turns it
+    anticlockwise, C or a right click clockwise. Over a special piece the loop is one square: X uses it to the left, C to
+    the right. Clear the tiles under a container and it sinks; clear everything under it and it drops out.</p>
+  <div class="row">
+    <button id="capy">Capybara rescue</button>
+    <button id="straight">Straight play</button>
+    <button id="again">Deal again</button>
+  </div>
+  <div class="row"><label title="Specials come in far more often, to try each one."><input type="checkbox" id="lots"> Lots of special pieces</label></div>
+  <div id="stats"></div>
+  <ul id="log"></ul>
+</div>
+<div id="prompt"></div>
+<div id="say"></div>
+<script type="importmap">
+  { "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { seeded, SPECIAL_ODDS } from './js/foraging.js';
+import { forageBoard, capybaraSkin } from './js/den/foraging.js';
+
+const $ = (id) => document.getElementById(id);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+document.body.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#2a4a3a');
+scene.fog = new THREE.Fog('#2a4a3a', 14, 40);
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+scene.add(new THREE.HemisphereLight('#ffe6c4', '#2a3a20', 1.0));
+const sun = new THREE.DirectionalLight('#ffd9a8', 1.6);
+sun.position.set(-4, 8, 9);
+sun.castShadow = true;
+scene.add(sun);
+// The lagoon at the board's foot, where what drops out lands.
+const water = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.MeshStandardMaterial({ color: '#2c6a6a', roughness: 0.25, metalness: 0.1 }));
+water.rotation.x = -Math.PI / 2;
+water.position.y = -2.9;
+scene.add(water);
+
+let board = null, mode = 'capy', seed = 1, banner = 0;
+const say = (t) => { $('say').textContent = t; $('say').classList.add('on'); banner = 1.6; };
+const log = (t) => { const li = document.createElement('li'); li.textContent = t; $('log').prepend(li); while ($('log').children.length > 8) $('log').lastChild.remove(); };
+const lots = () => ($('lots').checked ? { ...SPECIAL_ODDS, chance: 0.12, max: 0.5 } : SPECIAL_ODDS);
+const swimmers = [];
+
+function deal() {
+  board?.dispose();
+  $('log').innerHTML = '';
+  const random = seeded(seed);
+  const d = mode === 'capy'
+    ? { random, bananas: 0, specials: lots(), start: [{ size: 'basket', r: 0, c: 2, tag: 'capybara' }] }
+    : { random, bananas: 7, specials: lots() };
+  board = forageBoard({
+    deal: d, at: new THREE.Vector3(0, 0, 0), sq: 0.5,
+    skin: mode === 'capy' ? capybaraSkin : null,
+    onMove: (m) => {
+      const bits = [];
+      if (m.action !== 'turn') bits.push(m.action);
+      if (m.lines.length) bits.push(`${m.tiles} cleared`);
+      if (m.bites) bits.push(`the ant ate ${m.bites}`);
+      if (m.entered) bits.push('a container came in');
+      if (m.left.length) bits.push(`${m.left.length} out (+${m.points})`);
+      log(bits.join(', ') || 'a turn');
+      const drops = new Set(m.left.map((l) => l.drop)).size;
+      if (m.left.length > 1) say(drops > 1 ? (drops === 2 ? 'Double!' : 'Triple!') : `${m.left.length} crates cleared!`);
+    },
+    onLeave: (l) => {
+      if (l.tag !== 'capybara') return false;
+      // The capybara splashes down into the lagoon and swims off: its mesh is ours now.
+      const m = l.mesh, w = l.world;
+      board.pieces.remove(m);
+      scene.add(m);
+      m.position.copy(w);
+      m.scale.setScalar(board.sq);
+      swimmers.push({ m, t: 0 });
+      say('The capybara is free!');
+      return true;
+    },
+    onDone: () => { if (mode !== 'capy') say('All foraged!'); log('the board is done'); },
+  });
+  scene.add(board.group);
+  $('capy').classList.toggle('on', mode === 'capy');
+  $('straight').classList.toggle('on', mode !== 'capy');
+}
+$('capy').onclick = () => { mode = 'capy'; deal(); };
+$('straight').onclick = () => { mode = 'straight'; deal(); };
+$('again').onclick = () => { seed++; deal(); };
+$('lots').onchange = () => deal();
+const params = new URLSearchParams(location.search);
+if (params.get('mode') === 'straight') mode = 'straight';
+if (params.get('seed')) seed = Number(params.get('seed'));
+if (params.get('lots')) $('lots').checked = true;
+deal();
+
+addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') e.target.blur();
+  if (board.key(e.key, e)) e.preventDefault();
+});
+const canvas = renderer.domElement;
+const ndc = (e) => [e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1];
+canvas.addEventListener('pointermove', (e) => board.pointer(...ndc(e), camera));
+canvas.addEventListener('pointerdown', (e) => { if (board.pointer(...ndc(e), camera)) board.click(e.button); });
+canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+function fit() {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+}
+addEventListener('resize', fit);
+fit();
+
+const clock = new THREE.Clock();
+function frame() {
+  const dt = Math.min(0.05, clock.getDelta());
+  board.tick(dt);
+  // The camera straight on to the board, a little to its right so the panel doesn't cover it.
+  const v = board.camView(camera), wide = innerWidth > 700;
+  camera.position.copy(v.from).add(new THREE.Vector3(wide ? -1.4 : 0, 0.6, 0));
+  camera.lookAt(v.look.clone().add(new THREE.Vector3(wide ? -1.4 : 0, -0.1, 0)));
+  for (let i = swimmers.length - 1; i >= 0; i--) {
+    const s = swimmers[i];
+    s.t += dt;
+    if (s.m.position.y > water.position.y + 0.15) s.m.position.y -= dt * 6;
+    else { s.m.position.y = water.position.y + 0.15 + Math.sin(s.t * 3) * 0.03; s.m.position.x += dt * 1.4; s.m.position.z += dt * 0.8; }
+    if (s.t > 7) { scene.remove(s.m); swimmers.splice(i, 1); }
+  }
+  if (banner > 0 && (banner -= dt) <= 0) $('say').classList.remove('on');
+  const g = board.game;
+  $('stats').innerHTML = `Moves <b>${g.moves}</b> · out <b>${g.boxes}</b> · on the board <b>${g.containers().length}</b> · to come <b>${g.toCome}</b> · score <b>${g.score}</b>`;
+  $('prompt').textContent = board.prompt();
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+frame();
+window.fb = () => board;   // (for poking at it from the console)
+</script>
+</body>
+</html>
