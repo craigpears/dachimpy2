@@ -3,13 +3,14 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+const lf = (s: string) => s.replace(/\r\n/g, '\n');   // (git may check it out with CRLF)
 // @ts-expect-error: a plain .mjs tool, untyped
 import { bundled, ROOT, BUNDLE } from '../tools/bundle.mjs';
 
 describe('the den in one file (10 Nov: "shouldn\'t there be some build process that bundles and minifies things?")', () => {
   it('is up to date with js/, and den.html loads it: run `npm run build`', async () => {
     const { name, files } = await bundled() as { name: string; files: { name: string; text: string }[] };
-    for (const f of files) expect(readFileSync(join(ROOT, 'js', f.name), 'utf8')).toBe(f.text);
+    for (const f of files) expect(lf(readFileSync(join(ROOT, 'js', f.name), 'utf8'))).toBe(lf(f.text));
     expect(readFileSync(join(ROOT, 'den.html'), 'utf8')).toContain(`'./js/${name}'`);
     // No old bundles left lying about.
     expect(readdirSync(join(ROOT, 'js')).filter((f) => BUNDLE.test(f)).sort()).toEqual(files.map((f) => f.name).sort());
