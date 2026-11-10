@@ -281,6 +281,13 @@ moving. It gives such a nostalgia." What's next:
   same puzzle as a route as well as a reward, in keeping with "Every other way through costs a
   puzzle" (RULES.md). (Whether the coins are the den's doubloons or loot of their own, and what a
   bribe costs: to shape with the user.)
+  **Checkpoints of all strengths, and toll gates (10 Nov):** "they're just generally controlling
+  the trade routes", so checkpoints turn up along the lanes, of varying strengths, and come back
+  (respawn) after you've cleared them; clear one and you pass for free for a while, and later on
+  you'll meet one you can't get through. A checkpoint could be a toll gate: they charge you to
+  pass, so you choose: pay the toll, blast the gate and sail through, or wonder "is there another
+  way?", the game hinting at the secret way round (the locks, the crane). Not for now: "it
+  doesn't really make much sense at this stage of a proof of concept".
   **Bring back the crew's puzzles driving the helm (10 Nov):** in Puzzle Pirates, the crew's
   Sailing and Rigging puzzles are what give the helm its moves. The user would like that back:
   the helm steers left and right, "but if somebody starts doing things in sailing or rigging,
@@ -404,6 +411,18 @@ mustn't end the game" in TODO.md.) A first sketch, to talk through:
   chest and take a share of it (plundered, not the game over); soldiers from the armoury and any
   friends about the den (the capybara, the monkey on the gate) put up a fight. Coming home to a
   raid in progress is its own little moment.
+- **Reputation, and the Empire sending soldiers (10 Nov):** as in Port Royale and games like it,
+  a reputation with each side: Dalnoth's crew, the Empire. Shown for now in a little panel in the
+  top right (the user's suggestion; it would be the den's first panel of the kind, so to shape
+  against "no overlays"). Attacking imperial checkpoints or traders lowers it, with a warning
+  first ("your reputation with the Empire goes down if you attack its checkpoints or traders"),
+  and a while after you've wrecked a checkpoint the aggro brings imperial soldiers to attack the
+  den, like Dalnoth's raid at the start but in their own colours.
+- **Look after the den from afar (10 Nov):** when a raid comes while you're out at sea, you
+  shouldn't have to sail all the way back: "Factorio style, where you can be on a different
+  planet, but you can still see your own base and deal with problems remotely". Jump the camera
+  back to the den and play its puzzles as if you were there, and maybe jump back to the den
+  whenever you like.
 - **To check:** today the rampart's frames arrive as the reward for beating a wave, so the
   building needs feeding another way once raids are opt-in (timber from called raids, from the
   shipwright, from side quests).

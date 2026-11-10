@@ -138,6 +138,21 @@ the site (`.assetsignore` skips `*.md`).
   it." So the turret and its chest go; the trade winds run out towards the checkpoint and back
   home; the canal and the lock stay, as the side adventure.
 
+- **Rescue a capybara at the clifftop lagoon (10 Nov):** the friend's side quest (IDEAS.md, "Side
+  quests that leave friends about the den") goes in the lagoon: an animal is trapped there, you
+  rescue it (by a puzzle, as every reward is), click it and it turns up back at the den, "just
+  kind of hanging around near the shack ... as a pet that you found and rescued". The crane
+  being built only for the session is fine for a proof of concept (a refresh starts afresh).
+
+- **The secret way round the checkpoint: a chain of locks (10 Nov):** "make it a bit more of a
+  journey ... be more than just the one lock". The canal climbs through several locks ("maybe
+  there's 4 or 5 or something in total. Might be swallowing a bit too much"), each filled by
+  Bilge, and comes back down to rejoin the main trade winds beyond the checkpoint: the alternate
+  way round it, "a bit more getting through the locks", which makes it more discoverable ("I
+  wonder if there's a secret way"; something should hint at it). The crane up to the lagoon, with
+  its wreck and the rescued animal, branches off after the second or third lock, off the track the
+  locks lead you along, "almost more like an Easter egg" you find by wandering off.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map

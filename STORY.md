@@ -16,6 +16,10 @@ in time the den becomes the thing itself (TODO.md, "Split the den off").
 
 ## The principles
 
+- **Full of things to find.** "The game should be full of those little let's go explore,
+  discover some Easter eggs" (the user, 10 Nov, "a top principle that we want to follow"). Off
+  the track the story leads you along there's always something to stumble on (the lagoon behind
+  the locks, its wreck and the animal to rescue), never all signposted.
 - **A puzzle game, not an action game.** The raiders give a bit of interest and a bit of
   pressure, but the pull is always the puzzle in front of you: the next hole, the next frame, the
   next load for the guns. Never a pressured fight against defeat. When in doubt, the easy side:
