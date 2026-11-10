@@ -222,6 +222,16 @@ the site (`.assetsignore` skips `*.md`).
   love that the crane looks like carpentry pieces. It is just such a brilliant thing for the
   puzzle").
 
+- **Dignity in the den, and every pirate's clothes for anyone (10 Nov):** add Dignity, a real
+  pirate on Dalnoth's ocean (Emerald), drawn from her pirate page and portrait (the user remembers
+  "a black outfit with a mask and black kind of swashbuckle jacket"; check the portrait first).
+  And no pirate is drawn as a one-off: "we shouldn't be drawing Dalnoth. Dalnoth just happens to
+  be a guy dressed in yellow gold with a Viking helmet". Every real pirate is made by the same
+  pirate maker, from pieces of clothing (a horned helmet, a mask, a swashbuckler's jacket, a
+  tankard...), and "when you go on to your pirate, you should be able to put any clothing on of
+  these people": every piece any of them wears is in your own pirate's wardrobe too. (Where
+  Dignity turns up in the story: to pin down with the user.)
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
