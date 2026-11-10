@@ -123,6 +123,9 @@ the site (`.assetsignore` skips `*.md`).
   "ready enough to be slotted in ... even just that prototype mirrored thing"). Going straight
   must be something you can aim for: a small lopsidedness rows her straight, and only a clear
   imbalance turns her.
+  And the turn goes the way you'd expect, not the way real oars do (the user, 10 Nov: "if you pull
+  on the right-hand side, it should definitely go right"): more pull from the right-hand board
+  turns her right, more from the left turns her left.
 
 - **Something worth finding in the hidden cove: treasure (9 Nov):** the canal and the cove "would
   be great, but ... it needs a point of interest in here, even if it's a little like treasure
