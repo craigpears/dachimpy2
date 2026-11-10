@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { afterWave } from '../den-raids.js';
 import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, designOf, DYES, SKIN, HAIR, FUR, PARTS, EARRINGS, PIRATES, FLAGS, PATTERNS, DECOR, MAX_DECOR, BIOMES, twoColours } from '../den-look.js';
-import { C, mixedTiling, S, CALM_SECS, k, rand, $, keep, myLook, denLook, scene, camera, mat, mesh, woodTex, makePirate, wearLook, redrawFlag, designMat, flagpole, pirate, carry, bounds, obstacles, G, keys, raiders, wm, ray, burst, toast, worldLets } from './world.js';
+import { C, mixedTiling, S, CALM_SECS, k, rand, $, keep, myLook, denLook, scene, camera, mat, mesh, woodTex, wearLook, redrawFlag, designMat, flagpole, pirate, carry, bounds, obstacles, G, keys, raiders, wm, ray, burst, toast, worldLets } from './world.js';
 import { ramp, frames, openJob, frameState, stepTop, putFramePiece, finishFrame, HOUSE_PART, HOUSE_Z0, houseXF, paintHouse, startHouse, plotShow, applyBiome } from './land.js';
 import { wall, rest, ringOf, updateHole, updateStats, putPiece } from './wall.js';
 import { paintTower } from './gundeck.js';
@@ -492,20 +492,6 @@ function cheatDignity() {
   sail.riding = false;
   dignityScene();
 }
-// The real pirates (PIRATES), stood in a row on the beach outside the gate to look at; again to
-// take them away. (Where each turns up is the story's business: Dalnoth in the map's cutscene.)
-let lineUp = null;
-function cheatPirates() {
-  if (lineUp) { lineUp.forEach((p) => scene.remove(p.g)); lineUp = null; return toast('The real pirates have gone'); }
-  const names = Object.keys(PIRATES);
-  lineUp = names.map((n, i) => {
-    const p = makePirate({ look: PIRATES[n] });
-    p.g.position.set(wall.door.cx + (i - (names.length - 1) / 2) * 1.4, 0, -2.6);
-    scene.add(p.g);
-    return p;
-  });
-  toast(`On the beach: ${names.join(' and ')}`);
-}
 // [name, what it does, its link's name if it's a starting point (den.html?at=...)]
 const CHEATS = [
   ['Beat this wave', cheatBeat],
@@ -515,7 +501,6 @@ const CHEATS = [
   ["The captain's map scene", cheatMapScene, 'map-scene'],
   ['Go sailing', cheatSail, 'sea'],
   ["Dignity's scene", cheatDignity, 'dignity'],
-  ['Real pirates on the beach', cheatPirates, 'pirates'],
 ];
 /* Every starting point has a link, to share (the user, 10 Nov: "make it so that each starting point
    is something that I can put into the URL as well, so that I can share that animation with

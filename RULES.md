@@ -116,11 +116,15 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 
 Unlisted for now: reachable only by its URL until the user says to put it in the nav.
 
+- **Only the cheats asked for (10 Nov).** Of "Copy the deal" and "Real pirates on the beach": "What
+  on earth is this ...?", "I never asked for that cheat." The cheats menu holds only what the
+  user asked for (the stages, and skips to get to a scene). A tool for checking my own work stays
+  out of it: use the console (`window.den`) or a test instead.
 - **Every starting point has a link, to share (10 Nov).** "Make it so that each starting point is
   something that I can put into the URL as well, so that I can share that animation with
   somebody." `den.html?at=` and a name opens the den straight there: the cheats' stages (`start`,
   `walk`, `gun-tower`, `built`) and their starts and scenes (`shack`, `map-scene`, `sea`,
-  `dignity`, `pirates`). Choosing one from the cheats puts its link in the address bar, and its
+  `dignity`). Choosing one from the cheats puts its link in the address bar, and its
   button's tooltip shows it. A name that isn't one says so. A new scene or start gets a name too.
 - **Hidden gems, never hinted (10 Nov).** The user, of the checkpoint's "I wonder if there's another
   way round" and "Run it, row it, or knock its guns out": "I don't like it giving you a hint as to
@@ -768,8 +772,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     buckle; shadow pants; shadow Fancy boots with atlantean turned-down tops; a brass spyglass in
     her right hand (a wardrobe item: "In hand"); and Bella, her lavender monkey (a limited-edition
     monkey colour on YPPedia: what looked like little purple wings in the portrait is her curled
-    tail). She's the imperial checkpoint's commander ("Dignity at the checkpoint", below). The
-    cheat "Real pirates on the beach" stands every one of them outside the gate to look at.
+    tail). She's the imperial checkpoint's commander ("Dignity at the checkpoint", below).
     - **Faithful to the portrait (10 Nov).** Her hair: "nice, long kind of hair ... instead of
       like just straight long hair gathered at the back ... why has she got bumps? Or it looks like
       she's got more kind of pigtails", and then "I know like most of the style in this game is
