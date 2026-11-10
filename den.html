@@ -23,6 +23,10 @@
     .keys kbd { font: 700 13px 'Alegreya Sans'; color: var(--ink); background: #3b2a1b; border: 1px solid #6b4e32; border-radius: 4px; padding: 0 5px; }
     .prompt { background: var(--panel); border: 1px solid var(--gold); border-radius: 8px; padding: 8px 16px; font-size: 18px; font-weight: 700; white-space: nowrap; }
     .prompt:empty { display: none; }
+    /* A prompt with something to do (Space...) stands out, and pulses as it comes up. */
+    .prompt.act { font-size: 22px; padding: 10px 20px; border-width: 2px; color: #fff3c4; box-shadow: 0 0 0 2px rgba(255, 210, 58, 0.25), 0 0 22px rgba(255, 210, 58, 0.45); white-space: normal; text-align: center; max-width: 100%; box-sizing: border-box; }
+    .prompt.pulse { animation: prompt-pulse 0.9s ease-out 2; }
+    @keyframes prompt-pulse { 0% { transform: scale(1); } 30% { transform: scale(1.12); box-shadow: 0 0 0 4px rgba(255, 210, 58, 0.5), 0 0 34px rgba(255, 210, 58, 0.8); } 100% { transform: scale(1); } }
     /* At sea: Battle Navigation's move tokens (this turn, then the next), and none of the den's crates or keys. */
     .sailhud { display: none; flex-direction: column; align-items: center; gap: 6px; background: var(--panel); border: 1px solid #5a412a; border-radius: 10px; padding: 8px 14px; }
     body.sailing .sailhud { display: flex; }

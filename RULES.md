@@ -127,6 +127,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   quickly": a longer message stays up longer (about 70 ms a letter, 1.8 to 7 seconds), and one
   that comes while another is still being read waits its turn instead of wiping it (only the
   latest waits, so they never pile up). Bad news, a hit, never waits.
+- **Something new to do stands out (10 Nov).** "It says space, but it's such a tiny little thing
+  at the bottom. I did not see it." When the prompt at the bottom offers something new to do with
+  Space (board her, build the crane, haul the wreck), it's bigger, glows, and pulses as it comes
+  up. Not the running tips while you carry a piece or play a puzzle, which stay as they were.
 
 - **A puzzle game, not an action game.** The raiders are there for a bit of interest and a bit of
   pressure, so you can't ignore things altogether; the emphasis is always on wanting to finish the

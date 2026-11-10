@@ -685,7 +685,16 @@ export function prompt() {
   if (canRead(G.map) && !carry && !wm && pirate.h < 0.05 && !t.startsWith('Space')) t += " · M: the captain's map";
   t = sailPrompt() || mapPrompt() || bilgePrompt() || swordPrompt() || t;
   const el = $('prompt');
-  if (el.textContent !== t) el.textContent = t;
+  if (el.textContent !== t) {
+    el.textContent = t;
+    // Something new to do with a key (10 Nov: "it says space, but it's such a tiny little thing at
+    // the bottom. I did not see it"): it stands out, and pulses as it comes up.
+    // (Not the running tips while you carry a piece or play a puzzle: only somewhere new to do something.)
+    const act = /\bSpace\b/.test(t) && !carry && !/arrows or mouse|click a plank|click swaps|pick up the [A-Z]|put the|swap the/.test(t);
+    el.classList.toggle('act', act);
+    el.classList.remove('pulse');
+    if (act) { void el.offsetWidth; el.classList.add('pulse'); }
+  }
   $('gunhelp').classList.toggle('on', onGunDeck());
   if (onGunDeck()) $('intro').classList.add('off');   // (nothing over the board)
 }
