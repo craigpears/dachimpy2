@@ -110,6 +110,13 @@ the site (`.assetsignore` skips `*.md`).
   looking two moves ahead) to see whether better play goes much further, as a check on the skill
   curve.
 
+- **See her answer the oars as the pull builds (10 Nov):** "I'm not seeing any physical
+  difference. Like ... I expect the boat to start, tilt it, angling to one side if I'm just rowing
+  one side, and it to actually see some sense of movement." She still moves square by square, but
+  while you row you "should kind of see that like some kind of forward, left, or right move
+  building up based on how one person's doing or the other": she angles towards the way she's
+  turning and creeps ahead as pull builds, then the square's move completes.
+
 - **Rowing by port and starboard (10 Nov):** the user loves IDEAS.md's "Port and starboard":
   "absolutely hilarious ... not obviously like a brand new puzzle, but it's certainly a nice twist
   on bilging ... Do that. Absolutely do that." Her oars are rowed by a Bilge board split down the
