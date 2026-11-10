@@ -162,22 +162,12 @@ the site (`.assetsignore` skips `*.md`).
   the crane, haul her up, and the like), the offer is in the view where you're looking, at the
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
-- **The rare piece a frame's stuck on comes sooner (10 Nov):** a bin, or a rack to keep pieces in,
-  "just feels very uncarpentry like", and the raiders as they come are enough to throw at. Instead:
-  "if you do are stuck on a rare piece ... that becomes a bit more common. Like in my example, I've
-  got one on the stairs ... especially if we're going to have patterns like that where like you
-  absolutely need it". When nothing on the crates or in your hands will go into the frame you're
-  building, and only a rarer piece would, the deal brings that piece more often.
-  Then: "I want you to have to [dump] them ... just take into account a tiny bit more of the
-  context and rare pieces so that it's not completely random, just for enjoyability for this demo."
-  A light touch: still mostly the usual odds.
-- **A tiny gap on the stairs leaves no room to be creative (10 Nov):** not a lift-out bug ("I can
-  lift pieces out of the stairs. That's not a problem"). "It's just I can't fill tiny single gaps
-  because like the boundary is only like 1 or 2 tiles out of where you need to fill. So you can't
-  really be creative on how you fill it. If you've got like an M shape, because it's just so tiny."
-  And: "I was really at first enjoying the stairs and loving the variety of the shape, but yeah, it
-  just leaves that bit." The stuck-frame deal above helps; whether the stairs should also let a
-  piece stick out further round a small gap is to pin down with the user.
+- **Show where the stairs' boundary is (10 Nov):** "I can. Yeah, I just had to rearrange it a
+  bit. But yeah, I've gotten there, actually, which makes it more rewarding ... I think it should
+  certainly be clearer what the boundary of the stairs are, because I couldn't figure out really
+  how that I could all rearrange this a bit and then work within the boundary in a more creative
+  way." Show how far a piece may stick out round the stairs frame (its margin), so you can see the
+  room you have to rearrange in.
 
 ## Needs a playtest to pin down
 

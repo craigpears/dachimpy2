@@ -1882,7 +1882,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   (10 Nov, asked again what to do with a piece you can't use: a pile to saw it up, or a rack to
   keep it, "just feels very uncarpentry like", and "even just the small number of raiders as they
   are is fine". So no bin and no rack; the deal helps instead when a frame's stuck on a rare
-  piece: TODO.md.)
+  piece. Then, having worked it out: "I just had to rearrange it a bit ... I've gotten there,
+  actually, which makes it more rewarding." So the deal doesn't help with a frame either: finding
+  the way to fill it is the reward. What helps is seeing the room you have: TODO.md.)
 - **You must see what's happening in the den.** Raiders inside get a ⚔ marker, pinned to the edge
   of the screen when they're out of view (gold when carrying loot). The view widens on narrow screens.
 - **Keeping them out must be possible, and must feel worth it.** The user found it demoralising
