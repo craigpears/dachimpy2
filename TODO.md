@@ -197,8 +197,11 @@ the site (`.assetsignore` skips `*.md`).
   the enemies, and that was how we got rid of things. So maybe we do need the occasional attacker
   or something, I don't know, if you're in the base, so that we keep that wastage up." Once the
   opening siege is over, a piece that won't fit anywhere has nowhere to go. The user's thought: now
-  and then, while you're building in the den, a raider or two to throw them at. (To pin down with
-  the user.)
+  and then, while you're building in the den, a raider or two to throw them at. **Agreed (10
+  Nov):** "a bit peaceful, yeah. Definitely the occasional raiders, I think, is still needed. It
+  gives it a bit of life, and as you said, a way to throw scrap." Now and then after the siege, a
+  small boat of a raider or two lands and has a go at the wall: no siege, no cannon, just
+  something to throw your spare pieces at.
 
 ## Needs a playtest to pin down
 
