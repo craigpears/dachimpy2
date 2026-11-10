@@ -200,6 +200,9 @@ the site (`.assetsignore` skips `*.md`).
   really get past. I think we said that before a bit. That's just a bit too much going on here."
   Running the checkpoint should be hard but possible: a hit or two on the way, not one after
   another, so a bold run past the guns can make it.
+  Possible, but work (the user, 10 Nov): "you should be able to get through here, but it should
+  be work", strong enough that the side route is worth finding (IDEAS.md, "Sunk at the
+  checkpoint").
 
 - **The rowing board's look: under water, rowers in scale, side by side (10 Nov):** no bilge water
   line on the rowing boards ("everything should be under the water, really, for this mode"); two
