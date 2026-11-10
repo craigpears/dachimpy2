@@ -186,13 +186,6 @@ the site (`.assetsignore` skips `*.md`).
   whole thing through: "building the platform and the stairs and things in the base is really
   difficult now because you've got no way of wasting pieces. I mean, I can still kind of put stuff
   on the wall, but ... originally it was the balance, the key was that you could throw things at
-- **Turning on the spot under oars (10 Nov):** a friend rowed in from the checkpoint's side and
-  on to the capybara: "I think it's quite fun. I'm finding turning left [and] right is fine, but if
-  you actually want to like fully spin on the spot ... I ended up just to the right of the lock.
-  And I can't really spin to get to the left. Like, I can't just keep spamming the port until it
-  turns 90." Under oars every turn is a sailing turn, a square forward and round, so she can't
-  turn where she is. Pulling hard on one side should turn her round where she sits, a quarter at
-  a time, as oars can, so you can face her the way you want in a tight spot.
   the enemies, and that was how we got rid of things. So maybe we do need the occasional attacker
   or something, I don't know, if you're in the base, so that we keep that wastage up." Once the
   opening siege is over, a piece that won't fit anywhere has nowhere to go. The user's thought: now
@@ -201,6 +194,23 @@ the site (`.assetsignore` skips `*.md`).
   gives it a bit of life, and as you said, a way to throw scrap." Now and then after the siege, a
   small boat of a raider or two lands and has a go at the wall: no siege, no cannon, just
   something to throw your spare pieces at.
+- **How to turn her at the oars isn't obvious (10 Nov):** a friend rowed in from the checkpoint's side and
+  on to the capybara: "I think it's quite fun. I'm finding turning left [and] right is fine, but if
+  you actually want to like fully spin on the spot ... I ended up just to the right of the lock.
+  And I can't really spin to get to the left. Like, I can't just keep spamming the port until it
+  turns 90." Then, trying again: "[turning] on the spot works brilliantly, it's just not very
+  obvious [what] you have to do to achieve it. That does work, so yeah, if you do a good combo on
+  one side". So turning works as it is (a big clear on one side turns her that way, and hemmed in
+  she turns where she sits); what's missing is knowing that's how. Something should show you, when
+  the oars go out, that a big combo on one side turns her toward that side. (How, to pin down with
+  the user. An open-water spin on the spot at the oars was tried and kept back, as it changes
+  turns they like.)
+- **The lock's Bilge board hidden as she comes in (10 Nov):** "[pulling] in[to] the locks and the
+  [nose], so you can't see the [bilging] puzzle. Obviously, it should be orientated to the ship or
+  the dock or whatever." Coming into a lock, the board you pump it up with is blocked from view
+  (by her bows, or by facing the wrong way for how you've come in). It should face you as you
+  come in, turned to suit her and the lock, and never sit behind her. (Exactly what hides it, to
+  check in the game.)
 
 ## Needs a playtest to pin down
 
