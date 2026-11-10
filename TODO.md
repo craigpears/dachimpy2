@@ -123,6 +123,17 @@ the site (`.assetsignore` skips `*.md`).
   this point, after all." Then, unsure (10 Nov): "Part of me likes just being able to get through.
   Part of me wants her to actually sink you if you get enough damage. I'm really not sure on it."
   (To pin down: one hit, or enough damage over a run.)
+  **Settled (10 Nov): damage and bilge, as in Puzzle Pirates.** Three hits is no challenge ("I just did
+  a very simple go forward, forward, forward, forward, and I only got hit twice"), so instead: "as
+  you get hit, your damage goes up and carpentry brings it down ... you can jump into that puzzle.
+  ... same as how you hit O to get the oars out, but it's not a forced thing", and "bilging is ... the
+  same kind of idea. You can clear your bilge, but ... when you're damaged, bilge slowly goes up."
+  So her damage rises with each hit and Carpentry on her deck brings it down, whenever you choose
+  (no more being stopped to patch); while she's damaged, water seeps into her hold and her bilge
+  rises, and Bilge pumps it out. Sunk when her damage is full, and you row home. Shown as Puzzle
+  Pirates shows them, a damage meter and a bilge meter, and on her too (holes, water in her hold).
+  Check YPPedia for what bilge does to a ship (slower, say) and how damage sinks one. After the
+  lag at the gauntlet is fixed (it's in the same files).
 
 
 - **The Sailing puzzle, for Kikkit's quest (10 Nov):** Kikkit's penguin quest is next up once the
