@@ -126,6 +126,9 @@ the site (`.assetsignore` skips `*.md`).
   And the turn goes the way you'd expect, not the way real oars do (the user, 10 Nov: "if you pull
   on the right-hand side, it should definitely go right"): more pull from the right-hand board
   turns her right, more from the left turns her left.
+  And you can see where you're rowing (the user, 10 Nov: "I know it's like zoomed in is good to
+  see the puzzle, but like I can't see where I'm rowing"): the view keeps the boards big enough
+  to play but shows the water ahead of her too, the rocks, the marks and the next few squares.
 
 - **Something worth finding in the hidden cove: treasure (9 Nov):** the canal and the cove "would
   be great, but ... it needs a point of interest in here, even if it's a little like treasure
