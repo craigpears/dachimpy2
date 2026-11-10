@@ -162,6 +162,22 @@ the site (`.assetsignore` skips `*.md`).
   the crane, haul her up, and the like), the offer is in the view where you're looking, at the
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
+- **Mischievous's wedding, a proof of concept of the whole thing (10 Nov):** "really go for it,
+  really generate me a proof of concept for the whole thing ... have a cheat so we can jump to it
+  ... the cheesy ending, pre-generated scenes. This should probably be ... on an island somewhere
+  ... islands can all have their own little thing out there." And of Mischievous: "look for [her]
+  pirate page, just so you can get her likeness ... Go through her portraits, so you could choose
+  which version of [her] you would like to marry, or something silly." Her Emerald pirate page has
+  two portraits: "Mischief Never Sleeps" (curly black hair, a gold earring, a red-and-black
+  off-the-shoulder dress, her grey squirrel) and "Boo!" (her Halloween costume, 2010: the palace
+  shoppe's red Butterfly mask, bat wings). Built from IDEAS.md's "A Puzzle Pirates wedding": her
+  island out at sea, the wrecked venue and her darkly funny welcome, who you marry (her, in either
+  portrait's look; the line of suitors, "Bachelor number one" the groom left from last time; or
+  someone of your own), the venue, a theme to start from, then decorating and dressing the guests
+  freely, the plot, the cheesy cutscene, and a portrait to save, with the set-up kept and a link to
+  share. "There isn't officially anything in Puzzle Pirates for any of this stuff, other than
+  clothing and obviously furniture": so the clothes are YPP's (Dress top, Gown, Veil, Tiara, the
+  Butterfly, Frilly shirt with sash), the rest is ours. A cheat and a link: `?at=wedding`.
 
 ## Needs a playtest to pin down
 
