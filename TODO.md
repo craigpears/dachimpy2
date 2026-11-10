@@ -175,7 +175,9 @@ the site (`.assetsignore` skips `*.md`).
   out. Oh no, I can't pick this piece up. Yeah, like I put like another piece in there, but like
   that I can't use, and then I have one little gap, and there's nothing I can do about it." Any
   piece in an unfinished frame should lift back out (RULES: "A gap is never filled for you"), but
-  on the stairs it wouldn't.
+  on the stairs it wouldn't. Keep the stairs' shape as it is: "I was really at first enjoying the stairs and
+  loving the variety of the shape, but yeah, it just leaves that bit." It's the stuck gap that needs fixing,
+  not the stairs.
 
 ## Needs a playtest to pin down
 
