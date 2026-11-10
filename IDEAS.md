@@ -348,6 +348,33 @@ it should be work." Shaped a little:
   luck. (To pin down with the user: how many hits sink her, and whether the rowboat starts by the
   checkpoint or partway home.)
 
+## Kikkit's penguin: five lefts through the whirlpools (10 Nov)
+
+A side quest past the checkpoint, off to the right (the old wreck's off to the left). The user:
+"Look for the pirate Kikkit as well, we need to make her a penguin in the game somewhere, hehe";
+then "she's definitely a penguin side quest".
+- **Kikkit:** a real pirate on Emerald (checked 10 Nov): captain of Rodrigo's Revenge, of the flag
+  Egotistical Englishman, an Admiral in the Aimuari Island Navy (Dignity's navy, and above her).
+  Drawn from her portrait by the pirate maker: black curly hair crowned with red roses, an
+  eyepatch, gold hoops, her tongue out, blue swirling tattoos on her arms and middle, a red top
+  tied at the front, a red wristband, a ragged black skirt on a gold-buckled belt, bare feet, a
+  stone jug marked XXX, and a little ghost familiar at her shoulder. Every piece a wardrobe item.
+- **Her crazed directions:** "I really want a penguin. I saw one over there. I can't remember
+  which way I went. Maybe I took five lefts and a right, or was it five rights and a left?" She
+  sounds loopy ("you can't have taken five lefts ... spun around on the spot ... hopped"), "she
+  can't get her lefts and rights right", "weird and random like that".
+- **The twist, she was right:** the way there is through some really weird whirlpools, and
+  whirlpools, as in Puzzle Pirates' Battle Navigation, swing you round and set you off facing
+  another way. So getting through really does take five lefts: "oh, okay, I think she was actually
+  right". Her directions are the puzzle's key, if you take them seriously.
+- **The penguin:** found out past the whirlpools, and it "can eventually accompany you": swims
+  along beside her, and lives in the den after (with Umami in the shallows, say), or rides on your
+  shoulder as a familiar. Won by a puzzle, as every reward is (which one: to pin down).
+- **Penguins in the wardrobe too:** "make her a penguin" first meant Kikkit as one; if wanted,
+  a penguin body the pirate maker can dress, so anyone can be a penguin.
+(To shape with the user: which puzzle wins the penguin, whether the whirlpools are rowed or
+sailed, and what Kikkit gives you for bringing one back, if she even remembers asking.)
+
 ## Rewards that mean something (10 Nov)
 
 The user likes the clifftop lagoon ("I like the little lagoon"), but its treasure, 32 doubloons,
