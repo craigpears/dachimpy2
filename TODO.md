@@ -129,6 +129,9 @@ the site (`.assetsignore` skips `*.md`).
   And you can see where you're rowing (the user, 10 Nov: "I know it's like zoomed in is good to
   see the puzzle, but like I can't see where I'm rowing"): the view keeps the boards big enough
   to play but shows the water ahead of her too, the rocks, the marks and the next few squares.
+  Then the test page goes (the user, 10 Nov: "remove the mirror strokes test"): once mirror
+  strokes is the den's rowing, the den keeps it and the `row-test` page and its 3D go; the puzzle's
+  module, its tests and its bots stay.
 
 - **Something worth finding in the hidden cove: treasure (9 Nov):** the canal and the cove "would
   be great, but ... it needs a point of interest in here, even if it's a little like treasure
