@@ -192,6 +192,15 @@ the site (`.assetsignore` skips `*.md`).
   I've been working on, what it's got in there so far." Screenshots (and short clips, maybe) of each
   part, taken from its starting-point link, with a line on each; pirate names only.
 
+- **A sheltered harbour at the canal's mouth (10 Nov):** playtesting the way into the first
+  lock: "it just maybe needs a few rocks along the right-hand side so you can't try and, like,
+  sneak around the wind. I mean, you can't, but it kind of feels like you almost can. Maybe it just
+  needs some protruding rocks, almost like it's a bit of a harbour, sheltered area. And like the
+  wind just to expand up to the cliff. At the moment, it's just kind of in the middle of nowhere."
+  So rocks jut out from the cliff either side of the canal's mouth, most of all on its right, making
+  a little harbour, and the mouth's wind fills it right up to the cliff and the first lock: no
+  gap beside the wind that looks like a way round it.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
