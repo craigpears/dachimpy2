@@ -719,6 +719,14 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     straight is hard (the user hadn't yet). Wanted: fewer kinds of piece, "because that makes more
     of a risk for cascades and unintended effects", anything to make it more chaotic, better
     graphics, and "the actual 3D thing" (TODO.md).
+    **Fewer kinds, tested (10 Nov):** `row-test` now lets you pick 3 to 7 kinds of piece (Bilge has
+    7; 5 is the default now), with the den's look on the boards and her rowing in 3D beside them.
+    Bots, 30 games of 80 moves, squares made good by greedy and by looking two moves ahead: 7
+    kinds 2.8 and 10.4; 6 kinds 5.7 and 21.2; 5 kinds 15.2 and 40.6; 4 kinds 63.5 and 60.5. At 5,
+    looking ahead still pays a lot and careful play goes straight about two thirds of the time,
+    and a random player rows in circles a quarter of the time; at 4 the cascades do the playing
+    and thinking no longer helps. So 5 is the sweet spot. Still no bot ever gets a Vegas on both
+    sides at once.
     **A course like snakes and ladders (10 Nov):** a rowing race round a course where pulling the
     wrong way at the wrong spot sends you into a whirlpool, or a wind that sweeps you "all the way
     back to the start and you've got to row back up again. That would be hilarious." (Goes with

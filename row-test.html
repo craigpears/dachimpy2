@@ -5,202 +5,481 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mirror strokes test</title>
 <!-- A test page for IDEAS.md's "Mirror strokes" (TODO.md, 10 Nov), unlinked like den.html. The rules are
-     src/mirror-row.ts (compiled to js/mirror-row.js); this page only draws them. -->
+     src/mirror-row.ts (compiled to js/mirror-row.js); this page only draws them: the boards here, in the
+     den's look (js/den/bilge.js's pieces, js/den/rowing.js's deck, cursor and compass), and her rowing in
+     3D in js/row-test-3d.js. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  :root { --ink: #222; --mute: #666; --line: #ccc; --bg: #faf8f3; --sea: #cfe3ee; --wake: #fff; --port: #c0392b; --stbd: #1e8449; }
+  :root { --ink: #f6ead2; --dim: #cbb894; --gold: #e0a92a; --panel: rgba(28, 19, 12, 0.82); --edge: #5a412a; --port: #e0604c; --stbd: #4cc072; }
   * { box-sizing: border-box; }
-  body { margin: 0; padding: 16px; font: 15px/1.4 system-ui, sans-serif; color: var(--ink); background: var(--bg); }
-  h1 { font-size: 20px; margin: 0 0 4px; }
-  p.help { margin: 0 0 12px; color: var(--mute); max-width: 60em; }
-  .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px; }
-  .bar label { cursor: pointer; }
-  button { font: inherit; padding: 4px 10px; cursor: pointer; }
-  .play { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+  body { margin: 0; padding: 14px 16px; font: 500 16px/1.4 'Alegreya Sans', system-ui, sans-serif; color: var(--ink); background: #140d08; }
+  h1 { font: 700 24px 'Alegreya', serif; color: var(--gold); margin: 0 0 2px; }
+  p.help { margin: 0 0 10px; color: var(--dim); max-width: 70em; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-bottom: 12px; background: var(--panel); border: 1px solid var(--edge); border-radius: 10px; padding: 8px 12px; }
+  .bar label { cursor: pointer; color: var(--dim); }
+  .bar label:has(input:checked) { color: var(--ink); }
+  .bar select, button { font: 700 15px 'Alegreya Sans', sans-serif; color: var(--ink); background: #3b2a1b; border: 1px solid #c9a35c; border-radius: 6px; padding: 3px 10px; cursor: pointer; }
+  input { accent-color: var(--gold); }
+  .play { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start; }
   .board { text-align: center; }
-  .board h2 { font-size: 14px; margin: 0 0 4px; }
-  .board svg { display: block; background: #fff; border: 1px solid var(--line); cursor: pointer; touch-action: manipulation; }
-  .side { width: 320px; max-width: 100%; }
-  #sea { display: block; width: 100%; height: auto; background: var(--sea); border: 1px solid var(--line); }
-  .pulls { display: grid; grid-template-columns: 6em 1fr 3.5em; gap: 4px 8px; align-items: center; margin: 10px 0; }
-  .meter { height: 10px; background: #eee; }
-  .meter i { display: block; height: 100%; width: 0; }
-  #stats { margin: 6px 0; }
-  #log { list-style: none; padding: 0; margin: 6px 0; min-height: 9em; font-size: 14px; }
-  #log li:first-child { font-weight: 600; }
-  .combo { font-size: 22px; font-weight: 700; min-height: 1.4em; color: #8e44ad; }
+  .board canvas { display: block; cursor: pointer; touch-action: manipulation; border-radius: 6px; }
+  .mid { flex: 1 1 420px; min-width: 300px; max-width: 760px; display: flex; flex-direction: column; gap: 10px; }
+  #view { position: relative; height: 544px; border: 1px solid var(--edge); border-radius: 10px; overflow: hidden; background: #6f9cb8; }
+  #dial { position: absolute; left: 10px; bottom: 10px; width: 132px; height: 132px; pointer-events: none; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.45)); }
+  #combo { position: absolute; left: 0; right: 0; top: 18px; text-align: center; font: 700 34px 'Alegreya', serif; color: #ffd23a; text-shadow: 0 2px 0 #3a2210, 0 0 14px rgba(0,0,0,.6); pointer-events: none; opacity: 0; transition: opacity .4s; }
+  #combo.on { opacity: 1; transition: none; }
+  #combo small { display: block; font: 700 18px 'Alegreya Sans', sans-serif; color: var(--ink); }
+  #where { position: absolute; right: 10px; top: 10px; background: var(--panel); border: 1px solid var(--edge); border-radius: 8px; padding: 4px 10px; font-size: 15px; color: var(--dim); }
+  #where b { color: var(--gold); }
+  .panel { background: var(--panel); border: 1px solid var(--edge); border-radius: 10px; padding: 8px 12px; }
+  .pulls { display: grid; grid-template-columns: 6.5em 1fr 3em; gap: 4px 8px; align-items: center; }
+  .meter { height: 10px; background: #2a1c11; border: 1px solid #4a3420; border-radius: 5px; overflow: hidden; }
+  .meter i { display: block; height: 100%; width: 0; transition: width .25s; }
+  #stats { margin-top: 6px; color: var(--dim); font-size: 15px; }
+  #stats b { color: var(--gold); }
+  #log { list-style: none; padding: 0; margin: 0; min-height: 8.4em; font-size: 15px; color: var(--dim); }
+  #log li:first-child { color: var(--ink); font-weight: 700; }
+  #seed { color: var(--dim); font-size: 14px; }
 </style>
 </head>
 <body>
 <h1>Mirror strokes</h1>
-<p class="help">Two Bilge boards: port on the left, starboard on the right. Every swap you make on one is made in mirror on
-  the other. Clear on both at once to pull her straight; one side alone turns her. Arrows or the mouse move the
-  cursor, Space or a click swaps.</p>
+<p class="help">Two Bilge boards laid on her deck: port on the left, starboard on the right. Every swap you make on one is made
+  in mirror on the other. Clear on both at once to pull her straight; one side alone turns her. Row her up the channel,
+  between the red and green buoys. Arrows or the mouse move the cursor, Space or a click swaps.</p>
 <div class="bar">
   <label><input type="radio" name="kind" value="mirror" checked> Mirror strokes</label>
   <label><input type="radio" name="kind" value="split"> Plain split board</label>
+  <label title="Bilge has seven. Fewer and lines come together by themselves more often: more cascades, more you didn't plan.">Kinds of piece <select id="kinds"></select></label>
+  <label title="Pufferfish, crabs and jellyfish, at the odds the den's shallows have late in the raids."><input type="checkbox" id="specials"> Pufferfish, crabs, jellyfish</label>
   <label title="Off: what one move pulls on one side alone turns her. On: the next move can still even it up, as the den's oars do."><input type="checkbox" id="clocked"> Next move can even it up (as the den's oars)</label>
   <button id="again">New boards</button>
-  <span id="seed" style="color:var(--mute)"></span>
+  <span id="seed"></span>
 </div>
-<div class="play">
-  <div id="boards" class="play"></div>
-  <div class="side">
-    <div class="combo" id="combo"></div>
-    <svg id="sea" viewBox="0 0 300 300"></svg>
-    <div class="pulls">
-      <span style="color:var(--port)">Port</span><div class="meter"><i id="mp" style="background:var(--port)"></i></div><span id="np"></span>
-      <span style="color:var(--stbd)">Starboard</span><div class="meter"><i id="ms" style="background:var(--stbd)"></i></div><span id="ns"></span>
+<div class="play" id="play">
+  <div class="board" id="b0"></div>
+  <div class="mid">
+    <div id="view"><canvas id="dial" width="264" height="264"></canvas><div id="combo"></div><div id="where"></div></div>
+    <div class="panel">
+      <div class="pulls">
+        <span style="color:var(--port)">Port</span><div class="meter"><i id="mp" style="background:var(--port)"></i></div><span id="np"></span>
+        <span style="color:var(--stbd)">Starboard</span><div class="meter"><i id="ms" style="background:var(--stbd)"></i></div><span id="ns"></span>
+      </div>
+      <div id="stats"></div>
     </div>
-    <div id="stats"></div>
-    <ul id="log"></ul>
+    <div class="panel"><ul id="log"></ul></div>
   </div>
+  <div class="board" id="b1"></div>
 </div>
+<script type="importmap">
+  { "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  } }
+</script>
 <script type="module">
-import { H, W } from './js/bilge.js';
-import { MirrorRow, SplitRow, mirrorCol, seeded } from './js/mirror-row.js';
+import { H, W, KINDS } from './js/bilge.js';
+import { ROW } from './js/rowing.js';
+import { KINDS_DEFAULT, KINDS_LEAST, MirrorRow, SplitRow, mirrorCol, seeded } from './js/mirror-row.js';
+import { seaView } from './js/row-test-3d.js';
 
-const CELL = 34, NS = 'http://www.w3.org/2000/svg';
-const COLOURS = ['#e74c3c', '#f1c40f', '#2ecc71', '#3498db', '#9b59b6', '#e67e22', '#1abc9c'];
-const MARKS = ['●', '▲', '■', '◆', '★', '✚', '♥'];
-const DX = [0, 1, 0, -1], DY = [1, 0, -1, 0];
-
-let row, kind = 'mirror', cur = { r: 6, c: 2 }, busy = false, moves = 0, totals = { port: 0, starboard: 0 }, svgs = [];
 const $ = (id) => document.getElementById(id);
-const el = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent?.appendChild(e); return e; };
+const SIDES = ['port', 'starboard'];
+const TINT = { port: '200,64,46', starboard: '47,174,90' };
+/** The den's late odds for specials (src/den-bilge.ts, oddsFor from the fourth wave). */
+const SPECIALS = { puffer: 0.02, crab: 0.015, jelly: 0.01 };
+
+// ---------- the pieces, drawn as js/den/bilge.js draws them ----------
+/* Seven glassy pieces all in the sea's colours, each its own shape and pattern; the crab orange,
+   the pufferfish a yellow fish, the jellyfish a cyan and pink cap with purple tentacles. */
+const BITS = [
+  ['#7cc6f2', 'octagon', 'scallops'], ['#1e7d7a', 'octagon', 'swirl'], ['#1a9ae0', 'circle', 'wave'], ['#a6e2cf', 'circle', 'ripples'],
+  ['#2147b8', 'square', 'diagonals'], ['#6f84a8', 'rounded', 'waves'], ['#2fb5c4', 'pentagon', 'stripes'],
+];
+const tile = (draw) => { const cv = document.createElement('canvas'); cv.width = cv.height = 128; draw(cv.getContext('2d'), 128); return cv; };
+function shapePath(g, shape, c, r) {
+  g.beginPath();
+  if (shape === 'circle') g.arc(c, c, r, 0, Math.PI * 2);
+  else if (shape === 'octagon') for (let i = 0; i < 8; i++) { const a = Math.PI / 8 + i * Math.PI / 4, rr = r / Math.cos(Math.PI / 8) * 0.97; g.lineTo(c + Math.cos(a) * rr, c + Math.sin(a) * rr); }
+  else if (shape === 'pentagon') for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + i * 2 * Math.PI / 5, rr = r * 1.08; g.lineTo(c + Math.cos(a) * rr, c + 8 + Math.sin(a) * rr); }
+  else if (shape === 'square') g.rect(c - r * 0.92, c - r * 0.92, r * 1.84, r * 1.84);
+  else g.roundRect(c - r * 0.95, c - r * 0.95, r * 1.9, r * 1.9, r * 0.38);
+  g.closePath();
+}
+const shade = (hex, f) => { const n = parseInt(hex.slice(1), 16), ch = (s) => Math.max(0, Math.min(255, Math.round(((n >> s) & 255) * f))); return `rgb(${ch(16)},${ch(8)},${ch(0)})`; };
+const bitFace = ([col, shape, pat]) => tile((g, w) => {
+  const c = w / 2, r = 54;
+  shapePath(g, shape, c, r);
+  const body = g.createRadialGradient(c - 22, c - 26, 4, c, c, r * 1.3);
+  body.addColorStop(0, shade(col, 1.45)); body.addColorStop(0.45, col); body.addColorStop(1, shade(col, 0.55));
+  g.fillStyle = body; g.fill();
+  g.save(); g.clip();
+  g.strokeStyle = shade(col, 1.6); g.fillStyle = shade(col, 1.5); g.lineWidth = 7; g.lineCap = 'round';
+  if (pat === 'scallops') for (let y = 22; y < 120; y += 22) for (let x = -10; x < 140; x += 26) { g.beginPath(); g.arc(x + (y / 22 % 2) * 13, y, 11, Math.PI, 0); g.stroke(); }
+  else if (pat === 'swirl') { for (const s of [-1, 1]) { g.beginPath(); g.arc(c + s * 18, c - s * 4, 22, s > 0 ? Math.PI * 0.2 : Math.PI * 1.2, s > 0 ? Math.PI * 1.3 : Math.PI * 2.3); g.stroke(); } }
+  else if (pat === 'wave') { g.lineWidth = 10; g.beginPath(); g.arc(c - 4, c + 6, 26, Math.PI * 0.9, Math.PI * 2.05); g.stroke(); g.beginPath(); g.arc(c + 18, c + 4, 10, Math.PI, Math.PI * 2.2); g.stroke(); }
+  else if (pat === 'ripples') for (const rr of [16, 30, 44]) { g.beginPath(); g.arc(c + 6, c + 10, rr, Math.PI * 1.05, Math.PI * 1.75); g.stroke(); }
+  else if (pat === 'diagonals') for (let x = -60; x < 160; x += 24) { g.beginPath(); for (let t = 0; t <= 1; t += 0.1) g.lineTo(x + t * 70 + Math.sin(t * 9) * 6, 10 + t * 110); g.stroke(); }
+  else if (pat === 'waves') for (let y = 28; y < 120; y += 22) { g.beginPath(); for (let x = 0; x <= 128; x += 6) g.lineTo(x, y + Math.sin(x / 9) * 5); g.stroke(); }
+  else if (pat === 'stripes') for (let y = 30; y < 120; y += 20) { g.beginPath(); g.moveTo(0, y); g.bezierCurveTo(40, y - 10, 80, y + 10, 128, y); g.stroke(); }
+  g.restore();
+  shapePath(g, shape, c, r);
+  g.lineWidth = 5; g.strokeStyle = shade(col, 0.35); g.stroke();
+  g.fillStyle = 'rgba(255,255,255,0.85)';
+  g.beginPath(); g.ellipse(c + 26, c - 30, 9, 6, -0.6, 0, Math.PI * 2); g.fill();
+});
+const SPECIAL = {
+  crab: tile((g) => {
+    g.strokeStyle = '#7a3e08'; g.lineWidth = 7; g.lineCap = 'round';
+    for (const s of [-1, 1]) for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(64 + s * 26, 78 + i * 8); g.lineTo(64 + s * 50, 92 + i * 12); g.stroke(); }
+    g.fillStyle = '#e8901e'; g.strokeStyle = '#6a3606'; g.lineWidth = 4;
+    for (const s of [-1, 1]) {
+      g.beginPath(); g.moveTo(64 + s * 30, 66); g.lineTo(64 + s * 44, 34); g.stroke();
+      g.beginPath(); g.ellipse(64 + s * 44, 26, 14, 18, s * 0.3, 0, Math.PI * 2); g.fill(); g.stroke();
+      g.fillStyle = '#fff'; g.beginPath(); g.ellipse(64 + s * 40, 18, 3, 9, s * 0.3, 0, Math.PI * 2); g.fill(); g.fillStyle = '#e8901e';
+    }
+    g.beginPath(); g.ellipse(64, 78, 36, 24, 0, 0, Math.PI * 2); g.fill(); g.stroke();
+    for (const s of [-1, 1]) { g.fillStyle = '#fff'; g.beginPath(); g.arc(64 + s * 11, 66, 7, 0, Math.PI * 2); g.fill(); g.fillStyle = '#111'; g.beginPath(); g.arc(64 + s * 11, 67, 3.5, 0, Math.PI * 2); g.fill(); }
+  }),
+  puffer: tile((g) => {
+    g.fillStyle = '#f2d23a'; g.strokeStyle = '#6a5a10'; g.lineWidth = 4;
+    g.beginPath(); g.moveTo(112, 64); g.lineTo(124, 48); g.lineTo(124, 80); g.closePath(); g.fill(); g.stroke();
+    g.beginPath(); g.ellipse(64, 64, 50, 24, 0, 0, Math.PI * 2); g.fill(); g.stroke();
+    g.fillStyle = '#fbf3c0'; g.beginPath(); g.ellipse(60, 74, 36, 10, 0, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = '#a08a20'; g.lineWidth = 2; for (let x = 38; x < 96; x += 7) { g.beginPath(); g.moveTo(x, 68); g.lineTo(x + 3, 76); g.stroke(); }
+    g.fillStyle = '#fff'; g.beginPath(); g.arc(30, 58, 8, 0, Math.PI * 2); g.fill(); g.fillStyle = '#111'; g.beginPath(); g.arc(28, 58, 4, 0, Math.PI * 2); g.fill();
+  }),
+  jelly: tile((g) => {
+    g.strokeStyle = '#6a58c8'; g.lineWidth = 9; g.lineCap = 'round';
+    for (let i = 0; i < 5; i++) { g.beginPath(); g.moveTo(36 + i * 14, 66); g.quadraticCurveTo(28 + i * 14, 92, 38 + i * 14, 118); g.stroke(); }
+    g.fillStyle = '#3ad8e0'; g.strokeStyle = '#106a78'; g.lineWidth = 4;
+    g.beginPath(); g.arc(64, 66, 46, Math.PI, 0); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = '#f070c8'; for (const [x, y, r] of [[48, 44, 9], [74, 36, 8], [84, 56, 7], [56, 60, 6]]) { g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); }
+    g.fillStyle = 'rgba(255,255,255,0.75)'; g.beginPath(); g.ellipse(46, 34, 10, 5, -0.5, 0, Math.PI * 2); g.fill();
+  }),
+};
+/* Which of the den's seven each kind is drawn as: the most unlike first, so a board of fewer kinds
+   (3 to 7) still reads at a glance (pale octagon, dark square, mint circle, teal octagon, pentagon...). */
+const ORDER = [0, 4, 3, 1, 6, 2, 5];
+const FACES = ORDER.map((i) => bitFace(BITS[i]));
+const SHADOW = tile((g) => { const gr = g.createRadialGradient(64, 64, 8, 64, 64, 62); gr.addColorStop(0, 'rgba(0,0,0,0.45)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(0, 0, 128, 128); });
+const faceOf = (b) => (b.s ? SPECIAL[b.s] : FACES[b.k]);
+
+// ---------- the boards: on her deck, as js/den/rowing.js lays its board ----------
+/* Planks running fore and aft, washed red for port and green for starboard (her sidelights'
+   colours), a dark rim, the side's name painted across the bow end (the top, beyond row 0), and
+   the water she sits in over the bottom rows. The split board has both, a kingplank between. */
+const CELL = 40, RIM = 12, HEAD = 40, BW = W * CELL + 2 * RIM, BH = H * CELL + HEAD + 2 * RIM;
+const px = (c) => RIM + c * CELL, py = (r) => RIM + HEAD + r * CELL;
+function deckArt(halves) {
+  const cv = document.createElement('canvas'), dpr = Math.min(2, devicePixelRatio);
+  cv.width = BW * dpr; cv.height = BH * dpr;
+  const g = cv.getContext('2d');
+  g.scale(dpr, dpr);
+  g.fillStyle = '#3a2614'; g.beginPath(); g.roundRect(0, 0, BW, BH, 6); g.fill();
+  g.fillStyle = '#8a6a45'; g.fillRect(RIM - 4, RIM - 4, BW - 2 * RIM + 8, BH - 2 * RIM + 8);
+  for (let x = RIM - 4, i = 0; x < BW - RIM + 4; x += CELL / 2, i++) {
+    g.fillStyle = i % 2 ? 'rgba(0,0,0,0.10)' : 'rgba(255,240,210,0.06)'; g.fillRect(x, RIM - 4, CELL / 2 - 1, BH - 2 * RIM + 8);
+    g.fillStyle = 'rgba(40,24,10,0.5)'; for (let y = RIM + (i * 37) % 90; y < BH - RIM; y += 140) g.fillRect(x, y, CELL / 2 - 1, 2);
+  }
+  const w = BW - 2 * RIM + 8, x0 = RIM - 4;
+  halves.forEach((side, i) => {
+    const hw = w / halves.length, hx = x0 + i * hw;
+    g.fillStyle = `rgba(${TINT[side]},0.30)`; g.fillRect(hx, RIM - 4, hw, BH - 2 * RIM + 8);
+    g.font = `700 ${Math.round(CELL * 0.62 * (halves.length > 1 ? 0.62 : 1))}px 'Alegreya Sans', sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.lineWidth = 4; g.strokeStyle = 'rgba(30,18,8,0.8)';
+    const word = side.toUpperCase(), col = side === 'port' ? '#ffb3a6' : '#b6f0c6';
+    g.strokeText(word, hx + hw / 2, RIM + HEAD / 2); g.fillStyle = col; g.fillText(word, hx + hw / 2, RIM + HEAD / 2);
+  });
+  if (halves.length > 1) { g.fillStyle = '#3a2614'; g.fillRect(BW / 2 - 4, RIM - 4, 8, BH - 2 * RIM + 8); }
+  // The squares, faintly marked.
+  g.strokeStyle = 'rgba(40,24,10,0.25)'; g.lineWidth = 1;
+  for (let c = 0; c <= W; c++) { g.beginPath(); g.moveTo(px(c), py(0)); g.lineTo(px(c), py(H)); g.stroke(); }
+  for (let r = 0; r <= H; r++) { g.beginPath(); g.moveTo(px(0), py(r)); g.lineTo(px(W), py(r)); g.stroke(); }
+  return cv;
+}
+
+/** A board on the page: its canvas, and its pieces sliding about as its moves play out. */
+function boardView(i, halves) {
+  const cv = document.createElement('canvas'), dpr = Math.min(2, devicePixelRatio);
+  cv.width = BW * dpr; cv.height = BH * dpr;
+  cv.style.width = `${BW}px`; cv.style.height = `${BH}px`;
+  const g = cv.getContext('2d');
+  return { i, halves, cv, g, dpr, deck: deckArt(halves), pieces: new Map(), dying: [], splash: [], queue: [], holdT: 0, flash: { port: 0, starboard: 0 } };
+}
+function layPieces(v, grid) {
+  v.pieces.clear();
+  grid.forEach((line, r) => line.forEach((bit, c) => { if (bit) v.pieces.set(bit.id, { bit, x: c, y: r, tx: c, ty: r, jig: 0 }); }));
+}
+const sideOfCol = (v, c) => (v.halves.length === 1 ? v.halves[0] : c < W / 2 ? 'port' : 'starboard');
+
+function stageNext(v) {
+  const st = v.queue.shift();
+  v.holdT = 0;
+  for (const id of st.cleared) {
+    const p = v.pieces.get(id);
+    if (!p) continue;
+    v.pieces.delete(id);
+    v.dying.push({ ...p, t: 0 });
+    const tint = sideOfCol(v, Math.round(p.x)) === 'port' ? '255,208,200' : '208,255,220';
+    for (let k = 0; k < 5; k++) v.splash.push({ x: p.x + 0.5, y: p.y + 0.5, vx: (Math.random() - 0.5) * 4, vy: -1 - Math.random() * 3, t: 0, life: 0.5 + Math.random() * 0.3, tint });
+  }
+  const fresh = Array(W).fill(0);
+  st.grid.forEach((line, r) => line.forEach((bit, c) => {
+    if (!bit) return;
+    let p = v.pieces.get(bit.id);
+    // New pieces wash in from under her stern end and float up into place.
+    if (!p) { p = { bit, x: c, y: H + fresh[c]++, jig: 0 }; v.pieces.set(bit.id, p); }
+    p.tx = c; p.ty = r;
+  }));
+}
+const moving = (v) => [...v.pieces.values()].some((p) => Math.abs(p.x - p.tx) + Math.abs(p.y - p.ty) > 0.02) || v.dying.length > 0;
+
+function boardTick(v, dt, board, cursorCol) {
+  v.holdT += dt;
+  if (v.queue.length && v.holdT > 0.18 && !moving(v)) stageNext(v);
+  const wetFrom = H - board.water;
+  for (const p of v.pieces.values()) {
+    const sp = (p.y > wetFrom ? 4 : 7) * dt, dx = p.tx - p.x, dy = p.ty - p.y, d = Math.hypot(dx, dy);
+    if (d > 1e-3) { const k = Math.min(1, sp / d); p.x += dx * k; p.y += dy * k; }
+    p.jig = Math.max(0, p.jig - dt);
+  }
+  for (const s of SIDES) v.flash[s] = Math.max(0, v.flash[s] - dt * 1.6);
+  const g = v.g, now = performance.now() / 1000;
+  g.setTransform(v.dpr, 0, 0, v.dpr, 0, 0);
+  g.clearRect(0, 0, BW, BH);
+  g.drawImage(v.deck, 0, 0, BW, BH);
+  g.save();
+  g.beginPath(); g.rect(px(0), py(0), W * CELL, H * CELL); g.clip();
+  const S = CELL * 0.92, draw = (p, a = 1, sc = 1) => {
+    const cx = px(p.x) + CELL / 2, cy = py(p.y) + CELL / 2, wet = p.y > wetFrom - 0.5;
+    g.globalAlpha = a * 0.9;
+    g.drawImage(SHADOW, cx - S * 0.55 * sc - 2, cy - S * 0.55 * sc + 2, S * 1.1 * sc, S * 1.1 * sc);
+    g.globalAlpha = a;
+    g.save(); g.translate(cx, cy);
+    g.rotate(p.jig > 0 ? Math.sin(p.jig * 40) * 0.4 : wet ? Math.sin(now * 1.3 + p.bit.id) * 0.04 : 0);
+    g.drawImage(faceOf(p.bit), -S / 2 * sc, -S / 2 * sc, S * sc, S * sc);
+    g.restore();
+    g.globalAlpha = 1;
+  };
+  for (const p of v.pieces.values()) draw(p);
+  // What's cleared: a flash of white, swelling and gone.
+  v.dying = v.dying.filter((p) => (p.t += dt) < 0.22);
+  for (const p of v.dying) {
+    const u = p.t / 0.22;
+    draw(p, 1 - u, 1 + u * 0.4);
+    g.globalAlpha = (1 - u) * 0.8; g.fillStyle = '#ffffff';
+    g.beginPath(); g.arc(px(p.x) + CELL / 2, py(p.y) + CELL / 2, CELL * 0.42 * (1 + u * 0.4), 0, Math.PI * 2); g.fill();
+    g.globalAlpha = 1;
+  }
+  // The water she sits in, its edge rippling.
+  const wy = py(wetFrom);
+  g.fillStyle = 'rgba(42,111,216,0.35)'; g.fillRect(px(0), wy, W * CELL, py(H) - wy);
+  g.strokeStyle = 'rgba(220,240,255,0.55)'; g.lineWidth = 2; g.beginPath();
+  for (let x = 0; x <= W * CELL; x += 6) g.lineTo(px(0) + x, wy + Math.sin(x / 14 + now * 2) * 1.5);
+  g.stroke();
+  // Each half glows while its pull waits for the other side, and flashes as it pulls.
+  const pend = row.stroke.pending();
+  v.halves.forEach((side, k) => {
+    const waiting = side === 'port' ? Math.max(0, pend) : Math.max(0, -pend), a = Math.min(0.55, waiting * 0.1 + v.flash[side] * 0.4);
+    if (a < 0.01) return;
+    const hw = W * CELL / v.halves.length;
+    g.globalCompositeOperation = 'lighter';
+    g.fillStyle = `rgba(${TINT[side]},${a})`; g.fillRect(px(0) + k * hw, py(0), hw, H * CELL);
+    g.globalCompositeOperation = 'source-over';
+  });
+  // Splashes.
+  v.splash = v.splash.filter((s) => (s.t += dt) < s.life);
+  for (const s of v.splash) {
+    s.x += s.vx * dt; s.y += s.vy * dt; s.vy += 9 * dt;
+    g.fillStyle = `rgba(${s.tint},${1 - s.t / s.life})`;
+    g.beginPath(); g.arc(px(s.x), py(s.y), 3, 0, Math.PI * 2); g.fill();
+  }
+  g.restore();
+  // The cursor, as the den's Bilge boards have it: orange brackets round its two squares, ticks
+  // between them.
+  const x0 = px(cursorCol), y0 = py(cur.r), q = CELL, len = 11, t = 3;
+  g.fillStyle = '#f39a2b';
+  for (const [x, sx] of [[x0, 1], [x0 + 2 * q, -1]]) for (const [y, sy] of [[y0, 1], [y0 + q, -1]]) {
+    g.fillRect(sx > 0 ? x - t / 2 : x - len, y - t / 2, len + t / 2, t);
+    g.fillRect(x - t / 2, sy > 0 ? y - t / 2 : y - len, t, len + t / 2);
+  }
+  g.fillRect(x0 + q - t / 2, y0 - t / 2, t, len); g.fillRect(x0 + q - t / 2, y0 + q - len + t / 2, t, len);
+}
+
+// ---------- the compass by the board (js/den/rowing.js's): the next move building up ----------
+const TOK = { F: '↑', L: '↰', R: '↱' }, TIP = Math.PI / 3;
+const D = { g: $('dial').getContext('2d'), needle: 0, handed: null };
+function dialDraw(turn, ahead) {
+  const g = D.g, Wd = 132, c = Wd / 2, R = 58;
+  g.setTransform(2, 0, 0, 2, 0, 0);
+  g.clearRect(0, 0, Wd, Wd);
+  g.beginPath(); g.arc(c, c, R + 4, 0, Math.PI * 2); g.fillStyle = '#2a1c11'; g.fill();
+  g.lineWidth = 4; g.strokeStyle = '#c9a25a'; g.stroke();
+  g.beginPath(); g.arc(c, c, R - 9, 0, Math.PI * 2); g.fillStyle = '#efe2c2'; g.fill();
+  g.lineWidth = 1.5; g.strokeStyle = '#8a6a45'; g.stroke();
+  g.lineCap = 'round';
+  g.beginPath(); g.arc(c, c, R - 3, 0, Math.PI * 2); g.lineWidth = 6; g.strokeStyle = '#4a3420'; g.stroke();
+  if (ahead > 0.005) { g.beginPath(); g.arc(c, c, R - 3, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, ahead)); g.strokeStyle = '#ffd23a'; g.stroke(); }
+  g.strokeStyle = '#6b4e32'; g.lineWidth = 1.5;
+  for (let i = -4; i <= 4; i++) { const a = -Math.PI / 2 + i * TIP / 3; g.beginPath(); g.moveTo(c + Math.cos(a) * (R - 12), c + Math.sin(a) * (R - 12)); g.lineTo(c + Math.cos(a) * (R - 18), c + Math.sin(a) * (R - 18)); g.stroke(); }
+  g.font = "700 15px 'Alegreya Sans', sans-serif"; g.textAlign = 'center'; g.textBaseline = 'middle';
+  for (const [a, t, col] of [[-TIP, TOK.L, '#b8322a'], [0, TOK.F, '#5a3a20'], [TIP, TOK.R, '#b8322a']]) {
+    const aa = -Math.PI / 2 + a;
+    if (a) { g.strokeStyle = col; g.lineWidth = 3; g.beginPath(); g.moveTo(c + Math.cos(aa) * (R - 10), c + Math.sin(aa) * (R - 10)); g.lineTo(c + Math.cos(aa) * (R - 22), c + Math.sin(aa) * (R - 22)); g.stroke(); }
+    g.fillStyle = col; g.fillText(t, c + Math.cos(aa) * (R - 30), c + Math.sin(aa) * (R - 30));
+  }
+  const Hd = D.handed;
+  if (Hd && Hd.t > 0) {
+    const n = Hd.steps.length, m = Hd.steps[n - 1];
+    g.globalAlpha = Math.min(1, Hd.t * 3);
+    g.beginPath(); g.arc(c, c + 6, 22, 0, Math.PI * 2); g.fillStyle = '#2a1c11'; g.fill(); g.lineWidth = 2; g.strokeStyle = '#ffd23a'; g.stroke();
+    g.fillStyle = '#ffd23a'; g.font = "700 28px 'Alegreya Sans', sans-serif"; g.fillText(TOK[m], c, c + 6);
+    if (n > 1) { g.font = "700 13px 'Alegreya Sans', sans-serif"; g.fillStyle = '#5a3a20'; g.fillText(`×${n}`, c, c + 38); }
+    g.globalAlpha = 1;
+  } else {
+    const a = -Math.PI / 2 + D.needle * TIP, tx = c + Math.cos(a) * (R - 16), ty = c + Math.sin(a) * (R - 16);
+    const ppx = -Math.sin(a) * 4, ppy = Math.cos(a) * 4, bx = c - Math.cos(a) * 12, by = c - Math.sin(a) * 12;
+    g.beginPath(); g.moveTo(tx, ty); g.lineTo(c + ppx, c + ppy); g.lineTo(bx, by); g.lineTo(c - ppx, c - ppy); g.closePath();
+    g.fillStyle = Math.abs(turn) >= 1 ? '#d42a1c' : '#3d4a55'; g.fill();
+    g.beginPath(); g.moveTo(tx, ty); g.lineTo(c + ppx * 0.6, c + ppy * 0.6); g.lineTo(c - ppx * 0.6, c - ppy * 0.6); g.closePath(); g.fillStyle = '#d42a1c'; g.fill();
+    g.beginPath(); g.arc(c, c, 4, 0, Math.PI * 2); g.fillStyle = '#c9a25a'; g.fill();
+  }
+  g.fillStyle = '#efe2c2'; g.font = "700 11px 'Alegreya Sans', sans-serif"; g.fillText('NEXT MOVE', c, Wd - 4);
+}
+/** What's building toward her next square: forward (0 to 1 of a square) and turning (quarter turns,
+    to starboard more than nothing; pull still waiting for the other side counts toward it). */
+const building = () => ({ ahead: row.stroke.ahead / ROW.STEP, turn: (row.stroke.swing + row.stroke.pending()) / ROW.STEP });
+
+// ---------- the game ----------
+const view = seaView($('view'));
+let row, kind = 'mirror', cur = { r: 6, c: 2 }, moves = 0, totals = { port: 0, starboard: 0 }, boards = [], comboT = null;
+
+for (let k = KINDS_LEAST; k <= KINDS; k++) $('kinds').add(new Option(k === KINDS ? `${k} (Bilge's own)` : `${k}`, k, false, k === KINDS_DEFAULT));
 
 function start() {
-  const seed = Math.floor(Math.random() * 1e6), clocked = $('clocked').checked;
+  const seed = Math.floor(Math.random() * 1e6), clocked = $('clocked').checked, kinds = Number($('kinds').value);
+  const odds = $('specials').checked ? SPECIALS : undefined;
   $('seed').textContent = `seed ${seed}`;
-  row = kind === 'mirror' ? new MirrorRow({ randoms: [seeded(seed), seeded(seed + 1)], clocked }) : new SplitRow({ randoms: [seeded(seed)], clocked });
+  row = kind === 'mirror' ? new MirrorRow({ randoms: [seeded(seed), seeded(seed + 1)], clocked, kinds, odds }) : new SplitRow({ randoms: [seeded(seed)], clocked, kinds, odds });
   moves = 0; totals = { port: 0, starboard: 0 };
-  $('log').innerHTML = ''; $('combo').textContent = '';
-  const box = $('boards'); box.innerHTML = ''; svgs = [];
-  const names = kind === 'mirror' ? ['Port', 'Starboard'] : ['Port | Starboard'];
-  names.forEach((name, i) => {
-    const d = document.createElement('div'); d.className = 'board';
-    d.innerHTML = `<h2 style="color:${kind === 'split' ? 'inherit' : i ? 'var(--stbd)' : 'var(--port)'}">${name}</h2>`;
-    const svg = el('svg', { width: W * CELL, height: H * CELL, viewBox: `0 0 ${W * CELL} ${H * CELL}` }, d);
-    svg.addEventListener('mousemove', (e) => hover(e, i));
-    svg.addEventListener('click', (e) => { hover(e, i); swap(); });
-    box.appendChild(d); svgs.push(svg);
+  $('log').innerHTML = ''; $('combo').className = '';
+  view.reset(seed);
+  boards = (kind === 'mirror' ? [['port'], ['starboard']] : [['port', 'starboard']]).map((halves, i) => {
+    const v = boardView(i, halves), box = $(`b${i}`);
+    box.innerHTML = ''; box.appendChild(v.cv);
+    v.cv.addEventListener('mousemove', (e) => hover(e, i));
+    v.cv.addEventListener('click', (e) => { hover(e, i); swap(); });
+    layPieces(v, row.boards[i].grid);
+    return v;
   });
-  draw(); sea(); pulls({ port: 0, starboard: 0 });
+  $('b1').style.display = kind === 'mirror' ? '' : 'none';
+  pulls({ port: 0, starboard: 0 });
 }
 
 /** The cursor's column on board i (it's held as port's). */
 const colOn = (i) => (i === 1 ? mirrorCol(cur.c) : cur.c);
 
 function hover(e, i) {
-  if (busy) return;
-  const rect = e.currentTarget.getBoundingClientRect();
-  const r = Math.max(0, Math.min(H - 1, Math.floor((e.clientY - rect.top) / CELL)));
-  let c = Math.max(0, Math.min(W - 2, Math.floor((e.clientX - rect.left) / CELL - 0.5)));
+  const rect = e.currentTarget.getBoundingClientRect(), sx = BW / rect.width, sy = BH / rect.height;
+  const r = Math.max(0, Math.min(H - 1, Math.floor(((e.clientY - rect.top) * sy - RIM - HEAD) / CELL)));
+  let c = Math.max(0, Math.min(W - 2, Math.round(((e.clientX - rect.left) * sx - RIM) / CELL - 1)));
   if (i === 1) c = mirrorCol(c);
-  if (r !== cur.r || c !== cur.c) { cur = { r, c }; draw(); }
+  cur = { r, c };
 }
 
-function drawBoard(i, grid, hot = new Set()) {
-  const svg = svgs[i], b = row.boards[i];
-  svg.innerHTML = '';
-  el('rect', { x: 0, y: (H - b.water) * CELL, width: W * CELL, height: b.water * CELL, fill: '#d6eaf8' }, svg);
-  if (kind === 'split') el('line', { x1: W * CELL / 2, y1: 0, x2: W * CELL / 2, y2: H * CELL, stroke: '#999', 'stroke-dasharray': '4 3' }, svg);
-  grid.forEach((line, r) => line.forEach((bit, c) => {
-    if (!bit) return;
-    const g = el('g', { transform: `translate(${c * CELL},${r * CELL})` }, svg);
-    const lit = hot.has(bit.id);
-    el('rect', { x: 2, y: 2, width: CELL - 4, height: CELL - 4, rx: 6, fill: lit ? '#fff' : COLOURS[bit.k] ?? '#888', stroke: lit ? '#000' : 'none' }, g);
-    const t = el('text', { x: CELL / 2, y: CELL / 2 + 6, 'text-anchor': 'middle', 'font-size': 17, fill: lit ? '#000' : 'rgba(0,0,0,.45)' }, g);
-    t.textContent = bit.s === 'crab' ? '🦀' : MARKS[bit.k] ?? '?';
-  }));
-  el('rect', { x: colOn(i) * CELL + 1, y: cur.r * CELL + 1, width: 2 * CELL - 2, height: CELL - 2, fill: 'none', stroke: '#000', 'stroke-width': 3, rx: 5 }, svg);
-}
+const busy = () => boards.some((v) => v.queue.length || moving(v));
 
-function draw() { row.boards.forEach((b, i) => drawBoard(i, b.grid)); }
-
-const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
-
-/** Play each board's move through, step by step: the swap, what goes, what floats up. */
-async function animate(res, before) {
-  const n = Math.max(...res.moves.map((m) => m.stages.length));
-  const prev = before.slice();
-  for (let s = 0; s < n; s++) {
-    let anyClear = false;
-    res.moves.forEach((m, i) => { const st = m.stages[s]; if (st?.cleared.length) { anyClear = true; drawBoard(i, prev[i], new Set(st.cleared)); } });
-    if (anyClear) await wait(160);
-    res.moves.forEach((m, i) => { const st = m.stages[s]; if (st) { prev[i] = st.grid; drawBoard(i, st.grid); } });
-    await wait(90);
-  }
-}
-
-async function swap() {
-  if (busy) return;
-  busy = true;
-  const before = row.boards.map((b) => b.snap());
+function swap() {
+  if (busy()) return false;
   const res = row.swap(cur.r, cur.c);
+  if (!res.moves.some((m) => m.moved)) {
+    // A crab won't budge: it does a little jig.
+    boards.forEach((v, i) => { for (const c of [colOn(i), colOn(i) + 1]) { const b = row.boards[i].grid[cur.r][c]; if (b?.s === 'crab') { const p = v.pieces.get(b.id); if (p) p.jig = 0.6; } } });
+    return false;
+  }
   moves++; totals.port += res.pull.port; totals.starboard += res.pull.starboard;
-  await animate(res, before);
-  draw(); sea(); pulls(res.pull);
-  const named = res.combos.filter(Boolean);
-  if (kind === 'mirror' && res.combos.every((x) => x === 'Vegas!')) $('combo').textContent = 'Double Vegas!';
-  else if (kind === 'mirror' && res.combos.every((x) => x === 'Bingo!')) $('combo').textContent = 'Double Bingo!';
-  else $('combo').textContent = named.join(' + ');
+  res.moves.forEach((m, i) => { boards[i].queue.push(...m.stages); boards[i].holdT = 0; });
+  for (const side of SIDES) if (res.pull[side] > 0) for (const v of boards) if (v.halves.includes(side)) v.flash[side] = Math.min(1, 0.35 + res.pull[side] * 0.12);
+  view.row(res.pull, res.steps);
+  if (res.steps.length) D.handed = { steps: [...res.steps], t: 1.1 };
+  say(res);
+  pulls(res.pull);
+  return true;
+}
+
+/** What a move did, said over the view, and in the log. */
+function say(res) {
+  const named = res.combos.filter(Boolean), flying = res.steps.length >= 4;
+  let big = '';
+  if (kind === 'mirror' && res.combos.every((x) => x === 'Vegas!')) big = 'Double Vegas!';
+  else if (kind === 'mirror' && res.combos.every((x) => x === 'Bingo!')) big = 'Double Bingo!';
+  else big = named.join(' + ');
+  const sub = flying ? "Both sides rowing like crazy: she's flying!" : res.steps.length ? res.steps.map((s) => TOK[s]).join(' ') : '';
+  if (big || flying) {
+    $('combo').innerHTML = `${big || 'Heave!'}${sub ? `<small>${sub}</small>` : ''}`;
+    $('combo').className = 'on';
+    clearTimeout(comboT);
+    comboT = setTimeout(() => { $('combo').className = ''; }, flying ? 2200 : 1200);
+  }
   if (res.pull.port || res.pull.starboard) {
     const li = document.createElement('li');
     const who = kind === 'mirror' ? res.combos.map((x, i) => (x || (res.moves[i].cleared ? 'three' : '-'))).join(' / ') : (res.combos[0] || 'three');
-    li.textContent = `${moves}. ${who}: pull ${res.pull.port.toFixed(1)} / ${res.pull.starboard.toFixed(1)}${res.steps.length ? ' → ' + res.steps.join(' ') : ''}`;
+    const links = res.moves.reduce((t, m) => t + m.chain, 0);
+    li.textContent = `${moves}. ${who}${links ? ` (${links} in the chain)` : ''}: pull ${res.pull.port.toFixed(1)} / ${res.pull.starboard.toFixed(1)}${res.steps.length ? ' → ' + res.steps.map((s) => TOK[s]).join(' ') : ''}`;
     $('log').prepend(li);
-    while ($('log').children.length > 8) $('log').lastChild.remove();
+    while ($('log').children.length > 7) $('log').lastChild.remove();
   }
-  busy = false;
 }
 
 function pulls(p) {
   const big = Math.max(4, p.port, p.starboard);
   $('mp').style.width = `${100 * p.port / big}%`; $('ms').style.width = `${100 * p.starboard / big}%`;
   $('np').textContent = p.port.toFixed(1); $('ns').textContent = p.starboard.toFixed(1);
-  const c = row.course;
-  $('stats').innerHTML = `Moves ${moves} · up the course <b>${c.y}</b> squares · turned ${c.turned > 0 ? c.turned + ' to starboard' : c.turned < 0 ? -c.turned + ' to port' : 'none'} (quarter turns)${c.circled ? ' · <b>she has rowed a circle!</b>' : ''}<br>
-    Pull in all: port ${totals.port.toFixed(1)}, starboard ${totals.starboard.toFixed(1)}; building: ahead ${row.stroke.ahead.toFixed(1)}, swing ${row.stroke.swing.toFixed(1)}${row.stroke.pending() ? `, waiting ${row.stroke.pending() > 0 ? 'port' : 'starboard'} ${Math.abs(row.stroke.pending()).toFixed(1)}` : ''}`;
+  const c = row.course, turned = c.turned > 0 ? `${c.turned} to starboard` : c.turned < 0 ? `${-c.turned} to port` : 'none';
+  $('stats').innerHTML = `Moves <b>${moves}</b> · up the course <b>${c.y}</b> squares · turned ${turned} (quarter turns)${c.circled ? ' · <b>she has rowed a circle!</b>' : ''}<br>
+    Pull in all: port ${totals.port.toFixed(1)}, starboard ${totals.starboard.toFixed(1)}`;
 }
 
-/** The sea, top-down: her wake, and her. North (up the page) is the way she started. */
-function sea() {
-  const svg = $('sea'), t = row.course.trail;
-  svg.innerHTML = '';
-  const xs = t.map((p) => p[0]), ys = t.map((p) => -p[1]);
-  const pad = 3, span = Math.max(10, Math.max(...xs) - Math.min(...xs) + 2 * pad, Math.max(...ys) - Math.min(...ys) + 2 * pad);
-  const cx = (Math.max(...xs) + Math.min(...xs)) / 2, cy = (Math.max(...ys) + Math.min(...ys)) / 2;
-  svg.setAttribute('viewBox', `${cx - span / 2} ${cy - span / 2} ${span} ${span}`);
-  for (let x = Math.floor(cx - span / 2); x <= cx + span / 2; x++) el('line', { x1: x, y1: cy - span, x2: x, y2: cy + span, stroke: 'rgba(255,255,255,.35)', 'stroke-width': span / 600 }, svg);
-  for (let y = Math.floor(cy - span / 2); y <= cy + span / 2; y++) el('line', { x1: cx - span, y1: y, x2: cx + span, y2: y, stroke: 'rgba(255,255,255,.35)', 'stroke-width': span / 600 }, svg);
-  el('circle', { cx: 0, cy: 0, r: span / 80, fill: '#555' }, svg);
-  let d = `M0 0`;
-  for (let i = 1; i < t.length; i++) {
-    const [x0, y0, h0] = t[i - 1], [x1, y1, h1] = t[i];
-    if (h0 === h1) d += ` L${x1} ${-y1}`;
-    else d += ` Q${x0 + DX[h0]} ${-(y0 + DY[h0])} ${x1} ${-y1}`;
-  }
-  el('path', { d, fill: 'none', stroke: '#fff', 'stroke-width': span / 90, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: 0.9 }, svg);
-  const [bx, by, bh] = t[t.length - 1], s = 0.5;
-  el('path', { d: `M0 ${-1.2 * s} Q${0.6 * s} ${-0.2 * s} ${0.45 * s} ${s} L${-0.45 * s} ${s} Q${-0.6 * s} ${-0.2 * s} 0 ${-1.2 * s}Z`, fill: '#8b5a2b', stroke: '#3e2a14', 'stroke-width': 0.06, transform: `translate(${bx} ${-by}) rotate(${bh * 90}) scale(${Math.max(1, span / 14)})` }, svg);
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000);
+  last = now;
+  boards.forEach((v, i) => boardTick(v, dt, row.boards[i], colOn(i)));
+  const b = building();
+  view.build(b);
+  D.needle += (Math.max(-1.2, Math.min(1.2, b.turn)) - D.needle) * Math.min(1, dt * 6);
+  if (D.handed) D.handed.t -= dt;
+  dialDraw(b.turn, b.ahead);
+  $('where').innerHTML = `Up the course <b>${row.course.y}</b> · buoys passed <b>${view.gates}</b>`;
+  requestAnimationFrame(frame);
 }
 
 addEventListener('keydown', (e) => {
-  if (busy) return;
+  if (e.target.tagName === 'SELECT') return;
   const k = e.key;
   if (k === 'ArrowUp') cur.r = Math.max(0, cur.r - 1);
   else if (k === 'ArrowDown') cur.r = Math.min(H - 1, cur.r + 1);
   else if (k === 'ArrowLeft') cur.c = Math.max(0, cur.c - 1);
   else if (k === 'ArrowRight') cur.c = Math.min(W - 2, cur.c + 1);
-  else if (k === ' ') { e.preventDefault(); swap(); return; }
+  else if (k === ' ') { e.preventDefault(); if (!e.repeat) swap(); return; }
   else return;
-  e.preventDefault(); draw();
+  e.preventDefault();
 });
 document.querySelectorAll('input[name=kind]').forEach((r) => r.addEventListener('change', () => { kind = r.value; r.blur(); start(); }));
-$('clocked').addEventListener('change', (e) => { e.currentTarget.blur(); start(); });
+for (const id of ['clocked', 'specials', 'kinds']) $(id).addEventListener('change', (e) => { e.currentTarget.blur(); start(); });
 $('again').addEventListener('click', (e) => { e.currentTarget.blur(); start(); });
-window.rowTest = { get row() { return row; }, swap: (r, c) => { cur = { r, c }; return swap(); } };
+// A hook for checking the page by hand: rowTest.swap(r, c), rowTest.row, rowTest.pull({ port, starboard })
+// (as a move would pull, without the boards: { port: 15, starboard: 15 } is a double Vegas's).
+window.rowTest = {
+  get row() { return row; }, get busy() { return busy(); },
+  swap: (r, c) => { cur = { r, c }; return swap(); },
+  pull: (p) => { const steps = row.stroke.row(p); for (const s of steps) row.course.go(s); view.row(p, steps); if (steps.length) D.handed = { steps, t: 1.1 }; say({ pull: p, steps, combos: kind === 'mirror' ? ['', ''] : [''], moves: [{ cleared: 1, chain: 0 }, { cleared: 1, chain: 0 }] }); pulls(p); return steps; },
+};
 start();
+requestAnimationFrame(frame);
 </script>
 </body>
 </html>

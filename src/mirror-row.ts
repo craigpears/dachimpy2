@@ -16,12 +16,50 @@
    - ClockedOars: rowing.ts's own Oars, as the den rows, with a move every WINDOW seconds, so a
      one-sided move can still be evened up by the next one.
    The plain split board (SplitRow) is here too, paired either way, so the two can be played and
-   measured side by side. */
+   measured side by side.
 
-import { Bilge, NO_SPECIALS, W } from './bilge.js';
+   Fewer kinds of piece (the user, after playing it, 10 Nov: "because that makes more of a risk for
+   cascades and unintended effects"): Bilge's own rules, but each board can be dealt from fewer than
+   its seven kinds (KINDS_LEAST to KINDS), so lines come together by themselves more often and a
+   move sets off more you didn't plan. The default (KINDS_DEFAULT) is from the bots in
+   tools/row-bots.mjs. Bilge itself knows only seven, so a board of fewer is dealt from a source of
+   numbers squeezed into the first `kinds` sevenths (see fewer()). */
+
+import { Bilge, KINDS, NO_SPECIALS, W } from './bilge.js';
 import type { Move, Odds } from './bilge.js';
 import { Oars, ROW, pull } from './rowing.js';
 import type { Pull, Step } from './rowing.js';
+
+/** The fewest kinds of piece a board can have: with two, a square could be barred both kinds when
+    it's dealt (two alike beside it and two of the other above), and the deal would never end. */
+export const KINDS_LEAST = 3;
+/** How many kinds a board has unless it's asked for more or fewer: picked from the bots' runs (10
+    Nov, 30 games of 80 moves, mirror strokes move by move). Squares up the course for random /
+    greedy / two-ply: 7 kinds 0.9 / 2.8 / 10.4; 6: 1.2 / 5.7 / 21.2; 5: 0.6 / 15.2 / 40.6, random
+    play rowing a circle in 27% of games; 4: 0.7 / 63.5 / 60.5, random circling in 63%, and looking
+    ahead no better than greedy, the cascades doing the playing. Five keeps the chaos and the skill. */
+export const KINDS_DEFAULT = 5;
+
+/** A source of numbers for a Bilge board of `kinds` kinds: Bilge reckons a new piece's kind as
+    floor(x * 7), so squeezing every x into [0, kinds / 7) deals kinds 0 to kinds - 1, evenly. */
+export function fewer(random: () => number, kinds: number): () => number {
+  const k = Math.max(KINDS_LEAST, Math.min(KINDS, Math.round(kinds))) / KINDS;
+  return k === 1 ? random : () => random() * k;
+}
+
+/** The odds of a special piece for a board dealt by fewer(): the same squeeze applies to Bilge's
+    draw for a special, so the odds are squeezed too, to come out as asked. */
+export function fewerOdds(odds: Odds, kinds: number): Odds {
+  const k = Math.max(KINDS_LEAST, Math.min(KINDS, Math.round(kinds))) / KINDS;
+  return { puffer: odds.puffer * k, crab: odds.crab * k, jelly: odds.jelly * k };
+}
+
+/** A Bilge board for rowing: `kinds` kinds of piece, the water at ROW.WATER. */
+export function rowBilge(random: () => number, odds: Odds = NO_SPECIALS, kinds: number = KINDS_DEFAULT): Bilge {
+  const b = new Bilge(fewer(random, kinds), fewerOdds(odds, kinds));
+  b.water = ROW.WATER;
+  return b;
+}
 
 /** The column on starboard where a swap at column c on port is mirrored (its left piece). */
 export const mirrorCol = (c: number): number => W - 2 - c;
@@ -147,6 +185,8 @@ export interface RowOptions {
   /** A source for each board's pieces (the split board uses the first). */
   randoms?: (() => number)[];
   odds?: Odds;
+  /** Kinds of piece on each board, KINDS_LEAST to Bilge's seven (KINDS_DEFAULT unless asked). */
+  kinds?: number;
   /** Pair the sides as the den's Oars do (ClockedOars) rather than move by move (Stroke). */
   clocked?: boolean;
 }
@@ -157,6 +197,8 @@ export interface Rower {
   readonly boards: Bilge[];
   readonly stroke: Puller;
   readonly course: Course;
+  /** Kinds of piece on each board. */
+  readonly kinds: number;
   /** Swap at (r, c), on the port board for mirror strokes, and row with what it cleared. */
   swap(r: number, c: number): RowResult;
   /** What the swap would pull, tried on copies (each with new pieces from `random`). */
@@ -175,15 +217,13 @@ export class MirrorRow implements Rower {
   readonly boards: Bilge[];
   stroke: Puller;
   course = new Course();
+  readonly kinds: number;
 
   constructor(o: RowOptions = {}, boards?: Bilge[]) {
     this.stroke = o.clocked ? new ClockedOars() : new Stroke();
+    this.kinds = o.kinds ?? KINDS_DEFAULT;
     const rs = o.randoms ?? [Math.random, Math.random];
-    this.boards = boards ?? [0, 1].map((i) => {
-      const b = new Bilge(rs[i] ?? Math.random, o.odds ?? NO_SPECIALS);
-      b.water = ROW.WATER;
-      return b;
-    });
+    this.boards = boards ?? [0, 1].map((i) => rowBilge(rs[i] ?? Math.random, o.odds, this.kinds));
   }
 
   get port(): Bilge { return this.boards[0]; }
@@ -201,7 +241,7 @@ export class MirrorRow implements Rower {
   }
 
   tryMove(r: number, c: number, random: () => number) {
-    const copy = new MirrorRow({}, this.boards.map((b) => copyBilge(b, random)));
+    const copy = new MirrorRow({ kinds: this.kinds }, this.boards.map((b) => copyBilge(b, fewer(random, this.kinds))));
     const { pull: p, combos } = copy.play(r, c);
     return { pull: p, combos, copy };
   }
@@ -214,15 +254,12 @@ export class SplitRow implements Rower {
   readonly boards: Bilge[];
   stroke: Puller;
   course = new Course();
+  readonly kinds: number;
 
   constructor(o: RowOptions = {}, board?: Bilge) {
     this.stroke = o.clocked ? new ClockedOars() : new Stroke();
-    if (board) this.boards = [board];
-    else {
-      const b = new Bilge(o.randoms?.[0] ?? Math.random, o.odds ?? NO_SPECIALS);
-      b.water = ROW.WATER;
-      this.boards = [b];
-    }
+    this.kinds = o.kinds ?? KINDS_DEFAULT;
+    this.boards = [board ?? rowBilge(o.randoms?.[0] ?? Math.random, o.odds, this.kinds)];
   }
 
   private play(r: number, c: number): Omit<RowResult, 'steps'> {
@@ -236,7 +273,7 @@ export class SplitRow implements Rower {
   }
 
   tryMove(r: number, c: number, random: () => number) {
-    const copy = new SplitRow({}, copyBilge(this.boards[0], random));
+    const copy = new SplitRow({ kinds: this.kinds }, copyBilge(this.boards[0], fewer(random, this.kinds)));
     const { pull: p, combos } = copy.play(r, c);
     return { pull: p, combos, copy };
   }

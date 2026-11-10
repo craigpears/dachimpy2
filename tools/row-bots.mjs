@@ -7,7 +7,9 @@
    - games: seeded games per bot (default 40), moves: moves a game (default 60), width: how many
      first moves the two-ply bot looks past (default all 60; fewer samples the best by one ply),
      variants: comma-separated, from 'split move,mirror move,split clocked,mirror clocked' (the
-     default, all four; 'clocked' pairs the sides as the den's Oars do, a move every WINDOW).
+     default, all four; 'clocked' pairs the sides as the den's Oars do, a move every WINDOW),
+     kinds: kinds of piece on each board (default KINDS_DEFAULT; Bilge's own is 7), specials:
+     'specials' for pufferfish, crabs and jellyfish at the den's late odds (default none).
 
    The bots:
    - random: any swap.
@@ -17,7 +19,7 @@
    "Worth" is how far a stroke takes her up the course (the way she started), rowed as the page rows
    her, less a square for every quarter turn she's left heading off it. */
 
-import { Course, MirrorRow, SplitRow, seeded } from '../js/mirror-row.js';
+import { Course, KINDS_DEFAULT, MirrorRow, SplitRow, seeded } from '../js/mirror-row.js';
 import { ROW } from '../js/rowing.js';
 import { H, W } from '../js/bilge.js';
 
@@ -90,19 +92,23 @@ const BOTS = {
 
 /** Each board paired move by move ('move'), or as the den's oars pair them ('clocked'). */
 const VARIANTS = (process.argv[5] ?? 'split move,mirror move,split clocked,mirror clocked').split(',');
+const KINDS = Number(process.argv[6]) || KINDS_DEFAULT;
+const ODDS = process.argv[7] === 'specials' ? { puffer: 0.02, crab: 0.015, jelly: 0.01 } : undefined;
 
 const BIG = new Set(['Bingo!', 'Sea Donkey!', 'Vegas!']);
 
 function play(variant, bot, g) {
   const [kind, pairing] = variant.split(' '), clocked = pairing === 'clocked';
-  const row = kind === 'mirror' ? new MirrorRow({ randoms: [seeded(1000 + g), seeded(2000 + g)], clocked }) : new SplitRow({ randoms: [seeded(1000 + g)], clocked });
+  const o = { clocked, kinds: KINDS, odds: ODDS };
+  const row = kind === 'mirror' ? new MirrorRow({ randoms: [seeded(1000 + g), seeded(2000 + g)], ...o }) : new SplitRow({ randoms: [seeded(1000 + g)], ...o });
   const rnd = seeded(9000 + g * 7 + bot.length);
-  const s = { ahead: 0, circled: 0, fwd: 0, steps: 0, pull: 0, dBingo: 0, dVegas: 0, big: 0, vegas: 0 };
+  const s = { ahead: 0, circled: 0, fwd: 0, steps: 0, pull: 0, dBingo: 0, dVegas: 0, big: 0, vegas: 0, chain: 0 };
   for (let i = 0; i < MOVES; i++) {
     const [r, c] = BOTS[bot](row, rnd);
     const res = row.swap(r, c);
     s.fwd += res.steps.filter((x) => x === 'F').length; s.steps += res.steps.length; s.pull += res.pull.port + res.pull.starboard;
     s.big += res.combos.filter((x) => BIG.has(x)).length;
+    s.chain += res.moves.reduce((t, m) => t + m.chain, 0);
     s.vegas += res.combos.filter((x) => x === 'Vegas!').length;
     if (res.combos.length === 2 && res.combos.every((x) => BIG.has(x))) s.dBingo++;
     if (res.combos.length === 2 && res.combos.every((x) => x === 'Vegas!')) s.dVegas++;
@@ -115,9 +121,9 @@ const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;
 const sd = (xs) => { const m = mean(xs); return Math.sqrt(mean(xs.map((x) => (x - m) ** 2))); };
 const f1 = (x) => x.toFixed(1), f2 = (x) => x.toFixed(2);
 
-console.log(`${GAMES} games of ${MOVES} moves a bot; two-ply looks past ${WIDTH} first moves.\n`);
-console.log('variant        | bot     | ahead (sd)   | circled | F steps  | pull | big/game | vegas/game | dbl Bingo+ | dbl Vegas | s/game');
-console.log('---------------|---------|--------------|---------|----------|------|----------|------------|------------|----------|-------');
+console.log(`${GAMES} games of ${MOVES} moves a bot; two-ply looks past ${WIDTH} first moves; ${KINDS} kinds of piece${ODDS ? ', with specials' : ''}.\n`);
+console.log('variant        | bot     | ahead (sd)   | circled | F steps  | pull | links | big/game | vegas/game | dbl Bingo+ | dbl Vegas | s/game');
+console.log('---------------|---------|--------------|---------|----------|------|-------|----------|------------|------------|----------|-------');
 const out = {};
 for (const kind of VARIANTS) for (const bot of Object.keys(BOTS)) {
   const t0 = Date.now();
@@ -127,7 +133,7 @@ for (const kind of VARIANTS) for (const bot of Object.keys(BOTS)) {
   out[`${kind} ${bot}`] = mean(a);
   const sum = (k) => games.reduce((t, x) => t + x[k], 0);
   console.log([kind.padEnd(14), bot.padEnd(7), `${f1(mean(a))} (${f1(sd(a))})`.padEnd(12), `${Math.round(100 * sum('circled') / GAMES)}%`.padEnd(7),
-    `${Math.round(100 * sum('fwd') / Math.max(1, sum('steps')))}%`.padEnd(8), f1(sum('pull') / GAMES).padEnd(4),
+    `${Math.round(100 * sum('fwd') / Math.max(1, sum('steps')))}%`.padEnd(8), f1(sum('pull') / GAMES).padEnd(4), f1(sum('chain') / GAMES).padEnd(5),
     f2(sum('big') / GAMES).padEnd(8), f2(sum('vegas') / GAMES).padEnd(10),
     kind.startsWith('mirror') ? f2(sum('dBingo') / GAMES).padEnd(10) : '-'.padEnd(10), kind.startsWith('mirror') ? f2(sum('dVegas') / GAMES).padEnd(8) : '-'.padEnd(8), f2(secs)].join(' | '));
 }

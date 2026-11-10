@@ -112,12 +112,11 @@ the site (`.assetsignore` skips `*.md`).
   like crazy. (The rules are built: `src/rowing.ts`. The board, its look and the oars at sea are
   next.)
 
-- **Mirror strokes, closer to the real thing (10 Nov):** the user played `row-test` and loves
-  it ("This is actually quite a good puzzle. I love it."). Next: fewer kinds of piece, for more
-  cascades and unintended effects; anything that makes it a bit more chaotic; better graphics,
-  in the den's style; and "the actual 3D thing", her rowing in 3D as you play. Going straight
-  should be possible with care (the user hadn't managed it yet). Then mirror strokes as the
-  den's rowing board. (The oars-against-the-water page is its own test, as asked.)
+- **Mirror strokes as the den's rowing board (10 Nov):** the user played `row-test` and loves it
+  ("This is actually quite a good puzzle. I love it."). The test page now has fewer kinds of piece
+  (5, for more cascades), the den's look and her rowing in 3D (IDEAS.md, "Fewer kinds, tested").
+  Next: mirror strokes as the den's rowing board on the sloop, two boards side by side, with the
+  lean and the compass the den's rowing already has.
 
 - **A crane up a cliff, to somewhere of its own (9 Nov):** "I really do think we need the Wacky
   Races stuff, like the crane thing ... I just really love the idea. I want to see what it looks

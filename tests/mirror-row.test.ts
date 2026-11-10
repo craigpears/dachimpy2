@@ -3,7 +3,8 @@
 import { describe, expect, it } from 'vitest';
 import { H, KINDS, W } from '../src/bilge';
 import type { Bilge, Bit } from '../src/bilge';
-import { ClockedOars, Course, MirrorRow, SplitRow, Stroke, copyBilge, mirrorCol, seeded } from '../src/mirror-row';
+import { NO_SPECIALS } from '../src/bilge';
+import { ClockedOars, Course, KINDS_DEFAULT, KINDS_LEAST, MirrorRow, SplitRow, Stroke, copyBilge, fewer, mirrorCol, rowBilge, seeded } from '../src/mirror-row';
 import { ROW } from '../src/rowing';
 
 /** New pieces come in as kinds 0, 1, 2 ... in turn, so they don't line up by chance. */
@@ -20,7 +21,7 @@ function lay(b: Bilge, rows: string[], id = 1000): void {
 }
 
 function mirror(port: string[], starboard: string[]): MirrorRow {
-  const m = new MirrorRow({ randoms: [cycle(), cycle()] });
+  const m = new MirrorRow({ randoms: [cycle(), cycle()], kinds: KINDS });
   lay(m.port, port, 1000); lay(m.starboard, starboard, 5000);
   return m;
 }
@@ -134,5 +135,64 @@ describe('the bots', () => {
     const ids = new Set(m.port.grid.flat().map((b) => b!.id));
     const fresh = c.grid.flat().filter((b) => !ids.has(b!.id)).map((b) => b!.id);
     expect(Math.min(...fresh, Infinity)).toBeGreaterThan(Math.max(...ids));
+  });
+});
+
+/* Fewer kinds of piece (the user, 10 Nov: "fewer kinds of piece, because that makes more of a risk
+   for cascades and unintended effects"), an option on the page. */
+describe('fewer kinds of piece', () => {
+  const kindsOn = (b: Bilge) => new Set(b.grid.flat().filter((x) => x && !x.s).map((x) => x!.k));
+  it('a board of four kinds is dealt only those four, all of them, with nothing lined up', () => {
+    const b = rowBilge(seeded(7), NO_SPECIALS, 4);
+    expect([...kindsOn(b)].sort()).toEqual([0, 1, 2, 3]);
+    expect(b.lines()).toEqual([]);
+  });
+  it('new pieces coming in are of those kinds too', () => {
+    const b = rowBilge(seeded(8), NO_SPECIALS, 4);
+    for (let i = 0; i < 300; i++) b.swap(i % 12, i % 5);
+    expect(Math.max(...kindsOn(b))).toBeLessThan(4);
+  });
+  it('seven is Bilge as it is; the number is kept to KINDS_LEAST to seven', () => {
+    const r = seeded(1);
+    expect(fewer(r, KINDS)).toBe(r);
+    expect([...kindsOn(rowBilge(seeded(2), NO_SPECIALS, 2))].sort()).toEqual([0, 1, 2]);
+    expect(Math.max(...kindsOn(rowBilge(seeded(3), NO_SPECIALS, 12)))).toBe(KINDS - 1);
+    expect(KINDS_LEAST).toBe(3);
+  });
+  it('both boards and the split board take the option, and default to KINDS_DEFAULT', () => {
+    expect(new MirrorRow().kinds).toBe(KINDS_DEFAULT);
+    expect(new SplitRow().kinds).toBe(KINDS_DEFAULT);
+    const m = new MirrorRow({ randoms: [seeded(1), seeded(2)], kinds: 3 });
+    expect(m.boards.map((b) => Math.max(...kindsOn(b)))).toEqual([2, 2]);
+    const s = new SplitRow({ randoms: [seeded(3)], kinds: 6 });
+    expect(Math.max(...kindsOn(s.boards[0]))).toBe(5);
+  });
+  it("a bot's copies keep the boards' kinds", () => {
+    const m = new MirrorRow({ randoms: [seeded(1), seeded(2)], kinds: 4 });
+    const t = m.tryMove(11, 2, seeded(5));
+    expect(t.copy.kinds).toBe(4);
+    for (let i = 0; i < 100; i++) t.copy.swap(i % 12, i % 5);
+    for (const b of t.copy.boards) expect(Math.max(...kindsOn(b))).toBeLessThan(4);
+  });
+  it('specials still come in at the odds asked for', () => {
+    const b = rowBilge(seeded(9), { puffer: 0.2, crab: 0, jelly: 0.1 }, 4);
+    const fresh = b as unknown as { fresh(): Bit };
+    const n = 4000, got = Array.from({ length: n }, () => fresh.fresh());
+    expect(got.filter((x) => x.s === 'puffer').length / n).toBeCloseTo(0.2, 1);
+    expect(got.filter((x) => x.s === 'jelly').length / n).toBeCloseTo(0.1, 1);
+    expect(Math.max(...got.filter((x) => !x.s).map((x) => x.k))).toBe(3);
+  });
+  it('fewer kinds, more cascades: the same moves clear more and chain more (10 Nov)', () => {
+    const play = (kinds: number) => {
+      let cleared = 0, chain = 0;
+      for (let g = 0; g < 6; g++) {
+        const b = rowBilge(seeded(100 + g), NO_SPECIALS, kinds), r = seeded(200 + g);
+        for (let i = 0; i < 200; i++) { const m = b.swap(Math.floor(r() * 12), Math.floor(r() * 5)); cleared += m.cleared; chain += m.chain; }
+      }
+      return { cleared, chain };
+    };
+    const four = play(4), seven = play(7);
+    expect(four.cleared).toBeGreaterThan(2 * seven.cleared);
+    expect(four.chain).toBeGreaterThan(2 * seven.chain);
   });
 });
