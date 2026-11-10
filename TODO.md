@@ -227,11 +227,10 @@ the site (`.assetsignore` skips `*.md`).
   "it should be a short row home ... you've got the trade winds blowing you back, haven't you? So
   all you need to do is a quick row to get onto the trade winds." Sunk, you bob up in a little
   rowboat, row by mirror strokes the short way to the trade winds, and they carry you home; the
-  sloop's waiting at the den, and you're back aboard her, with a pop-up as games do (the user:
-  "you've now learned how to row. Hit the O button at any time to get the oars out. Switch from
-  sails to oars ... oars are great for rowing, let you row against the wind"). (To pin down with
-  the user: rowing against the wind was to be a secret, so the pop-up might say O gets the oars
-  out and leave the wind unsaid.) After Dignity's cutscene.
+  sloop's waiting at the den, and you're back aboard her, with a small, subtle note after the row
+  home that O gets the oars out any time. Nothing about the wind (the user, 10 Nov: "keep it
+  secret ... don't do a big thing ... We want to keep it as the Easter egg, the thing that you
+  figure out"). After Dignity's cutscene.
 
 ## Needs a playtest to pin down
 
