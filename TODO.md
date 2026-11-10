@@ -208,7 +208,8 @@ the site (`.assetsignore` skips `*.md`).
 - **The lock's Bilge board hidden as she comes in (10 Nov):** "[pulling] in[to] the locks and the
   [nose], so you can't see the [bilging] puzzle. Obviously, it should be orientated to the ship or
   the dock or whatever." Coming into a lock, the board you pump it up with is blocked from view
-  (by her bows, or by facing the wrong way for how you've come in). It should face you as you
+  (by her bows, or by facing the wrong way for how you've come in): "You can see some of it, but I
+  think some of it's in" [cut off: inside something, the quay or the lock's side?]. It should face you as you
   come in, turned to suit her and the lock, and never sit behind her. (Exactly what hides it, to
   check in the game.)
 
