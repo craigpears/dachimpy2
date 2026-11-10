@@ -178,6 +178,12 @@ the site (`.assetsignore` skips `*.md`).
   running the gauntlet and getting through the gate at the moment." Find what's slow there (its
   guns' shots, splashes, Dignity's lines, the wind) and make it smooth.
 
+- **Something to show people, tonight's goal (10 Nov):** once we reach a stopping point, likely after
+  Kikkit's sailing quest: "some kind of advertising material ... the fully built den, the imperial
+  checkpoint, the sailing around, the rowing puzzle ... just marketing material to show people what
+  I've been working on, what it's got in there so far." Screenshots (and short clips, maybe) of each
+  part, taken from its starting-point link, with a line on each; pirate names only.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
