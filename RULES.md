@@ -131,6 +131,13 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   on a frame for its Carpentry view (Space still fits a piece there in 3D). The one exception, as
   the user suggested ("maybe the front wall could be a bit of an exception"): stopping at the wall
   with a piece in hand still brings up the wall's view.
+- **Every other way through costs a puzzle (10 Nov).** A choice of routes is a choice of
+  puzzles: run a checkpoint's guns and patch the holes (Carpentry), the long way through the lock
+  (Bilge), or a crane up the cliff (Carpentry): "that is a nice balance ... you need a puzzle to
+  execute the alternatives". So even a sloop, which can take every little route, is choosing which
+  puzzle to play. But not the same trick everywhere: "having a lock everywhere is just a bit of a
+  cringy feature". A crane up a cliff can go "naturally ... anywhere"; a lock is a one-off. Each
+  puzzle should plausibly stand for the work it does (pumping is Bilge, mending is Carpentry).
 - **Every reward is won by a puzzle, never just picked up (9 Nov).** A chest from the wrecked
   turret that you sailed over to collect was "not Puzzle Pirates' spirit at all. Like, you need to
   have to haul it up. It's just mandatory. It's the Puzzle Pirates way. You need puzzles." So

@@ -604,6 +604,19 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     shallow water where ships "really slow down", and a small ship gets her oars out to get over
     it, "especially as bigger ships come in later" (they'd need the deep water). On hold: "it
     still just seems forced".
+    **Which puzzle would get her over the shallows? (10 Nov)** The user likes shallows as an
+    alternative way, but "what physical activity in the real world would you associate with going
+    through ... some shallow waters? Nothing really jumps to mind" (adjusting the rigging, the
+    Rigging puzzle, is "a bit of a stretch"). Real seamanship has some: **sounding** (a leadsman
+    swinging the lead and calling the depth, so she's steered through the channel: Navigation,
+    already the idea for the navigation post), **kedging** (rowing an anchor out ahead, dropping it
+    and heaving her up to it on the capstan, the way ships really got off sandbanks and through
+    calms: a heave, maybe Sailing or Rigging), and **lightening her** (stores over the side or into
+    the boat to float her higher). Sounding through by Navigation is the most natural fit. Also
+    asked: is it a problem that puzzles built for continual duty are used for small one-off jobs
+    (the lock's Bilge, the deck patch)? Puzzle Pirates' own duty puzzles map loosely onto the work
+    (Bilge for pumping, Sailing for trimming); a short round to a goal, as at the lock, seems to
+    stand up. (To talk over with the user.)
     **Weather is where oars make sense (9 Nov):** the wind can drop. Under sail she's quicker, but
     when the wind drops a ship that's all sails is "dead in the water until the wind picks back
     up again", and under sail you "can't go against the wind". Oars keep her moving either way:
