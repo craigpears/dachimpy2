@@ -4,7 +4,8 @@ import { describe, expect, it } from 'vitest';
 import { H, KINDS, W } from '../src/bilge';
 import type { Bit } from '../src/bilge';
 import { Oars, ROW } from '../src/rowing';
-import { CREW, RowBoard, bearing, pullFor } from '../src/den-row';
+import { CREW, LEAN, RowBoard, bearing, leadFor, leaned, pullFor, shownAt } from '../src/den-row';
+import { poseAt } from '../src/den-sail';
 import { WIND, Wind, rowTime } from '../src/den-wind';
 import { Helm, Sea, type SailEvent } from '../src/den-sail';
 
@@ -68,7 +69,7 @@ describe('rowing her', () => {
     const b = new RowBoard();
     b.rowing.oars.row('starboard', 3, b.t);
     expect(b.waiting('starboard')).toBe(3);
-    expect(b.tick(ROW.WINDOW - 0.1)).toEqual([]);
+    expect(b.tick(ROW.SOLO - 0.1)).toEqual([]);
     expect(b.tick(0.2)).toEqual(['L']);
     expect(b.waiting('starboard')).toBe(0);
   });
@@ -114,3 +115,50 @@ describe('rowing for the pin (the pilot doesn\'t row for her)', () => {
     expect([pullFor('starboard'), pullFor('port'), pullFor('ahead'), pullFor('astern'), pullFor('here')]).toEqual(['port', 'starboard', null, 'either', null]);
   });
 });
+
+describe(`"I'm not seeing any physical difference" (10 Nov): she answers the oars as the pull builds`, () => {
+  it(`rowed alone, a one-sided move turns her after ROW.SOLO, not the team's ROW.WINDOW`, () => {
+    const b = new RowBoard();
+    b.rowing.oars.row('port', ROW.STEP, b.t);
+    expect(ROW.SOLO).toBeLessThan(ROW.WINDOW);
+    expect(b.tick(ROW.SOLO - 0.05)).toEqual([]);
+    expect(b.tick(0.1)).toEqual(['R']);
+  });
+
+  it(`one side's clear swings her bows toward the turn at once, and heels her into it`, () => {
+    const b = new RowBoard();
+    b.rowing.oars.row('port', 1, b.t);
+    const got = b.building(), lead = leadFor(got);
+    expect(got.turn).toBeCloseTo(1 / ROW.STEP);
+    expect(lead.y).toBeGreaterThan(0);   // (port pulling harder: her bows swing to starboard)
+    expect(lead.heel).toBeGreaterThan(0);
+    const s = new RowBoard();
+    s.rowing.oars.row('starboard', 2, s.t);
+    expect(leadFor(s.building()).y).toBeLessThan(0);
+  });
+
+  it(`forward pull building creeps her ahead, a fraction of a square, before the square's move`, () => {
+    const b = new RowBoard();
+    b.rowing.oars.feed({ port: 0.5, starboard: 0.5 }, b.t);
+    expect(b.building()).toEqual({ ahead: 1 / ROW.STEP, turn: 0 });
+    const lead = leadFor({ ahead: 0.99, turn: 0 });
+    expect(lead.f).toBeGreaterThan(0);
+    expect(lead.f).toBeLessThanOrEqual(LEAN.CREEP);
+    expect(leaned({ c: 8, r: 3, a: 0 }, 0, lead).r).toBeCloseTo(3 + lead.f);
+  });
+
+  it(`the square's move starts from where she'd crept to, and never jumps back`, () => {
+    const from = { c: 8, r: 3, d: 0 }, lead = leadFor({ ahead: 0.9, turn: 0.6 });
+    const idle = leaned({ c: 8, r: 3, a: 0 }, 0, lead);
+    for (const m of ['F', 'L', 'R'] as const) {
+      expect(shownAt(from, m, 0, lead)).toEqual(idle);
+      const end = poseAt(from, m, 1);
+      const got = shownAt(from, m, 1, lead);
+      expect([got.c, got.r, got.a]).toEqual([end.c, end.r, end.a]);
+    }
+    // Forward, she only ever goes ahead.
+    let r = -Infinity;
+    for (let u = 0; u <= 1.0001; u += 0.05) { const p = shownAt(from, 'F', u, lead); expect(p.r).toBeGreaterThanOrEqual(r - 1e-9); r = p.r; }
+  });
+});
+

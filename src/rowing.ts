@@ -45,6 +45,10 @@ export const ROW = {
       bilger makes a move about every three seconds, so one side's move and the next move on the
       other side still pull together. */
   WINDOW: 3,
+  /** The wait on the split board, rowed alone (10 Nov: "I'm not seeing any physical difference"):
+      one pirate makes both sides' moves, so a one-sided move needn't wait as long for the next to
+      even it up before it turns her. */
+  SOLO: 1.5,
   /** Near enough even counts as straight: unmatched pull no more than this share of the pull
       rowed round it (itself, and what was matched in the WINDOW either side) drives her ahead
       rather than turning her. */
@@ -119,6 +123,9 @@ export class Oars {
   /** Pull matched lately (both sides together), to tell near-even from lopsided. */
   private matched: Lot[] = [];
 
+  /** `window`: the seconds pull on one side waits for the other (ROW.WINDOW, or ROW.SOLO). */
+  constructor(readonly window: number = ROW.WINDOW) {}
+
   /** Pull on one side's oars. */
   row(side: Side, n: number, now: number): Step[] {
     return this.feed(side === 'port' ? { port: n, starboard: 0 } : { port: 0, starboard: n }, now);
@@ -151,14 +158,14 @@ export class Oars {
   tick(now: number): Step[] {
     for (const side of ['port', 'starboard'] as Side[]) {
       const ls = this.waiting[side];
-      while (ls.length && ls[0].at + ROW.WINDOW <= now) {
+      while (ls.length && ls[0].at + this.window <= now) {
         const { n, at } = ls.shift()!;
-        const round = this.matched.filter((x) => Math.abs(x.at - at) <= ROW.WINDOW).reduce((t, x) => t + x.n, 0);
+        const round = this.matched.filter((x) => Math.abs(x.at - at) <= this.window).reduce((t, x) => t + x.n, 0);
         if (n <= ROW.EVEN * (n + round)) this.ahead += n;
         else this.swing += side === 'port' ? n : -n;
       }
     }
-    this.matched = this.matched.filter((x) => x.at + 2 * ROW.WINDOW > now);
+    this.matched = this.matched.filter((x) => x.at + 2 * this.window > now);
     const out: Step[] = [];
     while (this.swing >= ROW.STEP) { out.push('R'); this.swing -= ROW.STEP; }
     while (this.swing <= -ROW.STEP) { out.push('L'); this.swing += ROW.STEP; }

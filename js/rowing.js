@@ -42,6 +42,10 @@ export const ROW = {
         bilger makes a move about every three seconds, so one side's move and the next move on the
         other side still pull together. */
     WINDOW: 3,
+    /** The wait on the split board, rowed alone (10 Nov: "I'm not seeing any physical difference"):
+        one pirate makes both sides' moves, so a one-sided move needn't wait as long for the next to
+        even it up before it turns her. */
+    SOLO: 1.5,
     /** Near enough even counts as straight: unmatched pull no more than this share of the pull
         rowed round it (itself, and what was matched in the WINDOW either side) drives her ahead
         rather than turning her. */
@@ -96,6 +100,7 @@ export function pull(before, m) {
     it's handed out as a move for the sea. Times are in seconds, from any clock, so long as it only
     goes forward. */
 export class Oars {
+    window;
     /** Pull built up toward a square forward. */
     ahead = 0;
     /** Pull built up toward a turn: more than nothing to starboard (port's oars pulled harder), less
@@ -105,6 +110,10 @@ export class Oars {
     waiting = { port: [], starboard: [] };
     /** Pull matched lately (both sides together), to tell near-even from lopsided. */
     matched = [];
+    /** `window`: the seconds pull on one side waits for the other (ROW.WINDOW, or ROW.SOLO). */
+    constructor(window = ROW.WINDOW) {
+        this.window = window;
+    }
     /** Pull on one side's oars. */
     row(side, n, now) {
         return this.feed(side === 'port' ? { port: n, starboard: 0 } : { port: 0, starboard: n }, now);
@@ -139,16 +148,16 @@ export class Oars {
     tick(now) {
         for (const side of ['port', 'starboard']) {
             const ls = this.waiting[side];
-            while (ls.length && ls[0].at + ROW.WINDOW <= now) {
+            while (ls.length && ls[0].at + this.window <= now) {
                 const { n, at } = ls.shift();
-                const round = this.matched.filter((x) => Math.abs(x.at - at) <= ROW.WINDOW).reduce((t, x) => t + x.n, 0);
+                const round = this.matched.filter((x) => Math.abs(x.at - at) <= this.window).reduce((t, x) => t + x.n, 0);
                 if (n <= ROW.EVEN * (n + round))
                     this.ahead += n;
                 else
                     this.swing += side === 'port' ? n : -n;
             }
         }
-        this.matched = this.matched.filter((x) => x.at + 2 * ROW.WINDOW > now);
+        this.matched = this.matched.filter((x) => x.at + 2 * this.window > now);
         const out = [];
         while (this.swing >= ROW.STEP) {
             out.push('R');

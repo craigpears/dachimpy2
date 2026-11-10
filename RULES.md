@@ -315,11 +315,29 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     - **What it rows:** what a move clears pulls that side's oars, as hard as the move's worth (the
       bilging guides' reckoning: a three 1, a Good 1.5 up to a Bingo 8, a Sea Donkey 12 and a Vegas
       15; a chain's link 0.5, a crab 2), shared by where its pieces were. Pull on one side waits up to
-      3 seconds for the other: what's matched drives her ahead, what's still unmatched turns her
+      1.5 seconds for the other (3 when a team rows a board a side; solo it was 3 too, and a
+      one-sided move turned her too late to see why): what's matched drives her ahead, what's still unmatched turns her
       (harder on port swings her bows to starboard, as at the oars), near-even counting as straight.
       Every 3 of pull is a square: forward, left or right, as on Battle Navigation's tokens. So even
       work rows her straight, and one-sided work turns her ("you just end up rowing in circles"). A
       half glows its colour while its pull waits for the other side, and flashes as it pulls.
+    - **She answers the oars as the pull builds (10 Nov).** The user: "I'm not seeing any physical
+      difference. Like ... I expect the boat to start, tilt it, angling to one side if I'm just
+      rowing one side, and it to actually see some sense of movement." She still moves a whole
+      square at a time, but between squares she creeps ahead as forward pull builds (up to 0.3 of a
+      square with a whole square's worth), swings her bows toward the turn that's building (up to a
+      third of a quarter turn) and heels into it, counting pull still waiting on one side as the
+      turn it'll be. When the square's move comes it starts from where she'd crept to and the lean
+      melts into it: never a jump back. The camera keeps square to her heading and follows her
+      creep only halfway, so you see her angle and edge ahead under the board.
+    - **The compass by the board (10 Nov):** "almost a compass that says ... we're about to
+      generate a forward move or a left move or a right move ... at a certain point, it should go
+      one way or the other, maybe balance out." A brass-rimmed card in dark wood beside the board's
+      port edge, "NEXT MOVE" under it: its needle swings toward the side she'll turn as one side
+      out-pulls the other (port harder swings it right), straight up when they balance, red marks
+      with ↰ and ↱ where it tips into a turn (the needle goes red past them), ↑ at the top; a gold
+      ring round it fills as the next forward square builds. When a square's handed out the card
+      shows its token big (and ×5 for a Vegas's five), then resets.
     - **How quick:** she rows the squares straight away, no breather between turns. One square on
       its own takes 1.15 seconds; a pile of them waiting goes quicker, each taking 1.15 seconds over
       the size of the pile, as quick as the trade winds at most (0.28 seconds a square), the whole

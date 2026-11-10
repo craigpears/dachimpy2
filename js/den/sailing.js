@@ -16,7 +16,7 @@ import { deco, decoMode } from './menus.js';
 import { sailView, patchView, setPaused, denLets } from '../den.js';
 import { WIND } from '../den-wind.js';
 import { windTick, windSay, windHud, oarsHud, windSig, rowToggle } from './wind.js';
-import { rowing, rowShut, rowKey, rowHover, rowSwap, rowTick, rowPrompt } from './rowing.js';
+import { rowing, rowShut, rowKey, rowHover, rowSwap, rowTick, rowPrompt, rowShown } from './rowing.js';
 
 // The old sloop's at anchor in the cove from the moment the siege is over, while their ship makes
 // sail in the background (the user, 9 Nov: "I'm sat here quite a while waiting for his sloop to sail
@@ -331,12 +331,12 @@ export function sailTick(dt) {
     }
   }
   // Her, riding the swell, heeling into her turns.
-  const t = performance.now() / 1000, p = h.now(), turning = h.cur && (h.cur.m === 'L' || h.cur.m === 'R') && !h.cur.bump && h.t < h.cur.secs;
+  const t = performance.now() / 1000, p = rowShown(h.now()), turning = h.cur && (h.cur.m === 'L' || h.cur.m === 'R') && !h.cur.bump && h.t < h.cur.secs;
   sail.heel += ((turning ? (h.cur.m === 'L' ? -0.13 : 0.13) : 0) - sail.heel) * Math.min(1, dt * 4);
   sail.low = (sail.low ?? 0) + ((h.dazed() ? -0.3 : 0) - (sail.low ?? 0)) * Math.min(1, dt * 2);
   sail.g.position.set(seaX(p.c), liftAt(Math.round(p.c), Math.round(p.r)) + sail.low + Math.sin(t * 0.9) * 0.06, seaZ(p.r));
   sail.g.rotation.y = Math.PI / 2 - p.a * Math.PI / 2;
-  sail.g.rotation.x = sail.heel + Math.sin(t * 0.7) * 0.02;
+  sail.g.rotation.x = sail.heel + (p.heel ?? 0) + Math.sin(t * 0.7) * 0.02;   // (leaning into the oars' pull: rowShown)
   sail.g.rotation.z = Math.sin(t * 0.55) * 0.02;
   if (sail.on) {
     // You, at the tiller, facing her bow (up on her stern, beside it, while the board's on her deck,

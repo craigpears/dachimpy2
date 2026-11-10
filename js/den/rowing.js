@@ -4,11 +4,12 @@
 import * as THREE from 'three';
 import { W as BW, H as BH } from '../bilge.js';
 import { isPort } from '../rowing.js';
-import { CREW, RowBoard, bearing, pullFor } from '../den-row.js';
+import { CREW, RowBoard, bearing, pullFor, leadFor, leaned, shownAt } from '../den-row.js';
 import { oddsFor } from '../den-bilge.js';
 import { scene, camera, mat, mesh, canvasTex, woodTex, makePirate, V3, keys, ray, burst, toast, worldLets, shake } from './world.js';
 import { bitMesh } from './bilge.js';
 import { sail, SLOOP_DECK } from './sea.js';
+import { SAIL } from '../den-sail.js';
 
 /* TODO.md, "Rowing by port and starboard" (the user, 10 Nov: "a full bilge board, obviously with the
    rowing kind of graphics on each side"). Run her oars out (O) and the real Bilge board is laid
@@ -144,6 +145,7 @@ export function rowShut() {
   rowing.queue = [];
   sail.rowRate = null;
   document.body.classList.remove('rowing');
+  if (rowing.dial) rowing.dial.el.style.display = 'none';
 }
 // Rowing her: the board's wanted while her oars are out, unless something else has her (holed: the
 // patch; at the lock: the quay's Bilge; hauling treasure).
@@ -199,10 +201,11 @@ export function rowPull(p) {
   if (steps.length >= CREW.FLYING) toast("Both sides rowing like crazy: she's flying!");
   return steps;
 }
-// Squares rowed: to the helm, to row.
+// Squares rowed: to the helm, to row; and the compass shows which.
 function stroke(steps) {
   if (!steps.length) return;
   sail.helm.stroke(steps);
+  rowing.handed = { steps: [...steps], t: 1.1 };
   if (steps.length >= CREW.FLYING) worldLets.shake = Math.max(shake, 0.25);
 }
 
@@ -212,6 +215,7 @@ export function rowTick(dt, busy = false) {
   if (!(sail.on && h.oars)) rowing.board = null;
   else rowing.board ||= new RowBoard({ odds: oddsFor(0) });
   if (rowing.board) stroke(rowing.board.tick(dt));
+  leanTick(dt);
   const want = wanted(busy);
   if (want !== rowing.on) { if (rowing.on) rowShut(); if (want) rowOpen(); }
   if (!rowing.on) return;
@@ -269,15 +273,127 @@ export function rowTick(dt, busy = false) {
     p.g.rotation.z = crazy ? Math.sin(t * 23) * 0.12 : 0;
     if (crazy && Math.random() < dt * 6) { r.seat.updateMatrixWorld(true); burst(r.seat.localToWorld(V3(0, 1.0, 0)), '#e6f3f6', 2, 1.2); }
   }
+  dialTick(dt);
+}
+
+/* Seeing her answer the oars as the pull builds (the user, 10 Nov: "I'm not seeing any physical
+   difference ... I expect the boat to start, tilt it, angling to one side if I'm just rowing one
+   side"). Between squares she creeps ahead as forward pull builds, swings her bows toward the turn
+   that's building and heels into it (src/den-row.ts, leadFor); when the square's move comes, it
+   starts from where she'd crept to and the lean melts into it (shownAt), never jumping back. */
+const NO_LEAD = { f: 0, y: 0, heel: 0 };
+rowing.lead = { ...NO_LEAD };
+function leanTick(dt) {
+  const h = sail.helm, B = rowing.board;
+  if (!B) { rowing.lead = { ...NO_LEAD }; rowing.moveRef = null; return; }
+  const cur = h.cur, moving = cur && cur.m !== 'W' && h.t < cur.secs;
+  if (moving) {
+    // A move's begun: what she'd leaned goes into it, and she leans afresh after it.
+    if (rowing.moveRef !== cur) { rowing.moveRef = cur; rowing.lead0 = rowing.lead; rowing.lead = { ...NO_LEAD }; }
+    return;
+  }
+  rowing.moveRef = null;
+  const want = leadFor(B.building()), k = Math.min(1, dt * 5);
+  for (const x of ['f', 'y', 'heel']) rowing.lead[x] += (want[x] - rowing.lead[x]) * k;
+}
+// Where she's drawn at the oars (js/den/sailing.js draws her there): h.now(), leaning into the pull.
+export function rowShown(p) {
+  const h = sail.helm;
+  if (!h.oars || !rowing.board) return p;
+  const cur = h.cur;
+  if (rowing.moveRef && cur === rowing.moveRef) {
+    const u = Math.min(1, h.t / cur.secs), e = u * u * (3 - 2 * u), L = rowing.lead0;
+    rowing.applied = { f: L.f * (1 - e), y: L.y * (1 - e) };
+    return { ...shownAt(cur.from, cur.m, u, L, cur.bump), heel: L.heel * (1 - e) };
+  }
+  rowing.applied = { f: rowing.lead.f, y: rowing.lead.y };
+  return { ...leaned(p, h.pose.d, rowing.lead), heel: rowing.lead.heel };
+}
+
+/* The compass by the board (the user, 10 Nov: "almost a compass that says, well ... we're about to
+   generate a forward move or a left move or a right move ... at a certain point, it should go one
+   way or the other, maybe balance out"). A brass-rimmed card: its needle swings toward the side
+   she'll turn as one side out-pulls the other (port pulling harder swings it right), straight up
+   when they balance, with red marks where it tips into a turn; a gold ring fills as the forward
+   square builds up. When a square's handed out the card shows it, as Battle Navigation's token
+   (and how many), and resets. Kept beside the board's port edge on screen. */
+const TOK = { F: '↑', L: '↰', R: '↱' }, TIP = Math.PI / 3;
+function dialMake() {
+  const el = document.createElement('canvas'), px = 2;
+  el.width = el.height = 132 * px;
+  Object.assign(el.style, { position: 'fixed', width: '132px', height: '132px', pointerEvents: 'none', zIndex: 5, display: 'none', filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.45))' });
+  el.title = 'The next move building up';
+  document.body.appendChild(el);
+  return { el, g: el.getContext('2d'), px, needle: 0, fill: 0, sig: '' };
+}
+function dialDraw(D, turn, ahead) {
+  const g = D.g, W = 132, c = W / 2, R = 58;
+  g.setTransform(D.px, 0, 0, D.px, 0, 0);
+  g.clearRect(0, 0, W, W);
+  // The case: dark wood, a brass rim, a parchment card.
+  g.beginPath(); g.arc(c, c, R + 4, 0, Math.PI * 2); g.fillStyle = '#2a1c11'; g.fill();
+  g.lineWidth = 4; g.strokeStyle = '#c9a25a'; g.stroke();
+  g.beginPath(); g.arc(c, c, R - 9, 0, Math.PI * 2); g.fillStyle = '#efe2c2'; g.fill();
+  g.lineWidth = 1.5; g.strokeStyle = '#8a6a45'; g.stroke();
+  // The forward ring: filling round from the top as the next forward square builds up.
+  g.lineCap = 'round';
+  g.beginPath(); g.arc(c, c, R - 3, 0, Math.PI * 2); g.lineWidth = 6; g.strokeStyle = '#4a3420'; g.stroke();
+  if (ahead > 0.005) { g.beginPath(); g.arc(c, c, R - 3, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, ahead)); g.strokeStyle = '#ffd23a'; g.stroke(); }
+  // Ticks across the top, and the tipping marks, red, where it goes over into a turn.
+  g.strokeStyle = '#6b4e32'; g.lineWidth = 1.5;
+  for (let i = -4; i <= 4; i++) { const a = -Math.PI / 2 + i * TIP / 3; g.beginPath(); g.moveTo(c + Math.cos(a) * (R - 12), c + Math.sin(a) * (R - 12)); g.lineTo(c + Math.cos(a) * (R - 18), c + Math.sin(a) * (R - 18)); g.stroke(); }
+  g.fillStyle = '#5a3a20'; g.font = "700 15px 'Alegreya Sans', sans-serif"; g.textAlign = 'center'; g.textBaseline = 'middle';
+  for (const [a, t, col] of [[-TIP, TOK.L, '#b8322a'], [0, TOK.F, '#5a3a20'], [TIP, TOK.R, '#b8322a']]) {
+    const aa = -Math.PI / 2 + a;
+    if (a) { g.strokeStyle = col; g.lineWidth = 3; g.beginPath(); g.moveTo(c + Math.cos(aa) * (R - 10), c + Math.sin(aa) * (R - 10)); g.lineTo(c + Math.cos(aa) * (R - 22), c + Math.sin(aa) * (R - 22)); g.stroke(); }
+    g.fillStyle = col; g.fillText(t, c + Math.cos(aa) * (R - 30), c + Math.sin(aa) * (R - 30));
+  }
+  const H = rowing.handed;
+  if (H && H.t > 0) {
+    // A square handed out: its token, big, and how many.
+    const n = H.steps.length, m = H.steps[H.steps.length - 1], a = Math.min(1, H.t * 3);
+    g.globalAlpha = a;
+    g.beginPath(); g.arc(c, c + 6, 22, 0, Math.PI * 2); g.fillStyle = '#2a1c11'; g.fill(); g.lineWidth = 2; g.strokeStyle = '#ffd23a'; g.stroke();
+    g.fillStyle = '#ffd23a'; g.font = "700 28px 'Alegreya Sans', sans-serif"; g.fillText(TOK[m], c, c + 6);
+    if (n > 1) { g.font = "700 13px 'Alegreya Sans', sans-serif"; g.fillStyle = '#5a3a20'; g.fillText(`×${n}`, c, c + 38); }
+    g.globalAlpha = 1;
+  } else {
+    // The needle: iron, its tip red, swung toward the turn that's building.
+    const a = -Math.PI / 2 + D.needle * TIP, tx = c + Math.cos(a) * (R - 16), ty = c + Math.sin(a) * (R - 16);
+    const px = -Math.sin(a) * 4, py = Math.cos(a) * 4, bx = c - Math.cos(a) * 12, by = c - Math.sin(a) * 12;
+    g.beginPath(); g.moveTo(tx, ty); g.lineTo(c + px, c + py); g.lineTo(bx, by); g.lineTo(c - px, c - py); g.closePath();
+    g.fillStyle = Math.abs(turn) >= 1 ? '#d42a1c' : '#3d4a55'; g.fill();
+    g.beginPath(); g.moveTo(tx, ty); g.lineTo(c + px * 0.6, c + py * 0.6); g.lineTo(c - px * 0.6, c - py * 0.6); g.closePath(); g.fillStyle = '#d42a1c'; g.fill();
+    g.beginPath(); g.arc(c, c, 4, 0, Math.PI * 2); g.fillStyle = '#c9a25a'; g.fill();
+  }
+  g.fillStyle = '#efe2c2'; g.font = "700 11px 'Alegreya Sans', sans-serif"; g.fillText('NEXT MOVE', c, W - 4);
+}
+function dialTick(dt) {
+  const D = rowing.dial ||= dialMake(), b = rowing.board.building();
+  if (rowing.handed) rowing.handed.t -= dt;
+  const turn = Math.max(-1.2, Math.min(1.2, b.turn));
+  D.needle += (turn - D.needle) * Math.min(1, dt * 6);
+  // Beside the board's port edge, a little up from its stern, on screen.
+  rowing.group.updateMatrixWorld(true);
+  const at = rowing.group.localToWorld(V3(-BW / 2 - 2.6, 0, 1.5)).project(camera);
+  const x = (at.x + 1) / 2 * innerWidth - 132 - 6, y = (1 - at.y) / 2 * innerHeight - 66;
+  D.el.style.display = '';
+  D.el.style.left = `${Math.max(8, Math.min(innerWidth - 140, x))}px`;
+  D.el.style.top = `${Math.max(8, Math.min(innerHeight - 190, y))}px`;
+  const sig = `${D.needle.toFixed(3)}|${b.ahead.toFixed(3)}|${rowing.handed?.t > 0 ? rowing.handed.t.toFixed(2) : ''}`;
+  if (sig !== D.sig) { D.sig = sig; dialDraw(D, b.turn, b.ahead); }
 }
 
 // The camera while rowing: from over her stern, down along the board toward her bow, the sea ahead
-// beyond it at the top of the screen; turned with her as she turns, so the board stays put.
+// beyond it at the top of the screen; turned with her as she turns, so the board stays put. Not with
+// her lean into the pull, though (rowShown): you see her angle toward the turn that's building, and
+// creep ahead (the view following her only half of the way).
 export function rowCam() {
-  const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect), sq = rowing.sq, ry = sail.g.rotation.y;
+  const A = rowing.applied ?? { f: 0, y: 0 };
+  const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect), sq = rowing.sq, ry = sail.g.rotation.y + A.y * Math.PI / 2;
   rowing.group.updateMatrixWorld(true);
   const mid = rowing.group.localToWorld(V3(0, 0, 0)), bow = V3(Math.cos(ry), 0, -Math.sin(ry));
-  const look = mid.addScaledVector(bow, BH * sq * 0.3);
+  const look = mid.addScaledVector(bow, BH * sq * 0.3 - A.f * SAIL.CELL * 0.5);
   const dist = Math.max((BH * sq / 2 + 0.5) / Math.tan(vh), (BW * sq / 2 + 0.6) / Math.tan(hh)) * 1.3;
   return { look, dist, tilt: 1.0, yaw: Math.atan2(-Math.cos(ry), Math.sin(ry)) };
 }
