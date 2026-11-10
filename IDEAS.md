@@ -552,6 +552,14 @@ bursts it, to keep him in long enough to plunder the stuff.
   the vampire's, whose eyes follow you (a warning before he sits up); once you've nailed him back
   in, she sits you for a portrait of your own, for her collection, as your reward; and she's far
   more excited about adding you to her collection than worried about the vampire.
+  **The endless gallery (10 Nov):** you see your pirate and Gravee walking down past them, on and on:
+  "oh, it's just past my portraits", then "how many portraits? We've been walking quite a long
+  way. Just got to go through this giant gallery." A running gag, and a long walk of frames.
+  - **Config-driven:** the gallery is a list of portraits, each a pirate drawn by the pirate maker
+    from a look (as the real pirates are), so adding a picture is adding an entry, and it shows off
+    that any pirate can be pictured.
+  - **Her definitive proof:** among them, a yeti or abominable-snowman-style picture, the blurry
+    proof she's so sure of (from her real gallery).
 
 ## A little town up the cliffs (9 Nov)
 
