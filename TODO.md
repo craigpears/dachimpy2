@@ -171,13 +171,13 @@ the site (`.assetsignore` skips `*.md`).
   Then: "I want you to have to [dump] them ... just take into account a tiny bit more of the
   context and rare pieces so that it's not completely random, just for enjoyability for this demo."
   A light touch: still mostly the usual odds.
-- **Can't lift a piece back out of the stairs (10 Nov):** "the stairs only really lets you go one
-  out. Oh no, I can't pick this piece up. Yeah, like I put like another piece in there, but like
-  that I can't use, and then I have one little gap, and there's nothing I can do about it." Any
-  piece in an unfinished frame should lift back out (RULES: "A gap is never filled for you"), but
-  on the stairs it wouldn't. Keep the stairs' shape as it is: "I was really at first enjoying the stairs and
-  loving the variety of the shape, but yeah, it just leaves that bit." It's the stuck gap that needs fixing,
-  not the stairs.
+- **A tiny gap on the stairs leaves no room to be creative (10 Nov):** not a lift-out bug ("I can
+  lift pieces out of the stairs. That's not a problem"). "It's just I can't fill tiny single gaps
+  because like the boundary is only like 1 or 2 tiles out of where you need to fill. So you can't
+  really be creative on how you fill it. If you've got like an M shape, because it's just so tiny."
+  And: "I was really at first enjoying the stairs and loving the variety of the shape, but yeah, it
+  just leaves that bit." The stuck-frame deal above helps; whether the stairs should also let a
+  piece stick out further round a small gap is to pin down with the user.
 
 ## Needs a playtest to pin down
 
