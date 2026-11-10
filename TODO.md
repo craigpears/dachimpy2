@@ -136,6 +136,13 @@ the site (`.assetsignore` skips `*.md`).
   each side gets you through at a rush. Running it under sail as well. (The crane round it and
   the bribe stay ideas for later.)
 
+- **Mirror strokes, closer to the real thing (10 Nov):** the user played `row-test` and loves
+  it ("This is actually quite a good puzzle. I love it."). Next: fewer kinds of piece, for more
+  cascades and unintended effects; anything that makes it a bit more chaotic; better graphics,
+  in the den's style; and "the actual 3D thing", her rowing in 3D as you play. Going straight
+  should be possible with care (the user hadn't managed it yet). Then mirror strokes as the
+  den's rowing board. (The oars-against-the-water page is its own test, as asked.)
+
 - **A crane up a cliff, to somewhere of its own (9 Nov):** "I really do think we need the Wacky
   Races stuff, like the crane thing ... I just really love the idea. I want to see what it looks
   and feels like ... could I go somewhere to the side of a cliff and like construct a crane to get

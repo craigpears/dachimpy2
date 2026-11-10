@@ -709,6 +709,30 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     onto a mate's board they can't see, "you don't know what you're going to affect on the other
     person's board ... you can just see somebody like clearing, ruining other people's". The
     worry: people would just share screens, which might make it frustrating. Still "a bit funny".
+    **Played (10 Nov):** "I actually love it ... I love that it's kind of mirrored, so it's not
+    easy. Like, it kind of messes with the brain ... It stops you just kind of playing games and
+    setting stuff up. That is so hilarious. This is actually quite a good puzzle." Setting up a
+    stack on one side moves the piece you wanted on the other ("Oh god, everything's in reverse").
+    It isn't really building up: "within 2 clicks it's done something", which is maybe as it
+    should be, "otherwise it would be too easy just to play one side and the other side". Going
+    straight is hard (the user hadn't yet). Wanted: fewer kinds of piece, "because that makes more
+    of a risk for cascades and unintended effects", anything to make it more chaotic, better
+    graphics, and "the actual 3D thing" (TODO.md).
+    **A course like snakes and ladders (10 Nov):** a rowing race round a course where pulling the
+    wrong way at the wrong spot sends you into a whirlpool, or a wind that sweeps you "all the way
+    back to the start and you've got to row back up again. That would be hilarious." (Goes with
+    the whirlpools and trade winds the sea already has.)
+    **Guns trained on squares (10 Nov):** a gun tower (the checkpoint's, say) trained on certain
+    squares: land on one and you're blown up, and you mend her by Carpentry. So you either move
+    quickly, get hit and repair, or build a combo that moves her two squares at once and skips
+    the gun's square.
+    **Quick clears against big combos (10 Nov):** the heart of whatever puzzle drives a race: "this
+    balance of quick puzzle completion versus big combos". A combo has its risk, "you will get
+    shot because you aren't moving and you'll be sitting duck trying to complete a Vegas", and in
+    other spots, "trying to zoom past a checkpoint, there is a huge advantage to big combo
+    building. It becomes a lot more tactical and direct."
+    **A puzzling decathlon (10 Nov):** no reason a course can't switch puzzles as it goes, a rowing
+    stretch, then a sailing stretch, "is that like the puzzling decathlon? That would be funny."
     **Oars against the water, a puzzle of its own (10 Nov):** "think outside the box a bit more
     ... what's the analogy for, like, pulling motion". The user's idea, after Puzzle Pirates'
     Rumble: the oars are drawn on the board, and pieces come in from the top as the water's flow,
