@@ -23,6 +23,7 @@ import { WIND } from '../den-wind.js';
 import { windTick, windSay, windHud, oarsHud, windSig, rowToggle, headwindPrompt } from './wind.js';
 import { rowing, rowShut, rowKey, rowHover, rowSwap, rowTick, rowPrompt, rowShown } from './rowing.js';
 import { craneKey, cranePrompt, craneHolds, craneTick, craneReset, craneWorld } from './crane.js';
+import { umamiKey, umamiClick, umamiHover, umamiPrompt, umamiReset } from './umami.js';
 
 // The old sloop's at anchor in the cove from the moment the siege is over, while their ship makes
 // sail in the background (the user, 9 Nov: "I'm sat here quite a while waiting for his sloop to sail
@@ -70,6 +71,7 @@ export function sailReset() {
   if (patch.on) patchShut();
   patchClear();
   craneReset();
+  umamiReset();
   denLets.sailView = 0;
 }
 // A shot out of her side, from where she is right now: it flies straight out and comes down in the
@@ -77,9 +79,9 @@ export function sailReset() {
 // and they're loaded by Gunnery (src/den-guns.ts; js/den/sea-guns.js); then it runs out again with
 // that side's next load, if there is one.
 const SIDE_NAME = { L: 'port', R: 'starboard' };
+const ballGeo = new THREE.SphereGeometry(0.13, 10, 8), ballMat = mat('#3a3f45', { metalness: 0.6 });   // (every shot's: made afresh, they were never freed)
 function sailFire(side) {
   const did = sail.guns.fire(side);
-const ballGeo = new THREE.SphereGeometry(0.13, 10, 8), ballMat = mat('#3a3f45', { metalness: 0.6 });   // (every shot's: made afresh, they were never freed)
   if (did === 'empty') return toast(`No shot loaded to ${SIDE_NAME[side]}: G to load her guns by Gunnery`, true);
   if (did === 'running') return toast(`The ${SIDE_NAME[side]} gun's still running out`, true);
   const { cells, hit } = broadside(sail.sea, sail.helm.now(), side), gun = sail.g.userData.guns[side];
@@ -118,6 +120,7 @@ function seaCellAt(x, y) {
   return { c: (p.x - SEA_X0) / SAIL.CELL - 0.5, r: (SAIL.Z0 - p.z) / SAIL.CELL - 0.5 };
 }
 export function sailClick(x, y) {
+  if (umamiClick(x, y)) return;   // (his board, and poling her along the lagoon's shore: umami.js)
   if (patch.on) { patch.keyAt = null; patchHover(x, y); if (patch.hand) patchPlace(); return; }
   if (hold.mode) { holdHover(x, y); holdSwap(); return; }
   if (rowing.on) { rowHover(x, y); rowSwap(); return; }
@@ -129,6 +132,7 @@ export function sailClick(x, y) {
   else if (sail.helm.via) toast('She\'ll ride the trade winds: the pin\'s where they drop her off');
 }
 export function sailHover(x, y) {
+  if (umamiHover(x, y)) { sail.hover = null; return; }
   if (patch.on) { patchHover(x, y); sail.hover = null; return; }
   if (hold.mode) { holdHover(x, y); sail.hover = null; return; }
   if (rowing.on) { rowHover(x, y); sail.hover = null; return; }
@@ -139,6 +143,7 @@ export function sailHover(x, y) {
 }
 export function sailKey(key) {
   if (hold.mode && holdKey(key)) return;
+  if (umamiKey(key)) return;   // (Umami's board, and her moorings in the lagoon: umami.js)
   if (craneKey(key)) return;   // (the crane at the ledge, and the lagoon: crane.js)
   // Rowing: the board's keys; Esc or O ships the oars.
   if (rowing.on && (key === 'escape' || key === 'o')) return rowToggle();
@@ -168,7 +173,7 @@ export function sailPrompt() {
   if (haul.on) return haulPrompt();
   if (rowing.on) return rowPrompt();
   if (gunnery.on) return gunneryPrompt();
-  const cp = cranePrompt();
+  const cp = umamiPrompt() || cranePrompt();
   if (cp) return cp;
   const h = sail.helm, held = h.held();
   if (held === 'daze') {

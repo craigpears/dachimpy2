@@ -139,7 +139,8 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    moor at, and a crane you build there by Carpentry, foot, post and jib, each hauled up the cliff
    by hand, hauls her up the cliff and swings her down into a clifftop lagoon, a
    discovery, still and reedy, an old wreck sunk in it whose treasure is hauled up by Treasure
-   Haul; and lowers her back down whenever you like ("more of an adventure ... we can have a
+   Haul, and on its far bank Umami the capybara, shut in an old fish trap, freed by Foraging, who
+   comes home with her and lives in the den's shallows; and lowers her back down whenever you like ("more of an adventure ... we can have a
    multi-step thing and gradually build up on it"; more steps to come along the way).
    And not necessarily straight there: the captain drops a pile of scrolls (maps
    to an island to forage, the capybara rescue, plans for the gun platform), and you can stay

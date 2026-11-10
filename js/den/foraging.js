@@ -4,7 +4,7 @@
 // keys. It knows nothing of the den either (it imports only three.js and the rules), so a test page
 // can play it on its own (foraging-test.html).
 import * as THREE from 'three';
-import { Forage, H, W, SIZES } from '../foraging.js';
+import { Forage, H, W, SIZES, fallen } from '../foraging.js';
 
 /* Drawn after Puzzle Pirates' own (YPPedia's "Foraging" and "Official:Foraging" pictures, looked at
    10 Nov): the board stands in the jungle, the leaves showing through wherever it's empty, a thin
@@ -347,78 +347,126 @@ export function containerMesh(bit) {
 
 /* The capybara stuck in reeds, roots and mud: a skin for a basket-sized (2x2) container. A plump
    red-brown capybara with its big blunt head, tangled in an old net among reeds and roots in a bank
-   of mud. Pass `capybaraSkin` as a board's skin; it falls back to the default for anything else. */
+   of mud. Pass `capybaraSkin` as a board's skin; it falls back to the default for anything else.
+   When he leaves the board only he goes (its `userData.leaves`): the bank, the reeds and the net
+   break up and fall away where they were (the user, 10 Nov, of the capybara going off with "some
+   background pieces got caught up in it"). */
 const capyFur = mat('#c48a52', { roughness: 0.95 }), capyDark = mat('#6a4224', { roughness: 0.95 }), capyNose = mat('#2a1a12', { roughness: 0.6 });
-const capyEye = mat('#0e0a08', { roughness: 0.2 });
-const mudTex = () => tex(256, 256, (g, w, h) => {
-  // The lagoon's water behind, reeds standing in it, the muddy bank below, roots through it.
-  const sky = g.createLinearGradient(0, 0, 0, h * 0.55); sky.addColorStop(0, '#5a9a8a'); sky.addColorStop(1, '#2e6a62');
-  g.fillStyle = sky; g.fillRect(0, 0, w, h);
-  const R = dice(131);
-  g.lineCap = 'round';
-  for (let i = 0; i < 18; i++) { const x = R() * w; g.strokeStyle = R() < 0.5 ? '#8ab84a' : '#5a8a32'; g.lineWidth = 3 + R() * 3; g.beginPath(); g.moveTo(x, h * 0.7); g.quadraticCurveTo(x + (R() - 0.5) * 20, h * 0.35, x + (R() - 0.5) * 30, R() * h * 0.2); g.stroke(); }
-  g.fillStyle = '#7a5a38';
-  g.beginPath(); g.moveTo(0, h * 0.55); for (let x = 0; x <= w; x += 16) g.lineTo(x, h * 0.55 + Math.sin(x * 0.07) * 8); g.lineTo(w, h); g.lineTo(0, h); g.closePath(); g.fill();
-  for (let i = 0; i < 30; i++) { blob(g, R() * w, h * 0.6 + R() * h * 0.4, 8 + R() * 16, 5 + R() * 8, R() * 3); g.fillStyle = R() < 0.5 ? 'rgba(150,116,76,0.7)' : 'rgba(60,40,22,0.6)'; g.fill(); }
-  for (let i = 0; i < 5; i++) { g.strokeStyle = '#c8aa80'; g.lineWidth = 3 + R() * 4; g.beginPath(); const y = h * (0.62 + R() * 0.35); g.moveTo(0, y); g.bezierCurveTo(w * 0.3, y + (R() - 0.5) * 40, w * 0.7, y + (R() - 0.5) * 40, w, y + (R() - 0.5) * 30); g.stroke(); }
-  g.strokeStyle = '#2a1a0c'; g.lineWidth = 6; g.strokeRect(3, 3, w - 6, h - 6);
-});
-export function capybaraSkin(bit) {
-  if (bit.box !== 'basket') return null;
-  const g = new THREE.Group();
-  const bank = new THREE.Mesh(new THREE.BoxGeometry(1.94, 1.94, 0.3).translate(0, 0, 0.15), [mat('#3a2a1a'), mat('#3a2a1a'), mat('#3a2a1a'), mat('#3a2a1a'), new THREE.MeshStandardMaterial({ map: (capybaraSkin.mud ||= mudTex()), roughness: 0.95 }), mat('#3a2a1a')]);
-  bank.receiveShadow = true;
-  g.add(bank);
-  // The capybara, side on, facing right and turned a little toward you: a barrel of a body, a big
-  // square-ended head, little round ears, short legs, no tail to speak of.
+const capyEye = mat('#0e0a08', { roughness: 0.2 }), capyGlint = new THREE.MeshBasicMaterial({ color: '#ffffff' });
+/* The capybara himself, side on, facing +x, standing on his feet with y up (his feet about 0.67
+   below his middle): a barrel of a body, a big square-ended head, little round ears, short legs, no
+   tail to speak of. One model, wherever he's drawn: stuck on his bank, swimming, at the den.
+   `userData`: his `head` (it nods) and `legs` (they paddle). */
+export function capybaraMesh() {
   const c = new THREE.Group();
   const body = new THREE.Mesh(new THREE.SphereGeometry(0.5, 20, 14).scale(1.25, 0.85, 0.8), capyFur);
   body.position.set(-0.12, -0.1, 0);
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 18, 12).scale(1.25, 0.95, 0.85), capyFur);
+  const head = new THREE.Group();
   head.position.set(0.52, 0.12, 0.05);
+  const skull = new THREE.Mesh(new THREE.SphereGeometry(0.3, 18, 12).scale(1.25, 0.95, 0.85), capyFur);
   const snout = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.3, 0.36), capyFur);
-  snout.position.set(0.78, 0.04, 0.05);
+  snout.position.set(0.26, -0.08, 0);
   const nose = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.16, 0.22), capyNose);
-  nose.position.set(0.95, 0.09, 0.05);
-  c.add(body, head, snout, nose);
+  nose.position.set(0.43, -0.03, 0);
+  head.add(skull, snout, nose);
   for (const s of [-1, 1]) {
     const ear = new THREE.Mesh(new THREE.SphereGeometry(0.075, 10, 8).scale(1, 1.2, 0.5), capyDark);
-    ear.position.set(0.4, 0.38, s * 0.16);
-    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.045, 10, 8), capyEye);
-    eye.position.set(0.66, 0.22, s * 0.2);
-    c.add(ear, eye);
+    ear.position.set(-0.12, 0.26, s * 0.16 - 0.05);
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.055, 10, 8), capyEye);
+    eye.position.set(0.14, 0.1, s * 0.2 - 0.05);
+    const glint = new THREE.Mesh(new THREE.SphereGeometry(0.014, 6, 4), capyGlint);   // (a bright eye)
+    glint.position.set(0.18, 0.125, s * 0.2 - 0.05 + s * 0.022);
+    head.add(ear, eye, glint);
   }
+  c.add(body, head);
+  c.userData.head = head;
+  c.userData.legs = [];
   for (const [x, z] of [[-0.48, 0.22], [-0.48, -0.22], [0.22, 0.22], [0.22, -0.22]]) {
-    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.07, 0.3, 8), capyDark);
-    leg.position.set(x, -0.52, z);
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.07, 0.3, 8).translate(0, -0.15, 0), capyDark);
+    leg.position.set(x, -0.37, z);
     c.add(leg);
+    c.userData.legs.push(leg);
   }
   c.traverse((o) => { if (o.isMesh) o.castShadow = true; });
-  c.rotation.y = -0.55;   // turned a little toward you
-  c.scale.setScalar(0.92);
-  c.position.set(-0.08, 0.02, 0.62);
-  g.add(c);
-  g.userData.capybara = c;
-  // The old net over it: a few tarred strands across, knotted where they cross.
-  const netM = mat('#2a2018', { roughness: 1 }), knotM = mat('#4a3a26');
-  const strand = (x0, y0, x1, y1, z) => {
-    const a = new THREE.Vector3(x0, y0, z), b = new THREE.Vector3(x1, y1, z), d = b.clone().sub(a);
-    const m = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, d.length(), 6), netM);
-    m.position.copy(a).addScaledVector(d, 0.5);
-    m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
-    g.add(m);
+  return c;
+}
+/* The old fish trap he's shut in: a box of pale driftwood bars lashed with rope at the corners, its
+   front barred so you see him through it. Centred on him, a square of the board each way (his skin's
+   units). Every bar knows which way it flies when he breaks out (`cageOpen`). */
+const driftM = mat('#d8c8a8', { roughness: 0.85 }), driftD = mat('#a89070', { roughness: 0.9 }), lashM = mat('#8a6a3a', { roughness: 1 });
+function trap() {
+  const g = new THREE.Group(), X = 0.88, Y = 0.84, Z0 = 0.08, Z1 = 0.98;
+  const bar = (len, axis, x, y, z, m = driftM, r = 0.05) => {
+    const geo = new THREE.CylinderGeometry(r, r * 1.15, len, 7);
+    if (axis === 'x') geo.rotateZ(Math.PI / 2); else if (axis === 'z') geo.rotateX(Math.PI / 2);
+    const b = new THREE.Mesh(geo, m);
+    b.position.set(x, y, z);
+    b.castShadow = true;
+    // (when he breaks out: away from his middle, spinning, falling)
+    const out = new THREE.Vector3(x, y * 0.6 + 0.4, z - 0.5).normalize();
+    b.userData.fly = { p: b.position.clone(), r: b.rotation.clone(), d: out, spin: new THREE.Vector3(x * 3, 1.5 - y, y * 2) };
+    g.add(b);
+    return b;
   };
-  for (const k of [-0.45, 0.35]) { strand(-0.95, k - 0.45, 0.95, k + 0.35, 1.0); strand(-0.95, k + 0.35, 0.95, k - 0.5, 1.02); }
-  for (const [x, y] of [[-0.06, -0.08], [0.05, 0.03]]) { const kn = new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 6), knotM); kn.position.set(x, y, 1.03); g.add(kn); }
-  // Reeds in front, round its feet.
+  // Its frame: four corner posts at the front, rails along the top and bottom, front and back, and
+  // the sides' rails back to the bank.
+  for (const x of [-X, X]) { bar(2 * Y + 0.1, 'y', x, 0, Z1, driftD, 0.065); bar(2 * Y, 'y', x, 0, Z0, driftD, 0.055); }
+  for (const y of [-Y, Y]) for (const z of [Z0, Z1]) bar(2 * X + 0.12, 'x', 0, y, z, driftD, 0.06);
+  for (const x of [-X, X]) for (const y of [-Y, Y]) bar(Z1 - Z0, 'z', x, y, (Z0 + Z1) / 2, driftD, 0.05);
+  // The bars across its front, a little crooked, as an old trap's would be.
+  for (let i = 0; i < 4; i++) { const b = bar(2 * Y, 'y', -X + (i + 1) * (2 * X / 5), 0, Z1 + 0.02); b.rotation.z = ((i * 37) % 5 - 2) * 0.025; b.userData.fly.r = b.rotation.clone(); }
+  // Rope lashings at the front corners, and one tied across the middle.
+  for (const x of [-X, X]) for (const y of [-Y, Y]) { const l = new THREE.Mesh(new THREE.TorusGeometry(0.085, 0.028, 6, 10), lashM); l.position.set(x, y, Z1); l.userData.fly = { p: l.position.clone(), r: l.rotation.clone(), d: new THREE.Vector3(x, y, 0.4).normalize(), spin: new THREE.Vector3(2, 1, 0) }; g.add(l); }
+  return g;
+}
+/** His trap breaking open as he gets out, `k` from 0 (shut) to 1 (its bars flown off and fallen):
+    a pose for a moment, so it plays as a function of time (the caller's). */
+export function cageOpen(cage, k) {
+  const e = k * k * (3 - 2 * k);
+  for (const b of cage.children) {
+    const f = b.userData.fly;
+    if (!f) continue;
+    b.position.copy(f.p).addScaledVector(f.d, 1.1 * e);
+    b.position.y -= 1.6 * k * k;
+    b.rotation.set(f.r.x + f.spin.x * e, f.r.y + f.spin.y * e, f.r.z + f.spin.z * e);
+    b.scale.setScalar(k < 0.75 ? 1 : Math.max(0.01, 1 - (k - 0.75) * 4));
+  }
+}
+export function capybaraSkin(bit) {
+  if (bit.box !== 'basket') return null;
+  const g = new THREE.Group();
+  // A little mound of mud under him, and reeds round its foot: no picture behind him, the board's
+  // own jungle shows through the trap.
+  const mud = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2).scale(0.95, 0.3, 0.55), mat('#7a5634', { roughness: 1 }));
+  mud.position.set(0, -0.9, 0.55);
+  g.add(mud);
+  // The capybara, sat in it facing you, a little turned (the user, 10 Nov: "being in the cage or
+  // being trapped in some way visually makes sense while you're trying to free them"), shut in an old
+  // fish trap. He and the trap go down the board together (`leaves`); off its foot he breaks out of
+  // it (whoever takes him: his `capybara` and his `cage`; `cageOpen` breaks it).
+  const him = new THREE.Group();
+  const c = capybaraMesh();
+  c.rotation.set(0.2, -0.75, 0);   // three-quarters to you, looking up out of it
+  c.scale.setScalar(0.78);
+  c.position.set(-0.05, -0.1, 0.5);
+  him.add(c);
+  const cage = trap();
+  him.add(cage);
+  him.userData.capybara = c;
+  him.userData.cage = cage;
+  g.add(him);
+  g.userData.capybara = c;
+  g.userData.leaves = him;   // (only he leaves the board, in his trap: the mud falls away)
+  // Reeds round the trap's foot.
   const reedM = mat('#5a8a32', { roughness: 0.8 }), reedD = mat('#3e6a24', { roughness: 0.8 });
-  for (let i = 0; i < 9; i++) {
-    const hgt = 0.35 + (i * 37 % 10) / 40, r = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.03, hgt, 5), i % 2 ? reedM : reedD);
-    r.position.set(-0.9 + i * 0.22, -0.97 + hgt / 2, 0.75 + (i % 3) * 0.12);
+  for (let i = 0; i < 7; i++) {
+    const hgt = 0.3 + (i * 37 % 10) / 40, r = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.03, hgt, 5), i % 2 ? reedM : reedD);
+    r.position.set(-0.95 + i * 0.32, -0.97 + hgt / 2, 1.25 + (i % 2) * 0.08);
     r.rotation.z = ((i * 53) % 7 - 3) * 0.06;
     g.add(r);
   }
   return g;
+
 }
 
 // ---------- the board ----------
@@ -515,7 +563,31 @@ export function forageBoard(o = {}) {
   };
   const place = (bit, r, c) => { const { w, h } = sizeOf(bit); return [colX(c, w), rowY(r, h)]; };
 
-  // Lay out a stage's board: pieces already shown glide to their new squares, new ones come in
+  /* Every piece moves on the stage's one clock, as a function of the time since it started (no
+     stepping a frame at a time): what falls, falls together (src/foraging.ts, `fallen`), in step,
+     each stopping where it lands; a turn (or a shake) swings its pieces over in a fifth of a second,
+     eased in and out. */
+  const SLIDE = 0.2;
+  const go = (m, x, y) => {
+    const fx = m.position.x, fy = m.position.y;
+    m.userData.tx = x; m.userData.ty = y;
+    if (!b.shown) { m.position.set(x, y, m.position.z); m.userData.anim = null; return; }
+    if (Math.abs(fx - x) + Math.abs(fy - y) < 1e-6) { m.userData.anim = null; return; }
+    m.userData.anim = { fx, fy, tx: x, ty: y, t: 0, fall: Math.abs(fx - x) < 1e-6 && y < fy };
+  };
+  const step = (m, dt) => {
+    const a = m.userData.anim;
+    if (!a) return;
+    a.t += dt;
+    let done;
+    if (a.fall) { const d = a.fy - a.ty, s = Math.min(d, fallen(a.t)); m.position.y = a.fy - s; m.position.x = a.tx; done = s >= d; }
+    else {
+      const u = Math.min(1, a.t / SLIDE), k = u * u * (3 - 2 * u);
+      m.position.x = a.fx + (a.tx - a.fx) * k; m.position.y = a.fy + (a.ty - a.fy) * k; done = u >= 1;
+    }
+    if (done) { m.position.x = a.tx; m.position.y = a.ty; m.userData.anim = null; }
+  };
+  // Lay out a stage's board: pieces already shown move to their new squares, new ones come in
   // from above the top edge, stacked in their columns.
   const lay = (grid, inPlace = false) => {
     const above = Array(W).fill(0), seen = new Set();
@@ -537,7 +609,7 @@ export function forageBoard(o = {}) {
         if (inPlace && b.shown) { m.scale.setScalar(0.01); b.fx.push({ m, grow: true, t: 0.25, t0: 0.25 }); }
         pieces.add(m); b.meshes.set(bit.id, m);
       }
-      m.userData.tx = x; m.userData.ty = y;
+      go(m, x, y);
       if (bit.s === 'ant') {
         m.userData.face.rotation.z = (2 - (bit.dir ?? 2)) * Math.PI / 2;
         if (m.userData.bites !== bit.bites) { m.userData.face.material = antMat(bit.bites); m.userData.bites = bit.bites; }
@@ -546,12 +618,11 @@ export function forageBoard(o = {}) {
     b.shown = true;
   };
   // A piece cleared: it pops, a few bits of it flying.
-  const pop = (m) => {
+  const pop = (m, n = 5, cols = [m.userData.face?.material?.map ? '#c8b890' : '#a08060'], spread = 0) => {
     pieces.remove(m);
-    const col = m.userData.face?.material?.map ? '#c8b890' : '#a08060';
-    for (let i = 0; i < 5; i++) {
-      const bit = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.16, 0.1), mat(col));
-      bit.position.copy(m.position).add(new THREE.Vector3(0, 0, 0.3));
+    for (let i = 0; i < n; i++) {
+      const bit = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.16, 0.1), mat(cols[i % cols.length]));
+      bit.position.copy(m.position).add(new THREE.Vector3((Math.random() - 0.5) * spread, (Math.random() - 0.5) * spread, 0.3));
       const a = Math.random() * Math.PI * 2, s = 2 + Math.random() * 3;
       pieces.add(bit);
       b.fx.push({ m: bit, vx: Math.cos(a) * s, vy: Math.sin(a) * s + 2, vz: 2 + Math.random() * 2, t: 0.5 });
@@ -563,18 +634,30 @@ export function forageBoard(o = {}) {
   const apply = (st) => {
     for (const id of st.cleared) { const m = b.meshes.get(id); if (m) { b.meshes.delete(id); pop(m); } }
     for (const id of st.left) {
-      const m = b.meshes.get(id);
+      let m = b.meshes.get(id);
       if (!m) continue;
       b.meshes.delete(id);
       const left = b.pendingLeft.find((l) => l.id === id);
-      const { h } = SIZES[left.size];
-      b.leaving.push({ m, left, ty: -H / 2 - h / 2 - 0.1 });
+      let { h } = SIZES[left.size];
+      // A skin that's more than what leaves (the capybara on his bank): only he goes; the rest
+      // breaks up and falls away where it was, mud, reeds and net.
+      const goes = m.userData.leaves;
+      if (goes && goes !== m) {
+        pieces.attach(goes);
+        pop(m, 14, ['#7a5a38', '#5a8a32', '#3a2a1a', '#2a2018'], 1.6);
+        m = goes;
+        h = 1.4;
+      }
+      // Out of the bottom, falling with the pieces on the stage's clock.
+      m.userData.anim = null;
+      go(m, m.position.x, -H / 2 - h / 2 - 0.1);
+      b.leaving.push({ m, left });
     }
     if (st.what === 'use' && b.lastAction === 'earthquake') b.shake = 0.5;
     lay(st.grid, st.what === 'use');   // (the monkey's new tiles turn up where they are)
   };
   const busy = () => b.queue.length > 0 || b.leaving.length > 0 || moving();
-  const moving = () => { for (const m of b.meshes.values()) if (Math.abs(m.position.x - m.userData.tx) + Math.abs(m.position.y - m.userData.ty) > 0.02) return true; return false; };
+  const moving = () => { for (const m of b.meshes.values()) if (m.userData.anim) return true; return false; };
   b.busy = busy;
 
   b.press = (cw) => {
@@ -621,19 +704,18 @@ export function forageBoard(o = {}) {
   b.tick = (dt) => {
     if (!b.shown) lay(game.snap());
     b.holdT += dt;
-    if (b.queue.length && b.holdT > 0.08 && !moving()) { apply(b.queue.shift()); b.holdT = 0; }
+    if (b.queue.length && b.holdT > 0.1 && !moving()) { apply(b.queue.shift()); b.holdT = 0; }
     const t = performance.now() / 1000;
     for (const [, m] of b.meshes) {
-      const dx = m.userData.tx - m.position.x, dy = m.userData.ty - m.position.y, d = Math.hypot(dx, dy);
-      if (d > 1e-3) { const k = Math.min(1, 9 * dt / d); m.position.x += dx * k; m.position.y += dy * k; }
+      step(m, dt);
       m.visible = m.position.y < H / 2 - 0.4;   // (new ones show once they're in at the top)
       m.rotation.z = m.userData.jig > 0 ? Math.sin((m.userData.jig -= dt) * 50) * 0.12 : 0;
     }
-    // Containers dropping out of the bottom.
+    // Containers dropping out of the bottom, in step with the pieces falling round them.
     for (let i = b.leaving.length - 1; i >= 0; i--) {
       const L = b.leaving[i];
-      L.m.position.y -= dt * 7;
-      if (L.m.position.y > L.ty) continue;
+      step(L.m, dt);
+      if (L.m.userData.anim) continue;
       b.leaving.splice(i, 1);
       b.pendingLeft = b.pendingLeft.filter((l) => l !== L.left);
       const world = L.m.getWorldPosition(new THREE.Vector3());
@@ -659,7 +741,7 @@ export function forageBoard(o = {}) {
       m.rotation.z = horiz ? 0 : Math.PI / 2;
       m.position.set(cx + (horiz ? 0 : (i === 2 ? -half : half)), cy + (horiz ? (i === 0 ? half : -half) : 0), 0);
     });
-    b.cursor.visible = !b.done;
+    b.cursor.visible = !b.done && !b.idle;   // (no cursor on a board nobody's at: `idle`)
     // The bananas: one for each container the board has had or will have, the ones that have come
     // in filled, from the bottom.
     const toCome = game.toCome, total = Number.isFinite(toCome) ? (b.total ??= toCome + game.boxes + game.containers().length) : 0;

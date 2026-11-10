@@ -15,6 +15,9 @@ import { dignityScene } from './dignity.js';
 import { DIGNITY } from '../den-dignity.js';
 import { LAY } from '../den-sail.js';
 import { sail } from './sea.js';
+import { CRANE } from '../den-crane.js';
+import { craneCheat } from './crane.js';
+import { umamiCheat } from './umami.js';
 import { board, sailReset } from './sailing.js';
 import { online, guest, myId, send } from './crew.js';
 import { newGame } from '../den.js';
@@ -496,6 +499,19 @@ function cheatDignity() {
   sail.riding = false;
   dignityScene();
 }
+/* Umami's rescue (js/den/umami.js): out to sea, the crane up the cliff built at once, and her set
+   down in the clifftop lagoon and moored by the far bank, beside him. */
+function cheatUmami() {
+  if (cine) return;
+  if (!sail.on) cheatSail();
+  const h = sail.helm;
+  h.stop();
+  Object.assign(h, { cur: null, rides: [], turn: [], slot: -1, strokes: [], pose: { c: CRANE.LEDGE[0], r: CRANE.LEDGE[1], d: 0 } });   // (in the cove below, by the ledge, for when she's lowered)
+  sail.riding = false;
+  sail.said.cove = true;
+  craneCheat((cells) => tileFor(cells, []));
+  umamiCheat();
+}
 // [name, what it does, its link's name if it's a starting point (den.html?at=...)]
 const CHEATS = [
   ['Beat this wave', cheatBeat],
@@ -505,6 +521,7 @@ const CHEATS = [
   ["The captain's map scene", cheatMapScene, 'map-scene'],
   ['Go sailing', cheatSail, 'sea'],
   ["Dignity's scene", cheatDignity, 'dignity'],
+  ["Umami's rescue", cheatUmami, 'umami'],
 ];
 /* Every starting point has a link, to share (the user, 10 Nov: "make it so that each starting point
    is something that I can put into the URL as well, so that I can share that animation with

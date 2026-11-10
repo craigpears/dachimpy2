@@ -132,7 +132,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   something that I can put into the URL as well, so that I can share that animation with
   somebody." `den.html?at=` and a name opens the den straight there: the cheats' stages (`start`,
   `walk`, `gun-tower`, `built`) and their starts and scenes (`shack`, `map-scene`, `sea`,
-  `dignity`). Choosing one from the cheats puts its link in the address bar, and its
+  `dignity`, `umami`). Choosing one from the cheats puts its link in the address bar, and its
   button's tooltip shows it. A name that isn't one says so. A new scene or start gets a name too.
 - **Hidden gems, never hinted (10 Nov).** The user, of the checkpoint's "I wonder if there's another
   way round" and "Run it, row it, or knock its guns out": "I don't like it giving you a hint as to
@@ -708,7 +708,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     - **The clifftop lagoon:** a still lake up on the headland, unlike the lock or the cove: dark
       green and glassy, clear enough to see down to its bed, fringed with reeds and bulrushes, lily
       pads (a few in flower) on it, boulders round its shore. She isn't sailed there (it's off the
-      board): she rests by an old wreck sunk in it, its snapped mast out of the water. Space hauls
+      board): she rests by an old wreck sunk in it, its snapped mast out of the water (she can be
+      poled along the shore to its far bank: Umami, below). Space hauls
       up its treasure by Treasure Haul, the board on the water over the wreck, as for the other
       chests; once it's up the wreck's bare.
     - **Never stuck:** H (or Space, once the treasure's up) lowers her back down the same way, into
@@ -721,6 +722,60 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **A quick siege to start, then calm (9 Nov).** The first three waves come as they always have,
   each counting down after the last. Beat the third and their captain calls it off ("We'll be
   back!") and the ship sails out of the cove, its cannon with it. The den's quiet after that: no
+  - **Umami the capybara, rescued from the lagoon's far bank (10 Nov).** A friend's side quest (the
+    friend asked for the name): an animal trapped up there, freed by a puzzle, who then lives at the
+    den as "a pet that you found and rescued". A capybara, so it has to make sense ("not just hanging
+    around on the land"): he's by the water there, and at home in it at the den.
+    - **Found, never hinted:** nothing's said about him beforehand. From where the crane sets her
+      down you can see the lagoon's far bank across the water, a mound of mud and roots with reeds
+      round it, his Foraging board on its face, whole, pieces and all, in its own look, as the den's
+      other boards are seen before you start (the user: "you should surely just see the whole board"),
+      him high on it in an old driftwood fish trap. W or up (or a click on the water by him) poles her
+      along the shore to him, S or down (or a click back by the wreck) back again (about three
+      seconds). Coming in to him the first time: "A capybara, shut in an old fish trap on the bank!";
+      beside him: "Space: free him (Foraging)". The wreck's haul and lowering her (H) are from the
+      wreck's mooring; H at the bank poles her back and lowers her.
+    - **Freed by Foraging** (the user: "Definitely foraging ... it's got the same kind of logic as
+      treasure haul, but like reversed"): the one Foraging module, played on the bank's face, its
+      foot at the water. He's the board's one container (a basket's 2x2), dealt at its top in its
+      middle two columns, nothing more to come. Esc leaves the board as it is, to come back to; her
+      mast's struck while you play. Clear the tiles under him and he sinks; nothing left under him at
+      the foot and he drops off it.
+    - **A real puzzle's worth of clearing** (the user: "I don't understand as well how he seems to
+      get free after just 2 clicks"): his board deals no shovels, which dig a whole column out under
+      him in one go (two landing over him freed him in a move or two). He comes down row by row,
+      and it's plain why he's free when he is: he's dropped off the foot.
+    - **Never stuck** (the user: "as long as you can get through eventually if you make a
+      mistake"): dug out on one side, a container only sinks once its other side's cleared, and
+      against the board's edge that side can never be lined up. So he's dealt in the middle
+      columns and his board deals no earthquakes (the only thing that moves a container sideways):
+      a line can always be brought under him. Bots show it, blundering first and freeing him after.
+    - **Trapped, then free and happy** (the user: "being in the cage or being trapped in some way
+      visually makes sense while you're trying to free them. They break free and happily start
+      jumping around"): a cute capybara three-quarters to you in a little cage of pale driftwood
+      bars lashed with rope, on a bit of mud, reeds round it; no picture behind it (the user found
+      the first look "not very inviting"). He and his trap go down the board together. Off its foot
+      the trap bursts open, its bars flying off, he wriggles upright on the mud at the bank's foot,
+      bounds along it three times for joy, leaps into the lagoon, swims to her and clambers aboard
+      onto her foredeck, the camera watching him. "He's free! Umami the capybara".
+    - **Only he leaves** (the user, of the test page: "it wasn't just the animal itself. It was some
+      background pieces got caught up in it"): of his square on the board only he (in his trap)
+      leaves; the mud and reeds under him break up where they were.
+    - **In step, smooth, slow enough to watch** (the user: "why is it so out of sync with the pieces?
+      And it looks very jittery ... too fast ... ding, ding, ding, ding"): every Foraging board's
+      pieces move on one clock, as a function of the time since the move started, never a step a
+      frame: what falls gathers speed together (up to 5.5 squares a second) and stops where it
+      lands, so he falls with the tiles round him and the new ones coming in over him; a turn swings
+      over in a fifth of a second. Bobs and bounds are slow, soft arcs.
+    - **At home:** he rides home on her foredeck, and once you're ashore at the den he hops off into
+      the shallows and lives at the water's edge, on the beach left of her mooring (the shack's end):
+      mostly in the water, wading, swimming, sitting in the shallows, now and then sitting on the sand
+      at the edge, staying a while at each spot (4 to 11 seconds) before moving on. A new game (or a
+      refresh) starts without him.
+    - **His link:** "Umami's rescue" in the cheats, `den.html?at=umami`: the crane built at once and
+      her moored by his bank. Rules: `src/den-umami.ts` (his fall's pace: `FALL` in
+      `src/foraging.ts`); in the world: `js/den/umami.js` (the bank: `BANK` in `js/den/crane.js`; his
+      look and his trap: `capybaraSkin` in `js/den/foraging.js`, the test page's too).
   countdown, so you're free to build, roam and puzzle. The user liked the quick intro under attack
   but wanted raids "more opt-in ... so you're not constantly under pressure and you feel free to go
   explore": "do a few waves". What brings raiders back later is to come (IDEAS.md, "Raids you

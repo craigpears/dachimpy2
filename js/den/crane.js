@@ -29,7 +29,9 @@ import { wreckMesh } from './checkpoint.js';
    Built, it hauls her up the cliff and swings her round into a still lagoon up on the headland,
    a short, cheesy moment you can skip with Space; and lowers her back down whenever you like.
    In the lagoon an old wreck lies sunk in the clear water, its treasure hauled up by Treasure Haul. */
-export const crane = { rules: new Crane(), W: null, parts: [], hoist: null, slew: 0, said: {}, bubble: null, shot: null };
+// `moor`: where she rests in the lagoon ({ p, yaw }), if not where the crane sets her down (umami.js
+// poles her along the shore to the far bank).
+export const crane = { rules: new Crane(), W: null, parts: [], hoist: null, slew: 0, said: {}, bubble: null, shot: null, moor: null };
 const K = () => crane.rules;
 // The headland's top (as far over the hidden cove as ever, now the cove's up at the top of the
 // locks), the lagoon's water, and the ledge's (just above the cove's).
@@ -51,6 +53,15 @@ const LAG = { x: -46.6, z: POST.z - 0.5, rx: 9.2, rz: 10 };
 // Its shore, not a perfect oval: a wobble round it, a little bay here and there (the crane's side,
 // toward the cove, kept to the oval so she's set down clear of it).
 const shoreAt = (a) => (Math.abs(Math.atan2(Math.sin(a), Math.cos(a))) < 0.5 ? 1 : 1 + 0.07 * Math.sin(a * 3 + 1) + 0.05 * Math.sin(a * 5 + 2));
+/* The lagoon's far bank, across the water from where she's set down: a bank of mud, kept clear of
+   reeds, rocks and lily pads, where Umami the capybara's stuck (umami.js draws him and his bank). Its
+   foot's middle out in the water (so the headland's grass is under it, not through it), the angle
+   round the shore it's at, and how it leans back. */
+const BANK_A = 1.4;
+export const BANK = { a: BANK_A, x: LAG.x + Math.cos(BANK_A) * LAG.rx * shoreAt(BANK_A), z: LAG.z - Math.sin(BANK_A) * LAG.rz * shoreAt(BANK_A) + 1.0, yaw: 0, lean: 0.95 };
+const nearBank = (a) => Math.abs(Math.atan2(Math.sin(a - BANK_A), Math.cos(a - BANK_A))) < 0.3;
+// (the lagoon, for what else is up there: umami.js)
+export const LAGOON_AT = { HT, WATER, LAG, REST, REST_YAW };
 const shore = (k = 1, n = 64) => Array.from({ length: n }, (_, i) => { const a = i / n * Math.PI * 2, f = shoreAt(a) * k; return [LAG.x + Math.cos(a) * LAG.rx * f, LAG.z - Math.sin(a) * LAG.rz * f]; });
 // Hauling a frame up by hand: you stand on the clifftop at the back of the ledge's notch, the ropes
 // up over its lip (LIP) to your hands.
@@ -101,7 +112,7 @@ function headland(W) {
   }
   for (let i = 0; i < 16; i++) {
     const a = i / 16 * Math.PI * 2 + 0.2, k = 1.06 + (i % 3) * 0.05;
-    if (Math.abs(Math.atan2(Math.sin(a), Math.cos(a))) < 0.45) continue;   // (the crane's side kept clear)
+    if (Math.abs(Math.atan2(Math.sin(a), Math.cos(a))) < 0.45 || nearBank(a)) continue;   // (the crane's side and the far bank kept clear)
     const f = shoreAt(a) * k;
     W.g.add(rock(LAG.x + Math.cos(a) * LAG.rx * f, HT - 0.1, LAG.z - Math.sin(a) * LAG.rz * f, 0.6 + (i % 4) * 0.2));
   }
@@ -210,7 +221,7 @@ function lagoon(W) {
   const reedM = mat('#3f6a2c', { roughness: 1 }), rushM = mat('#5a3a1e', { roughness: 1 }), reed = new THREE.ConeGeometry(0.04, 1, 4);
   for (let i = 0; i < 26; i++) {
     const a = i / 26 * Math.PI * 2 + 0.13 * (i % 3);
-    if (Math.abs(Math.atan2(Math.sin(a), Math.cos(a))) < 0.6) continue;
+    if (Math.abs(Math.atan2(Math.sin(a), Math.cos(a))) < 0.6 || nearBank(a)) continue;
     const f = shoreAt(a), cx = LAG.x + Math.cos(a) * (LAG.rx * f - 0.5), cz = LAG.z - Math.sin(a) * (LAG.rz * f - 0.5);
     for (let j = 0; j < 6; j++) {
       const h = 0.9 + ((i * 7 + j * 3) % 5) * 0.18, m = mesh(reed, reedM, false);
@@ -225,7 +236,7 @@ function lagoon(W) {
   const padM = mat('#3b7a3a', { roughness: 0.7 }), flowerM = mat('#f2dce6', { roughness: 0.6, emissive: '#3a2a30' });
   for (let i = 0; i < 18; i++) {
     const a = i * 2.39996, k = 0.45 + (i % 5) * 0.1, x = LAG.x - 1 + Math.cos(a) * LAG.rx * k * 0.9, z = LAG.z + Math.sin(a) * LAG.rz * k * 0.9;
-    if (Math.hypot(x - REST.x, z - REST.z) < 3 || (x > LAG.x - 6 && x < REST.x && Math.abs(z - LAG.z) < 2.5)) continue;   // (clear of her and the haul's board)
+    if (Math.hypot(x - REST.x, z - REST.z) < 3 || (x > LAG.x - 6 && x < REST.x && Math.abs(z - LAG.z) < 2.5) || Math.hypot(x - BANK.x - 1.8, z - BANK.z - 2.6) < 4) continue;   // (clear of her, the haul's board, and her mooring by the far bank)
     const pad = mesh(new THREE.CircleGeometry(0.32 + (i % 3) * 0.08, 10, 0.4, Math.PI * 2 - 0.4).rotateX(-Math.PI / 2), padM, false);
     pad.position.set(x, WATER + 0.03, z); pad.rotation.y = i;
     W.g.add(pad);
@@ -415,7 +426,7 @@ function haulUp() {
   crane.bubble ||= (() => { const el = document.createElement('div'); el.className = 'label say'; el.style.display = 'none'; document.body.append(el); return el; })();
 }
 // Her mast, sails and guns struck while she hangs from the crane (they'd foul the jib), and up again.
-function rigged(on) {
+export function rigged(on) {
   const g = sail.g;
   for (const o of [...(g.userData.sails || []), ...(g.userData.rig || [])]) o.visible = on;
   for (const side of ['L', 'R']) if (g.userData.guns?.[side]) g.userData.guns[side].visible = on;
@@ -645,9 +656,9 @@ export function craneTick(dt) {
   W.outline.visible = !K().built() && K().up === 0 && !K().frame && !crane.ledgeG;
   // In the lagoon: she rests out from under the jib, you at her tiller.
   if (K().where === 'lagoon') {
-    const t = performance.now() / 1000;
-    sail.g.position.set(REST.x, WATER + Math.sin(t * 0.9) * 0.03, REST.z);
-    sail.g.rotation.set(Math.sin(t * 0.7) * 0.01, REST_YAW, Math.sin(t * 0.55) * 0.01);
+    const t = performance.now() / 1000, m = crane.moor ?? { p: REST, yaw: REST_YAW };
+    sail.g.position.set(m.p.x, WATER + Math.sin(t * 0.9) * 0.03, m.p.z);
+    sail.g.rotation.set(Math.sin(t * 0.7) * 0.01, m.yaw, Math.sin(t * 0.55) * 0.01);
     if (sail.on) standAboard();
   }
   // The first time she's stopped in the cove, the ledge is pointed out.
@@ -667,12 +678,43 @@ export function craneCam() {
   // (side on to the crane, so you see the jib swing her round from the cove to the lagoon)
   return { look: V3(-31.5 - 8 * k, HT + 0.5, POST.z), dist: 20, tilt: 0.3 + 0.1 * k, yaw: 0.35 };
 }
+/* A cheat (menus.js, "Umami's rescue"): the crane built at once, each part's frame filled for you
+   (`tile(cells)`: pieces that fill them, { letter, shape, dr, dc }) and put in its place as if hauled
+   up, and her set down in the lagoon. */
+export function craneCheat(tile) {
+  craneWorld();
+  const R = K();
+  while (!R.built()) {
+    const i = R.up, f = R.build(), b = f.board;
+    for (const p of tile(f.open())) f.put(p.letter, p.shape, p.dr, p.dc);
+    // (as the deck patch's tray lays a frame: sea-puzzles.js)
+    const g = new THREE.Group(), flat = new THREE.Group(), face = new THREE.Group();
+    g.scale.setScalar(CRANE.SQ / S);
+    flat.rotation.x = -Math.PI / 2;
+    face.position.set(-(b.c0 + b.w / 2) * S, (b.r0 + b.h / 2) * S, 0);
+    g.add(flat); flat.add(face);
+    for (const p of f.laid) {
+      const r0 = Math.min(...p.cells.map((q) => q[0])), c0 = Math.min(...p.cells.map((q) => q[1]));
+      const pg = pieceGroup(p.cells.map(([r, c]) => [r - r0, c - c0]), woodMat(p.letter));
+      pg.position.set(c0 * S, -r0 * S, 0.05);
+      face.add(pg);
+    }
+    const pose = partPose(i);
+    pose.parent.add(g); g.position.copy(pose.p); g.quaternion.copy(pose.q);
+    crane.parts.push(g);
+    R.raise();
+  }
+  rigCrane();
+  R.where = 'lagoon';
+  crane.slew = Math.PI;
+  crane.said.lagoon = crane.said.ledge = true;
+}
 // A new game (or sailing put back): no crane, its footings waiting, her back in the cove.
 export function craneReset() {
   const W = crane.W;
   if (crane.go) arrive('cove');
   crane.rules = new Crane();
-  crane.hoist = null; crane.go = null; crane.slew = 0; crane.said = {}; crane.ledgeG = null;
+  crane.hoist = null; crane.go = null; crane.slew = 0; crane.said = {}; crane.ledgeG = null; crane.moor = null;
   document.body.classList.remove('cine');
   if (!W) return;
   for (const g of crane.parts) g.removeFromParent();

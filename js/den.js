@@ -31,6 +31,7 @@ import { haul, haulKey, haulHover, haulSwap, haulTick, haulCam } from './den/tre
 import { gunnery, gunCam, gunneryUp, gunneryRub, gunneryWheel } from './den/sea-guns.js';
 import { rowing, rowCam, rowPull } from './den/rowing.js';
 import { crane, craneCam } from './den/crane.js';
+import { umami, umamiTick, umamiCam, umamiClick } from './den/umami.js';
 import { net, online, guest, isHost, send, updateMates, sendMe, snapshot, followRaider, sendSync, onNet, joinCrew, leaveCrew } from './den/crew.js';
 import { deco, decoMode, decoMove, decoClick, decoTurn, dress, dressPanel, dressRows, lookChanged, applyDen, buildAll, tileFor, fillFrame, cheats, skipTo, cheatPanel, startAt } from './den/menus.js';
 
@@ -192,7 +193,8 @@ addEventListener('mouseup', (e) => {
   if (e.button === 0 && gunnery.on) gunneryUp(e.clientX, e.clientY);
   if (e.button !== 2 || !drag) return;
   if (drag.deco) { if (!drag.moved) decoClick(drag.deco); drag = null; return; }
-  if (!drag.moved && gunnery.on) gunneryRub(e.clientX, e.clientY);
+  if (!drag.moved && umami.on) umamiClick(e.clientX, e.clientY, 2);
+  else if (!drag.moved && gunnery.on) gunneryRub(e.clientX, e.clientY);
   else if (!drag.moved && patch.on && patch.hand) patchTurn(flip);
   else if (!drag.moved && carry && !G.over) turn(flip, 0);
   else if (!drag.moved && !carry && onGunDeck() && (gd.hover = deckCellAt(e.clientX, e.clientY)) && gd.arrows.has(k(...gd.hover))) chalk(...gd.hover, -1);
@@ -273,7 +275,7 @@ const camAt = new THREE.Vector3(0, 7.4, 14.2), camLook = new THREE.Vector3(0, 1.
 camera.position.copy(camAt);
 export let deckView = 0, beachView = 0, viewCam = null;
 export let swordView = 0, bilgeView = 0;
-export let sailView = 0, holdView = 0, haulView = 0;
+export let sailView = 0, holdView = 0, haulView = 0, forageView = 0;
 
 // Other parts of the den assign to these lets through this, as an imported binding can't be assigned.
 export const denLets = {
@@ -469,6 +471,7 @@ function update(dt) {
   sailTick(dt);
   dignityTick(dt, sail.on ? sail.helm.pose : null);   // (the checkpoint's commander, on its gate)
   haulTick(dt);
+  umamiTick(dt);   // (Umami the capybara: his bank in the lagoon, his board, his life at the den)
 
   /* Camera follows the pirate, looking at the wall and a little over it. Up on the rampart it
      swings up high to look down over the wall at the raiders. The player can turn it (Z/C or
@@ -628,6 +631,18 @@ function update(dt) {
     d = Math.atan2(Math.sin(d), Math.cos(d));
     yaw = y0 + d * haulView;
   }
+  // Freeing Umami: straight on to his bank and its board (js/den/umami.js).
+  const uc = umamiCam();
+  forageView += ((uc ? 1 : 0) - forageView) * Math.min(1, dt * 3);
+  if (forageView > 0.001 && uc) {
+    look.lerp(uc.look, forageView);
+    dist += (uc.dist - dist) * forageView;
+    tilt += (uc.tilt - tilt) * forageView;
+    const y0 = Math.atan2(Math.sin(yaw), Math.cos(yaw));
+    let d = uc.yaw - y0;
+    d = Math.atan2(Math.sin(d), Math.cos(d));
+    yaw = y0 + d * forageView;
+  }
   // The crane: watching a part of it go up, or her hauled up the cliff and down (js/den/crane.js).
   const kc = craneCam();
   if (kc) craneShot = kc;
@@ -759,6 +774,6 @@ if (startHere && !online() && !startAt(startHere)) toast(`No starting point call
 
 // For poking at it from the console.
 window.den = { rowing, rowPull, tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { worldLets.myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, swordReward, swordBreak, lumber, toLumber, repairAll, newGame, raiders, G, get carry() { return carry; }, get patch() { return patch; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
-  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, hold, holdSwap, board, ashore, patch, patchKey, patchPlace, deckHoleShape, haul, haulSwap, crane, gunnery,
+  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, hold, holdSwap, board, ashore, patch, patchKey, patchPlace, deckHoleShape, haul, haulSwap, crane, gunnery, umami,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };

@@ -57,7 +57,8 @@
 <script type="module">
 import * as THREE from 'three';
 import { seeded, SPECIAL_ODDS } from './js/foraging.js';
-import { forageBoard, capybaraSkin } from './js/den/foraging.js';
+import { forageBoard, capybaraSkin, cageOpen } from './js/den/foraging.js';
+import { umamiDeal, UMAMI, freedAt, FREED_T } from './js/den-umami.js';
 
 const $ = (id) => document.getElementById(id);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -90,9 +91,8 @@ function deal() {
   board?.dispose();
   $('log').innerHTML = '';
   const random = seeded(seed);
-  const d = mode === 'capy'
-    ? { random, bananas: 0, specials: lots(), start: [{ size: 'basket', r: 0, c: 2, tag: 'capybara' }] }
-    : { random, bananas: 7, specials: lots() };
+  // (the capybara's board is Umami's, as the den deals it: src/den-umami.ts)
+  const d = mode === 'capy' ? umamiDeal(random, lots()) : { random, bananas: 7, specials: lots() };
   board = forageBoard({
     deal: d, at: new THREE.Vector3(0, 0, 0), sq: 0.5,
     skin: mode === 'capy' ? capybaraSkin : null,
@@ -108,14 +108,13 @@ function deal() {
       if (m.left.length > 1) say(drops > 1 ? (drops === 2 ? 'Double!' : 'Triple!') : `${m.left.length} crates cleared!`);
     },
     onLeave: (l) => {
-      if (l.tag !== 'capybara') return false;
-      // The capybara splashes down into the lagoon and swims off: its mesh is ours now.
-      const m = l.mesh, w = l.world;
-      board.pieces.remove(m);
-      scene.add(m);
-      m.position.copy(w);
-      m.scale.setScalar(board.sq);
-      swimmers.push({ m, t: 0 });
+      if (l.tag !== UMAMI.TAG) return false;
+      // Only he leaves, in his trap (the mud stays behind): off the board's foot he breaks out of it,
+      // bounds about for joy and leaps into the lagoon (src/den-umami.ts, freedAt). Ours now.
+      const him = l.mesh, m = him.userData.capybara, cage = him.userData.cage;
+      scene.attach(m); scene.attach(cage);
+      him.removeFromParent();
+      swimmers.push({ m, cage, t: 0, p0: m.position.clone(), q0: m.quaternion.clone() });
       say('The capybara is free!');
       return true;
     },
@@ -161,12 +160,31 @@ function frame() {
   const v = board.camView(camera), wide = innerWidth > 700;
   camera.position.copy(v.from).add(new THREE.Vector3(wide ? -1.4 : 0, 0.6, 0));
   camera.lookAt(v.look.clone().add(new THREE.Vector3(wide ? -1.4 : 0, -0.1, 0)));
+  // (as a function of time since he left the board: he breaks out of the trap, bounds along, leaps
+  // into the water and swims off, with a slow, soft bob)
   for (let i = swimmers.length - 1; i >= 0; i--) {
-    const s = swimmers[i];
-    s.t += dt;
-    if (s.m.position.y > water.position.y + 0.15) s.m.position.y -= dt * 6;
-    else { s.m.position.y = water.position.y + 0.15 + Math.sin(s.t * 3) * 0.03; s.m.position.x += dt * 1.4; s.m.position.z += dt * 0.8; }
-    if (s.t > 7) { scene.remove(s.m); swimmers.splice(i, 1); }
+    const s = swimmers[i], m = s.m, f = freedAt(s.t += dt), wy = water.position.y, feet = 0.67 * m.scale.x;
+    const stand = new THREE.Vector3(s.p0.x, s.p0.y, s.p0.z), hopTo = stand.clone().add(new THREE.Vector3(1.2, 0, 0.2));
+    const splash = hopTo.clone().add(new THREE.Vector3(0.8, 0, 0.6)).setY(wy + 0.1);
+    if (f.phase === 'break') {
+      const k = f.u * f.u * (3 - 2 * f.u);
+      m.quaternion.slerpQuaternions(s.q0, new THREE.Quaternion(), k);
+      m.rotateZ(Math.sin(f.u * Math.PI * 2) * 0.12);
+      m.position.copy(stand);
+      cageOpen(s.cage, f.u);
+    } else if (f.phase === 'hop') {
+      s.cage.removeFromParent();
+      m.position.lerpVectors(stand, hopTo, f.along).y += f.lift * 0.8;
+      m.quaternion.identity(); m.rotateZ((0.5 - f.u) * 0.35);
+    } else if (f.phase === 'leap') {
+      m.position.lerpVectors(hopTo, splash, f.u).y += f.lift;
+      m.quaternion.identity(); m.rotateZ(0.25 - f.u * 0.6);
+    } else {
+      const u = s.t - FREED_T;
+      m.quaternion.identity();
+      m.position.set(splash.x + u * 1.4, wy + 0.1 + Math.sin(u * 1.6) * 0.03, splash.z + u * 0.8);
+    }
+    if (s.t > FREED_T + 6) { scene.remove(m); swimmers.splice(i, 1); }
   }
   if (banner > 0 && (banner -= dt) <= 0) $('say').classList.remove('on');
   const g = board.game;

@@ -75,6 +75,28 @@ export function seeded(seed) {
 const isTile = (b) => !!b && b.k >= 0;
 const key = (r, c) => r * W + c;
 const inside = (r, c) => r >= 0 && r < H && c >= 0 && c < W;
+/** How pieces fall as a board's drawn (js/den/foraging.js): all on one clock, so what falls together
+    stays in step (a container among its tiles, the new tiles over them), each stopping where it
+    lands: gathering speed at `A` squares a second a second, up to `V` squares a second, never
+    bouncing. Slow enough to watch. (The user, 10 Nov, of the capybara dropping out of the bottom:
+    "why is it so out of sync with the pieces? And it looks very jittery ... I think the animation's
+    too fast and it just goes up and down like ding, ding, ding, ding." Till then each piece was
+    stepped along at 9 squares a second, and a container leaving at 7 on a clock of its own.) */
+export const FALL = { A: 16, V: 5.5 };
+/** How far (squares) anything falling has fallen, `t` seconds after the stage starts. */
+export function fallen(t) {
+    if (t <= 0)
+        return 0;
+    const tv = FALL.V / FALL.A; // (when it reaches full speed)
+    return t <= tv ? FALL.A * t * t / 2 : FALL.V * tv / 2 + FALL.V * (t - tv);
+}
+/** Seconds to fall `d` squares. */
+export function fallTime(d) {
+    if (d <= 0)
+        return 0;
+    const tv = FALL.V / FALL.A, dv = FALL.V * tv / 2;
+    return d <= dv ? Math.sqrt(2 * d / FALL.A) : tv + (d - dv) / FALL.V;
+}
 export class Forage {
     /** grid[row][col], row 0 at the top. */
     grid = [];

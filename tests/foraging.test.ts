@@ -1,7 +1,7 @@
 /* The Foraging puzzle's rules, as YPPedia gives them ("Foraging", "Official:Foraging", "Jamesh's
    Ultimate Foraging", "Talk:Foraging") and Fullbeard University's Foraging lessons, read 10 Nov 2026. */
 import { describe, expect, it } from 'vitest';
-import { Forage, H, KINDS, MAX_BOXES, NO_SPECIALS, SIZES, TILES, W, points, seeded } from '../src/foraging';
+import { FALL, Forage, H, KINDS, MAX_BOXES, NO_SPECIALS, SIZES, TILES, W, fallTime, fallen, points, seeded } from '../src/foraging';
 import type { Bit, Deal, Dir, Size, Special, SpecialOdds } from '../src/foraging';
 
 /** New pieces come in as tiles 0, 1, 2, 3, 4 in turn, so they don't line up by chance. */
@@ -463,5 +463,33 @@ describe('played at random for a long while', () => {
       expect(left).toBeGreaterThan(0);   // (random play gets few out: they stick)
       expect(f.boxes).toBe(left);
     }
+  });
+});
+
+/* The user, 10 Nov, watching the capybara drop out of the bottom: "why is it so out of sync with the
+   pieces? And it looks very jittery. Like, I think the animation's too fast and it just goes up and
+   down like ding, ding, ding, ding." */
+describe('the capybara falls in step with the pieces, smoothly and slowly enough to watch (10 Nov)', () => {
+  it('everything falling goes by one clock: what falls together stays level till the nearer lands', () => {
+    // A container falling six squares out of the bottom, and a tile beside it falling two: level all
+    // the way down till the tile lands, as it's one function of time for both.
+    for (let t = 0; t < fallTime(2); t += 0.01) expect(Math.min(6, fallen(t))).toBe(Math.min(2, fallen(t)));
+    expect(fallTime(6)).toBeGreaterThan(fallTime(2));
+  });
+  it('smooth: starts from rest, never goes back up, never jumps, and never runs faster than its top speed', () => {
+    expect(fallen(0)).toBe(0);
+    let last = 0;
+    for (let t = 0.001; t < 4; t += 0.001) {
+      const s = fallen(t);
+      expect(s).toBeGreaterThanOrEqual(last);
+      expect(s - last).toBeLessThanOrEqual(FALL.V * 0.001 + 1e-9);
+      last = s;
+    }
+    for (const d of [0.5, 1, 3, 10]) expect(fallen(fallTime(d))).toBeCloseTo(d, 9);
+  });
+  it('slow enough to watch: a square takes a third of a second, the whole board about two', () => {
+    expect(fallTime(1)).toBeGreaterThan(0.3);
+    expect(fallTime(H)).toBeGreaterThan(1.5);
+    expect(fallTime(H)).toBeLessThan(3);
   });
 });

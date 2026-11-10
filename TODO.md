@@ -61,38 +61,6 @@ the site (`.assetsignore` skips `*.md`).
   place, now built; the cove keeps a chest of its own on the beach. How you get that one: to pin
   down.)
 
-- **Rescue a capybara at the clifftop lagoon (10 Nov):** the friend's side quest (IDEAS.md, "Side
-  quests that leave friends about the den") goes in the lagoon: an animal is trapped there, you
-  rescue it (by a puzzle, as every reward is), click it and it turns up back at the den as "a pet
-  that you found and rescued". A capybara is semi-aquatic, so it has to make sense (the user, 10
-  Nov: "not just hanging around on the land"): it's trapped in the water, not on land (tangled in
-  an old net caught on the wreck, say), and at the den it lives at the water's edge, on the beach
-  and in the cove's shallows near the shack, wading, swimming and sitting in the water as
-  capybaras do. Freed by Foraging (the user, 10 Nov: "Definitely foraging ... it's got the same
-  kind of logic as treasure haul, but like reversed, and it fits the scene better. And we want
-  foraging later anyway"): Puzzle Pirates' real Foraging, played by its real rules, built as one
-  module of its own to reuse later (the foraging island), with the capybara as the container
-  stuck high on the lagoon's bank in reeds, roots and mud; cleared down off the board's foot it
-  splashes into the water and swims to her. The capybara is called Umami (the user, 10 Nov: "for
-  fun ... since he requested it"). Tried on the test page (10 Nov): "Looks good"; go ahead and wire
-  it in. Two fixes: never stuck ("as long as we've got enough pieces so that you don't get stuck ...
-  as long as you can get through eventually if you make a mistake"), and his going off ("a really
-  weird animation of the capybara going off ... it wasn't just the animal itself. It was some
-  background pieces got caught up in it": only Umami should leave, the bank stays). The crane being built only for
-  the session is fine for a proof of concept (a refresh starts afresh). His fall (10 Nov): "why is it
-  so out of sync with the pieces? And it looks very jittery ... ding, ding, ding, ding": in step with
-  the pieces, smooth and slower. Caged while you free him (10 Nov): "being in the cage or being
-  trapped in some way visually makes sense while you're trying to free them. They break free and
-  happily start jumping around." On the board he's shown trapped (a cage, or the net he's tangled
-  in), and once he's cleared off the foot he breaks out of it and bounds about happily before
-  swimming to her. Tried in the den (10 Nov): loves the poetry, but three things. How he's trapped
-  at the start "is not very inviting". "I don't understand as well how he seems to get free after
-  just 2 clicks": freeing him should take a real puzzle's worth of clearing, and it should be clear
-  why he's free when he is. And the board from afar: "you can see them before you've started the
-  puzzle, but you can't see the puzzle pieces. Like, you should surely just see the whole board":
-  the bank shows the whole Foraging board, pieces and all, in its own look, before you start, as
-  the den's other boards do.
-
 - **The puzzles' pieces checked against the real ones (10 Nov):** "the last few puzzles, the
   graphics have been placeholders rather than matching the Puzzle Pirate pieces". Compare each
   puzzle already in the den (Treasure Haul above all, and Bilge, Swordfight and Gunnery) with its
