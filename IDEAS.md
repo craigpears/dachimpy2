@@ -350,10 +350,13 @@ it should be work." Shaped a little:
 
 ## Kikkit's penguin: five lefts through the whirlpools (10 Nov)
 
-A side quest off to the right (the old wreck's off to the left). Not behind the checkpoint
-(10 Nov): "You don't really necessarily need to get through the checkpoint for her ... I want
-them to just be side quests everywhere." You come across Kikkit off to the right, telling you
-how she's trying to catch a penguin, and it takes you off down that way.
+A side quest **beyond the checkpoint, off to the right** (the old wreck's off to the left). The
+user went back and forth, then settled it (10 Nov): "I do want there to be a bit of a reward for
+getting through, and that is unlocking a few more side [quests] ... there's already side quest
+here [before it] ... I think it should be after the checkpoint, off to the right." You come across
+Kikkit off to the right, telling you how she's trying to catch a penguin, and it takes you off
+down that way. (Earlier the same day: "you don't really necessarily need to get through the
+checkpoint for her": superseded.)
 - **A sea that keeps blowing you back:** "just an insane number of ... whirlpools and winds, and
   they always keep blowing you back, like the Snakes and Ladders style." It suits her: "she's
   just a bit loopy crazy." (10 Nov.)
