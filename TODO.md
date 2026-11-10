@@ -210,21 +210,28 @@ the site (`.assetsignore` skips `*.md`).
   same size as you ("why are they so mini and you're like a giant on the back of the ship?"); and
   "make the ship a little wider so the little guys can sit next to each other".
 
-- **Rowing needs a look of its own, and a clearer compass (10 Nov):** "I like the feel and the
-  look of the puzzle so far", but "people are just going to get very confused given how visually
-  identical it is to the [Bilging] ... it can have some similarity, but". And "the next move compass
-  is a bit confusing, and like the left right arrows are very tiny on it ... that's really not very
-  clear or intuitive." So rowing gets its own pieces and board, plainly kin to Bilge but not to be
-  mistaken for it, and which way she's about to go reads at a glance, big. Also asked: "didn't we
-  talk about having fewer pieces? ... I see the pentagon piece, so ... isn't that like the 7th?"
-  (The live site still had the old split board, seven kinds; mirror strokes deals five, without
-  the pentagon.)
+- **Rowing: keep Bilge's water look, lose the compass (10 Nov):** first: "people are just going to
+  get very confused given how visually identical it is to the [Bilging]"; then, on second thoughts:
+  "I don't like the idea of different pieces ... part I did love of this similarity [to] bilge is
+  that they are very watercoloured ... I still like it in idea", and no rowing benches ("you
+  already see the guys with the rowing [oars]"). So the pieces and the water stay as they are.
+  The compass goes: "the next move compass is a bit confusing, and like the left right arrows are
+  very tiny"; "even just ... you can actually see the oars and the ship itself pulling gives you
+  enough of an indication. Do we need much else?" So the turn building shows on her: the oars on
+  the side pulling harder, her bows swinging and heeling, big enough to read. ("We're going to
+  have to prototype a bit more.") Also asked: "didn't we talk about having fewer pieces? ... I see
+  the pentagon" (the live site still had the old split board, seven kinds; mirror strokes deals
+  five, without the pentagon).
 
 - **Sunk at the checkpoint, row home (10 Nov):** agreed (IDEAS.md, "Sunk at the checkpoint"):
   "it should be a short row home ... you've got the trade winds blowing you back, haven't you? So
   all you need to do is a quick row to get onto the trade winds." Sunk, you bob up in a little
   rowboat, row by mirror strokes the short way to the trade winds, and they carry you home; the
-  sloop's waiting at the den. After Dignity's cutscene.
+  sloop's waiting at the den, and you're back aboard her, with a pop-up as games do (the user:
+  "you've now learned how to row. Hit the O button at any time to get the oars out. Switch from
+  sails to oars ... oars are great for rowing, let you row against the wind"). (To pin down with
+  the user: rowing against the wind was to be a secret, so the pop-up might say O gets the oars
+  out and leave the wind unsaid.) After Dignity's cutscene.
 
 ## Needs a playtest to pin down
 
