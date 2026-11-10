@@ -1,19 +1,20 @@
-// Sailing the sloop: boarding and going ashore, her guns and the turret's shots, the helm's keys
+// Sailing the sloop: boarding and going ashore, her guns, the helm's keys
 // and clicks, and each tick at sea. (Split out of den.js.)
 import * as THREE from 'three';
-import { SAIL, LAY, Helm, Guns, Turret, broadside } from '../den-sail.js';
+import { SAIL, LAY, Helm, broadside } from '../den-sail.js';
+import { Broadside } from '../den-guns.js';
 import { $, scene, camera, mat, mesh, animateWalk, V3, pirate, view, carry, G, keys, shake, wm, ray, burst, toast, tween, worldLets } from './world.js';
 import { outside } from './land.js';
 import { putBack, exitWall } from './pieces.js';
 import { sword } from './sword.js';
 import { shoreZ, bilge, groundPlane } from './bilge.js';
 import { chart, cine } from './map.js';
-import { SEA_X0, seaX, seaZ, SLOOP_DECK, sail, LIFT, liftAt, sloopMesh, seaRocks, seaWorld, turretLook, turretFall, floatChestMesh, pinMesh, dotMat, dotMine, dotGeo, hoverMat, TOK } from './sea.js';
+import { SEA_X0, seaX, seaZ, SLOOP_DECK, sail, LIFT, liftAt, sloopMesh, seaRocks, seaWorld, pinMesh, dotMat, dotMine, dotGeo, hoverMat, TOK } from './sea.js';
 import { hold, holdShut, holdKey, holdHover, holdSwap, holdTick, patch, deckHoleShape, patchClear, patchShut, patchPlace, patchHover, patchTick } from './sea-puzzles.js';
 import { online } from './crew.js';
-import { haul, haulShut, haulPrompt, canHaulTurret, haulTurret, canHaulWreck, haulWreck } from './treasure.js';
-import { checkpointReset, checkpointTick } from './checkpoint.js';
-import { isCheckpoint } from '../den-checkpoint.js';
+import { haul, haulShut, haulPrompt, canHaulWreck, haulWreck } from './treasure.js';
+import { checkpointReset, checkpointTick, checkpointShot } from './checkpoint.js';
+import { gunnery, gunneryReset, gunneryToggle, gunneryTick, gunneryKey, gunneryHover, gunneryDown, gunneryPrompt } from './sea-guns.js';
 import { deco, decoMode } from './menus.js';
 import { sailView, patchView, setPaused, denLets } from '../den.js';
 import { WIND } from '../den-wind.js';
@@ -44,6 +45,7 @@ export function board() {
 // Ashore, at her mooring: you hop down onto the beach by her.
 export function ashore() {
   sail.on = false;
+  gunneryReset();
   sail.helm.stop();
   document.body.classList.remove('sailing');
   Object.assign(pirate, { x: seaX(SAIL.HOME.c) + 0.6, z: shoreZ() + 0.7, h: 0, hs: 0, hop: null });
@@ -54,12 +56,9 @@ export function sailReset() {
   if (sail.on) { sail.on = false; document.body.classList.remove('sailing'); }
   sail.sea.breeze?.set(WIND.START.d, WIND.START.s);
   sail.helm = new Helm(sail.sea);
-  sail.guns = new Guns();
-  sail.turret = new Turret(LAY.TURRET);
+  sail.guns = new Broadside();
+  gunneryReset();
   checkpointReset();
-  if (sail.world) turretLook(sail.world, false);
-  sail.shots.forEach((v) => { scene.remove(v.ball, v.ring); });
-  sail.shots = [];
   sail.said = {};
   holdShut();
   rowShut();
@@ -71,25 +70,15 @@ export function sailReset() {
   craneReset();
   denLets.sailView = 0;
 }
-// A hit on the turret from her guns: quietened a while or, the third, wrecked, a chest floating
-// free of it (src/den-sail.ts, Turret.hit).
-function turretHit(at) {
-  const t = sail.turret, what = t.hit(sail.sea), left = SAIL.WRECK - t.hits;
-  if (what === 'quiet') return toast(`A hit on the turret! That's quietened it for a while (${left} more to wreck it)`);
-  if (!what) return toast('A hit on the wreck!');
-  // Its moment: a blast of fire, smoke and stone, and the tower comes down (see turretFall).
-  const W = sail.world, tw = W.turret.position;
-  burst(V3(tw.x, 3.4, tw.z), '#ffb85a', 36, 6); burst(V3(tw.x, 3, tw.z), '#ff7a2a', 20, 4.5); burst(V3(tw.x, 2.5, tw.z), '#3f3a37', 30, 4);
-  burst(V3(tw.x, 2, tw.z), '#8a8178', 24, 5.5); burst(at, '#e6f3f6', 16, 4);
-  W.fall = 0;
-  worldLets.shake = Math.max(shake, 0.6);
-  toast('The turret\'s wrecked! And a chest has floated free of it');
-}
 // A shot out of her side, from where she is right now: it flies straight out and comes down in the
-// sea, or on the first rock in its way (src/den-sail.ts, broadside). Then that gun loads again.
+// sea, or on the first rock in its way (src/den-sail.ts, broadside). Only a gun that's loaded fires,
+// and they're loaded by Gunnery (src/den-guns.ts; js/den/sea-guns.js); then it runs out again with
+// that side's next load, if there is one.
 const SIDE_NAME = { L: 'port', R: 'starboard' };
 function sailFire(side) {
-  if (!sail.guns.fire(side)) return toast(`The ${SIDE_NAME[side]} gun's still loading`, true);
+  const did = sail.guns.fire(side);
+  if (did === 'empty') return toast(`No shot loaded to ${SIDE_NAME[side]}: G to load her guns by Gunnery`, true);
+  if (did === 'running') return toast(`The ${SIDE_NAME[side]} gun's still running out`, true);
   const { cells, hit } = broadside(sail.sea, sail.helm.now(), side), gun = sail.g.userData.guns[side];
   sail.g.updateMatrixWorld(true);
   const from = gun.localToWorld(V3(0, 0.3, -0.85)), end = cells[cells.length - 1];
@@ -115,9 +104,7 @@ function sailFire(side) {
       const x0 = r.position.x, z0 = r.position.z;
       tween(0.4, (u) => { const k = Math.sin(u * Math.PI * 6) * 0.12 * (1 - u); r.position.x = x0 + k; r.position.z = z0 - k; }, () => { r.position.x = x0; r.position.z = z0; });
     }
-    if (hit[0] === LAY.TURRET[0] && hit[1] === LAY.TURRET[1]) turretHit(to);
-    else if (isCheckpoint(sail.sea, ...hit)) toast('A hit on the checkpoint! But a sloop\'s guns don\'t trouble an imperial bastion');
-    else toast('A hit on the rocks!');
+    if (!checkpointShot(hit, to)) toast('A hit on the rocks!');
   });
 }
 // The square of the board under the pointer (fractional: the middle of a square is whole).
@@ -131,6 +118,7 @@ export function sailClick(x, y) {
   if (patch.on) { patch.keyAt = null; patchHover(x, y); if (patch.hand) patchPlace(); return; }
   if (hold.mode) { holdHover(x, y); holdSwap(); return; }
   if (rowing.on) { rowHover(x, y); rowSwap(); return; }
+  if (gunnery.on) { gunneryDown(x, y); return; }
   if (craneHolds()) return;   // (up in the lagoon, or on her way: no pins)
   const at = seaCellAt(x, y);
   if (!at) return;
@@ -141,6 +129,7 @@ export function sailHover(x, y) {
   if (patch.on) { patchHover(x, y); sail.hover = null; return; }
   if (hold.mode) { holdHover(x, y); sail.hover = null; return; }
   if (rowing.on) { rowHover(x, y); sail.hover = null; return; }
+  if (gunnery.on) { gunneryHover(x, y); sail.hover = null; return; }
   if (craneHolds()) { sail.hover = null; return; }
   const at = seaCellAt(x, y);
   sail.hover = at && sail.sea.open(Math.round(at.c), Math.round(at.r)) ? [Math.round(at.c), Math.round(at.r)] : null;
@@ -151,6 +140,10 @@ export function sailKey(key) {
   // Rowing: the board's keys; Esc or O ships the oars.
   if (rowing.on && (key === 'escape' || key === 'o')) return rowToggle();
   if (rowing.on && rowKey(key)) return;
+  // At her guns: the board's keys (W A D still steer, Q E fire); O goes to the oars instead.
+  if (gunnery.on && key === 'o') { gunneryToggle(); return rowToggle(); }
+  if (gunneryKey(key)) return;
+  if (key === 'g') return gunneryToggle(haul.on || craneHolds());
   const m = { w: 'F', arrowup: 'F', a: 'L', arrowleft: 'L', d: 'R', arrowright: 'R' }[key];
   if (m) { if (!sail.helm.put(m)) toast('That\'s a turn\'s worth put in already', true); return; }
   if (key === 'q' || key === 'e') return sailFire(key === 'q' ? 'L' : 'R');
@@ -158,7 +151,6 @@ export function sailKey(key) {
   if (key === 's' || key === 'arrowdown' || key === 'backspace') sail.helm.unput();
   else if (key === 'escape') { sail.helm.stop(); toast('Pin pulled up: she\'ll stop when this turn\'s done'); }
   else if (key === 'h') { sail.helm.drop(SAIL.HOME.c, SAIL.HOME.r); if (sail.helm.pin) toast('Heading home to the cove'); }
-  else if ((key === ' ' || key === 'enter') && canHaulTurret()) haulTurret();
   else if ((key === ' ' || key === 'enter') && canHaulWreck()) haulWreck();
   else if ((key === ' ' || key === 'enter') && atHome() && sail.helm.slot < 0) ashore();
   else if (key === 'z' || key === 'c') keys.add(key);
@@ -172,6 +164,7 @@ export function sailPrompt() {
   if (!sail.on) return '';
   if (haul.on) return haulPrompt();
   if (rowing.on) return rowPrompt();
+  if (gunnery.on) return gunneryPrompt();
   const cp = cranePrompt();
   if (cp) return cp;
   const h = sail.helm, held = h.held();
@@ -186,55 +179,30 @@ export function sailPrompt() {
   if (held === 'gates') return 'The lock gates are swinging open';
   if (held === 'calm') return 'Becalmed: dead in the water till the wind picks up · O: out oars';
   if (atHome() && h.slot < 0 && !h.next().length) return 'At her mooring · Space: go ashore · click the sea to drop a pin';
-  if (canHaulTurret()) return 'The turret\'s chest · Space: haul it aboard (Treasure Haul) · click the sea to drop a pin';
   if (canHaulWreck()) return 'The old wreck · Space: haul up its treasure (Treasure Haul) · click the sea to drop a pin';
   if (h.slot < 0 && h.headwind()) return 'She can\'t sail to the pin: it\'s dead against the wind · O: out oars and row her there, or wait for it to shift';
   if (h.pin) return h.oars ? 'Rowing to the pin' : 'Under way to the pin';
   if (h.slot >= 0) return 'Under way';
-  return 'Click the sea to drop a pin, or put in moves with W A D · Q E: fire';
+  return 'Click the sea to drop a pin, or put in moves with W A D · G: load her guns (Gunnery) · Q E: fire';
 }
 // This turn's tokens (the one being sailed lit) and the next turn's, yours in gold.
 function sailHud() {
   const h = sail.helm, mineN = h.mine.length;
   const now = h.slot >= 0 ? h.turn : [], next = h.next();
-  const load = (side) => Math.round(sail.guns.loaded(side) * 20);
+  const load = (side) => Math.round(sail.guns.out(side) * 20), shots = (side) => sail.guns.shots(side);
   const lit = h.lit();   // (lit only while it's being sailed: not while she waits, becalmed, say)
-  const sig = `${now.join('')}|${lit}|${h.slot}|${next.join('')}|${mineN}|${load('L')}|${load('R')}|${windSig()}`;
+  const sig = `${now.join('')}|${lit}|${h.slot}|${next.join('')}|${mineN}|${load('L')}|${load('R')}|${shots('L')}${shots('R')}|${windSig()}`;
   if (sig === sail.hudSig) return;
   sail.hudSig = sig;
   const toks = (list, cls) => Array.from({ length: SAIL.SLOTS }, (_, i) => (list[i] ? `<b class="tok ${cls(i)}">${TOK[list[i]]}</b>` : '<b class="tok empty"></b>')).join('');
-  // Her guns either side of the tokens, port on the left: lit when loaded, filling as they load.
-  const gun = (side, k) => `<div class="gun${sail.guns.ready(side) ? ' ready' : ''}"><kbd>${k}</kbd>${side === 'L' ? 'Port' : 'Starboard'}<i style="width:${load(side) * 5}%"></i></div>`;
+  // Her guns either side of the tokens, port on the left: a pip for each shot loaded that side (by
+  // Gunnery: G), lit when there's one ready, the bar filling as her gun runs out again after a shot.
+  const pips = (side) => Array.from({ length: sail.guns.most(side) }, (_, i) => `<b class="pip${i < shots(side) ? ' on' : ''}"></b>`).join('');
+  const gun = (side, k) => `<div class="gun${sail.guns.ready(side) ? ' ready' : ''}" title="${side === 'L' ? 'Port' : 'Starboard'} shots loaded (Gunnery: G)"><kbd>${k}</kbd>${side === 'L' ? 'Port' : 'Starboard'}<span class="pips">${pips(side)}</span><i style="width:${shots(side) ? load(side) * 5 : 0}%"></i></div>`;
   // The wind, at the left end, and the oars at the right (wind.js).
   $('sailhud').innerHTML = `<div class="turns">${windHud()}${gun('L', 'Q')}<div class="turn"><span>This turn</span>${toks(now, (i) => (i < h.slot ? 'done' : i === lit ? 'now' : ''))}</div>`
-    + `<div class="turn"><span>Next</span>${toks(next, (i) => (i < mineN ? 'mine' : ''))}</div>${gun('R', 'E')}${oarsHud()}</div>`
-    + '<div class="help">Click the sea: drop a pin · <kbd>W</kbd> <kbd>A</kbd> <kbd>D</kbd>: forward, left, right yourself · <kbd>S</kbd>: take one back · <kbd>Q</kbd> <kbd>E</kbd>: fire port, starboard · <kbd>O</kbd>: oars out or in · <kbd>Esc</kbd>: pull up the pin · <kbd>H</kbd>: head home · wheel: zoom</div>';
-}
-// The turret's shots in the air: the ball on its arc, and a red ring on the water where it'll land,
-// so you can see it coming and get out from under it.
-const ringGeo = new THREE.RingGeometry(1.5, 1.9, 32).rotateX(-Math.PI / 2);   // (wide enough to show round her hull)
-function turretFire(to) {
-  const W = sail.world;
-  W.turret.updateMatrixWorld(true);
-  const from = W.gun.localToWorld(V3(0, 0.3, -0.85));
-  burst(from, '#ffcf6a', 14, 3); burst(from, '#cfc6b8', 10, 1.8);
-  const ball = mesh(new THREE.SphereGeometry(0.24, 10, 8), mat('#2a2d31', { metalness: 0.6 }));
-  const ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: '#e0412e', transparent: true, opacity: 0.85, depthWrite: false, fog: false }));
-  ring.position.set(seaX(to[0]), 0.1 + liftAt(...to), seaZ(to[1]));
-  ring.renderOrder = 3;
-  scene.add(ball, ring);
-  sail.shots.push({ to, t: 0, from, ball, ring });
-}
-function turretLand(to, hit) {
-  const i = sail.shots.findIndex((v) => v.to[0] === to[0] && v.to[1] === to[1]);
-  const v = i >= 0 ? sail.shots.splice(i, 1)[0] : null;
-  if (v) scene.remove(v.ball, v.ring);
-  const at = V3(seaX(to[0]), 0.3 + liftAt(...to), seaZ(to[1]));
-  if (!hit) { burst(at, '#e6f3f6', 20, 4); burst(at, '#9cc8d4', 10, 2.5); return; }
-  sail.helm.hit(deckHoleShape());
-  burst(at.setY(at.y + 0.8), '#ffb85a', 18, 4); burst(at, '#5a4630', 16, 3.5); burst(at, '#e6f3f6', 10, 3);
-  worldLets.shake = Math.max(shake, 0.45);
-  toast('Hit! She\'s holed: patch her to sail on', true);
+    + `<div class="turn"><span>Next</span>${toks(next, (i) => (i < mineN ? 'mine' : ''))}</div>${gun('R', 'E')}<button class="oars" id="guns-btn" title="Load her guns by Gunnery (G)"><kbd>G</kbd>Load</button>${oarsHud()}</div>`
+    + '<div class="help">Click the sea: drop a pin · <kbd>W</kbd> <kbd>A</kbd> <kbd>D</kbd>: forward, left, right yourself · <kbd>S</kbd>: take one back · <kbd>Q</kbd> <kbd>E</kbd>: fire port, starboard · <kbd>G</kbd>: load them by Gunnery · <kbd>O</kbd>: oars out or in · <kbd>Esc</kbd>: pull up the pin · <kbd>H</kbd>: head home · wheel: zoom</div>';
 }
 export function sailTick(dt) {
   sail.rocks ||= seaRocks();
@@ -262,22 +230,14 @@ export function sailTick(dt) {
     }
     if (sail.riding && !(h.cur && h.cur.m === 'W')) {
       sail.riding = false;
-      const [jc, jr] = LAY.JUNCTION;
-      if (h.pose.c === jc && h.pose.r === jr && !sail.said.junction) { sail.said.junction = true; toast('The junction: right rides the winds round and home, left\'s the canal to the lock, on is open sea'); }
+      const [jc, jr] = LAY.JUNCTION, home = sail.sea.dropOff(...LAY.LANES[2].at);
+      if (h.pose.c === jc && h.pose.r === jr && !sail.said.junction) { sail.said.junction = true; toast('The junction: on, the trade winds carry her out to the imperial checkpoint; left\'s the canal to the lock'); }
+      if (h.pose.c === home[0] && h.pose.r === home[1] && !sail.said.home) { sail.said.home = true; toast('The trade winds have carried her home: her mooring\'s just along the shore'); }
     }
     const held = h.held();
     if (held === 'up' && heldWas !== 'up' && !sail.said.lock) { sail.said.lock = true; toast('The lock: bilge on the quay to pump it up to the cove'); }
     if (held === 'gates' && heldWas === 'up') toast('The lock\'s full: the top gates open');
     if (sail.sea.level(h.pose.c, h.pose.r) === 1 && !sail.said.cove) { sail.said.cove = true; toast('The hidden cove, up behind the cliff: an old bilge pump on the sand'); }
-    // The turret shoots at her when she's in reach (not while she's dazed, or in the lock).
-    for (const e of sail.turret.tick(dt, h.spared() ? null : h.now())) {
-      if (e.kind === 'fire') turretFire(e.to);
-      else turretLand(e.to, e.hit);
-    }
-    // Stopped by the turret's chest: say how to haul it (only when you're there; never started for you).
-    const byChest = canHaulTurret();
-    if (byChest && !sail.byChest) toast('By the turret\'s chest: Space to haul it aboard');
-    sail.byChest = byChest;
     if (sail.bumpT > 0 && (sail.bumpT -= dt) <= 0) { worldLets.shake = 0.3; toast('Bump! Rocks', true); }
     sail.guns.tick(dt);
   }
@@ -285,29 +245,7 @@ export function sailTick(dt) {
   holdTick(dt);
   patchTick(dt);
   rowTick(dt, haul.on);
-  // The turret's shots on their way; its gun turned on her; smoking while it's quiet.
-  for (const v of sail.shots) {
-    v.t += dt;
-    const u = Math.min(1, v.t / SAIL.FLIGHT), to = V3(seaX(v.to[0]), 0.3 + liftAt(...v.to), seaZ(v.to[1]));
-    v.ball.position.lerpVectors(v.from, to, u);
-    v.ball.position.y += Math.sin(u * Math.PI) * 4;
-    v.ring.material.opacity = 0.5 + 0.4 * Math.sin(v.t * 14);
-  }
-  {
-    const p = h.now(), tw = W.turret.position, dx = seaX(p.c) - tw.x, dz = seaZ(p.r) - tw.z;
-    if (sail.on) W.gun.rotation.y += (Math.atan2(-dx, -dz) - W.gun.rotation.y + Math.PI * 3) % (Math.PI * 2) - Math.PI > 0 ? Math.min(dt * 2, ((Math.atan2(-dx, -dz) - W.gun.rotation.y + Math.PI * 3) % (Math.PI * 2)) - Math.PI) : Math.max(-dt * 2, ((Math.atan2(-dx, -dz) - W.gun.rotation.y + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
-    if (W.fall !== undefined) turretFall(W, dt);
-    else if (sail.turret.wrecked !== W.wrecked) turretLook(W, sail.turret.wrecked);
-    if (sail.turret.wrecked) { if ((W.smokeT = (W.smokeT ?? 0) - dt) < 0) { W.smokeT = 0.14; burst(V3(tw.x + 0.2, 2.8, tw.z), '#3f3a37', 4, 0.9); } }
-    else if (sail.turret.quiet > 0 && (W.smokeT = (W.smokeT ?? 0) - dt) < 0) { W.smokeT = 0.25; burst(V3(tw.x, 3.8, tw.z), '#6f6a66', 2, 0.6); }
-    // The wreck's chest, bobbing on the water till she hauls it aboard.
-    const ch = sail.turret.chest;
-    if (ch) sail.chestG ||= floatChestMesh();
-    if (sail.chestG) {
-      sail.chestG.visible = !!ch && !haul.on;   // (while you haul, it's on the board)
-      if (ch) { const tt = performance.now() / 1000; sail.chestG.position.set(seaX(ch[0]), 0.05 + Math.sin(tt * 1.6) * 0.1, seaZ(ch[1])); sail.chestG.rotation.set(Math.sin(tt * 1.1) * 0.08, 0.4 + Math.sin(tt * 0.5) * 0.2, Math.sin(tt * 1.3) * 0.08); }
-    }
-  }
+  gunneryTick(dt, haul.on || craneHolds());
   // The quay pump: its handle down and up again with each stroke, and water gushing from its spout
   // into the lock while it's rising.
   {
@@ -338,7 +276,7 @@ export function sailTick(dt) {
   }
   // A gun that's fired kicks back in and runs out again as it's loaded, smoking at first.
   for (const side of ['L', 'R']) {
-    const gun = sail.g.userData.guns[side], u = sail.guns.loaded(side);
+    const gun = sail.g.userData.guns[side], u = sail.guns.out(side);
     gun.position.z = gun.userData.z * (1 - 0.55 * (1 - u) ** 2);
     if (u < 0.6 && (gun.userData.smokeT = (gun.userData.smokeT ?? 0) - dt) < 0) {
       gun.userData.smokeT = 0.3;
@@ -356,7 +294,7 @@ export function sailTick(dt) {
   if (sail.on) {
     // You, at the tiller, facing her bow (up on her stern, beside it, while the board's on her deck,
     // so you're not stood on it, nor between it and the camera).
-    const deck = patch.on || rowing.on, at = sail.g.localToWorld(deck ? V3(-1.7, SLOOP_DECK + 0.35, 0.45) : V3(-1.15, SLOOP_DECK, 0)), yaw = sail.g.rotation.y;
+    const deck = patch.on || rowing.on || gunnery.on, at = sail.g.localToWorld(deck ? V3(-1.7, SLOOP_DECK + 0.35, 0.45) : V3(-1.15, SLOOP_DECK, 0)), yaw = sail.g.rotation.y;
     pirate.x = at.x; pirate.z = at.z;
     pirate.g.position.copy(at);
     pirate.g.rotation.set(0, Math.atan2(Math.cos(yaw), -Math.sin(yaw)), 0);
@@ -397,4 +335,8 @@ export function sailTick(dt) {
 }
 // The oars' button on the sailing bar (on mousedown: the bar's redrawn as the tokens change, so a
 // click could be lost between press and release).
-$('sailhud').addEventListener('mousedown', (e) => { if (e.button === 0 && e.target.closest('#oars-btn')) { e.preventDefault(); rowToggle(); } });
+$('sailhud').addEventListener('mousedown', (e) => {
+  if (e.button !== 0) return;
+  if (e.target.closest('#oars-btn')) { e.preventDefault(); rowToggle(); }
+  else if (e.target.closest('#guns-btn')) { e.preventDefault(); gunneryToggle(haul.on || craneHolds()); }
+});

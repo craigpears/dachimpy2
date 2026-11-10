@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { HAUL, Salvage, aboard, chestBoard, payout } from '../src/den-haul';
 import { H, W } from '../src/treasure-haul';
-import { Helm, Sea, Turret, LAY, SAIL } from '../src/den-sail';
+import { Helm, Sea } from '../src/den-sail';
 
 const clearSea = () => { const s = new Sea(1, false); s.rocks.clear(); return s; };
 const at = (sea: Sea, c: number, r: number) => new Helm(sea, { c, r, d: 0 });
@@ -125,17 +125,5 @@ describe('Esc out of a haul: the chest stays', () => {
     const again = s.open();
     expect(again).toBe(b);
     expect([again.score, again.hoard]).toEqual([score, hoard]);
-  });
-});
-
-describe('the wrecked turret\'s chest', () => {
-  it('floats free where she can sail to it, to be hauled up from there', () => {
-    const sea = new Sea(9), t = new Turret(LAY.TURRET);
-    for (let i = 0; i < SAIL.WRECK; i++) t.hit(sea);
-    expect(t.wrecked).toBe(true);
-    const ch = t.chest!;
-    expect(ch).not.toBeNull();
-    const s = new Salvage(ch);
-    expect(s.canStart(new Helm(sea, { c: ch[0], r: ch[1], d: 0 }))).toBe(true);
   });
 });

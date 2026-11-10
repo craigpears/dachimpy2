@@ -5,7 +5,7 @@ import { LAY, SAIL } from '../den-sail.js';
 import { CHECK, Checkpoint, throughSay } from '../den-checkpoint.js';
 import { scene, mat, mesh, canvasTex, woodTex, V3, burst, toast, worldLets, shake, flagpole } from './world.js';
 import { rock } from './land.js';
-import { gunMesh } from './gundeck.js';
+import { turretMesh, turretView, turretWrecked, turretFire, turretLand, turretShotsTick, turretShotsClear, shotComing } from './turret.js';
 import { hullGeo } from './raids.js';
 import { seaX, seaZ, sail, CLIFF_H } from './sea.js';
 import { deckHoleShape } from './sea-puzzles.js';
@@ -18,10 +18,15 @@ import { canHaulWreck } from './treasure.js';
    over it and banners down its towers, a boom chain lying slack under the water between its piers
    (the bribe, later, is paid here), and a bastion either side with a gun on it. Each gun is trained
    on squares of the way through, marked on the water with red rings: stop on one and she's hit.
+   Each bastion and its gun is a destructible turret (src/den-turret.ts, js/den/turret.js), put
+   down here and dressed in the Empire's stone and crimson: "just the same as the other one", a hit
+   quietens it ten seconds, smoking, and the third wrecks it, the gun toppling off and the bastion
+   sinking to a smoking stump. Once she's fired on it, its guns turn on her, a red ring on the water
+   where each shot will come down.
    On its left a headland (the crane, later, goes up and over it), on its right a reef whose far end
    is the long way round. Beyond it, an old wreck on the open sea, its treasure hauled up by
    Treasure Haul (treasure.js). */
-export const cp = { check: new Checkpoint(), W: null, shots: [], byWreck: false };
+export const cp = { check: new Checkpoint(), W: null, byWreck: false };
 const K = LAY.CHECKPOINT, GATE_Z = seaZ(K.ROW), ARCH_Y = 6.4;
 const stone = () => mat('#d3c9b2', { flatShading: true, roughness: 0.9 });
 const CRIMSON = '#9e1b24', GOLD = '#e0b53a';
@@ -67,19 +72,12 @@ function tower(w, h) {
   }
   return g;
 }
-// A round bastion with a gun on top that turns to aim, its rock round its foot.
+// A bastion: a destructible turret (js/den/turret.js) in the Empire's pale stone, a crimson band
+// under its battlements and its flag on top, on its rock.
 function bastion(c, r) {
-  const g = new THREE.Group(), st = stone();
-  const body = mesh(new THREE.CylinderGeometry(1.5, 1.8, 3.4, 14), st); body.position.y = 1.5;
-  const band = mesh(new THREE.CylinderGeometry(1.53, 1.53, 0.3, 14), mat(CRIMSON, { roughness: 0.8 })); band.position.y = 2.9;
-  g.add(body, band);
-  for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2, m = mesh(new THREE.BoxGeometry(0.42, 0.45, 0.42), st); m.position.set(Math.cos(a) * 1.35, 3.42, Math.sin(a) * 1.35); m.rotation.y = -a; g.add(m); }
-  const gun = gunMesh(); gun.scale.setScalar(0.9); gun.position.y = 3.2;
-  g.add(gun);
-  const fl = flagpole(1.6, flagMatImperial()); fl.position.set(-0.9, 3.2, 0.9); g.add(fl);
-  g.position.set(seaX(c), 0, seaZ(r));
-  for (let i = 0; i < 3; i++) g.add(rock((Math.random() - 0.5) * 3, 0.2, (Math.random() - 0.5) * 3, 0.8 + Math.random() * 0.5));
-  return { g, gun };
+  const V = turretMesh({ stone: '#d3c9b2', top: 1.5, foot: 1.8, height: 3.4, band: CRIMSON, flag: flagMatImperial(), rocks: 3, merlons: 10 });
+  V.g.position.set(seaX(c), 0, seaZ(r));
+  return V;
 }
 // The wreck: an old ship run onto a sandbar, listing, her masts snapped, ribs showing at her stern.
 export function wreckMesh() {
@@ -99,7 +97,7 @@ export function wreckMesh() {
   return ship;
 }
 function build() {
-  const W = { g: new THREE.Group(), guns: [], rings: [], wreck: null };
+  const W = { g: new THREE.Group(), bastions: [], rings: [], wreck: null };
   // The gatehouse: a tower on each pier, an arch between them high over the gate, battlemented.
   const [p0, p1] = K.PIERS, xa = seaX(p0[0]), xb = seaX(p1[0]), TW = 3.4;
   for (const x of [xa, xb]) {
@@ -125,7 +123,7 @@ function build() {
   }
   for (const x of [xa + TW / 2 + 0.25, xb - TW / 2 - 0.25]) { const w = mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.8, 10), mat('#5b3a20', { map: woodTex })); w.rotation.z = Math.PI / 2; w.position.set(x, 0.9, GATE_Z + 0.3); W.g.add(w); }
   // The bastions and their guns.
-  for (const [c, r] of K.GUNS) { const b = bastion(c, r); W.g.add(b.g); W.guns.push(b.gun); }
+  for (const [c, r] of K.GUNS) { const b = bastion(c, r); W.g.add(b.g); W.bastions.push(b); }
   // The guns' marks: a red ring on the water on each square they're trained on, a little marker
   // buoy at its corner. They flare as a shot comes down on them.
   CHECK.MARKS.forEach((ms, gi) => ms.forEach(([c, r]) => {
@@ -157,40 +155,45 @@ function build() {
 }
 export function checkpointReset() {
   cp.check = new Checkpoint();
-  for (const v of cp.shots) scene.remove(v.ball);
-  cp.shots = [];
+  turretShotsClear();
   cp.byWreck = false;
   sail.wreckSalvage = null;
 }
-const ballGeo = new THREE.SphereGeometry(0.24, 10, 8);
+const GUN_NAME = ['left', 'right'];
+/* A shot of hers came down on the checkpoint (sailing.js, sailFire): on a bastion, a hit on its gun,
+   quietening it a while or, the third, wrecking it; on the gatehouse, only stone. Either way it's a
+   fight now: its guns turn on her (src/den-checkpoint.ts, Checkpoint.shot). */
+export function checkpointShot(hit, at) {
+  const e = cp.check.shot(...hit), b = cp.check.battery;
+  if (!e) return false;
+  const fight = e.first ? ' It\'s a fight now: its guns are on her' : '';
+  if (e.on === 'gatehouse') { toast(`A hit on the gatehouse! Solid stone: aim for the bastions' guns.${fight}`); return true; }
+  const name = GUN_NAME[e.gun] ?? '';
+  if (e.did === 'quiet') toast(`A hit on the ${name} bastion's gun! That's quietened it for a while (${b.guns[e.gun].left()} more to wreck it).${fight}`);
+  else if (e.did === null) toast('A hit on the wrecked bastion!');
+  else {
+    turretWrecked(cp.W.bastions[e.gun], at);   // (its moment: it comes down)
+    toast(b.silenced() ? 'Both its guns are wrecked! The way through the checkpoint is safe' : `The ${name} bastion's gun is wrecked! Its marks are safe now`);
+  }
+  return true;
+}
 // Each tick at sea: its guns fire on their marks when she's on one, the shots come down, and what
 // she's done there is said. Drawn whether she's out or not (it's seen from the den too, far off).
 export function checkpointTick(dt) {
   const W = (cp.W ||= build()), h = sail.helm;
   if (sail.on) {
     for (const e of cp.check.battery.tick(dt, h.spared() ? null : h.now())) {
-      const gun = W.guns[e.gun];
-      if (e.kind === 'fire') {
-        gun.updateMatrixWorld(true);
-        const from = gun.localToWorld(V3(0, 0.3, -0.85));
-        burst(from, '#ffcf6a', 14, 3); burst(from, '#cfc6b8', 10, 1.8);
-        const ball = mesh(ballGeo, mat('#2a2d31', { metalness: 0.6 }));
-        scene.add(ball);
-        cp.shots.push({ to: e.to, t: 0, from, ball });
-        continue;
-      }
-      const i = cp.shots.findIndex((v) => v.to[0] === e.to[0] && v.to[1] === e.to[1]);
-      if (i >= 0) scene.remove(cp.shots.splice(i, 1)[0].ball);
-      const at = V3(seaX(e.to[0]), 0.3, seaZ(e.to[1]));
-      if (!e.hit) { burst(at, '#e6f3f6', 20, 4); burst(at, '#9cc8d4', 10, 2.5); continue; }
+      const where = V3(seaX(e.to[0]), 0, seaZ(e.to[1]));
+      if (e.kind === 'fire') { turretFire(W.bastions[e.gun], e, where); continue; }
+      turretLand(W.bastions[e.gun], e);
+      if (!e.hit) continue;
       h.hit(deckHoleShape());
       cp.check.holed();
-      burst(at.setY(1.1), '#ffb85a', 18, 4); burst(at, '#5a4630', 16, 3.5); burst(at, '#e6f3f6', 10, 3);
-      worldLets.shake = Math.max(shake, 0.45);
-      toast('Hit! That gun had her on its mark: patch her to sail on', true);
+      toast(e.aimed ? 'Hit! She\'s holed: patch her to sail on' : 'Hit! That gun had her on its mark: patch her to sail on', true);
     }
     for (const e of cp.check.watch(h.pose)) {
-      if (e.kind === 'sighted') toast('The imperial checkpoint! Its guns are trained on the red rings: stop on one and she\'s hit. Run it, row it, or go round the long way');
+      if (e.kind === 'sighted') toast('The imperial checkpoint! Its guns are trained on the red rings: stop on one and she\'s hit. Run it, row it, go round the long way, or knock its guns out');
+      else if (e.kind === 'calm') toast('Out of sight of the checkpoint: its guns go back to their marks');
       else toast(throughSay(e));
     }
     const by = canHaulWreck();
@@ -198,25 +201,17 @@ export function checkpointTick(dt) {
     cp.byWreck = by;
   }
   // The shots on their way down; the rings flare under them.
-  for (const v of cp.shots) {
-    v.t += dt;
-    const u = Math.min(1, v.t / CHECK.FLIGHT), to = V3(seaX(v.to[0]), 0.3, seaZ(v.to[1]));
-    v.ball.position.lerpVectors(v.from, to, u);
-    v.ball.position.y += Math.sin(u * Math.PI) * 1.5;
-  }
+  turretShotsTick(dt);
   const t = performance.now() / 1000;
   for (const ring of W.rings) {
-    const live = cp.shots.some((v) => v.to[0] === ring.c && v.to[1] === ring.r);
+    const live = shotComing(ring.c, ring.r);
     ring.m.opacity = live ? 0.6 + 0.35 * Math.sin(t * 20) : 0.32 + 0.08 * Math.sin(t * 2);
   }
-  // Each gun turns to her while she's in sight of the checkpoint, else to its first mark.
+  // Each gun as its turret's rules say (quiet, smoking; wrecked, coming down), turned to her while
+  // she's in sight of the checkpoint, else to its first mark.
   const p = h.now(), near = sail.on && Math.max(Math.abs(p.c - K.GATE), Math.abs(p.r - K.ROW)) <= CHECK.SIGHT + 1;
-  W.guns.forEach((gun, i) => {
-    const [mc, mr] = CHECK.MARKS[i][0], gp = V3(), tx = near ? seaX(p.c) : seaX(mc), tz = near ? seaZ(p.r) : seaZ(mr);
-    gun.getWorldPosition(gp);
-    const want = Math.atan2(-(tx - gp.x), -(tz - gp.z));
-    let d = want - gun.rotation.y;
-    d = Math.atan2(Math.sin(d), Math.cos(d));
-    gun.rotation.y += Math.sign(d) * Math.min(Math.abs(d), dt * 2);
+  W.bastions.forEach((B, i) => {
+    const [mc, mr] = CHECK.MARKS[i][0];
+    turretView(B, cp.check.battery.guns[i], dt, near ? { x: seaX(p.c), z: seaZ(p.r) } : { x: seaX(mc), z: seaZ(mr) });
   });
 }

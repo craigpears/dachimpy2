@@ -306,7 +306,8 @@ moving. It gives such a nostalgia." What's next:
   gun platform), then watch ships moving quickly by and time your shots, "you can shoot, but
   there's no guarantee", since ships are always moving and have far more chances to move or hold
   still than four slots a turn. (A first go is the sloop's two guns firing at the rocks as she
-  sails, and at a turret that fires back: RULES.md. Moving targets, loading her guns by Gunnery, and how a hit tells: to shape with
+  sails, and at the imperial checkpoint's guns, which fire back; loaded by Gunnery on her deck:
+  RULES.md. Moving targets, and how a hit tells: to shape with
   the user.)
 
 ## Smuggling: taxes, embargoes and the back beaches (9 Nov)

@@ -1,5 +1,9 @@
-// The gun tower, and Gunnery on it. (Split out of den.js.)
+// The gun tower, and Gunnery on it; and Gunnery's look, for any board that plays it (the sloop's deck
+// at sea too: js/den/sea-guns.js). The puzzle itself, its rules, is src/gunnery.ts: one copy of it
+// (the user, 10 Nov: "there should be one copy of the gunning puzzle ... there can be a few wrappers
+// with some of the different visual elements around it"). (Split out of den.js.)
 import * as THREE from 'three';
+import { GUNNERY, Gunnery, KINDS, DR, DC, gunSq } from '../gunnery.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { dyeHex } from '../den-look.js';
 import { C, S, k, rand, $, denLook, scene, camera, mat, mesh, canvasTex, woodTex, WOOD, outline, flagpole, pirate, carry, G, raiders, shake, burst, tween, v3, worldLets } from './world.js';
@@ -14,6 +18,7 @@ import { CREW_COLOURS, net, online, guest, isHost, myId, send, say, r2 } from '.
    the board. It's built in three frames laid on the den floor and hauled up and out over the wall
    one after another; you walk out onto it from the wall-walk. On it, Gunnery, kept as close to the
    puzzle as we can, so a Puzzle Pirates hand knows it at a glance.
+   The rules (src/gunnery.ts):
    - A powder barrel in the middle rolls out the stores (powder, wad, shot and buckets), each way
      round in turn, till there are two of each on deck. Use one and another comes out.
    - A store rolls straight on. Blocked (a crate, a gun, the barrel, the gunwale, a pirate standing
@@ -32,16 +37,14 @@ import { CREW_COLOURS, net, online, guest, isHost, myId, send, say, r2 } from '.
      gun. Each new board is tried out (stores rolling with no arrows) so a couple of guns sit on a
      loop of their own and the rest take more work, as on a good Gunnery board. */
 export const GD = {
-  // Gunnery's board: 13 by 13, the barrel in the middle.
-  cols: 13, rows: 13, tick: 0.36, each: 2, emit: 0.7, arrows: 3, crates: 16,
-  // Each gun: the lane square in front of its muzzle, and the way it faces (out). It lies on the
-  // three squares in from there.
-  guns: [{ port: [3, 0], d: 3 }, { port: [9, 0], d: 3 }, { port: [3, 12], d: 1 }, { port: [9, 12], d: 1 }],
+  // Gunnery's board (src/gunnery.ts): 13 by 13, the barrel in the middle; its beat, stores, arrows,
+  // crates and guns.
+  cols: GUNNERY.COLS, rows: GUNNERY.ROWS, tick: GUNNERY.TICK, each: GUNNERY.EACH, emit: GUNNERY.EMIT, arrows: GUNNERY.ARROWS, crates: GUNNERY.CRATES,
+  guns: GUNNERY.GUNS,
   parts: [4, 5, 4],   // the tower's frames, rows in each, from the wall out (more or less: see gunShape)
 };
 export const GUN_FRAME_Z = 0.6;   // the tower's frames are laid on the floor right up against the gate
-const KINDS = ['powder', 'wad', 'shot', 'bucket'];
-const DR = [-1, 0, 1, 0], DC = [0, 1, 0, -1];   // north (out from the wall), east, south, west
+export { gunSq };
 // What each gun shows: its look, the words, and the store it wants next.
 const GUN_SAYS = {
   empty: ['', 'Powder', 'powder'], powder: ['', 'Wad', 'wad'], wad: ['', 'Shot', 'shot'], loaded: ['done', 'Loaded!', ''],
@@ -98,7 +101,11 @@ export const gdCell = (x, z) => {
   return gd.cells.has(k(r, c)) ? [r, c] : null;
 };
 // (The planks' top is 5cm above the height you walk at.)
-const gdAt = (r, c, y = 0) => new THREE.Vector3(gd.x0 + (c + 0.5) * S, ramp.T + 0.05 + y, gd.z0 + (r + 0.5) * S);
+const gdAt = (r, c, y = 0) => gd.at(r, c, y);
+/* A board's look goes on the puzzle (a Gunnery from src/gunnery.ts) as it's played: each board has a
+   `group` it's drawn in and `at(r, c, y)`, the middle of a square in that group. The gun tower's is
+   `gd`; the sloop's deck has another (js/den/sea-guns.js). */
+const bWorld = (b, r, c, y = 0) => b.group.localToWorld(b.at(r, c, y));
 /* Standing on the gun tower, and playing it: walking across it doesn't start Gunnery (the user, 9
    Nov: "you get dragged into puzzles far too easily ... you should have to actively interact with
    something"). Space takes charge of the guns; Esc, or walking off, steps back. */
@@ -111,11 +118,6 @@ export const gundeckLets = {
   get gunOn() { return gunOn; }, set gunOn(v) { gunOn = v; },
 };
 export const onGunDeck = () => gunOn && atGunDeck();
-const isBarrel = (r, c) => gd.barrel[0] === r && gd.barrel[1] === c;
-// A gun's squares, counted in from the gunwale: 0 is the lane in front of its muzzle, where stores
-// go in; it lies on 1-3, muzzle on 1.
-export const gunSq = (g, i) => [g.port[0] - DR[g.d] * i, g.port[1] - DC[g.d] * i];
-const gunMouth = (g) => (g.d + 2) % 4;   // the way an arrow in the lane points to load it
 // Where a gun's carriage sits: run in on its squares, or run out over the lane, its muzzle through
 // the port, swung on the port to aim.
 function gunPos(g) {
@@ -123,9 +125,8 @@ function gunPos(g) {
   const pivot = gdAt(...g.port).add(new THREE.Vector3(DC[g.d], 0, DR[g.d]).multiplyScalar(S * 0.4));
   return gdAt(...gunSq(g, 2)).lerp(pivot.sub(fwd.multiplyScalar(0.3)), g.slide);
 }
-const gunCells = (guns = gd.guns) => new Map(guns.flatMap((g) => [1, 2, 3].map((i) => [k(...gunSq(g, i)), g])));
 // Where you can't walk or chalk: a crate, the barrel, a gun.
-const gdSolid = (r, c) => isBarrel(r, c) || gd.crateSet.has(k(r, c)) || gd.gunSet.has(k(r, c));
+const gdSolid = (r, c) => gd.solid(r, c);
 export function deckBlocks(x, z) {
   if (!gd) return false;
   return [[0, 0], [-1, -1], [1, -1], [-1, 1], [1, 1]].some(([a, b]) => { const cell = gdCell(x + a * 0.17, z + b * 0.17); return cell && gdSolid(...cell); });
@@ -383,23 +384,8 @@ function crateMesh(i) {
   }
   return ink(g, 0.018);
 }
-export function makeGunDeck() {
-  if (gd || !ramp) return;
-  const x0 = gunX0(), z0 = gunZ0(), cells = new Set();
-  for (let r = 0; r < GD.rows; r++) for (let c = 0; c < GD.cols; c++) if (heightAt(x0 + (c + 0.5) * S, z0 + (r + 0.5) * S) > ramp.T - 0.1) cells.add(k(r, c));
-  const group = new THREE.Group();
-  group.userData.scenery = true;
-  den.add(group);
-  gd = { x0, z0, cells, group, stores: [], arrows: new Map(), emitT: 0.4, dirI: 0, tickT: 0, seq: 0, hover: null, pen: 0, press: null, guns: [], crates: [], crateSet: new Set(), crateMeshes: [], crateSig: '' };
-  const nearest = (r, c) => [...cells].map((kk) => kk.split(',').map(Number)).sort((a, b) => Math.hypot(a[0] - r, a[1] - c) - Math.hypot(b[0] - r, b[1] - c))[0];
-  gd.barrel = nearest((GD.rows - 1) / 2, (GD.cols - 1) / 2);
-  // The deck's pieces, all one Gunnery brown.
-  for (const j of ramp.jobs) {
-    if (j.kind !== 'gun') continue;
-    j.frame.group.traverse((m) => { if (m.isMesh && m.material !== frameMat) m.material = deckMat(''); });
-    for (const pc of j.frame.pieces) pc.group.traverse((m) => { if (m.isMesh) m.material = deckMat(pc.info.letter); });
-  }
-  // The powder barrel, on its side in the middle, as on the Gunnery board.
+// The powder barrel, on its side in the middle, as on the Gunnery board.
+function barrelMesh() {
   const bg = new THREE.Group();
   const keg = mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.5, 18), mat('#7a4c28', { map: woodTex }));
   const bulge = mesh(new THREE.SphereGeometry(0.25, 18, 12), mat('#7a4c28', { map: woodTex }));
@@ -414,17 +400,70 @@ export function makeGunDeck() {
   tilt.rotation.y = 0.5;
   tilt.position.y = 0.24;
   bg.add(ink(tilt, 0.02));
-  bg.position.copy(gdAt(...gd.barrel));
-  group.add(bg);
-  for (const { port, d } of GD.guns) {
-    const g = { port, d, state: 'empty', out: false, slide: 0, aim: 0, want: 0, g: gunMesh(), label: document.createElement('div'), sig: '', waitT: 0 };
+  return bg;
+}
+/* Gunnery's look on a board (a Gunnery from src/gunnery.ts, with its `group` and `at`): the barrel,
+   the guns lying across the deck (a label over each, in `labels`), the cursor and the ghost arrow,
+   and the crates once they're set. The gun tower's and her deck's alike. */
+export function dressBoard(b, labels = $('labels')) {
+  Object.assign(b, { tickT: 0, hover: null, pen: 0, press: null, crateMeshes: [], crateSig: '', arrowMeshes: new Map() });
+  const bg = barrelMesh();
+  bg.position.copy(b.at(...b.barrel));
+  b.group.add(bg);
+  for (const g of b.guns) {
+    Object.assign(g, { out: false, slide: 0, aim: 0, want: 0, g: gunMesh(), label: document.createElement('div'), sig: '', waitT: 0 });
     g.g.rotation.y = gunBase(g);
-    g.g.position.copy(gunPos(g));
-    group.add(g.g);
-    $('labels').append(g.label);
-    gd.guns.push(g);
+    g.g.position.copy(b.at(...gunSq(g, 2)));   // (run in: see gunPos)
+    b.group.add(g.g);
+    labels.append(g.label);
   }
-  gd.gunSet = new Set(gunCells().keys());
+  // Where the pointer is on the deck: a ring, and a ghost of the arrow a click would chalk.
+  b.cursor = outline([[0, 0]], 0, '#ffffff');
+  b.cursor.material = new THREE.LineBasicMaterial({ color: '#ffffff' });
+  b.cursor.rotation.x = -Math.PI / 2;
+  b.cursor.visible = false;
+  b.ghost = arrowMesh('#ffd23a', 0.5);
+  b.ghost.visible = false;
+  b.group.add(b.cursor, b.ghost);
+  return b;
+}
+// The gunwale round a board, red with a gold rail as on a Puzzle Pirates ship, open at the gunports;
+// on the side `sill` faces (the tower's back, where it meets the wall-walk) only a low gold sill.
+export function gunwale(b, sill = -1) {
+  const red = towerMat.gunwale, gold = towerMat.rail;
+  const isPort = (r, c, d) => b.guns.some((o) => o.port[0] === r && o.port[1] === c && o.d === d);
+  for (let r = 0; r < GD.rows; r++) for (let c = 0; c < GD.cols; c++) for (let d = 0; d < 4; d++) {
+    if (!b.cells.has(k(r, c)) || b.cells.has(k(r + DR[d], c + DC[d]))) continue;
+    const along = d % 2 === 0, at = b.at(r, c).add(new THREE.Vector3(DC[d] * (S / 2 - 0.05), 0, DR[d] * (S / 2 - 0.05)));
+    const piece = (h, y, m, t) => { const bx = mesh(new THREE.BoxGeometry(along ? S + 0.001 : t, h, along ? t : S + 0.001), m); bx.position.copy(at); bx.position.y += y; b.group.add(bx); };
+    if (d === sill) { piece(0.05, 0.025, gold, 0.1); continue; }
+    if (isPort(r, c, d)) { piece(0.08, 0.04, red, 0.1); continue; }
+    piece(0.34, 0.17, red, 0.1);
+    piece(0.04, 0.36, gold, 0.13);
+  }
+}
+export function makeGunDeck() {
+  if (gd || !ramp) return;
+  const x0 = gunX0(), z0 = gunZ0(), cells = new Set();
+  for (let r = 0; r < GD.rows; r++) for (let c = 0; c < GD.cols; c++) if (heightAt(x0 + (c + 0.5) * S, z0 + (r + 0.5) * S) > ramp.T - 0.1) cells.add(k(r, c));
+  const group = new THREE.Group();
+  group.userData.scenery = true;
+  den.add(group);
+  // The puzzle (src/gunnery.ts), dressed as the tower.
+  gd = Object.assign(new Gunnery(cells), {
+    x0, z0, group,
+    at: (r, c, y = 0) => new THREE.Vector3(x0 + (c + 0.5) * S, ramp.T + 0.05 + y, z0 + (r + 0.5) * S),
+    bodies: () => gdBodies(),
+    said: towerSaid,
+  });
+  // The deck's pieces, all one Gunnery brown.
+  for (const j of ramp.jobs) {
+    if (j.kind !== 'gun') continue;
+    j.frame.group.traverse((m) => { if (m.isMesh && m.material !== frameMat) m.material = deckMat(''); });
+    for (const pc of j.frame.pieces) pc.group.traverse((m) => { if (m.isMesh) m.material = deckMat(pc.info.letter); });
+  }
+  dressBoard(gd);
+  for (const g of gd.guns) g.g.position.copy(gunPos(g));
   // Legs down to the ground outside, under the tower's front and sides, braced across.
   const legM = mat('#4f321b', { map: woodTex }), w = GD.cols * S, dz = GD.rows * S;
   for (const [x, z] of [[0.2, 0.2], [w / 2, 0.2], [w - 0.2, 0.2], [0.2, dz / 2], [w - 0.2, dz / 2]]) {
@@ -438,106 +477,23 @@ export function makeGunDeck() {
     brace.rotation.z = Math.atan2(ramp.T * 0.6, bx - ax);
     group.add(brace);
   }
-  // The gunwale round the three open sides, red with a gold rail as on a Puzzle Pirates ship, open
-  // at the gunports; a low sill along the back where it meets the wall-walk.
-  const red = towerMat.gunwale, gold = towerMat.rail;
-  const isPort = (r, c, d) => GD.guns.some((o) => o.port[0] === r && o.port[1] === c && o.d === d);
-  for (let r = 0; r < GD.rows; r++) for (let c = 0; c < GD.cols; c++) for (let d = 0; d < 4; d++) {
-    if (!cells.has(k(r, c)) || cells.has(k(r + DR[d], c + DC[d]))) continue;
-    const along = d % 2 === 0, at = gdAt(r, c).add(new THREE.Vector3(DC[d] * (S / 2 - 0.05), 0, DR[d] * (S / 2 - 0.05)));
-    const piece = (h, y, m, t) => { const b = mesh(new THREE.BoxGeometry(along ? S + 0.001 : t, h, along ? t : S + 0.001), m); b.position.copy(at); b.position.y += y; group.add(b); };
-    if (d === 2) { piece(0.05, 0.025, gold, 0.1); continue; }
-    if (isPort(r, c, d)) { piece(0.08, 0.04, red, 0.1); continue; }
-    piece(0.34, 0.17, red, 0.1);
-    piece(0.04, 0.36, gold, 0.13);
-  }
+  // The gunwale round the three open sides; a low sill along the back where it meets the wall-walk.
+  gunwale(gd, 2);
   // Your Jolly Rogers on its two outer corners.
   for (const x of [x0 + 0.12, x0 + w - 0.12]) {
     const fp = flagpole(2.2);
     fp.position.set(x, ramp.T + 0.05, z0 + 0.12);
     group.add(fp);
   }
-  // Where the pointer is on the deck: a ring, and a ghost of the arrow a click would chalk.
-  gd.cursor = outline([[0, 0]], 0, '#ffffff');
-  gd.cursor.material = new THREE.LineBasicMaterial({ color: '#ffffff' });
-  gd.cursor.rotation.x = -Math.PI / 2;
-  gd.cursor.visible = false;
-  gd.ghost = arrowMesh('#ffd23a', 0.5);
-  gd.ghost.visible = false;
-  group.add(gd.cursor, gd.ghost);
-  if (!guest()) setCrates(pickCrates());
+  if (!guest()) setCrates(gd, gd.pickCrates());
 }
-/* How stores roll on a board with no arrows: from every square and heading, follow the rules till
-   it repeats. A gun is on a loop when some loop rolls a store past the square where it goes in (one
-   arrow there then loads it, time after time). */
-export function loopsOf(blocked) {
-  const next = (r, c, d) => {
-    for (const t of [0, 1, 3, 2]) { const nd = (d + t) % 4; if (!blocked(r + DR[nd], c + DC[nd])) return [r + DR[nd], c + DC[nd], nd]; }
-    return [r, c, d];
-  };
-  const loops = [], done = new Set();
-  for (const kk of gd.cells) {
-    const [r0, c0] = kk.split(',').map(Number);
-    if (blocked(r0, c0)) continue;
-    for (let d0 = 0; d0 < 4; d0++) {
-      let st = [r0, c0, d0];
-      const path = new Map();
-      while (!done.has(st.join()) && !path.has(st.join())) { path.set(st.join(), path.size); st = next(...st); }
-      if (!done.has(st.join())) {
-        const from = path.get(st.join()), loop = [...path.keys()].slice(from).map((s) => s.split(',').map(Number));
-        loops.push({ len: loop.length, cells: new Set(loop.map(([r, c]) => k(r, c))) });
-      }
-      for (const s of path.keys()) done.add(s);
-    }
-  }
-  return loops;
-}
-// Lash the crates about the deck: none round the barrel in the middle, more out towards the edges;
-// none on a gun or where stores go into one, none side by side, and none walling off any of it.
-// Of the boards tried, the one closest to a good Gunnery board: two guns on a loop of their own.
-function pickCrates() {
-  const [br, bc] = gd.barrel, guns = gunCells();
-  const ban = new Set();
-  for (const g of gd.guns) for (let i = 0; i <= 4; i++) ban.add(k(...gunSq(g, i)));
-  const cand = [...gd.cells].filter((kk) => {
-    const [r, c] = kk.split(',').map(Number);
-    return !ban.has(kk) && c > 0 && c < GD.cols - 1 && Math.max(Math.abs(r - br), Math.abs(c - bc)) > 2;
-  });
-  // Weighted towards the edges.
-  const weight = (kk) => { const [r, c] = kk.split(',').map(Number); return 1 + Math.max(Math.abs(r - br) / (GD.rows / 2), Math.abs(c - bc) / (GD.cols / 2)) * 3; };
-  let best = null, bestScore = -Infinity;
-  for (let t = 0; t < 160; t++) {
-    const pick = new Set(), pool = cand.slice();
-    while (pick.size < GD.crates && pool.length) {
-      let x = Math.random() * pool.reduce((a, kk) => a + weight(kk), 0), i = 0;
-      while ((x -= weight(pool[i])) > 0 && i < pool.length - 1) i++;
-      const kk = pool.splice(i, 1)[0], [r, c] = kk.split(',').map(Number);
-      if (![0, 1, 2, 3].some((d) => pick.has(k(r + DR[d], c + DC[d])))) pick.add(kk);
-    }
-    const blocked = (r, c) => !gd.cells.has(k(r, c)) || pick.has(k(r, c)) || guns.has(k(r, c)) || (r === br && c === bc);
-    // Everything still joined up.
-    const open = [...gd.cells].filter((kk) => !blocked(...kk.split(',').map(Number)));
-    const seen = new Set([open[0]]), todo = [open[0]];
-    while (todo.length) {
-      const [r, c] = todo.pop().split(',').map(Number);
-      for (let d = 0; d < 4; d++) { const n = k(r + DR[d], c + DC[d]); if (!blocked(r + DR[d], c + DC[d]) && !seen.has(n)) { seen.add(n); todo.push(n); } }
-    }
-    if (seen.size !== open.length) continue;
-    // Which guns sit on a short loop of their own, with no arrows down.
-    const loops = loopsOf(blocked).filter((l) => l.len <= 30);
-    const onLoop = gd.guns.filter((g) => loops.some((l) => l.cells.has(k(...gunSq(g, 0))))).length;
-    const score = -Math.abs(onLoop - 2) * 10 + Math.random();
-    if (score > bestScore) { bestScore = score; best = pick; }
-    if (onLoop === 2 && t > 20) break;
-  }
-  return [...(best || [])].map((kk) => kk.split(',').map(Number));
-}
-function setCrates(list) {
-  gd.crateMeshes.forEach((m) => gd.group.remove(m));
-  gd.crates = list;
-  gd.crateSig = JSON.stringify(list);
-  gd.crateSet = new Set(list.map(([r, c]) => k(r, c)));
-  gd.crateMeshes = list.map(([r, c], i) => { const m = crateMesh(i); m.position.copy(gdAt(r, c)); gd.group.add(m); return m; });
+// How stores roll on the tower with no arrows (src/gunnery.ts, Gunnery.loopsOf).
+export const loopsOf = (blocked) => gd.loopsOf(blocked);
+export function setCrates(b, list) {
+  b.crateMeshes.forEach((m) => b.group.remove(m));
+  b.setCrates(list);
+  b.crateSig = JSON.stringify(list);
+  b.crateMeshes = list.map(([r, c], i) => { const m = crateMesh(i); m.position.copy(b.at(r, c)); b.group.add(m); return m; });
 }
 // Squares with a pirate standing on them: a body's an obstacle too.
 function gdBodies() {
@@ -546,88 +502,39 @@ function gdBodies() {
   if (online()) for (const mt of net.crew.values()) add(mt.tx ?? 0, mt.tz ?? 0, mt.th ?? 0);
   return out;
 }
-const storeAt = (r, c) => gd.stores.some((o) => o.r === r && o.c === c);
-export function gunTick() {
-  const bodies = gdBodies();
-  // (A gun run out lies across its lane.)
-  const blocked = (r, c) => !gd.cells.has(k(r, c)) || gdSolid(r, c) || bodies.has(k(r, c)) || gd.guns.some((g) => g.slide > 0.05 && g.port[0] === r && g.port[1] === c);
-  // Where each store wants to go.
-  const want = gd.stores.map((s) => {
-    const a = gd.arrows.get(k(s.r, s.c));
-    if (a) {
-      s.dir = a.dir;
-      // Into a gun: only off an arrow in its lane pointing into the muzzle.
-      const g = gd.guns.find((o) => k(...gunSq(o, 0)) === k(s.r, s.c) && a.dir === gunMouth(o));
-      if (g && g.state !== 'loaded') return { d: a.dir, r: s.r + DR[a.dir], c: s.c + DC[a.dir], gun: g };
-    }
-    for (const t of [0, 1, 3, 2]) {
-      const d = (s.dir + t) % 4, r = s.r + DR[d], c = s.c + DC[d];
-      if (!blocked(r, c)) return { d, r, c };
-    }
-    return null;
-  });
-  // Two that would meet, or swap places, both turn back; one rolling into a store that's staying
-  // put turns back too.
-  const back = new Set();
-  for (let i = 0; i < want.length; i++) for (let j = i + 1; j < want.length; j++) {
-    const a = want[i], b = want[j], s = gd.stores[i], o = gd.stores[j];
-    if (!a || !b) continue;
-    if ((a.r === b.r && a.c === b.c) || (a.r === o.r && a.c === o.c && b.r === s.r && b.c === s.c)) { back.add(i); back.add(j); }
+const storeAt = (r, c) => gd.storeAt(r, c);
+// A beat of the puzzle on a board (src/gunnery.ts, Gunnery.tick), and what it looks like: stores
+// rolled into a gun go in at its muzzle, it shows what's in it, new ones roll out of the barrel.
+export function gunTick(b = gd) {
+  for (const g of b.guns) g.inLane = g.slide > 0.05;   // (a gun run out lies across its lane)
+  const beat = b.tick(b.bodies?.());
+  for (const { gun, was } of beat.loads) {
+    burst(bWorld(b, ...gunSq(gun, 1), 0.45), gun.state === 'empty' ? '#9fd0ff' : gun.state === 'fouled' ? '#ff7a5c' : '#f0d9a8', 8, 2);
+    b.said?.(gun, was);
   }
-  for (let pass = 0; pass < 4; pass++) gd.stores.forEach((s, i) => {
-    const w = want[i];
-    if (!w || back.has(i)) return;
-    const j = gd.stores.findIndex((o) => o.r === w.r && o.c === w.c);
-    if (j >= 0 && (!want[j] || back.has(j))) back.add(i);
-  });
-  const gone = [];
-  gd.stores.forEach((s, i) => {
-    s.pr = s.r; s.pc = s.c; s.bump = null;
-    const w = want[i];
-    if (!w) return;
-    // Turned back: it bumps up against what's there and bounces off, rather than stopping dead.
-    if (back.has(i)) { s.bump = w.d; s.bumpA = gd.stores.some((o) => o.r === w.r && o.c === w.c) ? 0.12 : 0.34; s.dir = (w.d + 2) % 4; return; }
-    s.r = w.r; s.c = w.c; s.dir = w.d;
-    if (w.gun) { loadGun(w.gun, s.kind); gone.push(s); }
-  });
-  for (const s of gone) dropStore(s, true);
-  // The barrel rolls out another of whatever's short, each way round in turn.
-  gd.emitT -= GD.tick;
-  const short = KINDS.filter((kd) => gd.stores.filter((s) => s.kind === kd).length < GD.each);
-  if (gd.emitT <= 0 && short.length) {
-    for (let t = 0; t < 4; t++) {
-      const d = gd.dirI++ % 4, r = gd.barrel[0] + DR[d], c = gd.barrel[1] + DC[d];
-      if (blocked(r, c) || storeAt(r, c)) continue;
-      addStore(++gd.seq, short[rand(short.length)], r, c, d, gd.barrel[0], gd.barrel[1]);
-      gd.emitT = GD.emit;
-      break;
-    }
-  }
+  for (const s of beat.gone) dropStore(b, s, true);
+  for (const s of beat.added) showStore(b, s);
 }
-export function addStore(id, kind, r, c, dir, pr = r, pc = c) {
-  const m = storeMesh(kind);
-  m.position.copy(gdAt(pr, pc));
-  gd.group.add(m);
-  const s = { id, kind, r, c, dir, pr, pc, m, spin: 0 };
-  gd.stores.push(s);
-  return s;
-}
-function dropStore(s, roll = false) {
-  gd.stores.splice(gd.stores.indexOf(s), 1);
-  if (!roll) { gd.group.remove(s.m); return; }
-  // Roll on into the gun's muzzle before it goes.
-  const from = gdAt(s.pr, s.pc), to = gdAt(s.r, s.c, 0.2), grp = gd.group;
-  tween(GD.tick, (u) => { s.m.position.lerpVectors(from, to, u); s.m.scale.setScalar(1 - 0.7 * u); }, () => grp.remove(s.m));
-}
-function loadGun(g, kind) {
-  const next = { empty: 'powder', powder: 'wad', wad: 'shot' }[g.state];
-  const was = g.state;
-  if (kind === 'bucket') g.state = 'empty';
-  else if (kind === next) g.state = kind === 'shot' ? 'loaded' : kind;
-  else g.state = 'fouled';
-  burst(gdAt(...gunSq(g, 1), 0.45), kind === 'bucket' ? '#9fd0ff' : g.state === 'fouled' ? '#ff7a5c' : '#f0d9a8', 8, 2);
+// What the tower says as a gun's loaded or fouled (to the crew too).
+function towerSaid(g, was) {
   if (g.state === 'fouled' && was !== 'fouled') say('A gun\'s fouled! Roll a bucket into it', false, true);
   if (g.state === 'loaded') { g.waitT = 0.9; say('Loaded!'); }
+}
+// A store on the tower's board (a crewmate's game, say: gunIn), and its look.
+export function addStore(id, kind, r, c, dir, pr = r, pc = c) { return showStore(gd, gd.addStore(id, kind, r, c, dir, pr, pc)); }
+function showStore(b, s) {
+  const m = storeMesh(s.kind);
+  m.position.copy(b.at(s.pr, s.pc));
+  b.group.add(m);
+  return Object.assign(s, { m, spin: 0 });
+}
+function dropStore(b, s, roll = false) {
+  const i = b.stores.indexOf(s);
+  if (i >= 0) b.stores.splice(i, 1);
+  if (!roll) { b.group.remove(s.m); return; }
+  // Roll on into the gun's muzzle before it goes.
+  const from = b.at(s.pr, s.pc), to = b.at(s.r, s.c, 0.2), grp = b.group;
+  tween(GD.tick, (u) => { s.m.position.lerpVectors(from, to, u); s.m.scale.setScalar(1 - 0.7 * u); }, () => grp.remove(s.m));
 }
 // A loaded gun swings on its carriage to aim, anywhere in an arc round the way it faces, and
 // fires by itself: at the raiders at the wall first, then those coming in, then their cannon.
@@ -665,7 +572,7 @@ function gunTarget(g, taken = new Set()) {
 export function fireGun(i, tx, tz, atCannon) {
   const g = gd.guns[i];
   if (isHost()) send('all', { t: 'gfire', i, x: r2(tx), z: r2(tz), cn: atCannon ? 1 : 0 });
-  g.state = 'dirty';
+  gd.fired(g);
   // Out of its own muzzle, pointed at the target; the recoil brings it back in.
   g.aim = gunSwing(g, tx, tz) ?? g.aim;
   g.slide = 1;
@@ -721,12 +628,25 @@ export function updateGunDeck(dt) {
       fireGun(i, t.x, t.z, t.cannon);
     });
   } else gd.tickT = Math.min(1, gd.tickT + dt / GD.tick);
-  const u = Math.min(1, gd.tickT);
-  for (const s of gd.stores) {
+  drawBoard(gd, dt, gd.hover && onGunDeck() && !carry);
+  for (const g of gd.guns) {
+    // Hauled out slowly by the crew, then swung onto its target; the recoil throws it back in fast,
+    // and it's swung back square to be loaded again.
+    g.slide = g.out ? Math.min(1, g.slide + dt * 1.6) : Math.max(0, g.slide - dt * 5);
+    const want = !g.out ? 0 : g.slide > 0.95 ? g.want ?? 0 : g.aim, rate = g.out ? 1.6 : 3;
+    g.aim += Math.max(-dt * rate, Math.min(dt * rate, want - g.aim));
+    g.g.rotation.y = gunBase(g) + g.aim;
+    g.g.position.copy(gunPos(g));
+  }
+}
+// A board's stores rolling between beats, what's in its guns, and the cursor where you point.
+export function drawBoard(b, dt, pointing) {
+  const u = Math.min(1, b.tickT);
+  for (const s of b.stores) {
     const was = s.m.position.clone();
-    s.m.position.lerpVectors(gdAt(s.pr, s.pc), gdAt(s.r, s.c), u);
+    s.m.position.lerpVectors(b.at(s.pr, s.pc), b.at(s.r, s.c), u);
     // A bump: up against the store in the way, and back.
-    if (s.bump != null) { const b = Math.sin(u * Math.PI) * (s.bumpA ?? 0.2) * S; s.m.position.x += DC[s.bump] * b; s.m.position.z += DR[s.bump] * b; }
+    if (s.bump != null) { const bb = Math.sin(u * Math.PI) * (s.bumpA ?? 0.2) * S; s.m.position.x += DC[s.bump] * bb; s.m.position.z += DR[s.bump] * bb; }
     // It swings round to its new way smoothly, not in a snap.
     const face = s.bump != null && u < 0.5 ? s.bump : s.dir;
     s.yaw = s.yaw == null ? -face * Math.PI / 2 : s.yaw + wrapA(-face * Math.PI / 2 - s.yaw) * Math.min(1, dt * 14);
@@ -736,36 +656,28 @@ export function updateGunDeck(dt) {
     if (s.kind === 'shot') body.rotation.x -= moved / 0.2;
     else body.rotation.z = Math.sin((s.spin += moved * 9)) * 0.08;
   }
-  for (const g of gd.guns) {
-    gunLoad(g, dt);
-    // Hauled out slowly by the crew, then swung onto its target; the recoil throws it back in fast,
-    // and it's swung back square to be loaded again.
-    g.slide = g.out ? Math.min(1, g.slide + dt * 1.6) : Math.max(0, g.slide - dt * 5);
-    const want = !g.out ? 0 : g.slide > 0.95 ? g.want ?? 0 : g.aim, rate = g.out ? 1.6 : 3;
-    g.aim += Math.max(-dt * rate, Math.min(dt * rate, want - g.aim));
-    g.g.rotation.y = gunBase(g) + g.aim;
-    g.g.position.copy(gunPos(g));
-  }
-  gd.cursor.visible = gd.ghost.visible = false;
-  if (gd.hover && onGunDeck() && !carry) {
-    const [r, c] = gd.hover, at = gdAt(r, c, 0.03), a = gd.arrows.get(k(r, c));
-    if (canChalk(r, c)) {
-      gd.cursor.position.set(at.x - S / 2, at.y, at.z - S / 2);
-      gd.cursor.visible = true;
-      if (!a) { gd.ghost.position.copy(at); gd.ghost.rotation.y = -gd.pen * Math.PI / 2; gd.ghost.visible = true; }
+  for (const g of b.guns) gunLoad(g, dt);
+  b.cursor.visible = b.ghost.visible = false;
+  if (pointing && b.hover) {
+    const [r, c] = b.hover, at = b.at(r, c, 0.03), a = b.arrows.get(k(r, c));
+    if (b.canChalk(r, c)) {
+      b.cursor.position.set(at.x - S / 2, at.y, at.z - S / 2);
+      b.cursor.visible = true;
+      if (!a) { b.ghost.position.copy(at); b.ghost.rotation.y = -b.pen * Math.PI / 2; b.ghost.visible = true; }
     }
   }
+}
+// What a gun's label says: what it wants next ([class, html]).
+export function gunSays(g) {
+  const [cls, text, want] = GUN_SAYS[g.state];
+  return [`label gun ${cls}`, want ? `<small>${g.state === 'fouled' ? 'Fouled! needs' : g.state === 'dirty' ? 'Fired: needs' : 'needs'}</small>${STORE_ICON[want]}${STORE_NAME[want]}` : text];
 }
 // Labels over the guns: what each wants next.
 export function gunLabels() {
   if (!gd) return;
   for (const g of gd.guns) {
-    const [cls, text, want] = GUN_SAYS[g.state], sig = cls + text;
-    if (g.sig !== sig) {
-      g.sig = sig;
-      g.label.className = `label gun ${cls}`;
-      g.label.innerHTML = want ? `<small>${g.state === 'fouled' ? 'Fouled! needs' : g.state === 'dirty' ? 'Fired: needs' : 'needs'}</small>${STORE_ICON[want]}${STORE_NAME[want]}` : text;
-    }
+    const [cls, html] = gunSays(g), sig = cls + html;
+    if (g.sig !== sig) { g.sig = sig; g.label.className = cls; g.label.innerHTML = html; }
     // Out over its gunport, so it doesn't hide what's in the barrel.
     v3.copy(gdAt(...g.port, 0.5));
     v3.x += DC[g.d] * S * 1.1; v3.z += DR[g.d] * S * 1.1;
@@ -775,28 +687,37 @@ export function gunLabels() {
     g.label.style.display = v3.z > 1 || pirate.h < 1 ? 'none' : '';   // only once you're up on the wall
   }
 }
-// Chalking: an arrow on a plank, pointing one of the four ways. Chalk where one is and it turns
-// to point your way; chalk the same way again and it's rubbed out.
-export const myArrows = (by = myId()) => [...gd.arrows.values()].filter((a) => a.by === by);
-const canChalk = (r, c) => gd.cells.has(k(r, c)) && !gdSolid(r, c);
+// Chalking: an arrow on a plank, pointing one of the four ways (src/gunnery.ts, Gunnery.chalk).
+export const myArrows = (by = myId(), b = gd) => b.myArrows(by);
 export function chalk(r, c, dir, by = myId()) {
-  if (!gd || !canChalk(r, c)) return false;
+  if (!gd || !gd.canChalk(r, c)) return false;
   if (guest() && by === myId()) { send('host', { t: 'chalk', r, c, dir }); return true; }
-  const kk = k(r, c), old = gd.arrows.get(kk);
-  if (old) { gd.group.remove(old.m); gd.arrows.delete(kk); if (dir < 0 || (old.dir === dir && old.by === by)) return true; }
-  if (dir < 0) return true;
-  const mine = myArrows(by).sort((a, b) => a.t - b.t);
-  while (mine.length >= GD.arrows) { const o = mine.shift(); gd.group.remove(o.m); gd.arrows.delete(k(o.r, o.c)); }
-  putArrow(r, c, dir, by);
+  gd.chalk(r, c, dir, by, performance.now());
+  syncArrows(gd);
   return true;
 }
-function putArrow(r, c, dir, by, t = performance.now()) {
+// Chalking on any board: the tower's goes by chalk (it's shared with the crew).
+export function chalkOn(b, r, c, dir) {
+  if (b === gd) return chalk(r, c, dir);
+  if (!b.chalk(r, c, dir, myId(), performance.now())) return false;
+  syncArrows(b);
+  return true;
+}
+// A board's arrows drawn as they are in its puzzle.
+function syncArrows(b) {
+  for (const [kk, v] of b.arrowMeshes) {
+    const a = b.arrows.get(kk);
+    if (!a || a.dir !== v.dir || a.by !== v.by) { b.group.remove(v.m); b.arrowMeshes.delete(kk); }
+  }
+  for (const [kk, a] of b.arrows) if (!b.arrowMeshes.has(kk)) putArrow(b, a.r, a.c, a.dir, a.by);
+}
+function putArrow(b, r, c, dir, by) {
   const ci = by === myId() ? -1 : net.crew.get(by)?.ci ?? -1;
   const m = arrowMesh(ci >= 0 ? CREW_COLOURS[ci] : '#ffd23a');
-  m.position.copy(gdAt(r, c, 0.02));
+  m.position.copy(b.at(r, c, 0.02));
   m.rotation.y = -dir * Math.PI / 2;
-  gd.group.add(m);
-  gd.arrows.set(k(r, c), { r, c, dir, by, t, m });
+  b.group.add(m);
+  b.arrowMeshes.set(k(r, c), { dir, by, m });
 }
 const facing = () => {
   const ry = pirate.g.rotation.y, fx = Math.sin(ry), fz = Math.cos(ry);
@@ -817,32 +738,32 @@ export function turnArrowAhead(t) {
 /* The mouse, as in Gunnery: click a plank to chalk an arrow pointing the way the ghost arrow shows
    (the wheel turns it), or drag from the plank the way you want it to point. Click an arrow to turn
    it a quarter clockwise; the wheel over one turns it too. Right-click rubs one out. */
-function screenDir(r, c, dx, dy) {
-  const p0 = gdAt(r, c).project(camera);
+function screenDir(b, r, c, dx, dy) {
+  const p0 = bWorld(b, r, c).project(camera);
   let best = 0, bd = -Infinity;
   for (let d = 0; d < 4; d++) {
-    const p = gdAt(r + DR[d], c + DC[d]).project(camera), sx = p.x - p0.x, sy = p0.y - p.y, n = Math.hypot(sx, sy) || 1;
+    const p = bWorld(b, r + DR[d], c + DC[d]).project(camera), sx = p.x - p0.x, sy = p0.y - p.y, n = Math.hypot(sx, sy) || 1;
     const dot = (sx * dx + sy * dy) / n;
     if (dot > bd) { bd = dot; best = d; }
   }
   return best;
 }
-export function chalkRelease(x, y) {
-  const pr = gd.press;
-  gd.press = null;
+export function chalkRelease(x, y, b = gd) {
+  const pr = b.press;
+  b.press = null;
   if (!pr) return;
-  const dx = x - pr.x, dy = y - pr.y, old = gd.arrows.get(k(pr.r, pr.c));
+  const dx = x - pr.x, dy = y - pr.y, old = b.arrows.get(k(pr.r, pr.c));
   let dir;
-  if (Math.hypot(dx, dy) > 14) dir = screenDir(pr.r, pr.c, dx, dy);
-  else dir = old ? (old.dir + 1) % 4 : gd.pen;
+  if (Math.hypot(dx, dy) > 14) dir = screenDir(b, pr.r, pr.c, dx, dy);
+  else dir = old ? (old.dir + 1) % 4 : b.pen;
   if (old && old.dir === dir) return;
-  gd.pen = dir;
-  if (!chalk(pr.r, pr.c, dir)) worldLets.shake = 0.15;
+  b.pen = dir;
+  if (!chalkOn(b, pr.r, pr.c, dir)) worldLets.shake = 0.15;
 }
-export function wheelDeck(step) {
-  gd.pen = (gd.pen + step + 4) % 4;
-  const a = gd.hover && gd.arrows.get(k(...gd.hover));
-  if (a) { chalk(a.r, a.c, (a.dir + step + 4) % 4); gd.pen = (a.dir + step + 4) % 4; }
+export function wheelDeck(step, b = gd) {
+  b.pen = (b.pen + step + 4) % 4;
+  const a = b.hover && b.arrows.get(k(...b.hover));
+  if (a) { chalkOn(b, a.r, a.c, (a.dir + step + 4) % 4); b.pen = (a.dir + step + 4) % 4; }
 }
 export const gunOut = () => gd && {
   s: gd.stores.map((s) => [s.id, KINDS.indexOf(s.kind), s.r, s.c, s.dir]),
@@ -852,7 +773,7 @@ export const gunOut = () => gd && {
 };
 export function gunIn(d) {
   if (!d || !gd) return;
-  if (d.cr && JSON.stringify(d.cr) !== gd.crateSig) setCrates(d.cr);
+  if (d.cr && JSON.stringify(d.cr) !== gd.crateSig) setCrates(gd, d.cr);
   const seen = new Set(), stepped = new Set();
   for (const [id, ki, r, c, dir] of d.s) {
     seen.add(id);
@@ -868,12 +789,9 @@ export function gunIn(d) {
     gd.tickT = 0;
     for (const s of gd.stores) if (!stepped.has(s)) { s.pr = s.r; s.pc = s.c; s.bump = null; }
   }
-  for (const s of gd.stores.slice()) if (!seen.has(s.id)) { s.pr = s.r; s.pc = s.c; dropStore(s, true); }
+  for (const s of gd.stores.slice()) if (!seen.has(s.id)) { s.pr = s.r; s.pc = s.c; dropStore(gd, s, true); }
   d.g.forEach(([st, out, want], i) => { const g = gd.guns[i]; if (g) { g.state = st; g.out = !!out; g.want = want || 0; } });
-  const want = new Map(d.a.map(([r, c, dir, by]) => [k(r, c), { r, c, dir, by }]));
-  for (const [kk, a] of gd.arrows) {
-    const w = want.get(kk);
-    if (!w || w.dir !== a.dir || w.by !== a.by) { gd.group.remove(a.m); gd.arrows.delete(kk); }
-  }
-  for (const [kk, w] of want) if (!gd.arrows.has(kk)) putArrow(w.r, w.c, w.dir, w.by);
+  const was = gd.arrows;
+  gd.arrows = new Map(d.a.map(([r, c, dir, by]) => [k(r, c), { r, c, dir, by, t: was.get(k(r, c))?.t ?? performance.now() }]));
+  syncArrows(gd);
 }

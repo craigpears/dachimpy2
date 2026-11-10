@@ -51,10 +51,9 @@ export const SAIL = {
     WAKE: 0.5,
     /** Rocks on the board: clumps of one to three squares. */
     CLUMPS: 13,
-    /** Her guns, one each side (see Guns): how many squares a shot carries, and the seconds to load
-        again after firing. */
+    /** Her guns, one each side (see broadside; loaded by Gunnery: src/den-guns.ts): how many squares
+        a shot carries. */
     RANGE: 3,
-    RELOAD: 3,
     /** Seconds a square of trade wind takes to sweep her along: "just insanely quick wind tiles". */
     PUSH: 0.28,
     /** The lock: moves' worth of Bilge to raise her (see Helm.pump), and seconds it takes to drain
@@ -69,19 +68,11 @@ export const SAIL = {
     /** Seconds the gates take to swing open once the lock's full (or drained), before she sails on
         through them. */
     GATES: 0.8,
-    /** The turret: how far it reaches (squares, any way), seconds between shots, how long a shot is
-        in the air (time to get out from under it), and how long a hit from her guns quiets it. */
-    TURRET_RANGE: 3,
-    TURRET_RELOAD: 4,
-    FLIGHT: 1.4,
-    QUIET: 10,
-    /** Seconds the turret holds fire once she's patched, so she can get going (the user, 9 Nov: "as
-        soon as you finish the puzzle, the cannon starts shooting at you again ... literally before
-        you can do anything about it"). */
+    /** Seconds the guns that shoot at her (the checkpoint's: src/den-checkpoint.ts) hold fire once
+        she's patched, so she can get going (the user, 9 Nov, of the turret that was: "as soon as you
+        finish the puzzle, the cannon starts shooting at you again ... literally before you can do
+        anything about it"). */
     GRACE: 5,
-    /** Hits from her guns that wreck the turret for good (each one short of it quiets it QUIET
-        seconds; the user, 9 Nov: "it obviously needs to be destructible"). */
-    WRECK: 3,
     /** The hole a hit knocks in her deck when nothing says what shape (den.js makes a fresh one each
         hit): three pieces' worth, patched by Carpentry (src/den-patch.ts). */
     HOLE: [[0, 1], [0, 2], [1, 0], [1, 1], [1, 2], [1, 3], [2, 0], [2, 1], [2, 2], [2, 3], [3, 1], [3, 2], [3, 3], [4, 2], [4, 3]],
@@ -90,29 +81,30 @@ export const SAIL = {
    you've got a fork in the road ... some kind of a lock and canal ... if you want to switch from one
    route to the other one, you know, there's a bit of a cliff. You have to go up a lock").
 
-   A trade wind runs out from near the mooring (A) and drops her at a junction, "just like a normal
-   square", to choose: right onto the wind that sweeps her across (B) and round back in towards the
-   cove (C), a loop; left along a canal to a lock in a cliff, up into a hidden cove behind it; or on
-   out to open sea. Rocks stand along the lanes' sides, and a turret on a rock between them shoots
-   at her. */
+   Rebuilt round the imperial checkpoint (the user, 10 Nov: "there's no need for that cannon near
+   the turret near the den now, because ... we've got the Imperial checkpoint. That's the evolution
+   of it"): a trade wind runs out from off the beach and drops her at a junction, "just like a
+   normal square", to choose: on, the main shipping lane out to the checkpoint, which drops her
+   short of its guns; or left along a canal to a lock in a cliff, up into a hidden cove behind it
+   (the side adventure). Another trade wind runs back home from by where the main lane drops her.
+   Rocks stand along the lanes' sides. */
 export const LAY = {
-    /** The trade winds: where each starts, the way it blows, and how many squares long. The last is
-        the main shipping lane, on out from the junction to the imperial checkpoint: it drops her off
-        just out of reach of its guns, facing its gate (see CHECKPOINT). */
+    /** The trade winds: where each starts, the way it blows, and how many squares long. Out from off
+        the beach to the junction; on from the junction, the main shipping lane, out to the imperial
+        checkpoint, dropping her off just out of reach of its guns, facing its gate (see CHECKPOINT);
+        and back home, from beside where the main lane drops her to just off the beach. */
     LANES: [
         { at: [9, 2], d: 0, n: 8 },
-        { at: [10, 11], d: 1, n: 3 },
-        { at: [13, 11], d: 2, n: 9 },
         { at: [9, 11], d: 0, n: 4 },
+        { at: [11, 15], d: 2, n: 13 },
     ],
     JUNCTION: [9, 10],
     CANAL: [[8, 11], [7, 11], [6, 11]],
     LOCK: [5, 11],
     /** The hidden cove: up behind the cliff, its water a lock's lift above the sea. */
     COVE: { c0: 0, c1: 4, r0: 9, r1: 13 },
-    TURRET: [11, 6],
     /** Rocks along the lanes' sides ("some craziness to the journey"). */
-    SIDES: [[8, 5], [10, 8], [12, 4], [14, 8], [11, 13]],
+    SIDES: [[8, 5], [10, 8], [12, 4], [14, 8], [12, 12]],
     /** The imperial checkpoint (10 Nov), across the main shipping lane: a line across the sea at ROW,
         closed but for its gate (GATE, under a gatehouse whose PIERS stand either side) and the far end
         of its reef. Its guns stand on bastions either side (GUNS), each trained on squares of the way
@@ -184,11 +176,10 @@ export class Sea {
     rocks = new Set();
     /** The trade winds: the way each lane square blows (see LAY). */
     wind = new Map();
-    /** The cliff round the hidden cove (rocks too), the cove's water, the lock, the turret's rock. */
+    /** The cliff round the hidden cove (rocks too), the cove's water, the lock. */
     cliff = new Set();
     cove = new Set();
     lock = null;
-    turret = null;
     junction = null;
     /** The squares built on (the checkpoint's piers and bastions, its headland) and the wreck's:
         rocks to sail by, drawn by their own 3D rather than as sea stacks. */
@@ -221,7 +212,7 @@ export class Sea {
                 this.wind.set(key(x, y), d);
                 near(x, y);
             }
-        for (const [c, r] of [LAY.JUNCTION, [LAY.JUNCTION[0], LAY.JUNCTION[1] + 1], ...LAY.CANAL, LAY.TURRET])
+        for (const [c, r] of [LAY.JUNCTION, [LAY.JUNCTION[0], LAY.JUNCTION[1] + 1], ...LAY.CANAL])
             near(c, r);
         const { c0, c1, r0, r1 } = LAY.COVE;
         for (let c = c0; c <= c1; c++)
@@ -239,7 +230,6 @@ export class Sea {
             for (let r = r0 - 2; r <= r1; r++)
                 this.keep.add(key(c, r));
         this.lock = [...LAY.LOCK];
-        this.turret = [...LAY.TURRET];
         this.junction = [...LAY.JUNCTION];
         // The checkpoint, its headland and the wreck beyond it (all outside where the rocks scatter).
         for (const [c, r] of [...checkpointWorks(), LAY.WRECK])
@@ -249,7 +239,7 @@ export class Sea {
     scatter(roll) {
         const laid = this.wind.size > 0, K = LAY.CHECKPOINT;
         const reef = laid ? Array.from({ length: K.REEF.c1 - K.REEF.c0 + 1 }, (_, i) => key(K.REEF.c0 + i, K.ROW)) : [];
-        this.rocks = new Set([...this.cliff, ...this.works, ...reef, ...[...LAY.SIDES, ...LAY.FAR].filter(() => laid).map(([c, r]) => key(c, r)), ...(this.turret ? [key(...this.turret)] : [])]);
+        this.rocks = new Set([...this.cliff, ...this.works, ...reef, ...[...LAY.SIDES, ...LAY.FAR].filter(() => laid).map(([c, r]) => key(c, r))]);
         const H = SAIL.HOME, COLS = SAIL.SCATTER.COLS, ROWS = SAIL.SCATTER.ROWS;
         for (let n = 0; n < SAIL.CLUMPS; n++) {
             let c = Math.floor(roll() * COLS), r = 2 + Math.floor(roll() * (ROWS - 2));
@@ -509,18 +499,6 @@ export class Sea {
     }
     /** Just where the pin lands (see pinFor). */
     pinAt(c, r, from = SAIL.HOME) { return this.pinFor(c, r, from)?.at ?? null; }
-    /** Where the chest floats free of a wreck at `at` (the turret's rock): the nearest square of open
-        sea beside it, off the lanes, that she can sail to (nearer the cove first). */
-    chestAt(at) {
-        const near = [];
-        for (let c = 0; c < this.cols; c++)
-            for (let r = 0; r < this.rows; r++) {
-                if (this.open(c, r) && this.windAt(c, r) === undefined && !this.level(c, r) && !this.isLock(c, r))
-                    near.push([c, r]);
-            }
-        near.sort((a, b) => Math.hypot(a[0] - at[0], a[1] - at[1]) - Math.hypot(b[0] - at[0], b[1] - at[1]) || a[1] - b[1] || a[0] - b[0]);
-        return near.find(([c, r]) => this.plot(SAIL.HOME, c, r, null, true)) ?? null;
-    }
     allReachable() {
         const H = SAIL.HOME;
         if (!this.open(H.c, H.r))
@@ -596,7 +574,7 @@ export class Helm {
     hole = null;
     /** Seconds till the lock's gates are open, after it's filled or drained. */
     gates = 0;
-    /** Seconds the turret still holds fire after she's patched (SAIL.GRACE). */
+    /** Seconds the guns that shoot at her still hold fire after she's patched (SAIL.GRACE). */
     grace = 0;
     /** Her oars out (she's rowed by the port-and-starboard board, any way, whatever the wind) or
         shipped (she sails, by the wind). */
@@ -726,9 +704,9 @@ export class Helm {
     idle() { return this.slot < 0 && !this.next().length; }
     /** Holed, and the hole not yet patched. */
     dazed() { return !!this.hole && !this.hole.done(); }
-    /** Hit (by the turret, say): a hole in her deck, and she's dazed till it's patched. She finishes
-        the move she's on (or the trade wind's ride), then waits. (A hit while she's holed already
-        does nothing more: the turret holds fire then anyway.) */
+    /** Hit (by the checkpoint's guns, say): a hole in her deck, and she's dazed till it's patched. She
+        finishes the move she's on (or the trade wind's ride), then waits. (A hit while she's holed
+        already does nothing more: the guns hold fire then anyway.) */
     hit(cells = SAIL.HOLE) { if (!this.dazed()) {
         this.hole = new DeckHole(cells);
         this.grace = SAIL.GRACE;
@@ -788,7 +766,7 @@ export class Helm {
         // The wind drops, picks up and shifts as it will.
         if (this.sea.breeze)
             out.push(...this.sea.breeze.tick(dt));
-        // Holed, the turret's grace waits for the patch; then it runs down.
+        // Holed, the guns' grace waits for the patch; then it runs down.
         this.grace = this.dazed() ? SAIL.GRACE : Math.max(0, this.grace - dt);
         // The lock's water rising to what's been pumped in; full, the top gates swing open.
         if (this.fill > this.level + 1e-9) {
@@ -915,64 +893,6 @@ export class Helm {
         out.push({ kind: 'move', i: this.slot, m, from: { ...this.pose }, to: { ...to }, bump, irons: !!irons, secs });
     }
 }
-export class Turret {
-    at;
-    /** Seconds till it can fire again, and till it's over being hit. */
-    wait = 1;
-    quiet = 0;
-    /** Shots in the air: where each comes down, and when. */
-    shots = [];
-    /** Hits from her guns so far; wrecked, silent for good, at SAIL.WRECK. */
-    hits = 0;
-    wrecked = false;
-    /** The square where a chest floats free of the wreck. Nothing's won by sailing over it: it's to
-        be hauled up by puzzle (the user, 9 Nov: "you need to have to haul it up ... You need
-        puzzles"), Treasure Haul, not wired in yet. */
-    chest = null;
-    constructor(at) {
-        this.at = at;
-    }
-    /** Within its reach (squares, any way). */
-    reaches(c, r) { return Math.max(Math.abs(c - this.at[0]), Math.abs(r - this.at[1])) <= SAIL.TURRET_RANGE; }
-    /** Hit by her guns: quiet for a while or, the SAIL.WRECK-th hit, wrecked, and a chest floats free
-        of it (on the open water by it in `sea`). What the hit did (null if it's a wreck already). */
-    hit(sea) {
-        if (this.wrecked)
-            return null;
-        if (++this.hits < SAIL.WRECK) {
-            this.quiet = SAIL.QUIET;
-            return 'quiet';
-        }
-        this.wrecked = true;
-        this.quiet = 0;
-        this.chest = sea ? sea.chestAt(this.at) : null;
-        return 'wrecked';
-    }
-    /** `ship`: where she is now (Helm.now), or null when it shouldn't shoot at her (she's not out,
-        or Helm.spared: dazed, at the lock, or just patched). A wreck never fires (its last shots in
-        the air still come down). */
-    tick(dt, ship) {
-        const out = [];
-        this.quiet = Math.max(0, this.quiet - dt);
-        this.wait = Math.max(0, this.wait - dt);
-        for (const s of this.shots)
-            s.t -= dt;
-        for (const s of this.shots.filter((x) => x.t <= 1e-9)) {
-            const hit = !!ship && Math.round(ship.c) === s.to[0] && Math.round(ship.r) === s.to[1];
-            out.push({ kind: 'land', to: s.to, hit });
-        }
-        this.shots = this.shots.filter((x) => x.t > 1e-9);
-        if (ship && !this.wrecked && this.quiet <= 0 && this.wait <= 0) {
-            const to = [Math.round(ship.c), Math.round(ship.r)];
-            if (this.reaches(...to)) {
-                this.shots.push({ to, t: SAIL.FLIGHT });
-                this.wait = SAIL.TURRET_RELOAD;
-                out.push({ kind: 'fire', to });
-            }
-        }
-        return out;
-    }
-}
 /** A shot out of that side from where she is now (see Helm.now: mid-move counts from the square
     and heading she's nearest): the squares it passes over, and the rock it hits, if any. */
 export function broadside(sea, at, side) {
@@ -985,21 +905,4 @@ export function broadside(sea, at, side) {
             return { cells, hit: [c, r] };
     }
     return { cells, hit: null };
-}
-/** Her two guns: loaded, or loading again after a shot. */
-export class Guns {
-    /** Seconds till each is loaded again (0: loaded). */
-    wait = { L: 0, R: 0 };
-    ready(side) { return this.wait[side] <= 1e-9; }
-    /** Fire it, if it's loaded. */
-    fire(side) {
-        if (!this.ready(side))
-            return false;
-        this.wait[side] = SAIL.RELOAD;
-        return true;
-    }
-    /** How loaded it is, 0 just fired to 1 ready. */
-    loaded(side) { return 1 - Math.max(0, this.wait[side]) / SAIL.RELOAD; }
-    tick(dt) { for (const k of ['L', 'R'])
-        this.wait[k] = Math.max(0, this.wait[k] - dt); }
 }

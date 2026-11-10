@@ -25,11 +25,17 @@
    Out of reach of its guns she's safe, so you can stop short and build your combo. Or go round the
    long way, past the reef's end, out of reach the whole way.
 
-   Its guns can't be wrecked, nor quieted: a sloop's guns don't trouble an imperial bastion. They're
-   what the choice of ways through is about (RULES.md, "Every other way through costs a puzzle"), so
-   shooting them down mustn't be a way through that costs no puzzle, nor end the choice for good. */
+   And its guns can be knocked out, "just the same as" the turret that was (the user, 10 Nov:
+   "everything should be destructive"): a hit from her guns on a gun's bastion quietens that gun a
+   while, and the third wrecks it for good. A wrecked gun fires on its marks no more, so with both
+   wrecked the way through is safe. But it costs a puzzle, as every way through does (RULES.md,
+   "Every other way through costs a puzzle"): her guns are loaded by Gunnery (src/den-guns.ts). And
+   it's a fight: once she's fired on the checkpoint, its guns fire on her square too, wherever she
+   is within their reach, as the turret did, the shot in the air a while so a ship under way is
+   often gone from under it. That lasts till she's out of its sight. */
 
 import { LAY, type Sea } from './den-sail.js';
+import { Turret } from './den-turret.js';
 
 export const CHECK = {
   /** Seconds a shot takes to come down on a mark (the guns are trained on them: no long flight).
@@ -43,49 +49,74 @@ export const CHECK = {
   MARKS: [[[9, 17], [9, 21]], [[9, 19]]] as [number, number][][],
   /** How near (squares, any way) of the gate she comes before it's pointed out. */
   SIGHT: 4,
+  /** Once she's fired on it: how far a gun reaches to fire on her square (squares, any way), how
+      long that shot's in the air (time to get out from under it, as the turret's was), and the
+      seconds it takes that gun to load again after one. (Each gun's a destructible turret,
+      src/den-turret.ts, set up with these.) */
+  REACH: 3,
+  AIMED: 1.4,
+  AIMED_RELOAD: 4,
+  /** A hit from her guns quietens a gun this many seconds; this many hits wreck it for good. */
+  QUIET: 10,
+  WRECK: 3,
 };
 
-/** A shot from one of its guns (by number): fired on a mark, or coming down on it. */
-export type GunEvent = { kind: 'fire'; gun: number; to: [number, number] } | { kind: 'land'; gun: number; to: [number, number]; hit: boolean };
+/** A shot from one of its guns (by number): fired on a mark, or on her square once she's fired on
+    it (`aimed`), and how long it's in the air; or coming down. */
+export type GunEvent =
+  | { kind: 'fire'; gun: number; to: [number, number]; aimed: boolean; secs: number }
+  | { kind: 'land'; gun: number; to: [number, number]; hit: boolean; aimed: boolean };
+
+/** What a shot of hers did on the checkpoint: hit one of its guns (quietened it, wrecked it, or it
+    was a wreck already), or only the gatehouse's stone. `first`: the first she's fired on it since
+    she came in sight of it (it's a fight now). */
+export type ShotAt = ({ on: 'gun'; gun: number; did: 'quiet' | 'wrecked' | null } | { on: 'gatehouse' }) & { first: boolean };
 
 /** What she's done at the checkpoint: sighted it, or got to the other side of it (through its gate,
     or round its reef's end, the long way), out or back, and how many times she was holed doing it. */
 export type CheckEvent =
   | { kind: 'sighted' }
-  | { kind: 'through'; how: 'gate' | 'round'; back: boolean; hits: number };
+  | { kind: 'through'; how: 'gate' | 'round'; back: boolean; hits: number }
+  /** Out of its sight after she'd fired on it: its guns go back to their marks. */
+  | { kind: 'calm' };
 
-const same = (a: [number, number], b: [number, number]) => a[0] === b[0] && a[1] === b[1];
-
-/** The checkpoint's guns. */
+/** The checkpoint's guns: a destructible turret (src/den-turret.ts) on each bastion, trained on its
+    marks, and only firing on her square once she's fired on it. */
 export class Battery {
-  /** Seconds till each gun's loaded. */
-  wait: number[] = LAY.CHECKPOINT.GUNS.map(() => 0);
-  /** Shots on their way down. */
-  shots: { gun: number; to: [number, number]; t: number }[] = [];
+  readonly guns: Turret[] = LAY.CHECKPOINT.GUNS.map((at, g) => new Turret({
+    at, marks: CHECK.MARKS[g], alert: false, reach: CHECK.REACH,
+    flight: CHECK.AIMED, reload: CHECK.AIMED_RELOAD, markFlight: CHECK.FLIGHT, markReload: CHECK.RELOAD,
+    quiet: CHECK.QUIET, wreck: CHECK.WRECK,
+  }));
+
+  /** She's fired on it: its guns fire on her square too, wherever she's in their reach. */
+  get roused(): boolean { return this.guns.some((t) => t.roused); }
+  set roused(on: boolean) { for (const t of this.guns) t.roused = on; }
+  get hits(): number[] { return this.guns.map((t) => t.hits); }
+  get quiet(): number[] { return this.guns.map((t) => t.quiet); }
+  get wrecked(): boolean[] { return this.guns.map((t) => t.wrecked); }
 
   /** The gun trained on this square, if one is. */
-  gunFor(c: number, r: number): number {
-    return CHECK.MARKS.findIndex((ms) => ms.some((m) => m[0] === c && m[1] === r));
+  gunFor(c: number, r: number): number { return this.guns.findIndex((t) => t.trained(c, r)); }
+  /** The gun whose bastion stands on this square, if one does. */
+  gunAt(c: number, r: number): number { return this.guns.findIndex((t) => t.at[0] === c && t.at[1] === r); }
+  /** Within gun g's reach (squares, any way). */
+  reaches(g: number, c: number, r: number): boolean { return this.guns[g].reaches(c, r); }
+  /** Gun g can fire: not wrecked, nor quietened by a hit. */
+  live(g: number): boolean { return this.guns[g].live(); }
+  /** Every gun wrecked: the way through is safe. */
+  silenced(): boolean { return this.guns.every((t) => t.wrecked); }
+  /** Gun g hit by her guns (see Turret.hit): it's a fight now, for all of them. */
+  hit(g: number): 'quiet' | 'wrecked' | null {
+    this.roused = true;
+    return this.guns[g].hit();
   }
 
   /** `ship`: where she is now (Helm.now), or null when it shouldn't fire on her (she's not out, or
-      Helm.spared: dazed, or just patched). Shots in the air still come down. */
+      Helm.spared: dazed, or just patched). Each gun fires on her when she's on one of its marks;
+      and, once roused, anywhere in its reach. Shots in the air still come down, a wreck's too. */
   tick(dt: number, ship: { c: number; r: number } | null): GunEvent[] {
-    const out: GunEvent[] = [];
-    this.wait = this.wait.map((w) => Math.max(0, w - dt));
-    const at: [number, number] | null = ship ? [Math.round(ship.c), Math.round(ship.r)] : null;
-    for (const s of this.shots) s.t -= dt;
-    for (const s of this.shots.filter((x) => x.t <= 1e-9)) out.push({ kind: 'land', gun: s.gun, to: s.to, hit: !!at && same(at, s.to) });
-    this.shots = this.shots.filter((x) => x.t > 1e-9);
-    if (at) {
-      const g = this.gunFor(...at);
-      if (g >= 0 && this.wait[g] <= 1e-9) {
-        this.wait[g] = CHECK.RELOAD;
-        this.shots.push({ gun: g, to: at, t: CHECK.FLIGHT });
-        out.push({ kind: 'fire', gun: g, to: at });
-      }
-    }
-    return out;
+    return this.guns.flatMap((t, gun) => t.tick(dt, ship).map((e) => ({ ...e, gun })));
   }
 }
 
@@ -102,12 +133,27 @@ export class Checkpoint {
   /** Holed by one of its guns. */
   holed() { this.hits++; }
 
+  /** A shot of hers came down on (c, r): on a gun's bastion, a hit on that gun; on the gatehouse,
+      only stone. Either way it's a fight now (see Battery.roused). Null if it isn't the
+      checkpoint's. */
+  shot(c: number, r: number): ShotAt | null {
+    const K = LAY.CHECKPOINT, g = this.battery.gunAt(c, r);
+    const gate = K.PIERS.some(([pc, pr]) => pc === c && pr === r);
+    if (g < 0 && !gate) return null;
+    const first = !this.battery.roused;
+    this.battery.roused = true;
+    return g >= 0 ? { on: 'gun', gun: g, did: this.battery.hit(g), first } : { on: 'gatehouse', first };
+  }
+
   /** Her square now (Helm.pose, after each tick): whether she's sighted it, or got through. */
   watch(p: { c: number; r: number }): CheckEvent[] {
     const out: CheckEvent[] = [], K = LAY.CHECKPOINT;
     const near = Math.max(Math.abs(p.c - K.GATE), Math.abs(p.r - K.ROW));
     if (!this.sighted && near <= CHECK.SIGHT) { this.sighted = true; out.push({ kind: 'sighted' }); }
-    if (near > CHECK.SIGHT + 1) this.hits = 0;
+    if (near > CHECK.SIGHT + 1) {
+      this.hits = 0;
+      if (this.battery.roused) { this.battery.roused = false; out.push({ kind: 'calm' }); }
+    }
     // Through once she's past every mark (so "not a scratch on her" is so), crossing the line at the
     // gate or round the reef's end.
     if (p.r === K.ROW) this.crossed = p.c;
@@ -122,7 +168,7 @@ export class Checkpoint {
   }
 }
 
-/** Whether a square is the checkpoint's (its piers, its bastions): her shots do it no harm. */
+/** Whether a square is the checkpoint's (its piers, its bastions). */
 export function isCheckpoint(sea: Sea, c: number, r: number): boolean {
   const K = LAY.CHECKPOINT;
   return sea.works.has(`${c},${r}`) && r === K.ROW && c >= K.GUNS[0][0] && c <= K.GUNS[K.GUNS.length - 1][0];

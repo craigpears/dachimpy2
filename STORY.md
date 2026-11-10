@@ -101,13 +101,15 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    right, past rocks, the beach coming up as you land (▶ a first go is built: once the siege is
    over there's an old sloop at anchor in the cove; board her, drop a pin and she sails there on
    Battle Navigation's moves, or steer her yourself; she has a gun each side to fire at the rocks
-   as you go; trade winds sweep her out to a junction, a canal leads to a lock you pump up by
-   Bilge into a hidden cove behind a cliff, and a turret's hits hole her till you patch her by
-   Carpentry; three hits from her guns wreck it, and its chest is hauled up by Treasure Haul; on
-   from the junction the main shipping lane runs to an imperial checkpoint, its guns trained on
-   marks along the way through: run it under sail, row it (small clears walk her into the guns, a
-   Vegas on each side rushes her past), or go round the long way, to an old wreck beyond it whose
-   treasure is hauled up by Treasure Haul; the crane over its headland and a bribe come later).
+   as you go, loaded by Gunnery played on her deck, the den's own puzzle; trade winds sweep her
+   out from off the beach to a junction, where a canal leads off to a lock you pump up by Bilge
+   into a hidden cove behind a cliff, and on, the main shipping lane, to an imperial checkpoint,
+   another wind bringing her home; its guns are trained on marks along the way through, a hit
+   holes her till you patch her by Carpentry: run it under sail, row it (small clears walk her
+   into the guns, a Vegas on each side rushes her past), go round the long way, or knock its guns
+   out with her own, three hits apiece, a fight once you start it; beyond it an old wreck whose
+   treasure is hauled up by Treasure Haul; the crane over its headland and a bribe come later.
+   The turret near the den that came first is gone: the checkpoint is "the evolution of it").
    The cove is the first step of a journey that grows (▶ its next step is built): at the foot of
    its left-hand cliff there's an old smugglers' ledge, and a crane you build there by Carpentry,
    foot, post and jib, hauls her up the cliff and swings her down into a clifftop lagoon, a

@@ -29,11 +29,15 @@
     body.sailing .toolbox, body.sailing .boards, body.sailing .keys, body.sailing .intro, body.sailing .gunhelp, body.sailing #labels, body.sailing .banner { display: none; }
     body.sailing.patching .toolbox { display: flex; }   /* patching her deck: the same tray as ashore, a bit bigger */
     body.sailing.patching .tool { width: 84px; height: 86px; font-size: 13px; }
-    body.sailing.patching .sailhud, body.sailing.quay .sailhud, body.hauling .sailhud, body.sailing.rowing .sailhud { display: none; }   /* (nothing but the puzzle while you patch her, bilge at the lock, haul, or row) */
+    body.sailing.patching .sailhud, body.sailing.quay .sailhud, body.hauling .sailhud, body.sailing.rowing .sailhud, body.sailing.gunnery .sailhud { display: none; }   /* (nothing but the puzzle while you patch her, bilge at the lock, haul, row or load her guns) */
+    body.sailing.gunnery .gunhelp { display: block; }   /* (the stores' key, as on the gun tower) */
     .sailhud .turns { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; align-items: center; }
     .sailhud .gun { position: relative; overflow: hidden; height: 34px; padding: 0 10px; border-radius: 6px; border: 1px solid #6b4e32; background: #2a1c11; display: flex; gap: 6px; align-items: center; font: 700 14px 'Alegreya Sans'; color: var(--dim); }
     .sailhud .gun.ready { color: #f3ecdc; border-color: var(--gold); }
     .sailhud .gun i { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--gold); }
+    .sailhud .gun .pips { display: flex; gap: 3px; margin-left: 2px; }
+    .sailhud .gun .pip { width: 9px; height: 9px; border-radius: 50%; border: 1px solid #6b4e32; background: #3b2a1b; }
+    .sailhud .gun .pip.on { background: var(--gold); border-color: #fff3c4; }
     .sailhud .gun kbd { font: 700 13px 'Alegreya Sans'; color: var(--ink); background: #3b2a1b; border: 1px solid #6b4e32; border-radius: 4px; padding: 0 5px; }
     /* The wind (an arrow the way it blows, and how strong) and the oars (a button: O). */
     .sailhud .wind { height: 34px; padding: 0 10px 0 6px; border-radius: 6px; border: 1px solid #6b4e32; background: #2a1c11; display: flex; gap: 6px; align-items: center; font: 700 14px 'Alegreya Sans'; color: #f3ecdc; white-space: nowrap; }

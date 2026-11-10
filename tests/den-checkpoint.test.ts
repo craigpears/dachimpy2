@@ -1,7 +1,7 @@
 /* The imperial checkpoint (src/den-checkpoint.ts), on the sloop's sea (src/den-sail.ts). */
 import { describe, expect, it } from 'vitest';
 import { CHECK, Checkpoint, isCheckpoint, throughSay, type CheckEvent } from '../src/den-checkpoint';
-import { LAY, SAIL, Sea, Helm, Turret, type Move, type Pose } from '../src/den-sail';
+import { LAY, SAIL, Sea, Helm, broadside, type Move, type Pose } from '../src/den-sail';
 import { Wind } from '../src/den-wind';
 import { Salvage } from '../src/den-haul';
 import { carp } from './helpers';
@@ -35,10 +35,11 @@ function run(h: Helm, cp: Checkpoint, secs: number, { patch = true, each }: { pa
 const rowing = (sea = new Sea(9), pose = SHORT) => { const h = new Helm(sea, pose); h.row(true); return h; };
 
 describe('the lay: the main shipping lane runs out to an imperial checkpoint (10 Nov)', () => {
-  it('the board grew, and everything that was there is where it was', () => {
+  it('the board grew, and the near sea is as it was rebuilt round the checkpoint', () => {
     expect([SAIL.COLS, SAIL.ROWS]).toEqual([22, 26]);
-    // The rocks of the sea as it was (seed 9: the den's), the same as before it grew.
-    const was = ['0,8', '1,8', '10,8', '11,13', '11,6', '12,4', '14,8', '15,10', '15,9', '2,8', '3,8', '4,8', '5,10', '5,12', '5,13', '5,8', '5,9', '8,5'];
+    // The rocks of the near sea (seed 9: the den's): as before it grew, less the turret's rock, and
+    // as the lanes were laid again round the checkpoint (10 Nov).
+    const was = ['0,8', '1,8', '10,8', '12,12', '12,4', '14,10', '14,8', '14,9', '15,10', '15,9', '2,8', '3,8', '4,8', '5,10', '5,12', '5,13', '5,8', '5,9', '8,5'];
     const s = new Sea(9), old = [...s.rocks].filter((k) => { const [c, r] = k.split(',').map(Number); return c < 16 && r < 14; }).sort();
     expect(old).toEqual(was.sort());
   });
@@ -117,7 +118,7 @@ describe('"get through the Imperial checkpoint by doing slow row and then fast r
     const r = run(h, cp, 3, { patch: false });
     expect(r.hits).toBe(1);
     expect(h.dazed()).toBe(true);
-    // Dazed, then patched, its guns hold fire a while so she can get going (as the turret's do).
+    // Dazed, then patched, its guns hold fire a while so she can get going (as the turret's did).
     expect(run(h, cp, 10, { patch: false }).fired).toBe(0);
   });
 });
@@ -175,10 +176,126 @@ describe('the wreck beyond it, hauled up by Treasure Haul', () => {
     expect(s.open(wc, wr)).toBe(false);
     expect(s.works.has(`${wc},${wr}`)).toBe(true);
     const cp = new Checkpoint();
-    for (let c = wc - 1; c <= wc + 1; c++) for (let r = wr - 1; r <= wr + 1; r++) expect(cp.battery.gunFor(c, r)).toBe(-1);
-    // (out of reach of the old turret too)
-    expect(new Turret(LAY.TURRET).reaches(wc, wr)).toBe(false);
+    for (let c = wc - 1; c <= wc + 1; c++) for (let r = wr - 1; r <= wr + 1; r++) {
+      expect(cp.battery.gunFor(c, r)).toBe(-1);
+      // (and out of their reach once they're firing on her, too)
+      for (let g = 0; g < K.GUNS.length; g++) expect(cp.battery.reaches(g, c, r)).toBe(false);
+    }
     const h = new Helm(s, { c: wc + 1, r: wr, d: 0 });
     expect(new Salvage([wc, wr]).canStart(h)).toBe(true);
+  });
+});
+
+/** A broadside of hers from (c, r) facing d, and where it comes down on the checkpoint, if it does. */
+const fireOn = (s: Sea, cp: Checkpoint, c: number, r: number, d: number, side: 'L' | 'R') => {
+  const shot = broadside(s, { c, r, a: d }, side);
+  return shot.hit ? cp.shot(...shot.hit) : null;
+};
+
+describe('"just the same as the other one": its guns can be wrecked (10 Nov)', () => {
+  // The user: the checkpoint's guns should be "just the same as the other one" (the turret): a hit
+  // quietens a gun a while and the third wrecks it, "everything should be destructive". And it's a
+  // fight: once she's fired on it, its guns fire on her too.
+  const [g0c, g0r] = K.GUNS[0];
+
+  it('her guns can reach a bastion: sailing across its gun\'s column, her broadside comes down on it', () => {
+    const s = new Sea(9), cp = new Checkpoint();
+    // Facing right on the near side, three squares short: port fires out to sea, up the gun's column.
+    expect(fireOn(s, cp, g0c, g0r - 2, 1, 'L')).toEqual({ on: 'gun', gun: 0, did: 'quiet', first: true });
+    // Facing right from beyond it, starboard fires back in at it.
+    expect(fireOn(s, cp, g0c, g0r + 2, 1, 'R')).toEqual({ on: 'gun', gun: 0, did: 'quiet', first: false });
+    // A pier's only stone.
+    expect(fireOn(s, cp, K.PIERS[1][0], K.ROW - 1, 1, 'L')).toEqual({ on: 'gatehouse', first: false });
+    expect(cp.shot(5, 5)).toBeNull();
+  });
+
+  it('a hit quietens a gun ten seconds; the third wrecks it, and it never fires on its marks again', () => {
+    const b = new Checkpoint().battery, mark = CHECK.MARKS[1][0];
+    expect(b.hit(1)).toBe('quiet');
+    expect(b.tick(CHECK.QUIET - 0.1, { c: mark[0], r: mark[1] }).some((e) => e.kind === 'fire' && e.gun === 1)).toBe(false);
+    expect(b.tick(0.2, { c: mark[0], r: mark[1] })).toContainEqual({ kind: 'fire', gun: 1, to: mark, aimed: false, secs: CHECK.FLIGHT });
+    expect([CHECK.QUIET, CHECK.WRECK]).toEqual([10, 3]);
+    expect(b.hit(1)).toBe('quiet');
+    expect(b.hit(1)).toBe('wrecked');
+    expect(b.wrecked[1]).toBe(true);
+    // Its last shot in the air still comes down, but it never fires again.
+    const ev = b.tick(60, { c: mark[0], r: mark[1] });
+    expect(ev.some((e) => e.kind === 'land' && e.gun === 1)).toBe(true);
+    expect(b.tick(60, { c: mark[0], r: mark[1] }).some((e) => e.kind === 'fire' && e.gun === 1)).toBe(false);
+    expect(b.hit(1)).toBeNull();
+    // (each is a destructible turret: src/den-turret.ts)
+    expect(b.guns[1].wrecked).toBe(true);
+  });
+
+  it('with both its guns wrecked, the way through is safe, a square at a time', () => {
+    const cp = new Checkpoint(), h = rowing();
+    for (let g = 0; g < K.GUNS.length; g++) for (let i = 0; i < CHECK.WRECK; i++) cp.battery.hit(g);
+    expect(cp.battery.silenced()).toBe(true);
+    const r = run(h, cp, 40, { each: () => { if (!h.strokes.length && h.slot < 0 && h.pose.r < 23) h.stroke(['F']); } });
+    expect(r.fired).toBe(0);
+    expect(r.said).toContainEqual({ kind: 'through', how: 'gate', back: false, hits: 0 });
+  });
+
+  it('once she\'s fired on it, its guns fire on her square wherever she\'s in their reach, the shot a while coming down', () => {
+    const s = new Sea(9), cp = new Checkpoint(), b = cp.battery, near = { c: g0c, r: g0r - 2 };
+    // Not before: off its marks, it leaves her be.
+    expect(b.tick(5, near).some((e) => e.kind === 'fire')).toBe(false);
+    fireOn(s, cp, g0c + 1, g0r - 3, 1, 'L');   // (on stone, a pier: it's a fight all the same)
+    expect(b.roused).toBe(true);
+    const fired = b.tick(0.1, near);
+    expect(fired).toContainEqual({ kind: 'fire', gun: 0, to: [near.c, near.r], aimed: true, secs: CHECK.AIMED });
+    // Still there when it comes down, she's hit; gone, it splashes down.
+    expect(b.tick(CHECK.AIMED - 0.2, near).some((e) => e.kind === 'land')).toBe(false);
+    expect(b.tick(0.2, near)).toContainEqual({ kind: 'land', gun: 0, to: [near.c, near.r], hit: true, aimed: true });
+    b.tick(CHECK.AIMED_RELOAD, near);
+    expect(b.tick(CHECK.AIMED, { c: near.c - 1, r: near.r })).toContainEqual({ kind: 'land', gun: 0, to: [near.c, near.r], hit: false, aimed: true });
+    // Out of its reach, it holds fire.
+    const far = { c: g0c, r: g0r - CHECK.REACH - 1 };
+    b.tick(10, far);
+    expect(b.tick(10, far).some((e) => e.kind === 'fire')).toBe(false);
+  });
+
+  it('a gun knocked quiet, or wrecked, doesn\'t fire on her either', () => {
+    const cp = new Checkpoint(), b = cp.battery, near = { c: g0c, r: g0r - 1 };
+    cp.shot(g0c, g0r);
+    expect(b.tick(CHECK.QUIET - 0.1, near).some((e) => e.kind === 'fire' && e.gun === 0)).toBe(false);
+    expect(b.tick(0.2, near).some((e) => e.kind === 'fire' && e.gun === 0)).toBe(true);
+    cp.shot(g0c, g0r); cp.shot(g0c, g0r);
+    expect(b.tick(60, near).some((e) => e.kind === 'fire' && e.gun === 0)).toBe(false);
+  });
+
+  it('the turret fired again the moment she was patched (9 Nov): its guns hold fire a while once she is', () => {
+    // "As soon as you finish the puzzle, the cannon starts shooting at you again ... literally
+    // before you can do anything about it." So the checkpoint's guns, firing on her as the turret
+    // did, hold fire a while once she's patched.
+    const s = new Sea(9), cp = new Checkpoint(), h = new Helm(s, { c: g0c, r: g0r - 2, d: 1 });
+    cp.battery.roused = true;
+    h.hit();
+    const r = run(h, cp, 20, { patch: false });
+    expect(r.fired).toBe(0);   // dazed: no shots
+    fill(h.hole!);
+    expect(run(h, cp, SAIL.GRACE - 0.2, { patch: false }).fired).toBe(0);
+    expect(run(h, cp, 0.4, { patch: false }).fired).toBeGreaterThan(0);   // (she's still in reach)
+  });
+
+  it('it calms down once she\'s out of its sight, and its guns go back to their marks', () => {
+    const cp = new Checkpoint();
+    cp.watch({ c: K.GATE, r: 16 });
+    cp.shot(...K.PIERS[0]);
+    expect(cp.watch({ c: K.GATE, r: 14 })).toEqual([]);
+    expect(cp.battery.roused).toBe(true);
+    expect(cp.watch({ c: K.GATE, r: 12 })).toEqual([{ kind: 'calm' }]);
+    expect(cp.battery.roused).toBe(false);
+    // (what's wrecked stays wrecked)
+    for (let i = 0; i < CHECK.WRECK; i++) cp.shot(...K.GUNS[1]);
+    cp.watch({ c: K.GATE, r: 12 });
+    expect(cp.battery.wrecked).toEqual([false, true]);
+  });
+
+  it('the main lane still drops her out of its reach, so she can stop and load before a fight', () => {
+    const cp = new Checkpoint();
+    for (let g = 0; g < K.GUNS.length; g++) expect(cp.battery.reaches(g, K.GATE, 15)).toBe(false);
+    const home = LAY.LANES[2];
+    for (let g = 0; g < K.GUNS.length; g++) expect(cp.battery.reaches(g, ...home.at)).toBe(false);
   });
 });

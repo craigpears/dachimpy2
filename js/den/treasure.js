@@ -1,5 +1,5 @@
 // Treasure Haul in the world: the board laid on the water where a chest is to be hauled up, and the
-// wrecked turret's chest, or the old wreck's beyond the checkpoint, hauled aboard the sloop by it.
+// old wreck's beyond the checkpoint hauled aboard the sloop by it (the lagoon's too: crane.js).
 import * as THREE from 'three';
 import { H as TH, W as TW } from '../treasure-haul.js';
 import { Salvage, aboard } from '../den-haul.js';
@@ -24,7 +24,8 @@ import { seaX, seaZ, SLOOP_DECK, sail, liftAt } from './sea.js';
    toward the hauler, as the real one's "coins flying up the screen".
 
    haulOpen takes where the board goes and what to do when it's done, so any place can have one:
-   the wrecked turret's chest at sea now (haulTurret, below), the clifftop lagoon's wreck later. */
+   the old wreck's beyond the checkpoint (haulWreck, below), the clifftop lagoon's wreck (crane.js).
+   (The wrecked turret's chest, the first, went with the turret, 10 Nov.) */
 export const haul = { on: false, salvage: null, board: null, group: null, pieces: null, cursor: null, net: null, weed: [], meshes: new Map(), queue: [], holdT: 0, shown: null, cur: { r: 3, c: 3 }, yaw: 0, sq: 0.45, flying: 0, deck: null, onDone: null, stay: null };
 const colX = (c) => c - (TW - 1) / 2, rowZ = (r) => r - (TH - 1) / 2;
 
@@ -401,21 +402,7 @@ export function haulPrompt() {
   return `Treasure Haul · ${what || 'all of it'} to come up · arrows or mouse move · Space or click swaps · Esc: leave it for now`;
 }
 
-// ---------- the wrecked turret's chest ----------
-/* The chest that floats free of the wrecked turret (src/den-sail.ts, Turret.chest): sailing over it
-   wins nothing (RULES.md, "Every reward is won by a puzzle"). Stop her on it or beside it and Space
-   hauls it up: the board's laid on the water alongside her, on the chest's side, its top row along
-   her side, and the chest it hauls up swings aboard onto her deck. */
-function turretSalvage() {
-  const ch = sail.turret?.chest;
-  if (!ch) return null;
-  if (!sail.salvage || sail.salvage.at[0] !== ch[0] || sail.salvage.at[1] !== ch[1]) sail.salvage = new Salvage(ch);
-  return sail.salvage;
-}
-export const canHaulTurret = () => sail.on && !haul.on && !!turretSalvage()?.canStart(sail.helm);
-export function haulTurret() {
-  return haulBeside(turretSalvage(), () => { sail.turret.chest = null; sail.salvage = null; });
-}
+// ---------- treasure by her side ----------
 // The old wreck beyond the imperial checkpoint (LAY.WRECK, src/den-sail.ts): its treasure's hauled
 // up the same way, stopped beside it. Once it's up, the wreck's bare.
 function wreckSalvage() {

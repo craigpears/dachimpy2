@@ -147,7 +147,7 @@ describe('her pace by the wind, and the oars', () => {
     run(h, 10);
     expect(h.pose).toEqual({ c: 8, r: 3, d: 0 });
     expect(h.held()).toBe('calm');
-    expect(h.spared()).toBe(false);   // (becalmed under the turret's guns, row out of it)
+    expect(h.spared()).toBe(false);   // (becalmed under the guns, row out of it)
     sea.breeze!.set(1, 2, 1e9);
     run(h, 20);
     expect([h.pose.c, h.pose.r]).toEqual([8, 9]);

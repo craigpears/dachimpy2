@@ -1,7 +1,8 @@
-// The sailing sea and the sloop, in 3D: the water, rocks, cliffs, lock, turret, pump and pins.
+// The sailing sea and the sloop, in 3D: the water, rocks, cliffs, lock, pump and pins.
 // New things out on the sea are built here. (Split out of den.js.)
 import * as THREE from 'three';
-import { SAIL, LAY, Sea, Helm, Guns, Turret } from '../den-sail.js';
+import { SAIL, LAY, Sea, Helm } from '../den-sail.js';
+import { Broadside } from '../den-guns.js';
 import { Wind } from '../den-wind.js';
 import { scene, mat, mesh, canvasTex, woodTex, V3, flagMat, flagpole, burst } from './world.js';
 import { rock } from './land.js';
@@ -17,19 +18,19 @@ import { hullGeo } from './raids.js';
    yourself, played ahead of the pilot's. The board's squares are there but not drawn; the square
    you're pointing at shows faintly, and the course ahead is dotted on the water. Rocks stand out
    of the sea as stacks (you can see them from the den too). Sail back to her mooring to go ashore.
-   She has a gun each side: Q fires the port gun, E the starboard, as she sails, at the rocks.
-   The sea has its lay (LAY in src/den-sail.ts): a trade wind out to a junction, the loop round and
-   home, and a canal to a lock up a cliff into a hidden cove; a turret on a rock shoots at her, and
-   a hit holes her deck: she's dazed till you patch it by Carpentry (patchOpen). The lock's worked
-   by Bilge, from a board on the quay beside it, an old pump at its head (holdOpen). */
+   She has a gun each side: Q fires the port gun, E the starboard, as she sails, once they're
+   loaded by Gunnery (js/den/sea-guns.js). The sea has its lay (LAY in src/den-sail.ts): a trade
+   wind out to a junction, on to the imperial checkpoint (checkpoint.js) and back home on another,
+   and a canal to a lock up a cliff into a hidden cove; the checkpoint's guns shoot at her, and a
+   hit holes her deck: she's dazed till you patch it by Carpentry (patchOpen). The lock's worked by
+   Bilge, from a board on the quay beside it, an old pump at its head (holdOpen). */
 export const SEA_X0 = SAIL.X0;   // (where it was before the board grew out to the right)
 export const seaX = (c) => SEA_X0 + (c + 0.5) * SAIL.CELL, seaZ = (r) => SAIL.Z0 - (r + 0.5) * SAIL.CELL;
 export const SLOOP_DECK = 0.75;
-export const sail = { on: false, sea: new Sea(9), helm: null, g: null, rocks: null, pin: null, hover: null, dots: [], sig: '', hudSig: '', seen: false, heel: 0, bumpT: 0, guns: new Guns(), rockAt: new Map(), world: null, turret: null, shots: [], riding: false, said: {} };
+export const sail = { on: false, sea: new Sea(9), helm: null, g: null, rocks: null, pin: null, hover: null, dots: [], sig: '', hudSig: '', seen: false, heel: 0, bumpT: 0, guns: new Broadside(), rockAt: new Map(), world: null, riding: false, said: {} };
 // The wind she sails by (src/den-wind.ts; drawn in wind.js).
 sail.sea.breeze = new Wind(9);
 sail.helm = new Helm(sail.sea);
-sail.turret = new Turret(LAY.TURRET);
 // The hidden cove's water is a lock's lift above the sea; the cliff stands above that.
 export const LIFT = 1.6, CLIFF_H = 3.4;
 // The lock's gates, out from its middle each way: past her bow, bowsprit and stern, so she fits
@@ -103,11 +104,10 @@ export function seaRocks() {
   return g;
 }
 /* The lay of the sea: the trade winds as streaks of white water racing along their lanes, a yellow
-   buoy at the junction, the cliff with the hidden cove's water up behind it, the lock in its gap
-   (its chamber's water rising and falling, a pair of gates at each end), and the turret, a stone
-   tower on its rock with a gun on top. */
+   buoy at the junction, the cliff with the hidden cove's water up behind it, and the lock in its
+   gap (its chamber's water rising and falling, a pair of gates at each end). */
 export function seaWorld() {
-  const W = { g: new THREE.Group(), lanes: [], gates: {}, chamber: null, turret: null, gun: null };
+  const W = { g: new THREE.Group(), lanes: [], gates: {}, chamber: null };
   for (const { at: [c, r], d, n } of LAY.LANES) {
     const tex = canvasTex(64, 128, (g, w, h) => {
       g.clearRect(0, 0, w, h);
@@ -214,67 +214,8 @@ export function seaWorld() {
     }
     W.gates[end] = { leaves, sx, open: 1 };
   }
-  // The turret: a round stone tower on its rock, crenellated, a gun on top that turns to aim.
-  const [tc, tr] = LAY.TURRET, tower = new THREE.Group(), ts = mat('#8a8178', { flatShading: true });
-  const body = mesh(new THREE.CylinderGeometry(1.15, 1.35, 3.2, 12), ts); body.position.y = 1.6;
-  tower.add(body);
-  const merlons = [];
-  for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2, m = mesh(new THREE.BoxGeometry(0.4, 0.45, 0.4), ts); m.position.set(Math.cos(a) * 1.0, 3.4, Math.sin(a) * 1.0); m.rotation.y = -a; tower.add(m); merlons.push(m); }
-  const gun = gunMesh(); gun.scale.setScalar(0.85); gun.position.y = 3.2;
-  tower.add(gun);
-  tower.position.set(seaX(tc), 0, seaZ(tr));
-  W.g.add(tower);
-  // Its wreck (see turretLook): a broken stump, scorched, its stones and gun tumbled round it.
-  const scorch = mat('#3e3935', { flatShading: true }), ruin = new THREE.Group();
-  // (tall enough to stand up out of its rock, its top broken off jagged, embers glowing in it)
-  const stump = mesh(new THREE.CylinderGeometry(1.05, 1.35, 2.3, 10), scorch); stump.position.y = 1.15;
-  ruin.add(stump);
-  for (let i = 0; i < 6; i++) { const a = i / 10 * Math.PI * 2 + 0.3, ht = 0.3 + ((i * 7) % 5) * 0.16, b = mesh(new THREE.BoxGeometry(0.42, ht, 0.42), i % 2 ? ts : scorch); b.position.set(Math.cos(a) * 0.95, 2.3 + ht / 2, Math.sin(a) * 0.95); b.rotation.y = -a; ruin.add(b); }
-  const ember = new THREE.MeshBasicMaterial({ color: '#ff8a2a' });
-  for (let i = 0; i < 5; i++) { const e = mesh(new THREE.BoxGeometry(0.22, 0.12, 0.22), ember, false); e.position.set(Math.cos(i * 1.9) * 0.5, 2.32, Math.sin(i * 1.9) * 0.5); e.rotation.y = i; ruin.add(e); }
-  for (let i = 0; i < 9; i++) { const a = i * 2.4, k = 1.5 + (i % 3) * 0.35, b = mesh(new THREE.BoxGeometry(0.5, 0.45, 0.5), i % 3 ? ts : scorch); b.position.set(Math.cos(a) * k, 0.7 + (i % 2) * 0.2, Math.sin(a) * k); b.rotation.set(i * 0.7, i * 1.3, i * 0.4); ruin.add(b); }
-  const barrel = gunMesh(); barrel.scale.setScalar(0.75); barrel.position.set(1.4, 0.9, 0.7); barrel.rotation.set(0.5, 0.9, 1.2); ruin.add(barrel);
-  ruin.visible = false;
-  tower.add(ruin);
-  W.turret = tower; W.gun = gun; W.intact = [body, ...merlons, gun]; W.ruin = ruin; W.wrecked = false;
   scene.add(W.g);
   return W;
-}
-// The turret standing, or its wreck.
-export function turretLook(W, wrecked) {
-  W.wrecked = wrecked;
-  W.fall = undefined;
-  for (const o of W.intact) { o.visible = !wrecked; if (o.userData.home) { o.position.copy(o.userData.home); o.rotation.copy(o.userData.turn); } }
-  W.turret.children[0].scale.y = 1;
-  W.ruin.visible = wrecked;
-}
-// Wrecked, it comes down: its gun topples off the top and splashes down, its battlements fly
-// apart, the tower shudders and sinks into its rock, then there's the smoking stump.
-export function turretFall(W, dt) {
-  const T = 1.4, u = Math.min(1, (W.fall += dt) / T), tw = W.turret.position;
-  for (const o of W.intact) if (!o.userData.home) { o.userData.home = o.position.clone(); o.userData.turn = o.rotation.clone(); }
-  const body = W.turret.children[0];
-  body.scale.y = 1 - 0.45 * u * u;
-  body.position.x = Math.sin(W.fall * 40) * 0.08 * (1 - u);
-  W.intact.forEach((o, i) => {
-    if (o === body) return;
-    const h = o.userData.home, a = Math.atan2(h.z, h.x) || i;
-    o.position.set(h.x + Math.cos(a) * u * 2.5, h.y + 1.6 * u - 5.2 * u * u, h.z + Math.sin(a) * u * 2.5);
-    o.rotation.set(o.userData.turn.x + u * 3, o.userData.turn.y, o.userData.turn.z + u * (o === W.gun ? 1.6 : 2.5));
-  });
-  if ((W.smokeT = (W.smokeT ?? 0) - dt) < 0) { W.smokeT = 0.08; burst(V3(tw.x, 2 + Math.random(), tw.z), '#3f3a37', 4, 1.6); }
-  if (u >= 1) { burst(V3(tw.x + 2, 0.3, tw.z + 1), '#e6f3f6', 18, 3.5); burst(V3(tw.x, 1.5, tw.z), '#8a8178', 16, 3); turretLook(W, true); }
-}
-// The chest floating free of the wreck: a little sea chest, banded, bobbing on the water.
-export function floatChestMesh() {
-  const g = new THREE.Group(), wood = mat('#6e4a2a', { map: woodTex }), band = mat('#c9a43a', { metalness: 0.6, roughness: 0.4 });
-  const box = mesh(new THREE.BoxGeometry(1.1, 0.6, 0.75), wood); box.position.y = 0.15;
-  const lid = mesh(new THREE.CylinderGeometry(0.375, 0.375, 1.1, 10, 1, false, 0, Math.PI), wood); lid.rotation.z = Math.PI / 2; lid.position.y = 0.45;
-  for (const x of [-0.35, 0.35]) { const b = mesh(new THREE.BoxGeometry(0.08, 0.66, 0.8), band, false); b.position.set(x, 0.15, 0); g.add(b); }
-  const lock = mesh(new THREE.BoxGeometry(0.18, 0.2, 0.06), band, false); lock.position.set(0, 0.35, 0.39);
-  g.add(box, lid, lock);
-  scene.add(g);
-  return g;
 }
 /* An old bilge pump: a post, a spout out of one side and a handle out of the other, pivoted at the
    top of the post so it can be worked (userData.arm; the spout's mouth is userData.mouth). */

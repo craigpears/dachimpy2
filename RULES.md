@@ -141,7 +141,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **Every reward is won by a puzzle, never just picked up (9 Nov).** A chest from the wrecked
   turret that you sailed over to collect was "not Puzzle Pirates' spirit at all. Like, you need to
   have to haul it up. It's just mandatory. It's the Puzzle Pirates way. You need puzzles." So
-  treasure is hauled up by Treasure Haul (the turret's chest, the lagoon's wreck), and any new
+  treasure is hauled up by Treasure Haul (the wreck beyond the checkpoint, the lagoon's wreck; the
+  turret's chest, while there was a turret), and any new
   reward comes through a puzzle too, one of the few the den already has where it fits.
 - **Sailing, a first go (9 Nov).** The user: "can you do a proof of concept for ... how you end up
   getting a ship? ... a ship would just be waiting in the cove", with Battle Navigation's feel:
@@ -181,10 +182,27 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     goes straight out of that side from the square and heading she's nearest, up to three
     squares, and stops at the first rock: a burst of rock chips and spray, the stacks shudder, "A
     hit on the rocks!"; otherwise it splashes down. The gun kicks back, smokes, and runs out again
-    as it loads, three seconds; the two guns load apart. Shown either side of the tokens, lit when
-    loaded and filling as they load. The rocks don't break (as in Puzzle Pirates). A first go:
-    loading them by Gunnery, and things worth shooting that move, are IDEAS.md ("Gunnery at sea").
-  - **The trade winds, a lock and a turret (9 Nov).** The user: "just really go for it. Add some
+    with the next load. The rocks don't break (as in Puzzle Pirates). Things worth shooting that
+    move are IDEAS.md ("Gunnery at sea").
+  - **Her guns are loaded by Gunnery (10 Nov).** The user: "we should have to load the guns through
+    the puzzle". Q and E fire only a gun that's loaded; she puts out with none ("No shot loaded to
+    port: G to load her guns by Gunnery"). G (or Load on the sailing bar) takes you to her guns:
+    the den's own Gunnery board, the gun tower's puzzle and look, laid along her deck, its top row
+    toward her bow, you looking down it from over her stern, her mast, sails and own guns struck out
+    of the way. Its four guns are hers, as in Puzzle Pirates, where what the gunners load is what
+    the ship can fire: the two down its left side her port guns, the two down its right her
+    starboard. So she holds two shots a side, shown as pips on the gun indicators. Firing a side
+    fires one of its loaded guns, which then wants a bucket to swab it, as after any shot in Gunnery;
+    a second shot that side waits while her gun runs out again (1.2 seconds, the bar filling).
+    Played as on the tower: click a plank to chalk an arrow (drag the way it should point, the wheel
+    turns it, click an arrow to turn it, right-click rubs it out), or the arrows move a cursor,
+    Space chalks and Backspace rubs out. "Loaded! A shot for her port (Q)". She sails on to the pin
+    while you load, W A D still put in moves and Q E fire; the sailing bar's hidden, the stores' key
+    shows. Esc (or G) leaves the guns as they are, to come back to; the board only plays while
+    you're at it. One board on her deck at a time: with her oars out G says to ship them first, and
+    O at the guns goes to the oars; holed, the board gives way to the deck patch, at the lock to the
+    quay's Bilge, and comes back after. Rules: `src/den-guns.ts`; the board: `js/den/sea-guns.js`.
+  - **The trade winds and a lock (9 Nov).** The user: "just really go for it. Add some
     shipping lanes ... a fork in the road ... some kind of a lock and canal ... there's a bit of a
     cliff. You have to go up a lock". A first go of IDEAS.md's shipping lanes, on her sea:
     - **The trade winds:** runs of wind squares, streaked on the water. Sail onto one and it sweeps
@@ -194,11 +212,17 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       she sails onto the lane there or upwind of it, and arrives when the wind sets her down (9
       Nov: "I don't seem to be able to drop a pin onto the lanes"). The pilot picks the quickest
       way by the clock, a ride on the wind quick but not free, so she takes a lane when it saves
-      time and never rides the loop round to save a move (it was "going crazy around them"). A
-      lane runs out from off the beach to a junction.
-    - **The junction:** at the lane's end it drops her off "just like a normal square": right rides
-      the winds across and back in towards home (a loop), left is the canal to the lock, on is
-      open sea.
+      time and never rides a lane out of her way to save a move (it was "going crazy around them",
+      round the loop that was).
+    - **Rebuilt round the checkpoint (10 Nov).** The user: "there's no need for that cannon near the
+      turret near the den now, because ... we've got the Imperial checkpoint. That's the evolution
+      of it." So the turret, its chest and the loop of winds round it went. A lane runs out from off
+      the beach to a junction; on from there, the main shipping lane carries her out to the imperial
+      checkpoint, dropping her short of its guns; and another runs back home, from beside where the
+      main lane drops her to just off the beach ("The trade winds have carried her home").
+    - **The junction:** at the first lane's end it drops her off "just like a normal square": on,
+      the main shipping lane out to the checkpoint; left, the canal to the lock (the side
+      adventure); right, open sea.
     - **The canal and the lock:** a narrow canal between rocks to a lock at the foot of a cliff.
       Sail into the lock and she waits; nothing happens on its own. Bilge on the quay pumps it up,
       a proper go of it (about sixteen moves' worth), not "way too quickly": the lock's water rises
@@ -211,18 +235,19 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       itself in a couple of seconds, and she waits for the gates again before she sails out. Esc
       while she waits lets her off. The pilot finds the way into the cove through the lock. (A
       shortcut that costs puzzle work, not reflexes: IDEAS.md, "Locks on a canal".)
-    - **The turret:** a gun on a rock between the lanes. While she's within three squares it fires
-      at the square she's on; the shot takes about a second and a half to come down, a red ring
-      on the water marking where. Still there, she's hit; gone, it splashes down ("you can shoot,
-      but there's no guarantee"). It loads four seconds between shots, and a hit on it from her
-      guns quietens it ten seconds. The third hit wrecks it for good, a shot fired riding the
-      winds counting too ("plenty of people are going to try and see if they can time it"): the gun
-      topples, the battlements fly off and the tower sinks to a smoking stump, and a chest floats
-      free by the wreck. Sailing over it wins nothing; it's hauled up by puzzle (see "Every
-      reward is won by a puzzle"). It holds fire while she's dazed or at the lock, and for five
-      seconds once she's patched, so she can get going (9 Nov: it fired again "literally before
-      you can do anything about it").
-    - **Hauling up the turret's chest (10 Nov):** stop her on the chest's square or one beside
+    - **The turret (9 Nov, gone 10 Nov):** a gun on a rock between the lanes, which fired on her
+      square while she was in reach and was wrecked by three hits, a chest floating free to be
+      hauled up. The checkpoint's guns took its place and its rules (see "The imperial checkpoint").
+    - **A destructible turret is one module, to plug in (10 Nov).** The user: "there should be an
+      object for a destructible turret. We shouldn't have to be recoding something. It should just
+      be there to plug in." So every gun that shoots at her is a destructible turret: its rules in
+      `src/den-turret.ts` (in reach it fires on her square, or on marks it's trained on; a hit
+      quietens it, the third wrecks it; it holds fire while she's dazed and after a patch), its 3D
+      in `js/den/turret.js` (the gun turning to aim, its shots and red rings, smoking while quiet,
+      the toppling and the smoking stump). A place puts one down and sets it up: its square, reach,
+      marks, timings and look. The checkpoint's two bastion guns are two of them; the turret near
+      the den was one, and new ones plug in the same way.
+    - **Hauling up a chest beside her (10 Nov):** stop her on the chest's square or one beside
       it and Space starts Treasure Haul (the real puzzle's rules; sailing past or over it never
       starts it). The board lies on the water alongside her on the chest's side, its top row along
       her side, and you look down on it from beyond, back toward her, so the treasure rises up the
@@ -238,7 +263,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       cutlasses, the gold cross and the tan eight-sided coin with a crowned head; an octagon ruby
       and an emerald-cut emerald; an iron-bound lattice chest with a big padlock; a red and yellow
       cursor; coins hauled fly up the board toward her. Rules: `src/den-haul.ts`; the board
-      in the world: `js/den/treasure.js`, used for the clifftop lagoon's wreck too.
+      in the world: `js/den/treasure.js`, for the wreck beyond the checkpoint and the clifftop
+      lagoon's wreck.
     - **Dazed, not damaged:** a hit holes her ("Hit! She's holed: patch her to sail on"): she
       finishes the move she's on (or the wind's ride), then waits till you patch the hole in her
       deck by Carpentry, a whole hole to fill, with the wall's rules (a piece covers at least one
@@ -285,7 +311,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       against the wind: a move that would is "in irons", she makes no way, a turn swinging her head
       round where she is (as a blocked turn does), and it shows on her: her sails shake and flog
       while it lasts, and it's said ("In irons! Her bow's into the wind: she makes no way"). Becalmed,
-      she's fair game for the turret.
+      she's fair game for the checkpoint's guns.
     - **The pilot** plans by the clock, under sail by the wind there is (never a square against it,
       and the quicker headings preferred). The pin goes where you drop it, wind or no wind. A pin
       the wind won't let her sail to at all, she waits, and says so once ("She can't sail to the
@@ -352,7 +378,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       row for her. A pin stays where you dropped it, a buoy to row for, and goes when she gets there;
       the prompt says which way it lies and which side to pull harder ("the pin's to starboard: pull
       harder on port"). Holed, the board gives way to the deck patch; at the lock, to the quay's
-      Bilge; and comes back after. To haul the turret's chest, ship the oars first. Rules:
+      Bilge; and comes back after. To haul up a wreck's treasure, ship the oars first; to load her
+      guns, too (one board on her deck at a time). Rules:
       `src/den-row.ts`; the board in the world: `js/den/rowing.js`.
   - **The imperial checkpoint (10 Nov).** The user: "this race idea was the funny one. We absolutely
     need that. We need our own puzzle where we have to get through the Imperial checkpoint by doing
@@ -374,29 +401,44 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     - **Its guns are trained on marks:** red rings on the water on the way through, three of them:
       two squares before the gate, the gate itself, two squares beyond. Whenever she's on a mark and
       its gun is loaded (2.5 seconds between shots) it fires on that square, and the shot's down 0.9
-      seconds later: still there, she's holed (patched by Carpentry, as for the turret); gone, it
+      seconds later: still there, she's holed (patched by Carpentry); gone, it
       splashes down. So a square rowed on its own, which she stops on, is hit; two or more rowed at
       once go straight over the marks between, and a Vegas on each side (ten squares) carries her
       through the lot at the trade winds' pace. Under sail, a good wind behind her takes each square
       too quickly to be hit, but her breather between turns comes on the gate (four moves from where
       the lane drops her), and a wind across her or light airs is slow enough to be hit on every
-      mark. Patched, its guns hold fire five seconds, as the turret's do. Out of their reach she's
+      mark. Patched, its guns hold fire five seconds, as the turret's did. Out of their reach she's
       safe, so you can stop short and build your combo (or row in circles while you do).
-    - **Not to be wrecked or quieted:** a hit from her guns does nothing ("A hit on the checkpoint!
-      But a sloop's guns don't trouble an imperial bastion"). Its guns are what the choice of ways
-      through is about ("Every other way through costs a puzzle"), so shooting them down mustn't be
-      a way through without a puzzle, nor end the choice for good.
+    - **Its guns can be wrecked (10 Nov).** The user: the checkpoint's guns should be "just the same
+      as the other one" (the turret): "everything should be destructive", so knocking them out is a
+      way through of its own. But it costs a puzzle (see "Every other way through costs a
+      puzzle"): her guns are loaded by Gunnery. A hit from her guns on a gun's bastion (sailing
+      across its column, a broadside up it; three squares' reach) quietens that gun ten seconds,
+      smoking ("2 more to wreck it"); the third hit wrecks it for good, the same toppling and
+      smoking stump as the turret (each bastion's gun is a destructible turret): its gun topples off, its battlements fly apart, the bastion
+      sinks to a scorched stump with embers in it, smoking. A wrecked gun fires on its marks no
+      more; with both wrecked the way through is safe ("Both its guns are wrecked! The way through
+      the checkpoint is safe"). What's wrecked stays wrecked (a new game starts it whole). A hit on
+      the gatehouse's piers is only stone. No chest from the guns: the wreck beyond is the prize.
+    - **And it's a fight:** once she's fired on the checkpoint (a hit on its bastions or its
+      gatehouse), its surviving guns also fire on her square while she's within three squares of
+      them, as the turret did: a red ring on the water where the shot will come down, about a
+      second and a half later; still there, she's holed and patched by Carpentry; gone, it splashes
+      down. Four seconds between those shots, and five seconds' grace once she's patched. "It's a
+      fight now: its guns are on her." Out of its sight (more than five squares from the gate) it
+      calms down: "its guns go back to their marks". The main lane's drop and the lane home both
+      start out of their reach, so she can stop there and load before a fight.
     - **Round the long way:** past the reef's end, out of reach of its guns the whole way, about
       three times as far as through the gate. (It costs time, not a puzzle, for now; with a wind
       against one of its legs it's oars or a wait.)
     - **Said:** coming up to it, "The imperial checkpoint! Its guns are trained on the red rings:
-      stop on one and she's hit. Run it, row it, or go round the long way"; once she's past its
+      stop on one and she's hit. Run it, row it, go round the long way, or knock its guns out"; once she's past its
       last mark, "Through the checkpoint! Not a scratch on her" (or "Holed once, patched, and
       through"), "Round the checkpoint the long way, out of reach of its guns", and "Back through"
       or "Back round" coming home.
     - **The old wreck beyond it:** run aground on a sandbar on the open sea, out of reach of its
       guns: the reason to get past. Stop beside it and Space hauls its treasure up by Treasure Haul,
-      as for the turret's chest (the board on her other side, clear of the wreck); once it's up the
+      (the board on her other side, clear of the wreck); once it's up the
       wreck's bare.
     - **Room left for later:** a ledge at the headland's foot on the near side and a landing beyond
       it, kept clear, for the crane up and over it; the gatehouse's boom for the bribe. Rules:
@@ -1059,6 +1101,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   whole wave poured through it. Now each raider attacks the hole in front of where they come up to
   the wall, and only switches to a breach within about 3 m. Raiders at a Masterpiece mostly tire
   and leave. (They now also need a gap they can walk through: see "Raiders walk in" above.)
+- **One copy of the Gunnery puzzle (10 Nov).** The user: "there should be one copy of the gunning
+  puzzle. We should not be having different copies, one for the ship, one for the deck in the den
+  ... there can be a few wrappers with some of the different visual elements around it, but the
+  core puzzle should be more or less the same, as in code-wise." So Gunnery's rules are one tested
+  module knowing nothing of the den (`src/gunnery.ts`: the board, the barrel, the stores rolling,
+  the arrows, loading, the crates), and the gun tower (`js/den/gundeck.js`) and her deck at sea
+  (`js/den/sea-guns.js`) each drive it with a thin wrapper of their own look. The same goes for any
+  puzzle played in more than one place.
 - **The gun tower (after Gunnery): it must be instantly recognisable as Gunnery.** The user knows
   the puzzle well, and the first tries missed it: stores bounced into the guns by themselves, the
   deck was too small, the pieces were tiny and hard to tell apart, the bucket and the arrows

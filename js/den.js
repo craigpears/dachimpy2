@@ -25,7 +25,8 @@ import { MAP_D, MAP_W, chart, cine, mapView, cineCam, cineView, nearMap, openMap
 import { seaX, seaZ, sail } from './den/sea.js';
 import { nearSloop, board, ashore, sailReset, sailClick, sailHover, sailKey, sailTick } from './den/sailing.js';
 import { hold, holdSwap, patch, deckHoleShape, patchTurn, patchPlace, patchKey } from './den/sea-puzzles.js';
-import { haul, haulKey, haulHover, haulSwap, haulTick, haulCam, haulTurret } from './den/treasure.js';
+import { haul, haulKey, haulHover, haulSwap, haulTick, haulCam } from './den/treasure.js';
+import { gunnery, gunCam, gunneryUp, gunneryRub, gunneryWheel } from './den/sea-guns.js';
 import { rowing, rowCam, rowPull } from './den/rowing.js';
 import { crane, craneCam } from './den/crane.js';
 import { net, online, guest, isHost, send, updateMates, sendMe, snapshot, followRaider, sendSync, onNet, joinCrew, leaveCrew } from './den/crew.js';
@@ -182,9 +183,11 @@ addEventListener('mousemove', (e) => {
 });
 addEventListener('mouseup', (e) => {
   if (e.button === 0 && gd?.press) chalkRelease(e.clientX, e.clientY);
+  if (e.button === 0 && gunnery.on) gunneryUp(e.clientX, e.clientY);
   if (e.button !== 2 || !drag) return;
   if (drag.deco) { if (!drag.moved) decoClick(drag.deco); drag = null; return; }
-  if (!drag.moved && patch.on && patch.hand) patchTurn(flip);
+  if (!drag.moved && gunnery.on) gunneryRub(e.clientX, e.clientY);
+  else if (!drag.moved && patch.on && patch.hand) patchTurn(flip);
   else if (!drag.moved && carry && !G.over) turn(flip, 0);
   else if (!drag.moved && !carry && onGunDeck() && (gd.hover = deckCellAt(e.clientX, e.clientY)) && gd.arrows.has(k(...gd.hover))) chalk(...gd.hover, -1);
   drag = null;
@@ -196,6 +199,13 @@ renderer.domElement.addEventListener('wheel', (e) => {
   if (deco.on) {
     wheelAcc += e.deltaY;
     if (Math.abs(wheelAcc) >= 40) { decoTurn(wheelAcc > 0 ? 1 : -1); wheelAcc = 0; }
+    return;
+  }
+  // At her guns, as on the tower: the wheel turns your chalk.
+  if (gunnery.on) {
+    wheelAcc += e.deltaY;
+    const now = performance.now();
+    if (Math.abs(wheelAcc) >= 40 && now - wheelT > 110) { gunneryWheel(wheelAcc > 0 ? 1 : -1); wheelAcc = 0; wheelT = now; }
     return;
   }
   // On the gun deck the wheel turns your chalk, as in Gunnery, and never zooms.
@@ -263,7 +273,7 @@ export let sailView = 0, holdView = 0, haulView = 0;
 export const denLets = {
   get sailView() { return sailView; }, set sailView(v) { sailView = v; },
 };
-export let patchView = 0, rowView = 0;
+export let patchView = 0, rowView = 0, gunView = 0;
 let craneView = 0, craneShot = null;
 /* The Carpentry view's camera: straight on to the board, close enough to puzzle in. On the wall, a
    stretch of it round the piece, its whole height; on a frame on the floor, looking down on it from
@@ -585,6 +595,19 @@ function update(dt) {
     d = Math.atan2(Math.sin(d), Math.cos(d));
     yaw = y0 + d * rowView;
   }
+  // At her guns: down onto the Gunnery board on her deck from over her stern, turned with her
+  // (js/den/sea-guns.js).
+  gunView += ((gunnery.on ? 1 : 0) - gunView) * Math.min(1, dt * 3);
+  if (gunView > 0.001 && gunnery.group?.parent) {
+    const gc = gunCam();
+    look.lerp(gc.look, gunView);
+    dist += (gc.dist * view.zoom - dist) * gunView;
+    tilt += (gc.tilt - tilt) * gunView;
+    const y0 = Math.atan2(Math.sin(yaw), Math.cos(yaw));
+    let d = gc.yaw - y0;
+    d = Math.atan2(Math.sin(d), Math.cos(d));
+    yaw = y0 + d * gunView;
+  }
   // Treasure Haul: down onto the board from beyond it, looking back toward whoever's hauling.
   haulView += ((haul.on ? 1 : 0) - haulView) * Math.min(1, dt * 3);
   if (haulView > 0.001 && haul.group?.parent) {
@@ -623,7 +646,7 @@ function update(dt) {
     yaw = y0 + d * cineView;
   }
   v3.set(Math.sin(yaw) * Math.cos(tilt), Math.sin(tilt), Math.cos(yaw) * Math.cos(tilt)).multiplyScalar(dist).add(look);
-  camAt.lerp(v3, Math.min(1, dt * (3 + 9 * rowView)));   // (held close while rowing: she can fly along)
+  camAt.lerp(v3, Math.min(1, dt * (3 + 9 * Math.max(rowView, gunView))));   // (held close while rowing or at her guns: she can fly along)
   camera.position.copy(camAt);
   // The fog starts beyond what you're looking at, so a high or zoomed-out view doesn't go murky.
   const camD = camAt.distanceTo(camLook);
@@ -632,7 +655,7 @@ function update(dt) {
   // Looking down from the wall you see more of the floor the torches don't reach: brighten it up.
   renderer.toneMappingExposure = 1 + 0.45 * u;
   if (shake > 0) { camera.position.x += (Math.random() - 0.5) * shake * 0.5; camera.position.y += (Math.random() - 0.5) * shake * 0.5; worldLets.shake = Math.max(0, shake - dt); }
-  camLook.lerp(look, Math.min(1, dt * (3 + 9 * rowView)));
+  camLook.lerp(look, Math.min(1, dt * (3 + 9 * Math.max(rowView, gunView))));
   camera.lookAt(camLook);
   updateMates(dt);
   waveFlags(dt);
@@ -724,6 +747,6 @@ requestAnimationFrame(frame);
 
 // For poking at it from the console.
 window.den = { rowing, rowPull, tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { worldLets.myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, swordReward, swordBreak, lumber, toLumber, repairAll, newGame, raiders, G, get carry() { return carry; }, get patch() { return patch; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
-  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, hold, holdSwap, board, ashore, patch, patchKey, patchPlace, deckHoleShape, haul, haulSwap, haulTurret, crane,
+  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, hold, holdSwap, board, ashore, patch, patchKey, patchPlace, deckHoleShape, haul, haulSwap, crane, gunnery,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };
