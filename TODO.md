@@ -85,7 +85,13 @@ the site (`.assetsignore` skips `*.md`).
   trapped in some way visually makes sense while you're trying to free them. They break free and
   happily start jumping around." On the board he's shown trapped (a cage, or the net he's tangled
   in), and once he's cleared off the foot he breaks out of it and bounds about happily before
-  swimming to her.
+  swimming to her. Tried in the den (10 Nov): loves the poetry, but three things. How he's trapped
+  at the start "is not very inviting". "I don't understand as well how he seems to get free after
+  just 2 clicks": freeing him should take a real puzzle's worth of clearing, and it should be clear
+  why he's free when he is. And the board from afar: "you can see them before you've started the
+  puzzle, but you can't see the puzzle pieces. Like, you should surely just see the whole board":
+  the bank shows the whole Foraging board, pieces and all, in its own look, before you start, as
+  the den's other boards do.
 
 - **The puzzles' pieces checked against the real ones (10 Nov):** "the last few puzzles, the
   graphics have been placeholders rather than matching the Puzzle Pirate pieces". Compare each
