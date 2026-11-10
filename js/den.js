@@ -10,7 +10,6 @@ import * as THREE from 'three';
 import { W as BW, H as BH } from './bilge.js';
 import { holeKey } from './den-carp-view.js';
 import { countingDown } from './den-raids.js';
-import { LAY } from './den-sail.js';
 import { BILGE } from './den-bilge.js';
 import { cleanLook, cleanDen } from './den-look.js';
 import { C, S, SPEED, HP, BUILD_SECS, tune, k, $, myLook, denLook, renderer, scene, camera, skyDome, PILE_SC, rotCW, rotCCW, flip, animateWalk, faceTo, V3, pirate, HOP, STEP, view, carry, bounds, obstacles, G, keys, tweens, sparks, raiders, ghostKey, ghost, target, shake, mouseMode, mouse, topView, keyAt, wm, wmBlock, wmLinger, wallView, ray, wallPlane, toast, v3, L0, L1, L2, worldLets } from './den/world.js';
@@ -22,9 +21,10 @@ import { boats, raiderOut, focus, onBeach, atWall, clickedFoe, cursor, aimed, ai
 import { rack, barracks, sword, atSword, swordBreak, swordDrop, swordReward, swordEnter, swordKey, lumber, toLumber, repairAll, swordTick, swordReset } from './den/sword.js';
 import { tide, shoreZ, bilge, atBilge, bilgeEnter, bilgeKey, bilgeHover, bilgeSwap, dredge, bilgeTick, bilgeReset } from './den/bilge.js';
 import { MAP_D, MAP_W, chart, cine, mapView, cineCam, cineView, nearMap, openMap, mapKey, takeMap, mapTick, mapReset, cineEnd, mapLets } from './den/map.js';
-import { seaX, seaZ, sail } from './den/sea.js';
+import { sail } from './den/sea.js';
 import { nearSloop, board, ashore, sailReset, sailClick, sailHover, sailKey, sailTick } from './den/sailing.js';
-import { hold, holdSwap, patch, deckHoleShape, patchTurn, patchPlace, patchKey } from './den/sea-puzzles.js';
+import { patch, deckHoleShape, patchTurn, patchPlace, patchKey } from './den/sea-puzzles.js';
+import { hold, holdSwap } from './den/lock.js';
 import { haul, haulKey, haulHover, haulSwap, haulTick, haulCam } from './den/treasure.js';
 import { gunnery, gunCam, gunneryUp, gunneryRub, gunneryWheel } from './den/sea-guns.js';
 import { rowing, rowCam, rowPull } from './den/rowing.js';
@@ -541,13 +541,13 @@ function update(dt) {
     dist += (26 * view.zoom - dist) * sailView;
     tilt += (Math.max(0.3, Math.min(1.45, 0.78 + view.pitch)) - tilt) * sailView;
   }
-  // Bilging at the lock: down onto the board on the quay from the den side, drawn back to take in
-  // the lock beyond it and the pump, so you see her rise as you pump.
+  // Bilging at a lock: down onto the board on its quay from the den side, drawn back to take in
+  // the lock beside it and the pump, so you see her rise as you pump (js/den/lock.js).
   holdView += ((hold.mode ? 1 : 0) - holdView) * Math.min(1, dt * 3);
   if (holdView > 0.001 && hold.group?.parent) {
     const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect), sq = hold.group.scale.x;
     hold.group.getWorldPosition(L2);
-    L2.lerp(V3(seaX(LAY.LOCK[0]), L2.y, seaZ(LAY.LOCK[1])), 0.12);
+    L2.lerp(V3(hold.at.x, L2.y, hold.at.z), 0.12);
     look.lerp(L2, holdView);
     dist += (Math.max((BH * sq / 2 + 0.5 * sq * 4) / Math.tan(vh), (BW * sq / 2 + sq * 2) / Math.tan(hh)) * 1.75 * view.zoom - dist) * holdView;
     tilt += (1.2 - tilt) * holdView;

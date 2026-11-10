@@ -22,8 +22,11 @@
      side (ten squares) carries her through the lot at the trade winds' pace.
    - under sail, a good wind behind her sails her through quick, each square gone before the shot's
      down, but a turn's breather on a mark, or a wind across her, or light airs, and she's hit.
-   Out of reach of its guns she's safe, so you can stop short and build your combo. Or go round the
-   long way, past the reef's end, out of reach the whole way.
+   Out of reach of its guns she's safe, so you can stop short and build your combo. Or go round it
+   by the locks (the canal's chain of them, cut through the headland beside it: src/den-lock.ts),
+   out of its sight the whole way; that costs puzzles too, a go of Bilge at each lock up. Its
+   reef's far end, the long way round that cost only time, was closed once the locks were the way
+   round (the user, 10 Nov). Nothing says the locks are there: stop short of it, and a hint.
 
    And its guns can be knocked out, "just the same as" the turret that was (the user, 10 Nov:
    "everything should be destructive"): a hit from her guns on a gun's bastion quietens that gun a
@@ -49,6 +52,9 @@ export const CHECK = {
   MARKS: [[[9, 17], [9, 21]], [[9, 19]]] as [number, number][][],
   /** How near (squares, any way) of the gate she comes before it's pointed out. */
   SIGHT: 4,
+  /** Seconds she's been stopped short of it, in sight of it, before the hint (after what's said
+      when she sights it has been read). */
+  HINT_AFTER: 4,
   /** Once she's fired on it: how far a gun reaches to fire on her square (squares, any way), how
       long that shot's in the air (time to get out from under it, as the turret's was), and the
       seconds it takes that gun to load again after one. (Each gun's a destructible turret,
@@ -73,10 +79,13 @@ export type GunEvent =
 export type ShotAt = ({ on: 'gun'; gun: number; did: 'quiet' | 'wrecked' | null } | { on: 'gatehouse' }) & { first: boolean };
 
 /** What she's done at the checkpoint: sighted it, or got to the other side of it (through its gate,
-    or round its reef's end, the long way), out or back, and how many times she was holed doing it. */
+    or round it by the locks), out or back, and how many times she was holed doing it. And, the
+    first time she stops short of it, a hint there's another way ("I wonder if there's a secret
+    way": the user, 10 Nov; not a signpost). */
 export type CheckEvent =
   | { kind: 'sighted' }
-  | { kind: 'through'; how: 'gate' | 'round'; back: boolean; hits: number }
+  | { kind: 'hint' }
+  | { kind: 'through'; how: 'gate' | 'locks'; back: boolean; hits: number }
   /** Out of its sight after she'd fired on it: its guns go back to their marks. */
   | { kind: 'calm' };
 
@@ -129,6 +138,8 @@ export class Checkpoint {
   hits = 0;
   private crossed: number | null = null;
   private sighted = false;
+  private hinted = false;
+  private still = 0;
 
   /** Holed by one of its guns. */
   holed() { this.hits++; }
@@ -145,28 +156,35 @@ export class Checkpoint {
     return g >= 0 ? { on: 'gun', gun: g, did: this.battery.hit(g), first } : { on: 'gatehouse', first };
   }
 
-  /** Her square now (Helm.pose, after each tick): whether she's sighted it, or got through. */
-  watch(p: { c: number; r: number }): CheckEvent[] {
+  /** Her square now (Helm.pose, after each tick, `dt` seconds on): whether she's sighted it, or got
+      through; `idle`, she's stopped there (Helm.idle): stopped short of it in sight of it a while
+      (CHECK.HINT_AFTER), the hint. */
+  watch(p: { c: number; r: number }, idle = false, dt = 0): CheckEvent[] {
     const out: CheckEvent[] = [], K = LAY.CHECKPOINT;
     const near = Math.max(Math.abs(p.c - K.GATE), Math.abs(p.r - K.ROW));
     if (!this.sighted && near <= CHECK.SIGHT) { this.sighted = true; out.push({ kind: 'sighted' }); }
+    this.still = this.sighted && idle && near <= CHECK.SIGHT && this.side === 'near' && p.r < K.ROW ? this.still + dt : 0;
+    if (!this.hinted && this.still >= CHECK.HINT_AFTER) { this.hinted = true; out.push({ kind: 'hint' }); }
     if (near > CHECK.SIGHT + 1) {
       this.hits = 0;
       if (this.battery.roused) { this.battery.roused = false; out.push({ kind: 'calm' }); }
     }
     // Through once she's past every mark (so "not a scratch on her" is so), crossing the line at the
-    // gate or round the reef's end.
+    // gate or down the locks through the headland.
     if (p.r === K.ROW) this.crossed = p.c;
     const rows = CHECK.MARKS.flat().map((m) => m[1]);
     const side = p.r < Math.min(...rows) ? 'near' : p.r > Math.max(...rows) ? 'far' : this.side;
     if (side !== this.side) {
-      out.push({ kind: 'through', how: this.crossed === K.GATE ? 'gate' : 'round', back: side === 'near', hits: this.hits });
+      out.push({ kind: 'through', how: this.crossed === K.GATE ? 'gate' : 'locks', back: side === 'near', hits: this.hits });
       this.side = side;
       this.hits = 0;
     }
     return out;
   }
 }
+
+/** The hint, stopped short of it the first time: there's another way, but not where. */
+export const HINT = 'Smugglers get past that checkpoint somehow, and not under its guns... I wonder if there\'s a secret way round';
 
 /** Whether a square is the checkpoint's (its piers, its bastions). */
 export function isCheckpoint(sea: Sea, c: number, r: number): boolean {
@@ -176,7 +194,7 @@ export function isCheckpoint(sea: Sea, c: number, r: number): boolean {
 
 /** The den's word when she's through. */
 export function throughSay(e: Extract<CheckEvent, { kind: 'through' }>): string {
-  if (e.how === 'round') return e.back ? 'Back round the checkpoint, the long way' : 'Round the checkpoint the long way, out of reach of its guns';
+  if (e.how === 'locks') return e.back ? 'Back round the checkpoint by the locks, and they never saw her' : 'Round the checkpoint by the locks, and they never saw her! The open sea beyond';
   const head = e.back ? 'Back through the checkpoint!' : 'Through the checkpoint!';
   if (!e.hits) return `${head} Not a scratch on her`;
   return `${head} Holed ${e.hits === 1 ? 'once' : e.hits === 2 ? 'twice' : `${e.hits} times`}, patched, and through`;

@@ -9,8 +9,9 @@ import { putBack, exitWall } from './pieces.js';
 import { sword } from './sword.js';
 import { shoreZ, bilge, groundPlane } from './bilge.js';
 import { chart, cine } from './map.js';
-import { SEA_X0, seaX, seaZ, SLOOP_DECK, sail, LIFT, liftAt, sloopMesh, seaRocks, seaWorld, pinMesh, dotMat, dotMine, dotGeo, hoverMat, TOK } from './sea.js';
-import { hold, holdShut, holdKey, holdHover, holdSwap, holdTick, patch, deckHoleShape, patchClear, patchShut, patchPlace, patchHover, patchTick } from './sea-puzzles.js';
+import { SEA_X0, seaX, seaZ, SLOOP_DECK, sail, liftAt, sloopMesh, seaRocks, seaWorld, pinMesh, dotMat, dotMine, dotGeo, hoverMat, TOK } from './sea.js';
+import { patch, deckHoleShape, patchClear, patchShut, patchPlace, patchHover, patchTick } from './sea-puzzles.js';
+import { hold, holdShut, holdKey, holdHover, holdSwap, holdTick, lockWorld, lockTick, lockSay } from './lock.js';
 import { online } from './crew.js';
 import { haul, haulShut, haulPrompt, canHaulWreck, haulWreck } from './treasure.js';
 import { checkpointReset, checkpointTick, checkpointShot } from './checkpoint.js';
@@ -175,7 +176,8 @@ export function sailPrompt() {
     return (f ? `Space or click: fit the ${hd.letter}${f.over ? ' (it rests on the deck: boarded over)' : ''}` : `The ${hd.letter} won't go there`) + tips;
   }
   if (held === 'up') return 'In the lock · bilge on the quay to pump it up, and the top gates open: arrows or mouse move · Space or click swaps';
-  if (held === 'down') return 'The lock\'s draining down to the sea';
+  if (held === 'down') return 'The lock\'s draining down';
+  if (held === 'fill') return 'The lock\'s filling from the canal above';
   if (held === 'gates') return 'The lock gates are swinging open';
   if (held === 'calm') return 'Becalmed: dead in the water till the wind picks up · O: out oars';
   if (atHome() && h.slot < 0 && !h.next().length) return 'At her mooring · Space: go ashore · click the sea to drop a pin';
@@ -207,6 +209,7 @@ function sailHud() {
 export function sailTick(dt) {
   sail.rocks ||= seaRocks();
   sail.world ||= seaWorld();
+  lockWorld();   // (the canal's locks: lock.js)
   craneWorld();   // (the headland on the cove's left, the ledge and the lagoon: crane.js)
   sail.g ||= (() => { const g = sloopMesh(); scene.add(g); return g; })();
   const show = sail.on || sloopHome();
@@ -231,13 +234,11 @@ export function sailTick(dt) {
     if (sail.riding && !(h.cur && h.cur.m === 'W')) {
       sail.riding = false;
       const [jc, jr] = LAY.JUNCTION, home = sail.sea.dropOff(...LAY.LANES[2].at);
-      if (h.pose.c === jc && h.pose.r === jr && !sail.said.junction) { sail.said.junction = true; toast('The junction: on, the trade winds carry her out to the imperial checkpoint; left\'s the canal to the lock'); }
+      if (h.pose.c === jc && h.pose.r === jr && !sail.said.junction) { sail.said.junction = true; toast('The junction: on, the trade winds carry her out to the imperial checkpoint; left, a canal runs off into the cliffs'); }
       if (h.pose.c === home[0] && h.pose.r === home[1] && !sail.said.home) { sail.said.home = true; toast('The trade winds have carried her home: her mooring\'s just along the shore'); }
     }
-    const held = h.held();
-    if (held === 'up' && heldWas !== 'up' && !sail.said.lock) { sail.said.lock = true; toast('The lock: bilge on the quay to pump it up to the cove'); }
-    if (held === 'gates' && heldWas === 'up') toast('The lock\'s full: the top gates open');
-    if (sail.sea.level(h.pose.c, h.pose.r) === 1 && !sail.said.cove) { sail.said.cove = true; toast('The hidden cove, up behind the cliff: an old bilge pump on the sand'); }
+    lockSay(h, heldWas, sail.said);   // (the locks: lock.js)
+    if (sail.sea.cove.has(`${h.pose.c},${h.pose.r}`) && !sail.said.cove) { sail.said.cove = true; toast('A hidden cove, tucked away off the canal: an old bilge pump on the sand'); }
     if (sail.bumpT > 0 && (sail.bumpT -= dt) <= 0) { worldLets.shake = 0.3; toast('Bump! Rocks', true); }
     sail.guns.tick(dt);
   }
@@ -246,34 +247,8 @@ export function sailTick(dt) {
   patchTick(dt);
   rowTick(dt, haul.on);
   gunneryTick(dt, haul.on || craneHolds());
-  // The quay pump: its handle down and up again with each stroke, and water gushing from its spout
-  // into the lock while it's rising.
-  {
-    const P = W.pump, s = P.userData.stroke ?? 0;
-    P.userData.stroke = Math.max(0, s - dt * 2.5);
-    P.userData.arm.rotation.z = 0.35 - 0.75 * Math.sin(Math.PI * (1 - P.userData.stroke)) * (P.userData.stroke > 0 ? 1 : 0);
-    const rising = sail.on && h.fill > h.level + 1e-4;
-    W.gush.visible = rising;
-    if (rising) {
-      P.updateMatrixWorld(true);
-      const m = P.localToWorld(P.userData.mouth.clone()), y1 = h.level * LIFT + 0.05;
-      W.gush.scale.set(1, Math.max(0.1, m.y - y1), 1);
-      W.gush.position.set(m.x, (m.y + y1) / 2, m.z - 0.08);
-      if ((W.gushT = (W.gushT ?? 0) - dt) < 0) { W.gushT = 0.12; burst(V3(m.x, y1 + 0.05, m.z - 0.1), '#e6f3f6', 3, 1.6); burst(m, '#9fd4ec', 1, 0.8); }
-    }
-  }
-  // The lock: its chamber's water at its level; each pair of gates open when she can pass that end.
-  const lockY = h.level * LIFT;
-
-  W.chamber.position.y = lockY + 0.05;
-  W.chamber.visible = lockY > 0.02;
-  for (const [end, gt] of Object.entries(W.gates)) {
-    const open = end === 'sea' ? h.level < 0.01 : h.level > 0.99;
-    gt.open += ((open ? 1 : 0) - gt.open) * Math.min(1, dt * 2.5);
-    // (both pairs swing open towards the cove, the high side, as a lock's mitre gates do: the sea
-    // pair back into the chamber, against its walls, the cove pair into the cove)
-    for (const lf of gt.leaves) lf.rotation.y = gt.open * lf.userData.sz * Math.PI / 2;
-  }
+  // The locks: each one's water at its level, its gates, and the quay pump at work (lock.js).
+  lockTick(dt);
   // A gun that's fired kicks back in and runs out again as it's loaded, smoking at first.
   for (const side of ['L', 'R']) {
     const gun = sail.g.userData.guns[side], u = sail.guns.out(side);
@@ -320,7 +295,7 @@ export function sailTick(dt) {
       pts.forEach(([at, mine], i) => {
         const d = sail.dots[i] ||= (() => { const o = new THREE.Mesh(dotGeo, dotMat); o.renderOrder = 3; scene.add(o); return o; })();
         d.material = mine ? dotMine : dotMat;
-        d.position.set(seaX(at.c), 0.09 + LIFT * sail.sea.level(at.c, at.r), seaZ(at.r));
+        d.position.set(seaX(at.c), 0.09 + liftAt(at.c, at.r), seaZ(at.r));
         d.visible = true;
       });
     }
@@ -328,7 +303,7 @@ export function sailTick(dt) {
   // The square you're pointing at, faintly.
   sail.hoverG ||= (() => { const o = new THREE.Mesh(new THREE.PlaneGeometry(SAIL.CELL * 0.96, SAIL.CELL * 0.96).rotateX(-Math.PI / 2), hoverMat); o.renderOrder = 3; scene.add(o); return o; })();
   sail.hoverG.visible = sail.on && !!sail.hover;
-  if (sail.hover) sail.hoverG.position.set(seaX(sail.hover[0]), 0.08, seaZ(sail.hover[1]));
+  if (sail.hover) sail.hoverG.position.set(seaX(sail.hover[0]), 0.08 + liftAt(...sail.hover), seaZ(sail.hover[1]));
   windTick(dt);
   craneTick(dt);   // (after she's drawn where the helm has her: up the cliff, the crane has her)
   if (sail.on) sailHud();

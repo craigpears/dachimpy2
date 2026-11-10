@@ -8,7 +8,7 @@ import { H as TH } from '../treasure-haul.js';
 import { S, scene, camera, mat, mesh, woodTex, woodMat, pieceGroup, V3, basis, pirate, G, burst, toast, outline, v3, animateWalk } from './world.js';
 import { rock } from './land.js';
 import { updateStats } from './wall.js';
-import { seaX, seaZ, SLOOP_DECK, sail, LIFT } from './sea.js';
+import { seaX, seaZ, SLOOP_DECK, sail, COVE_Y } from './sea.js';
 import { patch } from './sea-puzzles.js';
 import { haul, haulOpen } from './treasure.js';
 import { wreckMesh } from './checkpoint.js';
@@ -27,8 +27,9 @@ import { wreckMesh } from './checkpoint.js';
    In the lagoon an old wreck lies sunk in the clear water, its treasure hauled up by Treasure Haul. */
 export const crane = { rules: new Crane(), W: null, parts: [], hoist: null, slew: 0, said: {}, bubble: null, shot: null };
 const K = () => crane.rules;
-// The headland's top, the lagoon's water, and the ledge's (just above the hidden cove's).
-const HT = 6, WATER = HT - 0.6, LEDGE_Y = LIFT + 0.15;
+// The headland's top (as far over the hidden cove as ever, now the cove's up at the top of the
+// locks), the lagoon's water, and the ledge's (just above the cove's).
+const HT = COVE_Y + 4.4, WATER = HT - 0.6, LEDGE_Y = COVE_Y + 0.15;
 // The ledge: cut into the foot of the headland, beside her square; the frames lie on it, their top
 // row toward the cliff.
 const LEDGE_X0 = -34.2, LEDGE_X1 = seaX(CRANE.LEDGE[0]) - 2, LEDGE_Z0 = seaZ(CRANE.LEDGE[1]) + 3.3, LEDGE_Z1 = seaZ(CRANE.LEDGE[1]) - 3.3;
@@ -372,7 +373,7 @@ const slewed = (v, s) => V3(POST.x + v.x * Math.cos(s) + v.z * Math.sin(s), POST
 const poseYaw = () => Math.PI / 2 - sail.helm.pose.d * Math.PI / 2;
 const alongYaw = () => (Math.cos(poseYaw() - Math.PI / 2) >= -1e-6 ? Math.PI / 2 : -Math.PI / 2);
 const ALONG_X = POST.x + TIP.x;
-const coveSpot = () => ({ p: V3(ALONG_X, LIFT, seaZ(CRANE.LEDGE[1])), yaw: alongYaw() });
+const coveSpot = () => ({ p: V3(ALONG_X, COVE_Y, seaZ(CRANE.LEDGE[1])), yaw: alongYaw() });
 const lagoonSpot = () => ({ p: REST.clone(), yaw: REST_YAW });
 const TOP = HT + 1.2;   // her (deck - SLOOP_DECK) up the cliff: her keel clear of the clifftop
 function haulUp() {
@@ -606,7 +607,7 @@ export function craneTick(dt) {
     if (sail.on) standAboard();
   }
   // The first time she's stopped in the cove, the ledge is pointed out.
-  if (sail.on && !crane.said.ledge && sail.sea.level(h.pose.c, h.pose.r) === 1 && h.idle() && K().where === 'cove') {
+  if (sail.on && !crane.said.ledge && sail.sea.cove.has(`${h.pose.c},${h.pose.r}`) && h.idle() && K().where === 'cove') {
     crane.said.ledge = true;
     toast('A ledge under the left-hand cliff, an old hoist above it');
   }
@@ -618,7 +619,7 @@ export function craneCam() {
   const b = K().beat();
   if (!b || !crane.go) return null;
   const go = crane.go, u = ease(b.swing), from = go.up ? 0 : 1, k = from + (1 - 2 * from) * u;   // 0 over the cove, 1 over the lagoon
-  if (b.back >= 1) return go.up ? { look: V3(LAG.x + 2, WATER, LAG.z), dist: 17, tilt: 0.7, yaw: 1.0 } : { look: V3(-31, LIFT + 1, POST.z), dist: 18, tilt: 0.45, yaw: 1.2 };
+  if (b.back >= 1) return go.up ? { look: V3(LAG.x + 2, WATER, LAG.z), dist: 17, tilt: 0.7, yaw: 1.0 } : { look: V3(-31, COVE_Y + 1, POST.z), dist: 18, tilt: 0.45, yaw: 1.2 };
   // (side on to the crane, so you see the jib swing her round from the cove to the lagoon)
   return { look: V3(-31.5 - 8 * k, HT + 0.5, POST.z), dist: 20, tilt: 0.3 + 0.1 * k, yaw: 0.35 };
 }

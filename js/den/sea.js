@@ -1,5 +1,5 @@
-// The sailing sea and the sloop, in 3D: the water, rocks, cliffs, lock, pump and pins.
-// New things out on the sea are built here. (Split out of den.js.)
+// The sailing sea and the sloop, in 3D: the water, rocks, cliffs, the canal's water and pins.
+// (Its locks: lock.js.) (Split out of den.js.)
 import * as THREE from 'three';
 import { SAIL, LAY, Sea, Helm } from '../den-sail.js';
 import { Broadside } from '../den-guns.js';
@@ -21,9 +21,10 @@ import { hullGeo } from './raids.js';
    She has a gun each side: Q fires the port gun, E the starboard, as she sails, once they're
    loaded by Gunnery (js/den/sea-guns.js). The sea has its lay (LAY in src/den-sail.ts): a trade
    wind out to a junction, on to the imperial checkpoint (checkpoint.js) and back home on another,
-   and a canal to a lock up a cliff into a hidden cove; the checkpoint's guns shoot at her, and a
-   hit holes her deck: she's dazed till you patch it by Carpentry (patchOpen). The lock's worked by
-   Bilge, from a board on the quay beside it, an old pump at its head (holdOpen). */
+   and a canal up through a chain of locks and down again round the checkpoint, the hidden cove off
+   it at the top; the checkpoint's guns shoot at her, and a hit holes her deck: she's dazed till you
+   patch it by Carpentry (patchOpen). Each lock is worked by Bilge, from a board on the quay beside
+   it, an old pump at its head (lock.js). */
 export const SEA_X0 = SAIL.X0;   // (where it was before the board grew out to the right)
 export const seaX = (c) => SEA_X0 + (c + 0.5) * SAIL.CELL, seaZ = (r) => SAIL.Z0 - (r + 0.5) * SAIL.CELL;
 export const SLOOP_DECK = 0.75;
@@ -31,12 +32,26 @@ export const sail = { on: false, sea: new Sea(9), helm: null, g: null, rocks: nu
 // The wind she sails by (src/den-wind.ts; drawn in wind.js).
 sail.sea.breeze = new Wind(9);
 sail.helm = new Helm(sail.sea);
-// The hidden cove's water is a lock's lift above the sea; the cliff stands above that.
-export const LIFT = 1.6, CLIFF_H = 3.4;
-// The lock's gates, out from its middle each way: past her bow, bowsprit and stern, so she fits
+// Each lock lifts the canal's water this much; its banks stand BANK above it (CLIFF_H, a lock's
+// lift up: the first lock's banks, as they always were).
+export const LIFT = 1.6, BANK = 1.8, CLIFF_H = LIFT + BANK;
+// The hidden cove's water, up at the top of the locks (the crane's ledge is just above it: crane.js).
+export const COVE_Y = LIFT * LAY.COVE.level;
+// A lock's gates, out from its middle each way: past her bow, bowsprit and stern, so she fits
 // between them shut (she's 4.4 long and her bowsprit reaches 3.3 ahead; a square's 4).
-const LOCK_GATE_X = 3.5;
-export const liftAt = (c, r) => LIFT * (sail.sea.isLock(c, r) ? sail.helm.level : sail.sea.level(c, r));
+export const LOCK_GATE_X = 3.5;
+// The water's height on a square: the sea's, the canal's, or a lock's as it is just now.
+export const liftAt = (c, r) => LIFT * (sail.helm.lockAt(c, r)?.height() ?? sail.sea.level(c, r));
+// The top of the cliff on a square: BANK over the highest water beside it (a lock counted full), and
+// never below CLIFF_H.
+export function bankTop(c, r) {
+  let top = 1;
+  for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) {
+    const i = sail.sea.lockAt(c + a, r + b), lv = i >= 0 ? sail.sea.locks[i].low + 1 : sail.sea.level(c + a, r + b);
+    top = Math.max(top, lv);
+  }
+  return LIFT * top + BANK;
+}
 // Her, smaller than their ship: one mast, a square sail and a topsail, a bowsprit, a tiller at the
 // stern, weathered planks, and your own flag at the masthead.
 export function sloopMesh() {
@@ -104,10 +119,12 @@ export function seaRocks() {
   return g;
 }
 /* The lay of the sea: the trade winds as streaks of white water racing along their lanes, a yellow
-   buoy at the junction, the cliff with the hidden cove's water up behind it, and the lock in its
-   gap (its chamber's water rising and falling, a pair of gates at each end). */
+   buoy at the junction, and the high ground the canal's cut through, its cliffs stepping up beside
+   each stretch of the canal's water, the hidden cove's up at the top. (Its locks: lock.js.) */
+export const coveM = mat('#2f86b0', { roughness: 0.3, transparent: true, opacity: 0.88, emissive: '#0f3f5e' });
+export const stoneM = mat('#6b6158', { flatShading: true, roughness: 0.95 }), grassM = mat('#5f7d3a', { roughness: 1 });
 export function seaWorld() {
-  const W = { g: new THREE.Group(), lanes: [], gates: {}, chamber: null };
+  const W = { g: new THREE.Group(), lanes: [] };
   for (const { at: [c, r], d, n } of LAY.LANES) {
     const tex = canvasTex(64, 128, (g, w, h) => {
       g.clearRect(0, 0, w, h);
@@ -137,89 +154,59 @@ export function seaWorld() {
   top.position.set(buoy.position.x, 0.9, buoy.position.z);
   W.g.add(buoy, top);
   W.buoy = buoy;
-  // The cliff: blocks of rock, flat-topped and grassy, round the cove. (Its left-hand side, past the
-  // board's edge, is the headland the crane stands on and the lagoon lies up on: crane.js.)
-  const { c0, c1, r0, r1 } = LAY.COVE, cliffAt = new Set(sail.sea.cliff);
-  for (let c = c0; c <= c1 + 1; c++) cliffAt.add(`${c},${r1 + 1}`);
-  const stone = mat('#6b6158', { flatShading: true, roughness: 0.95 }), grass = mat('#5f7d3a', { roughness: 1 });
+  // The cliffs: blocks of rock, flat-topped and grassy, each standing BANK over the highest water
+  // beside it, so they step up the locks with the canal. (The cove's left-hand side, past the
+  // board's edge, is the headland the crane stands on and the lagoon lies up on: crane.js; the
+  // checkpoint's headland, checkpoint.js. Between the two, past the board's edge, more of it.)
+  const P = LAY.PLATEAU, cliffAt = new Set(sail.sea.cliff);
+  for (let c = -2; c < P.c0; c++) for (let r = 16; r <= P.r1; r++) cliffAt.add(`${c},${r}`);
   for (const id of cliffAt) {
-    const [c, r] = id.split(',').map(Number), x = seaX(c), z = seaZ(r);
-    const b = mesh(new THREE.BoxGeometry(SAIL.CELL, CLIFF_H + 1, SAIL.CELL), stone);
-    b.position.set(x, (CLIFF_H - 1) / 2, z);
-    const t = mesh(new THREE.BoxGeometry(SAIL.CELL * 0.98, 0.12, SAIL.CELL * 0.98), grass);
-    t.position.set(x, CLIFF_H + 0.06, z);
+    const [c, r] = id.split(',').map(Number), x = seaX(c), z = seaZ(r), top = bankTop(c, r);
+    const b = mesh(new THREE.BoxGeometry(SAIL.CELL, top + 1, SAIL.CELL), stoneM);
+    b.position.set(x, (top - 1) / 2, z);
+    const t = mesh(new THREE.BoxGeometry(SAIL.CELL * 0.98, 0.12, SAIL.CELL * 0.98), grassM);
+    t.position.set(x, top + 0.06, z);
     W.g.add(b, t);
-    // (none on the quay by the lock, where its Bilge board lies: holdOpen)
-    if (c === LAY.LOCK[0] && (r === LAY.LOCK[1] - 1 || r === LAY.LOCK[1] - 2)) continue;
-    for (let i = 0; i < 2; i++) W.g.add(rock(x + (Math.random() - 0.5) * 3, CLIFF_H * (0.3 + Math.random() * 0.5), z + (Math.random() - 0.5) * 3, 0.8 + Math.random() * 0.7));
+    // (none on a lock's banks, where its quay and Bilge board are: lock.js)
+    if (sail.sea.locks.some(({ at: [lc, lr] }) => Math.abs(lc - c) <= 1 && Math.abs(lr - r) <= 1)) continue;
+    for (let i = 0; i < 2; i++) W.g.add(rock(x + (Math.random() - 0.5) * 3, top * (0.3 + Math.random() * 0.5), z + (Math.random() - 0.5) * 3, 0.8 + Math.random() * 0.7));
   }
-  // The cove's water, up behind the cliff (all but the end of the lock that reaches into it: see
-  // LOCK_GATE_X).
-  const [lc, lr] = LAY.LOCK;
-  const coveM = mat('#2f86b0', { roughness: 0.3, transparent: true, opacity: 0.88, emissive: '#0f3f5e' });
-  const cw = (c1 - c0 + 1) * SAIL.CELL, cd = (r1 - r0 + 1) * SAIL.CELL, cx = seaX((c0 + c1) / 2), cz = seaZ((r0 + r1) / 2);
-  const nx = seaX(lc) - LOCK_GATE_X - 0.2 - cx, ny = -(seaZ(lr) - cz), half = SAIL.CELL / 2;   // (the shape's y is -z)
-  const coveShape = new THREE.Shape();
-  coveShape.moveTo(-cw / 2, -cd / 2);
-  for (const [x, y] of [[cw / 2, -cd / 2], [cw / 2, ny - half], [nx, ny - half], [nx, ny + half], [cw / 2, ny + half], [cw / 2, cd / 2], [-cw / 2, cd / 2]]) coveShape.lineTo(x, y);
-  const cove = mesh(new THREE.ShapeGeometry(coveShape).rotateX(-Math.PI / 2), coveM, false);
-  cove.position.set(cx, LIFT + 0.05, cz);
+  // The canal's water between the locks, a square at a time at its level (all but the ends of the
+  // locks that reach into it: see LOCK_GATE_X; each lock draws its own chamber).
+  const half = SAIL.CELL / 2, into = LOCK_GATE_X - half;
+  for (const [id, lv] of sail.sea.pounds) {
+    if (sail.sea.cove.has(id)) continue;
+    const [c, r] = id.split(',').map(Number);
+    // (trimmed on each side a lock's end reaches into: x0, x1 across, z0, z1 out)
+    let x0 = -half, x1 = half, z0 = -half, z1 = half;
+    for (const { at: [lc, lr] } of sail.sea.locks) {
+      if (lr === r && lc === c - 1) x0 += into; else if (lr === r && lc === c + 1) x1 -= into;
+      else if (lc === c && lr === r - 1) z0 += into; else if (lc === c && lr === r + 1) z1 -= into;
+    }
+    const w = mesh(new THREE.PlaneGeometry(x1 - x0, z1 - z0).rotateX(-Math.PI / 2), coveM, false);
+    w.position.set(seaX(c) + (x0 + x1) / 2, LIFT * lv + 0.05, seaZ(r) - (z0 + z1) / 2);
+    W.g.add(w);
+  }
+  // The hidden cove's water, up at the top, its mouth the arm off the clifftop canal.
+  const { c0, c1, r0, r1 } = LAY.COVE;
+  const cw = (c1 - c0 + 1) * SAIL.CELL, cd = (r1 - r0 + 1) * SAIL.CELL;
+  const cove = mesh(new THREE.PlaneGeometry(cw, cd).rotateX(-Math.PI / 2), coveM, false);
+  cove.position.set(seaX((c0 + c1) / 2), COVE_Y + 0.05, seaZ((r0 + r1) / 2));
   W.g.add(cove);
-  // A strip of sand at the back of the cove, and an old pump on it (the map's "hidden cove with an
-  // old bilge pump").
+  // A strip of sand at the back of the cove (the den's side of it, away from its mouth), and an old
+  // pump on it (the map's "hidden cove with an old bilge pump").
   const sand = mesh(new THREE.BoxGeometry(cw, 0.3, 1.6), mat('#c9a874', { roughness: 1 }));
-  sand.position.set(cove.position.x, LIFT + 0.1, seaZ(r1) - SAIL.CELL / 2 + 0.8);
+  sand.position.set(cove.position.x, COVE_Y + 0.1, seaZ(r0) + SAIL.CELL / 2 - 0.8);
   W.g.add(sand);
   const pumpG = pumpMesh();
-  pumpG.position.set(seaX(c0 + 1), LIFT + 0.25, sand.position.z);
+  pumpG.position.set(seaX(c0 + 1), COVE_Y + 0.25, sand.position.z);
   W.g.add(pumpG);
-  // And one on the quay by the lock, at the head of its Bilge board, its spout out over the lock
-  // (the user, 9 Nov: "we need a visible pumping action going on as well. We need the actual bilge
-  // pump"): its handle works as you bilge, and water gushes from it into the lock as it fills.
-  W.pump = pumpMesh();
-  W.pump.scale.setScalar(1.8);
-  W.pump.rotation.y = -Math.PI / 2 + 0.7;   // (its spout out over the lock, its handle clear of the board)
-  W.pump.position.set(seaX(LAY.LOCK[0]) + 1.7, CLIFF_H + 0.12, seaZ(LAY.LOCK[1]) + SAIL.CELL / 2 + 0.6);
-  W.g.add(W.pump);
-  // (thick and bright enough to read from the quay's camera, up over the board)
-  W.gush = mesh(new THREE.CylinderGeometry(0.3, 0.45, 1, 10, 1, true), new THREE.MeshBasicMaterial({ color: '#cdeefa', transparent: true, opacity: 0.9, depthWrite: false, side: THREE.DoubleSide, fog: false }), false);
-  W.gush.visible = false;
-  W.g.add(W.gush);
-  // The lock: its chamber's water, and a pair of gates at each end. She's longer than a square, so
-  // its walls run on past the cliff each way, as stone piers, and the gates hang at their ends.
-  W.chamber = mesh(new THREE.PlaneGeometry(LOCK_GATE_X * 2, SAIL.CELL).rotateX(-Math.PI / 2), coveM, false);
-  W.chamber.position.set(seaX(lc), 0.05, seaZ(lr));
-  W.g.add(W.chamber);
-  const pierL = LOCK_GATE_X + 0.2 - half;
-  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
-    const pier = mesh(new THREE.BoxGeometry(pierL, CLIFF_H + 1, 0.6), stone);
-    pier.position.set(seaX(lc) + sx * (half + pierL / 2), (CLIFF_H - 1) / 2, seaZ(lr) + sz * (half + 0.3));
-    const top = mesh(new THREE.BoxGeometry(pierL, 0.12, 0.6), grass);
-    top.position.set(pier.position.x, CLIFF_H + 0.06, pier.position.z);
-    W.g.add(pier, top);
-  }
-  const gateM = mat('#5b3a20', { map: woodTex }), iron = mat('#3a3f45', { metalness: 0.6, roughness: 0.4 });
-  for (const [end, sx] of [['sea', 1], ['cove', -1]]) {
-    const leaves = [];
-    for (const sz of [-1, 1]) {
-      const hinge = new THREE.Group();
-      hinge.position.set(seaX(lc) + sx * LOCK_GATE_X, 0, seaZ(lr) + sz * SAIL.CELL / 2);
-      const leaf = mesh(new THREE.BoxGeometry(0.28, CLIFF_H + 0.2, SAIL.CELL / 2), gateM);
-      leaf.position.set(0, (CLIFF_H + 0.2) / 2 - 0.4, -sz * SAIL.CELL / 4);
-      for (const y of [0.4, 1.6, 2.8]) { const band = mesh(new THREE.BoxGeometry(0.32, 0.1, SAIL.CELL / 2), iron, false); band.position.set(0, y, -sz * SAIL.CELL / 4); hinge.add(band); }
-      hinge.add(leaf);
-      hinge.userData.sz = sz;
-      W.g.add(hinge);
-      leaves.push(hinge);
-    }
-    W.gates[end] = { leaves, sx, open: 1 };
-  }
   scene.add(W.g);
   return W;
 }
 /* An old bilge pump: a post, a spout out of one side and a handle out of the other, pivoted at the
    top of the post so it can be worked (userData.arm; the spout's mouth is userData.mouth). */
-function pumpMesh() {
+export function pumpMesh() {
   const g = new THREE.Group(), pw = mat('#6a5038', { map: woodTex });
   const post = mesh(new THREE.BoxGeometry(0.35, 1.2, 0.35), pw); post.position.y = 0.6;
   const arm = new THREE.Group(); arm.position.set(0.05, 1.2, 0); arm.rotation.z = 0.35;
@@ -231,8 +218,6 @@ function pumpMesh() {
   g.userData.mouth = V3(-0.5, 0.9, 0);
   return g;
 }
-// A stroke of the quay pump's handle, as a clear's pumped into the lock.
-export function pumpStroke() { const p = sail.world?.pump; if (p) p.userData.stroke = 1; }
 // The pin: a red buoy with a little pennant, riding the swell.
 export function pinMesh() {
   const g = new THREE.Group(), red = mat('#c8372a', { roughness: 0.6 }), white = mat('#f3ecdc');

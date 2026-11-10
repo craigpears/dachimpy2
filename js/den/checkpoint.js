@@ -1,13 +1,13 @@
 // The imperial checkpoint across the main shipping lane, in 3D, and its guns at work; the headland
 // beside it and the old wreck beyond it. (The rules: src/den-checkpoint.ts.)
 import * as THREE from 'three';
-import { LAY, SAIL } from '../den-sail.js';
-import { CHECK, Checkpoint, throughSay } from '../den-checkpoint.js';
+import { LAY, SAIL, canalAt } from '../den-sail.js';
+import { CHECK, HINT, Checkpoint, throughSay } from '../den-checkpoint.js';
 import { scene, mat, mesh, canvasTex, woodTex, V3, burst, toast, worldLets, shake, flagpole } from './world.js';
 import { rock } from './land.js';
 import { turretMesh, turretView, turretWrecked, turretFire, turretLand, turretShotsTick, turretShotsClear, shotComing } from './turret.js';
 import { hullGeo } from './raids.js';
-import { seaX, seaZ, sail, CLIFF_H } from './sea.js';
+import { seaX, seaZ, sail, CLIFF_H, bankTop } from './sea.js';
 import { deckHoleShape } from './sea-puzzles.js';
 import { canHaulWreck } from './treasure.js';
 
@@ -23,8 +23,8 @@ import { canHaulWreck } from './treasure.js';
    quietens it ten seconds, smoking, and the third wrecks it, the gun toppling off and the bastion
    sinking to a smoking stump. Once she's fired on it, its guns turn on her, a red ring on the water
    where each shot will come down.
-   On its left a headland (the crane, later, goes up and over it), on its right a reef whose far end
-   is the long way round. Beyond it, an old wreck on the open sea, its treasure hauled up by
+   On its left a headland, the canal's last two locks cut down through it (lock.js): the secret way
+   round. On its right a reef, out to the edge of the sea. Beyond it, an old wreck on the open sea, its treasure hauled up by
    Treasure Haul (treasure.js). */
 export const cp = { check: new Checkpoint(), W: null, byWreck: false };
 const K = LAY.CHECKPOINT, GATE_Z = seaZ(K.ROW), ARCH_Y = 6.4;
@@ -137,14 +137,17 @@ function build() {
     W.g.add(ring, cross, cross2, buoy, cap);
     W.rings.push({ c, r, gun: gi, m: ring.material });
   }));
-  // The headland: cliff, flat-topped and grassy as round the hidden cove, and on past the board.
+  // The headland: cliff, flat-topped and grassy as round the hidden cove, and on past the board; the
+  // canal's locks cut down through it (lock.js), its banks there level with the clifftop canal's.
   const { c0, c1, r0, r1 } = K.HEADLAND, rockM = mat('#6b6158', { flatShading: true, roughness: 0.95 }), grass = mat('#5f7d3a', { roughness: 1 });
   for (let c = c0 - 2; c <= c1; c++) for (let r = r0; r <= r1; r++) {
-    const x = seaX(c), z = seaZ(r), ht = CLIFF_H + 1.4 + ((c * 7 + r * 3) % 3) * 0.5;
+    if (canalAt(c, r)) continue;
+    const bank = [-1, 0, 1].some((a) => [-1, 0, 1].some((b) => canalAt(c + a, r + b)));
+    const x = seaX(c), z = seaZ(r), ht = bank ? bankTop(c, r) : CLIFF_H + 1.4 + ((c * 7 + r * 3) % 3) * 0.5;
     const b = mesh(new THREE.BoxGeometry(SAIL.CELL, ht + 1, SAIL.CELL), rockM); b.position.set(x, (ht - 1) / 2, z);
     const t = mesh(new THREE.BoxGeometry(SAIL.CELL * 0.98, 0.12, SAIL.CELL * 0.98), grass); t.position.set(x, ht + 0.06, z);
     W.g.add(b, t);
-    for (let i = 0; i < 2; i++) W.g.add(rock(x + (Math.random() - 0.5) * 3, ht * (0.3 + Math.random() * 0.5), z + (Math.random() - 0.5) * 3, 0.8 + Math.random() * 0.7));
+    if (!bank) for (let i = 0; i < 2; i++) W.g.add(rock(x + (Math.random() - 0.5) * 3, ht * (0.3 + Math.random() * 0.5), z + (Math.random() - 0.5) * 3, 0.8 + Math.random() * 0.7));
   }
   // The old wreck.
   const [wc, wr] = LAY.WRECK;
@@ -191,8 +194,9 @@ export function checkpointTick(dt) {
       cp.check.holed();
       toast(e.aimed ? 'Hit! She\'s holed: patch her to sail on' : 'Hit! That gun had her on its mark: patch her to sail on', true);
     }
-    for (const e of cp.check.watch(h.pose)) {
-      if (e.kind === 'sighted') toast('The imperial checkpoint! Its guns are trained on the red rings: stop on one and she\'s hit. Run it, row it, go round the long way, or knock its guns out');
+    for (const e of cp.check.watch(h.pose, h.idle(), dt)) {
+      if (e.kind === 'sighted') toast('The imperial checkpoint! Its guns are trained on the red rings: stop on one and she\'s hit. Run it, row it, or knock its guns out');
+      else if (e.kind === 'hint') toast(HINT);
       else if (e.kind === 'calm') toast('Out of sight of the checkpoint: its guns go back to their marks');
       else toast(throughSay(e));
     }

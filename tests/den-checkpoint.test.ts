@@ -1,6 +1,6 @@
 /* The imperial checkpoint (src/den-checkpoint.ts), on the sloop's sea (src/den-sail.ts). */
 import { describe, expect, it } from 'vitest';
-import { CHECK, Checkpoint, isCheckpoint, throughSay, type CheckEvent } from '../src/den-checkpoint';
+import { CHECK, HINT, Checkpoint, isCheckpoint, throughSay, type CheckEvent } from '../src/den-checkpoint';
 import { LAY, SAIL, Sea, Helm, broadside, type Move, type Pose } from '../src/den-sail';
 import { Wind } from '../src/den-wind';
 import { Salvage } from '../src/den-haul';
@@ -38,8 +38,10 @@ describe('the lay: the main shipping lane runs out to an imperial checkpoint (10
   it('the board grew, and the near sea is as it was rebuilt round the checkpoint', () => {
     expect([SAIL.COLS, SAIL.ROWS]).toEqual([22, 26]);
     // The rocks of the near sea (seed 9: the den's): as before it grew, less the turret's rock, and
-    // as the lanes were laid again round the checkpoint (10 Nov).
-    const was = ['0,8', '1,8', '10,8', '12,12', '12,4', '14,10', '14,8', '14,9', '15,10', '15,9', '2,8', '3,8', '4,8', '5,10', '5,12', '5,13', '5,8', '5,9', '8,5'];
+    // as the lanes were laid again round the checkpoint (10 Nov); and the cliffs the canal's chain
+    // of locks is cut through, the hidden cove narrower behind the first lock (10 Nov).
+    const was = ['0,8', '1,8', '10,8', '12,12', '12,4', '14,10', '14,8', '14,9', '15,10', '15,9', '2,8', '3,8', '4,8', '5,10', '5,12', '5,13', '5,8', '5,9', '8,5',
+      '3,9', '3,10', '3,11', '3,12', '3,13', '4,9', '4,10'];
     const s = new Sea(9), old = [...s.rocks].filter((k) => { const [c, r] = k.split(',').map(Number); return c < 16 && r < 14; }).sort();
     expect(old).toEqual(was.sort());
   });
@@ -51,25 +53,19 @@ describe('the lay: the main shipping lane runs out to an imperial checkpoint (10
     expect(cp.battery.gunFor(SHORT.c, SHORT.r)).toBe(-1);
   });
 
-  it('its line is closed but for the gate and the reef\'s end (the long way round)', () => {
+  it('its line is closed but for the gate, and the locks cut through its headland (the reef\'s end closed, 10 Nov)', () => {
     const s = new Sea(9), open = [];
     for (let c = 0; c < SAIL.COLS; c++) if (s.open(c, K.ROW)) open.push(c);
-    expect(open).toEqual([K.GATE, K.REEF.c1 + 1, K.REEF.c1 + 2]);
+    expect(open).toEqual([LAY.LOCKS[3].at[0], K.GATE]);
+    expect(K.REEF.c1).toBe(SAIL.COLS - 1);
     expect(isCheckpoint(s, ...K.GUNS[0])).toBe(true);
     expect(isCheckpoint(s, ...K.PIERS[1])).toBe(true);
     expect(isCheckpoint(s, K.REEF.c0, K.ROW)).toBe(false);
   });
 
-  it('room is kept for the crane over the headland, later', () => {
-    const s = new Sea(9);
-    expect(s.open(...K.LEDGE)).toBe(true);
-    expect(s.open(...K.LANDING)).toBe(true);
-    expect(s.open(K.LEDGE[0], K.ROW)).toBe(false);   // (the headland between them)
-  });
-
   it('every open square can still be reached, and the old sea\'s ways still work', () => {
     const s = new Sea(9), h = new Helm(s);
-    // (into the hidden cove, by the lock; and out past the checkpoint to the wreck)
+    // (into the hidden cove, up the locks; and out past the checkpoint to the wreck)
     expect(s.plot(SAIL.HOME, LAY.COVE.c0 + 1, LAY.COVE.r0 + 1, null, true)).not.toBeNull();
     expect(s.plot(SAIL.HOME, LAY.WRECK[0] + 1, LAY.WRECK[1], null, true)).not.toBeNull();
     expect(h.drop(LAY.JUNCTION[0] + 1, LAY.JUNCTION[1] + 1)).not.toBeNull();
@@ -145,28 +141,41 @@ describe('running it under sail (10 Nov)', () => {
   });
 });
 
-describe('or round the long way', () => {
-  it('past the reef\'s end, out of reach of its guns the whole way', () => {
-    const s = new Sea(9), h = new Helm(s, SHORT), cp = new Checkpoint();
-    // Pins along the long way: out to the right, past the reef's end, and back to the wreck.
-    const legs: [number, number][] = [[K.REEF.c1 + 1, 17], [K.REEF.c1 + 2, 22], [LAY.WRECK[0] + 1, LAY.WRECK[1]]];
+describe('or round it by the locks, the secret way (10 Nov)', () => {
+  it('up the canal and down through its headland, out of its sight and never a shot fired', () => {
+    // (The chain of locks itself: tests/den-lock.test.ts.)
+    const s = new Sea(9), h = new Helm(s, { c: 7, r: 11, d: 3 }), cp = new Checkpoint();
+    const pump = () => { if (h.working()) h.pump(0.5); };
+    // Pins along the way: up on the clifftop, then beyond, by the wreck.
+    const legs: [number, number][] = [[2, 16], [LAY.WRECK[0] - 1, LAY.WRECK[1]]];
     let fired = 0;
     const said: CheckEvent[] = [];
     for (const leg of legs) {
       h.drop(...leg);
-      const r = run(h, cp, 90, { each: () => {} });
+      const r = run(h, cp, 200, { each: pump });
       fired += r.fired; said.push(...r.said);
       expect([h.pose.c, h.pose.r]).toEqual(leg);
     }
     expect(fired).toBe(0);
-    expect(said).toContainEqual({ kind: 'through', how: 'round', back: false, hits: 0 });
+    expect(said).toContainEqual({ kind: 'through', how: 'locks', back: false, hits: 0 });
+    expect(said.find((e) => e.kind === 'sighted')).toBeUndefined();
+    expect(throughSay({ kind: 'through', how: 'locks', back: false, hits: 0 })).toMatch(/by the locks/);
   });
 
-  it('is a good deal longer than through the gate', () => {
-    const s = new Sea(9), to: [number, number] = [LAY.WRECK[0] + 1, LAY.WRECK[1]];
-    const gate = s.plot(SHORT, ...to, null, true)!.length;
-    const round = s.plot(SHORT, K.REEF.c1 + 1, 17, null, true)!.length + s.plot({ c: K.REEF.c1 + 1, r: 17, d: 0 }, ...to, null, true)!.length;
-    expect(round).toBeGreaterThanOrEqual(gate * 2);
+  it('nothing says where they are: stopped short of it, a hint there\'s another way, once', () => {
+    // "I wonder if there's a secret way": something should hint at it, not a signpost.
+    const cp = new Checkpoint();
+    expect(cp.watch(SHORT, false)).toEqual([{ kind: 'sighted' }]);
+    // (a while after, once what's said on sighting it has been read)
+    expect(cp.watch(SHORT, true, CHECK.HINT_AFTER - 1)).toEqual([]);
+    expect(cp.watch(SHORT, true, 1)).toEqual([{ kind: 'hint' }]);
+    expect(cp.watch(SHORT, true, 10)).toEqual([]);
+    expect(HINT).toMatch(/secret way/);
+    expect(HINT).not.toMatch(/lock|canal|left|right/i);
+    // Not while she's under way through it, nor beyond it.
+    const by = new Checkpoint();
+    by.watch({ c: K.GATE, r: K.ROW + 3 }, false);
+    expect(by.watch({ c: K.GATE, r: K.ROW + 3 }, true, 10)).toEqual([]);
   });
 });
 

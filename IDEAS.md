@@ -233,7 +233,8 @@ moving. It gives such a nostalgia." What's next:
   raise or lower your ship before the gates open. A shortcut that costs puzzle work, not
   reflexes, which keeps a race a puzzle game (and Bilge pumping water somewhere it believably
   needs pumping, as at the den's tide). (A first go: one lock up a cliff into a hidden cove,
-  pumped by Bilge: RULES.md.)
+  pumped by Bilge; then a chain of four, two up and two down, the secret way round the imperial
+  checkpoint: RULES.md.)
   **The Navigation duty puzzle (9 Nov):** bring Puzzle Pirates' Navigation duty puzzle into the
   races, so that, in concept, doing it well lets you find the shortcuts and hidden routes (how:
   "I don't quite know how that could work"). Check the real puzzle's rules before shaping it. Then
@@ -802,17 +803,11 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     oars to be sure, and it comes from the sea itself rather than a tile made for it. (A first go
     is on the sloop's sea, to see how it feels: RULES.md, "The wind, and her oars". Goes with
     "Weather and time of day", under landscapes.)
+    Parked for now (10 Nov, "just getting irritating": the arrows got in the way): switched off
+    by `WEATHER.parked` in src/den-wind.ts, its code kept, to refine later; the oars stay.
     **The wind in one place: a wreck you can see but can't sail to (10 Nov):** with the wind parked
-    across the whole sea ("just getting irritating"), the user would bring it back in one section
-    only, the lagoon say: "maybe it should just be refined to be in a certain section ... that
-    can have the wind. So you can see the shipwreck. So it's kind of there being tempting, but
-    you can't get to it unless you go around the back way. That would be quite cool." A wind dead
-    against her keeps her off the wreck in sight, and the back way round gets her there. The oars
-    beat it too, but that's never said: a secret for players to work out ("we won't tell anybody
-    that, but they can figure out oars go against the wind"). Only there, never all over the sea:
-    "it should only really apply to this little lagoon area, not everywhere, because otherwise
-    it's irritating."
-    Needs the lagoon to be a little board of its own, which it isn't yet (she rests by the wreck).
+    across the whole sea ("just getting irritating"), it comes back in one place only: being built,
+    see TODO.md, "A wind by the old wreck beyond the checkpoint".
     **Big ships hit hard, small ships mend fast (9 Nov):** a way to give big and small ships each a
     purpose. A big ship has more cannons, but the only control you really have is to "fire a full
     broadside": far more effective against medium and big ships. Against a small ship it's

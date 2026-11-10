@@ -143,27 +143,27 @@ the site (`.assetsignore` skips `*.md`).
   fun ... since he requested it"). The crane being built only for
   the session is fine for a proof of concept (a refresh starts afresh).
 
-- **The secret way round the checkpoint: a chain of locks (10 Nov):** "make it a bit more of a
-  journey ... be more than just the one lock". The canal climbs through several locks ("maybe
-  there's 4 or 5 or something in total. Might be swallowing a bit too much"), each filled by
-  Bilge, and comes back down to rejoin the main trade winds beyond the checkpoint: the alternate
-  way round it, "a bit more getting through the locks", which makes it more discoverable ("I
-  wonder if there's a secret way"; something should hint at it). The crane up to the lagoon, with
-  its wreck and the rescued animal, branches off after the second or third lock, off the track the
-  locks lead you along, "almost more like an Easter egg" you find by wandering off.
-
 - **The puzzles' pieces checked against the real ones (10 Nov):** "the last few puzzles, the
   graphics have been placeholders rather than matching the Puzzle Pirate pieces". Compare each
   puzzle already in the den (Treasure Haul above all, and Bilge, Swordfight and Gunnery) with its
   YPPedia page's pictures, and redraw any piece that doesn't read as the real one (RULES.md, "A
   puzzle's pieces look like the real ones").
 
-- **Park the wind for now (10 Nov):** "I think maybe we need to park the wind idea for now.
-  That's just getting irritating ... like I don't know why if I got arrows pointing to the right
-  all the time, like it's just over the top. I think it's the arrows getting in my way." Turn the
-  weather off, so she sails the same every way (no calms, no irons, no wind changes or their
-  messages), and take away the big arrows by her, the streaks and the wind on the sailing bar.
-  Keep the code, switched off, to refine later (IDEAS.md). The trade winds stay.
+- **The patch's pieces show when she rows (10 Nov):** "when I've just clicked oars, I see the
+  carpentry pieces for the repairing the damaged carpentry puzzle I've just played." Once she's
+  patched, nothing of the patch puzzle should show over the rowing board.
+
+- **A wind by the old wreck beyond the checkpoint (10 Nov):** the wind, parked everywhere else,
+  blows in one place only: not the lagoon (the user first said so, then: "maybe I didn't mean the
+  lagoon"), but "once you get past the Imperial checkpoint, there's that bit to the left ... where
+  you can have the wind to the left, where I can see a bit of a shipwreck. The one that you can get
+  through by going through the locks, but without going to the lagoon." So the old wreck is in
+  sight beyond the checkpoint, "tempting, but you can't get to it unless you go around the back
+  way": a wind dead against her keeps her off it from the checkpoint side, and the locks' way
+  round brings her in to it. The oars beat the wind too, but that's never said: a secret for
+  players to work out ("we won't tell anybody that, but they can figure out oars go against the
+  wind"). Only there: "it should only really apply to this little ... area, not everywhere,
+  because otherwise it's irritating."
 
 ## Needs a playtest to pin down
 

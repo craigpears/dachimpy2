@@ -17,9 +17,10 @@ const ship = (c: number, r: number, o: Partial<{ idle: boolean; held: string | n
 const [LC, LR] = CRANE.LEDGE;
 
 describe('the ledge', () => {
-  it('is in the hidden cove, open water she can get to through the lock', () => {
+  it('is in the hidden cove, open water she can get to up the locks', () => {
     const sea = new Sea(9);
-    expect(sea.level(LC, LR)).toBe(1);
+    expect(sea.level(LC, LR)).toBe(LAY.COVE.level);
+    expect(sea.cove.has(`${LC},${LR}`)).toBe(true);
     expect(sea.open(LC, LR)).toBe(true);
     expect(sea.plot(SAIL.HOME, LC, LR, null, true)).not.toBeNull();
   });

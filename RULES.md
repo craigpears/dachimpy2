@@ -144,7 +144,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   the user suggested ("maybe the front wall could be a bit of an exception"): stopping at the wall
   with a piece in hand still brings up the wall's view.
 - **Every other way through costs a puzzle (10 Nov).** A choice of routes is a choice of
-  puzzles: run a checkpoint's guns and patch the holes (Carpentry), the long way through the lock
+  puzzles: run a checkpoint's guns and patch the holes (Carpentry), round it by the locks
   (Bilge), or a crane up the cliff (Carpentry): "that is a nice balance ... you need a puzzle to
   execute the alternatives". So even a sloop, which can take every little route, is choosing which
   puzzle to play. But not the same trick everywhere: "having a lock everywhere is just a bit of a
@@ -233,20 +233,66 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       checkpoint, dropping her short of its guns; and another runs back home, from beside where the
       main lane drops her to just off the beach ("The trade winds have carried her home").
     - **The junction:** at the first lane's end it drops her off "just like a normal square": on,
-      the main shipping lane out to the checkpoint; left, the canal to the lock (the side
-      adventure); right, open sea.
-    - **The canal and the lock:** a narrow canal between rocks to a lock at the foot of a cliff.
+      the main shipping lane out to the checkpoint; left, a canal off into the cliffs (the chain of
+      locks: below); right, open sea. "Left, a canal runs off into the cliffs", it says, and no more.
+    - **The canal and the lock (the first of a chain: below):** a narrow canal between rocks to a lock at the foot of a cliff.
       Sail into the lock and she waits; nothing happens on its own. Bilge on the quay pumps it up,
       a proper go of it (about sixteen moves' worth), not "way too quickly": the lock's water rises
       a step with every clearing and she rises with it ("you should see the line of water
       gradually going up"), and a real pump stands on the quay by the board, its handle working
       and water gushing into the lock as you bilge ("we need the actual bilge pump"). The board
       reads the right way up from the quay (9 Nov: it looked "upside down"). Once it's full the
-      top gates swing open and, once they're open, she sails on into the hidden cove behind the
-      cliff, its water higher, an old bilge pump on the sand. Coming back down, the lock drains by
-      itself in a couple of seconds, and she waits for the gates again before she sails out. Esc
-      while she waits lets her off. The pilot finds the way into the cove through the lock. (A
+      top gates swing open and, once they're open, she sails on up the canal behind the cliff, its
+      water higher. Coming back down, the lock drains by itself in a couple of seconds, and she
+      waits for the gates again before she sails out. Esc while she waits lets her off. (A
       shortcut that costs puzzle work, not reflexes: IDEAS.md, "Locks on a canal".)
+    - **A chain of locks, the secret way round the checkpoint (10 Nov).** The user: "make it a bit
+      more of a journey ... be more than just the one lock ... maybe there's 4 or 5 or something in
+      total. Might be swallowing a bit too much", each filled by Bilge, coming back down to rejoin
+      the sea beyond the checkpoint: the alternate way round it, "a bit more getting through the
+      locks", which makes it more discoverable ("I wonder if there's a secret way"; something
+      should hint at it). The lagoon, its wreck and the rescued animal branch off "after the second
+      or third lock", off the track the locks lead you along, "almost more like an Easter egg" you
+      find by wandering off. So:
+      - **Two up and two down:** from the first lock the canal climbs a second, up onto the
+        clifftop, runs along the top of the cliffs, and comes down two more cut through the
+        checkpoint's headland, out onto the open sea beyond it, by the old wreck. Its cliffs step
+        up with its water, a lock's lift at a time. Out of the checkpoint's sight and its guns'
+        reach the whole way.
+      - **It costs puzzles, not just time:** every lock up is a go of Bilge on its quay, either way
+        you go (out, the first two; back, the two through the headland). Going down is free: with
+        her in it the lock drains by itself, and a lock left drained that she wants to go down
+        fills from the canal above by itself before she goes in (nobody's being lifted). Only
+        lifting her costs a puzzle.
+      - **One lock, put down four times:** every lock is the same thing, its rules
+        `src/den-lock.ts` (its water, what it needs, pumping, draining and filling, its gates), its
+        3D `js/den/lock.js` (chamber, piers, gates, the water rising, the quay's pump and the
+        Bilge board, the one Bilge puzzle `src/bilge.ts`); the sea's lay places each one
+        (LAY.LOCKS in `src/den-sail.ts`). Its quay is on its bank toward the den, or on its
+        right-hand bank if it runs out to sea. Its banks are rock, so she only ever goes through
+        a lock straight.
+      - **The ways past the checkpoint:** run it, row it, fight its guns, or the locks. The reef's
+        far end, the long way round that cost only time, is closed now the locks are the way round.
+      - **Nothing signposts it:** at the junction the canal just "runs off into the cliffs"; and the
+        first time she stops short of the checkpoint, in sight of it, a few seconds after what's
+        said on sighting it: "Smugglers get past that checkpoint somehow, and not under its
+        guns... I wonder if there's a secret way round".
+      - **The pilot** finds its way through the locks to a pin anywhere along them, but reckons a
+        lock up a go of Bilge (about 40 seconds), so from the open sea it never takes you round by
+        the locks: that's yours to find (and from up on the clifftop, on down them is the way). A
+        pin dropped on a lock goes to the water beside it.
+      - **Said:** "A lock up the cliff: bilge on the quay to pump her up", then "Another lock: bilge
+        on the quay to pump her up again"; "Up on the clifftop: the canal runs on along the top of
+        the cliffs"; the first time one drains or fills for her, "Down she goes: the lock drains by
+        itself" (or "The lock fills from the canal above by itself"); and through, "Round the
+        checkpoint by the locks, and they never saw her! The open sea beyond" (back, "Back round
+        the checkpoint by the locks, and they never saw her").
+    - **The hidden cove, an Easter egg off the chain (10 Nov):** up on the clifftop, at the top of
+      the locks, an arm runs off the clifftop canal, off the way the locks lead you, down to the
+      hidden cove behind the first lock's cliff (narrower now, three squares across), its water the
+      clifftop's, a strip of sand at its back (the den's side) with an old bilge pump on it ("A
+      hidden cove, tucked away off the canal"). The crane's ledge is in it, as before, its
+      headland as far above it as ever.
     - **The turret (9 Nov, gone 10 Nov):** a gun on a rock between the lanes, which fired on her
       square while she was in reach and was wrecked by three hits, a chest floating free to be
       hauled up. The checkpoint's guns took its place and its rules (see "The imperial checkpoint").
@@ -294,7 +340,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **Ashore:** sail back to her mooring and Space puts you on the beach beside her.
   - Alone only for now (no crews at sea yet). No tokens to earn yet, no destinations: those are
     IDEAS.md ("Sailing between places, for real"). Rules: `src/den-sail.ts`.
-  - **The wind, and her oars (a first go, 10 Nov).** The user (9 Nov): "try it. We'll see how it
+  - **The wind, and her oars (a first go, 10 Nov).** **Parked for now (10 Nov).** The user: "I think
+    maybe we need to park the wind idea for now. That's just getting irritating ... I think it's the
+    arrows getting in my way." So the weather's switched off, by one switch (`WEATHER.parked` in
+    `src/den-wind.ts`): under sail she goes the same every way, at a good wind's pace with it behind
+    her (a move 0.4 seconds), with no calms, no light airs, no irons and no changes, and nothing
+    said of them; no arrows by her, no streaks, no wind on the sailing bar; her flag streams aft and
+    her sails stand full, a steady fair wind. The oars and the trade winds are as they were. The
+    code's kept, to refine later (IDEAS.md): turned back on, what follows is what comes back. When
+    it's on: the user (9 Nov): "try it. We'll see how it
     feels, whether it's overcomplicated or not." The wind can drop, and a ship that's all sails is
     "dead in the water until the wind picks back up again"; under sail you "can't go against the
     wind"; oars keep her moving either way, never stuck. Not "just going faster". Made plainer the
@@ -408,8 +462,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       stone (two towers and an arch high enough for her mast, crimson banners down them, the
       Empire's crimson flag with a gold crown and rising sun over it, a boom chain lying slack under
       the water between its piers). A bastion either side has a gun on it. On its left a headland
-      (cliff), on its right a reef whose far end is open: the long way round. "Pirates aren't
-      welcome", so its guns fire on her, out and back.
+      (cliff), the chain of locks cut down through it; on its right a reef out to the edge of the
+      sea (its far end was open, the long way round, till the locks were the way round, 10 Nov).
+      "Pirates aren't welcome", so its guns fire on her, out and back.
     - **Its guns are trained on marks:** red rings on the water on the way through, three of them:
       two squares before the gate, the gate itself, two squares beyond. Whenever she's on a mark and
       its gun is loaded (2.5 seconds between shots) it fires on that square, and the shot's down 0.9
@@ -440,26 +495,26 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       fight now: its guns are on her." Out of its sight (more than five squares from the gate) it
       calms down: "its guns go back to their marks". The main lane's drop and the lane home both
       start out of their reach, so she can stop there and load before a fight.
-    - **Round the long way:** past the reef's end, out of reach of its guns the whole way, about
-      three times as far as through the gate. (It costs time, not a puzzle, for now; with a wind
-      against one of its legs it's oars or a wait.)
+    - **Or round it by the locks** (the chain of locks, above): the long way round the reef's end
+      that was there, costing only time, went (10 Nov).
     - **Said:** coming up to it, "The imperial checkpoint! Its guns are trained on the red rings:
-      stop on one and she's hit. Run it, row it, go round the long way, or knock its guns out"; once she's past its
-      last mark, "Through the checkpoint! Not a scratch on her" (or "Holed once, patched, and
-      through"), "Round the checkpoint the long way, out of reach of its guns", and "Back through"
-      or "Back round" coming home.
+      stop on one and she's hit. Run it, row it, or knock its guns out" (and, stopped short of it,
+      the hint at a secret way: above); once she's past its last mark, "Through the checkpoint! Not
+      a scratch on her" (or "Holed once, patched, and through"), or round by the locks, and "Back
+      through" or "Back round" coming home.
     - **The old wreck beyond it:** run aground on a sandbar on the open sea, out of reach of its
       guns: the reason to get past. Stop beside it and Space hauls its treasure up by Treasure Haul,
       (the board on her other side, clear of the wreck); once it's up the
       wreck's bare.
-    - **Room left for later:** a ledge at the headland's foot on the near side and a landing beyond
-      it, kept clear, for the crane up and over it; the gatehouse's boom for the bribe. Rules:
+    - **Room left for later:** the gatehouse's boom for the bribe. (A crane up and over its headland
+      had room kept for it, till the crane went to the hidden cove and the locks became the way
+      round.) Rules:
       `src/den-checkpoint.ts` (the lay: LAY.CHECKPOINT in `src/den-sail.ts`); in the world:
       `js/den/checkpoint.js`.
   - **A crane up the cliff, to a clifftop lagoon (10 Nov).** The user (9 Nov): "could I go somewhere
     to the side of a cliff and like construct a crane to get in?", built "with like the carpentry
     puzzle", and somewhere of its own: "I don't want ... the lock the same thing as the crane." The
-    next step of her journey (canal, lock, hidden cove), "more of an adventure ... we can have a
+    next step of her journey (canal, locks, hidden cove), "more of an adventure ... we can have a
     multi-step thing and gradually build up on it":
     - **The headland and the ledge:** the hidden cove's left-hand side is a headland now, taller
       than the cove's walls, off the board's left edge. At its foot, on the cove's middle row, a

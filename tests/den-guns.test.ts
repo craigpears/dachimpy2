@@ -78,9 +78,9 @@ describe('the Gunnery board on her deck, and the other boards', () => {
     let h = new Helm(clearSea());
     h.hit();
     expect(cantLoad(h)).toBe('holed');
-    const [lc, lr] = LAY.LOCK;
+    const [lc, lr] = LAY.LOCKS[0].at;
     h = new Helm(new Sea(9), { c: lc + 1, r: lr, d: 3 });
-    h.put('F'); h.put('F');   // (into the lock, and on up into the cove)
+    h.put('F'); h.put('F');   // (into the lock, and on up the canal)
     for (let i = 0; i < 200 && h.held() !== 'up'; i++) h.tick(0.05);
     expect(h.held()).toBe('up');
     expect(cantLoad(h)).toBe('lock');
