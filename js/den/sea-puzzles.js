@@ -37,10 +37,17 @@ function struck(on) {
   for (const o of [...sail.g.userData.sails, ...sail.g.userData.rig]) o.visible = !on;
   for (const side of ['L', 'R']) sail.g.userData.guns[side].visible = !on;
 }
-// The last patch's planks off her deck (a new hole, or a new voyage).
+/* Every patch's planks off her deck (a new hole, or a new voyage). Every one on her, not just
+   `patch.group` (whichever board is open): a crane frame opened since takes that over, and the old
+   planks were left on her, over the next hole (the user, 10 Nov: "the carpentry pieces ... from the
+   last time I got shot are all still on there and they are blocking the board. I can't even tell
+   where it thinks my supposed hole is"). */
 export function patchClear() {
-  if (patch.group) { patch.group.removeFromParent(); patch.group.traverse((o) => { if (o.geometry && o.geometry !== cellBox) o.geometry.dispose(); }); }
-  patch.group = patch.face = patch.wood = null;
+  for (const g of (sail.g?.children ?? []).filter((o) => o.userData.deckPatch)) {
+    g.removeFromParent();
+    g.traverse((o) => { if (o.geometry && o.geometry !== cellBox) o.geometry.dispose(); });
+  }
+  if (!patch.at) patch.group = patch.face = patch.wood = null;
 }
 function patchOpen(hole, away = null) {
   if (!away) patchClear();

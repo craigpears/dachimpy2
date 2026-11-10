@@ -181,12 +181,6 @@ the site (`.assetsignore` skips `*.md`).
   think some of it's in" [cut off: inside something, the quay or the lock's side?]. It should face you as you
   come in, turned to suit her and the lock, and never sit behind her. (Exactly what hides it, to
   check in the game.)
-- **Last time's deck patch still on her when she's hit again (10 Nov):** "I've just tried going
-  through and I've been shot by ... the enemy guns again, but like the carpentry pieces, I think
-  from ... the last time I got shot are all still on there and they are blocking the board. I can't
-  even tell where it thinks my supposed hole is ... Everything is just obscured." A new hit should
-  take the old patch's planks off her deck first, so the new hole and its board are clear.
-
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map

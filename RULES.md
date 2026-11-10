@@ -454,6 +454,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       "when I've just clicked oars, I see the carpentry pieces for the repairing the damaged
       carpentry puzzle I've just played"). Holed while she rows, the patch comes up with her sails
       and guns still struck.
+    - **A new hole, a clear deck (10 Nov):** hit again, every earlier patch's planks come off her
+      deck first, so the new hole and its board are plain to see (the user: "the carpentry pieces
+      ... from the last time I got shot are all still on there and they are blocking the board. I
+      can't even tell where it thinks my supposed hole is"). A crane frame played since had left
+      the older planks on her.
   - **Ashore, from anywhere near the beach (10 Nov):** the user: "how to get back to shore is not
     very obvious ... more squares should have that action. So you get to the general vicinity, not
     one specific square." The landing is the stretch of water along the den's beach, her mooring
