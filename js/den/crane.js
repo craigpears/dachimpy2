@@ -29,7 +29,7 @@ import { wreckMesh } from './checkpoint.js';
    Built, it hauls her up the cliff and swings her round into a still lagoon up on the headland,
    a short, cheesy moment you can skip with Space; and lowers her back down whenever you like.
    In the lagoon an old wreck lies sunk in the clear water, its treasure hauled up by Treasure Haul. */
-// `moor`: where she rests in the lagoon ({ p, yaw }), if not where the crane sets her down (umami.js
+// `moor`: where she rests in the lagoon ({ p, yaw }), if not where the crane sets her down (capybara.js
 // poles her along the shore to the far bank).
 export const crane = { rules: new Crane(), W: null, parts: [], hoist: null, slew: 0, said: {}, bubble: null, shot: null, moor: null };
 const K = () => crane.rules;
@@ -54,13 +54,13 @@ const LAG = { x: -46.6, z: POST.z - 0.5, rx: 9.2, rz: 10 };
 // toward the cove, kept to the oval so she's set down clear of it).
 const shoreAt = (a) => (Math.abs(Math.atan2(Math.sin(a), Math.cos(a))) < 0.5 ? 1 : 1 + 0.07 * Math.sin(a * 3 + 1) + 0.05 * Math.sin(a * 5 + 2));
 /* The lagoon's far bank, across the water from where she's set down: a bank of mud, kept clear of
-   reeds, rocks and lily pads, where Umami the capybara's stuck (umami.js draws him and his bank). Its
+   reeds, rocks and lily pads, where Umami the capybara's stuck (capybara.js draws him and his bank). Its
    foot's middle out in the water (so the headland's grass is under it, not through it), the angle
    round the shore it's at, and how it leans back. */
 const BANK_A = 1.4;
 export const BANK = { a: BANK_A, x: LAG.x + Math.cos(BANK_A) * LAG.rx * shoreAt(BANK_A), z: LAG.z - Math.sin(BANK_A) * LAG.rz * shoreAt(BANK_A) + 1.0, yaw: 0, lean: 0.95 };
 const nearBank = (a) => Math.abs(Math.atan2(Math.sin(a - BANK_A), Math.cos(a - BANK_A))) < 0.3;
-// (the lagoon, for what else is up there: umami.js)
+// (the lagoon, for what else is up there: capybara.js)
 export const LAGOON_AT = { HT, WATER, LAG, REST, REST_YAW };
 const shore = (k = 1, n = 64) => Array.from({ length: n }, (_, i) => { const a = i / n * Math.PI * 2, f = shoreAt(a) * k; return [LAG.x + Math.cos(a) * LAG.rx * f, LAG.z - Math.sin(a) * LAG.rz * f]; });
 // Hauling a frame up by hand: you stand on the clifftop at the back of the ledge's notch, the ropes

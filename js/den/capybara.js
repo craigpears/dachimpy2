@@ -1,9 +1,9 @@
 // Umami the capybara in 3D: stuck on the clifftop lagoon's far bank, his board (Foraging) on it, her
 // poled along the shore to him, his swim to her once he's free, and his life at the den's water's
-// edge. (The rules: src/den-umami.ts. The puzzle: src/foraging.ts; its look: foraging.js.)
+// edge. (The rules: src/den-capybara.ts. The puzzle: src/foraging.ts; its look: foraging.js.)
 import * as THREE from 'three';
 import { Forage } from '../foraging.js';
-import { UMAMI, Umami, Life, umamiDeal, freedAt } from '../den-umami.js';
+import { UMAMI, Umami, Life, umamiDeal, freedAt } from '../den-capybara.js';
 import { forageBoard, capybaraSkin, capybaraMesh, cageOpen } from './foraging.js';
 import { scene, camera, mat, mesh, V3, burst, toast, keys, ray, canvasTex } from './world.js';
 import { sail, SLOOP_DECK } from './sea.js';
@@ -211,7 +211,7 @@ function swimTick(dt) {
   s.t += dt;
   if (s.phase === 'free') {
     // Breaking out of the trap and bounding about: all a function of the time since he came off the
-    // board (src/den-umami.ts, freedAt): soft arcs, slow enough to watch.
+    // board (src/den-capybara.ts, freedAt): soft arcs, slow enough to watch.
     const f = freedAt(s.t);
     if (f.phase === 'break') {
       // He bursts out of the trap, its bars flying, and wriggles round upright onto the mud at the

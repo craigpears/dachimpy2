@@ -1,5 +1,5 @@
 /* Pirate Den: Umami the capybara, found stuck on the clifftop lagoon's far bank and freed by
-   Foraging. TypeScript, compiled to js/den-umami.js; tested in tests/den-umami.test.ts. js/den/umami.js
+   Foraging. TypeScript, compiled to js/den-capybara.js; tested in tests/den-capybara.test.ts. js/den/capybara.js
    draws it all: his bank, his board, his swim to her and his life at the den.
 
    A friend's side quest (IDEAS.md, "Side quests that leave friends about the den"), the user, 10 Nov:
@@ -26,7 +26,7 @@
    bottom, the outer one has no neighbour to line up with and can never be turned. So he's dealt in
    the middle two columns (UMAMI.AT), and his board has no earthquakes, the only thing that ever moves
    a container sideways: he never reaches an edge, and there's always a way to get him down. The bots
-   in tests/den-umami.test.ts show it, blundering first and freeing him after.
+   in tests/den-capybara.test.ts show it, blundering first and freeing him after.
 
    A real puzzle's worth of clearing (the user, 10 Nov: "I don't understand as well how he seems to
    get free after just 2 clicks"). A shovel digs out its whole column below it, containers ignored, so

@@ -128,6 +128,13 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   on earth is this ...?", "I never asked for that cheat." The cheats menu holds only what the
   user asked for (the stages, and skips to get to a scene). A tool for checking my own work stays
   out of it: use the console (`window.den`) or a test instead.
+- **No file a blocker would stop (10 Nov).** The den wouldn't load for the user, in any window,
+  incognito too: "Failed to load resource: net::ERR_BLOCKED_BY_CLIENT ... Trying to load
+  umami.js". Umami is also the name of a well-known analytics script, so ad and privacy blockers
+  stop any file called that, and one module missing stops the whole den. So no file the site
+  serves is named after an analytics, ad or tracking tool (umami, analytics, gtag, matomo,
+  plausible, pixel, beacon, ads and the like): Umami's files are `capybara.js`. A test checks
+  every file name.
 - **Every starting point has a link, to share (10 Nov).** "Make it so that each starting point is
   something that I can put into the URL as well, so that I can share that animation with
   somebody." `den.html?at=` and a name opens the den straight there: the cheats' stages (`start`,
@@ -413,7 +420,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       offered in the same tray along the bottom as ashore, a bit bigger, and you click them there
       or use the Carpentry view's keys, as at the wall; nothing lies on deck, and the sailing bar
       is hidden while you patch ("simplify. It's a very cluttered user interface. Just simplify
-      it, standardize it"). The deal is fair every time and there's no walking to the crates. The
+      it, standardize it"). The deal is fair every time and there's no walking to the crates.
+      Taking pieces back is the same as everywhere you build (one Carpentry, below: "A gap is
+      never filled for you"): empty-handed, Space or a click picks up the piece you're pointing
+      at, any of them; Backspace takes the last one back out. The
       camera looks almost straight down, the hole at least as big on screen as a wall hole ("it
       hurts my eyes ... a bit tiny") and sitting just above the tray, not far up the screen. Then "Patched! She sails on." Carpentry, not
       Bilge (the user, 9 Nov: "what do you mean bilge? I've been hit by a cannonball", and bilging
@@ -711,7 +721,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       filled with the deck patch's tray (1, 2, 3, dealt fair), keys and mouse, the camera looking
       down on it from over the cove, her mast struck and you ashore on the ledge by it. The den's
       frame rules: a piece covers an empty square, clear of the pieces in, and may stick out over
-      the edge (here up to two squares); Backspace takes the last piece back out; Esc leaves the
+      the edge (here up to two squares); empty-handed, Space or a click picks up the piece you're
+      pointing at, any of them, and Backspace takes the last one back out, as everywhere you build
+      (the user, 10 Nov: "why can I not do it here when I can do it in the other areas?"); Esc leaves the
       frame on the ledge as it is, to come back to. Single squares jut out of each frame for the
       rare pieces (the post's are its tenons). Full, it's sawn to fit (what sticks out falls away
       as sawdust; "Shipshape!" if nothing did), you leap up onto the clifftop and haul it up by hand
@@ -793,8 +805,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       at the edge, staying a while at each spot (4 to 11 seconds) before moving on. A new game (or a
       refresh) starts without him.
     - **His link:** "Umami's rescue" in the cheats, `den.html?at=umami`: the crane built at once and
-      her moored by his bank. Rules: `src/den-umami.ts` (his fall's pace: `FALL` in
-      `src/foraging.ts`); in the world: `js/den/umami.js` (the bank: `BANK` in `js/den/crane.js`; his
+      her moored by his bank. Rules: `src/den-capybara.ts` (his fall's pace: `FALL` in
+      `src/foraging.ts`); in the world: `js/den/capybara.js` (the bank: `BANK` in `js/den/crane.js`; his
       look and his trap: `capybaraSkin` in `js/den/foraging.js`, the test page's too).
 - **A quick siege to start, then calm (9 Nov).** The first three waves come as they always have,
   each counting down after the last. Beat the third and their captain calls it off ("We'll be
@@ -1019,7 +1031,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     it over the upper-left, upper-right, lower-left and lower-right holes (on the wall, the real
     four: the high and low holes left and right of the gate, going on round any cannon breach in
     that corner; on a frame, that quarter of it), Space puts it in. Backspace takes the last
-    piece back off (the real puzzle lets you adjust your last piece). E and F still turn and flip.
+    piece back off (the real puzzle lets you adjust your last piece), and empty-handed, Space or a
+    click picks up the piece you're pointing at. E and F still turn and flip.
     The mouse works too: point and click.
   - **The keys stay exactly the real game's, and each hole shows its key (9 Nov).** The user
     pressed W and S for up and down, as when walking, and the piece leapt to the top-right and
@@ -1408,6 +1421,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     puzzle. You've got to make the things fit.") The way out is to lift pieces back out: any piece
     in a frame that isn't finished, anyone's, by pointing at it (or standing by it, with the
     keyboard) and pressing Space or clicking. It goes into your hands.
+  - **One Carpentry everywhere you build (10 Nov).** The user, building the crane: "is this not
+    supposed to be like the same? That's what I mean by there should be one modular mechanic. So
+    the idea that you can pick up a piece like that you've just placed should be in that core
+    module." The den's frames, the hole in her deck and the crane's frames are one frame
+    (`src/carpentry-frame.ts`): the same fitting, the same lifting of any piece back out till it's
+    full, the same sawing, the same keys and clicks, and the prompt in the same words ("Space or
+    click: pick the T back up", "Backspace: the last piece back out"). Only how far a piece may
+    stick out differs from place to place.
   - **Shipshape:** every frame's shape can be filled exactly. A frame filled with nothing sawn off
     is Shipshape and pays a bonus.
 - **Up on the wall must stay bright.** The fog keeps its distance from the camera and the view

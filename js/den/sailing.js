@@ -23,7 +23,7 @@ import { WIND } from '../den-wind.js';
 import { windTick, windSay, windHud, oarsHud, windSig, rowToggle, headwindPrompt } from './wind.js';
 import { rowing, rowShut, rowKey, rowHover, rowSwap, rowTick, rowPrompt, rowShown } from './rowing.js';
 import { craneKey, cranePrompt, craneHolds, craneTick, craneReset, craneWorld } from './crane.js';
-import { umamiKey, umamiClick, umamiHover, umamiPrompt, umamiReset } from './umami.js';
+import { umamiKey, umamiClick, umamiHover, umamiPrompt, umamiReset } from './capybara.js';
 
 // The old sloop's at anchor in the cove from the moment the siege is over, while their ship makes
 // sail in the background (the user, 9 Nov: "I'm sat here quite a while waiting for his sloop to sail
@@ -143,7 +143,7 @@ export function sailHover(x, y) {
 }
 export function sailKey(key) {
   if (hold.mode && holdKey(key)) return;
-  if (umamiKey(key)) return;   // (Umami's board, and her moorings in the lagoon: umami.js)
+  if (umamiKey(key)) return;   // (Umami's board, and her moorings in the lagoon: capybara.js)
   if (craneKey(key)) return;   // (the crane at the ledge, and the lagoon: crane.js)
   // Rowing: the board's keys; Esc or O ships the oars.
   if (rowing.on && (key === 'escape' || key === 'o')) return rowToggle();

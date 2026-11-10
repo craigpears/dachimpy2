@@ -17,7 +17,7 @@ import { LAY } from '../den-sail.js';
 import { sail } from './sea.js';
 import { CRANE } from '../den-crane.js';
 import { craneCheat } from './crane.js';
-import { umamiCheat } from './umami.js';
+import { umamiCheat } from './capybara.js';
 import { board, sailReset } from './sailing.js';
 import { online, guest, myId, send } from './crew.js';
 import { newGame } from '../den.js';
@@ -499,7 +499,7 @@ function cheatDignity() {
   sail.riding = false;
   dignityScene();
 }
-/* Umami's rescue (js/den/umami.js): out to sea, the crane up the cliff built at once, and her set
+/* Umami's rescue (js/den/capybara.js): out to sea, the crane up the cliff built at once, and her set
    down in the clifftop lagoon and moored by the far bank, beside him. */
 function cheatUmami() {
   if (cine) return;

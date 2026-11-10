@@ -1,9 +1,9 @@
-/* Umami the capybara (src/den-umami.ts): his board in the lagoon, her moorings there, and his life at
+/* Umami the capybara (src/den-capybara.ts): his board in the lagoon, her moorings there, and his life at
    the den. */
 import { describe, expect, it } from 'vitest';
 import { Forage, H, NO_SPECIALS, SPECIAL_ODDS, SPECIALS, W, seeded } from '../src/foraging';
 import type { Bit, Move } from '../src/foraging';
-import { FREED, FREED_T, LIFE, UMAMI, Umami, Life, depth, freedAt, umamiDeal } from '../src/den-umami';
+import { FREED, FREED_T, LIFE, UMAMI, Umami, Life, depth, freedAt, umamiDeal } from '../src/den-capybara';
 
 const him = (f: Forage) => f.containers().find((x) => x.bit.tag === UMAMI.TAG) ?? null;
 

@@ -31,7 +31,7 @@ import { haul, haulKey, haulHover, haulSwap, haulTick, haulCam } from './den/tre
 import { gunnery, gunCam, gunneryUp, gunneryRub, gunneryWheel } from './den/sea-guns.js';
 import { rowing, rowCam, rowPull } from './den/rowing.js';
 import { crane, craneCam } from './den/crane.js';
-import { umami, umamiTick, umamiCam, umamiClick } from './den/umami.js';
+import { umami, umamiTick, umamiCam, umamiClick } from './den/capybara.js';
 import { net, online, guest, isHost, send, updateMates, sendMe, snapshot, followRaider, sendSync, onNet, joinCrew, leaveCrew } from './den/crew.js';
 import { deco, decoMode, decoMove, decoClick, decoTurn, dress, dressPanel, dressRows, lookChanged, applyDen, buildAll, tileFor, fillFrame, cheats, skipTo, cheatPanel, startAt } from './den/menus.js';
 
@@ -631,7 +631,7 @@ function update(dt) {
     d = Math.atan2(Math.sin(d), Math.cos(d));
     yaw = y0 + d * haulView;
   }
-  // Freeing Umami: straight on to his bank and its board (js/den/umami.js).
+  // Freeing Umami: straight on to his bank and its board (js/den/capybara.js).
   const uc = umamiCam();
   forageView += ((uc ? 1 : 0) - forageView) * Math.min(1, dt * 3);
   if (forageView > 0.001 && uc) {

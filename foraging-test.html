@@ -58,7 +58,7 @@
 import * as THREE from 'three';
 import { seeded, SPECIAL_ODDS } from './js/foraging.js';
 import { forageBoard, capybaraSkin, cageOpen } from './js/den/foraging.js';
-import { umamiDeal, UMAMI, freedAt, FREED_T } from './js/den-umami.js';
+import { umamiDeal, UMAMI, freedAt, FREED_T } from './js/den-capybara.js';
 
 const $ = (id) => document.getElementById(id);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -91,7 +91,7 @@ function deal() {
   board?.dispose();
   $('log').innerHTML = '';
   const random = seeded(seed);
-  // (the capybara's board is Umami's, as the den deals it: src/den-umami.ts)
+  // (the capybara's board is Umami's, as the den deals it: src/den-capybara.ts)
   const d = mode === 'capy' ? umamiDeal(random, lots()) : { random, bananas: 7, specials: lots() };
   board = forageBoard({
     deal: d, at: new THREE.Vector3(0, 0, 0), sq: 0.5,
@@ -110,7 +110,7 @@ function deal() {
     onLeave: (l) => {
       if (l.tag !== UMAMI.TAG) return false;
       // Only he leaves, in his trap (the mud stays behind): off the board's foot he breaks out of it,
-      // bounds about for joy and leaps into the lagoon (src/den-umami.ts, freedAt). Ours now.
+      // bounds about for joy and leaps into the lagoon (src/den-capybara.ts, freedAt). Ours now.
       const him = l.mesh, m = him.userData.capybara, cage = him.userData.cage;
       scene.attach(m); scene.attach(cage);
       him.removeFromParent();
