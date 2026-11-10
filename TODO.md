@@ -181,6 +181,11 @@ the site (`.assetsignore` skips `*.md`).
   think some of it's in" [cut off: inside something, the quay or the lock's side?]. It should face you as you
   come in, turned to suit her and the lock, and never sit behind her. (Exactly what hides it, to
   check in the game.)
+- **A thrown piece leaving your hands (10 Nov):** "the throwing animation seems to have lost a
+  bit. Like, I kind of see it going over the wall a bit, but like, I don't really see it being
+  thrown out of his hands. It just kind of, like, you see his hands move and then nothing else."
+  The piece should be seen leaving your hands and arcing over the wall onto the raider.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
