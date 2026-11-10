@@ -1,7 +1,7 @@
 /* Swordfight in the den: the sword rack and the soldiers (src/den-sword.ts). */
 import { describe, expect, it } from 'vitest';
-import { Barracks, Lumber, muster, planRepair, REPAIR, rewardPair, SWORD, SwordRack, waitSpot } from '../src/den-sword';
-import type { Foe, Mend } from '../src/den-sword';
+import { Barracks, Lumber, muster, outReach, planRepair, REPAIR, rewardPair, SWORD, SwordRack, waitSpot } from '../src/den-sword';
+import type { Field, Foe, Mend } from '../src/den-sword';
 import { carp, hole } from './helpers';
 import { toSword } from '../src/swordfight';
 import type { Pair } from '../src/swordfight';
@@ -249,7 +249,7 @@ describe('Barracks', () => {
     expect(on).toEqual([2, 2]);
   });
 
-  it('don\'t go out over the wall after raiders outside', () => {
+  it('with no gate to go out by, they stay inside: never out over the wall', () => {
     const b = new Barracks();
     b.enlist([{ hp: 2, size: 1 }], 0, 3);
     b.tick(0.05, [raider(0, -3, 'attack', false)], [], { x: 0, z: 5 });
@@ -289,5 +289,111 @@ describe('Waiting soldiers block the Swordfight board (9 Nov)', () => {
     const a = waitSpot(hoist), b = waitSpot({ ...hoist, x: hoist.x + 1, z: hoist.z - 2 });
     expect(b.x - a.x).toBeCloseTo(1);
     expect(b.z - a.z).toBeCloseTo(-2);
+  });
+});
+
+describe('Out through the gate to the raiders on the beach (10 Nov)', () => {
+  // The den's gate: its middle at x -0.275, 2.2 m wide; the tide well down the beach.
+  const field = (over: Partial<Field> = {}): Field => ({ gate: { x: -0.275, w: 2.2, open: false }, shore: -17, ...over });
+  const home = { x: -5.4, z: 5.2 };
+  /** Run the soldiers and the raiders fighting back, the gate opening while a soldier wants it (as
+      den.js does), for `secs`; every soldier's every step, and who got knocked flat. */
+  function sally(b: Barracks, foes: Foe[], secs: number, f: Field, gate = true) {
+    const knocked: Foe[] = [], steps: { x: number; z: number }[] = [];
+    let open = 0;
+    for (let t = 0; t < secs; t += 0.05) {
+      if (gate) open = Math.max(0, Math.min(1, open + (b.wantGate ? 2.6 : -1.4) * 0.05));
+      f.gate.open = open > 0.8;
+      for (const n of b.tick(0.05, foes, [], home, f)) if (n.kind === 'knock') { n.foe.state = 'down'; knocked.push(n.foe); }
+      for (const r of foes) if (r.duel) b.duel(r, 0.05);
+      for (const s of b.up()) steps.push({ x: s.x, z: s.z });
+    }
+    return { knocked, steps };
+  }
+  /** Through stone: in the wall's thickness anywhere but the gateway. */
+  const inStone = (p: { x: number; z: number }, f: Field) => p.z < SWORD.INSIDE - 0.05 && p.z > SWORD.OUTSIDE + 0.05 && Math.abs(p.x - f.gate.x) > f.gate.w / 2;
+
+  // The user: "It breaks the immersion for them to not go out and fight the attackers. It's like,
+  // what, you're just going to sit there and let them attack, hack at the wall?"
+  it('the soldiers sit inside while raiders hack at the wall (10 Nov)', () => {
+    const b = new Barracks(), f = field();
+    b.enlist([{ hp: 4, size: 1.2 }], -6, 3.2);
+    const r = raider(-5.2, -1.15, 'attack', false);
+    const { knocked, steps } = sally(b, [r], 12, f);
+    expect(knocked).toEqual([r]);
+    // Out through the gate, never through stone.
+    expect(steps.some((p) => p.z < SWORD.OUTSIDE)).toBe(true);
+    expect(steps.filter((p) => inStone(p, f))).toEqual([]);
+    // And with nobody left outside, back in by the gate to wait.
+    const back = sally(b, [r], 15, f).steps;
+    expect(back.filter((p) => inStone(p, f))).toEqual([]);
+    const s = b.soldiers[0];
+    expect(s.z).toBeGreaterThan(SWORD.INSIDE);
+    expect(Math.hypot(s.x - home.x, s.z - home.z)).toBeLessThan(1.5);
+  });
+
+  it('they meet raiders walking up the beach from their boats', () => {
+    const b = new Barracks();
+    b.enlist([{ hp: 4, size: 1.2 }], 0, 3);
+    const r = raider(2, -5, 'approach', false);
+    expect(sally(b, [r], 10, field()).knocked).toEqual([r]);
+  });
+
+  it('they wait at the gate till it\'s open, wanting it opened', () => {
+    const b = new Barracks(), f = field();
+    b.enlist([{ hp: 4, size: 1.2 }], -6, 3.2);
+    const { steps } = sally(b, [raider(-5.2, -1.15, 'attack', false)], 6, f, false);
+    expect(steps.every((p) => p.z >= SWORD.INSIDE - 0.01)).toBe(true);
+    expect(b.wantGate).toBe(true);
+    expect(Math.abs(b.soldiers[0].x - f.gate.x)).toBeLessThan(f.gate.w / 2);
+  });
+
+  it('raiders in the den come first: they\'re after the chest', () => {
+    const b = new Barracks(), f = field();
+    b.enlist([{ hp: 4, size: 1.2 }], 0, 1);
+    const inside = raider(3, 5), out = raider(-0.3, -1.15, 'attack', false);
+    b.tick(0.05, [out, inside], [], home, f);
+    expect(b.soldiers[0].foe).toBe(inside);
+    // But once there are plenty on the one inside, the rest go out.
+    b.enlist(Array(4).fill({ hp: 4, size: 1.2 }), 0, 1);
+    b.tick(0.05, [out, inside], [], home, f);
+    expect(b.soldiers.filter((s) => s.foe === out).length).toBeGreaterThan(0);
+  });
+
+  it('a soldier out on the beach comes back in by the gate for a raider who\'s got in', () => {
+    const b = new Barracks(), f = field();
+    b.enlist([{ hp: 4, size: 1.2 }], 3, -2);
+    const r = raider(4, 4);
+    const { knocked, steps } = sally(b, [r], 12, f);
+    expect(knocked).toEqual([r]);
+    expect(steps.filter((p) => inStone(p, f))).toEqual([]);
+  });
+
+  it('not out to boats still at sea, up a ladder, past the field or into the tide', () => {
+    const f = field({ shore: -4 });
+    expect(outReach(raider(0, -3, 'row', false), f)).toBe(false);
+    expect(outReach(raider(0, -3, 'rowOff', false), f)).toBe(false);
+    expect(outReach(raider(0, -3, 'leave', false), f)).toBe(false);
+    expect(outReach({ ...raider(4, -1.4, 'ladder', false), ly: 1 }, f)).toBe(false);
+    expect(outReach(raider(0, -4.4, 'approach', false), f)).toBe(false);   // in the water
+    expect(outReach(raider(0, -3, 'approach', false), f)).toBe(true);
+    expect(outReach(raider(0, -9, 'approach', false), field())).toBe(false);   // further out than FIELD
+    expect(outReach(raider(0, -1.2, 'attack', false), field({ shore: -1.2 }))).toBe(false);   // no dry sand at the gate
+    // Chasing one along the tide line, they keep to the dry sand.
+    const b = new Barracks();
+    b.enlist([{ hp: 9, size: 1.5 }], 0, -1.5);
+    const r = raider(-3, -3.4, 'approach', false);
+    const { steps } = sally(b, [r], 6, f);
+    expect(Math.min(...steps.map((p) => p.z))).toBeGreaterThanOrEqual(-4 + SWORD.DRY - 1e-9);
+  });
+
+  it('round the gun tower\'s legs, not through them', () => {
+    const post = { x: -2, z: -1.6, r: 0.18 }, f = field({ posts: [post] });
+    const b = new Barracks();
+    b.enlist([{ hp: 4, size: 1.2 }], -0.3, 2);
+    const r = raider(-4.5, -2.2, 'attack', false);
+    const { knocked, steps } = sally(b, [r], 12, f);
+    expect(knocked).toEqual([r]);
+    expect(Math.min(...steps.map((p) => Math.hypot(p.x - post.x, p.z - post.z)))).toBeGreaterThan(post.r + 0.29);
   });
 });

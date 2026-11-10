@@ -163,13 +163,6 @@ the site (`.assetsignore` skips `*.md`).
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
 
-- **The soldiers go out and fight them (10 Nov):** "now we've got the soldiers and then these
-  small raids. It breaks the immersion for them to not go out and fight the attackers. It's like,
-  what, you're just going to sit there and let them attack, hack at the wall?" Raiders at the
-  wall, on the beach outside, should be met by the den's soldiers: out through the gate onto the
-  sand to fight them, and back in when they're seen off. (Goes with "Soldiers going outside" in
-  IDEAS.md, under the Kraken.)
-
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map

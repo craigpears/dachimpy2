@@ -1266,8 +1266,17 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     but can be upgraded ... as you build more of a pirate den", to "build a little army up later"). The user: "you'd
     have to do a combo, like a fuse block to get a soldier, and obviously combo for multiples".
     Soldiers go for raiders loose in the den and stand just inside the gaps in the wall (or behind
-    the holes being hacked), and a raider coming through a gap they hold stops to fight them; they
-    don't go out over the wall. With nobody to fight or guard they wait off to the winch's side of
+    the holes being hacked), and a raider coming through a gap they hold stops to fight them. They
+    go out through the gate to raiders on the beach, and back in through it (10 Nov: "now we've got
+    the soldiers and then these small raids. It breaks the immersion for them to not go out and fight
+    the attackers. It's like, what, you're just going to sit there and let them attack, hack at the
+    wall?"): raiders walking up from their boats, hacking at a hole, dazed, or on a ladder's bottom
+    rungs, up to 6 m out from the wall and above the tide line (not ones still rowing, or high up a
+    ladder: those they meet inside). Raiders in the den come first: a soldier only goes out once
+    each one inside has about three on him. They wait at the gateway's mouth till the gate swings
+    open, walk through it, never through stone, round the gun tower's legs, and come back in the same
+    way when nobody's left outside. In the siege and for the occasional raiders alike
+    (`src/den-sword.ts`: Field, outReach). With nobody to fight or guard they wait off to the winch's side of
     the hoist, past where you stand to work it, never in front of the stack (the user, 9 Nov: they
     "stand in a spot that obscures the swordfighting board"; `waitSpot`, src/den-sword.ts).
   - **Loose crates mend the wall, for good.** Each sprinkle is a loose crate broken up for planks,

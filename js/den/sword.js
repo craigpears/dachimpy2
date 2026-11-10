@@ -7,6 +7,8 @@ import { drawStencil, drawBlade, PALETTE } from '../den-sword-draw.js';
 import { C, S, rand, $, scene, mat, mesh, canvasTex, woodTex, makePirate, animateWalk, faceTo, pirate, carry, bounds, G, keys, raiders, burst, toast, tween } from './world.js';
 import { wall, rest, updateHole, barFrac, plankMat, putPiece, strengthen, holeX } from './wall.js';
 import { hit, passable, doorX } from './raids.js';
+import { shoreZ } from './bilge.js';
+import { towerLegs } from './land.js';
 import { online, myId, say } from './crew.js';
 
 // ---------- Swordfight: soldiers to hold the breaches ----------
@@ -15,7 +17,8 @@ import { online, myId, say } from './crew.js';
    flat, or turned away at the wall) drops a sword piece, a Swordfight pair, that lands inside the
    den; walk over it to pick it up. At the sword rack you play them on a real Swordfight board, and
    what a break would send at an opponent musters soldiers instead, who go for the raiders in the den
-   and stand in the gaps in the wall. Raiders who get in while you're at the board bury it in
+   and stand in the gaps in the wall, and go out through the gate to the raiders on the beach (the
+   user, 10 Nov: "you're just going to sit there and let them attack, hack at the wall?"). Raiders who get in while you're at the board bury it in
    sprinkles, as an opponent's attacks would. (Playing alone only, for now: with a crew the rack
    isn't there.)
    The rules and the soldiers are src/den-sword.ts (SwordRack, Barracks), the looks
@@ -496,6 +499,13 @@ function guardSpots() {
   return wall.holes.filter((h) => h.attackers > 0).map((h) => ({ x: holeX(h), z: 0.95 }));
 }
 
+// The beach, for soldiers going out to raiders there (Field, src/den-sword.ts): the gate they go out
+// and back by, the tide line, and the gun tower's legs to walk round.
+function beachField() {
+  const d = wall.door;
+  return d ? { gate: { x: d.cx, w: d.w, open: d.open > 0.8 }, shore: shoreZ(), posts: towerLegs() } : null;
+}
+
 export function swordTick(dt) {
   sword.group.visible = !online();
   document.body.classList.toggle('swordfight', sword.on);
@@ -539,7 +549,10 @@ export function swordTick(dt) {
       toast(`${n} pair${n === 1 ? '' : 's'} of crates onto the armoury's shelves (${rack.queue.length} there) · Space at the winch to play them`);
     } else if (!G.shelfSaid) { G.shelfSaid = true; say('The armoury\'s shelves are full: play some at the winch first', true); }
   }
-  barracks.tick(dt, raiders, guardSpots(), waitSpot(sword)).forEach(swordNews);
+  barracks.tick(dt, raiders, guardSpots(), waitSpot(sword), beachField()).forEach(swordNews);
+  // A soldier at the gate opens it, as you do by walking up (land.js, gateTick, closes it after).
+  const door = wall.door;
+  if (barracks.wantGate && door) door.open = Math.min(1, door.open + 4 * dt);
   for (const [s, m] of sword.figures) poseFigure(s, m, dt);
   for (const s of barracks.sweep()) { scene.remove(sword.figures.get(s)?.g); sword.figures.delete(s); }
   if (sword.dirty && !sword.show) { sword.dirty = false; stackSync(); }

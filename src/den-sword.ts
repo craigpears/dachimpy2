@@ -43,8 +43,24 @@ export const SWORD = {
   REACH: 0.85,
   /** Walking pace, metres a second. */
   SPEED: 3.4,
-  /** A soldier can't step out past the wall: this far into the den at least. */
+  /** Inside, a soldier keeps this far into the den at least (the wall's inner face and a body's width). */
   INSIDE: 0.6,
+  /** Outside, this far out from the wall at least (its outer face and a body's width): the gateway's
+      mouth on the beach, as for you (land.js, throughGate). */
+  OUTSIDE: -1.0,
+  /** How far out onto the beach soldiers go: no further than this from the wall (the raiders "at the
+      wall": hacking, on a ladder's foot, or walking up the last of the beach). Out past it they'd be
+      chasing boats, and leave the den to anyone coming through a gap. */
+  FIELD: 6,
+  /** And they keep to the dry sand: this far above the tide line at least, as you do. */
+  DRY: 0.4,
+  /** Raiders inside come first (they're after the chest): one on the beach counts as this many metres
+      further off, so soldiers only go out to them once the ones inside are seen to (or three soldiers
+      are already on each of them). */
+  OUT_COST: 12,
+  /** A raider on a ladder is in reach till they're this far up it (a sword's reach up the rungs);
+      above that, the soldiers leave them be and guard the hole from inside. */
+  LADDER: 0.5,
 } as const;
 
 /** A soldier to send out: how many blows it can take, and how big it stands. */
@@ -222,6 +238,8 @@ export interface Foe {
   duel?: Soldier | null;
   /** Their own blow timer (den.js shares it with hacking). */
   hitT: number;
+  /** How far up a ladder they are (to a high hole): out of a soldier's reach once they're off the ground. */
+  ly?: number;
 }
 
 export interface Soldier {
@@ -249,8 +267,32 @@ export type BarracksNews =
   | { kind: 'knock'; foe: Foe; by: Soldier }
   | { kind: 'fell'; soldier: Soldier };
 
-/** Who a soldier can reach: raiders in the den, and ones coming in through a gap. */
+/** Who a soldier goes for first: raiders in the den, and ones coming in through a gap. */
 export const reachable = (r: Foe): boolean => !r.gone && r.state !== 'down' && (r.inside || r.state === 'climb' || r.state === 'winded');
+
+/** Out on the beach, as the soldiers see it: the gate they go out and back by, the tide line, and
+    what stands in the way out there. Without one (no gate), they stay inside. */
+export interface Field {
+  /** The gateway: its middle, its width, and whether the gate's open (den.js opens it for them). */
+  gate: { x: number; w: number; open: boolean };
+  /** The tide line, z: they keep to the dry sand above it. */
+  shore: number;
+  /** Posts in the way (the gun tower's legs), walked round. */
+  posts?: { x: number; z: number; r: number }[];
+}
+
+/** The furthest out a soldier goes onto the beach: FIELD from the wall, and never into the sea. */
+const fieldEdge = (f: Field): number => Math.max(f.shore + SWORD.DRY, -SWORD.FIELD);
+
+/** Raiders out on the beach a soldier can go out to (the user, 10 Nov: "It breaks the immersion
+    for them to not go out and fight the attackers ... you're just going to sit there and let them
+    attack, hack at the wall?"): walking up from their boat, hacking at a hole, reeling from it, or
+    on the bottom rungs of a ladder. Not still at sea (rowing in or off), not up a ladder (past
+    SWORD.LADDER), not heading back to their boat, and not out past FIELD or below the tide line. */
+const OUT_STATES = ['approach', 'attack', 'dazed', 'ladder'];
+export const outReach = (r: Foe, f?: Field | null): boolean => !!f && !r.gone && r.state !== 'down' && !r.inside
+  && OUT_STATES.includes(r.state) && (r.ly ?? 0) <= SWORD.LADDER && r.z <= 0 && r.z >= fieldEdge(f) - SWORD.REACH * 0.8
+  && fieldEdge(f) <= SWORD.OUTSIDE - 0.3;   // (and there's dry sand outside the gate to go out on)
 
 /** The armoury hoist, as the soldiers see it: the middle of the stack's foot (it faces +x, into the
     den, its width running along z) and how wide it is. The winch is on its +z side. */
@@ -283,17 +325,41 @@ export class Barracks {
 
   up(): Soldier[] { return this.soldiers.filter((s) => s.state === 'up'); }
 
-  /** The raider a soldier should go for: the nearest they can reach, spreading out (a raider two
-      others are already on counts as four metres further away). */
-  pick(s: Soldier, foes: Foe[]): Foe | null {
+  /** Whether a soldier's at the gate, or nearly, wanting it open (den.js opens it, as for you). */
+  wantGate = false;
+
+  /** Can this soldier go for this raider? Raiders in the den or coming through a gap, always; ones on
+      the beach, if there's a gate to go out by (see outReach). */
+  can(r: Foe, field?: Field | null): boolean { return reachable(r) || outReach(r, field); }
+
+  /** Where a soldier stands to fight a raider: inside the den for one in it or coming through a gap
+      (never out over the wall), on the dry sand for one on the beach. */
+  spot(r: Foe, field?: Field | null): { x: number; z: number } {
+    if (reachable(r) || !field) return { x: r.x, z: Math.max(SWORD.INSIDE, r.z) };
+    return { x: r.x, z: Math.max(fieldEdge(field), Math.min(SWORD.OUTSIDE, r.z)) };
+  }
+
+  /** The raider a soldier should go for: the nearest they can reach (by the gate, if it's the other
+      side of the wall), spreading out (a raider two others are already on counts as eight metres
+      further away), and the ones in the den first (one on the beach counts as OUT_COST further). */
+  pick(s: Soldier, foes: Foe[], field?: Field | null): Foe | null {
     let best: Foe | null = null, bd = Infinity;
     for (const r of foes) {
-      if (!reachable(r)) continue;
+      if (!this.can(r, field)) continue;
       const others = this.soldiers.filter((o) => o !== s && o.state === 'up' && o.foe === r).length;
-      const d = Math.hypot(r.x - s.x, r.z - s.z) + others * 4;
+      const p = this.spot(r, field);
+      const d = this.way(s, p.x, p.z, field) + others * 4 + (reachable(r) ? 0 : SWORD.OUT_COST);
       if (d < bd) { bd = d; best = r; }
     }
     return best;
+  }
+
+  /** How far a soldier has to walk to (tx, tz): straight there on the same side of the wall, or by
+      the gate. */
+  private way(s: { x: number; z: number }, tx: number, tz: number, field?: Field | null): number {
+    if (!field || (s.z > 0) === (tz > 0)) return Math.hypot(tx - s.x, tz - s.z);
+    const g = field.gate.x, mz = s.z > 0 ? SWORD.INSIDE : SWORD.OUTSIDE, oz = s.z > 0 ? SWORD.OUTSIDE : SWORD.INSIDE;
+    return Math.hypot(g - s.x, mz - s.z) + Math.abs(oz - mz) + Math.hypot(tx - g, tz - oz);
   }
 
   /** With nobody to fight, where soldier i stands: shared out over the spots to guard (gaps in the
@@ -304,18 +370,20 @@ export class Barracks {
     return { x: p.x + (n % 2 ? 0.5 : -0.5) * Math.ceil(n / 2), z: p.z + n * 0.15 };
   }
 
-  /** The soldiers' turn. `spots`: where to stand guard; `home`: where to wait when there's nothing to guard. */
-  tick(dt: number, foes: Foe[], spots: { x: number; z: number }[], home: { x: number; z: number }): BarracksNews[] {
+  /** The soldiers' turn. `spots`: where to stand guard; `home`: where to wait when there's nothing to
+      guard (both inside); `field`: the beach, if they can go out to raiders there by the gate. */
+  tick(dt: number, foes: Foe[], spots: { x: number; z: number }[], home: { x: number; z: number }, field?: Field | null): BarracksNews[] {
     const news: BarracksNews[] = [];
+    this.wantGate = false;
     this.up().forEach((s, i) => {
-      if (s.foe && !reachable(s.foe)) s.foe = null;
+      if (s.foe && !this.can(s.foe, field)) s.foe = null;
       // Look again every half second for the best one to go for, but never walk off mid-fight.
       s.retT -= dt;
       const close = !!s.foe && Math.hypot(s.foe.x - s.x, s.foe.z - s.z) <= SWORD.REACH;
-      if (!close && (!s.foe || s.retT <= 0)) { s.retT = 0.5; s.foe = this.pick(s, foes); }
+      if (!close && (!s.foe || s.retT <= 0)) { s.retT = 0.5; s.foe = this.pick(s, foes, field); }
       s.moving = s.fighting = false;
       const r = s.foe;
-      if (r && Math.hypot(r.x - s.x, r.z - s.z) > SWORD.REACH) s.moving = this.walk(s, r.x, Math.max(SWORD.INSIDE, r.z), SWORD.SPEED, dt);
+      if (r && Math.hypot(r.x - s.x, r.z - s.z) > SWORD.REACH) { const p = this.spot(r, field); s.moving = this.go(s, p.x, p.z, SWORD.SPEED, dt, field); }
       else if (r) {
         // En garde: the raider stops to fight (the first soldier to reach them), blow for blow.
         if (!r.duel) r.duel = s;
@@ -329,8 +397,9 @@ export class Barracks {
           if (r.hp <= 0) { r.duel = null; s.foe = null; news.push({ kind: 'knock', foe: r, by: s }); }
         }
       } else {
+        // Nobody to fight: back to their post (in through the gate, if they're out on the beach).
         const p = this.post(i, spots, home);
-        s.moving = this.walk(s, p.x, p.z, SWORD.SPEED * 0.9, dt);
+        s.moving = this.go(s, p.x, p.z, SWORD.SPEED * 0.9, dt, field);
         if (!s.moving) { s.fx = 0; s.fz = -1; }
       }
     });
@@ -368,6 +437,53 @@ export class Barracks {
   private face(s: Soldier, dx: number, dz: number): void {
     const n = Math.hypot(dx, dz);
     if (n > 1e-6) { s.fx = dx / n; s.fz = dz / n; }
+  }
+
+  /** A step towards (tx, tz), never through stone: on the same side of the wall, straight there (on
+      the beach, round the posts and on the dry sand); on the other side, to the gateway's mouth, and
+      through it once the gate's open (waiting for it at the mouth if not). True while on the way. */
+  private go(s: Soldier, tx: number, tz: number, speed: number, dt: number, field?: Field | null): boolean {
+    if (!field) return this.walk(s, tx, Math.max(SWORD.INSIDE, tz), speed, dt);
+    const IN = SWORD.INSIDE, OUT = SWORD.OUTSIDE, f = field, g = f.gate;
+    const half = Math.max(0.05, g.w / 2 - 0.45), gx = Math.max(g.x - half, Math.min(g.x + half, s.x));
+    const into = tz > 0, mouth = into ? IN + 0.15 : OUT - 0.15;   // (just past the far mouth, so they're clear of it)
+    if (s.z > OUT + 0.02 && s.z < IN - 0.02) {
+      // In the gateway: on through (the way they're headed), keeping it open till they're out of it.
+      this.wantGate = true;
+      if (!g.open) { s.fz = into ? 1 : -1; s.fx = 0; return false; }
+      return this.walk(s, gx, mouth, speed, dt);
+    }
+    if ((s.z >= IN - 0.02) === into) {
+      // The same side: straight there. Out on the beach, keeping to the dry sand and round the posts.
+      if (into) return this.walk(s, tx, Math.max(IN, tz), speed, dt);
+      const moved = this.walk(s, tx, Math.max(fieldEdge(f), Math.min(OUT, tz)), speed, dt);
+      this.clear(s, f);
+      return moved;
+    }
+    // The other side of the wall: to the gateway's mouth on this side, then through once it's open.
+    const mz = into ? OUT : IN, d = Math.hypot(gx - s.x, mz - s.z);
+    if (d < 1.6) this.wantGate = true;
+    if (d > 0.1) {
+      const moved = this.walk(s, gx, mz, speed, dt);
+      if (!into) return moved;
+      this.clear(s, f);
+      return moved;
+    }
+    if (!g.open) { s.fx = 0; s.fz = into ? 1 : -1; return false; }
+    return this.walk(s, gx, mouth, speed, dt);
+  }
+
+  /** Out on the beach: off the posts (sliding round them), and on the dry sand, no further out than FIELD. */
+  private clear(s: Soldier, f: Field): void {
+    for (const p of f.posts ?? []) {
+      const dx = s.x - p.x, dz = s.z - p.z, d = Math.hypot(dx, dz), min = p.r + 0.3;
+      if (d < min) {
+        // (Dead on, step round it to one side.)
+        const [ux, uz] = d > 1e-6 ? [dx / d, dz / d] : [1, 0];
+        s.x = p.x + ux * min; s.z = p.z + uz * min;
+      }
+    }
+    s.z = Math.max(fieldEdge(f), Math.min(SWORD.OUTSIDE, s.z));
   }
 
   /** A step towards (tx, tz). True while still on the way. */
