@@ -391,6 +391,16 @@ then "she's definitely a penguin side quest".
   shoulder as a familiar. Won by a puzzle, as every reward is (which one: to pin down).
 - **Penguins in the wardrobe too:** "make her a penguin" first meant Kikkit as one; if wanted,
   a penguin body the pirate maker can dress, so anyone can be a penguin.
+- **All in on her craziness (10 Nov):** "really just do the whole craziness of Kikkit ... she's the
+  crazy one". Her directions ramble: "I took five rights, all right. Did a double backflip. Well,
+  that's what I get", "and then I saw a penguin, and he was wearing a balaclava", doing some other
+  silly thing; she "just goes off on 20 different tangents while she's trying to explain to you
+  how to get to this penguin in a weird, like, loopy, drunk kind of way."
+- **Every bit of nonsense is literally true:** "it's got to actually make some mechanical sense so
+  that it's more funny and literal". Her ramble is the map, if you take it at its word: the
+  "double backflip" is a whirlpool pair that spins her right round twice; the turns she counts
+  are the turns the whirlpools make; the penguin in the balaclava is really there, up to
+  something, where she said. The funny part is finding out she was right all along.
 (To shape with the user: which puzzle wins the penguin, and what Kikkit gives you for bringing
 one back, if she even remembers asking.)
 
