@@ -1276,7 +1276,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     each one inside has about three on him. They wait at the gateway's mouth till the gate swings
     open, walk through it, never through stone, round the gun tower's legs, and come back in the same
     way when nobody's left outside. In the siege and for the occasional raiders alike
-    (`src/den-sword.ts`: Field, outReach). With nobody to fight or guard they wait off to the winch's side of
+    (`src/den-sword.ts`: Field, outReach). **But only with you (10 Nov):** "they kind of follow
+    you out the gate, so they just don't die needlessly. It's only when you go out and decide to
+    start engaging." While you're inside, so are they, and raiders on the beach are left be; step
+    out onto the sand and they follow you out, standing at your back with nobody to fight and going
+    for raiders out there; go back in and they come in after you. With nobody to fight or guard they wait off to the winch's side of
     the hoist, past where you stand to work it, never in front of the stack (the user, 9 Nov: they
     "stand in a spot that obscures the swordfighting board"; `waitSpot`, src/den-sword.ts).
   - **Loose crates mend the wall, for good.** Each sprinkle is a loose crate broken up for planks,

@@ -279,6 +279,10 @@ export interface Field {
   shore: number;
   /** Posts in the way (the gun tower's legs), walked round. */
   posts?: { x: number; z: number; r: number }[];
+  /** You, when you're out on the beach: they go out only with you, following you out of the gate
+      (the user, 10 Nov: "they kind of follow you out the gate, so they just don't die needlessly.
+      It's only when you go out and decide to start engaging"). While you're in, so are they. */
+  leader?: { x: number; z: number } | null;
 }
 
 /** The furthest out a soldier goes onto the beach: FIELD from the wall, and never into the sea. */
@@ -290,7 +294,7 @@ const fieldEdge = (f: Field): number => Math.max(f.shore + SWORD.DRY, -SWORD.FIE
     on the bottom rungs of a ladder. Not still at sea (rowing in or off), not up a ladder (past
     SWORD.LADDER), not heading back to their boat, and not out past FIELD or below the tide line. */
 const OUT_STATES = ['approach', 'attack', 'dazed', 'ladder'];
-export const outReach = (r: Foe, f?: Field | null): boolean => !!f && !r.gone && r.state !== 'down' && !r.inside
+export const outReach = (r: Foe, f?: Field | null): boolean => !!f?.leader && !r.gone && r.state !== 'down' && !r.inside
   && OUT_STATES.includes(r.state) && (r.ly ?? 0) <= SWORD.LADDER && r.z <= 0 && r.z >= fieldEdge(f) - SWORD.REACH * 0.8
   && fieldEdge(f) <= SWORD.OUTSIDE - 0.3;   // (and there's dry sand outside the gate to go out on)
 
@@ -370,6 +374,13 @@ export class Barracks {
     return { x: p.x + (n % 2 ? 0.5 : -0.5) * Math.ceil(n / 2), z: p.z + n * 0.15 };
   }
 
+  /** Where soldier i stands with you out on the beach and nobody to fight: a little behind you,
+      toward the wall, three to a row, on the dry sand. */
+  escort(i: number, f: Field): { x: number; z: number } {
+    const L = f.leader!, row = Math.floor(i / 3);
+    return { x: L.x + ((i % 3) - 1) * 0.8, z: Math.max(fieldEdge(f), Math.min(SWORD.OUTSIDE, L.z + 1.1 + row * 0.7)) };
+  }
+
   /** The soldiers' turn. `spots`: where to stand guard; `home`: where to wait when there's nothing to
       guard (both inside); `field`: the beach, if they can go out to raiders there by the gate. */
   tick(dt: number, foes: Foe[], spots: { x: number; z: number }[], home: { x: number; z: number }, field?: Field | null): BarracksNews[] {
@@ -397,8 +408,9 @@ export class Barracks {
           if (r.hp <= 0) { r.duel = null; s.foe = null; news.push({ kind: 'knock', foe: r, by: s }); }
         }
       } else {
-        // Nobody to fight: back to their post (in through the gate, if they're out on the beach).
-        const p = this.post(i, spots, home);
+        // Nobody to fight: with you out on the beach, at your back; otherwise back to their post (in
+        // through the gate, if they're out on the beach).
+        const p = field?.leader ? this.escort(i, field) : this.post(i, spots, home);
         s.moving = this.go(s, p.x, p.z, SWORD.SPEED * 0.9, dt, field);
         if (!s.moving) { s.fx = 0; s.fz = -1; }
       }

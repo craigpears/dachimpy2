@@ -8,7 +8,7 @@ import { C, S, rand, $, scene, mat, mesh, canvasTex, woodTex, makePirate, animat
 import { wall, rest, updateHole, barFrac, plankMat, putPiece, strengthen, holeX } from './wall.js';
 import { hit, passable, doorX } from './raids.js';
 import { shoreZ } from './bilge.js';
-import { towerLegs } from './land.js';
+import { towerLegs, outside } from './land.js';
 import { online, myId, say } from './crew.js';
 
 // ---------- Swordfight: soldiers to hold the breaches ----------
@@ -500,10 +500,11 @@ function guardSpots() {
 }
 
 // The beach, for soldiers going out to raiders there (Field, src/den-sword.ts): the gate they go out
-// and back by, the tide line, and the gun tower's legs to walk round.
+// and back by, the tide line, the gun tower's legs to walk round, and you: they go out only with you.
 function beachField() {
   const d = wall.door;
-  return d ? { gate: { x: d.cx, w: d.w, open: d.open > 0.8 }, shore: shoreZ(), posts: towerLegs() } : null;
+  const leader = outside() ? { x: pirate.x, z: pirate.z } : null;   // (they go out only with you)
+  return d ? { gate: { x: d.cx, w: d.w, open: d.open > 0.8 }, shore: shoreZ(), posts: towerLegs(), leader } : null;
 }
 
 export function swordTick(dt) {

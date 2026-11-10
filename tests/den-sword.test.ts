@@ -294,7 +294,7 @@ describe('Waiting soldiers block the Swordfight board (9 Nov)', () => {
 
 describe('Out through the gate to the raiders on the beach (10 Nov)', () => {
   // The den's gate: its middle at x -0.275, 2.2 m wide; the tide well down the beach.
-  const field = (over: Partial<Field> = {}): Field => ({ gate: { x: -0.275, w: 2.2, open: false }, shore: -17, ...over });
+  const field = (over: Partial<Field> = {}): Field => ({ gate: { x: -0.275, w: 2.2, open: false }, shore: -17, leader: { x: -0.275, z: -2.5 }, ...over });
   const home = { x: -5.4, z: 5.2 };
   /** Run the soldiers and the raiders fighting back, the gate opening while a soldier wants it (as
       den.js does), for `secs`; every soldier's every step, and who got knocked flat. */
@@ -324,12 +324,31 @@ describe('Out through the gate to the raiders on the beach (10 Nov)', () => {
     // Out through the gate, never through stone.
     expect(steps.some((p) => p.z < SWORD.OUTSIDE)).toBe(true);
     expect(steps.filter((p) => inStone(p, f))).toEqual([]);
-    // And with nobody left outside, back in by the gate to wait.
-    const back = sally(b, [r], 15, f).steps;
+    // And once you're back in, so are they, by the gate, to wait.
+    const back = sally(b, [r], 15, { ...f, leader: null }).steps;
     expect(back.filter((p) => inStone(p, f))).toEqual([]);
     const s = b.soldiers[0];
     expect(s.z).toBeGreaterThan(SWORD.INSIDE);
     expect(Math.hypot(s.x - home.x, s.z - home.z)).toBeLessThan(1.5);
+  });
+
+  // The user: "they kind of follow you out the gate, so they just don't die needlessly. It's only
+  // when you go out and decide to start engaging".
+  it("they go out only with you: while you're in, raiders hacking at the wall are left be (10 Nov)", () => {
+    const b = new Barracks(), f = field({ leader: null });
+    b.enlist([{ hp: 4, size: 1.2 }], -6, 3.2);
+    const r = raider(-5.2, -1.15, 'attack', false);
+    const { knocked, steps } = sally(b, [r], 12, f);
+    expect(knocked).toEqual([]);
+    expect(steps.every((p) => p.z >= SWORD.INSIDE - 0.05)).toBe(true);
+  });
+
+  it('with you out on the beach and nobody to fight, they follow you out the gate (10 Nov)', () => {
+    const b = new Barracks(), f = field({ leader: { x: 3, z: -4 } });
+    b.enlist([{ hp: 4, size: 1.2 }, { hp: 4, size: 1.2 }], -5.4, 5.2);
+    const { steps } = sally(b, [], 15, f);
+    expect(steps.filter((p) => inStone(p, f))).toEqual([]);
+    for (const s of b.soldiers) expect(Math.hypot(s.x - 3, s.z - -4)).toBeLessThan(2.5);
   });
 
   it('they meet raiders walking up the beach from their boats', () => {
