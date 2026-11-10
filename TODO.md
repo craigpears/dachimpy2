@@ -162,13 +162,6 @@ the site (`.assetsignore` skips `*.md`).
   the crane, haul her up, and the like), the offer is in the view where you're looking, at the
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
-- **Placing pieces is hard without the Carpentry view (10 Nov):** "friends saying that ... they're
-  finding it hard to place the carpentry pieces. I think that's probably a hint that the kind of view
-  that you get to if you hit tab is not obviously discoverable for him. But I don't know, maybe
-  that's just an experience thing. You know, you can't make everything magically obvious." Today
-  "Tab: the Carpentry view" is only added to the prompt once a piece already has a spot to fit, so
-  someone struggling ("The P won't go there", "Carry the P to a hole") never sees it. (Whether to
-  tell them sooner, to pin down with the user.)
 
 ## Needs a playtest to pin down
 
