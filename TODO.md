@@ -247,8 +247,9 @@ the site (`.assetsignore` skips `*.md`).
   jug marked XXX in her hand, and a little ghost familiar at her shoulder. As a penguin: a penguin
   wearing her look (the rose crown, eyepatch, earrings, tattoos, skirt, the XXX jug, the ghost).
   Made the modular way: a penguin is a body the pirate maker can dress, like the male and female
-  ones, so her clothes are wardrobe items and anyone could be a penguin too. (Where she turns up:
-  to pin down with the user.)
+  ones, so her clothes are wardrobe items and anyone could be a penguin too. "Or a side quest with
+  something related to penguins": where she turns up, and whether it's a side quest of its own, to
+  pin down with the user.
 
 ## Needs a playtest to pin down
 
