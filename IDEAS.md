@@ -617,6 +617,25 @@ Building on what's there now (the walk and its stairs are made of pieces that st
     (the lock's Bilge, the deck patch)? Puzzle Pirates' own duty puzzles map loosely onto the work
     (Bilge for pumping, Sailing for trimming); a short round to a goal, as at the lock, seems to
     stand up. (To talk over with the user.)
+    **Rowing puzzles, some first ideas (10 Nov, asked for: "going over some shallow shoals with
+    some rowing ... what kind of ideas have you come up with, like, for a rowing puzzle?").** The
+    user earlier didn't want a puzzle made just for rowing, so the first two reuse what's there:
+    - **Port and starboard (Bilge's board, split down the middle):** the left half is her port
+      oars, the right half starboard. Clears on a side pull those oars: even work on both sides
+      keeps her straight, more on one side turns her. Over a shoal the deep channel twists, so the
+      puzzle is the steering: you plan your clears to follow the bends. A run aground just stops
+      her till you've cleared her off (no damage).
+    - **Sounding the channel (a deduction board, Navigation):** the shoal ahead is hidden; each
+      cast of the lead shows a square's depth, and the numbers tell you about the squares round it,
+      so you work out the safe channel before you row it, a stroke a square. Thinking, not timing.
+    - **Keeping stroke (new, a rhythm-free tile puzzle):** a row of rowers' benches, each with an
+      oar in some position; one move swings a run of them, and a stroke lands when every oar on
+      the bench line matches. Fewer moves, longer strokes.
+    - **Kedging (the capstan):** row the anchor out, drop it, and heave her up to it: rings of the
+      capstan to turn into line (a Carpentry-like fitting, or a short Bilge round at the bars).
+      Slow but sure: good for the very worst shoals, and for a calm.
+    (Port and starboard is the pick for cohesion: one mechanic used a new way, and it makes the
+    oars steer rather than just go. To shape with the user.)
     **Weather is where oars make sense (9 Nov):** the wind can drop. Under sail she's quicker, but
     when the wind drops a ship that's all sails is "dead in the water until the wind picks back
     up again", and under sail you "can't go against the wind". Oars keep her moving either way:
