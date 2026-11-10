@@ -141,6 +141,18 @@ the site (`.assetsignore` skips `*.md`).
   the treasure, played by its real rules (checked first), with a believable reason for it there.
   (Treasure Haul's real home is a wreck, so it goes at the clifftop lagoon's wreck, the crane's
   place; the cove keeps a chest of its own on the beach. How you get that one: to pin down.)
+
+- **The checkpoint's guns can be wrecked, her guns loaded by Gunnery, and the turret goes (10 Nov):**
+  the checkpoint's guns should be "just the same as the other one" (the turret): a hit quietens a
+  gun for a while and the third wrecks it, the same toppling and smoking stump, so knocking them
+  out is a way through of its own ("everything should be destructive"). But it costs a puzzle:
+  "we should have to load the guns through the puzzle", so her two guns are loaded by Gunnery
+  (the gun tower's own puzzle, played on her deck) and Q/E fire only a gun that's loaded. And the
+  sea near the den is rebuilt round the checkpoint: "there's no need for that cannon near the
+  turret near the den now, because ... we've got the Imperial checkpoint. That's the evolution of
+  it." So the turret and its chest go; the trade winds run out towards the checkpoint and back
+  home; the canal and the lock stay, as the side adventure.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
