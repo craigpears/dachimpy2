@@ -556,8 +556,16 @@ pirate wedding absolutely is a must."
   every guest, the couple included, from the wardrobe (YPP clothes and dyes, as in Your pirate).
 - **Decorating and fashion made central,** not a side menu: the den's Decorate mode and the
   wardrobe become the puzzle-free heart of one quest, a showcase for them.
-- **The smaller version the user also floated:** someone "going decorating crazy" with a house they
-  need you to decorate. Could be the same character, or the way in (decorate their house first).
+- **The wedding takes in the house idea (10 Nov):** "the wedding thing supersedes the decorate the
+  house thing, that encapsulates everything." No separate decorate-their-house quest.
+- **Freeform, with an excited bride (10 Nov):** "it definitely needs to be very freeform because the
+  whole point is it's being creative, but I still think you need that kind of almost giggly
+  excited bride that tells you how much she loves the outfits ... or compliments you as you're
+  designing things. Maybe she asks you questions, you choose some different color palettes ... or
+  design schemes." So no score and no brief to meet: you place and dress what you like, and the
+  bride reacts as you go, delighted at an outfit, gushing over the arch. She asks you things along
+  the way (which colour palette, which scheme: say, sunset gold, ocean blues, jungle greens), and
+  your answer sets the mood she cheers you on toward, never a rule you can fail.
 - **Goes with:** "Side quests that leave friends about the den" (the couple could visit the den
   after), "Inside the house: furniture placed the same way, as in a YPP house" and "More clothes"
   (Making it yours, below).
