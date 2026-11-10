@@ -419,8 +419,8 @@ describe('sailing: the first lock, up the cliff from the canal (9 Nov)', () => {
     h.put('F'); h.put('F');
     run(h, 4);
     expect(h.held()).toBe('up');
-    // As many pieces cleared as used to fill it, and it's well short.
-    for (let i = 0; i < 5; i++) { h.pump(w); run(h, 1.5); }
+    // A few clears in, it's well short.
+    for (let i = 0; i < 3; i++) { h.pump(w); run(h, 1.5); }
     expect(lock(h).level).toBeLessThan(0.4);
     expect(h.held()).toBe('up');
     // Each clear lifts the water a step: smoothly, never all at once, and there within a second.
@@ -431,17 +431,23 @@ describe('sailing: the first lock, up the cliff from the canal (9 Nov)', () => {
     expect(lock(h).level - before).toBeLessThan(w / LOCK.WORK / 2);
     run(h, 1);
     expect(lock(h).level).toBeCloseTo(before + w / LOCK.WORK, 6);
-    // A proper go of Bilge: about fourteen plain threes, tens of seconds of play.
-    let n = 6;
+    // A proper go of Bilge still: about nine plain threes.
+    let n = 4;
     while (h.held() === 'up' && n < 100) { h.pump(w); run(h, 1.5); n++; }
-    expect(n).toBeGreaterThanOrEqual(11);
+    expect(n).toBeGreaterThanOrEqual(8);
     expect(lock(h).level).toBe(1);
   });
 
   it('"tone down how many times you need to get through the locks ... Maybe take a third off" (10 Nov)', () => {
-    // A third less Bilge to lift her than the sixteen moves' worth it was.
-    expect(LOCK.WORK).toBe(11);
-    expect(LOCK.WORK / 16).toBeCloseTo(2 / 3, 1);
+    // Less Bilge to lift her than the sixteen moves' worth it was: a third off, then less again.
+    expect(LOCK.WORK).toBeLessThanOrEqual(16 * 2 / 3);
+  });
+
+  it('the locks aren\'t so bilge-heavy now there\'s rowing to get in too (10 Nov)', () => {
+    // "the locks are incredibly [bilge] heavy now because we've got the rowing to get in ... a bit
+    // of balancing on how much bilging is needed": under half the sixteen it was, but still a go.
+    expect(LOCK.WORK).toBeLessThan(8);
+    expect(LOCK.WORK).toBeGreaterThanOrEqual(6);
   });
 
   it('coming back down, the lock drains by itself and lets her out', () => {

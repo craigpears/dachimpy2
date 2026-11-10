@@ -268,9 +268,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       (the canal's mouth is yours to find: "The way to the locks", below).
     - **The canal and the lock (the first of a chain: below):** a lock in the foot of a cliff, a little canal up to it.
       Sail into the lock and she waits; nothing happens on its own. Bilge on the quay pumps it up,
-      a proper go of it (about eleven moves' worth: sixteen, till the user, 10 Nov: "tone down how
+      a proper go of it (about seven moves' worth: sixteen, till the user, 10 Nov: "tone down how
       many times you need to get through the locks, just so I can get in there a bit quicker. For
-      now ... Maybe take a third off"; to look at again once the lagoon's been tried), not "way too quickly": the lock's water rises
+      now ... Maybe take a third off"; then eleven, till rowing in at the canal's mouth came too, 10
+      Nov: "the locks are incredibly [bilge] heavy now because we've got the rowing to get in ... a
+      bit of balancing on how much bilging is needed"), not "way too quickly": the lock's water rises
       a step with every clearing and she rises with it ("you should see the line of water
       gradually going up"), and a real pump stands on the quay by the board, its handle working
       and water gushing into the lock as you bilge ("we need the actual bilge pump"). The board
@@ -677,7 +679,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       - **Nothing looks built before it's built:** no old hoist (it went: a crane helping build the
         crane). Before you start, the crane's place waits: four squared stone footings set in the
         clifftop where its foot will go, and the first frame's outline chalked on the ledge where
-        it'll be laid.
+        it'll be laid (10 Nov: "I like the outline on the floor for the crane. That's definitely
+        looking a lot better").
       - **Stopping there says what to do:** "Alongside the ledge · Space: build a crane on the ledge
         to haul her up the cliff (Carpentry)".
       - **No bilge pump talk:** the old pump on the cove's sand is for a later step of the story,
@@ -719,9 +722,6 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       the headland itself, for the steps that come after. Rules: `src/den-crane.ts`; in the world:
       `js/den/crane.js` (its frames are played with the deck patch's Carpentry: `patch.away` in
       `js/den/sea-puzzles.js`).
-- **A quick siege to start, then calm (9 Nov).** The first three waves come as they always have,
-  each counting down after the last. Beat the third and their captain calls it off ("We'll be
-  back!") and the ship sails out of the cove, its cannon with it. The den's quiet after that: no
   - **Umami the capybara, rescued from the lagoon's far bank (10 Nov).** A friend's side quest (the
     friend asked for the name): an animal trapped up there, freed by a puzzle, who then lives at the
     den as "a pet that you found and rescued". A capybara, so it has to make sense ("not just hanging
@@ -776,6 +776,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       her moored by his bank. Rules: `src/den-umami.ts` (his fall's pace: `FALL` in
       `src/foraging.ts`); in the world: `js/den/umami.js` (the bank: `BANK` in `js/den/crane.js`; his
       look and his trap: `capybaraSkin` in `js/den/foraging.js`, the test page's too).
+- **A quick siege to start, then calm (9 Nov).** The first three waves come as they always have,
+  each counting down after the last. Beat the third and their captain calls it off ("We'll be
+  back!") and the ship sails out of the cove, its cannon with it. The den's quiet after that: no
   countdown, so you're free to build, roam and puzzle. The user liked the quick intro under attack
   but wanted raids "more opt-in ... so you're not constantly under pressure and you feel free to go
   explore": "do a few waves". What brings raiders back later is to come (IDEAS.md, "Raids you

@@ -169,6 +169,15 @@ the site (`.assetsignore` skips `*.md`).
   a little harbour, and the mouth's wind fills it right up to the cliff and the first lock: no
   gap beside the wind that looks like a way round it.
 
+- **Start something where you're looking, not at the foot of the screen (10 Nov):** "Still got to
+  fix that carpentry hauling up thing. Like, it should be in the middle of the screen where I'm
+  looking so that I can click on it and start it. It should not be a space along the bottom ...
+  it's not in my eye line at all." (Making the prompt at the bottom bigger and glowing, RULES
+  "Something new to do stands out", wasn't enough.) So when there's something new to start (build
+  the crane, haul her up, and the like), the offer is in the view where you're looking, at the
+  thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
+  still works. Starting with the crane, after the Umami work in the same file.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map

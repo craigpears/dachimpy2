@@ -10,7 +10,7 @@
    - It joins two stretches of water a step apart: its low side and its high side.
    - She goes in or out only when its water's at the level of the side she's going to or from.
    - Lifting her costs a puzzle: waiting in it to go up, Bilge on the quay pumps it full, a step
-     with every clear (a proper go of it: about sixteen moves' worth, "you should see the line of
+     with every clear (a proper go of it: about seven moves' worth, "you should see the line of
      water gradually going up").
    - Water running downhill is free: with her in it to go down, it drains by itself; empty and
      wanted full from the high side, it fills from above by itself (nobody's lifted).
@@ -19,8 +19,10 @@ export const LOCK = {
     /** Moves' worth of Bilge to raise her (see Lock.pump). At four it "filled way too quickly" (the
         user, 9 Nov); at sixteen, a third too long for now (10 Nov: "tone down how many times you need
         to get through the locks, just so I can get in there a bit quicker. For now ... Maybe take a
-        third off"), to look at again once the lagoon's been tried. */
-    WORK: 11,
+        third off"); at eleven, still heavy once rowing in at the canal's mouth came too (10 Nov: "the
+        locks are incredibly [bilge] heavy now because we've got the rowing to get in ... a bit of
+        balancing on how much bilging is needed"). */
+    WORK: 7,
     /** Seconds it takes to drain down, or to fill from above, by itself. */
     DRAIN: 2,
     /** Its water rising to what's been pumped (see lockRise): at least this much of the lift a
