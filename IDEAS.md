@@ -365,7 +365,19 @@ then "she's definitely a penguin side quest".
   Drawn from her portrait by the pirate maker: black curly hair crowned with red roses, an
   eyepatch, gold hoops, her tongue out, blue swirling tattoos on her arms and middle, a red top
   tied at the front, a red wristband, a ragged black skirt on a gold-buckled belt, bare feet, a
-  stone jug marked XXX, and a little ghost familiar at her shoulder. Every piece a wardrobe item.
+  stone jug marked XXX. Every piece a wardrobe item. Her familiar is a monkey, Rodrigo (the user,
+  10 Nov: "she doesn't have a ghost ... it's definitely Rodrigo"; her ship's named for him), not
+  the ghost first read off her portrait: check it again before drawing him.
+- **A bit drunk:** the jug and her tongue out are her. "I remember taking a left, the left, the
+  left, the left, and just spinning ... everything was just spinning": the irony is she's drunk
+  as well as in the whirlpools.
+- **Sailed, with the Sailing puzzle (10 Nov):** "she's definitely a sailing kind of person", so the
+  whirlpools are sailed, not rowed. The challenge is getting over the whirlpools, and "you've got
+  to do at least the Vegas to get through": you go into the Sailing puzzle and a Vegas sends her
+  a long run forward in one go ("like 7 forwards"), clear over what would spin you round. It also
+  teaches the way past the checkpoint: a Vegas carries you through in one go, past the guns.
+  "That ties in extremely well." (Sailing's real rules and combos to check on YPPedia; see
+  "Tokens from sailing".)
 - **Her crazed directions:** "I really want a penguin. I saw one over there. I can't remember
   which way I went. Maybe I took five lefts and a right, or was it five rights and a left?" She
   sounds loopy ("you can't have taken five lefts ... spun around on the spot ... hopped"), "she
@@ -379,8 +391,16 @@ then "she's definitely a penguin side quest".
   shoulder as a familiar. Won by a puzzle, as every reward is (which one: to pin down).
 - **Penguins in the wardrobe too:** "make her a penguin" first meant Kikkit as one; if wanted,
   a penguin body the pirate maker can dress, so anyone can be a penguin.
-(To shape with the user: which puzzle wins the penguin, whether the whirlpools are rowed or
-sailed, and what Kikkit gives you for bringing one back, if she even remembers asking.)
+(To shape with the user: which puzzle wins the penguin, and what Kikkit gives you for bringing
+one back, if she even remembers asking.)
+
+## A bigger ship from the shipwright (10 Nov)
+
+"Later we can figure out how ... you can have some shipbuilding, shipwright quest to ... strengthen
+your [ship] ... maybe that's the alternative if you go back into the base ... to get past the
+checkpoint by building a bigger, stronger ship." Another way past the checkpoint (as well as
+sailing through on a Vegas): back at the den, build a bigger, stronger ship that can take its
+guns. Built by puzzle, as everything is.
 
 ## Rewards that mean something (10 Nov)
 

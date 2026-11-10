@@ -90,34 +90,6 @@ the site (`.assetsignore` skips `*.md`).
   on the gun (chipped stone, a scorched and dented barrel, a battlement knocked off, smoking more
   as it's worse), and the toasts that count the hits ("2 more to wreck it") go.
 
-- **Dignity at the checkpoint, and her little cutscene (10 Nov):** "adding [her] as the dutiful
-  commander of the imperial checkpost, kind of peering down from the gates ... give her a little
-  cutscene similar to Dalnoth ... if you approach an imperial outpost, oh, pirates! Quick, shoot,
-  pirates! ... come up with something witty for her". She stands on the checkpoint's gate, looking
-  down. The first time you sail up, a short, cheesy cutscene like Dalnoth's: the camera finds her
-  peering out with a spyglass, she spots you, and has her say before the guns turn on you. Then a
-  line or two as things happen. Lines to start from (to try on the user):
-  - Spotting you: "Halt! Imperial checkpoint. State your busi... oh. Pirates. It's always pirates."
-    Then to her gunners: "Look lively! And do try to hit them this time."
-  - Coming closer: "One more stroke and I'll have to shoot. There'll be paperwork. I hate paperwork."
-  - A gun of hers wrecked: "That was Imperial property!"
-  - You get past: "This is going in my report. In very small, very cross handwriting."
-  - If you come round by the locks instead: "Nobody uses the canal. Nobody!"
-  **The warning shot (10 Nov):** "I need to give it a bit of a cheeky giggle and a win". Wander
-  too close on the trade winds and a shot comes your way: a warning shot, that she meant to miss
-  with (or did she?), and she has a cheeky giggle about it: get any closer and there's plenty more
-  where that came from. Something like: "Hee hee! Oops. That was a warning shot. Mostly.
-  Come any closer and the next ones won't be." (It should land close, splash her, and miss.)
-  **All in, and Bella fires it (10 Nov):** "we've really got to go all in with Dignity's little
-  cutscene. She's got to be very cute. The lavender monkey has got to be involved somehow ... the
-  little monkey is the one that fires the cannon at you. We've got to get these familiars really
-  involved." So Bella, on Dignity's shoulder, hops down to the gun, lights the fuse (or pulls the
-  lanyard) and covers her ears; the warning shot is hers, and Dignity's giggle is at her own
-  monkey's aim as much as at you. Lots of little touches: Bella chattering, a salute, the spyglass.
-  Familiars doing things in scenes is a thread to keep pulling (Dalnoth's monkey too).
-  Her look is ready: `makePirate({ look: PIRATES.Dignity })` (RULES.md, "Real pirates are only
-  looks"), placed in `js/den/checkpoint.js`, once the checkpoint's current work has landed.
-
 - **Rowing: keep Bilge's water look, lose the compass (10 Nov):** first: "people are just going to
   get very confused given how visually identical it is to the [Bilging]"; then, on second thoughts:
   "I don't like the idea of different pieces ... part I did love of this similarity [to] bilge is
@@ -142,6 +114,10 @@ the site (`.assetsignore` skips `*.md`).
   The hint moves here too (10 Nov): "I wonder if there's another way round" now plays after
   you're sunk, not on first sighting the checkpoint ("will probably come after you get sunk").
   The chain: you see the wind, and work out for yourself that the oars get you past it.
+  Sunk only by a real hit (10 Nov): Bella's first shot is the warning (her giggle stays); a gun
+  that actually hits you sinks her, and you row home. No more patching a bit of damage with
+  Carpentry at the checkpoint: "it probably adds a bit more stakes ... you are in a tiny sloop at
+  this point, after all."
 
 ## Needs a playtest to pin down
 
@@ -149,6 +125,12 @@ the site (`.assetsignore` skips `*.md`).
   "is great"; Dalnoth redrawn from his portrait and the map's view cleared, not yet seen. Watch: whether the cutscene's timing and camera feel right (about ten
   seconds), whether the map reads well from where the camera looks down on it, and whether M is
   a good key for it.
+
+- **Dignity's cutscene at the checkpoint (10 Nov).** (RULES.md, "Dignity at the checkpoint".)
+  Seen: "I love it", "she's cute"; her hair, colours and Bella's trip to the real gun redone since,
+  not yet seen. Watch: her new hair and the shadow and atlantean dyes against her portrait;
+  whether Bella's bounds down to the gun read; whether about sixteen seconds is too long; whether
+  her later lines over her head are seen from where the sea's camera usually is.
 
 - **Towers, a lower middle and a night sky (9 Nov), not yet seen by the user.** (RULES.md, "You
   can see out to sea".) Watch for: whether enough of the beach shows from where you usually
