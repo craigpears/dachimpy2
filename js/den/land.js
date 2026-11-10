@@ -5,6 +5,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { gateTop } from '../den-wall.js';
 import { CarpentryFrame } from '../carpentry-frame.js';
 import { HIGH } from '../den-bilge.js';
+import { beachFloor } from '../den-beach.js';
 import { dyeHex } from '../den-look.js';
 import { C, S, WOOD_D, STONE_D, WALL_Z, DEN_BACK, PAY, k, rand, $, denLook, scene, camera, hemi, paintSky, mat, mesh, canvasTex, woodTex, groundTex, WOOD, woodMat, pieceGroup, outline, xrMat, addXray, V3, basis, flags, flagpole, pirate, HOP, carry, obstacles, G, wm, burst, toast, tween, fatOutline, v3, worldLets } from './world.js';
 import { wall, X, cellPlane, updateStats } from './wall.js';
@@ -543,7 +544,7 @@ export function heightAt(x, z, pad = 0, from = 99) {
     if (z < ramp.zTop - 0.05 || z > ramp.zBot + pad) continue;
     if (j.frame) return 99;
   }
-  return 0;
+  return beachFloor(x, z);   // (out on the beach: the jetty's boards, src/den-beach.ts)
 }
 export const onRampart = () => ramp && pirate.h > ramp.T - 0.15;
 

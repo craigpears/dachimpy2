@@ -1,18 +1,20 @@
 // The landing off the den's beach: the stretch of water from anywhere on which Space at sea puts you
 // ashore (src/den-beach.ts). Drawn to stand out from the sea (the user, 10 Nov: "how to get back to
-// shore is not very obvious"): a short jetty out to her mooring with a torch at its end, a post
-// flying your flag at each end of the landing, a line of floats along its seaward edge, and its
-// water a little lighter, shallows over sand.
+// shore is not very obvious"): a jetty out to her mooring with a torch at its end, a post flying
+// your flag at each end of the landing, a line of floats along its seaward edge, and its water a
+// little lighter, shallows over sand. The jetty runs from dry sand all the way out to her, and you
+// walk out along it to board her (10 Nov: "I want to actually walk to it"): where it lies, and what's
+// walkable, is src/den-beach.ts.
 import * as THREE from 'three';
 import { SAIL } from '../den-sail.js';
-import { BEACH } from '../den-beach.js';
+import { HIGH } from '../den-bilge.js';
+import { BEACH, JETTY, JETTY_AT } from '../den-beach.js';
 import { scene, mat, mesh, canvasTex, woodTex, flagpole } from './world.js';
 import { torch } from './land.js';
 
 const L = BEACH.LANDING, CELL = SAIL.CELL;
 const X0 = SAIL.X0 + L.c0 * CELL, X1 = SAIL.X0 + (L.c1 + 1) * CELL;   // its ends, along the beach
 const EDGE = SAIL.Z0, Z_OUT = EDGE - L.rows * CELL;   // its shore edge (the lowest tide's), its seaward one
-const HOME_X = SAIL.X0 + (SAIL.HOME.c + 0.5) * CELL;
 const landing = { g: new THREE.Group(), floats: [] };
 scene.add(landing.g);
 const wood = mat('#6a5038', { map: woodTex }), plank = mat('#9a7a55', { map: woodTex });
@@ -39,19 +41,38 @@ shallows.position.set((X0 + X1) / 2, 0.052, (EDGE + Z_OUT) / 2);
 shallows.renderOrder = 2;
 landing.g.add(shallows);
 
-// The jetty: planks on piles from the sand out to her mooring, just along from where you board her.
-const JX = HOME_X - 1.9, JW = 1.3, J0 = EDGE + 1.4, J1 = EDGE - 1.1, DECK = 0.42;
-for (let z = J0; z > J1; z -= 0.34) {
+// The jetty: planks on piles from dry sand above high tide's mark out to her mooring, just astern of
+// her, its boards at the height you walk on them.
+const JX = JETTY_AT.x, JW = JETTY.W, J0 = JETTY_AT.z0, J1 = JETTY_AT.z1, DECK = JETTY.DECK;
+for (let z = J0; z > J1 + 0.1; z -= 0.34) {
   const b = mesh(new THREE.BoxGeometry(JW, 0.06, 0.3), plank);
-  b.position.set(JX + (Math.random() - 0.5) * 0.04, DECK, z - 0.17);
+  b.position.set(JX + (Math.random() - 0.5) * 0.04, DECK - 0.03, z - 0.17);
   b.rotation.y = (Math.random() - 0.5) * 0.03;
   landing.g.add(b);
 }
 for (const sx of [-1, 1]) {
   const beam = mesh(new THREE.BoxGeometry(0.12, 0.14, J0 - J1), wood);
-  beam.position.set(JX + sx * (JW / 2 - 0.08), DECK - 0.1, (J0 + J1) / 2);
+  beam.position.set(JX + sx * (JW / 2 - 0.08), DECK - 0.13, (J0 + J1) / 2);
   landing.g.add(beam);
   for (let z = J0 - 0.3; z >= J1 - 0.05; z -= 1.2) landing.g.add(pile(JX + sx * (JW / 2 - 0.02), z, DECK + 0.75));
+}
+// A step up onto it at its foot, half sunk in the sand.
+const step = mesh(new THREE.BoxGeometry(JW * 0.9, 0.14, 0.4), plank);
+step.position.set(JX, 0.07, J0 + 0.22);
+landing.g.add(step);
+// A rope rail along its seaward half, on short posts, so it reads as a way out to her.
+const rope = mat('#c8b48a', { roughness: 0.9 }), RAIL = 0.62, R0 = HIGH;   // (from high tide's mark out)
+for (const sx of [-1, 1]) {
+  const x = JX + sx * (JW / 2 - 0.05);
+  for (let z = R0; z > J1 + 0.6; z -= 1.6) {
+    const post = mesh(new THREE.CylinderGeometry(0.045, 0.05, RAIL, 6), wood);
+    post.position.set(x, DECK + RAIL / 2, z);
+    landing.g.add(post);
+  }
+  const line = mesh(new THREE.CylinderGeometry(0.018, 0.018, R0 - (J1 + 0.6), 5), rope);
+  line.rotation.x = Math.PI / 2;
+  line.position.set(x, DECK + RAIL - 0.04, (R0 + J1 + 0.6) / 2);
+  landing.g.add(line);
 }
 // A bollard at its end, and a torch to see it by from the sea.
 const bollard = mesh(new THREE.CylinderGeometry(0.13, 0.15, 0.4, 10), mat('#2a2a2a', { metalness: 0.6, roughness: 0.5 }));

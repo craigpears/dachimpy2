@@ -480,6 +480,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     her. It stands out from the sea: a post flying your flag at each end, a line of red and white
     floats along its seaward edge, its water a little lighter, and a short jetty out to her mooring
     with a torch at its end. Rules: `src/den-beach.ts`; the look: `js/den/landing.js`.
+    - **Walk out along the jetty to her (10 Nov).** "I like the little pier to the side. I feel
+      like I want to actually walk on the pier to the sloop, though. Like, it's just kind of a
+      random pier in the middle of the water at the moment. I want to actually walk to it." So the
+      jetty runs from dry sand above high tide's mark out to her mooring, just astern of her, with a
+      step at its foot and a rope rail on short posts. You walk out along its boards (never off its
+      sides or end into the sea) and Space boards her from its far end, nowhere else; going ashore
+      puts you on its end, to walk back along it. Its boards are low enough that on it you're still
+      out on the beach (the camera, the silhouette and the captain's map as on the sand). Rules:
+      `src/den-beach.ts` (JETTY, beachStep, canBoard, ashoreAt).
   - Alone only for now (no crews at sea yet). No tokens to earn yet, no destinations: those are
     IDEAS.md ("Sailing between places, for real"). Rules: `src/den-sail.ts`.
   - **The wind, and her oars (a first go, 10 Nov).** **Parked for now (10 Nov).** The user: "I think

@@ -163,11 +163,6 @@ the site (`.assetsignore` skips `*.md`).
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
 
-- **Walk out along the jetty to her (10 Nov):** "I like the little pier to the side. I feel like I
-  want to actually walk on the pier to the sloop, though. Like, it's just kind of a random pier in
-  the middle of the water at the moment. I want to actually walk to it." The landing's jetty should
-  run from the beach out to her mooring, and you walk along it to board her (and come back along
-  it when you go ashore).
 - **The soldiers go out and fight them (10 Nov):** "now we've got the soldiers and then these
   small raids. It breaks the immersion for them to not go out and fight the attackers. It's like,
   what, you're just going to sit there and let them attack, hack at the wall?" Raiders at the

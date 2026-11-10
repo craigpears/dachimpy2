@@ -11,6 +11,7 @@ import { W as BW, H as BH } from './bilge.js';
 import { holeKey } from './den-carp-view.js';
 import { countingDown } from './den-raids.js';
 import { BILGE } from './den-bilge.js';
+import { beachStep } from './den-beach.js';
 import { cleanLook, cleanDen } from './den-look.js';
 import { C, S, SPEED, HP, BUILD_SECS, tune, k, $, myLook, denLook, renderer, scene, camera, skyDome, PILE_SC, rotCW, rotCCW, flip, animateWalk, faceTo, V3, pirate, HOP, STEP, view, carry, bounds, obstacles, G, keys, tweens, sparks, raiders, ghostKey, ghost, target, shake, mouseMode, mouse, topView, keyAt, wm, wmBlock, wmLinger, wallView, ray, wallPlane, toast, v3, L0, L1, L2, worldLets } from './den/world.js';
 import { ramp, frames, frameAt, openJob, frameState, frameFits, putFramePiece, finishFrame, heightAt, onRampart, startHouse, houseState, plotLabel, atPlot, biomeTick, waveFlags, outside, throughGate, gateTick, towerLegs, selfSeen } from './den/land.js';
@@ -379,8 +380,12 @@ function update(dt) {
       const dx = nx - o.x, dz = nz - o.z, d = Math.hypot(dx, dz), min = o.r + 0.3;
       if (d < min && d > 0) { nx = o.x + dx / d * min; nz = o.z + dz / d * min; }
     }
-    nx = Math.max(-bounds.x, Math.min(bounds.x, nx));
-    nz = Math.max(pirate.h > 1 ? (gd ? gd.z0 + 0.2 : -0.3) : shoreZ() + 0.4, Math.min(bounds.z1, nz));
+    // Out on the beach, the sand down to the water's edge and the jetty out to her (src/den-beach.ts).
+    if (pirate.h <= 1 && Math.min(oz, nz) < 0) [nx, nz] = beachStep(ox, oz, nx, nz, shoreZ(), bounds.x);
+    else {
+      nx = Math.max(-bounds.x, Math.min(bounds.x, nx));
+      nz = Math.max(pirate.h > 1 ? (gd ? gd.z0 + 0.2 : -0.3) : shoreZ() + 0.4, Math.min(bounds.z1, nz));
+    }
     if (pirate.h <= 1) [nx, nz] = throughGate(ox, oz, nx, nz);
     // Up and down the stairs, but no walking into their side or off the edge of the rampart.
     const pad = pirate.h < 0.05 ? 0.28 : 0;
@@ -478,7 +483,7 @@ function update(dt) {
      swings up high to look down over the wall at the raiders. The player can turn it (Z/C or
      right-drag) all the way round, to see the outside of the wall, and tilt it (right-drag). It
      follows you right to the back of the den, where your house is. */
-  const cz = pirate.z, u = ramp ? Math.min(1, pirate.h / ramp.T) : 0;
+  const cz = pirate.z, u = ramp && !outside() ? Math.min(1, pirate.h / ramp.T) : 0;   // (the jetty's boards don't lift it)
   worldLets.topView = u > 0.7;
   L0.set(pirate.x * 0.55, 1.8, cz - 3.4);
   L1.set(pirate.x, 0.5, -2.6);

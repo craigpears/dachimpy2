@@ -7,9 +7,9 @@ import { $, scene, camera, mat, mesh, animateWalk, V3, pirate, view, carry, G, k
 import { outside } from './land.js';
 import { putBack, exitWall } from './pieces.js';
 import { sword } from './sword.js';
-import { shoreZ, bilge, groundPlane } from './bilge.js';
+import { bilge, groundPlane } from './bilge.js';
 import { chart } from './map.js';
-import { canLand } from '../den-beach.js';
+import { canLand, canBoard, ashoreAt } from '../den-beach.js';
 import { cine } from './cine.js';
 import { SEA_X0, seaX, seaZ, SLOOP_DECK, sail, liftAt, sloopMesh, seaRocks, seaWorld, pinMesh, dotMat, dotMine, dotGeo, hoverMat, TOK } from './sea.js';
 import { patch, deckHoleShape, patchClear, patchShut, patchClick, patchHover, patchTick, patchPrompt } from './sea-puzzles.js';
@@ -31,8 +31,9 @@ import { umamiKey, umamiClick, umamiHover, umamiPrompt, umamiReset } from './cap
 // off ... That should be a background feature as soon as he's rowed back").
 const sloopHome = () => G.phase === 'peace' && !online();
 const atHome = () => { const p = sail.helm.pose, H = SAIL.HOME; return p.c === H.c && p.r === H.r; };
+// You board her from the jetty's end, where she lies alongside (src/den-beach.ts).
 export const nearSloop = () => !sail.on && sail.g?.visible && atHome() && sail.helm.slot < 0 && outside() && !carry && !cine
-  && Math.abs(pirate.x - seaX(SAIL.HOME.c)) < 2.6 && pirate.z < shoreZ() + 2.4;
+  && canBoard(pirate.x, pirate.z);
 // Aboard: whatever you had in hand back on its crate, and the camera out over the sea.
 export function board() {
   if (wm) exitWall();
@@ -47,13 +48,14 @@ export function board() {
   toast('Aboard! Click the sea to drop a pin, and she\'ll sail there');
 }
 // Ashore: from anywhere on the landing along the den's beach (src/den-beach.ts), she's brought in to
-// her mooring and you hop down onto the beach by her.
+// her mooring and you step off onto the jetty's end by her, to walk back along it.
 export function ashore() {
   sail.on = false;
   gunneryReset();
   sail.helm.moor();
   document.body.classList.remove('sailing');
-  Object.assign(pirate, { x: seaX(SAIL.HOME.c) + 0.6, z: shoreZ() + 0.7, h: 0, hs: 0, hop: null });
+  const at = ashoreAt();
+  Object.assign(pirate, { x: at.x, z: at.z, h: at.h, hs: at.h, hop: null });
   pirate.g.rotation.set(0, 0, 0);
   keys.clear();
 }

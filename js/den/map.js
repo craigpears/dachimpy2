@@ -303,7 +303,7 @@ function mapLayout(t) {
   chart.rolls[1].scale.set(fat, 1, fat);
 }
 export function openMap() {
-  if (!canRead(G.map) || chart.on || sail.on || carry || pirate.h > 0.05 || wm || sword.on || bilge.on || deco.on || cine || G.over) return;
+  if (!canRead(G.map) || chart.on || sail.on || carry || pirate.h > 0.3 || wm || sword.on || bilge.on || deco.on || cine || G.over) return;
   keys.clear();
   const ry = pirate.g.rotation.y;
   if (!chart.g) mapMake();
@@ -360,7 +360,7 @@ export function mapTick(dt) {
   }
   mapLabel();
   // The map open: rolled up again if you've something else to do.
-  if (chart.on && (carry || pirate.h > 0.05 || wm || G.over)) chart.on = false;
+  if (chart.on && (carry || pirate.h > 0.3 || wm || G.over)) chart.on = false;
   chart.open = Math.max(0, Math.min(1, chart.open + (chart.on ? 1.6 : -2.4) * dt));
   document.body.classList.toggle('reading', chart.on);   // (only the map while you read it)
   if (chart.g) {
