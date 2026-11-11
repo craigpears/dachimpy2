@@ -307,7 +307,13 @@ the site (`.assetsignore` skips `*.md`).
   of Kikkit's whirlpools), bigger ones a bigger combo, the biggest the starlit door's tunnel. "Are you a
   person that can break quick double triples? That gets you through some shortcuts, and then, you know,
   you move a bit and you do ... equivalent thing on another puzzle. Or do you want to go for those giant"
-  ones. After the first draft (the agent building it was briefed before this).
+  ones. After the first draft (the agent building it was briefed before this). A balance to weigh in it (the
+  user, 11 Nov): "an interesting balance to note that you can essentially do some of the puzzles, like
+  [gunnery] and sailing, while you're on autopilot. I guess bilge ... for getting through the locks,
+  doesn't quite have that advantage." Sailing and Gunnery can be played while she sails on (the pilot or
+  a wind carrying her), so their time half overlaps the sailing; Bilge at the locks (and Carpentry at the
+  crane) has her stopped while you play. So a stopped-dead shortcut should save more for the same puzzle
+  time, or the on-the-move ones cost a little more.
 - **Snakes on the race course: a trade wind back up it, to jump with a Double (11 Nov):** the trade wind
   that runs her home, put through the middle of the zigzag too: "can that not be in like the middle of a
   zigzagging course? So if you're accidentally, like you have to do the double. I love that idea. Maybe at
