@@ -1896,6 +1896,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   walls are 7.5 m (her mast's top is about 5 m), its towers 10.5 m, its keep 13.5 m, the tallest thing
   on the sea; the town's buildings two storeys, their doors still pirate-sized (js/den/imperial-isle.js,
   FORT).
+- **Port Decorum is safe to look round: no guns on it (11 Nov).** First asked for gun turrets on its
+  towers, too many and too fast to take on, enforcing a no-access area; then: "Actually, no, I've
+  changed my mind on the [Port Decorum] cannons. It's fine as it is. I don't want that mechanic too
+  much. It's just going to get irritating. Like, you want to be able to check out the port without
+  being blown up." So its fort has no guns that fire, and nothing there sinks you; the jetty guard's
+  halt and grumbles are all the warning it gives.
 - **A hull's sides slant a little, top to bottom (11 Nov).** "I can definitely see the back of the
   ship has gotten a lot more curved, but I'm talking about, like, the top to bottom ... that's still
   quite boxy ... it needs a tiny bit of a slant." Tumblehome 0.15 (it was 0.05, too little to see), a
