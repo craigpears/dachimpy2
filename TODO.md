@@ -298,6 +298,11 @@ the site (`.assetsignore` skips `*.md`).
   taken down so instantly." So the fort's towers carry the checkpoint's kind of gun turret, in a skin of
   their own, many of them and far quicker; the jetty guard warns you off (a line, no cutscene); try anything
   and you're sunk at once.
+- **Primates Rule anchored out past Port Decorum, to its left (11 Nov):** "it's ready for that [war frig]
+  to be dropped in maybe a bit past in that same kind of deeper ocean area near where the [Port Decorum]
+  is. The Imperial Island, I'm sure if you go over to the left, you'll ... find the [war frig]." So she's
+  moved from just off the den's trade winds to the deeper water past Port Decorum, off to its left, still
+  marked as to come.
 
 ## Spotted along the way (not asked for)
 
