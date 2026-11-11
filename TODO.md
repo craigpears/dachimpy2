@@ -388,9 +388,11 @@ the site (`.assetsignore` skips `*.md`).
   obviously you will have maybe like the foraging slant").
 - **A Foraging shortcut on the race course (11 Nov):** "Did you get foraging in? ... you'd be like,
   macheteing through a forest to get through that way. That could definitely work." The first draft has
-  none. So a channel choked with jungle, overhanging trees and fallen trunks across a spit, cleared by
-  Foraging (src/foraging.ts, the one implementation) to open the way through: a stopped-dead shortcut,
-  like the locks and the crane. Umami's way round, naturally.
+  none. Then: "it's not even macheting. You just have to clear the barrier. It's just a way of clearing a
+  barrier, similar to the static rocks, but you're doing it through foraging." So a barrier across a gap
+  (overgrowth, driftwood, fallen trunks), cleared by Foraging (src/foraging.ts, the one implementation)
+  to open the way through, as the shoot-away rocks would be by Gunnery: a stopped-dead shortcut, like the
+  locks and the crane. Umami's way round, naturally.
 
 ## Spotted along the way (not asked for)
 
