@@ -1,7 +1,7 @@
 /* Duty Navigation's rules, as YPPedia gives them ("Navigation", read 11 Nov 2026), and what was made
    up where it doesn't say (src/navigation.ts). */
 import { describe, expect, it } from 'vitest';
-import { BOOCH_PENALTY, COLOURS, COLOUR_NAMES, FIRST_GO, Navigation, PAR, RINGS, SCORE, SIZES, SPOKES, linesOf, parFor, pointsFor, ratingFor } from '../src/navigation';
+import { BOOCH_PENALTY, COLOURS, COLOUR_NAMES, FIRST_GO, Navigation, PAR, RINGS, SCORE, SIZES, SPOKES, bottomRow, linesOf, needsCombo, parFor, pointsFor, ratingFor } from '../src/navigation';
 import type { Mark } from '../src/navigation';
 import { seeded } from '../src/mirror-row';
 
@@ -218,5 +218,69 @@ describe('the booch (11 Nov)', () => {
   it('dropping onto a spoke whose outer place is free is no booch, however full the rest is', () => {
     const g = game(['YRYRYRYR', 'RYRYRYRY', 'OBOBOB.B'], undefined, { c: Wh, spoke: 6 });
     expect(g.drop().booched).toBe(false);
+  });
+});
+
+describe('a combo constellation: the starlit door\'s evil one (11 Nov)', () => {
+  /* The user: "you've got to have like three reds together or four reds together on the bottom row ...
+     you basically got to put 2 in there and then say 2 of another color, 2 of the first color in the ring
+     above those 2, so that when you do a combo ... it creates a gap and it falls down ... Those kind of
+     really evil boards that are impossible and frustrating to beat". */
+  it('a row of a colour side by side round a ring, the inner one (the bottom row) unless said', () => {
+    expect(bottomRow(R, 3, 7)).toEqual([{ ring: 0, spoke: 7, colour: R }, { ring: 0, spoke: 0, colour: R }, { ring: 0, spoke: 1, colour: R }]);
+    expect(bottomRow(B, 2, 0, 1).every((m) => m.ring === 1)).toBe(true);
+  });
+
+  it('three, four or five side by side can be made a star at a time: two, a gap, two, and the last into the gap fills it, and filled it goes first', () => {
+    expect([3, 4, 5].map((n) => needsCombo(bottomRow(R, n)))).toEqual([false, false, false]);
+    const three = game(['RR......', '........', '........'], bottomRow(R, 3), { c: R, spoke: 2 }).drop();
+    expect(three.done?.stars).toBe(3);
+    expect(three.lines).toBe(0);
+    const five = game(['RR.RR...', '........', '........'], bottomRow(R, 5), { c: R, spoke: 2 }).drop();
+    expect(five.done?.stars).toBe(5);
+    expect(five.lines).toBe(0);
+  });
+
+  it('six can\'t: whichever five go in first, three of them are side by side, a line, and gone', () => {
+    expect([6, 7, 8].map((n) => needsCombo(bottomRow(R, n)))).toEqual([true, true, true]);
+    // Two, a gap, two, a gap: a red into either gap makes five in a row, and they go.
+    const g = game(['RR.RR.WB', '........', '........'], bottomRow(R, 6), { c: R, spoke: 2 });
+    const e = g.drop();
+    expect(e.done).toBeNull();
+    expect(e.lines).toBe(1);
+    expect(draw(g)[0]).toBe('......WB');
+    // (and the puzzle's own constellations never need a combo: any size, dealt at random)
+    for (let seed = 1; seed <= 200; seed++) expect(needsCombo(new Navigation(seeded(seed), { sizes: [seed % 8 + 1] }).constellation!.marks)).toBe(false);
+  });
+
+  it('two landing at once fill it: the ring above turned so two reds slide over the two gaps together and fall in', () => {
+    const g = game(['RR.RR.WB', '.R..R...', '........'], bottomRow(R, 6), { c: Y, spoke: 0 });
+    g.ring = 1;
+    const e = g.turn(1);
+    expect(e.done?.stars).toBe(6);
+    expect(e.lines).toBe(0);
+    expect(draw(g)).toEqual(['......WB', '........', '........']);
+  });
+
+  it('or the user\'s own way: two in, two of another colour, two of the first in the ring above; clear the other colour and the first falls into place', () => {
+    // (on four: the two blues go as a line with a third, and the reds above them fall into their places)
+    const g = game(['RRBB....', '..RR....', '........'], bottomRow(R, 4), { c: B, spoke: 4 });
+    const e = g.drop();
+    expect(e.done?.stars).toBe(4);
+    expect(e.done?.combo).toBe(true);
+    expect(e.stages.map((st) => st.kind)).toEqual(['drop', 'fall', 'line', 'fall', 'constellation', 'deal']);
+  });
+
+  it('a host can give its own constellations by their place in the run; the rest are dealt as ever', () => {
+    const evil = bottomRow(R, 6, 1);
+    const g = new Navigation(seeded(3), { sizes: [2, 3], given: [null, evil] });
+    expect(g.constellation!.marks).toHaveLength(2);
+    expect(needsCombo(g.constellation!.marks)).toBe(false);
+    g.lay([[], [], []]);
+    for (const m of g.constellation!.marks) g.grid[m.ring][m.spoke] = { id: 900 + m.ring * 8 + m.spoke, c: m.colour };
+    g.turn(1, 2);
+    expect(g.completed).toBe(1);
+    expect(g.constellation!.marks).toEqual(evil);
+    expect(g.constellation!.marks).not.toBe(evil);
   });
 });

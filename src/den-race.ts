@@ -105,6 +105,13 @@ export class Race {
     Object.assign(this, { state: 'count', t: RACE.COUNT, leg: 0, rivalHome: false, won: false, entered: false });
     return true;
   }
+  /** Carried on under the course (the starlit door's tunnel, src/den-door.ts) from stretch `from` to
+      stretch `to`, past the ones between: counted as reached in order, if she'd reached `from`. */
+  under(from: number, to: number): RaceEvent[] {
+    if (this.state !== 'on' || this.leg !== from || to <= from) return [];
+    this.leg = to;
+    return [{ kind: 'leg', n: to }];
+  }
   /** Given up (sailed back out through the gate, say). */
   quit() { this.state = 'off'; }
   /** The clock under way: from the gun, 0 till then. */

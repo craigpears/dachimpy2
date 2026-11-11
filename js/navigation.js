@@ -50,6 +50,38 @@ export const PAR = { BASE: 6, PER_STAR: 4 };
 /** Ratings by a constellation's points (a booch while it was up rates it Booched). */
 export const RATINGS = ['Booched', 'Poor', 'Fine', 'Good', 'Excellent', 'Incredible'];
 export const RATING_AT = [10, 30, 60, 120];
+/* A combo constellation: one that can't be made a star at a time. Most can: whatever order its
+   stars come in, the last one fills it, and filled it goes first, before any line (settle). But a
+   row of six of a colour side by side round a ring can't: whichever five are in before the last, three
+   of them are side by side, a line, and they're gone. (Three, four or five can: two, a gap, two, and
+   the last into the gap.) So the last two have to land at once: the ring above turned so two stars of
+   its colour slide over the two gaps together and fall in, or a line clearing under them. The user's
+   evil constellation (11 Nov), for the starlit door: "you've got to have like three reds together or
+   four reds together on the bottom row ... you basically got to put 2 in there and then say 2 of
+   another color, 2 of the first color in the ring above those 2, so that when you do a combo ... it
+   creates a gap and it falls down ... Those kind of really evil boards that are impossible and
+   frustrating to beat, like you're guaranteed to practically booch them." */
+/** `n` places of one colour side by side round a ring (the inner one, the bottom row, by default),
+    from `spoke` clockwise. */
+export function bottomRow(colour, n, spoke = 0, ring = 0) {
+    return Array.from({ length: Math.min(SPOKES, n) }, (_, i) => ({ ring, spoke: (spoke + i) % SPOKES, colour }));
+}
+/** Can't these places be filled a star at a time? True when every star that could go in last (none
+    of the others above it on its spoke, so it can) leaves the rest a line of three among themselves:
+    they'd have cleared before it came. (Any other stars a player keeps on the board can be colours
+    that make no line with them, and rings turn their places round together, so it's the places
+    themselves that say.) */
+export function needsCombo(marks) {
+    return !marks.some((m) => {
+        if (marks.some((o) => o !== m && o.spoke === m.spoke && o.ring > m.ring))
+            return false;
+        const g = emptyGrid();
+        for (const o of marks)
+            if (o !== m)
+                g[o.ring][o.spoke] = { id: 0, c: o.colour };
+        return !linesOf(g).length;
+    });
+}
 /** A constellation's par of moves. */
 export const parFor = (stars) => PAR.BASE + PAR.PER_STAR * stars;
 /** A constellation's points, by its stars, the moves it took and whether a combo filled it. */
@@ -124,11 +156,13 @@ export class Navigation {
     record = true;
     sizes;
     colours;
+    given;
     nextId = 1;
     constructor(random = Math.random, opts = {}) {
         this.random = random;
         this.sizes = opts.sizes?.length ? opts.sizes : SIZES;
         this.colours = Math.max(2, Math.min(COLOURS, opts.colours ?? COLOURS));
+        this.given = opts.given ?? [];
         this.next = this.newStar();
         this.deal();
     }
@@ -137,10 +171,19 @@ export class Navigation {
     }
     /** The size of the constellation up now (or next). */
     size() { return this.sizes[Math.min(this.completed, this.sizes.length - 1)]; }
-    /** Show a new constellation of size() stars: places weighted toward the middle (PLACE_WEIGHT),
+    /** Show a new constellation: the one given for this place in the run (NavOptions.given), if there
+        is one; else of size() stars (or `stars`): places weighted toward the middle (PLACE_WEIGHT),
         random colours, never a line of three of a colour among its own places, never filled already. */
-    deal(stars = this.size()) {
-        const n = Math.max(1, Math.min(RINGS * SPOKES, stars));
+    deal(stars) {
+        const given = stars === undefined ? this.given[this.completed] : null;
+        if (given?.length) {
+            const c = { id: this.nextId++, marks: given.map((m) => ({ ...m })) };
+            this.constellation = c;
+            this.moves = 0;
+            this.boochedThis = false;
+            return c;
+        }
+        const n = Math.max(1, Math.min(RINGS * SPOKES, stars ?? this.size()));
         for (let tries = 0;; tries++) {
             const marks = [], used = new Set();
             while (marks.length < n) {

@@ -34,6 +34,7 @@ import { gunnery, gunCam, gunneryUp, gunneryRub, gunneryWheel } from './den/sea-
 import { rowing, rowCam, rowPull } from './den/rowing.js';
 import { station, stationShift } from './den/sail-station.js';
 import { crane, craneCam } from './den/crane.js';
+import { doorCam } from './den/door.js';
 import { umami, umamiTick, umamiCam, umamiClick } from './den/capybara.js';
 import { net, online, guest, isHost, send, updateMates, sendMe, snapshot, followRaider, sendSync, onNet, joinCrew, leaveCrew } from './den/crew.js';
 import { spouse, spouseTick } from './den/spouse.js';
@@ -302,7 +303,7 @@ export const denLets = {
   get sailView() { return sailView; }, set sailView(v) { sailView = v; },
 };
 export let patchView = 0, rowView = 0, gunView = 0, stationView = 0;
-let craneView = 0, craneShot = null;
+let craneView = 0, craneShot = null, doorView = 0, doorShot = null;
 /* The Carpentry view's camera: straight on to the board, close enough to puzzle in. On the wall, a
    stretch of it round the piece, its whole height; on a frame on the floor, looking down on it from
    the side its rows run from; on the stairs, square on to their face. */
@@ -709,6 +710,20 @@ function update(dt) {
     d = Math.atan2(Math.sin(d), Math.cos(d));
     yaw = y0 + d * craneView;
   }
+  // The starlit door: its board and carved wheel on the rock, the door opening, her trip through the
+  // tunnel (js/den/door.js); a jump under the black as she goes in and comes out.
+  const dc = doorCam();
+  if (dc) doorShot = dc;
+  doorView = dc?.snap ? 1 : doorView + ((dc ? 1 : 0) - doorView) * Math.min(1, dt * 2.5);
+  if (doorView > 0.001 && doorShot) {
+    look.lerp(doorShot.look, doorView);
+    dist += (doorShot.dist - dist) * doorView;
+    tilt += (doorShot.tilt - tilt) * doorView;
+    const y0 = Math.atan2(Math.sin(yaw), Math.cos(yaw));
+    let d = doorShot.yaw - y0;
+    d = Math.atan2(Math.sin(d), Math.cos(d));
+    yaw = y0 + d * doorView;
+  }
   // On Mischievious's island: its own camera, whole (js/den/wedding.js).
   const wc = weddingCam();
   if (wc) { look.copy(wc.look); dist = wc.dist; tilt = wc.tilt; yaw = wc.yaw; }
@@ -725,7 +740,7 @@ function update(dt) {
     yaw = y0 + d * cineView;
   }
   v3.set(Math.sin(yaw) * Math.cos(tilt), Math.sin(tilt), Math.cos(yaw) * Math.cos(tilt)).multiplyScalar(dist).add(look);
-  if (wed.snap || house.snap) { wed.snap = false; house.snap = false; camAt.copy(v3); camLook.copy(look); }   // (off to her island, or back: no flying across the sea)
+  if (wed.snap || house.snap || dc?.snap) { wed.snap = false; house.snap = false; camAt.copy(v3); camLook.copy(look); }   // (off to her island, or back: no flying across the sea)
   camAt.lerp(v3, Math.min(1, dt * (3 + 9 * Math.max(rowView, gunView))));   // (held close while rowing or at her guns: she can fly along)
   camera.position.copy(camAt);
   // The fog starts beyond what you're looking at, so a high or zoomed-out view doesn't go murky.

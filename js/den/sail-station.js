@@ -26,7 +26,10 @@ import { sailBoardMake, sailBoardLayout, sailBoardLay, sailBoardDrop, sailBoardB
    sailing for the pin meanwhile, and the board's put away while something else has her (holed, at a
    lock's pump, hauling treasure, up in the lagoon) and comes back after. One board a voyage, kept
    while it's shut. */
-export const station = { on: false, want: false, game: null, pair: null, B: null, run: null, layout: null, lowT: 0, low: 0, top: 0, sparkle: new Sparkle(), easy: false, kept: {} };
+export const station = { on: false, want: false, game: null, pair: null, B: null, run: null, layout: null, lowT: 0, low: 0, top: 0, sparkle: new Sparkle(), easy: false, kept: {}, gusts: [] };
+/* A place that takes a drop's gust itself (the starlit door's tunnel: door.js) pushes a hook onto
+   station.gusts: given the drop's result, it returns what's said and how many squares she went, if
+   the gust was its, or null, and the gust's carried as ever (den-sailing.ts, carry). */
 const fresh = () => new Sailing(Math.random, true, { easy: station.easy });
 
 /* Kikkit's whirlpools have a board of their own, an easy one (the user, 11 Nov: "relatively small,
@@ -143,9 +146,11 @@ export function stationTick(dt, blocked = false) {
     station.run = null;
     if (res.booched) station.sparkle.booch();
     if (res.run > 0) {
-      const c = carry(sail.helm, res.run);
-      toast(carrySay(res.steps, c));
-      station.sparkle.chain(res.steps, c.went, SAIL.PUSH);
+      let took = null;
+      for (const f of station.gusts) if ((took = f(res))) break;
+      const c = took ? null : carry(sail.helm, res.run);
+      toast(took ? took.say : carrySay(res.steps, c));
+      station.sparkle.chain(res.steps, took ? took.went : c.went, SAIL.PUSH);
       if (station.sparkle.full()) sparkleWhoosh(sail.g);
     }
   }

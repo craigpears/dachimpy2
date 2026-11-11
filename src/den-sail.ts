@@ -225,9 +225,9 @@ const RACE_LAY = (() => {
     /** [E]: the crane's ledge on the neck (she lies alongside it, on the leg), and where it sets her down
         on the run home, facing along it. */
     CRANE: { LEDGE: [CRANE_C, S[4].r0 - 1] as [number, number], TO: { c: CRANE_C, r: S[4].r1 + 1, d: 3 } as Pose },
-    /** Kept for the starlit door (IDEAS.md; Duty Navigation opens it, to come): a plain cliff face on the
-        second spit, off leg 2 (FACE, the water off it OFF), and a tunnel's end on the fourth spit's far
-        face, out onto leg 5 (OUT, the water off it INTO). Nothing's there yet. */
+    /** The starlit door (src/den-door.ts; Duty Navigation opens it): a plain cliff face on the second
+        spit, off leg 2 (FACE, the water off it OFF), and its tunnel's end on the fourth spit's far face,
+        out onto leg 5 (OUT, the water off it INTO). The tunnel's no square of the sea: it runs under. */
     DOOR: {
       FACE: [[21, S[1].r0], [22, S[1].r0]] as [number, number][], OFF: [[21, S[1].r0 - 1], [22, S[1].r0 - 1]] as [number, number][],
       OUT: [[21, S[3].r1], [22, S[3].r1]] as [number, number][], INTO: [[21, S[3].r1 + 1], [22, S[3].r1 + 1]] as [number, number][],

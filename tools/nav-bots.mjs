@@ -22,15 +22,27 @@
    planner alike); booches 241 / 3 / 1 in the 40 games; no game short. Random rarely fills one: the
    board's fair, but not by chance. Over the full sizes (30 games of six), the planner fills every
    constellation: four stars in about 52 moves, five 63, six 74; combos are rare (the greedy got 2).
-   A one-star constellation is mostly waiting for a star of its colour, one in five. */
+   A one-star constellation is mostly waiting for a star of its colour, one in five.
 
-import { Navigation, RINGS, SPOKES, SIZES as OWN } from '../js/navigation.js';
+   DOOR=1 plays the starlit door's run instead (src/den-door.ts, DOOR.NAV: two dealt as ever, then the evil
+   one, six of a colour side by side on the inner ring, which takes two landing at once); COLOURS=n plays
+   it with n colours. The bots meet the evil one with its own sense of the board (comboWorth): four of
+   its places held, two gaps a ring's turn apart, and the two that'll fill them waiting in the ring above
+   to be turned in together; junk kept out of the inner ring. RECORD=1 prints each won game's moves (as
+   tests/den-door.test.ts replays one). Runs of 11 Nov, the planner, 40 goes of 600 moves at the door's
+   whole run: the two warm-ups always (about 25 moves each), then the evil one with four colours (the
+   door's) in 16 goes of 40, about 270 moves when it's done; with the puzzle's five, 6 of 40. No booches
+   (it's careful), but most goes wander on, the inner ring choked with stars that won't line up. */
+
+import { Navigation, RINGS, SPOKES, SIZES as OWN, needsCombo } from '../js/navigation.js';
 import { seeded } from '../js/mirror-row.js';
+import { DOOR } from '../js/den-door.js';
 
-const GAMES = Number(process.argv[2]) || 30, WANT = Number(process.argv[3]) || 7;
+const AT_DOOR = !!process.env.DOOR, OPTS = AT_DOOR ? { ...DOOR.NAV, ...(process.env.COLOURS ? { colours: Number(process.env.COLOURS) } : {}) } : null;
+const GAMES = Number(process.argv[2]) || 30, WANT = AT_DOOR ? DOOR.RUN : Number(process.argv[3]) || 7;
 const BOTS = (process.argv[4] || 'random,greedy,planner').split(',');
 const SIZES = process.env.SIZES ? process.env.SIZES.split(',').map(Number) : OWN;
-const CAP = 400;
+const CAP = Number(process.env.CAP) || (AT_DOOR ? 600 : 400);
 
 /** What a board left behind is worth to a navigator filling from the middle out. Rings turn on their
     own, so each ring is weighed by its best turn: the marks in it that turn would fill (less a little
@@ -65,6 +77,56 @@ function worth(g) {
   return v - outer * 3 - all * 0.5;
 }
 
+/** The evil one (a row of a colour side by side on a ring: needsCombo): what a board's worth to a
+    navigator building it. Over every turn of the ring and every pair of gaps that leaves no three of
+    the row side by side: its places held by its colour (and not by junk, worse in a gap), and the
+    stars of its colour in the ring above beside the gaps, to be turned in together. Junk that could
+    line up and go is worth a little; every star, more in the outer ring, costs. */
+function comboWorth(g) {
+  const G = g.grid, marks = g.constellation.marks, COL = marks[0].colour, N = marks.length, ring = marks[0].ring;
+  const s0 = marks.reduce((a, m) => (marks.some((o) => o.spoke === (m.spoke + SPOKES - 1) % SPOKES) ? a : m.spoke), marks[0].spoke);
+  const gaps = [];
+  for (let i = 0; i < N; i++) for (let j = i + 2; j < N; j++) {
+    const held = [...Array(N).keys()].filter((x) => x !== i && x !== j);
+    if (!held.some((a) => held.includes(a + 1) && held.includes(a + 2))) gaps.push([i, j]);
+  }
+  const help = (r, s) => {
+    const x = G[r][s];
+    let h = 0;
+    if (G[r][(s + 1) % SPOKES]?.c === x.c) h++;
+    if (G[r][(s + SPOKES - 1) % SPOKES]?.c === x.c) h++;
+    for (let rr = 0; rr < RINGS; rr++) if (rr !== r && G[rr][s]?.c === x.c) h++;
+    return h;
+  };
+  let best = -Infinity;
+  for (let k = 0; k < SPOKES; k++) for (const [gi, gj] of gaps) {
+    let v = 0;
+    for (let x = 0; x < SPOKES; x++) {
+      const s = (s0 + x + k) % SPOKES, st = G[ring][s];
+      if (x >= N) { if (st?.c === COL) v -= 6; continue; }
+      if (x === gi || x === gj) { if (st) v -= 40 - 4 * help(ring, s); continue; }
+      if (st?.c === COL) v += 20; else if (st) v -= 40 - 3 * help(ring, s);
+    }
+    let feed = 0;
+    if (ring + 1 < RINGS) for (const d of [-1, 1]) {
+      let f = 0;
+      for (const x of [gi, gj]) if (G[ring + 1][(s0 + x - d + k + SPOKES) % SPOKES]?.c === COL) f += 10;
+      feed = Math.max(feed, f);
+    }
+    best = Math.max(best, v + feed - Math.min(k, SPOKES - k) * 0.3);
+  }
+  let v = best, all = 0;
+  for (let r = 0; r < RINGS; r++) for (let s = 0; s < SPOKES; s++) {
+    const x = G[r][s];
+    if (!x) continue;
+    all++;
+    if (r === RINGS - 1) v -= 5;
+    if (r > ring && x.c !== COL) v += 1.2 * help(r, s);
+  }
+  if (G[RINGS - 1][g.next.spoke]) v -= 10;
+  return v - all;
+}
+
 /** A plan's turns as [ring, dir] steps: ring r turned k places (the shorter way). */
 const turns = (r, k) => { const n = k <= SPOKES / 2 ? k : SPOKES - k, d = k <= SPOKES / 2 ? 1 : -1; return Array.from({ length: n }, () => [r, d]); };
 
@@ -72,6 +134,7 @@ const turns = (r, k) => { const n = k <= SPOKES / 2 ? k : SPOKES - k, d = k <= S
 const show = (g) => g.grid.map((r) => r.map((x) => (x ? 'YROWB'[x.c] : '.')).join('')).join(' | ') + '   want ' + (g.constellation?.marks ?? []).map((m) => `${m.ring}/${m.spoke}:${'YROWB'[m.colour]}`).join(' ') + `  next ${'YROWB'[g.next.c]}@${g.next.spoke}`;
 
 let salt = 1;
+const evil = (g) => !!g.constellation && needsCombo(g.constellation.marks);
 /** Play a plan on a copy: its turns, then a drop if `drop`. Its worth, and its moves. */
 function tryPlan(g, steps, drop) {
   const c = g.copy(seeded(salt++));
@@ -80,6 +143,7 @@ function tryPlan(g, steps, drop) {
   if (drop) { const e = c.drop(); points += e.points; done ??= e.done; booched = e.booched; }
   const moves = steps.length + (drop ? 1 : 0);
   if (booched) return -1e6;
+  if (evil(g)) return done ? 1e4 - moves : comboWorth(c) - moves * 1.2;
   // Filling it now is what counts, quicker the better; then the board it leaves.
   return (done ? 1e4 + done.points * 10 : 0) + worth(c) - moves * 1.5 + points * 0.2;
 }
@@ -119,23 +183,25 @@ const BOT = {
   planner: thinker(2),
 };
 
-console.log(`${GAMES} games, ${WANT} constellations each, sizes ${SIZES.join(',')}.`);
+console.log(AT_DOOR ? `${GAMES} goes at the starlit door's run (${OPTS.colours ?? 5} colours), ${CAP} moves each.` : `${GAMES} games, ${WANT} constellations each, sizes ${SIZES.join(',')}.`);
 for (const name of BOTS) {
   const t0 = Date.now();
   const bySize = new Map(), rate = {};
   let booches = 0, stuck = 0, firstThree = [];
   for (let gi = 0; gi < GAMES; gi++) {
-    const g = new Navigation(seeded(1000 + gi), { sizes: SIZES });
+    const g = new Navigation(seeded(1000 + gi), OPTS ?? { sizes: SIZES });
     g.record = false;
-    const rnd = seeded(77 + gi);
+    const rnd = seeded(77 + gi), played = [];
     let movesAt = 0;
     while (g.completed < WANT && g.totalMoves < CAP) {
       const p = BOT[name](g, rnd);
+      played.push(p.steps.map(([r, d]) => `${r}${d > 0 ? '+' : '-'}`).join('') + (p.drop ? 'd' : ''));
       if (process.env.TRACE && gi === 0) console.log(show(g), ' -> ', p.steps.map(([r, d]) => `${r}${d > 0 ? '+' : '-'}`).join(' '), p.drop ? 'drop' : '');
       for (const [r, d] of p.steps) { const e = g.turn(d, r); if (e.done) record(e.done); }
       if (p.drop) { const e = g.drop(); if (e.booched) booches++; if (e.done) record(e.done); }
     }
     if (g.completed < WANT) stuck++;
+    else if (process.env.RECORD) console.log(`won, seed ${1000 + gi}, ${g.totalMoves} moves: ${played.join(' ')}`);
     function record(d) {
       const t = bySize.get(d.stars) ?? { n: 0, moves: 0, points: 0, combos: 0 };
       t.n++; t.moves += d.moves; t.points += d.points; if (d.combo) t.combos++;

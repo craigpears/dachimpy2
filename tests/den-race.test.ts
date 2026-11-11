@@ -327,7 +327,7 @@ describe('the race: the clock, in order, your best kept (11 Nov)', () => {
   });
 });
 
-describe('the starlit door\'s place, kept for later (11 Nov)', () => {
+describe('the starlit door\'s place (11 Nov; the door itself: den-door.test.ts)', () => {
   it('a plain cliff face off leg 2, and a tunnel\'s end onto leg 5, clear of every shortcut', () => {
     const D = RC.DOOR;
     for (const [c, r] of [...D.FACE, ...D.OUT]) expect(sea.ground(c, r), `${c},${r}`).toBe(true);

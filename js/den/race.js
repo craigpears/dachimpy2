@@ -6,7 +6,7 @@
 // Everything it's made of is a shared piece: the sea draws its line of rocks (reef.js), the locks
 // (lock.js) and the winds (sea.js, windLane); a gun is a destructible turret (turret.js), a whirlpool
 // Kikkit's look (whirlpools.js), the sloop the sloop (sloop.js), the crane's frames played on the deck
-// patch's tray (sea-puzzles.js). Touches the rest only through a few hooks: sailing.js builds, ticks and
+// patch's tray (sea-puzzles.js). The starlit door, hidden in the second spit's cliffs, is door.js's. Touches the rest only through a few hooks: sailing.js builds, ticks and
 // asks it (keys, the prompt, her shots, what holds her), and a starting point (menus.js).
 import * as THREE from 'three';
 import { LAY, SAIL } from '../den-sail.js';
@@ -22,6 +22,8 @@ import { pool } from './whirlpools.js';
 import { patch, patchPrompt, deckHoleShape } from './sea-puzzles.js';
 import { bake } from './bake.js';
 import { cine } from './cine.js';
+import { doorWorld, doorSquares, doorKey, doorPrompt, doorHolds, doorTick, doorReset } from './door.js';
+import { DOOR } from '../den-door.js';
 
 const RC = LAY.RACE, CELL = SAIL.CELL, DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
 const say = (s, secs) => s.replace('{time}', clockText(secs));
@@ -33,7 +35,8 @@ export const race = { W: null, rules: new Race(readBest()), gap: new GunGap(), d
 /* The course's land, a square at a time, each spit as it is: the first, third and last low and grassy
    (a few boulders on them), the second a high ridge of cliffs (the starlit door's face, kept plain:
    LAY.RACE.DOOR), the fourth a headland standing over the canal its locks cut through (its banks as the
-   sea's cliffs are: bankTop), the wall up the left a rocky bank. All baked into a mesh a material. */
+   sea's cliffs are: bankTop), the wall up the left a rocky bank. All baked into a mesh a material. (The
+   starlit door's squares, its face and the tunnel's far end, are its crags': door.js.) */
 const LOOK = [{ h: 0.9, low: true }, { h: 4.6 }, { h: 0.9, low: true }, { h: null }, { h: 1.0, low: true }];
 const sandM = mat('#d9c08a', { roughness: 1 }), lowGrass = mat('#7c9a52', { roughness: 1 });
 function land(g) {
@@ -46,6 +49,7 @@ function land(g) {
   RC.LAND.forEach((sq, i) => {
     const L = LOOK[i];
     for (const [c, r] of sq) {
+      if (doorSquares.has(`${c},${r}`)) continue;
       const h = L.h ?? bankTop(c, r);
       square(c, r, h, L.low ? sandM : stoneM, L.low ? lowGrass : grassM);
       if (L.low && (c * 7 + r * 3) % 4 === 0) g.add(rock(seaX(c) + (Math.random() - 0.5) * 2.5, h, seaZ(r) + (Math.random() - 0.5) * 2.5, 0.5 + Math.random() * 0.4));
@@ -132,7 +136,7 @@ function build() {
   return W;
 }
 /** Built the first time the sea's drawn (sailing.js). */
-export function raceWorld() { race.W ||= build(); }
+export function raceWorld() { race.W ||= build(); doorWorld(); }
 
 // ---------- the crane's frames, on the deck patch's tray (sea-puzzles.js) ----------
 const K = () => race.crane;
@@ -206,12 +210,13 @@ function standAboard() {
 
 // ---------- the keys, the prompt, her shots ----------
 /** Holding her: on the crane's hook, or at its frame (no pins, no Sailing board). */
-export const raceHolds = () => !!race.trip || building();
+export const raceHolds = () => !!race.trip || building() || doorHolds();
 const VIEW = ['z', 'c', 'v', '-', '_', '=', '+', 'p'];
 /** A key at sea, first: whether it was the race's. */
 export function raceKey(key) {
   if (!sail.on || !race.W) return false;
   const go = key === ' ' || key === 'enter', h = sail.helm;
+  if (!race.trip && !building() && doorKey(key)) return true;   // (the starlit door: door.js)
   if (race.trip) { if (go || key === 'escape') { K().skip(); arrive(); } return !VIEW.includes(key); }
   if (building()) {
     if (key === 'escape') { K().leave(); toast('The frame can wait: it stays on the neck as it is'); return true; }
@@ -226,6 +231,7 @@ export function raceKey(key) {
   if (go && atStart(h.pose.c, h.pose.r) && h.slot < 0 && !h.held() && R.state !== 'count' && R.state !== 'on') {
     R.start();
     race.gap = new GunGap();
+    doorReset();   // (shut again, for a new race)
     toast(STARTER.count[0]);
     return true;
   }
@@ -235,6 +241,8 @@ export function racePrompt() {
   if (!sail.on || !race.W) return '';
   const h = sail.helm, R = race.rules;
   if (race.trip) return 'Space: skip';
+  const dp = doorPrompt();
+  if (dp || doorHolds()) return dp;
   if (building() && !K().built()) return patchPrompt(`The crane's ${CRANE.PARTS[K().up].name} (${K().up + 1} of ${CRANE.PARTS.length}) · 1, 2, 3: a piece`, ' (the spare gets sawn off)', ' · Esc: leave it for now');
   if (K().alongside(h)) {
     if (K().built()) return 'Under the crane · Space: haul her over the neck';
@@ -316,6 +324,8 @@ export function raceTick(dt) {
   const t = performance.now() / 1000, [gc, gr] = RC.GUNS.gap, near = sail.on && Math.max(Math.abs(p.c - gc), Math.abs(p.r - gr)) <= RACE.SIGHT + 1;
   for (const ring of W.rings) ring.m.opacity = shotComing(ring.c, ring.r) ? 0.6 + 0.35 * Math.sin(t * 20) : 0.32 + 0.08 * Math.sin(t * 2);
   W.guns.forEach((V, i) => turretView(V, race.gap.guns[i], dt, near ? { x: seaX(p.c), z: seaZ(p.r) } : { x: seaX(gc), z: seaZ(gr) }));
+  // The starlit door: its board, its stars, its leaves, her trip through (out on leg 5: the race counts it).
+  doorTick(dt, () => R.under(DOOR.FROM, DOOR.TO));
   // Her trip over the neck, on the crane's hook.
   if (race.trip && sail.on) tripTick(dt);
   else if (K().built()) { const tip = W.crane.slew.localToWorld(TIP.clone()), l = W.crane.g.worldToLocal(tip); W.crane.hook.position.set(l.x, l.y - 1, l.z); }
@@ -342,6 +352,7 @@ export function raceReset() {
   race.said = {};
   if (race.trip) { race.trip = null; }
   race.crane = neckCrane();
+  doorReset();
   if (race.W) {
     for (const g of race.W.crane.parts) g.removeFromParent();
     race.W.crane.parts = [];
