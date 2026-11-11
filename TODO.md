@@ -167,11 +167,10 @@ the site (`.assetsignore` skips `*.md`).
   character on an island of their own; who, to settle with the user. What you paint her is kept in
   this browser, like your look.
 
-- **Pictures of Primate's Rule, from the user (11 Nov):** "I'll have to put a to-do in there that
+- **Pictures of Primates Rule, from the user (11 Nov):** "I'll have to put a to-do in there that
   I'll have to share the pictures of it, where it's got like the gold, the black and white
   thrones, the skeleton cannons." The user's war frigate, the one for Daquan's flotilla (IDEAS.md,
-  "Daquan's flotilla"): waiting on the user's pictures before she's drawn. Her name to confirm too
-  ("Is it Primate's Rule?").
+  "Daquan's flotilla"): waiting on the user's pictures before she's drawn.
 
 ## Needs a playtest to pin down
 
