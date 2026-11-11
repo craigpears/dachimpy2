@@ -927,7 +927,7 @@ there.
 
 Still to collect: the user's pictures not saved to disk need putting in `notes/museum/` by hand
 (the v1 page, the first shoot-Dalnoth board and the Dachimpy.com pages), and pictures of Imaduck's
-Duck's version.
+Global Cade Sim.
 
 ## Helium, and Distilling (11 Nov, from Mischievious)
 
