@@ -508,6 +508,14 @@ exactly; the real game's own seed can't be had, so her board is rebuilt in our d
   balloon twisted, squeak by squeak, into Sailing's pieces, then popped; and that's why Sailing's
   pieces pop at all: they're balloon animals. The Sailing board's own look can follow (its pieces
   balloony, popping as they clear): TODO.md, "Sailing's look".
+  **Or Sailing itself is you twisting balloons (11 Nov):** "do you go into the sailing puzzle, or
+  does the sailing puzzle become ... maybe you can use it to get through the thing and rescue the
+  penguin later, but that would be absolutely hilarious if you can do, like, a sailing version of
+  balloon animal ... and you actually see your character twisting the balloon animals somehow."
+  The open question: whether Sailing stays a board you go into, or becomes your own pirate on deck
+  twisting balloons (each piece you drop a twist, each chain a balloon animal, popped to send her
+  forward), the board shown as what's in their hands. Either way it's what gets you through the
+  whirlpools to the penguin, once Tzz has shown you how. (To settle with the user.)
 
 ## A bigger ship from the shipwright (10 Nov)
 
