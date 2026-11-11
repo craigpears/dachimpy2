@@ -405,11 +405,6 @@ the site (`.assetsignore` skips `*.md`).
   Hypothetically." The best line through is the crowded one: with several racers there, you jostle for
   it (and, if racers can ever fire on each other, IDEAS.md, get shot at), so a slower line on your own
   can pay.
-- **A design document for the races (11 Nov):** "all these kind of thoughts, design and balance decisions
-  should all be in some kind of game design document specific to these races." One place, RACE.md, for
-  the race's design and balance: what's built, what's agreed, the ideas, and the open questions. With the
-  user's latest thought: the lead isn't safe, since whoever's behind can shoot you while you sit still to
-  puzzle, and turning back isn't the thing, so the back can take the sitting-still shortcuts at will.
 
 ## Spotted along the way (not asked for)
 

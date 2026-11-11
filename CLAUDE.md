@@ -45,6 +45,10 @@ Modular, no technical debt (the user, 10 Nov: "we need to make sure I'm not crea
 
 Read [STORY.md](STORY.md) for the den's story, its progression and the principles behind them, and keep it
 up to date as the story grows. Read [RULES.md](RULES.md) before changing gameplay or wording, and add to it whenever the user corrects a rule or gives design feedback.
+The sloop race has a design document of its own, [RACE.md](RACE.md) (the user, 11 Nov: "all these kind of
+thoughts, design and balance decisions should all be in some kind of game design document specific to these
+races"): read it before working on the race, and keep it up to date with every design or balance decision and
+idea about racing, alongside RULES.md (the rules as built), TODO.md and IDEAS.md.
 
 Pirate Den notes: [TODO.md](TODO.md) holds the fixes and quality-of-life changes the user has asked for
 (agreed; just do them), and [IDEAS.md](IDEAS.md) holds their unrefined ideas for new puzzles and features.
