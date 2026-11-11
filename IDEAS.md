@@ -930,9 +930,9 @@ I need for in my house, yeah, just my trinkets and portraits. That's probably th
 Obviously, reference for the real monkeys and stuff like that, maybe. But yeah, all my trinkets,
 and my beloved friends, and certainly the special, really special, truly special ones. So [Kikkit]
 and [Mary], they absolutely need their special references." So the tribute isn't the museum's
-last room but Dachimpy's own house in the housing district (one more house, like Gravee's): his
-trinkets on shelves and tables (the real ones, from his pirate page's trophies and trinkets on
-YPPedia, each a shared furniture piece), his friends' portraits on the walls (the portraits piece,
+last room but Dachimpy's own house in the housing district (one more house, like Gravee's): the
+trinkets on shelves and tables (the real ones, from Dachimpy's pirate page's trophies and trinkets on
+YPPedia, each a shared furniture piece), their friends' portraits on the walls (the portraits piece,
 from their looks), and the truly special ones given pride of place with something of their own
 that refers to them: **Kikkit** and **Mary** (who Mary is, to pin down with the user). The real
 cuddly monkeys, Mini above all, from the user's photos. The museum keeps the story of the sims;
