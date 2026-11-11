@@ -456,6 +456,15 @@ shows how it's done: her board (TODO.md, "Sailing, as the user remembers", for i
 same deal to try it yourself, piece for piece. Hidden, not on the way (a gem to find), so she
 doesn't crowd Kikkit's scene. Needs the Sailing deal to be seeded, so a deal can be played again
 exactly; the real game's own seed can't be had, so her board is rebuilt in our deal.
+- **Nearer the start, the sensible one after Kikkit (11 Nov):** "Maybe ... [Tzz] appears nearer
+  the start, but maybe you talk to [Kikkit], and then the characters are like, now I wonder if I
+  can find somebody that can explain how to get past all these ... whirlpools and winds that makes
+  a bit more sense, or goes on fewer tangents." So after Kikkit's rambling, your pirate wonders
+  aloud (the joke's on her tangents) whether there's anyone who'd explain it straight, and Tzz is
+  that someone: her island nearer the start, not out among the whirlpools, where she shows plainly
+  how a big Vegas is built. This changes the earlier "hidden, not on the way" (above), and the
+  wondering aloud is a nudge that someone else is out there, which "Hidden gems, never hinted"
+  wouldn't allow: to settle with the user (it says someone exists, not where or how).
 
 ## A bigger ship from the shipwright (10 Nov)
 
