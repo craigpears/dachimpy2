@@ -869,6 +869,12 @@ doing the same: helping people learn. The user's feelings go on the plaque
 (11 Nov: "the emotion should be there ... a relatively light version of it. But yes, with the
 emotions."): told lightly, in a line or two, with the wish to do what she did and not quite the
 confidence to, and Dachimpy.com as the quieter way of helping that came of it.
+
+**Dachimpy shows you round (11 Nov):** "It very much fits me, kind of just ... showing you around
+all the history of the things that I've built. They are my pride and joy." So the museum's guide is
+Dachimpy, in their rose pink wig, belt and braces and kilt, walking with you from exhibit to
+exhibit as Gravee shows you her house (the same shared piece: a host who walks with you and talks
+at each stop), proud of every one, bugs and all.
 - **v1, "an insanely basic html page":** the Bnav Guide, a page of plain links. Ship movement;
   winds and rocks; whirlpools (the basics, turning around with one, holding your place in one,
   reaching the other side); shooting and grappling; collisions, same class and different; then
