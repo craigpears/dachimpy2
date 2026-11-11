@@ -867,7 +867,7 @@ its exhibits the real thing, oldest first. The user's screenshots are kept in `n
   after the website's collision-mechanics boards: "I bet people probably don't even recognise it."
   The flat blue board with flags, rocks, whirlpools and winds, and "Your ship" counting lefts,
   forwards and rights, chat beside it, on a multiplayer server whose name the user half remembers
-  ("some Fox or something": perhaps SmartFoxServer, to check). It tried to be more realistic: its
+  ("some Fox or something": SmartFoxServer, the user agrees). It tried to be more realistic: its
   "Create new game" had Starting Jobbers and Jobbers per Turn for each team, so you had to fill
   your ship with jobbers. "I remember deciding just to simplify it because it was too
   complicated. Just focus on the ship navigating part." A good line for its caption. The game
