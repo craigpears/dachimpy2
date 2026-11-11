@@ -865,8 +865,10 @@ helping people in a more indirect way. But that's the moment that it started." S
 with her: **Dlonelyone** (a real pirate: name's spelling, portrait and ocean to check on YPPedia
 before she's drawn), drawn at a sloop's helm showing a new pirate the ropes, under a "Did you
 know?" plaque telling how watching her started it all, and that Dachimpy.com was the quieter way of
-doing the same: helping people learn. (How much of the user's own feelings go on the plaque, to
-settle with the user: told warmly, in a line or two.)
+doing the same: helping people learn. The user's feelings go on the plaque
+(11 Nov: "the emotion should be there ... a relatively light version of it. But yes, with the
+emotions."): told lightly, in a line or two, with the wish to do what she did and not quite the
+confidence to, and Dachimpy.com as the quieter way of helping that came of it.
 - **v1, "an insanely basic html page":** the Bnav Guide, a page of plain links. Ship movement;
   winds and rocks; whirlpools (the basics, turning around with one, holding your place in one,
   reaching the other side); shooting and grappling; collisions, same class and different; then
