@@ -16,9 +16,10 @@
      faint marks in the rock for anyone looking closely, never pointed out ("Hidden gems, never hinted").
      Stop off it and Space, and Duty Navigation (src/navigation.ts, its one module) stands in front of
      the rock as the night sky; each constellation filled lights its stars on the rock, in their places
-     on the wheel. Its run is two dealt as ever, then the evil one (NAV): six of a colour side by side on
-     the inner ring, which can't be made a star at a time (navigation.ts, needsCombo). All three lit,
-     the door's outline glows and it swings open; open, it stays open that race.
+     on the wheel. Its run is two small ones dealt as ever (NAV), about a minute's navigating, so it pays
+     in a race (the user, 11 Nov: "simplify the duty navigation down to be more competitive"; the evil
+     constellation it had first is saved for elsewhere, IDEAS.md). Both lit, the door's outline glows and
+     it swings open; open, it stays open that race.
    - A booch turns her about, away from the cliff: she's pushed off, and the board starts again, every
      star on the rock gone dark (Door.booch).
    - The tunnel: a long straight passage under the cliffs, under legs 3 and 4, from the door to the
@@ -31,17 +32,14 @@
    - It's ours, not the film's: no words to speak, no elvish, just the stars. */
 import { LAY, SAIL } from './den-sail.js';
 import { runFor, RUN } from './sailing.js';
-import { bottomRow } from './navigation.js';
 const D = LAY.RACE.DOOR, LEN = D.INTO[0][1] - D.FACE[0][1] + 1;
 export const DOOR = {
-    /** The door's Navigation: two constellations dealt as ever (two stars, then three), then the evil
-        one, six reds side by side on the inner ring (the bottom row), which takes two stars landing at
-        once (navigation.ts, needsCombo). Four colours of star, not the puzzle's five: with five, the
-        bots (tools/nav-bots.mjs, DOOR=1) filled the evil one in 6 goes of 40, the inner ring choking on
-        stars that won't line up; with four, 16 of 40, in about 270 moves. Still evil. */
-    NAV: { sizes: [2, 3], colours: 4, given: [null, null, bottomRow(1, 6, 1)] },
+    /** The door's Navigation: two constellations dealt as ever, two stars then three, the puzzle's own five
+        colours: about 50 moves, a minute or so (tools/nav-bots.mjs, DOOR=1), so with the Vegas it still saves
+        time in a race. */
+    NAV: { sizes: [2, 3] },
     /** How many constellations open it (the run's length). */
-    RUN: 3,
+    RUN: 2,
     /** The squares a gust has to be worth to carry her the length of the tunnel: a Vegas's. */
     NEED: runFor(RUN.VEGAS),
     /** Squares from the door's face to the tunnel's far end, and out onto leg 5 (the trip's length). */

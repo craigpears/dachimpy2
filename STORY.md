@@ -184,7 +184,7 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    shortcut through it by a puzzle the den already has (guns, oars, whirlpools, locks, a crane), so the race
    comes down to which puzzles you back yourself on. Minigames like this, not sea battles. And hidden in
    its cliffs, never pointed out, the starlit door (11 Nov): Duty Navigation on the rock as the night sky,
-   its last constellation an evil one, opens a tunnel under the course, its biggest shortcut, for whoever
+   two constellations lighting its stars, opens a tunnel under the course, its biggest shortcut, for whoever
    finds it and can navigate (and then throw a Vegas).
    *(11 Nov: on hold. Dalnoth is the Vikings' chief, his raids on the den Viking raids as Puzzle
    Pirates has them, and called on by Pandayay; going after him, steps 6 and 7, waits until a reason

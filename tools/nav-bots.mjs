@@ -24,22 +24,25 @@
    constellation: four stars in about 52 moves, five 63, six 74; combos are rare (the greedy got 2).
    A one-star constellation is mostly waiting for a star of its colour, one in five.
 
-   DOOR=1 plays the starlit door's run instead (src/den-door.ts, DOOR.NAV: two dealt as ever, then the evil
-   one, six of a colour side by side on the inner ring, which takes two landing at once); COLOURS=n plays
-   it with n colours. The bots meet the evil one with its own sense of the board (comboWorth): four of
+   DOOR=1 plays the starlit door's run instead (src/den-door.ts, DOOR.NAV: two small ones dealt as ever).
+   EVIL=1 plays the evil constellation's run (two dealt as ever, then six of a colour side by side on the
+   inner ring, which takes two landing at once; built for the door first, saved for elsewhere since,
+   IDEAS.md "The evil constellation"); COLOURS=n plays it with n colours (4 by default). The bots meet the evil one with its own sense of the board (comboWorth): four of
    its places held, two gaps a ring's turn apart, and the two that'll fill them waiting in the ring above
    to be turned in together; junk kept out of the inner ring. RECORD=1 prints each won game's moves (as
-   tests/den-door.test.ts replays one). Runs of 11 Nov, the planner, 40 goes of 600 moves at the door's
-   whole run: the two warm-ups always (about 25 moves each), then the evil one with four colours (the
-   door's) in 16 goes of 40, about 270 moves when it's done; with the puzzle's five, 6 of 40. No booches
+   tests/navigation.test.ts replays one). Runs of 11 Nov, the planner, 40 goes of 600 moves at the evil
+   run: the two warm-ups always (about 25 moves each), then the evil one with four colours in 16 goes of 40, about 270 moves when it's done; with the puzzle's five, 6 of 40. No booches
    (it's careful), but most goes wander on, the inner ring choked with stars that won't line up. */
 
-import { Navigation, RINGS, SPOKES, SIZES as OWN, needsCombo } from '../js/navigation.js';
+import { Navigation, RINGS, SPOKES, SIZES as OWN, needsCombo, bottomRow } from '../js/navigation.js';
 import { seeded } from '../js/mirror-row.js';
 import { DOOR } from '../js/den-door.js';
 
-const AT_DOOR = !!process.env.DOOR, OPTS = AT_DOOR ? { ...DOOR.NAV, ...(process.env.COLOURS ? { colours: Number(process.env.COLOURS) } : {}) } : null;
-const GAMES = Number(process.argv[2]) || 30, WANT = AT_DOOR ? DOOR.RUN : Number(process.argv[3]) || 7;
+/** The evil constellation's run (IDEAS.md): two dealt as ever, then six reds side by side on the inner ring. */
+const EVIL = { sizes: [2, 3], colours: Number(process.env.COLOURS) || 4, given: [null, null, bottomRow(1, 6, 1)] };
+const AT_EVIL = !!process.env.EVIL, AT_DOOR = AT_EVIL || !!process.env.DOOR;
+const OPTS = AT_EVIL ? EVIL : AT_DOOR ? { ...DOOR.NAV, ...(process.env.COLOURS ? { colours: Number(process.env.COLOURS) } : {}) } : null;
+const GAMES = Number(process.argv[2]) || 30, WANT = AT_EVIL ? 3 : AT_DOOR ? DOOR.RUN : Number(process.argv[3]) || 7;
 const BOTS = (process.argv[4] || 'random,greedy,planner').split(',');
 const SIZES = process.env.SIZES ? process.env.SIZES.split(',').map(Number) : OWN;
 const CAP = Number(process.env.CAP) || (AT_DOOR ? 600 : 400);
@@ -183,7 +186,7 @@ const BOT = {
   planner: thinker(2),
 };
 
-console.log(AT_DOOR ? `${GAMES} goes at the starlit door's run (${OPTS.colours ?? 5} colours), ${CAP} moves each.` : `${GAMES} games, ${WANT} constellations each, sizes ${SIZES.join(',')}.`);
+console.log(AT_DOOR ? `${GAMES} goes at ${AT_EVIL ? "the evil constellation's" : "the starlit door's"} run (${OPTS.colours ?? 5} colours), ${CAP} moves each.` : `${GAMES} games, ${WANT} constellations each, sizes ${SIZES.join(',')}.`);
 for (const name of BOTS) {
   const t0 = Date.now();
   const bySize = new Map(), rate = {};

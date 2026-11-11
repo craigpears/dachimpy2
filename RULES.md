@@ -2046,25 +2046,20 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     close: the wheel's 24 places carved small high up the face, and a hairline seam below them. Nothing's
     said till she's stopped off it; then only "Under the cliff · Space: look closer at the rock".
   - **Space there** stands Duty Navigation on the rock beside the carved wheel, as the night sky, in the
-    world (no separate screen; the camera straight on to both). Its run is three constellations: two dealt
-    as ever (two stars, three), then the evil one. Each filled lights its stars on the carved wheel, in their
-    places (`placeXY`, `starCanvas`). The third lit, the door's outline glows and its two leaves swing in on
+    world (no separate screen; the camera straight on to both). Its run is two constellations dealt as
+    ever, two stars then three, the puzzle's own five colours: about 53 moves for the bots
+    (tools/nav-bots.mjs, DOOR=1), a minute or so. Each filled lights its stars on the carved wheel, in their
+    places (`placeXY`, `starCanvas`). The second lit, the door's outline glows and its two leaves swing in on
     a dark tunnel. Esc steps back, the board kept as it is. Open, it stays open that race; a new race (or
     a fresh voyage) shuts it again.
   - **A booch** turns her about, away from the cliff, pushed off a square; the board's gone and every star
     on the rock dark: the run starts again.
-  - **The evil constellation (the user's own design):** "you've got to have like three reds together or
-    four reds together on the bottom row ... put 2 in there and then say 2 of another color, 2 of the first
-    color in the ring above those 2, so that when you do a combo ... it creates a gap and it falls down ...
-    really evil boards that are impossible and frustrating to beat". Found building it: since a
-    constellation filled goes before any line (YPPedia's rule, kept), three, four or five side by side can
-    be made a star at a time (two, a gap, two, the last into the gap fills it and it goes). It takes **six
-    side by side on the inner ring** before whichever five are in first have three in a row and clear: so
-    the last two must land at once, the ring above turned so two reds slide over the two gaps together, or
-    a line clearing under them (`bottomRow`, `needsCombo`; the user's own way works on four, tested). Still
-    the usual three rings. The door's board has four colours, not the puzzle's five: the bots filled the
-    evil one in 6 goes of 40 with five, 16 of 40 with four (about 270 moves when they do; tools/nav-bots.mjs,
-    DOOR=1). Honest guess for a good player: two or three goes, five minutes or so each.
+  - **Simple, to be competitive (11 Nov):** built first with an evil constellation last (six of a colour
+    side by side on the inner ring, only to be filled by a combo), its run took minutes of puzzling to
+    save two and a half of sailing. The user: "Maybe save the evil [constellation] idea for somewhere else
+    in the world ... But yeah, simplify the duty navigation down to be more competitive." So it's just the
+    two dealt ones; the evil constellation is kept in the puzzle's module for elsewhere (`given`,
+    `bottomRow`, `needsCombo`; IDEAS.md, "The evil constellation").
   - **The tunnel:** a long straight cavern under legs 3 and 4, its walls lit by glowing stones of the
     stars' pale blues and whites, a dark still water, daylight at the far door. No wind in it but a draught
     blowing out of the door, so no sail or oar gets her in: only a Sailing chain's gust from the mouth (off
@@ -2074,7 +2069,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     again (not stuck: the snake's here the Vegas you didn't throw). The door's face is cliff to every move
     and gust otherwise, shut or open: the only way in. Her trip through is 6.8 seconds; **the long way,
     legs 2 to 5, sails in about 150: it saves about 145 seconds**, twice the crane's (`DOOR.SAVES`,
-    tested), but the puzzling's on top, the Navigation run and a Vegas, minutes of it.
+    tested), with the puzzling on top: a minute or so's Navigation and a Vegas.
   - **Ours, not the film's:** no words to speak, no elvish, just the stars. No changelog shot of it.
   Rules: `src/den-door.ts`; drawn and played by `js/den/door.js` (a console hook, `doorTest`, for testing).
 - **A hull's sides slant a little, top to bottom (11 Nov).** "I can definitely see the back of the

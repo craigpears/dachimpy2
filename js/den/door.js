@@ -434,7 +434,7 @@ export const doorTest = {
     if (door.board) boardDown(true);
     darkAll();
     door.rules.reset();
-    for (const marks of [[{ ring: 0, spoke: 3, colour: 4 }, { ring: 1, spoke: 6, colour: 0 }], [{ ring: 2, spoke: 1, colour: 3 }, { ring: 1, spoke: 4, colour: 2 }, { ring: 0, spoke: 7, colour: 0 }], DOOR.NAV.given[2]]) {
+    for (const marks of [[{ ring: 0, spoke: 3, colour: 4 }, { ring: 1, spoke: 6, colour: 0 }], [{ ring: 2, spoke: 1, colour: 3 }, { ring: 1, spoke: 4, colour: 2 }, { ring: 0, spoke: 7, colour: 0 }]]) {
       door.rules.done({ marks, booched: false });
       lightMarks(marks);
     }

@@ -2,7 +2,7 @@
    up where it doesn't say (src/navigation.ts). */
 import { describe, expect, it } from 'vitest';
 import { BOOCH_PENALTY, COLOURS, COLOUR_NAMES, FIRST_GO, Navigation, PAR, RINGS, SCORE, SIZES, SPOKES, bottomRow, linesOf, needsCombo, parFor, pointsFor, ratingFor } from '../src/navigation';
-import type { Mark } from '../src/navigation';
+import type { Done, Mark } from '../src/navigation';
 import { seeded } from '../src/mirror-row';
 
 const Y = 0, R = 1, O = 2, Wh = 3, B = 4;
@@ -221,7 +221,9 @@ describe('the booch (11 Nov)', () => {
   });
 });
 
-describe('a combo constellation: the starlit door\'s evil one (11 Nov)', () => {
+describe('a combo constellation: the evil one, built for the starlit door, saved for elsewhere (11 Nov)', () => {
+  /** Its run as it was at the door: two dealt as ever, then six reds side by side on the inner ring. */
+  const EVIL = { sizes: [2, 3], colours: 4, given: [null, null, bottomRow(R, 6, 1)] };
   /* The user: "you've got to have like three reds together or four reds together on the bottom row ...
      you basically got to put 2 in there and then say 2 of another color, 2 of the first color in the ring
      above those 2, so that when you do a combo ... it creates a gap and it falls down ... Those kind of
@@ -282,5 +284,18 @@ describe('a combo constellation: the starlit door\'s evil one (11 Nov)', () => {
     expect(g.completed).toBe(1);
     expect(g.constellation!.marks).toEqual(evil);
     expect(g.constellation!.marks).not.toBe(evil);
+  });
+
+  it('can be done: a whole run, as the bots played it (tools/nav-bots.mjs, EVIL=1 RECORD=1), the evil one filled by two landing at once', () => {
+    // Each go: rings turned ('1+' ring 1 clockwise), then 'd' the star dropped.
+    const PLAYED = 'd d d 1+d d d d 1+d d 1-d d d 1-d d 0+d 2-2-2-d d d 1-1-1-d 2-2-2-d 0+ 2+2+d 0-0-0-d 2-d d 2+d 0+0+0+d 1+d d 2-2-2-d 2-2-2-d 2-d 2+d 1+1+d d d d 2-d 1-d';
+    const g = new Navigation(seeded(1003), EVIL), done: Done[] = [];
+    for (const go of PLAYED.split(' ')) {
+      for (const [, r, d] of go.matchAll(/(\d)([+-])/g)) { const e = g.turn(d === '+' ? 1 : -1, Number(r)); if (e.done) done.push(e.done); }
+      if (go.endsWith('d')) { const e = g.drop(); expect(e.booched).toBe(false); if (e.done) done.push(e.done); }
+    }
+    expect(done.map((d) => d.stars)).toEqual([2, 3, 6]);
+    expect(needsCombo(done[2].marks)).toBe(true);
+    expect(g.totalMoves).toBe(76);
   });
 });

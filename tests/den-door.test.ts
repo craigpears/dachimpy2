@@ -169,31 +169,18 @@ describe('the door: its stars lit, a booch, open for the race (11 Nov)', () => {
     expect(door.lit).toEqual([]);
   });
 
-  it('its Navigation: two dealt as ever, then the evil one, which can\'t be made a star at a time; the usual three rings', () => {
+  it('its Navigation: two small ones dealt as ever, the puzzle\'s own five colours, no combo needed ("more competitive", 11 Nov)', () => {
     const g = new Navigation(seeded(4), DOOR.NAV);
-    expect(g.colours).toBe(DOOR.NAV.colours ?? COLOURS);
+    expect(g.colours).toBe(COLOURS);
     const sizes: number[] = [];
     for (let i = 0; i < DOOR.RUN; i++) {
       sizes.push(g.constellation!.marks.length);
-      expect(needsCombo(g.constellation!.marks), `constellation ${i}`).toBe(i === DOOR.RUN - 1);
+      expect(needsCombo(g.constellation!.marks), `constellation ${i}`).toBe(false);
       g.lay([[], [], []]);
       for (const m of g.constellation!.marks) g.grid[m.ring][m.spoke] = { id: 1000 + m.ring * 8 + m.spoke, c: m.colour };
       g.turn(1, 2);
     }
-    expect(sizes).toEqual([2, 3, 6]);
+    expect(sizes).toEqual([2, 3]);
     expect(g.completed).toBe(DOOR.RUN);
-  });
-
-  it('can be done: a whole run, as the bots played it (tools/nav-bots.mjs, DOOR=1 RECORD=1), the evil one filled by two landing at once', () => {
-    // Each go: rings turned ('1+' ring 1 clockwise), then 'd' the star dropped.
-    const PLAYED = 'd d d 1+d d d d 1+d d 1-d d d 1-d d 0+d 2-2-2-d d d 1-1-1-d 2-2-2-d 0+ 2+2+d 0-0-0-d 2-d d 2+d 0+0+0+d 1+d d 2-2-2-d 2-2-2-d 2-d 2+d 1+1+d d d d 2-d 1-d';
-    const g = new Navigation(seeded(1003), DOOR.NAV), done: Done[] = [];
-    for (const go of PLAYED.split(' ')) {
-      for (const [, r, d] of go.matchAll(/(\d)([+-])/g)) { const e = g.turn(d === '+' ? 1 : -1, Number(r)); if (e.done) done.push(e.done); }
-      if (go.endsWith('d')) { const e = g.drop(); expect(e.booched).toBe(false); if (e.done) done.push(e.done); }
-    }
-    expect(done.map((d) => d.stars)).toEqual([2, 3, 6]);
-    expect(needsCombo(done[2].marks)).toBe(true);
-    expect(g.totalMoves).toBe(76);
   });
 });
