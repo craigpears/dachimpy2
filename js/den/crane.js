@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { CRANE, Crane } from '../den-crane.js';
 import { CRANE_RIDE as SAYS } from '../lines/you.js';
 import { aboard } from '../den-haul.js';
+import { SLOOP_HULL, widthAt } from '../ships.js';
 import { H as TH } from '../treasure-haul.js';
 import { S, scene, camera, mat, mesh, woodTex, woodMat, pieceGroup, V3, basis, pirate, G, burst, toast, outline, v3, animateWalk } from './world.js';
 import { rock } from './land.js';
@@ -500,7 +501,7 @@ function tripTick(dt) {
   stretch(W.hookRope, tip, W.hook.position.clone().setY(hy + 0.2), 0.03);
   W.slings.forEach((r, n) => {
     r.visible = b.leap >= 1 && b.lower < 1;
-    if (r.visible) stretch(r, W.hook.position.clone().setY(hy - 0.35), sail.g.localToWorld(V3(n & 1 ? 1.3 : -1.3, SLOOP_DECK - 0.4, (n & 2 ? 1 : -1) * (SLOOP_BEAM / 2 + 0.02))), 0.025);   // (round her sides, just outside her)
+    if (r.visible) stretch(r, W.hook.position.clone().setY(hy - 0.35), sail.g.localToWorld(V3(n & 1 ? 1.3 : -1.3, SLOOP_DECK - 0.4, (n & 2 ? 1 : -1) * (widthAt(SLOOP_HULL, n & 1 ? 1.3 : -1.3, SLOOP_DECK - 0.4) + 0.03))), 0.025);   // (round her sides, just outside her)
   });
   // You: up to the windlass in a leap, winding (or leaning on the jib as it swings), and a leap
   // down onto her deck at the end.

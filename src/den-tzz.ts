@@ -15,7 +15,7 @@
    And no one comes aboard (11 Nov): "I don't think they need to be aboard, to be honest. I like Kikkit
    just kind of on her island. It works." She stays on hers. */
 
-import { LAY, SAIL } from './den-sail.js';
+import { LAY, SAIL, type Pose } from './den-sail.js';
 import { shoreOf } from './den-isle.js';
 import { ROUTINES, type Act } from './balloons.js';
 import { GREET, DOUBLE, BINGO, AFTER } from './lines/tzz.js';
@@ -32,6 +32,12 @@ export const TZZ = {
 
 const key = (c: number, r: number) => `${c},${r}`;
 const land = new Set(T.LAND.map(([c, r]) => key(c, r)));
+/** Her island's first square: where she stands, her board, her still and palm, the lesson's camera and
+    a starting point beside it are all placed from it, so the island moves as one (11 Nov: moved
+    further from Kikkit's whirlpools). */
+const O = T.LAND[0];
+/** A square, so far from her island's first square (across, out). */
+const off = (c: number, r: number): [number, number] => [O[0] + c, O[1] + r];
 /** Her island's squares. */
 export const tzzAt = (c: number, r: number): boolean => land.has(key(c, r));
 /** The water round her island, every square beside it (diagonally too), where her lesson's seen (and
@@ -44,11 +50,14 @@ export function onTzzLanding(c: number, r: number): boolean {
 export const tzzShore = (): [number, number][] => shoreOf(T.LAND);
 /** Where she stands, and where her balloons go up beside her (her stand, on the sand of her island's
     shore toward the camera: TZZ_CAST.shot). */
-export const TZZ_STANDS = { c: 22.95, r: 13.25 } as const;
+export const TZZ_STANDS = { c: O[0] - 0.05, r: O[1] + 0.25 } as const;
 export const inTzzEarshot = (c: number, r: number): boolean => Math.hypot(c - TZZ_STANDS.c, r - TZZ_STANDS.r) <= TZZ.EARSHOT;
 /** Where the sloop's brought alongside as her lesson begins, wherever round her island you came up:
     beside it, and out of the lesson's shot (the user, 11 Nov: "then the [ship] blocks the view"). */
 export const TZZ_MOOR = T.MOOR;
+/** Where a starting point puts her (den.html?at=tzz: js/den/menus.js): beside her island's near end,
+    facing it, her lesson about to begin. */
+export const TZZ_ARRIVE: Pose = { c: O[0] - 1, r: O[1] + 1, d: 1 };
 
 /** Her lesson, on a real Sailing board beside her (src/balloons.ts): a Double, then a Bingo (that
     Double with another storey on top), each built the real way, a platform one short and a line whose
@@ -99,15 +108,15 @@ export const TZZ_CAST = {
   /** Her board: the den's own Sailing board on a stand on the sand beside her (balloons.js), its front
       to the camera; `tall`, its picture's height in metres: taller than she is, and the shot closer in
       (the user, 11 Nov: "that puzzle can be a bit bigger. It's very tiny"). */
-  board: { at: [22.95, 14.1], tall: 3.5 },
+  board: { at: off(-0.05, 1.1), tall: 3.5 },
   /** Behind her, a copper still (her portrait's); and a palm. */
-  props: [{ kind: 'still', at: [23.75, 13.35], yaw: -1.9 }],
-  palm: [24.15, 12.85] as [number, number],
+  props: [{ kind: 'still', at: off(0.75, 0.35), yaw: -1.9 }],
+  palm: off(1.15, -0.15),
   /** The camera on her lesson, one shot held throughout (the user, 11 Nov: "She's hidden quite
       behind"): from out on the water toward `from` (squares), at her and her board side by side, `up`
       metres over the sand, `dist` metres off, tilted down `tilt`. From the island's left, the open
       water between hers and the Wedding Isle, with the sloop brought alongside out of it (TZZ_MOOR). */
-  shot: { from: [19.5, 13.7], dist: 6.3, tilt: 0.1, up: 1.95 },
+  shot: { from: off(-3.5, 0.7), dist: 6.3, tilt: 0.1, up: 1.95 },
 } as const;
 
 /** Her lesson's shot, on the sea's squares: what it looks at (between her and her board), where the

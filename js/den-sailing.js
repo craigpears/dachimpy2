@@ -11,7 +11,16 @@
    land, off the board) and of a lock (its gates are shut to a gust; she goes up and down the canal
    by its locks), of water at another level (the canal above the sea), and of the imperial
    checkpoint's gate: getting past it is meant to be work, so no gust blows her through it. Ending on
-   a trade wind's lane, the wind takes her on from there. */
+   a trade wind's lane, the wind takes her on from there.
+
+   And of the way through the whirlpools (Sea.passage: Kikkit's whirlpools, their winds, the gap in
+   the reef), unless she starts the gust at one of its mouths, facing into it (Sea.mouths). The user
+   (11 Nov), sailing with the board open by Tzz's island: "somehow I have ended up over near Dignity
+   ... I don't know how I managed to just make a mishap near the Whirlpools. Something got clipped",
+   and "this is supposed to be a secret way round". A chain heading out to sea past Kikkit's island
+   had carried her over the winds that feed the whirlpools, through the reef with them, and out the
+   other side. Now the whirlpools are a way through only when you sail into them on purpose: up to
+   the mouth, then the chain (as Kikkit tells it), or your own moves onto their winds. */
 import { LAY, path } from './den-sail.js';
 import { chainName, runFor, RUN } from './sailing.js';
 /** The squares a gust of `n` takes her, from `from` straight ahead, a pose each; short of the first
@@ -20,12 +29,17 @@ export function gustPath(sea, from, n) {
     const out = [], K = LAY.CHECKPOINT, level = sea.level(from.c, from.r);
     if (sea.isLock(from.c, from.r))
         return out;
+    const key = (c, r) => `${c},${r}`;
+    // (on purpose: from a mouth of the way through the whirlpools, facing into it, or in it already)
+    const meant = sea.passage.has(key(from.c, from.r)) || sea.mouths.some((m) => m.c === from.c && m.r === from.r && m.d === from.d);
     let at = from;
     for (let i = 0; i < n; i++) {
-        const to = path(at, 'F').to, whirl = sea.whirlAt(to.c, to.r), pocket = sea.pockets.has(`${to.c},${to.r}`);
-        // (Whirlpools, Kikkit's: a gust carries her clean over them, as the token moves do in Puzzle
-        // Pirates, and they have her only if it ends on one (src/den-whirl.ts). And into the penguins'
-        // water, but only a Vegas's: src/den-kikkit.ts)
+        const to = path(at, 'F').to, whirl = sea.whirlAt(to.c, to.r), pocket = sea.pockets.has(key(to.c, to.r));
+        if (!meant && (sea.passage.has(key(to.c, to.r)) || sea.reef.has(key(to.c, to.r))))
+            break;
+        // (Into the way through on purpose: a gust carries her clean over its whirlpools, as the token
+        // moves do in Puzzle Pirates, and they have her only if it ends on one (src/den-whirl.ts). And into
+        // the penguins' water, but only a Vegas's: src/den-kikkit.ts)
         if (!whirl && !pocket && (!sea.open(to.c, to.r) || sea.isLock(to.c, to.r) || sea.level(to.c, to.r) !== level))
             break;
         if (pocket && n < runFor(RUN.VEGAS))

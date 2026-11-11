@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import { SLOOP_HULL } from '../ships.js';
 import { mat, mesh, woodTex, flagMat, flagpole } from './world.js';
-import { hullGeo } from './hull.js';
+import { sweepGeo, deckGeo, bilgeRows, rise, sectionGeo } from './hull.js';
 import { gunMesh } from './gun.js';
 
 export const SLOOP_DECK = SLOOP_HULL.deck;
@@ -22,18 +22,21 @@ export function sloopSails(g) {
   const cloths = (g?.userData.sails ?? []).map((arm) => arm.children[0]);
   return { cloths, mat: cloths[0]?.material ?? null };
 }
-export function sloopMesh() {
+/** The sloop: `H`, her hull (src/ships.ts; another shape of it, to compare: frigate-test.html). */
+export function sloopMesh(H = SLOOP_HULL) {
   const g = new THREE.Group(), hullM = mat('#5e4128', { map: woodTex }), deckM = mat('#9a7a55', { map: woodTex }), spar = mat('#4a2f1a', { map: woodTex });
-  const B = SLOOP_BEAM;
-  const hull = mesh(hullGeo(SLOOP_HULL.len, B, SLOOP_HULL.deep), hullM);
-  hull.position.y = SLOOP_DECK - SLOOP_HULL.deep;
-  const deck = mesh(hullGeo(4.25, B - 0.15, 0.05), deckM);
-  deck.position.y = SLOOP_DECK - 0.02;
-  const stripe = mesh(hullGeo(4.46, B + 0.04, 0.1), mat('#d8c9a0'));
-  stripe.position.y = SLOOP_DECK - 0.32;
+  // Her hull, curved as Puzzle Pirates draws a ship (js/den/hull.js): up from her keel to her deck, a
+  // low gunwale round it rising with her sheer toward bow and stern, her deck level inside it.
+  const D = SLOOP_DECK, RIM = 0.05, T = 0.07, level = () => D;
+  const hull = mesh(sweepGeo(H, [[...bilgeRows(H), ...rise(0, D + RIM, 0, 6).slice(1)], [[D + RIM, 0], [D + RIM, -T]], [[D + RIM, -T], [level, -T]]]), hullM);
+  const deck = mesh(deckGeo(H, D - 0.02, -Infinity, Infinity, T - 0.01, 0.05), deckM);
+  // (her stripe, round her a little below her deck)
+  const stripe = mesh(sweepGeo(H, [[[D - 0.37, -0.03], [D - 0.37, 0.02]], [[D - 0.37, 0.02], [D - 0.27, 0.02]], [[D - 0.27, 0.02], [D - 0.27, -0.03]]]), mat('#d8c9a0'));
   g.add(hull, deck, stripe);
-  const stern = mesh(new THREE.BoxGeometry(0.9, 0.35, B * 0.87), hullM);
-  stern.position.set(-1.65, SLOOP_DECK + 0.17, 0);
+  // Her raised stern, where the tiller is: her own shape, up to 0.35 above her deck.
+  const SX = -1.2, up = () => D + 0.35;
+  const stern = new THREE.Group();
+  stern.add(mesh(sweepGeo(H, [[[level, 0], [up, 0]]], { x1: SX }), hullM), mesh(deckGeo(H, D + 0.33, -Infinity, SX, 0.004), deckM), mesh(sectionGeo(H, SX, D, D + 0.35, 1), hullM));
   const tiller = mesh(new THREE.BoxGeometry(0.7, 0.05, 0.05), spar);
   tiller.position.set(-1.6, SLOOP_DECK + 0.5, 0);
   const sprit = mesh(new THREE.CylinderGeometry(0.035, 0.05, 1.4, 6), spar);

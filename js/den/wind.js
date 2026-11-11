@@ -264,7 +264,7 @@ export function windSay(e) {
 }
 
 // What the bar's prompt says while she waits on a pin the wind won't let her sail to.
-export const headwindPrompt = () => (WEATHER.parked ? 'The wind\'s dead against her there: she can\'t sail to the pin' : 'She can\'t sail to the pin: it\'s dead against the wind · O: out oars and row her there, or wait for it to shift');
+export const headwindPrompt = () => (WEATHER.parked ? 'The wind\'s dead against her there: she can\'t sail to the pin' : 'She can\'t sail to the pin: it\'s dead against the wind · 3: out oars and row her there, or wait for it to shift');
 
 // The wind on the sailing bar: an arrow the way it blows (as you're looking), and how strong; and
 // the oars, out or in (O, or a click).
@@ -277,7 +277,7 @@ export function windHud() {
   const how = sail.helm.oars || !w.s ? '' : `<i>${POINT[pointOf(heading(), w.d)]}</i>`;
   return `<div class="wind s${w.s}" title="The wind: the way it blows, and how strong"><b style="transform:rotate(${deg}deg)">${w.s ? '↑' : '·'}</b><span>${STRENGTH[w.s]}${how}</span></div>`;
 }
-export const oarsHud = () => `<button class="oars${sail.helm.oars ? ' on' : ''}" id="oars-btn" title="Run out the oars, or ship them (O)"><kbd>O</kbd>${sail.helm.oars ? 'Rowing' : 'Oars'}</button>`;
+export const oarsHud = () => `<button class="oars${sail.helm.oars ? ' on' : ''}" id="oars-btn" title="Run out the oars, or ship them (3)"><kbd>3</kbd>${sail.helm.oars ? 'Rowing' : 'Oars'}</button>`;
 export const windSig = () => { const w = sail.sea.breeze; return WEATHER.parked ? `${sail.helm.oars}` : w ? `${w.d}${w.s}${Math.round(view.yaw * 36)}${sail.helm.oars}${heading()}` : ''; };
 export function rowToggle() {
   const on = sail.helm.row();

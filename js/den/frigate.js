@@ -11,9 +11,10 @@
 // Not yet: her people (up to 75: RULES.md, "Ships, physically proportional"), below decks, and a
 // place on the sea. Looked at on its own in the unlinked frigate-test.html.
 import * as THREE from 'three';
-import { halfBeam } from '../ships.js';
-import { WAR_FRIGATE_PLAN, deckAt, deckY, insideAt, deckGuns, portXs, mastSails } from '../den-frigate.js';
+import { widthAt, sideY, liftAt, stemX } from '../ships.js';
+import { WAR_FRIGATE_PLAN, deckAt, deckY, insideAt, deckGuns, portXs, portRows, mastSails } from '../den-frigate.js';
 import { mat, mesh, woodTex, canvasTex } from './world.js';
+import { sweepGeo, deckGeo, sectionGeo, bilgeRows, rise, skinFrame, sternFrame, sternX, placeOn } from './hull.js';
 import { FURNITURE } from './furniture.js';
 import { bake } from './bake.js';
 
@@ -35,10 +36,10 @@ const nameTex = (name, ink, ground) => canvasTex(512, 96, (g, w, h) => {
 
 /** A war frigate: `ship`, her config (src/den-frigate.ts, PRIMATES_RULE); `plan`, her shape. Her bow
     toward +x, her waterline at y 0, port (-z) and starboard (+z) as the sloop's. Returns { g, tick(dt),
-    sails (their group: hide it to see her deck), plan, ship }. */
-export function frigateMesh(ship, plan = WAR_FRIGATE_PLAN) {
-  const P = plan, H = P.hull, l = H.len / 2, tip = l + H.len * 0.04, xb = l - H.len * H.bow;
-  const hb = (x) => halfBeam(H, Math.min(tip, Math.max(-l, x))), slope = (x) => (hb(x + 0.01) - hb(x - 0.01)) / 0.02;
+    sails (their group: hide it to see her deck), plan, ship }. `furled`: at anchor, her sails rolled
+    up on their yards, squared across her (js/den/moored.js). */
+export function frigateMesh(ship, plan = WAR_FRIGATE_PLAN, { furled = false } = {}) {
+  const P = plan, H = P.hull, l = H.len / 2, tip = stemX(H);
   const yW = deckY(P, 'waist'), yQ = deckY(P, 'quarter'), yF = deckY(P, 'fore'), qto = P.quarter.to, ffrom = P.fore.from;
   const bw = P.bulwark, pt = ship.paint;
   const M = {
@@ -58,60 +59,43 @@ export function frigateMesh(ship, plan = WAR_FRIGATE_PLAN) {
     const A = new THREE.Vector3(...a), d = new THREE.Vector3(...b).sub(A), c = mesh(new THREE.CylinderGeometry(r, r, d.length(), n), m, n > 4);
     c.position.copy(A).addScaledVector(d, 0.5); c.quaternion.setFromUnitVectors(UP, d.normalize()); g.add(c); return c;
   };
+  const sweep = (faces, m, o) => g.add(mesh(sweepGeo(H, faces, o), m));
+  /** Her rail's top at `x`, above the water: the deck there, its bulwark, her sheer's lift. */
+  const railY = (x) => deckY(P, deckAt(P, x)) + bw.h + liftAt(H, x);
+  /** A thin band round her whole hull from y0 to y1 (heights on her side: her sheer lifts it), `out` proud of her side. */
+  const ring = (y0, y1, m, out = 0.025) => sweep([[[y0, -0.04], [y0, out]], [[y0, out], [y1, out]], [[y1, out], [y1, -0.04]]], m);
 
-  // ----- her hull: outlines along her, as hullGeo draws her (src/ships.ts, halfBeam) -----
-  const xsBetween = (x0, x1, n) => {
-    const xs = []; for (let i = 0; i <= n; i++) xs.push(x0 + (x1 - x0) * i / n);
-    if (x0 < xb && xb < x1) xs.push(xb);
-    return xs.sort((a, b) => a - b);
-  };
-  /** Her outline between x0 and x1 (closed: up the starboard side, back down port), `inset` in from her side (- out). */
-  const outline = (x0, x1, inset = 0) => {
-    const a = x0 <= -l ? -l + inset : x0, xs = xsBetween(a, x1, 30).filter((x) => hb(x) - inset > 0.005);
-    const stb = xs.map((x) => [x, hb(x) - inset]), pts = [...stb];
-    if (x1 >= tip - 1e-6) pts.push([tip - inset, 0]);
-    return pts.concat(stb.slice().reverse().map(([x, z]) => [x, -z]));
-  };
-  const shapeOf = (pts) => new THREE.Shape(pts.map(([x, z]) => new THREE.Vector2(x, -z)));
-  const prismGeo = (shape, y0, y1) => new THREE.ExtrudeGeometry(shape, { depth: y1 - y0, bevelEnabled: false, curveSegments: 2 }).rotateX(-Math.PI / 2).translate(0, y0, 0);
-  const prism = (pts, y0, y1, m) => g.add(mesh(prismGeo(shapeOf(pts), y0, y1), m));
-  /** A band round her whole hull, from y0 to y1, standing `out` proud of her side. */
-  const ring = (y0, y1, m, out = 0.025) => { const s = shapeOf(outline(-l, tip, -out)); s.holes.push(new THREE.Path(outline(-l, tip, 0.04).map(([x, z]) => new THREE.Vector2(x, -z)))); g.add(mesh(prismGeo(s, y0, y1), m)); };
-  /** A wall along one side (`sd` ±1) from x0 to x1, from zi(x) out to zo(x) from her middle. */
-  const strip = (x0, x1, sd, zo, zi, y0, y1, m) => { const xs = xsBetween(x0, x1, 24); prism([...xs.map((x) => [x, sd * zo(x)]), ...xs.slice().reverse().map((x) => [x, sd * Math.max(0, zi(x))])], y0, y1, m); };
-
-  const draught = H.deep - H.deck;
-  prism(outline(-l, tip), -draught, P.bottom, M.bottom);   // (bare wood below)
-  prism(outline(-l, tip), P.bottom, yW, M.hull);
-  prism(outline(-l, qto), yW, yQ, M.hull);                 // the quarterdeck
-  prism(outline(ffrom, tip), yW, yF, M.hull);              // the forecastle
-  prism(outline(-l, qto, 0.02), yQ, yQ + 0.02, M.deck);
-  prism(outline(qto, ffrom, 0.02), yW, yW + 0.02, M.deck);
-  prism(outline(ffrom, tip, 0.02), yF, yF + 0.02, M.deck);
-  for (const y of P.stripes.at) ring(y - P.stripes.h / 2, y + P.stripes.h / 2, M.side);
-  ring(P.bottom - 0.02, P.bottom + 0.03, M.side, 0.012);   // (a fine line where the paint stops)
-
-  // ----- bulwarks round each deck, capped with her rail -----
-  const ends = tip - 0.03;
-  for (const [x0, x1, y] of [[-l, qto, yQ], [qto, ffrom, yW], [ffrom, ends, yF]]) {
-    for (const sd of [-1, 1]) {
-      strip(x0, x1, sd, (x) => hb(x), (x) => hb(x) - bw.t, y, y + bw.h, M.hull);
-      strip(x0, x1, sd, (x) => hb(x) + 0.035, (x) => hb(x) - bw.t - 0.035, y + bw.h, y + bw.h + 0.06, M.rail);
-    }
+  // ----- her hull, curved as Puzzle Pirates draws a ship (js/den/hull.js; her shape, src/ships.ts) -----
+  sweep([[...bilgeRows(H), [P.bottom, 0]]], M.bottom);   // (bare wood below)
+  sweep([rise(P.bottom, H.deck, 0, 6)], M.hull);
+  // Each deck's bulwark up from her side's deck line, the quarterdeck's and forecastle's standing
+  // above the main deck's, capped with her rail; inside, each deck's planking; across her, where the
+  // quarterdeck and forecastle stop, their faces onto the main deck.
+  for (const [x0, x1, y] of [[-Infinity, qto, yQ], [qto, ffrom, yW], [ffrom, Infinity, yF]]) {
+    const top = y + bw.h, level = () => y, t = bw.t;
+    sweep([[[H.deck, 0], [top, 0]], [[top, 0], [top, -t]], [[top, -t], [level, -t]]], M.hull, { x0, x1, closed: true });
+    sweep([[[top, -t - 0.035], [top, 0.035]], [[top, 0.035], [top + 0.06, 0.035]], [[top + 0.06, 0.035], [top + 0.06, -t - 0.035]], [[top + 0.06, -t - 0.035], [top, -t - 0.035]]], M.rail, { x0, x1, closed: true });
+    g.add(mesh(deckGeo(H, y, x0, x1, 0.02), M.deck));
   }
-  const sternW = hb(-l);
-  box(bw.t, bw.h, sternW * 2, M.hull, -l + bw.t / 2, yQ + bw.h / 2, 0);
-  box(bw.t + 0.07, 0.06, sternW * 2 + 0.07, M.rail, -l + bw.t / 2, yQ + bw.h + 0.03, 0);
+  g.add(mesh(sectionGeo(H, qto, yW, yQ, 1), M.hull), mesh(sectionGeo(H, ffrom, yW, yF, -1), M.hull));
+  for (const y of P.stripes.at) ring(y - P.stripes.h / 2, y + P.stripes.h / 2, M.side);
+  ring(P.bottom - P.line / 2, P.bottom + P.line / 2, M.side, 0.012);   // (a fine line where the paint stops)
   // Her stem, up from the forecastle's rail to the bowsprit.
-  rod([tip - 0.05, yW - 0.6, 0], [tip - 0.15, yF + bw.h + 0.1, 0], 0.08, M.hull, 8);
+  rod([tip - 0.05, yW - 0.6, 0], [tip - 0.15, railY(tip) + 0.1, 0], 0.08, M.hull, 8);
 
   // ----- ports: two rows a side, and one in the bulwark for each gun on deck -----
-  const onSide = (x, y, sd, w, h, d, m, out = 0.012) => { const b = mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(x, y, sd * (hb(x) + out)); b.rotation.y = Math.atan2(-slope(x), sd); g.add(b); return b; };
-  const port = (x, y, sd, s) => { onSide(x, y, sd, s + 0.09, s + 0.09, 0.03, M.side); onSide(x, y, sd, s, s, 0.04, M.dark, 0.02); onSide(x, y + s / 2 + 0.02, sd, s + 0.14, 0.035, 0.05, M.side, 0.025); };
-  const [upper, lower] = portXs(P);
+  /** A box on her side (sd) at x and Y above the water, out proud of it, facing straight out of it. */
+  const onSide = (x, Y, sd, w, h, d, m, out = 0.012) => g.add(placeOn(mesh(new THREE.BoxGeometry(w, h, d), m), skinFrame(H, x, Y, sd, out)));
+  const onStern = (z, Y, w, h, d, m, out = 0.012) => g.add(placeOn(mesh(new THREE.BoxGeometry(w, h, d), m), sternFrame(H, z, Y, out)));
+  // (each in the middle of its band of black, its stripes' sheer lifting it with them: portRows)
+  const port = (x, y, sd, s) => {
+    const Y = sideY(H, x, y), lid = sideY(H, x, y + s / 2 + 0.02);
+    onSide(x, Y, sd, s + 0.09, s + 0.09, 0.03, M.side); onSide(x, Y, sd, s, s, 0.04, M.dark, 0.02); onSide(x, lid, sd, s + 0.14, 0.035, 0.05, M.side, 0.025);
+  };
+  const [upper, lower] = portXs(P), rows = portRows(P);
   for (const sd of [-1, 1]) {
-    upper.forEach((x) => port(x, P.ports.rows[1], sd, P.ports.size));
-    lower.forEach((x) => { if (x < tip - 1.2) port(x, P.ports.rows[0], sd, P.ports.size); });
+    upper.forEach((x) => port(x, rows[1], sd, P.ports.size));
+    lower.forEach((x) => { if (x < tip - 1.2) port(x, rows[0], sd, P.ports.size); });
   }
   const guns = deckGuns(P, ship.guns);
   for (const gun of guns) {
@@ -120,21 +104,34 @@ export function frigateMesh(ship, plan = WAR_FRIGATE_PLAN) {
   }
 
   // ----- the quarterdeck: its face onto the main deck, its windows, the stern -----
-  const faceX = qto + 0.02;
+  const faceX = qto + 0.02, qW = widthAt(H, qto, yQ);
   box(0.06, 1.3, 0.86, M.side, faceX, yW + 0.65, 0); box(0.08, 1.2, 0.72, M.wood, faceX + 0.01, yW + 0.6, 0);
   box(0.09, 1.2, 0.03, M.dark, faceX + 0.02, yW + 0.6, 0); box(0.1, 0.05, 0.05, M.gold, faceX + 0.04, yW + 0.6, 0.12);
-  box(0.04, 0.06, sternW * 2, M.side, faceX - 0.01, yQ - 0.03, 0);
-  for (const sd of [-1, 1]) for (const x of [-6.5, -5.5, -4.5]) { onSide(x, yW + 0.78, sd, 0.5, 0.42, 0.03, M.side); onSide(x, yW + 0.78, sd, 0.4, 0.32, 0.035, M.glass, 0.016); }
-  for (const z of [-1.2, -0.4, 0.4, 1.2]) { box(0.03, 0.46, 0.5, M.side, -l - 0.012, yW + 0.8, z); box(0.035, 0.36, 0.4, M.glass, -l - 0.018, yW + 0.8, z); }
-  const plate = mesh(new THREE.PlaneGeometry(2.6, 0.48), new THREE.MeshStandardMaterial({ map: nameTex(ship.name, pt.railing, pt.hull), roughness: 0.6 }), false);
-  plate.rotation.y = -Math.PI / 2; add(plate, -l - 0.02, yW + 0.2, 0);
-  // Lanterns on the taffrail, and its white scrollwork.
-  for (const z of [-sternW + 0.25, 0, sternW - 0.25]) {
-    rod([-l + 0.06, yQ + bw.h, z], [-l + 0.06, yQ + bw.h + 0.55, z], 0.025, M.dark);
-    box(0.18, 0.24, 0.18, M.dark, -l + 0.06, yQ + bw.h + 0.66, z); box(0.13, 0.17, 0.2, M.lamp, -l + 0.06, yQ + bw.h + 0.66, z); box(0.2, 0.17, 0.13, M.lamp, -l + 0.06, yQ + bw.h + 0.66, z);
+  box(0.04, 0.06, qW * 2 - 0.1, M.side, faceX - 0.01, yQ - 0.03, 0);
+  // (her cabin's windows, as her stripes, where her sheer lifts her side)
+  for (const sd of [-1, 1]) for (const x of [-6.5, -5.5, -4.5]) { const Y = sideY(H, x, yW + 0.78); onSide(x, Y, sd, 0.5, 0.42, 0.03, M.side); onSide(x, Y, sd, 0.4, 0.32, 0.035, M.glass, 0.016); }
+  // Her stern windows, round her curved stern, and her name across it.
+  const sY = (y) => sideY(H, -l, y);
+  for (const z of [-1.2, -0.4, 0.4, 1.2]) { onStern(z, sY(yW + 0.8), 0.5, 0.46, 0.03, M.side); onStern(z, sY(yW + 0.8), 0.4, 0.36, 0.035, M.glass, 0.018); }
+  {
+    // (a plate bent round her stern: each point of it set just off her stern there)
+    const geo = new THREE.PlaneGeometry(2.6, 0.48, 16, 1).rotateY(-Math.PI / 2), p = geo.attributes.position;
+    for (let i = 0; i < p.count; i++) { const z = p.getZ(i), Y = sY(yW + 0.2) + p.getY(i); p.setXYZ(i, sternX(H, z, Y) - 0.02, Y, z); }
+    geo.computeVertexNormals();
+    g.add(mesh(geo, new THREE.MeshStandardMaterial({ map: nameTex(ship.name, pt.railing, pt.hull), roughness: 0.6 }), false));
   }
-  for (const sd of [-1, 1]) { const s = mesh(new THREE.TorusGeometry(0.2, 0.045, 6, 14, Math.PI * 1.6).rotateY(Math.PI / 2), M.side); s.rotation.x = sd > 0 ? 0.6 : Math.PI - 0.6; add(s, -l - 0.03, yQ + bw.h + 0.2, sd * 0.42); }
-  box(0.05, 0.3, 0.5, M.side, -l - 0.02, yQ + bw.h + 0.12, 0);
+  // Lanterns on the taffrail, and its white scrollwork.
+  const tY = yQ + bw.h + liftAt(H, -l);
+  for (const z of [-1.3, 0, 1.3]) {
+    const x = sternX(H, z, tY) + bw.t / 2;
+    rod([x, tY, z], [x, tY + 0.55, z], 0.025, M.dark);
+    box(0.18, 0.24, 0.18, M.dark, x, tY + 0.66, z); box(0.13, 0.17, 0.2, M.lamp, x, tY + 0.66, z); box(0.2, 0.17, 0.13, M.lamp, x, tY + 0.66, z);
+  }
+  for (const sd of [-1, 1]) {
+    const s = placeOn(mesh(new THREE.TorusGeometry(0.2, 0.045, 6, 14, Math.PI * 1.6), M.side), sternFrame(H, sd * 0.42, tY + 0.2, 0.03));
+    s.rotateZ(sd > 0 ? 0.6 : Math.PI - 0.6); g.add(s);
+  }
+  g.add(placeOn(mesh(new THREE.BoxGeometry(0.5, 0.3, 0.05), M.side), sternFrame(H, 0, tY + 0.12, 0.02)));
 
   // ----- her figurehead: a black beast's head, gold scrollwork behind it -----
   const fy = yW - 0.2, fh = new THREE.Group();
@@ -152,8 +149,8 @@ export function frigateMesh(ship, plan = WAR_FRIGATE_PLAN) {
   }
   // Gold scrollwork along her bows, either side of the stem.
   for (const sd of [-1, 1]) for (const [dx, dy, r] of [[0.5, 0.25, 0.22], [0.95, -0.05, 0.15], [1.3, 0.2, 0.11]]) {
-    const s = mesh(new THREE.TorusGeometry(r, 0.045, 6, 14, Math.PI * 1.5), M.gold); s.rotation.y = -sd * Math.atan(slope(tip - dx)); s.rotation.z = dx * 2;
-    add(s, tip - dx, fy + dy, sd * (hb(tip - dx) + 0.04));
+    const s = placeOn(mesh(new THREE.TorusGeometry(r, 0.045, 6, 14, Math.PI * 1.5), M.gold), skinFrame(H, tip - dx, fy + dy, sd, 0.04));
+    s.rotateZ(dx * 2); g.add(s);
   }
   // The bowsprit and jib boom.
   rod([tip - 0.5, yF + 0.45, 0], [tip + 3.3, yF + 1.55, 0], 0.09, M.spar, 8);
@@ -201,7 +198,7 @@ export function frigateMesh(ship, plan = WAR_FRIGATE_PLAN) {
     for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; rod([m.x + Math.cos(a) * 0.46, nest, Math.sin(a) * 0.46], [m.x + Math.cos(a) * 0.46, nest + 0.32, Math.sin(a) * 0.46], 0.015, M.wood, 4); }
     // Shrouds from the crow's nest down to her rail each side, ratlines across them.
     for (const sd of [-1, 1]) {
-      const lines = [-0.75, -0.25, 0.25, 0.75].map((dx) => { const x = m.x + dx; return [[m.x + dx * 0.25, nest, sd * 0.4], [x, deckY(P, deckAt(P, x)) + bw.h + 0.06, sd * (hb(x) + 0.03)]]; });
+      const lines = [-0.75, -0.25, 0.25, 0.75].map((dx) => { const x = m.x + dx; return [[m.x + dx * 0.25, nest, sd * 0.4], [x, railY(x) + 0.06, sd * (widthAt(H, x, railY(x) + 0.06) + 0.03)]]; });
       for (const [a, b] of lines) rod(a, b, 0.016, M.rope, 3);
       const [a0, b0] = lines[0], [a1, b1] = lines[3], lerp = (p, q, f) => p.map((v, i) => v + (q[i] - v) * f);
       for (let f = 0.08; f < 0.95; f += 0.09) rod(lerp(b0, a0, f), lerp(b1, a1, f), 0.01, M.rope, 3);
@@ -210,11 +207,13 @@ export function frigateMesh(ship, plan = WAR_FRIGATE_PLAN) {
       const geo = new THREE.PlaneGeometry(w, h, 8, 4), pos = geo.attributes.position;
       for (let k = 0; k < pos.count; k++) pos.setZ(k, Math.cos(pos.getX(k) / w * Math.PI) * 0.22 * w / 2 * (0.6 + 0.4 * Math.cos(pos.getY(k) / h * Math.PI)));
       geo.computeVertexNormals();
-      const cloth = mesh(geo, M.sail, false), yard = mesh(new THREE.CylinderGeometry(0.05, 0.05, w + 0.35, 6), M.spar, false);
-      cloth.position.y = -h / 2; yard.rotation.z = Math.PI / 2;
+      const yard = mesh(new THREE.CylinderGeometry(0.05, 0.05, w + 0.35, 6), M.spar, false);
+      // (furled: the sail rolled up along the top of its yard)
+      const cloth = furled ? mesh(new THREE.CylinderGeometry(0.11, 0.11, w * 0.92, 8).rotateZ(Math.PI / 2), M.sail, false) : mesh(geo, M.sail, false);
+      cloth.position.y = furled ? 0.1 : -h / 2; yard.rotation.z = Math.PI / 2;
       const arm = new THREE.Group(); arm.add(cloth, yard);
       arm.position.set(m.x, feet[i] + h, 0);
-      arm.rotation.y = Math.PI / 2 - 0.45;   // (square across her, braced round a little, as the sloop's)
+      arm.rotation.y = Math.PI / 2 - (furled ? 0 : 0.45);   // (square across her, braced round a little, as the sloop's)
       sails.add(arm);
     });
   }
@@ -223,7 +222,7 @@ export function frigateMesh(ship, plan = WAR_FRIGATE_PLAN) {
   rod(tops[0], [tip + 4.4, yF + 1.9, 0], 0.02, M.rope, 3);
   rod(tops[1], [P.masts[0].x, mastSails(P.masts[0]).feet[1], 0], 0.02, M.rope, 3);
   rod(tops[2], [P.masts[1].x, mastSails(P.masts[1]).feet[1], 0], 0.02, M.rope, 3);
-  rod(tops[2], [-l + 0.2, yQ + bw.h, 0], 0.02, M.rope, 3);
+  rod(tops[2], [-l + 0.2, railY(-l + 0.2), 0], 0.02, M.rope, 3);
 
   // ----- her guns and furniture, as her config places them -----
   const piece = (kind, opts, x, z, yaw) => {

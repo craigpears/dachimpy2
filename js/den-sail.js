@@ -158,8 +158,9 @@ export const LAY = {
         isn't the canal's water (or a lock) is cliff. (The checkpoint's headland, beyond it, is its
         own: CHECKPOINT.HEADLAND.) */
     PLATEAU: { c0: 0, c1: 5, r0: 8, r1: 17 },
-    /** Rocks along the lanes' sides ("some craziness to the journey"). */
-    SIDES: [[8, 5], [10, 8], [12, 4], [14, 8], [12, 12]],
+    /** Rocks along the lanes' sides ("some craziness to the journey"). ([12, 4] in to [13, 2], 11 Nov, to
+        leave open sea round Primates Rule at anchor: PRIMATES.) */
+    SIDES: [[8, 5], [10, 8], [13, 2], [14, 8], [12, 12]],
     /** The imperial checkpoint (10 Nov), across the main shipping lane: a line across the sea at ROW,
         closed but for its gate (GATE, under a gatehouse whose PIERS stand either side). Its guns
         stand on bastions either side (GUNS), each trained on squares of the way through (MARKS,
@@ -206,8 +207,9 @@ export const LAY = {
         [21, 6], off its near shore, to leave room for its name on the captain's map. And one more, 11
         Nov, for Kikkit's island (KIKKIT): [15, 17] to [12, 17], out of the water off her shore; and
         [17, 22] gone, 11 Nov, for her whirlpools' winds; and [20, 15] gone, 11 Nov, for Tzz's island
-        (TZZ): with it the water behind her island, between hers and Kikkit's, was shut in.) */
-    FAR: [[17, 4], [21, 6], [15, 15], [12, 17], [13, 24], [19, 24], [1, 23]],
+        (TZZ): with it the water behind her island, between hers and Kikkit's, was shut in. And [17, 4]
+        out to [21, 3], 11 Nov, to leave open sea round Primates Rule at anchor: PRIMATES.) */
+    FAR: [[21, 3], [21, 6], [15, 15], [12, 17], [13, 24], [19, 24], [1, 23]],
     /** Mischievious's isle (11 Nov), where her wedding is (js/den/wedding.js). The user: "on an island
         somewhere ... islands can all have their own little thing out there". In plain sight, out to
         the right of the shipping lanes on the den's side of the checkpoint, so a new player can sail
@@ -286,10 +288,16 @@ export const LAY = {
         least to anything else. LAND: three squares, a little island of her own. The water round it,
         every square beside it, is where her lesson's seen (src/den-tzz.ts, onTzzLanding: the user, 11
         Nov, "you've got to go straight in front"). MOOR: where she's brought alongside as her lesson
-        begins, out of its shot (the user: "then the [ship] blocks the view"). */
+        begins, out of its shot (the user: "then the [ship] blocks the view").
+        Moved again (11 Nov) three squares in toward the den, further from Kikkit's whirlpools and the
+        gap in the reef, so sailing by her you don't stumble into the secret way round (the user, by her
+        island with the Sailing board open, a chain blew her through them: "Maybe they need to be a
+        little bit further away from each other"): beside the Wedding Isle's far shore now, still on the
+        den's side of Kikkit's and a hop from it, open sea two squares deep all round. (Everything of
+        hers is placed from LAND[0]: src/den-tzz.ts.) */
     TZZ: {
-        LAND: [[23, 13], [24, 13], [23, 14]],
-        MOOR: { c: 22, r: 12, d: 2 },
+        LAND: [[23, 10], [24, 10], [23, 11]],
+        MOOR: { c: 22, r: 9, d: 2 },
     },
     /** Port Decorum (11 Nov; src/den-imperial.ts, js/den/imperial-isle.js), an island under imperial
         control: "just some island that's, say, under imperial control ... to create trading mechanics,
@@ -308,6 +316,16 @@ export const LAY = {
             [11, 31], [12, 31], [13, 31], [14, 31],
         ],
         JETTY: [11, 27],
+    },
+    /** Primates Rule, the user's war frigate (src/den-frigate.ts; src/den-moored.ts), at anchor, still to
+        come (11 Nov: "add that to the scene somewhere so you can just, once you start getting out to sea,
+        you just kind of see that out there and put [a mark] on it. [To] make it clear, it's kind of a
+        to-do item"). Just to the right of the trade winds' first run out from the beach, in view as you
+        set out, broadside on to the den, her bow out to the right. AT: the squares she lies across (four:
+        she's about four squares long), which she can't be sailed through; open sea two squares deep all
+        round her. */
+    PRIMATES: {
+        AT: [[14, 5], [15, 5], [16, 5], [17, 5]],
     },
 };
 /** The canal's squares: its locks and the water between them (the hidden cove's too). */
@@ -387,9 +405,20 @@ export class Sea {
     /** Whirlpools (src/den-whirl.ts; Kikkit's: LAY.KIKKIT), each of their squares, and water only a
         gust gets to (her penguins'). Neither is open (the pilot never takes her into them, nor stops
         her there), but her own moves, a gust or the winds can put her on a whirlpool, and then it has
-        her (Helm's twirl); a gust carries her clean over one (src/den-sailing.ts, gustPath). */
+        her (Helm's twirl); a gust from the way through's mouth carries her clean over one, and one
+        from anywhere else stops short of it (src/den-sailing.ts, gustPath). */
     whirls = new Map();
     pockets = new Set();
+    /** The way through the whirlpools (Kikkit's): every square of it, its whirlpools, their missing
+        corners and the winds that feed them, the gap in the reef among them; and its mouths, where a
+        gust starts into it on purpose, facing it (src/den-sailing.ts, gustPath: a gust from anywhere
+        else stops short of it, so sailing by you never stumble through: 11 Nov). */
+    passage = new Set();
+    mouths = [];
+    /** The reef's rocks, drawn as one line of them (js/den/reef.js): the checkpoint's reef, out from
+        its right-hand gun to the sea's edge but where the passage runs through it, and the rocks round
+        the whirlpools. Rocks like any other to sail by. */
+    reef = new Set();
     /** Squares the scattered rocks keep off: the lanes and everything round them. */
     keep = new Set();
     /** A sea of scattered rocks; with `lay`, the lanes, the canal and its locks, and the cove too (LAY). */
@@ -463,6 +492,14 @@ export class Sea {
         for (const [c, r, d] of LAY.KIKKIT.WINDS)
             this.wind.set(key(c, r), d);
         this.pockets.add(key(...LAY.KIKKIT.PENGUINS));
+        const KK = LAY.KIKKIT;
+        for (const { at: [c, r] } of KK.WHIRLS)
+            for (const [a, b] of [[0, 0], [1, 0], [0, 1], [1, 1]])
+                this.passage.add(key(c + a, r + b));
+        for (const [c, r] of KK.WINDS)
+            this.passage.add(key(c, r));
+        // (its mouth, out through the gap; and past the reef, on out to the penguins: a Vegas's)
+        this.mouths = [{ ...KK.MOUTH }, { c: KK.OUT[0], r: KK.OUT[1], d: KK.MOUTH.d }];
         // Tzz's island, a hop from Kikkit's: land, and the water round it kept clear.
         for (const [c, r] of LAY.TZZ.LAND) {
             this.works.add(key(c, r));
@@ -473,13 +510,22 @@ export class Sea {
             this.works.add(key(c, r));
             near(c, r);
         }
+        // Primates Rule at anchor: in the way, drawn by her own 3D (js/den/moored.js), open sea two deep
+        // round her (no scattered rocks fall there).
+        for (const [c, r] of LAY.PRIMATES.AT) {
+            this.works.add(key(c, r));
+            for (let a = -2; a <= 2; a++)
+                for (let b = -2; b <= 2; b++)
+                    this.keep.add(key(c + a, r + b));
+        }
         this.zones = LAY.ZONES.map((z) => ({ ...z }));
     }
     scatter(roll) {
         const laid = this.wind.size > 0, K = LAY.CHECKPOINT;
         const reef = laid ? Array.from({ length: K.REEF.c1 - K.REEF.c0 + 1 }, (_, i) => key(K.REEF.c0 + i, K.ROW)) : [];
         // (the reef but where Kikkit's whirlpools and winds run through it; and the rocks round them)
-        this.rocks = new Set([...this.cliff, ...this.works, ...reef.filter((k) => !this.whirls.has(k) && !this.wind.has(k)), ...[...LAY.SIDES, ...LAY.FAR, ...LAY.HARBOUR, ...LAY.KIKKIT.REEF].filter(() => laid).map(([c, r]) => key(c, r))]);
+        this.reef = new Set([...reef.filter((k) => !this.whirls.has(k) && !this.wind.has(k)), ...LAY.KIKKIT.REEF.filter(() => laid).map(([c, r]) => key(c, r))]);
+        this.rocks = new Set([...this.cliff, ...this.works, ...this.reef, ...[...LAY.SIDES, ...LAY.FAR, ...LAY.HARBOUR].filter(() => laid).map(([c, r]) => key(c, r))]);
         const H = SAIL.HOME, COLS = SAIL.SCATTER.COLS, ROWS = SAIL.SCATTER.ROWS;
         for (let n = 0; n < SAIL.CLUMPS; n++) {
             let c = Math.floor(roll() * COLS), r = 2 + Math.floor(roll() * (ROWS - 2));

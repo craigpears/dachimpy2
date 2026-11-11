@@ -10,10 +10,16 @@
    - the board: the den's own Sailing board (sail-board.js, drawn off the page onto a picture on a
      stand), its platforms, its balloons, its falling pair steered down by the moves a player makes,
      its pops and the chain's name climbing, exactly as at sea;
+   - the plan marked on the board as it's built (src/balloons.ts, marks; sail-board.js draws them): the
+     gap, a stack and the square for its fourth, a balloon's drop, and on your go your pair's ghost and
+     what pops in what order; and what's for you to do or watch in a panel by the board
+     (lesson-panel.js), apart from the performer's chatter (the user, 11 Nov: "It's an actual
+     instruction to you, and it should be more prominent and persistent");
    - then the last pair's yours ("she sets up the balloons, you do the pop"): it comes in at the top
-     and falls by itself, and you steer and drop it with Sailing's own keys (A D or the arrows move it,
-     W Q E turn it, S or Space drops it). Set the chain off and it pops; miss, and the board's put back
-     as she left it for another go, while she eggs you on; miss three times and she shows you;
+     as in the real game, waits there a moment as it's handed over, then falls by itself, slower than
+     at sea, and you steer it down with Sailing's own keys (← → move it, ↑ ↓ turn it, Space speeds it).
+     Set the chain off and it pops; miss, and the board's put back as she left it for another go,
+     while she eggs you on; miss three times and she shows you;
    - in the performer's hands, the very balloons that go on it, the board's own drawing of them, big
      enough to see from the camera, the performer turned to it: one blown up at the mouth in three
      puffs, tied off with a squeak and brought down to the hands; the second the same, squeak; the
@@ -23,9 +29,10 @@
 import * as THREE from 'three';
 import { SailPair } from '../sail-pair.js';
 import { SPAWN } from '../sailing.js';
-import { layout, setup, SHOW } from '../balloons.js';
-import { mat, mesh, woodTex, V3 } from './world.js';
-import { balloon, sailBoardCanvas, sailBoardLay, sailBoardDrop, sailBoardTick, sailBoardBusy, sailBoardSnap, SAIL_BOARD } from './sail-board.js';
+import { layout, setup, marks, SHOW } from '../balloons.js';
+import { keys, mat, mesh, woodTex, V3 } from './world.js';
+import { balloon, sailBoardCanvas, sailBoardLay, sailBoardDrop, sailBoardTick, sailBoardBusy, sailBoardSnap, sailBoardMarks, SAIL_BOARD } from './sail-board.js';
+import { lessonPanel } from './lesson-panel.js';
 
 /** What the performer's doing on each kind of beat (props-people.js's IDLES). */
 const IDLE_FOR = { start: 'talk', twist: 'twist', fall: 'talk', pop: 'tada', after: 'clap' };
@@ -80,7 +87,16 @@ export function balloonStand({ performer, parent, x = 0, y = 0, z = 0, yaw = 0, 
   g.add(held);
   const squeaks = [];
 
-  const S = { show: null, game: null, pair: null, falling: false, done: 0, fallT: 0, route: null, rest: performer.idle, mine: false, redo: false, help: null, auto: false };
+  const S = { show: null, game: null, pair: null, falling: false, done: 0, fallT: 0, route: null, rest: performer.idle, mine: false, redo: false, help: null, auto: false, wait: 0 };
+  // What's for you to do or watch, in a panel by the board; and where the board's picture is, for it.
+  const panel = lessonPanel();
+  const corners = [V3(-wide / 2, LIFT + tall, 0), V3(wide / 2, LIFT + tall, 0), V3(wide / 2, LIFT, 0), V3(-wide / 2, LIFT, 0)];
+  const routine = () => S.show.acts[S.show.beat().act].routine;
+  // (your go: its pair as the panel shows it, and a moment at the top before it falls)
+  function yourGo() {
+    S.mine = true; S.wait = SHOW.YOU_WAIT;
+    sailBoardMarks(B, marks(routine(), routine().twists.length - 1));
+  }
   const v = new THREE.Vector3(), w2 = new THREE.Vector3();
   // The performer's hands, in the stand's own space.
   // (where she holds the pair, in the stand's space: in front of her, at her waist, toward the camera;
@@ -114,6 +130,7 @@ export function balloonStand({ performer, parent, x = 0, y = 0, z = 0, yaw = 0, 
     S.pair = new SailPair(S.game);
     S.falling = false;
     sailBoardLay(B, S.game);
+    sailBoardMarks(B, marks(r, 0));
   }
   // Your pair's landed: on the board, and the show told what it set off.
   function landed(res) {
@@ -121,8 +138,12 @@ export function balloonStand({ performer, parent, x = 0, y = 0, z = 0, yaw = 0, 
     if (!res.dropped) return;
     sailBoardDrop(B, res, S.game);
     sailBoardSnap(B);
+    // (the plan's done its job: the board plays your drop out, unmarked)
+    sailBoardMarks(B, null);
     const r = S.show.played(res.steps);
-    if (!r || r.result === 'hit') return;
+    if (!r) return;
+    for (const e of r.events) if (e.kind === 'note') note(e);
+    if (r.result === 'hit') return;
     // (a miss: once your drop's played out, the board as she left it, and another go; or she shows you)
     S.redo = true;
     for (const e of r.events) if (e.kind === 'line') say(e.text, e.secs); else if (e.kind === 'fall') S.help = e.route;
@@ -135,8 +156,14 @@ export function balloonStand({ performer, parent, x = 0, y = 0, z = 0, yaw = 0, 
     sailBoardLay(B, S.game);
     sailBoardSnap(B);
     S.redo = false;
+    sailBoardMarks(B, marks(r, n));
     if (S.help) { Object.assign(S, { falling: true, auto: true, route: S.help, done: 0, fallT: 0, help: null }); return; }
-    S.mine = true;
+    yourGo();
+  }
+  // An instruction to you, in the panel (your go's with your pair).
+  function note(e) {
+    const t = e.yours ? routine().twists[routine().twists.length - 1] : null;
+    panel.show({ text: e.text, yours: e.yours, pair: t ? t.pair : null });
   }
   // The pair steered down its route, a move at a time, up to `n` moves (sail-pair.js's own moves).
   function steer(n) {
@@ -243,8 +270,10 @@ export function balloonStand({ performer, parent, x = 0, y = 0, z = 0, yaw = 0, 
     /** Stops it where it is (or it's done): the performer back to themselves. */
     stop() {
       if (!S.show) return;
-      Object.assign(S, { show: null, falling: false, mine: false, redo: false, help: null, auto: false });
+      Object.assign(S, { show: null, falling: false, mine: false, redo: false, help: null, auto: false, wait: 0 });
       held.visible = false;
+      panel.hide();
+      sailBoardMarks(B, null);
       performer.lookAt = null;
       performer.chatty = true;
       performer.setIdle(S.rest);
@@ -262,27 +291,31 @@ export function balloonStand({ performer, parent, x = 0, y = 0, z = 0, yaw = 0, 
           S.pair.reset(); sailBoardSnap(B);
           Object.assign(S, { falling: true, route: e.route, done: 0, fallT: 0 });
           held.visible = false;
-        } else if (e.kind === 'land') land();
+        } else if (e.kind === 'land') { land(); sailBoardMarks(B, marks(S.show.acts[e.act].routine, e.twist + 1)); }
+        else if (e.kind === 'note') note(e);
         else if (e.kind === 'yours') {
           // Your turn: the last pair in at the top, falling by itself, yours to steer and drop.
           const t = S.show.acts[e.act].routine.twists[e.twist];
           S.game.pair = [t.pair[0], t.pair[1]]; S.game.next = [t.pair[0], t.pair[1]];
           S.pair.reset(); sailBoardSnap(B);
-          S.mine = true;
+          yourGo();
         } else if (e.kind === 'done') this.stop();
       }
     },
-    /** Sailing's keys on your turn (true if it took the key); Space before then is on to her next beat. */
-    key(k) {
+    /** Sailing's keys on your turn, the real game's (true if it took the key): ← → (A D) move, ↑ (W E)
+        turns it clockwise and ↓ (S Q) back, Space speeds it while it's held (src/sail-pair.ts; `keys`
+        has it till its keyup), and nothing drops it. Space before then is on to her next beat. `e`: the
+        key's event (a key repeat doesn't rush it again). */
+    key(k, e) {
       if (!S.show) return false;
       if (S.mine && S.show.yours) {
         const P = S.pair;
         if (k === 'a' || k === 'arrowleft') P.slide(-1);
         else if (k === 'd' || k === 'arrowright') P.slide(1);
         else if (k === 'w' || k === 'e' || k === 'arrowup') P.turnBy(1);
-        else if (k === 'q') P.turnBy(-1);
-        else if (k === 's' || k === 'arrowdown' || k === ' ' || k === 'enter') landed(P.slam());
-        else return false;
+        else if (k === 's' || k === 'q' || k === 'arrowdown') P.turnBy(-1);
+        else if (k === ' ') { keys.add(' '); if (!e?.repeat && !sailBoardBusy(B)) { S.wait = 0; P.rush(); } }
+        else if (k !== 'enter') return false;   // (Enter: nothing, rather than skipping the lesson)
         return true;
       }
       if (k === ' ' || k === 'enter') { if (!S.show.yours && !S.falling) this.handle(S.show.skip()); return true; }
@@ -290,7 +323,7 @@ export function balloonStand({ performer, parent, x = 0, y = 0, z = 0, yaw = 0, 
     },
     /** What the keys do just now, for the foot of the screen. */
     prompt() {
-      if (S.show?.yours && S.mine) return 'Your turn · A D or ← → move · W Q E turn · S or Space drop · Esc: skip the lesson';
+      if (S.show?.yours && S.mine) return 'Your go · ← → move · ↑ ↓ turn · Space: faster · Esc: skip the lesson';
       return S.show?.yours ? 'Esc: skip the lesson' : 'Space: next · Esc: skip the lesson';
     },
     /** Each tick: the show's clock (held while the board plays a chain out, and on your turn), the pair
@@ -307,9 +340,12 @@ export function balloonStand({ performer, parent, x = 0, y = 0, z = 0, yaw = 0, 
           if (now.twisting) inHand(now.twisting); else held.visible = false;
           if (S.falling) {
             S.fallT += dt; steer(Math.floor(S.fallT / SHOW.STEP));
-            if (S.auto && S.fallT >= S.route.length * SHOW.STEP + SHOW.LAND) land();
+            if (S.auto && S.fallT >= S.route.length * SHOW.STEP + SHOW.LAND) { land(); sailBoardMarks(B, null); }
           }
-          if (S.mine && !sailBoardBusy(B)) { const res = S.pair.tick(dt); if (res) landed(res); }
+          if (S.mine && !keys.has(' ')) S.pair.ease();   // (Space let go)
+          // (your go: a moment at the top as it's handed over, then falling by itself, at the lesson's pace)
+          if (S.mine && S.wait > 0) S.wait -= dt;
+          else if (S.mine && !sailBoardBusy(B)) { const res = S.pair.tick(dt, SHOW.YOU_FALL); if (res) landed(res); }
           if (S.redo && !sailBoardBusy(B)) again();
         }
       }
@@ -317,6 +353,7 @@ export function balloonStand({ performer, parent, x = 0, y = 0, z = 0, yaw = 0, 
       squeaks.splice(0, squeaks.length, ...squeaks.filter((q) => q.t <= 0.9));
       sailBoardTick(B, dt, S.falling || S.mine ? S.pair : null, null);
       tex.needsUpdate = true;
+      if (S.show) { g.updateMatrixWorld(true); panel.place(corners.map((c) => g.localToWorld(c.clone()))); }
     },
   };
 }

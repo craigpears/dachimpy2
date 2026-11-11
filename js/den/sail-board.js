@@ -227,7 +227,8 @@ function backArt(k) {
 }
 
 // ---------- the touch pad ----------
-const PAD = [['turnL', '⟲', 'Turn back (Q)'], ['turnR', '⟳', 'Turn (W or E)'], ['left', '◀', 'Left (A)'], ['right', '▶', 'Right (D)'], ['drop', '▼ Drop', 'Drop (S or Space)'], ['close', '✕ Helm', 'Back to the helm (R or Esc)']];
+// (the real game's keys, 11 Nov: ↑ clockwise, ↓ back, Space faster while it's held, never a drop)
+const PAD = [['turnL', '⟲', 'Turn anticlockwise (↓)'], ['turnR', '⟳', 'Turn clockwise (↑)'], ['left', '◀', 'Left (←)'], ['right', '▶', 'Right (→)'], ['fast', '▼ Faster', 'Faster while held (Space)'], ['close', '✕ Helm', 'Back to the helm (1 or Esc)']];
 const PAD_W = 2 * 54 + 6;
 function padMake(B) {
   const el = document.createElement('div');
@@ -236,8 +237,12 @@ function padMake(B) {
     const b = document.createElement('button');
     b.textContent = label; b.title = title;
     Object.assign(b.style, { height: act === 'close' ? '40px' : '54px', font: "700 20px 'Alegreya Sans', sans-serif", color: '#f6ead2', background: 'rgba(40,26,14,0.88)', border: '1px solid #c9a35c', borderRadius: '10px', padding: '0', touchAction: 'none', cursor: 'pointer' });
-    if (act === 'drop' || act === 'close') { b.style.gridColumn = 'span 2'; b.style.fontSize = act === 'close' ? '15px' : '19px'; }
-    if (act === 'drop') b.style.background = 'rgba(110,70,20,0.92)';
+    if (act === 'fast' || act === 'close') { b.style.gridColumn = 'span 2'; b.style.fontSize = act === 'close' ? '15px' : '19px'; }
+    if (act === 'fast') {
+      b.style.background = 'rgba(110,70,20,0.92)';
+      // (held as Space is: faster till it's let go)
+      for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) b.addEventListener(ev, () => B.onPad?.('slow'));
+    }
     b.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); B.onPad?.(act); });
     el.appendChild(b);
   }
@@ -253,6 +258,15 @@ const state = (cv) => ({ cv, g: cv.getContext('2d'), k: 0, dpr: 1, back: null, s
     in the world (sailBoardCanvas). */
 export const SAIL_BOARD = { W: BW, H: BH, x: (c) => px(c) + CELL / 2, y: (r) => py(r) + CELL / 2 };
 
+/** A lesson's plan marked on the board (src/balloons.ts, marks: the gap, a stack and the square for its
+    fourth, a balloon's drop, your pair's ghost, what pops in what order), or none (null or []). Marks
+    new since the last fade in. */
+export function sailBoardMarks(B, marks) {
+  const key = (m) => JSON.stringify({ ...m, t: undefined });
+  const was = new Map((B.marks ?? []).map((m) => [key(m), m.t]));
+  B.marks = (marks ?? []).map((m) => ({ ...m, t: was.get(key(m)) ?? 0 }));
+}
+
 /** A board drawn off the page, to stand in the world as a picture (balloons.js: a lesson's board on its
     stand), the same board as at sea, played the same way (sailBoardLay, sailBoardDrop, sailBoardTick);
     `k` its scale (1: SAIL_BOARD.W by SAIL_BOARD.H pixels). Its canvas is `cv`. */
@@ -263,7 +277,8 @@ export function sailBoardCanvas(k = 1) {
 }
 
 /** The board on screen: made once, shown while it's played. `onPad(action, col?)`: a button on the
-    touch pad ('left', 'right', 'turnL', 'turnR', 'drop', 'close'), or a column of the board pressed
+    touch pad ('left', 'right', 'turnL', 'turnR', 'fast' and 'slow' as Faster's pressed and let go,
+    'close'), or a column of the board pressed
     ('col'). */
 export function sailBoardMake(onPad) {
   const el = document.createElement('div');
@@ -429,7 +444,7 @@ const SLOT = 0.16;
     hidden) falling in it; `sp`, the sparkle (src/den-sailing.ts, Sparkle): its meter in the head,
     and glitter over the board while a chain's show lasts. */
 export function sailBoardTick(B, dt, pair, sp = null) {
-  B.sp = sp;
+  B.sp = sp; B.dt = dt;
   // Glitter over the board, as much as the show (a Double a little, a Vegas a shower).
   const lv = sp?.level ?? 0;
   B.owed = (B.owed ?? 0) + dt * 40 * lv ** 1.3;
@@ -586,6 +601,117 @@ function drawLit(g, what, u, now) {
   g.restore();
 }
 
+/* A lesson's plan, marked over the board (the user, 11 Nov, of Tzz's lesson: "It doesn't really visibly
+   show you the plan very well ... the trigger gap marked, where the line of four will be, the partner's
+   drop into the gap, what pops after what"). Big and few words, so they read on her board from the
+   lesson's camera: the gap glowing in the colour it wants, "gap" in it; a stack's three squares ringed,
+   those still to come dashed; the square for its fourth, a dashed ring and "4"; a dotted arrow from a balloon to where
+   it drops; your pair as a ghost, "you"; and the order things pop, numbered gold badges. Each fades in
+   (`t`) as it's first shown, and pulses gently. */
+const MARK_IN = 0.45;
+function tag(g, x, y, text, col, a) {
+  g.save();
+  g.globalAlpha = a;
+  g.font = "800 24px 'Alegreya Sans', sans-serif"; g.textAlign = 'center'; g.textBaseline = 'middle';
+  const w = g.measureText(text).width + 14;
+  g.fillStyle = 'rgba(14,9,4,0.88)'; g.strokeStyle = col; g.lineWidth = 2.5;
+  g.beginPath(); g.roundRect(x - w / 2, y - 14, w, 28, 9); g.fill(); g.stroke();
+  g.fillStyle = col; g.fillText(text, x, y + 1);
+  g.restore();
+}
+function drawMarks(g, marks, now, dt) {
+  if (!marks?.length) return;
+  const pulse = 0.7 + 0.3 * Math.sin(now * 5);
+  const cx = (c) => px(c) + CELL / 2, cy = (r) => py(r) + CELL / 2;
+  // (ghosts and arrows under the rest, badges and tags on top)
+  const order = { ghost: 0, stack: 1, drop: 2, gap: 3, four: 4, pop: 5 };
+  for (const m of [...marks].sort((a, b) => order[a.kind] - order[b.kind])) {
+    m.t = Math.min(1, (m.t ?? 0) + dt / MARK_IN);
+    const a = m.t * m.t * (3 - 2 * m.t), col = BRACKET[m.colour ?? 2];
+    g.save();
+    g.lineJoin = 'round'; g.lineCap = 'round';
+    if (m.kind === 'ghost') {
+      for (const [r, c, colour] of m.cells) {
+        g.globalAlpha = 0.35 * a; g.fillStyle = '#ffffff';
+        g.beginPath(); g.arc(cx(c), cy(r), S * 0.46, 0, Math.PI * 2); g.fill();
+        drawBalloon(g, colour, false, c, r, 0, 0, 1, 0.62 * a);
+      }
+      const rs = m.cells.map(([r]) => r), cs = m.cells.map(([, c]) => c), r0 = Math.min(...rs), c0 = Math.min(...cs);
+      const w = (Math.max(...cs) - c0 + 1) * CELL, h = (Math.max(...rs) - r0 + 1) * CELL;
+      g.globalAlpha = a * pulse; g.strokeStyle = '#ffffff'; g.lineWidth = 3; g.setLineDash([7, 6]);
+      g.beginPath(); g.roundRect(px(c0) + 1, py(r0) + 1, w - 2, h - 2, 12); g.stroke();
+      g.setLineDash([]);
+      g.restore();
+      tag(g, px(c0) + w / 2, py(r0) - 18, 'you', '#ffffff', a);
+      continue;
+    }
+    if (m.kind === 'gap') {
+      const [r, c] = m.at;
+      g.globalAlpha = a * (0.18 + 0.12 * pulse); g.fillStyle = col;
+      g.beginPath(); g.roundRect(px(c) + 3, py(r) + 3, CELL - 6, CELL - 6, 6); g.fill();
+      g.globalAlpha = a * pulse; g.strokeStyle = col; g.lineWidth = 4.5; g.shadowColor = col; g.shadowBlur = 16;
+      g.beginPath(); g.roundRect(px(c) + 2, py(r) + 2, CELL - 4, CELL - 4, 6); g.stroke();
+      // ("gap" in it: it's empty)
+      g.globalAlpha = a; g.shadowBlur = 0; g.font = "800 19px 'Alegreya Sans', sans-serif"; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.lineWidth = 4.5; g.strokeStyle = 'rgba(14,9,4,0.95)'; g.strokeText('gap', cx(c), cy(r) + 1);
+      g.fillStyle = col; g.fillText('gap', cx(c), cy(r) + 1);
+      g.restore();
+      continue;
+    }
+    if (m.kind === 'stack') {
+      const rs = m.cells.map(([r]) => r), cs = m.cells.map(([, c]) => c), r0 = Math.min(...rs), c0 = Math.min(...cs);
+      const w = (Math.max(...cs) - c0 + 1) * CELL, h = (Math.max(...rs) - r0 + 1) * CELL;
+      g.globalAlpha = a * 0.85; g.strokeStyle = col; g.lineWidth = 3; g.setLineDash([3, 6]);
+      g.beginPath(); g.roundRect(px(c0) - 2, py(r0) - 2, w + 4, h + 4, 14); g.stroke();
+      // (its three squares, the ones still to come dashed in: how tall it'll be)
+      for (const [r, c] of m.cells) if (r < Math.max(...rs) - m.of + 1) {
+        g.beginPath(); g.roundRect(px(c) + 5, py(r) + 5, CELL - 10, CELL - 10, 8); g.stroke();
+      }
+      g.setLineDash([]);
+      g.restore();
+      continue;
+    }
+    if (m.kind === 'four') {
+      const [r, c] = m.at;
+      g.globalAlpha = a * pulse; g.strokeStyle = col; g.lineWidth = 3.5; g.setLineDash([6, 5]); g.shadowColor = col; g.shadowBlur = 10;
+      g.beginPath(); g.arc(cx(c), cy(r), CELL * 0.44, 0, Math.PI * 2); g.stroke();
+      g.setLineDash([]); g.shadowBlur = 0;
+      g.globalAlpha = a; g.font = "800 26px 'Alegreya Sans', sans-serif"; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.lineWidth = 5; g.strokeStyle = 'rgba(14,9,4,0.9)'; g.strokeText('4', cx(c), cy(r) + 1);
+      g.fillStyle = col; g.fillText('4', cx(c), cy(r) + 1);
+      g.restore();
+      continue;
+    }
+    if (m.kind === 'drop') {
+      // A dotted arrow from the balloon to where it drops, a dark edge under it so white reads on white.
+      const x0 = cx(m.from[1]), y0 = cy(m.from[0]) + CELL * 0.3, x1 = cx(m.to[1]), y1 = cy(m.to[0]) - CELL * 0.05;
+      const flow = (now * 22) % 12;
+      for (const [w, s, dash] of [[8, 'rgba(14,9,4,0.75)', false], [4, col, true]]) {
+        g.globalAlpha = a; g.strokeStyle = s; g.lineWidth = w;
+        g.setLineDash(dash ? [2, 10] : []); g.lineDashOffset = dash ? -flow : 0;
+        g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1 - 12); g.stroke();
+      }
+      g.setLineDash([]);
+      g.fillStyle = col; g.strokeStyle = 'rgba(14,9,4,0.9)'; g.lineWidth = 2.5;
+      const ang = Math.atan2(y1 - y0, x1 - x0);
+      g.translate(x1, y1); g.rotate(ang);
+      g.beginPath(); g.moveTo(0, 0); g.lineTo(-16, -10); g.lineTo(-16, 10); g.closePath(); g.fill(); g.stroke();
+      g.restore();
+      continue;
+    }
+    if (m.kind === 'pop') {
+      const [r, c] = m.at, x = px(c) + 2, y = py(r) + 2;
+      g.globalAlpha = a; g.fillStyle = '#ffd23a'; g.strokeStyle = '#2a1608'; g.lineWidth = 3; g.shadowColor = 'rgba(0,0,0,0.6)'; g.shadowBlur = 6;
+      g.beginPath(); g.arc(x, y, 15, 0, Math.PI * 2); g.fill(); g.shadowBlur = 0; g.stroke();
+      g.fillStyle = '#2a1608'; g.font = "800 21px 'Alegreya Sans', sans-serif"; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(`${m.n}`, x, y + 1);
+      g.restore();
+      continue;
+    }
+    g.restore();
+  }
+}
+
 // A four-pointed sparkle at (x, y), `k` from its middle to a point.
 function sparkleStar(g, x, y, k) {
   if (k <= 0.2) return;
@@ -627,6 +753,8 @@ function draw(B, now, pair) {
     const u = Math.max(0, p.t) / POP_SWELL;
     drawPiece(g, p.p.c, p.p.fixed, p.x, p.y, p.blk, 0, Math.sin(now * 40) * u * 3, 1 + u * 0.28);
   }
+  // A lesson's plan, marked over it (sailBoardMarks).
+  drawMarks(g, B.marks, now, B.dt ?? 0);
   // The pair falling: its shadow where it'd land, and it.
   if (pair) {
     const cells = pair.cells(), dr = B.shown.r - pair.row, dc = B.shown.c - pair.col, rest = pair.rest();

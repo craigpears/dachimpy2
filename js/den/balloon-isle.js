@@ -8,7 +8,7 @@
 // asks it (Space, the prompt), sea.js's voices (whom you hear, with Kikkit a hop away), whether you've
 // heard Kikkit out (sail.said.wondered: whirlpools.js), and a starting point (menus.js).
 import * as THREE from 'three';
-import { TZZ_CAST, TZZ, TZZ_STANDS, TZZ_MOOR, Visit, lesson, lessonSecs, onTzzLanding, inTzzEarshot, tzzShore } from '../den-tzz.js';
+import { TZZ_CAST, TZZ, TZZ_STANDS, TZZ_MOOR, TZZ_ARRIVE, Visit, lesson, lessonSecs, onTzzLanding, inTzzEarshot, tzzShore } from '../den-tzz.js';
 import { BalloonShow } from '../balloons.js';
 import { readSecs } from '../den-dignity.js';
 import { PIRATES } from '../den-look.js';
@@ -80,7 +80,7 @@ function lessonPlay() {
     tick() { if (!W.stand.playing()) cineEnd(false); else bar(W.stand.prompt()); },
     end(skip) { tzz.play = null; if (skip) W.stand.stop(); bar('Space: skip'); },
     // (her board's keys on your turn; Space before then, on to her next beat)
-    key: (k) => W.stand.key(k),
+    key: (k, e) => W.stand.key(k, e),
   };
   tzz.play = c;
   cinePlay(c);
@@ -100,7 +100,7 @@ export function tzzPrompt() {
   if (!sail.on || !tzz.W) return '';
   const p = sail.helm.pose;
   if (!onTzzLanding(p.c, p.r) || !tzz.visit.seen || tzz.play) return '';
-  return `Off ${TZZ.NAME} · Space: show me again · R: Sailing`;
+  return `Off ${TZZ.NAME} · Space: show me again · 1: Sailing`;
 }
 
 /** Each tick at sea (sailing.js). */
@@ -110,7 +110,7 @@ export function tzzTick(dt) {
   if (sail.on) {
     const p = sail.helm.pose;
     // The first time you come up beside her island, anywhere round it, settled and not at the Sailing
-    // board (R: sail-station.js): her lesson.
+    // board (1: sail-station.js): her lesson.
     if (tzz.visit.arrive(onTzzLanding(p.c, p.r), free() && sail.helm.slot < 0 && !station.on)) lessonPlay();
   }
   W.stand.tick(dt);
@@ -127,6 +127,6 @@ export function tzzReset() {
 
 /** A starting point (menus.js): at sea, come up beside her island, so her lesson begins. */
 export function tzzCheat() {
-  sail.helm.moor({ c: 22, r: 14, d: 1 });
+  sail.helm.moor(TZZ_ARRIVE);
   sail.riding = false;
 }

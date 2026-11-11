@@ -76,7 +76,7 @@ addEventListener('keydown', (e) => {
   if (paused) { if (['p', ' ', 'escape', 'enter'].includes(key)) { e.preventDefault(); setPaused(false); } return; }
   // The cutscene: Space or Esc skips it; nothing else. (A scene can take keys of its own first: its
   // key(); Tzz's lesson, where the last pair's yours to play: js/den/balloon-isle.js.)
-  if (cine) { if (cine.key?.(key)) { e.preventDefault(); return; } if ([' ', 'escape', 'enter'].includes(key)) { e.preventDefault(); if (!e.repeat) cineEnd(true); } return; }
+  if (cine) { if (cine.key?.(key, e)) { e.preventDefault(); return; } if ([' ', 'escape', 'enter'].includes(key)) { e.preventDefault(); if (!e.repeat) cineEnd(true); } return; }
   // On Mischievious's island: its own keys (js/den/wedding.js). In a house: its own (js/den/house.js).
   if (wed.on) { weddingKey(key, e); return; }
   if (house.on) { houseKey(key, e); return; }

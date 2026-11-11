@@ -15,9 +15,9 @@ import { sail, SLOOP_DECK } from './sea.js';
    starboard (Q and E fire them). Played as on the tower: click a plank to chalk an arrow (drag the
    way it should point, the wheel turns it, click an arrow to turn it, right-click rubs it out), or
    the arrows move a cursor and Space chalks. She sails on to the pin while you load, W A D still
-   put in moves, and Q and E fire what's loaded. Esc (or G) leaves the guns as they are, to come
-   back to. One board on her deck at a time: with her oars out it's the rowing board's, so G says to
-   ship them first (and O at the guns ships you to the oars); holed, the board gives way to the deck
+   put in moves, and Q and E fire what's loaded. Esc (or 2) leaves the guns as they are, to come
+   back to. One board on her deck at a time: with her oars out it's the rowing board's, so 2 says to
+   ship them first (and 3 at the guns ships you to the oars); holed, the board gives way to the deck
    patch, at the lock to the quay's Bilge, and comes back after. */
 export const gunnery = { on: false, want: false, b: null, group: null, sq: 0.13, labels: null };
 const W = GUNNERY.COLS * S, H = GUNNERY.ROWS * S;
@@ -80,11 +80,11 @@ function shut() {
 export function gunneryReset() { gunnery.want = false; shut(); }
 
 const WHY = {
-  oars: 'Ship the oars first (O): she can\'t be rowed and loaded at once',
+  oars: 'Ship the oars first (3): she can\'t be rowed and loaded at once',
   holed: 'Patch her first: she\'s holed',
   lock: 'Pump her up the lock first',
 };
-// G: to her guns, or away from them.
+// 2 at sea (1 Sailing, 2 Gunnery, 3 the oars: js/den/sailing.js): to her guns, or away from them.
 export function gunneryToggle(busy = false) {
   if (gunnery.want) { gunnery.want = false; toast('Away from the guns: they stay as they are'); return; }
   const why = cantLoad(sail.helm);
@@ -130,7 +130,7 @@ export function gunneryKey(key) {
   if (mv) { const [r, c] = b.hover ?? [6, 2]; b.hover = [Math.max(0, Math.min(GUNNERY.ROWS - 1, r + mv[0])), Math.max(0, Math.min(GUNNERY.COLS - 1, c + mv[1]))]; return true; }
   if ((key === ' ' || key === 'enter') && b.hover) { chalkHere(...b.hover); return true; }
   if ((key === 'backspace' || key === 'delete') && b.hover) { chalkOn(b, ...b.hover, -1); return true; }
-  if (key === 'escape' || key === 'g') { gunneryToggle(); return true; }
+  if (key === 'escape' || key === '2') { gunneryToggle(); return true; }
   return false;
 }
 // The board's square under the pointer.

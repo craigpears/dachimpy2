@@ -8,6 +8,7 @@ import { Wind } from '../den-wind.js';
 import { Voices } from '../chatter.js';
 import { scene, mat, mesh, canvasTex, woodTex, V3, flagMat, flagpole, burst } from './world.js';
 import { rock } from './land.js';
+import { reef } from './reef.js';
 import { SLOOP_DECK } from './sloop.js';
 export { SLOOP_DECK, SLOOP_BEAM, sloopMesh, sloopSails } from './sloop.js';
 
@@ -47,11 +48,15 @@ export const liftAt = (c, r) => LIFT * (sail.helm.lockAt(c, r)?.height() ?? sail
 // never below CLIFF_H (src/den-sail.ts, Sea.bank).
 export const bankTop = (c, r) => LIFT * sail.sea.bank(c, r) + BANK;
 // The rocks: sea stacks, a clump of boulders on each square; the harbour's arms at the canal's
-// mouth as rocky spurs out from the cliff (harbourSpur).
+// mouth as rocky spurs out from the cliff (harbourSpur); and the reef, a line of rocks with surf
+// along it (reef.js).
 export function seaRocks() {
   const g = new THREE.Group(), harbour = new Set(LAY.HARBOUR.map(([c, r]) => `${c},${r}`));
+  const R = reef(sail.sea.reef, (c, r) => [seaX(c), seaZ(r)]);
+  g.add(R.g);
+  for (const [id, here] of R.rocks) sail.rockAt.set(id, here);
   for (const id of sail.sea.rocks) {
-    if (sail.sea.cliff.has(id) || sail.sea.works.has(id)) continue;   // (the cliff's drawn with the cove: seaWorld; the checkpoint and the wreck by checkpoint.js)
+    if (sail.sea.cliff.has(id) || sail.sea.works.has(id) || sail.sea.reef.has(id)) continue;   // (the cliff's drawn with the cove: seaWorld; the checkpoint and the wreck by checkpoint.js; the reef above)
     if (harbour.has(id)) { const s = harbourSpur(id, harbour); g.add(s.g); sail.rockAt.set(id, s.rocks); continue; }
     const [c, r] = id.split(',').map(Number), x = seaX(c), z = seaZ(r), here = [];
     for (let i = 0; i < 3; i++) here.push(rock(x + (Math.random() - 0.5) * 2.2, 0.2 + Math.random() * 0.4, z + (Math.random() - 0.5) * 2.2, 0.9 + Math.random() * 0.8));

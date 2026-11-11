@@ -12,7 +12,7 @@
    main deck has 12 Gunnery stations), 6 a side, and 12 below on the gun deck, behind the upper row
    of ports. Places along her are x (metres from amidships, + to the bow), across her z (+ to
    starboard, her right; port, her left, is -z), as the sloop's are. */
-import { WAR_FRIGATE, hullFor, halfBeam, type Hull } from './ships.js';
+import { WAR_FRIGATE, hullFor, widthAt, type Hull } from './ships.js';
 
 /** Which of her decks a place is on. */
 export type Deck = 'quarter' | 'waist' | 'fore';
@@ -30,13 +30,15 @@ export interface Plan {
   fore: { from: number; up: number };
   /** The bulwark round each deck: how high, how thick. */
   bulwark: { h: number; t: number };
-  /** The hull's paint stops this far above the water: bare wood below. */
-  bottom: number;
+  /** The hull's paint stops this far above the water: bare wood below, a fine white line along it
+      `line` deep. */
+  bottom: number; line: number;
   /** The two stripes (sideboard) round her: their middles' heights, and how deep each is. */
   stripes: { at: [number, number]; h: number };
-  /** Her gun ports, two rows a side: their middles' heights, how many in each, their size. The upper
-      row is the gun deck's (her 12 guns below); the lower, staggered, shut. */
-  ports: { rows: [number, number]; each: number; size: number; from: number; to: number };
+  /** Her gun ports, two rows a side, each in the middle of its band of black (portRows): how many in
+      each, their size, from and to along her. The upper row is the gun deck's (her 12 guns below);
+      the lower, staggered, shut. */
+  ports: { each: number; size: number; from: number; to: number };
   masts: Mast[];
   /** The ship's wheel, on the quarterdeck. */
   helm: { x: number };
@@ -55,9 +57,9 @@ export const WAR_FRIGATE_PLAN: Plan = {
   quarter: { to: -2.4, up: 1.5 },
   fore: { from: 3.4, up: 0.7 },
   bulwark: { h: 0.72, t: 0.12 },
-  bottom: 0.28,
+  bottom: 0.28, line: 0.05,
   stripes: { at: [0.88, 1.62], h: 0.09 },
-  ports: { rows: [0.5, 1.25], each: 6, size: 0.32, from: -5.6, to: 4.6 },
+  ports: { each: 6, size: 0.32, from: -5.6, to: 4.6 },
   masts: [
     { x: 5.0, foot: 5.3, sails: [[2.8, 1.6], [2.2, 1.2], [1.5, 0.8]] },
     { x: 0.6, foot: 5.0, sails: [[3.2, 1.8], [2.5, 1.3], [1.7, 0.9]] },
@@ -81,8 +83,17 @@ export function mastSails(m: Mast): { feet: number[]; top: number } {
 export const deckAt = (p: Plan, x: number): Deck => (x < p.quarter.to ? 'quarter' : x >= p.fore.from ? 'fore' : 'waist');
 /** That deck's height above the water. */
 export const deckY = (p: Plan, d: Deck): number => p.hull.deck + (d === 'quarter' ? p.quarter.up : d === 'fore' ? p.fore.up : 0);
-/** How far out from her middle the inside of her bulwark is at `x`. */
-export const insideAt = (p: Plan, x: number): number => halfBeam(p.hull, x) - p.bulwark.t;
+/** How far out from her middle the inside of her bulwark is at `x`, on that deck (her sides falling
+    in above the water: src/ships.ts, widthAt). */
+export const insideAt = (p: Plan, x: number): number => widthAt(p.hull, x, deckY(p, deckAt(p, x))) - p.bulwark.t;
+/** The heights of her two rows of ports: each in the middle of its band of black, the lower between
+    the line where her paint stops and her lower stripe, the upper between her stripes (the user, 11
+    Nov: "the ones at the bottom are like touching the bottom line instead of being centered"). As
+    her shape has them: her sheer lifts them with her stripes toward bow and stern (sideY). */
+export function portRows(p: Plan): [number, number] {
+  const [a, b] = p.stripes.at, h = p.stripes.h / 2;
+  return [(p.bottom + p.line / 2 + a - h) / 2, (a + h + b - h) / 2];
+}
 
 /** Her 12 main-deck guns, 6 a side: where each stands (muzzle out over her side). */
 export function deckGuns(p: Plan, xs: number[]): { x: number; z: number; side: 'port' | 'starboard' }[] {
@@ -134,10 +145,10 @@ export const PRIMATES_RULE: Frigate = {
     // The quarterdeck: the piano at the stern, armour in its corners, two anchor chairs to listen
     // from; a table of bottles by the wheel.
     { kind: 'grandPiano', x: -6.55, z: 0, yaw: Math.PI / 2 },
-    { kind: 'armour', x: -6.9, z: -1.3, yaw: Math.PI / 2 },
-    { kind: 'armour', x: -6.9, z: 1.3, yaw: Math.PI / 2 },
-    { kind: 'anchorChair', x: -5.45, z: -0.45, yaw: -Math.PI / 2 - 0.3 },
-    { kind: 'anchorChair', x: -5.45, z: 0.45, yaw: -Math.PI / 2 + 0.3 },
+    { kind: 'armour', x: -6.75, z: -1.15, yaw: Math.PI / 2 },
+    { kind: 'armour', x: -6.75, z: 1.15, yaw: Math.PI / 2 },
+    { kind: 'anchorChair', x: -5.45, z: -0.32, yaw: -Math.PI / 2 - 0.3 },
+    { kind: 'anchorChair', x: -5.45, z: 0.32, yaw: -Math.PI / 2 + 0.3 },
     { kind: 'table', x: -2.95, z: 0, opts: { cup: false, bottles: 3, black: true } },
     // The main deck: armour either side of the doors under the quarterdeck, jars, a hatch, skeleton
     // chairs, a tool chest.

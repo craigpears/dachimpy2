@@ -143,9 +143,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **Nothing but a cutscene's own keys in one (11 Nov).** Rowing came up over Tzz's lesson: "I'm not
   quite sure if I accidentally clicked something ... somehow the rowing thing ended up overlaying it."
   The sea's bar (Oars, Guns, Sailing) is hidden in a cutscene and its buttons do nothing.
+- **What's new, from inside the den (11 Nov).** "as each bigger feature's added, and it should be more
+  visual", and "I don't see why the changelog as well can't be visible from within the game. So if
+  somebody's coming back to the den, they can see it." `changelog.html`: each bigger feature with a
+  teaser shot, a few lines and its link to try it, newest first; a What's new button at the end of the
+  den's row, with a dot while there's something newer than you last saw (CLAUDE.md says how it's kept).
 - **The cheats jump to what's hard to get to, one per place (11 Nov).** "There's a lot there that are
   like basically the same thing ... these are supposed to help jump you to places that are hard to get
-  to." So no cheat for what's a key away (Sailing's board: go sailing, then R), and one per place, not
+  to." So no cheat for what's a key away (Sailing's board: go sailing, then 1), and one per place, not
   one per spot in it: the housing district, not Gravee's house as well (one is kept "because you need
   it for the link", and the district's is the link the user's shared: Gravee's is a click from its list); Kikkit's island, not her whirlpools as well ("they're right next to each other").
 - **Every starting point has a link, to share (10 Nov).** "Make it so that each starting point is
@@ -212,6 +217,28 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   bottles, jars with creatures in them, tool chests. Each is shared furniture any scene can place
   (`js/den/furniture.js`); she's any war frigate's plan with her config (`src/den-frigate.ts`,
   `PRIMATES_RULE`), so another frigate is only another config. The gold is kept, but isn't the point.
+  **Her curves (11 Nov), on first seeing her ("Oh, I absolutely love it"):** "is it intentional with
+  the style that it really is such a square back? I mean, looking at the [sloop], that's got the
+  same ... I'd like to see it maybe with a bit more curves ... Maybe experiment with the curvature a
+  bit." So a ship's hull is curved as Puzzle Pirates draws one (YPPedia's War frigate and Sloop
+  pictures): her stern rounded in rather than square across, her bow full in the shoulder but still
+  coming to a point, her sides falling in above the water (tumblehome) and rounding under below it,
+  her deck line, stripes, ports and rails rising toward bow and stern (sheer), her decks level. One
+  shape for every ship, the frigate and the sloop alike (`SHIP_SHAPE` in `src/ships.ts`, drawn by
+  `js/den/hull.js`), so what stands on a deck still fits; the amounts tried side by side on
+  `frigate-test.html?curve=` (box, as before; gentle; curved, the one chosen; round). **Her ports
+  (11 Nov):** "the ones at the bottom are like touching the bottom line instead of being centered."
+  Each row of ports sits in the middle of its band of black: the lower between the line where her
+  paint stops and her lower stripe, the upper between her stripes (`portRows`, worked out from the
+  stripes, never set by hand).
+  **At anchor, still to come (11 Nov):** "add that to the scene somewhere so you can just, once you
+  start getting out to sea, you just kind of see that out there and put [a mark] on it. [To] make it
+  clear, it's kind of a to-do item." Something modelled but not yet playable can wait on the sea in
+  plain sight, plainly marked as coming: Primates Rule lies at anchor, sails furled, just to the
+  right of the trade winds' first run out from the beach (`LAY.PRIMATES`, open sea two squares round
+  her, not to be sailed through), a sign over her ("Primates Rule · coming soon"), and sailing up
+  near her you say she's not ready yet. No boarding her, nothing to do there, until she's built
+  (`src/den-moored.ts`, `js/den/moored.js`).
 - **The same thing looks the same everywhere (11 Nov).** Of the whirlpools' winds, drawn their own
   way: "Why do the winds look different than the sea lane ones? Like, the graphic representation
   of them should be the same." A wind is a wind, whether it's a sea lane or one beside a whirlpool:
@@ -236,7 +263,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   to a place is its own mechanics (Kikkit's whirlpools), never the person in it.
   Done for Kikkit (11 Nov): she's `KIKKIT_CAST` in `src/den-kikkit.ts` (her look, where she
   stands, her `tipsy` sway and swig, her earshot) and `KIKKIT_SAYS`, a Script (the ramble once,
-  then her tangents for ever, the ramble retold after the last, "Too many lefts-eh!" slotted in
+  then her tangents for ever, the ramble retold after the last, "Too many leftsehhh!" slotted in
   when she's spat back), which `src/chatter.ts` plays for any talking pirate. Her familiars and the
   penguins (the balaclava'd sneak among them) are placed creatures with named behaviours. Her
   island's file, `js/den/whirlpools.js`, keeps only the whirlpools, the winds, Vegas Island and the
@@ -335,16 +362,31 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   penguins. A whirlpool lets her go after a whole turn round, so she's never held for ever. The
   pilot never takes her onto one, or onto a wind that feeds one. Any whirlpool anywhere on the sea
   is the same piece (src/den-whirl.ts).
-  - **Her "-eh" (11 Nov):** "her mannerisms are definitely like everything ends in EH, so it's not a
-    twirl, it's twirl EH." A whirlpool's turn is "a twirl-eh" in her directions, and many of her
-    sentences end on a word with "-eh". Her "five lefts and a right" is still literally true (the
-    right's the twirl).
+  - **Her "eh" is emphasis, drawn out (11 Nov).** First: "her mannerisms are definitely like
+    everything ends in EH, so it's not a twirl, it's twirl EH." Then, of "annoying-eh": "It's supposed
+    to be a childlike it was all sparklehhhhhhh and whooshhehhhhhhh. Not sure how to describe the rules
+    but annoyingeh just doesn't fit ... Like it's a form of accentuation? Not just random on random
+    words." So she draws out the one word she's savouring, like a child, run on and stretched
+    (sparklehhh, whooshehhh, twirlehhh, penguinehhh, Too many leftsehhh!, WHOOSHEHHHH), at most one word
+    a line, most lines plain, never on a plain word (no annoyingeh). Her "five lefts and a right" is
+    still literally true (the right's the twirl). A test keeps the rule.
   - **The first go's charm, kept (11 Nov):** "I do love how when you go to the whirlpool there, it
     does throw you out and say too many lefts, and yeah, it lines up with what [Kikkit] said and the
     little animation where it throws you out. So if we're able to keep some of that charm in, that
     would be brilliant." So the winds don't just carry her home, they spit her out, a big bounding
     hop and a splash each square, and she lands to "Too many lefts!", as Kikkit warned, Kikkit's
-    first word on it "Too many lefts-eh! I told you!" (a test keeps it).
+    first word on it "Too many leftsehhh! I told you!" (a test keeps it).
+  - **A way through only on purpose; the reef a plain line of rocks (11 Nov).** Sailing with the
+    Sailing board open, a chain heading out to sea past her island carried the sloop over the winds
+    that feed the whirlpools, through the reef with them, and out by the checkpoint ("Something got
+    clipped"). And "there definitely needs to be a much more visible line of rocks. Like, this is
+    supposed to be a secret way round. It's literally right next to it." So a chain's gust stops short
+    of the way through (the whirlpools, their winds, the gap) and of the reef, as of any rock, unless
+    it starts at the way through's mouth facing into it (off her island, out through the gap; or past
+    the reef, on out to the penguins): sailing by, you never stumble through; sailing to the mouth and
+    chaining, as she tells it, still works, and so do your own moves onto the winds. The reef is drawn
+    as one unbroken line of rocks with surf along it, out to the sea's edge (js/den/reef.js: the sea's
+    own rocks, merged a square at a time), so the gap with the whirlpools reads as the one way through.
   - **Her lines are protected (11 Nov):** "I want her line[s in] source control because they're
     brilliant. I think they're so spot on with their personality right now. I want that protected
     in source control." They're plain data in `src/lines/kikkit.ts`, recorded in `LINES.md`, both
@@ -390,6 +432,39 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     balloons in the board's three colours only; nothing long with knobs on, no flesh tones.
   - **Keep her in view:** "She's hidden quite behind." One shot held through it, her and her board
     side by side.
+  - **The plan shown on the board, not only said (11 Nov, Tzz again):** "her speech explains things.
+    It doesn't really visibly show you the plan very well. Like, we're starting a stack. Great. What on
+    earth does that even mean? What is the impact of that?" So as she builds, the board marks what each
+    balloon's for, read off the routine by the real rules (src/balloons.ts, plan and marks; drawn by
+    sail-board.js, sailBoardMarks), each as soon as there's something for it to point at: a platform's
+    gap glowing in the colour it wants, "gap" in it, once it's the only square left; a stack's three
+    squares ringed (those still to come dashed) from its first balloon, and the square for its fourth,
+    a dashed ring and "4", once there are three; a dotted arrow from a balloon that'll drop to where it
+    drops (the Bingo's parked pair as soon as it's down). On your go, your pair as a ghost where it goes,
+    "you" over it, its drop, and gold badges 1, 2, 3... for what pops after what. Shown, then named:
+    "words like trigger are shown before they're named", and in plain words ("she's using the right
+    terminology, like the trigger ... But ... that doesn't mean anything to most"): "trigger" first
+    comes once the gap's been shown, said what it is ("That gap's the trigger: fill it last, and the
+    whole lot pops"). Tested: every mark points at what it says, and every note comes as its mark does.
+  - **Her instructions apart from her chatter, and persistent (11 Nov):** "her [important] instructions
+    disappear very quickly. Like ... when she's telling me blue over the yellow and top the stack, that
+    should be a lot clearer that it's just not her being a bit just chatting. It's an actual instruction
+    to you, and it should be more prominent and persistent." What's for you to watch or do is a note in
+    a panel by her board (js/den/lesson-panel.js, a piece any teaching pirate can use), not her
+    parchment bubble: dark, a coloured edge, "Watch" over what to look at, "Your go!" in gold over what
+    to do. It stays up till the next replaces it, flashing as one comes in; a beat with a note lingers
+    long enough to read it. Left of the board where there's room, else above it. Her lines split
+    accordingly in src/lines/tzz.ts: chatter (start, twists, yours, again, help, popped) and
+    instructions (brief, watch, task, chain).
+  - **A fair go at the top (11 Nov):** "once she hands over to you, it's not very clear ... surely it
+    should start at the top ... give you a bit more of a chance" and "all of a sudden a white and a
+    yellow thing starts dropping, and it's like, ah, what am I supposed to do?" So your go is announced
+    plainly ("Your go!" in her bubble and on the panel), the panel shows the pair you've got, says to
+    steer it onto its ghost, and gives the keys (← → move, ↑ ↓ turn, Space faster). The pair comes in at
+    the top of the middle columns as in the real game, waits there two seconds as she hands it over
+    (Space starts it at once), then falls a row every 0.9 s (at sea 0.6 s): time to steer
+    (SHOW.YOU_WAIT, YOU_FALL; tested). Miss and the board's put back, the task still up, the ghost
+    still there, and she eggs you on kindly.
   - **Room of her own, and easy to start (11 Nov, first play):** "TZZ just seems kind of crammed into
     the middle ... can we see if we can just space things out a bit?" The sea grew five squares out
     to the right (27 across, the reef with it) and her island moved out into it: three squares, open
@@ -399,6 +474,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     blocks the view": it starts from any square beside her island, all round it (free, not mid-turn,
     the Sailing board put away), and as it starts the sloop's brought alongside at one spot
     (LAY.TZZ.MOOR) off to the side of the shot, so she and her board are always clear in it.
+  - **Further from the whirlpools (11 Nov, sailing by her island):** a chain's gust blew her through
+    Kikkit's whirlpools to Dignity: "somehow I have ended up over near Dignity ... I don't know how I
+    managed to just make a mishap near the Whirlpools. Something got clipped. Maybe they need to be a
+    little bit further away from each other." Her island moved three squares in toward the den, beside
+    the Wedding Isle's far shore, six squares or more from the whirlpools, their winds and the reef,
+    still a hop from Kikkit's and on the den's side of it, open sea two squares deep all round.
+    Everything of hers (where she stands, her board, still and palm, the lesson's camera, ?at=tzz) is
+    placed from her island's first square, so it moves as one.
   - **The whirlpools are one point of interest on the captain's map, nothing named (11 Nov):** "I
     don't want [Kikkit's] Island or ... the detailed individual ones ... the whole point of that map is
     here's a point of interest. It's ... a different way through. That's about all ... That's for you
@@ -464,7 +547,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   past something, where a secret way is, or that the oars exist: no hints, no "try this". What's
   said is what's happened (hit, through, the wind's shifted), and how to work a thing once you're
   at it (Space to haul). The one exception agreed: after you've been sunk and rowed home, a small
-  note that O gets the oars out (TODO.md, "Sunk at the checkpoint").
+  note that 3 gets the oars out (TODO.md, "Sunk at the checkpoint").
   **And the demo's quest list (10 Nov):** "I just know there's a lot of stuff in here and I want
   to make it ... discoverable given it's a proof of concept demo." Asked, the user chose the map
   stage only, and "tease, don't tell": "we can kind of hint at umami, the capybara to rescue ...
@@ -578,7 +661,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     move are IDEAS.md ("Gunnery at sea").
   - **Her guns are loaded by Gunnery (10 Nov).** The user: "we should have to load the guns through
     the puzzle". Q and E fire only a gun that's loaded; she puts out with none ("No shot loaded to
-    port: G to load her guns by Gunnery"). G (or Load on the sailing bar) takes you to her guns:
+    port: 2 to load her guns by Gunnery"). 2 (or Load on the sailing bar) takes you to her guns:
     the den's own Gunnery board, the gun tower's puzzle and look, laid along her deck, its top row
     toward her bow, you looking down it from over her stern, her mast, sails and own guns struck out
     of the way. Its four guns are hers, as in Puzzle Pirates, where what the gunners load is what
@@ -590,9 +673,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     turns it, click an arrow to turn it, right-click rubs it out), or the arrows move a cursor,
     Space chalks and Backspace rubs out. "Loaded! A shot for her port (Q)". She sails on to the pin
     while you load, W A D still put in moves and Q E fire; the sailing bar's hidden, the stores' key
-    shows. Esc (or G) leaves the guns as they are, to come back to; the board only plays while
-    you're at it. One board on her deck at a time: with her oars out G says to ship them first, and
-    O at the guns goes to the oars; holed, the board gives way to the deck patch, at the lock to the
+    shows. Esc (or 2) leaves the guns as they are, to come back to; the board only plays while
+    you're at it. One board on her deck at a time: with her oars out 2 says to ship them first, and
+    3 at the guns goes to the oars; holed, the board gives way to the deck patch, at the lock to the
     quay's Bilge, and comes back after. Rules: `src/den-guns.ts`; the board: `js/den/sea-guns.js`.
   - **The trade winds and a lock (9 Nov).** The user: "just really go for it. Add some
     shipping lanes ... a fork in the road ... some kind of a lock and canal ... there's a bit of a
@@ -899,8 +982,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       can't sail there. Well, it is letting me"). Only say she can't when she really won't. The
       trade winds are currents of their own and sweep her on whatever the weather. Rules:
       `src/den-wind.ts`.
-    - **The oars:** O, or the button at the right of the sailing bar, runs them out; while they're
-      out she's rowed by mirror strokes, below. Esc (or O) ships them again, and she
+    - **The oars:** 3, or the button at the right of the sailing bar, runs them out; while they're
+      out she's rowed by mirror strokes, below. Esc (or 3) ships them again, and she
       sails on to the pin, if there is one, by the wind. Running them out or shipping them, the rest
       of a turn under way goes after the move she's on (it was planned for the other rig).
   - **Rowing by mirror strokes (10 Nov).** First the real Bilge board split down the middle, port
@@ -1700,15 +1783,37 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     first; a filled platform clears only once no lines are left, and its fall can chain on.
     (YPPedia's "Resolution order" has platforms then lines each round: the user's memory wins
     here, and the code notes YPPedia's.)
-- **Sailing at sea (11 Nov).** Sailing's board is out anywhere at sea on **R** (a Sailing button on
-  the sailing bar too), as G is her guns and O her oars. It's called Sailing wherever a player sees it,
+- **Sailing at sea (11 Nov).** Sailing's board is out anywhere at sea on **1** (a Sailing button on
+  the sailing bar too), as 2 is her guns and 3 her oars (see "The puzzles' keys at sea, in one bank"). It's called Sailing wherever a player sees it,
   never "the rigging" (the user, 11 Nov: "It's supposed to be sailing, not rigging"; Rigging is
   another of Puzzle Pirates' puzzles, played from the same station). "You should
   be able to jump into the sailing puzzle whenever you want to ... it allows you to basically go
   really, really fast, and like in one go, like a trade winds, kind of, just jump multiple tiles."
   Each chain's run carries her that many squares straight ahead in one go, a gust played like the
-  trade winds' squares, stopping short of rocks, land, locks, other water levels and the
-  checkpoint's gate (`src/den-sailing.ts`). R or Esc puts it away. The pair is steered live as it falls (`src/sail-pair.ts`).
+  trade winds' squares, stopping short of rocks, land, locks, other water levels, the
+  checkpoint's gate, and Kikkit's whirlpools and the reef but from the way through's mouth
+  (`src/den-sailing.ts`; see "A way through only on purpose"). 1 or Esc puts it away. The pair is steered live as it falls (`src/sail-pair.ts`),
+  on the real game's keys (see "Sailing's keys, as the real game's").
+- **The puzzles' keys at sea, in one bank (11 Nov).** "The R does not make sense as a button for
+  sailing ... surely they should at least all be in the same bank of keys for activating the
+  puzzles." Settled: "I think 1, 2, 3 makes sense." At sea **1** is Sailing, **2** Gunnery (her
+  guns), **3** the oars (rowing), the order of their buttons at the right of the sailing bar. Each
+  key puts its puzzle out or away, and from one goes on to another (from the oars, 2 says to ship
+  them first). R, G and O do nothing at sea now. Ashore, 1 2 3 still take from the crates
+  (`js/den/sailing.js`, sailKey).
+- **Sailing's keys, as the real game's (11 Nov).** "when I press down, is it going down? ... isn't
+  that rotate? space is supposed to be down". YPPedia's Sailing, Controls: "Left and Right arrow
+  keys: Move the falling pair left or right; Up and Down arrow keys: Rotate the pair clockwise or
+  counterclockwise; Space bar: Increase the pair's falling speed." So on every Sailing board (at
+  sea, Kikkit's whirlpools' easy board, your turn in Tzz's lesson): ← → (A D) move it, ↑ (W, E)
+  turns it clockwise, ↓ (S, Q) anticlockwise, and Space makes it fall faster, still steerable. No
+  key drops it to the bottom: it falls by itself (a row every 0.6 s). Of Space: "the space usually
+  kind of speeds up the drop. It doesn't drop it entirely. So if you're like halfway down the screen
+  and you just want it to get 2/3 of the way down or 3/4, you normally tap space just so you zoom
+  kind of near the bottom but not at the bottom." A tap is a burst of a fifth of a second at a row
+  every 0.04 s (five rows); held, it falls that fast till it's let go; a new pair needs a fresh
+  press. The touch pad's Faster button is held the same way. Rules: `src/sail-pair.ts` (FALL,
+  rush, ease), tested.
   - **Its look, from the user's screenshot of "a huge multi Vegas" (10 Nov):** 8 wide by 16 tall;
     the next pair top left; markers over the middle columns where pairs come in. Three balls,
     yellow knotted rope, white swirled sail, blue wavy water, a pair's halves joined by a little
@@ -1748,6 +1853,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     chain, a little glitter for a Double, and on a Vegas they billow full and gilded, sparkles
     streaming aft and a whoosh of wind, holding while the gust lasts and fading after. It's what
     Kikkit's "really, really big and really sparkly" ramble is about, so her lines must match.
+- **Sailing's pair pushes off a wall as it turns (11 Nov).** "it doesn't turn when it's against the
+  wall. If you rotate it and it's against the wall, it should kind of push away from the wall." A turn
+  that would put a half into the wall or a piece steps the pair a column away (from the nearer side
+  first, then the other), or a row up (src/sail-pair.ts).
 - **Sailing's platforms are blocks, never a little row (11 Nov).** "Platforms never look that small.
   Like, they're always like 2 by 3 or 3 by 3, aren't they? I mean, check the actual official pages."
   YPPedia's "Sailing" page gives no sizes in words; its "typical sailing board" picture shows a 2 by

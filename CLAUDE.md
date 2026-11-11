@@ -51,6 +51,12 @@ Pirate Den notes: [TODO.md](TODO.md) holds the fixes and quality-of-life changes
 Keep the two apart: when the user mentions a fix or tweak, add it to TODO.md; when they brain-dump a new idea,
 add it to IDEAS.md.
 
+The changelog (the user, 11 Nov: "as each bigger feature's added, and it should be more visual"):
+`changelog.html` and its teaser shots in `changelog/`, newest first. When a bigger feature lands (a
+place, a character, a puzzle, a cutscene, a ship; not a bug fix or a tweak), add an entry: the date, a
+title, a teaser shot or two taken from its `?at=` link (by the subagent that checks it in the browser),
+and a few lines in plain words. Pirate names only.
+
 Keeping context lean: the den is big, so hand off work that would flood the main session to subagents with a
 self-contained brief (what to read, what done looks like, what to report back, in a few hundred words). In
 particular, browser checks (screenshots are costly) go to a subagent that checks, fixes what is plainly off,

@@ -2,8 +2,8 @@
    numbers (src/ships.ts). RULES.md, "Ships, physically proportional, by YPPedia's numbers" and
    "Primates Rule, as Puzzle Pirates drew her". */
 import { describe, expect, it } from 'vitest';
-import { SLOOP, WAR_FRIGATE, SLOOP_HULL, SLOOP_SAIL, hullVolume, halfBeam, sailArea } from '../src/ships';
-import { WAR_FRIGATE_PLAN as P, PRIMATES_RULE as PR, FRIGATE_HULL, deckGuns, portXs, onDeck, deckAt, insideAt } from '../src/den-frigate';
+import { SLOOP, WAR_FRIGATE, SLOOP_HULL, SLOOP_SAIL, hullVolume, halfBeam, sailArea, widthAt, sideY, liftAt, stemX, BOX_SHAPE, SHIP_SHAPE, SHAPES, hullFor } from '../src/ships';
+import { WAR_FRIGATE_PLAN as P, PRIMATES_RULE as PR, FRIGATE_HULL, deckGuns, portXs, portRows, onDeck, deckAt, deckY, insideAt } from '../src/den-frigate';
 
 describe('"I want everything physically proportional" (11 Nov): the war frigate beside the sloop', () => {
   it('holds sixteen times the sloop, as her hold does by YPPedia', () => {
@@ -16,8 +16,9 @@ describe('"I want everything physically proportional" (11 Nov): the war frigate 
     expect(FRIGATE_HULL.beam / SLOOP_HULL.beam).toBeCloseTo(2);
     // Two rows of ports between the water and her main deck, with room for a pirate between decks.
     expect(FRIGATE_HULL.deck).toBeGreaterThan(1.6);
-    expect(P.ports.rows[1] + P.ports.size / 2).toBeLessThan(P.stripes.at[1] - P.stripes.h / 2);
-    expect(P.ports.rows[0] + P.ports.size / 2).toBeLessThan(P.stripes.at[0] - P.stripes.h / 2);
+    const rows = portRows(P);
+    expect(rows[1] + P.ports.size / 2).toBeLessThan(P.stripes.at[1] - P.stripes.h / 2);
+    expect(rows[0] + P.ports.size / 2).toBeLessThan(P.stripes.at[0] - P.stripes.h / 2);
   });
 
   it('carries her sail cloth: her sails about 5⅓ times the sloop\'s, on three masts', () => {
@@ -50,7 +51,8 @@ describe('Primates Rule\'s deck, "relatively close" to her picture (11 Nov)', ()
   it('keeps everything on her deck, inside her bulwarks', () => {
     for (const o of all) {
       if (o.what === 'skeletalCannon' || o.what === 'stairs') continue;   // (a gun's muzzle's out over her side; the stairs run up against it)
-      expect(Math.abs(o.z) + o.r * 0.8, `${o.what} at ${o.x}, ${o.z}`).toBeLessThanOrEqual(insideAt(P, o.x));
+      // (all round it: her stern rounds in, her bow too)
+      for (const x of [o.x - o.r * 0.8, o.x, o.x + o.r * 0.8]) expect(Math.abs(o.z) + o.r * 0.8, `${o.what} at ${o.x}, ${o.z}`).toBeLessThanOrEqual(insideAt(P, x));
       expect(o.x - o.r * 0.8, `${o.what} at ${o.x}`).toBeGreaterThan(-P.hull.len / 2 + P.bulwark.t);
     }
   });
@@ -69,5 +71,82 @@ describe('Primates Rule\'s deck, "relatively close" to her picture (11 Nov)', ()
   it('puts the wheel and a mast on the quarterdeck, the main mast in the waist, the foremast on the forecastle', () => {
     expect(deckAt(P, P.helm.x)).toBe('quarter');
     expect(P.masts.map((m) => deckAt(P, m.x))).toEqual(['fore', 'waist', 'quarter']);
+  });
+});
+
+describe('"the ones at the bottom are like touching the bottom line instead of being centered" (11 Nov)', () => {
+  it('sits each row of ports in the middle of its band of black, the lower as the upper', () => {
+    const [lower, upper] = portRows(P), half = P.stripes.h / 2;
+    // The lower band: from the fine line where her paint stops up to her lower stripe.
+    const lo = [P.bottom + P.line / 2, P.stripes.at[0] - half], hi = [P.stripes.at[0] + half, P.stripes.at[1] - half];
+    expect(lower - lo[0]).toBeCloseTo(lo[1] - lower, 9);
+    expect(upper - hi[0]).toBeCloseTo(hi[1] - upper, 9);
+    // ...and clear of both lines, the port's frame and all.
+    const frame = P.ports.size / 2 + 0.045;
+    for (const [y, [a, b]] of [[lower, lo], [upper, hi]] as const) { expect(y - frame).toBeGreaterThan(a); expect(y + frame).toBeLessThan(b); }
+  });
+
+  it('keeps them centred toward bow and stern, where her sheer lifts her stripes and ports together', () => {
+    const H = P.hull, [lower] = portRows(P);
+    for (const x of [-6, -3, 0, 3, 6]) {
+      const a = sideY(H, x, P.bottom + P.line / 2), b = sideY(H, x, P.stripes.at[0] - P.stripes.h / 2), y = sideY(H, x, lower);
+      expect(y - a).toBeCloseTo(b - y, 9);
+    }
+  });
+});
+
+describe('"is it intentional ... such a square back? ... I\'d like to see it maybe with a bit more curves" (11 Nov)', () => {
+  const S = SLOOP_HULL, F = FRIGATE_HULL;
+
+  it('draws every ship with the same curves, the frigate and the sloop alike', () => {
+    expect(S.shape).toBe(SHIP_SHAPE);
+    expect(F.shape).toBe(SHIP_SHAPE);
+    expect(SHAPES.box).toBe(BOX_SHAPE);
+  });
+
+  it('rounds her stern in to her middle, instead of a flat transom square across', () => {
+    for (const h of [S, F]) {
+      const l = h.len / 2;
+      expect(halfBeam(h, -l)).toBeLessThan(1e-4);
+      // (smoothly: narrowing all the way round, never wider aft)
+      let w = halfBeam(h, -l);
+      for (let x = -l; x <= 0; x += h.len / 400) { const v = halfBeam(h, x); expect(v).toBeGreaterThanOrEqual(w - 1e-9); w = v; }
+      // ...and only at her very end: her sides still run straight along most of her.
+      expect(halfBeam(h, -l + h.len * 0.15)).toBeGreaterThan(h.beam / 2 * 0.85);
+    }
+    // The old box, to compare: square across.
+    const box = { ...S, shape: BOX_SHAPE };
+    expect(halfBeam(box, -S.len / 2)).toBeCloseTo(S.beam / 2 * 0.85, 9);
+  });
+
+  it('still comes to a point at her stem, her bow fuller behind it', () => {
+    for (const h of [S, F]) {
+      expect(halfBeam(h, stemX(h))).toBeCloseTo(0, 6);
+      const box = { ...h, shape: BOX_SHAPE }, mid = stemX(h) - h.len * 0.12;
+      expect(halfBeam(h, mid)).toBeGreaterThan(halfBeam(box, mid));
+    }
+  });
+
+  it('falls in above the water (tumblehome) and rounds under below it, her deck as wide as ever', () => {
+    for (const h of [S, F]) {
+      expect(widthAt(h, 0, h.deck)).toBeCloseTo(halfBeam(h, 0), 9);   // (what's on her deck still fits)
+      expect(widthAt(h, 0, 0)).toBeGreaterThan(widthAt(h, 0, h.deck));
+      expect(widthAt(h, 0, h.deck + 1)).toBeLessThan(widthAt(h, 0, h.deck));
+      expect(widthAt(h, 0, h.deck - h.deep)).toBeCloseTo(0, 6);   // (her keel)
+    }
+  });
+
+  it('lifts her deck line toward bow and stern (sheer), not amidships', () => {
+    for (const h of [S, F]) {
+      expect(liftAt(h, 0)).toBe(0);
+      expect(liftAt(h, -h.len / 2)).toBeGreaterThan(0.1 * h.deck);
+      expect(liftAt(h, stemX(h))).toBeGreaterThan(0.1 * h.deck);
+    }
+  });
+
+  it('still holds sixteen times the sloop, curved as she is (her hull grown, not her shape)', () => {
+    expect(hullVolume(hullFor(WAR_FRIGATE, 3.4, 2, { ...S, shape: BOX_SHAPE })) / hullVolume({ ...S, shape: BOX_SHAPE })).toBeCloseTo(16, 6);
+    expect(F.deep).toBeCloseTo(hullFor(WAR_FRIGATE, 3.4, 2, { ...S, shape: BOX_SHAPE }).deep, 6);   // (as deep as before: the same shape grown)
+    expect(deckY(P, 'waist')).toBeCloseTo(F.deck, 9);
   });
 });

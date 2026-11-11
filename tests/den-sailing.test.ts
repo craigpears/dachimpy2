@@ -52,6 +52,62 @@ describe('a gust (gustPath)', () => {
   });
 });
 
+describe('the whirlpools are a way through only on purpose (11 Nov)', () => {
+  /** A gust of `run` from `from`, played out with whatever the winds and whirlpools do after it. */
+  const blown = (s: Sea, from: Pose, run: number) => {
+    const h = new Helm(s, from), got = carry(h, run);
+    for (let i = 0; i < 2000 && (h.cur || h.gusts.length || h.whirling()); i++) h.tick(0.05);
+    return { h, got };
+  };
+  const K = LAY.CHECKPOINT, KK = LAY.KIKKIT;
+
+  it('11 Nov: sailing by Tzz\'s island, a chain blew her through the whirlpools to Dignity ("something got clipped")', () => {
+    // The user: "somehow I have ended up over near Dignity ... I don't know how I managed to just make a
+    // mishap near the Whirlpools". Heading out to sea past Kikkit's island, a big chain carried her over
+    // the winds that feed the whirlpools, through the reef with them, and out beside the checkpoint.
+    const s = new Sea(9);
+    for (const from of [{ c: 13, r: 16, d: 0 }, { c: 16, r: 13, d: 0 }, { c: 16, r: 16, d: 0 }]) {
+      const { h, got } = blown(s, from, runFor(6));
+      expect(h.pose.r, `${from.c},${from.r}`).toBeLessThan(K.ROW);
+      for (const p of got.squares) expect(s.passage.has(`${p.c},${p.r}`) || s.reef.has(`${p.c},${p.r}`), `${p.c},${p.r}`).toBe(false);
+    }
+  });
+
+  it('no gust from the den\'s side of the reef, but from the mouth, ever takes her past it, nor onto the way through', () => {
+    const s = new Sea(9), runs = [1, 2, 3, 4, 5, 7, 9];
+    for (let c = 0; c < s.cols; c++) for (let r = 0; r < K.ROW; r++) for (let d = 0; d < 4; d++) {
+      if (!s.open(c, r) || s.windAt(c, r) !== undefined || s.isLock(c, r) || s.level(c, r) !== 0) continue;
+      if (c === KK.MOUTH.c && r === KK.MOUTH.r && d === KK.MOUTH.d) continue;
+      for (const run of runs) {
+        const { h, got } = blown(s, { c, r, d }, run);
+        expect(h.pose.r, `${c},${r},${d} run ${run}`).toBeLessThanOrEqual(K.ROW);
+        for (const p of got.squares) expect(s.passage.has(`${p.c},${p.r}`), `${c},${r},${d} run ${run}: ${p.c},${p.r}`).toBe(false);
+      }
+    }
+  }, 60000);
+
+  it('from the mouth, facing out, it\'s the way through as Kikkit tells it: a Double clears the reef', () => {
+    const s = new Sea(9);
+    expect(blown(s, KK.MOUTH, runFor(2)).h.pose).toMatchObject({ c: KK.OUT[0], r: KK.OUT[1] });
+    // (and from OUT, on out to the penguins, a Vegas's)
+    expect(at(gustPath(s, { c: KK.OUT[0], r: KK.OUT[1], d: 0 }, runFor(6)).at(-1)!)).toEqual([...KK.PENGUINS, 0]);
+  });
+
+  it('stops short of a whirlpool and the reef, as of any rock, from outside the way through', () => {
+    const s = new Sea(9);
+    // Past the reef, along it toward the whirlpools from the right: short of the first whirlpool.
+    const along = gustPath(s, { c: 20, r: KK.OUT[1], d: 3 }, 9).map(at);
+    expect(along.at(-1)).toEqual([KK.OUT[0], KK.OUT[1], 3]);
+    // The reef's whole length is rock but where the way through runs, out to the sea's edge.
+    for (let c = K.REEF.c0; c <= K.REEF.c1; c++) {
+      const k = `${c},${K.ROW}`;
+      expect(s.reef.has(k) !== s.passage.has(k), k).toBe(true);
+      if (s.reef.has(k)) expect(s.isRock(c, K.ROW)).toBe(true);
+    }
+    expect(K.REEF.c1).toBe(SAIL.COLS - 1);
+  });
+});
+
 describe('carried by a chain (carry)', () => {
   it('a Triple carries her three squares, in one go, at the trade winds\' pace', () => {
     const h = new Helm(open(), { c: 5, r: 5, d: 1 });

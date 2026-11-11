@@ -5,9 +5,9 @@
    things", and "it should definitely be like a now you try thing ... she sets up the balloons, you do
    the pop". */
 import { describe, expect, it } from 'vitest';
-import { ROUTINES, SHOW, BalloonShow, beats, layout, perform, route, setup, type Act, type Routine, type ShowEvent } from '../src/balloons';
+import { ROUTINES, SHOW, BalloonShow, beats, layout, marks, perform, plan, route, setup, type Act, type Mark, type Routine, type ShowEvent } from '../src/balloons';
 import { Sailing, PLATFORM, SPAWN } from '../src/sailing';
-import { SailPair } from '../src/sail-pair';
+import { SailPair, FALL } from '../src/sail-pair';
 import { stagesAreWhatTheySay } from './sail-stages';
 
 /** Plays a routine a twist at a time: the board after each of her twists, and what your pair (the
@@ -162,7 +162,7 @@ describe('the show: she sets the balloons up, squeak by squeak; you do the pop',
   ];
 
   it('each of her pairs twisted (two squeaks, tossed), then steered down and landed; then your turn, then the chain', () => {
-    const kinds = play(new BalloonShow(acts, secs)).map((e) => (e.kind === 'line' ? `line ${e.text}` : e.kind));
+    const kinds = play(new BalloonShow(acts, secs)).filter((e) => e.kind !== 'note').map((e) => (e.kind === 'line' ? `line ${e.text}` : e.kind));
     const twist = ['squeak', 'squeak', 'toss', 'fall', 'land'];
     expect(kinds.slice(0, 28)).toEqual([
       'act', 'line watch',
@@ -207,11 +207,11 @@ describe('the show: she sets the balloons up, squeak by squeak; you do the pop',
     expect(show.played(1)!.events.map((e) => e.kind)).toEqual(['again', 'line']);
     const help = show.played(0)!;
     expect(help.result).toBe('help');
-    expect(help.events.map((e) => e.kind)).toEqual(['again', 'line', 'fall']);
+    expect(help.events.map((e) => e.kind)).toEqual(['again', 'note', 'line', 'fall']);
     expect(show.yours).toBe(false);
     const hit = new BalloonShow(acts.slice(0, 1), secs);
     for (let i = 0; i < 2000 && !hit.yours; i++) hit.tick(0.1);
-    expect(hit.played(2)).toEqual({ result: 'hit', events: [] });
+    expect(hit.played(2)).toEqual({ result: 'hit', events: [{ kind: 'note', text: '', yours: false }] });
     expect(hit.played(2)).toBeNull();
   });
 
@@ -243,5 +243,126 @@ describe('Sailing as it is', () => {
     expect(g).toBeInstanceOf(Sailing);
     expect(g.grid.flat().every((x) => !x)).toBe(true);
     expect(g.platforms).toHaveLength(ROUTINES.bingo.platforms.length);
+  });
+});
+
+/* The user, 11 Nov, of Tzz's lesson: "her speech explains things. It doesn't really visibly show you the
+   plan very well. Like, we're starting a stack. Great. What on earth does that even mean? What is the
+   impact of that?" So the plan's marked on the board, read off the routine by the rules. */
+describe('11 Nov, "it doesn\'t really visibly show you the plan": the plan, marked on the board', () => {
+  const key = (x: unknown) => JSON.stringify(x);
+
+  it('the Double\'s plan: the gap wanting yellow, three blues and the square for the fourth, the yellow dropping into the gap, the blues then the platform', () => {
+    const P = plan(ROUTINES.double);
+    expect(P.gaps).toEqual([{ at: [14, 2], colour: 1 }]);
+    expect(P.lines).toEqual([{ n: 1, colour: 0, stack: expect.arrayContaining([[13, 3], [14, 3], [15, 3]]), four: [[12, 3]] }]);
+    expect(P.drops).toEqual([{ from: [12, 2], to: [14, 2], colour: 1, yours: true }]);
+    expect(P.pops.map((p) => [p.n, p.kind])).toEqual([[1, 'line'], [2, 'platform']]);
+  });
+
+  it('11 Nov: the ghost is where the routine\'s last pair goes, in its colours', () => {
+    for (const r of Object.values(ROUTINES)) {
+      const t = r.twists[r.twists.length - 1], [a, b] = t.pair;
+      const want = t.turn === 0 ? [[t.row, t.col, a], [t.row, t.col + 1, b]] : t.turn === 1 ? [[t.row, t.col, a], [t.row + 1, t.col, b]] : null;
+      expect(want).not.toBeNull();
+      expect(plan(r).ghost).toEqual(want);
+    }
+  });
+
+  it('11 Nov: each mark points at what it says: every gap filled by a balloon dropping into it in its colour, every stack three of a colour under the square its fourth comes to', () => {
+    for (const r of Object.values(ROUTINES)) {
+      const P = plan(r), ghost = P.ghost.map(([row, c]) => key([row, c]));
+      for (const gap of P.gaps) expect(P.drops.find((d) => key(d.to) === key(gap.at))?.colour, `gap ${gap.at}`).toBe(gap.colour);
+      for (const l of P.lines) {
+        expect(l.stack).toHaveLength(3);
+        expect(l.four).toHaveLength(1);
+        const col = l.four[0][1], rows = l.stack.map(([row]) => row).sort((x, y) => x - y);
+        expect(l.stack.every(([, c]) => c === col)).toBe(true);
+        expect(rows).toEqual([rows[0], rows[0] + 1, rows[0] + 2]);
+        expect(l.four[0][0]).toBe(rows[0] - 1);
+        // (its fourth is yours, or a balloon dropping onto it)
+        const four = key(l.four[0]);
+        expect(ghost.includes(four) || P.drops.some((d) => key(d.to) === four)).toBe(true);
+      }
+      // (and every drop goes into a gap or onto a stack: nothing just falls about)
+      for (const d of P.drops) expect([...P.gaps.map((x) => key(x.at)), ...P.lines.map((l) => key(l.four[0]))]).toContain(key(d.to));
+      // (what pops after what: one to the end of the chain)
+      expect(P.pops.map((p) => p.n)).toEqual(Array.from({ length: perform(r).steps }, (_, i) => i + 1));
+    }
+  });
+
+  it('11 Nov, "words like trigger are shown before they\'re named": the gap\'s marked once it\'s the only square left, a stack from its first balloon, its fourth once there are three', () => {
+    const at = (n: number) => marks(ROUTINES.double, n);
+    expect(at(0)).toEqual([]);
+    expect(at(2).filter((m) => m.kind === 'gap')).toEqual([]);
+    expect(at(3)).toEqual(expect.arrayContaining([{ kind: 'gap', at: [14, 2], colour: 1 }, { kind: 'stack', cells: expect.any(Array), colour: 0, of: 1 }]));
+    expect(at(3).some((m) => m.kind === 'four')).toBe(false);
+    expect(at(4)).toEqual(expect.arrayContaining([{ kind: 'four', at: [12, 3], colour: 0 }, { kind: 'stack', cells: expect.any(Array), colour: 0, of: 3 }]));
+    // (the Bingo's parked pair: its drops marked as soon as it's down)
+    const b = ROUTINES.bingo, last = b.twists.length - 1, drops = (n: number) => marks(b, n).filter((m) => m.kind === 'drop');
+    expect(drops(last - 1)).toEqual([]);
+    expect(drops(last).map((m) => (m as { from: readonly number[] }).from)).toEqual(expect.arrayContaining([[9, 2], [9, 3]]));
+  });
+
+  it('11 Nov: on your go, your pair\'s ghost, every drop and what pops in what order; never before', () => {
+    for (const r of Object.values(ROUTINES)) {
+      const last = r.twists.length - 1;
+      for (let n = 0; n < last; n++) expect(marks(r, n).some((m) => m.kind === 'ghost' || m.kind === 'pop')).toBe(false);
+      const M = marks(r, last);
+      expect(M.filter((m) => m.kind === 'ghost')).toEqual([{ kind: 'ghost', cells: plan(r).ghost }]);
+      expect(M.filter((m) => m.kind === 'pop').map((m) => (m as { n: number }).n)).toEqual(plan(r).pops.map((p) => p.n));
+      expect(M.filter((m) => m.kind === 'drop')).toHaveLength(plan(r).drops.length);
+    }
+  });
+
+  it('a mark, once shown, stays while she builds (nothing she does takes the plan away)', () => {
+    for (const r of Object.values(ROUTINES)) for (let n = 1; n < r.twists.length; n++) {
+      const now = marks(r, n).filter((m) => m.kind !== 'stack').map(key);
+      for (const m of marks(r, n - 1).filter((x: Mark) => x.kind !== 'stack')) expect(now).toContain(key(m));
+    }
+  });
+});
+
+describe('11 Nov, "it\'s an actual instruction to you": what\'s for you to do or watch is a note of its own, up till the next', () => {
+  const acts: Act[] = [{
+    routine: ROUTINES.double, you: true,
+    says: { start: 'hi', twists: ['a', 'b', 'c', 'd'], yours: 'go!', again: ['again'], brief: 'watch it fill', watch: { 2: 'the gap', 3: 'three blues' }, task: 'yellow over the gap', chain: 'watch it pop' },
+  }];
+
+  it('the brief as it starts, each watch once its pair\'s down, the task on your go (a miss leaves it up), and once it\'s set off what to watch pop', () => {
+    const show = new BalloonShow(acts, secs), seen: string[] = [];
+    for (let i = 0; i < 5000 && !show.done; i++) {
+      for (const e of show.tick(0.05)) {
+        if (e.kind === 'note') seen.push(`${e.yours ? 'yours ' : ''}${e.text}`);
+        if (e.kind === 'land') seen.push(`land ${e.twist}`);
+      }
+      if (show.yours) {
+        expect(show.played(0)!.events.filter((e) => e.kind === 'note')).toEqual([]);
+        for (const e of show.played(2)!.events) if (e.kind === 'note') seen.push(e.text);
+      }
+    }
+    expect(seen).toEqual(['watch it fill', 'land 0', 'land 1', 'land 2', 'the gap', 'land 3', 'three blues', 'yours yellow over the gap', 'watch it pop']);
+  });
+
+  it('11 Nov, "her instructions disappear very quickly": each note\'s up long enough to read before the next replaces it', () => {
+    const show = new BalloonShow(acts, secs), at: [number, string][] = [];
+    for (let i = 0; i < 5000 && !show.yours; i++) for (const e of show.tick(0.05)) if (e.kind === 'note') at.push([show.t, e.text]);
+    expect(at.map(([, x]) => x)).toEqual(['watch it fill', 'the gap', 'three blues', 'yellow over the gap']);
+    for (let k = 1; k < at.length; k++) expect(at[k][0] - at[k - 1][0], at[k - 1][1]).toBeGreaterThanOrEqual(secs(at[k - 1][1]) - 0.06);
+  });
+});
+
+describe('11 Nov, "surely it should start at the top ... give you a bit more of a chance": your go', () => {
+  it('your pair comes in at the top of the middle columns, waits a moment, then falls slower than at sea, with time to steer it to the ghost', () => {
+    expect(SHOW.YOU_FALL).toBeGreaterThan(FALL.SECS);
+    expect(SHOW.YOU_WAIT).toBeGreaterThanOrEqual(1.5);
+    for (const r of Object.values(ROUTINES)) {
+      const n = r.twists.length - 1, t = r.twists[n], g = setup(r, n), way = route(g, t)!;
+      const P = new SailPair(g);
+      expect([P.row, P.col]).toEqual([0, SPAWN[0]]);
+      const moves = way.filter((s) => s !== 'down').length, secs = SHOW.YOU_WAIT + t.row * SHOW.YOU_FALL;
+      expect(secs).toBeGreaterThanOrEqual(6);
+      expect(secs / Math.max(1, moves)).toBeGreaterThanOrEqual(1.5);
+    }
   });
 });

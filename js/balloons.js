@@ -178,12 +178,86 @@ export function perform(routine) {
     });
     return { routes, steps, name, early, game: g };
 }
+/** Where every piece is, by id, on a grid. */
+function where(grid) {
+    const m = new Map();
+    grid.forEach((line, r) => line.forEach((x, c) => { if (x)
+        m.set(x.id, { at: [r, c], c: x.c }); }));
+    return m;
+}
+const same = (a, b) => a[0] === b[0] && a[1] === b[1];
+/** The routine's plan (see Plan), as Sailing's rules play its last pair. */
+export function plan(routine) {
+    const n = routine.twists.length - 1, t = routine.twists[n], g = setup(routine, n);
+    const before = g.snap(), ghost = g.cells(t.row, t.col, t.turn);
+    const res = g.drop(t.col, t.turn, t.row), st = res.stages;
+    // (the gaps in the platforms that pop: not the one she's not started on)
+    const went = new Set(st.flatMap((s) => s.went ?? []).map((p) => p.id));
+    const gaps = st[0].platforms.filter((p) => went.has(p.id)).flatMap((p) => p.targets.filter((q) => !before[q.r][q.c]).map((q) => ({ at: [q.r, q.c], colour: q.colour })));
+    const landed = where(st[0].grid), mine = new Set([...landed.keys()].filter((id) => !before.flat().some((x) => x?.id === id)));
+    const lines = [], drops = [], pops = [];
+    for (let k = 1; k < st.length; k++) {
+        // (what this step pops is where the step before left it, once it's all fallen: as the board shows it)
+        const sim = new Sailing(() => 0, false);
+        sim.lay(st[k - 1].grid.map((line) => line.slice()), st[k - 1].platforms.slice());
+        sim.fall();
+        const at = where(sim.grid), cells = st[k].cleared.map((id) => at.get(id).at);
+        pops.push({ n: k, kind: st[k].kind, cells });
+        for (const id of st[k].cleared) {
+            const from = landed.get(id).at, to = at.get(id).at;
+            if (!same(from, to))
+                drops.push({ from, to, colour: at.get(id).c, yours: mine.has(id) });
+        }
+        if (st[k].kind === 'line') {
+            const still = (id) => !mine.has(id) && same(landed.get(id).at, at.get(id).at);
+            lines.push({ n: k, colour: at.get(st[k].cleared[0]).c, stack: st[k].cleared.filter(still).map((id) => at.get(id).at), four: st[k].cleared.filter((id) => !still(id)).map((id) => at.get(id).at) });
+        }
+    }
+    return { gaps, lines, drops, pops, ghost };
+}
+/** What's marked on the board once `n` of the routine's twists are down, each mark as soon as there's
+    something on the board for it to point at, so it's seen before it's named (the user: "words like
+    'trigger' are shown before they're named"): a platform's gap once it's the only target left; a
+    stack as its first balloon's down, and the square for the fourth once there are three; a balloon's
+    drop once it's on the board. On your go (n the last), your pair's ghost too, its drops, and what
+    pops in what order. */
+export function marks(routine, n) {
+    const P = plan(routine), last = routine.twists.length - 1, g = setup(routine, Math.min(n, last)), out = [];
+    const has = ([r, c], colour) => g.grid[r][c]?.c === colour;
+    for (const gap of P.gaps) {
+        const p = g.platforms.find((q) => q.targets.some((t) => same([t.r, t.c], gap.at)));
+        if (p.targets.every((t) => same([t.r, t.c], gap.at) || has([t.r, t.c], t.colour)))
+            out.push({ kind: 'gap', ...gap });
+    }
+    for (const l of P.lines) {
+        const of = l.stack.filter((s) => has(s, l.colour)).length;
+        if (of)
+            out.push({ kind: 'stack', cells: l.stack, colour: l.colour, of });
+        if (of === l.stack.length)
+            for (const at of l.four)
+                out.push({ kind: 'four', at, colour: l.colour });
+    }
+    for (const d of P.drops)
+        if (n >= last ? true : !d.yours && has(d.from, d.colour))
+            out.push({ kind: 'drop', from: d.from, to: d.to, colour: d.colour });
+    if (n >= last) {
+        out.push({ kind: 'ghost', cells: P.ghost });
+        // (each pop's number by the top left of what pops)
+        for (const p of P.pops)
+            out.push({ kind: 'pop', n: p.n, at: p.cells.reduce((a, b) => (b[0] < a[0] || (b[0] === a[0] && b[1] < a[1]) ? b : a)) });
+    }
+    return out;
+}
 /** Seconds: a line to start; a twist in hand (the first balloon blown up and tied off, squeak; the
     second, squeak; pegged together and tossed onto the board: SQUEAKS and TOSS are its fractions); a move
     of the pair steered down the board; your turn's line (then it waits for you); the chain once it's
     going (the board plays it: a show waits while it does); after it's popped. A beat with a line is at
-    least as long as its line takes to read. HELP: misses before she shows you how after all. */
-export const SHOW = { START: 2.6, TWIST: 3.4, SQUEAKS: [0.38, 0.76], TOSS: 0.86, STEP: 0.055, LAND: 0.35, YOURS: 2.4, POP: 0.6, AFTER: 3, HELP: 3 };
+    least as long as its line takes to read. HELP: misses before she shows you how after all.
+    Your go comes in at the top of the board as in the real game, and with time to steer (the user, 11
+    Nov: "surely it should start at the top ... give you a bit more of a chance"): it waits there
+    YOU_WAIT while she hands it over, then falls a row every YOU_FALL (slower than at sea's
+    src/sail-pair.ts FALL.SECS; Space still speeds it). */
+export const SHOW = { START: 2.6, TWIST: 3.4, SQUEAKS: [0.38, 0.76], TOSS: 0.86, STEP: 0.055, LAND: 0.35, YOURS: 2.4, POP: 0.6, AFTER: 3, HELP: 3, YOU_WAIT: 2, YOU_FALL: 0.9 };
 /** A show's beats, end to end; `secs(text)` how long a line takes to read. */
 export function beats(acts, secs) {
     const out = [];
@@ -198,7 +272,9 @@ export function beats(acts, secs) {
         add(k, 'start', 0, S.start ? SHOW.START : 0.4, S.start);
         for (let i = 0; i < hers; i++) {
             add(k, 'twist', i, SHOW.TWIST, S.twists?.[i]);
-            add(k, 'fall', i, P.routes[i].length * SHOW.STEP + SHOW.LAND);
+            // (and once it's down, long enough to read a note on what it's for: before the next replaces it)
+            const w = S.watch?.[i];
+            add(k, 'fall', i, P.routes[i].length * SHOW.STEP + SHOW.LAND + (w ? secs(w) : 0));
         }
         if (a.you)
             add(k, 'yours', n - 1, SHOW.YOURS, S.yours);
@@ -255,10 +331,12 @@ export class BalloonShow {
                 this.sent.add(k);
                 out.push(e);
             };
+            const S = this.acts[b.act].says ?? {};
             if (n === 0 || b.act !== this.beats[n - 1].act) {
                 if (this.t >= b.t0 && !this.sent.has(`${n}:act`))
                     this.misses = 0;
                 once('act', 0, { kind: 'act', act: b.act });
+                once('brief', 0, { kind: 'note', text: S.brief ?? '', yours: false });
             }
             if (b.line)
                 once('line', 0, { kind: 'line', text: b.line, secs: b.secs });
@@ -270,10 +348,16 @@ export class BalloonShow {
             }
             if (b.kind === 'fall') {
                 once('fall', 0, { kind: 'fall', act: b.act, twist: b.i, route: this.shows[b.act].routes[b.i] });
-                once('land', b.secs - SHOW.LAND * 0.5, { kind: 'land', act: b.act, twist: b.i });
+                const down = this.shows[b.act].routes[b.i].length * SHOW.STEP + SHOW.LAND * 0.5, w = S.watch?.[b.i];
+                once('land', down, { kind: 'land', act: b.act, twist: b.i });
+                if (w)
+                    once('watch', down, { kind: 'note', text: w, yours: false });
             }
-            if (b.kind === 'yours')
+            if (b.kind === 'yours') {
                 once('yours', 0, { kind: 'yours', act: b.act, twist: b.i });
+                if (S.task)
+                    once('task', 0, { kind: 'note', text: S.task, yours: true });
+            }
         });
         if (this.done) {
             this.over = true;
@@ -288,15 +372,18 @@ export class BalloonShow {
     played(steps) {
         if (!this.yours)
             return null;
-        const n = this.index(), b = this.beats[n], want = this.shows[b.act].steps;
+        const n = this.index(), b = this.beats[n], want = this.shows[b.act].steps, S = this.acts[b.act].says ?? {};
+        // (once it's set off, what to watch pop: the note on your go comes down)
+        const chain = { kind: 'note', text: S.chain ?? '', yours: false };
         if (steps >= want) {
             this.through.add(n);
-            return { result: 'hit', events: [] };
+            return { result: 'hit', events: [chain] };
         }
         this.misses++;
-        const S = this.acts[b.act].says ?? {}, again = S.again ?? [], events = [{ kind: 'again', act: b.act, misses: this.misses }];
+        const again = S.again ?? [], events = [{ kind: 'again', act: b.act, misses: this.misses }];
         if (this.misses >= SHOW.HELP) {
             this.through.add(n);
+            events.push(chain);
             if (S.help)
                 events.push({ kind: 'line', text: S.help, secs: SHOW.YOURS * 1.5 });
             events.push({ kind: 'fall', act: b.act, twist: b.i, route: this.shows[b.act].routes[b.i] });

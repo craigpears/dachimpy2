@@ -50,7 +50,7 @@
     .sailhud .gun .pip { width: 9px; height: 9px; border-radius: 50%; border: 1px solid #6b4e32; background: #3b2a1b; }
     .sailhud .gun .pip.on { background: var(--gold); border-color: #fff3c4; }
     .sailhud .gun kbd { font: 700 13px 'Alegreya Sans'; color: var(--ink); background: #3b2a1b; border: 1px solid #6b4e32; border-radius: 4px; padding: 0 5px; }
-    /* The wind (an arrow the way it blows, and how strong) and the oars (a button: O). */
+    /* The wind (an arrow the way it blows, and how strong) and the puzzles' buttons, 1 2 3: Sailing, her guns, the oars. */
     .sailhud .wind { height: 34px; padding: 0 10px 0 6px; border-radius: 6px; border: 1px solid #6b4e32; background: #2a1c11; display: flex; gap: 6px; align-items: center; font: 700 14px 'Alegreya Sans'; color: #f3ecdc; white-space: nowrap; }
     .sailhud .wind b { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #3b2a1b; font: 700 18px/1 'Alegreya Sans'; color: #9fd4ec; }
     .sailhud .wind.s2 { border-color: #9fd4ec; }
@@ -154,6 +154,9 @@
     /* The den's buttons in a row under the stats, all in view so they're easy to find (the user tried
        them folded into a menu and wanted them back where they could see them). */
     button.mini { font-size: 14px; padding: 6px 12px; border-radius: 6px; margin: 6px 6px 0 0; }
+    /* What's new: the changelog (changelog.html) in a new tab, a dot on it while there's something you haven't seen. */
+    a.mini { display: inline-block; font: 700 14px 'Alegreya Sans'; color: #2a1d13; background: var(--gold); border-radius: 6px; padding: 6px 12px; margin: 6px 6px 0 0; text-decoration: none; position: relative; }
+    a.mini.new::after { content: ''; position: absolute; top: -3px; right: -3px; width: 10px; height: 10px; border-radius: 50%; background: var(--bad); border: 2px solid #2a1d13; }
     button.link { background: none; color: var(--dim); text-decoration: underline; padding: 6px; }
     .crew-line { margin-top: 6px; font-size: 15px; color: var(--dim); max-width: 360px; }
     .crew-line b { color: var(--gold); letter-spacing: 1px; }
@@ -408,7 +411,7 @@
     <h1>The Pirate Den</h1>
     <div class="stats"><span>Chest <b id="s-gold">50</b></span><span>Wave <b id="s-wave">0</b></span><span>★ <b id="s-master">0</b></span><span>Boarded <b id="s-board">0</b></span><span title="Vikings who gave up at your wall">Turned away <b id="s-turned">0</b></span></div>
     <div class="crew-line" id="crew-line"></div>
-    <button class="mini" id="look-btn">Your pirate</button><button class="mini" id="den-btn" title="Your flag, the landscape, the gun tower and your shack">Your den</button><button class="mini" id="deco-btn" title="Put up flags, banners, lanterns and barrels round the den (B)">Decorate</button><button class="mini" id="pause-btn" title="Pause (P)">Pause</button><button class="mini" id="crew-btn">Play with a crew</button><button class="mini" id="cheat-btn" title="Skip to a stage, or skip the wave (`)">Cheats</button>
+    <button class="mini" id="look-btn">Your pirate</button><button class="mini" id="den-btn" title="Your flag, the landscape, the gun tower and your shack">Your den</button><button class="mini" id="deco-btn" title="Put up flags, banners, lanterns and barrels round the den (B)">Decorate</button><button class="mini" id="pause-btn" title="Pause (P)">Pause</button><button class="mini" id="crew-btn">Play with a crew</button><button class="mini" id="cheat-btn" title="Skip to a stage, or skip the wave (`)">Cheats</button><a class="mini" id="news-btn" href="changelog.html" target="_blank" rel="noopener" title="The bigger things added to the den, newest first">What's new</a>
   </div>
   <div class="banner calm" id="banner"></div>
   <div class="intro" id="intro">Raiders are coming! Grab a piece from a crate and mend the wall.<br>Fill a hole exactly for a strong <b>Masterpiece</b>.</div>
@@ -476,6 +479,19 @@
   </div></div>
   <div class="wed-fade" id="wed-fade"></div>
 
+  <script>
+    // What's new: a dot while the changelog's newest date is later than the one you last saw there.
+    (() => {
+      const b = document.getElementById('news-btn');
+      let seen = '';
+      try { seen = localStorage.getItem('den-news-seen') || ''; } catch { /* (no storage: no dot) */ return; }
+      b.addEventListener('click', () => b.classList.remove('new'));
+      fetch('changelog.html').then((r) => (r.ok ? r.text() : '')).then((t) => {
+        const newest = (t.match(/<time datetime="(\d{4}-\d\d-\d\d)"/) || [])[1];
+        if (newest && newest > seen) b.classList.add('new');
+      }).catch(() => {});
+    })();
+  </script>
   <script src="js/engine.js"></script>
   <script src="js/render.js"></script>
   <script type="importmap">
@@ -488,7 +504,7 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.BYVMMQH2.js');
+    import(local ? './js/den.js' : './js/den.BW225RHE.js');
   </script>
 </body>
 </html>

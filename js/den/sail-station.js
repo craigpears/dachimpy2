@@ -1,4 +1,4 @@
-// The Sailing board at sea (R: Sailing, never "the rigging", 11 Nov): played whenever you like, and what its chains do to
+// The Sailing board at sea (1: Sailing, never "the rigging", 11 Nov): played whenever you like, and what its chains do to
 // her, each drop's run a gust carrying her straight ahead in one go. (The rules: src/sailing.ts, the
 // puzzle; src/sail-pair.ts, its pair as it falls; src/den-sailing.ts, a run given to her. The look:
 // js/den/sail-board.js. js/den/sailing.js wires it in with a few hooks, as js/den/rowing.js does the
@@ -16,9 +16,11 @@ import { sailBoardMake, sailBoardLayout, sailBoardLay, sailBoardDrop, sailBoardB
 /* TODO.md, "The Sailing puzzle, for Kikkit's quest" (10 Nov): "You should be able to jump into the
    sailing puzzle whenever you want to, and that gives you, like the doubles ... it allows you to
    basically go really, really fast, and like in one go, like a trade winds, kind of, just jump
-   multiple tiles." Like Carpentry for her deck, Bilge at the locks and O for the oars: R opens the
-   board anywhere at sea, R or Esc shuts it, and while it's open its keys take over (A D or the
-   arrows move the pair, W or ↑ and Q E turn it, S ↓ or Space drop it). Each drop's chain is a run
+   multiple tiles." Like Carpentry for her deck, Bilge at the locks and 3 for the oars: 1 opens the
+   board anywhere at sea (the puzzles in one bank, 11 Nov: 1 Sailing, 2 Gunnery, 3 the oars), 1 or Esc
+   shuts it, and while it's open its keys take over, the real game's (11 Nov): ← → (A D) move the
+   pair, ↑ (W, E) turns it clockwise and ↓ (S, Q) back, Space speeds its fall, a tap a burst and held
+   for as long as it's held (src/sail-pair.ts: rush, ease); no key drops it. Each drop's chain is a run
    (runFor: a plain clear a square, a Double two ... a Vegas seven), given to her once its pops have
    played out: a gust straight ahead, the way she's heading, after the move she's on. She keeps
    sailing for the pin meanwhile, and the board's put away while something else has her (holed, at a
@@ -47,6 +49,9 @@ export function stationBoard(easy) {
 function pad(act, col) {
   if (!station.on) return;
   if (act === 'close') return stationToggle();
+  // (the pad's Faster, held as Space is)
+  if (act === 'slow') { station.padFast = false; station.pair?.ease(); return; }
+  if (act === 'fast') station.padFast = true;
   play(act, col);
 }
 function show() {
@@ -66,7 +71,7 @@ function hide() {
   if (station.B) station.B.el.style.display = 'none';
 }
 
-/** R at sea: the board out, or put away. `blocked`: something else has her just now. */
+/** 1 at sea: the board out, or put away. `blocked`: something else has her just now. */
 export function stationToggle(blocked = false) {
   if (station.want) { station.want = false; hide(); return; }
   if (blocked) { toast('Not just now: she\'s busy', true); return; }
@@ -89,7 +94,7 @@ function play(act, col) {
   else if (act === 'right') P.slide(1);
   else if (act === 'turnR') P.turnBy(1);
   else if (act === 'turnL') P.turnBy(-1);
-  else if (act === 'drop') landed(P.slam());
+  else if (act === 'fast') P.rush();
   else if (act === 'col') { const d = col < P.col ? -1 : 1; while (P.col !== col && P.slide(d)); }
 }
 function landed(res) {
@@ -99,14 +104,17 @@ function landed(res) {
   station.run = res;
 }
 
-/** The board's keys, while it's open: true if it took the key. G and O put it away and go on to
-    her guns or oars. */
+/** The board's keys, while it's open (Sailing's own, as the real game's: YPPedia's Sailing, Controls):
+    true if it took the key. 2 and 3 put it away and go on to her guns or oars. Space speeds the pair
+    while it's held (in `keys` till its keyup: stationTick lets it go); its key repeat never gets here. */
 export function stationKey(key) {
   if (!station.on) return false;
-  if (key === 'r' || key === 'escape') { stationToggle(); return true; }
-  if (key === 'g' || key === 'o') { stationToggle(); return false; }
-  const act = { a: 'left', arrowleft: 'left', d: 'right', arrowright: 'right', w: 'turnR', arrowup: 'turnR', e: 'turnR', q: 'turnL', s: 'drop', arrowdown: 'drop', ' ': 'drop', enter: 'drop' }[key];
+  if (key === '1' || key === 'escape') { stationToggle(); return true; }
+  if (key === '2' || key === '3') { stationToggle(); return false; }
+  if (key === 'enter') return true;   // (nothing: it used to drop the pair)
+  const act = { a: 'left', arrowleft: 'left', d: 'right', arrowright: 'right', w: 'turnR', arrowup: 'turnR', e: 'turnR', s: 'turnL', arrowdown: 'turnL', q: 'turnL', ' ': 'fast' }[key];
   if (!act) return false;
+  if (act === 'fast') keys.add(' ');
   play(act);
   return true;
 }
@@ -142,12 +150,13 @@ export function stationTick(dt, blocked = false) {
     }
   }
   const busy = sailBoardBusy(B) || !!station.run;
+  if (!keys.has(' ') && !station.padFast) station.pair.ease();   // (Space let go)
   if (!busy) { const res = station.pair.tick(dt); if (res) landed(res); }
   sailBoardTick(B, dt, busy ? null : station.pair, station.sparkle);
 }
 
 export function stationPrompt() {
-  return 'Sailing · A D or ← → move · W Q E turn · S or Space drop · a chain carries her ahead · R or Esc: back to the helm';
+  return 'Sailing · ← → move · ↑ ↓ turn · Space: faster · a chain carries her ahead · 1 or Esc: back to the helm';
 }
 
 /* The camera while the board's open: the sea view as ever, slid so she sits in the part of the

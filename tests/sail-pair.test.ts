@@ -26,7 +26,21 @@ describe('the falling pair', () => {
     expect(p.turnBy(1)).toBe(true);
     expect(p.cells()).toEqual([[0, W - 2, 0], [1, W - 2, 1]]);
     expect(p.slide(1)).toBe(true);   // (upright, it fits in the last column)
-    expect(p.turnBy(1)).toBe(false);   // (turned 2 it'd stick out past the wall: no kick)
+  });
+  it("turned against the wall, it pushes off it (11 Nov: \"it doesn't turn when it's against the wall ... it should kind of push away from the wall\")", () => {
+    const p = new SailPair(game());
+    for (let i = 0; i < 9; i++) p.slide(1);
+    p.turnBy(1); p.slide(1);   // (upright in the last column)
+    expect(p.col).toBe(W - 1);
+    expect(p.turnBy(1)).toBe(true);   // (turned 2 it'd stick out past the wall: it steps a column in)
+    expect(p.col).toBe(W - 2);
+    expect(p.cells().every(([, c]) => c >= 0 && c < W)).toBe(true);
+    const q = new SailPair(game());
+    for (let i = 0; i < 9; i++) q.slide(-1);
+    q.turnBy(-1);   // (upright against the left wall, its second half above or below)
+    for (let i = 0; i < 4; i++) q.turnBy(-1);
+    expect(q.cells().every(([, c]) => c >= 0 && c < W)).toBe(true);
+    expect(q.col).toBeLessThanOrEqual(1);
   });
   it('falls a row every FALL.SECS, and lands where it can\'t sink', () => {
     const s = game(), p = new SailPair(s);
@@ -72,6 +86,63 @@ describe('the falling pair', () => {
   it('the shadow shows where a hard drop would land', () => {
     const p = new SailPair(game([0, 1], [], [[H - 1, SPAWN[0], 2]]));
     expect(p.rest()).toBe(H - 2);
+    expect(p.row).toBe(0);
+  });
+});
+
+/* TODO.md, "Sailing's keys as the real game's" (11 Nov): "the space usually kind of speeds up the drop.
+   It doesn't drop it entirely. So if you're like halfway down the screen and you just want it to get 2/3
+   of the way down or 3/4, you normally tap space just so you zoom kind of near the bottom but not at the
+   bottom." */
+describe("Space speeds the drop, it doesn't drop it entirely (the user, 11 Nov 2026)", () => {
+  /** A pair fallen `rows` rows on an empty board. */
+  function fallen(rows: number) {
+    const s = game(), p = new SailPair(s);
+    while (p.row < rows) p.tick(FALL.SECS);
+    return { s, p };
+  }
+  it('a tap halfway down zooms it near the bottom, but not to it', () => {
+    const { p } = fallen(H / 2);
+    p.rush();
+    expect(p.tick(0.08)).toBeNull();
+    p.ease();   // (a quick tap: let go)
+    expect(p.tick(FALL.BURST)).toBeNull();
+    expect(p.row).toBeGreaterThanOrEqual(H / 2 + 3);
+    expect(p.row).toBeLessThan(H - 1);   // (not at the bottom: still falling)
+    // And then at its own pace again.
+    const r = p.row;
+    p.tick(FALL.SECS * 0.9);
+    expect(p.row).toBeLessThanOrEqual(r + 1);   // (at most the row it was partway to)
+  });
+  it("held, it keeps falling fast till it's let go", () => {
+    const { p } = fallen(0);
+    p.rush();
+    for (let i = 0; i < 15; i++) p.tick(1 / 60);   // (a quarter of a second, held)
+    expect(p.row).toBeGreaterThanOrEqual(5);
+    const r = p.row;
+    p.ease();
+    p.tick(FALL.SECS * 0.9);
+    expect(p.row).toBeLessThanOrEqual(r + 1);   // (at most the row it was partway to)
+  });
+  it('it stays steerable as it falls fast, and lands where it was steered', () => {
+    const { s, p } = fallen(2);
+    p.rush();
+    p.tick(0.1);
+    expect(p.slide(1)).toBe(true);
+    expect(p.turnBy(1)).toBe(true);
+    let res = null;
+    for (let i = 0; i < 200 && !res; i++) res = p.tick(1 / 60);
+    expect(res?.dropped).toBe(true);
+    expect(s.grid[H - 2][SPAWN[0] + 1]?.c).toBe(0);
+    expect(s.grid[H - 1][SPAWN[0] + 1]?.c).toBe(1);
+  });
+  it("a Space held on from the last pair doesn't rush the next one in", () => {
+    const { p } = fallen(H - 2);
+    p.rush();
+    let res = null;
+    for (let i = 0; i < 60 && !res; i++) res = p.tick(1 / 60);
+    expect(res?.dropped).toBe(true);
+    p.tick(FALL.SECS * 0.9);
     expect(p.row).toBe(0);
   });
 });

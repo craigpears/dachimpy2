@@ -93,7 +93,6 @@ the site (`.assetsignore` skips `*.md`).
   damage or bilge meters are built for her. Still open: whether a hit can sink the sloop at the
   checkpoint (and you row home), and how.
 
-
 - **The Sailing puzzle, for Kikkit's quest (10 Nov):** Kikkit's penguin quest is next up once the
   work in hand is done ("that is next up ... I guess you can start some of that now because that
   requires the sailing puzzle"). First the Sailing puzzle itself, Puzzle Pirates' own rules
@@ -113,12 +112,6 @@ the site (`.assetsignore` skips `*.md`).
 - **Sailing's sparkle, two small things (11 Nov, seen when it was built):** from behind her, the
   camera sees her sails nearly edge-on, so a Vegas's billow barely shows; and on a phone the den's
   big toast covers the Sailing board for a moment after a chain.
-
-- **Something to show people, tonight's goal (10 Nov):** once we reach a stopping point, likely after
-  Kikkit's sailing quest: "some kind of advertising material ... the fully built den, the imperial
-  checkpoint, the sailing around, the rowing puzzle ... just marketing material to show people what
-  I've been working on, what it's got in there so far." Screenshots (and short clips, maybe) of each
-  part, taken from its starting-point link, with a line on each; pirate names only.
 
 - **Start something where you're looking, not at the foot of the screen (10 Nov):** "Still got to
   fix that carpentry hauling up thing. Like, it should be in the middle of the screen where I'm
@@ -166,7 +159,7 @@ the site (`.assetsignore` skips `*.md`).
   enough there to get started, and then I think you can naturally flesh out the rest of the
   mechanics later." But "try and finish things ... we need to finish things really one at a time"
   (RULES.md, "Finish one thing at a time"): each starts only when the one before is played and done.
-  - **Daquan's flotilla, to start (started 11 Nov: modelling Primates Rule first):** the cutscene (Dachimpy at the helm told to go sink a ship,
+  - **Daquan's flotilla, to start (started 11 Nov: Primates Rule modelled, curved, and moored at sea as still to come; below decks and the cutscene next):** the cutscene (Dachimpy at the helm told to go sink a ship,
     sinking their own; Daquan face-palming, then turning to you), and modelling a bigger ship,
     Primates Rule, the war frigate he lends you, to see how she looks beside the sloop
     (proportional by YPPedia's numbers). Daquan's portrait checked first; Primates Rule's gold,
@@ -285,68 +278,6 @@ the site (`.assetsignore` skips `*.md`).
   Since 9 Nov you can also lob a piece over the wall from the den floor at raiders hacking
   outside; not yet tried by the user. Watch for: the markers on raiders outside cluttering the
   view while you carry a piece.
-- **Tzz's lesson should show the plan, and give you a fair turn (11 Nov, Tzz again):** "once she hands
-  over to you, it's not very clear ... surely it should start at the top ... give you a bit more of a
-  chance." And "her speech explains things. It doesn't really visibly show you the plan very well. Like,
-  we're starting a stack. Great. What on earth does that even mean? What is the impact of that? It's not
-  really explaining it. It doesn't really feel like a complete tutorial." So: your pair starts at the top
-  as in the real game, with time to steer; and the plan shown on the board, not only said (the trigger gap
-  marked, where the line of four will be, the partner's drop into the gap, what pops after what), each
-  line saying what it's for and what it'll set off. And plain words, not jargon: "she's using the right
-  terminology, like the trigger or what triggers what. But ... that doesn't mean anything to most. And
-  like, all I'm sat here is watching the animation, and all of a sudden a white and a yellow thing starts
-  dropping, and it's like, ah, what am I supposed to do?" So your turn is announced plainly (it's yours
-  now, the pair you've got, where it goes, shown as a ghost on the board, and the keys), and words like
-  "trigger" are shown before they're named. And (11 Nov, after the solid targets landed: "looking a lot
-  better, especially graphics, like the square things"): "her [important] instructions disappear very
-  quickly. Like ... when she's telling me blue over the yellow and top the stack, that should be a lot
-  clearer that it's just not her being a bit just chatting. It's an actual instruction to you, and it
-  should be more prominent and persistent." So your instructions stand apart from her chatter, and stay
-  up till you've done them.
-- **The puzzles' keys at sea, in one bank (11 Nov):** "The R does not make sense as a button for sailing
-  ... I definitely still associated R with sailing ... surely they should at least all be in the same bank
-  of keys for activating the puzzles." Now R Sailing, G Gunnery, O the oars (rowing), scattered among the
-  helm's W A S D and the guns' Q E. Settled: "I think 1, 2, 3 makes sense": 1 Sailing, 2 Gunnery, 3 the
-  oars, the order of their buttons on the sea's bar.
-- **Sailing's keys as the real game's (11 Nov):** "when I press down, is it going down? ... isn't that
-  rotate? space is supposed to be down". Now ↓ (and S) drops the pair at once. YPPedia's Sailing,
-  Controls: left and right move it; up and down turn it, clockwise and anticlockwise; Space makes it fall
-  faster (still steerable as it falls). Every Sailing board: at sea, Kikkit's, Tzz's your-turn. Space,
-  the user (11 Nov): "the space usually kind of speeds up the drop. It doesn't drop it entirely. So if
-  you're like halfway down the screen and you just want it to get 2/3 of the way down or 3/4, you
-  normally tap space just so you zoom kind of near the bottom but not at the bottom." So a tap of Space
-  is a burst of speed for a moment, not a drop to the bottom.
-- **Sailing by Tzz's island blew you through the whirlpools to Dignity; a visible reef (11 Nov):** with the
-  Sailing board open near Tzz's island, "somehow I have ended up over near Dignity ... I don't know how I
-  managed to just make a mishap near the Whirlpools. Something got clipped. Maybe they need to be a little
-  bit further away from each other." And "there definitely needs to be a much more visible line of rocks.
-  Like, this is supposed to be a secret way round. It's literally right next to it." So Tzz's island
-  further from Kikkit's whirlpools, a plain line of rocks along the whole reef (its new length too), and a
-  chain's gust never carrying you into the whirlpools' way through by accident.
-- **Primates Rule: curves, her lower gun ports, and out at sea (11 Nov, first look):** "I'm liking the
-  frigate ... Oh, I absolutely love it." But "is it intentional with the style that it really is such a
-  square back? ... looking at the [sloop], that's got the same ... I'd like to see it maybe with a bit
-  more curves ... Maybe experiment with the curvature a bit." And "the gun holes at the bottom just seem
-  so off center on the bottom row ... they're like touching the [stripe's bottom] line ... the middle row
-  is fine." Confirmed: her ornamental pieces are for use anywhere. And "add that to the scene somewhere so
-  you can just, once you start getting out to sea, you just kind of see that out there and put [a mark]
-  on it. [To] make it clear, it's kind of a to-do item." So: a curvier stern (and the sloop's, if it
-  suits), the lower ports centred in their band, and her moored where you see her once out at sea,
-  marked plainly as still to come.
-- **A visual changelog, kept up as each bigger feature lands (11 Nov):** "I keep taking screenshots of all
-  the key moments in cutscenes and describing all the things I'm working on and changing ... I'd like a
-  change log maintaining, you know, not for the little bug fixes, but ... as each bigger feature's added,
-  and it should be more visual, like in this case, showing a picture of [Tzz] with her blowing a balloon,
-  [Gravee] in the portrait gallery, the gunning deck, [Dalnoth] coming as a Viking, the [Primates Rule],
-  kind of like just like a good teaser shot of like that [deck] with the [sloop] next to it." A page of
-  entries, newest first, each a teaser shot or two and a few lines, pirate names only; the start of
-  "Something to show people" (above). And in the game: "I don't see why the changelog as well can't be
-  visible from within the game. So if somebody's coming back to the den, they can see it." A "What's new"
-  button among the den's buttons, marked when there's something new since you last looked.
-- **Sailing's pair won't turn against the wall (11 Nov):** "it doesn't turn when it's against the wall.
-  If you rotate it and it's against the wall, it should kind of push away from the wall. Say if it's like
-  the two have rotated so they're on top of each other, ..." So a turn that would put a half into the wall
-  (or another piece) nudges the pair a column away instead, as the real game does.
 - **Penguin Island only by way of the whirlpools (11 Nov):** "Make sure you can't get to Penguin Island
   without going through the whirlpools ... the idea that, you know, you can get to the penguins by going
   behind it is obviously a bit weird. Also, there should be a way through, because it's a shortcut. The

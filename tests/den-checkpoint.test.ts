@@ -43,8 +43,10 @@ describe('the lay: the main shipping lane runs out to an imperial checkpoint (10
     // locks in one straight line, their mouth tucked away in the cliffs' face toward the den, and
     // the water by the junction where the canal was let go (a rock off it now) (10 Nov); then the
     // harbour's arms at the canal's mouth (LAY.HARBOUR, 10 Nov); then the clump off the Wedding
-    // Isle's jetty gone, its landing kept clear (11 Nov).
-    const was = ['0,8', '1,8', '10,8', '12,12', '12,4', '14,8', '2,8', '4,8', '5,10', '5,12', '5,13', '5,8', '5,9', '8,5',
+    // Isle's jetty gone, its landing kept clear (11 Nov); then Primates Rule at anchor, her near end
+    // on two of its squares, the rock by the lanes at 12,4 moved in to 13,2 to leave sea round her
+    // (11 Nov: LAY.PRIMATES).
+    const was = ['0,8', '1,8', '10,8', '12,12', '13,2', '14,5', '15,5', '14,8', '2,8', '4,8', '5,10', '5,12', '5,13', '5,8', '5,9', '8,5',
       '2,9', '2,10', '2,11', '2,12', '2,13', '4,9', '4,10', '4,11', '4,12', '4,13', '5,11', '7,12',
       '1,7', '1,6', '1,5', '0,7', '0,6', '5,7', '5,6', '5,5', '5,4', '6,7', '6,6'];
     const s = new Sea(9), old = [...s.rocks].filter((k) => { const [c, r] = k.split(',').map(Number); return c < 16 && r < 14; }).sort();

@@ -7,13 +7,23 @@
    same steps Sailing.moves() searches (a column either way, a turn either way about its first square,
    a row down when it can sink), so wherever it comes to rest is a place moves() has, and it's dropped
    there (Sailing.drop with its row). It comes in at the top of the middle columns (SPAWN), turned 0,
-   and falls a row every FALL.SECS by itself; a hard drop sends it straight down. */
+   and falls a row every FALL.SECS by itself. Space speeds it (rush, ease: TODO.md, "Sailing's keys as
+   the real game's", 11 Nov), never straight to the bottom: no key drops it. (slam() is for a pair
+   steered by a show, Tzz's own, not for a key.) */
 
-import { SPAWN, type Drop, type Sail, type Sailing } from './sailing.js';
+import { SPAWN, W, type Drop, type Sail, type Sailing } from './sailing.js';
 
 export const FALL = {
   /** Seconds a row as it falls by itself (YPPedia: pieces fall steadily, and can be sped up). */
   SECS: 0.6,
+  /** Seconds a row while Space speeds it (YPPedia's Sailing, Controls: "Space bar: Increase the pair's
+      falling speed"), still steerable as it goes. */
+  FAST: 0.04,
+  /** A tap of Space: this long falling FAST, a few rows (five), never to the bottom from up the board.
+      The user, 11 Nov: "the space usually kind of speeds up the drop. It doesn't drop it entirely ...
+      you normally tap space just so you zoom kind of near the bottom but not at the bottom." Held, it
+      keeps falling FAST till it's let go (ease). */
+  BURST: 0.2,
 };
 
 export type Turn = Drop['turn'];
@@ -22,13 +32,24 @@ export class SailPair {
   row = 0;
   col: number = SPAWN[0];
   turn: Turn = 0;
-  /** Seconds since it last fell a row. */
+  /** How far it's fallen toward the next row (a row at 1). */
   t = 0;
+  /** Space held: falling FAST. */
+  held = false;
+  /** Seconds of a tap's burst of speed left. */
+  burst = 0;
 
   constructor(readonly game: Sailing) {}
 
   /** Back at the top of the middle columns, the game's pair (its next, after a drop) coming in. */
-  reset(): void { this.row = 0; this.col = SPAWN[0]; this.turn = 0; this.t = 0; }
+  reset(): void { this.row = 0; this.col = SPAWN[0]; this.turn = 0; this.t = 0; this.held = false; this.burst = 0; }
+
+  /** Space pressed (not its key repeat): a burst of speed, FALL.BURST, and fast for as long as it's
+      held. A new pair needs a fresh press: one held on from the last doesn't rush it. */
+  rush(): void { this.held = true; this.burst = FALL.BURST; }
+
+  /** Space let go: what's left of the tap's burst plays out, then it falls at its own pace. */
+  ease(): void { this.held = false; }
 
   /** Its squares, [row, col, colour] each. */
   cells(): [number, number, number][] { return this.game.cells(this.row, this.col, this.turn) ?? []; }
@@ -40,12 +61,19 @@ export class SailPair {
     return true;
   }
 
-  /** A quarter turn clockwise (1) or back (-1), about its first square; no kick off a wall. */
+  /** A quarter turn clockwise (1) or back (-1), about its first square. Against a wall or a piece it
+      pushes off it, as the real game does (the user, 11 Nov: "it doesn't turn when it's against the
+      wall. If you rotate it and it's against the wall, it should kind of push away from the wall"): a
+      column away from the side it's nearer first, then the other, then a row up. */
   turnBy(dir: 1 | -1): boolean {
     const t = ((this.turn + (dir > 0 ? 1 : 3)) % 4) as Turn;
-    if (!this.game.open(this.row, this.col, t)) return false;
-    this.turn = t;
-    return true;
+    const away = this.col < W / 2 ? 1 : -1;
+    for (const [dr, dc] of [[0, 0], [0, away], [0, -away], [-1, 0]] as const) {
+      if (this.row + dr < 0 || !this.game.open(this.row + dr, this.col + dc, t)) continue;
+      this.row += dr; this.col += dc; this.turn = t;
+      return true;
+    }
+    return false;
   }
 
   private sinks(): boolean {
@@ -61,19 +89,21 @@ export class SailPair {
     return r;
   }
 
-  /** Time going by: it falls a row every FALL.SECS, and when it can't, it lands (what the drop
-      earned), else null. `secs`: seconds a row, if not FALL.SECS. */
+  /** Time going by: it falls a row every FALL.SECS (every FALL.FAST while Space speeds it), and when
+      it can't, it lands (what the drop earned), else null. `secs`: seconds a row, if not FALL.SECS. */
   tick(dt: number, secs = FALL.SECS): Sail | null {
-    this.t += dt;
-    while (this.t >= secs) {
-      this.t -= secs;
+    const fast = this.held ? dt : Math.min(dt, this.burst);
+    this.burst = Math.max(0, this.burst - dt);
+    this.t += fast / FALL.FAST + (dt - fast) / secs;
+    while (this.t >= 1) {
+      this.t -= 1;
       if (!this.sinks()) return this.land();
       this.row++;
     }
     return null;
   }
 
-  /** A hard drop: straight down, and it lands. */
+  /** Straight down, and it lands: a show's own pair (Tzz's), at the end of its route. No key does this. */
   slam(): Sail {
     while (this.sinks()) this.row++;
     return this.land();

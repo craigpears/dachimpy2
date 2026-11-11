@@ -12,7 +12,7 @@ import { patch } from './sea-puzzles.js';
 import { boardsMake, boardsLayout, boardsLay, boardsMove, boardsFlash, boardsJig, boardsBusy, boardsTick, boardsAt, dialHanded, dialTick } from './row-boards.js';
 
 /* RULES.md, "Rowing by mirror strokes" (the user, 10 Nov, after playing it on a page of its own:
-   "This is actually quite a good puzzle. I love it."). Run her oars out (O) and two Bilge boards
+   "This is actually quite a good puzzle. I love it."). Run her oars out (3) and two Bilge boards
    stand either side of the screen, port's on the left and starboard's on the right, the sea she's
    rowing through between them (the user: "I can't see where I'm rowing" when the one board lay
    along her deck). Every swap made on one is made in mirror on the other.

@@ -39,11 +39,16 @@ export const IN_GRAVEES_HOUSE = {
     says someone else might, never who or where (RULES.md, "Hidden gems, never hinted"). */
 export const AFTER_KIKKIT = 'Is there anyone out here who could explain that with fewer tangents?';
 
+/** Sailing up near Primates Rule at anchor, still to come (src/den-moored.ts; the user, 11 Nov: "make
+    it clear, it's kind of a to-do item"): at the foot of the screen. */
+export const BY_PRIMATES_RULE = 'Primates Rule, at anchor. She\'s not ready yet: coming soon!';
+
 export const CHARACTER: Character = {
   name: 'You',
   who: 'Your own pirate, dressed as you like from the wardrobe (or as any real pirate in it). You say little, '
     + 'and only at the den\'s short, cheesy moments: picking up the captain\'s map, and riding the crane '
-    + 'up the cliff and down again, your own wedding, and screaming at a vampire in Gravee\'s house.',
+    + 'up the cliff and down again, your own wedding, screaming at a vampire in Gravee\'s house, and sailing '
+    + 'by Primates Rule, not ready yet.',
   lines: [
     { when: 'Picking up the captain\'s map, at the end of Dalnoth\'s cutscene', says: [FOUND_MAP] },
     {
@@ -65,5 +70,6 @@ export const CHARACTER: Character = {
       each: { vow: 'Sweet and blissful: your vow, after your sweetheart\'s', ido: '"I do"' },
     },
     { when: 'Off Kikkit\'s island, once she\'s told her whole ramble the first time (wondering aloud)', says: [AFTER_KIKKIT] },
+    { when: 'Sailing up near Primates Rule at anchor, still to come (once a voyage)', says: [BY_PRIMATES_RULE] },
   ],
 };

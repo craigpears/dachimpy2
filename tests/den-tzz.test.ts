@@ -9,7 +9,7 @@ import { TZZ, TZZ_CAST, TZZ_MOOR, TZZ_SAYS, TZZ_STANDS, Visit, inTzzEarshot, les
 import { KIKKIT, KIKKIT_CAST, KIKKIT_SAYS, KIKKIT_STANDS, kikkitAt, onKikkitLanding, inEarshot, youWonder } from '../src/den-kikkit';
 import { LAY, SAIL, Sea, checkpointWorks } from '../src/den-sail';
 import { isleAt, onIsleLanding } from '../src/den-isle';
-import { BalloonShow, ROUTINES, perform } from '../src/balloons';
+import { BalloonShow, ROUTINES, marks, perform, plan } from '../src/balloons';
 import { Chatter, Voices } from '../src/chatter';
 import { readSecs } from '../src/den-dignity';
 import { CHART, NOTES, WHIRLPOOLS } from '../src/den-map';
@@ -50,9 +50,18 @@ describe('her island: a hop from Kikkit\'s, nearer the start, in plain sight', (
 
   it('is a hop from Kikkit\'s, on the den\'s side of it (nearer the start), short of the checkpoint', () => {
     const mid = [TZZ_STANDS.c, TZZ_STANDS.r], kik = [KIKKIT_STANDS.c, KIKKIT_STANDS.r];
-    expect(dist(mid, kik)).toBeLessThan(7);
+    // (a hop: a few squares' sail, moved a little further off on 11 Nov, below)
+    expect(dist(mid, kik)).toBeLessThan(9);
     const kikkitTop = Math.min(...LAY.KIKKIT.LAND.map(([, r]) => r));
     for (const [, r] of T.LAND) { expect(r).toBeLessThan(kikkitTop); expect(r).toBeLessThan(LAY.CHECKPOINT.ROW); }
+  });
+
+  it('11 Nov: well away from the whirlpools and the reef\'s gap ("maybe they need to be a little bit further away from each other")', () => {
+    // Sailing by her island with the Sailing board open, a chain blew her through the whirlpools to
+    // Dignity (tests/den-sailing.test.ts). Her island and the water round it are well off the way
+    // through and the reef, so sailing about her you're nowhere near the secret way round.
+    const s = new Sea(9), way = [...s.passage, ...s.reef].map((k) => k.split(',').map(Number));
+    for (const [c, r] of [...T.LAND, ...RING]) for (const [a, b] of way) expect(Math.max(Math.abs(a - c), Math.abs(b - r)), `${c},${r} to ${a},${b}`).toBeGreaterThanOrEqual(6);
   });
 
   it('11 Nov: her island has room of its own, open sea round it (it was "crammed into the middle")', () => {
@@ -193,9 +202,9 @@ describe('her lesson: a Double, then a Bingo, on a real board; she sets them up,
   });
   it('11 Nov: she says what each balloon\'s for, the real move: one short, a line, its partner dropping in', () => {
     expect(DOUBLE.start).toMatch(/one short/);
-    expect(DOUBLE.twists.join(' ')).toMatch(/colour its square wants/);
-    expect(BINGO.twists.join(' ')).toMatch(/One short, see\? That's your trigger/);
-    expect(BINGO.twists.join(' ')).toMatch(/keep that column clear/i);
+    expect(DOUBLE.twists.join(' ')).toMatch(/square of its own colour/);
+    expect(BINGO.twists.join(' ')).toMatch(/top gap's your trigger/);
+    expect(Object.values(BINGO.watch).join(' ')).toMatch(/Nothing goes over it, so a balloon can drop straight in/);
     // (no ledges or stairs any more: those were the bodged routines)
     expect(JSON.stringify([DOUBLE, BINGO, AFTER])).not.toMatch(/ledge|\bstairs?\b/i);
   });
@@ -213,6 +222,46 @@ describe('her lesson: a Double, then a Bingo, on a real board; she sets them up,
       expect(a.says?.help).toBeTruthy();
     }
     expect([DOUBLE, BINGO].map((s) => s.twists.length)).toEqual([4, 9]);
+  });
+  /* The user, 11 Nov: "her [important] instructions disappear very quickly. Like ... when she's telling
+     me blue over the yellow and top the stack, that should be a lot clearer that it's just not her being
+     a bit just chatting. It's an actual instruction to you, and it should be more prominent and
+     persistent." */
+  it('11 Nov, "it\'s an actual instruction to you": each act\'s instructions apart from her chatter, the task naming your pair\'s colours and where each goes', () => {
+    const NAME = ['blue', 'yellow', 'white'];
+    for (const a of lesson(false)) {
+      const S = a.says!, t = a.routine.twists[a.routine.twists.length - 1];
+      expect(S.brief && S.task && S.chain).toBeTruthy();
+      // (the task's said once, in the panel, not again in her bubble)
+      expect(S.yours).not.toContain(S.task);
+      const named = NAME.filter((n) => new RegExp(`\\b${n}\\b`, 'i').test(S.task!));
+      expect(named.sort()).toEqual([...new Set(t.pair.map((c) => NAME[c]))].sort());
+      expect(S.task).toMatch(/gap/);
+      // (and what to watch pop, by number, as the board numbers it)
+      expect(S.chain!.match(/\d/g)!.map(Number)).toEqual(plan(a.routine).pops.map((p) => p.n));
+    }
+  });
+  it('11 Nov, shown, then named: each of her notes once its mark is on the board, and "trigger" only once the gap is, said what it is', () => {
+    for (const a of lesson(false)) {
+      const S = a.says!, r = a.routine, last = r.twists.length - 1;
+      // (each watch note comes as something new is marked on the board, and a gap's named once it's shown)
+      for (const [i, text] of Object.entries(S.watch ?? {})) {
+        const n = Number(i) + 1, now = marks(r, n), was = marks(r, n - 1).map((m) => JSON.stringify(m));
+        expect(now.some((m) => !was.includes(JSON.stringify(m))), text).toBe(true);
+        if (/\bgap\b/.test(text)) expect(now.some((m) => m.kind === 'gap'), text).toBe(true);
+      }
+      // (her lines in the order they come, each with how many of her pairs are down by then)
+      const said: [number, string][] = [
+        [0, S.start ?? ''], [0, S.brief ?? ''],
+        ...(S.twists ?? []).flatMap((x, i): [number, string][] => [[i, x], [i + 1, S.watch?.[i] ?? '']]),
+        [last, S.yours ?? ''], [last, S.task ?? ''],
+      ];
+      const first = said.find(([, x]) => /trigger/i.test(x));
+      expect(first).toBeDefined();
+      expect(marks(r, first![0]).some((m) => m.kind === 'gap')).toBe(true);
+    }
+    // (and the first time, what a trigger is, simply)
+    expect(DOUBLE.yours).toMatch(/gap's the trigger: fill it last, and the whole lot pops/);
   });
   it('she greets you knowing you\'ve heard Kikkit out, once you have', () => {
     expect(lesson(false)[0].says?.start).toContain(GREET.plain);

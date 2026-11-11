@@ -33,7 +33,9 @@ const floor = mesh(new THREE.PlaneGeometry(70, 29 - SHORE), mat('#ffffff', { map
 floor.rotation.x = -Math.PI / 2;
 floor.position.z = (29 + SHORE) / 2;
 den.add(floor);
-const rockMats = ['#5d5048', '#6b5c50', '#4f443d', '#73655a'].map((c) => mat(c, { flatShading: true }));
+// The rocks' colours (a reef's drawn in them too: reef.js).
+export const ROCK_COLOURS = ['#5d5048', '#6b5c50', '#4f443d', '#73655a'];
+const rockMats = ROCK_COLOURS.map((c) => mat(c, { flatShading: true }));
 export function rock(x, y, z, s) {
   const r = mesh(new THREE.DodecahedronGeometry(s, 0), rockMats[rand(rockMats.length)]);
   r.position.set(x, y, z);

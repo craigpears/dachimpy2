@@ -16,7 +16,7 @@
    missing where there's some winds, so you kind of get caught in the whirlpool and it sends you to the
    opposite corner, which then gets you on some winds and sends you back". YPPedia's rules win.
 
-   So, sailed with the Sailing puzzle's gusts (R, Sailing), from the passage's mouth just off her
+   So, sailed with the Sailing puzzle's gusts (1, Sailing), from the passage's mouth just off her
    island, facing the reef's gap (LAY.KIKKIT says the squares):
    - a plain clear stops in the gap, and its wind blows her into a whirlpool: it turns her a quarter
      and sends her to its far corner, the missing one, whose wind takes her back up through the reef,
@@ -154,7 +154,7 @@ export class Whirlpools {
 /** What she says, and in what order (src/chatter.ts): the first time you sail up, her ramble (the real
     way through her whirlpools); then her tangents, round and round for ever while you're within
     earshot, hailed or not, the ramble retold after the last (it's the real way, after all); and spat
-    back by the winds, a new line each time, over whatever she was saying ("Too many lefts-eh!" first:
+    back by the winds, a new line each time, over whatever she was saying ("Too many leftsehhh!" first:
     `back`; `backOut` if you'd got out past the reef first). */
 export const KIKKIT_SAYS: Script = { intro: RAMBLE, loop: TANGENTS, retell: true, asides: { back: BACK, backOut: BACK_OUT }, afterIntro: 4 };
 

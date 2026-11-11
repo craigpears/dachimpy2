@@ -25,45 +25,78 @@ export const GREET = {
     moves": so she says what each balloon's for as she puts it down, the joke on top of the move,
     never instead of it. She sets each up, then hands you the last pair: "she sets up the balloons, you
     do the pop". A line as each act starts, one as each of her pairs is blown up, handing you yours,
-    each time you miss (in turn), if she shows you after all, and once it's popped. */
+    each time you miss (in turn), if she shows you after all, and once it's popped: her chatter, in her
+    bubble.
+    What's for you to do or watch is said apart from her chatter (the user, 11 Nov: "when she's telling
+    me blue over the yellow and top the stack, that should be a lot clearer that it's just not her being
+    a bit just chatting. It's an actual instruction to you, and it should be more prominent and
+    persistent"): a note in a panel by her board, up till the next. `brief` as the act starts; `watch`,
+    by her twist, once it's down and its mark's shown on the board (src/balloons.ts, marks: shown, then
+    named); `task` on your go; `chain` once you've set it off. In plain words (the user: "she's using the
+    right terminology, like the trigger or what triggers what. But ... that doesn't mean anything to
+    most"): "trigger" only once the gap's been shown, and said what it is. */
 export const DOUBLE = {
   start: 'First, a Double. A platform one short, and a line to set it off.',
   twists: [
-    'Blow, blow, tie. Each balloon the colour its square wants.',
+    'Blow, blow, tie. Each balloon in a square of its own colour.',
     'Second row. Wrong colour in a square and it never pops.',
-    'White in its square. Its blue partner starts a stack.',
-    'Two more blues. Three, and the platform one short. See?',
+    'White in its square. Its blue partner goes beside it.',
+    'Two more blues on top of that one. Up they go.',
   ],
-  yours: 'Your go! Blue on the blues, yellow over the gap.',
+  yours: 'Your go! That gap\'s the trigger: fill it last, and the whole lot pops.',
   again: [
-    'Ooh, nearly. Blue on the blue stack, yellow over the gap. Again!',
-    'Not quite! The yellow hangs on the blue till the blues pop. Again!',
-    'So close. Four blues pop, then the yellow drops in. Go on!',
+    'Ooh, nearly! Here it is again. Follow the ghost.',
+    'Not quite! The yellow sits on the blue till the blues pop. Again!',
+    'So close. Go on, you\'ve got this!',
   ],
   help: 'Here, like this. Watch the yellow.',
-  popped: 'Double! Blues pop, the yellow drops in, the platform pops. That\'s what zooms you over a whirlpool.',
+  popped: 'Double! That\'s what zooms you over a whirlpool.',
+  brief: 'The platform filling up: each balloon goes in a square of its own colour.',
+  watch: {
+    2: 'See the empty square? That\'s the gap. She leaves it empty on purpose.',
+    3: 'Three blues stacked up. One more blue on top makes four in a line, and four in a line pop.',
+  },
+  task: 'Yellow over the gap, blue on top of the blues.',
+  chain: '1, the four blues pop. 2, the yellow drops into the gap, and the platform pops.',
 } as const;
 export const BINGO = {
   start: 'Now a Bingo: that Double, with another on top.',
   twists: [
     'Bottom one first, same as before. Puff, puff...',
     '...puff, puff...',
-    '...white in, blue on the floor...',
+    '...white in, blue beside it...',
     '...three blues. Now, upstairs.',
-    'Top one, gap in the middle. Keep that column clear.',
+    'Top one. I\'m leaving a gap in the middle again.',
     'White, blue, in their squares. I\'m getting dizzy.',
-    'White on the corner. That\'s my next stack.',
-    'Three whites. One short, see? That\'s your trigger.',
-    'Park this: yellow on the corner, blue hanging over the blues.',
+    'White on the corner. That starts the next stack.',
+    'Three whites. That top gap\'s your trigger this time.',
+    'This pair waits on the corner. Watch where it\'ll fall.',
   ],
-  yours: 'Your go: white on the whites, yellow over the top gap.',
+  yours: 'Your go! Set off the lot.',
   again: [
-    'Nearly! White on the white stack, yellow over the top gap.',
+    'Nearly! Here it is again. Follow the ghost.',
     'Not quite. Pop the whites, and the rest falls into place. Again!',
-    'So close! The yellow hangs on the white till the whites pop. Go on!',
+    'So close! Go on!',
   ],
   help: 'Like this. Then just watch it go.',
-  popped: 'Bingo! Whites, top platform, my pair drops, blues, bottom platform. Now go make a whirlpool jealous.',
+  popped: 'Bingo! Four pops in a row. Now go make a whirlpool jealous.',
+  brief: 'The same Double at the bottom, then another platform on top of it.',
+  watch: {
+    3: 'Same as before: the gap, and three blues.',
+    6: 'A gap in the top platform too. Nothing goes over it, so a balloon can drop straight in.',
+    7: 'Three whites stacked up. One more white on top pops them.',
+    8: 'This pair waits. When the top platform pops, it falls: blue onto the blues, yellow into the bottom gap.',
+  },
+  task: 'White on top of the whites, yellow over the top gap.',
+  chain: '1, the whites pop. 2, the top platform. 3, the blues. 4, the bottom platform.',
+} as const;
+
+/** When each of a lesson act's lines is said (LINES.md). */
+const LESSON_EACH = {
+  start: 'In her bubble, as it starts', twists: 'In her bubble, as she blows up each pair', yours: 'In her bubble, handing you your go',
+  again: 'In her bubble, each time you miss', help: 'In her bubble, showing you after all', popped: 'In her bubble, once it\'s popped',
+  brief: 'An instruction, in the panel by her board, as it starts', watch: 'Instructions, in the panel by her board, once her pair (counted from 0) is down',
+  task: 'Your instruction on your go, in the panel by her board', chain: 'An instruction, in the panel by her board, once you\'ve set it off',
 } as const;
 
 /** After her lesson, while you're within earshot: a tip now and then, round and round. */
@@ -106,8 +139,8 @@ export const CHARACTER: Character = {
   ],
   lines: [
     { when: 'Sailing up to her island, her lesson begins (or Space there, again)', says: GREET, each: { plain: 'If you\'ve not heard Kikkit out', heard: 'If you have' } },
-    { when: 'Her lesson\'s first act: she blows up a Double\'s balloons onto her board, and you drop the pair that pops it', says: DOUBLE },
-    { when: 'Her lesson\'s last act: a Bingo, that Double with another on top, the last pair yours', says: BINGO },
+    { when: 'Her lesson\'s first act: she blows up a Double\'s balloons onto her board, and you drop the pair that pops it', says: DOUBLE, each: LESSON_EACH },
+    { when: 'Her lesson\'s last act: a Bingo, that Double with another on top, the last pair yours', says: BINGO, each: LESSON_EACH },
     { when: 'After her lesson, while you\'re within earshot of her island: round and round', says: AFTER },
   ],
 };

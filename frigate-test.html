@@ -38,6 +38,7 @@
     <button data-view="stern">Stern</button>
     <button id="sails" class="on">Sails</button>
   </div>
+  <div class="row" id="curves"></div>
   <div id="stats"></div>
 </div>
 <script src="js/engine.js"></script>
@@ -53,7 +54,7 @@ import { renderer, scene, camera, paintSky, pirate, makePirate } from './js/den/
 import { sloopMesh, SLOOP_DECK } from './js/den/sloop.js';
 import { frigateMesh } from './js/den/frigate.js';
 import { PRIMATES_RULE, WAR_FRIGATE_PLAN, deckY } from './js/den-frigate.js';
-import { SLOOP, WAR_FRIGATE, SLOOP_HULL } from './js/ships.js';
+import { SLOOP, WAR_FRIGATE, SLOOP_HULL, SHAPES, SHIP_SHAPE } from './js/ships.js';
 
 const $ = (id) => document.getElementById(id);
 paintSky('#4f8fd0', '#cfe2ee');
@@ -63,9 +64,18 @@ const sea = new THREE.Mesh(new THREE.CircleGeometry(120, 48).rotateX(-Math.PI / 
 sea.receiveShadow = true;
 scene.add(sea);
 
-const her = frigateMesh(PRIMATES_RULE);
+// Their hulls' curves (src/ships.ts, SHAPES), to compare: ?curve=box (as they were), gentle, curved
+// (what every ship's drawn with), round.
+const params = new URLSearchParams(location.search), curve = SHAPES[params.get('curve')] ? params.get('curve') : Object.keys(SHAPES).find((k) => SHAPES[k] === SHIP_SHAPE);
+const shaped = (h) => ({ ...h, shape: SHAPES[curve] });
+const her = frigateMesh(PRIMATES_RULE, { ...WAR_FRIGATE_PLAN, hull: shaped(WAR_FRIGATE_PLAN.hull) });
 scene.add(her.g);
-const sloop = sloopMesh();
+const sloop = sloopMesh(shaped(SLOOP_HULL));
+for (const k of Object.keys(SHAPES)) {
+  const b = document.createElement('button'); b.textContent = k[0].toUpperCase() + k.slice(1); b.classList.toggle('on', k === curve);
+  b.onclick = () => { params.set('curve', k); location.search = params.toString(); };
+  $('curves').append(b);
+}
 sloop.position.set(0.5, 0, 6.2);
 scene.add(sloop);
 // Pirates for scale: you on her main deck, a crewmate on the sloop.
@@ -89,9 +99,9 @@ const setView = (name) => {
   const v = VIEWS[name] || VIEWS.side;
   Object.assign(cam, { yaw: v.yaw, pitch: v.pitch, dist: v.dist }); cam.at.set(...v.at);
   document.querySelectorAll('[data-view]').forEach((b) => b.classList.toggle('on', b.dataset.view === name));
+  params.set('view', name); history.replaceState(null, '', '?' + params);   // (kept as you flip between curves)
 };
 document.querySelectorAll('[data-view]').forEach((b) => { b.onclick = () => setView(b.dataset.view); });
-const params = new URLSearchParams(location.search);
 setView(params.get('view') || 'side');
 const showSails = (on) => { her.sails.visible = on; for (const arm of sloop.userData.sails) arm.visible = on; $('sails').classList.toggle('on', on); };
 $('sails').onclick = () => showSails(!her.sails.visible);

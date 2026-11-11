@@ -31,6 +31,7 @@ import { kikkitWorld, kikkitTick, kikkitShown, kikkitHail, kikkitPrompt, kikkitH
 import { inKikkitWaters } from '../den-kikkit.js';
 import { tzzWorld, tzzTick, tzzHail, tzzPrompt, tzzReset } from './balloon-isle.js';
 import { empireWorld, empireTick, empirePrompt, empireReset } from './imperial-isle.js';
+import { primatesTick, primatesReset } from './moored.js';
 
 // The old sloop's at anchor in the cove from the moment the siege is over, while their ship makes
 // sail in the background (the user, 9 Nov: "I'm sat here quite a while waiting for his sloop to sail
@@ -86,6 +87,7 @@ export function sailReset() {
   kikkitReset();
   tzzReset();
   empireReset();
+  primatesReset();
   denLets.sailView = 0;
 }
 // A shot out of her side, from where she is right now: it flies straight out and comes down in the
@@ -96,7 +98,7 @@ const SIDE_NAME = { L: 'port', R: 'starboard' };
 const ballGeo = new THREE.SphereGeometry(0.13, 10, 8), ballMat = mat('#3a3f45', { metalness: 0.6 });   // (every shot's: made afresh, they were never freed)
 function sailFire(side) {
   const did = sail.guns.fire(side);
-  if (did === 'empty') return toast(`No shot loaded to ${SIDE_NAME[side]}: G to load her guns by Gunnery`, true);
+  if (did === 'empty') return toast(`No shot loaded to ${SIDE_NAME[side]}: 2 to load her guns by Gunnery`, true);
   if (did === 'running') return toast(`The ${SIDE_NAME[side]} gun's still running out`, true);
   const { cells, hit } = broadside(sail.sea, sail.helm.now(), side), gun = sail.g.userData.guns[side];
   sail.g.updateMatrixWorld(true);
@@ -157,7 +159,12 @@ export function sailHover(x, y) {
 }
 // Something else has her, so the Sailing board's put away (sail-station.js).
 const rigBusy = () => haul.on || craneHolds() || patch.on || !!hold.mode || umami.on || sail.helm.dazed() || kikkitHolds();
-// R: the Sailing board, out or away; from the oars or her guns, they're put away.
+/* The puzzles at sea in one bank, the order of their buttons on the sailing bar: 1 Sailing, 2 Gunnery
+   (her guns), 3 the oars (the user, 11 Nov: "surely they should at least all be in the same bank of keys
+   for activating the puzzles ... I think 1, 2, 3 makes sense"; R, G and O were scattered among the
+   helm's W A S D and the guns' Q E). Each one's key puts it out or away, and from one goes to another.
+   (Ashore, 1 2 3 take from the crates: js/den.js.) */
+// 1: the Sailing board, out or away; from the oars or her guns, they're put away.
 function rigToggle() {
   if (!station.want && !rigBusy()) { if (rowing.on) rowToggle(); if (gunnery.on) gunneryToggle(); }
   stationToggle(rigBusy());
@@ -167,20 +174,20 @@ export function sailKey(key) {
   if (kikkitHolds() && key !== 'p') return;   // (round and round in a whirlpool: whirlpools.js)
   if (umamiKey(key)) return;   // (Umami's board, and her moorings in the lagoon: capybara.js)
   if (craneKey(key)) return;   // (the crane at the ledge, and the lagoon: crane.js)
-  // The Sailing board: its keys while it's open; R or Esc puts it away (sail-station.js).
+  // The Sailing board: its keys while it's open; 1 or Esc puts it away (sail-station.js).
   if (stationKey(key)) return;
-  if (key === 'r') return rigToggle();
-  // Rowing: the board's keys; Esc or O ships the oars.
-  if (rowing.on && (key === 'escape' || key === 'o')) return rowToggle();
+  if (key === '1') return rigToggle();
+  // Rowing: the board's keys; Esc or 3 ships the oars.
+  if (rowing.on && (key === 'escape' || key === '3')) return rowToggle();
   if (rowing.on && rowKey(key)) return;
-  // At her guns: the board's keys (W A D still steer, Q E fire); O goes to the oars instead.
-  if (gunnery.on && key === 'o') { gunneryToggle(); return rowToggle(); }
+  // At her guns: the board's keys (W A D still steer, Q E fire); 3 goes to the oars instead.
+  if (gunnery.on && key === '3') { gunneryToggle(); return rowToggle(); }
   if (gunneryKey(key)) return;
-  if (key === 'g') return gunneryToggle(haul.on || craneHolds());
+  if (key === '2') return gunneryToggle(haul.on || craneHolds());
   const m = { w: 'F', arrowup: 'F', a: 'L', arrowleft: 'L', d: 'R', arrowright: 'R' }[key];
   if (m) { if (!sail.helm.put(m)) toast('That\'s a turn\'s worth put in already', true); return; }
   if (key === 'q' || key === 'e') return sailFire(key === 'q' ? 'L' : 'R');
-  if (key === 'o') return rowToggle();
+  if (key === '3') return rowToggle();
   if (key === 's' || key === 'arrowdown' || key === 'backspace') sail.helm.unput();
   else if (key === 'escape') { sail.helm.stop(); toast('Pin pulled up: she\'ll stop when this turn\'s done'); }
   else if (key === 'h') { sail.helm.drop(SAIL.HOME.c, SAIL.HOME.r); if (sail.helm.pin) toast('Heading home to the cove'); }
@@ -210,14 +217,14 @@ export function sailPrompt() {
   if (held === 'down') return 'The lock\'s draining down';
   if (held === 'fill') return 'The lock\'s filling from the canal above';
   if (held === 'gates') return 'The lock gates are swinging open';
-  if (held === 'calm') return 'Becalmed: dead in the water till the wind picks up · O: out oars';
-  if (canLand(h)) return h.slot < 0 ? 'Off the den\'s beach · Space: go ashore · click the sea to drop a pin · R: Sailing' : 'Under way off the den\'s beach · Space: go ashore';
+  if (held === 'calm') return 'Becalmed: dead in the water till the wind picks up · 3: out oars';
+  if (canLand(h)) return h.slot < 0 ? 'Off the den\'s beach · Space: go ashore · click the sea to drop a pin · 1: Sailing' : 'Under way off the den\'s beach · Space: go ashore';
   if (canLandIsle(h)) return h.slot < 0 ? 'Off the Wedding Isle · Space: go ashore · click the sea to drop a pin' : 'Under way off the Wedding Isle · Space: go ashore';
   if (canHaulWreck()) return 'The old wreck · Space: haul up its treasure (Treasure Haul) · click the sea to drop a pin';
   if (h.slot < 0 && h.headwind()) return headwindPrompt();
   if (h.pin) return h.oars ? 'Rowing to the pin' : 'Under way to the pin';
   if (h.slot >= 0) return 'Under way';
-  return 'Click the sea to drop a pin, or put in moves with W A D · G: load her guns (Gunnery) · Q E: fire · R: Sailing';
+  return 'Click the sea to drop a pin, or put in moves with W A D · Q E: fire · 1: Sailing · 2: load her guns (Gunnery) · 3: oars';
 }
 // This turn's tokens (the one being sailed lit) and the next turn's, yours in gold.
 function sailHud() {
@@ -230,13 +237,14 @@ function sailHud() {
   sail.hudSig = sig;
   const toks = (list, cls) => Array.from({ length: SAIL.SLOTS }, (_, i) => (list[i] ? `<b class="tok ${cls(i)}">${TOK[list[i]]}</b>` : '<b class="tok empty"></b>')).join('');
   // Her guns either side of the tokens, port on the left: a pip for each shot loaded that side (by
-  // Gunnery: G), lit when there's one ready, the bar filling as her gun runs out again after a shot.
+  // Gunnery: 2), lit when there's one ready, the bar filling as her gun runs out again after a shot.
   const pips = (side) => Array.from({ length: sail.guns.most(side) }, (_, i) => `<b class="pip${i < shots(side) ? ' on' : ''}"></b>`).join('');
-  const gun = (side, k) => `<div class="gun${sail.guns.ready(side) ? ' ready' : ''}" title="${side === 'L' ? 'Port' : 'Starboard'} shots loaded (Gunnery: G)"><kbd>${k}</kbd>${side === 'L' ? 'Port' : 'Starboard'}<span class="pips">${pips(side)}</span><i style="width:${shots(side) ? load(side) * 5 : 0}%"></i></div>`;
-  // The wind, at the left end, and the oars at the right (wind.js).
+  const gun = (side, k) => `<div class="gun${sail.guns.ready(side) ? ' ready' : ''}" title="${side === 'L' ? 'Port' : 'Starboard'} shots loaded (Gunnery: 2)"><kbd>${k}</kbd>${side === 'L' ? 'Port' : 'Starboard'}<span class="pips">${pips(side)}</span><i style="width:${shots(side) ? load(side) * 5 : 0}%"></i></div>`;
+  // The wind, at the left end, and the puzzles at the right in their keys' order, 1 2 3: Sailing, her
+  // guns, the oars (wind.js).
   $('sailhud').innerHTML = `<div class="turns">${windHud()}${gun('L', 'Q')}<div class="turn"><span>This turn</span>${toks(now, (i) => (i < h.slot ? 'done' : i === lit ? 'now' : ''))}</div>`
-    + `<div class="turn"><span>Next</span>${toks(next, (i) => (i < mineN ? 'mine' : ''))}</div>${gun('R', 'E')}<button class="oars" id="guns-btn" title="Load her guns by Gunnery (G)"><kbd>G</kbd>Load</button><button class="oars" id="rig-btn" title="Sailing: its chains carry her ahead (R)"><kbd>R</kbd>Sailing</button>${oarsHud()}</div>`
-    + '<div class="help">Click the sea: drop a pin · <kbd>W</kbd> <kbd>A</kbd> <kbd>D</kbd>: forward, left, right yourself · <kbd>S</kbd>: take one back · <kbd>Q</kbd> <kbd>E</kbd>: fire port, starboard · <kbd>G</kbd>: load them by Gunnery · <kbd>O</kbd>: oars out or in · <kbd>R</kbd>: Sailing · <kbd>Esc</kbd>: pull up the pin · <kbd>H</kbd>: head home · wheel: zoom</div>';
+    + `<div class="turn"><span>Next</span>${toks(next, (i) => (i < mineN ? 'mine' : ''))}</div>${gun('R', 'E')}<button class="oars" id="rig-btn" title="Sailing: its chains carry her ahead (1)"><kbd>1</kbd>Sailing</button><button class="oars" id="guns-btn" title="Load her guns by Gunnery (2)"><kbd>2</kbd>Load</button>${oarsHud()}</div>`
+    + '<div class="help">Click the sea: drop a pin · <kbd>W</kbd> <kbd>A</kbd> <kbd>D</kbd>: forward, left, right yourself · <kbd>S</kbd>: take one back · <kbd>Q</kbd> <kbd>E</kbd>: fire port, starboard · <kbd>1</kbd>: Sailing · <kbd>2</kbd>: load her guns by Gunnery · <kbd>3</kbd>: oars out or in · <kbd>Esc</kbd>: pull up the pin · <kbd>H</kbd>: head home · wheel: zoom</div>';
 }
 export function sailTick(dt) {
   sail.rocks ||= seaRocks();
@@ -247,6 +255,7 @@ export function sailTick(dt) {
   kikkitWorld();   // (Kikkit's island, her whirlpools and Vegas Island: whirlpools.js)
   tzzWorld();   // (Tzz's island, a hop from Kikkit's, and her balloon lesson: balloon-isle.js)
   empireWorld();   // (Port Decorum, the imperial island past the checkpoint: imperial-isle.js)
+  primatesTick(dt);   // (Primates Rule at anchor, still to come: moored.js)
   sail.g ||= (() => { const g = sloopMesh(); scene.add(g); return g; })();
   const show = sail.on || sloopHome();
   if (sail.g.visible !== show) sail.g.visible = show;

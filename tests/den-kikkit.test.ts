@@ -194,31 +194,40 @@ describe('her whirlpools, as Puzzle Pirates\' are (YPPedia, 11 Nov)', () => {
 });
 
 describe('her ramble is the real map, taken literally (10 Nov: "it\'s got to actually make some mechanical sense")', () => {
-  it('five lefts and a right (the right a twirl-eh), and back where she started', () => {
+  it('five lefts and a right (the right a twirl), and back where she started', () => {
     expect(turnsOf(1)).toEqual({ lefts: 5, rights: 0, twirls: 1, backflips: 0, home: true });
     expect(turnsOf(runFor(3))).toEqual({ lefts: 5, rights: 0, twirls: 1, backflips: 0, home: true });
     const all = RAMBLE.join(' ');
     expect(all).toMatch(/five lefts and a right/);
-    expect(all).toMatch(/twirl-eh/);
-    // The way, from where she set off to back where she started: a left-eh, the twirl-eh, four more lefts.
+    expect(all).toMatch(/twirlehhh/);
+    // The way, from where she set off to back where she started: a left, the twirl, four more lefts.
     const way = RAMBLE.slice(RAMBLE.findIndex((l) => l.startsWith('I set off')), RAMBLE.findIndex((l) => l.includes('back where I started')) + 1).join(' ');
-    expect(way.match(/\bleft-eh\b/g)?.length).toBe(5);
-    expect(way.match(/\btwirl-eh\b/g)?.length).toBe(1);
-    expect(all).toMatch(/back where I started-eh/);
+    expect(way.match(/\bleft\b/gi)?.length).toBe(5);
+    expect(way.match(/\btwirl(?:ehhh)?\b/gi)?.length).toBe(1);
+    expect(all).toMatch(/back where I started!/);
     expect(all).toMatch(/Clockwise/);
     expect(all).toMatch(/WHOOSH/);
     expect(all).toMatch(/really, really big and really sparkly/);
     expect(all).toMatch(/balaclava/);
   });
 
-  it('everything ends in -eh, near enough (11 Nov: "it\'s not a twirl, it\'s twirl EH"): sprinkled, not every word', () => {
-    for (const set of [RAMBLE, TANGENTS, BACK, BACK_OUT]) {
-      const eh = set.filter((l) => /-eh\b/.test(l)).length;
-      expect(eh / set.length).toBeGreaterThan(0.85);
-      for (const l of set) expect(l.split(' ').filter((w) => /-eh\b/.test(w)).length).toBeLessThan(l.split(' ').length / 2);
+  it('her "eh" is emphasis on the word she savours, not tagged on any word (11 Nov: "annoyingeh just doesn\'t fit ... a form of accentuation? Not just random on random words")', () => {
+    const drawn = /\b([A-Za-z]+?)(?:ehhh+|EHHH+|hhh+)\b/g;
+    const lines = [RAMBLE, TANGENTS, BACK, BACK_OUT].flat();
+    let with_ = 0;
+    for (const l of lines) {
+      expect(l).not.toMatch(/-eh\b/);   // (the old tag on the end of a word, gone)
+      const words = [...l.matchAll(drawn)].map((m) => m[1].toLowerCase().replace(/e$/, ''));
+      if (words.length) with_++;
+      expect(new Set(words).size).toBeLessThanOrEqual(1);   // (one word drawn out a line, at most: a chant may repeat it)
+      for (const w of words) expect(w).not.toMatch(/(ing|ly|y)$/);   // (never an annoyingeh)
     }
+    expect(with_ / lines.length).toBeGreaterThan(0.1);   // (she does it)
+    expect(with_ / lines.length).toBeLessThan(0.5);   // (but most lines are plain)
     for (const l of [...RAMBLE, ...BACK, ...BACK_OUT]) expect(l.length).toBeLessThanOrEqual(100);
-    expect([...RAMBLE, ...TANGENTS, ...BACK].join(' ')).not.toMatch(/\btwirl\b(?!-eh| round|y)/i);
+    expect(lines.join(' ')).toMatch(/sparklehhh/);
+    expect(lines.join(' ')).toMatch(/whooshehhh/i);
+    expect([...RAMBLE, ...TANGENTS, ...BACK].join(' ')).not.toMatch(/\btwirl\b(?!ehhh| round|y)/i);
   });
 
   it("she rambles the first time you sail up, then goes off on tangents, and has a new line each time you're thrown back", () => {

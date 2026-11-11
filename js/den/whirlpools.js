@@ -140,7 +140,7 @@ export function kikkitPrompt() {
   if (!sail.on) return '';
   if (kik.held) return 'A whirlpool has her: round to its far corner, and the winds...';
   if (!canHail()) return '';
-  return kik.W?.her.talking() ? 'Off Kikkit\'s island · Space: and then?' : 'Off Kikkit\'s island · Space: hail her · R: Sailing';
+  return kik.W?.her.talking() ? 'Off Kikkit\'s island · Space: and then?' : 'Off Kikkit\'s island · Space: hail her · 1: Sailing';
 }
 /** A whirlpool has her: Sailing's board is put away meanwhile (sailing.js). */
 export const kikkitHolds = () => !!kik.held;
