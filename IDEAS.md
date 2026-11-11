@@ -2181,6 +2181,13 @@ only for knocking out the gun gap: a rival sitting still to build a Vegas at the
 a sitting duck for you, holed and patching while you sail on (as "Dodging, and what a hit does" above has
 it: dazed, never knocked out). And the other way round: build your big combo where nobody can get a shot
 at you. First against the rival sloop (it could fire on you too), then players against each other.
+Shots as a budget (the user, 11 Nov): "Maybe start with one or two guns to enable that gameplay? And make
+obstacles need to either use those instead of vs other players as a kind of peaceful racer bonus or just need
+more hits idk." So every racer starts with a gun or two already loaded, enough to matter at the crowded line
+through the whirlpools. Either the shot-away obstacles (the gun gap's guns, the shoot-away rocks) want those
+same shots, so firing at another racer costs you a way through and leaving them in peace is its own reward;
+or the obstacles simply need more hits than a starting gun or two, so the loaded shots are for racers and the
+obstacles still take Gunnery. To weigh with the balance simulation (TODO.md), which can run both.
 
 **A Rigging passage: trimming her through shifting winds (11 Nov):** the user wants Rigging in, "certainly in
 a way that's like rigging ... I'm not sure I ever liked it as a compliment to the sailing puzzle ... my
