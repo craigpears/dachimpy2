@@ -942,6 +942,17 @@ control over when columns are burnt"), and with smuggling's cheap rum, made your
 (11 Nov): "that's more of an idea thing ... whenever you get to distilling or something
 somewhere": no hurry; Helium comes in whenever Distilling does.
 
+**A hidden Easter egg, a secret still (11 Nov):** "Maybe the helium thing can be a bit more of a
+hidden Easter egg where you have to explore the houses ... Maybe he's not running a distillery
+shop. Maybe he's got a secret distillery operation going. If you find his house, he ... teaches
+you how to make some rum. But he's very kind of by the by, and that leads into some of the
+smuggling things where you can smuggle the rum to the other island or some side mission." So
+Helium's is one of the houses in the housing district (the doorway in the den's cliff), with
+nothing to say it's special: inside, a secret still (hidden behind something, found by poking
+about). He's offhand about it, teaches you Distilling as if it were nothing, and the rum you make
+is the start of smuggling (below: taxes, embargoes and the back beaches), run to another island as
+a side mission. Hidden, never hinted (RULES.md).
+
 ## Placing creatures: choose what they get up to (11 Nov)
 
 "when you're placing ... familiars and pets in scenes, like, you should have options for, like,
