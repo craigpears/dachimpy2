@@ -2009,6 +2009,15 @@ to get more distinctive looks in." So she's the natural one to teach Rigging, Pu
 puzzle at the same station as Sailing (its own module from YPPedia's rules, not built yet; RULES.md
 keeps Sailing never called "the rigging", as they're two puzzles). Her portrait to check, and her look
 added to PIRATES and the wardrobe from it. And a general aim: more distinctive looks in the den.
+**How Rigging would move her, a note for later (11 Nov):** at sea a heavy combo is what rushes her past
+guns, whirlpools and winds, sailed or rowed ("it's the combo, heavy combo that gets you through, not
+anything specific to either one"). Rigging doesn't fit that as it stands: "rigging's got a lot more
+natural small breaks. You're like, you're supposed to do something every 2 or 3 moves. Obviously, you can
+do some bigger moves like looping and clearing all of one color, hooking, that kind of thing. But I don't
+know, we'll have to obviously think about that and how rigging will fit in as a puzzle." Not pressing:
+"not that we necessarily need to worry about adding every single puzzle, we've got enough concepts here."
+(To shape with the user, if Rigging comes: what counts as its heavy move, say a loop or clearing a whole
+colour, and what it does for her at sea.)
 
 ## Money, and the war frigate as the reason to earn it (11 Nov)
 
