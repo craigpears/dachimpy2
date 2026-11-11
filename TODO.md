@@ -338,6 +338,10 @@ the site (`.assetsignore` skips `*.md`).
   "Something to show people" (above). And in the game: "I don't see why the changelog as well can't be
   visible from within the game. So if somebody's coming back to the den, they can see it." A "What's new"
   button among the den's buttons, marked when there's something new since you last looked.
+- **Sailing's pair won't turn against the wall (11 Nov):** "it doesn't turn when it's against the wall.
+  If you rotate it and it's against the wall, it should kind of push away from the wall. Say if it's like
+  the two have rotated so they're on top of each other, ..." So a turn that would put a half into the wall
+  (or another piece) nudges the pair a column away instead, as the real game does.
 
 ## Spotted along the way (not asked for)
 
