@@ -22,6 +22,12 @@ import { TOUR_SAYS } from './lines/narrator.js';
     sail, row it, knock its guns out, or round it by the locks. */
 export type Way = 'run' | 'row' | 'fight' | 'locks';
 export const WAYS: readonly Way[] = ['run', 'row', 'fight', 'locks'];
+/** The routes past it, as the quest list counts them (the user, 11 Nov: "just do the [routes] only
+    for now ... there's got to be something really different"): running, rowing and fighting its
+    guns all go through the gate; the locks go round. (The reef's whirlpools, when they're built.) */
+export type Route = 'gate' | 'locks';
+export const ROUTES: readonly Route[] = ['gate', 'locks'];
+export const routeOf = (w: Way): Route => (w === 'locks' ? 'locks' : 'gate');
 
 /** The hidden places off the captain's map: the cove off the clifftop canal, and the lagoon up the
     cliff from it. */
@@ -97,7 +103,7 @@ export function quests(p: Progress): QuestGroup[] {
       job(`See what's afoot on the ${ISLE.NAME}`, p.wedding),
     ] },
     { title: 'Still to find', quests: [
-      tease('Ways past the checkpoint', WAYS.filter(has).length, WAYS.length),
+      tease('Ways past the checkpoint', ROUTES.filter((r) => WAYS.some((w) => has(w) && routeOf(w) === r)).length, ROUTES.length),
       tease('Hidden places', PLACES.filter(has).length, PLACES.length),
       tease('Secret treasure', p.lagoonChest ? 1 : 0, 1),
       tease('A friend to rescue', p.umami ? 1 : 0, 1),

@@ -17,6 +17,8 @@ import { SAIL } from './den-sail.js';
 import { ISLE } from './den-isle.js';
 import { TOUR_SAYS } from './lines/narrator.js';
 export const WAYS = ['run', 'row', 'fight', 'locks'];
+export const ROUTES = ['gate', 'locks'];
+export const routeOf = (w) => (w === 'locks' ? 'locks' : 'gate');
 export const PLACES = ['cove', 'lagoon'];
 /** Found just now: the list with it in (once). */
 export function addFind(found, f) {
@@ -58,7 +60,7 @@ export function quests(p) {
                 job(`See what's afoot on the ${ISLE.NAME}`, p.wedding),
             ] },
         { title: 'Still to find', quests: [
-                tease('Ways past the checkpoint', WAYS.filter(has).length, WAYS.length),
+                tease('Ways past the checkpoint', ROUTES.filter((r) => WAYS.some((w) => has(w) && routeOf(w) === r)).length, ROUTES.length),
                 tease('Hidden places', PLACES.filter(has).length, PLACES.length),
                 tease('Secret treasure', p.lagoonChest ? 1 : 0, 1),
                 tease('A friend to rescue', p.umami ? 1 : 0, 1),
