@@ -324,7 +324,11 @@ the site (`.assetsignore` skips `*.md`).
 - **Sailing's keys as the real game's (11 Nov):** "when I press down, is it going down? ... isn't that
   rotate? space is supposed to be down". Now ↓ (and S) drops the pair at once. YPPedia's Sailing,
   Controls: left and right move it; up and down turn it, clockwise and anticlockwise; Space makes it fall
-  faster (still steerable as it falls). Every Sailing board: at sea, Kikkit's, Tzz's your-turn.
+  faster (still steerable as it falls). Every Sailing board: at sea, Kikkit's, Tzz's your-turn. Space,
+  the user (11 Nov): "the space usually kind of speeds up the drop. It doesn't drop it entirely. So if
+  you're like halfway down the screen and you just want it to get 2/3 of the way down or 3/4, you
+  normally tap space just so you zoom kind of near the bottom but not at the bottom." So a tap of Space
+  is a burst of speed for a moment, not a drop to the bottom.
 
 ## Spotted along the way (not asked for)
 
