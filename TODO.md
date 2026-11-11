@@ -283,8 +283,9 @@ the site (`.assetsignore` skips `*.md`).
   near Primates Rule: five legs, the long way round past guns on marked squares, and a puzzle shortcut at
   each bend (Gunnery, rowing, Sailing over whirlpools, Bilge locks, the Carpentry crane). "What you've said
   sounds good as a first draft ... We're going to have to go through several iterations of this course."
-  The Gunnery shortcut is rocks blocking a gap, blasted away by her guns, not a turret (the user, 11 Nov:
-  "some destructible object that then reveals the shortcut. So like you shoot some rocks or something").
+  The Gunnery shortcut is a guarded gap with the imperial checkpoint's mechanic as it is: run it (and
+  patch), row it, or knock its guns out by Gunnery (the user, 11 Nov: "we've already got like the Imperial
+  checkpoint ... you basically just use that exact same mechanic"). Rocks shot away: IDEAS.md, later.
 - **Duty Navigation (11 Nov):** the real puzzle (three rings of stars, constellations), its own module, as
   the den's other puzzles are.
 - **The starlit door (11 Nov):** a hidden door in the race course's cliffs, found like the crane's ledge,

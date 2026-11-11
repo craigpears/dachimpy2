@@ -2143,6 +2143,12 @@ the door and have it discoverable in some way similar to the carpentry spots?"
   nothing of the den, with bots like Sailing's), and could find other hidden ways later (the smugglers'
   beach, Port Decorum's treasury).
 
+**More kinds of shortcut, for later versions of the course (11 Nov):** "we've got a good collection of
+mechanics actually here that you can have all different kinds of shortcuts." One the user suggested:
+"some destructible object that then reveals the shortcut. So like you shoot some rocks or something" (rocks
+across a gap, blasted away by her guns, loaded by Gunnery). The first draft's gun gap reuses the
+checkpoint's mechanic instead (TODO.md).
+
 (To shape with the user: where the course is and how you come to it; how long a race runs (a few minutes
 the long way?); whether the rival takes shortcuts too; what winning gets you; whether it's night all race
 or the door only shows at dusk; and what to build first: the course, the long way and one or two shortcuts
