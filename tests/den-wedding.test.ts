@@ -4,11 +4,11 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
-  AREA, ASK_HER, DYE_NAMES, GUESTS, GUSH, Gush, MAX_PROPS, PLOTS, PROPS, SUGGEST, THEMES, TODAY, TONES, VENUES, WELCOME, WRECK,
+  ALTAR, ARRIVE, AREA, ASK_HER, BODY_R, COUPLE, DYE_NAMES, FRONT, GUARDS, RETURN, STAND, inProp, onSomeone, propsOverlap, GUESTS, GUSH, Gush, MAX_PROPS, PLOTS, PROPS, SUGGEST, THEMES, TODAY, TONES, VENUES, WELCOME, WRECK,
   answer, arrival, caption, clean, decode, dressFor, encode, fill, fresh, layout, moveTo, plotAt, plotScript, readSecs,
   scriptSecs, seatsFor, suitorTitle, suitors, themeLook, wearable,
 } from '../src/den-wedding';
-import type { Prop, Wedding } from '../src/den-wedding';
+import type { Prop, ThemeId, Wedding } from '../src/den-wedding';
 
 const LOOK_JS = readFileSync(join(__dirname, '..', 'js', 'den-look.js'), 'utf8');
 /** The wardrobe's own lists, read from js/den-look.js (it needs three.js to run). */
@@ -117,19 +117,59 @@ describe('the suitors (10 Nov)', () => {
   });
 });
 
-describe('where the guests sit', () => {
-  it('two to a bench, facing the way it faces; any left over stand at the back', () => {
-    const ps: Prop[] = [{ k: 'bench', x: -2, z: 0, r: 0, c: 'pink' }, { k: 'flowers', x: 0, z: 0, r: 0, c: 'pink' }, { k: 'bench', x: 2, z: 1, r: 2, c: 'pink' }];
+describe('where the guests stand', () => {
+  it('two to a bench, on their feet in front of it, facing the way it faces; any left over stand at the back', () => {
+    const ps: Prop[] = [{ k: 'bench', x: -2, z: 0, r: 0, c: 'pink' }, { k: 'flowers', x: 0, z: 0, r: 0, c: 'pink' }, { k: 'bench', x: 3, z: 1, r: 2, c: 'pink' }];
     const s = seatsFor(ps, 6);
     expect(s).toHaveLength(6);
-    expect(s.slice(0, 4).every((x) => x.sit)).toBe(true);
-    expect(s[0].x).toBeCloseTo(-2.55); expect(s[0].z).toBeCloseTo(0); expect(s[0].yaw).toBeCloseTo(Math.PI);
-    expect(s[2].x).toBeCloseTo(2); expect(s[2].z).toBeCloseTo(1.55);   // (turned a quarter: along z)
-    expect(s.slice(4).every((x) => !x.sit && x.z > 4)).toBe(true);
+    expect(s.every((x) => !x.sit)).toBe(true);
+    expect(s[0].x).toBeCloseTo(-2.55); expect(s[0].z).toBeCloseTo(-0.58); expect(s[0].yaw).toBeCloseTo(Math.PI);
+    expect(s[2].x).toBeCloseTo(3 - 0.58); expect(s[2].z).toBeCloseTo(1.55);   // (turned a quarter: along z)
+    expect(s.slice(4).every((x) => x.z >= 5)).toBe(true);
   });
 
-  it('nobody sits on an overturned bench', () => {
-    expect(seatsFor(WRECK, 8).filter((x) => x.sit)).toHaveLength(2);
+  it('nobody stands at an overturned bench', () => {
+    const s = seatsFor(WRECK, 8), upright = WRECK.find((p) => p.k === 'bench' && !p.w)!;
+    expect(s.filter((x) => Math.hypot(x.x - upright.x, x.z - upright.z) < 1)).toHaveLength(2);
+  });
+});
+
+// The user, 11 Nov: "the pirates are kind of ... going through the benches ... we want to show their outfits
+// off"; and "front benches right up on them, so you can barely even see [Mischievious] because of all the
+// guests are all kind of crowding her out".
+describe('nobody stands in anything, and the front is kept clear for her and the couple (11 Nov)', () => {
+  const people = [STAND.mis, STAND.you, STAND.partner, COUPLE.you, COUPLE.partner, ALTAR, ...GUARDS];
+  const check = (props: readonly Prop[], what: string) => {
+    const s = seatsFor(props, GUESTS);
+    expect(s, what).toHaveLength(GUESTS);
+    s.forEach((g, i) => {
+      for (const p of props) expect(inProp(p, g.x, g.z), `${what}: guest ${i} in a ${p.k} at ${p.x},${p.z}`).toBe(false);
+      for (const h of s.slice(i + 1)) expect(Math.hypot(h.x - g.x, h.z - g.z), `${what}: guests ${i} in each other`).toBeGreaterThan(BODY_R * 2);
+      for (const q of people) expect(Math.hypot(q.x - g.x, q.z - g.z), `${what}: guest ${i} on someone`).toBeGreaterThan(BODY_R * 2);
+      expect(Math.abs(g.x) < FRONT.x && g.z < FRONT.z, `${what}: guest ${i} at the front`).toBe(false);
+    });
+  };
+  it('in every venue and theme, and the wreck: no guest in a prop, in another, on her or the couple, or at the front', () => {
+    for (const v of VENUES) for (const t of THEMES) check(layout(v.id, t.id as ThemeId), `${v.id}/${t.id}`);
+    check(WRECK, 'the wreck');
+  });
+  it('and wherever the benches are moved', () => {
+    for (let k = 0; k < 40; k++) {
+      const props = layout('beach', 'rosy').map((p, i) => (p.k === 'bench' ? { ...p, x: ((k * 7 + i * 3) % 11) - 5, z: ((k * 5 + i * 13) % 13) - 6, r: (k + i) % 8 } : p));
+      check(props, `moved ${k}`);
+    }
+  });
+  it('no prop stands in another, nor on her, the couple or the guards, in any venue and theme', () => {
+    for (const v of VENUES) for (const t of THEMES) {
+      const ps = layout(v.id, t.id as ThemeId).filter((p) => p.k !== 'cake');
+      ps.forEach((p, i) => {
+        expect(onSomeone(p), `${v.id}/${t.id}: a ${p.k} on someone`).toBe(false);
+        for (const q of ps.slice(i + 1)) expect(propsOverlap(p, q) || propsOverlap(q, p), `${v.id}/${t.id}: ${p.k} ${p.x},${p.z} in ${q.k} ${q.x},${q.z}`).toBe(false);
+      });
+    }
+  });
+  it('the benches stand well back from the arch: a clear space before it', () => {
+    for (const t of THEMES) for (const p of layout('beach', t.id as ThemeId)) if (p.k === 'bench') expect(p.z).toBeGreaterThan(FRONT.z + 0.5);
   });
 });
 
@@ -304,4 +344,43 @@ it('her five weddings today show off every venue, theme and plot, and she recall
     }
   }
   expect(WELCOME.happy.join(' ')).toMatch(/five today/);
+});
+
+// The user, 11 Nov: "check that's cohesive ... One joked about a parrot that swears coming as a set, but she
+// doesn't actually have a parrot, but the guy next to her does."
+it('the parrot that swears was on the man next to her: whatever a suitor mentions, they have (11 Nov)', () => {
+  const FAMS = ['parrot', 'monkey', 'octopus', 'squirrel', 'bat', 'krakling'];
+  for (const tone of ['happy', 'dark'] as const) for (const s of suitors(tone)) {
+    for (const f of FAMS) expect(s.look.fam === f, `${s.name}: ${f}`).toBe(new RegExp(`(^|[^a-z])${f}`, 'i').test(s.line));
+    if (/dais/i.test(s.line)) expect(s.look.handCol).toBe('white');
+    if (/bouquet|flowers?\b|picked you/i.test(s.line)) expect(s.look.hand).toBe('bouquet');
+  }
+});
+
+// The user, 11 Nov: "It should definitely be opening more with a cutscene where, you know, she explains to
+// you what it is and what's going on."
+it('she opens by explaining what it is: her venue, planning it your way, then it plays out and a portrait; shorter coming back (11 Nov)', () => {
+  expect(ARRIVE.join(' ')).toMatch(/isle/);
+  expect(ARRIVE.join(' ')).toMatch(/wedding venue/);
+  expect(ARRIVE.at(-1)).toMatch(/what sort of wedding/);
+  for (const t of TONES) {
+    const said = WELCOME[t.id].join(' ');
+    for (const w of ['who', 'where', 'the look', 'how it goes', 'portrait']) expect(said, `${t.id}: ${w}`).toMatch(w);
+    expect(RETURN[t.id].length).toBeLessThan(WELCOME[t.id].length);
+    expect(RETURN[t.id].join(' ')).toMatch(/left off/);
+  }
+  for (const line of [...ARRIVE, ...Object.values(RETURN).flat()]) {
+    expect(line).not.toMatch(/ever so many|always free|I'?m free|my last (one|husband|wife)/i);
+    expect(line.length).toBeLessThan(130);
+  }
+  expect([...ARRIVE, ...RETURN.happy].join(' ')).not.toMatch(/blood|guts|raid/);
+});
+
+// The user, 11 Nov: "when you're doing like someone of your own ... it should let you do like the same as
+// like when you're dressing yourself ... you need to be able to customize them".
+it('a partner of your own keeps their whole wardrobe and their name, in the set-up and its share link (11 Nov)', () => {
+  const look = { body: 'f', skin: 3, hair: 'braids', hairCol: 'dark brown', patch: false, earring: true, smile: true, hook: true, hat: 'wide', hatCol: 'rose', hatCol2: 'white', top: 'corset', topCol: 'pink', topCol2: 'black', waist: 'sash', waistCol: 'gold', legs: 'gown', legsCol: 'lavender', feet: 'fancy', feetCol: 'white', feetCol2: 'rose', hand: 'bouquet', handCol: 'white', fam: 'parrot', famCol: 'green', famCol2: 'red', name: "Peg O'Malley" };
+  const w = clean({ ...fresh('happy'), partner: { kind: 'own', look } });
+  expect(w.partner).toEqual({ kind: 'own', look });
+  expect(decode(encode(w))!.partner).toEqual({ kind: 'own', look });
 });

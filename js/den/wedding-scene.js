@@ -79,10 +79,12 @@ function ship() {
   const g = new THREE.Group();
   const hull = mesh(hullGeo(19, 14.4, 2.6, 0.18), hullM);
   hull.rotation.y = Math.PI / 2;
-  hull.position.y = -2.6 + 0.02;
+  // (her hull's top a little below the deck's, and the deck's a hair below the venue's floor, where the
+  // props and splatters stand: level with either, the two flickered through each other)
+  hull.position.y = -2.6 - 0.08;
   const deck = mesh(hullGeo(18.6, 14, 0.06, 0.18), deckM);
   deck.rotation.y = Math.PI / 2;
-  deck.position.y = -0.04;
+  deck.position.y = -0.065;
   g.add(hull, deck);
   for (const sx of [-1, 1]) {
     g.add(at(mesh(new THREE.BoxGeometry(0.12, 0.12, 13), spar), sx * 6.9, 0.85, 0.6));

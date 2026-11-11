@@ -14,20 +14,21 @@
 import * as THREE from 'three';
 import * as LOOK from '../den-look.js';
 import {
-  TONES, VENUES, THEMES, PLOTS, PROPS, SUGGEST, WELCOME, GUARDS, PROP_R, AREA, MAX_PROPS, DYE_NAMES, SECURITY, RAIDERS,
-  ASK_HER, answer, Gush, fresh, dressFor, moveTo, clean, encode, decode, seatsFor, suitors, suitorTitle, themeOf, themeLook, caption, readSecs, cleanProp,
+  TONES, VENUES, THEMES, PLOTS, PROPS, SUGGEST, ARRIVE, WELCOME, RETURN, GUARDS, PROP_R, AREA, MAX_PROPS, DYE_NAMES, SECURITY, RAIDERS,
+  ASK_HER, answer, STAND, onSomeone, Gush, fresh, dressFor, moveTo, clean, encode, decode, seatsFor, suitors, suitorTitle, themeOf, themeLook, caption, readSecs, cleanProp,
 } from '../den-wedding.js';
 import { $, scene, camera, renderer, hemi, skyDome, paintSky, keep, myLook, V3, toast as denToast, toastQuiet, toastHush, warm, sunOver, ray, burst, wearLook, worldLets, shake } from './world.js';
 import { cine, cinePlay, cineEnd, cineLets, bubble, bubbleAt, stepTo } from './cine.js';
 import { ISLE, VENUE_AT, ISLE_SKY, buildIsle, figure, dropFigure, poseFig, restArms, dressable, heartsTick, heartsClear, roomy } from './wedding-scene.js';
 import { propMesh } from './wedding-props.js';
+import { dressLook } from './menus.js';
 import { ceremony, PORTRAIT_CAM } from './wedding-ceremony.js';
 
 const KEY = 'carp.den.wedding';
 // (the den's own news is kept quiet while you're here: these are the island's)
 const toast = (text, bad = false) => denToast(text, bad, false, true);
 const STEPS = [['partner', 'Who'], ['venue', 'Where'], ['theme', 'Theme'], ['tune', 'Tune it'], ['plot', 'How it goes']];
-const MIS_SPOT = { x: -1.8, z: -2.9 }, YOU_SPOT = { x: -0.55, z: -3.1 }, PARTNER_SPOT = { x: 0.75, z: -3.1 };
+const { mis: MIS_SPOT, you: YOU_SPOT, partner: PARTNER_SPOT } = STAND;
 /** Her looks to choose from (js/den-look.js), or a stand-in till they're there. */
 function versions() {
   const v = LOOK.MISCHIEVIOUS_VERSIONS;
@@ -96,7 +97,7 @@ function placeVenue() {
 }
 function buildProps() {
   wed.propsG.clear();
-  wed.propG = (wed.step === 'tone' ? [] : wed.w.props).map((p, i) => {
+  wed.propG = wed.w.props.map((p, i) => {
     const g = propMesh(p);
     g.userData.prop = p; g.userData.i = i;
     // (a cake on a table sits on it)
@@ -215,7 +216,7 @@ export function weddingEnter({ bySea = false } = {}) {
     placeVenue(); buildProps(); buildCast();
     panel();
     warm(wed.isle);
-    if (ev) setTimeout(() => gush(ev), 500);
+    if (ev) comeBack(ev); else arrive();
   });
 }
 /** Home again: the den as it was, or, come by sea, back aboard her at the isle's jetty (she's waited
@@ -237,7 +238,56 @@ export function weddingLeave() {
   });
 }
 
-// ---------- the tone, and her welcome ----------
+// ---------- as you arrive: her greeting, the tone, and her welcome ----------
+/** Where you and she meet, at the top of the aisle (in the front kept clear of guests), for her greeting
+    and welcome. */
+const MEET_YOU = { x: 0.3, z: -1.0 }, MEET_HER = { x: 0, z: -2.3 };
+function meetUp() { const F = wed.fig; Object.assign(F.you, { ...MEET_YOU, yaw: Math.PI }); Object.assign(F.mis, { ...MEET_HER, yaw: 0 }); }
+function toSpots() { const F = wed.fig; Object.assign(F.you, { ...YOU_SPOT, yaw: 0 }); Object.assign(F.mis, { ...MIS_SPOT, yaw: 0 }); }
+/** The camera close on her as she talks, or on the two of you, from the side. */
+function herShot(C, dist, yaw, tilt = 0.13) { const m = wed.fig.mis; shot(C, m.x, 1.4, m.z, dist, tilt, yaw); }
+function twoShot(C, dist, yaw = 1.3) { const F = wed.fig; shot(C, (F.mis.x + F.you.x) / 2, 1.4, (F.mis.z + F.you.z) / 2, dist, 0.22, yaw); }   // (from the side, past the front row's end)
+/* A little cutscene of her talking (cine.js: Space, Esc or a double tap skips it), a line a beat, the
+   camera on each beat's shot (`frame(C, beat, secs into it)`), then `end()`. `meet`: you walk up the
+   aisle and she comes to meet you, if you're not there already. */
+function talk(lines, frame, end, meet = false) {
+  const F = wed.fig, beats = lines.map((text) => readSecs(text) + 0.9);
+  const c = { t: 0, cam: { look: V3(), dist: 6, tilt: 0.2, yaw: 0.5 }, tick, end: fin };
+  frame(c.cam, 0, 0);
+  wed.welcome = c;
+  cinePlay(c);
+  panel();
+  function tick(dt) {
+    const t = (c.t += dt);
+    let i = 0, t0 = 0;
+    while (i < beats.length && t > t0 + beats[i]) t0 += beats[i++];
+    if (i >= beats.length) { cineEnd(false); return; }
+    const L = t - t0, moving = new Set();
+    if (meet) {
+      if (!stepTo(F.you, F.you, MEET_YOU.x, MEET_YOU.z, 2.2, dt)) moving.add(F.you); else F.you.yaw = Math.PI;
+      F.you.g.position.x = F.you.x; F.you.g.position.z = F.you.z;
+      if (i >= 1 || t > 1.2) { if (!stepTo(F.mis, F.mis, MEET_HER.x, MEET_HER.z, 1.8, dt)) moving.add(F.mis); else F.mis.yaw = 0; F.mis.g.position.x = F.mis.x; F.mis.g.position.z = F.mis.z; }
+    }
+    everyone().forEach((p) => { restArms(p); if (!moving.has(p)) poseFig(p, dt); else p.yaw = p.g.rotation.y; });
+    // (giggly, hands clasped, a little bounce as she talks)
+    if (!moving.has(F.mis)) { F.mis.arms.forEach((a, j) => a.rotation.set(-1.1, 0, j ? -0.45 : 0.45)); F.mis.g.position.y = Math.abs(Math.sin(L * 8)) * 0.04; }
+    if (L > 0.25) say(F.mis, lines[i], 99); else say(null);
+    frame(c.cam, i, L);
+  }
+  function fin(skip) { wed.welcome = null; if (!wed.leaving) end(skip); }
+}
+/* As you arrive (the user, 11 Nov: "opening more with a cutscene where ... she explains to you what it
+   is"): close on her as you walk up, her greeting; her venue behind her; then she asks what sort of
+   wedding, the tone's choice in the planner, the two of you held close while you choose. */
+function arrive() {
+  const F = wed.fig;
+  Object.assign(F.mis, { ...MEET_HER, yaw: 0 }); Object.assign(F.you, { x: 0.3, z: 3.4, yaw: Math.PI });
+  talk(ARRIVE, (C, i, L) => {
+    if (i === 0) herShot(C, 4.2 - L * 0.12, -0.14, 0.3);   // (from up the aisle, as you walk up it)
+    else if (i === 1) shot(C, 0, 1.1, -1.6, (8.5 + L * 0.3) * roomy(), 0.42, 0.5 - L * 0.04);   // (the venue behind her, over the guests' heads)
+    else twoShot(C, 4.4);
+  }, () => { meetUp(); panel(); say(F.mis, ARRIVE.at(-1), 99); }, true);
+}
 function chooseTone(tone) {
   wed.w = fresh(tone);
   wed.gush = new Gush(tone);
@@ -246,46 +296,29 @@ function chooseTone(tone) {
   save();
   welcome();
 }
-/* As you arrive: a look over the venue (as she left it), you walking up, her coming to meet you, and
-   her welcome, each line its own beat; then she asks. */
+/* The tone chosen: the venue as she left it (pretty, or the wreck and its security), what you do here,
+   each line its own beat, close on the two of you; then she asks. */
 function welcome() {
   const lines = WELCOME[wed.w.tone], F = wed.fig, dark = wed.w.tone === 'dark';
-  const beats = lines.map((text) => readSecs(text) + 0.9);
-  const c = { t: 0, cam: { look: V3(), dist: 14, tilt: 0.45, yaw: 0.6 }, tick: wTick, end: wEnd };
-  Object.assign(F.you, { x: 0, z: 6.2, yaw: Math.PI });
-  Object.assign(F.mis, { x: MIS_SPOT.x, z: MIS_SPOT.z, yaw: 0 });
-  wed.welcome = c;
-  cinePlay(c);
-  panel();
-  function wTick(dt) {
-    const t = (c.t += dt);
-    let i = 0, t0 = 0;
-    while (i < beats.length && t > t0 + beats[i]) t0 += beats[i++];
-    if (i >= beats.length) { cineEnd(false); return; }
-    const L = t - t0;
-    // You walk up the aisle; she comes to meet you.
-    const moving = new Set();
-    if (!stepTo(F.you, F.you, 0, 1.6, 2.2, dt)) moving.add(F.you); else F.you.yaw = Math.PI;
-    F.you.g.position.x = F.you.x; F.you.g.position.z = F.you.z;
-    if (i >= 1 || t > 1.5) { if (!stepTo(F.mis, F.mis, 0, 0.2, 1.8, dt)) moving.add(F.mis); else F.mis.yaw = 0; F.mis.g.position.x = F.mis.x; F.mis.g.position.z = F.mis.z; }
-    everyone().forEach((p) => { restArms(p); if (!moving.has(p)) poseFig(p, dt); else p.yaw = p.g.rotation.y; });
-    // (giggly, hands clasped, a little bounce as she talks)
-    if (!moving.has(F.mis)) { F.mis.arms.forEach((a, j) => a.rotation.set(-1.1, 0, j ? -0.45 : 0.45)); F.mis.g.position.y = Math.abs(Math.sin(L * 8)) * 0.04; }
-    if (L > 0.25) say(F.mis, lines[i], 99); else say(null);
-    const C = c.cam;
-    const k = roomy();   // (further back on a phone held upright)
-    if (i === 0) shot(C, 0, 0.6, 0, (13.5 - L * 0.6) * k, 0.5, 0.7 - L * 0.12);
-    else if (i === 1 && dark) shot(C, 3.2, 1.1, -3.2, 7.5 * k, 0.22, 0.55);   // (the security)
-    else shot(C, (F.mis.x + F.you.x) / 2, 1.4, (F.mis.z + F.you.z) / 2, 4.6 * k, 0.14, 0.95);
-  }
-  function wEnd() {
-    wed.welcome = null;
-    Object.assign(F.you, { ...YOU_SPOT, yaw: 0 }); Object.assign(F.mis, { ...MIS_SPOT, yaw: 0 });
-    if (wed.leaving) return;
+  meetUp();
+  talk(lines, (C, i, L) => {
+    if (i === 0) shot(C, 0, 0.8, -1.2, (9.5 - L * 0.4) * roomy(), 0.4, 0.75 - L * 0.1);   // (the venue as she left it)
+    else if (i === 1 && dark) shot(C, 3.2, 1.1, -3.2, 7.5, 0.4, 0.55);   // (the security)
+    else twoShot(C, 4.4);
+  }, () => {
+    toSpots();
     wed.step = 'partner';
     panel();
     say(F.mis, `${lines.at(-1)} ${wed.gush.say('ask')}`);
-  }
+  });
+}
+/* Back again, a wedding already planned: a shorter welcome, close on her, then over to where you left off. */
+function comeBack(ev) {
+  const lines = [wed.gush.say(ev), ...RETURN[wed.w.tone]];
+  talk(lines, (C, i, L) => {
+    if (i === 0) herShot(C, 4.4 - L * 0.1, -0.95);   // (from her side of the front, clear of the guests)
+    else { const P = planCam(); C.look.copy(P.look); Object.assign(C, { dist: P.dist, tilt: P.tilt, yaw: P.yaw }); }
+  }, () => panel());
 }
 function shot(C, x, y, z, dist, tilt, yaw) { C.look.set(x, y, z); wed.root.localToWorld(C.look); Object.assign(C, { dist, tilt, yaw }); }
 
@@ -364,6 +397,22 @@ function pickOwn(body = null) {
   save(); panel();
   gush('own');
 }
+/* Your partner of your own in the wardrobe, as you dress yourself (the user, 11 Nov: "it should let you
+   do like the same as like when you're dressing yourself ... you could do random, but you need to be
+   able to customize them"): every piece, dye and familiar, their name, Surprise me; dressed as you go. */
+function dressOwn() {
+  if (wed.w.partner?.kind !== 'own') return;
+  dressLook({
+    title: 'Your sweetheart', look: wed.w.partner.look,
+    onChange: (look) => {
+      if (wed.w.partner?.kind !== 'own') return;
+      wed.w.partner = { kind: 'own', look: clean({ partner: { kind: 'own', look } }).partner.look };
+      if (wed.fig.partner && wed.fig.partner !== wed.fig.mis) wearLook(wed.fig.partner, dressable(wed.w.partner.look));
+      save();
+    },
+    onClose: () => { if (wed.on) { twirl(wed.fig.partner); panel(); gush('own'); } },
+  });
+}
 function endLineup() {
   const L = wed.lineup;
   if (!L) return;
@@ -399,12 +448,13 @@ function addProp(k, x, z) {
   if (wed.w.props.length >= MAX_PROPS) { say(wed.fig.mis, 'Ooh, it\'s full! Take something away first, and we\'ll squeeze it in.'); return; }
   const T = themeOf(wed.w.theme), c = k === 'splat' ? 'red' : k === 'barrel' ? 'brown' : T ? T.dyes[wed.w.props.length % 3] : 'rose';
   const p = cleanProp({ k, x, z, r: 0, c });
+  if (onSomeone(p)) { say(wed.fig.mis, 'Not on top of us, love! A bit further off.'); return; }
   wed.w.props.push(p);
   wed.sel = { kind: 'prop', i: wed.w.props.length - 1 };
   const v = V3(p.x, 0.4, p.z); wed.root.localToWorld(v); burst(v, '#fff3c4', 10, 2.4);
   propsChanged('add');
 }
-function turnProp(d) { const p = selProp(); if (!p) return; p.r = (p.r + d + 8) % 8; propsChanged('turn'); }
+function turnProp(d) { const p = selProp(); if (!p) return; const r = p.r; p.r = (p.r + d + 8) % 8; if (onSomeone(p)) { p.r = r; return; } propsChanged('turn'); }
 function colourProp(c) { const p = selProp(); if (!p) return; p.c = c; propsChanged('colour'); }
 function removeProp() {
   const p = selProp(); if (!p) return;
@@ -548,7 +598,7 @@ function go(step) {
   if (!can(step)) return;
   if (step !== 'partner') { endLineup(); wed.show = null; if (wed.w.partner?.kind === 'her' || wed.pick === 'her') { wearLook(wed.fig.mis, dressable(misLook())); } }
   if (step !== 'tune') { wed.sel = null; wed.tool = null; }
-  wed.step = step;
+  wed.step = step; wed.peek = null;
   panel();
   if (step === 'theme' && !wed.w.theme) say(wed.fig.mis, `Ooh, a theme! Shall we start from ${themeOf(SUGGEST[wed.w.tone].theme).name.toLowerCase()}? Or anything you like!`);
   if (step === 'plot') say(wed.fig.mis, 'And how shall it go? I do love a bit of drama. Or none! Your choice.');
@@ -586,7 +636,7 @@ function panel() {
     box.append(opt('Someone of your own', 'Anyone you like: a man, a woman, dressed however.', w.partner?.kind === 'own', () => pickOwn()));
     if (w.partner?.kind === 'own') {
       const r = el('div', 'row');
-      r.append(btn('Someone else', () => pickOwn()), btn('A man', () => pickOwn('m'), w.partner.look.body === 'm' ? 'on' : ''), btn('A woman', () => pickOwn('f'), w.partner.look.body === 'f' ? 'on' : ''));
+      r.append(btn('Dress them', dressOwn, 'on'), btn('Someone else', () => pickOwn()), btn('A man', () => pickOwn('m'), w.partner.look.body === 'm' ? 'on' : ''), btn('A woman', () => pickOwn('f'), w.partner.look.body === 'f' ? 'on' : ''));
       box.append(r);
       const nr = el('div', 'row'), inp = el('input');
       inp.placeholder = 'Their name'; inp.maxLength = 18; inp.value = w.partner.look.name || '';
@@ -598,7 +648,13 @@ function panel() {
     next('Next: where?', 'venue');
   } else if (wed.step === 'venue') {
     h('Where shall it be?');
-    for (const v of VENUES) box.append(opt(v.name, v.blurb, w.venue === v.id, () => chooseVenue(v.id)));
+    for (const v of VENUES) {
+      // (each shown as you point at it, or pick it)
+      const b = opt(v.name, v.blurb, w.venue === v.id, () => { wed.peek = null; chooseVenue(v.id); });
+      b.onmouseenter = b.onfocus = () => { wed.peek = v.id; };
+      b.onmouseleave = b.onblur = () => { if (wed.peek === v.id) wed.peek = null; };
+      box.append(b);
+    }
     next('Next: the theme', 'theme');
   } else if (wed.step === 'theme') {
     h('Pick a theme to start from');
@@ -709,7 +765,7 @@ export function weddingMove(e) {
     const g = groundAt(e), p = wed.w.props[wed.drag.i], m = wed.propG[wed.drag.i];
     if (!g || !p || !m) return;
     const q = cleanProp({ ...p, x: g.x + wed.drag.dx, z: g.z + wed.drag.dz });
-    if (q.x !== p.x || q.z !== p.z) {
+    if ((q.x !== p.x || q.z !== p.z) && !onSomeone(q)) {   // (never onto her, the couple or the guards)
       for (const j of wed.drag.on) { const c = wed.w.props[j]; c.x += q.x - p.x; c.z += q.z - p.z; wed.propG[j].position.x = c.x; wed.propG[j].position.z = c.z; }
       p.x = q.x; p.z = q.z; m.position.x = p.x; m.position.z = p.z; wed.drag.moved = true;
       if (p.k === 'bench') reseat();
@@ -734,7 +790,7 @@ export function weddingUp(e) {
 }
 export function weddingWheel(e) {
   if (!wed.on || cine) return;
-  wed.zoom = Math.max(0.45, Math.min(1.8, wed.zoom * (e.deltaY > 0 ? 1.1 : 1 / 1.1)));
+  wed.zoom = Math.max(0.45, Math.min(2.6, wed.zoom * (e.deltaY > 0 ? 1.1 : 1 / 1.1)));
 }
 /** Keys on her island (Space and Esc skip a cutscene first: den.js). True if it used the key. */
 export function weddingKey(key, e) {
@@ -785,7 +841,7 @@ renderer.domElement.addEventListener('touchmove', (e) => {
   if (!wed.on || !touch) return;
   e.preventDefault();
   if (touch.pinch) {
-    if (e.touches.length >= 2) wed.zoom = Math.max(0.45, Math.min(1.8, touch.zoom * touch.pinch / Math.max(1, apart(e.touches[0], e.touches[1]))));
+    if (e.touches.length >= 2) wed.zoom = Math.max(0.45, Math.min(2.6, touch.zoom * touch.pinch / Math.max(1, apart(e.touches[0], e.touches[1]))));
     return;
   }
   const t = e.touches[0];
@@ -919,29 +975,47 @@ function panelOff() {
   const x = (innerWidth - r.left + 14) / innerWidth;
   return { x: x < 0.6 ? x : 0, y: 0 };
 }
+/* Close on what each choice is about (the user, 11 Nov: "Definitely more zoomed in ... I don't
+   understand why it's so zoomed out while I'm choosing"): the two of you as she asks the tone; you
+   and her (and whoever you're marrying) choosing who; her modelling her looks; the bachelors, each
+   close as they step forward; each venue as you point at it or pick it; the layout from a near angle
+   for the theme and tuning; the couple at the arch for how it goes. The wheel or a pinch zooms out. */
 function planCam() {
   if (!wed.on || !wed.root) return null;
   const C = { look: V3(), dist: 15, tilt: 0.6, yaw: wed.yaw };
-  const F = wed.fig;
-  if (wed.step === 'tone') { shot(C, 4, 2, 10, 46, 0.42, 0.35 + performance.now() / 40000); return C; }
+  const F = wed.fig, z = wed.zoom;
+  // (far enough back to take in `w` metres across, in what the planner leaves showing)
+  const hh = Math.atan(Math.tan(camera.fov * Math.PI / 360) * camera.aspect), across = (w) => w / (2 * Math.tan(hh) * (1 - panelOff().x));
   if ((wed.step === 'portrait' || wed.step === 'playing') && wed.shot) return wed.shot;
+  if (!F) return C;
+  if (wed.step === 'tone' || wed.step === 'welcome') { twoShot(C, Math.max(4.4, across(3)) * z, 1.3 + wed.yaw); return C; }
   if (wed.step === 'partner' && wed.lineup) {
     const L = wed.lineup, f = L.i >= 0 && L.list[L.i];
     if (f && L.phase === 'step') shot(C, f.x, 1.3, f.z, 3.6 * roomy(), 0.12, 0.05);
-    else {
-      // (all of them in what the planner leaves showing)
-      const hh = Math.atan(Math.tan(camera.fov * Math.PI / 360) * camera.aspect);
-      shot(C, 0, 1.2, -3.4, Math.max(8.6, 5 / (Math.tan(hh) * (1 - panelOff().x))) * wed.zoom, 0.16, 0);
-    }
+    else if (f && L.phase === 'title') shot(C, f.x, 1.2, f.z, Math.max(5.5, across(3.5)), 0.14, 0.05);
+    else shot(C, 0, 1.2, -3.4, Math.max(8.6, across(10)) * z, 0.16, 0);   // (all of them)
     return C;
   }
-  if (wed.step === 'partner' && (wed.show || wed.pick === 'her' || wed.w.partner?.kind === 'own') && F) {
+  if (wed.step === 'partner' && (wed.show || wed.pick === 'her' || wed.w.partner?.kind === 'own')) {
     const f = wed.w.partner?.kind === 'own' && wed.pick !== 'her' ? F.partner : F.mis;
-    shot(C, f.x, 1.1, f.z, 4.2 * roomy() * wed.zoom, 0.26, 0.2 + wed.yaw);
+    shot(C, f.x, 1.1, f.z, 4.2 * roomy() * z, 0.26, 0.2 + wed.yaw);
     return C;
   }
-  // (the whole venue, in what the planner leaves showing)
-  const hh = Math.atan(Math.tan(camera.fov * Math.PI / 360) * camera.aspect);
-  shot(C, 0, 0.5, -0.4, Math.max(15.5, 6.2 / (Math.tan(hh) * (1 - panelOff().x))) * wed.zoom, 0.62, wed.yaw);
+  if (wed.step === 'partner') {
+    // (you and her, and whoever you're marrying, at the front)
+    const xs = [F.you, F.mis, ...(F.partner && F.partner !== F.mis ? [F.partner] : [])].map((p) => p.x);
+    const lo = Math.min(...xs), hi = Math.max(...xs);
+    shot(C, (lo + hi) / 2, 1.2, -3, Math.max(5.2, across(hi - lo + 2.4)) * z, 0.3, 0.12 + wed.yaw);
+    return C;
+  }
+  if (wed.step === 'venue') {
+    const at = VENUE_AT[wed.peek || wed.w.venue] || VENUE_AT.beach;
+    C.look.set(at.x, at.y + 0.8, at.z - 0.8); wed.isle.localToWorld(C.look);
+    Object.assign(C, { dist: Math.max(11, across(13)) * z, tilt: 0.42, yaw: 0.5 + wed.yaw });
+    return C;
+  }
+  if (wed.step === 'plot') { shot(C, -0.5, 1.25, -3.2, Math.max(5.8, across(5)) * z, 0.42, 0.15 + wed.yaw); return C; }
+  // (the theme and tuning: the venue's layout from a comfortable near angle)
+  shot(C, 0, 0.5, -1.0, Math.max(10.5, across(9)) * z, 0.6, 0.22 + wed.yaw);
   return C;
 }

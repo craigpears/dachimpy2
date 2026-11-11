@@ -55,6 +55,15 @@ export const AISLE_FOOT = { x: 0, z: 6.4 } as const;
 export const COUPLE = { you: { x: -0.65, z: -3.7 }, partner: { x: 0.65, z: -3.7 } } as const;
 /** The two security guards, either side at the front. */
 export const GUARDS = [{ x: -5.2, z: -3.6 }, { x: 5.2, z: -3.6 }] as const;
+/** Where she, you and your partner stand as you plan: at the front, before the arch. */
+export const STAND = { mis: { x: -1.8, z: -2.9 }, you: { x: -0.55, z: -3.1 }, partner: { x: 0.75, z: -3.1 } } as const;
+/** The front, kept clear of guests (the user, 11 Nov: "front benches right up on them, so you can barely
+    even see [Mischievious] because of all the guests are all kind of crowding her out"): her, the couple
+    and the arch always plainly seen. And the aisle, for your partner to walk up. */
+export const FRONT = { x: 2.9, z: -0.8 } as const;
+const AISLE_X = 0.7;
+/** How much room a pirate takes, standing (metres, from their middle). */
+export const BODY_R = 0.28;
 
 // ---------- props ----------
 export const PROPS = [
@@ -144,8 +153,9 @@ export type ThemeId = 'rosy' | 'gory' | 'drunk';
 export const themeOf = (id: string | null): Theme | null => THEMES.find((t) => t.id === id) ?? null;
 export const GUESTS = 8;
 
-/** The benches, four rows a side, facing the altar; everyone's layout starts from them. */
-const ROWS = [-2.4, -0.9, 0.6, 2.1];
+/** The benches, four rows a side, facing the altar, well back from it (the front's kept clear: FRONT);
+    everyone's layout starts from them. */
+const ROWS = [0.2, 1.7, 3.2, 4.7];
 function benches(c: string): Prop[] { return ROWS.flatMap((z) => [P('bench', -2.1, z, c), P('bench', 2.1, z, c)]); }
 /** The layout a theme starts from at a venue: the benches and the arch, the theme's own dressing,
     and a little something each venue adds (lanterns at the beach's aisle, candles in the chapel,
@@ -154,16 +164,16 @@ export function layout(venue: VenueId, theme: ThemeId): Prop[] {
   const T = themeOf(theme)!, [a, b, c, d] = T.dyes;
   const out: Prop[] = [P('arch', ALTAR.x, -5.3, a), ...benches(b)];
   if (theme === 'rosy') {
-    for (const z of ROWS) out.push(P('flowers', -0.95, z, z % 2 ? a : d), P('flowers', 0.95, z, z % 2 ? a : d));
-    out.push(P('candles', -1.7, -4.9, c), P('candles', 1.7, -4.9, c), P('banner', -3.8, -5.4, a, 0), P('banner', 3.8, -5.4, a, 0), P('table', 4.3, 4.6, c), P('cake', 4.3, 4.6, a));
+    ROWS.forEach((z, i) => out.push(P('flowers', -0.62, z - 0.5, i % 2 ? a : d), P('flowers', 0.62, z - 0.5, i % 2 ? a : d)));
+    out.push(P('candles', -1.7, -4.9, c), P('candles', 1.7, -4.9, c), P('banner', -3.8, -5.4, a, 0), P('banner', 3.8, -5.4, a, 0), P('table', 4.6, 5.0, c), P('cake', 4.6, 5.0, a));
   } else if (theme === 'gory') {
     for (const [x, z] of [[-0.6, 3.6], [0.7, 1.2], [-3.4, -3.6], [4.1, 0.2], [-4.4, 3.2], [0.2, -2.0]] as const) out.push(P('splat', x, z, 'red', (x * 3 + z * 5 + 16) % 8 | 0));
-    out.push(P('banner', -3.8, -5.4, c, 0), P('banner', 3.8, -5.4, c, 0), P('flowers', -1.0, -4.6, a), P('flowers', 1.0, -4.6, a), P('lantern', -4.4, -1.6, c), P('lantern', 4.4, -1.6, c), P('candles', -1.8, -5.0, b), P('candles', 1.8, -5.0, b), P('barrel', -4.6, 4.8, b), P('table', 4.3, 4.6, b), P('cake', 4.3, 4.6, c));
+    out.push(P('banner', -3.8, -5.4, c, 0), P('banner', 3.8, -5.4, c, 0), P('flowers', -1.0, -4.6, a), P('flowers', 1.0, -4.6, a), P('lantern', -4.4, -1.6, c), P('lantern', 4.4, -1.6, c), P('candles', -1.8, -5.0, b), P('candles', 1.8, -5.0, b), P('barrel', -4.8, 5.2, b), P('table', 4.6, 5.0, b), P('cake', 4.6, 5.0, c));
   } else {
-    for (const [x, z] of [[-4.6, -3.8], [4.6, -3.8], [-4.8, 1.5], [4.8, 1.5], [-4.4, 5.2], [-3.6, 5.6]] as const) out.push(P('barrel', x, z, c));
-    out.push(P('banner', -3.8, -5.4, d, 0), P('banner', 3.8, -5.4, d, 0), P('lantern', -1.2, 5.6, b), P('lantern', 1.2, 5.6, b), P('table', 4.2, 4.4, a), P('table', 2.4, 5.6, a, 2), P('cake', 4.2, 4.4, b), P('flowers', -1.0, -4.6, e(T)), P('flowers', 1.0, -4.6, e(T)));
+    for (const [x, z] of [[-4.6, -1.6], [4.6, -1.6], [-4.8, 1.5], [4.8, 1.5], [-4.6, 5.4], [-3.8, 6.2]] as const) out.push(P('barrel', x, z, c));
+    out.push(P('banner', -3.8, -5.4, d, 0), P('banner', 3.8, -5.4, d, 0), P('lantern', -1.2, 5.8, b), P('lantern', 1.2, 5.8, b), P('table', 4.6, 5.0, a), P('table', 2.6, 6.2, a, 2), P('cake', 4.6, 5.0, b), P('flowers', -1.0, -4.6, e(T)), P('flowers', 1.0, -4.6, e(T)));
   }
-  if (venue === 'beach') out.push(P('lantern', -1.4, 6.6, b), P('lantern', 1.4, 6.6, b));
+  if (venue === 'beach') out.push(P('lantern', -1.2, 6.8, b), P('lantern', 1.2, 6.8, b));
   else if (venue === 'chapel') out.push(P('candles', -3.4, -4.6, c), P('candles', 3.4, -4.6, c));
   else out.push(P('barrel', -5.4, -5.2, 'brown'), P('barrel', 5.4, -5.2, 'brown'));
   return out;
@@ -182,25 +192,82 @@ export const WRECK: readonly Prop[] = [
 /** The venue as you find it in Happy and cheesy: all clean and pretty, ready for you. */
 export const arrival = (tone: ToneId): Prop[] => (tone === 'dark' ? WRECK.map((p) => ({ ...p })) : layout('beach', 'rosy'));
 
-/** Where the guests sit: two to a bench (one that's standing up), in the order the benches are laid;
-    any guests left over stand at the back. Each: where, which way they face (a turn, radians, as
-    three.js's rotation.y: 0 faces +z) and whether they're sitting. */
+/** What a prop stands on, as rectangles in its own frame (x along its length, z its depth; turned with
+    it): a bench's seat and back, the arch's two posts, a banner's poles, a table's top... A splatter's
+    flat, and a cake's on its table. */
+export interface Rect { x: number; z: number; hx: number; hz: number }
+export function footprint(p: Prop): Rect[] {
+  const r = (x: number, z: number, hx: number, hz = hx): Rect => ({ x, z, hx, hz });
+  switch (p.k) {
+    case 'bench': return [p.w ? r(0, -0.4, 1.15, 0.45) : r(0, 0.01, 1.15, 0.25)];
+    case 'arch': return p.w ? [r(0.2, 0.5, 1.7, 0.9)] : [r(-1.1, 0, 0.13), r(1.1, 0, 0.13)];
+    case 'banner': return [r(0, 0, 0.8, 0.1)];
+    case 'flowers': return [r(0, 0, 0.26)];
+    case 'barrel': return [p.w ? r(0.37, 0, 0.4, 0.36) : r(0, 0, 0.35)];
+    case 'table': return [r(0, 0, 0.58)];
+    case 'lantern': return [r(0, 0, 0.1)];
+    case 'candles': return [r(0, 0, 0.25)];
+    case 'cake': return [r(0, 0, 0.42)];
+    default: return [];
+  }
+}
+/** Whether a circle (a pirate standing at x, z) would stand in something. */
+export function inProp(p: Prop, x: number, z: number, rad = BODY_R): boolean {
+  const a = p.r * Math.PI / 4, dx = x - p.x, dz = z - p.z;
+  const lx = dx * Math.cos(a) - dz * Math.sin(a), lz = dx * Math.sin(a) + dz * Math.cos(a);
+  return footprint(p).some((f) => Math.hypot(Math.max(0, Math.abs(lx - f.x) - f.hx), Math.max(0, Math.abs(lz - f.z) - f.hz)) < rad);
+}
+/** Whether two props stand in each other (sampling the first's footprint against the second's). */
+export function propsOverlap(p: Prop, q: Prop): boolean {
+  const a = p.r * Math.PI / 4;
+  return footprint(p).some((f) => {
+    for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) {
+      const lx = f.x + f.hx * i / 2, lz = f.z + f.hz * j / 2;
+      if (inProp(q, p.x + lx * Math.cos(a) + lz * Math.sin(a), p.z - lx * Math.sin(a) + lz * Math.cos(a), 0.05)) return true;
+    }
+    return false;
+  });
+}
+/** Where nobody else may stand: her, the couple, the officiant at the altar, the guards. */
+const PEOPLE = [STAND.mis, STAND.you, STAND.partner, COUPLE.you, COUPLE.partner, ALTAR, ...GUARDS];
+/** Whether a prop would stand on her, the couple or the guards (moved or added there, it's not). */
+export const onSomeone = (p: Prop): boolean => PEOPLE.some((s) => inProp(p, s.x, s.z));
+
+/** Where the guests stand (the user, 11 Nov: "the pirates are kind of ... going through the benches ...
+    we want to show their outfits off"): two to a bench (one that's standing up), on their feet just in
+    front of it, facing the way it faces, in the order the benches are laid; never in a bench or a prop,
+    in each other, in the aisle or in the front kept clear for her and the couple (FRONT). Wherever a
+    bench is moved; a spot that won't do tries behind it, then its ends. Any left over stand at the back,
+    then down the sides. Each: where, which way they face (a turn, radians, as three.js's rotation.y:
+    0 faces +z), and whether they're sitting (they never are now: standing shows off their outfits). */
 export interface Seat { x: number; z: number; yaw: number; sit: boolean }
 export function seatsFor(props: readonly Prop[], n = GUESTS): Seat[] {
   const out: Seat[] = [];
+  const free = (x: number, z: number) => Math.abs(x) <= AREA.x + 0.5 && z >= AREA.z0 && z <= AREA.z1 + 0.5
+    && !(Math.abs(x) < FRONT.x && z < FRONT.z) && !(Math.abs(x) < AISLE_X && z >= FRONT.z)
+    && !props.some((p) => inProp(p, x, z)) && !out.some((o) => Math.hypot(o.x - x, o.z - z) < BODY_R * 2.1)
+    && !PEOPLE.some((s) => Math.hypot(s.x - x, s.z - z) < BODY_R * 2.1);
   for (const b of props) {
     if (b.k !== 'bench' || b.w) continue;
-    const a = b.r * Math.PI / 4;
+    const a = b.r * Math.PI / 4, yaw = a + Math.PI;
+    // (a bench's length along its own x; it faces its own -z, so they look its way)
+    const at = (lx: number, lz: number) => ({ x: b.x + lx * Math.cos(a) + lz * Math.sin(a), z: b.z - lx * Math.sin(a) + lz * Math.cos(a) });
     for (const lx of [-0.55, 0.55]) {
       if (out.length >= n) return out;
-      // (a bench's length along its own x; it faces its own -z, so they look its way)
-      out.push({ x: b.x + lx * Math.cos(a), z: b.z - lx * Math.sin(a), yaw: a + Math.PI, sit: true });
+      const spot = [at(lx, -0.58), at(lx, 0.6), at(lx * 2.75, 0)].find((s) => free(s.x, s.z));
+      if (spot) out.push({ ...spot, yaw, sit: false });
     }
   }
-  for (let i = 0; out.length < n; i++) {
-    const side = i % 2 ? 1 : -1, row = Math.floor(i / 2);
-    out.push({ x: side * (1.6 + (row % 4) * 1.1), z: 4.6 + Math.floor(row / 4) * 0.9, yaw: Math.PI, sit: false });
+  // (the rest at the back, from the aisle outwards, then down the sides, front to back)
+  const rest: { x: number; z: number }[] = [];
+  for (let z = 5.0; z <= AREA.z1 + 0.01; z += 0.8) for (let i = 0; i < 6; i++) for (const sd of [-1, 1]) rest.push({ x: sd * (1.4 + i * 0.85), z });
+  for (let z = FRONT.z; z < 5; z += 0.8) for (const x of [5.4, 4.6]) for (const sd of [-1, 1]) rest.push({ x: sd * x, z });
+  for (const r of rest) {
+    if (out.length >= n) break;
+    if (free(r.x, r.z)) out.push({ x: r.x, z: r.z, yaw: Math.PI, sit: false });
   }
+  // (and if there's nowhere at all, somewhere at the very back)
+  for (let i = 0; out.length < n; i++) out.push({ x: (i % 2 ? 1 : -1) * (1.2 + Math.floor(i / 2) * 0.7), z: AREA.z1 + 0.6, yaw: Math.PI, sit: false });
   return out;
 }
 
@@ -228,7 +295,7 @@ const JILTED: Suitor = {
 };
 const SWEET: Suitor = {
   name: 'Sweet William',
-  look: { body: 'm', skin: 2, hair: 'wavy', hairCol: 'blonde', beard: 'none', patch: false, smile: true, hat: 'feathered', hatCol: 'peach', hatCol2: 'white', top: 'vest', topCol: 'peach', topCol2: 'white', legs: 'pantaloons', legsCol: 'white', feet: 'shoes', feetCol: 'tan', hand: 'bouquet' },
+  look: { body: 'm', skin: 2, hair: 'wavy', hairCol: 'blonde', beard: 'none', patch: false, smile: true, hat: 'feathered', hatCol: 'peach', hatCol2: 'white', top: 'vest', topCol: 'peach', topCol2: 'white', legs: 'pantaloons', legsCol: 'white', feet: 'shoes', feetCol: 'tan', hand: 'bouquet', handCol: 'white' },
   line: 'I picked you a daisy. I picked everyone a daisy, actually. I just really like daisies.',
 };
 const REST: Suitor[] = [
@@ -238,9 +305,9 @@ const REST: Suitor[] = [
     line: 'I\'ve written you a poem. It\'s mostly about rum, but you\'re in the last verse.' },
   { name: 'Captain Rosalind', look: { body: 'f', skin: 0, hair: 'wavy', hairCol: 'auburn', patch: false, smile: true, hat: 'captain', hatCol: 'maroon', hatCol2: 'gold', top: 'captain', topCol: 'maroon', topCol2: 'gold', legs: 'long', legsCol: 'black', feet: 'fancy', feetCol: 'black', feetCol2: 'gold', hand: 'bouquet' },
     line: 'I\'ve sunk forty ships, darling, but nobody\'s ever sunk my heart. Until now.' },
-  { name: 'Wobbly Pete', look: { body: 'm', skin: 1, hair: 'bald', hairCol: 'grey', beard: 'long', patch: true, smile: true, hat: 'fez', hatCol: 'purple', top: 'striped', topCol: 'purple', topCol2: 'white', legs: 'kilt', legsCol: 'green', legsCol2: 'black', feet: 'curled', feetCol: 'gold', hand: 'bouquet', fam: 'parrot', famCol: 'green', famCol2: 'red' },
+  { name: 'Wobbly Pete', look: { body: 'm', skin: 1, hair: 'bald', hairCol: 'grey', beard: 'long', patch: true, smile: true, hat: 'fez', hatCol: 'purple', top: 'striped', topCol: 'purple', topCol2: 'white', legs: 'kilt', legsCol: 'green', legsCol2: 'black', feet: 'curled', feetCol: 'gold', hand: 'bouquet' },
     line: 'I\'ve only the one good knee, but I\'ll go down on it for you. Getting up again\'s your job.' },
-  { name: 'Lady Marigold', look: { body: 'f', skin: 5, hair: 'bun', hairCol: 'black', patch: false, smile: true, hat: 'wide', hatCol: 'orange', hatCol2: 'lemon', top: 'corset', topCol: 'orange', topCol2: 'lemon', legs: 'gown', legsCol: 'lemon', feet: 'shoes', feetCol: 'orange', hand: 'bouquet' },
+  { name: 'Lady Marigold', look: { body: 'f', skin: 5, hair: 'bun', hairCol: 'black', patch: false, smile: true, hat: 'wide', hatCol: 'orange', hatCol2: 'lemon', top: 'corset', topCol: 'orange', topCol2: 'lemon', legs: 'gown', legsCol: 'lemon', feet: 'shoes', feetCol: 'orange', hand: 'bouquet', fam: 'parrot', famCol: 'green', famCol2: 'red' },
     line: 'I\'ve a house on Admiral Island, three cats and a parrot who swears. We come as a set.' },
 ];
 export const suitors = (tone: ToneId): Suitor[] => [tone === 'dark' ? JILTED : SWEET, ...REST];
@@ -331,19 +398,34 @@ export function plotAt(s: readonly Beat[], t: number): { beat: string; i: number
 export const fill = (text: string, names: { you: string; partner: string }): string => text.replace(/\{partner\}/g, names.partner).replace(/\{you\}/g, names.you);
 
 // ---------- what Mischievious says ----------
-/** Her welcome as you arrive, by tone: giggly and romantic, or not in the least bothered by the
-    blood and guts. */
+/** As you arrive, before you've chosen a tone (the user, 11 Nov: "opening more with a cutscene where
+    ... she explains to you what it is and what's going on"): her greeting, what this is, and her
+    question, the tone's choice. Her voice, not yet either tone's. */
+export const ARRIVE: readonly string[] = [
+  "Ahoy! Welcome to my isle! Mind the crabs, they're guests too.",
+  'This is my wedding venue. Pirates sail in from all over the Ocean to get hitched here.',
+  'First things first: what sort of wedding are we having?',
+];
+/** Her welcome once you've chosen the tone: the venue as she left it, what you do here, and her
+    question. Giggly and romantic, or not in the least bothered by the blood and guts. */
 export const WELCOME: Record<ToneId, readonly string[]> = {
   happy: [
-    'Oh! You came! Welcome to my island! Isn\'t it pretty?',
-    'I do love a wedding. I\'ve been through five today, just for the fun of it! Hee hee!',
+    "Ooh, happy and cheesy! Roses, ribbons, the lot. I've done five today, just for the fun of it!",
+    "You plan it your way: who, where, the look, and how it goes. I'll help. Then it plays out, and you get a portrait!",
     'So! How are you? Would you like to get married?',
   ],
   dark: [
-    'Oh, hello! Don\'t mind the blood and guts. The last wedding went a bit... bloody and gory.',
-    'It\'s fine. Five weddings today, and only the one got raided. We\'ve hired a bit of extra security.',
+    "Ooh, dark humour! Don't mind the blood and guts. The last wedding went a bit... bloody and gory.",
+    "It's fine. Five weddings today, and only the one got raided. We've hired a bit of extra security.",
+    "You plan it your way: who, where, the look, and how it goes. Then it plays out, and you get a portrait. Mop's in the corner.",
     'So! How are you? Would you like to get married?',
   ],
+};
+/** Back again, a wedding already planned (kept in this browser, or a share link): a shorter welcome,
+    after her line for coming back (GUSH back, shared). */
+export const RETURN: Record<ToneId, readonly string[]> = {
+  happy: ["Carry on where you left off. Who, where, the look, how it goes: I'll be right here!"],
+  dark: ["Carry on where you left off. I'll be right here. With the mop."],
 };
 /** The weddings she's been through today, for the fun of it (the user, 11 Nov: "showing that ... you
     can keep doing it for fun all the time ... I enjoy getting married, go through the ceremonies ...

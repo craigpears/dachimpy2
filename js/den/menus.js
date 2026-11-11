@@ -165,7 +165,27 @@ $('deco-flag').onclick = () => { decoMode(false); dressPanel(true, 'den', 'flag'
 /* "Your pirate": a turning preview of your pirate, with what to wear chosen from Puzzle Pirates'
    own tailor in its dyes, a familiar for your shoulder, and the den's flag and house paint. Kept
    in this browser; crewmates see your look, and the den's dress is shared by the crew. */
-export const dress = { open: false, tab: 'pirate', r: null, scene: null, cam: null, model: null, yaw: 0.6, drag: null, held: false };
+export const dress = { open: false, tab: 'pirate', r: null, scene: null, cam: null, model: null, yaw: 0.6, drag: null, held: false, edit: null };
+/* Whose look the Your pirate panel dresses: yours, or anyone else's handed to it (dressLook: your partner
+   of your own at Mischievious's wedding). `get` the look, `set` a new one; `name` to give them a name. */
+const yours = { title: 'Your pirate', get: () => myLook, set: (L) => { worldLets.myLook = L; lookChanged(); } };
+dress.edit = yours;
+function setLook(L) {
+  dress.edit.set(L);
+  if (dress.edit !== yours && dress.open) { dressModel(); dressRows(); }   // (lookChanged does it for yours)
+}
+/** The Your pirate panel on someone else's look: `look` to start from, `onChange(look)` each change,
+    `onClose()` when it's done; `title`, and `name` (their name, kept on the look as `name`). */
+export function dressLook({ title, look, onChange, onClose, name = true }) {
+  let cur = { ...look };
+  const named = (L, n) => { const N = { ...L }; if (n) N.name = n; else delete N.name; return N; };
+  dress.edit = {
+    title, name, onClose, get: () => cur,
+    set: (L) => { cur = named(L, cur.name); onChange(cur); },   // (the wardrobe's own looks have no name: theirs kept)
+    rename: (n) => { cur = named(cur, n); onChange(cur); },
+  };
+  dressPanel(true, 'pirate', 'pirate');
+}
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 function dressInit() {
   if (dress.r) return;
@@ -193,7 +213,7 @@ function dressInit() {
 }
 function dressModel() {
   if (dress.model) dress.scene.remove(dress.model.g);
-  dress.model = dressPirate(myLook);
+  dress.model = dressPirate(dress.edit.get());
   dress.scene.add(dress.model.g);
 }
 let dressT = 0;
@@ -203,7 +223,7 @@ function dressFrame(now) {
   dressT = now;
   const cv = $('dress-cv'), w = cv.clientWidth, h = cv.clientHeight;
   if (cv.width !== Math.round(w * dress.r.getPixelRatio())) { dress.r.setSize(w, h, false); dress.cam.aspect = w / h; dress.cam.updateProjectionMatrix(); }
-  const fam = myLook.fam !== 'none', denMode = dress.mode === 'den';
+  const fam = dress.edit.get().fam !== 'none', denMode = dress.mode === 'den';
   // Your den: no pirate, a closer look at your flag.
   dress.model.g.visible = !denMode;
   if (denMode) { dress.cam.position.set(-0.1, 1.75, 2.6); dress.cam.lookAt(-0.35, 1.75, -0.9); }
@@ -219,10 +239,11 @@ export function dressPanel(on, mode = 'pirate', tab = null) {
   if (on) dress.held = false;
   $('dress').classList.toggle('on', on);
   palette(null);
-  if (!on) return;
+  if (!on) { const E = dress.edit; dress.edit = yours; if (E !== yours) E.onClose?.(); return; }
+  if (mode === 'den') dress.edit = yours;
   dress.mode = mode;
   if (tab || !dressTabsFor[mode].some(([id]) => id === dress.tab)) dress.tab = tab || dressTabsFor[mode][0][0];
-  $('dress-title').textContent = mode === 'den' ? 'Your den' : 'Your pirate';
+  $('dress-title').textContent = mode === 'den' ? 'Your den' : dress.edit.title;
   $('dress-rand').style.display = mode === 'den' ? 'none' : '';
   keys.clear();
   dressInit();
@@ -258,7 +279,7 @@ export function dressRows() {
   tabs.replaceChildren(...dressTabsFor[dress.mode || 'pirate'].map(([id, name]) => { const b = el('button', 'tab' + (dress.tab === id ? ' on' : ''), name); b.onclick = () => { dress.tab = id; palette(null); dressRows(); }; return b; }));
   const box = $('dress-rows');
   box.replaceChildren();
-  const L = myLook;
+  const L = dress.edit.get();
   const row = (label) => { const r = el('div', 'drow'); r.append(el('span', 'lab', label)); box.append(r); return r; };
   const chooser = (r, list, cur, set) => {
     const i = Math.max(0, list.findIndex(([id]) => id === cur)), w = el('span', 'pick');
@@ -278,7 +299,7 @@ export function dressRows() {
     r.append(b);
   };
   const toggle = (r, on, set) => { const b = el('button', 'tog' + (on ? ' on' : ''), on ? 'Yes' : 'No'); b.onclick = () => set(!on); r.append(b); };
-  const look = (k) => (v) => { worldLets.myLook = cleanLook({ ...myLook, [k]: v }); lookChanged(); };
+  const look = (k) => (v) => setLook(cleanLook({ ...L, [k]: v }));
   const slot = (label, k) => {
     const r = row(label);
     chooser(r, PARTS[k][L.body], L[k], look(k));
@@ -287,6 +308,12 @@ export function dressRows() {
     if (twoColours(L, k)) swatch(r, DYES, L[k + 'Col2'], look(k + 'Col2'), 'Second colour');
   };
   if (dress.tab === 'pirate') {
+    if (dress.edit.name) {
+      const inp = el('input');
+      inp.placeholder = 'Their name'; inp.maxLength = 18; inp.value = L.name || '';
+      inp.oninput = () => dress.edit.rename(inp.value.replace(/[^a-z0-9 '-]/gi, '').slice(0, 18));
+      row('Name').append(inp);
+    }
     chooser(row('Pirate'), [['m', 'Male'], ['f', 'Female']], L.body, look('body'));
     const sk = row('Skin');
     SKIN.forEach((c, i) => { const b = el('button', 'sw' + (i === L.skin ? ' cur' : '')); b.style.background = c; b.title = 'Skin'; b.setAttribute('aria-label', `Skin ${i + 1}`); b.onclick = () => look('skin')(i); sk.append(b); });
@@ -373,7 +400,7 @@ $('look-btn').onclick = () => dressPanel(true, 'pirate');
 $('den-btn').onclick = () => dressPanel(true, 'den');
 $('deco-btn').onclick = (e) => { e.currentTarget.blur(); decoMode(!deco.on); };
 $('dress-done').onclick = () => dressPanel(false);
-$('dress-rand').onclick = () => { worldLets.myLook = randomLook(); lookChanged(); };
+$('dress-rand').onclick = () => setLook(randomLook());
 $('dress').addEventListener('click', (e) => { if (e.target === $('dress')) dressPanel(false); else if (!e.target.closest('#palette')) palette(null); });
 
 /* A shortcut for trying things out (den.html?try=gundeck): the whole rampart and the gun deck
