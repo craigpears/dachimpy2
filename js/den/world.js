@@ -123,6 +123,13 @@ sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
 Object.assign(sun.shadow.camera, { left: -16, right: 16, top: 14, bottom: -14, near: 1, far: 45 });
 scene.add(sun);
+/* Where the sun's shadows fall: on the den (by default), or over somewhere else in the world, at
+   (x, y, z) (Mischievious's island: js/den/wedding.js). Same light, same angle, just moved along. */
+export function sunOver(x = 0, y = 0, z = 0) {
+  sun.position.set(x - 5, y + 12, z + 9);
+  sun.target.position.set(x, y, z);
+  sun.target.updateMatrixWorld();
+}
 // Moonlight from outside, so the outer face of the wall shows when you turn the view round.
 const moon = new THREE.DirectionalLight('#a9bce0', 1.1);
 moon.position.set(4, 10, -14);
@@ -469,7 +476,11 @@ let toastTimer;
 // rather than wiping it; only the latest waiting toast is kept, so they never pile up behind.
 let toastShown = 0, toastRead = 0, toastWaiting = null, toastWait;
 const readMs = (text) => Math.min(4500, Math.max(1200, text.length * 45));
-export function toast(text, bad = false, warn = false) {
+/* Somewhere else for a while (Mischievious's island: js/den/wedding.js), the den's own news is kept
+   quiet: only a toast that's `loud` (that place's own) shows. */
+export const toastQuiet = { on: false };
+export function toast(text, bad = false, warn = false, loud = false) {
+  if (toastQuiet.on && !loud) return;
   const now = performance.now();
   const left = toastShown + toastRead - now;
   if (!bad && $('toast').classList.contains('on') && left > 0) {   // bad news (a hit) never waits

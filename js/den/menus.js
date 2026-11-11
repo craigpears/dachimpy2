@@ -20,6 +20,7 @@ import { craneCheat } from './crane.js';
 import { umamiCheat } from './capybara.js';
 import { board, sailReset } from './sailing.js';
 import { online, guest, myId, send } from './crew.js';
+import { wed, weddingEnter, weddingLeave } from './wedding.js';
 import { newGame } from '../den.js';
 
 // ---------- decorating the den ----------
@@ -512,6 +513,22 @@ function cheatUmami() {
   craneCheat((cells) => tileFor(cells, []));
   umamiCheat();
 }
+/* Mischievious's wedding (js/den/wedding.js): the siege put to rest and their ship gone, and off to
+   her island. */
+function cheatWedding() {
+  if (cine || wed.on) return;
+  if (wm) exitWall();
+  if (deco.on) decoMode(false);
+  if (carry) putBack();
+  raiders.splice(0).forEach((r) => raiderOut(r, true)); boats.splice(0).forEach((b) => scene.remove(b.g));
+  Object.assign(G, { phase: 'peace', wave: Math.max(G.wave, 3), toSpawn: 0, aim: null, cannonShots: 0 });
+  mapLets.phaseWas = 'peace';   // (no cutscene)
+  ship.visible = cannon.visible = false; ship.position.x = ship.userData.home + SHIP_GONE + 1;
+  $('intro').classList.add('off');
+  if (sail.on) sailReset();
+  sail.seen = true;   // (no "their ship's making sail" while you're away)
+  weddingEnter();
+}
 // [name, what it does, its link's name if it's a starting point (den.html?at=...)]
 const CHEATS = [
   ['Beat this wave', cheatBeat],
@@ -522,6 +539,7 @@ const CHEATS = [
   ['Go sailing', cheatSail, 'sea'],
   ["Dignity's scene", cheatDignity, 'dignity'],
   ["Umami's rescue", cheatUmami, 'umami'],
+  ["Mischievious's wedding", cheatWedding, 'wedding'],
 ];
 /* Every starting point has a link, to share (the user, 10 Nov: "make it so that each starting point
    is something that I can put into the URL as well, so that I can share that animation with
@@ -555,7 +573,7 @@ const cheatButtons = (el, list) => $(el).replaceChildren(...list.map(([name], i)
   b.textContent = name;
   const at = el === 'cheat-stages' ? STAGE_AT[i] : CHEATS[i][2];
   if (at) b.title = `Link: den.html?at=${at}`;
-  b.onclick = () => { cheatPanel(false); (el === 'cheat-stages' ? skipTo : (j) => CHEATS[j][1]())(i); if (at) linkTo(at); };
+  b.onclick = () => { cheatPanel(false); if (wed.on && at !== 'wedding') weddingLeave(); (el === 'cheat-stages' ? skipTo : (j) => CHEATS[j][1]())(i); if (at) linkTo(at); };
   return b;
 }));
 cheatButtons('cheat-stages', STAGES);

@@ -35,6 +35,7 @@ import { rowing, rowCam, rowPull } from './den/rowing.js';
 import { crane, craneCam } from './den/crane.js';
 import { umami, umamiTick, umamiCam, umamiClick } from './den/capybara.js';
 import { net, online, guest, isHost, send, updateMates, sendMe, snapshot, followRaider, sendSync, onNet, joinCrew, leaveCrew } from './den/crew.js';
+import { wed, weddingKey, weddingDown, weddingMove, weddingUp, weddingWheel, weddingTick, weddingCam } from './den/wedding.js';
 import { deco, decoMode, decoMove, decoClick, decoTurn, dress, dressPanel, dressRows, lookChanged, applyDen, buildAll, tileFor, fillFrame, cheats, skipTo, cheatPanel, startAt } from './den/menus.js';
 
 export function newGame() {
@@ -70,6 +71,8 @@ addEventListener('keydown', (e) => {
   if (paused) { if (['p', ' ', 'escape', 'enter'].includes(key)) { e.preventDefault(); setPaused(false); } return; }
   // The cutscene: Space or Esc skips it; nothing else.
   if (cine) { if ([' ', 'escape', 'enter'].includes(key)) { e.preventDefault(); if (!e.repeat) cineEnd(true); } return; }
+  // On Mischievious's island: its own keys (js/den/wedding.js).
+  if (wed.on) { weddingKey(key, e); return; }
   if (chart.on && !deco.on) { e.preventDefault(); mapKey(key, e); return; }
   // Treasure Haul: its own keys (P still pauses).
   if (haul.on) { e.preventDefault(); if (!haulKey(key, e) && key === 'p' && !e.repeat) setPaused(true); return; }
@@ -130,6 +133,7 @@ function deckCellAt(x, y) {
   return ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), -(ramp.T + 0.05)), p) ? gdCell(p.x, p.z) : null;
 }
 renderer.domElement.addEventListener('mousemove', (e) => {
+  if (wed.on) { weddingMove(e); return; }
   if (wm && keyAt) { if (Math.hypot(e.clientX - keyAt.x, e.clientY - keyAt.y) < 24) return; worldLets.keyAt = null; }
   if (deco.on) { decoMove(e); return; }
   if (haul.on) { haulHover(e.clientX, e.clientY); return; }
@@ -159,6 +163,7 @@ document.addEventListener('mouseleave', () => { raidsLets.cursor = null; });
 // camera; a right click without dragging flips the piece.
 let drag = null;
 renderer.domElement.addEventListener('mousedown', (e) => {
+  if (wed.on) { weddingDown(e); return; }
   if (deco.on) { if (e.button === 2) drag = { x: e.clientX, y: e.clientY, moved: false, deco: e }; else decoClick(e); return; }
   if (e.button === 2) { drag = { x: e.clientX, y: e.clientY, moved: false }; return; }
   if (e.button !== 0 || G.over || cine) return;
@@ -191,6 +196,7 @@ addEventListener('mousemove', (e) => {
   drag.x = e.clientX; drag.y = e.clientY;
 });
 addEventListener('mouseup', (e) => {
+  if (wed.on) { weddingUp(e); return; }
   if (e.button === 0 && gd?.press) chalkRelease(e.clientX, e.clientY);
   if (e.button === 0 && gunnery.on) gunneryUp(e.clientX, e.clientY);
   if (e.button !== 2 || !drag) return;
@@ -206,6 +212,7 @@ addEventListener('mouseup', (e) => {
 // rotate a piece"), or your chalk on the gun deck; otherwise it zooms (- and = zoom too).
 let wheelAcc = 0, wheelT = 0;
 renderer.domElement.addEventListener('wheel', (e) => {
+  if (wed.on) { weddingWheel(e); return; }
   if (deco.on) {
     wheelAcc += e.deltaY;
     if (Math.abs(wheelAcc) >= 40) { decoTurn(wheelAcc > 0 ? 1 : -1); wheelAcc = 0; }
@@ -478,6 +485,7 @@ function update(dt) {
   dignityTick(dt, sail.on ? sail.helm.pose : null);   // (the checkpoint's commander, on its gate)
   haulTick(dt);
   umamiTick(dt);   // (Umami the capybara: his bank in the lagoon, his board, his life at the den)
+  weddingTick(dt);   // (Mischievious's wedding, on her island)
 
   /* Camera follows the pirate, looking at the wall and a little over it. Up on the rampart it
      swings up high to look down over the wall at the raiders. The player can turn it (Z/C or
@@ -666,6 +674,9 @@ function update(dt) {
     d = Math.atan2(Math.sin(d), Math.cos(d));
     yaw = y0 + d * craneView;
   }
+  // On Mischievious's island: its own camera, whole (js/den/wedding.js).
+  const wc = weddingCam();
+  if (wc) { look.copy(wc.look); dist = wc.dist; tilt = wc.tilt; yaw = wc.yaw; }
   // The cutscene's own shots.
   if (cine) cineLets.cineCam = cine.cam;
   cineLets.cineView += ((cine ? 1 : 0) - cineView) * Math.min(1, dt * 2.5);
@@ -679,6 +690,7 @@ function update(dt) {
     yaw = y0 + d * cineView;
   }
   v3.set(Math.sin(yaw) * Math.cos(tilt), Math.sin(tilt), Math.cos(yaw) * Math.cos(tilt)).multiplyScalar(dist).add(look);
+  if (wed.snap) { wed.snap = false; camAt.copy(v3); camLook.copy(look); }   // (off to her island, or back: no flying across the sea)
   camAt.lerp(v3, Math.min(1, dt * (3 + 9 * Math.max(rowView, gunView))));   // (held close while rowing or at her guns: she can fly along)
   camera.position.copy(camAt);
   // The fog starts beyond what you're looking at, so a high or zoomed-out view doesn't go murky.
@@ -786,6 +798,6 @@ if (startHere && !online() && !startAt(startHere)) toast(`No starting point call
 
 // For poking at it from the console.
 window.den = { rowing, rowPull, tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { worldLets.myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, swordReward, swordBreak, lumber, toLumber, repairAll, newGame, raiders, G, get carry() { return carry; }, get patch() { return patch; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
-  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, hold, holdSwap, board, ashore, patch, patchKey, patchPlace, deckHoleShape, haul, haulSwap, crane, gunnery, umami,
+  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, hold, holdSwap, board, ashore, patch, patchKey, patchPlace, deckHoleShape, haul, haulSwap, crane, gunnery, umami, wed,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };
