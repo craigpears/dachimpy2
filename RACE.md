@@ -71,6 +71,23 @@ tiny one a Double gets you through, bigger ones need a bigger combo, the biggest
 you a person that can break quick double triples? That gets you through some shortcuts ... Or do you want to
 go for those giant" ones.
 
+**Small combos pay on the long way too (idea, the user theorising, 11 Nov).** "When I've said, you know, you
+should have some benefit from just doing small doubles, that's very much something you can do on the long
+way round ... people have to time it so that they break their double at the same time so they can jump over
+an obstacle, like a wind or something like that." The shape: a narrow stretch of the long way, only two
+squares wide, with headwinds blowing her back, alternating side to side in a zigzag with gaps between them.
+"Yes, you can bump around the rocks and get around them, but getting over them with, like, a double, like a
+well-timed double, would be a lot more effective."
+- **Weaving through costs time.** You swing from side to side through the gaps, and any slip puts you in
+  a headwind that pushes you back.
+- **A Double timed right hops one.** A Double broken just as she's lined up behind a headwind carries
+  her over it, like a gust over the whirlpools.
+- **It's a skill on the long way.** Timing your breaks, not only building big combos, so the long way isn't
+  just waiting. It suits the quick double-and-triple player, and it's on the move, so the leader can use
+  it safely (§6).
+- **For the course's redesign** (it will change anyway): the Double's gust length decides how long each
+  headwind is and how far apart they sit.
+
 **Findable, never marked.** On a first go the user couldn't find the crane or the rowing gap ("There's a
 carpentry shortcut in here I've not seen it"). So the shortcuts should be plain to see as you sail past: a
 gap, the crane's footing. The starter names a few as examples. Only the starlit door is secret.
