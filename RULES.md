@@ -583,6 +583,35 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   on its YPPedia page (colour, shape and the markings that tell them apart at a glance), in the
   den's 3D style, as the gun tower is "instantly recognisable as Gunnery". Check the finished
   board side by side with YPPedia's pictures before calling it done. No placeholder tiles.
+  **Checked side by side, 11 Nov** (each puzzle's YPPedia page and its piece pictures), one look
+  per puzzle, shared wherever it's played:
+  - **Treasure Haul** (`js/den/treasure.js`; the wreck beyond the checkpoint and the lagoon's
+    wreck): the coins were placeholders (olive and gold both yellow, a plain X, a white blob of a
+    king). Redrawn as the real ones, each design struck in relief: olive green, a square hole in a
+    frame with a skull over it, scrolled handles and a goblet's foot; silver, two cutlasses
+    crossed hilts down under a skull; lemon gold, a scalloped ring, a cross and an emblem in each
+    quarter; tan and eight-sided, a white crowned bust. The net behind them is the real close
+    grey-brown diamond lattice (it was a coarse brown net on green water), and the chest an iron
+    frame round pale lattice slats, a strap down the middle to the big face-like padlock. The
+    ruby, emerald, silver frame and red-and-yellow cursor already matched.
+  - **Bilge** (`js/den/bilge.js`, and the rowing boards that borrow its pieces): five of the
+    seven match YPPedia's screenshots; three patterns were redrawn to them (the teal octagon's
+    three curling waves, the blue sphere's white curling wave, the pale green sphere's three
+    wavy strokes), the dark blue square's corners slightly rounded, and the cursor red lined in
+    yellow as the real one (it was orange). Not confirmed: the colours of the last two kinds, the
+    rounded square with waves and the pentagon with stripes. YPPedia's screenshots show only five
+    kinds; their shapes are from its high-contrast "alternate pieces" picture, which matches the
+    real ones shape for shape, but not their usual colours. The crab, pufferfish and jellyfish match.
+  - **Swordfight** (`src/den-sword-draw.ts`): the crates are the den's own (8 Nov, the user's
+    call), so only what's on them was checked against YPPedia's sword pieces: the four swords
+    match (skull dagger, dagger, machete, scimitar); the yellow, green and blue now have the real
+    ones' cord-bound grips, the scimitar the real one's broad blade, and the yellow is lemon, not
+    the orange it came out as on the crates' wood. The real pieces are glossy gems; that stays a
+    crate, as the user chose.
+  - **Gunnery** (`js/den/gundeck.js`, the tower and her deck): already matched (deck, red
+    gunwale and gold rail, crates of shot and red stores, the barrel, the four stores, yellow
+    arrows). Only the powder bag changed: tied off at the top with a cord and a flared tuft, as
+    the real one's sack, where it was a plain red ball.
 
 - **Messages stay up long enough to read (10 Nov).** The checkpoint's message "vanished very
   quickly": a longer message stays up longer (about 70 ms a letter, 1.8 to 7 seconds), and one

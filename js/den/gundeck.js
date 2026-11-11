@@ -203,16 +203,23 @@ function storeMesh(kind) {
     body.add(mesh(new THREE.SphereGeometry(0.2, 20, 14), mat('#8d969f', { metalness: 0.55, roughness: 0.3 })));
     body.position.y = 0.2;
   } else if (kind === 'powder') {
-    // A round red bag of powder, with the flame on it.
-    const bag = mesh(new THREE.SphereGeometry(0.2, 18, 12), mat('#c42d1f', { roughness: 0.8 }));
+    // A round red bag of powder, with the flame on it, tied off at the top as Gunnery's is (as on
+    // YPPedia's picture of the pieces): its neck gathered in a dark cord, the cloth flaring out
+    // past it.
+    const red = mat('#c42d1f', { roughness: 0.8 });
+    const bag = mesh(new THREE.SphereGeometry(0.2, 18, 12), red);
     bag.scale.y = 0.72;
     const badge = mesh(new THREE.CircleGeometry(0.15, 20), new THREE.MeshStandardMaterial({ map: powderTex, roughness: 0.8 }));
     badge.rotation.x = -Math.PI / 2;
     badge.position.y = 0.146;
-    const neck = mesh(new THREE.TorusGeometry(0.07, 0.025, 6, 14), mat('#5a0f08'));
+    const top = new THREE.Group();
+    const neck = mesh(new THREE.TorusGeometry(0.045, 0.02, 6, 14), mat('#4a0c06'));
+    const tuft = mesh(new THREE.ConeGeometry(0.075, 0.1, 10).rotateX(Math.PI).translate(0, 0.07, 0), red);
+    top.add(neck, tuft);
     neck.rotation.x = Math.PI / 2;
-    neck.position.set(0, 0.11, 0.13);
-    body.add(bag, badge);
+    top.position.set(0, 0.08, -0.15);
+    top.rotation.set(-0.9, 0, 0);
+    body.add(bag, badge, top);
     body.position.y = 0.145;
   } else if (kind === 'wad') {
     // A puff of old rag and oakum.

@@ -5,13 +5,14 @@
    user, of the sign: "it just feels like it's been forced in. There's nothing natural looking about
    it"). In the spirit of the real puzzle's pieces (drawn fresh here, not copied): every colour has
    its own sword. Red a dagger with a skull for a pommel, yellow a broadsword, green a machete, blue
-   a sabre with a hand guard. A block is a crate of that colour with its sword stencilled on; a
+   a broad scimitar with a hand guard, the last three with cord-bound grips (checked against
+   YPPedia's Sword_pieces picture, 11 Nov). A block is a crate of that colour with its sword stencilled on; a
    breaker is the sword itself, bare and glowing; a fused block is a big chest with one big sword;
    attack blocks are crates nailed shut with iron bands. */
 /** Each colour's base, highlight and shadow. */
 export const PALETTE = {
     0: { base: '#cf2418', light: '#ff7a5c', dark: '#5e0905' },
-    1: { base: '#dcae0c', light: '#ffe979', dark: '#6e5000' },
+    1: { base: '#ecc810', light: '#fff07c', dark: '#6e5600' }, // (a lemon yellow, as the real one: on the crates' cream wood, not orange)
     2: { base: '#2c9a1c', light: '#93ef6c', dark: '#0d4408' },
     3: { base: '#2b6bd6', light: '#8cc4ff', dark: '#0b2c6a' },
 };
@@ -45,6 +46,11 @@ export function drawSword(x, c, X, Y, w, h, fill, line) {
         x.lineWidth = Math.max(1, w * 0.05);
         x.strokeStyle = line;
     };
+    // A grip bound round with cord, as the real swords' are: bands across it.
+    const bands = (u0, u1, vs) => { x.beginPath(); for (const v of vs) {
+        x.moveTo(...p(u0, v));
+        x.lineTo(...p(u1, v));
+    } x.stroke(); };
     switch (c) {
         case 0: {
             // The skull dagger: a straight tapering blade, crossed bones for a guard, a skull on top.
@@ -68,6 +74,7 @@ export function drawSword(x, c, X, Y, w, h, fill, line) {
             // The broadsword: wide and straight, a flat pommel, a long bar of a guard.
             rect(0.37, 0.03, 0.63, 0.09);
             rect(0.44, 0.09, 0.56, 0.27);
+            bands(0.44, 0.56, [0.14, 0.18, 0.22]);
             rect(0.18, 0.27, 0.82, 0.34);
             poly([[0.35, 0.34], [0.65, 0.34], [0.63, 0.82], [0.5, 0.97], [0.37, 0.82]]);
             x.beginPath();
@@ -82,6 +89,7 @@ export function drawSword(x, c, X, Y, w, h, fill, line) {
             x.arc(...p(0.5, 0.06), w * 0.06, 0, Math.PI * 2);
             paint();
             rect(0.44, 0.08, 0.56, 0.27);
+            bands(0.44, 0.56, [0.13, 0.18, 0.23]);
             poly([[0.2, 0.33], [0.25, 0.27], [0.75, 0.27], [0.8, 0.33], [0.74, 0.33], [0.7, 0.31], [0.3, 0.31], [0.26, 0.33]]);
             x.beginPath();
             x.moveTo(...p(0.42, 0.31));
@@ -109,14 +117,16 @@ export function drawSword(x, c, X, Y, w, h, fill, line) {
             x.lineWidth = lw;
             x.strokeStyle = line;
             rect(0.44, 0.06, 0.56, 0.28);
+            bands(0.44, 0.56, [0.12, 0.17, 0.22]);
             x.beginPath();
             x.ellipse(...p(0.5, 0.3), w * 0.22, h * 0.035, 0, 0, Math.PI * 2);
             paint();
+            // The blade broad, as a scimitar's, swelling out and curving back to its point.
             x.beginPath();
             x.moveTo(...p(0.43, 0.32));
             x.lineTo(...p(0.57, 0.32));
-            x.quadraticCurveTo(...p(0.66, 0.66), ...p(0.4, 0.97));
-            x.quadraticCurveTo(...p(0.5, 0.62), ...p(0.43, 0.32));
+            x.quadraticCurveTo(...p(0.84, 0.62), ...p(0.36, 0.97));
+            x.quadraticCurveTo(...p(0.54, 0.64), ...p(0.43, 0.32));
             x.closePath();
             paint();
             break;

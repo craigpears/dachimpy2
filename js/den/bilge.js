@@ -47,7 +47,7 @@ function shapePath(g, shape, c, r) {
   if (shape === 'circle') g.arc(c, c, r, 0, Math.PI * 2);
   else if (shape === 'octagon') for (let i = 0; i < 8; i++) { const a = Math.PI / 8 + i * Math.PI / 4, rr = r / Math.cos(Math.PI / 8) * 0.97; g.lineTo(c + Math.cos(a) * rr, c + Math.sin(a) * rr); }
   else if (shape === 'pentagon') for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + i * 2 * Math.PI / 5, rr = r * 1.08; g.lineTo(c + Math.cos(a) * rr, c + 8 + Math.sin(a) * rr); }
-  else if (shape === 'square') g.rect(c - r * 0.92, c - r * 0.92, r * 1.84, r * 1.84);
+  else if (shape === 'square') g.roundRect(c - r * 0.92, c - r * 0.92, r * 1.84, r * 1.84, r * 0.12);
   else g.roundRect(c - r * 0.95, c - r * 0.95, r * 1.9, r * 1.9, r * 0.38);
   g.closePath();
 }
@@ -64,9 +64,26 @@ function bitFace(col, shape, pat) {
     g.save(); g.clip();
     g.strokeStyle = shade(col, 1.6); g.fillStyle = shade(col, 1.5); g.lineWidth = 7; g.lineCap = 'round';
     if (pat === 'scallops') for (let y = 22; y < 120; y += 22) for (let x = -10; x < 140; x += 26) { g.beginPath(); g.arc(x + (y / 22 % 2) * 13, y, 11, Math.PI, 0); g.stroke(); }
-    else if (pat === 'swirl') { for (const s of [-1, 1]) { g.beginPath(); g.arc(c + s * 18, c - s * 4, 22, s > 0 ? Math.PI * 0.2 : Math.PI * 1.2, s > 0 ? Math.PI * 1.3 : Math.PI * 2.3); g.stroke(); } }
-    else if (pat === 'wave') { g.lineWidth = 10; g.beginPath(); g.arc(c - 4, c + 6, 26, Math.PI * 0.9, Math.PI * 2.05); g.stroke(); g.beginPath(); g.arc(c + 18, c + 4, 10, Math.PI, Math.PI * 2.2); g.stroke(); }
-    else if (pat === 'ripples') for (const rr of [16, 30, 44]) { g.beginPath(); g.arc(c + 6, c + 10, rr, Math.PI * 1.05, Math.PI * 1.75); g.stroke(); }
+    else if (pat === 'swirl') {
+      // Three waves curling round the middle, pale green on the teal.
+      g.strokeStyle = '#c4ebae'; g.lineWidth = 6;
+      for (let i = 0; i < 3; i++) {
+        const a = i * Math.PI * 2 / 3 - Math.PI / 2, ox = c + Math.cos(a) * 15, oy = c + Math.sin(a) * 15;
+        g.beginPath(); g.arc(ox, oy, 15, a + Math.PI, a + Math.PI * 2.15); g.stroke();
+        g.beginPath(); g.arc(ox + Math.cos(a) * 9, oy + Math.sin(a) * 9, 6, a + Math.PI * 1.2, a + Math.PI * 2.4); g.stroke();
+      }
+    }
+    else if (pat === 'wave') {
+      // A white wave curling over, and a swell under it.
+      g.strokeStyle = 'rgba(255,255,255,0.9)'; g.lineWidth = 8;
+      g.beginPath(); g.moveTo(c - 38, c + 8); g.bezierCurveTo(c - 26, c - 26, c + 22, c - 32, c + 24, c - 8); g.bezierCurveTo(c + 25, c + 4, c + 8, c + 6, c + 6, c - 5); g.stroke();
+      g.lineWidth = 6; g.beginPath(); g.moveTo(c - 32, c + 28); g.quadraticCurveTo(c, c + 10, c + 36, c + 22); g.stroke();
+    }
+    else if (pat === 'ripples') {
+      // Three white wavy strokes across it, rising a little to the right.
+      g.strokeStyle = 'rgba(255,255,255,0.9)'; g.lineWidth = 5.5;
+      for (let i = 0; i < 3; i++) { g.beginPath(); for (let x = -34; x <= 14; x += 3) g.lineTo(c + x, c - 6 + i * 13 - (x + 34) * 0.18 + Math.sin(x / 6) * 3.5); g.stroke(); }
+    }
     else if (pat === 'diagonals') for (let x = -60; x < 160; x += 24) { g.beginPath(); for (let t = 0; t <= 1; t += 0.1) g.lineTo(x + t * 70 + Math.sin(t * 9) * 6, 10 + t * 110); g.stroke(); }
     else if (pat === 'waves') for (let y = 28; y < 120; y += 22) { g.beginPath(); for (let x = 0; x <= 128; x += 6) g.lineTo(x, y + Math.sin(x / 9) * 5); g.stroke(); }
     else if (pat === 'stripes') for (let y = 30; y < 120; y += 20) { g.beginPath(); g.moveTo(0, y); g.bezierCurveTo(40, y - 10, 80, y + 10, 128, y); g.stroke(); }
@@ -169,16 +186,18 @@ export function bilgePlace(half) {
     st.rotation.z = (Math.random() - 0.5) * 0.2;
     bilge.group.add(st);
   }
-  // The cursor, as in the real puzzle: orange brackets at the corners of the two squares, and
-  // ticks between them.
+  // The cursor, as in the real puzzle: red brackets lined in yellow at the corners of the two
+  // squares, and ticks between them.
   bilge.cursor = new THREE.Group();
-  const orange = new THREE.MeshBasicMaterial({ color: '#f39a2b' }), q = BILGE.SQ, t = 0.07, len = 0.28;
-  const bar = (x, z, sx, sz) => { const m = mesh(new THREE.BoxGeometry(sx, 0.03, sz), orange, false); m.position.set(x, 0.07, z); bilge.cursor.add(m); };
+  const red = new THREE.MeshBasicMaterial({ color: '#d42a1c' }), yel = new THREE.MeshBasicMaterial({ color: '#ffd23a' }), q = BILGE.SQ, t = 0.08, len = 0.28, i = 0.04;
+  const bar = (x, z, sx, sz, m = red, y = 0.07) => { const b = mesh(new THREE.BoxGeometry(sx, 0.03, sz), m, false); b.position.set(x, y, z); bilge.cursor.add(b); };
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
     bar(sx * (q - len / 2), sz * q / 2, len, t);
     bar(sx * q, sz * (q / 2 - len / 2), t, len);
+    bar(sx * (q - len / 2 - i / 2), sz * (q / 2 - t / 2 - i / 2), len - i, i, yel, 0.072);
+    bar(sx * (q - t / 2 - i / 2), sz * (q / 2 - len / 2 - i / 2), i, len - i, yel, 0.072);
   }
-  for (const sz of [-1, 1]) bar(0, sz * (q / 2 - len / 2), t, len);
+  for (const sz of [-1, 1]) { bar(0, sz * (q / 2 - len / 2), t, len); bar(0, sz * (q / 2 - len / 2 - i / 2), i * 0.6, len - i, yel, 0.072); }
   bilge.group.add(bilge.cursor);
   // Sharp rocks and barnacled stones beyond high tide's mark, bare when the tide's out.
   bilge.rocks = [];

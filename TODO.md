@@ -30,12 +30,6 @@ the site (`.assetsignore` skips `*.md`).
   place, now built; the cove keeps a chest of its own on the beach. How you get that one: to pin
   down.)
 
-- **The puzzles' pieces checked against the real ones (10 Nov):** "the last few puzzles, the
-  graphics have been placeholders rather than matching the Puzzle Pirate pieces". Compare each
-  puzzle already in the den (Treasure Haul above all, and Bilge, Swordfight and Gunnery) with its
-  YPPedia page's pictures, and redraw any piece that doesn't read as the real one (RULES.md, "A
-  puzzle's pieces look like the real ones").
-
 - **A hit on a gun shows on it, not in words (10 Nov):** "there should be some visible damage once
   you fire a cannonball at one of the turrets. Right now it's just like, oh, read the text to work
   out that it's been damaged ... I probably shouldn't really be any text. It should just be visible
