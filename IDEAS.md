@@ -973,6 +973,16 @@ Zizzy; her portrait to check on YPPedia (Meridian) before she's drawn). The real
 cuddly monkeys, Mini above all, from the user's photos. The museum keeps the story of the sims;
 the house keeps the people.
 
+**Cookies and hugs at the door; the house doubles as the museum (11 Nov):** "a random thing about
+myself as well is I'm very well known for giving just like hugs and cookies ... anyone that comes
+into my house, which I guess you can double up as a museum, I need to give them cookies." So
+Dachimpy's house and the museum may be one place: the house in the housing district, its rooms the
+museum's exhibits (the sims' story, oldest first) and the tribute (the trinkets, the friends' portraits,
+Kikkit, Zizzy, Mini), Dachimpy showing you round all of it. Whoever comes in is met at the door
+with a hug and a cookie, every visit, as Dachimpy did in Puzzle Pirates; the cookie maybe yours to
+keep (in your hold or on a shelf at home). Whether it's one place or the museum stays an island of
+its own with the house beside it: to settle with the user.
+
 Still to collect: the user's pictures not saved to disk need putting in `notes/museum/` by hand
 (the v1 page, the first shoot-Dalnoth board and the Dachimpy.com pages), and pictures of Imaduck's
 Global Cade Sim.
@@ -1009,6 +1019,18 @@ waves it off: "Oops. That happens sometimes. Don't worry about it." Then carries
 if nothing had. The humour's a layer on the real thing (RULES.md): it could even be what a burnt
 Distilling board looks like (the user's own Distilling Simulator was all about when columns get
 burnt), so a botched batch in the puzzle gets a little bang of its own.
+
+## Every house means something: visiting gives you things to go and do (11 Nov)
+
+The user (11 Nov): "Obviously, each house needs a meaning, so maybe visiting them can give you some
+things to go and do that give you trophies or something." So no house is only a look round: each
+is about its owner (Gravee's portraits and the Count; Pandayay's trophies and Vikings; Dachimpy's
+sims and friends) and sends you off with something to do because of it, done out in the world and
+rewarded with a trophy (or a portrait, a cookie, a thing for your shelf at home). Gravee might send
+you to find her a yeti for her "proof"; Pandayay to try a first of each thing (her "spread your
+adventures far"); Multibella to forage with fewer moves. The trophies could be the den's own entry
+trophies (Pandayay's house, below), kept in this browser, shown at home. How trophies work, and
+each house's errand: to settle with the user.
 
 ## Pandayay's house: her trophies, and her love of Vikings (11 Nov)
 
