@@ -380,8 +380,14 @@ then "she's definitely a penguin side quest".
   definitely one of the ways. I think that would make sense for getting through that reef." So the
   whirlpools and winds are a passage through the reef to the right of the gate, sailed with the
   Sailing puzzle and its Vegas; harder than the gate or the locks, and the penguin in the middle is
-  the reward for going that way. A way past of its own on the map's list. (Where Kikkit's island
-  sits now, at the reef's near side rather than beyond the checkpoint: to pin down with the user.)
+  the reward for going that way. A way past of its own on the map's list.
+  **Settled (11 Nov):** Kikkit's island and her whirlpools are to the right of the imperial
+  checkpoint, "because it's another way of getting past the reef, so it should go over there."
+  And "definitely a Vegas to get fully through to the penguins. I think as long as we have a
+  relatively simplified puzzle, that should be achievable. Because you've got relatively small,
+  easy platforms. So most people familiar with it, I'd expect can do that." So the whirlpools'
+  board stays simple (small, easy platforms), smaller chains carry you part way, and a Vegas
+  takes you all the way through to the penguins.
 - **Kikkit:** a real pirate on Emerald (checked 10 Nov): captain of Rodrigo's Revenge, of the flag
   Egotistical Englishman, an Admiral in the Aimuari Island Navy (Dignity's navy, and above her).
   Drawn from her portrait by the pirate maker: black curly hair crowned with red roses, an
@@ -499,6 +505,9 @@ exactly; the real game's own seed can't be had, so her board is rebuilt in our d
   how a big Vegas is built. This changes the earlier "hidden, not on the way" (above), and the
   wondering aloud is a nudge that someone else is out there, which "Hidden gems, never hinted"
   wouldn't allow: to settle with the user (it says someone exists, not where or how).
+  **Settled (11 Nov):** "you wonder about [Kikkit]. Yeah, that's kind of the wondering [aloud]
+  thing." The wondering's allowed: it's your pirate reacting to Kikkit's tangents, not the game
+  pointing the way, and it still says nothing of where Tzz is.
 - **On Kikkit's island, teaching Sailing like balloon animals (11 Nov):** "Maybe she's on the same
   island as [Kikkit], just to keep it simple. Or you could go over and find her ... like how
   someone does balloon animals, except that she's doing like a sailing version of balloon animals,
@@ -549,9 +558,14 @@ said "right, quick ... you got to start sinking something. Go sink a ship, quick
 were starting to leave. The user "took a few more risks and ended up sinking our ship rather than
 somebody else's ... my literalness is like, well, you told me to go sink a ship, I did that."
 
+**Who's who (11 Nov):** the user's own pirate is **Dachimpy** (the repository's name too), and
+"we should all be on the same Emerald Ocean": Dachimpy, Daquan, Dalnoth and Kikkit all of
+Emerald. Dachimpy is to be drawn in "my rose pink wig, belt and braces and kilt outfit", without
+fail (dye names from YPPedia; the rest of the look from Dachimpy's pirate page). Daquan's portrait
+still to check on YPPedia (Emerald) before he's drawn.
+
 - **A cutscene past the reef:** Daquan as your instructor, your introduction to attacking the
-  ships on the main shipping lane. It opens on the flotilla memory, with the user's own pirate
-  (pirate name to get from the user) at the helm: told to go sink a ship, they sink their own and
+  ships on the main shipping lane. It opens on the flotilla memory, with Dachimpy at the helm: told to go sink a ship, they sink their own and
   give that literal answer, and Daquan face-palms. Then he turns to you: "right, I need someone
   new to drive my ships. Please ... don't do what the last guy did."
 - **Pick a side: the big ship or the underdogs.** This is where Dalnoth comes back in. The user
