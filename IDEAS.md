@@ -496,8 +496,18 @@ exactly; the real game's own seed can't be had, so her board is rebuilt in our d
   piece with breezy patter ("it's simple, look, this, and this, and this..."), each piece a
   squeaky balloon twisted on, till she pops it and the chain goes off down the board pop-pop-pop
   like balloons bursting. Sailing as balloon animals: the look of her lesson, and maybe of the
-  Sailing board's chains when they go off. (Whether she's on Kikkit's island or her own nearby,
-  and how much of her lesson you then play yourself: to settle with the user.)
+  Sailing board's chains when they go off. (How much of her lesson you then play yourself: to
+  settle with the user.)
+  **Settled (11 Nov): her own island, nearby.** "Have it nearby because you want to run in to
+  [Kikkit] first, because then it's like the point is you want to go find the other person to help
+  you." Kikkit first, always; then Tzz is the one you go looking for.
+  **The balloon's the heart of it (11 Nov):** "she's literally got a balloon and starts twisting it,
+  like the same as you're making a balloon animal, but she ends up ... twisting it into sailing
+  pieces and then pops [it] ... It just makes sense of like, well, how on earth do these sailing
+  pieces pop in the puzzle? It makes sense. They're balloon animals." So her animation is a real
+  balloon twisted, squeak by squeak, into Sailing's pieces, then popped; and that's why Sailing's
+  pieces pop at all: they're balloon animals. The Sailing board's own look can follow (its pieces
+  balloony, popping as they clear): TODO.md, "Sailing's look".
 
 ## A bigger ship from the shipwright (10 Nov)
 
