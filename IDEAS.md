@@ -605,6 +605,14 @@ pirate wedding absolutely is a must."
   venue clean and pretty, her welcome all giggles, no mishap, no leftover groom) or dark humour (the
   wreck, the welcome below, the leftover groom as Bachelor number one). It flavours her lines and
   what she suggests first; every theme and plot stays open in either.
+- **Married five times a day, and the line of them to show for it (11 Nov):** "Mischie[v]ious
+  agrees, should leave it open to males or females, but she's not naming the females. Yeah, I kind
+  of imagine you could turn up and say, oh, weddings are fun, I've gotten married 5 times a day, and
+  you can kind of just see the line of various people that she's married of all sorts." So she
+  greets you breezily ("Weddings are fun! I've got married five times today"), and there they all
+  are: a line of her husbands and wives of the day, of every sort, milling about the venue. Open to
+  men and women alike, as she agrees. (What "she's not naming the females" means: to pin down with
+  the user.)
 - **The welcome, darkly funny (10 Nov):** "when you first turn up ... the last wedding party has
   gone horribly well. Mischievious is there, kind of trying to proposition you, and it's just like,
   yeah, don't pay attention to the blood and guts, yeah, it's fine. We've hired a bit of extra
