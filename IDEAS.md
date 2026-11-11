@@ -306,6 +306,13 @@ moving. It gives such a nostalgia." What's next:
   pass, so you choose: pay the toll, blast the gate and sail through, or wonder "is there another
   way?", the game hinting at the secret way round (the locks, the crane). Not for now: "it
   doesn't really make much sense at this stage of a proof of concept".
+  **Control the checkpoint, and the trade lanes grow (11 Nov):** "maybe once you control the
+  Imperial checkpoint, you know, the trade lanes get bigger. So again, that's kind of the shortcut,
+  so you can get through faster when you start exploring more of the world." Taking the checkpoint
+  is a reward that lasts: wider, longer trade winds through it, a quick way out to the rest of the
+  world once there's more of it to explore. (What "control" means, holding it rather than only
+  knocking its guns out, and whether it fits with checkpoints that come back: to shape with the
+  user.)
   **Bring back the crew's puzzles driving the helm (10 Nov):** in Puzzle Pirates, the crew's
   Sailing and Rigging puzzles are what give the helm its moves. The user would like that back:
   the helm steers left and right, "but if somebody starts doing things in sailing or rigging,
