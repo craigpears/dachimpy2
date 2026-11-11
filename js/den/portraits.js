@@ -269,12 +269,19 @@ function layer(objs) {
   g.putImageData(img, 0, 0);
   return cv;
 }
-/** Paints you (`look`), frozen mid-scream, the Count sat up behind you: a canvas, and a texture of it. */
-export function paintYou(portrait, look) {
+/** Paints any portrait (yours, with your `look`) into a canvas of its own, twice a wall's size: the same
+    picture as on the wall, to look at close up, flat (js/den/picture-view.js), or to save. It's read back
+    off the graphics card, so one at a time, when it's wanted, not every frame. */
+export function paintFlat(portrait, look) {
   const cv = backdropCanvas(portrait.backdrop, CW, CH), g = cv.getContext('2d');
   const { objs } = compose(portrait, look);
   g.drawImage(layer(objs), 0, 0);
   objs.forEach(drop);
+  return cv;
+}
+/** Paints you (`look`), frozen mid-scream, the Count sat up behind you: a canvas, and a texture of it. */
+export function paintYou(portrait, look) {
+  const cv = paintFlat(portrait, look);
   const texture = new THREE.CanvasTexture(cv);
   texture.colorSpace = THREE.SRGBColorSpace;
   return { canvas: cv, texture };

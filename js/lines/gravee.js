@@ -64,6 +64,32 @@ export const YOUR_PORTRAIT = [
     'My favourite. Look at that face!',
     'Visitors always ask who you are. I tell them: my friend, mid-scream.',
 ];
+/** About the portrait you're looking at (the house shell's: src/den-houses.ts's lookingAt), by its id in
+    src/den-gravee.ts, once a visit each: who it is and the story behind its title (the user, 11 Nov: "she
+    talks about the portrait you are looking at"). Also under it in the portraits' close view. */
+export const ON_A_PORTRAIT = {
+    herself: 'That\'s me, by me. I\'m my own favourite sitter. I never fidget.',
+    busy: 'Busy This Weekend? I hoped someone would ask. Nobody did. More cocoa for me.',
+    graves: 'Graves. I lost my shoes on that beach. And my hat. And the boat.',
+    vampyre: 'Vampyre, with a Y. It\'s fancier. The Count says it\'s not accurate. He\'s jealous of the bat.',
+    wicked: 'Wicked. I\'m not, really. It\'s the hat.',
+    autumn: 'Hello Autumn! I wore orange so the leaves wouldn\'t feel left out.',
+    dalnoth: 'Dalnoth, sober. It took three sittings to catch him. In the fourth he fell off the stool.',
+    dignity: 'Dignity, off duty. She says it\'s a forgery. She wrote me a very cross report about it.',
+    mischievious: 'Mischievious, between weddings. I had to paint ever so fast.',
+    kikkit: 'Kikkit, mid-sentence. She\'s still finishing it.',
+    vampire: 'The Count, awake! I did that one from memory. Don\'t tell him.',
+    you: 'My favourite. You, mid-scream. Look at those eyebrows!',
+};
+/** About one of her yeti proofs ({yeti}: its yeti, as its title names them), a line a picture in turn. */
+export const ON_A_PROOF = [
+    '{yeti}. Definitive proof. That blur is definitely a yeti.',
+    'That\'s {yeti}! You can tell it\'s real. It\'s out of focus.',
+    '{yeti}. Moved, of course. They always move.',
+    'Proof of {yeti}. Some say it\'s a snowdrift. Snowdrifts don\'t wave.',
+    '{yeti}! I\'d know that fur anywhere.',
+    '{yeti}. Proved twice, just to be sure.',
+];
 /** Seeing you out. */
 export const GOODBYE = 'Come back soon! Bring your face!';
 export const CHARACTER = {
@@ -101,6 +127,15 @@ export const CHARACTER = {
         { when: 'The Count sits up, and she paints you', says: THE_SCARE, each: { moment: 'As you both scream', painting: 'At her easel', done: 'Her brush down', hung: 'Your portrait up, pride of place' } },
         { when: 'Now and then, as you wander her house after the tour', says: CHATTER },
         { when: 'By your portrait, once it\'s hung', says: YOUR_PORTRAIT },
+        {
+            when: 'About the portrait you\'ve stopped by or turned to look at (once a visit each), and under it in the portraits\' close view', says: ON_A_PORTRAIT,
+            each: {
+                herself: 'Gravee, by Gravee (the hall)', busy: 'Busy This Weekend?', graves: 'Graves (the hall, and the gallery)', vampyre: 'Vampyre', wicked: 'Wicked', autumn: 'Hello Autumn',
+                dalnoth: 'Dalnoth, Sober (Rare)', dignity: 'Dignity, Off Duty (Never)', mischievious: 'Mischievious, Between Weddings', kikkit: 'Kikkit, Mid-Sentence',
+                vampire: 'The Count, Awake (Rare), over his coffin', you: 'Yours, in the portraits\' close view, once she\'s painted you',
+            },
+        },
+        { when: 'About a yeti proof ("Definitive Proof of ..."), each in turn', says: ON_A_PROOF },
         { when: 'As you leave', says: [GOODBYE] },
     ],
 };

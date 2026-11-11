@@ -19,10 +19,14 @@ export const DYES = {
   // Mischievious's (her Emerald portraits, 11 Nov): plum (a seasonal limited edition: her dress and
   // boots in "Son of a Nutcracker!") and crimson (the deep, blue-ish red of her "What is Love?" gown).
   plum: '#86094f', crimson: '#a8031f',
+  // Tzz's D'rizzle (her Emerald portrait, 11 Nov): a dragon in silver and vibrant red, the February 2025
+  // gold box's (YPPedia: Dragon, "Silver/Vibrant Red"; silver is also a clothing chroma, YPPedia:
+  // Clothing palette). Sampled from her portrait: his horns, and his body.
+  silver: '#a6a9bf', 'vibrant red': '#d7094a',
 };
 export const SKIN = ['#f6d3b0', '#f0bf8e', '#d9a066', '#b57a4a', '#8a5530', '#5c3a22'];
-// (Red: Mischievious's deep red curls, from her portraits, 11 Nov.)
-export const HAIR = { black: '#1f1a17', 'dark brown': '#3b2414', brown: '#6a4020', auburn: '#7f2e16', red: '#9a0a08', ginger: '#c4642a', blonde: '#dcb565', grey: '#a09a92', white: '#ece8e0' };
+// (Red: Mischievious's deep red curls, from her portraits, 11 Nov. Light brown: Tzz's, sampled from hers.)
+export const HAIR = { black: '#1f1a17', 'dark brown': '#3b2414', brown: '#6a4020', 'light brown': '#94713c', auburn: '#7f2e16', red: '#9a0a08', ginger: '#c4642a', blonde: '#dcb565', grey: '#a09a92', white: '#ece8e0' };
 // Monkeys and squirrels only come in natural colours (YPPedia: Monkey), white (a champion's) and a
 // few limited editions (lavender, from a Booch Box; pink, Mischievious's monkey in "What is Love?").
 // A lavender monkey has a white face and tummy.
@@ -55,9 +59,9 @@ export const PARTS = {
   },
   top: {
     m: [['striped', 'Striped shirt', 1], ['plain', 'Plain shirt'], ['sash', 'Shirt with sash', 1], ['vest', 'Striped shirt with vest', 1], ['swashbuckler', "Swashbuckler's jacket", 1], ['buccaneer', 'Buccaneer jacket', 1], ['captain', "Captain's jacket", 1],
-      ['frilly', 'Frilly shirt with sash', 1], ['raiment', 'Vampire raiment', 1]],
+      ['frilly', 'Frilly shirt with sash', 1], ['raiment', 'Vampire raiment', 1], ['rag', 'Rag shirt']],
     f: [['striped', 'Striped shirt', 1], ['belt', 'Shirt with belt'], ['corset', 'Corset', 1], ['vest', 'Striped shirt with vest', 1], ['buccaneer', 'Buccaneer jacket', 1], ['swashbuckler', "Swashbuckler's jacket", 1], ['captain', "Captain's jacket", 1],
-      ['dresstop', 'Dress top', 1], ['frilly', 'Frilly shirt with sash', 1], ['midriff', 'Midriff blouse with scarf', 1], ['raiment', 'Vampire raiment', 1], ['tied', 'Top tied at the front']],
+      ['dresstop', 'Dress top', 1], ['frilly', 'Frilly shirt with sash', 1], ['midriff', 'Midriff blouse with scarf', 1], ['raiment', 'Vampire raiment', 1], ['tied', 'Top tied at the front'], ['rag', 'Rag shirt']],
   },
   // Round the waist, over whatever top (a plain belt isn't worn with a corset or a shirt with sash).
   waist: {
@@ -78,10 +82,12 @@ export const PARTS = {
     m: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug'], ['candle', 'Candle']],
     f: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug'], ['candle', 'Candle']],
   },
-  // (Squirrel, bat, krakling: real familiars, from expeditions and treasure chests: YPPedia, Familiar.)
+  // (Squirrel, bat, krakling: real familiars, from expeditions and treasure chests: YPPedia, Familiar.
+  // Dragon: from gold boxes; its first colour is its horns', its second its body's, as YPPedia says
+  // dragons' colours go: Tzz's D'rizzle, silver and vibrant red.)
   fam: {
-    m: [['none', 'No familiar'], ['parrot', 'Parrot', 1], ['monkey', 'Monkey'], ['octopus', 'Octopus'], ['squirrel', 'Squirrel'], ['bat', 'Bat'], ['krakling', 'Krakling']],
-    f: [['none', 'No familiar'], ['parrot', 'Parrot', 1], ['monkey', 'Monkey'], ['octopus', 'Octopus'], ['squirrel', 'Squirrel'], ['bat', 'Bat'], ['krakling', 'Krakling']],
+    m: [['none', 'No familiar'], ['parrot', 'Parrot', 1], ['monkey', 'Monkey'], ['octopus', 'Octopus'], ['squirrel', 'Squirrel'], ['bat', 'Bat'], ['krakling', 'Krakling'], ['dragon', 'Dragon', 1]],
+    f: [['none', 'No familiar'], ['parrot', 'Parrot', 1], ['monkey', 'Monkey'], ['octopus', 'Octopus'], ['squirrel', 'Squirrel'], ['bat', 'Bat'], ['krakling', 'Krakling'], ['dragon', 'Dragon', 1]],
   },
 };
 // The props that take a colour (the rest are what they're made of).
@@ -91,9 +97,11 @@ export const EARRINGS = [[false, 'None'], [true, 'One'], ['both', 'Both ears']];
 // `hook`: a hook for a left hand (Mischievious has one in nearly every portrait). `tongue` out, blue
 // swirling `tattoos` (on whatever skin a top leaves bare) and a `wristband` (in the top's colour, on
 // the right wrist): Kikkit's (11 Nov). A blue `starfish` stuck to the cheek: Gravee's (her portrait, 11
-// Nov; a starfish on the face is a Puzzle Pirates thing: YPPedia lists Starfish repellent for it).
+// Nov; a starfish on the face is a Puzzle Pirates thing: YPPedia lists Starfish repellent for it). A
+// `pegleg` for the right leg: Tzz's (her portrait, 11 Nov). The eyepatch, the hook, the pegleg and the
+// starfish are Puzzle Pirates' four injuries, from being sunk (YPPedia: Injury).
 export const DEFAULT_LOOK = {
-  body: 'm', skin: 1, hair: 'short', hairCol: 'brown', beard: 'full', patch: true, earring: true, smile: false, hook: false, tongue: false, tattoos: false, wristband: false, starfish: false,
+  body: 'm', skin: 1, hair: 'short', hairCol: 'brown', beard: 'full', patch: true, earring: true, smile: false, hook: false, tongue: false, tattoos: false, wristband: false, starfish: false, pegleg: false,
   hat: 'bandana', hatCol: 'red', hatCol2: 'white', top: 'striped', topCol: 'red', topCol2: 'white', waist: 'belt', waistCol: 'black',
   legs: 'pants', legsCol: 'navy', legsCol2: 'tan', feet: 'boots', feetCol: 'black', feetCol2: 'black', hand: 'none', handCol: 'red', fam: 'none', famCol: 'green', famCol2: 'red',
 };
@@ -112,7 +120,7 @@ export function cleanLook(o) {
   if (!DYES[src.feetCol2]) L.feetCol2 = L.feetCol;   // (fancy boots' tops were the boots' own colour)
   if (HAIR[src.hairCol]) L.hairCol = src.hairCol;
   if (Number.isInteger(src.skin) && SKIN[src.skin]) L.skin = src.skin;
-  for (const kk of ['patch', 'smile', 'hook', 'tongue', 'tattoos', 'wristband', 'starfish']) if (typeof src[kk] === 'boolean') L[kk] = src[kk];
+  for (const kk of ['patch', 'smile', 'hook', 'tongue', 'tattoos', 'wristband', 'starfish', 'pegleg']) if (typeof src[kk] === 'boolean') L[kk] = src[kk];
   if (EARRINGS.some(([v]) => v === src.earring)) L.earring = src.earring;
   if (FURRY[L.fam]) L.famCol = FUR[src.famCol] ? src.famCol : FURRY[L.fam];
   return L;
@@ -121,7 +129,7 @@ const pickOf = (o) => Object.keys(o)[Math.floor(Math.random() * Object.keys(o).l
 const pickIn = (list) => list[Math.floor(Math.random() * list.length)][0];
 export function randomLook(body = Math.random() < 0.5 ? 'm' : 'f') {
   const L = { body, skin: Math.floor(Math.random() * SKIN.length), hairCol: pickOf(HAIR), patch: Math.random() < 0.4, earring: pickIn(EARRINGS), smile: Math.random() < 0.5, hook: Math.random() < 0.15,
-    tongue: Math.random() < 0.08, tattoos: Math.random() < 0.15, wristband: Math.random() < 0.15, starfish: Math.random() < 0.05 };
+    tongue: Math.random() < 0.08, tattoos: Math.random() < 0.15, wristband: Math.random() < 0.15, starfish: Math.random() < 0.05, pegleg: Math.random() < 0.08 };
   for (const slot of Object.keys(PARTS)) L[slot] = pickIn(PARTS[slot][body]);
   for (const kk of DYE_KEYS) L[kk] = pickOf(DYES);
   if (FURRY[L.fam]) L.famCol = pickOf(FUR);
@@ -185,6 +193,15 @@ export const PIRATES = Object.fromEntries(Object.entries({
     hat: 'pelt', hatCol: 'white', top: 'dresstop', topCol: 'green', topCol2: 'white', waist: 'none',
     legs: 'gown', legsCol: 'green', legsCol2: 'white', feet: 'shoes', feetCol: 'black', hand: 'candle', fam: 'monkey', famCol: 'tan',
   },
+  // Tzz (her Emerald pirate page's portrait, checked 11 Nov), who teaches Sailing as balloon animals on
+  // her island by Kikkit's: light brown hair tied back, an eyepatch, a gold hoop earring, a big grin, a
+  // ragged light blue Rag shirt off one shoulder, blue-and-white Stripy knickers to below the knee, a peg
+  // leg, a bare foot, and on her shoulder D'rizzle, a red dragon with silver horns (silver, vibrant red).
+  Tzz: {
+    body: 'f', skin: 1, hair: 'ponytail', hairCol: 'light brown', patch: true, earring: true, smile: true, pegleg: true,
+    hat: 'none', top: 'rag', topCol: 'light blue', waist: 'none',
+    legs: 'knickers', legsCol: 'blue', feet: 'bare', hand: 'none', fam: 'dragon', famCol: 'silver', famCol2: 'vibrant red',
+  },
 }).map(([name, look]) => [name, cleanLook(look)]));
 
 /* Mischievious through her gallery (Emerald, 399 portraits, checked 11 Nov), to choose which of her
@@ -230,6 +247,8 @@ function tex(w, h, draw) {
 }
 const texCache = new Map();
 const cached = (key, make) => (texCache.has(key) ? texCache.get(key) : texCache.set(key, make()).get(key));
+// Stripes down (round a leg, say): Stripy knickers' (Tzz's portrait, 11 Nov: blue and white, down the leg).
+const vstripeTex = (a, b, n = 10) => cached(`v${a}${b}${n}`, () => tex(64, 4, (g) => { for (let i = 0; i < n; i++) { g.fillStyle = i % 2 ? hexOf(b) : hexOf(a); g.fillRect(i * 64 / n, 0, 64 / n + 0.5, 4); } }));
 const stripeTex = (a, b, n = 8) => cached(`s${a}${b}${n}`, () => tex(4, 64, (g) => { for (let i = 0; i < n; i++) { g.fillStyle = i % 2 ? hexOf(b) : hexOf(a); g.fillRect(0, i * 64 / n, 4, 64 / n); } }));
 const patchTex = (a, b) => cached(`p${a}${b}`, () => tex(64, 64, (g) => {
   g.fillStyle = hexOf(a); g.fillRect(0, 0, 64, 64);
@@ -286,16 +305,18 @@ export function dressPirate(look, opts = {}) {
     vest: () => M('#ffffff', { map: stripeTex('white', top2) }), swashbuckler: () => M('white'), buccaneer: () => M('white'), captain: () => M('white'), corset: () => M('white'),
     dresstop: () => skin, midriff: () => skin, frilly: () => M('white'), raiment: () => M(top),   // (off the shoulder and a bare midriff: skin under them)
     tied: () => (L.tattoos ? inked : skin),
+    rag: () => (F ? (L.tattoos ? inked : skin) : M(top)),   // (a woman's off one shoulder: skin under it)
   }[L.top]?.() || M(top);
   const coat = L.top === 'swashbuckler' || L.top === 'buccaneer' || L.top === 'captain', bucc = L.top === 'buccaneer';
-  const sleeveM = coat ? M(top) : shirtM === skin ? inked : shirtM;
+  const sleeveM = coat ? M(top) : shirtM === skin || L.top === 'rag' ? inked : shirtM;
 
   // Legs: a thigh and a shin, from the hip, then the feet.
   const thinner = F ? 0.88 : 1;
-  const thighM = { pants: () => M(L.legsCol), patched: () => M('#fff', { map: patchTex(L.legsCol, L.legsCol2) }), knickers: () => M('#fff', { map: stripeTex('white', L.legsCol, 6) }),
+  const thighM = { pants: () => M(L.legsCol), patched: () => M('#fff', { map: patchTex(L.legsCol, L.legsCol2) }), knickers: () => M('#fff', { map: vstripeTex('white', L.legsCol) }),
     pantaloons: () => M(L.legsCol), flare: () => M(L.legsCol), kilt: () => skin, long: () => M(L.legsCol), short: () => M('white'), ragged: () => skin,
     gown: () => M(L.legsCol), bloomers: () => M(L.legsCol) }[L.legs]?.() || M(L.legsCol);
-  const shinM = { knickers: white, pantaloons: white, kilt: white, short: white }[L.legs] || thighM;
+  // (Stockings under knickers and the like; bare legs over bare feet.)
+  const shinM = { knickers: L.feet === 'bare' ? skin : white, pantaloons: white, kilt: white, short: white }[L.legs] || thighM;
   const legs = [-1, 1].map((s) => {
     const hip = new THREE.Group();
     hip.position.set((F ? 0.12 : 0.13) * s, 0.72, 0);
@@ -308,12 +329,20 @@ export function dressPirate(look, opts = {}) {
       shin.scale.set(1, 1.3, 1);
       hip.add(part(new THREE.CylinderGeometry(0.075, 0.08, 0.05, 10), M(L.legsCol2), 0, -0.55));
     }
-    hip.add(thigh, shin);
+    // A peg leg for the right leg (Tzz's): from under the knee, a leather cup and a wooden peg, no foot.
+    const peg = L.pegleg && s === -1;
+    hip.add(thigh);
+    if (peg) {
+      const wood = M('#94621c', { roughness: 0.7 });
+      hip.add(part(new THREE.CylinderGeometry(0.085 * thinner, 0.06, 0.1, 10), M('#5a3a22'), 0, -0.36));
+      hip.add(part(new THREE.CylinderGeometry(0.05, 0.03, 0.3, 8), wood, 0, -0.55));
+      hip.add(part(new THREE.CylinderGeometry(0.036, 0.036, 0.03, 8), M('#3a2a1a'), 0, -0.7));
+    } else hip.add(shin);
     if (L.legs === 'knickers') hip.add(part(new THREE.CylinderGeometry(0.1 * thinner, 0.1 * thinner, 0.04, 10), M(L.legsCol), 0, -0.3));
     const fc = M(L.feetCol);
     // (Under a dress the feet come a little further forward, so they peep out from under it.)
     const fz = L.legs === 'long' || L.legs === 'short' || L.legs === 'ragged' ? 0.1 : L.legs === 'gown' ? 0.16 : 0.05;
-    if (L.feet === 'bare') {
+    if (peg) { /* (no foot on a peg) */ } else if (L.feet === 'bare') {
       // Bare feet: a foot in the skin's colour, and its toes.
       hip.add(part(new RoundedBoxGeometry(0.14 * thinner, 0.08, 0.25, 2, 0.035), skin, 0, -0.67, fz));
       for (let i = 0; i < 4; i++) hip.add(part(new THREE.SphereGeometry(0.022, 6, 5), skin, (-0.045 + i * 0.03) * thinner, -0.675, fz + 0.125));
@@ -321,12 +350,12 @@ export function dressPirate(look, opts = {}) {
       const foot = part(new RoundedBoxGeometry(0.18 * thinner, L.feet === 'shoes' ? 0.1 : 0.15, 0.3, 2, 0.045), fc, 0, L.feet === 'shoes' ? -0.645 : -0.62, fz);
       hip.add(foot);
     }
-    if (L.feet === 'boots' || L.feet === 'fancy') hip.add(part(new THREE.CylinderGeometry(0.1 * thinner, 0.1 * thinner, 0.24, 10), fc, 0, -0.48));
+    if ((L.feet === 'boots' || L.feet === 'fancy') && !peg) hip.add(part(new THREE.CylinderGeometry(0.1 * thinner, 0.1 * thinner, 0.24, 10), fc, 0, -0.48));
     // Fancy boots' wide turned-down tops, in their second colour.
     // (Low enough on the shin to show under a long coat.)
-    if (L.feet === 'fancy') hip.add(part(new THREE.CylinderGeometry(0.14 * thinner, 0.112 * thinner, 0.12, 12), M(L.feetCol2 || L.feetCol), 0, -0.39));
-    if (L.feet === 'shoes') hip.add(part(new THREE.BoxGeometry(0.08, 0.05, 0.02), gold, 0, -0.6, fz + 0.13));
-    if (L.feet === 'curled') {
+    if (L.feet === 'fancy' && !peg) hip.add(part(new THREE.CylinderGeometry(0.14 * thinner, 0.112 * thinner, 0.12, 12), M(L.feetCol2 || L.feetCol), 0, -0.39));
+    if (L.feet === 'shoes' && !peg) hip.add(part(new THREE.BoxGeometry(0.08, 0.05, 0.02), gold, 0, -0.6, fz + 0.13));
+    if (L.feet === 'curled' && !peg) {
       const curl = part(new THREE.TorusGeometry(0.05, 0.022, 6, 12, Math.PI * 1.3), fc, 0, -0.6, fz + 0.15);
       curl.rotation.y = Math.PI / 2;
       hip.add(curl);
@@ -393,6 +422,22 @@ export function dressPirate(look, opts = {}) {
       const end = part(new THREE.ConeGeometry(0.035, 0.12, 6), M(top), 0.035 * s, 0.26, rAt(0.3) * 1.05 + 0.01);
       end.rotation.set(Math.PI, 0, -0.35 * s);
       body.add(end);
+    }
+  } else if (L.top === 'rag') {
+    // The Rag shirt (YPPedia: Rags, what clothes turn to as they dust): loose, torn to points round its
+    // hem, a little short of the waist; a woman's worn off the left shoulder (Tzz's), a man's whole.
+    const hem = 0.1, m = M(top, { side: THREE.DoubleSide });
+    const from = (y0, y1) => [[rAt(y0), y0], ...shape.filter(([, y]) => y > y0 && y < y1), [rAt(y1), y1]];
+    if (F) {
+      body.add(part(lathe(from(hem, 0.44), 1.06), m, 0, 0.02));
+      // (up over the right shoulder: half round, from the back to the front on the right)
+      body.add(part(new THREE.LatheGeometry(from(0.42, 0.6).map(([r, y]) => new THREE.Vector2(r * 1.06, y)), 10, Math.PI, Math.PI), m, 0, 0.02));
+    } else body.add(part(lathe(from(hem, 0.64), 1.06), m, 0, 0.02));
+    for (let i = 0; i < 16; i++) {
+      const a = (i / 16) * Math.PI * 2, r = rAt(hem) * 1.06, pt = part(new THREE.ConeGeometry(0.04, 0.07 + (i % 3) * 0.03, 4), m, Math.sin(a) * r, hem - 0.02 - (i % 3) * 0.012, Math.cos(a) * r);
+      pt.rotation.set(Math.PI, a, 0);
+      pt.scale.z = 0.35;
+      body.add(pt);
     }
   } else if (L.top === 'frilly') {
     // The Frilly shirt with sash: a white shirt with a ruffle down its front (a man's under an open
@@ -892,6 +937,17 @@ export function dressPirate(look, opts = {}) {
       if (L.top === 'dresstop') sh.add(part(new THREE.CylinderGeometry(0.078, 0.078, 0.03, 12), M(top2), 0, -0.18));
       else sh.add(part(new THREE.CylinderGeometry(0.07, 0.068, 0.07, 12), brass, 0, -0.38));
     }
+    // The Rag shirt's short sleeves, torn ragged (a woman's only on the shoulder it's still on, the right).
+    if (L.top === 'rag' && (!F || s === -1)) {
+      const rm = M(top, { side: THREE.DoubleSide });
+      sh.add(part(new THREE.CylinderGeometry(0.085 * ar, 0.095 * ar, 0.2, 10, 1, true), rm, 0, -0.09));
+      for (let i = 0; i < 7; i++) {
+        const a = (i / 7) * Math.PI * 2, pt = part(new THREE.ConeGeometry(0.03, 0.06 + (i % 2) * 0.03, 4), rm, Math.sin(a) * 0.09 * ar, -0.21 - (i % 2) * 0.01, Math.cos(a) * 0.09 * ar);
+        pt.rotation.set(Math.PI, a, 0);
+        pt.scale.z = 0.4;
+        sh.add(pt);
+      }
+    }
     if (L.top === 'frilly') {
       const cuff = part(new THREE.SphereGeometry(0.085, 10, 8), white, 0, -0.44);
       cuff.scale.set(1, 0.5, 1);
@@ -1213,6 +1269,62 @@ function makeFamiliar(L) {
       arms.push(arm);
     }
     Object.assign(fam, { tentacles: arms });
+  } else if (L.fam === 'dragon') {
+    // A dragon (YPPedia: Dragon; Tzz's D'rizzle): a round little body in its second colour, a big head
+    // on it with a snout, a grin of teeth and big eyes, horns sweeping back and spines down its back in
+    // its first; leathery wings half spread, a tail curling down to a spade, little arms and feet.
+    const horn = M(L.famCol, { metalness: 0.35, roughness: 0.4 }), hide = M(L.famCol2), dark = M('#5a0a1c');
+    const bodyM = part(new THREE.SphereGeometry(0.085, 12, 10), hide, 0, 0.1, 0);
+    bodyM.scale.set(0.95, 1.15, 0.9);
+    const tum = part(new THREE.SphereGeometry(0.06, 10, 8), M('#f07a8a'), 0, 0.09, 0.035);
+    tum.scale.set(0.85, 1.1, 0.6);
+    const head = new THREE.Group();
+    head.position.set(0, 0.25, 0.03);
+    head.add(part(new THREE.SphereGeometry(0.075, 12, 10), hide));
+    const snout = part(new THREE.SphereGeometry(0.05, 10, 8), hide, 0, -0.025, 0.06);
+    snout.scale.set(1.1, 0.75, 1.2);
+    const mouth = part(new THREE.SphereGeometry(0.04, 10, 6), dark, 0, -0.045, 0.075);
+    mouth.scale.set(1.2, 0.35, 0.8);
+    head.add(snout, mouth);
+    for (let i = 0; i < 4; i++) { const tooth = part(new THREE.ConeGeometry(0.008, 0.018, 4), white, -0.027 + i * 0.018, -0.036, 0.105); tooth.rotation.x = Math.PI; head.add(tooth); }
+    [-1, 1].forEach((s) => {
+      head.add(part(new THREE.SphereGeometry(0.026, 8, 6), white, 0.038 * s, 0.022, 0.055));
+      head.add(part(new THREE.SphereGeometry(0.014, 6, 5), black, 0.042 * s, 0.024, 0.075));
+      head.add(part(new THREE.SphereGeometry(0.007, 5, 4), black, 0.018 * s, -0.012, 0.118));   // (a nostril)
+      const h = part(new THREE.ConeGeometry(0.02, 0.11, 8), horn, 0.045 * s, 0.075, -0.025);
+      h.rotation.set(-0.7, 0, -0.35 * s);
+      head.add(h);
+    });
+    for (let i = 0; i < 3; i++) { const sp = part(new THREE.ConeGeometry(0.015, 0.04, 5), horn, 0, 0.17 - i * 0.05, -0.075 - i * 0.004); sp.rotation.x = -0.8; g.add(sp); }
+    const wingM = M(L.famCol2, { side: THREE.DoubleSide, roughness: 0.7 });
+    const wings = [-1, 1].map((s) => {
+      const w = new THREE.Group();
+      w.position.set(0.05 * s, 0.17, -0.04);
+      const shp = new THREE.Shape();
+      shp.moveTo(0, 0); shp.lineTo(0.22, 0.1); shp.quadraticCurveTo(0.2, 0.02, 0.22, -0.04); shp.quadraticCurveTo(0.15, -0.03, 0.14, -0.09);
+      shp.quadraticCurveTo(0.08, -0.06, 0.06, -0.11); shp.lineTo(0, -0.07); shp.lineTo(0, 0);
+      const m = part(new THREE.ShapeGeometry(shp), wingM);
+      m.scale.x = s;
+      w.add(m);
+      w.rotation.y = 0.7 * s;
+      g.add(w);
+      return w;
+    });
+    const curve = new THREE.CatmullRomCurve3([[0, 0.04, -0.07], [0, -0.06, -0.14], [0.04, -0.17, -0.1], [0.02, -0.22, -0.02]].map((p) => new THREE.Vector3(...p)));
+    const tail = new THREE.Group();
+    tail.add(part(new THREE.TubeGeometry(curve, 16, 0.02, 6), hide));
+    const spade = part(new THREE.ConeGeometry(0.03, 0.05, 4), horn, 0.02, -0.24, 0.0);
+    spade.rotation.x = Math.PI;
+    tail.add(spade);
+    const arms = [-1, 1].map((s) => {
+      const a = part(new THREE.CapsuleGeometry(0.016, 0.05, 4, 6), hide, 0.05 * s, 0.13, 0.06);
+      a.rotation.set(-1, 0, 0.4 * s);
+      g.add(a);
+      return a;
+    });
+    [-1, 1].forEach((s) => g.add(part(new THREE.SphereGeometry(0.03, 8, 6), hide, 0.05 * s, 0.03, 0.04)));
+    g.add(bodyM, tum, head, tail);
+    Object.assign(fam, { head, wings, tail, arms });
   }
   return fam;
 }
@@ -1235,6 +1347,13 @@ export function familiarTick(fam, dt) {
     fam.head.rotation.y = Math.sin(t * 1.3) * 0.5 + (Math.sin(t * 7) > 0.97 ? 0.3 : 0);
     fam.head.rotation.x = (t % 4) < 0.6 ? 0.35 : 0;
     fam.tail.rotation.x = Math.sin(t * 2.2) * 0.12;
+  } else if (fam.kind === 'dragon') {
+    // (Looking about, its tail swishing, a stretch of its wings now and then.)
+    fam.head.rotation.y = Math.sin(t * 0.8) * 0.45;
+    fam.head.rotation.x = Math.sin(t * 1.7) * 0.08;
+    fam.tail.rotation.y = Math.sin(t * 1.4) * 0.3;
+    const flap = (t % 5) < 1.1 ? Math.sin(t * 12) * 0.55 : Math.sin(t * 1.2) * 0.08;
+    fam.wings.forEach((w, i) => { w.rotation.y = (i ? 1 : -1) * (0.7 + flap); });
   } else if (fam.kind === 'bat') {
     fam.head.rotation.y = Math.sin(t * 0.8) * 0.4;
     const flap = (t % 6) < 0.9 ? Math.sin(t * 16) * 0.6 : Math.sin(t * 1.5) * 0.08;

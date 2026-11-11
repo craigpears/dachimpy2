@@ -256,6 +256,21 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **The painting's camera eases and holds (11 Nov).** "hold it there, does the painting ... It
     doesn't really flow right": the camera eases from shot to shot, never cutting: onto the coffin
     as he sits up, in on your fright, round to her painting you, held till she's done, then back.
+  - **Look round freely in any house (11 Nov).** "If I'm standing next to the portraits ... I should be
+    able to move the camera freely, zoom in, look around." Drag (either button, or a finger) turns the
+    camera round you, as the den's right-drag does; the wheel or a pinch zooms, right in to a portrait at
+    about your eye height, along the walls either way but never out of the open front or through a wall.
+    Stood still you keep your look; walk on and the house's own view eases back; a cutscene takes it over
+    and hands back the house's view. A click without a drag still walks you.
+  - **Whoever shows you round talks about what you're looking at (11 Nov).** "like she talks about the
+    portrait you are looking at." Stop by a portrait, or turn the camera onto one, a moment, and the host
+    says their line about it: who it is, the story behind its title. Never over anything else said, and
+    once a visit each. Any house's host can.
+  - **Pictures close up, flat, like a puzzle's 2D view (11 Nov).** "needs a 2D version similar to the
+    puzzles, so you can go through the portraits easily with keyboard controls." Tab (or the button) opens
+    them one at a time, big, with the title and the host's line; Left and Right (A and D) through them in
+    the order they hang, round and round; Esc back. It opens on the one you're looking at or nearest, and
+    yours is among them once she's painted you. Any list of pictures can use it (a museum's, later).
   - **Drawn to the coffin, with no arrows (11 Nov).** "if you're on the other side of the room,
     there's nothing really pushing you in that direction." Once you're in her bedchamber she stands
     by the coffin and beckons you over now and then; its lid rattles, the Count snores, a candle
@@ -305,6 +320,40 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   round, the ramble retold after the last, Space skipping on to the next. Out of earshot she
   finishes her line and stops; come back and she starts up again. Keep adding to the list; a bit of
   the real way can hide in them, never a hint at anything else.
+- **Tzz's balloon lesson (11 Nov).** The sensible one after Kikkit, on a little island of her own a
+  hop from hers (IDEAS.md, "Tzz's huge Vegas"): once Kikkit's told her ramble you wonder aloud, a line
+  of your own, whether anyone could explain it with fewer tangents (never who or where). Nobody comes
+  aboard: "I like Kikkit just kind of on her island. It works." Seeing the first go, the user:
+  - **A real board, a real lesson:** "it's not really a real looking sailing board, it's just things
+    stacked on each other ... She's helping you ... how to build doubles and bingos and things." Her
+    board is the den's own Sailing board (sail-board.js's look) on a stand, every pair steered down
+    by real moves and dropped by the real rules: a Double, a Bingo, then a Vegas, each a stair of
+    ledges a little higher (src/balloons.ts).
+  - **Now you try:** "she sets up the balloons, you do the pop." She builds each; the last pair is
+    yours, on Sailing's own keys. Miss and she eggs you on with the board put back; three misses and
+    she shows you.
+  - **One look in hand and on the board:** "the visual appearance between when it's in her hand and
+    when it's on the board is too different." She blows up the board's own balloons and tosses the
+    pegged pair onto the top of the board, where it comes in as the falling pair.
+  - **Slow enough to see** ("it goes really quickly in her hand ... Fiddling around some Play-Doh"):
+    each balloon blown up and twisted off, squeak by squeak, about three seconds a pair.
+  - **Careful with shapes and colours** ("it looks a bit wrong ... with balls at the end"): round
+    balloons in the board's three colours only; nothing long with knobs on, no flesh tones.
+  - **Keep her in view:** "She's hidden quite behind." One shot held through it, her and her board
+    side by side.
+- **A pirate showing you a puzzle is the heart of it (11 Nov).** "if somebody introduces you to a
+  puzzle that, it has like a tutorial element, that's kind of the whole history of my website and
+  things. This is hopefully the latest modern iteration of what my tutorial stuff can be. It's a bit
+  of fun, a bit more animated, a bit more funny." Dachimpy.com taught Puzzle Pirates' puzzles; the
+  den is its newest form. Each puzzle comes with a real pirate who teaches it in their own way, as a
+  scene, not a manual: Tzz twists Sailing out of balloons, Helium will show you real distilling
+  moves; you watch, then "now you try". Still a game, not a tutorial ("It's a game, not a
+  tutorial", above): the teaching is a funny little scene and then you play.
+- **Finish one thing at a time (11 Nov).** "try and finish things, because I don't want to move too
+  quickly, because I'm conscious we haven't play tested any of the [Tzz] stuff yet. So we need to
+  finish things really one at a time", and "I want to reveal things one at a time." A feature is
+  built, played by the user, fixed and finished before the next is started; the next ones wait in
+  TODO.md, ready to start, not started.
 - **Hidden gems, never hinted (10 Nov).** The user, of the checkpoint's "I wonder if there's another
   way round" and "Run it, row it, or knock its guns out": "I don't like it giving you a hint as to
   what you can do ... I like these just to be hidden gems that you work out ... make the fact that
@@ -1541,8 +1590,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     first; a filled platform clears only once no lines are left, and its fall can chain on.
     (YPPedia's "Resolution order" has platforms then lines each round: the user's memory wins
     here, and the code notes YPPedia's.)
-- **Sailing at sea: the rigging (11 Nov).** Sailing's board is out anywhere at sea on **R** ("the
-  rigging"; a Rigging button on the sailing bar too), as G is her guns and O her oars: "You should
+- **Sailing at sea (11 Nov).** Sailing's board is out anywhere at sea on **R** (a Sailing button on
+  the sailing bar too), as G is her guns and O her oars. It's called Sailing wherever a player sees it,
+  never "the rigging" (the user, 11 Nov: "It's supposed to be sailing, not rigging"; Rigging is
+  another of Puzzle Pirates' puzzles, played from the same station). "You should
   be able to jump into the sailing puzzle whenever you want to ... it allows you to basically go
   really, really fast, and like in one go, like a trade winds, kind of, just jump multiple tiles."
   Each chain's run carries her that many squares straight ahead in one go, a gust played like the
@@ -1565,6 +1616,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     chain, a little glitter for a Double, and on a Vegas they billow full and gilded, sparkles
     streaming aft and a whoosh of wind, holding while the gust lasts and fading after. It's what
     Kikkit's "really, really big and really sparkly" ramble is about, so her lines must match.
+- **Sailing's platforms are blocks, never a little row (11 Nov).** "Platforms never look that small.
+  Like, they're always like 2 by 3 or 3 by 3, aren't they? I mean, check the actual official pages."
+  YPPedia's "Sailing" page gives no sizes in words; its "typical sailing board" picture shows a 2 by
+  2 and two 2 by 3s. So platforms are two wide (three wide as it gets harder), two or three high, on
+  every Sailing board: at sea, Kikkit's whirlpools' easy board, Tzz's lesson (src/sailing.ts).
 - **Bilge is the model to aim for (9 Nov).** The user loved it most for being "so faithful and
   close": "really close one-to-one with the puzzle ... it just plays like the puzzle. It's not like
   a dumbed down version at all", while you can still see what's going on in the den. They loved

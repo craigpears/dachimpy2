@@ -16,7 +16,7 @@
    missing where there's some winds, so you kind of get caught in the whirlpool and it sends you to the
    opposite corner, which then gets you on some winds and sends you back". YPPedia's rules win.
 
-   So, sailed with the Sailing puzzle's gusts (R, the rigging), from the passage's mouth just off her
+   So, sailed with the Sailing puzzle's gusts (R, Sailing), from the passage's mouth just off her
    island, facing the reef's gap (LAY.KIKKIT says the squares):
    - a plain clear stops in the gap, and its wind blows her into a whirlpool: it turns her a quarter
      and sends her to its far corner, the missing one, whose wind takes her back up through the reef,
@@ -31,7 +31,8 @@ import { Helm, LAY, Sea, type Pose, type SailEvent } from './den-sail.js';
 import { carry } from './den-sailing.js';
 import { shoreOf } from './den-isle.js';
 import { RAMBLE, TANGENTS, BACK, BACK_OUT } from './lines/kikkit.js';
-import type { Script } from './chatter.js';
+import { AFTER_KIKKIT } from './lines/you.js';
+import type { Chatter, Script } from './chatter.js';
 
 const K = LAY.KIKKIT;
 export const KIKKIT = {
@@ -155,13 +156,21 @@ export class Whirlpools {
     earshot, hailed or not, the ramble retold after the last (it's the real way, after all); and spat
     back by the winds, a new line each time, over whatever she was saying ("Too many lefts-eh!" first:
     `back`; `backOut` if you'd got out past the reef first). */
-export const KIKKIT_SAYS: Script = { intro: RAMBLE, loop: TANGENTS, retell: true, asides: { back: BACK, backOut: BACK_OUT } };
+export const KIKKIT_SAYS: Script = { intro: RAMBLE, loop: TANGENTS, retell: true, asides: { back: BACK, backOut: BACK_OUT }, afterIntro: 4 };
+
+/** Once she's told her whole ramble, the first time, you wonder aloud in the quiet after it (her
+    `afterIntro`: KIKKIT_CAST's `then`, src/lines/you.ts), whether anyone could explain it with fewer
+    tangents (IDEAS.md, "Nearer the start, the sensible one after Kikkit", settled 11 Nov: it's your
+    pirate reacting to her, and it never says where anyone is). Once a voyage: not before she's told it
+    all, and never again after. */
+export const youWonder = (her: Chatter, said: boolean): boolean => her.told && !said;
 
 export const KIKKIT_CAST = {
   /** Kikkit: her look (PIRATES's), on the sand by the whirlpools' mouth, a touch big so she reads from
       the sea (as Dignity), looking out (`yaw`) or at you when you're within earshot (`earshot`,
-      squares), swaying a bit drunk and swigging from her jug, her hands going as she talks. */
-  her: { look: 'Kikkit', at: [KIKKIT_STANDS.c, KIKKIT_STANDS.r], on: 'sand', scale: 1.15, yaw: -0.9, idle: 'tipsy', earshot: KIKKIT.EARSHOT, says: KIKKIT_SAYS },
+      squares), swaying a bit drunk and swigging from her jug, her hands going as she talks; and `then`,
+      what you say once she's told her whole ramble (youWonder). */
+  her: { look: 'Kikkit', at: [KIKKIT_STANDS.c, KIKKIT_STANDS.r], on: 'sand', scale: 1.15, yaw: -0.9, idle: 'tipsy', earshot: KIKKIT.EARSHOT, says: KIKKIT_SAYS, then: AFTER_KIKKIT },
   /** Her familiars about her, each doing its own thing ("the familiar version of a cat lady"); and
       the penguins on Vegas Island, one of them in a balaclava with a sack, up to something. */
   creatures: [

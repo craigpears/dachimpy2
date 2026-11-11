@@ -684,7 +684,7 @@ export function themeLook(theme, body, rand = Math.random) {
 }
 // ---------- the whole set-up ----------
 /** The wardrobe's familiars (js/den-look.js's `fam` slot: a test checks they're the same), 'none' first. */
-export const FAMS = ['none', 'parrot', 'monkey', 'octopus', 'squirrel', 'bat', 'krakling'];
+export const FAMS = ['none', 'parrot', 'monkey', 'octopus', 'squirrel', 'bat', 'krakling', 'dragon']; // (the dragon last, 11 Nov: Tzz's D'rizzle came into the wardrobe; old links keep their numbers)
 const isFam = (f) => FAMS.includes(f);
 /* Her familiar, as well as her outfit (Mischievious herself, 11 Nov: "I'm usually wearing a monkey but
    maybe I could switch fams as well as outfits?"): offered after which look of hers, her look's own

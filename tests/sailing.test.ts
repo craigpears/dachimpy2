@@ -1,7 +1,7 @@
 /* The Sailing puzzle's rules, as YPPedia gives them ("Sailing", "Sail scoring", "Chain", read 10 Nov
    2026), and the den's run forward for a chain (the user, 10 Nov). */
 import { describe, expect, it } from 'vitest';
-import { BOOCH_PENALTY, COLOURS, COLOUR_NAMES, DIFFICULTY, EASY, H, RUN_TABLE, SPAWN, Sailing, TOP_FREE, W, chainName, multiplier, runFor } from '../src/sailing';
+import { BOOCH_PENALTY, COLOURS, COLOUR_NAMES, DIFFICULTY, EASY, H, PLATFORM, RUN_TABLE, SPAWN, Sailing, TOP_FREE, W, chainName, multiplier, runFor } from '../src/sailing';
 import type { Drop, Pair, Piece, Platform, Sail } from '../src/sailing';
 import { seeded } from '../src/mirror-row';
 
@@ -62,14 +62,30 @@ describe('the board', () => {
       expect(s.easy).toBe(true);
       expect(s.platforms.length).toBeGreaterThanOrEqual(1);
       expect(s.platforms.length).toBeLessThanOrEqual(EASY.MOST);
-      for (const p of s.platforms) { expect(p.h).toBe(1); expect(p.w).toBeLessThanOrEqual(EASY.WIDE); }
+      // (the smallest a platform comes: two wide, two or three high)
+      for (const p of s.platforms) { expect(p.w).toBe(PLATFORM.W[0]); expect(PLATFORM.H).toContain(p.h); }
       expect(s.grid.flat().some((x) => x?.fixed)).toBe(false);
       // A fresh board after one's cleared is as easy as ever.
       s.difficulty = DIFFICULTY.MAX;
       s.deal();
-      for (const p of s.platforms) { expect(p.h).toBe(1); expect(p.w).toBeLessThanOrEqual(EASY.WIDE); }
+      for (const p of s.platforms) { expect(p.w).toBe(PLATFORM.W[0]); expect(PLATFORM.H).toContain(p.h); }
     }
     expect(new Sailing(seeded(1)).easy).toBe(false);
+  });
+  it("platforms are 2 by 3 or 3 by 3, never a little row (11 Nov): blocks two or three wide, two or three high, as on YPPedia's typical board", () => {
+    // (the user, 11 Nov: "Platforms never look that small. Like, they're always like 2 by 3 or 3 by 3";
+    // YPPedia's "A typical sailing board" shows a 2 by 2 and two 2 by 3s: https://yppedia.puzzlepirates.com/Sailing)
+    const seen = new Set<string>();
+    for (const easy of [false, true]) for (let d = DIFFICULTY.START; d <= DIFFICULTY.MAX; d++) for (let seed = 1; seed <= 30; seed++) {
+      const s = new Sailing(seeded(seed), true, { easy });
+      s.difficulty = d; s.deal();
+      for (const p of s.platforms) {
+        expect(p.w).toBeGreaterThanOrEqual(2); expect(p.w).toBeLessThanOrEqual(3);
+        expect(p.h).toBeGreaterThanOrEqual(2); expect(p.h).toBeLessThanOrEqual(3);
+        seen.add(`${p.w}x${p.h}`);
+      }
+    }
+    expect([...seen].sort()).toEqual(['2x2', '2x3', '3x2', '3x3']);
   });
   it('puts no fixed piece over a target, where it would shut it in', () => {
     for (let seed = 1; seed <= 40; seed++) {
@@ -288,7 +304,7 @@ describe('chains', () => {
 /** A game from an ordinary deal (seed 1), played by the staircase bot in tools/sail-bots.mjs: its drops
     as [column, turn, row], recorded with `tools/sail-bots.mjs record`. Record again if the deal or
     the pairs change. */
-const STAIRCASE = { seed: 1, drops: [[6, 2, 15], [6, 2, 14], [0, 0, 8], [0, 1, 14], [0, 1, 12], [6, 0, 13], [6, 1, 11], [5, 0, 14], [6, 1, 12], [6, 2, 11], [4, 0, 13], [5, 1, 11], [4, 0, 15], [4, 2, 10], [4, 1, 11], [1, 0, 15], [1, 0, 14], [0, 1, 10], [0, 1, 8], [1, 0, 13], [0, 1, 11], [0, 1, 9], [0, 0, 12], [0, 1, 10], [3, 0, 14], [0, 1, 12], [0, 0, 11], [5, 0, 9], [3, 0, 9], [3, 1, 12], [3, 0, 8], [0, 1, 9], [2, 0, 11], [3, 0, 11], [0, 1, 11], [1, 1, 10], [0, 1, 9], [0, 1, 12], [0, 1, 10], [4, 2, 7], [1, 1, 8], [2, 0, 7], [2, 0, 6], [2, 1, 11], [2, 0, 10], [3, 2, 5], [2, 1, 8], [2, 1, 4], [1, 2, 5], [1, 0, 8], [1, 0, 4], [1, 0, 7], [7, 1, 9], [2, 2, 3], [3, 0, 4]] as [number, Drop['turn'], number][] };
+const STAIRCASE = { seed: 2, drops: [[0, 2, 5], [6, 0, 15], [6, 2, 14], [6, 2, 13], [6, 3, 11], [6, 1, 13], [5, 2, 12], [6, 0, 11], [0, 0, 15], [0, 0, 14], [1, 1, 12], [4, 2, 11], [0, 0, 13], [1, 1, 11], [2, 1, 4], [4, 0, 15], [4, 0, 10], [4, 0, 14], [5, 2, 9], [3, 0, 9], [3, 0, 8], [3, 1, 12], [3, 1, 10], [4, 2, 7], [3, 1, 6], [3, 1, 14], [0, 0, 15], [0, 0, 14], [0, 0, 13], [0, 0, 12], [0, 0, 11], [1, 1, 9], [0, 0, 8], [0, 0, 9], [0, 2, 10], [0, 1, 10], [0, 1, 8], [0, 1, 6], [3, 0, 5], [2, 3, 12], [2, 1, 10], [2, 1, 8], [2, 1, 6], [0, 1, 4], [1, 1, 12], [0, 1, 2], [1, 2, 5], [1, 0, 4], [0, 1, 4], [0, 1, 2], [0, 1, 4], [1, 3, 10], [2, 2, 3], [2, 1, 1]] as [number, Drop['turn'], number][] };
 
 describe('the staircase', () => {
   it('Vegas 3s and 4s "quite easily": stairs built pair by pair on an ordinary deal set off a Vegas, a column a step (the user, 10 Nov)', () => {
@@ -301,14 +317,14 @@ describe('the staircase', () => {
     }
     expect(last!.steps).toBeGreaterThanOrEqual(6);
     expect(last!.name).toBe('Vegas!!');
-    // Down the stairs a column a step, from column 3 to 7 (columns 4 and 5 going together once), then
-    // a row of four that the falls made at the bottom: the columns each step cleared three or more from.
+    // Down the stairs a column a step, from column 2 to 7: the columns each step cleared three or more
+    // from. (Recorded again 11 Nov, when platforms became blocks: src/sailing.ts, PLATFORM.)
     const stairs = last!.stages.slice(1).map((st, i) => {
       const count = Array<number>(W).fill(0);
       last!.stages[i].grid.forEach((r) => r.forEach((x, c) => { if (x && st.cleared.includes(x.id)) count[c]++; }));
       return count.flatMap((n, c) => (n >= 3 ? [c] : []));
     });
-    expect(stairs).toEqual([[3], [4], [4, 5], [6], [7], []]);
+    expect(stairs).toEqual([[2], [3], [4], [5], [6], [7]]);
   });
 });
 

@@ -23,6 +23,11 @@ export const IN_GRAVEES_HOUSE = {
     howMany: 'How many portraits ARE there?',
     scream: 'AAAAAH!',
 };
+/** Once Kikkit's told her ramble (all of it, the first time), you wonder aloud, the joke on her
+    tangents (the user, 11 Nov: "now I wonder if I can find somebody that can explain how to get past
+    all these ... whirlpools and winds that makes a bit more sense, or goes on fewer tangents"). It
+    says someone else might, never who or where (RULES.md, "Hidden gems, never hinted"). */
+export const AFTER_KIKKIT = 'Is there anyone out here who could explain that with fewer tangents?';
 export const CHARACTER = {
     name: 'You',
     who: 'Your own pirate, dressed as you like from the wardrobe (or as any real pirate in it). You say little, '
@@ -48,5 +53,6 @@ export const CHARACTER = {
             when: 'Your wedding, on the Wedding Isle', says: AT_YOUR_WEDDING,
             each: { vow: 'Sweet and blissful: your vow, after your sweetheart\'s', ido: '"I do"' },
         },
+        { when: 'Off Kikkit\'s island, once she\'s told her whole ramble the first time (wondering aloud)', says: [AFTER_KIKKIT] },
     ],
 };

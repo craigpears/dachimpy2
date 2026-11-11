@@ -19,6 +19,7 @@ import { CRANE } from '../den-crane.js';
 import { craneCheat } from './crane.js';
 import { umamiCheat } from './capybara.js';
 import { kikkitCheat } from './whirlpools.js';
+import { tzzCheat } from './balloon-isle.js';
 import { board, sailReset } from './sailing.js';
 import { station, stationToggle } from './sail-station.js';
 import { online, guest, myId, send } from './crew.js';
@@ -329,6 +330,7 @@ export function dressRows() {
     if (L.body === 'm') chooser(row('Beard'), PARTS.beard.m, L.beard, look('beard'));
     toggle(row('Eyepatch'), L.patch, look('patch'));
     toggle(row('Hook'), L.hook, look('hook'));   // (for the left hand, as Mischievious has)
+    toggle(row('Peg leg'), L.pegleg, look('pegleg'));   // (for the right leg, as Tzz has)
     chooser(row('Earrings'), EARRINGS, L.earring, look('earring'));
     toggle(row('Smile'), L.smile, look('smile'));
     toggle(row('Tongue out'), L.tongue, look('tongue'));   // (Kikkit's, as are the tattoos and the wristband)
@@ -526,8 +528,8 @@ function cheatSail() {
   sailReset();
   board();
 }
-// The Sailing board at sea (js/den/sail-station.js): out to sea, and the rigging out.
-function cheatRigging() {
+// The Sailing board at sea (js/den/sail-station.js): out to sea, and Sailing's board out.
+function cheatSailing() {
   if (!sail.on) cheatSail();
   if (!station.want) stationToggle();
 }
@@ -556,12 +558,18 @@ function cheatUmami() {
   umamiCheat();
 }
 /* Kikkit's island (js/den/whirlpools.js): out to sea, off her island (she rambles as you come up); or at
-   her whirlpools' mouth, facing the reef, the rigging out (the whirlpools' own easy board). */
+   her whirlpools' mouth, facing the reef, Sailing's board out (the whirlpools' own easy board). */
 function cheatKikkit(where) {
   if (cine) return;
   if (!sail.on) cheatSail();
   kikkitCheat(where);
   if (where === 'mouth' && !station.want) stationToggle();
+}
+/* Tzz's island (js/den/balloon-isle.js): out to sea, just off it, where her balloon lesson begins. */
+function cheatTzz() {
+  if (cine) return;
+  if (!sail.on) cheatSail();
+  tzzCheat();
 }
 /* Mischievious's wedding (js/den/wedding.js): the siege put to rest and their ship gone, and off to
    her island. */
@@ -634,12 +642,13 @@ const CHEATS = [
   ['Build the shack', cheatShack, 'shack'],
   ["The captain's map scene", cheatMapScene, 'map-scene'],
   ['Go sailing', cheatSail, 'sea'],
-  ['Sailing, the puzzle', cheatRigging, 'sailing'],
+  ['Sailing, the puzzle', cheatSailing, 'sailing'],
   ["Dignity's scene", cheatDignity, 'dignity'],
   ["Umami's rescue", cheatUmami, 'umami'],
   ['The Wedding Isle', cheatWedding, 'wedding'],
   ["Kikkit's island", () => cheatKikkit('off'), 'kikkit'],
   ["Kikkit's whirlpools", () => cheatKikkit('mouth'), 'whirlpools'],
+  ["Tzz's balloon lesson", cheatTzz, 'tzz'],
   ['Home, married', cheatMarried, 'married'],
   ['The housing district', cheatLodgings, 'lodgings'],
   ["Gravee's house", cheatGravee, 'gravee'],

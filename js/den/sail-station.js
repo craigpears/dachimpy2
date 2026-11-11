@@ -1,4 +1,4 @@
-// The Sailing board at sea (R, "the rigging"): played whenever you like, and what its chains do to
+// The Sailing board at sea (R: Sailing, never "the rigging", 11 Nov): played whenever you like, and what its chains do to
 // her, each drop's run a gust carrying her straight ahead in one go. (The rules: src/sailing.ts, the
 // puzzle; src/sail-pair.ts, its pair as it falls; src/den-sailing.ts, a run given to her. The look:
 // js/den/sail-board.js. js/den/sailing.js wires it in with a few hooks, as js/den/rowing.js does the
@@ -58,7 +58,7 @@ function show() {
   station.lowT = 0;
   document.body.classList.add('sailboard');
   keys.clear();
-  if (!station.told) { station.told = true; toast('The rigging! Clear a chain and the wind carries her that many squares ahead: a Vegas, seven'); }
+  if (!station.told) { station.told = true; toast('Sailing! Clear a chain and the wind carries her that many squares ahead: a Vegas, seven'); }
 }
 function hide() {
   station.on = false;

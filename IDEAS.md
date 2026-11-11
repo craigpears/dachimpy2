@@ -1087,8 +1087,14 @@ same thread as the museum's: helping and leading people, and growing into it.
   Pandayay, who loves hosting them, is how you call a raid on: visit her and she sends Vikings at
   your den, any size you dare, a reason to go home and defend it (STORY.md step 8 already has
   "raids that come ... when you ring the bell"). Dalnoth stays this small, self-contained thing,
-  the Vikings' chief, rather than a bigger story of his own: what that means for STORY.md's steps
-  6 and 7 (guarding his treasure, coming back furious), to settle with the user. IOs: what they
+  the Vikings' chief, rather than a bigger story of his own.
+  **Settled (11 Nov): Viking-themed, faithful to the mechanic.** "just keep it as Viking themed. I
+  just don't think we've naturally gotten to a reason to go attack him like that. I'm sure that can
+  evolve naturally from something else as a mechanic, but I'm going with faithful depiction of
+  mechanics, and Vikings seem a good fit for him." So Dalnoth's raids on the den are Viking raids, as
+  YPPedia has them (the guns while the longships come in, then the fray), and going after him
+  (STORY.md steps 6 and 7, his treasure, his return) waits until a reason grows out of something
+  else. IOs: what they
   are in Puzzle Pirates, to check on YPPedia.
 - **A double act with Multibella (11 Nov).** The user: "Multibella is very sweet as well, maybe
   they can do a duo act." **Multibella**, a real pirate (pirate name only; ocean, pirate page and

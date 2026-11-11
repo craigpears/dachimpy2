@@ -6,7 +6,8 @@
    person({ look, parent, x, y, z, yaw, scale, idle, script, lines, loop, random, gap, wait, secs, begun,
    say, bubble, shown, tall, earshot, face }) is a pirate from a look standing in a scene doing an idle
    animation picked by name from IDLES (swaying, a tipsy sway with a swig, talking, waving, clapping,
-   painting, giggling, cowering, screaming...), and, if it's given something to say, saying it:
+   painting, giggling, cowering, screaming, twisting a balloon, ta-da...), and, if it's given something
+   to say, saying it:
    - what, and in what order: `script` (src/chatter.ts's Script: an intro once, then a loop for ever, the
      intro retold after each time round if it says, asides by name), or just `lines`, round and round
      (`loop`, in turn or `random`) or once; a pause between (`gap`, seconds, or [least, most]), `wait`
@@ -70,6 +71,14 @@ export const IDLES = {
   giggle: (p, t) => { rest(p); p.arms.forEach((a, i) => a.rotation.set(-1.25, 0, (i ? -1 : 1) * 0.45)); p.body.position.y = 0.72 + Math.abs(Math.sin(t * 9)) * 0.035; },
   /** Cowering: hunched, hands up over the face, trembling. */
   cower: (p, t) => { rest(p); p.body.rotation.x = 0.25; p.arms.forEach((a, i) => a.rotation.set(-2.2, 0, (i ? -1 : 1) * 0.6 + Math.sin(t * 40) * 0.03)); },
+  /** Twisting a balloon: both hands together in front, wrists turning against each other (balloons.js). */
+  twist: (p, t) => {
+    rest(p);
+    p.arms.forEach((a, i) => a.rotation.set(-1.15 + Math.sin(t * 9 + i * Math.PI) * 0.12, (i ? 1 : -1) * Math.sin(t * 11) * 0.35, (i ? -1 : 1) * 0.42));
+    p.body.rotation.x = 0.05;
+  },
+  /** Ta-da: arms flung up and out, presenting something, a little bounce. */
+  tada: (p, t) => { rest(p); p.arms.forEach((a, i) => a.rotation.set(-2.25, 0, (i ? 1 : -1) * 0.55)); p.body.position.y = 0.72 + Math.abs(Math.sin(t * 5)) * 0.02; },
   /** Scared to death: hair on end, mouth open, arms flung up (creatures.js's fright). */
   scream: (p) => fright(p, true),
 };

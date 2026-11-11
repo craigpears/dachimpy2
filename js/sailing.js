@@ -37,7 +37,15 @@
 
    - Difficulty is more platforms and a little bigger (the user, 10 Nov: "you may start with 2 or 3,
      you end up with 4 or 5 and more ... boundaries, so you have to kind of navigate around them.
-     Doesn't get drastically bigger"). Platforms come single or in small blocks (the screenshot).
+     Doesn't get drastically bigger").
+   - Platforms are blocks, never a little row (the user, 11 Nov: "Platforms never look that small.
+     Like, they're always like 2 by 3 or 3 by 3, aren't they?"). YPPedia's "Sailing" page
+     (https://yppedia.puzzlepirates.com/Sailing, read 11 Nov) gives no sizes in words, only that "a
+     platform is completed when every outlined target contains a piece of the required color" and
+     that "an active platform acts as a shelf across its full rectangular width"; its picture, "A
+     typical sailing board", shows blocks two wide, two and three high (a 2 by 2 and two 2 by 3s), the
+     single squares on it being fixed pieces. So: two wide, two or three high, and three wide too as
+     it gets harder (the user's 3 by 3).
 
    Not on YPPedia, so made up here (say so if it matters): the exact deal (sizes, how many targets,
    fixed pieces), how fast difficulty rises and when it resets, whether the target points are inside
@@ -59,11 +67,15 @@ export const TOP_FREE = 4;
     (YPPedia: "increasingly difficult ... after several boards have been cleared ... reset"; the
     numbers are guesses.) */
 export const DIFFICULTY = { START: 1, MAX: 4, RESET_AFTER: 5 };
+/** Platforms' sizes: two wide, or three once it's harder (from difficulty WIDE_AT), and two or three
+    high (YPPedia's typical board: see the top of this file). */
+export const PLATFORM = { W: [2, 3], H: [2, 3], WIDE_AT: 2 };
 /** An easy board (Kikkit's whirlpools, 11 Nov: "as long as we have a relatively simplified puzzle,
     that should be achievable. Because you've got relatively small, easy platforms. So most people
-    familiar with it, I'd expect can do that"): two or three platforms, each a single row one or two
-    squares wide, no fixed pieces, and it stays that easy board after board. */
-export const EASY = { MOST: 3, WIDE: 2 };
+    familiar with it, I'd expect can do that"): two or three platforms, each the smallest a platform
+    comes (two wide, two or three high: never a little row, 11 Nov), no fixed pieces, and it stays that
+    easy board after board. */
+export const EASY = { MOST: 3 };
 /** A chain's name by its steps. */
 export function chainName(steps) {
     return steps >= 6 ? 'Vegas!!' : ['', '', 'Double', 'Triple', 'Bingo!', 'Donkey!'][Math.max(0, steps)];
@@ -125,9 +137,9 @@ export class Sailing {
     deal() {
         this.clear();
         const d = this.difficulty, want = this.easy ? EASY.MOST - (this.random() < 0.5 ? 1 : 0) : 1 + d + (this.random() < 0.5 ? 1 : 0);
-        const wide = this.easy ? EASY.WIDE : d >= 3 ? 4 : 3, high = d >= 3 ? 3 : 2;
+        const wides = this.easy || d < PLATFORM.WIDE_AT ? [PLATFORM.W[0]] : PLATFORM.W, highs = PLATFORM.H;
         for (let tries = 0; this.platforms.length < want && tries < 400; tries++) {
-            const w = 1 + Math.floor(this.random() * wide), h = !this.easy && this.random() < 0.3 ? 1 + Math.floor(this.random() * high) : 1;
+            const w = wides[Math.floor(this.random() * wides.length)], h = highs[Math.floor(this.random() * highs.length)];
             const c = Math.floor(this.random() * (W - w + 1)), r = TOP_FREE + Math.floor(this.random() * (H - TOP_FREE - h + 1));
             // Not touching another platform, so every shelf is its own.
             if (this.platforms.some((p) => r <= p.r + p.h && p.r <= r + h && c <= p.c + p.w && p.c <= c + w))

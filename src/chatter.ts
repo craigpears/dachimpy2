@@ -23,6 +23,9 @@ export interface Script {
   /** Lines slotted in when something happens, by name: each name's said in turn, round again after its
       last. */
   readonly asides?: { readonly [name: string]: readonly string[] };
+  /** Seconds of quiet after the intro, the first time it's been told through, before the loop starts:
+      room for an answer (you, wondering aloud after Kikkit's ramble). */
+  readonly afterIntro?: number;
 }
 
 /** How it's said: each line's time up (seconds, by its text), the pause between, and the wait before
@@ -46,6 +49,8 @@ export class Chatter {
   started = false;
   /** The line up just now, if any. */
   line: Said | null = null;
+  /** Its intro's been told through, all of it, at least once (it's on to its loop). */
+  told = false;
   private phase: 'intro' | 'loop' = 'intro';
   private i = 0;
   private wait: number;
@@ -70,7 +75,7 @@ export class Chatter {
     const S = this.script, intro = S.intro ?? [], loop = S.loop ?? [];
     if (this.phase === 'intro') {
       if (this.i < intro.length) return intro[this.i++];
-      this.phase = 'loop'; this.i = 0;
+      this.phase = 'loop'; this.i = 0; this.told = true;
     }
     if (!loop.length) return null;
     if (S.random) return loop[Math.floor(this.rand() * loop.length)];
@@ -91,6 +96,12 @@ export class Chatter {
     }
     if (!this.started || !near) return null;   // (out of earshot: its line finished, it stops there)
     if ((this.wait -= dt) > 0) return null;
+    // (its intro's just been told through, the first time: a quiet beat, if it's to have one)
+    const intro = this.script.intro ?? [];
+    if (!this.told && this.phase === 'intro' && intro.length && this.i >= intro.length) {
+      this.told = true;
+      if ((this.wait = this.script.afterIntro ?? 0) > 0) return null;
+    }
     return this.say(this.next());
   }
 
@@ -125,4 +136,30 @@ export class Chatter {
     const g = this.pace.gap ?? 0;
     return typeof g === 'number' ? g : g[0] + this.rand() * (g[1] - g[0]);
   }
+}
+
+/* Who you hear, at sea, when two talking pirates are near: the nearest, within its earshot (Kikkit's
+   island and Tzz's are a hop apart, and each talks while you're near; the user, 11 Nov, of a house:
+   "I see 4 of them open there at the moment"). Each place says where its talker stands and how far
+   it carries; whoever asks hears only the one you're nearest. */
+
+/** A talking pirate's place: where it stands (squares) and how far it's heard. */
+export interface Voice { c: number; r: number; earshot: number }
+
+export class Voices {
+  private all = new Map<string, Voice>();
+  /** A talker, by name, standing there. */
+  add(name: string, v: Voice): void { this.all.set(name, v); }
+  /** Whom you hear from (c, r): the nearest within its earshot, or null. */
+  heard(c: number, r: number): string | null {
+    let best: string | null = null, d0 = Infinity;
+    for (const [name, v] of this.all) {
+      const d = Math.hypot(c - v.c, r - v.r);
+      if (d <= v.earshot && d < d0) { best = name; d0 = d; }
+    }
+    return best;
+  }
+  /** Does `name` reach you at (c, r)? (Within its earshot, and nobody nearer.) A talker nobody's
+      added is heard by its own earshot alone. */
+  hears(name: string, c: number, r: number): boolean { return !this.all.has(name) || this.heard(c, r) === name; }
 }

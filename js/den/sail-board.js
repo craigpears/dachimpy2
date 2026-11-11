@@ -31,9 +31,11 @@ const canvas = (w, h, draw) => { const cv = document.createElement('canvas'); cv
 
 /* A balloon, 128 square: a glossy round body a touch taller than wide, its pattern on it (water's
    waves, rope's braid and knot, wind's swirl), the shine top left, and its knot tied at the bottom.
-   A fixed piece is the same balloon held in an iron hoop. */
+   A fixed piece is the same balloon held in an iron hoop. (The one drawing of a Sailing balloon:
+   balloons.js twists the same ones in someone's hands, RULES.md "The same thing looks the same
+   everywhere".) */
 const SPRITES = new Map();
-function balloon(c, fixed = false) {
+export function balloon(c, fixed = false) {
   const k = `${c}${fixed ? 'f' : ''}`;
   if (SPRITES.has(k)) return SPRITES.get(k);
   const C = COL[c];
@@ -197,6 +199,23 @@ function padMake(B) {
   return el;
 }
 
+// A board's own state: its canvas, what's on it, what's playing out.
+const state = (cv) => ({ cv, g: cv.getContext('2d'), k: 0, dpr: 1, back: null, sig: '', rect: null, game: null,
+  pieces: new Map(), platforms: [], pops: [], bits: [], rings: [], glit: [], queue: [], prev: null, holdT: 0, steps: 0, banner: null, fall: null, shown: { r: 0, c: SPAWN[0] } });
+
+/** The board's size in its own units (pixels at scale 1), and where a square of it is: for a board put
+    in the world (sailBoardCanvas). */
+export const SAIL_BOARD = { W: BW, H: BH, x: (c) => px(c) + CELL / 2, y: (r) => py(r) + CELL / 2 };
+
+/** A board drawn off the page, to stand in the world as a picture (balloons.js: a lesson's board on its
+    stand), the same board as at sea, played the same way (sailBoardLay, sailBoardDrop, sailBoardTick);
+    `k` its scale (1: SAIL_BOARD.W by SAIL_BOARD.H pixels). Its canvas is `cv`. */
+export function sailBoardCanvas(k = 1) {
+  const cv = document.createElement('canvas');
+  cv.width = Math.round(BW * k); cv.height = Math.round(BH * k);
+  return Object.assign(state(cv), { el: null, k, back: backArt(k) });
+}
+
 /** The board on screen: made once, shown while it's played. `onPad(action, col?)`: a button on the
     touch pad ('left', 'right', 'turnL', 'turnR', 'drop', 'close'), or a column of the board pressed
     ('col'). */
@@ -207,8 +226,7 @@ export function sailBoardMake(onPad) {
   const cv = document.createElement('canvas');
   Object.assign(cv.style, { position: 'absolute', borderRadius: '10px', filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.55))', pointerEvents: 'auto', touchAction: 'none' });
   el.appendChild(cv);
-  const B = { el, cv, g: cv.getContext('2d'), k: 0, dpr: 1, back: null, sig: '', rect: null, onPad, game: null,
-    pieces: new Map(), platforms: [], pops: [], bits: [], rings: [], glit: [], queue: [], prev: null, holdT: 0, steps: 0, banner: null, fall: null, shown: { r: 0, c: SPAWN[0] } };
+  const B = { el, ...state(cv), onPad };
   B.pad = padMake(B);
   el.appendChild(B.pad);
   cv.addEventListener('pointerdown', (e) => {

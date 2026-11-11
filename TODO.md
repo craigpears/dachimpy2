@@ -107,7 +107,7 @@ the site (`.assetsignore` skips `*.md`).
   its board drawn, balloony, and playable anywhere at sea first (done: RULES.md, "Sailing at sea"); then Kikkit's island and her
   rambling (done); the whirlpools through the reef with the penguin in the middle (done: RULES.md,
   "Kikkit's whirlpools"); Tzz's island and her
-  balloon lesson on her island (nobody comes aboard: IDEAS.md, 11 Nov); the ending: Kikkit moves to Vegas Island, the penguins' island
+  balloon lesson on her island (built, to be played: RULES.md, "Tzz's balloon lesson"); the ending: Kikkit moves to Vegas Island, the penguins' island
   past the reef, her familiars swimming after your ship (11 Nov, IDEAS.md).
 
 - **Sailing's sparkle, two small things (11 Nov, seen when it was built):** from behind her, the
@@ -178,38 +178,6 @@ the site (`.assetsignore` skips `*.md`).
     hidden Easter egg in his house, with the mishap ("Oops. That happens sometimes. Don't worry
     about it."). His portrait checked first. Smuggling the rum after still waits. (IDEAS.md,
     "Helium, and Distilling".)
-
-- **Tzz's balloon lesson, after the user's first look (11 Nov):** "I love the start of [Tzz]." The
-  one long whoosh works. But:
-  - **The camera:** "the camera angle is a bit off. She's hidden quite behind." Frame her and the
-    board so you see both.
-  - **A real Sailing board, a real lesson:** "it's not really a real looking sailing board, it's just
-    things stacked on each other, so it needs to be ... closer to the actual tutorial idea. She's
-    helping you ... how to build doubles and bingos and things." Her board should look like Sailing's
-    own (the den's Sailing board), each piece landing where it would in a real game, building a
-    double, then a bingo, then the Vegas, so you learn how they're made.
-  - **The balloon in her hand and the piece on the board should look like the same thing:** "it
-    kind of loses some of the continuity ... the visual appearance between when it's in her hand and
-    when it's on the board is too different. There should be more cohesion."
-  - **Slower in her hand:** "it goes really quickly in her hand. It's just like, what is she doing?
-    Fiddling around some Play-Doh." Slow enough to see a balloon being twisted into that piece.
-  - **Careful with shapes and colours:** "it looks a bit wrong as well when it's certain colours with
-    balls at the end. So be careful about that." No long shapes with round knobs at the end, nor
-    colours that make them look rude.
-  - **Now you try (11 Nov):** "it should definitely be like a now you try thing. And, you know, she
-    sets up the balloons, you do the pop. Just make it a bit more ... interactive." She builds each
-    step (the double, the bingo, the Vegas), then hands it to you: you drop the last piece that
-    sets it off and watch it pop, and maybe build the next one yourself, her egging you on.
-  - **It's Sailing, not "the rigging" (11 Nov):** "She says R for rigging. It's supposed to be
-    sailing, not rigging." Everywhere the den calls the Sailing board "the rigging" (her line, the
-    island's hint, the R key's toast, the cheats), it says Sailing.
-  - **Platforms are never that small (11 Nov):** "Platforms never look that small. Like, they're
-    always like 2 by 3 or 3 by 3, aren't they? I mean, check the actual official pages, but these
-    look really weird." The easy board's platforms are a single row, one or two wide; check
-    YPPedia's Sailing page and the screenshots for their real sizes, and deal them so, on every
-    Sailing board (the shared rules), not only hers.
-
-## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
   "is great"; Dalnoth redrawn from his portrait and the map's view cleared, not yet seen. Watch: whether the cutscene's timing and camera feel right (about ten

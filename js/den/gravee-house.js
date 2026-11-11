@@ -12,13 +12,14 @@ import { PIRATES } from '../den-look.js';
 import {
   PLAN, ARRIVE, WALLS, FURNISH, blocksOf, galleryHang, HERSELF, VAMPIRE_PORTRAIT, HALL_OTHER, HALL_WALL, YOURS, VAMPIRE,
   WHIZ, TOUR, stopAt, atCoffin, COFFIN, SITTING, SCARE, scareShot, LEAD, LURE, leading, GALLERY_LEN, yourTitle, paintedBy,
+  portraitLine, allPortraits,
 } from '../den-gravee.js';
 import { SITTINGS_KEY, cleanSittings, sat, plaqueDate, snapshotName } from '../den-houses.js';
 import { AT_THE_DOOR, HALL_YOURS, TOUR_LINES, THE_GALLERY, THE_SCARE, CHATTER, YOUR_PORTRAIT, GOODBYE, BECKON } from '../lines/gravee.js';
 import { WOKEN, ASLEEP } from '../lines/vampire.js';
 import { IN_GRAVEES_HOUSE } from '../lines/you.js';
 import { FURNITURE, place } from './furniture.js';
-import { paint, paintYou, snapshot, watching } from './portraits.js';
+import { paint, paintYou, paintFlat, snapshot, watching } from './portraits.js';
 import { creature, fright } from './creatures.js';
 import { person } from './props-people.js';
 import { cine, cinePlay, cineEnd } from './cine.js';
@@ -47,9 +48,11 @@ export const GRAVEE_HOUSE = {
       if (p.kind === 'easel') G.easel = piece;
     }
     // ---------- her portraits, on the walls ----------
+    G.exhibits = [];
     const hang = (portrait, x, wallZ, o) => {
       const f = place(R, FURNITURE.frame({ plaque: portrait.title, ...o }), x, wallZ, 0);
       G.queue.push({ f, portrait });
+      G.exhibits.push({ id: portrait.id, x, y: o.y, z: wallZ });   // (what she can talk about: the shell's)
       return f;
     };
     const hallZ = HALL.z0 + WALL_T, galZ = GAL.z0 + WALL_T, chZ = CHAMBER.z0 + WALL_T;
@@ -79,7 +82,7 @@ export const GRAVEE_HOUSE = {
       who: G.herP, idle: 'sway', still: () => !!G.scare,
       showing() {
         const s = TOUR[G.tour - 1];
-        if (s && H.house.talk?.fig === G.her) return { at: s.at, near: s.near, stand: s.her };
+        if (s && H.house.talk && H.house.talk === G.tourTalk) return { at: s.at, near: s.near, stand: s.her };
         return leading(G.tour, !!G.woken) ? LEAD : null;
       },
     };
@@ -216,6 +219,28 @@ export const GRAVEE_HOUSE = {
       host,
       // The gallery: walked, on and on; or whizzed along, her titles going by.
       stretch: { ...WHIZ, titles: G.titles, lines: { ask: IN_GRAVEES_HOUSE.howMany, answer: THE_GALLERY.answer, back: THE_GALLERY.back } },
+      // Her portraits: the one you're looking at, she tells you about (the shell's; her lines by each).
+      exhibits: G.exhibits,
+      remark: portraitLine,
+      // ...and all of them close up, flat, one at a time (the shell's: picture-view.js), in the order they
+      // hang, yours among them once she's painted you; each painted as on the wall (portraits.js), when
+      // it's first wanted, and kept.
+      pictures: {
+        name: 'Portraits', who: 'Gravee',
+        list() {
+          const where = { herself: [HALL_WALL.herself.x, hallZ], you: [HALL_WALL.pride.x, hallZ], vampire: [HALL_WALL.vampire.x, chZ] };
+          return allPortraits(!!G.painted).map((p, i) => {
+            const [x, z] = where[p.id] || (p.x !== undefined ? [p.x, galZ] : i <= 2 ? [HALL_WALL.other.x, hallZ] : [0, 0]);
+            return { id: p.id, title: p.id === 'you' ? yourTitle(yourName()) : p.title, x, z, portrait: p };
+          });
+        },
+        art(p) {
+          if (p.id === 'you') return G.painted?.canvas || null;
+          G.flat ||= new Map();
+          if (!G.flat.has(p.id)) G.flat.set(p.id, paintFlat(p.portrait));
+          return G.flat.get(p.id);
+        },
+      },
       enter() {
         const kind = G.painted ? 'painted' : G.visited ? 'again' : 'first';
         G.visited = true; G.saidYours = false;
@@ -253,6 +278,7 @@ export const GRAVEE_HOUSE = {
             const L = [...TOUR_LINES[TOUR[j].id]];
             if (TOUR[j].id === 'hall' && G.painted) L[L.length - 1] = HALL_YOURS;   // (her favourite's up now: you)
             H.talk(her, L);
+            G.tourTalk = H.house.talk;   // (her tour's: she stands by the stop while she says it)
           }
         }
         // (her walking with you, talking as she goes: the shell's, house.js's host)

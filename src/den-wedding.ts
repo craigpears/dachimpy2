@@ -707,7 +707,7 @@ export function themeLook(theme: ThemeId, body: 'm' | 'f', rand: () => number = 
 
 // ---------- the whole set-up ----------
 /** The wardrobe's familiars (js/den-look.js's `fam` slot: a test checks they're the same), 'none' first. */
-export const FAMS = ['none', 'parrot', 'monkey', 'octopus', 'squirrel', 'bat', 'krakling'] as const;
+export const FAMS = ['none', 'parrot', 'monkey', 'octopus', 'squirrel', 'bat', 'krakling', 'dragon'] as const;   // (the dragon last, 11 Nov: Tzz's D'rizzle came into the wardrobe; old links keep their numbers)
 export type FamId = typeof FAMS[number];
 const isFam = (f: unknown): f is FamId => FAMS.includes(f as FamId);
 /* Her familiar, as well as her outfit (Mischievious herself, 11 Nov: "I'm usually wearing a monkey but

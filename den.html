@@ -341,7 +341,7 @@
       .wed { top: 8px; right: 8px; bottom: 8px; width: min(290px, 42vw); }
       .wed.tucked { bottom: auto; }
     }
-    body.wedding canvas { touch-action: none; }
+    body.wedding canvas, body.housing canvas { touch-action: none; }
     @media (pointer: coarse) { body.wedding .cine-bar.bot { font-size: 0; } body.wedding .cine-bar.bot::after { content: 'Double-tap: skip'; font-size: 14px; } }
     .wed-portrait { position: fixed; inset: 0; display: none; place-items: center; background: rgba(10, 6, 3, .6); z-index: 40; }
     .wed-portrait.on { display: grid; }
@@ -378,6 +378,21 @@
     .house-prompt button.mini { margin: 0; min-height: 40px; font-size: 16px; }
     .house-cap { position: fixed; left: 50%; top: 16%; transform: translateX(-50%); display: none; z-index: 30; font: italic 700 24px 'Alegreya', serif; color: #3a2210; background: #e9d7a6; border: 3px solid #7a5216; border-radius: 6px; padding: 6px 18px; white-space: nowrap; max-width: calc(100vw - 32px); box-sizing: border-box; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 6px 18px rgba(0,0,0,.5); }
     .house-cap.on { display: block; }
+    /* The pictures' close view (js/den/picture-view.js): one big, flat, its title and what's said of it. */
+    .pic-view { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; background: rgba(10, 6, 3, .86); z-index: 40; padding: 16px; box-sizing: border-box; }
+    .pic-view.on { display: flex; }
+    .pic-box { display: flex; align-items: center; gap: 12px; max-width: 100%; }
+    .pic-view figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; }
+    .pic-art canvas { display: block; height: min(calc(100dvh - 230px), 640px); width: auto; max-width: calc(100vw - 130px); aspect-ratio: 256 / 320; object-fit: contain; border: 10px solid #a8761f; border-radius: 3px; box-shadow: 0 0 0 3px #f2cf6a inset, 0 10px 30px rgba(0,0,0,.7); background: #1a110b; }
+    .pic-view figcaption { display: flex; flex-direction: column; align-items: center; background: #e9d7a6; border: 3px solid #7a5216; border-radius: 6px; padding: 4px 16px; color: #3a2210; max-width: calc(100vw - 40px); box-sizing: border-box; }
+    .pic-view figcaption b { font: italic 700 22px 'Alegreya', serif; text-align: center; }
+    .pic-view figcaption small { font-size: 13px; opacity: .75; }
+    .pic-line { margin: 0; max-width: min(560px, calc(100vw - 40px)); text-align: center; font-size: 17px; color: #f6ecd2; line-height: 1.35; }
+    .pic-line[hidden] { display: none; }
+    .pic-step { font-size: 40px; line-height: 1; width: 48px; height: 72px; padding: 0; border-radius: 10px; flex: none; }
+    .pic-foot { display: flex; align-items: center; gap: 12px; color: #d8c8a0; font-size: 14px; }
+    .pic-foot span[hidden] { display: none; }
+    .pic-foot button.mini { margin: 0; min-height: 36px; }
     .label.say.house-say { font-size: 18px; max-width: min(340px, 80vw); z-index: 3; }
     @media (max-width: 640px) {
       .label.say.house-say { font-size: 15px; padding: 3px 10px; border-radius: 12px; max-width: min(280px, 76vw); }
@@ -473,7 +488,7 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.HNCNNJ2P.js');
+    import(local ? './js/den.js' : './js/den.V4LS4DZR.js');
   </script>
 </body>
 </html>

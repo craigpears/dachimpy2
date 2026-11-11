@@ -4,7 +4,8 @@
    house's floor plan (floors, papered walls, the front walls cut low so the camera looks in as at a
    doll's house), walks you about them (WASD or the arrows; or click or tap where to go), lets you out at
    the front door (Space there, or the Leave button), shows who's talking in speech bubbles, and holds the
-   camera. Everything inside is the house's own scene module (SCENES), which furnishes it from the shared
+   camera, which you can turn round you and zoom right in (a drag, the wheel or a pinch: src/den-houses.ts's
+   Look), the house's own view easing back once you walk on. Everything inside is the house's own scene module (SCENES), which furnishes it from the shared
    furniture (furniture.js) and plays its owner's part. A friend's house: an entry in HOUSES, a scene
    module, one line in SCENES.
 
@@ -12,17 +13,26 @@
    side at your pace, by whatever they're showing you while they talk about it), and a long stretch of
    it you can skip along at a run (a Stretch: a button and Q), the camera alongside.
 
+   And its host talks about what you're looking at (src/den-houses.ts's lookingAt and remark): stop by a
+   portrait, or turn the camera onto one, and they tell you about it, once a visit each.
+
    A scene module: { plan, arrive, build(H) } where build returns { blocks, tick(dt), act(), prompt(),
-   enter(), leave(), cam(), frozen(), host, stretch }: `host` { who (a person(): props-people.js), idle,
+   enter(), leave(), cam(), frozen(), host, stretch, exhibits, remark(id) }: `exhibits` what's on its
+   walls ({ id, x, y, z }: src/den-houses.ts's Exhibit), `remark(id)` what the host says of one;
+   `pictures` its pictures to look through close up, flat (picture-view.js: Tab, or the button), as
+   { name, who (says what's said of them), list() ({ id, title, x, z }, in the order they hang), art(picture)
+   (a canvas) }; `host` { who (a person(): props-people.js), idle,
    showing() (a ShowSpot, or null), still() (true: the scene has them just now) }; `stretch` a Stretch
    with `titles` ({ x, title }: shown as they go by) and `lines` ({ ask: yours the first time, answer:
    the host's then, back: theirs coming back }). H is the shell's side: the root to build in, you,
    figures, say and talk, showing a portrait, the house's own view of you (home). */
 import * as THREE from 'three';
-import { step, walkable, atWayOut, houseById, readSecs, LODGINGS, YOUR_PACE, hostTarget, skipTo, skipSecs, roomAt } from '../den-houses.js';
+import { step, walkable, atWayOut, houseById, readSecs, LODGINGS, YOUR_PACE, hostTarget, skipTo, skipSecs, roomAt, WALL_BACK, LOOK_HOME, lookTurn, lookZoom, lookWheel, lookEase, lookView, isDrag, walkDir, lookingAt, remark, REMARK, GAZE_START } from '../den-houses.js';
 import { $, scene, camera, renderer, hemi, skyDome, paintSky, myLook, V3, toast as denToast, toastQuiet, toastHush, warm, sunOver, makePirate, animateWalk, faceTo, keys, mat, mesh, woodTex, ray, pirate } from './world.js';
 import { cine, cinePlay, cineEnd, cineLets, bubble, bubbleAt, stepTo } from './cine.js';
 import { GRAVEE_HOUSE } from './gravee-house.js';
+import { pictures, picturesOpen, picturesClose, picturesKey } from './picture-view.js';
+import { startAt } from '../picture-view.js';
 
 /** Where the houses are: well out of sight of the den, the sea and the Wedding Isle (at +400). */
 export const HOUSE_AT = V3(-400, 0, 0);
@@ -35,12 +45,17 @@ export const house = {
   on: false, snap: false, id: null, cur: null, root: null, you: null, to: null, built: {}, sky: null,
   /** Who's saying what: a bubble each. */
   lines: new Map(), talk: null, view: null, touch: matchMedia('(pointer: coarse)').matches,
+  /** How you're looking round, over the house's own view (src/den-houses.ts's Look); the way the keys
+      walk you while you hold them (`walkYaw`); the camera's turn as last drawn (`camYaw`). */
+  look: { ...LOOK_HOME }, walkYaw: null, camYaw: 0,
+  /** What you're looking at on the walls, and what's been said of them this visit (src/den-houses.ts's Gaze). */
+  gaze: GAZE_START,
 };
 
 // ---------- the page's parts: the bar along the top, the prompt, the portrait viewer ----------
 const hud = document.createElement('div');
 hud.className = 'house-hud'; hud.id = 'house-hud';
-hud.innerHTML = '<div class="house-name"><b id="house-name"></b><small id="house-owner"></small></div><button class="mini" id="house-skip" hidden>Whiz along</button><button class="mini" id="house-pic" hidden>Your portrait</button><button class="mini" id="house-leave">Leave</button>';
+hud.innerHTML = '<div class="house-name"><b id="house-name"></b><small id="house-owner"></small></div><button class="mini" id="house-skip" hidden>Whiz along</button><button class="mini" id="house-pics" hidden>Pictures</button><button class="mini" id="house-pic" hidden>Your portrait</button><button class="mini" id="house-leave">Leave</button>';
 const promptEl = document.createElement('div');
 promptEl.className = 'house-prompt'; promptEl.id = 'house-prompt';
 promptEl.innerHTML = '<span></span><button class="mini"></button>';
@@ -55,6 +70,7 @@ document.body.append(hud, promptEl, viewer, capEl, fadeEl);
 $('house-leave').onclick = (e) => { e.currentTarget.blur(); houseLeave(); };
 $('house-close').onclick = () => showPortrait(null);
 $('house-skip').onclick = (e) => { e.currentTarget.blur(); skipAlong(); };
+$('house-pics').onclick = (e) => { e.currentTarget.blur(); openPictures(); };
 if (!house.touch) $('house-skip').textContent = 'Whiz along (Q)';
 $('house-save').onclick = () => {
   if (!house.view) return;
@@ -127,7 +143,7 @@ function buildRooms(root, S) {
       };
       // (a side wall full height at the back, stepping down to the front's low wall for the front half, so
       // it never stands between the camera and the room)
-      const zm = r.z0 + (r.z1 - r.z0) * 0.45;
+      const zm = r.z0 + (r.z1 - r.z0) * WALL_BACK;
       const part = (s0, s1, y0, y1) => {
         if (wl.along !== 'z' || wl.h <= low) { seg(s0, s1, y0, y1); return; }
         if (s0 < zm) seg(s0, Math.min(s1, zm), y0, y1);
@@ -241,7 +257,7 @@ export function houseEnter(id) {
       warm(root);
     }
     const B = house.built[id];
-    Object.assign(house, { on: true, snap: true, id, cur: S, root: B.root, inst: B.inst, you: B.you, to: null });
+    Object.assign(house, { on: true, snap: true, id, cur: S, root: B.root, inst: B.inst, you: B.you, to: null, look: { ...LOOK_HOME }, walkYaw: null, gaze: GAZE_START });
     B.root.visible = true;
     // (dressed as you are now)
     swapLook(house.you, myLook);
@@ -274,6 +290,7 @@ export function houseLeave() {
     cineLets.cineView = 0;
     shell.hush();
     showPortrait(null);
+    picturesClose();
     promptEl.classList.remove('on');
     document.body.classList.remove('housing');
     toastQuiet.on = false;
@@ -363,6 +380,20 @@ function skipAlong() {
   return true;
 }
 
+// ---------- the house's pictures, close up ----------
+/* Its pictures one at a time, flat and big (picture-view.js; the user, 11 Nov: "a 2D version similar to the
+   puzzles, so you can go through the portraits easily with keyboard controls"): Tab or the button, as Tab
+   opens a puzzle's 2D view in the den; opening on the one you're looking at, or else the one you're
+   nearest (src/picture-view.ts's startAt), each with what the host says of it; Esc back. */
+function openPictures() {
+  const I = house.inst, P = I?.pictures;
+  if (!house.on || !P || cine || I.frozen?.() || house.view || pictures.on) return false;
+  const list = P.list(), Y = house.you, c = camera.position, d = camera.getWorldDirection(V3());
+  const seen = I.exhibits ? lookingAt(I.exhibits, Y, { x: c.x - HOUSE_AT.x, y: c.y - HOUSE_AT.y, z: c.z - HOUSE_AT.z }, d) : null;
+  keys.clear(); house.to = null;
+  return picturesOpen({ list, at: startAt(list, seen?.id ?? null, Y), art: P.art, line: I.remark ? (p) => I.remark(p.id) : null, who: P.who || '', done: () => keys.clear() });
+}
+
 // ---------- your keys, clicks and taps ----------
 /** Space (or the prompt's button, or a click on what's prompted): the house's own thing first, then the
     way out; otherwise it moves the talk on. */
@@ -377,24 +408,71 @@ function act() {
 export function houseKey(key, e) {
   if (!house.on) return false;
   if (e.target instanceof HTMLInputElement) return true;
+  if (pictures.on) return picturesKey(key, e);
+  if (key === 'tab') { e.preventDefault?.(); if (!e.repeat && !cine) openPictures(); return true; }
   if (house.view) { if (['escape', ' ', 'enter'].includes(key)) { e.preventDefault?.(); showPortrait(null); } return true; }
   if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) { e.preventDefault?.(); keys.add(key); house.to = null; return true; }
   if ((key === ' ' || key === 'enter') && !e.repeat) { e.preventDefault?.(); act(); return true; }
   if (key === 'q' && !e.repeat) { if (!cine) skipAlong(); return true; }
+  // Looking round, as in the den: Z and C turn, - and = zoom, V puts the house's view back.
+  if (key === 'z' || key === 'c') { keys.add(key); return true; }
+  if (!cine && (key === '-' || key === '_')) { house.look = lookZoom(house.look, 1.15); return true; }
+  if (!cine && (key === '=' || key === '+')) { house.look = lookZoom(house.look, 1 / 1.15); return true; }
+  if (key === 'v') { house.look = { ...LOOK_HOME }; return true; }
   if (key === 'escape' && !e.repeat) { if (!shell.skipLine()) houseLeave(); return true; }
   return true;
 }
 /* A click or a tap on the floor: walk there (the way to get about on a phone). On something the house
-   prompts for (the coffin, the door), you walk to it and it's done when you're there. */
-renderer.domElement.addEventListener('pointerdown', (e) => {
-  if (!house.on || cine || house.view || e.button !== 0) return;
+   prompts for (the coffin, the door), you walk to it and it's done when you're there. A press that moves
+   is a drag instead (src/den-houses.ts's isDrag): it turns the camera round you (either mouse button, or a
+   finger), as the den's right-drag does; two fingers pinch to zoom, as the wheel does. Walking happens on
+   letting go, so a drag never walks you. */
+const cv = renderer.domElement, presses = new Map();
+let grab = null, pinch = null;
+const apart = () => { const [a, b] = [...presses.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
+const looking = () => house.on && !cine && !house.view && !pictures.on;
+cv.addEventListener('pointerdown', (e) => {
+  if (!looking() || (e.pointerType === 'mouse' && e.button !== 0 && e.button !== 2)) return;
+  presses.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  try { cv.setPointerCapture(e.pointerId); } catch { /* never mind */ }
+  if (presses.size === 2) { pinch = { d: Math.max(1, apart()), zoom: house.look.zoom }; if (grab) grab.moved = true; return; }
+  if (presses.size === 1) grab = { id: e.pointerId, x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: false, button: e.button, touch: e.pointerType === 'touch' };
+});
+cv.addEventListener('pointermove', (e) => {
+  const P = presses.get(e.pointerId);
+  if (!P) return;
+  P.x = e.clientX; P.y = e.clientY;
+  if (!looking()) return;
+  if (pinch && presses.size >= 2) { house.look = lookZoom({ ...house.look, zoom: pinch.zoom }, pinch.d / Math.max(1, apart())); return; }
+  if (!grab || grab.id !== e.pointerId) return;
+  if (!grab.moved && !isDrag(e.clientX - grab.sx, e.clientY - grab.sy, grab.touch)) return;
+  if (!grab.moved) { grab.moved = true; grab.x = grab.sx; grab.y = grab.sy; }
+  house.look = lookTurn(house.look, e.clientX - grab.x, e.clientY - grab.y, grab.touch);
+  grab.x = e.clientX; grab.y = e.clientY;
+});
+function letGo(e, cancel = false) {
+  if (!presses.delete(e.pointerId)) return;
+  if (pinch) {
+    if (presses.size < 2) pinch = null;
+    // (a finger left on: it carries on turning, never a tap)
+    if (presses.size === 1) { const [[id, p]] = [...presses]; grab = { id, x: p.x, y: p.y, sx: p.x, sy: p.y, moved: true, touch: true }; } else grab = null;
+    return;
+  }
+  const G = grab;
+  if (!G || G.id !== e.pointerId) return;
+  grab = null;
+  if (cancel || G.moved || G.button !== 0 || !looking()) return;
   ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1), camera);
   const p = new THREE.Vector3();
   if (!ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), p)) return;
   p.sub(HOUSE_AT);
   house.to = { x: p.x, z: p.z };
   if (talking()) shell.skipLine();
-});
+}
+cv.addEventListener('pointerup', (e) => letGo(e));
+cv.addEventListener('pointercancel', (e) => letGo(e, true));
+// The wheel zooms, in toward what's ahead of you at a portrait's height (den.js leaves it to a house).
+cv.addEventListener('wheel', (e) => { if (looking()) house.look = lookWheel(house.look, e.deltaY * (e.deltaMode ? 33 : 1)); }, { passive: true });
 
 // ---------- each tick, and the camera ----------
 export function houseTick(dt) {
@@ -409,20 +487,27 @@ export function houseTick(dt) {
     if (keys.has('s') || keys.has('arrowdown')) mz++;
   }
   const ox = Y.x, oz = Y.z;
+  // (the way the camera faces as you set off, kept while you hold the keys, so the view easing back as
+  // you walk on doesn't curve your path)
+  if (!mx && !mz) house.walkYaw = null;
+  else house.walkYaw ??= house.camYaw;
   if (mx || mz) {
-    const n = Math.hypot(mx, mz), sp = YOUR_PACE * dt;
-    [Y.x, Y.z] = step(plan, Y.x, Y.z, Y.x + mx / n * sp, Y.z + mz / n * sp, house.inst.blocks || []);
-    faceTo(Y, mx, mz, dt);
+    const [wx, wz] = walkDir(mx, mz, house.walkYaw), sp = YOUR_PACE * dt;
+    [Y.x, Y.z] = step(plan, Y.x, Y.z, Y.x + wx * sp, Y.z + wz * sp, house.inst.blocks || []);
+    faceTo(Y, wx, wz, dt);
     animateWalk(Y, true, dt);
   } else if (house.to && !cine && !house.inst.frozen?.()) {
     if (walkTo(Y, house.to.x, house.to.z, YOUR_PACE, dt)) house.to = null;
   } else if (!house.inst.frozen?.()) animateWalk(Y, false, dt);
   Y.g.position.set(Y.x, Y.g.position.y, Y.z);
   if (!walkable(plan, Y.x, Y.z)) { Y.x = ox; Y.z = oz; }
+  const moved = Math.hypot(Y.x - ox, Y.z - oz);
+  lookTick(dt, moved);
   // The talk moves on by itself, a line at a time.
   if (house.talk && (house.talk.t -= dt) <= 0) nextLine();
   house.inst.tick?.(dt, { ox, oz });
   hostTick(dt);
+  remarkTick(dt, moved);
   // The bubbles over whoever's talking.
   const now = performance.now();
   for (const [fig, L] of house.lines) {
@@ -435,10 +520,12 @@ export function houseTick(dt) {
   }
   // What Space does here, along the bottom, with a button for it (a phone has no Space).
   const pr = cine ? null : house.inst.prompt?.() || (atWayOut(plan, Y.x, Y.z) ? { text: 'The front door', btn: 'Go out' } : talking() ? { text: '', btn: 'Next' } : null);
-  promptEl.classList.toggle('on', !!pr && !house.view);
+  promptEl.classList.toggle('on', !!pr && !house.view && !pictures.on);
   // The long stretch's skip, while you're in it.
   const S = house.inst.stretch, skip = !cine && !!S && !house.inst.frozen?.() && skipTo(plan, S, Y.x, Y.z, facing(Y)) !== null;
   if ($('house-skip').hidden === skip) $('house-skip').hidden = !skip;
+  const pics = !cine && !!house.inst.pictures && !house.inst.frozen?.();
+  if ($('house-pics').hidden === pics) { $('house-pics').hidden = !pics; $('house-pics').textContent = `${house.inst.pictures?.name || 'Pictures'}${house.touch ? '' : ' (Tab)'}`; }
   if (pr) {
     const [span, b] = promptEl.children;
     if (span.textContent !== pr.text) span.textContent = pr.text;
@@ -465,6 +552,19 @@ function hostTick(dt) {
   P.pose(dt, walked ? 'walked' : false);
   P.talk(dt);
 }
+/* The host on what you're looking at (the scene's `exhibits`, and its `remark` for each): stand looking
+   at one a moment, stopped by it or the camera turned onto it, and they say their line about it, when
+   nothing else is being said and they're by you; once a visit each (src/den-houses.ts's remark). */
+function remarkTick(dt, moved) {
+  const I = house.inst, h = I.host;
+  if (!h || !I.exhibits?.length || !I.remark) return;
+  const p = h.who.p, Y = house.you, c = camera.position, d = camera.getWorldDirection(V3());
+  const seen = cine ? null : lookingAt(I.exhibits, Y, { x: c.x - HOUSE_AT.x, y: c.y - HOUSE_AT.y, z: c.z - HOUSE_AT.z }, d);
+  const quiet = !cine && !pictures.on && !I.frozen?.() && !talking() && !house.lines.has(p) && Math.hypot(p.x - Y.x, p.z - Y.z) < REMARK.near;
+  const r = remark(house.gaze, seen?.id ?? null, dt, moved < 1e-3 && !house.to, quiet, I.remark);
+  house.gaze = r.gaze;
+  if (r.say) talk(p, [r.say]);
+}
 /** How far back the camera stands to see `across` metres side to side (more on a phone held upright). */
 function across(m) {
   const hh = Math.atan(Math.tan(camera.fov * Math.PI / 360) * camera.aspect);
@@ -475,9 +575,25 @@ function across(m) {
     something itself. */
 export function houseCam() {
   if (!house.on || !house.you) return null;
-  const own = house.inst?.cam?.(), H0 = home();
+  const own = house.inst?.cam?.(), H0 = home(), Y = house.you;
   const C = own || { look: V3(H0.look.x, H0.look.y, H0.look.z), dist: H0.dist, tilt: H0.tilt, yaw: H0.yaw };
-  return { look: C.look.clone().add(HOUSE_AT), dist: C.dist, tilt: C.tilt, yaw: C.yaw, cut: C.cut };
+  // (your look round over it: src/den-houses.ts's lookView, kept out of the room's walls)
+  const v = lookView({ look: { x: C.look.x, y: C.look.y, z: C.look.z }, dist: C.dist, tilt: C.tilt, yaw: C.yaw }, Y, house.look, roomAt(house.cur.plan, Y.x, Y.z), house.cur.walls?.high);
+  house.camYaw = v.yaw;
+  return { look: V3(v.look.x, v.look.y, v.look.z).add(HOUSE_AT), dist: v.dist, tilt: v.tilt, yaw: v.yaw, cut: C.cut };
+}
+/* Your look round, each tick: Z and C turn it (as in the den); a cutscene takes the camera and, when it
+   hands back, it's the house's own view again; walk on and it eases back (stood still, it stays). Zoomed
+   well in, the camera's close behind your head: you're out of the way while it is. */
+function lookTick(dt, moved) {
+  if (cine || house.inst.frozen?.()) house.look = { ...LOOK_HOME };
+  else {
+    const turn = (keys.has('z') ? 1 : 0) - (keys.has('c') ? 1 : 0);
+    if (turn) house.look = lookTurn(house.look, -turn * dt * 1.4 / 0.006, 0);
+    house.look = lookEase(house.look, dt, moved);
+  }
+  const Y = house.you, w = Y.g.getWorldPosition(V3()), c = camera.position;
+  Y.g.visible = !!cine || Math.hypot(c.x - w.x, c.z - w.z) > 1.5 || c.y > w.y + 2.8;
 }
 /** The house's own view of you, house-local: looking in from the front and a little above (not so steeply
     you see only the tops of hats: the user, 11 Nov, of Gravee in her pelt, "you really can't see her"). */

@@ -163,7 +163,16 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    Bedside Manors, where she shows you round her portraits, the vampire sits up in his coffin, and
    she paints you scared to death for her wall. Each house is a friend's little scene of their own.
    Or find Kikkit on her little island right of the checkpoint, rambling the real way through her
-   whirlpools (taken literally), and, with a Vegas, the penguins of Vegas Island beyond them.
+   whirlpools (taken literally), and, with a Vegas, the penguins of Vegas Island beyond them. Once
+   she's told it all you wonder aloud whether anyone could explain it with fewer tangents, and a hop
+   back toward the den, on a little island of her own, is Tzz, the sensible one (11 Nov): she twists
+   balloons, squeak by squeak, into Sailing's pieces and plays them onto a real Sailing board beside
+   her, a Double ("that's what zooms you over a whirlpool"), a Bingo and a Vegas, and in each hands you
+   the last pair to drop and pop. Then you sail the whirlpools yourself. Kikkit first, always; Tzz is
+   the one you go looking for (nothing says where).
+   *(11 Nov: on hold. Dalnoth is the Vikings' chief, his raids on the den Viking raids as Puzzle
+   Pirates has them, and called on by Pandayay; going after him, steps 6 and 7, waits until a reason
+   grows out of something else: IDEAS.md, "Her Vikings bring you back to the den".)*
 6. · **Dalnoth, guarding his treasure.** A big famous pirate, sitting on his chest with his monkey
    and his tankard. Get past him your way: swordfight him, shoot him off from the gun platform, or
    pump water in from the hidden cove and flood him out so the treasure washes onto the ground. He runs off, but his

@@ -4,7 +4,7 @@ Every character's lines, and who they are, made from `src/lines/` by `npm run bu
 (`tools/lines-doc.mjs`): change a line there, not here, and the game changes with it.
 This file's history in git shows every line as it's changed.
 
-[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava) · [Gravee](#gravee) · [The Count](#the-count)
+[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava) · [Tzz](#tzz) · [Gravee](#gravee) · [The Count](#the-count)
 
 ## Dalnoth
 
@@ -50,6 +50,10 @@ Your own pirate, dressed as you like from the wardrobe (or as any real pirate in
 
 - *Sweet and blissful: your vow, after your sweetheart's:* "And I promise to mend your wall. Every time."
 - *"I do":* "I do!"
+
+### Off Kikkit's island, once she's told her whole ramble the first time (wondering aloud)
+
+- "Is there anyone out here who could explain that with fewer tangents?"
 
 ## The den's pirate voice
 
@@ -728,6 +732,92 @@ He doesn't speak: his lines are what's said as you get to him.
 - *A Vegas carries her clean over the winds that feed the whirlpools, into the penguins' water:* "Penguins! A whole colony of them, out past the whirlpools"
 - *Just after, as he freezes and looks round at her:* "And one of them's in a balaclava. He's up to something"
 
+## Tzz
+
+On a little island of her own a hop from Kikkit's, on the den's side of it, with a copper still behind her. A real Puzzle Pirates pirate (Tzz of Emerald): Senior Officer and "Nap Specialist" of Virtute et Armis, Princess of the flag Don't Open Till Doomsday; she built the huge multi-Vegas in the user's screenshot, in a competition. Drawn from her portrait: light brown hair tied back, an eyepatch, a gold hoop earring, a big grin, a ragged light blue Rag shirt off one shoulder, blue-and-white Stripy knickers to below the knee, a peg leg, and D'rizzle on her shoulder, a red dragon with silver horns.
+
+The sensible one, after Kikkit: she shows you plainly how a big Vegas is built, as a street performer twists balloon animals: real balloons, squeak by squeak, into Sailing's pieces, played onto a real Sailing board beside her. A Double ("and that's what zooms you over a whirlpool"), a Bingo, then a Vegas, breezily ("it's simple, look, this, and this..."); she sets the balloons up and you drop the pair that pops it, egged on, and the chain goes off pop-pop-pop. That's why Sailing's pieces pop at all: they're balloon animals.
+
+> "Maybe Tzz can be on an island in there showing how she built her huge Vegas?" (the user, 10 Nov)
+>
+> "like how someone does balloon animals, except that she's doing like a sailing version of balloon animals" (the user, 11 Nov)
+>
+> "Say, look, it's simple. Look, you just do this, and this, and this, and this, and this. You set up this thing, and it pop, and then she pops it, and all the balloons go popping down" (the user, 11 Nov)
+>
+> "It just makes sense of like, well, how on earth do these sailing pieces pop in the puzzle? It makes sense. They're balloon animals." (the user, 11 Nov)
+>
+> "Have it nearby because you want to run in to [Kikkit] first, because then it's like the point is you want to go find the other person to help you." (the user, 11 Nov)
+>
+> "it's not really a real looking sailing board ... it needs to be ... closer to the actual tutorial idea. She's helping you ... how to build doubles and bingos and things." (the user, 11 Nov)
+>
+> "it should definitely be like a now you try thing. And, you know, she sets up the balloons, you do the pop." (the user, 11 Nov)
+>
+> "I don't think they need to be aboard, to be honest. I like Kikkit just kind of on her island. It works." (the user, 11 Nov)
+
+### Sailing up to her island, her lesson begins (or Space there, again)
+
+- *If you've not heard Kikkit out:* "Ahoy! Sailing, is it? Easy. It's just balloon animals."
+- *If you have:* "Let me guess. Kikkit? Five lefts and a penguin? Ha. Watch. It's just balloon animals."
+
+### Her lesson's first act: she twists a Double onto her board, and you drop the pair that pops it
+
+- *start:* "First, a Double. Two ledges, one over the other. Watch the balloons."
+- *twists:*
+  - "One on the bottom ledge's floor. Its spare goes beside it, under the gap..."
+  - "one on the top ledge's floor. Its spare's the colour the bottom gap wants..."
+- *yours:* "Your turn! Fill the top ledge's gap. A D move, W turns, S drops."
+- *again:*
+  - "Ooh, so close. Again! Right in the gap, the colour it wants."
+  - "Not quite! Steer it under, top ledge, top right. You've got this."
+  - "Nearly! Look at the colour the gap wants. Again!"
+- *help:* "Here, like this. Watch."
+- *popped:* "Double! The top ledge pops and drops its spare in the next gap, that pops. That's what zooms you over a whirlpool."
+
+### Her lesson's second act: a Bingo, four ledges high, the last pair yours
+
+- *start:* "Now a Bingo. Same trick, four ledges high."
+- *twists:*
+  - "Bottom ledge..."
+  - "next one up, its spare the colour the gap below wants..."
+  - "next one up, same again..."
+  - "top ledge, same again..."
+- *yours:* "Go on, then. Fill the top gap."
+- *again:*
+  - "Ooh, so close. Again! Right in the gap, the colour it wants."
+  - "Not quite! Steer it under, top ledge, top right. You've got this."
+  - "Nearly! Look at the colour the gap wants. Again!"
+- *help:* "Like this. See?"
+- *popped:* "Bingo! Four pops. Each ledge drops one into the next. Stairs, see?"
+
+### Her lesson's last act: a Vegas, six ledges high, the last pair yours
+
+- *start:* "And a Vegas. It's simple, look."
+- *twists:*
+  - "This,"
+  - "and this,"
+  - "and this,"
+  - "and this,"
+  - "and this,"
+  - "and this..."
+- *yours:* "...and you do the pop!"
+- *again:*
+  - "Ooh, so close. Again! Right in the gap, the colour it wants."
+  - "Not quite! Steer it under, top ledge, top right. You've got this."
+  - "Nearly! Look at the colour the gap wants. Again!"
+- *help:* "Like this! Pop!"
+- *popped:* "Vegas! Six pops, one long whoosh. That's all a Vegas is."
+
+### After her lesson, while you're within earshot of her island: round and round
+
+- "Space if you want it again. Balloons are cheap."
+- "Ledges pop last. So stack them like stairs, and each one drops into the next."
+- "A Double gets you over one whirly bit. The far side wants a Vegas."
+- "Kikkit's not wrong, you know. She's just... scenic about it."
+- "D'rizzle ate a balloon once. Squeaked for a week."
+- "I'm a Nap Specialist, officially. This is my awake bit."
+- "R gets you Sailing. Twist away."
+- "Every pop's a gust. Six in a row and you're gone."
+
 ## Gravee
 
 A real pirate of the Emerald Ocean (by her pirate name only): captain of Just In Time, Lady of the flag Don't Open Till Doomsday, and a great collector of portraits: seven pages of them, most of herself in her many looks, and dozens of her "Definitive Proof" of a yeti. Drawn from her pirate page's portrait: a white Berserker pelt (a bear's head) over white hair, an eyepatch, a blue starfish stuck to her cheek, a green Dress top and Gown trimmed white, a hook for her left hand, a candle in her right, and Spud, her tan monkey.
@@ -799,6 +889,30 @@ Sweet and excitable, far more excited about adding you to her collection than wo
 
 - "My favourite. Look at that face!"
 - "Visitors always ask who you are. I tell them: my friend, mid-scream."
+
+### About the portrait you've stopped by or turned to look at (once a visit each), and under it in the portraits' close view
+
+- *Gravee, by Gravee (the hall):* "That's me, by me. I'm my own favourite sitter. I never fidget."
+- *Busy This Weekend?:* "Busy This Weekend? I hoped someone would ask. Nobody did. More cocoa for me."
+- *Graves (the hall, and the gallery):* "Graves. I lost my shoes on that beach. And my hat. And the boat."
+- *Vampyre:* "Vampyre, with a Y. It's fancier. The Count says it's not accurate. He's jealous of the bat."
+- *Wicked:* "Wicked. I'm not, really. It's the hat."
+- *Hello Autumn:* "Hello Autumn! I wore orange so the leaves wouldn't feel left out."
+- *Dalnoth, Sober (Rare):* "Dalnoth, sober. It took three sittings to catch him. In the fourth he fell off the stool."
+- *Dignity, Off Duty (Never):* "Dignity, off duty. She says it's a forgery. She wrote me a very cross report about it."
+- *Mischievious, Between Weddings:* "Mischievious, between weddings. I had to paint ever so fast."
+- *Kikkit, Mid-Sentence:* "Kikkit, mid-sentence. She's still finishing it."
+- *The Count, Awake (Rare), over his coffin:* "The Count, awake! I did that one from memory. Don't tell him."
+- *Yours, in the portraits' close view, once she's painted you:* "My favourite. You, mid-scream. Look at those eyebrows!"
+
+### About a yeti proof ("Definitive Proof of ..."), each in turn
+
+- "{yeti}. Definitive proof. That blur is definitely a yeti."
+- "That's {yeti}! You can tell it's real. It's out of focus."
+- "{yeti}. Moved, of course. They always move."
+- "Proof of {yeti}. Some say it's a snowdrift. Snowdrifts don't wave."
+- "{yeti}! I'd know that fur anywhere."
+- "{yeti}. Proved twice, just to be sure."
 
 ### As you leave
 

@@ -198,8 +198,9 @@ export const LAY = {
         (ISLE): [16, 13] out to [15, 15], to leave the water off its jetty clear, and [19, 8] to
         [21, 6], off its near shore, to leave room for its name on the captain's map. And one more, 11
         Nov, for Kikkit's island (KIKKIT): [15, 17] to [12, 17], out of the water off her shore; and
-        [17, 22] gone, 11 Nov, for her whirlpools' winds.) */
-    FAR: [[17, 4], [21, 6], [15, 15], [20, 15], [12, 17], [13, 24], [19, 24], [1, 23]],
+        [17, 22] gone, 11 Nov, for her whirlpools' winds; and [20, 15] gone, 11 Nov, for Tzz's island
+        (TZZ): with it the water behind her island, between hers and Kikkit's, was shut in.) */
+    FAR: [[17, 4], [21, 6], [15, 15], [12, 17], [13, 24], [19, 24], [1, 23]],
     /** Mischievious's isle (11 Nov), where her wedding is (js/den/wedding.js). The user: "on an island
         somewhere ... islands can all have their own little thing out there". In plain sight, out to
         the right of the shipping lanes on the den's side of the checkpoint, so a new player can sail
@@ -267,6 +268,18 @@ export const LAY = {
         ],
         REEF: [[14, 18], [15, 18], [14, 23], [17, 21], [17, 22], [17, 23]],
         VEGAS: [[15, 23], [15, 24], [16, 24]],
+    },
+    /** Tzz's island (11 Nov; src/den-tzz.ts): the sensible one after Kikkit, who shows you plainly how a
+        Vegas is built. "Have it nearby because you want to run in to [Kikkit] first, because then it's
+        like the point is you want to go find the other person to help you", and "[Tzz] appears nearer
+        the start": a hop from Kikkit's, on the den's side of it, between hers and the Wedding Isle, in
+        plain sight. LAND: two squares, a little island of her own (a third, [21, 13], shut the water
+        between it and the Wedding Isle in) (the rock that was off it, [20, 15],
+        gone: FAR). LANDING: the water off its left-hand shore, where her lesson's seen (nearer her than Kikkit,
+        so it's her you hear there: src/chatter.ts's Voices). */
+    TZZ: {
+        LAND: [[20, 14], [21, 14]],
+        LANDING: { c0: 18, c1: 19, r0: 14, r1: 14 },
     },
 };
 /** The canal's squares: its locks and the water between them (the hidden cove's too). */
@@ -422,6 +435,13 @@ export class Sea {
         for (const [c, r, d] of LAY.KIKKIT.WINDS)
             this.wind.set(key(c, r), d);
         this.pockets.add(key(...LAY.KIKKIT.PENGUINS));
+        // Tzz's island, a hop from Kikkit's: land, and the water off it kept clear.
+        for (const [c, r] of LAY.TZZ.LAND)
+            this.works.add(key(c, r));
+        const T = LAY.TZZ.LANDING;
+        for (let c = T.c0; c <= T.c1; c++)
+            for (let r = T.r0; r <= T.r1; r++)
+                this.keep.add(key(c, r));
         this.zones = LAY.ZONES.map((z) => ({ ...z }));
     }
     scatter(roll) {

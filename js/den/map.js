@@ -150,6 +150,7 @@ function mapTexture() {
     g.fillStyle = fill; g.fill(); g.strokeStyle = INK; g.lineWidth = 3; g.stroke();
   };
   isle(CHART.kikkit.shore, SAND);
+  isle(CHART.tzz.shore, SAND);   // (Tzz's, a hop away, unnamed)
   {
     const [x, y] = Q([20, 17.2]);
     g.strokeStyle = INK; g.lineWidth = 2;

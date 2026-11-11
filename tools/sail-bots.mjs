@@ -17,6 +17,7 @@
    - stairs: the expert, who builds a staircase (the user, 10 Nov: "Vegas 3s and 4s quite easily";
      see stairs() below) and fires it at six steps. It looks a drop ahead with the next pair after its
      AHEAD best (an environment variable, default 4).
+   EASY=1 plays the easy board (Kikkit's whirlpools': src/sailing.ts, EASY) instead of an ordinary deal.
    'record' as the first argument plays the expert from seed 1 up until it makes a Vegas and prints
    that game's drops, for the staircase test in tests/sailing.test.ts.
 
@@ -245,7 +246,7 @@ for (const name of BOTS) {
   const t0 = Date.now();
   const tally = { drops: 0, points: 0, run: 0, booches: 0, boards: 0, longest: 0, at: Array(8).fill(0) };
   for (let g = 0; g < GAMES; g++) {
-    const s = new Sailing(seeded(1000 + g));
+    const s = new Sailing(seeded(1000 + g), true, { easy: !!process.env.EASY });
     s.record = false;
     const rnd = seeded(77 + g);
     for (let d = 0; d < DROPS; d++) {

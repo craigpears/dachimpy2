@@ -35,6 +35,7 @@ import type { Phase } from './den-raids.js';
 import { LAY, SAIL } from './den-sail.js';
 import { ISLE, isleShore, shoreOf } from './den-isle.js';
 import { KIKKIT, kikkitShore } from './den-kikkit.js';
+import { tzzShore } from './den-tzz.js';
 
 /** Where the map is: not yet dropped ('none'), lying on the beach ('lying'), or picked up ('found'). */
 export type MapState = 'none' | 'lying' | 'found';
@@ -138,6 +139,9 @@ export const CHART = {
     reef: LAY.KIKKIT.REEF.map(([c, r]): Square => [c, r]),
     vegas: shoreOf(LAY.KIKKIT.VEGAS).map(([c, r]): Square => [c - 0.5, r - 0.5]),
   },
+  /** Tzz's island (11 Nov), a hop from Kikkit's, in plain sight, so it's on the map: but unnamed (whose
+      it is, and what's on it, is for you to find: "Hidden gems, never hinted"). */
+  tzz: { shore: tzzShore().map(([c, r]): Square => [c - 0.5, r - 0.5]) },
 };
 
 /** Where the X is: on the old wreck beyond the checkpoint. */
@@ -173,7 +177,7 @@ export const NOTES: readonly MapNote[] = [
   { label: 'The open sea', at: [LAY.CHECKPOINT.REEF.c1 - 2, LAY.CHECKPOINT.ROW + 4] },
   { label: 'An old wreck', note: 'aground on a sandbar', at: [LAY.WRECK[0] + 5.5, LAY.WRECK[1] - 0.2] },
   { label: ISLE.NAME, at: [17.4, 8.2] },   // (under it, clear of the compass)
-  { label: KIKKIT.NAME, at: [19.8, 14.7] },   // (on the near side of it, clear of the reef's name)
+  { label: KIKKIT.NAME, at: [19.6, 15.55] },   // (on the near side of it, clear of the reef's name and Tzz's island)
 ];
 
 /** Vegas Island's name, written once you've been there (js/den/map.js). */

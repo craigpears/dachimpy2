@@ -1,3 +1,4 @@
+import { ON_A_PORTRAIT, ON_A_PROOF } from './lines/gravee.js';
 // ---------- the house ----------
 /** The gallery's length (metres), and how far apart its frames hang. Long: the gag's that it goes on. */
 export const GALLERY_LEN = 64;
@@ -212,6 +213,23 @@ export function scareShot(t, home) {
         }
     }
     return mixShot(home, home, 0);
+}
+// ---------- what she says of each portrait ----------
+/** Her line about a portrait (by its id), as you stand looking at it, or under it in the portraits'
+    close view: her own words for each (src/lines/gravee.ts's ON_A_PORTRAIT), and for her yeti proofs one
+    of a few, in turn along the wall, each with its yeti's name; null for one she's nothing to say of. */
+export function portraitLine(id) {
+    const m = /^proof-(\d+)$/.exec(id);
+    if (m) {
+        const i = Number(m[1]);
+        return i < YETIS.length ? ON_A_PROOF[i % ON_A_PROOF.length].replace('{yeti}', YETIS[i]) : null;
+    }
+    return ON_A_PORTRAIT[id] ?? null;
+}
+/** Every portrait she has up, in the order you come to them: the hall's (hers, yours if she's painted
+    you, then the other), the gallery's, and the Count's over his coffin. */
+export function allPortraits(painted) {
+    return [HERSELF, ...(painted ? [YOURS] : []), HALL_OTHER, ...galleryHang(), VAMPIRE_PORTRAIT];
 }
 // ---------- your portrait's plaque ----------
 /** Its title: you, by name, as she sees you. */

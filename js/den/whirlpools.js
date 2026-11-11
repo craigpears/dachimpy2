@@ -6,25 +6,27 @@
 // familiars and the penguins), placed through the shared pieces: props-people.js's person() and
 // creatures.js's creature() (RULES.md, "A character is only config"). Touches the rest only through a
 // few hooks: sailing.js builds, ticks and asks it (where the sloop's drawn, Space, the prompt, whether
-// the rigging's busy), the Sailing board's easy one in her waters (sail-station.js), what's found
-// (G.found) and the checkpoint's word on which way she crossed.
+// Sailing's board is busy), the Sailing board's easy one in her waters (sail-station.js), what's found
+// (G.found), the checkpoint's word on which way she crossed, sea.js's voices (whom you hear, Tzz's island
+// a hop away), and, once she's told her ramble, your wondering aloud (her cast's `then`).
 import * as THREE from 'three';
 import { SAIL, LAY } from '../den-sail.js';
-import { KIKKIT_CAST, Whirlpools, onKikkitLanding, inKikkitWaters, inEarshot, kikkitShore, PENGUINS } from '../den-kikkit.js';
+import { KIKKIT, KIKKIT_CAST, KIKKIT_STANDS, Whirlpools, onKikkitLanding, inKikkitWaters, inEarshot, kikkitShore, youWonder, PENGUINS } from '../den-kikkit.js';
 import { whirlpool } from '../den-whirl.js';
 import { shoreOf } from '../den-isle.js';
 import { readSecs } from '../den-dignity.js';
 import { addFind } from '../den-finds.js';
 import { OF_HIM } from '../lines/penguin.js';
 import { PIRATES } from '../den-look.js';
-import { scene, mat, mesh, canvasTex, G, keys, toast, burst, V3 } from './world.js';
-import { sail, seaX, seaZ, windLane } from './sea.js';
+import { scene, mat, mesh, canvasTex, G, keys, toast, burst, V3, pirate } from './world.js';
+import { sail, seaX, seaZ, windLane, voices } from './sea.js';
 import { outline, slab } from './isle.js';
 import { palm } from './wedding-scene.js';
 import { cp } from './checkpoint.js';
 import { stationBoard } from './sail-station.js';
 import { person } from './props-people.js';
 import { creature } from './creatures.js';
+import { bubble, bubbleAt } from './cine.js';
 
 const K = LAY.KIKKIT, CELL = SAIL.CELL;
 /* Where her island's ground is, and Vegas Island's, so whoever stands there stands on it (the user,
@@ -106,8 +108,9 @@ function build() {
     look: PIRATES[H.look], parent: g, x: seaX(H.at[0]), y: GROUNDS[H.on], z: seaZ(H.at[1]), yaw: H.yaw, scale: H.scale, idle: H.idle,
     script: H.says, secs: readSecs, gap: 0, wait: 0, begun: false,
     bubble: 'page', shown: () => sail.on,
-    // (within earshot, hailed or not; not while a whirlpool has her)
-    earshot: () => { const s = ship(); return !!s && !kik.held && inEarshot(s.c, s.r); },
+    // (within earshot, hailed or not, and nobody nearer talking (Tzz's island's a hop away: sea.js's
+    // voices); not while a whirlpool has her)
+    earshot: () => { const s = ship(); return !!s && !kik.held && inEarshot(s.c, s.r) && voices.hears('kikkit', s.c, s.r); },
     face: () => { const s = ship(); return s && inEarshot(s.c, s.r) ? { x: seaX(s.c), z: seaZ(s.r) } : null; },
   });
   const crew = KIKKIT_CAST.creatures.map((c) => {
@@ -117,6 +120,7 @@ function build() {
     g.add(o.g);
     return Object.assign(o, { id: c.id });
   });
+  voices.add('kikkit', { c: KIKKIT_STANDS.c, r: KIKKIT_STANDS.r, earshot: KIKKIT.EARSHOT });
   scene.add(g);
   return { g, her, crew, sneak: crew.find((o) => o.id === 'sneak'), pools, winds };
 }
@@ -136,9 +140,9 @@ export function kikkitPrompt() {
   if (!sail.on) return '';
   if (kik.held) return 'A whirlpool has her: round to its far corner, and the winds...';
   if (!canHail()) return '';
-  return kik.W?.her.talking() ? 'Off Kikkit\'s island · Space: and then?' : 'Off Kikkit\'s island · Space: hail her · R: the rigging (Sailing)';
+  return kik.W?.her.talking() ? 'Off Kikkit\'s island · Space: and then?' : 'Off Kikkit\'s island · Space: hail her · R: Sailing';
 }
-/** A whirlpool has her: the rigging's put away meanwhile (sailing.js). */
+/** A whirlpool has her: Sailing's board is put away meanwhile (sailing.js). */
 export const kikkitHolds = () => !!kik.held;
 
 /** The ending's hook (left for later, 11 Nov: Kikkit moves to Vegas Island, and her familiars swim
@@ -178,7 +182,13 @@ export function kikkitTick(dt, events = []) {
   if (sail.on) atSea(dt, events);
   // Kikkit: swaying, swigging, talking, turned to you when you're about.
   W.her.tick(dt);
+  // Once she's told her whole ramble, you wonder aloud (her cast's `then`), in the quiet after it.
+  mine.el ||= bubble('', document.body, 'wrap');
+  if (sail.on && youWonder(W.her.chatter, !!sail.said.wondered)) { sail.said.wondered = true; mine.t = 5; mine.el.textContent = KIKKIT_CAST.her.then; }
+  if ((mine.t -= dt) > 0 && sail.on) { pirate.g.getWorldPosition(mine.at); bubbleAt(mine.el, true, mine.at.x, mine.at.y + 2.3, mine.at.z); } else mine.el.style.display = 'none';
 }
+/* Your own line over your head at sea (the wondering), for its few seconds. */
+const mine = { el: null, t: 0, at: V3(0, 0, 0) };
 
 function atSea(dt, events) {
   const h = sail.helm, pose = h.pose;

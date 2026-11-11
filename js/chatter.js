@@ -18,6 +18,8 @@ export class Chatter {
     started = false;
     /** The line up just now, if any. */
     line = null;
+    /** Its intro's been told through, all of it, at least once (it's on to its loop). */
+    told = false;
     phase = 'intro';
     i = 0;
     wait;
@@ -45,6 +47,7 @@ export class Chatter {
                 return intro[this.i++];
             this.phase = 'loop';
             this.i = 0;
+            this.told = true;
         }
         if (!loop.length)
             return null;
@@ -72,6 +75,13 @@ export class Chatter {
             return null; // (out of earshot: its line finished, it stops there)
         if ((this.wait -= dt) > 0)
             return null;
+        // (its intro's just been told through, the first time: a quiet beat, if it's to have one)
+        const intro = this.script.intro ?? [];
+        if (!this.told && this.phase === 'intro' && intro.length && this.i >= intro.length) {
+            this.told = true;
+            if ((this.wait = this.script.afterIntro ?? 0) > 0)
+                return null;
+        }
         return this.say(this.next());
     }
     /** Space: on to its next line now if it's talking (no pause), else (begun) its next line. Null if it's
@@ -105,4 +115,24 @@ export class Chatter {
         const g = this.pace.gap ?? 0;
         return typeof g === 'number' ? g : g[0] + this.rand() * (g[1] - g[0]);
     }
+}
+export class Voices {
+    all = new Map();
+    /** A talker, by name, standing there. */
+    add(name, v) { this.all.set(name, v); }
+    /** Whom you hear from (c, r): the nearest within its earshot, or null. */
+    heard(c, r) {
+        let best = null, d0 = Infinity;
+        for (const [name, v] of this.all) {
+            const d = Math.hypot(c - v.c, r - v.r);
+            if (d <= v.earshot && d < d0) {
+                best = name;
+                d0 = d;
+            }
+        }
+        return best;
+    }
+    /** Does `name` reach you at (c, r)? (Within its earshot, and nobody nearer.) A talker nobody's
+        added is heard by its own earshot alone. */
+    hears(name, c, r) { return !this.all.has(name) || this.heard(c, r) === name; }
 }
