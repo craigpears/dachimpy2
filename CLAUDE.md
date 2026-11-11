@@ -37,6 +37,11 @@ Modular, no technical debt (the user, 10 Nov: "we need to make sure I'm not crea
 - The same goes for the world's objects and scenes (a lock, a gun, a crane, a ship, a place on the sea): each a
   module of its own that can be reused, not code smeared across files. Introduce this gradually as the world grows:
   when a change would copy code or tangle two parts together, pull the shared part out first.
+- Places and events as little islands (the user, 11 Nov, after the Wedding Isle: "I like that we can add like
+  these little islands of different events, and it's not like compounding in complexity. Each is relatively
+  isolated, can work"): a new place or event is its own island in the code too (its rules in `src/`, its 3D in
+  its own `js/den/` files, its lines in `src/lines/`), touching the rest only through a few thin hooks (a
+  square on the sea, a quest line, a cheat, what comes home with you). Keep that seam thin as more are added.
 
 Read [STORY.md](STORY.md) for the den's story, its progression and the principles behind them, and keep it
 up to date as the story grows. Read [RULES.md](RULES.md) before changing gameplay or wording, and add to it whenever the user corrects a rule or gives design feedback.
