@@ -609,6 +609,14 @@ spaghetti on the idea of attacking down north with the rowboats, or redoing like
 thing. I'm not sure." Three ways it could go: Daquan gives you a bigger ship (bigger ships need a
 go-ahead); boarding the big ship from rowboats up north; or a flotilla-style run of your own. To
 settle with the user before it's built, and kept to one little island of its own whichever it is.
+**Settled (11 Nov): Daquan lends you his war frigate.** "I want to go for a bigger ship. Maybe
+[Daquan] lends you his ship or something. So you got your little sloop for most of it, but for the
+flotilla thing, maybe you know go see him and he gives you a bigger ship ... Then you get a [war
+frig] to go sink the flotilla, but going around the world, you're in your little tiny sloop. That
+can work." So you go and see Daquan, he lends you his war frigate for the flotilla (the one
+bigger ship, his, borrowed for that), and everywhere else you sail your own little sloop. That's
+the user's go-ahead for this one borrowed ship, not for bigger ships in general (the shipwright's,
+below, still waits). Not the rowboats, and not a flotilla run in the sloop.
 
 ## A bigger ship from the shipwright (10 Nov)
 

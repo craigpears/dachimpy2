@@ -161,6 +161,12 @@ the site (`.assetsignore` skips `*.md`).
   you can save. Her look from her pirate page and portrait first (IDEAS.md, "The vampire in the
   coffin").
 
+- **Paint your ship (11 Nov, for later):** "we definitely need that on the to-do, being able to
+  paint your ship somewhere. Maybe ... some character later on an island ... will let you paint
+  your ship. I don't know who yet." Her colours (hull, sails, trim) chosen somewhere at sea, from a
+  character on an island of their own; who, to settle with the user. What you paint her is kept in
+  this browser, like your look.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
