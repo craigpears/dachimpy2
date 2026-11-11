@@ -432,6 +432,15 @@ then "she's definitely a penguin side quest".
   ended up with a penguin. But then I took a few lefts, too many lefts, and I ended up back on
   this island", sad face. That's the mechanic, told her way: a big combo, a long rush forward,
   and the whirlpools' lefts that bring you back.
+- **Kikkit aboard, doing the sound effects (11 Nov):** "maybe Kikkit comes on board and does all
+  like the sound effects of like whoosh or sparkly, like commenting on how sparkly all their sails
+  are, really sparkly and all sparkling ... doing her just loopy kind of commentary as you do
+  while at sails." So while you play Sailing she rides along, calling out each chain her way: a
+  "whoosh!" on a gust, cooing over the sails as they glitter, beside herself at a Vegas. Her
+  commentary follows what really happens on the board and in her sails (TODO.md, "Sparkly full
+  sails"), so the loopy talk is a layer on the real mechanic (RULES.md), and it's her old ramble
+  coming true in front of you. Tzz is also meant to come aboard for the whirlpools (below), so
+  who's aboard when needs settling (to pin down with the user).
 - **A fighting chance, and progress you can feel (10 Nov):** "give people a bit of a fighting
   chance", so you can "accidentally work out, oh, I did a double and it went forward double and
   got me past one of the whirlwinds". Not straight back to the start after that ("immediately
