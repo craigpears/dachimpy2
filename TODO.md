@@ -290,9 +290,18 @@ the site (`.assetsignore` skips `*.md`).
   three (the user, 11 Nov: "I think they've done it so there are now ... 4 rings in the [duty] navigation?
   So I don't know if that can be an idea on how to make just our one difficult constellation ... is it
   going to be really ridiculous to say you have 5 rings to complete ... It's like just one mega
-  constellation. Well, I don't know if that's actually going to work at all, but why not?"). So the
-  puzzle takes its number of rings as an option (three today, a constant), and the door tries four or
-  five, tested with the bots for whether it's hard but doable.
+  constellation. Well, I don't know if that's actually going to work at all, but why not?"). Then,
+  rather than more rings: the usual three, but a constellation picked on purpose to need a really hard
+  combo, which never happens in duty nav as it's played ("you get a few accidental clears and things, but
+  it's relatively more about just board management ... combos never have any point"): "you've got to have
+  like three reds together or four reds together on the bottom row." Three or four of a colour side by
+  side would clear as a line if placed a star at a time, so they have to land all at once: "you basically
+  got to put 2 in there and then say 2 of another color, 2 of the first color in the ring above those 2, so
+  that when you do a combo ... it creates a gap and it falls down." (The constellation going first when
+  it's made with a line at once, as YPPedia has it and src/navigation.ts already does.) "Those kind of
+  really evil boards that are impossible and frustrating to beat, like you're guaranteed to practically
+  booch them. Oh, that would be so evil and so fitting. That would be fantastic." The bots to show it can
+  be done.
 - **Shortcuts not all created equal (11 Nov):** on the race course, small shortcuts as well as big ones,
   each needing a combo of its size: a tiny one a Double gets you through (as a Double clears the reef out
   of Kikkit's whirlpools), bigger ones a bigger combo, the biggest the starlit door's tunnel. "Are you a
