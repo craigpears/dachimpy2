@@ -12,6 +12,9 @@ import { poseFig, restArms, heartsUp, roomy } from './wedding-scene.js';
 
 /** The portrait's shot, and where everyone stands for it (the couple in the middle under the arch). */
 export const PORTRAIT_CAM = { look: V3(0, 1.25, -3.7), dist: 8.4, tilt: 0.14, yaw: 0 };
+/** The portrait's shot for so many guests: a big wedding's from higher, over the heads of the crowd
+    still standing in front, the couple and those gathered round them still in the middle. */
+export const portraitCam = (n) => (n > SPOTS.length ? { ...PORTRAIT_CAM, look: PORTRAIT_CAM.look.clone().setY(0.9), dist: 11, tilt: 0.62 } : PORTRAIT_CAM);
 const SPOTS = [[-1.55, -3.0], [1.55, -3.0], [-2.75, -3.1], [2.75, -3.1], [-2.15, -4.2], [2.15, -4.2], [-3.55, -4.0], [3.55, -4.0]];
 const ease = (u) => { const v = Math.min(1, Math.max(0, u)); return v * v * (3 - 2 * v); };
 
@@ -36,7 +39,8 @@ export function ceremony(W, done) {
   const seats = W.seats();
   const dyes = W.dyes();
   // Everyone to their places: seated, you at the altar, your partner at the aisle's foot.
-  F.guests.forEach((g, i) => Object.assign(g, { x: seats[i].x, z: seats[i].z, yaw: seats[i].yaw, sit: seats[i].sit, y: 0 }));
+  // (each guest drawn whole knows which they are, gi: a big wedding's crowd is drawn on its own, W.crowd)
+  F.guests.forEach((g) => Object.assign(g, { x: seats[g.gi].x, z: seats[g.gi].z, yaw: seats[g.gi].yaw, sit: seats[g.gi].sit, y: 0 }));
   Object.assign(F.you, { x: COUPLE.you.x, z: COUPLE.you.z, yaw: Math.PI / 2 });
   Object.assign(F.partner, { x: AISLE_FOOT.x, z: AISLE_FOOT.z, yaw: Math.PI });
   Object.assign(off, { x: ALTAR.x, z: ALTAR.z, yaw: 0 });
@@ -60,7 +64,7 @@ export function ceremony(W, done) {
     if (beat === 'storm') F.raiders.forEach((r) => { r.g.visible = true; });
     if (beat === 'storm' || beat === 'brawl' || beat === 'cheer') F.guests.forEach((g) => { if (g !== drunk || plot !== 'drunk') g.sit = false; });
     if (beat === 'argue' || beat === 'stagger') { (beat === 'argue' ? [g0, g1] : [drunk]).forEach((g) => { g.sit = false; }); }
-    if (beat === 'cleared') F.guests.forEach((g, i) => { Object.assign(g, { x: seats[i].x, z: seats[i].z, yaw: seats[i].yaw, sit: seats[i].sit }); });
+    if (beat === 'cleared') F.guests.forEach((g) => { Object.assign(g, { x: seats[g.gi].x, z: seats[g.gi].z, yaw: seats[g.gi].yaw, sit: seats[g.gi].sit }); });
     if (beat === 'kiss') c.kissed = false;
   }
   function tick(dt) {
@@ -68,6 +72,7 @@ export function ceremony(W, done) {
     if (s.done) { cineEnd(false); return; }
     if (s.i !== c.beatI) { c.beatI = s.i; enter(s.beat); }
     const b = s.beat, u = s.u, L = s.local;
+    W.crowd?.(b, t);
     // The line being said, over whoever's saying it.
     if (s.line) W.say(who[s.line.who], fill(s.line.text, names)); else W.say(null);
     const all = [...F.guests, F.you, F.partner, F.mis, ...F.guards];
@@ -225,6 +230,8 @@ export function ceremony(W, done) {
     let n = 0;
     F.guests.forEach((g) => {
       if (plot === 'drunk' && g === drunk) return;   // (they stay in the cake)
+      // (the rest of a big wedding stay where they stand, turned for the picture, cheering)
+      if (n >= SPOTS.length) { g.body.rotation.set(0, 0, 0); turnTo(g, 0, dt); g.arms.forEach((a, j) => { a.rotation.x = b === 'cheer' ? -2.6 - Math.sin(t * 9 + g.gi + j) * 0.3 : 0; }); g.y = b === 'cheer' ? Math.abs(Math.sin(t * 8 + g.gi)) * 0.18 : 0; return; }
       const [x, z] = SPOTS[n++];
       g.body.rotation.x = 0; g.body.rotation.z = 0;
       if (b === 'cheer' && go(g, x, z, 2.6)) moving.delete(g);
@@ -234,7 +241,7 @@ export function ceremony(W, done) {
     turnTo(off, 0, dt);
     F.guards.forEach((g, i) => { if (g === off) return; if (b === 'cheer' && go(g, i ? 4.6 : -4.6, -4.3, 2.6)) moving.delete(g); if (!moving.has(g)) turnTo(g, 0, dt); });
     if (b === 'cheer' && (c.fx -= dt) < 0) { c.fx = 0.6; confetti((Math.random() - 0.5) * 4, 3.2, -3.4, 5); heartsUp(W.root, (Math.random() - 0.5) * 2, 2, -3.6, 2); }
-    const P = PORTRAIT_CAM;
+    const P = portraitCam(W.w.guests.length);
     shot(0, P.look.y, P.look.z, P.dist + (1 - k) * 2, P.tilt, P.yaw);
   }
 
@@ -242,6 +249,7 @@ export function ceremony(W, done) {
      benches overturned, a guest face down in the cake). Played out or skipped. */
   function end(skip) {
     W.play = null;
+    W.crowd?.('portrait', 0);
     W.say(null);
     if (skip) {
       F.raiders.forEach((r) => { r.g.visible = false; });
@@ -258,6 +266,7 @@ export function ceremony(W, done) {
     let n = 0;
     F.guests.forEach((g) => {
       if (plot === 'drunk' && g === drunk) return;
+      if (n >= SPOTS.length) { Object.assign(g, { yaw: 0, sit: false, y: 0 }); g.body.rotation.set(0, 0, 0); g.arms.forEach((a) => { a.rotation.x = 0; }); return; }
       const [x, z] = SPOTS[n++];
       Object.assign(g, { x, z, yaw: 0, sit: false, y: 0 });
       g.body.rotation.set(0, 0, 0); g.arms.forEach((a) => { a.rotation.x = 0; });

@@ -7,8 +7,9 @@ import {
   ALTAR, ARRIVE, AREA, ASK_HER, BODY_R, COUPLE, DYE_NAMES, FRONT, GUARDS, RETURN, STAND, inProp, onSomeone, propsOverlap, GUESTS, GUSH, Gush, MAX_PROPS, PLOTS, PROPS, SUGGEST, THEMES, TODAY, TONES, VENUES, WELCOME, WRECK,
   answer, arrival, caption, clean, decode, dressFor, encode, fill, fresh, layout, moveTo, plotAt, plotScript, readSecs,
   scriptSecs, seatsFor, suitorTitle, suitors, themeLook, wearable,
+  WHO, SIZES, MAX_GUESTS, GROUNDS, PROP_GROUPS, PROP_R, FLAT, TOPPERS, MADE_IN, footprint, clashes, restsOn, baseGuest, dressedUp, withSize, reseed, moveGuest, standFree, sizeN,
 } from '../src/den-wedding';
-import type { Prop, ThemeId, Wedding } from '../src/den-wedding';
+import type { Prop, Seat, SizeId, ThemeId, Wedding } from '../src/den-wedding';
 
 const LOOK_JS = readFileSync(join(__dirname, '..', 'js', 'den-look.js'), 'utf8');
 /** The wardrobe's own lists, read from js/den-look.js (it needs three.js to run). */
@@ -321,6 +322,9 @@ it("'she's nearly always free' felt mean: none of her lines run her down (11 Nov
   const all = [...Object.values(WELCOME).flat(), ...Object.values(GUSH).flatMap((p) => (Array.isArray(p) ? p : Object.values(p).flat()))];
   expect(all.length).toBeGreaterThan(40);
   for (const line of all) expect(line).not.toMatch(/always free|I'?m free|usually me|nobody wants|desperate|lonely|single again/i);
+  // (and nor does the planner: it was still the blurb under "Marry Mischievious", 11 Nov)
+  for (const f of ['js/den/wedding.js', 'den.html']) expect(readFileSync(join(__dirname, '..', f), 'utf8'), f).not.toMatch(/nearly always free|she'?s free/i);
+  for (const w of Object.values(WHO)) expect(w.blurb).not.toMatch(/always free|she'?s free/i);
 });
 
 // The user, 11 Nov: "she's just the facilitator for this wedding mechanic. I don't want this to be a
@@ -383,4 +387,249 @@ it('a partner of your own keeps their whole wardrobe and their name, in the set-
   const w = clean({ ...fresh('happy'), partner: { kind: 'own', look } });
   expect(w.partner).toEqual({ kind: 'own', look });
   expect(decode(encode(w))!.partner).toEqual({ kind: 'own', look });
+});
+
+// ---------- more to play with (11 Nov) ----------
+// The user, 11 Nov: "people are really going to be like wanting more control and variety ... on the furniture
+// ... I want them to have at least have some feel for getting lost in the furniture placement and the guest
+// placement ... how many guests you want. Do you want big, small, cozy, large? Do you want the grand wedding
+// where half the ocean turns up? ... Just the ability to like go around like with a camera and click on each
+// pirate and configure them."
+const PEOPLE = [STAND.mis, STAND.you, STAND.partner, COUPLE.you, COUPLE.partner, ALTAR, ...GUARDS];
+/** Somewhere a guest could be moved to just now (the k-th such place, from the front, on quarter metres). */
+function somewhere(w: Wedding, k = 0): [number, number] {
+  const s = seatsFor(w.props, w.guests.length, w.spots);
+  for (let z = -6; z <= 7.5; z += 0.25) for (let x = -6.25; x <= 6.25; x += 0.25) if (standFree(w.props, s, x, z) && k-- <= 0) return [x, z];
+  throw new Error('nowhere free');
+}
+/** Every rule for where guests stand: none in a prop, in each other, on her, the couple or the guards, at
+    the front, in the aisle, or off the grounds. */
+function standsRight(props: readonly Prop[], s: readonly Seat[], what: string) {
+  s.forEach((g, i) => {
+    expect(Math.abs(g.x) <= GROUNDS.x && g.z >= GROUNDS.z0 && g.z <= GROUNDS.z1, `${what}: guest ${i} off the grounds at ${g.x},${g.z}`).toBe(true);
+    for (const p of props) expect(inProp(p, g.x, g.z), `${what}: guest ${i} in a ${p.k} at ${p.x},${p.z}`).toBe(false);
+    for (const q of PEOPLE) expect(Math.hypot(q.x - g.x, q.z - g.z), `${what}: guest ${i} on someone`).toBeGreaterThan(BODY_R * 2);
+    expect(Math.abs(g.x) < FRONT.x && g.z < FRONT.z, `${what}: guest ${i} at the front`).toBe(false);
+    expect(Math.abs(g.x) < 0.7 && g.z >= FRONT.z, `${what}: guest ${i} in the aisle`).toBe(false);
+  });
+  // (each against the rest, on a grid: a hundred and forty of them)
+  const cell = new Map<string, number[]>(), key = (x: number, z: number) => `${Math.floor(x)},${Math.floor(z)}`;
+  s.forEach((g, i) => { const k = key(g.x, g.z); cell.set(k, [...(cell.get(k) ?? []), i]); });
+  s.forEach((g, i) => {
+    for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) for (const j of cell.get(key(g.x + dx, g.z + dz)) ?? []) {
+      if (j > i) expect(Math.hypot(s[j].x - g.x, s[j].z - g.z), `${what}: guests ${i} and ${j} in each other`).toBeGreaterThan(BODY_R * 2);
+    }
+  });
+}
+
+describe('how many come: cosy to half the Ocean (11 Nov)', () => {
+  it('runs from a handful to a crowd of a hundred and forty, small (eight) as ever', () => {
+    expect(SIZES.map((s) => s.name)).toEqual(['Cosy', 'Small', 'Big', 'Large', 'Grand']);
+    expect(SIZES[0].n).toBeLessThanOrEqual(GUESTS);
+    expect(sizeN('small')).toBe(GUESTS);
+    expect(SIZES.at(-1)!.n).toBe(MAX_GUESTS);
+    expect(MAX_GUESTS).toBeGreaterThanOrEqual(100);
+    for (let i = 1; i < SIZES.length; i++) expect(SIZES[i].n).toBeGreaterThan(SIZES[i - 1].n);
+    // (the plots want three guests at least: the drunk, and two to argue)
+    expect(SIZES[0].n).toBeGreaterThanOrEqual(5);
+    expect(fresh().size).toBe('small');
+  });
+
+  it('every size stands everyone right, in every venue and theme: none in a prop, each other, the aisle or the front', () => {
+    for (const z of SIZES) for (const v of VENUES) for (const t of THEMES) {
+      const props = layout(v.id, t.id as ThemeId), s = seatsFor(props, z.n);
+      expect(s, `${z.id} ${v.id}/${t.id}`).toHaveLength(z.n);
+      standsRight(props, s, `${z.id} ${v.id}/${t.id}`);
+    }
+  });
+
+  it('half the Ocean turns up: a crowd spilling off the benches, down the sides and to the back', () => {
+    const props = layout('beach', 'rosy'), s = seatsFor(props, MAX_GUESTS);
+    expect(s.filter((g) => g.z > 5.5).length).toBeGreaterThan(20);   // (the back)
+    expect(s.filter((g) => Math.abs(g.x) > 4.4).length).toBeGreaterThan(20);   // (down the sides)
+    expect(s.filter((g) => Math.abs(g.x) > 3.3 && g.z > -1 && g.z < 5).length).toBeGreaterThan(10);   // (beside the benches)
+    // (and the small wedding's eight stand where they always did)
+    expect(s.slice(0, GUESTS)).toEqual(seatsFor(props, GUESTS));
+  });
+
+  it('even with the benches moved about and more props down, a grand wedding fits, every rule kept', () => {
+    for (let k = 0; k < 6; k++) {
+      const props = [...layout('chapel', 'drunk').map((p, i) => (p.k === 'bench' ? { ...p, x: ((k * 7 + i * 3) % 9) - 4, z: ((k * 5 + i * 13) % 11) - 3, r: (k + i) % 8 } : p)),
+        { k: 'feast', x: -3.5, z: 6, r: 0, c: 'gold' } as Prop, { k: 'band', x: 4.5, z: -0.5, r: 0, c: 'gold' } as Prop];
+      const s = seatsFor(props, MAX_GUESTS);
+      expect(s).toHaveLength(MAX_GUESTS);
+      standsRight(props, s, `moved ${k}`);
+    }
+  });
+
+  it('the crowd beyond the theme\'s eight is dressed in the theme, the same from the same seed, another from another', () => {
+    for (const t of THEMES) {
+      const w = dressFor({ ...fresh(), size: 'grand', seed: 77 }, t.id as ThemeId);
+      expect(w.guests).toHaveLength(MAX_GUESTS);
+      expect(w.guests.slice(0, GUESTS)).toEqual(t.guests);
+      for (const g of w.guests.slice(GUESTS)) { expect(t.wear[g.body as 'm'].top).toContain(g.top); expect(t.dyes).toContain(g.topCol); }
+      expect(dressFor({ ...fresh(), size: 'grand', seed: 77 }, t.id as ThemeId).guests).toEqual(w.guests);
+      expect(dressFor({ ...fresh(), size: 'grand', seed: 78 }, t.id as ThemeId).guests).not.toEqual(w.guests);
+    }
+  });
+
+  it('changing the size or the crowd keeps the guests you\'ve dressed and moved, while there\'s room for them', () => {
+    let w = dressFor({ ...fresh(), size: 'large', seed: 5 }, 'gory');
+    w.guests[3] = { ...w.guests[3], hat: 'fez' }; w.guests[30] = { ...w.guests[30], topCol: 'mint' };
+    w = moveGuest(w, seatsFor(w.props, 48), 30, ...somewhere(w))!;
+    expect(dressedUp(w, 30)).toBe(true); expect(dressedUp(w, 31)).toBe(false);
+    const g = withSize(w, 'grand');
+    expect(g.guests).toHaveLength(MAX_GUESTS);
+    expect([g.guests[3].hat, g.guests[30].topCol]).toEqual(['fez', 'mint']);
+    expect(g.spots).toEqual(w.spots);
+    const c = withSize(w, 'cosy');
+    expect(c.guests).toHaveLength(6); expect(c.guests[3].hat).toBe('fez'); expect(c.spots).toEqual([]);
+    const r = reseed(w, 999);
+    expect(r.guests[30]).toEqual(w.guests[30]); expect(r.guests[3]).toEqual(w.guests[3]);
+    expect(r.guests[31]).toEqual(baseGuest('gory', 999, 31));
+    expect(r.guests[31]).not.toEqual(w.guests[31]);
+  });
+});
+
+describe('every guest yours: click one, move them anywhere free, dress them (11 Nov)', () => {
+  const w0 = dressFor({ ...fresh(), size: 'big' }, 'rosy'), n = sizeN('big');
+  it('moved, they stand where you put them, facing the altar; nobody else shuffles about', () => {
+    const before = seatsFor(w0.props, n);
+    const [x, z] = somewhere(w0);
+    const w = moveGuest(w0, before, 5, x, z)!;
+    expect(w.spots).toHaveLength(1);
+    expect(w.spots[0]).toMatchObject({ i: 5, x, z });
+    const after = seatsFor(w.props, n, w.spots);
+    expect([after[5].x, after[5].z]).toEqual([x, z]);
+    expect(Math.sin(after[5].yaw) * (ALTAR.x - x) + Math.cos(after[5].yaw) * (ALTAR.z - z)).toBeGreaterThan(0);   // (facing the altar)
+    after.forEach((s, i) => { if (i !== 5) expect(s, `guest ${i}`).toEqual(before[i]); });
+    standsRight(w.props, after, 'moved');
+  });
+  it('never into a prop, someone else, the aisle or the front, nor off the grounds', () => {
+    const s = seatsFor(w0.props, n), bench = w0.props.find((p) => p.k === 'bench')!;
+    expect(moveGuest(w0, s, 2, bench.x, bench.z)).toBe(null);
+    expect(moveGuest(w0, s, 2, s[7].x, s[7].z)).toBe(null);
+    expect(moveGuest(w0, s, 2, 0, 3)).toBe(null);
+    expect(moveGuest(w0, s, 2, 0.5, -2)).toBe(null);
+    expect(moveGuest(w0, s, 2, 9, 2.25)!.spots[0]).toMatchObject({ x: GROUNDS.x, z: 2.25 });   // (dragged off the side: at its edge)
+    expect(moveGuest(w0, s, 2, s[2].x, s[2].z)).not.toBe(null);   // (back where they were's fine)
+    expect(moveGuest(w0, s, 2, s[2].x, s[2].z, 2)!.spots).toEqual([{ i: 2, x: Math.round(s[2].x * 20) / 20, z: Math.round(s[2].z * 20) / 20, r: 2 }]);   // (or turned where they stand)
+    expect(standFree(w0.props, s, 6, 2.3)).toBe(true);
+  });
+  it('a prop put on someone you\'ve moved sends them back among the others, every rule kept', () => {
+    const [x, z] = somewhere(w0, 1);
+    const w = moveGuest(w0, seatsFor(w0.props, n), 0, x, z)!;
+    expect(seatsFor(w.props, n, w.spots)[0]).toMatchObject({ x, z });
+    const props = [...w.props, { k: 'band', x, z, r: 0, c: 'gold' } as Prop];
+    const s = seatsFor(props, n, w.spots);
+    expect(Math.hypot(s[0].x - x, s[0].z - z)).toBeGreaterThan(0.5);
+    standsRight(props, s, 'a band on them');
+  });
+});
+
+describe('far more furniture, grouped for the palette (11 Nov)', () => {
+  it('has the furnisher\'s whole shop, each kind in one group, each named, and room in the link for more', () => {
+    expect(PROPS.length).toBeGreaterThanOrEqual(30);
+    expect(PROPS.length).toBeLessThanOrEqual(36);   // (one letter each in the share link)
+    const grouped = PROP_GROUPS.flatMap((g) => g.kinds);
+    expect([...grouped].sort()).toEqual(PROPS.map(([k]) => k).sort());
+    for (const [k, name] of PROPS) { expect(name.length).toBeGreaterThan(2); expect(PROP_R[k]).toBeGreaterThan(0); }
+    for (const k of ['feast', 'rug', 'palm', 'chandelier', 'flag', 'statue', 'fountain', 'piano', 'band'] as const) expect(grouped).toContain(k);
+    expect(MAX_PROPS).toBeGreaterThanOrEqual(96);
+    for (const c of Object.values(MADE_IN)) expect(DYE_NAMES).toContain(c);
+  });
+  it('everything but the flat things stands on something; anyone stands on a rug, petals or a splatter', () => {
+    for (const [k] of PROPS) expect(footprint({ k, x: 0, z: 0, r: 0, c: 'white' }).length > 0, k).toBe(!FLAT.includes(k));
+  });
+  it('props stay out of each other where it matters: a bench not in a bench, a cake on its table, anything on a rug', () => {
+    const b: Prop = { k: 'bench', x: 0, z: 0, r: 0, c: 'pink' };
+    expect(clashes({ ...b, x: 0.5 }, [b])).toBe(true);
+    expect(clashes({ ...b, z: 1.5 }, [b])).toBe(false);
+    const t: Prop = { k: 'feast', x: 3, z: 3, r: 0, c: 'gold' }, cake: Prop = { k: 'cake', x: 3.5, z: 3, r: 0, c: 'rose' };
+    expect(clashes(cake, [t])).toBe(false);
+    expect(restsOn(cake, [t])).toBe(t);
+    expect(restsOn({ ...cake, x: 5 }, [t])).toBe(null);
+    for (const k of TOPPERS) expect(clashes({ ...cake, k }, [t]), k).toBe(false);
+    expect(clashes({ k: 'piano', x: 3, z: 3, r: 0, c: 'black' }, [{ k: 'rug', x: 3, z: 3, r: 0, c: 'red' }])).toBe(false);
+    // (a prop never clashes with itself)
+    expect(clashes(b, [b], 0)).toBe(false);
+  });
+  it('no theme\'s layout has a prop in another, or on her, the couple or the guards', () => {
+    for (const v of VENUES) for (const t of THEMES) layout(v.id, t.id as ThemeId).forEach((p, i, ps) => {
+      expect(clashes(p, ps, i), `${v.id}/${t.id}: ${p.k} at ${p.x},${p.z}`).toBe(false);
+      expect(onSomeone(p)).toBe(false);
+    });
+  });
+  it('she has something to say about the new things, and each size, in both tones, delighted as ever', () => {
+    for (const tone of ['happy', 'dark'] as const) {
+      const g = new Gush(tone);
+      for (const [k] of PROPS.slice(10)) expect(g.pool(`add_${k}`).length, `${tone} add_${k}`).toBeGreaterThan(0);
+      for (const s of SIZES) expect(g.pool(`size_${s.id}`).length, `${tone} size_${s.id}`).toBeGreaterThan(0);
+      for (const ev of ['guest_move', 'crowd']) expect(g.say(ev)).toBeTruthy();
+    }
+  });
+});
+
+describe('the set-up with all of that, kept and shared (11 Nov)', () => {
+  const big = (): Wedding => {
+    const w: Wedding = { ...dressFor({ ...fresh('happy'), size: 'grand', seed: 4321 }, 'drunk'), partner: { kind: 'her', ver: 1 }, plot: 'brawl' };
+    w.props = [...w.props, { k: 'chandelier', x: 0, z: 2.5, r: 2, c: 'gold' }, { k: 'statue', x: -5.75, z: -0.5, r: 1, c: 'white' }, { k: 'skulls', x: 5.5, z: 6, r: 3, c: 'white' }];
+    w.guests[1] = { ...w.guests[1], hat: 'fez', topCol: 'mint' };
+    w.guests[57] = { ...w.guests[57], top: 'captain', topCol: 'gold', name: 'Dread Pirate Kev' };
+    w.guests[139] = { body: 'f', skin: 3, hair: 'bun', hairCol: 'black', hat: 'tiara', hatCol: 'gold', top: 'corset', topCol: 'pink', topCol2: 'white', legs: 'gown', legsCol: 'pink', feet: 'shoes', feetCol: 'white', smile: true, patch: false, hand: 'tankard', beard: 'none', earring: 'both' };
+    const s = seatsFor(w.props, MAX_GUESTS);
+    const a = moveGuest(w, s, 57, ...somewhere(w))!;
+    return moveGuest(a, seatsFor(a.props, MAX_GUESTS, a.spots), 139, ...somewhere(a, 1))!;
+  };
+  it('round-trips a grand wedding: its size, crowd, new props, dressed guests and moved ones', () => {
+    const w = big();
+    expect(w.spots).toHaveLength(2);
+    const back = decode(encode(w))!;
+    expect(back).toEqual(clean(w));
+    expect(back.guests).toHaveLength(MAX_GUESTS);
+    expect(back.guests[57].name).toBe('Dread Pirate Kev');
+    expect(back.props.at(-3)!.k).toBe('chandelier');
+    expect(back.spots).toEqual(w.spots);
+  });
+  it('keeps the link short: only the guests you changed go in it, the rest from the seed', () => {
+    expect(encode(big()).length).toBeLessThan(1400);
+    const plain: Wedding = { ...dressFor({ ...fresh(), size: 'grand', seed: 4321 }, 'rosy'), partner: { kind: 'suitor', i: 1 } };
+    expect(encode(plain).length).toBeLessThan(90);
+    expect(decode(encode(plain))!.guests).toEqual(plain.guests);
+  });
+  it('cleans junk sizes, seeds and moved guests away', () => {
+    const w = clean({ theme: 'rosy', size: 'galactic', seed: -4, spots: [{ i: 99, x: 0, z: 0 }, { i: 2, x: 'a', z: 1 }, { i: 3, x: 50, z: -50, r: 13 }, { i: 3, x: 1, z: 1 }] });
+    expect([w.size, w.seed, w.guests.length]).toEqual(['small', 0, GUESTS]);
+    expect(w.spots).toEqual([{ i: 3, x: GROUNDS.x, z: GROUNDS.z0, r: 5 }]);
+    expect(clean({ ...fresh(), spots: [{ i: 0, x: 1, z: 1, r: 0 }] }).spots).toEqual([]);   // (no theme yet: no guests to move)
+  });
+});
+
+// Links made before guests could be counted, moved or dressed one by one (made on 11 Nov by the share link as
+// it was then, version 1): they still open, as they were.
+describe('old share links still open (11 Nov)', () => {
+  it('a plain one: the gory raid on the beach, Barnaby the groom, eight guests', () => {
+    const w = decode('WzEsMSwwLDEsMSxbInMiLDBdLDAsMF0')!;
+    expect(w).toMatchObject({ tone: 'dark', venue: 'beach', theme: 'gory', plot: 'raiders', partner: { kind: 'suitor', i: 0 }, size: 'small', spots: [] });
+    expect(w.guests).toEqual(THEMES[1].guests);
+    expect(w.props).toEqual(layout('beach', 'gory'));
+  });
+  it('a tuned one: its props as laid out, the guest it redressed, and her in Taco Princess', () => {
+    const w = decode('WzEsMCwyLDIsMyxbImgiLDJdLCIwMGcwdjA0MDB3MHYwNDAwZzExMDQwMHcxMTA0MDBnMTcwNDAwdzE3MDQ0MDYwaTAzNDE2MGkwMzQwNTB1MDM0MTcwdTAzNDA2MWEwMzQwOTFkMDMzMDkwMjBnMzEzMDIwZzYwajFiMDQ2MHQxYjA0NTE2MTgwbjUweTFkMm44MTYxODA0MjBrMDYwYjIwczA2MGI0MDIwMzAzNDFhMDMwMzgwajEyZGEiLFswLDAsMCx7ImhhdCI6ImZleiIsInRvcENvbCI6Im1pbnQifSwwLDAsMCwwXV0')!;
+    expect(w).toMatchObject({ tone: 'happy', venue: 'deck', theme: 'drunk', plot: 'brawl', partner: { kind: 'her', ver: 2 }, size: 'small' });
+    expect(w.props.at(-1)).toEqual({ k: 'cake', x: -1.25, z: 3.5, r: 5, c: 'lime', w: true });
+    expect(w.props.filter((p) => p.k === 'bench')).toHaveLength(6);   // (two taken away)
+    expect(w.guests).toHaveLength(GUESTS);
+    expect(w.guests[3]).toEqual({ ...THEMES[2].guests[3], hat: 'fez', topCol: 'mint' });
+    expect(w.guests.filter((_, i) => !dressedUp(w, i))).toHaveLength(GUESTS - 1);
+  });
+  it('one with someone of your own, before a theme', () => {
+    const w = decode('WzEsMCwwLC0xLDAsWyJvIix7ImJvZHkiOiJmIiwiaGFpciI6ImJ1biIsInRvcENvbCI6InJvc2UiLCJuYW1lIjoiUGVnIn1dLDAsMF0')!;
+    expect(w.partner).toEqual({ kind: 'own', look: { body: 'f', hair: 'bun', topCol: 'rose', name: 'Peg' } });
+    expect([w.theme, w.guests.length]).toEqual([null, 0]);
+  });
+  it('and shared again, they come back the same', () => {
+    const w = decode('WzEsMSwwLDEsMSxbInMiLDBdLDAsMF0')!;
+    expect(decode(encode(w))).toEqual(w);
+  });
 });

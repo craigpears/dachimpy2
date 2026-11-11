@@ -66,17 +66,49 @@ const AISLE_X = 0.7;
 export const BODY_R = 0.28;
 
 // ---------- props ----------
+/** Everything there is to lay out. Their order is the share link's: new ones go on the end (and no
+    more than 36, one letter each). The user, 11 Nov: "people are really going to be like wanting more
+    control and variety ... on the furniture ... some feel for getting lost in the furniture placement",
+    so the furnisher's whole shop: seats, a feast and its grog, lights, flowers, finery, music, and the
+    piratey bits. */
 export const PROPS = [
   ['bench', 'Bench'], ['arch', 'Arch'], ['flowers', 'Flowers'], ['banner', 'Banner'], ['barrel', 'Barrel'],
   ['table', 'Table'], ['lantern', 'Lantern'], ['candles', 'Candles'], ['cake', 'Cake'], ['splat', 'Splatter'],
+  ['chair', 'Chair'], ['throne', 'Throne'], ['feast', 'Feast table'], ['punch', 'Punch bowl'], ['fountain', 'Rum fountain'],
+  ['candelabra', 'Candelabra'], ['torch', 'Torch'], ['chandelier', 'Chandelier'], ['palm', 'Potted palm'], ['garland', 'Garland'],
+  ['petals', 'Petals'], ['rug', 'Rug'], ['flag', 'Flag pole'], ['statue', 'Statue'], ['heart', 'Big heart'],
+  ['chest', 'Treasure chest'], ['gifts', 'Presents'], ['piano', 'Piano'], ['band', 'Band stand'], ['cannon', 'Cannon'],
+  ['anchor', 'Anchor'], ['skulls', 'Skulls'],
 ] as const;
 export type PropKind = typeof PROPS[number][0];
+/** The palette, by kind (each prop in one group). */
+export const PROP_GROUPS: readonly { id: string; name: string; kinds: readonly PropKind[] }[] = [
+  { id: 'seats', name: 'Seats', kinds: ['bench', 'chair', 'throne'] },
+  { id: 'food', name: 'Food and grog', kinds: ['table', 'feast', 'cake', 'punch', 'fountain', 'barrel'] },
+  { id: 'lights', name: 'Lights', kinds: ['lantern', 'candles', 'candelabra', 'torch', 'chandelier'] },
+  { id: 'flowers', name: 'Flowers', kinds: ['flowers', 'palm', 'garland', 'petals', 'arch'] },
+  { id: 'finery', name: 'Finery', kinds: ['rug', 'banner', 'flag', 'statue', 'heart', 'chest', 'gifts'] },
+  { id: 'music', name: 'Music', kinds: ['piano', 'band'] },
+  { id: 'piratey', name: 'Piratey', kinds: ['cannon', 'anchor', 'skulls', 'splat'] },
+];
 /** A prop: its kind, where (x, z: metres in AREA, on quarter metres), its turn (r: eighths of a turn),
     its colour (a dye), and w: wrecked (a bench overturned, a banner torn, the arch snapped). */
 export interface Prop { k: PropKind; x: number; z: number; r: number; c: string; w?: boolean }
-export const MAX_PROPS = 48;
+export const MAX_PROPS = 96;
 /** How much room each needs (its radius, metres): for picking it and keeping it in AREA. */
-export const PROP_R: Record<PropKind, number> = { bench: 1.2, arch: 1.3, flowers: 0.35, banner: 0.8, barrel: 0.4, table: 0.6, lantern: 0.25, candles: 0.3, cake: 0.45, splat: 0.6 };
+export const PROP_R: Record<PropKind, number> = {
+  bench: 1.2, arch: 1.3, flowers: 0.35, banner: 0.8, barrel: 0.4, table: 0.6, lantern: 0.25, candles: 0.3, cake: 0.45, splat: 0.6,
+  chair: 0.4, throne: 0.55, feast: 1.2, punch: 0.35, fountain: 0.7, candelabra: 0.3, torch: 0.25, chandelier: 0.9, palm: 0.45, garland: 1.1,
+  petals: 0.7, rug: 1.3, flag: 0.3, statue: 0.45, heart: 0.6, chest: 0.5, gifts: 0.45, piano: 0.85, band: 0.85, cannon: 0.7, anchor: 0.5, skulls: 0.4,
+};
+/** Flat on the ground (a splatter, a rug, petals): anyone stands on them, and anything goes on them. */
+export const FLAT: readonly PropKind[] = ['splat', 'rug', 'petals'];
+/** What goes on a table (a cake, a punch bowl, candles, presents), and the tables. */
+export const TOPPERS: readonly PropKind[] = ['cake', 'punch', 'candles', 'gifts'];
+const TABLES: readonly PropKind[] = ['table', 'feast'];
+/** The colour a prop's made in when it's added, if it's not the theme's: blood's red, a barrel's
+    brown, a statue's marble... */
+export const MADE_IN: Partial<Record<PropKind, string>> = { splat: 'red', barrel: 'brown', statue: 'white', anchor: 'black', cannon: 'black', skulls: 'white', piano: 'black', chest: 'gold', fountain: 'gold' };
 const snap = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, Math.round(v * 4) / 4));
 // (on quarter metres, as anything you move is)
 const P = (k: PropKind, x0: number, z0: number, c: string, r0 = 0, w = false): Prop => {
@@ -151,7 +183,48 @@ const DRUNK: Theme = {
 export const THEMES = [ROSY, GORY, DRUNK] as const;
 export type ThemeId = 'rosy' | 'gory' | 'drunk';
 export const themeOf = (id: string | null): Theme | null => THEMES.find((t) => t.id === id) ?? null;
+/** The guests each theme dresses itself (and a small wedding's size). */
 export const GUESTS = 8;
+
+// ---------- how many come ----------
+/** The user, 11 Nov: "how many guests you want. Do you want big, small, cozy, large? Do you want the
+    grand wedding where half the ocean turns up?" Their order is the share link's. */
+export const SIZES = [
+  { id: 'cosy', name: 'Cosy', n: 6, blurb: 'A handful of your nearest and dearest.' },
+  { id: 'small', name: 'Small', n: GUESTS, blurb: 'Just the crew. Everyone gets a good view.' },
+  { id: 'big', name: 'Big', n: 20, blurb: 'The whole flag, best hats on.' },
+  { id: 'large', name: 'Large', n: 48, blurb: 'Everyone you\'ve ever pillaged with.' },
+  { id: 'grand', name: 'Grand', n: 140, blurb: 'Half the Ocean turns up. Standing room only.' },
+] as const;
+export type SizeId = typeof SIZES[number]['id'];
+export const MAX_GUESTS = 140;
+export const sizeN = (id: string): number => SIZES.find((s) => s.id === id)?.n ?? GUESTS;
+/** How many different crowds there are (a crowd's seed is one of them). */
+export const SEEDS = 36 ** 3;
+/** A little generator of numbers in [0, 1), the same ones each time from the same seed. */
+export function seeded(seed: number): () => number {
+  let a = seed | 0;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+/** The i-th guest as they come, before you've touched them: the theme's own eight, then the crowd,
+    each dressed within the theme from the wedding's seed (so a crowd of a hundred and forty needs no
+    more than its seed to share). */
+export function baseGuest(theme: ThemeId, seed: number, i: number): Look {
+  const T = themeOf(theme)!;
+  if (i < T.guests.length) return { ...T.guests[i] };
+  const r = seeded(seed * 4099 + i * 7919 + 17);
+  return themeLook(theme, r() < 0.5 ? 'm' : 'f', r);
+}
+/** Whether two looks are the same in every slot. */
+export const sameLook = (a: Look, b: Look): boolean => {
+  const ka = Object.keys(a), kb = Object.keys(b);
+  return ka.length === kb.length && ka.every((k) => a[k] === b[k]);
+};
 
 /** The benches, four rows a side, facing the altar, well back from it (the front's kept clear: FRONT);
     everyone's layout starts from them. */
@@ -166,12 +239,18 @@ export function layout(venue: VenueId, theme: ThemeId): Prop[] {
   if (theme === 'rosy') {
     ROWS.forEach((z, i) => out.push(P('flowers', -0.62, z - 0.5, i % 2 ? a : d), P('flowers', 0.62, z - 0.5, i % 2 ? a : d)));
     out.push(P('candles', -1.7, -4.9, c), P('candles', 1.7, -4.9, c), P('banner', -3.8, -5.4, a, 0), P('banner', 3.8, -5.4, a, 0), P('table', 4.6, 5.0, c), P('cake', 4.6, 5.0, a));
+    // (a runner up the aisle, and palms either side of the front)
+    out.push(P('rug', 0, 2.4, a, 2), P('palm', -4.4, -1.6, d), P('palm', 4.4, -1.6, d));
   } else if (theme === 'gory') {
     for (const [x, z] of [[-0.6, 3.6], [0.7, 1.2], [-3.4, -3.6], [4.1, 0.2], [-4.4, 3.2], [0.2, -2.0]] as const) out.push(P('splat', x, z, 'red', (x * 3 + z * 5 + 16) % 8 | 0));
     out.push(P('banner', -3.8, -5.4, c, 0), P('banner', 3.8, -5.4, c, 0), P('flowers', -1.0, -4.6, a), P('flowers', 1.0, -4.6, a), P('lantern', -4.4, -1.6, c), P('lantern', 4.4, -1.6, c), P('candles', -1.8, -5.0, b), P('candles', 1.8, -5.0, b), P('barrel', -4.8, 5.2, b), P('table', 4.6, 5.0, b), P('cake', 4.6, 5.0, c));
+    // (torches by the front, and a pile of skulls or two)
+    out.push(P('torch', -3.4, -1.2, c), P('torch', 3.4, -1.2, c), P('skulls', 5.4, 3.6, 'white', 1), P('skulls', -5.4, 1.4, 'white', 6));
   } else {
     for (const [x, z] of [[-4.6, -1.6], [4.6, -1.6], [-4.8, 1.5], [4.8, 1.5], [-4.6, 5.4], [-3.8, 6.2]] as const) out.push(P('barrel', x, z, c));
     out.push(P('banner', -3.8, -5.4, d, 0), P('banner', 3.8, -5.4, d, 0), P('lantern', -1.2, 5.8, b), P('lantern', 1.2, 5.8, b), P('table', 4.6, 5.0, a), P('table', 2.6, 6.2, a, 2), P('cake', 4.6, 5.0, b), P('flowers', -1.0, -4.6, e(T)), P('flowers', 1.0, -4.6, e(T)));
+    // (the rum fountain, and the shanty-singer's piano)
+    out.push(P('fountain', -4.7, 3.4, 'gold'), P('piano', 4.6, 3.4, 'brown', 2));
   }
   if (venue === 'beach') out.push(P('lantern', -1.2, 6.8, b), P('lantern', 1.2, 6.8, b));
   else if (venue === 'chapel') out.push(P('candles', -3.4, -4.6, c), P('candles', 3.4, -4.6, c));
@@ -208,7 +287,27 @@ export function footprint(p: Prop): Rect[] {
     case 'lantern': return [r(0, 0, 0.1)];
     case 'candles': return [r(0, 0, 0.25)];
     case 'cake': return [r(0, 0, 0.42)];
-    default: return [];
+    case 'chair': return [r(0, 0, 0.24)];
+    case 'throne': return [r(0, 0.05, 0.42, 0.36)];
+    case 'feast': return [r(0, 0, 1.15, 0.45)];
+    case 'punch': return [r(0, 0, 0.28)];
+    case 'fountain': return [r(0, 0, 0.62)];
+    case 'candelabra': return [r(0, 0, 0.16)];
+    case 'torch': return [r(0, 0, 0.08)];
+    case 'chandelier': return [r(-1.0, 0, 0.12)];   // (its post: it hangs from an arm, over whoever's under it)
+    case 'palm': return [r(0, 0, 0.3)];
+    case 'garland': return [r(-1.0, 0, 0.08), r(1.0, 0, 0.08)];
+    case 'flag': return [r(0, 0, 0.1)];
+    case 'statue': return [r(0, 0, 0.36)];
+    case 'heart': return [r(0, 0, 0.55, 0.15)];
+    case 'chest': return [r(0, 0, 0.42, 0.28)];
+    case 'gifts': return [r(0, 0, 0.42)];
+    case 'piano': return [r(0, 0, 0.78, 0.32)];
+    case 'band': return [r(0, 0, 0.8)];
+    case 'cannon': return [r(0, 0.1, 0.36, 0.72)];
+    case 'anchor': return [r(0, 0, 0.45, 0.16)];
+    case 'skulls': return [r(0, 0, 0.36)];
+    default: return [];   // (flat: a splatter, a rug, petals)
   }
 }
 /** Whether a circle (a pirate standing at x, z) would stand in something. */
@@ -232,6 +331,19 @@ export function propsOverlap(p: Prop, q: Prop): boolean {
 const PEOPLE = [STAND.mis, STAND.you, STAND.partner, COUPLE.you, COUPLE.partner, ALTAR, ...GUARDS];
 /** Whether a prop would stand on her, the couple or the guards (moved or added there, it's not). */
 export const onSomeone = (p: Prop): boolean => PEOPLE.some((s) => inProp(p, s.x, s.z));
+/** The table a cake (or a punch bowl, candles, presents) is standing on, if it's on one. */
+export function restsOn(p: Prop, props: readonly Prop[]): Prop | null {
+  if (!TOPPERS.includes(p.k) || p.w) return null;
+  return props.find((q) => TABLES.includes(q.k) && !q.w && inProp(q, p.x, p.z, 0.01)) ?? null;
+}
+const stacks = (a: Prop, b: Prop) => (TOPPERS.includes(a.k) && TABLES.includes(b.k)) || (TOPPERS.includes(b.k) && TABLES.includes(a.k));
+/** Whether a prop would stand in another (props[self] is itself, left out): never mind anything flat,
+    and a cake's meant to be on its table. (The user, 11 Nov, wanting more to place: they stay out of
+    each other where it matters.) */
+export function clashes(p: Prop, props: readonly Prop[], self = -1): boolean {
+  if (FLAT.includes(p.k)) return false;
+  return props.some((q, j) => j !== self && q !== p && !FLAT.includes(q.k) && !stacks(p, q) && (propsOverlap(p, q) || propsOverlap(q, p)));
+}
 
 /** Where the guests stand (the user, 11 Nov: "the pirates are kind of ... going through the benches ...
     we want to show their outfits off"): two to a bench (one that's standing up), on their feet just in
@@ -241,34 +353,77 @@ export const onSomeone = (p: Prop): boolean => PEOPLE.some((s) => inProp(p, s.x,
     then down the sides. Each: where, which way they face (a turn, radians, as three.js's rotation.y:
     0 faces +z), and whether they're sitting (they never are now: standing shows off their outfits). */
 export interface Seat { x: number; z: number; yaw: number; sit: boolean }
-export function seatsFor(props: readonly Prop[], n = GUESTS): Seat[] {
-  const out: Seat[] = [];
-  const free = (x: number, z: number) => Math.abs(x) <= AREA.x + 0.5 && z >= AREA.z0 && z <= AREA.z1 + 0.5
-    && !(Math.abs(x) < FRONT.x && z < FRONT.z) && !(Math.abs(x) < AISLE_X && z >= FRONT.z)
-    && !props.some((p) => inProp(p, x, z)) && !out.some((o) => Math.hypot(o.x - x, o.z - z) < BODY_R * 2.1)
-    && !PEOPLE.some((s) => Math.hypot(s.x - x, s.z - z) < BODY_R * 2.1);
-  for (const b of props) {
-    if (b.k !== 'bench' || b.w) continue;
-    const a = b.r * Math.PI / 4, yaw = a + Math.PI;
+/** A guest you've moved: which (i), where (on twentieths of a metre: wherever you let go of them),
+    and their turn (r: eighths of a turn, 0 facing the back, 4 facing the altar). */
+export interface Spot { i: number; x: number; z: number; r: number }
+/** Where guests can stand at all: the venue, a little either side and behind it (the ship's deck
+    narrows at her stern). */
+export const GROUNDS = { x: 6.3, z0: AREA.z0, z1: AREA.z1 + 0.5 } as const;
+const onGrounds = (x: number, z: number) => Math.abs(x) <= GROUNDS.x && z >= GROUNDS.z0 && z <= GROUNDS.z1 && !(z > 6.9 && Math.abs(x) > 5.7);
+const SPACE = BODY_R * 2.1;
+/** Whether a guest could stand at x, z: on the grounds, never in a prop, in someone (`others`, or her,
+    the couple and the guards), in the aisle, or in the front kept clear for her and the couple. */
+export function standFree(props: readonly Prop[], others: readonly { x: number; z: number }[], x: number, z: number): boolean {
+  return onGrounds(x, z) && !(Math.abs(x) < FRONT.x && z < FRONT.z) && !(Math.abs(x) < AISLE_X && z >= FRONT.z)
+    && !props.some((p) => inProp(p, x, z)) && !others.some((o) => Math.hypot(o.x - x, o.z - z) < SPACE)
+    && !PEOPLE.some((s) => Math.hypot(s.x - x, s.z - z) < SPACE);
+}
+/** Which way someone at x, z faces to look at the altar (a turn, in eighths). */
+export const facingAltar = (x: number, z: number): number => ((Math.round(Math.atan2(ALTAR.x - x, ALTAR.z - z) / (Math.PI / 4)) % 8) + 8) % 8;
+/* Everywhere a guest might stand, in the order they fill up: each a few spots to try, the first free
+   one taken. Two at each bench; the back, from the aisle outwards; down the sides; then, for a crowd,
+   a second rank behind each bench and one at each end, then shoulder to shoulder, from the back rows
+   forward, everyone turned to the altar. */
+function places(props: readonly Prop[]): Seat[][] {
+  const out: Seat[][] = [], S = (x: number, z: number, yaw: number): Seat => ({ x, z, yaw, sit: false });
+  const benches = props.filter((b) => b.k === 'bench' && !b.w).map((b) => {
+    const a = b.r * Math.PI / 4;
     // (a bench's length along its own x; it faces its own -z, so they look its way)
-    const at = (lx: number, lz: number) => ({ x: b.x + lx * Math.cos(a) + lz * Math.sin(a), z: b.z - lx * Math.sin(a) + lz * Math.cos(a) });
-    for (const lx of [-0.55, 0.55]) {
-      if (out.length >= n) return out;
-      const spot = [at(lx, -0.58), at(lx, 0.6), at(lx * 2.75, 0)].find((s) => free(s.x, s.z));
-      if (spot) out.push({ ...spot, yaw, sit: false });
-    }
+    return { yaw: a + Math.PI, at: (lx: number, lz: number) => ({ x: b.x + lx * Math.cos(a) + lz * Math.sin(a), z: b.z - lx * Math.sin(a) + lz * Math.cos(a) }) };
+  });
+  for (const b of benches) for (const lx of [-0.55, 0.55]) out.push([b.at(lx, -0.58), b.at(lx, 0.6), b.at(lx * 2.75, 0)].map((s) => S(s.x, s.z, b.yaw)));
+  for (let z = 5.0; z <= AREA.z1 + 0.01; z += 0.8) for (let i = 0; i < 6; i++) for (const sd of [-1, 1]) out.push([S(sd * (1.4 + i * 0.85), z, Math.PI)]);
+  for (let z = FRONT.z; z < 5; z += 0.8) for (const x of [5.4, 4.6]) for (const sd of [-1, 1]) out.push([S(sd * x, z, Math.PI)]);
+  for (const b of benches) for (const [lx, lz] of [[-0.55, 0.62], [0.55, 0.62], [-1.5, 0], [1.5, 0], [-1.5, 0.62], [1.5, 0.62]]) { const s = b.at(lx, lz); out.push([S(s.x, s.z, b.yaw)]); }
+  const D = 0.62, DZ = D * Math.sqrt(3) / 2;
+  for (let row = 0, z = GROUNDS.z1; z >= GROUNDS.z0; row++, z -= DZ) {
+    const xs: number[] = [];
+    for (let x = AISLE_X + BODY_R + (row % 2 ? D / 2 : 0); x <= GROUNDS.x; x += D) xs.push(x);
+    for (const x of xs) for (const sd of [-1, 1]) out.push([S(sd * x, z, facingAltar(sd * x, z) * Math.PI / 4)]);
   }
-  // (the rest at the back, from the aisle outwards, then down the sides, front to back)
-  const rest: { x: number; z: number }[] = [];
-  for (let z = 5.0; z <= AREA.z1 + 0.01; z += 0.8) for (let i = 0; i < 6; i++) for (const sd of [-1, 1]) rest.push({ x: sd * (1.4 + i * 0.85), z });
-  for (let z = FRONT.z; z < 5; z += 0.8) for (const x of [5.4, 4.6]) for (const sd of [-1, 1]) rest.push({ x: sd * x, z });
-  for (const r of rest) {
-    if (out.length >= n) break;
-    if (free(r.x, r.z)) out.push({ x: r.x, z: r.z, yaw: Math.PI, sit: false });
-  }
-  // (and if there's nowhere at all, somewhere at the very back)
-  for (let i = 0; out.length < n; i++) out.push({ x: (i % 2 ? 1 : -1) * (1.2 + Math.floor(i / 2) * 0.7), z: AREA.z1 + 0.6, yaw: Math.PI, sit: false });
   return out;
+}
+/** Where the guests stand: `n` of them, `spots` the ones you've moved (each where you put them, if it's
+    still free: a prop moved onto them, they go back among the others). The rest stand where they would
+    if nobody had moved, so moving one guest leaves the others be; only one you've put someone on
+    finds somewhere else. */
+export function seatsFor(props: readonly Prop[], n = GUESTS, spots: readonly Spot[] = []): Seat[] {
+  const P = places(props);
+  const fill = (taken: Seat[], want: number): Seat[] => {
+    const got: Seat[] = [];
+    for (const c of P) {
+      if (got.length >= want) break;
+      const s = c.find((s) => standFree(props, taken, s.x, s.z));
+      if (s) { got.push(s); taken.push(s); }
+    }
+    return got;
+  };
+  // (as they'd stand with nobody moved)
+  const base = fill([], n);
+  const out: (Seat | null)[] = Array.from({ length: n }, () => null), fixed: Seat[] = [];
+  for (const sp of spots) {
+    if (!(sp.i >= 0 && sp.i < n) || out[sp.i] || !standFree(props, fixed, sp.x, sp.z)) continue;
+    fixed.push(out[sp.i] = { x: sp.x, z: sp.z, yaw: sp.r * Math.PI / 4, sit: false });
+  }
+  const taken = [...fixed];
+  for (let i = 0; i < n; i++) {
+    const b = base[i];
+    if (!out[i] && b && !fixed.some((f) => Math.hypot(f.x - b.x, f.z - b.z) < SPACE)) taken.push(out[i] = b);
+  }
+  // (anyone left: the next free place; and if there's nowhere at all, somewhere at the very back)
+  const left = out.filter((s) => !s).length, more = left ? fill(taken, left) : [];
+  let k = 0;
+  return out.map((s) => s ?? more.shift() ?? { x: (k % 2 ? 1 : -1) * (1.2 + Math.floor(k++ / 2) * 0.7), z: GROUNDS.z1 + 0.6, yaw: Math.PI, sit: false });
 }
 
 /** The hired security, in black and grey, cutlasses at their sides; and the raiders who crash it. */
@@ -310,6 +465,13 @@ const REST: Suitor[] = [
   { name: 'Lady Marigold', look: { body: 'f', skin: 5, hair: 'bun', hairCol: 'black', patch: false, smile: true, hat: 'wide', hatCol: 'orange', hatCol2: 'lemon', top: 'corset', topCol: 'orange', topCol2: 'lemon', legs: 'gown', legsCol: 'lemon', feet: 'shoes', feetCol: 'orange', hand: 'bouquet', fam: 'parrot', famCol: 'green', famCol2: 'red' },
     line: 'I\'ve a house on Admiral Island, three cats and a parrot who swears. We come as a set.' },
 ];
+/** The planner's three ways to choose who you marry, each with its blurb. Kind and funny about her (the
+    user, 11 Nov: "marry [her], she's free, she's nearly always free. Like, that feels mean"). */
+export const WHO = {
+  her: { name: 'Marry Mischievious', blurb: "Five of her looks, and she'll model every one." },
+  suitors: { name: 'Here are your bachelors!', blurb: 'A line of suitors, bouquets out, blind-date style.' },
+  own: { name: 'Someone of your own', blurb: 'Anyone you like: a man, a woman, dressed however.' },
+} as const;
 export const suitors = (tone: ToneId): Suitor[] => [tone === 'dark' ? JILTED : SWEET, ...REST];
 const NUMBERS = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
 /** "Bachelor number one", "Bachelorette number two"... */
@@ -479,6 +641,37 @@ export const GUSH: Record<string, Pool> = {
   colour: ['That colour! Swoon.', 'Oh, it matches! Or clashes. I love it either way.', 'Gorgeous. Simply gorgeous.', 'Ooh, a pricey dye, that. Worth every doubloon.'],
   remove: ['Gone! Never liked it anyway.', 'Less is more. Sometimes. Hee hee!', 'Room to dance!'],
   dress: ['Oh, they look divine!', 'Stunning! Absolutely stunning!', 'Fit for the Governor\'s ball!', 'Fresh from the tailor, that.', 'Fabulous! Twirl for me!'],
+  // (How many come, a guest moved, a fresh crowd: 11 Nov.)
+  size_cosy: ['Cosy! Just the nearest and dearest. More cake each.'],
+  size_small: ['Just the crew! Everyone gets a good view.'],
+  size_big: ['A big one! The whole flag\'s coming. Best hats on!'],
+  size_large: ['Ooh, a crowd! I\'ll have the inn brew more grog.'],
+  size_grand: ['Half the Ocean! I do hope the island doesn\'t tip over.', 'Everyone! Even a few from the next island over. Hee hee!'],
+  guest_move: ['Ooh, they\'ll have a lovely view from there.', 'There! Perfect for the portrait.', 'Mingling! I love a mingle.'],
+  crowd: ['A whole new crowd! Where do they all come from?', 'Fresh faces! Hello, everyone!'],
+  // (Each new thing from the furnisher's, as it's put down; the plain 'add' lines the rest of the time.)
+  add_chair: ['A chair! For the guest with the one good knee.'],
+  add_throne: ['A throne! Fit for a Governor. Or for tired feet.'],
+  add_feast: ['A feast! Roast boar, ship\'s biscuit, the works. I\'ll be having seconds.'],
+  add_punch: ['Punch! It\'s mostly grog. Well, it\'s all grog.'],
+  add_fountain: ['A rum fountain! The inn\'s going to be so jealous.', 'Rum on tap! Somebody fetch a bigger mug.'],
+  add_candelabra: ['Candles on a stand! Very gothic. I love it.'],
+  add_torch: ['A torch! Ever so romantic. Mind the veil.'],
+  add_chandelier: ['A chandelier! Ooh, posh. Mind your heads.'],
+  add_palm: ['A potted palm! Like the island\'s, only tidier.'],
+  add_garland: ['A garland! It\'s like a hug made of flowers.'],
+  add_petals: ['Petals! For throwing. Or for slipping on. Hee hee!'],
+  add_rug: ['A rug! Wipe your boots, everyone.'],
+  add_flag: ['Flags up! Let the whole Ocean know.'],
+  add_statue: ['A statue! Ooh, very Governor\'s mansion.'],
+  add_heart: ['A great big heart! Mine\'s gone all fluttery.'],
+  add_chest: ['A treasure chest! For the presents. Or the doubloons. Ooh, both!'],
+  add_gifts: ['Presents! I do hope someone\'s got you a spyglass.'],
+  add_piano: ['A piano! The shanty-singer knows three songs. Now he can play them louder.'],
+  add_band: ['A band! There\'ll be dancing after. I\'ve my dancing boots on already.'],
+  add_cannon: ['A cannon! For the salute. Boom! Hee hee!'],
+  add_anchor: ['An anchor! For a couple who never want to leave.'],
+  add_skulls: { happy: ['Skulls! Ooh, a bit spooky. I love it.'], dark: ['Skulls! Very tasteful. Nobody ask whose.'] },
   ready: ['Ooh, it\'s all ready! Shall we?', 'Everything\'s perfect. I\'m going to cry.'],
   back: ['You\'re back! I kept everything just as you left it.'],
   shared: ['Oh, this one! I remember this one. Shall we do it again?'],
@@ -563,15 +756,44 @@ export interface Wedding {
   theme: ThemeId | null;
   plot: PlotId;
   props: Prop[];
+  /** Every guest's look, once there's a theme: as they come (baseGuest), or as you've dressed them. */
   guests: Look[];
+  /** How many come (SIZES), and the seed their crowd's dressed from. */
+  size: SizeId;
+  seed: number;
+  /** The guests you've moved, and where to. */
+  spots: Spot[];
 }
 /** A fresh wedding in a tone: the venue as you find it, nothing chosen. */
-export function fresh(tone: ToneId = 'happy'): Wedding {
-  return { tone, partner: null, venue: 'beach', theme: null, plot: SUGGEST[tone].plots[0], props: arrival(tone), guests: [] };
+export function fresh(tone: ToneId = 'happy', seed = 0): Wedding {
+  return { tone, partner: null, venue: 'beach', theme: null, plot: SUGGEST[tone].plots[0], props: arrival(tone), guests: [], size: 'small', seed, spots: [] };
 }
-/** The theme chosen: its layout for the venue, its guests in its outfits. */
+const guestsOf = (theme: ThemeId, size: string, seed: number) => Array.from({ length: sizeN(size) }, (_, i) => baseGuest(theme, seed, i));
+/** The theme chosen: its layout for the venue, its guests (however many) in its outfits, where they'd stand. */
 export function dressFor(w: Wedding, theme: ThemeId): Wedding {
-  return { ...w, theme, props: layout(w.venue, theme), guests: themeOf(theme)!.guests.map((g) => ({ ...g })) };
+  return { ...w, theme, props: layout(w.venue, theme), guests: guestsOf(theme, w.size, w.seed), spots: [] };
+}
+/** Whether you've dressed the i-th guest yourself. */
+export const dressedUp = (w: Wedding, i: number): boolean => !!w.theme && !!w.guests[i] && !sameLook(w.guests[i], baseGuest(w.theme, w.seed, i));
+/** How many come, changed: those you've dressed and moved stay so, while there's room for them. */
+export function withSize(w: Wedding, size: SizeId): Wedding {
+  const n = sizeN(size);
+  const guests = w.theme ? Array.from({ length: n }, (_, i) => (w.guests[i] ? { ...w.guests[i] } : baseGuest(w.theme!, w.seed, i))) : [];
+  return { ...w, size, guests, spots: w.spots.filter((s) => s.i < n) };
+}
+/** A different crowd (the same theme, dressed afresh from another seed): those you've dressed stay. */
+export function reseed(w: Wedding, seed: number): Wedding {
+  if (!w.theme) return { ...w, seed };
+  return { ...w, seed, guests: w.guests.map((g, i) => (dressedUp(w, i) ? g : baseGuest(w.theme!, seed, i))) };
+}
+const fine = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, Math.round(v * 20) / 20));
+/** A guest moved to x, z (facing `r`, or the altar), or turned where they stand: if they can stand
+    there, among everyone else where they stand now (`seats`), the set-up with them there; if not, null. */
+export function moveGuest(w: Wedding, seats: readonly Seat[], i: number, x0: number, z0: number, r?: number): Wedding | null {
+  const x = fine(x0, -GROUNDS.x, GROUNDS.x), z = fine(z0, GROUNDS.z0, GROUNDS.z1);
+  if (!(i >= 0 && i < w.guests.length) || !standFree(w.props, seats.filter((_, j) => j !== i), x, z)) return null;
+  const turn = r === undefined ? facingAltar(x, z) : ((Math.round(r) % 8) + 8) % 8;
+  return { ...w, spots: [...w.spots.filter((s) => s.i !== i), { i, x, z, r: turn }] };
 }
 /** The venue changed: a layout still as the theme laid it out goes with it (one you've tuned stays as
     you tuned it). */
@@ -603,7 +825,7 @@ export function cleanProp(o: unknown): Prop | null {
   return out;
 }
 /** A set-up from anywhere (storage, a link, a crewmate) made safe: anything that isn't one of the
-    choices is the default, and there are always GUESTS guests once a theme's chosen. */
+    choices is the default, and once a theme's chosen there's a look for every guest its size has. */
 export function clean(o: unknown): Wedding {
   const w = (o && typeof o === 'object' ? o : {}) as Record<string, unknown>;
   const tone: ToneId = w.tone === 'dark' ? 'dark' : 'happy';
@@ -619,18 +841,29 @@ export function clean(o: unknown): Wedding {
     else if (pa.kind === 'own') partner = { kind: 'own', look: plainLook(pa.look) };
   }
   const props = Array.isArray(w.props) ? w.props.slice(0, MAX_PROPS).map(cleanProp).filter((p): p is Prop => !!p) : theme ? layout(venue, theme) : arrival(tone);
-  const given = Array.isArray(w.guests) ? w.guests.slice(0, GUESTS).map(plainLook) : [];
-  const T = themeOf(theme);
-  const guests = T ? Array.from({ length: GUESTS }, (_, i) => (given[i] && Object.keys(given[i]).length ? given[i] : { ...T.guests[i] })) : [];
-  return { tone, partner, venue, theme, plot, props, guests };
+  const size = (SIZES.find((s) => s.id === w.size)?.id ?? 'small') as SizeId, n = sizeN(size);
+  const seed = Number.isInteger(w.seed) && (w.seed as number) >= 0 && (w.seed as number) < SEEDS ? w.seed as number : 0;
+  const given = Array.isArray(w.guests) ? w.guests.slice(0, n).map(plainLook) : [];
+  const guests = theme ? Array.from({ length: n }, (_, i) => (given[i] && Object.keys(given[i]).length ? given[i] : baseGuest(theme, seed, i))) : [];
+  const spots: Spot[] = [];
+  if (theme && Array.isArray(w.spots)) {
+    for (const s of w.spots.slice(0, n) as Record<string, unknown>[]) {
+      const i = Number(s?.i), x = Number(s?.x), z = Number(s?.z), r = Number(s?.r);
+      if (!Number.isInteger(i) || i < 0 || i >= n || spots.some((t) => t.i === i) || !Number.isFinite(x) || !Number.isFinite(z)) continue;
+      spots.push({ i, x: fine(x, -GROUNDS.x, GROUNDS.x), z: fine(z, GROUNDS.z0, GROUNDS.z1), r: Number.isFinite(r) ? ((Math.round(r) % 8) + 8) % 8 : 4 });
+    }
+  }
+  return { tone, partner, venue, theme, plot, props, guests, size, seed, spots };
 }
 
 // ---------- the share link ----------
 /* Short: the choices as indices, the props as seven characters each (or nothing, if they're still the
-   theme's layout), the guests as only what's been changed from the theme's outfits. Then JSON in
-   base64url, for den.html?at=wedding&w=... */
+   theme's layout), the guests as only what's been changed from how they come (the theme's outfits, and
+   the crowd's from its seed: a hundred and forty guests, and only the ones you've dressed are in it),
+   and the guests you've moved as seven characters each. Then JSON in base64url, for
+   den.html?at=wedding&w=... Version 1 (10 Nov) had no size, seed or moved guests; its links still open. */
 const b36 = (n: number, len: number) => n.toString(36).padStart(len, '0');
-const VERSION = 1;
+const VERSION = 2;
 function packProp(p: Prop): string {
   return b36(PROPS.findIndex(([k]) => k === p.k), 1) + b36(Math.round(p.x * 4) + 24, 2) + b36(Math.round(p.z * 4) + 24, 2) + b36(p.r + (p.w ? 8 : 0), 1) + b36(Math.max(0, DYE_NAMES.indexOf(p.c as typeof DYE_NAMES[number])), 1);
 }
@@ -640,6 +873,16 @@ function unpackProp(s: string): Prop | null {
   if (!k || Number.isNaN(rw)) return null;
   return cleanProp({ k, x: (n(1, 3) - 24) / 4, z: (n(3, 5) - 24) / 4, r: rw % 8, w: rw >= 8, c: DYE_NAMES[n(6, 7)] });
 }
+const packSpot = (s: Spot) => b36(s.i, 2) + b36(Math.round(s.x * 20) + 150, 2) + b36(Math.round(s.z * 20) + 150, 2) + b36(s.r, 1);
+function unpackSpots(s: unknown): Spot[] {
+  if (typeof s !== 'string') return [];
+  const out: Spot[] = [], n = (t: string, a: number, b: number) => parseInt(t.slice(a, b), 36);
+  for (let j = 0; j + 7 <= s.length && out.length < MAX_GUESTS; j += 7) {
+    const t = s.slice(j, j + 7), v = [n(t, 0, 2), n(t, 2, 4), n(t, 4, 6), n(t, 6, 7)];
+    if (!v.some(Number.isNaN)) out.push({ i: v[0], x: (v[1] - 150) / 20, z: (v[2] - 150) / 20, r: v[3] });
+  }
+  return out;
+}
 function diff(a: Look, base: Look): Look | 0 {
   const out: Look = {};
   for (const k of new Set([...Object.keys(a), ...Object.keys(base)])) if (a[k] !== base[k] && a[k] !== undefined) out[k] = a[k];
@@ -647,6 +890,7 @@ function diff(a: Look, base: Look): Look | 0 {
 }
 const toB64 = (s: string) => btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 const fromB64 = (s: string) => atob(s.replace(/-/g, '+').replace(/_/g, '/'));
+const SMALL = SIZES.findIndex((s) => s.id === 'small');
 export function encode(w0: Wedding): string {
   const w = clean(w0), T = themeOf(w.theme);
   const tone = TONES.findIndex((t) => t.id === w.tone), venue = VENUES.findIndex((v) => v.id === w.venue);
@@ -654,24 +898,44 @@ export function encode(w0: Wedding): string {
   const pa = !w.partner ? 0 : w.partner.kind === 'her' ? ['h', w.partner.ver] : w.partner.kind === 'suitor' ? ['s', w.partner.i] : ['o', w.partner.look];
   const base = T ? layout(w.venue, w.theme!) : arrival(w.tone);
   const props = same(w.props, base) ? 0 : w.props.map(packProp).join('');
-  const guests = T ? w.guests.map((g, i) => diff(g, T.guests[i])) : 0;
-  const gs = guests && guests.some((g) => g) ? guests : 0;
+  // (a guest's changes; or, if they've lost something they came with, their whole look, in a list)
+  const gs: Record<number, Look | [Look]> = {};
+  if (w.theme) w.guests.forEach((g, i) => {
+    const b = baseGuest(w.theme!, w.seed, i), d = diff(g, b);
+    if (d) gs[i] = Object.keys(b).every((k) => k in g) ? d : [g];
+  });
+  const out: unknown[] = [VERSION, tone, venue, theme, plot, pa, props, Object.keys(gs).length ? gs : 0, SIZES.findIndex((s) => s.id === w.size), w.seed, w.spots.length ? w.spots.map(packSpot).join('') : 0];
+  // (what's as it always was left off the end: a plain wedding's link as short as ever)
+  const DEF: unknown[] = [null, null, null, null, null, null, null, 0, SMALL, 0, 0];
+  while (out.length > 7 && out[out.length - 1] === DEF[out.length - 1]) out.pop();
   // (JSON's own characters: a look's names are plain ASCII after clean())
-  return toB64(JSON.stringify([VERSION, tone, venue, theme, plot, pa, props, gs]));
+  return toB64(JSON.stringify(out));
 }
 /** A link's set-up, or null if it isn't one. */
 export function decode(code: string): Wedding | null {
   let a: unknown;
   try { a = JSON.parse(fromB64(String(code))); } catch { return null; }
-  if (!Array.isArray(a) || a[0] !== VERSION) return null;
-  const [, tone, venue, theme, plot, pa, props, gs] = a as [number, number, number, number, number, unknown, unknown, unknown];
+  if (!Array.isArray(a) || (a[0] !== 1 && a[0] !== VERSION)) return null;
+  const [ver, tone, venue, theme, plot, pa, props, gs, size, seed, spots] = a as [number, number, number, number, number, unknown, unknown, unknown, number | undefined, unknown, unknown];
   const T = THEMES[theme] ?? null, tn = TONES[tone]?.id ?? 'happy', vn = VENUES[venue]?.id ?? 'beach';
+  const sz = ver === 1 ? 'small' : SIZES[size ?? SMALL]?.id ?? 'small';
+  const sd = Number.isInteger(seed) && (seed as number) >= 0 && (seed as number) < SEEDS ? seed as number : 0;
   let partner: unknown = null;
   if (Array.isArray(pa)) partner = pa[0] === 'h' ? { kind: 'her', ver: pa[1] } : pa[0] === 's' ? { kind: 'suitor', i: pa[1] } : pa[0] === 'o' ? { kind: 'own', look: pa[1] } : null;
   let ps: unknown;
   if (typeof props === 'string') { const out: Prop[] = []; for (let i = 0; i + 7 <= props.length && out.length < MAX_PROPS; i += 7) { const p = unpackProp(props.slice(i, i + 7)); if (p) out.push(p); } ps = out; }
-  const guests = T ? T.guests.map((g, i) => ({ ...g, ...(Array.isArray(gs) && gs[i] && typeof gs[i] === 'object' ? plainLook(gs[i]) : {}) })) : [];
-  return clean({ tone: tn, venue: vn, theme: T?.id ?? null, plot: PLOTS[plot]?.id, partner, props: ps, guests });
+  // (version 1: the eight guests' changes in a list; since, only the changed ones, by number)
+  const changed = (i: number): unknown => {
+    if (!gs || typeof gs !== 'object') return null;
+    if (Array.isArray(gs)) return ver === 1 ? gs[i] : null;
+    return Object.prototype.hasOwnProperty.call(gs, String(i)) ? (gs as Record<string, unknown>)[String(i)] : null;
+  };
+  const guests = T ? Array.from({ length: sizeN(sz) }, (_, i) => {
+    const d = changed(i);
+    if (Array.isArray(d)) return plainLook(d[0]);
+    return { ...baseGuest(T.id as ThemeId, sd, i), ...(d && typeof d === 'object' ? plainLook(d) : {}) };
+  }) : [];
+  return clean({ tone: tn, venue: vn, theme: T?.id ?? null, plot: PLOTS[plot]?.id, partner, props: ps, guests, size: sz, seed: sd, spots: unpackSpots(spots) });
 }
 
 /** The portrait's caption: "You & Barnaby, wed on the beach, bloody and gory". */

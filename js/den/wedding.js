@@ -10,24 +10,33 @@
    (den.html?at=wedding&w=...), which opens straight into that wedding, ready to play again. The set-up's
    kept in this browser as you go. Sailed to (her isle on the sea: isle.js), leaving puts you back
    aboard her at its jetty; by the cheat, back in the den. The rules and words: src/den-wedding.ts. The island and its pirates:
-   wedding-scene.js; the props: wedding-props.js. */
+   wedding-scene.js; the props: wedding-props.js; a big wedding's crowd: wedding-crowd.js. While you
+   choose the guests (how many, cosy to half the Ocean; each one yours to dress, move and turn) and
+   decorate (the furnisher's whole shop, by kind), the camera's yours to roam: look round, slide, zoom. */
 import * as THREE from 'three';
 import * as LOOK from '../den-look.js';
 import {
   TONES, VENUES, THEMES, PLOTS, PROPS, SUGGEST, ARRIVE, WELCOME, RETURN, GUARDS, PROP_R, AREA, MAX_PROPS, DYE_NAMES, SECURITY, RAIDERS,
   ASK_HER, answer, STAND, onSomeone, Gush, fresh, dressFor, moveTo, clean, encode, decode, seatsFor, suitors, suitorTitle, themeOf, themeLook, caption, readSecs, cleanProp,
+  WHO, SIZES, MAX_GUESTS, SEEDS, PROP_GROUPS, MADE_IN, GROUNDS, clashes, restsOn, withSize, reseed, moveGuest, dressedUp, baseGuest, standFree, plainLook,
 } from '../den-wedding.js';
 import { $, scene, camera, renderer, hemi, skyDome, paintSky, keep, myLook, V3, toast as denToast, toastQuiet, toastHush, warm, sunOver, ray, burst, wearLook, worldLets, shake } from './world.js';
 import { cine, cinePlay, cineEnd, cineLets, bubble, bubbleAt, stepTo } from './cine.js';
 import { ISLE, VENUE_AT, ISLE_SKY, buildIsle, figure, dropFigure, poseFig, restArms, dressable, heartsTick, heartsClear, roomy } from './wedding-scene.js';
 import { propMesh } from './wedding-props.js';
+import { crowdMake, crowdSet, crowdPose, crowdPick } from './wedding-crowd.js';
 import { dressLook } from './menus.js';
-import { ceremony, PORTRAIT_CAM } from './wedding-ceremony.js';
+import { ceremony, portraitCam } from './wedding-ceremony.js';
 
 const KEY = 'carp.den.wedding';
 // (the den's own news is kept quiet while you're here: these are the island's)
 const toast = (text, bad = false) => denToast(text, bad, false, true);
-const STEPS = [['partner', 'Who'], ['venue', 'Where'], ['theme', 'Theme'], ['tune', 'Tune it'], ['plot', 'How it goes']];
+const STEPS = [['partner', 'Who'], ['venue', 'Where'], ['theme', 'Theme'], ['guests', 'Guests'], ['tune', 'Decorate'], ['plot', 'How it goes']];
+/** The steps where you go round with the camera, picking guests and props (the user, 11 Nov: "go around
+    like with a camera and click on each pirate and configure them"). */
+const ROAM = new Set(['guests', 'tune']);
+const roaming = () => ROAM.has(wed.step);
+const newSeed = () => Math.floor(Math.random() * SEEDS);
 const { mis: MIS_SPOT, you: YOU_SPOT, partner: PARTNER_SPOT } = STAND;
 /** Her looks to choose from (js/den-look.js), or a stand-in till they're there. */
 function versions() {
@@ -42,6 +51,8 @@ const dyesHere = () => DYE_NAMES.filter((d) => LOOK.DYES[d]);
 export const wed = {
   on: false, snap: false, w: null, step: 'tone', pick: null, isle: null, root: null, propsG: null, propG: [], fig: null,
   gush: new Gush(), sel: null, tool: null, drag: null, rdrag: null, yaw: 0, zoom: 1, shot: null, play: null,
+  /** The roaming camera: tilted (added to the usual), and panned (metres, on the venue). */
+  tilt: 0, pan: { x: 0, z: 0 }, pdrag: null, gdrag: null, group: 'seats', crowd: null, camDist: 10,
   line: null, bub: null, show: null, lineup: null, welcome: null, portrait: null, settle: 0, sky: null, ring: null, mark: null,
   /** Come by sea (her isle's jetty: isle.js), so leaving's back aboard; and whether you've had a
       wedding yet (the captain's map's quests: quests.js). */
@@ -100,13 +111,13 @@ function buildProps() {
   wed.propG = wed.w.props.map((p, i) => {
     const g = propMesh(p);
     g.userData.prop = p; g.userData.i = i;
-    // (a cake on a table sits on it)
-    if (p.k === 'cake' && !p.w && wed.w.props.some((t) => t.k === 'table' && !t.w && Math.hypot(t.x - p.x, t.z - p.z) < 0.5)) g.position.y = 0.78;
+    // (a cake, a punch bowl, candles or presents on a table sit on it)
+    if (restsOn(p, wed.w.props)) g.position.y = 0.78;
     wed.propsG.add(g);
     return g;
   });
 }
-const seats = () => seatsFor(wed.w.props, wed.w.guests.length || 8);
+const seats = () => seatsFor(wed.w.props, wed.w.guests.length || 8, wed.w.spots);
 /** Everyone, afresh: you, Mischievious, your partner, the security, the guests (in their seats), and
     the raiders (hidden till they crash it). */
 function buildCast() {
@@ -134,18 +145,37 @@ function partnerFigure() {
   const s = p.kind === 'suitor' ? suitors(wed.w.tone)[p.i] : null;
   F.partner = figure(wed.root, s ? s.look : p.look, { ...PARTNER_SPOT, hurt: !!s?.hurt, bouquet: s ? 'rose' : null });
 }
-function guestsFigures() {
-  const F = wed.fig;
-  F.guests.forEach(dropFigure);
-  const st = seats();
-  F.guests = wed.w.guests.map((l, i) => {
+/* The guests: the first few drawn whole, and anyone you've dressed, moved or picked; the rest (a big
+   wedding's crowd) cheap figures, all in one go (wedding-crowd.js). */
+const FULL = () => (wed.touch ? 10 : 16);
+function whole(i) { return i < FULL() || (wed.sel?.kind === 'guest' && wed.sel.i === i) || (wed.gdrag?.i === i) || wed.w.spots.some((s) => s.i === i) || dressedUp(wed.w, i); }
+/** The figure of the i-th guest, if they're drawn whole. */
+const figOf = (i) => wed.fig?.guests.find((g) => g.gi === i) || null;
+/** Every guest drawn afresh (`all`), or just those now to be drawn whole or not, and the crowd. */
+function guestsFigures(all = true) {
+  const F = wed.fig, st = seats();
+  if (all) { F.guests.forEach(dropFigure); F.guests = []; }
+  F.guests = F.guests.filter((g) => { if (g.gi < wed.w.guests.length && whole(g.gi)) return true; dropFigure(g); return false; });
+  wed.w.guests.forEach((l, i) => {
+    if (!whole(i) || figOf(i)) return;
     const g = figure(wed.root, l, { x: st[i].x, z: st[i].z, yaw: st[i].yaw });
-    g.sit = st[i].sit;
-    g.g.userData.guest = i;
-    return g;
+    g.gi = i; g.sit = st[i].sit; g.g.userData.guest = i;
+    F.guests.push(g);
   });
+  F.guests.sort((a, b) => a.gi - b.gi);
+  crowdFill(st);
 }
-function reseat() { const st = seats(); wed.fig.guests.forEach((g, i) => Object.assign(g, { x: st[i].x, z: st[i].z, yaw: st[i].yaw, sit: st[i].sit })); }
+function crowdFill(st = seats()) {
+  const list = [];
+  wed.w.guests.forEach((l, i) => { if (!figOf(i)) list.push({ i, look: dressable(l), x: st[i].x, z: st[i].z, yaw: st[i].yaw }); });
+  crowdSet(wed.crowd, list);
+}
+function reseat() {
+  const st = seats();
+  wed.fig.guests.forEach((g) => { if (g.gi !== wed.gdrag?.i) Object.assign(g, { x: st[g.gi].x, z: st[g.gi].z, yaw: st[g.gi].yaw, sit: st[g.gi].sit }); });
+  wed.crowd.list.forEach((f) => Object.assign(f, { x: st[f.i].x, z: st[f.i].z, yaw: st[f.i].yaw }));
+  crowdPose(wed.crowd);
+}
 const everyone = () => { const F = wed.fig; return F ? [F.you, F.mis, ...(F.partner && F.partner !== F.mis ? [F.partner] : []), ...F.guards, ...F.guests] : []; };
 
 // ---------- her lines ----------
@@ -199,6 +229,7 @@ export function weddingEnter({ bySea = false } = {}) {
     wed.bub = bubble('', document.body, 'wrap wed-say');
     wed.ring = new THREE.Mesh(new THREE.RingGeometry(0.9, 1, 40).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#ffd23a', transparent: true, opacity: 0.85, depthWrite: false }));
     wed.ring.renderOrder = 3; wed.root.add(wed.ring);
+    wed.crowd = crowdMake(wed.root, MAX_GUESTS);
   }
   fade(() => {
     wed.on = true; wed.snap = true; wed.isle.visible = true; toastQuiet.on = true; toastHush();
@@ -212,7 +243,7 @@ export function weddingEnter({ bySea = false } = {}) {
     else { wed.w = fresh('happy'); wed.step = 'tone'; }
     if (code && !shared) toast('That wedding link didn\'t work: a fresh one, then', true);
     wed.gush = new Gush(wed.w.tone);
-    Object.assign(wed, { pick: null, sel: null, tool: null, show: null, yaw: 0, zoom: 1, portrait: null });
+    Object.assign(wed, { pick: null, sel: null, tool: null, show: null, yaw: 0, zoom: 1, tilt: 0, pan: { x: 0, z: 0 }, portrait: null });
     placeVenue(); buildProps(); buildCast();
     panel();
     warm(wed.isle);
@@ -233,7 +264,7 @@ export function weddingLeave() {
     heartsClear();
     leaveSky();
     try { const u = new URL(location.href); u.searchParams.delete('w'); if (u.searchParams.get('at') === 'wedding') u.searchParams.delete('at'); history.replaceState(history.state, '', u); } catch { /* never mind */ }
-    if (wed.bySea) denToast("Back aboard, off Mischievious's isle");
+    if (wed.bySea) denToast('Back aboard, off the Wedding Isle');
     wed.bySea = false;
   });
 }
@@ -289,7 +320,7 @@ function arrive() {
   }, () => { meetUp(); panel(); say(F.mis, ARRIVE.at(-1), 99); }, true);
 }
 function chooseTone(tone) {
-  wed.w = fresh(tone);
+  wed.w = fresh(tone, newSeed());
   wed.gush = new Gush(tone);
   wed.step = 'welcome';
   placeVenue(); buildProps(); buildCast();
@@ -440,21 +471,37 @@ function chooseTheme(id) {
   gush(`theme_${id}`);
 }
 const selProp = () => (wed.sel?.kind === 'prop' ? wed.w.props[wed.sel.i] : null);
+const selGuest = () => (wed.sel?.kind === 'guest' && wed.sel.i < wed.w.guests.length ? wed.sel.i : null);
 function propsChanged(ev) {
   buildProps(); reseat(); save(); panel();
   if (ev) gush(ev);
 }
+/** Whether a prop can stand at p: never on her, the couple or the guards, nor in another prop (one
+    that's already in something, as the wreck leaves them, may move out of it). */
+const fits = (p, i = -1, was = null) => !onSomeone(p) && (!clashes(p, wed.w.props, i) || (was && clashes(was, wed.w.props, i)));
 function addProp(k, x, z) {
-  if (wed.w.props.length >= MAX_PROPS) { say(wed.fig.mis, 'Ooh, it\'s full! Take something away first, and we\'ll squeeze it in.'); return; }
-  const T = themeOf(wed.w.theme), c = k === 'splat' ? 'red' : k === 'barrel' ? 'brown' : T ? T.dyes[wed.w.props.length % 3] : 'rose';
+  if (wed.w.props.length >= MAX_PROPS) { say(wed.fig.mis, 'Ooh, it\'s full! Take something away first, and we\'ll squeeze it in.'); return false; }
+  const T = themeOf(wed.w.theme), c = MADE_IN[k] || (T ? T.dyes[wed.w.props.length % 3] : 'rose');
   const p = cleanProp({ k, x, z, r: 0, c });
-  if (onSomeone(p)) { say(wed.fig.mis, 'Not on top of us, love! A bit further off.'); return; }
+  if (onSomeone(p)) { say(wed.fig.mis, 'Not on top of us, love! A bit further off.'); return false; }
+  if (clashes(p, wed.w.props)) { say(wed.fig.mis, 'Ooh, something\'s there already! A little to the side?'); return false; }
   wed.w.props.push(p);
   wed.sel = { kind: 'prop', i: wed.w.props.length - 1 };
   const v = V3(p.x, 0.4, p.z); wed.root.localToWorld(v); burst(v, '#fff3c4', 10, 2.4);
-  propsChanged('add');
+  // (her line for the very thing, unless she's just said it)
+  propsChanged(wed.gush.pool(`add_${k}`).some((l) => l !== wed.gush.last) ? `add_${k}` : 'add');
+  return true;
 }
-function turnProp(d) { const p = selProp(); if (!p) return; const r = p.r; p.r = (p.r + d + 8) % 8; if (onSomeone(p)) { p.r = r; return; } propsChanged('turn'); }
+/** Another of the one you've picked, just beside it. */
+function another() {
+  const p = selProp(); if (!p) return;
+  for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1.5, 1], [-1.5, 1], [2, 0], [-2, 0], [0, 2], [0, -2]]) {
+    const d = Math.max(0.5, PROP_R[p.k] * 1.6), q = cleanProp({ ...p, x: p.x + dx * d, z: p.z + dz * d });
+    if (q && (q.x !== p.x || q.z !== p.z) && !onSomeone(q) && !clashes(q, wed.w.props) && wed.w.props.length < MAX_PROPS) { delete q.w; wed.w.props.push(q); wed.sel = { kind: 'prop', i: wed.w.props.length - 1 }; propsChanged('add'); return; }
+  }
+  say(wed.fig.mis, 'Ooh, no room beside it! Somewhere else, perhaps?');
+}
+function turnProp(d) { const p = selProp(); if (!p) return; const was = { ...p }; p.r = (p.r + d + 8) % 8; if (!fits(p, wed.sel.i, was)) { p.r = was.r; return; } propsChanged('turn'); }
 function colourProp(c) { const p = selProp(); if (!p) return; p.c = c; propsChanged('colour'); }
 function removeProp() {
   const p = selProp(); if (!p) return;
@@ -462,26 +509,77 @@ function removeProp() {
   wed.sel = null;
   propsChanged('remove');
 }
+
+// ---------- the guests: how many, and each one yours ----------
+function chooseSize(id) {
+  wed.w = withSize(wed.w, id);
+  if (selGuest() === null) wed.sel = null;
+  guestsFigures(false);
+  save(); panel();
+  gush(`size_${id}`);
+}
+function newCrowd() {
+  wed.w = reseed(wed.w, newSeed());
+  guestsFigures(true);
+  save(); panel();
+  gush('crowd');
+}
+/** A guest picked: drawn whole, if they weren't already, and their ring on. */
+function pickGuest(i) {
+  wed.sel = { kind: 'guest', i };
+  if (!figOf(i)) guestsFigures(false);
+  twirl(figOf(i));
+}
 function redress(i) {
   const g = wed.w.guests[i], body = g.body === 'f' ? 'f' : 'm';
-  wed.w.guests[i] = themeLook(wed.w.theme || 'rosy', body);
+  wed.w.guests[i] = { ...themeLook(wed.w.theme || 'rosy', body), ...(g.name ? { name: g.name } : {}) };
   regDress(i);
   gush('dress');
 }
+function surprise(i) { const n = wed.w.guests[i].name; wed.w.guests[i] = plainLook({ ...LOOK.randomLook(), ...(n ? { name: n } : {}) }); regDress(i); gush('dress'); }
 function recolour(i, c) { wed.w.guests[i] = { ...wed.w.guests[i], topCol: c, hatCol: c }; regDress(i); gush('dress'); }
+function asTheyCame(i) { wed.w.guests[i] = baseGuest(wed.w.theme, wed.w.seed, i); regDress(i); }
 function regDress(i) {
-  const f = wed.fig.guests[i];
+  if (!figOf(i)) guestsFigures(false);
+  const f = figOf(i);
+  if (!f) return;
   wearLook(f, dressable(wed.w.guests[i]));
   f.g.userData.guest = i;
   twirl(f);
   save(); panel();
 }
+const guestName = (i) => String(wed.w.guests[i]?.name || '').trim() || `Guest ${i + 1}`;
+/* A guest in the wardrobe, as you dress yourself (the user, 11 Nov: "click on each pirate and configure
+   them"): every piece, dye and familiar, a name, Surprise me; dressed as you go. */
+function dressGuest(i) {
+  dressLook({
+    title: guestName(i), look: dressable(wed.w.guests[i]),
+    onChange: (look) => {
+      if (!wed.w.guests[i]) return;
+      wed.w.guests[i] = plainLook(look);
+      if (!figOf(i)) guestsFigures(false);
+      const f = figOf(i);
+      if (f) { wearLook(f, dressable(wed.w.guests[i])); f.g.userData.guest = i; }
+      save();
+    },
+    onClose: () => { if (wed.on) { twirl(figOf(i)); panel(); gush('dress'); } },
+  });
+}
+/** A guest turned where they stand (an eighth at a time). */
+function turnGuest(i, d) {
+  const st = seats(), s = st[i], sp = wed.w.spots.find((x) => x.i === i);
+  const r = ((sp ? sp.r : Math.round(s.yaw / (Math.PI / 4))) + d + 16) % 8;
+  const w = moveGuest(wed.w, st, i, s.x, s.z, r);
+  if (!w) return;
+  wed.w = w; reseat(); save(); panel();
+}
+function backToPlace(i) { wed.w.spots = wed.w.spots.filter((s) => s.i !== i); reseat(); save(); panel(); }
 
 // ---------- the wedding itself, and its portrait ----------
 function startWedding() {
   if (!wed.w.partner || !wed.w.theme) return;
   endLineup();
-  wed.sel = null; wed.tool = null; wed.show = null;
+  wed.sel = null; wed.tool = null; wed.show = null; wed.gdrag = null; wed.drag = null; wed.pdrag = null;
   say(null);
   save();
   wed.step = 'playing';
@@ -490,13 +588,15 @@ function startWedding() {
     get w() { return wed.w; }, root: wed.root, fig: wed.fig, propG: wed.propG,
     names: () => ({ you: yourName(), partner: partnerName() }), seats, dyes: () => themeOf(wed.w.theme)?.dyes.slice(0, 4) || ['rose', 'pink', 'white'],
     hex, say: (f, text) => say(f, text, 99), shake: () => { worldLets.shake = Math.max(shake, 0.15); }, set play(v) { wed.play = v; },
+    // (the crowd: turned to the camera for the cheer and the portrait, bouncing as they cheer)
+    crowd: (beat, t) => { const g = beat === 'cheer' || beat === 'portrait'; if (g || wed.crowd.posed) { wed.crowd.posed = g; crowdPose(wed.crowd, beat === 'cheer' ? (k) => Math.abs(Math.sin(t * 8 + k * 1.7)) * 0.16 : null, g ? 0 : null); } },
   }, (skipped) => {
     wed.play = null;
     if (wed.leaving) return;
     wed.had = true;
     wed.step = 'portrait';
     wed.settle = skipped ? 1.3 : 0.7;   // (the camera's still easing in from wherever the cutscene was)
-    const P = PORTRAIT_CAM; wed.shot = { look: P.look.clone(), dist: P.dist * roomy(), tilt: P.tilt, yaw: P.yaw }; wed.root.localToWorld(wed.shot.look);
+    const P = portraitCam(wed.w.guests.length); wed.shot = { look: P.look.clone(), dist: P.dist * roomy(), tilt: P.tilt, yaw: P.yaw }; wed.root.localToWorld(wed.shot.look);
   });
 }
 /* The last shot, held: drawn once more just now and read off the canvas (it doesn't keep what it
@@ -526,7 +626,7 @@ function takePortrait() {
   g.font = '700 36px Alegreya, Georgia, serif';
   g.fillText(caption(wed.w, yourName(), partnerName()), cv.width / 2, pad + oh + 60);
   g.font = 'italic 20px Alegreya, Georgia, serif';
-  g.fillText('On Mischievious\'s island, with love', cv.width / 2, pad + oh + 88);
+  g.fillText('On the Wedding Isle, with love', cv.width / 2, pad + oh + 88);
   wed.portrait = cv.toDataURL('image/png');
   $('wed-img').src = wed.portrait;
   $('wed-portrait').classList.add('on');
@@ -537,7 +637,7 @@ function closePortrait(again) {
   wed.portrait = null;
   heartsClear();
   if (again) {
-    wed.w = { ...fresh(wed.w.tone) };
+    wed.w = fresh(wed.w.tone, newSeed());
     wed.pick = null;
     setLink(null);
     save();
@@ -568,7 +668,7 @@ $('wed-afresh').onclick = (e) => {
   e.currentTarget.blur();
   if (wed.play || wed.welcome) return;
   endLineup();
-  wed.w = fresh('happy'); wed.step = 'tone'; wed.sel = null; wed.tool = null; wed.show = null; wed.pick = null;
+  wed.w = fresh('happy', newSeed()); wed.step = 'tone'; wed.sel = null; wed.tool = null; wed.show = null; wed.pick = null; wed.pan = { x: 0, z: 0 }; wed.tilt = 0;
   setLink(null);
   try { localStorage.removeItem(KEY); } catch { /* never mind */ }
   placeVenue(); buildProps(); buildCast(); panel(); say(null);
@@ -597,7 +697,8 @@ const can = (step) => step === 'partner' || (step === 'venue' || step === 'theme
 function go(step) {
   if (!can(step)) return;
   if (step !== 'partner') { endLineup(); wed.show = null; if (wed.w.partner?.kind === 'her' || wed.pick === 'her') { wearLook(wed.fig.mis, dressable(misLook())); } }
-  if (step !== 'tune') { wed.sel = null; wed.tool = null; }
+  if (!ROAM.has(step)) { wed.sel = null; wed.tool = null; }
+  if (step !== 'tune') wed.tool = null;
   wed.step = step; wed.peek = null;
   panel();
   if (step === 'theme' && !wed.w.theme) say(wed.fig.mis, `Ooh, a theme! Shall we start from ${themeOf(SUGGEST[wed.w.tone].theme).name.toLowerCase()}? Or anything you like!`);
@@ -616,24 +717,24 @@ function panel() {
   const next = (label, step) => { const b = btn(label, () => go(step), 'next'); b.disabled = !can(step); box.append(b); };
   if (wed.step === 'tone') {
     h('What sort of wedding would you like?');
-    note('Mischievious is waiting on her island. She does love a wedding.');
+    note('Your wedding, your way: who, where, the guests, every stick of furniture, and how it goes.');
     for (const t of TONES) box.append(opt(t.name, t.blurb, false, () => chooseTone(t.id)));
   } else if (wed.step === 'partner') {
     h('Who are you marrying?');
-    box.append(opt('Marry Mischievious', 'She\'s free. She\'s nearly always free.', w.partner?.kind === 'her' || wed.pick === 'her', startShow));
+    box.append(opt(WHO.her.name, WHO.her.blurb, w.partner?.kind === 'her' || wed.pick === 'her', startShow));
     if (wed.pick === 'her') {
       note('She\'ll model each of her looks for you. Which one?');
       const r = el('div', 'row');
       versions().forEach((v, i) => r.append(btn(v.title, () => pickHer(i), (w.partner?.kind === 'her' && w.partner.ver === i && !wed.show) || wed.show?.i === i ? 'on' : '')));
       box.append(r);
     }
-    box.append(opt('Here are your bachelors!', 'A line of suitors, bouquets out, blind-date style.', w.partner?.kind === 'suitor' || wed.pick === 'suitors', startLineup));
+    box.append(opt(WHO.suitors.name, WHO.suitors.blurb, w.partner?.kind === 'suitor' || wed.pick === 'suitors', startLineup));
     if (wed.pick === 'suitors') {
       const r = el('div', 'row');
       suitors(w.tone).forEach((s, i) => r.append(btn(`${suitorTitle(s, i)}: ${s.name}`, () => pickSuitor(i), w.partner?.kind === 'suitor' && w.partner.i === i ? 'on' : '')));
       box.append(r);
     }
-    box.append(opt('Someone of your own', 'Anyone you like: a man, a woman, dressed however.', w.partner?.kind === 'own', () => pickOwn()));
+    box.append(opt(WHO.own.name, WHO.own.blurb, w.partner?.kind === 'own', () => pickOwn()));
     if (w.partner?.kind === 'own') {
       const r = el('div', 'row');
       r.append(btn('Dress them', dressOwn, 'on'), btn('Someone else', () => pickOwn()), btn('A man', () => pickOwn('m'), w.partner.look.body === 'm' ? 'on' : ''), btn('A woman', () => pickOwn('f'), w.partner.look.body === 'f' ? 'on' : ''));
@@ -661,41 +762,63 @@ function panel() {
     note('It lays out the venue and dresses the guests. Change anything you like after.');
     const pick = SUGGEST[w.tone].theme;
     for (const t of [...THEMES].sort((a, b) => (b.id === pick) - (a.id === pick))) box.append(opt(t.name, t.blurb, w.theme === t.id, () => chooseTheme(t.id), t.id === pick ? 'her pick ♥' : ''));
-    next('Next: tune it', 'tune');
-  } else if (wed.step === 'tune') {
-    h('Make it yours');
-    note(wed.touch ? 'Tap a prop to pick it, and drag it about. Tap a guest to redress them. Drag anywhere else to turn the view; pinch to zoom.' : 'Click a prop to pick it up and drag it about. Click a guest to redress them. Right-drag turns the view; the wheel zooms.');
-    box.append(el('p', 'note', 'Add:'));
-    const r = el('div', 'row');
-    for (const [k, name] of PROPS) r.append(btn(name, () => { wed.tool = wed.tool === k ? null : k; wed.sel = null; panel(); }, wed.tool === k ? 'on' : ''));
-    box.append(r);
-    if (wed.tool) note(`${wed.touch ? 'Tap' : 'Click'} where the ${PROPS.find(([k]) => k === wed.tool)[1].toLowerCase()} goes (${wed.touch ? 'tap it again' : 'Esc'}: never mind).`);
-    const p = selProp();
+    next('Next: the guests', 'guests');
+  } else if (wed.step === 'guests' || wed.step === 'tune') {
+    const tune = wed.step === 'tune', T = themeOf(w.theme), first = T ? [...T.dyes] : [], dyes = [...first, ...dyesHere().filter((d) => !first.includes(d))];
+    const tap = wed.touch ? 'Tap' : 'Click';
+    // What you've picked, first: a prop (turn, dye, another, take away) or a guest (dress, move, turn).
+    const p = selProp(), gi = selGuest();
     if (p) {
-      box.append(el('h3', '', PROPS.find(([k]) => k === p.k)[1] + (p.w ? ' (wrecked)' : '')));
+      h(PROPS.find(([k]) => k === p.k)[1] + (p.w ? ' (wrecked)' : ''));
       const r1 = el('div', 'row');
-      r1.append(btn('⟲ Turn', () => turnProp(1)), btn('Turn ⟳', () => turnProp(-1)));
+      r1.append(btn('⟲ Turn', () => turnProp(1)), btn('Turn ⟳', () => turnProp(-1)), btn('Another one', another));
       if (p.w) r1.append(btn('Mend it', () => { p.w = false; delete p.w; propsChanged('add'); }));
-      r1.append(btn('Take it away', removeProp));
+      r1.append(btn('Take it away', removeProp), btn('Done', () => { wed.sel = null; panel(); }));
       box.append(r1);
       const r2 = el('div', 'row');
-      const T = themeOf(w.theme), first = T ? [...T.dyes] : [];
-      swatches(r2, p.c, colourProp, [...first, ...dyesHere().filter((d) => !first.includes(d))]);
+      swatches(r2, p.c, colourProp, dyes);
       box.append(r2);
-    } else if (wed.sel?.kind === 'guest') {
-      const i = wed.sel.i;
-      box.append(el('h3', '', `Guest ${i + 1}`));
+    } else if (gi !== null) {
+      const moved = w.spots.some((x) => x.i === gi);
+      h(guestName(gi));
       const r1 = el('div', 'row');
-      r1.append(btn('Something else to wear', () => redress(i)), btn('Back in their outfit', () => { wed.w.guests[i] = { ...themeOf(w.theme).guests[i] }; regDress(i); }));
+      r1.append(btn('Dress them', () => dressGuest(gi), 'on'), btn('Surprise me', () => surprise(gi)), btn('Something else to wear', () => redress(gi)));
+      if (dressedUp(w, gi)) r1.append(btn('As they came', () => asTheyCame(gi)));
       box.append(r1);
-      note('Their colours:');
+      const r3 = el('div', 'row');
+      r3.append(btn('⟲ Turn', () => turnGuest(gi, 1)), btn('Turn ⟳', () => turnGuest(gi, -1)));
+      if (moved) r3.append(btn('Back to their place', () => backToPlace(gi)));
+      r3.append(btn('Done', () => { wed.sel = null; panel(); }));
+      box.append(r3);
+      note(`Their colours (or drag them anywhere there's room${wed.touch ? '' : '; Q/E turn them'}):`);
       const r2 = el('div', 'row');
-      const T = themeOf(w.theme), first = T ? [...T.dyes] : [];
-      swatches(r2, w.guests[i].topCol, (c) => recolour(i, c), [...first, ...dyesHere().filter((d) => !first.includes(d))]);
+      swatches(r2, w.guests[gi].topCol, (c) => recolour(gi, c), dyes);
       box.append(r2);
     }
-    note(`${w.props.length} of ${MAX_PROPS} props${wed.touch ? '' : ' · Q/E turn · Delete takes it away'}`);
-    next('Next: how it goes', 'plot');
+    if (!tune) {
+      if (gi === null) h('Who\'s coming?');
+      for (const z of SIZES) box.append(opt(`${z.name}: ${z.n}`, z.blurb, w.size === z.id, () => chooseSize(z.id)));
+      const r = el('div', 'row');
+      r.append(btn('A different crowd', newCrowd));
+      box.append(r);
+      note(`${tap} any guest to dress them, then drag them anywhere there's room. ${wed.touch ? 'Drag to look round, two fingers to slide the view, pinch to zoom.' : 'Right-drag looks round, drag the ground to slide the view, the wheel zooms.'}`);
+      next('Next: decorate', 'tune');
+    } else {
+      if (!p && gi === null) h('Make it yours');
+      // The furnisher's, by kind (the user, 11 Nov: "some feel for getting lost in the furniture placement").
+      const tabs = el('div', 'row wed-tabs');
+      for (const g of PROP_GROUPS) tabs.append(btn(g.name, () => { wed.group = g.id; panel(); }, wed.group === g.id ? 'on' : ''));
+      box.append(tabs);
+      const G = PROP_GROUPS.find((g) => g.id === wed.group) || PROP_GROUPS[0], r = el('div', 'row');
+      for (const k of G.kinds) r.append(btn(PROPS.find(([q]) => q === k)[1], () => { wed.tool = wed.tool === k ? null : k; wed.sel = null; panel(); }, wed.tool === k ? 'on' : ''));
+      box.append(r);
+      if (wed.tool) note(`${tap} where the ${PROPS.find(([k]) => k === wed.tool)[1].toLowerCase()} goes (${wed.touch ? 'tap it again' : 'Esc'}: never mind).`);
+      else note(wed.touch ? 'Tap a prop or a guest to pick them, and drag them about. Drag anywhere else to look round, two fingers to slide the view, pinch to zoom.' : 'Click a prop or a guest to pick them up and drag them about. Right-drag looks round, drag the ground to slide the view, the wheel zooms.');
+      note(`${w.props.length} of ${MAX_PROPS} props${wed.touch ? '' : ' · Q/E turn · Delete takes it away · WASD slides the view'}`);
+      next('Next: how it goes', 'plot');
+    }
+    const rc = btn('Recentre the view', () => { wed.pan = { x: 0, z: 0 }; wed.tilt = 0; wed.yaw = 0; wed.zoom = 1; }, 'mini');
+    box.append(rc);
   } else if (wed.step === 'plot') {
     h('How does the wedding go?');
     const sug = SUGGEST[w.tone].plots;
@@ -708,80 +831,138 @@ function panel() {
 }
 
 // ---------- the mouse and keys on her island ----------
+function aim(e) { ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1), camera); }
 function groundAt(e) {
-  ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1), camera);
+  aim(e);
   const o = V3(0, 0, 0); wed.root.localToWorld(o);
   const p = new THREE.Vector3();
   if (!ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), -o.y), p)) return null;
   return wed.root.worldToLocal(p);
 }
+/** What's under the pointer: a prop, a guest (drawn whole, or one of the crowd), or nothing. */
 function picked(e) {
-  ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1), camera);
+  aim(e);
+  let best = null;
   const hits = ray.intersectObjects([wed.propsG, ...wed.fig.guests.map((g) => g.g)], true);
   for (const h of hits) {
-    let o = h.object;
-    while (o && o !== wed.root) {
-      if (o.userData.guest !== undefined) return { kind: 'guest', i: o.userData.guest };
-      if (o.userData.i !== undefined && o.parent === wed.propsG) return { kind: 'prop', i: o.userData.i };
+    let o = h.object, got = null;
+    while (o && o !== wed.root && !got) {
+      if (o.userData.guest !== undefined) got = { kind: 'guest', i: o.userData.guest };
+      else if (o.userData.i !== undefined && o.parent === wed.propsG) got = { kind: 'prop', i: o.userData.i };
       o = o.parent;
     }
+    if (got) { best = { ...got, d: h.distance }; break; }
   }
+  const c = crowdPick(wed.crowd, ray);
+  if (c && (!best || c.d < best.d)) best = { kind: 'guest', i: c.i, d: c.d };
+  if (best) return best;
   // (a flat splatter's easy to miss: the nearest prop to where you clicked, if you're right by it)
   const g = groundAt(e);
   if (!g) return null;
-  let best = null;
   wed.w.props.forEach((p, i) => { const d = Math.hypot(p.x - g.x, p.z - g.z); if (d < Math.min(0.7, PROP_R[p.k]) && (!best || d < best.d)) best = { kind: 'prop', i, d }; });
   return best;
 }
 const inArea = (p) => p && Math.abs(p.x) <= AREA.x && p.z >= AREA.z0 && p.z <= AREA.z1;
+/* The roaming camera (the user, 11 Nov: "go around like with a camera and click on each pirate"): it
+   looks round (turns and tilts), slides over the venue and zooms, while you're at the guests and
+   decorating. Dragging the ground slides it, the way a map's dragged. */
+function lookRound(dx, dy) {
+  wed.yaw -= dx * 0.006;
+  if (roaming()) wed.tilt = Math.max(-0.45, Math.min(0.85, wed.tilt + dy * 0.004));
+}
+function slide(dx, dy) {
+  const k = wed.camDist / Math.max(300, innerHeight) * 1.15, a = 0.22 + wed.yaw;
+  wed.pan.x = Math.max(-9, Math.min(9, wed.pan.x + (-Math.cos(a) * dx - Math.sin(a) * dy) * k));
+  wed.pan.z = Math.max(-7, Math.min(9, wed.pan.z + (Math.sin(a) * dx - Math.cos(a) * dy) * k));
+}
+const zoomBy = (f) => { wed.zoom = Math.max(roaming() ? 0.18 : 0.45, Math.min(2.6, wed.zoom * f)); };
 export function weddingDown(e) {
   if (!wed.on || cine) return;
   if (e.button === 2) { wed.rdrag = { x: e.clientX, y: e.clientY }; return; }
-  if (e.button !== 0 || wed.step !== 'tune') return;
+  if (e.button === 1 && roaming()) { wed.pdrag = { x: e.clientX, y: e.clientY, moved: true }; e.preventDefault?.(); return; }
+  if (e.button !== 0 || !roaming()) return;
   if (wed.tool) {
     const g = groundAt(e);
-    if (inArea(g)) { addProp(wed.tool, g.x, g.z); wed.tool = null; panel(); }
+    if (inArea(g) && addProp(wed.tool, g.x, g.z)) { wed.tool = null; panel(); }
     return;
   }
   const hit = picked(e);
-  wed.sel = hit ? { kind: hit.kind, i: hit.i } : null;
-  if (hit?.kind === 'prop') {
+  if (!hit) { wed.pdrag = { x: e.clientX, y: e.clientY, moved: false }; return; }   // (the ground: slide the view, or a click lets go of what's picked)
+  if (hit.kind === 'prop') {
+    wed.sel = { kind: 'prop', i: hit.i };
     const g = groundAt(e), p = wed.w.props[hit.i];
-    // (a table takes the cake on it along with it)
-    const on = p.k === 'table' ? wed.w.props.map((q, j) => j).filter((j) => wed.w.props[j].k === 'cake' && Math.hypot(wed.w.props[j].x - p.x, wed.w.props[j].z - p.z) < 0.5) : [];
-    wed.drag = { i: hit.i, moved: false, dx: g ? p.x - g.x : 0, dz: g ? p.z - g.z : 0, on };
+    // (a table takes what's on it along with it)
+    const on = wed.w.props.map((q, j) => j).filter((j) => restsOn(wed.w.props[j], [p]));
+    wed.drag = { i: hit.i, moved: false, dx: g ? p.x - g.x : 0, dz: g ? p.z - g.z : 0, on, was: { ...p } };
+  } else {
+    pickGuest(hit.i);
+    const f = figOf(hit.i), g = groundAt(e);
+    wed.gdrag = { i: hit.i, moved: false, x: e.clientX, y: e.clientY, dx: g && f ? f.x - g.x : 0, dz: g && f ? f.z - g.z : 0, ok: true };
   }
-  if (hit?.kind === 'guest') twirl(wed.fig.guests[hit.i]);
   panel();
 }
 export function weddingMove(e) {
   if (!wed.on) return;
   if (wed.rdrag && e.buttons & 2) {
-    wed.yaw -= (e.clientX - wed.rdrag.x) * 0.006;
-    wed.rdrag.x = e.clientX;
+    lookRound(e.clientX - wed.rdrag.x, e.clientY - wed.rdrag.y);
+    wed.rdrag.x = e.clientX; wed.rdrag.y = e.clientY;
+    return;
+  }
+  if (wed.pdrag && e.buttons & 5) {
+    if (!wed.pdrag.moved && Math.hypot(e.clientX - wed.pdrag.x, e.clientY - wed.pdrag.y) < 5) return;
+    wed.pdrag.moved = true;
+    slide(e.clientX - wed.pdrag.x, e.clientY - wed.pdrag.y);
+    wed.pdrag.x = e.clientX; wed.pdrag.y = e.clientY;
+    return;
+  }
+  if (wed.gdrag) {
+    const G = wed.gdrag, f = figOf(G.i), g = groundAt(e);
+    if (!f || !g) return;
+    if (!G.moved && Math.hypot(e.clientX - G.x, e.clientY - G.y) < 6) return;
+    G.moved = true;
+    const x = Math.max(-GROUNDS.x, Math.min(GROUNDS.x, g.x + G.dx)), z = Math.max(GROUNDS.z0, Math.min(GROUNDS.z1, g.z + G.dz));
+    const st = seats();
+    G.ok = standFree(wed.w.props, st.filter((_, j) => j !== G.i), x, z);
+    Object.assign(f, { x, z }); f.g.position.set(x, 0.12, z);
     return;
   }
   if (wed.drag) {
     const g = groundAt(e), p = wed.w.props[wed.drag.i], m = wed.propG[wed.drag.i];
     if (!g || !p || !m) return;
-    const q = cleanProp({ ...p, x: g.x + wed.drag.dx, z: g.z + wed.drag.dz });
-    if ((q.x !== p.x || q.z !== p.z) && !onSomeone(q)) {   // (never onto her, the couple or the guards)
+    const tx = g.x + wed.drag.dx, tz = g.z + wed.drag.dz;
+    // (never onto her, the couple or the guards, nor into another prop: it slides along what it meets)
+    const q = [cleanProp({ ...p, x: tx, z: tz }), cleanProp({ ...p, x: tx }), cleanProp({ ...p, z: tz })].find((q) => (q.x !== p.x || q.z !== p.z) && fits(q, wed.drag.i, p));
+    if (q) {
       for (const j of wed.drag.on) { const c = wed.w.props[j]; c.x += q.x - p.x; c.z += q.z - p.z; wed.propG[j].position.x = c.x; wed.propG[j].position.z = c.z; }
       p.x = q.x; p.z = q.z; m.position.x = p.x; m.position.z = p.z; wed.drag.moved = true;
-      if (p.k === 'bench') reseat();
+      if (p.k === 'bench' || wed.w.guests.length <= 48) reseat();
     }
     return;
   }
-  if (wed.step === 'tune' && !cine) {
+  if (roaming() && !cine) {
     const hit = wed.tool ? null : picked(e);
-    renderer.domElement.style.cursor = wed.tool ? 'copy' : hit ? 'pointer' : '';
+    renderer.domElement.style.cursor = wed.tool ? 'copy' : hit ? 'pointer' : 'grab';
     const g = wed.tool ? groundAt(e) : null;
     wed.mark = g && inArea(g) ? g : null;
-  }
+  } else renderer.domElement.style.cursor = '';
 }
 export function weddingUp(e) {
   if (!wed.on) return;
   if (e.button === 2) wed.rdrag = null;
+  if (wed.pdrag && (e.button === 0 || e.button === 1)) {
+    const P = wed.pdrag;
+    wed.pdrag = null;
+    if (!P.moved && e.button === 0 && (wed.sel || wed.tool)) { wed.sel = null; panel(); }
+  }
+  if (e.button === 0 && wed.gdrag) {
+    const G = wed.gdrag;
+    wed.gdrag = null;
+    if (G.moved) {
+      const f = figOf(G.i), w = f && moveGuest(wed.w, seats(), G.i, f.x, f.z);
+      if (w) { wed.w = w; save(); gush('guest_move'); } else say(wed.fig.mis, 'Somewhere with a bit more room, love!');
+      reseat(); panel();
+    }
+  }
   if (e.button === 0 && wed.drag) {
     const moved = wed.drag.moved;
     wed.drag = null;
@@ -790,7 +971,7 @@ export function weddingUp(e) {
 }
 export function weddingWheel(e) {
   if (!wed.on || cine) return;
-  wed.zoom = Math.max(0.45, Math.min(2.6, wed.zoom * (e.deltaY > 0 ? 1.1 : 1 / 1.1)));
+  zoomBy(e.deltaY > 0 ? 1.1 : 1 / 1.1);
 }
 /** Keys on her island (Space and Esc skip a cutscene first: den.js). True if it used the key. */
 export function weddingKey(key, e) {
@@ -798,10 +979,15 @@ export function weddingKey(key, e) {
   if (e.target instanceof HTMLInputElement) return true;
   if (wed.step === 'portrait' && key === 'escape') { if (wed.portrait) closePortrait(false); return true; }
   if (key === 'escape' && !$('wed-asks').hidden) { asks(false); return true; }
-  if (wed.step !== 'tune') return true;
+  if (!roaming()) return true;
+  const gi = selGuest();
   if (key === 'escape') { wed.tool = null; wed.sel = null; panel(); }
-  else if ((key === 'q' || key === 'e') && !e.repeat) turnProp(key === 'q' ? 1 : -1);
+  else if ((key === 'q' || key === 'e') && !e.repeat) { if (gi !== null) turnGuest(gi, key === 'q' ? 1 : -1); else turnProp(key === 'q' ? 1 : -1); }
   else if ((key === 'delete' || key === 'backspace') && !e.repeat) removeProp();
+  else {
+    const d = { w: [0, -1], arrowup: [0, -1], s: [0, 1], arrowdown: [0, 1], a: [-1, 0], arrowleft: [-1, 0], d: [1, 0], arrowright: [1, 0] }[key];
+    if (d) { e.preventDefault?.(); slide(-d[0] * 40, -d[1] * 40); }
+  }
   return true;
 }
 
@@ -813,12 +999,15 @@ function tuck(on) {
   $('wed-tuck').setAttribute('aria-expanded', String(!on));
 }
 $('wed-tuck').onclick = (e) => { e.currentTarget.blur(); tuck(!$('wed').classList.contains('tucked')); };
-/* By touch, all done here (no mouse events follow): a tap is a click; a drag from a prop moves it, from
-   anywhere else turns the view (the mouse's right-drag); two fingers pinch to zoom; a double tap skips
-   the welcome or the wedding (Space, on a keyboard). */
+/* By touch, all done here (no mouse events follow): a tap is a click; a drag from a prop or a guest
+   moves it, from anywhere else looks round (turning, and tilting at the guests and decorating); two
+   fingers pinch to zoom and slide the view; a double tap skips the welcome or the wedding (Space, on a
+   keyboard). */
 let touch = null, lastTap = 0;
 const tp = (t) => ({ clientX: t.clientX, clientY: t.clientY, button: 0, buttons: 1 });
 const apart = (a, b) => Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+const mid = (a, b) => ({ x: (a.clientX + b.clientX) / 2, y: (a.clientY + b.clientY) / 2 });
+function letGo(t) { if (touch?.prop) weddingUp(tp(t)); }
 renderer.domElement.addEventListener('touchstart', (e) => {
   if (!wed.on) return;
   e.preventDefault();
@@ -829,26 +1018,31 @@ renderer.domElement.addEventListener('touchstart', (e) => {
     return;
   }
   if (e.touches.length >= 2) {
-    if (touch?.prop) weddingUp(tp(e.touches[0]));
-    touch = { pinch: apart(e.touches[0], e.touches[1]), zoom: wed.zoom };
+    letGo(e.touches[0]);
+    touch = { pinch: apart(e.touches[0], e.touches[1]), zoom: wed.zoom, mid: mid(e.touches[0], e.touches[1]) };
     return;
   }
   const t = e.touches[0];
   touch = { x: t.clientX, y: t.clientY, moved: false, prop: false };
-  if (wed.step === 'tune' && !wed.tool && picked(tp(t))?.kind === 'prop') { weddingDown(tp(t)); touch.prop = !!wed.drag; }
+  if (roaming() && !wed.tool && picked(tp(t))) { weddingDown(tp(t)); touch.prop = !!(wed.drag || wed.gdrag); }
 }, { passive: false });
 renderer.domElement.addEventListener('touchmove', (e) => {
   if (!wed.on || !touch) return;
   e.preventDefault();
   if (touch.pinch) {
-    if (e.touches.length >= 2) wed.zoom = Math.max(0.45, Math.min(2.6, touch.zoom * touch.pinch / Math.max(1, apart(e.touches[0], e.touches[1]))));
+    if (e.touches.length >= 2) {
+      wed.zoom = touch.zoom; zoomBy(touch.pinch / Math.max(1, apart(e.touches[0], e.touches[1])));
+      const m = mid(e.touches[0], e.touches[1]);
+      if (roaming()) slide(m.x - touch.mid.x, m.y - touch.mid.y);
+      touch.mid = m;
+    }
     return;
   }
   const t = e.touches[0];
   if (touch.prop) { weddingMove(tp(t)); return; }
   if (!touch.moved && Math.hypot(t.clientX - touch.x, t.clientY - touch.y) < 10) return;
   touch.moved = true;
-  wed.yaw -= (t.clientX - touch.x) * 0.008;
+  lookRound((t.clientX - touch.x) * 1.3, t.clientY - touch.y);
   touch.x = t.clientX; touch.y = t.clientY;
 }, { passive: false });
 renderer.domElement.addEventListener('touchend', (e) => {
@@ -858,9 +1052,18 @@ renderer.domElement.addEventListener('touchend', (e) => {
   if (e.touches.length) { if (T.pinch && e.touches.length === 1) touch = { x: e.touches[0].clientX, y: e.touches[0].clientY, moved: true, prop: false }; return; }
   touch = null;
   if (T.prop) weddingUp(tp(t));
-  else if (!T.moved && !T.pinch && !cine) { weddingDown(tp(t)); if (wed.drag) weddingUp(tp(t)); }
+  else if (!T.moved && !T.pinch && !cine) {
+    // (a tap on nothing lets go of what's picked; on a prop or guest, picks it)
+    weddingDown(tp(t));
+    if (wed.pdrag) { wed.pdrag = null; if (wed.sel) { wed.sel = null; panel(); } }
+    if (wed.drag || wed.gdrag) weddingUp(tp(t));
+  }
 }, { passive: false });
-renderer.domElement.addEventListener('touchcancel', () => { if (touch?.prop && wed.drag) { wed.drag = null; propsChanged('move'); } touch = null; });
+renderer.domElement.addEventListener('touchcancel', () => {
+  if (touch?.prop && wed.drag) { wed.drag = null; propsChanged('move'); }
+  if (wed.gdrag) { wed.gdrag = null; reseat(); }
+  touch = null;
+});
 
 // ---------- each tick, and the camera ----------
 export function weddingTick(dt0) {
@@ -937,13 +1140,14 @@ export function weddingTick(dt0) {
     wed.bub.style.left = `${Math.max(bw + 8, Math.min(innerWidth - bw - 8, x))}px`;
   } else wed.bub.style.display = 'none';
   // The ring under what you've picked (or where a new prop will go).
-  const p = selProp(), gi = wed.sel?.kind === 'guest' ? F.guests[wed.sel.i] : null, mk = wed.tool ? wed.mark : null;
-  wed.ring.visible = wed.step === 'tune' && !!(p || gi || mk);
+  const p = selProp(), gs = selGuest(), gi = gs !== null ? figOf(gs) : null, mk = wed.tool ? wed.mark : null;
+  wed.ring.visible = roaming() && !!(p || gi || mk);
   if (wed.ring.visible) {
     const at = p ? { x: p.x, z: p.z, r: PROP_R[p.k] } : gi ? { x: gi.x, z: gi.z, r: 0.5 } : { x: mk.x, z: mk.z, r: 0.5 };
     wed.ring.position.set(at.x, 0.04, at.z);
     wed.ring.scale.setScalar(at.r);
-    wed.ring.material.color.set(mk ? '#7dff7a' : '#ffd23a');
+    // (green where a new prop goes; red while a guest's dragged where there's no room)
+    wed.ring.material.color.set(mk ? '#7dff7a' : wed.gdrag?.moved && !wed.gdrag.ok ? '#ff5a4a' : '#ffd23a');
     wed.ring.material.opacity = 0.6 + 0.3 * Math.sin(t * 5);
   }
 }
@@ -953,6 +1157,7 @@ export function weddingTick(dt0) {
 export function weddingCam() {
   const C = planCam();
   if (!C || C === wed.shot) return C;
+  wed.camDist = C.dist;
   // (the venue in the middle of what the planner leaves showing: the look slid right of where it'd be,
   // or, the planner a sheet along the bottom, below it, so the venue sits up in what's above it)
   const off = panelOff();
@@ -983,7 +1188,7 @@ function panelOff() {
 function planCam() {
   if (!wed.on || !wed.root) return null;
   const C = { look: V3(), dist: 15, tilt: 0.6, yaw: wed.yaw };
-  const F = wed.fig, z = wed.zoom;
+  const F = wed.fig, z = roaming() ? wed.zoom : Math.max(0.45, wed.zoom);
   // (far enough back to take in `w` metres across, in what the planner leaves showing)
   const hh = Math.atan(Math.tan(camera.fov * Math.PI / 360) * camera.aspect), across = (w) => w / (2 * Math.tan(hh) * (1 - panelOff().x));
   if ((wed.step === 'portrait' || wed.step === 'playing') && wed.shot) return wed.shot;
@@ -1015,7 +1220,9 @@ function planCam() {
     return C;
   }
   if (wed.step === 'plot') { shot(C, -0.5, 1.25, -3.2, Math.max(5.8, across(5)) * z, 0.42, 0.15 + wed.yaw); return C; }
-  // (the theme and tuning: the venue's layout from a comfortable near angle)
+  // (the theme: the venue's layout from a comfortable near angle; the guests and decorating, the same,
+  // but yours to go round: tilted, slid over the venue and zoomed right in)
+  if (roaming()) { shot(C, wed.pan.x, 0.5 + Math.max(0, 0.35 - z) * 1.6, -1.0 + wed.pan.z, Math.max(10.5, across(9)) * z, Math.max(0.1, Math.min(1.45, 0.6 + wed.tilt)), 0.22 + wed.yaw); return C; }
   shot(C, 0, 0.5, -1.0, Math.max(10.5, across(9)) * z, 0.6, 0.22 + wed.yaw);
   return C;
 }
