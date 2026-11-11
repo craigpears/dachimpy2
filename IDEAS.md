@@ -2157,6 +2157,27 @@ the door and have it discoverable in some way similar to the carpentry spots?"
   nothing of the den, with bots like Sailing's), and could find other hidden ways later (the smugglers'
   beach, Port Decorum's treasury).
 
+**A Rigging passage: trimming her through shifting winds (11 Nov):** the user wants Rigging in, "certainly in
+a way that's like rigging ... I'm not sure I ever liked it as a compliment to the sailing puzzle ... my
+understanding of like rigging. Usually, is all about changing winds and whatnot ... the rigging shortcut is
+one full of unpredictable winds where you've got to change the rigging quick ... changing the rigging
+positions to deal with high wind, low wind, catching the wind from a different direction ... similar to
+what we've done with rowing, are we able to ... tweak the rigging puzzle so that ... you can deal with
+really gusty, unpredictable passages, and that, again, would give you another path through, is a rigging
+path. But you've got to constantly change and adapt the rigging to get through it."
+- **A first shape (to shape with the user):** a passage of gusty, shifting wind, its next change shown a
+  little ahead (stronger, lighter, round to another quarter), as mirror strokes turned a puzzle's clears
+  into pulling the oars. On the Rigging board, what you clear sets her trim: reefed for a blow, full sail
+  for light airs, sheeted round to the side the wind's coming from. Trimmed to the wind she's carried on;
+  caught wrong she's pushed back or stalls (a knockdown in a blow: the snake).
+- **Why it suits Rigging:** its play comes in small breaks every two or three moves (above, "How Rigging
+  would move her"), which here is the point: the wind keeps changing, so it's quick, constant adjusting
+  that gets her through, not holding out for a heavy combo. The opposite of the Sailing and rowing
+  shortcuts, so it's a different kind of player's way through.
+- Check Rigging's real rules on YPPedia before shaping it (its loops, hooks and clearing a colour, as the
+  user remembers them), and keep it the real puzzle with a new job, as mirror strokes did for rowing.
+  SunnyKira, "sublime in rigging", to teach it.
+
 **More kinds of shortcut, for later versions of the course (11 Nov):** "we've got a good collection of
 mechanics actually here that you can have all different kinds of shortcuts." One the user suggested:
 "some destructible object that then reveals the shortcut. So like you shoot some rocks or something" (rocks
