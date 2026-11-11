@@ -316,7 +316,20 @@ the site (`.assetsignore` skips `*.md`).
   bit evil, but like at least brings you all the way, brings you back a significant like one leg." So a
   trade wind runs back up the course across the legs; where a leg crosses it, a Double's gust carries her
   clean over it (as a gust goes over the whirlpools), and anything less lands her in it and it sweeps her
-  back a leg. With the shortcuts of every size, after the starlit door.
+  back a leg. With the shortcuts of every size, after the starlit door. And the trade wind up the left that runs her home
+  should be a real risk on the way out too (11 Nov, after a go): "I'm not seeing accidentally being caught
+  in those trade winds at the left of it yet. But the whole point is they're supposed to be risk of really
+  just doing some kind of accidental [slip] on that thing on the left-hand side and accidentally being
+  caught in the winds that sweep you in. I want the snakes and [ladders]." So legs that end hard by it, a
+  careless turn or a gust too far landing her in it and sweeping her back.
+- **The race explained at the start (11 Nov):** "the concepts in this are going to need ... quite a bit of
+  explaining as well at the start, like everything we've talked about. Here are your options. Shortcuts
+  mean a short path, the puzzle ... just illustrate a few of the examples. Like, yeah, do you want to bilge
+  through a [lock]? Or you can take the long way around or zoom over a whirlpool, risking a doomed return
+  to the start if you ... get it wrong." So the starter at the buoy tells you the idea before the off: the
+  long way round, or a shortcut that costs a puzzle, with a few of them as examples, and the snakes that
+  sweep you back. Not the starlit door ("Hidden gems, never hinted": a race's rules are explained, its
+  secret isn't).
 - **Knowing where you're going on the race course (11 Nov):** the user's first go at `?at=race`: "my first
   impression is I've not got a clue where I'm going. But then again, my other wonder is that a good thing?
   Because that is that part of the joy? Is it like a maze as much as a course?" Suggested: the long way
