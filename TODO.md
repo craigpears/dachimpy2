@@ -286,8 +286,6 @@ the site (`.assetsignore` skips `*.md`).
   The Gunnery shortcut is a guarded gap with the imperial checkpoint's mechanic as it is: run it (and
   patch) or knock its guns out by Gunnery (a heavy combo, sailed or rowed, zooms her through; rowing a stroke at a time is "a sitting duck") (the user, 11 Nov: "we've already got like the Imperial
   checkpoint ... you basically just use that exact same mechanic"). Rocks shot away: IDEAS.md, later.
-- **Duty Navigation (11 Nov):** the real puzzle (three rings of stars, constellations), its own module, as
-  the den's other puzzles are.
 - **The starlit door (11 Nov):** a hidden door in the race course's cliffs, found like the crane's ledge,
   opened by Duty Navigation: each constellation lights its stars on the rock, then the door opens on a
   tunnel, the course's biggest shortcut. "build duty navigation in the door ... I don't see why it's one or

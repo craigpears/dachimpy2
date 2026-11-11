@@ -1,0 +1,346 @@
+/* Duty Navigation, the real puzzle (YPPedia "Navigation", read 11 Nov 2026, with its two pictures of a
+   board: "A typical duty navigation puzzle" and the one without a constellation). TypeScript,
+   compiled to js/navigation.js by `npm run build`; tested in tests/navigation.test.ts and played by
+   the bots in tools/nav-bots.mjs. It knows nothing of the den: js/den/nav-board.js draws a board of
+   it wherever its caller puts it.
+
+   Faithful to the original (RULES.md, "Duty Navigation"):
+   - A round board, a ship's wheel on a night sky: three rings round the hub, eight places round each
+     (up, down, left, right and the diagonals), on the wheel's eight spokes. Ring 0 is the innermost.
+   - Stars of five colours (the pictures: yellow, red, orange, white and blue, each its own shape).
+     The next star waits outside the wheel on one of its spokes; Space drops it in, and it falls
+     toward the middle down that spoke.
+   - Up moves to the higher ring (outward, here), Down to the lower; Left turns the ring selected
+     anticlockwise, Right clockwise, its stars with it. A star with nothing under it (inward) falls.
+   - Three or more stars of a colour in a line vanish: straight out from the centre (a spoke, all
+     three of its places), or round a ring (three or more in a row, round the ring's join too).
+   - The constellation: coloured places marked on the board. Get stars of the right colours into
+     every one of them and it vanishes, its stars with it, and scores; a new one's shown. Lining up
+     stars "does little to increase the score". When the last star makes a constellation and a line
+     at once, the constellation goes (YPPedia's strategy: a constellation with three like stars in a
+     line, "that part of the constellation must be completed last").
+   - Scores are "strongly weighted on the number of stars in the constellation" and on the moves
+     taken; a combo (a line clearing, what falls then finishing it) that fills a constellation scores
+     big. Constellations start at one or two stars and grow as you go.
+   - A booch: dropping a star onto a star in the outermost ring (the ship turns round).
+
+   Not on YPPedia, so made up here (say so if it matters): the exact points, the par of moves, the
+   ratings' thresholds, how fast constellations grow (SIZES), that Up is outward, that a booch blows
+   the board clear of stars (the constellation stays, rated Booched), that the next star's spoke and
+   colour are plain random, that turning and dropping are the moves counted (choosing a ring isn't),
+   and that a constellation's own places never make a line of three of a colour. */
+
+export const RINGS = 3, SPOKES = 8, COLOURS = 5, LINE = 3;
+/** The colours, as the pictures have them. */
+export const COLOUR_NAMES = ['yellow', 'red', 'orange', 'white', 'blue'] as const;
+/** Points off for a booch. */
+export const BOOCH_PENALTY = 25;
+/** Constellations' sizes in turn, the last repeating: one star, then two, then three... (YPPedia: "The
+    constellations in the first couple of levels have only one or two stars"). A first go is the first
+    FIRST_GO of them, one, two and three stars: tools/nav-bots.mjs's greedy navigator takes about 66
+    moves over them (15, 21 and 30), a minute or two at the keys. */
+export const SIZES: readonly number[] = [1, 2, 3, 4, 5, 6, 7, 8];
+export const FIRST_GO = 3;
+/** Where a constellation's places go: weights for the inner, middle and outer rings. */
+export const PLACE_WEIGHT: readonly number[] = [3, 2, 1];
+/** A constellation's points: STAR * stars squared, times par / moves when over par, times COMBO when a
+    combo fills it. Par is BASE + PER_STAR a star (about what the bots take, tools/nav-bots.mjs: a
+    one-star constellation is mostly waiting for a star of its colour, one in five). */
+export const SCORE = { STAR: 10, COMBO: 3 };
+export const PAR = { BASE: 6, PER_STAR: 4 };
+/** Ratings by a constellation's points (a booch while it was up rates it Booched). */
+export const RATINGS = ['Booched', 'Poor', 'Fine', 'Good', 'Excellent', 'Incredible'] as const;
+export const RATING_AT: readonly number[] = [10, 30, 60, 120];
+export type Rating = (typeof RATINGS)[number];
+
+/** A star on the board. */
+export interface Star { id: number; c: number }
+/** A place: its ring (0 innermost) and spoke (0 up, then clockwise: 2 right, 4 down, 6 left). */
+export interface Place { ring: number; spoke: number }
+/** A constellation's place, wanting a colour. */
+export interface Mark extends Place { colour: number }
+export interface Constellation { id: number; marks: Mark[] }
+/** The star waiting outside the wheel, on its spoke. */
+export interface NextStar { id: number; c: number; spoke: number }
+/** grid[ring][spoke]. */
+export type Grid = (Star | null)[][];
+
+/** A constellation finished: its stars, the moves it took, par, whether a combo filled it, its points
+    and rating. */
+export interface Done { id: number; stars: number; moves: number; par: number; combo: boolean; booched: boolean; points: number; rating: Rating; marks: Mark[] }
+
+/** One step as it's seen, for drawing: what happened, then the board. 'turn' a ring turned (`ring`,
+    `dir`); 'drop' the next star in at the outer ring; 'fall' everything loose fallen in; 'line' lines
+    gone (`lines`, each its places); 'constellation' one filled and gone (`done`); 'deal' a new one
+    shown; 'booch' the star dropped onto a star, and the board blown clear. */
+export interface Stage {
+  kind: 'turn' | 'drop' | 'fall' | 'line' | 'constellation' | 'deal' | 'booch';
+  grid: Grid;
+  cleared: number[];
+  constellation: Constellation | null;
+  ring?: number;
+  dir?: number;
+  lines?: Place[][];
+  done?: Done;
+}
+
+/** What a move did. */
+export interface Move {
+  /** False when nothing happened (no such ring). */
+  moved: boolean;
+  kind: 'turn' | 'drop';
+  booched: boolean;
+  /** Lines gone, stars gone (lines and constellation), and steps of the cascade. */
+  lines: number;
+  cleared: number;
+  steps: number;
+  /** Points this move (a constellation's, the lines', less a booch). */
+  points: number;
+  /** The constellation it finished, if it did. */
+  done: Done | null;
+  stages: Stage[];
+}
+
+export interface NavOptions {
+  /** Constellations' sizes in turn, the last repeating (SIZES). */
+  sizes?: readonly number[];
+  /** Colours of star in play (COLOURS). */
+  colours?: number;
+}
+
+/** A constellation's par of moves. */
+export const parFor = (stars: number) => PAR.BASE + PAR.PER_STAR * stars;
+/** A constellation's points, by its stars, the moves it took and whether a combo filled it. */
+export function pointsFor(stars: number, moves: number, combo: boolean): number {
+  const par = parFor(stars);
+  return Math.round(SCORE.STAR * stars * stars * Math.min(1, par / Math.max(1, moves)) * (combo ? SCORE.COMBO : 1));
+}
+export function ratingFor(points: number, booched = false): Rating {
+  if (booched) return 'Booched';
+  let i = 0;
+  while (i < RATING_AT.length && points >= RATING_AT[i]) i++;
+  return RATINGS[i + 1];
+}
+
+/** Every line of three or more of a colour on a grid: each spoke all of a colour, and runs round each
+    ring (the whole ring, if it's all one colour). */
+export function linesOf(grid: Grid): Place[][] {
+  const out: Place[][] = [];
+  for (let s = 0; s < SPOKES; s++) {
+    const a = grid[0][s];
+    if (a && grid.every((ring) => ring[s]?.c === a.c)) out.push(grid.map((_, ring) => ({ ring, spoke: s })));
+  }
+  for (let ring = 0; ring < RINGS; ring++) {
+    const row = grid[ring], col = (s: number) => row[(s + SPOKES) % SPOKES]?.c ?? -1;
+    // A start where a run begins (its colour differs from the place before); none: one colour all round.
+    let start = -1;
+    for (let s = 0; s < SPOKES; s++) if (col(s) !== col(s - 1)) { start = s; break; }
+    if (start < 0) { if (col(0) >= 0 && SPOKES >= LINE) out.push(row.map((_, spoke) => ({ ring, spoke }))); continue; }
+    let run: number[] = [];
+    for (let k = 0; k <= SPOKES; k++) {
+      const s = (start + k) % SPOKES, c = k < SPOKES ? col(s) : -2;
+      if (run.length && c === col(run[0])) { run.push(s); continue; }
+      if (run.length >= LINE && col(run[0]) >= 0) out.push(run.map((spoke) => ({ ring, spoke })));
+      run = c >= 0 ? [s] : [];
+    }
+  }
+  return out;
+}
+
+const emptyGrid = (): Grid => Array.from({ length: RINGS }, () => Array<Star | null>(SPOKES).fill(null));
+
+export class Navigation {
+  grid: Grid = emptyGrid();
+  /** The ring selected (0 innermost). */
+  ring = RINGS - 1;
+  next: NextStar;
+  constellation: Constellation | null = null;
+  /** Constellations finished, and the last one's what-it-was. */
+  completed = 0;
+  last: Done | null = null;
+  score = 0;
+  /** Moves (turns and drops) since this constellation was shown, and in all. */
+  moves = 0;
+  totalMoves = 0;
+  booches = 0;
+  /** A booch while this constellation was up. */
+  boochedThis = false;
+  /** Keep stages (the board animates them; bots don't need them). */
+  record = true;
+  readonly sizes: readonly number[];
+  readonly colours: number;
+  private nextId = 1;
+
+  constructor(private readonly random: () => number = Math.random, opts: NavOptions = {}) {
+    this.sizes = opts.sizes?.length ? opts.sizes : SIZES;
+    this.colours = Math.max(2, Math.min(COLOURS, opts.colours ?? COLOURS));
+    this.next = this.newStar();
+    this.deal();
+  }
+
+  private newStar(): NextStar {
+    return { id: this.nextId++, c: Math.floor(this.random() * this.colours), spoke: Math.floor(this.random() * SPOKES) };
+  }
+
+  /** The size of the constellation up now (or next). */
+  size(): number { return this.sizes[Math.min(this.completed, this.sizes.length - 1)]; }
+
+  /** Show a new constellation of size() stars: places weighted toward the middle (PLACE_WEIGHT),
+      random colours, never a line of three of a colour among its own places, never filled already. */
+  deal(stars = this.size()): Constellation {
+    const n = Math.max(1, Math.min(RINGS * SPOKES, stars));
+    for (let tries = 0; ; tries++) {
+      const marks: Mark[] = [], used = new Set<number>();
+      while (marks.length < n) {
+        const total = PLACE_WEIGHT.reduce((a, b) => a + b, 0);
+        let x = this.random() * total, ring = 0;
+        while (ring < RINGS - 1 && x >= PLACE_WEIGHT[ring]) x -= PLACE_WEIGHT[ring++];
+        const spoke = Math.floor(this.random() * SPOKES), k = ring * SPOKES + spoke;
+        if (used.has(k)) { if (used.size >= RINGS * SPOKES) break; continue; }
+        used.add(k);
+        marks.push({ ring, spoke, colour: Math.floor(this.random() * this.colours) });
+      }
+      const c: Constellation = { id: this.nextId++, marks };
+      const own = emptyGrid();
+      for (const m of marks) own[m.ring][m.spoke] = { id: 0, c: m.colour };
+      if (tries < 200 && (linesOf(own).length || this.filled(c))) continue;
+      this.constellation = c;
+      this.moves = 0;
+      this.boochedThis = false;
+      return c;
+    }
+  }
+
+  /** Is every place of the constellation holding a star of its colour? */
+  filled(c = this.constellation): boolean {
+    return !!c && c.marks.every((m) => this.grid[m.ring][m.spoke]?.c === m.colour);
+  }
+
+  /** Choose the higher (+1, outward) or lower (-1) ring. Not a move. */
+  select(d: number): boolean {
+    const r = Math.max(0, Math.min(RINGS - 1, this.ring + Math.sign(d)));
+    if (r === this.ring) return false;
+    this.ring = r;
+    return true;
+  }
+
+  /** Turn a ring (the one selected) a place: +1 clockwise (Right), -1 anticlockwise (Left), its stars
+      with it; then everything settles. A move. */
+  turn(dir: number, ring = this.ring): Move {
+    const res = this.blank('turn');
+    if (ring < 0 || ring >= RINGS || !dir) return res;
+    const d = Math.sign(dir), row = this.grid[ring];
+    this.grid[ring] = row.map((_, s) => row[(s - d + SPOKES) % SPOKES]);
+    res.moved = true;
+    this.counted();
+    this.stage(res, 'turn', [], { ring, dir: d });
+    this.settle(res);
+    return res;
+  }
+
+  /** Drop the next star in down its spoke. Onto a star in the outer ring, it's a booch. A move. */
+  drop(): Move {
+    const res = this.blank('drop'), n = this.next, outer = RINGS - 1;
+    res.moved = true;
+    this.counted();
+    this.next = this.newStar();
+    if (this.grid[outer][n.spoke]) {
+      res.booched = true;
+      res.points -= BOOCH_PENALTY;
+      this.score -= BOOCH_PENALTY;
+      this.booches++;
+      this.boochedThis = true;
+      const gone: number[] = [];
+      for (const ring of this.grid) for (const x of ring) if (x) gone.push(x.id);
+      this.grid = emptyGrid();
+      this.stage(res, 'booch', [...gone, n.id]);
+      return res;
+    }
+    this.grid[outer][n.spoke] = { id: n.id, c: n.c };
+    this.stage(res, 'drop', []);
+    this.settle(res);
+    return res;
+  }
+
+  /** Everything loose falls in until it rests. Did anything move? */
+  fall(): boolean {
+    let any = false;
+    for (let moved = true; moved;) {
+      moved = false;
+      for (let ring = 1; ring < RINGS; ring++) for (let s = 0; s < SPOKES; s++) {
+        if (this.grid[ring][s] && !this.grid[ring - 1][s]) { this.grid[ring - 1][s] = this.grid[ring][s]; this.grid[ring][s] = null; moved = any = true; }
+      }
+    }
+    return any;
+  }
+
+  /** Every line of three or more of a colour now. */
+  lines(): Place[][] { return linesOf(this.grid); }
+
+  private counted(): void { this.moves++; this.totalMoves++; }
+
+  private blank(kind: Move['kind']): Move {
+    return { moved: false, kind, booched: false, lines: 0, cleared: 0, steps: 0, points: 0, done: null, stages: [] };
+  }
+
+  /** After a move: falls; a constellation filled goes first; then lines; round again till still. */
+  private settle(res: Move): void {
+    let lineSteps = 0;
+    for (;;) {
+      if (this.fall()) this.stage(res, 'fall', []);
+      const c = this.constellation;
+      if (c && this.filled(c)) {
+        const ids = c.marks.map((m) => this.grid[m.ring][m.spoke]!.id);
+        for (const m of c.marks) this.grid[m.ring][m.spoke] = null;
+        const stars = c.marks.length, combo = lineSteps > 0, points = pointsFor(stars, this.moves, combo);
+        const done: Done = { id: c.id, stars, moves: this.moves, par: parFor(stars), combo, booched: this.boochedThis, points, rating: ratingFor(points, this.boochedThis), marks: c.marks };
+        res.done = done;
+        res.points += points;
+        res.cleared += ids.length;
+        res.steps++;
+        this.score += points;
+        this.completed++;
+        this.last = done;
+        this.constellation = null;
+        this.stage(res, 'constellation', ids, { done });
+        continue;
+      }
+      const lines = this.lines();
+      if (!lines.length) break;
+      lineSteps++;
+      res.steps++;
+      res.lines += lines.length;
+      const ids = new Set<number>();
+      for (const l of lines) for (const p of l) ids.add(this.grid[p.ring][p.spoke]!.id);
+      for (const l of lines) for (const p of l) this.grid[p.ring][p.spoke] = null;
+      res.cleared += ids.size;
+      // ("Simply lining up same-colored stars does little to increase the score": a point a star,
+      // times its step in the cascade.)
+      res.points += ids.size * lineSteps;
+      this.score += ids.size * lineSteps;
+      this.stage(res, 'line', [...ids], { lines });
+    }
+    if (!this.constellation) { this.deal(); this.stage(res, 'deal', []); }
+  }
+
+  private stage(res: Move, kind: Stage['kind'], cleared: number[], what: Partial<Stage> = {}): void {
+    if (this.record) res.stages.push({ kind, cleared, grid: this.snap(), constellation: this.constellation, ...what });
+  }
+
+  /** A copy of the grid, stars and all. */
+  snap(): Grid { return this.grid.map((ring) => ring.map((x) => (x ? { ...x } : null))); }
+
+  /** Lay a board out as given (a test's): grid[ring][spoke] colours, -1 or null empty. */
+  lay(colours: (number | null)[][], constellation?: Mark[]): void {
+    this.grid = emptyGrid();
+    colours.forEach((ring, r) => ring.forEach((c, s) => { if (c !== null && c >= 0) this.grid[r][s] = { id: this.nextId++, c }; }));
+    if (constellation) { this.constellation = { id: this.nextId++, marks: constellation.map((m) => ({ ...m })) }; this.moves = 0; this.boochedThis = false; }
+  }
+
+  /** A copy of the whole game with its own source of numbers (what a bot imagines a move would do). */
+  copy(random: () => number): Navigation {
+    const s: Navigation = Object.assign(Object.create(Navigation.prototype) as Navigation, this as Navigation);
+    Object.assign(s, { grid: this.snap(), next: { ...this.next }, random, record: false });
+    return s;
+  }
+}

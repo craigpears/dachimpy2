@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Navigation test</title>
+<!-- A test page for Puzzle Pirates' Duty Navigation, unlinked like den.html. The rules are
+     src/navigation.ts (compiled to js/navigation.js); the board's look is js/den/nav-board.js, the same
+     one the den will place as the night sky at the hidden cliff door. This page only stands it up on
+     its own, with a slab of rock beside it that each constellation lights its stars on, as the door's
+     will (the board's onConstellation hook). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #f6ead2; --dim: #cbb894; --gold: #e0a92a; --panel: rgba(18, 16, 28, 0.86); --edge: #4a4060; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #070b18; font: 500 16px/1.4 'Alegreya Sans', system-ui, sans-serif; color: var(--ink); }
+  canvas { display: block; }
+  .ui { position: fixed; left: 12px; top: 12px; width: min(330px, calc(100vw - 24px)); background: var(--panel); border: 1px solid var(--edge); border-radius: 10px; padding: 10px 12px; }
+  h1 { font: 700 22px 'Alegreya', serif; color: var(--gold); margin: 0 0 4px; }
+  p { margin: 0 0 8px; color: var(--dim); font-size: 14px; }
+  .row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  button { font: 700 14px 'Alegreya Sans', sans-serif; color: var(--ink); background: #2a2440; border: 1px solid #a89060; border-radius: 6px; padding: 3px 9px; cursor: pointer; }
+  button.on { background: #4a3a6a; }
+  #stats b { color: var(--gold); }
+  #log { list-style: none; padding: 0; margin: 6px 0 0; font-size: 14px; color: var(--dim); max-height: 9.5em; overflow: hidden; }
+  #log li:first-child { color: var(--ink); font-weight: 700; }
+  #prompt { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); background: var(--panel); border: 1px solid var(--edge); border-radius: 8px; padding: 4px 12px; font-size: 15px; color: var(--dim); white-space: nowrap; max-width: calc(100vw - 24px); overflow: hidden; text-overflow: ellipsis; }
+  #say { position: fixed; left: 0; right: 0; top: 18px; text-align: center; font: 700 30px 'Alegreya', serif; color: #ffd23a; text-shadow: 0 2px 0 #1a1030, 0 0 14px rgba(0,0,0,.6); pointer-events: none; opacity: 0; transition: opacity .5s; }
+  #say.on { opacity: 1; transition: none; }
+  @media (max-width: 700px) { .ui { top: auto; bottom: 48px; } }
+</style>
+</head>
+<body>
+<div class="ui">
+  <h1>Duty Navigation</h1>
+  <p>Puzzle Pirates' Duty Navigation, by its real rules and keys. Up and Down choose a ring (or point at one), Left and
+    Right turn it (or click: left anticlockwise, right clockwise), Space drops the star waiting on its spoke. Three of
+    a colour in a line, out from the middle or round a ring, vanish. Fill the constellation's places with their
+    colours. Don't drop a star onto a star in the outer ring.</p>
+  <div class="row">
+    <button id="first">First go (1, 2, 3 stars)</button>
+    <button id="full">The full puzzle</button>
+    <button id="again">Deal again</button>
+  </div>
+  <div id="stats"></div>
+  <ul id="log"></ul>
+</div>
+<div id="prompt"></div>
+<div id="say"></div>
+<script type="importmap">
+  { "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { seeded } from './js/mirror-row.js';
+import { SIZES, FIRST_GO, COLOUR_NAMES, parFor } from './js/navigation.js';
+import { navBoard, placeXY, starCanvas } from './js/den/nav-board.js';
+
+const $ = (id) => document.getElementById(id);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+document.body.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#070b18');
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+scene.add(new THREE.HemisphereLight('#a8b8e8', '#1a1420', 0.9));
+const moon = new THREE.DirectionalLight('#c8d4ff', 1.2);
+moon.position.set(-4, 6, 8);
+scene.add(moon);
+
+// The rock: a slab of cliff behind the board, where each constellation's stars light up (the door's
+// hook: onConstellation gives its marks, placeXY where each sits, starCanvas its star).
+const rock = new THREE.Mesh(new THREE.BoxGeometry(12, 7, 0.6), new THREE.MeshStandardMaterial({ color: '#5a5664', roughness: 0.95 }));
+rock.position.set(1.5, 0, -1.2);
+scene.add(rock);
+const lit = new THREE.Group();
+scene.add(lit);
+const starTex = new Map();
+const texFor = (c) => { if (!starTex.has(c)) { const t = new THREE.CanvasTexture(starCanvas(c)); t.colorSpace = THREE.SRGBColorSpace; starTex.set(c, t); } return starTex.get(c); };
+function lightOnRock(done, n) {
+  // Each constellation in its own patch of rock, right of the board, its figure as on the board.
+  const ox = 3.3 + (n % 2) * 1.4, oy = 1.6 - Math.floor(n / 2) * 1.4;
+  for (const m of done.marks) {
+    const p = placeXY(m.ring, m.spoke);
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: texFor(m.colour), toneMapped: false }));
+    s.position.set(ox + p.x * 1.6, oy + p.y * 1.6, -0.85);
+    s.scale.setScalar(0.32);
+    lit.add(s);
+  }
+}
+
+let board = null, mode = 'first', seed = 1, banner = 0, shown = 0;
+const say = (t) => { $('say').textContent = t; $('say').classList.add('on'); banner = 1.8; };
+const log = (t) => { const li = document.createElement('li'); li.textContent = t; $('log').prepend(li); while ($('log').children.length > 8) $('log').lastChild.remove(); };
+
+function deal() {
+  board?.dispose();
+  lit.clear(); shown = 0;
+  $('log').innerHTML = '';
+  board = navBoard({
+    random: seeded(seed), options: { sizes: mode === 'first' ? SIZES.slice(0, FIRST_GO) : SIZES },
+    at: new THREE.Vector3(0, 0, 0), size: 4.6,
+    onMove: (m) => {
+      if (m.lines) log(`${m.lines} line${m.lines > 1 ? 's' : ''}, ${m.cleared} stars${m.steps > 1 ? ` (${m.steps} steps)` : ''}`);
+    },
+    onConstellation: (d) => {
+      log(`constellation of ${d.stars}: ${d.moves} moves (par ${d.par})${d.combo ? ', a combo!' : ''}, ${d.points} points, ${d.rating}`);
+      say(`${d.rating}!${d.combo ? ' A combo!' : ''}`);
+      lightOnRock(d, shown++);
+      if (mode === 'first' && shown === FIRST_GO) setTimeout(() => say('The door would open!'), 1600);
+    },
+    onBooch: () => { say('Booched! The ship turns about.'); log('booched'); },
+    onDeal: (c) => log(`a new constellation: ${c.marks.length} star${c.marks.length > 1 ? 's' : ''}, ${c.marks.map((m) => COLOUR_NAMES[m.colour]).join(', ')}`),
+  });
+  scene.add(board.group);
+  $('first').classList.toggle('on', mode === 'first');
+  $('full').classList.toggle('on', mode !== 'first');
+}
+$('first').onclick = () => { mode = 'first'; deal(); };
+$('full').onclick = () => { mode = 'full'; deal(); };
+$('again').onclick = () => { seed++; deal(); };
+const params = new URLSearchParams(location.search);
+if (params.get('mode') === 'full') mode = 'full';
+if (params.get('seed')) seed = Number(params.get('seed'));
+deal();
+
+addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') e.target.blur();
+  if (board.key(e.key, e)) e.preventDefault();
+});
+const canvas = renderer.domElement;
+const ndc = (e) => [e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1];
+canvas.addEventListener('pointermove', (e) => board.pointer(...ndc(e), camera));
+canvas.addEventListener('pointerdown', (e) => { if (board.pointer(...ndc(e), camera)) board.click(e.button); });
+canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+function fit() {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+}
+addEventListener('resize', fit);
+fit();
+
+const clock = new THREE.Clock();
+function frame() {
+  const dt = Math.min(0.05, clock.getDelta());
+  board.tick(dt);
+  // The camera straight on to the board, a little to its left so the panel doesn't cover it, the
+  // rock's lit stars in view at the right.
+  const v = board.camView(camera), wide = innerWidth > 900, side = wide ? 0.9 : 0;
+  camera.position.copy(v.from).add(new THREE.Vector3(side, 0, wide ? 2.2 : 0.3));
+  camera.lookAt(v.look.clone().add(new THREE.Vector3(side, 0, 0)));
+  if (banner > 0 && (banner -= dt) <= 0) $('say').classList.remove('on');
+  const g = board.game, c = g.constellation;
+  $('stats').innerHTML = `Constellation <b>${g.completed + 1}</b>, <b>${c ? c.marks.length : '-'}</b> star${c?.marks.length === 1 ? '' : 's'} · moves <b>${g.moves}</b> (par ${c ? parFor(c.marks.length) : '-'}) · score <b>${g.score}</b> · booches <b>${g.booches}</b>${g.last ? ` · last <b>${g.last.rating}</b>` : ''}`;
+  $('prompt').textContent = board.prompt();
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+frame();
+window.nb = () => board;   // (for poking at it from the console)
+</script>
+</body>
+</html>

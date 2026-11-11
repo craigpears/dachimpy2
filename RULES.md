@@ -1902,6 +1902,41 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   It's just empty space. There's no graphic for it, which I think is what really confused me." So a
   platform is targets all over, or (half of them) targets on a zigzag with the gaps on the other, and
   a gap is drawn as nothing at all, only the platform's ledge running under it.
+- **Duty Navigation (11 Nov), built by the real puzzle, not placed yet.** To be the night sky in front of a
+  hidden cliff door, each constellation lighting its stars on the rock. One module, `src/navigation.ts`,
+  knowing nothing of the den; its look `js/den/nav-board.js` (`navBoard`); played on its own in the
+  unlinked `navigation-test.html`; bots in `tools/nav-bots.mjs`. As YPPedia ("Navigation", read 11 Nov)
+  and its two pictures of a board have it:
+  - A round board, a ship's wheel on a night sky (a crescent moon): three rings round the hub, eight
+    places round each, on the wheel's spokes. Stars of five colours, each its own shape: yellow a plump
+    five-pointed star, red a sharp one, orange an eight-pointed burst, white six-pointed, blue a
+    four-pointed compass star. The next star waits out on a spoke's handle; Space drops it in and it
+    falls toward the middle down that spoke.
+  - Up moves to the higher ring, Down to the lower; Left turns the ring selected anticlockwise, Right
+    clockwise, its stars with it (WASD too; the mouse picks the ring nearest it, a left click turns it
+    anticlockwise, a right click clockwise). A star with nothing under it falls in.
+  - Three or more of a colour in a line vanish: a spoke all of a colour (out from the centre), or
+    three or more in a row round a ring (round its join too). What falls in can line up again (a
+    cascade). Lines score little: a point a star, times its step in the cascade.
+  - The constellation: places marked in colours, a medallion each (empty, a ring in its colour with a
+    dim star; holding its colour, a solid coin with the star on it), faint lines joining them as a
+    star chart's. Fill every one and it vanishes, its stars with it, and scores; a new one's shown.
+    Made with a line at once, the constellation goes first (YPPedia: such a part "must be completed
+    last").
+  - Its points: 10 x stars squared, times par / moves when over par (par 6 + 4 a star), times 3 when
+    a combo (a line clearing, what falls then filling it) finishes it. Rated Poor, Fine, Good,
+    Excellent, Incredible at 10, 30, 60, 120 points, so one or two stars can only rate low, as on
+    YPPedia.
+  - A booch: dropping a star onto a star in the outer ring. 25 points off, the board blown clear of
+    stars, and the constellation rated Booched (the ship turns about).
+  - Made up, as YPPedia doesn't say: the points, par and ratings' thresholds; that Up is outward; the
+    booch clearing the board; the next star's spoke and colour plain random; turns and drops are the
+    moves counted (choosing a ring isn't); constellations' places weighted toward the middle (filled
+    from the centre out, its strategy) and never a line of three of a colour among themselves; sizes
+    one star, then two, three... a constellation (SIZES, a host can give its own, and fewer colours).
+  - A first go is the first three, one, two and three stars (FIRST_GO): the greedy bot takes about 66
+    moves over them (15, 21 and 30), a minute or two at the keys, and booches about once in thirteen
+    goes.
 - **Port Decorum towers over the sloop (11 Nov).** "just looking at port decorum size relative to the
   sloop. Isn't the wall for it going to tower over that? ... we've clearly got a scale problem here."
   Its fort's walls were lower than her mast, its towers lower than the checkpoint's. Now its curtain
