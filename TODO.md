@@ -318,10 +318,16 @@ the site (`.assetsignore` skips `*.md`).
   Like, this is supposed to be a secret way round. It's literally right next to it." So Tzz's island
   further from Kikkit's whirlpools, a plain line of rocks along the whole reef (its new length too), and a
   chain's gust never carrying you into the whirlpools' way through by accident.
-- **Kikkit's "-eh" comes off weird (11 Nov):** "It's supposed to be a childlike it was all sparklehhhhhhh
-  and whooshhehhhhhhh. Not sure how to describe the rules but annoyingeh just doesn't fit." A drawn-out,
-  childlike sound on words that flow into it, not a tag on any word. Her lines are protected (RULES.md):
-  reworked on purpose, none lost. The rule and spelling to settle with the user from a few samples first.
+- **Primates Rule: curves, her lower gun ports, and out at sea (11 Nov, first look):** "I'm liking the
+  frigate ... Oh, I absolutely love it." But "is it intentional with the style that it really is such a
+  square back? ... looking at the [sloop], that's got the same ... I'd like to see it maybe with a bit
+  more curves ... Maybe experiment with the curvature a bit." And "the gun holes at the bottom just seem
+  so off center on the bottom row ... they're like touching the [stripe's bottom] line ... the middle row
+  is fine." Confirmed: her ornamental pieces are for use anywhere. And "add that to the scene somewhere so
+  you can just, once you start getting out to sea, you just kind of see that out there and put [a mark]
+  on it. [To] make it clear, it's kind of a to-do item." So: a curvier stern (and the sloop's, if it
+  suits), the lower ports centred in their band, and her moored where you see her once out at sea,
+  marked plainly as still to come.
 
 ## Spotted along the way (not asked for)
 
