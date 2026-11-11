@@ -855,6 +855,18 @@ simulator and dachimpy.com." An island on the sea (a little island of its own, l
 its exhibits the real thing, oldest first. The user's screenshots are kept in `notes/museum/`
 (not deployed), numbered in that order:
 
+
+**Where it all started: Dlonelyone (11 Nov), a "Did you know?":** "She's a pirate that
+definitely needs referencing in a museum. You know, this all started when I saw her. I think she
+was like teaching somebody how to use a ship or a sloop or something for the first time." The user
+wished they could do the same, but "I'm not quite as extroverted or did not feel confident enough
+to do that. So I ended up starting the [Dachimpy].com things ... spawned from ... my preference for
+helping people in a more indirect way. But that's the moment that it started." So the museum opens
+with her: **Dlonelyone** (a real pirate: name's spelling, portrait and ocean to check on YPPedia
+before she's drawn), drawn at a sloop's helm showing a new pirate the ropes, under a "Did you
+know?" plaque telling how watching her started it all, and that Dachimpy.com was the quieter way of
+doing the same: helping people learn. (How much of the user's own feelings go on the plaque, to
+settle with the user: told warmly, in a line or two.)
 - **v1, "an insanely basic html page":** the Bnav Guide, a page of plain links. Ship movement;
   winds and rocks; whirlpools (the basics, turning around with one, holding your place in one,
   reaching the other side); shooting and grappling; collisions, same class and different; then
