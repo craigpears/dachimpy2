@@ -291,6 +291,17 @@ the site (`.assetsignore` skips `*.md`).
   and her board.
 - **Tzz still says R for Sailing (11 Nov, first play):** "it still says r for sailing which seems odd." Her
   lesson shouldn't end on a key to press.
+- **Tzz's lesson has lost the balloon animals, and shows bodged moves (11 Nov, first play):** "It's not got
+  any resemblance to balloon animals in those animations now ... she kind of twists her hands. Nothing's
+  actually happening when she's talking about balloon animals. We've really gone off the mark here." And of
+  the board: "Was that actually a valid combo that she just did when it dropped? That looked suspicious ...
+  the bingo thing. Bottom ledge. I'm like, why are there ledges? ... the colours are not going into the
+  right spots ... they're just going in random places and bodging it. This is a tutorial, and she's just
+  showing bodging moves." Her routines are a contrived staircase of little two-by-two ledges, each piece's
+  other half left on a square that isn't a target. They should be the real way a chain's built (YPPedia,
+  Sailing, Strategy: a platform one target short, a line of four above it breaking a joined pair so the
+  other half drops into the missing target, then more in succession), every piece going where a good
+  sailor puts it. And the balloons have to be visible and read as balloon animals again.
 
 ## Spotted along the way (not asked for)
 
