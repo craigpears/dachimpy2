@@ -820,7 +820,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
         sea), nudged toward the high side room allowing; where there's only the one square, its
         squares are a little smaller to fit, the view coming in to suit, so it looks the same. Rule:
         `src/den-lock.ts` (quayOf).
-      - **The ways past the checkpoint:** run it, row it, fight its guns, or the locks. The reef's
+      - **The ways past the checkpoint:** run it, fight its guns, or the locks. Not rowing it (the user,
+        11 Nov: "There is no rowing through. Like, that does not help you. That just makes you a sitting
+        duck. Where does that idea keep coming from?": it came from their 10 Nov idea of "slow row and then
+        fast rowing with the Vegas", which in play doesn't get you through; never offer it as a way past). The reef's
         far end, the long way round that cost only time, is closed now the locks are the way round.
       - **Nothing signposts it:** nothing at the junction, and nothing at the checkpoint either
         ("Hidden gems, never hinted", below).
