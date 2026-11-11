@@ -108,6 +108,10 @@ the site (`.assetsignore` skips `*.md`).
   rambling; the whirlpools through the reef with the penguin in the middle; Tzz's island and her
   balloon lesson aboard; the penguin home to Kikkit.
 
+- **Sailing's sparkle, two small things (11 Nov, seen when it was built):** from behind her, the
+  camera sees her sails nearly edge-on, so a Vegas's billow barely shows; and on a phone the den's
+  big toast covers the Sailing board for a moment after a chain.
+
 - **Something to show people, tonight's goal (10 Nov):** once we reach a stopping point, likely after
   Kikkit's sailing quest: "some kind of advertising material ... the fully built den, the imperial
   checkpoint, the sailing around, the rowing puzzle ... just marketing material to show people what
