@@ -384,9 +384,17 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   things. This is hopefully the latest modern iteration of what my tutorial stuff can be. It's a bit
   of fun, a bit more animated, a bit more funny." Dachimpy.com taught Puzzle Pirates' puzzles; the
   den is its newest form. Each puzzle comes with a real pirate who teaches it in their own way, as a
-  scene, not a manual: Tzz twists Sailing out of balloons, Helium will show you real distilling
+  scene, not a manual: Tzz blows Sailing up out of balloons, Helium will show you real distilling
   moves; you watch, then "now you try". Still a game, not a tutorial ("It's a game, not a
   tutorial", above): the teaching is a funny little scene and then you play.
+  - **What they show is good play, tested, not just legal play (11 Nov).** Tzz's first routines were
+    real chains by the real Sailing module (it steered, dropped and popped every piece), but the moves
+    she chose were "bodging": pieces parked on squares that weren't their targets to fall later. Her
+    tests only asked that the chain had the right name and nothing popped early. The user: "it's
+    concerning that it went this badly wrong". The puzzle module answers what's legal and what pops;
+    a lesson's moves are content, and need their own tests of what a good player would do (every
+    piece in a target of its colour or a line that clears, nothing left idle, the trigger left one
+    short), from the puzzle's real strategy (YPPedia) or the user, never invented.
 - **Finish one thing at a time (11 Nov).** "try and finish things, because I don't want to move too
   quickly, because I'm conscious we haven't play tested any of the [Tzz] stuff yet. So we need to
   finish things really one at a time", and "I want to reveal things one at a time." A feature is
