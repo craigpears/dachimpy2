@@ -1667,9 +1667,16 @@ Building on what's there now (the walk and its stairs are made of pieces that st
 
 For now the den is the first version, and that works.
 
-## Balloffire teaches Gunnery (11 Nov)
+## Rapportus teaches Gunnery; Balloffire, free loop gunning (11 Nov)
 
-The user (11 Nov): "Balloffire is definitely down to be the gunning tutor ❤️". **Balloffire**, a
+Changed (11 Nov): "I think rapportus actually deserves the gunning tutorial one, especially for loops as
+he made the original guides. Ball of fire can come in somewhere like free loop gunning." So
+**Rapportus** (he; pirate name as the user spelt it, to confirm; he wrote the original Gunnery guides,
+loops above all) is the Gunnery tutor, and **Balloffire** comes in for free loop gunning (what that is
+and how it differs, from YPPedia or the user, not guessed). Both pirate pages and portraits to check
+before they're drawn.
+
+Before that (11 Nov): "Balloffire is definitely down to be the gunning tutor ❤️". **Balloffire**, a
 real pirate who has said yes (pirate name only; ocean, pirate page and portrait to check before
 they're drawn, then into PIRATES and the wardrobe), teaches Gunnery as Tzz teaches Sailing (RULES.md,
 "A pirate showing you a puzzle is the heart of it"): a funny animated scene showing you real
