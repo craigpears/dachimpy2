@@ -818,6 +818,16 @@ pirate wedding absolutely is a must."
   lines and when she says them, the palettes she offers, how the portrait is saved and shared, and
   what it pays. Check YPPedia for Puzzle Pirates' own weddings and wedding clothes first.
 
+## A fashion show (11 Nov, parked: "a bit duplicated for a proof of concept")
+
+"I could certainly imagine having a fashion show or something like that, like certainly based on
+how [Mischievious] twirls and goes through her different outfits. Everyone like designs an outfit
+or look ... for a certain theme, and they all the contestants twirl through each one for people to
+vote on." A theme is set, everyone dresses a look for it in the wardrobe, and the contestants come
+down the runway one by one, twirling as Mischievious does through her outfits, for people to vote
+on. Built from what's there (the wardrobe, her twirl, the wedding's crowd), which is why it's
+parked: too close to the wedding for a proof of concept. One for if people love dressing up.
+
 ## Zoom in on what you're doing, like the captain's map (9 Nov)
 
 The user liked how the camera zooms in onto the captain's map and back out again: you're still in
