@@ -619,6 +619,13 @@ the user's go-ahead for this one borrowed ship, not for bigger ships in general 
 below, still waits). Not the rowboats, and not a flotilla run in the sloop.
 Proportional, by YPPedia's numbers (RULES.md, "Ships, physically proportional"): his war frigate
 dwarfs your sloop, with 24 large guns and dozens of crew to be seen on deck and below (up to 75).
+**The frigate is the user's own: Primate's Rule (11 Nov).** "Oh, I want to use my ship. What was
+it? Is it Primate's Rule? My war frigate that's painted black and white ... where it's got like the
+gold, the black and white thrones, the skeleton cannons. That's just really cool. I want Primate's
+Rule." So the war frigate for the flotilla is Dachimpy's own Primate's Rule (the name to confirm
+with the user): painted black and white, with gold, black-and-white thrones and skeleton cannons.
+Drawn from the user's pictures of her (TODO.md, "Pictures of Primate's Rule"), with the paint,
+furniture and cannon names as YPPedia gives them.
 
 ## A bigger ship from the shipwright (10 Nov)
 
