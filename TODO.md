@@ -176,6 +176,11 @@ the site (`.assetsignore` skips `*.md`).
     she's painting, to like, oh, hold it there, does the painting. Like, it kind of fixes itself,
     but it ruins some of the scene. It doesn't really flow right." The camera should settle where
     you see her painting you, and hold there till she's done.
+  - **Nothing draws you to the coffin:** "it's not necessarily discoverable that you can go near
+    the coffin ... it's obvious once you're in proximity. But ... if you're on the other side of
+    the room, there's nothing really pushing you in that direction." Gravee leads you over to it
+    as her tour's last stop and eggs you on to peek, and the coffin catches your eye from across
+    the room (its lid rattling now and then, the bat circling over it), with no arrows.
   - **The Count's watching eyes, a piece of their own:** "The vampire portrait that's following
     you definitely needs to be a normal thing." Any portrait in any scene can have eyes that follow
     you (the Count's, a pirate's), a shared piece, not code in her house. The bat's flight round
