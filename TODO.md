@@ -153,6 +153,12 @@ the site (`.assetsignore` skips `*.md`).
   title, in her voice, each portrait's line in its config. It's the house shell's piece, so any
   host can talk about what you're looking at in their house.
 
+- **A 2D view of the portraits, like the puzzles' (11 Nov):** "needs a 2D version similar to the
+  puzzles, so you can go through the portraits easily with keyboard controls." A flat view, opened
+  by a button and key the way the puzzles' boards are, showing one portrait big with its title (and
+  her line about it), left and right to go through them, Escape back to the house. A shared piece
+  (any house's pictures; the museum's exhibits too), not Gravee's own.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
