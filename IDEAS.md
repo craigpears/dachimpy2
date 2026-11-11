@@ -886,6 +886,11 @@ its exhibits the real thing, oldest first. The user's screenshots are kept in `n
   play like a #1 SFer with a broken space bar ... don't stall. Ever."), who has her own island
   coming; and the 2011 home page with carousels of every puzzle. Shown on the museum's walls as
   framed pages (the shared frames), or on an old monitor you can click through.
+- **The site's own art (kept, 10 and 11 in `notes/museum/`):** the videos' title card (the
+  Dachimpy.com logo over the sea, faint jigsaw pieces across it, a little ship sailing in the top
+  corner) and the header banner (the chimp in his blue pirate hat, a dashed treasure-map trail to
+  an X, the cliffs, the sloop on its green ring). The title card could play when you step in, or
+  on the old monitor; the banner over the museum's door.
 - **Privacy:** some of those pages show the user's real name, an e-mail and a forum handle. The
   museum shows only the pirate name Dachimpy: crop or redraw those parts, never put them in.
 
