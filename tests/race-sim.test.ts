@@ -14,7 +14,7 @@ const RC = LAY.RACE;
 
 describe('the simulated course is the helm\'s (11 Nov)', () => {
   it('the long way takes as long as the helm sails it, from the rival\'s spot on the line, no puzzle', () => {
-    const h = new Helm(shut(...WAYS), spotPose(RACE.RIVAL.SPOT)), race = new Race();
+    const h = new Helm(shut(...WAYS), spotPose(RACE.LONG_SPOT)), race = new Race();
     race.start();
     race.tick(RACE.COUNT + 0.01, h.pose);
     longWay(h, () => race.tick(DT, h.pose));

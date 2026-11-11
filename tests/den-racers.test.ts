@@ -49,16 +49,17 @@ describe('two to four racers on one course, each in order, finishing in order (1
     expect(round(f, 2)).toEqual([]);
   });
 
-  it('the den\'s own race keeps a field of two: you, and the rival as a bot racer, placed by time', () => {
+  it('the den\'s own race keeps a field of you and your rivals, placed by time as each comes home (11 Nov)', () => {
     const race = new Race();
     race.start();
     race.tick(RACE.COUNT + 0.01, { c: RC.BUOY[0], r: RC.BUOY[1] });
-    for (let t = 0; t < RACE.RIVAL.SECS + 1; t += 1) race.tick(1, { c: RC.BUOY[0], r: RC.BUOY[1] });
-    expect(race.field.racers[1]).toMatchObject({ state: 'finished', time: RACE.RIVAL.SECS, place: 1 });
+    expect(race.field.racers.map((r) => r.name)).toEqual(['you', 'Kikkit', 'Tzz', 'Dalnoth']);
+    race.field.home(2, 0.005);   // (Tzz, home first: a rival's time, earlier than yours)
     for (let n = 1; n < S.length; n++) race.tick(0.1, { c: 10, r: S[n].r });
     const e = race.tick(0.1, { c: RC.FINISH[0], r: RC.FINISH[1] });
-    expect(e).toMatchObject([{ kind: 'finish', won: false }]);
+    expect(e).toMatchObject([{ kind: 'finish', won: false, place: 2 }]);
     expect(race.field.racers[0].place).toBe(2);
+    expect(race.standings().map((x) => x.name).slice(0, 2)).toEqual(['Tzz', 'you']);
   });
 });
 

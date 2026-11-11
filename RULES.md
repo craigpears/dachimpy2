@@ -2066,7 +2066,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     `src/den-sail.ts` (`RACE_LAY`, `LAY.RACE`), to rework freely; `tools/race-measure.mjs` measures it.
   - **The start (11 Nov: "pick your starting spot along the starting edge"):** Space by the buoy off the
     gate takes her in to the starting line, behind the line of rocks; A and D move her along it (never onto
-    the rival's spot); the starter's card explains the race; Space, and he counts you down. Below the line,
+    a rival's spot), 1 to 3 pick how many rivals race her; the starter's card explains the race and says
+    who's racing; Space, and he counts you down. Below the line,
     a field of plain whirlpools and winds by Puzzle Pirates' rules, to ride, not to fear: a conveyor across
     it blowing right, dropping her at a gap in a trade wind blowing back along its far side, headwinds by the
     gap, plain whirlpools (stop on one and it has her; a gust zooms her over). The gap is the quickest line,
@@ -2116,21 +2117,38 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     striped towers, one on spit 5 and one out past the left-hand trade wind, a chequered banner strung between
     them and a chequered line on the water. Over it, a burst of colour and a card with her time and place.
     Past it, the left-hand trade wind carries her back to the start for another go.
-  - **The rival:** one sloop, nameless for now (the den's own characters race next), from its spot on the
-    line the long way at a set pace, home in 3:30, quicker than the long way sailed: you beat it on the
-    shortcuts you're good at. Your best time's kept in this browser.
+  - **Your rivals, the den's own characters (11 Nov: "Everyone's got their own little profile and way they
+    approach it"):** up to three sloops racing you, three to start with, one to three picked on the line
+    (one is Kikkit; two, Kikkit and Tzz). Each is the sloop's own look in her colours (Kikkit's red sails and
+    black flag, Tzz's blue, Dalnoth's gold), her pirate at the tiller, and sails from her own spot on the line
+    her favourite way round in her own style, as the simulation's bots do (`src/race-sim.ts`, `simDrive`):
+    Kikkit greedy for the Vegas over the whirlpools, stopping at the channel's mouth in the open, and firing
+    on anyone she finds sitting still; Tzz steady, hopping the Double's and the Triple's gaps on the move,
+    never firing; Dalnoth (in Daquan's place till Daquan's drawn) through the barrier of driftwood, Umami the
+    capybara aboard on her foredeck doing his foraging, and firing on anyone sitting still, loading more by
+    Gunnery. Each is a level better at her own route's puzzle. A rival builds her own crane and clears her own
+    barrier; none takes the starlit door. Each has a line on the line before the gun and one over the finish
+    line, in a bubble over her sloop. Home in about 3:13 (Kikkit, her Vegas a gamble: 3:00 to 3:45), 3:24 (Tzz)
+    and 3:36 (Dalnoth), against the long way's 3:42 sailed. Your best time's kept in this
+    browser.
   - **The race explained (11 Nov: "Here are your options"):** the starter's card on the line: the long way,
     shortcuts that cost a puzzle with a few named (bilge up through a lock, build a crane, row the headwind
     gap, zoom over the whirlpools on a Vegas, hop a headwind with a Double), the snakes, and that the others
     shoot you if you sit still in the open. Never where a shortcut is or how beyond that, and never the
     starlit door.
   - **Racers shoot each other (11 Nov):** "I definitely want to be able to shoot other racers. That's
-    absolutely part of this."
-  - **Two to four racers on one course (11 Nov, rules only, not drawn yet):** "start adding multiple players
+    absolutely part of this." Q and E fire her broadside, as anywhere at sea: a rival on its squares, before
+    any rock or land, is holed, sits low and smoking with stars over her till she's patched, then races on.
+    Your rivals fire on you by their styles when you've sat on one square a second and a half in the open: a
+    flash and smoke on her, and you patch her deck as after any hit (knocked off the starlit door's board, if
+    she was at it). At the gun she's loaded up to two shots, one a side; the clock's bar shows her shots.
+  - **Two to four racers on one course (11 Nov; on the water since stage 3):** "start adding multiple players
     to this first, even if it's like 2 to 4 players with some bots". The field (`src/den-racers.ts`): each
     racer's pose, the stretches she's reached in order, what she's doing (sailing, waiting her turn,
     puzzling, dazed, carried by a gust, the crane or the tunnel, finished), her time and place. The den's
-    race is already a field of two, you and the rival as a bot racer, placed by time.
+    race is you and your rivals. The clock's bar shows your place as you race ("2nd of 4"), by how far round
+    the long way each has got; over the finish line the card lists everyone's places and times, those still
+    racing filled in as they come home (shown again once they're all home).
     - **First come, first served:** the up lock, the down lock, the crane and the barrier's notch are each
       one racer's at a time; the next waits her turn, in the order they came ("If you got through it first,
       we get through it first").

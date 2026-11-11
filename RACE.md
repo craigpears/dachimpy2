@@ -43,8 +43,9 @@ How it sits with the other notes:
   is a reach and every bend a run. Leg 4 before the locks is the zigzag (§3).
 - **Home:** the run home is one square wide, the left-hand trade wind blowing along beside it (§4), to a
   finish line across it between two towers (§5). Past the line, that wind carries you back to the start.
-- **Times:** the long way takes about 3:42 (222 s), from the rival's spot. The rival takes it at a set pace
-  and is home in 3:25. Your best time's kept in this browser.
+- **Times:** the long way takes about 3:42 (222 s), from the long way's own spot on the line. Your rivals
+  (§6) are home in about 3:13 (Kikkit, her Vegas a gamble: 3:00 to 3:45), 3:24 (Tzz) and 3:36 (Dalnoth),
+  so you beat them on the shortcuts you're good at. Your best time's kept in this browser.
 
 ## 3. Shortcuts (the ladders)
 
@@ -159,15 +160,21 @@ sweep.
 
 ## 6. Racing each other: position and risk
 
-**Several racers (rules built 11 Nov; not drawn yet).** Two to four on the course, you and bots to start
-with: "start adding multiple players to this first, even if it's like 2 to 4 players with some bots, and
-obviously tweak the course and sizes according to that." The field (`src/den-racers.ts`) holds each
-racer's pose, the stretch she's reached in order, what she's doing (sailing, waiting her turn, puzzling,
-dazed, carried by a gust, the crane or the tunnel, finished), and her time and place. The den's race is
-already a field of two: you, and the rival as a bot racer. Drawing more sloops and their bots at sea is the
-next agent's.
+**Several racers (rules built 11 Nov; on the water, stage 3, 11 Nov).** Two to four on the course, you and
+bots to start with: "start adding multiple players to this first, even if it's like 2 to 4 players with
+some bots, and obviously tweak the course and sizes according to that." The field (`src/den-racers.ts`)
+holds each racer's pose, the stretch she's reached in order, what she's doing (sailing, waiting her turn,
+puzzling, dazed, carried by a gust, the crane or the tunnel, finished), and her time and place. In the den
+it's you and one to three rivals (below), picked with 1 to 3 on the line, three to start with. The clock's
+bar shows your place ("2nd of 4"), by how far round the long way each of you has got (`progressAt`), and
+your shots; over the line, the card lists everyone's places and times, filled in as the rest come home.
 
-**Shooting other racers (rules built 11 Nov).** Her guns are for the other sloops as well as the gun gap.
+**Shooting other racers (rules built 11 Nov; at sea, stage 3).** Her guns are for the other sloops as well as the gun gap.
+At sea it's Q and E, as anywhere: a rival on the broadside's squares, before rock or land, is holed, sits low
+and smoking with stars over her till she's patched. Rivals fire on you by their styles once you've sat on
+one square a second and a half in the open (`RACE.STILL`): a flash on her, and the deck patch, as any hit
+(knocked off the starlit door's board, if she was at it). At the gun she's loaded up to two, one a side
+(`Broadside.stock`). Hits are shown on the sloops, never as wordy toasts.
 Her guns fire a broadside, three squares out of her side (`SAIL.RANGE`, as everywhere at sea), stopped by
 rock or land, so nobody shoots across a spit. A hit holes her: she's dazed, still, till she's patched by
 Carpentry, but is never knocked out, and can't be hit again till she's patched. Every racer starts with two
@@ -223,16 +230,24 @@ So if you're at the back, you can take those shortcuts at will, in theory."
   On the second pass, stopping in the open in the lead she's hit three times in four, last one time in
   twenty; leaders who stopped there still won 38% of their races, those last 10%.
 
-**The rivals: the den's own characters (agreed).** The nameless rival becomes several pirates from the
-den, each a bot with a profile: which shortcuts they go for, how good they are at each puzzle, and how
-willing they are to shoot. "Everyone's got their own little profile and way they approach it."
-- Kikkit goes greedy for the Vegases.
-- Tzz sails steadily another way.
-- A carpenter takes the crane.
-- Umami the capybara takes the Foraging barrier.
-- Daquan joins once his portrait is checked.
-- Each looks as they do elsewhere and has a line or two on the way. Where a puzzle has bots (Sailing,
-  rowing, Navigation), they play real moves. They're the testers as well.
+**The rivals: the den's own characters (built 11 Nov, stage 3).** "Everyone's got their own little profile
+and way they approach it." Each is a profile in her own file in `src/lines/` (`RACER`: how she races, her
+favourite route and style as the simulation names them, her skill, a line or two on the line and over the
+finish), lined up in `src/den-rivals.ts` (`RIVALS`: their order, spots on the line, sails and flag, who's
+aboard), and sailed by the simulation's own bots (`simDrive`, `src/race-sim.ts`) on the race's own field,
+you racer 0 on it: the same logic that's balance-tested races you.
+- **Kikkit** (red sails, black flag, spot 18 by the field's gap): greedy for the Vegas over the whirlpools,
+  stopped at the channel's mouth in the open; an opportunist, firing on anyone she finds sitting still.
+  Good, so great at her Vegas.
+- **Tzz** (blue sails, spot 14): steady, hopping the Double's and the Triple's gaps on Doubles and Triples
+  built on the move; peaceful, never fires. Decent, so good at her Doubles.
+- **Dalnoth, with Umami aboard** (gold sails, spot 4): through the barrier of driftwood, Umami on her
+  foredeck doing his foraging; aggressive, firing on anyone sitting still and loading more by Gunnery.
+  Decent, so good at the Foraging. **Daquan has no look yet** (his portrait's still to check), so Dalnoth
+  races in his place for now; Umami rides with him rather than racing a sloop of his own.
+- One rival is Kikkit; two, Kikkit and Tzz. None takes the starlit door (it's never shown or hinted).
+- Still to come: their puzzles played as real moves where the puzzles have bots (Sailing, rowing,
+  Navigation), so they're the testers as well; today they take the simulation's drawn times. And Daquan.
 
 ## 7. The start: a field of whirlpools and winds (built 11 Nov)
 
@@ -240,7 +255,7 @@ willing they are to shoot. "Everyone's got their own little profile and way they
 and you have to really eyeball it to figure out what the fastest way forward is. And you can kind of ...
 pick your starting spot along the starting edge based on that."
 - **Picking your spot:** Space at the buoy takes you in to the starting line, a rope of floats across the
-  course behind the rocks, your spot ringed in gold; A and D move you along it (never onto the rival's
+  course behind the rocks, your spot ringed in gold; A and D move you along it (never onto a rival's
   spot); Space and the count. Racers start from their spots at the gun.
 - **The field:** six rows between the line and leg 1. A conveyor across its near side blows right, from
   the left edge to a gap, where it turns her down; a trade wind blows back left along its far side, right of
@@ -291,7 +306,9 @@ balance held by `tests/race-sim.test.ts`.
   race. The course is read from `LAY.RACE`, so a reworked course is simulated as it's laid: each racer's
   progress is how far round the long way she's got, sailed at the helm's own pace (the long way 257 s,
   measured and tested), and each shortcut leaves and rejoins it where the course does, saving the long way
-  between less her own trip through (tested to agree with `RACE.DECENT`).
+  between less her own trip through (tested to agree with `RACE.DECENT`). Since stage 3 (11 Nov) a bot comes
+  down the start's field from her own spot (straight down, then along the first leg), and a shortcut's
+  trip runs through its own water, as your rivals are drawn; the balance test held, unchanged.
 - **The bots:** each is a route and a style. Routes: the long way; the gun gap run square by square, rushed
   on a heavy combo, or its guns shot quiet; the headwind gap rowed; the whirlpools' Vegas; the locks; the
   crane; the starlit door; or every shortcut it comes to. Styles: peaceful (never fires), opportunist (fires
@@ -450,7 +467,11 @@ their times. A race could also be watched live.
 - Can the lead hold? How strong the "lead isn't safe" effect should be (§6). The simulation says it holds
   as it is (§6, "What it found").
 - Is a built crane built for everyone that race (§8, "For the user to decide")? The same for the barrier
-  of driftwood once one racer's cleared it.
+  of driftwood once one racer's cleared it. **Default for now (stage 3, 11 Nov, the user to decide):** each
+  racer builds her own crane, clears her own barrier and opens her own door, as the simulation has it; so a
+  rival's sloop sails through your barrier's logs or swings over the neck with no crane of yours up.
+- How good a rival is at her own route's puzzle. **Default for now:** a level better than at the rest
+  (`bestAt`), as the simulation's bots are.
 - The mandatory Double over the trade wind back up the course: every racer has to hop it, so the long way
   isn't quite "without doing anything" (a Double, a few seconds' timing). Keep it, or give it a way round?
 - The snakes' slips in the simulation are guesses (`SIM.SNAKE`); players will show how often they bite.
@@ -464,13 +485,16 @@ their times. A race could also be watched live.
 - **The race's rules:** `src/den-race.ts` (the line and your spot, the clock, the snakes, the buoys, the
   finish line, the barrier). Its course is `LAY.RACE` in `src/den-sail.ts`, measured by
   `tools/race-measure.mjs`. Its field of racers (several on one course, first come first served, shooting
-  each other): `src/den-racers.ts`.
+  each other): `src/den-racers.ts`. Your rivals: `src/den-rivals.ts`, each one's racing in her file in
+  `src/lines/` (`RACER`), sailed by `simDrive` in `src/race-sim.ts`.
 - **The simulation:** `src/race-sim.ts`, run by `tools/race-sim.mjs` (§8).
 - **Drawn and played by:** `js/den/race.js`; its start (the line, your spot, the starter's card)
   `js/den/race-start.js`; its buoys and finish line `js/den/race-marks.js`; its barrier of driftwood and
-  its Foraging `js/den/race-forage.js`.
+  its Foraging `js/den/race-forage.js`; your rivals' sloops, their broadsides and yours
+  `js/den/race-field.js`.
 - **The starter's lines:** `src/lines/race.ts`.
 - **The starlit door:** `src/den-door.ts` and `js/den/door.js`.
-- **Tests:** `tests/den-race.test.ts`, `tests/den-door.test.ts`, `tests/den-racers.test.ts` and
-  `tests/race-sim.test.ts` (the balance test).
+- **Tests:** `tests/den-race.test.ts`, `tests/den-door.test.ts`, `tests/den-racers.test.ts`,
+  `tests/den-rivals.test.ts` (the rivals racing you, shooting, places) and `tests/race-sim.test.ts` (the
+  balance test).
 - **Try it:** `den.html?at=race`.

@@ -8,7 +8,7 @@
 import { describe, expect, it } from 'vitest';
 import { LAY, SAIL, Sea, Helm, type Pose } from '../src/den-sail';
 import {
-  RACE, Race, GunGap, Drift, Barrier, RIVAL_ROUTE, rivalAt, stretchAt, atStart, atFinish, cleanBest, clockText, neckCrane,
+  RACE, Race, GunGap, Drift, Barrier, LONG_ROUTE, stretchAt, atStart, atFinish, cleanBest, clockText, neckCrane,
   onLine, spotPose, snakeAt, nextBuoy, barrierDeal, atNotch, FIRST_SPOT,
 } from '../src/den-race';
 import { sheltered } from '../src/den-racers';
@@ -67,18 +67,19 @@ describe('where the course is: out past Primates Rule, a place of its own (11 No
 });
 
 describe('a start through plain whirlpools and winds, picking your own spot along the starting line (11 Nov: "you can kind of ... pick your starting spot along the starting edge")', () => {
-  it('Space at the buoy takes her in to the line; she moves along it, never onto the rival\'s spot, then the count', () => {
+  it('Space at the buoy takes her in to the line; she moves along it, never onto a rival\'s spot, then the count', () => {
     const race = new Race();
+    const theirs = race.racing().map((r) => r.spot);
     expect(race.take()).toBe(true);
     expect(race.state).toBe('line');
     expect(race.spot).toBe(FIRST_SPOT);
     expect(onLine(race.spot, RC.LINE.r)).toBe(true);
     for (let i = 0; i < 40; i++) race.shift(-1);
     expect(race.spot).toBe(RC.LINE.c0);
-    for (let i = 0; i < 40; i++) { race.shift(1); expect(race.spot).not.toBe(RACE.RIVAL.SPOT); }
+    for (let i = 0; i < 40; i++) { race.shift(1); expect(theirs).not.toContain(race.spot); }
     expect(race.spot).toBe(RC.LINE.c1);
     expect(race.shift(0, 6)).toBe(6);
-    expect(race.shift(0, RACE.RIVAL.SPOT)).not.toBe(RACE.RIVAL.SPOT);
+    for (const c of theirs) expect(race.shift(0, c)).not.toBe(c);
     expect(race.start()).toBe(true);
     expect(race.state).toBe('count');
     // (her spot's held through the count)
@@ -403,11 +404,11 @@ describe('each shortcut saves about what a decent player takes on its puzzle (11
   }
 });
 
-describe('the rival: one sloop, the long way, at a set pace (11 Nov)', () => {
-  it('sails open water all the way round from its spot on the line, every bend, to the finish line', () => {
-    expect(RIVAL_ROUTE[0]).toEqual([RACE.RIVAL.SPOT, RC.LINE.r]);
-    for (let i = 1; i < RIVAL_ROUTE.length; i++) {
-      const [a, b] = [RIVAL_ROUTE[i - 1], RIVAL_ROUTE[i]];
+describe('the long way: the route the simulation\'s bots sail round (11 Nov)', () => {
+  it('sails open water all the way round from the long way\'s own spot on the line, every bend, to the finish line', () => {
+    expect(LONG_ROUTE[0]).toEqual([RACE.LONG_SPOT, RC.LINE.r]);
+    for (let i = 1; i < LONG_ROUTE.length; i++) {
+      const [a, b] = [LONG_ROUTE[i - 1], LONG_ROUTE[i]];
       expect(a[0] === b[0] || a[1] === b[1], `${a} to ${b}`).toBe(true);
       const n = Math.ceil(Math.abs(b[0] - a[0]) + Math.abs(b[1] - a[1])) * 2;
       for (let j = 0; j <= n; j++) {
@@ -417,22 +418,7 @@ describe('the rival: one sloop, the long way, at a set pace (11 Nov)', () => {
         }
       }
     }
-    expect(RIVAL_ROUTE[RIVAL_ROUTE.length - 1]).toEqual(RC.FINISH);
-  });
-
-  it('finishes at its pace, and the race says so; quicker than the long way, beaten on the shortcuts', () => {
-    expect(rivalAt(0).home).toBe(false);
-    expect(rivalAt(RACE.RIVAL.SECS - 1).home).toBe(false);
-    const end = rivalAt(RACE.RIVAL.SECS + 0.01);
-    expect(end.home).toBe(true);
-    expect([end.c, end.r]).toEqual(RC.FINISH);
-    const race = new Race();
-    race.start();
-    const said: string[] = [];
-    for (let t = 0; t < RACE.COUNT + RACE.RIVAL.SECS + 1; t += 0.5) said.push(...race.tick(0.5, { c: RC.BUOY[0], r: RC.BUOY[1] }).map((e) => e.kind));
-    expect(said).toEqual(['count', 'count', 'go', 'rival']);
-    expect(RACE.RIVAL.SECS).toBeLessThan(SIM.LONG);
-    expect(RACE.RIVAL.SECS).toBeGreaterThan(SIM.LONG * 0.85);
+    expect(LONG_ROUTE[LONG_ROUTE.length - 1]).toEqual(RC.FINISH);
   });
 });
 

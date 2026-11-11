@@ -17,7 +17,7 @@
    words." So it's emphasis: she draws out the one word she's savouring, like a child, run on and
    stretched (sparklehhh, whooshehhh, twirlehhh, penguinehhh, leftsehhh, WHOOSHEHHHH), at most one word a
    line, and most lines none. Never tagged on to a plain word (no annoyingeh). */
-import type { Character } from './character.js';
+import type { Character, Racer } from './character.js';
 
 /** Her ramble, the first time you sail up to her island (and again if you hail her): in order. */
 export const RAMBLE = [
@@ -142,6 +142,20 @@ export const BACK_OUT = [
   'So close! Did you see him? Was he still in his balaclava? He\'s up to something.',
 ] as const;
 
+/** Racing you in the sloop race (src/den-rivals.ts), in Rodrigo's Revenge: greedy for the Vegas over the
+    whirlpools (the user, 11 Nov: "maybe [Kikkit] goes greedy for the Vegases"), and she'll fire on anyone
+    she finds sitting still as she goes by. */
+export const RACER: Racer = {
+  how: 'Greedy for the Vegas: straight for the whirlpool channel, stopped at its mouth in the open to build '
+    + 'one, back to the mouth if it doesn\'t come off. Fires on anyone sitting still as she goes by.',
+  route: 'whirls', style: 'opportunist', skill: 'good',
+  says: {
+    start: ['Ooh, a race! I\'m going straight over the whirly bits.', 'Rodrigo says left. Rodrigo always says left.'],
+    won: ['First! Right over the whirly bits, all sparklehhh!'],
+    lost: ['Did I take a few lefts? I think I took a few lefts.'],
+  },
+};
+
 export const CHARACTER: Character = {
   name: 'Kikkit',
   who: 'Out in the middle of nowhere on a little deserted island at the reef\'s near end, to the right of the '
@@ -169,5 +183,6 @@ export const CHARACTER: Character = {
     { when: 'Once she\'s told it all, never stopping while you\'re within earshot: tangents, round and round, a bit of the real way buried in them', says: TANGENTS },
     { when: 'A whirlpool\'s had you, and its winds have thrown you back to her island (a new one each time)', says: BACK },
     { when: 'Thrown back after you\'d got out past the reef', says: BACK_OUT },
+    { when: 'Racing you in the sloop race, over her sloop: on the starting line, and over the finish line first or after', says: RACER.says },
   ],
 };

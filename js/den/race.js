@@ -2,10 +2,11 @@
 // what the starter says, src/lines/race.ts). Out past Primates Rule, behind a line of rocks with one gate
 // in it: the starting buoy off the gate, the course's land (its spits, the headland the locks cut through),
 // its winds (the snakes, the headwinds the Doubles hop, the start's field's), the field's whirlpools and the
-// whirlpool channel's, its gun gap's two guns, the crane in its notch on the last spit; the rival sloop; the
-// clock. Its start (the line, picking your spot, the starter's card) is race-start.js; its marks (the
-// numbered buoys, the finish line and the moment you cross it) race-marks.js; the barrier of driftwood and
-// its Foraging race-forage.js.
+// whirlpool channel's, its gun gap's two guns, the crane in its notch on the last spit; the clock and your
+// place. Its start (the line, picking your spot and how many rivals, the starter's card) is race-start.js;
+// its marks (the numbered buoys, the finish line and the moment you cross it, everyone's places)
+// race-marks.js; the barrier of driftwood and its Foraging race-forage.js; your rivals' sloops on the water,
+// their broadsides and yours, race-field.js.
 // Everything it's made of is a shared piece: the sea draws its line of rocks (reef.js), the locks
 // (lock.js) and the winds (sea.js, windLane); a gun is a destructible turret (turret.js), a whirlpool
 // Kikkit's look (whirlpools.js), the sloop the sloop (sloop.js), the crane's frames played on the deck
@@ -15,28 +16,34 @@ import * as THREE from 'three';
 import { LAY, SAIL } from '../den-sail.js';
 import { whirlpool } from '../den-whirl.js';
 import { CRANE, travel } from '../den-crane.js';
-import { RACE, Race, GunGap, Drift, rivalAt, atStart, clockText, cleanBest, neckCrane, nextBuoy, stretchAt } from '../den-race.js';
+import { RACE, Race, GunGap, Drift, atStart, clockText, cleanBest, neckCrane, nextBuoy, stretchAt } from '../den-race.js';
+import { simDrive } from '../race-sim.js';
+import { FIELD } from '../den-racers.js';
 import { STARTER } from '../lines/race.js';
 import { scene, mat, mesh, canvasTex, V3, burst, toast, flagpole, pirate } from './world.js';
 import { rock } from './land.js';
-import { sail, seaX, seaZ, windLane, sloopMesh, bankTop, stoneM, grassM, SLOOP_DECK } from './sea.js';
+import { sail, seaX, seaZ, windLane, bankTop, stoneM, grassM, SLOOP_DECK } from './sea.js';
 import { turretMesh, turretMark, turretView, turretWrecked, turretFire, turretLand, shotComing } from './turret.js';
 import { pool } from './whirlpools.js';
 import { patch, patchPrompt, deckHoleShape } from './sea-puzzles.js';
 import { bake } from './bake.js';
 import { cine } from './cine.js';
-import { doorWorld, doorSquares, doorKey, doorPrompt, doorHolds, doorTick, doorReset } from './door.js';
+import { doorWorld, doorSquares, doorKey, doorPrompt, doorHolds, doorCarried, doorTick, doorReset } from './door.js';
 import { DOOR } from '../den-door.js';
-import { startWorld, takeLine, lineKey, linePrompt, startTick, rivalSpot } from './race-start.js';
-import { marksWorld, marksTick, crossed } from './race-marks.js';
+import { startWorld, takeLine, lineKey, linePrompt, startTick } from './race-start.js';
+import { marksWorld, marksTick, crossed, placings } from './race-marks.js';
+import { fieldWorld, fieldTick, fieldHome, fieldShot, fieldHit, fieldAt, fieldReset } from './race-field.js';
 import { forageWorld, forageKey, foragePrompt, forageHolds, forageTick, forageReset, forageCam, forageHover, forageClick } from './race-forage.js';
 
 const RC = LAY.RACE, CELL = SAIL.CELL, DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
 const NTH = (n) => (n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`);
 const say = (s, secs, place = 1) => s.replace('{time}', clockText(secs)).replace('{place}', NTH(place));
+/** Everyone's places for the finish card: you, and each rival, home or still racing. */
+const rows = (R) => R.standings().map((x) => ({ place: x.place, name: x.i === 0 ? 'You' : x.name, time: x.time === null ? null : clockText(x.time), you: x.i === 0 }));
 function readBest() { try { return cleanBest(localStorage.getItem(RACE.STORE)); } catch { return null; } }
 function keepBest(secs) { try { localStorage.setItem(RACE.STORE, String(secs)); } catch { /* (no storage: kept this voyage only) */ } }
-export const race = { W: null, rules: new Race(readBest()), gap: new GunGap(), drift: new Drift(), crane: neckCrane(), said: {}, trip: null, hud: null, doneT: 0 };
+const newRace = () => new Race(readBest(), simDrive);
+export const race = { W: null, rules: newRace(), gap: new GunGap(), drift: new Drift(), crane: neckCrane(), said: {}, trip: null, hud: null, doneT: 0 };
 
 // ---------- the look of it ----------
 /* The course's land, a square at a time, each spit as it is: the first, third and last low and grassy
@@ -114,7 +121,7 @@ function partPlace(V, i, fg) {
 }
 
 function build() {
-  const W = { g: new THREE.Group(), winds: [], pools: [], guns: [], rings: [], crane: null, rival: null };
+  const W = { g: new THREE.Group(), winds: [], pools: [], guns: [], rings: [], crane: null };
   const ground = new THREE.Group();
   land(ground);
   bake(ground);
@@ -131,14 +138,8 @@ function build() {
   RC.GUNS.marks.forEach((ms) => ms.forEach(([c, r]) => { const m = turretMark(seaX(c), seaZ(r)); W.g.add(m.g); W.rings.push({ c, r, m: m.m }); }));
   // The crane's footing on the neck.
   W.crane = craneMesh(); W.g.add(W.crane.g);
-  // The rival: a sloop like hers, a red pennant at her masthead.
-  W.rival = sloopMesh();
-  const pen = mesh(new THREE.ConeGeometry(0.2, 1.1, 3).rotateZ(-Math.PI / 2), mat('#c8372a')); pen.scale.set(1, 1, 0.15); pen.position.set(0, 6.1, 0.5);
-  W.rival.add(pen);
-  W.rival.visible = false;
-  W.g.add(W.rival);
   scene.add(W.g);
-  startWorld(); marksWorld(); forageWorld();
+  startWorld(); marksWorld(); forageWorld(); fieldWorld();
   return W;
 }
 /** Built the first time the sea's drawn (sailing.js). */
@@ -264,6 +265,15 @@ export function racePrompt() {
   }
   return '';
 }
+/* Her broadside, fired over `cells` (sailing.js, sailFire): the rival it'd come down on, if one's on them
+   (before any rock: the race's field says), and where her sloop's drawn; or null. */
+export function raceTarget(cells) {
+  if (!sail.on || !race.W) return null;
+  const i = race.rules.target(cells);
+  return i > 0 ? { i, at: fieldAt(i) } : null;
+}
+/** Her shot's come down on rival `i`: holed, dazed till she's patched (the field's rules), shown on her. */
+export function raceHitRival(i) { if (race.rules.shoot(i)) fieldHit(i); }
 /* Her shot came down on (c, r) (sailing.js, sailFire): on one of the gun gap's guns, a hit on it; once
    she's fired on them they fire on her, as the checkpoint's do. Whether it was theirs. */
 export function raceShot(hit, at) {
@@ -293,7 +303,10 @@ function hud() {
   // Where she is: the leg she's on and the buoy at its end, the next one (the long way plain to follow).
   const legs = RC.STRETCHES.length - 1, p = sail.helm.pose, here = stretchAt(p.c, p.r);
   const where = R.state === 'done' ? 'home' : here === legs ? 'the run home · to the finish line' : here >= 0 ? `Leg ${here + 1} of ${legs} · to buoy ${here + 1}` : R.leg === 0 && p.r < RC.STRETCHES[0].r ? 'the start · to buoy 1' : `Leg ${Math.min(legs, R.leg + 1)} of ${legs}`;
-  const txt = R.state === 'count' ? `Race · ${Math.ceil(R.t)}...` : `Race ${clockText(R.clock())} · ${where}${R.best ? ` · best ${clockText(R.best)}` : ''}`;
+  // (your place among the field, and your shots: her guns' loaded, more by Gunnery)
+  const n = R.field.racers.length, place = n > 1 ? ` · ${NTH(R.place())} of ${n}` : '';
+  const shots = sail.guns.shots('L') + sail.guns.shots('R');
+  const txt = R.state === 'count' ? `Race · ${Math.ceil(R.t)}...` : `Race ${clockText(R.clock())}${place} · ${where} · shots ${shots}${R.best ? ` · best ${clockText(R.best)}` : ''}`;
   if (race.hud.textContent !== txt) race.hud.textContent = txt;
 }
 /** Each tick at sea (sailing.js, after she's drawn where the helm has her, and the cliff's crane). */
@@ -306,15 +319,29 @@ export function raceTick(dt) {
   if (sail.on) {
     // The starter's hail, the first time she's by the buoy a voyage.
     if (atStart(h.pose.c, h.pose.r) && !race.said.hail && !cine && R.state === 'off') { race.said.hail = true; toast(STARTER.hail); }
-    for (const e of R.tick(dt, h.pose)) {
+    // (what holds her, for the rivals' guns: holed and patching, or carried out of reach)
+    const held = h.dazed() ? 'dazed' : race.trip || h.gusts.length || doorCarried() ? 'carried' : null;
+    for (const e of R.tick(dt, { c: h.pose.c, r: h.pose.r, d: h.pose.d, held })) {
       if (e.kind === 'count') toast(STARTER.count[RACE.COUNT - e.n] ?? '');
-      if (e.kind === 'go') { toast(STARTER.go); burst(V3(seaX(RC.BUOY[0]), 2.5, seaZ(RC.BUOY[1])), '#cfc6b8', 16, 2); }
-      if (e.kind === 'rival') toast(say(STARTER.rival, RACE.RIVAL.SECS));
+      if (e.kind === 'go') {
+        toast(STARTER.go);
+        burst(V3(seaX(RC.BUOY[0]), 2.5, seaZ(RC.BUOY[1])), '#cfc6b8', 16, 2);
+        sail.guns.stock(FIELD.SHOTS);   // (every racer starts with her shots loaded: one a side)
+      }
       if (e.kind === 'quit') toast(STARTER.quit);
       if (e.kind === 'swept') toast(STARTER.swept[e.snake], true);
+      if (e.kind === 'shot') {
+        fieldShot(e);
+        if (e.hit === 0 && doorHolds()) doorKey('escape');   // (holed at the rock: she's knocked off its board)
+      }
+      if (e.kind === 'home') {
+        fieldHome(e);
+        toast(say(STARTER.home.replace('{name}', R.field.racers[e.racer].name), e.secs, e.place));
+        if (R.state === 'done') placings(rows(R), R.field.state === 'done');
+      }
       if (e.kind === 'finish') {
         race.doneT = 8;
-        crossed(clockText(e.secs), e.place);
+        crossed(clockText(e.secs), e.place, rows(R));
         toast(say(e.won ? STARTER.won : STARTER.lost, e.secs, e.place));
         if (e.best) { keepBest(e.secs); toast(say(STARTER.best, e.secs)); }
       }
@@ -348,25 +375,15 @@ export function raceTick(dt) {
   // The start's line and card; the buoys, the next one lit; the finish's banner.
   startTick(R, sail.on);
   marksTick(dt, sail.on && R.state === 'on' ? nextBuoy(p.c, p.r) : -1);
-  // The rival: waiting on its spot on the line for the count, then round the course at its pace, then
-  // moored past the finish line.
-  const show = sail.on && R.state !== 'off';
-  W.rival.visible = show;
-  if (show) {
-    const at = R.state === 'count' || R.state === 'line' ? rivalSpot() : rivalAt(R.clock()), parked = at.home;
-    const c = parked ? RC.FINISH[0] - 2 : at.c, r = parked ? RC.FINISH[1] : at.r, a = parked ? 3 : at.a;
-    W.rival.position.set(seaX(c), Math.sin(t * 0.9 + 1) * 0.06, seaZ(r));
-    const want = Math.PI / 2 - a * Math.PI / 2;
-    let d = want - W.rival.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d));
-    W.rival.rotation.y += d * Math.min(1, dt * 3);
-    W.rival.rotation.z = Math.sin(t * 0.55 + 1) * 0.02;
-  }
+  // Your rivals: on their spots on the line for the count, then racing, then moored past the finish line.
+  fieldTick(dt, R, sail.on);
   hud();
 }
 
 /** A fresh voyage: no race on, the guns and the crane as they were, said again. Your best is kept. */
 export function raceReset() {
-  race.rules = new Race(readBest());
+  race.rules = newRace();
+  fieldReset();
   race.gap = new GunGap();
   race.drift = new Drift();
   race.said = {};

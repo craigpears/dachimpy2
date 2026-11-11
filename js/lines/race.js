@@ -19,8 +19,10 @@ export const STARTER = {
     /** The count, then the gun. */
     count: ['Three...', 'Two...', 'One...'],
     go: 'Go!',
-    /** The other sloop's home. */
-    rival: 'The other sloop\'s home: {time}',
+    /** On the line: who's racing ye ({names}: your rivals, src/den-rivals.ts). */
+    field: 'Racing ye: {names}',
+    /** A rival's home ({name}, her place and time). */
+    home: '{name}\'s over the line: {place}, {time}',
     /** A snake has her: the left-hand trade wind, the tight water past the gun gap, the trade wind back up
         the course. */
     swept: {
@@ -39,7 +41,7 @@ export const CHARACTER = {
     name: 'The race\'s starter',
     who: 'Whoever keeps the buoy off the sloop race\'s gate, out past Primates Rule: takes you in to the starting '
         + 'line, explains the race, counts you down, fires the gun, and calls the times at the finish line. Nameless '
-        + 'for now, as the rival sloop is: a real pirate needs the user\'s pick.\n\n'
+        + 'for now: a real pirate needs the user\'s pick. (The rivals racing you are the den\'s own characters.)\n\n'
         + 'Explains the race\'s rules before the off (the long way, shortcuts that cost a puzzle, a few named as '
         + 'examples, the snakes, the shooting), never where a shortcut is or how it\'s done beyond that, and never '
         + 'the starlit door (RULES.md, "Hidden gems, never hinted").',
@@ -57,10 +59,11 @@ export const CHARACTER = {
                 explain: 'Taken in to the starting line, before the off: the race explained, a line at a time',
                 count: 'The count, a second each',
                 go: 'The gun',
-                rival: 'When the other sloop\'s home',
+                field: 'On the starter\'s card, on the line: who\'s racing you',
+                home: 'When a rival\'s over the finish line',
                 swept: 'When a snake has her: the left-hand trade wind, the tight water past the gun gap, the trade wind back up the course',
-                won: 'Over the finish line before the other sloop',
-                lost: 'Over it after',
+                won: 'Over the finish line before everyone else',
+                lost: 'Over it after someone',
                 best: 'Your best time yet, kept in this browser',
                 quit: 'Sailed back out through the gate mid-race',
             },

@@ -335,6 +335,8 @@ function tripTick(dt, onLeg) {
 // ---------- the keys, the prompt, the camera ----------
 /** Holding her: at the board, or on her way through. */
 export const doorHolds = () => door.on || !!door.trip;
+/** On her way through the tunnel (or carried back out of it): out of anyone's reach (race.js). */
+export const doorCarried = () => !!door.trip;
 const VIEW = ['z', 'c', 'v', '-', '_', '=', '+', 'p'];
 /** A key at sea, first: whether it was the door's. */
 export function doorKey(key) {

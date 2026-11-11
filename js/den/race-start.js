@@ -10,7 +10,8 @@
 // course's (race.js). Touches the rest only through race.js.
 import * as THREE from 'three';
 import { LAY, SAIL } from '../den-sail.js';
-import { RACE, spotPose } from '../den-race.js';
+import { spotPose } from '../den-race.js';
+import { MOST_RIVALS } from '../den-rivals.js';
 import { STARTER } from '../lines/race.js';
 import { scene, mat, mesh, toast } from './world.js';
 import { sail, seaX, seaZ } from './sea.js';
@@ -38,15 +39,20 @@ function build() {
 /** Built with the race's course (race.js). */
 export function startWorld() { start.W ||= build(); }
 
-/** The starter's card, while she's on the line: what the race is, and the keys. */
-function card(show) {
+/** Who's racing you, as the card says it: each rival, and who's aboard with them. */
+const names = (R) => R.racing().map((x) => (x.crew ? `${x.name} (${x.crew.said})` : x.name)).join(', ');
+/** The starter's card, while she's on the line: what the race is, who's racing you, and the keys. */
+function card(show, R) {
   if (!start.card) {
     const el = start.card = document.createElement('div');
     el.id = 'racecard';
     Object.assign(el.style, { position: 'fixed', top: '150px', right: '18px', width: '340px', padding: '14px 18px', borderRadius: '10px', background: 'rgba(20,14,9,.84)', color: '#f4e9cf', font: '15px/1.4 Georgia, serif', zIndex: 20, pointerEvents: 'none', display: 'none', border: '2px solid #e8b52a' });
-    el.innerHTML = `<div style="font:700 13px system-ui,sans-serif;letter-spacing:3px;color:#e8b52a;margin-bottom:6px">THE STARTER</div>${STARTER.explain.map((l) => `<p style="margin:0 0 7px">${l}</p>`).join('')}<div style="font:600 13px system-ui,sans-serif;color:#e8b52a;margin-top:8px">A D: along the line · Space: the count · Esc: back to the buoy</div>`;
+    el.innerHTML = `<div style="font:700 13px system-ui,sans-serif;letter-spacing:3px;color:#e8b52a;margin-bottom:6px">THE STARTER</div>${STARTER.explain.map((l) => `<p style="margin:0 0 7px">${l}</p>`).join('')}<p class="who" style="margin:0 0 7px;font-style:italic"></p><div style="font:600 13px system-ui,sans-serif;color:#e8b52a;margin-top:8px">A D: along the line · 1 to ${MOST_RIVALS}: how many race ye · Space: the count · Esc: back to the buoy</div>`;
     document.body.appendChild(el);
   }
+  const who = STARTER.field.replace('{names}', names(R));
+  const p = start.card.querySelector('.who');
+  if (show && p.textContent !== who) p.textContent = who;
   start.card.style.display = show ? 'block' : 'none';
 }
 
@@ -63,18 +69,19 @@ export function lineKey(key, R) {
   if (R.state !== 'line') return false;
   const by = { a: -1, arrowleft: -1, d: 1, arrowright: 1 }[key];
   if (by) { R.shift(by); sail.helm.moor(spotPose(R.spot)); return true; }
+  // (how many rivals: 1 to all of them)
+  const n = Number(key);
+  if (key.length === 1 && n >= 1 && n <= MOST_RIVALS) { R.setRivals(n); sail.helm.moor(spotPose(R.spot)); return true; }
   if (key === ' ' || key === 'enter') { R.start(); toast(STARTER.count[0]); return true; }
   if (key === 'escape') { R.quit(); sail.helm.moor({ c: RC.BUOY[0] - 1, r: RC.BUOY[1], d: 0 }); return true; }
   return !['z', 'c', 'v', '-', '_', '=', '+', 'p'].includes(key);
 }
-export const linePrompt = (R) => (R.state === 'line' ? `The starting line, spot ${R.spot} · A D: along it · Space: the count · Esc: back out` : R.state === 'count' ? 'On the line: wait for the gun' : '');
+export const linePrompt = (R) => (R.state === 'line' ? `The starting line, spot ${R.spot} · A D: along it · 1 to ${MOST_RIVALS}: rivals (${R.rivals}) · Space: the count · Esc: back out` : R.state === 'count' ? 'On the line: wait for the gun' : '');
 /** Each tick: her spot's ring, and the card while she's on the line. */
 export function startTick(R, on) {
   if (!start.W) return;
   const t = performance.now() / 1000, show = on && (R.state === 'line' || R.state === 'count');
   start.W.ring.visible = show;
   if (show) { start.W.ring.position.set(seaX(R.spot), 0.09, seaZ(L.r)); start.W.ring.material.opacity = 0.55 + Math.sin(t * 4) * 0.2; }
-  card(on && R.state === 'line');
+  card(on && R.state === 'line', R);
 }
-/** The rival's spot on the line, for drawing it there before the gun. */
-export const rivalSpot = () => ({ c: RACE.RIVAL.SPOT, r: L.r, a: 0 });

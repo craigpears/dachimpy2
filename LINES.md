@@ -26,6 +26,15 @@ Beaten after the third wave, he leaves his cannon, rows in, stomps up the beach 
 
 - "We hear there's some secret treasure here, guarded by a fearsome enemy"
 
+### Racing you in the sloop race, Umami aboard, over his sloop: on the starting line, and over the finish line first or after
+
+- *start:*
+  - "Out o' me way! Umami, get foragin'! \*hic\*"
+- *won:*
+  - "Har! Vikings first! \*hic\*"
+- *lost:*
+  - "We'll be back! \*hic\*"
+
 ## You
 
 Your own pirate, dressed as you like from the wardrobe (or as any real pirate in it). You say little, and only at the den's short, cheesy moments: picking up the captain's map, and riding the crane up the cliff and down again, your own wedding, screaming at a vampire in Gravee's house, and sailing by Primates Rule, not ready yet, and coming into the smugglers' cove behind Port Decorum.
@@ -131,6 +140,10 @@ He doesn't speak (yet): his lines are what's said of him.
 - *Poling her along the lagoon to his bank, the first time:* "A capybara, shut in an old fish trap on the bank!"
 - *Off the foot of his Foraging board: his trap bursts open:* "He's free! Umami the capybara"
 - *He's clambered aboard onto her foredeck:* "Umami's aboard!"
+
+### In the sloop race, aboard Dalnoth's sloop: on the starter's card, after Dalnoth's name
+
+- "Umami aboard, to do his foraging"
 
 ## Mischievious
 
@@ -724,6 +737,16 @@ Loopy, a bit drunk, and off on twenty tangents at once, she can't get her lefts 
 - "You got out past the reef! And then the whirly ones got you. They always get you."
 - "So close! Did you see him? Was he still in his balaclava? He's up to something."
 
+### Racing you in the sloop race, over her sloop: on the starting line, and over the finish line first or after
+
+- *start:*
+  - "Ooh, a race! I'm going straight over the whirly bits."
+  - "Rodrigo says left. Rodrigo always says left."
+- *won:*
+  - "First! Right over the whirly bits, all sparklehhh!"
+- *lost:*
+  - "Did I take a few lefts? I think I took a few lefts."
+
 ## The penguin in the balaclava
 
 One of a colony of penguins on a floe out past Kikkit's whirlpools and their winds, beyond the reef: the bigger prize, only a Vegas carries you there. Exactly where she said, and in a balaclava, as she said, sneaking about the floe with a sack over his shoulder, up to something.
@@ -830,6 +853,16 @@ The sensible one, after Kikkit: she shows you plainly how a big Vegas is built, 
 - "I'm a Nap Specialist, officially. This is my awake bit."
 - "Never put a balloon in the wrong colour. It just sulks there."
 - "Every pop's a gust. Six in a row and you're gone."
+
+### Racing you in the sloop race, over her sloop: on the starting line, and over the finish line first or after
+
+- *start:*
+  - "Doubles. Pop, hop, pop, hop. Easy."
+  - "Shoot at me if you like. I'll be gone."
+- *won:*
+  - "Told you. It's just balloons."
+- *lost:*
+  - "Huh. Nap first, rematch after."
 
 ## Gravee
 
@@ -977,7 +1010,7 @@ For now there's nothing to do there: the island's sketched, to sail up to and lo
 
 ## The race's starter
 
-Whoever keeps the buoy off the sloop race's gate, out past Primates Rule: takes you in to the starting line, explains the race, counts you down, fires the gun, and calls the times at the finish line. Nameless for now, as the rival sloop is: a real pirate needs the user's pick.
+Whoever keeps the buoy off the sloop race's gate, out past Primates Rule: takes you in to the starting line, explains the race, counts you down, fires the gun, and calls the times at the finish line. Nameless for now: a real pirate needs the user's pick. (The rivals racing you are the den's own characters.)
 
 Explains the race's rules before the off (the long way, shortcuts that cost a puzzle, a few named as examples, the snakes, the shooting), never where a shortcut is or how it's done beyond that, and never the starlit door (RULES.md, "Hidden gems, never hinted").
 
@@ -1002,12 +1035,13 @@ Explains the race's rules before the off (the long way, shortcuts that cost a pu
   - "Two..."
   - "One..."
 - *The gun:* "Go!"
-- *When the other sloop's home:* "The other sloop's home: {time}"
+- *On the starter's card, on the line: who's racing you:* "Racing ye: {names}"
+- *When a rival's over the finish line:* "{name}'s over the line: {place}, {time}"
 - *When a snake has her: the left-hand trade wind, the tight water past the gun gap, the trade wind back up the course:*
   - *left:* "The trade wind's got ye! All the way back to the start"
   - *tight:* "One too many! The wind's sweeping ye back to the bend"
   - *mid:* "Caught in the trade wind! Back up to leg two wi' ye"
-- *Over the finish line before the other sloop:* "Over the line, and home first! {time}"
-- *Over it after:* "Over the line in {time}: {place}. Beaten to it, this time"
+- *Over the finish line before everyone else:* "Over the line, and home first! {time}"
+- *Over it after someone:* "Over the line in {time}: {place}. Beaten to it, this time"
 - *Your best time yet, kept in this browser:* "Yer best yet: {time}"
 - *Sailed back out through the gate mid-race:* "Out the gate? That race is off, then"

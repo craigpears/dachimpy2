@@ -29,6 +29,21 @@ export interface Lines {
 /** What the user said of them, word for word, and when. */
 export interface Quote { on: string; said: string }
 
+/** A character who races you in the sloop race (src/den-rivals.ts lines them up; src/race-sim.ts's bots
+    sail them): how they race, in plain words and as the simulation's names for it, and what they say. */
+export interface Racer {
+  /** How they race, in plain words. */
+  how: string;
+  /** Their favourite way round (a route of src/race-sim.ts's ROUTES, by name: 'whirls', 'doubles'...),
+      their racing style (STYLES: 'peaceful', 'opportunist', 'aggressive', 'cautious'), and how good they
+      are at the puzzles (a level better at their own route's: RACE.md §1, back yourself). */
+  route: string;
+  style: string;
+  skill: 'decent' | 'good' | 'great';
+  /** On the starting line before the gun; over the finish line first; over it after someone. */
+  says: { readonly start: readonly string[]; readonly won: readonly string[]; readonly lost: readonly string[] };
+}
+
 export interface Character {
   /** Their name, as the game has it. */
   name: string;

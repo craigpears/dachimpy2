@@ -88,3 +88,17 @@ describe('the Gunnery board on her deck, and the other boards', () => {
     expect(cantLoad(h)).toBe('lock');
   });
 });
+
+describe('a race\'s starting shots (11 Nov: "Maybe start with one or two guns to enable that gameplay?")', () => {
+  it('at the gun she\'s loaded up to two shots, one a side; more loaded already are kept, and none is lost', () => {
+    const b = new Broadside();
+    expect(b.stock(2)).toBe(2);
+    expect([b.shots('L'), b.shots('R')]).toEqual([1, 1]);
+    expect(b.fire('L')).toBe('fired');
+    // (one fired: the next race's gun loads her again, the fired gun wanting its swab left as it is)
+    expect(b.stock(2)).toBe(2);
+    const full = new Broadside();
+    for (let i = 0; i < 4; i++) full.board.guns[i].state = 'loaded';
+    expect(full.stock(2)).toBe(4);
+  });
+});

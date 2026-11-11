@@ -55,6 +55,19 @@ export class Broadside {
     return 'fired';
   }
 
+  /** Loaded up to `n` shots all told, if she has fewer: empty guns on the board loaded, a side at a time
+      (port first), so a race's starting shots (FIELD.SHOTS, src/den-racers.ts: the user, 11 Nov, "a gun or
+      two loaded") are one a side. A gun part loaded, fouled or wanting a swab is left as it is. How many
+      she has now. */
+  stock(n: number): number {
+    const sides: Side[] = ['L', 'R'];
+    for (let k = 0; this.shots('L') + this.shots('R') < n && k < 2 * this.board.guns.length; k++) {
+      const g = this.side(sides[k % 2]).find((x) => x.state === 'empty');
+      if (g) g.state = 'loaded';
+    }
+    return this.shots('L') + this.shots('R');
+  }
+
   tick(dt: number) { for (const k of ['L', 'R'] as Side[]) this.wait[k] = Math.max(0, this.wait[k] - dt); }
 }
 

@@ -29,7 +29,7 @@ function hop(h, n) { const sq = []; let p = h.pose; const DC = [0, 1, 0, -1], DR
 
 /** The long way, from a spot on the line to over the finish, every shortcut shut, hopping the trade wind
     back up the course with a Double (it can't be sailed round). */
-export function longWay(spot = RACE.RIVAL.SPOT, log = false) {
+export function longWay(spot = RACE.LONG_SPOT, log = false) {
   const s = shut(...WAYS), h = new Helm(s, spotPose(spot));
   const legs = [];
   let t = 0;
@@ -49,8 +49,8 @@ export function longWay(spot = RACE.RIVAL.SPOT, log = false) {
 
 if (process.argv[1].endsWith('race-measure.mjs')) {
   const sea = new Sea(9);
-  const L = longWay(RACE.RIVAL.SPOT, true);
-  console.log(`The long way from spot ${RACE.RIVAL.SPOT}: ${L.t.toFixed(1)} s, ends ${L.at.c},${L.at.r}`);
+  const L = longWay(RACE.LONG_SPOT, true);
+  console.log(`The long way from spot ${RACE.LONG_SPOT}: ${L.t.toFixed(1)} s, ends ${L.at.c},${L.at.r}`);
   // Each spot on the line: the seconds to the first bend (and to the gun gap's way in).
   const spots = [];
   for (let c = RC.LINE.c0; c <= RC.LINE.c1; c++) {

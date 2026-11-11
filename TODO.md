@@ -251,27 +251,10 @@ the site (`.assetsignore` skips `*.md`).
   outside; not yet tried by the user. Watch for: the markers on raiders outside cluttering the
   view while you carry a piece.
 
-- **The race's rivals: the den's own characters, each with a way of racing (11 Nov):** "maybe we just focus
-  on this for now, and Daquan ... whoever other characters we've got already in here can all be characters
-  that can drive sloops. And obviously we've got different strengths, like ... [Tzz] and [Kikkit] will be
-  the sailors ... maybe [Kikkit] goes greedy for the Vegases, [Tzz] goes another route ... Everyone's got
-  their own little profile and way they approach it." So the nameless rival becomes several, from the
-  pirates already in the den (Kikkit, Tzz, Dignity, Mischievious, Gravee, Dalnoth...; Daquan once he's
-  drawn, his portrait checked first), each a bot with a profile: which shortcuts they go for and how good
-  they are at each puzzle (Kikkit always for the Vegas at the whirlpools, Tzz steady Sailing another way, a
-  carpenter for the crane...), played as real moves where the puzzles have bots (tools/sail-bots.mjs,
-  row-bots, nav-bots), so they're the testers as well. Each looks as they do elsewhere (one look
-  everywhere), with a line or two on the way. Umami the capybara too, with a Foraging slant ("the umami, the capybara ...
-  obviously you will have maybe like the foraging slant").
-- **Shooting other racers (11 Nov):** "I definitely want to be able to shoot other racers. That's
-  absolutely part of this." So her guns are for the other sloops as well as the gun gap: catch a racer
-  sitting still building a Vegas, or jostling for the best line through the whirlpools, and hole them
-  (dazed and patching, never knocked out), and they can do the same to you. Each racer starts with a gun
-  or two loaded, so there's something to fire from the off (the user: "Maybe start with one or two guns
-  to enable that gameplay?"). Still to settle, with the balance simulation below: whether the obstacles
-  want the same shots ("use those instead of vs other players as a kind of peaceful racer bonus"), or
-  simply need more hits than a starting gun or two. The rival bots fire too, each by its profile. Goes
-  with the 2–4 racers.
+- **The race's rivals, what's left (11 Nov; the rivals and shooting at sea are built: RACE.md §6):** Daquan
+  in Dalnoth's place once his portrait's checked and he's drawn; and the rivals' puzzles played as real
+  moves where the puzzles have bots (tools/sail-bots.mjs, row-bots, nav-bots), so they're the testers as
+  well (today they take the simulation's drawn times).
 - **Balancing the race: a headless simulation, and 2–4 racers (11 Nov):** after more goes, the routes
   don't feel even: "the bilging one is relatively probably quick to get through, same with the carpentry.
   I mean, I definitely noticed just loading the guns and gunning takes a long time ... Gunning felt very

@@ -24,9 +24,13 @@
      the crane's notch, or the notch in front of the barrier of driftwood, nobody's broadside reaches her. Everywhere else on the course she's in the
      open: stopped there, she's a sitting duck for whoever comes by. */
 
-import { LAY, SAIL, broadside, type Pose, type Sea, type Side } from './den-sail.js';
+import { LAY, SAIL, Sea, broadside, type Pose, type Side } from './den-sail.js';
 
 const RC = LAY.RACE;
+let sea: Sea | null = null;
+/** The den's sea, the race's course on it (one, made once): what stops a broadside, for any field that
+    wants one (the den's race, the simulation). */
+export const courseSea = (): Sea => (sea ??= new Sea(9));
 const key = (c: number, r: number) => `${c},${r}`;
 
 /** Which stretch of the course a square's on (0 the first leg, 5 the run home), or -1. (src/den-race.ts
@@ -224,12 +228,17 @@ export class Field {
   aim(i: number, side: Side): { cells: [number, number][]; hit: number } {
     const r = this.racers[i], at = { c: r.pose.c, r: r.pose.r, a: r.pose.d };
     const cells = this.sea ? broadside(this.sea, at, side).cells : straight(at, side);
+    return { cells, hit: this.firstOn(cells, i) };
+  }
+  /** The first racer but `not` on one of these squares (a broadside's, in order) who can be hit, before
+      any rock or land; -1 nobody. */
+  firstOn(cells: [number, number][], not = -1): number {
     for (const [c, y] of cells) {
       if (this.sea?.isRock(c, y)) break;
-      const t = this.racers.find((o) => o.i !== i && hittable(o) && Math.round(o.pose.c) === c && Math.round(o.pose.r) === y);
-      if (t) return { cells, hit: t.i };
+      const t = this.racers.find((o) => o.i !== not && hittable(o) && Math.round(o.pose.c) === c && Math.round(o.pose.r) === y);
+      if (t) return t.i;
     }
-    return { cells, hit: -1 };
+    return -1;
   }
   /** Racer `i` fires out of `side`: a shot spent (none, no shot: null), and whoever it hits is holed,
       dazed till she's patched. `lands`: false when it's fired too soon or too late as she goes by (a

@@ -33,7 +33,7 @@ import { tzzWorld, tzzTick, tzzHail, tzzPrompt, tzzReset } from './balloon-isle.
 import { empireWorld, empireTick, empirePrompt, empireReset } from './imperial-isle.js';
 import { primatesTick, primatesReset } from './moored.js';
 import { smugglersWorld, smugglersTick, smugglersPrompt, smugglersReset } from './smugglers.js';
-import { raceWorld, raceTick, raceKey, racePrompt, raceShot, raceHolds, raceReset, raceHover, raceClick } from './race.js';
+import { raceWorld, raceTick, raceKey, racePrompt, raceShot, raceTarget, raceHitRival, raceHolds, raceReset, raceHover, raceClick } from './race.js';
 
 // The old sloop's at anchor in the cove from the moment the siege is over, while their ship makes
 // sail in the background (the user, 9 Nov: "I'm sat here quite a while waiting for his sloop to sail
@@ -107,7 +107,9 @@ function sailFire(side) {
   const { cells, hit } = broadside(sail.sea, sail.helm.now(), side), gun = sail.g.userData.guns[side];
   sail.g.updateMatrixWorld(true);
   const from = gun.localToWorld(V3(0, 0.3, -0.85)), end = cells[cells.length - 1];
-  const to = V3(seaX(end[0]), hit ? 1 : 0.05, seaZ(end[1]));
+  // (a rival in the race on the squares it flies over: it comes down on her sloop: race.js)
+  const rival = raceTarget(cells);
+  const to = rival?.at ?? V3(seaX(end[0]), hit ? 1 : 0.05, seaZ(end[1]));
   burst(from, '#ffcf6a', 12, 3);
   burst(from, '#cfc6b8', 8, 1.5);
   worldLets.shake = Math.max(shake, 0.15);
@@ -119,6 +121,7 @@ function sailFire(side) {
     ball.position.y += Math.sin(u * Math.PI) * (0.8 + d * 0.08);
   }, () => {
     scene.remove(ball);
+    if (rival) { raceHitRival(rival.i); return; }
     if (!hit) { burst(to, '#e6f3f6', 18, 3.5); burst(to, '#9cc8d4', 10, 2.5); return; }
     burst(to, '#ffb85a', 14, 4);
     burst(to, '#6b5c50', 18, 4);

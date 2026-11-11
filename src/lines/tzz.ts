@@ -10,7 +10,7 @@
    they're balloons and she's blowing them up": each of Sailing's pieces a balloon she blows up. Breezy,
    quick, a bit smug about how easy it is. Each line's a bubble over her head: kept short, on a phone
    too. */
-import type { Character } from './character.js';
+import type { Character, Racer } from './character.js';
 
 /** Her greeting, starting her lesson: if you've not met Kikkit, or (`heard`) you've heard her out. */
 export const GREET = {
@@ -111,6 +111,20 @@ export const AFTER = [
   'Every pop\'s a gust. Six in a row and you\'re gone.',
 ] as const;
 
+/** Racing you in the sloop race (src/den-rivals.ts): steady Sailing her own way (the user, 11 Nov: "[Tzz] goes
+    another route"), hopping the Double's and the Triple's gaps on Doubles and Triples she builds on the move,
+    and never firing a shot: it's just balloons. */
+export const RACER: Racer = {
+  how: 'Steady: Sailing on the move all the way, hopping the small gaps with Doubles and Triples timed to break '
+    + 'as she\'s lined up. Never stops in the open, never fires.',
+  route: 'doubles', style: 'peaceful', skill: 'decent',
+  says: {
+    start: ['Doubles. Pop, hop, pop, hop. Easy.', 'Shoot at me if you like. I\'ll be gone.'],
+    won: ['Told you. It\'s just balloons.'],
+    lost: ['Huh. Nap first, rematch after.'],
+  },
+};
+
 export const CHARACTER: Character = {
   name: 'Tzz',
   who: 'On a little island of her own a hop from Kikkit\'s, on the den\'s side of it, with a copper still behind '
@@ -142,5 +156,6 @@ export const CHARACTER: Character = {
     { when: 'Her lesson\'s first act: she blows up a Double\'s balloons onto her board, and you drop the pair that pops it', says: DOUBLE, each: LESSON_EACH },
     { when: 'Her lesson\'s last act: a Bingo, that Double with another on top, the last pair yours', says: BINGO, each: LESSON_EACH },
     { when: 'After her lesson, while you\'re within earshot of her island: round and round', says: AFTER },
+    { when: 'Racing you in the sloop race, over her sloop: on the starting line, and over the finish line first or after', says: RACER.says },
   ],
 };

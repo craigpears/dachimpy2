@@ -10,6 +10,10 @@ export const OF_HIM = {
   aboard: 'Umami\'s aboard!',
 } as const;
 
+/** In the sloop race (src/den-rivals.ts): aboard Dalnoth's sloop, sat up on her foredeck, doing his
+    foraging for him at the barrier of driftwood. Said on the starter's card, of who's racing. */
+export const RACING = 'Umami aboard, to do his foraging';
+
 export const CHARACTER: Character = {
   name: 'Umami',
   who: 'A capybara, the den\'s first rescued friend (a friend\'s side quest: the friend asked for the name). '
@@ -31,5 +35,6 @@ export const CHARACTER: Character = {
         aboard: 'He\'s clambered aboard onto her foredeck',
       },
     },
+    { when: 'In the sloop race, aboard Dalnoth\'s sloop: on the starter\'s card, after Dalnoth\'s name', says: [RACING] },
   ],
 };

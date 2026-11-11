@@ -1,7 +1,7 @@
 /* Pirate Den: the sloop race. TypeScript, compiled to js/den-race.js; tested in tests/den-race.test.ts.
-   js/den/race.js draws it (the course's land, its buoy and gate, the guns, the whirlpools, the crane, the
-   rival) and plays it at sea; its squares are LAY.RACE in src/den-sail.ts (with every other place's, as
-   the sea lays them), what's said src/lines/race.ts.
+   js/den/race.js draws it (the course's land, its buoy and gate, the guns, the whirlpools, the crane; the
+   rivals, js/den/race-field.js) and plays it at sea; its squares are LAY.RACE in src/den-sail.ts (with
+   every other place's, as the sea lays them), what's said src/lines/race.ts.
 
    The user (11 Nov): "maybe we've got enough to start some sloop races ... a winding, snakes and ladders,
    zigzagging kind of course, just with a lot of shortcuts, and each shortcut is a different puzzle, and
@@ -47,16 +47,20 @@
    down the course they are, the left-hand trade wind most: legs 2 and 4 end hard by it, the run home runs
    beside it, and it carries her all the way back to the start. Home is a line across the run home
    between two markers (atFinish).
-   The rival (nameless for now: the den's own characters race next) sails the long way at a set pace;
-   your best time's kept in this browser. The race keeps a field of racers (src/den-racers.ts: two to
-   four on one course, first come first served, shooting each other): you, and the rival as a bot racer.
-   The race simulated with bots of every way round is src/race-sim.ts (RACE.md §8). */
+   Your best time's kept in this browser. The race keeps a field of racers (src/den-racers.ts: two to
+   four on one course, first come first served, shooting each other): you, and up to three rivals, the
+   den's own characters (src/den-rivals.ts, how many picked on the line), each sailed by the
+   simulation's bots (src/race-sim.ts, simDrive, handed in as the Race's `drive`: this file can't import
+   it, as it imports this) on her favourite route in her own style. They fire on you as the field's rules
+   say, and you on them (target, shoot). The race simulated with bots of every way round is
+   src/race-sim.ts (RACE.md §8). */
 
 import { LAY, SAIL, type Helm, type Pose, type Sea } from './den-sail.js';
 import { CHECK } from './den-checkpoint.js';
 import { Turret, type TurretEvent } from './den-turret.js';
 import { Crane } from './den-crane.js';
-import { Field, stretchAt, atFinish, type FieldEvent } from './den-racers.js';
+import { Field, stretchAt, atFinish, courseSea, type FieldEvent } from './den-racers.js';
+import { RIVALS, type Rival } from './den-rivals.js';
 import type { Deal } from './foraging.js';
 
 export { stretchAt, atFinish };
@@ -79,10 +83,12 @@ export const RACE = {
       squares rowed by mirror strokes; a Vegas; a lock pumped up by Bilge and another drained; three
       frames of Carpentry; a barrier cleared by Foraging; and the gaps a Double and a Triple hop. */
   DECENT: { guns: 14, headwind: 25, whirls: 49, locks: 26, crane: 38, forage: 15, double: 8, triple: 9 },
-  /** The rival: seconds to sail the whole course the long way, from the gun; and its spot on the
-      starting line. Quicker than you can sail it the long way (they know the water), so you beat them
-      on the shortcuts you're good at. */
-  RIVAL: { SECS: 205, SPOT: 13 },
+  /** The long way's own spot on the starting line: where the long way's route starts (LONG_ROUTE), and
+      what the simulation measures every other spot against (src/race-sim.ts, SIM.SPOTS). */
+  LONG_SPOT: 13,
+  /** Seconds sat on one square before you count as sitting still (stopped to puzzle): a sitting duck in
+      the open for a rival going by (src/den-racers.ts). */
+  STILL: 1.5,
   /** Where your best time's kept, in this browser. */
   STORE: 'den-race-best',
   /** The gun gap's guns in a race of several (RACE.md §6; src/race-sim.ts tries both): what quietens
@@ -137,7 +143,11 @@ export type RaceEvent =
   | { kind: 'go' }
   /** On to the next stretch (1 the second leg ... 5 the run home). */
   | { kind: 'leg'; n: number }
-  | { kind: 'rival' }
+  /** A rival's over the finish line: who (her number in the field), her time and place. */
+  | { kind: 'home'; racer: number; secs: number; place: number }
+  /** A rival's fired a broadside (`by`, her number): the squares it went over, and who it hit (-1 nobody,
+      0 you: you're holed, to patch). */
+  | { kind: 'shot'; by: number; cells: [number, number][]; hit: number }
   /** A snake has her: swept back. */
   | { kind: 'swept'; snake: Snake }
   /** Over the finish line: her time and place. */
@@ -145,10 +155,30 @@ export type RaceEvent =
   /** Back out through the gate once she'd been through it: the race is off. */
   | { kind: 'quit' };
 
-/** The race you sail in the den: on the line (picking her spot), counting down, under way (the clock), or
-    done; how far round she's got, in order. Its field (src/den-racers.ts) is two racers: you (racer 0,
-    moved by the helm: `at` each tick) and the rival (racer 1, a bot racer the long way round at its set
-    pace: rivalAt). */
+/** The rivals' sailing, handed to the Race (src/race-sim.ts, simDrive: the simulation's bots, the race's
+    field theirs to move): each tick their moves, shots and finishes; how far round the long way any racer
+    is (seconds of it, for places: you as well); a rival hit by you; and how high she's lifted (by the
+    crane: 0 on the water, 1 at the top of its swing). */
+export interface Driver {
+  step(dt: number): FieldEvent[];
+  progress(i: number): number;
+  hit(i: number, by: number): boolean;
+  lift(i: number): number;
+}
+export type Drive = (field: Field, rivals: readonly Rival[]) => Driver;
+
+/** You, each tick: your square (fractional as she sails), the way you face, and what holds you if
+    anything (holed: 'dazed', patching; 'carried', on the crane's hook or a gust, out of reach). */
+export interface You { c: number; r: number; d?: number; held?: 'dazed' | 'carried' | null }
+
+/** Where a racer stands now: her number, her name, her place (1 first), her time once she's home. */
+export interface Standing { i: number; name: string; place: number; time: number | null }
+
+/** The race you sail in the den: on the line (picking her spot, and how many rivals), counting down,
+    under way (the clock), or done; how far round she's got, in order. Its field (src/den-racers.ts) is you
+    (racer 0, moved by the helm: `at` each tick) and your rivals (src/den-rivals.ts, the first `rivals` of
+    them), sailed from the gun by `drive` (none: they sit on their spots, as some tests have them). Once
+    you're home, the rest race on till they're home too. */
 export class Race {
   state: 'off' | 'line' | 'count' | 'on' | 'done' = 'off';
   /** Counting down, the seconds left; under way, the clock; done, her time. */
@@ -158,37 +188,66 @@ export class Race {
   entered = false;
   /** Her spot on the starting line (its column). */
   spot: number = FIRST_SPOT;
-  /** The racers: you, then the rival. */
-  field = new Field(['you', 'rival'], null, RACE.COUNT);
+  /** How many rivals race you (picked on the line). */
+  rivals: number = RIVALS.length;
+  /** The racers: you, then your rivals. */
+  field: Field;
+  /** The rivals' sailing, from the gun. */
+  run: Driver | null = null;
   /** The snake that has her now, if one does (said once a sweep). */
   private snake: Snake | null = null;
-  constructor(public best: number | null = null) {}
+  /** How long she's sat on one square, and which. */
+  private stillT = 0;
+  private sq = '';
+  constructor(public best: number | null = null, public drive: Drive | null = null) { this.field = this.lineUp(); }
+
+  /** Your rivals this race, in their order. */
+  racing(): readonly Rival[] { return RIVALS.slice(0, this.rivals); }
+  /** A fresh field: you, and your rivals on their spots. */
+  private lineUp(): Field {
+    const f = new Field(['you', ...this.racing().map((r) => r.name)], courseSea(), RACE.COUNT);
+    this.racing().forEach((r, k) => { f.racers[k + 1].pose = spotPose(r.spot); });
+    return f;
+  }
+  /** A rival's spot (one racing this race). */
+  taken(c: number): boolean { return this.racing().some((r) => r.spot === c); }
 
   /** The furthest stretch she's reached in order (0 the first leg): every one counts, a shortcut's or not. */
   get leg(): number { return this.field.racers[0].leg; }
-  /** The rival's home. */
-  get rivalHome(): boolean { return this.field.racers[1].state === 'finished'; }
 
   /** In to the starting line from the buoy, to pick her spot. Not while one's on. */
   take(): boolean {
     if (this.state === 'count' || this.state === 'on') return false;
-    Object.assign(this, { state: 'line', spot: FIRST_SPOT, won: false, entered: false });
+    Object.assign(this, { state: 'line', spot: FIRST_SPOT, won: false, entered: false, run: null });
+    this.field = this.lineUp();
+    if (this.taken(this.spot)) this.shift(1);
     return true;
   }
-  /** Along the line a square, left (-1) or right (+1), or to spot `to`: never onto the rival's (she
-      goes past it). Where she is now. */
+  /** On the line: how many rivals race you, one to all of them (RIVALS). Your spot moves along if one of
+      theirs is it now. How many now. */
+  setRivals(n: number): number {
+    if (this.state !== 'line') return this.rivals;
+    this.rivals = Math.max(1, Math.min(RIVALS.length, Math.round(n)));
+    this.field = this.lineUp();
+    if (this.taken(this.spot)) this.shift(this.spot < RC.LINE.c1 ? 1 : -1);
+    return this.rivals;
+  }
+  /** Along the line a square, left (-1) or right (+1), or to spot `to`: never onto a rival's (she goes past
+      it). Where she is now. */
   shift(by: number, to: number | null = null): number {
     if (this.state !== 'line') return this.spot;
+    const dir = (to ?? this.spot + by) >= this.spot ? 1 : -1;
     let c = to ?? this.spot + by;
-    if (c === RACE.RIVAL.SPOT) c += (to ?? c) >= this.spot ? 1 : -1;
-    if (c >= RC.LINE.c0 && c <= RC.LINE.c1 && c !== RACE.RIVAL.SPOT) this.spot = c;
+    while (this.taken(c)) c += dir;
+    if (c >= RC.LINE.c0 && c <= RC.LINE.c1) this.spot = c;
     return this.spot;
   }
   /** The count, from the line (or straight from the buoy). Not while one's on. */
   start(): boolean {
     if (this.state === 'count' || this.state === 'on') return false;
-    Object.assign(this, { state: 'count', t: RACE.COUNT, won: false, entered: false });
+    Object.assign(this, { state: 'count', t: RACE.COUNT, won: false, entered: false, run: null, stillT: 0, sq: '' });
     this.snake = null;
+    this.field = this.lineUp();
     this.field.start();
     return true;
   }
@@ -199,47 +258,77 @@ export class Race {
     return this.field.under(0, from, to).flatMap((e) => (e.kind === 'leg' ? [{ kind: 'leg' as const, n: e.n }] : []));
   }
   /** Given up (sailed back out through the gate, say). */
-  quit() { this.state = 'off'; }
+  quit() { this.state = 'off'; this.run = null; }
   /** The clock under way: from the gun, 0 till then. */
   clock(): number { return this.state === 'on' || this.state === 'done' ? this.t : 0; }
 
-  /** Each tick: `at`, her square after it. */
-  tick(dt: number, at: { c: number; r: number }): RaceEvent[] {
+  /** Each tick: `at`, where you are after it. Once you're home, the rivals race on. */
+  tick(dt: number, at: You): RaceEvent[] {
     const out: RaceEvent[] = [];
     if (this.state === 'count') {
       for (const e of this.field.tick(dt)) if (e.kind === 'count' || e.kind === 'go') out.push(e);
       this.t = this.field.t;
-      if (this.field.state === 'on') this.state = 'on';
+      if (this.field.state === 'on') { this.state = 'on'; this.run = this.drive?.(this.field, this.racing()) ?? null; }
       return out;
     }
-    if (this.state !== 'on') return out;
+    const rest = this.state === 'done' && this.field.state === 'on';
+    if (this.state !== 'on' && !rest) return out;
     this.field.tick(dt);
-    this.t = this.field.t;
-    if (onCourse(at.c, at.r)) this.entered = true;
-    else if (this.entered) { this.state = 'off'; out.push({ kind: 'quit' }); return out; }
-    // (the rival: home at its set time, whatever the clock's steps)
-    const rival = this.field.racers[1];
-    if (rival.state !== 'finished') {
-      const p = rivalAt(this.t);
-      const ev: FieldEvent[] = this.t >= RACE.RIVAL.SECS ? this.field.home(1, RACE.RIVAL.SECS) : this.field.move(1, { c: p.c, r: p.r, d: p.a });
-      if (ev.some((e) => e.kind === 'finish')) out.push({ kind: 'rival' });
-    }
-    // (a snake: said once each time one has her)
-    const sn = snakeAt(at.c, at.r);
-    if (sn && sn !== this.snake) out.push({ kind: 'swept', snake: sn });
-    this.snake = sn;
-    for (const e of this.field.move(0, { c: at.c, r: at.r, d: 0 })) {
-      if (e.kind === 'leg') out.push({ kind: 'leg', n: e.n });
-      if (e.kind === 'finish') {
-        this.state = 'done';
-        this.won = e.place === 1;
-        const best = this.best === null || this.t < this.best;
-        if (best) this.best = this.t;
-        out.push({ kind: 'finish', secs: this.t, best, won: this.won, place: e.place });
+    if (this.state === 'on') {
+      this.t = this.field.t;
+      if (onCourse(at.c, at.r)) this.entered = true;
+      else if (this.entered) { this.quit(); out.push({ kind: 'quit' }); return out; }
+      // (a snake: said once each time one has her)
+      const sn = snakeAt(at.c, at.r);
+      if (sn && sn !== this.snake) out.push({ kind: 'swept', snake: sn });
+      this.snake = sn;
+      for (const e of this.field.move(0, { c: at.c, r: at.r, d: at.d ?? 0 })) {
+        if (e.kind === 'leg') out.push({ kind: 'leg', n: e.n });
+        if (e.kind === 'finish') {
+          this.state = 'done';
+          this.won = e.place === 1;
+          const best = this.best === null || this.t < this.best;
+          if (best) this.best = this.t;
+          out.push({ kind: 'finish', secs: this.t, best, won: this.won, place: e.place });
+        }
       }
+      // (what she's doing, for the rivals' guns: sat on one square a while, she's stopped to puzzle)
+      const k = `${Math.round(at.c)},${Math.round(at.r)}`;
+      this.stillT = k === this.sq ? this.stillT + dt : 0;
+      this.sq = k;
+      const me = this.field.racers[0];
+      if (me.state !== 'finished') me.state = at.held === 'dazed' ? 'dazed' : at.held === 'carried' ? 'carried' : this.stillT >= RACE.STILL ? 'puzzling' : 'sailing';
+    }
+    // The rivals: their moves, their broadsides (at you too), home.
+    for (const e of this.run?.step(dt) ?? []) {
+      if (e.kind === 'shot') out.push({ kind: 'shot', by: e.racer, cells: e.cells, hit: e.hit });
+      if (e.kind === 'finish' && e.racer > 0) out.push({ kind: 'home', racer: e.racer, secs: e.secs, place: e.place });
     }
     return out;
   }
+
+  /** Who a broadside of yours over `cells` (in order, as it flies) would hit: the first rival on one who
+      can be hit, before any rock or land; -1 nobody. */
+  target(cells: [number, number][]): number { return this.state === 'on' ? this.field.firstOn(cells, 0) : -1; }
+  /** Your shot's come down on rival `i`: she's holed, dazed till she's patched (not if she can't be hit
+      now). Whether it holed her. */
+  shoot(i: number): boolean {
+    if (this.state !== 'on' || i <= 0) return false;
+    return this.run ? this.run.hit(i, 0) : this.field.hit(i, 0);
+  }
+  /** Where everyone stands: those home by their times, then the rest by how far round the long way
+      they've got (the rivals' sailing says; before the gun, in the field's order). */
+  standings(): Standing[] {
+    const F = this.field.racers, far = (i: number) => this.run?.progress(i) ?? -i;
+    const order = F.map((r) => r.i).sort((a, b) => {
+      const ta = F[a].time, tb = F[b].time;
+      if (ta !== null || tb !== null) return ta === null ? 1 : tb === null ? -1 : ta - tb;
+      return far(b) - far(a);
+    });
+    return order.map((i, k) => ({ i, name: F[i].name, place: k + 1, time: F[i].time }));
+  }
+  /** Your place now (1 first). */
+  place(): number { return this.standings().findIndex((s) => s.i === 0) + 1; }
 }
 
 /** A time as the clock shows it: 3:07.4. */
@@ -253,15 +342,14 @@ export function cleanBest(o: unknown): number | null {
   return typeof n === 'number' && Number.isFinite(n) && n > 0 && n < 3600 ? n : null;
 }
 
-/* The rival: the long way round, at a set pace, from its spot on the line. Its route as squares,
-   straight runs between them, down through the start's field and along the middle of each stretch
-   (the run home's one row), round every bend, to the finish line, at a steady pace that brings it home
-   in RACE.RIVAL.SECS. */
+/* The long way round, as squares (the simulation's bots sail it: src/race-sim.ts), from the long way's own
+   spot on the line (RACE.LONG_SPOT): straight runs between them, down through the start's field and along
+   the middle of each stretch (the run home's one row), round every bend, to the finish line. */
 const S = RC.STRETCHES;
 /** The row the long way runs along a stretch: the middle of its two, or the run home's one. */
 export const routeRow = (i: number): number => (i === S.length - 1 ? S[i].r : S[i].r + 0.5);
-export const RIVAL_ROUTE: [number, number][] = (() => {
-  const out: [number, number][] = [[RACE.RIVAL.SPOT, RC.LINE.r], [RACE.RIVAL.SPOT, routeRow(0)]];
+export const LONG_ROUTE: [number, number][] = (() => {
+  const out: [number, number][] = [[RACE.LONG_SPOT, RC.LINE.r], [RACE.LONG_SPOT, routeRow(0)]];
   S.forEach((s, i) => {
     const end = s.d === 1 ? SAIL.COLS - 1.5 : i === S.length - 1 ? RC.FINISH[0] : 2.5;
     out.push([end, routeRow(i)]);
@@ -269,22 +357,6 @@ export const RIVAL_ROUTE: [number, number][] = (() => {
   });
   return out;
 })();
-const seg = RIVAL_ROUTE.slice(1).map((b, i) => { const a = RIVAL_ROUTE[i]; return { a, b, len: Math.abs(b[0] - a[0]) + Math.abs(b[1] - a[1]) }; });
-const pace = RACE.RIVAL.SECS / seg.reduce((n, x) => n + x.len, 0);
-/** Where the rival is `t` seconds from the gun: across, out, and the way it faces (quarter turns). */
-export function rivalAt(t: number): { c: number; r: number; a: number; home: boolean } {
-  let left = Math.max(0, t);
-  for (let i = 0; i < seg.length; i++) {
-    const { a, b, len } = seg[i], secs = len * pace;
-    const dc = Math.sign(b[0] - a[0]), dr = Math.sign(b[1] - a[1]), face = dr > 0 ? 0 : dc > 0 ? 1 : dr < 0 ? 2 : 3;
-    if (left < secs || i === seg.length - 1) {
-      const u = Math.min(1, left / secs);
-      return { c: a[0] + (b[0] - a[0]) * u, r: a[1] + (b[1] - a[1]) * u, a: face, home: left >= secs };
-    }
-    left -= secs;
-  }
-  return { c: RC.FINISH[0], r: RC.FINISH[1], a: 3, home: true };
-}
 
 /* [A] The gun gap's guns: a destructible turret either side (src/den-turret.ts), set up with the imperial
    checkpoint's numbers (src/den-checkpoint.ts, CHECK), trained on the way in, the gap and the way out.

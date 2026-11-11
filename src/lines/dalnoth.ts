@@ -1,12 +1,27 @@
 /* Pirate Den: Dalnoth's lines (src/lines/character.ts says how these files go). Said in the captain's
    map cutscene (js/den/map.js); his scrawl is on the map itself (src/den-map.ts, drawn by map.js). */
-import type { Character } from './character.js';
+import type { Character, Racer } from './character.js';
 
 /** Beaten, shaking his fist at your wall from the beach before he runs for his boat. */
 export const PARTING = 'We\'ll be back! *hic*';
 
 /** What he scrawled across his map, the one that falls out of his coat. */
 export const RUMOUR = "We hear there's some secret treasure here, guarded by a fearsome enemy";
+
+/** Racing you in the sloop race (src/den-rivals.ts), standing in for Daquan till Daquan's drawn (his
+    portrait's still to check): Umami the capybara aboard, who does his foraging for him at the barrier of
+    driftwood (the user, 11 Nov: "obviously you will have maybe like the foraging slant"), while he loads
+    his guns and fires on anyone he finds sitting still. */
+export const RACER: Racer = {
+  how: 'Through the barrier of driftwood, Umami clearing it by Foraging in the sheltered notch; on the way he '
+    + 'fires on anyone sitting still, and loads more by Gunnery once he\'s fired his.',
+  route: 'forage', style: 'aggressive', skill: 'decent',
+  says: {
+    start: ['Out o\' me way! Umami, get foragin\'! *hic*'],
+    won: ['Har! Vikings first! *hic*'],
+    lost: [PARTING],
+  },
+};
 
 export const CHARACTER: Character = {
   name: 'Dalnoth',
@@ -26,5 +41,6 @@ export const CHARACTER: Character = {
   lines: [
     { when: 'The siege beaten: on the beach, shaking his fist at your wall (the captain\'s map cutscene)', says: [PARTING] },
     { when: 'Scrawled across his map', says: [RUMOUR] },
+    { when: 'Racing you in the sloop race, Umami aboard, over his sloop: on the starting line, and over the finish line first or after', says: RACER.says },
   ],
 };

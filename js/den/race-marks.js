@@ -75,8 +75,17 @@ export function marksWorld() {
   marks.banner = finish();
 }
 
-/** The moment she crosses the line: a burst of colour over it, and a card with her time and place. */
-export function crossed(time, place) {
+const nth = (n) => (n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`);
+/** The card: her time and place, and everyone's (`rows`: { place, name, time, you }, time a clock's text or
+    null still racing), redrawn as the rest come home. */
+function cardHtml(time, place, rows) {
+  const row = (x) => `<tr style="${x.you ? 'color:#ffd54a' : ''}"><td style="padding:1px 10px 1px 0;text-align:right">${nth(x.place)}</td><td style="padding:1px 14px 1px 0;text-align:left">${x.name}</td><td style="text-align:right;font-variant-numeric:tabular-nums">${x.time ?? '<i style="opacity:.6">racing...</i>'}</td></tr>`;
+  const table = rows.length > 1 ? `<table style="margin:10px auto 0;font:600 17px/1.35 system-ui,sans-serif;border-collapse:collapse">${rows.map(row).join('')}</table>` : '';
+  return `<div style="font-size:15px;letter-spacing:4px;color:#e8b52a">OVER THE LINE</div><div>${time}</div><div style="font-size:22px">${nth(place)}${place === 1 ? ' · home first!' : ''}</div>${table}`;
+}
+/** The moment she crosses the line: a burst of colour over it, and a card with her time and place, and
+    everyone's. */
+export function crossed(time, place, rows = []) {
   const x = (seaX(RC.FINISH[0]) + seaX(RC.FINISH[0] + 1)) / 2, z = seaZ(RC.FINISH[1]);
   for (const col of ['#ffd54a', '#c8372a', '#f4f1e8', '#5aa0e0']) burst(V3(x, 6, z), col, 26, 5);
   if (!marks.card) {
@@ -84,10 +93,17 @@ export function crossed(time, place) {
     Object.assign(el.style, { position: 'fixed', top: '28%', left: '50%', transform: 'translate(-50%, -50%)', padding: '18px 34px', borderRadius: '12px', background: 'rgba(20,14,9,.86)', color: '#f4e9cf', font: '700 30px/1.25 Georgia, serif', textAlign: 'center', zIndex: 25, pointerEvents: 'none', display: 'none', border: '3px solid #e8b52a', boxShadow: '0 8px 30px rgba(0,0,0,.45)' });
     document.body.appendChild(el);
   }
-  const nth = place === 1 ? '1st' : place === 2 ? '2nd' : place === 3 ? '3rd' : `${place}th`;
-  marks.card.innerHTML = `<div style="font-size:15px;letter-spacing:4px;color:#e8b52a">OVER THE LINE</div><div>${time}</div><div style="font-size:22px">${nth}${place === 1 ? ' · home first!' : ''}</div>`;
+  marks.mine = { time, place };
+  marks.card.innerHTML = cardHtml(time, place, rows);
   marks.card.style.display = 'block';
-  marks.cardT = 5;
+  marks.cardT = rows.length > 1 ? 8 : 5;
+}
+/** Everyone's places again, as they stand (one more home): redrawn on the card if it's up, or it's shown
+    again a while (`again`: all home now). */
+export function placings(rows, again = false) {
+  if (!marks.card || !marks.mine) return;
+  marks.card.innerHTML = cardHtml(marks.mine.time, marks.mine.place, rows);
+  if (again) { marks.card.style.display = 'block'; marks.cardT = Math.max(marks.cardT, 6); }
 }
 
 /** Each tick: the next buoy lit (`next`, 1 to 5; anything else none), the banner flapping, the card. */
