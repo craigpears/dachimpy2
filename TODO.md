@@ -166,6 +166,10 @@ the site (`.assetsignore` skips `*.md`).
     the room, there's nothing really pushing you in that direction." Gravee leads you over to it
     as her tour's last stop and eggs you on to peek, and the coffin catches your eye from across
     the room (its lid rattling now and then, the bat circling over it), with no arrows.
+  - **You can't see Gravee for her hat:** "I love her hat, but you really can't see her at all.
+    I don't know if there's anything we can do about that." The white Berserker pelt hides her
+    face. Sit it as Puzzle Pirates' does, the bear's head up on top, its jaw over her brow, so her
+    face shows (fixed in the pelt itself, so it's right everywhere it's worn).
   - **The Count's watching eyes, a piece of their own:** "The vampire portrait that's following
     you definitely needs to be a normal thing." Any portrait in any scene can have eyes that follow
     you (the Count's, a pirate's), a shared piece, not code in her house. The bat's flight round
