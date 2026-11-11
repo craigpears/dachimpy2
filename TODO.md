@@ -285,6 +285,12 @@ the site (`.assetsignore` skips `*.md`).
 - **The raiders are Vikings (11 Nov):** "If we're depicting Dalnoth now as the Viking, obviously the little raiders
   need to be Vikings as well." Dress them from the wardrobe (Viking helmets, beards, battle axes: YPPedia
   says Vikings may fight with a battle axe) and call them Vikings where the den names them.
+- **Tzz's lesson is awkward to start, and the sloop blocks it (11 Nov, first play):** "to actually get
+  the [lesson] to trigger was awkward. So you've got to go straight in front, and then the [ship] blocks the
+  view." It should start from anywhere close by her island, and the sloop mustn't stand between you and her
+  and her board.
+- **Tzz still says R for Sailing (11 Nov, first play):** "it still says r for sailing which seems odd." Her
+  lesson shouldn't end on a key to press.
 
 ## Spotted along the way (not asked for)
 
