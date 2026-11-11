@@ -129,19 +129,6 @@ the site (`.assetsignore` skips `*.md`).
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
 
-- **Gravee's house, the first of a housing district (11 Nov):** "you have like the areas of
-  houses and you have the enter a house stuff and you can choose whose house to go into. And maybe
-  she's just one of them ... she can show you ... around her house. And the vampires and do the
-  portrait thing. Maybe we don't go as far as a vampire game ... the taking a portrait and a
-  snapshot, because that's fun ... a nice way of adding other friends in later." So: a housing
-  district as in old Puzzle Pirates (YPPedia's housing checked first), where you pick whose house
-  to enter from a list; each house its own little island in the code, so a friend's house is one
-  more entry. Gravee's the first: she shows you round, her portraits line the walls (the vampire's
-  eyes following you, her yeti "proof"), the vampire's in the house but no vampire game yet, and
-  she paints your portrait, which hangs on her wall and is kept in this browser, with a snapshot
-  you can save. Her look from her pirate page and portrait first (IDEAS.md, "The vampire in the
-  coffin").
-
 - **Paint your ship (11 Nov, for later):** "we definitely need that on the to-do, being able to
   paint your ship somewhere. Maybe ... some character later on an island ... will let you paint
   your ship. I don't know who yet." Her colours (hull, sails, trim) chosen somewhere at sea, from a
@@ -153,8 +140,9 @@ the site (`.assetsignore` skips `*.md`).
   thrones, the skeleton cannons." The user's war frigate, the one for Daquan's flotilla (IDEAS.md,
   "Daquan's flotilla"): waiting on the user's pictures before she's drawn.
 
-- **Kikkit's island onto the shared pieces (11 Nov):** once Gravee's house has made them (RULES.md,
-  "Talking pirates, animations and creatures are pieces too"): Kikkit becomes a talking pirate
+- **Kikkit's island onto the shared pieces (11 Nov):** now that Gravee's house has made them
+  (js/den/props-people.js, js/den/creatures.js; RULES.md, "Talking pirates, animations and
+  creatures are pieces too"): Kikkit becomes a talking pirate
   with her looping lines and her swaying, swigging animation, and her familiars and the penguins
   placed creatures, so her island only places and configures them.
 

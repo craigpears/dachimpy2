@@ -197,6 +197,21 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   anywhere." Every piece (a coffin, a portrait frame, an easel, a chair) is its own reusable object
   in a shared module, animated by its own little tick if it moves; a house or a scene only places
   pieces, never builds its own one-off copy.
+- **The housing district, and Gravee's house (11 Nov).** "you have like the areas of houses and
+  you have the enter a house stuff and you can choose whose house to go into. And maybe she's just
+  one of them ... she can show you ... around her house. And the vampires and do the portrait
+  thing. Maybe we don't go as far as a vampire game ... the taking a portrait and a snapshot ... a
+  nice way of adding other friends in later." As in Puzzle Pirates (YPPedia, House): a doorway in
+  the den's left-hand cliff lists the houses by owner, and you pick whose to go in. A house is data
+  (src/den-houses.ts) plus its own scene, so a friend's house is one more entry. Gravee's is the
+  first, **Bedside Manors** (her real manor's name), Gravee drawn from her portrait (the white
+  Berserker pelt, the starfish on her cheek, a green gown, a hook, a lit candle, Spud her tan
+  monkey) and in PIRATES. She shows you round: her portraits, from her real gallery's titles, line
+  the walls (her "Definitive Proof" of the yeti among them), the camera whizzing down the endless
+  gallery after a few steps; the Count's portrait's eyes follow you; lift his coffin's lid and he
+  sits up, you both scream, and she paints you mid-fright. Your portrait hangs pride of place on
+  her wall, kept in this browser, and you can save it as a picture. No vampire game. Built from
+  the shared pieces: furniture, talking pirates, creatures.
 - **Kikkit's whirlpools, by YPPedia's rules (11 Nov).** The first go only spun her and flung her
   back; the user: "Whirlpools are basically four tiles ... each one ... rotates the ship and sends
   it to the opposite corner ... on some of them you'd naturally have like a whirlpool but with a

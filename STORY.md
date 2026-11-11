@@ -159,6 +159,11 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    Or sail out to the Wedding Isle, where Mischievious is always planning the next wedding (built as a
    proof of concept, 10 Nov): lay out the venue, dress the guests, pick who you marry and how it
    goes, and keep a collage of the day. Whoever you marry sails home with you and lives at the den.
+   Or knock at the houses in the den's cliff (a proof of concept, 11 Nov): the first is Gravee's,
+   Bedside Manors, where she shows you round her portraits, the vampire sits up in his coffin, and
+   she paints you scared to death for her wall. Each house is a friend's little scene of their own.
+   Or find Kikkit on her little island right of the checkpoint, rambling the real way through her
+   whirlpools (taken literally), and, with a Vegas, the penguins of Vegas Island beyond them.
 6. · **Dalnoth, guarding his treasure.** A big famous pirate, sitting on his chest with his monkey
    and his tankard. Get past him your way: swordfight him, shoot him off from the gun platform, or
    pump water in from the hidden cove and flood him out so the treasure washes onto the ground. He runs off, but his

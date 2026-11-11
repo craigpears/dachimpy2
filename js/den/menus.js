@@ -24,6 +24,9 @@ import { station, stationToggle } from './sail-station.js';
 import { online, guest, myId, send } from './crew.js';
 import { wed, weddingEnter, weddingLeave, plannedSpouse } from './wedding.js';
 import { spouse, spouseCheat } from './spouse.js';
+import { house, houseEnter, houseLeave } from './house.js';
+import { lodgingsOpen } from './lodgings.js';
+import { LODGINGS } from '../den-houses.js';
 import { newGame } from '../den.js';
 
 // ---------- decorating the den ----------
@@ -331,6 +334,7 @@ export function dressRows() {
     toggle(row('Tongue out'), L.tongue, look('tongue'));   // (Kikkit's, as are the tattoos and the wristband)
     toggle(row('Tattoos'), L.tattoos, look('tattoos'));
     toggle(row('Wristband'), L.wristband, look('wristband'));
+    toggle(row('Starfish'), L.starfish, look('starfish'));   // (stuck to the cheek: Gravee's)
   } else if (dress.tab === 'clothes') {
     slot('Hat', 'hat'); slot('Top', 'top'); slot('Waist', 'waist'); slot('Legs', 'legs'); slot('Feet', 'feet'); slot('In hand', 'hand');
     box.append(el('p', 'note', `Clothes and dyes from the Puzzle Pirates tailor, and everything ${Object.keys(PIRATES).join(' and ')} wear.`));
@@ -596,6 +600,32 @@ function cheatMarried() {
   Object.assign(pirate, { x: at.x, z: at.z, h: 0, hs: 0, hop: null });
   pirate.g.rotation.set(0, at.yaw, 0);
 }
+/* The housing district (js/den/lodgings.js): the siege put to rest, and you at its door in the den's
+   left-hand cliff, the list of houses open; or straight into Gravee's house (js/den/house.js). */
+function toLodgings() {
+  if (wm) exitWall();
+  if (deco.on) decoMode(false);
+  if (carry) putBack();
+  raiders.splice(0).forEach((r) => raiderOut(r, true)); boats.splice(0).forEach((b) => scene.remove(b.g));
+  Object.assign(G, { phase: 'peace', wave: Math.max(G.wave, 3), toSpawn: 0, aim: null, cannonShots: 0 });
+  mapLets.phaseWas = 'peace';   // (no cutscene)
+  ship.visible = cannon.visible = false; ship.position.x = ship.userData.home + SHIP_GONE + 1;
+  $('intro').classList.add('off');
+  if (sail.on) sailReset();
+  sail.seen = true;
+  Object.assign(pirate, { x: LODGINGS.x + 1.05 * LODGINGS.face, z: LODGINGS.z, h: 0, hs: 0, hop: null });
+  pirate.g.rotation.set(0, -Math.PI / 2 * LODGINGS.face, 0);
+}
+function cheatLodgings() {
+  if (cine || house.on) return;
+  toLodgings();
+  lodgingsOpen(true);
+}
+function cheatGravee() {
+  if (cine || house.on) return;
+  toLodgings();
+  houseEnter('gravee');
+}
 // [name, what it does, its link's name if it's a starting point (den.html?at=...)]
 const CHEATS = [
   ['Beat this wave', cheatBeat],
@@ -611,6 +641,8 @@ const CHEATS = [
   ["Kikkit's island", () => cheatKikkit('off'), 'kikkit'],
   ["Kikkit's whirlpools", () => cheatKikkit('mouth'), 'whirlpools'],
   ['Home, married', cheatMarried, 'married'],
+  ['The housing district', cheatLodgings, 'lodgings'],
+  ["Gravee's house", cheatGravee, 'gravee'],
 ];
 /* Every starting point has a link, to share (the user, 10 Nov: "make it so that each starting point
    is something that I can put into the URL as well, so that I can share that animation with
@@ -644,7 +676,7 @@ const cheatButtons = (el, list) => $(el).replaceChildren(...list.map(([name], i)
   b.textContent = name;
   const at = el === 'cheat-stages' ? STAGE_AT[i] : CHEATS[i][2];
   if (at) b.title = `Link: den.html?at=${at}`;
-  b.onclick = () => { cheatPanel(false); if (wed.on && at !== 'wedding') weddingLeave(); (el === 'cheat-stages' ? skipTo : (j) => CHEATS[j][1]())(i); if (at) linkTo(at); };
+  b.onclick = () => { cheatPanel(false); if (wed.on && at !== 'wedding') weddingLeave(); if (house.on && at !== 'gravee') houseLeave(); (el === 'cheat-stages' ? skipTo : (j) => CHEATS[j][1]())(i); if (at) linkTo(at); };
   return b;
 }));
 cheatButtons('cheat-stages', STAGES);

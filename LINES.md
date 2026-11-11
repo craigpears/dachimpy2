@@ -4,7 +4,7 @@ Every character's lines, and who they are, made from `src/lines/` by `npm run bu
 (`tools/lines-doc.mjs`): change a line there, not here, and the game changes with it.
 This file's history in git shows every line as it's changed.
 
-[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava)
+[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava) · [Gravee](#gravee) · [The Count](#the-count)
 
 ## Dalnoth
 
@@ -28,7 +28,7 @@ Beaten after the third wave, he leaves his cannon, rows in, stomps up the beach 
 
 ## You
 
-Your own pirate, dressed as you like from the wardrobe (or as any real pirate in it). You say little, and only at the den's short, cheesy moments: picking up the captain's map, and riding the crane up the cliff and down again, and your own wedding.
+Your own pirate, dressed as you like from the wardrobe (or as any real pirate in it). You say little, and only at the den's short, cheesy moments: picking up the captain's map, and riding the crane up the cliff and down again, your own wedding, and screaming at a vampire in Gravee's house.
 
 ### Picking up the captain's map, at the end of Dalnoth's cutscene
 
@@ -727,3 +727,87 @@ He doesn't speak: his lines are what's said as you get to him.
 - *A small chain from the mouth carries her clean over the reef's gap and out past the reef:* "Through the reef by the whirlpools! The open sea beyond"
 - *A Vegas carries her clean over the winds that feed the whirlpools, into the penguins' water:* "Penguins! A whole colony of them, out past the whirlpools"
 - *Just after, as he freezes and looks round at her:* "And one of them's in a balaclava. He's up to something"
+
+## Gravee
+
+A real pirate of the Emerald Ocean (by her pirate name only): captain of Just In Time, Lady of the flag Don't Open Till Doomsday, and a great collector of portraits: seven pages of them, most of herself in her many looks, and dozens of her "Definitive Proof" of a yeti. Drawn from her pirate page's portrait: a white Berserker pelt (a bear's head) over white hair, an eyepatch, a blue starfish stuck to her cheek, a green Dress top and Gown trimmed white, a hook for her left hand, a candle in her right, and Spud, her tan monkey.
+
+Sweet and excitable, far more excited about adding you to her collection than worried about the vampire in the coffin by her bed. She shows you round her house, Bedside Manors, the first house in the den's housing district, and when the Count sits up and you both scream, she sits you for a portrait, frozen mid-fright, and hangs it pride of place.
+
+> "I think we need Gravee, she's a sweety." (the user, 10 Nov)
+>
+> "Oh, that looks like a perfect portrait moment. Just hold that pose while I paint." (the user, 10 Nov)
+>
+> "she can show you, be showing you around her house. And the vampires and do the portrait thing." (the user, 11 Nov)
+
+### Answering the door when you knock
+
+- *Your first visit:* "A visitor! Oh, come in, come in! Mind Spud, he only bites a little."
+- *Coming back, not yet painted:* "You came back! Come in, come in!"
+- *Coming back, your portrait on her wall:* "It's you! From the wall! Come in, come in!"
+
+### Showing you round, as you come to each stop
+
+- *Just inside the front door, by the pride of place:*
+  - "Welcome to Bedside Manors! I collect portraits. Just a few."
+  - "That's me, by the way. Well, me last Tuesday."
+  - "And that spot in the middle's for my very favourite. It's empty. For now..."
+- *At the gallery's door:*
+  - "This way! The bedchamber's just past my portraits."
+- *At the gallery's far end, among her yeti proofs:*
+  - "Oh! And those are my definitive proof. The yeti! Look at him. Clear as day."
+  - "Thirty-one times I've proved him. Nobody believes me."
+- *Coming into her bedchamber, the vampire's portrait over his coffin:*
+  - "And this is the bedchamber! Bedside Manors, see? The coffin's at the bedside."
+  - "That's the Count's. He's a darling. Sleeps all day."
+  - "Don't mind his eyes. They do that."
+- *Coming up to the coffin:*
+  - "Ooh, don't open it. He's ever so grumpy before sunset."
+
+### In the hall, instead of "It's empty. For now...", once your portrait's hung there
+
+- "And in the middle, my very favourite. You! Mid-scream."
+
+### The endless gallery, as the camera whizzes you down it
+
+- *The first time, after you ask:* "Only seven pages!"
+- *Coming back down it:* "Mind the yetis!"
+
+### The Count sits up, and she paints you
+
+- *As you both scream:* "Oh! OH! That's a perfect portrait moment! Hold that pose while I paint!"
+- *At her easel:* "Don't move... a little more terror in the eyebrows... perfect!"
+- *Her brush down:* "Done! Pride of place, I think. Right in the middle of the hall."
+- *Your portrait up, pride of place:* "There! Now everyone who visits sees you first."
+
+### Now and then, as you wander her house after the tour
+
+- "Have you seen the yetis? Every one of them's a different yeti. I checked."
+- "Spud, no. Not the frames."
+- "Seven pages, and I've room for eight."
+- "Everyone I meet ends up on a wall. It's a compliment!"
+- "Dalnoth sat for me once. Well, fell over near me. Same thing."
+- "The Count's portrait does follow you round. Isn't it lovely?"
+
+### By your portrait, once it's hung
+
+- "My favourite. Look at that face!"
+- "Visitors always ask who you are. I tell them: my friend, mid-scream."
+
+### As you leave
+
+- "Come back soon! Bring your face!"
+
+## The Count
+
+The vampire who sleeps in the coffin at the bedside in Gravee's house (Bedside Manors). Not a real pirate: a look from the wardrobe (a black Vampire raiment lined red), deathly pale. His portrait over the coffin follows you with its eyes. Lift his lid and he sits bolt upright, and you both scream at each other; then he lies back down. Grumpy before sunset, harmless after it. (No vampire game yet: IDEAS.md, "The vampire in the coffin".)
+
+> "you open a coffin, and a vampire sits up. You both scream at each other comically, "ah! ah!"" (the user, 9 Nov)
+>
+> "Maybe we don't go as far as a vampire game." (the user, 11 Nov)
+
+### Lifting his lid
+
+- *Sitting bolt upright, nose to nose with you:* "AAAAH!"
+- *Lying back down as the lid shuts:* "Five more minutes..."
+- *Lifting it again, another time:* "Do you MIND?"

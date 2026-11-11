@@ -27,11 +27,17 @@ export const AT_YOUR_WEDDING = {
   ido: 'I do!',
 } as const;
 
+/** In Gravee's house (js/den/gravee-house.js): down her endless gallery, and when the Count sits up. */
+export const IN_GRAVEES_HOUSE = {
+  howMany: 'How many portraits ARE there?',
+  scream: 'AAAAAH!',
+} as const;
+
 export const CHARACTER: Character = {
   name: 'You',
   who: 'Your own pirate, dressed as you like from the wardrobe (or as any real pirate in it). You say little, '
     + 'and only at the den\'s short, cheesy moments: picking up the captain\'s map, and riding the crane '
-    + 'up the cliff and down again, and your own wedding.',
+    + 'up the cliff and down again, your own wedding, and screaming at a vampire in Gravee\'s house.',
   lines: [
     { when: 'Picking up the captain\'s map, at the end of Dalnoth\'s cutscene', says: [FOUND_MAP] },
     {
