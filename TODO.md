@@ -131,6 +131,9 @@ the site (`.assetsignore` skips `*.md`).
   checked on YPPedia, as a module knowing nothing of the den, tested and with bots; its Vegas (or
   whatever its real big combo is) sends her a long run forward in one go (IDEAS.md, "Kikkit's
   penguin").
+  **Her whirlpools are a way through the reef (11 Nov):** the passage through the reef to the right
+  of the checkpoint's gate, sailed with Vegases, a harder way past than the gate or the locks, with
+  the penguin in the middle as its reward (IDEAS.md, "Kikkit's penguin").
   **Playable whenever you like at sea (10 Nov):** "same principle with sailing as well. You should
   be able to jump into the sailing puzzle whenever you want to, and that gives you, like the
   doubles ... it allows you to basically go really, really fast, and like in one go, like a trade

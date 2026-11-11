@@ -364,6 +364,17 @@ middle of nowhere on an island trying to figure out some sailing."
 The user, earlier:
 "Look for the pirate Kikkit as well, we need to make her a penguin in the game somewhere, hehe";
 then "she's definitely a penguin side quest".
+- **Her whirlpools are a way through the reef, past the checkpoint (11 Nov):** looking at the
+  map's "ways past the checkpoint" count, the user felt it was "realistically ... only really the
+  two ways around" (the gate and the locks), then: "maybe that will be a good place for it to be,
+  is that's a way for you to get through the reef. And there's a penguin in the middle, so it gives
+  you a bit of a reward. So it's not just the same as ... because it's going to be a bit harder than
+  the other option. So you get the reward of the penguin in the middle. Yeah, that can be
+  definitely one of the ways. I think that would make sense for getting through that reef." So the
+  whirlpools and winds are a passage through the reef to the right of the gate, sailed with the
+  Sailing puzzle and its Vegas; harder than the gate or the locks, and the penguin in the middle is
+  the reward for going that way. A way past of its own on the map's list. (Where Kikkit's island
+  sits now, at the reef's near side rather than beyond the checkpoint: to pin down with the user.)
 - **Kikkit:** a real pirate on Emerald (checked 10 Nov): captain of Rodrigo's Revenge, of the flag
   Egotistical Englishman, an Admiral in the Aimuari Island Navy (Dignity's navy, and above her).
   Drawn from her portrait by the pirate maker: black curly hair crowned with red roses, an
