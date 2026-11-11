@@ -279,13 +279,13 @@ the site (`.assetsignore` skips `*.md`).
   outside; not yet tried by the user. Watch for: the markers on raiders outside cluttering the
   view while you carry a piece.
 
-- **Credit Umami for the evil constellation (11 Nov):** from the starlit door's item, now built (RULES.md,
-  "The starlit door"). Where it came from (the user): "I was inspired thinking, what would be a really evil
-  thing for Umami in the sloop races to have to contend with?" (Umami, a friend's pirate, whose idea PvP
-  races were.) Settled: credit Umami in the changelog, for fun ("we should definitely credit that Umami.
-  Maybe if it's just in the change log. I was just thinking of the change log being funny"), in Duty
-  Navigation's entry: the evil constellation made with Umami in mind, without saying where it's played
-  (the door stays a secret; no shot of the door or tunnel). Duty Navigation has no changelog entry yet.
+- **The starlit door's Navigation, simpler and competitive (11 Nov):** built with the evil constellation
+  last, the door's run took several minutes of puzzling to save about two and a half of sailing. The user:
+  "Maybe save the evil [constellation] idea for somewhere else in the world, then put that on the ideas
+  list. But yeah, simplify the duty navigation down to be more competitive." So the door's run is just
+  the dealt constellations, small ones, with the puzzle's own five colours, about a minute's navigating,
+  so that with the Vegas it still pays in a race. The evil constellation goes to IDEAS.md, and with it
+  Umami's credit in the changelog (when it lands somewhere: "we should definitely credit that Umami").
 - **Shortcuts not all created equal (11 Nov):** on the race course, small shortcuts as well as big ones,
   each needing a combo of its size: a tiny one a Double gets you through (as a Double clears the reef out
   of Kikkit's whirlpools), bigger ones a bigger combo, the biggest the starlit door's tunnel. "Are you a

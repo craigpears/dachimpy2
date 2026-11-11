@@ -2157,6 +2157,19 @@ the door and have it discoverable in some way similar to the carpentry spots?"
   nothing of the den, with bots like Sailing's), and could find other hidden ways later (the smugglers'
   beach, Port Decorum's treasury).
 
+**The evil constellation, somewhere else in the world (11 Nov):** built first as the starlit door's last
+constellation, then taken off it to keep the race competitive: "Maybe save the evil [constellation] idea for
+somewhere else in the world, then put that on the ideas list." The user's own design, made with Umami in mind
+("what would be a really evil thing for Umami ... to have to contend with?"): a constellation that can only be
+filled by a combo, which never matters in Duty Navigation as it's played. Found building it: three, four or
+five of a colour side by side on the inner ring can still be made a star at a time (two, a gap, two, the last
+into the gap), so it takes six, the last two landing together (the ring above turned so two slide over the
+two gaps at once). Kept in the puzzle's module, ready for anywhere (src/navigation.ts: `given` constellations,
+`bottomRow`, `needsCombo`; the bots' EVIL=1 in tools/nav-bots.mjs: with five colours the planner filled it in
+6 goes of 40, with four 16 of 40, about 270 moves). Somewhere a long, deliberate challenge fits, not a race:
+a vault, a treasure's lock, a navigator's trial. Credit Umami in the changelog when it lands ("we should
+definitely credit that Umami ... I was just thinking of the change log being funny").
+
 **Balancing from what players do (11 Nov, for a full competitive version):** "Once we got to a full competitive
 version, if we got to that far, we would start recording times people took through different routes and
 puzzle times, and ... collect data for ... balancing ... I think they do it in like Age of Empires, don't
