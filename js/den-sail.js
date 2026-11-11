@@ -762,6 +762,11 @@ export class Helm {
     /** The seconds each rowed square takes just now: set by the biggest pile of them rowed and
         waiting since she last caught up, so a Vegas is rowed at a rush all the way (rowTime). */
     pace = WIND.OARS;
+    /** A gust's squares still to come (a Sailing chain's run: src/den-sailing.ts), played as the trade
+        winds' are, after the move she's on (and its ride). */
+    gusts = [];
+    /** The gust blowing came with no move of a turn on, so it's no step of one. */
+    free = false;
     /** The headwind's been said for this pin. */
     told = false;
     wait = 0;
@@ -774,10 +779,10 @@ export class Helm {
     lockAt(c, r) { return this.locks[this.sea.lockAt(c, r)] ?? null; }
     /** Where she'll be when this turn's played out. */
     after() {
+        let p = this.gustFrom();
         if (this.slot < 0)
-            return { ...this.pose };
-        let p = this.cur ? (this.rides.length ? this.rides[this.rides.length - 1] : this.cur.to) : this.pose;
-        for (let i = this.slot + (this.cur ? 1 : 0); i < this.turn.length; i++)
+            return { ...p };
+        for (let i = this.slot + (this.cur && !this.free ? 1 : 0); i < this.turn.length; i++)
             p = this.sea.sail(p, this.turn[i], this.oars).to;
         return { ...p };
     }
@@ -791,6 +796,25 @@ export class Helm {
             p = this.sea.sail(p, m, this.oars).to;
         const pilot = this.pin ? this.sea.plot(p, ...this.pin, this.via, this.oars) ?? [] : [];
         return [...this.mine, ...pilot];
+    }
+    /** Where a gust given now would start from: where she'll be once the move she's on, its trade
+        wind and any gust already blowing are done. */
+    gustFrom() {
+        if (this.gusts.length)
+            return { ...this.gusts[this.gusts.length - 1] };
+        return { ...(this.cur ? (this.rides.length ? this.rides[this.rides.length - 1] : this.cur.to) : this.pose) };
+    }
+    /** A gust can carry her: not while she's holed, nor waiting on a lock (a calm's fine: it's wind). */
+    gusty() {
+        const h = this.held();
+        return !this.dazed() && (!h || h === 'calm') && !this.sea.isLock(this.pose.c, this.pose.r);
+    }
+    /** A gust: these squares (src/den-sailing.ts, gustPath), blown straight on, after the move she's
+        on; ending on a trade wind's lane, the wind takes her on from there. */
+    gust(squares) {
+        if (!squares.length)
+            return;
+        this.gusts.push(...squares.map((p) => ({ ...p })), ...this.sea.ride(squares[squares.length - 1]));
     }
     /** Run the oars out, or ship them (a toggle, with nothing said). Always yours to choose: the pilot
         never does. Out, the board rows her (stroke) and your own moves go; either way the rest of a
@@ -894,6 +918,8 @@ export class Helm {
         this.rides = [];
         this.strokes = [];
         this.wait = 0;
+        this.gusts = [];
+        this.free = false;
         this.pose = { ...at };
     }
     /** Nothing playing and nothing to play. */
@@ -984,7 +1010,7 @@ export class Helm {
                 // A move or a square of wind, then (after the last of the wind) the pause. Dazed, she
                 // holds once the move's sailed; the wind sweeps her on regardless.
                 const cur = this.cur, dur = cur.secs;
-                const span = dur + (this.rides.length ? 0 : cur.pause), hold = this.dazed() && !this.rides.length;
+                const span = dur + (this.rides.length || this.gusts.length ? 0 : cur.pause), hold = this.dazed() && !this.rides.length;
                 if (hold && cur.done)
                     break;
                 const use = hold ? Math.min(left, Math.max(0, dur - this.t)) : Math.min(left, span - this.t);
@@ -1009,7 +1035,17 @@ export class Helm {
                     out.push({ kind: 'push', from: { ...this.pose }, to: { ...to } });
                     continue;
                 }
+                // A gust after it (src/den-sailing.ts): its squares, as the trade winds' are.
+                if (this.gusts.length) {
+                    this.blow(out);
+                    continue;
+                }
                 this.cur = null;
+                // (a gust that came with no move on is no step of the turn)
+                if (this.free) {
+                    this.free = false;
+                    continue;
+                }
                 this.slot++;
                 // At the oars, squares rowed since the turn began join it, up to a turn's worth; and there's
                 // no breather after it: she rows whatever's been rowed.
@@ -1020,6 +1056,12 @@ export class Helm {
                     this.turn = [];
                     this.wait = this.oars ? 0 : SAIL.BREAK;
                 }
+                continue;
+            }
+            // A gust with no move on: it blows her straight away (in a calm too).
+            if (this.gusts.length && !this.dazed()) {
+                this.free = true;
+                this.blow(out);
                 continue;
             }
             if (this.slot >= 0) {
@@ -1085,6 +1127,13 @@ export class Helm {
         this.pace = WIND.OARS;
         this.turn = this.turn.slice(0, this.slot + 1);
         this.told = false;
+    }
+    /** The next square of a gust. */
+    blow(out) {
+        const to = this.gusts.shift();
+        this.cur = { m: 'W', from: { ...this.pose }, to, bump: false, secs: SAIL.PUSH, pause: SAIL.PAUSE };
+        this.t = 0;
+        out.push({ kind: 'push', from: { ...this.pose }, to: { ...to }, gust: true });
     }
     begin(out) {
         const m = this.turn[this.slot], { to, bump, ride, irons } = this.sea.move(this.pose, m, this.oars);

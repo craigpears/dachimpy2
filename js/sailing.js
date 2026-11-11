@@ -171,7 +171,8 @@ export class Sailing {
             default: return [[row, col, b], [row + 1, col, a]];
         }
     }
-    /** Can the pair be there: on the board, its squares empty, not split by a shelf? */
+    /** Can the pair be there: on the board, its squares empty, not split by a shelf? (Public for a
+        pair steered live as it falls: src/sail-pair.ts.) */
     open(row, col, turn) {
         const cs = this.cells(row, col, turn);
         if (!cs || cs.some(([r, c]) => this.grid[r][c]))
@@ -209,11 +210,16 @@ export class Sailing {
         const seen = new Set(), todo = [[0, SPAWN[0], 0]];
         const id = (r, c, t) => (r * W + c) * 4 + t;
         seen.add(id(0, SPAWN[0], 0));
+        // (A pair of one colour lies the same turned 2 as 0, and 3 as 1: each place given once, as 0 or
+        // 1, however it was got to. It used to skip 2 and 3, losing a place only reached turned that way.)
+        const rests = new Set();
         while (todo.length) {
             const [r, c, t] = todo.pop();
-            const falls = this.sinks(r, c, t);
-            if (!falls && !(same && t >= 2))
-                out.push({ col: c, turn: t, row: r });
+            const falls = this.sinks(r, c, t), tt = (same ? t & 1 : t);
+            if (!falls && !rests.has(id(r, c, tt))) {
+                rests.add(id(r, c, tt));
+                out.push({ col: c, turn: tt, row: r });
+            }
             const next = [[r, c - 1, t], [r, c + 1, t], [r, c, ((t + 1) % 4)], [r, c, ((t + 3) % 4)]];
             if (falls)
                 next.push([r + 1, c, t]);

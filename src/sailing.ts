@@ -215,15 +215,16 @@ export class Sailing {
     }
   }
 
-  /** Can the pair be there: on the board, its squares empty, not split by a shelf? */
-  private open(row: number, col: number, turn: Drop['turn']): boolean {
+  /** Can the pair be there: on the board, its squares empty, not split by a shelf? (Public for a
+      pair steered live as it falls: src/sail-pair.ts.) */
+  open(row: number, col: number, turn: Drop['turn']): boolean {
     const cs = this.cells(row, col, turn);
     if (!cs || cs.some(([r, c]) => this.grid[r][c])) return false;
     return (turn === 0 || turn === 2) || !this.shelf(row, col);
   }
 
   /** Can the pair fall a row from there? */
-  private sinks(row: number, col: number, turn: Drop['turn']): boolean {
+  sinks(row: number, col: number, turn: Drop['turn']): boolean {
     const cs = this.cells(row, col, turn)!;
     return cs.every(([r, c]) => r + 1 < H && !this.shelf(r, c) && (!this.grid[r + 1][c] || cs.some(([rr, cc]) => rr === r + 1 && cc === c)));
   }
@@ -249,10 +250,13 @@ export class Sailing {
     const seen = new Set<number>(), todo: [number, number, Drop['turn']][] = [[0, SPAWN[0], 0]];
     const id = (r: number, c: number, t: number) => (r * W + c) * 4 + t;
     seen.add(id(0, SPAWN[0], 0));
+    // (A pair of one colour lies the same turned 2 as 0, and 3 as 1: each place given once, as 0 or
+    // 1, however it was got to. It used to skip 2 and 3, losing a place only reached turned that way.)
+    const rests = new Set<number>();
     while (todo.length) {
       const [r, c, t] = todo.pop()!;
-      const falls = this.sinks(r, c, t);
-      if (!falls && !(same && t >= 2)) out.push({ col: c, turn: t, row: r });
+      const falls = this.sinks(r, c, t), tt = (same ? t & 1 : t) as Drop['turn'];
+      if (!falls && !rests.has(id(r, c, tt))) { rests.add(id(r, c, tt)); out.push({ col: c, turn: tt, row: r }); }
       const next: [number, number, Drop['turn']][] = [[r, c - 1, t], [r, c + 1, t], [r, c, ((t + 1) % 4) as Drop['turn']], [r, c, ((t + 3) % 4) as Drop['turn']]];
       if (falls) next.push([r + 1, c, t]);
       for (const [nr, nc, nt] of next) {

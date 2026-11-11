@@ -24,8 +24,9 @@ import { WIND } from '../den-wind.js';
 import { windTick, windSay, windHud, oarsHud, windSig, rowToggle, headwindPrompt } from './wind.js';
 import { rowing, rowShut, rowKey, rowHover, rowSwap, rowTick, rowPrompt, rowShown } from './rowing.js';
 import { craneKey, cranePrompt, craneHolds, craneTick, craneReset, craneWorld } from './crane.js';
-import { umamiKey, umamiClick, umamiHover, umamiPrompt, umamiReset } from './capybara.js';
+import { umami, umamiKey, umamiClick, umamiHover, umamiPrompt, umamiReset } from './capybara.js';
 import { isleWorld, isleTick, isleAshore, canLandIsle } from './isle.js';
+import { station, stationKey, stationToggle, stationTick, stationPrompt, stationReset } from './sail-station.js';
 
 // The old sloop's at anchor in the cove from the moment the siege is over, while their ship makes
 // sail in the background (the user, 9 Nov: "I'm sat here quite a while waiting for his sloop to sail
@@ -77,6 +78,7 @@ export function sailReset() {
   patchClear();
   craneReset();
   umamiReset();
+  stationReset();
   denLets.sailView = 0;
 }
 // A shot out of her side, from where she is right now: it flies straight out and comes down in the
@@ -146,10 +148,20 @@ export function sailHover(x, y) {
   const at = seaCellAt(x, y);
   sail.hover = at && sail.sea.open(Math.round(at.c), Math.round(at.r)) ? [Math.round(at.c), Math.round(at.r)] : null;
 }
+// Something else has her, so the Sailing board's put away (sail-station.js).
+const rigBusy = () => haul.on || craneHolds() || patch.on || !!hold.mode || umami.on || sail.helm.dazed();
+// R: the Sailing board ("the rigging"), out or away; from the oars or her guns, they're put away.
+function rigToggle() {
+  if (!station.want && !rigBusy()) { if (rowing.on) rowToggle(); if (gunnery.on) gunneryToggle(); }
+  stationToggle(rigBusy());
+}
 export function sailKey(key) {
   if (hold.mode && holdKey(key)) return;
   if (umamiKey(key)) return;   // (Umami's board, and her moorings in the lagoon: capybara.js)
   if (craneKey(key)) return;   // (the crane at the ledge, and the lagoon: crane.js)
+  // The Sailing board: its keys while it's open; R or Esc puts it away (sail-station.js).
+  if (stationKey(key)) return;
+  if (key === 'r') return rigToggle();
   // Rowing: the board's keys; Esc or O ships the oars.
   if (rowing.on && (key === 'escape' || key === 'o')) return rowToggle();
   if (rowing.on && rowKey(key)) return;
@@ -179,6 +191,7 @@ export function sailPrompt() {
   if (haul.on) return haulPrompt();
   if (rowing.on) return rowPrompt();
   if (gunnery.on) return gunneryPrompt();
+  if (station.on) return stationPrompt();
   const cp = umamiPrompt() || cranePrompt();
   if (cp) return cp;
   const h = sail.helm, held = h.held();
@@ -188,13 +201,13 @@ export function sailPrompt() {
   if (held === 'fill') return 'The lock\'s filling from the canal above';
   if (held === 'gates') return 'The lock gates are swinging open';
   if (held === 'calm') return 'Becalmed: dead in the water till the wind picks up · O: out oars';
-  if (canLand(h)) return h.slot < 0 ? 'Off the den\'s beach · Space: go ashore · click the sea to drop a pin' : 'Under way off the den\'s beach · Space: go ashore';
+  if (canLand(h)) return h.slot < 0 ? 'Off the den\'s beach · Space: go ashore · click the sea to drop a pin · R: the rigging (Sailing)' : 'Under way off the den\'s beach · Space: go ashore';
   if (canLandIsle(h)) return h.slot < 0 ? 'Off the Wedding Isle · Space: go ashore · click the sea to drop a pin' : 'Under way off the Wedding Isle · Space: go ashore';
   if (canHaulWreck()) return 'The old wreck · Space: haul up its treasure (Treasure Haul) · click the sea to drop a pin';
   if (h.slot < 0 && h.headwind()) return headwindPrompt();
   if (h.pin) return h.oars ? 'Rowing to the pin' : 'Under way to the pin';
   if (h.slot >= 0) return 'Under way';
-  return 'Click the sea to drop a pin, or put in moves with W A D · G: load her guns (Gunnery) · Q E: fire';
+  return 'Click the sea to drop a pin, or put in moves with W A D · G: load her guns (Gunnery) · Q E: fire · R: the rigging (Sailing)';
 }
 // This turn's tokens (the one being sailed lit) and the next turn's, yours in gold.
 function sailHud() {
@@ -212,8 +225,8 @@ function sailHud() {
   const gun = (side, k) => `<div class="gun${sail.guns.ready(side) ? ' ready' : ''}" title="${side === 'L' ? 'Port' : 'Starboard'} shots loaded (Gunnery: G)"><kbd>${k}</kbd>${side === 'L' ? 'Port' : 'Starboard'}<span class="pips">${pips(side)}</span><i style="width:${shots(side) ? load(side) * 5 : 0}%"></i></div>`;
   // The wind, at the left end, and the oars at the right (wind.js).
   $('sailhud').innerHTML = `<div class="turns">${windHud()}${gun('L', 'Q')}<div class="turn"><span>This turn</span>${toks(now, (i) => (i < h.slot ? 'done' : i === lit ? 'now' : ''))}</div>`
-    + `<div class="turn"><span>Next</span>${toks(next, (i) => (i < mineN ? 'mine' : ''))}</div>${gun('R', 'E')}<button class="oars" id="guns-btn" title="Load her guns by Gunnery (G)"><kbd>G</kbd>Load</button>${oarsHud()}</div>`
-    + '<div class="help">Click the sea: drop a pin · <kbd>W</kbd> <kbd>A</kbd> <kbd>D</kbd>: forward, left, right yourself · <kbd>S</kbd>: take one back · <kbd>Q</kbd> <kbd>E</kbd>: fire port, starboard · <kbd>G</kbd>: load them by Gunnery · <kbd>O</kbd>: oars out or in · <kbd>Esc</kbd>: pull up the pin · <kbd>H</kbd>: head home · wheel: zoom</div>';
+    + `<div class="turn"><span>Next</span>${toks(next, (i) => (i < mineN ? 'mine' : ''))}</div>${gun('R', 'E')}<button class="oars" id="guns-btn" title="Load her guns by Gunnery (G)"><kbd>G</kbd>Load</button><button class="oars" id="rig-btn" title="The rigging: Sailing, its chains carrying her ahead (R)"><kbd>R</kbd>Rigging</button>${oarsHud()}</div>`
+    + '<div class="help">Click the sea: drop a pin · <kbd>W</kbd> <kbd>A</kbd> <kbd>D</kbd>: forward, left, right yourself · <kbd>S</kbd>: take one back · <kbd>Q</kbd> <kbd>E</kbd>: fire port, starboard · <kbd>G</kbd>: load them by Gunnery · <kbd>O</kbd>: oars out or in · <kbd>R</kbd>: the rigging (Sailing) · <kbd>Esc</kbd>: pull up the pin · <kbd>H</kbd>: head home · wheel: zoom</div>';
 }
 export function sailTick(dt) {
   sail.rocks ||= seaRocks();
@@ -237,7 +250,8 @@ export function sailTick(dt) {
       if (e.kind === 'arrive' && canLand(h)) toast('Off the den\'s beach: Space to go ashore');
       if (e.kind === 'arrive' && canLandIsle(h)) toast('Off the Wedding Isle: Space to go ashore');
       if (e.kind === 'push') {
-        if (!sail.riding) { sail.riding = true; if (!sail.said.wind) { sail.said.wind = true; toast('The trade winds have her!'); } }
+        // (a gust off the Sailing board isn't the trade winds: sail-station.js)
+        if (!e.gust && !sail.riding) { sail.riding = true; if (!sail.said.wind) { sail.said.wind = true; toast('The trade winds have her!'); } }
         burst(V3(seaX(e.from.c), 0.3 + liftAt(e.from.c, e.from.r), seaZ(e.from.r)), '#e6f3f6', 5, 2);
       }
       if (e.kind === 'move') sail.riding = false;
@@ -258,6 +272,7 @@ export function sailTick(dt) {
   patchTick(dt);
   rowTick(dt, haul.on);
   gunneryTick(dt, haul.on || craneHolds());
+  stationTick(dt, rigBusy());
   // The locks: each one's water at its level, its gates, and the quay pump at work (lock.js).
   lockTick(dt);
   isleTick();
@@ -326,4 +341,5 @@ $('sailhud').addEventListener('mousedown', (e) => {
   if (e.button !== 0) return;
   if (e.target.closest('#oars-btn')) { e.preventDefault(); rowToggle(); }
   else if (e.target.closest('#guns-btn')) { e.preventDefault(); gunneryToggle(haul.on || craneHolds()); }
+  else if (e.target.closest('#rig-btn')) { e.preventDefault(); rigToggle(); }
 });

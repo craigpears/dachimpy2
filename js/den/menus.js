@@ -19,6 +19,7 @@ import { CRANE } from '../den-crane.js';
 import { craneCheat } from './crane.js';
 import { umamiCheat } from './capybara.js';
 import { board, sailReset } from './sailing.js';
+import { station, stationToggle } from './sail-station.js';
 import { online, guest, myId, send } from './crew.js';
 import { wed, weddingEnter, weddingLeave, plannedSpouse } from './wedding.js';
 import { spouse, spouseCheat } from './spouse.js';
@@ -517,6 +518,11 @@ function cheatSail() {
   sailReset();
   board();
 }
+// The Sailing board at sea (js/den/sail-station.js): out to sea, and the rigging out.
+function cheatRigging() {
+  if (!sail.on) cheatSail();
+  if (!station.want) stationToggle();
+}
 /* Dignity's cutscene at the imperial checkpoint, again (js/den/dignity.js): out to sea first if you're
    not, and the sloop put where the trade wind drops her, facing its gate. */
 function cheatDignity() {
@@ -586,6 +592,7 @@ const CHEATS = [
   ['Build the shack', cheatShack, 'shack'],
   ["The captain's map scene", cheatMapScene, 'map-scene'],
   ['Go sailing', cheatSail, 'sea'],
+  ['Sailing, the puzzle', cheatRigging, 'sailing'],
   ["Dignity's scene", cheatDignity, 'dignity'],
   ["Umami's rescue", cheatUmami, 'umami'],
   ['The Wedding Isle', cheatWedding, 'wedding'],

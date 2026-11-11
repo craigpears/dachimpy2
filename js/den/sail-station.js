@@ -1,0 +1,145 @@
+// The Sailing board at sea (R, "the rigging"): played whenever you like, and what its chains do to
+// her, each drop's run a gust carrying her straight ahead in one go. (The rules: src/sailing.ts, the
+// puzzle; src/sail-pair.ts, its pair as it falls; src/den-sailing.ts, a run given to her. The look:
+// js/den/sail-board.js. js/den/sailing.js wires it in with a few hooks, as js/den/rowing.js does the
+// oars.)
+import * as THREE from 'three';
+import { Sailing } from '../sailing.js';
+import { SailPair } from '../sail-pair.js';
+import { carry, carrySay, Sparkle } from '../den-sailing.js';
+import { SAIL } from '../den-sail.js';
+import { sparkleTick, sparkleWhoosh } from './sail-sparkle.js';
+import { camera, keys, toast, $ } from './world.js';
+import { sail } from './sea.js';
+import { sailBoardMake, sailBoardLayout, sailBoardLay, sailBoardDrop, sailBoardBusy, sailBoardTick, sailBoardSnap } from './sail-board.js';
+
+/* TODO.md, "The Sailing puzzle, for Kikkit's quest" (10 Nov): "You should be able to jump into the
+   sailing puzzle whenever you want to, and that gives you, like the doubles ... it allows you to
+   basically go really, really fast, and like in one go, like a trade winds, kind of, just jump
+   multiple tiles." Like Carpentry for her deck, Bilge at the locks and O for the oars: R opens the
+   board anywhere at sea, R or Esc shuts it, and while it's open its keys take over (A D or the
+   arrows move the pair, W or ↑ and Q E turn it, S ↓ or Space drop it). Each drop's chain is a run
+   (runFor: a plain clear a square, a Double two ... a Vegas seven), given to her once its pops have
+   played out: a gust straight ahead, the way she's heading, after the move she's on. She keeps
+   sailing for the pin meanwhile, and the board's put away while something else has her (holed, at a
+   lock's pump, hauling treasure, up in the lagoon) and comes back after. One board a voyage, kept
+   while it's shut. */
+export const station = { on: false, want: false, game: null, pair: null, B: null, run: null, layout: null, lowT: 0, low: 0, top: 0, sparkle: new Sparkle() };
+
+function pad(act, col) {
+  if (!station.on) return;
+  if (act === 'close') return stationToggle();
+  play(act, col);
+}
+function show() {
+  station.B ||= sailBoardMake(pad);
+  sailBoardLay(station.B, station.game);
+  sailBoardSnap(station.B);
+  station.B.el.style.display = '';
+  station.on = true;
+  station.lowT = 0;
+  document.body.classList.add('sailboard');
+  keys.clear();
+  if (!station.told) { station.told = true; toast('The rigging! Clear a chain and the wind carries her that many squares ahead: a Vegas, seven'); }
+}
+function hide() {
+  station.on = false;
+  document.body.classList.remove('sailboard');
+  if (station.B) station.B.el.style.display = 'none';
+}
+
+/** R at sea: the board out, or put away. `blocked`: something else has her just now. */
+export function stationToggle(blocked = false) {
+  if (station.want) { station.want = false; hide(); return; }
+  if (blocked) { toast('Not just now: she\'s busy', true); return; }
+  station.want = true;
+}
+/** A fresh voyage: the board put away, and a fresh one next time. */
+export function stationReset() {
+  station.want = false;
+  hide();
+  station.game = null; station.pair = null; station.run = null;
+  station.sparkle = new Sparkle();
+}
+
+// The pair's moves, by key or pad; none while a drop's still playing out.
+function play(act, col) {
+  const P = station.pair;
+  if (!P || sailBoardBusy(station.B) || station.run) return;
+  if (act === 'left') P.slide(-1);
+  else if (act === 'right') P.slide(1);
+  else if (act === 'turnR') P.turnBy(1);
+  else if (act === 'turnL') P.turnBy(-1);
+  else if (act === 'drop') landed(P.slam());
+  else if (act === 'col') { const d = col < P.col ? -1 : 1; while (P.col !== col && P.slide(d)); }
+}
+function landed(res) {
+  if (!res.dropped) return;
+  sailBoardDrop(station.B, res, station.game);
+  sailBoardSnap(station.B);
+  station.run = res;
+}
+
+/** The board's keys, while it's open: true if it took the key. G and O put it away and go on to
+    her guns or oars. */
+export function stationKey(key) {
+  if (!station.on) return false;
+  if (key === 'r' || key === 'escape') { stationToggle(); return true; }
+  if (key === 'g' || key === 'o') { stationToggle(); return false; }
+  const act = { a: 'left', arrowleft: 'left', d: 'right', arrowright: 'right', w: 'turnR', arrowup: 'turnR', e: 'turnR', q: 'turnL', s: 'drop', arrowdown: 'drop', ' ': 'drop', enter: 'drop' }[key];
+  if (!act) return false;
+  play(act);
+  return true;
+}
+
+export function stationTick(dt, blocked = false) {
+  // Doing well shows: on her sails, whether the board's open or not, fading as the gust's spent.
+  station.sparkle.tick(dt);
+  sparkleTick(sail.g, station.sparkle, dt);
+  const want = station.want && sail.on && !blocked;
+  if (want !== station.on) {
+    if (want) {
+      station.game ||= new Sailing();
+      station.pair ||= new SailPair(station.game);
+      show();
+    } else hide();
+  }
+  if (!station.on) return;
+  const B = station.B;
+  // Where it goes: clear of the prompt at the bottom and the den's panel at the top (measured now
+  // and then: they change as you go).
+  if ((station.lowT -= dt) <= 0) { station.lowT = 0.5; station.low = $('dock').getBoundingClientRect().top; station.top = document.querySelector('.hud')?.getBoundingClientRect().bottom ?? 0; }
+  station.layout = sailBoardLayout(B, station.low || innerHeight, station.top);
+  // A drop's pops played out: its run's given to her.
+  if (station.run && !sailBoardBusy(B)) {
+    const res = station.run;
+    station.run = null;
+    if (res.booched) station.sparkle.booch();
+    if (res.run > 0) {
+      const c = carry(sail.helm, res.run);
+      toast(carrySay(res.steps, c));
+      station.sparkle.chain(res.steps, c.went, SAIL.PUSH);
+      if (station.sparkle.full()) sparkleWhoosh(sail.g);
+    }
+  }
+  const busy = sailBoardBusy(B) || !!station.run;
+  if (!busy) { const res = station.pair.tick(dt); if (res) landed(res); }
+  sailBoardTick(B, dt, busy ? null : station.pair, station.sparkle);
+}
+
+export function stationPrompt() {
+  return 'Sailing · A D or ← → move · W Q E turn · S or Space drop · a chain carries her ahead · R or Esc: back to the helm';
+}
+
+/* The camera while the board's open: the sea view as ever, slid so she sits in the part of the
+   screen the board leaves (to its right on a wide screen, above it on a tall one). What to take off
+   the camera's look point, given its yaw, tilt and distance. */
+const shift = new THREE.Vector3();
+export function stationShift(yaw, tilt, dist) {
+  const F = station.layout?.free;
+  if (!station.on || !F) return null;
+  const nx = ((F.x + F.w / 2) / innerWidth) * 2 - 1, ny = 1 - ((F.y + F.h * 0.55) / innerHeight) * 2;
+  const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect);
+  const a = nx * dist * Math.tan(hh), b = ny * dist * Math.tan(vh) / Math.max(0.3, Math.sin(tilt));
+  return shift.set(Math.cos(yaw) * a - Math.sin(yaw) * b, 0, -Math.sin(yaw) * a - Math.cos(yaw) * b);
+}

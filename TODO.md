@@ -103,33 +103,10 @@ the site (`.assetsignore` skips `*.md`).
   **Her whirlpools are a way through the reef (11 Nov):** the passage through the reef to the right
   of the checkpoint's gate, sailed with Vegases, a harder way past than the gate or the locks, with
   the penguin in the middle as its reward (IDEAS.md, "Kikkit's penguin").
-  **Playable whenever you like at sea (10 Nov):** "same principle with sailing as well. You should
-  be able to jump into the sailing puzzle whenever you want to, and that gives you, like the
-  doubles ... it allows you to basically go really, really fast, and like in one go, like a trade
-  winds, kind of, just jump multiple tiles". Like Carpentry for damage, Bilge for the bilge and O
-  for the oars: a key takes you into it anywhere at sea, and each combo sends her its run of
-  squares in one go, as the trade winds carry her. Not only at Kikkit's whirlpools.
   **Order of work (11 Nov, "move on to that sailing feature with all the accompanying things"):**
-  its board drawn, balloony, and playable anywhere at sea first; then Kikkit's island and her
+  its board drawn, balloony, and playable anywhere at sea first (done: RULES.md, "Sailing at sea"); then Kikkit's island and her
   rambling; the whirlpools through the reef with the penguin in the middle; Tzz's island and her
   balloon lesson aboard; the penguin home to Kikkit.
-
-- **Sailing's look, when it's drawn (10 Nov):** (its rules are done: RULES.md, "The Sailing
-  puzzle".)
-  - **Its look, from the user's screenshot of "a huge multi Vegas" (10 Nov):** 8 wide, about 16
-    tall; the next pair at the top left; two markers over the middle columns where pairs come in.
-    Three balls: yellow knotted rope, white swirled sail, blue wavy water; a pair's halves joined by
-    a little brown peg that stays after they land. Platforms are translucent square tiles with a
-    thin ledge under them: filled, the piece shows inside; empty, coloured corner brackets for the
-    colour it wants. A wave and a ship's sails behind the board. A whole board of interlocked
-    staircases, pairs straddling columns everywhere, is what a run of Vegases looks like.
-  - **Sparkly full sails when you sail well, "very importantly" (11 Nov):** "when you do well in
-    sailing, you normally get like a sparkly indicator to show how well you're doing. So when you
-    do the big Vegas ... we definitely need that visual thing to carry through. So ... you need lots
-    of sparkly full sails like in the game." The bigger the chain, the more she sparkles: her sails
-    billowing full and glittering on a Vegas, fading as the gust is spent; a sparkle meter on the
-    board. It's what Kikkit's "really, really big and really sparkly" ramble is about (IDEAS.md,
-    "Her whoosh"), so her lines and the look must match.
 
 - **Something to show people, tonight's goal (10 Nov):** once we reach a stopping point, likely after
   Kikkit's sailing quest: "some kind of advertising material ... the fully built den, the imperial

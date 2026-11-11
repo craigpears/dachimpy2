@@ -51,6 +51,12 @@ export const bankTop = (c, r) => LIFT * sail.sea.bank(c, r) + BANK;
 // cannons on opposite sides of the ship, but in the same slots each side. I don't know if it needs
 // to make the ship a bit wider"): 2.3. (Her length, as a lock holds her: HER in src/den-lock.ts.)
 export const SLOOP_BEAM = 2.3;
+/** Her sails' cloths (the canvas in each, its belly bulging along its z) and their one material: for
+    the Sailing board's sparkle to fill and light them (js/den/sail-sparkle.js). */
+export function sloopSails(g) {
+  const cloths = (g?.userData.sails ?? []).map((arm) => arm.children[0]);
+  return { cloths, mat: cloths[0]?.material ?? null };
+}
 export function sloopMesh() {
   const g = new THREE.Group(), hullM = mat('#5e4128', { map: woodTex }), deckM = mat('#9a7a55', { map: woodTex }), spar = mat('#4a2f1a', { map: woodTex });
   const B = SLOOP_BEAM;

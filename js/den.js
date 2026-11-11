@@ -32,6 +32,7 @@ import { hold, holdSwap } from './den/lock.js';
 import { haul, haulKey, haulHover, haulSwap, haulTick, haulCam } from './den/treasure.js';
 import { gunnery, gunCam, gunneryUp, gunneryRub, gunneryWheel } from './den/sea-guns.js';
 import { rowing, rowCam, rowPull } from './den/rowing.js';
+import { station, stationShift } from './den/sail-station.js';
 import { crane, craneCam } from './den/crane.js';
 import { umami, umamiTick, umamiCam, umamiClick } from './den/capybara.js';
 import { net, online, guest, isHost, send, updateMates, sendMe, snapshot, followRaider, sendSync, onNet, joinCrew, leaveCrew } from './den/crew.js';
@@ -291,7 +292,7 @@ export let sailView = 0, holdView = 0, haulView = 0, forageView = 0;
 export const denLets = {
   get sailView() { return sailView; }, set sailView(v) { sailView = v; },
 };
-export let patchView = 0, rowView = 0, gunView = 0;
+export let patchView = 0, rowView = 0, gunView = 0, stationView = 0;
 let craneView = 0, craneShot = null;
 /* The Carpentry view's camera: straight on to the board, close enough to puzzle in. On the wall, a
    stretch of it round the piece, its whole height; on a frame on the floor, looking down on it from
@@ -568,6 +569,10 @@ function update(dt) {
     dist += (26 * view.zoom - dist) * sailView;
     tilt += (Math.max(0.3, Math.min(1.45, 0.78 + view.pitch)) - tilt) * sailView;
   }
+  // The Sailing board open: her slid into the part of the screen it leaves (js/den/sail-station.js).
+  stationView += ((station.on ? 1 : 0) - stationView) * Math.min(1, dt * 3);
+  const rig = stationView > 0.001 && stationShift(yaw, tilt, dist);
+  if (rig) look.addScaledVector(rig, -stationView);
   // Bilging at a lock: down onto the board on its quay from behind her, the way she faces waiting to
   // go up (its top row's way: the user, 10 Nov, coming back up through the headland, had her bow
   // coming at you and couldn't see the board), drawn back to take in the lock beside it and the pump,

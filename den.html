@@ -38,6 +38,10 @@
     body.sailing.rowing .dock { max-width: min(40vw, calc(100vw - 32px)); }   /* (rowing: the prompt between the two boards, js/den/row-boards.js) */
     body.sailing.rowing .prompt { white-space: normal; text-align: center; font-size: 15px; }
     @media (max-aspect-ratio: 21/20) { body.sailing.rowing .dock { max-width: calc(100vw - 32px); } body.sailing.rowing .prompt { font-size: 13px; padding: 6px 10px; } }   /* (the boards along the bottom, above the prompt) */
+    body.sailing.sailboard .sailhud { display: none; }   /* the Sailing board (js/den/sail-board.js): down the left, the prompt in the sea to its right */
+    body.sailing.sailboard .dock { left: 64%; max-width: 46vw; }
+    body.sailing.sailboard .prompt { white-space: normal; text-align: center; font-size: 15px; }
+    @media (max-aspect-ratio: 21/20) { body.sailing.sailboard .dock { left: 50%; max-width: calc(100vw - 32px); } body.sailing.sailboard .prompt { font-size: 13px; padding: 6px 10px; } }   /* (along the bottom, above the prompt) */
     .sailhud .turns { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; align-items: center; }
     .sailhud .gun { position: relative; overflow: hidden; height: 34px; padding: 0 10px; border-radius: 6px; border: 1px solid #6b4e32; background: #2a1c11; display: flex; gap: 6px; align-items: center; font: 700 14px 'Alegreya Sans'; color: var(--dim); }
     .sailhud .gun.ready { color: #f3ecdc; border-color: var(--gold); }
@@ -435,7 +439,7 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.QFB27T5V.js');
+    import(local ? './js/den.js' : './js/den.MCPSQ3S5.js');
   </script>
 </body>
 </html>

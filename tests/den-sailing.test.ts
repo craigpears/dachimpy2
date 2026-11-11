@@ -1,0 +1,191 @@
+/* The Sailing puzzle at sea (TODO.md, "The Sailing puzzle, for Kikkit's quest", 10 Nov: "like a
+   trade winds, kind of, just jump multiple tiles"): a drop's run carries her that many squares
+   straight ahead in one go, stopping short of whatever her other moves are stopped by. */
+import { describe, expect, it } from 'vitest';
+import { Helm, LAY, SAIL, Sea, type Pose, type SailEvent } from '../src/den-sail';
+import { WEATHER, Wind } from '../src/den-wind';
+import { SPARKLE, Sparkle, carry, carrySay, gustPath, sparkleFor } from '../src/den-sailing';
+import { runFor } from '../src/sailing';
+
+/** Open sea: no rocks, no lanes, no wind to put her in irons (every move SAIL.MOVE). */
+const open = () => { const s = new Sea(1, false); s.rocks.clear(); return s; };
+const run = (h: Helm, secs: number, step = 0.01) => { const ev: SailEvent[] = []; for (let t = 0; t < secs; t += step) ev.push(...h.tick(step)); return ev; };
+const at = (p: Pose) => [p.c, p.r, p.d];
+
+describe('a gust (gustPath)', () => {
+  it('goes straight ahead the way she heads, a square at a time', () => {
+    expect(gustPath(open(), { c: 5, r: 5, d: 1 }, 3).map(at)).toEqual([[6, 5, 1], [7, 5, 1], [8, 5, 1]]);
+    expect(gustPath(open(), { c: 5, r: 5, d: 0 }, 2).map(at)).toEqual([[5, 6, 0], [5, 7, 0]]);
+    expect(gustPath(open(), { c: 5, r: 5, d: 2 }, 0)).toEqual([]);
+  });
+  it('stops short of a rock, and of the board\'s edge', () => {
+    const s = open();
+    s.rocks.add('9,5');
+    expect(gustPath(s, { c: 5, r: 5, d: 1 }, 7).map(at)).toEqual([[6, 5, 1], [7, 5, 1], [8, 5, 1]]);
+    expect(gustPath(s, { c: 8, r: 5, d: 1 }, 7)).toEqual([]);
+    expect(gustPath(s, { c: 1, r: 5, d: 3 }, 7).map(at)).toEqual([[0, 5, 3]]);
+  });
+  it('stops short of land and the cliffs (the laid sea: the Wedding Isle, the clifftop)', () => {
+    const s = new Sea(1);
+    const [jc, jr] = LAY.ISLE.JETTY;   // (its jetty, land; the water off it to the left)
+    expect(gustPath(s, { c: jc - 1, r: jr, d: 1 }, 5)).toEqual([]);
+    for (const p of gustPath(s, { c: 6, r: 2, d: 0 }, 20)) expect(s.ground(p.c, p.r)).toBe(false);
+  });
+  it('stops short of a lock, and never runs from one', () => {
+    const s = new Sea(1), [lc, lr] = LAY.LOCKS[0].at;
+    // (up the canal's mouth toward the first lock, from the sea)
+    expect(gustPath(s, { c: lc, r: lr - 3, d: 0 }, 7).map(at)).toEqual([[lc, lr - 2, 0], [lc, lr - 1, 0]]);
+    expect(gustPath(s, { c: lc, r: lr, d: 0 }, 3)).toEqual([]);
+  });
+  it('stops short of water at another level', () => {
+    const s = open();
+    s.pounds.set('7,5', 1);
+    expect(gustPath(s, { c: 5, r: 5, d: 1 }, 4).map(at)).toEqual([[6, 5, 1]]);
+  });
+  it('never blows her through the checkpoint\'s gate', () => {
+    const s = new Sea(1), K = LAY.CHECKPOINT;
+    expect(s.open(K.GATE, K.ROW)).toBe(true);   // (her own moves can go through it)
+    const got = gustPath(s, { c: K.GATE, r: K.ROW - 3, d: 0 }, 7);
+    expect(got.map(at)).toEqual([[K.GATE, K.ROW - 2, 0], [K.GATE, K.ROW - 1, 0]]);
+    // From in the gate, out the other side's fine.
+    expect(gustPath(s, { c: K.GATE, r: K.ROW, d: 0 }, 2).length).toBe(2);
+  });
+});
+
+describe('carried by a chain (carry)', () => {
+  it('a Triple carries her three squares, in one go, at the trade winds\' pace', () => {
+    const h = new Helm(open(), { c: 5, r: 5, d: 1 });
+    const c = carry(h, runFor(3));
+    expect(c).toMatchObject({ run: 3, went: 3, why: null });
+    const ev = run(h, 3 * SAIL.PUSH + 0.05);
+    expect(ev.filter((e) => e.kind === 'push' && e.gust).length).toBe(3);
+    expect(at(h.pose)).toEqual([8, 5, 1]);
+    expect(h.slot).toBe(-1);
+  });
+  it('a Vegas carries her seven', () => {
+    const h = new Helm(open(), { c: 2, r: 5, d: 1 });
+    expect(carry(h, runFor(6)).went).toBe(7);
+    run(h, 3);
+    expect(at(h.pose)).toEqual([9, 5, 1]);
+  });
+  it('blows after the move she\'s on, then the rest of her turn goes on from there', () => {
+    const h = new Helm(open(), { c: 5, r: 5, d: 1 });
+    h.put('F'); h.put('F');
+    run(h, SAIL.WAKE + 0.1);   // (the first move under way)
+    expect(h.cur?.m).toBe('F');
+    expect(at(h.gustFrom())).toEqual([6, 5, 1]);
+    carry(h, 2);
+    expect(at(h.after())).toEqual([9, 5, 1]);   // (6, then the gust to 8, then her second move)
+    run(h, 10);
+    expect(at(h.pose)).toEqual([9, 5, 1]);
+    expect(h.idle()).toBe(true);
+  });
+  it('carries her in a calm (it\'s wind), and the move she was waiting on goes after', () => {
+    const parked = WEATHER.parked;
+    WEATHER.parked = false;   // (the weather's parked for now, 10 Nov: no calms till it's back on)
+    try {
+      const s = open();
+      s.breeze = new Wind(1); s.breeze.set(1, 0, 1e9);
+      const h = new Helm(s, { c: 5, r: 5, d: 1 });
+      h.put('F');
+      run(h, 1);
+      expect(h.held()).toBe('calm');
+      carry(h, 2);
+      run(h, 1);
+      expect(at(h.pose)).toEqual([7, 5, 1]);
+      expect(h.held()).toBe('calm');
+    } finally { WEATHER.parked = parked; }
+  });
+  it('stops short, and says so', () => {
+    const s = open();
+    s.rocks.add('8,5');
+    const h = new Helm(s, { c: 5, r: 5, d: 1 });
+    const c = carry(h, 5);
+    expect(c).toMatchObject({ run: 5, went: 2, why: 'short' });
+    expect(carrySay(3, c)).toBe('A Triple! The wind carries her 2 squares, as far as she can go');
+    run(h, 2);
+    expect(at(h.pose)).toEqual([7, 5, 1]);
+  });
+  it('not while she\'s holed', () => {
+    const h = new Helm(open(), { c: 5, r: 5, d: 1 });
+    h.hit();
+    const c = carry(h, 3);
+    expect(c.why).toBe('held');
+    run(h, 2);
+    expect(at(h.pose)).toEqual([5, 5, 1]);
+  });
+  it('ending on a trade wind, the wind takes her on', () => {
+    const s = new Sea(1), [lc, lr] = LAY.LANES[0].at;
+    // (just before the lane out from off the beach, heading onto it from the side)
+    const h = new Helm(s, { c: lc - 2, r: lr + 1, d: 1 });
+    const c = carry(h, 2);
+    expect(c.went).toBe(2);
+    run(h, 8);
+    expect(h.pose.c).toBe(lc);
+    expect(h.pose.r).toBeGreaterThan(lr + 1);
+  });
+  it('moored, it\'s all forgotten', () => {
+    const h = new Helm(open(), { c: 5, r: 5, d: 1 });
+    carry(h, 3);
+    h.moor();
+    expect(h.gusts).toEqual([]);
+  });
+});
+
+describe('what\'s said (carrySay)', () => {
+  const c = (went: number, run = went) => ({ run, went, why: null, squares: [] });
+  it('names the chain and the squares', () => {
+    expect(carrySay(1, c(1))).toBe('A clear! The wind carries her a square');
+    expect(carrySay(2, c(2))).toBe('A Double! The wind carries her 2 squares');
+    expect(carrySay(3, c(3))).toBe('A Triple! The wind carries her 3 squares');
+    expect(carrySay(4, c(4))).toBe('A Bingo! The wind carries her 4 squares');
+    expect(carrySay(6, c(7))).toBe('A Vegas! The wind carries her 7 squares');
+  });
+  it('says when there\'s nowhere to go', () => {
+    expect(carrySay(2, { run: 2, went: 0, why: 'short', squares: [] })).toBe("A Double! But there's no sea ahead of her to run");
+    expect(carrySay(2, { run: 2, went: 0, why: 'held', squares: [] })).toMatch(/held up/);
+  });
+});
+
+describe('doing well shows (Sparkle; the user, 11 Nov: "a sparkly indicator, and sparkly full sails")', () => {
+  it('bigger chains, more show: nothing for a plain clear, a little glitter for a Double, everything for a Vegas', () => {
+    expect([0, 1, 2, 3, 6, 9].map(sparkleFor)).toEqual([0, 0, 0.25, 0.45, 1, 1]);
+    for (let s = 1; s < 6; s++) expect(sparkleFor(s + 1)).toBeGreaterThan(sparkleFor(s));
+    const a = new Sparkle(), b = new Sparkle();
+    a.chain(2); b.chain(6, 7);
+    expect(a.full()).toBe(false);
+    expect(b.full()).toBe(true);
+  });
+  it('lasts while the gust carries her and a while after, then fades away', () => {
+    const s = new Sparkle();
+    s.chain(6, 7, 0.28);
+    s.tick(7 * 0.28 + SPARKLE.HOLD - 0.1);
+    expect(s.level).toBe(1);
+    s.tick(SPARKLE.FADE / 2);
+    expect(s.level).toBeGreaterThan(0.3);
+    expect(s.level).toBeLessThan(0.7);
+    s.tick(SPARKLE.FADE);
+    expect(s.level).toBe(0);
+  });
+  it('a smaller chain doesn\'t dim a bigger one\'s show', () => {
+    const s = new Sparkle();
+    s.chain(6, 7);
+    s.chain(2, 2);
+    expect(s.level).toBe(1);
+  });
+  it('the meter fills with chains, more for bigger ones, drains slowly, and a booch knocks most of it out', () => {
+    const s = new Sparkle();
+    s.chain(1);
+    const plain = s.meter;
+    s.chain(3);
+    expect(s.meter - plain).toBeGreaterThan(plain);
+    for (let i = 0; i < 5; i++) s.chain(6);
+    expect(s.meter).toBe(1);
+    s.tick(10);
+    expect(s.meter).toBeLessThan(1);
+    expect(s.meter).toBeGreaterThan(0.8);
+    s.booch();
+    expect(s.meter).toBeLessThan(0.3);
+    expect(s.level).toBe(0);
+  });
+});

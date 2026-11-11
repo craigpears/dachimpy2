@@ -1398,6 +1398,30 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     first; a filled platform clears only once no lines are left, and its fall can chain on.
     (YPPedia's "Resolution order" has platforms then lines each round: the user's memory wins
     here, and the code notes YPPedia's.)
+- **Sailing at sea: the rigging (11 Nov).** Sailing's board is out anywhere at sea on **R** ("the
+  rigging"; a Rigging button on the sailing bar too), as G is her guns and O her oars: "You should
+  be able to jump into the sailing puzzle whenever you want to ... it allows you to basically go
+  really, really fast, and like in one go, like a trade winds, kind of, just jump multiple tiles."
+  Each chain's run carries her that many squares straight ahead in one go, a gust played like the
+  trade winds' squares, stopping short of rocks, land, locks, other water levels and the
+  checkpoint's gate (`src/den-sailing.ts`). R or Esc puts it away. `?at=sailing` starts at sea
+  with it out. The pair is steered live as it falls (`src/sail-pair.ts`).
+  - **Its look, from the user's screenshot of "a huge multi Vegas" (10 Nov):** 8 wide by 16 tall;
+    the next pair top left; markers over the middle columns where pairs come in. Three balls,
+    yellow knotted rope, white swirled sail, blue wavy water, a pair's halves joined by a little
+    brown peg that stays after they land. Platforms are translucent tiles with a thin ledge, coloured
+    corner brackets for the colour each square wants. A wave and a ship's sails behind the board.
+    On a wide screen it's down the left; on a tall one along the bottom with a touch pad beside it.
+  - **Balloons, so they pop (11 Nov):** the pieces are balloon animals (IDEAS.md, Tzz's lesson), so
+    they're glossy and knotted, squash as they land, and a chain pops down the board a stage at a
+    time, pop-pop-pop, its name rising as it climbs.
+  - **Sparkly full sails when you sail well, "very importantly" (11 Nov):** "when you do well in
+    sailing, you normally get like a sparkly indicator to show how well you're doing ... you need
+    lots of sparkly full sails like in the game." A sparkle meter on the board fills with your
+    chains and drains slowly (a booch knocks most of it out); her own sails sparkle with each
+    chain, a little glitter for a Double, and on a Vegas they billow full and gilded, sparkles
+    streaming aft and a whoosh of wind, holding while the gust lasts and fading after. It's what
+    Kikkit's "really, really big and really sparkly" ramble is about, so her lines must match.
 - **Bilge is the model to aim for (9 Nov).** The user loved it most for being "so faithful and
   close": "really close one-to-one with the puzzle ... it just plays like the puzzle. It's not like
   a dumbed down version at all", while you can still see what's going on in the den. They loved
