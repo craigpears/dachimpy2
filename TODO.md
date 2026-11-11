@@ -166,6 +166,14 @@ the site (`.assetsignore` skips `*.md`).
   up everything that you see in the background, so it's not exactly very mobile friendly at the
   moment. Not that this is ever usually a mobile friendly game, because it's just usually a lot
   going on." The planner and her speech shouldn't hide the venue on a small screen.
+- **Mischievious the host, not the show (11 Nov):** "Maybe it's that kind of interactive. You could
+  ask her ... because I do know she's conscious, she doesn't want [it to] come off too open ... I
+  don't want this to go too far down that line ... But I want there to be a bit of chattery
+  banter. But obviously, the whole point of this is she's just the facilitator for this wedding
+  mechanic. I don't want this to be a [Mischievious] show, but it still needs a bit of fun and
+  personality. And Puzzle Pirate personality, though, especially, rather than specific people.
+  There's the balance." So fewer lines about her own love life (how often she's married, the black
+  widow jokes), more chattery Puzzle Pirates banter as the host, and things you can ask her.
 
 ## Needs a playtest to pin down
 
