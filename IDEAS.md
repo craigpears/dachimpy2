@@ -1953,3 +1953,11 @@ looting mechanics, smuggling mechanics, all that kind of stuff. Just proof of co
 things ... that can certainly be the place for a few more puzzles." First the island, empty (TODO.md);
 later, proofs of concept: trading, looting, smuggling (smuggling still needs its own go-ahead), Dignity
 met again, more puzzles there.
+
+## Affame, the queen of sweetness (11 Nov)
+
+"Need to work affame into it somewhere... I have dubbed her the queen of sweetness so she can have a nice
+kind peaceful role somewhere." **Affame** (she; a real pirate, pirate name as the user spelt it, to check
+on her pirate page with her ocean and portrait before she's drawn, then into PIRATES): the queen of
+sweetness, a kind, peaceful part, where and what still open. (Nearby ideas it might sit with: Dachimpy's
+house with its cookies and hugs at the door, the houses that each give you something kind to do.)
