@@ -11,6 +11,12 @@ import { W, H, SPAWN, chainName } from '../sailing.js';
    stays after they land. Platforms are translucent square tiles with a thin ledge under them:
    filled, the piece shows inside; empty, coloured corner brackets for the colour it wants. A wave
    and a ship's sails behind the board.
+   Each pop shown for what it is (11 Nov, of Tzz's board: "there was no chain of four or platform
+   clear ... a yellow on a white block, and somehow it cleared a platform"): a target square is
+   faintly tinted the colour it wants, its brackets showing round whatever's in it, so a platform
+   reads as its colours and a square that's no target stays plain; and before a step pops, what it
+   is lights up (the stage says, src/sailing.ts): a line's four ringed, or a platform's outline, and
+   then they all pop together, the platform fading and its ledge dropping away with them.
    And balloony (11 Nov: "how on earth do these sailing pieces pop in the puzzle? It makes sense.
    They're balloon animals"): each piece a glossy balloon with its knot, a little squishy, squashing
    as it lands; when a chain goes off they pop a step at a time down the board, pop-pop-pop, each a
@@ -201,7 +207,8 @@ function padMake(B) {
 
 // A board's own state: its canvas, what's on it, what's playing out.
 const state = (cv) => ({ cv, g: cv.getContext('2d'), k: 0, dpr: 1, back: null, sig: '', rect: null, game: null,
-  pieces: new Map(), platforms: [], pops: [], bits: [], rings: [], glit: [], queue: [], prev: null, holdT: 0, steps: 0, banner: null, fall: null, shown: { r: 0, c: SPAWN[0] } });
+  pieces: new Map(), platforms: [], pops: [], bits: [], rings: [], glit: [], queue: [], prev: null, holdT: 0, steps: 0, banner: null, fall: null, shown: { r: 0, c: SPAWN[0] },
+  hi: null, what: null, fading: [] });
 
 /** The board's size in its own units (pixels at scale 1), and where a square of it is: for a board put
     in the world (sailBoardCanvas). */
@@ -278,6 +285,7 @@ export function sailBoardLayout(B, low, top, touch = matchMedia('(pointer: coars
 export function sailBoardLay(B, game) {
   B.game = game;
   B.pieces.clear(); B.pops = []; B.bits = []; B.rings = []; B.queue = []; B.prev = null; B.holdT = 0;
+  B.doomed = null; B.hi = null; B.what = null; B.fading = []; B.stagePlatforms = null; B.after = null;
   layGrid(B, game.snap(), game.platforms.slice());
 }
 function layGrid(B, grid, platforms) {
@@ -334,21 +342,34 @@ function stageNext(B) {
     q.ty = r; q.p = p ?? q.p;
   }
   B.doomed = new Set(st.cleared);
+  B.what = { kind: st.kind, lines: st.lines ?? [], went: st.went ?? [], colours: new Map() };
+  for (const l of B.what.lines) { const [r, c] = l[0]; B.what.colours.set(`${r},${c}`, colourAt(B, at, r, c)); }
   B.stagePlatforms = st.platforms;
   B.prev = { grid: st.grid, platforms: st.platforms };
 }
-// Once everything's fallen, the step's pops: a row apart down the board, pop-pop-pop.
+// The colour of the piece that'll be at (r, c) once this step's fallen (`at`: where each is, by id).
+function colourAt(B, at, r, c) {
+  for (const [id, [rr, cc]] of at) if (rr === r && cc === c) return B.pieces.get(id)?.p.c;
+  return undefined;
+}
+// Once everything's fallen and what it is has lit up (HILITE), the step's pops, all together: a
+// line's four, or a platform's targets, the platform fading and its ledge dropping away with them.
+// Step by step down the board, pop, pop, pop.
+const HILITE = 0.3;
 function doomedPop(B) {
-  if (!B.doomed?.size) { B.doomed = null; if (B.stagePlatforms) { B.platforms = B.stagePlatforms; B.stagePlatforms = null; } return; }
+  B.hi = null;
+  if (!B.doomed?.size) { B.doomed = null; B.what = null; if (B.stagePlatforms) { B.platforms = B.stagePlatforms; B.stagePlatforms = null; } return; }
   const qs = [...B.doomed].map((id) => [id, B.pieces.get(id)]).filter(([, q]) => q);
-  const top = Math.min(...qs.map(([, q]) => q.ty));
-  for (const [id, q] of qs) { pop(B, q, (q.ty - top) * 0.045); B.pieces.delete(id); }
-  B.doomed = null;
+  for (const [id, q] of qs) { pop(B, q, 0); B.pieces.delete(id); }
+  B.doomed = null; B.what = null;
   B.steps++;
   if (B.steps >= 2) B.banner = { text: chainName(B.steps), t: 0 };
   // (a platform that went goes with its pops)
   const gone = B.platforms.filter((p) => !B.stagePlatforms?.includes(p));
-  for (const p of gone) for (let i = 0; i < 6; i++) B.bits.push({ x: p.c + Math.random() * p.w, y: p.r + p.h, vx: (Math.random() - 0.5) * 3, vy: -2 - Math.random() * 2, t: 0, life: 0.8, col: '#8a5a2a', w: 0.18, h: 0.07, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 12 });
+  for (const p of gone) {
+    B.fading.push({ p, t: 0 });
+    for (let i = 0; i < 6; i++) B.bits.push({ x: p.c + Math.random() * p.w, y: p.r + p.h, vx: (Math.random() - 0.5) * 3, vy: -2 - Math.random() * 2, t: 0, life: 0.8, col: '#8a5a2a', w: 0.18, h: 0.07, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 12 });
+  }
   B.platforms = B.stagePlatforms ?? B.platforms;
   B.stagePlatforms = null;
 }
@@ -373,7 +394,13 @@ export function sailBoardTick(B, dt, pair, sp = null) {
     q.sq = Math.max(0, q.sq - dt * 4);
   }
   const fallen = ![...B.pieces.values()].some((q) => Math.abs(q.y - q.ty) > 1e-3);
-  if (fallen && B.doomed) doomedPop(B);
+  // (once it's all fallen, what's going lights up, then pops)
+  if (fallen && B.doomed) {
+    if (!B.doomed.size) doomedPop(B);
+    else if (!B.hi) B.hi = { t: 0 };
+    else if ((B.hi.t += dt) >= HILITE) doomedPop(B);
+  }
+  B.fading = B.fading.filter((f) => (f.t += dt) < FADE);
   if (B.after && !B.pops.some((p) => !p.gone)) { B.after(); B.after = null; }
   if (B.queue.length && fallen && !B.doomed && !B.after && !B.pops.some((p) => !p.gone) && B.holdT > 0.12) stageNext(B);
   // Pops: a quick swell, then the burst: a ring, scraps of skin and confetti.
@@ -425,10 +452,59 @@ function drawPeg(g, a, b) {
 }
 function brackets(g, r, c, col) {
   const x = px(c) + 4, y = py(r) + 4, s = CELL - 8, l = 10;
-  g.strokeStyle = col; g.lineWidth = 3.5; g.lineCap = 'round';
+  g.strokeStyle = col; g.lineWidth = 3.5; g.lineCap = 'round'; g.lineJoin = 'round';
   for (const [ox, oy, dx, dy] of [[0, 0, 1, 1], [s, 0, -1, 1], [0, s, 1, -1], [s, s, -1, -1]]) {
     g.beginPath(); g.moveTo(x + ox, y + oy + dy * l); g.lineTo(x + ox, y + oy); g.lineTo(x + ox + dx * l, y + oy); g.stroke();
   }
+}
+
+/* A platform: a translucent tile on each square, each target tinted the colour it wants with that
+   colour's brackets in its corners (drawn under the balloons, so they show round one sitting in it;
+   brighter once it holds its colour), any other square plain; the ledge under it. `a` how much of it
+   there is (fading as it goes), `drop` how far its ledge has fallen away. */
+const FADE = 0.35;
+const TINT = [['rgba(47,134,232,0.30)', 'rgba(47,134,232,0.5)'], ['rgba(255,205,40,0.5)', 'rgba(255,205,40,0.68)'], ['rgba(255,255,255,0.26)', 'rgba(255,255,255,0.45)']];
+const BRACKET = ['#4ea2ff', '#ffd23a', '#ffffff'];
+function drawPlatform(g, p, grid, a = 1, drop = 0) {
+  g.globalAlpha = a;
+  const want = new Map(p.targets.map((t) => [`${t.r},${t.c}`, t.colour]));
+  for (let r = p.r; r < p.r + p.h; r++) for (let c = p.c; c < p.c + p.w; c++) {
+    const colour = want.get(`${r},${c}`);
+    g.beginPath(); g.roundRect(px(c) + 2, py(r) + 2, CELL - 4, CELL - 4, 5);
+    if (colour === undefined) {
+      g.fillStyle = 'rgba(150,180,210,0.10)'; g.strokeStyle = 'rgba(200,225,245,0.35)'; g.lineWidth = 1.5;
+      g.fill(); g.stroke();
+      continue;
+    }
+    const q = grid.get(`${r},${c}`), ok = q && q.p.c === colour && Math.abs(q.y - q.ty) < 1e-3;
+    g.fillStyle = TINT[colour][ok ? 1 : 0]; g.strokeStyle = 'rgba(225,245,255,0.7)'; g.lineWidth = 2;
+    g.fill(); g.stroke();
+    brackets(g, r, c, BRACKET[colour]);
+  }
+  const ly = py(p.r + p.h) - 3 + drop * CELL * 0.8;
+  g.fillStyle = '#6b4220'; g.fillRect(px(p.c) + 1, ly, p.w * CELL - 2, 6);
+  g.fillStyle = '#b07a40'; g.fillRect(px(p.c) + 1, ly, p.w * CELL - 2, 2);
+  g.globalAlpha = 1;
+}
+/* What a step's about to pop, lit up (`u` 0 to 1 as it comes on): a line's squares ringed in one
+   bright band, in its colour; a platform's outline in gold, ledge and all. */
+function drawLit(g, what, u, now) {
+  if (!what) return;
+  const pulse = 0.75 + 0.25 * Math.sin(now * 22);
+  g.save();
+  g.lineJoin = 'round'; g.shadowBlur = 14;
+  const band = (x, y, w, h, col) => {
+    g.globalAlpha = u * 0.22; g.fillStyle = '#ffffff'; g.shadowColor = 'transparent';
+    g.beginPath(); g.roundRect(x, y, w, h, CELL * 0.42); g.fill();
+    g.globalAlpha = u * pulse; g.shadowColor = col; g.strokeStyle = col; g.lineWidth = 4;
+    g.beginPath(); g.roundRect(x, y, w, h, CELL * 0.42); g.stroke();
+  };
+  for (const l of what.lines) {
+    const rs = l.map(([r]) => r), cs = l.map(([, c]) => c), r0 = Math.min(...rs), c0 = Math.min(...cs);
+    band(px(c0) + 1, py(r0) + 1, (Math.max(...cs) - c0 + 1) * CELL - 2, (Math.max(...rs) - r0 + 1) * CELL - 2, BRACKET[what.colours.get(`${l[0][0]},${l[0][1]}`) ?? 2]);
+  }
+  for (const p of what.went) band(px(p.c) - 1, py(p.r) - 1, p.w * CELL + 2, p.h * CELL + 6, '#ffd23a');
+  g.restore();
 }
 
 // A four-pointed sparkle at (x, y), `k` from its middle to a point.
@@ -450,21 +526,9 @@ function draw(B, now, pair) {
   g.setTransform(s, 0, 0, s, 0, 0);
   const grid = new Map();
   for (const q of B.pieces.values()) grid.set(`${Math.round(q.ty)},${q.x}`, q);
-  // The platforms: translucent tiles, a ledge under each, brackets on the targets still wanting.
-  for (const p of B.platforms) {
-    for (let r = p.r; r < p.r + p.h; r++) for (let c = p.c; c < p.c + p.w; c++) {
-      g.fillStyle = 'rgba(190,230,255,0.22)'; g.strokeStyle = 'rgba(225,245,255,0.75)'; g.lineWidth = 2;
-      g.beginPath(); g.roundRect(px(c) + 2, py(r) + 2, CELL - 4, CELL - 4, 5); g.fill(); g.stroke();
-    }
-    for (const t of p.targets) {
-      const q = grid.get(`${t.r},${t.c}`), ok = q && q.p.c === t.colour && Math.abs(q.y - q.ty) < 1e-3;
-      if (ok) { g.fillStyle = `${COL[t.colour].base}55`; g.beginPath(); g.roundRect(px(t.c) + 2, py(t.r) + 2, CELL - 4, CELL - 4, 5); g.fill(); }
-      else brackets(g, t.r, t.c, COL[t.colour].base === '#eef2f8' ? '#ffffff' : COL[t.colour].base);
-    }
-    const ly = py(p.r + p.h) - 3;
-    g.fillStyle = '#6b4220'; g.fillRect(px(p.c) + 1, ly, p.w * CELL - 2, 6);
-    g.fillStyle = '#b07a40'; g.fillRect(px(p.c) + 1, ly, p.w * CELL - 2, 2);
-  }
+  // The platforms: translucent tiles, a ledge under each, and the platforms that just went fading.
+  for (const p of B.platforms) drawPlatform(g, p, grid);
+  for (const f of B.fading) drawPlatform(g, f.p, grid, 1 - f.t / FADE, f.t / FADE);
   // The pegs between a pair's halves (still joined), then the balloons.
   const where = new Map();
   for (const [id, q] of B.pieces) where.set(id, q);
@@ -472,7 +536,13 @@ function draw(B, now, pair) {
     const m = q.p.mate !== undefined ? where.get(q.p.mate) : null;
     if (m && id < q.p.mate && Math.abs(m.y - q.y) + Math.abs(m.x - q.x) < 1.2) drawPeg(g, [q.y, q.x], [m.y, m.x]);
   }
-  for (const [id, q] of B.pieces) drawBalloon(g, q.p.c, q.p.fixed, q.x, q.y, q.sq, Math.sin(now * 2.3 + id * 1.7));
+  // (what's about to pop, lit up, quivers)
+  const lit = B.hi ? Math.min(1, B.hi.t / (HILITE * 0.35)) : 0;
+  for (const [id, q] of B.pieces) {
+    const going = lit && B.doomed?.has(id);
+    drawBalloon(g, q.p.c, q.p.fixed, q.x, q.y, q.sq, going ? Math.sin(now * 38 + id) * 1.6 * lit : Math.sin(now * 2.3 + id * 1.7), going ? 1 + 0.06 * lit : 1);
+  }
+  if (lit) drawLit(g, B.what, lit, now);
   // About to pop: swelling.
   for (const p of B.pops) if (!p.gone) {
     const u = Math.max(0, p.t) / POP_SWELL;

@@ -298,7 +298,7 @@ export class Sailing {
                 this.remove(ids);
                 fill += this.fills();
                 res.cleared += ids.length;
-                this.stage(res, 'line', ids);
+                this.stage(res, 'line', ids, { lines });
                 continue;
             }
             const done = this.platforms.filter((p) => p.targets.every((t) => { const x = this.grid[t.r][t.c]; return !!x && x.c === t.colour; }));
@@ -317,7 +317,7 @@ export class Sailing {
             this.platforms = this.platforms.filter((p) => !done.includes(p));
             this.remove(ids);
             res.cleared += ids.length;
-            this.stage(res, 'platform', ids);
+            this.stage(res, 'platform', ids, { went: done });
         }
         res.name = chainName(res.steps);
         res.mult = multiplier(res.steps, this.difficulty);
@@ -447,9 +447,9 @@ export class Sailing {
         scan(H, (c, r) => [r, c], W);
         return out;
     }
-    stage(res, kind, cleared) {
+    stage(res, kind, cleared, what = {}) {
         if (this.record)
-            res.stages.push({ kind, cleared, grid: this.snap(), platforms: this.platforms.slice() });
+            res.stages.push({ kind, cleared, grid: this.snap(), platforms: this.platforms.slice(), ...what });
     }
     /** A copy of the grid, pieces and all. */
     snap() { return this.grid.map((row) => row.map((x) => (x ? { ...x } : null))); }

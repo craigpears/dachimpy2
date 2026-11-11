@@ -1661,6 +1661,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **Balloons, so they pop (11 Nov):** the pieces are balloon animals (IDEAS.md, Tzz's lesson), so
     they're glossy and knotted, squash as they land, and a chain pops down the board a stage at a
     time, pop-pop-pop, its name rising as it climbs.
+  - **Each pop shown for what it is (11 Nov, after Tzz's lesson):** "when things popped, it did not
+    seem to be following the mechanics ... there was no chain of four or platform clear. It was ...
+    a yellow on a white block, and somehow it cleared a platform." The board was drawing what the
+    rules did (checked step by step), but a platform read as a white block. So each target square is
+    faintly tinted the colour it wants, its brackets kept round whatever sits in it (brighter once
+    filled), and a square that's no target stays plain; and before a step pops, what it is lights up
+    for a moment (the step says, src/sailing.ts: a line's squares, a platform that went): a line's
+    four ringed in their colour, or a platform's outline in gold. Then they pop together, the
+    platform fading and its ledge dropping away. The same board at sea, Kikkit's and Tzz's.
   - **Sparkly full sails when you sail well, "very importantly" (11 Nov):** "when you do well in
     sailing, you normally get like a sparkly indicator to show how well you're doing ... you need
     lots of sparkly full sails like in the game." A sparkle meter on the board fills with your

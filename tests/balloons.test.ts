@@ -8,6 +8,7 @@ import { describe, expect, it } from 'vitest';
 import { ROUTINES, SHOW, BalloonShow, beats, layout, perform, route, setup, type Act, type Routine, type ShowEvent } from '../src/balloons';
 import { Sailing, PLATFORM, SPAWN } from '../src/sailing';
 import { SailPair } from '../src/sail-pair';
+import { stagesAreWhatTheySay } from './sail-stages';
 
 /** Plays a routine a twist at a time: the board after each of her twists, and what your pair (the
     last) set off, stage by stage. */
@@ -87,6 +88,19 @@ describe('her lesson\'s boards are real Sailing boards, played by the real rules
       // (a line pops first, and then a platform, every time)
       const kinds = last.stages.slice(1).map((s) => s.kind);
       expect(kinds).toEqual(Array.from({ length: last.steps }, (_, i) => (i % 2 ? 'platform' : 'line')));
+    }
+  });
+
+  it('11 Nov, "a yellow on a white block, and somehow it cleared a platform": each pop is a line of four or a platform she built, and says which', () => {
+    for (const r of Object.values(ROUTINES)) {
+      const { boards, last } = stepThrough(r), before = boards[boards.length - 1];
+      stagesAreWhatTheySay(before.snap(), before.platforms.slice(), last);
+      // (every line is four of a colour, every platform that goes one she built on, all its targets
+      // filled in their colours: the board shows each for what it is, sail-board.js)
+      for (const st of last.stages) {
+        if (st.kind === 'line') expect(st.lines!.map((l) => l.length)).toEqual([4]);
+        if (st.kind === 'platform') expect(st.went!.every((p) => p.targets.some((t) => before.grid[t.r][t.c]))).toBe(true);
+      }
     }
   });
 

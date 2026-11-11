@@ -115,8 +115,11 @@ export type Pair = [number, number];
     square where it comes to rest (left out: dropped straight down that column from the top). */
 export interface Drop { col: number; turn: 0 | 1 | 2 | 3; row?: number }
 
-/** One step as it's seen: what went (or, for 'land', nothing), then the board. */
-export interface Stage { kind: 'land' | 'platform' | 'line'; cleared: number[]; grid: (Piece | null)[][]; platforms: Platform[] }
+/** One step as it's seen: what went (or, for 'land', nothing), then the board. And what it was, so it
+    can be shown for what it is (the user, 11 Nov, of Tzz's board: "there was no chain of four or
+    platform clear ... a yellow on a white block, and somehow it cleared a platform"): a line step's
+    lines, each its squares [row, col] where they popped; a platform step's platforms that went. */
+export interface Stage { kind: 'land' | 'platform' | 'line'; cleared: number[]; grid: (Piece | null)[][]; platforms: Platform[]; lines?: [number, number][][]; went?: Platform[] }
 
 /** What a drop earned. */
 export interface Sail {
@@ -327,7 +330,7 @@ export class Sailing {
         this.remove(ids);
         fill += this.fills();
         res.cleared += ids.length;
-        this.stage(res, 'line', ids);
+        this.stage(res, 'line', ids, { lines });
         continue;
       }
       const done = this.platforms.filter((p) => p.targets.every((t) => { const x = this.grid[t.r][t.c]; return !!x && x.c === t.colour; }));
@@ -344,7 +347,7 @@ export class Sailing {
       this.platforms = this.platforms.filter((p) => !done.includes(p));
       this.remove(ids);
       res.cleared += ids.length;
-      this.stage(res, 'platform', ids);
+      this.stage(res, 'platform', ids, { went: done });
     }
 
     res.name = chainName(res.steps);
@@ -446,8 +449,8 @@ export class Sailing {
     return out;
   }
 
-  private stage(res: Sail, kind: Stage['kind'], cleared: number[]): void {
-    if (this.record) res.stages.push({ kind, cleared, grid: this.snap(), platforms: this.platforms.slice() });
+  private stage(res: Sail, kind: Stage['kind'], cleared: number[], what: Pick<Stage, 'lines' | 'went'> = {}): void {
+    if (this.record) res.stages.push({ kind, cleared, grid: this.snap(), platforms: this.platforms.slice(), ...what });
   }
 
   /** A copy of the grid, pieces and all. */

@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { BOOCH_PENALTY, COLOURS, COLOUR_NAMES, DIFFICULTY, EASY, H, PLATFORM, RUN_TABLE, SPAWN, Sailing, TOP_FREE, W, chainName, multiplier, runFor } from '../src/sailing';
 import type { Drop, Pair, Piece, Platform, Sail } from '../src/sailing';
 import { seeded } from '../src/mirror-row';
+import { stagesAreWhatTheySay } from './sail-stages';
 
 let ids = 10000;
 /** A board drawn by its bottom rows (the last string is the bottom row): '.' empty, 0-2 a loose piece
@@ -412,4 +413,24 @@ describe('a copy', () => {
     expect(s.score).toBe(0);
     expect(c.score).toBe(4);
   });
+});
+
+describe('each step of a chain is a line or a platform, and says which (11 Nov)', () => {
+  it('pops nothing but a line of four or a finished platform: "a yellow on a white block, and somehow it cleared a platform" (11 Nov)', () => {
+    let seen = { line: 0, platform: 0 };
+    // (greedy play, the move that scores most, so platforms get finished too)
+    for (let seed = 1; seed <= 3; seed++) {
+      const s = new Sailing(seeded(seed), true, { easy: true });
+      for (let n = 0; n < 30; n++) {
+        const ms = s.moves().map((m) => ({ m, pts: s.copy(seeded(1)).drop(m.col, m.turn, m.row).points }));
+        if (!ms.length) break;
+        const { m } = ms.reduce((a, b) => (b.pts > a.pts ? b : a)), prev = s.snap(), before = s.platforms.slice();
+        const res = s.drop(m.col, m.turn, m.row);
+        stagesAreWhatTheySay(prev, before, res);
+        for (const st of res.stages) if (st.kind !== 'land') seen[st.kind]++;
+      }
+    }
+    expect(seen.line).toBeGreaterThan(2);
+    expect(seen.platform).toBeGreaterThan(0);
+  }, 30000);
 });
