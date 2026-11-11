@@ -953,6 +953,15 @@ about). He's offhand about it, teaches you Distilling as if it were nothing, and
 is the start of smuggling (below: taxes, embargoes and the back beaches), run to another island as
 a side mission. Hidden, never hinted (RULES.md).
 
+**The mishap (11 Nov):** "just for the comedic layer ... occasionally, distilleries have been
+known to blow up. So I'm guessing when you sneak in and he starts showing you, you can have a bit
+of a mishap. So, oops, that happened sometimes. Don't worry about it." As he shows you round, the
+still goes up with a bang (soot, a hat blown off, bits of copper raining down) and Helium, unfazed,
+waves it off: "Oops. That happens sometimes. Don't worry about it." Then carries on teaching you as
+if nothing had. The humour's a layer on the real thing (RULES.md): it could even be what a burnt
+Distilling board looks like (the user's own Distilling Simulator was all about when columns get
+burnt), so a botched batch in the puzzle gets a little bang of its own.
+
 ## Placing creatures: choose what they get up to (11 Nov)
 
 "when you're placing ... familiars and pets in scenes, like, you should have options for, like,
