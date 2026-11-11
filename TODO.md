@@ -279,34 +279,13 @@ the site (`.assetsignore` skips `*.md`).
   outside; not yet tried by the user. Watch for: the markers on raiders outside cluttering the
   view while you carry a piece.
 
-- **The starlit door (11 Nov):** a hidden door in the race course's cliffs, found like the crane's ledge,
-  opened by Duty Navigation: each constellation lights its stars on the rock, then the door opens on a
-  tunnel, the course's biggest shortcut. "build duty navigation in the door ... I don't see why it's one or
-  the other." The tunnel behind it is a long straight passage under the cliffs, a cavern,
-  and getting through it takes a big Vegas too: "that unlocks a really long, straight passage. But it
-  requires some like more hardcore puzzling ... you're going underneath the cavern, but you've got to do
-  like big Vegas, like a big Vegas to get through it in sailing or whatever. That would be fantastic."
-  And the door's Navigation could be one mega constellation on a bigger board, more rings than the usual
-  three (the user, 11 Nov: "I think they've done it so there are now ... 4 rings in the [duty] navigation?
-  So I don't know if that can be an idea on how to make just our one difficult constellation ... is it
-  going to be really ridiculous to say you have 5 rings to complete ... It's like just one mega
-  constellation. Well, I don't know if that's actually going to work at all, but why not?"). Then,
-  rather than more rings: the usual three, but a constellation picked on purpose to need a really hard
-  combo, which never happens in duty nav as it's played ("you get a few accidental clears and things, but
-  it's relatively more about just board management ... combos never have any point"): "you've got to have
-  like three reds together or four reds together on the bottom row." Three or four of a colour side by
-  side would clear as a line if placed a star at a time, so they have to land all at once: "you basically
-  got to put 2 in there and then say 2 of another color, 2 of the first color in the ring above those 2, so
-  that when you do a combo ... it creates a gap and it falls down." (The constellation going first when
-  it's made with a line at once, as YPPedia has it and src/navigation.ts already does.) "Those kind of
-  really evil boards that are impossible and frustrating to beat, like you're guaranteed to practically
-  booch them. Oh, that would be so evil and so fitting. That would be fantastic." The bots to show it can
-  be done. Where it came from (the user, 11 Nov): "I was inspired thinking, what would be a really evil
+- **Credit Umami for the evil constellation (11 Nov):** from the starlit door's item, now built (RULES.md,
+  "The starlit door"). Where it came from (the user): "I was inspired thinking, what would be a really evil
   thing for Umami in the sloop races to have to contend with?" (Umami, a friend's pirate, whose idea PvP
   races were.) Settled: credit Umami in the changelog, for fun ("we should definitely credit that Umami.
   Maybe if it's just in the change log. I was just thinking of the change log being funny"), in Duty
-  Navigation's entry when the door lands: the evil constellation made with Umami in mind, without saying
-  where it's played (the door stays a secret).
+  Navigation's entry: the evil constellation made with Umami in mind, without saying where it's played
+  (the door stays a secret; no shot of the door or tunnel). Duty Navigation has no changelog entry yet.
 - **Shortcuts not all created equal (11 Nov):** on the race course, small shortcuts as well as big ones,
   each needing a combo of its size: a tiny one a Double gets you through (as a Double clears the reef out
   of Kikkit's whirlpools), bigger ones a bigger combo, the biggest the starlit door's tunnel. "Are you a
@@ -419,7 +398,11 @@ the site (`.assetsignore` skips `*.md`).
   rules (the one whirlpool module, src/den-whirl.ts, and the wind), there to be ridden, not to send you
   back: each racer picks where to start along the starting line, as at a blockade's opening, having
   eyeballed the fastest way through. A field for the simulation (above) to weigh too: no one spot along
-  the line should always win.
+  the line should always win. Part of why (the user, 11 Nov): "if you want to take the most optimum
+  route, you're more likely to be competing against other players and potentially going to get shot.
+  Hypothetically." The best line through is the crowded one: with several racers there, you jostle for
+  it (and, if racers can ever fire on each other, IDEAS.md, get shot at), so a slower line on your own
+  can pay.
 
 ## Spotted along the way (not asked for)
 
