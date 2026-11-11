@@ -293,6 +293,13 @@ the site (`.assetsignore` skips `*.md`).
   boxy. I think some of that, as I said, is probably a good style and fit, but I think it needs a tiny bit
   of a slant." Not dramatic: the sides falling in a little from the waterline up to the deck (tumblehome),
   so a hull no longer reads as a box side-on, the sloop's and the frigate's alike.
+- **Sailing's platforms as the real game's: no gaps, no colour on top of itself (11 Nov):** "why is there,
+  it's almost like a grayed out block ... on the platform, it's just like a gap. Like that definitely does
+  not happen in sailing. Nor do ... I never feel like I've seen the same color on top of each other. They
+  either kind of, if they're going to do that, they're either next to each other, or you can have like
+  really big platforms with like a diagonal shape with like ... 6 of the same color, but like 2 on top of
+  each other with different colors at the side. I've never seen that." So every square of a dealt platform
+  a target, and a colour runs side by side or on along a diagonal, never stacked on itself.
 
 ## Spotted along the way (not asked for)
 
