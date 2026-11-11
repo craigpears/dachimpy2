@@ -168,6 +168,18 @@ the site (`.assetsignore` skips `*.md`).
   between the wedding choices." A short opening cutscene, close on her, telling you what this is
   (her wedding venue, you plan one your way, then it plays out); and the camera close while you
   choose, on whatever the choice is about.
+- **Dress someone of your own, as you dress yourself (11 Nov):** "when you're doing like someone of
+  your own as well, again, it should let you do like the same as like when you're dressing
+  yourself. You know, you could do random, but you need to be able to customize them." The whole
+  wardrobe (body, skin, hair, every piece and dye, a familiar) for the partner you make, with
+  random as a start.
+- **The ship's deck flickers (11 Nov):** "the ship's deck scene went really crazy flickering." The
+  wedding on the ship's deck venue flickers badly (to find: likely two surfaces at the same height).
+- **Guests stand through the benches (11 Nov):** "the pirates are kind of, you know, going through
+  the benches. Although, you know, I guess we do want them probably to be standing up maybe all on
+  benches. I don't know, because, you know, obviously we want to show their outfits off." So no
+  guest stands inside a bench: they stand beside the benches (or up on them), in full view, outfits
+  on show.
 
 ## Needs a playtest to pin down
 

@@ -1037,6 +1037,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     jetty), a theme (Happy and rosy, Bloody and gory, Drunkards' fest) that lays out the props and
     dresses eight guests, then anything tuned freely (move, turn, recolour, add or remove props;
     redress a guest), then the plot.
+  - **The suitors' cheesy lines, loved (11 Nov):** "Oh, I love the cheesy lines ... the variety is
+    funny", Captain Rosalind's "I've sunk forty ships, darling, but nobody's ever sunk my heart"
+    among them. Keep them cheesy and varied. And cohesive: Lady Marigold's "a parrot who swears. We
+    come as a set" had no parrot, "but the guy next to her does", so whatever a suitor mentions,
+    they have (a test checks).
   - **Funny about her, never mean (11 Nov):** "we'd rather be a lot more humorous about
     [Mischievious], but not negative. Like, I don't like where it says, oh, marry [her], she's free,
     she's nearly always free. Like, that feels mean." She jokes about herself (the dress already on,
