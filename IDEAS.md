@@ -414,6 +414,13 @@ then "she's definitely a penguin side quest".
   the penguin, and she's just so happy." The ending is that little scene: her island, all her
   familiars, the penguin among them, and Kikkit overjoyed. (Earlier thought, now set aside: the
   penguin keeping you company.)
+  **Or she goes to live with the penguins (11 Nov):** "Maybe the end is when you get to the
+  island, Kikkit [decides] she's just going to go live with the penguins. You know, fits with her
+  personality and the general craziness." So instead of the penguin coming home to her, she
+  ups and leaves her island to live among them: the ending is her settling in with a colony of
+  penguins, delighted, which nobody saw coming but which makes perfect sense for Kikkit. (To pin
+  down with the user: which island, hers or a penguins' island past the whirlpools, and whether
+  her familiars go with her.)
 - **Penguins in the wardrobe too:** "make her a penguin" first meant Kikkit as one; if wanted,
   a penguin body the pirate maker can dress, so anyone can be a penguin.
 - **All in on her craziness (10 Nov):** "really just do the whole craziness of Kikkit ... she's the

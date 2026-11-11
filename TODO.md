@@ -106,7 +106,8 @@ the site (`.assetsignore` skips `*.md`).
   **Order of work (11 Nov, "move on to that sailing feature with all the accompanying things"):**
   its board drawn, balloony, and playable anywhere at sea first (done: RULES.md, "Sailing at sea"); then Kikkit's island and her
   rambling; the whirlpools through the reef with the penguin in the middle; Tzz's island and her
-  balloon lesson aboard; the penguin home to Kikkit.
+  balloon lesson aboard; the ending (the penguin home to Kikkit, or, 11 Nov, Kikkit off to live
+  with the penguins: IDEAS.md).
 
 - **Sailing's sparkle, two small things (11 Nov, seen when it was built):** from behind her, the
   camera sees her sails nearly edge-on, so a Vegas's billow barely shows; and on a phone the den's
