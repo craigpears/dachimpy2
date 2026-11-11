@@ -116,7 +116,7 @@ the site (`.assetsignore` skips `*.md`).
   starting position on the next one, but flipped around." And "on some of them you'd naturally have
   like a whirlpool but with a corner missing where there's some winds, so you kind of get caught in
   the whirlpool and it sends you to the opposite corner, which then gets you on some winds and sends
-  you back ... those kind of mechanics of throwing you back to the start." So a whirlpool is a 2×2
+  you back ... those kind of mechanics of throwing you back to the start." So a whirlpool is a 2Ã—2
   of squares on the sea, acting like the trade winds: end a move on one and it turns her a quarter
   and puts her on the opposite corner, round and round; one with a corner missing has winds there
   that carry her back toward the start. A Sailing gust has to carry her clean over them.
@@ -141,6 +141,13 @@ the site (`.assetsignore` skips `*.md`).
   the crane, haul her up, and the like), the offer is in the view where you're looking, at the
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
+
+- **Kikkit never stops talking (11 Nov):** "I love how long she goes on tangents ... you're sailing
+  past, you've not even engaged, and she's going on these tangents ... she should just like have an
+  insanely long list of speech ... After you get through the mechanical one, she just goes and just
+  keeps going on tangents ... a never-ending loop of tangents and her speech bubbles that don't stop.
+  That suits so incredibly well." So: after her ramble, an endless run of tangents for as long as
+  you're within earshot of her island, without being hailed; a very long list of them.
 
 ## Needs a playtest to pin down
 
