@@ -152,6 +152,14 @@ the site (`.assetsignore` skips `*.md`).
   - **3-hold-throne:** the hold: the gold and black throne on a tiered black-and-gold dais
     ringed with bones; skeleton cannons along both sides; long tables heaped with gold and gems;
     piles of skulls and bones; chests of gold; pumps and buckets; pumpkins; a globe.
+  - **How close (11 Nov):** "Not saying ... to do a faithful depiction ... but ... obviously Puzzle
+    Pirate elements ... should be faithful ... the skeleton cannons and the black and white theme and
+    a few of the bits of furniture ... the gibbet, the skeleton set ... most of the stuff like on the
+    top of the deck looks good. I'm not so sure about some of the goldy bits ... Actually, to be
+    fair, yeah, go relatively close. That's fine." So: the war frigate herself as Puzzle Pirates
+    drew her (faithful), black and white; must-haves the skeleton cannons, the gibbet cages and the
+    skeleton furniture set; the top deck's things relatively close; the gold (the throne, the
+    treasure) kept, but not the point. "It was just such a happy one."
 
 - **Next, one at a time, once Tzz is finished and played (11 Nov):** "for the [Daquan] and Helium
   ones, I think they're fleshed out enough ... to be on the to-do list to get started ... there's
