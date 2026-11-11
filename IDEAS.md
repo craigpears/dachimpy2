@@ -1072,6 +1072,24 @@ same thread as the museum's: helping and leading people, and growing into it.
 - Each trophy as a shared furniture piece; her lines in src/lines/; the house's pictures in the
   2D viewer too (TODO.md, "A 2D view of the portraits").
 
+- **Her Vikings bring you back to the den, and Dalnoth is the Vikings (11 Nov).** "the Vikings and
+  the [IOs] would actually be quite a good reason ... to be back at the Den ... that's the Viking
+  attack, isn't it? ... they come and attack your den ... [Dalnoth] is the Viking raids. So ... when
+  you go find their house, you can spawn more Viking raids ... [Dalnoth] can just be the Vikings.
+  Like, we could drop any, like, bigger role for him ... stick to this kind of smaller
+  self-contained thing." YPPedia, "Viking raid" (checked 11 Nov): an expedition, from a map bought
+  at an explorers' hall or won from a chart box, to a tiny outpost island; the crew mans the shore
+  fortifications' guns (Gunnery: "Each cannon fired adds damage blocks to the vikings' puzzles")
+  while the longships come in, then "the vikings will descend upon the island, starting either a
+  swordfight or rumble"; win it and it pays out. Sizes small (1 longship, 5-11 Vikings) to huge
+  (8-9 longships, up to 260). Which is the den already: its gun tower, its wall, its Swordfight.
+  So the den's raiders become Vikings, led by Dalnoth (already in his Viking helmet), and
+  Pandayay, who loves hosting them, is how you call a raid on: visit her and she sends Vikings at
+  your den, any size you dare, a reason to go home and defend it (STORY.md step 8 already has
+  "raids that come ... when you ring the bell"). Dalnoth stays this small, self-contained thing,
+  the Vikings' chief, rather than a bigger story of his own: what that means for STORY.md's steps
+  6 and 7 (guarding his treasure, coming back furious), to settle with the user. IOs: what they
+  are in Puzzle Pirates, to check on YPPedia.
 - **A double act with Multibella (11 Nov).** The user: "Multibella is very sweet as well, maybe
   they can do a duo act." **Multibella**, a real pirate (pirate name only; ocean, pirate page and
   portrait to check before they're drawn), in the same chat: "Foraging is mostly about using less
