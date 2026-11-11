@@ -347,6 +347,12 @@ the site (`.assetsignore` skips `*.md`).
   If you rotate it and it's against the wall, it should kind of push away from the wall. Say if it's like
   the two have rotated so they're on top of each other, ..." So a turn that would put a half into the wall
   (or another piece) nudges the pair a column away instead, as the real game does.
+- **Penguin Island only by way of the whirlpools (11 Nov):** "Make sure you can't get to Penguin Island
+  without going through the whirlpools ... the idea that, you know, you can get to the penguins by going
+  behind it is obviously a bit weird. Also, there should be a way through, because it's a shortcut. The
+  penguins ... should be an obvious bonus to go, oh, look, I found the penguins. They should be at least a
+  few rocks around them." So rocks round the penguins' island, closed off from the open sea behind, the
+  whirlpools (and a Vegas over them) the one way to it, and the whirlpools still the shortcut past the reef.
 
 ## Spotted along the way (not asked for)
 
