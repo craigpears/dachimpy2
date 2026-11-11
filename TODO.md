@@ -374,6 +374,17 @@ the site (`.assetsignore` skips `*.md`).
   little gold flags there now confuse: "they don't look like they're in the actual proper direction at
   all." So replace them with buoys that plainly lead round the long way. After the starlit door, with the
   shortcuts of every size.
+- **The race's rivals: the den's own characters, each with a way of racing (11 Nov):** "maybe we just focus
+  on this for now, and Daquan ... whoever other characters we've got already in here can all be characters
+  that can drive sloops. And obviously we've got different strengths, like ... [Tzz] and [Kikkit] will be
+  the sailors ... maybe [Kikkit] goes greedy for the Vegases, [Tzz] goes another route ... Everyone's got
+  their own little profile and way they approach it." So the nameless rival becomes several, from the
+  pirates already in the den (Kikkit, Tzz, Dignity, Mischievious, Gravee, Dalnoth...; Daquan once he's
+  drawn, his portrait checked first), each a bot with a profile: which shortcuts they go for and how good
+  they are at each puzzle (Kikkit always for the Vegas at the whirlpools, Tzz steady Sailing another way, a
+  carpenter for the crane...), played as real moves where the puzzles have bots (tools/sail-bots.mjs,
+  row-bots, nav-bots), so they're the testers as well. Each looks as they do elsewhere (one look
+  everywhere), with a line or two on the way.
 
 ## Spotted along the way (not asked for)
 
