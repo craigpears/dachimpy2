@@ -515,7 +515,14 @@ exactly; the real game's own seed can't be had, so her board is rebuilt in our d
   The open question: whether Sailing stays a board you go into, or becomes your own pirate on deck
   twisting balloons (each piece you drop a twist, each chain a balloon animal, popped to send her
   forward), the board shown as what's in their hands. Either way it's what gets you through the
-  whirlpools to the penguin, once Tzz has shown you how. (To settle with the user.)
+  whirlpools to the penguin, once Tzz has shown you how.
+  **Settled (11 Nov): both, together.** "you've got actually going through the whirlpools, but
+  she's there maybe on your ship teaching you, showing you through her ... balloon animal skills."
+  You sail the whirlpools yourself, in the Sailing puzzle, and Tzz comes aboard with you as you go,
+  twisting balloons alongside: showing the double that'll clear the next whirlpool, then the Vegas
+  for the last stretch, her balloons the same shapes as the pieces on your board, popping as your
+  chains do. The joke's on top and the mechanic's real underneath (RULES.md, "The humour's a layer
+  on a real mechanic").
 
 ## A bigger ship from the shipwright (10 Nov)
 

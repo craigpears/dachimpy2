@@ -141,6 +141,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   `walk`, `gun-tower`, `built`) and their starts and scenes (`shack`, `map-scene`, `sea`,
   `dignity`, `umami`, `wedding`, `married`). Choosing one from the cheats puts its link in the address bar, and its
   button's tooltip shows it. A name that isn't one says so. A new scene or start gets a name too.
+- **The humour's a layer on a real mechanic (11 Nov).** Of Tzz teaching Sailing as balloon animals:
+  "it works well as a mechanic. Everything works together, that's always the point. The humour is
+  the layer on top, but there's a genuine mechanic underneath." A joke is never just set dressing:
+  it explains or teaches something you then really play (the balloon animals are why Sailing's
+  pieces pop; Kikkit's nonsense is the literal way through her whirlpools). And a mechanic is never
+  left dry when a joke could carry it.
 - **Hidden gems, never hinted (10 Nov).** The user, of the checkpoint's "I wonder if there's another
   way round" and "Run it, row it, or knock its guns out": "I don't like it giving you a hint as to
   what you can do ... I like these just to be hidden gems that you work out ... make the fact that
