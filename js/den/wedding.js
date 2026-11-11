@@ -18,7 +18,7 @@ import * as LOOK from '../den-look.js';
 import {
   TONES, VENUES, THEMES, PLOTS, PROPS, SUGGEST, ARRIVE, WELCOME, RETURN, GUARDS, PROP_R, AREA, MAX_PROPS, DYE_NAMES, SECURITY, RAIDERS,
   ASK_HER, answer, STAND, onSomeone, Gush, fresh, dressFor, moveTo, clean, encode, decode, seatsFor, suitors, suitorTitle, themeOf, themeLook, caption, readSecs, cleanProp,
-  WHO, SIZES, MAX_GUESTS, SEEDS, PROP_GROUPS, MADE_IN, GROUNDS, clashes, restsOn, withSize, reseed, moveGuest, dressedUp, baseGuest, standFree, plainLook,
+  PLANNER, SIGNED, collage, momentCaption, fill, WHO, SIZES, MAX_GUESTS, SEEDS, PROP_GROUPS, MADE_IN, GROUNDS, clashes, restsOn, withSize, reseed, moveGuest, dressedUp, baseGuest, standFree, plainLook,
 } from '../den-wedding.js';
 import { $, scene, camera, renderer, hemi, skyDome, paintSky, keep, myLook, V3, toast as denToast, toastQuiet, toastHush, warm, sunOver, ray, burst, wearLook, worldLets, shake } from './world.js';
 import { cine, cinePlay, cineEnd, cineLets, bubble, bubbleAt, stepTo } from './cine.js';
@@ -27,6 +27,7 @@ import { propMesh } from './wedding-props.js';
 import { crowdMake, crowdSet, crowdPose, crowdPick } from './wedding-crowd.js';
 import { dressLook } from './menus.js';
 import { ceremony, portraitCam } from './wedding-ceremony.js';
+import { spouse, spouseOf, spouseMarried, spouseLeaves } from './spouse.js';
 
 const KEY = 'carp.den.wedding';
 // (the den's own news is kept quiet while you're here: these are the island's)
@@ -56,7 +57,7 @@ export const wed = {
   line: null, bub: null, show: null, lineup: null, welcome: null, portrait: null, settle: 0, sky: null, ring: null, mark: null,
   /** Come by sea (her isle's jetty: isle.js), so leaving's back aboard; and whether you've had a
       wedding yet (the captain's map's quests: quests.js). */
-  bySea: false, had: false,
+  bySea: false, had: !!spouse.who,
   /** Played by touch (a phone or tablet): the planner's hints say tap, drag and pinch. */
   touch: matchMedia('(pointer: coarse)').matches,
 };
@@ -210,6 +211,13 @@ function asks(on) {
 }
 $('wed-ask').onclick = (e) => { e.currentTarget.blur(); asks($('wed-asks').hidden); };
 
+/** Who you'd marry (for the cheat "Home, married"): whoever the wedding kept in this browser has you
+    marrying, or her. */
+export function plannedSpouse() {
+  const w = kept();
+  return spouseOf(w?.partner ? w : { ...fresh('happy'), partner: { kind: 'her', ver: 0 } }, versions());
+}
+
 // ---------- entering and leaving ----------
 function fade(then) {
   const f = $('wed-fade');
@@ -265,6 +273,7 @@ export function weddingLeave() {
     leaveSky();
     try { const u = new URL(location.href); u.searchParams.delete('w'); if (u.searchParams.get('at') === 'wedding') u.searchParams.delete('at'); history.replaceState(history.state, '', u); } catch { /* never mind */ }
     if (wed.bySea) denToast('Back aboard, off the Wedding Isle');
+    spouseLeaves(wed.bySea);
     wed.bySea = false;
   });
 }
@@ -480,11 +489,11 @@ function propsChanged(ev) {
     that's already in something, as the wreck leaves them, may move out of it). */
 const fits = (p, i = -1, was = null) => !onSomeone(p) && (!clashes(p, wed.w.props, i) || (was && clashes(was, wed.w.props, i)));
 function addProp(k, x, z) {
-  if (wed.w.props.length >= MAX_PROPS) { say(wed.fig.mis, 'Ooh, it\'s full! Take something away first, and we\'ll squeeze it in.'); return false; }
+  if (wed.w.props.length >= MAX_PROPS) { say(wed.fig.mis, PLANNER.full); return false; }
   const T = themeOf(wed.w.theme), c = MADE_IN[k] || (T ? T.dyes[wed.w.props.length % 3] : 'rose');
   const p = cleanProp({ k, x, z, r: 0, c });
-  if (onSomeone(p)) { say(wed.fig.mis, 'Not on top of us, love! A bit further off.'); return false; }
-  if (clashes(p, wed.w.props)) { say(wed.fig.mis, 'Ooh, something\'s there already! A little to the side?'); return false; }
+  if (onSomeone(p)) { say(wed.fig.mis, PLANNER.onUs); return false; }
+  if (clashes(p, wed.w.props)) { say(wed.fig.mis, PLANNER.taken); return false; }
   wed.w.props.push(p);
   wed.sel = { kind: 'prop', i: wed.w.props.length - 1 };
   const v = V3(p.x, 0.4, p.z); wed.root.localToWorld(v); burst(v, '#fff3c4', 10, 2.4);
@@ -499,7 +508,7 @@ function another() {
     const d = Math.max(0.5, PROP_R[p.k] * 1.6), q = cleanProp({ ...p, x: p.x + dx * d, z: p.z + dz * d });
     if (q && (q.x !== p.x || q.z !== p.z) && !onSomeone(q) && !clashes(q, wed.w.props) && wed.w.props.length < MAX_PROPS) { delete q.w; wed.w.props.push(q); wed.sel = { kind: 'prop', i: wed.w.props.length - 1 }; propsChanged('add'); return; }
   }
-  say(wed.fig.mis, 'Ooh, no room beside it! Somewhere else, perhaps?');
+  say(wed.fig.mis, PLANNER.noRoom);
 }
 function turnProp(d) { const p = selProp(); if (!p) return; const was = { ...p }; p.r = (p.r + d + 8) % 8; if (!fits(p, wed.sel.i, was)) { p.r = was.r; return; } propsChanged('turn'); }
 function colourProp(c) { const p = selProp(); if (!p) return; p.c = c; propsChanged('colour'); }
@@ -582,51 +591,87 @@ function startWedding() {
   wed.sel = null; wed.tool = null; wed.show = null; wed.gdrag = null; wed.drag = null; wed.pdrag = null;
   say(null);
   save();
+  wed.snaps = [];
   wed.step = 'playing';
   panel();
   ceremony({
     get w() { return wed.w; }, root: wed.root, fig: wed.fig, propG: wed.propG,
     names: () => ({ you: yourName(), partner: partnerName() }), seats, dyes: () => themeOf(wed.w.theme)?.dyes.slice(0, 4) || ['rose', 'pink', 'white'],
-    hex, say: (f, text) => say(f, text, 99), shake: () => { worldLets.shake = Math.max(shake, 0.15); }, set play(v) { wed.play = v; },
+    hex, say: (f, text) => say(f, text, 99), snap, shake: () => { worldLets.shake = Math.max(shake, 0.15); }, set play(v) { wed.play = v; },
     // (the crowd: turned to the camera for the cheer and the portrait, bouncing as they cheer)
     crowd: (beat, t) => { const g = beat === 'cheer' || beat === 'portrait'; if (g || wed.crowd.posed) { wed.crowd.posed = g; crowdPose(wed.crowd, beat === 'cheer' ? (k) => Math.abs(Math.sin(t * 8 + k * 1.7)) * 0.16 : null, g ? 0 : null); } },
   }, (skipped) => {
     wed.play = null;
     if (wed.leaving) return;
     wed.had = true;
+    // (whoever you've married comes home with you when you leave: spouse.js)
+    spouseMarried(spouseOf(wed.w, versions()));
     wed.step = 'portrait';
     wed.settle = skipped ? 1.3 : 0.7;   // (the camera's still easing in from wherever the cutscene was)
     const P = portraitCam(wed.w.guests.length); wed.shot = { look: P.look.clone(), dist: P.dist * roomy(), tilt: P.tilt, yaw: P.yaw }; wed.root.localToWorld(wed.shot.look);
   });
 }
+/** The middle of the view, 4:3: where a snapshot or the portrait is cut from. */
+function middle() {
+  const src = renderer.domElement, sw = src.width, sh = src.height, w = Math.min(sw, sh * 4 / 3), h = w * 3 / 4;
+  return [src, (sw - w) / 2, (sh - h) / 2, w, h];
+}
+/* A snapshot for the keepsake, at one of the ceremony's key moments (src/den-wedding.ts, moments; the
+   user, 11 Nov: "snapshots of all the key moments, so you have a nice kind of collage of the whole
+   wedding"): the frame drawn once more and read straight off into a small canvas of its own, cheap
+   enough not to hold the cutscene up. */
+function snap(m) {
+  renderer.render(scene, camera);
+  const cv = document.createElement('canvas');
+  cv.width = 480; cv.height = 360;
+  cv.getContext('2d').drawImage(...middle(), 0, 0, cv.width, cv.height);
+  (wed.snaps ||= []).push({ id: m.id, cv });
+}
 /* The last shot, held: drawn once more just now and read off the canvas (it doesn't keep what it
-   drew, so it's read straight after), then framed in gilt with its caption. */
+   drew, so it's read straight after), then framed in gilt with its caption: the keepsake's hero, the
+   snapshots of the ceremony round it, each captioned in the wedding's tone (src/lines/keepsake.ts). Laid
+   out for the screen it's seen on: upright, the snapshots under it; sideways, down its right. */
 function takePortrait() {
   renderer.render(scene, camera);
-  const src = renderer.domElement, sw = src.width, sh = src.height;
-  // A 4:3 window on the middle of the view.
-  const w = Math.min(sw, sh * 4 / 3), h = w * 3 / 4, sx = (sw - w) / 2, sy = (sh - h) / 2;
-  const OUT = 1200, oh = OUT * 3 / 4, pad = 46, cap = 112;
+  const snaps = wed.snaps || [], L = collage(snaps.length, innerWidth > innerHeight);
   const cv = document.createElement('canvas');
-  cv.width = OUT + pad * 2; cv.height = oh + pad * 2 + cap;
+  cv.width = L.w; cv.height = L.h;
   const g = cv.getContext('2d');
   const gold = g.createLinearGradient(0, 0, cv.width, cv.height);
   gold.addColorStop(0, '#7a5216'); gold.addColorStop(0.3, '#f2cf6a'); gold.addColorStop(0.55, '#a8761f'); gold.addColorStop(0.8, '#f6dc86'); gold.addColorStop(1, '#6e4812');
   g.fillStyle = gold; g.fillRect(0, 0, cv.width, cv.height);
   g.strokeStyle = 'rgba(60, 35, 8, .7)'; g.lineWidth = 4; g.strokeRect(12, 12, cv.width - 24, cv.height - 24);
-  g.strokeRect(pad - 8, pad - 8, OUT + 16, oh + 16);
-  g.drawImage(src, sx, sy, w, h, pad, pad, OUT, oh);
-  // A soft vignette, like an old painting.
-  const vg = g.createRadialGradient(pad + OUT / 2, pad + oh / 2, oh * 0.45, pad + OUT / 2, pad + oh / 2, OUT * 0.72);
-  vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(40,20,5,.45)');
-  g.fillStyle = vg; g.fillRect(pad, pad, OUT, oh);
-  g.fillStyle = '#f6ecd2'; g.fillRect(pad, pad + oh + 18, OUT, cap - 30);
-  g.strokeStyle = '#7a5216'; g.lineWidth = 2; g.strokeRect(pad, pad + oh + 18, OUT, cap - 30);
-  g.fillStyle = '#3a2210'; g.textAlign = 'center';
-  g.font = '700 36px Alegreya, Georgia, serif';
-  g.fillText(caption(wed.w, yourName(), partnerName()), cv.width / 2, pad + oh + 60);
+  // A picture in its own little frame, with a soft vignette, like an old painting.
+  const picture = (img, B, sub) => {
+    g.strokeStyle = 'rgba(60, 35, 8, .7)'; g.lineWidth = sub ? 3 : 4;
+    g.strokeRect(B.x - (sub ? 5 : 8), B.y - (sub ? 5 : 8), B.w + (sub ? 10 : 16), B.h + (sub ? 10 : 16));
+    g.drawImage(...img, B.x, B.y, B.w, B.h);
+    const vg = g.createRadialGradient(B.x + B.w / 2, B.y + B.h / 2, B.h * 0.45, B.x + B.w / 2, B.y + B.h / 2, B.w * 0.72);
+    vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, `rgba(40,20,5,${sub ? 0.35 : 0.45})`);
+    g.fillStyle = vg; g.fillRect(B.x, B.y, B.w, B.h);
+  };
+  const plaque = (B) => { g.fillStyle = '#f6ecd2'; g.fillRect(B.x, B.y, B.w, B.h); g.strokeStyle = '#7a5216'; g.lineWidth = 2; g.strokeRect(B.x, B.y, B.w, B.h); };
+  const fit = (text, x, y, maxW, px, style) => {
+    let s = px;
+    do g.font = `${style} ${s}px Alegreya, Georgia, serif`; while (g.measureText(text).width > maxW && --s > 12);
+    g.fillText(text, x, y);
+  };
+  picture(middle(), L.hero, false);
+  const names = { you: yourName(), partner: partnerName() };
+  g.textAlign = 'center';
+  snaps.forEach((s, i) => {
+    picture([s.cv, 0, 0, s.cv.width, s.cv.height], L.shots[i], true);
+    const C = L.caps[i], B = { x: C.x - 5, y: C.y + 8, w: C.w + 10, h: C.h - 10 };
+    plaque(B);
+    g.fillStyle = '#3a2210';
+    fit(fill(momentCaption(s.id, wed.w.tone), names), B.x + B.w / 2, B.y + B.h / 2 + 8, B.w - 16, B.w > 360 ? 25 : 22, 'italic');
+  });
+  const T = L.title;
+  plaque(T);
+  g.fillStyle = '#3a2210';
+  fit(caption(wed.w, names.you, names.partner), cv.width / 2, T.y + 42, T.w - 30, 36, '700');
   g.font = 'italic 20px Alegreya, Georgia, serif';
-  g.fillText('On the Wedding Isle, with love', cv.width / 2, pad + oh + 88);
+  g.fillText(SIGNED, cv.width / 2, T.y + 70);
   wed.portrait = cv.toDataURL('image/png');
   $('wed-img').src = wed.portrait;
   $('wed-portrait').classList.add('on');
@@ -701,8 +746,8 @@ function go(step) {
   if (step !== 'tune') wed.tool = null;
   wed.step = step; wed.peek = null;
   panel();
-  if (step === 'theme' && !wed.w.theme) say(wed.fig.mis, `Ooh, a theme! Shall we start from ${themeOf(SUGGEST[wed.w.tone].theme).name.toLowerCase()}? Or anything you like!`);
-  if (step === 'plot') say(wed.fig.mis, 'And how shall it go? I do love a bit of drama. Or none! Your choice.');
+  if (step === 'theme' && !wed.w.theme) say(wed.fig.mis, PLANNER.theme.replace('{theme}', themeOf(SUGGEST[wed.w.tone].theme).name.toLowerCase()));
+  if (step === 'plot') say(wed.fig.mis, PLANNER.plot);
 }
 function panel() {
   const box = $('wed-body'), steps = $('wed-steps'), w = wed.w;
@@ -959,7 +1004,7 @@ export function weddingUp(e) {
     wed.gdrag = null;
     if (G.moved) {
       const f = figOf(G.i), w = f && moveGuest(wed.w, seats(), G.i, f.x, f.z);
-      if (w) { wed.w = w; save(); gush('guest_move'); } else say(wed.fig.mis, 'Somewhere with a bit more room, love!');
+      if (w) { wed.w = w; save(); gush('guest_move'); } else say(wed.fig.mis, PLANNER.guestRoom);
       reseat(); panel();
     }
   }
@@ -1101,7 +1146,7 @@ export function weddingTick(dt0) {
         else if (L.phase === 'step' && L.t > readSecs(suitors(wed.w.tone)[L.i].line) + 1.2) {
           L.t = 0;
           if (L.i + 1 < L.list.length) { L.i++; L.phase = 'title'; title(); }
-          else { L.phase = 'wait'; L.i = -1; say(F.mis, "Well? Who's it to be?", 99); }
+          else { L.phase = 'wait'; L.i = -1; say(F.mis, PLANNER.who, 99); }
         }
       }
       L?.list.forEach((f) => { restArms(f); f.arms[0].rotation.x = -1.1; if (!moving.has(f)) poseFig(f, dt); });

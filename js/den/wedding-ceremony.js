@@ -5,7 +5,7 @@
 // benches. Then "I do", the kiss, hearts and confetti, and everyone gathered for the portrait, the last
 // shot held for wedding.js to frame. Skipped (Space), it goes straight to that last shot, the plot's
 // aftermath and all.
-import { plotScript, plotAt, fill, COUPLE, ALTAR, AISLE_FOOT, GUARDS, PROP_R } from '../den-wedding.js';
+import { plotScript, plotAt, momentsDue, fill, COUPLE, ALTAR, AISLE_FOOT, GUARDS, PROP_R } from '../den-wedding.js';
 import { V3, burst, wearLook } from './world.js';
 import { cinePlay, cineEnd, stepTo } from './cine.js';
 import { poseFig, restArms, heartsUp, roomy } from './wedding-scene.js';
@@ -19,7 +19,8 @@ const SPOTS = [[-1.55, -3.0], [1.55, -3.0], [-2.75, -3.1], [2.75, -3.1], [-2.15,
 const ease = (u) => { const v = Math.min(1, Math.max(0, u)); return v * v * (3 - 2 * v); };
 
 /* W (wedding.js's state): its venue root, the set-up (W.w), the pirates (W.fig: you, partner, mis,
-   guards, guests, raiders), the props' meshes (W.propG), the names, and W.say(fig, text) for a bubble.
+   guards, guests, raiders), the props' meshes (W.propG), the names, W.say(fig, text) for a bubble, and
+   W.snap(moment) to take a snapshot for the keepsake.
    `done(skipped)` once it's over. */
 export function ceremony(W, done) {
   const F = W.fig, herPartner = W.w.partner?.kind === 'her';
@@ -114,6 +115,8 @@ export function ceremony(W, done) {
     for (const p of all) if (!moving.has(p)) still(p, dt);
     for (const r of F.raiders) if (r.g.visible && !moving.has(r) && !r.fly) still(r, dt);
     if (b !== 'kiss' && b !== 'portrait') { F.you.body.rotation.x = 0; F.partner.body.rotation.x = 0; }
+    // A snapshot at each key moment, everyone posed (src/den-wedding.ts, moments): the keepsake's.
+    for (const m of momentsDue(script, plot, t - dt, t)) W.snap?.(m);
   }
 
   // ---- Raiders crash it ----

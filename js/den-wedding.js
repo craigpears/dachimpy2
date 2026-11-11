@@ -17,7 +17,18 @@
 
    Mischievious is a real pirate, only a look (PIRATES.Mischievious and MISCHIEVIOUS_VERSIONS in
    js/den-look.js); this knows nothing of how anyone's drawn. Looks here are partial: the den's
-   cleanLook fills in the rest, after wearable() has swapped anything the wardrobe hasn't got yet. */
+   cleanLook fills in the rest, after wearable() has swapped anything the wardrobe hasn't got yet.
+
+   What everyone says is in src/lines/ (the user, 11 Nov: "a record of them in case any get lost that I
+   really love"): hers in mischievious.ts, the suitors' in suitors.ts, your sweetheart's in spouse.ts,
+   yours in you.ts, the guests' in wedding-guests.ts, the keepsake's captions in keepsake.ts. Hers are re-exported here under their own names. */
+import { ARRIVE, WELCOME, RETURN, GUSH, ASK_HER, PLANNER, CEREMONY as MIS } from './lines/mischievious.js';
+import { SUITORS } from './lines/suitors.js';
+import { VOWS } from './lines/spouse.js';
+import { AT_YOUR_WEDDING as YOURS } from './lines/you.js';
+import { GUESTS_SAY as GUEST, DRUNK_SAYS, RAIDER_SAYS, GUARD_SAYS } from './lines/wedding-guests.js';
+import { CAPTIONS, SIGNED } from './lines/keepsake.js';
+export { ARRIVE, WELCOME, RETURN, GUSH, ASK_HER, PLANNER, SIGNED };
 /** The Puzzle Pirates dyes, by name, as the wardrobe's DYES has them (a test checks each is there).
     Their order is the share link's: new ones go on the end. */
 export const DYE_NAMES = [
@@ -423,27 +434,16 @@ export const RAIDERS = [
     { body: 'f', skin: 3, hair: 'braids', hairCol: 'ginger', patch: false, hat: 'bandana', hatCol: 'black', top: 'vest', topCol: 'maroon', topCol2: 'white', legs: 'pants', legsCol: 'brown', feet: 'boots', feetCol: 'brown' },
     { body: 'm', skin: 0, hair: 'short', hairCol: 'brown', beard: 'goatee', patch: true, hat: 'tricorne', hatCol: 'brown', top: 'striped', topCol: 'black', topCol2: 'yellow', legs: 'pants', legsCol: 'black', feet: 'boots', feetCol: 'black' },
 ];
-const JILTED = {
-    name: 'Barnaby', hurt: true,
-    look: { body: 'm', skin: 1, hair: 'short', hairCol: 'brown', beard: 'moustache', patch: false, smile: true, hat: 'none', top: 'captain', topCol: 'white', topCol2: 'gold', waist: 'sash', waistCol: 'rose', legs: 'pants', legsCol: 'white', feet: 'shoes', feetCol: 'black', hand: 'bouquet' },
-    line: 'My last bride had a little mishap. With a cannon. I\'ve had a lie down and I\'m ready to try again!',
-};
-const SWEET = {
-    name: 'Sweet William',
-    look: { body: 'm', skin: 2, hair: 'wavy', hairCol: 'blonde', beard: 'none', patch: false, smile: true, hat: 'feathered', hatCol: 'peach', hatCol2: 'white', top: 'vest', topCol: 'peach', topCol2: 'white', legs: 'pantaloons', legsCol: 'white', feet: 'shoes', feetCol: 'tan', hand: 'bouquet', handCol: 'white' },
-    line: 'I picked you a daisy. I picked everyone a daisy, actually. I just really like daisies.',
-};
+/** A suitor: their name and line (src/lines/suitors.ts), and their look. */
+const S = (id, look, hurt = false) => ({ id, name: SUITORS[id].name, line: SUITORS[id].line, look, ...(hurt ? { hurt } : {}) });
+const JILTED = S('barnaby', { body: 'm', skin: 1, hair: 'short', hairCol: 'brown', beard: 'moustache', patch: false, smile: true, hat: 'none', top: 'captain', topCol: 'white', topCol2: 'gold', waist: 'sash', waistCol: 'rose', legs: 'pants', legsCol: 'white', feet: 'shoes', feetCol: 'black', hand: 'bouquet' }, true);
+const SWEET = S('william', { body: 'm', skin: 2, hair: 'wavy', hairCol: 'blonde', beard: 'none', patch: false, smile: true, hat: 'feathered', hatCol: 'peach', hatCol2: 'white', top: 'vest', topCol: 'peach', topCol2: 'white', legs: 'pantaloons', legsCol: 'white', feet: 'shoes', feetCol: 'tan', hand: 'bouquet', handCol: 'white' });
 const REST = [
-    { name: 'Saltwater Sal', look: { body: 'f', skin: 3, hair: 'braids', hairCol: 'black', patch: true, smile: true, hat: 'bandana', hatCol: 'aqua', top: 'vest', topCol: 'navy', topCol2: 'white', legs: 'patched', legsCol: 'navy', legsCol2: 'aqua', feet: 'boots', feetCol: 'black', hand: 'bouquet' },
-        line: 'I can splice a rope, bilge a sloop and drink a kraken under the table. You\'ll never be bored.' },
-    { name: 'Gentleman Jem', look: { body: 'm', skin: 4, hair: 'ponytail', hairCol: 'black', beard: 'goatee', patch: false, smile: true, hat: 'tricorne', hatCol: 'navy', top: 'swashbuckler', topCol: 'navy', topCol2: 'gold', legs: 'pants', legsCol: 'white', feet: 'fancy', feetCol: 'black', feetCol2: 'gold', hand: 'bouquet' },
-        line: 'I\'ve written you a poem. It\'s mostly about rum, but you\'re in the last verse.' },
-    { name: 'Captain Rosalind', look: { body: 'f', skin: 0, hair: 'wavy', hairCol: 'auburn', patch: false, smile: true, hat: 'captain', hatCol: 'maroon', hatCol2: 'gold', top: 'captain', topCol: 'maroon', topCol2: 'gold', legs: 'long', legsCol: 'black', feet: 'fancy', feetCol: 'black', feetCol2: 'gold', hand: 'bouquet' },
-        line: 'I\'ve sunk forty ships, darling, but nobody\'s ever sunk my heart. Until now.' },
-    { name: 'Wobbly Pete', look: { body: 'm', skin: 1, hair: 'bald', hairCol: 'grey', beard: 'long', patch: true, smile: true, hat: 'fez', hatCol: 'purple', top: 'striped', topCol: 'purple', topCol2: 'white', legs: 'kilt', legsCol: 'green', legsCol2: 'black', feet: 'curled', feetCol: 'gold', hand: 'bouquet' },
-        line: 'I\'ve only the one good knee, but I\'ll go down on it for you. Getting up again\'s your job.' },
-    { name: 'Lady Marigold', look: { body: 'f', skin: 5, hair: 'bun', hairCol: 'black', patch: false, smile: true, hat: 'wide', hatCol: 'orange', hatCol2: 'lemon', top: 'corset', topCol: 'orange', topCol2: 'lemon', legs: 'gown', legsCol: 'lemon', feet: 'shoes', feetCol: 'orange', hand: 'bouquet', fam: 'parrot', famCol: 'green', famCol2: 'red' },
-        line: 'I\'ve a house on Admiral Island, three cats and a parrot who swears. We come as a set.' },
+    S('sal', { body: 'f', skin: 3, hair: 'braids', hairCol: 'black', patch: true, smile: true, hat: 'bandana', hatCol: 'aqua', top: 'vest', topCol: 'navy', topCol2: 'white', legs: 'patched', legsCol: 'navy', legsCol2: 'aqua', feet: 'boots', feetCol: 'black', hand: 'bouquet' }),
+    S('jem', { body: 'm', skin: 4, hair: 'ponytail', hairCol: 'black', beard: 'goatee', patch: false, smile: true, hat: 'tricorne', hatCol: 'navy', top: 'swashbuckler', topCol: 'navy', topCol2: 'gold', legs: 'pants', legsCol: 'white', feet: 'fancy', feetCol: 'black', feetCol2: 'gold', hand: 'bouquet' }),
+    S('rosalind', { body: 'f', skin: 0, hair: 'wavy', hairCol: 'auburn', patch: false, smile: true, hat: 'captain', hatCol: 'maroon', hatCol2: 'gold', top: 'captain', topCol: 'maroon', topCol2: 'gold', legs: 'long', legsCol: 'black', feet: 'fancy', feetCol: 'black', feetCol2: 'gold', hand: 'bouquet' }),
+    S('pete', { body: 'm', skin: 1, hair: 'bald', hairCol: 'grey', beard: 'long', patch: true, smile: true, hat: 'fez', hatCol: 'purple', top: 'striped', topCol: 'purple', topCol2: 'white', legs: 'kilt', legsCol: 'green', legsCol2: 'black', feet: 'curled', feetCol: 'gold', hand: 'bouquet' }),
+    S('marigold', { body: 'f', skin: 5, hair: 'bun', hairCol: 'black', patch: false, smile: true, hat: 'wide', hatCol: 'orange', hatCol2: 'lemon', top: 'corset', topCol: 'orange', topCol2: 'lemon', legs: 'gown', legsCol: 'lemon', feet: 'shoes', feetCol: 'orange', hand: 'bouquet', fam: 'parrot', famCol: 'green', famCol2: 'red' }),
 ];
 /** The planner's three ways to choose who you marry, each with its blurb. Kind and funny about her (the
     user, 11 Nov: "marry [her], she's free, she's nearly always free. Like, that feels mean"). */
@@ -468,36 +468,36 @@ export const readSecs = (text) => Math.min(5, Math.max(1.6, text.length * 0.06))
 const L = (who, at, text, cake) => (cake === undefined ? { who, at, text } : { who, at, text, cake });
 /** Every wedding opens the same: everyone seated, your partner up the aisle, the vows begun. */
 const OPEN = [
-    { beat: 'seated', secs: 3.4, lines: [L('off', 0.4, 'Places, everyone! Ooh, I\'m going to cry.')] },
-    { beat: 'procession', secs: 6, lines: [L('guest', 1.2, 'Ooh, look at them!'), L('guest2', 3.6, 'Stunning. Simply stunning.')] },
-    { beat: 'vows', secs: 4.6, lines: [L('off', 0.2, 'Dearly beloved, we are gathered here today, on purpose...')] },
+    { beat: 'seated', secs: 3.4, lines: [L('off', 0.4, MIS.places)] },
+    { beat: 'procession', secs: 6, lines: [L('guest', 1.2, GUEST.lookAtThem), L('guest2', 3.6, GUEST.stunning)] },
+    { beat: 'vows', secs: 4.6, lines: [L('off', 0.2, MIS.beloved)] },
 ];
 /** The plot's twist, after the vows begin. */
 const TWIST = {
     sweet: [
-        { beat: 'sweet', secs: 9.2, lines: [L('partner', 0.3, 'I promise to love you, share my rum, and bilge beside you always.'), L('you', 4.6, 'And I promise to mend your wall. Every time.'), L('guest', 7.4, '*sniff* It\'s beautiful!')] },
-        { beat: 'calm', secs: 3, lines: [L('mis', 0.3, 'Nothing\'s gone wrong. Is that allowed?')] },
+        { beat: 'sweet', secs: 9.2, lines: [L('partner', 0.3, VOWS.vow), L('you', 4.6, YOURS.vow), L('guest', 7.4, GUEST.sniff)] },
+        { beat: 'calm', secs: 3, lines: [L('mis', 0.3, MIS.calm)] },
     ],
     raiders: [
-        { beat: 'storm', secs: 3.6, lines: [L('raider', 0.6, 'Yarr! Hand over the cake!')] },
-        { beat: 'fight', secs: 6.2, lines: [L('mis', 0.2, 'Oh, not again. Security!'), L('guard', 2.6, 'On it, miss!')] },
-        { beat: 'cleared', secs: 3, lines: [L('off', 0.3, 'Lovely. Now, where were we?')] },
+        { beat: 'storm', secs: 3.6, lines: [L('raider', 0.6, RAIDER_SAYS)] },
+        { beat: 'fight', secs: 6.2, lines: [L('mis', 0.2, MIS.security), L('guard', 2.6, GUARD_SAYS)] },
+        { beat: 'cleared', secs: 3, lines: [L('off', 0.3, MIS.whereWereWe)] },
     ],
     drunk: [
-        { beat: 'stagger', secs: 7.2, lines: [L('drunk', 0.3, 'Hic! I jusht wanna shay... I love you all!'), L('mis', 4.4, 'Oh dear. Somebody\'s had a few.')] },
-        { beat: 'topple', secs: 3.6, lines: [L('mis', 1.5, '...and that\'s the cake.', true), L('mis', 1.5, '...and down they go.', false)] },
+        { beat: 'stagger', secs: 7.2, lines: [L('drunk', 0.3, DRUNK_SAYS), L('mis', 4.4, MIS.hadAFew)] },
+        { beat: 'topple', secs: 3.6, lines: [L('mis', 1.5, MIS.cake, true), L('mis', 1.5, MIS.down, false)] },
     ],
     brawl: [
-        { beat: 'argue', secs: 4.4, lines: [L('guest', 0.2, 'You spilt my grog!'), L('guest2', 2.2, 'You spilt your FACE!')] },
-        { beat: 'brawl', secs: 6.4, lines: [L('mis', 1.0, 'Not the benches! They\'re hired!')] },
-        { beat: 'sorry', secs: 2.6, lines: [L('guest', 0.3, '...sorry.')] },
+        { beat: 'argue', secs: 4.4, lines: [L('guest', 0.2, GUEST.grog), L('guest2', 2.2, GUEST.face)] },
+        { beat: 'brawl', secs: 6.4, lines: [L('mis', 1.0, MIS.benches)] },
+        { beat: 'sorry', secs: 2.6, lines: [L('guest', 0.3, GUEST.sorry)] },
     ],
 };
 /** And every one ends the same, cheesily: I do, the kiss, hearts and confetti, the portrait. */
 const CLOSE = [
-    { beat: 'ido', secs: 6.8, lines: [L('off', 0.1, 'Do you take {partner}, through bilge and broadside?'), L('you', 3.3, 'I do!'), L('partner', 5.0, 'I do!')] },
-    { beat: 'kiss', secs: 4.2, lines: [L('off', 0.2, 'Then you may kiss!')] },
-    { beat: 'cheer', secs: 4.2, lines: [L('guest', 0.3, 'Hooray!'), L('mis', 1.9, 'Eee! I love weddings!')] },
+    { beat: 'ido', secs: 6.8, lines: [L('off', 0.1, MIS.doYou), L('you', 3.3, YOURS.ido), L('partner', 5.0, VOWS.ido)] },
+    { beat: 'kiss', secs: 4.2, lines: [L('off', 0.2, MIS.kiss)] },
+    { beat: 'cheer', secs: 4.2, lines: [L('guest', 0.3, GUEST.hooray), L('mis', 1.9, MIS.love)] },
     { beat: 'portrait', secs: 2.4, lines: [] },
 ];
 /** The whole ceremony for a plot, its lines filtered by whether there's a cake to fall in. */
@@ -527,38 +527,73 @@ export function plotAt(s, t) {
     const last = s[s.length - 1];
     return { beat: last?.beat ?? '', i: s.length - 1, u: 1, local: last?.secs ?? 0, line: null, done: true };
 }
+const MOMENT_OPEN = [{ id: 'aisle', beat: 'procession', at: 3.0 }, { id: 'vows', beat: 'vows', at: 3.2 }];
+const MOMENT_TWIST = {
+    sweet: [{ id: 'sweet', beat: 'sweet', at: 3.2 }], // (hand in hand, hearts floating up, the vow)
+    raiders: [{ id: 'raiders', beat: 'fight', at: 3.6 }], // (one in the sea, another on his way)
+    drunk: [{ id: 'drunk', beat: 'topple', at: 2.8 }], // (face first in the cake)
+    brawl: [{ id: 'brawl', beat: 'brawl', at: 4.2 }], // (benches flying)
+};
+const MOMENT_CLOSE = [{ id: 'kiss', beat: 'kiss', at: 2.4 }, { id: 'cheer', beat: 'cheer', at: 2.8 }];
+/** A plot's key moments, in the order they come. */
+export const moments = (plot) => [...MOMENT_OPEN, ...MOMENT_TWIST[plot], ...MOMENT_CLOSE];
+/** When a moment comes in a ceremony (seconds from its start), or -1 if its beat isn't in it. */
+export function momentTime(s, m) {
+    let t0 = 0;
+    for (const b of s) {
+        if (b.beat === m.beat)
+            return t0 + m.at;
+        t0 += b.secs;
+    }
+    return -1;
+}
+/** The moments that came between t0 and t1 (a frame's worth of the ceremony): each taken once. */
+export const momentsDue = (s, plot, t0, t1) => moments(plot).filter((m) => { const t = momentTime(s, m); return t > t0 && t <= t1; });
+/** A moment's caption in the tone (names not yet put in: fill()). */
+export const momentCaption = (id, tone) => CAPTIONS[id][tone];
+/** The keepsake laid out: its size, the hero (the portrait, 4:3), each snapshot (4:3) with its caption's
+    box under it, and the title's box at the foot (the couple's names, and SIGNED). Upright (a phone held
+    so), the hero on top and the snapshots in rows under it, three to a row; `wide`, the hero on the left
+    and the snapshots in two columns down its right. With no snapshots (the ceremony skipped), just the
+    portrait, as it always was. */
+export function collage(n, wide) {
+    const PAD = 46, GAP = 18, CAP = 46, TITLE = 82, shots = [], caps = [];
+    const at = (x, y, w, h) => ({ x, y, w, h });
+    if (n <= 0) {
+        const hero = at(PAD, PAD, 1200, 900);
+        return { w: 1200 + PAD * 2, h: PAD + 900 + GAP + TITLE + PAD + 12, hero, shots, caps, title: at(PAD, PAD + 900 + GAP, 1200, TITLE) };
+    }
+    if (!wide) {
+        const W = 1200, cols = n === 4 ? 2 : 3, sw = (W - 2 * GAP) / 3, sh = sw * 3 / 4, rows = Math.ceil(n / cols);
+        const hero = at(PAD, PAD, W, W * 3 / 4);
+        let y = hero.y + hero.h + GAP;
+        for (let r = 0; r < rows; r++) {
+            const inRow = Math.min(cols, n - r * cols), x0 = PAD + (W - (inRow * sw + (inRow - 1) * GAP)) / 2;
+            for (let c = 0; c < inRow; c++) {
+                const x = x0 + c * (sw + GAP);
+                shots.push(at(x, y, sw, sh));
+                caps.push(at(x, y + sh, sw, CAP));
+            }
+            y += sh + CAP + GAP;
+        }
+        return { w: W + PAD * 2, h: y + TITLE + PAD + 12, hero, shots, caps, title: at(PAD, y, W, TITLE) };
+    }
+    const cols = n <= 3 ? 1 : 2, rows = Math.ceil(n / cols), sw = 330, sh = sw * 3 / 4;
+    const side = rows * (sh + CAP) + (rows - 1) * GAP, hh = Math.max(side, 720), hero = at(PAD, PAD, hh * 4 / 3, hh);
+    const x0 = hero.x + hero.w + GAP, y0 = PAD + (hh - side) / 2;
+    for (let i = 0; i < n; i++) {
+        const c = i % cols, r = Math.floor(i / cols), inRow = Math.min(cols, n - r * cols);
+        const x = x0 + c * (sw + GAP) + (cols - inRow) * (sw + GAP) / 2, y = y0 + r * (sh + CAP + GAP);
+        shots.push(at(x, y, sw, sh));
+        caps.push(at(x, y + sh, sw, CAP));
+    }
+    const w = x0 + cols * sw + (cols - 1) * GAP + PAD, ty = PAD + hh + GAP;
+    return { w, h: ty + TITLE + PAD + 12, hero, shots, caps, title: at(PAD, ty, w - PAD * 2, TITLE) };
+}
 /** A line with the names put in. */
 export const fill = (text, names) => text.replace(/\{partner\}/g, names.partner).replace(/\{you\}/g, names.you);
 // ---------- what Mischievious says ----------
-/** As you arrive, before you've chosen a tone (the user, 11 Nov: "opening more with a cutscene where
-    ... she explains to you what it is and what's going on"): her greeting, what this is, and her
-    question, the tone's choice. Her voice, not yet either tone's. */
-export const ARRIVE = [
-    "Ahoy! Welcome to my isle! Mind the crabs, they're guests too.",
-    'This is my wedding venue. Pirates sail in from all over the Ocean to get hitched here.',
-    'First things first: what sort of wedding are we having?',
-];
-/** Her welcome once you've chosen the tone: the venue as she left it, what you do here, and her
-    question. Giggly and romantic, or not in the least bothered by the blood and guts. */
-export const WELCOME = {
-    happy: [
-        "Ooh, happy and cheesy! Roses, ribbons, the lot. I've done five today, just for the fun of it!",
-        "You plan it your way: who, where, the look, and how it goes. I'll help. Then it plays out, and you get a portrait!",
-        'So! How are you? Would you like to get married?',
-    ],
-    dark: [
-        "Ooh, dark humour! Don't mind the blood and guts. The last wedding went a bit... bloody and gory.",
-        "It's fine. Five weddings today, and only the one got raided. We've hired a bit of extra security.",
-        "You plan it your way: who, where, the look, and how it goes. Then it plays out, and you get a portrait. Mop's in the corner.",
-        'So! How are you? Would you like to get married?',
-    ],
-};
-/** Back again, a wedding already planned (kept in this browser, or a share link): a shorter welcome,
-    after her line for coming back (GUSH back, shared). */
-export const RETURN = {
-    happy: ["Carry on where you left off. Who, where, the look, how it goes: I'll be right here!"],
-    dark: ["Carry on where you left off. I'll be right here. With the mop."],
-};
+/* Her greeting, her welcome and her welcome back (ARRIVE, WELCOME, RETURN): src/lines/mischievious.ts. */
 /** The weddings she's been through today, for the fun of it (the user, 11 Nov: "showing that ... you
     can keep doing it for fun all the time ... I enjoy getting married, go through the ceremonies ...
     the first time I had this kind of wedding, second time it didn't quite go so well. The Raiders
@@ -578,81 +613,8 @@ export const SUGGEST = {
     happy: { theme: 'rosy', plots: ['sweet'] },
     dark: { theme: 'gory', plots: ['raiders', 'brawl'] },
 };
-export const GUSH = {
-    ask: { happy: ['Me, perhaps? I do make a gorgeous bride. Hee hee!', 'Me, perhaps? I\'ve the dress on already!'], dark: ['Me, perhaps? I\'ve a dress that\'s hardly been bled on.', 'Me, perhaps? I\'ve had the veil cleaned. Mostly.'] },
-    her: { happy: ['Me? Oh, you charmer! Yes! Yes yes yes!', 'I knew you\'d ask! I\'ve had the dress on since Tuesday.'], dark: ['Me? Oh, you brave thing! Yes!', 'Lovely. I\'ll have security stand a bit closer this time.'] },
-    version: ['Ooh, that one\'s my favourite!', 'Good choice. I look fabulous in that.', 'This old thing? Hee hee!', 'Twirl! Did you see me twirl?'],
-    bachelors: ['Here are your bachelors!'],
-    suitor: ['Ooh, good choice! I\'d have picked them too.', 'A match made in the Ocean!', 'They\'ll scrub up lovely.', 'Eee! I love them already!'],
-    suitorOne: { happy: ['Sweet William! He\'s an absolute poppet.'], dark: ['Barnaby! He\'s had a lie down and everything.'] },
-    own: ['Someone of your own! How mysterious. I love it.', 'Ooh, who\'s this? They\'re gorgeous!', 'Oh, I like them. I like them a lot.'],
-    // (Each with her memory of one of today's weddings: TODAY, below.)
-    venue_beach: ['The beach! Sand between your toes. Perfect.', 'Ooh, the sea breeze in your hair!', 'My first today was on the beach. Roses everywhere!'],
-    venue_chapel: ['The old chapel! So romantic. Mind the drop.', 'Up on the cliff! You can see half the Ocean from here.', 'I\'ve had two up there today! The raiders came to one. The other made me cry.'],
-    venue_deck: ['A ship\'s deck! How very piratey of you.', 'On the deck! We can sail off on honeymoon straight after!', 'My third today was on that deck. Mind the cake.'],
-    theme_rosy: ['Happy and rosy! Pink everywhere! I could burst!', 'Roses! I adore roses.', 'Just like my first today! Roses all down the aisle.'],
-    theme_gory: { happy: ['Bloody and gory! Ooh, daring. I love it.', 'Like my second today! That one went a bit red.'], dark: ['Bloody and gory! Saves on tidying up, really.', 'Red goes with everything. Especially blood.', 'Like my second today! The raiders saw to the red.'] },
-    theme_drunk: ['A drunkards\' fest! Grog for everyone!', 'Barrels! Lovely, lovely barrels.', 'I\'ve had the inn send over every drop they\'ve got.', 'Like my third today! Grog in the punch, grog in the cake.'],
-    plot_sweet: { happy: ['Sweet and blissful! Oh, I\'m welling up already.', 'My fifth today went just like that. I cried!'], dark: ['Sweet and blissful? Ooh, that\'d make a change.', 'My fifth today went just like that. Made a nice change!'] },
-    plot_raiders: { happy: ['Raiders! How exciting! Good thing I hired security.', 'Like my second today! They came right up the aisle.'], dark: ['Raiders! Just like last time. I\'ll tell the guards.', 'Like my second today! They came right up the aisle.'] },
-    plot_drunk: ['Somebody\'s drunk! There\'s always one. Hee hee!', 'Hee hee! I\'ll put the cake somewhere safe. Or not.', 'Like my third today! Face first in the cake.'],
-    plot_brawl: { happy: ['A brawl? Ooh, a lively one!', 'Like my fourth today! Benches everywhere. Lovely day, though.'], dark: ['A brawl! Proper wedding, that.', 'Like my fourth today! Benches everywhere. Lovely day, though.'] },
-    add: ['More! More is always better.', 'Oh, that\'s gorgeous there.', 'Yes! Just there!', 'Ooh, I wouldn\'t have thought of that!', 'Straight from the furnisher\'s, that!'],
-    move: ['Ooh, much better there.', 'Perfect! Well, nearly perfect. No, perfect!', 'Yes, yes, yes! There!', 'Oh, that\'s much more you.'],
-    turn: ['Ooh, a different angle!', 'Twirly! I love it.'],
-    colour: ['That colour! Swoon.', 'Oh, it matches! Or clashes. I love it either way.', 'Gorgeous. Simply gorgeous.', 'Ooh, a pricey dye, that. Worth every doubloon.'],
-    remove: ['Gone! Never liked it anyway.', 'Less is more. Sometimes. Hee hee!', 'Room to dance!'],
-    dress: ['Oh, they look divine!', 'Stunning! Absolutely stunning!', 'Fit for the Governor\'s ball!', 'Fresh from the tailor, that.', 'Fabulous! Twirl for me!'],
-    // (How many come, a guest moved, a fresh crowd: 11 Nov.)
-    size_cosy: ['Cosy! Just the nearest and dearest. More cake each.'],
-    size_small: ['Just the crew! Everyone gets a good view.'],
-    size_big: ['A big one! The whole flag\'s coming. Best hats on!'],
-    size_large: ['Ooh, a crowd! I\'ll have the inn brew more grog.'],
-    size_grand: ['Half the Ocean! I do hope the island doesn\'t tip over.', 'Everyone! Even a few from the next island over. Hee hee!'],
-    guest_move: ['Ooh, they\'ll have a lovely view from there.', 'There! Perfect for the portrait.', 'Mingling! I love a mingle.'],
-    crowd: ['A whole new crowd! Where do they all come from?', 'Fresh faces! Hello, everyone!'],
-    // (Each new thing from the furnisher's, as it's put down; the plain 'add' lines the rest of the time.)
-    add_chair: ['A chair! For the guest with the one good knee.'],
-    add_throne: ['A throne! Fit for a Governor. Or for tired feet.'],
-    add_feast: ['A feast! Roast boar, ship\'s biscuit, the works. I\'ll be having seconds.'],
-    add_punch: ['Punch! It\'s mostly grog. Well, it\'s all grog.'],
-    add_fountain: ['A rum fountain! The inn\'s going to be so jealous.', 'Rum on tap! Somebody fetch a bigger mug.'],
-    add_candelabra: ['Candles on a stand! Very gothic. I love it.'],
-    add_torch: ['A torch! Ever so romantic. Mind the veil.'],
-    add_chandelier: ['A chandelier! Ooh, posh. Mind your heads.'],
-    add_palm: ['A potted palm! Like the island\'s, only tidier.'],
-    add_garland: ['A garland! It\'s like a hug made of flowers.'],
-    add_petals: ['Petals! For throwing. Or for slipping on. Hee hee!'],
-    add_rug: ['A rug! Wipe your boots, everyone.'],
-    add_flag: ['Flags up! Let the whole Ocean know.'],
-    add_statue: ['A statue! Ooh, very Governor\'s mansion.'],
-    add_heart: ['A great big heart! Mine\'s gone all fluttery.'],
-    add_chest: ['A treasure chest! For the presents. Or the doubloons. Ooh, both!'],
-    add_gifts: ['Presents! I do hope someone\'s got you a spyglass.'],
-    add_piano: ['A piano! The shanty-singer knows three songs. Now he can play them louder.'],
-    add_band: ['A band! There\'ll be dancing after. I\'ve my dancing boots on already.'],
-    add_cannon: ['A cannon! For the salute. Boom! Hee hee!'],
-    add_anchor: ['An anchor! For a couple who never want to leave.'],
-    add_skulls: { happy: ['Skulls! Ooh, a bit spooky. I love it.'], dark: ['Skulls! Very tasteful. Nobody ask whose.'] },
-    ready: ['Ooh, it\'s all ready! Shall we?', 'Everything\'s perfect. I\'m going to cry.'],
-    back: ['You\'re back! I kept everything just as you left it.'],
-    shared: ['Oh, this one! I remember this one. Shall we do it again?'],
-    again: ['That was lovely. Shall we have another?'],
-};
-/** Things you can ask her while you plan, and what she says: chattery Puzzle Pirates banter, the
-    wedding's and the Ocean's, not her own life (the user, 11 Nov: "Maybe it's that kind of
-    interactive. You could ask her"). Same in both tones but where the tone gives her another answer. */
-export const ASK_HER = [
-    { q: 'How were today\'s weddings?', a: 'Five so far! Roses on the beach, raiders at the chapel, cake on the deck, a lovely brawl, and a sweet one to finish. Every one a treat!' },
-    { q: 'Who\'s on the guest list?', a: 'Anyone with a clean shirt. Well, a shirt.' },
-    { q: 'What\'s the dress code?', a: 'Whatever the tailor had in! Dyed to match, ideally. Black if you\'re showing off.' },
-    { q: 'Who\'s paying for all this?', a: 'The crew\'s coffers, love. Don\'t tell the purser.' },
-    { q: 'Is the cake safe?', a: { happy: 'Safer than a sloop in a sea battle!', dark: 'Safer than the last one. That one had a cutlass in it.' } },
-    { q: 'What if raiders turn up?', a: { happy: 'Then the guards earn their doubloons. Hee hee!', dark: 'Then the guards earn their doubloons. And the mop earns its keep.' } },
-    { q: 'Any advice?', a: 'Say "I do", not "Arr". People mix them up.' },
-    { q: 'Can my familiar come?', a: 'Of course! Parrots in the front row. Monkeys at the back, near the cake.' },
-    { q: 'Who\'s doing the music?', a: 'A shanty-singer from the inn. He knows three songs. All about the sea.' },
-];
+/* Her reactions as you plan (GUSH, a pool for each event, the same in both tones or one for each) and
+   the things you can ask her (ASK_HER): src/lines/mischievious.ts. */
 /** Her answer to the i-th question, in the tone. */
 export const answer = (i, tone) => {
     const a = ASK_HER[i]?.a;

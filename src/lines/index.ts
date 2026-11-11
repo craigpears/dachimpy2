@@ -8,5 +8,10 @@ import { CHARACTER as NARRATOR } from './narrator.js';
 import { CHARACTER as DIGNITY } from './dignity.js';
 import { CHARACTER as BELLA } from './bella.js';
 import { CHARACTER as UMAMI } from './capybara.js';
+import { CHARACTER as MISCHIEVIOUS } from './mischievious.js';
+import { CHARACTER as SUITORS } from './suitors.js';
+import { CHARACTER as SPOUSE } from './spouse.js';
+import { CHARACTER as GUESTS } from './wedding-guests.js';
+import { CHARACTER as KEEPSAKE } from './keepsake.js';
 
-export const CHARACTERS: readonly Character[] = [DALNOTH, YOU, NARRATOR, DIGNITY, BELLA, UMAMI];
+export const CHARACTERS: readonly Character[] = [DALNOTH, YOU, NARRATOR, DIGNITY, BELLA, UMAMI, MISCHIEVIOUS, SUITORS, SPOUSE, GUESTS, KEEPSAKE];

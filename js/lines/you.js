@@ -13,11 +13,16 @@ export const CRANE_RIDE = {
     lagoon: 'Ooh, a lagoon!',
     cove: 'Home sweet cove',
 };
+/** Your wedding, on the Wedding Isle: your vow (Sweet and blissful) and your "I do". */
+export const AT_YOUR_WEDDING = {
+    vow: 'And I promise to mend your wall. Every time.',
+    ido: 'I do!',
+};
 export const CHARACTER = {
     name: 'You',
     who: 'Your own pirate, dressed as you like from the wardrobe (or as any real pirate in it). You say little, '
         + 'and only at the den\'s short, cheesy moments: picking up the captain\'s map, and riding the crane '
-        + 'up the cliff and down again.',
+        + 'up the cliff and down again, and your own wedding.',
     lines: [
         { when: 'Picking up the captain\'s map, at the end of Dalnoth\'s cutscene', says: [FOUND_MAP] },
         {
@@ -33,6 +38,10 @@ export const CHARACTER = {
                 lagoon: 'There: up in the lagoon',
                 cove: 'There: back down in the cove',
             },
+        },
+        {
+            when: 'Your wedding, on the Wedding Isle', says: AT_YOUR_WEDDING,
+            each: { vow: 'Sweet and blissful: your vow, after your sweetheart\'s', ido: '"I do"' },
         },
     ],
 };

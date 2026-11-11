@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import {
   ALTAR, ARRIVE, AREA, ASK_HER, BODY_R, COUPLE, DYE_NAMES, FRONT, GUARDS, RETURN, STAND, inProp, onSomeone, propsOverlap, GUESTS, GUSH, Gush, MAX_PROPS, PLOTS, PROPS, SUGGEST, THEMES, TODAY, TONES, VENUES, WELCOME, WRECK,
   answer, arrival, caption, clean, decode, dressFor, encode, fill, fresh, layout, moveTo, plotAt, plotScript, readSecs,
-  scriptSecs, seatsFor, suitorTitle, suitors, themeLook, wearable,
+  scriptSecs, seatsFor, suitorTitle, suitors, themeLook, wearable, moments, momentTime, momentsDue, momentCaption, collage,
   WHO, SIZES, MAX_GUESTS, GROUNDS, PROP_GROUPS, PROP_R, FLAT, TOPPERS, MADE_IN, footprint, clashes, restsOn, baseGuest, dressedUp, withSize, reseed, moveGuest, standFree, sizeN,
 } from '../src/den-wedding';
 import type { Prop, Seat, SizeId, ThemeId, Wedding } from '../src/den-wedding';
@@ -631,5 +631,57 @@ describe('old share links still open (11 Nov)', () => {
   it('and shared again, they come back the same', () => {
     const w = decode('WzEsMSwwLDEsMSxbInMiLDBdLDAsMF0')!;
     expect(decode(encode(w))).toEqual(w);
+  });
+});
+
+describe('a collage of the whole wedding, not just one picture (11 Nov: "snapshots of all the key moments")', () => {
+  it('takes the walk up the aisle, the vows, the plot\'s big moment, the kiss and the cheer, in order, each once', () => {
+    const big = { sweet: 'sweet', raiders: 'raiders', drunk: 'drunk', brawl: 'brawl' } as const;
+    for (const p of PLOTS) {
+      expect(moments(p.id).map((m) => m.id)).toEqual(['aisle', 'vows', big[p.id], 'kiss', 'cheer']);
+      for (const cake of [true, false]) {
+        const s = plotScript(p.id, cake), times = moments(p.id).map((m) => momentTime(s, m));
+        // (each inside its beat, a second or more in, when the camera's settled on the shot)
+        moments(p.id).forEach((m, i) => {
+          const b = s.find((x) => x.beat === m.beat)!;
+          expect(b, `${p.id}: ${m.beat}`).toBeDefined();
+          expect(m.at).toBeGreaterThanOrEqual(1.5);
+          expect(m.at).toBeLessThan(b.secs - 0.3);
+          expect(plotAt(s, times[i]).beat).toBe(m.beat);
+        });
+        for (let i = 1; i < times.length; i++) expect(times[i]).toBeGreaterThan(times[i - 1]);
+        // (a frame at a time, every one taken exactly once)
+        const got: string[] = [];
+        for (let t = 0; t < scriptSecs(s); t += 1 / 30) got.push(...momentsDue(s, p.id, t, t + 1 / 30).map((m) => m.id));
+        expect(got).toEqual(moments(p.id).map((m) => m.id));
+      }
+    }
+  });
+
+  it('captions every snapshot in both tones, with the names put in', () => {
+    for (const p of PLOTS) for (const m of moments(p.id)) for (const t of TONES) {
+      const c = momentCaption(m.id, t.id);
+      expect(c.length).toBeGreaterThan(5);
+      expect(c.length).toBeLessThan(42);   // (one line under a little picture)
+      expect(fill(c, { you: 'Ann', partner: 'Barnaby' })).not.toMatch(/[{}]/);
+    }
+    expect(momentCaption('aisle', 'happy')).toMatch(/\{partner\}/);
+  });
+
+  it('lays the keepsake out round the portrait, upright or sideways, nothing over anything and all of it inside', () => {
+    const inside = (B: { x: number; y: number; w: number; h: number }, W: number, H: number) => B.x >= 20 && B.y >= 20 && B.x + B.w <= W - 20 && B.y + B.h <= H - 20;
+    const apart = (a: { x: number; y: number; w: number; h: number }, b: typeof a) => a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y;
+    for (const wide of [false, true]) for (let n = 0; n <= 6; n++) {
+      const L = collage(n, wide), all = [L.hero, ...L.shots, ...L.caps, L.title];
+      expect(L.shots.length).toBe(n);
+      for (const B of all) expect(inside(B, L.w, L.h), `${wide ? 'wide' : 'upright'} ${n}`).toBe(true);
+      for (let i = 0; i < all.length; i++) for (let j = i + 1; j < all.length; j++) expect(apart(all[i], all[j])).toBe(true);
+      for (const B of [L.hero, ...L.shots]) expect(B.w / B.h).toBeCloseTo(4 / 3);
+      for (const B of L.shots) expect(B.w * B.h).toBeLessThan(L.hero.w * L.hero.h / 4);   // (the portrait's the hero)
+      // (upright, it's for a phone held upright: taller than wide; sideways, wider)
+      if (n >= 3) expect(wide ? L.w > L.h : L.h > L.w).toBe(true);
+    }
+    // (no snapshots, the ceremony skipped: the portrait as it always was)
+    expect(collage(0, false)).toMatchObject({ w: 1292, h: 1104, hero: { x: 46, y: 46, w: 1200, h: 900 } });
   });
 });

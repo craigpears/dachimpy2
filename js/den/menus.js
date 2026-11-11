@@ -20,7 +20,8 @@ import { craneCheat } from './crane.js';
 import { umamiCheat } from './capybara.js';
 import { board, sailReset } from './sailing.js';
 import { online, guest, myId, send } from './crew.js';
-import { wed, weddingEnter, weddingLeave } from './wedding.js';
+import { wed, weddingEnter, weddingLeave, plannedSpouse } from './wedding.js';
+import { spouse, spouseCheat } from './spouse.js';
 import { newGame } from '../den.js';
 
 // ---------- decorating the den ----------
@@ -556,6 +557,27 @@ function cheatWedding() {
   sail.seen = true;   // (no "their ship's making sail" while you're away)
   weddingEnter();
 }
+/* Whoever you married on the Wedding Isle, home with you (spouse.js): the siege put to rest, and you in
+   the den beside them. Your spouse if you've one; else whoever the wedding you're planning has you
+   marrying, or her. */
+function cheatMarried() {
+  if (cine) return;
+  if (wed.on) weddingLeave();
+  if (wm) exitWall();
+  if (deco.on) decoMode(false);
+  if (carry) putBack();
+  raiders.splice(0).forEach((r) => raiderOut(r, true)); boats.splice(0).forEach((b) => scene.remove(b.g));
+  Object.assign(G, { phase: 'peace', wave: Math.max(G.wave, 3), toSpawn: 0, aim: null, cannonShots: 0 });
+  mapLets.phaseWas = 'peace';   // (no cutscene)
+  ship.visible = cannon.visible = false; ship.position.x = ship.userData.home + SHIP_GONE + 1;
+  $('intro').classList.add('off');
+  if (sail.on) sailReset();
+  sail.seen = true;
+  const at = spouseCheat(spouse.who || plannedSpouse());
+  wed.had = true;
+  Object.assign(pirate, { x: at.x, z: at.z, h: 0, hs: 0, hop: null });
+  pirate.g.rotation.set(0, at.yaw, 0);
+}
 // [name, what it does, its link's name if it's a starting point (den.html?at=...)]
 const CHEATS = [
   ['Beat this wave', cheatBeat],
@@ -567,6 +589,7 @@ const CHEATS = [
   ["Dignity's scene", cheatDignity, 'dignity'],
   ["Umami's rescue", cheatUmami, 'umami'],
   ['The Wedding Isle', cheatWedding, 'wedding'],
+  ['Home, married', cheatMarried, 'married'],
 ];
 /* Every starting point has a link, to share (the user, 10 Nov: "make it so that each starting point
    is something that I can put into the URL as well, so that I can share that animation with

@@ -1,6 +1,7 @@
 /* Pirate Den: your own pirate's lines (src/lines/character.ts says how these files go). Said over your
    head: picking up the captain's map (js/den/map.js), and hauling her up the cliff by the crane
-   (js/den/crane.js: its trip's beats are src/den-crane.ts's). */
+   (js/den/crane.js: its trip's beats are src/den-crane.ts's); and at your wedding (src/den-wedding.ts's
+   plotScript; the questions you ask Mischievious as you plan are with her answers, in mischievious.ts). */
 import type { Character } from './character.js';
 
 /** Picking up the captain's map, at the end of Dalnoth's cutscene. */
@@ -20,11 +21,17 @@ export const CRANE_RIDE = {
   cove: 'Home sweet cove',
 } as const;
 
+/** Your wedding, on the Wedding Isle: your vow (Sweet and blissful) and your "I do". */
+export const AT_YOUR_WEDDING = {
+  vow: 'And I promise to mend your wall. Every time.',
+  ido: 'I do!',
+} as const;
+
 export const CHARACTER: Character = {
   name: 'You',
   who: 'Your own pirate, dressed as you like from the wardrobe (or as any real pirate in it). You say little, '
     + 'and only at the den\'s short, cheesy moments: picking up the captain\'s map, and riding the crane '
-    + 'up the cliff and down again.',
+    + 'up the cliff and down again, and your own wedding.',
   lines: [
     { when: 'Picking up the captain\'s map, at the end of Dalnoth\'s cutscene', says: [FOUND_MAP] },
     {
@@ -40,6 +47,10 @@ export const CHARACTER: Character = {
         lagoon: 'There: up in the lagoon',
         cove: 'There: back down in the cove',
       },
+    },
+    {
+      when: 'Your wedding, on the Wedding Isle', says: AT_YOUR_WEDDING,
+      each: { vow: 'Sweet and blissful: your vow, after your sweetheart\'s', ido: '"I do"' },
     },
   ],
 };

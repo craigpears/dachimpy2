@@ -35,6 +35,7 @@ import { rowing, rowCam, rowPull } from './den/rowing.js';
 import { crane, craneCam } from './den/crane.js';
 import { umami, umamiTick, umamiCam, umamiClick } from './den/capybara.js';
 import { net, online, guest, isHost, send, updateMates, sendMe, snapshot, followRaider, sendSync, onNet, joinCrew, leaveCrew } from './den/crew.js';
+import { spouse, spouseTick } from './den/spouse.js';
 import { wed, weddingKey, weddingDown, weddingMove, weddingUp, weddingWheel, weddingTick, weddingCam } from './den/wedding.js';
 import { deco, decoMode, decoMove, decoClick, decoTurn, dress, dressPanel, dressRows, lookChanged, applyDen, buildAll, tileFor, fillFrame, cheats, skipTo, cheatPanel, startAt } from './den/menus.js';
 
@@ -486,6 +487,7 @@ function update(dt) {
   haulTick(dt);
   umamiTick(dt);   // (Umami the capybara: his bank in the lagoon, his board, his life at the den)
   weddingTick(dt);   // (Mischievious's wedding, on her island)
+  spouseTick(dt, wed.on);   // (whoever you married there: aboard her, then at the den)
 
   /* Camera follows the pirate, looking at the wall and a little over it. Up on the rampart it
      swings up high to look down over the wall at the raiders. The player can turn it (Z/C or
@@ -798,6 +800,6 @@ if (startHere && !online() && !startAt(startHere)) toast(`No starting point call
 
 // For poking at it from the console.
 window.den = { rowing, rowPull, tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { worldLets.myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, swordReward, swordBreak, lumber, toLumber, repairAll, newGame, raiders, G, get carry() { return carry; }, get patch() { return patch; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
-  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, hold, holdSwap, board, ashore, patch, patchKey, patchPlace, deckHoleShape, haul, haulSwap, crane, gunnery, umami, wed,
+  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, hold, holdSwap, board, ashore, patch, patchKey, patchPlace, deckHoleShape, haul, haulSwap, crane, gunnery, umami, wed, spouse,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };
