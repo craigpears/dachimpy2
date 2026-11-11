@@ -227,8 +227,9 @@ export function windTick(dt) {
     o.lock.visible = W.out > 0.02;
     o.lock.scale.z = Math.max(0.02, W.out);
     // (swung aft on the pull, its blade down in the water; forward again on the recovery, lifted
-    // clear; at rest, held out just clear of the water)
-    o.arm.rotation.y = 0.42 * Math.sin(ph) * o.s;
+    // clear; at rest, held out just clear of the water); wider on the side leading the turn that's
+    // building (js/den/rowing.js, sail.rowReach)
+    o.arm.rotation.y = 0.42 * (sail.rowReach?.(side) ?? 1) * Math.sin(ph) * o.s;
     o.arm.rotation.x = (0.3 - 0.12 * Math.cos(ph)) * (1 - rest) + 0.24 * rest;
   }
 }
