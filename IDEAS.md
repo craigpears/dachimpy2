@@ -532,7 +532,7 @@ exactly; the real game's own seed can't be had, so her board is rebuilt in our d
   **Settled (11 Nov):** "you wonder about [Kikkit]. Yeah, that's kind of the wondering [aloud]
   thing." The wondering's allowed: it's your pirate reacting to Kikkit's tangents, not the game
   pointing the way, and it still says nothing of where Tzz is.
-- **Both aboard at once (11 Nov):** asked who rides with you while you sail, Kikkit doing her
+- **Both aboard at once (11 Nov; dropped, below):** asked who rides with you while you sail, Kikkit doing her
   sound effects or Tzz teaching, the user chose "both of them at once": a double act, Kikkit's
   loopy "whoosh!" and "so sparkly!" beside Tzz twisting balloons into the pieces that'll work,
   both following what really happens on your board.
@@ -576,6 +576,11 @@ exactly; the real game's own seed can't be had, so her board is rebuilt in our d
   for the last stretch, her balloons the same shapes as the pieces on your board, popping as your
   chains do. The joke's on top and the mechanic's real underneath (RULES.md, "The humour's a layer
   on a real mechanic").
+  **Changed (11 Nov): nobody comes aboard.** "I don't think they need to be [aboard], to be honest.
+  I like [Kikkit] just kind of on her island. It works. It's a very reusable piece as well." So Tzz
+  stays on her island as Kikkit stays on hers: a pirate on an island, met there, the same reusable
+  piece. She gives her balloon lesson there, and you sail the whirlpools yourself. The double act
+  aboard (above) is dropped.
 
 ## Daquan's flotilla: "go sink a ship" (11 Nov)
 

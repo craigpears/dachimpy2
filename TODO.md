@@ -107,7 +107,7 @@ the site (`.assetsignore` skips `*.md`).
   its board drawn, balloony, and playable anywhere at sea first (done: RULES.md, "Sailing at sea"); then Kikkit's island and her
   rambling (done); the whirlpools through the reef with the penguin in the middle (done: RULES.md,
   "Kikkit's whirlpools"); Tzz's island and her
-  balloon lesson aboard; the ending: Kikkit moves to Vegas Island, the penguins' island
+  balloon lesson on her island (nobody comes aboard: IDEAS.md, 11 Nov); the ending: Kikkit moves to Vegas Island, the penguins' island
   past the reef, her familiars swimming after your ship (11 Nov, IDEAS.md).
 
 - **Sailing's sparkle, two small things (11 Nov, seen when it was built):** from behind her, the
