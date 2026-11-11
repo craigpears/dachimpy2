@@ -626,6 +626,11 @@ Rule." So the war frigate for the flotilla is Dachimpy's own Primates Rule
 (no apostrophe: the user, 11 Nov): painted black and white, with gold, black-and-white thrones and skeleton cannons.
 Drawn from the user's pictures of her (TODO.md, "Pictures of Primates Rule"), with the paint,
 furniture and cannon names as YPPedia gives them.
+**Mems as the XO (11 Nov):** "need mems as the xo, she was so awesome. There's a second from the
+old viridian days who I can't remember though." Mems, a real pirate (pirate name only; her
+ocean, pirate page and portrait to check before she's drawn, and she goes into PIRATES): the XO,
+second in command, aboard Primates Rule for the flotilla (to confirm with the user). A second
+crewmate from the user's Viridian days to add once the user remembers who.
 
 ## A bigger ship from the shipwright (10 Nov)
 
