@@ -512,6 +512,14 @@ shows how it's done: her board (TODO.md, "Sailing, as the user remembers", for i
 same deal to try it yourself, piece for piece. Hidden, not on the way (a gem to find), so she
 doesn't crowd Kikkit's scene. Needs the Sailing deal to be seeded, so a deal can be played again
 exactly; the real game's own seed can't be had, so her board is rebuilt in our deal.
+- **Her pirate page, checked (11 Nov):** Tzz is on the Emerald Ocean
+  (https://emerald.puzzlepirates.com/yoweb/pirate.wm?target=Tzz): Senior Officer and "Nap
+  Specialist" of Virtute et Armis, Princess of the flag Don't Open Till Doomsday, hearties with
+  Dachimpy-West, Daquan and Dalnoth among many; eight shacks and a cabin; twelve familiars. Her
+  portrait: light brown hair tied back, an eyepatch, a gold hoop earring, a ragged aqua shirt off
+  one shoulder, blue-and-white striped trousers to below the knee, a peg leg, grinning, and on her
+  shoulder D'rizzle, a red dragon with silver horns (silver, vibrant red); behind her, a copper
+  still.
 - **Nearer the start, the sensible one after Kikkit (11 Nov):** "Maybe ... [Tzz] appears nearer
   the start, but maybe you talk to [Kikkit], and then the characters are like, now I wonder if I
   can find somebody that can explain how to get past all these ... whirlpools and winds that makes
