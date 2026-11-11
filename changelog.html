@@ -30,6 +30,7 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 40px rgba(120, 80, 30, 0.18); padding: 14px; margin: 0 0 20px; }
   .shots { display: grid; gap: 10px; grid-template-columns: 1fr; }
   .shots.two { grid-template-columns: 1fr 1fr; }
+  .shots.three { grid-template-columns: 1fr 1fr 1fr; }
   .shots a { display: block; border-radius: 7px; overflow: hidden; border: 2px solid #3b2a1b; background: #2a1c11; line-height: 0; }
   .shots img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; transition: transform .25s; }
   .shots a:hover img { transform: scale(1.02); }
@@ -42,7 +43,7 @@
   footer { margin-top: 40px; color: #8c7a60; font-size: 13px; text-align: center; }
   @media (max-width: 640px) {
     body { font-size: 16px; }
-    .shots.two { grid-template-columns: 1fr; }
+    .shots.two, .shots.three { grid-template-columns: 1fr; }
     h3 { font-size: 22px; }
     article { padding: 10px; }
   }
@@ -128,8 +129,10 @@
   <h2><time datetime="2026-11-10">10 November</time></h2>
 
   <article>
-    <div class="shots">
+    <div class="shots three">
+      <a href="changelog/capybara-crane.jpg"><img src="changelog/capybara-crane.jpg" width="1280" height="720" loading="lazy" alt="The crane built by Carpentry swinging the sloop down off the cliff into the lagoon"></a>
       <a href="changelog/capybara-trap.jpg"><img src="changelog/capybara-trap.jpg" width="1280" height="720" loading="lazy" alt="A Foraging board on a cliff bank, Umami the capybara caged at its top"></a>
+      <a href="changelog/capybara-aboard.jpg"><img src="changelog/capybara-aboard.jpg" width="1280" height="720" loading="lazy" alt="Umami, free, aboard the sloop with the crew beside the Foraging board"></a>
     </div>
     <h3>Umami's rescue</h3>
     <p>A crane you build by Carpentry hauls the sloop up the cove's cliff into a still, reedy lagoon. On its far bank Umami the capybara is shut in an old fish trap. Free him by Foraging and he comes home to live in the den's shallows.</p>
@@ -178,14 +181,37 @@
 
   <article>
     <div class="shots">
-      <a href="changelog/bilge-shallows.jpg"><img src="changelog/bilge-shallows.jpg" width="1280" height="720" loading="lazy" alt="A Bilge board laid out on the beach, running down into the sea"></a>
+      <a href="changelog/bilge-raid.jpg"><img src="changelog/bilge-raid.jpg" width="1280" height="720" loading="lazy" alt="Vikings rowing in past a Bilge board in the shallows, soldiers meeting them on the beach, powder barrels on the sand"></a>
     </div>
-    <h3>Bilging the shallows</h3>
-    <p>The real Bilge board lies on the beach, and its water is the tide. Good moves draw the tide back so bare rocks cut the raiders off, and big combos dredge up powder barrels that blow up Vikings who come by.</p>
+    <h3>Bilging the shallows, and powder barrels</h3>
+    <p>The real Bilge board lies on the beach, and its water is the tide. Good moves draw the tide back so bare rocks cut off the Vikings rowing in.</p>
+    <p>Clear two lines in one swap and you dredge up a powder barrel. It lands on the sand by the wall and blows any Viking who comes by flat.</p>
     <p class="try">Try it: <a href="den.html?at=built"><code>den.html?at=built</code></a>, then out through the gate to the beach</p>
   </article>
 
+  <h2><time datetime="2026-11-08">8 November</time></h2>
+
+  <article>
+    <div class="shots two">
+      <a href="changelog/swordfight-hoist.jpg"><img src="changelog/swordfight-hoist.jpg" width="1280" height="720" loading="lazy" alt="The armoury hoist stacked with coloured crates of weapons, soldiers in blue and white waiting beside it"></a>
+      <a href="changelog/soldiers.jpg"><img src="changelog/soldiers.jpg" width="1280" height="720" loading="lazy" alt="Little soldiers in blue and white stripes holding a breach in the den's wall"></a>
+    </div>
+    <h3>Swordfight at the armoury hoist, and the soldiers</h3>
+    <p>Beaten Vikings drop crates of weapons. Carry them to the armoury and play them on its hoist by Swordfight's rules.</p>
+    <p>A broken chest of swords arms little soldiers in blue and white, who go and hold the breaches. Loose crates are broken up into planks that mend the wall.</p>
+    <p class="try">Try it: <a href="den.html?at=start"><code>den.html?at=start</code></a>, then take the dropped crates to the hoist</p>
+  </article>
+
   <h2><time datetime="2026-11-07">7 November</time></h2>
+
+  <article>
+    <div class="shots">
+      <a href="changelog/shack.jpg"><img src="changelog/shack.jpg" width="1280" height="720" loading="lazy" alt="Your shack in the den, its walls and roof built from Carpentry pieces"></a>
+    </div>
+    <h3>Your shack</h3>
+    <p>The shack's plot is marked on the den floor from the start. Build it whenever you like, wall by wall and then the roof, every part a Carpentry frame filled piece by piece.</p>
+    <p class="try">Try it: <a href="den.html?at=shack"><code>den.html?at=shack</code></a></p>
+  </article>
 
   <article>
     <div class="shots">
@@ -203,6 +229,17 @@
     <h3>The gun tower</h3>
     <p>The top of the gun tower is a Gunnery board. Chalk arrows steer the stores into the guns, and the loaded guns fire on the raiders. The same Gunnery is later played on the sloop's deck.</p>
     <p class="try">Try it: <a href="den.html?at=gun-tower"><code>den.html?at=gun-tower</code></a></p>
+  </article>
+
+  <article>
+    <div class="shots two">
+      <a href="changelog/carpentry-frame.jpg"><img src="changelog/carpentry-frame.jpg" width="1280" height="720" loading="lazy" alt="A frame for the wall-walk half filled with wooden Carpentry pieces on the den floor"></a>
+      <a href="changelog/carpentry-wall.jpg"><img src="changelog/carpentry-wall.jpg" width="1280" height="720" loading="lazy" alt="Fitting a piece into a hole in the den's wall in the Carpentry view"></a>
+    </div>
+    <h3>Building by Carpentry</h3>
+    <p>Everything in the den is built from pieces that stay pieces: the walk along the wall, the stairs and the gun tower are laid out as frames on the floor and filled a piece at a time, then go up.</p>
+    <p>Since 9 November there's also the Carpentry view: Tab takes you straight to the wall or any frame, with Puzzle Pirates' own keys.</p>
+    <p class="try">Try it: <a href="den.html?at=walk"><code>den.html?at=walk</code></a></p>
   </article>
 
   <article>
