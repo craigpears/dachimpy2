@@ -282,6 +282,11 @@ the site (`.assetsignore` skips `*.md`).
   outside; not yet tried by the user. Watch for: the markers on raiders outside cluttering the
   view while you carry a piece.
 
+- **Gravee holds a brush to the canvas when she paints (11 Nov):** "when [Gravee's] painting ... her
+  hand should actually be holding a brush at least pointing in the general direction of the canvas.
+  She's right next to it at the moment." A brush in her hand, facing the canvas within arm's reach,
+  her arm reaching to it, dabbing while she paints you.
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
