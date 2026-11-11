@@ -162,6 +162,13 @@ the site (`.assetsignore` skips `*.md`).
   the crane, haul her up, and the like), the offer is in the view where you're looking, at the
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
+- **Mischievious's lines: funny, never mean about her (11 Nov):** "we'd rather be a lot more
+  humorous about [Mischievious], but not negative. Like, I don't like where it says, oh, marry
+  [her], she's free, she's nearly always free. Like, that feels mean." Go through all her lines.
+- **The wedding on a phone (11 Nov):** "I can't look at that on the mobile ... the dialogue covers
+  up everything that you see in the background, so it's not exactly very mobile friendly at the
+  moment. Not that this is ever usually a mobile friendly game, because it's just usually a lot
+  going on." The planner and her speech shouldn't hide the venue on a small screen.
 
 ## Needs a playtest to pin down
 

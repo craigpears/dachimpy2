@@ -611,8 +611,8 @@ pirate wedding absolutely is a must."
   you can kind of just see the line of various people that she's married of all sorts." So she
   greets you breezily ("Weddings are fun! I've got married five times today"), and there they all
   are: a line of her husbands and wives of the day, of every sort, milling about the venue. Open to
-  men and women alike, as she agrees. (What "she's not naming the females" means: to pin down with
-  the user.)
+  men and women alike, as she agrees. Nobody in the line is named: "she's not naming her women,
+  obviously based on like the real pirates' names" (her real spouses are real pirates).
 - **The welcome, darkly funny (10 Nov):** "when you first turn up ... the last wedding party has
   gone horribly well. Mischievious is there, kind of trying to proposition you, and it's just like,
   yeah, don't pay attention to the blood and guts, yeah, it's fine. We've hired a bit of extra
