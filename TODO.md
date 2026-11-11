@@ -301,7 +301,10 @@ the site (`.assetsignore` skips `*.md`).
   it's made with a line at once, as YPPedia has it and src/navigation.ts already does.) "Those kind of
   really evil boards that are impossible and frustrating to beat, like you're guaranteed to practically
   booch them. Oh, that would be so evil and so fitting. That would be fantastic." The bots to show it can
-  be done.
+  be done. Where it came from (the user, 11 Nov): "I was inspired thinking, what would be a really evil
+  thing for Umami in the sloop races to have to contend with?" (Umami, a friend's pirate, whose idea PvP
+  races were.) The user wants that in the den once Duty Navigation's there ("put that in the pirate den");
+  how, to settle with them (the constellation named for Umami, say).
 - **Shortcuts not all created equal (11 Nov):** on the race course, small shortcuts as well as big ones,
   each needing a combo of its size: a tiny one a Double gets you through (as a Double clears the reef out
   of Kikkit's whirlpools), bigger ones a bigger combo, the biggest the starlit door's tunnel. "Are you a
