@@ -160,11 +160,15 @@ the site (`.assetsignore` skips `*.md`).
   She went ahead to each stop slower than you walk and stood still while she talked, so you lost
   her. She should keep at your side as you walk, at your pace (hurrying to catch up if you've got
   ahead), talking as she goes, and stand by each thing as she shows it you.
+  "This definitely needs to be a standard feature for people in houses and things": whoever shows
+  you round any house walks with you, a piece of the houses, not Gravee's own code.
 
 - **Gravee's house, after the user's first walk round (11 Nov):** "Oh, I love it. I love it." But:
   - **The gallery's whiz is too fast:** "zooming past the paintings was a little too fast. That
     was just like, what happened? I don't think we need to go quite like that." Slower, so you see
-    it's the gallery going on and on.
+    it's the gallery going on and on. Then (11 Nov): "Obviously, you can zoom by as a skip. I don't
+    think it should do that by default, though." So you walk it, and whizzing along is a skip you
+    choose.
   - **Her speech bubbles get stuck:** "quite a few of her speech bubbles kind of seem to get
     stuck. Like I see 4 of them open there at the moment." One bubble at a time, each gone when
     its line is done.
