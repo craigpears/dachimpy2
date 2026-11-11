@@ -184,6 +184,13 @@ the site (`.assetsignore` skips `*.md`).
   example, front benches right up on them, so you can barely even see [Mischievious] because of all
   the guests are all kind of crowding her out." The front benches and guests stand back from the
   arch, so she and the couple are always clear to see; nothing overlaps.
+- **Every character's lines in files of their own, kept in history (11 Nov):** "make sure that all
+  the various lines, characters, and personalities are in like some configurable files ... I just
+  want there to be a record of them in case any get lost that I really love, so I can see how
+  they've evolved over time, even if it's just in source control somehow." One file per character
+  (`src/lines/`), what they say and who they are, the code taking its lines from there; and a
+  readable LINES.md made from them (a test keeps it up to date), so git's history shows each line
+  as it changes.
 
 ## Needs a playtest to pin down
 
