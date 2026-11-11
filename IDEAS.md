@@ -2016,6 +2016,11 @@ natural small breaks. You're like, you're supposed to do something every 2 or 3 
 do some bigger moves like looping and clearing all of one color, hooking, that kind of thing. But I don't
 know, we'll have to obviously think about that and how rigging will fit in as a puzzle." Not pressing:
 "not that we necessarily need to worry about adding every single puzzle, we've got enough concepts here."
+One way (the user, 11 Nov, thinking of SunnyKira's love of it): "maybe rigging, maybe you could be set up
+a bit better, so you get given a board where there's already a, more likely to be, big clears in progress.
+But obviously it would need to be balanced with sailing and whatnot." So Rigging dealt with big clears
+already half-built on its board (as the den's first wave deals Carpentry fair: RULES.md), so a heavy move
+is within reach, tuned to be as quick a way through as a big Sailing chain, no quicker.
 (To shape with the user, if Rigging comes: what counts as its heavy move, say a loop or clearing a whole
 colour, and what it does for her at sea.)
 
