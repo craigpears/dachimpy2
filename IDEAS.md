@@ -2174,9 +2174,28 @@ path. But you've got to constantly change and adapt the rigging to get through i
   would move her"), which here is the point: the wind keeps changing, so it's quick, constant adjusting
   that gets her through, not holding out for a heavy combo. The opposite of the Sailing and rowing
   shortcuts, so it's a different kind of player's way through.
-- Check Rigging's real rules on YPPedia before shaping it (its loops, hooks and clearing a colour, as the
-  user remembers them), and keep it the real puzzle with a new job, as mirror strokes did for rowing.
-  SunnyKira, "sublime in rigging", to teach it.
+- **The real puzzle (YPPedia, "Rigging", read 11 Nov):** a hexagonal grid of pieces, moved in straight
+  lines in six directions; **six pulleys** round it, one always active, the active one moving on clockwise
+  after every move, pull or not. A chain of a colour in front of the active pulley is pulled off the board;
+  big pulls score, lots of small ones don't. Surrounding pieces in a pull is a loop (a bonus, and loops on
+  the rope coil); the coil full (20 loops) gives a wild piece; no pull three moves running loses 5 loops.
+  Special pieces: wild, gaff (pulls everything round it; from surrounding a non-matching piece), tar (from
+  pulling all of a colour, five or more), splice (a second chain pulled; from linking an inactive pulley).
+- **The six pulleys as her rigging points (the user, 11 Nov):** "the different combos or a hook or something
+  would like impact whether you're putting the sails up, down, catching the angles. I don't want it just to
+  be like rowing ... normally rigging's all about, you know, it goes around in a circle ... is it 8 points
+  ... or is it 6? ... it's like a toggle. So if you clear a piece on any one of the [points] around ... it
+  toggles the rigging for that point. So essentially ... if you want sails down, you have to unclip all ...
+  of them. If you want full set, you have to do more of them, and maybe ... they almost charge, so ... bigger
+  combo will hook it immediately, or you have to do multiple to kind of slowly kind of tighten it. That would
+  work actually very well." So each of the six pulleys is a line of her rigging: a pull at it hauls that
+  line in, a big pull (or a loop) hauls it taut at once, small ones a bit at a time; let alone, a line slowly
+  pays out. All six hauled is full sail for light airs; all let go, sails down to ride out a blow; hauled on
+  one side and not the other, sheeted round to catch a wind from that quarter. The active pulley going round
+  clockwise is the tactics: you can only haul the line whose turn it is, so you plan your pulls round the
+  board to have her trimmed for the gust that's coming.
+- Keep it the real puzzle with a new job, as mirror strokes did for rowing. SunnyKira, "sublime in
+  rigging", to teach it.
 
 **More kinds of shortcut, for later versions of the course (11 Nov):** "we've got a good collection of
 mechanics actually here that you can have all different kinds of shortcuts." One the user suggested:
