@@ -664,6 +664,11 @@ crewmate from the user's Viridian days to add once the user remembers who.
   very prideful, we'll put it that way." A race between your sloop and the frigate, using the den's sailing
   for real (the winds, a chain's run ahead, the whirlpools as a shortcut) and the oars: "I think we've got
   the racing mechanics, and it lets us do the rowing and all that kind of stuff." Win, and she's yours.
+  The loser rows off in a little boat (as in "Sunk at the checkpoint: row home in a little boat"): "the
+  loser is definitely just rowing off in their boat. Or maybe you'll end up rowing back because he keeps
+  your [sloop], so you have to row. There's a little animation of you just rowing back to your home." So
+  win, and Daquan rows off; lose, and he keeps your sloop and a little cutscene has you rowing home to
+  the den.
   (To shape with the user: the course, how a sloop can fairly beat a frigate (her winds and the whirlpools
   a frigate can't take? see "Bigger ships ride out the winds"), when he's met, and his lines: prideful,
   never quoting him.)
