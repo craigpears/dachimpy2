@@ -335,7 +335,9 @@ the site (`.assetsignore` skips `*.md`).
   [Gravee] in the portrait gallery, the gunning deck, [Dalnoth] coming as a Viking, the [Primates Rule],
   kind of like just like a good teaser shot of like that [deck] with the [sloop] next to it." A page of
   entries, newest first, each a teaser shot or two and a few lines, pirate names only; the start of
-  "Something to show people" (above).
+  "Something to show people" (above). And in the game: "I don't see why the changelog as well can't be
+  visible from within the game. So if somebody's coming back to the den, they can see it." A "What's new"
+  button among the den's buttons, marked when there's something new since you last looked.
 
 ## Spotted along the way (not asked for)
 
