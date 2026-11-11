@@ -1971,3 +1971,9 @@ So perhaps: Bilge, rigging, Citadel runs, and dens (to confirm with the user or 
 what Citadel runs are before anything's built). **SunnyKira** (she; a real pirate, pirate name only; her
 pirate page and portrait to check before she's drawn, then into PIRATES): her part still open, fitting
 someone who loves the tutorials (RULES.md, "A pirate showing you a puzzle is the heart of it").
+Then (11 Nov): "she's sublime in rigging. I think that definitely gives her credibility for loving that
+puzzle. She's got a nice distinctive look on her portrait as well, so that's always a good thing. We want
+to get more distinctive looks in." So she's the natural one to teach Rigging, Puzzle Pirates' other
+puzzle at the same station as Sailing (its own module from YPPedia's rules, not built yet; RULES.md
+keeps Sailing never called "the rigging", as they're two puzzles). Her portrait to check, and her look
+added to PIRATES and the wardrobe from it. And a general aim: more distinctive looks in the den.
