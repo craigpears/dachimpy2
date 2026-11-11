@@ -431,6 +431,12 @@ then "she's definitely a penguin side quest".
   penguins, delighted, which nobody saw coming but which makes perfect sense for Kikkit. (To pin
   down with the user: which island, hers or a penguins' island past the whirlpools, and whether
   her familiars go with her.)
+  **Settled (11 Nov): she moves to Vegas Island.** "She goes and moves to the Vegas Island.
+  That's what we call that. That's a funny name." The penguins' island, past the reef where only a
+  Vegas reaches, is **Vegas Island**. "Familiars definitely follow along with her. Maybe they can
+  swim in the water after your ship when you're kind of doing the sailing." So the ending: Kikkit
+  comes along to Vegas Island, her familiars swimming in your wake as you sail there, and she
+  settles in among the penguins, delighted.
 - **Penguins in the wardrobe too:** "make her a penguin" first meant Kikkit as one; if wanted,
   a penguin body the pirate maker can dress, so anyone can be a penguin.
 - **All in on her craziness (10 Nov):** "really just do the whole craziness of Kikkit ... she's the
