@@ -872,11 +872,29 @@ its exhibits the real thing, oldest first. The user's screenshots are kept in `n
   a tiny bit manually back in the day, poor guy!" Thirty-two hand-drawn sloops, every heading,
   shown turning round on a stand (the source PSD is on the user's own drive).
 
+- **Then Dachimpy.com, through its versions ("the various evolutions"):** the first, a grey page
+  with parchment-scroll menus (Home, Stations, Piracy, Crafting, Carousing, Misc) and a Gunning
+  guide: wild style, the two-cannon loop, board sitting, central looping. Then the blue site with
+  the chimp in the pirate hat on its header and the sloop on the right: Puzzle Guides for every
+  puzzle (Piracy, Carousing, Crafting), Applications (the **Blockade Simulator**, "blockade
+  practice without the need to gather hundreds of jobbers", and the **Distilling Simulator**,
+  2010-10-02, "Distilling with control over when columns are burnt", 1,798 views), and its 2010
+  updates log ("Blockade simulator is up on whirled!", 13 April 2010, then freeze and sync fixes
+  into June). Rumble tips drawn with arrows ("start in the middle and then cut through"); Spades
+  tips on side tabs; the Swordfighting guide's videos and the "So you think you can SF?" series
+  (Novo vs Antartic, Novo vs Dunny); a teaming-strategy tip sourced from **Tzz** ("Bots tend to
+  play like a #1 SFer with a broken space bar ... don't stall. Ever."), who has her own island
+  coming; and the 2011 home page with carousels of every puzzle. Shown on the museum's walls as
+  framed pages (the shared frames), or on an old monitor you can click through.
+- **Privacy:** some of those pages show the user's real name, an e-mail and a forum handle. The
+  museum shows only the pirate name Dachimpy: crop or redraw those parts, never put them in.
+
 The fun of it: the exhibits play. The den already has whirlpools by Puzzle Pirates' rules
 (`den-whirl.ts`), winds and rocks, so the old 9×9 boards can be played as they were, Execute
 Move and all, and "shoot Dalnoth" is Dalnoth himself, who's in the den. Hidden, never hinted.
 Still to collect: more of the user's screenshots (pictures not saved to disk need putting in
-`notes/museum/` by hand: the v1 page and the first shoot-Dalnoth board).
+`notes/museum/` by hand: the v1 page, the first shoot-Dalnoth board and the Dachimpy.com pages).
+Maybe the Distilling Simulator plays too, one day, as a Distilling board of its own.
 
 ## Placing creatures: choose what they get up to (11 Nov)
 
