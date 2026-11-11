@@ -329,7 +329,9 @@ the site (`.assetsignore` skips `*.md`).
   to the start if you ... get it wrong." So the starter at the buoy tells you the idea before the off: the
   long way round, or a shortcut that costs a puzzle, with a few of them as examples, and the snakes that
   sweep you back. Not the starlit door ("Hidden gems, never hinted": a race's rules are explained, its
-  secret isn't).
+  secret isn't). On a first go the user couldn't find the Carpentry crane or the rowing gap at all ("There's a
+  carpentry shortcut in here I've not seen it"), so the shortcuts need to be findable: plain to see as
+  you sail by (the gap, the crane's footing), and named among the starter's examples.
 - **Knowing where you're going on the race course (11 Nov):** the user's first go at `?at=race`: "my first
   impression is I've not got a clue where I'm going. But then again, my other wonder is that a good thing?
   Because that is that part of the joy? Is it like a maze as much as a course?" Suggested: the long way
