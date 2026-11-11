@@ -848,6 +848,36 @@ of your own on the sea: its shape, its palms and sand, what stands on it, all pl
 modular pieces (furniture, creatures, talking pirates: RULES.md), and kept in this browser as
 everything you make your own is. Goes with the decorating competition (above).
 
+## A museum island: how the Blockade Simulator began (11 Nov)
+
+"I'd love an island that's a museum of the really old school first versions of the blockade
+simulator and dachimpy.com." An island on the sea (a little island of its own, like the others),
+its exhibits the real thing, oldest first. The user's screenshots are kept in `notes/museum/`
+(not deployed), numbered in that order:
+
+- **v1, "an insanely basic html page":** the Bnav Guide, a page of plain links. Ship movement;
+  winds and rocks; whirlpools (the basics, turning around with one, holding your place in one,
+  reaching the other side); shooting and grappling; collisions, same class and different; then
+  practice with a health bar: shooting a moving target, a target that fires back, move
+  generation, damage and bilge, and "Dalnoth traverses the board" I to III. Its last line plans a
+  Survival Game: waves of bot ships, each wave harder, your ship improving as you sink them.
+- **"The very first shoot Dalnoth!":** a 9×9 board ringed with rocks, a whirlpool, winds and
+  Dalnoth's face on four squares to shoot. Then the first prototype board (a whirlpool, the little
+  ship, left/forward/right and Execute Move); the flat blue board with flags, rocks, whirlpools
+  and winds, and "Your ship" counting lefts, forwards and rights; the game set-up wireframe
+  (Admiral and Nav per team, chat, user list); the Blockade Sim lobby (choose your ship, jobber
+  level Weak, Normal or Elite, Ready?), its teams and "Create your game" (map, turn time,
+  friendly fire); and the finished thing in play, isometric, with the Blockade! move panel.
+- **The sloop rotations:** "love the sloop rotations, someone had to do these by hand that I paid
+  a tiny bit manually back in the day, poor guy!" Thirty-two hand-drawn sloops, every heading,
+  shown turning round on a stand (the source PSD is on the user's own drive).
+
+The fun of it: the exhibits play. The den already has whirlpools by Puzzle Pirates' rules
+(`den-whirl.ts`), winds and rocks, so the old 9×9 boards can be played as they were, Execute
+Move and all, and "shoot Dalnoth" is Dalnoth himself, who's in the den. Hidden, never hinted.
+Still to collect: more of the user's screenshots (pictures not saved to disk need putting in
+`notes/museum/` by hand: the v1 page and the first shoot-Dalnoth board).
+
 ## Placing creatures: choose what they get up to (11 Nov)
 
 "when you're placing ... familiars and pets in scenes, like, you should have options for, like,
