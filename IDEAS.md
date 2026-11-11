@@ -388,6 +388,10 @@ then "she's definitely a penguin side quest".
   easy platforms. So most people familiar with it, I'd expect can do that." So the whirlpools'
   board stays simple (small, easy platforms), smaller chains carry you part way, and a Vegas
   takes you all the way through to the penguins.
+  **Then a small combo through, the penguins the bigger prize (11 Nov):** "Maybe a small combo
+  gets you through the reef, with the penguins being the bigger prize after." So a small chain
+  gets you through the whirlpools and past the reef (the third way past), and the penguins lie
+  just beyond, reached only by a Vegas.
 - **Kikkit:** a real pirate on Emerald (checked 10 Nov): captain of Rodrigo's Revenge, of the flag
   Egotistical Englishman, an Admiral in the Aimuari Island Navy (Dignity's navy, and above her).
   Drawn from her portrait by the pirate maker: black curly hair crowned with red roses, an
@@ -508,6 +512,10 @@ exactly; the real game's own seed can't be had, so her board is rebuilt in our d
   **Settled (11 Nov):** "you wonder about [Kikkit]. Yeah, that's kind of the wondering [aloud]
   thing." The wondering's allowed: it's your pirate reacting to Kikkit's tangents, not the game
   pointing the way, and it still says nothing of where Tzz is.
+- **Both aboard at once (11 Nov):** asked who rides with you while you sail, Kikkit doing her
+  sound effects or Tzz teaching, the user chose "both of them at once": a double act, Kikkit's
+  loopy "whoosh!" and "so sparkly!" beside Tzz twisting balloons into the pieces that'll work,
+  both following what really happens on your board.
 - **On Kikkit's island, teaching Sailing like balloon animals (11 Nov):** "Maybe she's on the same
   island as [Kikkit], just to keep it simple. Or you could go over and find her ... like how
   someone does balloon animals, except that she's doing like a sailing version of balloon animals,
