@@ -146,6 +146,13 @@ the site (`.assetsignore` skips `*.md`).
   Gravee's own), drag to turn the camera round you and look about, and zoom in close to a portrait
   to read it and see it properly; the house's own view comes back when you walk on or let go.
 
+- **Gravee talks about the portrait you're looking at (11 Nov):** "I think the speech should adapt
+  to what you are looking at better in the gallery tour, like she talks about the portrait you are
+  looking at." Her tour's lines are by stop, not by picture. Instead, as you stop by a portrait (or
+  turn the camera onto one), she says something about that one: who it is, the story behind its
+  title, in her voice, each portrait's line in its config. It's the house shell's piece, so any
+  host can talk about what you're looking at in their house.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
