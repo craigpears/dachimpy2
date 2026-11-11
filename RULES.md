@@ -155,6 +155,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   more into those modules." So a place or event is built to be fun on its own, and needn't carry
   saved progress, other players or a deep economy yet; those come later, for the parts that prove
   popular. Keeping each one a little island in the code is what lets any of them grow then.
+  **Except what people make their own (11 Nov):** "the spouse thing and anything you do to style
+  ... you should definitely at least save that into local storage or something, because people
+  will be very upset if that gets lost, even for a proof of concept." So whoever you married, your
+  look, the den's decorations, your name and the wedding you planned are kept in this browser,
+  through a reload and a new game alike; any new thing you dress, style or keep is saved the same
+  way. Voyage progress (the map, the sea, found pets) still starts afresh.
 - **The humour's a layer on a real mechanic (11 Nov).** Of Tzz teaching Sailing as balloon animals:
   "it works well as a mechanic. Everything works together, that's always the point. The humour is
   the layer on top, but there's a genuine mechanic underneath." A joke is never just set dressing:
