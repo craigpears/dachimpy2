@@ -2165,7 +2165,14 @@ each run: the route taken (which shortcuts, which snakes), the time on each puzz
 finish, kept by the leaderboard's worker (worker/index.js, D1) as the Carpentry primer's scores are. Then
 how often each route wins, and what each shortcut really saves at each skill, to tune the course by (not
 auto-balancing, data for the user to balance by). Only with players' runs, anonymous, by pirate name at
-most.
+most. **Replays, down to the puzzling, and watching a race (11 Nov):** "the full version, you'd have ...
+replays, and ... that would go down to the detail of the actual puzzling, because that's kind of what you're
+watching and part of the whole point of the race. It's also what makes this so fantastic. It would be so
+fantastic to watch. You could see everybody puzzling and racing." So a replay shows the sea and every
+sloop on it, and beside each one the board they're playing, move by move: the Vegas being built at the
+whirlpools, the panicked dash past the guns. Cheap to keep, as the puzzles are dealt from a seed: a run is
+its seeds and its moves with their times, played back through the same puzzle modules. And watched live,
+a race to spectate: the sea, and each racer's board.
 
 **Shooting each other: Gunnery's other use in a race (11 Nov):** "one of the advantages of [gunnery] as well
 is that you can disrupt somebody trying to do the sailing Vegas or something ... by shooting them. So yeah
