@@ -284,6 +284,10 @@ the site (`.assetsignore` skips `*.md`).
   penguins ... should be an obvious bonus to go, oh, look, I found the penguins. They should be at least a
   few rocks around them." So rocks round the penguins' island, closed off from the open sea behind, the
   whirlpools (and a Vegas over them) the one way to it, and the whirlpools still the shortcut past the reef.
+- **Port Decorum to scale with the sloop (11 Nov):** "just looking at port decorum size relative to the
+  sloop. Isn't the wall for it going to tower over that? ... we've clearly got a scale problem here." Its
+  fort's walls are lower than the sloop's mast and its towers lower than the checkpoint's: a fort's walls
+  should tower over a sloop, its keep over everything, and the town's buildings be proper houses beside her.
 
 ## Spotted along the way (not asked for)
 
