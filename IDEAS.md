@@ -2187,7 +2187,9 @@ more hits idk." So every racer starts with a gun or two already loaded, enough t
 through the whirlpools. Either the shot-away obstacles (the gun gap's guns, the shoot-away rocks) want those
 same shots, so firing at another racer costs you a way through and leaving them in peace is its own reward;
 or the obstacles simply need more hits than a starting gun or two, so the loaded shots are for racers and the
-obstacles still take Gunnery. To weigh with the balance simulation (TODO.md), which can run both.
+obstacles still take Gunnery. To weigh with the balance simulation (TODO.md), which can run both. Agreed
+(11 Nov): "I definitely want to be able to shoot other racers. That's absolutely part of this." Now in
+TODO.md, "Shooting other racers".
 
 **A Rigging passage: trimming her through shifting winds (11 Nov):** the user wants Rigging in, "certainly in
 a way that's like rigging ... I'm not sure I ever liked it as a compliment to the sailing puzzle ... my

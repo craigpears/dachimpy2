@@ -372,6 +372,15 @@ the site (`.assetsignore` skips `*.md`).
   (overgrowth, driftwood, fallen trunks), cleared by Foraging (src/foraging.ts, the one implementation)
   to open the way through, as the shoot-away rocks would be by Gunnery: a stopped-dead shortcut, like the
   locks and the crane. Umami's way round, naturally.
+- **Shooting other racers (11 Nov):** "I definitely want to be able to shoot other racers. That's
+  absolutely part of this." So her guns are for the other sloops as well as the gun gap: catch a racer
+  sitting still building a Vegas, or jostling for the best line through the whirlpools, and hole them
+  (dazed and patching, never knocked out), and they can do the same to you. Each racer starts with a gun
+  or two loaded, so there's something to fire from the off (the user: "Maybe start with one or two guns
+  to enable that gameplay?"). Still to settle, with the balance simulation below: whether the obstacles
+  want the same shots ("use those instead of vs other players as a kind of peaceful racer bonus"), or
+  simply need more hits than a starting gun or two. The rival bots fire too, each by its profile. Goes
+  with the 2–4 racers.
 - **Balancing the race: a headless simulation, and 2–4 racers (11 Nov):** after more goes, the routes
   don't feel even: "the bilging one is relatively probably quick to get through, same with the carpentry.
   I mean, I definitely noticed just loading the guns and gunning takes a long time ... Gunning felt very

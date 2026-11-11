@@ -2029,6 +2029,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     checked), the long way at a set pace, home in 3:55, quicker than the long way sailed: you beat it on
     the shortcuts you're good at. Your best time's kept in this browser.
   - **Nothing hinted:** the starter says what the course is, never where the shortcuts are or how.
+  - **Racers shoot each other (11 Nov):** "I definitely want to be able to shoot other racers. That's
+    absolutely part of this." A race is PvP, guns and all, not only a time trial (TODO.md, "Shooting
+    other racers", for how).
   - **Kept for the starlit door (to come):** a plain cliff face on the second spit off leg 2 (squares 21
     and 22 across, 43 out) and a tunnel's end on the fourth spit's far face onto leg 5 (21 and 22, 58 out),
     nothing there yet (`LAY.RACE.DOOR`).
