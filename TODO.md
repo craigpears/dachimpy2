@@ -312,6 +312,10 @@ the site (`.assetsignore` skips `*.md`).
 - **Rowing came up over Tzz's lesson (11 Nov):** "I'm not quite sure if I accidentally clicked something
   ... somehow the rowing thing ended up overlaying it." The sea's buttons (Oars, Guns, Sailing) stayed on
   screen and clickable during a cutscene. Nothing but the cutscene's own keys should work in one.
+- **The puzzles' keys at sea, in one bank (11 Nov):** "The R does not make sense as a button for sailing
+  ... I definitely still associated R with sailing ... surely they should at least all be in the same bank
+  of keys for activating the puzzles." Now R Sailing, G Gunnery, O the oars (rowing), scattered among the
+  helm's W A S D and the guns' Q E. To settle with the user which bank (number keys 1 2 3 are free at sea).
 
 ## Spotted along the way (not asked for)
 
