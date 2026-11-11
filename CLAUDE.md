@@ -50,6 +50,10 @@ thoughts, design and balance decisions should all be in some kind of game design
 races"): read it before working on the race, and keep it up to date with every design or balance decision and
 idea about racing, alongside RULES.md (the rules as built), TODO.md and IDEAS.md.
 
+Pushing to main deploys, so a commit that only changes notes or docs (any `.md`) is committed locally and
+not pushed on its own; it goes up with the next push that carries a real change (the user, 11 Nov: "I don't
+think we want to trigger deployments for doc changes. Not if there's no other change with them").
+
 Pirate Den notes: [TODO.md](TODO.md) holds the fixes and quality-of-life changes the user has asked for
 (agreed; just do them), and [IDEAS.md](IDEAS.md) holds their unrefined ideas for new puzzles and features.
 Keep the two apart: when the user mentions a fix or tweak, add it to TODO.md; when they brain-dump a new idea,
