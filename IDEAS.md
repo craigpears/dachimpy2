@@ -916,6 +916,15 @@ its story, and the museum walks you through it:
   maybe a little sloop by the exhibit that now and then spins and hops into the rocks, and the
   caption for the newer one says, deadpan, that it works perfectly.
 
+**A tribute, and a thank-you (11 Nov):** "there should be some tribute to the people, friends
+and relationships I've had from PP and a thank-you to all the people who make it such an awesome
+place. Plus my cuddly monkeys, Mini in particular." The museum's last room: the friends drawn from
+their portraits (pirate names only), the ones already in the den among them (Dalnoth, Dignity,
+Mischievious, Kikkit, Gravee, Tzz, Daquan, Mems), and a thank-you to everyone who makes Puzzle
+Pirates what it is. And the user's cuddly monkeys, **Mini** above all, in pride of place (what Mini
+looks like, from a photo, to pin down with the user). Kept warm, not soppy, the den's humour still
+there.
+
 Still to collect: the user's pictures not saved to disk need putting in `notes/museum/` by hand
 (the v1 page, the first shoot-Dalnoth board and the Dachimpy.com pages), and pictures of I'm a
 Duck's version.
