@@ -1957,9 +1957,10 @@ met again, more puzzles there.
 **Monlizzy, its queen (11 Nov):** "Monlizzy definitely needs to be in. She had a flag named imperial
 coalition so she can definitely be the queen of the imperial island." **Monlizzy** (she; a real pirate,
 pirate name only; her pirate page, ocean, flag and portrait to check before she's drawn, then into
-PIRATES): the queen of Port Decorum, the imperial island, ruling it (Dignity, the checkpoint's
-commander, presumably answers to her: to settle with the user). Her flag's name, Imperial Coalition, to
-confirm on YPPedia.
+PIRATES): the queen of Port Decorum, the imperial island. Not thought out yet (the user, 11 Nov): "I don't
+really think that they necessarily need to be fully connected up ... [Dignity] is just a guard at the
+thing. I don't see a huge need to continue any of that over yet." So no tie to Dignity for now. Her
+flag's name, Imperial Coalition, to confirm on YPPedia.
 
 ## Affame, the queen of sweetness (11 Nov)
 
