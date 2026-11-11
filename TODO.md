@@ -308,6 +308,15 @@ the site (`.assetsignore` skips `*.md`).
   person that can break quick double triples? That gets you through some shortcuts, and then, you know,
   you move a bit and you do ... equivalent thing on another puzzle. Or do you want to go for those giant"
   ones. After the first draft (the agent building it was briefed before this).
+- **Snakes on the race course: a trade wind back up it, to jump with a Double (11 Nov):** the trade wind
+  that runs her home, put through the middle of the zigzag too: "can that not be in like the middle of a
+  zigzagging course? So if you're accidentally, like you have to do the double. I love that idea. Maybe at
+  some points, like you have to get a double in sailing and basically jump over the trade winds. But yeah,
+  it's the snake that brings you all the way back to the start, or at least back to maybe start would be a
+  bit evil, but like at least brings you all the way, brings you back a significant like one leg." So a
+  trade wind runs back up the course across the legs; where a leg crosses it, a Double's gust carries her
+  clean over it (as a gust goes over the whirlpools), and anything less lands her in it and it sweeps her
+  back a leg. With the shortcuts of every size, after the starlit door.
 
 ## Spotted along the way (not asked for)
 
