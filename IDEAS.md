@@ -1671,10 +1671,11 @@ For now the den is the first version, and that works.
 
 Changed (11 Nov): "I think rapportus actually deserves the gunning tutorial one, especially for loops as
 he made the original guides. Ball of fire can come in somewhere like free loop gunning." So
-**Rapportus** (he; pirate name as the user spelt it, to confirm; he wrote the original Gunnery guides,
-loops above all) is the Gunnery tutor, and **Balloffire** comes in for free loop gunning (what that is
-and how it differs, from YPPedia or the user, not guessed). Both pirate pages and portraits to check
-before they're drawn.
+**Rapportus** (he; "the original gunning guide guy"; spelt "rapportus" and "Reportus" by the user, so
+the spelling's to confirm from his pirate page) is the Gunnery tutor, loops above all. **Balloffire**
+(she) is "much better at free loop gunning, but I don't really know how you put that into a tutorial.
+She's just very good and loves doing it. So I'll have to think of something a better fit for her": her
+part's open, for the user to think of. Both pirate pages and portraits to check before they're drawn.
 
 Before that (11 Nov): "Balloffire is definitely down to be the gunning tutor ❤️". **Balloffire**, a
 real pirate who has said yes (pirate name only; ocean, pirate page and portrait to check before
