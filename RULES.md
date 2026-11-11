@@ -820,7 +820,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
         sea), nudged toward the high side room allowing; where there's only the one square, its
         squares are a little smaller to fit, the view coming in to suit, so it looks the same. Rule:
         `src/den-lock.ts` (quayOf).
-      - **The ways past the checkpoint:** run it, fight its guns, or the locks. Not rowing it (the user,
+      - **The ways past the checkpoint:** run it (a big Sailing boost zooms her through untouched), fight
+        its guns, or the locks. Not rowing it (the user,
         11 Nov: "There is no rowing through. Like, that does not help you. That just makes you a sitting
         duck. Where does that idea keep coming from?": it came from their 10 Nov idea of "slow row and then
         fast rowing with the Vegas", which in play doesn't get you through; never offer it as a way past). The reef's
@@ -1805,9 +1806,13 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   be able to jump into the sailing puzzle whenever you want to ... it allows you to basically go
   really, really fast, and like in one go, like a trade winds, kind of, just jump multiple tiles."
   Each chain's run carries her that many squares straight ahead in one go, a gust played like the
-  trade winds' squares, stopping short of rocks, land, locks, other water levels, the
-  checkpoint's gate, and Kikkit's whirlpools and the reef but from the way through's mouth
-  (`src/den-sailing.ts`; see "A way through only on purpose"). 1 or Esc puts it away. The pair is steered live as it falls (`src/sail-pair.ts`),
+  trade winds' squares, stopping short of rocks, land, locks, other water levels, and Kikkit's
+  whirlpools and the reef but from the way through's mouth (`src/den-sailing.ts`; see "A way through
+  only on purpose"). **Through the checkpoint's gate it carries her** (11 Nov; till then it stopped
+  short): "It does not help you get through a checkpoint. The only thing that will do that is obviously
+  the big sailing boost, but same with the whirlpools and the wind barriers is to just zoom over those."
+  A gust's squares are gone before a gun's shot is down, so a big chain past its marks is untouched; one
+  that ends on a mark is hit. Rowing is for the winds ("Rowing is only helpful in windy situations"). 1 or Esc puts it away. The pair is steered live as it falls (`src/sail-pair.ts`),
   on the real game's keys (see "Sailing's keys, as the real game's").
 - **The puzzles' keys at sea, in one bank (11 Nov).** "The R does not make sense as a button for
   sailing ... surely they should at least all be in the same bank of keys for activating the

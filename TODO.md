@@ -292,11 +292,6 @@ the site (`.assetsignore` skips `*.md`).
   opened by Duty Navigation: each constellation lights its stars on the rock, then the door opens on a
   tunnel, the course's biggest shortcut. "build duty navigation in the door ... I don't see why it's one or
   the other."
-- **A big Sailing boost zooms you through the checkpoint (11 Nov):** "Rowing is only helpful in windy
-  situations. It does not help you get through a checkpoint. The only thing that will do that is obviously
-  the big sailing boost, but same with the whirlpools and the wind barriers is to just zoom over those. I
-  mean, I'm sure rowing could have a similar mechanic, but it's not anything exclusive to rowing." Today a
-  Sailing chain's gust stops short of the checkpoint's gate; let it carry her through, over the guns' marks.
 
 ## Spotted along the way (not asked for)
 
