@@ -298,7 +298,9 @@ the site (`.assetsignore` skips `*.md`).
   other half left on a square that isn't a target. They should be the real way a chain's built (YPPedia,
   Sailing, Strategy: a platform one target short, a line of four above it breaking a joined pair so the
   other half drops into the missing target, then more in succession), every piece going where a good
-  sailor puts it. And the balloons have to be visible and read as balloon animals again.
+  sailor puts it. And the balloons have to be visible. Simpler (the user, 11 Nov): "they're balloons and
+  she's blowing them up ... Maybe my balloon animal thing was a bit too complicated": each piece a round
+  balloon she blows up, no twisting into animals.
 - **Space the sea's islands out; Tzz's is crammed in (11 Nov, first play):** "can we see if we can just
   space things out a bit? ... Kikit's got a very nice shape, got island. Mischievous is nice, and then TZZ
   just seems kind of crammed into the middle. Like, this is very all just crammed in." Give her island room
