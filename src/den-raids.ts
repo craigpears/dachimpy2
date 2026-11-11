@@ -85,14 +85,14 @@ export function stragglerClock(s: { phase: Phase; away: boolean; raiders: number
 /** What's said as they put in: short and light, nothing like a siege. The first time, how to be
     rid of a piece on them. */
 export function stragglerLine(n: number, first: boolean): string {
-  const who = n === 1 ? "A boat's putting in: a raider after an easy mark"
-    : `${n === 2 ? 'Two boats' : 'Boats'} putting in: ${n === 2 ? 'a couple of' : 'three'} raiders after an easy mark`;
+  const who = n === 1 ? "A boat's putting in: a Viking after an easy mark"
+    : `${n === 2 ? 'Two boats' : 'Boats'} putting in: ${n === 2 ? 'a couple of' : 'three'} Vikings after an easy mark`;
   return first ? `${who}. Spare pieces? Shift throws` : who;
 }
 
 /** The banner while they're about: no wave, no count down. */
 export const stragglerBanner = (n: number): string =>
-  `${n === 1 ? 'A raider' : `${n} raiders`} ashore · throw your spare pieces at them`;
+  `${n === 1 ? 'A Viking' : `${n} Vikings`} ashore · throw your spare pieces at them`;
 
 /** Said when the last of them is gone. */
 export const STRAGGLERS_GONE = "That's them seen off. The den's quiet again";

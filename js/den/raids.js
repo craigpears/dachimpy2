@@ -5,7 +5,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { W as BW } from '../bilge.js';
 import { afterWave, timberComes, STRAGGLERS, STRAGGLERS_GONE, stragglersIn, stragglerCount, stragglerClock, stragglerLine, stragglerBanner, theft } from '../den-raids.js';
 import { BILGE, onRocks } from '../den-bilge.js';
-import { PIRATES } from '../den-look.js';
+import { PIRATES, DEFAULT_LOOK } from '../den-look.js';
 import { C, S, STONE_D, PAY, RUBBLE, CANNON_GAP, CANNON_AIM, DOOR_W, DOOR_H, WALL_DONE_SECS, CALM_SECS, RAIDER_STAMINA, WINDED, TIRED_SLOW, FALLEN, DAZE, hackRate, k, rand, $, scene, camera, mat, mesh, canvasTex, woodTex, WOOD, outline, xrMat, addXray, makePirate, animateWalk, faceTo, flagpole, pirate, carry, bounds, G, raiders, shake, topView, burst, toast, fmt, tween, v3, worldLets } from './world.js';
 import { rock, ramp, frames, openJob, outside, chest } from './land.js';
 import { wall, wallGroup, X, Y, cellPlane, commonWays, roomyShapes, registerHole, holeOutline, holeVisuals, doorOf, stones, wallBack, updateHole, updateStats, breakHole, nextOut, dropPiece, layerNextOut, dropBoard, holeX, holeMidY, holeFootY } from './wall.js';
@@ -464,7 +464,22 @@ function ladderShow(r) {
   }
   if (r.lad) { r.lad.visible = on; if (on && r.state !== 'climb') r.lad.position.x = r.x; }
 }
-const SHIRTS = ['#59607a', '#2f6b4f', '#6b2f5e'], SCARVES = ['#2b2b2b', '#3a4a8a', '#7a1f1f'], BEARDS = ['#222', '#7a4a1a', '#999'];
+/* The raiders are Vikings, Dalnoth's (the user, 11 Nov: "If we're depicting Dalnoth now as the Viking,
+   obviously the little raiders need to be Vikings as well"), each a look from the wardrobe like anyone
+   else: a Viking helmet, its fur in one of a few colours, a beard, a rag or plain shirt in earthy dyes,
+   and a battle axe or a cutlass (YPPedia, Viking raid: in a swordfight "vikings may use a battle
+   axe"). A raider's `look` is four picks, [fur, hair, axe, beard], so a crewmate's den draws the same. */
+const VIKING = {
+  fur: ['brown', 'tan', 'white'], hair: ['blonde', 'ginger', 'light brown'], beard: ['bushy', 'long', 'full'],
+  top: ['rag', 'plain', 'rag'], topCol: ['brown', 'grey', 'maroon'], legsCol: ['tan', 'brown', 'grey'],
+};
+export function vikingLook([a, b, , d]) {
+  return {
+    ...DEFAULT_LOOK, body: 'm', skin: (a + d) % 3, hair: 'long', hairCol: VIKING.hair[b], beard: VIKING.beard[d], patch: false, earring: false,
+    hat: 'viking', hatCol: VIKING.fur[a], top: VIKING.top[(a + b) % 3], topCol: VIKING.topCol[(b + d) % 3], topCol2: VIKING.topCol[(b + d) % 3],
+    waist: 'belt', waistCol: 'brown', legs: 'pants', legsCol: VIKING.legsCol[(a + d) % 3], feet: 'boots', feetCol: 'brown', hand: 'none', fam: 'none',
+  };
+}
 export let raiderSeq = 0;
 
 // Other parts of the den assign to these lets through this, as an imported binding can't be assigned.
@@ -474,8 +489,7 @@ export const raidsLets = {
   get aimed() { return aimed; }, set aimed(v) { aimed = v; },
 };
 export function makeRaider(look, id, x, z) {
-  const [sh, sc, pt, bd] = look;
-  const m = makePirate({ shirt: ['#1f2433', SHIRTS[sh]], scarf: SCARVES[sc], trousers: '#5a4636', patch: !!pt, beard: BEARDS[bd], sword: true });
+  const m = makePirate({ look: vikingLook(look), axe: !!look[2], sword: !look[2] });
   m.g.scale.setScalar(0.82);
   const xr = addXray(m.g);
   const r = { id, look, m, xr, x, z, state: 'approach', hole: null, t: 0, stamina: RAIDER_STAMINA, hitT: 0.5, slot: 0, inside: false, loot: null };
@@ -492,7 +506,7 @@ export function spawnRaider() {
   let x = (Math.random() - 0.5) * wall.W * S * 0.9;
   const b0 = bilge.x0 - 0.9, b1 = bilge.x0 + BW * BILGE.SQ + 0.9;
   if (x > b0 && x < b1) x = x - b0 < b1 - x ? b0 : b1;
-  const r = makeRaider([rand(3), rand(3), Math.random() < 0.5 ? 1 : 0, rand(3)], ++raiderSeq, x, BOAT_FROM);
+  const r = makeRaider([rand(3), rand(3), Math.random() < 0.6 ? 1 : 0, rand(3)], ++raiderSeq, x, BOAT_FROM);
   r.state = 'row';
   r.hole = pickHole(x);
   r.slot = (Math.random() - 0.5) * 1.2;
@@ -596,7 +610,7 @@ export function updateRaider(r, dt) {
         if (into) {
           if (!guest()) G.waveIn++;
           // At the sword rack, a raider getting in hits your board like an opponent's attack.
-          if (sword.on && rack.hitBy(2)) { sword.dirty = true; say('A raider\'s in: crates nailed shut on your stack!', true, true); }
+          if (sword.on && rack.hitBy(2)) { sword.dirty = true; say('A Viking\'s in: crates nailed shut on your stack!', true, true); }
           r.tired = Math.min(1, Math.max(0, 1 - r.stamina / RAIDER_STAMINA));
           if (r.tired > 0.15) {
             r.state = 'winded';
@@ -628,9 +642,9 @@ export function updateRaider(r, dt) {
         if (took) {
           G.gold -= took; G.stolen++;
           updateStats();
-          say(`A raider stole ${took} doubloon${took === 1 ? '' : 's'}!`, true);
+          say(`A Viking stole ${took} doubloon${took === 1 ? '' : 's'}!`, true);
           giveLoot(r);
-        } else say('A raider found the chest all but empty, and left it be');
+        } else say('A Viking found the chest all but empty, and left it be');
         r.state = 'flee';
       }
       break;
@@ -859,7 +873,7 @@ export function startWave() {
   G.windSaid = false;
   if (!ship.visible || ship.position.x !== ship.userData.home) shipHome();   // a raid called on, once they'd sailed off
   if (G.wave >= 2 && !cannon.visible) { cannon.visible = true; say('Their ship\'s run out a cannon!', true); }
-  else say(`Wave ${G.wave}: raiders!`, true);
+  else say(`Wave ${G.wave}: Vikings!`, true);
   $('intro').classList.add('off');
   updateStats();
 }
@@ -934,7 +948,7 @@ function stragglers(dt) {
 export function banner() {
   const el = $('banner');
   let t, cls = 'banner calm';
-  if (G.phase === 'build') t = wall.holes.every((h) => h.status !== 'open') ? `The wall's mended! Raiders attack in ${fmt(Math.ceil(G.phaseT))}` : `Raiders attack in ${fmt(Math.ceil(G.phaseT))}: mend the wall!`;
+  if (G.phase === 'build') t = wall.holes.every((h) => h.status !== 'open') ? `The wall's mended! Vikings attack in ${fmt(Math.ceil(G.phaseT))}` : `Vikings attack in ${fmt(Math.ceil(G.phaseT))}: mend the wall!`;
   else if (G.phase === 'calm') t = `Wave ${G.wave} beaten off · next wave in ${fmt(Math.ceil(G.phaseT))}`;
   else if (G.phase === 'peace') { const n = raiders.filter((r) => r.state !== 'down').length; t = n ? stragglerBanner(n) : 'The raiders have sailed off · the den\'s quiet'; }
   else { t = `Wave ${G.wave} · ${G.toSpawn + raiders.filter((r) => r.state !== 'down').length} raiders`; cls = 'banner'; }
@@ -947,6 +961,6 @@ export function checkEnd() {
   endScreen();
 }
 export function endScreen() {
-  $('end-text').textContent = `They emptied the chest in wave ${G.wave}. You built ${G.masters} Masterpiece${G.masters === 1 ? '' : 's'}, boarded over ${G.boarded} hole${G.boarded === 1 ? '' : 's'} and knocked out ${G.bonked} raider${G.bonked === 1 ? '' : 's'}.`;
+  $('end-text').textContent = `They emptied the chest in wave ${G.wave}. You built ${G.masters} Masterpiece${G.masters === 1 ? '' : 's'}, boarded over ${G.boarded} hole${G.boarded === 1 ? '' : 's'} and knocked out ${G.bonked} Viking${G.bonked === 1 ? '' : 's'}.`;
   setTimeout(() => $('end').classList.add('on'), 900);
 }

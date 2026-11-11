@@ -8,7 +8,7 @@ This file's history in git shows every line as it's changed.
 
 ## Dalnoth
 
-Captain of the raiders who lay siege to the den, and the one at their ship's cannon from its first shot. A real Puzzle Pirates pirate, Dalnoth of Emerald (the user's friend), drawn from his portrait with affection: a Viking helmet with yellow fur, a big black beard, a long gold coat, a frothy tankard of ale in his hand and his white monkey on his shoulder. A bit of a drunk: the ale slops as he rants, and he's unsteady on his feet.
+Captain of the Vikings who lay siege to the den, and the one at their ship's cannon from its first shot. A real Puzzle Pirates pirate, Dalnoth of Emerald (the user's friend), drawn from his portrait with affection: a Viking helmet with yellow fur, a big black beard, a long gold coat, a frothy tankard of ale in his hand and his white monkey on his shoulder. A bit of a drunk: the ale slops as he rants, and he's unsteady on his feet.
 
 Beaten after the third wave, he leaves his cannon, rows in, stomps up the beach and shakes his fist at your wall, then runs for it, and his map falls out of his coat. To come: guarding his treasure on his island, his white monkey hopping onto your shoulder when you beat him, and back, furious.
 

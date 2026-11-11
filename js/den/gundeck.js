@@ -599,7 +599,7 @@ export function fireGun(i, tx, tz, atCannon) {
     if (atCannon) { const spoilt = !!G.aim; G.aim = null; G.cannonT = Math.max(G.cannonT, 25); say(spoilt ? 'A hit on their cannon! Its aim\'s spoilt' : 'A hit on their cannon! It\'s quiet for a while'); return; }
     let n = 0;
     for (const r of raiders) if (!r.inside && r.state !== 'down' && !r.gone && Math.hypot(r.x - tx, r.z - tz) < 1.8) { hit(r, from, '#3a3a3a'); n++; }
-    if (n > 1) say(`Broadside! ${n} raiders bowled over`);
+    if (n > 1) say(`Broadside! ${n} Vikings bowled over`);
   });
 }
 export function updateGunDeck(dt) {

@@ -971,6 +971,17 @@ export function dressPirate(look, opts = {}) {
   if (opts.sword) {
     const blade = part(new THREE.BoxGeometry(0.04, 0.05, 0.62), M('#d8dde2', { metalness: 0.8, roughness: 0.25 }), 0, -0.52, 0.34);
     arms[1].add(blade, part(new THREE.BoxGeometry(0.16, 0.05, 0.04), gold, 0, -0.52, 0.04));
+  } else if (opts.axe) {
+    // A Viking's battle axe (YPPedia, Viking raid: in a swordfight "vikings may use a battle axe"): a
+    // wooden haft held forward like the cutlass, a steel head at its end with a curved, flaring edge.
+    const steel = M('#c4c8cc', { metalness: 0.8, roughness: 0.25 });
+    const haft = part(new THREE.CylinderGeometry(0.022, 0.026, 0.74, 8), M('#6b4423', { roughness: 0.8 }), 0, -0.52, 0.32);
+    haft.rotation.x = Math.PI / 2;
+    // The edge: a wedge of a disc on the haft, fanning out to one side of it (rotated so it lies in
+    // the haft's plane, its angles there run from +z, the haft's end, round to -y, its side).
+    const edge = part(new THREE.CylinderGeometry(0.15, 0.15, 0.026, 16, 1, false, -Math.PI / 2 - 0.75, 1.5), steel, 0, -0.52, 0.6);
+    edge.rotation.z = Math.PI / 2;
+    arms[1].add(haft, edge, part(new THREE.BoxGeometry(0.036, 0.07, 0.08), steel, 0, -0.55, 0.6));
   }
   let held = null;   // what's in the right hand, if anything
   if (L.hand === 'tankard') {

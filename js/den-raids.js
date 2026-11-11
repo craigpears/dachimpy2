@@ -70,12 +70,12 @@ export function stragglerClock(s) {
 /** What's said as they put in: short and light, nothing like a siege. The first time, how to be
     rid of a piece on them. */
 export function stragglerLine(n, first) {
-    const who = n === 1 ? "A boat's putting in: a raider after an easy mark"
-        : `${n === 2 ? 'Two boats' : 'Boats'} putting in: ${n === 2 ? 'a couple of' : 'three'} raiders after an easy mark`;
+    const who = n === 1 ? "A boat's putting in: a Viking after an easy mark"
+        : `${n === 2 ? 'Two boats' : 'Boats'} putting in: ${n === 2 ? 'a couple of' : 'three'} Vikings after an easy mark`;
     return first ? `${who}. Spare pieces? Shift throws` : who;
 }
 /** The banner while they're about: no wave, no count down. */
-export const stragglerBanner = (n) => `${n === 1 ? 'A raider' : `${n} raiders`} ashore · throw your spare pieces at them`;
+export const stragglerBanner = (n) => `${n === 1 ? 'A Viking' : `${n} Vikings`} ashore · throw your spare pieces at them`;
 /** Said when the last of them is gone. */
 export const STRAGGLERS_GONE = "That's them seen off. The den's quiet again";
 /** What a raider who reaches the chest takes, of `steal`, with `gold` in it. In the siege, the

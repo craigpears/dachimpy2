@@ -135,6 +135,16 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   serves is named after an analytics, ad or tracking tool (umami, analytics, gtag, matomo,
   plausible, pixel, beacon, ads and the like): Umami's files are `capybara.js`. A test checks
   every file name.
+- **The raiders are Vikings, Dalnoth's (11 Nov).** "If we're depicting Dalnoth now as the Viking,
+  obviously the little raiders need to be Vikings as well." Each is a look from the wardrobe (a Viking
+  helmet, its fur in brown, tan or white; long hair and a beard; a rag or plain shirt in earthy dyes),
+  most with a battle axe, the rest a cutlass (YPPedia, Viking raid: in a swordfight "vikings may use a
+  battle axe"). The den calls them Vikings wherever it names them ("Wave 2: Vikings!").
+- **The cheats jump to what's hard to get to, one per place (11 Nov).** "There's a lot there that are
+  like basically the same thing ... these are supposed to help jump you to places that are hard to get
+  to." So no cheat for what's a key away (Sailing's board: go sailing, then R), and one per place, not
+  one per spot in it: the housing district, not Gravee's house as well (one is kept "because you need
+  it for the link", and the district's is the link the user's shared: Gravee's is a click from its list); Kikkit's island, not her whirlpools as well ("they're right next to each other").
 - **Every starting point has a link, to share (10 Nov).** "Make it so that each starting point is
   something that I can put into the URL as well, so that I can share that animation with
   somebody." `den.html?at=` and a name opens the den straight there: the cheats' stages (`start`,
@@ -1614,8 +1624,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   really, really fast, and like in one go, like a trade winds, kind of, just jump multiple tiles."
   Each chain's run carries her that many squares straight ahead in one go, a gust played like the
   trade winds' squares, stopping short of rocks, land, locks, other water levels and the
-  checkpoint's gate (`src/den-sailing.ts`). R or Esc puts it away. `?at=sailing` starts at sea
-  with it out. The pair is steered live as it falls (`src/sail-pair.ts`).
+  checkpoint's gate (`src/den-sailing.ts`). R or Esc puts it away. The pair is steered live as it falls (`src/sail-pair.ts`).
   - **Its look, from the user's screenshot of "a huge multi Vegas" (10 Nov):** 8 wide by 16 tall;
     the next pair top left; markers over the middle columns where pairs come in. Three balls,
     yellow knotted rope, white swirled sail, blue wavy water, a pair's halves joined by a little

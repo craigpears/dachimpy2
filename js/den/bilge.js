@@ -211,8 +211,8 @@ export function bilgeEnter() {
   $('intro').classList.add('off');
   /* How it works, as you start (the barrels too, 10 Nov: "too hidden"); and if you come back
      without ever having dredged one, the barrels once more. */
-  if (!G.bilgeSaid) { G.bilgeSaid = true; say('Bilge the shallows: three in a row clear, and the tide goes out with every good move. Clear two lines in one swap to dredge up a powder barrel: it blows up raiders who come by', false, true); }
-  else if (!G.barrelSaid && !G.barrelDredged) { G.barrelSaid = true; say('Clear two lines in one swap to dredge up a powder barrel for the raiders', false, true); }
+  if (!G.bilgeSaid) { G.bilgeSaid = true; say('Bilge the shallows: three in a row clear, and the tide goes out with every good move. Clear two lines in one swap to dredge up a powder barrel: it blows up Vikings who come by', false, true); }
+  else if (!G.barrelSaid && !G.barrelDredged) { G.barrelSaid = true; say('Clear two lines in one swap to dredge up a powder barrel for the Vikings', false, true); }
 }
 // The keys play the board, as in the real puzzle: the arrows (or WASD) move the cursor, Space swaps.
 export function bilgeKey(key, e) {
@@ -295,7 +295,7 @@ function blowBarrel(b) {
   worldLets.shake = 0.5;
   const near = blastHits(b, raiders.filter((r) => !r.inside && r.state !== 'down' && r.state !== 'row' && r.state !== 'rowOff'));
   near.forEach((r) => hit(r, new THREE.Vector3(b.x, 0, b.z), '#ffb21a'));
-  say(near.length > 1 ? `Boom! A powder barrel blew ${near.length} raiders flat!` : 'Boom! A powder barrel blew a raider flat!');
+  say(near.length > 1 ? `Boom! A powder barrel blew ${near.length} Vikings flat!` : 'Boom! A powder barrel blew a Viking flat!');
 }
 
 export function bilgeTick(dt) {
@@ -358,7 +358,7 @@ export function bilgeTick(dt) {
   bilge.cursor.position.set((cellX(bilge.cur.c) + cellX(bilge.cur.c + 1)) / 2, 0, cellZ(bilge.cur.r));
   // Rocks bared by the tide; the first time, say what they're for.
   for (const g of bilge.rocks) g.visible = g.userData.z > sz + 0.1;
-  if (!G.rocksSaid && rocksBare(sz) > 2 && G.wave > 0) { G.rocksSaid = true; say('The tide\'s out: sharp rocks on the bare sand cut up raiders landing beyond them'); }
+  if (!G.rocksSaid && rocksBare(sz) > 2 && G.wave > 0) { G.rocksSaid = true; say('The tide\'s out: sharp rocks on the bare sand cut up Vikings landing beyond them'); }
   // Barrels: set off by a raider coming by.
   for (const br of bilge.barrels) {
     if (br.gone || !br.landed) continue;

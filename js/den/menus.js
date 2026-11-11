@@ -19,14 +19,13 @@ import { CRANE } from '../den-crane.js';
 import { craneCheat } from './crane.js';
 import { umamiCheat } from './capybara.js';
 import { kikkitCheat } from './whirlpools.js';
+import { lodgingsOpen } from './lodgings.js';
 import { tzzCheat } from './balloon-isle.js';
 import { board, sailReset } from './sailing.js';
-import { station, stationToggle } from './sail-station.js';
 import { online, guest, myId, send } from './crew.js';
 import { wed, weddingEnter, weddingLeave, plannedSpouse } from './wedding.js';
 import { spouse, spouseCheat } from './spouse.js';
-import { house, houseEnter, houseLeave } from './house.js';
-import { lodgingsOpen } from './lodgings.js';
+import { house, houseLeave } from './house.js';
 import { LODGINGS } from '../den-houses.js';
 import { newGame } from '../den.js';
 
@@ -528,11 +527,6 @@ function cheatSail() {
   sailReset();
   board();
 }
-// The Sailing board at sea (js/den/sail-station.js): out to sea, and Sailing's board out.
-function cheatSailing() {
-  if (!sail.on) cheatSail();
-  if (!station.want) stationToggle();
-}
 /* Dignity's cutscene at the imperial checkpoint, again (js/den/dignity.js): out to sea first if you're
    not, and the sloop put where the trade wind drops her, facing its gate. */
 function cheatDignity() {
@@ -557,13 +551,13 @@ function cheatUmami() {
   craneCheat((cells) => tileFor(cells, []));
   umamiCheat();
 }
-/* Kikkit's island (js/den/whirlpools.js): out to sea, off her island (she rambles as you come up); or at
-   her whirlpools' mouth, facing the reef, Sailing's board out (the whirlpools' own easy board). */
-function cheatKikkit(where) {
+/* Kikkit's island (js/den/whirlpools.js): out to sea, off her island (she rambles as you come up). Her
+   whirlpools are right beside it, so one cheat does for both (the user, 11 Nov: "they're not really
+   that far apart. They're right next to each other"). */
+function cheatKikkit() {
   if (cine) return;
   if (!sail.on) cheatSail();
-  kikkitCheat(where);
-  if (where === 'mouth' && !station.want) stationToggle();
+  kikkitCheat();
 }
 /* Tzz's island (js/den/balloon-isle.js): out to sea, just off it, where her balloon lesson begins. */
 function cheatTzz() {
@@ -609,7 +603,7 @@ function cheatMarried() {
   pirate.g.rotation.set(0, at.yaw, 0);
 }
 /* The housing district (js/den/lodgings.js): the siege put to rest, and you at its door in the den's
-   left-hand cliff, the list of houses open; or straight into Gravee's house (js/den/house.js). */
+   left-hand cliff, the list of houses open (Gravee's house is a click on it: js/den/house.js). */
 function toLodgings() {
   if (wm) exitWall();
   if (deco.on) decoMode(false);
@@ -629,12 +623,10 @@ function cheatLodgings() {
   toLodgings();
   lodgingsOpen(true);
 }
-function cheatGravee() {
-  if (cine || house.on) return;
-  toLodgings();
-  houseEnter('gravee');
-}
-// [name, what it does, its link's name if it's a starting point (den.html?at=...)]
+/* [name, what it does, its link's name if it's a starting point (den.html?at=...)]. Only jumps to
+   what's hard to get to, one per place (the user, 11 Nov: "these are supposed to help jump you to
+   places that are hard to get to"): no Sailing board of its own (go sailing, then R), no Gravee's
+   house beside the housing district (its link the one shared), no Kikkit's whirlpools beside her island. */
 const CHEATS = [
   ['Beat this wave', cheatBeat],
   ['Next wave now', () => (G.phase === 'wave' ? toast('A wave\'s on: beat it first', true) : startWave())],
@@ -642,16 +634,13 @@ const CHEATS = [
   ['Build the shack', cheatShack, 'shack'],
   ["The captain's map scene", cheatMapScene, 'map-scene'],
   ['Go sailing', cheatSail, 'sea'],
-  ['Sailing, the puzzle', cheatSailing, 'sailing'],
   ["Dignity's scene", cheatDignity, 'dignity'],
   ["Umami's rescue", cheatUmami, 'umami'],
   ['The Wedding Isle', cheatWedding, 'wedding'],
-  ["Kikkit's island", () => cheatKikkit('off'), 'kikkit'],
-  ["Kikkit's whirlpools", () => cheatKikkit('mouth'), 'whirlpools'],
+  ["Kikkit's island", cheatKikkit, 'kikkit'],
   ["Tzz's balloon lesson", cheatTzz, 'tzz'],
   ['Home, married', cheatMarried, 'married'],
   ['The housing district', cheatLodgings, 'lodgings'],
-  ["Gravee's house", cheatGravee, 'gravee'],
 ];
 /* Every starting point has a link, to share (the user, 10 Nov: "make it so that each starting point
    is something that I can put into the URL as well, so that I can share that animation with
@@ -685,7 +674,7 @@ const cheatButtons = (el, list) => $(el).replaceChildren(...list.map(([name], i)
   b.textContent = name;
   const at = el === 'cheat-stages' ? STAGE_AT[i] : CHEATS[i][2];
   if (at) b.title = `Link: den.html?at=${at}`;
-  b.onclick = () => { cheatPanel(false); if (wed.on && at !== 'wedding') weddingLeave(); if (house.on && at !== 'gravee') houseLeave(); (el === 'cheat-stages' ? skipTo : (j) => CHEATS[j][1]())(i); if (at) linkTo(at); };
+  b.onclick = () => { cheatPanel(false); if (wed.on && at !== 'wedding') weddingLeave(); if (house.on) houseLeave(); (el === 'cheat-stages' ? skipTo : (j) => CHEATS[j][1]())(i); if (at) linkTo(at); };
   return b;
 }));
 cheatButtons('cheat-stages', STAGES);

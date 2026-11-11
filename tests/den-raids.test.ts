@@ -91,8 +91,8 @@ describe('the occasional raider after the siege', () => {
   it('is no siege: nothing said reads as a wave, a countdown or cannon', () => {
     const said = [1, 2, 3].flatMap((n) => [stragglerLine(n, true), stragglerLine(n, false), stragglerBanner(n)]).concat(STRAGGLERS_GONE);
     for (const s of said) expect(s).not.toMatch(/wave|siege|cannon|attack in|next/i);
-    expect(stragglerLine(2, false)).toBe("Two boats putting in: a couple of raiders after an easy mark");
-    expect(stragglerLine(1, false)).toBe("A boat's putting in: a raider after an easy mark");
+    expect(stragglerLine(2, false)).toBe("Two boats putting in: a couple of Vikings after an easy mark");
+    expect(stragglerLine(1, false)).toBe("A boat's putting in: a Viking after an easy mark");
     // The first time, how to be rid of a piece on them.
     expect(stragglerLine(1, true)).toMatch(/Shift throws/);
   });

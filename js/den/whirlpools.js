@@ -243,10 +243,10 @@ export function kikkitReset() {
   kik.W?.her.restart();
 }
 
-/** Starting points (menus.js): at sea off her island, or at the whirlpools' mouth. */
-export function kikkitCheat(where) {
+/** Its starting point (menus.js): at sea off her island, her whirlpools beside it. */
+export function kikkitCheat() {
   const h = sail.helm;
-  h.moor(where === 'mouth' ? { ...K.MOUTH } : { c: K.MOUTH.c, r: K.LANDING.r0, d: 0 });
+  h.moor({ c: K.MOUTH.c, r: K.LANDING.r0, d: 0 });
   sail.riding = false;
 }
 export { PENGUINS };

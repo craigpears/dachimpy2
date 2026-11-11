@@ -335,7 +335,7 @@ let lastT = performance.now();
    with a crew the raiders don't wait for anyone. It also pauses when you switch away from the tab. */
 let paused = false;
 export function setPaused(on) {
-  if (on && (online() || G.over)) { if (online()) toast('No pausing with a crew: the raiders don\'t wait for anyone', true); return; }
+  if (on && (online() || G.over)) { if (online()) toast('No pausing with a crew: the Vikings don\'t wait for anyone', true); return; }
   paused = on;
   keys.clear();
   $('paused').classList.toggle('on', on);

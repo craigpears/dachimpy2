@@ -4,7 +4,7 @@ export const PARTING = 'We\'ll be back! *hic*';
 export const RUMOUR = "We hear there's some secret treasure here, guarded by a fearsome enemy";
 export const CHARACTER = {
     name: 'Dalnoth',
-    who: 'Captain of the raiders who lay siege to the den, and the one at their ship\'s cannon from its first '
+    who: 'Captain of the Vikings who lay siege to the den, and the one at their ship\'s cannon from its first '
         + 'shot. A real Puzzle Pirates pirate, Dalnoth of Emerald (the user\'s friend), drawn from his portrait '
         + 'with affection: a Viking helmet with yellow fur, a big black beard, a long gold coat, a frothy tankard '
         + 'of ale in his hand and his white monkey on his shoulder. A bit of a drunk: the ale slops as he rants, '
