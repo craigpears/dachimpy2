@@ -33,6 +33,7 @@
 
 import type { Phase } from './den-raids.js';
 import { LAY, SAIL } from './den-sail.js';
+import { ISLE, isleShore } from './den-isle.js';
 
 /** Where the map is: not yet dropped ('none'), lying on the beach ('lying'), or picked up ('found'). */
 export type MapState = 'none' | 'lying' | 'found';
@@ -119,6 +120,14 @@ export const CHART = {
   rocks: [...LAY.SIDES, ...LAY.FAR].map(([c, r]): Square => [c, r]),
   /** The old wreck beyond the checkpoint, the X on it. */
   wreck: [...LAY.WRECK] as Square,
+  /** Mischievious's isle (11 Nov), off to the right of the lanes, in plain sight from them, so it's
+      on the map, named: its shore (corners, on the squares' edges: src/den-isle.ts), its jetty's
+      square, and where her chapel's ruin stands on it. (What's on there isn't said.) */
+  isle: {
+    shore: isleShore().map(([c, r]): Square => [c - 0.5, r - 0.5]),
+    jetty: [...LAY.ISLE.JETTY] as Square,
+    chapel: [19.3, 11.9] as Square,
+  },
 };
 
 /** Where the X is: on the old wreck beyond the checkpoint. */
@@ -152,4 +161,5 @@ export const NOTES: readonly MapNote[] = [
   { label: 'Cliffs', at: [(LAY.PLATEAU.c0 + LAY.PLATEAU.c1) / 2, (LAY.PLATEAU.r0 + LAY.PLATEAU.r1) / 2] },
   { label: 'The open sea', at: [LAY.CHECKPOINT.REEF.c0 + 3, LAY.CHECKPOINT.ROW + 3.6] },
   { label: 'An old wreck', note: 'aground on a sandbar', at: [LAY.WRECK[0] + 5.5, LAY.WRECK[1] - 0.2] },
+  { label: ISLE.NAME, at: [17.4, 8.2] },   // (under it, clear of the compass)
 ];

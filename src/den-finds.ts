@@ -15,6 +15,7 @@
 
 import { CHART, X_AT, type Square } from './den-map.js';
 import { SAIL } from './den-sail.js';
+import { ISLE } from './den-isle.js';
 
 /** The ways past the imperial checkpoint (RULES.md, "The ways past the checkpoint"): run it under
     sail, row it, knock its guns out, or round it by the locks. */
@@ -63,6 +64,8 @@ export interface Progress {
   lagoonChest: boolean;
   /** Umami out of his fish trap. */
   umami: boolean;
+  /** A wedding had on Mischievious's isle (js/den/wedding.js). */
+  wedding: boolean;
   /** The ways past and the hidden places found. */
   found: readonly string[];
 }
@@ -89,6 +92,8 @@ export function quests(p: Progress): QuestGroup[] {
     ] },
     { title: 'Out at sea', quests: [
       job('Haul up the treasure at the X', p.x),
+      // (the isle's on the map, so it's named; what's afoot there isn't said: 11 Nov)
+      job(`See what's afoot on ${ISLE.NAME}`, p.wedding),
     ] },
     { title: 'Still to find', quests: [
       tease('Ways past the checkpoint', WAYS.filter(has).length, WAYS.length),

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { PLACES, QUESTS_TITLE, TOUR, WAYS, addFind, done, questLine, quests, tourKey, wayThrough, wayWrecked, type Progress } from '../src/den-finds';
 import { CHART, X_AT } from '../src/den-map';
 
-const none: Progress = { walk: false, stairs: false, tower: false, shack: false, x: false, lagoonChest: false, umami: false, found: [] };
+const none: Progress = { walk: false, stairs: false, tower: false, shack: false, x: false, lagoonChest: false, umami: false, wedding: false, found: [] };
 const lines = (p: Progress) => quests(p).flatMap((g) => g.quests);
 const line = (p: Progress, start: string) => lines(p).find((q) => q.label.startsWith(start))!;
 
@@ -48,7 +48,7 @@ describe('the den\'s a lot to take in for a demo (10 Nov)', () => {
   it('lists the den\'s jobs plainly and the secrets by their counts, under one heading', () => {
     expect(QUESTS_TITLE).toBe('Quests');
     const all = lines(none);
-    expect(all.filter((q) => !q.secret).map(questLine)).toEqual(['Build the walk along the wall', 'Build the stairs up to it', 'Build the gun tower', 'Build yer shack', 'Haul up the treasure at the X']);
+    expect(all.filter((q) => !q.secret).map(questLine)).toEqual(['Build the walk along the wall', 'Build the stairs up to it', 'Build the gun tower', 'Build yer shack', 'Haul up the treasure at the X', "See what's afoot on Mischievious's isle"]);
     expect(all.filter((q) => q.secret).map(questLine)).toEqual(['Ways past the checkpoint: 0 of 4', 'Hidden places: 0 of 2', 'Secret treasure: 0 of 1', 'A friend to rescue: 0 of 1']);
   });
 
@@ -65,9 +65,18 @@ describe('the den\'s a lot to take in for a demo (10 Nov)', () => {
     expect(done(line(p, 'Ways past'))).toBe(false);
     expect(questLine(line(p, 'Hidden places'))).toBe('Hidden places: 1 of 2');
     expect(done(line(p, 'A friend'))).toBe(true);
-    const all: Progress = { ...p, tower: true, x: true, lagoonChest: true, found: [...WAYS, ...PLACES] };
+    const all: Progress = { ...p, tower: true, x: true, lagoonChest: true, wedding: true, found: [...WAYS, ...PLACES] };
     expect(lines(all).every(done)).toBe(true);
     expect(lines(all)).toHaveLength(lines(none).length);
+  });
+
+  it("Out at sea: her isle's on the map, so it's named, but what's afoot there isn't said (11 Nov)", () => {
+    const q = line(none, 'See what');
+    expect(quests(none).find((g) => g.title === 'Out at sea')!.quests).toContainEqual(q);
+    expect(q.secret).toBe(false);
+    expect(questLine(q)).not.toMatch(/\b(wedding|marry|marri\w*|bride|groom|ceremony)\b/i);
+    expect(done(q)).toBe(false);
+    expect(done(line({ ...none, wedding: true }, 'See what'))).toBe(true);
   });
 
   it('counts each find once', () => {

@@ -193,8 +193,32 @@ export const LAY = {
         { c0: 2, c1: 4, r0: 5, r1: 8, d: 2, s: 2 },
         { c0: 9, c1: 9, r0: 19, r1: 19, d: 1, s: 1 },
     ],
-    /** Rocks out on the water the board grew into. */
-    FAR: [[17, 4], [19, 8], [16, 13], [20, 15], [15, 17], [17, 22], [13, 24], [19, 24], [1, 23]],
+    /** Rocks out on the water the board grew into. (Two moved, 11 Nov, for Mischievious's isle
+        (ISLE): [16, 13] out to [15, 15], to leave the water off its jetty clear, and [19, 8] to
+        [21, 6], off its near shore, to leave room for its name on the captain's map.) */
+    FAR: [[17, 4], [21, 6], [15, 15], [20, 15], [15, 17], [17, 22], [13, 24], [19, 24], [1, 23]],
+    /** Mischievious's isle (11 Nov), where her wedding is (js/den/wedding.js). The user: "on an island
+        somewhere ... islands can all have their own little thing out there". In plain sight, out to
+        the right of the shipping lanes on the den's side of the checkpoint, so a new player can sail
+        there without the oars or the locks. LAND: its squares (land to sail by, drawn by
+        js/den/isle.js, not as sea stacks), its jetty's among them, out from its left-hand shore
+        toward the lanes. MOOR: where she lies alongside the jetty, bows toward the lanes, ready to
+        sail home. LANDING: the water off its left-hand shore (whatever rocks the sea's scattered
+        there; the column she moors in is past where they fall, so it's always clear) from any square
+        of which Space puts you ashore (src/den-isle.ts), as along the den's beach: "you get to the
+        general vicinity, not one specific square" (10 Nov). */
+    ISLE: {
+        LAND: [
+            [17, 9], [18, 9], [19, 9],
+            [16, 10], [17, 10], [18, 10], [19, 10], [20, 10],
+            [17, 11], [18, 11], [19, 11], [20, 11],
+            [17, 12], [18, 12], [19, 12], [20, 12],
+            [18, 13], [19, 13],
+        ],
+        JETTY: [16, 10],
+        MOOR: { c: 16, r: 11, d: 3 },
+        LANDING: { c0: 14, c1: 16, r0: 9, r1: 13 },
+    },
 };
 /** The canal's squares: its locks and the water between them (the hidden cove's too). */
 export function canalAt(c, r) {
@@ -323,6 +347,11 @@ export class Sea {
         for (const [c, r] of [...checkpointWorks(), LAY.WRECK])
             this.works.add(key(c, r));
         this.wreck = [...LAY.WRECK];
+        // Mischievious's isle: land, drawn by its own 3D. (Its landing isn't kept clear of the scattered
+        // rocks: the near sea stays as it was, and her mooring's column, past where they fall, is always
+        // clear.)
+        for (const [c, r] of LAY.ISLE.LAND)
+            this.works.add(key(c, r));
         this.zones = LAY.ZONES.map((z) => ({ ...z }));
     }
     scatter(roll) {
@@ -850,8 +879,9 @@ export class Helm {
         }
     }
     /** Brought in to her mooring and made fast, whatever she was doing: no pin, no moves, nothing
-        playing (going ashore from anywhere along the den's beach: src/den-beach.ts). */
-    moor() {
+        playing (going ashore from anywhere along the den's beach: src/den-beach.ts; or at another
+        mooring, `at`: Mischievious's isle's, src/den-isle.ts). */
+    moor(at = SAIL.HOME) {
         this.pin = null;
         this.via = null;
         this.mine = [];
@@ -862,7 +892,7 @@ export class Helm {
         this.rides = [];
         this.strokes = [];
         this.wait = 0;
-        this.pose = { ...SAIL.HOME };
+        this.pose = { ...at };
     }
     /** Nothing playing and nothing to play. */
     idle() { return this.slot < 0 && !this.next().length; }

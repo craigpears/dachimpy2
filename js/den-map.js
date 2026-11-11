@@ -31,6 +31,7 @@
    get past the checkpoint: that's yours to find. The ways past Dalnoth himself (sword, gun, flooding
    him out) come back onto it when his hideout's built (STORY.md). */
 import { LAY, SAIL } from './den-sail.js';
+import { ISLE, isleShore } from './den-isle.js';
 export const MAP = {
     /** Where it lies on the beach, across from the gate's middle (the pumps are off to the right) and
         out from the wall (metres; the wall's at 0, out is -). */
@@ -94,6 +95,14 @@ export const CHART = {
     rocks: [...LAY.SIDES, ...LAY.FAR].map(([c, r]) => [c, r]),
     /** The old wreck beyond the checkpoint, the X on it. */
     wreck: [...LAY.WRECK],
+    /** Mischievious's isle (11 Nov), off to the right of the lanes, in plain sight from them, so it's
+        on the map, named: its shore (corners, on the squares' edges: src/den-isle.ts), its jetty's
+        square, and where her chapel's ruin stands on it. (What's on there isn't said.) */
+    isle: {
+        shore: isleShore().map(([c, r]) => [c - 0.5, r - 0.5]),
+        jetty: [...LAY.ISLE.JETTY],
+        chapel: [19.3, 11.9],
+    },
 };
 /** Where the X is: on the old wreck beyond the checkpoint. */
 export const X_AT = [...LAY.WRECK];
@@ -120,4 +129,5 @@ export const NOTES = [
     { label: 'Cliffs', at: [(LAY.PLATEAU.c0 + LAY.PLATEAU.c1) / 2, (LAY.PLATEAU.r0 + LAY.PLATEAU.r1) / 2] },
     { label: 'The open sea', at: [LAY.CHECKPOINT.REEF.c0 + 3, LAY.CHECKPOINT.ROW + 3.6] },
     { label: 'An old wreck', note: 'aground on a sandbar', at: [LAY.WRECK[0] + 5.5, LAY.WRECK[1] - 0.2] },
+    { label: ISLE.NAME, at: [17.4, 8.2] }, // (under it, clear of the compass)
 ];

@@ -8,7 +8,8 @@
    or take away any prop, add more, redress a guest), the plot, and "Start the wedding": the ceremony
    (wedding-ceremony.js), ending on a framed portrait to save or share as a link
    (den.html?at=wedding&w=...), which opens straight into that wedding, ready to play again. The set-up's
-   kept in this browser as you go. The rules and words: src/den-wedding.ts. The island and its pirates:
+   kept in this browser as you go. Sailed to (her isle on the sea: isle.js), leaving puts you back
+   aboard her at its jetty; by the cheat, back in the den. The rules and words: src/den-wedding.ts. The island and its pirates:
    wedding-scene.js; the props: wedding-props.js. */
 import * as THREE from 'three';
 import * as LOOK from '../den-look.js';
@@ -41,6 +42,9 @@ export const wed = {
   on: false, snap: false, w: null, step: 'tone', pick: null, isle: null, root: null, propsG: null, propG: [], fig: null,
   gush: new Gush(), sel: null, tool: null, drag: null, rdrag: null, yaw: 0, zoom: 1, shot: null, play: null,
   line: null, bub: null, show: null, lineup: null, welcome: null, portrait: null, settle: 0, sky: null, ring: null, mark: null,
+  /** Come by sea (her isle's jetty: isle.js), so leaving's back aboard; and whether you've had a
+      wedding yet (the captain's map's quests: quests.js). */
+  bySea: false, had: false,
 };
 
 // ---------- kept as you go ----------
@@ -155,10 +159,13 @@ function fade(then) {
   f.classList.add('on');
   setTimeout(() => { then(); setTimeout(() => f.classList.remove('on'), 120); }, 360);
 }
-/** Off to her island (from the den, or later the sea map). The set-up from a share link (?w=), else
-    the one kept in this browser, else a fresh one: the tone to choose first. */
-export function weddingEnter() {
+/** Off to her island (from the den by the cheat, or ashore off the sloop at her isle's jetty: `bySea`).
+    The set-up from a share link (?w=), else the one kept in this browser, else a fresh one: the tone
+    to choose first. */
+export function weddingEnter({ bySea = false } = {}) {
   if (wed.on) return;
+  wed.bySea = bySea;
+  $('wed-home').textContent = bySea ? 'Back aboard' : 'Back to the den';
   wed.isle ||= buildIsle();
   if (!wed.root) {
     wed.root = new THREE.Group(); wed.propsG = new THREE.Group(); wed.root.add(wed.propsG); wed.isle.add(wed.root);
@@ -184,7 +191,8 @@ export function weddingEnter() {
     if (ev) setTimeout(() => gush(ev), 500);
   });
 }
-/** Home again: the den (or the sea) as it was. */
+/** Home again: the den as it was, or, come by sea, back aboard her at the isle's jetty (she's waited
+    there, moored, the sea going on as it was: sailing.js). */
 export function weddingLeave() {
   if (!wed.on) return;
   fade(() => {
@@ -197,6 +205,8 @@ export function weddingLeave() {
     heartsClear();
     leaveSky();
     try { const u = new URL(location.href); u.searchParams.delete('w'); if (u.searchParams.get('at') === 'wedding') u.searchParams.delete('at'); history.replaceState(history.state, '', u); } catch { /* never mind */ }
+    if (wed.bySea) denToast("Back aboard, off Mischievious's isle");
+    wed.bySea = false;
   });
 }
 
@@ -405,6 +415,7 @@ function startWedding() {
   }, (skipped) => {
     wed.play = null;
     if (wed.leaving) return;
+    wed.had = true;
     wed.step = 'portrait';
     wed.settle = skipped ? 1.3 : 0.7;   // (the camera's still easing in from wherever the cutscene was)
     const P = PORTRAIT_CAM; wed.shot = { look: P.look.clone(), dist: P.dist, tilt: P.tilt, yaw: P.yaw }; wed.root.localToWorld(wed.shot.look);

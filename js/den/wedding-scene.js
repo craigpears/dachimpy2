@@ -22,7 +22,7 @@ const trunkM = mat('#8a6a44'), frond = mat('#3f8a3a', { side: THREE.DoubleSide }
 const hullM = mat('#4a2f1c', { map: woodTex }), deckM = mat('#a07c55', { map: woodTex }), plank = mat('#8a6a48', { map: woodTex }), spar = mat('#4a2f1a', { map: woodTex });
 const at = (m, x, y, z) => { m.position.set(x, y, z); return m; };
 
-function palm(h = 5, lean = 0.25) {
+export function palm(h = 5, lean = 0.25) {
   const g = new THREE.Group(), n = 6;
   let x = 0, y = 0;
   for (let i = 0; i < n; i++) {
@@ -47,7 +47,7 @@ function palm(h = 5, lean = 0.25) {
 }
 // The clifftop chapel: a ruin, open to the sky, its walls broken down to jagged stumps, an apse
 // behind the altar with its window arch still standing, and flagstones up the aisle.
-function chapel() {
+export function chapel() {
   const g = new THREE.Group();
   g.add(at(mesh(new THREE.CylinderGeometry(11, 12.5, 7.6, 28), rockM), 0, -3.8 - 0.02, 0));
   g.add(at(mesh(new THREE.CylinderGeometry(10.8, 10.8, 0.1, 28), grass), 0, -0.04, 0));

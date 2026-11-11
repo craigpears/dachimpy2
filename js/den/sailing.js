@@ -25,6 +25,7 @@ import { windTick, windSay, windHud, oarsHud, windSig, rowToggle, headwindPrompt
 import { rowing, rowShut, rowKey, rowHover, rowSwap, rowTick, rowPrompt, rowShown } from './rowing.js';
 import { craneKey, cranePrompt, craneHolds, craneTick, craneReset, craneWorld } from './crane.js';
 import { umamiKey, umamiClick, umamiHover, umamiPrompt, umamiReset } from './capybara.js';
+import { isleWorld, isleTick, isleAshore, canLandIsle } from './isle.js';
 
 // The old sloop's at anchor in the cove from the moment the siege is over, while their ship makes
 // sail in the background (the user, 9 Nov: "I'm sat here quite a while waiting for his sloop to sail
@@ -165,6 +166,7 @@ export function sailKey(key) {
   else if (key === 'h') { sail.helm.drop(SAIL.HOME.c, SAIL.HOME.r); if (sail.helm.pin) toast('Heading home to the cove'); }
   else if ((key === ' ' || key === 'enter') && canHaulWreck()) haulWreck();
   else if ((key === ' ' || key === 'enter') && canLand(sail.helm)) ashore();
+  else if ((key === ' ' || key === 'enter') && canLandIsle(sail.helm)) isleAshore();   // (Mischievious's isle: isle.js)
   else if (key === 'z' || key === 'c') keys.add(key);
   else if (key === 'p') setPaused(true);
   else if (key === 'v') Object.assign(view, { yaw: 0, pitch: 0, zoom: 1 });
@@ -187,6 +189,7 @@ export function sailPrompt() {
   if (held === 'gates') return 'The lock gates are swinging open';
   if (held === 'calm') return 'Becalmed: dead in the water till the wind picks up · O: out oars';
   if (canLand(h)) return h.slot < 0 ? 'Off the den\'s beach · Space: go ashore · click the sea to drop a pin' : 'Under way off the den\'s beach · Space: go ashore';
+  if (canLandIsle(h)) return h.slot < 0 ? 'Off Mischievious\'s isle · Space: go ashore · click the sea to drop a pin' : 'Under way off Mischievious\'s isle · Space: go ashore';
   if (canHaulWreck()) return 'The old wreck · Space: haul up its treasure (Treasure Haul) · click the sea to drop a pin';
   if (h.slot < 0 && h.headwind()) return headwindPrompt();
   if (h.pin) return h.oars ? 'Rowing to the pin' : 'Under way to the pin';
@@ -217,6 +220,7 @@ export function sailTick(dt) {
   sail.world ||= seaWorld();
   lockWorld();   // (the canal's locks: lock.js)
   craneWorld();   // (the headland on the cove's left, the ledge and the lagoon: crane.js)
+  isleWorld();   // (Mischievious's isle, out to the right of the lanes: isle.js)
   sail.g ||= (() => { const g = sloopMesh(); scene.add(g); return g; })();
   const show = sail.on || sloopHome();
   if (sail.g.visible !== show) sail.g.visible = show;
@@ -231,6 +235,7 @@ export function sailTick(dt) {
       windSay(e);
       if (e.kind === 'move' && e.bump && !e.irons) sail.bumpT = e.secs * 0.45;   // (felt as she hits)
       if (e.kind === 'arrive' && canLand(h)) toast('Off the den\'s beach: Space to go ashore');
+      if (e.kind === 'arrive' && canLandIsle(h)) toast('Off Mischievious\'s isle: Space to go ashore');
       if (e.kind === 'push') {
         if (!sail.riding) { sail.riding = true; if (!sail.said.wind) { sail.said.wind = true; toast('The trade winds have her!'); } }
         burst(V3(seaX(e.from.c), 0.3 + liftAt(e.from.c, e.from.r), seaZ(e.from.r)), '#e6f3f6', 5, 2);
@@ -255,6 +260,7 @@ export function sailTick(dt) {
   gunneryTick(dt, haul.on || craneHolds());
   // The locks: each one's water at its level, its gates, and the quay pump at work (lock.js).
   lockTick(dt);
+  isleTick();
   // A gun that's fired kicks back in and runs out again as it's loaded, smoking at first.
   for (const side of ['L', 'R']) {
     const gun = sail.g.userData.guns[side], u = sail.guns.out(side);

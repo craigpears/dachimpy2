@@ -14,6 +14,7 @@
    not hidden. Only what the den can tell is done is on it. */
 import { CHART, X_AT } from './den-map.js';
 import { SAIL } from './den-sail.js';
+import { ISLE } from './den-isle.js';
 export const WAYS = ['run', 'row', 'fight', 'locks'];
 export const PLACES = ['cove', 'lagoon'];
 /** Found just now: the list with it in (once). */
@@ -52,6 +53,8 @@ export function quests(p) {
             ] },
         { title: 'Out at sea', quests: [
                 job('Haul up the treasure at the X', p.x),
+                // (the isle's on the map, so it's named; what's afoot there isn't said: 11 Nov)
+                job(`See what's afoot on ${ISLE.NAME}`, p.wedding),
             ] },
         { title: 'Still to find', quests: [
                 tease('Ways past the checkpoint', WAYS.filter(has).length, WAYS.length),

@@ -1045,6 +1045,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **The clothes are Puzzle Pirates'** ("There isn't officially anything in Puzzle Pirates for any of
     this stuff, other than clothing and obviously furniture"): Dress top, Gown, Veil, Tiara,
     Butterfly, Frilly shirt with sash, from YPPedia; the bouquet, the props and the plots are ours.
+  - **Her isle, out at sea (10 Nov):** "on an island somewhere ... islands can all have their own
+    little thing out there." Out to the right of the lanes on the den's side of the checkpoint, so
+    you can sail there from the start, no oars or locks (a test sails there and home on 20 seas):
+    sand, palms, her chapel ruin on a rise, a jetty, her heart flag. Off its jetty, Space puts you
+    ashore to the wedding; "Back aboard" puts you back on her at the jetty (the cheat's way goes back
+    to the den). It's on the captain's map by name, in plain sight, and the quest list's "Out at sea"
+    has "See what's afoot on Mischievious's isle", ticked once you've had a wedding. Rules:
+    `src/den-isle.ts` (`LAY.ISLE` in `src/den-sail.ts`).
 - **You can see out to sea (9 Nov).** The taller wall shut the view in: "it just feels like I'm
   staring at a wall. It's lost some of the chop. I don't feel like there's any background to look
   at. I don't know why it's so black. Rather like there's supposed to be a sea over there." So:

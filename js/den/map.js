@@ -75,7 +75,9 @@ function mapTexture() {
   g.save(); g.clip();
   g.lineWidth = 14; g.strokeStyle = 'rgba(80,42,14,.5)'; g.stroke();
   for (let i = 0; i < 8; i++) { g.fillStyle = `rgba(140,95,45,${0.04 + rnd() * 0.06})`; g.beginPath(); g.arc(rnd() * w, rnd() * h, 20 + rnd() * 60, 0, 7); g.fill(); }
-  const onLand = (c, r) => CHART.land.some((L) => c >= L.c0 - 0.5 && c <= L.c1 + 0.5 && r >= L.r0 - 0.5 && r <= L.r1 + 0.5) || r < -0.5;
+  const isleBox = CHART.isle.shore.reduce((b, [c, r]) => [Math.min(b[0], c), Math.max(b[1], c), Math.min(b[2], r), Math.max(b[3], r)], [Infinity, -Infinity, Infinity, -Infinity]);
+  const onLand = (c, r) => CHART.land.some((L) => c >= L.c0 - 0.5 && c <= L.c1 + 0.5 && r >= L.r0 - 0.5 && r <= L.r1 + 0.5) || r < -0.5
+    || (c >= isleBox[0] - 1.5 && c <= isleBox[1] + 0.5 && r >= isleBox[2] - 0.5 && r <= isleBox[3] + 0.5);   // (Mischievious's isle, and its jetty)
   // A hand-drawn line through points (pixels), wobbling a little between them.
   const wobbly = (pts, close, jag = 3) => {
     g.beginPath();
@@ -196,6 +198,48 @@ function mapTexture() {
     g.beginPath(); g.moveTo(14, -4); g.lineTo(20, -10); g.moveTo(10, 2); g.lineTo(22, 0); g.stroke();   // (her bows stove in)
     g.beginPath(); g.moveTo(-6, -4); g.lineTo(-2, -24); g.lineTo(8, -30); g.stroke();
     g.restore();
+  }
+
+  // Mischievious's isle: its sandy shore, palms, her chapel's ruin on its rise, a jetty out from it
+  // toward the lanes with her flag on it, and bunting.
+  {
+    const corners = CHART.isle.shore.map((sq) => Q(sq));
+    const px = corners.flatMap((p, i, a) => {   // (its corners worn round, as the cliffs')
+      const cut = (q) => { const d = Math.hypot(q[0] - p[0], q[1] - p[1]), k = Math.min(14, d / 2.5) / d; return [p[0] + (q[0] - p[0]) * k, p[1] + (q[1] - p[1]) * k]; };
+      return [cut(a[(i + a.length - 1) % a.length]), cut(a[(i + 1) % a.length])];
+    });
+    wobbly(px, true, 6);
+    g.fillStyle = SAND; g.fill(); g.strokeStyle = INK; g.lineWidth = 3; g.stroke();
+    // The jetty, out from its shore, and her flag at its foot.
+    const [jx, jy] = Q(CHART.isle.jetty), [ex] = Q([CHART.isle.jetty[0] + 0.5, 0]);
+    g.fillStyle = '#9a7a55'; g.lineWidth = 2;
+    g.fillRect(jx - cw * 0.45, jy - ch * 0.35, ex - jx + cw * 0.45, 7); g.strokeRect(jx - cw * 0.45, jy - ch * 0.35, ex - jx + cw * 0.45, 7);
+    const fx = ex - cw * 0.12, fy = jy - ch * 0.35;
+    g.beginPath(); g.moveTo(fx, fy); g.lineTo(fx, fy - 30); g.stroke();
+    g.fillStyle = '#d14a8b'; g.beginPath(); g.moveTo(fx, fy - 30); g.lineTo(fx + 18, fy - 25); g.lineTo(fx, fy - 20); g.closePath(); g.fill(); g.stroke();
+    // Her chapel's ruin on its rise: a hill, broken walls, an arch.
+    const [cx, cy] = Q(CHART.isle.chapel);
+    g.strokeStyle = INK; g.lineWidth = 2.5; g.fillStyle = '#c7a86e';
+    g.beginPath(); g.moveTo(cx - 34, cy + 12); g.quadraticCurveTo(cx, cy - 22, cx + 34, cy + 12); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = '#b9ad9c';
+    for (const [dx, hh] of [[-16, 14], [-8, 9], [8, 16], [15, 7]]) { g.fillRect(cx + dx - 3, cy - 4 - hh, 6, hh); g.strokeRect(cx + dx - 3, cy - 4 - hh, 6, hh); }
+    g.beginPath(); g.arc(cx, cy - 14, 6, Math.PI, 0); g.stroke();
+    // Palms round the sand.
+    for (const sq of [[17.2, 9.6], [20.2, 10.6], [17.6, 12.6], [18.9, 13.3]]) {
+      const [x, y] = Q(sq);
+      g.strokeStyle = INK; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + 3, y - 9, x + 1, y - 18); g.stroke();
+      for (const a of [-2.6, -2, -1.2, -0.5]) { g.beginPath(); g.moveTo(x + 1, y - 18); g.quadraticCurveTo(x + 1 + Math.cos(a) * 8, y - 21 + Math.sin(a) * 3, x + 1 + Math.cos(a) * 14, y - 15 + Math.sin(a) * 4); g.stroke(); }
+    }
+    // Bunting, from her flag up the isle toward the chapel.
+    const [bx, by] = Q([CHART.isle.chapel[0] - 1.2, CHART.isle.chapel[1] - 1]);
+    g.strokeStyle = 'rgba(74,44,20,.8)'; g.lineWidth = 1.5;
+    g.beginPath(); g.moveTo(fx, fy - 26); g.quadraticCurveTo((fx + bx) / 2, (fy + by) / 2 - 4, bx, by - 14); g.stroke();
+    const cols = ['#c8402a', '#d9a93a', '#d14a8b', '#3f7fa8'];
+    for (let i = 1; i < 9; i++) {
+      const t = i / 9, x = (1 - t) ** 2 * fx + 2 * (1 - t) * t * (fx + bx) / 2 + t * t * bx, y = (1 - t) ** 2 * (fy - 26) + 2 * (1 - t) * t * ((fy + by) / 2 - 4) + t * t * (by - 14);
+      g.fillStyle = cols[i % cols.length]; g.beginPath(); g.moveTo(x - 3, y); g.lineTo(x + 3, y); g.lineTo(x, y + 6); g.closePath(); g.fill();
+    }
   }
 
   // Your cove at the bottom: the shore, the den's wall and its gate, the rocks either side, palms.

@@ -12,6 +12,7 @@ import { ramp } from './land.js';
 import { sail } from './sea.js';
 import { umami } from './capybara.js';
 import { crane } from './crane.js';
+import { wed } from './wedding.js';
 
 // The tour's shown once in this browser (as your pirate's look is kept: world.js); T on the map
 // shows it again.
@@ -23,8 +24,8 @@ export const touring = () => tour.step >= 0;
 /* How the den stands, for the list. The ways past the checkpoint are kept in G.found as she finds
    them (checkpoint.js); the rest is read off the den as it is: the rampart's and the shack's frames
    up (land.js), the wrecks' treasure aboard (treasure.js, crane.js), Umami out of his trap
-   (capybara.js), the hidden cove and the lagoon come on (said there the first time: sailing.js,
-   crane.js). */
+   (capybara.js), a wedding had on Mischievious's isle (wedding.js), the hidden cove and the lagoon
+   come on (said there the first time: sailing.js, crane.js). */
 function progress() {
   const jobs = ramp?.jobs ?? [];
   const up = (kind) => { const js = jobs.filter((j) => j.kind === kind); return js.length > 0 && js.every((j) => j.up); };
@@ -34,7 +35,7 @@ function progress() {
   return {
     walk: up('deck'), stairs: up('stair'), tower: up('gun'), shack: up('house'),
     x: !!sail.wreckSalvage?.done, lagoonChest: !!crane.rules?.salvage?.done,
-    umami: !!umami.rules && umami.rules.stage !== 'stuck', found,
+    umami: !!umami.rules && umami.rules.stage !== 'stuck', wedding: wed.had, found,
   };
 }
 
