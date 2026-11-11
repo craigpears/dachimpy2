@@ -1010,6 +1010,29 @@ if nothing had. The humour's a layer on the real thing (RULES.md): it could even
 Distilling board looks like (the user's own Distilling Simulator was all about when columns get
 burnt), so a botched batch in the puzzle gets a little bang of its own.
 
+## Pandayay's house: her trophies, and her love of Vikings (11 Nov)
+
+The user (11 Nov): "Pandayay is sounding very cute, she can have a house where she shows you her
+trophy collection and love of vikings." **Pandayay**, a real pirate (pirate name only; her ocean,
+pirate page, trophies and portrait to check before she's drawn, then into PIRATES and the
+wardrobe). In her own words (to the user, 11 Nov): "they are sentimental trophies for me, as back
+then I was a very nervous little navver who went from only bnavving in the navy or if another
+officer was on my ship, to hosting Vikings/IO's, to hosting BK's, to being confident to host lots
+of things! So I love vikings and IO's."
+
+So a house in the housing district (one more entry in HOUSES, its own scene), where Pandayay shows
+you round her trophy collection, walking with you (the shared host piece, as Gravee does), and
+each trophy is a step in her story: the nervous navver who'd only battle-navigate with another
+officer aboard, then hosting Vikings and IOs, then BKs, then hosting anything. Told lightly, with
+the feeling in it (as Dlonelyone's plaque is): the trophies are sentimental, not boasts. Her love
+of Vikings is the house's theme (what's on its walls, what she's wearing, maybe a longship). The
+same thread as the museum's: helping and leading people, and growing into it.
+- **To check on YPPedia before it's built:** what Vikings, IOs and BKs are in Puzzle Pirates (the
+  events she hosted; names as she wrote them, not guessed), her real trophies (her pirate page's
+  trophy collection), and her portrait.
+- Each trophy as a shared furniture piece; her lines in src/lines/; the house's pictures in the
+  2D viewer too (TODO.md, "A 2D view of the portraits").
+
 ## Placing creatures: choose what they get up to (11 Nov)
 
 "when you're placing ... familiars and pets in scenes, like, you should have options for, like,
