@@ -297,7 +297,12 @@ the site (`.assetsignore` skips `*.md`).
   like, all I'm sat here is watching the animation, and all of a sudden a white and a yellow thing starts
   dropping, and it's like, ah, what am I supposed to do?" So your turn is announced plainly (it's yours
   now, the pair you've got, where it goes, shown as a ghost on the board, and the keys), and words like
-  "trigger" are shown before they're named. Next, once the solid targets and bigger board land.
+  "trigger" are shown before they're named. And (11 Nov, after the solid targets landed: "looking a lot
+  better, especially graphics, like the square things"): "her [important] instructions disappear very
+  quickly. Like ... when she's telling me blue over the yellow and top the stack, that should be a lot
+  clearer that it's just not her being a bit just chatting. It's an actual instruction to you, and it
+  should be more prominent and persistent." So your instructions stand apart from her chatter, and stay
+  up till you've done them.
 - **The puzzles' keys at sea, in one bank (11 Nov):** "The R does not make sense as a button for sailing
   ... I definitely still associated R with sailing ... surely they should at least all be in the same bank
   of keys for activating the puzzles." Now R Sailing, G Gunnery, O the oars (rowing), scattered among the
