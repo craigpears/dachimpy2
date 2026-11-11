@@ -1,7 +1,7 @@
 /* Pirate Den: Kikkit's island and her whirlpools, a way through the reef. TypeScript, compiled to
    js/den-kikkit.js; tested in tests/den-kikkit.test.ts. js/den/kikkit.js draws them and her; the
-   squares are LAY.KIKKIT in src/den-sail.ts, and a gust's way over the whirlpools is gustPath's
-   (src/den-sailing.ts).
+   squares are LAY.KIKKIT in src/den-sail.ts, a whirlpool's rules src/den-whirl.ts (the helm plays
+   them), and a gust's way over them gustPath's (src/den-sailing.ts).
 
    The user (11 Nov), of the map's ways past the checkpoint: "maybe that will be a good place for it
    to be, is that's a way for you to get through the reef. And there's a penguin in the middle, so it
@@ -10,19 +10,24 @@
    penguins ... you've got relatively small, easy platforms" (so Sailing's board is an easy one in her
    waters: KIKKIT.WATERS, src/sailing.ts's EASY).
 
-   So, sailed with the Sailing puzzle's gusts (R, the rigging), from the passage's mouth just off her
-   island, facing the reef:
-   - a plain clear drops her in the little whirlpool in the reef: it has her, spins her round and
-     round (too many lefts) and spits her all the way back to Kikkit's island;
-   - a small chain (a Double or better) carries her over it and out the other side: through the
-     reef, the third way past the checkpoint;
-   - only a Vegas carries her over the big whirlpools beyond, to the penguins in the middle of them:
-     a lesser chain stops short of them, out past the reef;
-   - sailing into a whirlpool under her own way (or at the oars), it has her too: back to the island.
-   Whatever has her, she's back off Kikkit's island ("I don't want progress to sit. That's the funny
-   [part]": 10 Nov), and Kikkit finds it hilarious. */
+   Then (11 Nov) the first go "only spun her and flung her back": "Whirlpools are basically four tiles
+   ... each one ... rotates the ship and sends it to the opposite corner", and some have "a corner
+   missing where there's some winds, so you kind of get caught in the whirlpool and it sends you to the
+   opposite corner, which then gets you on some winds and sends you back". YPPedia's rules win.
 
-import { LAY, type Helm, type Pose, type SailEvent } from './den-sail.js';
+   So, sailed with the Sailing puzzle's gusts (R, the rigging), from the passage's mouth just off her
+   island, facing the reef's gap (LAY.KIKKIT says the squares):
+   - a plain clear stops in the gap, and its wind blows her into a whirlpool: it turns her a quarter
+     and sends her to its far corner, the missing one, whose wind takes her back up through the reef,
+     along her shore and into the mouth, just as she started (five lefts and a right: turnsOf);
+   - a Double carries her clean over the gap, out past the reef: the third way past the checkpoint;
+   - a Triple, a Bingo or a Donkey further, onto the winds past it, into the other whirlpool, and
+     home the same way;
+   - only a Vegas over all of it, to the penguins.
+   Her own moves into any of it, and they have her the same way. The pilot never takes her in. */
+
+import { Helm, LAY, Sea, type Pose, type SailEvent } from './den-sail.js';
+import { carry } from './den-sailing.js';
 import { shoreOf } from './den-isle.js';
 import { RAMBLE, TANGENTS, BACK, BACK_OUT } from './lines/kikkit.js';
 
@@ -32,11 +37,8 @@ export const KIKKIT = {
       11 Nov: "reached only by a Vegas"). */
   NAME: 'Kikkit\'s Island',
   VEGAS: 'Vegas Island',
-  /** Seconds a whirlpool spins her before it spits her out, and her flight back to the island. */
-  SPIN: 1.6,
-  FLING: 1.1,
   /** Her waters: where Sailing's board is the whirlpools' own easy one (src/sailing.ts, EASY). */
-  WATERS: { c0: 13, c1: 21, r0: 14, r1: 23 },
+  WATERS: { c0: 13, c1: 21, r0: 14, r1: 24 },
   /** Within earshot: squares from where she stands on her island. Once she's told her ramble she
       never stops talking while you're this near (the user, 11 Nov: "you're sailing past, you've not
       even engaged, and she's going on these tangents"). */
@@ -66,57 +68,74 @@ export const inEarshot = (c: number, r: number): boolean =>
 /** Her island's shore, for the 3D and the captain's map (src/den-isle.ts, shoreOf). */
 export const kikkitShore = (): [number, number][] => shoreOf(K.LAND);
 
-/** The passage, square by square from the mouth. */
-export const PASSAGE = K.PASSAGE.map(([c, r, spin, kind]) => ({ c, r, spin, kind }));
-const find = (kind: string) => { const p = PASSAGE.find((q) => q.kind === kind)!; return [p.c, p.r] as [number, number]; };
-/** The little whirlpool in the reef, the open water past it, and the penguins' water. */
-export const REEF_WHIRL = find('small');
-export const OUT = find('out');
-export const PENGUINS = find('penguins');
-/** Where too many lefts leave her: back off Kikkit's island. */
-export const spatPose = (): Pose => ({ ...K.SPAT });
+/** The passage's mouth, the reef's gap, the open water past it, and the penguins' water. */
+export const MOUTH: Pose = { ...K.MOUTH };
+export const GAP = [...K.GAP] as [number, number];
+export const OUT = [...K.OUT] as [number, number];
+export const PENGUINS = [...K.PENGUINS] as [number, number];
+/** A square of the passage: a whirlpool's (its missing corner too) or one of its winds. The
+    checkpoint knows she crossed the reef by them (src/den-checkpoint.ts). */
+const passage = new Set([
+  ...K.WHIRLS.flatMap(({ at: [c, r] }) => [key(c, r), key(c + 1, r), key(c, r + 1), key(c + 1, r + 1)]),
+  ...K.WINDS.map(([c, r]) => key(c, r)),
+]);
+export const passageAt = (c: number, r: number): boolean => passage.has(key(c, r));
 
-/** The turns the whirlpools make, as Kikkit counts them: a little whirlpool's full spin is four
-    lefts ("the left, the left, the left, the left, and just spinning"), a big one's a backflip. */
-export function turnsOf(): { lefts: number; rights: number; backflips: number } {
-  let lefts = 0, rights = 0, backflips = 0;
-  for (const { spin, kind } of PASSAGE) {
-    if (kind === 'big' && Math.abs(spin) === 4) backflips++;
-    else if (spin > 0) lefts += spin;
-    else rights -= spin;
+/** The turns she makes, as Kikkit counts them, sailing a gust of `run` squares from the mouth: each
+    quarter turn left (the winds turn her the way they blow), right, or a whirl's quarter right (a
+    twirl), and about-turns (backflips); and whether she's back as she started, at the mouth. */
+export function turnsOf(run = 1): { lefts: number; rights: number; twirls: number; backflips: number; home: boolean } {
+  const h = new Helm(new Sea(1), MOUTH), n = { lefts: 0, rights: 0, twirls: 0, backflips: 0 };
+  carry(h, run);
+  for (let t = 0; t < 40; t += 0.05) {
+    for (const e of h.tick(0.05)) {
+      if (e.kind !== 'push') continue;
+      const q = (((e.to.d - e.from.d) % 4) + 4) % 4;
+      if (q === 3) n.lefts++;
+      else if (q === 2) n.backflips++;
+      else if (q === 1) n[e.whirl ? 'twirls' : 'rights']++;
+    }
   }
-  return { lefts, rights, backflips };
+  const p = h.pose;
+  return { ...n, home: p.c === MOUTH.c && p.r === MOUTH.r && p.d === MOUTH.d };
 }
 
-/** A whirlpool has her: she's come to rest on one (a gust left her there: nothing more to play on
-    the square), or sailed into one (a move's `whirl`). Where, if so. */
-export function caught(h: Helm, events: readonly SailEvent[] = []): [number, number] | null {
-  for (const e of events) if (e.kind === 'move' && e.whirl) return [...e.whirl];
-  const { c, r } = h.pose;
-  if (!h.sea.whirlAt(c, r)) return null;
-  const settled = (!h.cur || !!h.cur.done) && !h.gusts.length && !h.rides.length;
-  return settled ? [c, r] : null;
-}
+/** What she's done in the whirlpools, by what the helm's done: through the reef, at the penguins, a
+    whirlpool has her, and she's come to rest again after it (back at the mouth). */
+export type WhirlEvent = 'through' | 'penguins' | 'caught' | 'back';
 
-/** What she's done in the whirlpools, by what the helm's done. */
-export type WhirlEvent = 'through' | 'penguins';
-
-/** The passage's watch: through the reef (carried over the little whirlpool and out past it), and to
-    the penguins. Each time she does it. */
+/** The passage's watch. Each time she does it. */
 export class Whirlpools {
   /** Through the reef, and at the penguins, ever. */
   through = false;
   penguins = false;
+  /** A whirlpool has her just now, its whirls and winds still carrying her: and whether she'd got
+      out past the reef first. */
+  has: { out: boolean } | null = null;
+  /** The last time it let her go, whether she'd got out past the reef first. */
+  backOut = false;
   private crossing = false;
+  private past = false;
   private atPenguins = false;
 
-  /** A tick's events and where she is after them (Helm.pose). */
-  watch(events: readonly SailEvent[], pose: Pose): WhirlEvent[] {
-    const out: WhirlEvent[] = [];
-    for (const e of events) if (e.kind === 'push' && e.to.c === REEF_WHIRL[0] && e.to.r === REEF_WHIRL[1]) this.crossing = true;
-    if (this.crossing && pose.r > LAY.CHECKPOINT.ROW) { this.crossing = false; this.through = true; out.push('through'); }
-    else if (this.crossing && pose.r < K.MOUTH.r) this.crossing = false;   // (spat back)
-    const there = pose.c === PENGUINS[0] && pose.r === PENGUINS[1];
+  /** A tick's events and the helm after them. */
+  watch(events: readonly SailEvent[], h: Helm): WhirlEvent[] {
+    const out: WhirlEvent[] = [], ROW = LAY.CHECKPOINT.ROW;
+    for (const e of events) {
+      if (e.kind !== 'push' && e.kind !== 'move') continue;
+      // Through: a gust's carrying her over the gap and on, out past the reef.
+      if (e.kind === 'push' && e.whirl) {
+        this.crossing = false;
+        if (!this.has) { this.has = { out: this.past }; out.push('caught'); }
+      } else if (e.kind === 'push' && e.gust && e.to.c === GAP[0] && e.to.r === GAP[1]) this.crossing = true;
+      else if (this.crossing && e.to.r > ROW) { this.crossing = false; this.through = this.past = true; out.push('through'); }
+      if (e.to.r < ROW) this.crossing = this.past = false;
+    }
+    const p = h.pose;
+    // Let go: nothing more carrying her, and not about to whirl again.
+    const settled = (!h.cur || !!h.cur.done) && !h.rides.length && !h.gusts.length && !h.whirling();
+    if (this.has && settled) { this.backOut = this.has.out; this.has = null; this.past = false; out.push('back'); }
+    const there = p.c === PENGUINS[0] && p.r === PENGUINS[1];
     if (there && !this.atPenguins) { this.penguins = true; out.push('penguins'); }
     this.atPenguins = there;
     return out;
@@ -147,7 +166,8 @@ export class Kikkit {
     if (this.tangent >= TANGENTS.length) { this.tangent = 0; return [...RAMBLE]; }
     return [TANGENTS[this.tangent++]];
   }
-  /** Too many lefts, and you're back: a new line each time (`out`: you'd got out past the reef). */
+  /** The whirlpools and the winds have thrown you back: a new line each time (`out`: you'd got out
+      past the reef first). */
   spat(out = false): string {
     if (out) return BACK_OUT[this.backOut++ % BACK_OUT.length];
     return BACK[this.back++ % BACK.length];

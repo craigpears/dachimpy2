@@ -182,12 +182,51 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   of them should be the same." A wind is a wind, whether it's a sea lane or one beside a whirlpool:
   one look, from one shared piece of drawing code, never a second version for a new place. The same
   goes for any other thing that turns up again (a rock, a buoy, a gun).
+- **Talking pirates, animations and creatures are pieces too (11 Nov).** "what we've got here for
+  [Kikkit], where she goes on this kind of loop and ramble ... you could almost have this as a
+  furniture item. It's a pirate with a configurable loop of text, and obviously animations ...
+  modular as well. So you can choose what animation they stand there doing and use that generally
+  everywhere ... these pets here, as we keep adding the penguins and the creatures, you should be
+  able to add these to your [scenes], similar to the furniture." So a pirate standing about saying
+  lines is one reusable piece (a look, its lines, looping or once, an idle animation picked by name
+  from a shared set), and every creature (a familiar, a penguin, a bat) is a placeable piece too; a
+  place only places and configures them.
 - **Furniture and props are modular, usable in any scene (11 Nov).** Of Gravee's house: "anything
   in these houses, they should all be modular objects that can be reused in other scenes. So, like,
   if we're doing the vampire's coffin, that should just be a bit of furniture that you can use
   anywhere." Every piece (a coffin, a portrait frame, an easel, a chair) is its own reusable object
   in a shared module, animated by its own little tick if it moves; a house or a scene only places
   pieces, never builds its own one-off copy.
+- **Kikkit's whirlpools, by YPPedia's rules (11 Nov).** The first go only spun her and flung her
+  back; the user: "Whirlpools are basically four tiles ... each one ... rotates the ship and sends
+  it to the opposite corner ... on some of them you'd naturally have like a whirlpool but with a
+  corner missing where there's some winds ... it sends you to the opposite corner, which then gets
+  you on some winds and sends you back", and "obviously, follow the [YPPedia] thing". So, as
+  YPPedia has it: a whirlpool is 2×2 squares; each move she's on one it sends her clockwise round
+  to the opposite corner and turns her a quarter clockwise (four and she's back as she was); it acts
+  after her move, once a move. A wind pushes her one square (and, as the den's trade winds do,
+  turns her its way). Kikkit's are whirlpools with a corner missing, winds in the gap carrying her
+  home to the passage's mouth: a plain clear is blown into one and brought back; a Double clears
+  the reef; a bigger chain gets through but into the second, and home; only a Vegas reaches the
+  penguins. A whirlpool lets her go after a whole turn round, so she's never held for ever. The
+  pilot never takes her onto one, or onto a wind that feeds one. Any whirlpool anywhere on the sea
+  is the same piece (src/den-whirl.ts).
+  - **Her "-eh" (11 Nov):** "her mannerisms are definitely like everything ends in EH, so it's not a
+    twirl, it's twirl EH." A whirlpool's turn is "a twirl-eh" in her directions, and many of her
+    sentences end on a word with "-eh". Her "five lefts and a right" is still literally true (the
+    right's the twirl).
+  - **The first go's charm, kept (11 Nov):** "I do love how when you go to the whirlpool there, it
+    does throw you out and say too many lefts, and yeah, it lines up with what [Kikkit] said and the
+    little animation where it throws you out. So if we're able to keep some of that charm in, that
+    would be brilliant." So the winds don't just carry her home, they spit her out, a big bounding
+    hop and a splash each square, and she lands to "Too many lefts!", as Kikkit warned, Kikkit's
+    first word on it "Too many lefts-eh! I told you!" (a test keeps it).
+  - **Her lines are protected (11 Nov):** "I want her line[s in] source control because they're
+    brilliant. I think they're so spot on with their personality right now. I want that protected
+    in source control." They're plain data in `src/lines/kikkit.ts`, recorded in `LINES.md`, both
+    committed: change them only on purpose, add to them freely, and never lose one in a rework.
+  - **Standing on the ground (11 Nov):** "the pets on [Kikkit's] Island ... are sinking into the
+    ground." Everyone on an island stands on its real ground height, its sand's top.
 - **Kikkit never stops talking (11 Nov).** "I love how long she goes on tangents ... you're sailing
   past, you've not even engaged, and she's going on these tangents ... a never-ending loop of
   tangents and her speech bubbles that don't stop. That suits so incredibly well." Once she's told

@@ -171,6 +171,19 @@ export const stoneM = mat('#6b6158', { flatShading: true, roughness: 0.95 }), gr
 export function seaWorld() {
   const W = { g: new THREE.Group(), lanes: [] };
   for (const { at: [c, r], d, n } of LAY.LANES) {
+    const lane = windLane(c, r, d, n);
+    W.g.add(lane.g);
+    W.lanes.push(lane.tex);
+  }
+  return seaWorldRest(W);
+}
+/** A lane of wind, `n` squares from (c, r) the way `d` blows: white streaks racing along it over a
+    faint blue band, so it reads from afar. The trade winds' lanes, and any other wind on the sea
+    (Kikkit's whirlpools': kikkit.js), are drawn by this. Move `tex.offset.y` by -2.2 a second to
+    race it along (sailing.js). */
+export function windLane(c, r, d, n) {
+  const G = new THREE.Group();
+  {   // (indented as it was in seaWorld's loop)
     const tex = canvasTex(64, 128, (g, w, h) => {
       g.clearRect(0, 0, w, h);
       g.strokeStyle = 'rgba(240,250,252,0.95)'; g.lineCap = 'round';
@@ -183,15 +196,17 @@ export function seaWorld() {
     m.position.set(seaX(c + DCx * mid), 0.07, seaZ(r + DRx * mid));
     m.rotation.y = -d * Math.PI / 2;
     m.renderOrder = 2;
-    W.g.add(m);
-    W.lanes.push(tex);
+    G.add(m);
     // A faint blue band under the streaks, so the lane reads from afar.
     const band = mesh(new THREE.PlaneGeometry(SAIL.CELL * 0.95, L).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#7fd0ea', transparent: true, opacity: 0.18, depthWrite: false, fog: false }), false);
     band.position.copy(m.position).setY(0.065);
     band.rotation.y = m.rotation.y;
     band.renderOrder = 2;
-    W.g.add(band);
+    G.add(band);
+    return { g: G, tex };
   }
+}
+function seaWorldRest(W) {
   // The junction's buoy, yellow, at the corner of the square.
   const [jc, jr] = LAY.JUNCTION, buoy = mesh(new THREE.CylinderGeometry(0.3, 0.42, 0.8, 12), mat('#e8b52a', { roughness: 0.6 }));
   buoy.position.set(seaX(jc) - SAIL.CELL * 0.42, 0.25, seaZ(jr) + SAIL.CELL * 0.42);

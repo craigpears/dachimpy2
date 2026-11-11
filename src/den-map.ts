@@ -130,7 +130,7 @@ export const CHART = {
     chapel: [19.3, 11.9] as Square,
   },
   /** Kikkit's island (11 Nov), at the reef's near end, in plain sight, so on the map and named; the
-      rocks round her big whirlpools with the reef's (the whirlpools themselves aren't drawn: what's
+      rocks round her whirlpools with the reef's (the whirlpools and their winds aren't drawn: what's
       there is for you to find); and Vegas Island, the penguins', drawn only once you've been there
       (js/den/map.js: "hidden gems are never hinted"). */
   kikkit: {
@@ -177,4 +177,4 @@ export const NOTES: readonly MapNote[] = [
 ];
 
 /** Vegas Island's name, written once you've been there (js/den/map.js). */
-export const VEGAS_NOTE: MapNote = { label: KIKKIT.VEGAS, at: [15.6, 24.8] };
+export const VEGAS_NOTE: MapNote = { label: KIKKIT.VEGAS, at: [15.6, 25.1] };

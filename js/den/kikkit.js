@@ -6,14 +6,15 @@
 // what's found (G.found) and the checkpoint's word on which way she crossed.
 import * as THREE from 'three';
 import { SAIL, LAY } from '../den-sail.js';
-import { KIKKIT, KIKKIT_STANDS, Kikkit, Whirlpools, caught, onKikkitLanding, inKikkitWaters, inEarshot, kikkitShore, spatPose, PENGUINS } from '../den-kikkit.js';
+import { KIKKIT_STANDS, Kikkit, Whirlpools, onKikkitLanding, inKikkitWaters, inEarshot, kikkitShore, PENGUINS } from '../den-kikkit.js';
+import { whirlpool } from '../den-whirl.js';
 import { shoreOf } from '../den-isle.js';
 import { readSecs } from '../den-dignity.js';
 import { addFind } from '../den-finds.js';
 import { OF_HIM } from '../lines/penguin.js';
 import { PIRATES, familiar, familiarTick } from '../den-look.js';
 import { scene, mat, mesh, canvasTex, makePirate, G, keys, toast, burst, V3 } from './world.js';
-import { sail, seaX, seaZ } from './sea.js';
+import { sail, seaX, seaZ, windLane } from './sea.js';
 import { outline, slab } from './isle.js';
 import { palm } from './wedding-scene.js';
 import { bubble, bubbleAt } from './cine.js';
@@ -22,6 +23,13 @@ import { stationBoard } from './sail-station.js';
 
 const K = LAY.KIKKIT, CELL = SAIL.CELL;
 const SC = 1.15;   // (a touch big, so she reads from the sea, as Dignity)
+/* Where her island's ground is, and Vegas Island's, so whoever stands there stands on it (the user,
+   11 Nov: the pets "are sinking into the ground. You only really see them when they jump up"). A slab
+   (isle.js) tops out at its y0 + its height + its bevel's 0.25: her sand, her grass (the higher, a
+   hair over the sand's), and the floe's top. */
+const BEVEL = 0.25, SAND = { y0: -0.4, h: 0.62 }, GRASS = { y0: -0.25, h: 0.5 }, ICE = { y0: -0.35, h: 0.55 };
+const GROUND = Math.max(SAND.y0 + SAND.h, GRASS.y0 + GRASS.h) + BEVEL;
+const FLOE = ICE.y0 + ICE.h + BEVEL;
 export const kik = { W: null, rules: new Kikkit(), pool: new Whirlpools(), queue: [], line: null, on: false, held: null, moment: null };
 
 // ---------- the look of it ----------
@@ -40,13 +48,30 @@ const swirlTex = (dark) => canvasTex(128, 128, (g, w) => {
     g.stroke();
   }
 });
-function whirlpool(big, spin) {
-  const m = new THREE.MeshBasicMaterial({ map: swirlTex(big), transparent: true, depthWrite: false });
-  const o = mesh(new THREE.CircleGeometry(CELL * (big ? 0.62 : 0.5), 40), m, false);
+/* A whirlpool (src/den-whirl.ts): one swirl over all four of its squares, turning clockwise seen from
+   above, as every whirlpool does (YPPedia). */
+function pool(w) {
+  const m = new THREE.MeshBasicMaterial({ map: swirlTex(true), transparent: true, depthWrite: false });
+  const o = mesh(new THREE.CircleGeometry(CELL * 1.02, 48), m, false);
   o.rotation.x = -Math.PI / 2;
+  o.position.set(seaX(w.mid[0]), 0.06, seaZ(w.mid[1]));
   o.renderOrder = 2;
-  o.userData.speed = (big ? 2.4 : 3.2) * (spin < 0 ? -1 : 1);   // (anticlockwise for lefts, seen from above)
+  o.userData.speed = -1.6;   // (rotation.z up is anticlockwise seen from above: so, down)
   return o;
+}
+/* Her winds, drawn as the trade winds' lanes are (sea.js, windLane: the same wind, the same look; the
+   user, 11 Nov: "the graphic representation of them should be the same"): each straight run of
+   squares blowing the same way one lane. */
+function windLanes() {
+  const d0 = new Map(K.WINDS.map(([c, r, d]) => [`${c},${r}`, d])), DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
+  const out = [];
+  for (const [c, r, d] of K.WINDS) {
+    if (d0.get(`${c - DC[d]},${r - DR[d]}`) === d) continue;   // (not the start of its run)
+    let n = 1;
+    while (d0.get(`${c + DC[d] * n},${r + DR[d] * n}`) === d) n++;
+    out.push(windLane(c, r, d, n));
+  }
+  return out;
 }
 // A penguin, standing about; `balaclava`: the one up to something, a sack over his shoulder.
 function penguin(balaclava = false) {
@@ -86,7 +111,7 @@ function build() {
   const g = new THREE.Group(), sand = mat('#e6cf96', { roughness: 1 }), wet = mat('#c9ad78', { roughness: 1 }), grass = mat('#7c9a52', { roughness: 1 });
   // Her island: sand, a wet rim, a tuft of grass, two palms leaning out over the water.
   const shore = kikkitShore();
-  g.add(slab(outline(0.5, shore), -0.55, 0.45, wet), slab(outline(1.1, shore), -0.4, 0.62, sand), slab(outline(3, shore), -0.25, 0.5, grass));
+  g.add(slab(outline(0.5, shore), -0.55, 0.45, wet), slab(outline(1.1, shore), SAND.y0, SAND.h, sand), slab(outline(3, shore), GRASS.y0, GRASS.h, grass));
   for (const [c, r, h, l] of [[20.4, 16.4, 4, 0.35], [21, 18.2, 3.4, -0.3], [19.6, 18.4, 3.6, 0.25]]) {
     const p = palm(h, l);
     p.scale.setScalar(0.8);
@@ -97,7 +122,7 @@ function build() {
   // Kikkit, on the sand by the whirlpools' mouth, looking out at you.
   const p = makePirate({ look: PIRATES.Kikkit });
   p.g.scale.setScalar(SC);
-  const at = V3(seaX(KIKKIT_STANDS.c), 0.25, seaZ(KIKKIT_STANDS.r));
+  const at = V3(seaX(KIKKIT_STANDS.c), GROUND, seaZ(KIKKIT_STANDS.r));
   p.g.position.copy(at);
   g.add(p.g);
   // Her familiars about her, each doing its own thing ("the familiar version of a cat lady").
@@ -112,24 +137,21 @@ function build() {
   ].map((f, i) => {
     const o = familiar(f);
     o.g.scale.setScalar(2.2);
-    o.g.position.set(seaX(f.at[0]), 0.25, seaZ(f.at[1]));
+    o.g.position.set(seaX(f.at[0]), GROUND, seaZ(f.at[1]));
     o.g.rotation.y = -0.6 + i * 0.7;
     g.add(o.g);
-    return { o, ...f, ph: i * 1.3, y0: 0.25 };
+    return { o, ...f, ph: i * 1.3, y0: GROUND };
   });
-  // The whirlpools, on the water: the little one in the reef, the big ones beyond.
-  const pools = K.PASSAGE.filter(([, , , kind]) => kind === 'small' || kind === 'big').map(([c, r, spin, kind]) => {
-    const o = whirlpool(kind === 'big', spin);
-    o.position.set(seaX(c), 0.06, seaZ(r));
-    g.add(o);
-    return o;
-  });
-  // Vegas Island: a little island in the middle of the big ones, and its penguins.
+  // The whirlpools on the water, each over its four squares, and the winds: the gap's, those past it,
+  // the whirlpools' missing corners, and the way home.
+  const pools = K.WHIRLS.map((spot) => { const o = pool(whirlpool(spot)); g.add(o); return o; });
+  const winds = windLanes().map(({ g: lane, tex }) => { g.add(lane); return tex; });
+  // Vegas Island: a little island past them, and its penguins.
   const vs = shoreOf(K.VEGAS);
-  g.add(slab(outline(0.4, vs), -0.5, 0.4, mat('#e9ecef', { roughness: 0.9 })), slab(outline(1, vs), -0.35, 0.55, mat('#f6f8fa', { roughness: 0.8 })));
-  const flock = [[15.2, 22.3], [15.6, 22.8], [15.1, 23.3], [16.2, 23.4], [15.7, 23.6]].map(([c, r], i) => {
+  g.add(slab(outline(0.4, vs), -0.5, 0.4, mat('#e9ecef', { roughness: 0.9 })), slab(outline(1, vs), ICE.y0, ICE.h, mat('#f6f8fa', { roughness: 0.8 })));
+  const flock = [[15.1, 23.1], [14.9, 23.8], [15.3, 24.4], [15.9, 24.0], [16.3, 24.4]].map(([c, r], i) => {
     const o = penguin();
-    o.position.set(seaX(c), 0.25, seaZ(r));
+    o.position.set(seaX(c), FLOE, seaZ(r));
     o.rotation.y = i * 1.7;
     o.scale.setScalar(1.6);
     g.add(o);
@@ -137,11 +159,11 @@ function build() {
   });
   const sneak = penguin(true);
   sneak.scale.setScalar(1.6);
-  sneak.position.set(seaX(15.5), 0.25, seaZ(22.05));
+  sneak.position.set(seaX(15.2), FLOE, seaZ(23.55));
   g.add(sneak);
   const say = bubble('', document.body, 'wrap');   // (on the page: at sea the den's labels are hidden)
   scene.add(g);
-  return { g, p, at, fams, pools, flock, sneak, say, yaw: 0 };
+  return { g, p, at, fams, pools, winds, flock, sneak, say, yaw: 0 };
 }
 
 /** Built the first time the sea's drawn (sailing.js), seen from afar too. */
@@ -168,7 +190,7 @@ export function kikkitHail() {
 const canHail = () => sail.on && !kik.held && onKikkitLanding(sail.helm.pose.c, sail.helm.pose.r);
 export function kikkitPrompt() {
   if (!sail.on) return '';
-  if (kik.held) return 'Round and round in the whirlpool...';
+  if (kik.held) return 'A whirlpool has her: round to its far corner, and the winds...';
   if (!canHail()) return '';
   return kik.line ? 'Off Kikkit\'s island · Space: and then?' : 'Off Kikkit\'s island · Space: hail her · R: the rigging (Sailing)';
 }
@@ -180,24 +202,20 @@ export const kikkitHolds = () => !!kik.held;
     moment. Nothing yet. */
 export function kikkitEnding() { /* (to come) */ }
 
-// ---------- how she's drawn while a whirlpool has her, or a gust carries her over one ----------
-/* sailing.js draws her where the helm has her (Helm.now), through this: in a whirlpool's grip she
-   spins round and round on it (too many lefts), then she's flung back to Kikkit's island in a long
-   hop; carried over a little whirlpool by a gust she's swung round as it turns her; over a big one
-   that's a backflip, end over end ("Did a double backflip. Well, that's what I get"). Returns the
-   pose, perhaps with a lift (`hop`) and a flip (`flip`, radians end over end). */
+// ---------- how she's drawn while a whirlpool has her ----------
+/* sailing.js draws her where the helm has her (Helm.now: a whirl swings her round the whirlpool's
+   middle to its far corner, turning a quarter), through this: as a whirlpool swings her she's
+   dragged down into it a little, heeling into the turn. And once it's let her go, the winds don't
+   just blow her home, they spit her out: a big bounding hop each square, splashing down, all the
+   way back to Kikkit's island (the user, 11 Nov, of the first go's fling: "I do love how ... it
+   does throw you out and say too many lefts ... if we're able to keep some of that charm in"). */
 export function kikkitShown(p) {
-  const h = sail.helm, H = kik.held;
-  if (H) {
-    if (H.phase === 'spin') { const u = H.t / KIKKIT.SPIN; return { ...p, c: H.at[0], r: H.at[1], a: H.a0 - u * u * 10, hop: -0.25 * Math.sin(u * Math.PI) }; }
-    const u = Math.min(1, H.t / KIKKIT.FLING), S = spatPose();
-    return { ...p, c: H.at[0] + (S.c - H.at[0]) * u, r: H.at[1] + (S.r - H.at[1]) * u, a: H.a0 - 10 - u * 6, hop: Math.sin(u * Math.PI) * 6 };
-  }
-  const cur = h.cur, w = cur && cur.m === 'W' ? h.sea.whirlAt(cur.to.c, cur.to.r) : null;
-  if (!w) return p;
-  const u = Math.min(1, h.t / SAIL.PUSH), e = u * u * (3 - 2 * u);
-  if (w.big && Math.abs(w.spin) === 4) return { ...p, flip: e * Math.PI * 2, hop: Math.sin(e * Math.PI) * 1.4 };
-  return { ...p, a: cur.from.d - w.spin * e };
+  const h = sail.helm, cur = h.cur;
+  if (!cur || cur.m !== 'W') return p;
+  const u = Math.min(1, h.t / cur.secs), s = Math.sin(u * Math.PI);
+  if (cur.via) return { ...p, hop: -0.3 * s, heel: 0.16 * s };
+  if (!kik.held) return p;
+  return { ...p, hop: s * 1.8, heel: 0.22 * Math.sin(u * Math.PI * 2) };
 }
 
 // ---------- each tick ----------
@@ -211,12 +229,13 @@ export function kikkitTick(dt, events = []) {
   const t = performance.now() / 1000;
   // The whirlpools turning; her familiars at it; the penguins pottering.
   for (const o of W.pools) o.rotation.z += dt * o.userData.speed;
+  for (const tex of W.winds) tex.offset.y -= dt * 2.2;   // (as the trade winds' lanes race: sailing.js)
   for (const f of W.fams) {
     familiarTick(f.o, dt);
     if (f.fly) f.o.g.position.set(seaX(f.at[0]) + Math.cos(t * 1.3 + f.ph) * 1.6, 2.4 + Math.sin(t * 2.1) * 0.5, seaZ(f.at[1]) + Math.sin(t * 1.3 + f.ph) * 1.6);
     else if (f.hop) f.o.g.position.y = f.y0 + Math.max(0, Math.sin(t * 3 * f.hop + f.ph)) * 0.35;
   }
-  for (const o of W.flock) { const u = o.userData; u.head.rotation.y = Math.sin(t * 0.8 + u.ph) * 0.5; u.flips.forEach((f, i) => { f.rotation.z = (i ? -1 : 1) * (0.15 + Math.max(0, Math.sin(t * 2 + u.ph)) * 0.3); }); o.position.y = 0.25 + Math.abs(Math.sin(t * 3 + u.ph)) * 0.04; }
+  for (const o of W.flock) { const u = o.userData; u.head.rotation.y = Math.sin(t * 0.8 + u.ph) * 0.5; u.flips.forEach((f, i) => { f.rotation.z = (i ? -1 : 1) * (0.15 + Math.max(0, Math.sin(t * 2 + u.ph)) * 0.3); }); o.position.y = FLOE + Math.abs(Math.sin(t * 3 + u.ph)) * 0.04; }
   sneakTick(W, dt, t);
   if (sail.on) atSea(dt, events);
   // Kikkit: facing you when you're about, swigging from her jug now and then, swaying (a bit drunk).
@@ -245,36 +264,23 @@ function atSea(dt, events) {
   kik.on = off;
   // Told it all, and back within earshot: off she goes again.
   if (!kik.line && chatty()) sayNext();
-  // Through the reef, and to the penguins (src/den-kikkit.ts).
-  for (const e of kik.pool.watch(events, pose)) {
+  // Through the reef, to the penguins, and a whirlpool having her: the helm plays it, as Puzzle
+  // Pirates' whirlpools go (src/den-whirl.ts), and its winds bring her back (src/den-kikkit.ts).
+  for (const e of kik.pool.watch(events, h)) {
     if (e === 'through') { G.found = addFind(G.found, 'whirlpools'); onceToast('through', OF_HIM.through); }
     if (e === 'penguins') penguinMoment();
-  }
-  // A whirlpool has her (she came to rest on one, or sailed into one): round and round, then back.
-  const H = kik.held;
-  if (!H) {
-    const at = caught(h, events);
-    if (at) {
-      kik.held = { at, t: 0, phase: 'spin', a0: h.now().a, out: pose.r > LAY.CHECKPOINT.ROW };
-      h.moor({ ...pose });   // (everything she was doing let go)
-      keys.clear();
+    if (e === 'caught') { kik.held = true; keys.clear(); toast('A whirlpool has her! A quarter turn, and round to its far corner'); }
+    if (e === 'back') {
+      kik.held = false;
+      cp.check?.whirled();   // (back across the reef by them, if she was out: the checkpoint's word on it)
+      toast(onKikkitLanding(pose.c, pose.r) ? 'Too many lefts! Twirled round and spat all the way back to Kikkit\'s island' : 'The whirlpool\'s let her go');
+      if (inEarshot(pose.c, pose.r)) { kik.queue = [kik.rules.spat(kik.pool.backOut)]; sayNext(); }
     }
-    return;
   }
-  H.t += dt;
-  if (H.phase === 'spin' && H.t >= KIKKIT.SPIN) {
-    H.phase = 'fling'; H.t = 0;
-    burst(V3(seaX(H.at[0]), 0.4, seaZ(H.at[1])), '#e6f3f6', 24, 5);
-  } else if (H.phase === 'fling' && H.t >= KIKKIT.FLING) {
-    const S = spatPose();
-    h.moor(S);
-    cp.check?.whirled();   // (back across the reef by them, if she was out: the checkpoint's word on it)
-    burst(V3(seaX(S.c), 0.3, seaZ(S.r)), '#e6f3f6', 20, 4);
-    kik.held = null;
-    toast('Too many lefts! Spun round and round, and spat all the way back to Kikkit\'s island');
-    kik.queue = [kik.rules.spat(H.out)];
-    sayNext();
-  }
+  // Each whirl churns the water as it swings her round.
+  for (const e of events) if (e.kind === 'push' && e.whirl) burst(V3(seaX(e.from.c), 0.4, seaZ(e.from.r)), '#e6f3f6', 14, 3);
+  // Spat out by the winds: a splash where each hop comes down.
+  for (const e of events) if (e.kind === 'push' && !e.whirl && !e.gust && kik.held) burst(V3(seaX(e.to.c), 0.3, seaZ(e.to.r)), '#e6f3f6', 18, 4);
 }
 
 /* The penguins: the moment you first get there, and each time after. Their island goes on the map
@@ -301,9 +307,9 @@ function sneakTick(W, dt, t) {
   }
   // Up to something: tiptoeing to and fro across the island, eyes darting, sack over his shoulder.
   const x = Math.sin(t * 0.35);
-  o.position.x = seaX(15.5) + x * 1.2;
+  o.position.x = seaX(15.3) + x * 1.2;
   o.rotation.y = Math.cos(t * 0.35) > 0 ? Math.PI / 2 : -Math.PI / 2;
-  o.position.y = 0.25 + Math.abs(Math.sin(t * 6)) * 0.06;
+  o.position.y = FLOE + Math.abs(Math.sin(t * 6)) * 0.06;
   u.head.rotation.y = Math.sin(t * 2.3) * 0.7;
   for (const e of u.eyes) e.position.x = Math.sign(e.position.x) * 0.045 + Math.sin(t * 3.1) * 0.02;
 }

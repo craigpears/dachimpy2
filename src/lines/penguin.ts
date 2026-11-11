@@ -1,18 +1,18 @@
-/* Pirate Den: the penguin in the balaclava (src/lines/character.ts says how these files go), out in the
-   middle of Kikkit's big whirlpools, where she said he'd be. He doesn't speak: these are what's said
+/* Pirate Den: the penguin in the balaclava (src/lines/character.ts says how these files go), out past
+   Kikkit's whirlpools and their winds, where she said he'd be. He doesn't speak: these are what's said
    when you get to him, by js/den/kikkit.js. */
 import type { Character } from './character.js';
 
 /** What's said as you get there. */
 export const OF_HIM = {
   through: 'Through the reef by the whirlpools! The open sea beyond',
-  penguins: 'Penguins! A whole colony of them, out in the middle of the whirlpools',
+  penguins: 'Penguins! A whole colony of them, out past the whirlpools',
   balaclava: 'And one of them\'s in a balaclava. He\'s up to something',
 } as const;
 
 export const CHARACTER: Character = {
   name: 'The penguin in the balaclava',
-  who: 'One of a colony of penguins on a floe out in the middle of Kikkit\'s big whirlpools, beyond the reef: '
+  who: 'One of a colony of penguins on a floe out past Kikkit\'s whirlpools and their winds, beyond the reef: '
     + 'the bigger prize, only a Vegas carries you there. Exactly where she said, and in a balaclava, as she '
     + 'said, sneaking about the floe with a sack over his shoulder, up to something.\n\n'
     + 'He doesn\'t speak: his lines are what\'s said as you get to him.',
@@ -24,8 +24,8 @@ export const CHARACTER: Character = {
     {
       when: 'Getting through her whirlpools', says: OF_HIM,
       each: {
-        through: 'A small chain from the mouth carries her over the little whirlpool and out past the reef',
-        penguins: 'A Vegas carries her over the big whirlpools too, into the penguins\' water',
+        through: 'A small chain from the mouth carries her clean over the reef\'s gap and out past the reef',
+        penguins: 'A Vegas carries her clean over the winds that feed the whirlpools, into the penguins\' water',
         balaclava: 'Just after, as he freezes and looks round at her',
       },
     },

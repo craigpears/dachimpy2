@@ -1,22 +1,29 @@
 /* Kikkit's island and her whirlpools through the reef (src/den-kikkit.ts), on the sloop's sea
-   (LAY.KIKKIT in src/den-sail.ts). The user (11 Nov): "Maybe a small combo gets you through the reef,
-   with the penguins being the bigger prize after", and "definitely a Vegas to get fully through to
-   the penguins". */
+   (LAY.KIKKIT in src/den-sail.ts), Puzzle Pirates' whirlpools (src/den-whirl.ts). The user (11 Nov):
+   "Maybe a small combo gets you through the reef, with the penguins being the bigger prize after",
+   and "definitely a Vegas to get fully through to the penguins". */
 import { describe, expect, it } from 'vitest';
-import { KIKKIT, KIKKIT_STANDS, Kikkit, OUT, PASSAGE, PENGUINS, REEF_WHIRL, Whirlpools, caught, inEarshot, inKikkitWaters, kikkitAt, kikkitShore, onKikkitLanding, spatPose, turnsOf } from '../src/den-kikkit';
+import { GAP, KIKKIT, KIKKIT_STANDS, Kikkit, MOUTH, OUT, PENGUINS, Whirlpools, inEarshot, inKikkitWaters, kikkitAt, kikkitShore, onKikkitLanding, passageAt, turnsOf, type WhirlEvent } from '../src/den-kikkit';
 import { LAY, SAIL, Sea, Helm, path, type Pose, type SailEvent } from '../src/den-sail';
+import { WHIRL, whirlpool } from '../src/den-whirl';
 import { carry, gustPath } from '../src/den-sailing';
 import { runFor, RUN } from '../src/sailing';
 import { isleMooring } from '../src/den-isle';
 import { Checkpoint } from '../src/den-checkpoint';
 import { CHART, NOTES, VEGAS_NOTE } from '../src/den-map';
-import { RAMBLE, BACK, TANGENTS } from '../src/lines/kikkit';
+import { RAMBLE, BACK, BACK_OUT, TANGENTS } from '../src/lines/kikkit';
 
-const K = LAY.KIKKIT, MOUTH = K.MOUTH;
+const K = LAY.KIKKIT, ROW = LAY.CHECKPOINT.ROW;
 const at = (p: Pose) => [p.c, p.r];
 const last = (ps: Pose[]) => ps[ps.length - 1];
-const run = (h: Helm, secs: number, step = 0.02) => { const ev: SailEvent[] = []; for (let t = 0; t < secs; t += step) ev.push(...h.tick(step)); return ev; };
 const DOUBLE = runFor(2), VEGAS = runFor(RUN.VEGAS);
+/** A gust of `run` from the mouth (or `from`), played out: what the helm did, what the watch said, and where she ends. */
+function sail(run: number, from: Pose = MOUTH, secs = 30) {
+  const h = new Helm(new Sea(9), from), w = new Whirlpools(), events: SailEvent[] = [], said: WhirlEvent[] = [];
+  const went = carry(h, run);
+  for (let t = 0; t < secs; t += 0.02) { const ev = h.tick(0.02); events.push(...ev); said.push(...w.watch(ev, h)); }
+  return { h, w, events, said, went, whirls: events.filter((e) => e.kind === 'push' && e.whirl) as Extract<SailEvent, { kind: 'push' }>[] };
+}
 
 describe("her island, at the reef's near end, right of the checkpoint's gate (11 Nov)", () => {
   it('is land to sail by, on every sea, right of the gate and on the near side of the reef', () => {
@@ -26,7 +33,7 @@ describe("her island, at the reef's near end, right of the checkpoint's gate (11
     }
     for (const [c, r] of K.LAND) {
       expect(c).toBeGreaterThan(LAY.CHECKPOINT.GATE);
-      expect(r).toBeLessThan(LAY.CHECKPOINT.ROW);
+      expect(r).toBeLessThan(ROW);
       expect(kikkitAt(c, r)).toBe(true);
     }
   });
@@ -36,7 +43,6 @@ describe("her island, at the reef's near end, right of the checkpoint's gate (11
       for (let c = 0; c < SAIL.COLS; c++) for (let r = 0; r < SAIL.ROWS; r++) if (onKikkitLanding(c, r)) expect(s.open(c, r), `seed ${seed}: ${c},${r}`).toBe(true);
     }
     expect(onKikkitLanding(MOUTH.c, MOUTH.r)).toBe(true);
-    expect(onKikkitLanding(spatPose().c, spatPose().r)).toBe(true);
     expect(inKikkitWaters(MOUTH.c, MOUTH.r)).toBe(true);
   });
   it("a new player can sail there from the den and home, and still to the Wedding Isle and home (seas 1 to 20)", () => {
@@ -63,105 +69,152 @@ describe("her island, at the reef's near end, right of the checkpoint's gate (11
   });
 });
 
-describe('her whirlpools: a small chain through the reef, a Vegas to the penguins (11 Nov)', () => {
+describe('her whirlpools, as Puzzle Pirates\' are (YPPedia, 11 Nov)', () => {
   const s = new Sea(9);
 
-  it('run through a gap in the reef, which is otherwise closed but for the gate', () => {
-    expect(REEF_WHIRL[1]).toBe(LAY.CHECKPOINT.ROW);
-    expect(s.isRock(...REEF_WHIRL)).toBe(false);
-    expect(s.whirlAt(...REEF_WHIRL)).toEqual({ spin: 4, big: false });
-    expect(OUT[1]).toBeGreaterThan(LAY.CHECKPOINT.ROW);
-    expect(s.open(...OUT)).toBe(true);
+  it('are two whirlpools of four squares, each with a corner missing where the winds sit', () => {
+    expect(K.WHIRLS).toHaveLength(2);
+    for (const spot of K.WHIRLS) {
+      const w = whirlpool(spot);
+      expect(w.squares).toHaveLength(3);
+      for (const [c, r] of w.squares) { expect(s.whirlAt(c, r)?.squares).toEqual(w.squares); expect(s.open(c, r)).toBe(false); }
+      expect(s.windAt(...w.gone!)).toBeDefined();
+    }
+    // The reef's gap is a wind, in the reef's row; past it, open water.
+    expect(GAP[1]).toBe(ROW);
+    expect(s.windAt(...GAP)).toBeDefined();
+    expect(OUT[1]).toBeGreaterThan(ROW);
+    expect(s.open(...OUT) && s.windAt(...OUT) === undefined).toBe(true);
   });
 
-  it('a small chain from the mouth carries her over the little whirlpool and out past the reef', () => {
-    const got = gustPath(s, MOUTH, DOUBLE);
-    expect(got.map(at)).toEqual([REEF_WHIRL, OUT]);
-    expect(last(got).r).toBeGreaterThan(LAY.CHECKPOINT.ROW);
-    // A Triple, a Bingo or a Donkey too: out past the reef, stopped short of the big whirlpools.
-    for (const steps of [3, 4, 5]) expect(at(last(gustPath(s, MOUTH, runFor(steps))))).toEqual(OUT);
+  it(`whirlpools only spun her and flung her back, not the four-tile turn to the opposite corner (11 Nov)`, () => {
+    // "Whirlpools are basically four tiles ... each one ... rotates the ship and sends it to the opposite
+    // corner"; "a corner missing where there's some winds, so you kind of get caught in the whirlpool and
+    // it sends you to the opposite corner, which then gets you on some winds and sends you back".
+    const { h, whirls, events, said } = sail(runFor(1));
+    expect(whirls).toHaveLength(1);
+    const [first] = whirls, w = s.whirlAt(first.from.c, first.from.r)!;
+    // A quarter turn clockwise, and across the whirlpool to its opposite corner, the missing one.
+    expect(first.to.d).toBe((first.from.d + 1) % 4);
+    expect(Math.abs(first.to.c - first.from.c)).toBe(1);
+    expect(Math.abs(first.to.r - first.from.r)).toBe(1);
+    expect(at(first.to)).toEqual(w.gone);
+    // Then the winds carry her back, a square at a time, never a leap: back as she started.
+    for (const e of events) if (e.kind === 'push' && !e.whirl) expect(Math.abs(e.to.c - e.from.c) + Math.abs(e.to.r - e.from.r)).toBe(1);
+    expect(h.pose).toEqual(MOUTH);
+    expect(said).toEqual(['caught', 'back']);
   });
 
-  it('a Vegas from the mouth carries her over the big whirlpools too, to the penguins; a lesser chain doesn\'t', () => {
+  it('a plain clear stops in the gap and is caught; the winds throw her back to the mouth', () => {
+    const { h, w, went } = sail(runFor(1));
+    expect(went.squares.map(at)[0]).toEqual(GAP);
+    expect(h.pose).toEqual(MOUTH);
+    expect(w.through).toBe(false);
+    expect(w.backOut).toBe(false);
+  });
+
+  it('a Double carries her clean over the gap and out past the reef: through', () => {
+    const { h, w, whirls, said } = sail(DOUBLE);
+    expect(at(h.pose)).toEqual(OUT);
+    expect(whirls).toEqual([]);
+    expect(said).toEqual(['through']);
+    expect(w.through).toBe(true);
+  });
+
+  it('a Triple, a Bingo or a Donkey gets through, then onto the winds past it, into the other whirlpool, and home', () => {
+    for (const steps of [3, 4, 5]) {
+      const { h, whirls, said, w } = sail(runFor(steps));
+      expect(said, `steps ${steps}`).toEqual(['through', 'caught', 'back']);
+      expect(whirls).toHaveLength(1);
+      expect(s.whirlAt(whirls[0].from.c, whirls[0].from.r)).toBe(s.whirlAt(...(K.WHIRLS[1].at as [number, number])));
+      expect(at(h.pose)).toEqual([MOUTH.c, MOUTH.r]);
+      expect(w.backOut).toBe(true);
+    }
+  });
+
+  it('only a Vegas carries her to the penguins, from the mouth or from past the reef', () => {
     const got = gustPath(s, MOUTH, VEGAS);
     expect(at(last(got))).toEqual(PENGUINS);
-    expect(got).toHaveLength(PASSAGE.length);
     for (let steps = 1; steps < RUN.VEGAS; steps++) expect(gustPath(s, MOUTH, runFor(steps)).map(at)).not.toContainEqual(PENGUINS);
-    // A bigger Vegas gets there too, and no further (their water's closed in).
     expect(at(last(gustPath(s, MOUTH, runFor(8))))).toEqual(PENGUINS);
-    // From out past the reef, still only a Vegas.
     const out: Pose = { c: OUT[0], r: OUT[1], d: 0 };
     expect(at(last(gustPath(s, out, VEGAS)))).toEqual(PENGUINS);
-    expect(gustPath(s, out, runFor(5))).toEqual([]);
-  });
-
-  it('played on the helm: a Vegas from the mouth and she\'s with the penguins, the watch saying through and penguins', () => {
-    const h = new Helm(new Sea(9), MOUTH), w = new Whirlpools(), said: string[] = [];
-    expect(carry(h, VEGAS)).toMatchObject({ went: PASSAGE.length, why: null });
-    for (let t = 0; t < 4; t += 0.02) said.push(...w.watch(h.tick(0.02), h.pose));
+    for (let steps = 1; steps < RUN.VEGAS; steps++) expect(gustPath(s, out, runFor(steps)).map(at)).not.toContainEqual(PENGUINS);
+    // Played: through and to the penguins, and nothing has her.
+    const { h, said, whirls } = sail(VEGAS);
     expect(at(h.pose)).toEqual(PENGUINS);
     expect(said).toEqual(['through', 'penguins']);
-    expect(caught(h)).toBeNull();
-    // And a Double: through, no penguins.
-    const h2 = new Helm(new Sea(9), MOUTH), w2 = new Whirlpools(), said2: string[] = [];
-    carry(h2, DOUBLE);
-    for (let t = 0; t < 3; t += 0.02) said2.push(...w2.watch(h2.tick(0.02), h2.pose));
-    expect(at(h2.pose)).toEqual(OUT);
-    expect(said2).toEqual(['through']);
-    expect(w2.penguins).toBe(false);
+    expect(whirls).toEqual([]);
   });
 
-  it('a plain clear drops her in the little whirlpool, and it has her (too many lefts: back to the island)', () => {
-    const h = new Helm(new Sea(9), MOUTH);
-    carry(h, runFor(1));
-    expect(caught(h)).toBeNull();   // (still on her way)
-    run(h, 2);
-    expect(caught(h)).toEqual(REEF_WHIRL);
-    h.moor(spatPose());
-    expect(onKikkitLanding(h.pose.c, h.pose.r)).toBe(true);
-  });
-
-  it('sailing into one under her own way, it has her too; and the pilot never takes her through them', () => {
-    const h = new Helm(new Sea(9), MOUTH);
+  it('sailing into it under her own way, it has her the same; and the pilot never takes her in', () => {
+    const h = new Helm(new Sea(9), MOUTH), w = new Whirlpools(), said: WhirlEvent[] = [];
     h.put('F');
-    const ev = run(h, 3);
-    expect(caught(h, ev)).toEqual(REEF_WHIRL);
-    expect(at(h.pose)).toEqual([MOUTH.c, MOUTH.r]);
-    // No pin's course goes through them: the penguins only by a gust, and beyond the reef not this way.
+    for (let t = 0; t < 30; t += 0.02) said.push(...w.watch(h.tick(0.02), h));
+    expect(said).toEqual(['caught', 'back']);
+    expect(h.pose).toEqual(MOUTH);
+    // The pilot: out past the reef the long way round, never onto a whirlpool nor the winds that feed them.
+    const p = new Helm(new Sea(9), MOUTH), ev: SailEvent[] = [];
+    expect(p.drop(...OUT)).toEqual(OUT);
+    for (let t = 0; t < 400 && p.pin; t += 0.05) ev.push(...p.tick(0.05));
+    expect(at(p.pose)).toEqual(OUT);
+    expect(ev.some((e) => e.kind === 'push' && e.whirl)).toBe(false);
     expect(s.plot(MOUTH, ...PENGUINS, null, true)).toBeNull();
-    for (const [c, r] of PASSAGE.filter((q) => q.kind === 'small' || q.kind === 'big').map((q) => [q.c, q.r])) expect(s.open(c, r)).toBe(false);
   });
 
-  it('the checkpoint knows she came by them', () => {
+  it('never holds her for ever: from anywhere in it, facing any way, she comes to rest', () => {
+    const squares = [...K.WHIRLS.flatMap((spot) => whirlpool(spot).squares), ...K.WINDS.map(([c, r]) => [c, r] as [number, number])];
+    for (const [c, r] of squares) for (let d = 0; d < 4; d++) {
+      const h = new Helm(new Sea(9), { c, r, d });
+      if (s.windAt(c, r) !== undefined) h.gust([{ c, r, d }]);   // (blown on from a wind, as she'd come to it)
+      let whirls = 0;
+      for (let t = 0; t < 40; t += 0.05) whirls += h.tick(0.05).filter((e) => e.kind === 'push' && e.whirl).length;
+      const rest = (!h.cur || h.cur.done) && !h.rides.length && !h.gusts.length && !h.whirling();
+      expect(rest, `${c},${r},${d}`).toBe(true);
+      expect(whirls).toBeLessThanOrEqual(WHIRL.MOST);
+      // From a whirlpool's corner opposite its missing one, or any wind, it's the winds home to the mouth.
+      if (s.windAt(c, r) !== undefined) expect(at(h.pose), `${c},${r}`).toEqual([MOUTH.c, MOUTH.r]);
+    }
+  });
+
+  it('the checkpoint knows she came by them, out and back', () => {
     const h = new Helm(new Sea(9), MOUTH), cp = new Checkpoint(), said = [];
-    carry(h, DOUBLE);
-    for (let t = 0; t < 3; t += 0.02) { h.tick(0.02); said.push(...cp.watch(h.pose)); }
-    // (out on to the open sea beyond)
-    h.moor({ c: OUT[0] + 1, r: LAY.CHECKPOINT.ROW + 3, d: 0 });
-    said.push(...cp.watch(h.pose));
+    carry(h, runFor(3));
+    for (let t = 0; t < 30; t += 0.02) { h.tick(0.02); said.push(...cp.watch(h.pose)); }
     expect(said).toContainEqual({ kind: 'through', how: 'whirlpools', back: false, hits: 0 });
+    expect(passageAt(...GAP)).toBe(true);
   });
 });
 
 describe('her ramble is the real map, taken literally (10 Nov: "it\'s got to actually make some mechanical sense")', () => {
-  it('five lefts and a right, and a double backflip, as the whirlpools turn her', () => {
-    expect(turnsOf()).toEqual({ lefts: 5, rights: 1, backflips: 2 });
+  it('five lefts and a right (the right a twirl-eh), and back where she started', () => {
+    expect(turnsOf(1)).toEqual({ lefts: 5, rights: 0, twirls: 1, backflips: 0, home: true });
+    expect(turnsOf(runFor(3))).toEqual({ lefts: 5, rights: 0, twirls: 1, backflips: 0, home: true });
     const all = RAMBLE.join(' ');
     expect(all).toMatch(/five lefts and a right/);
-    expect(all).toMatch(/double backflip/);
-    expect(all).toMatch(/a left, the left, the left, the left/i);
+    expect(all).toMatch(/twirl-eh/);
+    // The way, from where she set off to back where she started: a left-eh, the twirl-eh, four more lefts.
+    const way = RAMBLE.slice(RAMBLE.findIndex((l) => l.startsWith('I set off')), RAMBLE.findIndex((l) => l.includes('back where I started')) + 1).join(' ');
+    expect(way.match(/\bleft-eh\b/g)?.length).toBe(5);
+    expect(way.match(/\btwirl-eh\b/g)?.length).toBe(1);
+    expect(all).toMatch(/back where I started-eh/);
+    expect(all).toMatch(/Clockwise/);
     expect(all).toMatch(/WHOOSH/);
     expect(all).toMatch(/really, really big and really sparkly/);
     expect(all).toMatch(/balaclava/);
-    expect(all).toMatch(/too many lefts/i);
-    // (the big ones: a left, the backflips, a right, in that order)
-    const big = PASSAGE.filter((q) => q.kind === 'big').map((q) => q.spin);
-    expect(big).toEqual([1, 4, 4, -1]);
-    expect(all.indexOf('A left. Then a double backflip')).toBeGreaterThan(0);
-    expect(all.indexOf('double backflip')).toBeLessThan(all.indexOf('Then a right'));
   });
 
-  it('she rambles the first time you sail up, then goes off on tangents, and has a new line each time you\'re spat back', () => {
+  it('everything ends in -eh, near enough (11 Nov: "it\'s not a twirl, it\'s twirl EH"): sprinkled, not every word', () => {
+    for (const set of [RAMBLE, TANGENTS, BACK, BACK_OUT]) {
+      const eh = set.filter((l) => /-eh\b/.test(l)).length;
+      expect(eh / set.length).toBeGreaterThan(0.85);
+      for (const l of set) expect(l.split(' ').filter((w) => /-eh\b/.test(w)).length).toBeLessThan(l.split(' ').length / 2);
+    }
+    for (const l of [...RAMBLE, ...BACK, ...BACK_OUT]) expect(l.length).toBeLessThanOrEqual(100);
+    expect([...RAMBLE, ...TANGENTS, ...BACK].join(' ')).not.toMatch(/\btwirl\b(?!-eh| round|y)/i);
+  });
+
+  it('she rambles the first time you sail up, then goes off on tangents, and has a new line each time you\'re thrown back', () => {
     const k = new Kikkit();
     expect(k.arrive()).toEqual([...RAMBLE]);
     expect(k.arrive()).toEqual([]);
@@ -194,5 +247,12 @@ describe(`she never stops talking (11 Nov: "a never-ending loop of tangents and 
     for (let r = K.LANDING.r0; r <= K.LANDING.r1; r++) expect(inEarshot(K.LANDING.c0, r)).toBe(true);
     expect(inEarshot(KIKKIT_STANDS.c - KIKKIT.EARSHOT - 1, KIKKIT_STANDS.r)).toBe(false);
     expect(inEarshot(LAY.CHECKPOINT.GATE, LAY.CHECKPOINT.ROW)).toBe(false);   // (Dignity's to talk there)
+  });
+});
+
+describe(`keeping the charm of the first go (11 Nov: "it does throw you out and say too many lefts")`, () => {
+  it('spat back, the first thing she says is "too many lefts", as her ramble warned', () => {
+    expect(new Kikkit().spat()).toMatch(/too many lefts/i);
+    expect(RAMBLE.join(' ')).toMatch(/too many lefts/i);
   });
 });

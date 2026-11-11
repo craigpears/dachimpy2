@@ -38,6 +38,7 @@
    is within their reach, as the turret did, the shot in the air a while so a ship under way is
    often gone from under it. That lasts till she's out of its sight. */
 import { LAY } from './den-sail.js';
+import { passageAt } from './den-kikkit.js';
 import { Turret } from './den-turret.js';
 /* A real chance to get past (the user, 10 Nov: "you need some chance to actually sail through. I
    think getting hit once or twice is funny, but they hit like there's no opportunity to really get
@@ -123,8 +124,8 @@ export class Checkpoint {
     sighted = false;
     /** Holed by one of its guns. */
     holed() { this.hits++; }
-    /** Kikkit's whirlpools have had her and spat her back to her island (src/den-kikkit.ts): if that
-        takes her back across, it was by the whirlpools. */
+    /** Kikkit's whirlpools have had her and their winds thrown her back to her island (src/den-kikkit.ts):
+        if that took her back across, it was by the whirlpools. */
     whirled() { this.crossed = 'whirl'; }
     /** A shot of hers came down on (c, r): on a gun's bastion, a hit on that gun; on the gatehouse,
         only stone. Either way it's a fight now (see Battery.roused). Null if it isn't the
@@ -157,7 +158,7 @@ export class Checkpoint {
         // Through once she's past every mark (so "not a scratch on her" is so), crossing the line at the
         // gate or down the locks through the headland.
         if (p.r === K.ROW)
-            this.crossed = LAY.KIKKIT.PASSAGE.some(([c, r]) => c === p.c && r === p.r) ? 'whirl' : p.c;
+            this.crossed = passageAt(p.c, p.r) ? 'whirl' : p.c;
         const rows = CHECK.MARKS.flat().map((m) => m[1]);
         const side = p.r < Math.min(...rows) ? 'near' : p.r > Math.max(...rows) ? 'far' : this.side;
         if (side !== this.side) {

@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { LAY, SAIL, canalAt } from '../den-sail.js';
 import { CHECK, Checkpoint, throughSay } from '../den-checkpoint.js';
 import { addFind, wayThrough, wayWrecked } from '../den-finds.js';
+import { passageAt } from '../den-kikkit.js';
 import { G, scene, mat, mesh, canvasTex, woodTex, V3, burst, toast, worldLets, shake, flagpole, warm } from './world.js';
 import { rock } from './land.js';
 import { turretMesh, turretView, turretWrecked, turretFire, turretLand, turretShotsTick, turretShotsClear, shotComing } from './turret.js';
@@ -207,7 +208,8 @@ export function checkpointTick(dt) {
     }
     // Its commander on the gate: her cutscene the first time she's sighted from the cove's side
     // (dignity.js). What's said here waits till it's over, so they don't talk over each other.
-    dignityWatch(h.pose);
+    // (not while Kikkit's whirlpools' winds carry her home past it: she'd be gone before it began)
+    if (!passageAt(h.pose.c, h.pose.r)) dignityWatch(h.pose);
     if (h.pose.r === K.ROW && h.pose.c === K.GATE) cp.rowed = h.oars;   // (at the oars in the gate, or under sail)
     for (const e of cp.check.watch(h.pose)) {
       dignityHeard(e);

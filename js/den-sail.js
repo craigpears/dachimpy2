@@ -19,6 +19,7 @@
 import { DeckHole } from './den-patch.js';
 import { Lock, lockCost } from './den-lock.js';
 import { WIND, against, inZone, lie, rowTime, sailTime, weather, zoneAir } from './den-wind.js';
+import { WHIRL, whirl, whirlAt, whirlpool } from './den-whirl.js';
 export const SAIL = {
     /** The board: squares across and out to sea. Grown (10 Nov) from 16 by 14 to make room for the
         imperial checkpoint and the open sea beyond it (the user wanted "a bit of the map, not just
@@ -196,8 +197,9 @@ export const LAY = {
     /** Rocks out on the water the board grew into. (Two moved, 11 Nov, for Mischievious's isle
         (ISLE): [16, 13] out to [15, 15], to leave the water off its jetty clear, and [19, 8] to
         [21, 6], off its near shore, to leave room for its name on the captain's map. And one more, 11
-        Nov, for Kikkit's island (KIKKIT): [15, 17] to [12, 17], out of the water off her shore.) */
-    FAR: [[17, 4], [21, 6], [15, 15], [20, 15], [12, 17], [17, 22], [13, 24], [19, 24], [1, 23]],
+        Nov, for Kikkit's island (KIKKIT): [15, 17] to [12, 17], out of the water off her shore; and
+        [17, 22] gone, 11 Nov, for her whirlpools' winds.) */
+    FAR: [[17, 4], [21, 6], [15, 15], [20, 15], [12, 17], [13, 24], [19, 24], [1, 23]],
     /** Mischievious's isle (11 Nov), where her wedding is (js/den/wedding.js). The user: "on an island
         somewhere ... islands can all have their own little thing out there". In plain sight, out to
         the right of the shipping lanes on the den's side of the checkpoint, so a new player can sail
@@ -222,19 +224,23 @@ export const LAY = {
     /** Kikkit's island and her whirlpools (11 Nov; rules: src/den-kikkit.ts): "another way of getting
         past the reef, so it should go over there", to the right of the checkpoint's gate, the island
         on the reef's near side. LAND: her little island, against the reef's right-hand end. LANDING:
-        the water off its left-hand shore, where you hear her out. PASSAGE: the way through, from its
-        MOUTH (just off her shore, facing out to sea), a square at a time as a gust carries her, each
-        [c, r, spin, kind]: spin the quarter turns a whirlpool swings her as she's carried over it
-        (left +, right -: four is right round), kind 'small' (any gust carries her over it), 'big'
-        (only a Vegas's), 'out' (open water beyond the reef: through) or 'penguins' (their water, in
-        the middle of the big ones, a gust's only). The user (11 Nov): "Maybe a small combo gets you
-        through the reef, with the penguins being the bigger prize after." Her ramble is this, taken
-        literally: the little whirlpool in the reef spins her round, "the left, the left, the left,
-        the left"; out the other side; then the big ones, a left, a double backflip, a right: five
-        lefts and a right. REEF: rocks round the big whirlpools and the penguins (the FAR rock at
-        [17, 22] is one of them too). VEGAS: Vegas Island (the user named it, 11 Nov), the little
-        island the penguins live on, beside their water, "reached only by a Vegas". SPAT: where too
-        many lefts leave her, back off her island, spun round to face the den. */
+        the water off its left-hand shore, where you hear her out. MOUTH: where the way through starts,
+        just off her shore, facing out to sea at the reef's gap (GAP).
+        Reworked (11 Nov) to Puzzle Pirates' whirlpools (src/den-whirl.ts): WHIRLS, two whirlpools of
+        four squares, each with a corner missing (`gone`) where the winds sit; WINDS, [c, r, d] squares
+        of wind, blowing as the trade winds do. So, a gust from the mouth (a Sailing chain's run: src/
+        den-sailing.ts), straight out through the gap:
+        - a plain clear stops in the gap, on a wind that blows her left into the first whirlpool's near
+          right corner; it whirls her round to its far left, the missing corner, whose wind blows her
+          left onto the winds home: back up through the reef, along toward her island and into the
+          mouth, as she started. Five lefts and a right (the right a whirl's: a twirl), as Kikkit said;
+        - a Double carries her clean over the gap to OUT, open water past the reef: through;
+        - a Triple, a Bingo or a Donkey further, onto the winds past OUT, into the second whirlpool,
+          and home the same way (a Donkey stops short of the penguins: only a Vegas carries her in);
+        - a Vegas over all of it to PENGUINS, their water, a gust's only, beside VEGAS, Vegas Island
+          (the user named it, 11 Nov: "reached only by a Vegas").
+        REEF: rocks round it all, so the whirlpools' corners can't be sailed into but from the winds
+        and the gap, and the penguins' water is closed in. */
     KIKKIT: {
         LAND: [
             [19, 16], [20, 16],
@@ -242,23 +248,27 @@ export const LAY = {
             [18, 18], [19, 18], [20, 18], [21, 18],
         ],
         LANDING: { c0: 16, c1: 17, r0: 15, r1: 18 },
-        MOUTH: { c: 17, r: 18, d: 0 },
-        PASSAGE: [
-            [17, 19, 4, 'small'],
-            [17, 20, 0, 'out'],
-            [17, 21, 1, 'big'],
-            [16, 21, 4, 'big'],
-            [15, 21, 4, 'big'],
-            [14, 21, -1, 'big'],
-            [14, 22, 0, 'penguins'],
+        MOUTH: { c: 16, r: 18, d: 0 },
+        GAP: [16, 19],
+        OUT: [16, 20],
+        PENGUINS: [16, 23],
+        WHIRLS: [
+            { at: [14, 19], gone: [14, 20] },
+            { at: [14, 21], gone: [14, 22] },
         ],
-        REEF: [[14, 20], [15, 20], [16, 20], [13, 21], [18, 21], [13, 22], [16, 22], [14, 23]],
-        VEGAS: [[15, 22], [15, 23], [16, 23]],
-        SPAT: { c: 17, r: 16, d: 2 },
+        WINDS: [
+            // The gap, and on past OUT: into a whirlpool's near right corner.
+            [16, 19, 3], [16, 21, 3], [16, 22, 2],
+            // Each whirlpool's missing corner, out of it; then home, back up through the reef...
+            [14, 20, 3], [14, 22, 3], [13, 22, 2], [13, 21, 2], [13, 20, 2], [13, 19, 2], [13, 18, 2],
+            // ...along toward her island, and in to the mouth from behind it (the water on its right left
+            // open, the way out of it).
+            [13, 17, 1], [14, 17, 1], [15, 17, 1], [16, 17, 0],
+        ],
+        REEF: [[14, 18], [15, 18], [14, 23], [17, 21], [17, 22], [17, 23]],
+        VEGAS: [[15, 23], [15, 24], [16, 24]],
     },
 };
-/** Her heading after a whirlpool's spin (left +, as path's 'L'). */
-export const spun = (d, spin) => (((d - spin) % 4) + 4) % 4;
 /** The canal's squares: its locks and the water between them (the hidden cove's too). */
 export function canalAt(c, r) {
     const { c0, c1, r0, r1 } = LAY.COVE;
@@ -333,9 +343,10 @@ export class Sea {
     /** The wind she sails by (src/den-wind.ts), if there's one. With none, every move takes
         SAIL.MOVE and goes any way. */
     breeze = null;
-    /** Whirlpools (Kikkit's: LAY.KIKKIT), and water only a gust gets to (her penguins'): neither open
-        to her own moves (sailing into a whirlpool, it has her: src/den-kikkit.ts), but a gust carries
-        her over a whirlpool, turned as it swings her (src/den-sailing.ts, gustPath). */
+    /** Whirlpools (src/den-whirl.ts; Kikkit's: LAY.KIKKIT), each of their squares, and water only a
+        gust gets to (her penguins'). Neither is open (the pilot never takes her into them, nor stops
+        her there), but her own moves, a gust or the winds can put her on a whirlpool, and then it has
+        her (Helm's twirl); a gust carries her clean over one (src/den-sailing.ts, gustPath). */
     whirls = new Map();
     pockets = new Set();
     /** Squares the scattered rocks keep off: the lanes and everything round them. */
@@ -399,22 +410,25 @@ export class Sea {
         for (let c = I.c0; c <= I.c1; c++)
             for (let r = I.r0; r <= I.r1; r++)
                 this.keep.add(key(c, r));
-        // Kikkit's island, land too, and her whirlpools through the reef, the penguins' water among them.
+        // Kikkit's island, land too, and her whirlpools and winds through the reef, the penguins' water
+        // beyond them.
         for (const [c, r] of [...LAY.KIKKIT.LAND, ...LAY.KIKKIT.VEGAS])
             this.works.add(key(c, r));
-        for (const [c, r, spin, kind] of LAY.KIKKIT.PASSAGE) {
-            if (kind === 'small' || kind === 'big')
-                this.whirls.set(key(c, r), { spin, big: kind === 'big' });
-            if (kind === 'penguins')
-                this.pockets.add(key(c, r));
+        for (const spot of LAY.KIKKIT.WHIRLS) {
+            const w = whirlpool(spot);
+            for (const [c, r] of w.squares)
+                this.whirls.set(key(c, r), w);
         }
+        for (const [c, r, d] of LAY.KIKKIT.WINDS)
+            this.wind.set(key(c, r), d);
+        this.pockets.add(key(...LAY.KIKKIT.PENGUINS));
         this.zones = LAY.ZONES.map((z) => ({ ...z }));
     }
     scatter(roll) {
         const laid = this.wind.size > 0, K = LAY.CHECKPOINT;
         const reef = laid ? Array.from({ length: K.REEF.c1 - K.REEF.c0 + 1 }, (_, i) => key(K.REEF.c0 + i, K.ROW)) : [];
-        // (the reef but where Kikkit's whirlpools run through it; and the rocks round her big ones)
-        this.rocks = new Set([...this.cliff, ...this.works, ...reef.filter((k) => !this.whirls.has(k)), ...[...LAY.SIDES, ...LAY.FAR, ...LAY.HARBOUR, ...LAY.KIKKIT.REEF].filter(() => laid).map(([c, r]) => key(c, r))]);
+        // (the reef but where Kikkit's whirlpools and winds run through it; and the rocks round them)
+        this.rocks = new Set([...this.cliff, ...this.works, ...reef.filter((k) => !this.whirls.has(k) && !this.wind.has(k)), ...[...LAY.SIDES, ...LAY.FAR, ...LAY.HARBOUR, ...LAY.KIKKIT.REEF].filter(() => laid).map(([c, r]) => key(c, r))]);
         const H = SAIL.HOME, COLS = SAIL.SCATTER.COLS, ROWS = SAIL.SCATTER.ROWS;
         for (let n = 0; n < SAIL.CLUMPS; n++) {
             let c = Math.floor(roll() * COLS), r = 2 + Math.floor(roll() * (ROWS - 2));
@@ -461,16 +475,20 @@ export class Sea {
         return i >= 0 ? this.locks[i].low : 0;
     }
     /** Swept along by the trade winds from here, a square at a time, facing the way it blows, till
-        she's off the lane (or would hit something). */
-    ride(p) {
+        she's off the lane (or would hit something). With `whirls`, as she really goes: onto a
+        whirlpool, if the wind blows her there, and it has her (Helm's twirl); without, as the pilot
+        reckons, stopping short of one. */
+    ride(p, whirls = false) {
         const out = [];
         let at = p;
         for (let d = this.windAt(at.c, at.r); d !== undefined && out.length < 64; d = this.windAt(at.c, at.r)) {
-            const c = at.c + DC[d], r = at.r + DR[d];
-            if (!this.open(c, r))
+            const c = at.c + DC[d], r = at.r + DR[d], into = whirls && this.whirls.has(key(c, r));
+            if (!into && !this.open(c, r))
                 break;
             at = { c, r, d };
             out.push(at);
+            if (into)
+                break;
         }
         return out;
     }
@@ -494,20 +512,27 @@ export class Sea {
         return !oars && this.legs(p, m).some(({ d, air }) => !!air && against(d, air));
     }
     /** A move and what the trade wind does after it. In irons, or blocked, she stays where she is (a
-        turn turning her on the spot): `bump` either way, and `irons` too if it was the wind, `whirl`
-        if it was a whirlpool she'd have sailed into (it has her: src/den-kikkit.ts). */
-    move(p, m, oars = false) {
+        turn turning her on the spot): `bump` either way, and `irons` too if it was the wind. With
+        `whirls`, as she really goes (Helm): a whirlpool's squares are water she sails into, and it has
+        her; without, as the pilot reckons, they're in her way. */
+    move(p, m, oars = false, whirls = false) {
         const { cells, to } = path(p, m);
         if (this.irons(p, m, oars))
             return { to: { c: p.c, r: p.r, d: m === 'F' ? p.d : to.d }, bump: true, ride: [], irons: true };
-        if (cells.every(([c, r]) => this.open(c, r)))
-            return { to, bump: false, ride: this.ride(to) };
-        const into = cells.find(([c, r]) => !this.open(c, r));
-        const whirl = into && this.whirls.has(key(...into)) ? { whirl: into } : {};
-        return { to: { c: p.c, r: p.r, d: to.d }, bump: true, ride: [], ...whirl };
+        if (cells.every(([c, r]) => this.open(c, r) || (whirls && this.whirls.has(key(c, r)))))
+            return { to, bump: false, ride: this.ride(to, whirls) };
+        return { to: { c: p.c, r: p.r, d: to.d }, bump: true, ride: [] };
     }
     /** The whirlpool on this square, if there's one. */
     whirlAt(c, r) { return this.whirls.get(key(c, r)); }
+    /** Whether a move from here would put her on a whirlpool, as she really goes (by its own squares
+        or the trade wind after it): the pilot never makes it. */
+    whirly(p, m, oars = false) {
+        if (!this.whirls.size)
+            return false;
+        const got = this.move(p, m, oars, true);
+        return !got.bump && [got.to, ...got.ride, ...path(p, m).cells.map(([c, r]) => ({ c, r }))].some((q) => this.whirls.has(key(q.c, q.r)));
+    }
     /** The seconds a move takes: at the oars (a square on its own: see Helm for a pile of them), or
         under sail in the wind there is, by how she lies to it on the way (a turn's two squares
         shared; in a calm, as in light airs, which is what she'll have when it picks up). Without a
@@ -631,7 +656,7 @@ export class Sea {
             got = ['F', 'L', 'R'].map((m) => {
                 const { to, bump, ride } = this.move(p, m, oars), end = ride.length ? ride[ride.length - 1] : to;
                 const secs = this.moveSecs(oars, p, m), toll = this.lockToll(p, m, bump);
-                return { end: (end.c * this.rows + end.r) * 4 + end.d, ride: ride.length, bump, on: to.c * this.rows + to.r, secs: secs + pauseFor(secs) + toll.secs, up: toll.up };
+                return { end: (end.c * this.rows + end.r) * 4 + end.d, ride: ride.length, bump, on: to.c * this.rows + to.r, secs: secs + pauseFor(secs) + toll.secs, up: toll.up, whirl: this.whirly(p, m, oars) };
             });
             set.set(id, got);
         }
@@ -697,8 +722,8 @@ export class Sea {
             const out = this.from(at, oars);
             for (let m = 0; m < out.length; m++) {
                 const e = out[m], cost = t + e.secs + COST_TURN + e.ride * COST_PUSH;
-                if (e.up && !up)
-                    continue;
+                if ((e.up && !up) || e.whirl)
+                    continue; // (and never onto a whirlpool: it'd have her)
                 if (e.end >> 2 === goalSq && (!boards || (!e.bump && board[e.on]))) {
                     if (!goal || cost < goal.cost - 1e-9)
                         goal = { cost, at, m };
@@ -804,8 +829,11 @@ export class Helm {
     turn = [];
     slot = -1;
     t = 0;
-    /** What's being sailed just now: a move, or a square of trade wind ('W') sweeping her on. */
+    /** What's being sailed just now: a move, or a square of trade wind ('W') sweeping her on (or a
+        whirlpool whirling her round, by the corner `via`). */
     cur = null;
+    /** Whirls in a row since she last moved of her own accord or a gust took her (WHIRL.MOST). */
+    spins = 0;
     /** The squares of trade wind still to come after it. */
     rides = [];
     /** The locks on her sea and their water (src/den-lock.ts), as LAY.LOCKS: they start drained. */
@@ -875,8 +903,11 @@ export class Helm {
     gust(squares) {
         if (!squares.length)
             return;
-        this.gusts.push(...squares.map((p) => ({ ...p })), ...this.sea.ride(squares[squares.length - 1]));
+        this.gusts.push(...squares.map((p) => ({ ...p })), ...this.sea.ride(squares[squares.length - 1], true));
+        this.spins = 0;
     }
+    /** A whirlpool will have her next: she's on one, and it hasn't yet turned her right round. */
+    whirling() { return this.spins < WHIRL.MOST && !!this.sea.whirlAt(this.pose.c, this.pose.r); }
     /** Run the oars out, or ship them (a toggle, with nothing said). Always yours to choose: the pilot
         never does. Out, the board rows her (stroke) and your own moves go; either way the rest of a
         turn under way goes after the move she's on, as it was planned for the other rig. Shipped,
@@ -981,6 +1012,7 @@ export class Helm {
         this.wait = 0;
         this.gusts = [];
         this.free = false;
+        this.spins = 0;
         this.pose = { ...at };
     }
     /** Nothing playing and nothing to play. */
@@ -1049,6 +1081,8 @@ export class Helm {
         if (!this.cur)
             return { c: this.pose.c, r: this.pose.r, a: this.pose.d };
         const { from, to, m } = this.cur;
+        if (m === 'W' && this.cur.via)
+            return whirlAt(from, to, Math.min(1, this.t / this.cur.secs));
         if (m === 'W') {
             const u = Math.min(1, this.t / SAIL.PUSH), turn = ((to.d - from.d + 6) % 4) - 2;
             return { c: from.c + (to.c - from.c) * u, r: from.r + (to.r - from.r) * u, a: from.d + turn * Math.min(1, u * 1.5) };
@@ -1101,6 +1135,9 @@ export class Helm {
                     this.blow(out);
                     continue;
                 }
+                // Come to rest on a whirlpool: it has her (after the move, as in Puzzle Pirates).
+                if (this.twirl(out))
+                    continue;
                 this.cur = null;
                 // (a gust that came with no move on is no step of the turn)
                 if (this.free) {
@@ -1123,6 +1160,11 @@ export class Helm {
             if (this.gusts.length && !this.dazed()) {
                 this.free = true;
                 this.blow(out);
+                continue;
+            }
+            // Idle on a whirlpool (put there, say): it has her.
+            if (this.slot < 0 && !this.dazed() && this.twirl(out)) {
+                this.free = true;
                 continue;
             }
             if (this.slot >= 0) {
@@ -1189,6 +1231,20 @@ export class Helm {
         this.turn = this.turn.slice(0, this.slot + 1);
         this.told = false;
     }
+    /** A whirl, if she's on a whirlpool (src/den-whirl.ts): round by the next corner, clockwise, to the
+        opposite one, turned a quarter clockwise; then, if that's a wind, it takes her on. Whether it
+        had her. */
+    twirl(out) {
+        if (!this.whirling())
+            return false;
+        const { via, to } = whirl(this.sea.whirlAt(this.pose.c, this.pose.r), this.pose);
+        this.spins++;
+        this.cur = { m: 'W', from: { ...this.pose }, to, via, bump: false, secs: WHIRL.SECS, pause: SAIL.PAUSE };
+        this.rides = this.sea.ride(to, true);
+        this.t = 0;
+        out.push({ kind: 'push', from: { ...this.pose }, to: { ...to }, whirl: true });
+        return true;
+    }
     /** The next square of a gust. */
     blow(out) {
         const to = this.gusts.shift();
@@ -1197,7 +1253,8 @@ export class Helm {
         out.push({ kind: 'push', from: { ...this.pose }, to: { ...to }, gust: true });
     }
     begin(out) {
-        const m = this.turn[this.slot], { to, bump, ride, irons, whirl } = this.sea.move(this.pose, m, this.oars);
+        const m = this.turn[this.slot], { to, bump, ride, irons } = this.sea.move(this.pose, m, this.oars, true);
+        this.spins = 0;
         // At the oars, the more squares rowed and waiting, the quicker she goes (a Vegas on each side
         // at once: as quick as the trade winds); under sail, by how she lies to the wind.
         const secs = this.oars ? this.pace : this.sea.moveSecs(false, this.pose, m);
@@ -1206,7 +1263,7 @@ export class Helm {
         this.cur = { m, from: { ...this.pose }, to, bump, secs, pause: pauseFor(secs), irons: !!irons };
         this.rides = ride;
         this.t = 0;
-        out.push({ kind: 'move', i: this.slot, m, from: { ...this.pose }, to: { ...to }, bump, irons: !!irons, secs, ...(whirl ? { whirl } : {}) });
+        out.push({ kind: 'move', i: this.slot, m, from: { ...this.pose }, to: { ...to }, bump, irons: !!irons, secs });
     }
 }
 /** A shot out of that side from where she is now (see Helm.now: mid-move counts from the square

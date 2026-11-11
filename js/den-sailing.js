@@ -12,7 +12,7 @@
    by its locks), of water at another level (the canal above the sea), and of the imperial
    checkpoint's gate: getting past it is meant to be work, so no gust blows her through it. Ending on
    a trade wind's lane, the wind takes her on from there. */
-import { LAY, path, spun } from './den-sail.js';
+import { LAY, path } from './den-sail.js';
 import { chainName, runFor, RUN } from './sailing.js';
 /** The squares a gust of `n` takes her, from `from` straight ahead, a pose each; short of the first
     square she can't go to (and none if it's the first). */
@@ -23,17 +23,15 @@ export function gustPath(sea, from, n) {
     let at = from;
     for (let i = 0; i < n; i++) {
         const to = path(at, 'F').to, whirl = sea.whirlAt(to.c, to.r), pocket = sea.pockets.has(`${to.c},${to.r}`);
-        // (Kikkit's whirlpools: a gust carries her over them, as her own moves can't, and into the
-        // penguins' water among them; but only a Vegas's carries her over a big one: src/den-kikkit.ts)
+        // (Whirlpools, Kikkit's: a gust carries her clean over them, as the token moves do in Puzzle
+        // Pirates, and they have her only if it ends on one (src/den-whirl.ts). And into the penguins'
+        // water, but only a Vegas's: src/den-kikkit.ts)
         if (!whirl && !pocket && (!sea.open(to.c, to.r) || sea.isLock(to.c, to.r) || sea.level(to.c, to.r) !== level))
             break;
-        if (whirl?.big && n < runFor(RUN.VEGAS))
+        if (pocket && n < runFor(RUN.VEGAS))
             break;
         if (to.c === K.GATE && to.r === K.ROW && sea.works.size)
             break;
-        // Each whirlpool swings her round as she's carried over it, and on she goes the way it leaves her.
-        if (whirl)
-            to.d = spun(to.d, whirl.spin);
         out.push(to);
         at = to;
     }

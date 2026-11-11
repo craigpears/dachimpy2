@@ -28,6 +28,7 @@ import { umami, umamiKey, umamiClick, umamiHover, umamiPrompt, umamiReset } from
 import { isleWorld, isleTick, isleAshore, canLandIsle } from './isle.js';
 import { station, stationKey, stationToggle, stationTick, stationPrompt, stationReset } from './sail-station.js';
 import { kikkitWorld, kikkitTick, kikkitShown, kikkitHail, kikkitPrompt, kikkitHolds, kikkitReset } from './kikkit.js';
+import { inKikkitWaters } from '../den-kikkit.js';
 
 // The old sloop's at anchor in the cove from the moment the siege is over, while their ship makes
 // sail in the background (the user, 9 Nov: "I'm sat here quite a while waiting for his sloop to sail
@@ -253,12 +254,13 @@ export function sailTick(dt) {
     events = h.tick(dt);
     for (const e of events) {
       windSay(e);
-      if (e.kind === 'move' && e.bump && !e.irons && !e.whirl) sail.bumpT = e.secs * 0.45;   // (felt as she hits; a whirlpool has her instead: kikkit.js)
+      if (e.kind === 'move' && e.bump && !e.irons) sail.bumpT = e.secs * 0.45;   // (felt as she hits)
       if (e.kind === 'arrive' && canLand(h)) toast('Off the den\'s beach: Space to go ashore');
       if (e.kind === 'arrive' && canLandIsle(h)) toast('Off the Wedding Isle: Space to go ashore');
       if (e.kind === 'push') {
         // (a gust off the Sailing board isn't the trade winds: sail-station.js)
-        if (!e.gust && !sail.riding) { sail.riding = true; if (!sail.said.wind) { sail.said.wind = true; toast('The trade winds have her!'); } }
+        // (nor a whirlpool's whirl, nor the winds of Kikkit's whirlpools: kikkit.js says what those do)
+        if (!e.gust && !e.whirl && !sail.riding && !inKikkitWaters(e.from.c, e.from.r)) { sail.riding = true; if (!sail.said.wind) { sail.said.wind = true; toast('The trade winds have her!'); } }
         burst(V3(seaX(e.from.c), 0.3 + liftAt(e.from.c, e.from.r), seaZ(e.from.r)), '#e6f3f6', 5, 2);
       }
       if (e.kind === 'move') sail.riding = false;

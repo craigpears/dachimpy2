@@ -59,8 +59,9 @@ describe('the lay: the main shipping lane runs out to an imperial checkpoint (10
   });
 
   it('its line is closed but for the gate, and the locks cut through its headland (the reef\'s end closed, 10 Nov)', () => {
+    // (Kikkit's whirlpools' winds through the reef are a way past of their own: tests/den-kikkit.test.ts)
     const s = new Sea(9), open = [];
-    for (let c = 0; c < SAIL.COLS; c++) if (s.open(c, K.ROW)) open.push(c);
+    for (let c = 0; c < SAIL.COLS; c++) if (s.open(c, K.ROW) && s.windAt(c, K.ROW) === undefined) open.push(c);
     expect(open).toEqual([LAY.LOCKS[3].at[0], K.GATE]);
     expect(K.REEF.c1).toBe(SAIL.COLS - 1);
     expect(isCheckpoint(s, ...K.GUNS[0])).toBe(true);

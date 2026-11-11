@@ -105,23 +105,10 @@ the site (`.assetsignore` skips `*.md`).
   the penguin in the middle as its reward (IDEAS.md, "Kikkit's penguin").
   **Order of work (11 Nov, "move on to that sailing feature with all the accompanying things"):**
   its board drawn, balloony, and playable anywhere at sea first (done: RULES.md, "Sailing at sea"); then Kikkit's island and her
-  rambling; the whirlpools through the reef with the penguin in the middle; Tzz's island and her
+  rambling (done); the whirlpools through the reef with the penguin in the middle (done: RULES.md,
+  "Kikkit's whirlpools"); Tzz's island and her
   balloon lesson aboard; the ending: Kikkit moves to Vegas Island, the penguins' island
   past the reef, her familiars swimming after your ship (11 Nov, IDEAS.md).
-
-- **Whirlpools that work like Puzzle Pirates' (11 Nov):** the first go only spun her and flung her
-  back. "Whirlpools are basically four tiles ... each one ... rotates the ship and sends it to the
-  opposite corner. So let's say like on turn one, you're facing forward in one corner. Second one,
-  you'll have rotated 90 degrees and be in the [opposite corner]. Then you'll go back to your
-  starting position on the next one, but flipped around." And "on some of them you'd naturally have
-  like a whirlpool but with a corner missing where there's some winds, so you kind of get caught in
-  the whirlpool and it sends you to the opposite corner, which then gets you on some winds and sends
-  you back ... those kind of mechanics of throwing you back to the start." So a whirlpool is a 2×2
-  of squares on the sea, acting like the trade winds: end a move on one and it turns her a quarter
-  and puts her on the opposite corner, round and round; one with a corner missing has winds there
-  that carry her back toward the start. A Sailing gust has to carry her clean over them.
-  **YPPedia's rules win (11 Nov):** "obviously, follow the [YPPedia] thing. I might not have
-  described it perfectly, but I've given it the rough idea."
 
 - **Sailing's sparkle, two small things (11 Nov, seen when it was built):** from behind her, the
   camera sees her sails nearly edge-on, so a Vegas's billow barely shows; and on a phone the den's
@@ -141,12 +128,6 @@ the site (`.assetsignore` skips `*.md`).
   the crane, haul her up, and the like), the offer is in the view where you're looking, at the
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
-
-- **Kikkit's "-eh" (11 Nov):** "you got Whirlpool, so when she's giving the directions, do a
-  twirl, but her mannerisms are definitely like everything ends in EH, so it's not a twirl, it's
-  twirl EH." So a whirlpool's turn is "a twirl-eh" in her directions, and her words end in "-eh"
-  all through her lines ("a left-eh", "a twirl-eh"). With the whirlpool rework, since her ramble
-  is rewritten to match it.
 
 - **Gravee's house, the first of a housing district (11 Nov):** "you have like the areas of
   houses and you have the enter a house stuff and you can choose whose house to go into. And maybe
@@ -172,13 +153,10 @@ the site (`.assetsignore` skips `*.md`).
   thrones, the skeleton cannons." The user's war frigate, the one for Daquan's flotilla (IDEAS.md,
   "Daquan's flotilla"): waiting on the user's pictures before she's drawn.
 
-- **Kikkit's familiars sunk into her island (11 Nov):** "the pets on [Kikkit's] Island are getting
-  a base a bit too low. They're sinking into the ground. You only really see them when they jump
-  up." They stand on the sand's top, the penguins on Vegas Island's too, and Kikkit herself.
-
-- **The whirlpools' winds look like the sea lanes' (11 Nov):** "Why do the winds look different
-  than the sea lane ones? Like, the graphic representation of them should be the same." One
-  drawing of a wind, the trade-wind lanes' white streaks on a faint blue band, used for both.
+- **Kikkit's island onto the shared pieces (11 Nov):** once Gravee's house has made them (RULES.md,
+  "Talking pirates, animations and creatures are pieces too"): Kikkit becomes a talking pirate
+  with her looping lines and her swaying, swigging animation, and her familiars and the penguins
+  placed creatures, so her island only places and configures them.
 
 ## Needs a playtest to pin down
 

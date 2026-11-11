@@ -115,7 +115,8 @@ describe('"be more than just the one lock": a chain of them, the secret way roun
 
   it('the reef\'s end is closed: the gate and the locks are the only ways past (10 Nov)', () => {
     const open: number[] = [];
-    for (let c = 0; c < SAIL.COLS; c++) if (sea.open(c, K.ROW)) open.push(c);
+    // (but Kikkit's whirlpools' winds through the reef, a way past of their own: tests/den-kikkit.test.ts)
+    for (let c = 0; c < SAIL.COLS; c++) if (sea.open(c, K.ROW) && sea.windAt(c, K.ROW) === undefined) open.push(c);
     expect(open).toEqual([LAY.LOCKS[3].at[0], K.GATE]);
     expect(sea.isLock(LAY.LOCKS[3].at[0], K.ROW - 1)).toBe(true);
   });
