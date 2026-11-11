@@ -894,12 +894,24 @@ its exhibits the real thing, oldest first. The user's screenshots are kept in `n
 - **Privacy:** some of those pages show the user's real name, an e-mail and a forum handle. The
   museum shows only the pirate name Dachimpy: crop or redraw those parts, never put them in.
 
-The fun of it: the exhibits play. The den already has whirlpools by Puzzle Pirates' rules
-(`den-whirl.ts`), winds and rocks, so the old 9×9 boards can be played as they were, Execute
-Move and all, and "shoot Dalnoth" is Dalnoth himself, who's in the den. Hidden, never hinted.
-Still to collect: more of the user's screenshots (pictures not saved to disk need putting in
-`notes/museum/` by hand: the v1 page, the first shoot-Dalnoth board and the Dachimpy.com pages).
-Maybe the Distilling Simulator plays too, one day, as a Distilling board of its own.
+**Pictures and the story, no gameplay (11 Nov):** "No need for gameplay, just pictures and
+telling the story." The exhibits are the pictures on the walls, in order, each with a few lines of
+its story, and the museum walks you through it:
+- how it began as a plain HTML guide, then the boards, then Flash and the lobby, then live on
+  Whirled (13 April 2010);
+- the sad part: "Flash got deprecated and Whirled was taken down", and the sim went with them;
+- then **I'm a Duck's version** (the pirate's name as the user said it; spelling to check),
+  shown as the Blockade Simulator's evolution. It works perfectly, which is the joke: "It didn't
+  have quite the same charm as mine ... there was always a fun gamble that ... your ship might
+  randomly spin and jump into the rocks on mine ... the bugs are what made it, kept it
+  interesting. They gave it the character. His version just works perfectly. Like, where's the
+  fun in that?" So the museum is fond of the bugs: the caption for the old sim boasts of them,
+  maybe a little sloop by the exhibit that now and then spins and hops into the rocks, and the
+  caption for the newer one says, deadpan, that it works perfectly.
+
+Still to collect: the user's pictures not saved to disk need putting in `notes/museum/` by hand
+(the v1 page, the first shoot-Dalnoth board and the Dachimpy.com pages), and pictures of I'm a
+Duck's version.
 
 ## Placing creatures: choose what they get up to (11 Nov)
 
