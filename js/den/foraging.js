@@ -310,11 +310,22 @@ function chestDraw(g, w, h) {
   g.fillStyle = '#d8a838'; g.beginPath(); g.roundRect(w / 2 - 22, h * 0.79, 44, 16, 4); g.fill(); g.stroke();
 }
 
+/* A box with no front (+z), its back at z 0: its picture is a plane laid exactly where the front
+   would be, the lid on it. A front under the picture flickered through it (z-fighting) seen from
+   any way off, the squares flashing their dark sides (the user, 11 Nov, from the hidden cove: "the
+   squares are flashing black. And flickering"), the two only a millimetre apart. */
+function openBox(w, h, d) {
+  const g = new THREE.BoxGeometry(w, h, d), front = g.groups[4], idx = Array.from(g.index.array);
+  idx.splice(front.start, front.count);
+  g.setIndex(idx);
+  g.clearGroups();
+  return g.translate(0, 0, d / 2);
+}
 const look = {};
 function makeLook() {
   if (look.ready) return;
   look.ready = true;
-  look.slab = new THREE.BoxGeometry(0.97, 0.97, 0.18).translate(0, 0, 0.09);
+  look.slab = openBox(0.97, 0.97, 0.18);
   look.face = new THREE.PlaneGeometry(0.97, 0.97);
   look.tileSide = TILE_BASE.map((c) => mat(shade(c, 0.6), { roughness: 0.9 }));
   look.tiles = tileDraw.map((d) => faceMat(tex(128, 128, d), 0.8));
@@ -337,10 +348,10 @@ function antMat(n) {
 export function containerMesh(bit) {
   makeLook();
   const { w, h } = SIZES[bit.box], g = new THREE.Group();
-  const body = new THREE.Mesh(new THREE.BoxGeometry(w - 0.06, h - 0.06, 0.4).translate(0, 0, 0.2), look.boxSide[bit.box]);
+  const body = new THREE.Mesh(openBox(w - 0.06, h - 0.06, 0.4), look.boxSide[bit.box]);
   body.castShadow = true;
   const face = new THREE.Mesh(new THREE.PlaneGeometry(w - 0.06, h - 0.06), look.boxFace[bit.box]);
-  face.position.z = 0.402;
+  face.position.z = 0.4;   // (its lid: openBox)
   g.add(body, face);
   return g;
 }
@@ -555,7 +566,7 @@ export function forageBoard(o = {}) {
     const slab = new THREE.Mesh(look.slab, side);
     slab.castShadow = true;
     const face = new THREE.Mesh(look.face, bit.s === 'ant' ? antMat(bit.bites) : bit.s ? look.specials[bit.s] : look.tiles[bit.k]);
-    face.position.z = 0.182;
+    face.position.z = 0.18;   // (the slab's lid: openBox)
     g.add(slab, face);
     g.userData.face = face;
     if (bit.s === 'ant') { face.rotation.z = (2 - (bit.dir ?? 2)) * Math.PI / 2; g.userData.bites = bit.bites; }

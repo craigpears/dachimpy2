@@ -127,6 +127,18 @@ export class Umami {
     byWreck(inLagoon) { return !inLagoon || (this.moor === 'wreck' && !this.pole); }
     /** She's moored by his bank. */
     beside(inLagoon) { return inLagoon && this.moor === 'bank' && !this.pole; }
+    /** She's been up in the lagoon: he's been found. */
+    found = false;
+    /** His board's on the bank to be seen, and notes it once it is (`upThere`: she's up in the lagoon,
+        or on her way back down from it). Found, never hinted: not from the cove below, where the
+        crane's built, nor while she's first hauled up (the user, 11 Nov, the crane just built: "why am
+        I looking at the foraging puzzle?"); from where the crane sets her down, whole, till he's off it
+        and away. Once found it stays in view from the cove too, so it never vanishes as she's lowered. */
+    boardSeen(upThere) {
+        if (upThere)
+            this.found = true;
+        return this.found && (this.stage === 'stuck' || this.stage === 'swimming');
+    }
     /** He can be freed: she's beside him and he's still stuck. */
     canFree(inLagoon) { return this.beside(inLagoon) && this.stage === 'stuck'; }
     /** Start freeing him (or go back to it): his board, as you left it. `deal` makes it the first time. */

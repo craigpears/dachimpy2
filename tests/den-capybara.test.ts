@@ -202,6 +202,21 @@ describe('her moorings in the lagoon', () => {
   });
 });
 
+describe("the Foraging board isn't in view from the cove once the crane's built (11 Nov)", () => {
+  it('is first seen up in the lagoon, whole before you start, till he is off it and away', () => {
+    const u = new Umami();
+    expect(u.boardSeen(false)).toBe(false);   // the cove below, the crane just built, her hauled up
+    expect(u.boardSeen(false)).toBe(false);
+    expect(u.boardSeen(true)).toBe(true);   // set down in the lagoon: there across the water
+    expect(u.boardSeen(false)).toBe(true);   // found: it doesn't vanish as she's lowered again
+    u.free(() => new Forage(umamiDeal(seeded(1))));
+    u.freed();
+    expect(u.boardSeen(true)).toBe(true);   // what's left of it breaks up as he swims to her
+    u.aboard();
+    expect(u.boardSeen(true)).toBe(false);
+  });
+});
+
 describe('his life at the den', () => {
   it('keeps to his stretch of the water\'s edge, mostly in the water, and does what the depth there allows', () => {
     const l = new Life(seeded(9));

@@ -316,7 +316,10 @@ export function umamiTick(dt) {
     else document.body.classList.add('hauling');   // (the sailing bar out of the way)
   }
   if (!umami.board && u.stage === 'stuck') showBoard();
-  if (umami.board) umami.board.idle = !umami.on;
+  if (umami.board) {
+    umami.board.idle = !umami.on;
+    umami.board.group.visible = u.boardSeen(crane.rules.where === 'lagoon');   // (not from the cove below till he's found)
+  }
   umami.board?.tick(dt);
   if (umami.boardGone > 0 && (umami.boardGone -= dt) <= 0) { umami.board.dispose(); umami.board = null; }
   if (umami.swim) swimTick(dt);

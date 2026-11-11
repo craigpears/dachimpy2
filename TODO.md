@@ -177,12 +177,6 @@ the site (`.assetsignore` skips `*.md`).
   Den with you, that sort of thing. It's got to carry out into the world." Your spouse (her, a
   suitor, or the one you dressed yourself), in their wedding look, boards the sloop with you when
   you leave, sails with you, and lives at the den afterwards, kept with your save.
-- **The Foraging board shows and flashes black after the crane's built (11 Nov):** "why am I looking
-  at the foraging puzzle? It looks like again, there's this like black flickering when I'm looking
-  at like not when I've started it, but I've just built the crane. And it's like flashing, the
-  squares are flashing black. And flickering." A Foraging board is in view before you've started
-  it, just after building the crane, its squares flashing black. Nothing of a puzzle should show
-  till it's started (or it should be plainly part of the place), and nothing should flicker.
 - **A collage of the whole wedding, not one portrait (11 Nov):** "given how much work we've done
   into the different scenes on the wedding thing, like you shouldn't just get one picture, you
   should get snapshots of all the key moments, so you have a nice kind of collage of the whole

@@ -842,6 +842,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       seconds). Coming in to him the first time: "A capybara, shut in an old fish trap on the bank!";
       beside him: "Space: free him (Foraging)". The wreck's haul and lowering her (H) are from the
       wreck's mooring; H at the bank poles her back and lowers her.
+    - **Not seen from the cove below (11 Nov):** "why am I looking at the foraging puzzle? ... I've
+      just built the crane." His board stays out of view till she's first been up in the lagoon (the
+      mud bank shows from the cove, as part of the place); after that it stays, so it never vanishes
+      as she's lowered. Its tiles never flash black: no face sits a hair's breadth behind another.
+      Rule: `src/den-capybara.ts` (boardSeen).
     - **Freed by Foraging** (the user: "Definitely foraging ... it's got the same kind of logic as
       treasure haul, but like reversed"): the one Foraging module, played on the bank's face, its
       foot at the water. He's the board's one container (a basket's 2x2), dealt at its top in its
