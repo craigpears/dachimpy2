@@ -12,7 +12,7 @@ import { isleAt, onIsleLanding } from '../src/den-isle';
 import { BalloonShow, ROUTINES, perform } from '../src/balloons';
 import { Chatter, Voices } from '../src/chatter';
 import { readSecs } from '../src/den-dignity';
-import { CHART, NOTES } from '../src/den-map';
+import { CHART, NOTES, WHIRLPOOLS } from '../src/den-map';
 import { RAMBLE, TANGENTS } from '../src/lines/kikkit';
 import { AFTER_KIKKIT } from '../src/lines/you';
 import { GREET, DOUBLE, BINGO, VEGAS, AFTER } from '../src/lines/tzz';
@@ -58,12 +58,13 @@ describe('her island: a hop from Kikkit\'s, nearer the start, in plain sight', (
     }
   }, 30000);
 
-  it('is on the captain\'s map, as it is, but unnamed: whose it is is yours to find', () => {
+  it("the whirlpools are one point of interest on the map, no island named (11 Nov)", () => {
     expect(CHART.tzz.shore.length).toBe(tzzShore().length);
-    expect(NOTES.some((n) => /tzz/i.test(n.label + (n.note ?? '')))).toBe(false);
-    // (and Kikkit's name is written clear of it)
-    const k = NOTES.find((n) => n.label === KIKKIT.NAME)!;
-    for (const [c, r] of T.LAND) expect(Math.abs(k.at[0] - c) < 0.6 && Math.abs(k.at[1] - r) < 0.6).toBe(false);
+    expect(NOTES.some((n) => /tzz|kikkit/i.test(n.label + (n.note ?? '')))).toBe(false);
+    const w = NOTES.find((n) => n.label === WHIRLPOOLS.label)!;
+    expect(w.note).toMatch(/way through/);
+    // (written off both islands, not on them)
+    for (const [c, r] of [...T.LAND, ...LAY.KIKKIT.LAND]) expect(Math.abs(w.at[0] - c) < 0.6 && Math.abs(w.at[1] - r) < 0.6).toBe(false);
   });
 });
 

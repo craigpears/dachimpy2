@@ -6,8 +6,8 @@
    person({ look, parent, x, y, z, yaw, scale, idle, script, lines, loop, random, gap, wait, secs, begun,
    say, bubble, shown, tall, earshot, face }) is a pirate from a look standing in a scene doing an idle
    animation picked by name from IDLES (swaying, a tipsy sway with a swig, talking, waving, clapping,
-   painting, giggling, cowering, screaming, twisting a balloon, ta-da...), and, if it's given something
-   to say, saying it:
+   painting, giggling, cowering, screaming, twisting a balloon, ta-da...), holding what that idle holds
+   (HOLDS: a brush to paint), and, if it's given something to say, saying it:
    - what, and in what order: `script` (src/chatter.ts's Script: an intro once, then a loop for ever, the
      intro retold after each time round if it says, asides by name), or just `lines`, round and round
      (`loop`, in turn or `random`) or once; a pause between (`gap`, seconds, or [least, most]), `wait`
@@ -24,7 +24,7 @@ import * as THREE from 'three';
 import { makePirate, animateWalk } from './world.js';
 import { familiarTick } from '../den-look.js';
 import { Chatter } from '../chatter.js';
-import { readSecs } from '../den-houses.js';
+import { readSecs, CANVAS, BRUSH, brushReach } from '../den-houses.js';
 import { fright } from './creatures.js';
 import { bubble as pageBubble, bubbleAt } from './cine.js';
 
@@ -65,8 +65,16 @@ export const IDLES = {
   wave: (p, t) => { rest(p); p.arms[0].rotation.set(-2.7, 0, 0.35 + Math.sin(t * 9) * 0.35); },
   /** Clapping, delighted. */
   clap: (p, t) => { rest(p); const k = Math.abs(Math.sin(t * 12)); p.arms.forEach((a, i) => a.rotation.set(-1.35, 0, (i ? -1 : 1) * (0.25 + k * 0.3))); p.body.position.y = 0.72 + k * 0.02; },
-  /** At an easel: the brush hand making strokes. */
-  paint: (p, t) => { rest(p); p.arms[0].rotation.set(-1.5 + Math.sin(t * 9) * 0.3, 0, Math.cos(t * 7) * 0.3); p.arms[1].rotation.set(-0.6, 0, -0.2); },
+  /** At an easel, a brush in hand (HOLDS): the arm out to the canvas, its tip on it a brush's reach
+      straight ahead (src/den-houses.ts's toPaint stands a painter there), dabbing little strokes about. */
+  paint: (p, t, talking, brush) => {
+    rest(p);
+    const sh = p.arms[0].position, up = p.body.position.y + sh.y;
+    aim(p.arms[0], -sh.x + Math.sin(t * 2.3) * 0.05 + Math.sin(t * 5.3) * 0.025, CANVAS.y - up + Math.sin(t * 3.1) * 0.07, brushReach());
+    // (a dab: the brush drawn back a touch in the hand and put to the canvas again)
+    if (brush) brush.position.y = -0.5 + 0.045 * Math.max(0, Math.sin(t * 7.5)) ** 2;
+    p.arms[1].rotation.set(-0.6, 0, -0.2);
+  },
   /** A giggle: hands clasped up, bouncing. */
   giggle: (p, t) => { rest(p); p.arms.forEach((a, i) => a.rotation.set(-1.25, 0, (i ? -1 : 1) * 0.45)); p.body.position.y = 0.72 + Math.abs(Math.sin(t * 9)) * 0.035; },
   /** Cowering: hunched, hands up over the face, trembling. */
@@ -82,6 +90,35 @@ export const IDLES = {
   /** Scared to death: hair on end, mouth open, arms flung up (creatures.js's fright). */
   scream: (p) => fright(p, true),
 };
+
+/** Points an arm (hanging down from its shoulder, as the wardrobe's do) along (dx, dy, dz), in its
+    figure's own frame (+z ahead). */
+function aim(arm, dx, dy, dz) {
+  const n = Math.hypot(dx, dy, dz) || 1;
+  arm.rotation.set(Math.atan2(-dz, -dy), 0, Math.asin(Math.max(-1, Math.min(1, dx / n))));
+}
+
+/* What an idle holds in its right hand while it's on (whatever the look holds, a candle, a tankard, is
+   put away meanwhile): any figure doing it gets one. Each a little piece from the hand, along the arm. */
+const PROPS = {
+  /** A paintbrush: a wooden handle, a brass ferrule, bristles dipped in paint, its tip BRUSH.tip from
+      the shoulder (src/den-houses.ts). */
+  brush() {
+    // From a little behind the fist (+y, the hand's at 0) out to the tip, down the arm (-y).
+    const g = new THREE.Group(), tip = -(BRUSH.tip - 0.5), ferrule = tip + 0.09, bristles = tip + 0.05;
+    const piece = (geo, col, y0, y1, o = {}) => {
+      const m = new THREE.Mesh(geo(Math.abs(y0 - y1)), new THREE.MeshStandardMaterial({ color: col, roughness: 0.6, ...o }));
+      m.position.y = (y0 + y1) / 2; m.castShadow = true; g.add(m);
+    };
+    piece((h) => new THREE.CylinderGeometry(0.012, 0.009, h, 8), '#7a3b1e', 0.06, ferrule);
+    piece((h) => new THREE.CylinderGeometry(0.009, 0.013, h, 8), '#c9a13c', ferrule, bristles, { metalness: 0.7, roughness: 0.3 });
+    piece((h) => new THREE.ConeGeometry(0.014, h, 8).rotateX(Math.PI), '#b0182a', bristles, tip);
+    g.position.y = -0.5;   // (in the hand: the 'paint' idle slides it along a touch to dab)
+    return g;
+  },
+};
+/** By idle: what it holds (PROPS). */
+export const HOLDS = { paint: 'brush' };
 
 const v = new THREE.Vector3();
 
@@ -106,12 +143,15 @@ export function person({
     chatty: true,
     /** The line on show (so a new one's put up once). */
     shown: null,
+    /** What its idle has in its hand (HOLDS), if anything. */
+    prop: null,
     /** Its idle animation, by name (IDLES). */
     setIdle(name) {
       if (name === P.idle) return;
       if (P.idle === 'scream') fright(p, false);
       P.idle = IDLES[name] ? name : 'stand';
       rest(p);
+      hold(HOLDS[P.idle]);
     },
     /** Something new to say (src/chatter.ts's Script), from the start; `o` its pace (gap, wait, secs). */
     setScript(s, { begun: b = true, ...o } = {}) {
@@ -154,7 +194,7 @@ export function person({
       if (moving === 'walked') return;
       if (moving) { animateWalk(p, true, dt); return; }
       p.legs.forEach((l) => l.rotation.set(0, 0, l.rotation.z));
-      IDLES[P.idle]?.(p, P.t, !!P.chatter.line);
+      IDLES[P.idle]?.(p, P.t, !!P.chatter.line, P.prop);
       familiarTick(p.fam, dt);
     },
     /** Just its lines, a pause between, while you're near enough to hear. */
@@ -175,6 +215,13 @@ export function person({
       if (L && parseFloat(el.style.top) < 90) el.style.top = '90px';
     },
   };
+  /** Puts what an idle holds in its right hand (PROPS, by name), its own put away meanwhile; or none. */
+  function hold(name) {
+    if (P.prop) { P.prop.removeFromParent(); P.prop.traverse((m) => { m.geometry?.dispose(); m.material?.dispose(); }); P.prop = null; }
+    if (name && PROPS[name]) { P.prop = PROPS[name](); p.arms[0].add(P.prop); }
+    if (p.held) p.held.visible = !P.prop;
+  }
+  hold(HOLDS[P.idle]);
   P.setScript(script || (lines?.length ? scriptOf(lines, {}) : null), { begun });
   return P;
 }

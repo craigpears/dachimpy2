@@ -23,9 +23,9 @@ import type { Script } from './chatter.js';
 
 const T = LAY.TZZ;
 export const TZZ = {
-  /** Its name (not on the captain's map: the map shows the island, never whose: "Hidden gems, never
-      hinted"). */
-  NAME: 'Tzz\'s island',
+  /** Its name (never on the captain's map, where the whirlpools' islands are one unnamed point of
+      interest: src/den-map.ts's WHIRLPOOLS). */
+  NAME: "Tzz's Island",
   /** Within earshot: squares from where she stands. */
   EARSHOT: 4,
 } as const;

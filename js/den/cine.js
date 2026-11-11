@@ -67,6 +67,6 @@ export function stepTo(o, p, tx, tz, speed, dt) {
   const s = Math.min(d, speed * dt);
   o.x += dx / d * s; o.z += dz / d * s;
   faceTo(p, dx, dz, dt);
-  animateWalk(p, true, dt, speed * 3.4);
+  animateWalk(p, true, dt);
   return false;
 }

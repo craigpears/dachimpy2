@@ -282,26 +282,6 @@ the site (`.assetsignore` skips `*.md`).
   outside; not yet tried by the user. Watch for: the markers on raiders outside cluttering the
   view while you carry a piece.
 
-- **Gravee holds a brush to the canvas when she paints (11 Nov):** "when [Gravee's] painting ... her
-  hand should actually be holding a brush at least pointing in the general direction of the canvas.
-  She's right next to it at the moment." A brush in her hand, facing the canvas within arm's reach,
-  her arm reaching to it, dabbing while she paints you.
-
-- **Your legs jitter instead of walking, whizzing along and fetching the map (11 Nov):** "the main
-  character's legs get stuck a lot ... it seems to be fine now when I'm walking, but in the whiz
-  along, it's definitely not really a walking motion. It's just kind of jittery legs. But I noticed
-  it the same when you're in the getting the map scene for the first time ... it doesn't obviously
-  need to be high quality animation ... but you should actually look like [you're] walking when
-  [you're] walking out to get the map." Whenever a pirate is moved (by you, a cutscene or a skip),
-  their legs swing at a pace that matches how far they go, a run when they're running, never a
-  flicker; fixed once, in the shared walk, so it's right everywhere.
-
-- **The captions under Gravee's pictures flicker (11 Nov):** "We're getting some of that flickering
-  again in [Gravee's] Mansion, especially ... the little captions underneath the pictures flicker."
-  As with the ship's deck (RULES.md, "The ship's deck doesn't flicker"): no two surfaces close enough
-  to fight, the plaques, frames and wallpaper each clearly in front of the last, from any camera,
-  zoomed in or out; fixed in the shared frame, so it's right on every wall.
-
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.

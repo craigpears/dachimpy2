@@ -90,6 +90,36 @@ export function hostTarget(host, you, showing, walking = false) {
     }
     return alongside(host, you, walking);
 }
+// ---------- painting at an easel ----------
+/* Anyone painting at an easel, in any house (the user, 11 Nov, of Gravee: "her hand should actually be
+   holding a brush at least pointing in the general direction of the canvas. She's right next to it at
+   the moment"): stood a brush's reach from the canvas, facing it, a little round to one side so you see
+   the picture past them, their brush hand to it. The easel's canvas (js/den/furniture.js's easel draws it
+   from CANVAS): facing +z from the easel's foot at yaw 0, its middle `y` up and `out` in front, its
+   painted face `face` further on. */
+export const CANVAS = { y: 1.35, out: 0.18, face: 0.02 };
+/** The 'paint' idle's brush (js/den/props-people.js, which holds one in the right hand while painting):
+    from the shoulder to its tip along the arm (`tip`, metres: the arm to the hand, and the brush), where
+    a pirate's right shoulder is (`shoulder`: out to the side, and up), and how far round from square-on
+    to the canvas a painter stands (`slant`, radians; to the canvas's left as they face it, so the brush
+    hand's toward it). */
+export const BRUSH = { tip: 0.76, shoulder: { x: 0.28, y: 1.3 }, slant: 0.6 };
+/** How far straight ahead of a painter's middle, at the canvas's height, the brush's tip reaches. */
+export const brushReach = () => Math.sqrt(BRUSH.tip ** 2 - BRUSH.shoulder.x ** 2 - (CANVAS.y - BRUSH.shoulder.y) ** 2);
+/** The canvas's painted middle, on the floor plan, of an easel at (x, z) turned to `yaw`. */
+export function canvasAt(e) {
+    const y = e.yaw ?? 0, out = CANVAS.out + CANVAS.face;
+    return { x: e.x + Math.sin(y) * out, z: e.z + Math.cos(y) * out };
+}
+/** Where to stand to paint at an easel, and which way to face (yaw: 0 faces +z): the brush's tip on the
+    canvas's middle, the painter `slant` round to its left. */
+export function toPaint(e) {
+    const y = e.yaw ?? 0, c = canvasAt(e), d = brushReach();
+    // Facing into the canvas (along -its normal), turned `slant` toward its right (+x at its yaw).
+    const fx = -Math.sin(y) * Math.cos(BRUSH.slant) + Math.cos(y) * Math.sin(BRUSH.slant);
+    const fz = -Math.cos(y) * Math.cos(BRUSH.slant) - Math.sin(y) * Math.sin(BRUSH.slant);
+    return { x: c.x - fx * d, z: c.z - fz * d, yaw: Math.atan2(fx, fz) };
+}
 /** Skipping from x, facing `dir` (+1: toward b): to its end that way, or, nothing much left that way, its
     other end; null if you're not in its room. */
 export function skipTo(plan, s, x, z, dir) {

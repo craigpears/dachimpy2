@@ -66,10 +66,10 @@ describe("her island, at the reef's near end, right of the checkpoint's gate (11
       expect(s.plot(W, MOUTH.c, MOUTH.r)).not.toBeNull();
     }
   });
-  it("is on the captain's map by name, drawn round its land", () => {
+  it("is on the captain's map, drawn round its land, but not named (11 Nov: one point of interest)", () => {
     expect(kikkitShore().length).toBeGreaterThanOrEqual(4);
     expect(CHART.kikkit.shore).toHaveLength(kikkitShore().length);
-    expect(NOTES.some((n) => n.label === KIKKIT.NAME)).toBe(true);
+    expect(NOTES.some((n) => n.label === KIKKIT.NAME)).toBe(false);
     // (Vegas Island isn't on the map's notes from the start: map.js writes it once you've been.)
     expect(NOTES.some((n) => n.label === KIKKIT.VEGAS)).toBe(false);
     expect(VEGAS_NOTE.label).toBe('Vegas Island');

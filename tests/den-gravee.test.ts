@@ -8,7 +8,7 @@ import {
   WHIZ, TOUR, stopAt, atCoffin, COFFIN, EASEL, SITTING, SCARE, SCARE_SHOTS, scareShot, LEAD, LURE, leading,
 } from '../src/den-gravee';
 import type { Portrait } from '../src/den-gravee';
-import { walkable, roomAt, atWayOut, step, skipTo, hostTarget } from '../src/den-houses';
+import { walkable, roomAt, atWayOut, step, skipTo, hostTarget, canvasAt, brushReach, BRUSH } from '../src/den-houses';
 import type { Stretch } from '../src/den-houses';
 import { TOUR_LINES, AT_THE_DOOR, THE_SCARE, BECKON } from '../src/lines/gravee';
 
@@ -148,6 +148,39 @@ describe('her tour, stop by stop', () => {
     expect(SCARE.freeze).toBeLessThan(SCARE.paint);
     expect(SCARE.paint).toBeLessThan(SCARE.done);
     expect(COFFIN.x).toBeGreaterThan(PLAN.rooms[2].x0);
+  });
+});
+
+describe("her brush to the canvas (11 Nov: 'her hand should actually be holding a brush at least pointing in the general direction of the canvas')", () => {
+  const canvas = canvasAt(EASEL), her = SITTING.her;
+  it('she faces the canvas when she paints (11 Nov)', () => {
+    // Her yaw (0 faces +z) points at the canvas's middle...
+    const want = Math.atan2(canvas.x - her.x, canvas.z - her.z);
+    expect(Math.abs(Math.atan2(Math.sin(her.yaw - want), Math.cos(her.yaw - want)))).toBeLessThan(0.05);
+    // ...from in front of it, not beside or behind it...
+    const nx = Math.sin(EASEL.yaw), nz = Math.cos(EASEL.yaw);
+    expect((her.x - canvas.x) * nx + (her.z - canvas.z) * nz).toBeGreaterThan(0.3);
+    // ...and within arm's reach: the brush's tip on it.
+    expect(Math.hypot(canvas.x - her.x, canvas.z - her.z)).toBeCloseTo(brushReach(), 5);
+    expect(brushReach()).toBeGreaterThan(0.5);
+    expect(brushReach()).toBeLessThan(BRUSH.tip);
+  });
+  it('paints with a brush in hand: the shared idle holds one, for any pirate who paints', () => {
+    const PEOPLE_JS = readFileSync(join(__dirname, '..', 'js', 'den', 'props-people.js'), 'utf8');
+    expect(PEOPLE_JS).toMatch(/HOLDS = \{[^}]*paint: 'brush'/);
+    expect(FURNITURE_JS).toMatch(/CANVAS\.y, CANVAS\.out/);   // (the easel's canvas where a painter aims)
+  });
+});
+
+describe("her pictures' captions don't flicker (11 Nov: 'the little captions underneath the pictures flicker')", () => {
+  it('stands each layer clearly in front of the last: the wall, its wainscot, the picture, the plaque', () => {
+    const HOUSE_JS = readFileSync(join(__dirname, '..', 'js', 'den', 'house.js'), 'utf8');
+    const proud = Number(/WALL_T \+ ([\d.]+)/.exec(HOUSE_JS)![1]) / 2;   // (the wainscot, centred on the wall)
+    const L = /const LAYER = \{ picture: ([\d.]+), plaque: ([\d.]+) \}/.exec(FURNITURE_JS)!;
+    const picture = Number(L[1]), plaque = Number(L[2]);
+    expect(picture).toBeGreaterThan(proud + 0.01);
+    expect(plaque).toBeGreaterThan(Math.max(proud, picture) + 0.01);
+    expect(FURNITURE_JS).toMatch(/polygonOffset: true/);
   });
 });
 

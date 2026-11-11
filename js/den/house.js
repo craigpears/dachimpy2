@@ -212,7 +212,7 @@ function walkTo(p, x, z, speed, dt) {
   const moved = Math.hypot(nx - p.x, nz - p.z) > 1e-4;
   p.x = nx; p.z = nz;
   faceTo(p, dx, dz, dt);
-  animateWalk(p, moved, dt, speed * 3.4);
+  animateWalk(p, moved, dt);
   if (!moved) return true;   // (stuck: as near as it gets)
   return false;
 }
@@ -342,16 +342,14 @@ function skipAlong() {
   shell.hush(); house.to = null;
   if (first && S.lines?.ask) say(Y, S.lines.ask, secs * 0.45);
   const cap = { title: null, t: 1 };
-  let lastX = from;
   const c = {
     t: 0, cam: { look: V3(), dist: 0, tilt: 0, yaw: 0 },
     tick(dt) {
       c.t += dt;
-      const u = Math.min(1, c.t / secs), x = from + (to - from) * smooth(u), speed = Math.abs(x - lastX) / Math.max(dt, 1e-3);
-      lastX = x;
+      const u = Math.min(1, c.t / secs), x = from + (to - from) * smooth(u);
       Y.x = x; Y.z = zm + 0.2;
       if (host) { host.x = x + dir * 0.9; host.z = zm - 0.45; }
-      for (const p of host ? [Y, host] : [Y]) { faceTo(p, dir, 0, dt); animateWalk(p, true, dt, Math.min(26, 4 + speed * 2.6)); p.g.position.set(p.x, p.g.position.y, p.z); }
+      for (const p of host ? [Y, host] : [Y]) { faceTo(p, dir, 0, dt); animateWalk(p, true, dt); p.g.position.set(p.x, p.g.position.y, p.z); }
       // The camera: from the house's view of you, round alongside, and back again at the end.
       const H0 = home(), k = smooth(Math.min(c.t, secs - c.t) / 0.8);
       const run = { x: x + dir * 1.2, y: 1.35, z: zm, dist: 6.2 - Math.sin(Math.PI * u) * 1.2, tilt: 0.22 };

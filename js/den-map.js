@@ -114,8 +114,8 @@ export const CHART = {
         reef: LAY.KIKKIT.REEF.map(([c, r]) => [c, r]),
         vegas: shoreOf(LAY.KIKKIT.VEGAS).map(([c, r]) => [c - 0.5, r - 0.5]),
     },
-    /** Tzz's island (11 Nov), a hop from Kikkit's, in plain sight, so it's on the map: but unnamed (whose
-        it is, and what's on it, is for you to find: "Hidden gems, never hinted"). */
+    /** Tzz's island (11 Nov), a hop from Kikkit's, in plain sight, so it's on the map: drawn, never
+        named (the whirlpools' islands are one point of interest: WHIRLPOOLS). */
     tzz: { shore: tzzShore().map(([c, r]) => [c - 0.5, r - 0.5]) },
 };
 /** Where the X is: on the old wreck beyond the checkpoint. */
@@ -133,6 +133,8 @@ export const ROUTE = [
     [(LAY.CHECKPOINT.GATE + LAY.WRECK[0]) / 2 + 0.5, (LAY.CHECKPOINT.ROW + LAY.WRECK[1]) / 2 + 1.5],
     X_AT,
 ];
+/** Kikkit's whirlpools and the islands by them, on the map as one point of interest: never whose. */
+export const WHIRLPOOLS = { label: 'Whirlpools', note: 'another way through?', at: [16.9, 14.6] };
 export const NOTES = [
     { label: 'Yer den', at: [DEN[0] - 2.2, DEN[1] + 1.5] },
     { label: 'The trade winds', at: [(CHART.lanes[0].from[0] + CHART.lanes[2].from[0]) / 2, CHART.lanes[0].from[1] + 2.2], along: true },
@@ -145,7 +147,11 @@ export const NOTES = [
     { label: 'The open sea', at: [LAY.CHECKPOINT.REEF.c1 - 2, LAY.CHECKPOINT.ROW + 4] },
     { label: 'An old wreck', note: 'aground on a sandbar', at: [LAY.WRECK[0] + 5.5, LAY.WRECK[1] - 0.2] },
     { label: ISLE.NAME, at: [17.4, 8.2] }, // (under it, clear of the compass)
-    { label: KIKKIT.NAME, at: [19.6, 15.55] }, // (on the near side of it, clear of the reef's name and Tzz's island)
+    // The whirlpools' islands, Kikkit's and Tzz's, as one point of interest, unnamed (the user, 11 Nov:
+    // "I don't want [Kikkit's] Island or ... the detailed individual ones ... the whole point of that map
+    // is here's a point of interest. It's ... a different way through. That's about all ... That's for
+    // you to discover").
+    { label: WHIRLPOOLS.label, note: WHIRLPOOLS.note, at: WHIRLPOOLS.at },
 ];
 /** Vegas Island's name, written once you've been there (js/den/map.js). */
 export const VEGAS_NOTE = { label: KIKKIT.VEGAS, at: [15.6, 25.1] };

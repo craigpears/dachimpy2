@@ -18,6 +18,7 @@
    portrait, frozen mid-fright, that hangs pride of place in her hall, kept in this browser. No vampire
    game (yet: the rapid-Carpentry coffins wait, IDEAS.md). */
 import type { Plan, Block, Stretch, ShowSpot } from './den-houses.js';
+import { toPaint } from './den-houses.js';
 import { ON_A_PORTRAIT, ON_A_PROOF } from './lines/gravee.js';
 
 // ---------- the house ----------
@@ -221,8 +222,9 @@ export const LURE = { beckon: [7, 11], rattle: [4.5, 8], far: 2.6 } as const;
 /** Is she leading you to the coffin: shown into the bedchamber, and he's not been woken yet? */
 export const leading = (tour: number, woken: boolean): boolean => !woken && tour >= TOUR.findIndex((s) => s.id === 'coffin');
 
-/** Where you stand for your sitting (by the coffin, as you were when he sat up), and she at her easel. */
-export const SITTING = { you: { x: COFFIN.x - 1.05, z: COFFIN.z + 1.15, yaw: 0.5 }, her: { x: EASEL.x + 0.6, z: EASEL.z + 0.45, yaw: 2.2 } } as const;
+/** Where you stand for your sitting (by the coffin, as you were when he sat up), and she at her easel,
+    facing the canvas, her brush to it (src/den-houses.ts's toPaint: any painter's place at an easel). */
+export const SITTING = { you: { x: COFFIN.x - 1.05, z: COFFIN.z + 1.15, yaw: 0.5 }, her: toPaint(EASEL) } as const;
 
 /* The scare, beat by beat (seconds from lifting the lid): the lid creaks up, he sits bolt upright, you
    both scream, she claps, you freeze, she paints (he lies back down, the lid shuts), she's painted you,

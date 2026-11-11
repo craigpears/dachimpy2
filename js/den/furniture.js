@@ -10,6 +10,7 @@
    and outdoors a still. */
 import * as THREE from 'three';
 import { mat, mesh, woodTex, canvasTex } from './world.js';
+import { CANVAS } from '../den-houses.js';
 
 const at = (m, x, y, z) => { m.position.set(x, y, z); return m; };
 const box = (w, h, d, m, x = 0, y = 0, z = 0) => at(mesh(new THREE.BoxGeometry(w, h, d), m), x, y, z);
@@ -181,6 +182,14 @@ const plaqueTex = (text) => canvasTex(256, 48, (g, W, H) => {
   do g.font = `italic 700 ${px}px Alegreya, Georgia, serif`; while (g.measureText(text).width > W - 16 && --px > 9);
   g.fillText(text, W / 2, H / 2 + 1);
 });
+/* How far off the wall each layer of a framed picture stands (metres; the wall's face at 0), each clearly
+   in front of the last so none fights another for the same depth, from any camera, zoomed in or out
+   (the user, 11 Nov: "the little captions underneath the pictures flicker"; RULES.md, "The ship's deck
+   doesn't flicker"): the wall; a house's wainscot (house.js's, 0.02 proud of it, which a plaque can hang
+   over); the frame (0 to 0.06 deep); the picture in it; and the plaque under it, standing off the wall on
+   its own, in front of the wainscot too. And drawn a touch nearer than its depth says (AHEAD), to be sure. */
+const LAYER = { picture: 0.036, plaque: 0.05 };
+const AHEAD = { polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -4 };
 /* A picture in a gilt frame, `w` by `h` metres (the picture; the frame round it), its back to the wall at
    its origin, its middle at height `y`. `picture`: a texture (a portrait from js/den/portraits.js), or
    plain canvas till it's painted. `plaque`: its title on a little brass plate under it. setPicture and
@@ -188,7 +197,7 @@ const plaqueTex = (text) => canvasTex(256, 48, (g, W, H) => {
 export function frame({ w = 0.8, h = 1.0, y = 1.75, picture = null, plaque = '', ornate = true } = {}) {
   const g = new THREE.Group(), t = ornate ? 0.11 : 0.07, d = 0.06;
   const pic = mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: picture || PLAIN, color: '#e6e0d6' }), false);   // (a painting's own colours, a touch dimmed by the room)
-  pic.position.set(0, y, d * 0.6);
+  pic.position.set(0, y, LAYER.picture);
   g.add(pic, box(w + 2 * t, t, d, gilt, 0, y + h / 2 + t / 2, d / 2), box(w + 2 * t, t, d, gilt, 0, y - h / 2 - t / 2, d / 2), box(t, h, d, gilt, -w / 2 - t / 2, y, d / 2), box(t, h, d, gilt, w / 2 + t / 2, y, d / 2));
   if (ornate) for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) g.add(at(mesh(new THREE.SphereGeometry(t * 0.55, 8, 6), gilt), sx * (w / 2 + t / 2), y + sy * (h / 2 + t / 2), d * 0.9));
   let plate = null;
@@ -196,8 +205,8 @@ export function frame({ w = 0.8, h = 1.0, y = 1.75, picture = null, plaque = '',
     if (plate) { plate.geometry.dispose(); plate.material.map?.dispose(); plate.material.dispose(); g.remove(plate); plate = null; }
     if (!text) return;
     const pw = Math.min(w + 0.1, 0.9);
-    plate = mesh(new THREE.PlaneGeometry(pw, pw * 48 / 256), new THREE.MeshStandardMaterial({ map: plaqueTex(text), roughness: 0.5, metalness: 0.2 }), false);
-    plate.position.set(0, y - h / 2 - t - pw * 24 / 256 - 0.03, 0.02);
+    plate = mesh(new THREE.PlaneGeometry(pw, pw * 48 / 256), new THREE.MeshStandardMaterial({ map: plaqueTex(text), roughness: 0.5, metalness: 0.2, ...AHEAD }), false);
+    plate.position.set(0, y - h / 2 - t - pw * 24 / 256 - 0.03, LAYER.plaque);
     g.add(plate);
   };
   setPlaque(plaque);
@@ -224,7 +233,7 @@ export function easel() {
   // The canvas: on the ledge, leant on the front legs and clear in front of them (never the wood through
   // the painting), as they lean.
   const cv = mesh(new THREE.BoxGeometry(0.8, 1.0, 0.03), mat('#f2ead8', { roughness: 0.9 }));
-  cv.position.set(0, 1.35, 0.18); cv.rotation.x = 0.08; g.add(cv);
+  cv.position.set(0, CANVAS.y, CANVAS.out); cv.rotation.x = 0.08; g.add(cv);   // (where a painter's brush goes: src/den-houses.ts)
   const pic = mesh(new THREE.PlaneGeometry(0.76, 0.96), new THREE.MeshStandardMaterial({ map: PLAIN, roughness: 0.85 }), false);
   pic.position.set(0, 0, 0.017); cv.add(pic);
   const pal = mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.015, 16), mat('#c9a56e', { map: woodTex }));

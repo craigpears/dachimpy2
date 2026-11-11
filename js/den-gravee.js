@@ -1,3 +1,4 @@
+import { toPaint } from './den-houses.js';
 import { ON_A_PORTRAIT, ON_A_PROOF } from './lines/gravee.js';
 // ---------- the house ----------
 /** The gallery's length (metres), and how far apart its frames hang. Long: the gag's that it goes on. */
@@ -177,8 +178,9 @@ export const LEAD = { at: { x: G1 + 5, z: -0.25 }, near: 5.2, stand: { x: COFFIN
 export const LURE = { beckon: [7, 11], rattle: [4.5, 8], far: 2.6 };
 /** Is she leading you to the coffin: shown into the bedchamber, and he's not been woken yet? */
 export const leading = (tour, woken) => !woken && tour >= TOUR.findIndex((s) => s.id === 'coffin');
-/** Where you stand for your sitting (by the coffin, as you were when he sat up), and she at her easel. */
-export const SITTING = { you: { x: COFFIN.x - 1.05, z: COFFIN.z + 1.15, yaw: 0.5 }, her: { x: EASEL.x + 0.6, z: EASEL.z + 0.45, yaw: 2.2 } };
+/** Where you stand for your sitting (by the coffin, as you were when he sat up), and she at her easel,
+    facing the canvas, her brush to it (src/den-houses.ts's toPaint: any painter's place at an easel). */
+export const SITTING = { you: { x: COFFIN.x - 1.05, z: COFFIN.z + 1.15, yaw: 0.5 }, her: toPaint(EASEL) };
 /* The scare, beat by beat (seconds from lifting the lid): the lid creaks up, he sits bolt upright, you
    both scream, she claps, you freeze, she paints (he lies back down, the lid shuts), she's painted you,
    and it's done. */

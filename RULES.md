@@ -279,6 +279,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     all." The Berserker pelt sits as Puzzle Pirates' does, the bear's head up on top, its hide down
     her back; fixed in the pelt, so it's right wherever it's worn.
   - **The easel stays behind its canvas (11 Nov):** fixed in the shared easel.
+  - **She paints with a brush, at the canvas (11 Nov).** "her hand should actually be holding a brush
+    at least pointing in the general direction of the canvas." Any pirate who paints holds a brush
+    (the talking pirates' 'paint' idle), stands facing the canvas within a brush's reach (toPaint, in
+    src/den-houses.ts), and dabs at it.
   - **Watching eyes are a piece (11 Nov).** "The vampire portrait that's following you definitely
     needs to be a normal thing." Any portrait can have eyes that follow you (`watch`): the Count's,
     and Dignity's "Off Duty (Never)", one eye under her patch.
@@ -341,6 +345,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     balloons in the board's three colours only; nothing long with knobs on, no flesh tones.
   - **Keep her in view:** "She's hidden quite behind." One shot held through it, her and her board
     side by side.
+  - **The whirlpools are one point of interest on the captain's map, nothing named (11 Nov):** "I
+    don't want [Kikkit's] Island or ... the detailed individual ones ... the whole point of that map is
+    here's a point of interest. It's ... a different way through. That's about all ... That's for you
+    to discover." Their islands are drawn, and one note, "Whirlpools: another way through?", marks
+    them; whose islands they are, and what's on them, isn't said.
 - **A pirate showing you a puzzle is the heart of it (11 Nov).** "if somebody introduces you to a
   puzzle that, it has like a tutorial element, that's kind of the whole history of my website and
   things. This is hopefully the latest modern iteration of what my tutorial stuff can be. It's a bit
@@ -1320,7 +1329,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     benches right up on them, so you can barely even see [Mischievious]." Guests stand by their
     bench, never in a prop, each other, the aisle, or the clear space at the front where she and the
     couple stand; benches start well back. No prop goes on her, the couple or the guards.
-  - **The ship's deck doesn't flicker (11 Nov):** surfaces never share a height.
+  - **The ship's deck doesn't flicker (11 Nov):** surfaces never share a height. Nor a wall and what
+    hangs on it a depth (11 Nov, Gravee's captions): wall, wainscot, frame, picture and plaque each
+    clearly in front of the last (js/den/furniture.js's LAYER).
   - **Guests and furniture to get lost in (11 Nov):** "people are really going to be like wanting
     more control and variety ... on the furniture ... how many guests you want. Do you want big,
     small, cozy, large? Do you want the grand wedding where half the ocean turns up? ... the ability
@@ -1368,6 +1379,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     **Named for the wedding, not her (11 Nov):** "she's a primary character, but not the star of
     the show": the Wedding Isle on the map, the quest, the prompts at sea and the cheat. Rules:
     `src/den-isle.ts` (`LAY.ISLE` in `src/den-sail.ts`).
+- **Legs walk, never jitter (11 Nov).** "in the whiz along, it's definitely not really a walking
+  motion. It's just kind of jittery legs ... you should actually look like [you're] walking when
+  [you're] walking out to get the map." Whoever moves a pirate (you, a cutscene, a skip), their legs
+  swing with the distance they actually go, a run when they're fast, and ease to rest when they stop;
+  one shared walk (src/walk.ts), right everywhere. Not high-quality animation, but always a walk.
 - **You can see out to sea (9 Nov).** The taller wall shut the view in: "it just feels like I'm
   staring at a wall. It's lost some of the chop. I don't feel like there's any background to look
   at. I don't know why it's so black. Rather like there's supposed to be a sea over there." So:

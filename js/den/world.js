@@ -2,6 +2,7 @@
 // helpers, the pirates' figures, your flag, the game state and toasts. (Split out of den.js.)
 import * as THREE from 'three';
 import { turnWide } from '../den-deal.js';
+import { WALK_CADENCE, newGait, gaitStep, gaitPose } from '../walk.js';
 import { dressPirate, familiarTick, cleanLook, cleanDen, drawFlag } from '../den-look.js';
 
 // The main puzzle's engine, turned for wide shapes (see turnWide in src/den-deal.ts).
@@ -343,15 +344,22 @@ export function wearLook(p, look) {
   old.parent?.remove(old);
   Object.assign(p, { g: np.g, legs: np.legs, arms: np.arms, body: np.body, fam: np.fam, look: np.look, held: np.held });
 }
-export function animateWalk(p, moving, dt, speed = 11) {
-  p.phase = moving ? p.phase + dt * speed : 0;
+/* A pirate's legs, walking (or running) as far as they've gone since the last call, easing to rest
+   once they stop (the rule: src/walk.ts). Where they are is their x, z if they keep one, else their
+   figure's. `moving`: whether whoever moves them calls it walking (false: stood, or carried along);
+   `pace`, a cadence for walking with no way measured (on the spot, or moved with what they're on).
+   Returns the stride's swing (-1..1). */
+export function animateWalk(p, moving, dt, pace = WALK_CADENCE) {
+  const g = (p.gait ||= newGait());
+  const at = typeof p.x === 'number' && typeof p.z === 'number' ? p : p.g.position;
+  gaitStep(g, at.x, at.z, !!moving, dt, pace);
   familiarTick(p.fam, dt);
-  const swing = moving ? Math.sin(p.phase) : 0;
-  p.legs[0].rotation.x = swing * 0.6;
-  p.legs[1].rotation.x = -swing * 0.6;
-  p.arms[0].rotation.x = -swing * 0.5;
-  p.arms[1].rotation.x = swing * 0.5;
-  p.g.position.y = moving ? Math.abs(Math.cos(p.phase)) * 0.05 : 0;
+  const { leg, arm, bob, swing } = gaitPose(g);
+  p.legs[0].rotation.x = leg;
+  p.legs[1].rotation.x = -leg;
+  p.arms[0].rotation.x = -arm;
+  p.arms[1].rotation.x = arm;
+  p.g.position.y = bob;
   return swing;
 }
 export function faceTo(p, dx, dz, dt) {
