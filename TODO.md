@@ -120,6 +120,8 @@ the site (`.assetsignore` skips `*.md`).
   of squares on the sea, acting like the trade winds: end a move on one and it turns her a quarter
   and puts her on the opposite corner, round and round; one with a corner missing has winds there
   that carry her back toward the start. A Sailing gust has to carry her clean over them.
+  **YPPedia's rules win (11 Nov):** "obviously, follow the [YPPedia] thing. I might not have
+  described it perfectly, but I've given it the rough idea."
 
 - **Sailing's sparkle, two small things (11 Nov, seen when it was built):** from behind her, the
   camera sees her sails nearly edge-on, so a Vegas's billow barely shows; and on a phone the den's
