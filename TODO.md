@@ -140,6 +140,24 @@ the site (`.assetsignore` skips `*.md`).
   thrones, the skeleton cannons." The user's war frigate, the one for Daquan's flotilla (IDEAS.md,
   "Daquan's flotilla"): waiting on the user's pictures before she's drawn.
 
+- **Next, one at a time, once Tzz is finished and played (11 Nov):** "for the [Daquan] and Helium
+  ones, I think they're fleshed out enough ... to be on the to-do list to get started ... there's
+  enough there to get started, and then I think you can naturally flesh out the rest of the
+  mechanics later." But "try and finish things ... we need to finish things really one at a time"
+  (RULES.md, "Finish one thing at a time"): each starts only when the one before is played and done.
+  - **Daquan's flotilla, to start:** the cutscene (Dachimpy at the helm told to go sink a ship,
+    sinking their own; Daquan face-palming, then turning to you), and modelling a bigger ship,
+    Primates Rule, the war frigate he lends you, to see how she looks beside the sloop
+    (proportional by YPPedia's numbers). Daquan's portrait checked first; Primates Rule's gold,
+    black and white thrones and skeleton cannons from the user's pictures (above). What you do
+    against the flotilla: fleshed out after. (IDEAS.md, "Daquan's flotilla".)
+  - **Helium and Distilling, to start:** a Distilling puzzle of its own (its rules from YPPedia, a
+    module knowing nothing of the den, tested), and Helium teaching it as Tzz teaches Sailing: a
+    funny animated scene showing you real distilling moves, then "now you try". His still is the
+    hidden Easter egg in his house, with the mishap ("Oops. That happens sometimes. Don't worry
+    about it."). His portrait checked first. Smuggling the rum after still waits. (IDEAS.md,
+    "Helium, and Distilling".)
+
 - **Tzz's balloon lesson, after the user's first look (11 Nov):** "I love the start of [Tzz]." The
   one long whoosh works. But:
   - **The camera:** "the camera angle is a bit off. She's hidden quite behind." Frame her and the
