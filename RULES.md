@@ -2053,76 +2053,112 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   to sea for her (37 rows), everything already there staying put, the old wreck's wind running on to the
   new edge (so still no sailing round its far end to the locks: she lies in it, so from Port Decorum's
   side you sail up to her as far as its edge, two squares off her, near enough to say she's not ready).
-- **The sloop race (11 Nov), a first draft.** "a winding, snakes and ladders, zigzagging kind of course,
+- **The sloop race (11 Nov), its second pass.** "a winding, snakes and ladders, zigzagging kind of course,
   just with a lot of shortcuts, and each shortcut is a different puzzle, and you have to choose either the
   long way round, just ... without doing anything", "it should be significant", and of the first draft:
   "Obviously, this will be out near where Primates Rule is ... We're going to have to go through several
   iterations of this course." A minigame, not a sea battle ("creative new mechanics, and tutorials").
+  RACE.md is its design document, with the reasoning and the simulation's numbers.
   - **Where:** its own place out past Primates Rule, behind a line of rocks right across the sea (row 37)
-    with one gate in it, right of the old wreck's wind, so nothing on the den's side changes (that wind
-    now ends at the line, which shuts its far end as the sea's edge did). The sea grew to 65 rows for it;
-    the captain's map still shows the 37 it had (the course is off the map, `SAIL.CHARTED`). It's laid out
-    on the den's own sea, not a sea of its own: the Sea, the helm and every place's 3D are built round the
-    one sea, and an own-sea would have meant swapping all of it. Its whole layout is a few numbers in
-    `src/den-sail.ts` (`RACE_LAY`, `LAY.RACE`), to rework freely.
-  - **The course:** a buoy on the open sea off the gate (Space by it: the starter counts you down, and
-    you're off, a rival sloop beside you, the clock running). Five legs, two squares deep, back and forth
-    across the sea, one under the other, and a run home; a spit of land between each pair, the long way
-    round its end; the course's own breeze blowing out across it (every leg a reach, every bend a run, no
-    sailing back the way you came). The run home ends on a trade wind up the course's left-hand side,
-    behind a wall, that sweeps her up to the finish flag, by the gate she came in at. Back out of the gate
-    once through it, the race is off. About four and a quarter minutes the long way.
-  - **A shortcut through each spit, each a puzzle the den already has, by its one module:** [A] a gap with
-    a gun either side, as the imperial checkpoint's (its numbers, each gun a destructible turret), light airs
-    in the gap as under the gatehouse: it's the combo that gets you through, a heavy one (a big Sailing
-    chain's boost, or a Vegas rowed each side) rushing her past their marks, a square at a time a sitting
-    duck; or knock its guns out by Gunnery; and the long way along the first leg runs over one of its marks,
-    so it can hole you too (patched by Carpentry). [B] a gap with the wind straight back through it, no sail
-    gets her in: row it by mirror strokes; idle in it and the wind blows her back out a square at a time.
-    [C] three whirlpools in a channel through the spit: only a Vegas from its mouth carries her over, less
-    and a whirlpool has her and its winds carry her back to the mouth (Kikkit's whirlpools' rules). [D] a
-    lock up, pumped by Bilge, and a lock down. [E] a crane on the last neck of land, built by Carpentry a
-    part at a time on the deck patch's tray (the cliff's crane's rules, its ledge here), that hauls her over
-    to the run home. Each saves about what a decent player takes on its puzzle (guns 30 s, headwind 30,
-    whirlpools 55, locks 45, crane 75: `RACE.DECENT`, tested), so a shortcut pays only if it's your puzzle.
-  - **The rival:** one sloop, nameless for now (a real pirate needs the user's pick and their portrait
-    checked), the long way at a set pace, home in 3:55, quicker than the long way sailed: you beat it on
-    the shortcuts you're good at. Your best time's kept in this browser.
-  - **Nothing hinted:** the starter says what the course is, never where the shortcuts are or how.
+    with one gate in it, right of the old wreck's wind, so nothing on the den's side changes. The sea grew
+    to 74 rows for it (65 for the first draft); the captain's map still shows the 37 it had (the course is
+    off the map, `SAIL.CHARTED`). It's laid out on the den's own sea, from a few numbers in
+    `src/den-sail.ts` (`RACE_LAY`, `LAY.RACE`), to rework freely; `tools/race-measure.mjs` measures it.
+  - **The start (11 Nov: "pick your starting spot along the starting edge"):** Space by the buoy off the
+    gate takes her in to the starting line, behind the line of rocks; A and D move her along it (never onto
+    the rival's spot); the starter's card explains the race; Space, and he counts you down. Below the line,
+    a field of plain whirlpools and winds by Puzzle Pirates' rules, to ride, not to fear: a conveyor across
+    it blowing right, dropping her at a gap in a trade wind blowing back along its far side, headwinds by the
+    gap, plain whirlpools (stop on one and it has her; a gust zooms her over). The gap is the quickest line,
+    so the crowded one; a spot on her own is a few seconds slower (no spot more than ten from the best).
+  - **The course:** five legs, two squares deep, back and forth, a spit of land between each pair, the long
+    way round its end; the course's own breeze blowing out across it (every leg a reach, every bend a run).
+    The run home is one square wide, sailed left to the finish line. About 3:42 the long way.
+  - **Knowing where you're going (11 Nov: "clearer [buoys] for the main route"):** a tall numbered buoy at
+    each bend of the long way, on the outside of its turn; the one she's sailing for lit, its lamp and its
+    number bright; the clock's bar says "Leg 2 of 5 · to buoy 2". The gate's flags and the finish flag are
+    gone. Shortcuts are never marked.
+  - **Snakes, winds that sweep her back, their sting growing down the course (11 Nov: "I want the snakes and
+    [ladders]"):** the left-hand trade wind up the whole left-hand side to the starting line: legs 2 and 4
+    end hard by it (a gust too far, a careless turn, and she's back at the start), and the run home runs
+    beside it, so a misclick there, with the finish in sight, sends her all the way back ("pushed into the
+    trade winds that send you back right to the very start"). The trade wind back up the course crosses all
+    of leg 3 and runs up through a gap in spit 2 onto leg 2: every racer hops it with a Double ("you have to
+    get a double in sailing and basically jump over the trade winds"); anything less and it sweeps her back
+    up onto leg 2, a leg and a half lost. The tight water just past the gun gap: a wall ahead and, a move too
+    far, a wind sweeping her back along leg 2 to its bend ("you accidentally clicked one too many"); out of
+    the gap, a turn to port is the way on. The starter calls out each sweep.
+  - **A shortcut through each spit, and every size of them,** each a puzzle the den already has, by its
+    one module, each saving about what a decent player takes on it (`RACE.DECENT`, tested), so it pays only
+    if it's your puzzle: spit 1, the gun gap, three squares deep, its guns' marks all in the spit (the long
+    way's clear of them): a Quad from the leg rushes her past them, a square at a time she's holed, or shoot
+    them quiet (14 s); spit 2, the headwind gap, rowed, its far end a dog-leg so it doesn't open straight onto
+    leg 3 and out of the gun gap's reach (30 s), and a small gap with one wind blowing back across it that a
+    well-timed Double hops (8 s); spit 3, the whirlpool channel, only a Vegas from its mouth (46 s), and a
+    barrier of driftwood across a gap, cleared by Foraging (15 s); spit 4, the locks (26 s); spit 5, the crane
+    (38 s), and a gap with two winds that a Triple hops (9 s); and the starlit door (78 s). On the long way,
+    leg 4 before the locks is the zigzag: headwinds blowing back along it, alternating side to side with gaps
+    between, a wind behind her there so she can weave either way; weaving through takes about 17 s, hopping
+    each headwind with a well-timed Double about 9 ("getting over them with, like, a double, like a
+    well-timed double, would be a lot more effective"). Every shortcut's way in is a gap beside a leg, plain
+    to see as she sails by.
+  - **The barrier of driftwood (11 Nov: "You just have to clear the barrier"):** a jam of logs across a gap
+    in spit 3. She sails into the notch in front of it and Space stands a board of Foraging on the jam
+    (`src/foraging.ts`, played as Umami's), dealt with two bundles of driftwood on it and nothing more to
+    come; cleared down off the bottom, the jam breaks up and floats off, and the gap's open water for the
+    rest of the race (a new race, it's back). **Sheltered:** the notch is tucked into the spit, between the
+    gap's banks, so no broadside reaches her there; with the whirlpools on the same spit out in the open, it's
+    the leader's shortcut on that stretch.
+  - **Sheltered spots off the leg:** the crane's ledge is a notch in spit 5, off leg 5; a racer waiting her
+    turn at the up lock waits in a berth, a notch beside its way in; the barrier's notch. Each has a wind along
+    the leg in front of it, so she can sail back out under sail.
+  - **The finish (11 Nov: "a more ceremonious finish goal line"):** a line across the run home between two
+    striped towers, one on spit 5 and one out past the left-hand trade wind, a chequered banner strung between
+    them and a chequered line on the water. Over it, a burst of colour and a card with her time and place.
+    Past it, the left-hand trade wind carries her back to the start for another go.
+  - **The rival:** one sloop, nameless for now (the den's own characters race next), from its spot on the
+    line the long way at a set pace, home in 3:30, quicker than the long way sailed: you beat it on the
+    shortcuts you're good at. Your best time's kept in this browser.
+  - **The race explained (11 Nov: "Here are your options"):** the starter's card on the line: the long way,
+    shortcuts that cost a puzzle with a few named (bilge up through a lock, build a crane, row the headwind
+    gap, zoom over the whirlpools on a Vegas, hop a headwind with a Double), the snakes, and that the others
+    shoot you if you sit still in the open. Never where a shortcut is or how beyond that, and never the
+    starlit door.
   - **Racers shoot each other (11 Nov):** "I definitely want to be able to shoot other racers. That's
-    absolutely part of this." A race is PvP, guns and all, not only a time trial (TODO.md, "Shooting
-    other racers", for how).
+    absolutely part of this."
   - **Two to four racers on one course (11 Nov, rules only, not drawn yet):** "start adding multiple players
     to this first, even if it's like 2 to 4 players with some bots". The field (`src/den-racers.ts`): each
     racer's pose, the stretches she's reached in order, what she's doing (sailing, waiting her turn,
     puzzling, dazed, carried by a gust, the crane or the tunnel, finished), her time and place. The den's
     race is already a field of two, you and the rival as a bot racer, placed by time.
-    - **First come, first served:** the up lock, the down lock and the crane are each one racer's at a time;
-      the next waits her turn, in the order they came ("If you got through it first, we get through it
-      first").
+    - **First come, first served:** the up lock, the down lock, the crane and the barrier's notch are each
+      one racer's at a time; the next waits her turn, in the order they came ("If you got through it first,
+      we get through it first").
     - **A broadside three squares out of her side** (`SAIL.RANGE`), stopped by rock or land (no shooting
       across a spit), holes the first racer on it who can be hit: dazed, still, till she's patched by
       Carpentry, never knocked out, and not hit again till she's patched. Every racer starts with two shots
       (`FIELD.SHOTS`), holds four, and loads more by Gunnery.
-    - **Sheltered:** in a lock's chamber, the canal between them, or alongside the crane's ledge, nobody's
-      broadside reaches her; nor while she's carried. Everywhere else, stopped, she's a sitting duck for
-      whoever comes by (the user: "Some can be safe, like ... the locks and the crane").
+    - **Sheltered:** in a lock's chamber, the canal between them, the berth, the crane's notch or the
+      barrier's notch, nobody's broadside reaches her; nor while she's carried. Everywhere else, stopped,
+      she's a sitting duck for whoever comes by (the user: "Some can be safe, like ... the locks and the
+      crane").
     - **The gun gap's guns take the same shots as racers,** a hit a gun to quieten (`RACE.GAP.MODE`
       'shared': leaving other racers in peace pays), settled by the simulation; and roused, they load
       again in 6 s, not the checkpoint's 4, since in a race they fire on whoever comes near ("If they're
       aggroed, they are very relentless").
-  - **Simulated (11 Nov):** "a test harness underneath this ... where you don't need to worry about the
-    graphical elements ... and just actually make sure they all have a relatively equal chance of
-    winning." `src/race-sim.ts`, run by `tools/race-sim.mjs`: bots of every route and racing style raced
-    on the course over many seeded races; `tests/race-sim.test.ts` fails if a route wins under half or over
-    1.6 times its fair share in a field of four. As laid, every shortcut saves too much (the long way 1%,
-    the starlit door 58%); RACE.md §8 has the numbers, what each shortcut should save on the next pass
-    (`NEXT`, which the balance test races on till the course is laid to it) and the layout changes.
-  - **The starlit door:** a plain cliff face on the second spit off leg 2 (squares 21 and 22 across, 43
-    out) and a tunnel's end on the fourth spit's far face onto leg 5 (21 and 22, 58 out), `LAY.RACE.DOOR`:
-    "The starlit door (11 Nov)", below.
-  `?at=race` and one cheat. Rules: `src/den-race.ts`; drawn and played by `js/den/race.js`; the starter's
-  lines `src/lines/race.ts`.
+  - **Simulated, and laid to it (11 Nov):** "a test harness underneath this ... where you don't need to worry
+    about the graphical elements ... and just actually make sure they all have a relatively equal chance of
+    winning." `src/race-sim.ts`, run by `tools/race-sim.mjs`: bots of every route and racing style, from
+    their spots on the line, raced on the course as laid over many seeded races; `tests/race-sim.test.ts`
+    fails if a route wins under half or over 1.6 times its fair share in a field of four, if a style or a
+    part of the starting line strays far from fair, or if a leader has no shortcut worth taking (sheltered
+    or on the move) on some stretch. RACE.md §8 has the numbers.
+  - **The starlit door:** a plain cliff face on the second spit off leg 2 (squares 16 and 17 across, 52 out)
+    and a tunnel's end on the third spit's far face onto leg 4 (16 and 17, 62 out), `LAY.RACE.DOOR`: "The
+    starlit door (11 Nov)", below.
+  `?at=race` and one cheat. Rules: `src/den-race.ts`; drawn and played by `js/den/race.js`, its start
+  `js/den/race-start.js`, its buoys and finish `js/den/race-marks.js`, its barrier `js/den/race-forage.js`;
+  the starter's lines `src/lines/race.ts`.
 - **The starlit door (11 Nov).** "Can we do a similar kind of thing [as Moria's door by starlight] and use
   duty navigation as the puzzle for how you find the door and have it discoverable in some way similar to
   the carpentry spots?", and of the tunnel: "a really long, straight passage. But it requires some like more
@@ -2146,16 +2182,18 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     in the world ... But yeah, simplify the duty navigation down to be more competitive." So it's just the
     two dealt ones; the evil constellation is kept in the puzzle's module for elsewhere (`given`,
     `bottomRow`, `needsCombo`; IDEAS.md, "The evil constellation").
-  - **The tunnel:** a long straight cavern under legs 3 and 4, its walls lit by glowing stones of the
+  - **The tunnel:** a long straight cavern under leg 3 and the whirlpools' spit, its walls lit by glowing stones of the
     stars' pale blues and whites, a dark still water, daylight at the far door. No wind in it but a draught
     blowing out of the door, so no sail or oar gets her in: only a Sailing chain's gust from the mouth (off
     the door, facing it), and **only a Vegas's carries her through**, into the dark and out of a plain door
-    in the fourth spit's far face onto leg 5 (the race counts legs 3 and 4 as passed: `Race.under`). **Less,
+    in the third spit's far face onto leg 4 (the race counts leg 3 as passed: `Race.under`). **Less,
     and she's carried in that far and the draught carries her back out to the mouth**, facing in, to try
     again (not stuck: the snake's here the Vegas you didn't throw). The door's face is cliff to every move
-    and gust otherwise, shut or open: the only way in. Her trip through is 6.8 seconds; **the long way,
-    legs 2 to 5, sails in about 150: it saves about 145 seconds**, twice the crane's (`DOOR.SAVES`,
-    tested), with the puzzling on top: a minute or so's Navigation and a Vegas.
+    and gust otherwise, shut or open: the only way in. Her trip through is 5.4 seconds; **the long way,
+    legs 2 to 4, sails in about 83: it saves about 78 seconds**, twice the crane's (`DOOR.SAVES`,
+    tested), with the puzzling on top: a minute or so's Navigation and a Vegas. (On the first draft it ran
+    on under leg 4 to leg 5 and saved 145, twice its puzzling's worth; the course's second pass, 11 Nov,
+    brings it up a leg sooner, to what the simulation said it should save: RACE.md §8.)
   - **Ours, not the film's:** no words to speak, no elvish, just the stars. No changelog shot of it.
   Rules: `src/den-door.ts`; drawn and played by `js/den/door.js` (a console hook, `doorTest`, for testing).
 - **A hull's sides slant a little, top to bottom (11 Nov).** "I can definitely see the back of the

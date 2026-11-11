@@ -83,11 +83,14 @@ function zoneStreaks(z) {
     }
   });
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  const m = mesh(geo, new THREE.MeshBasicMaterial({ map: tex, vertexColors: true, transparent: true, opacity: 0.9, depthWrite: false, fog: false }), false);
+  // (a wide breeze over a whole place, as the sloop race's course has, fainter: its own winds, its snakes
+  // and the headwinds its Doubles hop, have to read over it, 11 Nov)
+  const wide = (z.c1 - z.c0 + 1) * (z.r1 - z.r0 + 1) > 200;
+  const m = mesh(geo, new THREE.MeshBasicMaterial({ map: tex, vertexColors: true, transparent: true, opacity: wide ? 0.28 : 0.9, depthWrite: false, fog: false }), false);
   m.position.set(cx, 0.07, cz);
   m.renderOrder = 3;   // (over the sea, as the trade winds' lanes are, and over its ruffle)
   // Under them, the water ruffled darker by the wind, as a cat's-paw darkens it, fading out with them.
-  const ruffle = mesh(geo, new THREE.MeshBasicMaterial({ color: '#0b4a6e', vertexColors: true, transparent: true, opacity: 0.3, depthWrite: false, fog: false }), false);
+  const ruffle = mesh(geo, new THREE.MeshBasicMaterial({ color: '#0b4a6e', vertexColors: true, transparent: true, opacity: wide ? 0.1 : 0.3, depthWrite: false, fog: false }), false);
   ruffle.position.set(cx, 0.065, cz);
   ruffle.renderOrder = 2;
   scene.add(ruffle, m);

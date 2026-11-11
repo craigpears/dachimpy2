@@ -13,25 +13,23 @@
    she'll stop in the open with someone close behind), each reported on its own.
    SAVES=locks:30,crane:60 tries the course with those shortcuts saving those seconds instead (a course
    before it's laid). ROUTES=long,locks races just those routes. CHAIN=0: nobody Sails on the pilot.
-   SHOTS=n: racers start with n shots. NEXT=1 races the course's next pass as the simulation would have it
-   (NEXT in src/race-sim.ts: what each shortcut should save, the long way clear of the gap's marks). */
+   SHOTS=n: racers start with n shots. SNAKES=0: no snakes. */
 
-import { run, ROUTES, STYLES, CUTS, SKILLS, PACE, SIM, NEXT } from '../js/race-sim.js';
+import { run, ROUTES, STYLES, CUTS, SKILLS, PACE, SIM } from '../js/race-sim.js';
 import { RACE } from '../js/den-race.js';
 
 const RACES = Number(process.argv[2]) || 2000, SIZE = Number(process.argv[3]) || 4, MODE = process.argv[4] || RACE.GAP.MODE;
-const next = process.env.NEXT === '1';
-const saves = next ? { ...NEXT.saves } : {};
+const saves = {};
 Object.assign(saves, Object.fromEntries((process.env.SAVES || '').split(',').filter(Boolean).map((kv) => { const [k, v] = kv.split(':'); return [k, Number(v)]; })));
 const routes = process.env.ROUTES ? ROUTES.filter((s) => process.env.ROUTES.split(',').includes(s.name)) : ROUTES;
-const opts = { mode: MODE, saves, routes, longMark: !next, chains: process.env.CHAIN !== '0', ...(process.env.SHOTS ? { shots: Number(process.env.SHOTS) } : {}) };
+const opts = { mode: MODE, saves, routes, chains: process.env.CHAIN !== '0', snakes: process.env.SNAKES !== '0', ...(process.env.SHOTS ? { shots: Number(process.env.SHOTS) } : {}) };
 
 const t0 = Date.now();
 const rep = run(RACES, SIZE, opts);
 const pct = (a, b) => (b ? `${((100 * a) / b).toFixed(1)}%` : '-').padStart(6);
 const fair = 1 / SIZE;
 
-console.log(`${RACES} races of ${SIZE}${next ? ' on the next course' : ''}, the gap's guns '${MODE}', Sailing on the pilot ${opts.chains ? 'on' : 'off'}, the long way ${SIM.LONG} s (${PACE.toFixed(2)} s a square); ${((Date.now() - t0) / 1000).toFixed(1)} s.`);
+console.log(`${RACES} races of ${SIZE}, the gap's guns '${MODE}', Sailing on the pilot ${opts.chains ? 'on' : 'off'}, the long way ${SIM.LONG} s (${PACE.toFixed(2)} s a square); ${((Date.now() - t0) / 1000).toFixed(1)} s.`);
 console.log('Shortcuts on the course (seconds): ' + Object.values(CUTS).map((c) => `${c.id} saves ${(saves[c.id] ?? c.saves).toFixed(0)} (trip ${c.trip.toFixed(1)}${c.sheltered ? ', sheltered' : ''})`).join('; '));
 
 const table = (title, rows, by) => {
@@ -46,6 +44,9 @@ table('By route', routes, rep.byRoute);
 table('By style', STYLES, rep.byStyle);
 console.log('\nBy skill');
 for (const k of SKILLS) { const t = rep.bySkill[k]; if (t) console.log(`${k.padEnd(8)} ${pct(t.wins, t.n)}  time ${(t.time / t.n).toFixed(0)}`); }
+table('By starting spot (left of the field\'s gap, at it, right of it)', [{ name: 'left' }, { name: 'gap' }, { name: 'right' }], rep.bySpot);
+console.log('\nSwept back by a snake (racers it had, and how many of them still won)');
+for (const [k, x] of Object.entries(rep.bySnake)) console.log(`${k.padEnd(7)} ${String(x.n).padStart(5)}  won ${pct(x.wins, x.n)}`);
 
 console.log('\nStopped in the open to puzzle, by place in the field then');
 for (const [k, p] of Object.entries(rep.byPosition)) console.log(`${k.padEnd(7)} stops ${String(p.n).padStart(5)}  hit there ${pct(p.hit, p.n)}  won the race ${pct(p.wins, p.n)}`);

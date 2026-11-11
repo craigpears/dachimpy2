@@ -977,25 +977,37 @@ For now there's nothing to do there: the island's sketched, to sail up to and lo
 
 ## The race's starter
 
-Whoever keeps the buoy off the sloop race's gate, out past Primates Rule: counts you down, fires the gun, and calls the times at the finish. Nameless for now, as the rival sloop is: a real pirate needs the user's pick.
+Whoever keeps the buoy off the sloop race's gate, out past Primates Rule: takes you in to the starting line, explains the race, counts you down, fires the gun, and calls the times at the finish line. Nameless for now, as the rival sloop is: a real pirate needs the user's pick.
 
-Never says how to get round quicker: the shortcuts are yours to find (RULES.md, "Hidden gems, never hinted").
+Explains the race's rules before the off (the long way, shortcuts that cost a puzzle, a few named as examples, the snakes, the shooting), never where a shortcut is or how it's done beyond that, and never the starlit door (RULES.md, "Hidden gems, never hinted").
 
 > "a winding, snakes and ladders, zigzagging kind of course, just with a lot of shortcuts, and each shortcut is a different puzzle" (the user, 11 Nov)
 >
 > "Obviously, this will be out near where Primates Rule is, I guess ... We're going to have to go through several iterations of this course." (the user, 11 Nov)
+>
+> "the concepts in this are going to need ... quite a bit of explaining as well at the start, like everything we've talked about. Here are your options." (the user, 11 Nov)
 
 ### At the buoy, and the race
 
-- *Sailing up to the buoy, the first time a voyage:* "A race round the course? Five legs out and back behind them rocks, and the trade wind home. Space when ye're ready"
+- *Sailing up to the buoy, the first time a voyage:* "A race round the course? Five legs out and back behind them rocks, round the buoys. Space when ye're ready"
 - *By the buoy again, after a race:* "Another go? Space when ye're ready"
+- *Taken in to the starting line, before the off: the race explained, a line at a time:*
+  - "Here's the way of it. Round the numbered buoys, five legs and the run home: the long way, no puzzle, just sail her"
+  - "Or cut through the spits, if ye dare. Every shortcut costs ye a puzzle: bilge up through a lock, build a crane, row the headwind gap"
+  - "Zoom over the whirlpools on a Vegas, hop a headwind with a Double. Get it wrong and ye're back where ye started"
+  - "Mind the winds that sweep ye back. The trade wind up the left takes ye all the way to the start, and the run home runs right beside it"
+  - "And the others'll shoot ye if ye sit still in the open. Pick yer spot on the line, and Space for the count"
 - *The count, a second each:*
   - "Three..."
   - "Two..."
   - "One..."
 - *The gun:* "Go!"
 - *When the other sloop's home:* "The other sloop's home: {time}"
-- *Home before the other sloop:* "Home first! {time}"
-- *Home after it:* "Home in {time}. Beaten to it, this time"
+- *When a snake has her: the left-hand trade wind, the tight water past the gun gap, the trade wind back up the course:*
+  - *left:* "The trade wind's got ye! All the way back to the start"
+  - *tight:* "One too many! The wind's sweeping ye back to the bend"
+  - *mid:* "Caught in the trade wind! Back up to leg two wi' ye"
+- *Over the finish line before the other sloop:* "Over the line, and home first! {time}"
+- *Over it after:* "Over the line in {time}: {place}. Beaten to it, this time"
 - *Your best time yet, kept in this browser:* "Yer best yet: {time}"
 - *Sailed back out through the gate mid-race:* "Out the gate? That race is off, then"

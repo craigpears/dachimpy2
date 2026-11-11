@@ -73,7 +73,9 @@ describe('sailing: rocks ("just keep it simple as like with a few rocks", 9 Nov)
       const lee = (c: number, r: number) => (r >= LAY.ZONES[0].r0 && c <= LAY.ZONES[0].c1) || s.level(c, r) > 0 || s.isLock(c, r) || s.zoneAt(c, r) === harbour;
       // (and not the water only Kikkit's whirlpools get to, the smugglers' run behind Port Decorum, 11 Nov:
       // tests/den-smugglers.test.ts)
-      for (let c = 0; c < s.cols; c++) for (let r = 0; r < s.rows; r++) if (s.open(c, r) && !s.hidden.has(`${c},${r}`)) {
+      // (nor the race's course behind its line of rocks, where past the trade wind back up it only a
+      // gust gets her, 11 Nov: tests/den-race.test.ts sails her round it)
+      for (let c = 0; c < s.cols; c++) for (let r = 0; r <= LAY.RACE.R0; r++) if (s.open(c, r) && !s.hidden.has(`${c},${r}`)) {
         expect(s.plot(H, c, r, null, true) !== null).toBe(s.windAt(c, r) === undefined);
         if (!lee(c, r)) expect(s.plot(H, c, r) !== null).toBe(s.windAt(c, r) === undefined);
       }

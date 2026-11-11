@@ -251,73 +251,6 @@ the site (`.assetsignore` skips `*.md`).
   outside; not yet tried by the user. Watch for: the markers on raiders outside cluttering the
   view while you carry a piece.
 
-- **Shortcuts not all created equal (11 Nov):** on the race course, small shortcuts as well as big ones,
-  each needing a combo of its size: a tiny one a Double gets you through (as a Double clears the reef out
-  of Kikkit's whirlpools), bigger ones a bigger combo, the biggest the starlit door's tunnel. "Are you a
-  person that can break quick double triples? That gets you through some shortcuts, and then, you know,
-  you move a bit and you do ... equivalent thing on another puzzle. Or do you want to go for those giant"
-  ones. After the first draft (the agent building it was briefed before this). A balance to weigh in it (the
-  user, 11 Nov): "an interesting balance to note that you can essentially do some of the puzzles, like
-  [gunnery] and sailing, while you're on autopilot. I guess bilge ... for getting through the locks,
-  doesn't quite have that advantage." Sailing and Gunnery can be played while she sails on (the pilot or
-  a wind carrying her), so their time half overlaps the sailing; Bilge at the locks (and Carpentry at the
-  crane) has her stopped while you play. So a stopped-dead shortcut should save more for the same puzzle
-  time, or the on-the-move ones cost a little more. The real balancing is for players to find by playing it (the user: "balancing
-  is going to be certainly, I think, for players to actually test").
-- **Snakes on the race course: a trade wind back up it, to jump with a Double (11 Nov):** the trade wind
-  that runs her home, put through the middle of the zigzag too: "can that not be in like the middle of a
-  zigzagging course? So if you're accidentally, like you have to do the double. I love that idea. Maybe at
-  some points, like you have to get a double in sailing and basically jump over the trade winds. But yeah,
-  it's the snake that brings you all the way back to the start, or at least back to maybe start would be a
-  bit evil, but like at least brings you all the way, brings you back a significant like one leg." So a
-  trade wind runs back up the course across the legs; where a leg crosses it, a Double's gust carries her
-  clean over it (as a gust goes over the whirlpools), and anything less lands her in it and it sweeps her
-  back a leg. With the shortcuts of every size, after the starlit door. And the trade wind up the left that runs her home
-  should be a real risk on the way out too (11 Nov, after a go): "I'm not seeing accidentally being caught
-  in those trade winds at the left of it yet. But the whole point is they're supposed to be risk of really
-  just doing some kind of accidental [slip] on that thing on the left-hand side and accidentally being
-  caught in the winds that sweep you in. I want the snakes and [ladders]." So legs that end hard by it, a
-  careless turn or a gust too far landing her in it and sweeping her back. And put a snake right past the gun gap
-  (11 Nov): "part of me is evil. I almost want it to be like an accidental misclick ... I do love the idea of
-  like, oh, whoops, I can't get through here ... I almost want the sense of foreboding doom ... you panic
-  trying to get past the gunning post so that you don't get shot again, and because you're in a quick
-  panic, you accidentally clicked one too many, and now you've got no way of turning around ... without
-  going into those winds that drag you back ... the wind will probably ... go quite well actually with
-  trying to race through the gun turrets. Because you are just panicking, trying to get through fast." So
-  the water just beyond the gun gap is tight, a wall ahead, and a sweeping wind a move too far: rush it
-  and you're past the guns but in the wind. And the gun gap's too easy as it is: "that's relatively quick,
-  to be honest, because you only get shot once. So that's relatively easy ... almost no-brainer" (only a
-  hole's patch to pay; the snake beside it is what makes it a gamble). And the run in to the finish (11 Nov, on a go): "I'm sitting at
-  the edge here, and it almost looks like I'm at the very back wall, and it makes me really anxious. Like
-  I'm near the finish line. If I accidentally misclick, like it's like a too wide lane, isn't it? So if I
-  accept the idea that I could accidentally misclick and be pushed into the trade winds that send you back
-  right to the very start or something." So the run home narrow, hard by a wind that sweeps her all the
-  way back to the start: the last snake, the biggest, with the finish in sight. (A snake's sting grows down the
-  course: the gun gap's, near the start, costs little, "already a bit more balanced because it's right
-  near the start of the course anyway"; one by the finish costs the lot. Where the shoot-away rocks go,
-  if they come, matters the same way: IDEAS.md.)
-- **A ceremonious finish line (11 Nov):** "Obviously, you need a more ceremonious finish goal line for
-  sure." A proper finish: a line across the water between two markers, flags or a banner, and a moment
-  when you cross it (your time, and the rival's).
-- **The race explained at the start (11 Nov):** "the concepts in this are going to need ... quite a bit of
-  explaining as well at the start, like everything we've talked about. Here are your options. Shortcuts
-  mean a short path, the puzzle ... just illustrate a few of the examples. Like, yeah, do you want to bilge
-  through a [lock]? Or you can take the long way around or zoom over a whirlpool, risking a doomed return
-  to the start if you ... get it wrong." So the starter at the buoy tells you the idea before the off: the
-  long way round, or a shortcut that costs a puzzle, with a few of them as examples, and the snakes that
-  sweep you back. Not the starlit door ("Hidden gems, never hinted": a race's rules are explained, its
-  secret isn't). On a first go the user couldn't find the Carpentry crane or the rowing gap at all ("There's a
-  carpentry shortcut in here I've not seen it"), so the shortcuts need to be findable: plain to see as
-  you sail by (the gap, the crane's footing), and named among the starter's examples.
-- **Knowing where you're going on the race course (11 Nov):** the user's first go at `?at=race`: "my first
-  impression is I've not got a clue where I'm going. But then again, my other wonder is that a good thing?
-  Because that is that part of the joy? Is it like a maze as much as a course?" Suggested: the long way
-  plain to follow (marker buoys along it, numbered at each bend, the next one shown, "Leg 2 of 5"), as "The
-  way on pulls you" in STORY.md; the shortcuts the maze part, there to spot and work out, never marked.
-  Settled (11 Nov): "That sounds good. Yeah, clearer [buoys] for the main route should be clearer." And the
-  little gold flags there now confuse: "they don't look like they're in the actual proper direction at
-  all." So replace them with buoys that plainly lead round the long way. After the starlit door, with the
-  shortcuts of every size.
 - **The race's rivals: the den's own characters, each with a way of racing (11 Nov):** "maybe we just focus
   on this for now, and Daquan ... whoever other characters we've got already in here can all be characters
   that can drive sloops. And obviously we've got different strengths, like ... [Tzz] and [Kikkit] will be
@@ -330,13 +263,6 @@ the site (`.assetsignore` skips `*.md`).
   row-bots, nav-bots), so they're the testers as well. Each looks as they do elsewhere (one look
   everywhere), with a line or two on the way. Umami the capybara too, with a Foraging slant ("the umami, the capybara ...
   obviously you will have maybe like the foraging slant").
-- **A Foraging shortcut on the race course (11 Nov):** "Did you get foraging in? ... you'd be like,
-  macheteing through a forest to get through that way. That could definitely work." The first draft has
-  none. Then: "it's not even macheting. You just have to clear the barrier. It's just a way of clearing a
-  barrier, similar to the static rocks, but you're doing it through foraging." So a barrier across a gap
-  (overgrowth, driftwood, fallen trunks), cleared by Foraging (src/foraging.ts, the one implementation)
-  to open the way through, as the shoot-away rocks would be by Gunnery: a stopped-dead shortcut, like the
-  locks and the crane. Umami's way round, naturally.
 - **Shooting other racers (11 Nov):** "I definitely want to be able to shoot other racers. That's
   absolutely part of this." So her guns are for the other sloops as well as the gun gap: catch a racer
   sitting still building a Vegas, or jostling for the best line through the whirlpools, and hole them
@@ -362,21 +288,6 @@ the site (`.assetsignore` skips `*.md`).
   everybody. The rivals with profiles (above) are these bots. Gunnery's gap wants to pay off better for
   its time, and the turrets once roused less relentless. Before the course's next pass, so that pass is
   tuned with it.
-- **A start through plain whirlpools and winds, picking your own starting spot (11 Nov):** "It'd be
-  really good to have a section with just like regular whirlpools. Obviously, we've been using them more
-  as a way of throwing you back. But ... they are a genuine navigation challenge as well. So part of
-  usually in the opening of a blockade, one of the challenges is, right, you've got a bunch of winds and
-  whirlpools and you have to really eyeball it to figure out what the fastest way forward is. And you can
-  kind of ... pick your starting spot along the starting edge based on that. That would definitely be a
-  way of starting off a race." So the race opens on a field of whirlpools and winds by Puzzle Pirates'
-  rules (the one whirlpool module, src/den-whirl.ts, and the wind), there to be ridden, not to send you
-  back: each racer picks where to start along the starting line, as at a blockade's opening, having
-  eyeballed the fastest way through. A field for the simulation (above) to weigh too: no one spot along
-  the line should always win. Part of why (the user, 11 Nov): "if you want to take the most optimum
-  route, you're more likely to be competing against other players and potentially going to get shot.
-  Hypothetically." The best line through is the crowded one: with several racers there, you jostle for
-  it (and, if racers can ever fire on each other, IDEAS.md, get shot at), so a slower line on your own
-  can pay.
 
 ## Spotted along the way (not asked for)
 

@@ -22,13 +22,15 @@
      it swings open; open, it stays open that race.
    - A booch turns her about, away from the cliff: she's pushed off, and the board starts again, every
      star on the rock gone dark (Door.booch).
-   - The tunnel: a long straight passage under the cliffs, under legs 3 and 4, from the door to the
-     fourth spit's far face, out onto leg 5 (OUT, INTO). No wind blows in it but a draught out through
+   - The tunnel: a long straight passage under the cliffs, under leg 3 and the whirlpools' spit, from the
+     door to the third spit's far face, out onto leg 4 (OUT, INTO). (It ran on under leg 4 to leg 5 on
+     the first draft; on the course's second pass, 11 Nov, it comes up a leg sooner, so it saves about
+     what the simulation said it should: RACE.md §8.) No wind blows in it but a draught out through
      the door, so no sail or oar gets her in: only a Sailing chain's gust from the door's mouth (OFF,
      facing in), and only a Vegas's carries her the length of it (tunnelGust; as only a Vegas gets her
      over the race's whirlpools, or into the penguins' water). Less, and she's carried in that far, and
      the draught carries her back out to the mouth, facing in, to try again. It's the course's biggest
-     shortcut: legs 2 to 5 in seconds (DOOR.SAVES, tested), for whoever finds it and can navigate.
+     shortcut: legs 2 to 4 in seconds (DOOR.SAVES, tested), for whoever finds it and can navigate.
    - It's ours, not the film's: no words to speak, no elvish, just the stars. */
 import { LAY, SAIL } from './den-sail.js';
 import { runFor, RUN } from './sailing.js';
@@ -44,16 +46,16 @@ export const DOOR = {
     NEED: runFor(RUN.VEGAS),
     /** Squares from the door's face to the tunnel's far end, and out onto leg 5 (the trip's length). */
     LEN,
-    /** The stretches it joins: she's on leg 2 (1) at its mouth, and comes out on leg 5 (4). */
-    FROM: 1, TO: 4,
+    /** The stretches it joins: she's on leg 2 (1) at its mouth, and comes out on leg 4 (3). */
+    FROM: 1, TO: 3,
     /** Seconds her trip through takes, door to daylight, at a gust's pace (SAIL.PUSH a square), with a
         little dark either end as she goes in and comes out; and back out, carried in and the draught
         bringing her out again. */
     TRIP: Math.round((LEN * SAIL.PUSH + 2) * 10) / 10,
     BACK: 3,
-    /** About what the tunnel saves over the long way, legs 2 to 5 sailed under sail, in seconds
+    /** About what the tunnel saves over the long way, legs 2 to 4 sailed under sail, in seconds
         (tests/den-door.test.ts holds it to this; the puzzling's on top: the Navigation run and a Vegas). */
-    SAVES: 145,
+    SAVES: 78,
 };
 /** Off the door: the water off its face, on leg 2, where Space by the rock brings the board up. */
 export const offDoor = (c, r) => D.OFF.some(([x, y]) => x === c && y === r);
@@ -61,11 +63,11 @@ export const offDoor = (c, r) => D.OFF.some(([x, y]) => x === c && y === r);
 export function mouthOf(p) {
     return p.d === 0 ? D.OFF.findIndex(([x, y]) => x === p.c && y === p.r) : -1;
 }
-/** Where the tunnel puts her out, from mouth `i`: on leg 5 below its far end, facing straight on. */
+/** Where the tunnel puts her out, from mouth `i`: on leg 4 below its far end, facing straight on. */
 export const outOf = (i) => ({ c: D.INTO[i][0], r: D.INTO[i][1], d: 0 });
 /** What a gust from `from` does at the door: null if it isn't the tunnel's (not at its mouth facing in,
     or the door's shut: the cliff stops it as any rock does, src/den-sailing.ts); 'through' with a
-    Vegas's run or more, out onto leg 5 (`to`); 'back' with less, carried in `went` squares and back out
+    Vegas's run or more, out onto leg 4 (`to`); 'back' with less, carried in `went` squares and back out
     to the mouth (`to`, facing in). */
 export function tunnelGust(open, from, run) {
     const i = mouthOf(from);

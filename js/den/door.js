@@ -124,6 +124,11 @@ function crag(g, z, dir, left, right, h) {
   const rec = new THREE.Mesh(new THREE.BoxGeometry(DW, DH + 1.5, deep - 0.6), new THREE.MeshBasicMaterial({ color: '#050407', side: THREE.BackSide, fog: false }));
   rec.position.set(DX, (DH - 1.5) / 2, z - dir * (0.5 + (deep - 0.6) / 2));
   g.add(rec);
+  // (and the doorway shut behind with rock, so from the spit's other side it's a plain crag: on the
+  // course's second pass, 11 Nov, the far end's back stood in sight of leg 3, a black hole in it)
+  const shut = mesh(new THREE.BoxGeometry(DW + 0.2, DH + 0.2, 0.4), stoneM);
+  shut.position.set(DX, DH / 2, dir > 0 ? z0 + 0.2 : z1 - 0.2);
+  g.add(shut);
   // (its water dark and still: the course's breeze doesn't blow in there)
   const pool = new THREE.Mesh(new THREE.PlaneGeometry(DW, deep - 0.6).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#0b1119', fog: false }));
   pool.position.set(DX, 0.12, rec.position.z);

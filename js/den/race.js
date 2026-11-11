@@ -1,8 +1,11 @@
 // The sloop race, in 3D and at sea (its rules: src/den-race.ts; its course LAY.RACE in src/den-sail.ts;
 // what the starter says, src/lines/race.ts). Out past Primates Rule, behind a line of rocks with one gate
-// in it: the starting buoy off the gate, the course's land (its spits, the wall up its left-hand side,
-// the headland the locks cut through), its gun gap's two guns, its whirlpool reef and winds, the crane on
-// its last neck of land, the trade wind home and the finish flag; the rival sloop; the clock.
+// in it: the starting buoy off the gate, the course's land (its spits, the headland the locks cut through),
+// its winds (the snakes, the headwinds the Doubles hop, the start's field's), the field's whirlpools and the
+// whirlpool channel's, its gun gap's two guns, the crane in its notch on the last spit; the rival sloop; the
+// clock. Its start (the line, picking your spot, the starter's card) is race-start.js; its marks (the
+// numbered buoys, the finish line and the moment you cross it) race-marks.js; the barrier of driftwood and
+// its Foraging race-forage.js.
 // Everything it's made of is a shared piece: the sea draws its line of rocks (reef.js), the locks
 // (lock.js) and the winds (sea.js, windLane); a gun is a destructible turret (turret.js), a whirlpool
 // Kikkit's look (whirlpools.js), the sloop the sloop (sloop.js), the crane's frames played on the deck
@@ -12,7 +15,7 @@ import * as THREE from 'three';
 import { LAY, SAIL } from '../den-sail.js';
 import { whirlpool } from '../den-whirl.js';
 import { CRANE, travel } from '../den-crane.js';
-import { RACE, Race, GunGap, Drift, rivalAt, atStart, clockText, cleanBest, neckCrane } from '../den-race.js';
+import { RACE, Race, GunGap, Drift, rivalAt, atStart, clockText, cleanBest, neckCrane, nextBuoy, stretchAt } from '../den-race.js';
 import { STARTER } from '../lines/race.js';
 import { scene, mat, mesh, canvasTex, V3, burst, toast, flagpole, pirate } from './world.js';
 import { rock } from './land.js';
@@ -24,9 +27,13 @@ import { bake } from './bake.js';
 import { cine } from './cine.js';
 import { doorWorld, doorSquares, doorKey, doorPrompt, doorHolds, doorTick, doorReset } from './door.js';
 import { DOOR } from '../den-door.js';
+import { startWorld, takeLine, lineKey, linePrompt, startTick, rivalSpot } from './race-start.js';
+import { marksWorld, marksTick, crossed } from './race-marks.js';
+import { forageWorld, forageKey, foragePrompt, forageHolds, forageTick, forageReset, forageCam, forageHover, forageClick } from './race-forage.js';
 
 const RC = LAY.RACE, CELL = SAIL.CELL, DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
-const say = (s, secs) => s.replace('{time}', clockText(secs));
+const NTH = (n) => (n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`);
+const say = (s, secs, place = 1) => s.replace('{time}', clockText(secs)).replace('{place}', NTH(place));
 function readBest() { try { return cleanBest(localStorage.getItem(RACE.STORE)); } catch { return null; } }
 function keepBest(secs) { try { localStorage.setItem(RACE.STORE, String(secs)); } catch { /* (no storage: kept this voyage only) */ } }
 export const race = { W: null, rules: new Race(readBest()), gap: new GunGap(), drift: new Drift(), crane: neckCrane(), said: {}, trip: null, hud: null, doneT: 0 };
@@ -35,7 +42,7 @@ export const race = { W: null, rules: new Race(readBest()), gap: new GunGap(), d
 /* The course's land, a square at a time, each spit as it is: the first, third and last low and grassy
    (a few boulders on them), the second a high ridge of cliffs (the starlit door's face, kept plain:
    LAY.RACE.DOOR), the fourth a headland standing over the canal its locks cut through (its banks as the
-   sea's cliffs are: bankTop), the wall up the left a rocky bank. All baked into a mesh a material. (The
+   sea's cliffs are: bankTop). All baked into a mesh a material. (The
    starlit door's squares, its face and the tunnel's far end, are its crags': door.js.) */
 const LOOK = [{ h: 0.9, low: true }, { h: 4.6 }, { h: 0.9, low: true }, { h: null }, { h: 1.0, low: true }];
 const sandM = mat('#d9c08a', { roughness: 1 }), lowGrass = mat('#7c9a52', { roughness: 1 });
@@ -56,7 +63,6 @@ function land(g) {
       if (!L.low && (c * 5 + r) % 3 === 0) g.add(rock(seaX(c) + (Math.random() - 0.5) * 3, h * (0.3 + Math.random() * 0.5), seaZ(r) + (Math.random() - 0.5) * 3, 0.8 + Math.random() * 0.6));
     }
   });
-  for (const [c, r] of RC.WALL) square(c, r, 2.2, stoneM, grassM);
 }
 // A race flag: chequered black and white.
 const chequer = () => new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, roughness: 0.9, map: canvasTex(64, 40, (x, w, h) => { for (let i = 0; i < 8; i++) for (let j = 0; j < 5; j++) { x.fillStyle = (i + j) % 2 ? '#111' : '#f4f1e8'; x.fillRect(i * 8, j * 8, 8, 8); } }) });
@@ -80,10 +86,10 @@ function lanes(list) {
   }
   return out;
 }
-/* The crane on the neck: a stone footing on the land, its frames (the pieces you fit) put up on it as
+/* The crane on the last spit: a stone footing on the land, its frames (the pieces you fit) put up on it as
    each is built: the foot laid flat, the post stood up on it, the jib out from its top on a turning
-   head; then its rope and hook. Where it stands: the neck's middle, beside her ledge. */
-const CR = { c: RC.CRANE.LEDGE[0], r: (RC.SPITS[4].r0 + RC.SPITS[4].r1) / 2, y: LOOK[4].h + 0.12 };
+   head; then its rope and hook. Where it stands: on the spit beside the notch she lies in. */
+const CR = { c: RC.CRANE.LEDGE[0] + 1, r: (RC.SPITS[4].r0 + RC.SPITS[4].r1) / 2, y: LOOK[4].h + 0.12 };
 const POST_H = 8 * CRANE.SQ, JIB_A = 0.33, JIB_L = 10 * CRANE.SQ, TIP = V3(JIB_L * Math.cos(JIB_A) - 0.2, POST_H + 0.3 + JIB_L * Math.sin(JIB_A), 0);
 function craneMesh() {
   const g = new THREE.Group(), slew = new THREE.Group(), rope = mat('#c9ab72', { roughness: 0.95 });
@@ -113,14 +119,13 @@ function build() {
   land(ground);
   bake(ground);
   W.g.add(ground);
-  // The starting buoy, and the gate's flags either side of it, on the line's rocks.
+  // The starting buoy off the gate (the gate's flags and the finish flag there were are the numbered
+  // buoys and the finish line now: race-marks.js).
   const b = buoy(); b.position.set(seaX(RC.BUOY[0]) + CELL * 0.4, 0.1, seaZ(RC.BUOY[1]) - CELL * 0.4); W.g.add(b);
-  for (const c of [RC.GATE[0][0] - 1, RC.GATE[1][0] + 1]) { const f = flagpole(3, chequer()); f.position.set(seaX(c), 0.8, seaZ(RC.R0)); W.g.add(f); }
-  // The finish: a chequered flag on the wall's top by where the trade wind drops her.
-  const fin = flagpole(3.4, chequer()); fin.position.set(seaX(1), 2.3, seaZ(RC.FINISH[1] + 2)); W.g.add(fin);
-  // The trade wind home, and the whirlpool reef's winds and whirlpools.
-  for (const l of [windLane(RC.LANE.at[0], RC.LANE.at[1], RC.LANE.d, RC.LANE.n), ...lanes(RC.WHIRLS.WINDS)]) { W.g.add(l.g); W.winds.push(l.tex); }
-  for (const spot of RC.WHIRLS.POOLS) { const o = pool(whirlpool(spot)); W.g.add(o); W.pools.push(o); }
+  // Its winds (the snakes, the headwinds the Doubles hop, the start's field's), the whirlpool channel's
+  // winds, and the channel's whirlpools and the field's.
+  for (const l of [...lanes(RC.WINDS), ...lanes(RC.WHIRLS.WINDS)]) { W.g.add(l.g); W.winds.push(l.tex); }
+  for (const spot of [...RC.WHIRLS.POOLS, ...RC.FIELD.POOLS]) { const o = pool(whirlpool(spot)); W.g.add(o); W.pools.push(o); }
   // The gun gap: a turret either side on the spit, in plain stone, and the squares they're trained on.
   for (const [c, r] of RC.GUNS.at) { const V = turretMesh({ rocks: 2 }); V.g.position.set(seaX(c), LOOK[0].h - 0.3, seaZ(r)); W.g.add(V.g); W.guns.push(V); }
   RC.GUNS.marks.forEach((ms) => ms.forEach(([c, r]) => { const m = turretMark(seaX(c), seaZ(r)); W.g.add(m.g); W.rings.push({ c, r, m: m.m }); }));
@@ -133,6 +138,7 @@ function build() {
   W.rival.visible = false;
   W.g.add(W.rival);
   scene.add(W.g);
+  startWorld(); marksWorld(); forageWorld();
   return W;
 }
 /** Built the first time the sea's drawn (sailing.js). */
@@ -210,13 +216,15 @@ function standAboard() {
 
 // ---------- the keys, the prompt, her shots ----------
 /** Holding her: on the crane's hook, or at its frame (no pins, no Sailing board). */
-export const raceHolds = () => !!race.trip || building() || doorHolds();
+export const raceHolds = () => !!race.trip || building() || doorHolds() || forageHolds() || (sail.on && (race.rules.state === 'line' || race.rules.state === 'count'));
 const VIEW = ['z', 'c', 'v', '-', '_', '=', '+', 'p'];
 /** A key at sea, first: whether it was the race's. */
 export function raceKey(key) {
   if (!sail.on || !race.W) return false;
   const go = key === ' ' || key === 'enter', h = sail.helm;
   if (!race.trip && !building() && doorKey(key)) return true;   // (the starlit door: door.js)
+  if (!race.trip && !building() && forageKey(key)) return true;   // (the barrier of driftwood: race-forage.js)
+  if (lineKey(key, race.rules)) return true;   // (on the starting line: race-start.js)
   if (race.trip) { if (go || key === 'escape') { K().skip(); arrive(); } return !VIEW.includes(key); }
   if (building()) {
     if (key === 'escape') { K().leave(); toast('The frame can wait: it stays on the neck as it is'); return true; }
@@ -229,10 +237,11 @@ export function raceKey(key) {
   }
   const R = race.rules;
   if (go && atStart(h.pose.c, h.pose.r) && h.slot < 0 && !h.held() && R.state !== 'count' && R.state !== 'on') {
-    R.start();
+    takeLine(R);
     race.gap = new GunGap();
     doorReset();   // (shut again, for a new race)
-    toast(STARTER.count[0]);
+    forageReset();   // (the driftwood back across its gap)
+    toast('Pick yer spot on the line, and Space when ye\'re ready');
     return true;
   }
   return false;
@@ -243,13 +252,15 @@ export function racePrompt() {
   if (race.trip) return 'Space: skip';
   const dp = doorPrompt();
   if (dp || doorHolds()) return dp;
+  const lp = linePrompt(R) || foragePrompt();
+  if (lp) return lp;
   if (building() && !K().built()) return patchPrompt(`The crane's ${CRANE.PARTS[K().up].name} (${K().up + 1} of ${CRANE.PARTS.length}) · 1, 2, 3: a piece`, ' (the spare gets sawn off)', ' · Esc: leave it for now');
   if (K().alongside(h)) {
     if (K().built()) return 'Under the crane · Space: haul her over the neck';
     return K().frame || K().up ? `Alongside the neck · Space: back to building the crane (its ${CRANE.PARTS[K().up].name})` : 'Alongside the neck · Space: build a crane to haul her over (Carpentry)';
   }
   if (atStart(h.pose.c, h.pose.r) && h.slot < 0 && R.state !== 'count' && R.state !== 'on') {
-    return `The race buoy · Space: race round the course${R.best ? ` · your best ${clockText(R.best)}` : ''}`;
+    return `The race buoy · Space: in to the starting line${R.best ? ` · your best ${clockText(R.best)}` : ''}`;
   }
   return '';
 }
@@ -279,8 +290,10 @@ function hud() {
   const R = race.rules, show = sail.on && !cine && (R.state === 'count' || R.state === 'on' || (R.state === 'done' && race.doneT > 0));
   race.hud.style.display = show ? 'block' : 'none';
   if (!show) return;
-  const legs = RC.STRETCHES.length;
-  const txt = R.state === 'count' ? `Race · ${Math.ceil(R.t)}...` : `Race ${clockText(R.clock())} · ${R.leg < legs - 1 ? `leg ${R.leg + 1} of ${legs - 1}` : R.state === 'done' ? 'home' : 'the run home'}${R.best ? ` · best ${clockText(R.best)}` : ''}`;
+  // Where she is: the leg she's on and the buoy at its end, the next one (the long way plain to follow).
+  const legs = RC.STRETCHES.length - 1, p = sail.helm.pose, here = stretchAt(p.c, p.r);
+  const where = R.state === 'done' ? 'home' : here === legs ? 'the run home · to the finish line' : here >= 0 ? `Leg ${here + 1} of ${legs} · to buoy ${here + 1}` : R.leg === 0 && p.r < RC.STRETCHES[0].r ? 'the start · to buoy 1' : `Leg ${Math.min(legs, R.leg + 1)} of ${legs}`;
+  const txt = R.state === 'count' ? `Race · ${Math.ceil(R.t)}...` : `Race ${clockText(R.clock())} · ${where}${R.best ? ` · best ${clockText(R.best)}` : ''}`;
   if (race.hud.textContent !== txt) race.hud.textContent = txt;
 }
 /** Each tick at sea (sailing.js, after she's drawn where the helm has her, and the cliff's crane). */
@@ -298,9 +311,11 @@ export function raceTick(dt) {
       if (e.kind === 'go') { toast(STARTER.go); burst(V3(seaX(RC.BUOY[0]), 2.5, seaZ(RC.BUOY[1])), '#cfc6b8', 16, 2); }
       if (e.kind === 'rival') toast(say(STARTER.rival, RACE.RIVAL.SECS));
       if (e.kind === 'quit') toast(STARTER.quit);
+      if (e.kind === 'swept') toast(STARTER.swept[e.snake], true);
       if (e.kind === 'finish') {
         race.doneT = 8;
-        toast(say(e.won ? STARTER.won : STARTER.lost, e.secs));
+        crossed(clockText(e.secs), e.place);
+        toast(say(e.won ? STARTER.won : STARTER.lost, e.secs, e.place));
         if (e.best) { keepBest(e.secs); toast(say(STARTER.best, e.secs)); }
       }
     }
@@ -317,6 +332,7 @@ export function raceTick(dt) {
     }
     // [B] idle in the headwind gap, she's blown back out of it.
     const back = race.drift.tick(dt, h);
+    forageTick(dt);
     if (back) { h.gust([back]); if (!race.said.drift) { race.said.drift = true; toast('The wind\'s blowing her back out of the gap'); } }
   }
   race.doneT -= dt;
@@ -329,12 +345,16 @@ export function raceTick(dt) {
   // Her trip over the neck, on the crane's hook.
   if (race.trip && sail.on) tripTick(dt);
   else if (K().built()) { const tip = W.crane.slew.localToWorld(TIP.clone()), l = W.crane.g.worldToLocal(tip); W.crane.hook.position.set(l.x, l.y - 1, l.z); }
-  // The rival: waiting by the buoy for the count, then round the course at its pace, then moored by the finish.
+  // The start's line and card; the buoys, the next one lit; the finish's banner.
+  startTick(R, sail.on);
+  marksTick(dt, sail.on && R.state === 'on' ? nextBuoy(p.c, p.r) : -1);
+  // The rival: waiting on its spot on the line for the count, then round the course at its pace, then
+  // moored past the finish line.
   const show = sail.on && R.state !== 'off';
   W.rival.visible = show;
   if (show) {
-    const at = R.state === 'count' ? { c: RC.GATE[1][0], r: RC.R0 - 1, a: 0 } : rivalAt(R.clock()), parked = at.home;
-    const c = parked ? RC.FINISH[0] + 2.5 : at.c, r = parked ? RC.FINISH[1] + 0.5 : at.r, a = parked ? 3 : at.a;
+    const at = R.state === 'count' || R.state === 'line' ? rivalSpot() : rivalAt(R.clock()), parked = at.home;
+    const c = parked ? RC.FINISH[0] - 2 : at.c, r = parked ? RC.FINISH[1] : at.r, a = parked ? 3 : at.a;
     W.rival.position.set(seaX(c), Math.sin(t * 0.9 + 1) * 0.06, seaZ(r));
     const want = Math.PI / 2 - a * Math.PI / 2;
     let d = want - W.rival.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d));
@@ -353,6 +373,7 @@ export function raceReset() {
   if (race.trip) { race.trip = null; }
   race.crane = neckCrane();
   doorReset();
+  forageReset();
   if (race.W) {
     for (const g of race.W.crane.parts) g.removeFromParent();
     race.W.crane.parts = [];
@@ -361,6 +382,9 @@ export function raceReset() {
     for (const ch of [...race.W.g.children]) if (ch.userData.frameOnNeck) race.W.g.remove(ch);
   }
 }
+
+/** The camera, the mouse: on the barrier's Foraging board (den.js, sailing.js). */
+export const raceCam = forageCam, raceHover = forageHover, raceClick = forageClick;
 
 /** A starting point (menus.js): at sea, by the race's buoy. */
 export function raceCheat() {

@@ -37,6 +37,8 @@ import { station, stationShift } from './den/sail-station.js';
 import { crane, craneCam } from './den/crane.js';
 import { doorCam } from './den/door.js';
 import { umami, umamiTick, umamiCam, umamiClick } from './den/capybara.js';
+import { forage as raceForage } from './den/race-forage.js';
+import { raceCam, raceClick } from './den/race.js';
 import { net, online, guest, isHost, send, updateMates, sendMe, snapshot, followRaider, sendSync, onNet, joinCrew, leaveCrew } from './den/crew.js';
 import { spouse, spouseTick } from './den/spouse.js';
 import { wed, weddingKey, weddingDown, weddingMove, weddingUp, weddingWheel, weddingTick, weddingCam } from './den/wedding.js';
@@ -213,6 +215,7 @@ addEventListener('mouseup', (e) => {
   if (e.button !== 2 || !drag) return;
   if (drag.deco) { if (!drag.moved) decoClick(drag.deco); drag = null; return; }
   if (!drag.moved && umami.on) umamiClick(e.clientX, e.clientY, 2);
+  else if (!drag.moved && raceForage.on) raceClick(e.clientX, e.clientY, 2);
   else if (!drag.moved && gunnery.on) gunneryRub(e.clientX, e.clientY);
   else if (!drag.moved && patch.on && patch.hand) patchTurn(flip);
   else if (!drag.moved && carry && !G.over) turn(flip, 0);
@@ -688,8 +691,9 @@ function update(dt) {
     d = Math.atan2(Math.sin(d), Math.cos(d));
     yaw = y0 + d * haulView;
   }
-  // Freeing Umami: straight on to his bank and its board (js/den/capybara.js).
-  const uc = umamiCam();
+  // Freeing Umami: straight on to his bank and its board (js/den/capybara.js); or clearing the race's
+  // barrier of driftwood, its board the same (js/den/race-forage.js).
+  const uc = umamiCam() || raceCam();
   forageView += ((uc ? 1 : 0) - forageView) * Math.min(1, dt * 3);
   if (forageView > 0.001 && uc) {
     look.lerp(uc.look, forageView);

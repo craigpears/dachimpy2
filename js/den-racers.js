@@ -20,8 +20,8 @@
      (more by Gunnery, up to FIELD.HOLD). A hit holes her: she's dazed, still, till she's patched by
      Carpentry (src/den-patch.ts), as any hit at sea; she's never knocked out. A dazed racer can't be hit
      again till she's patched (Helm.hit).
-   - Sheltered (SHELTER): in a lock's chamber or the canal between its walls, or alongside the crane's
-     ledge behind the neck, nobody's broadside reaches her. Everywhere else on the course she's in the
+   - Sheltered (SHELTER): in a lock's chamber or the canal between its walls, the berth by its way in,
+     the crane's notch, or the notch in front of the barrier of driftwood, nobody's broadside reaches her. Everywhere else on the course she's in the
      open: stopped there, she's a sitting duck for whoever comes by. */
 import { LAY, SAIL, broadside } from './den-sail.js';
 const RC = LAY.RACE;
@@ -33,8 +33,8 @@ export function stretchAt(c, r) {
         return -1;
     return RC.STRETCHES.findIndex((s) => r === s.r || r === s.r + 1);
 }
-/** The finish: where the trade wind home drops her. */
-export const atFinish = (c, r) => c === RC.FINISH[0] && r === RC.FINISH[1];
+/** Over the finish line: on the run home, at or past the line across it (it's sailed to the left). */
+export const atFinish = (c, r) => r === RC.FINISH[1] && c >= 1 && c <= RC.FINISH[0];
 export const FIELD = {
     /** Racers on one course. */
     LEAST: 2,
@@ -43,12 +43,15 @@ export const FIELD = {
         holds: her Gunnery board's four guns, two a side (src/den-guns.ts), counted together here. */
     SHOTS: 2,
     HOLD: 4,
-    /** The squares that are one racer's at a time: each lock's chamber, and the crane's ledge. */
-    SPOTS: { 'lock-up': RC.LOCKS[0].at, 'lock-down': RC.LOCKS[1].at, crane: RC.CRANE.LEDGE },
+    /** The squares that are one racer's at a time: each lock's chamber, the crane's ledge, and the notch
+        in front of the barrier of driftwood. */
+    SPOTS: { 'lock-up': RC.LOCKS[0].at, 'lock-down': RC.LOCKS[1].at, crane: RC.CRANE.LEDGE, forage: RC.FORAGE.NOTCH },
 };
 /** Sheltered squares: nobody's broadside reaches a racer on one (the locks' chambers and the canal
-    between them, the crane's ledge). */
-export const SHELTER = new Set([...RC.LOCKS.map((l) => l.at), ...RC.POUND.at, RC.CRANE.LEDGE].map(([c, r]) => key(c, r)));
+    between them, the berth beside the up lock's way in where she waits her turn, the crane's ledge in
+    its notch, and the notch in front of the barrier of driftwood: each tucked into the spit, off the
+    leg). */
+export const SHELTER = new Set([...RC.LOCKS.map((l) => l.at), ...RC.POUND.at, RC.BERTH, RC.CRANE.LEDGE, RC.FORAGE.NOTCH].map(([c, r]) => key(c, r)));
 export const sheltered = (c, r) => SHELTER.has(key(Math.round(c), Math.round(r)));
 /** What a racer's doing sets whether a shot can hit her: not once she's home, nor while she's carried,
     nor dazed already (patching), nor sheltered. */

@@ -33,7 +33,7 @@ import { tzzWorld, tzzTick, tzzHail, tzzPrompt, tzzReset } from './balloon-isle.
 import { empireWorld, empireTick, empirePrompt, empireReset } from './imperial-isle.js';
 import { primatesTick, primatesReset } from './moored.js';
 import { smugglersWorld, smugglersTick, smugglersPrompt, smugglersReset } from './smugglers.js';
-import { raceWorld, raceTick, raceKey, racePrompt, raceShot, raceHolds, raceReset } from './race.js';
+import { raceWorld, raceTick, raceKey, racePrompt, raceShot, raceHolds, raceReset, raceHover, raceClick } from './race.js';
 
 // The old sloop's at anchor in the cove from the moment the siege is over, while their ship makes
 // sail in the background (the user, 9 Nov: "I'm sat here quite a while waiting for his sloop to sail
@@ -141,6 +141,7 @@ function seaCellAt(x, y) {
 }
 export function sailClick(x, y) {
   if (umamiClick(x, y)) return;   // (his board, and poling her along the lagoon's shore: capybara.js)
+  if (raceClick(x, y)) return;   // (the race's barrier of driftwood, its Foraging board: race-forage.js)
   if (patch.on) { patchClick(x, y); return; }
   if (hold.mode) { holdHover(x, y); holdSwap(); return; }
   if (rowing.on) { rowHover(x, y); rowSwap(); return; }
@@ -152,7 +153,7 @@ export function sailClick(x, y) {
   else if (sail.helm.via) toast('She\'ll ride the trade winds: the pin\'s where they drop her off');
 }
 export function sailHover(x, y) {
-  if (umamiHover(x, y)) { sail.hover = null; return; }
+  if (umamiHover(x, y) || raceHover(x, y)) { sail.hover = null; return; }
   if (patch.on) { patchHover(x, y); sail.hover = null; return; }
   if (hold.mode) { holdHover(x, y); sail.hover = null; return; }
   if (rowing.on) { rowHover(x, y); sail.hover = null; return; }
