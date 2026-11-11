@@ -384,7 +384,13 @@ the site (`.assetsignore` skips `*.md`).
   they are at each puzzle (Kikkit always for the Vegas at the whirlpools, Tzz steady Sailing another way, a
   carpenter for the crane...), played as real moves where the puzzles have bots (tools/sail-bots.mjs,
   row-bots, nav-bots), so they're the testers as well. Each looks as they do elsewhere (one look
-  everywhere), with a line or two on the way.
+  everywhere), with a line or two on the way. Umami the capybara too, with a Foraging slant ("the umami, the capybara ...
+  obviously you will have maybe like the foraging slant").
+- **A Foraging shortcut on the race course (11 Nov):** "Did you get foraging in? ... you'd be like,
+  macheteing through a forest to get through that way. That could definitely work." The first draft has
+  none. So a channel choked with jungle, overhanging trees and fallen trunks across a spit, cleared by
+  Foraging (src/foraging.ts, the one implementation) to open the way through: a stopped-dead shortcut,
+  like the locks and the crane. Umami's way round, naturally.
 
 ## Spotted along the way (not asked for)
 
