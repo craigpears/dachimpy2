@@ -343,7 +343,10 @@ the site (`.assetsignore` skips `*.md`).
   I'm near the finish line. If I accidentally misclick, like it's like a too wide lane, isn't it? So if I
   accept the idea that I could accidentally misclick and be pushed into the trade winds that send you back
   right to the very start or something." So the run home narrow, hard by a wind that sweeps her all the
-  way back to the start: the last snake, the biggest, with the finish in sight.
+  way back to the start: the last snake, the biggest, with the finish in sight. (A snake's sting grows down the
+  course: the gun gap's, near the start, costs little, "already a bit more balanced because it's right
+  near the start of the course anyway"; one by the finish costs the lot. Where the shoot-away rocks go,
+  if they come, matters the same way: IDEAS.md.)
 - **A ceremonious finish line (11 Nov):** "Obviously, you need a more ceremonious finish goal line for
   sure." A proper finish: a line across the water between two markers, flags or a banner, and a moment
   when you cross it (your time, and the rival's).
