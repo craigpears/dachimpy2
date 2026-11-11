@@ -288,6 +288,16 @@ the site (`.assetsignore` skips `*.md`).
   later." So rocks round Port Decorum's back, the open sea shut off there, and a smugglers' beach in a
   cove behind it, reached only through the whirlpools by way of Penguin Island; nothing to do there yet
   (smuggling, and Helium's rum, plug in later).
+- **Port Decorum's towers are gun turrets, too many and too fast to take on (11 Nov):** "those big square
+  towers there should be some gunnery turrets on [Port Decorum] ... maybe it's like he gives a bit more of a
+  warning again, that little just the guy on the dock, no need for a big cinematic, we've already
+  established it. Well, I think that gives it a bit of the right vibe, is this is just a no access area,
+  but the guns are also what enforces that. That maybe here there are so many guns and they're just so much
+  faster that, you know, you've just not got any chance really of destroying them ... they can be the same
+  style as the same [turrets], but a slightly different skin ... if you try messing with them, you just get
+  taken down so instantly." So the fort's towers carry the checkpoint's kind of gun turret, in a skin of
+  their own, many of them and far quicker; the jetty guard warns you off (a line, no cutscene); try anything
+  and you're sunk at once.
 
 ## Spotted along the way (not asked for)
 
