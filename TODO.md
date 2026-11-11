@@ -170,6 +170,8 @@ the site (`.assetsignore` skips `*.md`).
     I don't know if there's anything we can do about that." The white Berserker pelt hides her
     face. Sit it as Puzzle Pirates' does, the bear's head up on top, its jaw over her brow, so her
     face shows (fixed in the pelt itself, so it's right everywhere it's worn).
+  - **The easel sticks through her canvas:** "when [Gravee] is painting ... the easel is sticking
+    through the canvas." The canvas sits in front of the easel's wood (fixed in the shared easel).
   - **The Count's watching eyes, a piece of their own:** "The vampire portrait that's following
     you definitely needs to be a normal thing." Any portrait in any scene can have eyes that follow
     you (the Count's, a pirate's), a shared piece, not code in her house. The bat's flight round
