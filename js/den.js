@@ -26,7 +26,8 @@ import { cine, cineCam, cineView, cineEnd, cineTick, cineLets } from './den/cine
 import { dignityTick, dignityReset } from './den/dignity.js';
 import { sail } from './den/sea.js';
 import { landingTick } from './den/landing.js';
-import { nearSloop, board, ashore, sailReset, sailClick, sailHover, sailKey, sailTick } from './den/sailing.js';
+import { nearSloop, board, ashore, sailReset, sailClick, sailHover, sailKey, sailTick, sailOffer } from './den/sailing.js';
+import { startMark } from './den/start-mark.js';
 import { patch, deckHoleShape, patchTurn, patchPlace, patchKey } from './den/sea-puzzles.js';
 import { hold, holdSwap } from './den/lock.js';
 import { haul, haulKey, haulHover, haulSwap, haulTick, haulCam } from './den/treasure.js';
@@ -358,6 +359,8 @@ function tick() {
 }
 function frame() {
   tick();
+  // Something new to start, offered on the thing itself where you're looking (js/den/start-mark.js).
+  startMark(sailOffer(), paused || cheats.open || G.over || !!cine || chart.on || deco.on || dress.open || lodgings.open || wed.on || house.on, 1 / 60);
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }
@@ -849,6 +852,6 @@ if (startHere && !online() && !startAt(startHere)) toast(`No starting point call
 
 // For poking at it from the console.
 window.den = { rowing, rowPull, tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { worldLets.myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, swordReward, swordBreak, lumber, toLumber, repairAll, newGame, raiders, G, get carry() { return carry; }, get patch() { return patch; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
-  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, hold, holdSwap, board, ashore, patch, patchKey, patchPlace, deckHoleShape, haul, haulSwap, crane, gunnery, umami, wed, spouse, house, houseEnter, lodgingsOpen,
+  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, station, hold, holdSwap, board, ashore, patch, patchKey, patchPlace, deckHoleShape, haul, haulSwap, crane, gunnery, umami, wed, spouse, house, houseEnter, lodgingsOpen,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };

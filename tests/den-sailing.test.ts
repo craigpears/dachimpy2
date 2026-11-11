@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { Helm, LAY, SAIL, Sea, type Pose, type SailEvent } from '../src/den-sail';
 import { WEATHER, Wind } from '../src/den-wind';
-import { SPARKLE, Sparkle, carry, carrySay, gustPath, sparkleFor } from '../src/den-sailing';
+import { BILLOW, SPARKLE, Sparkle, billow, carry, carrySay, gustPath, sparkleFor } from '../src/den-sailing';
 import { runFor } from '../src/sailing';
 
 /** Open sea: no rocks, no lanes, no wind to put her in irons (every move SAIL.MOVE). */
@@ -242,5 +242,22 @@ describe('doing well shows (Sparkle; the user, 11 Nov: "a sparkly indicator, and
     s.booch();
     expect(s.meter).toBeLessThan(0.3);
     expect(s.level).toBe(0);
+  });
+});
+
+describe('Sailing\'s sparkle seen from behind her (11 Nov: from the usual camera a Vegas\'s billow barely showed)', () => {
+  it('a Vegas swells her sails wider and taller, so they read bigger from anywhere, and deepens their belly', () => {
+    const b = billow(1);
+    expect(b.wide * b.tall).toBeGreaterThanOrEqual(1.5);   // (their face, as the camera behind her sees it)
+    expect(b.fill).toBeGreaterThan(BILLOW.FULL_WIND);   // (fuller than the best wind fills them)
+    expect(b.square).toBe(1);   // (square across her, facing the camera behind her full on)
+  });
+  it('no show, no change: the wind alone shapes them', () => {
+    expect(billow(0)).toEqual({ wide: 1, tall: 1, fill: 0, square: 0 });
+  });
+  it('a Double swells them a little, less than a Vegas', () => {
+    const d = billow(sparkleFor(2)), v = billow(sparkleFor(6));
+    expect(d.wide).toBeGreaterThan(1);
+    expect(d.wide).toBeLessThan(v.wide);
   });
 });

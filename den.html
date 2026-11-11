@@ -27,6 +27,16 @@
     .prompt.act { font-size: 22px; padding: 10px 20px; border-width: 2px; color: #fff3c4; box-shadow: 0 0 0 2px rgba(255, 210, 58, 0.25), 0 0 22px rgba(255, 210, 58, 0.45); white-space: normal; text-align: center; max-width: 100%; box-sizing: border-box; }
     .prompt.pulse { animation: prompt-pulse 0.9s ease-out 2; }
     @keyframes prompt-pulse { 0% { transform: scale(1); } 30% { transform: scale(1.12); box-shadow: 0 0 0 4px rgba(255, 210, 58, 0.5), 0 0 34px rgba(255, 210, 58, 0.8); } 100% { transform: scale(1); } }
+    /* Something new to start, offered on the thing itself where you're looking: click it, or Space (js/den/start-mark.js). */
+    .startmark { position: fixed; z-index: 4; display: none; transform: translate(-50%, calc(-100% - 14px)); pointer-events: auto; cursor: pointer; font: 700 20px 'Alegreya', serif; color: #fff3c4; background: rgba(42, 28, 17, 0.92); border: 2px solid var(--gold); border-radius: 12px; padding: 6px 12px 6px 16px; white-space: nowrap; box-shadow: 0 0 0 2px rgba(255, 210, 58, 0.25), 0 0 22px rgba(255, 210, 58, 0.45); }
+    .startmark::after { content: ''; position: absolute; left: 50%; bottom: -12px; margin-left: -10px; border: 10px solid transparent; border-top-color: var(--gold); border-bottom: 0; }
+    .startmark:hover { background: #4a3420; }
+    .startmark kbd { font: 700 13px 'Alegreya Sans'; color: var(--ink); background: #3b2a1b; border: 1px solid #6b4e32; border-radius: 4px; padding: 0 5px; margin-left: 10px; vertical-align: 2px; }
+    .startmark.pulse { animation: mark-pulse 0.9s ease-out 2; }
+    @keyframes mark-pulse { 30% { box-shadow: 0 0 0 4px rgba(255, 210, 58, 0.5), 0 0 34px rgba(255, 210, 58, 0.8); scale: 1.12; } }
+    @media (pointer: coarse) { .startmark kbd { display: none; } }
+    @media (max-width: 640px) { .startmark { font-size: 16px; padding: 5px 10px; } }
+    body.cine .startmark, body.reading .startmark { display: none !important; }
     /* At sea: Battle Navigation's move tokens (this turn, then the next), and none of the den's crates or keys. */
     .sailhud { display: none; flex-direction: column; align-items: center; gap: 6px; background: var(--panel); border: 1px solid #5a412a; border-radius: 10px; padding: 8px 14px; }
     body.sailing .sailhud { display: flex; }
@@ -142,6 +152,9 @@
     @media (max-width: 620px) { .credit { top: auto; bottom: 2px; left: 0; right: 0; max-width: none; text-align: center; } .credit br { display: none; } .dock { bottom: 30px; } }
     .toast { position: fixed; top: 18%; left: 50%; transform: translateX(-50%); font: 700 34px 'Alegreya', serif; color: var(--gold); text-shadow: 0 2px 0 #000, 0 0 18px rgba(0,0,0,.8); pointer-events: none; opacity: 0; transition: opacity .3s; }
     .toast.on { opacity: 1; }
+    /* With the Sailing board out, toasts stay off it, in the sea it leaves (js/den/sail-station.js, seaToast); on a tall screen smaller, under the panel. */
+    body.sailing.sailboard .toast { left: var(--sea-mid, 50%); top: var(--sea-top, 18%); width: max-content; max-width: var(--sea-w, 90vw); text-align: center; }
+    body.sailing.sailboard.sailtall .toast { font-size: 18px; text-shadow: 0 1px 0 #000, 0 0 10px rgba(0,0,0,.9); }
     .toast.bad { color: var(--bad); }
     .intro { position: fixed; top: 45%; left: 50%; transform: translateX(-50%); background: var(--panel); border: 1px solid var(--gold); border-radius: 10px; padding: 12px 18px; text-align: center; font-size: 18px; line-height: 1.4; transition: opacity .6s; pointer-events: none; }
     .intro.off { opacity: 0; }
@@ -504,7 +517,7 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.SNNIJ2TJ.js');
+    import(local ? './js/den.js' : './js/den.PIXSKKNF.js');
   </script>
 </body>
 </html>

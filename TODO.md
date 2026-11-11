@@ -109,19 +109,6 @@ the site (`.assetsignore` skips `*.md`).
   balloon lesson on her island (built, to be played: RULES.md, "Tzz's balloon lesson"); the ending: Kikkit moves to Vegas Island, the penguins' island
   past the reef, her familiars swimming after your ship (11 Nov, IDEAS.md).
 
-- **Sailing's sparkle, two small things (11 Nov, seen when it was built):** from behind her, the
-  camera sees her sails nearly edge-on, so a Vegas's billow barely shows; and on a phone the den's
-  big toast covers the Sailing board for a moment after a chain.
-
-- **Start something where you're looking, not at the foot of the screen (10 Nov):** "Still got to
-  fix that carpentry hauling up thing. Like, it should be in the middle of the screen where I'm
-  looking so that I can click on it and start it. It should not be a space along the bottom ...
-  it's not in my eye line at all." (Making the prompt at the bottom bigger and glowing, RULES
-  "Something new to do stands out", wasn't enough.) So when there's something new to start (build
-  the crane, haul her up, and the like), the offer is in the view where you're looking, at the
-  thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
-  still works. Starting with the crane, after the Umami work in the same file.
-
 - **Paint your ship (11 Nov, for later):** "we definitely need that on the to-do, being able to
   paint your ship somewhere. Maybe ... some character later on an island ... will let you paint
   your ship. I don't know who yet." Her colours (hull, sails, trim) chosen somewhere at sea, from a

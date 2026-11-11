@@ -595,6 +595,23 @@ export function cranePrompt() {
   }
   return '';
 }
+/* What there is to start here, offered on the thing itself where you're looking (js/den/start-mark.js;
+   the user, 10 Nov: "it should be in the middle of the screen where I'm looking so that I can click
+   on it and start it"): building the crane, on its chalked frame on the ledge; hauling her up, and
+   lowering her down, on the hook; the lagoon's wreck, over it. A click does what Space does. */
+export function craneOffer() {
+  if (!sail.on || crane.hoist || K().trip || (patch.on && patch.at === away)) return null;
+  const go = () => craneKey(' ');
+  const hook = () => crane.W.hook.position.clone().setY(crane.W.hook.position.y - 0.3);
+  if (K().where === 'lagoon') {
+    if (K().canHaulWreck()) return { at: V3(REST.x - 7, WATER + 0.4, REST.z - 0.4), label: 'Haul up the wreck\'s treasure', go };
+    return { at: hook(), label: 'Lower her down to the cove', go };
+  }
+  if (!K().alongside(sail.helm)) return null;
+  if (K().built()) return { at: hook(), label: 'Haul her up the cliff', go };
+  const next = PART_NAME[CRANE.PARTS[K().up].name];
+  return { at: V3(FRAME_AT.x, LEDGE_Y + 0.3, FRAME_AT.z), label: K().frame || K().up ? `Back to building its ${next}` : 'Build a crane here', go };
+}
 // Your hands on the ropes while you haul a frame up, on the clifftop at the back of the ledge.
 const haulHands = () => V3(pirate.x + 0.35, HT + 1.0, pirate.z);
 // Hauling a frame up: a leap up from the ledge onto the clifftop as it's sawn, then hand over hand.

@@ -23,8 +23,8 @@ import { sailView, patchView, setPaused, denLets } from '../den.js';
 import { WIND } from '../den-wind.js';
 import { windTick, windSay, windHud, oarsHud, windSig, rowToggle, headwindPrompt } from './wind.js';
 import { rowing, rowShut, rowKey, rowHover, rowSwap, rowTick, rowPrompt, rowShown } from './rowing.js';
-import { craneKey, cranePrompt, craneHolds, craneTick, craneReset, craneWorld } from './crane.js';
-import { umami, umamiKey, umamiClick, umamiHover, umamiPrompt, umamiReset } from './capybara.js';
+import { craneKey, cranePrompt, craneOffer, craneHolds, craneTick, craneReset, craneWorld } from './crane.js';
+import { umami, umamiKey, umamiClick, umamiHover, umamiPrompt, umamiOffer, umamiReset } from './capybara.js';
 import { isleWorld, isleTick, isleAshore, canLandIsle } from './isle.js';
 import { station, stationKey, stationToggle, stationTick, stationPrompt, stationReset } from './sail-station.js';
 import { kikkitWorld, kikkitTick, kikkitShown, kikkitHail, kikkitPrompt, kikkitHolds, kikkitReset } from './whirlpools.js';
@@ -230,6 +230,20 @@ export function sailPrompt() {
   if (h.pin) return h.oars ? 'Rowing to the pin' : 'Under way to the pin';
   if (h.slot >= 0) return 'Under way';
   return 'Click the sea to drop a pin, or put in moves with W A D · Q E: fire · 1: Sailing · 2: load her guns (Gunnery) · 3: oars';
+}
+/* What there is to start just now, offered on the thing itself where you're looking (js/den/start-mark.js:
+   the user, 10 Nov, "it should be in the middle of the screen where I'm looking so that I can click on
+   it and start it"), as the prompt offers it, in the prompt's order: boarding her, from the jetty; at sea
+   freeing Umami, the crane's starts, the old wreck's treasure. A click does what Space does. */
+export function sailOffer() {
+  if (nearSloop()) return { at: sail.g.localToWorld(V3(0.3, SLOOP_DECK + 1.6, 0)), label: 'Board the old sloop', go: board };
+  if (!sail.on || haul.on || rowing.on || gunnery.on || station.on || patch.on || hold.mode) return null;
+  const go = () => sailKey(' ');
+  if (umamiPrompt()) return umamiOffer();
+  if (cranePrompt()) return craneOffer();
+  if (sail.helm.held() || canLand(sail.helm) || canLandIsle(sail.helm) || !canHaulWreck()) return null;
+  const w = sail.sea.wreck;
+  return w ? { at: V3(seaX(w[0]), 0.8, seaZ(w[1])), label: 'Haul up its treasure (Treasure Haul)', go } : null;
 }
 // This turn's tokens (the one being sailed lit) and the next turn's, yours in gold.
 function sailHud() {
