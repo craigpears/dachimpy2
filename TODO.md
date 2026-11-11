@@ -288,6 +288,14 @@ the site (`.assetsignore` skips `*.md`).
   kind of stuff. Just proof of concepts around those things ... that can certainly be the place for a few
   more puzzles." For now: the island itself, at sea, to sail up to and look at, nothing to do there yet.
   (IDEAS.md, "An imperial island".)
+- **A piece in its target should become a solid square, and empty targets look full (11 Nov, Tzz again):**
+  comparing with a video of a real Vegas: "when you slot something into the platform visually ... it goes
+  from a circle to almost, it almost slots in perfectly, like it's a solid square of color ... [ours] just
+  look like they're kind of hanging on the background. There's not that same visual impact." And the
+  empty targets read as filled: "I thought she'd completely filled the platform. Why is it not being set
+  off? ... I think it's all visual." So a piece in a target of its colour is drawn as a solid square of
+  that colour, and an empty target plainly empty (an outline, nothing that looks like a piece). The
+  same board everywhere. And on Tzz's island: "that [sailing] puzzle can be a bit bigger. It's very tiny."
 
 ## Spotted along the way (not asked for)
 
