@@ -31,7 +31,8 @@
    get past the checkpoint: that's yours to find. The ways past Dalnoth himself (sword, gun, flooding
    him out) come back onto it when his hideout's built (STORY.md). */
 import { LAY, SAIL } from './den-sail.js';
-import { ISLE, isleShore } from './den-isle.js';
+import { ISLE, isleShore, shoreOf } from './den-isle.js';
+import { KIKKIT, kikkitShore } from './den-kikkit.js';
 export const MAP = {
     /** Where it lies on the beach, across from the gate's middle (the pumps are off to the right) and
         out from the wall (metres; the wall's at 0, out is -). */
@@ -103,6 +104,15 @@ export const CHART = {
         jetty: [...LAY.ISLE.JETTY],
         chapel: [19.3, 11.9],
     },
+    /** Kikkit's island (11 Nov), at the reef's near end, in plain sight, so on the map and named; the
+        rocks round her big whirlpools with the reef's (the whirlpools themselves aren't drawn: what's
+        there is for you to find); and Vegas Island, the penguins', drawn only once you've been there
+        (js/den/map.js: "hidden gems are never hinted"). */
+    kikkit: {
+        shore: kikkitShore().map(([c, r]) => [c - 0.5, r - 0.5]),
+        reef: LAY.KIKKIT.REEF.map(([c, r]) => [c, r]),
+        vegas: shoreOf(LAY.KIKKIT.VEGAS).map(([c, r]) => [c - 0.5, r - 0.5]),
+    },
 };
 /** Where the X is: on the old wreck beyond the checkpoint. */
 export const X_AT = [...LAY.WRECK];
@@ -127,7 +137,11 @@ export const NOTES = [
     { label: 'Reef', at: [LAY.CHECKPOINT.REEF.c1 - 2, LAY.CHECKPOINT.ROW + 1.1] },
     { label: 'Headland', at: [(LAY.CHECKPOINT.HEADLAND.c0 + LAY.CHECKPOINT.HEADLAND.c1) / 2, LAY.CHECKPOINT.HEADLAND.r0 + 1] },
     { label: 'Cliffs', at: [(LAY.PLATEAU.c0 + LAY.PLATEAU.c1) / 2, (LAY.PLATEAU.r0 + LAY.PLATEAU.r1) / 2] },
-    { label: 'The open sea', at: [LAY.CHECKPOINT.REEF.c0 + 3, LAY.CHECKPOINT.ROW + 3.6] },
+    // (out to the right of Kikkit's whirlpools since 11 Nov: where it was, Vegas Island is, once found)
+    { label: 'The open sea', at: [LAY.CHECKPOINT.REEF.c1 - 2, LAY.CHECKPOINT.ROW + 4] },
     { label: 'An old wreck', note: 'aground on a sandbar', at: [LAY.WRECK[0] + 5.5, LAY.WRECK[1] - 0.2] },
     { label: ISLE.NAME, at: [17.4, 8.2] }, // (under it, clear of the compass)
+    { label: KIKKIT.NAME, at: [19.8, 14.7] }, // (on the near side of it, clear of the reef's name)
 ];
+/** Vegas Island's name, written once you've been there (js/den/map.js). */
+export const VEGAS_NOTE = { label: KIKKIT.VEGAS, at: [15.6, 24.8] };

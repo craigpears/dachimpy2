@@ -49,7 +49,8 @@ describe('the den\'s a lot to take in for a demo (10 Nov)', () => {
     expect(QUESTS_TITLE).toBe('Quests');
     const all = lines(none);
     expect(all.filter((q) => !q.secret).map(questLine)).toEqual(['Build the walk along the wall', 'Build the stairs up to it', 'Build the gun tower', 'Build yer shack', 'Haul up the treasure at the X', "See what's afoot on the Wedding Isle"]);
-    expect(all.filter((q) => q.secret).map(questLine)).toEqual(['Ways past the checkpoint: 0 of 2', 'Hidden places: 0 of 2', 'Secret treasure: 0 of 1', 'A friend to rescue: 0 of 1']);
+    // (11 Nov: Kikkit's whirlpools a third way past, through the reef; Vegas Island a third hidden place)
+    expect(all.filter((q) => q.secret).map(questLine)).toEqual(['Ways past the checkpoint: 0 of 3', 'Hidden places: 0 of 3', 'Secret treasure: 0 of 1', 'A friend to rescue: 0 of 1']);
   });
 
   it('never names a secret for what it is or the way to it', () => {
@@ -58,9 +59,11 @@ describe('the den\'s a lot to take in for a demo (10 Nov)', () => {
 
   it("'I'm really not even sure how you're getting to four': running, rowing and fighting are all the gate, so it counts routes (11 Nov)", () => {
     const n = (found: string[]) => questLine(line({ ...none, found }, 'Ways past'));
-    expect(n([])).toBe('Ways past the checkpoint: 0 of 2');
-    expect(n(['run', 'row', 'fight'])).toBe('Ways past the checkpoint: 1 of 2');
-    expect(n(['row', 'locks'])).toBe('Ways past the checkpoint: 2 of 2');
+    // (11 Nov: and Kikkit's whirlpools, through the reef, a third: "that's a way for you to get through the reef")
+    expect(n([])).toBe('Ways past the checkpoint: 0 of 3');
+    expect(n(['run', 'row', 'fight'])).toBe('Ways past the checkpoint: 1 of 3');
+    expect(n(['row', 'locks'])).toBe('Ways past the checkpoint: 2 of 3');
+    expect(n(['row', 'locks', 'whirlpools'])).toBe('Ways past the checkpoint: 3 of 3');
   });
 
   it('ticks each off as it\'s done, and keeps it on the list', () => {
@@ -68,9 +71,9 @@ describe('the den\'s a lot to take in for a demo (10 Nov)', () => {
     expect(done(line(p, 'Build the walk'))).toBe(true);
     expect(done(line(p, 'Build the gun tower'))).toBe(false);
     expect(done(line(p, 'Build yer shack'))).toBe(true);
-    expect(questLine(line(p, 'Ways past'))).toBe('Ways past the checkpoint: 1 of 2');
+    expect(questLine(line(p, 'Ways past'))).toBe('Ways past the checkpoint: 1 of 3');   // (of 3 since Kikkit's whirlpools, 11 Nov)
     expect(done(line(p, 'Ways past'))).toBe(false);
-    expect(questLine(line(p, 'Hidden places'))).toBe('Hidden places: 1 of 2');
+    expect(questLine(line(p, 'Hidden places'))).toBe('Hidden places: 1 of 3');   // (of 3 since Vegas Island, 11 Nov)
     expect(done(line(p, 'A friend'))).toBe(true);
     const all: Progress = { ...p, tower: true, x: true, lagoonChest: true, wedding: true, found: [...WAYS, ...PLACES] };
     expect(lines(all).every(done)).toBe(true);

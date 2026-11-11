@@ -18,6 +18,7 @@ import { sail } from './sea.js';
 import { CRANE } from '../den-crane.js';
 import { craneCheat } from './crane.js';
 import { umamiCheat } from './capybara.js';
+import { kikkitCheat } from './kikkit.js';
 import { board, sailReset } from './sailing.js';
 import { station, stationToggle } from './sail-station.js';
 import { online, guest, myId, send } from './crew.js';
@@ -327,6 +328,9 @@ export function dressRows() {
     toggle(row('Hook'), L.hook, look('hook'));   // (for the left hand, as Mischievious has)
     chooser(row('Earrings'), EARRINGS, L.earring, look('earring'));
     toggle(row('Smile'), L.smile, look('smile'));
+    toggle(row('Tongue out'), L.tongue, look('tongue'));   // (Kikkit's, as are the tattoos and the wristband)
+    toggle(row('Tattoos'), L.tattoos, look('tattoos'));
+    toggle(row('Wristband'), L.wristband, look('wristband'));
   } else if (dress.tab === 'clothes') {
     slot('Hat', 'hat'); slot('Top', 'top'); slot('Waist', 'waist'); slot('Legs', 'legs'); slot('Feet', 'feet'); slot('In hand', 'hand');
     box.append(el('p', 'note', `Clothes and dyes from the Puzzle Pirates tailor, and everything ${Object.keys(PIRATES).join(' and ')} wear.`));
@@ -547,6 +551,14 @@ function cheatUmami() {
   craneCheat((cells) => tileFor(cells, []));
   umamiCheat();
 }
+/* Kikkit's island (js/den/kikkit.js): out to sea, off her island (she rambles as you come up); or at
+   her whirlpools' mouth, facing the reef, the rigging out (the whirlpools' own easy board). */
+function cheatKikkit(where) {
+  if (cine) return;
+  if (!sail.on) cheatSail();
+  kikkitCheat(where);
+  if (where === 'mouth' && !station.want) stationToggle();
+}
 /* Mischievious's wedding (js/den/wedding.js): the siege put to rest and their ship gone, and off to
    her island. */
 function cheatWedding() {
@@ -596,6 +608,8 @@ const CHEATS = [
   ["Dignity's scene", cheatDignity, 'dignity'],
   ["Umami's rescue", cheatUmami, 'umami'],
   ['The Wedding Isle', cheatWedding, 'wedding'],
+  ["Kikkit's island", () => cheatKikkit('off'), 'kikkit'],
+  ["Kikkit's whirlpools", () => cheatKikkit('mouth'), 'whirlpools'],
   ['Home, married', cheatMarried, 'married'],
 ];
 /* Every starting point has a link, to share (the user, 10 Nov: "make it so that each starting point

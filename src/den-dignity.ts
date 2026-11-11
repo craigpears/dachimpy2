@@ -146,6 +146,7 @@ export function heard(e: CheckEvent | ShotAt): Later | null {
   if ('on' in e) return e.on === 'gun' && e.did === 'wrecked' ? 'wrecked' : null;
   if (e.kind !== 'through') return null;
   if (e.how === 'gate') return 'passed';
+  if (e.how === 'whirlpools') return null;   // (out of her sight, and nobody would believe it)
   return e.back ? null : 'canal';
 }
 

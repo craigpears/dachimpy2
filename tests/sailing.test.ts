@@ -1,7 +1,7 @@
 /* The Sailing puzzle's rules, as YPPedia gives them ("Sailing", "Sail scoring", "Chain", read 10 Nov
    2026), and the den's run forward for a chain (the user, 10 Nov). */
 import { describe, expect, it } from 'vitest';
-import { BOOCH_PENALTY, COLOURS, COLOUR_NAMES, DIFFICULTY, H, RUN_TABLE, SPAWN, Sailing, TOP_FREE, W, chainName, multiplier, runFor } from '../src/sailing';
+import { BOOCH_PENALTY, COLOURS, COLOUR_NAMES, DIFFICULTY, EASY, H, RUN_TABLE, SPAWN, Sailing, TOP_FREE, W, chainName, multiplier, runFor } from '../src/sailing';
 import type { Drop, Pair, Piece, Platform, Sail } from '../src/sailing';
 import { seeded } from '../src/mirror-row';
 
@@ -55,6 +55,21 @@ describe('the board', () => {
           expect(p.r <= q.r + q.h && q.r <= p.r + p.h && p.c <= q.c + q.w && q.c <= p.c + p.w).toBe(false);
       }
     }
+  });
+  it("deals easy boards for Kikkit's whirlpools: 'relatively small, easy platforms' (11 Nov), and stays easy", () => {
+    for (let seed = 1; seed <= 40; seed++) {
+      const s = new Sailing(seeded(seed), true, { easy: true });
+      expect(s.easy).toBe(true);
+      expect(s.platforms.length).toBeGreaterThanOrEqual(1);
+      expect(s.platforms.length).toBeLessThanOrEqual(EASY.MOST);
+      for (const p of s.platforms) { expect(p.h).toBe(1); expect(p.w).toBeLessThanOrEqual(EASY.WIDE); }
+      expect(s.grid.flat().some((x) => x?.fixed)).toBe(false);
+      // A fresh board after one's cleared is as easy as ever.
+      s.difficulty = DIFFICULTY.MAX;
+      s.deal();
+      for (const p of s.platforms) { expect(p.h).toBe(1); expect(p.w).toBeLessThanOrEqual(EASY.WIDE); }
+    }
+    expect(new Sailing(seeded(1)).easy).toBe(false);
   });
   it('puts no fixed piece over a target, where it would shut it in', () => {
     for (let seed = 1; seed <= 40; seed++) {

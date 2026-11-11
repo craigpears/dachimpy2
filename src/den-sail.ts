@@ -205,8 +205,9 @@ export const LAY = {
   ] as WindZone[],
   /** Rocks out on the water the board grew into. (Two moved, 11 Nov, for Mischievious's isle
       (ISLE): [16, 13] out to [15, 15], to leave the water off its jetty clear, and [19, 8] to
-      [21, 6], off its near shore, to leave room for its name on the captain's map.) */
-  FAR: [[17, 4], [21, 6], [15, 15], [20, 15], [15, 17], [17, 22], [13, 24], [19, 24], [1, 23]] as [number, number][],
+      [21, 6], off its near shore, to leave room for its name on the captain's map. And one more, 11
+      Nov, for Kikkit's island (KIKKIT): [15, 17] to [12, 17], out of the water off her shore.) */
+  FAR: [[17, 4], [21, 6], [15, 15], [20, 15], [12, 17], [17, 22], [13, 24], [19, 24], [1, 23]] as [number, number][],
   /** Mischievious's isle (11 Nov), where her wedding is (js/den/wedding.js). The user: "on an island
       somewhere ... islands can all have their own little thing out there". In plain sight, out to
       the right of the shipping lanes on the den's side of the checkpoint, so a new player can sail
@@ -228,7 +229,53 @@ export const LAY = {
     MOOR: { c: 16, r: 11, d: 3 } as Pose,
     LANDING: { c0: 14, c1: 16, r0: 9, r1: 13 },
   },
+  /** Kikkit's island and her whirlpools (11 Nov; rules: src/den-kikkit.ts): "another way of getting
+      past the reef, so it should go over there", to the right of the checkpoint's gate, the island
+      on the reef's near side. LAND: her little island, against the reef's right-hand end. LANDING:
+      the water off its left-hand shore, where you hear her out. PASSAGE: the way through, from its
+      MOUTH (just off her shore, facing out to sea), a square at a time as a gust carries her, each
+      [c, r, spin, kind]: spin the quarter turns a whirlpool swings her as she's carried over it
+      (left +, right -: four is right round), kind 'small' (any gust carries her over it), 'big'
+      (only a Vegas's), 'out' (open water beyond the reef: through) or 'penguins' (their water, in
+      the middle of the big ones, a gust's only). The user (11 Nov): "Maybe a small combo gets you
+      through the reef, with the penguins being the bigger prize after." Her ramble is this, taken
+      literally: the little whirlpool in the reef spins her round, "the left, the left, the left,
+      the left"; out the other side; then the big ones, a left, a double backflip, a right: five
+      lefts and a right. REEF: rocks round the big whirlpools and the penguins (the FAR rock at
+      [17, 22] is one of them too). VEGAS: Vegas Island (the user named it, 11 Nov), the little
+      island the penguins live on, beside their water, "reached only by a Vegas". SPAT: where too
+      many lefts leave her, back off her island, spun round to face the den. */
+  KIKKIT: {
+    LAND: [
+      [19, 16], [20, 16],
+      [18, 17], [19, 17], [20, 17], [21, 17],
+      [18, 18], [19, 18], [20, 18], [21, 18],
+    ] as [number, number][],
+    LANDING: { c0: 16, c1: 17, r0: 15, r1: 18 },
+    MOUTH: { c: 17, r: 18, d: 0 } as Pose,
+    PASSAGE: [
+      [17, 19, 4, 'small'],
+      [17, 20, 0, 'out'],
+      [17, 21, 1, 'big'],
+      [16, 21, 4, 'big'],
+      [15, 21, 4, 'big'],
+      [14, 21, -1, 'big'],
+      [14, 22, 0, 'penguins'],
+    ] as [number, number, number, WhirlKind][],
+    REEF: [[14, 20], [15, 20], [16, 20], [13, 21], [18, 21], [13, 22], [16, 22], [14, 23]] as [number, number][],
+    VEGAS: [[15, 22], [15, 23], [16, 23]] as [number, number][],
+    SPAT: { c: 17, r: 16, d: 2 } as Pose,
+  },
 };
+
+/** A square of Kikkit's passage (LAY.KIKKIT.PASSAGE): a whirlpool, small or big, open water beyond
+    the reef, or the penguins' water. */
+export type WhirlKind = 'small' | 'big' | 'out' | 'penguins';
+/** A whirlpool: the quarter turns it swings her as a gust carries her over it (left +), and whether
+    it's a big one (only a Vegas carries her over). */
+export interface Whirl { spin: number; big: boolean }
+/** Her heading after a whirlpool's spin (left +, as path's 'L'). */
+export const spun = (d: number, spin: number): number => (((d - spin) % 4) + 4) % 4;
 
 /** The canal's squares: its locks and the water between them (the hidden cove's too). */
 export function canalAt(c: number, r: number): boolean {
@@ -306,6 +353,11 @@ export class Sea {
   /** The wind she sails by (src/den-wind.ts), if there's one. With none, every move takes
       SAIL.MOVE and goes any way. */
   breeze: Wind | null = null;
+  /** Whirlpools (Kikkit's: LAY.KIKKIT), and water only a gust gets to (her penguins'): neither open
+      to her own moves (sailing into a whirlpool, it has her: src/den-kikkit.ts), but a gust carries
+      her over a whirlpool, turned as it swings her (src/den-sailing.ts, gustPath). */
+  whirls = new Map<string, Whirl>();
+  pockets = new Set<string>();
   /** Squares the scattered rocks keep off: the lanes and everything round them. */
   private keep = new Set<string>();
 
@@ -347,13 +399,20 @@ export class Sea {
     for (const [c, r] of LAY.ISLE.LAND) this.works.add(key(c, r));
     const I = LAY.ISLE.LANDING;
     for (let c = I.c0; c <= I.c1; c++) for (let r = I.r0; r <= I.r1; r++) this.keep.add(key(c, r));
+    // Kikkit's island, land too, and her whirlpools through the reef, the penguins' water among them.
+    for (const [c, r] of [...LAY.KIKKIT.LAND, ...LAY.KIKKIT.VEGAS]) this.works.add(key(c, r));
+    for (const [c, r, spin, kind] of LAY.KIKKIT.PASSAGE) {
+      if (kind === 'small' || kind === 'big') this.whirls.set(key(c, r), { spin, big: kind === 'big' });
+      if (kind === 'penguins') this.pockets.add(key(c, r));
+    }
     this.zones = LAY.ZONES.map((z) => ({ ...z }));
   }
 
   private scatter(roll: () => number) {
     const laid = this.wind.size > 0, K = LAY.CHECKPOINT;
     const reef = laid ? Array.from({ length: K.REEF.c1 - K.REEF.c0 + 1 }, (_, i) => key(K.REEF.c0 + i, K.ROW)) : [];
-    this.rocks = new Set([...this.cliff, ...this.works, ...reef, ...[...LAY.SIDES, ...LAY.FAR, ...LAY.HARBOUR].filter(() => laid).map(([c, r]) => key(c, r))]);
+    // (the reef but where Kikkit's whirlpools run through it; and the rocks round her big ones)
+    this.rocks = new Set([...this.cliff, ...this.works, ...reef.filter((k) => !this.whirls.has(k)), ...[...LAY.SIDES, ...LAY.FAR, ...LAY.HARBOUR, ...LAY.KIKKIT.REEF].filter(() => laid).map(([c, r]) => key(c, r))]);
     const H = SAIL.HOME, COLS = SAIL.SCATTER.COLS, ROWS = SAIL.SCATTER.ROWS;
     for (let n = 0; n < SAIL.CLUMPS; n++) {
       let c = Math.floor(roll() * COLS), r = 2 + Math.floor(roll() * (ROWS - 2));
@@ -432,13 +491,19 @@ export class Sea {
   }
 
   /** A move and what the trade wind does after it. In irons, or blocked, she stays where she is (a
-      turn turning her on the spot): `bump` either way, and `irons` too if it was the wind. */
-  move(p: Pose, m: Move, oars = false): { to: Pose; bump: boolean; ride: Pose[]; irons?: boolean } {
+      turn turning her on the spot): `bump` either way, and `irons` too if it was the wind, `whirl`
+      if it was a whirlpool she'd have sailed into (it has her: src/den-kikkit.ts). */
+  move(p: Pose, m: Move, oars = false): { to: Pose; bump: boolean; ride: Pose[]; irons?: boolean; whirl?: [number, number] } {
     const { cells, to } = path(p, m);
     if (this.irons(p, m, oars)) return { to: { c: p.c, r: p.r, d: m === 'F' ? p.d : to.d }, bump: true, ride: [], irons: true };
     if (cells.every(([c, r]) => this.open(c, r))) return { to, bump: false, ride: this.ride(to) };
-    return { to: { c: p.c, r: p.r, d: to.d }, bump: true, ride: [] };
+    const into = cells.find(([c, r]) => !this.open(c, r));
+    const whirl = into && this.whirls.has(key(...into)) ? { whirl: into } : {};
+    return { to: { c: p.c, r: p.r, d: to.d }, bump: true, ride: [], ...whirl };
   }
+
+  /** The whirlpool on this square, if there's one. */
+  whirlAt(c: number, r: number): Whirl | undefined { return this.whirls.get(key(c, r)); }
 
   /** The seconds a move takes: at the oars (a square on its own: see Helm for a pile of them), or
       under sail in the wind there is, by how she lies to it on the way (a turn's two squares
@@ -459,7 +524,8 @@ export class Sea {
 
   /** On the board and not a rock. */
   open(c: number, r: number): boolean {
-    return c >= 0 && c < this.cols && r >= 0 && r < this.rows && !this.rocks.has(key(c, r));
+    const k = key(c, r);
+    return c >= 0 && c < this.cols && r >= 0 && r < this.rows && !this.rocks.has(k) && !this.whirls.has(k) && !this.pockets.has(k);
   }
 
   isRock(c: number, r: number): boolean { return this.rocks.has(key(c, r)); }
@@ -689,7 +755,7 @@ export function poseAt(p: Pose, m: Move, u: number, bump = false): { c: number; 
     bumped), or she got to the pin. */
 export type SailEvent =
   | { kind: 'turn'; moves: Move[] }
-  | { kind: 'move'; i: number; m: Move; from: Pose; to: Pose; bump: boolean; irons: boolean; secs: number }
+  | { kind: 'move'; i: number; m: Move; from: Pose; to: Pose; bump: boolean; irons: boolean; secs: number; whirl?: [number, number] }
   | { kind: 'push'; from: Pose; to: Pose; gust?: boolean }
   | { kind: 'arrive'; at: Pose }
   /** The pin's where the wind won't let her sail at all: she waits (said once for each pin). The
@@ -1044,7 +1110,7 @@ export class Helm {
   }
 
   private begin(out: SailEvent[]) {
-    const m = this.turn[this.slot], { to, bump, ride, irons } = this.sea.move(this.pose, m, this.oars);
+    const m = this.turn[this.slot], { to, bump, ride, irons, whirl } = this.sea.move(this.pose, m, this.oars);
     // At the oars, the more squares rowed and waiting, the quicker she goes (a Vegas on each side
     // at once: as quick as the trade winds); under sail, by how she lies to the wind.
     const secs = this.oars ? this.pace : this.sea.moveSecs(false, this.pose, m);
@@ -1052,7 +1118,7 @@ export class Helm {
     this.cur = { m, from: { ...this.pose }, to, bump, secs, pause: pauseFor(secs), irons: !!irons };
     this.rides = ride;
     this.t = 0;
-    out.push({ kind: 'move', i: this.slot, m, from: { ...this.pose }, to: { ...to }, bump, irons: !!irons, secs });
+    out.push({ kind: 'move', i: this.slot, m, from: { ...this.pose }, to: { ...to }, bump, irons: !!irons, secs, ...(whirl ? { whirl } : {}) });
   }
 }
 

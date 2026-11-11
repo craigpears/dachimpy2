@@ -59,6 +59,11 @@ export const TOP_FREE = 4;
     (YPPedia: "increasingly difficult ... after several boards have been cleared ... reset"; the
     numbers are guesses.) */
 export const DIFFICULTY = { START: 1, MAX: 4, RESET_AFTER: 5 };
+/** An easy board (Kikkit's whirlpools, 11 Nov: "as long as we have a relatively simplified puzzle,
+    that should be achievable. Because you've got relatively small, easy platforms. So most people
+    familiar with it, I'd expect can do that"): two or three platforms, each a single row one or two
+    squares wide, no fixed pieces, and it stays that easy board after board. */
+export const EASY = { MOST: 3, WIDE: 2 };
 /** A chain's name by its steps. */
 export function chainName(steps) {
     return steps >= 6 ? 'Vegas!!' : ['', '', 'Double', 'Triple', 'Bingo!', 'Donkey!'][Math.max(0, steps)];
@@ -96,8 +101,11 @@ export class Sailing {
     record = true;
     filled = new Set();
     nextId = 1;
-    constructor(random = Math.random, deal = true) {
+    /** Easy boards only (EASY): small platforms, never harder. */
+    easy;
+    constructor(random = Math.random, deal = true, opts = {}) {
         this.random = random;
+        this.easy = !!opts.easy;
         this.pair = this.newPair();
         this.next = this.newPair();
         if (deal)
@@ -116,10 +124,10 @@ export class Sailing {
         a little bigger; fixed pieces from the second level. */
     deal() {
         this.clear();
-        const d = this.difficulty, want = 1 + d + (this.random() < 0.5 ? 1 : 0);
-        const wide = d >= 3 ? 4 : 3, high = d >= 3 ? 3 : 2;
+        const d = this.difficulty, want = this.easy ? EASY.MOST - (this.random() < 0.5 ? 1 : 0) : 1 + d + (this.random() < 0.5 ? 1 : 0);
+        const wide = this.easy ? EASY.WIDE : d >= 3 ? 4 : 3, high = d >= 3 ? 3 : 2;
         for (let tries = 0; this.platforms.length < want && tries < 400; tries++) {
-            const w = 1 + Math.floor(this.random() * wide), h = this.random() < 0.3 ? 1 + Math.floor(this.random() * high) : 1;
+            const w = 1 + Math.floor(this.random() * wide), h = !this.easy && this.random() < 0.3 ? 1 + Math.floor(this.random() * high) : 1;
             const c = Math.floor(this.random() * (W - w + 1)), r = TOP_FREE + Math.floor(this.random() * (H - TOP_FREE - h + 1));
             // Not touching another platform, so every shelf is its own.
             if (this.platforms.some((p) => r <= p.r + p.h && p.r <= r + h && c <= p.c + p.w && p.c <= c + w))
@@ -134,7 +142,7 @@ export class Sailing {
             this.platforms.push({ id: this.nextId++, r, c, w, h, targets });
         }
         // Fixed pieces low down, never over a target (it would be shut in) nor inside a platform.
-        for (let n = 0, tries = 0; n < d - 1 && tries < 100; tries++) {
+        for (let n = 0, tries = 0; !this.easy && n < d - 1 && tries < 100; tries++) {
             const r = H - 6 + Math.floor(this.random() * 6), c = Math.floor(this.random() * W);
             if (this.grid[r][c] || this.inPlatform(r, c) || this.platforms.some((p) => p.targets.some((t) => t.c === c && t.r > r)))
                 continue;
@@ -317,7 +325,7 @@ export class Sailing {
             this.boards++;
             if (this.boards >= DIFFICULTY.RESET_AFTER)
                 this.boards = 0;
-            this.difficulty = Math.min(DIFFICULTY.MAX, DIFFICULTY.START + this.boards);
+            this.difficulty = this.easy ? DIFFICULTY.START : Math.min(DIFFICULTY.MAX, DIFFICULTY.START + this.boards);
             this.deal();
         }
         this.score += res.points;

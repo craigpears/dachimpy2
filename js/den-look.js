@@ -40,9 +40,9 @@ export const PARTS = {
   // (Veil, Tiara: the tailor's. Butterfly, Feminine feline, Wicked witch: the palace shoppe's
   // Halloween masks and hats, women's only: YPPedia, Clothing (hats).)
   hat: {
-    m: [['none', 'No hat'], ['bandana', 'Bandana'], ['tricorne', 'Tricorne'], ['feathered', 'Feathered hat', 1], ['captain', "Captain's hat", 1], ['sleeping', 'Sleeping hat'], ['fez', 'Fez'], ['viking', 'Viking helmet']],
+    m: [['none', 'No hat'], ['bandana', 'Bandana'], ['tricorne', 'Tricorne'], ['feathered', 'Feathered hat', 1], ['captain', "Captain's hat", 1], ['sleeping', 'Sleeping hat'], ['fez', 'Fez'], ['viking', 'Viking helmet'], ['roses', 'Crown of roses', 1]],
     f: [['none', 'No hat'], ['bandana', 'Bandana'], ['tricorne', 'Tricorne'], ['feathered', 'Feathered hat', 1], ['captain', "Captain's hat", 1], ['sleeping', 'Sleeping hat'], ['wide', 'Wide-brimmed hat', 1], ['viking', 'Viking helmet'],
-      ['veil', 'Veil', 1], ['tiara', 'Tiara', 1], ['butterfly', 'Butterfly'], ['feline', 'Feminine feline', 1], ['witch', 'Wicked witch', 1]],
+      ['veil', 'Veil', 1], ['tiara', 'Tiara', 1], ['butterfly', 'Butterfly'], ['feline', 'Feminine feline', 1], ['witch', 'Wicked witch', 1], ['roses', 'Crown of roses', 1]],
   },
   hair: {
     m: [['short', 'Short'], ['ponytail', 'Ponytail'], ['long', 'Long'], ['wavy', 'Wavy'], ['curly', 'Curly'], ['bald', 'Bald']],
@@ -56,7 +56,7 @@ export const PARTS = {
     m: [['striped', 'Striped shirt', 1], ['plain', 'Plain shirt'], ['sash', 'Shirt with sash', 1], ['vest', 'Striped shirt with vest', 1], ['swashbuckler', "Swashbuckler's jacket", 1], ['buccaneer', 'Buccaneer jacket', 1], ['captain', "Captain's jacket", 1],
       ['frilly', 'Frilly shirt with sash', 1], ['raiment', 'Vampire raiment', 1]],
     f: [['striped', 'Striped shirt', 1], ['belt', 'Shirt with belt'], ['corset', 'Corset', 1], ['vest', 'Striped shirt with vest', 1], ['buccaneer', 'Buccaneer jacket', 1], ['swashbuckler', "Swashbuckler's jacket", 1], ['captain', "Captain's jacket", 1],
-      ['dresstop', 'Dress top', 1], ['frilly', 'Frilly shirt with sash', 1], ['midriff', 'Midriff blouse with scarf', 1], ['raiment', 'Vampire raiment', 1]],
+      ['dresstop', 'Dress top', 1], ['frilly', 'Frilly shirt with sash', 1], ['midriff', 'Midriff blouse with scarf', 1], ['raiment', 'Vampire raiment', 1], ['tied', 'Top tied at the front']],
   },
   // Round the waist, over whatever top (a plain belt isn't worn with a corset or a shirt with sash).
   waist: {
@@ -66,16 +66,16 @@ export const PARTS = {
   legs: {
     m: [['pants', 'Pants'], ['patched', 'Patched pants', 1], ['knickers', 'Stripy knickers'], ['pantaloons', 'Pantaloons'], ['kilt', 'Kilt', 1]],
     f: [['pants', 'Pants'], ['patched', 'Patched pants', 1], ['knickers', 'Stripy knickers'], ['flare', 'Flare pants'], ['long', 'Long dress bottom'], ['short', 'Short dress bottom'],
-      ['gown', 'Gown', 1], ['bloomers', 'Bloomers', 1]],
+      ['gown', 'Gown', 1], ['bloomers', 'Bloomers', 1], ['ragged', 'Ragged skirt']],
   },
   feet: {
-    m: [['boots', 'Boots'], ['shoes', 'Buckle shoes'], ['fancy', 'Fancy boots', 1], ['curled', 'Curled boots']],
-    f: [['boots', 'Boots'], ['shoes', 'Buckle shoes'], ['fancy', 'Fancy boots', 1], ['curled', 'Curled slippers']],
+    m: [['boots', 'Boots'], ['shoes', 'Buckle shoes'], ['fancy', 'Fancy boots', 1], ['curled', 'Curled boots'], ['bare', 'Bare feet']],
+    f: [['boots', 'Boots'], ['shoes', 'Buckle shoes'], ['fancy', 'Fancy boots', 1], ['curled', 'Curled slippers'], ['bare', 'Bare feet']],
   },
   // In the right hand: props, not clothing (only a bouquet takes a colour, its flowers').
   hand: {
-    m: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre']],
-    f: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre']],
+    m: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug']],
+    f: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug']],
   },
   // (Squirrel, bat, krakling: real familiars, from expeditions and treasure chests: YPPedia, Familiar.)
   fam: {
@@ -87,9 +87,11 @@ export const PARTS = {
 export const HAND_DYED = ['bouquet'];
 // Earrings: none, one (in the left ear, as ever) or one in each ear.
 export const EARRINGS = [[false, 'None'], [true, 'One'], ['both', 'Both ears']];
-// `hook`: a hook for a left hand (Mischievious has one in nearly every portrait).
+// `hook`: a hook for a left hand (Mischievious has one in nearly every portrait). `tongue` out, blue
+// swirling `tattoos` (on whatever skin a top leaves bare) and a `wristband` (in the top's colour, on
+// the right wrist): Kikkit's (11 Nov).
 export const DEFAULT_LOOK = {
-  body: 'm', skin: 1, hair: 'short', hairCol: 'brown', beard: 'full', patch: true, earring: true, smile: false, hook: false,
+  body: 'm', skin: 1, hair: 'short', hairCol: 'brown', beard: 'full', patch: true, earring: true, smile: false, hook: false, tongue: false, tattoos: false, wristband: false,
   hat: 'bandana', hatCol: 'red', hatCol2: 'white', top: 'striped', topCol: 'red', topCol2: 'white', waist: 'belt', waistCol: 'black',
   legs: 'pants', legsCol: 'navy', legsCol2: 'tan', feet: 'boots', feetCol: 'black', feetCol2: 'black', hand: 'none', handCol: 'red', fam: 'none', famCol: 'green', famCol2: 'red',
 };
@@ -108,7 +110,7 @@ export function cleanLook(o) {
   if (!DYES[src.feetCol2]) L.feetCol2 = L.feetCol;   // (fancy boots' tops were the boots' own colour)
   if (HAIR[src.hairCol]) L.hairCol = src.hairCol;
   if (Number.isInteger(src.skin) && SKIN[src.skin]) L.skin = src.skin;
-  for (const kk of ['patch', 'smile', 'hook']) if (typeof src[kk] === 'boolean') L[kk] = src[kk];
+  for (const kk of ['patch', 'smile', 'hook', 'tongue', 'tattoos', 'wristband']) if (typeof src[kk] === 'boolean') L[kk] = src[kk];
   if (EARRINGS.some(([v]) => v === src.earring)) L.earring = src.earring;
   if (FURRY[L.fam]) L.famCol = FUR[src.famCol] ? src.famCol : FURRY[L.fam];
   return L;
@@ -116,7 +118,8 @@ export function cleanLook(o) {
 const pickOf = (o) => Object.keys(o)[Math.floor(Math.random() * Object.keys(o).length)];
 const pickIn = (list) => list[Math.floor(Math.random() * list.length)][0];
 export function randomLook(body = Math.random() < 0.5 ? 'm' : 'f') {
-  const L = { body, skin: Math.floor(Math.random() * SKIN.length), hairCol: pickOf(HAIR), patch: Math.random() < 0.4, earring: pickIn(EARRINGS), smile: Math.random() < 0.5, hook: Math.random() < 0.15 };
+  const L = { body, skin: Math.floor(Math.random() * SKIN.length), hairCol: pickOf(HAIR), patch: Math.random() < 0.4, earring: pickIn(EARRINGS), smile: Math.random() < 0.5, hook: Math.random() < 0.15,
+    tongue: Math.random() < 0.08, tattoos: Math.random() < 0.15, wristband: Math.random() < 0.15 };
   for (const slot of Object.keys(PARTS)) L[slot] = pickIn(PARTS[slot][body]);
   for (const kk of DYE_KEYS) L[kk] = pickOf(DYES);
   if (FURRY[L.fam]) L.famCol = pickOf(FUR);
@@ -158,6 +161,16 @@ export const PIRATES = Object.fromEntries(Object.entries({
     body: 'f', skin: 2, hair: 'curly', hairCol: 'black', patch: false, earring: 'both', smile: true, hook: true,
     hat: 'feline', hatCol: 'black', hatCol2: 'black', top: 'dresstop', topCol: 'plum', topCol2: 'white', waist: 'none',
     legs: 'short', legsCol: 'plum', feet: 'fancy', feetCol: 'plum', feetCol2: 'white', hand: 'pistol', fam: 'squirrel', famCol: 'grey',
+  },
+  // Kikkit (her Emerald portrait, as IDEAS.md has it, 10 Nov), out on her island by the reef: black
+  // curls crowned with red roses, an eyepatch, gold hoops, her tongue out, blue swirling tattoos on her
+  // arms and middle, a red top tied at the front, a red wristband, a ragged black skirt on a black belt
+  // with a big gold buckle, bare feet, a stone jug marked XXX, and Rodrigo, her monkey (her ship's
+  // named for him: the user, 10 Nov, "it's definitely Rodrigo").
+  Kikkit: {
+    body: 'f', skin: 1, hair: 'curly', hairCol: 'black', patch: true, earring: 'both', smile: false, tongue: true, tattoos: true, wristband: true,
+    hat: 'roses', hatCol: 'red', top: 'tied', topCol: 'red', waist: 'buckle', waistCol: 'black',
+    legs: 'ragged', legsCol: 'black', feet: 'bare', hand: 'jug', fam: 'monkey', famCol: 'brown',
   },
 }).map(([name, look]) => [name, cleanLook(look)]));
 
@@ -219,6 +232,21 @@ const tartanTex = (a, b) => cached(`t${a}${b}`, () => tex(64, 64, (g) => {
   g.globalAlpha = 0.5; g.fillStyle = '#111';
   for (let i = 8; i < 64; i += 16) { g.fillRect(i, 0, 1.5, 64); g.fillRect(0, i, 64, 1.5); }
 }));
+// Blue swirling tattoos on skin (Kikkit's): spirals and curls over the skin's colour.
+const tattooTex = (sk) => cached(`ink${sk}`, () => tex(128, 128, (g, w, h) => {
+  g.fillStyle = sk; g.fillRect(0, 0, w, h);
+  g.strokeStyle = '#2e5fb8'; g.lineWidth = 3; g.lineCap = 'round';
+  for (const [x, y, r0] of [[28, 30, 16], [92, 44, 14], [54, 92, 18], [110, 108, 12], [12, 96, 10]]) {
+    g.beginPath();
+    for (let t = 0; t < 16; t++) { const a = t * 0.55, r = r0 * (1 - t / 18); g.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r); }
+    g.stroke();
+  }
+}));
+// A stone jug's glaze, XXX on it.
+const jugTex = () => cached('jug', () => tex(64, 64, (g, w, h) => {
+  g.fillStyle = '#cdbd9a'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#5a3a22'; g.font = 'bold 13px serif'; g.textAlign = 'center'; g.fillText('XXX', w / 4, h * 0.6);
+}));
 // The torso's outline (radius, height) from the hips up, by body.
 const TORSO = {
   m: [[0.29, 0], [0.29, 0.1], [0.27, 0.3], [0.255, 0.5], [0.22, 0.6], [0.15, 0.64]],
@@ -235,6 +263,8 @@ export function dressPirate(look, opts = {}) {
   body.position.y = 0.72;
   g.add(body);
   const skin = M(SKIN[L.skin] || SKIN[1]), black = M('#1d1a18'), white = M('white');
+  // Blue swirling tattoos, on skin a top leaves bare (Kikkit's arms and middle).
+  const inked = L.tattoos ? M('#ffffff', { map: tattooTex(SKIN[L.skin] || SKIN[1]) }) : skin;
   const gold = M('#e8b23a', { metalness: 0.7, roughness: 0.3 });
   const hairM = M(HAIR[L.hairCol] || L.hairCol);
   const top = L.topCol, top2 = L.topCol2;
@@ -242,14 +272,15 @@ export function dressPirate(look, opts = {}) {
     striped: () => M('#ffffff', { map: stripeTex(top2, top) }), plain: () => M(top), sash: () => M(top), belt: () => M(top),
     vest: () => M('#ffffff', { map: stripeTex('white', top2) }), swashbuckler: () => M('white'), buccaneer: () => M('white'), captain: () => M('white'), corset: () => M('white'),
     dresstop: () => skin, midriff: () => skin, frilly: () => M('white'), raiment: () => M(top),   // (off the shoulder and a bare midriff: skin under them)
+    tied: () => (L.tattoos ? inked : skin),
   }[L.top]?.() || M(top);
   const coat = L.top === 'swashbuckler' || L.top === 'buccaneer' || L.top === 'captain', bucc = L.top === 'buccaneer';
-  const sleeveM = coat ? M(top) : shirtM;
+  const sleeveM = coat ? M(top) : shirtM === skin ? inked : shirtM;
 
   // Legs: a thigh and a shin, from the hip, then the feet.
   const thinner = F ? 0.88 : 1;
   const thighM = { pants: () => M(L.legsCol), patched: () => M('#fff', { map: patchTex(L.legsCol, L.legsCol2) }), knickers: () => M('#fff', { map: stripeTex('white', L.legsCol, 6) }),
-    pantaloons: () => M(L.legsCol), flare: () => M(L.legsCol), kilt: () => skin, long: () => M(L.legsCol), short: () => M('white'),
+    pantaloons: () => M(L.legsCol), flare: () => M(L.legsCol), kilt: () => skin, long: () => M(L.legsCol), short: () => M('white'), ragged: () => skin,
     gown: () => M(L.legsCol), bloomers: () => M(L.legsCol) }[L.legs]?.() || M(L.legsCol);
   const shinM = { knickers: white, pantaloons: white, kilt: white, short: white }[L.legs] || thighM;
   const legs = [-1, 1].map((s) => {
@@ -268,9 +299,15 @@ export function dressPirate(look, opts = {}) {
     if (L.legs === 'knickers') hip.add(part(new THREE.CylinderGeometry(0.1 * thinner, 0.1 * thinner, 0.04, 10), M(L.legsCol), 0, -0.3));
     const fc = M(L.feetCol);
     // (Under a dress the feet come a little further forward, so they peep out from under it.)
-    const fz = L.legs === 'long' || L.legs === 'short' ? 0.1 : L.legs === 'gown' ? 0.16 : 0.05;
-    const foot = part(new RoundedBoxGeometry(0.18 * thinner, L.feet === 'shoes' ? 0.1 : 0.15, 0.3, 2, 0.045), fc, 0, L.feet === 'shoes' ? -0.645 : -0.62, fz);
-    hip.add(foot);
+    const fz = L.legs === 'long' || L.legs === 'short' || L.legs === 'ragged' ? 0.1 : L.legs === 'gown' ? 0.16 : 0.05;
+    if (L.feet === 'bare') {
+      // Bare feet: a foot in the skin's colour, and its toes.
+      hip.add(part(new RoundedBoxGeometry(0.14 * thinner, 0.08, 0.25, 2, 0.035), skin, 0, -0.67, fz));
+      for (let i = 0; i < 4; i++) hip.add(part(new THREE.SphereGeometry(0.022, 6, 5), skin, (-0.045 + i * 0.03) * thinner, -0.675, fz + 0.125));
+    } else {
+      const foot = part(new RoundedBoxGeometry(0.18 * thinner, L.feet === 'shoes' ? 0.1 : 0.15, 0.3, 2, 0.045), fc, 0, L.feet === 'shoes' ? -0.645 : -0.62, fz);
+      hip.add(foot);
+    }
     if (L.feet === 'boots' || L.feet === 'fancy') hip.add(part(new THREE.CylinderGeometry(0.1 * thinner, 0.1 * thinner, 0.24, 10), fc, 0, -0.48));
     // Fancy boots' wide turned-down tops, in their second colour.
     // (Low enough on the shin to show under a long coat.)
@@ -332,6 +369,18 @@ export function dressPirate(look, opts = {}) {
     const panel = part(new THREE.BoxGeometry(0.18, 0.34, 0.02), M(top2), 0, -0.12, 0.29);
     panel.rotation.x = -0.12;
     body.add(panel);
+  } else if (L.top === 'tied') {
+    // A top tied at the front (Kikkit's): a short top across the bust, up over the shoulders, its
+    // fronts knotted under it with the ends hanging, the midriff bare.
+    body.add(part(lathe([[rAt(0.32), 0.32], [rAt(0.4), 0.4], [rAt(0.52), 0.52], [rAt(0.6) * 0.98, 0.6]], 1.05), M(top, { side: THREE.DoubleSide }), 0, 0.02));
+    const knot = part(new THREE.SphereGeometry(0.045, 10, 8), M(top), 0, 0.33, rAt(0.32) * 1.05 + 0.01);
+    knot.scale.set(1.3, 0.8, 0.8);
+    body.add(knot);
+    for (const s of [-1, 1]) {
+      const end = part(new THREE.ConeGeometry(0.035, 0.12, 6), M(top), 0.035 * s, 0.26, rAt(0.3) * 1.05 + 0.01);
+      end.rotation.set(Math.PI, 0, -0.35 * s);
+      body.add(end);
+    }
   } else if (L.top === 'frilly') {
     // The Frilly shirt with sash: a white shirt with a ruffle down its front (a man's under an open
     // vest in its first colour), and a sash striped in both.
@@ -419,14 +468,16 @@ export function dressPirate(look, opts = {}) {
     }
   }
   if (L.legs === 'kilt') body.add(part(lathe([[0.37, -0.36], [0.31, 0.08]], 1), M('#fff', { map: tartanTex(L.legsCol, L.legsCol2), side: THREE.DoubleSide }), 0, 0));
-  if (L.legs === 'long' || L.legs === 'short') {
+  if (L.legs === 'long' || L.legs === 'short' || L.legs === 'ragged') {
     // Ankle length at most, and not too wide at the hem: whatever's on your feet always shows.
-    const len = L.legs === 'long' ? 0.44 : 0.32;
+    const len = L.legs === 'long' ? 0.44 : L.legs === 'ragged' ? 0.36 : 0.32;
     const skirt = part(lathe([[0.3, -len], [0.31, -len * 0.5], [0.28, 0.08]], 1), M(L.legsCol, { side: THREE.DoubleSide }), 0, 0);
     body.add(skirt);
     // The short dress bottom's hem is ragged, cut in points (YPPedia's picture of it; Mischievious's).
-    if (L.legs === 'short') for (let i = 0; i < 14; i++) {
-      const a = (i / 14) * Math.PI * 2, pt = part(new THREE.ConeGeometry(0.045, 0.08 + (i % 3) * 0.025, 4), skirt.material, Math.sin(a) * 0.29, -len - 0.04 - (i % 3) * 0.012, Math.cos(a) * 0.29);
+    // (A ragged skirt's torn longer and rougher: Kikkit's.)
+    if (L.legs === 'short' || L.legs === 'ragged') for (let i = 0; i < 14; i++) {
+      const rag = L.legs === 'ragged' ? 1.8 : 1;
+      const a = (i / 14) * Math.PI * 2, pt = part(new THREE.ConeGeometry(0.045, (0.08 + (i % 3) * 0.025) * rag, 4), skirt.material, Math.sin(a) * 0.29, -len - 0.04 * rag - (i % 3) * 0.012 * rag, Math.cos(a) * 0.29);
       pt.rotation.set(Math.PI, a, 0);
       pt.scale.z = 0.35;
       body.add(pt);
@@ -479,6 +530,12 @@ export function dressPirate(look, opts = {}) {
     const lips = part(new THREE.SphereGeometry(0.05, 10, 6), M('#b8473f'), 0, 0.815, hr - 0.025);
     lips.scale.set(1, 0.42, 0.5);
     body.add(lips);
+  }
+  if (L.tongue) {
+    // Her tongue out, a little to one side (Kikkit's).
+    const tg = part(new THREE.CapsuleGeometry(0.028, 0.04, 4, 8), M('#e0707a'), 0.02, 0.795, hr - 0.005);
+    tg.rotation.set(1.1, 0, 0.25);
+    body.add(tg);
   }
   for (const s of L.earring === 'both' ? [1, -1] : L.earring ? [1] : []) {
     const ring = part(new THREE.TorusGeometry(0.04, 0.012, 6, 16), gold, hr * s, 0.83, 0);
@@ -549,7 +606,7 @@ export function dressPirate(look, opts = {}) {
     // Curly: a big loose mass of curls, full on the crown and falling past the shoulders, open only
     // at the face (Mischievious's, 11 Nov). Each curl a little ball, all in one mesh to stay cheap.
     // (Under a hat that sits over the crown, the curls start below its brim.)
-    const capped = !['none', 'veil', 'feline', 'butterfly', 'tiara'].includes(L.hat);
+    const capped = !['none', 'veil', 'feline', 'butterfly', 'tiara', 'roses'].includes(L.hat);
     const curls = [];
     let seed = 7;
     const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
@@ -743,6 +800,17 @@ export function dressPirate(look, opts = {}) {
       }
     }
     holes();
+  } else if (L.hat === 'roses') {
+    // A crown of roses (Kikkit's), round the top of the head, leaves between them.
+    const leaf = M('#3f7a2c'), n = 9;
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2, rr = hr * 0.86;
+      const rose = part(new THREE.SphereGeometry(0.05, 9, 7), hc, Math.sin(a) * rr, 1.07 + Math.cos(a) * 0.06, Math.cos(a) * rr - 0.02);
+      rose.scale.set(1, 0.75, 1);
+      const lf = part(new THREE.SphereGeometry(0.035, 6, 4), leaf, Math.sin(a + 0.35) * rr * 1.04, 1.06 + Math.cos(a + 0.35) * 0.06, Math.cos(a + 0.35) * rr * 1.04 - 0.02);
+      lf.scale.set(1.4, 0.4, 0.7);
+      hat.add(rose, lf);
+    }
   } else if (L.hat === 'witch') {
     // The Wicked witch: a tall pointed black hat with a wide brim, bent at the tip, a band round it in
     // its second colour (which is also her face's).
@@ -793,6 +861,7 @@ export function dressPirate(look, opts = {}) {
     body.add(sh);
     return sh;
   });
+  if (L.wristband) arms[0].add(part(new THREE.CylinderGeometry(0.072 * ar, 0.072 * ar, 0.06, 12), M(top), 0, -0.42));
   if (opts.sword) {
     const blade = part(new THREE.BoxGeometry(0.04, 0.05, 0.62), M('#d8dde2', { metalness: 0.8, roughness: 0.25 }), 0, -0.52, 0.34);
     arms[1].add(blade, part(new THREE.BoxGeometry(0.16, 0.05, 0.04), gold, 0, -0.52, 0.04));
@@ -861,6 +930,19 @@ export function dressPirate(look, opts = {}) {
     wg.position.set(0, -0.56, 0.08);
     arms[0].add(wg);
     held = wg;
+  } else if (L.hand === 'jug') {
+    // A stone jug, its top dipped dark, a little handle, XXX on its side (Kikkit's).
+    const jg = new THREE.Group(), stone = M('#ffffff', { map: jugTex() }), dark = M('#5a3a22');
+    const belly = part(new THREE.SphereGeometry(0.1, 14, 12), stone, 0, 0.02);
+    belly.scale.set(1, 1.15, 1);
+    belly.rotation.y = Math.PI;   // (its XXX facing out)
+    jg.add(belly, part(new THREE.CylinderGeometry(0.032, 0.05, 0.08, 10), dark, 0, 0.14), part(new THREE.CylinderGeometry(0.022, 0.022, 0.03, 8), M('#a07b4a'), 0, 0.19));
+    const handle = part(new THREE.TorusGeometry(0.04, 0.012, 6, 10, Math.PI), dark, -0.08, 0.1);
+    handle.rotation.z = Math.PI / 2;
+    jg.add(handle);
+    jg.position.set(0, -0.58, 0.1);
+    arms[0].add(jg);
+    held = jg;
   } else if (L.hand === 'scepter') {
     // A golden sceptre, a jewel at its top.
     const sc = new THREE.Group(), gilt = M('#e8b23a', { metalness: 0.7, roughness: 0.3 });
@@ -882,6 +964,9 @@ export function dressPirate(look, opts = {}) {
 }
 
 // ---------- familiars ----------
+/** A familiar on its own (not on a shoulder): a look's `fam` and its colours. Kikkit's island has a
+    crowd of them (js/den/kikkit.js); familiarTick animates it. */
+export const familiar = (look) => makeFamiliar(cleanLook({ body: 'f', ...look }));
 function makeFamiliar(L) {
   if (L.fam === 'none' || !PARTS.fam[L.body].some(([id]) => id === L.fam)) return null;
   const g = new THREE.Group(), black = M('#121212'), white = M('white');

@@ -27,6 +27,7 @@ import { craneKey, cranePrompt, craneHolds, craneTick, craneReset, craneWorld } 
 import { umami, umamiKey, umamiClick, umamiHover, umamiPrompt, umamiReset } from './capybara.js';
 import { isleWorld, isleTick, isleAshore, canLandIsle } from './isle.js';
 import { station, stationKey, stationToggle, stationTick, stationPrompt, stationReset } from './sail-station.js';
+import { kikkitWorld, kikkitTick, kikkitShown, kikkitHail, kikkitPrompt, kikkitHolds, kikkitReset } from './kikkit.js';
 
 // The old sloop's at anchor in the cove from the moment the siege is over, while their ship makes
 // sail in the background (the user, 9 Nov: "I'm sat here quite a while waiting for his sloop to sail
@@ -79,6 +80,7 @@ export function sailReset() {
   craneReset();
   umamiReset();
   stationReset();
+  kikkitReset();
   denLets.sailView = 0;
 }
 // A shot out of her side, from where she is right now: it flies straight out and comes down in the
@@ -149,7 +151,7 @@ export function sailHover(x, y) {
   sail.hover = at && sail.sea.open(Math.round(at.c), Math.round(at.r)) ? [Math.round(at.c), Math.round(at.r)] : null;
 }
 // Something else has her, so the Sailing board's put away (sail-station.js).
-const rigBusy = () => haul.on || craneHolds() || patch.on || !!hold.mode || umami.on || sail.helm.dazed();
+const rigBusy = () => haul.on || craneHolds() || patch.on || !!hold.mode || umami.on || sail.helm.dazed() || kikkitHolds();
 // R: the Sailing board ("the rigging"), out or away; from the oars or her guns, they're put away.
 function rigToggle() {
   if (!station.want && !rigBusy()) { if (rowing.on) rowToggle(); if (gunnery.on) gunneryToggle(); }
@@ -157,6 +159,7 @@ function rigToggle() {
 }
 export function sailKey(key) {
   if (hold.mode && holdKey(key)) return;
+  if (kikkitHolds() && key !== 'p') return;   // (round and round in a whirlpool: kikkit.js)
   if (umamiKey(key)) return;   // (Umami's board, and her moorings in the lagoon: capybara.js)
   if (craneKey(key)) return;   // (the crane at the ledge, and the lagoon: crane.js)
   // The Sailing board: its keys while it's open; R or Esc puts it away (sail-station.js).
@@ -179,6 +182,7 @@ export function sailKey(key) {
   else if ((key === ' ' || key === 'enter') && canHaulWreck()) haulWreck();
   else if ((key === ' ' || key === 'enter') && canLand(sail.helm)) ashore();
   else if ((key === ' ' || key === 'enter') && canLandIsle(sail.helm)) isleAshore();   // (Mischievious's isle: isle.js)
+  else if ((key === ' ' || key === 'enter') && kikkitHail()) { /* (Kikkit, off her island: kikkit.js) */ }
   else if (key === 'z' || key === 'c') keys.add(key);
   else if (key === 'p') setPaused(true);
   else if (key === 'v') Object.assign(view, { yaw: 0, pitch: 0, zoom: 1 });
@@ -192,7 +196,7 @@ export function sailPrompt() {
   if (rowing.on) return rowPrompt();
   if (gunnery.on) return gunneryPrompt();
   if (station.on) return stationPrompt();
-  const cp = umamiPrompt() || cranePrompt();
+  const cp = umamiPrompt() || cranePrompt() || kikkitPrompt();
   if (cp) return cp;
   const h = sail.helm, held = h.held();
   if (held === 'daze') return patchPrompt('Holed! Patch her deck to sail on · 1, 2, 3: a piece from the crate', ' (it rests on the deck: boarded over)');
@@ -234,6 +238,7 @@ export function sailTick(dt) {
   lockWorld();   // (the canal's locks: lock.js)
   craneWorld();   // (the headland on the cove's left, the ledge and the lagoon: crane.js)
   isleWorld();   // (Mischievious's isle, out to the right of the lanes: isle.js)
+  kikkitWorld();   // (Kikkit's island, her whirlpools and Vegas Island: kikkit.js)
   sail.g ||= (() => { const g = sloopMesh(); scene.add(g); return g; })();
   const show = sail.on || sloopHome();
   if (sail.g.visible !== show) sail.g.visible = show;
@@ -242,11 +247,13 @@ export function sailTick(dt) {
   const h = sail.helm, W = sail.world;
   // The trade winds race along their lanes.
   for (const tex of W.lanes) tex.offset.y -= dt * 2.2;
+  let events = [];
   if (sail.on) {
     const heldWas = h.held();
-    for (const e of h.tick(dt)) {
+    events = h.tick(dt);
+    for (const e of events) {
       windSay(e);
-      if (e.kind === 'move' && e.bump && !e.irons) sail.bumpT = e.secs * 0.45;   // (felt as she hits)
+      if (e.kind === 'move' && e.bump && !e.irons && !e.whirl) sail.bumpT = e.secs * 0.45;   // (felt as she hits; a whirlpool has her instead: kikkit.js)
       if (e.kind === 'arrive' && canLand(h)) toast('Off the den\'s beach: Space to go ashore');
       if (e.kind === 'arrive' && canLandIsle(h)) toast('Off the Wedding Isle: Space to go ashore');
       if (e.kind === 'push') {
@@ -286,13 +293,13 @@ export function sailTick(dt) {
     }
   }
   // Her, riding the swell, heeling into her turns.
-  const t = performance.now() / 1000, p = lockClear(rowShown(h.now())), turning = h.cur && (h.cur.m === 'L' || h.cur.m === 'R') && !h.cur.bump && h.t < h.cur.secs;
+  const t = performance.now() / 1000, p = kikkitShown(lockClear(rowShown(h.now()))), turning = h.cur && (h.cur.m === 'L' || h.cur.m === 'R') && !h.cur.bump && h.t < h.cur.secs;
   sail.heel += ((turning ? (h.cur.m === 'L' ? -0.13 : 0.13) : 0) - sail.heel) * Math.min(1, dt * 4);
   sail.low = (sail.low ?? 0) + ((h.dazed() ? -0.3 : 0) - (sail.low ?? 0)) * Math.min(1, dt * 2);
-  sail.g.position.set(seaX(p.c), liftAt(Math.round(p.c), Math.round(p.r)) + sail.low + Math.sin(t * 0.9) * 0.06, seaZ(p.r));
+  sail.g.position.set(seaX(p.c), liftAt(Math.round(p.c), Math.round(p.r)) + sail.low + Math.sin(t * 0.9) * 0.06 + (p.hop ?? 0), seaZ(p.r));
   sail.g.rotation.y = Math.PI / 2 - p.a * Math.PI / 2;
   sail.g.rotation.x = sail.heel + (p.heel ?? 0) + Math.sin(t * 0.7) * 0.02;   // (leaning into the oars' pull: rowShown)
-  sail.g.rotation.z = Math.sin(t * 0.55) * 0.02;
+  sail.g.rotation.z = Math.sin(t * 0.55) * 0.02 + (p.flip ?? 0);   // (end over end: a backflip in Kikkit's whirlpools)
   if (sail.on) {
     // You, at the tiller, facing her bow (up on her stern, beside it, while the board's on her deck,
     // so you're not stood on it, nor between it and the camera).
@@ -333,6 +340,7 @@ export function sailTick(dt) {
   if (sail.hover) sail.hoverG.position.set(seaX(sail.hover[0]), 0.08 + liftAt(...sail.hover), seaZ(sail.hover[1]));
   windTick(dt);
   craneTick(dt);   // (after she's drawn where the helm has her: up the cliff, the crane has her)
+  kikkitTick(dt, events);   // (Kikkit, her whirlpools and the penguins: kikkit.js)
   if (sail.on) sailHud();
 }
 // The oars' button on the sailing bar (on mousedown: the bar's redrawn as the tokens change, so a

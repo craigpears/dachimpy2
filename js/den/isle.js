@@ -19,17 +19,18 @@ const CELL = SAIL.CELL, I = LAY.ISLE;
 const ex = (c) => SAIL.X0 + c * CELL, ez = (r) => SAIL.Z0 - r * CELL;   // (a square's edges: c, r whole)
 export const isle = { g: null, bunting: [] };
 
-/* The isle's shore (src/den-isle.ts, isleShore: round the edge of its land squares, all but the
-   jetty's), smoothed into a curve and drawn in a little, so it reads as a sandy island, not a block. */
-function outline(inset) {
-  const pts = isleShore().map(([c, r]) => new THREE.Vector3(ex(c), 0, ez(r)));
+/* An island's shore (src/den-isle.ts: isleShore, round the edge of its land squares, all but the
+   jetty's; or any island's, shoreOf), smoothed into a curve and drawn in a little, so it reads as a
+   sandy island, not a block. Kikkit's island uses it too (kikkit.js). */
+export function outline(inset, shore = isleShore()) {
+  const pts = shore.map(([c, r]) => new THREE.Vector3(ex(c), 0, ez(r)));
   // (each corner's midpoints, so the curve keeps to the squares rather than ballooning out)
   const mids = pts.flatMap((p, i) => [p.clone().lerp(pts[(i + 1) % pts.length], 0.25), p.clone().lerp(pts[(i + 1) % pts.length], 0.75)]);
   const curve = new THREE.CatmullRomCurve3(mids, true, 'centripetal');
   const mid = mids.reduce((a, p) => a.add(p), new THREE.Vector3()).multiplyScalar(1 / mids.length);
   return curve.getSpacedPoints(90).slice(0, -1).map((p) => { const d = p.clone().sub(mid), l = d.length(); return mid.clone().add(d.multiplyScalar(Math.max(0, l - inset) / l)); });
 }
-function slab(pts, y0, h, m) {
+export function slab(pts, y0, h, m) {
   const s = new THREE.Shape(pts.map((p) => new THREE.Vector2(p.x, -p.z)));
   const geo = new THREE.ExtrudeGeometry(s, { depth: h, bevelEnabled: true, bevelThickness: 0.25, bevelSize: 0.5, bevelSegments: 2 });
   geo.rotateX(-Math.PI / 2);

@@ -39,12 +39,18 @@ export function canLandIsle(h: Helm): boolean {
 export const isleMooring = (): Pose => ({ ...LAY.ISLE.MOOR });
 
 /** The isle's shore, round its land squares (but the jetty's, which stands out from it into the
-    water): the corners of the squares along it in order, [c, r] with whole numbers on the squares'
-    edges (a square [c, r] runs from c to c + 1 across and r to r + 1 out), once round. The sea's 3D
-    (js/den/isle.js) and the captain's map (js/den/map.js) both draw it from this. */
+    water): see shoreOf. The sea's 3D (js/den/isle.js) and the captain's map (js/den/map.js) both draw
+    it from this. */
 export function isleShore(): [number, number][] {
   const [jc, jr] = LAY.ISLE.JETTY;
-  const sand = new Set(LAY.ISLE.LAND.filter(([c, r]) => c !== jc || r !== jr).map(([c, r]) => `${c},${r}`));
+  return shoreOf(LAY.ISLE.LAND.filter(([c, r]) => c !== jc || r !== jr));
+}
+
+/** The shore round some squares of land (any island on the sea: the Wedding Isle's, Kikkit's): the
+    corners of the squares along it in order, [c, r] with whole numbers on the squares' edges (a
+    square [c, r] runs from c to c + 1 across and r to r + 1 out), once round, only where it turns. */
+export function shoreOf(squares: readonly (readonly [number, number])[]): [number, number][] {
+  const sand = new Set(squares.map(([c, r]) => `${c},${r}`));
   const on = (c: number, r: number) => sand.has(`${c},${r}`);
   // Each square's edges with water beyond them, corner to corner, all going the same way round.
   const next = new Map<string, [number, number]>();

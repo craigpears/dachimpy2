@@ -13,5 +13,7 @@ import { CHARACTER as SUITORS } from './suitors.js';
 import { CHARACTER as SPOUSE } from './spouse.js';
 import { CHARACTER as GUESTS } from './wedding-guests.js';
 import { CHARACTER as KEEPSAKE } from './keepsake.js';
+import { CHARACTER as KIKKIT } from './kikkit.js';
+import { CHARACTER as PENGUIN } from './penguin.js';
 
-export const CHARACTERS: readonly Character[] = [DALNOTH, YOU, NARRATOR, DIGNITY, BELLA, UMAMI, MISCHIEVIOUS, SUITORS, SPOUSE, GUESTS, KEEPSAKE];
+export const CHARACTERS: readonly Character[] = [DALNOTH, YOU, NARRATOR, DIGNITY, BELLA, UMAMI, MISCHIEVIOUS, SUITORS, SPOUSE, GUESTS, KEEPSAKE, KIKKIT, PENGUIN];

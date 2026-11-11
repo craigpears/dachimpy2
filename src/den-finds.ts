@@ -19,20 +19,23 @@ import { ISLE } from './den-isle.js';
 import { TOUR_SAYS } from './lines/narrator.js';
 
 /** The ways past the imperial checkpoint (RULES.md, "The ways past the checkpoint"): run it under
-    sail, row it, knock its guns out, or round it by the locks. */
-export type Way = 'run' | 'row' | 'fight' | 'locks';
-export const WAYS: readonly Way[] = ['run', 'row', 'fight', 'locks'];
+    sail, row it, knock its guns out, round it by the locks, or through the reef by Kikkit's
+    whirlpools (src/den-kikkit.ts, 11 Nov). */
+export type Way = 'run' | 'row' | 'fight' | 'locks' | 'whirlpools';
+export const WAYS: readonly Way[] = ['run', 'row', 'fight', 'locks', 'whirlpools'];
 /** The routes past it, as the quest list counts them (the user, 11 Nov: "just do the [routes] only
     for now ... there's got to be something really different"): running, rowing and fighting its
-    guns all go through the gate; the locks go round. (The reef's whirlpools, when they're built.) */
-export type Route = 'gate' | 'locks';
-export const ROUTES: readonly Route[] = ['gate', 'locks'];
-export const routeOf = (w: Way): Route => (w === 'locks' ? 'locks' : 'gate');
+    guns all go through the gate; the locks go round; and the reef's whirlpools, through the reef
+    (11 Nov: "that's a way for you to get through the reef"). */
+export type Route = 'gate' | 'locks' | 'whirlpools';
+export const ROUTES: readonly Route[] = ['gate', 'locks', 'whirlpools'];
+export const routeOf = (w: Way): Route => (w === 'locks' || w === 'whirlpools' ? w : 'gate');
 
-/** The hidden places off the captain's map: the cove off the clifftop canal, and the lagoon up the
-    cliff from it. */
-export type Place = 'cove' | 'lagoon';
-export const PLACES: readonly Place[] = ['cove', 'lagoon'];
+/** The hidden places off the captain's map: the cove off the clifftop canal, the lagoon up the
+    cliff from it, and Vegas Island, the penguins' beyond Kikkit's whirlpools (11 Nov: "reached only
+    by a Vegas"; on the map once you've been). */
+export type Place = 'cove' | 'lagoon' | 'vegas';
+export const PLACES: readonly Place[] = ['cove', 'lagoon', 'vegas'];
 
 /** What's been found, as the den keeps it (G.found): the ways past and the hidden places. */
 export type Find = Way | Place;
@@ -48,8 +51,8 @@ export function addFind(found: readonly string[] | undefined, f: Find): string[]
     how she was going: through the gate at the oars she rowed it, under sail she ran it. With both
     its guns wrecked the gate's safe, so going through it is no way past of its own (knocking the
     guns out was: wayWrecked). */
-export function wayThrough(how: 'gate' | 'locks', at: { oars: boolean; silenced: boolean }): Way | null {
-  if (how === 'locks') return 'locks';
+export function wayThrough(how: 'gate' | 'locks' | 'whirlpools', at: { oars: boolean; silenced: boolean }): Way | null {
+  if (how === 'locks' || how === 'whirlpools') return how;
   if (at.silenced) return null;
   return at.oars ? 'row' : 'run';
 }

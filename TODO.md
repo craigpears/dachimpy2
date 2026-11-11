@@ -109,6 +109,18 @@ the site (`.assetsignore` skips `*.md`).
   balloon lesson aboard; the ending: Kikkit moves to Vegas Island, the penguins' island
   past the reef, her familiars swimming after your ship (11 Nov, IDEAS.md).
 
+- **Whirlpools that work like Puzzle Pirates' (11 Nov):** the first go only spun her and flung her
+  back. "Whirlpools are basically four tiles ... each one ... rotates the ship and sends it to the
+  opposite corner. So let's say like on turn one, you're facing forward in one corner. Second one,
+  you'll have rotated 90 degrees and be in the [opposite corner]. Then you'll go back to your
+  starting position on the next one, but flipped around." And "on some of them you'd naturally have
+  like a whirlpool but with a corner missing where there's some winds, so you kind of get caught in
+  the whirlpool and it sends you to the opposite corner, which then gets you on some winds and sends
+  you back ... those kind of mechanics of throwing you back to the start." So a whirlpool is a 2×2
+  of squares on the sea, acting like the trade winds: end a move on one and it turns her a quarter
+  and puts her on the opposite corner, round and round; one with a corner missing has winds there
+  that carry her back toward the start. A Sailing gust has to carry her clean over them.
+
 - **Sailing's sparkle, two small things (11 Nov, seen when it was built):** from behind her, the
   camera sees her sails nearly edge-on, so a Vegas's billow barely shows; and on a phone the den's
   big toast covers the Sailing board for a moment after a chain.

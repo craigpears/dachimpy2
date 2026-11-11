@@ -4,7 +4,7 @@ Every character's lines, and who they are, made from `src/lines/` by `npm run bu
 (`tools/lines-doc.mjs`): change a line there, not here, and the game changes with it.
 This file's history in git shows every line as it's changed.
 
-[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake)
+[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava)
 
 ## Dalnoth
 
@@ -575,3 +575,74 @@ Not someone you meet: the captions on the keepsake you're given at the end of a 
 ### Across its foot, under the couple's names
 
 - "On the Wedding Isle, with love"
+
+## Kikkit
+
+Out in the middle of nowhere on a little deserted island at the reef's near end, to the right of the imperial checkpoint, with all her familiars about her: "the familiar version of a cat lady". A real Puzzle Pirates pirate (Kikkit of Emerald): captain of Rodrigo's Revenge, of the flag Egotistical Englishman, an Admiral in the Aimuari Island Navy (Dignity's navy, and above her). Drawn from her portrait: black curls crowned with red roses, an eyepatch, gold hoops, her tongue out, blue swirling tattoos on her arms and middle, a red top tied at the front, a red wristband, a ragged black skirt on a gold-buckled belt, bare feet, and a stone jug marked XXX. Rodrigo, her monkey, on her shoulder (her ship's named for him).
+
+Loopy, a bit drunk, and off on twenty tangents at once, she can't get her lefts and rights right. She really, really wants a penguin. And every word of her nonsense is the real way through her whirlpools, if you take it literally: the funny part is finding out she was right all along.
+
+> "Look for the pirate Kikkit as well, we need to make her a penguin in the game somewhere, hehe" (the user, 10 Nov)
+>
+> "it kind of fits with her just being out in the middle of nowhere on an island trying to figure out some sailing" (the user, 10 Nov)
+>
+> "really just do the whole craziness of Kikkit ... she's the crazy one" (the user, 10 Nov)
+>
+> "it's got to actually make some mechanical sense so that it's more funny and literal" (the user, 10 Nov)
+>
+> "Maybe a small combo gets you through the reef, with the penguins being the bigger prize after." (the user, 11 Nov)
+
+### Her ramble, the first time you sail up to her island (and again, hailing her with Space)
+
+- "Ooh, hello! Have you seen a penguin? I really, really want a penguin."
+- "I saw one over there. Through the whirly bits. I can't remember which way I went."
+- "Maybe I took five lefts and a right? Or was it five rights and a left?"
+- "I set off from just there. Pointy end at the reef. That bit I remember."
+- "Then a left, the left, the left, the left, and just spinning. Everything was just spinning."
+- "And I popped out the other side of the reef! Hee hee! Easy peasy."
+- "Then the big whirly ones. A left. Then a double backflip. Well, that's what I get. Then a right."
+- "I kind of remember going in the sailing puzzle, doing some sailing, and then... WHOOSH!"
+- "It got really, really big and really sparkly and awesome, and I ended up with a penguin!"
+- "And he was wearing a balaclava. Up to something, he was. You can always tell."
+- "But then I took a few lefts. Too many lefts. And I ended up back on this island."
+
+### Hailed again once she's told it all: tangents, a bit of the real way buried in them
+
+- "Rodrigo says hello. Rodrigo is a monkey. He says lots of things."
+- "The little whirly one, any old whoosh does. The big ones want a really, really big whoosh."
+- "Did you count your lefts? I count mine. I lose count at about one."
+- "I named my ship after Rodrigo. He wanted it named after a banana."
+- "Seven! It was seven of something. Squares? Whooshes? Sparkles? Seven sparkles."
+- "Have some of my jug. No? More for me, then. Hic."
+- "Penguins are just very small admirals. Think about it."
+
+### Too many lefts: the whirlpools have spun you back to her island (a new one each time)
+
+- "Hee hee! Too many lefts! I told you!"
+- "Whee! Round and round and round! Back again!"
+- "Spat out like a pip! Hee hee! Again! Again!"
+- "Ooh, you went all spinny. I went all spinny too. Still a bit spinny, actually."
+- "Back so soon? The whirly bits like you. They like me too. Too much."
+- "Was it the backflips? It's always the backflips."
+- "You have to go WHOOSH. Really, really big. Like a firework, but a boat."
+
+### Spun back after you'd got out past the reef
+
+- "You got out past the reef! And then the big ones got you. They always get you."
+- "So close! Did you see him? Was he still in his balaclava? He's up to something."
+
+## The penguin in the balaclava
+
+One of a colony of penguins on a floe out in the middle of Kikkit's big whirlpools, beyond the reef: the bigger prize, only a Vegas carries you there. Exactly where she said, and in a balaclava, as she said, sneaking about the floe with a sack over his shoulder, up to something.
+
+He doesn't speak: his lines are what's said as you get to him.
+
+> "there's a penguin in the middle, so it gives you a bit of a reward" (the user, 11 Nov)
+>
+> "Maybe a small combo gets you through the reef, with the penguins being the bigger prize after." (the user, 11 Nov)
+
+### Getting through her whirlpools
+
+- *A small chain from the mouth carries her over the little whirlpool and out past the reef:* "Through the reef by the whirlpools! The open sea beyond"
+- *A Vegas carries her over the big whirlpools too, into the penguins' water:* "Penguins! A whole colony of them, out in the middle of the whirlpools"
+- *Just after, as he freezes and looks round at her:* "And one of them's in a balaclava. He's up to something"

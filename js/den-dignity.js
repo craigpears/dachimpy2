@@ -125,6 +125,8 @@ export function heard(e) {
         return null;
     if (e.how === 'gate')
         return 'passed';
+    if (e.how === 'whirlpools')
+        return null; // (out of her sight, and nobody would believe it)
     return e.back ? null : 'canal';
 }
 /** Dignity: whether you've met (the cutscene's played) and what she's said since. */

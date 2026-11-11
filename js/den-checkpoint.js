@@ -123,6 +123,9 @@ export class Checkpoint {
     sighted = false;
     /** Holed by one of its guns. */
     holed() { this.hits++; }
+    /** Kikkit's whirlpools have had her and spat her back to her island (src/den-kikkit.ts): if that
+        takes her back across, it was by the whirlpools. */
+    whirled() { this.crossed = 'whirl'; }
     /** A shot of hers came down on (c, r): on a gun's bastion, a hit on that gun; on the gatehouse,
         only stone. Either way it's a fight now (see Battery.roused). Null if it isn't the
         checkpoint's. */
@@ -154,11 +157,11 @@ export class Checkpoint {
         // Through once she's past every mark (so "not a scratch on her" is so), crossing the line at the
         // gate or down the locks through the headland.
         if (p.r === K.ROW)
-            this.crossed = p.c;
+            this.crossed = LAY.KIKKIT.PASSAGE.some(([c, r]) => c === p.c && r === p.r) ? 'whirl' : p.c;
         const rows = CHECK.MARKS.flat().map((m) => m[1]);
         const side = p.r < Math.min(...rows) ? 'near' : p.r > Math.max(...rows) ? 'far' : this.side;
         if (side !== this.side) {
-            out.push({ kind: 'through', how: this.crossed === K.GATE ? 'gate' : 'locks', back: side === 'near', hits: this.hits });
+            out.push({ kind: 'through', how: this.crossed === K.GATE ? 'gate' : this.crossed === 'whirl' ? 'whirlpools' : 'locks', back: side === 'near', hits: this.hits });
             this.side = side;
             this.hits = 0;
         }
@@ -174,6 +177,8 @@ export function isCheckpoint(sea, c, r) {
 export function throughSay(e) {
     if (e.how === 'locks')
         return e.back ? 'Back round the checkpoint by the locks, and they never saw her' : 'Round the checkpoint by the locks, and they never saw her! The open sea beyond';
+    if (e.how === 'whirlpools')
+        return e.back ? '' : 'Out past the checkpoint, and they never saw her: through the reef by the whirlpools';
     const head = e.back ? 'Back through the checkpoint!' : 'Through the checkpoint!';
     if (!e.hits)
         return `${head} Not a scratch on her`;

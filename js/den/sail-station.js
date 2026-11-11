@@ -24,7 +24,25 @@ import { sailBoardMake, sailBoardLayout, sailBoardLay, sailBoardDrop, sailBoardB
    sailing for the pin meanwhile, and the board's put away while something else has her (holed, at a
    lock's pump, hauling treasure, up in the lagoon) and comes back after. One board a voyage, kept
    while it's shut. */
-export const station = { on: false, want: false, game: null, pair: null, B: null, run: null, layout: null, lowT: 0, low: 0, top: 0, sparkle: new Sparkle() };
+export const station = { on: false, want: false, game: null, pair: null, B: null, run: null, layout: null, lowT: 0, low: 0, top: 0, sparkle: new Sparkle(), easy: false, kept: {} };
+const fresh = () => new Sailing(Math.random, true, { easy: station.easy });
+
+/* Kikkit's whirlpools have a board of their own, an easy one (the user, 11 Nov: "relatively small,
+   easy platforms"): in her waters (kikkit.js says when) it's that one, and out of them the sea's own
+   again, each kept as you left it. Swapped only between drops. */
+export function stationBoard(easy) {
+  if (!!easy === station.easy || station.run || (station.B && sailBoardBusy(station.B))) return;
+  station.kept[station.easy ? 'easy' : 'sea'] = { game: station.game, pair: station.pair };
+  station.easy = !!easy;
+  const k = station.kept[station.easy ? 'easy' : 'sea'];
+  station.game = k?.game ?? null; station.pair = k?.pair ?? null;
+  if (station.on) {
+    station.game ||= fresh();
+    station.pair ||= new SailPair(station.game);
+    sailBoardLay(station.B, station.game);
+    sailBoardSnap(station.B);
+  }
+}
 
 function pad(act, col) {
   if (!station.on) return;
@@ -60,6 +78,7 @@ export function stationReset() {
   hide();
   station.game = null; station.pair = null; station.run = null;
   station.sparkle = new Sparkle();
+  station.easy = false; station.kept = {};
 }
 
 // The pair's moves, by key or pad; none while a drop's still playing out.
@@ -99,7 +118,7 @@ export function stationTick(dt, blocked = false) {
   const want = station.want && sail.on && !blocked;
   if (want !== station.on) {
     if (want) {
-      station.game ||= new Sailing();
+      station.game ||= fresh();
       station.pair ||= new SailPair(station.game);
       show();
     } else hide();

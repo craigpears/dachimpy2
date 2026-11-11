@@ -16,10 +16,10 @@ import { CHART, X_AT } from './den-map.js';
 import { SAIL } from './den-sail.js';
 import { ISLE } from './den-isle.js';
 import { TOUR_SAYS } from './lines/narrator.js';
-export const WAYS = ['run', 'row', 'fight', 'locks'];
-export const ROUTES = ['gate', 'locks'];
-export const routeOf = (w) => (w === 'locks' ? 'locks' : 'gate');
-export const PLACES = ['cove', 'lagoon'];
+export const WAYS = ['run', 'row', 'fight', 'locks', 'whirlpools'];
+export const ROUTES = ['gate', 'locks', 'whirlpools'];
+export const routeOf = (w) => (w === 'locks' || w === 'whirlpools' ? w : 'gate');
+export const PLACES = ['cove', 'lagoon', 'vegas'];
 /** Found just now: the list with it in (once). */
 export function addFind(found, f) {
     const list = [...(found ?? [])];
@@ -32,8 +32,8 @@ export function addFind(found, f) {
     its guns wrecked the gate's safe, so going through it is no way past of its own (knocking the
     guns out was: wayWrecked). */
 export function wayThrough(how, at) {
-    if (how === 'locks')
-        return 'locks';
+    if (how === 'locks' || how === 'whirlpools')
+        return how;
     if (at.silenced)
         return null;
     return at.oars ? 'row' : 'run';

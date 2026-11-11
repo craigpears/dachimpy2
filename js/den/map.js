@@ -1,6 +1,6 @@
 // The captain's map, and the cutscene of their captain's parting shot. (Split out of den.js.)
 import * as THREE from 'three';
-import { MAP, mapAfter, canPickUp, canRead, RUMOUR, NOTES, X_AT, CHART, ROUTE, SHEET, onMap } from '../den-map.js';
+import { MAP, mapAfter, canPickUp, canRead, RUMOUR, NOTES, X_AT, CHART, ROUTE, SHEET, onMap, VEGAS_NOTE } from '../den-map.js';
 import { SAIL } from '../den-sail.js';
 import { PARTING } from '../lines/dalnoth.js';
 import { FOUND_MAP } from '../lines/you.js';
@@ -136,7 +136,27 @@ function mapTexture() {
       g.beginPath(); g.moveTo(rx - rr, ry + rr * 0.5); g.lineTo(rx - rr * 0.4, ry - rr * 0.7); g.lineTo(rx + rr * 0.5, ry - rr * 0.6); g.lineTo(rx + rr, ry + rr * 0.5); g.closePath(); g.fill(); g.stroke();
     }
   };
-  for (const sq of CHART.rocks) rockAt(...Q(sq));
+  for (const sq of [...CHART.rocks, ...CHART.kikkit.reef]) rockAt(...Q(sq));
+
+  // Kikkit's island, a little sandy one by the reef's end, a palm on it; and Vegas Island beyond, the
+  // penguins', only once you've been there (hidden gems are never hinted).
+  const isle = (shore, fill) => {
+    const corners = shore.map((sq) => Q(sq));
+    const px = corners.flatMap((p, i, a) => {
+      const cut = (q) => { const d = Math.hypot(q[0] - p[0], q[1] - p[1]), k = Math.min(14, d / 2.5) / d; return [p[0] + (q[0] - p[0]) * k, p[1] + (q[1] - p[1]) * k]; };
+      return [cut(a[(i + a.length - 1) % a.length]), cut(a[(i + 1) % a.length])];
+    });
+    wobbly(px, true, 6);
+    g.fillStyle = fill; g.fill(); g.strokeStyle = INK; g.lineWidth = 3; g.stroke();
+  };
+  isle(CHART.kikkit.shore, SAND);
+  {
+    const [x, y] = Q([20, 17.2]);
+    g.strokeStyle = INK; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + 3, y - 9, x + 1, y - 18); g.stroke();
+    for (const a of [-2.6, -2, -1.2, -0.5]) { g.beginPath(); g.moveTo(x + 1, y - 18); g.quadraticCurveTo(x + 1 + Math.cos(a) * 8, y - 21 + Math.sin(a) * 3, x + 1 + Math.cos(a) * 14, y - 15 + Math.sin(a) * 4); g.stroke(); }
+  }
+  if (chart.vegas) isle(CHART.kikkit.vegas, '#f3f4f2');
 
   // The trade winds: streaks along each lane, arrows the way it blows.
   for (const { from, to } of CHART.lanes) {
@@ -295,7 +315,7 @@ function mapTexture() {
     return out;
   };
   const NOTE = 'italic 21px Alegreya, serif';
-  for (const n of NOTES) {
+  for (const n of chart.vegas ? [...NOTES, VEGAS_NOTE] : NOTES) {
     const [x, y] = Q(n.at);
     if (n.along) {   // (written up along a lane, as on a chart)
       g.save(); g.translate(x, y); g.rotate(-Math.PI / 2);
@@ -328,6 +348,7 @@ function mapTexture() {
 
 // The map, opened out: the parchment between two rolls, unrolling towards you.
 function mapMake() {
+  chart.vegas = (G.found ?? []).includes('vegas');
   chart.tex ||= mapTexture();
   const g = new THREE.Group();
   chart.paper = mesh(new THREE.PlaneGeometry(MAP_W, MAP_D), new THREE.MeshStandardMaterial({ map: chart.tex, transparent: true, alphaTest: 0.4, roughness: 0.95, emissive: '#6a5a40', emissiveMap: chart.tex, side: THREE.DoubleSide }), false);
@@ -354,6 +375,14 @@ export function openMap() {
   keys.clear();
   const ry = pirate.g.rotation.y;
   if (!chart.g) mapMake();
+  else if (chart.vegas !== (G.found ?? []).includes('vegas')) {
+    // (Vegas Island, been to since it was drawn: drawn again with it on)
+    chart.vegas = !chart.vegas;
+    chart.tex.dispose();
+    chart.tex = mapTexture();
+    chart.paper.material.map = chart.paper.material.emissiveMap = chart.tex;
+    chart.paper.material.needsUpdate = true;
+  }
   // (laid where you stand: on the jetty, on its planks, not under them)
   chart.g.position.set(pirate.x + Math.sin(ry) * 0.95, Math.max(0, pirate.h), pirate.z + Math.cos(ry) * 0.95);
   chart.g.rotation.y = chart.yaw = ry + Math.PI;   // its top away from you
