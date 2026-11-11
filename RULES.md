@@ -437,6 +437,21 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     a lesson's moves are content, and need their own tests of what a good player would do (every
     piece in a target of its colour or a line that clears, nothing left idle, the trigger left one
     short), from the puzzle's real strategy (YPPedia) or the user, never invented.
+- **A lesson breaks it down, shows it on the board, and lets you work it out (11 Nov).** Of Tzz's
+  lesson once the plan was shown on her board: "I'm loving the changes ... It's much more tutorial and
+  educational. That's fantastic." And as the rule for every lesson: "capture that principle in general
+  ... where it helps you visualize it, break it down, absorb it slowly. You know, actually lets you
+  figure it out, and it shows you, doesn't just demonstrate it. It breaks it down." So any pirate
+  teaching a puzzle (Tzz's Sailing; Helium's Distilling, Rapportus's and Balloffire's Gunnery,
+  SunnyKira's Rigging to come):
+  - **Breaks it into steps**, one idea at a time, slow enough to take in, never a rush of moves.
+  - **Shows it on the board**: what each move is for, marked where it happens (the gap left as the
+    trigger glowing, where the line will form, an arrow for what drops where, what pops after what),
+    shown before it's named, in plain words, no unexplained jargon.
+  - **Instructions to you stand apart from chatter**: prominent, and up till you've done them.
+  - **Lets you work it out**: "now you try", your turn announced plainly with a ghost of where it goes
+    and the keys, a kind second go if you miss.
+  - **Real, good play** (above): every move what a good player would make, tested.
 - **Finish one thing at a time (11 Nov).** "try and finish things, because I don't want to move too
   quickly, because I'm conscious we haven't play tested any of the [Tzz] stuff yet. So we need to
   finish things really one at a time", and "I want to reveal things one at a time." A feature is
