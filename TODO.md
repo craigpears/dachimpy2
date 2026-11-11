@@ -176,6 +176,10 @@ the site (`.assetsignore` skips `*.md`).
   a base a bit too low. They're sinking into the ground. You only really see them when they jump
   up." They stand on the sand's top, the penguins on Vegas Island's too, and Kikkit herself.
 
+- **The whirlpools' winds look like the sea lanes' (11 Nov):** "Why do the winds look different
+  than the sea lane ones? Like, the graphic representation of them should be the same." One
+  drawing of a wind, the trade-wind lanes' white streaks on a faint blue band, used for both.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map

@@ -177,6 +177,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   times the sloop's; a **grand frigate**, 159 crew. Her size, her guns and the people you see aboard
   her, on deck and below, all match: a frigate visibly busy with dozens of crew, a sloop a
   handful.
+- **The same thing looks the same everywhere (11 Nov).** Of the whirlpools' winds, drawn their own
+  way: "Why do the winds look different than the sea lane ones? Like, the graphic representation
+  of them should be the same." A wind is a wind, whether it's a sea lane or one beside a whirlpool:
+  one look, from one shared piece of drawing code, never a second version for a new place. The same
+  goes for any other thing that turns up again (a rock, a buoy, a gun).
 - **Furniture and props are modular, usable in any scene (11 Nov).** Of Gravee's house: "anything
   in these houses, they should all be modular objects that can be reused in other scenes. So, like,
   if we're doing the vampire's coffin, that should just be a bit of furniture that you can use
