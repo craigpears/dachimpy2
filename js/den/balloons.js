@@ -1,7 +1,7 @@
-/* Balloon animals, in anyone's hands, played onto a real Sailing board (the rules: src/balloons.ts, a
-   show of Sailing's pieces twisted out of balloons; src/sailing.ts, the puzzle). A piece for any scene,
+/* Balloons, blown up in anyone's hands, played onto a real Sailing board (the rules: src/balloons.ts, a
+   show of Sailing's pieces as balloons; src/sailing.ts, the puzzle). A piece for any scene,
    like the furniture: give it a talking pirate (props-people.js's person()) and where the board stands,
-   and play it a BalloonShow. Knows nothing of who's twisting: an island's config says (src/den-tzz.ts:
+   and play it a BalloonShow. Knows nothing of who's blowing them up: an island's config says (src/den-tzz.ts:
    Tzz's lesson).
 
    What's drawn (the user, 11 Nov, of a first go: "it's not really a real looking sailing board, it's
@@ -14,8 +14,9 @@
      and falls by itself, and you steer and drop it with Sailing's own keys (A D or the arrows move it,
      W Q E turn it, S or Space drops it). Set the chain off and it pops; miss, and the board's put back
      as she left it for another go, while she eggs you on; miss three times and she shows you;
-   - in the performer's hands, the very balloons that go on it, the board's own drawing of them: one
-     blown up, wobbling as it fills, twisted off with a squeak; the second beside it, squeak; the
+   - in the performer's hands, the very balloons that go on it, the board's own drawing of them, big
+     enough to see from the camera, the performer turned to it: one blown up at the mouth in three
+     puffs, tied off with a squeak and brought down to the hands; the second the same, squeak; the
      board's brown peg joining them; held up, and tossed in an arc onto the top of the board, shrinking
      to the board's size as it goes, where it comes in as the falling pair. Round balloons only, in the
      board's three colours: nothing long, nothing with knobs on (the user: "be careful about that"). */
@@ -67,8 +68,11 @@ export function balloonStand({ performer, parent, x = 0, y = 0, z = 0, yaw = 0, 
   const onBoard = (bx, by) => V3((bx / SAIL_BOARD.W - 0.5) * wide, LIFT + tall * (1 - by / SAIL_BOARD.H), 0.04);
   const cellM = (wide * 40) / SAIL_BOARD.W;   // (a square of it, in metres)
 
-  // The pair in hand: the board's own balloons, as sprites, and the board's brown peg.
-  const HAND = 0.42;
+  // The pair in hand: the board's own balloons, as sprites, and the board's brown peg. Big enough to
+  // read from the lesson's camera, seven metres off (the user, 11 Nov: "she kind of twists her hands.
+  // Nothing's actually happening": they were 0.42 m, blown up at her fists while she stood side-on to
+  // the camera, turned to the sloop, so all you saw was her hands).
+  const HAND = 0.56;
   const sprite = () => { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: artTex(0), transparent: true })); s.renderOrder = 4; return s; };
   const held = new THREE.Group(), halves = [sprite(), sprite()], peg = mesh(new THREE.BoxGeometry(0.2, 0.05, 0.05), mat('#6b4220'), false);
   held.add(...halves, peg);
@@ -79,14 +83,22 @@ export function balloonStand({ performer, parent, x = 0, y = 0, z = 0, yaw = 0, 
   const S = { show: null, game: null, pair: null, falling: false, done: 0, fallT: 0, route: null, rest: performer.idle, mine: false, redo: false, help: null, auto: false };
   const v = new THREE.Vector3(), w2 = new THREE.Vector3();
   // The performer's hands, in the stand's own space.
+  // (where she holds the pair, in the stand's space: in front of her, at her waist, toward the camera;
+  // from where she stands rather than her hands, so it doesn't jig about as her arms move)
   function hands() {
     const P = performer.p;
     P.g.updateMatrixWorld(true);
-    P.arms[0].localToWorld(v.set(0, -0.52, 0.08));
-    P.arms[1].localToWorld(w2.set(0, -0.52, 0.08));
-    v.add(w2).multiplyScalar(0.5);
+    P.g.localToWorld(v.set(0, 1.0, 0.45));
     g.updateMatrixWorld(true);
-    return g.worldToLocal(v.clone()).add(V3(0, -0.12, 0.4));   // (held out in front, below her face)
+    return g.worldToLocal(v.clone());
+  }
+  // Her mouth, in the stand's space, where each balloon's blown up.
+  function mouth() {
+    const P = performer.p;
+    P.g.updateMatrixWorld(true);
+    P.body.localToWorld(v.set(0, 0.87, 0.3));
+    g.updateMatrixWorld(true);
+    return g.worldToLocal(v.clone());
   }
   function say(text, secs) {
     const C = performer.chatter;
@@ -155,20 +167,27 @@ export function balloonStand({ performer, parent, x = 0, y = 0, z = 0, yaw = 0, 
     const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace;
     const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, transparent: true, depthWrite: false }));
     s.scale.set(0.8, 0.3, 1); s.renderOrder = 5;
-    const at = hands();
-    s.position.set(at.x + (half ? 0.3 : -0.3), at.y + 0.35, at.z);
+    const at = mouth();
+    s.position.set(at.x + (half ? 0.45 : -0.45), at.y + 0.3, at.z + 0.3);
     g.add(s);
     squeaks.push({ s, t: 0 });
   }
-  // The pair in hand, `u` through its twist: blown up, twisted off, pegged, held up, tossed.
+  /* The pair in hand, `u` through it (the user, 11 Nov: "Maybe it would be simpler just to be like,
+     they're balloons and she's blowing them up"): each balloon, the board's own drawing of it, blown up
+     at her mouth in three puffs from a little limp one to full size, its knot to her lips; tied off
+     (squeak) and brought down into her hands, the first to her left; the second blown up the same; the
+     board's brown peg joining them; held up, and tossed in an arc onto the top of the board, shrinking
+     to the board's size, where it comes in as the falling pair. Round balloons only, in the board's
+     three colours ("be careful about that"). */
+  function blown(w) {
+    // (three puffs, each a quick breath in and a pause; a limp little balloon to start)
+    const puffs = clamp((w - 0.06) / 0.76) * 3, n = Math.floor(puffs), f = puffs - n;
+    return 0.16 + 0.84 * Math.min(1, (n + ease(clamp(f / 0.6))) / 3);
+  }
   function inHand(tw) {
-    const u = tw.u, [s0, s1] = SHOW.SQUEAKS, T = SHOW.TOSS, at = hands();
+    const u = tw.u, [s0, s1] = SHOW.SQUEAKS, T = SHOW.TOSS, at = hands(), lips = mouth();
     halves[0].material.map = artTex(tw.pair[0]); halves[1].material.map = artTex(tw.pair[1]);
-    const grow = (a, b) => ease(clamp((u - a) / (b - a)));
-    const wob = (k, ph) => 1 + Math.sin(performance.now() / 55 + ph) * 0.06 * (k < 1 ? 1 : 0.15);
-    // (each blown up from a little nub, wobbling as it fills; a quick squash as it's twisted off)
-    const k0 = grow(0.04, s0 - 0.05), k1 = grow(s0 + 0.04, s1 - 0.05);
-    const sq0 = Math.max(0, 1 - Math.abs(u - s0) * 20) * 0.25, sq1 = Math.max(0, 1 - Math.abs(u - s1) * 20) * 0.25;
+    const now = performance.now() / 1000;
     let size = HAND, cx = at.x, cy = at.y, cz = at.z;
     if (u > T) {
       // Tossed: an arc from the hands to the top of the board, shrinking to the board's own size.
@@ -177,12 +196,30 @@ export function balloonStand({ performer, parent, x = 0, y = 0, z = 0, yaw = 0, 
       size = HAND + (cellM - HAND) * f;
     } else if (u > s1) cy += ease(clamp((u - s1) / (T - s1))) * 0.25;
     held.position.set(cx, cy, cz);
-    halves[0].position.set(-size * 0.5, 0, 0);
-    halves[1].position.set(size * 0.5, 0, 0);
-    const a0 = size * Math.max(0.12, k0), a1 = size * Math.max(0.12, k1);
-    halves[0].scale.set(a0 * (wob(k0, 0) + sq0), a0 * (wob(k0, 1) - sq0), 1);
-    halves[1].scale.set(a1 * (wob(k1, 2) + sq1), a1 * (wob(k1, 3) - sq1), 1);
-    halves[1].visible = u > s0;
+    // Each balloon: blown up at her lips over [a, b], then tied off and brought down to its place in
+    // her hands (`side`: -1 her left, +1 her right) over the next little while.
+    const one = (h, a, b, side) => {
+      const s = halves[h], home = V3(side * size * 0.5, 0, 0);
+      if (u < a) { s.visible = false; return; }
+      s.visible = true;
+      s.material.rotation = 0;
+      const w = clamp((u - a) / (b - a)), down = ease(clamp((u - b) / 0.08));
+      const sq = Math.max(0, 1 - Math.abs(u - b) * 25) * 0.22;   // (a squash as it's tied off)
+      if (w < 1 || down < 1) {
+        // At her lips: out in front of her face and up a little, its knot to her mouth, swelling.
+        const k = blown(w), r = HAND * k * 0.5, wob = Math.sin(now * 13 + h) * 0.04 * (w < 1 ? 1 : 0);
+        const d = V3(0.35 * side, 0.45, 0.82).normalize(), c = lips.clone().addScaledVector(d, r * 1.05 + 0.03).sub(held.position);
+        s.position.copy(c.lerp(home, down));
+        s.scale.set(HAND * k * (1 + wob + sq), HAND * k * (1 - wob - sq), 1);
+        s.material.rotation = (1 - down) * Math.atan2(-d.x, d.y);
+        return;
+      }
+      s.position.copy(home);
+      s.scale.set(size * (1 + sq), size * (1 - sq), 1);
+    };
+    one(0, 0.02, s0, -1);
+    one(1, s0 + 0.1, s1, 1);
+    peg.position.set(0, 0, 0.02);
     peg.visible = u > s1;
     peg.scale.setScalar(size / HAND);
     held.visible = true;
@@ -193,6 +230,10 @@ export function balloonStand({ performer, parent, x = 0, y = 0, z = 0, yaw = 0, 
     /** Plays a show (src/balloons.ts's BalloonShow) from its start. */
     play(show) {
       S.show = show;
+      // (turned to her audience, the way her board faces, the camera's: not to the sloop)
+      g.updateMatrixWorld(true);
+      const front = g.localToWorld(V3(0, 0, 40));
+      performer.lookAt = { x: front.x, z: front.z };
       performer.chatty = false;
       performer.hush();
       act(0);
@@ -204,6 +245,7 @@ export function balloonStand({ performer, parent, x = 0, y = 0, z = 0, yaw = 0, 
       if (!S.show) return;
       Object.assign(S, { show: null, falling: false, mine: false, redo: false, help: null, auto: false });
       held.visible = false;
+      performer.lookAt = null;
       performer.chatty = true;
       performer.setIdle(S.rest);
       performer.hush();
@@ -259,7 +301,9 @@ export function balloonStand({ performer, parent, x = 0, y = 0, z = 0, yaw = 0, 
         this.handle(sh.tick(dt, sailBoardBusy(B) || S.falling || S.redo || S.mine));
         if (S.show) {
           const now = sh.now();
-          performer.setIdle(S.mine ? 'clap' : IDLE_FOR[now.beat.kind] ?? 'sway');
+          // (blowing them up, both hands at her mouth; then holding the pair)
+          const blowing = now.twisting && now.twisting.u < SHOW.SQUEAKS[1];
+          performer.setIdle(S.mine ? 'clap' : blowing ? 'blow' : IDLE_FOR[now.beat.kind] ?? 'sway');
           if (now.twisting) inHand(now.twisting); else held.visible = false;
           if (S.falling) {
             S.fallT += dt; steer(Math.floor(S.fallT / SHOW.STEP));

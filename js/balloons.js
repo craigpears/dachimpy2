@@ -1,6 +1,6 @@
-/* Balloon animals: Sailing's pieces twisted out of balloons, squeak by squeak, and played onto a real
+/* Balloons: Sailing's pieces blown up one by one, tied off with a squeak, and played onto a real
    Sailing board till they pop. TypeScript, compiled to js/balloons.js; tested in tests/balloons.test.ts.
-   It knows nothing of who's twisting them or where: js/den/balloons.js shows it in any pair of hands
+   It knows nothing of who's blowing them up or where: js/den/balloons.js shows it in any pair of hands
    beside a board drawn as the den's own Sailing board (js/den/sail-board.js), and an island's config
    says who, and what they say as they go (src/den-tzz.ts: Tzz's lesson).
 
@@ -10,7 +10,11 @@
    It makes sense. They're balloon animals." And "the humour is the layer on top, but there's a
    genuine mechanic underneath" (RULES.md). Then, seeing a first go (11 Nov): "it's not really a real
    looking sailing board, it's just things stacked on each other, so it needs to be ... closer to the
-   actual tutorial idea. She's helping you ... how to build doubles and bingos and things."
+   actual tutorial idea. She's helping you ... how to build doubles and bingos and things." And later
+   the same day, simpler: "Maybe it would be simpler just to be like, they're balloons and she's blowing
+   them up ... Maybe my balloon animal thing was a bit too complicated." So no animals: each piece is a
+   round balloon in its colour, blown up and tied. (A "twist", below, is still a pair of them: the
+   name's from when they were twisted.)
 
    So it's the real puzzle (src/sailing.ts), on its real board: a routine lays out some platforms, then
    each twist is a pair that comes in at the top of the middle columns and is steered down to where it
@@ -18,50 +22,85 @@
    each one Sailing's own), and dropped there by the rules. Nothing clears as it's built; the last
    twist's landing sets off a real chain, popped by the board as any chain is.
 
-   The routines (ROUTINES) are staircases: ledges one over the other down the board's left-hand side,
-   each wanting a colour in its top square, a balloon on each ledge's floor the colour the ledge below
-   wants (its other half hanging beside it by its peg). Fill the top ledge and it pops; the balloon it
-   held drops into the next ledge down, which pops, and so on down: a chain as long as the stair is high.
-   Platforms clear last (the user's memory of the real game, src/sailing.ts), so each ledge's pop is a
-   step of its own. Two ledges a Double ("and that's what zooms you over a whirlpool"), four a Bingo,
-   six a Vegas.
+   The routines (ROUTINES) are the real way a chain is built (YPPedia, "Sailing", Strategy, read 11
+   Nov: "A common construction begins by preparing a lower platform one target short. A line clear
+   above it breaks a joined pair, allowing the surviving piece to fall into the missing target. Further
+   platforms and line clears may then be arranged to resolve in succession"; "Avoid placing the wrong
+   color in a target"; "Keep the columns above unfinished targets open"). After the user saw a first
+   go (11 Nov): "the colours are not going into the right spots ... they're just going in random places
+   and bodging it. This is a tutorial, and she's just showing bodging moves." So every balloon she puts
+   down goes in a target of its own colour or in a line that pops, platforms are blocks (three by two),
+   and nothing's left on the board once it's popped. Lines clear before platforms (src/sailing.ts), so
+   a line pops first, its partner drops into the gap, and then the platform pops: a Double. The Bingo is
+   that Double with another storey on top, whose pop drops a parked pair onto it.
 
    A show (BalloonShow) plays acts, each a routine and what's said as it goes: a line to start, a line
-   as each twist's twisted, and one once it's popped. Its clock gives each beat its time (long enough
-   to read its line; a twist slow enough to see each balloon blown up and twisted off, the user: "it
+   as each pair's blown up, and one once it's popped. Its clock gives each beat its time (long enough
+   to read its line; a pair slow enough to see each balloon blown up and tied off, the user: "it
    goes really quickly in her hand ... like, what is she doing? Fiddling around some Play-Doh"), and
-   says what's happening: a squeak as each balloon's twisted off, the pair tossed onto the board, the
+   says what's happening: a squeak as each balloon's tied off, the pair tossed onto the board, the
    pair falling, landing, and the chain going off. */
 import { Sailing, SPAWN, chainName } from './sailing.js';
-/** A staircase of ledges one over the other down the board's left-hand side: platforms two by two
-    (the smallest Sailing has: src/sailing.ts, PLATFORM), each with two targets, its floor's left square
-    (`floor[k]`, bottom ledge first) and a gap at its top right (`slot[k]`); its floor's right square no
-    target, holding a balloon the colour of the slot below, under the slot. Each ledge is built by one
-    pair across its floor, slid in under the ledge above (its two halves pegged: the target's, and the
-    one for the ledge below); then the top ledge's slot is filled by a pair across its top, `last` beside
-    the colour it wants: it pops, the balloon under its slot drops into the slot below, that ledge pops,
-    and so on down. n ledges, a chain of n. */
-export function staircase(slot, floor, last) {
-    const n = slot.length, platforms = [], twists = [];
-    for (let k = 0; k < n; k++) {
-        const a = 14 - 2 * k, b = a + 1;
-        platforms.push({ id: 1000 + k, r: a, c: 0, w: 2, h: 2, targets: [{ r: a, c: 1, colour: slot[k] }, { r: b, c: 0, colour: floor[k] }] });
-        // (the bottom ledge's spare balloon drops into nothing, so it's any colour but its own slot's)
-        twists.push({ pair: [floor[k], k ? slot[k - 1] : (slot[0] + 1) % 3], col: 0, turn: 0, row: b });
-    }
-    twists.push({ pair: [last, slot[n - 1]], col: 0, turn: 0, row: 14 - 2 * (n - 1) });
-    // (and one more platform off to the right, two by three, as a real board has more than its stair:
-    // so the stair's chain is the chain, and the board isn't cleared and dealt afresh under it)
-    platforms.push({ id: 999, r: 11, c: 5, w: 2, h: 3, targets: [11, 12, 13].flatMap((r, i) => [5, 6].map((c, j) => ({ r, c, colour: (i + j + n) % 3 }))) });
-    return { platforms, twists };
+/** Sailing's colours, by name: water (blue), rope (yellow), wind (white). */
+const WATER = 0, ROPE = 1, WIND = 2;
+/** A platform from its rows of target colours, top row first ('B' water, 'Y' rope, 'W' wind). */
+function platform(id, r, c, rows) {
+    return { id, r, c, w: rows[0].length, h: rows.length, targets: rows.flatMap((row, i) => [...row].map((ch, j) => ({ r: r + i, c: c + j, colour: 'BYW'.indexOf(ch) }))) };
 }
+const across = (a, b, col, row) => ({ pair: [a, b], col, turn: 0, row });
+const upright = (top, under, col, row) => ({ pair: [top, under], col, turn: 1, row });
+/** The bottom storey, both routines' (rows 14 and 15, columns 0 to 3): a platform three by two on the
+    floor, every target but its top right filled in its own colour, and beside that gap a stack of
+    three blues, the first of them pegged to the platform's bottom right. The gap wants yellow.
+      row 13   . . . B
+      row 14   W B _ B      (_ the gap: yellow)
+      row 15   B Y W B */
+const BOTTOM = platform(1, 14, 0, ['WBY', 'BYW']);
+const BOTTOM_TWISTS = [
+    across(WATER, ROPE, 0, 15),
+    across(WIND, WATER, 0, 14),
+    // (a white in its square, its blue partner beside it on the floor: the stack's first)
+    across(WIND, WATER, 2, 15),
+    upright(WATER, WATER, 3, 13),
+];
+/** Off to the right, a platform she's not started on (a real board has more than one on the go): and
+    so a chain that pops her others doesn't clear the board, dealing a fresh one under it. */
+const NEXT = platform(9, 9, 5, ['BW', 'YB', 'WY']);
 export const ROUTINES = {
-    /** Two ledges, three twists: a Double. */
-    double: staircase([1, 2], [0, 1], 2),
-    /** Four ledges, five twists: a Bingo! */
-    bingo: staircase([2, 0, 1, 2], [1, 2, 0, 1], 0),
-    /** Six ledges, seven twists: a Vegas!! */
-    vegas: staircase([1, 2, 0, 1, 2, 0], [0, 1, 2, 0, 1, 2], 2),
+    /** A Double, the real way: the platform one short, three blues beside its gap; then a pair across
+        the top, yellow over the gap, blue on the stack. The four blues pop (a line clears first), the
+        yellow pegged to them drops into the gap, and the platform pops: two. */
+    double: {
+        platforms: [BOTTOM, NEXT],
+        twists: [...BOTTOM_TWISTS, across(ROPE, WATER, 2, 12)],
+    },
+    /** A Bingo: the same Double, with another storey on top that drops its trigger in. The top platform
+        (rows 10 and 11, columns 0 to 2) is one short in the middle of its top row, wanting yellow; on its
+        left corner, a stack of three whites (the first pegged to the corner's blue); and parked on its
+        right corner a yellow and a blue, the blue hanging out over the bottom stack. Your pair: a white
+        on the whites, a yellow over the top gap.
+          row  6   W Y          (yours)
+          row  7   W
+          row  8   W
+          row  9   W . Y B      (the parked pair: yellow on the corner, blue hanging)
+          row 10   B _ W        (_ the top gap: yellow)
+          row 11   Y W B
+          rows 13 to 15: the Double's
+        The whites pop (1); the yellow drops into the top gap and the top platform pops (2); the parked
+        pair drops, its blue onto the blues, which pop (3); its yellow drops into the bottom gap and the
+        bottom platform pops (4). */
+    bingo: {
+        platforms: [platform(2, 10, 0, ['BYW', 'YWB']), BOTTOM, NEXT],
+        twists: [
+            ...BOTTOM_TWISTS,
+            across(ROPE, WIND, 0, 11),
+            upright(WIND, WATER, 2, 10),
+            upright(WIND, WATER, 0, 9),
+            upright(WIND, WIND, 0, 7),
+            across(ROPE, WATER, 2, 9),
+            across(WIND, ROPE, 0, 6),
+        ],
+    },
 };
 /** A game laid out for a routine: its platforms, an empty board, its first pair coming in. */
 export function layout(routine) {
@@ -105,8 +144,10 @@ export function route(g, t) {
         const next = [
             [r, c - 1, u, 'left'], [r, c + 1, u, 'right'], [r, c, ((u + 1) % 4), 'turnR'], [r, c, ((u + 3) % 4), 'turnL'],
         ];
+        // (down last: of the shortest ways, the one a player takes, across and turned first, then dropped,
+        // sliding in sideways only where it has to, under a platform)
         if (g.sinks(r, c, u))
-            next.unshift([r + 1, c, u, 'down']);
+            next.push([r + 1, c, u, 'down']);
         for (const [nr, nc, nu, step] of next) {
             const k = id(nr, nc, nu);
             if (from.has(k) || !g.open(nr, nc, nu))
@@ -137,12 +178,12 @@ export function perform(routine) {
     });
     return { routes, steps, name, early, game: g };
 }
-/** Seconds: a line to start; a twist in hand (the first balloon blown up and twisted off, squeak; the
+/** Seconds: a line to start; a twist in hand (the first balloon blown up and tied off, squeak; the
     second, squeak; pegged together and tossed onto the board: SQUEAKS and TOSS are its fractions); a move
     of the pair steered down the board; your turn's line (then it waits for you); the chain once it's
     going (the board plays it: a show waits while it does); after it's popped. A beat with a line is at
     least as long as its line takes to read. HELP: misses before she shows you how after all. */
-export const SHOW = { START: 2.6, TWIST: 3.2, SQUEAKS: [0.34, 0.68], TOSS: 0.82, STEP: 0.07, LAND: 0.35, YOURS: 2.4, POP: 0.6, AFTER: 3, HELP: 3 };
+export const SHOW = { START: 2.6, TWIST: 3.4, SQUEAKS: [0.38, 0.76], TOSS: 0.86, STEP: 0.055, LAND: 0.35, YOURS: 2.4, POP: 0.6, AFTER: 3, HELP: 3 };
 /** A show's beats, end to end; `secs(text)` how long a line takes to read. */
 export function beats(acts, secs) {
     const out = [];

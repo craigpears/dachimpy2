@@ -24,8 +24,11 @@ export const SAIL = {
     /** The board: squares across and out to sea. Grown (10 Nov) from 16 by 14 to make room for the
         imperial checkpoint and the open sea beyond it (the user wanted "a bit of the map, not just
         tiny sections"): out to the right and further out to sea, everything already there staying
-        put. */
-    COLS: 22,
+        put. Grown again (11 Nov) from 22 to 27 across, out to the right, to space the islands out
+        (the user: "can we see if we can just space things out a bit? ... TZZ just seems kind of
+        crammed into the middle"): Tzz's island out in the new water, open sea round it, and the Wedding
+        Isle and Kikkit's island no longer against the edge. */
+    COLS: 27,
     ROWS: 26,
     /** Where the scattered rocks fall: the board as it was before it grew, so its rocks are the same
         as ever. The new water is laid out by hand (LAY). */
@@ -167,7 +170,7 @@ export const LAY = {
         PIERS: [[8, 19], [10, 19]],
         GUNS: [[7, 19], [11, 19]],
         HEADLAND: { c0: 0, c1: 6, r0: 18, r1: 20 },
-        REEF: { c0: 12, c1: 21 },
+        REEF: { c0: 12, c1: 26 },
     },
     /** An old wreck on the open sea beyond the checkpoint, its treasure hauled up by Treasure Haul:
         the reason to get past. Out of reach of the checkpoint's guns, so she can haul in peace. */
@@ -224,7 +227,8 @@ export const LAY = {
     },
     /** Kikkit's island and her whirlpools (11 Nov; rules: src/den-kikkit.ts): "another way of getting
         past the reef, so it should go over there", to the right of the checkpoint's gate, the island
-        on the reef's near side. LAND: her little island, against the reef's right-hand end. LANDING:
+        on the reef's near side. LAND: her little island, against the reef (at its right-hand end till
+        the board grew out past it, 11 Nov: SAIL.COLS). LANDING:
         the water off its left-hand shore, where you hear her out. MOUTH: where the way through starts,
         just off her shore, facing out to sea at the reef's gap (GAP).
         Reworked (11 Nov) to Puzzle Pirates' whirlpools (src/den-whirl.ts): WHIRLS, two whirlpools of
@@ -272,14 +276,16 @@ export const LAY = {
     /** Tzz's island (11 Nov; src/den-tzz.ts): the sensible one after Kikkit, who shows you plainly how a
         Vegas is built. "Have it nearby because you want to run in to [Kikkit] first, because then it's
         like the point is you want to go find the other person to help you", and "[Tzz] appears nearer
-        the start": a hop from Kikkit's, on the den's side of it, between hers and the Wedding Isle, in
-        plain sight. LAND: two squares, a little island of her own (a third, [21, 13], shut the water
-        between it and the Wedding Isle in) (the rock that was off it, [20, 15],
-        gone: FAR). LANDING: the water off its left-hand shore, where her lesson's seen (nearer her than Kikkit,
-        so it's her you hear there: src/chatter.ts's Voices). */
+        the start": a hop from Kikkit's, on the den's side of it, in plain sight. Moved (11 Nov) out of
+        the gap between hers and the Wedding Isle, where it was "crammed into the middle", into the
+        water the board grew into on the right (SAIL.COLS): open sea all round it, two squares at
+        least to anything else. LAND: three squares, a little island of her own. The water round it,
+        every square beside it, is where her lesson's seen (src/den-tzz.ts, onTzzLanding: the user, 11
+        Nov, "you've got to go straight in front"). MOOR: where she's brought alongside as her lesson
+        begins, out of its shot (the user: "then the [ship] blocks the view"). */
     TZZ: {
-        LAND: [[20, 14], [21, 14]],
-        LANDING: { c0: 18, c1: 19, r0: 14, r1: 14 },
+        LAND: [[23, 13], [24, 13], [23, 14]],
+        MOOR: { c: 22, r: 12, d: 2 },
     },
 };
 /** The canal's squares: its locks and the water between them (the hidden cove's too). */
@@ -435,13 +441,11 @@ export class Sea {
         for (const [c, r, d] of LAY.KIKKIT.WINDS)
             this.wind.set(key(c, r), d);
         this.pockets.add(key(...LAY.KIKKIT.PENGUINS));
-        // Tzz's island, a hop from Kikkit's: land, and the water off it kept clear.
-        for (const [c, r] of LAY.TZZ.LAND)
+        // Tzz's island, a hop from Kikkit's: land, and the water round it kept clear.
+        for (const [c, r] of LAY.TZZ.LAND) {
             this.works.add(key(c, r));
-        const T = LAY.TZZ.LANDING;
-        for (let c = T.c0; c <= T.c1; c++)
-            for (let r = T.r0; r <= T.r1; r++)
-                this.keep.add(key(c, r));
+            near(c, r);
+        }
         this.zones = LAY.ZONES.map((z) => ({ ...z }));
     }
     scatter(roll) {

@@ -341,8 +341,18 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **A real board, a real lesson:** "it's not really a real looking sailing board, it's just things
     stacked on each other ... She's helping you ... how to build doubles and bingos and things." Her
     board is the den's own Sailing board (sail-board.js's look) on a stand, every pair steered down
-    by real moves and dropped by the real rules: a Double, a Bingo, then a Vegas, each a stair of
-    ledges a little higher (src/balloons.ts).
+    by real moves and dropped by the real rules: a Double, then a Bingo (src/balloons.ts).
+  - **The real way, never bodged (11 Nov, first play):** "the colours are not going into the right
+    spots ... they're just going in random places and bodging it. This is a tutorial, and she's just
+    showing bodging moves." Built as YPPedia's Sailing strategy has it: a platform one target short, a
+    stack of three beside its gap, a pair whose half finishes the line and whose partner drops into the
+    gap. Every balloon goes in a target of its own colour or a line that pops, platforms are blocks,
+    and nothing's left once it's popped (tests/balloons.test.ts). The Bingo is the Double with another
+    storey on top whose pop drops a parked pair onto it.
+  - **Just balloons, blown up (11 Nov):** "Maybe it would be simpler just to be like, they're balloons
+    and she's blowing them up ... Maybe my balloon animal thing was a bit too complicated." No
+    twisting into animals: she blows each up at her mouth, ties it off (squeak), pairs them, tosses
+    them on, facing her audience (the camera) while she does.
   - **Now you try:** "she sets up the balloons, you do the pop." She builds each; the last pair is
     yours, on Sailing's own keys. Miss and she eggs you on with the board put back; three misses and
     she shows you.
@@ -355,6 +365,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     balloons in the board's three colours only; nothing long with knobs on, no flesh tones.
   - **Keep her in view:** "She's hidden quite behind." One shot held through it, her and her board
     side by side.
+  - **Room of her own, and easy to start (11 Nov, first play):** "TZZ just seems kind of crammed into
+    the middle ... can we see if we can just space things out a bit?" The sea grew five squares out
+    to the right (27 across, the reef with it) and her island moved out into it: three squares, open
+    sea two squares deep all round, still a hop from Kikkit's and on the den's side of it; the
+    Wedding Isle and Kikkit's island stay put, no longer against the edge. "To actually get the
+    [lesson] to trigger was awkward. So you've got to go straight in front, and then the [ship]
+    blocks the view": it starts from any square beside her island, all round it (free, not mid-turn,
+    the Sailing board put away), and as it starts the sloop's brought alongside at one spot
+    (LAY.TZZ.MOOR) off to the side of the shot, so she and her board are always clear in it.
   - **The whirlpools are one point of interest on the captain's map, nothing named (11 Nov):** "I
     don't want [Kikkit's] Island or ... the detailed individual ones ... the whole point of that map is
     here's a point of interest. It's ... a different way through. That's about all ... That's for you

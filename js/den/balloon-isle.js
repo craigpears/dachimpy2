@@ -8,12 +8,13 @@
 // asks it (Space, the prompt), sea.js's voices (whom you hear, with Kikkit a hop away), whether you've
 // heard Kikkit out (sail.said.wondered: whirlpools.js), and a starting point (menus.js).
 import * as THREE from 'three';
-import { TZZ_CAST, TZZ, TZZ_STANDS, Visit, lesson, lessonSecs, onTzzLanding, inTzzEarshot, tzzShore } from '../den-tzz.js';
+import { TZZ_CAST, TZZ, TZZ_STANDS, TZZ_MOOR, Visit, lesson, lessonSecs, onTzzLanding, inTzzEarshot, tzzShore } from '../den-tzz.js';
 import { BalloonShow } from '../balloons.js';
 import { readSecs } from '../den-dignity.js';
 import { PIRATES } from '../den-look.js';
 import { scene, mat, V3 } from './world.js';
 import { sail, seaX, seaZ, voices } from './sea.js';
+import { station } from './sail-station.js';
 import { outline, slab } from './isle.js';
 import { palm } from './wedding-scene.js';
 import { person } from './props-people.js';
@@ -30,12 +31,12 @@ function build() {
   const g = new THREE.Group(), sand = mat('#e6cf96', { roughness: 1 }), wet = mat('#c9ad78', { roughness: 1 });
   const shore = tzzShore();
   g.add(slab(outline(0.5, shore), -0.55, 0.45, wet), slab(outline(1.1, shore), SAND.y0, SAND.h, sand));
-  const p = palm(3.6, 0.3);
+  const C = TZZ_CAST, p = palm(3.6, 0.3);
   p.scale.setScalar(0.75);
-  p.position.set(seaX(21.6), 0.2, seaZ(13.85));
+  p.position.set(seaX(C.palm[0]), 0.2, seaZ(C.palm[1]));
   p.rotation.y = 2.4;
   g.add(p);
-  const C = TZZ_CAST, H = C.her, ship = () => (sail.on ? sail.helm.pose : null);
+  const H = C.her, ship = () => (sail.on ? sail.helm.pose : null);
   // The way her stand faces: toward the camera's spot on the water.
   const S = C.board, toCam = Math.atan2(seaX(C.shot.from[0]) - seaX(S.at[0]), seaZ(C.shot.from[1]) - seaZ(S.at[1]));
   const her = person({
@@ -63,9 +64,13 @@ export function tzzWorld() { tzz.W ||= build(); }
 
 // ---------- her lesson: a little cutscene ----------
 /* Her balloons twisted and popped (balloons.js plays the show, src/balloons.ts), the camera on her and
-   her stand from out on the water. Space or Esc skips it (cine.js); it ends when the show does. */
+   her stand from out on the water. Space or Esc skips it (cine.js); it ends when the show does. The
+   sloop's brought alongside first, wherever round her island you came up, out of the shot (TZZ_MOOR:
+   the user, 11 Nov, "then the [ship] blocks the view"); you sail on from there after. */
 function lessonPlay() {
   const W = tzz.W, C = TZZ_CAST;
+  sail.helm.moor(TZZ_MOOR);
+  sail.riding = false;
   W.stand.play(new BalloonShow(lesson(!!sail.said.wondered), lessonSecs));
   const her = W.her.p.g.getWorldPosition(V3(0, 0, 0)), at = W.stand.g.getWorldPosition(V3(0, 0, 0));
   const look = her.clone().lerp(at, 0.5).add(V3(0, C.shot.up, 0));
@@ -104,8 +109,9 @@ export function tzzTick(dt) {
   if (!W) return;
   if (sail.on) {
     const p = sail.helm.pose;
-    // The first time you come up off her island, settled: her lesson.
-    if (tzz.visit.arrive(onTzzLanding(p.c, p.r), free() && sail.helm.slot < 0)) lessonPlay();
+    // The first time you come up beside her island, anywhere round it, settled and not at the Sailing
+    // board (R: sail-station.js): her lesson.
+    if (tzz.visit.arrive(onTzzLanding(p.c, p.r), free() && sail.helm.slot < 0 && !station.on)) lessonPlay();
   }
   W.stand.tick(dt);
   W.her.tick(dt);
@@ -119,8 +125,8 @@ export function tzzReset() {
   tzz.W?.stand.stop();
 }
 
-/** A starting point (menus.js): at sea, just off her island, coming up to it. */
+/** A starting point (menus.js): at sea, come up beside her island, so her lesson begins. */
 export function tzzCheat() {
-  sail.helm.moor({ c: 18, r: 14, d: 1 });
+  sail.helm.moor({ c: 22, r: 14, d: 1 });
   sail.riding = false;
 }

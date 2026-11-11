@@ -736,7 +736,7 @@ He doesn't speak: his lines are what's said as you get to him.
 
 On a little island of her own a hop from Kikkit's, on the den's side of it, with a copper still behind her. A real Puzzle Pirates pirate (Tzz of Emerald): Senior Officer and "Nap Specialist" of Virtute et Armis, Princess of the flag Don't Open Till Doomsday; she built the huge multi-Vegas in the user's screenshot, in a competition. Drawn from her portrait: light brown hair tied back, an eyepatch, a gold hoop earring, a big grin, a ragged light blue Rag shirt off one shoulder, blue-and-white Stripy knickers to below the knee, a peg leg, and D'rizzle on her shoulder, a red dragon with silver horns.
 
-The sensible one, after Kikkit: she shows you plainly how a big Vegas is built, as a street performer twists balloon animals: real balloons, squeak by squeak, into Sailing's pieces, played onto a real Sailing board beside her. A Double ("and that's what zooms you over a whirlpool"), a Bingo, then a Vegas, breezily ("it's simple, look, this, and this..."); she sets the balloons up and you drop the pair that pops it, egged on, and the chain goes off pop-pop-pop. That's why Sailing's pieces pop at all: they're balloon animals.
+The sensible one, after Kikkit: she shows you plainly how a big Vegas is built, as a street performer does balloons: each of Sailing's pieces a real balloon she blows up and ties off, squeak, played onto a real Sailing board beside her. A Double ("and that's what zooms you over a whirlpool"), then a Bingo, the real way: a platform one short, a line beside it whose pop drops its partner into the gap; every balloon in its own colour, breezily, a joke on each; she sets the balloons up and you drop the pair that pops it, egged on, and the chain goes off pop-pop-pop. That's why Sailing's pieces pop at all: they're balloons.
 
 > "Maybe Tzz can be on an island in there showing how she built her huge Vegas?" (the user, 10 Nov)
 >
@@ -753,69 +753,60 @@ The sensible one, after Kikkit: she shows you plainly how a big Vegas is built, 
 > "it should definitely be like a now you try thing. And, you know, she sets up the balloons, you do the pop." (the user, 11 Nov)
 >
 > "I don't think they need to be aboard, to be honest. I like Kikkit just kind of on her island. It works." (the user, 11 Nov)
+>
+> "Maybe it would be simpler just to be like, they're balloons and she's blowing them up. Would that be easier? Maybe my balloon animal thing was a bit too complicated." (the user, 11 Nov)
 
 ### Sailing up to her island, her lesson begins (or Space there, again)
 
-- *If you've not heard Kikkit out:* "Ahoy! Sailing, is it? Easy. It's just balloon animals."
-- *If you have:* "Let me guess. Kikkit? Five lefts and a penguin? Ha. Watch. It's just balloon animals."
+- *If you've not heard Kikkit out:* "Ahoy! Sailing, is it? Easy. It's just balloons."
+- *If you have:* "Let me guess. Kikkit? Five lefts and a penguin? Ha. Watch. It's just balloons."
 
-### Her lesson's first act: she twists a Double onto her board, and you drop the pair that pops it
+### Her lesson's first act: she blows up a Double's balloons onto her board, and you drop the pair that pops it
 
-- *start:* "First, a Double. Two ledges, one over the other. Watch the balloons."
+- *start:* "First, a Double. A platform one short, and a line to set it off."
 - *twists:*
-  - "One on the bottom ledge's floor. Its spare goes beside it, under the gap..."
-  - "one on the top ledge's floor. Its spare's the colour the bottom gap wants..."
-- *yours:* "Your turn! Fill the top ledge's gap. A D move, W turns, S drops."
+  - "Blow, blow, tie. Each balloon the colour its square wants."
+  - "Second row. Wrong colour in a square and it never pops."
+  - "White in its square. Its blue partner starts a stack."
+  - "Two more blues. Three, and the platform one short. See?"
+- *yours:* "Your go! Blue on the blues, yellow over the gap."
 - *again:*
-  - "Ooh, so close. Again! Right in the gap, the colour it wants."
-  - "Not quite! Steer it under, top ledge, top right. You've got this."
-  - "Nearly! Look at the colour the gap wants. Again!"
-- *help:* "Here, like this. Watch."
-- *popped:* "Double! The top ledge pops and drops its spare in the next gap, that pops. That's what zooms you over a whirlpool."
+  - "Ooh, nearly. Blue on the blue stack, yellow over the gap. Again!"
+  - "Not quite! The yellow hangs on the blue till the blues pop. Again!"
+  - "So close. Four blues pop, then the yellow drops in. Go on!"
+- *help:* "Here, like this. Watch the yellow."
+- *popped:* "Double! Blues pop, the yellow drops in, the platform pops. That's what zooms you over a whirlpool."
 
-### Her lesson's second act: a Bingo, four ledges high, the last pair yours
+### Her lesson's last act: a Bingo, that Double with another on top, the last pair yours
 
-- *start:* "Now a Bingo. Same trick, four ledges high."
+- *start:* "Now a Bingo: that Double, with another on top."
 - *twists:*
-  - "Bottom ledge..."
-  - "next one up, its spare the colour the gap below wants..."
-  - "next one up, same again..."
-  - "top ledge, same again..."
-- *yours:* "Go on, then. Fill the top gap."
+  - "Bottom one first, same as before. Puff, puff..."
+  - "...puff, puff..."
+  - "...white in, blue on the floor..."
+  - "...three blues. Now, upstairs."
+  - "Top one, gap in the middle. Keep that column clear."
+  - "White, blue, in their squares. I'm getting dizzy."
+  - "White on the corner. That's my next stack."
+  - "Three whites. One short, see? That's your trigger."
+  - "Park this: yellow on the corner, blue hanging over the blues."
+- *yours:* "Your go: white on the whites, yellow over the top gap."
 - *again:*
-  - "Ooh, so close. Again! Right in the gap, the colour it wants."
-  - "Not quite! Steer it under, top ledge, top right. You've got this."
-  - "Nearly! Look at the colour the gap wants. Again!"
-- *help:* "Like this. See?"
-- *popped:* "Bingo! Four pops. Each ledge drops one into the next. Stairs, see?"
-
-### Her lesson's last act: a Vegas, six ledges high, the last pair yours
-
-- *start:* "And a Vegas. It's simple, look."
-- *twists:*
-  - "This,"
-  - "and this,"
-  - "and this,"
-  - "and this,"
-  - "and this,"
-  - "and this..."
-- *yours:* "...and you do the pop!"
-- *again:*
-  - "Ooh, so close. Again! Right in the gap, the colour it wants."
-  - "Not quite! Steer it under, top ledge, top right. You've got this."
-  - "Nearly! Look at the colour the gap wants. Again!"
-- *help:* "Like this! Pop!"
-- *popped:* "Vegas! Six pops, one long whoosh. That's all a Vegas is."
+  - "Nearly! White on the white stack, yellow over the top gap."
+  - "Not quite. Pop the whites, and the rest falls into place. Again!"
+  - "So close! The yellow hangs on the white till the whites pop. Go on!"
+- *help:* "Like this. Then just watch it go."
+- *popped:* "Bingo! Whites, top platform, my pair drops, blues, bottom platform. Now go make a whirlpool jealous."
 
 ### After her lesson, while you're within earshot of her island: round and round
 
 - "Space if you want it again. Balloons are cheap."
-- "Ledges pop last. So stack them like stairs, and each one drops into the next."
+- "Lines pop before platforms. So a line drops its partners into the gaps."
 - "A Double gets you over one whirly bit. The far side wants a Vegas."
 - "Kikkit's not wrong, you know. She's just... scenic about it."
 - "D'rizzle ate a balloon once. Squeaked for a week."
 - "I'm a Nap Specialist, officially. This is my awake bit."
-- "R gets you Sailing. Twist away."
+- "Never put a balloon in the wrong colour. It just sulks there."
 - "Every pop's a gust. Six in a row and you're gone."
 
 ## Gravee

@@ -85,6 +85,14 @@ export const IDLES = {
     p.arms.forEach((a, i) => a.rotation.set(-1.15 + Math.sin(t * 9 + i * Math.PI) * 0.12, (i ? 1 : -1) * Math.sin(t * 11) * 0.35, (i ? -1 : 1) * 0.42));
     p.body.rotation.x = 0.05;
   },
+  /** Blowing up a balloon: both hands up at the mouth, holding its neck, a little heave with each puff
+      (balloons.js). */
+  blow: (p, t) => {
+    rest(p);
+    const puff = Math.max(0, Math.sin(t * 7)) ** 2;
+    p.arms.forEach((a, i) => a.rotation.set(-2.45 - puff * 0.08, 0, (i ? -1 : 1) * 0.62));
+    p.body.rotation.x = -0.06 - puff * 0.05;
+  },
   /** Ta-da: arms flung up and out, presenting something, a little bounce. */
   tada: (p, t) => { rest(p); p.arms.forEach((a, i) => a.rotation.set(-2.25, 0, (i ? 1 : -1) * 0.55)); p.body.position.y = 0.72 + Math.abs(Math.sin(t * 5)) * 0.02; },
   /** Scared to death: hair on end, mouth open, arms flung up (creatures.js's fright). */
@@ -145,6 +153,9 @@ export function person({
     shown: null,
     /** What its idle has in its hand (HOLDS), if anything. */
     prop: null,
+    /** A scene's say in which way it faces, over `face` (a world point { x, z }, or null): a performer
+        turned to its audience (balloons.js). */
+    lookAt: null,
     /** Its idle animation, by name (IDLES). */
     setIdle(name) {
       if (name === P.idle) return;
@@ -184,8 +195,8 @@ export function person({
         whoever's near (`face`). */
     pose(dt, moving = false) {
       P.t += dt;
-      if (face) {
-        const f = face();
+      if (face || P.lookAt) {
+        const f = P.lookAt ?? face?.();
         p.g.getWorldPosition(v);
         const want = f ? Math.atan2(f.x - v.x, f.z - v.z) : yaw;
         P.yaw += (want - P.yaw) * Math.min(1, dt * 2);

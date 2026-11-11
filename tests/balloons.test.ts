@@ -5,9 +5,22 @@
    things", and "it should definitely be like a now you try thing ... she sets up the balloons, you do
    the pop". */
 import { describe, expect, it } from 'vitest';
-import { ROUTINES, SHOW, BalloonShow, beats, layout, perform, route, setup, staircase, type Act, type ShowEvent } from '../src/balloons';
+import { ROUTINES, SHOW, BalloonShow, beats, layout, perform, route, setup, type Act, type Routine, type ShowEvent } from '../src/balloons';
 import { Sailing, PLATFORM, SPAWN } from '../src/sailing';
 import { SailPair } from '../src/sail-pair';
+
+/** Plays a routine a twist at a time: the board after each of her twists, and what your pair (the
+    last) set off, stage by stage. */
+function stepThrough(r: Routine) {
+  const g = layout(r), boards: Sailing[] = [];
+  let last = null as ReturnType<Sailing['drop']> | null;
+  r.twists.forEach((t, i) => {
+    g.pair = [t.pair[0], t.pair[1]];
+    const res = g.drop(t.col, t.turn, t.row);
+    if (i < r.twists.length - 1) boards.push(g.copy(() => 0)); else last = res;
+  });
+  return { boards, last: last!, game: g };
+}
 
 const secs = (t: string) => 1 + t.length * 0.01;
 /** Plays a show a tenth at a time till it's done or `stop` says, dropping your pairs with `you` (the
@@ -22,14 +35,73 @@ function play(show: BalloonShow, you: (act: number) => number = (a) => show.show
 }
 
 describe('her lesson\'s boards are real Sailing boards, played by the real rules (11 Nov)', () => {
-  it('a Double, a Bingo and a Vegas: nothing pops till the last pair, then a chain of two, four, six', () => {
-    const want = { double: [3, 2, 'Double'], bingo: [5, 4, 'Bingo!'], vegas: [7, 6, 'Vegas!!'] } as const;
+  it('a Double and a Bingo: nothing pops till the last pair, then a chain of two, then four', () => {
+    const want = { double: [5, 2, 'Double'], bingo: [10, 4, 'Bingo!'] } as const;
+    expect(Object.keys(ROUTINES)).toEqual(['double', 'bingo']);
     for (const [name, r] of Object.entries(ROUTINES)) {
       const p = perform(r), [twists, steps, chain] = want[name as keyof typeof want];
       expect(r.twists).toHaveLength(twists);
       expect(p.early).toBe(0);
       expect([p.steps, p.name]).toEqual([steps, chain]);
     }
+  });
+
+  /* The user, 11 Nov, of the staircase routines: "Was that actually a valid combo that she just did when
+     it dropped? That looked suspicious ... why are there ledges? ... the colours are not going into the
+     right spots ... they're just going in random places and bodging it. This is a tutorial, and she's
+     just showing bodging moves." */
+  it('11 Nov: no bodged pieces: every balloon she puts on a platform is in a target of its own colour', () => {
+    for (const r of Object.values(ROUTINES)) for (const g of stepThrough(r).boards) {
+      for (let row = 0; row < g.grid.length; row++) for (let c = 0; c < g.grid[row].length; c++) {
+        const x = g.grid[row][c], p = x && g.inPlatform(row, c);
+        if (!p) continue;
+        const t = p.targets.find((q) => q.r === row && q.c === c);
+        expect(t, `a balloon on a square that's no target, ${row},${c}`).toBeDefined();
+        expect(x!.c, `the wrong colour in the target at ${row},${c}`).toBe(t!.colour);
+      }
+    }
+  });
+
+  it('11 Nov: no balloon sits idle: everything she and you put down is popped by the chain', () => {
+    for (const r of Object.values(ROUTINES)) {
+      const { boards, last, game } = stepThrough(r), before = boards[boards.length - 1];
+      expect(game.grid.flat().filter(Boolean)).toEqual([]);
+      expect(last.cleared).toBe(r.twists.length * 2);
+      // (every platform she builds on pops; the one she hasn't started on stays, so the board isn't
+      // dealt afresh under her chain)
+      const untouched = before.platforms.filter((p) => p.targets.every((t) => !before.grid[t.r][t.c])).map((p) => p.id);
+      expect(untouched).toHaveLength(1);
+      expect(game.platforms.map((p) => p.id)).toEqual(untouched);
+      expect(last.boardCleared).toBe(false);
+    }
+  });
+
+  it('11 Nov: the real way (YPPedia\'s Sailing strategy): each platform one target short, and a line\'s pop drops its partner in', () => {
+    for (const r of Object.values(ROUTINES)) {
+      const { boards, last } = stepThrough(r), before = boards[boards.length - 1];
+      // (before your pair: each platform she's built on wants just one more balloon)
+      for (const p of before.platforms) {
+        const short = p.targets.filter((t) => before.grid[t.r][t.c]?.c !== t.colour).length;
+        expect(short === 1 || short === p.targets.length, `platform ${p.id}: ${short} short`).toBe(true);
+      }
+      // (a line pops first, and then a platform, every time)
+      const kinds = last.stages.slice(1).map((s) => s.kind);
+      expect(kinds).toEqual(Array.from({ length: last.steps }, (_, i) => (i % 2 ? 'platform' : 'line')));
+    }
+  });
+
+  it('11 Nov: her platforms are blocks, two by three at least, never a little row or ledge', () => {
+    for (const r of Object.values(ROUTINES)) for (const p of r.platforms) {
+      expect(Math.min(p.w, p.h)).toBeGreaterThanOrEqual(2);
+      expect(p.w * p.h).toBeGreaterThanOrEqual(6);
+      expect(p.targets).toHaveLength(p.w * p.h);
+    }
+  });
+
+  it('the Bingo is the Double with another storey on top: the same bottom, built the same way first', () => {
+    const d = ROUTINES.double, b = ROUTINES.bingo, n = d.twists.length - 1;
+    expect(b.twists.slice(0, n)).toEqual(d.twists.slice(0, n));
+    expect(b.platforms).toEqual(expect.arrayContaining([...d.platforms]));
   });
 
   it('every pair comes in at the top of the middle columns and is steered down by moves a player can make, to where it comes to rest', () => {
@@ -50,9 +122,9 @@ describe('her lesson\'s boards are real Sailing boards, played by the real rules
     }
   });
 
-  it('its platforms are Sailing\'s own sizes: two by two at least, never a little row (11 Nov)', () => {
+  it('its platforms are Sailing\'s own sizes (11 Nov)', () => {
     for (const r of Object.values(ROUTINES)) for (const p of r.platforms) {
-      expect(p.w).toBeGreaterThanOrEqual(PLATFORM.W[0]);
+      expect(PLATFORM.W).toContain(p.w);
       expect(PLATFORM.H).toContain(p.h);
     }
   });
@@ -63,15 +135,8 @@ describe('her lesson\'s boards are real Sailing boards, played by the real rules
       expect(g.pair).toEqual([t.pair[0], t.pair[1]]);
       const res = g.drop(t.col, t.turn, t.row);
       expect(res.steps).toBe(perform(r).steps);
-      // (and the stair's chain doesn't clear the board: a spare platform's left, so its name shows)
+      // (and her chain doesn't clear the board: a platform she's not started on is left, so its name shows)
       expect(res.boardCleared).toBe(false);
-    }
-  });
-
-  it('a staircase of n ledges is a chain of n', () => {
-    for (const n of [1, 2, 3, 4, 5, 6]) {
-      const slot = [1, 2, 0, 1, 2, 0].slice(0, n), floor = [0, 1, 2, 0, 1, 2].slice(0, n);
-      expect(perform(staircase(slot, floor, 2)).steps).toBe(n);
     }
   });
 });
@@ -84,15 +149,17 @@ describe('the show: she sets the balloons up, squeak by squeak; you do the pop',
 
   it('each of her pairs twisted (two squeaks, tossed), then steered down and landed; then your turn, then the chain', () => {
     const kinds = play(new BalloonShow(acts, secs)).map((e) => (e.kind === 'line' ? `line ${e.text}` : e.kind));
-    expect(kinds.slice(0, 18)).toEqual([
+    const twist = ['squeak', 'squeak', 'toss', 'fall', 'land'];
+    expect(kinds.slice(0, 28)).toEqual([
       'act', 'line watch',
-      'line one', 'squeak', 'squeak', 'toss', 'fall', 'land',
-      'line two', 'squeak', 'squeak', 'toss', 'fall', 'land',
+      'line one', ...twist,
+      'line two', ...twist,
+      ...twist, ...twist,   // (her other two, quietly)
       'line your go', 'yours',
       'line Double!', 'act',
     ]);
-    // (the second act's hers all through: five pairs, no turn of yours)
-    expect(kinds.filter((k) => k === 'toss')).toHaveLength(2 + 5);
+    // (the second act's hers all through: ten pairs, no turn of yours)
+    expect(kinds.filter((k) => k === 'toss')).toHaveLength(4 + 10);
     expect(kinds.filter((k) => k === 'yours')).toHaveLength(1);
     expect(kinds[kinds.length - 1]).toBe('done');
   });
@@ -106,7 +173,7 @@ describe('the show: she sets the balloons up, squeak by squeak; you do the pop',
 
   it('the squeaks are the colours of the balloons twisted off, in order', () => {
     const ev = play(new BalloonShow(acts.slice(0, 1), secs)).filter((e) => e.kind === 'squeak') as { colour: number; half: 0 | 1 }[];
-    expect(ev.map((e) => e.colour)).toEqual(ROUTINES.double.twists.slice(0, 2).flatMap((t) => [t.pair[0], t.pair[1]]));
+    expect(ev.map((e) => e.colour)).toEqual(ROUTINES.double.twists.slice(0, -1).flatMap((t) => [t.pair[0], t.pair[1]]));
   });
 
   it('it waits for you on your turn, however long', () => {
@@ -158,9 +225,9 @@ describe('the show: she sets the balloons up, squeak by squeak; you do the pop',
 
 describe('Sailing as it is', () => {
   it('her board is a plain Sailing game: nothing dealt but her platforms', () => {
-    const g = layout(ROUTINES.vegas);
+    const g = layout(ROUTINES.bingo);
     expect(g).toBeInstanceOf(Sailing);
     expect(g.grid.flat().every((x) => !x)).toBe(true);
-    expect(g.platforms).toHaveLength(ROUTINES.vegas.platforms.length);
+    expect(g.platforms).toHaveLength(ROUTINES.bingo.platforms.length);
   });
 });

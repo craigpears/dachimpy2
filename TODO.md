@@ -282,30 +282,6 @@ the site (`.assetsignore` skips `*.md`).
   outside; not yet tried by the user. Watch for: the markers on raiders outside cluttering the
   view while you carry a piece.
 
-- **Tzz's lesson is awkward to start, and the sloop blocks it (11 Nov, first play):** "to actually get
-  the [lesson] to trigger was awkward. So you've got to go straight in front, and then the [ship] blocks the
-  view." It should start from anywhere close by her island, and the sloop mustn't stand between you and her
-  and her board.
-- **Tzz still says R for Sailing (11 Nov, first play):** "it still says r for sailing which seems odd." Her
-  lesson shouldn't end on a key to press.
-- **Tzz's lesson has lost the balloon animals, and shows bodged moves (11 Nov, first play):** "It's not got
-  any resemblance to balloon animals in those animations now ... she kind of twists her hands. Nothing's
-  actually happening when she's talking about balloon animals. We've really gone off the mark here." And of
-  the board: "Was that actually a valid combo that she just did when it dropped? That looked suspicious ...
-  the bingo thing. Bottom ledge. I'm like, why are there ledges? ... the colours are not going into the
-  right spots ... they're just going in random places and bodging it. This is a tutorial, and she's just
-  showing bodging moves." Her routines are a contrived staircase of little two-by-two ledges, each piece's
-  other half left on a square that isn't a target. They should be the real way a chain's built (YPPedia,
-  Sailing, Strategy: a platform one target short, a line of four above it breaking a joined pair so the
-  other half drops into the missing target, then more in succession), every piece going where a good
-  sailor puts it. And the balloons have to be visible. Simpler (the user, 11 Nov): "they're balloons and
-  she's blowing them up ... Maybe my balloon animal thing was a bit too complicated": each piece a round
-  balloon she blows up, no twisting into animals.
-- **Space the sea's islands out; Tzz's is crammed in (11 Nov, first play):** "can we see if we can just
-  space things out a bit? ... Kikit's got a very nice shape, got island. Mischievous is nice, and then TZZ
-  just seems kind of crammed into the middle. Like, this is very all just crammed in." Give her island room
-  of its own (and the others breathing space), with the map and the links following.
-
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
