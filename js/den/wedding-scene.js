@@ -7,7 +7,7 @@ import * as THREE from 'three';
 import * as LOOK from '../den-look.js';
 import { wearable } from '../den-wedding.js';
 import { scene, camera, mat, mesh, woodTex, makePirate, V3 } from './world.js';
-import { hullGeo } from './raids.js';
+import { hullGeo } from './hull.js';
 import { heartMesh, bouquetMesh } from './wedding-props.js';
 
 /** Where her island is: well out of sight of the den and the sea you sail (nothing else is out here). */

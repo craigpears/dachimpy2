@@ -12,11 +12,14 @@ import { W, H, SPAWN, chainName } from '../sailing.js';
    filled, the piece shows inside; empty, coloured corner brackets for the colour it wants. A wave
    and a ship's sails behind the board.
    Each pop shown for what it is (11 Nov, of Tzz's board: "there was no chain of four or platform
-   clear ... a yellow on a white block, and somehow it cleared a platform"): a target square is
-   faintly tinted the colour it wants, its brackets showing round whatever's in it, so a platform
-   reads as its colours and a square that's no target stays plain; and before a step pops, what it
-   is lights up (the stage says, src/sailing.ts): a line's four ringed, or a platform's outline, and
+   clear ... a yellow on a white block, and somehow it cleared a platform"): before a step pops, what
+   it is lights up (the stage says, src/sailing.ts): a line's four ringed, or a platform's outline, and
    then they all pop together, the platform fading and its ledge dropping away with them.
+   Slotting in, as in a real Vegas (11 Nov: "it goes from a circle to ... like it's a solid square of
+   color"; "They just look like they're kind of hanging on the background"): a piece come to rest in a
+   target of its own colour squares off into a solid block filling the square, and stays so till the
+   platform goes; an empty target is plainly empty, only its outline and corner brackets in the colour
+   it wants, so a full platform reads as solid colour and one with a gap as one short.
    And balloony (11 Nov: "how on earth do these sailing pieces pop in the puzzle? It makes sense.
    They're balloon animals"): each piece a glossy balloon with its knot, a little squishy, squashing
    as it lands; when a chain goes off they pop a step at a time down the board, pop-pop-pop, each a
@@ -34,6 +37,73 @@ const COL = [
 ];
 
 const canvas = (w, h, draw) => { const cv = document.createElement('canvas'); cv.width = w; cv.height = h; draw(cv.getContext('2d'), w, h); return cv; };
+
+/* A piece's pattern, round (cx, cy), `rx` across either way: water's rolling waves, rope's braid and
+   its knot in the middle, wind's swirl. On a balloon's skin, and on the block it squares off into in a
+   target of its colour. */
+function skin(g, c, cx, cy, rx) {
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  if (c === 0) {
+    // Water: rolling waves across it.
+    g.strokeStyle = 'rgba(255,255,255,0.62)'; g.lineWidth = 6;
+    for (const y of [cy - 22, cy + 2, cy + 26]) {
+      g.beginPath();
+      for (let x = cx - rx; x <= cx + rx; x += 3) g.lineTo(x, y + Math.sin((x - cx) / 9 + y) * 6);
+      g.stroke();
+    }
+  } else if (c === 1) {
+    // Rope: a braid of strands slanting round it, and a knot in the middle.
+    g.strokeStyle = 'rgba(120,78,8,0.55)'; g.lineWidth = 4;
+    for (let i = -6; i <= 6; i++) { g.beginPath(); g.moveTo(cx + i * 16 - 50, cy - 60); g.lineTo(cx + i * 16 + 10, cy + 60); g.stroke(); }
+    g.strokeStyle = 'rgba(255,248,210,0.35)'; g.lineWidth = 2;
+    for (let i = -6; i <= 6; i++) { g.beginPath(); g.moveTo(cx + i * 16 - 45, cy - 60); g.lineTo(cx + i * 16 + 15, cy + 60); g.stroke(); }
+    g.strokeStyle = '#7a4c0a'; g.lineWidth = 7;
+    g.beginPath(); g.ellipse(cx - 9, cy + 4, 15, 11, -0.5, 0, Math.PI * 2); g.stroke();
+    g.beginPath(); g.ellipse(cx + 9, cy + 4, 15, 11, 0.5, 0, Math.PI * 2); g.stroke();
+    g.strokeStyle = '#f7d870'; g.lineWidth = 3;
+    g.beginPath(); g.ellipse(cx - 9, cy + 4, 15, 11, -0.5, 3.6, 5.6); g.stroke();
+    g.beginPath(); g.ellipse(cx + 9, cy + 4, 15, 11, 0.5, 3.8, 5.8); g.stroke();
+  } else {
+    // Wind: a swirl, like a gust on a sail.
+    g.strokeStyle = 'rgba(110,135,175,0.7)'; g.lineWidth = 5;
+    g.beginPath();
+    for (let a = 0; a < Math.PI * 4.2; a += 0.1) { const r = 4 + a * 3.4; g.lineTo(cx + 2 + Math.cos(a) * r, cy + 4 + Math.sin(a) * r * 0.9); }
+    g.stroke();
+    g.strokeStyle = 'rgba(255,255,255,0.8)'; g.lineWidth = 2;
+    g.beginPath();
+    for (let a = 0.3; a < Math.PI * 3.6; a += 0.1) { const r = 6 + a * 3.4; g.lineTo(cx + Math.cos(a) * r, cy + 2 + Math.sin(a) * r * 0.9); }
+    g.stroke();
+  }
+}
+
+/* The block a piece squares off into once it's in a target of its own colour, 128 square (the user,
+   11 Nov, of a real Vegas: "when you slot something into the platform ... it goes from a circle to
+   ... it almost slots in perfectly, like it's a solid square of color"): a solid square of the colour
+   filling its square, its pattern on it, bevelled light at the top left and dark at the bottom right. */
+const BLOCKS = new Map();
+export function block(c) {
+  if (BLOCKS.has(c)) return BLOCKS.get(c);
+  const C = COL[c];
+  const cv = canvas(128, 128, (g) => {
+    const face = () => { g.beginPath(); g.roundRect(3, 3, 122, 122, 12); };
+    face();
+    const gr = g.createLinearGradient(0, 0, 128, 128);
+    gr.addColorStop(0, C.light); gr.addColorStop(0.3, C.base); gr.addColorStop(0.8, C.base); gr.addColorStop(1, C.dark);
+    g.fillStyle = gr; g.fill();
+    g.save(); face(); g.clip();
+    skin(g, c, 64, 62, 64);
+    // The bevel: a light edge top and left, a dark one bottom and right.
+    g.lineWidth = 10;
+    g.strokeStyle = 'rgba(255,255,255,0.5)';
+    g.beginPath(); g.moveTo(6, 122); g.lineTo(6, 6); g.lineTo(122, 6); g.stroke();
+    g.strokeStyle = 'rgba(0,0,0,0.28)';
+    g.beginPath(); g.moveTo(122, 6); g.lineTo(122, 122); g.lineTo(6, 122); g.stroke();
+    g.restore();
+    face(); g.lineWidth = 3; g.strokeStyle = 'rgba(20,20,40,0.6)'; g.stroke();
+  });
+  BLOCKS.set(c, cv);
+  return cv;
+}
 
 /* A balloon, 128 square: a glossy round body a touch taller than wide, its pattern on it (water's
    waves, rope's braid and knot, wind's swirl), the shine top left, and its knot tied at the bottom.
@@ -59,38 +129,7 @@ export function balloon(c, fixed = false) {
     g.fillStyle = gr; g.fill();
     // Its pattern, on the skin.
     g.save(); body(); g.clip();
-    g.lineCap = 'round'; g.lineJoin = 'round';
-    if (c === 0) {
-      // Water: rolling waves across it.
-      g.strokeStyle = 'rgba(255,255,255,0.62)'; g.lineWidth = 6;
-      for (const y of [cy - 22, cy + 2, cy + 26]) {
-        g.beginPath();
-        for (let x = cx - rx; x <= cx + rx; x += 3) g.lineTo(x, y + Math.sin((x - cx) / 9 + y) * 6);
-        g.stroke();
-      }
-    } else if (c === 1) {
-      // Rope: a braid of strands slanting round it, and a knot in the middle.
-      g.strokeStyle = 'rgba(120,78,8,0.55)'; g.lineWidth = 4;
-      for (let i = -6; i <= 6; i++) { g.beginPath(); g.moveTo(cx + i * 16 - 50, cy - 60); g.lineTo(cx + i * 16 + 10, cy + 60); g.stroke(); }
-      g.strokeStyle = 'rgba(255,248,210,0.35)'; g.lineWidth = 2;
-      for (let i = -6; i <= 6; i++) { g.beginPath(); g.moveTo(cx + i * 16 - 45, cy - 60); g.lineTo(cx + i * 16 + 15, cy + 60); g.stroke(); }
-      g.strokeStyle = '#7a4c0a'; g.lineWidth = 7;
-      g.beginPath(); g.ellipse(cx - 9, cy + 4, 15, 11, -0.5, 0, Math.PI * 2); g.stroke();
-      g.beginPath(); g.ellipse(cx + 9, cy + 4, 15, 11, 0.5, 0, Math.PI * 2); g.stroke();
-      g.strokeStyle = '#f7d870'; g.lineWidth = 3;
-      g.beginPath(); g.ellipse(cx - 9, cy + 4, 15, 11, -0.5, 3.6, 5.6); g.stroke();
-      g.beginPath(); g.ellipse(cx + 9, cy + 4, 15, 11, 0.5, 3.8, 5.8); g.stroke();
-    } else {
-      // Wind: a swirl, like a gust on a sail.
-      g.strokeStyle = 'rgba(110,135,175,0.7)'; g.lineWidth = 5;
-      g.beginPath();
-      for (let a = 0; a < Math.PI * 4.2; a += 0.1) { const r = 4 + a * 3.4; g.lineTo(cx + 2 + Math.cos(a) * r, cy + 4 + Math.sin(a) * r * 0.9); }
-      g.stroke();
-      g.strokeStyle = 'rgba(255,255,255,0.8)'; g.lineWidth = 2;
-      g.beginPath();
-      for (let a = 0.3; a < Math.PI * 3.6; a += 0.1) { const r = 6 + a * 3.4; g.lineTo(cx + Math.cos(a) * r, cy + 2 + Math.sin(a) * r * 0.9); }
-      g.stroke();
-    }
+    skin(g, c, cx, cy, rx);
     g.restore();
     // The rim of it, and the shine.
     body(); g.lineWidth = 2.5; g.strokeStyle = 'rgba(20,20,40,0.55)'; g.stroke();
@@ -290,9 +329,18 @@ export function sailBoardLay(B, game) {
 }
 function layGrid(B, grid, platforms) {
   B.pieces.clear();
-  grid.forEach((line, r) => line.forEach((x, c) => { if (x) B.pieces.set(x.id, { x: c, y: r, ty: r, vy: 0, sq: 0, p: x }); }));
+  // (what's already in a target of its colour is laid as its block, no slotting in)
+  const want = wants(platforms);
+  grid.forEach((line, r) => line.forEach((x, c) => { if (x) B.pieces.set(x.id, { x: c, y: r, ty: r, vy: 0, sq: 0, p: x, blk: want.get(`${r},${c}`) === x.c ? 1 : 0 }); }));
   B.platforms = platforms;
   B.prev = { grid, platforms };
+}
+
+/** Each platform's targets: the colour wanted on a square, by "r,c". */
+function wants(platforms) {
+  const m = new Map();
+  for (const p of platforms) for (const t of p.targets) m.set(`${t.r},${t.c}`, t.colour);
+  return m;
 }
 
 /** A drop: its steps to play out (Sail.stages), and a fresh board after, if one was dealt. */
@@ -311,7 +359,7 @@ export const sailBoardBusy = (B) => B.queue.length > 0 || !!B.doomed || !!B.afte
 export function sailBoardSnap(B) { B.shown = { r: 0, c: SPAWN[0] }; }
 
 function pop(B, q, delay, red = false) {
-  B.pops.push({ x: q.x, y: q.y, p: q.p, t: -delay, gone: false, red });
+  B.pops.push({ x: q.x, y: q.y, p: q.p, t: -delay, gone: false, red, blk: q.blk ?? 0 });
 }
 // The next step of a drop: what's loose falls to where the rules have it fall (the board as the step
 // before left it, settled by Sailing.fall on a copy), then what this step cleared pops, top first.
@@ -338,7 +386,7 @@ function stageNext(B) {
   for (const [id, [r, c]] of at) {
     let q = B.pieces.get(id);
     const p = st.grid[r]?.[c]?.id === id ? st.grid[r][c] : q?.p;
-    if (!q) { q = { x: c, y: r, ty: r, vy: 0, sq: 0, p }; B.pieces.set(id, q); }
+    if (!q) { q = { x: c, y: r, ty: r, vy: 0, sq: 0, p, blk: 0 }; B.pieces.set(id, q); }
     q.ty = r; q.p = p ?? q.p;
   }
   B.doomed = new Set(st.cleared);
@@ -375,6 +423,8 @@ function doomedPop(B) {
 }
 
 const POP_SWELL = 0.09;
+/** How long a piece takes to square off into its block. */
+const SLOT = 0.16;
 /** A frame: the drop playing out, and the board drawn, with `pair` (a SailPair, or null while it's
     hidden) falling in it; `sp`, the sparkle (src/den-sailing.ts, Sparkle): its meter in the head,
     and glitter over the board while a chain's show lasts. */
@@ -393,9 +443,18 @@ export function sailBoardTick(B, dt, pair, sp = null) {
     else { q.y = q.ty; q.vy = 0; }
     q.sq = Math.max(0, q.sq - dt * 4);
   }
+  // Slotting in: a piece come to rest in a target of its own colour squares off into its block, quickly;
+  // one that's moved off it (or never was) is a balloon.
+  const want = wants(B.platforms);
+  let seating = false;
+  for (const q of B.pieces.values()) {
+    const fits = q.y === q.ty && want.get(`${q.ty},${q.x}`) === q.p.c;
+    q.blk = fits ? Math.min(1, (q.blk ?? 0) + dt / SLOT) : Math.max(0, (q.blk ?? 0) - dt / SLOT);
+    if (fits && q.blk < 1) seating = true;
+  }
   const fallen = ![...B.pieces.values()].some((q) => Math.abs(q.y - q.ty) > 1e-3);
-  // (once it's all fallen, what's going lights up, then pops)
-  if (fallen && B.doomed) {
+  // (once it's all fallen and seated, what's going lights up, then pops)
+  if (fallen && !seating && B.doomed) {
     if (!B.doomed.size) doomedPop(B);
     else if (!B.hi) B.hi = { t: 0 };
     else if ((B.hi.t += dt) >= HILITE) doomedPop(B);
@@ -442,6 +501,25 @@ function drawBalloon(g, c, fixed, x, y, sq = 0, wob = 0, scale = 1, alpha = 1) {
   g.drawImage(balloon(c, fixed), cx - S / 2 * sx, cy - S / 2 * sy, S * sx, S * sy);
   g.globalAlpha = 1;
 }
+/* A piece in a target of its own colour, squaring off into its block as it slots in (`blk` 0 to 1: a
+   balloon, then a solid square of its colour filling the square): the balloon's round outline drawn in
+   to the square's corners, swelling a touch and flashing as it seats, the balloon fading off it. */
+const easeIn = (u) => u * u * (3 - 2 * u);
+function drawPiece(g, c, fixed, x, y, blk, sq = 0, wob = 0, scale = 1, alpha = 1) {
+  if (blk <= 0 || fixed) { drawBalloon(g, c, fixed, x, y, sq, wob, scale, alpha); return; }
+  const e = easeIn(Math.min(1, blk)), full = CELL - 4;
+  const size = (S + (full - S) * e) * scale * (1 + 0.1 * Math.sin(Math.PI * e)), rad = (size / 2) * (1 - e) + 5 * e;
+  g.save();
+  g.globalAlpha = alpha;
+  g.translate(px(x) + CELL / 2, py(y) + CELL / 2);
+  g.rotate(wob * 0.025);
+  g.scale(1 + sq * 0.1, 1 - sq * 0.08);
+  g.beginPath(); g.roundRect(-size / 2, -size / 2, size, size, rad); g.clip();
+  g.drawImage(block(c), -size / 2, -size / 2, size, size);
+  if (e < 1) { g.globalAlpha = alpha * Math.sin(Math.PI * e) * 0.55; g.fillStyle = '#ffffff'; g.fillRect(-size / 2, -size / 2, size, size); }
+  g.restore();
+  if (e < 1) drawBalloon(g, c, fixed, x, y, sq, wob, scale * (1 - 0.15 * e), alpha * (1 - e) ** 1.5);
+}
 function drawPeg(g, a, b) {
   const ax = px(a[1]) + CELL / 2, ay = py(a[0]) + CELL / 2, bx = px(b[1]) + CELL / 2, by = py(b[0]) + CELL / 2;
   const mx = (ax + bx) / 2, my = (ay + by) / 2, flat = Math.abs(ay - by) < Math.abs(ax - bx);
@@ -458,27 +536,28 @@ function brackets(g, r, c, col) {
   }
 }
 
-/* A platform: a translucent tile on each square, each target tinted the colour it wants with that
-   colour's brackets in its corners (drawn under the balloons, so they show round one sitting in it;
-   brighter once it holds its colour), any other square plain; the ledge under it. `a` how much of it
-   there is (fading as it goes), `drop` how far its ledge has fallen away. */
+/* A platform: a translucent tile on each square that's no target, and its ledge under it. A target is
+   left plainly empty (the user, 11 Nov, of Tzz's board: "I thought she'd completely filled the platform.
+   Why is it not being set off?"): the board shows through it, outlined in the colour it wants with that
+   colour's brackets in its corners, nothing in it that could pass for a piece; a piece of its colour
+   seated in it is a solid block over it (drawPiece), so a finished platform reads as solid squares of
+   colour and one with a gap plainly one short. `a` how much of it there is (fading as it goes), `drop`
+   how far its ledge has fallen away. */
 const FADE = 0.35;
-const TINT = [['rgba(47,134,232,0.30)', 'rgba(47,134,232,0.5)'], ['rgba(255,205,40,0.5)', 'rgba(255,205,40,0.68)'], ['rgba(255,255,255,0.26)', 'rgba(255,255,255,0.45)']];
 const BRACKET = ['#4ea2ff', '#ffd23a', '#ffffff'];
-function drawPlatform(g, p, grid, a = 1, drop = 0) {
+const OUTLINE = ['rgba(78,162,255,0.6)', 'rgba(255,210,58,0.6)', 'rgba(255,255,255,0.55)'];
+function drawPlatform(g, p, a = 1, drop = 0) {
   g.globalAlpha = a;
   const want = new Map(p.targets.map((t) => [`${t.r},${t.c}`, t.colour]));
   for (let r = p.r; r < p.r + p.h; r++) for (let c = p.c; c < p.c + p.w; c++) {
     const colour = want.get(`${r},${c}`);
     g.beginPath(); g.roundRect(px(c) + 2, py(r) + 2, CELL - 4, CELL - 4, 5);
     if (colour === undefined) {
-      g.fillStyle = 'rgba(150,180,210,0.10)'; g.strokeStyle = 'rgba(200,225,245,0.35)'; g.lineWidth = 1.5;
+      g.fillStyle = 'rgba(150,180,210,0.16)'; g.strokeStyle = 'rgba(200,225,245,0.4)'; g.lineWidth = 1.5;
       g.fill(); g.stroke();
       continue;
     }
-    const q = grid.get(`${r},${c}`), ok = q && q.p.c === colour && Math.abs(q.y - q.ty) < 1e-3;
-    g.fillStyle = TINT[colour][ok ? 1 : 0]; g.strokeStyle = 'rgba(225,245,255,0.7)'; g.lineWidth = 2;
-    g.fill(); g.stroke();
+    g.strokeStyle = OUTLINE[colour]; g.lineWidth = 1.5; g.stroke();
     brackets(g, r, c, BRACKET[colour]);
   }
   const ly = py(p.r + p.h) - 3 + drop * CELL * 0.8;
@@ -524,29 +603,29 @@ function draw(B, now, pair) {
   g.clearRect(0, 0, B.cv.width, B.cv.height);
   if (B.back) g.drawImage(B.back, 0, 0);
   g.setTransform(s, 0, 0, s, 0, 0);
-  const grid = new Map();
-  for (const q of B.pieces.values()) grid.set(`${Math.round(q.ty)},${q.x}`, q);
-  // The platforms: translucent tiles, a ledge under each, and the platforms that just went fading.
-  for (const p of B.platforms) drawPlatform(g, p, grid);
-  for (const f of B.fading) drawPlatform(g, f.p, grid, 1 - f.t / FADE, f.t / FADE);
+  // The platforms: translucent tiles, empty targets, a ledge under each, and the platforms that just
+  // went fading.
+  for (const p of B.platforms) drawPlatform(g, p);
+  for (const f of B.fading) drawPlatform(g, f.p, 1 - f.t / FADE, f.t / FADE);
   // The pegs between a pair's halves (still joined), then the balloons.
   const where = new Map();
   for (const [id, q] of B.pieces) where.set(id, q);
   for (const [id, q] of B.pieces) {
     const m = q.p.mate !== undefined ? where.get(q.p.mate) : null;
-    if (m && id < q.p.mate && Math.abs(m.y - q.y) + Math.abs(m.x - q.x) < 1.2) drawPeg(g, [q.y, q.x], [m.y, m.x]);
+    // (not between two blocks: they're solid squares side by side)
+    if (m && id < q.p.mate && Math.abs(m.y - q.y) + Math.abs(m.x - q.x) < 1.2 && !(q.blk > 0.5 && m.blk > 0.5)) drawPeg(g, [q.y, q.x], [m.y, m.x]);
   }
   // (what's about to pop, lit up, quivers)
   const lit = B.hi ? Math.min(1, B.hi.t / (HILITE * 0.35)) : 0;
   for (const [id, q] of B.pieces) {
     const going = lit && B.doomed?.has(id);
-    drawBalloon(g, q.p.c, q.p.fixed, q.x, q.y, q.sq, going ? Math.sin(now * 38 + id) * 1.6 * lit : Math.sin(now * 2.3 + id * 1.7), going ? 1 + 0.06 * lit : 1);
+    drawPiece(g, q.p.c, q.p.fixed, q.x, q.y, q.blk ?? 0, q.sq, going ? Math.sin(now * 38 + id) * 1.6 * lit : Math.sin(now * 2.3 + id * 1.7), going ? 1 + 0.06 * lit : 1);
   }
   if (lit) drawLit(g, B.what, lit, now);
   // About to pop: swelling.
   for (const p of B.pops) if (!p.gone) {
     const u = Math.max(0, p.t) / POP_SWELL;
-    drawBalloon(g, p.p.c, p.p.fixed, p.x, p.y, 0, Math.sin(now * 40) * u * 3, 1 + u * 0.28);
+    drawPiece(g, p.p.c, p.p.fixed, p.x, p.y, p.blk, 0, Math.sin(now * 40) * u * 3, 1 + u * 0.28);
   }
   // The pair falling: its shadow where it'd land, and it.
   if (pair) {

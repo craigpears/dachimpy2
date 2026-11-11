@@ -5,10 +5,11 @@ import { LAY, SAIL, canalAt } from '../den-sail.js';
 import { CHECK, Checkpoint, throughSay } from '../den-checkpoint.js';
 import { addFind, wayThrough, wayWrecked } from '../den-finds.js';
 import { passageAt } from '../den-kikkit.js';
-import { G, scene, mat, mesh, canvasTex, woodTex, V3, burst, toast, worldLets, shake, flagpole, warm } from './world.js';
+import { G, scene, mat, mesh, woodTex, V3, burst, toast, worldLets, shake, flagpole, warm } from './world.js';
 import { rock } from './land.js';
+import { CRIMSON, STONE, stone, flagMatImperial, banner, tower } from './empire.js';
 import { turretMesh, turretView, turretWrecked, turretFire, turretLand, turretShotsTick, turretShotsClear, shotComing } from './turret.js';
-import { hullGeo } from './raids.js';
+import { hullGeo } from './hull.js';
 import { seaX, seaZ, sail, CLIFF_H, bankTop } from './sea.js';
 import { deckHoleShape } from './sea-puzzles.js';
 import { canHaulWreck } from './treasure.js';
@@ -32,54 +33,10 @@ import { cine } from './cine.js';
    Treasure Haul (treasure.js). */
 export const cp = { check: new Checkpoint(), W: null, byWreck: false, held: [] };
 const K = LAY.CHECKPOINT, GATE_Z = seaZ(K.ROW), ARCH_Y = 6.4;
-const stone = () => mat('#d3c9b2', { flatShading: true, roughness: 0.9 });
-const CRIMSON = '#9e1b24', GOLD = '#e0b53a';
-
-// The Empire's flag: crimson, a gold border, a gold crown over a rising sun.
-const imperialTex = (w = 200, h = 128) => canvasTex(w, h, (g) => {
-  g.fillStyle = CRIMSON; g.fillRect(0, 0, w, h);
-  g.strokeStyle = GOLD; g.lineWidth = h * 0.06; g.strokeRect(h * 0.06, h * 0.06, w - h * 0.12, h - h * 0.12);
-  const cx = w / 2, cy = h * 0.62, R = h * 0.26;
-  g.fillStyle = GOLD;
-  for (let i = 0; i < 9; i++) { const a = Math.PI + (i + 0.5) / 9 * Math.PI; g.beginPath(); g.moveTo(cx + Math.cos(a - 0.08) * R * 0.9, cy + Math.sin(a - 0.08) * R * 0.9); g.lineTo(cx + Math.cos(a) * R * 1.55, cy + Math.sin(a) * R * 1.55); g.lineTo(cx + Math.cos(a + 0.08) * R * 0.9, cy + Math.sin(a + 0.08) * R * 0.9); g.fill(); }
-  g.beginPath(); g.arc(cx, cy, R * 0.8, Math.PI, 0); g.fill();
-  // the crown, over the sun
-  const y0 = h * 0.2, cw = h * 0.36, ch = h * 0.2;
-  g.beginPath(); g.moveTo(cx - cw / 2, y0 + ch);
-  for (const [x, y] of [[-0.5, 0], [-0.25, 0.45], [0, -0.1], [0.25, 0.45], [0.5, 0], [0.5, 1]]) g.lineTo(cx + x * cw, y0 + y * ch);
-  g.closePath(); g.fill();
-  g.fillStyle = CRIMSON; g.fillRect(cx - cw / 2, y0 + ch * 0.82, cw, ch * 0.08);
-});
-let imperialMat = null;
-const flagMatImperial = () => (imperialMat ||= new THREE.MeshStandardMaterial({ map: imperialTex(), side: THREE.DoubleSide, roughness: 0.9 }));
-// A long banner hanging down a tower's face.
-function banner(w, h) {
-  const m = new THREE.MeshStandardMaterial({ map: canvasTex(64, 160, (g, cw, chh) => {
-    g.fillStyle = CRIMSON; g.fillRect(0, 0, cw, chh);
-    g.fillStyle = GOLD; g.fillRect(0, 0, cw, 8); g.fillRect(6, 0, 4, chh); g.fillRect(cw - 10, 0, 4, chh);
-    g.beginPath(); g.arc(cw / 2, chh * 0.35, 12, 0, Math.PI * 2); g.fill();
-    g.fillStyle = CRIMSON; g.beginPath(); g.arc(cw / 2, chh * 0.35, 7, 0, Math.PI * 2); g.fill();
-    g.clearRect(0, chh - 18, cw, 18); g.fillStyle = CRIMSON; g.beginPath(); g.moveTo(0, chh - 18); g.lineTo(cw / 2, chh); g.lineTo(cw, chh - 18); g.fill();
-  }), side: THREE.DoubleSide, roughness: 0.9, transparent: true });
-  return mesh(new THREE.PlaneGeometry(w, h), m, false);
-}
-// A square tower of pale stone, battlemented, a crimson band below its top.
-function tower(w, h) {
-  const g = new THREE.Group(), st = stone();
-  const body = mesh(new THREE.BoxGeometry(w, h + 1, w), st); body.position.y = (h - 1) / 2;
-  const band = mesh(new THREE.BoxGeometry(w + 0.08, 0.35, w + 0.08), mat(CRIMSON, { roughness: 0.8 })); band.position.y = h - 0.7;
-  g.add(body, band);
-  for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) {
-    const m = mesh(new THREE.BoxGeometry(0.5, 0.55, 0.5), st), s = (j - 1) * (w - 0.5) / 2, e = (w - 0.5) / 2;
-    m.position.set([s, e, s, -e][i], h + 0.27, [e, s, -e, s][i]);
-    g.add(m);
-  }
-  return g;
-}
 // A bastion: a destructible turret (js/den/turret.js) in the Empire's pale stone, a crimson band
 // under its battlements and its flag on top, on its rock.
 function bastion(c, r) {
-  const V = turretMesh({ stone: '#d3c9b2', top: 1.5, foot: 1.8, height: 3.4, band: CRIMSON, flag: flagMatImperial(), rocks: 3, merlons: 10 });
+  const V = turretMesh({ stone: STONE, top: 1.5, foot: 1.8, height: 3.4, band: CRIMSON, flag: flagMatImperial(), rocks: 3, merlons: 10 });
   V.g.position.set(seaX(c), 0, seaZ(r));
   return V;
 }

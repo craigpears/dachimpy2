@@ -30,6 +30,7 @@ import { station, stationKey, stationToggle, stationTick, stationPrompt, station
 import { kikkitWorld, kikkitTick, kikkitShown, kikkitHail, kikkitPrompt, kikkitHolds, kikkitReset } from './whirlpools.js';
 import { inKikkitWaters } from '../den-kikkit.js';
 import { tzzWorld, tzzTick, tzzHail, tzzPrompt, tzzReset } from './balloon-isle.js';
+import { empireWorld, empireTick, empirePrompt, empireReset } from './imperial-isle.js';
 
 // The old sloop's at anchor in the cove from the moment the siege is over, while their ship makes
 // sail in the background (the user, 9 Nov: "I'm sat here quite a while waiting for his sloop to sail
@@ -84,6 +85,7 @@ export function sailReset() {
   stationReset();
   kikkitReset();
   tzzReset();
+  empireReset();
   denLets.sailView = 0;
 }
 // A shot out of her side, from where she is right now: it flies straight out and comes down in the
@@ -200,7 +202,7 @@ export function sailPrompt() {
   if (rowing.on) return rowPrompt();
   if (gunnery.on) return gunneryPrompt();
   if (station.on) return stationPrompt();
-  const cp = umamiPrompt() || cranePrompt() || kikkitPrompt() || tzzPrompt();
+  const cp = umamiPrompt() || cranePrompt() || kikkitPrompt() || tzzPrompt() || empirePrompt();
   if (cp) return cp;
   const h = sail.helm, held = h.held();
   if (held === 'daze') return patchPrompt('Holed! Patch her deck to sail on · 1, 2, 3: a piece from the crate', ' (it rests on the deck: boarded over)');
@@ -244,6 +246,7 @@ export function sailTick(dt) {
   isleWorld();   // (Mischievious's isle, out to the right of the lanes: isle.js)
   kikkitWorld();   // (Kikkit's island, her whirlpools and Vegas Island: whirlpools.js)
   tzzWorld();   // (Tzz's island, a hop from Kikkit's, and her balloon lesson: balloon-isle.js)
+  empireWorld();   // (Port Decorum, the imperial island past the checkpoint: imperial-isle.js)
   sail.g ||= (() => { const g = sloopMesh(); scene.add(g); return g; })();
   const show = sail.on || sloopHome();
   if (sail.g.visible !== show) sail.g.visible = show;
@@ -348,12 +351,13 @@ export function sailTick(dt) {
   craneTick(dt);   // (after she's drawn where the helm has her: up the cliff, the crane has her)
   kikkitTick(dt, events);   // (Kikkit, her whirlpools and the penguins: whirlpools.js)
   tzzTick(dt);   // (Tzz and her balloons: balloon-isle.js)
+  empireTick(dt);   // (Port Decorum's guards: imperial-isle.js)
   if (sail.on) sailHud();
 }
 // The oars' button on the sailing bar (on mousedown: the bar's redrawn as the tokens change, so a
 // click could be lost between press and release).
 $('sailhud').addEventListener('mousedown', (e) => {
-  if (e.button !== 0) return;
+  if (e.button !== 0 || cine) return;   // (nothing but a cutscene's own keys in one: rowing came up over Tzz's lesson, 11 Nov)
   if (e.target.closest('#oars-btn')) { e.preventDefault(); rowToggle(); }
   else if (e.target.closest('#guns-btn')) { e.preventDefault(); gunneryToggle(haul.on || craneHolds()); }
   else if (e.target.closest('#rig-btn')) { e.preventDefault(); rigToggle(); }

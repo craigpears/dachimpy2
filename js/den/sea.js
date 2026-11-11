@@ -8,8 +8,8 @@ import { Wind } from '../den-wind.js';
 import { Voices } from '../chatter.js';
 import { scene, mat, mesh, canvasTex, woodTex, V3, flagMat, flagpole, burst } from './world.js';
 import { rock } from './land.js';
-import { gunMesh } from './gundeck.js';
-import { hullGeo } from './raids.js';
+import { SLOOP_DECK } from './sloop.js';
+export { SLOOP_DECK, SLOOP_BEAM, sloopMesh, sloopSails } from './sloop.js';
 
 // ---------- sailing: the old sloop in the cove ----------
 /* A first go at sailing (the user, 9 Nov: "how you end up getting a ship? ... a ship would just be
@@ -29,7 +29,6 @@ import { hullGeo } from './raids.js';
    it, an old pump at its head (lock.js). */
 export const SEA_X0 = SAIL.X0;   // (where it was before the board grew out to the right)
 export const seaX = (c) => SEA_X0 + (c + 0.5) * SAIL.CELL, seaZ = (r) => SAIL.Z0 - (r + 0.5) * SAIL.CELL;
-export const SLOOP_DECK = 0.75;
 /** Who's talking at sea, and where (src/chatter.ts): each island's talker is added as it's built, and
     you hear the nearest (Kikkit's island and Tzz's are a hop apart). */
 export const voices = new Voices();
@@ -47,76 +46,6 @@ export const liftAt = (c, r) => LIFT * (sail.helm.lockAt(c, r)?.height() ?? sail
 // The top of the cliff on a square: BANK over the highest water beside it (a lock counted full), and
 // never below CLIFF_H (src/den-sail.ts, Sea.bank).
 export const bankTop = (c, r) => LIFT * sail.sea.bank(c, r) + BANK;
-// Her, smaller than their ship: one mast, a square sail and a topsail, a bowsprit, a tiller at the
-// stern, weathered planks, and your own flag at the masthead. Beamy enough for her two rowers to sit
-// side by side, each at their own sweep (the user, 10 Nov: "make the ship a little wider so the
-// little guys can sit next to each other"): 2 across, from 1.7; and for her two guns to stand
-// straight across from each other, clear of each other as they run in (10 Nov: "they should be just
-// cannons on opposite sides of the ship, but in the same slots each side. I don't know if it needs
-// to make the ship a bit wider"): 2.3. (Her length, as a lock holds her: HER in src/den-lock.ts.)
-export const SLOOP_BEAM = 2.3;
-/** Her sails' cloths (the canvas in each, its belly bulging along its z) and their one material: for
-    the Sailing board's sparkle to fill and light them (js/den/sail-sparkle.js). */
-export function sloopSails(g) {
-  const cloths = (g?.userData.sails ?? []).map((arm) => arm.children[0]);
-  return { cloths, mat: cloths[0]?.material ?? null };
-}
-export function sloopMesh() {
-  const g = new THREE.Group(), hullM = mat('#5e4128', { map: woodTex }), deckM = mat('#9a7a55', { map: woodTex }), spar = mat('#4a2f1a', { map: woodTex });
-  const B = SLOOP_BEAM;
-  const hull = mesh(hullGeo(4.4, B, 1.3), hullM);
-  hull.position.y = SLOOP_DECK - 1.3;
-  const deck = mesh(hullGeo(4.25, B - 0.15, 0.05), deckM);
-  deck.position.y = SLOOP_DECK - 0.02;
-  const stripe = mesh(hullGeo(4.46, B + 0.04, 0.1), mat('#d8c9a0'));
-  stripe.position.y = SLOOP_DECK - 0.32;
-  g.add(hull, deck, stripe);
-  const stern = mesh(new THREE.BoxGeometry(0.9, 0.35, B * 0.87), hullM);
-  stern.position.set(-1.65, SLOOP_DECK + 0.17, 0);
-  const tiller = mesh(new THREE.BoxGeometry(0.7, 0.05, 0.05), spar);
-  tiller.position.set(-1.6, SLOOP_DECK + 0.5, 0);
-  const sprit = mesh(new THREE.CylinderGeometry(0.035, 0.05, 1.4, 6), spar);
-  sprit.rotation.z = -Math.PI / 2 + 0.25; sprit.position.set(2.6, SLOOP_DECK + 0.2, 0);
-  const mast = mesh(new THREE.CylinderGeometry(0.06, 0.08, 4.2, 8), spar);
-  mast.position.set(0.35, SLOOP_DECK + 2.1, 0);
-  g.add(stern, tiller, sprit, mast);
-  const sailM = mat('#e9dfc8', { side: THREE.DoubleSide, roughness: 0.95 });
-  for (const [y, w, ht] of [[1.45, 2, 1.6], [3.1, 1.4, 0.9]]) {
-    const geo = new THREE.PlaneGeometry(w, ht, 8, 4), pos = geo.attributes.position;
-    for (let i = 0; i < pos.count; i++) pos.setZ(i, Math.cos(pos.getX(i) / w * Math.PI) * 0.22 * (0.6 + 0.4 * Math.cos(pos.getY(i) / ht * Math.PI)));
-    geo.computeVertexNormals();
-    const cloth = mesh(geo, sailM, false), yard = mesh(new THREE.CylinderGeometry(0.035, 0.035, w + 0.25, 6), spar, false);
-    cloth.position.y = -ht / 2; yard.rotation.z = Math.PI / 2;
-    const arm = new THREE.Group();
-    arm.add(cloth, yard);
-    arm.position.set(0.35, SLOOP_DECK + y + ht / 2, 0);
-    arm.rotation.y = Math.PI / 2 - 0.45;   // square across her, braced round a little so they show from the side too
-    g.add(arm);
-    (g.userData.sails ||= []).push(arm);
-  }
-  const fl = flagpole(0.6, flagMat);
-  fl.position.set(0.35, SLOOP_DECK + 4.15, 0);
-  g.add(fl);
-  g.userData.rig = [mast, fl];   // (struck, with her sails, while you patch a hole in her deck)
-  // A gun each side, a smaller copy of the gun tower's, muzzle out over her side (port is her left):
-  // a matching pair, in the same slot each side, straight across from each other, between her mast
-  // and the tiller. Each runs in and out along its slide (js/den/sailing.js runs it in, by its
-  // userData.z, when it's fired), the slide far enough out from her middle that the two, both run
-  // in at once, still clear each other.
-  g.userData.guns = {};
-  for (const side of ['L', 'R']) {
-    const slide = new THREE.Group(), gun = gunMesh();
-    slide.position.set(-0.3, SLOOP_DECK, side === 'L' ? -0.44 : 0.44);
-    slide.rotation.y = side === 'L' ? 0 : Math.PI;   // (its -z out over her side)
-    gun.scale.setScalar(0.55);
-    gun.position.z = gun.userData.z = -0.36;   // (out along it: her muzzle 1.2 from her middle)
-    slide.add(gun);
-    g.add(slide);
-    g.userData.guns[side] = gun;
-  }
-  g.rotation.order = 'YXZ';   // (turned to her heading, then heeled over about her own length)
-  return g;
-}
 // The rocks: sea stacks, a clump of boulders on each square; the harbour's arms at the canal's
 // mouth as rocky spurs out from the cliff (harbourSpur).
 export function seaRocks() {

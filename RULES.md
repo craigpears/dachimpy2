@@ -140,6 +140,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   helmet, its fur in brown, tan or white; long hair and a beard; a rag or plain shirt in earthy dyes),
   most with a battle axe, the rest a cutlass (YPPedia, Viking raid: in a swordfight "vikings may use a
   battle axe"). The den calls them Vikings wherever it names them ("Wave 2: Vikings!").
+- **Nothing but a cutscene's own keys in one (11 Nov).** Rowing came up over Tzz's lesson: "I'm not
+  quite sure if I accidentally clicked something ... somehow the rowing thing ended up overlaying it."
+  The sea's bar (Oars, Guns, Sailing) is hidden in a cutscene and its buttons do nothing.
 - **The cheats jump to what's hard to get to, one per place (11 Nov).** "There's a lot there that are
   like basically the same thing ... these are supposed to help jump you to places that are hard to get
   to." So no cheat for what's a key away (Sailing's board: go sailing, then R), and one per place, not
@@ -187,6 +190,28 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   times the sloop's; a **grand frigate**, 159 crew. Her size, her guns and the people you see aboard
   her, on deck and below, all match: a frigate visibly busy with dozens of crew, a sloop a
   handful.
+  **How a bigger ship is sized (11 Nov):** the pirates stay the same size, so she isn't the sloop
+  scaled up. Her hull holds as many times the sloop's as her hold does (a war frigate's 324,000
+  litres, sixteen times the sloop's 20,250), laid out longer and beamier (3.4 times the sloop's
+  length, twice her beam, the rest in depth: 15 m by 4.6, 3.1 deep, her deck 1.8 up, against the
+  sloop's 4.4 by 2.3, 1.3 deep, 0.75 up); her sails as many times the sloop's as her sail cloth (400
+  to 75); her guns on deck as YPPedia's main deck has its Gunnery stations (12 of her 24). The numbers
+  are `src/ships.ts`, tested.
+- **Primates Rule, as Puzzle Pirates drew her (11 Nov).** The user's own war frigate, no apostrophe:
+  "my war frigate that's painted black and white ... the gold, the black and white thrones, the
+  skeleton cannons." How close: "obviously Puzzle Pirate elements ... should be faithful ... the
+  skeleton cannons and the black and white theme and a few of the bits of furniture ... the gibbet,
+  the skeleton set ... most of the stuff like on the top of the deck looks good ... go relatively
+  close." So the war frigate is drawn as Puzzle Pirates draws one (from her picture,
+  `notes/primates-rule/1-top-deck.jpg`): black hull, white rails and two white stripes (YPPedia's
+  paints for her: hull, sideboard, railing), two rows of square ports, bare wood below the paint, three
+  masts with crow's nests, a raised quarterdeck aft and forecastle forward, a black beast's head at her
+  bow with gold scrollwork. On deck, by YPPedia's names where it has them: the skeletal large cannons
+  (black, banded in bone, a skull on each), gibbets, the skeleton chair (one with a skeleton sat in
+  it), suits of armour on plinths, a black grand piano, anchor-backed chairs, tables of cards and
+  bottles, jars with creatures in them, tool chests. Each is shared furniture any scene can place
+  (`js/den/furniture.js`); she's any war frigate's plan with her config (`src/den-frigate.ts`,
+  `PRIMATES_RULE`), so another frigate is only another config. The gold is kept, but isn't the point.
 - **The same thing looks the same everywhere (11 Nov).** Of the whirlpools' winds, drawn their own
   way: "Why do the winds look different than the sea lane ones? Like, the graphic representation
   of them should be the same." A wind is a wind, whether it's a sea lane or one beside a whirlpool:
@@ -379,6 +404,23 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     here's a point of interest. It's ... a different way through. That's about all ... That's for you
     to discover." Their islands are drawn, and one note, "Whirlpools: another way through?", marks
     them; whose islands they are, and what's on them, isn't said.
+- **Port Decorum, an island under imperial control, sketched (11 Nov).** "start sketching out even just
+  like, even if it's just an empty island or something where you can't interact yet, is just some island
+  that's, say, under imperial control ... to create trading mechanics, looting mechanics, smuggling
+  mechanics, all that kind of stuff. Just proof of concepts around those things." First the place, nothing
+  to do there yet: in imperial waters, where the main shipping lane leads, straight out past the
+  checkpoint's gate beyond the old wreck, so the checkpoint guards the way to it and getting through is a
+  reason to go. The sea grew eight squares out to sea for it (34 rows), everything already there staying
+  put (the wreck's wind running on out to the new edge, so there's still no sailing round it to the locks),
+  open sea two squares deep all round it. A proper island, twice Kikkit's: a stone fort with a keep
+  flying the Empire's flag, a watchtower, a stone quay and a jetty out toward the gate (where trading will
+  happen), a customs house, a market, a warehouse, and guards in the Empire's uniform, all from the
+  wardrobe, in the checkpoint's stone, crimson and gold (js/den/empire.js: the same look everywhere).
+  Sailing up, the status line says whose it is, once a voyage, and the guard on the jetty halts you and
+  grumbles on while you're within earshot, never a hint how you might get in. On the captain's map it's
+  drawn, one note, "Imperial waters", never its name. `?at=imperial` and one cheat. Trading, looting,
+  smuggling (its own go-ahead first) and Dignity met again there come later (IDEAS.md, "An imperial
+  island").
 - **A pirate showing you a puzzle is the heart of it (11 Nov).** "if somebody introduces you to a
   puzzle that, it has like a tutorial element, that's kind of the whole history of my website and
   things. This is hopefully the latest modern iteration of what my tutorial stuff can be. It's a bit
@@ -1664,12 +1706,26 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **Each pop shown for what it is (11 Nov, after Tzz's lesson):** "when things popped, it did not
     seem to be following the mechanics ... there was no chain of four or platform clear. It was ...
     a yellow on a white block, and somehow it cleared a platform." The board was drawing what the
-    rules did (checked step by step), but a platform read as a white block. So each target square is
-    faintly tinted the colour it wants, its brackets kept round whatever sits in it (brighter once
-    filled), and a square that's no target stays plain; and before a step pops, what it is lights up
-    for a moment (the step says, src/sailing.ts: a line's squares, a platform that went): a line's
-    four ringed in their colour, or a platform's outline in gold. Then they pop together, the
-    platform fading and its ledge dropping away. The same board at sea, Kikkit's and Tzz's.
+    rules did (checked step by step), but a platform read as a white block. So before a step pops,
+    what it is lights up for a moment (the step says, src/sailing.ts: a line's squares, a platform
+    that went): a line's four ringed in their colour, or a platform's outline in gold. Then they pop
+    together, the platform fading and its ledge dropping away. The same board at sea, Kikkit's and Tzz's.
+    (Targets were first tinted the colour they want; that read as filled, below.)
+  - **Pieces slot in as solid blocks; empty targets look empty (11 Nov, Tzz's board beside a video of
+    a real Vegas):** "when you slot something into the platform visually, it goes from a circle to
+    ... it almost slots in perfectly, like it's a solid square of color ... They just look like
+    they're kind of hanging on the background. There's not that same visual impact." And "I thought
+    she'd completely filled the platform. Why is it not being set off? ... I think it's all visual":
+    tinted empty targets read as filled. So a piece that comes to rest in a target of its own colour
+    squares off into a solid block of that colour filling the square, its symbol on it (a quick
+    swell and flash as it seats), and stays a block till the platform goes; a piece in a target of
+    another colour, or on a square that's no target, stays a round balloon. An empty target has no
+    fill at all, the board showing through, only its thin outline and corner brackets in the colour
+    it wants. A finished platform reads as solid colour, one with a gap as plainly one short; it
+    lights up gold only once its last block has seated.
+  - **Bigger in Tzz's lesson (11 Nov):** "that puzzle can be a bit bigger. It's very tiny." Her
+    board's stand is taller than she is and the lesson's shot closer in (src/den-tzz.ts), her and it
+    both in frame.
   - **Sparkly full sails when you sail well, "very importantly" (11 Nov):** "when you do well in
     sailing, you normally get like a sparkly indicator to show how well you're doing ... you need
     lots of sparkly full sails like in the game." A sparkle meter on the board fills with your

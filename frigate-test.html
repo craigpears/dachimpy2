@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frigate test</title>
+<!-- A test page for a war frigate, unlinked like den.html (TODO.md, "Pictures of Primates Rule"): Primates
+     Rule, Dachimpy's war frigate, beside the sloop for scale. Her plan and config are src/den-frigate.ts
+     (compiled to js/den-frigate.js); her look is js/den/frigate.js, and the sloop's js/den/sloop.js, the
+     same the den draws. This page only stands them up side by side on a calm sea. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #f6ead2; --dim: #cbb894; --gold: #e0a92a; --panel: rgba(28, 19, 12, 0.86); --edge: #5a412a; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0e1a24; font: 500 16px/1.4 'Alegreya Sans', system-ui, sans-serif; color: var(--ink); }
+  canvas { display: block; touch-action: none; }
+  .ui { position: fixed; left: 12px; top: 12px; width: min(330px, calc(100vw - 24px)); background: var(--panel); border: 1px solid var(--edge); border-radius: 10px; padding: 10px 12px; }
+  h1 { font: 700 22px 'Alegreya', serif; color: var(--gold); margin: 0 0 4px; }
+  p { margin: 0 0 8px; color: var(--dim); font-size: 14px; }
+  .row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  button { font: 700 14px 'Alegreya Sans', sans-serif; color: var(--ink); background: #3b2a1b; border: 1px solid #c9a35c; border-radius: 6px; padding: 3px 9px; cursor: pointer; }
+  button.on { background: #6a4a1a; }
+  #stats { font-size: 13px; color: var(--dim); }
+  #stats b { color: var(--gold); }
+  @media (max-width: 700px) { .ui { top: auto; bottom: 12px; } p { display: none; } }
+</style>
+</head>
+<body>
+<div class="ui">
+  <h1>Primates Rule</h1>
+  <p>Dachimpy's war frigate beside your sloop, sized by YPPedia's numbers. Drag to turn round them, the wheel or a pinch to zoom.</p>
+  <div class="row">
+    <button data-view="side">Side</button>
+    <button data-view="deck">Deck</button>
+    <button data-view="bow">Bow</button>
+    <button data-view="stern">Stern</button>
+    <button id="sails" class="on">Sails</button>
+  </div>
+  <div id="stats"></div>
+</div>
+<script src="js/engine.js"></script>
+<script type="importmap">
+  { "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { renderer, scene, camera, paintSky, pirate, makePirate } from './js/den/world.js';
+import { sloopMesh, SLOOP_DECK } from './js/den/sloop.js';
+import { frigateMesh } from './js/den/frigate.js';
+import { PRIMATES_RULE, WAR_FRIGATE_PLAN, deckY } from './js/den-frigate.js';
+import { SLOOP, WAR_FRIGATE, SLOOP_HULL } from './js/ships.js';
+
+const $ = (id) => document.getElementById(id);
+paintSky('#4f8fd0', '#cfe2ee');
+scene.fog.near = 60; scene.fog.far = 140;
+camera.far = 300; camera.updateProjectionMatrix();
+const sea = new THREE.Mesh(new THREE.CircleGeometry(120, 48).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#2f78a8', roughness: 0.35, metalness: 0.1 }));
+sea.receiveShadow = true;
+scene.add(sea);
+
+const her = frigateMesh(PRIMATES_RULE);
+scene.add(her.g);
+const sloop = sloopMesh();
+sloop.position.set(0.5, 0, 6.2);
+scene.add(sloop);
+// Pirates for scale: you on her main deck, a crewmate on the sloop.
+pirate.g.position.set(0.9, deckY(WAR_FRIGATE_PLAN, 'waist'), -0.2); pirate.g.rotation.y = Math.PI / 2;
+const mate = makePirate(); mate.g.position.set(-0.8, SLOOP_DECK, 0.3); mate.g.rotation.y = Math.PI / 2; sloop.add(mate.g);
+
+const H = WAR_FRIGATE_PLAN.hull, f = (n) => n.toFixed(1);
+$('stats').innerHTML = `Her: <b>${f(H.len)}</b> m long, <b>${f(H.beam)}</b> abeam, <b>${f(H.deep)}</b> deep, deck <b>${f(H.deck)}</b> up ` +
+  `(the sloop ${f(SLOOP_HULL.len)} × ${f(SLOOP_HULL.beam)} × ${f(SLOOP_HULL.deep)}, deck ${f(SLOOP_HULL.deck)}). ` +
+  `Hold ×<b>${WAR_FRIGATE.holdLitres / SLOOP.holdLitres}</b>, crew <b>${WAR_FRIGATE.crew}</b> to ${SLOOP.crew}, <b>${WAR_FRIGATE.guns}</b> large guns to ${SLOOP.guns} small.`;
+
+// An orbiting camera: turn round them, tilt, zoom.
+const VIEWS = {
+  side: { yaw: 0.35, pitch: 0.32, dist: 26, at: [0, 3, 2.5] },
+  deck: { yaw: 0.75, pitch: 0.78, dist: 17, at: [0, 2.2, 0] },
+  bow: { yaw: 1.25, pitch: 0.28, dist: 18, at: [3, 2.5, 1.5] },
+  stern: { yaw: -1.05, pitch: 0.38, dist: 16, at: [-4, 3, 0] },
+};
+const cam = { yaw: 0, pitch: 0, dist: 20, at: new THREE.Vector3() };
+const setView = (name) => {
+  const v = VIEWS[name] || VIEWS.side;
+  Object.assign(cam, { yaw: v.yaw, pitch: v.pitch, dist: v.dist }); cam.at.set(...v.at);
+  document.querySelectorAll('[data-view]').forEach((b) => b.classList.toggle('on', b.dataset.view === name));
+};
+document.querySelectorAll('[data-view]').forEach((b) => { b.onclick = () => setView(b.dataset.view); });
+const params = new URLSearchParams(location.search);
+setView(params.get('view') || 'side');
+const showSails = (on) => { her.sails.visible = on; for (const arm of sloop.userData.sails) arm.visible = on; $('sails').classList.toggle('on', on); };
+$('sails').onclick = () => showSails(!her.sails.visible);
+if (params.get('sails') === '0') showSails(false);
+
+const canvas = renderer.domElement, pts = new Map();
+let pinch = 0;
+canvas.addEventListener('pointerdown', (e) => { pts.set(e.pointerId, [e.clientX, e.clientY]); canvas.setPointerCapture(e.pointerId); });
+canvas.addEventListener('pointerup', (e) => { pts.delete(e.pointerId); pinch = 0; });
+canvas.addEventListener('pointercancel', (e) => { pts.delete(e.pointerId); pinch = 0; });
+canvas.addEventListener('pointermove', (e) => {
+  const p = pts.get(e.pointerId);
+  if (!p) return;
+  if (pts.size === 2) {
+    const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+    if (pinch) cam.dist = Math.min(60, Math.max(4, cam.dist * pinch / d));
+    pinch = d;
+  } else {
+    cam.yaw -= (e.clientX - p[0]) * 0.006;
+    cam.pitch = Math.min(1.45, Math.max(0.02, cam.pitch + (e.clientY - p[1]) * 0.005));
+  }
+  p[0] = e.clientX; p[1] = e.clientY;
+});
+canvas.addEventListener('wheel', (e) => { e.preventDefault(); cam.dist = Math.min(60, Math.max(4, cam.dist * Math.exp(e.deltaY * 0.001))); }, { passive: false });
+
+const clock = new THREE.Clock();
+function frame() {
+  const dt = Math.min(0.05, clock.getDelta()), t = clock.elapsedTime;
+  her.tick(dt);
+  // A gentle roll at anchor, each her own.
+  her.g.rotation.z = Math.sin(t * 0.6) * 0.012; her.g.position.y = Math.sin(t * 0.8) * 0.03;
+  sloop.rotation.z = Math.sin(t * 0.9 + 1) * 0.03; sloop.position.y = Math.sin(t * 1.1 + 2) * 0.04;
+  camera.position.set(cam.at.x + Math.sin(cam.yaw) * Math.cos(cam.pitch) * cam.dist, cam.at.y + Math.sin(cam.pitch) * cam.dist, cam.at.z + Math.cos(cam.yaw) * Math.cos(cam.pitch) * cam.dist);
+  camera.lookAt(cam.at);
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+frame();
+window.her = her; window.cam = cam;   // (for poking at them from the console)
+</script>
+</body>
+</html>

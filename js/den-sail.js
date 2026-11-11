@@ -27,9 +27,11 @@ export const SAIL = {
         put. Grown again (11 Nov) from 22 to 27 across, out to the right, to space the islands out
         (the user: "can we see if we can just space things out a bit? ... TZZ just seems kind of
         crammed into the middle"): Tzz's island out in the new water, open sea round it, and the Wedding
-        Isle and Kikkit's island no longer against the edge. */
+        Isle and Kikkit's island no longer against the edge. And again (11 Nov) from 26 to 34 out to
+        sea, for Port Decorum, the island under imperial control (LAY.EMPIRE): out past the wreck, open
+        sea round it. */
     COLS: 27,
-    ROWS: 26,
+    ROWS: 34,
     /** Where the scattered rocks fall: the board as it was before it grew, so its rocks are the same
         as ever. The new water is laid out by hand (LAY). */
     SCATTER: { COLS: 16, ROWS: 14 },
@@ -180,7 +182,9 @@ export const LAY = {
         wreck, she's dead into it ("tempting, but you can't get to it unless you go around the back
         way"), and down the locks she comes out beside it with it across her or behind her. It starts
         a column short of the last lock's foot, so from beside the wreck she can slip out of it
-        westward and back up the locks, as well as downwind.
+        westward and back up the locks, as well as downwind. It runs out to the sea's far edge, as it did
+        before the sea grew out past it for Port Decorum (11 Nov: LAY.EMPIRE), so there's still no sailing
+        round its far end to the locks' foot.
         And the canal's mouth (10 Nov: "there should be some wind stopping you from getting to the
         locks on the left as well ... People have got to figure out that they can use the oars to go
         past the wind"): it blows down out of the cut toward the den, so under sail she can't get into
@@ -193,7 +197,7 @@ export const LAY = {
         through the gate slowly, on its gun's mark, and that gun has her (once a gun:
         src/den-checkpoint.ts); a combo rowed as one still rushes her through. */
     ZONES: [
-        { c0: 4, c1: 7, r0: 20, r1: 25, d: 1, s: 2 },
+        { c0: 4, c1: 7, r0: 20, r1: 33, d: 1, s: 2 },
         { c0: 2, c1: 4, r0: 5, r1: 8, d: 2, s: 2 },
         { c0: 9, c1: 9, r0: 19, r1: 19, d: 1, s: 1 },
     ],
@@ -286,6 +290,24 @@ export const LAY = {
     TZZ: {
         LAND: [[23, 13], [24, 13], [23, 14]],
         MOOR: { c: 22, r: 12, d: 2 },
+    },
+    /** Port Decorum (11 Nov; src/den-imperial.ts, js/den/imperial-isle.js), an island under imperial
+        control: "just some island that's, say, under imperial control ... to create trading mechanics,
+        looting mechanics, smuggling mechanics". In imperial waters, where the main shipping lane leads:
+        straight out past the checkpoint's gate, beyond the old wreck, so the checkpoint guards the way
+        to it and getting through is a reason to go. A proper island, twice Kikkit's (a port town to
+        come), in the water the board grew into out to sea (SAIL.ROWS), open sea two squares deep all
+        round it. LAND: its squares, the jetty's among them (JETTY: out from its near shore, toward the
+        gate). */
+    EMPIRE: {
+        LAND: [
+            [11, 27],
+            [11, 28], [12, 28], [13, 28], [14, 28],
+            [10, 29], [11, 29], [12, 29], [13, 29], [14, 29], [15, 29],
+            [10, 30], [11, 30], [12, 30], [13, 30], [14, 30], [15, 30],
+            [11, 31], [12, 31], [13, 31], [14, 31],
+        ],
+        JETTY: [11, 27],
     },
 };
 /** The canal's squares: its locks and the water between them (the hidden cove's too). */
@@ -443,6 +465,11 @@ export class Sea {
         this.pockets.add(key(...LAY.KIKKIT.PENGUINS));
         // Tzz's island, a hop from Kikkit's: land, and the water round it kept clear.
         for (const [c, r] of LAY.TZZ.LAND) {
+            this.works.add(key(c, r));
+            near(c, r);
+        }
+        // Port Decorum, the imperial island: land, the same.
+        for (const [c, r] of LAY.EMPIRE.LAND) {
             this.works.add(key(c, r));
             near(c, r);
         }

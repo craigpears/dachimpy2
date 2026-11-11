@@ -47,7 +47,7 @@ export function balloonStand({ performer, parent, x = 0, y = 0, z = 0, yaw = 0, 
   parent.add(g);
   const wood = mat('#6a4428', { map: woodTex }), LIFT = 0.45, wide = tall * SAIL_BOARD.W / SAIL_BOARD.H;
   // The board: the den's Sailing board, drawn off the page, on a picture standing on two legs.
-  const B = sailBoardCanvas(1.4), tex = new THREE.CanvasTexture(B.cv);
+  const B = sailBoardCanvas(1.8), tex = new THREE.CanvasTexture(B.cv);
   tex.colorSpace = THREE.SRGBColorSpace;
   const pic = mesh(new THREE.PlaneGeometry(wide, tall), new THREE.MeshBasicMaterial({ map: tex, transparent: true }), false);
   pic.position.set(0, LIFT + tall / 2, 0);
@@ -69,7 +69,7 @@ export function balloonStand({ performer, parent, x = 0, y = 0, z = 0, yaw = 0, 
   const cellM = (wide * 40) / SAIL_BOARD.W;   // (a square of it, in metres)
 
   // The pair in hand: the board's own balloons, as sprites, and the board's brown peg. Big enough to
-  // read from the lesson's camera, seven metres off (the user, 11 Nov: "she kind of twists her hands.
+  // read from the lesson's camera, six metres off (the user, 11 Nov: "she kind of twists her hands.
   // Nothing's actually happening": they were 0.42 m, blown up at her fists while she stood side-on to
   // the camera, turned to the sloop, so all you saw was her hands).
   const HAND = 0.56;

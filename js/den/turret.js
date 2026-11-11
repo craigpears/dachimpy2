@@ -6,7 +6,7 @@
 import * as THREE from 'three';
 import { scene, mat, mesh, V3, burst, worldLets, shake, flagpole, warm } from './world.js';
 import { rock } from './land.js';
-import { gunMesh } from './gundeck.js';
+import { gunMesh } from './gun.js';
 
 /* `look`: the stone's colour, the tower's top and foot radius and height, a coloured band below its
    battlements, a flag on its top, rocks round its foot. */

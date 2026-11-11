@@ -34,6 +34,7 @@ import { LAY, SAIL } from './den-sail.js';
 import { ISLE, isleShore, shoreOf } from './den-isle.js';
 import { KIKKIT, kikkitShore } from './den-kikkit.js';
 import { tzzShore } from './den-tzz.js';
+import { empireShore } from './den-imperial.js';
 export const MAP = {
     /** Where it lies on the beach, across from the gate's middle (the pumps are off to the right) and
         out from the wall (metres; the wall's at 0, out is -). */
@@ -117,6 +118,9 @@ export const CHART = {
     /** Tzz's island (11 Nov), a hop from Kikkit's, in plain sight, so it's on the map: drawn, never
         named (the whirlpools' islands are one point of interest: WHIRLPOOLS). */
     tzz: { shore: tzzShore().map(([c, r]) => [c - 0.5, r - 0.5]) },
+    /** Port Decorum (11 Nov), the imperial island past the checkpoint, where the shipping lane leads: no
+        secret, so it's drawn, one point of interest (IMPERIAL), never named, nothing said of what's there. */
+    empire: { shore: empireShore().map(([c, r]) => [c - 0.5, r - 0.5]) },
 };
 /** Where the X is: on the old wreck beyond the checkpoint. */
 export const X_AT = [...LAY.WRECK];
@@ -133,6 +137,8 @@ export const ROUTE = [
     [(LAY.CHECKPOINT.GATE + LAY.WRECK[0]) / 2 + 0.5, (LAY.CHECKPOINT.ROW + LAY.WRECK[1]) / 2 + 1.5],
     X_AT,
 ];
+/** Port Decorum, the imperial island, as one point of interest: whose waters, never its name. */
+export const IMPERIAL = { label: 'Imperial waters', at: [19.4, 29.4] };
 /** Kikkit's whirlpools and the islands by them, on the map as one point of interest: never whose. */
 export const WHIRLPOOLS = { label: 'Whirlpools', note: 'another way through?', at: [16.9, 14.6] };
 export const NOTES = [
@@ -152,6 +158,7 @@ export const NOTES = [
     // is here's a point of interest. It's ... a different way through. That's about all ... That's for
     // you to discover").
     { label: WHIRLPOOLS.label, note: WHIRLPOOLS.note, at: WHIRLPOOLS.at },
+    { label: IMPERIAL.label, at: IMPERIAL.at },
 ];
 /** Vegas Island's name, written once you've been there (js/den/map.js). */
 export const VEGAS_NOTE = { label: KIKKIT.VEGAS, at: [15.6, 25.1] };

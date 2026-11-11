@@ -21,6 +21,8 @@ import { umamiCheat } from './capybara.js';
 import { kikkitCheat } from './whirlpools.js';
 import { lodgingsOpen } from './lodgings.js';
 import { tzzCheat } from './balloon-isle.js';
+import { empireCheat } from './imperial-isle.js';
+import { cp } from './checkpoint.js';
 import { board, sailReset } from './sailing.js';
 import { online, guest, myId, send } from './crew.js';
 import { wed, weddingEnter, weddingLeave, plannedSpouse } from './wedding.js';
@@ -565,6 +567,15 @@ function cheatTzz() {
   if (!sail.on) cheatSail();
   tzzCheat();
 }
+/* Port Decorum, the imperial island (js/den/imperial-isle.js), out past the checkpoint: at sea, just off
+   its jetty, and the checkpoint told she's beyond it (else, jumped there, she'd seem to have slipped
+   round it by the locks, and Dignity would say so). */
+function cheatEmpire() {
+  if (cine) return;
+  if (!sail.on) cheatSail();
+  empireCheat();
+  cp.check.side = 'far';
+}
 /* Mischievious's wedding (js/den/wedding.js): the siege put to rest and their ship gone, and off to
    her island. */
 function cheatWedding() {
@@ -639,6 +650,7 @@ const CHEATS = [
   ['The Wedding Isle', cheatWedding, 'wedding'],
   ["Kikkit's island", cheatKikkit, 'kikkit'],
   ["Tzz's balloon lesson", cheatTzz, 'tzz'],
+  ['The imperial island', cheatEmpire, 'imperial'],
   ['Home, married', cheatMarried, 'married'],
   ['The housing district', cheatLodgings, 'lodgings'],
 ];

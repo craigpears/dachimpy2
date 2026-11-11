@@ -33,7 +33,7 @@
     body.sailing .toolbox, body.sailing .boards, body.sailing .keys, body.sailing .intro, body.sailing .gunhelp, body.sailing #labels, body.sailing .banner { display: none; }
     body.sailing.patching .toolbox { display: flex; }   /* patching her deck: the same tray as ashore, a bit bigger */
     body.sailing.patching .tool { width: 84px; height: 86px; font-size: 13px; }
-    body.sailing.patching .sailhud, body.sailing.quay .sailhud, body.hauling .sailhud, body.sailing.rowing .sailhud, body.sailing.gunnery .sailhud { display: none; }   /* (nothing but the puzzle while you patch her, bilge at the lock, haul, row or load her guns) */
+    body.cine .sailhud, body.sailing.patching .sailhud, body.sailing.quay .sailhud, body.hauling .sailhud, body.sailing.rowing .sailhud, body.sailing.gunnery .sailhud { display: none; }   /* (nothing but the puzzle while you patch her, bilge at the lock, haul, row or load her guns) */
     body.sailing.gunnery .gunhelp { display: block; }   /* (the stores' key, as on the gun tower) */
     body.sailing.rowing .dock { max-width: min(40vw, calc(100vw - 32px)); }   /* (rowing: the prompt between the two boards, js/den/row-boards.js) */
     body.sailing.rowing .prompt { white-space: normal; text-align: center; font-size: 15px; }
@@ -488,7 +488,7 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.UNDV74RG.js');
+    import(local ? './js/den.js' : './js/den.BYVMMQH2.js');
   </script>
 </body>
 </html>

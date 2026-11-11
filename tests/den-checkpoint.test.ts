@@ -36,7 +36,7 @@ const rowing = (sea = new Sea(9), pose = SHORT) => { const h = new Helm(sea, pos
 
 describe('the lay: the main shipping lane runs out to an imperial checkpoint (10 Nov)', () => {
   it('the board grew, and the near sea is as it was rebuilt round the checkpoint', () => {
-    expect([SAIL.COLS, SAIL.ROWS]).toEqual([27, 26]);   // (and again, 11 Nov, out to the right: the islands spaced out)
+    expect([SAIL.COLS, SAIL.ROWS]).toEqual([27, 34]);   // (and again, 11 Nov, out to the right: the islands spaced out; and out to sea, for Port Decorum)
     // The rocks of the near sea (seed 9: the den's): as before it grew, less the turret's rock, and
     // as the lanes were laid again round the checkpoint (10 Nov); and the cliffs the canal's chain
     // of locks is cut through, the hidden cove narrower behind the first lock (10 Nov); then the

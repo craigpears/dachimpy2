@@ -77,9 +77,11 @@ function mapTexture() {
   g.save(); g.clip();
   g.lineWidth = 14; g.strokeStyle = 'rgba(80,42,14,.5)'; g.stroke();
   for (let i = 0; i < 8; i++) { g.fillStyle = `rgba(140,95,45,${0.04 + rnd() * 0.06})`; g.beginPath(); g.arc(rnd() * w, rnd() * h, 20 + rnd() * 60, 0, 7); g.fill(); }
-  const isleBox = CHART.isle.shore.reduce((b, [c, r]) => [Math.min(b[0], c), Math.max(b[1], c), Math.min(b[2], r), Math.max(b[3], r)], [Infinity, -Infinity, Infinity, -Infinity]);
+  const boxOf = (shore) => shore.reduce((b, [c, r]) => [Math.min(b[0], c), Math.max(b[1], c), Math.min(b[2], r), Math.max(b[3], r)], [Infinity, -Infinity, Infinity, -Infinity]);
+  const isleBox = boxOf(CHART.isle.shore), empireBox = boxOf(CHART.empire.shore);
   const onLand = (c, r) => CHART.land.some((L) => c >= L.c0 - 0.5 && c <= L.c1 + 0.5 && r >= L.r0 - 0.5 && r <= L.r1 + 0.5) || r < -0.5
-    || (c >= isleBox[0] - 1.5 && c <= isleBox[1] + 0.5 && r >= isleBox[2] - 0.5 && r <= isleBox[3] + 0.5);   // (Mischievious's isle, and its jetty)
+    || (c >= isleBox[0] - 1.5 && c <= isleBox[1] + 0.5 && r >= isleBox[2] - 0.5 && r <= isleBox[3] + 0.5)   // (Mischievious's isle, and its jetty)
+    || (c >= empireBox[0] - 0.5 && c <= empireBox[1] + 0.5 && r >= empireBox[2] - 1.5 && r <= empireBox[3] + 0.5);   // (Port Decorum, and its jetty)
   // A hand-drawn line through points (pixels), wobbling a little between them.
   const wobbly = (pts, close, jag = 3) => {
     g.beginPath();
@@ -151,6 +153,7 @@ function mapTexture() {
   };
   isle(CHART.kikkit.shore, SAND);
   isle(CHART.tzz.shore, SAND);   // (Tzz's, a hop away, unnamed)
+  isle(CHART.empire.shore, LAND);   // (Port Decorum, the imperial island past the checkpoint, unnamed)
   {
     const [x, y] = Q([20, 17.2]);
     g.strokeStyle = INK; g.lineWidth = 2;

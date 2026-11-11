@@ -285,21 +285,6 @@ the site (`.assetsignore` skips `*.md`).
   Since 9 Nov you can also lob a piece over the wall from the den floor at raiders hacking
   outside; not yet tried by the user. Watch for: the markers on raiders outside cluttering the
   view while you carry a piece.
-- **An island under imperial control, sketched (11 Nov):** "start sketching out even just like, even if
-  it's just an empty island or something where you can't interact yet, is just some island that's, say,
-  under imperial control. So, you know, I guess you could naturally run into [Dignity] again there or
-  something. But, you know, to create trading mechanics, looting mechanics, smuggling mechanics, all that
-  kind of stuff. Just proof of concepts around those things ... that can certainly be the place for a few
-  more puzzles." For now: the island itself, at sea, to sail up to and look at, nothing to do there yet.
-  (IDEAS.md, "An imperial island".)
-- **A piece in its target should become a solid square, and empty targets look full (11 Nov, Tzz again):**
-  comparing with a video of a real Vegas: "when you slot something into the platform visually ... it goes
-  from a circle to almost, it almost slots in perfectly, like it's a solid square of color ... [ours] just
-  look like they're kind of hanging on the background. There's not that same visual impact." And the
-  empty targets read as filled: "I thought she'd completely filled the platform. Why is it not being set
-  off? ... I think it's all visual." So a piece in a target of its colour is drawn as a solid square of
-  that colour, and an empty target plainly empty (an outline, nothing that looks like a piece). The
-  same board everywhere. And on Tzz's island: "that [sailing] puzzle can be a bit bigger. It's very tiny."
 - **Tzz's lesson should show the plan, and give you a fair turn (11 Nov, Tzz again):** "once she hands
   over to you, it's not very clear ... surely it should start at the top ... give you a bit more of a
   chance." And "her speech explains things. It doesn't really visibly show you the plan very well. Like,
@@ -313,9 +298,6 @@ the site (`.assetsignore` skips `*.md`).
   dropping, and it's like, ah, what am I supposed to do?" So your turn is announced plainly (it's yours
   now, the pair you've got, where it goes, shown as a ghost on the board, and the keys), and words like
   "trigger" are shown before they're named. Next, once the solid targets and bigger board land.
-- **Rowing came up over Tzz's lesson (11 Nov):** "I'm not quite sure if I accidentally clicked something
-  ... somehow the rowing thing ended up overlaying it." The sea's buttons (Oars, Guns, Sailing) stayed on
-  screen and clickable during a cutscene. Nothing but the cutscene's own keys should work in one.
 - **The puzzles' keys at sea, in one bank (11 Nov):** "The R does not make sense as a button for sailing
   ... I definitely still associated R with sailing ... surely they should at least all be in the same bank
   of keys for activating the puzzles." Now R Sailing, G Gunnery, O the oars (rowing), scattered among the

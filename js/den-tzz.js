@@ -89,8 +89,9 @@ export const TZZ_CAST = {
         turned to you while you're within earshot; her lines. */
     her: { look: 'Tzz', at: [TZZ_STANDS.c, TZZ_STANDS.r], scale: 1.15, yaw: -1.4, idle: 'sway', earshot: TZZ.EARSHOT, says: TZZ_SAYS, gap: [4, 7] },
     /** Her board: the den's own Sailing board on a stand on the sand beside her (balloons.js), its front
-        to the camera; `tall`, its picture's height in metres. */
-    board: { at: [22.95, 14.1], tall: 2.6 },
+        to the camera; `tall`, its picture's height in metres: taller than she is, and the shot closer in
+        (the user, 11 Nov: "that puzzle can be a bit bigger. It's very tiny"). */
+    board: { at: [22.95, 14.1], tall: 3.5 },
     /** Behind her, a copper still (her portrait's); and a palm. */
     props: [{ kind: 'still', at: [23.75, 13.35], yaw: -1.9 }],
     palm: [24.15, 12.85],
@@ -98,7 +99,7 @@ export const TZZ_CAST = {
         behind"): from out on the water toward `from` (squares), at her and her board side by side, `up`
         metres over the sand, `dist` metres off, tilted down `tilt`. From the island's left, the open
         water between hers and the Wedding Isle, with the sloop brought alongside out of it (TZZ_MOOR). */
-    shot: { from: [19.5, 13.7], dist: 7.2, tilt: 0.1, up: 1.55 },
+    shot: { from: [19.5, 13.7], dist: 6.3, tilt: 0.1, up: 1.95 },
 };
 /** Her lesson's shot, on the sea's squares: what it looks at (between her and her board), where the
     camera stands (dist metres back toward `from`), and the half-width it sees either side of straight

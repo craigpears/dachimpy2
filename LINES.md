@@ -4,7 +4,7 @@ Every character's lines, and who they are, made from `src/lines/` by `npm run bu
 (`tools/lines-doc.mjs`): change a line there, not here, and the game changes with it.
 This file's history in git shows every line as it's changed.
 
-[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava) · [Tzz](#tzz) · [Gravee](#gravee) · [The Count](#the-count)
+[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava) · [Tzz](#tzz) · [Gravee](#gravee) · [The Count](#the-count) · [The imperial guards of Port Decorum](#the-imperial-guards-of-port-decorum)
 
 ## Dalnoth
 
@@ -926,3 +926,29 @@ The vampire who sleeps in the coffin at the bedside in Gravee's house (Bedside M
 - *Sitting bolt upright, nose to nose with you:* "AAAAH!"
 - *Lying back down as the lid shuts:* "Five more minutes..."
 - *Lifting it again, another time:* "Do you MIND?"
+
+## The imperial guards of Port Decorum
+
+Soldiers of the Empire in its crimson and gold, standing guard over Port Decorum, the imperial port out past the checkpoint: on the jetty's end, at the fort's gate, along the quay. The one on the jetty does the talking: by the book, politely unhelpful, a little smug that the harbour's shut to pirates.
+
+For now there's nothing to do there: the island's sketched, to sail up to and look at, the place for trading, looting and smuggling to come.
+
+> "even if it's just an empty island or something where you can't interact yet, is just some island that's, say, under imperial control" (the user, 11 Nov)
+
+### The first time you come up off the island on a voyage, as the status line
+
+- "Port Decorum, under imperial control. Its harbour's shut to pirates"
+
+### The jetty guard, as you first come within earshot
+
+- "Halt! Port Decorum, by order of the Empire. No pirates in the harbour."
+
+### Then, while you're within earshot, round and round
+
+- "Move along. The market's not for the likes of you."
+- "Customs house is shut. To pirates. Always."
+- "Nice little sloop. Be a shame if she were impounded."
+- "Keep your guns run in. The fort's watching."
+- "No, you can't see the warehouse. Nobody sees the warehouse."
+- "Everything ashore is imperial property. Every last crate."
+- "Papers? No? Then no."

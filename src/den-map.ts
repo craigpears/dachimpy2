@@ -36,6 +36,7 @@ import { LAY, SAIL } from './den-sail.js';
 import { ISLE, isleShore, shoreOf } from './den-isle.js';
 import { KIKKIT, kikkitShore } from './den-kikkit.js';
 import { tzzShore } from './den-tzz.js';
+import { empireShore } from './den-imperial.js';
 
 /** Where the map is: not yet dropped ('none'), lying on the beach ('lying'), or picked up ('found'). */
 export type MapState = 'none' | 'lying' | 'found';
@@ -142,6 +143,9 @@ export const CHART = {
   /** Tzz's island (11 Nov), a hop from Kikkit's, in plain sight, so it's on the map: drawn, never
       named (the whirlpools' islands are one point of interest: WHIRLPOOLS). */
   tzz: { shore: tzzShore().map(([c, r]): Square => [c - 0.5, r - 0.5]) },
+  /** Port Decorum (11 Nov), the imperial island past the checkpoint, where the shipping lane leads: no
+      secret, so it's drawn, one point of interest (IMPERIAL), never named, nothing said of what's there. */
+  empire: { shore: empireShore().map(([c, r]): Square => [c - 0.5, r - 0.5]) },
 };
 
 /** Where the X is: on the old wreck beyond the checkpoint. */
@@ -165,6 +169,9 @@ export const ROUTE: readonly Square[] = [
     along a lane, as on a chart. Only what's there to see; never what to do about it. */
 export interface MapNote { label: string; note?: string; at: Square; along?: boolean }
 
+/** Port Decorum, the imperial island, as one point of interest: whose waters, never its name. */
+export const IMPERIAL = { label: 'Imperial waters', at: [19.4, 29.4] as Square } as const;
+
 /** Kikkit's whirlpools and the islands by them, on the map as one point of interest: never whose. */
 export const WHIRLPOOLS = { label: 'Whirlpools', note: 'another way through?', at: [16.9, 14.6] as Square } as const;
 
@@ -185,6 +192,7 @@ export const NOTES: readonly MapNote[] = [
   // is here's a point of interest. It's ... a different way through. That's about all ... That's for
   // you to discover").
   { label: WHIRLPOOLS.label, note: WHIRLPOOLS.note, at: WHIRLPOOLS.at },
+  { label: IMPERIAL.label, at: IMPERIAL.at },
 ];
 
 /** Vegas Island's name, written once you've been there (js/den/map.js). */

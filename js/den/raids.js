@@ -17,6 +17,7 @@ import { cine } from './cine.js';
 import { guest, isHost, myId, crewSize, send, say } from './crew.js';
 // (Last, so the order the den's modules start up in is as it was: both are in by now.)
 import { sail } from './sea.js';
+import { hullGeo } from './hull.js';
 import { chart } from './map.js';
 
 export const cannon = (() => {
@@ -55,15 +56,6 @@ const pirateFlagMat = new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, r
   g.beginPath(); g.arc(w / 2, h / 2 - 8, 26, 0, Math.PI * 2); g.fill();
   g.fillStyle = '#111'; g.beginPath(); g.arc(w / 2 - 9, h / 2 - 10, 6, 0, Math.PI * 2); g.arc(w / 2 + 9, h / 2 - 10, 6, 0, Math.PI * 2); g.fill();
 }) });
-// A hull seen from above (bow to +x), stood up: `len` long, `beam` wide, `deep` from keel to deck.
-export function hullGeo(len, beam, deep, bow = 0.22) {
-  const sh = new THREE.Shape(), l = len / 2, b = beam / 2;
-  sh.moveTo(-l, -b * 0.85); sh.lineTo(l - len * bow, -b);
-  sh.quadraticCurveTo(l, -b * 0.6, l + len * 0.04, 0);
-  sh.quadraticCurveTo(l, b * 0.6, l - len * bow, b);
-  sh.lineTo(-l, b * 0.85); sh.closePath();
-  return new THREE.ExtrudeGeometry(sh, { depth: deep, bevelEnabled: false }).rotateX(-Math.PI / 2);
-}
 export const ship = (() => {
   const g = new THREE.Group(), hullM = mat('#3d2716', { map: woodTex }), deckM = mat('#8a6a48', { map: woodTex });
   const hull = mesh(hullGeo(8.5, 2.6, 1.9), hullM);

@@ -7,10 +7,12 @@
    where furniture was something you bought and put anywhere in your house (YPPedia, Furniture).
 
    The pieces: rug, runner, armchair, chair, table, candelabra, sconce, bed, coffin, easel, frame, door,
-   and outdoors a still. */
+   and outdoors a still; and the skeleton set and its company (Primates Rule's deck): skeleton,
+   skeletonChair, skeletalCannon, gibbet, armour, grandPiano, anchorChair, jar, toolChest. */
 import * as THREE from 'three';
 import { mat, mesh, woodTex, canvasTex } from './world.js';
 import { CANVAS } from '../den-houses.js';
+import { bake } from './bake.js';
 
 const at = (m, x, y, z) => { m.position.set(x, y, z); return m; };
 const box = (w, h, d, m, x = 0, y = 0, z = 0) => at(mesh(new THREE.BoxGeometry(w, h, d), m), x, y, z);
@@ -56,11 +58,21 @@ export function armchair({ col = '#4a6b3a' } = {}) {
   for (const [x, z] of [[-0.36, -0.32], [0.36, -0.32], [-0.36, 0.32], [0.36, 0.32]]) g.add(cyl(0.035, 0.025, 0.25, ebony, x, 0.125, z, 6));
   return { g };
 }
-/** A round side table on one leg, a teacup on it. */
-export function table({ cup = true } = {}) {
-  const g = new THREE.Group();
-  g.add(cyl(0.42, 0.42, 0.05, mid, 0, 0.72, 0, 20), cyl(0.05, 0.07, 0.7, dark, 0, 0.36, 0, 8), cyl(0.26, 0.3, 0.04, dark, 0, 0.02, 0, 16));
+/** A round side table on one leg, a teacup on it; or `cards` dealt on it and `bottles` stood on it
+    (Primates Rule's deck); `black`, in ebony. */
+export function table({ cup = true, cards = false, bottles = 0, black = false } = {}) {
+  const g = new THREE.Group(), top = black ? ebony : mid, foot = black ? ebony : dark;
+  g.add(cyl(0.42, 0.42, 0.05, top, 0, 0.72, 0, 20), cyl(0.05, 0.07, 0.7, foot, 0, 0.36, 0, 8), cyl(0.26, 0.3, 0.04, foot, 0, 0.02, 0, 16));
   if (cup) g.add(cyl(0.05, 0.04, 0.07, mat('#f4f1ea'), 0.1, 0.78, 0.05, 10), cyl(0.08, 0.08, 0.01, mat('#f4f1ea'), 0.1, 0.75, 0.05, 12));
+  if (cards) {
+    // A hand dealt round, and the pack.
+    [[-0.2, 0.05, 0.3], [0.05, -0.22, -0.4], [0.22, 0.12, 1.1], [-0.05, 0.24, 2.0], [0.15, -0.05, 2.6]].forEach(([x, z, a], i) => { const c = box(0.08, 0.004, 0.11, i === 3 ? cardRed : cardM, x, 0.748, z); c.rotation.y = a; g.add(c); });
+    g.add(box(0.08, 0.03, 0.11, cardM, -0.18, 0.76, -0.15));
+  }
+  for (let i = 0; i < bottles; i++) {
+    const a = 0.8 + i * 2.1, x = Math.cos(a) * 0.2, z = Math.sin(a) * 0.2, m = i % 2 ? bottleBrown : bottleGreen;
+    g.add(cyl(0.045, 0.045, 0.2, m, x, 0.845, z, 8), cyl(0.016, 0.03, 0.09, m, x, 0.99, z, 6), cyl(0.018, 0.018, 0.02, cork, x, 1.045, z, 6));
+  }
   return { g };
 }
 /** A bed: a four-poster, its canopy and curtains in its colour, a pillow and a turned-down blanket. */
@@ -276,5 +288,170 @@ export function still() {
   return { g, tick() { fire.scale.y = 0.6 + Math.sin(performance.now() / 90) * 0.12; } };
 }
 
-/** Every piece by its kind (the name a house's rules use: src/den-gravee.ts's FURNISH). */
-export const FURNITURE = { rug, runner, chair, armchair, table, bed, candelabra, sconce, coffin, easel, frame, door, still };
+// ---------- bones, iron and the like (Primates Rule's deck, and anywhere else) ----------
+/* The skeleton set and its company, as Puzzle Pirates has them (YPPedia: the Skeletal large cannon, the
+   Gibbet, the Skeleton chair): bone white on black, from the user's war frigate (TODO.md, "Pictures of
+   Primates Rule"; the user, 11 Nov: "the skeleton cannons ... the gibbet, the skeleton set"). Each piece's
+   materials are shared by every copy, so a ship full of them bakes down to a few meshes
+   (js/den/bake.js). */
+const bone = mat('#e8dfc4', { roughness: 0.7 }), socket = mat('#17120e', { roughness: 1 });
+const ironBlack = mat('#1f1e23', { metalness: 0.45, roughness: 0.45 }), steel = mat('#dde1e6', { metalness: 0.35, roughness: 0.35 });
+const plinthM = mat('#dcd6cb', { roughness: 0.9 }), paleDeal = mat('#c2b6a2', { map: woodTex, roughness: 0.9 });
+const pianoBlack = mat('#131216', { roughness: 0.22, metalness: 0.15 }), ivory = mat('#f3efe6', { roughness: 0.5 });
+const greyStone = mat('#8d9296', { roughness: 0.85 }), anchorGrey = mat('#5a5f66', { metalness: 0.3, roughness: 0.6 });
+const glass = mat('#d4ecef', { transparent: true, opacity: 0.32, roughness: 0.08, depthWrite: false }), straw = mat('#d8c27c', { roughness: 0.8 });
+const cardM = mat('#f6f3ea', { roughness: 0.8 }), cardRed = mat('#c8343a', { roughness: 0.8 });
+const bottleGreen = mat('#2f6b3a', { roughness: 0.2, metalness: 0.1 }), bottleBrown = mat('#6a3a1c', { roughness: 0.2, metalness: 0.1 }), cork = mat('#b08a5a');
+const creatureMats = {}, creatureMat = (c) => (creatureMats[c] ||= mat(c, { emissive: c, emissiveIntensity: 0.25, roughness: 0.5 }));
+const UP = new THREE.Vector3(0, 1, 0);
+/** A rod from a to b ([x, y, z] each), `r` thick. */
+function rod(a, b, r, m, n = 6) {
+  const A = new THREE.Vector3(...a), d = new THREE.Vector3(...b).sub(A), c = mesh(new THREE.CylinderGeometry(r, r, d.length(), n), m);
+  c.position.copy(A).addScaledVector(d, 0.5);
+  c.quaternion.setFromUnitVectors(UP, d.normalize());
+  return c;
+}
+const ball = (r, m, x, y, z, n = 8) => at(mesh(new THREE.SphereGeometry(r, n, Math.max(4, n - 2)), m), x, y, z);
+/** A skull, its middle at (x, y, z), looking toward +z. */
+function skull(parent, x, y, z, r = 0.1) {
+  const c = ball(r, bone, x, y, z, 10); c.scale.set(0.92, 1, 1.08);
+  parent.add(c, box(r * 1.1, r * 0.45, r * 0.9, bone, x, y - r * 0.85, z + r * 0.25));
+  for (const sx of [-1, 1]) parent.add(ball(r * 0.26, socket, x + sx * r * 0.38, y - r * 0.05, z + r * 0.84, 6));
+  parent.add(ball(r * 0.12, socket, x, y - r * 0.4, z + r * 0.98, 4));
+}
+/** A skeleton: `pose` 'stand', 'sit' (sat on a seat 0.46 high, at its origin, thighs out toward +z), or
+    'slump' (hanging in a gibbet). About a pirate's height stood. */
+export function skeleton({ pose = 'stand' } = {}) {
+  const g = new THREE.Group(), sit = pose === 'sit', hipY = sit ? 0.5 : 0.92;
+  for (const sx of [-1, 1]) {
+    const hx = 0.1 * sx;
+    if (sit) {
+      const knee = [hx * 1.25, hipY + 0.02, 0.42];
+      g.add(rod([hx, hipY, 0], knee, 0.03, bone), rod(knee, [hx * 1.25, 0.06, 0.47], 0.026, bone), ball(0.04, bone, ...knee), box(0.08, 0.04, 0.16, bone, hx * 1.25, 0.03, 0.52));
+    } else {
+      const knee = [hx, 0.48, pose === 'slump' ? 0.06 : 0.02];
+      g.add(rod([hx, hipY, 0], knee, 0.03, bone), rod(knee, [hx, 0.06, 0], 0.026, bone), ball(0.04, bone, ...knee), box(0.08, 0.04, 0.16, bone, hx, 0.03, 0.05));
+    }
+  }
+  g.add(box(0.26, 0.1, 0.12, bone, 0, hipY + 0.02, 0));
+  // From the hips up: the spine, the ribs (open at the back), the collarbones, arms and the skull.
+  const torso = new THREE.Group(); torso.position.set(0, hipY + 0.05, 0); torso.rotation.x = sit ? -0.12 : pose === 'slump' ? 0.3 : 0; g.add(torso);
+  torso.add(rod([0, 0, -0.04], [0, 0.6, -0.04], 0.022, bone), rod([-0.2, 0.52, -0.02], [0.2, 0.52, -0.02], 0.018, bone));
+  for (let i = 0; i < 4; i++) {
+    const r = 0.13 - i * 0.012, rib = mesh(new THREE.TorusGeometry(r, 0.014, 4, 12, Math.PI * 1.5).rotateX(Math.PI / 2).rotateY(Math.PI / 4), bone);
+    rib.position.set(0, 0.44 - i * 0.075, 0.02); torso.add(rib);
+  }
+  for (const sx of [-1, 1]) {
+    const sh = [0.2 * sx, 0.5, -0.02], elbow = sit ? [0.21 * sx, 0.24, 0.12] : [0.22 * sx, 0.22, 0], hand = sit ? [0.16 * sx, 0.12, 0.38] : [0.22 * sx, -0.04, 0.04];
+    torso.add(rod(sh, elbow, 0.022, bone), rod(elbow, hand, 0.018, bone), box(0.05, 0.08, 0.03, bone, hand[0], hand[1] - 0.03, hand[2]));
+  }
+  torso.add(rod([0, 0.6, -0.03], [0, 0.66, 0], 0.02, bone));
+  skull(torso, 0, 0.76, 0.01);
+  if (pose === 'slump') torso.rotation.z = 0.12;
+  return { g };
+}
+/** A skeleton chair (YPPedia: Skeleton chair): a chair of bones, a skull atop its back. `sitter`: a
+    skeleton sat in it. */
+export function skeletonChair({ sitter = false } = {}) {
+  const g = new THREE.Group();
+  for (const [x, z] of [[-0.2, -0.19], [0.2, -0.19], [-0.2, 0.19], [0.2, 0.19]]) g.add(rod([x, 0, z], [x, 0.44, z], 0.028, bone), ball(0.045, bone, x, 0.02, z), ball(0.045, bone, x, 0.44, z));
+  for (let i = 0; i < 5; i++) g.add(rod([-0.24, 0.47, -0.18 + i * 0.09], [0.24, 0.47, -0.18 + i * 0.09], 0.024, bone));
+  for (const x of [-0.2, -0.07, 0.07, 0.2]) g.add(rod([x, 0.47, -0.2], [x * 0.9, 1.08, -0.24], 0.022, bone));
+  g.add(rod([-0.22, 0.75, -0.215], [0.22, 0.75, -0.215], 0.02, bone), rod([-0.2, 1.05, -0.24], [0.2, 1.05, -0.24], 0.02, bone));
+  skull(g, 0, 1.17, -0.24, 0.085);
+  if (sitter) { const s = skeleton({ pose: 'sit' }); s.g.position.z = -0.1; g.add(s.g); }
+  return { g };
+}
+/** A skeletal large cannon (YPPedia's name for it): a black barrel banded in bone, a skull on its breech,
+    on a black carriage on bone wheels. Its muzzle toward +z, 0.8 out; its barrel 0.42 up. */
+export function skeletalCannon() {
+  const g = new THREE.Group();
+  g.add(box(0.48, 0.2, 0.86, ironBlack, 0, 0.2, -0.1), box(0.3, 0.12, 0.3, ironBlack, 0, 0.36, -0.35));
+  for (const sx of [-1, 1]) for (const z of [-0.42, 0.22]) { const w = cyl(0.13, 0.13, 0.06, bone, 0.27 * sx, 0.13, z, 12); w.rotation.z = Math.PI / 2; g.add(w); }
+  const barrel = mesh(new THREE.CylinderGeometry(0.15, 0.2, 1.3, 14).rotateX(Math.PI / 2), ironBlack); barrel.position.set(0, 0.42, 0.1); g.add(barrel);
+  const swell = mesh(new THREE.CylinderGeometry(0.19, 0.17, 0.14, 14).rotateX(Math.PI / 2), ironBlack); swell.position.set(0, 0.42, 0.74); g.add(swell);
+  const bore = mesh(new THREE.CircleGeometry(0.1, 12), socket, false); bore.position.set(0, 0.42, 0.812); g.add(bore);
+  for (const [z, r] of [[-0.38, 0.205], [-0.14, 0.19], [0.1, 0.18], [0.34, 0.17], [0.66, 0.2]]) { const band = mesh(new THREE.TorusGeometry(r, 0.035, 5, 16), bone); band.position.set(0, 0.42, z); g.add(band); }
+  g.add(ball(0.2, ironBlack, 0, 0.42, -0.55, 12), ball(0.07, bone, 0, 0.42, -0.76));
+  skull(g, 0, 0.66, -0.36, 0.09);
+  return { g };
+}
+/** A gibbet (YPPedia: Gibbet): a post and arm on a pale platform, an iron cage hanging from it, a
+    skeleton slumped inside. Its cage swings a little (`tick`), so it's left out of a bake. */
+export function gibbet({ bones = true } = {}) {
+  const g = new THREE.Group();
+  g.add(box(0.9, 0.08, 0.9, paleDeal, 0, 0.04, 0), box(0.12, 2.1, 0.12, dark, -0.36, 1.13, 0), box(0.82, 0.1, 0.1, dark, -0.01, 2.13, 0), rod([-0.36, 1.75, 0], [-0.02, 2.1, 0], 0.03, dark));
+  const hang = new THREE.Group(); hang.position.set(0.24, 2.08, 0); hang.userData.live = true; g.add(hang);
+  hang.add(rod([0, 0, 0], [0, -0.16, 0], 0.012, ironBlack, 4));
+  const cage = new THREE.Group(); cage.position.y = -0.16; hang.add(cage);
+  for (const y of [0, -0.5, -1.0]) { const ring = mesh(new THREE.TorusGeometry(0.24, 0.016, 4, 14).rotateX(Math.PI / 2), ironBlack); ring.position.y = y; cage.add(ring); }
+  for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2, x = Math.cos(a) * 0.24, z = Math.sin(a) * 0.24; cage.add(rod([x, 0, z], [x, -1.0, z], 0.012, ironBlack, 4), rod([x, 0, z], [0, 0.14, 0], 0.012, ironBlack, 4)); }
+  cage.add(cyl(0.24, 0.24, 0.02, ironBlack, 0, -1.0, 0, 14));
+  if (bones) { const s = skeleton({ pose: 'slump' }); s.g.scale.setScalar(0.55); s.g.position.y = -0.99; cage.add(s.g); }
+  bake(hang);   // (the cage and its bones as a few meshes, swinging as one)
+  let t = Math.random() * 10;
+  return { g, tick(dt) { t += dt; hang.rotation.z = Math.sin(t * 1.3) * 0.05; hang.rotation.x = Math.sin(t * 0.9 + 1) * 0.035; } };
+}
+/** A suit of armour stood on a stone plinth, a plume on its helm. */
+export function armour({ plinth = true, plume = '#2f5fb8' } = {}) {
+  const g = new THREE.Group(), y0 = plinth ? 0.34 : 0;
+  if (plinth) g.add(box(0.56, 0.3, 0.5, plinthM, 0, 0.15, 0), box(0.62, 0.04, 0.56, plinthM, 0, 0.32, 0));
+  for (const sx of [-1, 1]) {
+    g.add(cyl(0.07, 0.06, 0.82, steel, 0.1 * sx, y0 + 0.43, 0, 8), ball(0.075, steel, 0.1 * sx, y0 + 0.45, 0.02), box(0.11, 0.06, 0.2, steel, 0.1 * sx, y0 + 0.03, 0.04));
+    g.add(ball(0.1, steel, 0.25 * sx, y0 + 1.35, 0), rod([0.26 * sx, y0 + 1.32, 0], [0.27 * sx, y0 + 0.95, 0.04], 0.055, steel), ball(0.06, steel, 0.27 * sx, y0 + 0.9, 0.05));
+  }
+  g.add(cyl(0.2, 0.24, 0.22, steel, 0, y0 + 0.92, 0, 12), cyl(0.21, 0.17, 0.42, steel, 0, y0 + 1.22, 0, 12), box(0.02, 0.36, 0.06, steel, 0, y0 + 1.22, 0.18));
+  g.add(cyl(0.11, 0.115, 0.2, steel, 0, y0 + 1.56, 0, 12), ball(0.11, steel, 0, y0 + 1.66, 0, 12), box(0.15, 0.025, 0.02, socket, 0, y0 + 1.58, 0.11));
+  const pl = cyl(0.01, 0.06, 0.24, mat(plume, { roughness: 0.95 }), 0, y0 + 1.86, -0.02, 8); pl.rotation.x = -0.35; g.add(pl);
+  return { g };
+}
+/** A grand piano, black (as on Primates Rule's quarterdeck): its lid propped open, its keyboard toward
+    +z. About 1.25 across and 1.4 deep. */
+export function grandPiano() {
+  const g = new THREE.Group(), s = new THREE.Shape();
+  // Its outline from above (x across, y = -z: the keyboard's edge at z 0.45, the curved tail at z -0.7).
+  s.moveTo(-0.62, -0.45); s.lineTo(0.62, -0.45); s.lineTo(0.62, 0.0);
+  s.bezierCurveTo(0.62, 0.3, 0.25, 0.3, 0.2, 0.5); s.quadraticCurveTo(0.1, 0.7, -0.2, 0.7); s.lineTo(-0.62, 0.7); s.closePath();
+  const body = mesh(new THREE.ExtrudeGeometry(s, { depth: 0.28, bevelEnabled: false, curveSegments: 6 }).rotateX(-Math.PI / 2), pianoBlack); body.position.y = 0.62; g.add(body);
+  const hinge = new THREE.Group(); hinge.position.set(-0.62, 0.92, 0); hinge.rotation.z = 0.6; g.add(hinge);
+  const lid = mesh(new THREE.ExtrudeGeometry(s, { depth: 0.02, bevelEnabled: false, curveSegments: 6 }).rotateX(-Math.PI / 2), pianoBlack); lid.position.x = 0.62; hinge.add(lid);
+  g.add(rod([0.5, 0.9, 0.1], [0.5, 1.5, 0.1], 0.012, pianoBlack, 4));
+  for (const [x, z] of [[-0.5, 0.35], [0.5, 0.35], [-0.35, -0.55]]) g.add(cyl(0.05, 0.04, 0.62, pianoBlack, x, 0.31, z, 8));
+  g.add(box(1.2, 0.1, 0.24, pianoBlack, 0, 0.78, 0.55), box(1.12, 0.04, 0.16, ivory, 0, 0.845, 0.56));
+  for (let i = 0; i < 15; i++) if (i % 7 !== 2 && i % 7 !== 6) g.add(box(0.035, 0.02, 0.09, pianoBlack, -0.54 + i * 0.075, 0.87, 0.53));
+  const stand = box(0.6, 0.26, 0.02, pianoBlack, 0, 1.03, 0.4); stand.rotation.x = -0.25; g.add(stand);
+  return { g };
+}
+/** An anchor-backed chair: grey, an anchor on its tall rounded back. */
+export function anchorChair() {
+  const g = new THREE.Group();
+  g.add(box(0.5, 0.08, 0.46, greyStone, 0, 0.44, 0), box(0.5, 0.62, 0.08, greyStone, 0, 0.78, -0.2));
+  const top = mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.08, 14, 1, false, -Math.PI / 2, Math.PI).rotateX(Math.PI / 2), greyStone); top.position.set(0, 1.09, -0.2); g.add(top);
+  for (const [x, z] of [[-0.21, -0.19], [0.21, -0.19], [-0.21, 0.19], [0.21, 0.19]]) g.add(box(0.06, 0.42, 0.06, greyStone, x, 0.21, z));
+  g.add(box(0.035, 0.38, 0.02, anchorGrey, 0, 0.84, -0.15), box(0.2, 0.035, 0.02, anchorGrey, 0, 0.98, -0.15));
+  const ring = mesh(new THREE.TorusGeometry(0.035, 0.01, 4, 10), anchorGrey); ring.position.set(0, 1.05, -0.15); g.add(ring);
+  const arms = mesh(new THREE.TorusGeometry(0.13, 0.016, 4, 12, Math.PI).rotateZ(Math.PI), anchorGrey); arms.position.set(0, 0.79, -0.15); g.add(arms);
+  return { g };
+}
+/** A big glass jar with something in it looking out: a creature of colour `creature`. */
+export function jar({ creature = '#8a5cd8' } = {}) {
+  const g = new THREE.Group(), c = creatureMat(creature);
+  g.add(cyl(0.23, 0.24, 0.05, dark, 0, 0.025, 0, 14), cyl(0.22, 0.22, 0.66, glass, 0, 0.38, 0, 14), cyl(0.245, 0.245, 0.06, straw, 0, 0.74, 0, 14), ball(0.05, straw, 0, 0.79, 0));
+  const blob = ball(0.13, c, 0, 0.3, 0, 10); blob.scale.set(1, 1.2, 0.9); g.add(blob);
+  for (const sx of [-1, 1]) g.add(ball(0.04, ivory, sx * 0.05, 0.38, 0.1, 6), ball(0.018, socket, sx * 0.05, 0.38, 0.135, 4));
+  for (let i = 0; i < 3; i++) { const a = i * 2.1 + 0.4; g.add(rod([Math.cos(a) * 0.08, 0.2, Math.sin(a) * 0.08], [Math.cos(a) * 0.17, 0.07, Math.sin(a) * 0.17], 0.025, c, 5)); }
+  return { g };
+}
+/** A tool chest, its lid thrown back, a hammer and a saw sticking out. */
+export function toolChest() {
+  const g = new THREE.Group();
+  g.add(box(0.7, 0.34, 0.42, mid, 0, 0.17, 0), box(0.72, 0.04, 0.44, brass, 0, 0.3, 0), box(0.72, 0.04, 0.44, brass, 0, 0.06, 0));
+  const lid = box(0.7, 0.05, 0.42, mid, 0, 0, 0.21), hinge = new THREE.Group(); hinge.position.set(0, 0.34, -0.21); hinge.rotation.x = -1.9; hinge.add(lid); g.add(hinge);
+  g.add(rod([0.12, 0.25, 0], [0.2, 0.55, 0.05], 0.018, dark), box(0.16, 0.05, 0.05, ironBlack, 0.2, 0.57, 0.05));
+  const saw = box(0.04, 0.32, 0.14, steel, -0.15, 0.42, 0); saw.rotation.z = 0.25; g.add(saw, box(0.05, 0.08, 0.06, dark, -0.2, 0.6, 0));
+  return { g };
+}
+
+/** Every piece by its kind (the name a house's rules use: src/den-gravee.ts's FURNISH; a ship's deck:
+    src/den-frigate.ts). */
+export const FURNITURE = { rug, runner, chair, armchair, table, bed, candelabra, sconce, coffin, easel, frame, door, still, skeleton, skeletonChair, skeletalCannon, gibbet, armour, grandPiano, anchorChair, jar, toolChest };

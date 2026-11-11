@@ -76,7 +76,7 @@ describe('sailing: rocks ("just keep it simple as like with a few rocks", 9 Nov)
         if (!lee(c, r)) expect(s.plot(H, c, r) !== null).toBe(s.windAt(c, r) === undefined);
       }
     }
-  }, 60000);   // (a lot of plotting, on the bigger board)
+  }, 120000);   // (a lot of plotting, on the bigger board: bigger again, 11 Nov, for Port Decorum)
 
   it('is the same sea for the same seed', () => {
     expect([...new Sea(7).rocks].sort()).toEqual([...new Sea(7).rocks].sort());
