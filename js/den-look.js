@@ -38,11 +38,12 @@ export const paletteOf = (look, slot) => (slot === 'fam' && FURRY[look.fam] ? FU
    can dress as any of them piece by piece (the user, 10 Nov). */
 export const PARTS = {
   // (Veil, Tiara: the tailor's. Butterfly, Feminine feline, Wicked witch: the palace shoppe's
-  // Halloween masks and hats, women's only: YPPedia, Clothing (hats).)
+  // Halloween masks and hats, women's only: YPPedia, Clothing (hats). Berserker pelt: a bear's head and
+  // its fur, either body, a prize from a 2011 event made since from a design: YPPedia; Gravee's, white.)
   hat: {
-    m: [['none', 'No hat'], ['bandana', 'Bandana'], ['tricorne', 'Tricorne'], ['feathered', 'Feathered hat', 1], ['captain', "Captain's hat", 1], ['sleeping', 'Sleeping hat'], ['fez', 'Fez'], ['viking', 'Viking helmet'], ['roses', 'Crown of roses', 1]],
+    m: [['none', 'No hat'], ['bandana', 'Bandana'], ['tricorne', 'Tricorne'], ['feathered', 'Feathered hat', 1], ['captain', "Captain's hat", 1], ['sleeping', 'Sleeping hat'], ['fez', 'Fez'], ['viking', 'Viking helmet'], ['roses', 'Crown of roses', 1], ['pelt', 'Berserker pelt']],
     f: [['none', 'No hat'], ['bandana', 'Bandana'], ['tricorne', 'Tricorne'], ['feathered', 'Feathered hat', 1], ['captain', "Captain's hat", 1], ['sleeping', 'Sleeping hat'], ['wide', 'Wide-brimmed hat', 1], ['viking', 'Viking helmet'],
-      ['veil', 'Veil', 1], ['tiara', 'Tiara', 1], ['butterfly', 'Butterfly'], ['feline', 'Feminine feline', 1], ['witch', 'Wicked witch', 1], ['roses', 'Crown of roses', 1]],
+      ['veil', 'Veil', 1], ['tiara', 'Tiara', 1], ['butterfly', 'Butterfly'], ['feline', 'Feminine feline', 1], ['witch', 'Wicked witch', 1], ['roses', 'Crown of roses', 1], ['pelt', 'Berserker pelt']],
   },
   hair: {
     m: [['short', 'Short'], ['ponytail', 'Ponytail'], ['long', 'Long'], ['wavy', 'Wavy'], ['curly', 'Curly'], ['bald', 'Bald']],
@@ -74,8 +75,8 @@ export const PARTS = {
   },
   // In the right hand: props, not clothing (only a bouquet takes a colour, its flowers').
   hand: {
-    m: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug']],
-    f: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug']],
+    m: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug'], ['candle', 'Candle']],
+    f: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug'], ['candle', 'Candle']],
   },
   // (Squirrel, bat, krakling: real familiars, from expeditions and treasure chests: YPPedia, Familiar.)
   fam: {
@@ -89,9 +90,10 @@ export const HAND_DYED = ['bouquet'];
 export const EARRINGS = [[false, 'None'], [true, 'One'], ['both', 'Both ears']];
 // `hook`: a hook for a left hand (Mischievious has one in nearly every portrait). `tongue` out, blue
 // swirling `tattoos` (on whatever skin a top leaves bare) and a `wristband` (in the top's colour, on
-// the right wrist): Kikkit's (11 Nov).
+// the right wrist): Kikkit's (11 Nov). A blue `starfish` stuck to the cheek: Gravee's (her portrait, 11
+// Nov; a starfish on the face is a Puzzle Pirates thing: YPPedia lists Starfish repellent for it).
 export const DEFAULT_LOOK = {
-  body: 'm', skin: 1, hair: 'short', hairCol: 'brown', beard: 'full', patch: true, earring: true, smile: false, hook: false, tongue: false, tattoos: false, wristband: false,
+  body: 'm', skin: 1, hair: 'short', hairCol: 'brown', beard: 'full', patch: true, earring: true, smile: false, hook: false, tongue: false, tattoos: false, wristband: false, starfish: false,
   hat: 'bandana', hatCol: 'red', hatCol2: 'white', top: 'striped', topCol: 'red', topCol2: 'white', waist: 'belt', waistCol: 'black',
   legs: 'pants', legsCol: 'navy', legsCol2: 'tan', feet: 'boots', feetCol: 'black', feetCol2: 'black', hand: 'none', handCol: 'red', fam: 'none', famCol: 'green', famCol2: 'red',
 };
@@ -110,7 +112,7 @@ export function cleanLook(o) {
   if (!DYES[src.feetCol2]) L.feetCol2 = L.feetCol;   // (fancy boots' tops were the boots' own colour)
   if (HAIR[src.hairCol]) L.hairCol = src.hairCol;
   if (Number.isInteger(src.skin) && SKIN[src.skin]) L.skin = src.skin;
-  for (const kk of ['patch', 'smile', 'hook', 'tongue', 'tattoos', 'wristband']) if (typeof src[kk] === 'boolean') L[kk] = src[kk];
+  for (const kk of ['patch', 'smile', 'hook', 'tongue', 'tattoos', 'wristband', 'starfish']) if (typeof src[kk] === 'boolean') L[kk] = src[kk];
   if (EARRINGS.some(([v]) => v === src.earring)) L.earring = src.earring;
   if (FURRY[L.fam]) L.famCol = FUR[src.famCol] ? src.famCol : FURRY[L.fam];
   return L;
@@ -119,7 +121,7 @@ const pickOf = (o) => Object.keys(o)[Math.floor(Math.random() * Object.keys(o).l
 const pickIn = (list) => list[Math.floor(Math.random() * list.length)][0];
 export function randomLook(body = Math.random() < 0.5 ? 'm' : 'f') {
   const L = { body, skin: Math.floor(Math.random() * SKIN.length), hairCol: pickOf(HAIR), patch: Math.random() < 0.4, earring: pickIn(EARRINGS), smile: Math.random() < 0.5, hook: Math.random() < 0.15,
-    tongue: Math.random() < 0.08, tattoos: Math.random() < 0.15, wristband: Math.random() < 0.15 };
+    tongue: Math.random() < 0.08, tattoos: Math.random() < 0.15, wristband: Math.random() < 0.15, starfish: Math.random() < 0.05 };
   for (const slot of Object.keys(PARTS)) L[slot] = pickIn(PARTS[slot][body]);
   for (const kk of DYE_KEYS) L[kk] = pickOf(DYES);
   if (FURRY[L.fam]) L.famCol = pickOf(FUR);
@@ -171,6 +173,17 @@ export const PIRATES = Object.fromEntries(Object.entries({
     body: 'f', skin: 1, hair: 'curly', hairCol: 'black', patch: true, earring: 'both', smile: false, tongue: true, tattoos: true, wristband: true,
     hat: 'roses', hatCol: 'red', top: 'tied', topCol: 'red', waist: 'buckle', waistCol: 'black',
     legs: 'ragged', legsCol: 'black', feet: 'bare', hand: 'jug', fam: 'monkey', famCol: 'brown',
+  },
+  // Gravee (her Emerald pirate page's portrait, checked 11 Nov), the portrait collector with a house in
+  // the den's district (Bedside Manors): brown skin, white hair under a white Berserker pelt (a polar
+  // bear's head, its snout over her brow, fangs at her forehead, its fur down to her shoulders), an
+  // eyepatch, a blue starfish stuck to her cheek, a green Dress top (its puffed sleeves white) and a
+  // green Gown with a white panel down the front, a hook for her left hand, a lit candle in her right,
+  // and Spud, her tan monkey.
+  Gravee: {
+    body: 'f', skin: 3, hair: 'long', hairCol: 'white', patch: true, earring: false, smile: true, hook: true, starfish: true,
+    hat: 'pelt', hatCol: 'white', top: 'dresstop', topCol: 'green', topCol2: 'white', waist: 'none',
+    legs: 'gown', legsCol: 'green', legsCol2: 'white', feet: 'shoes', feetCol: 'black', hand: 'candle', fam: 'monkey', famCol: 'tan',
   },
 }).map(([name, look]) => [name, cleanLook(look)]));
 
@@ -531,6 +544,14 @@ export function dressPirate(look, opts = {}) {
     lips.scale.set(1, 0.42, 0.5);
     body.add(lips);
   }
+  if (L.starfish) {
+    // A blue starfish stuck to the cheek (Gravee's), on the side without the eyepatch.
+    const st = new THREE.Shape();
+    for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2 + Math.PI / 2, r = i % 2 ? 0.026 : 0.066; st[i ? 'lineTo' : 'moveTo'](Math.cos(a) * r, Math.sin(a) * r); }
+    const sf = part(new THREE.ExtrudeGeometry(st, { depth: 0.014, bevelEnabled: true, bevelSize: 0.008, bevelThickness: 0.008, bevelSegments: 1 }), M('#2f8fe6', { roughness: 0.5 }), 0.12, 0.865, hr - 0.06);
+    sf.rotation.set(-0.1, 0.5, 0.25);
+    body.add(sf);
+  }
   if (L.tongue) {
     // Her tongue out, a little to one side (Kikkit's).
     const tg = part(new THREE.CapsuleGeometry(0.028, 0.04, 4, 8), M('#e0707a'), 0.02, 0.795, hr - 0.005);
@@ -811,6 +832,32 @@ export function dressPirate(look, opts = {}) {
       lf.scale.set(1.4, 0.4, 0.7);
       hat.add(rose, lf);
     }
+  } else if (L.hat === 'pelt') {
+    // The Berserker pelt: a bear's head worn as a hood, in its colour (Gravee's, white: a polar bear),
+    // its snout out over the brow with a black nose, its eyes shut, two fangs at the forehead, round
+    // ears, and its fur falling either side of the face to the shoulders.
+    const white0 = L.hatCol === 'white';
+    const fur = M(L.hatCol, { roughness: 1 }), shade = white0 ? M('#c9d6e6') : M('#000000', { transparent: true, opacity: 0.25 });
+    const dome = part(new THREE.SphereGeometry(hr + 0.065, 20, 12, 0, Math.PI * 2, 0, Math.PI * 0.56), fur, 0, 0.94, -0.01);
+    dome.rotation.x = -0.22; dome.scale.set(1.08, 1.0, 1.1);
+    // (its face over her brow, looking out the way she does)
+    const snout = part(new THREE.SphereGeometry(0.11, 14, 10), fur, 0, 1.09, hr * 0.95);
+    snout.scale.set(1.0, 0.8, 1.3);
+    const muzzle = part(new THREE.SphereGeometry(0.065, 10, 8), shade, 0, 1.075, hr * 0.95 + 0.1);
+    muzzle.scale.set(1.15, 0.75, 0.85);
+    hat.add(dome, snout, muzzle, part(new THREE.SphereGeometry(0.036, 10, 8), black, 0, 1.1, hr * 0.95 + 0.15));
+    for (const s of [-1, 1]) {
+      const ear = part(new THREE.SphereGeometry(0.068, 10, 8), fur, s * 0.19, 1.2, -0.03);
+      ear.scale.set(1, 1, 0.55);
+      const inner = part(new THREE.SphereGeometry(0.038, 8, 6), shade, s * 0.19, 1.2, 0.005);
+      inner.scale.set(1, 1, 0.4);
+      const shut = part(new THREE.CapsuleGeometry(0.009, 0.04, 2, 6), black, s * 0.095, 1.15, hr * 0.78);
+      shut.rotation.z = Math.PI / 2 + s * 0.25;
+      const fang = part(new THREE.ConeGeometry(0.018, 0.06, 6), white, s * 0.06, 1.0, hr + 0.04);
+      fang.rotation.x = Math.PI;
+      hat.add(ear, inner, shut, fang);
+    }
+    hat.add(part(new THREE.CylinderGeometry(hr + 0.05, hr + 0.12, 0.5, 18, 1, true, Math.PI / 2 - 0.25, Math.PI + 0.5), M(L.hatCol, { roughness: 1, side: THREE.DoubleSide }), 0, 0.74, -0.02));
   } else if (L.hat === 'witch') {
     // The Wicked witch: a tall pointed black hat with a wide brim, bent at the tip, a band round it in
     // its second colour (which is also her face's).
@@ -943,6 +990,17 @@ export function dressPirate(look, opts = {}) {
     jg.position.set(0, -0.58, 0.1);
     arms[0].add(jg);
     held = jg;
+  } else if (L.hand === 'candle') {
+    // A lit candle (Gravee's), in a little brass holder, its flame glowing.
+    const cd = new THREE.Group(), brass = M('#c9a13c', { metalness: 0.7, roughness: 0.35 });
+    cd.add(part(new THREE.CylinderGeometry(0.05, 0.045, 0.02, 12), brass, 0, 0), part(new THREE.CylinderGeometry(0.024, 0.026, 0.17, 10), M('#f4efe2', { roughness: 0.6 }), 0, 0.095));
+    const flame = new THREE.Mesh(new THREE.ConeGeometry(0.02, 0.06, 8), new THREE.MeshBasicMaterial({ color: '#ffcf4a' }));
+    flame.position.y = 0.21;
+    cd.add(flame);
+    cd.position.set(0, -0.56, 0.06);
+    cd.rotation.x = 0.15;
+    arms[0].add(cd);
+    held = cd;
   } else if (L.hand === 'scepter') {
     // A golden sceptre, a jewel at its top.
     const sc = new THREE.Group(), gilt = M('#e8b23a', { metalness: 0.7, roughness: 0.3 });

@@ -352,6 +352,40 @@
     .wed-portrait .row button { font-size: 16px; padding: 8px 14px; }
     .wed-fade { position: fixed; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity .35s; z-index: 50; }
     .wed-fade.on { opacity: 1; }
+    /* The housing district: its list of houses by owner (js/den/lodgings.js), and a house inside, a place
+       of its own (js/den/house.js): none of the den's own buttons, its name and Leave along the top, what
+       Space does along the bottom with a button for it, a picture's title as it whizzes past. */
+    .lodgings > div { width: min(380px, calc(100vw - 32px)); box-sizing: border-box; padding: 18px 18px; }
+    .house-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    .house-row { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; text-align: left; padding: 10px 12px; border-radius: 8px; background: #3b2a1b; color: var(--ink); border: 1px solid #6b4e32; cursor: pointer; font: inherit; }
+    .house-row:hover, .house-row:focus-visible { border-color: var(--gold); outline: none; }
+    .house-row b { font: 700 20px 'Alegreya', serif; color: var(--gold); }
+    .house-row span, .house-row small { grid-column: 1; }
+    .house-row small { color: var(--dim); }
+    .house-row em { grid-column: 2; grid-row: 1 / span 3; align-self: center; font-style: normal; font-weight: 700; background: var(--gold); color: #2a1d13; border-radius: 6px; padding: 8px 14px; }
+    body.housing .hud, body.housing .dock, body.housing .banner, body.housing .intro, body.housing #labels, body.housing .gunhelp, body.housing .sailhud, body.housing .map-hint { display: none; }
+    .house-hud { position: fixed; top: 14px; left: 14px; display: none; align-items: center; gap: 8px; flex-wrap: wrap; background: var(--panel); border: 1px solid var(--gold); border-radius: 10px; padding: 8px 12px; z-index: 4; max-width: calc(100vw - 28px); box-sizing: border-box; }
+    body.housing .house-hud { display: flex; }
+    body.cine .house-hud, body.cine .house-prompt { display: none !important; }
+    .house-name { margin-right: 4px; }
+    .house-name b { display: block; font: 700 21px 'Alegreya', serif; color: var(--gold); line-height: 1.1; }
+    .house-name small { color: var(--dim); font-size: 14px; }
+    .house-hud button.mini { margin: 0; min-height: 34px; }
+    .house-hud button[hidden] { display: none; }
+    .house-prompt { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); display: none; align-items: center; gap: 10px; background: var(--panel); border: 1px solid var(--gold); border-radius: 10px; padding: 6px 8px 6px 14px; z-index: 4; font-size: 18px; font-weight: 700; white-space: nowrap; }
+    .house-prompt.on { display: flex; }
+    .house-prompt span[hidden] { display: none; }
+    .house-prompt button.mini { margin: 0; min-height: 40px; font-size: 16px; }
+    .house-cap { position: fixed; left: 50%; top: 16%; transform: translateX(-50%); display: none; z-index: 30; font: italic 700 24px 'Alegreya', serif; color: #3a2210; background: #e9d7a6; border: 3px solid #7a5216; border-radius: 6px; padding: 6px 18px; white-space: nowrap; max-width: calc(100vw - 32px); box-sizing: border-box; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 6px 18px rgba(0,0,0,.5); }
+    .house-cap.on { display: block; }
+    .label.say.house-say { font-size: 18px; max-width: min(340px, 80vw); z-index: 3; }
+    @media (max-width: 640px) {
+      .label.say.house-say { font-size: 15px; padding: 3px 10px; border-radius: 12px; max-width: min(280px, 76vw); }
+      .house-cap { font-size: 17px; padding: 4px 12px; }
+      .house-name b { font-size: 17px; } .house-name small { font-size: 12.5px; }
+      .house-hud { padding: 6px 8px; gap: 6px; }
+      .house-prompt { font-size: 15px; bottom: 34px; }   /* (over the credit, along the very bottom on a phone) */
+    }
   </style>
 </head>
 <body>
@@ -439,7 +473,7 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.G6IKX2CZ.js');
+    import(local ? './js/den.js' : './js/den.6K5JWIRR.js');
   </script>
 </body>
 </html>

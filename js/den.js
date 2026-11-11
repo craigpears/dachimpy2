@@ -38,6 +38,8 @@ import { umami, umamiTick, umamiCam, umamiClick } from './den/capybara.js';
 import { net, online, guest, isHost, send, updateMates, sendMe, snapshot, followRaider, sendSync, onNet, joinCrew, leaveCrew } from './den/crew.js';
 import { spouse, spouseTick } from './den/spouse.js';
 import { wed, weddingKey, weddingDown, weddingMove, weddingUp, weddingWheel, weddingTick, weddingCam } from './den/wedding.js';
+import { house, houseKey, houseTick, houseCam, houseEnter } from './den/house.js';
+import { lodgings, lodgingsOpen, lodgingsKey, nearLodgings, lodgingsTick } from './den/lodgings.js';
 import { deco, decoMode, decoMove, decoClick, decoTurn, dress, dressPanel, dressRows, lookChanged, applyDen, buildAll, tileFor, fillFrame, cheats, skipTo, cheatPanel, startAt } from './den/menus.js';
 
 export function newGame() {
@@ -68,13 +70,15 @@ addEventListener('keydown', (e) => {
   if (e.target instanceof HTMLInputElement) return;
   if (dress.open) { if (e.key === 'Escape') dressPanel(false); return; }
   const key = e.key.toLowerCase();
+  if (lodgings.open) { lodgingsKey(key); return; }   // (the district's list of houses: js/den/lodgings.js)
   if (cheats.open) { if (key === 'escape' || key === '`') cheatPanel(false); return; }
   if (key === '`' && !deco.on && !paused) { cheatPanel(true); return; }
   if (paused) { if (['p', ' ', 'escape', 'enter'].includes(key)) { e.preventDefault(); setPaused(false); } return; }
   // The cutscene: Space or Esc skips it; nothing else.
   if (cine) { if ([' ', 'escape', 'enter'].includes(key)) { e.preventDefault(); if (!e.repeat) cineEnd(true); } return; }
-  // On Mischievious's island: its own keys (js/den/wedding.js).
+  // On Mischievious's island: its own keys (js/den/wedding.js). In a house: its own (js/den/house.js).
   if (wed.on) { weddingKey(key, e); return; }
+  if (house.on) { houseKey(key, e); return; }
   if (chart.on && !deco.on) { e.preventDefault(); mapKey(key, e); return; }
   // Treasure Haul: its own keys (P still pauses).
   if (haul.on) { e.preventDefault(); if (!haulKey(key, e) && key === 'p' && !e.repeat) setPaused(true); return; }
@@ -136,6 +140,7 @@ function deckCellAt(x, y) {
 }
 renderer.domElement.addEventListener('mousemove', (e) => {
   if (wed.on) { weddingMove(e); return; }
+  if (house.on) return;
   if (wm && keyAt) { if (Math.hypot(e.clientX - keyAt.x, e.clientY - keyAt.y) < 24) return; worldLets.keyAt = null; }
   if (deco.on) { decoMove(e); return; }
   if (haul.on) { haulHover(e.clientX, e.clientY); return; }
@@ -166,6 +171,7 @@ document.addEventListener('mouseleave', () => { raidsLets.cursor = null; });
 let drag = null;
 renderer.domElement.addEventListener('mousedown', (e) => {
   if (wed.on) { weddingDown(e); return; }
+  if (house.on) return;   // (a house's own clicks: js/den/house.js)
   if (deco.on) { if (e.button === 2) drag = { x: e.clientX, y: e.clientY, moved: false, deco: e }; else decoClick(e); return; }
   if (e.button === 2) { drag = { x: e.clientX, y: e.clientY, moved: false }; return; }
   if (e.button !== 0 || G.over || cine) return;
@@ -215,6 +221,7 @@ addEventListener('mouseup', (e) => {
 let wheelAcc = 0, wheelT = 0;
 renderer.domElement.addEventListener('wheel', (e) => {
   if (wed.on) { weddingWheel(e); return; }
+  if (house.on) return;
   if (deco.on) {
     wheelAcc += e.deltaY;
     if (Math.abs(wheelAcc) >= 40) { decoTurn(wheelAcc > 0 ? 1 : -1); wheelAcc = 0; }
@@ -259,6 +266,7 @@ function act() {
   if (net.pending || net.asking || cine) return;   // waiting to hear back about the last one (or watching)
   if (nearMap()) return takeMap();
   if (nearSloop()) return board();
+  if (nearLodgings()) return lodgingsOpen(true);   // (the housing district's door)
   if (!carry && atSword() && rack.pieces) return swordEnter();
   if (!carry && atBilge()) return bilgeEnter();
   const f = focus();
@@ -352,7 +360,26 @@ function frame() {
   requestAnimationFrame(frame);
 }
 setInterval(() => { if (online() && performance.now() - lastT > 250) tick(); }, 200);
+/* In a house (js/den/house.js): the den waits, as it was, while you're inside; the house walks you about
+   and holds the camera, looking in as at a doll's house (a cutscene's shots over it). */
+function houseUpdate(dt) {
+  houseTick(dt);
+  cineTick(dt);
+  const C = cine ? cine.cam : houseCam();
+  if (!C) return;
+  v3.set(Math.sin(C.yaw) * Math.cos(C.tilt), Math.sin(C.tilt), Math.cos(C.yaw) * Math.cos(C.tilt)).multiplyScalar(C.dist).add(C.look);
+  const k = house.snap || C.cut ? 1 : Math.min(1, dt * (cine ? 7 : 4));
+  house.snap = false; C.cut = false;
+  camAt.lerp(v3, k); camLook.lerp(C.look, k);
+  camera.position.copy(camAt);
+  camera.lookAt(camLook);
+  const camD = camAt.distanceTo(camLook);
+  scene.fog.near = camD + 10; scene.fog.far = camD + 45;
+  skyDome.position.copy(camera.position);
+  renderer.toneMappingExposure = 1;
+}
 function update(dt) {
+  if (house.on) { houseUpdate(dt); return; }
   // Walk.
   let mx = 0, mz = 0;
   if (!G.over) {
@@ -697,7 +724,7 @@ function update(dt) {
     yaw = y0 + d * cineView;
   }
   v3.set(Math.sin(yaw) * Math.cos(tilt), Math.sin(tilt), Math.cos(yaw) * Math.cos(tilt)).multiplyScalar(dist).add(look);
-  if (wed.snap) { wed.snap = false; camAt.copy(v3); camLook.copy(look); }   // (off to her island, or back: no flying across the sea)
+  if (wed.snap || house.snap) { wed.snap = false; house.snap = false; camAt.copy(v3); camLook.copy(look); }   // (off to her island, or back: no flying across the sea)
   camAt.lerp(v3, Math.min(1, dt * (3 + 9 * Math.max(rowView, gunView))));   // (held close while rowing or at her guns: she can fly along)
   camera.position.copy(camAt);
   // The fog starts beyond what you're looking at, so a high or zoomed-out view doesn't go murky.
@@ -714,6 +741,7 @@ function update(dt) {
   biomeTick(dt);
   roomGlow(!!carry || !!(patch.on && patch.hand), dt);   // (a frame's chalked room, brighter with a piece in hand)
   landingTick();
+  lodgingsTick(dt);   // (the housing district's door: js/den/lodgings.js)
   gateTick(dt);
   selfSeen();
   showAim();
@@ -805,6 +833,6 @@ if (startHere && !online() && !startAt(startHere)) toast(`No starting point call
 
 // For poking at it from the console.
 window.den = { rowing, rowPull, tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { worldLets.myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, swordReward, swordBreak, lumber, toLumber, repairAll, newGame, raiders, G, get carry() { return carry; }, get patch() { return patch; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
-  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, hold, holdSwap, board, ashore, patch, patchKey, patchPlace, deckHoleShape, haul, haulSwap, crane, gunnery, umami, wed, spouse,
+  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, hold, holdSwap, board, ashore, patch, patchKey, patchPlace, deckHoleShape, haul, haulSwap, crane, gunnery, umami, wed, spouse, house, houseEnter, lodgingsOpen,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };
