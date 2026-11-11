@@ -139,7 +139,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   something that I can put into the URL as well, so that I can share that animation with
   somebody." `den.html?at=` and a name opens the den straight there: the cheats' stages (`start`,
   `walk`, `gun-tower`, `built`) and their starts and scenes (`shack`, `map-scene`, `sea`,
-  `dignity`, `umami`, `wedding`). Choosing one from the cheats puts its link in the address bar, and its
+  `dignity`, `umami`, `wedding`, `married`). Choosing one from the cheats puts its link in the address bar, and its
   button's tooltip shows it. A name that isn't one says so. A new scene or start gets a name too.
 - **Hidden gems, never hinted (10 Nov).** The user, of the checkpoint's "I wonder if there's another
   way round" and "Run it, row it, or knock its guns out": "I don't like it giving you a hint as to
@@ -1020,11 +1020,18 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   her spyglass now and then and turns to watch you. The cheat "Dignity's scene" plays it again
   (sailing out first). Rules: `src/den-dignity.ts`; in the world: `js/den/dignity.js`; the
   cutscene machinery every scene shares (Dalnoth's too): `js/den/cine.js`.
+- **Every character's lines in files of their own, kept in history (11 Nov).** "make sure that all
+  the various lines, characters, and personalities are in like some configurable files ... I just
+  want there to be a record of them in case any get lost that I really love, so I can see how
+  they've evolved over time." Every line anyone says is in `src/lines/`, a file per character with
+  who they are, and the code takes its lines from there; LINES.md, made from them by the build, is
+  the readable record, and git's history of it shows every line as it changes. A new line or a new
+  speaking character goes there first.
 - **Mischievious's wedding, on her island (10 Nov), a proof of concept of the whole thing.** The
   user: "really go for it, really generate me a proof of concept for the whole thing ... the cheesy
   ending, pre-generated scenes ... on an island somewhere." The design is IDEAS.md's "A Puzzle
   Pirates wedding"; what's built: her island, a place of its own like the sea (the cheat
-  "Mischievious's wedding", `den.html?at=wedding`). Rules: `src/den-wedding.ts`; drawn by
+  "The Wedding Isle", `den.html?at=wedding`). Rules: `src/den-wedding.ts`; drawn by
   `js/den/wedding.js` and its `wedding-*.js` parts.
   - **Her name's Mischievious** (with the extra i: "That's not the pirate page you showed, it was
     missing an i"). Her Emerald pirate page, not the similarly named Mischievous's.
@@ -1111,6 +1118,16 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       finger looks, two pinch and pan). Her close shots elsewhere stay.
   - **Named for the wedding, not her (11 Nov):** "she's a primary character, but not the star of the
     show." The Wedding Isle; the planner's "Your wedding".
+  - **Whoever you marry comes home with you (11 Nov):** "whoever you marry, I think naturally has to
+    jump on the ship with you after you leave the Isle to have that continuity and hang out with the
+    Den with you ... It's got to carry out into the world." In their wedding look they come aboard
+    and stand by her mast on the way home, then live at the den: strolling clear of crates and
+    stairs, waving, and a word when you walk up (each spouse their own lines). Kept in this browser,
+    a new wedding bringing a new one. `?at=married` starts home, married. Rules: `src/den-spouse.ts`.
+  - **A collage of the whole wedding, not one portrait (11 Nov):** "you should get snapshots of all
+    the key moments, so you have a nice kind of collage of the whole wedding." A snapshot at each of
+    the plot's key moments as the ceremony plays, laid out as one keepsake with a big shot and the
+    rest round it, a caption each in the tone; skip the ceremony and it's the one portrait.
   - **The plots:** sweet and blissful; raiders crash it (the guards knock them into the sea); somebody's
     drunk (face first into the cake); a brawl (benches flying). Each ends in "I do", the kiss,
     hearts and confetti, and a group shot framed in gilt as the wedding portrait: save the picture,

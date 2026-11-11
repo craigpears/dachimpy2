@@ -165,24 +165,6 @@ the site (`.assetsignore` skips `*.md`).
   the crane, haul her up, and the like), the offer is in the view where you're looking, at the
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
-- **Every character's lines in files of their own, kept in history (11 Nov):** "make sure that all
-  the various lines, characters, and personalities are in like some configurable files ... I just
-  want there to be a record of them in case any get lost that I really love, so I can see how
-  they've evolved over time, even if it's just in source control somehow." One file per character
-  (`src/lines/`), what they say and who they are, the code taking its lines from there; and a
-  readable LINES.md made from them (a test keeps it up to date), so git's history shows each line
-  as it changes.
-- **Whoever you marry comes home with you (11 Nov):** "whoever you marry, I think naturally has to
-  jump on the ship with you after you leave the Isle to have that continuity and hang out with the
-  Den with you, that sort of thing. It's got to carry out into the world." Your spouse (her, a
-  suitor, or the one you dressed yourself), in their wedding look, boards the sloop with you when
-  you leave, sails with you, and lives at the den afterwards, kept with your save.
-- **A collage of the whole wedding, not one portrait (11 Nov):** "given how much work we've done
-  into the different scenes on the wedding thing, like you shouldn't just get one picture, you
-  should get snapshots of all the key moments, so you have a nice kind of collage of the whole
-  wedding." Snapshots taken at each key moment of the ceremony as it plays (the walk up the aisle,
-  the vows, the plot's big moment, the kiss, the send-off...), laid out together as one keepsake.
-
 
 ## Needs a playtest to pin down
 

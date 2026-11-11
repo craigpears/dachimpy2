@@ -158,7 +158,7 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    fight; every theft angers them more, and that's what brings the raids back.
    Or sail out to the Wedding Isle, where Mischievious is always planning the next wedding (built as a
    proof of concept, 10 Nov): lay out the venue, dress the guests, pick who you marry and how it
-   goes, and keep the portrait.
+   goes, and keep a collage of the day. Whoever you marry sails home with you and lives at the den.
 6. · **Dalnoth, guarding his treasure.** A big famous pirate, sitting on his chest with his monkey
    and his tankard. Get past him your way: swordfight him, shoot him off from the gun platform, or
    pump water in from the hidden cove and flood him out so the treasure washes onto the ground. He runs off, but his
