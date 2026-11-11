@@ -279,13 +279,6 @@ the site (`.assetsignore` skips `*.md`).
   outside; not yet tried by the user. Watch for: the markers on raiders outside cluttering the
   view while you carry a piece.
 
-- **A sloop race, first draft (11 Nov):** build the S-shaped course from IDEAS.md ("A sloop race"), out
-  near Primates Rule: five legs, the long way round past guns on marked squares, and a puzzle shortcut at
-  each bend (Gunnery, rowing, Sailing over whirlpools, Bilge locks, the Carpentry crane). "What you've said
-  sounds good as a first draft ... We're going to have to go through several iterations of this course."
-  The Gunnery shortcut is a guarded gap with the imperial checkpoint's mechanic as it is: run it (and
-  patch) or knock its guns out by Gunnery (a heavy combo, sailed or rowed, zooms her through; rowing a stroke at a time is "a sitting duck") (the user, 11 Nov: "we've already got like the Imperial
-  checkpoint ... you basically just use that exact same mechanic"). Rocks shot away: IDEAS.md, later.
 - **The starlit door (11 Nov):** a hidden door in the race course's cliffs, found like the crane's ledge,
   opened by Duty Navigation: each constellation lights its stars on the rock, then the door opens on a
   tunnel, the course's biggest shortcut. "build duty navigation in the door ... I don't see why it's one or
@@ -293,6 +286,13 @@ the site (`.assetsignore` skips `*.md`).
   and getting through it takes a big Vegas too: "that unlocks a really long, straight passage. But it
   requires some like more hardcore puzzling ... you're going underneath the cavern, but you've got to do
   like big Vegas, like a big Vegas to get through it in sailing or whatever. That would be fantastic."
+  And the door's Navigation could be one mega constellation on a bigger board, more rings than the usual
+  three (the user, 11 Nov: "I think they've done it so there are now ... 4 rings in the [duty] navigation?
+  So I don't know if that can be an idea on how to make just our one difficult constellation ... is it
+  going to be really ridiculous to say you have 5 rings to complete ... It's like just one mega
+  constellation. Well, I don't know if that's actually going to work at all, but why not?"). So the
+  puzzle takes its number of rings as an option (three today, a constant), and the door tries four or
+  five, tested with the bots for whether it's hard but doable.
 - **Shortcuts not all created equal (11 Nov):** on the race course, small shortcuts as well as big ones,
   each needing a combo of its size: a tiny one a Double gets you through (as a Double clears the reef out
   of Kikkit's whirlpools), bigger ones a bigger combo, the biggest the starlit door's tunnel. "Are you a
