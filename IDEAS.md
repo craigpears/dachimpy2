@@ -1954,6 +1954,13 @@ things ... that can certainly be the place for a few more puzzles." First the is
 later, proofs of concept: trading, looting, smuggling (smuggling still needs its own go-ahead), Dignity
 met again, more puzzles there.
 
+**Monlizzy, its queen (11 Nov):** "Monlizzy definitely needs to be in. She had a flag named imperial
+coalition so she can definitely be the queen of the imperial island." **Monlizzy** (she; a real pirate,
+pirate name only; her pirate page, ocean, flag and portrait to check before she's drawn, then into
+PIRATES): the queen of Port Decorum, the imperial island, ruling it (Dignity, the checkpoint's
+commander, presumably answers to her: to settle with the user). Her flag's name, Imperial Coalition, to
+confirm on YPPedia.
+
 ## Affame, the queen of sweetness (11 Nov)
 
 "Need to work affame into it somewhere... I have dubbed her the queen of sweetness so she can have a nice
