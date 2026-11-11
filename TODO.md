@@ -318,6 +318,10 @@ the site (`.assetsignore` skips `*.md`).
   Like, this is supposed to be a secret way round. It's literally right next to it." So Tzz's island
   further from Kikkit's whirlpools, a plain line of rocks along the whole reef (its new length too), and a
   chain's gust never carrying you into the whirlpools' way through by accident.
+- **Kikkit's "-eh" comes off weird (11 Nov):** "It's supposed to be a childlike it was all sparklehhhhhhh
+  and whooshhehhhhhhh. Not sure how to describe the rules but annoyingeh just doesn't fit." A drawn-out,
+  childlike sound on words that flow into it, not a tag on any word. Her lines are protected (RULES.md):
+  reworked on purpose, none lost. The rule and spelling to settle with the user from a few samples first.
 
 ## Spotted along the way (not asked for)
 
