@@ -2157,6 +2157,14 @@ the door and have it discoverable in some way similar to the carpentry spots?"
   nothing of the den, with bots like Sailing's), and could find other hidden ways later (the smugglers'
   beach, Port Decorum's treasury).
 
+**Shooting each other: Gunnery's other use in a race (11 Nov):** "one of the advantages of [gunnery] as well
+is that you can disrupt somebody trying to do the sailing Vegas or something ... by shooting them. So yeah
+... I forgot there's going to be those competitive elements to this." So her guns, loaded by Gunnery, aren't
+only for knocking out the gun gap: a rival sitting still to build a Vegas at the whirlpools or the tunnel is
+a sitting duck for you, holed and patching while you sail on (as "Dodging, and what a hit does" above has
+it: dazed, never knocked out). And the other way round: build your big combo where nobody can get a shot
+at you. First against the rival sloop (it could fire on you too), then players against each other.
+
 **A Rigging passage: trimming her through shifting winds (11 Nov):** the user wants Rigging in, "certainly in
 a way that's like rigging ... I'm not sure I ever liked it as a compliment to the sailing puzzle ... my
 understanding of like rigging. Usually, is all about changing winds and whatnot ... the rigging shortcut is
