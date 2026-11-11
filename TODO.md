@@ -7,21 +7,6 @@ the site (`.assetsignore` skips `*.md`).
 
 ## Asked for
 
-- **Pull the tricky parts out into their own tested pieces (8 Nov):** the den's code is getting
-  more complicated, all in one long file with few separate parts. The user: the fair deal "is
-  definitely worthy of a class that's got some proper automated tests around it. Like, here are
-  some holes, test what pieces are generated", so they can describe the scenarios they run into
-  and have each one become a test. The same for working out layouts (the wall's holes, the frames,
-  the walk), "their own little classes ... that you can put tests around", for quality control.
-  Tests that run without the browser, from the command line. The user wanted "an actual
-  framework, not just some plain JavaScript" (they're most at home in C#), and chose TypeScript
-  with Vitest. **Started 8 Nov:** the fair deal is done, in TypeScript (`src/den-deal.ts`), with
-  73 Vitest tests (`npm test`). Still to do: the architectural review the user asked for (what's
-  tangled in den.js, how to split it, in what order), then the layouts (the wall's holes, the
-  frames, the walk). Found on the way: tested on any holes the engine makes, the fair deal asks
-  for fewer rare pieces than dealing at random but still 17%; the den's own walls are roomier, so
-  test with the den's wall maker once it's pulled out.
-
 - **Raiders getting through mustn't end the game (9 Nov):** rethink what happens when raiders get
   in, because the den should let you go off on side quests, row out to the ship and explore: "I
   don't want the game to be ending because you decided to go exploring." Getting plundered should
@@ -35,22 +20,6 @@ the site (`.assetsignore` skips `*.md`).
   "we don't care about that at this point". Later: the den becomes the site (or its own repo), and
   the primer goes. (How, where it's hosted, and what of the primer's engine the den still needs,
   to pin down with the user when it's time.)
-
-- **Rowing by port and starboard (10 Nov):** the user loves IDEAS.md's "Port and starboard":
-  "absolutely hilarious ... not obviously like a brand new puzzle, but it's certainly a nice twist
-  on bilging ... Do that. Absolutely do that." Her oars are rowed by a Bilge board split down the
-  middle: the left half is her port oars, the right half starboard. Clears on a side pull those
-  oars; even work keeps her straight, more on one side turns her, so the puzzle is the steering.
-  Over a shoal the deep channel twists and you plan your clears to follow it; running aground
-  just stops her till you clear her off. The graphics suit rowing rather than bilging ("you'd have
-  to update the graphics to suit the rowing theme"). Goes with the wind and oars, and gives the
-  shallows the puzzle they were missing. For now the single-player version: one full Bilge board,
-  dressed for rowing on each side (10 Nov: "a full bilge board, obviously with the rowing kind of
-  graphics on each side"). No cap on a big clear: "everything should be proportionate, but I
-  guess that's the point of Vegas. I want the funny animation." A Vegas on each side at once
-  sends her zooming at super speed, "the same as traveling on the winds", with her rowers going
-  like crazy. (The rules are built: `src/rowing.ts`. The board, its look and the oars at sea are
-  next.)
 
 - **Something worth finding in the hidden cove: treasure (9 Nov):** the canal and the cove "would
   be great, but ... it needs a point of interest in here, even if it's a little like treasure
@@ -165,6 +134,14 @@ the site (`.assetsignore` skips `*.md`).
   the crane, haul her up, and the like), the offer is in the view where you're looking, at the
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
+
+- **Small things the agents spotted (11 Nov):** the user: "fix any tiny bugs that were found by the
+  agents, like log them and then work through them."
+  - Opening the captain's map standing on the den's jetty, it's drawn under the planks.
+  - On some seas, the scattered rocks can sit where you land at the Wedding Isle.
+  - After a reload, Umami's Foraging board is hidden from the cove again until you go back up (that
+    you've found it isn't kept).
+  - Whoever you married sails home with you once, but isn't aboard on later trips out.
 
 ## Needs a playtest to pin down
 

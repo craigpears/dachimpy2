@@ -141,6 +141,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   `walk`, `gun-tower`, `built`) and their starts and scenes (`shack`, `map-scene`, `sea`,
   `dignity`, `umami`, `wedding`, `married`). Choosing one from the cheats puts its link in the address bar, and its
   button's tooltip shows it. A name that isn't one says so. A new scene or start gets a name too.
+- **The layout follows the screen's shape, not the device (11 Nov).** A tall, narrow window on a
+  desktop gets the phone's layout (the wedding planner as a sheet along the bottom, say), and
+  that's right: "That's kind of by design. The whole point of the design is you adapt the layout to
+  the screen size ... whether that's because it's a desktop or a phone doesn't really matter."
+- **The code's in a good spot (11 Nov).** The 8 Nov ask to pull the tricky parts into tested pieces
+  is done as far as it needs to go: "things seem very modular and we're working on things well. So
+  I would say architecturally the game seems in a good spot for the complexity that we've got right
+  now." No separate architectural review; keep to the split in CLAUDE.md as things are added.
 - **The humour's a layer on a real mechanic (11 Nov).** Of Tzz teaching Sailing as balloon animals:
   "it works well as a mechanic. Everything works together, that's always the point. The humour is
   the layer on top, but there's a genuine mechanic underneath." A joke is never just set dressing:
