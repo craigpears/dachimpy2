@@ -159,6 +159,10 @@ the site (`.assetsignore` skips `*.md`).
   enough there to get started, and then I think you can naturally flesh out the rest of the
   mechanics later." But "try and finish things ... we need to finish things really one at a time"
   (RULES.md, "Finish one thing at a time"): each starts only when the one before is played and done.
+  **On hold for the racing (11 Nov):** "I just want to focus on this racing for right now on these core
+  things." Helium and Distilling "can definitely wait", Kikkit's ending (her move to Vegas Island) too,
+  and Primates Rule below decks is "definitely way down the" list. Kept here, not started, until the
+  race's core is done.
   - **Daquan's flotilla, to start (started 11 Nov: Primates Rule modelled, curved, and moored at sea as still to come; below decks and the cutscene next):** the cutscene (Dachimpy at the helm told to go sink a ship,
     sinking their own; Daquan face-palming, then turning to you), and modelling a bigger ship,
     Primates Rule, the war frigate he lends you, to see how she looks beside the sloop
