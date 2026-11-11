@@ -172,23 +172,6 @@ the site (`.assetsignore` skips `*.md`).
   (`src/lines/`), what they say and who they are, the code taking its lines from there; and a
   readable LINES.md made from them (a test keeps it up to date), so git's history shows each line
   as it changes.
-- **Her wedding needs more to play with: guests and furniture (11 Nov):** "people are really going to
-  be like wanting more control and variety ... on the furniture ... I want them to have at least have
-  some feel for getting lost in the furniture placement and the guest placement ... the whole point of
-  this was configuring the guests, configuring ... how many guests you want. Do you want big, small,
-  cozy, large? Do you want the grand wedding where half the ocean turns up? ... decorating everything
-  completely and utterly ... Just the ability to like go around like with a camera and click on each
-  pirate and configure them." So: how many guests, from cosy to half the ocean; far more furniture to
-  place, and everything placed yours to move, turn and dye; each guest yours to move, and to click
-  and dress as you dress yourself (with random); a camera you can roam with. The cheesy lines stay
-  ("That's very much my thing").
-- **Not "Mischievious's isle": the wedding's the star (11 Nov):** "I don't like it being labelled as
-  [Mischievious's] Isle. Again, she's the character. She's got a massive prominent role, but ...
-  the whole point is the wedding and the furniture. Like, she's a primary character, but not the
-  star of the show." So the isle, its map label, quest, sea prompts, cheat and the planner's
-  heading are named for the wedding, not her (the Wedding Isle). And "She's free. She's nearly
-  always free." was still under "Marry Mischievious" in the planner, after it was taken out of
-  her lines: gone, with a test that looks at the planner too.
 - **Whoever you marry comes home with you (11 Nov):** "whoever you marry, I think naturally has to
   jump on the ship with you after you leave the Isle to have that continuity and hang out with the
   Den with you, that sort of thing. It's got to carry out into the world." Your spouse (her, a

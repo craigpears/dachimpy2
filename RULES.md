@@ -1090,6 +1090,22 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     bench, never in a prop, each other, the aisle, or the clear space at the front where she and the
     couple stand; benches start well back. No prop goes on her, the couple or the guards.
   - **The ship's deck doesn't flicker (11 Nov):** surfaces never share a height.
+  - **Guests and furniture to get lost in (11 Nov):** "people are really going to be like wanting
+    more control and variety ... on the furniture ... how many guests you want. Do you want big,
+    small, cozy, large? Do you want the grand wedding where half the ocean turns up? ... the ability
+    to like go around like with a camera and click on each pirate and configure them." So:
+    - **How many guests:** Cosy 6, Small 8, Big 20, Large 48, Grand 140 (half the ocean), filling
+      the benches, a second rank, the ends, then the back and sides; never in a prop, the aisle or
+      the front. The nearest are full pirates, the rest a cheap crowd (a few draw calls).
+    - **Furniture in kinds:** seats, food and grog, lights, flowers, finery, music, piratey (32
+      props); each placed one yours to move, turn, dye, copy or remove; nothing dropped into
+      another (rugs, petals and splatters go under, cakes on tables). She has a line for each.
+    - **Every guest yours:** click any, even in the crowd, to drag, turn, or dress them as you dress
+      yourself (Surprise me), or put them back. Only those you changed go in the share link.
+    - **A camera to roam with** while placing guests and decorating: orbit, pan, zoom (touch: one
+      finger looks, two pinch and pan). Her close shots elsewhere stay.
+  - **Named for the wedding, not her (11 Nov):** "she's a primary character, but not the star of the
+    show." The Wedding Isle; the planner's "Your wedding".
   - **The plots:** sweet and blissful; raiders crash it (the guards knock them into the sea); somebody's
     drunk (face first into the cake); a brawl (benches flying). Each ends in "I do", the kiss,
     hearts and confetti, and a group shot framed in gilt as the wedding portrait: save the picture,
