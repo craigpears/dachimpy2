@@ -313,7 +313,8 @@ the site (`.assetsignore` skips `*.md`).
   doesn't quite have that advantage." Sailing and Gunnery can be played while she sails on (the pilot or
   a wind carrying her), so their time half overlaps the sailing; Bilge at the locks (and Carpentry at the
   crane) has her stopped while you play. So a stopped-dead shortcut should save more for the same puzzle
-  time, or the on-the-move ones cost a little more.
+  time, or the on-the-move ones cost a little more. The real balancing is for players to find by playing it (the user: "balancing
+  is going to be certainly, I think, for players to actually test").
 - **Snakes on the race course: a trade wind back up it, to jump with a Double (11 Nov):** the trade wind
   that runs her home, put through the middle of the zigzag too: "can that not be in like the middle of a
   zigzagging course? So if you're accidentally, like you have to do the double. I love that idea. Maybe at
@@ -337,7 +338,15 @@ the site (`.assetsignore` skips `*.md`).
   the water just beyond the gun gap is tight, a wall ahead, and a sweeping wind a move too far: rush it
   and you're past the guns but in the wind. And the gun gap's too easy as it is: "that's relatively quick,
   to be honest, because you only get shot once. So that's relatively easy ... almost no-brainer" (only a
-  hole's patch to pay; the snake beside it is what makes it a gamble).
+  hole's patch to pay; the snake beside it is what makes it a gamble). And the run in to the finish (11 Nov, on a go): "I'm sitting at
+  the edge here, and it almost looks like I'm at the very back wall, and it makes me really anxious. Like
+  I'm near the finish line. If I accidentally misclick, like it's like a too wide lane, isn't it? So if I
+  accept the idea that I could accidentally misclick and be pushed into the trade winds that send you back
+  right to the very start or something." So the run home narrow, hard by a wind that sweeps her all the
+  way back to the start: the last snake, the biggest, with the finish in sight.
+- **A ceremonious finish line (11 Nov):** "Obviously, you need a more ceremonious finish goal line for
+  sure." A proper finish: a line across the water between two markers, flags or a banner, and a moment
+  when you cross it (your time, and the rival's).
 - **The race explained at the start (11 Nov):** "the concepts in this are going to need ... quite a bit of
   explaining as well at the start, like everything we've talked about. Here are your options. Shortcuts
   mean a short path, the puzzle ... just illustrate a few of the examples. Like, yeah, do you want to bilge
