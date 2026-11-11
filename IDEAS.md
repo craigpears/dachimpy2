@@ -1084,6 +1084,15 @@ same thread as the museum's: helping and leading people, and growing into it.
   though. Like having it be [Pandayay]'s house seems mean." So the double act isn't a guest in
   Pandayay's house: they're equals, in a place that's both of theirs (a house they share, or a house
   each with the double act in both), each with their own thing to show you and their own errand.
+  **Settled (11 Nov): one mechanic, trophies, split between them.** "the pull that was bringing them
+  together was one mechanic ... for proof of concept, these are trophies ... one shows you the
+  collection ... [Multibella] being the more helpful one that's got [their] little island somewhere
+  that teaches ... helps you get your own trophy." So: **Pandayay's house** shows you her trophy
+  collection, each one a step in her story (the exhibits piece). **Multibella's little island**,
+  somewhere on the sea, is where they teach you and help you earn a trophy of your own (Foraging
+  first: "mostly about using less moves", on the den's Foraging module), kept and shown at home.
+  The two halves of trophies, each theirs: seeing what they mean, and getting your own. The den's
+  trophies (what earns one, where they're kept) are the proof of concept, to work out when it's built.
 
 ## Puzzles you can size up, and play by keys (11 Nov)
 
