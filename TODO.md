@@ -300,6 +300,20 @@ the site (`.assetsignore` skips `*.md`).
   really big platforms with like a diagonal shape with like ... 6 of the same color, but like 2 on top of
   each other with different colors at the side. I've never seen that." So every square of a dealt platform
   a target, and a colour runs side by side or on along a diagonal, never stacked on itself.
+  Again, later: "there's like white and yellow next to each other, and then another white and yellow above
+  them. Again, I've never seen that pattern. They would always be alternating." (YPPedia's Sailing pages
+  do mention blank spaces in a platform between targets; the user's memory wins.)
+- **Sailing's turn keys the other way round, and Space's drop smooth (11 Nov):** "could you really double
+  check which way round the keys are rotating the sailing pieces? Because it feels kind of opposite to me.
+  The spacebar drop is improved, but could also be a lot smoother. That's noticeably jumpy." YPPedia only
+  says "Up and Down arrow keys: Rotate the pair clockwise or counterclockwise", not which is which: so up
+  turns it anticlockwise, down clockwise, and the pair glides down rather than hopping a row at a time.
+- **Pirates other than Kikkit talk now and then, not every few seconds (11 Nov):** "it's feeling like they
+  come through a bit fast. Like the idea of [Kikkit] was supposed to be she's just a rambling, tangenting
+  person that just goes on and on ... There should be more distinct difference. I think like this guy at
+  the Imperial Island. Like, it's not the odd bonus thing. Like, it's coming along every few seconds ...
+  Obviously, don't touch [Kikkit]. She's fantastic." So everyone else's lines the odd bonus line, well
+  apart; Kikkit as she is.
 
 ## Spotted along the way (not asked for)
 
