@@ -907,8 +907,8 @@ its story, and the museum walks you through it:
 - how it began as a plain HTML guide, then the boards, then Flash and the lobby, then live on
   Whirled (13 April 2010);
 - the sad part: "Flash got deprecated and Whirled was taken down", and the sim went with them;
-- then **I'm a Duck's version** (the pirate's name as the user said it; spelling to check),
-  shown as the Blockade Simulator's evolution. It works perfectly, which is the joke: "It didn't
+- then **Imaduck's version**, the **Global Cade Sim** (globalcadesim.com, still running: "I think
+  it's imaduck"; his pirate name's spelling to check), shown as the Blockade Simulator's evolution. It works perfectly, which is the joke: "It didn't
   have quite the same charm as mine ... there was always a fun gamble that ... your ship might
   randomly spin and jump into the rocks on mine ... the bugs are what made it, kept it
   interesting. They gave it the character. His version just works perfectly. Like, where's the
@@ -926,7 +926,7 @@ looks like, from a photo, to pin down with the user). Kept warm, not soppy, the 
 there.
 
 Still to collect: the user's pictures not saved to disk need putting in `notes/museum/` by hand
-(the v1 page, the first shoot-Dalnoth board and the Dachimpy.com pages), and pictures of I'm a
+(the v1 page, the first shoot-Dalnoth board and the Dachimpy.com pages), and pictures of Imaduck's
 Duck's version.
 
 ## Helium, and Distilling (11 Nov, from Mischievious)
