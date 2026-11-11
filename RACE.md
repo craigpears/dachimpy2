@@ -44,18 +44,22 @@ How it sits with the other notes:
 ## 3. Shortcuts (the ladders)
 
 **Two kinds of shortcut.** On the move, you keep sailing while you puzzle: Sailing on the pilot, Gunnery
-while you sail. Stopped dead, she sits still while you play. Stopped dead is exposed: it's slower for the
-same puzzle time, and you're a sitting duck for anyone behind you (§6).
+while you sail. Stopped dead, she sits still while you play, which is slower for the same puzzle time.
+
+**Sheltered or exposed.** A stopped-dead shortcut can be sheltered: in a lock's chamber between its walls,
+or on the crane's ledge behind the neck of land, out of a passing broadside's reach. These are safe to play
+even in the lead. Others are out in the open: the whirlpool channel's mouth and the starlit door's rock and
+mouth. Sitting there, you're a sitting duck for anyone coming up behind (§6).
 
 | Shortcut | Puzzle | Kind | Saves (s) | State |
 |---|---|---|---|---|
 | The gun gap: a gap with a gun either side, as at the imperial checkpoint | A heavy combo zooms her past (a big Sailing chain, or a Vegas rowed each side); or knock the guns out by Gunnery | On the move | 30 | Built |
 | The headwind gap: the wind straight back through it | Rowing (mirror strokes); idle in it and the wind blows her back out | Rowing, slowly | 30 | Built |
-| The whirlpool channel: three whirlpools across a spit | Only a Sailing Vegas from its mouth carries her over; anything less sends her back to the mouth | Stopped at the mouth to build the Vegas | 55 | Built |
-| The locks: a lock up and a lock down | Bilge, pumping each lock | Stopped dead | 45 | Built |
-| The crane on the last neck of land | Carpentry, building the crane a part at a time, which hauls her over | Stopped dead | 75 | Built |
-| The starlit door: a hidden tunnel from leg 2 to leg 5 (§9) | Duty Navigation on the rock (two small constellations), then a Sailing Vegas through | Stopped dead, twice | about 145 | Built, secret |
-| A barrier across a gap: overgrowth, driftwood, fallen trunks | Foraging clears it ("it's not even macheting. You just have to clear the barrier") | Stopped dead | ? | Agreed. Umami's way round |
+| The whirlpool channel: three whirlpools across a spit | Only a Sailing Vegas from its mouth carries her over; anything less sends her back to the mouth | Stopped at the mouth to build the Vegas, exposed | 55 | Built |
+| The locks: a lock up and a lock down | Bilge, pumping each lock | Stopped dead, sheltered in the chamber | 45 | Built |
+| The crane on the last neck of land | Carpentry, building the crane a part at a time, which hauls her over | Stopped dead, sheltered behind the neck | 75 | Built |
+| The starlit door: a hidden tunnel from leg 2 to leg 5 (§9) | Duty Navigation on the rock (two small constellations), then a Sailing Vegas through | Stopped dead, twice, exposed | about 145 | Built, secret |
+| A barrier across a gap: overgrowth, driftwood, fallen trunks | Foraging clears it ("it's not even macheting. You just have to clear the barrier") | Stopped dead; sheltered or exposed, to decide | ? | Agreed. Umami's way round |
 | Small shortcuts a Double gets you through | Sailing (or rowing): a Double's gust | On the move | small | Agreed |
 | Rocks across a gap, blasted away | Gunnery: her guns | On the move | ? | Idea |
 | A Rigging passage of shifting, gusty winds | Rigging, its six pulleys as her rigging lines (§11) | On the move | ? | Idea |
@@ -136,16 +140,23 @@ So if you're at the back, you can take those shortcuts at will, in theory."
 - **Why it works.** The course runs one way, every leg a reach with the breeze, so nobody turns back. A
   sloop sitting still to puzzle can only be shot by someone coming up behind. Guns fire to the side, so
   they shoot her as they sail past.
-- **So the leader is exposed.** If they stop for the tunnel, the whirlpool Vegas, the locks or the crane,
-  the pack can catch them and shoot them on the way past. The leader's safest play is on-the-move
-  puzzles (a Sailing chain on the pilot, Gunnery under way) and the long way.
-- **And the back of the field is safe.** Nobody behind you means you can sit and puzzle for the big
-  shortcuts. It's a catch-up the race doesn't have to fake. It grows out of the course running one way and
-  the guns firing sideways, rather than a rule that helps the last place.
+- **But the leader still puzzles.** The user, 11 Nov: "Some can be safe, like ... the locks and the crane
+  ... So I don't want the leaders not be able to puzzle at all. That doesn't sound fun." So the sheltered
+  shortcuts (§3) are safe to play in the lead: the locks (Bilge, quick) and the crane (Carpentry, longer and
+  saving more). Add any others as the course grows. The leader also has the on-the-move puzzles: a Sailing
+  chain on the pilot, Gunnery under way.
+- **What the leader can't safely do is the exposed ones.** Stopping out in the open, for the whirlpool
+  Vegas or the starlit door, lets the pack catch up and shoot them on the way past. That's a gamble a
+  leader might still take, with a big enough lead.
+- **And the back of the field can take the exposed ones at will.** Nobody behind you means you can sit
+  in the open and build a big combo for the biggest shortcuts. It's a catch-up the race doesn't have to
+  fake. It grows out of the course running one way and the guns firing sideways, rather than a rule that
+  helps the last place. It's a nudge, not a lock-out: every position always has puzzles worth playing.
 - **It feeds the crowded line.** The quickest line, through the whirlpool start and along each leg, is the
   crowded one (§7). Puzzle where nobody can get a shot at you; build your big combo out of the pack's way.
-- **To check with the simulation:** a strong leader shouldn't be doomed, and a weak racer shouldn't win just
-  by hanging back. How far guns reach, how long a hit dazes her, and how often you can fire set the
+- **To check with the simulation:** a strong leader shouldn't be doomed, a weak racer shouldn't win just by
+  hanging back, and a leader should always have a shortcut worth taking (a sheltered one or an on-the-move
+  one) on every stretch. How far guns reach, how long a hit dazes her, and how often you can fire set the
   balance.
 
 **The rivals: the den's own characters (agreed).** The nameless rival becomes several pirates from the
