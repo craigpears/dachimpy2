@@ -1,5 +1,5 @@
-// Duty Navigation's look, for any board that plays it: a round chart of the night sky, the ship's wheel
-// on it with its three rings, and the stars. The puzzle itself, its rules, is src/navigation.ts: one
+// Duty Navigation's look, for any board that plays it: Puzzle Pirates' own panel, a ship's wheel
+// standing on a night sea, and the stars. The puzzle itself, its rules, is src/navigation.ts: one
 // copy of it; this only draws a board of it wherever its caller puts it (a plane in the scene, its
 // picture painted on a canvas), and plays it by the real keys. It knows nothing of the den (it
 // imports only three.js and the rules), so a test page can play it on its own (navigation-test.html).
@@ -8,19 +8,28 @@
 import * as THREE from 'three';
 import { Navigation, RINGS, SPOKES, parFor } from '../navigation.js';
 
-/* Drawn after Puzzle Pirates' own (YPPedia's "Navigation", its two pictures of a board, looked at
-   11 Nov): a night sky, a crescent moon at the top left, faint stars; a gold ship's wheel, its eight
-   spokes running out past the rim to handles, three gold rings round the hub, the stars sitting on
-   them where the spokes cross. Each colour of star its own shape: yellow a plump five-pointed star,
-   red a sharp five-pointed one, orange an eight-pointed burst, white a six-pointed star, blue a
-   four-pointed compass star. The next star waits out on a spoke's handle, glowing. The
-   constellation's places are round medallions: empty, a ring in its colour with a dim star inside;
-   holding a star of its colour, a solid coin of that colour, the star on it. (Faint lines join the
-   constellation's places, as a star chart's, so it reads as one figure.) */
+/* Drawn after Puzzle Pirates' own (YPPedia's "Navigation": its board pictures, full size, looked at
+   close on 11 Nov). An upright panel, 3 wide by 4 high: "Navigation" in pale serif letters at the
+   top, a pale crescent moon at the top left, a few faint stars in a navy sky, and below the middle a
+   flat painted sea in wavy bands of navy, teal and royal blue. On it an olive-gold ship's wheel, its
+   handles' knot-work reaching the panel's sides. Its three rings are the places: the outer ring is
+   the wheel's own broad rim (white tick marks round it), the middle a second broad rim, the inner a
+   thin ring near the hub; eight thin spokes, out past the rim to the handles, each a little ring and
+   two leaves. In the hub, gold filigree: a half dome above, an anchor below, and a ship's hull of
+   loops and peaks between the two lower rims. The stars are glossy and cut, each point a light facet
+   and a dark one, dark-edged, a shape to each colour: yellow a fat six-pointed star, red a sharp
+   five-pointed one, orange a spiky burst, white eight thin points, blue a compass star (four long
+   points, four short). The next star sits out on a spoke's handle, a pale halo round it. The
+   constellation's places are drawn on the board, nothing joining them: empty, a thick ring of its
+   colour round a dark middle, the colour's star outlined in it; holding its colour, a coin of that
+   colour with its star on it; holding another, the ring with that star sitting in it. Down the
+   bottom left a column of little stars, lit from the bottom (made up: here, how far under par you
+   are), and at the top right a cluster of four small stars, that sparkles as a constellation goes. */
 
-/** The canvas's size, and the board's radii on it: the sky, the wheel's rim, the three rings, and the
-    next star out on the handles. */
-const S = 1024, C = S / 2, SKY = 506, RIM = 408, RING_R = [140, 240, 340], OUT = 456, STAR_R = 44;
+/** The canvas: S wide; with the sky, the panel's height (the real one's 450 by 600); and the
+    board's radii on it, centred: the three rings, the handles' little rings (where the next star
+    sits), and a star's size. (Measured off the real board, scaled from 450 wide to 1024.) */
+const S = 1024, C = S / 2, PANEL_H = 1366, RING_R = [118, 248, 369], OUT = 457, STAR_R = 46;
 /** A spoke's angle on the canvas (y down): 0 straight up, then clockwise. */
 const ang = (spoke) => -Math.PI / 2 + spoke * (2 * Math.PI / SPOKES);
 const radius = (ring) => (ring < RINGS ? RING_R[ring] : OUT);
@@ -28,146 +37,215 @@ const radius = (ring) => (ring < RINGS ? RING_R[ring] : OUT);
     host lighting a constellation's stars on something else in the same arrangement. */
 export function placeXY(ring, spoke) { const r = radius(ring) / S, a = ang(spoke); return { x: Math.cos(a) * r, y: -Math.sin(a) * r }; }
 
-/** The colours, as COLOUR_NAMES: base, light, dark; and each one's shape (points, how deep). */
+/** The colours, as COLOUR_NAMES: the star's base, light facet, dark facet and edge; a coin's ring and
+    face; and its shape (points, how deep the notches, and the odd points' length when they alternate). */
 const COL = [
-  { base: '#ffd23a', light: '#fff6b8', dark: '#a8780a', pts: 5, depth: 0.5 },    // yellow
-  { base: '#e8303a', light: '#ffb0a8', dark: '#7a0e18', pts: 5, depth: 0.38 },   // red
-  { base: '#ff8a1e', light: '#ffd8a0', dark: '#9a3e06', pts: 8, depth: 0.5 },    // orange
-  { base: '#e8ecf6', light: '#ffffff', dark: '#8a90b0', pts: 6, depth: 0.5 },    // white
-  { base: '#5aa8ff', light: '#d8f0ff', dark: '#1a4aa0', pts: 4, depth: 0.32 },   // blue
+  { base: '#f2c830', light: '#fff4a8', dark: '#b88a10', edge: '#6a4a04', ring: '#f6e01e', face: '#e6d488', pts: 6, depth: 0.56 },                 // yellow
+  { base: '#dc2236', light: '#ff9aa4', dark: '#8a0a1a', edge: '#4a0410', ring: '#e8303c', face: '#d02a38', pts: 5, depth: 0.44 },                 // red
+  { base: '#f8862a', light: '#ffd2a0', dark: '#b84a0a', edge: '#6a2804', ring: '#f08a34', face: '#f4a050', pts: 12, depth: 0.52, alt: 0.8 },      // orange
+  { base: '#ecebf6', light: '#ffffff', dark: '#aaa6c8', edge: '#4a4870', ring: '#ead8f0', face: '#dcd8e8', pts: 8, depth: 0.46 },                 // white
+  { base: '#b8dcff', light: '#ffffff', dark: '#6aa8ec', edge: '#1a6ad8', ring: '#7ab2f2', face: '#5a90e2', pts: 8, depth: 0.3, alt: 0.58 },       // blue
 ];
 
 const canvas = (w, h, draw) => { const cv = document.createElement('canvas'); cv.width = w; cv.height = h; draw(cv.getContext('2d'), w, h); return cv; };
-function starPath(g, c, x, y, r, turn = 0) {
-  const { pts, depth } = COL[c];
-  g.beginPath();
+/** A star's corners: tips and notches round it, from the top. */
+function starPts(c, x, y, r) {
+  const { pts, depth, alt = 1 } = COL[c], out = [];
   for (let i = 0; i < pts * 2; i++) {
-    const a = -Math.PI / 2 + turn + i * Math.PI / pts, rr = i % 2 ? r * depth : r;
-    g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
+    const a = -Math.PI / 2 + i * Math.PI / pts, rr = i % 2 ? r * depth : (i % 4 === 2 ? r * alt : r);
+    out.push([x + Math.cos(a) * rr, y + Math.sin(a) * rr, a]);
   }
+  return out;
+}
+function starPath(g, c, x, y, r) {
+  g.beginPath();
+  for (const [px, py] of starPts(c, x, y, r)) g.lineTo(px, py);
   g.closePath();
 }
-/** A star, 128 square: its shape, shaded light at the top left, a dark edge and a shine. (Exported:
-    the one drawing of a navigation star, for a host to light on the rock.) */
+const mix = (h1, h2, t) => {
+  const a = parseInt(h1.slice(1), 16), b = parseInt(h2.slice(1), 16), m = (s) => Math.round(((a >> s) & 255) * (1 - t) + ((b >> s) & 255) * t);
+  return `rgb(${m(16)},${m(8)},${m(0)})`;
+};
+/** A star, 128 square, as the real ones: each point cut in two, a facet either side of its ridge, lit
+    from the top left, and a dark edge. (Exported: the one drawing of a navigation star, for a host
+    to light on the rock.) */
 const STARS = new Map();
 export function starCanvas(c) {
   if (STARS.has(c)) return STARS.get(c);
   const K = COL[c];
   const cv = canvas(128, 128, (g) => {
-    if (K.pts === 4) {   // (the compass star has a little four-pointed one turned behind it)
-      starPath(g, c, 64, 64, 34, Math.PI / 4);
-      g.fillStyle = K.dark; g.fill();
+    const p = starPts(c, 64, 64, 58), n = p.length, L = -3 * Math.PI / 4;
+    // The facets: from the middle to each tip and the notch either side of it.
+    for (let i = 0; i < n; i += 2) {
+      for (const side of [-1, 1]) {
+        const v = p[(i + side + n) % n], t = Math.cos(p[i][2] + side * 1.1 - L);
+        g.fillStyle = t > 0 ? mix(K.base, K.light, Math.min(1, t * 0.95)) : mix(K.base, K.dark, Math.min(1, -t * 0.85));
+        g.beginPath(); g.moveTo(64, 64); g.lineTo(p[i][0], p[i][1]); g.lineTo(v[0], v[1]); g.closePath(); g.fill();
+        g.strokeStyle = g.fillStyle; g.lineWidth = 0.8; g.stroke();   // (no hairline seams)
+      }
     }
     starPath(g, c, 64, 64, 58);
-    const gr = g.createRadialGradient(50, 44, 4, 64, 64, 64);
-    gr.addColorStop(0, K.light); gr.addColorStop(0.5, K.base); gr.addColorStop(1, K.dark);
-    g.fillStyle = gr; g.fill();
-    g.lineWidth = 3.5; g.strokeStyle = 'rgba(20,16,40,0.75)'; g.lineJoin = 'round'; g.stroke();
-    // A ridge down each point, light on one side: a faceted, cut look.
-    const { pts } = K;
-    for (let i = 0; i < pts; i++) {
-      const a = -Math.PI / 2 + i * 2 * Math.PI / pts;
-      g.strokeStyle = 'rgba(255,255,255,0.45)'; g.lineWidth = 2;
-      g.beginPath(); g.moveTo(64, 64); g.lineTo(64 + Math.cos(a) * 52, 64 + Math.sin(a) * 52); g.stroke();
-    }
-    g.fillStyle = 'rgba(255,255,255,0.8)';
-    g.beginPath(); g.ellipse(54, 46, 7, 4, -0.6, 0, Math.PI * 2); g.fill();
+    g.lineJoin = 'round'; g.lineWidth = 3; g.strokeStyle = K.edge; g.stroke();
+    g.fillStyle = 'rgba(255,255,255,0.75)';
+    g.beginPath(); g.arc(57, 55, 4, 0, Math.PI * 2); g.fill();
   });
   STARS.set(c, cv);
   return cv;
 }
-
-/** The sky behind it all: deep blue, lighter toward the bottom, faint stars, the crescent moon. */
-let SKY_CV = null;
-function skyCanvas() {
-  if (SKY_CV) return SKY_CV;
-  SKY_CV = canvas(S, S, (g) => {
-    g.save();
-    g.beginPath(); g.arc(C, C, SKY, 0, Math.PI * 2); g.clip();
-    const gr = g.createLinearGradient(0, 0, 0, S);
-    gr.addColorStop(0, '#04122e'); gr.addColorStop(0.55, '#0a2654'); gr.addColorStop(1, '#123a72');
-    g.fillStyle = gr; g.fillRect(0, 0, S, S);
-    // Faint stars, the same every time.
-    let a = 7;
-    const rnd = () => { a = (a * 16807) % 2147483647; return a / 2147483647; };
-    for (let i = 0; i < 260; i++) {
-      const x = rnd() * S, y = rnd() * S, r = rnd() * 1.6 + 0.4;
-      g.fillStyle = `rgba(220,230,255,${0.25 + rnd() * 0.5})`;
-      g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
-    }
-    // The moon, a crescent at the top left.
-    // (between the handles, out past the rim)
-    const ma = -Math.PI / 2 - 0.42, mx = C + Math.cos(ma) * 462, my = C + Math.sin(ma) * 462;
-    g.fillStyle = '#c8d4ee';
-    g.beginPath(); g.arc(mx, my, 28, 0, Math.PI * 2); g.fill();
-    g.globalCompositeOperation = 'destination-out';
-    g.beginPath(); g.arc(mx + 13, my - 9, 26, 0, Math.PI * 2); g.fill();
-    g.globalCompositeOperation = 'source-over';
-    g.restore();
-    // The chart's edge: a thin brass ring.
-    g.lineWidth = 8; g.strokeStyle = '#6a5426'; g.beginPath(); g.arc(C, C, SKY - 4, 0, Math.PI * 2); g.stroke();
-    g.lineWidth = 2; g.strokeStyle = '#d8b860'; g.beginPath(); g.arc(C, C, SKY - 4, 0, Math.PI * 2); g.stroke();
-  });
-  return SKY_CV;
+/** A little flat star for the panel's meter and cluster: lit (filled pale), or just its outline. */
+function smallStar(g, x, y, r, fill, line) {
+  g.beginPath();
+  for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.48 : r; g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); }
+  g.closePath();
+  if (fill) { g.fillStyle = fill; g.fill(); }
+  g.lineJoin = 'round'; g.lineWidth = 4; g.strokeStyle = line; g.stroke();
 }
 
-/** The wheel: spokes out to handles, the rim, the hub; the rings drawn on it each frame (one lit). */
+/** The panel behind it all: the night sky with its moon and faint stars, the painted sea below the
+    middle, the title. */
+let PANEL_CV = null;
+function panelCanvas() {
+  if (PANEL_CV) return PANEL_CV;
+  PANEL_CV = canvas(S, PANEL_H, (g, w, h) => {
+    const cy = h / 2, horizon = cy - 8;
+    const sky = g.createLinearGradient(0, 0, 0, horizon);
+    sky.addColorStop(0, '#011646'); sky.addColorStop(1, '#0a2a64');
+    g.fillStyle = sky; g.fillRect(0, 0, w, horizon + 4);
+    let a = 11;
+    const rnd = () => { a = (a * 16807) % 2147483647; return a / 2147483647; };
+    for (let i = 0; i < 46; i++) {   // (a few faint stars, some twinkling)
+      const x = rnd() * w, y = rnd() * horizon * 0.95, r = 1.6 + rnd() * 2;
+      g.fillStyle = `rgba(190,205,240,${0.35 + rnd() * 0.4})`;
+      g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+      if (i % 7 === 0) { g.fillRect(x - r * 3, y - 0.8, r * 6, 1.6); g.fillRect(x - 0.8, y - r * 3, 1.6, r * 6); }
+    }
+    // The moon, a pale crescent at the top left, open to the right.
+    const moon = canvas(160, 160, (m) => {
+      const gr = m.createLinearGradient(20, 20, 120, 140);
+      gr.addColorStop(0, '#b4c2e0'); gr.addColorStop(1, '#7a8cb8');
+      m.fillStyle = gr; m.beginPath(); m.arc(80, 80, 58, 0, Math.PI * 2); m.fill();
+      m.globalCompositeOperation = 'destination-out';
+      m.beginPath(); m.arc(104, 70, 52, 0, Math.PI * 2); m.fill();
+    });
+    g.drawImage(moon, 120 - 80, 128 - 80);
+    // The sea: wavy bands, dark at the horizon, teal, then royal blue, faint darker lines between.
+    const bands = [[0, '#0a1f5c'], [52, '#0e2c74'], [118, '#155e88'], [158, '#1b7898'], [204, '#155490'], [250, '#183c98'],
+      [318, '#1d46ac'], [392, '#1a3ca2'], [470, '#2048b2'], [552, '#1a3a9c'], [620, '#1e44aa']];
+    const wave = (y0, k) => { g.moveTo(0, y0); for (let x = 0; x <= w; x += 16) g.lineTo(x, y0 + Math.sin(x * (0.006 + k * 0.0013) + k * 1.7) * (5 + k % 3 * 3) + Math.sin(x * 0.017 + k) * 2.5); };
+    bands.forEach(([dy, col], k) => {
+      g.fillStyle = col; g.beginPath(); wave(horizon + dy, k); g.lineTo(w, h); g.lineTo(0, h); g.closePath(); g.fill();
+    });
+    g.lineWidth = 2.5; g.strokeStyle = 'rgba(4,14,52,0.4)';
+    bands.forEach(([dy], k) => { if (k) { g.beginPath(); wave(horizon + dy + 20 + k % 2 * 14, k + 5); g.stroke(); } });
+    // The title.
+    g.font = '600 56px "Book Antiqua", Palatino, Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.lineJoin = 'round'; g.lineWidth = 9; g.strokeStyle = '#06102c'; g.strokeText('Navigation', w / 2, 48);
+    g.fillStyle = '#e2eaf8'; g.fillText('Navigation', w / 2, 48);
+  });
+  return PANEL_CV;
+}
+
+/** Olive-gold, the wheel's: dark edge, body, shade and shine. */
+const GOLD = { edge: '#2e2808', body: '#857526', shade: '#62561a', shine: '#ddd290', tick: '#f0ecd0' };
+/** The wheel: spokes out to their handles, the hub's filigree, the thin inner ring and the two broad
+    rims the other places sit on (one lit over it each frame). */
 let WHEEL_CV = null;
 function wheelCanvas() {
   if (WHEEL_CV) return WHEEL_CV;
   WHEEL_CV = canvas(S, S, (g) => {
-    const brass = (w, col) => { g.lineWidth = w; g.strokeStyle = col; };
-    g.lineCap = 'round';
+    g.lineCap = 'round'; g.lineJoin = 'round';
+    // Gold work: a dark edge, then the gold, along the same path.
+    const gold = (path, w) => { path(); g.lineWidth = w + 6; g.strokeStyle = GOLD.edge; g.stroke(); g.lineWidth = w; g.strokeStyle = GOLD.body; g.stroke(); };
+    const at = (r, a) => [C + Math.cos(a) * r, C + Math.sin(a) * r];
     for (let s = 0; s < SPOKES; s++) {
-      const a = ang(s), cx = Math.cos(a), cy = Math.sin(a);
-      brass(16, '#3a2c10'); g.beginPath(); g.moveTo(C + cx * 40, C + cy * 40); g.lineTo(C + cx * (OUT - 44), C + cy * (OUT - 44)); g.stroke();
-      brass(9, '#a88a3a'); g.beginPath(); g.moveTo(C + cx * 40, C + cy * 40); g.lineTo(C + cx * (OUT - 44), C + cy * (OUT - 44)); g.stroke();
-      // The handle: a ring the next star sits in.
-      brass(7, '#3a2c10'); g.beginPath(); g.arc(C + cx * OUT, C + cy * OUT, 44, 0, Math.PI * 2); g.stroke();
-      brass(3.5, '#b89a48'); g.beginPath(); g.arc(C + cx * OUT, C + cy * OUT, 44, 0, Math.PI * 2); g.stroke();
+      const a = ang(s), u = [Math.cos(a), Math.sin(a)], v = [-u[1], u[0]];
+      gold(() => { g.beginPath(); g.moveTo(C, C); g.lineTo(...at(OUT - 17, a)); }, 5);
+      // The handle: a little ring, and two leaves out from it.
+      const [kx, ky] = at(OUT, a);
+      gold(() => { g.beginPath(); g.arc(kx, ky, 15, 0, Math.PI * 2); }, 5);
+      for (const sd of [-1, 1]) {
+        const bx = kx + u[0] * 13, by = ky + u[1] * 13, tx = bx + u[0] * 40 + v[0] * 24 * sd, ty = by + u[1] * 40 + v[1] * 24 * sd;
+        gold(() => {
+          g.beginPath(); g.moveTo(bx, by);
+          g.quadraticCurveTo(bx + u[0] * 34 + v[0] * 2 * sd, by + u[1] * 34 + v[1] * 2 * sd, tx, ty);
+          g.quadraticCurveTo(bx + u[0] * 6 + v[0] * 30 * sd, by + u[1] * 6 + v[1] * 30 * sd, bx, by);
+        }, 5);
+      }
     }
-    // The rim, broad and dark gold, just outside the outer ring.
-    // The rim, broad dark wood with a brass edge each side, just outside the outer ring (the rings
-    // are brass: the wood keeps it from reading as a fourth).
-    brass(34, '#1e1206'); g.beginPath(); g.arc(C, C, RIM, 0, Math.PI * 2); g.stroke();
-    brass(26, '#5a3416'); g.beginPath(); g.arc(C, C, RIM, 0, Math.PI * 2); g.stroke();
-    for (let i = 0; i < 96; i++) {   // (the wood's grain, round it)
-      const a = i * Math.PI / 48, w = 2 + (i % 3);
-      brass(w, i % 2 ? 'rgba(30,16,4,0.5)' : 'rgba(140,90,40,0.35)');
-      g.beginPath(); g.arc(C, C, RIM - 9 + (i % 5) * 4, a, a + 0.05); g.stroke();
+    // The hub's filigree: a half dome over the middle, an anchor under it, ribs out to a ship's hull
+    // of peaks and loops between the two lower rims.
+    gold(() => { g.beginPath(); g.arc(C, C, 62, Math.PI, 2 * Math.PI); g.moveTo(C - 62, C); g.lineTo(C + 62, C); }, 8);
+    gold(() => { g.beginPath(); g.arc(C, C, 46, Math.PI, 2 * Math.PI); }, 3);
+    gold(() => { g.beginPath(); g.moveTo(C, C + 4); g.lineTo(C, C + 236); }, 10);
+    gold(() => {   // (the anchor's head, a spade, and its arms)
+      g.beginPath(); g.moveTo(C, C - 4); g.quadraticCurveTo(C + 26, C + 24, C + 4, C + 46); g.lineTo(C - 4, C + 46); g.quadraticCurveTo(C - 26, C + 24, C, C - 4);
+      for (const sd of [-1, 1]) { g.moveTo(C, C + 70); g.quadraticCurveTo(C + sd * 50, C + 74, C + sd * 54, C + 36); g.arc(C + sd * 46, C + 36, 8, 0, Math.PI * 2); }
+    }, 6);
+    gold(() => {   // (the ribs, like a ship's sweeping up to her hull)
+      g.beginPath();
+      for (const sd of [-1, 1]) {
+        g.moveTo(C + sd * 8, C + 96); g.quadraticCurveTo(C + sd * 110, C + 112, C + sd * 176, C + 268);
+        g.moveTo(C + sd * 8, C + 140); g.quadraticCurveTo(C + sd * 64, C + 156, C + sd * 82, C + 268);
+        g.moveTo(C + sd * 26, C + 120); g.quadraticCurveTo(C + sd * 40, C + 196, C + sd * 30, C + 268);
+      }
+    }, 7);
+    gold(() => {   // (the hull: a band of peaks and loops)
+      g.beginPath();
+      g.moveTo(C - 196, C + 268); g.lineTo(C + 196, C + 268); g.lineTo(C + 132, C + 336); g.lineTo(C - 132, C + 336); g.closePath();
+      for (const x of [-120, 0, 120]) { g.moveTo(C + x - 30, C + 330); g.lineTo(C + x, C + 276); g.lineTo(C + x + 30, C + 330); }
+      for (const x of [-60, 60]) { g.moveTo(C + x + 20, C + 302); g.arc(C + x, C + 302, 20, 0, Math.PI * 2); }
+    }, 6);
+    // The inner ring, thin.
+    gold(() => { g.beginPath(); g.arc(C, C, RING_R[0], 0, Math.PI * 2); }, 9);
+    g.lineWidth = 2; g.strokeStyle = GOLD.shine; g.beginPath(); g.arc(C, C, RING_R[0] - 2, 0, Math.PI * 2); g.stroke();
+    // The two broad rims, the middle and the outer: shaded on the inside, a shine toward the outside,
+    // tick marks round the outer like a dial's.
+    for (const r of [RING_R[1], RING_R[2]]) {
+      const w = 46;
+      g.lineWidth = w + 7; g.strokeStyle = GOLD.edge; g.beginPath(); g.arc(C, C, r, 0, Math.PI * 2); g.stroke();
+      g.lineWidth = w; g.strokeStyle = GOLD.body; g.stroke();
+      g.lineWidth = w * 0.34; g.strokeStyle = GOLD.shade; g.beginPath(); g.arc(C, C, r - w * 0.3, 0, Math.PI * 2); g.stroke();
+      g.lineWidth = 4; g.strokeStyle = GOLD.shine; g.beginPath(); g.arc(C, C, r + w * 0.16, 0, Math.PI * 2); g.stroke();
+      g.lineWidth = 2; g.strokeStyle = 'rgba(221,210,144,0.6)'; g.beginPath(); g.arc(C, C, r - w * 0.12, 0, Math.PI * 2); g.stroke();
+      const n = r === RING_R[2] ? 72 : 48;
+      for (let i = 0; i < n; i++) {
+        const a = i * 2 * Math.PI / n, long = i % 3 === 0;
+        g.lineWidth = 2.5; g.strokeStyle = r === RING_R[2] ? GOLD.tick : 'rgba(46,40,8,0.7)';
+        g.beginPath(); g.moveTo(...at(r + w * 0.05, a)); g.lineTo(...at(r + w * (long ? 0.36 : 0.26), a)); g.stroke();
+      }
     }
-    brass(3, '#c8a050'); g.beginPath(); g.arc(C, C, RIM - 14, 0, Math.PI * 2); g.stroke();
-    g.beginPath(); g.arc(C, C, RIM + 14, 0, Math.PI * 2); g.stroke();
-    // The hub.
-    const hg = g.createRadialGradient(C - 12, C - 12, 4, C, C, 46);
-    hg.addColorStop(0, '#f0d890'); hg.addColorStop(0.6, '#a8883a'); hg.addColorStop(1, '#4a3812');
-    g.fillStyle = hg; g.beginPath(); g.arc(C, C, 44, 0, Math.PI * 2); g.fill();
-    brass(3, '#2a1e08'); g.stroke();
-    g.fillStyle = '#3a2c10'; g.beginPath(); g.arc(C, C, 12, 0, Math.PI * 2); g.fill();
   });
   return WHEEL_CV;
 }
 
-/** A medallion for a constellation's place: an outline in its colour with a dim star inside (empty),
-    or a solid coin of its colour with the star on it (filled). */
+/** A constellation's place: holding its colour, a coin of it with its star on; else a thick ring of
+    its colour round a dark middle, the star's outline in it (a wrong star drawn on top by the caller). */
 function medallion(g, c, x, y, filled, glow, k = 1) {
-  const K = COL[c], R = 50 * k;
+  const K = COL[c], R = 56 * k;
   g.save();
   if (glow > 0) {
     const gg = g.createRadialGradient(x, y, R * 0.6, x, y, R * 2);
-    gg.addColorStop(0, hexA(K.base, 0.45 * glow)); gg.addColorStop(1, hexA(K.base, 0));
+    gg.addColorStop(0, hexA(K.ring, 0.5 * glow)); gg.addColorStop(1, hexA(K.ring, 0));
     g.fillStyle = gg; g.beginPath(); g.arc(x, y, R * 2, 0, Math.PI * 2); g.fill();
   }
+  g.beginPath(); g.arc(x, y, R - 6, 0, Math.PI * 2);
   if (filled) {
-    const gr = g.createRadialGradient(x - R * 0.35, y - R * 0.35, 3, x, y, R);
-    gr.addColorStop(0, K.light); gr.addColorStop(0.55, K.base); gr.addColorStop(1, K.dark);
-    g.fillStyle = gr; g.beginPath(); g.arc(x, y, R, 0, Math.PI * 2); g.fill();
-    g.lineWidth = 3; g.strokeStyle = 'rgba(255,255,255,0.7)'; g.stroke();
+    const gr = g.createRadialGradient(x - R * 0.3, y - R * 0.35, 4, x, y, R);
+    gr.addColorStop(0, mix(K.face, '#ffffff', 0.35)); gr.addColorStop(1, mix(K.face, '#000000', 0.12));
+    g.fillStyle = gr; g.fill();
   } else {
-    g.fillStyle = 'rgba(4,10,30,0.55)'; g.beginPath(); g.arc(x, y, R, 0, Math.PI * 2); g.fill();
-    g.lineWidth = 6; g.strokeStyle = hexA(K.base, 0.85); g.stroke();
-    g.globalAlpha = 0.35;
-    g.drawImage(starCanvas(c), x - R * 0.7, y - R * 0.7, R * 1.4, R * 1.4);
+    g.fillStyle = 'rgba(4,12,40,0.88)'; g.fill();
+  }
+  // The ring: its colour, a dark edge each side, lit along the top.
+  g.lineWidth = 15; g.strokeStyle = 'rgba(10,10,30,0.7)'; g.beginPath(); g.arc(x, y, R - 6, 0, Math.PI * 2); g.stroke();
+  g.lineWidth = 11; g.strokeStyle = K.ring; g.stroke();
+  g.lineWidth = 3; g.strokeStyle = 'rgba(255,255,255,0.45)'; g.beginPath(); g.arc(x, y, R - 6, Math.PI * 1.1, Math.PI * 1.75); g.stroke();
+  if (filled) {
+    g.drawImage(starCanvas(c), x - R * 0.82, y - R * 0.82, R * 1.64, R * 1.64);
+  } else {
+    starPath(g, c, x, y, R * 0.66);
+    g.fillStyle = hexA(K.edge, 0.35); g.fill();
+    g.lineWidth = 3; g.lineJoin = 'round'; g.strokeStyle = mix(K.ring, '#000000', 0.45); g.stroke();
   }
   g.restore();
 }
@@ -181,8 +259,9 @@ const TIME = { turn: 0.13, drop: 0.12, fall: 0.16, line: 0.42, constellation: 0.
 /* A Navigation board. `game` (a Navigation already made) or `random` and `options` (its NavOptions:
    sizes, colours) to make one. `at` (a Vector3, the board's middle), `yaw` (turned about the world's
    up) and `lean` (0 standing upright facing along +z after the yaw; Math.PI / 2 lying flat face up):
-   where it goes; `size`: its width in metres (3). `sky`: draw the round night sky behind the wheel
-   (true); without it the wheel stands on whatever's behind (the cliff, say).
+   where it goes; `size`: its width in metres (3). `sky`: draw the real puzzle's whole panel, its
+   night sky and sea, title, meter and cluster, 3 wide by 4 high (true); without it the wheel and its
+   stars stand on whatever's behind (the cliff, say), square. Either way the wheel's in the middle.
    Hooks: `onMove(move)` after each turn or drop (the rules' Move: points, lines, done, booched...),
    as it's made; `onConstellation(done)` as a filled constellation is seen to go (done.marks are its
    places and colours, placeXY says where each is, starCanvas draws its star); `onBooch()` as a booch
@@ -193,22 +272,23 @@ const TIME = { turn: 0.13, drop: 0.12, fall: 0.16, line: 0.42, constellation: 0.
    `idle` (set it) hides the selected ring's light when nobody's at it. */
 export function navBoard(o = {}) {
   const game = o.game ?? new Navigation(o.random ?? Math.random, o.options ?? {});
+  const sky = o.sky !== false, CH = sky ? PANEL_H : S, OFF = (CH - S) / 2;
   const cv = document.createElement('canvas');
-  cv.width = cv.height = S;
+  cv.width = S; cv.height = CH;
   const g = cv.getContext('2d');
   const tex = new THREE.CanvasTexture(cv);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 4;
   const size = o.size ?? 3;
   const group = new THREE.Group();
-  const face = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: tex, transparent: true, toneMapped: false, depthWrite: false }));
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(1, CH / S), new THREE.MeshBasicMaterial({ map: tex, transparent: true, toneMapped: false, depthWrite: false }));
   group.add(face);
   group.position.copy(o.at ?? new THREE.Vector3());
   group.rotation.set(-(o.lean ?? 0), o.yaw ?? 0, 0, 'YXZ');
   group.scale.setScalar(size);
 
   const b = {
-    game, group, canvas: cv, size, sky: o.sky !== false, idle: false,
+    game, group, canvas: cv, size, sky, idle: false,
     onMove: o.onMove ?? null, onConstellation: o.onConstellation ?? null, onBooch: o.onBooch ?? null, onDeal: o.onDeal ?? null,
     queue: [], stage: null, t: 0,
     /** Stars as drawn: id -> { c, r, a, fr, fa, tr, ta } (radius and angle, from and to). */
@@ -311,7 +391,7 @@ export function navBoard(o = {}) {
     if (!ray.ray.intersectPlane(new THREE.Plane().setFromNormalAndCoplanarPoint(n, p0), p)) return false;
     group.worldToLocal(p);
     const d = Math.hypot(p.x, p.y) * S;
-    if (d > RIM + 20) return false;
+    if (d > RING_R[RINGS - 1] + 60) return false;
     let best = 0;
     for (let r = 1; r < RINGS; r++) if (Math.abs(RING_R[r] - d) < Math.abs(RING_R[best] - d)) best = r;
     game.ring = best;
@@ -350,63 +430,59 @@ export function navBoard(o = {}) {
   };
 
   function draw() {
-    g.clearRect(0, 0, S, S);
-    if (b.sky) g.drawImage(skyCanvas(), 0, 0);
+    g.clearRect(0, 0, S, CH);
+    if (sky) g.drawImage(panelCanvas(), 0, 0);
+    // The wheel and all on it, its middle the canvas's.
+    g.save();
+    g.translate(0, OFF);
     g.drawImage(wheelCanvas(), 0, 0);
-    // The rings: gold circles the stars sit on; the one selected lit.
+    // The ring selected, a little brighter (and one just turned, brighter still for a moment).
     for (let r = 0; r < RINGS; r++) {
-      const sel = r === game.ring && !b.idle, glow = Math.max(sel ? 0.55 + 0.15 * Math.sin(b.time * 4) : 0, b.ringGlow[r]);
-      g.beginPath(); g.arc(C, C, RING_R[r], 0, Math.PI * 2);
-      if (glow > 0) { g.save(); g.lineWidth = 34; g.strokeStyle = `rgba(255,226,120,${0.4 * glow})`; g.shadowColor = '#ffe080'; g.shadowBlur = 30 * glow; g.stroke(); g.restore(); }
-      g.lineWidth = 16; g.strokeStyle = '#2e2208'; g.stroke();
-      g.lineWidth = 10; g.strokeStyle = sel ? '#ffe27a' : '#9a7e34'; g.stroke();
-      g.lineWidth = 2.5; g.strokeStyle = sel ? '#fff8d0' : '#d0b060'; g.beginPath(); g.arc(C, C, RING_R[r] - 2, 0, Math.PI * 2); g.stroke();
+      const sel = r === game.ring && !b.idle, lift = Math.max(sel ? 0.22 + 0.05 * Math.sin(b.time * 3) : 0, b.ringGlow[r] * 0.55);
+      if (lift <= 0) continue;
+      g.save(); g.globalCompositeOperation = 'lighter';
+      g.lineWidth = r ? 46 : 10; g.strokeStyle = `rgba(150,130,60,${lift})`;
+      g.beginPath(); g.arc(C, C, RING_R[r], 0, Math.PI * 2); g.stroke();
+      g.restore();
     }
-    // The constellation: faint lines joining its places, a star chart's figure; then its medallions.
+    // The constellation's places.
     const con = b.shownCon;
     if (con) {
-      const fade = ease(b.conFade), flare = b.conFlare, ps = chartOrder(con.marks);
-      g.save();
-      g.lineWidth = 3 + 5 * flare;
-      g.strokeStyle = `rgba(210,225,255,${(0.45 + 0.5 * flare) * fade})`;
-      g.setLineDash(flare ? [] : [10, 10]);
-      g.beginPath();
-      ps.forEach((m, i) => { const [x, y] = xy(radius(m.ring), ang(m.spoke)); if (i) g.lineTo(x, y); else g.moveTo(x, y); });
-      g.stroke();
-      g.restore();
+      const fade = ease(b.conFade), flare = b.conFlare;
       g.save();
       g.globalAlpha = fade;
       const grid = shownGrid();
       for (const m of con.marks) {
         const [x, y] = xy(radius(m.ring), ang(m.spoke)), here = grid.get(`${m.ring},${m.spoke}`);
-        medallion(g, m.colour, x, y, here === m.colour || flare > 0, flare > 0 ? 1 + flare : 0.5 + 0.2 * Math.sin(b.time * 2.5 + m.spoke), 1 + 0.35 * flare);
+        medallion(g, m.colour, x, y, here === m.colour || flare > 0, flare > 0 ? 1 + flare : 0, 1 + 0.3 * flare);
       }
       g.restore();
     }
-    // The stars.
+    // The stars (on a place of the constellation's in its own colour, the coin shows it instead).
+    const filled = new Set();
+    if (con) for (const m of con.marks) filled.add(`${m.ring},${m.spoke},${m.colour}`);
     for (const [id, s] of b.stars) {
       const [x, y] = xy(s.r, s.a);
+      const rr = RING_R.indexOf(Math.round(s.r)), sp = Math.round(((s.a + Math.PI / 2) / (2 * Math.PI / SPOKES) % SPOKES + SPOKES) % SPOKES);
+      if (rr >= 0 && filled.has(`${rr},${sp},${s.c}`) && !b.lit?.has(id)) continue;
       let k = 1;
       if (b.lit?.has(id)) {   // (a line about to go: ringed and swelling)
         const u = Math.min(1, b.t / TIME.line);
         k = 1 + 0.25 * u;
-        g.save(); g.lineWidth = 5; g.strokeStyle = `rgba(255,255,255,${0.5 + 0.5 * Math.sin(b.t * 40)})`; g.beginPath(); g.arc(x, y, STAR_R * 1.35, 0, Math.PI * 2); g.stroke(); g.restore();
+        g.save(); g.lineWidth = 5; g.strokeStyle = `rgba(255,255,255,${0.5 + 0.5 * Math.sin(b.t * 40)})`; g.beginPath(); g.arc(x, y, STAR_R * 1.3, 0, Math.PI * 2); g.stroke(); g.restore();
       }
       if (s.flee) g.globalAlpha = Math.max(0, 1 - (s.r - s.fr) / (S - s.fr) * 1.5);
       const R = STAR_R * k;
       g.drawImage(starCanvas(s.c), x - R, y - R, 2 * R, 2 * R);
       g.globalAlpha = 1;
     }
-    // The next star, out on its handle, glowing (not while one's still dropping in).
+    // The next star, out on its spoke's handle, a pale halo round it (not while one's still dropping in).
     if (!b.dropFrom.length && !(b.stage?.kind === 'booch')) {
-      const n = game.next, [x, y] = xy(OUT, ang(n.spoke)), p = 0.5 + 0.5 * Math.sin(b.time * 5);
-      const gg = g.createRadialGradient(x, y, 6, x, y, 62);
-      gg.addColorStop(0, hexA(COL[n.c].light, 0.7)); gg.addColorStop(1, hexA(COL[n.c].base, 0));
-      g.fillStyle = gg; g.beginPath(); g.arc(x, y, 62, 0, Math.PI * 2); g.fill();
-      const R = STAR_R * (1.05 + 0.08 * p);
-      g.save(); g.translate(x, y); g.rotate(Math.sin(b.time * 2) * 0.15);
-      g.drawImage(starCanvas(n.c), -R, -R, 2 * R, 2 * R);
-      g.restore();
+      const n = game.next, [x, y] = xy(OUT, ang(n.spoke)), p = 0.5 + 0.5 * Math.sin(b.time * 4);
+      const gg = g.createRadialGradient(x, y, STAR_R * 0.6, x, y, STAR_R * 1.5);
+      gg.addColorStop(0, `rgba(200,220,255,${0.45 + 0.15 * p})`); gg.addColorStop(1, 'rgba(160,190,255,0)');
+      g.fillStyle = gg; g.beginPath(); g.arc(x, y, STAR_R * 1.5, 0, Math.PI * 2); g.fill();
+      g.drawImage(starCanvas(n.c), x - STAR_R, y - STAR_R, 2 * STAR_R, 2 * STAR_R);
     }
     // Sparks and ghosts.
     for (const f of b.fx) {
@@ -415,10 +491,41 @@ export function navBoard(o = {}) {
       else { const R = STAR_R * (1 + u); g.globalAlpha = 1 - u; g.drawImage(starCanvas(f.c), f.x - R, f.y - R, 2 * R, 2 * R); }
       g.globalAlpha = 1;
     }
-    // A booch: the sky flushes red.
+    g.restore();
+    if (sky) panelBits();
+    // A booch: the night flushes red.
     if (b.flash > 0) {
-      g.save(); g.beginPath(); g.arc(C, C, SKY, 0, Math.PI * 2); g.clip();
-      g.fillStyle = `rgba(200,30,30,${0.45 * b.flash})`; g.fillRect(0, 0, S, S); g.restore();
+      g.save();
+      if (!sky) { g.beginPath(); g.arc(C, C, OUT + 50, 0, Math.PI * 2); g.clip(); }
+      g.fillStyle = `rgba(200,30,30,${0.45 * b.flash})`; g.fillRect(0, 0, S, CH); g.restore();
+    }
+  }
+  // The panel's own pieces: the column of little stars at the bottom left (lit from the bottom: a
+  // star a place of the constellation's, all lit until you pass par, then going out as par / moves),
+  // and the cluster at the top right, sparkling as a constellation goes.
+  function panelBits() {
+    const con = game.constellation, n = Math.max(3, con ? con.marks.length : 3);
+    const lit = con ? n * Math.min(1, parFor(con.marks.length) / Math.max(1, game.moves)) : n;
+    for (let i = 0; i < n; i++) {
+      const x = 91, y = CH - 80 - i * 43;
+      smallStar(g, x, y, 21, 'rgba(0,10,40,0.25)', '#c8b030');
+      const f = Math.max(0, Math.min(1, lit - i));
+      if (f > 0) {
+        g.save(); g.beginPath(); g.rect(x - 30, y + 24 - 48 * f, 60, 48 * f); g.clip();
+        const gr = g.createLinearGradient(x, y - 21, x, y + 21);
+        gr.addColorStop(0, '#fffbd8'); gr.addColorStop(1, '#f0de70');
+        smallStar(g, x, y, 21, gr, '#b89a20');
+        g.restore();
+      }
+    }
+    const sp = b.conFlare;
+    for (const [dx, dy] of [[0, -26], [24, 0], [0, 26], [-24, 0]]) smallStar(g, 950 + dx, 74 + dy, 14 * (1 + 0.2 * sp), '#eef2a8', '#8a8a2a');
+    if (sp > 0) {
+      for (let i = 0; i < 18; i++) {
+        const a = i * 2.4 + b.time * 3, r = 28 + (i % 5) * 9;
+        g.fillStyle = `rgba(255,250,190,${sp * (0.5 + 0.5 * Math.sin(b.time * 20 + i))})`;
+        g.fillRect(950 + Math.cos(a) * r - 2, 74 + Math.sin(a) * r - 2, 4, 4);
+      }
     }
   }
   // Which colour each place holds as drawn, by "ring,spoke" (stars at rest only).
@@ -435,7 +542,7 @@ export function navBoard(o = {}) {
   // The camera to play it from: straight on to its face, far enough back to see it all.
   b.camView = (camera) => {
     const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect);
-    const dist = Math.max((size / 2) / Math.tan(vh), (size / 2) / Math.tan(hh)) * 1.08;
+    const dist = Math.max((size * CH / S / 2) / Math.tan(vh), (size / 2) / Math.tan(hh)) * 1.08;
     group.updateMatrixWorld(true);
     const look = new THREE.Vector3().setFromMatrixPosition(group.matrixWorld), out = new THREE.Vector3(0, 0, 1).transformDirection(group.matrixWorld);
     return { look, from: look.clone().addScaledVector(out, dist), dist };
@@ -450,19 +557,4 @@ export function navBoard(o = {}) {
   draw();
   tex.needsUpdate = true;
   return b;
-}
-
-/** A constellation's places in the order its figure's lines join them: from the innermost, on to the
-    nearest not yet joined. */
-function chartOrder(marks) {
-  if (marks.length < 2) return marks;
-  const pos = (m) => xy(radius(m.ring), ang(m.spoke));
-  const left = marks.slice().sort((p, q) => p.ring - q.ring || p.spoke - q.spoke), out = [left.shift()];
-  while (left.length) {
-    const [x, y] = pos(out[out.length - 1]);
-    let bi = 0, bd = Infinity;
-    left.forEach((m, i) => { const [mx, my] = pos(m); const d = Math.hypot(mx - x, my - y); if (d < bd) { bd = d; bi = i; } });
-    out.push(left.splice(bi, 1)[0]);
-  }
-  return out;
 }

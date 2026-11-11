@@ -1907,20 +1907,35 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   knowing nothing of the den; its look `js/den/nav-board.js` (`navBoard`); played on its own in the
   unlinked `navigation-test.html`; bots in `tools/nav-bots.mjs`. As YPPedia ("Navigation", read 11 Nov)
   and its two pictures of a board have it:
-  - A round board, a ship's wheel on a night sky (a crescent moon): three rings round the hub, eight
-    places round each, on the wheel's spokes. Stars of five colours, each its own shape: yellow a plump
-    five-pointed star, red a sharp one, orange an eight-pointed burst, white six-pointed, blue a
-    four-pointed compass star. The next star waits out on a spoke's handle; Space drops it in and it
-    falls toward the middle down that spoke.
+  - Its look, checked against YPPedia's board pictures at full size (11 Nov, after "double check the
+    graphics ... are they definitely following it?"): an upright panel, 3 wide by 4 high, "Navigation"
+    in pale serif letters at the top, a pale crescent moon top left, a navy night sky with a few faint
+    stars, and from the middle down a flat painted sea of wavy navy, teal and royal-blue bands. On it
+    an olive-gold ship's wheel whose handles reach the panel's sides. Three rings of eight places, on
+    the spokes: the outer ring is the wheel's own broad rim (white tick marks round it), the middle a
+    second broad rim, the inner a thin ring by the hub. Thin spokes run out past the rim to handles,
+    each a little ring with two leaves. Gold filigree in the hub: a half dome, an anchor, and a ship's
+    hull of peaks and loops at the bottom. Stars of five colours, glossy and cut (each point a light
+    facet and a dark one), each its own shape: yellow a fat six-pointed star, red a sharp five-pointed
+    one, orange a spiky burst, white eight thin points, blue a compass star (four long points, four
+    short). The ring selected is a little brighter (the pictures don't show how the real one marks it).
+    The next star waits out on a spoke's handle with a pale halo; Space drops it in and it falls toward
+    the middle down that spoke. Without its sky (`sky: false`, for the cliff) it's the wheel alone,
+    square.
   - Up moves to the higher ring, Down to the lower; Left turns the ring selected anticlockwise, Right
     clockwise, its stars with it (WASD too; the mouse picks the ring nearest it, a left click turns it
     anticlockwise, a right click clockwise). A star with nothing under it falls in.
   - Three or more of a colour in a line vanish: a spoke all of a colour (out from the centre), or
     three or more in a row round a ring (round its join too). What falls in can line up again (a
     cascade). Lines score little: a point a star, times its step in the cascade.
-  - The constellation: places marked in colours, a medallion each (empty, a ring in its colour with a
-    dim star; holding its colour, a solid coin with the star on it), faint lines joining them as a
-    star chart's. Fill every one and it vanishes, its stars with it, and scores; a new one's shown.
+  - The constellation: places marked in colours, nothing joining them. Empty, a thick ring of its
+    colour round a dark middle with that colour's star outlined in it; holding its colour, a coin of
+    it with the star on it; holding another colour, the ring with that star sitting in it. Fill every
+    one and it vanishes, its stars with it, and scores; a new one's shown. Down the panel's bottom left
+    a column of little stars, lit from the bottom, and at its top right a cluster of four small ones,
+    as in the pictures; what they mean isn't said, so here (made up) the column is a star a place,
+    all lit until you pass par and then going out as par / moves, and the cluster sparkles as a
+    constellation goes.
     Made with a line at once, the constellation goes first (YPPedia: such a part "must be completed
     last").
   - Its points: 10 x stars squared, times par / moves when over par (par 6 + 4 a star), times 3 when

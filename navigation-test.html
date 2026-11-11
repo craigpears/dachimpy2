@@ -29,7 +29,8 @@
   #prompt { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); background: var(--panel); border: 1px solid var(--edge); border-radius: 8px; padding: 4px 12px; font-size: 15px; color: var(--dim); white-space: nowrap; max-width: calc(100vw - 24px); overflow: hidden; text-overflow: ellipsis; }
   #say { position: fixed; left: 0; right: 0; top: 18px; text-align: center; font: 700 30px 'Alegreya', serif; color: #ffd23a; text-shadow: 0 2px 0 #1a1030, 0 0 14px rgba(0,0,0,.6); pointer-events: none; opacity: 0; transition: opacity .5s; }
   #say.on { opacity: 1; transition: none; }
-  @media (max-width: 700px) { .ui { top: auto; bottom: 48px; } }
+  /* Narrow, the panel goes under the board (the board's own title and moon are at its top), its blurb hidden. */
+  @media (max-width: 900px) { .ui { top: auto; bottom: 48px; } .ui p { display: none; } }
 </style>
 </head>
 <body>
@@ -153,10 +154,10 @@ function frame() {
   const dt = Math.min(0.05, clock.getDelta());
   board.tick(dt);
   // The camera straight on to the board, a little to its left so the panel doesn't cover it, the
-  // rock's lit stars in view at the right.
-  const v = board.camView(camera), wide = innerWidth > 900, side = wide ? 0.9 : 0;
-  camera.position.copy(v.from).add(new THREE.Vector3(side, 0, wide ? 2.2 : 0.3));
-  camera.lookAt(v.look.clone().add(new THREE.Vector3(side, 0, 0)));
+  // rock's lit stars in view at the right; narrow, further back and the board higher, the panel under it.
+  const v = board.camView(camera), wide = innerWidth > 900, side = wide ? 0.9 : 0, low = wide ? 0 : -0.9;
+  camera.position.copy(v.from).add(new THREE.Vector3(side, low, wide ? 2.2 : 1.6));
+  camera.lookAt(v.look.clone().add(new THREE.Vector3(side, low, 0)));
   if (banner > 0 && (banner -= dt) <= 0) $('say').classList.remove('on');
   const g = board.game, c = g.constellation;
   $('stats').innerHTML = `Constellation <b>${g.completed + 1}</b>, <b>${c ? c.marks.length : '-'}</b> star${c?.marks.length === 1 ? '' : 's'} · moves <b>${g.moves}</b> (par ${c ? parFor(c.marks.length) : '-'}) · score <b>${g.score}</b> · booches <b>${g.booches}</b>${g.last ? ` · last <b>${g.last.rating}</b>` : ''}`;
