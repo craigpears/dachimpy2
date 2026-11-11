@@ -929,6 +929,18 @@ Still to collect: the user's pictures not saved to disk need putting in `notes/m
 (the v1 page, the first shoot-Dalnoth board and the Dachimpy.com pages), and pictures of I'm a
 Duck's version.
 
+## Helium, and Distilling (11 Nov, from Mischievious)
+
+Mischievious (the real pirate, giving feedback on her wedding): "Wanted to mention helium. He has a
+lot of puzzle talents and really loves distilling if there were certain tutorials and such."
+**Helium**, a real pirate (portrait and ocean to check on YPPedia before he's drawn; then into
+PIRATES and the wardrobe), as the one who teaches a puzzle, Distilling above all: a still on an
+island of his, or a corner of the den, where he shows you how it's done and plays it with you.
+Distilling would be a new puzzle module of its own (rules in `src/`, knowing nothing of where it's
+played), as every puzzle is. It goes with the museum's Distilling Simulator (the user's own, "with
+control over when columns are burnt"), and with smuggling's cheap rum, made yourself. Not to build
+without a go-ahead.
+
 ## Placing creatures: choose what they get up to (11 Nov)
 
 "when you're placing ... familiars and pets in scenes, like, you should have options for, like,
