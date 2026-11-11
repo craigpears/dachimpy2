@@ -172,6 +172,10 @@ the site (`.assetsignore` skips `*.md`).
     (proportional by YPPedia's numbers). Daquan's portrait checked first; Primates Rule's gold,
     black and white thrones and skeleton cannons from the user's pictures (above). What you do
     against the flotilla: fleshed out after. (IDEAS.md, "Daquan's flotilla".)
+    **Modelled (11 Nov), to be looked at:** Primates Rule beside the sloop on the unlinked
+    `frigate-test.html` (`js/den/frigate.js`, `src/den-frigate.ts`; RULES.md, "Primates Rule, as Puzzle
+    Pirates drew her"). Next: below decks (the captain's cabin; the hold and its throne), her crew to
+    be seen aboard (dozens), then placing her on the sea for the flotilla.
   - **Helium and Distilling, to start:** a Distilling puzzle of its own (its rules from YPPedia, a
     module knowing nothing of the den, tested), and Helium teaching it as Tzz teaches Sailing: a
     funny animated scene showing you real distilling moves, then "now you try". His still is the
@@ -315,7 +319,12 @@ the site (`.assetsignore` skips `*.md`).
 - **The puzzles' keys at sea, in one bank (11 Nov):** "The R does not make sense as a button for sailing
   ... I definitely still associated R with sailing ... surely they should at least all be in the same bank
   of keys for activating the puzzles." Now R Sailing, G Gunnery, O the oars (rowing), scattered among the
-  helm's W A S D and the guns' Q E. To settle with the user which bank (number keys 1 2 3 are free at sea).
+  helm's W A S D and the guns' Q E. Settled: "I think 1, 2, 3 makes sense": 1 Sailing, 2 Gunnery, 3 the
+  oars, the order of their buttons on the sea's bar.
+- **Sailing's keys as the real game's (11 Nov):** "when I press down, is it going down? ... isn't that
+  rotate? space is supposed to be down". Now ↓ (and S) drops the pair at once. YPPedia's Sailing,
+  Controls: left and right move it; up and down turn it, clockwise and anticlockwise; Space makes it fall
+  faster (still steerable as it falls). Every Sailing board: at sea, Kikkit's, Tzz's your-turn.
 
 ## Spotted along the way (not asked for)
 
