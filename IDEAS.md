@@ -861,11 +861,11 @@ of your own on the sea: its shape, its palms and sand, what stands on it, all pl
 modular pieces (furniture, creatures, talking pirates: RULES.md), and kept in this browser as
 everything you make your own is. Goes with the decorating competition (above).
 
-## A museum island: how the Blockade Simulator began (11 Nov)
+## A museum, in Dachimpy's house: how the Blockade Simulator began (11 Nov; first an island)
 
 "I'd love an island that's a museum of the really old school first versions of the blockade
-simulator and dachimpy.com." An island on the sea (a little island of its own, like the others),
-its exhibits the real thing, oldest first. The user's screenshots are kept in `notes/museum/`
+simulator and dachimpy.com." First an island on the sea; now Dachimpy's own house (below, "the museum
+is Dachimpy's house"), its exhibits the real thing, oldest first. The user's screenshots are kept in `notes/museum/`
 (not deployed), numbered in that order:
 
 
@@ -980,8 +980,15 @@ Dachimpy's house and the museum may be one place: the house in the housing distr
 museum's exhibits (the sims' story, oldest first) and the tribute (the trinkets, the friends' portraits,
 Kikkit, Zizzy, Mini), Dachimpy showing you round all of it. Whoever comes in is met at the door
 with a hug and a cookie, every visit, as Dachimpy did in Puzzle Pirates; the cookie maybe yours to
-keep (in your hold or on a shelf at home). Whether it's one place or the museum stays an island of
-its own with the house beside it: to settle with the user.
+keep (in your hold or on a shelf at home).
+**Settled (11 Nov): the museum is Dachimpy's house.** "I think an island is maybe a bit of overkill
+for the museum thing. So yeah, maybe it could just be my own house ... a museum thing ... showing
+off some beloved memories and things like that could be a generic enough thing." So no museum
+island: the museum is Dachimpy's house in the housing district, the sims' story and the tribute its
+rooms. And showing off beloved memories is a piece of its own, not Dachimpy's code: exhibits (a
+picture, a trinket, a plaque with its story) placed in any house as config, the host walking you
+from one to the next and telling each one's story, every exhibit in the 2D viewer too. Gravee's
+portraits, Pandayay's trophies and Dachimpy's sims are all that piece.
 
 Still to collect: the user's pictures not saved to disk need putting in `notes/museum/` by hand
 (the v1 page, the first shoot-Dalnoth board and the Dachimpy.com pages), and pictures of Imaduck's
@@ -1072,7 +1079,11 @@ same thread as the museum's: helping and leading people, and growing into it.
   from if you want?" and "You got this!" So Pandayay and Multibella together, both encouraging:
   Pandayay with her trophies and Vikings, Multibella the one who'll show you Foraging (the den's
   Foraging puzzle is already its own module), kind and practical ("using less moves"). Where they
-  meet you (her house, or a place of their own), and who leads, to settle with the user.
+  meet you, to settle with the user.
+  **Neither is the sidekick (11 Nov):** "I don't want [Multibella] to be like the secondary character
+  though. Like having it be [Pandayay]'s house seems mean." So the double act isn't a guest in
+  Pandayay's house: they're equals, in a place that's both of theirs (a house they share, or a house
+  each with the double act in both), each with their own thing to show you and their own errand.
 
 ## Puzzles you can size up, and play by keys (11 Nov)
 
