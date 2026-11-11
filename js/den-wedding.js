@@ -297,15 +297,29 @@ export const fill = (text, names) => text.replace(/\{partner\}/g, names.partner)
 export const WELCOME = {
     happy: [
         'Oh! You came! Welcome to my island! Isn\'t it pretty?',
-        'I do love a wedding. Best day out on the whole Ocean. Hee hee!',
+        'I do love a wedding. I\'ve been through five today, just for the fun of it! Hee hee!',
         'So! How are you? Would you like to get married?',
     ],
     dark: [
         'Oh, hello! Don\'t mind the blood and guts. The last wedding went a bit... bloody and gory.',
-        'It\'s fine. It happens round here all the time. We\'ve hired a bit of extra security.',
+        'It\'s fine. Five weddings today, and only the one got raided. We\'ve hired a bit of extra security.',
         'So! How are you? Would you like to get married?',
     ],
 };
+/** The weddings she's been through today, for the fun of it (the user, 11 Nov: "showing that ... you
+    can keep doing it for fun all the time ... I enjoy getting married, go through the ceremonies ...
+    the first time I had this kind of wedding, second time it didn't quite go so well. The Raiders
+    came and it was bloody gory ... tie it into the mechanics in a happy, fun way, not in a
+    promiscuous ... way"). Each is the wedding's own options, so her stories (in GUSH, when you
+    choose one, and asked about them) show you what there is to choose: between them, every venue,
+    theme and plot. */
+export const TODAY = [
+    { venue: 'beach', theme: 'rosy', plot: 'sweet' },
+    { venue: 'chapel', theme: 'gory', plot: 'raiders' },
+    { venue: 'deck', theme: 'drunk', plot: 'drunk' },
+    { venue: 'beach', theme: 'drunk', plot: 'brawl' },
+    { venue: 'chapel', theme: 'rosy', plot: 'sweet' },
+];
 /** What she suggests first in each tone (every theme and plot is open in either). */
 export const SUGGEST = {
     happy: { theme: 'rosy', plots: ['sweet'] },
@@ -319,16 +333,17 @@ export const GUSH = {
     suitor: ['Ooh, good choice! I\'d have picked them too.', 'A match made in the Ocean!', 'They\'ll scrub up lovely.', 'Eee! I love them already!'],
     suitorOne: { happy: ['Sweet William! He\'s an absolute poppet.'], dark: ['Barnaby! He\'s had a lie down and everything.'] },
     own: ['Someone of your own! How mysterious. I love it.', 'Ooh, who\'s this? They\'re gorgeous!', 'Oh, I like them. I like them a lot.'],
-    venue_beach: ['The beach! Sand between your toes. Perfect.', 'Ooh, the sea breeze in your hair!'],
-    venue_chapel: ['The old chapel! So romantic. Mind the drop.', 'Up on the cliff! You can see half the Ocean from here.'],
-    venue_deck: ['A ship\'s deck! How very piratey of you.', 'On the deck! We can sail off on honeymoon straight after!'],
-    theme_rosy: ['Happy and rosy! Pink everywhere! I could burst!', 'Roses! I adore roses.'],
-    theme_gory: { happy: ['Bloody and gory! Ooh, daring. I love it.'], dark: ['Bloody and gory! Saves on tidying up, really.', 'Red goes with everything. Especially blood.'] },
-    theme_drunk: ['A drunkards\' fest! Grog for everyone!', 'Barrels! Lovely, lovely barrels.', 'I\'ve had the inn send over every drop they\'ve got.'],
-    plot_sweet: { happy: ['Sweet and blissful! Oh, I\'m welling up already.'], dark: ['Sweet and blissful? Ooh, that\'d make a change.'] },
-    plot_raiders: { happy: ['Raiders! How exciting! Good thing I hired security.'], dark: ['Raiders! Just like last time. I\'ll tell the guards.'] },
-    plot_drunk: ['Somebody\'s drunk! There\'s always one. Hee hee!', 'Hee hee! I\'ll put the cake somewhere safe. Or not.'],
-    plot_brawl: { happy: ['A brawl? Ooh, a lively one!'], dark: ['A brawl! Proper wedding, that.'] },
+    // (Each with her memory of one of today's weddings: TODAY, below.)
+    venue_beach: ['The beach! Sand between your toes. Perfect.', 'Ooh, the sea breeze in your hair!', 'My first today was on the beach. Roses everywhere!'],
+    venue_chapel: ['The old chapel! So romantic. Mind the drop.', 'Up on the cliff! You can see half the Ocean from here.', 'I\'ve had two up there today! The raiders came to one. The other made me cry.'],
+    venue_deck: ['A ship\'s deck! How very piratey of you.', 'On the deck! We can sail off on honeymoon straight after!', 'My third today was on that deck. Mind the cake.'],
+    theme_rosy: ['Happy and rosy! Pink everywhere! I could burst!', 'Roses! I adore roses.', 'Just like my first today! Roses all down the aisle.'],
+    theme_gory: { happy: ['Bloody and gory! Ooh, daring. I love it.', 'Like my second today! That one went a bit red.'], dark: ['Bloody and gory! Saves on tidying up, really.', 'Red goes with everything. Especially blood.', 'Like my second today! The raiders saw to the red.'] },
+    theme_drunk: ['A drunkards\' fest! Grog for everyone!', 'Barrels! Lovely, lovely barrels.', 'I\'ve had the inn send over every drop they\'ve got.', 'Like my third today! Grog in the punch, grog in the cake.'],
+    plot_sweet: { happy: ['Sweet and blissful! Oh, I\'m welling up already.', 'My fifth today went just like that. I cried!'], dark: ['Sweet and blissful? Ooh, that\'d make a change.', 'My fifth today went just like that. Made a nice change!'] },
+    plot_raiders: { happy: ['Raiders! How exciting! Good thing I hired security.', 'Like my second today! They came right up the aisle.'], dark: ['Raiders! Just like last time. I\'ll tell the guards.', 'Like my second today! They came right up the aisle.'] },
+    plot_drunk: ['Somebody\'s drunk! There\'s always one. Hee hee!', 'Hee hee! I\'ll put the cake somewhere safe. Or not.', 'Like my third today! Face first in the cake.'],
+    plot_brawl: { happy: ['A brawl? Ooh, a lively one!', 'Like my fourth today! Benches everywhere. Lovely day, though.'], dark: ['A brawl! Proper wedding, that.', 'Like my fourth today! Benches everywhere. Lovely day, though.'] },
     add: ['More! More is always better.', 'Oh, that\'s gorgeous there.', 'Yes! Just there!', 'Ooh, I wouldn\'t have thought of that!', 'Straight from the furnisher\'s, that!'],
     move: ['Ooh, much better there.', 'Perfect! Well, nearly perfect. No, perfect!', 'Yes, yes, yes! There!', 'Oh, that\'s much more you.'],
     turn: ['Ooh, a different angle!', 'Twirly! I love it.'],
@@ -344,6 +359,7 @@ export const GUSH = {
     wedding's and the Ocean's, not her own life (the user, 11 Nov: "Maybe it's that kind of
     interactive. You could ask her"). Same in both tones but where the tone gives her another answer. */
 export const ASK_HER = [
+    { q: 'How were today\'s weddings?', a: 'Five so far! Roses on the beach, raiders at the chapel, cake on the deck, a lovely brawl, and a sweet one to finish. Every one a treat!' },
     { q: 'Who\'s on the guest list?', a: 'Anyone with a clean shirt. Well, a shirt.' },
     { q: 'What\'s the dress code?', a: 'Whatever the tailor had in! Dyed to match, ideally. Black if you\'re showing off.' },
     { q: 'Who\'s paying for all this?', a: 'The crew\'s coffers, love. Don\'t tell the purser.' },

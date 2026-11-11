@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
-  AREA, ASK_HER, DYE_NAMES, GUESTS, GUSH, Gush, MAX_PROPS, PLOTS, PROPS, SUGGEST, THEMES, TONES, VENUES, WELCOME, WRECK,
+  AREA, ASK_HER, DYE_NAMES, GUESTS, GUSH, Gush, MAX_PROPS, PLOTS, PROPS, SUGGEST, THEMES, TODAY, TONES, VENUES, WELCOME, WRECK,
   answer, arrival, caption, clean, decode, dressFor, encode, fill, fresh, layout, moveTo, plotAt, plotScript, readSecs,
   scriptSecs, seatsFor, suitorTitle, suitors, themeLook, wearable,
 } from '../src/den-wedding';
@@ -290,4 +290,18 @@ it('she\'s the host, not the show: no lines about how often she\'s married, and 
   for (const line of all) expect(line).not.toMatch(/ever so many|keep this one alive|marry them|my last (one|husband|wife)/i);
   expect(ASK_HER.length).toBeGreaterThanOrEqual(6);
   for (const tone of ['happy', 'dark'] as const) ASK_HER.forEach((_, i) => expect(answer(i, tone).length).toBeGreaterThan(10));
+});
+
+// The user, 11 Nov: "the first time I had this kind of wedding, second time it didn't quite go so well. The
+// Raiders came and it was bloody gory ... tie it into the mechanics in a happy, fun way".
+it('her five weddings today show off every venue, theme and plot, and she recalls one whenever you choose (11 Nov)', () => {
+  expect(TODAY).toHaveLength(5);
+  for (const [key, list] of [['venue', VENUES], ['theme', THEMES], ['plot', PLOTS]] as const) {
+    const ids = list.map((x: { id: string }) => x.id);
+    expect(new Set(TODAY.map((w) => w[key]))).toEqual(new Set(ids));
+    for (const id of ids) for (const tone of ['happy', 'dark'] as const) {
+      expect(new Gush(tone).pool(`${key}_${id}`).some((l) => /today/.test(l))).toBe(true);
+    }
+  }
+  expect(WELCOME.happy.join(' ')).toMatch(/five today/);
 });

@@ -1049,6 +1049,13 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     (the tailor, dyes and doubloons, the inn's grog, the furnisher, security earning their pay), not
     her own love life, and you can ask her things as you plan ("Who's paying for all this?" "The
     crew's coffers, love. Don't tell the purser."). A test checks.
+  - **Five weddings today, for the fun of it (11 Nov):** "showing that ... you can keep doing it for
+    fun all the time ... not in a promiscuous way, but in a this is a fun game ... tie it into the
+    mechanics in a happy, fun way." She's been through five ceremonies today because she enjoys them,
+    and each is one of the wedding's own options: roses on the beach, raiders at the chapel ("it
+    didn't quite go so well"), cake on the deck, a brawl, a sweet one to finish. She says so in her
+    welcome, recalls the matching one whenever you choose a venue, theme or plot, and tells them all
+    if asked: her stories show you what you can choose (`TODAY`; a test checks every option's there).
   - **The plots:** sweet and blissful; raiders crash it (the guards knock them into the sea); somebody's
     drunk (face first into the cake); a brawl (benches flying). Each ends in "I do", the kiss,
     hearts and confetti, and a group shot framed in gilt as the wedding portrait: save the picture,
