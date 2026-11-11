@@ -278,12 +278,6 @@ the site (`.assetsignore` skips `*.md`).
   Since 9 Nov you can also lob a piece over the wall from the den floor at raiders hacking
   outside; not yet tried by the user. Watch for: the markers on raiders outside cluttering the
   view while you carry a piece.
-- **Penguin Island only by way of the whirlpools (11 Nov):** "Make sure you can't get to Penguin Island
-  without going through the whirlpools ... the idea that, you know, you can get to the penguins by going
-  behind it is obviously a bit weird. Also, there should be a way through, because it's a shortcut. The
-  penguins ... should be an obvious bonus to go, oh, look, I found the penguins. They should be at least a
-  few rocks around them." So rocks round the penguins' island, closed off from the open sea behind, the
-  whirlpools (and a Vegas over them) the one way to it, and the whirlpools still the shortcut past the reef.
 - **Port Decorum to scale with the sloop (11 Nov):** "just looking at port decorum size relative to the
   sloop. Isn't the wall for it going to tower over that? ... we've clearly got a scale problem here." Its
   fort's walls are lower than the sloop's mast and its towers lower than the checkpoint's: a fort's walls
@@ -293,27 +287,18 @@ the site (`.assetsignore` skips `*.md`).
   boxy. I think some of that, as I said, is probably a good style and fit, but I think it needs a tiny bit
   of a slant." Not dramatic: the sides falling in a little from the waterline up to the deck (tumblehome),
   so a hull no longer reads as a box side-on, the sloop's and the frigate's alike.
-- **Sailing's platforms as the real game's: no gaps, no colour on top of itself (11 Nov):** "why is there,
-  it's almost like a grayed out block ... on the platform, it's just like a gap. Like that definitely does
-  not happen in sailing. Nor do ... I never feel like I've seen the same color on top of each other. They
-  either kind of, if they're going to do that, they're either next to each other, or you can have like
-  really big platforms with like a diagonal shape with like ... 6 of the same color, but like 2 on top of
-  each other with different colors at the side. I've never seen that." So every square of a dealt platform
-  a target, and a colour runs side by side or on along a diagonal, never stacked on itself.
-  Again, later: "there's like white and yellow next to each other, and then another white and yellow above
-  them. Again, I've never seen that pattern. They would always be alternating." (YPPedia's Sailing pages
-  do mention blank spaces in a platform between targets; the user's memory wins.)
-- **Sailing's turn keys the other way round, and Space's drop smooth (11 Nov):** "could you really double
-  check which way round the keys are rotating the sailing pieces? Because it feels kind of opposite to me.
-  The spacebar drop is improved, but could also be a lot smoother. That's noticeably jumpy." YPPedia only
-  says "Up and Down arrow keys: Rotate the pair clockwise or counterclockwise", not which is which: so up
-  turns it anticlockwise, down clockwise, and the pair glides down rather than hopping a row at a time.
 - **Pirates other than Kikkit talk now and then, not every few seconds (11 Nov):** "it's feeling like they
   come through a bit fast. Like the idea of [Kikkit] was supposed to be she's just a rambling, tangenting
   person that just goes on and on ... There should be more distinct difference. I think like this guy at
   the Imperial Island. Like, it's not the odd bonus thing. Like, it's coming along every few seconds ...
   Obviously, don't touch [Kikkit]. She's fantastic." So everyone else's lines the odd bonus line, well
   apart; Kikkit as she is.
+- **Sailing's platform gaps: on the zigzag, and drawn as nothing (11 Nov):** "you can get gaps ... they're
+  usually diagonal to each other. So ... if you've got 2 by 3 square, you'll have 3 that are part of the
+  platform that have to fill with colours, and they'll be all on a diagonal, so then the gaps will be on
+  the corresponding other kind of zigzag. But there's no kind of grey outline. It's just empty space.
+  There's no graphic for it, which I think is what really confused me." So some platforms have their
+  targets on a zigzag and gaps on the other, and a gap is drawn as plain empty space.
 
 ## Spotted along the way (not asked for)
 
