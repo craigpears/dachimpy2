@@ -328,6 +328,14 @@ the site (`.assetsignore` skips `*.md`).
   on it. [To] make it clear, it's kind of a to-do item." So: a curvier stern (and the sloop's, if it
   suits), the lower ports centred in their band, and her moored where you see her once out at sea,
   marked plainly as still to come.
+- **A visual changelog, kept up as each bigger feature lands (11 Nov):** "I keep taking screenshots of all
+  the key moments in cutscenes and describing all the things I'm working on and changing ... I'd like a
+  change log maintaining, you know, not for the little bug fixes, but ... as each bigger feature's added,
+  and it should be more visual, like in this case, showing a picture of [Tzz] with her blowing a balloon,
+  [Gravee] in the portrait gallery, the gunning deck, [Dalnoth] coming as a Viking, the [Primates Rule],
+  kind of like just like a good teaser shot of like that [deck] with the [sloop] next to it." A page of
+  entries, newest first, each a teaser shot or two and a few lines, pirate names only; the start of
+  "Something to show people" (above).
 
 ## Spotted along the way (not asked for)
 
