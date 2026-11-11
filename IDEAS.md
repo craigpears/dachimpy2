@@ -938,8 +938,9 @@ PIRATES and the wardrobe), as the one who teaches a puzzle, Distilling above all
 island of his, or a corner of the den, where he shows you how it's done and plays it with you.
 Distilling would be a new puzzle module of its own (rules in `src/`, knowing nothing of where it's
 played), as every puzzle is. It goes with the museum's Distilling Simulator (the user's own, "with
-control over when columns are burnt"), and with smuggling's cheap rum, made yourself. Not to build
-without a go-ahead.
+control over when columns are burnt"), and with smuggling's cheap rum, made yourself. The user
+(11 Nov): "that's more of an idea thing ... whenever you get to distilling or something
+somewhere": no hurry; Helium comes in whenever Distilling does.
 
 ## Placing creatures: choose what they get up to (11 Nov)
 
