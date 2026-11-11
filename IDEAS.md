@@ -929,12 +929,14 @@ there.
 I need for in my house, yeah, just my trinkets and portraits. That's probably the best thing.
 Obviously, reference for the real monkeys and stuff like that, maybe. But yeah, all my trinkets,
 and my beloved friends, and certainly the special, really special, truly special ones. So [Kikkit]
-and [Mary], they absolutely need their special references." So the tribute isn't the museum's
+and [her], they absolutely need their special references." So the tribute isn't the museum's
 last room but Dachimpy's own house in the housing district (one more house, like Gravee's): the
 trinkets on shelves and tables (the real ones, from Dachimpy's pirate page's trophies and trinkets on
 YPPedia, each a shared furniture piece), their friends' portraits on the walls (the portraits piece,
 from their looks), and the truly special ones given pride of place with something of their own
-that refers to them: **Kikkit** and **Mary** (who Mary is, to pin down with the user). The real
+that refers to them: **Kikkit**, and **Zizzy**, her most recent pirate, on the Meridian Ocean
+("I really can't remember at times": she had others before; the game uses pirate names only, so
+Zizzy; her portrait to check on YPPedia (Meridian) before she's drawn). The real
 cuddly monkeys, Mini above all, from the user's photos. The museum keeps the story of the sims;
 the house keeps the people.
 
