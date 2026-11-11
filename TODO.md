@@ -284,7 +284,7 @@ the site (`.assetsignore` skips `*.md`).
   each bend (Gunnery, rowing, Sailing over whirlpools, Bilge locks, the Carpentry crane). "What you've said
   sounds good as a first draft ... We're going to have to go through several iterations of this course."
   The Gunnery shortcut is a guarded gap with the imperial checkpoint's mechanic as it is: run it (and
-  patch) or knock its guns out by Gunnery (no rowing through: "that just makes you a sitting duck") (the user, 11 Nov: "we've already got like the Imperial
+  patch) or knock its guns out by Gunnery (a heavy combo, sailed or rowed, zooms her through; rowing a stroke at a time is "a sitting duck") (the user, 11 Nov: "we've already got like the Imperial
   checkpoint ... you basically just use that exact same mechanic"). Rocks shot away: IDEAS.md, later.
 - **Duty Navigation (11 Nov):** the real puzzle (three rings of stars, constellations), its own module, as
   the den's other puzzles are.

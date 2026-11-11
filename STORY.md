@@ -138,8 +138,8 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    out from off the beach to a junction, and on, the main shipping lane, to an imperial
    checkpoint, another wind bringing her home; its guns are trained on marks along the way
    through, a hit holes her till you patch her by Carpentry, a strong thing that's work to get
-   past but can be done: run it under sail (a hit or two, or none on a big Sailing boost that zooms
-   her through), knock its guns out with her own, three hits
+   past but can be done: run it (a hit or two, or none on a heavy combo, a big Sailing chain or a combo
+   rowed on both sides, that zooms her through), knock its guns out with her own, three hits
    apiece, a fight once you start it, or find the secret way round: tucked away off to the left of
    the trade wind's run, out of view, a wind blowing down out of its mouth that only the oars beat
    (nothing ever says so), the canal climbs two locks straight up the cliff, each pumped up by
