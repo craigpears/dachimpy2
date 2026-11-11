@@ -123,6 +123,13 @@ the site (`.assetsignore` skips `*.md`).
     thin ledge under them: filled, the piece shows inside; empty, coloured corner brackets for the
     colour it wants. A wave and a ship's sails behind the board. A whole board of interlocked
     staircases, pairs straddling columns everywhere, is what a run of Vegases looks like.
+  - **Sparkly full sails when you sail well, "very importantly" (11 Nov):** "when you do well in
+    sailing, you normally get like a sparkly indicator to show how well you're doing. So when you
+    do the big Vegas ... we definitely need that visual thing to carry through. So ... you need lots
+    of sparkly full sails like in the game." The bigger the chain, the more she sparkles: her sails
+    billowing full and glittering on a Vegas, fading as the gust is spent; a sparkle meter on the
+    board. It's what Kikkit's "really, really big and really sparkly" ramble is about (IDEAS.md,
+    "Her whoosh"), so her lines and the look must match.
 
 - **Something to show people, tonight's goal (10 Nov):** once we reach a stopping point, likely after
   Kikkit's sailing quest: "some kind of advertising material ... the fully built den, the imperial

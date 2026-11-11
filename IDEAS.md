@@ -524,6 +524,35 @@ exactly; the real game's own seed can't be had, so her board is rebuilt in our d
   chains do. The joke's on top and the mechanic's real underneath (RULES.md, "The humour's a layer
   on a real mechanic").
 
+## Daquan's flotilla: "go sink a ship" (11 Nov)
+
+The user's partner in crime, **Daquan** (a real pirate: pirate name only; his ocean and portrait to
+check on YPPedia before he's drawn). Their weirdest memory together: on a flotilla, the user
+"wasn't doing very well on that particular day, and people were starting to grumble", so Daquan
+said "right, quick ... you got to start sinking something. Go sink a ship, quick", since people
+were starting to leave. The user "took a few more risks and ended up sinking our ship rather than
+somebody else's ... my literalness is like, well, you told me to go sink a ship, I did that."
+
+- **A cutscene past the reef:** Daquan as your instructor, your introduction to attacking the
+  ships on the main shipping lane. It opens on the flotilla memory, with the user's own pirate
+  (pirate name to get from the user) at the helm: told to go sink a ship, they sink their own and
+  give that literal answer, and Daquan face-palms. Then he turns to you: "right, I need someone
+  new to drive my ships. Please ... don't do what the last guy did."
+- **Pick a side: the big ship or the underdogs.** This is where Dalnoth comes back in. The user
+  and Daquan "were very proud ... of being the underdogs. You know, we didn't seek the fame and
+  glory. We wanted to actually ... liven up the ocean." So a choice: Dalnoth staring you down
+  from a war frigate full of cannons (maybe where bigger ships and a 50-strong crew come into
+  the game), or the underdogs in your little sloop, "livening up the ocean. It's where the fun
+  is at."
+- **Underdogs vs the giant ship:** a cutscene with someone darting back and forth, "are you
+  serious? He's got a giant ship, dude." Maybe this is where the soldiers from the base come in
+  (the quest list's soldiers), and you take him out by boarding him from rowboats, "or something.
+  I don't know."
+
+Ties in with: the shipping lanes and the gun platform over them (above; the cliff gun platform
+needs a go-ahead before it's built), Dalnoth's return (STORY.md step 7), crew from the barracks
+(below), rowing (the rowboats), and PvP and bigger ships (both need a go-ahead).
+
 ## A bigger ship from the shipwright (10 Nov)
 
 "Later we can figure out how ... you can have some shipbuilding, shipwright quest to ... strengthen
