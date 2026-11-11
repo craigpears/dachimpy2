@@ -1643,6 +1643,16 @@ Building on what's there now (the walk and its stairs are made of pieces that st
 
 For now the den is the first version, and that works.
 
+## Balloffire teaches Gunnery (11 Nov)
+
+The user (11 Nov): "Balloffire is definitely down to be the gunning tutor ❤️". **Balloffire**, a
+real pirate who has said yes (pirate name only; ocean, pirate page and portrait to check before
+they're drawn, then into PIRATES and the wardrobe), teaches Gunnery as Tzz teaches Sailing (RULES.md,
+"A pirate showing you a puzzle is the heart of it"): a funny animated scene showing you real
+Gunnery moves, then "now you try", on the den's one Gunnery module (the gun tower's and her deck's).
+Their own way of showing it, and where you meet them (the gun tower, an island of their own), to
+settle with the user. Waits its turn (RULES.md, "Finish one thing at a time").
+
 ## Gun tower: what's left (the tower itself is built; its rules are in RULES.md)
 
 - **Knocked flying:** get hit by their cannonball up on the wall and you're knocked clean off the
