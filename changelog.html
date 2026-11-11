@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pirate Den: what's new</title>
+<!-- The Pirate Den's changelog (CLAUDE.md, "The changelog"): the bigger features as they land, newest
+     first, each with a teaser shot or two from changelog/ and its link to try it. Not bug fixes or tweaks.
+     The den's "What's new" button (den.html) reads the first date here to know whether there's anything
+     new since you last looked. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,500&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #2a1d13; --ink2: #5b4330; --gold: #e0a92a; --cream: #f6ead2; --dim: #cbb894; --edge: #5a412a; --paper: #f3e3c3; --paper2: #e8d2a8; }
+  * { box-sizing: border-box; }
+  html { background: #140d08; }
+  body { margin: 0; min-height: 100vh; color: var(--cream); font: 500 17px/1.5 'Alegreya Sans', system-ui, sans-serif;
+    background: #140d08 repeating-linear-gradient(90deg, rgba(255, 220, 160, 0.025) 0 2px, transparent 2px 120px); }
+  a { color: var(--gold); }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 28px 16px 48px; }
+  header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 20px; margin-bottom: 8px; }
+  h1 { margin: 0; font: 700 clamp(30px, 6vw, 44px)/1.05 'Alegreya', serif; color: var(--gold); }
+  .lede { margin: 6px 0 0; color: var(--dim); max-width: 560px; }
+  .play { display: inline-block; font: 700 17px 'Alegreya Sans'; color: var(--ink); background: var(--gold); border-radius: 8px; padding: 9px 18px; text-decoration: none; white-space: nowrap; }
+  .play:hover { background: #f0bd44; }
+  h2 { display: flex; align-items: center; gap: 14px; margin: 38px 0 14px; font: 700 22px 'Alegreya', serif; color: var(--dim); }
+  h2::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--edge), transparent); }
+  article { background: linear-gradient(170deg, var(--paper), var(--paper2)); color: var(--ink); border: 1px solid #c9a35c; border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 40px rgba(120, 80, 30, 0.18); padding: 14px; margin: 0 0 20px; }
+  .shots { display: grid; gap: 10px; grid-template-columns: 1fr; }
+  .shots.two { grid-template-columns: 1fr 1fr; }
+  .shots a { display: block; border-radius: 7px; overflow: hidden; border: 2px solid #3b2a1b; background: #2a1c11; line-height: 0; }
+  .shots img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; transition: transform .25s; }
+  .shots a:hover img { transform: scale(1.02); }
+  h3 { margin: 12px 2px 4px; font: 700 25px/1.15 'Alegreya', serif; color: #6b2a12; }
+  article p { margin: 0 2px 6px; color: var(--ink2); max-width: 70ch; }
+  .try { margin: 8px 2px 2px; font-weight: 700; font-size: 15px; }
+  .try a { color: #8a4b0f; }
+  .try code { font: 600 14px ui-monospace, Consolas, monospace; }
+  .note { font-style: italic; font-size: 15px; color: #7a6048; }
+  footer { margin-top: 40px; color: #8c7a60; font-size: 13px; text-align: center; }
+  @media (max-width: 640px) {
+    body { font-size: 16px; }
+    .shots.two { grid-template-columns: 1fr; }
+    h3 { font-size: 22px; }
+    article { padding: 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>What's new in the Pirate Den</h1>
+      <p class="lede">The bigger things as they land, newest first: places, pirates, puzzles and cutscenes. Each has a link that drops you straight there.</p>
+    </div>
+    <a class="play" href="den.html">Play the den</a>
+  </header>
+
+  <h2><time datetime="2026-11-11">11 November</time></h2>
+
+  <article>
+    <div class="shots two">
+      <a href="changelog/primates-rule.jpg"><img src="changelog/primates-rule.jpg" width="1280" height="720" alt="Primates Rule, a black war frigate with three masts, at anchor beside the little sloop"></a>
+      <a href="changelog/primates-rule-deck.jpg"><img src="changelog/primates-rule-deck.jpg" width="1280" height="720" loading="lazy" alt="Looking down on Primates Rule's deck: rows of guns, stairs up to the quarterdeck, skeletons and a suit of armour"></a>
+    </div>
+    <h3>Primates Rule</h3>
+    <p>Dachimpy's war frigate, built to YPPedia's numbers and moored beside your sloop for scale: two rows of guns, a quarterdeck, a figurehead, and a crew of skeletons standing about.</p>
+    <p class="note">Still being shaped: her stern's curves and lower gun ports are on the list.</p>
+    <p class="try">Try it: <a href="frigate-test.html"><code>frigate-test.html</code></a></p>
+  </article>
+
+  <article>
+    <div class="shots">
+      <a href="changelog/port-decorum.jpg"><img src="changelog/port-decorum.jpg" width="1280" height="720" loading="lazy" alt="Port Decorum, a sandstone island town with towers, market awnings and a jetty, the sloop alongside"></a>
+    </div>
+    <h3>Port Decorum, the imperial island</h3>
+    <p>Out past the imperial checkpoint, the empire's own little port: towers, a market and a jetty to tie up at. A first sketch of a place to sail to.</p>
+    <p class="try">Try it: <a href="den.html?at=imperial"><code>den.html?at=imperial</code></a></p>
+  </article>
+
+  <article>
+    <div class="shots">
+      <a href="changelog/dalnoth-viking.jpg"><img src="changelog/dalnoth-viking.jpg" width="1280" height="720" loading="lazy" alt="Dalnoth in a horned Viking helmet and a gold coat, shaking his fist on the deck of his ship"></a>
+    </div>
+    <h3>Dalnoth and his Vikings</h3>
+    <p>The raiders at your wall are Vikings now, horned helmets and all, and Dalnoth is their chief. He shakes his fist from his ship's deck before he rows in.</p>
+    <p class="try">Try it: <a href="den.html?at=map-scene"><code>den.html?at=map-scene</code></a>, or <a href="den.html?at=start"><code>?at=start</code></a> for the siege</p>
+  </article>
+
+  <article>
+    <div class="shots">
+      <a href="changelog/tzz-balloon.jpg"><img src="changelog/tzz-balloon.jpg" width="1280" height="720" loading="lazy" alt="Tzz on her little island blowing up a blue balloon, a white one in her hand, beside a tall Sailing board"></a>
+    </div>
+    <h3>Tzz's balloon lesson</h3>
+    <p>A hop from Kikkit's island, Tzz blows up balloons into Sailing's pieces and plays them onto a real Sailing board beside her: a Double, a Bingo and a Vegas. In each one she hands you the last pair to drop.</p>
+    <p class="try">Try it: <a href="den.html?at=tzz"><code>den.html?at=tzz</code></a></p>
+  </article>
+
+  <article>
+    <div class="shots">
+      <a href="changelog/gravee.jpg"><img src="changelog/gravee.jpg" width="1280" height="720" loading="lazy" alt="Gravee, in a green dress and a polar bear pelt, showing you round her portraits by candlelight"></a>
+    </div>
+    <h3>Gravee's house: Bedside Manors</h3>
+    <p>Knock at the houses in the den's cliff. The first is Gravee's. She walks you round her portraits and talks about each one you look at, the vampire sits up in his coffin, and she paints you scared to death for her wall.</p>
+    <p class="try">Try it: <a href="den.html?at=lodgings"><code>den.html?at=lodgings</code></a>, then Gravee's house</p>
+  </article>
+
+  <article>
+    <div class="shots">
+      <a href="changelog/kikkit.jpg"><img src="changelog/kikkit.jpg" width="1280" height="720" loading="lazy" alt="The sloop near Kikkit's island, with a whirlpool spinning in a gap in the reef"></a>
+    </div>
+    <h3>Kikkit's whirlpools</h3>
+    <p>Kikkit on her little island beside the reef, explaining whirlpools (taken literally) by Puzzle Pirates' rules, with plenty of tangents. Sail through the reef by them, and with a Vegas reach the penguins on Vegas Island beyond.</p>
+    <p class="try">Try it: <a href="den.html?at=kikkit"><code>den.html?at=kikkit</code></a></p>
+  </article>
+
+  <article>
+    <div class="shots">
+      <a href="changelog/wedding.jpg"><img src="changelog/wedding.jpg" width="1280" height="720" loading="lazy" alt="A beach wedding: guests on wooden benches, a flower arch, heart banners and a cake"></a>
+    </div>
+    <h3>Mischievious's wedding</h3>
+    <p>Sail out to the Wedding Isle, where Mischievious is always planning the next one. Lay out the venue, dress the guests, pick who you marry and how it goes, and keep a collage of the day. Whoever you marry sails home with you and lives at the den.</p>
+    <p class="try">Try it: <a href="den.html?at=wedding"><code>den.html?at=wedding</code></a></p>
+  </article>
+
+  <h2><time datetime="2026-11-10">10 November</time></h2>
+
+  <article>
+    <div class="shots">
+      <a href="changelog/capybara-trap.jpg"><img src="changelog/capybara-trap.jpg" width="1280" height="720" loading="lazy" alt="A Foraging board on a cliff bank, Umami the capybara caged at its top"></a>
+    </div>
+    <h3>Umami's rescue</h3>
+    <p>A crane you build by Carpentry hauls the sloop up the cove's cliff into a still, reedy lagoon. On its far bank Umami the capybara is shut in an old fish trap. Free him by Foraging and he comes home to live in the den's shallows.</p>
+    <p class="try">Try it: <a href="den.html?at=umami"><code>den.html?at=umami</code></a></p>
+  </article>
+
+  <article>
+    <div class="shots two">
+      <a href="changelog/checkpoint.jpg"><img src="changelog/checkpoint.jpg" width="1280" height="720" loading="lazy" alt="The imperial checkpoint's sandstone gate, with Dignity on top beneath a red banner"></a>
+      <a href="changelog/dignity.jpg"><img src="changelog/dignity.jpg" width="1280" height="720" loading="lazy" alt="Dignity, with long blonde hair and her monkey Bella on her shoulder, peering through a spyglass"></a>
+    </div>
+    <h3>The imperial checkpoint, and Dignity</h3>
+    <p>Its guns are trained on marks in the water, so getting past takes some work. You can run it, row it, knock its guns out, or find the secret way round by the locks. The first time you sail up, its commander Dignity peers down from the gate, and her monkey Bella fires the warning shot.</p>
+    <p class="try">Try it: <a href="den.html?at=dignity"><code>den.html?at=dignity</code></a></p>
+  </article>
+
+  <article>
+    <div class="shots">
+      <a href="changelog/rowing.jpg"><img src="changelog/rowing.jpg" width="1280" height="720" loading="lazy" alt="Rowing the sloop toward the checkpoint's gate, a port board on the left, a starboard board on the right and a compass"></a>
+    </div>
+    <h3>Rowing</h3>
+    <p>Row the sloop by port and starboard: two boards of mirror strokes, one for each side's oars, and a compass for the next move. It's the way through calms and headwinds, and through the checkpoint's guns.</p>
+    <p class="try">Try it: <a href="den.html?at=sea"><code>den.html?at=sea</code></a>, then the oars</p>
+  </article>
+
+  <h2><time datetime="2026-11-09">9 November</time></h2>
+
+  <article>
+    <div class="shots two">
+      <a href="changelog/dalnoth-beach.jpg"><img src="changelog/dalnoth-beach.jpg" width="1280" height="720" loading="lazy" alt="Dalnoth on the beach shaking his fist, his ship and the sloop behind him"></a>
+      <a href="changelog/captains-map.jpg"><img src="changelog/captains-map.jpg" width="1280" height="720" loading="lazy" alt="The captain's map: the den, the trade winds, the imperial checkpoint and an old wreck marked with an X"></a>
+    </div>
+    <h3>The captain's map</h3>
+    <p>Beat the opening siege and Dalnoth calls it off in a short, cheesy cutscene: "We'll be back!" A map falls out of his coat as he runs for his boat. It shows the sea as it really is, with an X on an old wreck.</p>
+    <p class="try">Try it: <a href="den.html?at=map-scene"><code>den.html?at=map-scene</code></a></p>
+  </article>
+
+  <article>
+    <div class="shots">
+      <a href="changelog/sloop.jpg"><img src="changelog/sloop.jpg" width="1280" height="720" loading="lazy" alt="The old sloop at the den's jetty, the Bilge board in the shallows beside her"></a>
+    </div>
+    <h3>Out to sea in the sloop</h3>
+    <p>Once the siege is over, an old sloop is left at anchor in the cove. Board her and sail on Battle Navigation's moves, with a gun each side loaded by Gunnery on her deck. Trade winds sweep you out to sea.</p>
+    <p class="try">Try it: <a href="den.html?at=sea"><code>den.html?at=sea</code></a></p>
+  </article>
+
+  <article>
+    <div class="shots">
+      <a href="changelog/bilge-shallows.jpg"><img src="changelog/bilge-shallows.jpg" width="1280" height="720" loading="lazy" alt="A Bilge board laid out on the beach, running down into the sea"></a>
+    </div>
+    <h3>Bilging the shallows</h3>
+    <p>The real Bilge board lies on the beach, and its water is the tide. Good moves draw the tide back so bare rocks cut the raiders off, and big combos dredge up powder barrels that blow up Vikings who come by.</p>
+    <p class="try">Try it: <a href="den.html?at=built"><code>den.html?at=built</code></a>, then out through the gate to the beach</p>
+  </article>
+
+  <h2><time datetime="2026-11-07">7 November</time></h2>
+
+  <article>
+    <div class="shots">
+      <a href="changelog/wardrobe.jpg"><img src="changelog/wardrobe.jpg" width="1280" height="720" loading="lazy" alt="A line-up of pirates in their outfits: Tzz, Gravee, Dalnoth, a pirate in a bear hat, Dignity, Mischievious and Kikkit"></a>
+    </div>
+    <h3>Dress your pirate</h3>
+    <p>A wardrobe of Puzzle Pirates clothes, dyes and familiars, plus your own flag and den. Since 10 November the real pirates are dressed from the same wardrobe, so you can wear anything they wear.</p>
+    <p class="try">Try it: <a href="den.html"><code>den.html</code></a>, then "Your pirate"</p>
+  </article>
+
+  <article>
+    <div class="shots">
+      <a href="changelog/gun-tower.jpg"><img src="changelog/gun-tower.jpg" width="1280" height="720" loading="lazy" alt="The gun tower's deck as a Gunnery board: four cannons, crates of stores, a powder barrel and buckets"></a>
+    </div>
+    <h3>The gun tower</h3>
+    <p>The top of the gun tower is a Gunnery board. Chalk arrows steer the stores into the guns, and the loaded guns fire on the raiders. The same Gunnery is later played on the sloop's deck.</p>
+    <p class="try">Try it: <a href="den.html?at=gun-tower"><code>den.html?at=gun-tower</code></a></p>
+  </article>
+
+  <article>
+    <div class="shots">
+      <a href="changelog/den-wall.jpg"><img src="changelog/den-wall.jpg" width="1280" height="720" loading="lazy" alt="The den: a stone wall with holes to mend, crates of Carpentry pieces, and the raiders' ship beyond"></a>
+    </div>
+    <h3>The den, mended against raiders</h3>
+    <p>Where it began: the den's wall is broken and raiders are coming. Grab pieces from the crates and mend the holes by Carpentry. Fill a hole exactly for a Masterpiece.</p>
+    <p class="try">Try it: <a href="den.html?at=start"><code>den.html?at=start</code></a></p>
+  </article>
+
+  <footer>Puzzle Pirates™ © 2001–2026 Grey Havens, LLC, created by Three Rings Design.<br>An unofficial fan project, not affiliated with or endorsed by them.</footer>
+</div>
+<script>
+  // Seen it: the den's "What's new" button stops showing its dot until there's something newer.
+  try { localStorage.setItem('den-news-seen', document.querySelector('time').getAttribute('datetime')); } catch { /* (no storage: never mind) */ }
+</script>
+</body>
+</html>
