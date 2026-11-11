@@ -182,6 +182,13 @@ the site (`.assetsignore` skips `*.md`).
   place, and everything placed yours to move, turn and dye; each guest yours to move, and to click
   and dress as you dress yourself (with random); a camera you can roam with. The cheesy lines stay
   ("That's very much my thing").
+- **Not "Mischievious's isle": the wedding's the star (11 Nov):** "I don't like it being labelled as
+  [Mischievious's] Isle. Again, she's the character. She's got a massive prominent role, but ...
+  the whole point is the wedding and the furniture. Like, she's a primary character, but not the
+  star of the show." So the isle, its map label, quest, sea prompts, cheat and the planner's
+  heading are named for the wedding, not her (the Wedding Isle). And "She's free. She's nearly
+  always free." was still under "Marry Mischievious" in the planner, after it was taken out of
+  her lines: gone, with a test that looks at the planner too.
 
 
 ## Needs a playtest to pin down
