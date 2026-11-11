@@ -61,7 +61,9 @@ export interface HullShape {
       fuller shoulder with a fine cheek: a full bow still coming to a point. */
   shoulder: [number, number]; cheek: [number, number];
   /** Tumblehome: how much fuller she is at the waterline than at her deck (a fraction), her sides
-      falling in above it, steepest at the top. */
+      falling in above it in a gentle slant, near enough straight (the user, 11 Nov: "the top to
+      bottom ... that's still quite boxy ... it needs a tiny bit of a slant"), easing in from the
+      waterline, where her bilge rounds under. */
   tumble: number;
   /** Sheer: how far her side's deck line (her stripes, ports and rails with it) rises at bow and
       stern, as a fraction of her deck's height above the water. Her decks themselves stay level. */
@@ -75,9 +77,9 @@ export const BOX_SHAPE: HullShape = { stern: 0, square: 2, shoulder: [0.564, 0.7
 /** The ships' curves to try against each other (frigate-test.html?curve=...). */
 export const SHAPES: Record<string, HullShape> = {
   box: BOX_SHAPE,
-  gentle: { stern: 0.06, square: 4, shoulder: [0.5, 0.85], cheek: [0.85, 0.4], tumble: 0.03, sheer: 0.15, bilge: 3 },
-  curved: { stern: 0.1, square: 3, shoulder: [0.5, 0.95], cheek: [0.8, 0.42], tumble: 0.05, sheer: 0.25, bilge: 2.5 },
-  round: { stern: 0.16, square: 2.4, shoulder: [0.55, 1], cheek: [0.78, 0.5], tumble: 0.08, sheer: 0.4, bilge: 2.2 },
+  gentle: { stern: 0.06, square: 4, shoulder: [0.5, 0.85], cheek: [0.85, 0.4], tumble: 0.08, sheer: 0.15, bilge: 3 },
+  curved: { stern: 0.1, square: 3, shoulder: [0.5, 0.95], cheek: [0.8, 0.42], tumble: 0.15, sheer: 0.25, bilge: 2.5 },
+  round: { stern: 0.16, square: 2.4, shoulder: [0.55, 1], cheek: [0.78, 0.5], tumble: 0.2, sheer: 0.4, bilge: 2.2 },
 };
 /** The curves every ship's hull is drawn with (11 Nov). */
 export const SHIP_SHAPE: HullShape = SHAPES.curved;
@@ -142,12 +144,15 @@ export function bowAt(h: Hull, u: number): [number, number] {
 }
 
 /** How wide she is at height `y` (her shape's, before the sheer lifts it: above the water, - below),
-    against her deck's width: fuller at the waterline by her tumblehome, falling in above it (on up
-    past her deck, steadily), rounding in below it to her keel. */
+    against her deck's width: fuller at the waterline by her tumblehome, falling in above it in a
+    gentle slant (half straight, half eased in from the waterline, so it reads as a slant side-on,
+    not a bend at the top), rounding in below it to her keel. On up past her deck (her bulwarks, a
+    frigate's quarterdeck and forecastle) she falls in more gently, steadily, so what stands on her
+    upper decks still fits. */
 export function section(h: Hull, y: number): number {
   const S = shapeOf(h), d = h.deck, dr = h.deep - h.deck, T = S.tumble;
-  if (y >= d) return Math.max(0.7, 1 - 2 * T * (y - d) / d);
-  if (y >= 0) return 1 + T * (1 - (y / d) * (y / d));
+  if (y >= d) return Math.max(0.7, 1 - 2 / 3 * T * (y - d) / d);
+  if (y >= 0) { const u = y / d; return 1 + T * (1 - (u + u * u) / 2); }
   if (!S.bilge) return 1 + T;
   const v = Math.min(1, -y / dr);
   return (1 + T) * Math.pow(Math.max(0, 1 - Math.pow(v, S.bilge)), 1 / S.bilge);

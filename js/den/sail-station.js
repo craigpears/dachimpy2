@@ -112,7 +112,7 @@ export function stationKey(key) {
   if (key === '1' || key === 'escape') { stationToggle(); return true; }
   if (key === '2' || key === '3') { stationToggle(); return false; }
   if (key === 'enter') return true;   // (nothing: it used to drop the pair)
-  const act = { a: 'left', arrowleft: 'left', d: 'right', arrowright: 'right', w: 'turnR', arrowup: 'turnR', e: 'turnR', s: 'turnL', arrowdown: 'turnL', q: 'turnL', ' ': 'fast' }[key];
+  const act = { a: 'left', arrowleft: 'left', d: 'right', arrowright: 'right', w: 'turnL', arrowup: 'turnL', e: 'turnR', s: 'turnR', arrowdown: 'turnR', q: 'turnL', ' ': 'fast' }[key];
   if (!act) return false;
   if (act === 'fast') keys.add(' ');
   play(act);

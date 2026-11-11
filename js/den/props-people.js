@@ -23,7 +23,7 @@
 import * as THREE from 'three';
 import { makePirate, animateWalk } from './world.js';
 import { familiarTick } from '../den-look.js';
-import { Chatter } from '../chatter.js';
+import { Chatter, PACE } from '../chatter.js';
 import { readSecs, CANVAS, BRUSH, brushReach } from '../den-houses.js';
 import { fright } from './creatures.js';
 import { bubble as pageBubble, bubbleAt } from './cine.js';
@@ -133,7 +133,7 @@ const v = new THREE.Vector3();
 /** A pirate from a look, standing about in a scene: see the top of this file. */
 export function person({
   look, parent = null, x = 0, y = 0, z = 0, yaw = 0, scale = 1, idle = 'sway',
-  script = null, lines = null, loop = true, random = false, gap = 6, wait = 1.5, secs = readSecs, begun = true,
+  script = null, lines = null, loop = true, random = false, gap = PACE.ASIDE, wait = 1.5, secs = readSecs, begun = true,
   say = null, bubble = null, shown = () => true, tall = 2.4, earshot = null, face = null,
 } = {}) {
   const p = Object.assign(makePirate({ look }), { x, z, phase: 0 });

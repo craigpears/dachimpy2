@@ -387,6 +387,17 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     chaining, as she tells it, still works, and so do your own moves onto the winds. The reef is drawn
     as one unbroken line of rocks with surf along it, out to the sea's edge (js/den/reef.js: the sea's
     own rocks, merged a square at a time), so the gap with the whirlpools reads as the one way through.
+  - **Penguin Island only by way of the whirlpools (11 Nov).** "Make sure you can't get to Penguin
+    Island without going through the whirlpools ... the idea that, you know, you can get to the
+    penguins by going behind it is obviously a bit weird ... Also, there should be a way through,
+    because it's a shortcut. The penguins ... should be an obvious bonus to go, oh, look, I found the
+    penguins. They should be at least a few rocks around them." Sailed the long way, past the
+    checkpoint, she could come up beside Vegas Island from the open sea behind it (its left, below it,
+    its right). Now a ring of rocks, drawn as the reef is, closes in every square round it, corners
+    too, but the whirlpools' own way in: a Vegas over them is the one way to the penguins, and a
+    Double through them still the shortcut out to the open sea past the reef. A test searches every
+    way she can go without touching the whirlpools (her moves, the winds, a chain's gusts) and finds
+    nowhere beside the penguins.
   - **Her lines are protected (11 Nov):** "I want her line[s in] source control because they're
     brilliant. I think they're so spot on with their personality right now. I want that protected
     in source control." They're plain data in `src/lines/kikkit.ts`, recorded in `LINES.md`, both
@@ -1805,8 +1816,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   that rotate? space is supposed to be down". YPPedia's Sailing, Controls: "Left and Right arrow
   keys: Move the falling pair left or right; Up and Down arrow keys: Rotate the pair clockwise or
   counterclockwise; Space bar: Increase the pair's falling speed." So on every Sailing board (at
-  sea, Kikkit's whirlpools' easy board, your turn in Tzz's lesson): ← → (A D) move it, ↑ (W, E)
-  turns it clockwise, ↓ (S, Q) anticlockwise, and Space makes it fall faster, still steerable. No
+  sea, Kikkit's whirlpools' easy board, your turn in Tzz's lesson): ← → (A D) move it, ↑ (W, Q)
+  turns it anticlockwise, ↓ (S, E) clockwise, and Space makes it fall faster, still steerable.
+  (YPPedia doesn't say which arrow is which; ↑ was clockwise at first, and the user, 11 Nov: "could
+  you really double check which way round the keys are rotating the sailing pieces? Because it feels
+  kind of opposite to me." Their feel wins.) No
   key drops it to the bottom: it falls by itself (a row every 0.6 s). Of Space: "the space usually
   kind of speeds up the drop. It doesn't drop it entirely. So if you're like halfway down the screen
   and you just want it to get 2/3 of the way down or 3/4, you normally tap space just so you zoom
@@ -1862,6 +1876,40 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   YPPedia's "Sailing" page gives no sizes in words; its "typical sailing board" picture shows a 2 by
   2 and two 2 by 3s. So platforms are two wide (three wide as it gets harder), two or three high, on
   every Sailing board: at sea, Kikkit's whirlpools' easy board, Tzz's lesson (src/sailing.ts).
+- **A platform's colours, as the real game's: no colour on top of itself, gaps on a zigzag (11 Nov).** "it's
+  almost like a grayed out block ... on the platform, it's just like a gap. Like that definitely does
+  not happen in sailing ... I never feel like I've seen the same color on top of each other. They
+  either kind of, if they're going to do that, they're either next to each other, or you can have
+  like really big platforms with like a diagonal shape"; and "white and yellow next to each other,
+  and then another white and yellow above them ... I've never seen that pattern. They would always
+  be alternating." So a colour runs on side by side or down a diagonal, never sitting on itself
+  (src/sailing.ts, paint); Tzz's boards were already so. Then, of the gaps: "Yeah, you can get gaps
+  ... they're usually diagonal to each other. So ... if you've got 2 by 3 square, you'll have 3 that
+  are part of the platform that have to fill with colours, and they'll be all on a diagonal, so then
+  the gaps will be on the corresponding other kind of zigzag. But there's no kind of grey outline.
+  It's just empty space. There's no graphic for it, which I think is what really confused me." So a
+  platform is targets all over, or (half of them) targets on a zigzag with the gaps on the other, and
+  a gap is drawn as nothing at all, only the platform's ledge running under it.
+- **Port Decorum towers over the sloop (11 Nov).** "just looking at port decorum size relative to the
+  sloop. Isn't the wall for it going to tower over that? ... we've clearly got a scale problem here."
+  Its fort's walls were lower than her mast, its towers lower than the checkpoint's. Now its curtain
+  walls are 7.5 m (her mast's top is about 5 m), its towers 10.5 m, its keep 13.5 m, the tallest thing
+  on the sea; the town's buildings two storeys, their doors still pirate-sized (js/den/imperial-isle.js,
+  FORT).
+- **A hull's sides slant a little, top to bottom (11 Nov).** "I can definitely see the back of the
+  ship has gotten a lot more curved, but I'm talking about, like, the top to bottom ... that's still
+  quite boxy ... it needs a tiny bit of a slant." Tumblehome 0.15 (it was 0.05, too little to see), a
+  straight slant from the waterline up, the same on every ship (src/ships.ts, SHAPES.curved).
+- **Sailing's pair glides down (11 Nov).** Of Space: "could also be a lot smoother. That's noticeably
+  jumpy." The pair is drawn where it's fallen to between rows (src/sail-pair.ts, y), not hopping a
+  row at a time, at any speed.
+- **Pirates talk now and then; Kikkit rambles (11 Nov).** "it's feeling like they come through a bit
+  fast. Like the idea of [Kikkit] was supposed to be she's just a rambling, tangenting person that
+  just goes on and on and on ... There should be more distinct difference. I think like this guy at
+  the Imperial Island. Like, it's not the odd bonus thing. Like, it's coming along every few seconds
+  ... Obviously, don't touch [Kikkit]. She's fantastic." So anyone standing about talking says the
+  odd line, a good while apart (src/chatter.ts, PACE.ASIDE, 16 to 28 seconds; a greeting or a halt
+  still comes at once); Kikkit alone goes on line after line (PACE.RAMBLE).
 - **Bilge is the model to aim for (9 Nov).** The user loved it most for being "so faithful and
   close": "really close one-to-one with the puzzle ... it just plays like the puzzle. It's not like
   a dumbed down version at all", while you can still see what's going on in the den. They loved

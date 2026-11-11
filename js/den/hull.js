@@ -3,9 +3,9 @@
 // prism (a deck, a barge, the older hulls); and a curved hull, as Puzzle Pirates draws its ships (the
 // user, 11 Nov: "is it intentional with the style that it really is such a square back? ... I'd like
 // to see it maybe with a bit more curves"): her stern rounded in, her bow fuller, her sides falling
-// in above the water and rounding under below it, her deck line rising toward bow and stern. Its
-// numbers are her Hull's shape (src/ships.ts, HullShape), and anything built on her measures her with
-// widthAt there; here it's drawn: swept round her (sweepGeo), her decks (outlinePts), a bulkhead
+// in above the water in a gentle slant (11 Nov: "it needs a tiny bit of a slant") and rounding under
+// below it, her deck line rising toward bow and stern. Its numbers are her Hull's shape (src/ships.ts,
+// HullShape), and anything built on her measures her with widthAt there; here it's drawn: swept round her (sweepGeo), her decks (outlinePts), a bulkhead
 // across her (sectionGeo), and where on her side a thing sits and which way it faces (skinFrame,
 // sternFrame). The sloop (js/den/sloop.js) and a war frigate (js/den/frigate.js) are built from it.
 import * as THREE from 'three';

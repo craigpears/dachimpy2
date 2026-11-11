@@ -261,7 +261,13 @@ export const LAY = {
       - a Vegas over all of it to PENGUINS, their water, a gust's only, beside VEGAS, Vegas Island
         (the user named it, 11 Nov: "reached only by a Vegas").
       REEF: rocks round it all, so the whirlpools' corners can't be sailed into but from the winds
-      and the gap, and the penguins' water is closed in. */
+      and the gap, and the penguins' water is closed in.
+      And a ring of them round Vegas Island (11 Nov): "Make sure you can't get to Penguin Island without
+      going through the whirlpools ... the idea that ... you can get to the penguins by going behind it
+      is obviously a bit weird ... They should be at least a few rocks around them." Sailed round the
+      long way, past the checkpoint, she could come up beside it from the open sea behind (on its left,
+      below it and on its right); now every square round it, corners too, is rock or the whirlpools'
+      own way in, so the whirlpools (a Vegas over them) are the one way to the penguins. */
   KIKKIT: {
     LAND: [
       [19, 16], [20, 16],
@@ -286,7 +292,11 @@ export const LAY = {
       // open, the way out of it).
       [13, 17, 1], [14, 17, 1], [15, 17, 1], [16, 17, 0],
     ] as [number, number, number][],
-    REEF: [[14, 18], [15, 18], [14, 23], [17, 21], [17, 22], [17, 23]] as [number, number][],
+    REEF: [
+      [14, 18], [15, 18], [14, 23], [17, 21], [17, 22], [17, 23],
+      // (round Vegas Island: its left, below it, its right)
+      [14, 24], [14, 25], [15, 25], [16, 25], [17, 25], [17, 24],
+    ] as [number, number][],
     VEGAS: [[15, 23], [15, 24], [16, 24]] as [number, number][],
   },
   /** Tzz's island (11 Nov; src/den-tzz.ts): the sensible one after Kikkit, who shows you plainly how a
@@ -430,7 +440,7 @@ export class Sea {
   mouths: Pose[] = [];
   /** The reef's rocks, drawn as one line of them (js/den/reef.js): the checkpoint's reef, out from
       its right-hand gun to the sea's edge but where the passage runs through it, and the rocks round
-      the whirlpools. Rocks like any other to sail by. */
+      the whirlpools and round Vegas Island. Rocks like any other to sail by. */
   reef = new Set<string>();
   /** Squares the scattered rocks keep off: the lanes and everything round them. */
   private keep = new Set<string>();

@@ -8,7 +8,7 @@ import { W, H, SPAWN, chainName } from '../sailing.js';
 /* From the user's screenshot of "a huge multi Vegas" (10 Nov): 8 wide by 16 tall, the next pair at
    the top left, two markers over the middle columns where pairs come in. Three balls: blue wavy
    water, yellow knotted rope, white swirled sail; a pair's halves joined by a little brown peg that
-   stays after they land. Platforms are translucent square tiles with a thin ledge under them:
+   stays after they land. Platforms are their targets with a thin ledge under them (a gap, nothing):
    filled, the piece shows inside; empty, coloured corner brackets for the colour it wants. A wave
    and a ship's sails behind the board.
    Each pop shown for what it is (11 Nov, of Tzz's board: "there was no chain of four or platform
@@ -227,8 +227,8 @@ function backArt(k) {
 }
 
 // ---------- the touch pad ----------
-// (the real game's keys, 11 Nov: ↑ clockwise, ↓ back, Space faster while it's held, never a drop)
-const PAD = [['turnL', '⟲', 'Turn anticlockwise (↓)'], ['turnR', '⟳', 'Turn clockwise (↑)'], ['left', '◀', 'Left (←)'], ['right', '▶', 'Right (→)'], ['fast', '▼ Faster', 'Faster while held (Space)'], ['close', '✕ Helm', 'Back to the helm (1 or Esc)']];
+// (the real game's keys, 11 Nov: ↑ anticlockwise, ↓ clockwise (the user: "it feels kind of opposite"), Space faster while it's held, never a drop)
+const PAD = [['turnL', '⟲', 'Turn anticlockwise (↑)'], ['turnR', '⟳', 'Turn clockwise (↓)'], ['left', '◀', 'Left (←)'], ['right', '▶', 'Right (→)'], ['fast', '▼ Faster', 'Faster while held (Space)'], ['close', '✕ Helm', 'Back to the helm (1 or Esc)']];
 const PAD_W = 2 * 54 + 6;
 function padMake(B) {
   const el = document.createElement('div');
@@ -499,11 +499,13 @@ export function sailBoardTick(B, dt, pair, sp = null) {
   B.bits = B.bits.filter((b) => (b.t += dt) < b.life);
   for (const b of B.bits) { b.x += b.vx * dt; b.y += b.vy * dt; b.vy += 14 * dt; b.vx *= 1 - dt * 1.5; b.rot += b.vr * dt; }
   if (B.banner && (B.banner.t += dt) > 1.6) B.banner = null;
-  // The falling pair glides to where it is.
+  // The falling pair glides to where it is: down, where it's fallen to between rows (pair.y), smooth
+  // at any speed; a step (a show's pair moved by hand) or a slide eased.
   if (pair) {
-    const k = Math.min(1, dt * 18);
-    B.shown.r += (pair.row - B.shown.r) * k; B.shown.c += (pair.col - B.shown.c) * k;
-    if (Math.abs(pair.row - B.shown.r) > 2) B.shown.r = pair.row;
+    const k = Math.min(1, dt * 18), y = pair.y?.() ?? pair.row, d = y - B.shown.r;
+    B.shown.r = d >= 0 && d < 1 ? y : B.shown.r + d * k;   // (a whole row at once: a show's step, eased)
+    B.shown.c += (pair.col - B.shown.c) * k;
+    if (Math.abs(y - B.shown.r) > 2) B.shown.r = y;
   }
   draw(B, now, pair);
 }
@@ -551,7 +553,7 @@ function brackets(g, r, c, col) {
   }
 }
 
-/* A platform: a translucent tile on each square that's no target, and its ledge under it. A target is
+/* A platform: its targets and its ledge under it; a square that's no target, nothing at all. A target is
    left plainly empty (the user, 11 Nov, of Tzz's board: "I thought she'd completely filled the platform.
    Why is it not being set off?"): the board shows through it, outlined in the colour it wants with that
    colour's brackets in its corners, nothing in it that could pass for a piece; a piece of its colour
@@ -567,11 +569,7 @@ function drawPlatform(g, p, a = 1, drop = 0) {
   for (let r = p.r; r < p.r + p.h; r++) for (let c = p.c; c < p.c + p.w; c++) {
     const colour = want.get(`${r},${c}`);
     g.beginPath(); g.roundRect(px(c) + 2, py(r) + 2, CELL - 4, CELL - 4, 5);
-    if (colour === undefined) {
-      g.fillStyle = 'rgba(150,180,210,0.16)'; g.strokeStyle = 'rgba(200,225,245,0.4)'; g.lineWidth = 1.5;
-      g.fill(); g.stroke();
-      continue;
-    }
+    if (colour === undefined) continue;   // (a gap: plain empty space, 11 Nov: "there's no kind of grey outline ... There's no graphic for it")
     g.strokeStyle = OUTLINE[colour]; g.lineWidth = 1.5; g.stroke();
     brackets(g, r, c, BRACKET[colour]);
   }
@@ -729,7 +727,7 @@ function draw(B, now, pair) {
   g.clearRect(0, 0, B.cv.width, B.cv.height);
   if (B.back) g.drawImage(B.back, 0, 0);
   g.setTransform(s, 0, 0, s, 0, 0);
-  // The platforms: translucent tiles, empty targets, a ledge under each, and the platforms that just
+  // The platforms: their targets, a ledge under each, and the platforms that just
   // went fading.
   for (const p of B.platforms) drawPlatform(g, p);
   for (const f of B.fading) drawPlatform(g, f.p, 1 - f.t / FADE, f.t / FADE);

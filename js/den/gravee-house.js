@@ -17,6 +17,7 @@ import {
 import { SITTINGS_KEY, cleanSittings, sat, plaqueDate, snapshotName } from '../den-houses.js';
 import { AT_THE_DOOR, HALL_YOURS, TOUR_LINES, THE_GALLERY, THE_SCARE, CHATTER, YOUR_PORTRAIT, GOODBYE, BECKON } from '../lines/gravee.js';
 import { WOKEN, ASLEEP } from '../lines/vampire.js';
+import { PACE } from '../chatter.js';
 import { IN_GRAVEES_HOUSE } from '../lines/you.js';
 import { FURNITURE, place } from './furniture.js';
 import { paint, paintYou, paintFlat, snapshot, watching } from './portraits.js';
@@ -70,7 +71,7 @@ export const GRAVEE_HOUSE = {
     G.herP = person({
       look: PIRATES.Gravee, parent: R, x: ARRIVE.her.x, z: ARRIVE.her.z, idle: 'sway', say: H.say,
       // (after her tour, a word now and then while you're by her, never over something she's saying)
-      lines: CHATTER, random: true, gap: [11, 17],
+      lines: CHATTER, random: true, gap: PACE.ASIDE,
       earshot: () => !cine && !G.scare && !H.talking() && !leading(G.tour, !!G.woken) && (G.herP.talking() || !H.house.lines.has(G.her)) && Math.hypot(G.her.x - H.you.x, G.her.z - H.you.z) < 4.5,
     });
     G.herP.chatty = false;

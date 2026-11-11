@@ -302,8 +302,8 @@ export function balloonStand({ performer, parent, x = 0, y = 0, z = 0, yaw = 0, 
         } else if (e.kind === 'done') this.stop();
       }
     },
-    /** Sailing's keys on your turn, the real game's (true if it took the key): ← → (A D) move, ↑ (W E)
-        turns it clockwise and ↓ (S Q) back, Space speeds it while it's held (src/sail-pair.ts; `keys`
+    /** Sailing's keys on your turn, the real game's (true if it took the key): ← → (A D) move, ↑ (W Q)
+        turns it anticlockwise and ↓ (S E) clockwise (the user, 11 Nov: "it feels kind of opposite"), Space speeds it while it's held (src/sail-pair.ts; `keys`
         has it till its keyup), and nothing drops it. Space before then is on to her next beat. `e`: the
         key's event (a key repeat doesn't rush it again). */
     key(k, e) {
@@ -312,8 +312,8 @@ export function balloonStand({ performer, parent, x = 0, y = 0, z = 0, yaw = 0, 
         const P = S.pair;
         if (k === 'a' || k === 'arrowleft') P.slide(-1);
         else if (k === 'd' || k === 'arrowright') P.slide(1);
-        else if (k === 'w' || k === 'e' || k === 'arrowup') P.turnBy(1);
-        else if (k === 's' || k === 'q' || k === 'arrowdown') P.turnBy(-1);
+        else if (k === 's' || k === 'e' || k === 'arrowdown') P.turnBy(1);
+        else if (k === 'w' || k === 'q' || k === 'arrowup') P.turnBy(-1);
         else if (k === ' ') { keys.add(' '); if (!e?.repeat && !sailBoardBusy(B)) { S.wait = 0; P.rush(); } }
         else if (k !== 'enter') return false;   // (Enter: nothing, rather than skipping the lesson)
         return true;

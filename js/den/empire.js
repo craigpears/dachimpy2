@@ -41,15 +41,17 @@ export function banner(w, h) {
   return mesh(new THREE.PlaneGeometry(w, h), bannerMat, false);
 }
 
-/** A square tower of pale stone, w wide and h tall, battlemented, a crimson band below its top. */
-export function tower(w, h) {
-  const g = new THREE.Group(), st = stone();
+/** A square tower of pale stone, w wide and h tall, battlemented, a crimson band below its top.
+    `merlon`: how big its merlons are (the band with them), for a bigger tower (Port Decorum's fort);
+    `st`, `band`: materials to share with the rest of what it's built into (to bake: bake.js). */
+export function tower(w, h, { merlon = 0.5, st = stone(), band = mat(CRIMSON, { roughness: 0.8 }) } = {}) {
+  const g = new THREE.Group(), k = merlon / 0.5;
   const body = mesh(new THREE.BoxGeometry(w, h + 1, w), st); body.position.y = (h - 1) / 2;
-  const band = mesh(new THREE.BoxGeometry(w + 0.08, 0.35, w + 0.08), mat(CRIMSON, { roughness: 0.8 })); band.position.y = h - 0.7;
-  g.add(body, band);
+  const b = mesh(new THREE.BoxGeometry(w + 0.08 * k, 0.35 * k, w + 0.08 * k), band); b.position.y = h - 0.7 * k;
+  g.add(body, b);
   for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) {
-    const m = mesh(new THREE.BoxGeometry(0.5, 0.55, 0.5), st), s = (j - 1) * (w - 0.5) / 2, e = (w - 0.5) / 2;
-    m.position.set([s, e, s, -e][i], h + 0.27, [e, s, -e, s][i]);
+    const m = mesh(new THREE.BoxGeometry(merlon, merlon * 1.1, merlon), st), s = (j - 1) * (w - merlon) / 2, e = (w - merlon) / 2;
+    m.position.set([s, e, s, -e][i], h + merlon * 0.55, [e, s, -e, s][i]);
     g.add(m);
   }
   return g;

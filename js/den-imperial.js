@@ -68,25 +68,27 @@ export const UNIFORM = {
 export const EMPIRE_CAST = {
     guards: [
         { face: { body: 'm', skin: 1, hair: 'short', hairCol: 'brown', beard: 'moustache' }, at: [EMPIRE_STANDS.c, EMPIRE_STANDS.r], yaw: Math.PI, idle: 'stand', talks: true },
-        { face: { body: 'f', skin: 3, hair: 'bun', hairCol: 'black', beard: 'none' }, at: [12.15, 29.2], yaw: Math.PI, idle: 'stand' },
-        { face: { body: 'm', skin: 4, hair: 'short', hairCol: 'black', beard: 'none' }, at: [12.85, 29.2], yaw: Math.PI, idle: 'stand' },
+        { face: { body: 'f', skin: 3, hair: 'bun', hairCol: 'black', beard: 'none' }, at: [11.95, 29.15], yaw: Math.PI, idle: 'stand' },
+        { face: { body: 'm', skin: 4, hair: 'short', hairCol: 'black', beard: 'none' }, at: [12.85, 29.15], yaw: Math.PI, idle: 'stand' },
         { face: { body: 'm', skin: 0, hair: 'short', hairCol: 'ginger', beard: 'goatee' }, at: [14.1, 28.3], yaw: Math.PI - 0.5, idle: 'sway' },
-        { face: { body: 'f', skin: 2, hair: 'ponytail', hairCol: 'blonde', beard: 'none' }, at: [10.55, 29.95], yaw: Math.PI + 0.6, idle: 'sway' },
+        { face: { body: 'f', skin: 2, hair: 'ponytail', hairCol: 'blonde', beard: 'none' }, at: [10.1, 29.25], yaw: Math.PI + 0.6, idle: 'sway' },
     ],
     /** Its buildings: the fort at the back, its keep flying the Empire's flag; a watchtower on the left;
         along the quay, the customs house at the jetty's foot, the market (the trading house) and the
-        warehouse. `w`, `d`: across and deep, in squares. */
+        warehouse. `w`, `d`: across and deep, in squares. To scale with the sloop (11 Nov; the heights in
+        js/den/imperial-isle.js, FORT): the fort fills the back of the island, 12 m by 7.4 inside its
+        corner towers, the guards at its gate; the town between it and the quay. */
     town: [
-        { kind: 'fort', at: [12.5, 30.35], w: 1.9, d: 1.75 },
-        { kind: 'watchtower', at: [10.35, 29.45] },
-        { kind: 'customs', at: [11.55, 28.7], w: 0.95, d: 0.7 },
-        { kind: 'market', at: [13.05, 28.75], w: 0.9, d: 0.65 },
-        { kind: 'warehouse', at: [14.75, 29.7], w: 0.8, d: 1.25 },
+        { kind: 'fort', at: [12.4, 30.35], w: 3, d: 1.85 },
+        { kind: 'watchtower', at: [10, 30.1] },
+        { kind: 'customs', at: [11.55, 28.65], w: 1, d: 0.7 },
+        { kind: 'market', at: [13.2, 28.7], w: 0.85, d: 0.6 },
+        { kind: 'warehouse', at: [14.85, 29.7], w: 0.75, d: 1.25 },
     ],
     /** The stone quay along its near shore, from the jetty's foot along to the warehouse (squares across,
         and how far out its face is). */
     quay: { c0: 10.75, c1: 14.4, r: 27.62 },
     /** Cargo on the quay: crates and barrels. */
-    cargo: [[12.2, 28.15], [12.45, 28.25], [14.3, 28.6], [14.25, 28.95], [10.95, 28.35]],
-    palms: [[15.2, 30.75], [10.6, 30.75], [15.35, 29.15]],
+    cargo: [[12.2, 28.15], [12.45, 28.25], [14.3, 28.6], [14.4, 28.9], [10.95, 28.35]],
+    palms: [[15.2, 30.75], [9.75, 29.6], [15.35, 29.15]],
 };

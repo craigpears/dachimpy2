@@ -57,6 +57,38 @@ describe('the board', () => {
       }
     }
   });
+  it("a dealt platform is the real game's: no colour on top of itself, and any gaps on a zigzag (11 Nov: \"I never feel like I've seen the same color on top of each other\"; \"they'll be all on a diagonal, so then the gaps will be on the corresponding other kind of zigzag\")", () => {
+    let side = 0, diag = 0, full = 0, zigzag = 0;
+    for (let seed = 1; seed <= 200; seed++) for (const easy of [false, true]) {
+      const s = new Sailing(seeded(seed), true, { easy });
+      for (let d = 0; d < 3; d++) {
+        for (const p of s.platforms) {
+          // (every square a target, or every other one, on a zigzag: the gaps on the other)
+          const parity = new Set(p.targets.map((t) => (t.r + t.c) % 2));
+          if (p.targets.length === p.w * p.h) full++;
+          else {
+            zigzag++;
+            expect(parity.size).toBe(1);
+            let squares = 0;
+            for (let r = p.r; r < p.r + p.h; r++) for (let c = p.c; c < p.c + p.w; c++) if ((r + c) % 2 === [...parity][0]) squares++;
+            expect(p.targets).toHaveLength(squares);
+          }
+          const at = (r: number, c: number) => p.targets.find((t) => t.r === r && t.c === c)?.colour;
+          for (let r = p.r; r < p.r + p.h; r++) for (let c = p.c; c < p.c + p.w; c++) {
+            if (at(r, c) === undefined) continue;
+            if (r > p.r && at(r - 1, c) !== undefined) expect(at(r, c), `seed ${seed}: ${r},${c} on top of itself`).not.toBe(at(r - 1, c));
+            if (c > p.c && at(r, c) === at(r, c - 1)) side++;
+            if (r > p.r && c > p.c && at(r, c) === at(r - 1, c - 1)) diag++;
+          }
+        }
+        s.difficulty = Math.min(DIFFICULTY.MAX, s.difficulty + 1); s.deal();
+      }
+    }
+    expect(side).toBeGreaterThan(0);   // (a colour does run on side by side)
+    expect(diag).toBeGreaterThan(0);   // (and down a diagonal)
+    expect(full).toBeGreaterThan(0);
+    expect(zigzag).toBeGreaterThan(0);
+  });
   it("deals easy boards for Kikkit's whirlpools: 'relatively small, easy platforms' (11 Nov), and stays easy", () => {
     for (let seed = 1; seed <= 40; seed++) {
       const s = new Sailing(seeded(seed), true, { easy: true });
@@ -305,7 +337,7 @@ describe('chains', () => {
 /** A game from an ordinary deal (seed 1), played by the staircase bot in tools/sail-bots.mjs: its drops
     as [column, turn, row], recorded with `tools/sail-bots.mjs record`. Record again if the deal or
     the pairs change. */
-const STAIRCASE = { seed: 2, drops: [[0, 2, 5], [6, 0, 15], [6, 2, 14], [6, 2, 13], [6, 3, 11], [6, 1, 13], [5, 2, 12], [6, 0, 11], [0, 0, 15], [0, 0, 14], [1, 1, 12], [4, 2, 11], [0, 0, 13], [1, 1, 11], [2, 1, 4], [4, 0, 15], [4, 0, 10], [4, 0, 14], [5, 2, 9], [3, 0, 9], [3, 0, 8], [3, 1, 12], [3, 1, 10], [4, 2, 7], [3, 1, 6], [3, 1, 14], [0, 0, 15], [0, 0, 14], [0, 0, 13], [0, 0, 12], [0, 0, 11], [1, 1, 9], [0, 0, 8], [0, 0, 9], [0, 2, 10], [0, 1, 10], [0, 1, 8], [0, 1, 6], [3, 0, 5], [2, 3, 12], [2, 1, 10], [2, 1, 8], [2, 1, 6], [0, 1, 4], [1, 1, 12], [0, 1, 2], [1, 2, 5], [1, 0, 4], [0, 1, 4], [0, 1, 2], [0, 1, 4], [1, 3, 10], [2, 2, 3], [2, 1, 1]] as [number, Drop['turn'], number][] };
+const STAIRCASE = { seed: 2, drops: [[0,2,5],[6,2,15],[7,1,13],[0,0,15],[6,3,13],[5,0,12],[0,0,14],[6,0,11],[2,0,15],[4,0,11],[0,0,14],[0,0,13],[4,0,10],[0,0,12],[4,1,8],[0,0,11],[2,0,13],[0,1,10],[0,0,13],[0,0,12],[0,0,11],[5,2,9],[3,0,13],[4,1,11],[4,3,9],[3,2,8],[4,2,7],[2,0,7],[2,0,6],[0,0,4],[0,0,3],[5,1,5],[2,1,4],[3,0,5],[5,1,3],[6,1,7],[6,1,5],[2,1,4],[5,1,1],[5,0,4],[5,0,3],[5,1,1],[5,1,3],[7,1,9],[7,1,7],[7,1,5],[7,1,3],[0,1,1],[0,1,3],[2,0,3],[0,0,2],[2,1,1]] as [number, Drop['turn'], number][] };
 
 describe('the staircase', () => {
   it('Vegas 3s and 4s "quite easily": stairs built pair by pair on an ordinary deal set off a Vegas, a column a step (the user, 10 Nov)', () => {
@@ -318,14 +350,22 @@ describe('the staircase', () => {
     }
     expect(last!.steps).toBeGreaterThanOrEqual(6);
     expect(last!.name).toBe('Vegas!!');
-    // Down the stairs a column a step, from column 2 to 7: the columns each step cleared three or more
-    // from. (Recorded again 11 Nov, when platforms became blocks: src/sailing.ts, PLATFORM.)
+    // Down the stairs a column a step: the columns each step cleared three or more
+    // from. (Recorded again 11 Nov, when platforms became blocks, and again when their colours stopped sitting
+    // on top of themselves: src/sailing.ts, PLATFORM and paint.)
     const stairs = last!.stages.slice(1).map((st, i) => {
       const count = Array<number>(W).fill(0);
       last!.stages[i].grid.forEach((r) => r.forEach((x, c) => { if (x && st.cleared.includes(x.id)) count[c]++; }));
       return count.flatMap((n, c) => (n >= 3 ? [c] : []));
     });
-    expect(stairs).toEqual([[2], [3], [4], [5], [6], [7]]);
+    // (Re-recorded whenever the deal changes, so not the same columns each time: four steps or more of
+    // it a column a step, one column on from the last, whichever way the stairs run.)
+    let run = 1, best = 1;
+    for (let i = 1; i < stairs.length; i++) {
+      const ok = stairs[i].length === 1 && stairs[i - 1].length === 1 && Math.abs(stairs[i][0] - stairs[i - 1][0]) === 1;
+      run = ok ? run + 1 : 1; best = Math.max(best, run);
+    }
+    expect(best, JSON.stringify(stairs)).toBeGreaterThanOrEqual(4);
   });
 });
 

@@ -147,6 +147,26 @@ describe("Space speeds the drop, it doesn't drop it entirely (the user, 11 Nov 2
   });
 });
 
+describe("the drop is smooth, not a row at a time (11 Nov: \"could also be a lot smoother. That's noticeably jumpy\")", () => {
+  it('it is drawn partway to the next row as it falls, Space held or not, and never past where it rests', () => {
+    const p = new SailPair(game());
+    p.tick(FALL.SECS * 0.5);
+    expect(p.y()).toBeCloseTo(0.5, 5);
+    p.rush();
+    let last = p.y();
+    for (let i = 0; i < 20; i++) {
+      p.tick(1 / 120);
+      expect(p.y()).toBeGreaterThanOrEqual(last);
+      expect(p.y() - last).toBeLessThan(1);   // (glides: never a jump of a whole row in a frame)
+      last = p.y();
+    }
+    const q = new SailPair(game([0, 1], [], [[H - 1, SPAWN[0], 2], [H - 1, SPAWN[1], 2]]));
+    while (q.row < q.rest()) q.tick(FALL.SECS);
+    q.tick(FALL.SECS * 0.5);
+    expect(q.y()).toBe(q.row);   // (resting on something: drawn on its row, not sunk into it)
+  });
+});
+
 describe('moves() and a pair of one colour (bug, 11 Nov)', () => {
   it('gives each place once, as turn 0 or 1, even one only reached turned 2 or 3', () => {
     const s = game([1, 1]);

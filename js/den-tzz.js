@@ -18,6 +18,7 @@ import { LAY, SAIL } from './den-sail.js';
 import { shoreOf } from './den-isle.js';
 import { ROUTINES } from './balloons.js';
 import { GREET, DOUBLE, BINGO, AFTER } from './lines/tzz.js';
+import { PACE } from './chatter.js';
 const T = LAY.TZZ;
 export const TZZ = {
     /** Its name (never on the captain's map, where the whirlpools' islands are one unnamed point of
@@ -96,7 +97,7 @@ export const TZZ_SAYS = { loop: AFTER };
 export const TZZ_CAST = {
     /** Tzz: her look (PIRATES's), on the sand, a touch big so she reads from the sea, swaying gently,
         turned to you while you're within earshot; her lines. */
-    her: { look: 'Tzz', at: [TZZ_STANDS.c, TZZ_STANDS.r], scale: 1.15, yaw: -1.4, idle: 'sway', earshot: TZZ.EARSHOT, says: TZZ_SAYS, gap: [4, 7] },
+    her: { look: 'Tzz', at: [TZZ_STANDS.c, TZZ_STANDS.r], scale: 1.15, yaw: -1.4, idle: 'sway', earshot: TZZ.EARSHOT, says: TZZ_SAYS, gap: PACE.ASIDE },
     /** Her board: the den's own Sailing board on a stand on the sand beside her (balloons.js), its front
         to the camera; `tall`, its picture's height in metres: taller than she is, and the shot closer in
         (the user, 11 Nov: "that puzzle can be a bit bigger. It's very tiny"). */

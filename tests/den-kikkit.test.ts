@@ -318,3 +318,76 @@ describe(`keeping the charm of the first go (11 Nov: "it does throw you out and 
     expect(RAMBLE.join(' ')).toMatch(/too many lefts/i);
   });
 });
+
+/** Every square the sloop can get to from the den without ever touching the way through the
+    whirlpools (Sea.passage: the whirlpools, their winds, the gap), as she really goes: her own moves
+    (under sail or at the oars), the winds after them, and a Sailing chain's gust from wherever she
+    is, all as the helm plays them; any of it that touches the passage is left out. */
+function reachedAround(s: Sea): Set<string> {
+  const k = (c: number, r: number) => `${c},${r}`, avoid = (c: number, r: number) => s.passage.has(k(c, r)) || !!s.whirlAt(c, r);
+  const got = new Set<string>(), seen = new Set<string>();
+  let edge: Pose[] = [{ ...SAIL.HOME }];
+  const go = (to: Pose, next: Pose[]) => {
+    const id = `${to.c},${to.r},${to.d}`;
+    if (seen.has(id)) return;
+    seen.add(id); got.add(k(to.c, to.r)); next.push(to);
+  };
+  while (edge.length) {
+    const next: Pose[] = [];
+    for (const p of edge) {
+      for (const oars of [false, true]) for (const m of ['F', 'L', 'R'] as const) {
+        const { to, bump, ride } = s.move(p, m, oars, true);
+        if (bump || [...path(p, m).cells, [to.c, to.r], ...ride.map((q) => [q.c, q.r])].some(([c, r]) => avoid(c, r))) continue;
+        go(ride.length ? ride[ride.length - 1] : to, next);
+      }
+      for (let steps = 1; steps <= 8; steps++) {
+        const g = gustPath(s, p, runFor(steps));
+        if (!g.length) continue;
+        const end = g[g.length - 1], ride = s.ride(end, true);
+        if ([...g, ...ride].some((q) => avoid(q.c, q.r))) continue;
+        go(ride.length ? ride[ride.length - 1] : end, next);
+      }
+    }
+    edge = next;
+  }
+  return got;
+}
+
+describe(`"Make sure you can't get to Penguin Island without going through the whirlpools" (11 Nov)`, () => {
+  /** Every square touching Vegas Island or the penguins' water, corners too. */
+  const round = () => {
+    const isle = new Set([...K.VEGAS, K.PENGUINS].map(([c, r]) => `${c},${r}`)), out: [number, number][] = [];
+    for (const id of isle) {
+      const [c, r] = id.split(',').map(Number);
+      for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) if (!isle.has(`${c + a},${r + b}`) && !out.some(([x, y]) => x === c + a && y === r + b)) out.push([c + a, r + b]);
+    }
+    return out;
+  };
+
+  it('going round behind it, from the den, past the checkpoint or from Port Decorum\'s waters, nowhere near the penguins can be reached', () => {
+    for (const seed of [1, 9, 17]) {
+      const s = new Sea(seed), got = reachedAround(s);
+      // (the open sea past the reef is reached the long way, by the checkpoint's gate: so this is a real search)
+      expect(got.has(`${OUT[0]},${OUT[1]}`), `seed ${seed}`).toBe(true);
+      expect(got.has(`${LAY.WRECK[0] + 1},${LAY.WRECK[1]}`)).toBe(true);
+      for (const [c, r] of round()) expect(got.has(`${c},${r}`), `seed ${seed}: ${c},${r}`).toBe(false);
+    }
+  }, 60000);
+
+  it('"at least a few rocks around them": every square round their island is rock, or the whirlpools\' way in', () => {
+    const s = new Sea(9);
+    for (const [c, r] of round()) expect(s.isRock(c, r) || s.passage.has(`${c},${r}`), `${c},${r}`).toBe(true);
+    // (drawn as the reef is, a line of rocks: js/den/reef.js)
+    const rocks = round().filter(([c, r]) => s.reef.has(`${c},${r}`));
+    expect(rocks.length).toBeGreaterThanOrEqual(6);
+  });
+
+  it('"there should be a way through, because it\'s a shortcut": the whirlpools still let you out to the open sea, and a Vegas to the penguins', () => {
+    const { h, said } = sail(DOUBLE);
+    expect(at(h.pose)).toEqual(OUT);
+    expect(said).toEqual(['through']);
+    // (and from there, out on the open sea beyond the reef, as the long way round gets you)
+    expect(h.sea.plot(h.pose, LAY.WRECK[0] + 1, LAY.WRECK[1], null, true)).not.toBeNull();
+    expect(at(sail(VEGAS).h.pose)).toEqual(PENGUINS);
+  });
+});

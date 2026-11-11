@@ -25,9 +25,9 @@ export const BOX_SHAPE = { stern: 0, square: 2, shoulder: [0.564, 0.733], cheek:
 /** The ships' curves to try against each other (frigate-test.html?curve=...). */
 export const SHAPES = {
     box: BOX_SHAPE,
-    gentle: { stern: 0.06, square: 4, shoulder: [0.5, 0.85], cheek: [0.85, 0.4], tumble: 0.03, sheer: 0.15, bilge: 3 },
-    curved: { stern: 0.1, square: 3, shoulder: [0.5, 0.95], cheek: [0.8, 0.42], tumble: 0.05, sheer: 0.25, bilge: 2.5 },
-    round: { stern: 0.16, square: 2.4, shoulder: [0.55, 1], cheek: [0.78, 0.5], tumble: 0.08, sheer: 0.4, bilge: 2.2 },
+    gentle: { stern: 0.06, square: 4, shoulder: [0.5, 0.85], cheek: [0.85, 0.4], tumble: 0.08, sheer: 0.15, bilge: 3 },
+    curved: { stern: 0.1, square: 3, shoulder: [0.5, 0.95], cheek: [0.8, 0.42], tumble: 0.15, sheer: 0.25, bilge: 2.5 },
+    round: { stern: 0.16, square: 2.4, shoulder: [0.55, 1], cheek: [0.78, 0.5], tumble: 0.2, sheer: 0.4, bilge: 2.2 },
 };
 /** The curves every ship's hull is drawn with (11 Nov). */
 export const SHIP_SHAPE = SHAPES.curved;
@@ -97,14 +97,19 @@ export function bowAt(h, u) {
     return [k.reduce((s, q, i) => s + q * xs[i], 0), k.reduce((s, q, i) => s + q * ws[i], 0)];
 }
 /** How wide she is at height `y` (her shape's, before the sheer lifts it: above the water, - below),
-    against her deck's width: fuller at the waterline by her tumblehome, falling in above it (on up
-    past her deck, steadily), rounding in below it to her keel. */
+    against her deck's width: fuller at the waterline by her tumblehome, falling in above it in a
+    gentle slant (half straight, half eased in from the waterline, so it reads as a slant side-on,
+    not a bend at the top), rounding in below it to her keel. On up past her deck (her bulwarks, a
+    frigate's quarterdeck and forecastle) she falls in more gently, steadily, so what stands on her
+    upper decks still fits. */
 export function section(h, y) {
     const S = shapeOf(h), d = h.deck, dr = h.deep - h.deck, T = S.tumble;
     if (y >= d)
-        return Math.max(0.7, 1 - 2 * T * (y - d) / d);
-    if (y >= 0)
-        return 1 + T * (1 - (y / d) * (y / d));
+        return Math.max(0.7, 1 - 2 / 3 * T * (y - d) / d);
+    if (y >= 0) {
+        const u = y / d;
+        return 1 + T * (1 - (u + u * u) / 2);
+    }
     if (!S.bilge)
         return 1 + T;
     const v = Math.min(1, -y / dr);

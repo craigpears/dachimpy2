@@ -47,10 +47,16 @@
      single squares on it being fixed pieces. So: two wide, two or three high, and three wide too as
      it gets harder (the user's 3 by 3).
 
-   Not on YPPedia, so made up here (say so if it matters): the exact deal (sizes, how many targets,
-   fixed pieces), how fast difficulty rises and when it resets, whether the target points are inside
-   the chain's multiplier (here they're not), and turning: a pair turns about its first square, with
-   no kick off a wall.
+   - A dealt platform's colours run side by side or on down a diagonal, never on top of themselves
+     (the user, 11 Nov: paint, below). It's targets all over, or (PLATFORM.ZIGZAG of them) targets on
+     a zigzag, every other square, its gaps on the other zigzag (the user, 11 Nov: "if you've got 2 by
+     3 square, you'll have 3 that are part of the platform ... all on a diagonal, so then the gaps will
+     be on the corresponding other kind of zigzag"). A gap shows nothing: "It's just empty space.
+
+   Not on YPPedia, so made up here (say so if it matters): the exact deal (sizes, how its colours
+   fall beyond the user's rule, fixed pieces), how fast difficulty rises and when it resets, whether
+   the target points are inside the chain's multiplier (here they're not), and turning: a pair turns
+   about its first square, and turned against a wall it pushes off it (src/sail-pair.ts).
 
    The den's twist (the user, 10 Nov: "set up a Vegas, and go like 7 forwards in one go"): each drop's
    chain is a run straight ahead, in one go (runFor). The real game has nothing like it: there, the
@@ -69,7 +75,7 @@ export const TOP_FREE = 4;
 export const DIFFICULTY = { START: 1, MAX: 4, RESET_AFTER: 5 };
 /** Platforms' sizes: two wide, or three once it's harder (from difficulty WIDE_AT), and two or three
     high (YPPedia's typical board: see the top of this file). */
-export const PLATFORM = { W: [2, 3], H: [2, 3], WIDE_AT: 2 };
+export const PLATFORM = { W: [2, 3], H: [2, 3], WIDE_AT: 2, ZIGZAG: 0.5 };
 /** An easy board (Kikkit's whirlpools, 11 Nov: "as long as we have a relatively simplified puzzle,
     that should be achievable. Because you've got relatively small, easy platforms. So most people
     familiar with it, I'd expect can do that"): two or three platforms, each the smallest a platform
@@ -94,6 +100,33 @@ export const RUN = { VEGAS: 6 };
 export function runFor(steps) {
     const s = Math.max(0, Math.floor(steps)), top = RUN_TABLE.length - 1;
     return s <= top ? RUN_TABLE[s] : RUN_TABLE[top] + s - top;
+}
+/** A platform's colours, w by h, top row first, as the real game's (the user, 11 Nov: "it's almost like a
+    grayed out block ... on the platform, it's just like a gap. Like that definitely does not happen in
+    sailing ... I never feel like I've seen the same color on top of each other ... they're either next
+    to each other, or you can have like really big platforms with like a diagonal shape"): every square
+    a target, no gaps; a colour runs on side by side along a row, or on down a diagonal, but never sits
+    on top of itself. Tzz's boards (src/balloons.ts) are made the same way by hand. (Gaps came back, on
+    a zigzag: the user, later the same day, "Yeah, you can get gaps ... they're usually diagonal to each
+    other": deal.) */
+export function paint(w, h, random) {
+    const rows = [];
+    for (let i = 0; i < h; i++) {
+        const row = [];
+        for (let j = 0; j < w; j++) {
+            const up = i ? rows[i - 1][j] : -1, left = j ? row[j - 1] : -1, diag = i && j ? rows[i - 1][j - 1] : -1, x = random();
+            if (left >= 0 && left !== up && x < 0.4)
+                row.push(left); // (on along the row)
+            else if (diag >= 0 && diag !== up && x < 0.7)
+                row.push(diag); // (on down the diagonal)
+            else {
+                const ok = [0, 1, 2].filter((k) => k !== up);
+                row.push(ok[Math.floor(random() * ok.length)]);
+            }
+        }
+        rows.push(row);
+    }
+    return rows;
 }
 const key = (p, t) => `${p.id}:${t.r},${t.c}`;
 export class Sailing {
@@ -144,13 +177,12 @@ export class Sailing {
             // Not touching another platform, so every shelf is its own.
             if (this.platforms.some((p) => r <= p.r + p.h && p.r <= r + h && c <= p.c + p.w && p.c <= c + w))
                 continue;
-            const targets = [];
-            for (let rr = r; rr < r + h; rr++)
-                for (let cc = c; cc < c + w; cc++)
-                    if (this.random() < 0.85)
-                        targets.push({ r: rr, c: cc, colour: Math.floor(this.random() * COLOURS) });
-            if (!targets.length)
-                continue;
+            // (ZIGZAG of them: its targets on a zigzag, every other square, and the gaps on the other)
+            const colours = paint(w, h, this.random), zig = this.random() < PLATFORM.ZIGZAG ? Math.floor(this.random() * 2) : -1, targets = [];
+            for (let i = 0; i < h; i++)
+                for (let j = 0; j < w; j++)
+                    if (zig < 0 || (i + j) % 2 === zig)
+                        targets.push({ r: r + i, c: c + j, colour: colours[i][j] });
             this.platforms.push({ id: this.nextId++, r, c, w, h, targets });
         }
         // Fixed pieces low down, never over a target (it would be shut in) nor inside a platform.

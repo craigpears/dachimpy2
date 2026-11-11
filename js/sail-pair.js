@@ -73,6 +73,10 @@ export class SailPair {
     sinks() {
         return this.game.sinks(this.row, this.col, this.turn) && this.game.open(this.row + 1, this.col, this.turn);
     }
+    /** Where it's drawn, in rows: its row and how far it's fallen toward the next, if it's going on down
+        (its row, if it's resting on something), so it glides down at any speed rather than hopping a row
+        at a time (the user, 11 Nov, of Space: "could also be a lot smoother. That's noticeably jumpy"). */
+    y() { return this.row + (this.sinks() ? Math.min(this.t, 1) : 0); }
     /** The row it'd come to rest on, dropped straight down from here (for its shadow). */
     rest() {
         const r0 = this.row;

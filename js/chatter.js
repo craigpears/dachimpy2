@@ -10,6 +10,13 @@
    when you're spat back). A Chatter plays one: a line up for as long as it takes to read, a pause
    between if it has one, only while you're within earshot (out of it, it finishes its line and stops;
    come back and it carries on where it was), Space on to the next. */
+/** How often a pirate talks (the user, 11 Nov): "it's feeling like they come through a bit fast. Like
+    the idea of [Kikkit] was supposed to be she's just a rambling, tangenting person that just goes on
+    and on ... There should be more distinct difference. I think like this guy at the Imperial Island.
+    Like, it's not the odd bonus thing. Like, it's coming along every few seconds ... Obviously, don't
+    touch [Kikkit]. She's fantastic." So Kikkit rambles, line on line (her own pace, no gap: RAMBLE);
+    anyone else just says something now and then, the odd bonus line (ASIDE: seconds between). */
+export const PACE = { RAMBLE: 0, ASIDE: [16, 28] };
 /** Someone's talk, played: see the top of this file. */
 export class Chatter {
     script;

@@ -79,3 +79,13 @@ describe('played: a line at a time, while you\'re within earshot', () => {
     expect(c.started).toBe(false);
   });
 });
+
+describe("pirates other than Kikkit talk now and then, not every few seconds (11 Nov: \"it's not the odd bonus thing. Like, it's coming along every few seconds\")", () => {
+  it('an aside comes a good while after the last line; Kikkit rambles on, line on line', async () => {
+    const { PACE } = await import('../src/chatter');
+    const { TZZ_CAST } = await import('../src/den-tzz');
+    expect(PACE.ASIDE[0]).toBeGreaterThanOrEqual(15);
+    expect(PACE.RAMBLE).toBe(0);
+    expect(TZZ_CAST.her.gap).toEqual(PACE.ASIDE);
+  });
+});

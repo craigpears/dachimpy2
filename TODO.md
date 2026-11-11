@@ -278,27 +278,16 @@ the site (`.assetsignore` skips `*.md`).
   Since 9 Nov you can also lob a piece over the wall from the den floor at raiders hacking
   outside; not yet tried by the user. Watch for: the markers on raiders outside cluttering the
   view while you carry a piece.
-- **Port Decorum to scale with the sloop (11 Nov):** "just looking at port decorum size relative to the
-  sloop. Isn't the wall for it going to tower over that? ... we've clearly got a scale problem here." Its
-  fort's walls are lower than the sloop's mast and its towers lower than the checkpoint's: a fort's walls
-  should tower over a sloop, its keep over everything, and the town's buildings be proper houses beside her.
-- **The hulls' sides a little slanted, top to bottom (11 Nov):** "I can definitely see the back of the ship
-  has gotten a lot more curved, but I'm talking about, like, the top to bottom ... that's still quite
-  boxy. I think some of that, as I said, is probably a good style and fit, but I think it needs a tiny bit
-  of a slant." Not dramatic: the sides falling in a little from the waterline up to the deck (tumblehome),
-  so a hull no longer reads as a box side-on, the sloop's and the frigate's alike.
-- **Pirates other than Kikkit talk now and then, not every few seconds (11 Nov):** "it's feeling like they
-  come through a bit fast. Like the idea of [Kikkit] was supposed to be she's just a rambling, tangenting
-  person that just goes on and on ... There should be more distinct difference. I think like this guy at
-  the Imperial Island. Like, it's not the odd bonus thing. Like, it's coming along every few seconds ...
-  Obviously, don't touch [Kikkit]. She's fantastic." So everyone else's lines the odd bonus line, well
-  apart; Kikkit as she is.
-- **Sailing's platform gaps: on the zigzag, and drawn as nothing (11 Nov):** "you can get gaps ... they're
-  usually diagonal to each other. So ... if you've got 2 by 3 square, you'll have 3 that are part of the
-  platform that have to fill with colours, and they'll be all on a diagonal, so then the gaps will be on
-  the corresponding other kind of zigzag. But there's no kind of grey outline. It's just empty space.
-  There's no graphic for it, which I think is what really confused me." So some platforms have their
-  targets on a zigzag and gaps on the other, and a gap is drawn as plain empty space.
+- **Port Decorum's back way in: a smugglers' beach, only by way of Kikkit's whirlpools (11 Nov):** "for
+  the Imperial Outpost, the kind of beach, so the back way in, I think that will be better, like, accessed
+  far through those whirlpools by, you know, [Kikkit]. I think having it one open area is a bit off. Like,
+  I do think, like, Penguin Island, and then you have the, you know, Smuggler's Beach there. So that you
+  can go sell the rum made by helium or with helium, obviously, once we tie that in. So yeah, redesign the
+  fort so that, you know, there's some rocks and whatnot blocking some back entry where that, you know,
+  with some kind of, you know, Smuggler's Beach, you know, obviously for that mechanic to plug into
+  later." So rocks round Port Decorum's back, the open sea shut off there, and a smugglers' beach in a
+  cove behind it, reached only through the whirlpools by way of Penguin Island; nothing to do there yet
+  (smuggling, and Helium's rum, plug in later).
 
 ## Spotted along the way (not asked for)
 

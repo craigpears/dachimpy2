@@ -28,6 +28,14 @@ export interface Script {
   readonly afterIntro?: number;
 }
 
+/** How often a pirate talks (the user, 11 Nov): "it's feeling like they come through a bit fast. Like
+    the idea of [Kikkit] was supposed to be she's just a rambling, tangenting person that just goes on
+    and on ... There should be more distinct difference. I think like this guy at the Imperial Island.
+    Like, it's not the odd bonus thing. Like, it's coming along every few seconds ... Obviously, don't
+    touch [Kikkit]. She's fantastic." So Kikkit rambles, line on line (her own pace, no gap: RAMBLE);
+    anyone else just says something now and then, the odd bonus line (ASIDE: seconds between). */
+export const PACE = { RAMBLE: 0, ASIDE: [16, 28] as readonly [number, number] } as const;
+
 /** How it's said: each line's time up (seconds, by its text), the pause between, and the wait before
     the first. */
 export interface Pace {
