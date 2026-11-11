@@ -1921,7 +1921,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   her there from the open sea. A hidden gem: nothing names it till you're in its cove ("A smugglers'
   beach, round the back of Port Decorum! Not a guard in sight"), the captain's map draws the rocks whole
   (the run as rock) till you've been, then the beach and its name, and it's a hidden place on the quests
-  (of 4). Nothing to do there yet: smuggling, and Helium's rum, plug in there. `?at=smugglers`. Rules:
+  (of 4). Nothing to do there yet: smuggling, and Helium's rum, plug in there. `?at=smugglers`, and named in the cheats like Umami's rescue (the
+  user, 11 Nov: "having it there is fine for now. So this is all just a demo proof of concept thing"). Rules:
   `src/den-smugglers.ts` (its squares `LAY.SMUGGLERS`); drawn by `js/den/smugglers.js`.
 - **Primates Rule out past Port Decorum (11 Nov).** "it's ready for that [war frig] to be dropped in maybe
   a bit past in that same kind of deeper ocean area near where the [Port Decorum] is. The Imperial
