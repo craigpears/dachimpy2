@@ -161,6 +161,22 @@ the site (`.assetsignore` skips `*.md`).
   her. She should keep at your side as you walk, at your pace (hurrying to catch up if you've got
   ahead), talking as she goes, and stand by each thing as she shows it you.
 
+- **Gravee's house, after the user's first walk round (11 Nov):** "Oh, I love it. I love it." But:
+  - **The gallery's whiz is too fast:** "zooming past the paintings was a little too fast. That
+    was just like, what happened? I don't think we need to go quite like that." Slower, so you see
+    it's the gallery going on and on.
+  - **Her speech bubbles get stuck:** "quite a few of her speech bubbles kind of seem to get
+    stuck. Like I see 4 of them open there at the moment." One bubble at a time, each gone when
+    its line is done.
+  - **The camera while she paints you:** "the camera zoom's not really in the right place when
+    she's painting, to like, oh, hold it there, does the painting. Like, it kind of fixes itself,
+    but it ruins some of the scene. It doesn't really flow right." The camera should settle where
+    you see her painting you, and hold there till she's done.
+  - **The Count's watching eyes, a piece of their own:** "The vampire portrait that's following
+    you definitely needs to be a normal thing." Any portrait in any scene can have eyes that follow
+    you (the Count's, a pirate's), a shared piece, not code in her house. The bat's flight round
+    his coffin is loved too ("these are all just priceless"); it's already the shared creatures'.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
