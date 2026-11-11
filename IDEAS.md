@@ -498,6 +498,14 @@ then "she's definitely a penguin side quest".
   around her". Rodrigo among them, and Bubba "definitely". One more the user wants in but not
   named in the game (the one heard as "CZ Junior"). Each familiar a little character doing its
   own thing on the island.
+- **Nessah and her three-fiddy (11 Nov):** "kikkit and I love nessah wanting 3-fiddy from south park,
+  need to add a line for her around that. Almost secret quest like." The Loch Ness monster in South
+  Park, forever after "about tree fiddy": a running joke between the user and Kikkit. A line of
+  Kikkit's about Nessah wanting her three-fiddy, said in passing among her tangents, that's really
+  the start of a hidden quest: somewhere out on the water, Nessah, and if you find her she wants
+  three-fifty (three pieces of eight and a half? to pin down), never hinted beyond Kikkit's
+  aside. (To shape with the user: where Nessah is, what three-fiddy is in the den's money, and what
+  paying her gets you.)
 (To shape with the user: which puzzle wins the penguin, and what Kikkit gives you for bringing
 one back, if she even remembers asking.)
 
