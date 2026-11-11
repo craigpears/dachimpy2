@@ -303,7 +303,12 @@ the site (`.assetsignore` skips `*.md`).
   really explaining it. It doesn't really feel like a complete tutorial." So: your pair starts at the top
   as in the real game, with time to steer; and the plan shown on the board, not only said (the trigger gap
   marked, where the line of four will be, the partner's drop into the gap, what pops after what), each
-  line saying what it's for and what it'll set off. Next, once the solid targets and bigger board land.
+  line saying what it's for and what it'll set off. And plain words, not jargon: "she's using the right
+  terminology, like the trigger or what triggers what. But ... that doesn't mean anything to most. And
+  like, all I'm sat here is watching the animation, and all of a sudden a white and a yellow thing starts
+  dropping, and it's like, ah, what am I supposed to do?" So your turn is announced plainly (it's yours
+  now, the pair you've got, where it goes, shown as a ghost on the board, and the keys), and words like
+  "trigger" are shown before they're named. Next, once the solid targets and bigger board land.
 
 ## Spotted along the way (not asked for)
 
