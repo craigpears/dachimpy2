@@ -35,6 +35,10 @@ export const KIKKIT = {
     FLING: 1.1,
     /** Her waters: where Sailing's board is the whirlpools' own easy one (src/sailing.ts, EASY). */
     WATERS: { c0: 13, c1: 21, r0: 14, r1: 23 },
+    /** Within earshot: squares from where she stands on her island. Once she's told her ramble she
+        never stops talking while you're this near (the user, 11 Nov: "you're sailing past, you've not
+        even engaged, and she's going on these tangents"). */
+    EARSHOT: 7,
 };
 const key = (c, r) => `${c},${r}`;
 const land = new Set(K.LAND.map(([c, r]) => key(c, r)));
@@ -50,6 +54,10 @@ export function inKikkitWaters(c, r) {
     const W = KIKKIT.WATERS;
     return c >= W.c0 && c <= W.c1 && r >= W.r0 && r <= W.r1;
 }
+/** Where she stands on her island (js/den/kikkit.js draws her there). */
+export const KIKKIT_STANDS = { c: 18.35, r: 17.35 };
+/** Within earshot of her: she keeps talking. */
+export const inEarshot = (c, r) => Math.hypot(c - KIKKIT_STANDS.c, r - KIKKIT_STANDS.r) <= KIKKIT.EARSHOT;
 /** Her island's shore, for the 3D and the captain's map (src/den-isle.ts, shoreOf). */
 export const kikkitShore = () => shoreOf(K.LAND);
 /** The passage, square by square from the mouth. */
@@ -131,10 +139,13 @@ export class Kikkit {
         this.told = true;
         return [...RAMBLE];
     }
-    /** Hailed: her ramble if she's not told it, else off on a tangent; after the last, the ramble again. */
+    /** Hailed: her ramble if she's not told it, else on she goes. */
     hail() {
-        if (!this.told)
-            return this.arrive();
+        return this.told ? this.more() : this.arrive();
+    }
+    /** What she says next once she's run out, and she always has more: the next tangent, round and
+        round for ever; after the last, the whole ramble again (it's the real way, after all). */
+    more() {
         if (this.tangent >= TANGENTS.length) {
             this.tangent = 0;
             return [...RAMBLE];

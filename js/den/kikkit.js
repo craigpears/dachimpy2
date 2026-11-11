@@ -6,7 +6,7 @@
 // what's found (G.found) and the checkpoint's word on which way she crossed.
 import * as THREE from 'three';
 import { SAIL, LAY } from '../den-sail.js';
-import { KIKKIT, Kikkit, Whirlpools, caught, onKikkitLanding, inKikkitWaters, kikkitShore, spatPose, PENGUINS } from '../den-kikkit.js';
+import { KIKKIT, KIKKIT_STANDS, Kikkit, Whirlpools, caught, onKikkitLanding, inKikkitWaters, inEarshot, kikkitShore, spatPose, PENGUINS } from '../den-kikkit.js';
 import { shoreOf } from '../den-isle.js';
 import { readSecs } from '../den-dignity.js';
 import { addFind } from '../den-finds.js';
@@ -97,7 +97,7 @@ function build() {
   // Kikkit, on the sand by the whirlpools' mouth, looking out at you.
   const p = makePirate({ look: PIRATES.Kikkit });
   p.g.scale.setScalar(SC);
-  const at = V3(seaX(18.35), 0.25, seaZ(17.35));
+  const at = V3(seaX(KIKKIT_STANDS.c), 0.25, seaZ(KIKKIT_STANDS.r));
   p.g.position.copy(at);
   g.add(p.g);
   // Her familiars about her, each doing its own thing ("the familiar version of a cat lady").
@@ -148,7 +148,11 @@ function build() {
 export function kikkitWorld() { kik.W ||= build(); }
 
 // ---------- what she says ----------
+/* Once she's told her ramble, she never stops while you're within earshot: run out, and she's off on
+   the next tangent, hailed or not (src/den-kikkit.ts, more). Not while a whirlpool has you. */
+const chatty = () => sail.on && !kik.held && kik.rules.told && inEarshot(sail.helm.pose.c, sail.helm.pose.r);
 function sayNext() {
+  if (!kik.queue.length && chatty()) kik.queue = kik.rules.more();
   const text = kik.queue.shift();
   kik.line = text ? { text, t: 0, secs: readSecs(text) } : null;
   if (text) kik.W.say.textContent = text;
@@ -216,7 +220,7 @@ export function kikkitTick(dt, events = []) {
   sneakTick(W, dt, t);
   if (sail.on) atSea(dt, events);
   // Kikkit: facing you when you're about, swigging from her jug now and then, swaying (a bit drunk).
-  const s = sail.on ? sail.helm.pose : null, near = s && Math.hypot(s.c - 18.3, s.r - 17.3) < 8;
+  const s = sail.on ? sail.helm.pose : null, near = s && inEarshot(s.c, s.r);
   const want = near ? Math.atan2(seaX(s.c) - W.at.x, seaZ(s.r) - W.at.z) : -0.9;
   W.yaw += (want - W.yaw) * Math.min(1, dt * 2);
   W.p.g.rotation.y = W.yaw;
@@ -239,6 +243,8 @@ function atSea(dt, events) {
   const off = onKikkitLanding(pose.c, pose.r);
   if (off && !kik.on && !kik.held) { const lines = kik.rules.arrive(); if (lines.length) { kik.queue = lines; sayNext(); } }
   kik.on = off;
+  // Told it all, and back within earshot: off she goes again.
+  if (!kik.line && chatty()) sayNext();
   // Through the reef, and to the penguins (src/den-kikkit.ts).
   for (const e of kik.pool.watch(events, pose)) {
     if (e === 'through') { G.found = addFind(G.found, 'whirlpools'); onceToast('through', OF_HIM.through); }

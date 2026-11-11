@@ -167,6 +167,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   it explains or teaches something you then really play (the balloon animals are why Sailing's
   pieces pop; Kikkit's nonsense is the literal way through her whirlpools). And a mechanic is never
   left dry when a joke could carry it.
+- **Kikkit never stops talking (11 Nov).** "I love how long she goes on tangents ... you're sailing
+  past, you've not even engaged, and she's going on these tangents ... a never-ending loop of
+  tangents and her speech bubbles that don't stop. That suits so incredibly well." Once she's told
+  her ramble (the real way through her whirlpools), she's off on one tangent after another for as
+  long as you're within earshot of her island, hailed or not: a very long list of them, round and
+  round, the ramble retold after the last, Space skipping on to the next. Out of earshot she
+  finishes her line and stops; come back and she starts up again. Keep adding to the list; a bit of
+  the real way can hide in them, never a hint at anything else.
 - **Hidden gems, never hinted (10 Nov).** The user, of the checkpoint's "I wonder if there's another
   way round" and "Run it, row it, or knock its guns out": "I don't like it giving you a hint as to
   what you can do ... I like these just to be hidden gems that you work out ... make the fact that

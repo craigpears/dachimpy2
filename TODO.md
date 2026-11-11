@@ -142,13 +142,6 @@ the site (`.assetsignore` skips `*.md`).
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
 
-- **Kikkit never stops talking (11 Nov):** "I love how long she goes on tangents ... you're sailing
-  past, you've not even engaged, and she's going on these tangents ... she should just like have an
-  insanely long list of speech ... After you get through the mechanical one, she just goes and just
-  keeps going on tangents ... a never-ending loop of tangents and her speech bubbles that don't stop.
-  That suits so incredibly well." So: after her ramble, an endless run of tangents for as long as
-  you're within earshot of her island, without being hailed; a very long list of them.
-
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map

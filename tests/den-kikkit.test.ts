@@ -3,7 +3,7 @@
    with the penguins being the bigger prize after", and "definitely a Vegas to get fully through to
    the penguins". */
 import { describe, expect, it } from 'vitest';
-import { KIKKIT, Kikkit, OUT, PASSAGE, PENGUINS, REEF_WHIRL, Whirlpools, caught, inKikkitWaters, kikkitAt, kikkitShore, onKikkitLanding, spatPose, turnsOf } from '../src/den-kikkit';
+import { KIKKIT, KIKKIT_STANDS, Kikkit, OUT, PASSAGE, PENGUINS, REEF_WHIRL, Whirlpools, caught, inEarshot, inKikkitWaters, kikkitAt, kikkitShore, onKikkitLanding, spatPose, turnsOf } from '../src/den-kikkit';
 import { LAY, SAIL, Sea, Helm, path, type Pose, type SailEvent } from '../src/den-sail';
 import { carry, gustPath } from '../src/den-sailing';
 import { runFor, RUN } from '../src/sailing';
@@ -168,5 +168,31 @@ describe('her ramble is the real map, taken literally (10 Nov: "it\'s got to act
     expect(k.hail()).toEqual([TANGENTS[0]]);
     const backs = Array.from({ length: BACK.length }, () => k.spat());
     expect(new Set(backs).size).toBe(BACK.length);
+  });
+});
+
+describe(`she never stops talking (11 Nov: "a never-ending loop of tangents and her speech bubbles that don't stop")`, () => {
+  it('after her ramble she always has more: every tangent in turn, then the ramble again, round and round for ever', () => {
+    const k = new Kikkit();
+    k.arrive();
+    const said = Array.from({ length: TANGENTS.length }, () => k.more());
+    expect(said.flat()).toEqual([...TANGENTS]);
+    expect(k.more()).toEqual([...RAMBLE]);
+    expect(k.more()).toEqual([TANGENTS[0]]);
+    for (let i = 0; i < 1000; i++) expect(k.more().length).toBeGreaterThan(0);
+  });
+
+  it('an insanely long list of them, each short enough for a bubble on a phone, none said twice', () => {
+    expect(TANGENTS.length).toBeGreaterThanOrEqual(60);
+    expect(new Set(TANGENTS).size).toBe(TANGENTS.length);
+    for (const t of TANGENTS) expect(t.length).toBeLessThanOrEqual(100);
+  });
+
+  it(`within earshot as you sail past her island, hailed or not, and not from the checkpoint's gate`, () => {
+    expect(inEarshot(KIKKIT_STANDS.c, KIKKIT_STANDS.r)).toBe(true);
+    expect(inEarshot(MOUTH.c, MOUTH.r)).toBe(true);
+    for (let r = K.LANDING.r0; r <= K.LANDING.r1; r++) expect(inEarshot(K.LANDING.c0, r)).toBe(true);
+    expect(inEarshot(KIKKIT_STANDS.c - KIKKIT.EARSHOT - 1, KIKKIT_STANDS.r)).toBe(false);
+    expect(inEarshot(LAY.CHECKPOINT.GATE, LAY.CHECKPOINT.ROW)).toBe(false);   // (Dignity's to talk there)
   });
 });
