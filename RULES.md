@@ -1041,6 +1041,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     [Mischievious], but not negative. Like, I don't like where it says, oh, marry [her], she's free,
     she's nearly always free. Like, that feels mean." She jokes about herself (the dress already on,
     "a dress that's hardly been bled on"), never runs herself down; a test checks her lines.
+  - **The host, not the show (11 Nov):** "she's just the facilitator for this wedding mechanic. I
+    don't want this to be a [Mischievious] show, but it still needs a bit of fun and personality.
+    And Puzzle Pirate personality, though, especially, rather than specific people. There's the
+    balance." And, of how often she's married: "I don't want this to go too far down that line ...
+    But I want there to be a bit of chattery banter." So her lines are the wedding's and the Ocean's
+    (the tailor, dyes and doubloons, the inn's grog, the furnisher, security earning their pay), not
+    her own love life, and you can ask her things as you plan ("Who's paying for all this?" "The
+    crew's coffers, love. Don't tell the purser."). A test checks.
   - **The plots:** sweet and blissful; raiders crash it (the guards knock them into the sea); somebody's
     drunk (face first into the cake); a brawl (benches flying). Each ends in "I do", the kiss,
     hearts and confetti, and a group shot framed in gilt as the wedding portrait: save the picture,

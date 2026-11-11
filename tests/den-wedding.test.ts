@@ -4,8 +4,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
-  AREA, DYE_NAMES, GUESTS, GUSH, Gush, MAX_PROPS, PLOTS, PROPS, SUGGEST, THEMES, TONES, VENUES, WELCOME, WRECK,
-  arrival, caption, clean, decode, dressFor, encode, fill, fresh, layout, moveTo, plotAt, plotScript, readSecs,
+  AREA, ASK_HER, DYE_NAMES, GUESTS, GUSH, Gush, MAX_PROPS, PLOTS, PROPS, SUGGEST, THEMES, TONES, VENUES, WELCOME, WRECK,
+  answer, arrival, caption, clean, decode, dressFor, encode, fill, fresh, layout, moveTo, plotAt, plotScript, readSecs,
   scriptSecs, seatsFor, suitorTitle, suitors, themeLook, wearable,
 } from '../src/den-wedding';
 import type { Prop, Wedding } from '../src/den-wedding';
@@ -281,4 +281,13 @@ it("'she's nearly always free' felt mean: none of her lines run her down (11 Nov
   const all = [...Object.values(WELCOME).flat(), ...Object.values(GUSH).flatMap((p) => (Array.isArray(p) ? p : Object.values(p).flat()))];
   expect(all.length).toBeGreaterThan(40);
   for (const line of all) expect(line).not.toMatch(/always free|I'?m free|usually me|nobody wants|desperate|lonely|single again/i);
+});
+
+// The user, 11 Nov: "she's just the facilitator for this wedding mechanic. I don't want this to be a
+// [Mischievious] show, but it still needs a bit of fun and personality. And Puzzle Pirate personality".
+it('she\'s the host, not the show: no lines about how often she\'s married, and things to ask her, answered in both tones (11 Nov)', () => {
+  const all = [...Object.values(WELCOME).flat(), ...Object.values(GUSH).flatMap((p) => (Array.isArray(p) ? p : Object.values(p).flat()))];
+  for (const line of all) expect(line).not.toMatch(/ever so many|keep this one alive|marry them|my last (one|husband|wife)/i);
+  expect(ASK_HER.length).toBeGreaterThanOrEqual(6);
+  for (const tone of ['happy', 'dark'] as const) ASK_HER.forEach((_, i) => expect(answer(i, tone).length).toBeGreaterThan(10));
 });

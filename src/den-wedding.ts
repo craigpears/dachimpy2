@@ -336,7 +336,7 @@ export const fill = (text: string, names: { you: string; partner: string }): str
 export const WELCOME: Record<ToneId, readonly string[]> = {
   happy: [
     'Oh! You came! Welcome to my island! Isn\'t it pretty?',
-    'I do love a wedding. I\'ve had ever so many. Hee hee!',
+    'I do love a wedding. Best day out on the whole Ocean. Hee hee!',
     'So! How are you? Would you like to get married?',
   ],
   dark: [
@@ -353,11 +353,14 @@ export const SUGGEST: Record<ToneId, { theme: ThemeId; plots: readonly PlotId[] 
 /** Her reactions as you plan: gushing, giggly, delighted with whatever you do (never "wrong"), and
     funny about herself without ever running herself down (the user, 11 Nov: "more humorous about
     [her], but not negative ... 'she's nearly always free' ... that feels mean"). A pool is the same
-    in both tones, or one for each. */
+    in both tones, or one for each. And she's the host, not the show (the user, 11 Nov: "she's just
+    the facilitator for this wedding mechanic. I don't want this to be a [Mischievious] show, but it
+    still needs a bit of fun and personality. And Puzzle Pirate personality ... rather than specific
+    people"): chattery Puzzle Pirates banter, little about her own love life. */
 type Pool = readonly string[] | Record<ToneId, readonly string[]>;
 export const GUSH: Record<string, Pool> = {
   ask: { happy: ['Me, perhaps? I do make a gorgeous bride. Hee hee!', 'Me, perhaps? I\'ve the dress on already!'], dark: ['Me, perhaps? I\'ve a dress that\'s hardly been bled on.', 'Me, perhaps? I\'ve had the veil cleaned. Mostly.'] },
-  her: { happy: ['Me? Oh, you charmer! Yes! Yes yes yes!', 'I knew you\'d ask! I\'ve had the dress on since Tuesday.'], dark: ['Me? Oh, you brave thing! Yes!', 'Lovely. I\'ll try to keep this one alive.'] },
+  her: { happy: ['Me? Oh, you charmer! Yes! Yes yes yes!', 'I knew you\'d ask! I\'ve had the dress on since Tuesday.'], dark: ['Me? Oh, you brave thing! Yes!', 'Lovely. I\'ll have security stand a bit closer this time.'] },
   version: ['Ooh, that one\'s my favourite!', 'Good choice. I look fabulous in that.', 'This old thing? Hee hee!', 'Twirl! Did you see me twirl?'],
   bachelors: ['Here are your bachelors!'],
   suitor: ['Ooh, good choice! I\'d have picked them too.', 'A match made in the Ocean!', 'They\'ll scrub up lovely.', 'Eee! I love them already!'],
@@ -368,21 +371,39 @@ export const GUSH: Record<string, Pool> = {
   venue_deck: ['A ship\'s deck! How very piratey of you.', 'On the deck! We can sail off on honeymoon straight after!'],
   theme_rosy: ['Happy and rosy! Pink everywhere! I could burst!', 'Roses! I adore roses.'],
   theme_gory: { happy: ['Bloody and gory! Ooh, daring. I love it.'], dark: ['Bloody and gory! Saves on tidying up, really.', 'Red goes with everything. Especially blood.'] },
-  theme_drunk: ['A drunkards\' fest! Grog for everyone!', 'Barrels! Lovely, lovely barrels.'],
+  theme_drunk: ['A drunkards\' fest! Grog for everyone!', 'Barrels! Lovely, lovely barrels.', 'I\'ve had the inn send over every drop they\'ve got.'],
   plot_sweet: { happy: ['Sweet and blissful! Oh, I\'m welling up already.'], dark: ['Sweet and blissful? Ooh, that\'d make a change.'] },
   plot_raiders: { happy: ['Raiders! How exciting! Good thing I hired security.'], dark: ['Raiders! Just like last time. I\'ll tell the guards.'] },
   plot_drunk: ['Somebody\'s drunk! There\'s always one. Hee hee!', 'Hee hee! I\'ll put the cake somewhere safe. Or not.'],
   plot_brawl: { happy: ['A brawl? Ooh, a lively one!'], dark: ['A brawl! Proper wedding, that.'] },
-  add: ['More! More is always better.', 'Oh, that\'s gorgeous there.', 'Yes! Just there!', 'Ooh, I wouldn\'t have thought of that!'],
+  add: ['More! More is always better.', 'Oh, that\'s gorgeous there.', 'Yes! Just there!', 'Ooh, I wouldn\'t have thought of that!', 'Straight from the furnisher\'s, that!'],
   move: ['Ooh, much better there.', 'Perfect! Well, nearly perfect. No, perfect!', 'Yes, yes, yes! There!', 'Oh, that\'s much more you.'],
   turn: ['Ooh, a different angle!', 'Twirly! I love it.'],
-  colour: ['That colour! Swoon.', 'Oh, it matches! Or clashes. I love it either way.', 'Gorgeous. Simply gorgeous.'],
+  colour: ['That colour! Swoon.', 'Oh, it matches! Or clashes. I love it either way.', 'Gorgeous. Simply gorgeous.', 'Ooh, a pricey dye, that. Worth every doubloon.'],
   remove: ['Gone! Never liked it anyway.', 'Less is more. Sometimes. Hee hee!', 'Room to dance!'],
-  dress: ['Oh, they look divine!', 'Stunning! Absolutely stunning!', 'I\'d marry them. I might, actually, later.', 'Fabulous! Twirl for me!'],
+  dress: ['Oh, they look divine!', 'Stunning! Absolutely stunning!', 'Fit for the Governor\'s ball!', 'Fresh from the tailor, that.', 'Fabulous! Twirl for me!'],
   ready: ['Ooh, it\'s all ready! Shall we?', 'Everything\'s perfect. I\'m going to cry.'],
   back: ['You\'re back! I kept everything just as you left it.'],
   shared: ['Oh, this one! I remember this one. Shall we do it again?'],
   again: ['That was lovely. Shall we have another?'],
+};
+/** Things you can ask her while you plan, and what she says: chattery Puzzle Pirates banter, the
+    wedding's and the Ocean's, not her own life (the user, 11 Nov: "Maybe it's that kind of
+    interactive. You could ask her"). Same in both tones but where the tone gives her another answer. */
+export const ASK_HER: readonly { q: string; a: string | Record<ToneId, string> }[] = [
+  { q: 'Who\'s on the guest list?', a: 'Anyone with a clean shirt. Well, a shirt.' },
+  { q: 'What\'s the dress code?', a: 'Whatever the tailor had in! Dyed to match, ideally. Black if you\'re showing off.' },
+  { q: 'Who\'s paying for all this?', a: 'The crew\'s coffers, love. Don\'t tell the purser.' },
+  { q: 'Is the cake safe?', a: { happy: 'Safer than a sloop in a sea battle!', dark: 'Safer than the last one. That one had a cutlass in it.' } },
+  { q: 'What if raiders turn up?', a: { happy: 'Then the guards earn their doubloons. Hee hee!', dark: 'Then the guards earn their doubloons. And the mop earns its keep.' } },
+  { q: 'Any advice?', a: 'Say "I do", not "Arr". People mix them up.' },
+  { q: 'Can my familiar come?', a: 'Of course! Parrots in the front row. Monkeys at the back, near the cake.' },
+  { q: 'Who\'s doing the music?', a: 'A shanty-singer from the inn. He knows three songs. All about the sea.' },
+];
+/** Her answer to the i-th question, in the tone. */
+export const answer = (i: number, tone: ToneId): string => {
+  const a = ASK_HER[i]?.a;
+  return a === undefined ? '' : typeof a === 'string' ? a : a[tone];
 };
 /** Her chatter: a line for something that's happened, never the same line twice running. */
 export class Gush {
