@@ -483,6 +483,21 @@ exactly; the real game's own seed can't be had, so her board is rebuilt in our d
   how a big Vegas is built. This changes the earlier "hidden, not on the way" (above), and the
   wondering aloud is a nudge that someone else is out there, which "Hidden gems, never hinted"
   wouldn't allow: to settle with the user (it says someone exists, not where or how).
+- **On Kikkit's island, teaching Sailing like balloon animals (11 Nov):** "Maybe she's on the same
+  island as [Kikkit], just to keep it simple. Or you could go over and find her ... like how
+  someone does balloon animals, except that she's doing like a sailing version of balloon animals,
+  where she's teaching you how to make a double that makes the ship go ... and zoom over the
+  whirlpool, and then she almost does like a balloon animal version of a Vegas. Say, look, it's
+  simple. Look, you just do this, and this, and this, and this, and this. You set up this thing,
+  and it pop, and then she pops it, and all the balloons go popping down as she's popping with the
+  thing. That would be hilarious." So Tzz sits on Kikkit's island (or a hop away), the sensible one
+  to Kikkit's rambling, and shows Sailing as a street performer twists balloon animals: a quick
+  double first ("and that's what zooms you over a whirlpool"), then a Vegas built up piece by
+  piece with breezy patter ("it's simple, look, this, and this, and this..."), each piece a
+  squeaky balloon twisted on, till she pops it and the chain goes off down the board pop-pop-pop
+  like balloons bursting. Sailing as balloon animals: the look of her lesson, and maybe of the
+  Sailing board's chains when they go off. (Whether she's on Kikkit's island or her own nearby,
+  and how much of her lesson you then play yourself: to settle with the user.)
 
 ## A bigger ship from the shipwright (10 Nov)
 
