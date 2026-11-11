@@ -322,7 +322,10 @@ the site (`.assetsignore` skips `*.md`).
   Because that is that part of the joy? Is it like a maze as much as a course?" Suggested: the long way
   plain to follow (marker buoys along it, numbered at each bend, the next one shown, "Leg 2 of 5"), as "The
   way on pulls you" in STORY.md; the shortcuts the maze part, there to spot and work out, never marked.
-  (To settle with the user.) After the starlit door, with the shortcuts of every size.
+  Settled (11 Nov): "That sounds good. Yeah, clearer [buoys] for the main route should be clearer." And the
+  little gold flags there now confuse: "they don't look like they're in the actual proper direction at
+  all." So replace them with buoys that plainly lead round the long way. After the starlit door, with the
+  shortcuts of every size.
 
 ## Spotted along the way (not asked for)
 
