@@ -191,6 +191,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   lines is one reusable piece (a look, its lines, looping or once, an idle animation picked by name
   from a shared set), and every creature (a familiar, a penguin, a bat) is a placeable piece too; a
   place only places and configures them.
+  **A character is only config (11 Nov):** "the point of [Kikkit] though is they shouldn't be in a
+  [Kikkit file] ... [Kikkit] should just be a bit of config. Like, this is what [Kikkit] looks like.
+  This is what her lines are. But then it should be using ... some generic pirate talking ...
+  configured with an animation ... There's little unique to [Kikkit] other than ... adding her to
+  the scene essentially on that island." So no character gets code of her own: her look, her
+  lines (and in what order: once, then looping), her animation and where she stands are data,
+  handed to the generic talking pirate; her familiars are creatures placed beside her. What's left
+  to a place is its own mechanics (Kikkit's whirlpools), never the person in it.
 - **Furniture and props are modular, usable in any scene (11 Nov).** Of Gravee's house: "anything
   in these houses, they should all be modular objects that can be reused in other scenes. So, like,
   if we're doing the vampire's coffin, that should just be a bit of furniture that you can use
