@@ -311,6 +311,13 @@ the site (`.assetsignore` skips `*.md`).
   you're like halfway down the screen and you just want it to get 2/3 of the way down or 3/4, you
   normally tap space just so you zoom kind of near the bottom but not at the bottom." So a tap of Space
   is a burst of speed for a moment, not a drop to the bottom.
+- **Sailing by Tzz's island blew you through the whirlpools to Dignity; a visible reef (11 Nov):** with the
+  Sailing board open near Tzz's island, "somehow I have ended up over near Dignity ... I don't know how I
+  managed to just make a mishap near the Whirlpools. Something got clipped. Maybe they need to be a little
+  bit further away from each other." And "there definitely needs to be a much more visible line of rocks.
+  Like, this is supposed to be a secret way round. It's literally right next to it." So Tzz's island
+  further from Kikkit's whirlpools, a plain line of rocks along the whole reef (its new length too), and a
+  chain's gust never carrying you into the whirlpools' way through by accident.
 
 ## Spotted along the way (not asked for)
 
