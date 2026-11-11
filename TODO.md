@@ -409,6 +409,17 @@ the site (`.assetsignore` skips `*.md`).
   everybody. The rivals with profiles (above) are these bots. Gunnery's gap wants to pay off better for
   its time, and the turrets once roused less relentless. Before the course's next pass, so that pass is
   tuned with it.
+- **A start through plain whirlpools and winds, picking your own starting spot (11 Nov):** "It'd be
+  really good to have a section with just like regular whirlpools. Obviously, we've been using them more
+  as a way of throwing you back. But ... they are a genuine navigation challenge as well. So part of
+  usually in the opening of a blockade, one of the challenges is, right, you've got a bunch of winds and
+  whirlpools and you have to really eyeball it to figure out what the fastest way forward is. And you can
+  kind of ... pick your starting spot along the starting edge based on that. That would definitely be a
+  way of starting off a race." So the race opens on a field of whirlpools and winds by Puzzle Pirates'
+  rules (the one whirlpool module, src/den-whirl.ts, and the wind), there to be ridden, not to send you
+  back: each racer picks where to start along the starting line, as at a blockade's opening, having
+  eyeballed the fastest way through. A field for the simulation (above) to weigh too: no one spot along
+  the line should always win.
 
 ## Spotted along the way (not asked for)
 
