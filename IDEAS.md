@@ -639,6 +639,10 @@ Rule." So the war frigate for the flotilla is Dachimpy's own Primates Rule
 (no apostrophe: the user, 11 Nov): painted black and white, with gold, black-and-white thrones and skeleton cannons.
 Drawn from the user's pictures of her (TODO.md, "Pictures of Primates Rule"), with the paint,
 furniture and cannon names as YPPedia gives them.
+**Primates Rule as an entry point (11 Nov):** "whether it's a flotilla or pillaging or something ...
+there's no reason that can't be the starting [point] for either going for a pillaging or flotilla or
+blockade or something, you know, that could be an entry point." So the war frigate's the way into the
+bigger-ship activities, whichever comes first; modelling her started 11 Nov.
 **Mems as the XO (11 Nov):** "need mems as the xo, she was so awesome. There's a second from the
 old viridian days who I can't remember though." Mems, a real pirate (pirate name only; her
 ocean, pirate page and portrait to check before she's drawn, and she goes into PIRATES): the XO,
@@ -1939,3 +1943,13 @@ The user's brain-dump (7 Nov 2026), for much later:
   coast. They attack from land now, but the sea is right there.
 - **Ships and voyages:** later, build ships and sail off on voyages for resources: the full Puzzle
   Pirates kind of thing.
+
+## An imperial island (11 Nov)
+
+"start sketching out even just like, even if it's just an empty island or something where you can't
+interact yet, is just some island that's, say, under imperial control. So, you know, I guess you could
+naturally run into [Dignity] again there or something. But, you know, to create trading mechanics,
+looting mechanics, smuggling mechanics, all that kind of stuff. Just proof of concepts around those
+things ... that can certainly be the place for a few more puzzles." First the island, empty (TODO.md);
+later, proofs of concept: trading, looting, smuggling (smuggling still needs its own go-ahead), Dignity
+met again, more puzzles there.

@@ -166,7 +166,7 @@ the site (`.assetsignore` skips `*.md`).
   enough there to get started, and then I think you can naturally flesh out the rest of the
   mechanics later." But "try and finish things ... we need to finish things really one at a time"
   (RULES.md, "Finish one thing at a time"): each starts only when the one before is played and done.
-  - **Daquan's flotilla, to start:** the cutscene (Dachimpy at the helm told to go sink a ship,
+  - **Daquan's flotilla, to start (started 11 Nov: modelling Primates Rule first):** the cutscene (Dachimpy at the helm told to go sink a ship,
     sinking their own; Daquan face-palming, then turning to you), and modelling a bigger ship,
     Primates Rule, the war frigate he lends you, to see how she looks beside the sloop
     (proportional by YPPedia's numbers). Daquan's portrait checked first; Primates Rule's gold,
@@ -281,6 +281,13 @@ the site (`.assetsignore` skips `*.md`).
   Since 9 Nov you can also lob a piece over the wall from the den floor at raiders hacking
   outside; not yet tried by the user. Watch for: the markers on raiders outside cluttering the
   view while you carry a piece.
+- **An island under imperial control, sketched (11 Nov):** "start sketching out even just like, even if
+  it's just an empty island or something where you can't interact yet, is just some island that's, say,
+  under imperial control. So, you know, I guess you could naturally run into [Dignity] again there or
+  something. But, you know, to create trading mechanics, looting mechanics, smuggling mechanics, all that
+  kind of stuff. Just proof of concepts around those things ... that can certainly be the place for a few
+  more puzzles." For now: the island itself, at sea, to sail up to and look at, nothing to do there yet.
+  (IDEAS.md, "An imperial island".)
 
 ## Spotted along the way (not asked for)
 
