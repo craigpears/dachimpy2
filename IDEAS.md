@@ -2059,3 +2059,91 @@ sea's module (src/den-turret.ts) as config, or something like it. (To shape with
 round the back, given its rocks and the smugglers' beach behind them reached only by way of Kikkit's
 whirlpools (TODO, 11 Nov): the treasury beside that cove, or a way round for a bigger ship; how hard the
 fort fights back; and what the haul is worth.)
+
+## A sloop race: an S-shaped course, a puzzle shortcut at every bend (11 Nov)
+
+The user: "maybe we've got enough to start some sloop races ... we've got enough mechanics here to make a
+little racing course, especially like all the sloop snakes and ladders sort of stuff we talked about."
+First thought: four routes, "which one do you want to compete on?" ("probably a bit more Puzzle
+Pirate-esque"). Then, wanting it "a bit more tactical": "a winding, snakes and ladders, zigzagging kind of
+course, just with a lot of shortcuts, and each shortcut is a different puzzle, and you have to choose either
+the long way round, just ... without doing anything, and the long way it potentially involves running past
+some cannons ... so there's a risk of having to do a bit of carpentry, but not as much as, say, with a crane
+... a zigzagging S-shaped course where you have puzzle-based shortcuts for each one." And "it should be
+significant", long enough that the choices matter. It pulls together the racing notes above ("Racing, one
+day", "A course like snakes and ladders", "Guns trained on squares", "Quick clears against big combos",
+"A puzzling decathlon").
+
+**A first design (to shape with the user):**
+
+```
+ START ══ leg 1 ═══════════════════════════╗
+          ▲ guns on marked squares           ║ [A] the gun gap (Gunnery)
+ ╔══ leg 2 ════════════════════════════════╝
+ ║ [B] the headwind gap (rowing)        ◄── a wind down the leg: the snake
+ ╚══ leg 3 ════════════════════════════════╗
+          ~ ~ whirlpool reef ~ ~             ║ [C] over the whirlpools (Sailing, a Vegas)
+ ╔══ leg 4 ════════════════════════════════╝
+ ║ [D] the locks through the headland (Bilge)
+ ╚══ leg 5 ════════════════════════════════╗
+                                             ║ [E] the crane over the neck (Carpentry)
+            FINISH ═════════════════════════╝
+    (*) the starlit door: a hidden tunnel in the cliffs, leg 2 to leg 5 (Duty Navigation)
+```
+
+- **The course:** five legs, back and forth down the page, with a spit of land or reef between each pair.
+  The long way sails right round every bend, needs no puzzle and is open to anyone, but it's long, and runs
+  past guns trained on marked squares (as at the checkpoint: src/den-checkpoint.ts, src/den-turret.ts).
+  Land on one and you're holed: a little deck patch (Carpentry, src/den-patch.ts) before you sail on. "A
+  bit of carpentry, but not as much as ... with a crane."
+- **The shortcuts (the ladders), one at each bend, each a different puzzle, each cutting the bend off:**
+  - **[A] the gun gap (Gunnery):** a turret sits in a narrow gap through the first spit. Load her guns
+    (src/gunnery.ts, src/den-guns.ts) and shoot it out, and the gap's open. Miss, and it holes you.
+  - **[B] the headwind gap (rowing):** a gap with the wind blowing straight back through it, so no sail
+    gets through: row it by mirror strokes (src/mirror-row.ts). Drift and the wind carries you back up
+    the leg, the snake, "all the way back to the start and you've got to row back up again".
+  - **[C] over the whirlpools (Sailing):** a whirlpool reef across the bend, as at Kikkit's
+    (src/den-whirl.ts): only a Vegas carries you over (src/sailing.ts). Less, and they spin you back.
+  - **[D] the locks (Bilge):** a canal cut through the headland, two locks up and down, pumped by Bilge
+    (src/den-lock.ts), as the canal round the checkpoint.
+  - **[E] the crane (Carpentry):** a neck of land to haul her over, the crane built by Carpentry
+    (src/carpentry-frame.ts), as up the cliff into the lagoon. The biggest saving, and the most work.
+- **The tactics:** each shortcut saves about what a good player takes on its puzzle, so a shortcut only
+  pays if that's your puzzle: the race comes down to which puzzles you back yourself on, and how fast and
+  well you play them (big combos or quick clears: "Quick clears against big combos"). A good Gunner takes
+  [A] and sails round [E]; a good Carpenter does the reverse. Doing all five badly loses to the long way.
+- **Who you race:** to start, one rival sloop, a pirate of the den's (Daquan, say, before the pink slips:
+  "Racing him for pink slips", above), taking a set route at a set pace, and your best time to beat. PvP
+  later ("Solo for now").
+- **Its own place:** an island of its own in the code (its course in src/, its 3D in js/den/, its lines in
+  src/lines/), reached by a starting buoy off one of the islands, with its own `?at=` link to the start.
+  Ends where it started, so the den's sea is left as it is.
+
+**The starlit door: Duty Navigation finds the secret passage (11 Nov).** The user, of the Navigation duty
+puzzle finding hidden routes: "I don't like the idea of like how exactly you're going to look at the sky to
+see this route ... how would you actually reveal that mechanic? ... the only thing that comes to mind is in
+[The Fellowship of the Ring] ... going into the mines of Moria, and he's ... doing the thing to reveal the
+door by starlight. Can we do a similar kind of thing and use duty navigation as the puzzle for how you find
+the door and have it discoverable in some way similar to the carpentry spots?"
+- **The real puzzle (YPPedia, "Navigation", checked 11 Nov):** a round board of three rings, eight places
+  round each (up, down, left, right and the diagonals). Stars fall in from outside toward the middle; you
+  pick a ring and turn it (and its stars) clockwise or anticlockwise, and a star with nothing under it
+  falls inward. Three or more of a colour in a line, out from the middle or round a ring, vanish. The aim
+  is a **constellation**: stars of the right colours in the marked places, which then vanish and score.
+  Dropping a star onto a full outer ring is a booch: the ship turns around. Keys: left and right turn the
+  ring, up and down change ring, Space drops.
+- **The door:** a stretch of plain cliff along the course with, for anyone looking closely, faint marks
+  in the rock (found as the crane's ledge is: noticed, never pointed out; "Hidden gems, never hinted").
+  Stop beside it under the night sky, and the Navigation board is the sky: each constellation you complete
+  lights up its stars on the rock, and once they're all lit the outline of a door glows and swings open.
+  A booch sends her about, away from the cliff. Inside, a tunnel through the cliffs comes out on a later
+  leg: the biggest ladder on the course, for whoever finds it and can navigate. (Ours, not the film's: no
+  words to speak, no elvish, just the stars.)
+- **New work:** the one puzzle the den doesn't have yet, so it gets a module of its own (src/, knowing
+  nothing of the den, with bots like Sailing's), and could find other hidden ways later (the smugglers'
+  beach, Port Decorum's treasury).
+
+(To shape with the user: where the course is and how you come to it; how long a race runs (a few minutes
+the long way?); whether the rival takes shortcuts too; what winning gets you; whether it's night all race
+or the door only shows at dusk; and what to build first: the course, the long way and one or two shortcuts
+the den already has, before the Navigation puzzle and the door.)
