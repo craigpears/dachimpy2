@@ -140,24 +140,23 @@ the site (`.assetsignore` skips `*.md`).
   thrones, the skeleton cannons." The user's war frigate, the one for Daquan's flotilla (IDEAS.md,
   "Daquan's flotilla"): waiting on the user's pictures before she's drawn.
 
-- **Looking round a house freely (11 Nov):** "the camera isn't quite working on the portrait
-  gallery stuff ... If I'm standing next to the portraits of [Gravee], I should be able to move the
-  camera freely, zoom in, look around, that kind of thing." In any house (the shared shell, not
-  Gravee's own), drag to turn the camera round you and look about, and zoom in close to a portrait
-  to read it and see it properly; the house's own view comes back when you walk on or let go.
-
-- **Gravee talks about the portrait you're looking at (11 Nov):** "I think the speech should adapt
-  to what you are looking at better in the gallery tour, like she talks about the portrait you are
-  looking at." Her tour's lines are by stop, not by picture. Instead, as you stop by a portrait (or
-  turn the camera onto one), she says something about that one: who it is, the story behind its
-  title, in her voice, each portrait's line in its config. It's the house shell's piece, so any
-  host can talk about what you're looking at in their house.
-
-- **A 2D view of the portraits, like the puzzles' (11 Nov):** "needs a 2D version similar to the
-  puzzles, so you can go through the portraits easily with keyboard controls." A flat view, opened
-  by a button and key the way the puzzles' boards are, showing one portrait big with its title (and
-  her line about it), left and right to go through them, Escape back to the house. A shared piece
-  (any house's pictures; the museum's exhibits too), not Gravee's own.
+- **Tzz's balloon lesson, after the user's first look (11 Nov):** "I love the start of [Tzz]." The
+  one long whoosh works. But:
+  - **The camera:** "the camera angle is a bit off. She's hidden quite behind." Frame her and the
+    board so you see both.
+  - **A real Sailing board, a real lesson:** "it's not really a real looking sailing board, it's just
+    things stacked on each other, so it needs to be ... closer to the actual tutorial idea. She's
+    helping you ... how to build doubles and bingos and things." Her board should look like Sailing's
+    own (the den's Sailing board), each piece landing where it would in a real game, building a
+    double, then a bingo, then the Vegas, so you learn how they're made.
+  - **The balloon in her hand and the piece on the board should look like the same thing:** "it
+    kind of loses some of the continuity ... the visual appearance between when it's in her hand and
+    when it's on the board is too different. There should be more cohesion."
+  - **Slower in her hand:** "it goes really quickly in her hand. It's just like, what is she doing?
+    Fiddling around some Play-Doh." Slow enough to see a balloon being twisted into that piece.
+  - **Careful with shapes and colours:** "it looks a bit wrong as well when it's certain colours with
+    balls at the end. So be careful about that." No long shapes with round knobs at the end, nor
+    colours that make them look rude.
 
 ## Needs a playtest to pin down
 
