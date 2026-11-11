@@ -4,7 +4,7 @@
 // them for a Double, more for each step, and for a Vegas her sails billowing full and lit gold, sparkles
 // streaming off them aft, and a whoosh of wind rushing past her. js/den/sail-station.js drives it.
 import * as THREE from 'three';
-import { scene } from './world.js';
+import { scene, camera } from './world.js';
 import { sloopSails } from './sea.js';
 
 // A sparkle: a little four-pointed star with a soft glow, added on (it shines over the sea).
@@ -39,10 +39,12 @@ export function sparkleTick(g, sp, dt) {
   fx.t += dt;
   const level = sp?.level ?? 0, { cloths, mat } = sloopSails(g);
   const up = g?.visible && cloths.length && cloths[0].parent.visible;
-  // Her sails billow out, fuller with a bigger chain, and glow gold.
-  for (const c of cloths) c.scale.z += (1 + 1.4 * level - c.scale.z) * Math.min(1, dt * 4);
+  // Her sails billow out, fuller with a bigger chain (their shape's the wind's to draw, with this on
+  // top: wind.js, by src/den-sailing.ts's billow), and glow gold.
+  if (g) g.userData.swell = level;
   if (mat?.emissive) mat.emissive.copy(fx.glow).multiplyScalar(0.45 * level);
-  // Sparkles off the cloth, streaming aft.
+  // Sparkles off the cloth, streaming aft: off its face toward the camera, where they're seen (from
+  // behind her, the far side of her sails, toward her bow, hid them), and round its edges.
   if (up && level > 0.01) {
     fx.owed += dt * 90 * level ** 1.3;
     g.updateMatrixWorld(true);
@@ -51,7 +53,10 @@ export function sparkleTick(g, sp, dt) {
       const s = star();
       if (!s) { fx.owed = 0; break; }
       const c = cloths[Math.floor(Math.random() * cloths.length)], P = c.geometry.parameters;
-      s.position.set((Math.random() - 0.5) * P.width, (Math.random() - 0.5) * P.height, 0.25 * c.scale.z);
+      const seen = c.worldToLocal(fx.v.copy(camera.position)).z >= 0 ? 1 : -1;   // (the camera's side of it)
+      const x = (Math.random() - 0.5) * P.width, y = (Math.random() - 0.5) * P.height;
+      const belly = Math.cos(x / P.width * Math.PI) * 0.22 * (0.6 + 0.4 * Math.cos(y / P.height * Math.PI));   // (as sloop.js shapes it)
+      s.position.set(x * (1 + 0.15 * Math.random()), y, belly + seen * (0.12 + Math.random() * 0.2) / Math.max(0.2, c.scale.z));   // (its z is scaled by the belly's)
       c.localToWorld(s.position);
       const sp2 = 1.5 + Math.random() * 2.5 * (0.4 + level);
       s.userData = { v: fx.bow.clone().multiplyScalar(-sp2).add(fx.v.set((Math.random() - 0.5) * 0.8, 0.2 + Math.random() * 0.6, (Math.random() - 0.5) * 0.8)), life: 0.7 + Math.random() * 0.8, t: 0, ph: Math.random() * 9, size: 0.22 + Math.random() * 0.28 };

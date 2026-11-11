@@ -192,6 +192,12 @@ export function umamiPrompt() {
   if (u.canFree(true)) return 'A capybara, shut in an old fish trap · Space: free him (Foraging) · S: pole her back to the wreck';
   return 'The far bank · S: pole her back to the wreck · H: lower her down to the cove';
 }
+/** Freeing him, offered on his bank where you're looking (js/den/start-mark.js): a click does what
+    Space does. */
+export function umamiOffer() {
+  if (umami.on || !inLagoon() || U().pole || U().moor !== 'bank' || !U().canFree(true)) return null;
+  return { at: MID, label: 'Free him (Foraging)', go: openBoard };
+}
 /** The camera while you free him: straight on to the bank's face; then on him as he breaks free,
     bounds about and swims to her. */
 export function umamiCam() {

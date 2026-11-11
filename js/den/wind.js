@@ -22,6 +22,7 @@
 import * as THREE from 'three';
 import { STRENGTH, WIND, WEATHER, pointOf, lie } from '../den-wind.js';
 import { SAIL } from '../den-sail.js';
+import { billow } from '../den-sailing.js';
 import { scene, mesh, mat, woodTex, canvasTex, burst, toast, view, V3 } from './world.js';
 import { sail, seaX, seaZ, SLOOP_DECK, SLOOP_BEAM } from './sea.js';
 
@@ -194,11 +195,16 @@ export function windTick(dt) {
     const across = new THREE.Vector3(DC[air.d], 0, -DR[air.d]).applyAxisAngle(V3(0, 1, 0), -g.rotation.y).z;
     brace = Math.PI / 2 - across * 0.6;
   } else if (felt) brace = Math.PI / 2;
+  // On top of the wind, Sailing's sparkle billows them (src/den-sailing.ts, billow; sail-sparkle.js
+  // says how much): swelling wider and taller, their bellies deeper, so it shows from behind her.
+  const B = billow(h.oars ? 0 : g.userData.swell ?? 0), kb = Math.min(1, dt * 4);
+  if (!irons) brace += (Math.PI / 2 - brace) * B.square;   // (squared across her, the gust behind her)
   for (const arm of g.userData.sails) {
     const c = arm.children[0], ht = c.geometry.parameters.height;
     const full = felt ? (point === 'reach' ? 0.75 : 1.25) * [0.1, 0.5, 1][air.s] : [0.12, 0.6, 1.25][w.s];
-    const fy = h.oars ? 0.18 : 1, fz = h.oars ? 0.3 : irons ? 0.2 + 0.5 * Math.abs(Math.sin(t * 17 + ht)) : full;
-    c.scale.y += (fy - c.scale.y) * k; c.scale.z += (fz - c.scale.z) * (irons ? 1 : k);
+    const fy = h.oars ? 0.18 : B.tall, fz = h.oars ? 0.3 : irons ? 0.2 + 0.5 * Math.abs(Math.sin(t * 17 + ht)) : Math.max(full, B.fill);
+    c.scale.x += (B.wide - c.scale.x) * kb;
+    c.scale.y += (fy - c.scale.y) * k; c.scale.z += (fz - c.scale.z) * (irons ? 1 : B.fill ? kb : k);
     c.position.y = -ht * c.scale.y / 2;
     arm.rotation.z = irons ? Math.sin(t * 13 + ht) * 0.08 : arm.rotation.z * (1 - k);
     arm.rotation.y += (brace - arm.rotation.y) * k;

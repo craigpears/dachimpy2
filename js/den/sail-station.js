@@ -70,7 +70,8 @@ function show() {
 }
 function hide() {
   station.on = false;
-  document.body.classList.remove('sailboard');
+  document.body.classList.remove('sailboard', 'sailtall');
+  document.body.style.removeProperty('--sea-sig');
   if (station.B) station.B.el.style.display = 'none';
 }
 
@@ -140,6 +141,7 @@ export function stationTick(dt, blocked = false) {
   // and then: they change as you go).
   if ((station.lowT -= dt) <= 0) { station.lowT = 0.5; station.low = $('dock').getBoundingClientRect().top; station.top = document.querySelector('.hud')?.getBoundingClientRect().bottom ?? 0; }
   station.layout = sailBoardLayout(B, station.low || innerHeight, station.top);
+  seaToast(station.layout);
   // A drop's pops played out: its run's given to her.
   if (station.run && !sailBoardBusy(B)) {
     const res = station.run;
@@ -158,6 +160,19 @@ export function stationTick(dt, blocked = false) {
   if (!keys.has(' ') && !station.padFast) station.pair.ease();   // (Space let go)
   if (!busy) { const res = station.pair.tick(dt); if (res) landed(res); }
   sailBoardTick(B, dt, busy ? null : station.pair, station.sparkle);
+}
+
+/* The den's toasts kept off the board, in the sea it leaves (11 Nov: on a phone the big toast after a
+   chain covered the board for a moment): over the middle of the sea's part of the screen, no wider
+   than it, and on a tall screen (the board along the bottom) smaller, just under the den's panel. */
+function seaToast(L) {
+  const F = L.free, s = document.body.style, px = (v) => `${Math.round(v)}px`;
+  if (s.getPropertyValue('--sea-sig') === `${F.x},${F.y},${F.w},${F.h},${L.wide}`) return;
+  s.setProperty('--sea-sig', `${F.x},${F.y},${F.w},${F.h},${L.wide}`);
+  s.setProperty('--sea-mid', px(F.x + F.w / 2));
+  s.setProperty('--sea-w', px(Math.max(120, F.w - 24)));
+  s.setProperty('--sea-top', L.wide ? '18%' : px(F.y + 6));
+  document.body.classList.toggle('sailtall', !L.wide);
 }
 
 export function stationPrompt() {

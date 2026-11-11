@@ -625,6 +625,19 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   like flashing yellow things ... when I'm standing around the carpentry puzzle and the sword
   fighting, it's really irritating": walking about there, the offer changed every few steps and
   pulsed each time).
+  - **Started where you're looking, by a click (10 Nov, done 11 Nov).** That wasn't enough: "Still
+    got to fix that carpentry hauling up thing. Like, it should be in the middle of the screen where
+    I'm looking so that I can click on it and start it. It should not be a space along the bottom
+    ... it's not in my eye line at all." So something new to start is also offered on the thing
+    itself, in the view: a marker over it with what it starts ("Build a crane here", over the
+    crane's chalked frame on the ledge), and a click on it starts it. Space still does, and the
+    prompt at the bottom still says so. One at a time, the prompt's own offer; kept clear of the
+    den's panel and the prompt; brought in to the edge when the thing's just off the screen, gone
+    when it's well off or behind you; pulsing the first time each offer comes up only. Offered so
+    far: boarding her from the jetty, the crane's starts (building it, back to building it, hauling
+    her up, lowering her down, the lagoon's wreck), freeing Umami, the old wreck at sea. One shared
+    piece any place can offer one through (src/start-mark.ts, js/den/start-mark.js), so more can
+    adopt it.
 
 - **A puzzle game, not an action game.** The raiders are there for a bit of interest and a bit of
   pressure, so you can't ignore things altogether; the emphasis is always on wanting to finish the
@@ -1917,6 +1930,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     chain, a little glitter for a Double, and on a Vegas they billow full and gilded, sparkles
     streaming aft and a whoosh of wind, holding while the gust lasts and fading after. It's what
     Kikkit's "really, really big and really sparkly" ramble is about, so her lines must match.
+  - **Seen from behind her, and never under a toast (11 Nov, seen when it was built).** From the
+    usual camera at sea, behind her and above, her sails were seen at a slant, nearly edge-on, and
+    a belly out toward her bow hardly showed, so a Vegas's billow barely showed. Now the billow
+    squares her sails across her (the gust's right behind her), so from behind they face you full
+    on, and swells them wider and taller, their bellies deeper, on top of whatever the wind does
+    (src/den-sailing.ts, billow); the sparkles come off the side of the cloth the camera sees. The
+    camera's no different. And on a phone the den's big toast covered the Sailing board for a moment
+    after a chain: with the board out, toasts go in the sea it leaves, no wider than it, and on a
+    tall screen smaller, just under the den's panel, so they're never over the board.
 - **Sailing's pair pushes off a wall as it turns (11 Nov).** "it doesn't turn when it's against the
   wall. If you rotate it and it's against the wall, it should kind of push away from the wall." A turn
   that would put a half into the wall or a piece steps the pair a column away (from the nearer side

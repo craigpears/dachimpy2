@@ -134,3 +134,27 @@ export class Sparkle {
     /** Her sails billowing full (a Vegas's show, while it lasts). */
     full() { return this.level >= SPARKLE.FULL - 1e-9; }
 }
+/* Her sails' billow, by the show on them (0 to 1), on top of what the wind does to them. Seen from the
+   usual camera at sea, behind her and above, her square sails face you, so a deeper belly alone (out
+   toward her bow, away from you) hardly showed (11 Nov, when it was built: a Vegas's billow "barely
+   shows" from behind her). So they swell too, wider and taller, which reads from anywhere; their
+   bellies deepen as well, which from above curves their feet; and they're squared across her, the
+   gust right behind her, so from behind her they face you full on (braced round, as the wind or
+   her moorings have them, they were seen at a slant). (Their feet blown forward was tried: seen
+   from above and behind, that tips the cloth away from you, and they look smaller.) */
+export const BILLOW = {
+    /** At a Vegas: how much wider and taller they swell (1 is their own size)... */
+    WIDE: 0.3,
+    TALL: 0.2,
+    /** ...and how much fuller than the best a wind fills them (FULL_WIND) their belly gets, whatever
+        the wind (in a calm too). */
+    BELLY: 0.8,
+    FULL_WIND: 1.25,
+};
+/** Her sails' billow for a show of `level`: their width and height (times their own), the least
+    fullness of their belly (0: the wind's alone), and how far they're squared across her (0: as the
+    wind has them braced, 1: square). */
+export function billow(level) {
+    const l = Math.max(0, Math.min(1, level || 0));
+    return { wide: 1 + BILLOW.WIDE * l, tall: 1 + BILLOW.TALL * l, fill: l > 0 ? BILLOW.FULL_WIND * (1 + BILLOW.BELLY * l) : 0, square: l };
+}
