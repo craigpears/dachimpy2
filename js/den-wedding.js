@@ -28,6 +28,7 @@ import { VOWS } from './lines/spouse.js';
 import { AT_YOUR_WEDDING as YOURS } from './lines/you.js';
 import { GUESTS_SAY as GUEST, DRUNK_SAYS, RAIDER_SAYS, GUARD_SAYS } from './lines/wedding-guests.js';
 import { CAPTIONS, SIGNED } from './lines/keepsake.js';
+import { choices, restyle } from './showcase.js';
 export { ARRIVE, WELCOME, RETURN, GUSH, ASK_HER, PLANNER, SIGNED };
 /** The Puzzle Pirates dyes, by name, as the wardrobe's DYES has them (a test checks each is there).
     Their order is the share link's: new ones go on the end. */
@@ -681,6 +682,20 @@ export function themeLook(theme, body, rand = Math.random) {
     L.hairCol = pick(['black', 'dark brown', 'brown', 'auburn', 'ginger', 'blonde', 'grey']);
     return L;
 }
+// ---------- the whole set-up ----------
+/** The wardrobe's familiars (js/den-look.js's `fam` slot: a test checks they're the same), 'none' first. */
+export const FAMS = ['none', 'parrot', 'monkey', 'octopus', 'squirrel', 'bat', 'krakling'];
+const isFam = (f) => FAMS.includes(f);
+/* Her familiar, as well as her outfit (Mischievious herself, 11 Nov: "I'm usually wearing a monkey but
+   maybe I could switch fams as well as outfits?"): offered after which look of hers, her look's own
+   first, then a monkey, as she usually wears one, then the rest, none last. */
+export const herFams = (look) => choices(typeof look.fam === 'string' ? look.fam : undefined, FAMS, ['monkey']);
+/** Her as you're marrying her: the version you picked (of `vs`, MISCHIEVIOUS_VERSIONS), with the familiar
+    you picked (in the colours another of her looks has it in, else the wardrobe's own). */
+export function herLook(vs, p) {
+    const v = vs[p.ver] ?? vs[0];
+    return restyle(v?.look ?? {}, { fam: p.fam }, vs.map((x) => x.look));
+}
 /** A fresh wedding in a tone: the venue as you find it, nothing chosen. */
 export function fresh(tone = 'happy', seed = 0) {
     return { tone, partner: null, venue: 'beach', theme: null, plot: SUGGEST[tone].plots[0], props: arrival(tone), guests: [], size: 'small', seed, spots: [] };
@@ -764,7 +779,7 @@ export function clean(o) {
     if (pa && typeof pa === 'object') {
         const n = Number(pa.kind === 'her' ? pa.ver : pa.i);
         if (pa.kind === 'her')
-            partner = { kind: 'her', ver: Number.isInteger(n) && n >= 0 && n < 16 ? n : 0 };
+            partner = { kind: 'her', ver: Number.isInteger(n) && n >= 0 && n < 16 ? n : 0, ...(isFam(pa.fam) ? { fam: pa.fam } : {}) };
         else if (pa.kind === 'suitor' && Number.isInteger(n) && n >= 0 && n < suitors(tone).length)
             partner = { kind: 'suitor', i: n };
         else if (pa.kind === 'own')
@@ -830,7 +845,7 @@ export function encode(w0) {
     const w = clean(w0), T = themeOf(w.theme);
     const tone = TONES.findIndex((t) => t.id === w.tone), venue = VENUES.findIndex((v) => v.id === w.venue);
     const theme = T ? THEMES.indexOf(T) : -1, plot = PLOTS.findIndex((p) => p.id === w.plot);
-    const pa = !w.partner ? 0 : w.partner.kind === 'her' ? ['h', w.partner.ver] : w.partner.kind === 'suitor' ? ['s', w.partner.i] : ['o', w.partner.look];
+    const pa = !w.partner ? 0 : w.partner.kind === 'her' ? ['h', w.partner.ver, ...(w.partner.fam ? [w.partner.fam] : [])] : w.partner.kind === 'suitor' ? ['s', w.partner.i] : ['o', w.partner.look];
     const base = T ? layout(w.venue, w.theme) : arrival(w.tone);
     const props = same(w.props, base) ? 0 : w.props.map(packProp).join('');
     // (a guest's changes; or, if they've lost something they came with, their whole look, in a list)
@@ -866,7 +881,7 @@ export function decode(code) {
     const sd = Number.isInteger(seed) && seed >= 0 && seed < SEEDS ? seed : 0;
     let partner = null;
     if (Array.isArray(pa))
-        partner = pa[0] === 'h' ? { kind: 'her', ver: pa[1] } : pa[0] === 's' ? { kind: 'suitor', i: pa[1] } : pa[0] === 'o' ? { kind: 'own', look: pa[1] } : null;
+        partner = pa[0] === 'h' ? { kind: 'her', ver: pa[1], fam: pa[2] } : pa[0] === 's' ? { kind: 'suitor', i: pa[1] } : pa[0] === 'o' ? { kind: 'own', look: pa[1] } : null;
     let ps;
     if (typeof props === 'string') {
         const out = [];

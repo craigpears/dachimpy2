@@ -19,6 +19,7 @@ import {
   TONES, VENUES, THEMES, PLOTS, PROPS, SUGGEST, ARRIVE, WELCOME, RETURN, GUARDS, PROP_R, AREA, MAX_PROPS, DYE_NAMES, SECURITY, RAIDERS,
   ASK_HER, answer, STAND, onSomeone, Gush, fresh, dressFor, moveTo, clean, encode, decode, seatsFor, suitors, suitorTitle, themeOf, themeLook, caption, readSecs, cleanProp,
   PLANNER, SIGNED, collage, momentCaption, fill, WHO, SIZES, MAX_GUESTS, SEEDS, PROP_GROUPS, MADE_IN, GROUNDS, clashes, restsOn, withSize, reseed, moveGuest, dressedUp, baseGuest, standFree, plainLook,
+  herFams, herLook,
 } from '../den-wedding.js';
 import { $, scene, camera, renderer, hemi, skyDome, paintSky, keep, myLook, V3, toast as denToast, toastQuiet, toastHush, warm, sunOver, ray, burst, wearLook, worldLets, shake } from './world.js';
 import { cine, cinePlay, cineEnd, cineLets, bubble, bubbleAt, stepTo } from './cine.js';
@@ -28,6 +29,7 @@ import { crowdMake, crowdSet, crowdPose, crowdPick } from './wedding-crowd.js';
 import { dressLook } from './menus.js';
 import { ceremony, portraitCam } from './wedding-ceremony.js';
 import { spouse, spouseOf, spouseMarried, spouseLeaves } from './spouse.js';
+import { showcase, twirl, twirlTick } from './showcase.js';
 
 const KEY = 'carp.den.wedding';
 // (the den's own news is kept quiet while you're here: these are the island's)
@@ -133,9 +135,10 @@ function buildCast() {
   partnerFigure();
   guestsFigures();
 }
+/** How she's dressed: as you're marrying her (her look and familiar), or the look she's modelling. */
 function misLook() {
   const p = wed.w?.partner, vs = versions();
-  return (p?.kind === 'her' ? vs[p.ver] || vs[0] : vs[wed.show?.i ?? 0] || vs[0]).look;
+  return p?.kind === 'her' ? herLook(vs, p) : (vs[wed.show?.i ?? 0] || vs[0]).look;
 }
 function partnerFigure() {
   const F = wed.fig, p = wed.w.partner;
@@ -364,29 +367,38 @@ function shot(C, x, y, z, dist, tilt, yaw) { C.look.set(x, y, z); wed.root.local
 
 // ---------- who you marry ----------
 function pickHer(ver) {
-  const first = wed.w.partner?.kind !== 'her';
+  const was = wed.w.partner, first = was?.kind !== 'her';
   wed.show = null;
-  wed.w.partner = { kind: 'her', ver };
+  // (the familiar you picked her stays with her, whichever look, unless it's this look's own)
+  const fam = !first && was.fam && was.fam !== versions()[ver]?.look.fam ? was.fam : null;
+  wed.w.partner = { kind: 'her', ver, ...(fam ? { fam } : {}) };
   partnerFigure();
   twirl(wed.fig.mis);
   save(); panel();
   gush(first ? 'her' : 'version');
 }
-// She models each of her looks in turn, each by its portrait's title, till you pick one.
+/* Her familiar, as well as her outfit (her own feedback, 11 Nov: "I'm usually wearing a monkey but maybe
+   I could switch fams as well as outfits?"): her look's own, a monkey, the rest, none. */
+function pickFam(id) {
+  const p = wed.w.partner;
+  if (p?.kind !== 'her') return;
+  if (id === versions()[p.ver]?.look.fam) delete p.fam; else p.fam = id;
+  wearLook(wed.fig.mis, dressable(misLook()));
+  twirl(wed.fig.mis);
+  save(); panel();
+  gush('version');
+}
+// She models each of her looks in turn, each by its portrait's title, till you pick one (showcase.js).
 function startShow() {
   wed.pick = 'her';
-  wed.show = { i: wed.w.partner?.kind === 'her' ? wed.w.partner.ver : 0, t: 0, n: 0 };
-  modelLook();
+  const p = wed.w.partner?.kind === 'her' ? wed.w.partner : null;
+  wed.show = showcase({
+    looks: versions(), fig: wed.fig.mis, wear: (f, l) => wearLook(f, dressable(l)), say, over: { fam: p?.fam },
+    onLook: () => panel(), onEnd: () => { wed.show = null; panel(); },
+  });
+  wed.show.start(p ? p.ver : 0);
   panel();
 }
-function modelLook() {
-  const v = versions()[wed.show.i];
-  wearLook(wed.fig.mis, dressable(v.look));
-  twirl(wed.fig.mis);
-  say(wed.fig.mis, `"${v.title}"`, 2.8);
-  panel();
-}
-function twirl(p) { p.twirl = 0.8; }
 // "Here are your bachelors!" A line of them walks in, bouquets out, and each steps forward in turn.
 function startLineup() {
   wed.pick = 'suitors';
@@ -772,6 +784,14 @@ function panel() {
       const r = el('div', 'row');
       versions().forEach((v, i) => r.append(btn(v.title, () => pickHer(i), (w.partner?.kind === 'her' && w.partner.ver === i && !wed.show) || wed.show?.i === i ? 'on' : '')));
       box.append(r);
+      // (then her familiar: her look's own first)
+      if (w.partner?.kind === 'her' && !wed.show) {
+        const own = versions()[w.partner.ver]?.look.fam, on = w.partner.fam || own || 'none';
+        const f = el('div', 'row');
+        f.append(el('span', 'note', 'Her familiar: '));
+        herFams(versions()[w.partner.ver]?.look || {}).forEach((id) => f.append(btn(id === 'none' ? 'None' : LOOK.PARTS.fam.f.find(([x]) => x === id)?.[1] || id, () => pickFam(id), id === on ? 'on' : '')));
+        box.append(f);
+      }
     }
     box.append(opt(WHO.suitors.name, WHO.suitors.blurb, w.partner?.kind === 'suitor' || wed.pick === 'suitors', startLineup));
     if (wed.pick === 'suitors') {
@@ -1122,10 +1142,7 @@ export function weddingTick(dt0) {
   if (!wed.play && !wed.welcome) {
     const moving = new Set();
     // She models her looks, one after another.
-    if (wed.show && (wed.show.t += dt) > 2.9) {
-      wed.show.t = 0; wed.show.n++;
-      if (wed.show.n >= versions().length) { wed.show = null; panel(); } else { wed.show.i = (wed.show.i + 1) % versions().length; modelLook(); }
-    }
+    wed.show?.tick(dt);
     // The bachelors: in they walk, then each steps forward in turn with their line.
     const L = wed.lineup;
     if (L) {
@@ -1159,7 +1176,7 @@ export function weddingTick(dt0) {
       restArms(p);
       if (p === F.partner && F.partner !== F.mis && !p.hurt) p.arms[0].rotation.x = -0.9;   // (flowers out)
       poseFig(p, dt);
-      if (p.twirl > 0) { p.twirl = Math.max(0, p.twirl - dt); p.g.rotation.y = p.yaw + (1 - p.twirl / 0.8) * Math.PI * 2; p.g.position.y += Math.sin(p.twirl / 0.8 * Math.PI) * 0.12; }
+      twirlTick(p, dt);
     }
     // Her, as she talks: a little bounce, hands clasped, now and then a giggle behind them.
     if (wed.line?.fig === F.mis && !moving.has(F.mis)) {

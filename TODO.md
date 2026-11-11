@@ -140,21 +140,6 @@ the site (`.assetsignore` skips `*.md`).
   thrones, the skeleton cannons." The user's war frigate, the one for Daquan's flotilla (IDEAS.md,
   "Daquan's flotilla"): waiting on the user's pictures before she's drawn.
 
-- **Modelling looks, a piece of its own (11 Nov):** "That way that [Mischievious] changes outfits
-  and spins, that definitely needs to be a generic module so that you can just ... go through
-  someone like as a wardrobe furniture kind of thing that you can just like cycle and demo some
-  outfits ... that is incredibly reusable." Her twirl through her looks at the wedding (each by its
-  title, a spin and a line) becomes a shared piece any scene can place: a pirate and a list of
-  looks, cycled and twirled, with the wedding only configuring it. (Groundwork for the fashion
-  show, IDEAS.md.)
-
-- **Mischievious: switch her familiar as well as her outfit (11 Nov, her own feedback):** "The
-  squirrel is cute and moving on my shoulder. Nice touch. I'm usually wearing a monkey but maybe I
-  could switch fams as well as outfits?" When you marry her, after picking which of her looks, you
-  can pick her familiar too (her monkey offered first, as she usually wears one), kept with the
-  wedding and in its share link. Part of the modelling piece above: swapping a familiar is one of
-  the things it can do to any look.
-
 - **Gravee walks with you round her house (11 Nov):** "I think [Gravee] should be walking with
   you. As you walk through the house. Oh, she comes eventually. She was very slow to, though."
   She went ahead to each stop slower than you walk and stood still while she talked, so you lost

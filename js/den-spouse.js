@@ -1,4 +1,4 @@
-import { suitors, plainLook } from './den-wedding.js';
+import { suitors, plainLook, herLook } from './den-wedding.js';
 import { AT_HOME as HER_HOME } from './lines/mischievious.js';
 import { AT_HOME as SUITOR_HOME, SUITORS } from './lines/suitors.js';
 import { AT_HOME as OWN_HOME, OF_THEM } from './lines/spouse.js';
@@ -8,15 +8,16 @@ const ownName = (look) => {
     const n = String(look.name ?? '').trim();
     return NAME.test(n) ? n : 'Your sweetheart';
 };
-/** Whoever a wedding married you to, in their wedding look: `her` is Mischievious's versions to choose
-    from (js/den-look.js's MISCHIEVIOUS_VERSIONS: a title and a look each). Null if nobody's chosen yet. */
+/** Whoever a wedding married you to, in their wedding look (her, with the familiar you picked her):
+    `her` is Mischievious's versions to choose from (js/den-look.js's MISCHIEVIOUS_VERSIONS: a title and
+    a look each). Null if nobody's chosen yet. */
 export function spouseOf(w, her) {
     const p = w.partner;
     if (!p)
         return null;
     if (p.kind === 'her') {
         const v = her[p.ver] ?? her[0];
-        return { kind: 'her', name: 'Mischievious', look: { ...(v?.look ?? {}) }, ...(v ? { title: v.title } : {}) };
+        return { kind: 'her', name: 'Mischievious', look: herLook(her, p), ...(v ? { title: v.title } : {}) };
     }
     if (p.kind === 'suitor') {
         const s = suitors(w.tone)[p.i];

@@ -29,6 +29,7 @@ import { VOWS } from './lines/spouse.js';
 import { AT_YOUR_WEDDING as YOURS } from './lines/you.js';
 import { GUESTS_SAY as GUEST, DRUNK_SAYS, RAIDER_SAYS, GUARD_SAYS } from './lines/wedding-guests.js';
 import { CAPTIONS, SIGNED } from './lines/keepsake.js';
+import { choices, restyle } from './showcase.js';
 export { ARRIVE, WELCOME, RETURN, GUSH, ASK_HER, PLANNER, SIGNED };
 
 /** A look, partial: slot ids and dye names as the wardrobe (js/den-look.js) has them. */
@@ -705,9 +706,23 @@ export function themeLook(theme: ThemeId, body: 'm' | 'f', rand: () => number = 
 }
 
 // ---------- the whole set-up ----------
-/** Who you marry: her (which version: an index into MISCHIEVIOUS_VERSIONS), a suitor, or someone of
-    your own (their look). */
-export type Partner = { kind: 'her'; ver: number } | { kind: 'suitor'; i: number } | { kind: 'own'; look: Look };
+/** The wardrobe's familiars (js/den-look.js's `fam` slot: a test checks they're the same), 'none' first. */
+export const FAMS = ['none', 'parrot', 'monkey', 'octopus', 'squirrel', 'bat', 'krakling'] as const;
+export type FamId = typeof FAMS[number];
+const isFam = (f: unknown): f is FamId => FAMS.includes(f as FamId);
+/* Her familiar, as well as her outfit (Mischievious herself, 11 Nov: "I'm usually wearing a monkey but
+   maybe I could switch fams as well as outfits?"): offered after which look of hers, her look's own
+   first, then a monkey, as she usually wears one, then the rest, none last. */
+export const herFams = (look: Look): string[] => choices(typeof look.fam === 'string' ? look.fam : undefined, FAMS, ['monkey']);
+/** Her as you're marrying her: the version you picked (of `vs`, MISCHIEVIOUS_VERSIONS), with the familiar
+    you picked (in the colours another of her looks has it in, else the wardrobe's own). */
+export function herLook(vs: readonly { look: Look }[], p: { ver: number; fam?: FamId }): Look {
+  const v = vs[p.ver] ?? vs[0];
+  return restyle(v?.look ?? {}, { fam: p.fam }, vs.map((x) => x.look));
+}
+/** Who you marry: her (which version: an index into MISCHIEVIOUS_VERSIONS; and her familiar, if not her
+    look's own), a suitor, or someone of your own (their look). */
+export type Partner = { kind: 'her'; ver: number; fam?: FamId } | { kind: 'suitor'; i: number } | { kind: 'own'; look: Look };
 export interface Wedding {
   tone: ToneId;
   partner: Partner | null;
@@ -795,7 +810,7 @@ export function clean(o: unknown): Wedding {
   const pa = w.partner as Record<string, unknown> | null;
   if (pa && typeof pa === 'object') {
     const n = Number(pa.kind === 'her' ? pa.ver : pa.i);
-    if (pa.kind === 'her') partner = { kind: 'her', ver: Number.isInteger(n) && n >= 0 && n < 16 ? n : 0 };
+    if (pa.kind === 'her') partner = { kind: 'her', ver: Number.isInteger(n) && n >= 0 && n < 16 ? n : 0, ...(isFam(pa.fam) ? { fam: pa.fam } : {}) };
     else if (pa.kind === 'suitor' && Number.isInteger(n) && n >= 0 && n < suitors(tone).length) partner = { kind: 'suitor', i: n };
     else if (pa.kind === 'own') partner = { kind: 'own', look: plainLook(pa.look) };
   }
@@ -854,7 +869,7 @@ export function encode(w0: Wedding): string {
   const w = clean(w0), T = themeOf(w.theme);
   const tone = TONES.findIndex((t) => t.id === w.tone), venue = VENUES.findIndex((v) => v.id === w.venue);
   const theme = T ? THEMES.indexOf(T as typeof THEMES[number]) : -1, plot = PLOTS.findIndex((p) => p.id === w.plot);
-  const pa = !w.partner ? 0 : w.partner.kind === 'her' ? ['h', w.partner.ver] : w.partner.kind === 'suitor' ? ['s', w.partner.i] : ['o', w.partner.look];
+  const pa = !w.partner ? 0 : w.partner.kind === 'her' ? ['h', w.partner.ver, ...(w.partner.fam ? [w.partner.fam] : [])] : w.partner.kind === 'suitor' ? ['s', w.partner.i] : ['o', w.partner.look];
   const base = T ? layout(w.venue, w.theme!) : arrival(w.tone);
   const props = same(w.props, base) ? 0 : w.props.map(packProp).join('');
   // (a guest's changes; or, if they've lost something they came with, their whole look, in a list)
@@ -880,7 +895,7 @@ export function decode(code: string): Wedding | null {
   const sz = ver === 1 ? 'small' : SIZES[size ?? SMALL]?.id ?? 'small';
   const sd = Number.isInteger(seed) && (seed as number) >= 0 && (seed as number) < SEEDS ? seed as number : 0;
   let partner: unknown = null;
-  if (Array.isArray(pa)) partner = pa[0] === 'h' ? { kind: 'her', ver: pa[1] } : pa[0] === 's' ? { kind: 'suitor', i: pa[1] } : pa[0] === 'o' ? { kind: 'own', look: pa[1] } : null;
+  if (Array.isArray(pa)) partner = pa[0] === 'h' ? { kind: 'her', ver: pa[1], fam: pa[2] } : pa[0] === 's' ? { kind: 'suitor', i: pa[1] } : pa[0] === 'o' ? { kind: 'own', look: pa[1] } : null;
   let ps: unknown;
   if (typeof props === 'string') { const out: Prop[] = []; for (let i = 0; i + 7 <= props.length && out.length < MAX_PROPS; i += 7) { const p = unpackProp(props.slice(i, i + 7)); if (p) out.push(p); } ps = out; }
   // (version 1: the eight guests' changes in a list; since, only the changed ones, by number)

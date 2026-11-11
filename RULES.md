@@ -207,6 +207,19 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   island's file, `js/den/whirlpools.js`, keeps only the whirlpools, the winds, Vegas Island and the
   throw-out. She now finishes her line and waits while a whirlpool has you or you're out of
   earshot, picking up where she left off, and her ramble carries on after a spat line.
+- **Modelling looks is a piece too (11 Nov).** "That way that [Mischievious] changes outfits and
+  spins, that definitely needs to be a generic module so that you can just ... go through someone
+  like as a wardrobe furniture kind of thing that you can just like cycle and demo some outfits ...
+  that is incredibly reusable." `js/den/showcase.js` (its rules `src/showcase.ts`): give it a pirate
+  (or let it place one) and a list of looks, and it changes into each in turn with the one twirl
+  there is, a spin and a little hop, saying each look's title; any piece can be swapped on every
+  look (a familiar, say). Her wedding only configures it.
+  - **Mischievious's familiar (11 Nov, her own feedback):** "The squirrel is cute and moving on my
+    shoulder. Nice touch. I'm usually wearing a monkey but maybe I could switch fams as well as
+    outfits?" Marrying her, once you've picked her look you can pick her familiar: her look's own,
+    then the monkey (she usually wears one), then the rest, or none, coloured as another of her
+    looks wears it. Kept with the wedding, in its link (a plain link's as short as before, old
+    links still work), in her portrait and at the den once you're wed.
 - **Furniture and props are modular, usable in any scene (11 Nov).** Of Gravee's house: "anything
   in these houses, they should all be modular objects that can be reused in other scenes. So, like,
   if we're doing the vampire's coffin, that should just be a bit of furniture that you can use

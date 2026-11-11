@@ -8,8 +8,10 @@ import {
   answer, arrival, caption, clean, decode, dressFor, encode, fill, fresh, layout, moveTo, plotAt, plotScript, readSecs,
   scriptSecs, seatsFor, suitorTitle, suitors, themeLook, wearable, moments, momentTime, momentsDue, momentCaption, collage,
   WHO, SIZES, MAX_GUESTS, GROUNDS, PROP_GROUPS, PROP_R, FLAT, TOPPERS, MADE_IN, footprint, clashes, restsOn, baseGuest, dressedUp, withSize, reseed, moveGuest, standFree, sizeN,
+  FAMS, herFams, herLook,
 } from '../src/den-wedding';
-import type { Prop, Seat, SizeId, ThemeId, Wedding } from '../src/den-wedding';
+import { spouseOf } from '../src/den-spouse';
+import type { FamId, Look, Prop, Seat, SizeId, ThemeId, Wedding } from '../src/den-wedding';
 
 const LOOK_JS = readFileSync(join(__dirname, '..', 'js', 'den-look.js'), 'utf8');
 /** The wardrobe's own lists, read from js/den-look.js (it needs three.js to run). */
@@ -683,5 +685,69 @@ describe('a collage of the whole wedding, not just one picture (11 Nov: "snapsho
     }
     // (no snapshots, the ceremony skipped: the portrait as it always was)
     expect(collage(0, false)).toMatchObject({ w: 1292, h: 1104, hero: { x: 46, y: 46, w: 1200, h: 900 } });
+  });
+});
+
+/* Her own feedback, as a player (11 Nov): "The squirrel is cute and moving on my shoulder. Nice touch. I'm
+   usually wearing a monkey but maybe I could switch fams as well as outfits?" */
+describe('Mischievious: "I\'m usually wearing a monkey but maybe I could switch fams as well as outfits?" (11 Nov)', () => {
+  // (her looks' familiars as js/den-look.js has them)
+  const HER = [
+    { title: 'Son of a Nutcracker!', look: { body: 'f', hat: 'feline', fam: 'squirrel', famCol: 'grey', famCol2: 'red' } as Look },
+    { title: 'What is Love?', look: { body: 'f', hat: 'feline', fam: 'monkey', famCol: 'pink', famCol2: 'red' } as Look },
+    { title: 'Taco Princess', look: { body: 'f', hat: 'tiara', fam: 'krakling', famCol: 'lemon', famCol2: 'red' } as Look },
+    { title: 'Hotter Than Hell', look: { body: 'f', hat: 'feline', fam: 'none', famCol: 'green', famCol2: 'red' } as Look },
+  ];
+  const famsIn = (slot: string) => {
+    const m = LOOK_JS.replace(/\r\n/g, '\n').match(new RegExp(`\\n  ${slot}: \\{\\n    m: \\[([\\s\\S]*?)\\],\\n    f: \\[([\\s\\S]*?)\\],\\n  \\}`))!;
+    return [m[1], m[2]].map((b) => [...b.matchAll(/\['([a-z]+)'/g)].map((x) => x[1]));
+  };
+  const link = (a: unknown[]) => btoa(JSON.stringify(a)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const unlink = (code: string) => JSON.parse(atob(code.replace(/-/g, '+').replace(/_/g, '/')));
+
+  it('offers every familiar the wardrobe has, and nothing else', () => {
+    for (const body of famsIn('fam')) expect([...body].sort()).toEqual([...FAMS].sort());
+  });
+  it('offers her look\'s own first, then a monkey (she usually wears one), the rest, none last', () => {
+    expect(herFams(HER[0].look)).toEqual(['squirrel', 'monkey', 'parrot', 'octopus', 'bat', 'krakling', 'none']);
+    expect(herFams(HER[1].look)[0]).toBe('monkey');
+    expect(herFams(HER[3].look)).toEqual(['none', 'monkey', 'parrot', 'octopus', 'squirrel', 'bat', 'krakling']);
+    for (const v of HER) expect([...herFams(v.look)].sort()).toEqual([...FAMS].sort());
+  });
+  it('puts it on her in the colours another of her looks has it in, else the wardrobe\'s own', () => {
+    expect(herLook(HER, { ver: 0, fam: 'monkey' })).toEqual({ ...HER[0].look, fam: 'monkey', famCol: 'pink', famCol2: 'red' });
+    const parrot = herLook(HER, { ver: 0, fam: 'parrot' });
+    expect(parrot.fam).toBe('parrot');
+    expect(parrot.famCol).toBe(undefined);
+    expect(parrot.hat).toBe('feline');
+    expect(herLook(HER, { ver: 1 })).toEqual(HER[1].look);
+    expect(herLook(HER, { ver: 3, fam: 'none' })).toEqual(HER[3].look);
+    expect(herLook(HER, { ver: 9 })).toEqual(HER[0].look);
+  });
+  it('is kept with the wedding and its share link, a plain one\'s link as short as before', () => {
+    const w: Wedding = { ...fresh('happy'), partner: { kind: 'her', ver: 2, fam: 'monkey' } };
+    expect(decode(encode(w))!.partner).toEqual({ kind: 'her', ver: 2, fam: 'monkey' });
+    expect(clean(JSON.parse(JSON.stringify(w))).partner).toEqual({ kind: 'her', ver: 2, fam: 'monkey' });
+    const plain: Wedding = { ...fresh('happy'), partner: { kind: 'her', ver: 2 } };
+    expect(decode(encode(plain))!.partner).toEqual({ kind: 'her', ver: 2 });
+    expect(unlink(encode(plain))).toEqual([2, 0, 0, -1, 0, ['h', 2], 0]);
+    expect(unlink(encode(w))).toEqual([2, 0, 0, -1, 0, ['h', 2, 'monkey'], 0]);
+  });
+  it('never takes a familiar the wardrobe hasn\'t got', () => {
+    expect(clean({ partner: { kind: 'her', ver: 1, fam: 'dragon' } }).partner).toEqual({ kind: 'her', ver: 1 });
+    expect(clean({ partner: { kind: 'her', ver: 1, fam: 7 } }).partner).toEqual({ kind: 'her', ver: 1 });
+    expect(decode(link([2, 0, 0, -1, 0, ['h', 1, '<script>'], 0]))!.partner).toEqual({ kind: 'her', ver: 1 });
+    const fam: FamId = 'monkey';
+    expect(FAMS).toContain(fam);
+  });
+  it('old links and saved weddings, from before, are her look\'s own', () => {
+    expect(decode(link([1, 0, 2, 2, 3, ['h', 2], 0]))!.partner).toEqual({ kind: 'her', ver: 2 });
+    expect(decode(link([2, 0, 0, -1, 0, ['h', 4], 0]))!.partner).toEqual({ kind: 'her', ver: 4 });
+    expect(clean({ partner: { kind: 'her', ver: 2 } }).partner).toEqual({ kind: 'her', ver: 2 });
+  });
+  it('comes home with her: whoever you married, at the den, has it', () => {
+    const s = spouseOf({ ...fresh('happy'), partner: { kind: 'her', ver: 0, fam: 'monkey' } }, HER)!;
+    expect(s.look).toMatchObject({ fam: 'monkey', famCol: 'pink', hat: 'feline' });
+    expect(spouseOf({ ...fresh('happy'), partner: { kind: 'her', ver: 0 } }, HER)!.look).toEqual(HER[0].look);
   });
 });
