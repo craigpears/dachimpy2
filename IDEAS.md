@@ -1667,15 +1667,19 @@ Building on what's there now (the walk and its stairs are made of pieces that st
 
 For now the den is the first version, and that works.
 
-## Rapportus teaches Gunnery; Balloffire, free loop gunning (11 Nov)
+## Gunnery in two styles: Rapportus's loops, Balloffire's free gunning (11 Nov)
 
 Changed (11 Nov): "I think rapportus actually deserves the gunning tutorial one, especially for loops as
 he made the original guides. Ball of fire can come in somewhere like free loop gunning." So
-**Rapportus** (he; "the original gunning guide guy"; spelt "rapportus" and "Reportus" by the user, so
-the spelling's to confirm from his pirate page) is the Gunnery tutor, loops above all. **Balloffire**
-(she) is "much better at free loop gunning, but I don't really know how you put that into a tutorial.
-She's just very good and loves doing it. So I'll have to think of something a better fit for her": her
-part's open, for the user to think of. Both pirate pages and portraits to check before they're drawn.
+**Rapportus** (he; "the original gunning guide guy") is the Gunnery tutor, loops above all. His
+YPPedia page (checked 11 Nov) has the spelling: Rapportus, of Hunter (now merged into Emerald), once #1
+at Gunnery on four oceans, and the writer of YPPedia's "Top Gunner - Going from Ultimate to #1" guide
+(yppedia.puzzlepirates.com/Top_gunner): his loops to come from there. **Balloffire** (she) is "much
+better at free loop gunning, but I don't really know how you put that into a tutorial". Then (11 Nov):
+"there's no reason it can't be a two-part tutorial. You know, she can demo that there's different
+styles ... she's very good at ... the free gunning, and [Rapportus] does the loop gunning demo." So a
+two-part Gunnery lesson: two styles, each shown by the pirate who loves it, then you try. Where, still
+open. His portrait and hers to check before they're drawn. Way off: an idea, not a TODO.
 
 Before that (11 Nov): "Balloffire is definitely down to be the gunning tutor ❤️". **Balloffire**, a
 real pirate who has said yes (pirate name only; ocean, pirate page and portrait to check before
