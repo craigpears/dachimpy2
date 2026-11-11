@@ -58,9 +58,14 @@ export const homeNews = (s, bySea) => (bySea ? OF_THEM.aboard : OF_THEM.home).re
 /** Leaving the isle, just married: aboard her with you (by sea), or home (by the cheat). */
 export const leaving = (bySea) => (bySea ? 'aboard' : 'den');
 /** Where they are now: aboard her, once she's home and you're ashore (not sailing, not on the isle),
-    they step off, home for good. */
+    they step off, home; at home, when you set sail again they're aboard with you (the user, 11 Nov:
+    "whoever you marry ... has to jump on the ship with you": every trip, not just the first). */
 export function settle(where, at) {
-    return where === 'aboard' && !at.sailing && !at.onIsle ? 'den' : where;
+    if (where === 'aboard' && !at.sailing && !at.onIsle)
+        return 'den';
+    if (where === 'den' && at.sailing)
+        return 'aboard';
+    return where;
 }
 /** Where they are when the den's opened again (her and the sea start afresh): at the den. */
 export const reopened = () => 'den';

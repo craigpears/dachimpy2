@@ -135,14 +135,6 @@ the site (`.assetsignore` skips `*.md`).
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
 
-- **Small things the agents spotted (11 Nov):** the user: "fix any tiny bugs that were found by the
-  agents, like log them and then work through them."
-  - Opening the captain's map standing on the den's jetty, it's drawn under the planks.
-  - On some seas, the scattered rocks can sit where you land at the Wedding Isle.
-  - After a reload, Umami's Foraging board is hidden from the cove again until you go back up (that
-    you've found it isn't kept).
-  - Whoever you married sails home with you once, but isn't aboard on later trips out.
-
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map

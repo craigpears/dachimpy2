@@ -42,6 +42,13 @@ describe("her isle stands out on the open sea, on the den's side of the checkpoi
     }
   });
 
+  it('rocks fell where you land on some seas: the water off its jetty is always clear (11 Nov)', () => {
+    for (let seed = 1; seed <= 200; seed++) {
+      const s = new Sea(seed);
+      for (let c = 0; c < SAIL.COLS; c++) for (let r = 0; r < SAIL.ROWS; r++) if (onIsleLanding(c, r)) expect(s.open(c, r), `seed ${seed}: ${c},${r}`).toBe(true);
+    }
+  });
+
   it('and a pin dropped on it lands just off it, in the water', () => {
     const s = new Sea(9), at = s.pinAt(18, 11)!;
     expect(s.open(...at)).toBe(true);

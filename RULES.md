@@ -149,6 +149,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   is done as far as it needs to go: "things seem very modular and we're working on things well. So
   I would say architecturally the game seems in a good spot for the complexity that we've got right
   now." No separate architectural review; keep to the split in CLAUDE.md as things are added.
+- **It's a proof of concept: breadth first, depth for what people love (11 Nov).** "Keep in mind,
+  yeah, this is proof of concept. If people really love one particular thing, like the weddings,
+  then yeah, we can do that, add the multi-player saving state and all that kind of stuff, and dive
+  more into those modules." So a place or event is built to be fun on its own, and needn't carry
+  saved progress, other players or a deep economy yet; those come later, for the parts that prove
+  popular. Keeping each one a little island in the code is what lets any of them grow then.
 - **The humour's a layer on a real mechanic (11 Nov).** Of Tzz teaching Sailing as balloon animals:
   "it works well as a mechanic. Everything works together, that's always the point. The humour is
   the layer on top, but there's a genuine mechanic underneath." A joke is never just set dressing:
@@ -925,7 +931,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   About seventeen seconds in all. The den's labels stay out of the cutscene. Whatever
   you had in hand goes back on its crate first. **Space or Esc skips it**, and then the map's left
   lying on the beach, "A map?" over it, for you to walk out and pick up with Space. **M** opens
-  it again wherever you're standing on the ground; M, Esc, Space or a click rolls it up. **While
+  it again wherever you're standing on the ground (out on the jetty, it lies on the planks, 11
+  Nov); M, Esc, Space or a click rolls it up. **While
   it's open, only the map shows** (the user, 9 Nov: the crates and the piece instructions "ruin
   the immersion"): the buttons, the crates, the keys and the labels fade away, leaving a quiet
   "M, Esc or Space: roll it up" at the bottom. The map
@@ -1138,6 +1145,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     and stand by her mast on the way home, then live at the den: strolling clear of crates and
     stairs, waving, and a word when you walk up (each spouse their own lines). Kept in this browser,
     a new wedding bringing a new one. `?at=married` starts home, married. Rules: `src/den-spouse.ts`.
+    **Aboard every trip (11 Nov):** not just the first sail home: whenever you set sail from the den
+    they're on her deck with you, and back home they step off and stroll the den again.
   - **A collage of the whole wedding, not one portrait (11 Nov):** "you should get snapshots of all
     the key moments, so you have a nice kind of collage of the whole wedding." A snapshot at each of
     the plot's key moments as the ceremony plays, laid out as one keepsake with a big shot and the
@@ -1153,7 +1162,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **Her isle, out at sea (10 Nov):** "on an island somewhere ... islands can all have their own
     little thing out there." Out to the right of the lanes on the den's side of the checkpoint, so
     you can sail there from the start, no oars or locks (a test sails there and home on 20 seas):
-    sand, palms, her chapel ruin on a rise, a jetty, her heart flag. Off its jetty, Space puts you
+    sand, palms, her chapel ruin on a rise, a jetty, her heart flag. The water off its jetty is kept
+    clear of the scattered rocks, on every sea (11 Nov). Off its jetty, Space puts you
     ashore to the wedding; "Back aboard" puts you back on her at the jetty (the cheat's way goes back
     to the den). It's on the captain's map by name, in plain sight, and the quest list's "Out at sea"
     has "See what's afoot on the Wedding Isle", ticked once you've had a wedding.

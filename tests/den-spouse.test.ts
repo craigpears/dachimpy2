@@ -44,6 +44,16 @@ describe('whoever you marry comes home with you (11 Nov: "It\'s got to carry out
     expect(cleanSpouse({ kind: 'suitor', suitor: 'pete', name: 'Someone Else', look: {} })!.name).toBe('Wobbly Pete');
   });
 
+  it('sailed home with you once, then stayed at the den on later trips: aboard every time you set sail (11 Nov)', () => {
+    let w = settle('aboard', { sailing: false, onIsle: false });
+    expect(w).toBe('den');
+    w = settle(w, { sailing: true, onIsle: false });
+    expect(w).toBe('aboard');
+    w = settle(w, { sailing: false, onIsle: false });
+    expect(w).toBe('den');
+    expect(settle('den', { sailing: false, onIsle: false })).toBe('den');
+  });
+
   it('comes aboard with you leaving the isle by sea, or straight home by the cheat; steps off once she\'s home and you\'re ashore', () => {
     expect(leaving(true)).toBe('aboard');
     expect(leaving(false)).toBe('den');
@@ -51,7 +61,6 @@ describe('whoever you marry comes home with you (11 Nov: "It\'s got to carry out
     expect(settle('aboard', { sailing: true, onIsle: true })).toBe('aboard');
     expect(settle('aboard', { sailing: false, onIsle: false })).toBe('den');
     expect(settle('isle', { sailing: false, onIsle: true })).toBe('isle');
-    expect(settle('den', { sailing: true, onIsle: false })).toBe('den');
     expect(reopened()).toBe('den');
   });
 

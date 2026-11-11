@@ -213,8 +213,7 @@ export const LAY = {
       there without the oars or the locks. LAND: its squares (land to sail by, drawn by
       js/den/isle.js, not as sea stacks), its jetty's among them, out from its left-hand shore
       toward the lanes. MOOR: where she lies alongside the jetty, bows toward the lanes, ready to
-      sail home. LANDING: the water off its left-hand shore (whatever rocks the sea's scattered
-      there; the column she moors in is past where they fall, so it's always clear) from any square
+      sail home. LANDING: the water off its left-hand shore (kept clear of the scattered rocks) from any square
       of which Space puts you ashore (src/den-isle.ts), as along the den's beach: "you get to the
       general vicinity, not one specific square" (10 Nov). */
   ISLE: {
@@ -343,10 +342,11 @@ export class Sea {
     // The checkpoint, its headland and the wreck beyond it (all outside where the rocks scatter).
     for (const [c, r] of [...checkpointWorks(), LAY.WRECK]) this.works.add(key(c, r));
     this.wreck = [...LAY.WRECK];
-    // Mischievious's isle: land, drawn by its own 3D. (Its landing isn't kept clear of the scattered
-    // rocks: the near sea stays as it was, and her mooring's column, past where they fall, is always
-    // clear.)
+    // Mischievious's isle: land, drawn by its own 3D, and the water off its jetty kept clear of the
+    // scattered rocks, so you never come in to land among them (11 Nov: rocks fell there on some seas).
     for (const [c, r] of LAY.ISLE.LAND) this.works.add(key(c, r));
+    const I = LAY.ISLE.LANDING;
+    for (let c = I.c0; c <= I.c1; c++) for (let r = I.r0; r <= I.r1; r++) this.keep.add(key(c, r));
     this.zones = LAY.ZONES.map((z) => ({ ...z }));
   }
 

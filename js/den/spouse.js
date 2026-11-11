@@ -88,6 +88,7 @@ export function spouseTick(dt, onIsle) {
   const f = spouse.fig, g = f.g;
   if (spouse.where === 'isle') { g.visible = false; showLine(false); return; }
   if (spouse.where === 'aboard') {
+    if (was === 'den') spouse.stroll = null;   // (off with you again: a fresh spot when they're home)
     if (!sail.g) { g.visible = false; showLine(false); return; }
     if (g.parent !== sail.g) sail.g.add(g);
     g.visible = true;

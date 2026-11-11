@@ -354,7 +354,8 @@ export function openMap() {
   keys.clear();
   const ry = pirate.g.rotation.y;
   if (!chart.g) mapMake();
-  chart.g.position.set(pirate.x + Math.sin(ry) * 0.95, 0, pirate.z + Math.cos(ry) * 0.95);
+  // (laid where you stand: on the jetty, on its planks, not under them)
+  chart.g.position.set(pirate.x + Math.sin(ry) * 0.95, Math.max(0, pirate.h), pirate.z + Math.cos(ry) * 0.95);
   chart.g.rotation.y = chart.yaw = ry + Math.PI;   // its top away from you
   chart.on = true;
   chart.open = 0;
