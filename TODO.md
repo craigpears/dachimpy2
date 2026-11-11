@@ -299,6 +299,10 @@ the site (`.assetsignore` skips `*.md`).
   Sailing, Strategy: a platform one target short, a line of four above it breaking a joined pair so the
   other half drops into the missing target, then more in succession), every piece going where a good
   sailor puts it. And the balloons have to be visible and read as balloon animals again.
+- **Space the sea's islands out; Tzz's is crammed in (11 Nov, first play):** "can we see if we can just
+  space things out a bit? ... Kikit's got a very nice shape, got island. Mischievous is nice, and then TZZ
+  just seems kind of crammed into the middle. Like, this is very all just crammed in." Give her island room
+  of its own (and the others breathing space), with the map and the links following.
 
 ## Spotted along the way (not asked for)
 
