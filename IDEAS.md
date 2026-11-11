@@ -925,6 +925,19 @@ Pirates what it is. And the user's cuddly monkeys, **Mini** above all, in pride 
 looks like, from a photo, to pin down with the user). Kept warm, not soppy, the den's humour still
 there.
 
+**The tribute moves home, to Dachimpy's house (11 Nov):** "for my tribute to my friends, I think
+I need for in my house, yeah, just my trinkets and portraits. That's probably the best thing.
+Obviously, reference for the real monkeys and stuff like that, maybe. But yeah, all my trinkets,
+and my beloved friends, and certainly the special, really special, truly special ones. So [Kikkit]
+and [Mary], they absolutely need their special references." So the tribute isn't the museum's
+last room but Dachimpy's own house in the housing district (one more house, like Gravee's): his
+trinkets on shelves and tables (the real ones, from his pirate page's trophies and trinkets on
+YPPedia, each a shared furniture piece), his friends' portraits on the walls (the portraits piece,
+from their looks), and the truly special ones given pride of place with something of their own
+that refers to them: **Kikkit** and **Mary** (who Mary is, to pin down with the user). The real
+cuddly monkeys, Mini above all, from the user's photos. The museum keeps the story of the sims;
+the house keeps the people.
+
 Still to collect: the user's pictures not saved to disk need putting in `notes/museum/` by hand
 (the v1 page, the first shoot-Dalnoth board and the Dachimpy.com pages), and pictures of Imaduck's
 Global Cade Sim.
