@@ -302,6 +302,10 @@ the site (`.assetsignore` skips `*.md`).
   Sailing, Strategy: a platform one target short, a line of four above it breaking a joined pair so the
   other half drops into the missing target, then more in succession), every piece going where a good
   sailor puts it. And the balloons have to be visible and read as balloon animals again.
+- **Trim the cheats menu (11 Nov):** "There's a lot there that are like basically the same thing ...
+  these are supposed to help jump you to places that are hard to get to." Sailing the puzzle is just going
+  to sea and pressing R; the housing district and Gravee's house are one (keep Gravee's, "because you need it
+  for the link"); Kikkit's island and Kikkit's whirlpools "are right next to each other."
 
 ## Spotted along the way (not asked for)
 
