@@ -180,6 +180,10 @@ the site (`.assetsignore` skips `*.md`).
   benches. I don't know, because, you know, obviously we want to show their outfits off." So no
   guest stands inside a bench: they stand beside the benches (or up on them), in full view, outfits
   on show.
+  And room to see (11 Nov): "make sure you get like the spacing and overlapping things, like for
+  example, front benches right up on them, so you can barely even see [Mischievious] because of all
+  the guests are all kind of crowding her out." The front benches and guests stand back from the
+  arch, so she and the couple are always clear to see; nothing overlaps.
 
 ## Needs a playtest to pin down
 

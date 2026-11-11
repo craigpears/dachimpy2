@@ -1054,6 +1054,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     (the tailor, dyes and doubloons, the inn's grog, the furnisher, security earning their pay), not
     her own love life, and you can ask her things as you plan ("Who's paying for all this?" "The
     crew's coffers, love. Don't tell the purser."). A test checks.
+    - **Cheeky, never dirty (11 Nov):** "I love ... the more funny lines where she's got, oh, yes,
+      yes, right there, when you placed some of the furniture, I guess it gets her kind of
+      promiscuous side in without it being overly, yeah, but dirty." A wink in a line about the
+      furniture is the right amount; keep those ("Yes, yes, yes! There!", "Just there!").
   - **Five weddings today, for the fun of it (11 Nov):** "showing that ... you can keep doing it for
     fun all the time ... not in a promiscuous way, but in a this is a fun game ... tie it into the
     mechanics in a happy, fun way." She's been through five ceremonies today because she enjoys them,
