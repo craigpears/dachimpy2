@@ -1030,6 +1030,14 @@ same thread as the museum's: helping and leading people, and growing into it.
 - **To check on YPPedia before it's built:** what Vikings, IOs and BKs are in Puzzle Pirates (the
   events she hosted; names as she wrote them, not guessed), her real trophies (her pirate page's
   trophy collection), and her portrait.
+- **Her advice: spread your adventures far (11 Nov).** Pandayay, to the user: "You can also spread
+  your adventures far to get a lot of the entry trophies, 1/25 lair frays, 1/25 wolf frays, early
+  flotilla sink trophies (people will job any THer to help get some poe), first couple of CI
+  frays/forage, entry KH." Her voice in the house: encouraging, telling you to try a bit of
+  everything, since the first trophy of each kind is within anyone's reach. Maybe the den has its
+  own entry trophies too, a first one for trying each thing (a puzzle, a place), shown on a shelf
+  at home, with Pandayay the one who tells you about them (to settle with the user; the names
+  above, frays, CI, KH, to check on YPPedia before any are used).
 - Each trophy as a shared furniture piece; her lines in src/lines/; the house's pictures in the
   2D viewer too (TODO.md, "A 2D view of the portraits").
 
