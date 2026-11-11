@@ -1961,3 +1961,13 @@ kind peaceful role somewhere." **Affame** (she; a real pirate, pirate name as th
 on her pirate page with her ocean and portrait before she's drawn, then into PIRATES): the queen of
 sweetness, a kind, peaceful part, where and what still open. (Nearby ideas it might sit with: Dachimpy's
 house with its cookies and hugs at the door, the houses that each give you something kind to do.)
+
+## SunnyKira, a fan of the tutorials (11 Nov)
+
+"SunnyKira has been really cute in how excited she was to see me and is clearly a huge fan of the
+tutorials so she can go in the ideas list. Just a few ideas below, I think all are free?" Her ideas, as
+she sent them: "bilge rigs Ci and De". The user's reading: "CI I think is citadel runs and De for dens?"
+So perhaps: Bilge, rigging, Citadel runs, and dens (to confirm with the user or her, and check on YPPedia
+what Citadel runs are before anything's built). **SunnyKira** (she; a real pirate, pirate name only; her
+pirate page and portrait to check before she's drawn, then into PIRATES): her part still open, fitting
+someone who loves the tutorials (RULES.md, "A pirate showing you a puzzle is the heart of it").
