@@ -155,6 +155,12 @@ the site (`.assetsignore` skips `*.md`).
   wedding and in its share link. Part of the modelling piece above: swapping a familiar is one of
   the things it can do to any look.
 
+- **Gravee walks with you round her house (11 Nov):** "I think [Gravee] should be walking with
+  you. As you walk through the house. Oh, she comes eventually. She was very slow to, though."
+  She went ahead to each stop slower than you walk and stood still while she talked, so you lost
+  her. She should keep at your side as you walk, at your pace (hurrying to catch up if you've got
+  ahead), talking as she goes, and stand by each thing as she shows it you.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
