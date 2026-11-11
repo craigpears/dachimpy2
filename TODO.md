@@ -281,6 +281,12 @@ the site (`.assetsignore` skips `*.md`).
   Since 9 Nov you can also lob a piece over the wall from the den floor at raiders hacking
   outside; not yet tried by the user. Watch for: the markers on raiders outside cluttering the
   view while you carry a piece.
+- **The pops on Tzz's board didn't look like Sailing (11 Nov, first play):** her tossing pairs straight
+  where she wants them is fine ("that speeds things up. That's good"), but "when things popped, it did not
+  seem to be following the mechanics ... there was no chain of four or platform clear. It was, you know, a
+  yellow on a white block, and somehow it cleared a platform". Check the board draws exactly what the
+  Sailing rules did, step by step, and that every pop reads as a line of four or a finished platform
+  (what each target wants plain to see, not a white block). The same board is used at sea.
 
 ## Spotted along the way (not asked for)
 
