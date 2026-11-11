@@ -617,6 +617,8 @@ can work." So you go and see Daquan, he lends you his war frigate for the flotil
 bigger ship, his, borrowed for that), and everywhere else you sail your own little sloop. That's
 the user's go-ahead for this one borrowed ship, not for bigger ships in general (the shipwright's,
 below, still waits). Not the rowboats, and not a flotilla run in the sloop.
+Proportional, by YPPedia's numbers (RULES.md, "Ships, physically proportional"): his war frigate
+dwarfs your sloop, with 24 large guns and dozens of crew to be seen on deck and below (up to 75).
 
 ## A bigger ship from the shipwright (10 Nov)
 

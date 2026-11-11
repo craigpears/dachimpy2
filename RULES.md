@@ -167,6 +167,16 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   it explains or teaches something you then really play (the balloon animals are why Sailing's
   pieces pop; Kikkit's nonsense is the literal way through her whirlpools). And a mechanic is never
   left dry when a joke could carry it.
+- **Ships, physically proportional, by YPPedia's numbers (11 Nov).** "As always, make it
+  proportional ... the sloop in Puzzle Pirates is ... basically designed for ... 7 people max? A war
+  frigate's ... up to 75? So, in this game, you know, I want everything physically proportional.
+  Obviously, the war frigate should have some ... more visible people hanging around up and below
+  decks." Each ship is sized, gunned and crewed as YPPedia has it (checked 11 Nov): a **sloop**,
+  7 crew at most, 4 small cannons (1 shot a side), 4 move tokens a turn; a **war frigate**, 75 crew
+  at most (17 at least), 24 large cannons (2 shots a side), 3 move tokens a turn, its hold sixteen
+  times the sloop's; a **grand frigate**, 159 crew. Her size, her guns and the people you see aboard
+  her, on deck and below, all match: a frigate visibly busy with dozens of crew, a sloop a
+  handful.
 - **Furniture and props are modular, usable in any scene (11 Nov).** Of Gravee's house: "anything
   in these houses, they should all be modular objects that can be reused in other scenes. So, like,
   if we're doing the vampire's coffin, that should just be a bit of furniture that you can use
