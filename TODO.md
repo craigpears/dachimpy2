@@ -321,7 +321,17 @@ the site (`.assetsignore` skips `*.md`).
   in those trade winds at the left of it yet. But the whole point is they're supposed to be risk of really
   just doing some kind of accidental [slip] on that thing on the left-hand side and accidentally being
   caught in the winds that sweep you in. I want the snakes and [ladders]." So legs that end hard by it, a
-  careless turn or a gust too far landing her in it and sweeping her back.
+  careless turn or a gust too far landing her in it and sweeping her back. And put a snake right past the gun gap
+  (11 Nov): "part of me is evil. I almost want it to be like an accidental misclick ... I do love the idea of
+  like, oh, whoops, I can't get through here ... I almost want the sense of foreboding doom ... you panic
+  trying to get past the gunning post so that you don't get shot again, and because you're in a quick
+  panic, you accidentally clicked one too many, and now you've got no way of turning around ... without
+  going into those winds that drag you back ... the wind will probably ... go quite well actually with
+  trying to race through the gun turrets. Because you are just panicking, trying to get through fast." So
+  the water just beyond the gun gap is tight, a wall ahead, and a sweeping wind a move too far: rush it
+  and you're past the guns but in the wind. And the gun gap's too easy as it is: "that's relatively quick,
+  to be honest, because you only get shot once. So that's relatively easy ... almost no-brainer" (only a
+  hole's patch to pay; the snake beside it is what makes it a gamble).
 - **The race explained at the start (11 Nov):** "the concepts in this are going to need ... quite a bit of
   explaining as well at the start, like everything we've talked about. Here are your options. Shortcuts
   mean a short path, the puzzle ... just illustrate a few of the examples. Like, yeah, do you want to bilge
