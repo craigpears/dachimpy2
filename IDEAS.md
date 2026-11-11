@@ -1678,7 +1678,13 @@ at Gunnery on four oceans, and the writer of YPPedia's "Top Gunner - Going from 
 better at free loop gunning, but I don't really know how you put that into a tutorial". Then (11 Nov):
 "there's no reason it can't be a two-part tutorial. You know, she can demo that there's different
 styles ... she's very good at ... the free gunning, and [Rapportus] does the loop gunning demo." So a
-two-part Gunnery lesson: two styles, each shown by the pirate who loves it, then you try. Where, still
+two-part Gunnery lesson: two styles, each shown by the pirate who loves it, then you try. The two styles,
+as the user put it (11 Nov): loop gunning, arrows making a loop round the cannons so the pieces come
+round and go in ("cognitively it's a lot easier"); free gunning, "you're not looking for a loop, you're
+just grabbing them and putting them wherever", faster ("you don't have to wait for things to come
+around the loop, you just grab them where they are") but harder for most people. "Some people have a
+different preference and skill for one or the other." The user's not sure of free gunning's detail:
+a video from Balloffire, or someone, before it's built. Where, still
 open. His portrait and hers to check before they're drawn. Way off: an idea, not a TODO.
 
 Before that (11 Nov): "Balloffire is definitely down to be the gunning tutor ❤️". **Balloffire**, a
