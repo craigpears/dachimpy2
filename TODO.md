@@ -279,6 +279,17 @@ the site (`.assetsignore` skips `*.md`).
   outside; not yet tried by the user. Watch for: the markers on raiders outside cluttering the
   view while you carry a piece.
 
+- **A sloop race, first draft (11 Nov):** build the S-shaped course from IDEAS.md ("A sloop race"), out
+  near Primates Rule: five legs, the long way round past guns on marked squares, and a puzzle shortcut at
+  each bend (Gunnery, rowing, Sailing over whirlpools, Bilge locks, the Carpentry crane). "What you've said
+  sounds good as a first draft ... We're going to have to go through several iterations of this course."
+- **Duty Navigation (11 Nov):** the real puzzle (three rings of stars, constellations), its own module, as
+  the den's other puzzles are.
+- **The starlit door (11 Nov):** a hidden door in the race course's cliffs, found like the crane's ledge,
+  opened by Duty Navigation: each constellation lights its stars on the rock, then the door opens on a
+  tunnel, the course's biggest shortcut. "build duty navigation in the door ... I don't see why it's one or
+  the other."
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.

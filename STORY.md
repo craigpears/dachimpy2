@@ -55,6 +55,11 @@ in time the den becomes the thing itself (TODO.md, "Split the den off").
 - **Something mechanically original.** A puzzle has to have "something really mechanically
   original" (the user, 10 Nov): mirror strokes "is really something"; a puzzle that only recolours
   one we have (four colours for four oars) has "nothing unique about it".
+- **New mechanics and tutorials, not the big fights again.** The den is "supposed to be about creative new
+  mechanics, and tutorials, not ... recreating puzzle, imitating" (the user, 11 Nov): "we've got plenty of
+  big fighting simulators in Puzzle Pirates itself and the Blockade Sim ... that's all been done. I don't
+  think that's really the space this wants to ... fit into." So minigames like the sloop race, a puzzle
+  shortcut at every bend, over sea battles.
 - **Quick to learn, hard to master.** "The whole point of the Puzzle Pirates puzzles is they need
   an infinite skill curve, like quick to learn, hard to master, Vegas's ... these can't just be
   gimmicks. They need to be meaningful, skill-based mechanics. That's what makes coming up with a
