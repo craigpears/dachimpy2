@@ -132,22 +132,33 @@ Snakes are winds that sweep her back. They're the risk that makes a dash a gambl
 
 ## 6. Racing each other: position and risk
 
-**Several racers (agreed).** Two to four on the course, you and bots to start with: "start adding multiple
-players to this first, even if it's like 2 to 4 players with some bots, and obviously tweak the course and
-sizes according to that."
+**Several racers (rules built 11 Nov; not drawn yet).** Two to four on the course, you and bots to start
+with: "start adding multiple players to this first, even if it's like 2 to 4 players with some bots, and
+obviously tweak the course and sizes according to that." The field (`src/den-racers.ts`) holds each
+racer's pose, the stretch she's reached in order, what she's doing (sailing, waiting her turn, puzzling,
+dazed, carried by a gust, the crane or the tunnel, finished), and her time and place. The den's race is
+already a field of two: you, and the rival as a bot racer. Drawing more sloops and their bots at sea is the
+next agent's.
 
-**Shooting other racers (agreed).** Her guns are for the other sloops as well as the gun gap. Her guns
-fire a broadside, about three squares to her side. A hit holes her: she's dazed and has to patch by
-Carpentry, but is never knocked out. Every racer starts with a gun or two loaded, so there's something to
-fire from the off. "One of the advantages of [gunnery] ... is that you can disrupt somebody trying to do the
-sailing Vegas ... by shooting them."
-- **Still open:** do the obstacles use the same shots, so leaving other racers in peace is "a kind of
-  peaceful racer bonus"? Or do they just need more hits than a starting gun or two? The simulation
-  (§8) can run both.
+**Shooting other racers (rules built 11 Nov).** Her guns are for the other sloops as well as the gun gap.
+Her guns fire a broadside, three squares out of her side (`SAIL.RANGE`, as everywhere at sea), stopped by
+rock or land, so nobody shoots across a spit. A hit holes her: she's dazed, still, till she's patched by
+Carpentry, but is never knocked out, and can't be hit again till she's patched. Every racer starts with two
+shots loaded (`FIELD.SHOTS`) and holds four at most; more are loaded by Gunnery. "One of the advantages of
+[gunnery] ... is that you can disrupt somebody trying to do the sailing Vegas ... by shooting them."
+- **Settled by the simulation: shared shots** (`RACE.GAP.MODE`). The gun gap's guns are quietened by the
+  same shots that hit racers, a hit a gun, so leaving other racers in peace pays: "a kind of peaceful
+  racer bonus". With the guns needing more hits than a racer starts with, shooting them out was the worst
+  way through the gap (12% against fair 25%), and the rest even (§8).
+- **Roused, the gap's guns load slower in a race** (`RACE.GAP.AIMED_RELOAD`, 6 s against the checkpoint's
+  4). In a race they fire on whoever comes near, not only on whoever roused them, and they were already
+  "very relentless".
 
-**First come, first served (agreed).** A lock is anyone's who gets there first: "If you got through it
-first, we get through it first." There could be more than one lock or crane spot, but not one for
-everybody.
+**First come, first served (rules built 11 Nov).** A lock is anyone's who gets there first: "If you got
+through it first, we get through it first." The up lock, the down lock and the crane are each one racer's
+at a time; the next waits her turn, in the order they came, and has it when it's free. Waiting, she's
+beside the way in, out in the open. (The bots give up after 20 s and go the long way.) There could be more
+than one lock or crane spot, but not one for everybody.
 
 **The lead isn't safe; the back is free (the user, 11 Nov, theorising).** "Getting an early start is not
 necessarily what it seems, because let's say you're in the lead. You can't necessarily take the tunnel
@@ -175,6 +186,12 @@ So if you're at the back, you can take those shortcuts at will, in theory."
   hanging back, and a leader should always have a shortcut worth taking (a sheltered one or an on-the-move
   one) on every stretch. How far guns reach, how long a hit dazes her, and how often you can fire set the
   balance.
+- **What it found (11 Nov, §8):** it holds. Stopping in the open in the lead, she's hit three times in four
+  in a field of four; last, one time in ten. Yet leaders who stopped still won about half their races, so
+  the lead isn't doomed, and hanging back doesn't win (those who stopped last won 9%). Cautious racers (who
+  stop in the open only with nobody close behind) win their fair share. Two things on the course as laid
+  undo it: the headwind gap's far end opens onto leg 3, so a rower can be shot from the leg ahead as well;
+  and it's within the gun gap's guns' reach, so once they're roused they fire on her too.
 
 **The rivals: the den's own characters (agreed).** The nameless rival becomes several pirates from the
 den, each a bot with a profile: which shortcuts they go for, how good they are at each puzzle, and how
@@ -228,15 +245,93 @@ counts against it as well.
 - The width of the lanes by the snakes.
 - How many locks and crane spots there are.
 
-**A headless simulation (agreed, next).** "A test harness underneath this ... where you don't need to worry
+**A headless simulation (built 11 Nov).** "A test harness underneath this ... where you don't need to worry
 about the graphical elements. So you can just run through simulations quickly and easily, and just really
-test balance."
-- **What it runs:** the race's rules with no graphics, racing 2–4 bots on different strategies over many
-  runs.
-- **The puzzles:** played by the existing puzzle bots where they exist, otherwise a puzzle time drawn from
-  a skill level.
-- **What it reports:** win rates by strategy and by starting spot, and the time each shortcut really saves.
+test balance." `src/race-sim.ts`, run by `tools/race-sim.mjs` (2000 races of four in about 20 s), its
+balance held by `tests/race-sim.test.ts`.
+- **What it runs:** the race's field (§6) with no graphics, 2–4 bots over many seeded races, one seed one
+  race. The course is read from `LAY.RACE`, so a reworked course is simulated as it's laid: each racer's
+  progress is how far round the long way she's got, sailed at the helm's own pace (the long way 257 s,
+  measured and tested), and each shortcut leaves and rejoins it where the course does, saving the long way
+  between less her own trip through (tested to agree with `RACE.DECENT`).
+- **The bots:** each is a route and a style. Routes: the long way; the gun gap run square by square, rushed
+  on a heavy combo, or its guns shot quiet; the headwind gap rowed; the whirlpools' Vegas; the locks; the
+  crane; the starlit door; or every shortcut it comes to. Styles: peaceful (never fires), opportunist (fires
+  its two shots on anyone sitting still as it goes by), aggressive (and loads more by Gunnery), cautious
+  (stops in the open only with nobody within 30 s behind). Skill decent, good or great, and a level better
+  at its own route's puzzle: back yourself on your puzzles (§1).
+- **The puzzles:** a time drawn round a decent player's, spread as people are; good takes three quarters
+  of it, great a little over half. Measured where a bot or the den has a figure: Navigation at the door 53
+  moves (`tools/nav-bots.mjs`), Bilge at a lock the pilot's own 28 s, running the gap one hit (the helm and
+  its guns, measured). Assumed elsewhere: a Vegas 55 s and coming off 55/70/85% of goes, a heavy combo 30 s,
+  rowing the gap 30 s, a Carpentry piece 4 s, a shot loaded by Gunnery 20 s, a broadside landing 60/75/90%
+  of the time. Free on the move, everyone Sails on the pilot, its chains carrying her on (from
+  `tools/sail-bots.mjs`: 0.06 to 0.12 squares a second by skill; assumed); a combo or Gunnery on the move
+  takes that time instead and slows her to 85%.
+- **What it reports:** win rates by route, by style, by skill, by place in the field when stopping in the
+  open, and what each shortcut really saved.
 - **How it's used:** the course's next pass is tuned with it, before it's played.
+
+**Simulation results (11 Nov).** 3000 races of four, routes drawn at random (no two alike), fair 25%.
+
+| Route | Course as laid | Next pass (`NEXT`) |
+|---|---|---|
+| The long way | 1% | 23% |
+| Gun gap, run | 22% | 19% |
+| Gun gap, combo | 32% | 33% |
+| Gun gap, shot quiet | 30% | 31% |
+| Headwind, rowed | 3% | 23% |
+| Whirlpools' Vegas | 7% | 23% |
+| Locks | 13% | 24% |
+| Crane | 28% | 22% |
+| Starlit door | 58% | 24% |
+| Every shortcut | 55% | 29% |
+
+- **As laid, every shortcut saves too much against the long way,** so the long way never wins, and the
+  biggest savings win most. The locks and the crane save half as much again as a decent player takes on
+  them (the user found them quick). The door's 149 s is worth twice its Navigation and Vegas. The
+  headwind gap and the whirlpools win little: they're where a racer stopped in the open gets shot (the
+  headwind gap from both legs and the gap's roused guns), and a Vegas doesn't always come off.
+- **What each shortcut should save** (`NEXT` in `src/race-sim.ts`, for `RACE.DECENT` when the course is
+  re-laid): the gun gap 10 s, the headwind gap 30, the whirlpools 46, the locks 24, the crane 37, the
+  door 85; and the long way kept off the gap's guns' marks (the pilot's line from the buoy runs over gun 0's
+  way-in mark today, so every racer who doesn't take the gap is holed there). With those, every route wins
+  19–33%. Racing styles are even either way (peaceful 27%, opportunist 25%, aggressive 23%, cautious 25%),
+  and skill tells: great 47%, good 25%, decent 4%.
+- **Each shortcut on the next pass pays for a good or great player at it, and costs a decent one** (the
+  locks: decent −5 s, great +3; the whirlpools: −29, −4): back yourself on your puzzles.
+- **Two to three racers:** in fields of two every route wins 42–59% (fair 50%); in fields of three
+  25–43% (fair 33%), the gap's combo and shot strongest, its run weakest.
+- **The gun gap:** shooting its guns quiet with your starting shots (shared shots) evens it with rushing it
+  on a combo (31% and 33%); needing more hits, shooting them out falls to 12%. Running it costs about a hit
+  (as the user found) and is the weakest way past it, 19%: a combo of four squares on the move is cheap.
+- **Sailing on the pilot carries the long way.** With nobody Sailing on the pilot, the long way falls to
+  5%; it's what a racer who takes no shortcut is doing, and it has to work at sea in a race for the long
+  way to be a real choice.
+- **One starting shot instead of two** hurts the aggressive style (19%) and changes little else, so two it
+  stays.
+
+**Recommended for the course's next pass** (layout, for the agent laying it out):
+- Shortcut savings as above, `RACE.DECENT` updated to them (`tests/den-race.test.ts` then holds the course
+  to them, and the balance test races on the course as laid instead of `NEXT`).
+- The long way clear of the gun gap's marks: gun 0's way-in mark off the first leg, or the gap set back in a
+  notch.
+- The headwind gap's far end not opening straight onto leg 3, and out of reach (3 squares) of the gun gap's
+  guns: a dog-leg at its exit, or moved along its spit.
+- The crane's ledge truly behind the neck, in a notch off the leg (today it's on leg 5's second row, where
+  only the rule shelters her).
+- The gap's heavy combo bigger (a combo of five or six squares, the gap longer), if its combo is to be no
+  stronger than the rest; or its saving a little less.
+- Waiting for a lock or the crane, a racer sits in the open by the way in: a sheltered berth to wait in
+  would keep the leader's sheltered shortcuts sheltered.
+
+**For the user to decide:**
+- Once the crane's built in a race, is it built for everyone (the next racer just rides it, as the den's
+  crane stays built), or does each racer build her own? The simulation has each build her own. The same
+  for the starlit door once it's open.
+- The skill model: a racer a level better at her own route's puzzle. Without it, the shortcuts would
+  have to save less again for the long way to keep up.
+- How strong Sailing on the pilot should be in a race (it carries the long way).
 
 **From players, later (idea).** A full competitive version would log each run: the route, the time on each
 puzzle and each leg, and the finish. That gives win rates by route, "like in Age of Empires". The data is
@@ -278,8 +373,10 @@ their times. A race could also be watched live.
 
 ## 12. Open questions
 
-- Shared shots or more hits for the obstacles (§6)?
-- Can the lead hold? How strong the "lead isn't safe" effect should be (§6).
+- Shared shots or more hits for the obstacles (§6)? Settled by the simulation: shared (§6, §8).
+- Can the lead hold? How strong the "lead isn't safe" effect should be (§6). The simulation says it holds
+  as it is (§6, "What it found").
+- Is a built crane built for everyone that race (§8, "For the user to decide")?
 - More than one lock or crane spot for 2–4 racers, and how the course's size changes with more racers.
 - How the starlit door's door and tunnel work with several racers: once one racer opens it, is it open for
   everyone that race?
@@ -287,9 +384,12 @@ their times. A race could also be watched live.
 
 ## 13. Where it lives
 
-- **The race's rules:** `src/den-race.ts`. Its course is `LAY.RACE` in `src/den-sail.ts`.
+- **The race's rules:** `src/den-race.ts`. Its course is `LAY.RACE` in `src/den-sail.ts`. Its field of
+  racers (several on one course, first come first served, shooting each other): `src/den-racers.ts`.
+- **The simulation:** `src/race-sim.ts`, run by `tools/race-sim.mjs` (§8).
 - **Drawn and played by:** `js/den/race.js`.
 - **The starter's lines:** `src/lines/race.ts`.
 - **The starlit door:** `src/den-door.ts` and `js/den/door.js`.
-- **Tests:** `tests/den-race.test.ts` and `tests/den-door.test.ts`.
+- **Tests:** `tests/den-race.test.ts`, `tests/den-door.test.ts`, `tests/den-racers.test.ts` and
+  `tests/race-sim.test.ts` (the balance test).
 - **Try it:** `den.html?at=race`.

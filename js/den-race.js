@@ -31,11 +31,15 @@
    Each shortcut saves about what a decent player takes on its puzzle (RACE.DECENT, tested), so it pays
    only if it's your puzzle. Then the trade wind home sweeps her up to the finish, by the gate.
    The rival (nameless for now: a real pirate needs the user's pick) sails the long way at a set pace;
-   your best time's kept in this browser. */
+   your best time's kept in this browser. The race keeps a field of racers (src/den-racers.ts: two to four
+   on one course, first come first served, shooting each other): you, and the rival as a bot racer. The
+   race simulated with bots of every way round is src/race-sim.ts (RACE.md §8). */
 import { LAY, SAIL } from './den-sail.js';
 import { CHECK } from './den-checkpoint.js';
 import { Turret } from './den-turret.js';
 import { Crane } from './den-crane.js';
+import { Field, stretchAt, atFinish } from './den-racers.js';
+export { stretchAt, atFinish };
 const RC = LAY.RACE;
 const key = (c, r) => `${c},${r}`;
 export const RACE = {
@@ -56,51 +60,57 @@ export const RACE = {
     RIVAL: { SECS: 235 },
     /** Where your best time's kept, in this browser. */
     STORE: 'den-race-best',
+    /** The gun gap's guns in a race of several (RACE.md §6; src/race-sim.ts tries both): what quietens
+        them, the same shots as hit other racers, a hit a gun ('shared': leaving the other racers in peace
+        pays, "a kind of peaceful racer bonus"); or more hits than a racer starts with, so they want
+        Gunnery as well ('hits': HARD hits a gun). The simulation settled it (11 Nov): shared, the gap's
+        ways through even with each other; with more hits, shooting them out was the worst way round. And
+        once roused, the seconds a gun takes to load again after an aimed shot: slower than the checkpoint's
+        (CHECK.AIMED_RELOAD, 4), since in a race it fires on whoever comes near, not only on the racer who
+        roused it (the user, 11 Nov: "If they're aggroed, they are very relentless"). */
+    GAP: { MODE: 'shared', HARD: 2, AIMED_RELOAD: 6 },
 };
-/** Which stretch of the course a square's on (0 the first leg, 5 the run home), or -1. */
-export function stretchAt(c, r) {
-    if (c < 1 || c >= SAIL.COLS)
-        return -1;
-    return RC.STRETCHES.findIndex((s) => r === s.r || r === s.r + 1);
-}
 /** By the starting buoy: where Space starts a race. */
 export const atStart = (c, r) => c >= RC.START.c0 && c <= RC.START.c1 && r >= RC.START.r0 && r <= RC.START.r1;
 /** Anywhere on the course: behind its line of rocks. */
 export const onCourse = (c, r) => r > RC.R0;
-/** The finish: where the trade wind home drops her. */
-export const atFinish = (c, r) => c === RC.FINISH[0] && r === RC.FINISH[1];
 const headwind = new Set(RC.HEADWIND.map(([c, r]) => key(c, r)));
 /** In the headwind gap [B]. */
 export const inHeadwind = (c, r) => headwind.has(key(c, r));
-/** The race: counting down, under way (the clock), or done; how far round she's got, in order. */
+/** The race you sail in the den: counting down, under way (the clock), or done; how far round she's got, in
+    order. Its field (src/den-racers.ts) is two racers: you (racer 0, moved by the helm: `at` each tick)
+    and the rival (racer 1, a bot racer the long way round at its set pace: rivalAt). */
 export class Race {
     best;
     state = 'off';
     /** Counting down, the seconds left; under way, the clock; done, her time. */
     t = 0;
-    /** The furthest stretch she's reached in order (0 the first leg): every one counts, a shortcut's or not. */
-    leg = 0;
-    rivalHome = false;
     won = false;
     /** Through the gate onto the course, this race. */
     entered = false;
+    /** The racers: you, then the rival. */
+    field = new Field(['you', 'rival'], null, RACE.COUNT);
     constructor(best = null) {
         this.best = best;
     }
+    /** The furthest stretch she's reached in order (0 the first leg): every one counts, a shortcut's or not. */
+    get leg() { return this.field.racers[0].leg; }
+    /** The rival's home. */
+    get rivalHome() { return this.field.racers[1].state === 'finished'; }
     /** Off from the buoy: the count. Not while one's on. */
     start() {
         if (this.state === 'count' || this.state === 'on')
             return false;
-        Object.assign(this, { state: 'count', t: RACE.COUNT, leg: 0, rivalHome: false, won: false, entered: false });
+        Object.assign(this, { state: 'count', t: RACE.COUNT, won: false, entered: false });
+        this.field.start();
         return true;
     }
     /** Carried on under the course (the starlit door's tunnel, src/den-door.ts) from stretch `from` to
         stretch `to`, past the ones between: counted as reached in order, if she'd reached `from`. */
     under(from, to) {
-        if (this.state !== 'on' || this.leg !== from || to <= from)
+        if (this.state !== 'on')
             return [];
-        this.leg = to;
-        return [{ kind: 'leg', n: to }];
+        return this.field.under(0, from, to).flatMap((e) => (e.kind === 'leg' ? [{ kind: 'leg', n: e.n }] : []));
     }
     /** Given up (sailed back out through the gate, say). */
     quit() { this.state = 'off'; }
@@ -110,20 +120,18 @@ export class Race {
     tick(dt, at) {
         const out = [];
         if (this.state === 'count') {
-            const was = Math.ceil(this.t - 1e-9);
-            this.t -= dt;
-            if (this.t <= 1e-9) {
+            for (const e of this.field.tick(dt))
+                if (e.kind === 'count' || e.kind === 'go')
+                    out.push(e);
+            this.t = this.field.t;
+            if (this.field.state === 'on')
                 this.state = 'on';
-                this.t = -this.t;
-                out.push({ kind: 'go' });
-            }
-            else if (Math.ceil(this.t - 1e-9) < was)
-                out.push({ kind: 'count', n: Math.ceil(this.t - 1e-9) });
             return out;
         }
         if (this.state !== 'on')
             return out;
-        this.t += dt;
+        this.field.tick(dt);
+        this.t = this.field.t;
         if (onCourse(at.c, at.r))
             this.entered = true;
         else if (this.entered) {
@@ -131,22 +139,25 @@ export class Race {
             out.push({ kind: 'quit' });
             return out;
         }
-        if (!this.rivalHome && this.t >= RACE.RIVAL.SECS) {
-            this.rivalHome = true;
-            out.push({ kind: 'rival' });
+        // (the rival: home at its set time, whatever the clock's steps)
+        const rival = this.field.racers[1];
+        if (rival.state !== 'finished') {
+            const p = rivalAt(this.t);
+            const ev = this.t >= RACE.RIVAL.SECS ? this.field.home(1, RACE.RIVAL.SECS) : this.field.move(1, { c: p.c, r: p.r, d: p.a });
+            if (ev.some((e) => e.kind === 'finish'))
+                out.push({ kind: 'rival' });
         }
-        const s = stretchAt(at.c, at.r);
-        if (s === this.leg + 1) {
-            this.leg = s;
-            out.push({ kind: 'leg', n: s });
-        }
-        if (this.leg === RC.STRETCHES.length - 1 && atFinish(at.c, at.r)) {
-            this.state = 'done';
-            this.won = this.t < RACE.RIVAL.SECS;
-            const best = this.best === null || this.t < this.best;
-            if (best)
-                this.best = this.t;
-            out.push({ kind: 'finish', secs: this.t, best, won: this.won });
+        for (const e of this.field.move(0, { c: at.c, r: at.r, d: 0 })) {
+            if (e.kind === 'leg')
+                out.push({ kind: 'leg', n: e.n });
+            if (e.kind === 'finish') {
+                this.state = 'done';
+                this.won = e.place === 1;
+                const best = this.best === null || this.t < this.best;
+                if (best)
+                    this.best = this.t;
+                out.push({ kind: 'finish', secs: this.t, best, won: this.won });
+            }
         }
         return out;
     }
@@ -198,7 +209,7 @@ export function rivalAt(t) {
 export class GunGap {
     guns = RC.GUNS.at.map((at, g) => new Turret({
         at, marks: RC.GUNS.marks[g], alert: false, reach: CHECK.REACH,
-        flight: CHECK.AIMED, reload: CHECK.AIMED_RELOAD, markFlight: CHECK.FLIGHT, markReload: CHECK.RELOAD,
+        flight: CHECK.AIMED, reload: RACE.GAP.AIMED_RELOAD, markFlight: CHECK.FLIGHT, markReload: CHECK.RELOAD,
         quiet: CHECK.QUIET, wreck: CHECK.WRECK,
     }));
     scored = this.guns.map(() => false);

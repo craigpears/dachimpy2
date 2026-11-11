@@ -2032,6 +2032,32 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **Racers shoot each other (11 Nov):** "I definitely want to be able to shoot other racers. That's
     absolutely part of this." A race is PvP, guns and all, not only a time trial (TODO.md, "Shooting
     other racers", for how).
+  - **Two to four racers on one course (11 Nov, rules only, not drawn yet):** "start adding multiple players
+    to this first, even if it's like 2 to 4 players with some bots". The field (`src/den-racers.ts`): each
+    racer's pose, the stretches she's reached in order, what she's doing (sailing, waiting her turn,
+    puzzling, dazed, carried by a gust, the crane or the tunnel, finished), her time and place. The den's
+    race is already a field of two, you and the rival as a bot racer, placed by time.
+    - **First come, first served:** the up lock, the down lock and the crane are each one racer's at a time;
+      the next waits her turn, in the order they came ("If you got through it first, we get through it
+      first").
+    - **A broadside three squares out of her side** (`SAIL.RANGE`), stopped by rock or land (no shooting
+      across a spit), holes the first racer on it who can be hit: dazed, still, till she's patched by
+      Carpentry, never knocked out, and not hit again till she's patched. Every racer starts with two shots
+      (`FIELD.SHOTS`), holds four, and loads more by Gunnery.
+    - **Sheltered:** in a lock's chamber, the canal between them, or alongside the crane's ledge, nobody's
+      broadside reaches her; nor while she's carried. Everywhere else, stopped, she's a sitting duck for
+      whoever comes by (the user: "Some can be safe, like ... the locks and the crane").
+    - **The gun gap's guns take the same shots as racers,** a hit a gun to quieten (`RACE.GAP.MODE`
+      'shared': leaving other racers in peace pays), settled by the simulation; and roused, they load
+      again in 6 s, not the checkpoint's 4, since in a race they fire on whoever comes near ("If they're
+      aggroed, they are very relentless").
+  - **Simulated (11 Nov):** "a test harness underneath this ... where you don't need to worry about the
+    graphical elements ... and just actually make sure they all have a relatively equal chance of
+    winning." `src/race-sim.ts`, run by `tools/race-sim.mjs`: bots of every route and racing style raced
+    on the course over many seeded races; `tests/race-sim.test.ts` fails if a route wins under half or over
+    1.6 times its fair share in a field of four. As laid, every shortcut saves too much (the long way 1%,
+    the starlit door 58%); RACE.md §8 has the numbers, what each shortcut should save on the next pass
+    (`NEXT`, which the balance test races on till the course is laid to it) and the layout changes.
   - **The starlit door:** a plain cliff face on the second spit off leg 2 (squares 21 and 22 across, 43
     out) and a tunnel's end on the fourth spit's far face onto leg 5 (21 and 22, 58 out), `LAY.RACE.DOOR`:
     "The starlit door (11 Nov)", below.
