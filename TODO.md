@@ -109,6 +109,10 @@ the site (`.assetsignore` skips `*.md`).
   winds, kind of, just jump multiple tiles". Like Carpentry for damage, Bilge for the bilge and O
   for the oars: a key takes you into it anywhere at sea, and each combo sends her its run of
   squares in one go, as the trade winds carry her. Not only at Kikkit's whirlpools.
+  **Order of work (11 Nov, "move on to that sailing feature with all the accompanying things"):**
+  its board drawn, balloony, and playable anywhere at sea first; then Kikkit's island and her
+  rambling; the whirlpools through the reef with the penguin in the middle; Tzz's island and her
+  balloon lesson aboard; the penguin home to Kikkit.
 
 - **Sailing's look, when it's drawn (10 Nov):** (its rules are done: RULES.md, "The Sailing
   puzzle".)
