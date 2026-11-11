@@ -317,6 +317,12 @@ the site (`.assetsignore` skips `*.md`).
   trade wind runs back up the course across the legs; where a leg crosses it, a Double's gust carries her
   clean over it (as a gust goes over the whirlpools), and anything less lands her in it and it sweeps her
   back a leg. With the shortcuts of every size, after the starlit door.
+- **Knowing where you're going on the race course (11 Nov):** the user's first go at `?at=race`: "my first
+  impression is I've not got a clue where I'm going. But then again, my other wonder is that a good thing?
+  Because that is that part of the joy? Is it like a maze as much as a course?" Suggested: the long way
+  plain to follow (marker buoys along it, numbered at each bend, the next one shown, "Leg 2 of 5"), as "The
+  way on pulls you" in STORY.md; the shortcuts the maze part, there to spot and work out, never marked.
+  (To settle with the user.) After the starlit door, with the shortcuts of every size.
 
 ## Spotted along the way (not asked for)
 
