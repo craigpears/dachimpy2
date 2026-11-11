@@ -33,6 +33,7 @@ import { tzzWorld, tzzTick, tzzHail, tzzPrompt, tzzReset } from './balloon-isle.
 import { empireWorld, empireTick, empirePrompt, empireReset } from './imperial-isle.js';
 import { primatesTick, primatesReset } from './moored.js';
 import { smugglersWorld, smugglersTick, smugglersPrompt, smugglersReset } from './smugglers.js';
+import { raceWorld, raceTick, raceKey, racePrompt, raceShot, raceHolds, raceReset } from './race.js';
 
 // The old sloop's at anchor in the cove from the moment the siege is over, while their ship makes
 // sail in the background (the user, 9 Nov: "I'm sat here quite a while waiting for his sloop to sail
@@ -90,6 +91,7 @@ export function sailReset() {
   empireReset();
   smugglersReset();
   primatesReset();
+  raceReset();
   denLets.sailView = 0;
 }
 // A shot out of her side, from where she is right now: it flies straight out and comes down in the
@@ -127,7 +129,7 @@ function sailFire(side) {
       const x0 = r.position.x, z0 = r.position.z;
       tween(0.4, (u) => { const k = Math.sin(u * Math.PI * 6) * 0.12 * (1 - u); r.position.x = x0 + k; r.position.z = z0 - k; }, () => { r.position.x = x0; r.position.z = z0; });
     }
-    if (!checkpointShot(hit, to)) toast('A hit on the rocks!');
+    if (!checkpointShot(hit, to) && !raceShot(hit, to)) toast('A hit on the rocks!');   // (the race's gun gap: race.js)
   });
 }
 // The square of the board under the pointer (fractional: the middle of a square is whole).
@@ -143,7 +145,7 @@ export function sailClick(x, y) {
   if (hold.mode) { holdHover(x, y); holdSwap(); return; }
   if (rowing.on) { rowHover(x, y); rowSwap(); return; }
   if (gunnery.on) { gunneryDown(x, y); return; }
-  if (craneHolds()) return;   // (up in the lagoon, or on her way: no pins)
+  if (craneHolds() || raceHolds()) return;   // (up in the lagoon, or on her way: no pins; on the race's crane: race.js)
   const at = seaCellAt(x, y);
   if (!at) return;
   if (!sail.helm.drop(at.c, at.r)) toast('She\'s there already', true);
@@ -155,12 +157,12 @@ export function sailHover(x, y) {
   if (hold.mode) { holdHover(x, y); sail.hover = null; return; }
   if (rowing.on) { rowHover(x, y); sail.hover = null; return; }
   if (gunnery.on) { gunneryHover(x, y); sail.hover = null; return; }
-  if (craneHolds()) { sail.hover = null; return; }
+  if (craneHolds() || raceHolds()) { sail.hover = null; return; }
   const at = seaCellAt(x, y);
   sail.hover = at && sail.sea.open(Math.round(at.c), Math.round(at.r)) ? [Math.round(at.c), Math.round(at.r)] : null;
 }
 // Something else has her, so the Sailing board's put away (sail-station.js).
-const rigBusy = () => haul.on || craneHolds() || patch.on || !!hold.mode || umami.on || sail.helm.dazed() || kikkitHolds();
+const rigBusy = () => haul.on || craneHolds() || raceHolds() || patch.on || !!hold.mode || umami.on || sail.helm.dazed() || kikkitHolds();
 /* The puzzles at sea in one bank, the order of their buttons on the sailing bar: 1 Sailing, 2 Gunnery
    (her guns), 3 the oars (the user, 11 Nov: "surely they should at least all be in the same bank of keys
    for activating the puzzles ... I think 1, 2, 3 makes sense"; R, G and O were scattered among the
@@ -176,6 +178,7 @@ export function sailKey(key) {
   if (kikkitHolds() && key !== 'p') return;   // (round and round in a whirlpool: whirlpools.js)
   if (umamiKey(key)) return;   // (Umami's board, and her moorings in the lagoon: capybara.js)
   if (craneKey(key)) return;   // (the crane at the ledge, and the lagoon: crane.js)
+  if (raceKey(key)) return;   // (the race: its buoy, and its crane on the neck: race.js)
   // The Sailing board: its keys while it's open; 1 or Esc puts it away (sail-station.js).
   if (stationKey(key)) return;
   if (key === '1') return rigToggle();
@@ -211,7 +214,7 @@ export function sailPrompt() {
   if (rowing.on) return rowPrompt();
   if (gunnery.on) return gunneryPrompt();
   if (station.on) return stationPrompt();
-  const cp = umamiPrompt() || cranePrompt() || kikkitPrompt() || tzzPrompt() || empirePrompt() || smugglersPrompt();
+  const cp = umamiPrompt() || cranePrompt() || racePrompt() || kikkitPrompt() || tzzPrompt() || empirePrompt() || smugglersPrompt();
   if (cp) return cp;
   const h = sail.helm, held = h.held();
   if (held === 'daze') return patchPrompt('Holed! Patch her deck to sail on · 1, 2, 3: a piece from the crate', ' (it rests on the deck: boarded over)');
@@ -258,6 +261,7 @@ export function sailTick(dt) {
   tzzWorld();   // (Tzz's island, a hop from Kikkit's, and her balloon lesson: balloon-isle.js)
   empireWorld();   // (Port Decorum, the imperial island past the checkpoint: imperial-isle.js)
   smugglersWorld();   // (the smugglers' beach behind it: smugglers.js)
+  raceWorld();   // (the sloop race's course, out past Primates Rule: race.js)
   primatesTick(dt);   // (Primates Rule at anchor, still to come: moored.js)
   sail.g ||= (() => { const g = sloopMesh(); scene.add(g); return g; })();
   const show = sail.on || sloopHome();
@@ -365,6 +369,7 @@ export function sailTick(dt) {
   tzzTick(dt);   // (Tzz and her balloons: balloon-isle.js)
   empireTick(dt);   // (Port Decorum's guards: imperial-isle.js)
   smugglersTick();   // (the smugglers' beach, found: smugglers.js)
+  raceTick(dt);   // (the race, its guns, its crane and the rival: race.js)
   if (sail.on) sailHud();
 }
 // The oars' button on the sailing bar (on mousedown: the bar's redrawn as the tokens change, so a

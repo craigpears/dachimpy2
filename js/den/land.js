@@ -762,8 +762,9 @@ const seaTex = canvasTex(128, 128, (g, w, h) => {
 });
 seaTex.wrapS = seaTex.wrapT = THREE.RepeatWrapping;
 // The sea runs SEA_OUT metres out: as far as the sloop's sea goes and well past it, past the checkpoint
-// (140 m) and since 11 Nov past Port Decorum, the imperial island, out to sea beyond the wreck (200 m).
-const SEA_OUT = 200;
+// (140 m) and since 11 Nov past Port Decorum, the imperial island, out to sea beyond the wreck (200 m),
+// and on past the sloop race's course out beyond Primates Rule (300 m).
+const SEA_OUT = 300;
 seaTex.repeat.set(16, 8 * SEA_OUT / 90);
 const trunkMat = mat('#7d5b38', { map: woodTex });
 const leafMats = ['#3f8a3a', '#2f7432', '#4f9a3c'].map((c) => mat(c, { side: THREE.DoubleSide, flatShading: true }));

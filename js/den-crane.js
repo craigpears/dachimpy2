@@ -82,6 +82,7 @@ export function travel(t) {
 }
 /** The crane: how much of it is up, the frame being filled, and her trips up and down. */
 export class Crane {
+    ledge;
     /** Parts up so far (all of CRANE.PARTS: it's built). */
     up = 0;
     /** The next part's frame, on the ledge, once you've started on it (kept as you left it). */
@@ -93,12 +94,18 @@ export class Crane {
     trip = null;
     /** The lagoon wreck's treasure. */
     salvage;
-    constructor(random = Math.random) { this.salvage = new Salvage(LAGOON.WRECK, random); }
+    /** `ledge`: the square she lies alongside it on (the hidden cove's ledge, CRANE.LEDGE, unless it's put
+        down somewhere else: the sloop race's, over the neck of its last spit, src/den-race.ts). There,
+        'cove' is the side she's hauled from and 'lagoon' the side she's set down on. */
+    constructor(random = Math.random, ledge = CRANE.LEDGE) {
+        this.ledge = ledge;
+        this.salvage = new Salvage(LAGOON.WRECK, random);
+    }
     built() { return this.up >= CRANE.PARTS.length; }
     /** She's alongside the ledge, in the cove: on its square, stopped, nothing holding her up, her
         oars shipped (as for hauling a chest). */
     alongside(ship) {
-        return this.where === 'cove' && !this.trip && ship.pose.c === CRANE.LEDGE[0] && ship.pose.r === CRANE.LEDGE[1] && ship.idle() && !ship.held() && !ship.oars;
+        return this.where === 'cove' && !this.trip && ship.pose.c === this.ledge[0] && ship.pose.r === this.ledge[1] && ship.idle() && !ship.held() && !ship.oars;
     }
     /** Start (or go back to) the next part: its frame, laid on the ledge. Null once it's built. */
     build() {

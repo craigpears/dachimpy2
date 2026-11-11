@@ -8,7 +8,7 @@ import { passageAt } from '../den-kikkit.js';
 import { G, scene, mat, mesh, woodTex, V3, burst, toast, worldLets, shake, flagpole, warm } from './world.js';
 import { rock } from './land.js';
 import { CRIMSON, STONE, stone, flagMatImperial, banner, tower } from './empire.js';
-import { turretMesh, turretView, turretWrecked, turretFire, turretLand, turretShotsTick, turretShotsClear, shotComing } from './turret.js';
+import { turretMesh, turretMark, turretView, turretWrecked, turretFire, turretLand, turretShotsTick, turretShotsClear, shotComing } from './turret.js';
 import { hullGeo } from './hull.js';
 import { seaX, seaZ, sail, CLIFF_H, bankTop } from './sea.js';
 import { deckHoleShape } from './sea-puzzles.js';
@@ -88,15 +88,9 @@ function build() {
   // The guns' marks: a red ring on the water on each square they're trained on, a little marker
   // buoy at its corner. They flare as a shot comes down on them.
   CHECK.MARKS.forEach((ms, gi) => ms.forEach(([c, r]) => {
-    const ring = mesh(new THREE.RingGeometry(1.3, 1.65, 32).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#d23a2a', transparent: true, opacity: 0.4, depthWrite: false, fog: false }), false);
-    ring.position.set(seaX(c), 0.09, seaZ(r)); ring.renderOrder = 3;
-    const cross = mesh(new THREE.PlaneGeometry(0.18, 2.6).rotateX(-Math.PI / 2), ring.material, false);
-    cross.position.copy(ring.position); cross.renderOrder = 3;
-    const cross2 = cross.clone(); cross2.rotation.y = Math.PI / 2;
-    const buoy = mesh(new THREE.ConeGeometry(0.3, 0.8, 8), mat('#c8372a')); buoy.position.set(seaX(c) + 1.6, 0.3, seaZ(r) + 1.6);
-    const cap = mesh(new THREE.SphereGeometry(0.14, 8, 6), mat('#f3ecdc')); cap.position.set(buoy.position.x, 0.78, buoy.position.z);
-    W.g.add(ring, cross, cross2, buoy, cap);
-    W.rings.push({ c, r, gun: gi, m: ring.material });
+    const mark = turretMark(seaX(c), seaZ(r));
+    W.g.add(mark.g);
+    W.rings.push({ c, r, gun: gi, m: mark.m });
   }));
   // The headland: cliff, flat-topped and grassy as round the hidden cove, and on past the board; the
   // canal's locks cut down through it (lock.js), its banks there level with the clifftop canal's.

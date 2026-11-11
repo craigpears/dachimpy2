@@ -106,7 +106,7 @@ describe('sailing: the pilot ("drop a pin ... it almost like auto moves", 9 Nov)
 
   it('every sea\'s pilot gets from the mooring to the far side', () => {
     for (let seed = 1; seed < 20; seed++) {
-      const s = new Sea(seed), at = s.pinAt(LAY.CHECKPOINT.GATE + 3, s.rows - 1)!, h = new Helm(s);
+      const s = new Sea(seed), at = s.pinAt(LAY.CHECKPOINT.GATE + 3, SAIL.CHARTED.ROWS - 1)!, h = new Helm(s);   // (the far side of the charted sea: the race's course is beyond it, 11 Nov)
       h.drop(...at);
       run(h, 120);
       expect([h.pose.c, h.pose.r]).toEqual(at);
@@ -138,7 +138,7 @@ describe('sailing: the turns ("left, pauses, right, pauses, forward, forward", 9
 
   it('crossing the whole board doesn\'t take forever (under a minute)', () => {
     const h = new Helm(clearSea());
-    h.drop(SAIL.HOME.c + 5, SAIL.ROWS - 1);
+    h.drop(SAIL.HOME.c + 5, SAIL.CHARTED.ROWS - 1);   // (the charted sea's far edge: the race's course is beyond it, 11 Nov)
     let t = 0;
     while (h.pin && t < 120) { h.tick(0.05); t += 0.05; }
     expect(h.pin).toBeNull();
@@ -341,6 +341,7 @@ describe('sailing: the trade winds ("just insanely quick wind tiles", 9 Nov)', (
     // than planned, and there.
     for (let c = 0; c < s.cols; c++) for (let r = 0; r < s.rows; r++) {
       if (!s.open(c, r) || s.windAt(c, r) !== undefined || s.level(c, r) || s.isLock(c, r) || s.hidden.has(`${c},${r}`)) continue;   // (nor behind the smugglers' rocks: only the whirlpools get there)
+      if (r >= LAY.RACE.R0) continue;   // (nor out on the race's course, minutes away: tests/den-race.test.ts)
       const g = new Helm(s);
       if (!g.drop(c, r) || !g.pin || g.headwind()) continue;   // (the wreck's wind keeps her off: den-wind.test.ts)
       const plan = g.course().length;

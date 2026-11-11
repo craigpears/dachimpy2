@@ -179,6 +179,10 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    the rocks leads to a smugglers' beach round the back of Port Decorum, the imperial island past the
    checkpoint (11 Nov): the back way into a port shut to pirates, where Helium's rum will one day be
    smuggled ashore. Nothing to do there yet, and nothing says it's there.
+   And out past Primates Rule, a buoy and a gate in a line of rocks: the sloop race (a first draft, 11
+   Nov), a rival sloop round a zigzag course against the clock, the long way round every bend or a
+   shortcut through it by a puzzle the den already has (guns, oars, whirlpools, locks, a crane), so the race
+   comes down to which puzzles you back yourself on. Minigames like this, not sea battles.
    *(11 Nov: on hold. Dalnoth is the Vikings' chief, his raids on the den Viking raids as Puzzle
    Pirates has them, and called on by Pandayay; going after him, steps 6 and 7, waits until a reason
    grows out of something else: IDEAS.md, "Her Vikings bring you back to the den".)*

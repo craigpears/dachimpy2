@@ -4,7 +4,7 @@ Every character's lines, and who they are, made from `src/lines/` by `npm run bu
 (`tools/lines-doc.mjs`): change a line there, not here, and the game changes with it.
 This file's history in git shows every line as it's changed.
 
-[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava) · [Tzz](#tzz) · [Gravee](#gravee) · [The Count](#the-count) · [The imperial guards of Port Decorum](#the-imperial-guards-of-port-decorum)
+[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava) · [Tzz](#tzz) · [Gravee](#gravee) · [The Count](#the-count) · [The imperial guards of Port Decorum](#the-imperial-guards-of-port-decorum) · [The race's starter](#the-races-starter)
 
 ## Dalnoth
 
@@ -974,3 +974,28 @@ For now there's nothing to do there: the island's sketched, to sail up to and lo
 - "No, you can't see the warehouse. Nobody sees the warehouse."
 - "Everything ashore is imperial property. Every last crate."
 - "Papers? No? Then no."
+
+## The race's starter
+
+Whoever keeps the buoy off the sloop race's gate, out past Primates Rule: counts you down, fires the gun, and calls the times at the finish. Nameless for now, as the rival sloop is: a real pirate needs the user's pick.
+
+Never says how to get round quicker: the shortcuts are yours to find (RULES.md, "Hidden gems, never hinted").
+
+> "a winding, snakes and ladders, zigzagging kind of course, just with a lot of shortcuts, and each shortcut is a different puzzle" (the user, 11 Nov)
+>
+> "Obviously, this will be out near where Primates Rule is, I guess ... We're going to have to go through several iterations of this course." (the user, 11 Nov)
+
+### At the buoy, and the race
+
+- *Sailing up to the buoy, the first time a voyage:* "A race round the course? Five legs out and back behind them rocks, and the trade wind home. Space when ye're ready"
+- *By the buoy again, after a race:* "Another go? Space when ye're ready"
+- *The count, a second each:*
+  - "Three..."
+  - "Two..."
+  - "One..."
+- *The gun:* "Go!"
+- *When the other sloop's home:* "The other sloop's home: {time}"
+- *Home before the other sloop:* "Home first! {time}"
+- *Home after it:* "Home in {time}. Beaten to it, this time"
+- *Your best time yet, kept in this browser:* "Yer best yet: {time}"
+- *Sailed back out through the gate mid-race:* "Out the gate? That race is off, then"

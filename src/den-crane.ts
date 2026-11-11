@@ -119,14 +119,17 @@ export class Crane {
   /** The lagoon wreck's treasure. */
   salvage: Salvage;
 
-  constructor(random: () => number = Math.random) { this.salvage = new Salvage(LAGOON.WRECK, random); }
+  /** `ledge`: the square she lies alongside it on (the hidden cove's ledge, CRANE.LEDGE, unless it's put
+      down somewhere else: the sloop race's, over the neck of its last spit, src/den-race.ts). There,
+      'cove' is the side she's hauled from and 'lagoon' the side she's set down on. */
+  constructor(random: () => number = Math.random, readonly ledge: [number, number] = CRANE.LEDGE) { this.salvage = new Salvage(LAGOON.WRECK, random); }
 
   built(): boolean { return this.up >= CRANE.PARTS.length; }
 
   /** She's alongside the ledge, in the cove: on its square, stopped, nothing holding her up, her
       oars shipped (as for hauling a chest). */
   alongside(ship: Ship): boolean {
-    return this.where === 'cove' && !this.trip && ship.pose.c === CRANE.LEDGE[0] && ship.pose.r === CRANE.LEDGE[1] && ship.idle() && !ship.held() && !ship.oars;
+    return this.where === 'cove' && !this.trip && ship.pose.c === this.ledge[0] && ship.pose.r === this.ledge[1] && ship.idle() && !ship.held() && !ship.oars;
   }
 
   /** Start (or go back to) the next part: its frame, laid on the ledge. Null once it's built. */

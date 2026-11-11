@@ -23,9 +23,10 @@ import { SLOOP_DECK, sail } from './sea.js';
    user, 9 Nov: the pieces shown twice, on the lid and in the tray, was "a very cluttered user
    interface ... simplify it, standardize it"); the sailing bar's hidden while you patch. Played with the Carpentry view's own keys (src/den-carp-view.ts), looking down on it
    from her stern, its top row toward her bow, as the wall's Carpentry reads. */
-export const patch = { on: false, hole: null, group: null, face: null, wood: null, ghost: null, ghostKey: '', crate: null, slots: [], hand: null, lift: -1, r: 0, c: 0, sq: 0.2, keyAt: null, fair: new FairDeal(C), away: null };
+export const patch = { on: false, hole: null, group: null, face: null, wood: null, ghost: null, ghostKey: '', crate: null, slots: [], hand: null, lift: -1, r: 0, c: 0, sq: 0.2, keyAt: null, fair: new FairDeal(C), aways: [] };
 /* The same Carpentry, the same tray and keys, for a frame somewhere other than her deck: the crane's
-   frames on the cliff's ledge (crane.js). `patch.away` is { hole() (the frame to fill, or null), sq
+   frames on the cliff's ledge (crane.js), and the race's crane on its neck of land (race.js). Each one's in
+   `patch.aways`, and the first with a frame to fill has the board. One is { hole() (the frame to fill, or null), sq
    (metres a square), mount(g) (puts the board's group in the world), dress(face, frame) (draws the
    frame under the pieces), done(frame) (it's full) }. Its board and pieces are the crane's to keep:
    they're left where they are when it's shut. */
@@ -262,7 +263,7 @@ export function patchHover(x, y) {
   if (patch.hole.fit(patch.hand.cells, r, c)) { patch.r = r; patch.c = c; patchClamp(); } else patchSnap(at, 1.2);
 }
 export function patchTick(dt) {
-  const away = !sail.helm.dazed() && patch.away?.hole() ? patch.away : null;
+  const away = !sail.helm.dazed() ? patch.aways.find((a) => a.hole()) ?? null : null;
   const want = sail.on && sail.helm.dazed() ? sail.helm.hole : sail.on && away ? away.hole() : null;
   if (want !== (patch.on ? patch.hole : null)) { if (patch.on) patchShut(); if (want) patchOpen(want, want === sail.helm.hole ? null : away); }
   if (!patch.on) return;

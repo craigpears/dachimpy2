@@ -83,7 +83,7 @@ export const SHEET = { U0: 0.02, U1: 0.98, V0: 0.06, V1: 0.78 } as const;
 /** Where a square of the sea falls on the sheet. */
 export function onMap([c, r]: Square): [number, number] {
   const S = SHEET;
-  return [S.U0 + (c + 0.5) / SAIL.COLS * (S.U1 - S.U0), S.V1 - (r + 0.5) / SAIL.ROWS * (S.V1 - S.V0)];
+  return [S.U0 + (c + 0.5) / SAIL.COLS * (S.U1 - S.U0), S.V1 - (r + 0.5) / SAIL.CHARTED.ROWS * (S.V1 - S.V0)];
 }
 
 /** A run of trade wind, from its first square to its last, and the way it blows (0 out to sea,

@@ -1993,6 +1993,47 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   to sea for her (37 rows), everything already there staying put, the old wreck's wind running on to the
   new edge (so still no sailing round its far end to the locks: she lies in it, so from Port Decorum's
   side you sail up to her as far as its edge, two squares off her, near enough to say she's not ready).
+- **The sloop race (11 Nov), a first draft.** "a winding, snakes and ladders, zigzagging kind of course,
+  just with a lot of shortcuts, and each shortcut is a different puzzle, and you have to choose either the
+  long way round, just ... without doing anything", "it should be significant", and of the first draft:
+  "Obviously, this will be out near where Primates Rule is ... We're going to have to go through several
+  iterations of this course." A minigame, not a sea battle ("creative new mechanics, and tutorials").
+  - **Where:** its own place out past Primates Rule, behind a line of rocks right across the sea (row 37)
+    with one gate in it, right of the old wreck's wind, so nothing on the den's side changes (that wind
+    now ends at the line, which shuts its far end as the sea's edge did). The sea grew to 65 rows for it;
+    the captain's map still shows the 37 it had (the course is off the map, `SAIL.CHARTED`). It's laid out
+    on the den's own sea, not a sea of its own: the Sea, the helm and every place's 3D are built round the
+    one sea, and an own-sea would have meant swapping all of it. Its whole layout is a few numbers in
+    `src/den-sail.ts` (`RACE_LAY`, `LAY.RACE`), to rework freely.
+  - **The course:** a buoy on the open sea off the gate (Space by it: the starter counts you down, and
+    you're off, a rival sloop beside you, the clock running). Five legs, two squares deep, back and forth
+    across the sea, one under the other, and a run home; a spit of land between each pair, the long way
+    round its end; the course's own breeze blowing out across it (every leg a reach, every bend a run, no
+    sailing back the way you came). The run home ends on a trade wind up the course's left-hand side,
+    behind a wall, that sweeps her up to the finish flag, by the gate she came in at. Back out of the gate
+    once through it, the race is off. About four and a quarter minutes the long way.
+  - **A shortcut through each spit, each a puzzle the den already has, by its one module:** [A] a gap with
+    a gun either side, as the imperial checkpoint's (its numbers, each gun a destructible turret), light airs
+    in the gap as under the gatehouse: it's the combo that gets you through, a heavy one (a big Sailing
+    chain's boost, or a Vegas rowed each side) rushing her past their marks, a square at a time a sitting
+    duck; or knock its guns out by Gunnery; and the long way along the first leg runs over one of its marks,
+    so it can hole you too (patched by Carpentry). [B] a gap with the wind straight back through it, no sail
+    gets her in: row it by mirror strokes; idle in it and the wind blows her back out a square at a time.
+    [C] three whirlpools in a channel through the spit: only a Vegas from its mouth carries her over, less
+    and a whirlpool has her and its winds carry her back to the mouth (Kikkit's whirlpools' rules). [D] a
+    lock up, pumped by Bilge, and a lock down. [E] a crane on the last neck of land, built by Carpentry a
+    part at a time on the deck patch's tray (the cliff's crane's rules, its ledge here), that hauls her over
+    to the run home. Each saves about what a decent player takes on its puzzle (guns 30 s, headwind 30,
+    whirlpools 55, locks 45, crane 75: `RACE.DECENT`, tested), so a shortcut pays only if it's your puzzle.
+  - **The rival:** one sloop, nameless for now (a real pirate needs the user's pick and their portrait
+    checked), the long way at a set pace, home in 3:55, quicker than the long way sailed: you beat it on
+    the shortcuts you're good at. Your best time's kept in this browser.
+  - **Nothing hinted:** the starter says what the course is, never where the shortcuts are or how.
+  - **Kept for the starlit door (to come):** a plain cliff face on the second spit off leg 2 (squares 21
+    and 22 across, 43 out) and a tunnel's end on the fourth spit's far face onto leg 5 (21 and 22, 58 out),
+    nothing there yet (`LAY.RACE.DOOR`).
+  `?at=race` and one cheat. Rules: `src/den-race.ts`; drawn and played by `js/den/race.js`; the starter's
+  lines `src/lines/race.ts`.
 - **A hull's sides slant a little, top to bottom (11 Nov).** "I can definitely see the back of the
   ship has gotten a lot more curved, but I'm talking about, like, the top to bottom ... that's still
   quite boxy ... it needs a tiny bit of a slant." Tumblehome 0.15 (it was 0.05, too little to see), a

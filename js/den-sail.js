@@ -30,9 +30,14 @@ export const SAIL = {
         Isle and Kikkit's island no longer against the edge. And again (11 Nov) from 26 to 34 out to
         sea, for Port Decorum, the island under imperial control (LAY.EMPIRE): out past the wreck, open
         sea round it. And again (11 Nov) from 34 to 37, for Primates Rule at anchor out past Port Decorum,
-        to its left (LAY.PRIMATES), open sea round her: everything already there staying put. */
+        to its left (LAY.PRIMATES), open sea round her: everything already there staying put. And again
+        (11 Nov) from 37 to 65, for the sloop race's course out past her (LAY.RACE), behind a line of
+        rocks with one gate in it: everything already there staying put. */
     COLS: 27,
-    ROWS: 37,
+    ROWS: 65,
+    /** The sea as the captain's map shows it: the rows it had before the race's course was laid out
+        past Primates Rule (src/den-map.ts). The course is a place of its own, off the map. */
+    CHARTED: { ROWS: 37 },
     /** Where the scattered rocks fall: the board as it was before it grew, so its rocks are the same
         as ever. The new water is laid out by hand (LAY). */
     SCATTER: { COLS: 16, ROWS: 14 },
@@ -105,6 +110,132 @@ export const SAIL = {
    down through the headland, and out of every lock she faces on along the canal, its next lock's
    gates ahead. The way on pulls you; the side way pushes back (STORY.md): the arm to the hidden
    cove doubles back off it, narrow, two turns tight together. */
+/* The sloop race's course (11 Nov; its rules src/den-race.ts, its 3D js/den/race.js). The user: "a
+   winding, snakes and ladders, zigzagging kind of course, just with a lot of shortcuts, and each
+   shortcut is a different puzzle", "out near where Primates Rule is", and "we're going to have to go
+   through several iterations of this course": so it's laid out here from a few numbers, to rework
+   freely. Out past Primates Rule, behind a line of rocks across the sea (REEF) with one gate in it
+   (GATE), right of the old wreck's wind, so nothing on the den's side of the line changes. Six
+   stretches of water two squares deep (STRETCHES: five legs and the run home), back and forth
+   across the sea, out from the den one under the other, the course's own breeze (ZONE) blowing out
+   across them, so every leg is a reach and every bend a run; between each pair a spit of land (SPITS),
+   the bend round its end the long way. A shortcut cuts through each spit, each its own puzzle:
+   - [A] the gun gap (GUNS): a gap in the first spit, a gun either side trained on it as the
+     checkpoint's are (src/den-checkpoint.ts's numbers, src/den-turret.ts), light airs in the gap as
+     under the checkpoint's gatehouse: a heavy combo rushes her past their marks, or knock them out
+     by Gunnery; a square at a time, she's a sitting duck.
+   - [B] the headwind gap (HEADWIND): a gap in the second, the wind blowing straight back through it,
+     so no sail gets through: row it (src/den-row.ts); idle in it and she drifts back out.
+   - [C] the whirlpool reef (WHIRLS): only a Vegas from its mouth carries her clean over (src/den-whirl.ts,
+     src/den-sailing.ts); less and a whirlpool has her and its winds carry her back to the mouth.
+   - [D] the locks (LOCKS): a canal through the fourth, a lock up and a lock down (src/den-lock.ts),
+     the up one pumped by Bilge.
+   - [E] the crane (CRANE): on the neck of the last spit, built by Carpentry (src/den-crane.ts), it
+     hauls her over to the run home.
+   The run home ends on a trade wind (LANE) up the course's left-hand side, behind a wall (WALL), that
+   sweeps her up to the finish (FINISH), by the gate she came in at. Laid out at r0 (the line of
+   rocks' row), 27 squares across. */
+const RACE_LAY = (() => {
+    const R0 = 37, W = 27;
+    /** Each stretch: its first row (it's two deep) and the way it's sailed (1 right, 3 left). */
+    const STRETCHES = [{ r: R0 + 1, d: 1 }, { r: R0 + 4, d: 3 }, { r: R0 + 9, d: 1 }, { r: R0 + 17, d: 3 }, { r: R0 + 22, d: 1 }, { r: R0 + 26, d: 3 }];
+    /** Each spit: its rows, and the end she rounds it the long way ('R' the right, 'L' the left). Two
+        squares of water round its end; on the left, the wall (WALL) beside them. */
+    const SPITS = [{ r0: R0 + 3, r1: R0 + 3, bend: 'R' }, { r0: R0 + 6, r1: R0 + 8, bend: 'L' }, { r0: R0 + 11, r1: R0 + 16, bend: 'R' }, { r0: R0 + 19, r1: R0 + 21, bend: 'L' }, { r0: R0 + 24, r1: R0 + 25, bend: 'R' }];
+    const GUN_C = 15, WIND_C = 13, WHIRL_C = 11, LOCK_C = 17, CRANE_C = 3;
+    const S = SPITS;
+    // The whirlpool reef [C]: a gust from MOUTH straight out down WHIRL_C, over three whirlpools beside
+    // it (two squares across, at WHIRL_C - 2), each missing its far left corner, where a wind blows her
+    // into the way home: up the column beside them (WHIRL_C - 3), across the stretch above and down into
+    // the mouth. Each square of the way down is a wind: the even ones blow her left into a whirlpool's
+    // near right corner (it whirls her round to the missing corner, home); the odd ones back up a square
+    // onto an even one. Seven squares from the mouth is the stretch beyond: only a Vegas's gust (src/sailing.ts).
+    const wr0 = S[2].r0, whirls = [], winds = [];
+    for (let k = 0; k < 3; k++)
+        whirls.push({ at: [WHIRL_C - 2, wr0 + 2 * k], gone: [WHIRL_C - 2, wr0 + 2 * k + 1] });
+    for (let r = wr0; r <= S[2].r1; r++)
+        winds.push([WHIRL_C, r, (r - wr0) % 2 ? 2 : 3]);
+    for (const w of whirls)
+        winds.push([w.gone[0], w.gone[1], 3]);
+    for (let r = S[2].r1; r >= wr0 - 1; r--)
+        winds.push([WHIRL_C - 3, r, 2]);
+    const mouthR = wr0 - 1, topR = wr0 - 2;
+    for (let c = WHIRL_C - 3; c < WHIRL_C; c++)
+        winds.push([c, topR, 1]);
+    winds.push([WHIRL_C, topR, 0]);
+    const passage = new Set([...winds.map(([c, r]) => `${c},${r}`), ...whirls.flatMap(({ at: [c, r] }) => [`${c},${r}`, `${c + 1},${r}`, `${c},${r + 1}`, `${c + 1},${r + 1}`])]);
+    // The locks [D], straight down through the fourth spit: up a lock, a stretch of canal, down a lock.
+    const locks = [{ at: [LOCK_C, S[3].r0], up: 0, low: 0 }, { at: [LOCK_C, S[3].r1], up: 2, low: 0 }];
+    const pound = [];
+    for (let r = S[3].r0 + 1; r < S[3].r1; r++)
+        pound.push([LOCK_C, r]);
+    // The land of each spit, but for its shortcut's way through it.
+    const open = new Set([`${GUN_C},${S[0].r0}`, ...[S[1].r0, S[1].r0 + 1, S[1].r1].map((r) => `${WIND_C},${r}`), ...passage, ...locks.map((l) => `${l.at[0]},${l.at[1]}`), ...pound.map(([c, r]) => `${c},${r}`)]);
+    const land = S.map((s) => {
+        const out = [];
+        for (let r = s.r0; r <= s.r1; r++)
+            for (let c = s.bend === 'R' ? 1 : 4; c <= (s.bend === 'R' ? W - 3 : W - 1); c++)
+                if (!open.has(`${c},${r}`))
+                    out.push([c, r]);
+        return out;
+    });
+    // The wall up the left-hand side, between the bends and the trade wind home.
+    const wall = [];
+    for (let r = S[0].r0; r <= S[4].r1; r++)
+        if (!land.some((l) => l.some(([c, y]) => c === 1 && y === r)))
+            wall.push([1, r]);
+    const reef = [];
+    for (let c = 0; c < W; c++)
+        if (c !== 8 && c !== 9)
+            reef.push([c, R0]);
+    const last = STRETCHES[STRETCHES.length - 1];
+    return {
+        R0, STRETCHES, SPITS,
+        /** The line of rocks across the sea in front of it, and its gate (the start, from the open sea). */
+        REEF: reef,
+        GATE: [[8, R0], [9, R0]],
+        /** The starting buoy, on the open sea off the gate, a little to the right of Primates Rule: where
+            she starts, from any square of START (Space). */
+        BUOY: [10, R0 - 1],
+        START: { c0: 8, c1: 10, r0: R0 - 2, r1: R0 - 1 },
+        /** The land of each spit (works: drawn by js/den/race.js), and the wall. */
+        LAND: land, WALL: wall,
+        /** The trade wind home, up the left-hand edge from the run home, and the finish where it drops her. */
+        LANE: { at: [0, last.r + 1], d: 2, n: last.r + 1 - (R0 + 2) + 1 },
+        FINISH: [0, R0 + 1],
+        /** The course's own breeze, out across it; light airs across the gun gap (as under the checkpoint's
+            gatehouse); and the headwind back through the second spit's gap. (The first that has a square
+            is the one she feels: src/den-sail.ts, Sea.zoneAt.) */
+        ZONES: [
+            { c0: GUN_C, c1: GUN_C, r0: S[0].r0, r1: S[0].r0, d: 1, s: 1 },
+            { c0: WIND_C, c1: WIND_C, r0: S[1].r0, r1: S[1].r1, d: 2, s: 2 },
+            // (but the third leg's first row past the whirlpools' mouth, where the winds into the mouth cross it
+            // and the only way into it is up from the row beside it)
+            { c0: 1, c1: W - 1, r0: R0 + 1, r1: topR - 1, d: 0, s: 2 },
+            { c0: 1, c1: WHIRL_C, r0: topR, r1: topR, d: 0, s: 2 },
+            { c0: 1, c1: W - 1, r0: topR + 1, r1: last.r + 1, d: 0, s: 2 },
+        ],
+        /** [A]: the gap, its guns either side, and the squares each is trained on (gun 0 the way in and the
+            way out, gun 1 the gap itself, as the checkpoint's: src/den-checkpoint.ts, CHECK.MARKS). */
+        GUNS: { gap: [GUN_C, S[0].r0], at: [[GUN_C - 1, S[0].r0], [GUN_C + 1, S[0].r0]], marks: [[[GUN_C, S[0].r0 - 1], [GUN_C, S[0].r0 + 1]], [[GUN_C, S[0].r0]]] },
+        /** [B]: the gap's squares, the way in first. */
+        HEADWIND: [S[1].r0, S[1].r0 + 1, S[1].r1].map((r) => [WIND_C, r]),
+        /** [C]: the mouth (facing in), the whirlpools and their winds ([c, r, the way it blows]). */
+        WHIRLS: { MOUTH: { c: WHIRL_C, r: mouthR, d: 0 }, POOLS: whirls, WINDS: winds, OUT: [WHIRL_C, S[2].r1 + 1] },
+        /** [D]: the locks and the canal between them (its level, a lock's lift up). */
+        LOCKS: locks, POUND: { level: 1, at: pound },
+        /** [E]: the crane's ledge on the neck (she lies alongside it, on the leg), and where it sets her down
+            on the run home, facing along it. */
+        CRANE: { LEDGE: [CRANE_C, S[4].r0 - 1], TO: { c: CRANE_C, r: S[4].r1 + 1, d: 3 } },
+        /** Kept for the starlit door (IDEAS.md; Duty Navigation opens it, to come): a plain cliff face on the
+            second spit, off leg 2 (FACE, the water off it OFF), and a tunnel's end on the fourth spit's far
+            face, out onto leg 5 (OUT, the water off it INTO). Nothing's there yet. */
+        DOOR: {
+            FACE: [[21, S[1].r0], [22, S[1].r0]], OFF: [[21, S[1].r0 - 1], [22, S[1].r0 - 1]],
+            OUT: [[21, S[3].r1], [22, S[3].r1]], INTO: [[21, S[3].r1 + 1], [22, S[3].r1 + 1]],
+        },
+    };
+})();
 export const LAY = {
     /** The trade winds: where each starts, the way it blows, and how many squares long. Out from off
         the beach to the junction; on from the junction, the main shipping lane, out to the imperial
@@ -199,7 +330,8 @@ export const LAY = {
         through the gate slowly, on its gun's mark, and that gun has her (once a gun:
         src/den-checkpoint.ts); a combo rowed as one still rushes her through. */
     ZONES: [
-        { c0: 4, c1: 7, r0: 20, r1: SAIL.ROWS - 1, d: 1, s: 2 },
+        // (out to the race course's line of rocks, since 11 Nov: LAY.RACE.REEF, which shuts its far end)
+        { c0: 4, c1: 7, r0: 20, r1: 36, d: 1, s: 2 },
         { c0: 2, c1: 4, r0: 5, r1: 8, d: 2, s: 2 },
         { c0: 9, c1: 9, r0: 19, r1: 19, d: 1, s: 1 },
     ],
@@ -370,6 +502,8 @@ export const LAY = {
     PRIMATES: {
         AT: [[3, 34], [4, 34], [5, 34], [6, 34]],
     },
+    /** The sloop race's course, out past Primates Rule (11 Nov): see RACE_LAY above. */
+    RACE: RACE_LAY,
 };
 /** The canal's squares: its locks and the water between them (the hidden cove's too). */
 export function canalAt(c, r) {
@@ -572,13 +706,39 @@ export class Sea {
                     this.keep.add(key(c + a, r + b));
         }
         this.zones = LAY.ZONES.map((z) => ({ ...z }));
+        // The sloop race's course out past her (LAY.RACE; src/den-race.ts): its spits and wall (land, drawn
+        // by js/den/race.js), its whirlpool reef and the winds round it (a way through, as Kikkit's, its
+        // mouth on the third leg), its locks and canal, the trade wind home, and its breezes. (Its line of
+        // rocks is the reef's: scatter.)
+        const RC = LAY.RACE;
+        for (const [c, r] of [...RC.LAND.flat(), ...RC.WALL])
+            this.works.add(key(c, r));
+        for (const spot of RC.WHIRLS.POOLS) {
+            const w = whirlpool(spot);
+            for (const [c, r] of w.squares)
+                this.whirls.set(key(c, r), w);
+            for (const [c, r] of w.corners)
+                this.passage.add(key(c, r));
+        }
+        for (const [c, r, d] of RC.WHIRLS.WINDS) {
+            this.wind.set(key(c, r), d);
+            this.passage.add(key(c, r));
+        }
+        this.mouths.push({ ...RC.WHIRLS.MOUTH });
+        const L = RC.LANE;
+        for (let i = 0; i < L.n; i++)
+            this.wind.set(key(L.at[0] + DC[L.d] * i, L.at[1] + DR[L.d] * i), L.d);
+        this.locks.push(...RC.LOCKS.map((l) => ({ ...l, at: [...l.at] })));
+        for (const [c, r] of RC.POUND.at)
+            this.pounds.set(key(c, r), RC.POUND.level);
+        this.zones.push(...RC.ZONES.map((z) => ({ ...z })));
     }
     scatter(roll) {
         const laid = this.wind.size > 0, K = LAY.CHECKPOINT;
         const reef = laid ? Array.from({ length: K.REEF.c1 - K.REEF.c0 + 1 }, (_, i) => key(K.REEF.c0 + i, K.ROW)) : [];
         // (the reef but where Kikkit's whirlpools and winds run through it; the rocks round them; and the
         // smugglers' rocks round Port Decorum's back)
-        this.reef = new Set([...reef.filter((k) => !this.whirls.has(k) && !this.wind.has(k)), ...[...LAY.KIKKIT.REEF, ...LAY.SMUGGLERS.ROCKS].filter(() => laid).map(([c, r]) => key(c, r))]);
+        this.reef = new Set([...reef.filter((k) => !this.whirls.has(k) && !this.wind.has(k)), ...[...LAY.KIKKIT.REEF, ...LAY.SMUGGLERS.ROCKS, ...LAY.RACE.REEF].filter(() => laid).map(([c, r]) => key(c, r))]);
         this.rocks = new Set([...this.cliff, ...this.works, ...this.reef, ...[...LAY.SIDES, ...LAY.FAR, ...LAY.HARBOUR].filter(() => laid).map(([c, r]) => key(c, r))]);
         const H = SAIL.HOME, COLS = SAIL.SCATTER.COLS, ROWS = SAIL.SCATTER.ROWS;
         for (let n = 0; n < SAIL.CLUMPS; n++) {

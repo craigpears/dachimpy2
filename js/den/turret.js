@@ -39,6 +39,22 @@ export function turretMesh({ stone = '#8a8178', top = 1.15, foot = 1.35, height 
   return { g, gun, body, intact, ruin, ty, wrecked: false, fall: undefined, smokeT: 0 };
 }
 
+/* A square a gun's trained on, marked on the water at (x, z): a red ring and cross on it, a little
+   marker buoy at its corner. `m` is the ring's material, to flare as a shot comes down (the checkpoint's
+   marks, the race's gun gap's: the same everywhere). */
+export function turretMark(x, z) {
+  const g = new THREE.Group();
+  const ring = mesh(new THREE.RingGeometry(1.3, 1.65, 32).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#d23a2a', transparent: true, opacity: 0.4, depthWrite: false, fog: false }), false);
+  ring.position.set(x, 0.09, z); ring.renderOrder = 3;
+  const cross = mesh(new THREE.PlaneGeometry(0.18, 2.6).rotateX(-Math.PI / 2), ring.material, false);
+  cross.position.copy(ring.position); cross.renderOrder = 3;
+  const cross2 = cross.clone(); cross2.rotation.y = Math.PI / 2;
+  const buoy = mesh(new THREE.ConeGeometry(0.3, 0.8, 8), mat('#c8372a')); buoy.position.set(x + 1.6, 0.3, z + 1.6);
+  const cap = mesh(new THREE.SphereGeometry(0.14, 8, 6), mat('#f3ecdc')); cap.position.set(buoy.position.x, 0.78, buoy.position.z);
+  g.add(ring, cross, cross2, buoy, cap);
+  return { g, m: ring.material };
+}
+
 // Standing, or its wreck.
 function look(V, wrecked) {
   V.wrecked = wrecked;

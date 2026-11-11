@@ -42,13 +42,10 @@ describe('a gust (gustPath)', () => {
     s.pounds.set('7,5', 1);
     expect(gustPath(s, { c: 5, r: 5, d: 1 }, 4).map(at)).toEqual([[6, 5, 1]]);
   });
-  it('never blows her through the checkpoint\'s gate', () => {
+  it('"the big sailing boost" zooms her through the checkpoint\'s gate (11 Nov)', () => {
     const s = new Sea(1), K = LAY.CHECKPOINT;
-    expect(s.open(K.GATE, K.ROW)).toBe(true);   // (her own moves can go through it)
     const got = gustPath(s, { c: K.GATE, r: K.ROW - 3, d: 0 }, 7);
-    expect(got.map(at)).toEqual([[K.GATE, K.ROW - 2, 0], [K.GATE, K.ROW - 1, 0]]);
-    // From in the gate, out the other side's fine.
-    expect(gustPath(s, { c: K.GATE, r: K.ROW, d: 0 }, 2).length).toBe(2);
+    expect(got.map(at)).toEqual(Array.from({ length: 7 }, (_, i) => [K.GATE, K.ROW - 2 + i, 0]));
   });
 });
 
@@ -80,7 +77,9 @@ describe('the whirlpools are a way through only on purpose (11 Nov)', () => {
       if (c === KK.MOUTH.c && r === KK.MOUTH.r && d === KK.MOUTH.d) continue;
       for (const run of runs) {
         const { h, got } = blown(s, { c, r, d }, run);
-        expect(h.pose.r, `${c},${r},${d} run ${run}`).toBeLessThanOrEqual(K.ROW);
+        // (through the checkpoint's gate is the other way past it, a big boost's since 11 Nov)
+        const gate = got.squares.some((p) => p.c === K.GATE && p.r === K.ROW);
+        if (!gate) expect(h.pose.r, `${c},${r},${d} run ${run}`).toBeLessThanOrEqual(K.ROW);
         for (const p of got.squares) expect(s.passage.has(`${p.c},${p.r}`), `${c},${r},${d} run ${run}: ${p.c},${p.r}`).toBe(false);
       }
     }

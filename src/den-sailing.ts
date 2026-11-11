@@ -9,9 +9,15 @@
    gust, played as the trade winds play their squares (Helm.gust: SAIL.PUSH seconds a square), after
    the move she's on. She stops short of anything her other moves are stopped by (rocks, the cliffs,
    land, off the board) and of a lock (its gates are shut to a gust; she goes up and down the canal
-   by its locks), of water at another level (the canal above the sea), and of the imperial
-   checkpoint's gate: getting past it is meant to be work, so no gust blows her through it. Ending on
-   a trade wind's lane, the wind takes her on from there.
+   by its locks), and of water at another level (the canal above the sea). Ending on a trade wind's
+   lane, the wind takes her on from there.
+
+   Through the imperial checkpoint's gate it carries her (11 Nov; till then it stopped short of it): a
+   big chain is what gets her through its guns, a gust's squares gone before a shot's down, as it zooms
+   her over the whirlpools and the winds (the user: "It does not help you get through a checkpoint. The
+   only thing that will do that is obviously the big sailing boost, but same with the whirlpools and the
+   wind barriers is to just zoom over those"). Where it ends, on a gun's mark, she's hit as ever: a
+   small chain into the guns is a hit, a big one past them isn't (src/den-checkpoint.ts).
 
    And of the way through the whirlpools (Sea.passage: Kikkit's whirlpools, their winds, the gap in
    the reef), unless she starts the gust at one of its mouths, facing into it (Sea.mouths). The user
@@ -22,13 +28,13 @@
    other side. Now the whirlpools are a way through only when you sail into them on purpose: up to
    the mouth, then the chain (as Kikkit tells it), or your own moves onto their winds. */
 
-import { LAY, path, type Helm, type Pose, type Sea } from './den-sail.js';
+import { path, type Helm, type Pose, type Sea } from './den-sail.js';
 import { chainName, runFor, RUN } from './sailing.js';
 
 /** The squares a gust of `n` takes her, from `from` straight ahead, a pose each; short of the first
     square she can't go to (and none if it's the first). */
 export function gustPath(sea: Sea, from: Pose, n: number): Pose[] {
-  const out: Pose[] = [], K = LAY.CHECKPOINT, level = sea.level(from.c, from.r);
+  const out: Pose[] = [], level = sea.level(from.c, from.r);
   if (sea.isLock(from.c, from.r)) return out;
   const key = (c: number, r: number) => `${c},${r}`;
   // (on purpose: from a mouth of the way through the whirlpools, facing into it, or in it already)
@@ -42,7 +48,6 @@ export function gustPath(sea: Sea, from: Pose, n: number): Pose[] {
     // the penguins' water, but only a Vegas's: src/den-kikkit.ts)
     if (!whirl && !pocket && (!sea.open(to.c, to.r) || sea.isLock(to.c, to.r) || sea.level(to.c, to.r) !== level)) break;
     if (pocket && n < runFor(RUN.VEGAS)) break;
-    if (to.c === K.GATE && to.r === K.ROW && sea.works.size) break;
     out.push(to);
     at = to;
   }

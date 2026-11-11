@@ -65,7 +65,7 @@ describe('the map matches the sea, and doesn\'t show off the secrets (10 Nov)', 
     expect(denV).toBeGreaterThan(lineV);
     expect(lineV).toBeGreaterThan(xV);
     expect(xU).toBeLessThan(gateU);   // (the wreck's off to the left beyond it, as it is)
-    for (const sq of [[0, 0], [SAIL.COLS - 1, SAIL.ROWS - 1], CHART.den] as Square[]) {
+    for (const sq of [[0, 0], [SAIL.COLS - 1, SAIL.CHARTED.ROWS - 1], CHART.den] as Square[]) {   // (the charted sea: the race's course past it is off the map, 11 Nov)
       const [u, v] = onMap(sq);
       expect(u).toBeGreaterThan(0); expect(u).toBeLessThan(1);
       expect(v).toBeGreaterThan(0); expect(v).toBeLessThan(1);

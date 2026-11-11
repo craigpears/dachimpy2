@@ -64,7 +64,7 @@ function mapTexture() {
   const rnd = () => (seed = seed * 16807 % 2147483647) / 2147483647;
   const P = (u, v) => [u * w, v * h];
   const Q = (sq) => P(...onMap(sq));   // a square of her sea
-  const cw = (SHEET.U1 - SHEET.U0) / SAIL.COLS * w, ch = (SHEET.V1 - SHEET.V0) / SAIL.ROWS * h;   // (a square, in pixels)
+  const cw = (SHEET.U1 - SHEET.U0) / SAIL.COLS * w, ch = (SHEET.V1 - SHEET.V0) / SAIL.CHARTED.ROWS * h;   // (a square, in pixels)
   const INK = '#4a2c14', LAND = '#d6b778', SAND = '#e2c88e';
   // A ragged, burnt edge.
   const edge = [], side = (x0, y0, x1, y1, n) => { for (let i = 0; i < n; i++) { const t = i / n; edge.push([x0 + (x1 - x0) * t + (rnd() - 0.5) * 12, y0 + (y1 - y0) * t + (rnd() - 0.5) * 12]); } };
@@ -97,7 +97,7 @@ function mapTexture() {
   g.strokeStyle = 'rgba(52,72,84,.45)'; g.lineWidth = 2;
   const wave = (x, y) => { g.beginPath(); g.moveTo(x - 11, y); g.quadraticCurveTo(x - 5.5, y - 5, x, y); g.quadraticCurveTo(x + 5.5, y + 5, x + 11, y); g.stroke(); };
   for (let i = 0; i < 70; i++) {
-    const c = -0.5 + rnd() * SAIL.COLS, r = -0.3 + rnd() * SAIL.ROWS;
+    const c = -0.5 + rnd() * SAIL.COLS, r = -0.3 + rnd() * SAIL.CHARTED.ROWS;
     if (!onLand(c, r) && Math.abs(r - CHART.checkpoint.row) > 0.8) wave(...Q([c, r]));
   }
 

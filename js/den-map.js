@@ -64,7 +64,7 @@ export const SHEET = { U0: 0.02, U1: 0.98, V0: 0.06, V1: 0.78 };
 /** Where a square of the sea falls on the sheet. */
 export function onMap([c, r]) {
     const S = SHEET;
-    return [S.U0 + (c + 0.5) / SAIL.COLS * (S.U1 - S.U0), S.V1 - (r + 0.5) / SAIL.ROWS * (S.V1 - S.V0)];
+    return [S.U0 + (c + 0.5) / SAIL.COLS * (S.U1 - S.U0), S.V1 - (r + 0.5) / SAIL.CHARTED.ROWS * (S.V1 - S.V0)];
 }
 const DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
 /** The den: its gate in the wall, at the den's middle (across, the column the den's middle falls

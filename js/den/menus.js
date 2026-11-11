@@ -23,6 +23,7 @@ import { lodgingsOpen } from './lodgings.js';
 import { tzzCheat } from './balloon-isle.js';
 import { empireCheat } from './imperial-isle.js';
 import { smugglersCheat } from './smugglers.js';
+import { raceCheat } from './race.js';
 import { cp } from './checkpoint.js';
 import { board, sailReset } from './sailing.js';
 import { online, guest, myId, send } from './crew.js';
@@ -585,6 +586,14 @@ function cheatSmugglers() {
   smugglersCheat();
   cp.check.side = 'far';
 }
+/* The sloop race (js/den/race.js), out past Primates Rule: at sea, by its starting buoy, the checkpoint
+   told she's beyond it, as for Port Decorum. */
+function cheatRace() {
+  if (cine) return;
+  if (!sail.on) cheatSail();
+  raceCheat();
+  cp.check.side = 'far';
+}
 /* Mischievious's wedding (js/den/wedding.js): the siege put to rest and their ship gone, and off to
    her island. */
 function cheatWedding() {
@@ -661,6 +670,7 @@ const CHEATS = [
   ["Tzz's balloon lesson", cheatTzz, 'tzz'],
   ['The imperial island', cheatEmpire, 'imperial'],
   ["The smugglers' beach", cheatSmugglers, 'smugglers'],
+  ['The sloop race', cheatRace, 'race'],
   ['Home, married', cheatMarried, 'married'],
   ['The housing district', cheatLodgings, 'lodgings'],
 ];

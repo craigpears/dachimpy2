@@ -57,8 +57,9 @@ const swirlTex = (dark) => canvasTex(128, 128, (g, w) => {
   }
 });
 /* A whirlpool (src/den-whirl.ts): one swirl over all four of its squares, turning clockwise seen from
-   above, as every whirlpool does (YPPedia). */
-function pool(w) {
+   above, as every whirlpool does (YPPedia). Any whirlpool's look (the race's: race.js). Spin it by
+   `userData.speed` a second. */
+export function pool(w) {
   const m = new THREE.MeshBasicMaterial({ map: swirlTex(true), transparent: true, depthWrite: false });
   const o = mesh(new THREE.CircleGeometry(CELL * 1.02, 48), m, false);
   o.rotation.x = -Math.PI / 2;

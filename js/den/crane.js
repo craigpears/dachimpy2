@@ -304,7 +304,7 @@ const away = {
   },
   done(f) { startHoist(f); },
 };
-patch.away = away;
+patch.aways.push(away);
 const PART_NAME = { foot: 'foot', post: 'post', jib: 'jib' };
 // Where each part goes on the crane: its parent (the crane's place, or the turning frame), and the
 // frame's group's place and turn in it. A frame's group: its columns along x, its face up y, its
@@ -558,7 +558,7 @@ export function craneKey(key) {
     if (go || key === 'escape') { if (crane.hoist) { crane.hoist.t = HOIST_ALL; hoistTick(0); } else { const e = K().skip(); if (e.length) arrive(e[0].where); } }
     return key !== 'p';
   }
-  if (K().building && patch.on && patch.at) {
+  if (K().building && patch.on && patch.at === away) {
     if (key === 'escape') { K().leave(); toast('The frame can wait: it stays on the ledge as it is'); return true; }
     return !VIEW.includes(key);
   }
@@ -581,7 +581,7 @@ export function craneKey(key) {
 export function cranePrompt() {
   if (!sail.on) return '';
   if (crane.hoist || K().trip) return 'Space: skip';
-  if (patch.on && patch.at) {
+  if (patch.on && patch.at === away) {
     const name = PART_NAME[CRANE.PARTS[K().up].name];
     return patchPrompt(`The crane's ${name} (${K().up + 1} of ${CRANE.PARTS.length}) · 1, 2, 3: a piece`, ' (the spare gets sawn off)', ' · Esc: leave it for now');
   }
@@ -613,7 +613,7 @@ function standHauling() {
 // others see you building (as at the den's frames).
 function standAboard() {
   if (crane.hoist) return standHauling();
-  if (patch.on && patch.at) {
+  if (patch.on && patch.at === away) {
     pirate.x = LEDGE_X0 + 0.55; pirate.z = LEDGE_Z0 - 0.35;
     pirate.g.position.set(pirate.x, LEDGE_Y, pirate.z);
     pirate.g.rotation.set(0, Math.PI, 0);
@@ -629,7 +629,7 @@ export function craneTick(dt) {
   const W = craneWorld(), h = sail.helm;
   if (K().building && !crane.hoist && !K().alongside(h)) K().leave();
   // Her mast and sails struck while you build (they'd be in your way, looking down on the ledge).
-  const atFrame = !!(patch.on && patch.at) || !!crane.hoist;
+  const atFrame = !!(patch.on && patch.at === away) || !!crane.hoist;
   if (!K().trip && (atFrame || crane.struck)) { rigged(!atFrame); crane.struck = atFrame; }
   document.body.classList.toggle('hauling', !!crane.hoist || !!K().trip || haul.on);   // (the sailing bar out of the way while a part goes up)
   if (crane.hoist) hoistTick(dt);

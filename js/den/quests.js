@@ -104,7 +104,7 @@ export function questsTick(map) {
   let low = false;
   if (step.at) {
     const [u, v] = onMap(step.at), [sw, sh] = step.size ?? [3, 3];
-    const du = sw / SAIL.COLS * (SHEET.U1 - SHEET.U0) / 2, dv = sh / SAIL.ROWS * (SHEET.V1 - SHEET.V0) / 2;
+    const du = sw / SAIL.COLS * (SHEET.U1 - SHEET.U0) / 2, dv = sh / SAIL.CHARTED.ROWS * (SHEET.V1 - SHEET.V0) / 2;
     const pts = [[u - du, v - dv], [u + du, v - dv], [u - du, v + dv], [u + du, v + dv]].map(([a, b]) => onScreen(map, a, b));
     const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
     const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys), pad = 14;

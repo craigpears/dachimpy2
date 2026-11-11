@@ -5,6 +5,7 @@ import { LAY, SAIL, Sea, Helm, broadside, type Move, type Pose } from '../src/de
 import { Wind } from '../src/den-wind';
 import { Salvage } from '../src/den-haul';
 import { carp, stilled } from './helpers';
+import { carry } from '../src/den-sailing';
 import type { DeckHole } from '../src/den-patch';
 import type { Cell } from '../src/engine';
 
@@ -36,7 +37,7 @@ const rowing = (sea = new Sea(9), pose = SHORT) => { const h = new Helm(sea, pos
 
 describe('the lay: the main shipping lane runs out to an imperial checkpoint (10 Nov)', () => {
   it('the board grew, and the near sea is as it was rebuilt round the checkpoint', () => {
-    expect([SAIL.COLS, SAIL.ROWS]).toEqual([27, 37]);   // (and again, 11 Nov, out to the right: the islands spaced out; and out to sea, for Port Decorum, then for Primates Rule past it)
+    expect([SAIL.COLS, SAIL.ROWS]).toEqual([27, 65]);   // (and again, 11 Nov, out to the right: the islands spaced out; and out to sea, for Port Decorum, then for Primates Rule past it, then for the sloop race's course past her)
     // The rocks of the near sea (seed 9: the den's): as before it grew, less the turret's rock, and
     // as the lanes were laid again round the checkpoint (10 Nov); and the cliffs the canal's chain
     // of locks is cut through, the hidden cove narrower behind the first lock (10 Nov); then the
@@ -143,6 +144,21 @@ describe('"get through the Imperial checkpoint by doing slow row and then fast r
     expect(c2.battery.scored.some(Boolean)).toBe(true);
     c2.watch({ c: K.GATE, r: 10 });
     expect(c2.battery.scored.some(Boolean)).toBe(false);
+  });
+
+  it('"the big sailing boost" (11 Nov): a big Sailing chain zooms her through the lot; a small one into the guns is a hit', () => {
+    // (the user: "It does not help you get through a checkpoint. The only thing that will do that is
+    // obviously the big sailing boost")
+    const cp = new Checkpoint(), h = new Helm(new Sea(9), SHORT);
+    expect(carry(h, 7).went).toBe(7);
+    const r = run(h, cp, 6, { patch: false });
+    expect(h.pose.r).toBeGreaterThanOrEqual(SHORT.r + 7);
+    expect(r.hits).toBe(0);
+    expect(r.said).toContainEqual({ kind: 'through', how: 'gate', back: false, hits: 0 });
+    // Two squares on: it ends on a gun's mark, and she sits there.
+    const c2 = new Checkpoint(), s = new Helm(new Sea(9), SHORT);
+    carry(s, 2);
+    expect(run(s, c2, 3, { patch: false }).hits).toBe(1);
   });
 
   it('a big combo leaves her sitting still while you build it: on a mark, she\'s hit', () => {
