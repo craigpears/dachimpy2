@@ -828,6 +828,12 @@ down the runway one by one, twirling as Mischievious does through her outfits, f
 on. Built from what's there (the wardrobe, her twirl, the wedding's crowd), which is why it's
 parked: too close to the wedding for a proof of concept. One for if people love dressing up.
 
+- **And a decorating competition (11 Nov):** "Same kind of idea with a decorating competition.
+  Like, that'd definitely be something people go for. Like decorating a house or something." A
+  theme, everyone decorates a house for it (the housing district's houses, Gravee's the first, and
+  the furniture as modular pieces: RULES.md), then a tour of the entries to vote on. Parked with
+  the fashion show, for the same reason; the houses make it nearer to hand.
+
 ## Zoom in on what you're doing, like the captain's map (9 Nov)
 
 The user liked how the camera zooms in onto the captain's map and back out again: you're still in
