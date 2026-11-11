@@ -1071,6 +1071,21 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     what's left; her bubble's small and kept on screen; taps, dragging props, pinching to zoom, a
     double tap to skip. The desktop's as it was. ("Ask her", the questions above, is a button in
     the planner's footer.)
+  - **She opens by explaining it, close up (11 Nov):** "It should definitely be opening more with a
+    cutscene where ... she explains to you what it is and what's going on. Definitely more zoomed in."
+    Arriving, the camera's close on her: she greets you, says what this is, and asks the tone; then
+    what you do here, in that tone. Coming back to a saved or shared wedding, a shorter welcome. The
+    camera stays close while you choose, on whatever the choice is about (her, a bachelor, a venue,
+    the guests, the couple at the arch). Space, Esc or a double tap skips.
+  - **Dress your own sweetheart as you dress yourself (11 Nov):** "you could do random, but you need
+    to be able to customize them." The same wardrobe as your own pirate's, with a name and Surprise
+    me, kept in the set-up and the share link.
+  - **Guests stand, clear of everything, outfits on show; room to see her (11 Nov):** "the pirates
+    are kind of ... going through the benches ... we want to show their outfits off," and "front
+    benches right up on them, so you can barely even see [Mischievious]." Guests stand by their
+    bench, never in a prop, each other, the aisle, or the clear space at the front where she and the
+    couple stand; benches start well back. No prop goes on her, the couple or the guards.
+  - **The ship's deck doesn't flicker (11 Nov):** surfaces never share a height.
   - **The plots:** sweet and blissful; raiders crash it (the guards knock them into the sea); somebody's
     drunk (face first into the cake); a brawl (benches flying). Each ends in "I do", the kiss,
     hearts and confetti, and a group shot framed in gilt as the wedding portrait: save the picture,

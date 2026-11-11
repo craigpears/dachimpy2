@@ -162,28 +162,6 @@ the site (`.assetsignore` skips `*.md`).
   the crane, haul her up, and the like), the offer is in the view where you're looking, at the
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
-- **The wedding opens with her explaining it, close up (11 Nov):** "It should definitely be opening
-  more with a cutscene where, you know, she explains to you what it is and what's going on.
-  Definitely more zoomed in, like, I don't understand why it's so zoomed out while I'm choosing
-  between the wedding choices." A short opening cutscene, close on her, telling you what this is
-  (her wedding venue, you plan one your way, then it plays out); and the camera close while you
-  choose, on whatever the choice is about.
-- **Dress someone of your own, as you dress yourself (11 Nov):** "when you're doing like someone of
-  your own as well, again, it should let you do like the same as like when you're dressing
-  yourself. You know, you could do random, but you need to be able to customize them." The whole
-  wardrobe (body, skin, hair, every piece and dye, a familiar) for the partner you make, with
-  random as a start.
-- **The ship's deck flickers (11 Nov):** "the ship's deck scene went really crazy flickering." The
-  wedding on the ship's deck venue flickers badly (to find: likely two surfaces at the same height).
-- **Guests stand through the benches (11 Nov):** "the pirates are kind of, you know, going through
-  the benches. Although, you know, I guess we do want them probably to be standing up maybe all on
-  benches. I don't know, because, you know, obviously we want to show their outfits off." So no
-  guest stands inside a bench: they stand beside the benches (or up on them), in full view, outfits
-  on show.
-  And room to see (11 Nov): "make sure you get like the spacing and overlapping things, like for
-  example, front benches right up on them, so you can barely even see [Mischievious] because of all
-  the guests are all kind of crowding her out." The front benches and guests stand back from the
-  arch, so she and the couple are always clear to see; nothing overlaps.
 - **Every character's lines in files of their own, kept in history (11 Nov):** "make sure that all
   the various lines, characters, and personalities are in like some configurable files ... I just
   want there to be a record of them in case any get lost that I really love, so I can see how
@@ -191,6 +169,17 @@ the site (`.assetsignore` skips `*.md`).
   (`src/lines/`), what they say and who they are, the code taking its lines from there; and a
   readable LINES.md made from them (a test keeps it up to date), so git's history shows each line
   as it changes.
+- **Her wedding needs more to play with: guests and furniture (11 Nov):** "people are really going to
+  be like wanting more control and variety ... on the furniture ... I want them to have at least have
+  some feel for getting lost in the furniture placement and the guest placement ... the whole point of
+  this was configuring the guests, configuring ... how many guests you want. Do you want big, small,
+  cozy, large? Do you want the grand wedding where half the ocean turns up? ... decorating everything
+  completely and utterly ... Just the ability to like go around like with a camera and click on each
+  pirate and configure them." So: how many guests, from cosy to half the ocean; far more furniture to
+  place, and everything placed yours to move, turn and dye; each guest yours to move, and to click
+  and dress as you dress yourself (with random); a camera you can roam with. The cheesy lines stay
+  ("That's very much my thing").
+
 
 ## Needs a playtest to pin down
 
