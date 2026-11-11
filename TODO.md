@@ -142,6 +142,25 @@ the site (`.assetsignore` skips `*.md`).
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
 
+- **Kikkit's "-eh" (11 Nov):** "you got Whirlpool, so when she's giving the directions, do a
+  twirl, but her mannerisms are definitely like everything ends in EH, so it's not a twirl, it's
+  twirl EH." So a whirlpool's turn is "a twirl-eh" in her directions, and her words end in "-eh"
+  all through her lines ("a left-eh", "a twirl-eh"). With the whirlpool rework, since her ramble
+  is rewritten to match it.
+
+- **Gravee's house, the first of a housing district (11 Nov):** "you have like the areas of
+  houses and you have the enter a house stuff and you can choose whose house to go into. And maybe
+  she's just one of them ... she can show you ... around her house. And the vampires and do the
+  portrait thing. Maybe we don't go as far as a vampire game ... the taking a portrait and a
+  snapshot, because that's fun ... a nice way of adding other friends in later." So: a housing
+  district as in old Puzzle Pirates (YPPedia's housing checked first), where you pick whose house
+  to enter from a list; each house its own little island in the code, so a friend's house is one
+  more entry. Gravee's the first: she shows you round, her portraits line the walls (the vampire's
+  eyes following you, her yeti "proof"), the vampire's in the house but no vampire game yet, and
+  she paints your portrait, which hangs on her wall and is kept in this browser, with a snapshot
+  you can save. Her look from her pirate page and portrait first (IDEAS.md, "The vampire in the
+  coffin").
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map

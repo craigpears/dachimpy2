@@ -437,6 +437,12 @@ then "she's definitely a penguin side quest".
   swim in the water after your ship when you're kind of doing the sailing." So the ending: Kikkit
   comes along to Vegas Island, her familiars swimming in your wake as you sail there, and she
   settles in among the penguins, delighted.
+  **A cutscene of her own? Probably not (11 Nov):** "does she deserve a cinematic? I don't know
+  ... maybe I think, yeah, that would be too much, especially since we're going to be getting the
+  cinematic from [Tzz] on her balloon popping. Otherwise, it's just going to be too much, maybe."
+  So her ending stays light, in her speech bubbles and what happens on the water (her familiars
+  swimming after you), not a full cutscene; Tzz's balloon lesson is the cutscene of this stretch.
+  Comes after the whirlpools and Tzz.
 - **Penguins in the wardrobe too:** "make her a penguin" first meant Kikkit as one; if wanted,
   a penguin body the pirate maker can dress, so anyone can be a penguin.
 - **All in on her craziness (10 Nov):** "really just do the whole craziness of Kikkit ... she's the
@@ -596,6 +602,13 @@ still to check on YPPedia (Emerald) before he's drawn.
 Ties in with: the shipping lanes and the gun platform over them (above; the cliff gun platform
 needs a go-ahead before it's built), Dalnoth's return (STORY.md step 7), crew from the barracks
 (below), rowing (the rowboats), and PvP and bigger ships (both need a go-ahead).
+
+**What his part actually is, still open (11 Nov):** "we're finally going to get either into
+some... Maybe that's why he gives you a bigger ship, or we're doing... I think that's a bit of a
+spaghetti on the idea of attacking down north with the rowboats, or redoing like a flotilla-style
+thing. I'm not sure." Three ways it could go: Daquan gives you a bigger ship (bigger ships need a
+go-ahead); boarding the big ship from rowboats up north; or a flotilla-style run of your own. To
+settle with the user before it's built, and kept to one little island of its own whichever it is.
 
 ## A bigger ship from the shipwright (10 Nov)
 
@@ -848,6 +861,16 @@ bursts it, to keep him in long enough to plunder the stuff.
     mouth open, arms flung up), with Gravee delighted, brush already out. Then it hangs pride of
     place in her gallery, the one you walked down, among all the others, your own look drawn by
     the pirate maker in that terrified pose.
+- **Her house, in a housing district like old Puzzle Pirates' (11 Nov, refined):** "maybe I want
+  to refine that to be more like, you know, old Puzzle Pirates, you have like the areas of houses
+  and you have the enter a house stuff and you can choose whose house to go into. And maybe she's
+  just one of them. That gives us ... another just proof of concept of modularity. And she can show
+  you, be showing you around her house. And the vampires and do the portrait thing. Maybe we don't
+  go as far as a vampire game. It's more just about exploring her house and the portrait angle of
+  it. And the taking a portrait and a snapshot, because that's fun. It's a nice way of adding other
+  friends in later if I just want people to have their own little house and their own scenes."
+  So the rapid-Carpentry coffin game (above) waits; first Gravee's house as the first house of a
+  district (TODO.md, "Gravee's house").
 
 ## A little town up the cliffs (9 Nov)
 
