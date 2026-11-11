@@ -157,6 +157,18 @@ the site (`.assetsignore` skips `*.md`).
   - **Careful with shapes and colours:** "it looks a bit wrong as well when it's certain colours with
     balls at the end. So be careful about that." No long shapes with round knobs at the end, nor
     colours that make them look rude.
+  - **Now you try (11 Nov):** "it should definitely be like a now you try thing. And, you know, she
+    sets up the balloons, you do the pop. Just make it a bit more ... interactive." She builds each
+    step (the double, the bingo, the Vegas), then hands it to you: you drop the last piece that
+    sets it off and watch it pop, and maybe build the next one yourself, her egging you on.
+  - **It's Sailing, not "the rigging" (11 Nov):** "She says R for rigging. It's supposed to be
+    sailing, not rigging." Everywhere the den calls the Sailing board "the rigging" (her line, the
+    island's hint, the R key's toast, the cheats), it says Sailing.
+  - **Platforms are never that small (11 Nov):** "Platforms never look that small. Like, they're
+    always like 2 by 3 or 3 by 3, aren't they? I mean, check the actual official pages, but these
+    look really weird." The easy board's platforms are a single row, one or two wide; check
+    YPPedia's Sailing page and the screenshots for their real sizes, and deal them so, on every
+    Sailing board (the shared rules), not only hers.
 
 ## Needs a playtest to pin down
 
