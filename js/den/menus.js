@@ -566,7 +566,7 @@ const CHEATS = [
   ['Go sailing', cheatSail, 'sea'],
   ["Dignity's scene", cheatDignity, 'dignity'],
   ["Umami's rescue", cheatUmami, 'umami'],
-  ["Mischievious's wedding", cheatWedding, 'wedding'],
+  ['The Wedding Isle', cheatWedding, 'wedding'],
 ];
 /* Every starting point has a link, to share (the user, 10 Nov: "make it so that each starting point
    is something that I can put into the URL as well, so that I can share that animation with

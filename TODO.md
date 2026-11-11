@@ -189,6 +189,11 @@ the site (`.assetsignore` skips `*.md`).
   heading are named for the wedding, not her (the Wedding Isle). And "She's free. She's nearly
   always free." was still under "Marry Mischievious" in the planner, after it was taken out of
   her lines: gone, with a test that looks at the planner too.
+- **Whoever you marry comes home with you (11 Nov):** "whoever you marry, I think naturally has to
+  jump on the ship with you after you leave the Isle to have that continuity and hang out with the
+  Den with you, that sort of thing. It's got to carry out into the world." Your spouse (her, a
+  suitor, or the one you dressed yourself), in their wedding look, boards the sloop with you when
+  you leave, sails with you, and lives at the den afterwards, kept with your save.
 
 
 ## Needs a playtest to pin down

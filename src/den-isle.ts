@@ -12,8 +12,9 @@ import { LAY } from './den-sail.js';
 import type { Helm, Pose } from './den-sail.js';
 
 export const ISLE = {
-  /** Its name, as the captain's map has it. */
-  NAME: "Mischievious's isle",
+  /** Its name, as the captain's map has it: the wedding's, not hers (the user, 11 Nov: "she's a primary
+      character, but not the star of the show"). */
+  NAME: 'Wedding Isle',
 } as const;
 
 const land = new Set(LAY.ISLE.LAND.map(([c, r]) => `${c},${r}`));

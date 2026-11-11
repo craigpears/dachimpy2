@@ -1100,7 +1100,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     sand, palms, her chapel ruin on a rise, a jetty, her heart flag. Off its jetty, Space puts you
     ashore to the wedding; "Back aboard" puts you back on her at the jetty (the cheat's way goes back
     to the den). It's on the captain's map by name, in plain sight, and the quest list's "Out at sea"
-    has "See what's afoot on Mischievious's isle", ticked once you've had a wedding. Rules:
+    has "See what's afoot on the Wedding Isle", ticked once you've had a wedding.
+    **Named for the wedding, not her (11 Nov):** "she's a primary character, but not the star of
+    the show": the Wedding Isle on the map, the quest, the prompts at sea and the cheat. Rules:
     `src/den-isle.ts` (`LAY.ISLE` in `src/den-sail.ts`).
 - **You can see out to sea (9 Nov).** The taller wall shut the view in: "it just feels like I'm
   staring at a wall. It's lost some of the chop. I don't feel like there's any background to look

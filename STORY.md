@@ -156,7 +156,7 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    to an island to forage, the capybara rescue, plans for the gun platform), and you can stay
    home and do up the den first. Or sneak onto his island for some of his buried loot, without a
    fight; every theft angers them more, and that's what brings the raids back.
-   Or sail out to Mischievious's isle, where she's always planning the next wedding (built as a
+   Or sail out to the Wedding Isle, where Mischievious is always planning the next wedding (built as a
    proof of concept, 10 Nov): lay out the venue, dress the guests, pick who you marry and how it
    goes, and keep the portrait.
 6. · **Dalnoth, guarding his treasure.** A big famous pirate, sitting on his chest with his monkey

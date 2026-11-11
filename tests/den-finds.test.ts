@@ -48,7 +48,7 @@ describe('the den\'s a lot to take in for a demo (10 Nov)', () => {
   it('lists the den\'s jobs plainly and the secrets by their counts, under one heading', () => {
     expect(QUESTS_TITLE).toBe('Quests');
     const all = lines(none);
-    expect(all.filter((q) => !q.secret).map(questLine)).toEqual(['Build the walk along the wall', 'Build the stairs up to it', 'Build the gun tower', 'Build yer shack', 'Haul up the treasure at the X', "See what's afoot on Mischievious's isle"]);
+    expect(all.filter((q) => !q.secret).map(questLine)).toEqual(['Build the walk along the wall', 'Build the stairs up to it', 'Build the gun tower', 'Build yer shack', 'Haul up the treasure at the X', "See what's afoot on the Wedding Isle"]);
     expect(all.filter((q) => q.secret).map(questLine)).toEqual(['Ways past the checkpoint: 0 of 4', 'Hidden places: 0 of 2', 'Secret treasure: 0 of 1', 'A friend to rescue: 0 of 1']);
   });
 
@@ -70,11 +70,12 @@ describe('the den\'s a lot to take in for a demo (10 Nov)', () => {
     expect(lines(all)).toHaveLength(lines(none).length);
   });
 
-  it("Out at sea: her isle's on the map, so it's named, but what's afoot there isn't said (11 Nov)", () => {
+  it("Out at sea: the isle's on the map, named for the wedding, not her: 'she's a primary character, but not the star of the show' (11 Nov)", () => {
     const q = line(none, 'See what');
     expect(quests(none).find((g) => g.title === 'Out at sea')!.quests).toContainEqual(q);
     expect(q.secret).toBe(false);
-    expect(questLine(q)).not.toMatch(/\b(wedding|marry|marri\w*|bride|groom|ceremony)\b/i);
+    expect(questLine(q)).toBe("See what's afoot on the Wedding Isle");
+    expect(questLine(q)).not.toMatch(/Mischievious/);
     expect(done(q)).toBe(false);
     expect(done(line({ ...none, wedding: true }, 'See what'))).toBe(true);
   });

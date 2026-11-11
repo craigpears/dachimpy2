@@ -108,6 +108,6 @@ describe("on the captain's map, since it's in plain sight", () => {
     }
     expect(CHART.isle.shore).toHaveLength(shore.length);
     expect(NOTES.some((n) => n.label === ISLE.NAME)).toBe(true);
-    expect(ISLE.NAME).toBe("Mischievious's isle");
+    expect(ISLE.NAME).toBe('Wedding Isle');
   });
 });

@@ -189,7 +189,7 @@ export function sailPrompt() {
   if (held === 'gates') return 'The lock gates are swinging open';
   if (held === 'calm') return 'Becalmed: dead in the water till the wind picks up · O: out oars';
   if (canLand(h)) return h.slot < 0 ? 'Off the den\'s beach · Space: go ashore · click the sea to drop a pin' : 'Under way off the den\'s beach · Space: go ashore';
-  if (canLandIsle(h)) return h.slot < 0 ? 'Off Mischievious\'s isle · Space: go ashore · click the sea to drop a pin' : 'Under way off Mischievious\'s isle · Space: go ashore';
+  if (canLandIsle(h)) return h.slot < 0 ? 'Off the Wedding Isle · Space: go ashore · click the sea to drop a pin' : 'Under way off the Wedding Isle · Space: go ashore';
   if (canHaulWreck()) return 'The old wreck · Space: haul up its treasure (Treasure Haul) · click the sea to drop a pin';
   if (h.slot < 0 && h.headwind()) return headwindPrompt();
   if (h.pin) return h.oars ? 'Rowing to the pin' : 'Under way to the pin';
@@ -235,7 +235,7 @@ export function sailTick(dt) {
       windSay(e);
       if (e.kind === 'move' && e.bump && !e.irons) sail.bumpT = e.secs * 0.45;   // (felt as she hits)
       if (e.kind === 'arrive' && canLand(h)) toast('Off the den\'s beach: Space to go ashore');
-      if (e.kind === 'arrive' && canLandIsle(h)) toast('Off Mischievious\'s isle: Space to go ashore');
+      if (e.kind === 'arrive' && canLandIsle(h)) toast('Off the Wedding Isle: Space to go ashore');
       if (e.kind === 'push') {
         if (!sail.riding) { sail.riding = true; if (!sail.said.wind) { sail.said.wind = true; toast('The trade winds have her!'); } }
         burst(V3(seaX(e.from.c), 0.3 + liftAt(e.from.c, e.from.r), seaZ(e.from.r)), '#e6f3f6', 5, 2);

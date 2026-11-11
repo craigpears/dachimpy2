@@ -94,7 +94,7 @@ export function quests(p: Progress): QuestGroup[] {
     { title: 'Out at sea', quests: [
       job('Haul up the treasure at the X', p.x),
       // (the isle's on the map, so it's named; what's afoot there isn't said: 11 Nov)
-      job(`See what's afoot on ${ISLE.NAME}`, p.wedding),
+      job(`See what's afoot on the ${ISLE.NAME}`, p.wedding),
     ] },
     { title: 'Still to find', quests: [
       tease('Ways past the checkpoint', WAYS.filter(has).length, WAYS.length),
