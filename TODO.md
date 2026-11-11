@@ -289,7 +289,16 @@ the site (`.assetsignore` skips `*.md`).
 - **The starlit door (11 Nov):** a hidden door in the race course's cliffs, found like the crane's ledge,
   opened by Duty Navigation: each constellation lights its stars on the rock, then the door opens on a
   tunnel, the course's biggest shortcut. "build duty navigation in the door ... I don't see why it's one or
-  the other."
+  the other." The tunnel behind it is a long straight passage under the cliffs, a cavern,
+  and getting through it takes a big Vegas too: "that unlocks a really long, straight passage. But it
+  requires some like more hardcore puzzling ... you're going underneath the cavern, but you've got to do
+  like big Vegas, like a big Vegas to get through it in sailing or whatever. That would be fantastic."
+- **Shortcuts not all created equal (11 Nov):** on the race course, small shortcuts as well as big ones,
+  each needing a combo of its size: a tiny one a Double gets you through (as a Double clears the reef out
+  of Kikkit's whirlpools), bigger ones a bigger combo, the biggest the starlit door's tunnel. "Are you a
+  person that can break quick double triples? That gets you through some shortcuts, and then, you know,
+  you move a bit and you do ... equivalent thing on another puzzle. Or do you want to go for those giant"
+  ones. After the first draft (the agent building it was briefed before this).
 
 ## Spotted along the way (not asked for)
 
