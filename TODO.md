@@ -172,6 +172,10 @@ the site (`.assetsignore` skips `*.md`).
   thrones, the skeleton cannons." The user's war frigate, the one for Daquan's flotilla (IDEAS.md,
   "Daquan's flotilla"): waiting on the user's pictures before she's drawn.
 
+- **Kikkit's familiars sunk into her island (11 Nov):** "the pets on [Kikkit's] Island are getting
+  a base a bit too low. They're sinking into the ground. You only really see them when they jump
+  up." They stand on the sand's top, the penguins on Vegas Island's too, and Kikkit herself.
+
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
