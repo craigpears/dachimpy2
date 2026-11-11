@@ -3,6 +3,7 @@
 // it goes up, her trip up and down, and the lagoon with its sunk wreck. (The rules: src/den-crane.ts.)
 import * as THREE from 'three';
 import { CRANE, Crane } from '../den-crane.js';
+import { CRANE_RIDE as SAYS } from '../lines/you.js';
 import { aboard } from '../den-haul.js';
 import { H as TH } from '../treasure-haul.js';
 import { S, scene, camera, mat, mesh, woodTex, woodMat, pieceGroup, V3, basis, pirate, G, burst, toast, outline, v3, animateWalk } from './world.js';
@@ -444,15 +445,15 @@ function arrive(where) {
     else toast('Up in the lagoon');
   } else { crane.warp = 1; toast('Back down in the cove'); }
 }
-// Who says what, when: the cheesy bit.
+// Who says what, when: the cheesy bit (the words: src/lines/you.ts).
 function says(go, b) {
-  if (b.leap < 1) return go.up ? 'Up she comes!' : 'Down she goes!';
-  if (b.rise < 0.5) return 'Heave!';
-  if (b.rise < 1) return 'Ho!';
-  if (b.swing < 1) return 'Easy... easy...';
-  if (b.lower < 1) return 'Mind her paint!';
-  if (b.back < 1) return 'Wheee!';
-  return go.up ? 'Ooh, a lagoon!' : 'Home sweet cove';
+  if (b.leap < 1) return go.up ? SAYS.up : SAYS.down;
+  if (b.rise < 0.5) return SAYS.heave;
+  if (b.rise < 1) return SAYS.ho;
+  if (b.swing < 1) return SAYS.easy;
+  if (b.lower < 1) return SAYS.paint;
+  if (b.back < 1) return SAYS.wheee;
+  return go.up ? SAYS.lagoon : SAYS.cove;
 }
 // Her trip, a tick at a time; false once she's there.
 function tripTick(dt) {

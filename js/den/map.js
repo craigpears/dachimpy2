@@ -2,6 +2,8 @@
 import * as THREE from 'three';
 import { MAP, mapAfter, canPickUp, canRead, RUMOUR, NOTES, X_AT, CHART, ROUTE, SHEET, onMap } from '../den-map.js';
 import { SAIL } from '../den-sail.js';
+import { PARTING } from '../lines/dalnoth.js';
+import { FOUND_MAP } from '../lines/you.js';
 import { PIRATES } from '../den-look.js';
 import { $, scene, camera, mat, mesh, makePirate, animateWalk, faceTo, V3, pirate, carry, G, keys, wm, burst, v3, worldLets } from './world.js';
 import { cine, cinePlay, cineEnd, bubble, bubbleAt, stepTo } from './cine.js';
@@ -471,7 +473,7 @@ function cineStart() {
   const deck = { x: ship.position.x + 0.1, z: SHIP_Z + 0.15 };
   dal = {
     t: 0, cap, at: { ...deck }, deck, from, land, stand: { x: s.x - 0.2, z: s.z - 1.5 }, boat, bz, drop: null, got: 0,
-    says: bubble('We\'ll be back! *hic*'), mine: bubble('A map!'), cam: { look: V3(deck.x, SHIP_DECK + 1, deck.z), dist: 7, tilt: 0.32, yaw: 0.3 },
+    says: bubble(PARTING), mine: bubble(FOUND_MAP), cam: { look: V3(deck.x, SHIP_DECK + 1, deck.z), dist: 7, tilt: 0.32, yaw: 0.3 },
     tick: dalTick, end: dalEnd,
   };
   cap.g.position.set(deck.x, SHIP_DECK, deck.z);

@@ -15,6 +15,7 @@
 import { CHART, X_AT } from './den-map.js';
 import { SAIL } from './den-sail.js';
 import { ISLE } from './den-isle.js';
+import { TOUR_SAYS } from './lines/narrator.js';
 export const WAYS = ['run', 'row', 'fight', 'locks'];
 export const PLACES = ['cove', 'lagoon'];
 /** Found just now: the list with it in (once). */
@@ -73,23 +74,23 @@ const laneC = lanes.flatMap((l) => [l.from[0], l.to[0]]), laneR = lanes.flatMap(
 const K = CHART.checkpoint;
 export const TOUR = [
     {
-        say: 'Yer den, and the old sloop they left ye, at anchor off the beach. Walk out to the end o\' the jetty and press Space to board her.',
+        say: TOUR_SAYS.den,
         at: [(CHART.den[0] + SAIL.HOME.c) / 2, (CHART.den[1] + SAIL.HOME.r) / 2], size: [9, 6],
     },
     {
-        say: 'The trade winds sweep her out from the beach, and the shipping lane runs on out to sea. Click the sea to drop a pin and she sails there herself, or steer her with W, A and D.',
+        say: TOUR_SAYS.winds,
         at: [(Math.min(...laneC) + Math.max(...laneC)) / 2, (Math.min(...laneR) + Math.max(...laneR)) / 2], size: [5, Math.max(...laneR) - Math.min(...laneR) + 2],
     },
     {
-        say: 'The Imperial checkpoint. Pirates not welcome, and its guns say so. There\'s more than one way past it, mind. Which? That\'s for ye to find.',
+        say: TOUR_SAYS.checkpoint,
         at: [K.gate, K.row], size: [K.to - K.from + 4, 3],
     },
     {
-        say: 'Beyond it, the open sea, and an old wreck aground on a sandbar. X marks the spot: the captain\'s treasure, there for the hauling.',
+        say: TOUR_SAYS.wreck,
         at: [...X_AT], size: [7, 3],
     },
     {
-        say: 'And that\'s only what the captain drew. There\'s more off the edges o\' this map. Yer quests are on the scrap by it, ticked off as ye go: the den\'s jobs, and what\'s still out there to find. T shows ye this again.',
+        say: TOUR_SAYS.more,
         quests: true,
     },
 ];

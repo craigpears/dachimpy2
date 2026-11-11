@@ -16,6 +16,7 @@
 import { CHART, X_AT, type Square } from './den-map.js';
 import { SAIL } from './den-sail.js';
 import { ISLE } from './den-isle.js';
+import { TOUR_SAYS } from './lines/narrator.js';
 
 /** The ways past the imperial checkpoint (RULES.md, "The ways past the checkpoint"): run it under
     sail, row it, knock its guns out, or round it by the locks. */
@@ -112,8 +113,8 @@ export const questLine = (q: Quest): string => (q.secret ? `${q.label}: ${q.got}
 
 /* The tour, the first time you open the map: a few captions, each pointing at a part of it (a square
    of her sea, as in src/den-map.ts, and how many squares across and up to ring), the last at the
-   quests. In the den's pirate voice, and only what's there to see and how to work a thing: never
-   how to get past the checkpoint, nor where a secret is. */
+   quests. In the den's pirate voice (its words: src/lines/narrator.ts), and only what's there to
+   see and how to work a thing: never how to get past the checkpoint, nor where a secret is. */
 export interface TourStep { say: string; at?: Square; size?: [number, number]; quests?: boolean }
 
 const lanes = CHART.lanes.slice(0, 2);
@@ -122,23 +123,23 @@ const K = CHART.checkpoint;
 
 export const TOUR: readonly TourStep[] = [
   {
-    say: 'Yer den, and the old sloop they left ye, at anchor off the beach. Walk out to the end o\' the jetty and press Space to board her.',
+    say: TOUR_SAYS.den,
     at: [(CHART.den[0] + SAIL.HOME.c) / 2, (CHART.den[1] + SAIL.HOME.r) / 2], size: [9, 6],
   },
   {
-    say: 'The trade winds sweep her out from the beach, and the shipping lane runs on out to sea. Click the sea to drop a pin and she sails there herself, or steer her with W, A and D.',
+    say: TOUR_SAYS.winds,
     at: [(Math.min(...laneC) + Math.max(...laneC)) / 2, (Math.min(...laneR) + Math.max(...laneR)) / 2], size: [5, Math.max(...laneR) - Math.min(...laneR) + 2],
   },
   {
-    say: 'The Imperial checkpoint. Pirates not welcome, and its guns say so. There\'s more than one way past it, mind. Which? That\'s for ye to find.',
+    say: TOUR_SAYS.checkpoint,
     at: [K.gate, K.row], size: [K.to - K.from + 4, 3],
   },
   {
-    say: 'Beyond it, the open sea, and an old wreck aground on a sandbar. X marks the spot: the captain\'s treasure, there for the hauling.',
+    say: TOUR_SAYS.wreck,
     at: [...X_AT], size: [7, 3],
   },
   {
-    say: 'And that\'s only what the captain drew. There\'s more off the edges o\' this map. Yer quests are on the scrap by it, ticked off as ye go: the den\'s jobs, and what\'s still out there to find. T shows ye this again.',
+    say: TOUR_SAYS.more,
     quests: true,
   },
 ];

@@ -20,20 +20,11 @@
    deck. Dignity giggles at it, Bella strikes a proud pose and
    scampers back up. After that, a line over her head now and then as things happen, each said once.
    She's only a look (PIRATES.Dignity in den-look.js): this knows nothing of how she's drawn. */
-/** Her lines: the cutscene's, then the ones for later (each said once). */
-export const SAYS = {
-    halt: 'Halt! Imperial checkpoint. State your busi...',
-    oh: '...oh. Pirates. It\'s always pirates.',
-    lively: 'Look lively! And do try to hit them this time.',
-    giggle: 'Hee hee! Oops. That was a warning shot. Mostly. Come any closer and the next ones won\'t be.',
-    /** Bella's chatter, as she's sent to the gun, and when it's gone off. */
-    eek: 'Eek eek!',
-    proud: 'Eek!',
-    closer: 'One more stroke and I\'ll have to shoot. There\'ll be paperwork. I hate paperwork.',
-    wrecked: 'That was Imperial property!',
-    passed: 'This is going in my report. In very small, very cross handwriting.',
-    canal: 'Nobody uses the canal. Nobody!',
-};
+import { SCENE, LATER } from './lines/dignity.js';
+import { CHATTER } from './lines/bella.js';
+/** Her lines: the cutscene's, then the ones for later (each said once); and Bella's chatter, as
+    she's sent to the gun, and when it's gone off. Written in src/lines/dignity.ts and bella.ts. */
+export const SAYS = { ...SCENE, eek: CHATTER.eek, proud: CHATTER.proud, ...LATER };
 export const DIGNITY = {
     /** How near her gate (squares, any way) she spots you, from the cove's side: the cutscene. As
         the checkpoint's own sight (CHECK.SIGHT): where the trade wind drops her, facing its gate. */

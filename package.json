@@ -2,7 +2,7 @@
   "name": "carpentry-primer",
   "private": true,
   "scripts": {
-    "build": "tsc -p . && node tools/bundle.mjs",
+    "build": "tsc -p . && node tools/bundle.mjs && node tools/lines-doc.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "tsc -p tests"

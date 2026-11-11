@@ -63,8 +63,8 @@ export const canPickUp = (state: MapState | undefined, dx: number, dz: number): 
 /** Whether you can open it out to look at: once it's been picked up (by you or a crewmate). */
 export const canRead = (state: MapState | undefined): boolean => state === 'found';
 
-/** What the captain scrawled across the top. */
-export const RUMOUR = "We hear there's some secret treasure here, guarded by a fearsome enemy";
+/** What the captain scrawled across it (src/lines/dalnoth.ts). */
+export { RUMOUR } from './lines/dalnoth.js';
 
 /* Where things are on the map: a square of her sea, [across, out] as in src/den-sail.ts (fractions
    and squares off the board allowed), drawn across the sheet from left to right as seen from the

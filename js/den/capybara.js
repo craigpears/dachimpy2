@@ -4,6 +4,7 @@
 import * as THREE from 'three';
 import { Forage } from '../foraging.js';
 import { UMAMI, Umami, Life, umamiDeal, freedAt } from '../den-capybara.js';
+import { OF_HIM } from '../lines/capybara.js';
 import { forageBoard, capybaraSkin, capybaraMesh, cageOpen } from './foraging.js';
 import { scene, camera, mat, mesh, V3, burst, toast, keys, ray, canvasTex } from './world.js';
 import { sail, SLOOP_DECK } from './sea.js';
@@ -133,7 +134,7 @@ function onLeave(l) {
   him.removeFromParent();
   umami.cage = cage;
   umami.swim = { m: c, cage, t: 0, phase: 'free', s0: c.scale.x, q0: c.quaternion.clone(), p0: c.position.clone() };
-  toast('He\'s free! Umami the capybara', false, true);
+  toast(OF_HIM.free, false, true);
   return true;
 }
 // Where he breaks free (on the mud at the bank's foot), how far along it he bounds, and where he
@@ -271,7 +272,7 @@ function swimTick(dt) {
   umami.pet = m;
   umami.swim = null;
   U().aboard();
-  toast('Umami\'s aboard!');
+  toast(OF_HIM.aboard);
 }
 // At home: where Life has him on the beach, at the depth there.
 function homeTick(dt) {
@@ -303,7 +304,7 @@ export function umamiTick(dt) {
   if (crane.rules.where === 'lagoon' && !crane.rules.trip) {
     const was = u.pole?.to;
     if (u.tick(dt)) {
-      if (was === 'bank' && u.stage === 'stuck' && !umami.said.found) { umami.said.found = true; toast('A capybara, shut in an old fish trap on the bank!'); }
+      if (was === 'bank' && u.stage === 'stuck' && !umami.said.found) { umami.said.found = true; toast(OF_HIM.found); }
       if (umami.then === 'lower') { umami.then = null; craneKey('h'); }
     }
     if (u.pole && (umami.ripple = (umami.ripple ?? 0) - dt) < 0) { umami.ripple = 0.2; burst(sail.g.localToWorld(V3(2.4, 0.05, 0)), '#cdeefa', 3, 1); }

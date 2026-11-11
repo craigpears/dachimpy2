@@ -52,8 +52,8 @@ export function mapAfter(state, phase) {
 export const canPickUp = (state, dx, dz) => state === 'lying' && Math.hypot(dx, dz) <= MAP.REACH;
 /** Whether you can open it out to look at: once it's been picked up (by you or a crewmate). */
 export const canRead = (state) => state === 'found';
-/** What the captain scrawled across the top. */
-export const RUMOUR = "We hear there's some secret treasure here, guarded by a fearsome enemy";
+/** What the captain scrawled across it (src/lines/dalnoth.ts). */
+export { RUMOUR } from './lines/dalnoth.js';
 /** The sheet (0 to 1 across from the left, down from the top): the sea's board between U0 and U1
     across, and between V0 (its far edge, out to sea) and V1 (its near edge, the shore) down. */
 export const SHEET = { U0: 0.02, U1: 0.98, V0: 0.06, V1: 0.78 };
