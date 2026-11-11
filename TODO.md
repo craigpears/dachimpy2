@@ -174,6 +174,16 @@ the site (`.assetsignore` skips `*.md`).
   personality. And Puzzle Pirate personality, though, especially, rather than specific people.
   There's the balance." So fewer lines about her own love life (how often she's married, the black
   widow jokes), more chattery Puzzle Pirates banter as the host, and things you can ask her.
+- **Five weddings today, for the fun of it (11 Nov):** "I feel like it's supposed to be a link in to
+  just showing that ... you can keep doing it for fun all the time ... portraying it not in a
+  promiscuous way, but in a this is a fun game. I enjoy getting married, go through the ceremonies
+  ... I definitely want that actually on the [TODO] ... maybe it would help if, like, all the first
+  time, maybe it tells you about things. All the first time I had this kind of wedding, second time
+  it didn't quite go so well. The Raiders came and it was bloody gory ... tie it into the mechanics
+  in a happy, fun way, not in a promiscuous, dirty way ... I want her to be the fun pirate that's
+  showing you through this stuff." So she's been through five ceremonies today because they're
+  fun, and each she tells of is one of the wedding's own options (a theme, a venue, how it went),
+  so her stories show you what you can choose.
 
 ## Needs a playtest to pin down
 

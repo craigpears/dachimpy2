@@ -624,7 +624,8 @@ pirate wedding absolutely is a must."
   obviously based on like the real pirates' names" (her real spouses are real pirates).
   But not too far down that line (11 Nov): "I don't want this to go too far down that line ... she's
   just the facilitator for this wedding mechanic. I don't want this to be a [Mischievious] show"
-  (RULES.md, "The host, not the show"). If it's done, a light touch.
+  (RULES.md, "The host, not the show"). Now agreed, as fun not promiscuous: TODO.md, "Five weddings
+  today, for the fun of it".
 - **The welcome, darkly funny (10 Nov):** "when you first turn up ... the last wedding party has
   gone horribly well. Mischievious is there, kind of trying to proposition you, and it's just like,
   yeah, don't pay attention to the blood and guts, yeah, it's fine. We've hired a bit of extra
