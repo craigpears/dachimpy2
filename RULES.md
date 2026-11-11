@@ -1068,19 +1068,28 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       difference. Like ... I expect the boat to start, tilt it, angling to one side if I'm just
       rowing one side, and it to actually see some sense of movement." She still moves a whole
       square at a time, but between squares she creeps ahead as forward pull builds (up to 0.3 of a
-      square with a whole square's worth), swings her bows toward the side that's leading (up to a
-      third of a quarter turn with a whole turn's lead) and heels into it. When the square's move
-      comes it starts from where she'd crept to and the lean melts into it: never a jump back. The
-      camera keeps square to her heading and follows her creep only halfway, so you see her angle
-      and edge ahead.
-    - **The compass by the boards (10 Nov):** "almost a compass that says ... we're about to
-      generate a forward move or a left move or a right move ... at a certain point, it should go
-      one way or the other, maybe balance out." A brass-rimmed card in dark wood low beside port's
-      board, "NEXT MOVE" under it: its needle swings toward the side she'll turn as that side's
-      lead grows (starboard leading swings it right), straight up when they balance, red marks
-      with ↰ and ↱ where it tips into a turn (the needle goes red past them), ↑ at the top; a gold
-      ring round it fills as the next forward square builds. When a square's handed out the card
-      shows its token big (and ×10 for a Vegas on each side), then resets.
+      square with a whole square's worth), swings her bows toward the side that's leading and
+      heels into it. When the square's move comes it starts from where she'd crept to and the lean
+      melts into it: never a jump back. The camera keeps square to her heading and follows her
+      creep only halfway, so you see her angle and edge ahead.
+    - **The turn building shows on her, no compass (10 Nov).** There was a compass by the boards
+      (a needle swinging toward the turn, ↰ ↑ ↱, "NEXT MOVE"); it went: "the next move compass is a
+      bit confusing, and like the left right arrows are very tiny"; "even just ... you can actually
+      see the oars and the ship itself pulling gives you enough of an indication. Do we need much
+      else?" So she shows it, big enough to read, scaled to how big the lead is: the side leading
+      keeps rowing while the other rests (its rower stroking up to 2.4 a second faster, its sweep
+      swinging up to 60% wider, white water churned up at its blade as it bites), and her bows
+      swing toward it (up to 0.4 of a quarter turn, about 36°, with a whole turn's lead) as she
+      heels into it. All eased so a little lead shows plainly: a three on one side, 0.13 of a
+      turn, shows as 0.3 of the most. The boards still glow their colour while their lead waits.
+      ("We're going to have to prototype a bit more": the numbers are LEAN and CREW in
+      `src/den-row.ts`.)
+    - **The pieces and the water stay Bilge's (10 Nov):** "part I did love of this similarity
+      [to] bilge is that they are very watercoloured ... I still like it in idea", so no new
+      pieces and no rowing benches ("you already see the guys with the rowing [oars]"). Five
+      kinds, and not the pentagon ("didn't we talk about having fewer pieces? ... I see the
+      pentagon"): the den deals mirror strokes' five, drawn as the pale octagon, dark square, mint
+      circle, teal octagon and slate rounded square (the fifth had been drawn as the pentagon).
     - **How quick:** she rows the squares straight away, no breather between turns. One square on
       its own takes 1.15 seconds; a pile of them waiting goes quicker, each taking 1.15 seconds over
       the size of the pile, as quick as the trade winds at most (0.28 seconds a square), the whole

@@ -4,12 +4,12 @@
 // js/den/row-boards.js.)
 import * as THREE from 'three';
 import { CREW, RowBoard, bearing, pullFor, leadFor, leaned, shownAt } from '../den-row.js';
-import { camera, makePirate, V3, keys, burst, toast, worldLets, shake, $ } from './world.js';
+import { camera, makePirate, V3, keys, burst, toast, worldLets, shake, $, scene, canvasTex } from './world.js';
 import { sail, SLOOP_DECK } from './sea.js';
 import { SWEEP_X, SWEEP_Z } from './wind.js';
 import { SAIL } from '../den-sail.js';
 import { patch } from './sea-puzzles.js';
-import { boardsMake, boardsLayout, boardsLay, boardsMove, boardsFlash, boardsJig, boardsBusy, boardsTick, boardsAt, dialHanded, dialTick } from './row-boards.js';
+import { boardsMake, boardsLayout, boardsLay, boardsMove, boardsFlash, boardsJig, boardsBusy, boardsTick, boardsAt } from './row-boards.js';
 
 /* RULES.md, "Rowing by mirror strokes" (the user, 10 Nov, after playing it on a page of its own:
    "This is actually quite a good puzzle. I love it."). Run her oars out (3) and two Bilge boards
@@ -22,7 +22,10 @@ import { boardsMake, boardsLayout, boardsLay, boardsMove, boardsFlash, boardsJig
    strokes as hard as that side's been pulling: steady while she's under way, and "like crazy" after
    a big clear on that side (bouncing, sweeps thrashing, spray flying); a Vegas on each side sends
    her flying at the trade winds' pace. A board glows its colour while its side's lead waits for the
-   other side to catch it up, so you can see a turn coming.
+   other side to catch it up, and she shows the turn coming on her, no compass (the user, 10 Nov:
+   "you can actually see the oars and the ship itself pulling gives you enough of an indication"):
+   that side's rower keeps rowing, harder and wider the bigger the lead, white water at its blades,
+   the other side resting, and her bows swing toward it as she heels (leanTick, foamTick).
 
    While you row the sailing bar's hidden and her guns are run in, her mast and sails struck out of
    the way (as for the deck patch). Esc (or O) ships the oars and she's under sail again, sailing on
@@ -97,6 +100,7 @@ function rowOpen() {
   struck(true);
   underBoard(true);
   sail.rowRate = (side, under) => rowing.board.rate(side, under);
+  sail.rowReach = (side) => rowing.board.sweep(side).reach;
   document.body.classList.add('rowing');   // (the sailing bar out of the way while you row)
   keys.clear();
   /* How to turn her, the first time the oars go out (the user, 10 Nov: "[turning] on the spot works
@@ -110,6 +114,8 @@ export function rowShut() {
   if (rowing.on) { struck(patch.on && !patch.at); underBoard(false); }
   rowing.on = false;
   sail.rowRate = null;
+  sail.rowReach = null;
+  for (const f of rowing.foam ?? []) f.m.visible = false;
   document.body.classList.remove('rowing');
   if (rowing.boards) rowing.boards.el.style.display = 'none';
 }
@@ -160,11 +166,10 @@ export function rowPull(p) {
   if (steps.filter((s) => s === 'F').length >= CREW.FLYING) toast("Both sides rowing like crazy: she's flying!");
   return steps;
 }
-// Squares rowed: to the helm, to row; and the compass shows which.
+// Squares rowed: to the helm, to row.
 function stroke(steps) {
   if (!steps.length) return;
   sail.helm.stroke(steps);
-  if (rowing.boards) dialHanded(rowing.boards, steps);
   if (steps.length >= CREW.FLYING) worldLets.shake = Math.max(shake, 0.25);
 }
 
@@ -183,7 +188,7 @@ export function rowTick(dt, busy = false) {
   if ((rowing.lowT -= dt) <= 0) { rowing.lowT = 0.5; rowing.low = $('dock').getBoundingClientRect().top; rowing.top = document.querySelector('.hud')?.getBoundingClientRect().bottom ?? 0; }
   rowing.layout = boardsLayout(rowing.boards, rowing.low || innerHeight, rowing.top);
   boardsTick(rowing.boards, dt, rowing.cur, { port: B.waiting('port'), starboard: B.waiting('starboard') });
-  dialTick(rowing.boards, dt, B.building());
+  foamTick(dt);
   // The rowers, in time with their side's sweeps (js/den/wind.js), going like crazy after a big clear.
   const t = performance.now() / 1000;
   for (const r of rowing.rowers) {
@@ -196,6 +201,45 @@ export function rowTick(dt, busy = false) {
     p.g.rotation.z = crazy ? Math.sin(t * 23) * 0.08 : 0;
     onLoom(r);
     if (crazy && Math.random() < dt * 6) { r.seat.updateMatrixWorld(true); burst(r.seat.localToWorld(V3(0, 1.4, 0)), '#e6f3f6', 2, 1.2); }
+  }
+}
+
+/* White water at the blades of the side leading the turn that's building (no compass: the user, 11
+   Nov, "you can actually see the oars and the ship itself pulling gives you enough of an
+   indication"): a patch of foam churned up where each of its sweeps bites, bigger and whiter the
+   bigger its lead (src/den-row.ts, RowBoard.sweep), fading as the blade lifts. */
+const FOAM_TEX = canvasTex(128, 128, (g) => {
+  const gr = g.createRadialGradient(64, 64, 6, 64, 64, 62);
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.5, 'rgba(245,252,255,0.75)'); gr.addColorStop(1, 'rgba(240,250,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+  // (churned: blobs of white thick in the middle, thinning out)
+  for (let i = 0; i < 46; i++) {
+    const a = i * 2.39996, d = 44 * Math.sqrt((i + 0.5) / 46), r = 9 - d / 8;
+    g.fillStyle = `rgba(255,255,255,${0.9 - d / 70})`;
+    g.beginPath(); g.arc(64 + Math.cos(a) * d, 64 + Math.sin(a) * d, r, 0, Math.PI * 2); g.fill();
+  }
+});
+const at3 = new THREE.Vector3();
+function foamTick(dt) {
+  const W = sail.sweeps, B = rowing.board;
+  if (!W || !B) return;
+  rowing.foam ||= W.oars.map((o) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: FOAM_TEX, transparent: true, opacity: 0, depthWrite: false, fog: false }));
+    m.renderOrder = 3;
+    scene.add(m);
+    return { o, m, a: 0 };
+  });
+  for (const f of rowing.foam) {
+    const side = f.o.s > 0 ? 'starboard' : 'port', foam = B.sweep(side).foam, bite = -Math.cos(W.ph?.[side] ?? 0);
+    // (churned up as the blade bites, hanging a moment after it lifts)
+    const want = foam > 0.02 && bite > 0 ? 0.55 + 0.45 * foam : 0;
+    f.a += (want - f.a) * Math.min(1, dt * (want > f.a ? 10 : 2.5));
+    f.m.visible = f.a > 0.01 && W.out > 0.5;
+    if (!f.m.visible) continue;
+    f.o.blade.localToWorld(at3.set(0, 0, 0));
+    f.m.position.set(at3.x, 0.16, at3.z);   // (just above the swell)
+    f.m.scale.setScalar(1 + 1.4 * foam);
+    f.m.material.opacity = f.a;
   }
 }
 

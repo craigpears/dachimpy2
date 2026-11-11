@@ -1,7 +1,7 @@
 // The rowing boards' look: mirror strokes' two Bilge boards, port's and starboard's, drawn flat
-// either side of the view while her oars are out, and the compass by them (RULES.md, "Rowing by
-// mirror strokes"). Only the look: the rules are src/mirror-row.ts (through src/den-row.ts), and
-// js/den/rowing.js wires them to the sloop.
+// either side of the view while her oars are out (RULES.md, "Rowing by mirror strokes"). Only the
+// look: the rules are src/mirror-row.ts (through src/den-row.ts), and js/den/rowing.js wires them to
+// the sloop. No compass by them: the turn building shows on her (js/den/rowing.js).
 import { W, H } from '../bilge.js';
 import { mirrorCol } from '../mirror-row.js';
 import { bitArt } from './bilge.js';
@@ -25,8 +25,9 @@ const CELL = 40, RIM = 12, HEAD = 40, BW = W * CELL + 2 * RIM, BH = H * CELL + H
 const px = (c) => RIM + c * CELL, py = (r) => RIM + HEAD + r * CELL;
 /* Which of the den's seven pieces each kind is drawn as: the most unlike first, so a board of five
    kinds (src/mirror-row.ts, KINDS_DEFAULT) reads at a glance: pale octagon, dark square, mint
-   circle, teal octagon, pentagon. */
-const ORDER = [0, 4, 3, 1, 6, 2, 5];
+   circle, teal octagon, slate rounded square. Not the pentagon (the user, 10 Nov: "didn't we talk
+   about having fewer pieces? ... I see the pentagon"): five kinds, and none of them that. */
+const ORDER = [0, 4, 3, 1, 5, 2, 6];
 const faceOf = (b) => bitArt(b.s ? b : { k: ORDER[b.k] });
 const SHADOW = (() => {
   const cv = document.createElement('canvas'); cv.width = cv.height = 128;
@@ -59,7 +60,7 @@ function deckArt(side, k) {
   return cv;
 }
 
-/** The boards on screen, and the compass: made once, shown while she rows. */
+/** The boards on screen: made once, shown while she rows. */
 export function boardsMake() {
   const el = document.createElement('div');
   Object.assign(el.style, { position: 'fixed', inset: '0', pointerEvents: 'none', zIndex: 4, display: 'none' });
@@ -70,10 +71,8 @@ export function boardsMake() {
     el.appendChild(cv);
     return { i, side, cv, g: cv.getContext('2d'), k: 0, deck: null, pieces: new Map(), dying: [], splash: [], queue: [], holdT: 0, flash: 0, rect: null };
   });
-  const dial = dialMake();
-  el.appendChild(dial.el);
   document.body.appendChild(el);
-  return { el, views, dial, sig: '' };
+  return { el, views, sig: '' };
 }
 
 /* Where they go: either side of the screen when it's wide enough to leave the sea a good middle,
@@ -103,10 +102,7 @@ export function boardsLayout(B, low, top) {
     }
   }
   B.views.forEach((v, i) => { Object.assign(v.cv.style, { left: `${at[i][0]}px`, top: `${at[i][1]}px` }); v.rect = { x: at[i][0], y: at[i][1], w: bw, h: bh }; });
-  // The compass: low down by port's board, in the sea's part of the screen.
   const free = wide ? { x: gap * 2 + bw, y: 0, w: w - 4 * gap - 2 * bw, h } : { x: 0, y: top, w, h: Math.max(60, at[0][1] - gap - top) };
-  const ds = Math.max(72, Math.min(132, free.h * 0.45, free.w * 0.3));
-  Object.assign(B.dial.el.style, { width: `${ds}px`, height: `${ds}px`, left: `${free.x + 6}px`, top: `${wide ? Math.min(h - ds - 14, low - ds - 10) : free.y + free.h - ds}px` });
   return { wide, free };
 }
 
@@ -248,71 +244,4 @@ export function boardsAt(B, x, y) {
     return { r, c: v.i ? mirrorCol(c) : c };
   }
   return null;
-}
-
-/* The compass by the boards (the user, 10 Nov: "almost a compass that says, well ... we're about to
-   generate a forward move or a left move or a right move ... at a certain point, it should go one
-   way or the other, maybe balance out"). A brass-rimmed card: its needle swings toward the side
-   she'll turn as one side out-pulls the other (starboard pulling harder swings it right), straight
-   up when they balance, with red marks where it tips into a turn; a gold ring fills as the forward
-   square builds up. When a square's handed out the card shows it, as Battle Navigation's token (and
-   how many), and resets. */
-const TOK = { F: '↑', L: '↰', R: '↱' }, TIP = Math.PI / 3;
-function dialMake() {
-  const el = document.createElement('canvas'), px2 = 2;
-  el.width = el.height = 132 * px2;
-  Object.assign(el.style, { position: 'absolute', width: '132px', height: '132px', filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.45))' });
-  el.title = 'The next move building up';
-  return { el, g: el.getContext('2d'), px: px2, needle: 0, sig: '', handed: null };
-}
-/** Squares handed out: the card shows them a moment. */
-export function dialHanded(B, steps) { if (steps.length) B.dial.handed = { steps: [...steps], t: 1.1 }; }
-/** A frame of the compass: `b`, the square building (Stroke.building). */
-export function dialTick(B, dt, b) {
-  const D = B.dial;
-  if (D.handed) D.handed.t -= dt;
-  D.needle += (Math.max(-1.2, Math.min(1.2, b.turn)) - D.needle) * Math.min(1, dt * 6);
-  const sig = `${D.needle.toFixed(3)}|${b.ahead.toFixed(3)}|${D.handed?.t > 0 ? D.handed.t.toFixed(2) : ''}`;
-  if (sig === D.sig) return;
-  D.sig = sig;
-  const g = D.g, Wd = 132, c = Wd / 2, R = 58, turn = b.turn, ahead = b.ahead;
-  g.setTransform(D.px, 0, 0, D.px, 0, 0);
-  g.clearRect(0, 0, Wd, Wd);
-  // The case: dark wood, a brass rim, a parchment card.
-  g.beginPath(); g.arc(c, c, R + 4, 0, Math.PI * 2); g.fillStyle = '#2a1c11'; g.fill();
-  g.lineWidth = 4; g.strokeStyle = '#c9a25a'; g.stroke();
-  g.beginPath(); g.arc(c, c, R - 9, 0, Math.PI * 2); g.fillStyle = '#efe2c2'; g.fill();
-  g.lineWidth = 1.5; g.strokeStyle = '#8a6a45'; g.stroke();
-  // The forward ring: filling round from the top as the next forward square builds up.
-  g.lineCap = 'round';
-  g.beginPath(); g.arc(c, c, R - 3, 0, Math.PI * 2); g.lineWidth = 6; g.strokeStyle = '#4a3420'; g.stroke();
-  if (ahead > 0.005) { g.beginPath(); g.arc(c, c, R - 3, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, ahead)); g.strokeStyle = '#ffd23a'; g.stroke(); }
-  // Ticks across the top, and the tipping marks, red, where it goes over into a turn.
-  g.strokeStyle = '#6b4e32'; g.lineWidth = 1.5;
-  for (let i = -4; i <= 4; i++) { const a = -Math.PI / 2 + i * TIP / 3; g.beginPath(); g.moveTo(c + Math.cos(a) * (R - 12), c + Math.sin(a) * (R - 12)); g.lineTo(c + Math.cos(a) * (R - 18), c + Math.sin(a) * (R - 18)); g.stroke(); }
-  g.font = "700 15px 'Alegreya Sans', sans-serif"; g.textAlign = 'center'; g.textBaseline = 'middle';
-  for (const [a, t, col] of [[-TIP, TOK.L, '#b8322a'], [0, TOK.F, '#5a3a20'], [TIP, TOK.R, '#b8322a']]) {
-    const aa = -Math.PI / 2 + a;
-    if (a) { g.strokeStyle = col; g.lineWidth = 3; g.beginPath(); g.moveTo(c + Math.cos(aa) * (R - 10), c + Math.sin(aa) * (R - 10)); g.lineTo(c + Math.cos(aa) * (R - 22), c + Math.sin(aa) * (R - 22)); g.stroke(); }
-    g.fillStyle = col; g.fillText(t, c + Math.cos(aa) * (R - 30), c + Math.sin(aa) * (R - 30));
-  }
-  const Hd = D.handed;
-  if (Hd && Hd.t > 0) {
-    // A square handed out: its token, big, and how many.
-    const n = Hd.steps.length, m = Hd.steps[n - 1];
-    g.globalAlpha = Math.min(1, Hd.t * 3);
-    g.beginPath(); g.arc(c, c + 6, 22, 0, Math.PI * 2); g.fillStyle = '#2a1c11'; g.fill(); g.lineWidth = 2; g.strokeStyle = '#ffd23a'; g.stroke();
-    g.fillStyle = '#ffd23a'; g.font = "700 28px 'Alegreya Sans', sans-serif"; g.fillText(TOK[m], c, c + 6);
-    if (n > 1) { g.font = "700 13px 'Alegreya Sans', sans-serif"; g.fillStyle = '#5a3a20'; g.fillText(`×${n}`, c, c + 38); }
-    g.globalAlpha = 1;
-  } else {
-    // The needle: iron, its tip red, swung toward the turn that's building.
-    const a = -Math.PI / 2 + D.needle * TIP, tx = c + Math.cos(a) * (R - 16), ty = c + Math.sin(a) * (R - 16);
-    const ppx = -Math.sin(a) * 4, ppy = Math.cos(a) * 4, bx = c - Math.cos(a) * 12, by = c - Math.sin(a) * 12;
-    g.beginPath(); g.moveTo(tx, ty); g.lineTo(c + ppx, c + ppy); g.lineTo(bx, by); g.lineTo(c - ppx, c - ppy); g.closePath();
-    g.fillStyle = Math.abs(turn) >= 1 ? '#d42a1c' : '#3d4a55'; g.fill();
-    g.beginPath(); g.moveTo(tx, ty); g.lineTo(c + ppx * 0.6, c + ppy * 0.6); g.lineTo(c - ppx * 0.6, c - ppy * 0.6); g.closePath(); g.fillStyle = '#d42a1c'; g.fill();
-    g.beginPath(); g.arc(c, c, 4, 0, Math.PI * 2); g.fillStyle = '#c9a25a'; g.fill();
-  }
-  g.fillStyle = '#efe2c2'; g.font = "700 11px 'Alegreya Sans', sans-serif"; g.fillText('NEXT MOVE', c, Wd - 4);
 }

@@ -43,19 +43,6 @@ the site (`.assetsignore` skips `*.md`).
   on the gun (chipped stone, a scorched and dented barrel, a battlement knocked off, smoking more
   as it's worse), and the toasts that count the hits ("2 more to wreck it") go.
 
-- **Rowing: keep Bilge's water look, lose the compass (10 Nov):** first: "people are just going to
-  get very confused given how visually identical it is to the [Bilging]"; then, on second thoughts:
-  "I don't like the idea of different pieces ... part I did love of this similarity [to] bilge is
-  that they are very watercoloured ... I still like it in idea", and no rowing benches ("you
-  already see the guys with the rowing [oars]"). So the pieces and the water stay as they are.
-  The compass goes: "the next move compass is a bit confusing, and like the left right arrows are
-  very tiny"; "even just ... you can actually see the oars and the ship itself pulling gives you
-  enough of an indication. Do we need much else?" So the turn building shows on her: the oars on
-  the side pulling harder, her bows swinging and heeling, big enough to read. ("We're going to
-  have to prototype a bit more.") Also asked: "didn't we talk about having fewer pieces? ... I see
-  the pentagon" (the live site still had the old split board, seven kinds; mirror strokes deals
-  five, without the pentagon).
-
 - **Sunk at the checkpoint, row home (10 Nov):** agreed (IDEAS.md, "Sunk at the checkpoint"):
   "it should be a short row home ... you've got the trade winds blowing you back, haven't you? So
   all you need to do is a quick row to get onto the trade winds." Sunk, you bob up in a little

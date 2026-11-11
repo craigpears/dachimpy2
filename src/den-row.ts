@@ -34,6 +34,11 @@ export const CREW = {
   CRAZY: 4,
   /** Squares handed out at once that send her flying: a Vegas shared across both sides is five. */
   FLYING: 4,
+  /** Strokes a second more for the side leading the turn that's building, with a whole turn's lead
+      (as shown: leading). */
+  LEADING: 2.4,
+  /** And how much wider its sweeps swing then: 0.6 is sixty per cent more. */
+  REACH: 0.6,
 };
 
 export interface RowBoardOptions {
@@ -53,9 +58,20 @@ export class RowBoard {
 
   /** The next square building up, as fractions (Stroke.building): `ahead` toward a forward (0 to
       1), and `turn` toward a quarter turn, more than nothing to starboard (right), less to port
-      (left). A whole one either way and she turns. The compass shows it, and she leans into it
-      (leadFor). */
+      (left). A whole one either way and she turns. She shows it: leans into it (leadFor), and the
+      side leading works its oars the harder (leading). */
   building(): { ahead: number; turn: number } { return this.row.stroke.building(); }
+
+  /** How far a side leads the turn that's building, as she shows it (eased, so a little lead shows
+      plainly): 0 when it doesn't lead, 1 with a whole turn's lead. */
+  leading(side: Side): number { const t = shownTurn(this.building().turn); return Math.max(0, side === 'starboard' ? t : -t); }
+
+  /** A side's sweeps, as they show the turn building: `reach`, how wide they swing (1 as ever, more
+      for the side leading), and `foam`, white water at their blades (0 to 1). */
+  sweep(side: Side): { reach: number; foam: number } {
+    const d = this.leading(side);
+    return { reach: 1 + CREW.REACH * d, foam: d };
+  }
 
   /** A swap at (r, c) on the port board, made in mirror on the starboard board, rowed now. */
   swap(r: number, c: number): RowResult {
@@ -80,10 +96,12 @@ export class RowBoard {
     this.lately.port *= k; this.lately.starboard *= k;
   }
 
-  /** A side's rower's strokes a second (`under`: she's being rowed along just now). */
+  /** A side's rower's strokes a second (`under`: she's being rowed along just now). The side
+      leading the turn that's building keeps rowing, harder the bigger its lead, while the other
+      side rests: so you see which way she's coming round. */
   rate(side: Side, under: boolean): number {
-    const l = this.lately[side];
-    return (under || l > 0.05 ? CREW.STEADY : 0) + CREW.PER * l;
+    const l = this.lately[side], d = this.leading(side);
+    return (under || l > 0.05 || d > 0.02 ? CREW.STEADY : 0) + CREW.PER * l + CREW.LEADING * d;
   }
 
   /** That side's rower is going like crazy. */
@@ -123,21 +141,34 @@ export function pullFor(b: ReturnType<typeof bearing>): Side | 'either' | null {
    time, but between them she creeps ahead as forward pull builds, swings her bows toward the turn
    that's building, and heels toward it; and when the square's move comes it starts from where she's
    crept to, the lead melting into the move, never jumping back. */
+/* No compass (the user, 10 Nov: "the next move compass is a bit confusing, and like the left right
+   arrows are very tiny"; "you can actually see the oars and the ship itself pulling gives you enough
+   of an indication"): the turn building shows on her, big enough to read. Her bows swing toward it
+   and she heels into it, and the side leading it works its oars (RowBoard.leading, sweep), all
+   eased (SHOW) so even a three's lead on one side shows plainly. */
 export const LEAN = {
   /** Squares she creeps ahead with a whole square's pull built up (short of handing it out). */
   CREEP: 0.3,
   /** Quarter turns her bows swing with a whole turn's pull built up. */
-  YAW: 0.35,
+  YAW: 0.4,
   /** Radians she heels into it then. */
-  HEEL: 0.1,
+  HEEL: 0.16,
+  /** The turn building, as she shows it, goes as its share of a whole turn to this power: under 1,
+      a little lead shows plainly (a three on one side, 0.13 of a turn, shows as 0.3). */
+  SHOW: 0.6,
 };
 
 /** How far she leans into the square that's building: `f` squares ahead along her heading, `y`
     quarter turns (more than nothing to starboard), `heel` radians. */
 export interface Lead { f: number; y: number; heel: number }
 const clamp = (x: number, a: number, b: number) => Math.max(a, Math.min(b, x));
+/** The turn building (Stroke.building's `turn`), as she shows it: -1 to 1, eased (LEAN.SHOW). */
+export function shownTurn(turn: number): number {
+  const t = clamp(turn, -1, 1);
+  return Math.sign(t) * Math.abs(t) ** LEAN.SHOW;
+}
 export function leadFor(b: { ahead: number; turn: number }): Lead {
-  const t = clamp(b.turn, -1, 1);
+  const t = shownTurn(b.turn);
   return { f: LEAN.CREEP * clamp(b.ahead, 0, 1), y: LEAN.YAW * t, heel: LEAN.HEEL * t };
 }
 

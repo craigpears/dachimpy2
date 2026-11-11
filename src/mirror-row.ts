@@ -86,7 +86,7 @@ export interface Puller {
   pending(): number;
   /** The next square building up, as fractions: `ahead` toward a square forward (0 to 1), and
       `turn` toward a quarter turn, more than nothing to starboard, a whole one either way and she
-      turns. The compass shows it, and she leans into it. */
+      turns. She leans into it, and the side leading works its oars the harder (src/den-row.ts). */
   building(): { ahead: number; turn: number };
   row(p: Pull): Step[];
   copy(): Puller;

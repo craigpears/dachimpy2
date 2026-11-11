@@ -5,7 +5,7 @@ import { H, KINDS, W } from '../src/bilge';
 import type { Bilge, Bit } from '../src/bilge';
 import { ROW } from '../src/rowing';
 import { BALANCE } from '../src/mirror-row';
-import { CREW, LEAN, RowBoard, bearing, leadFor, leaned, pullFor, shownAt } from '../src/den-row';
+import { CREW, LEAN, RowBoard, bearing, leadFor, leaned, pullFor, shownAt, shownTurn } from '../src/den-row';
 import { poseAt } from '../src/den-sail';
 import { WIND, Wind, rowTime } from '../src/den-wind';
 import { Helm, Sea, type SailEvent } from '../src/den-sail';
@@ -175,3 +175,39 @@ describe(`"I'm not seeing any physical difference" (10 Nov): she answers the oar
   });
 });
 
+
+describe(`"the next move compass is a bit confusing ... the left right arrows are very tiny" (10 Nov): the turn building shows on her`, () => {
+  it(`the side leading the turn keeps rowing, harder and wider, with white water at its blades; the other side rests`, () => {
+    const b = new RowBoard();
+    b.pull({ port: 0, starboard: 3 });
+    expect(b.leading('starboard')).toBeGreaterThan(0);
+    expect(b.leading('port')).toBe(0);
+    expect(b.rate('starboard', false)).toBeGreaterThan(CREW.STEADY);
+    for (let i = 0; i < 100; i++) b.tick(0.1);   // (the pull lately long gone: the lead still waits)
+    expect(b.rate('starboard', false)).toBeGreaterThan(CREW.STEADY);
+    expect(b.rate('port', false)).toBe(0);
+    expect(b.sweep('starboard').reach).toBeGreaterThan(1);
+    expect(b.sweep('starboard').foam).toBeGreaterThan(0);
+    expect(b.sweep('port')).toEqual({ reach: 1, foam: 0 });
+  });
+
+  it(`scaled to how big the turn is, and a little lead still shows plainly`, () => {
+    const small = new RowBoard(), big = new RowBoard();
+    small.pull({ port: ROW.THREE, starboard: 0 });   // (a three on port alone)
+    big.pull({ port: 6, starboard: 0 });
+    expect(small.leading('port')).toBeGreaterThan(0.25);
+    expect(big.leading('port')).toBeGreaterThan(small.leading('port'));
+    expect(big.sweep('port').reach).toBeGreaterThan(small.sweep('port').reach);
+    expect(Math.abs(leadFor(big.building()).y)).toBeGreaterThan(Math.abs(leadFor(small.building()).y));
+    // A whole turn's lead and she's swung well round, heeled hard.
+    expect(leadFor({ ahead: 0, turn: 1 })).toMatchObject({ y: LEAN.YAW, heel: LEAN.HEEL });
+    expect(shownTurn(-2)).toBe(-1);
+  });
+
+  it(`even work shows no turn: both sides row alike`, () => {
+    const b = new RowBoard();
+    b.pull({ port: 2, starboard: 2 });
+    expect([b.leading('port'), b.leading('starboard')]).toEqual([0, 0]);
+    expect(b.sweep('port')).toEqual(b.sweep('starboard'));
+  });
+});
