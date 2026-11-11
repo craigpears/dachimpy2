@@ -863,8 +863,15 @@ its exhibits the real thing, oldest first. The user's screenshots are kept in `n
   Survival Game: waves of bot ships, each wave harder, your ship improving as you sink them.
 - **"The very first shoot Dalnoth!":** a 9×9 board ringed with rocks, a whirlpool, winds and
   Dalnoth's face on four squares to shoot. Then the first prototype board (a whirlpool, the little
-  ship, left/forward/right and Execute Move); the flat blue board with flags, rocks, whirlpools
-  and winds, and "Your ship" counting lefts, forwards and rights; the game set-up wireframe
+  ship, left/forward/right and Execute Move). Then the **version before Whirled** (2a and 2b),
+  after the website's collision-mechanics boards: "I bet people probably don't even recognise it."
+  The flat blue board with flags, rocks, whirlpools and winds, and "Your ship" counting lefts,
+  forwards and rights, chat beside it, on a multiplayer server whose name the user half remembers
+  ("some Fox or something": perhaps SmartFoxServer, to check). It tried to be more realistic: its
+  "Create new game" had Starting Jobbers and Jobbers per Turn for each team, so you had to fill
+  your ship with jobbers. "I remember deciding just to simplify it because it was too
+  complicated. Just focus on the ship navigating part." A good line for its caption. The game
+  set-up wireframe
   (Admiral and Nav per team, chat, user list); the Blockade Sim lobby (choose your ship, jobber
   level Weak, Normal or Elite, Ready?), its teams and "Create your game" (map, turn time,
   friendly fire); and the finished thing in play, isometric, with the Blockade! move panel.
