@@ -1030,16 +1030,35 @@ same thread as the museum's: helping and leading people, and growing into it.
 - **To check on YPPedia before it's built:** what Vikings, IOs and BKs are in Puzzle Pirates (the
   events she hosted; names as she wrote them, not guessed), her real trophies (her pirate page's
   trophy collection), and her portrait.
-- **Her advice: spread your adventures far (11 Nov).** Pandayay, to the user: "You can also spread
-  your adventures far to get a lot of the entry trophies, 1/25 lair frays, 1/25 wolf frays, early
-  flotilla sink trophies (people will job any THer to help get some poe), first couple of CI
-  frays/forage, entry KH." Her voice in the house: encouraging, telling you to try a bit of
+- **Her advice: spread your adventures far (11 Nov).** Pandayay, in a chat the user shared, to
+  another pirate after more trophies: "You can also spread your adventures far to get a lot of the
+  entry trophies, 1/25 lair frays, 1/25 wolf frays, early flotilla sink trophies (people will job
+  any THer to help get some poe), first couple of CI frays/forage, entry KH." And: "I can also
+  recommend a lot of trophies people put off that will get you thru ranks, such as IO's, Vikings,
+  forage/TH expeditions." Her voice in the house: encouraging, telling you to try a bit of
   everything, since the first trophy of each kind is within anyone's reach. Maybe the den has its
   own entry trophies too, a first one for trying each thing (a puzzle, a place), shown on a shelf
   at home, with Pandayay the one who tells you about them (to settle with the user; the names
   above, frays, CI, KH, to check on YPPedia before any are used).
 - Each trophy as a shared furniture piece; her lines in src/lines/; the house's pictures in the
   2D viewer too (TODO.md, "A 2D view of the portraits").
+
+- **A double act with Multibella (11 Nov).** The user: "Multibella is very sweet as well, maybe
+  they can do a duo act." **Multibella**, a real pirate (pirate name only; ocean, pirate page and
+  portrait to check before they're drawn), in the same chat: "Foraging is mostly about using less
+  moves", and to someone finding it hard, "I can probably show you some foraging sometime to learn
+  from if you want?" and "You got this!" So Pandayay and Multibella together, both encouraging:
+  Pandayay with her trophies and Vikings, Multibella the one who'll show you Foraging (the den's
+  Foraging puzzle is already its own module), kind and practical ("using less moves"). Where they
+  meet you (her house, or a place of their own), and who leads, to settle with the user.
+
+## Puzzles you can size up, and play by keys (11 Nov)
+
+From the same chat the user shared: a pirate whose mouse aim isn't steady said Puzzle Pirates'
+update letting you resize the puzzles "was such a blessing ... my stats became better almost
+instantly", and Multibella suggested keyboarding Foraging where timing doesn't matter. So every
+board in the den could be made bigger (a size you choose, kept in this browser) and played fully by
+keys, with no mouse-only puzzle. Worth checking each puzzle against (to settle with the user).
 
 ## Placing creatures: choose what they get up to (11 Nov)
 
