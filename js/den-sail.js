@@ -29,9 +29,10 @@ export const SAIL = {
         crammed into the middle"): Tzz's island out in the new water, open sea round it, and the Wedding
         Isle and Kikkit's island no longer against the edge. And again (11 Nov) from 26 to 34 out to
         sea, for Port Decorum, the island under imperial control (LAY.EMPIRE): out past the wreck, open
-        sea round it. */
+        sea round it. And again (11 Nov) from 34 to 37, for Primates Rule at anchor out past Port Decorum,
+        to its left (LAY.PRIMATES), open sea round her: everything already there staying put. */
     COLS: 27,
-    ROWS: 34,
+    ROWS: 37,
     /** Where the scattered rocks fall: the board as it was before it grew, so its rocks are the same
         as ever. The new water is laid out by hand (LAY). */
     SCATTER: { COLS: 16, ROWS: 14 },
@@ -184,8 +185,8 @@ export const LAY = {
         way"), and down the locks she comes out beside it with it across her or behind her. It starts
         a column short of the last lock's foot, so from beside the wreck she can slip out of it
         westward and back up the locks, as well as downwind. It runs out to the sea's far edge, as it did
-        before the sea grew out past it for Port Decorum (11 Nov: LAY.EMPIRE), so there's still no sailing
-        round its far end to the locks' foot.
+        before the sea grew out past it for Port Decorum (11 Nov: LAY.EMPIRE), and again for Primates Rule
+        (11 Nov: LAY.PRIMATES), so there's still no sailing round its far end to the locks' foot.
         And the canal's mouth (10 Nov: "there should be some wind stopping you from getting to the
         locks on the left as well ... People have got to figure out that they can use the oars to go
         past the wind"): it blows down out of the cut toward the den, so under sail she can't get into
@@ -198,7 +199,7 @@ export const LAY = {
         through the gate slowly, on its gun's mark, and that gun has her (once a gun:
         src/den-checkpoint.ts); a combo rowed as one still rushes her through. */
     ZONES: [
-        { c0: 4, c1: 7, r0: 20, r1: 33, d: 1, s: 2 },
+        { c0: 4, c1: 7, r0: 20, r1: SAIL.ROWS - 1, d: 1, s: 2 },
         { c0: 2, c1: 4, r0: 5, r1: 8, d: 2, s: 2 },
         { c0: 9, c1: 9, r0: 19, r1: 19, d: 1, s: 1 },
     ],
@@ -257,7 +258,8 @@ export const LAY = {
         is obviously a bit weird ... They should be at least a few rocks around them." Sailed round the
         long way, past the checkpoint, she could come up beside it from the open sea behind (on its left,
         below it and on its right); now every square round it, corners too, is rock or the whirlpools'
-        own way in, so the whirlpools (a Vegas over them) are the one way to the penguins. */
+        own way in, so the whirlpools (a Vegas over them) are the one way to the penguins. (On its right,
+        since 11 Nov, the smugglers' run, on from the penguins: SMUGGLERS.) */
     KIKKIT: {
         LAND: [
             [19, 16], [20, 16],
@@ -283,8 +285,9 @@ export const LAY = {
             [13, 17, 1], [14, 17, 1], [15, 17, 1], [16, 17, 0],
         ],
         REEF: [
-            [14, 18], [15, 18], [14, 23], [17, 21], [17, 22], [17, 23],
-            // (round Vegas Island: its left, below it, its right)
+            [14, 18], [15, 18], [14, 23], [17, 21],
+            // (round Vegas Island: its left, below it, its right; beside the penguins' water on its right, the
+            // smugglers' run, SMUGGLERS.RUN)
             [14, 24], [14, 25], [15, 25], [16, 25], [17, 25], [17, 24],
         ],
         VEGAS: [[15, 23], [15, 24], [16, 24]],
@@ -327,15 +330,45 @@ export const LAY = {
         ],
         JETTY: [11, 27],
     },
+    /** The smugglers' beach (11 Nov; src/den-smugglers.ts, js/den/smugglers.js): Port Decorum's back way
+        in, reached only by way of Kikkit's whirlpools. The user: "for the Imperial Outpost, the kind of
+        beach, so the back way in, I think that will be better, like, accessed far through those
+        whirlpools ... I think having it one open area is a bit off ... Penguin Island, and then you have
+        the ... Smuggler's Beach there ... redesign the fort so that ... there's some rocks and whatnot
+        blocking some back entry". So rocks (drawn as the reef is: ROCKS, with the reef in Sea.reef) shut
+        off Port Decorum's right-hand side and its back from the open sea, and behind them a narrow run of
+        water (RUN) goes from beside the penguins' water, down past the island, to a cove (COVE) at its
+        back, behind the warehouse, and a little sandy beach there (BEACH). The run's one way in is off the
+        penguins' water (only a Vegas over the whirlpools gets there: KIKKIT), turning out of it to the
+        right; its top square opens onto the whirlpools' wind beside the penguins, the way home (the winds
+        throw her back to Kikkit's island, as from anywhere in them). Nothing to do there yet: the place
+        for smuggling (Helium's rum) to plug into later. */
+    SMUGGLERS: {
+        RUN: [[17, 22], [17, 23], [18, 23], [18, 24], [18, 25], [18, 26], [18, 27], [18, 28], [18, 29], [18, 30]],
+        COVE: [[18, 31], [17, 31], [16, 31], [18, 32], [17, 32], [16, 32], [15, 32]],
+        BEACH: [[15, 31]],
+        ROCKS: [
+            // (the run's near side, between it and the open water off Port Decorum's right-hand shore, on from
+            // the rocks round Vegas Island, round to the island's corner by the beach)
+            [17, 26], [17, 27], [17, 28], [17, 29], [17, 30], [16, 30],
+            // (its far side, from beside the whirlpools down to the cove)
+            [18, 21], [18, 22], [19, 22], [19, 23], [19, 24], [19, 25], [19, 26], [19, 27], [19, 28], [19, 29], [19, 30], [19, 31], [19, 32],
+            // (under the cove, and on round the island's back to its left-hand shore)
+            [19, 33], [18, 33], [17, 33], [16, 33], [15, 33], [14, 32], [13, 32], [12, 32], [11, 32], [10, 32], [10, 31],
+        ],
+    },
     /** Primates Rule, the user's war frigate (src/den-frigate.ts; src/den-moored.ts), at anchor, still to
         come (11 Nov: "add that to the scene somewhere so you can just, once you start getting out to sea,
         you just kind of see that out there and put [a mark] on it. [To] make it clear, it's kind of a
-        to-do item"). Just to the right of the trade winds' first run out from the beach, in view as you
-        set out, broadside on to the den, her bow out to the right. AT: the squares she lies across (four:
-        she's about four squares long), which she can't be sailed through; open sea two squares deep all
-        round her. */
+        to-do item"). Moved (11 Nov) from just off the trade winds' first run out from the beach to the
+        deeper water out past Port Decorum, to its left (the user: "it's ready for that [war frig] to be
+        dropped in maybe a bit past in that same kind of deeper ocean area near where the [Port Decorum]
+        is ... if you go over to the left, you'll ... find the [war frig]"): broadside on to the den, her
+        bow out to the right, toward the island, in the old wreck's wind (ZONES) that runs out to the
+        sea's edge. AT: the squares she lies across (four: she's about four squares long), which she
+        can't be sailed through; open sea two squares deep all round her (the sea grew for it: SAIL.ROWS). */
     PRIMATES: {
-        AT: [[14, 5], [15, 5], [16, 5], [17, 5]],
+        AT: [[3, 34], [4, 34], [5, 34], [6, 34]],
     },
 };
 /** The canal's squares: its locks and the water between them (the hidden cove's too). */
@@ -429,6 +462,10 @@ export class Sea {
         its right-hand gun to the sea's edge but where the passage runs through it, and the rocks round
         the whirlpools and round Vegas Island. Rocks like any other to sail by. */
     reef = new Set();
+    /** Water reached only by way of the whirlpools (the smugglers' run and its cove: LAY.SMUGGLERS):
+        open to sail on, but never got to from the den without them, so not counted when every open
+        square's checked for a way there (allReachable). */
+    hidden = new Set();
     /** Squares the scattered rocks keep off: the lanes and everything round them. */
     keep = new Set();
     /** A sea of scattered rocks; with `lay`, the lanes, the canal and its locks, and the cove too (LAY). */
@@ -520,6 +557,12 @@ export class Sea {
             this.works.add(key(c, r));
             near(c, r);
         }
+        // The smugglers' run, its cove and beach, behind Port Decorum: water only the whirlpools get to,
+        // the beach land; its rocks are the reef's (scatter).
+        for (const [c, r] of [...LAY.SMUGGLERS.RUN, ...LAY.SMUGGLERS.COVE])
+            this.hidden.add(key(c, r));
+        for (const [c, r] of LAY.SMUGGLERS.BEACH)
+            this.works.add(key(c, r));
         // Primates Rule at anchor: in the way, drawn by her own 3D (js/den/moored.js), open sea two deep
         // round her (no scattered rocks fall there).
         for (const [c, r] of LAY.PRIMATES.AT) {
@@ -533,8 +576,9 @@ export class Sea {
     scatter(roll) {
         const laid = this.wind.size > 0, K = LAY.CHECKPOINT;
         const reef = laid ? Array.from({ length: K.REEF.c1 - K.REEF.c0 + 1 }, (_, i) => key(K.REEF.c0 + i, K.ROW)) : [];
-        // (the reef but where Kikkit's whirlpools and winds run through it; and the rocks round them)
-        this.reef = new Set([...reef.filter((k) => !this.whirls.has(k) && !this.wind.has(k)), ...LAY.KIKKIT.REEF.filter(() => laid).map(([c, r]) => key(c, r))]);
+        // (the reef but where Kikkit's whirlpools and winds run through it; the rocks round them; and the
+        // smugglers' rocks round Port Decorum's back)
+        this.reef = new Set([...reef.filter((k) => !this.whirls.has(k) && !this.wind.has(k)), ...[...LAY.KIKKIT.REEF, ...LAY.SMUGGLERS.ROCKS].filter(() => laid).map(([c, r]) => key(c, r))]);
         this.rocks = new Set([...this.cliff, ...this.works, ...this.reef, ...[...LAY.SIDES, ...LAY.FAR, ...LAY.HARBOUR].filter(() => laid).map(([c, r]) => key(c, r))]);
         const H = SAIL.HOME, COLS = SAIL.SCATTER.COLS, ROWS = SAIL.SCATTER.ROWS;
         for (let n = 0; n < SAIL.CLUMPS; n++) {
@@ -899,9 +943,10 @@ export class Sea {
             edge = next;
         }
         // (She can't stop on a lane: the wind always sweeps her on.)
+        // (nor is the water only the whirlpools get to: Sea.hidden)
         for (let c = 0; c < this.cols; c++)
             for (let r = 0; r < this.rows; r++)
-                if (this.open(c, r) && this.windAt(c, r) === undefined && !got.has(key(c, r)))
+                if (this.open(c, r) && this.windAt(c, r) === undefined && !this.hidden.has(key(c, r)) && !got.has(key(c, r)))
                     return false;
         return true;
     }

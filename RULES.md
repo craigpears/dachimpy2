@@ -234,9 +234,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   **At anchor, still to come (11 Nov):** "add that to the scene somewhere so you can just, once you
   start getting out to sea, you just kind of see that out there and put [a mark] on it. [To] make it
   clear, it's kind of a to-do item." Something modelled but not yet playable can wait on the sea in
-  plain sight, plainly marked as coming: Primates Rule lies at anchor, sails furled, just to the
-  right of the trade winds' first run out from the beach (`LAY.PRIMATES`, open sea two squares round
-  her, not to be sailed through), a sign over her ("Primates Rule · coming soon"), and sailing up
+  plain sight, plainly marked as coming: Primates Rule lies at anchor, sails furled, out past Port
+  Decorum, to its left (since 11 Nov: "Primates Rule out past Port Decorum", below; she was first just
+  to the right of the trade winds' first run out from the beach) (`LAY.PRIMATES`, open sea two squares
+  round her, not to be sailed through), a sign over her ("Primates Rule · coming soon"), and sailing up
   near her you say she's not ready yet. No boarding her, nothing to do there, until she's built
   (`src/den-moored.ts`, `js/den/moored.js`).
 - **The same thing looks the same everywhere (11 Nov).** Of the whirlpools' winds, drawn their own
@@ -1902,6 +1903,34 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   much. It's just going to get irritating. Like, you want to be able to check out the port without
   being blown up." So its fort has no guns that fire, and nothing there sinks you; the jetty guard's
   halt and grumbles are all the warning it gives.
+- **Port Decorum's back way in: the smugglers' beach, only by way of the whirlpools (11 Nov).** "for the
+  Imperial Outpost, the kind of beach, so the back way in, I think that will be better, like, accessed far
+  through those whirlpools by, you know, [Kikkit]. I think having it one open area is a bit off ...
+  Penguin Island, and then you have the, you know, Smuggler's Beach there. So that you can go sell the rum
+  made by [Helium] ... redesign the fort so that, you know, there's some rocks and whatnot blocking some
+  back entry ... for that mechanic to plug into later." So a line of rocks, drawn as the reef is, shuts off
+  Port Decorum's back from the open sea, from its left-hand shore round behind it and up its right-hand
+  side to the rocks round Vegas Island (its front, jetty and quay as they were, open sea two deep there).
+  Behind them a narrow run of water leads from beside the penguins' water down to a cove at the island's
+  back, behind the warehouse: a little sandy beach, a lantern on a post, crates and barrels under a tarp,
+  a rowboat drawn up (shared furniture, placed from config). The run's one way in is off the penguins'
+  water (a Vegas over the whirlpools gets you there), turning out of it to starboard; its top opens onto
+  the whirlpools' wind, so the way home is spat back to Kikkit's island ("too many lefts"). A test searches
+  every way she can go without the whirlpools (her moves, the winds, a chain's gusts) and finds nowhere
+  behind the rocks; another sails it: a Vegas to the penguins, the run, the cove. The pilot never takes
+  her there from the open sea. A hidden gem: nothing names it till you're in its cove ("A smugglers'
+  beach, round the back of Port Decorum! Not a guard in sight"), the captain's map draws the rocks whole
+  (the run as rock) till you've been, then the beach and its name, and it's a hidden place on the quests
+  (of 4). Nothing to do there yet: smuggling, and Helium's rum, plug in there. `?at=smugglers`. Rules:
+  `src/den-smugglers.ts` (its squares `LAY.SMUGGLERS`); drawn by `js/den/smugglers.js`.
+- **Primates Rule out past Port Decorum (11 Nov).** "it's ready for that [war frig] to be dropped in maybe
+  a bit past in that same kind of deeper ocean area near where the [Port Decorum] is. The Imperial
+  Island, I'm sure if you go over to the left, you'll ... find the [war frig]." So she lies at anchor out
+  past Port Decorum, beyond its back, off to its left (squares 3 to 6 across, 34 out), still marked as
+  coming, still not to be sailed through, open sea two squares round her. The sea grew three squares out
+  to sea for her (37 rows), everything already there staying put, the old wreck's wind running on to the
+  new edge (so still no sailing round its far end to the locks: she lies in it, so from Port Decorum's
+  side you sail up to her as far as its edge, two squares off her, near enough to say she's not ready).
 - **A hull's sides slant a little, top to bottom (11 Nov).** "I can definitely see the back of the
   ship has gotten a lot more curved, but I'm talking about, like, the top to bottom ... that's still
   quite boxy ... it needs a tiny bit of a slant." Tumblehome 0.15 (it was 0.05, too little to see), a

@@ -14,6 +14,8 @@ import { CHART, NOTES, VEGAS_NOTE } from '../src/den-map';
 import { RAMBLE, BACK, BACK_OUT, TANGENTS } from '../src/lines/kikkit';
 import { Chatter } from '../src/chatter';
 import { readSecs } from '../src/den-dignity';
+import { onSmugglersRun } from '../src/den-smugglers';
+import { reachedAround } from './helpers';
 
 /** Kikkit, talking (src/chatter.ts with her script: she's only config, RULES.md "A character is only config"). */
 const kikkit = () => new Chatter(KIKKIT_SAYS, { secs: readSecs });
@@ -319,40 +321,6 @@ describe(`keeping the charm of the first go (11 Nov: "it does throw you out and 
   });
 });
 
-/** Every square the sloop can get to from the den without ever touching the way through the
-    whirlpools (Sea.passage: the whirlpools, their winds, the gap), as she really goes: her own moves
-    (under sail or at the oars), the winds after them, and a Sailing chain's gust from wherever she
-    is, all as the helm plays them; any of it that touches the passage is left out. */
-function reachedAround(s: Sea): Set<string> {
-  const k = (c: number, r: number) => `${c},${r}`, avoid = (c: number, r: number) => s.passage.has(k(c, r)) || !!s.whirlAt(c, r);
-  const got = new Set<string>(), seen = new Set<string>();
-  let edge: Pose[] = [{ ...SAIL.HOME }];
-  const go = (to: Pose, next: Pose[]) => {
-    const id = `${to.c},${to.r},${to.d}`;
-    if (seen.has(id)) return;
-    seen.add(id); got.add(k(to.c, to.r)); next.push(to);
-  };
-  while (edge.length) {
-    const next: Pose[] = [];
-    for (const p of edge) {
-      for (const oars of [false, true]) for (const m of ['F', 'L', 'R'] as const) {
-        const { to, bump, ride } = s.move(p, m, oars, true);
-        if (bump || [...path(p, m).cells, [to.c, to.r], ...ride.map((q) => [q.c, q.r])].some(([c, r]) => avoid(c, r))) continue;
-        go(ride.length ? ride[ride.length - 1] : to, next);
-      }
-      for (let steps = 1; steps <= 8; steps++) {
-        const g = gustPath(s, p, runFor(steps));
-        if (!g.length) continue;
-        const end = g[g.length - 1], ride = s.ride(end, true);
-        if ([...g, ...ride].some((q) => avoid(q.c, q.r))) continue;
-        go(ride.length ? ride[ride.length - 1] : end, next);
-      }
-    }
-    edge = next;
-  }
-  return got;
-}
-
 describe(`"Make sure you can't get to Penguin Island without going through the whirlpools" (11 Nov)`, () => {
   /** Every square touching Vegas Island or the penguins' water, corners too. */
   const round = () => {
@@ -376,7 +344,9 @@ describe(`"Make sure you can't get to Penguin Island without going through the w
 
   it('"at least a few rocks around them": every square round their island is rock, or the whirlpools\' way in', () => {
     const s = new Sea(9);
-    for (const [c, r] of round()) expect(s.isRock(c, r) || s.passage.has(`${c},${r}`), `${c},${r}`).toBe(true);
+    // (or, on its right since 11 Nov, the smugglers' run on from the penguins, itself got to only by way of
+    // the whirlpools: tests/den-smugglers.test.ts)
+    for (const [c, r] of round()) expect(s.isRock(c, r) || s.passage.has(`${c},${r}`) || onSmugglersRun(c, r), `${c},${r}`).toBe(true);
     // (drawn as the reef is, a line of rocks: js/den/reef.js)
     const rocks = round().filter(([c, r]) => s.reef.has(`${c},${r}`));
     expect(rocks.length).toBeGreaterThanOrEqual(6);

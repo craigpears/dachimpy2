@@ -32,10 +32,11 @@ export const ROUTES: readonly Route[] = ['gate', 'locks', 'whirlpools'];
 export const routeOf = (w: Way): Route => (w === 'locks' || w === 'whirlpools' ? w : 'gate');
 
 /** The hidden places off the captain's map: the cove off the clifftop canal, the lagoon up the
-    cliff from it, and Vegas Island, the penguins' beyond Kikkit's whirlpools (11 Nov: "reached only
-    by a Vegas"; on the map once you've been). */
-export type Place = 'cove' | 'lagoon' | 'vegas';
-export const PLACES: readonly Place[] = ['cove', 'lagoon', 'vegas'];
+    cliff from it, Vegas Island, the penguins' beyond Kikkit's whirlpools (11 Nov: "reached only
+    by a Vegas"; on the map once you've been), and the smugglers' beach on from it, round the back of
+    Port Decorum (11 Nov: src/den-smugglers.ts; on the map once you've been). */
+export type Place = 'cove' | 'lagoon' | 'vegas' | 'smugglers';
+export const PLACES: readonly Place[] = ['cove', 'lagoon', 'vegas', 'smugglers'];
 
 /** What's been found, as the den keeps it (G.found): the ways past and the hidden places. */
 export type Find = Way | Place;

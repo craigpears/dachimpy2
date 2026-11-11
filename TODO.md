@@ -278,21 +278,6 @@ the site (`.assetsignore` skips `*.md`).
   Since 9 Nov you can also lob a piece over the wall from the den floor at raiders hacking
   outside; not yet tried by the user. Watch for: the markers on raiders outside cluttering the
   view while you carry a piece.
-- **Port Decorum's back way in: a smugglers' beach, only by way of Kikkit's whirlpools (11 Nov):** "for
-  the Imperial Outpost, the kind of beach, so the back way in, I think that will be better, like, accessed
-  far through those whirlpools by, you know, [Kikkit]. I think having it one open area is a bit off. Like,
-  I do think, like, Penguin Island, and then you have the, you know, Smuggler's Beach there. So that you
-  can go sell the rum made by helium or with helium, obviously, once we tie that in. So yeah, redesign the
-  fort so that, you know, there's some rocks and whatnot blocking some back entry where that, you know,
-  with some kind of, you know, Smuggler's Beach, you know, obviously for that mechanic to plug into
-  later." So rocks round Port Decorum's back, the open sea shut off there, and a smugglers' beach in a
-  cove behind it, reached only through the whirlpools by way of Penguin Island; nothing to do there yet
-  (smuggling, and Helium's rum, plug in later).
-- **Primates Rule anchored out past Port Decorum, to its left (11 Nov):** "it's ready for that [war frig]
-  to be dropped in maybe a bit past in that same kind of deeper ocean area near where the [Port Decorum]
-  is. The Imperial Island, I'm sure if you go over to the left, you'll ... find the [war frig]." So she's
-  moved from just off the den's trade winds to the deeper water past Port Decorum, off to its left, still
-  marked as to come.
 
 ## Spotted along the way (not asked for)
 

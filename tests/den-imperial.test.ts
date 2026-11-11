@@ -9,6 +9,7 @@ import { kikkitAt, onKikkitLanding } from '../src/den-kikkit';
 import { tzzAt, onTzzLanding } from '../src/den-tzz';
 import { isleAt, onIsleLanding } from '../src/den-isle';
 import { inZone } from '../src/den-wind';
+import { smugglersAt } from '../src/den-smugglers';
 import { Chatter } from '../src/chatter';
 import { CHART, IMPERIAL, NOTES } from '../src/den-map';
 import { HALT, GRUMBLES, SIGHTED } from '../src/lines/imperial-guards';
@@ -40,10 +41,11 @@ describe('Port Decorum: an imperial island out past the checkpoint', () => {
     expect(E.LAND.length).toBeGreaterThan(LAY.TZZ.LAND.length * 5);
   });
 
-  it('has room of its own: open sea two squares deep all round, nothing crammed in', () => {
+  it(`has room of its own: open sea two squares deep round its front and sides, nothing crammed in; its back shut off by rocks (11 Nov: "there's some rocks and whatnot blocking some back entry")`, () => {
     const s = new Sea(9), works = new Set(checkpointWorks().map(([c, r]) => `${c},${r}`));
     for (const [lc, lr] of E.LAND) for (let c = lc - 2; c <= lc + 2; c++) for (let r = lr - 2; r <= lr + 2; r++) {
-      if (empireAt(c, r)) continue;
+      // (the smugglers' rocks round its back, and the water and beach behind them: tests/den-smugglers.test.ts)
+      if (empireAt(c, r) || smugglersAt(c, r)) continue;
       expect(c >= 0 && c < SAIL.COLS && r >= 0 && r < SAIL.ROWS, `${c},${r} on the board`).toBe(true);
       expect(s.open(c, r), `${c},${r}`).toBe(true);
       expect(s.windAt(c, r)).toBeUndefined();

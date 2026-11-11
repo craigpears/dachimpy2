@@ -19,7 +19,7 @@ import { TOUR_SAYS } from './lines/narrator.js';
 export const WAYS = ['run', 'row', 'fight', 'locks', 'whirlpools'];
 export const ROUTES = ['gate', 'locks', 'whirlpools'];
 export const routeOf = (w) => (w === 'locks' || w === 'whirlpools' ? w : 'gate');
-export const PLACES = ['cove', 'lagoon', 'vegas'];
+export const PLACES = ['cove', 'lagoon', 'vegas', 'smugglers'];
 /** Found just now: the list with it in (once). */
 export function addFind(found, f) {
     const list = [...(found ?? [])];

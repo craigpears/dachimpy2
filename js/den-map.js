@@ -35,6 +35,7 @@ import { ISLE, isleShore, shoreOf } from './den-isle.js';
 import { KIKKIT, kikkitShore } from './den-kikkit.js';
 import { tzzShore } from './den-tzz.js';
 import { empireShore } from './den-imperial.js';
+import { SMUGGLERS } from './den-smugglers.js';
 export const MAP = {
     /** Where it lies on the beach, across from the gate's middle (the pumps are off to the right) and
         out from the wall (metres; the wall's at 0, out is -). */
@@ -121,6 +122,15 @@ export const CHART = {
     /** Port Decorum (11 Nov), the imperial island past the checkpoint, where the shipping lane leads: no
         secret, so it's drawn, one point of interest (IMPERIAL), never named, nothing said of what's there. */
     empire: { shore: empireShore().map(([c, r]) => [c - 0.5, r - 0.5]) },
+    /** The rocks shutting off Port Decorum's right-hand side and its back (11 Nov), drawn whole (`whole`:
+        the run of water behind them and its cove drawn as rock too, as the cliffs are drawn without their
+        canal) till you've found the smugglers' beach behind them; then the rocks alone (`rocks`), the
+        beach (`beach`) and its name (SMUGGLERS_NOTE), as Vegas Island is (js/den/map.js). */
+    smugglers: {
+        rocks: LAY.SMUGGLERS.ROCKS.map(([c, r]) => [c, r]),
+        whole: [...LAY.SMUGGLERS.ROCKS, ...LAY.SMUGGLERS.RUN, ...LAY.SMUGGLERS.COVE].map(([c, r]) => [c, r]),
+        beach: shoreOf(LAY.SMUGGLERS.BEACH).map(([c, r]) => [c - 0.5, r - 0.5]),
+    },
 };
 /** Where the X is: on the old wreck beyond the checkpoint. */
 export const X_AT = [...LAY.WRECK];
@@ -163,3 +173,5 @@ export const NOTES = [
 /** Vegas Island's name, written once you've been there (js/den/map.js). */
 // (under the rocks round it: 11 Nov)
 export const VEGAS_NOTE = { label: KIKKIT.VEGAS, at: [15.6, 26.2] };
+/** The smugglers' beach's name, written once you've been there (js/den/map.js): beside its rocks. */
+export const SMUGGLERS_NOTE = { label: SMUGGLERS.NAME, at: [21.6, 32.2] };

@@ -5,8 +5,9 @@
 
    The user (11 Nov), of the war frigate modelled that day: "add that to the scene somewhere so you can
    just, once you start getting out to sea, you just kind of see that out there and put [a mark] on it.
-   [To] make it clear, it's kind of a to-do item." So she lies at anchor, sails furled, just off the
-   trade winds' first run out from the beach, a sign over her saying she's coming soon; sailing up near
+   [To] make it clear, it's kind of a to-do item." So she lies at anchor, sails furled, out past Port
+   Decorum, to its left (moved there 11 Nov from just off the trade winds' first run out from the beach:
+   "if you go over to the left, you'll ... find the [war frig]"), a sign over her saying she's coming soon; sailing up near
    her, you say she's not ready yet. Nothing to do there yet: no boarding her. */
 import { LAY } from './den-sail.js';
 const P = LAY.PRIMATES.AT;

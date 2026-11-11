@@ -31,12 +31,16 @@ export const AFTER_KIKKIT = 'Is there anyone out here who could explain that wit
 /** Sailing up near Primates Rule at anchor, still to come (src/den-moored.ts; the user, 11 Nov: "make
     it clear, it's kind of a to-do item"): at the foot of the screen. */
 export const BY_PRIMATES_RULE = 'Primates Rule, at anchor. She\'s not ready yet: coming soon!';
+/** Coming into the smugglers' cove round the back of Port Decorum, the first time on a voyage (the user,
+    11 Nov: "Penguin Island, and then you have the ... Smuggler's Beach there"): at the foot of the screen.
+    Only once you're there: nothing names it before (RULES.md, "Hidden gems, never hinted"). */
+export const AT_SMUGGLERS_BEACH = 'A smugglers\' beach, round the back of Port Decorum! Not a guard in sight';
 export const CHARACTER = {
     name: 'You',
     who: 'Your own pirate, dressed as you like from the wardrobe (or as any real pirate in it). You say little, '
         + 'and only at the den\'s short, cheesy moments: picking up the captain\'s map, and riding the crane '
         + 'up the cliff and down again, your own wedding, screaming at a vampire in Gravee\'s house, and sailing '
-        + 'by Primates Rule, not ready yet.',
+        + 'by Primates Rule, not ready yet, and coming into the smugglers\' cove behind Port Decorum.',
     lines: [
         { when: 'Picking up the captain\'s map, at the end of Dalnoth\'s cutscene', says: [FOUND_MAP] },
         {
@@ -59,5 +63,6 @@ export const CHARACTER = {
         },
         { when: 'Off Kikkit\'s island, once she\'s told her whole ramble the first time (wondering aloud)', says: [AFTER_KIKKIT] },
         { when: 'Sailing up near Primates Rule at anchor, still to come (once a voyage)', says: [BY_PRIMATES_RULE] },
+        { when: 'Coming into the smugglers\' cove behind Port Decorum, by way of the whirlpools (once a voyage)', says: [AT_SMUGGLERS_BEACH] },
     ],
 };

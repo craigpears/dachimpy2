@@ -16,6 +16,7 @@
    is; the guard on the jetty hails you and grumbles on while you're within earshot. */
 import { LAY } from './den-sail.js';
 import { shoreOf } from './den-isle.js';
+import { smugglersAt } from './den-smugglers.js';
 import { HALT, GRUMBLES } from './lines/imperial-guards.js';
 const E = LAY.EMPIRE;
 export const EMPIRE = {
@@ -29,9 +30,10 @@ const key = (c, r) => `${c},${r}`;
 const land = new Set(E.LAND.map(([c, r]) => key(c, r)));
 /** Its squares (the jetty's among them). */
 export const empireAt = (c, r) => land.has(key(c, r));
-/** The water round it, every square beside it (diagonally too): off its shore, where you're told whose it is. */
+/** The water round it, every square beside it (diagonally too): off its shore, where you're told whose it is.
+    Not the rocks shutting off its back, nor the smugglers' water behind them (src/den-smugglers.ts). */
 export function onEmpireLanding(c, r) {
-    return !empireAt(c, r) && E.LAND.some(([x, y]) => Math.abs(x - c) <= 1 && Math.abs(y - r) <= 1);
+    return !empireAt(c, r) && !smugglersAt(c, r) && E.LAND.some(([x, y]) => Math.abs(x - c) <= 1 && Math.abs(y - r) <= 1);
 }
 /** Its shore, for the 3D and the captain's map (src/den-isle.ts, shoreOf): round its land but the jetty,
     which stands out from it on piles. */

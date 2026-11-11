@@ -71,7 +71,9 @@ describe('sailing: rocks ("just keep it simple as like with a few rocks", 9 Nov)
       // (and the canal, up past its mouth's wind, and the harbour that wind fills: tests/den-wind.test.ts)
       const harbour = s.zoneAt(...LAY.LOCKS[0].at);
       const lee = (c: number, r: number) => (r >= LAY.ZONES[0].r0 && c <= LAY.ZONES[0].c1) || s.level(c, r) > 0 || s.isLock(c, r) || s.zoneAt(c, r) === harbour;
-      for (let c = 0; c < s.cols; c++) for (let r = 0; r < s.rows; r++) if (s.open(c, r)) {
+      // (and not the water only Kikkit's whirlpools get to, the smugglers' run behind Port Decorum, 11 Nov:
+      // tests/den-smugglers.test.ts)
+      for (let c = 0; c < s.cols; c++) for (let r = 0; r < s.rows; r++) if (s.open(c, r) && !s.hidden.has(`${c},${r}`)) {
         expect(s.plot(H, c, r, null, true) !== null).toBe(s.windAt(c, r) === undefined);
         if (!lee(c, r)) expect(s.plot(H, c, r) !== null).toBe(s.windAt(c, r) === undefined);
       }
@@ -338,7 +340,7 @@ describe('sailing: the trade winds ("just insanely quick wind tiles", 9 Nov)', (
     // Anywhere she's sent, she sails what she plotted, with no dithering on the way: no more moves
     // than planned, and there.
     for (let c = 0; c < s.cols; c++) for (let r = 0; r < s.rows; r++) {
-      if (!s.open(c, r) || s.windAt(c, r) !== undefined || s.level(c, r) || s.isLock(c, r)) continue;
+      if (!s.open(c, r) || s.windAt(c, r) !== undefined || s.level(c, r) || s.isLock(c, r) || s.hidden.has(`${c},${r}`)) continue;   // (nor behind the smugglers' rocks: only the whirlpools get there)
       const g = new Helm(s);
       if (!g.drop(c, r) || !g.pin || g.headwind()) continue;   // (the wreck's wind keeps her off: den-wind.test.ts)
       const plan = g.course().length;

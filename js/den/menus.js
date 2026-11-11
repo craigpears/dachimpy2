@@ -22,6 +22,7 @@ import { kikkitCheat } from './whirlpools.js';
 import { lodgingsOpen } from './lodgings.js';
 import { tzzCheat } from './balloon-isle.js';
 import { empireCheat } from './imperial-isle.js';
+import { smugglersCheat } from './smugglers.js';
 import { cp } from './checkpoint.js';
 import { board, sailReset } from './sailing.js';
 import { online, guest, myId, send } from './crew.js';
@@ -576,6 +577,14 @@ function cheatEmpire() {
   empireCheat();
   cp.check.side = 'far';
 }
+/* The smugglers' beach (js/den/smugglers.js), behind Port Decorum: at sea, in its cove, the checkpoint
+   told she's beyond it, as for Port Decorum. */
+function cheatSmugglers() {
+  if (cine) return;
+  if (!sail.on) cheatSail();
+  smugglersCheat();
+  cp.check.side = 'far';
+}
 /* Mischievious's wedding (js/den/wedding.js): the siege put to rest and their ship gone, and off to
    her island. */
 function cheatWedding() {
@@ -651,6 +660,7 @@ const CHEATS = [
   ["Kikkit's island", cheatKikkit, 'kikkit'],
   ["Tzz's balloon lesson", cheatTzz, 'tzz'],
   ['The imperial island', cheatEmpire, 'imperial'],
+  ["The smugglers' beach", cheatSmugglers, 'smugglers'],
   ['Home, married', cheatMarried, 'married'],
   ['The housing district', cheatLodgings, 'lodgings'],
 ];

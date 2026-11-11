@@ -169,7 +169,10 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    balloons, squeak by squeak, into Sailing's pieces and plays them onto a real Sailing board beside
    her, a Double ("that's what zooms you over a whirlpool"), a Bingo and a Vegas, and in each hands you
    the last pair to drop and pop. Then you sail the whirlpools yourself. Kikkit first, always; Tzz is
-   the one you go looking for (nothing says where).
+   the one you go looking for (nothing says where). And on from the penguins, a run of water behind
+   the rocks leads to a smugglers' beach round the back of Port Decorum, the imperial island past the
+   checkpoint (11 Nov): the back way into a port shut to pirates, where Helium's rum will one day be
+   smuggled ashore. Nothing to do there yet, and nothing says it's there.
    *(11 Nov: on hold. Dalnoth is the Vikings' chief, his raids on the den Viking raids as Puzzle
    Pirates has them, and called on by Pandayay; going after him, steps 6 and 7, waits until a reason
    grows out of something else: IDEAS.md, "Her Vikings bring you back to the den".)*

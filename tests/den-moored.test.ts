@@ -44,19 +44,25 @@ describe('Primates Rule at anchor, "kind of a to-do item" (11 Nov)', () => {
     }
   });
 
-  it('is seen early, "once you start getting out to sea": just off the trade winds\' first run out from the beach', () => {
-    const [lc, lr] = LAY.LANES[0].at, run = Array.from({ length: LAY.LANES[0].n }, (_, i) => [lc, lr + i]);
-    const nearest = Math.min(...AT.flatMap(([c, r]) => run.map(([x, y]) => Math.max(Math.abs(c - x), Math.abs(r - y)))));
-    expect(nearest).toBeLessThanOrEqual(6);
-    expect(Math.min(...AT.map(([, r]) => r))).toBeLessThan(8);   // (not far out: near the start)
+  it(`out past Port Decorum, to its left, in the deeper water (11 Nov: "it's ready for that [war frig] to be dropped in maybe a bit past ... near where the [Port Decorum] is ... if you go over to the left, you'll ... find the [war frig]")`, () => {
+    const land = LAY.EMPIRE.LAND;
+    // (past it: further out to sea than any of its land)
+    expect(Math.min(...AT.map(([, r]) => r))).toBeGreaterThan(Math.max(...land.map(([, r]) => r)));
+    // (to its left: wholly left of its land, but near it, not off at the far edge)
+    expect(Math.max(...AT.map(([c]) => c))).toBeLessThan(Math.min(...land.map(([c]) => c)));
+    expect(Math.min(...land.map(([c]) => c)) - Math.max(...AT.map(([c]) => c))).toBeLessThanOrEqual(5);
+    // (and no longer off the trade winds' first run out from the beach: beyond the checkpoint)
+    expect(Math.min(...AT.map(([, r]) => r))).toBeGreaterThan(LAY.CHECKPOINT.ROW);
   });
 
-  it('can be sailed up to from the mooring, under sail, on every sea', () => {
+  it('can be sailed up to from the mooring, under sail, on every sea: past the checkpoint, from Port Decorum\'s side', () => {
+    const [c, r] = AT[AT.length - 1];
+    expect(nearMoored(c + MOORED.NEAR, r)).toBe(true);
     for (const seed of [1, 2, 3, 4, 5, 6, 9]) {   // (9: the den's own sea)
-      const s = new Sea(seed), [c, r] = AT[0];
-      expect(s.plot(SAIL.HOME, c, r - 1), `seed ${seed}`).not.toBeNull();
+      const s = new Sea(seed);
+      expect(s.plot(SAIL.HOME, c + MOORED.NEAR, r), `seed ${seed}`).not.toBeNull();
     }
-  }, 30000);
+  }, 60000);
 
   it('says she\'s not ready yet the first time on a voyage you sail near her, not on every tick', () => {
     expect(BY_PRIMATES_RULE).toMatch(/not ready yet/);

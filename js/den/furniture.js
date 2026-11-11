@@ -8,7 +8,8 @@
 
    The pieces: rug, runner, armchair, chair, table, candelabra, sconce, bed, coffin, easel, frame, door,
    and outdoors a still; and the skeleton set and its company (Primates Rule's deck): skeleton,
-   skeletonChair, skeletalCannon, gibbet, armour, grandPiano, anchorChair, jar, toolChest. */
+   skeletonChair, skeletalCannon, gibbet, armour, grandPiano, anchorChair, jar, toolChest; and cargo and a
+   beach's things (the smugglers' beach): crate, barrel, tarpPile, lantern, rowboat. */
 import * as THREE from 'three';
 import { mat, mesh, woodTex, canvasTex } from './world.js';
 import { CANVAS } from '../den-houses.js';
@@ -452,6 +453,63 @@ export function toolChest() {
   return { g };
 }
 
+// ---------- cargo, and a beach's things (the smugglers' beach: smugglers.js) ----------
+const staves = mat('#8a6238', { map: woodTex }), hoops = mat('#3b3631', { metalness: 0.5, roughness: 0.6 }), crateM = mat('#9a7a50', { map: woodTex });
+/** A crate, `s` metres a side, battens across its faces. */
+export function crate({ s = 0.7 } = {}) {
+  const g = new THREE.Group();
+  g.add(box(s, s, s, crateM, 0, s / 2, 0));
+  for (const z of [-1, 1]) for (const y of [0.15, 0.85]) g.add(box(s + 0.02, s * 0.1, 0.03, dark, 0, s * y, z * (s / 2 + 0.01)));
+  return { g };
+}
+/** A barrel, standing, bound in iron hoops. */
+export function barrel({ h = 0.8 } = {}) {
+  const g = new THREE.Group(), r = h * 0.36;
+  g.add(cyl(r * 0.88, r * 0.88, h, staves, 0, h / 2, 0, 14), cyl(r, r, h * 0.5, staves, 0, h / 2, 0, 14));
+  for (const y of [0.1, 0.32, 0.68, 0.9]) g.add(cyl(r * (y > 0.2 && y < 0.8 ? 1.01 : 0.92), r * (y > 0.2 && y < 0.8 ? 1.01 : 0.92), 0.04, hoops, 0, h * y, 0, 14));
+  return { g };
+}
+/** Crates and barrels stacked under a tarp, `col`, roped down, its corner turned back on a barrel's top. */
+export function tarpPile({ col = '#6f6a4e' } = {}) {
+  const g = new THREE.Group(), tarp = cloth(col);
+  for (const [x, z, s] of [[-0.4, -0.2, 0.75], [0.38, -0.25, 0.7], [-0.05, 0.4, 0.65]]) g.add(at(crate({ s }).g, x, 0, z));
+  g.add(at(crate({ s: 0.55 }).g, -0.2, 0.75, -0.2));
+  // the tarp: a draped shell over the stack, its hem on the sand
+  const shell = mesh(new THREE.SphereGeometry(1, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), tarp); shell.scale.set(1.05, 1.4, 0.95); shell.position.set(-0.05, 0, -0.02);
+  g.add(shell);
+  for (const x of [-0.45, 0.4]) { const rope = mesh(new THREE.TorusGeometry(1.0, 0.025, 4, 18, Math.PI), mat('#c8b48a', { roughness: 1 })); rope.scale.set(1.08, 1.42, 1); rope.rotation.y = Math.PI / 2; rope.position.set(x, 0, -0.02); g.add(rope); }
+  const b = barrel({ h: 0.75 }).g; b.position.set(1.05, 0, 0.35); g.add(b);
+  const flap = mesh(new THREE.PlaneGeometry(0.6, 0.5), new THREE.MeshStandardMaterial({ color: col, roughness: 0.95, side: THREE.DoubleSide })); flap.rotation.set(-1.2, 0.3, 0.2); flap.position.set(0.85, 0.8, 0.3);
+  g.add(flap);
+  return { g };
+}
+/** A lantern on a post, lit, its glow round it. */
+export function lantern({ h = 1.5 } = {}) {
+  const g = new THREE.Group();
+  g.add(cyl(0.05, 0.06, h, dark, 0, h / 2, 0, 6), box(0.4, 0.04, 0.04, dark, 0.18, h - 0.05, 0));
+  const L = new THREE.Group(); L.position.set(0.34, h - 0.12, 0);
+  L.add(box(0.16, 0.2, 0.16, glowM.clone(), 0, -0.14, 0), cyl(0.04, 0.04, 0.1, flameM, 0, -0.14, 0, 6), box(0.2, 0.03, 0.2, ironBlack, 0, -0.03, 0), box(0.2, 0.03, 0.2, ironBlack, 0, -0.25, 0));
+  for (const [x, z] of [[-0.09, -0.09], [0.09, -0.09], [-0.09, 0.09], [0.09, 0.09]]) L.add(box(0.015, 0.22, 0.015, ironBlack, x, -0.14, z));
+  const halo = mesh(new THREE.SphereGeometry(0.42, 12, 8), glowM, false); halo.position.y = -0.14; L.add(halo);
+  g.add(L);
+  return { g };
+}
+/** A rowboat drawn up on a beach, a pair of oars across her thwarts. */
+export function rowboat({ col = '#6e4a2c' } = {}) {
+  const g = new THREE.Group(), hull = mat(col, { map: woodTex }), L = 2.6, B = 0.5;
+  const shape = new THREE.Shape();
+  shape.moveTo(-L / 2, 0); shape.quadraticCurveTo(-L / 2 + 0.15, B, 0, B); shape.quadraticCurveTo(L / 2 - 0.4, B, L / 2, 0);
+  shape.quadraticCurveTo(L / 2 - 0.4, -B, 0, -B); shape.quadraticCurveTo(-L / 2 + 0.15, -B, -L / 2, 0);
+  const side = new THREE.Shape(shape.getPoints(16)); side.holes.push(new THREE.Path(shape.getPoints(16).map((p) => p.clone().multiplyScalar(0.9))));
+  const wall = mesh(new THREE.ExtrudeGeometry(side, { depth: 0.38, bevelEnabled: false }).rotateX(-Math.PI / 2), hull); wall.position.y = 0.05;
+  const floor = mesh(new THREE.ShapeGeometry(shape).rotateX(-Math.PI / 2), hull); floor.position.y = 0.08; floor.scale.set(0.9, 1, 0.9);
+  g.add(wall, floor);
+  for (const x of [-0.45, 0.35]) g.add(box(0.16, 0.04, B * 1.75, mid, x, 0.33, 0));
+  for (const s of [-1, 1]) { const oar = box(2.2, 0.04, 0.06, mid, 0.05, 0.4, s * 0.12); oar.rotation.y = s * 0.08; g.add(oar, box(0.4, 0.03, 0.14, mid, 1.1, 0.4, s * 0.2)); }
+  g.rotation.z = 0.06;   // (her bow up the sand)
+  return { g };
+}
+
 /** Every piece by its kind (the name a house's rules use: src/den-gravee.ts's FURNISH; a ship's deck:
-    src/den-frigate.ts). */
-export const FURNITURE = { rug, runner, chair, armchair, table, bed, candelabra, sconce, coffin, easel, frame, door, still, skeleton, skeletonChair, skeletalCannon, gibbet, armour, grandPiano, anchorChair, jar, toolChest };
+    src/den-frigate.ts; the smugglers' beach: src/den-smugglers.ts). */
+export const FURNITURE = { rug, runner, chair, armchair, table, bed, candelabra, sconce, coffin, easel, frame, door, still, skeleton, skeletonChair, skeletalCannon, gibbet, armour, grandPiano, anchorChair, jar, toolChest, crate, barrel, tarpPile, lantern, rowboat };

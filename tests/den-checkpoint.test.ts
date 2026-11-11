@@ -36,7 +36,7 @@ const rowing = (sea = new Sea(9), pose = SHORT) => { const h = new Helm(sea, pos
 
 describe('the lay: the main shipping lane runs out to an imperial checkpoint (10 Nov)', () => {
   it('the board grew, and the near sea is as it was rebuilt round the checkpoint', () => {
-    expect([SAIL.COLS, SAIL.ROWS]).toEqual([27, 34]);   // (and again, 11 Nov, out to the right: the islands spaced out; and out to sea, for Port Decorum)
+    expect([SAIL.COLS, SAIL.ROWS]).toEqual([27, 37]);   // (and again, 11 Nov, out to the right: the islands spaced out; and out to sea, for Port Decorum, then for Primates Rule past it)
     // The rocks of the near sea (seed 9: the den's): as before it grew, less the turret's rock, and
     // as the lanes were laid again round the checkpoint (10 Nov); and the cliffs the canal's chain
     // of locks is cut through, the hidden cove narrower behind the first lock (10 Nov); then the
@@ -45,8 +45,9 @@ describe('the lay: the main shipping lane runs out to an imperial checkpoint (10
     // harbour's arms at the canal's mouth (LAY.HARBOUR, 10 Nov); then the clump off the Wedding
     // Isle's jetty gone, its landing kept clear (11 Nov); then Primates Rule at anchor, her near end
     // on two of its squares, the rock by the lanes at 12,4 moved in to 13,2 to leave sea round her
-    // (11 Nov: LAY.PRIMATES).
-    const was = ['0,8', '1,8', '10,8', '12,12', '13,2', '14,5', '15,5', '14,8', '2,8', '4,8', '5,10', '5,12', '5,13', '5,8', '5,9', '8,5',
+    // (11 Nov: LAY.PRIMATES); then she moved out past Port Decorum, off those squares again (11 Nov: the
+    // rock stays at 13,2, the scattered rocks as they were).
+    const was = ['0,8', '1,8', '10,8', '12,12', '13,2', '14,8', '2,8', '4,8', '5,10', '5,12', '5,13', '5,8', '5,9', '8,5',
       '2,9', '2,10', '2,11', '2,12', '2,13', '4,9', '4,10', '4,11', '4,12', '4,13', '5,11', '7,12',
       '1,7', '1,6', '1,5', '0,7', '0,6', '5,7', '5,6', '5,5', '5,4', '6,7', '6,6'];
     const s = new Sea(9), old = [...s.rocks].filter((k) => { const [c, r] = k.split(',').map(Number); return c < 16 && r < 14; }).sort();
