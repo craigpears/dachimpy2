@@ -299,6 +299,9 @@ the site (`.assetsignore` skips `*.md`).
   person that can break quick double triples? That gets you through some shortcuts, and then, you know,
   you move a bit and you do ... equivalent thing on another puzzle. Or do you want to go for those giant"
   ones. After the first draft (the agent building it was briefed before this).
+- **Duty Navigation looks like the real game's (11 Nov):** "double check the graphics, because that's
+  always been a problem, are they definitely following it? Following the Puzzle Pirate graphics and look
+  and feel." Check the board against the real puzzle's pictures and fix what differs.
 
 ## Spotted along the way (not asked for)
 
