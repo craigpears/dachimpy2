@@ -296,6 +296,14 @@ the site (`.assetsignore` skips `*.md`).
   off? ... I think it's all visual." So a piece in a target of its colour is drawn as a solid square of
   that colour, and an empty target plainly empty (an outline, nothing that looks like a piece). The
   same board everywhere. And on Tzz's island: "that [sailing] puzzle can be a bit bigger. It's very tiny."
+- **Tzz's lesson should show the plan, and give you a fair turn (11 Nov, Tzz again):** "once she hands
+  over to you, it's not very clear ... surely it should start at the top ... give you a bit more of a
+  chance." And "her speech explains things. It doesn't really visibly show you the plan very well. Like,
+  we're starting a stack. Great. What on earth does that even mean? What is the impact of that? It's not
+  really explaining it. It doesn't really feel like a complete tutorial." So: your pair starts at the top
+  as in the real game, with time to steer; and the plan shown on the board, not only said (the trigger gap
+  marked, where the line of four will be, the partner's drop into the gap, what pops after what), each
+  line saying what it's for and what it'll set off. Next, once the solid targets and bigger board land.
 
 ## Spotted along the way (not asked for)
 
