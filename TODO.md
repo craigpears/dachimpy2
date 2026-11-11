@@ -288,6 +288,11 @@ the site (`.assetsignore` skips `*.md`).
   sloop. Isn't the wall for it going to tower over that? ... we've clearly got a scale problem here." Its
   fort's walls are lower than the sloop's mast and its towers lower than the checkpoint's: a fort's walls
   should tower over a sloop, its keep over everything, and the town's buildings be proper houses beside her.
+- **The hulls' sides a little slanted, top to bottom (11 Nov):** "I can definitely see the back of the ship
+  has gotten a lot more curved, but I'm talking about, like, the top to bottom ... that's still quite
+  boxy. I think some of that, as I said, is probably a good style and fit, but I think it needs a tiny bit
+  of a slant." Not dramatic: the sides falling in a little from the waterline up to the deck (tumblehome),
+  so a hull no longer reads as a box side-on, the sloop's and the frigate's alike.
 
 ## Spotted along the way (not asked for)
 
