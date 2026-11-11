@@ -296,6 +296,12 @@ the site (`.assetsignore` skips `*.md`).
   their legs swing at a pace that matches how far they go, a run when they're running, never a
   flicker; fixed once, in the shared walk, so it's right everywhere.
 
+- **The captions under Gravee's pictures flicker (11 Nov):** "We're getting some of that flickering
+  again in [Gravee's] Mansion, especially ... the little captions underneath the pictures flicker."
+  As with the ship's deck (RULES.md, "The ship's deck doesn't flicker"): no two surfaces close enough
+  to fight, the plaques, frames and wallpaper each clearly in front of the last, from any camera,
+  zoomed in or out; fixed in the shared frame, so it's right on every wall.
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
