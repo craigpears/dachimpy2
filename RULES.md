@@ -139,7 +139,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   something that I can put into the URL as well, so that I can share that animation with
   somebody." `den.html?at=` and a name opens the den straight there: the cheats' stages (`start`,
   `walk`, `gun-tower`, `built`) and their starts and scenes (`shack`, `map-scene`, `sea`,
-  `dignity`, `umami`). Choosing one from the cheats puts its link in the address bar, and its
+  `dignity`, `umami`, `wedding`). Choosing one from the cheats puts its link in the address bar, and its
   button's tooltip shows it. A name that isn't one says so. A new scene or start gets a name too.
 - **Hidden gems, never hinted (10 Nov).** The user, of the checkpoint's "I wonder if there's another
   way round" and "Run it, row it, or knock its guns out": "I don't like it giving you a hint as to
@@ -1011,6 +1011,40 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   her spyglass now and then and turns to watch you. The cheat "Dignity's scene" plays it again
   (sailing out first). Rules: `src/den-dignity.ts`; in the world: `js/den/dignity.js`; the
   cutscene machinery every scene shares (Dalnoth's too): `js/den/cine.js`.
+- **Mischievious's wedding, on her island (10 Nov), a proof of concept of the whole thing.** The
+  user: "really go for it, really generate me a proof of concept for the whole thing ... the cheesy
+  ending, pre-generated scenes ... on an island somewhere." The design is IDEAS.md's "A Puzzle
+  Pirates wedding"; what's built: her island, a place of its own like the sea (the cheat
+  "Mischievious's wedding", `den.html?at=wedding`). Rules: `src/den-wedding.ts`; drawn by
+  `js/den/wedding.js` and its `wedding-*.js` parts.
+  - **Her name's Mischievious** (with the extra i: "That's not the pirate page you showed, it was
+    missing an i"). Her Emerald pirate page, not the similarly named Mischievous's.
+  - **Which version of her you marry** ("Go through her portraits, so you could choose which version
+    of [her] you would like to marry, or something silly"): five of her 399 portraits, each by its
+    own title, she modelling each in turn: "Son of a Nutcracker!" (her Wanted poster now: a feline
+    mask, plum dress top and short dress, a pistol and a hook, Ash her grey squirrel), "What is
+    Love?" (red curls, crimson), "Taco Princess" (a tiara, purple, a sceptre, a lemon krakling),
+    "Wicked" (a witch, a black bat) and "Hotter Than Hell" (crimson midriff blouse and bloomers).
+    Every piece is a wardrobe item, as ever (`MISCHIEVIOUS_VERSIONS`, `js/den-look.js`).
+  - **Happy and cheesy, or dark humour, chosen first (10 Nov):** "the whole mishap of the previous
+    wedding and suggesting the previous groom thing comes in if you choose the kind of darker humour
+    theme." Happy: the venue clean, her welcome all giggles, Sweet William as Bachelor number one.
+    Dark: the wreck of the last wedding, "don't mind the blood and guts ... we've hired a bit of
+    extra security", and Barnaby, the bandaged groom left over, as Bachelor number one.
+  - **Then the planner, her reacting to everything** (never the same line twice running, never
+    "wrong"): who (her; the bachelors, walking up with bouquets, each stepping forward with a line;
+    or someone of your own), the venue (the beach, the chapel ruin on the headland, the ship by the
+    jetty), a theme (Happy and rosy, Bloody and gory, Drunkards' fest) that lays out the props and
+    dresses eight guests, then anything tuned freely (move, turn, recolour, add or remove props;
+    redress a guest), then the plot.
+  - **The plots:** sweet and blissful; raiders crash it (the guards knock them into the sea); somebody's
+    drunk (face first into the cake); a brawl (benches flying). Each ends in "I do", the kiss,
+    hearts and confetti, and a group shot framed in gilt as the wedding portrait: save the picture,
+    copy a link (`?at=wedding&w=...`, the whole set-up, opening ready to play it again), or plan
+    another. The set-up's kept as you go.
+  - **The clothes are Puzzle Pirates'** ("There isn't officially anything in Puzzle Pirates for any of
+    this stuff, other than clothing and obviously furniture"): Dress top, Gown, Veil, Tiara,
+    Butterfly, Frilly shirt with sash, from YPPedia; the bouquet, the props and the plots are ours.
 - **You can see out to sea (9 Nov).** The taller wall shut the view in: "it just feels like I'm
   staring at a wall. It's lost some of the chop. I don't feel like there's any background to look
   at. I don't know why it's so black. Rather like there's supposed to be a sea over there." So:

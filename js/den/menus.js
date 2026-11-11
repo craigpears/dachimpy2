@@ -2,7 +2,7 @@
 // of den.js.)
 import * as THREE from 'three';
 import { afterWave } from '../den-raids.js';
-import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, designOf, DYES, SKIN, HAIR, FUR, PARTS, EARRINGS, PIRATES, FLAGS, PATTERNS, DECOR, MAX_DECOR, BIOMES, twoColours } from '../den-look.js';
+import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, designOf, DYES, SKIN, HAIR, PARTS, EARRINGS, PIRATES, FLAGS, PATTERNS, DECOR, MAX_DECOR, BIOMES, twoColours, paletteOf, HAND_DYED } from '../den-look.js';
 import { C, mixedTiling, S, CALM_SECS, k, rand, $, keep, myLook, denLook, scene, camera, mat, mesh, woodTex, wearLook, redrawFlag, designMat, flagpole, pirate, carry, bounds, obstacles, G, keys, raiders, wm, ray, burst, toast, worldLets } from './world.js';
 import { ramp, frames, openJob, frameState, stepTop, putFramePiece, finishFrame, HOUSE_PART, HOUSE_Z0, houseXF, paintHouse, startHouse, plotShow, applyBiome } from './land.js';
 import { wall, rest, ringOf, updateHole, updateStats, putPiece } from './wall.js';
@@ -282,9 +282,8 @@ export function dressRows() {
   const slot = (label, k) => {
     const r = row(label);
     chooser(r, PARTS[k][L.body], L[k], look(k));
-    if (L[k] === 'none' || k === 'hand') return;   // (nothing to dye; a tankard's pewter)
-    const pal = k === 'fam' && L.fam === 'monkey' ? FUR : DYES;
-    swatch(r, pal, L[k + 'Col'], look(k + 'Col'), 'Colour');
+    if (L[k] === 'none' || (k === 'hand' && !HAND_DYED.includes(L.hand))) return;   // (nothing to dye; a tankard's pewter; a bouquet's flowers are dyed)
+    swatch(r, paletteOf(L, k), L[k + 'Col'], look(k + 'Col'), k === 'hand' ? 'Flowers' : 'Colour');   // (a monkey's or a squirrel's fur only comes in natural colours)
     if (twoColours(L, k)) swatch(r, DYES, L[k + 'Col2'], look(k + 'Col2'), 'Second colour');
   };
   if (dress.tab === 'pirate') {
@@ -296,6 +295,7 @@ export function dressRows() {
     swatch(hr, HAIR, L.hairCol, look('hairCol'), 'Hair colour');
     if (L.body === 'm') chooser(row('Beard'), PARTS.beard.m, L.beard, look('beard'));
     toggle(row('Eyepatch'), L.patch, look('patch'));
+    toggle(row('Hook'), L.hook, look('hook'));   // (for the left hand, as Mischievious has)
     chooser(row('Earrings'), EARRINGS, L.earring, look('earring'));
     toggle(row('Smile'), L.smile, look('smile'));
   } else if (dress.tab === 'clothes') {
