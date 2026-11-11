@@ -1,6 +1,6 @@
 /* Pirate Den: a whirlpool on the sloop's sea, by Puzzle Pirates' rules. TypeScript, compiled to
    js/den-whirl.js; tested in tests/den-whirl.test.ts. The helm plays it (src/den-sail.ts: Sea.whirlAt,
-   Helm's twirl); Kikkit's are laid in LAY.KIKKIT.WHIRLS and drawn by js/den/kikkit.js. Knows nothing
+   Helm's twirl); Kikkit's are laid in LAY.KIKKIT.WHIRLS and drawn by js/den/whirlpools.js. Knows nothing
    of where it's put: any whirlpool anywhere on the sea is one of these.
 
    The user (11 Nov): "Whirlpools are basically four tiles ... each one ... rotates the ship and sends it

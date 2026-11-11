@@ -3,7 +3,7 @@
    "Maybe a small combo gets you through the reef, with the penguins being the bigger prize after",
    and "definitely a Vegas to get fully through to the penguins". */
 import { describe, expect, it } from 'vitest';
-import { GAP, KIKKIT, KIKKIT_STANDS, Kikkit, MOUTH, OUT, PENGUINS, Whirlpools, inEarshot, inKikkitWaters, kikkitAt, kikkitShore, onKikkitLanding, passageAt, turnsOf, type WhirlEvent } from '../src/den-kikkit';
+import { GAP, KIKKIT, KIKKIT_CAST, KIKKIT_SAYS, KIKKIT_STANDS, MOUTH, OUT, PENGUINS, Whirlpools, inEarshot, inKikkitWaters, kikkitAt, kikkitShore, onKikkitLanding, passageAt, turnsOf, type WhirlEvent } from '../src/den-kikkit';
 import { LAY, SAIL, Sea, Helm, path, type Pose, type SailEvent } from '../src/den-sail';
 import { WHIRL, whirlpool } from '../src/den-whirl';
 import { carry, gustPath } from '../src/den-sailing';
@@ -12,6 +12,13 @@ import { isleMooring } from '../src/den-isle';
 import { Checkpoint } from '../src/den-checkpoint';
 import { CHART, NOTES, VEGAS_NOTE } from '../src/den-map';
 import { RAMBLE, BACK, BACK_OUT, TANGENTS } from '../src/lines/kikkit';
+import { Chatter } from '../src/chatter';
+import { readSecs } from '../src/den-dignity';
+
+/** Kikkit, talking (src/chatter.ts with her script: she's only config, RULES.md "A character is only config"). */
+const kikkit = () => new Chatter(KIKKIT_SAYS, { secs: readSecs });
+/** Her next `n` lines, in order. */
+const nextOf = (k: Chatter, n: number) => Array.from({ length: n }, () => k.next());
 
 const K = LAY.KIKKIT, ROW = LAY.CHECKPOINT.ROW;
 const at = (p: Pose) => [p.c, p.r];
@@ -214,31 +221,68 @@ describe('her ramble is the real map, taken literally (10 Nov: "it\'s got to act
     expect([...RAMBLE, ...TANGENTS, ...BACK].join(' ')).not.toMatch(/\btwirl\b(?!-eh| round|y)/i);
   });
 
-  it('she rambles the first time you sail up, then goes off on tangents, and has a new line each time you\'re thrown back', () => {
-    const k = new Kikkit();
-    expect(k.arrive()).toEqual([...RAMBLE]);
-    expect(k.arrive()).toEqual([]);
-    expect(k.hail()).toEqual([TANGENTS[0]]);
-    const backs = Array.from({ length: BACK.length }, () => k.spat());
+  it("she rambles the first time you sail up, then goes off on tangents, and has a new line each time you're thrown back", () => {
+    const k = kikkit();
+    expect(k.start()).toBe(true);   // (sailing up to her island: js/den/whirlpools.js)
+    expect(k.start()).toBe(false);   // (and again: she's begun, nothing new)
+    expect(nextOf(k, RAMBLE.length + 1)).toEqual([...RAMBLE, TANGENTS[0]]);
+    const backs = Array.from({ length: BACK.length }, () => k.aside('back'));
     expect(new Set(backs).size).toBe(BACK.length);
+    expect(new Set(Array.from({ length: BACK_OUT.length }, () => k.aside('backOut'))).size).toBe(BACK_OUT.length);
+  });
+
+  it('played: her ramble a line at a time, each up long enough to read, then the tangents straight after', () => {
+    const k = kikkit(), said: string[] = [];
+    k.start();
+    for (let t = 0; t < 600; t += 0.05) { const l = k.tick(0.05, true); if (l) said.push(l); }
+    expect(said.slice(0, RAMBLE.length + 2)).toEqual([...RAMBLE, TANGENTS[0], TANGENTS[1]]);
+  });
+
+  it("she's placed from config: her look, her lines, her animation, where she stands, her familiars and the penguins", () => {
+    const her = KIKKIT_CAST.her;
+    expect(her.look).toBe('Kikkit');
+    expect(her.says).toBe(KIKKIT_SAYS);
+    expect(her.at).toEqual([KIKKIT_STANDS.c, KIKKIT_STANDS.r]);
+    expect(her.earshot).toBe(KIKKIT.EARSHOT);
+    // Each on its own island: her familiars on hers, the penguins on Vegas Island.
+    const near = (sq: readonly (readonly number[])[], at: readonly number[]) => sq.some(([c, r]) => Math.hypot(c + 0.5 - at[0], r + 0.5 - at[1]) < 1.6);
+    for (const c of KIKKIT_CAST.creatures) expect(near(c.on === 'sand' ? K.LAND : K.VEGAS, c.at), `${c.kind} ${c.at}`).toBe(true);
+    expect(KIKKIT_CAST.creatures.filter((c) => c.kind === 'penguin')).toHaveLength(6);
+    expect(KIKKIT_CAST.creatures.filter((c) => c.on === 'sand').map((c) => c.kind)).toEqual(['parrot', 'octopus', 'squirrel', 'bat', 'krakling', 'parrot', 'monkey']);
   });
 });
 
 describe(`she never stops talking (11 Nov: "a never-ending loop of tangents and her speech bubbles that don't stop")`, () => {
   it('after her ramble she always has more: every tangent in turn, then the ramble again, round and round for ever', () => {
-    const k = new Kikkit();
-    k.arrive();
-    const said = Array.from({ length: TANGENTS.length }, () => k.more());
-    expect(said.flat()).toEqual([...TANGENTS]);
-    expect(k.more()).toEqual([...RAMBLE]);
-    expect(k.more()).toEqual([TANGENTS[0]]);
-    for (let i = 0; i < 1000; i++) expect(k.more().length).toBeGreaterThan(0);
+    const k = kikkit();
+    k.start();
+    nextOf(k, RAMBLE.length);
+    expect(nextOf(k, TANGENTS.length)).toEqual([...TANGENTS]);
+    expect(nextOf(k, RAMBLE.length)).toEqual([...RAMBLE]);
+    expect(k.next()).toBe(TANGENTS[0]);
+    for (let i = 0; i < 1000; i++) expect(k.next()).toBeTruthy();
   });
 
   it('an insanely long list of them, each short enough for a bubble on a phone, none said twice', () => {
     expect(TANGENTS.length).toBeGreaterThanOrEqual(60);
     expect(new Set(TANGENTS).size).toBe(TANGENTS.length);
     for (const t of TANGENTS) expect(t.length).toBeLessThanOrEqual(100);
+  });
+
+  it("within earshot, hailed or not, she goes on and on; out of it she finishes her line and stops, and starts up again when you're back", () => {
+    const k = kikkit(), said: string[] = [];
+    const go = (secs: number, near: boolean) => { for (let t = 0; t < secs; t += 0.05) { const l = k.tick(0.05, near); if (l) said.push(l); } };
+    k.start();
+    go(400, true);
+    const n = said.length;
+    expect(n).toBeGreaterThan(RAMBLE.length + 20);
+    go(60, false);
+    expect(said.length).toBe(n);
+    expect(k.line).toBeNull();
+    go(1, true);
+    expect(said.length).toBe(n + 1);
+    // Space: on to the next now.
+    expect(k.hail()).toBe(k.line?.text);
   });
 
   it(`within earshot as you sail past her island, hailed or not, and not from the checkpoint's gate`, () => {
@@ -252,7 +296,16 @@ describe(`she never stops talking (11 Nov: "a never-ending loop of tangents and 
 
 describe(`keeping the charm of the first go (11 Nov: "it does throw you out and say too many lefts")`, () => {
   it('spat back, the first thing she says is "too many lefts", as her ramble warned', () => {
-    expect(new Kikkit().spat()).toMatch(/too many lefts/i);
+    expect(kikkit().aside('back')).toMatch(/too many lefts/i);
+    // Slotted in over her ramble, and then she carries on with it.
+    const k = kikkit();
+    k.start();
+    k.tick(0.05);
+    expect(k.line?.text).toBe(RAMBLE[0]);
+    expect(k.aside('back')).toMatch(/too many lefts/i);
+    let next: string | null = null;
+    for (let t = 0; t < 10 && !next; t += 0.05) next = k.tick(0.05);
+    expect(next).toBe(RAMBLE[1]);
     expect(RAMBLE.join(' ')).toMatch(/too many lefts/i);
   });
 });

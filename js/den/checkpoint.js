@@ -220,7 +220,7 @@ export function checkpointTick(dt) {
       // "I like these just to be hidden gems that you work out").
       if (e.kind === 'sighted') continue;
       const say = e.kind === 'calm' ? 'Out of sight of the checkpoint: its guns go back to their marks' : throughSay(e);
-      if (!say) continue;   // (spat back by Kikkit's whirlpools: kikkit.js says so)
+      if (!say) continue;   // (spat back by Kikkit's whirlpools: whirlpools.js says so)
       if (cine) cp.held.push(say); else toast(say);
     }
     if (!cine && cp.held.length) for (const say of cp.held.splice(0)) toast(say);

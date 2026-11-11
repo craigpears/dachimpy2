@@ -76,14 +76,56 @@ export function vampire(look) {
   return p;
 }
 
+/** A penguin, standing about (Vegas Island's); `balaclava`: in one, his eyes darting in its slit, a
+    bobble on top; `sack`: a sack of swag over his shoulder. About 0.95 tall. Its parts (head, flips, eyes,
+    sack) for creature()'s idles to move. */
+export function penguin({ balaclava = false, sack = false } = {}) {
+  const g = new THREE.Group(), black = mat('#1b1d22'), white = mat('#f4f2ec'), orange = mat('#f0a028');
+  const body = mesh(new THREE.SphereGeometry(0.3, 14, 12), black);
+  body.scale.set(0.85, 1.25, 0.8); body.position.y = 0.38;
+  const belly = mesh(new THREE.SphereGeometry(0.26, 14, 12), white);
+  belly.scale.set(0.75, 1.1, 0.6); belly.position.set(0, 0.34, 0.08);
+  const head = new THREE.Group();
+  head.position.y = 0.8;
+  head.add(mesh(new THREE.SphereGeometry(0.17, 14, 12), balaclava ? mat('#3c4a3a', { roughness: 1 }) : black));
+  const beak = mesh(new THREE.ConeGeometry(0.045, 0.14, 8), orange);
+  beak.rotation.x = Math.PI / 2; beak.position.set(0, -0.02, 0.17);
+  head.add(beak);
+  let eyes = [];
+  if (balaclava) {
+    const slit = mesh(new THREE.BoxGeometry(0.2, 0.055, 0.04), white);
+    slit.position.set(0, 0.04, 0.145);
+    const bobble = mesh(new THREE.SphereGeometry(0.045, 8, 6), mat('#3c4a3a'));
+    bobble.position.y = 0.17;
+    head.add(slit, bobble);
+    eyes = [-1, 1].map((s) => { const e = mesh(new THREE.SphereGeometry(0.022, 6, 5), black, false); e.position.set(0.045 * s, 0.04, 0.17); head.add(e); return e; });
+  } else for (const s of [-1, 1]) { const e = mesh(new THREE.SphereGeometry(0.022, 6, 5), white, false); e.position.set(0.07 * s, 0.04, 0.14); head.add(e); }
+  let bag = null;
+  if (sack) {
+    bag = mesh(new THREE.SphereGeometry(0.16, 10, 8), mat('#a98a5a', { roughness: 1 }));
+    bag.scale.set(1, 1.2, 0.9); bag.position.set(-0.22, 0.75, -0.18);
+    g.add(bag);
+  }
+  const flips = [-1, 1].map((s) => { const f = mesh(new THREE.SphereGeometry(0.1, 8, 6), black); f.scale.set(0.25, 1, 0.6); f.position.set(0.25 * s, 0.42, 0); g.add(f); return f; });
+  for (const s of [-1, 1]) { const ft = mesh(new THREE.SphereGeometry(0.07, 8, 6), orange); ft.scale.set(1, 0.35, 1.5); ft.position.set(0.1 * s, 0.03, 0.06); g.add(ft); }
+  g.add(body, belly, head);
+  return { g, head, flips, eyes, sack: bag };
+}
+
 /* A creature to place in any scene, like a piece of furniture (the user, 11 Nov: "the pets ... the
    penguins and the creatures, you should be able to add these to your [scenes], similar to the
-   furniture"): creature(kind, opts) gives { g, tick(dt), fig }, standing at its origin.
+   furniture"): creature(kind, opts) gives { g, tick(dt), fig }, standing at its origin, opts.scale its
+   size. Each does a named behaviour (opts.idle), the same wherever it's placed:
    - 'yeti': opts.idle 'sway' (arms swinging) or 'still'.
    - 'vampire': opts.look (a look from the wardrobe, made undead).
-   - a familiar on its own ('bat', 'monkey', 'parrot', 'squirrel', 'octopus', 'krakling'), in opts.col:
-     opts.idle 'perch' (sat where it's put, fidgeting), 'hop' (bouncing on the spot) or 'flutter'
-     (round and round a circle opts.r across, opts.h up: a bat about a room). */
+   - a familiar on its own ('bat', 'monkey', 'parrot', 'squirrel', 'octopus', 'krakling'), in opts.col (and
+     opts.col2, a parrot's second): opts.idle 'perch' (sat where it's put, fidgeting), 'hop' (a hop now
+     and then, opts.rate how often, opts.height how high) or 'flutter' (round and round a circle opts.r
+     across, opts.h up, opts.speed how fast, bobbing opts.bob: a bat about a room, or about an island).
+   - 'penguin' (opts.balaclava, opts.sack: penguin() above): opts.idle 'potter' (looking about, flippers
+     going, a little shuffle) or 'sneak' (tiptoeing to and fro opts.span either side, eyes darting, up to
+     something). caught() freezes him, caught in the act: he looks round, flippers up, and drops his sack;
+     opts.caughtSecs later (6) he's back at it. */
 export function creature(kind, o = {}) {
   const g = new THREE.Group();
   if (kind === 'yeti') {
@@ -92,7 +134,8 @@ export function creature(kind, o = {}) {
     return { g, fig: y, tick(dt) { if (o.idle === 'still') return; t += dt; y.arms.forEach((a, i) => { a.rotation.x = Math.sin(t * 1.4 + i * Math.PI) * 0.25; }); y.body.rotation.z = Math.sin(t * 0.9) * 0.04; } };
   }
   if (kind === 'vampire') { const v = vampire(o.look || {}); g.add(v.g); return { g, fig: v, tick() {} }; }
-  const f = familiar({ fam: kind, famCol: o.col || 'black' });
+  if (kind === 'penguin') return penguinCreature(g, o);
+  const f = familiar({ fam: kind, famCol: o.col || 'black', famCol2: o.col2 });
   if (!f) return { g, tick() {} };
   const s = o.scale ?? 1.4, holder = new THREE.Group();
   holder.add(f.g); holder.scale.setScalar(s); g.add(holder);
@@ -102,13 +145,50 @@ export function creature(kind, o = {}) {
     tick(dt) {
       t += dt;
       familiarTick(f, dt);
-      if (o.idle === 'hop') holder.position.y = Math.abs(Math.sin(t * 4)) * 0.12;
+      if (o.idle === 'hop') holder.position.y = Math.max(0, Math.sin(t * 3 * (o.rate ?? 1))) * (o.height ?? 0.2);
       else if (o.idle === 'flutter') {
         const r = o.r ?? 1.2, a = t * (o.speed ?? 1.1);
-        holder.position.set(Math.cos(a) * r, (o.h ?? 2.2) + Math.sin(t * 3) * 0.15, Math.sin(a) * r);
+        holder.position.set(Math.cos(a) * r, (o.h ?? 2.2) + Math.sin(t * 3) * (o.bob ?? 0.15), Math.sin(a) * r);
         holder.rotation.y = -a;
         if (f.wings) f.wings.forEach((w, i) => { w.rotation.y = (i ? 1 : -1) * (0.6 + Math.sin(t * 16) * 0.6); });
       }
+    },
+  };
+}
+
+/* A penguin as a creature: see creature(). */
+function penguinCreature(g, o) {
+  const P = penguin(o), holder = new THREE.Group();
+  holder.add(P.g); holder.scale.setScalar(o.scale ?? 1); g.add(holder);
+  const sackY = P.sack?.position.y ?? 0, span = o.span ?? 1.2, caughtSecs = o.caughtSecs ?? 6;
+  let t = Math.random() * 9, ph = Math.random() * 6, caught = null;
+  return {
+    g, fig: P,
+    /** Caught in the act: he freezes, looks round, flippers up, and drops his sack. */
+    caught() { caught = { t: 0 }; },
+    tick(dt) {
+      t += dt;
+      if (caught) {
+        const T = (caught.t += dt), k = Math.min(1, T * 3);
+        P.head.rotation.y = -1.2 * k;
+        P.flips.forEach((f, i) => { f.rotation.z = (i ? -1 : 1) * 1.3 * k; });
+        if (P.sack) P.sack.position.y = Math.max(0.15, sackY - Math.max(0, T - 0.6) * 3);
+        if (T > caughtSecs) { caught = null; if (P.sack) P.sack.position.y = sackY; }
+        return;
+      }
+      if (o.idle === 'sneak') {
+        // Up to something: tiptoeing to and fro, facing the way he's going, eyes darting.
+        holder.position.x = Math.sin(t * 0.35) * span;
+        holder.rotation.y = Math.cos(t * 0.35) > 0 ? Math.PI / 2 : -Math.PI / 2;
+        holder.position.y = Math.abs(Math.sin(t * 6)) * 0.06;
+        P.head.rotation.y = Math.sin(t * 2.3) * 0.7;
+        for (const e of P.eyes) e.position.x = Math.sign(e.position.x) * 0.045 + Math.sin(t * 3.1) * 0.02;
+        return;
+      }
+      // Pottering: looking about, flippers going, a little shuffle.
+      P.head.rotation.y = Math.sin(t * 0.8 + ph) * 0.5;
+      P.flips.forEach((f, i) => { f.rotation.z = (i ? -1 : 1) * (0.15 + Math.max(0, Math.sin(t * 2 + ph)) * 0.3); });
+      holder.position.y = Math.abs(Math.sin(t * 3 + ph)) * 0.04;
     },
   };
 }

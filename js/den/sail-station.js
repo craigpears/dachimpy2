@@ -28,7 +28,7 @@ export const station = { on: false, want: false, game: null, pair: null, B: null
 const fresh = () => new Sailing(Math.random, true, { easy: station.easy });
 
 /* Kikkit's whirlpools have a board of their own, an easy one (the user, 11 Nov: "relatively small,
-   easy platforms"): in her waters (kikkit.js says when) it's that one, and out of them the sea's own
+   easy platforms"): in her waters (whirlpools.js says when) it's that one, and out of them the sea's own
    again, each kept as you left it. Swapped only between drops. */
 export function stationBoard(easy) {
   if (!!easy === station.easy || station.run || (station.B && sailBoardBusy(station.B))) return;

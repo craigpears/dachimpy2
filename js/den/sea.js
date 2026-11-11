@@ -179,7 +179,7 @@ export function seaWorld() {
 }
 /** A lane of wind, `n` squares from (c, r) the way `d` blows: white streaks racing along it over a
     faint blue band, so it reads from afar. The trade winds' lanes, and any other wind on the sea
-    (Kikkit's whirlpools': kikkit.js), are drawn by this. Move `tex.offset.y` by -2.2 a second to
+    (Kikkit's whirlpools': whirlpools.js), are drawn by this. Move `tex.offset.y` by -2.2 a second to
     race it along (sailing.js). */
 export function windLane(c, r, d, n) {
   const G = new THREE.Group();

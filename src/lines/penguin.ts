@@ -1,6 +1,6 @@
 /* Pirate Den: the penguin in the balaclava (src/lines/character.ts says how these files go), out past
    Kikkit's whirlpools and their winds, where she said he'd be. He doesn't speak: these are what's said
-   when you get to him, by js/den/kikkit.js. */
+   when you get to him, by js/den/whirlpools.js. */
 import type { Character } from './character.js';
 
 /** What's said as you get there. */

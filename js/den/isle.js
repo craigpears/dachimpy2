@@ -21,7 +21,7 @@ export const isle = { g: null, bunting: [] };
 
 /* An island's shore (src/den-isle.ts: isleShore, round the edge of its land squares, all but the
    jetty's; or any island's, shoreOf), smoothed into a curve and drawn in a little, so it reads as a
-   sandy island, not a block. Kikkit's island uses it too (kikkit.js). */
+   sandy island, not a block. Kikkit's island uses it too (whirlpools.js). */
 export function outline(inset, shore = isleShore()) {
   const pts = shore.map(([c, r]) => new THREE.Vector3(ex(c), 0, ez(r)));
   // (each corner's midpoints, so the curve keeps to the squares rather than ballooning out)

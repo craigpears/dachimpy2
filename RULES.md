@@ -199,6 +199,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   lines (and in what order: once, then looping), her animation and where she stands are data,
   handed to the generic talking pirate; her familiars are creatures placed beside her. What's left
   to a place is its own mechanics (Kikkit's whirlpools), never the person in it.
+  Done for Kikkit (11 Nov): she's `KIKKIT_CAST` in `src/den-kikkit.ts` (her look, where she
+  stands, her `tipsy` sway and swig, her earshot) and `KIKKIT_SAYS`, a Script (the ramble once,
+  then her tangents for ever, the ramble retold after the last, "Too many lefts-eh!" slotted in
+  when she's spat back), which `src/chatter.ts` plays for any talking pirate. Her familiars and the
+  penguins (the balaclava'd sneak among them) are placed creatures with named behaviours. Her
+  island's file, `js/den/whirlpools.js`, keeps only the whirlpools, the winds, Vegas Island and the
+  throw-out. She now finishes her line and waits while a whirlpool has you or you're out of
+  earshot, picking up where she left off, and her ramble carries on after a spat line.
 - **Furniture and props are modular, usable in any scene (11 Nov).** Of Gravee's house: "anything
   in these houses, they should all be modular objects that can be reused in other scenes. So, like,
   if we're doing the vampire's coffin, that should just be a bit of furniture that you can use

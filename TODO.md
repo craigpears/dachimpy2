@@ -140,12 +140,6 @@ the site (`.assetsignore` skips `*.md`).
   thrones, the skeleton cannons." The user's war frigate, the one for Daquan's flotilla (IDEAS.md,
   "Daquan's flotilla"): waiting on the user's pictures before she's drawn.
 
-- **Kikkit's island onto the shared pieces (11 Nov):** now that Gravee's house has made them
-  (js/den/props-people.js, js/den/creatures.js; RULES.md, "Talking pirates, animations and
-  creatures are pieces too"): Kikkit becomes a talking pirate
-  with her looping lines and her swaying, swigging animation, and her familiars and the penguins
-  placed creatures, so her island only places and configures them.
-
 ## Needs a playtest to pin down
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map

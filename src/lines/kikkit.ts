@@ -1,5 +1,5 @@
 /* Pirate Den: Kikkit's lines (src/lines/character.ts says how these files go). When she says them is
-   src/den-kikkit.ts's (Kikkit); js/den/kikkit.js shows them over her head on her island.
+   src/den-kikkit.ts's (KIKKIT_SAYS, played by src/chatter.ts); js/den/whirlpools.js shows them over her head.
 
    Every bit of her nonsense is literally true (the user, 10 Nov: "it's got to actually make some
    mechanical sense so that it's more funny and literal"): her ramble is the real way through her

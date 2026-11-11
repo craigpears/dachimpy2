@@ -1,7 +1,8 @@
 /* Pirate Den: Kikkit's island and her whirlpools, a way through the reef. TypeScript, compiled to
-   js/den-kikkit.js; tested in tests/den-kikkit.test.ts. js/den/kikkit.js draws them and her; the
-   squares are LAY.KIKKIT in src/den-sail.ts, a whirlpool's rules src/den-whirl.ts (the helm plays
-   them), and a gust's way over them gustPath's (src/den-sailing.ts).
+   js/den-kikkit.js; tested in tests/den-kikkit.test.ts. js/den/whirlpools.js draws them, and places
+   her and her familiars from KIKKIT_CAST (below), plain data; the squares are LAY.KIKKIT in
+   src/den-sail.ts, a whirlpool's rules src/den-whirl.ts (the helm plays them), and a gust's way over
+   them gustPath's (src/den-sailing.ts).
 
    The user (11 Nov), of the map's ways past the checkpoint: "maybe that will be a good place for it
    to be, is that's a way for you to get through the reef. And there's a penguin in the middle, so it
@@ -30,6 +31,7 @@ import { Helm, LAY, Sea, type Pose, type SailEvent } from './den-sail.js';
 import { carry } from './den-sailing.js';
 import { shoreOf } from './den-isle.js';
 import { RAMBLE, TANGENTS, BACK, BACK_OUT } from './lines/kikkit.js';
+import type { Script } from './chatter.js';
 
 const K = LAY.KIKKIT;
 export const KIKKIT = {
@@ -60,7 +62,7 @@ export function inKikkitWaters(c: number, r: number): boolean {
   const W = KIKKIT.WATERS;
   return c >= W.c0 && c <= W.c1 && r >= W.r0 && r <= W.r1;
 }
-/** Where she stands on her island (js/den/kikkit.js draws her there). */
+/** Where she stands on her island (KIKKIT_CAST places her there). */
 export const KIKKIT_STANDS = { c: 18.35, r: 17.35 } as const;
 /** Within earshot of her: she keeps talking. */
 export const inEarshot = (c: number, r: number): boolean =>
@@ -142,34 +144,37 @@ export class Whirlpools {
   }
 }
 
-/** Kikkit: what she's said, and what she says next. */
-export class Kikkit {
-  /** She's told you her ramble, all of it at least once. */
-  told = false;
-  private tangent = 0;
-  private back = 0;
-  private backOut = 0;
+/* Who's on her island, placed: a character is only config (RULES.md, "A character is only config").
+   js/den/whirlpools.js puts them there through the shared pieces, a talking pirate (props-people.js's
+   person(), saying her Script with src/chatter.ts) and creatures (creatures.js's creature()), and has
+   nothing of hers in code. Squares are on the sloop's sea (`at`: [c, r]); `on` is whose ground they
+   stand on, her island's sand or Vegas Island's floe. */
 
-  /** Sailing up to her island: the first time, her ramble (to be said in turn). */
-  arrive(): string[] {
-    if (this.told) return [];
-    this.told = true;
-    return [...RAMBLE];
-  }
-  /** Hailed: her ramble if she's not told it, else on she goes. */
-  hail(): string[] {
-    return this.told ? this.more() : this.arrive();
-  }
-  /** What she says next once she's run out, and she always has more: the next tangent, round and
-      round for ever; after the last, the whole ramble again (it's the real way, after all). */
-  more(): string[] {
-    if (this.tangent >= TANGENTS.length) { this.tangent = 0; return [...RAMBLE]; }
-    return [TANGENTS[this.tangent++]];
-  }
-  /** The whirlpools and the winds have thrown you back: a new line each time (`out`: you'd got out
-      past the reef first). */
-  spat(out = false): string {
-    if (out) return BACK_OUT[this.backOut++ % BACK_OUT.length];
-    return BACK[this.back++ % BACK.length];
-  }
-}
+/** What she says, and in what order (src/chatter.ts): the first time you sail up, her ramble (the real
+    way through her whirlpools); then her tangents, round and round for ever while you're within
+    earshot, hailed or not, the ramble retold after the last (it's the real way, after all); and spat
+    back by the winds, a new line each time, over whatever she was saying ("Too many lefts-eh!" first:
+    `back`; `backOut` if you'd got out past the reef first). */
+export const KIKKIT_SAYS: Script = { intro: RAMBLE, loop: TANGENTS, retell: true, asides: { back: BACK, backOut: BACK_OUT } };
+
+export const KIKKIT_CAST = {
+  /** Kikkit: her look (PIRATES's), on the sand by the whirlpools' mouth, a touch big so she reads from
+      the sea (as Dignity), looking out (`yaw`) or at you when you're within earshot (`earshot`,
+      squares), swaying a bit drunk and swigging from her jug, her hands going as she talks. */
+  her: { look: 'Kikkit', at: [KIKKIT_STANDS.c, KIKKIT_STANDS.r], on: 'sand', scale: 1.15, yaw: -0.9, idle: 'tipsy', earshot: KIKKIT.EARSHOT, says: KIKKIT_SAYS },
+  /** Her familiars about her, each doing its own thing ("the familiar version of a cat lady"); and
+      the penguins on Vegas Island, one of them in a balaclava with a sack, up to something. */
+  creatures: [
+    { kind: 'parrot', col: 'green', col2: 'red', at: [19.1, 16.6], on: 'sand', scale: 2.2, yaw: -0.6, idle: 'hop', rate: 1, height: 0.35 },
+    { kind: 'octopus', col: 'violet', at: [18.6, 18.1], on: 'sand', scale: 2.2, yaw: 0.1, idle: 'perch' },
+    { kind: 'squirrel', col: 'grey', at: [19.6, 17.5], on: 'sand', scale: 2.2, yaw: 0.8, idle: 'hop', rate: 1.4, height: 0.35 },
+    { kind: 'bat', col: 'black', at: [20.3, 17.2], on: 'sand', scale: 2.2, yaw: 1.5, idle: 'flutter', r: 1.6, h: 1.9, speed: 1.3, bob: 0.5 },
+    { kind: 'krakling', col: 'aqua', at: [20.6, 18.4], on: 'sand', scale: 2.2, yaw: 2.2, idle: 'perch' },
+    { kind: 'parrot', col: 'blue', col2: 'yellow', at: [20.9, 16.9], on: 'sand', scale: 2.2, yaw: 2.9, idle: 'hop', rate: 0.8, height: 0.35 },
+    { kind: 'monkey', col: 'tan', at: [19.4, 18.6], on: 'sand', scale: 2.2, yaw: 3.6, idle: 'hop', rate: 1.2, height: 0.35 },
+    ...([[15.1, 23.1], [14.9, 23.8], [15.3, 24.4], [15.9, 24.0], [16.3, 24.4]] as const).map(([c, r], i) => (
+      { kind: 'penguin', at: [c, r], on: 'floe', scale: 1.6, yaw: i * 1.7, idle: 'potter' })),
+    /** (Caught in the act when you first reach them: js/den/whirlpools.js.) */
+    { kind: 'penguin', balaclava: true, sack: true, at: [15.3, 23.55], on: 'floe', scale: 1.6, yaw: 0, idle: 'sneak', span: 1.2, id: 'sneak' },
+  ],
+} as const;

@@ -27,7 +27,7 @@ import { craneKey, cranePrompt, craneHolds, craneTick, craneReset, craneWorld } 
 import { umami, umamiKey, umamiClick, umamiHover, umamiPrompt, umamiReset } from './capybara.js';
 import { isleWorld, isleTick, isleAshore, canLandIsle } from './isle.js';
 import { station, stationKey, stationToggle, stationTick, stationPrompt, stationReset } from './sail-station.js';
-import { kikkitWorld, kikkitTick, kikkitShown, kikkitHail, kikkitPrompt, kikkitHolds, kikkitReset } from './kikkit.js';
+import { kikkitWorld, kikkitTick, kikkitShown, kikkitHail, kikkitPrompt, kikkitHolds, kikkitReset } from './whirlpools.js';
 import { inKikkitWaters } from '../den-kikkit.js';
 
 // The old sloop's at anchor in the cove from the moment the siege is over, while their ship makes
@@ -160,7 +160,7 @@ function rigToggle() {
 }
 export function sailKey(key) {
   if (hold.mode && holdKey(key)) return;
-  if (kikkitHolds() && key !== 'p') return;   // (round and round in a whirlpool: kikkit.js)
+  if (kikkitHolds() && key !== 'p') return;   // (round and round in a whirlpool: whirlpools.js)
   if (umamiKey(key)) return;   // (Umami's board, and her moorings in the lagoon: capybara.js)
   if (craneKey(key)) return;   // (the crane at the ledge, and the lagoon: crane.js)
   // The Sailing board: its keys while it's open; R or Esc puts it away (sail-station.js).
@@ -183,7 +183,7 @@ export function sailKey(key) {
   else if ((key === ' ' || key === 'enter') && canHaulWreck()) haulWreck();
   else if ((key === ' ' || key === 'enter') && canLand(sail.helm)) ashore();
   else if ((key === ' ' || key === 'enter') && canLandIsle(sail.helm)) isleAshore();   // (Mischievious's isle: isle.js)
-  else if ((key === ' ' || key === 'enter') && kikkitHail()) { /* (Kikkit, off her island: kikkit.js) */ }
+  else if ((key === ' ' || key === 'enter') && kikkitHail()) { /* (Kikkit, off her island: whirlpools.js) */ }
   else if (key === 'z' || key === 'c') keys.add(key);
   else if (key === 'p') setPaused(true);
   else if (key === 'v') Object.assign(view, { yaw: 0, pitch: 0, zoom: 1 });
@@ -239,7 +239,7 @@ export function sailTick(dt) {
   lockWorld();   // (the canal's locks: lock.js)
   craneWorld();   // (the headland on the cove's left, the ledge and the lagoon: crane.js)
   isleWorld();   // (Mischievious's isle, out to the right of the lanes: isle.js)
-  kikkitWorld();   // (Kikkit's island, her whirlpools and Vegas Island: kikkit.js)
+  kikkitWorld();   // (Kikkit's island, her whirlpools and Vegas Island: whirlpools.js)
   sail.g ||= (() => { const g = sloopMesh(); scene.add(g); return g; })();
   const show = sail.on || sloopHome();
   if (sail.g.visible !== show) sail.g.visible = show;
@@ -259,7 +259,7 @@ export function sailTick(dt) {
       if (e.kind === 'arrive' && canLandIsle(h)) toast('Off the Wedding Isle: Space to go ashore');
       if (e.kind === 'push') {
         // (a gust off the Sailing board isn't the trade winds: sail-station.js)
-        // (nor a whirlpool's whirl, nor the winds of Kikkit's whirlpools: kikkit.js says what those do)
+        // (nor a whirlpool's whirl, nor the winds of Kikkit's whirlpools: whirlpools.js says what those do)
         if (!e.gust && !e.whirl && !sail.riding && !inKikkitWaters(e.from.c, e.from.r)) { sail.riding = true; if (!sail.said.wind) { sail.said.wind = true; toast('The trade winds have her!'); } }
         burst(V3(seaX(e.from.c), 0.3 + liftAt(e.from.c, e.from.r), seaZ(e.from.r)), '#e6f3f6', 5, 2);
       }
@@ -342,7 +342,7 @@ export function sailTick(dt) {
   if (sail.hover) sail.hoverG.position.set(seaX(sail.hover[0]), 0.08 + liftAt(...sail.hover), seaZ(sail.hover[1]));
   windTick(dt);
   craneTick(dt);   // (after she's drawn where the helm has her: up the cliff, the crane has her)
-  kikkitTick(dt, events);   // (Kikkit, her whirlpools and the penguins: kikkit.js)
+  kikkitTick(dt, events);   // (Kikkit, her whirlpools and the penguins: whirlpools.js)
   if (sail.on) sailHud();
 }
 // The oars' button on the sailing bar (on mousedown: the bar's redrawn as the tokens change, so a

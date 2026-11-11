@@ -18,7 +18,7 @@ import { sail } from './sea.js';
 import { CRANE } from '../den-crane.js';
 import { craneCheat } from './crane.js';
 import { umamiCheat } from './capybara.js';
-import { kikkitCheat } from './kikkit.js';
+import { kikkitCheat } from './whirlpools.js';
 import { board, sailReset } from './sailing.js';
 import { station, stationToggle } from './sail-station.js';
 import { online, guest, myId, send } from './crew.js';
@@ -555,7 +555,7 @@ function cheatUmami() {
   craneCheat((cells) => tileFor(cells, []));
   umamiCheat();
 }
-/* Kikkit's island (js/den/kikkit.js): out to sea, off her island (she rambles as you come up); or at
+/* Kikkit's island (js/den/whirlpools.js): out to sea, off her island (she rambles as you come up); or at
    her whirlpools' mouth, facing the reef, the rigging out (the whirlpools' own easy board). */
 function cheatKikkit(where) {
   if (cine) return;
