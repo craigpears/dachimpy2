@@ -282,6 +282,10 @@ the site (`.assetsignore` skips `*.md`).
   outside; not yet tried by the user. Watch for: the markers on raiders outside cluttering the
   view while you carry a piece.
 
+- **The raiders are Vikings (11 Nov):** "If we're depicting Dalnoth now as the Viking, obviously the little raiders
+  need to be Vikings as well." Dress them from the wardrobe (Viking helmets, beards, battle axes: YPPedia
+  says Vikings may fight with a battle axe) and call them Vikings where the den names them.
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
