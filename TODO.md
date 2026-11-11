@@ -309,6 +309,9 @@ the site (`.assetsignore` skips `*.md`).
   dropping, and it's like, ah, what am I supposed to do?" So your turn is announced plainly (it's yours
   now, the pair you've got, where it goes, shown as a ghost on the board, and the keys), and words like
   "trigger" are shown before they're named. Next, once the solid targets and bigger board land.
+- **Rowing came up over Tzz's lesson (11 Nov):** "I'm not quite sure if I accidentally clicked something
+  ... somehow the rowing thing ended up overlaying it." The sea's buttons (Oars, Guns, Sailing) stayed on
+  screen and clickable during a cutscene. Nothing but the cutscene's own keys should work in one.
 
 ## Spotted along the way (not asked for)
 
