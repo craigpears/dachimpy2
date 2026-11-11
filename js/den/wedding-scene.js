@@ -6,7 +6,7 @@
 import * as THREE from 'three';
 import * as LOOK from '../den-look.js';
 import { wearable } from '../den-wedding.js';
-import { scene, mat, mesh, woodTex, makePirate, V3 } from './world.js';
+import { scene, camera, mat, mesh, woodTex, makePirate, V3 } from './world.js';
 import { hullGeo } from './raids.js';
 import { heartMesh, bouquetMesh } from './wedding-props.js';
 
@@ -14,6 +14,12 @@ import { heartMesh, bouquetMesh } from './wedding-props.js';
 export const ISLE = V3(400, 0, 0);
 /** Where each venue's floor is on the island (its middle: the aisle runs down its z). */
 export const VENUE_AT = { beach: V3(0, 0, 0), chapel: V3(-27, 7, 2), deck: V3(31, 1.7, 0) };
+/** How much further back a shot stands on a screen narrower than 4:3 (a phone held upright), so it
+    takes in as much across as it would on a desktop (1 on a desktop, sideways or a tablet). */
+export function roomy() {
+  const across = Math.tan(camera.fov * Math.PI / 360) * Math.min(camera.aspect, 4 / 3);
+  return Math.max(1, Math.tan(Math.PI / 8) * 4 / 3 / across);
+}
 /** The sky over her island: a warm sunset (the den's own comes back when you leave). */
 export const ISLE_SKY = { zenith: '#3b4f93', horizon: '#f4a46f', hemi: ['#ffe2cf', '#6a4a52'] };
 

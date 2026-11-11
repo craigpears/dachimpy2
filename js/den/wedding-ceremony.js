@@ -8,7 +8,7 @@
 import { plotScript, plotAt, fill, COUPLE, ALTAR, AISLE_FOOT, GUARDS, PROP_R } from '../den-wedding.js';
 import { V3, burst, wearLook } from './world.js';
 import { cinePlay, cineEnd, stepTo } from './cine.js';
-import { poseFig, restArms, heartsUp } from './wedding-scene.js';
+import { poseFig, restArms, heartsUp, roomy } from './wedding-scene.js';
 
 /** The portrait's shot, and where everyone stands for it (the couple in the middle under the arch). */
 export const PORTRAIT_CAM = { look: V3(0, 1.25, -3.7), dist: 8.4, tilt: 0.14, yaw: 0 };
@@ -48,7 +48,7 @@ export function ceremony(W, done) {
   const benches = W.propG.filter((g) => g.userData.prop.k === 'bench' && !g.userData.prop.w);
 
   const c = { t: 0, beatI: -1, cam: { look: V3(0, 1, -1), dist: 13, tilt: 0.35, yaw: 0 }, fx: 0, flew: new Set(), tick, end };
-  const shot = (x, y, z, dist, tilt, yaw) => { c.cam.look.set(x, y, z); W.root.localToWorld(c.cam.look); Object.assign(c.cam, { dist, tilt, yaw }); };
+  const shot = (x, y, z, dist, tilt, yaw) => { c.cam.look.set(x, y, z); W.root.localToWorld(c.cam.look); Object.assign(c.cam, { dist: dist >= 8 ? dist * roomy() : dist, tilt, yaw }); };   // (the wide shots further back on a phone held upright; a close one'd back into the guests)
   const walk = (p, tx, tz, speed, dt) => { const there = stepTo(p, p, tx, tz, speed, dt); p.g.position.x = p.x; p.g.position.z = p.z; p.yaw = p.g.rotation.y; return there; };
   const still = (p, dt) => poseFig(p, dt);
   const turnTo = (p, yaw, dt) => { let d = yaw - p.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); p.yaw += d * Math.min(1, dt * 6); };

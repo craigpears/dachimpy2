@@ -283,7 +283,59 @@
     .wed .go { width: 100%; margin-top: 8px; font: 700 21px 'Alegreya', serif; padding: 12px; box-shadow: 0 0 18px rgba(255, 160, 200, .45); }
     .wed-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid #5a412a; }
     .wed-foot .mini { margin: 0; }
-    @media (max-width: 760px) { .wed { top: auto; height: 46vh; } }
+    /* Asking her things as you plan (wedding.js): a small list of questions over the foot. */
+    .wed-foot .ask { background: #3b2a1b; color: var(--ink); border: 1px solid #6b4e32; }
+    .wed-foot .ask.on { border-color: var(--gold); }
+    .wed-foot .ask[hidden] { display: none; }
+    .wed-foot { position: relative; }
+    .wed-asks { position: absolute; left: 0; right: 0; bottom: calc(100% + 6px); max-height: min(300px, 60vh); overflow: auto; display: flex; flex-direction: column; gap: 4px; padding: 6px; background: #2a1d13; border: 1px solid var(--gold); border-radius: 8px; box-shadow: 0 -6px 18px rgba(0,0,0,.5); box-sizing: border-box; z-index: 1; }
+    .wed-asks[hidden] { display: none; }
+    .wed-asks button { text-align: left; font-size: 14px; padding: 6px 10px; border-radius: 6px; background: #3b2a1b; color: var(--ink); border: 1px solid #6b4e32; }
+    .wed-asks button:hover { border-color: var(--gold); }
+    .wed-head { display: flex; align-items: center; gap: 8px; }
+    .wed-head h2 { flex: 1; }
+    .wed-tuck { display: none; }
+    /* On a phone or a tablet held upright, the planner's a sheet along the bottom; held sideways (or in
+       a short window), a narrower panel down the right. Either tucks away to its heading (its button),
+       its rows scrolling inside it, with buttons big enough to tap; her bubble sits small, and the
+       camera frames the venue in what's left (wedding.js). */
+    @media (max-aspect-ratio: 1/1) and (max-width: 1024px), (min-aspect-ratio: 1001/1000) and (max-height: 560px), (min-aspect-ratio: 1001/1000) and (max-width: 760px) {
+      .wed { padding: 8px 10px; }
+      .wed h2 { font-size: 19px; margin: 0; }
+      .wed-tuck { display: block; margin: 0; padding: 6px 12px; font-size: 14px; min-height: 36px; }
+      .wed.tucked .wed-steps, .wed.tucked .wed-body, .wed.tucked .wed-foot { display: none; }
+      .wed-asks { max-height: min(300px, 32vh); }
+      .wed-asks button { min-height: 36px; }
+      .wed-head, .wed-foot { flex: none; }
+      .wed-steps { flex: none; flex-wrap: nowrap; overflow-x: auto; margin: 6px 0; scrollbar-width: none; }
+      .wed-steps button { flex: none; font-size: 14px; padding: 7px 12px; min-height: 36px; }
+      .wed h3 { font-size: 16px; margin: 2px 0 6px; }
+      .wed .opt { font-size: 15px; padding: 8px 10px; margin-bottom: 5px; }
+      .wed .opt small { font-size: 12.5px; }
+      .wed .note { font-size: 13px; margin: 2px 0 6px; }
+      .wed .row button { min-height: 38px; padding: 6px 11px; }
+      .wed .row .sw { width: 32px; height: 32px; min-height: 0; }
+      .wed .go { font-size: 19px; padding: 10px; }
+      .wed-foot { padding-top: 6px; }
+      .wed-foot { gap: 6px; }
+      .wed-foot .mini, .wed-foot .link { min-height: 36px; white-space: nowrap; font-size: 13.5px; padding: 6px 9px; }
+      .wed-head h2 { font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .label.say.wed-say { font-size: 15px; padding: 3px 10px; border-radius: 12px; max-width: min(300px, 78vw); margin-top: -6px; }
+      body.wedding .toast { font-size: 20px; top: 12%; width: max-content; max-width: calc(100vw - 32px); text-align: center; }
+      .wed-portrait > div { padding: 10px; }
+      .wed-portrait img { max-height: calc(100vh - 150px); max-height: calc(100dvh - 150px); margin-bottom: 8px; }
+      .wed-portrait .row button { font-size: 15px; padding: 8px 12px; min-height: 44px; }
+      #wed-close { min-height: 40px; }
+    }
+    @media (max-aspect-ratio: 1/1) and (max-width: 1024px) {
+      .wed { top: auto; left: 0; right: 0; bottom: 0; width: auto; max-height: 46%; border-radius: 14px 14px 0 0; border-width: 1px 0 0; padding-bottom: calc(8px + env(safe-area-inset-bottom)); }
+    }
+    @media (min-aspect-ratio: 1001/1000) and (max-height: 560px), (min-aspect-ratio: 1001/1000) and (max-width: 760px) {
+      .wed { top: 8px; right: 8px; bottom: 8px; width: min(290px, 42vw); }
+      .wed.tucked { bottom: auto; }
+    }
+    body.wedding canvas { touch-action: none; }
+    @media (pointer: coarse) { body.wedding .cine-bar.bot { font-size: 0; } body.wedding .cine-bar.bot::after { content: 'Double-tap: skip'; font-size: 14px; } }
     .wed-portrait { position: fixed; inset: 0; display: none; place-items: center; background: rgba(10, 6, 3, .6); z-index: 40; }
     .wed-portrait.on { display: grid; }
     .wed-portrait > div { background: #2a1d13; border: 2px solid var(--gold); border-radius: 12px; padding: 14px 16px; text-align: center; max-width: min(760px, calc(100vw - 32px)); box-sizing: border-box; animation: wed-in .6s ease-out; }
@@ -356,10 +408,10 @@
   </div></div>
 
   <div class="wed" id="wed">
-    <h2>Mischievious's wedding</h2>
+    <div class="wed-head"><h2>Mischievious's wedding</h2><button class="mini wed-tuck" id="wed-tuck" aria-expanded="true">Tuck away</button></div>
     <div class="wed-steps" id="wed-steps"></div>
     <div class="wed-body" id="wed-body"></div>
-    <div class="wed-foot"><button class="mini" id="wed-home">Back to the den</button><button class="link" id="wed-afresh">Start afresh</button></div>
+    <div class="wed-foot"><div class="wed-asks" id="wed-asks" hidden></div><button class="mini" id="wed-home">Back to the den</button><button class="mini ask" id="wed-ask" aria-expanded="false" title="Chat with Mischievious as you plan">Ask her</button><button class="link" id="wed-afresh">Start afresh</button></div>
   </div>
   <div class="wed-portrait" id="wed-portrait"><div>
     <img id="wed-img" alt="Your wedding portrait">
@@ -380,7 +432,7 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.HIOVTQ4L.js');
+    import(local ? './js/den.js' : './js/den.5BPOV2OU.js');
   </script>
 </body>
 </html>

@@ -491,6 +491,11 @@ export function toast(text, bad = false, warn = false, loud = false) {
   }
   showToast(text, bad, warn);
 }
+/** The den's toast gone at once, and any waiting behind it (off to her island: its news isn't hers). */
+export function toastHush() {
+  clearTimeout(toastWait); clearTimeout(toastTimer); toastWaiting = null;
+  $('toast').classList.remove('on');
+}
 function showToast(text, bad, warn) {
   const t = $('toast');
   t.textContent = text;

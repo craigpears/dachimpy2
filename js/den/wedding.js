@@ -15,11 +15,11 @@ import * as THREE from 'three';
 import * as LOOK from '../den-look.js';
 import {
   TONES, VENUES, THEMES, PLOTS, PROPS, SUGGEST, WELCOME, GUARDS, PROP_R, AREA, MAX_PROPS, DYE_NAMES, SECURITY, RAIDERS,
-  Gush, fresh, dressFor, moveTo, clean, encode, decode, seatsFor, suitors, suitorTitle, themeOf, themeLook, caption, readSecs, cleanProp,
+  ASK_HER, answer, Gush, fresh, dressFor, moveTo, clean, encode, decode, seatsFor, suitors, suitorTitle, themeOf, themeLook, caption, readSecs, cleanProp,
 } from '../den-wedding.js';
-import { $, scene, camera, renderer, hemi, skyDome, paintSky, keep, myLook, V3, toast as denToast, toastQuiet, warm, sunOver, ray, burst, wearLook, worldLets, shake } from './world.js';
+import { $, scene, camera, renderer, hemi, skyDome, paintSky, keep, myLook, V3, toast as denToast, toastQuiet, toastHush, warm, sunOver, ray, burst, wearLook, worldLets, shake } from './world.js';
 import { cine, cinePlay, cineEnd, cineLets, bubble, bubbleAt, stepTo } from './cine.js';
-import { ISLE, VENUE_AT, ISLE_SKY, buildIsle, figure, dropFigure, poseFig, restArms, dressable, heartsTick, heartsClear } from './wedding-scene.js';
+import { ISLE, VENUE_AT, ISLE_SKY, buildIsle, figure, dropFigure, poseFig, restArms, dressable, heartsTick, heartsClear, roomy } from './wedding-scene.js';
 import { propMesh } from './wedding-props.js';
 import { ceremony, PORTRAIT_CAM } from './wedding-ceremony.js';
 
@@ -45,6 +45,8 @@ export const wed = {
   /** Come by sea (her isle's jetty: isle.js), so leaving's back aboard; and whether you've had a
       wedding yet (the captain's map's quests: quests.js). */
   bySea: false, had: false,
+  /** Played by touch (a phone or tablet): the planner's hints say tap, drag and pinch. */
+  touch: matchMedia('(pointer: coarse)').matches,
 };
 
 // ---------- kept as you go ----------
@@ -152,6 +154,30 @@ function say(fig, text, secs = null) {
   wed.line = { fig, text, until: performance.now() + 1000 * (secs ?? readSecs(text) * 1.5 + 1.2), giggle: 0.7 };
 }
 const gush = (ev) => say(wed.fig.mis, wed.gush.say(ev));
+/* Asking her things as you plan (the user, 11 Nov: "You could ask her"): your question over you, then
+   her answer, the usual way her lines show; unless something else has been said in between. Small,
+   in the planner's foot: she's the host, not the show. */
+function ask(i) {
+  const q = ASK_HER[i]?.q;
+  if (!q) return;
+  asks(false);
+  const secs = readSecs(q) + 0.6;
+  say(wed.fig.you, q, secs);
+  const mine = wed.line;
+  clearTimeout(wed.askT);
+  wed.askT = setTimeout(() => {
+    if (wed.on && STEPS.some(([id]) => id === wed.step) && (!wed.line || wed.line === mine)) say(wed.fig.mis, answer(i, wed.w.tone));
+  }, secs * 1000);
+}
+/** The list of questions open (or shut). */
+function asks(on) {
+  const L = $('wed-asks');
+  if (on && !L.childElementCount) ASK_HER.forEach((x, i) => L.append(btn(x.q, () => ask(i))));
+  L.hidden = !on;
+  $('wed-ask').classList.toggle('on', on);
+  $('wed-ask').setAttribute('aria-expanded', String(on));
+}
+$('wed-ask').onclick = (e) => { e.currentTarget.blur(); asks($('wed-asks').hidden); };
 
 // ---------- entering and leaving ----------
 function fade(then) {
@@ -169,13 +195,14 @@ export function weddingEnter({ bySea = false } = {}) {
   wed.isle ||= buildIsle();
   if (!wed.root) {
     wed.root = new THREE.Group(); wed.propsG = new THREE.Group(); wed.root.add(wed.propsG); wed.isle.add(wed.root);
-    wed.bub = bubble('', document.body, 'wrap');
+    wed.bub = bubble('', document.body, 'wrap wed-say');
     wed.ring = new THREE.Mesh(new THREE.RingGeometry(0.9, 1, 40).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#ffd23a', transparent: true, opacity: 0.85, depthWrite: false }));
     wed.ring.renderOrder = 3; wed.root.add(wed.ring);
   }
   fade(() => {
-    wed.on = true; wed.snap = true; wed.isle.visible = true; toastQuiet.on = true;
+    wed.on = true; wed.snap = true; wed.isle.visible = true; toastQuiet.on = true; toastHush();
     document.body.classList.add('wedding');
+    tuck(false);
     enterSky();
     const code = new URLSearchParams(location.search).get('w'), shared = code ? decode(code) : null, mine = kept();
     let ev = null;
@@ -246,9 +273,10 @@ function welcome() {
     if (!moving.has(F.mis)) { F.mis.arms.forEach((a, j) => a.rotation.set(-1.1, 0, j ? -0.45 : 0.45)); F.mis.g.position.y = Math.abs(Math.sin(L * 8)) * 0.04; }
     if (L > 0.25) say(F.mis, lines[i], 99); else say(null);
     const C = c.cam;
-    if (i === 0) shot(C, 0, 0.6, 0, 13.5 - L * 0.6, 0.5, 0.7 - L * 0.12);
-    else if (i === 1 && dark) shot(C, 3.2, 1.1, -3.2, 7.5, 0.22, 0.55);   // (the security)
-    else shot(C, (F.mis.x + F.you.x) / 2, 1.4, (F.mis.z + F.you.z) / 2, 4.6, 0.14, 0.95);
+    const k = roomy();   // (further back on a phone held upright)
+    if (i === 0) shot(C, 0, 0.6, 0, (13.5 - L * 0.6) * k, 0.5, 0.7 - L * 0.12);
+    else if (i === 1 && dark) shot(C, 3.2, 1.1, -3.2, 7.5 * k, 0.22, 0.55);   // (the security)
+    else shot(C, (F.mis.x + F.you.x) / 2, 1.4, (F.mis.z + F.you.z) / 2, 4.6 * k, 0.14, 0.95);
   }
   function wEnd() {
     wed.welcome = null;
@@ -418,7 +446,7 @@ function startWedding() {
     wed.had = true;
     wed.step = 'portrait';
     wed.settle = skipped ? 1.3 : 0.7;   // (the camera's still easing in from wherever the cutscene was)
-    const P = PORTRAIT_CAM; wed.shot = { look: P.look.clone(), dist: P.dist, tilt: P.tilt, yaw: P.yaw }; wed.root.localToWorld(wed.shot.look);
+    const P = PORTRAIT_CAM; wed.shot = { look: P.look.clone(), dist: P.dist * roomy(), tilt: P.tilt, yaw: P.yaw }; wed.root.localToWorld(wed.shot.look);
   });
 }
 /* The last shot, held: drawn once more just now and read off the canvas (it doesn't keep what it
@@ -528,6 +556,10 @@ function go(step) {
 function panel() {
   const box = $('wed-body'), steps = $('wed-steps'), w = wed.w;
   $('wed').classList.toggle('off', ['welcome', 'playing', 'portrait'].includes(wed.step));
+  // (asking her: at every planning step, not before she's welcomed you nor in the ceremony)
+  const planning = STEPS.some(([id]) => id === wed.step);
+  $('wed-ask').hidden = !planning;
+  if (!planning) { asks(false); clearTimeout(wed.askT); }
   steps.replaceChildren(...(wed.step === 'tone' ? [] : STEPS.map(([id, name]) => { const b = btn(name, () => go(id), wed.step === id ? 'on' : ''); b.disabled = !can(id); return b; })));
   box.replaceChildren();
   const h = (t) => box.append(el('h3', '', t)), note = (t) => box.append(el('p', 'note', t));
@@ -576,12 +608,12 @@ function panel() {
     next('Next: tune it', 'tune');
   } else if (wed.step === 'tune') {
     h('Make it yours');
-    note('Click a prop to pick it up and drag it about. Click a guest to redress them. Right-drag turns the view; the wheel zooms.');
+    note(wed.touch ? 'Tap a prop to pick it, and drag it about. Tap a guest to redress them. Drag anywhere else to turn the view; pinch to zoom.' : 'Click a prop to pick it up and drag it about. Click a guest to redress them. Right-drag turns the view; the wheel zooms.');
     box.append(el('p', 'note', 'Add:'));
     const r = el('div', 'row');
     for (const [k, name] of PROPS) r.append(btn(name, () => { wed.tool = wed.tool === k ? null : k; wed.sel = null; panel(); }, wed.tool === k ? 'on' : ''));
     box.append(r);
-    if (wed.tool) note(`Click where the ${PROPS.find(([k]) => k === wed.tool)[1].toLowerCase()} goes (Esc: never mind).`);
+    if (wed.tool) note(`${wed.touch ? 'Tap' : 'Click'} where the ${PROPS.find(([k]) => k === wed.tool)[1].toLowerCase()} goes (${wed.touch ? 'tap it again' : 'Esc'}: never mind).`);
     const p = selProp();
     if (p) {
       box.append(el('h3', '', PROPS.find(([k]) => k === p.k)[1] + (p.w ? ' (wrecked)' : '')));
@@ -606,7 +638,7 @@ function panel() {
       swatches(r2, w.guests[i].topCol, (c) => recolour(i, c), [...first, ...dyesHere().filter((d) => !first.includes(d))]);
       box.append(r2);
     }
-    note(`${w.props.length} of ${MAX_PROPS} props · Q/E turn · Delete takes it away`);
+    note(`${w.props.length} of ${MAX_PROPS} props${wed.touch ? '' : ' · Q/E turn · Delete takes it away'}`);
     next('Next: how it goes', 'plot');
   } else if (wed.step === 'plot') {
     h('How does the wedding go?');
@@ -709,12 +741,70 @@ export function weddingKey(key, e) {
   if (!wed.on) return false;
   if (e.target instanceof HTMLInputElement) return true;
   if (wed.step === 'portrait' && key === 'escape') { if (wed.portrait) closePortrait(false); return true; }
+  if (key === 'escape' && !$('wed-asks').hidden) { asks(false); return true; }
   if (wed.step !== 'tune') return true;
   if (key === 'escape') { wed.tool = null; wed.sel = null; panel(); }
   else if ((key === 'q' || key === 'e') && !e.repeat) turnProp(key === 'q' ? 1 : -1);
   else if ((key === 'delete' || key === 'backspace') && !e.repeat) removeProp();
   return true;
 }
+
+// ---------- on a phone: the planner tucked away, and touch ----------
+/** The planner tucked away to its heading (on a phone or tablet: its button), or out again. */
+function tuck(on) {
+  $('wed').classList.toggle('tucked', on);
+  $('wed-tuck').textContent = on ? 'Show' : 'Tuck away';
+  $('wed-tuck').setAttribute('aria-expanded', String(!on));
+}
+$('wed-tuck').onclick = (e) => { e.currentTarget.blur(); tuck(!$('wed').classList.contains('tucked')); };
+/* By touch, all done here (no mouse events follow): a tap is a click; a drag from a prop moves it, from
+   anywhere else turns the view (the mouse's right-drag); two fingers pinch to zoom; a double tap skips
+   the welcome or the wedding (Space, on a keyboard). */
+let touch = null, lastTap = 0;
+const tp = (t) => ({ clientX: t.clientX, clientY: t.clientY, button: 0, buttons: 1 });
+const apart = (a, b) => Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+renderer.domElement.addEventListener('touchstart', (e) => {
+  if (!wed.on) return;
+  e.preventDefault();
+  wed.touch = true;
+  if (cine) {
+    const now = performance.now();
+    if ((wed.play || wed.welcome) && now - lastTap < 400) { cineEnd(true); lastTap = 0; } else lastTap = now;
+    return;
+  }
+  if (e.touches.length >= 2) {
+    if (touch?.prop) weddingUp(tp(e.touches[0]));
+    touch = { pinch: apart(e.touches[0], e.touches[1]), zoom: wed.zoom };
+    return;
+  }
+  const t = e.touches[0];
+  touch = { x: t.clientX, y: t.clientY, moved: false, prop: false };
+  if (wed.step === 'tune' && !wed.tool && picked(tp(t))?.kind === 'prop') { weddingDown(tp(t)); touch.prop = !!wed.drag; }
+}, { passive: false });
+renderer.domElement.addEventListener('touchmove', (e) => {
+  if (!wed.on || !touch) return;
+  e.preventDefault();
+  if (touch.pinch) {
+    if (e.touches.length >= 2) wed.zoom = Math.max(0.45, Math.min(1.8, touch.zoom * touch.pinch / Math.max(1, apart(e.touches[0], e.touches[1]))));
+    return;
+  }
+  const t = e.touches[0];
+  if (touch.prop) { weddingMove(tp(t)); return; }
+  if (!touch.moved && Math.hypot(t.clientX - touch.x, t.clientY - touch.y) < 10) return;
+  touch.moved = true;
+  wed.yaw -= (t.clientX - touch.x) * 0.008;
+  touch.x = t.clientX; touch.y = t.clientY;
+}, { passive: false });
+renderer.domElement.addEventListener('touchend', (e) => {
+  if (!wed.on || !touch) return;
+  e.preventDefault();
+  const T = touch, t = e.changedTouches[0];
+  if (e.touches.length) { if (T.pinch && e.touches.length === 1) touch = { x: e.touches[0].clientX, y: e.touches[0].clientY, moved: true, prop: false }; return; }
+  touch = null;
+  if (T.prop) weddingUp(tp(t));
+  else if (!T.moved && !T.pinch && !cine) { weddingDown(tp(t)); if (wed.drag) weddingUp(tp(t)); }
+}, { passive: false });
+renderer.domElement.addEventListener('touchcancel', () => { if (touch?.prop && wed.drag) { wed.drag = null; propsChanged('move'); } touch = null; });
 
 // ---------- each tick, and the camera ----------
 export function weddingTick(dt0) {
@@ -782,12 +872,13 @@ export function weddingTick(dt0) {
   if (l && l.fig?.g.parent) {
     const v = V3(); l.fig.g.getWorldPosition(v); v.y += 2.2;
     bubbleAt(wed.bub, true, v.x, v.y, v.z);
-    if (parseFloat(wed.bub.style.top) < 70) wed.bub.style.top = '70px';
-    // (kept clear of the planner down the right)
-    const r = $('wed').getBoundingClientRect(), bw = wed.bub.offsetWidth / 2;
-    let x = parseFloat(wed.bub.style.left);
-    if (!$('wed').classList.contains('off') && x + bw > r.left - 10) x = r.left - 10 - bw;
-    wed.bub.style.left = `${Math.max(bw + 8, x)}px`;
+    // (kept clear of the planner: left of it down the right, above it as a sheet along the bottom; and on the screen)
+    const r = $('wed').getBoundingClientRect(), bw = wed.bub.offsetWidth / 2, open = !$('wed').classList.contains('off'), off = panelOff();
+    let x = parseFloat(wed.bub.style.left), y = parseFloat(wed.bub.style.top);
+    if (open && !off.y && x + bw > r.left - 10) x = r.left - 10 - bw;
+    if (open && off.y && y > r.top - 16) y = r.top - 16;
+    wed.bub.style.top = `${Math.max(70, 8 + wed.bub.offsetHeight, y)}px`;   // (its foot, as it's drawn above it)
+    wed.bub.style.left = `${Math.max(bw + 8, Math.min(innerWidth - bw - 8, x))}px`;
   } else wed.bub.style.display = 'none';
   // The ring under what you've picked (or where a new prop will go).
   const p = selProp(), gi = wed.sel?.kind === 'guest' ? F.guests[wed.sel.i] : null, mk = wed.tool ? wed.mark : null;
@@ -806,18 +897,27 @@ export function weddingTick(dt0) {
 export function weddingCam() {
   const C = planCam();
   if (!C || C === wed.shot) return C;
-  // (the venue in the middle of what the planner leaves showing: the look slid right of where it'd be)
+  // (the venue in the middle of what the planner leaves showing: the look slid right of where it'd be,
+  // or, the planner a sheet along the bottom, below it, so the venue sits up in what's above it)
   const off = panelOff();
-  if (off > 0) {
+  if (off.x > 0) {
     const half = Math.tan(camera.fov * Math.PI / 360) * camera.aspect * C.dist * Math.cos(C.tilt * 0.5);
-    C.look.x += Math.cos(C.yaw) * half * off; C.look.z -= Math.sin(C.yaw) * half * off;
+    C.look.x += Math.cos(C.yaw) * half * off.x; C.look.z -= Math.sin(C.yaw) * half * off.x;
+  }
+  if (off.y > 0) {
+    const d = Math.tan(camera.fov * Math.PI / 360) * C.dist * off.y, st = Math.sin(C.tilt);
+    C.look.x += st * Math.sin(C.yaw) * d; C.look.y -= Math.cos(C.tilt) * d; C.look.z += st * Math.cos(C.yaw) * d;
   }
   return C;
 }
-/** How much of the screen's width the planner takes, down the right (none when it's out of the way). */
+/** How much of the screen the planner takes: across, down the right (x), or up, as a sheet along the
+    bottom on a phone held upright (y); none when it's out of the way. */
 function panelOff() {
-  const r = $('wed').getBoundingClientRect(), off = $('wed').classList.contains('off') || r.width < 10 ? 0 : (innerWidth - r.left + 14) / innerWidth;
-  return off < 0.6 && innerWidth > 760 ? off : 0;
+  const P = $('wed'), r = P.getBoundingClientRect();
+  if (P.classList.contains('off') || r.width < 10) return { x: 0, y: 0 };
+  if (r.width > innerWidth * 0.7) { const y = (innerHeight - r.top + 8) / innerHeight; return { x: 0, y: y < 0.7 ? y : 0 }; }
+  const x = (innerWidth - r.left + 14) / innerWidth;
+  return { x: x < 0.6 ? x : 0, y: 0 };
 }
 function planCam() {
   if (!wed.on || !wed.root) return null;
@@ -827,21 +927,21 @@ function planCam() {
   if ((wed.step === 'portrait' || wed.step === 'playing') && wed.shot) return wed.shot;
   if (wed.step === 'partner' && wed.lineup) {
     const L = wed.lineup, f = L.i >= 0 && L.list[L.i];
-    if (f && L.phase === 'step') shot(C, f.x, 1.3, f.z, 3.6, 0.12, 0.05);
+    if (f && L.phase === 'step') shot(C, f.x, 1.3, f.z, 3.6 * roomy(), 0.12, 0.05);
     else {
       // (all of them in what the planner leaves showing)
       const hh = Math.atan(Math.tan(camera.fov * Math.PI / 360) * camera.aspect);
-      shot(C, 0, 1.2, -3.4, Math.max(8.6, 5 / (Math.tan(hh) * (1 - panelOff()))) * wed.zoom, 0.16, 0);
+      shot(C, 0, 1.2, -3.4, Math.max(8.6, 5 / (Math.tan(hh) * (1 - panelOff().x))) * wed.zoom, 0.16, 0);
     }
     return C;
   }
   if (wed.step === 'partner' && (wed.show || wed.pick === 'her' || wed.w.partner?.kind === 'own') && F) {
     const f = wed.w.partner?.kind === 'own' && wed.pick !== 'her' ? F.partner : F.mis;
-    shot(C, f.x, 1.1, f.z, 4.2 * wed.zoom, 0.26, 0.2 + wed.yaw);
+    shot(C, f.x, 1.1, f.z, 4.2 * roomy() * wed.zoom, 0.26, 0.2 + wed.yaw);
     return C;
   }
   // (the whole venue, in what the planner leaves showing)
   const hh = Math.atan(Math.tan(camera.fov * Math.PI / 360) * camera.aspect);
-  shot(C, 0, 0.5, -0.4, Math.max(15.5, 6.2 / (Math.tan(hh) * (1 - panelOff()))) * wed.zoom, 0.62, wed.yaw);
+  shot(C, 0, 0.5, -0.4, Math.max(15.5, 6.2 / (Math.tan(hh) * (1 - panelOff().x))) * wed.zoom, 0.62, wed.yaw);
   return C;
 }

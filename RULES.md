@@ -1056,6 +1056,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     didn't quite go so well"), cake on the deck, a brawl, a sweet one to finish. She says so in her
     welcome, recalls the matching one whenever you choose a venue, theme or plot, and tells them all
     if asked: her stories show you what you can choose (`TODAY`; a test checks every option's there).
+  - **On a phone (11 Nov):** "I can't look at that on the mobile ... the dialogue covers up
+    everything." On an upright screen the planner's a sheet along the bottom (under half the
+    screen), sideways a narrow panel on the right, both tucking away; the camera frames the venue in
+    what's left; her bubble's small and kept on screen; taps, dragging props, pinching to zoom, a
+    double tap to skip. The desktop's as it was. ("Ask her", the questions above, is a button in
+    the planner's footer.)
   - **The plots:** sweet and blissful; raiders crash it (the guards knock them into the sea); somebody's
     drunk (face first into the cake); a brawl (benches flying). Each ends in "I do", the kiss,
     hearts and confetti, and a group shot framed in gilt as the wedding portrait: save the picture,

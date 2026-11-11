@@ -162,18 +162,6 @@ the site (`.assetsignore` skips `*.md`).
   the crane, haul her up, and the like), the offer is in the view where you're looking, at the
   thing itself (the crane's chalked frame on the ledge, say), and clicking it starts it. Space
   still works. Starting with the crane, after the Umami work in the same file.
-- **The wedding on a phone (11 Nov):** "I can't look at that on the mobile ... the dialogue covers
-  up everything that you see in the background, so it's not exactly very mobile friendly at the
-  moment. Not that this is ever usually a mobile friendly game, because it's just usually a lot
-  going on." The planner and her speech shouldn't hide the venue on a small screen.
-- **Mischievious the host, not the show (11 Nov):** "Maybe it's that kind of interactive. You could
-  ask her ... because I do know she's conscious, she doesn't want [it to] come off too open ... I
-  don't want this to go too far down that line ... But I want there to be a bit of chattery
-  banter. But obviously, the whole point of this is she's just the facilitator for this wedding
-  mechanic. I don't want this to be a [Mischievious] show, but it still needs a bit of fun and
-  personality. And Puzzle Pirate personality, though, especially, rather than specific people.
-  There's the balance." So fewer lines about her own love life (how often she's married, the black
-  widow jokes), more chattery Puzzle Pirates banter as the host, and things you can ask her.
 - **The wedding opens with her explaining it, close up (11 Nov):** "It should definitely be opening
   more with a cutscene where, you know, she explains to you what it is and what's going on.
   Definitely more zoomed in, like, I don't understand why it's so zoomed out while I'm choosing
