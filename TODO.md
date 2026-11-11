@@ -183,6 +183,11 @@ the site (`.assetsignore` skips `*.md`).
   squares are flashing black. And flickering." A Foraging board is in view before you've started
   it, just after building the crane, its squares flashing black. Nothing of a puzzle should show
   till it's started (or it should be plainly part of the place), and nothing should flicker.
+- **A collage of the whole wedding, not one portrait (11 Nov):** "given how much work we've done
+  into the different scenes on the wedding thing, like you shouldn't just get one picture, you
+  should get snapshots of all the key moments, so you have a nice kind of collage of the whole
+  wedding." Snapshots taken at each key moment of the ceremony as it plays (the walk up the aisle,
+  the vows, the plot's big moment, the kiss, the send-off...), laid out together as one keepsake.
 
 
 ## Needs a playtest to pin down
