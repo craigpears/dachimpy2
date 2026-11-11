@@ -167,6 +167,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   it explains or teaches something you then really play (the balloon animals are why Sailing's
   pieces pop; Kikkit's nonsense is the literal way through her whirlpools). And a mechanic is never
   left dry when a joke could carry it.
+- **Furniture and props are modular, usable in any scene (11 Nov).** Of Gravee's house: "anything
+  in these houses, they should all be modular objects that can be reused in other scenes. So, like,
+  if we're doing the vampire's coffin, that should just be a bit of furniture that you can use
+  anywhere." Every piece (a coffin, a portrait frame, an easel, a chair) is its own reusable object
+  in a shared module, animated by its own little tick if it moves; a house or a scene only places
+  pieces, never builds its own one-off copy.
 - **Kikkit never stops talking (11 Nov).** "I love how long she goes on tangents ... you're sailing
   past, you've not even engaged, and she's going on these tangents ... a never-ending loop of
   tangents and her speech bubbles that don't stop. That suits so incredibly well." Once she's told
@@ -988,6 +994,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     feet), and his white monkey on his left shoulder. (In the portrait the one on his shoulder is
     his black Hunter Archetype familiar; the white monkey is the Champion one, the one that comes
     to you.) **Any real pirate drawn in the den: check their portrait first.**
+  - **Every pirate whose look is checked goes into the game (11 Nov).** "as always, when you're
+    checking each of these pirates' portraits and looks, make sure they're added to the game if
+    they're not already there." Each real pirate looked up (a guide, someone in a gallery, a
+    friend's house) becomes a look in `PIRATES`, with anything they wear or carry added to the
+    wardrobe, whether or not the scene that needed them shows all of it.
   - **Real pirates are only looks, and you can wear anything they wear (10 Nov).** The user: "we
     shouldn't be drawing Dalnoth. Dalnoth just happens to be a guy dressed in yellow gold with a
     Viking helmet ... when you go on to your pirate, you should be able to put any clothing on of
