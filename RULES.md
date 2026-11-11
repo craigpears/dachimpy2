@@ -1037,6 +1037,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     jetty), a theme (Happy and rosy, Bloody and gory, Drunkards' fest) that lays out the props and
     dresses eight guests, then anything tuned freely (move, turn, recolour, add or remove props;
     redress a guest), then the plot.
+  - **Funny about her, never mean (11 Nov):** "we'd rather be a lot more humorous about
+    [Mischievious], but not negative. Like, I don't like where it says, oh, marry [her], she's free,
+    she's nearly always free. Like, that feels mean." She jokes about herself (the dress already on,
+    "a dress that's hardly been bled on"), never runs herself down; a test checks her lines.
   - **The plots:** sweet and blissful; raiders crash it (the guards knock them into the sea); somebody's
     drunk (face first into the cake); a brawl (benches flying). Each ends in "I do", the kiss,
     hearts and confetti, and a group shot framed in gilt as the wedding portrait: save the picture,

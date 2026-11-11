@@ -274,3 +274,11 @@ describe('the set-up, kept and shared (10 Nov)', () => {
 it('every prop kind has a name, for the palette', () => {
   expect(PROPS.every(([, n]) => n.length > 2)).toBe(true);
 });
+
+// The user, 11 Nov: "we'd rather be a lot more humorous about [Mischievious], but not negative. Like, I
+// don't like where it says, oh, marry [her], she's free, she's nearly always free. Like, that feels mean."
+it("'she's nearly always free' felt mean: none of her lines run her down (11 Nov)", () => {
+  const all = [...Object.values(WELCOME).flat(), ...Object.values(GUSH).flatMap((p) => (Array.isArray(p) ? p : Object.values(p).flat()))];
+  expect(all.length).toBeGreaterThan(40);
+  for (const line of all) expect(line).not.toMatch(/always free|I'?m free|usually me|nobody wants|desperate|lonely|single again/i);
+});

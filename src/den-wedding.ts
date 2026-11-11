@@ -350,11 +350,13 @@ export const SUGGEST: Record<ToneId, { theme: ThemeId; plots: readonly PlotId[] 
   happy: { theme: 'rosy', plots: ['sweet'] },
   dark: { theme: 'gory', plots: ['raiders', 'brawl'] },
 };
-/** Her reactions as you plan: gushing, giggly, delighted with whatever you do (never "wrong"). A pool
-    is the same in both tones, or one for each. */
+/** Her reactions as you plan: gushing, giggly, delighted with whatever you do (never "wrong"), and
+    funny about herself without ever running herself down (the user, 11 Nov: "more humorous about
+    [her], but not negative ... 'she's nearly always free' ... that feels mean"). A pool is the same
+    in both tones, or one for each. */
 type Pool = readonly string[] | Record<ToneId, readonly string[]>;
 export const GUSH: Record<string, Pool> = {
-  ask: { happy: ['Me, perhaps? I\'m free. I\'m nearly always free.'], dark: ['Me, perhaps? I\'m free. My last one\'s... not around any more.'] },
+  ask: { happy: ['Me, perhaps? I do make a gorgeous bride. Hee hee!', 'Me, perhaps? I\'ve the dress on already!'], dark: ['Me, perhaps? I\'ve a dress that\'s hardly been bled on.', 'Me, perhaps? I\'ve had the veil cleaned. Mostly.'] },
   her: { happy: ['Me? Oh, you charmer! Yes! Yes yes yes!', 'I knew you\'d ask! I\'ve had the dress on since Tuesday.'], dark: ['Me? Oh, you brave thing! Yes!', 'Lovely. I\'ll try to keep this one alive.'] },
   version: ['Ooh, that one\'s my favourite!', 'Good choice. I look fabulous in that.', 'This old thing? Hee hee!', 'Twirl! Did you see me twirl?'],
   bachelors: ['Here are your bachelors!'],
@@ -369,7 +371,7 @@ export const GUSH: Record<string, Pool> = {
   theme_drunk: ['A drunkards\' fest! Grog for everyone!', 'Barrels! Lovely, lovely barrels.'],
   plot_sweet: { happy: ['Sweet and blissful! Oh, I\'m welling up already.'], dark: ['Sweet and blissful? Ooh, that\'d make a change.'] },
   plot_raiders: { happy: ['Raiders! How exciting! Good thing I hired security.'], dark: ['Raiders! Just like last time. I\'ll tell the guards.'] },
-  plot_drunk: ['Somebody\'s drunk! There\'s always one. Usually me.', 'Hee hee! I\'ll put the cake somewhere safe. Or not.'],
+  plot_drunk: ['Somebody\'s drunk! There\'s always one. Hee hee!', 'Hee hee! I\'ll put the cake somewhere safe. Or not.'],
   plot_brawl: { happy: ['A brawl? Ooh, a lively one!'], dark: ['A brawl! Proper wedding, that.'] },
   add: ['More! More is always better.', 'Oh, that\'s gorgeous there.', 'Yes! Just there!', 'Ooh, I wouldn\'t have thought of that!'],
   move: ['Ooh, much better there.', 'Perfect! Well, nearly perfect. No, perfect!', 'Yes, yes, yes! There!', 'Oh, that\'s much more you.'],
