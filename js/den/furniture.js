@@ -144,7 +144,7 @@ export function coffin({ sitter = null, wood = '#3a2416' } = {}) {
   if (sitter) { sitter.g.position.set(0, -0.72, 0); sitter.g.rotation.set(0, 0, 0); hips.add(sitter.g); }
   const st = { open: 0, up: 0, wantOpen: 0, wantUp: 0, rattle: 0, t: 0 };
   const pose = () => {
-    hinge.rotation.z = st.open * 2.05 + (st.rattle > 0 ? Math.sin(st.t * 60) * 0.03 * st.rattle : 0);
+    hinge.rotation.z = st.open * 2.05 + (st.rattle > 0 ? Math.abs(Math.sin(st.t * 34)) * 0.16 * st.rattle : 0);   // (a rattle: the lid jumping on its hinge)
     hips.rotation.x = -Math.PI / 2 * (1 - st.up);
     if (!sitter) return;
     sitter.legs.forEach((l) => { l.rotation.set(-Math.PI / 2 * st.up, 0, 0); });
@@ -157,6 +157,8 @@ export function coffin({ sitter = null, wood = '#3a2416' } = {}) {
     get opened() { return st.open; },
     open(u) { if (u > st.wantOpen) st.rattle = 0.5; st.wantOpen = u; },
     sitUp(u) { st.wantUp = u; },
+    /** The lid gives a rattle, shut or open (whoever's in it stirring). */
+    rattle(k = 0.7) { st.rattle = Math.max(st.rattle, k); },
     /** Straight to how it is (no easing). */
     set(open, up) { st.open = st.wantOpen = open; st.up = st.wantUp = up; pose(); },
     tick(dt) {
@@ -217,14 +219,16 @@ export function easel() {
   for (const [x, z, rz, rx] of [[-0.32, 0.08, -0.12, 0.08], [0.32, 0.08, 0.12, 0.08], [0, -0.42, 0, -0.32]]) {
     const leg = cyl(0.03, 0.035, 1.9, mid, x, 0.93, z, 6); leg.rotation.set(rx, 0, rz); g.add(leg);
   }
-  g.add(box(0.86, 0.05, 0.12, mid, 0, 0.82, 0.12));
+  g.add(box(0.86, 0.05, 0.12, mid, 0, 0.82, 0.15));
+  // The canvas: on the ledge, leant on the front legs and clear in front of them (never the wood through
+  // the painting), as they lean.
   const cv = mesh(new THREE.BoxGeometry(0.8, 1.0, 0.03), mat('#f2ead8', { roughness: 0.9 }));
-  cv.position.set(0, 1.35, 0.12); cv.rotation.x = -0.08; g.add(cv);
+  cv.position.set(0, 1.35, 0.18); cv.rotation.x = 0.08; g.add(cv);
   const pic = mesh(new THREE.PlaneGeometry(0.76, 0.96), new THREE.MeshStandardMaterial({ map: PLAIN, roughness: 0.85 }), false);
   pic.position.set(0, 0, 0.017); cv.add(pic);
   const pal = mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.015, 16), mat('#c9a56e', { map: woodTex }));
-  pal.rotation.set(Math.PI / 2, 0, 0.3); pal.position.set(-0.36, 1.05, 0.15); g.add(pal);
-  for (const [c, a] of [['#d72c22', 0], ['#2a6fd7', 1.3], ['#f8ff35', 2.4], ['#3b6c2c', 3.6], ['#f6f2ea', 4.8]]) g.add(at(mesh(new THREE.SphereGeometry(0.025, 6, 5), mat(c)), -0.36 + Math.cos(a) * 0.1, 1.05 + Math.sin(a) * 0.1, 0.17));
+  pal.rotation.set(Math.PI / 2, 0, 0.3); pal.position.set(-0.55, 1.05, 0.12); g.add(pal);
+  for (const [c, a] of [['#d72c22', 0], ['#2a6fd7', 1.3], ['#f8ff35', 2.4], ['#3b6c2c', 3.6], ['#f6f2ea', 4.8]]) g.add(at(mesh(new THREE.SphereGeometry(0.025, 6, 5), mat(c)), -0.55 + Math.cos(a) * 0.1, 1.05 + Math.sin(a) * 0.1, 0.14));
   pic.visible = false;
   return {
     g, canvas: cv,

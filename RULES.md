@@ -236,11 +236,37 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   first, **Bedside Manors** (her real manor's name), Gravee drawn from her portrait (the white
   Berserker pelt, the starfish on her cheek, a green gown, a hook, a lit candle, Spud her tan
   monkey) and in PIRATES. She shows you round: her portraits, from her real gallery's titles, line
-  the walls (her "Definitive Proof" of the yeti among them), the camera whizzing down the endless
-  gallery after a few steps; the Count's portrait's eyes follow you; lift his coffin's lid and he
+  the walls (her "Definitive Proof" of the yeti among them), the endless gallery that goes on and
+  on; the Count's portrait's eyes follow you; lift his coffin's lid and he
   sits up, you both scream, and she paints you mid-fright. Your portrait hangs pride of place on
   her wall, kept in this browser, and you can save it as a picture. No vampire game. Built from
   the shared pieces: furniture, talking pirates, creatures.
+  - **Whoever shows you round walks with you (11 Nov).** "I think [Gravee] should be walking with
+    you ... She was very slow to, though", and "this definitely needs to be a standard feature for
+    people in houses and things". Any house's host keeps at your side at your pace, hurries if
+    you've got ahead, talks as they walk, and stands by each thing while they show it you: the house
+    shell's, a house only says who and where.
+  - **The gallery is walked; whizzing along it is a skip (11 Nov).** The whiz was "a little too
+    fast. That was just like, what happened?", and "you can zoom by as a skip. I don't think it
+    should do that by default, though." You walk it with her (the joke's that it goes on); "Whiz
+    along" (a button and Q) runs you to the other end, slow enough the first time to see it go on
+    and read the titles. Any house can have such a stretch.
+  - **One bubble per speaker, gone when the line's done (11 Nov).** "I see 4 of them open there at
+    the moment": a finished line takes its bubble with it.
+  - **The painting's camera eases and holds (11 Nov).** "hold it there, does the painting ... It
+    doesn't really flow right": the camera eases from shot to shot, never cutting: onto the coffin
+    as he sits up, in on your fright, round to her painting you, held till she's done, then back.
+  - **Drawn to the coffin, with no arrows (11 Nov).** "if you're on the other side of the room,
+    there's nothing really pushing you in that direction." Once you're in her bedchamber she stands
+    by the coffin and beckons you over now and then; its lid rattles, the Count snores, a candle
+    burns beside it, the bat circles over it.
+  - **Her face shows under the pelt (11 Nov).** "I love her hat, but you really can't see her at
+    all." The Berserker pelt sits as Puzzle Pirates' does, the bear's head up on top, its hide down
+    her back; fixed in the pelt, so it's right wherever it's worn.
+  - **The easel stays behind its canvas (11 Nov):** fixed in the shared easel.
+  - **Watching eyes are a piece (11 Nov).** "The vampire portrait that's following you definitely
+    needs to be a normal thing." Any portrait can have eyes that follow you (`watch`): the Count's,
+    and Dignity's "Off Duty (Never)", one eye under her patch.
 - **Kikkit's whirlpools, by YPPedia's rules (11 Nov).** The first go only spun her and flung her
   back; the user: "Whirlpools are basically four tiles ... each one ... rotates the ship and sends
   it to the opposite corner ... on some of them you'd naturally have like a whirlpool but with a

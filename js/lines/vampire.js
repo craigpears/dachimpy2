@@ -4,6 +4,8 @@ export const WOKEN = {
     grumble: 'Five more minutes...',
     again: 'Do you MIND?',
 };
+/** Asleep in his coffin, now and then, his lid giving a rattle: what draws you over to it. */
+export const ASLEEP = 'Zzzz...';
 export const CHARACTER = {
     name: 'The Count',
     who: 'The vampire who sleeps in the coffin at the bedside in Gravee\'s house (Bedside Manors). Not a real '
@@ -16,6 +18,7 @@ export const CHARACTER = {
         { on: '11 Nov', said: 'Maybe we don\'t go as far as a vampire game.' },
     ],
     lines: [
+        { when: 'Asleep in his coffin, now and then, his lid rattling', says: [ASLEEP] },
         { when: 'Lifting his lid', says: WOKEN, each: { scream: 'Sitting bolt upright, nose to nose with you', grumble: 'Lying back down as the lid shuts', again: 'Lifting it again, another time' } },
     ],
 };

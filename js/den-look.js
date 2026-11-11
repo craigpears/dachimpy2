@@ -833,31 +833,34 @@ export function dressPirate(look, opts = {}) {
       hat.add(rose, lf);
     }
   } else if (L.hat === 'pelt') {
-    // The Berserker pelt: a bear's head worn as a hood, in its colour (Gravee's, white: a polar bear),
-    // its snout out over the brow with a black nose, its eyes shut, two fangs at the forehead, round
-    // ears, and its fur falling either side of the face to the shoulders.
+    // The Berserker pelt, as Puzzle Pirates' sat: a bear's head worn up on top of hers, in its colour
+    // (Gravee's, white: a polar bear), its jaw over her brow, its snout out above her face with a black
+    // nose, its eyes shut, two fangs at her forehead, round ears, and its hide falling down her back. Her
+    // face shows clear underneath, from the den's camera looking down too (the user, 11 Nov, of Gravee: "I
+    // love her hat, but you really can't see her at all"): nothing of it comes down in front below her brow.
     const white0 = L.hatCol === 'white';
     const fur = M(L.hatCol, { roughness: 1 }), shade = white0 ? M('#c9d6e6') : M('#000000', { transparent: true, opacity: 0.25 });
-    const dome = part(new THREE.SphereGeometry(hr + 0.065, 20, 12, 0, Math.PI * 2, 0, Math.PI * 0.56), fur, 0, 0.94, -0.01);
-    dome.rotation.x = -0.22; dome.scale.set(1.08, 1.0, 1.1);
-    // (its face over her brow, looking out the way she does)
-    const snout = part(new THREE.SphereGeometry(0.11, 14, 10), fur, 0, 1.09, hr * 0.95);
-    snout.scale.set(1.0, 0.8, 1.3);
-    const muzzle = part(new THREE.SphereGeometry(0.065, 10, 8), shade, 0, 1.075, hr * 0.95 + 0.1);
+    const dome = part(new THREE.SphereGeometry(hr + 0.06, 20, 12, 0, Math.PI * 2, 0, Math.PI * 0.5), fur, 0, 1.03, -0.03);
+    dome.rotation.x = -0.12; dome.scale.set(1.08, 0.85, 1.1);
+    // (its face up on her brow, looking out the way she does)
+    const snout = part(new THREE.SphereGeometry(0.1, 14, 10), fur, 0, 1.195, hr * 0.85);
+    snout.scale.set(1.0, 0.75, 1.2);
+    const muzzle = part(new THREE.SphereGeometry(0.06, 10, 8), shade, 0, 1.185, hr * 0.85 + 0.09);
     muzzle.scale.set(1.15, 0.75, 0.85);
-    hat.add(dome, snout, muzzle, part(new THREE.SphereGeometry(0.036, 10, 8), black, 0, 1.1, hr * 0.95 + 0.15));
+    hat.add(dome, snout, muzzle, part(new THREE.SphereGeometry(0.032, 10, 8), black, 0, 1.205, hr * 0.85 + 0.135));
     for (const s of [-1, 1]) {
-      const ear = part(new THREE.SphereGeometry(0.068, 10, 8), fur, s * 0.19, 1.2, -0.03);
+      const ear = part(new THREE.SphereGeometry(0.066, 10, 8), fur, s * 0.19, 1.3, -0.04);
       ear.scale.set(1, 1, 0.55);
-      const inner = part(new THREE.SphereGeometry(0.038, 8, 6), shade, s * 0.19, 1.2, 0.005);
+      const inner = part(new THREE.SphereGeometry(0.036, 8, 6), shade, s * 0.19, 1.3, -0.008);
       inner.scale.set(1, 1, 0.4);
-      const shut = part(new THREE.CapsuleGeometry(0.009, 0.04, 2, 6), black, s * 0.095, 1.15, hr * 0.78);
+      const shut = part(new THREE.CapsuleGeometry(0.009, 0.036, 2, 6), black, s * 0.085, 1.255, hr * 0.62);
       shut.rotation.z = Math.PI / 2 + s * 0.25;
-      const fang = part(new THREE.ConeGeometry(0.018, 0.06, 6), white, s * 0.06, 1.0, hr + 0.04);
+      const fang = part(new THREE.ConeGeometry(0.016, 0.05, 6), white, s * 0.06, 1.1, hr + 0.005);
       fang.rotation.x = Math.PI;
       hat.add(ear, inner, shut, fang);
     }
-    hat.add(part(new THREE.CylinderGeometry(hr + 0.05, hr + 0.12, 0.5, 18, 1, true, Math.PI / 2 - 0.25, Math.PI + 0.5), M(L.hatCol, { roughness: 1, side: THREE.DoubleSide }), 0, 0.74, -0.02));
+    // Its hide, down her back (round behind her, not either side of her face).
+    hat.add(part(new THREE.CylinderGeometry(hr + 0.05, hr + 0.14, 0.52, 18, 1, true, Math.PI / 2 + 0.3, Math.PI - 0.6), M(L.hatCol, { roughness: 1, side: THREE.DoubleSide }), 0, 0.8, -0.03));
   } else if (L.hat === 'witch') {
     // The Wicked witch: a tall pointed black hat with a wide brim, bent at the tip, a band round it in
     // its second colour (which is also her face's).

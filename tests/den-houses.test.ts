@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { HOUSES, houseById, houseList, LODGINGS, atLodgings, walkable, step, roomAt, atWayOut, PAD, cleanSittings, sat, SITTINGS_KEY, plaqueDate, snapshotName } from '../src/den-houses';
+import { HOUSES, houseById, houseList, LODGINGS, atLodgings, walkable, step, roomAt, atWayOut, PAD, cleanSittings, sat, SITTINGS_KEY, plaqueDate, snapshotName, YOUR_PACE, ALONGSIDE, alongside, hostTarget, skipTo, skipSecs } from '../src/den-houses';
 import type { Plan } from '../src/den-houses';
 
 const ROOT = join(__dirname, '..');
@@ -68,6 +68,70 @@ describe('walking about a house', () => {
   it('lets you out at the front door', () => {
     expect(atWayOut(BOX, 2, 3.4)).toBe(true);
     expect(atWayOut(BOX, 2, 1)).toBe(false);
+  });
+});
+
+describe('whoever shows you round walks with you', () => {
+  /** You walk along x at your pace for `secs`, then stop; they follow as the shell walks them. The
+      furthest they got from you while you walked, and where they are a while after you stop. */
+  function stroll(secs: number, start = { x: -1.5, z: 0 }) {
+    const you = { x: 0, z: 0 }, host = { ...start }, dt = 1 / 60;
+    let walking = false, worst = 0;
+    for (let t = 0; t < secs + 3; t += dt) {
+      if (t < secs) you.x += YOUR_PACE * dt;
+      const to = hostTarget(host, you, null, walking);
+      walking = !!to;
+      if (to) {
+        const dx = to.x - host.x, dz = to.z - host.z, d = Math.hypot(dx, dz), s = Math.min(d, to.speed * dt);
+        if (d > 1e-9) { host.x += dx / d * s; host.z += dz / d * s; }
+      }
+      if (t < secs) worst = Math.max(worst, Math.hypot(host.x - you.x, host.z - you.z));
+    }
+    return { worst, end: Math.hypot(host.x - you.x, host.z - you.z) };
+  }
+
+  it("Gravee walks with you, not slowly behind (11 Nov: 'she comes eventually. She was very slow to, though')", () => {
+    const { worst, end } = stroll(6);
+    expect(worst).toBeLessThan(ALONGSIDE.near + 0.3);   // at your side the whole way, not left behind
+    expect(end).toBeLessThan(ALONGSIDE.near);
+    expect(end).toBeGreaterThan(0.8);                     // (beside you, not on top of you)
+  });
+
+  it('hurries to catch up when you have got ahead of them', () => {
+    expect(alongside({ x: 0, z: 0 }, { x: 6, z: 0 })!.speed).toBeGreaterThan(YOUR_PACE);
+    expect(alongside({ x: 0, z: 0 }, { x: 2.5, z: 0 })!.speed).toBe(YOUR_PACE);
+    expect(stroll(0.01, { x: -9, z: 0 }).end).toBeLessThan(ALONGSIDE.near);
+  });
+
+  it("doesn't stop and start at your heels", () => {
+    // Once on their way they keep on till they're back beside you; stood, they wait till you're a step off.
+    expect(alongside({ x: 0, z: 0 }, { x: 1.7, z: 0 }, true)).not.toBeNull();
+    expect(alongside({ x: 0, z: 0 }, { x: 1.7, z: 0 }, false)).toBeNull();
+  });
+
+  it('stands by what they are showing you while you are there, and comes along when you walk on', () => {
+    const spot = { at: { x: 5, z: 0 }, near: 1.5, stand: { x: 6, z: -1 } };
+    expect(hostTarget({ x: 4, z: 0 }, { x: 5.2, z: 0 }, spot)).toMatchObject({ x: 6, z: -1 });
+    expect(hostTarget({ x: 6, z: -1 }, { x: 5.2, z: 0 }, spot)).toBeNull();
+    expect(hostTarget({ x: 6, z: -1 }, { x: 12, z: 0 }, spot)).toMatchObject({ speed: ALONGSIDE.hurry });
+  });
+});
+
+describe("a long stretch you can skip along (11 Nov: 'you can zoom by as a skip. I don't think it should do that by default, though')", () => {
+  const S = { room: 'b', a: 4.5, b: 7.5 };
+  const LONG: Plan = { rooms: [{ id: 'a', name: 'A', x0: 0, x1: 4, z0: 0, z1: 4 }, { id: 'b', name: 'B', x0: 4, x1: 40, z0: 0, z1: 4 }], doors: BOX.doors, out: BOX.out };
+  const L = { ...S, b: 38 };
+  it('takes you to its end the way you face, or back the other way from the far end', () => {
+    expect(skipTo(LONG, L, 6, 2, 1)).toBe(38);
+    expect(skipTo(LONG, L, 30, 2, -1)).toBe(4.5);
+    expect(skipTo(LONG, L, 37, 2, 1)).toBe(4.5);
+    expect(skipTo(LONG, L, 2, 2, 1)).toBeNull();   // (not in its room)
+  });
+  it('offers nothing in a stretch too short to skip', () => expect(skipTo(BOX, S, 6, 2, 1)).toBeNull());
+  it('goes slowly enough the first time to see it go on and on, quicker after, never a chore', () => {
+    expect(50 / skipSecs(50, 0)).toBeLessThan(8);   // metres a second
+    expect(skipSecs(50, 1)).toBeLessThan(skipSecs(50, 0));
+    expect(skipSecs(50, 1)).toBeLessThan(6);
   });
 });
 

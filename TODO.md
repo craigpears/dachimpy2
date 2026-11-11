@@ -140,42 +140,11 @@ the site (`.assetsignore` skips `*.md`).
   thrones, the skeleton cannons." The user's war frigate, the one for Daquan's flotilla (IDEAS.md,
   "Daquan's flotilla"): waiting on the user's pictures before she's drawn.
 
-- **Gravee walks with you round her house (11 Nov):** "I think [Gravee] should be walking with
-  you. As you walk through the house. Oh, she comes eventually. She was very slow to, though."
-  She went ahead to each stop slower than you walk and stood still while she talked, so you lost
-  her. She should keep at your side as you walk, at your pace (hurrying to catch up if you've got
-  ahead), talking as she goes, and stand by each thing as she shows it you.
-  "This definitely needs to be a standard feature for people in houses and things": whoever shows
-  you round any house walks with you, a piece of the houses, not Gravee's own code.
-
-- **Gravee's house, after the user's first walk round (11 Nov):** "Oh, I love it. I love it." But:
-  - **The gallery's whiz is too fast:** "zooming past the paintings was a little too fast. That
-    was just like, what happened? I don't think we need to go quite like that." Slower, so you see
-    it's the gallery going on and on. Then (11 Nov): "Obviously, you can zoom by as a skip. I don't
-    think it should do that by default, though." So you walk it, and whizzing along is a skip you
-    choose.
-  - **Her speech bubbles get stuck:** "quite a few of her speech bubbles kind of seem to get
-    stuck. Like I see 4 of them open there at the moment." One bubble at a time, each gone when
-    its line is done.
-  - **The camera while she paints you:** "the camera zoom's not really in the right place when
-    she's painting, to like, oh, hold it there, does the painting. Like, it kind of fixes itself,
-    but it ruins some of the scene. It doesn't really flow right." The camera should settle where
-    you see her painting you, and hold there till she's done.
-  - **Nothing draws you to the coffin:** "it's not necessarily discoverable that you can go near
-    the coffin ... it's obvious once you're in proximity. But ... if you're on the other side of
-    the room, there's nothing really pushing you in that direction." Gravee leads you over to it
-    as her tour's last stop and eggs you on to peek, and the coffin catches your eye from across
-    the room (its lid rattling now and then, the bat circling over it), with no arrows.
-  - **You can't see Gravee for her hat:** "I love her hat, but you really can't see her at all.
-    I don't know if there's anything we can do about that." The white Berserker pelt hides her
-    face. Sit it as Puzzle Pirates' does, the bear's head up on top, its jaw over her brow, so her
-    face shows (fixed in the pelt itself, so it's right everywhere it's worn).
-  - **The easel sticks through her canvas:** "when [Gravee] is painting ... the easel is sticking
-    through the canvas." The canvas sits in front of the easel's wood (fixed in the shared easel).
-  - **The Count's watching eyes, a piece of their own:** "The vampire portrait that's following
-    you definitely needs to be a normal thing." Any portrait in any scene can have eyes that follow
-    you (the Count's, a pirate's), a shared piece, not code in her house. The bat's flight round
-    his coffin is loved too ("these are all just priceless"); it's already the shared creatures'.
+- **Looking round a house freely (11 Nov):** "the camera isn't quite working on the portrait
+  gallery stuff ... If I'm standing next to the portraits of [Gravee], I should be able to move the
+  camera freely, zoom in, look around, that kind of thing." In any house (the shared shell, not
+  Gravee's own), drag to turn the camera round you and look about, and zoom in close to a portrait
+  to read it and see it properly; the house's own view comes back when you walk on or let go.
 
 ## Needs a playtest to pin down
 

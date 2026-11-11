@@ -12,13 +12,12 @@
 
    So: she shows you round in speech bubbles, stop by stop, as you walk; her portraits line the walls
    (each a pirate drawn by the pirate maker from a look: config here, so a picture is an entry); a
-   long gallery you walk a few steps of before the camera whizzes past the rest (the gag: never
-   tedious); her yeti "proof" (dozens of them: "Definitive Proof of Snowy Arden" and so on, as in her
+   long gallery that goes on and on, that you walk with her or skip along at a run (the gag); her yeti "proof" (dozens of them: "Definitive Proof of Snowy Arden" and so on, as in her
    real gallery); the vampire's portrait over his coffin, its eyes following you; and the coffin by
    her bed (Bedside Manors). Lift its lid and he sits up, you both scream, and she sits you for a
    portrait, frozen mid-fright, that hangs pride of place in her hall, kept in this browser. No vampire
    game (yet: the rapid-Carpentry coffins wait, IDEAS.md). */
-import type { Plan, Block } from './den-houses.js';
+import type { Plan, Block, Stretch, ShowSpot } from './den-houses.js';
 
 // ---------- the house ----------
 /** The gallery's length (metres), and how far apart its frames hang. Long: the gag's that it goes on. */
@@ -65,7 +64,7 @@ export const FURNISH: readonly Piece[] = [
   { kind: 'coffin', x: COFFIN.x, z: COFFIN.z, yaw: COFFIN.yaw },
   { kind: 'easel', x: EASEL.x, z: EASEL.z, yaw: EASEL.yaw },
   { kind: 'rug', x: G1 + 5.4, z: 0.6, col: '#2d3f5c' },
-  { kind: 'candelabra', x: G1 + 9.2, z: -3.0 },
+  { kind: 'candelabra', x: COFFIN.x + 0.85, z: COFFIN.z - 0.55 },   // (a candle by the coffin, catching your eye)
   { kind: 'candelabra', x: G1 + 5.7, z: -3.0 },
   { kind: 'chair', x: G1 + 8.6, z: 1.8, yaw: -2.6 },
 ];
@@ -98,8 +97,9 @@ export type Sitter =
   | { who: 'yeti'; name: string; dress?: Record<string, string | number | boolean> }
   | { who: 'vampire' }
   | { who: 'you' };
-/** A portrait: its title (on its plaque), who's in it, what's behind them. */
-export interface Portrait { id: string; title: string; sitter: Sitter; backdrop: Backdrop }
+/** A portrait: its title (on its plaque), who's in it, what's behind them; `watch`: its eyes follow you
+    about the room (js/den/portraits.js's watching()). */
+export interface Portrait { id: string; title: string; sitter: Sitter; backdrop: Backdrop; watch?: boolean }
 export type Backdrop = 'bloodmoon' | 'snow' | 'beach' | 'crypt' | 'autumn' | 'witch' | 'sea' | 'den' | 'night';
 export const BACKDROPS: readonly Backdrop[] = ['bloodmoon', 'snow', 'beach', 'crypt', 'autumn', 'witch', 'sea', 'den', 'night'];
 
@@ -121,7 +121,8 @@ const HER: Portrait[] = [
 /** Pirates she's met (each in the wardrobe as they are: PIRATES), with her titles for them. */
 const MET: Portrait[] = [
   { id: 'dalnoth', title: 'Dalnoth, Sober (Rare)', backdrop: 'sea', sitter: { who: 'pirate', name: 'Dalnoth' } },
-  { id: 'dignity', title: 'Dignity, Off Duty (Never)', backdrop: 'den', sitter: { who: 'pirate', name: 'Dignity' } },
+  // (off duty, she says: her eyes follow you down the gallery all the same)
+  { id: 'dignity', title: 'Dignity, Off Duty (Never)', backdrop: 'den', sitter: { who: 'pirate', name: 'Dignity' }, watch: true },
   { id: 'mischievious', title: 'Mischievious, Between Weddings', backdrop: 'beach', sitter: { who: 'pirate', name: 'Mischievious' } },
   { id: 'kikkit', title: 'Kikkit, Mid-Sentence', backdrop: 'sea', sitter: { who: 'pirate', name: 'Kikkit' } },
 ];
@@ -149,8 +150,8 @@ export const VAMPIRE: Record<string, string | number | boolean> = {
 
 /** Her portrait as she is now: over the hall's mantel, by the pride of place. */
 export const HERSELF: Portrait = { id: 'herself', title: 'Gravee, by Gravee', backdrop: 'bloodmoon', sitter: { who: 'pirate', name: 'Gravee' } };
-/** The vampire's, over his coffin: its eyes follow you. */
-export const VAMPIRE_PORTRAIT: Portrait = { id: 'vampire', title: 'The Count, Awake (Rare)', backdrop: 'night', sitter: { who: 'vampire' } };
+/** The vampire's, over his coffin: its eyes follow you (src/eyes.ts; any portrait can, `watch`). */
+export const VAMPIRE_PORTRAIT: Portrait = { id: 'vampire', title: 'The Count, Awake (Rare)', backdrop: 'night', sitter: { who: 'vampire' }, watch: true };
 /** Yours, once she's painted you: pride of place in her hall. */
 export const YOURS: Portrait = { id: 'you', title: '', backdrop: 'crypt', sitter: { who: 'you' } };
 
@@ -175,18 +176,11 @@ export const HALL_WALL = { pride: { x: 0, w: 1.5, h: 1.9 }, herself: { x: -3.0 }
 export const HALL_OTHER: Portrait = HER[1];
 
 // ---------- the gag: the endless gallery ----------
-/** Where the gallery's two ends are, that you walk at a walk: past the first (going in), the camera
-    whizzes you the length of it, to the second; and back again the same, coming out. */
-export const WHIZ = { a: G0 + 6.2, b: G1 - 4.2 } as const;
-/** Walking from x0 to x1 along the gallery: where the whiz takes you, or null. Never into the middle. */
-export function whiz(x0: number, x1: number): number | null {
-  if (x0 < WHIZ.a && x1 >= WHIZ.a) return WHIZ.b + 0.3;
-  if (x0 > WHIZ.b && x1 <= WHIZ.b) return WHIZ.a - 0.3;
-  return null;
-}
-/** How long the whiz takes: the first time along it, long enough to see how far it goes; after that,
-    quick (it's a joke, not a chore). */
-export const whizSecs = (times: number): number => (times ? 1.6 : 4.2);
+/* It goes on and on, and you walk it, Gravee at your side: that's the joke (the user, 11 Nov: "Obviously,
+   you can zoom by as a skip. I don't think it should do that by default, though"). Or skip along it, a
+   button and a key (the house shell's: src/den-houses.ts's Stretch), at a run, the frames and their
+   titles going by, from a few steps in at one end to a few steps from the other. */
+export const WHIZ: Stretch = { room: 'gallery', a: G0 + 5.9, b: G1 - 3.9 };
 
 // ---------- the tour ----------
 /** Her tour, stop by stop: where you have to come to (`at`, within `near`) for her to say a stop's lines,
@@ -196,7 +190,7 @@ export type TourStop = 'hall' | 'gallery' | 'yeti' | 'chamber' | 'coffin';
 export const TOUR: readonly Stop[] = [
   { id: 'hall', at: { x: 0, z: 0.4 }, near: 2.4, her: { x: -0.9, z: -1.6 } },
   { id: 'gallery', at: { x: G0 + 0.8, z: 0 }, near: 1.6, her: { x: G0 + 2.4, z: -0.6 } },
-  { id: 'yeti', at: { x: WHIZ.b + 0.3, z: 0 }, near: 1.4, her: { x: WHIZ.b + 1.8, z: -0.7 } },
+  { id: 'yeti', at: { x: WHIZ.b, z: 0 }, near: 1.4, her: { x: WHIZ.b + 1.8, z: -0.7 } },
   { id: 'chamber', at: { x: G1 + 1.3, z: 0 }, near: 1.8, her: { x: G1 + 2.8, z: 1.2 } },
   { id: 'coffin', at: { x: COFFIN.x - 0.4, z: COFFIN.z + 1.6 }, near: 1.5, her: { x: EASEL.x - 0.5, z: EASEL.z + 0.6 } },
 ];
@@ -212,21 +206,60 @@ export function stopAt(from: number, x: number, z: number): number {
 /** Close enough to the coffin to lift its lid. */
 export const atCoffin = (x: number, z: number): boolean => Math.hypot(x - COFFIN.x, z - (COFFIN.z + 1.3)) < 1.3;
 
+/* Drawn to the coffin, the house's main event, from anywhere in her bedchamber (the user, 11 Nov: "it's not
+   necessarily discoverable that you can go near the coffin ... if you're on the other side of the room,
+   there's nothing really pushing you in that direction"). No arrow: she and the scene do it. Once she's
+   shown you into the bedchamber she goes and stands by the coffin (LEAD: while you're anywhere in the
+   room), beckoning you over now and then (her BECKON lines), till you've lifted its lid; and the coffin
+   catches your eye itself, its lid giving a rattle now and then, the Count snoring, the bat circling over
+   it, a candle burning beside it. */
+export const LEAD: ShowSpot = { at: { x: G1 + 5, z: -0.25 }, near: 5.2, stand: { x: COFFIN.x + 1.25, z: COFFIN.z + 0.5 } };
+/** How often (seconds, least and most between) she beckons and the lid rattles; and how far off you are
+    (from the coffin, metres) for her to bother beckoning. */
+export const LURE = { beckon: [7, 11], rattle: [4.5, 8], far: 2.6 } as const;
+/** Is she leading you to the coffin: shown into the bedchamber, and he's not been woken yet? */
+export const leading = (tour: number, woken: boolean): boolean => !woken && tour >= TOUR.findIndex((s) => s.id === 'coffin');
+
 /** Where you stand for your sitting (by the coffin, as you were when he sat up), and she at her easel. */
 export const SITTING = { you: { x: COFFIN.x - 1.05, z: COFFIN.z + 1.15, yaw: 0.5 }, her: { x: EASEL.x + 0.6, z: EASEL.z + 0.45, yaw: 2.2 } } as const;
 
 /* The scare, beat by beat (seconds from lifting the lid): the lid creaks up, he sits bolt upright, you
-   both scream, she claps, you freeze, she paints, he lies back down, the lid shuts, and it's done. */
-export const SCARE = { creak: 0.0, up: 0.9, scream: 1.3, clap: 2.8, freeze: 3.4, paint: 5.2, done: 9.6 } as const;
+   both scream, she claps, you freeze, she paints (he lies back down, the lid shuts), she's painted you,
+   and it's done. */
+export const SCARE = { creak: 0.0, up: 0.9, scream: 1.3, clap: 2.8, freeze: 3.4, paint: 5.2, painted: 9.2, done: 10.6 } as const;
 
-// ---------- the vampire's eyes ----------
-/** Which way the portrait's eyes look to follow you: (dx, dy), each -1 to 1, from where its eyes are
-    (x, y on its wall) to where you are (x along the wall, 1.5 m up: your face), a little lazy. */
-export function eyesToward(eyeX: number, eyeY: number, youX: number, youZ: number, wallZ: number): [number, number] {
-  const dx = youX - eyeX, dz = Math.max(0.5, youZ - wallZ), dy = 1.5 - eyeY;
-  const ax = Math.atan2(dx, dz) / (Math.PI / 2), ay = Math.atan2(dy, Math.hypot(dx, dz)) / (Math.PI / 2);
-  const c = (v: number) => Math.max(-1, Math.min(1, v * 1.6));
-  return [c(ax), c(ay)];
+/** A camera shot, in the house's own terms: what it looks at, how far back it stands, how high up
+    (`tilt`) and how far round (`yaw`, 0: from the front), radians. */
+export interface Shot { look: { x: number; y: number; z: number }; dist: number; tilt: number; yaw: number }
+const shot = (x: number, y: number, z: number, dist: number, tilt: number, yaw: number): Shot => ({ look: { x, y, z }, dist, tilt, yaw });
+const YOU = SITTING.you, AT_EASEL = SITTING.her;
+/* The scare's camera (the user, 11 Nov: "the camera zoom's not really in the right place when she's
+   painting, to like, oh, hold it there, does the painting ... It doesn't really flow right"): shots each
+   held a while, the camera easing from one to the next, never cutting: from where it was, onto the coffin
+   as he sits up; in on your fright; round to her at her easel painting you, you and the coffin beyond,
+   held till she's done; and back to where it was. `from`, `to`: when each is held (seconds). */
+export const SCARE_SHOTS: readonly { from: number; to: number; shot: Shot }[] = [
+  { from: 0.9, to: 2.9, shot: shot((COFFIN.x + YOU.x) / 2, 1.2, COFFIN.z + 1.0, 5.6, 0.3, 0.25) },
+  { from: 3.5, to: 4.6, shot: shot(YOU.x + 0.5, 1.2, YOU.z - 0.4, 4.2, 0.15, 0.2) },
+  { from: 5.6, to: SCARE.painted + 0.3, shot: shot((EASEL.x + AT_EASEL.x + YOU.x) / 3 + 0.2, 1.15, (EASEL.z + AT_EASEL.z + YOU.z) / 3, 5.8, 0.26, -0.1) },
+];
+const mixShot = (a: Shot, b: Shot, k: number): Shot => {
+  const m = (p: number, q: number) => p + (q - p) * k;
+  return shot(m(a.look.x, b.look.x), m(a.look.y, b.look.y), m(a.look.z, b.look.z), m(a.dist, b.dist), m(a.tilt, b.tilt), m(a.yaw, b.yaw));
+};
+/** The camera `t` seconds into the scare: `home` (the house's own view, where it was) at the start and
+    from the end (SCARE.done), the shots between, eased (smoothstep) from each to the next. */
+export function scareShot(t: number, home: Shot): Shot {
+  const holds = [{ from: -Infinity, to: 0, shot: home }, ...SCARE_SHOTS, { from: SCARE.done, to: Infinity, shot: home }];
+  for (let i = 0; i < holds.length; i++) {
+    const h = holds[i];
+    if (t <= h.to) {
+      if (t >= h.from) return mixShot(h.shot, h.shot, 0);
+      const p = holds[i - 1], u = (t - p.to) / (h.from - p.to), k = u * u * (3 - 2 * u);
+      return mixShot(p.shot, h.shot, k);
+    }
+  }
+  return mixShot(home, home, 0);
 }
 
 // ---------- your portrait's plaque ----------

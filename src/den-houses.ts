@@ -90,6 +90,56 @@ export function step(plan: Plan, ox: number, oz: number, nx: number, nz: number,
 /** How long a line stays up in its bubble: long enough to read (seconds). */
 export const readSecs = (text: string): number => Math.max(1.8, String(text).trim().split(/\s+/).length * 0.33 + 1.0);
 
+// ---------- whoever shows you round: at your side ----------
+/* A house's host walks with you (the user, 11 Nov, of Gravee: "[she] should be walking with you. As you
+   walk through the house. Oh, she comes eventually. She was very slow to, though."; and "definitely needs
+   to be a standard feature for people in houses and things"): kept at your side, at your pace (you walk
+   at YOUR_PACE), hurrying when you've got ahead, and by the thing they're showing you while they talk
+   about it. The house shell (js/den/house.js) walks any house's host so; a house only says who, and
+   where each thing they show you is. */
+export const YOUR_PACE = 4.2;
+/** How near they keep (`keep`, metres), how far you get before they set off after you (`near`; once
+    walking they keep on till they're back at `keep`, so they don't stop and start at your heels), and
+    past `far` they hurry. */
+export const ALONGSIDE = { near: 1.9, keep: 1.3, hurry: 6.2, far: 3.2 } as const;
+interface At { x: number; z: number }
+/** Where a host heads to keep by you, and how fast; null when they're by you already. `walking`: they
+    were on their way last step. */
+export function alongside(host: At, you: At, walking = false): { x: number; z: number; speed: number } | null {
+  const d = Math.hypot(host.x - you.x, host.z - you.z);
+  if (d < (walking ? ALONGSIDE.keep + 0.1 : ALONGSIDE.near)) return null;
+  const k = ALONGSIDE.keep / d;
+  return { x: you.x + (host.x - you.x) * k, z: you.z + (host.z - you.z) * k, speed: d > ALONGSIDE.far ? ALONGSIDE.hurry : YOUR_PACE };
+}
+/** Something a host shows you: you come within `near` of `at`, and they stand at `stand` to talk about it. */
+export interface ShowSpot { at: At; near: number; stand: At }
+/** Where a host heads: to the thing they're `showing` you while you're there (and they're on about it),
+    or else at your side. Null: stay put. */
+export function hostTarget(host: At, you: At, showing: ShowSpot | null, walking = false): { x: number; z: number; speed: number } | null {
+  if (showing && Math.hypot(you.x - showing.at.x, you.z - showing.at.z) < showing.near + 0.8) {
+    return Math.hypot(host.x - showing.stand.x, host.z - showing.stand.z) < 0.1 ? null : { ...showing.stand, speed: YOUR_PACE };
+  }
+  return alongside(host, you, walking);
+}
+
+// ---------- a long stretch you can skip along ----------
+/* A house can have a stretch that goes on and on (Gravee's gallery), which you walk at a walk, the joke
+   being that it does; or skip along, a button and a key, at a run, the camera alongside (the user, 11 Nov:
+   "Obviously, you can zoom by as a skip. I don't think it should do that by default, though"). Along x,
+   in one room, from `a` to `b`. */
+export interface Stretch { room: string; a: number; b: number }
+/** Skipping from x, facing `dir` (+1: toward b): to its end that way, or, nothing much left that way, its
+    other end; null if you're not in its room. */
+export function skipTo(plan: Plan, s: Stretch, x: number, z: number, dir: number): number | null {
+  if (roomAt(plan, x, z)?.id !== s.room) return null;
+  const ahead = dir >= 0 ? s.b : s.a, behind = dir >= 0 ? s.a : s.b;
+  if (Math.abs(ahead - x) > 2.5) return ahead;
+  return Math.abs(behind - x) > 2.5 ? behind : null;
+}
+/** How long a skip takes (seconds), `dist` metres: the first time slow enough to see it go on and on and
+    read the titles as they pass; after that quicker. A joke, not a chore. */
+export const skipSecs = (dist: number, times: number): number => Math.max(2.2, Math.abs(dist) / (times ? 11 : 6.5));
+
 /** At the front door, to go out? */
 export const atWayOut = (plan: Plan, x: number, z: number): boolean => Math.hypot(x - plan.out.x, z - plan.out.z) < plan.out.r;
 

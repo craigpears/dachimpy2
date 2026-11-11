@@ -6,9 +6,11 @@
 
    - paint(portrait) for a wall: drawn straight into a tile of a big shared picture (an atlas) that stays
      on the graphics card, never read back (reading back stalls a frame: RULES.md, "No stutter"). Gives
-     { texture, uv, eyes }: the atlas, where on it this one is, and, for the Count's, where his eyes are on
-     the picture (u, v from its bottom left; `eyes.r` their size, a share of its height), so a frame can
-     make them follow you.
+     { texture, uv, eyes }: the atlas, where on it this one is, and, for a portrait that watches (the
+     Count's; any with `watch`), where its eyes are on the picture (u, v from its bottom left; `eyes.r`
+     their size, a share of its height; `eyes.pupil` their colour), for watching().
+   - watching(frame, painted, target) for its eyes to follow you: drawn over the picture on its frame,
+     a piece with a tick, like any of furniture.js's. Which way they look is src/eyes.ts's.
    - paintYou(look) for yours: read off into a canvas, to finish stroke by stroke on her easel and to save
      as a snapshot. Gives { canvas, texture }. */
 import * as THREE from 'three';
@@ -17,6 +19,7 @@ import { renderer, makePirate } from './world.js';
 import { yeti, vampire, fright } from './creatures.js';
 import { coffin } from './furniture.js';
 import { VAMPIRE } from '../den-gravee.js';
+import { eyesToward, pirateEyes } from '../eyes.js';
 
 /** A portrait's size (pixels): upright, as Puzzle Pirates' were (174 by 255, near enough). */
 export const PW = 256, PH = 320;
@@ -115,13 +118,29 @@ function blurryYeti() {
   });
   return g;
 }
+/** Where a figure's eyes (points on its body) come out on the picture, as watching() wants them, once the
+    camera's aimed: u, v from its bottom left, their size (`r`, a share of its height) and pupils' colour. */
+function eyesOn(fig, points, pupil) {
+  fig.g.updateMatrixWorld(true);
+  const at = (q) => fig.body.localToWorld(new THREE.Vector3(q.x, q.y, q.z)).project(pCam);
+  const eyes = points.map((q) => { const p = at(q); return { u: (p.x + 1) / 2, v: (p.y + 1) / 2 }; });
+  const a = at(points[0]), b = at({ ...points[0], y: points[0].y + 0.035 });
+  eyes.r = Math.max(0.012, Math.abs(b.y - a.y) / 2 * 1.1);
+  eyes.pupil = pupil;
+  return eyes;
+}
 /** What's in the picture (and where the camera stands), for a sitter. */
 function compose(portrait, you) {
   const s = portrait.sitter, objs = [];
   let eyes = null;
   if (s.who === 'pirate') {
-    objs.push(sitFor(makePirate({ look: lookOf(s.name, s.dress) })).g);
-    aim(0.3, 1.12, 4.4, 0, 1.0, 0);
+    const look = lookOf(s.name, s.dress), p = sitFor(makePirate({ look }));
+    objs.push(p.g);
+    if (portrait.watch) {
+      // Head and shoulders, close enough to see the eyes move.
+      aim(0.25, 1.62, 2.3, 0, 1.5, 0);
+      eyes = eyesOn(p, pirateEyes(look), '#1a1208');
+    } else aim(0.3, 1.12, 4.4, 0, 1.0, 0);
   } else if (s.who === 'yeti') {
     // Her, sharp, beside him, not.
     const her = sitFor(makePirate({ look: lookOf('Gravee', s.dress) }), 0.45), y = blurryYeti();
@@ -132,10 +151,7 @@ function compose(portrait, you) {
     // Head and shoulders, his eyes where a frame can find them.
     const v = vampire(VAMPIRE);
     aim(0, 1.6, 2.05, 0, 1.5, 0);
-    v.g.updateMatrixWorld(true);
-    const e = [0.085, -0.085].map((x) => v.body.localToWorld(new THREE.Vector3(x, 0.95, 0.245)).project(pCam));
-    eyes = e.map((p) => ({ u: (p.x + 1) / 2, v: (p.y + 1) / 2 }));
-    eyes.r = 0.036;
+    eyes = eyesOn(v, [0.085, -0.085].map((x) => ({ x, y: 0.95, z: 0.245 })), '#7a0a14');
     objs.push(v.g);
   } else if (s.who === 'you') {
     // You, frozen mid-scream, the Count sitting bolt upright in his coffin behind you.
@@ -185,6 +201,37 @@ export function paint(portrait) {
   objs.forEach(drop);
   const e = 1.5;   // (a pixel and a half in, so a neighbour's edge never bleeds in as it shrinks)
   return { texture: A.rt.texture, uv: { u0: (x + e) / ATLAS_W, v0: (y + e) / ATLAS_H, u1: (x + PW - e) / ATLAS_W, v1: (y + PH - e) / ATLAS_H }, eyes };
+}
+
+// ---------- eyes that follow you ----------
+const WHITE = new THREE.MeshBasicMaterial({ color: '#f4efe4' });
+const v4 = new THREE.Vector3();
+/* A portrait's eyes, following you about the room (the user, 11 Nov: "The vampire portrait that's
+   following you definitely needs to be a normal thing"): over the picture on its `frame` (furniture.js's),
+   where paint() found them (`painted.eyes`), each a white with a pupil that looks toward `target()` (a
+   point in the world: you), as src/eyes.ts says. A piece: { g, tick(dt) }; null if it has no eyes. */
+export function watching(frame, painted, target) {
+  if (!painted?.eyes) return null;
+  const dark = new THREE.MeshBasicMaterial({ color: painted.eyes.pupil || '#1a1208' });
+  const eyes = painted.eyes.map((e) => {
+    const r = painted.eyes.r * frame.h, x = (e.u - 0.5) * frame.w, y = frame.y + (e.v - 0.5) * frame.h;
+    const ball = new THREE.Mesh(new THREE.CircleGeometry(r, 16), WHITE); ball.position.set(x, y, 0.04);
+    const pupil = new THREE.Mesh(new THREE.CircleGeometry(r * 0.5, 12), dark); pupil.position.set(x, y, 0.045);
+    frame.g.add(ball, pupil);
+    return { pupil, x, y, r };
+  });
+  return {
+    g: frame.g,
+    tick() {
+      const at = target();
+      if (!at) return;
+      frame.g.worldToLocal(v4.copy(at));
+      for (const e of eyes) {
+        const [dx, dy] = eyesToward(e.x, e.y, v4.x, v4.z, 0);
+        e.pupil.position.set(e.x + dx * e.r * 0.5, e.y + dy * e.r * 0.5, 0.045);
+      }
+    },
+  };
 }
 
 // ---------- yours: read off into a canvas ----------

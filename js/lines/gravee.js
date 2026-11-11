@@ -28,9 +28,17 @@ export const TOUR_LINES = {
         'Ooh, don\'t open it. He\'s ever so grumpy before sunset.',
     ],
 };
+/** By his coffin, beckoning you over to it from across her bedchamber, now and then, till you've had
+    your look (the user, 11 Nov: "if you're on the other side of the room, there's nothing really pushing
+    you in that direction"). */
+export const BECKON = [
+    "Go on, have a look at the Count. He won't mind.",
+    'Over here! Come and say hello to the Count.',
+    "He's only sleeping. Have a peek!",
+];
 /** The hall's last line, once your portrait's up in the middle of it. */
 export const HALL_YOURS = 'And in the middle, my very favourite. You! Mid-scream.';
-/** The endless gallery: as the camera whizzes you down it, the first time (yours is in you.ts). */
+/** The endless gallery: whizzing down it at a run (a skip you choose), the first time (yours is in you.ts). */
 export const THE_GALLERY = {
     answer: 'Only seven pages!',
     back: 'Mind the yetis!',
@@ -87,8 +95,9 @@ export const CHARACTER = {
                 coffin: 'Coming up to the coffin',
             },
         },
+        { when: "Stood by the coffin, beckoning you over, now and then till you've lifted its lid", says: BECKON },
         { when: 'In the hall, instead of "It\'s empty. For now...", once your portrait\'s hung there', says: [HALL_YOURS] },
-        { when: 'The endless gallery, as the camera whizzes you down it', says: THE_GALLERY, each: { answer: 'The first time, after you ask', back: 'Coming back down it' } },
+        { when: 'Whizzing down the endless gallery (a skip you choose)', says: THE_GALLERY, each: { answer: 'The first time, after you ask', back: 'Coming back down it' } },
         { when: 'The Count sits up, and she paints you', says: THE_SCARE, each: { moment: 'As you both scream', painting: 'At her easel', done: 'Her brush down', hung: 'Your portrait up, pride of place' } },
         { when: 'Now and then, as you wander her house after the tour', says: CHATTER },
         { when: 'By your portrait, once it\'s hung', says: YOUR_PORTRAIT },

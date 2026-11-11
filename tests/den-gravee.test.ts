@@ -5,11 +5,12 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   PLAN, ARRIVE, FURNISH, blocksOf, galleryHang, GALLERY_SLOTS, GALLERY_LEN, FRAME_GAP, YETIS, HERSELF, VAMPIRE_PORTRAIT, HALL_OTHER, BACKDROPS,
-  WHIZ, whiz, whizSecs, TOUR, stopAt, atCoffin, COFFIN, SITTING, SCARE, eyesToward,
+  WHIZ, TOUR, stopAt, atCoffin, COFFIN, EASEL, SITTING, SCARE, SCARE_SHOTS, scareShot, LEAD, LURE, leading,
 } from '../src/den-gravee';
 import type { Portrait } from '../src/den-gravee';
-import { walkable, roomAt, atWayOut, step } from '../src/den-houses';
-import { TOUR_LINES, AT_THE_DOOR, THE_SCARE } from '../src/lines/gravee';
+import { walkable, roomAt, atWayOut, step, skipTo, hostTarget } from '../src/den-houses';
+import type { Stretch } from '../src/den-houses';
+import { TOUR_LINES, AT_THE_DOOR, THE_SCARE, BECKON } from '../src/lines/gravee';
 
 const LOOK_JS = readFileSync(join(__dirname, '..', 'js', 'den-look.js'), 'utf8').replace(/\r\n/g, '\n');   // (either line ending, as checked out)
 const FURNITURE_JS = readFileSync(join(__dirname, '..', 'js', 'den', 'furniture.js'), 'utf8');
@@ -105,19 +106,19 @@ describe('the endless gallery (10 Nov: "you wouldn\'t want to make it too tediou
     expect(PLAN.rooms[1].x1 - WHIZ.b).toBeLessThan(8);
   });
 
-  it('whizzes you the length of it going in, and back again coming out, never into the middle', () => {
-    expect(whiz(WHIZ.a - 0.1, WHIZ.a + 0.05)).toBeCloseTo(WHIZ.b + 0.3);
-    expect(whiz(WHIZ.b + 0.1, WHIZ.b - 0.05)).toBeCloseTo(WHIZ.a - 0.3);
-    expect(whiz(WHIZ.a - 2, WHIZ.a - 1.9)).toBeNull();
-    expect(whiz(WHIZ.b + 1, WHIZ.b + 1.1)).toBeNull();
-    // Landing past the line it started from, so it doesn't whiz you straight back.
-    expect(whiz(WHIZ.b + 0.3, WHIZ.b + 0.35)).toBeNull();
-    expect(whiz(WHIZ.a - 0.3, WHIZ.a - 0.35)).toBeNull();
-  });
-
-  it('takes long enough the first time to see how far it goes, and is quick after', () => {
-    expect(whizSecs(0)).toBeGreaterThan(3);
-    expect(whizSecs(1)).toBeLessThan(2);
+  it("is walked, not whizzed down by itself: the whiz is a skip you choose (11 Nov: 'Obviously, you can zoom by as a skip. I don't think it should do that by default, though')", () => {
+    const S: Stretch = WHIZ;
+    const GAL = PLAN.rooms[1];
+    expect(S.room).toBe(GAL.id);
+    // A skip from the gallery's door goes the length of it, and from its far end all the way back.
+    expect(skipTo(PLAN, S, GAL.x0 + 1, 0, 1)).toBe(WHIZ.b);
+    expect(skipTo(PLAN, S, GAL.x1 - 1, 0, -1)).toBe(WHIZ.a);
+    expect(skipTo(PLAN, S, PLAN.rooms[0].x0 + 1, 0, 1)).toBeNull();   // (not from the hall)
+    // Landing where you can stand, at the yeti stop going in.
+    expect(walkable(PLAN, WHIZ.a, 0) && walkable(PLAN, WHIZ.b, 0)).toBe(true);
+    expect(stopAt(0, WHIZ.b, 0)).toBe(TOUR.findIndex((s) => s.id === 'yeti'));
+    // And nothing in the house whizzes you by itself any more.
+    expect(readFileSync(join(__dirname, '..', 'js', 'den', 'gravee-house.js'), 'utf8')).not.toMatch(/[^.\w]whiz\(/);
   });
 });
 
@@ -151,12 +152,62 @@ describe('her tour, stop by stop', () => {
 });
 
 describe("the Count's portrait: its eyes follow you", () => {
-  it('looks left when you are to its left, right when you are to its right', () => {
-    expect(eyesToward(10, 2, 7, 1, -3)[0]).toBeLessThan(-0.3);
-    expect(eyesToward(10, 2, 13, 1, -3)[0]).toBeGreaterThan(0.3);
-    expect(Math.abs(eyesToward(10, 2, 10, 1, -3)[0])).toBeLessThan(0.01);
+  it("is a portrait that watches (the eyes themselves: src/eyes.ts, any portrait's)", () => expect(VAMPIRE_PORTRAIT.watch).toBe(true));
+});
+
+describe("the camera while she paints you (11 Nov: 'the camera zoom's not really in the right place when she's painting ... It doesn't really flow right')", () => {
+  const home = { look: { x: COFFIN.x - 1, y: 0.8, z: -2 }, dist: 8.5, tilt: 0.82, yaw: 0 };
+  it('eases from where it was and back to it, never cutting', () => {
+    expect(scareShot(0, home)).toEqual(home);
+    expect(scareShot(SCARE.done, home)).toEqual(home);
+    let last = scareShot(0, home);
+    for (let t = 0.01; t < SCARE.done + 0.5; t += 0.01) {
+      const s = scareShot(t, home);
+      expect(Math.hypot(s.look.x - last.look.x, s.look.y - last.look.y, s.look.z - last.look.z), `look at ${t.toFixed(2)}`).toBeLessThan(0.08);
+      expect(Math.abs(s.dist - last.dist), `dist at ${t.toFixed(2)}`).toBeLessThan(0.08);
+      expect(Math.abs(s.tilt - last.tilt) + Math.abs(s.yaw - last.yaw)).toBeLessThan(0.02);
+      last = s;
+    }
   });
-  it('never rolls its eyes right out of its head', () => {
-    for (const x of [-100, 0, 100]) for (const z of [-3, 0, 50]) for (const v of eyesToward(10, 2, x, z, -3)) expect(Math.abs(v)).toBeLessThanOrEqual(1);
+  it('holds on her at her easel, painting you, from her first stroke till she has done', () => {
+    const paint = SCARE_SHOTS[SCARE_SHOTS.length - 1];
+    expect(paint.from).toBeLessThanOrEqual(SCARE.paint + 0.5);
+    expect(paint.to).toBeGreaterThanOrEqual(SCARE.painted);
+    expect(scareShot(SCARE.painted, home)).toEqual(scareShot(SCARE.paint + 1, home));
+    // Looking at the middle of her, the easel and you.
+    const { look } = paint.shot;
+    for (const p of [EASEL, SITTING.her, SITTING.you]) expect(Math.hypot(look.x - p.x, look.z - p.z)).toBeLessThan(1.8);
+  });
+  it('has her finish the picture before the scene ends', () => {
+    expect(SCARE.paint).toBeLessThan(SCARE.painted);
+    expect(SCARE.painted).toBeLessThan(SCARE.done);
+  });
+});
+
+describe("drawn to the coffin from across her bedchamber (11 Nov: 'if you're on the other side of the room, there's nothing really pushing you in that direction')", () => {
+  const CH = PLAN.rooms[2], coffinStop = TOUR.findIndex((s) => s.id === 'coffin');
+  it('has her lead you to it once she has shown you into the bedchamber, till you have woken him', () => {
+    expect(leading(coffinStop - 1, false)).toBe(false);   // (not before the bedchamber)
+    expect(leading(coffinStop, false)).toBe(true);
+    expect(leading(TOUR.length, false)).toBe(true);       // (still, after "don't open it")
+    expect(leading(TOUR.length, true)).toBe(false);
+  });
+  it('takes her to the coffin from anywhere in the room, to stand beside it, not in your way', () => {
+    for (const [x, z] of [[CH.x0 + 0.6, 2.4], [CH.x1 - 0.6, 2.4], [CH.x0 + 1, -3], [(CH.x0 + CH.x1) / 2, 0]]) {
+      expect(hostTarget({ x: CH.x0 + 3, z: 1 }, { x, z }, LEAD), `you at ${x - CH.x0}, ${z}`).toMatchObject(LEAD.stand);
+    }
+    expect(walkable(PLAN, LEAD.stand.x, LEAD.stand.z)).toBe(true);
+    expect(atCoffin(LEAD.stand.x, LEAD.stand.z)).toBe(false);
+    for (const b of blocksOf(FURNISH)) expect(Math.hypot(LEAD.stand.x - b.x, LEAD.stand.z - b.z)).toBeGreaterThan(b.r + 0.3);
+    // Out in the gallery, she walks with you instead.
+    expect(hostTarget({ x: CH.x0 + 3, z: 1 }, { x: CH.x0 - 4, z: 0 }, LEAD)).not.toMatchObject(LEAD.stand);
+  });
+  it('beckons you over in her own words, and the coffin stirs now and then', () => {
+    expect(BECKON.some((l) => /have a look at the Count/.test(l))).toBe(true);
+    expect(LURE.rattle[0]).toBeGreaterThan(2); expect(LURE.rattle[1]).toBeLessThan(12);
+    expect(LURE.beckon[0]).toBeGreaterThan(4);
+  });
+  it('lights a candle beside it', () => {
+    expect(FURNISH.some((p) => p.kind === 'candelabra' && Math.hypot(p.x - COFFIN.x, p.z - COFFIN.z) < 1.2)).toBe(true);
   });
 });

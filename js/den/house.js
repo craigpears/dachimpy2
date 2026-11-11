@@ -8,13 +8,20 @@
    furniture (furniture.js) and plays its owner's part. A friend's house: an entry in HOUSES, a scene
    module, one line in SCENES.
 
+   What any house has, the shell does: its host walks with you (src/den-houses.ts's hostTarget: at your
+   side at your pace, by whatever they're showing you while they talk about it), and a long stretch of
+   it you can skip along at a run (a Stretch: a button and Q), the camera alongside.
+
    A scene module: { plan, arrive, build(H) } where build returns { blocks, tick(dt), act(), prompt(),
-   enter(), leave(), cam() }; H is the shell's side: the root to build in, you, figures, say and talk,
-   showing a portrait. */
+   enter(), leave(), cam(), frozen(), host, stretch }: `host` { who (a person(): props-people.js), idle,
+   showing() (a ShowSpot, or null), still() (true: the scene has them just now) }; `stretch` a Stretch
+   with `titles` ({ x, title }: shown as they go by) and `lines` ({ ask: yours the first time, answer:
+   the host's then, back: theirs coming back }). H is the shell's side: the root to build in, you,
+   figures, say and talk, showing a portrait, the house's own view of you (home). */
 import * as THREE from 'three';
-import { step, walkable, atWayOut, houseById, readSecs, LODGINGS } from '../den-houses.js';
+import { step, walkable, atWayOut, houseById, readSecs, LODGINGS, YOUR_PACE, hostTarget, skipTo, skipSecs, roomAt } from '../den-houses.js';
 import { $, scene, camera, renderer, hemi, skyDome, paintSky, myLook, V3, toast as denToast, toastQuiet, toastHush, warm, sunOver, makePirate, animateWalk, faceTo, keys, mat, mesh, woodTex, ray, pirate } from './world.js';
-import { cine, cineEnd, cineLets, bubble, bubbleAt, stepTo } from './cine.js';
+import { cine, cinePlay, cineEnd, cineLets, bubble, bubbleAt, stepTo } from './cine.js';
 import { GRAVEE_HOUSE } from './gravee-house.js';
 
 /** Where the houses are: well out of sight of the den, the sea and the Wedding Isle (at +400). */
@@ -33,7 +40,7 @@ export const house = {
 // ---------- the page's parts: the bar along the top, the prompt, the portrait viewer ----------
 const hud = document.createElement('div');
 hud.className = 'house-hud'; hud.id = 'house-hud';
-hud.innerHTML = '<div class="house-name"><b id="house-name"></b><small id="house-owner"></small></div><button class="mini" id="house-pic" hidden>Your portrait</button><button class="mini" id="house-leave">Leave</button>';
+hud.innerHTML = '<div class="house-name"><b id="house-name"></b><small id="house-owner"></small></div><button class="mini" id="house-skip" hidden>Whiz along</button><button class="mini" id="house-pic" hidden>Your portrait</button><button class="mini" id="house-leave">Leave</button>';
 const promptEl = document.createElement('div');
 promptEl.className = 'house-prompt'; promptEl.id = 'house-prompt';
 promptEl.innerHTML = '<span></span><button class="mini"></button>';
@@ -47,6 +54,8 @@ fadeEl.className = 'wed-fade'; fadeEl.id = 'house-fade';
 document.body.append(hud, promptEl, viewer, capEl, fadeEl);
 $('house-leave').onclick = (e) => { e.currentTarget.blur(); houseLeave(); };
 $('house-close').onclick = () => showPortrait(null);
+$('house-skip').onclick = (e) => { e.currentTarget.blur(); skipAlong(); };
+if (!house.touch) $('house-skip').textContent = 'Whiz along (Q)';
 $('house-save').onclick = () => {
   if (!house.view) return;
   const a = document.createElement('a');
@@ -142,11 +151,21 @@ function figure(look, x = 0, z = 0, yaw = 0) {
   house.root.add(p.g);
   return p;
 }
+/** Takes `fig`'s bubble down (back in the pile for the next line). */
+function unsay(fig) {
+  const L = house.lines.get(fig);
+  if (!L) return;
+  L.el.style.display = 'none';
+  house.bubbles.push(L.el);
+  house.lines.delete(fig);
+}
 /** `fig` says `text` in a bubble over them for a while (`secs`, or as long as it takes to read), or, with
-    no text, stops. Each speaker has their own bubble, so two can scream at once. */
+    no text, stops. Each speaker has one bubble, so two can scream at once but no one says two things.
+    (Stopping used to take them off the list and leave the bubble up where it was, so every run of lines
+    that ended left one stuck on the screen: the user, 11 Nov, "I see 4 of them open there at the moment".) */
 function say(fig, text, secs = null) {
   if (!fig) return;
-  if (!text) { house.lines.delete(fig); return; }
+  if (!text) { unsay(fig); return; }
   let L = house.lines.get(fig);
   if (!L) { L = { el: house.bubbles.pop() || bubble('', document.body, 'wrap house-say') }; house.lines.set(fig, L); }
   L.el.textContent = text;
@@ -253,8 +272,7 @@ export function houseLeave() {
     house.on = false; house.snap = true;
     house.root.visible = false;
     cineLets.cineView = 0;
-    house.lines.forEach((L) => { L.el.style.display = 'none'; house.bubbles.push(L.el); });
-    house.lines.clear(); house.talk = null;
+    shell.hush();
     showPortrait(null);
     promptEl.classList.remove('on');
     document.body.classList.remove('housing');
@@ -284,8 +302,66 @@ const shell = {
   /** Skips on to the next line of whoever's talking (true if there was one). */
   skipLine() { if (!house.talk) return false; nextLine(); return true; },
   /** Stops all talk. */
-  hush() { house.talk = null; house.lines.forEach((L) => { L.el.style.display = 'none'; house.bubbles.push(L.el); }); house.lines.clear(); },
+  hush() { house.talk = null; [...house.lines.keys()].forEach(unsay); },
+  /** The house's own view of you (house-local: { look: { x, y, z }, dist, tilt, yaw }), for a cutscene
+      to ease from and back to. */
+  home,
 };
+
+// ---------- a long stretch, skipped along ----------
+const smooth = (u) => { u = Math.max(0, Math.min(1, u)); return u * u * (3 - 2 * u); };
+const facing = (p) => (Math.sin(p.g.rotation.y) >= 0 ? 1 : -1);
+/* Skipping along the house's long stretch, if you're in it (src/den-houses.ts's skipTo: the way you're
+   facing): you and your host off down it at a run, the camera easing round alongside and back, the
+   titles of what's on the walls going by, each up long enough to read. */
+function skipAlong() {
+  const S = house.inst?.stretch, Y = house.you;
+  if (!house.on || !S || cine || house.inst.frozen?.()) return false;
+  const to = skipTo(house.cur.plan, S, Y.x, Y.z, facing(Y));
+  if (to === null) return false;
+  const from = Y.x, dir = Math.sign(to - from), first = !house.skips, secs = skipSecs(to - from, house.skips || 0);
+  const host = house.inst.host?.who.p, room = roomAt(house.cur.plan, Y.x, Y.z), zm = room ? (room.z0 + room.z1) / 2 : Y.z;
+  house.skips = (house.skips || 0) + 1;
+  shell.hush(); house.to = null;
+  if (first && S.lines?.ask) say(Y, S.lines.ask, secs * 0.45);
+  const cap = { title: null, t: 1 };
+  let lastX = from;
+  const c = {
+    t: 0, cam: { look: V3(), dist: 0, tilt: 0, yaw: 0 },
+    tick(dt) {
+      c.t += dt;
+      const u = Math.min(1, c.t / secs), x = from + (to - from) * smooth(u), speed = Math.abs(x - lastX) / Math.max(dt, 1e-3);
+      lastX = x;
+      Y.x = x; Y.z = zm + 0.2;
+      if (host) { host.x = x + dir * 0.9; host.z = zm - 0.45; }
+      for (const p of host ? [Y, host] : [Y]) { faceTo(p, dir, 0, dt); animateWalk(p, true, dt, Math.min(26, 4 + speed * 2.6)); p.g.position.set(p.x, p.g.position.y, p.z); }
+      // The camera: from the house's view of you, round alongside, and back again at the end.
+      const H0 = home(), k = smooth(Math.min(c.t, secs - c.t) / 0.8);
+      const run = { x: x + dir * 1.2, y: 1.35, z: zm, dist: 6.2 - Math.sin(Math.PI * u) * 1.2, tilt: 0.22 };
+      c.cam.look.set(H0.look.x + (run.x - H0.look.x) * k, H0.look.y + (run.y - H0.look.y) * k, H0.look.z + (run.z - H0.look.z) * k).add(HOUSE_AT);
+      c.cam.dist = H0.dist + (run.dist - H0.dist) * k; c.cam.tilt = H0.tilt + (run.tilt - H0.tilt) * k; c.cam.yaw = 0;
+      // What's going by: the nearest title, each kept up a moment to read.
+      cap.t += dt;
+      if (S.titles?.length && cap.t > 0.75) {
+        const near = S.titles.reduce((a, b) => (Math.abs(b.x - x) < Math.abs(a.x - x) ? b : a));
+        const t = Math.abs(near.x - x) < 1.2 && u > 0.03 && u < 0.97 ? near.title : null;
+        if (t !== cap.title) { cap.title = t; cap.t = 0; shell.caption(t); }
+      }
+      if (first && u > 0.5 && !c.said && S.lines?.answer) { c.said = true; say(host, S.lines.answer, secs * 0.45); }
+      if (!first && dir < 0 && u > 0.3 && !c.said && S.lines?.back) { c.said = true; say(host, S.lines.back, 1.6); }
+      if (u >= 1) cineEnd(false);
+    },
+    end() {
+      shell.caption(null);
+      Y.x = to; Y.z = zm + 0.2;
+      if (host) { host.x = to + dir * 1.1; host.z = zm - 0.5; }
+      for (const p of host ? [Y, host] : [Y]) p.g.position.set(p.x, p.g.position.y, p.z);
+      house.to = null;
+    },
+  };
+  cinePlay(c);
+  return true;
+}
 
 // ---------- your keys, clicks and taps ----------
 /** Space (or the prompt's button, or a click on what's prompted): the house's own thing first, then the
@@ -304,6 +380,7 @@ export function houseKey(key, e) {
   if (house.view) { if (['escape', ' ', 'enter'].includes(key)) { e.preventDefault?.(); showPortrait(null); } return true; }
   if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) { e.preventDefault?.(); keys.add(key); house.to = null; return true; }
   if ((key === ' ' || key === 'enter') && !e.repeat) { e.preventDefault?.(); act(); return true; }
+  if (key === 'q' && !e.repeat) { if (!cine) skipAlong(); return true; }
   if (key === 'escape' && !e.repeat) { if (!shell.skipLine()) houseLeave(); return true; }
   return true;
 }
@@ -333,22 +410,23 @@ export function houseTick(dt) {
   }
   const ox = Y.x, oz = Y.z;
   if (mx || mz) {
-    const n = Math.hypot(mx, mz), sp = 4.2 * dt;
+    const n = Math.hypot(mx, mz), sp = YOUR_PACE * dt;
     [Y.x, Y.z] = step(plan, Y.x, Y.z, Y.x + mx / n * sp, Y.z + mz / n * sp, house.inst.blocks || []);
     faceTo(Y, mx, mz, dt);
     animateWalk(Y, true, dt);
   } else if (house.to && !cine && !house.inst.frozen?.()) {
-    if (walkTo(Y, house.to.x, house.to.z, 4.2, dt)) house.to = null;
+    if (walkTo(Y, house.to.x, house.to.z, YOUR_PACE, dt)) house.to = null;
   } else if (!house.inst.frozen?.()) animateWalk(Y, false, dt);
   Y.g.position.set(Y.x, Y.g.position.y, Y.z);
   if (!walkable(plan, Y.x, Y.z)) { Y.x = ox; Y.z = oz; }
   // The talk moves on by itself, a line at a time.
   if (house.talk && (house.talk.t -= dt) <= 0) nextLine();
   house.inst.tick?.(dt, { ox, oz });
+  hostTick(dt);
   // The bubbles over whoever's talking.
   const now = performance.now();
   for (const [fig, L] of house.lines) {
-    if (now > L.until || !fig.g.parent) { L.el.style.display = 'none'; house.bubbles.push(L.el); house.lines.delete(fig); continue; }
+    if (now > L.until || !fig.g.parent) { unsay(fig); continue; }
     const v = V3(); fig.g.getWorldPosition(v); v.y += fig.tall ?? 2.15;
     bubbleAt(L.el, true, v.x, v.y, v.z);
     const bw = L.el.offsetWidth / 2;
@@ -358,12 +436,34 @@ export function houseTick(dt) {
   // What Space does here, along the bottom, with a button for it (a phone has no Space).
   const pr = cine ? null : house.inst.prompt?.() || (atWayOut(plan, Y.x, Y.z) ? { text: 'The front door', btn: 'Go out' } : talking() ? { text: '', btn: 'Next' } : null);
   promptEl.classList.toggle('on', !!pr && !house.view);
+  // The long stretch's skip, while you're in it.
+  const S = house.inst.stretch, skip = !cine && !!S && !house.inst.frozen?.() && skipTo(plan, S, Y.x, Y.z, facing(Y)) !== null;
+  if ($('house-skip').hidden === skip) $('house-skip').hidden = !skip;
   if (pr) {
     const [span, b] = promptEl.children;
     if (span.textContent !== pr.text) span.textContent = pr.text;
     if (b.textContent !== pr.btn) b.textContent = pr.btn;
     span.hidden = !pr.text;
   }
+}
+/* The house's host (the scene's `host`), walking with you: at your side at your pace, hurrying if you've
+   got ahead, by what they're showing you while they talk about it; turned to you when stood; their hands
+   going while they talk (src/den-houses.ts's hostTarget). Not while a cutscene or the scene has them. */
+function hostTick(dt) {
+  const h = house.inst.host;
+  if (!h) return;
+  const P = h.who, p = P.p, Y = house.you;
+  let walked = false;
+  if (!cine && !h.still?.()) {
+    const t = hostTarget(p, Y, h.showing?.() || null, house.hostWalking);
+    walked = !!t && !walkTo(p, t.x, t.z, t.speed, dt);
+    if (!walked) faceTo(p, Y.x - p.x, Y.z - p.z, dt * 0.6);
+    p.g.position.set(p.x, p.g.position.y, p.z);
+    P.setIdle(house.talk?.fig === p || house.lines.has(p) ? 'talk' : h.idle || 'sway');
+  }
+  house.hostWalking = walked;
+  P.pose(dt, walked ? 'walked' : false);
+  P.talk(dt);
 }
 /** How far back the camera stands to see `across` metres side to side (more on a phone held upright). */
 function across(m) {
@@ -375,8 +475,13 @@ function across(m) {
     something itself. */
 export function houseCam() {
   if (!house.on || !house.you) return null;
-  const own = house.inst?.cam?.();
-  const tall = camera.aspect < 1;   // (a phone held upright: closer in, and more from above, to fill the height)
-  const C = own || { look: V3(house.you.x, 0.8, house.you.z - (tall ? 2.0 : 1.3)), dist: tall ? Math.max(7, across(5.4)) : Math.max(8.5, across(8.5)), tilt: tall ? 1.12 : 0.82, yaw: 0 };
+  const own = house.inst?.cam?.(), H0 = home();
+  const C = own || { look: V3(H0.look.x, H0.look.y, H0.look.z), dist: H0.dist, tilt: H0.tilt, yaw: H0.yaw };
   return { look: C.look.clone().add(HOUSE_AT), dist: C.dist, tilt: C.tilt, yaw: C.yaw, cut: C.cut };
+}
+/** The house's own view of you, house-local: looking in from the front and a little above (not so steeply
+    you see only the tops of hats: the user, 11 Nov, of Gravee in her pelt, "you really can't see her"). */
+function home() {
+  const tall = camera.aspect < 1;   // (a phone held upright: closer in, and more from above, to fill the height)
+  return { look: { x: house.you.x, y: 0.85, z: house.you.z - (tall ? 1.9 : 1.2) }, dist: tall ? Math.max(7, across(5.4)) : Math.max(8.5, across(8.5)), tilt: tall ? 1.05 : 0.7, yaw: 0 };
 }

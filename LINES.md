@@ -764,11 +764,17 @@ Sweet and excitable, far more excited about adding you to her collection than wo
 - *Coming up to the coffin:*
   - "Ooh, don't open it. He's ever so grumpy before sunset."
 
+### Stood by the coffin, beckoning you over, now and then till you've lifted its lid
+
+- "Go on, have a look at the Count. He won't mind."
+- "Over here! Come and say hello to the Count."
+- "He's only sleeping. Have a peek!"
+
 ### In the hall, instead of "It's empty. For now...", once your portrait's hung there
 
 - "And in the middle, my very favourite. You! Mid-scream."
 
-### The endless gallery, as the camera whizzes you down it
+### Whizzing down the endless gallery (a skip you choose)
 
 - *The first time, after you ask:* "Only seven pages!"
 - *Coming back down it:* "Mind the yetis!"
@@ -805,6 +811,10 @@ The vampire who sleeps in the coffin at the bedside in Gravee's house (Bedside M
 > "you open a coffin, and a vampire sits up. You both scream at each other comically, "ah! ah!"" (the user, 9 Nov)
 >
 > "Maybe we don't go as far as a vampire game." (the user, 11 Nov)
+
+### Asleep in his coffin, now and then, his lid rattling
+
+- "Zzzz..."
 
 ### Lifting his lid
 
