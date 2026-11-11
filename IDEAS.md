@@ -2014,3 +2014,16 @@ the lesson principle), good play rather than just legal play, and tested. Played
 (src/foraging.ts, js/den/foraging.js), his board's skin. (To shape with the user: what the lesson's
 steps are, where he gives it, at his bank in the lagoon or at the den, and how a capybara shows
 things.)
+
+## Bigger ships ride out the winds: a deep-water mechanic (11 Nov, for the future)
+
+"maybe for the future, yeah, that [wind] mechanic, again, can be something that affects small ships like
+the sloop, but obviously, I guess, for a bigger war frigate, would they be less affected? So they can
+navigate in those kind of waters much more freely. So it's equivalent to a deep water mechanic as well?"
+So the winds (and maybe the whirlpools) push a sloop about but barely move a war frigate: rough or
+deep water that's a maze in a sloop is open sea in a frigate, and a reason to want the bigger ship
+(see "Money, and the war frigate as the reason to earn it"). The rules of a wind already live in
+src/den-wind.ts and a whirlpool's in src/den-whirl.ts, so a ship's size (src/ships.ts) would be what
+they're told. (To shape with the user: how much less a frigate is moved, whether whirlpools spare her
+too or Kikkit's stay a sloop's way only, and whether some shallow waters are a sloop's alone, as
+the flip side.)
