@@ -2157,6 +2157,16 @@ the door and have it discoverable in some way similar to the carpentry spots?"
   nothing of the den, with bots like Sailing's), and could find other hidden ways later (the smugglers'
   beach, Port Decorum's treasury).
 
+**Balancing from what players do (11 Nov, for a full competitive version):** "Once we got to a full competitive
+version, if we got to that far, we would start recording times people took through different routes and
+puzzle times, and ... collect data for ... balancing ... I think they do it in like Age of Empires, don't
+they, where it's like ... percentage of people winning by ... going this certain route." So a race would log
+each run: the route taken (which shortcuts, which snakes), the time on each puzzle and each leg, and the
+finish, kept by the leaderboard's worker (worker/index.js, D1) as the Carpentry primer's scores are. Then
+how often each route wins, and what each shortcut really saves at each skill, to tune the course by (not
+auto-balancing, data for the user to balance by). Only with players' runs, anonymous, by pirate name at
+most.
+
 **Shooting each other: Gunnery's other use in a race (11 Nov):** "one of the advantages of [gunnery] as well
 is that you can disrupt somebody trying to do the sailing Vegas or something ... by shooting them. So yeah
 ... I forgot there's going to be those competitive elements to this." So her guns, loaded by Gunnery, aren't

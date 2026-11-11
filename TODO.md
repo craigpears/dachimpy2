@@ -303,8 +303,10 @@ the site (`.assetsignore` skips `*.md`).
   booch them. Oh, that would be so evil and so fitting. That would be fantastic." The bots to show it can
   be done. Where it came from (the user, 11 Nov): "I was inspired thinking, what would be a really evil
   thing for Umami in the sloop races to have to contend with?" (Umami, a friend's pirate, whose idea PvP
-  races were.) The user wants that in the den once Duty Navigation's there ("put that in the pirate den");
-  how, to settle with them (the constellation named for Umami, say).
+  races were.) Settled: credit Umami in the changelog, for fun ("we should definitely credit that Umami.
+  Maybe if it's just in the change log. I was just thinking of the change log being funny"), in Duty
+  Navigation's entry when the door lands: the evil constellation made with Umami in mind, without saying
+  where it's played (the door stays a secret).
 - **Shortcuts not all created equal (11 Nov):** on the race course, small shortcuts as well as big ones,
   each needing a combo of its size: a tiny one a Double gets you through (as a Double clears the reef out
   of Kikkit's whirlpools), bigger ones a bigger combo, the biggest the starlit door's tunnel. "Are you a
