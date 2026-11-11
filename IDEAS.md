@@ -656,6 +656,17 @@ old viridian days who I can't remember though." Mems, a real pirate (pirate name
 ocean, pirate page and portrait to check before she's drawn, and she goes into PIRATES): the XO,
 second in command, aboard Primates Rule for the flotilla (to confirm with the user). A second
 crewmate from the user's Viridian days to add once the user remembers who.
+- **Racing him for pink slips: how you win Primates Rule (11 Nov).** The other way to the frigate, rather
+  than buying her ("Maybe it's the alternative"), a friend's idea: you go to Daquan, and he, cocky, says
+  "yeah, I'll race you for pink slips. Your sloop against my [war] frigate. Haha, you'll never win" (the
+  user's sketch of it, not his words; whose frigate she is, Primates Rule or one of his, to pin down). "I guess you can show him as being a bit cocky ... you can be very arrogant, like, I've never
+  been beaten. Kind of have it that way. It's not that quote, but I feel like he is on some level. He's
+  very prideful, we'll put it that way." A race between your sloop and the frigate, using the den's sailing
+  for real (the winds, a chain's run ahead, the whirlpools as a shortcut) and the oars: "I think we've got
+  the racing mechanics, and it lets us do the rowing and all that kind of stuff." Win, and she's yours.
+  (To shape with the user: the course, how a sloop can fairly beat a frigate (her winds and the whirlpools
+  a frigate can't take? see "Bigger ships ride out the winds"), when he's met, and his lines: prideful,
+  never quoting him.)
 
 ## A bigger ship from the shipwright (10 Nov)
 
