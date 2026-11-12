@@ -763,9 +763,11 @@ const seaTex = canvasTex(128, 128, (g, w, h) => {
 seaTex.wrapS = seaTex.wrapT = THREE.RepeatWrapping;
 // The sea runs SEA_OUT metres out: as far as the sloop's sea goes and well past it, past the checkpoint
 // (140 m) and since 11 Nov past Port Decorum, the imperial island, out to sea beyond the wreck (200 m),
-// and on past the sloop race's course out beyond Primates Rule (300 m).
-const SEA_OUT = 300;
-seaTex.repeat.set(16, 8 * SEA_OUT / 90);
+// and on past the sloop race's course out beyond Primates Rule (300 m); and since 12 Nov a haze's reach
+// (100 m, the camera's far plane) past the sloop's last square every way, so its edge never shows in a
+// wide shot (it was a hard line, the haze jumping about at it as the view turned).
+const SEA_OUT = 420, SEA_W = 400;
+seaTex.repeat.set(16 * SEA_W / 220, 8 * SEA_OUT / 90);
 const trunkMat = mat('#7d5b38', { map: woodTex });
 const leafMats = ['#3f8a3a', '#2f7432', '#4f9a3c'].map((c) => mat(c, { side: THREE.DoubleSide, flatShading: true }));
 const canopyMats = ['#2f6b2a', '#3b7d2f', '#275a26'].map((c) => mat(c, { flatShading: true }));
@@ -868,15 +870,20 @@ export function applyBiome(force = false) {
   // Every den's in a cove: the sea beyond the beach where the raiders land, with a line of surf.
   // The sea is see-through, clearest at its edge, over a sandy bed that falls away into the deep:
   // as the tide goes out you see the water draw back off the sand (and off the bilge board).
-  sea = mesh(new THREE.PlaneGeometry(220, SEA_OUT), mat('#ffffff', { map: seaTex, roughness: 0.45, metalness: 0, emissive: '#1f6c9e', transparent: true, alphaMap: seaFade, depthWrite: false }), false);
+  // The water's drawn ahead of the bed further than the bed's drawn ahead of the ground: the bed's own
+  // nudge (polygonOffset) grows as you look along the water, and from far enough off it beat the water's
+  // few centimetres, the dark bed cut across the far sea in a hard line that slid about as the view
+  // turned, tilted and zoomed (the user, 12 Nov, at sea: "the fog of war kind of shading seems to jump
+  // about"; and "the distant water looks oddly dark in wide shots").
+  sea = mesh(new THREE.PlaneGeometry(SEA_W, SEA_OUT), mat('#ffffff', { map: seaTex, roughness: 0.45, metalness: 0, emissive: '#1f6c9e', transparent: true, alphaMap: seaFade, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }), false);
   sea.rotation.x = -Math.PI / 2;
   sea.position.set(0, 0.05, SHORE - SEA_OUT / 2);
   sea.renderOrder = 1;
-  const surf = mesh(new THREE.PlaneGeometry(220, 0.5), new THREE.MeshBasicMaterial({ color: '#e8f4f2', transparent: true, opacity: 0.55, depthWrite: false }), false);
+  const surf = mesh(new THREE.PlaneGeometry(SEA_W, 0.5), new THREE.MeshBasicMaterial({ color: '#e8f4f2', transparent: true, opacity: 0.55, depthWrite: false }), false);
   surf.rotation.x = -Math.PI / 2;
   surf.position.set(0, 0.055, SHORE - 0.15);
   surf.renderOrder = 2;
-  const bed = mesh(new THREE.PlaneGeometry(220, SEA_OUT + 10), new THREE.MeshStandardMaterial({ map: seabedTex, roughness: 1, polygonOffset: true, polygonOffsetFactor: -1 }), false);
+  const bed = mesh(new THREE.PlaneGeometry(SEA_W, SEA_OUT + 10), new THREE.MeshStandardMaterial({ map: seabedTex, roughness: 1, polygonOffset: true, polygonOffsetFactor: -1 }), false);
   bed.rotation.x = -Math.PI / 2;
   bed.position.set(0, 0.003, HIGH - (SEA_OUT + 10) / 2);
   biomeGroup.add(sea, surf, bed);

@@ -292,11 +292,6 @@ the site (`.assetsignore` skips `*.md`).
   like usually vanish unless you're at the right distance." The numbered buoys and the next one lit
   should show at any distance you'd sail by them.
 
-- **The sea's fog shading jumps about as the camera turns (12 Nov):** "At different camera angles, the
-  kind of ... fog of war kind of shading seems to jump about. It's like bouncing back and forth, like you
-  can't decide where it's going to shade." The shading should stay put on the water as the camera moves.
-  (Seen alongside: the distant water looking oddly dark in wide shots, 11 Nov.)
-
 ## Spotted along the way (not asked for)
 
 - **Space at the race's start buoy, with the Sailing board open (12 Nov, spotted by the agent fixing

@@ -115,6 +115,28 @@ export const scene = new THREE.Scene();
 scene.background = new THREE.Color('#1a110b');
 scene.fog = new THREE.Fog('#1a110b', 24, 52);   // (far enough to make out the raiders' ship in the cove)
 export const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 100);
+/* The haze by each thing's true distance from the camera, not its depth along the view (three.js's
+   own), so a patch of sea keeps its shade as the view turns and tilts over it (the user, 12 Nov, at
+   sea: "the fog of war kind of shading seems to jump about ... like you can't decide where it's going
+   to shade"). The distance is taken per pixel, from the position passed along, not per corner: a
+   corner's distance doesn't blend across a big plane such as the sea, whose corners are far off.
+   Before any shader's built: every material's fog goes through these chunks. */
+{
+  const C = THREE.ShaderChunk, swap = (k, a, b) => { if (!C[k].includes(a)) throw new Error(`fog chunk ${k} changed`); C[k] = C[k].replace(a, b); };
+  swap('fog_pars_vertex', 'varying float vFogDepth;', 'varying vec3 vFogAt;');
+  swap('fog_vertex', 'vFogDepth = - mvPosition.z;', 'vFogAt = mvPosition.xyz;');
+  swap('fog_pars_fragment', 'varying float vFogDepth;', 'varying vec3 vFogAt;');
+  swap('fog_fragment', '#ifdef USE_FOG', '#ifdef USE_FOG\n\tfloat vFogDepth = length( vFogAt );');
+}
+/** The haze set for a view `d` from what it's looking at: clear to d + 10, gone into the horizon's
+    colour by d + 45, and always whole before the camera's far plane, so nothing's cut off at an edge
+    showing through. The den's camera passes the distance it's settling to, eased (js/den.js), never
+    the camera's lagging distance as it swings round, which dipped the haze in and out as you turned. */
+export function hazeAt(d) {
+  const far = Math.min(d + 45, camera.far - 2);
+  scene.fog.far = far;
+  scene.fog.near = Math.min(d + 10, far - 20);
+}
 
 export const hemi = new THREE.HemisphereLight('#ffe6c4', '#3a2616', 0.9);
 scene.add(hemi);
@@ -163,7 +185,7 @@ export function paintSky(zenith, horizon) {
   for (let i = 0; i < pos.count; i++) {
     const t = pos.getY(i) / 90;
     if (t >= 0) c.copy(low).lerp(top, Math.pow(t, 0.45));
-    else c.copy(low).multiplyScalar(Math.max(0.4, 1 + t * 2));   // below the horizon, the dark sea
+    else c.copy(low);   // below the horizon, the far sea in the haze: the fog's own colour, so the sea fades into it (it was darker, a dark band beyond the water in a wide shot)
     cols.set([c.r, c.g, c.b], i * 3);
   }
   geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
