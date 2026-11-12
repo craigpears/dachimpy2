@@ -377,6 +377,9 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     it costs you a tiny bit ... I don't want it to be rage-inducing." So every snake (the left-hand trade
     wind down the course's edge included) carries her back a few squares, to the start of what she was
     doing, a loop to try again; none sends her back legs or to the start line.
+    **The right strength (12 Nov):** "I like the [tight] water feature that just sends you back 3 or 4
+    squares ... that's the kind of snakes and ladders level that's a good tune, so it's not quite as
+    rage-inducing, but it is kind of like, ah, damn it, not again." Every snake tuned to that.
   - **Every shortcut reads as what it is, on the water (12 Nov):** "I can see kind of like a cove tunnel
     thing, next to the docks. Is that supposed to be where the duty navigation entrance is? Because I
     don't even see anything. Is there supposed to be a visible marker ...? Surely." And "there's still
