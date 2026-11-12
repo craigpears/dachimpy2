@@ -17,7 +17,7 @@ import type { Wedding } from '../src/den-wedding';
 const LOOK_JS = readFileSync(join(__dirname, '..', 'js', 'den-look.js'), 'utf8');
 const gifts = THEMES.find((t) => t.id === 'gifts')!;
 
-describe('a wedding showered in gifts, fun and never demanding (12 Nov)', () => {
+describe('a wedding showered in gifts (12 Nov)', () => {
   it('is a theme of its own: bright ribbon colours, and a present in every guest\'s hand', () => {
     expect(gifts.name).toBe('Showered in gifts');
     expect(THEMES.at(-1)).toBe(gifts);   // (on the end: the share link's themes are by number)
@@ -103,12 +103,17 @@ describe('a wedding showered in gifts, fun and never demanding (12 Nov)', () => 
     }
   });
 
-  it('she\'s delighted by the heap, and it\'s all the couple\'s: never asking for presents herself', () => {
+  // (12 Nov, Mischievious herself: "she does think it's all about her. So I think she is happy with being a bit
+  //  more attention-seeking and being the one wanting lots more gifts")
+  it('she thinks it\'s all about her: sure the presents are hers, wanting lots more (12 Nov)', () => {
     const hers = [
       ...new Gush('happy').pool('theme_gifts'), ...new Gush('happy').pool('plot_gifts'), ...new Gush('dark').pool('plot_gifts'),
       ...GUSH.add_gifts as readonly string[], CEREMONY.presents, CEREMONY.stillThere, CEREMONY.thankYous,
     ];
-    for (const l of hers) expect(l).not.toMatch(/\b(for me|my presents?|my gifts?|give me|gimme|I want|I expect|owe me|mine)\b/i);
+    const claims = (l: string) => /\b(for me|by me|mine|my pick|first pick|pass me|good ones|shiny ones)\b/i.test(l);
+    expect(hers.filter(claims).length).toBeGreaterThanOrEqual(hers.length - 2);
+    // (cheeky and a bit delusional, never nasty to you)
+    for (const l of hers) expect(l).not.toMatch(/\b(owe me|or else|pay up|cheap|stingy)\b/i);
     // (one of today's six was this one, and she recalls it)
     expect(TODAY.some((w) => w.theme === 'gifts' && w.plot === 'gifts')).toBe(true);
     expect(TODAY).toHaveLength(6);

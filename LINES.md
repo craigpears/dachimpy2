@@ -171,6 +171,8 @@ Marry her, and she comes home with you: aboard the sloop, then at the den.
 > "she's a primary character, but not the star of the show." (the user, 11 Nov)
 >
 > "you don't want her to seem demanding, but just make it fun ... maybe it can fit into the thing of like a wedding theme with lots and lots of gifts." (the user, 12 Nov)
+>
+> "Mischievous is correcting ... maybe she's a bit delusional, but she does think it's all about her. So I think she is happy with being a bit more attention-seeking and being the one wanting lots more gifts." (the user, 12 Nov)
 
 ### As you arrive, close on her: her greeting, what this is, and the tone's choice
 
@@ -264,9 +266,9 @@ Marry her, and she comes home with you: aboard the sloop, then at the den.
   - "I've had the inn send over every drop they've got."
   - "Like my third today! Grog in the punch, grog in the cake."
 - *You choose Showered in gifts:*
-  - "Showered in gifts! Ribbons on everything. Even the cake."
-  - "A present in every hand! Bows on the bows!"
-  - "Like my fifth today! The presents went up past the arch."
+  - "Showered in gifts! My favourite. The planner gets first pick, you know."
+  - "A present in every hand! Is that one for me? It looks like it's for me."
+  - "Like my fifth today! Most of those presents were for me, I'm nearly sure."
 - *You choose Sweet and blissful:*
   - *happy:*
     - "Sweet and blissful! Oh, I'm welling up already."
@@ -294,11 +296,11 @@ Marry her, and she comes home with you: aboard the sloop, then at the den.
     - "Like my fourth today! Benches everywhere. Lovely day, though."
 - *You choose Showered in gifts:*
   - *happy:*
-    - "Everyone brought a present. Everyone! I do hope you've room in the hold."
-    - "Like my fifth today! We had to dig the couple out."
+    - "Everyone brought a present! I'll mind the shiny ones for you. Forever."
+    - "Like my fifth today! We dug the couple out. I kept the good ones."
   - *dark:*
-    - "Everyone brought a present. Let's hope none of them ticks."
-    - "Like my fifth today! We dug the couple out. Eventually."
+    - "Everyone brought a present. Let's hope none of them ticks. I'll open mine first."
+    - "Like my fifth today! We dug the couple out. After I'd had my pick."
 - *You add a prop (one she hasn't a line of its own for, or has just said):*
   - "More! More is always better."
   - "Oh, that's gorgeous there."
@@ -380,7 +382,7 @@ Marry her, and she comes home with you: aboard the sloop, then at the den.
 - *You add a treasure chest:*
   - "A treasure chest! For the presents. Or the doubloons. Ooh, both!"
 - *You add presents:*
-  - "Presents! I do hope someone's got you a spyglass."
+  - "Presents! Put the big ones by me. For safekeeping."
 - *You add a piano:*
   - "A piano! The shanty-singer knows three songs. Now he can play them louder."
 - *You add a band stand:*
@@ -442,9 +444,9 @@ Marry her, and she comes home with you: aboard the sloop, then at the den.
 - *Somebody's drunk: face first into the cake:* "...and that's the cake."
 - *Somebody's drunk: down they go, with no cake to fall in:* "...and down they go."
 - *A brawl breaks out:* "Not the benches! They're hired!"
-- *Showered in gifts: the guests filing up with their presents:* "Ooh, look at it all! Somebody fetch a bigger hold."
-- *Showered in gifts: the couple buried in them up to the neck (as the officiant):* "Hello? Still in there, you two?"
-- *Showered in gifts: the pile topples (as the officiant):* "Thank-you notes later, loves. Now, where were we?"
+- *Showered in gifts: the guests filing up with their presents:* "Ooh, look at it all! Some of these must be for me."
+- *Showered in gifts: the couple buried in them up to the neck (as the officiant):* "In there, you two? Pass me the gold one."
+- *Showered in gifts: the pile topples (as the officiant):* "Thank-you notes later. Mine first. Where were we?"
 - *"I do" (as the officiant):* "Do you take {partner}, through bilge and broadside?"
 - *The kiss (as the officiant):* "Then you may kiss!"
 - *The cheer:* "Eee! I love weddings!"

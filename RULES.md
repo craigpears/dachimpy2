@@ -1635,11 +1635,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     hearts and confetti, and a group shot framed in gilt as the wedding portrait: save the picture,
     copy a link (`?at=wedding&w=...`, the whole set-up, opening ready to play it again), or plan
     another. The set-up's kept as you go.
-  - **Showered in gifts (12 Nov), fun, never demanding.** Mischievious herself, laughing, of her
-    weddings: "Something fun (not expected) maybe that I expect everyone to shower me with gifts 😂".
-    The user: "you don't want her to seem demanding, but just make it fun ... maybe it can fit into the
-    thing of like a wedding theme with lots and lots of gifts." So the presents are the couple's, never
-    hers to ask for:
+  - **Showered in gifts (12 Nov), and she thinks it's all about her.** Mischievious herself, laughing,
+    of her weddings: "Something fun (not expected) maybe that I expect everyone to shower me with gifts
+    😂". The user first: "you don't want her to seem demanding, but just make it fun ... maybe it can fit
+    into the thing of like a wedding theme with lots and lots of gifts." Then her correction, the same
+    day: "maybe she's a bit delusional, but she does think it's all about her. So I think she is happy
+    with being a bit more attention-seeking and being the one wanting lots more gifts." So the presents
+    are the couple's, but she's sure half of them are hers, comically: cheeky and delusional, never
+    nasty. The wedding's choices are still yours (the host, not the show, above):
     - **A fourth theme, Showered in gifts:** bright ribbon colours (red, gold, aqua, magenta, lime),
       gilded benches, a stack of presents either side of the arch, a mountain of them beside the couple
       (a treasure chest in it), more up the aisle between the rows and by the back row, the cake; and a
@@ -1651,8 +1654,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       are in them up to the neck, arms waving out of the top ("Mmf! Lovely! Thank you all! Mmf!"); then
       the pile tumbles over, spilling across the front, and the ceremony carries on. With any theme (in
       another, the presents are its colours). Its keepsake snapshot: buried to the neck.
-    - **Her lines:** delighted by the heap ("Somebody fetch a bigger hold"), never asking for it; a
-      test checks none of hers says "for me", "I want" and the like. The guests do the outdoing.
+    - **Her lines:** all about her ("Some of these must be for me", "Pass me the gold one", "The
+      planner gets first pick, you know", "Thank-you notes later. Mine first."); a test checks nearly all
+      of hers claim the presents, and none is nasty. The guests do the outdoing.
   - **The clothes are Puzzle Pirates'** ("There isn't officially anything in Puzzle Pirates for any of
     this stuff, other than clothing and obviously furniture"): Dress top, Gown, Veil, Tiara,
     Butterfly, Frilly shirt with sash, from YPPedia; the bouquet, the props and the plots are ours.
