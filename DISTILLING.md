@@ -637,6 +637,23 @@ rescue them"), and among all the browns there's one black.
   for it escapes them; it's "Pull a line up" in §3 and in the bots (`linePull`), the loop done again and
   again.
 
+**The sixth note: the line pull as a sequence, a crawl and a loop (the user, 12 Nov, six screenshots drawn on
+in orange and green; not saved to `notes/`, as they came in mid-task).** "let's say it's 6 to 7. That's
+basically the equivalent of a crawl. But then you can kind of see how all the browns are one lower, and then
+I can loop the brown back again, up through, do kind of a crawl at the top, black down, round the bottom, up
+again, and drag all of those brown pieces down." ("6 to 7" may be the shape drawn in orange on the first
+picture, or steps of a longer sequence: to pin down with the user.) The board, the same mid game as the
+fifth note: browns filling the top left, one black among them, blacks stuck at the bottom.
+- **Orange, the crawl:** the black and a brown beside it work along the bottom of the browns and up past
+  them, a crawl as in the fourth note; afterwards every brown in that line sits one place lower.
+- **Green, the loop:** then the brown loops back: up through the browns, a crawl along the top, the black
+  down, round the bottom and up again, and the whole line of browns is dragged down another place. One
+  picture has the black drawn from low in the middle diagonally up and left through the browns to the left
+  wall, hooking at the end.
+- **What it adds to "Pull a line up" (§3, `linePull`):** it isn't one black's loop alone. A black and a brown
+  together crawl to shift the line one place, then loop round and go again, each pass lowering every brown in
+  the line by one, until the line's where it's wanted.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
