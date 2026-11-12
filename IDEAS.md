@@ -1190,7 +1190,9 @@ The user (12 Nov): "This absolutely needs to be a memory later, she needs her li
 drawn, then into PIRATES and the wardrobe). From a chat the user shared: they were guessing what her name
 stands for, "a french sounding Robert, roo like kangaroo plus a bear, or did someone roob an ear?" (they
 asked Dignity too), and Roobear answered: "I could be Robert the kangaroo bear that roobs ears ... I like
-it."
+it." Dignity's guess: "or from winne the pooh - Roo was baby kanga and bear was winner? Yes abstract I
+know." (A line for Dignity, then, if she's in the house's story; the books' characters themselves stay out
+of the den.)
 
 So a little house in the housing district (one more entry in HOUSES, its own scene, Roobear walking you
 round as Gravee does), its theme her name's story: Robert the kangaroo bear, half kangaroo and half bear,
