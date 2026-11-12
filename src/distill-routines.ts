@@ -458,7 +458,7 @@ const diamond: Routine = {
       // Any way through, as a hand sweeps it: down and up through the whites, and on the junk's side the
       // ladder, a black climbing through browns from one column to the next and a brown sinking through
       // blacks (the user, 12 Nov: "that is how you get it up").
-      const paths = traceDrags(cols, x, y, ALL, ctx.reach, arrived, 80);
+      const paths = [...traceDrags(cols, x, y, towards(side), ctx.reach, arrived, 60), ...traceDrags(cols, x, y, ALL, ctx.reach, arrived, 80)];
       if (!paths.length) continue;
       // Where the technique wants it: over with the junk, then the black as high and the brown as low as
       // it goes ("browns at the bottom, blacks at the top"), the shorter the better.
@@ -467,7 +467,7 @@ const diamond: Routine = {
         for (const d of w) [cx, cy] = neighbourOn(cols, cx, cy, d)!;
         const h = halfOf(cols, cx, cy), v = p === BLACK ? -h : h;
         const over = side > 0 ? cx >= ctx.burnFrom : cx < ctx.fill - 1;
-        return (over ? 40 + v : side * cx * 4 + v * 0.3) - w.length * 0.05;
+        return (over ? 40 + v : side * cx * 4 + v * 0.3) - w.length * 0.2;
       };
       paths.sort((a, b) => rate(b) - rate(a));
       const name = p === BLACK ? 'black' : 'brown';
@@ -598,14 +598,26 @@ const crawl: Routine = {
         }
       }
     }
+    // A black and a brown side by side in the whites: a pair to crawl along together (the user, 12 Nov:
+    // "the black can go down, up, down. And then the brown can essentially do a very similar motion
+    // because it's got the black next to it").
+    const pairs = new Set<string>();
+    for (let x = 0; x < Math.min(ctx.burnFrom, COLS); x++) for (let y = 0; y < cols[x].length; y++) {
+      if (cols[x][y] !== BLACK || !embedded(cols, x, y) || seeds.some((s) => s[0] === x && s[1] === y)) continue;
+      if (partners(cols, x, y, 2, 2).length) { seeds.push([x, y]); pairs.add(`${x},${y}`); }
+    }
     const before = ctx.burnFrom < COLS ? whitesFrom(cols, ctx.burnFrom) : 0;
-    for (const [x, y] of seeds.slice(0, 5)) {
-      for (const pt of partners(cols, x, y, 4, 6).slice(0, 3)) {
+    for (const [x, y] of seeds.slice(0, 6)) {
+      const pair = pairs.has(`${x},${y}`);
+      for (const pt of partners(cols, x, y, pair ? 2 : 4, pair ? 2 : 6).slice(0, pair ? 1 : 3)) {
         const start: [number, number][] = [[x, y], pt];
         const h0 = halfOf(cols, x, y);
         const found = groupSearch(cols, start, WHITE, Math.min(ctx.reach, 16), (pos) => {
           const saved = ctx.burnFrom < COLS ? before - whitesFromMoved(cols, ctx.burnFrom, start, pos) : 0;
-          const across = side * (pos[0][0] - x);
+          const across = pair ? Math.min(side * (pos[0][0] - x), side * (pos[1][0] - pt[0])) : side * (pos[0][0] - x);
+          // A pair crawls level and together, looping round each other, never drifting apart.
+          if (pair && (Math.abs(halfOf(cols, pos[1][0], pos[1][1]) - halfOf(cols, pt[0], pt[1])) > 2
+            || Math.abs(halfOf(cols, pos[0][0], pos[0][1]) - h0) > 2 || Math.abs(pos[0][0] - pos[1][0]) > 2)) return null;
           if (saved <= 0 && across < 2) return null;
           if (Math.abs(halfOf(cols, pos[0][0], pos[0][1]) - h0) > 4 && saved <= 0) return null;
           if (pos.some(([px]) => side > 0 && px > COLS - 1)) return null;
@@ -617,6 +629,7 @@ const crawl: Routine = {
         const what = cols[x][y] === BROWN ? 'brown' : 'black';
         out.push({ routine: 'crawl', drags, reason: before && ctx.burnFrom < COLS && found.score >= 6
           ? 'whites stuck at the top: crawl them out, a black and a brown working together'
+          : pair ? `crawl the black at ${placeName(x, y)} and the brown beside it ${side > 0 ? 'right' : 'left'} together: down, up, down in turn, looping round each other`
           : `the ${what} at ${placeName(x, y)} can't move alone: crawl it ${side > 0 ? 'right' : 'left'} with a ${what === 'brown' ? 'black' : 'brown'} beside it` });
       }
     }
@@ -877,7 +890,7 @@ export function carryOn(cols: Board, drags: readonly Drag[], ctx: Ctx): Drag[] {
   return out;
 }
 /** The routines that move a piece up or down on the spot, whose drags stop where they mean to. */
-const ON_THE_SPOT: readonly RoutineName[] = ['figureEight', 'linePull', 'turnOver'];
+const ON_THE_SPOT: readonly RoutineName[] = ['figureEight', 'linePull', 'turnOver', 'crawl', 'store'];
 /** A routine whose moves always come out as whole drags, the last carried on as far as it goes. */
 const whole = (r: Routine): Routine => ({
   ...r,

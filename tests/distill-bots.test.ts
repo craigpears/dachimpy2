@@ -3,7 +3,7 @@
    each tier reaches is tools/distill-bots.mjs's to measure (DISTILLING.md §4). */
 import { describe, expect, it } from 'vitest';
 import { BURN_TICKS, COLS, Distilling, SHORT, TALL, WHITE, parseBoard } from '../src/distilling';
-import { MENU, TIERS, advise, playSession, tierNamed } from '../src/distill-bots';
+import { HELIUM, MENU, TIERS, advise, choose, contextFor, playSession, sweepsOn, tierNamed } from '../src/distill-bots';
 import { playDrags } from '../src/distill-routines';
 import type { Board } from '../src/distilling';
 import { seeded } from '../src/mirror-row';
@@ -99,5 +99,35 @@ describe('advise: Helium reads anyone\'s board (12 Nov: "context aware")', () =>
     expect(a.kind).toBe('dismiss');
     expect(a.reason).toMatch(/gamble/);
     expect(a.reason).toMatch(/CC\^10/);
+  });
+});
+
+describe('the start is sweeping, the techniques after (12 Nov)', () => {
+  it('the start is quick sweeping drags, not careful little ones (12 Nov: "It\'s just quick drag motions ... go, go, go")', () => {
+    const g = new Distilling(seeded(5000));
+    g.burnNow(); g.tick(1000);
+    const a = advise({ cols: g.cols, chain: 0, timeLeft: g.timeLeft() });
+    expect(a.sweep).toBe(true);
+    expect(a.label).toBe('The sweep');
+    expect(a.drags).toHaveLength(1);
+    expect(a.drags[0].ways.length).toBeGreaterThanOrEqual(3);
+    // Swept blind: hardly a pause between them, every tier (the lower ones a bit slower).
+    for (const t of TIERS) expect(t.sweepSpot).toBeLessThan(t.spot / 2);
+    // A bot's first move is a sweep, and sweeps are what it plays most at the start.
+    const plans: string[] = [];
+    playSession(new Distilling(seeded(5001)), tierNamed('master'), 1, undefined, (p) => { if (p.kind === 'move') plans.push(p.label); });
+    const first = plans.slice(0, 20), most = (l: string) => first.filter((x) => x === l).length;
+    expect(first[0]).toBe('The sweep');
+    for (const l of new Set(first)) expect(most('The sweep')).toBeGreaterThanOrEqual(most(l));
+  });
+  it('the techniques come in only once sweeping blind stops getting junk over (12 Nov: "it\'s only once you can\'t just do that blind ... that you start needing to do things")', () => {
+    // The sweep's end: whites left, browns top right, blacks bottom right, nothing left to sweep.
+    const cols = board([...column(6, 'bbbbKKKKK'), ...column(7, 'bbbbKKKK'), ...column(8, 'bbbbKKKKK'), ...column(9, 'bbbbKKKK')]);
+    const ctx = contextFor(cols, 'junk', 0, 16);
+    expect(sweepsOn(cols, ctx, HELIUM)).toHaveLength(0);
+    const a = choose({ cols, chain: 0, timeLeft: 12000 }, ctx, HELIUM);
+    expect(a.sweep).toBe(false);
+    expect(a.routine).toBe('turnOver');
+    expect(a.reason).toMatch(/zigzagging up the side/);
   });
 });

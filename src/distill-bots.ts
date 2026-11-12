@@ -93,6 +93,10 @@ export const P = {
   /** ... swept blind while it does nearly as well as the best thing to do (a careful rescue worth far more
       comes first). */
   SWEEP_AS_GOOD: 0.6,
+  /** Turning the right side over: played next unless something's worth more than this (a big rescue),
+      and so long as it costs the board no more than this by the measure. */
+  TURN_UNLESS: 12,
+  TURN_COST: 1,
 };
 
 /** What the planner says to do now: its stage, and a routine's drags, a burn, a wait or a dismiss, with
@@ -180,18 +184,25 @@ export function choose(sit: Situation, ctx: Ctx, style: Style): Advice {
       return advice('dismiss', 'Cash in', `the gamble: CC^${sit.chain} so far, and the next column needs ${need} more white${need > 1 ? 's' : ''} in ${(sit.timeLeft / 1000).toFixed(0)} s. Poor odds: cash in now`);
     }
   }
+  // The start is sweeping, decided by the board: while a plain long drag still takes a black or a brown
+  // over to the junk, sweep blind and fast, the best such drag each time; the techniques come in only when
+  // that stops getting junk right, or when the furnace's column needs saving.
+  const sweeps = ctx.stage === 'junk' && !urgent ? sweepsOn(cols, ctx, style, base) : [];
+  const sweeping = sweeps.length > 0 && (!best || sweeps[0].value >= P.SWEEP_AS_GOOD * best.value);
+  // Then, the sweep done, turn the right side over (blacks up its side, browns down), so what comes next
+  // from the left can hook in; only a big rescue comes first.
+  if (ctx.stage === 'junk' && !urgent && !sweeping) {
+    const turn = moves.filter((m) => m.move.routine === 'turnOver' && m.value > -P.TURN_COST)[0];
+    if (turn && (!best || best.value < P.TURN_UNLESS)) return advice('move', ROUTINES.turnOver.label, turn.move.reason, turn);
+  }
   // Burn a ready column at once when nothing much is left to do; in the chain, only when nothing is (a
   // Crystal Clear burned early is time lost ferrying whites for the next).
   if (ready && style.early && (!best || (ctx.stage === 'junk' && best.value < P.SLACK))) {
     return advice('burn', 'Burn now', burning ? "the furnace's column is all junk: burn it now" : 'the column is Crystal Clear: send it up now');
   }
-  // The start is sweeping, decided by the board: while a plain long drag still takes a black or a brown
-  // over to the junk, sweep blind and fast, the best such drag each time; the techniques come in only when
-  // that stops getting junk right, or when the furnace's column needs saving.
-  const sweeps = ctx.stage === 'junk' && !urgent ? sweepsOn(cols, ctx, style, base) : [];
-  if (sweeps.length && (!best || sweeps[0].value >= P.SWEEP_AS_GOOD * best.value)) {
-    const s = sweeps[0];
-    return { ...advice('move', 'The sweep', `go, go, go: ${s.move.reason}`, s), sweep: true };
+  if (sweeping) {
+    const sw = sweeps[0];
+    return { ...advice('move', 'The sweep', `go, go, go: ${sw.move.reason}`, sw), sweep: true };
   }
   if (best) {
     const gamble = !burning && sit.chain >= P.CASH_FROM && !ready && style.gamble

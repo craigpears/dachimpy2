@@ -3,7 +3,7 @@
    (w b K), on a sea of whites. */
 import { describe, expect, it } from 'vitest';
 import { BLACK, BROWN, COLS, DOWN_LEFT, DOWN_RIGHT, SHORT, TALL, UP_LEFT, UP_RIGHT, WHITE, canSwapOn, neighbourOn, parseBoard } from '../src/distilling';
-import { ROUTINES, burnsClean, canGo, halfOf, playDrags, stepsOf, swapsIn } from '../src/distill-routines';
+import { ROUTINES, burnsClean, canGo, carryOn, halfOf, playDrags, stepsOf, swapsIn } from '../src/distill-routines';
 import type { Board } from '../src/distilling';
 import type { Ctx, Move, RoutineName } from '../src/distill-routines';
 
@@ -66,7 +66,7 @@ describe('the routines (12 Nov)', () => {
   it('the diamond: a black from the top left goes down-right across the whites, then up through the browns to the blacks, in one drag', () => {
     const cols = board([...column(8, 'KKKKbbbbb'), ...column(9, 'KKKKbbbb'), [0, 1, 'K']]);
     const moves = find('diamond', cols, stageI(8));
-    expect(moves).toHaveLength(1);
+    expect(moves.length).toBeGreaterThan(0);
     const m = moves[0];
     expect(m.drags).toHaveLength(1);
     expect(m.drags[0]).toEqual({ x: 0, y: 1, ways: [...Array(7).fill(DOWN_RIGHT), UP_RIGHT] });
@@ -129,9 +129,10 @@ describe('the routines (12 Nov)', () => {
     const cols = board([[1, 0, 'K'], [2, 0, 'b'], [4, 0, 'b'], [6, 0, 'b'], ...column(9, 'KKKKbbbb')]);
     const moves = find('leapfrog', cols, stageI(9)).filter((m) => m.drags[0].x === 1);
     expect(moves).toHaveLength(1);
-    expect(moves[0].drags).toEqual([{ x: 1, y: 0, ways: [UP_RIGHT, DOWN_RIGHT, UP_RIGHT, DOWN_RIGHT, UP_RIGHT, DOWN_RIGHT] }]);
+    expect(moves[0].drags).toEqual([{ x: 1, y: 0, ways: [UP_RIGHT, DOWN_RIGHT, UP_RIGHT, DOWN_RIGHT, UP_RIGHT, DOWN_RIGHT, DOWN_RIGHT] }]);
     const after = wholeDrags(cols, moves[0]);
-    expect(after[7][0]).toBe(BLACK);
+    // On past the last brown, it carries on down as far as it goes (into the junk on the right).
+    expect(where(after, BLACK).some(([x, y]) => x === 8 && y === 1)).toBe(true);
     // Each brown let it past and stepped one back, still at the top.
     for (const x of [1, 3, 5]) expect(after[x][0]).toBe(BROWN);
   });
@@ -153,6 +154,67 @@ describe('the routines (12 Nov)', () => {
     expect(m.drags[0].ways).toEqual([DOWN_RIGHT, DOWN_RIGHT, DOWN_RIGHT, DOWN_RIGHT]);
     const after = wholeDrags(cols, m);
     expect(after[4][3]).toBe(WHITE);
+  });
+  it('a black dragged down through the whites goes as far as it can, never stopping in the middle (12 Nov: "it should carry on as far as it can go")', () => {
+    // A drag stopped one place into the whites is carried on: down, and on to the right, till nothing takes it further.
+    const cols = board([[0, 1, 'K'], ...column(9, 'bbbbbbbb')]);
+    const [d] = carryOn(cols, [{ x: 0, y: 1, ways: [DOWN_RIGHT] }], stageI(9));
+    expect(d.ways.length).toBeGreaterThan(5);
+    const after = playDrags(cols, [d])!;
+    let at: [number, number] = [0, 1];
+    for (const w of d.ways) at = neighbourOn(cols, at[0], at[1], w)!;
+    expect(after[at[0]][at[1]]).toBe(BLACK);
+    expect(canGo(after, at[0], at[1], 1)).toBe(false);
+    // ... and every move a routine offers ends where its piece can't be swept on any further.
+    for (const m of find('diamond', cols, stageI(9))) {
+      const b = wholeDrags(cols, m), last = m.drags[m.drags.length - 1];
+      let [x, y] = [last.x, last.y];
+      for (const w of last.ways) [x, y] = neighbourOn(cols, x, y, w)!;
+      expect(canGo(b, x, y, 1)).toBe(false);
+    }
+  });
+  it('browns at the bottom, blacks at the top: a brown low on the left goes over the top and down through the blacks in one drag (12 Nov: "you don\'t just drag it to the right and leave it there")', () => {
+    // The user's board (notes/distilling/2-brown-over-the-top.webp): whites left and middle, junk on the right.
+    const cols = parseBoard(['wwKbKbKKb', 'wwbKwKbb', 'wwwwwwwKb', 'ww*wwKKb', 'wwwww*Kww', 'wwwwwKbw', 'wwwwwKwww', 'wbwwbKww', 'bbbKKK*bK', 'KKKKKwbb']);
+    const red = find('diamond', cols, stageI(8)).filter((m) => m.drags[0].x === 0 && m.drags[0].y === 5);
+    expect(red.length).toBeGreaterThan(0);
+    const w = red[0].drags[0].ways;
+    // Down through the black beside it, up the long diagonal through the whites, down through the blacks.
+    expect(w.slice(0, 7)).toEqual([DOWN_RIGHT, ...Array(6).fill(UP_RIGHT)]);
+    expect(w.slice(7, 9)).toEqual([DOWN_RIGHT, DOWN_RIGHT]);
+    const after = wholeDrags(cols, red[0]);
+    let at: [number, number] = [0, 5];
+    for (const d of w) at = neighbourOn(cols, at[0], at[1], d)!;
+    expect(at[0]).toBeGreaterThanOrEqual(8);
+    expect(after[at[0]][at[1]]).toBe(BROWN);
+    expect(halfOf(after, at[0], at[1])).toBeGreaterThan(6);
+  });
+  it('turn the right side over: blacks zigzag up the side through the browns to the top (12 Nov: "zigzagging up the side is how you get them over")', () => {
+    // The sweep's end: browns at the top right, blacks at the bottom (notes/distilling/4-end-of-the-sweep.webp).
+    const cols = board([...column(6, 'bbbbKKKKK'), ...column(7, 'bbbbKKKK'), ...column(8, 'bbbbKKKKK'), ...column(9, 'bbbbKKKK')]);
+    const moves = find('turnOver', cols, stageI(4));
+    expect(moves.length).toBeGreaterThan(0);
+    const d = moves[0].drags[0];
+    expect(moves[0].drags).toHaveLength(1);
+    expect(d.ways.every((w) => w === UP_RIGHT || w === UP_LEFT)).toBe(true);
+    expect(d.ways).toContain(UP_LEFT);
+    const after = wholeDrags(cols, moves[0]);
+    let at: [number, number] = [d.x, d.y];
+    for (const w of d.ways) at = neighbourOn(cols, at[0], at[1], w)!;
+    expect(after[at[0]][at[1]]).toBe(BLACK);
+    expect(halfOf(after, at[0], at[1])).toBeLessThanOrEqual(1);
+  });
+  it('the crawl, drawn: "the black can go down, up, down. And then the brown can essentially do a very similar motion because it\'s got the black next to it" (12 Nov)', () => {
+    // notes/distilling/7-the-crawl.png: a black and a brown side by side low in the whites.
+    const cols = board([[1, 5, 'K'], [3, 5, 'b'], ...column(8, 'KKKKbbbbb'), ...column(9, 'KKKKbbbb')]);
+    const m = find('crawl', cols, stageI(8)).find((x) => x.drags[0].x === 1 && x.drags[0].y === 5)!;
+    expect(m).toBeDefined();
+    expect(m.drags[0].ways).toEqual([DOWN_RIGHT, UP_RIGHT, DOWN_RIGHT]);
+    expect(m.drags[1].ways.slice(0, 3)).toEqual([UP_RIGHT, DOWN_RIGHT, UP_RIGHT]);
+    const after = wholeDrags(cols, m);
+    const [[kx]] = where(after, BLACK).filter(([x]) => x < 8), [[bx]] = where(after, BROWN).filter(([x]) => x < 8);
+    expect(kx).toBeGreaterThanOrEqual(3);
+    expect(bx).toBeGreaterThanOrEqual(5);
   });
   it('a routine\'s moves come out as whole drags, not single swaps: a piece is swept along its path (the user, 12 Nov: "one smooth motion")', () => {
     const cols = board([[1, 0, 'K'], [2, 0, 'b'], [4, 0, 'b'], [6, 0, 'b'], ...column(9, 'KKKKbbbb')]);
