@@ -13,7 +13,7 @@ import { countingDown } from './den-raids.js';
 import { BILGE } from './den-bilge.js';
 import { beachStep } from './den-beach.js';
 import { cleanLook, cleanDen } from './den-look.js';
-import { C, S, SPEED, HP, BUILD_SECS, tune, k, $, myLook, denLook, renderer, scene, camera, skyDome, PILE_SC, rotCW, rotCCW, flip, animateWalk, faceTo, V3, pirate, HOP, STEP, view, carry, bounds, obstacles, G, keys, tweens, sparks, raiders, ghostKey, ghost, target, shake, mouseMode, mouse, topView, keyAt, wm, wmBlock, wmLinger, wallView, ray, wallPlane, toast, v3, L0, L1, L2, worldLets, roomGlow } from './den/world.js';
+import { C, S, SPEED, HP, BUILD_SECS, tune, k, $, myLook, denLook, renderer, scene, camera, skyDome, PILE_SC, rotCW, rotCCW, flip, animateWalk, faceTo, V3, pirate, HOP, STEP, view, carry, bounds, obstacles, G, keys, tweens, sparks, raiders, ghostKey, ghost, target, shake, mouseMode, mouse, topView, keyAt, wm, wmBlock, wmLinger, wallView, ray, wallPlane, toast, v3, L0, L1, L2, worldLets, roomGlow, hazeAt } from './den/world.js';
 import { ramp, frames, frameAt, openJob, frameState, frameFits, putFramePiece, finishFrame, heightAt, onRampart, startHouse, houseState, plotLabel, atPlot, biomeTick, waveFlags, outside, throughGate, gateTick, towerLegs, selfSeen } from './den/land.js';
 import { wall, X, Y, newWall, doorOf, fits, layerOpen, curLayer, patchFits, nextMat, nextLayer, barFrac, labelFor, frameLabel, updateStats, breakHole, dropPiece, dropBoard, holeX } from './den/wall.js';
 import { GD, gd, gdCell, atGunDeck, gunOn, onGunDeck, gunSq, deckBlocks, loopsOf, gunTick, addStore, updateGunDeck, gunLabels, chalk, chalkAhead, turnArrowAhead, chalkRelease, wheelDeck, pointChalk, gundeckLets } from './den/gundeck.js';
@@ -300,6 +300,7 @@ function act() {
 
 // ---------- main loop ----------
 const camAt = new THREE.Vector3(0, 7.4, 14.2), camLook = new THREE.Vector3(0, 1.8, 3.6);
+let hazeD = null;   // (the view's distance the haze is set by: world.js, hazeAt)
 camera.position.copy(camAt);
 export let deckView = 0, beachView = 0, viewCam = null;
 export let swordView = 0, bilgeView = 0;
@@ -384,8 +385,8 @@ function houseUpdate(dt) {
   camAt.lerp(v3, k); camLook.lerp(C.look, k);
   camera.position.copy(camAt);
   camera.lookAt(camLook);
-  const camD = camAt.distanceTo(camLook);
-  scene.fog.near = camD + 10; scene.fog.far = camD + 45;
+  hazeD = hazeD == null ? C.dist : hazeD + (C.dist - hazeD) * k;   // (k is 1 on a cut)
+  hazeAt(hazeD);
   skyDome.position.copy(camera.position);
   renderer.toneMappingExposure = 1;
 }
@@ -753,12 +754,15 @@ function update(dt) {
     yaw = y0 + d * cineView;
   }
   v3.set(Math.sin(yaw) * Math.cos(tilt), Math.sin(tilt), Math.cos(yaw) * Math.cos(tilt)).multiplyScalar(dist).add(look);
-  if (wed.snap || house.snap || dc?.snap) { wed.snap = false; house.snap = false; camAt.copy(v3); camLook.copy(look); }   // (off to her island, or back: no flying across the sea)
-  camAt.lerp(v3, Math.min(1, dt * (3 + 9 * Math.max(rowView, gunView, xc?.close ?? 0))));   // (held close while rowing or at her guns, or following a racer watched: she can fly along)
+  const camK = Math.min(1, dt * (3 + 9 * Math.max(rowView, gunView, xc?.close ?? 0)));   // (held close while rowing or at her guns, or following a racer watched: she can fly along)
+  if (wed.snap || house.snap || dc?.snap) { wed.snap = false; house.snap = false; camAt.copy(v3); camLook.copy(look); hazeD = dist; }   // (off to her island, or back: no flying across the sea)
+  hazeD ??= dist;
+  camAt.lerp(v3, camK);
   camera.position.copy(camAt);
-  // The fog starts beyond what you're looking at, so a high or zoomed-out view doesn't go murky.
-  const camD = camAt.distanceTo(camLook);
-  scene.fog.near = camD + 10; scene.fog.far = camD + 45;
+  // The fog starts beyond what you're looking at, so a high or zoomed-out view doesn't go murky: by
+  // the view's distance, eased as the camera eases in or out, steady as it turns (world.js, hazeAt).
+  hazeD += (dist - hazeD) * camK;
+  hazeAt(hazeD);
   skyDome.position.copy(camera.position);
   // Looking down from the wall you see more of the floor the torches don't reach: brighten it up.
   renderer.toneMappingExposure = 1 + 0.45 * u;

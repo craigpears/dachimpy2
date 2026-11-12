@@ -1657,6 +1657,18 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     glow, with the moon (where the moonlight comes from) and stars, coloured to the landscape.
     The fog takes the horizon's colour and starts further off, so the sea out to the ship shows
     and then fades into the sky.
+    - **Fixed: the sea's shading jumped about as the camera turned (12 Nov).** "At different camera
+      angles, the ... fog of war kind of shading seems to jump about ... like you can't decide where
+      it's going to shade" (and the distant water oddly dark in wide shots). It wasn't the fog: the
+      seabed under the see-through sea is nudged toward the camera (to sit over the den's ground), and
+      looking along the water from far enough off that nudge beat the water's few centimetres, so the
+      dark bed cut across the far sea in a hard line that slid about with every turn, tilt and zoom. The
+      water is now nudged further still (js/den/land.js), and reaches a haze's width past the sloop's
+      last square every way, so no edge of it shows. The haze itself is steady too: by each thing's true
+      distance from the camera, per pixel, not its depth along the view; set by the distance the view
+      is settling to, eased, not the camera's lagging one as it swings round (which dipped it in a turn);
+      always whole before the camera's far plane; and the sky below the horizon is the haze's own colour,
+      so the far sea fades into it with no dark band (js/den/world.js, `hazeAt`).
 - **A cove (9 Nov).** The den should feel like a pirate hideout in a cove, a step towards the
   more ship-based den the user would like (without starting again). Whatever the landscape, out
   beyond the wall is a beach and the sea. The raiders row in from their ship in little rowboats,
