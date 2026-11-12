@@ -292,12 +292,6 @@ the site (`.assetsignore` skips `*.md`).
   like usually vanish unless you're at the right distance." The numbered buoys and the next one lit
   should show at any distance you'd sail by them.
 
-- **Whirlpools at sea: one step, between your moves (12 Nov):** "taking you to the opposite corner is like
-  one turn, so you like do your own move, and then the [whirlpool] does an action to take you to the
-  corner, and then your move happens again. So, for example, if I do like forward into a whirlpool, it
-  should be like take me into the whirlpool, then to the other corner, rotate it a bit, and then my next
-  forward should happen." Today it doesn't work like that (to pin down exactly how it goes wrong).
-
 - **The sea's fog shading jumps about as the camera turns (12 Nov):** "At different camera angles, the
   kind of ... fog of war kind of shading seems to jump about. It's like bouncing back and forth, like you
   can't decide where it's going to shade." The shading should stay put on the water as the camera moves.

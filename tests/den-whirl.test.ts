@@ -3,7 +3,7 @@
    corner of the whirlpool. They simultaneously rotate the ship clockwise 90 degrees." */
 import { describe, expect, it } from 'vitest';
 import { WHIRL, inWhirlpool, whirl, whirlAt, whirlpool } from '../src/den-whirl';
-import { Helm, Sea, type Pose, type SailEvent } from '../src/den-sail';
+import { Helm, SAIL, Sea, type Pose, type SailEvent } from '../src/den-sail';
 
 describe('a whirlpool, as YPPedia has it (11 Nov)', () => {
   const w = whirlpool({ at: [4, 6] });
@@ -66,5 +66,40 @@ describe('a whirlpool, as YPPedia has it (11 Nov)', () => {
     const more: SailEvent[] = [];
     for (let t = 0; t < 10; t += 0.02) more.push(...h.tick(0.02));
     expect(more.some((e) => e.kind === 'push' && e.whirl)).toBe(true);
+  });
+
+  // The user (12 Nov), at the race's start and Kikkit's: "if I do like forward into a whirlpool, it should
+  // be like take me into the whirlpool, then to the other corner, rotate it a bit, and then my next
+  // forward should happen." It whirled her four times in a row, back where she'd come in, and her next
+  // move went on from there.
+  it('a move into a whirlpool: her move, the pool\'s step to its far corner, then her next move (12 Nov)', () => {
+    const s = new Sea(1, false), pool = whirlpool({ at: [4, 6] });
+    for (const [c, r] of pool.squares) s.whirls.set(`${c},${r}`, pool);
+    const h = new Helm(s, { c: 4, r: 5, d: 0 }), ev: { e: SailEvent; t: number }[] = [];
+    h.put('F'); h.put('F');
+    for (let t = 0; t < 8; t += 0.02) for (const e of h.tick(0.02)) ev.push({ e, t });
+    const steps = ev.filter(({ e }) => e.kind === 'move' || (e.kind === 'push' && e.whirl));
+    // Into its near left corner; one whirl, to the far right one, a quarter turn right; then her
+    // forward, from there, facing right: off the pool.
+    expect(steps.map(({ e }) => e.kind === 'move' ? `F ${e.to.c},${e.to.r}` : e.kind === 'push' ? `whirl ${e.to.c},${e.to.r},${e.to.d}` : '')).toEqual(['F 4,6', 'whirl 5,7,1', 'F 6,7']);
+    expect(h.pose).toEqual({ c: 6, r: 7, d: 1 });
+    // The whirl a beat of its own, as long as a move's about: not instant, not slow.
+    const beat = steps[2].t - steps[1].t, move = steps[1].t - steps[0].t;
+    expect(beat).toBeGreaterThan(0.6);
+    expect(beat).toBeLessThanOrEqual(move + 0.05);
+    // One beat: the step, and the move after it, both in the one turn.
+    expect(ev.filter(({ e }) => e.kind === 'turn')).toHaveLength(1);
+  });
+
+  it('where its step leaves her on it still, it acts again only a beat later: her next move first, or with none a breather', () => {
+    const s = new Sea(1, false), pool = whirlpool({ at: [4, 6] });
+    for (const [c, r] of pool.squares) s.whirls.set(`${c},${r}`, pool);
+    const h = new Helm(s, { c: 4, r: 5, d: 0 }), at: number[] = [];
+    h.put('F');
+    for (let t = 0; t < 12; t += 0.02) for (const e of h.tick(0.02)) if (e.kind === 'push' && e.whirl) at.push(t);
+    // Round and round, a step at a time, each a breather after the last: never two at once.
+    expect(at).toHaveLength(WHIRL.MOST);
+    for (let i = 1; i < at.length; i++) expect(at[i] - at[i - 1]).toBeGreaterThanOrEqual(WHIRL.SECS + SAIL.BREAK - 0.05);
+    expect(h.pose).toEqual({ c: 4, r: 6, d: 0 });
   });
 });

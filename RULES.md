@@ -363,6 +363,18 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   penguins. A whirlpool lets her go after a whole turn round, so she's never held for ever. The
   pilot never takes her onto one, or onto a wind that feeds one. Any whirlpool anywhere on the sea
   is the same piece (src/den-whirl.ts).
+  - **One step, between your moves (12 Nov).** At the race's start and Kikkit's: "you do your own
+    move, and then the [whirlpool] does an action to take you to the corner, and then your move
+    happens again ... if I do like forward into a whirlpool, it should be like take me into the
+    whirlpool, then to the other corner, rotate it a bit, and then my next forward should happen."
+    What went wrong: its step landed her on the far corner, a square of it still, and it went again
+    straight away, four steps in a row, round to where she came in; her next move then went on from
+    there. Now it's her move, then the pool's one step (to its far corner, a quarter turn right, a
+    short beat of its own, about a quick move's: WHIRL.SECS), then her next move from there (YPPedia:
+    landed on a special square by one, "it has no effect for this phase"). A wind that takes her on
+    from where it put her still does, in the same beat. With nothing more to play and her on it
+    still, it takes her on a step a breather later, till a whole turn round lets her go. Tested in
+    tests/den-whirl.test.ts.
   - **Her "eh" is emphasis, drawn out (11 Nov).** First: "her mannerisms are definitely like
     everything ends in EH, so it's not a twirl, it's twirl EH." Then, of "annoying-eh": "It's supposed
     to be a childlike it was all sparklehhhhhhh and whooshhehhhhhhh. Not sure how to describe the rules
