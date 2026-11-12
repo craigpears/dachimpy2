@@ -825,6 +825,19 @@ column by column on the right".
 - **How to use it:** a score of the board from these, used as a test of each candidate drag (the board after
   it, scored), not a deep search: "I'm not saying implement them because they're expensive". The cheap
   plain drag that scores well wins over a crawl.
+- **Blacks to the top, misread (the user, 12 Nov, `notes/distilling/21-a-diagonal-of-blacks.webp`):** "it's
+  trying to get blacks to the top. And it's now ended up with a diagonal of blacks the entire way across the
+  screen because it's tried to drag them up. I think it's really misunderstood that, no, you want blacks to the
+  bottom right at this stage. I think it's really misunderstood the concept and the point of doing that." In
+  the picture a band of blacks runs diagonally across the middle, with whites above and below it (the eighth
+  note's horror). Blacks at the top is for the late game's scarce colour; early on a black goes down and right,
+  into the junk.
+- **The score, start simple (the user):** "the scoring should just be as simple as like how many whites have
+  moved to the left, how many other pieces have moved to the right. For burning, and it's bonus for completing
+  columns, and having more pieces like further to the left ... Like completed brown black columns with no
+  whites in on the right, good." So: whites further left is good, junk further right is good, and a bonus for
+  each completed junk column on the right with no white in it. Build that first, then add the rest above only
+  where it shows it's needed.
 
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
