@@ -325,6 +325,17 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   on the screen. (Being done with the starlit door going public.)
 
 
+- **The driftwood barrier one square off (12 Nov):** "I don't like where the foraging is. Because, like,
+  how do you get to it? Like, you have to spin on the spot after jumping over the, that snake trade wind
+  thing. It just feels like it's one square off." Its gap sits right beside the middle snake, so a Double
+  over the snake lands you facing past it, and you turn on the spot into its notch. Move it a square on,
+  so one natural turn takes you in. (Being done with the course editor.)
+- **The race's chart kept in step with the course (12 Nov):** "hopefully we're keeping this [race map]
+  JPEG in sync." Redraw `changelog/race-map.jpg` whenever the course changes, and have a test fail when
+  it's out of date (the chart's drawing records which course it drew; the test compares with today's), as
+  `tests/build.test.ts` does for the compiled js.
+
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
