@@ -154,6 +154,7 @@ export function sailClick(x, y) {
   if (craneHolds() || raceHolds()) return;   // (up in the lagoon, or on her way: no pins; on the race's crane: race.js)
   const at = seaCellAt(x, y);
   if (!at) return;
+  if (sail.pins.some((f) => f(x, y, at))) return;   // (a pin on the starlit door: door.js)
   if (!sail.helm.drop(at.c, at.r)) toast('She\'s there already', true);
   else if (sail.helm.via) toast('She\'ll ride the trade winds: the pin\'s where they drop her off');
 }
@@ -297,7 +298,8 @@ export function sailTick(dt) {
     events = raceHelm(h, dt);   // (in whole steps during a race: race.js)
     for (const e of events) {
       windSay(e);
-      if (e.kind === 'move' && e.bump && !e.irons) sail.bumpT = e.secs * 0.45;   // (felt as she hits)
+      // (felt as she hits; unless it's a place's own, the starlit door's: door.js, sail.bumps)
+      if (e.kind === 'move' && e.bump && !sail.bumps.some((f) => f(e)) && !e.irons) sail.bumpT = e.secs * 0.45;
       if (e.kind === 'arrive' && canLand(h)) toast('Off the den\'s beach: Space to go ashore');
       if (e.kind === 'arrive' && canLandIsle(h)) toast('Off the Wedding Isle: Space to go ashore');
       if (e.kind === 'push') {

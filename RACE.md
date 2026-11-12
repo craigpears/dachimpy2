@@ -795,6 +795,11 @@ Yeah, no hidden ... not for a proof of concept. It didn't really work"). Built t
 - **The door:** faint marks on a cliff off leg 2. Stop by it and press Space, and Duty Navigation stands
   on the rock as the night sky. Each constellation filled lights its stars on the carved wheel. Two small
   ones open it, about a minute's play. A booch pushes her off and darkens the stars.
+- **Getting in (12 Nov, the user's first try: "I'm just bumping into the rocks"):** sailing at the open
+  door, or a pin on it, brings her into the doorway facing in, the Sailing board out, and the prompt says
+  "any clear carries her in, a Vegas on through the dark"; never a bump. The doorway's as wide as the
+  clefts and tall for her mast. The design's as it was (Navigation, a clear in, a Vegas a stretch), and the
+  simulation's door timings unchanged. RULES.md, "Getting in, plain and forgiving".
 - **The tunnel (its stretches built 12 Nov):** straight on under the course in the door's columns, in two
   stretches, each ending under a cleft in a spit's far face that comes up onto the course further along:
   - **The first exit, onto leg 3:** a cleft in the second spit's far face, just past the leg's start. A

@@ -43,7 +43,7 @@
    she passed (the first, from the mouth): never back to the mouth, so going in always gains something.
    Out of a cave she's back among the field, in the open as anywhere. */
 
-import { LAY, SAIL, type Pose } from './den-sail.js';
+import { LAY, SAIL, path, type Move, type Pose } from './den-sail.js';
 import { runFor, RUN } from './sailing.js';
 import { type Done, type Mark, type NavOptions } from './navigation.js';
 
@@ -92,6 +92,32 @@ export const offDoor = (c: number, r: number): boolean => D.OFF.some(([x, y]) =>
 export function mouthOf(p: Pose): number {
   return p.d === 0 ? D.OFF.findIndex(([x, y]) => x === p.c && y === p.r) : -1;
 }
+/** The door's mouth in column `i`: the water off its face there, facing in. */
+export const mouthPose = (i: number): Pose => ({ c: D.OFF[i][0], r: D.OFF[i][1], d: 0 });
+/** Which of its mouths is nearer column `c` (a pin on the door goes there). */
+export const mouthNear = (c: number): number => (Math.abs(c - D.OFF[0][0]) <= Math.abs(c - D.OFF[1][0]) ? 0 : 1);
+
+/* Getting in, plain and forgiving (12 Nov, the user's first try at it: "I can't actually get through the
+   door ... I'm just bumping into the rocks. And it won't let me autopilot through it either"). The door's
+   face stays no square of the sea (the pilot never sails into it, and a long-way race is unchanged), but a
+   move into it is never a bump against rock: */
+/** What a move from `from` into the door's face does instead of a bump: 'in', straight at it from the water
+    off it, or turning in to it from alongside: she's brought to its mouth there, facing in (`to`; open, she's
+    in the doorway, and any clear's gust carries her in; shut, it's said what opens it). 'turn', a turn
+    from its mouth facing in: she turns on the spot as at any cliff (her way back out), nothing said of
+    rocks. null: the move doesn't touch its face. */
+export function doorMove(from: Pose, m: Move): { way: 'in' | 'turn'; to: Pose } | null {
+  const { cells } = path(from, m);
+  for (let k = 0; k < cells.length; k++) {
+    const i = D.FACE.findIndex(([x, y]) => x === cells[k][0] && y === cells[k][1]);
+    if (i < 0) continue;
+    if (k === 0 && m !== 'F' && mouthOf(from) >= 0) return { way: 'turn', to: { c: from.c, r: from.r, d: path(from, m).to.d } };
+    const [bc, br] = k ? cells[k - 1] : [from.c, from.r];
+    return bc === D.OFF[i][0] && br === D.OFF[i][1] ? { way: 'in', to: mouthPose(i) } : null;
+  }
+  return null;
+}
+
 /** Where exit `k` puts her out, in column `i` (the door's, the tunnel running straight): the water off its
     cave, facing straight on. */
 export const exitPose = (k: number, i: number): Pose => ({ c: D.EXITS[k].INTO[i][0], r: D.EXITS[k].INTO[i][1], d: 0 });
