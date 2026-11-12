@@ -334,6 +334,15 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   JPEG in sync." Redraw `changelog/race-map.jpg` whenever the course changes, and have a test fail when
   it's out of date (the chart's drawing records which course it drew; the test compares with today's), as
   `tests/build.test.ts` does for the compiled js.
+  **And clearer (12 Nov):** reading the chart, the user couldn't tell what the wreck by the start was for,
+  took the locks' berth on leg 4 for the starlit door, and didn't find the rowing shortcut or the veiled
+  wind. Each label beside what it names, not across the spit (the imperial gate's label sits on the
+  spit's far end from the gate; "The locks" on the far end from the locks); the wreck labelled "haul the
+  bribe here", the berth "wait for the lock", the headwind gap "row it"; the veiled wind's "?" named.
+- **Rocks blasted away by her guns, a shortcut part way round the race (12 Nov):** "we still haven't got
+  the destructible rocks. That was supposed to be part way through the course somewhere." Rocks across a
+  gap, shot away by Gunnery loading her guns, on the move (RACE.md §3's table, "Rocks across a gap,
+  blasted away", an idea till now). After the course editor lands, as it moves the course's numbers.
 
 
 ## Spotted along the way (not asked for)
