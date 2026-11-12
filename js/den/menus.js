@@ -18,12 +18,13 @@ import { sail } from './sea.js';
 import { CRANE } from '../den-crane.js';
 import { craneCheat } from './crane.js';
 import { umamiCheat } from './capybara.js';
-import { kikkitCheat } from './whirlpools.js';
+import { kikkitCheat, penguinsCheat } from './whirlpools.js';
 import { lodgingsOpen } from './lodgings.js';
 import { tzzCheat } from './balloon-isle.js';
 import { empireCheat } from './imperial-isle.js';
 import { smugglersCheat } from './smugglers.js';
 import { raceCheat } from './race.js';
+import { doorCheat } from './door.js';
 import { watchStart, watchStop } from './race-watch.js';
 import { cp } from './checkpoint.js';
 import { board, sailReset } from './sailing.js';
@@ -564,6 +565,16 @@ function cheatKikkit() {
   if (!sail.on) cheatSail();
   kikkitCheat();
 }
+/* Vegas Island and its penguins (js/den/whirlpools.js), past Kikkit's whirlpools: at sea in the
+   penguins' water, as if a Vegas had carried her there, the checkpoint told she's beyond it (she's past
+   the reef), as for the smugglers' beach. Its own place, not a spot on Kikkit's island: only a Vegas
+   gets there. */
+function cheatPenguins() {
+  if (cine) return;
+  if (!sail.on) cheatSail();
+  penguinsCheat();
+  cp.check.side = 'far';
+}
 /* Tzz's island (js/den/balloon-isle.js): out to sea, just off it, where her balloon lesson begins. */
 function cheatTzz() {
   if (cine) return;
@@ -594,6 +605,13 @@ function cheatRace() {
   if (!sail.on) cheatSail();
   raceCheat();
   cp.check.side = 'far';
+}
+/* The starlit door (js/den/door.js), on the race course off leg 2: by the race's buoy first, as for the
+   race, then stopped under the door's crag, Space to look closer at the rock. */
+function cheatDoor() {
+  if (cine) return;
+  cheatRace();
+  doorCheat();
 }
 /* The sloop race watched (js/den/race-watch.js): four racers and no player in it, a free camera and a
    key to jump between them, each one's board as she plays it. At sea by the race's buoy first, as for
@@ -661,29 +679,42 @@ function cheatLodgings() {
   toLodgings();
   lodgingsOpen(true);
 }
-/* [name, what it does, its link's name if it's a starting point (den.html?at=...)]. Only jumps to
-   what's hard to get to, one per place (the user, 11 Nov: "these are supposed to help jump you to
-   places that are hard to get to"): no Sailing board of its own (go sailing, then R), no Gravee's
-   house beside the housing district (its link the one shared), no Kikkit's whirlpools beside her island. */
-const CHEATS = [
-  ['Beat this wave', cheatBeat],
-  ['Next wave now', () => (G.phase === 'wave' ? toast('A wave\'s on: beat it first', true) : startWave())],
-  ['Mend every hole', cheatMend],
-  ['Build the shack', cheatShack, 'shack'],
-  ["The captain's map scene", cheatMapScene, 'map-scene'],
-  ['Go sailing', cheatSail, 'sea'],
-  ["Dignity's scene", cheatDignity, 'dignity'],
-  ["Umami's rescue", cheatUmami, 'umami'],
-  ['The Wedding Isle', cheatWedding, 'wedding'],
-  ["Kikkit's island", cheatKikkit, 'kikkit'],
-  ["Tzz's balloon lesson", cheatTzz, 'tzz'],
-  ['The imperial island', cheatEmpire, 'imperial'],
-  ["The smugglers' beach", cheatSmugglers, 'smugglers'],
-  ['The sloop race', cheatRace, 'race'],
-  ['Watch the sloop race', cheatRaceWatch, 'race-watch'],
-  ['Home, married', cheatMarried, 'married'],
-  ['The housing district', cheatLodgings, 'lodgings'],
+/* [name, what it does, its link's name if it's a starting point (den.html?at=...)], in the menu's
+   sections (the user, 12 Nov: "all of the cheats ... can be grouped into sections at this point, and
+   it's probably quite a long menu"). Only jumps to what's hard to get to, one per place (the user, 11
+   Nov: "these are supposed to help jump you to places that are hard to get to"): no Sailing board of
+   its own (go sailing, then R), no Gravee's house beside the housing district (its link the one shared),
+   no Kikkit's whirlpools beside her island. */
+const CHEAT_SECTIONS = [
+  ['At the den', [
+    ['Beat this wave', cheatBeat],
+    ['Next wave now', () => (G.phase === 'wave' ? toast('A wave\'s on: beat it first', true) : startWave())],
+    ['Mend every hole', cheatMend],
+    ['Build the shack', cheatShack, 'shack'],
+    ["The captain's map scene", cheatMapScene, 'map-scene'],
+    ['Home, married', cheatMarried, 'married'],
+    ['The housing district', cheatLodgings, 'lodgings'],
+  ]],
+  ['Out to sea', [
+    ['Go sailing', cheatSail, 'sea'],
+    ["Dignity's scene", cheatDignity, 'dignity'],
+    ["Umami's rescue", cheatUmami, 'umami'],
+  ]],
+  ['The islands', [
+    ['The Wedding Isle', cheatWedding, 'wedding'],
+    ["Kikkit's island", cheatKikkit, 'kikkit'],
+    ["Vegas Island's penguins", cheatPenguins, 'penguins'],
+    ["Tzz's balloon lesson", cheatTzz, 'tzz'],
+    ['The imperial island', cheatEmpire, 'imperial'],
+    ["The smugglers' beach", cheatSmugglers, 'smugglers'],
+  ]],
+  ['The sloop race', [
+    ['The sloop race', cheatRace, 'race'],
+    ['The starlit door', cheatDoor, 'door'],
+    ['Watch the sloop race', cheatRaceWatch, 'race-watch'],
+  ]],
 ];
+const CHEATS = CHEAT_SECTIONS.flatMap(([, list]) => list);
 /* Every starting point has a link, to share (the user, 10 Nov: "make it so that each starting point
    is something that I can put into the URL as well, so that I can share that animation with
    somebody"): den.html?at=dignity, say, opens the den straight into Dignity's scene. Choosing one
@@ -711,15 +742,24 @@ export function cheatPanel(on) {
   keys.clear();
   $('cheats').classList.toggle('on', on);
 }
-const cheatButtons = (el, list) => $(el).replaceChildren(...list.map(([name], i) => {
-  const b = document.createElement('button');
-  b.textContent = name;
-  const at = el === 'cheat-stages' ? STAGE_AT[i] : CHEATS[i][2];
-  if (at) b.title = `Link: den.html?at=${at}`;
-  b.onclick = () => { cheatPanel(false); watchStop(); if (wed.on && at !== 'wedding') weddingLeave(); if (house.on) houseLeave(); (el === 'cheat-stages' ? skipTo : (j) => CHEATS[j][1]())(i); if (at) linkTo(at); };
-  return b;
-}));
-cheatButtons('cheat-stages', STAGES);
-cheatButtons('cheat-now', CHEATS);
+/* The menu: each section a heading and its buttons ([name, run, link]); a fresh den's stages first. */
+function cheatSection(title, list) {
+  const sec = document.createElement('section'), h = document.createElement('h3'), grid = document.createElement('div');
+  h.textContent = title;
+  grid.className = 'grid';
+  grid.replaceChildren(...list.map(([name, run, at]) => {
+    const b = document.createElement('button');
+    b.textContent = name;
+    if (at) b.title = `Link: den.html?at=${at}`;
+    b.onclick = () => { cheatPanel(false); watchStop(); if (wed.on && at !== 'wedding') weddingLeave(); if (house.on) houseLeave(); run(); if (at) linkTo(at); };
+    return b;
+  }));
+  sec.append(h, grid);
+  return sec;
+}
+$('cheat-groups').replaceChildren(
+  cheatSection('A fresh den, built up to', STAGES.map(([name], i) => [name, () => skipTo(i), STAGE_AT[i]])),
+  ...CHEAT_SECTIONS.map(([title, list]) => cheatSection(title, list)),
+);
 $('cheat-btn').onclick = () => cheatPanel(!cheats.open);
 $('cheats-close').onclick = () => cheatPanel(false);

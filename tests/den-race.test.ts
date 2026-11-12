@@ -603,20 +603,29 @@ describe('Space at the race\'s start buoy, with the Sailing board open (12 Nov)'
 });
 
 describe('the starter\'s card names the gambles (12 Nov): a veiled wind, on or back, and a whirlpool that turns', () => {
-  it('names them as gambles, in a few words, and still never the starlit door', () => {
+  it('names them as gambles, in a few words', () => {
     const line = STARTER.explain.find((l) => /gamble/.test(l))!;
     expect(line).toMatch(/veiled wind/);
     expect(line).toMatch(/whirlpool that turns/);
     expect(line.split(' ').length).toBeLessThan(35);
-    expect(STARTER.explain.join(' ')).not.toMatch(/\bdoor\b|\bstar(s|lit)?\b|navigation|tunnel/i);
+  });
+});
+
+describe('the starter\'s card names the starlit door, 12 Nov: no hidden gems in the proof of concept', () => {
+  it('a starry door in the cliff off leg 2, opened by Navigation, and a tunnel under the course, in a line of its own', () => {
+    const line = STARTER.explain.find((l) => /\bdoor\b/.test(l))!;
+    expect(line).toMatch(/starry door/);
+    expect(line).toMatch(/leg two/);
+    expect(line).toMatch(/Navigation/);
+    expect(line).toMatch(/tunnel under the course/);
+    expect(line.split(' ').length).toBeLessThan(35);
   });
 });
 
 describe('the starter\'s card names the bribe at the gate (12 Nov)', () => {
-  it('pay off the guard at the gate, among the ways through; never the starlit door', () => {
+  it('pay off the guard at the gate, among the ways through', () => {
     const card = STARTER.explain.join(' ');
     expect(card).toMatch(/pay off the guard at the gate/);
     expect(card).toMatch(/treasure/);
-    expect(card).not.toMatch(/\bdoor\b|\bstar(s|lit)?\b|navigation|tunnel/i);
   });
 });

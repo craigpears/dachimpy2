@@ -1058,7 +1058,7 @@ For now there's nothing to do there: the island's sketched, to sail up to and lo
 
 Whoever keeps the buoy off the sloop race's gate, out past Primates Rule: takes you in to the starting line, explains the race, counts you down, fires the gun, and calls the times at the finish line. Nameless for now: a real pirate needs the user's pick. (The rivals racing you are the den's own characters.)
 
-Explains the race's rules before the off (the long way, shortcuts that cost a puzzle, a few named as examples, the snakes, the shooting), never where a shortcut is or how it's done beyond that, and never the starlit door (RULES.md, "Hidden gems, never hinted").
+Explains the race's rules before the off (the long way, shortcuts that cost a puzzle, a few named as examples, the starlit door among them, the snakes, the shooting), never where a shortcut is or how it's done beyond that (RULES.md, "No hidden gems in the proof of concept").
 
 > "a winding, snakes and ladders, zigzagging kind of course, just with a lot of shortcuts, and each shortcut is a different puzzle" (the user, 11 Nov)
 >
@@ -1074,6 +1074,7 @@ Explains the race's rules before the off (the long way, shortcuts that cost a pu
   - "Here's the way of it. Round the numbered buoys, five legs and the run home: the long way, no puzzle, just sail her"
   - "Or cut through the spits, if ye dare. Every shortcut costs ye a puzzle: bilge up through a lock, build a crane, row the headwind gap"
   - "Zoom over the whirlpools on a Vegas, hop a headwind with a Double, or haul up some treasure and pay off the guard at the gate. Get it wrong and ye're back where ye started"
+  - "Or, for a navigator, a starry door in the cliff off leg two, opened by Navigation, and a tunnel under the course. A Vegas carries ye on through the dark"
   - "Or take a gamble: a veiled wind that might carry ye on or blow ye back, or a whirlpool that turns its spin. Catch it turning yer way"
   - "Mind the winds that sweep ye back. The trade wind up the left takes ye all the way to the start, and the run home runs right beside it"
   - "And the others'll shoot ye if ye sit still in the open. Pick yer spot on the line, and Space for the count"

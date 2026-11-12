@@ -64,11 +64,11 @@ describe('a link to watch four bots race (12 Nov)', () => {
     expect(a.W.field.racers.map((r) => r.time)).toEqual(b.W.field.racers.map((r) => r.time));
   });
 
-  it('nobody takes the starlit door, and nothing said names it: it\'s a secret', () => {
+  it('nobody takes the starlit door, 12 Nov: kept off the bots\' routes for balance, no longer a secret', () => {
     for (const seed of [1, 2, 3, 4]) {
       const { W, said } = watched(seed);
       for (let i = 0; i < 4; i++) expect(W.info(i)!.done).not.toContain('door');
-      for (const s of said) for (const x of s) expect(x.toLowerCase()).not.toMatch(/door|tunnel|starlit|navigation/);
+      for (const s of said) for (const x of s) expect(x.toLowerCase()).not.toMatch(/through the (door|tunnel)/);
     }
   });
 });

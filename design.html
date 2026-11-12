@@ -7,7 +7,8 @@
 <title>Pirate Den: how it's designed</title>
 <!-- The thinking behind the Pirate Den (CLAUDE.md, "The changelog"): high level, plain words, a picture for
      each section from changelog/, in the changelog's own look. Kept up to date as the design grows; the
-     detail lives in RACE.md, STORY.md and RULES.md. Pirate names only, and nothing of the hidden gems. -->
+     detail lives in RACE.md, STORY.md and RULES.md. Pirate names only. Nothing's kept secret here: no hidden
+     gems in the proof of concept (RULES.md, 12 Nov), so the starlit door is shown like the rest. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,500&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -78,13 +79,13 @@
       <a class="play" href="den.html">Play the den</a>
     </div>
   </header>
-  <nav class="toc">The race: <a href="#race" target="_self">snakes and ladders</a> · <a href="#fair" target="_self">every way can win</a> · <a href="#gates" target="_self">the gates</a> · <a href="#gambles" target="_self">the gambles</a> · <a href="#tactics" target="_self">racing each other</a> · <a href="#watch" target="_self">watching</a>. The den: <a href="#everywhere" target="_self">one puzzle everywhere</a> · <a href="#islands" target="_self">little islands</a> · <a href="#world" target="_self">in the world</a> · <a href="#host" target="_self">the host</a> · <a href="#pirates" target="_self">real pirates</a>.</nav>
+  <nav class="toc">The race: <a href="#race" target="_self">snakes and ladders</a> · <a href="#fair" target="_self">every way can win</a> · <a href="#gates" target="_self">the gates</a> · <a href="#gambles" target="_self">the gambles</a> · <a href="#door" target="_self">the starlit door</a> · <a href="#tactics" target="_self">racing each other</a> · <a href="#watch" target="_self">watching</a>. The den: <a href="#everywhere" target="_self">one puzzle everywhere</a> · <a href="#islands" target="_self">little islands</a> · <a href="#world" target="_self">in the world</a> · <a href="#host" target="_self">the host</a> · <a href="#pirates" target="_self">real pirates</a>.</nav>
 
   <h2>The sloop race</h2>
 
   <article class="tall" id="race">
     <div class="shots">
-      <a href="changelog/race-map.jpg"><img src="changelog/race-map.jpg" width="1280" height="1822" alt="A parchment chart of the sloop race: five legs zigzagging up between spits of land from the starting line to the finish, the long way dashed round numbered buoys, each shortcut through a spit labelled with its puzzle, the seconds it saves and how often it wins, the snakes in red and the two gambles in gold"></a>
+      <a href="changelog/race-map.jpg"><img src="changelog/race-map.jpg" width="1280" height="1822" alt="A parchment chart of the sloop race: five legs zigzagging up between spits of land from the starting line to the finish, the long way dashed round numbered buoys, each shortcut through a spit labelled with its puzzle, the seconds it saves and how often it wins, the snakes in red, the two gambles in gold, and the starlit door's tunnel dotted in purple under the course"></a>
     </div>
     <div>
       <h3>Snakes and ladders at sea</h3>
@@ -140,6 +141,19 @@
     <p class="ask">What kind of gambles will you take?</p>
     <p>Neither is worth anything on average, and that's the point: they're a swing, not a shortcut. In the lead, why risk it? At the back, a swing might be just what you need. The bots in the simulated races play them that way, hardly ever in the lead and most of the time in last place, and the gambles still come out about even.</p>
     <p class="try">Try it: <a href="den.html?at=race"><code>den.html?at=race</code></a></p>
+  </article>
+
+  <article id="door">
+    <div class="shots two">
+      <a href="changelog/starlit-door.jpg"><img src="changelog/starlit-door.jpg" width="1280" height="720" loading="lazy" alt="A door standing open in a tall cliff off the race's second leg, a carved wheel of stars above it with five of them lit, and the sloop waiting at its foot"></a>
+      <a href="changelog/starlit-tunnel.jpg"><img src="changelog/starlit-tunnel.jpg" width="1280" height="720" loading="lazy" alt="The sloop carried along a long dark tunnel of rock under the race course"></a>
+    </div>
+    <h3>The starlit door: the long way round for a navigator</h3>
+    <p class="ask">Is Navigation your puzzle?</p>
+    <p>Off the second leg a door is shut in the cliff, and a constellation keeps it shut. Stop under it and Duty Navigation stands on the rock as the night sky; each constellation you fill lights its stars on the carved wheel, and two of them open it. It's two stops, the rock and then the tunnel's mouth, so it's the back of the field's big chance and a risk for the leader.</p>
+    <p>Behind it a tunnel runs straight on under the course, in stretches, each carried by a Vegas. Under the third leg it comes up through a cleft in the rock, and there you choose: come up and rejoin the race about 40 seconds ahead, or build the next Vegas down there in peace, out of everyone's reach, and ride on up onto the fifth leg, about two minutes saved in all. It pays off big, but only for a player good at both.</p>
+    <p><b>Always some gain for going in.</b> Anything less than a Vegas spills you up the last cleft you passed, never back to the start: a side route's failure drops you back onto the main course, a little further on than where you left it, and the race carries on round you.</p>
+    <p class="try">Try it: <a href="den.html?at=door"><code>den.html?at=door</code></a></p>
   </article>
 
   <article id="tactics">
