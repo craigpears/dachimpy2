@@ -2072,6 +2072,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     camera's no different. And on a phone the den's big toast covered the Sailing board for a moment
     after a chain: with the board out, toasts go in the sea it leaves, no wider than it, and on a
     tall screen smaller, just under the den's panel, so they're never over the board.
+- **What a clear leaves in the air falls at once (12 Nov).** "when you clear a platform, pieces just kind
+  of floating in the air until the next piece hits the ground." After a drop's last clear, a platform's
+  or a line's, whatever it held up falls straight away, as a step of its own on the board, not when the
+  next pair lands (src/sailing.ts, a last 'fall' stage).
 - **A quick tap of Space is a nudge (12 Nov).** "A quick tap of the spacebar also seems a bit overpowered in
   sailing. It's like, whoa". The pair falls a row every 0.06 s while Space speeds it (it was 0.04), so a
   quick tap is three or four rows, not five or more; held, it still races down (`FALL.FAST`, src/sail-pair.ts).
