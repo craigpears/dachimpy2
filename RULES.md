@@ -2188,7 +2188,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     them quiet (14 s); spit 2, the headwind gap, rowed, its far end a dog-leg so it doesn't open straight onto
     leg 3 and out of the gun gap's reach (30 s), and a small gap with one wind blowing back across it that a
     well-timed Double hops (9 s); spit 3, the whirlpool channel, only a Vegas from its mouth (46 s), and a
-    barrier of driftwood across a gap, cleared by Foraging (15 s); spit 4, the locks (23 s); spit 5, the crane
+    barrier of driftwood across a gap, cleared by Foraging (12 s since it moved a column east, 12 Nov: below); spit 4, the locks (23 s); spit 5, the crane
     (38 s), and a gap with two winds that a Triple hops (9 s); and the starlit door (40 s up at leg 3, 119 on to leg 5). On the long way,
     leg 4 before the locks is the zigzag: headwinds blowing back along it, alternating side to side with gaps
     between, a wind behind her there so she can weave either way; weaving through takes about 17 s, hopping
@@ -2337,6 +2337,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       `Race.takes`.
     - **The starter's card names the bribe:** "haul up some treasure and pay off the guard at the gate",
       among the ways through. The starlit door stays unmentioned.
+    - **The barrier a square along (12 Nov: "how do you get to it? Like, you have to spin on the spot after
+      jumping over the, that snake trade wind thing. It just feels like it's one square off"):** it, its notch
+      and its gap moved a column east (column 21), two past the trade wind back up the course. A Double over
+      that wind along leg 3 lands her a square short of it, and one turn to port takes her up into the notch
+      from the leg's second row (from its first, a turn and a move). It saves 12 s now (it was 15; the helm's).
   - **The gambles (12 Nov: "sometimes maybe there should be a mysterious headwind. Half the time it pushes
     you forward ... Sometimes ... it goes backwards. But maybe the whirlpool, the direction the whirlpool goes
     is changes, so it goes back up ... So you can go that way if you want to take a gamble"):** two ways that
@@ -2364,6 +2369,29 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       turning whirlpool!").
     - **The starter's card names them:** "Or take a gamble: a veiled wind that might carry ye on or blow ye
       back, or a whirlpool that turns its spin. Catch it turning yer way".
+  - **Your own course (12 Nov: "having a map editor are going to be like the top of demands ... you'd need to
+    be able to switch between 2D and 3D views"):** `race-editor.html` (RACE.md §10 has the detail).
+    - **The chart:** the course in 2D in the race chart's look. Click a buoy, a shortcut or a gamble (or its
+      name) to pick it, outlined in gold; drag it along its spit, or ◂ ▸ (the arrow keys too); Esc lets go.
+      Its numbers are in the side panel: the up lock's Bilge clears (3 to 20), the crane's frames (small,
+      standard, large), the barrier's bundles (1 to 4), the guard's price (10 to 100 coins, in tens), the
+      veiled wind's odds (10 to 90%) and where it blows her back to, the turning pool's beat (2 to 8 s).
+    - **Always a race:** each way through inside its spit, a column of land either end and between it and
+      the next way through, where the legs either side reach it; the long way open round every buoy, every
+      shortcut sailable. Anything out of place is listed in plain words and the chart's edged in red; it
+      can't be shared or raced till it's put right.
+    - **3D:** "Race it in 3D" (or the 3D tab) opens `den.html?at=race&course=...`: the den's race laid from
+      the course, read once as the page loads, rivals and all. "Back to the course editor (2D)", top right,
+      goes back with it. Its best time is kept apart from the den's own course's.
+    - **Share:** "Copy share link" (`race-editor.html?course=` and about 26 characters); the page's own
+      address keeps the course too. Reset goes back to the den's own course. A link that's garbled, or not a
+      race, opens the den's own.
+    - **Balance check:** 300 races of four of the simulation's bots, in a worker, about ten seconds: each way
+      round's wins against its fair share (red outside half to 1.6 times it), what each shortcut saves on the
+      course and really saved a decent, good and great racer, the gambles each way; each feature's wins on
+      the chart too.
+    - **The starlit door stays where it is** on every course (public since 12 Nov), drawn on the chart with its
+      tunnel and raced in the balance check; nothing else cuts through a spit in its columns.
   `?at=race` and one cheat. Rules: `src/den-race.ts`; drawn and played by `js/den/race.js`, its start
   `js/den/race-start.js`, its buoys and finish `js/den/race-marks.js`, its barrier `js/den/race-forage.js`;
   the starter's lines `src/lines/race.ts`.

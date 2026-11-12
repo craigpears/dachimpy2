@@ -55,10 +55,10 @@
    say, and you on them (target, shoot). The race simulated with bots of every way round is
    src/race-sim.ts (RACE.md §8). */
 
-import { LAY, SAIL, type Helm, type Pose, type Sea } from './den-sail.js';
+import { LAY, SAIL, type Helm, type Pose, type RaceLay, type Sea } from './den-sail.js';
 import { CHECK } from './den-checkpoint.js';
 import { Turret, type TurretEvent } from './den-turret.js';
-import { Crane } from './den-crane.js';
+import { Crane, CRANES } from './den-crane.js';
 import { Field, stretchAt, atFinish, courseSea, type FieldEvent } from './den-racers.js';
 import { RIVALS, type Rival } from './den-rivals.js';
 import type { Deal } from './foraging.js';
@@ -82,16 +82,17 @@ export const RACE = {
       shortcut pays only for a player good at its puzzle. A heavy combo through the gun gap; a few
       squares rowed by mirror strokes; a Vegas; a lock pumped up by Bilge and another drained; three
       frames of Carpentry; a barrier cleared by Foraging; and the gaps a Double and a Triple hop. The
-      locks' went from 26 to 31 (12 Nov) when their water and gates became a beat, not a wait (LOCK). */
-  DECENT: { guns: 14, headwind: 25, whirls: 49, locks: 23, crane: 38, forage: 15, double: 9, triple: 9 },
+      locks' went from 26 to 31 (12 Nov) when their water and gates became a beat, not a wait (LOCK). The barrier's
+      from 15 to 12 (12 Nov) when it moved a column east, off the trade wind's hop. */
+  DECENT: { guns: 14, headwind: 25, whirls: 49, locks: 23, crane: 38, forage: 12, double: 9, triple: 9 },
   /** The long way's own spot on the starting line: where the long way's route starts (LONG_ROUTE), and
       what the simulation measures every other spot against (src/race-sim.ts, SIM.SPOTS). */
   LONG_SPOT: 13,
   /** Seconds sat on one square before you count as sitting still (stopped to puzzle): a sitting duck in
       the open for a rival going by (src/den-racers.ts). */
   STILL: 1.5,
-  /** Where your best time's kept, in this browser. */
-  STORE: 'den-race-best',
+  /** Where your best time's kept, in this browser (a course from the editor keeps its own: src/race-course.ts). */
+  STORE: RC.CUSTOM ? `den-race-best:${RC.CODE}` : 'den-race-best',
   /** The gun gap's guns in a race of several (RACE.md §6; src/race-sim.ts tries both): what quietens
       them, the same shots as hit other racers, a hit a gun ('shared': leaving the other racers in peace
       pays, "a kind of peaceful racer bonus"); or more hits than a racer starts with, so they want
@@ -103,8 +104,9 @@ export const RACE = {
   GAP: { MODE: 'shared' as 'shared' | 'hits', HARD: 2, AIMED_RELOAD: 6 },
   /** The barrier of driftwood across a gap [C], as Foraging deals it: its bundles of driftwood on the
       board from the start ([row, column], a crate each, the puzzle's smallest container), nothing more
-      to come; cleared when they've all dropped out of the bottom (src/foraging.ts: the board's done). */
-  FORAGE: { BUNDLES: [[4, 2], [3, 4]] as [number, number][] },
+      to come; cleared when they've all dropped out of the bottom (src/foraging.ts: the board's done). As many as
+      the course has (src/race-course.ts, bundles: two, the den's own). */
+  FORAGE: { BUNDLES: ([[4, 2], [3, 4], [5, 5], [2, 1]] as [number, number][]).slice(0, RC.COURSE.bundles) },
 } as const;
 
 /** With the Sailing board open at sea, Space and Enter are the board's (Space drops its pair faster), never
@@ -361,15 +363,18 @@ export function cleanBest(o: unknown): number | null {
 const S = RC.STRETCHES;
 /** The row the long way runs along a stretch: the middle of its two, or the run home's one. */
 export const routeRow = (i: number): number => (i === S.length - 1 ? S[i].r : S[i].r + 0.5);
-export const LONG_ROUTE: [number, number][] = (() => {
-  const out: [number, number][] = [[RACE.LONG_SPOT, RC.LINE.r], [RACE.LONG_SPOT, routeRow(0)]];
-  S.forEach((s, i) => {
-    const end = s.d === 1 ? SAIL.COLS - 1.5 : i === S.length - 1 ? RC.FINISH[0] : 2.5;
+/** The long way round a course laid out (this page's, or any from the race's editor: src/race-course.ts),
+    round each buoy. */
+export function longRoute(lay: RaceLay = RC): [number, number][] {
+  const out: [number, number][] = [[RACE.LONG_SPOT, lay.LINE.r], [RACE.LONG_SPOT, routeRow(0)]];
+  lay.STRETCHES.forEach((s, i) => {
+    const end = i === S.length - 1 ? lay.FINISH[0] : lay.BUOYS[i].at[0] + 0.5;
     out.push([end, routeRow(i)]);
     if (i + 1 < S.length) out.push([end, routeRow(i + 1)]);
   });
   return out;
-})();
+}
+export const LONG_ROUTE: [number, number][] = longRoute();
 
 /* [A] The gun gap's guns: a destructible turret either side (src/den-turret.ts), set up with the imperial
    checkpoint's numbers (src/den-checkpoint.ts, CHECK), trained on the way in, the gap and the way out.
@@ -443,7 +448,7 @@ export function readyLocks(h: Helm) {
 /** [E] The crane in its notch: the cliff's crane's rules (src/den-crane.ts), its ledge here: she lies in
     the notch off leg 5, and it sets her down on the run home (LAY.RACE.CRANE.TO). Once built it stays
     built, race after race. */
-export const neckCrane = (random: () => number = Math.random): Crane => new Crane(random, [...RC.CRANE.LEDGE] as [number, number]);
+export const neckCrane = (random: () => number = Math.random): Crane => new Crane(random, [...RC.CRANE.LEDGE] as [number, number], CRANES[RC.COURSE.frames]);
 
 /* [C] The barrier of driftwood across a gap (the user, 11 Nov: "it's not even macheting. You just have
    to clear the barrier ... similar to the static rocks, but you're doing it through foraging"): land on

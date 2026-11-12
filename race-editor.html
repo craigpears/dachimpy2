@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pirate Den: make your own race course</title>
+<!-- The sloop race's course editor (12 Nov; RACE.md §10): the course in 2D, in the race chart's look, to
+     click and drag; its numbers in the side panel; a balance check (the simulation's bots, in a worker);
+     a share link; and the course raced in 3D in the den. Its rules: src/race-editor.ts and
+     src/race-course.ts; drawn by js/race-editor-view.js; raced by js/race-balance.js. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,500&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #2a1d13; --ink2: #5b4330; --gold: #e0a92a; --cream: #f6ead2; --dim: #cbb894; --edge: #5a412a; --paper: #f3e3c3; --paper2: #e8d2a8; --red: #9b2a14; --green: #2f5a24; }
+  * { box-sizing: border-box; }
+  html { background: #140d08; }
+  body { margin: 0; min-height: 100vh; color: var(--cream); font: 500 16px/1.45 'Alegreya Sans', system-ui, sans-serif;
+    background: #140d08 repeating-linear-gradient(90deg, rgba(255, 220, 160, 0.025) 0 2px, transparent 2px 120px); }
+  a { color: var(--gold); }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 18px 16px 40px; }
+  header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 20px; margin-bottom: 12px; }
+  h1 { margin: 0; font: 700 clamp(26px, 4.4vw, 38px)/1.05 'Alegreya', serif; color: var(--gold); }
+  .lede { margin: 4px 0 0; color: var(--dim); max-width: 620px; font-size: 15px; }
+  .views { display: inline-flex; border: 2px solid var(--gold); border-radius: 9px; overflow: clip; }
+  .views a, .views span { padding: 7px 14px; font: 700 15px 'Alegreya Sans'; text-decoration: none; }
+  .views span { background: var(--gold); color: var(--ink); }
+  .views a { color: var(--gold); }
+  .views a:hover { background: rgba(224, 169, 42, 0.18); }
+  .views a.off { opacity: 0.4; pointer-events: none; }
+  main { display: grid; grid-template-columns: minmax(0, 680px) minmax(300px, 440px); justify-content: center; gap: 16px; align-items: start; }
+  #chart { background: #2a1c11; border: 2px solid #3b2a1b; border-radius: 10px; padding: 6px; line-height: 0; }
+  #chart svg { width: 100%; height: auto; display: block; touch-action: none; user-select: none; cursor: pointer; }
+  #chart svg.drag { cursor: ew-resize; }
+  aside { display: flex; flex-direction: column; gap: 12px; position: sticky; top: 10px; max-height: calc(100vh - 20px); overflow-y: auto; }
+  .card { background: linear-gradient(170deg, var(--paper), var(--paper2)); color: var(--ink); border: 1px solid #c9a35c; border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4), inset 0 0 30px rgba(120, 80, 30, 0.16); padding: 12px 14px; }
+  .card h2 { margin: 0 0 4px; font: 700 21px/1.15 'Alegreya', serif; color: #6b2a12; }
+  .card h3 { margin: 10px 0 4px; font: 700 16px 'Alegreya', serif; color: #6b2a12; }
+  .card p { margin: 0 0 6px; color: var(--ink2); font-size: 15px; }
+  .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
+  .row label { min-width: 132px; font-weight: 700; font-size: 14px; color: var(--ink2); }
+  .row output { min-width: 64px; font-weight: 700; }
+  .row input[type=range] { flex: 1; min-width: 120px; accent-color: #8a4b0f; }
+  button, .btn { font: 700 15px 'Alegreya Sans'; color: var(--ink); background: var(--gold); border: 0; border-radius: 8px; padding: 7px 13px; cursor: pointer; text-decoration: none; display: inline-block; }
+  button:hover, .btn:hover { background: #f0bd44; }
+  button.ghost { background: transparent; color: #6b2a12; border: 2px solid #b58a46; padding: 5px 11px; }
+  button.ghost:hover { background: rgba(181, 138, 70, 0.2); }
+  button.small { padding: 3px 10px; font-size: 16px; }
+  button:disabled, .btn.off { opacity: 0.45; pointer-events: none; }
+  select { font: 600 15px 'Alegreya Sans'; padding: 3px 6px; border-radius: 6px; border: 1px solid #b58a46; background: #fbf3e2; }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .chips button { font-size: 13px; padding: 3px 8px; background: #efd9a8; }
+  .chips button.on { background: var(--gold); }
+  .bad { background: #f6d6c8; border: 1px solid #b0472c; border-radius: 8px; padding: 6px 10px; color: #6e1d0c; font-size: 14px; }
+  .bad ul { margin: 2px 0; padding-left: 18px; }
+  .good { color: var(--green); font-weight: 700; font-size: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  td, th { padding: 2px 4px; text-align: left; vertical-align: middle; }
+  th { color: var(--ink2); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .bar { height: 9px; background: #c99b4a; border-radius: 4px; }
+  .bar.out { background: #b0472c; }
+  .meter { height: 8px; background: rgba(0, 0, 0, 0.12); border-radius: 4px; overflow: clip; margin: 6px 0; }
+  .meter div { height: 100%; width: 0; background: #8a4b0f; transition: width .2s; }
+  .note { font-style: italic; font-size: 13px; color: #7a6048; }
+  .toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: rgba(20, 14, 9, 0.92); color: var(--cream); padding: 8px 16px; border-radius: 8px; font-weight: 700; opacity: 0; transition: opacity .25s; pointer-events: none; }
+  .toast.on { opacity: 1; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } aside { position: static; max-height: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Make your own race course</h1>
+      <p class="lede">The sloop race, laid out on a chart. Click a buoy or a shortcut and drag it along its spit, set how big its puzzle is, check its balance, then race it in 3D or share it.</p>
+    </div>
+    <div class="views" role="tablist" aria-label="View">
+      <span role="tab" aria-selected="true">2D chart</span><a id="to3d" role="tab" href="den.html?at=race">3D race ▸</a>
+    </div>
+  </header>
+  <main>
+    <div id="chart" aria-label="The course"></div>
+    <aside>
+      <section class="card" id="picked"></section>
+      <section class="card" id="course"></section>
+      <section class="card" id="balance"></section>
+    </aside>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+<script type="module" src="js/race-editor-view.js"></script>
+</body>
+</html>

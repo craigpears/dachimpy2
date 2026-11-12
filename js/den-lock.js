@@ -82,7 +82,7 @@ export class Lock {
         return into ? 'fill' : 'up';
     }
     /** A move's worth of Bilge pumped in, with her waiting in it to go up. */
-    pump(w) { this.fill = Math.min(1, Math.max(this.fill, this.level) + w / LOCK.WORK); }
+    pump(w) { this.fill = Math.min(1, Math.max(this.fill, this.level) + w / (this.spot.work ?? LOCK.WORK)); }
     /** Its water rising to what's been pumped in; full, the top gates swing open. */
     rise(dt) {
         if (this.fill <= this.level + 1e-9)

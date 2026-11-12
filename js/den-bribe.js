@@ -39,9 +39,10 @@ export const BRIBE = {
         random clearing swap with the den's gems; the best swap each time takes 2.5), so about 7 s at a
         decent player's 1.5 s a move. Set by the simulation (RACE.md §8): the bribe won 29% of its races at 30
         coins, 27% at 40 (fair 25%). */
-    PRICE: 40,
-    /** Moves a decent player takes to haul the price up (as measured above); src/race-sim.ts's haul time. */
-    MOVES: 4.7,
+    PRICE: LAY.RACE.COURSE.coins,
+    /** Moves a decent player takes to haul the price up (as measured above, for 40 coins; a course from the
+        race's editor may ask more or fewer: src/race-course.ts, coins); src/race-sim.ts's haul time. */
+    MOVES: (4.7 * LAY.RACE.COURSE.coins) / 40,
     /** Seconds a move of Treasure Haul takes a decent player: seeing it, the swap, the coins going up. */
     MOVE_SECS: 1.5,
     /** Gems now and then, as the den's other hauls; no chest. */

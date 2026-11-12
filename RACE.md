@@ -69,7 +69,7 @@ mouth. Sitting there, you're a sitting duck for anyone coming up behind (§6).
 | Spit 2, the headwind gap, a dog-leg at its far end | Rowing (mirror strokes); idle in it and the wind blows her back out | Rowing, slowly | 25 | Built |
 | Spit 2, a small gap, one wind blowing back across it | A Double, built on the move and broken in its mouth (it lines her up: 12 Nov) | On the move | 9 | Built |
 | Spit 3, the whirlpool channel | Only a Sailing Vegas from its mouth carries her over; less sends her back to the mouth | Stopped at the mouth, exposed | 49 | Built |
-| Spit 3, a barrier of driftwood across a gap | Foraging clears it, from the notch in front of it | Stopped dead, sheltered | 15 | Built |
+| Spit 3, a barrier of driftwood across a gap | Foraging clears it, from the notch in front of it | Stopped dead, sheltered | 12 | Built (a column east, 12 Nov) |
 | Spit 4, the locks: a lock up and a lock down | Bilge, pumping the up lock; a sheltered berth to wait your turn in | Stopped dead, sheltered | 23 | Built |
 | Leg 4, the zigzag (on the long way) | Hop its headwinds with well-timed Doubles; weaving through is the no-puzzle way | On the move | 8 | Built |
 | Spit 5, the crane in a notch | Carpentry, building the crane a part at a time, which hauls her over | Stopped dead, sheltered | 38 | Built |
@@ -106,6 +106,15 @@ at its puzzle.
 **Every stretch has a shortcut a leader can play safely (built 11 Nov).** Sheltered or on the move: the gun
 gap's combo or its bribe, hauled in the wreck's sheltered notch (spit 1), the Double's gap (spit 2), the barrier of driftwood (spit 3), the locks and the zigzag
 (spit 4, leg 4), the crane and the Triple's gap (spit 5). The simulation checks each saves a good player time.
+
+**The barrier a square along (12 Nov).** At the chart: "how do you get to it? Like, you have to spin on the
+spot after jumping over the, that snake trade wind thing. It just feels like it's one square off." It was in
+column 20, right beside the trade wind back up the course (column 19): hop the wind on a Double along leg 3 and
+she landed on its column facing along the leg, and had to turn on the spot to face the notch. Moved a column east
+(21, `DEFAULT_COURSE.forage`), the Double lands her a square short and one turn to port takes her up into the
+notch. The helm: it saves 12 s now (15 before; `RACE.DECENT.forage`), and the long way's 220.6 s (221.7: the
+notch's breeze along leg 3 a column on). Foraging's own time stays 15 s (`SIM.PUZZLE.forage`), so it pays a
+little less: 2000 races of four, the barrier won 23.0% (fair 25%, it was 24%), the rest in their band (§8).
 
 **The barrier of driftwood (built 11 Nov).** "it's not even macheting. You just have to clear the barrier."
 A jam of logs across a gap in spit 3; in the notch in front of it, Space stands a board of Foraging on the
@@ -637,6 +646,12 @@ four, fair 25%:
   both are taken and come off as often as they should, the back of the field takes them more than the
   leader, a cautious leader never, and each is worth about nothing on average.
 
+**The barrier a column east (12 Nov, §3).** Its saving 15 s to 12 (the helm), Foraging still 15 s
+(`SIM.PUZZLE.forage`, no longer tied to its saving). 2000 races of four, fair 25%: the long way 33%, gap run 20%,
+combo 25%, shot quiet 21%, bribe 25%, headwind 17%, doubles 29%, whirlpools 34%, **barrier 23%**, locks 27%,
+crane 20%, door 23%, every shortcut 25%. Styles 24.9–25.1%; skill great 39%, good 24%, decent 12%; spots left
+25%, gap 26%, right 22%. All in the band (0.5–1.6 of fair).
+
 **For the user to decide:**
 - The gambles: the pool's beat (4 s each way), how often a racer times it (assumed), and its snake back to
   leg 1 three and a half times its ladder: is that the right sting for a bet you can read? Should the veiled
@@ -715,7 +730,7 @@ changelog and on the design page and the public chart, and the starter names it 
   push on with the next Vegas for more, in peace unless someone else came this way. A failed Vegas spills
   her out of the last exit she passed, never back to the start: always some gain for having gone in.
 
-## 10. Watching (built) and replays (idea)
+## 10. Watching (built), the course editor (built) and replays (idea)
 
 "Replays, and ... that would go down to the detail of the actual puzzling, because that's kind of what
 you're watching." A replay shows the sea and every sloop on it, with each racer's board beside them, move by
@@ -789,7 +804,59 @@ question of whether a crane is everyone's), and the bribe gate as the final toll
   draws it in 2D; each shortcut's size (lock clears, the crane's frames, the barrier, the coins) is
   already config; and the simulation could test an edited course's balance before it's raced (win rates,
   what each shortcut saves). Replays (above) are cheap for the same reason the boards are: seeds and moves.
-  Not started; after the first course has been playtested.
+  Replays not started.
+
+**The course editor (built 12 Nov, a first version).** The user agreed to go for it "if it's relatively
+easy". `race-editor.html`: the course in 2D in the chart's look, click and drag, a side panel, a balance
+check, a share link, and the den's own race for 3D.
+- **The course as data** (`src/race-course.ts`, `Course`): the few numbers `LAY.RACE` is laid from, plus each
+  shortcut's size. `layRace(course)` in `src/den-sail.ts` lays any course; the den's own is `DEFAULT_COURSE`,
+  every square of it as before (`tests/race-course.test.ts` holds it to a snapshot taken before the change,
+  `tests/fixtures/race-course-12nov.json`). What's editable:
+  - **the buoys:** where each spit ends, so the long way round it (spit 1's 20–25, the other right-hand ends
+    16–25, the left-hand ones 2–10); leg 4's zigzag goes with buoy 4;
+  - **where each way through cuts its spit** (a column): the gate, the wreck, the turning pool, the headwind
+    gap, the Double's gap, the trade wind back up the course (the middle snake), the whirlpool channel, the
+    barrier, the locks, the crane, the Triple's gap, the veiled wind (and where it blows her back to), the
+    finish line;
+  - **each shortcut's size:** the up lock's Bilge clears (3–20, the den's 7: `LockSpot.work`), the crane's
+    frames (small 6 pieces, standard 13, large 18: `CRANES` in `src/den-crane.ts`, each tested to fill
+    exactly), the barrier's bundles of driftwood (1–4), the guard's price (10–100 coins; Treasure Haul's moves
+    scale with it), the veiled wind's odds (10–90%) and the turning pool's beat (2–8 s).
+  - **Fixed for now:** the rows (the legs two deep, each spit its depth: the whirlpool channel's depth is what
+    makes it a Vegas, so its Vegas isn't editable yet), the start's field, the left-hand trade wind, the gun
+    gap's Quad, the tight water (it follows the gate).
+- **Always a race** (`problems`, `waterProblems`): every way through inside its spit with a column of land
+  either end and a column of land between it and the next (so no way through runs into another), each where
+  the legs either side reach it (the gate and wreck past the starting line's middle, the locks past the
+  zigzag...), and the water itself checked: the long way open round every buoy to the finish, every
+  shortcut's way in sailable. A thousand random edits are tested. Moving a buoy in past a shortcut flags it
+  ("The imperial gate has to be between columns ...") rather than shoving it along; nothing's shared or raced
+  in 3D till it's put right.
+- **The share link** packs a course into about 26 characters (`?course=`, one base-36 character a number);
+  a garbled one, or one that isn't a race, opens the den's own course.
+- **3D:** `den.html?at=race&course=...` lays the race from the link, read once as the page loads
+  (`courseFromPage`): the land, buoys, locks, crane, barrier, gambles, the rivals racing it by the
+  simulation's bots. A link top right goes back to the editor with the course (`js/den/course-back.js`). Its
+  best time is kept apart from the den's own course's (`den-race-best:<code>`).
+- **The starlit door, public (12 Nov: "make the [starlit] door public ... no hidden"), fixed in place:** it's on
+  every course, edited or not, where it is on the den's own (columns 15 and 16: `DOOR_COLS`), drawn on the
+  editor's chart with its tunnel and exits, its route in the balance check. Nothing else may cut through spit 2
+  or spit 4 in its columns, nor the whirlpools' way home or the barrier come out onto leg 3 where it does, and
+  the gate stays clear of its water on leg 2 (from column 18). Its saving is shifted with the legs it passes
+  under. Moving it is left for later.
+- **The balance check:** 300 races of four, in a Web Worker (`js/race-balance.js`, about 10 s), as the chart
+  does: each way round's wins (flagged outside half to 1.6 times its fair share, the balance test's band),
+  what each shortcut saves on the course and what it really saved a decent, good and great racer, and the
+  gambles each way. Nobody's measured an edited course with the helm, so each shortcut's and gamble's saving
+  is the den's own measured one shifted by how much more or less of the long way it cuts out (`SHIFT` in
+  `src/race-sim.ts`), and the long way's time scales with its squares. Its puzzles are as big as the course
+  has them (Bilge by its clears, Foraging by its bundles, Carpentry by the crane's pieces, the haul by its
+  price).
+- **Left for later:** editing rows (spit depths, so the whirlpools' Vegas, leg widths), adding or removing a
+  shortcut, more than one of a kind, the start's field, the gun gap's combo and guns' hits, a shortcut's
+  saving measured by the helm on an edited course (it's estimated), moving the starlit door, saving courses by name, rotating the
+  chart sideways on wide screens, undo, and a 3D view inside the editor rather than the den's race.
 
 - **Shortcuts that change from race to race (idea, 12 Nov):** "if [this] does get too complicated as a
   course, you can always have shortcuts be different each time. Like some of them can be a double hop for
@@ -849,6 +916,10 @@ question of whether a crane is everyone's), and the bribe gate as the final toll
   each other): `src/den-racers.ts`. Your rivals: `src/den-rivals.ts`, each one's racing in her file in
   `src/lines/` (`RACER`), sailed by `simDrive` in `src/race-sim.ts`.
 - **The simulation:** `src/race-sim.ts`, run by `tools/race-sim.mjs` (§8).
+- **The course as data, and its editor (12 Nov, §10):** `src/race-course.ts` (the course, its share link, what
+  makes it a race), `layRace` in `src/den-sail.ts`, `src/race-editor.ts` (the editor's rules), the page
+  `race-editor.html` drawn by `js/race-editor-view.js`, its balance check `js/race-balance.js` (a Web Worker),
+  and the den's way back to it `js/den/course-back.js`.
 - **A chart of the course (12 Nov):** `tools/race-map.mjs <out.html> [races] [size]` (Node 22:
   `node_modules/node/bin/node.exe`) writes one page in the captain's map's look, drawn from `LAY.RACE` and the
   simulation: the long way and its buoys, every shortcut with its puzzle, saving and its route's wins, the
