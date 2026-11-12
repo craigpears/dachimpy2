@@ -448,8 +448,8 @@ A hidden gem, never hinted. There's no cheat, no `?at=` link, no shot, and the s
 - **Position matters most here (§6):** it's two stops, the rock and then the mouth. It's the back
   of the field's big chance, and a leader's big risk.
 
-- **Idea: keep the tunnel connected, failure pulling her back into the main path (12 Nov, to build
-  once agreed).** Today a failed Vegas only sends her back to the mouth, out of everyone's way. Instead,
+- **Keep the tunnel connected, failure pulling her back into the main path (12 Nov, agreed, being
+  built).** Today a failed Vegas only sends her back to the mouth, out of everyone's way. Instead,
   the side route's winds and whirlpools spill her back into the main course: "it's very risky ... when you
   go through the navigation door, but the winds and the whirlpools kind of pull you back into the main
   path." Get shot, or slip into a whirlpool by a careless move, and "it will pull you into the main path if
@@ -458,6 +458,13 @@ A hidden gem, never hinted. There's no cheat, no `?at=` link, no shot, and the s
   the legs it passes under, and where you come out depends on how far you got. The same goes for any
   later side route. "All subject to balancing. I'm just getting out ideas." For the simulation: a failed
   side route lands her on a main leg, not at its mouth, and costs what that leg costs from there.
+  Settled (12 Nov): "you should always get some benefit from going through it, similar to ... any other
+  shortcut. So you then have the choice. You either rejoin ... the main leg, or you have the opportunity
+  to go through the Vegases ... in relative peace, assuming you're the only one that's taken that route."
+  So the tunnel is a run of stretches, each ending at an exit up onto the main course further along than
+  where she went in. At each exit she chooses: come up and rejoin the leg, keeping what she's gained, or
+  push on with the next Vegas for more, in peace unless someone else came this way. A failed Vegas spills
+  her out of the last exit she passed, never back to the start: always some gain for having gone in.
 
 ## 10. Watching and replays (idea)
 
