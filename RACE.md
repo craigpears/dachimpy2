@@ -450,7 +450,14 @@ to (four by default, six at most). As built:
   numbers start again), never a change or a one-off event that must arrive: a hit is a count of hits taken (a
   missed broadside is taken all the same), a turn is who holds the spot, a finish a time and a place. Your
   own sloop is sailed in your browser against your own sea; everyone else's is drawn only from snapshots, a
-  quarter second behind the newest and between two, never sailed on by itself. Heard nothing for two seconds
+  quarter second behind the newest and between two, never sailed on by itself. Drawn on her moves (12 Nov:
+  the bots online glided too, "it wasn't just in the watching"): each snapshot says the move each racer's on
+  (`mv`: from which square to which, forward, a turn or a square of wind, how far along and how long it takes;
+  a bot's as the room sails her, a player's as her browser said it with her pose, brought on at its own pace to
+  the snapshot's moment), and between two snapshots she's drawn along that move, or the rest of it and on into
+  the next, a turn on its quarter circle (`mvBetween`); only further apart than a move (a jump, missed
+  snapshots) is she put straight there as before. Only for drawing: nothing the race's rules or its record
+  go by, so replays are as exact as they were. Heard nothing for two seconds
   (the room goes quiet in its lobby), a browser asks for the race again. Tested with a browser that
   drops two snapshots in five all race long.
 - **Dropping out:** a closed tab has six seconds to come back (`NET.GRACE`), then a bot of the long way sails
@@ -629,7 +636,9 @@ balance held by `tests/race-sim.test.ts`.
   measured and tested), and each shortcut leaves and rejoins it where the course does, saving the long way
   between less her own trip through (tested to agree with `RACE.DECENT`). Since stage 3 (11 Nov) a bot comes
   down the start's field from her own spot (straight down, then along the first leg), and a shortcut's
-  trip runs through its own water, as your rivals are drawn; the balance test held, unchanged.
+  trip runs through its own water, as your rivals are drawn; the balance test held, unchanged. Since 12 Nov
+  ("Moves and gusts", below) every bot sails on a helm of her own, square to square, and her progress is read
+  off her square.
 - **The bots:** each is a route and a style. Routes: the long way; the gun gap run square by square, rushed
   on a heavy combo, or its guns shot quiet; the headwind gap rowed; the whirlpools' Vegas; the locks; the
   crane; the starlit door; or every shortcut it comes to. Styles: peaceful (never fires), opportunist (fires
@@ -641,9 +650,9 @@ balance held by `tests/race-sim.test.ts`.
   moves (`tools/nav-bots.mjs`), Bilge at a lock the pilot's own 28 s, running the gap one hit (the helm and
   its guns, measured). Assumed elsewhere: a Vegas 55 s and coming off 55/70/85% of goes, a heavy combo 30 s,
   rowing the gap 30 s, a Carpentry piece 4 s, a shot loaded by Gunnery 20 s, a broadside landing 60/75/90%
-  of the time. Free on the move, everyone Sails on the pilot, its chains carrying her on (from
-  `tools/sail-bots.mjs`: 0.06 to 0.12 squares a second by skill; assumed); a combo or Gunnery on the move
-  takes that time instead and slows her to 85%. The bribe's haul (12 Nov): 4.7 moves of Treasure Haul for its
+  of the time. Free on the move, everyone Sails on the pilot, its chains carrying her on (till 12 Nov a steady
+  0.06 to 0.12 squares a second by skill, and a combo or Gunnery on the move slowed her to 85%; since, each
+  clear's own gust: "Moves and gusts", below). The bribe's haul (12 Nov): 4.7 moves of Treasure Haul for its
   40 coins (measured by a bot playing any line it sees) at 1.5 s a move (assumed); a second at the gate to
   pay, then the tow.
 - **What it reports:** win rates by route, by style, by skill, by place in the field when stopping in the
@@ -856,7 +865,48 @@ races of four, fair 25%:
 - **Close to the band's edges:** the Doubles (1.59 of fair: two on-the-move hops, nearly free) and rowing
   (0.56: exposed, and rowed slowly). Both in band; the balance test (800 races) holds them there.
 
+**Moves and gusts (12 Nov).** "She's doing lots of Doubles and Triples, but that's supposed to be zooming your
+ship along in any context"; "why are they going so smoothly? ... It's supposed to be like moves". Every bot now
+sails as your sloop does (RULES.md, "Every racer sails as your sloop does"): a `Helm` of her own on the race's
+sea (its start's field from the seed, every shortcut's way shut), square to square at the helm's pace, the
+pilot's quickest way charted once backwards from each pin (`src/race-pilot.ts`, the pilot's own weights) to the
+long way's pins or her route's next shortcut's way in (on the leg's second row: the course's wind blows down
+it, so there's no sailing back up). Off the helm (a trip, a sweep, into a spot) she's walked a square at a time;
+the moves into a spot come off the trip's time, which the helm measured from the long way. Her Sailing is a drop
+at her skill's pace (2.6 / 2.2 / 1.8 s) whose chain is drawn from the shallow bot's own odds (`SAILOR.ODDS`:
+3000 drops, a clear 34%, a Double 2%, a Triple 0.07%; about 0.38 squares a drop), played on a real board when
+watched; each clear is a gust there and then (`carry`), along a leg, heading along it (not round a bend, not by
+the trade wind back, not on the start's field, not loading by Gunnery). `CHAIN` and `OVERLAP` are gone. The
+long way with no puzzle now takes a good Sailor about 198 s (222 s with no Sailing, the helm's measure). 2000
+races of four, fair 25% (before → after):
+
+| Route | Before | After | Route | Before | After |
+|---|---|---|---|---|---|
+| The long way | 20.8% | 22.0% | Doubles | 39.7% | **64.7%** |
+| Gun gap, run | 23.4% | 21.6% | Whirlpools' Vegas | 26.5% | 27.0% |
+| Gun gap, Quad | 36.6% | **12.2%** | Rocks | 28.8% | 22.0% |
+| Gun gap, shot quiet | 35.8% | 33.9% | Barrier (Foraging) | 22.9% | 15.4% |
+| Bribe | 20.6% | **7.3%** | Locks | 19.6% | 24.0% |
+| Headwind, rowed | 14.0% | 18.1% | Crane | 17.6% | 36.7% |
+| Starlit door | 19.7% | 24.9% | Every shortcut | 24.3% | 20.3% |
+
+- **Out of the band (0.5–1.6 of fair), left for the user, not tuned:** the **Doubles** (2.59): both gaps built
+  on the move cost nothing now that her clears carry her while she builds (the 85% she sailed at while building
+  was what held them back); the **gun gap's Quad** (0.49, on the edge): the real pilot brings her to the gap
+  sooner than the old reckoning did, before her combo's built, so she stops short in the open (stopped there
+  75 times in 300 races against 40); the **bribe** (0.29): the wreck's notch sits behind the field's hop and
+  the conveyor, and the course's wind blows down, so from most of the line no sailing reaches it (a player would
+  row); a bot that can't get there goes on without the coins and runs the gap. `tests/race-sim.test.ts` holds
+  these three to wider bands, so a further slide still shows. Levers if wanted: the Doubles' build times
+  (`SIM.PUZZLE.double`, `triple`, assumed 22 and 28 s; the builder bot makes a Double or better one drop in
+  thirteen), where the wreck lies, and a rival choosing her spot by her route.
+- **Styles** 23–26%; **skill** great 38%, good 26%, decent 12%; **spots** left 20%, above the hop 27%, right 28%.
+  Snakes: the trade wind back 131 racers (15% still won), the left-hand loops 190 (8%), the tight water 70 (6%).
+- **Running it:** about two minutes for 2000 races (it was 30 s): the pilot's charts are made once per pin and
+  per race for the start's field.
+
 **For the user to decide:**
+- Moves and gusts (above): the Doubles, the gap's Quad and the bribe out of the band.
 - The rocks: should the rubble settle back after half a minute or so, so only whoever's close behind the
   shooter gets through free (§4)? And should a rival make for them when she's behind?
 - The bribe's price (40 coins) and Treasure Haul's pace (1.5 s a move) are guesses till it's played. Should a
@@ -962,9 +1012,17 @@ looks." `den.html?at=race-watch` (`&seed=` names a race: one seed, one race, to 
 - **The camera and the bar:** a free camera (W A S D, Q E, drag, wheel, pinch), 1 to 4 to follow a racer,
   Tab the next, 0 back to free; the bar says who, her place, her leg and what she's doing in plain words
   (`src/race-watch.ts`, `doing`). RULES.md, "Watched", has the keys.
+- **Moves, and every clear a gust (12 Nov):** "she's doing lots of Doubles and Triples, but that's supposed to
+  be zooming your ship along in any context", and "why are they going so smoothly? ... It's supposed to be like
+  moves, like forward, left, right". Every racer sails as your sloop does (§8, "Moves and gusts"): square to
+  square on her own helm, drawn exactly where it has her (`motion`; race-field.js's `boatAt` no longer eases
+  after her). Under way her Sailing board is the race's own (`W.sailor`: a real board played by the shallow
+  bot, `src/race-sailor.ts`), mirrored on screen drop for drop (watch-boards.js), so each clear you see pop is
+  the gust that carries her on, as it pops.
 - **The puzzling, with real moves:** her board as she plays it, each puzzle's own rules played by its own bot
-  and drawn by its own look, paced to the simulation's drawn seconds, so the balance holds: the board is a
-  picture of the time the simulation gave her, not what decides it. Sailing on the pilot is the shallow bot
+  and drawn by its own look, paced to the simulation's drawn seconds, so the balance holds: at a stop the board
+  is a picture of the time the simulation gave her, not what decides it; under way, Sailing is what moves her
+  (above). Sailing is the shallow bot
   (`src/sail-bots.ts`: one drop ahead, the builder's sense at a thirtieth of its cost, a Double every 60 drops
   or so against the builder's 20; the builder's third of a second a drop stutters the browser). A Vegas is
   one the staircase bot made (`VEGAS_GAMES`, three recorded), its last drops played in her time and the last
@@ -974,7 +1032,8 @@ looks." `den.html?at=race-watch` (`&seed=` names a race: one seed, one race, to 
   nobody takes the door.
 - **Not yet:** the rowing boards aren't drawn when watching (nobody watched rows). A built crane isn't
   drawn going up for a bot (its frame shows on her deck). The lock's own water doesn't rise as a bot pumps
-  (the board's water goes down). Boards are only played for the racer followed.
+  (the board's water goes down). Boards at a stop are only played for the racer followed (every racer's Sailing
+  board is played, followed or not: it's what sails her).
 - **For the user to judge:** how realistic it looks; whether the boards' pace reads right (the bots don't
   decide when a puzzle's done, the simulation does: a board can look half done when she sails on, or wait
   done a few seconds).

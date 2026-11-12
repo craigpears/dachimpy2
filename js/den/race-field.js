@@ -134,19 +134,18 @@ export function fieldTick(dt, Rc, on) {
   });
 }
 
-/** A rival's sloop drawn where the field has her (`p`, lifted `lift` metres by the crane), smoothly; low
-    and smoking while she's holed (`dazed`). `k`: her number among the boats, to set her swell apart.
-    Also the watched race's (race-watch.js). */
+/** A rival's sloop drawn where the field has her (`p`, lifted `lift` metres by the crane); low and smoking
+    while she's holed (`dazed`). `k`: her number among the boats, to set her swell apart. Also the watched
+    race's (race-watch.js). Exactly where the race has her, as your own sloop is drawn from your helm: on a
+    square, or partway along a move between two (forward, a turn's quarter circle, a square of wind), with
+    its pause (12 Nov: "It's supposed to be like moves, like forward, left, right"). Eased after it, as she
+    was till then, she glided. */
 export function boatAt(B, k, p, lift, dazed, dt) {
-  const t = performance.now() / 1000, want = xyz(p, lift);
-  // (smoothly after where the field has her; a jump of more than a few squares, a sweep, straight there)
-  if (!B.at || B.at.distanceTo(want) > CELL * 4) B.at = want.clone();
-  else B.at.lerp(want, Math.min(1, dt * 5));
+  const t = performance.now() / 1000;
+  B.at = xyz(p, lift);
   B.low += ((dazed ? -0.3 : 0) - B.low) * Math.min(1, dt * 2);
   B.g.position.set(B.at.x, B.at.y + B.low + Math.sin(t * 0.9 + k * 2) * 0.06, B.at.z);
-  const yaw = Math.PI / 2 - p.d * Math.PI / 2;
-  let d = yaw - B.g.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d));
-  B.g.rotation.y += d * Math.min(1, dt * 3);
+  B.g.rotation.y = Math.PI / 2 - p.d * Math.PI / 2;
   B.g.rotation.x = Math.sin(t * 0.7 + k) * 0.02;
   B.g.rotation.z = Math.sin(t * 0.55 + k) * 0.02 + (dazed ? 0.08 : 0);
   B.stars.visible = dazed;

@@ -2365,6 +2365,36 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       'shared': leaving other racers in peace pays), settled by the simulation; and roused, they load
       again in 6 s, not the checkpoint's 4, since in a race they fire on whoever comes near ("If they're
       aggroed, they are very relentless").
+  - **Every racer sails as your sloop does (12 Nov):** watching Kikkit, "she's doing lots of Doubles and
+    Triples, but that's supposed to be zooming your ship along in any context" ("if you do a Double or Triple,
+    even just in a normal lane, it's supposed to speed you along a bit"); "why are they going so smoothly? ...
+    It's supposed to be like moves, like forward, left, right"; and online, "it wasn't just in the watching".
+    So, for your rivals, the watched racers and the bots online alike (`src/race-sim.ts`):
+    - **Moves, square to square:** each sails on a helm of her own (`Helm`, `src/den-sail.ts`), a move at a
+      time, a turn's worth put in ahead, at the helm's pace with its pauses and breathers, on the race's sea:
+      the start's field (its slow winds and whirlpools, from the race's seed), the trade winds, the course's
+      wind blowing down it. The pilot's way is the quickest, charted once (`src/race-pilot.ts`, weighed as the
+      pilot weighs it), to the long way's pins, or to her route's next shortcut's way in. Off the helm (a
+      shortcut's trip, a snake's sweep, into the spot she stops at) she's moved a square at a time. She's drawn
+      exactly where that has her: on a square, or partway along a move between two, a turn on its quarter
+      circle, never eased along a curve.
+    - **Every clear a gust, there and then:** her Sailing board drops a pair at her skill's pace (2.6 s a drop
+      decent, 2.2 good, 1.8 great; `src/race-sailor.ts`), and whatever a drop clears carries her on by its
+      gust at that moment, as yours does (`carry`, `src/den-sailing.ts`): a clear a square, a Double two, a
+      Triple three. On the pilot, and while she's building a combo for a gap on the same board. Along a leg,
+      heading along it: not round a bend (into the spit), not coming up to the trade wind back up the course,
+      not down the start's field, not while loading a shot by Gunnery. After a gust she lets the rest of her
+      turn go and puts in her next moves from where it left her.
+    - **Watched, her board is what moves her:** the board on screen is the race's own, played on a real board
+      by the shallow bot and mirrored drop for drop, so each clear you see is the gust you see. Your rivals and
+      the bots online draw each drop's chain from the same bot's own odds instead (3000 drops: nothing 64%, a
+      clear 34%, a Double 2%, a Triple under 0.1%), the same balance at a fraction of the cost.
+    - **Online, the same:** each snapshot says the move every racer's on (a bot's, or a player's as her
+      browser said it), and everyone else is drawn along it between snapshots, never slid across.
+    - **A way in she can't sail to:** the course's wind blows down it, so from a leg's second row there's no
+      sailing back up onto the first. A shortcut's way in no sailing gets her to from where she is (the
+      wreck's notch, from most of the starting line: behind the field's hop, past the conveyor), she goes on
+      without it.
   - **Simulated, and laid to it (11 Nov):** "a test harness underneath this ... where you don't need to worry
     about the graphical elements ... and just actually make sure they all have a relatively equal chance of
     winning." `src/race-sim.ts`, run by `tools/race-sim.mjs`: bots of every route and racing style, from

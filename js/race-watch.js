@@ -21,6 +21,10 @@
      simulation draws them; and its moves paced to those (`Pacer`), so the race's balance holds and the
      board is what's being played. The moves are the puzzles' own bots' (src/sail-bots.ts and the rest),
      played on the puzzles' own rules, drawn by their own looks.
+   - Under way, her Sailing board is the simulation's own (`sailor`: src/race-sailor.ts, played on a real
+     board here), so every clear you see on it is the gust that carries her sloop on, there and then (12 Nov:
+     "if you do a Double or Triple, even just in a normal lane, it's supposed to speed you along a bit"). Her
+     sloop sails square to square, a move at a time, as yours does (src/race-sim.ts, `motion`).
    - The free camera's sums (`FreeCam`): moved, turned, tilted and zoomed, held over the course.
    - The starlit door stays a secret: nobody in the field takes it (the test checks), and nothing here
      names it. */
@@ -29,13 +33,14 @@ import { RACE, clockText } from './den-race.js';
 import { Field, FIELD, courseSea } from './den-racers.js';
 import { WATCHED } from './den-rivals.js';
 import { sail, route, style, SIM } from './race-sim.js';
+import { SAILOR } from './race-sailor.js';
 import { LOCK } from './den-lock.js';
 import { PATCH } from './den-patch.js';
 const RC = LAY.RACE;
 export const WATCH = {
-    /** Seconds between the drops of a Sailing board played on the pilot (a decent player's, SIM.CHAIN's
-        reckoning: a drop every 2.5 s or so), by skill. */
-    DROP: { decent: 2.6, good: 2.2, great: 1.8 },
+    /** Seconds between the drops of a Sailing board, by skill: the racers' own pace (src/race-sailor.ts). Under
+        way it's her very board (the simulation's sailor, `sailor`), at her own pace; this is a board's at a stop. */
+    DROP: SAILOR.DROP,
     /** A Vegas shown at the whirlpools' mouth: the drops of a recorded one (src/sail-bots.ts, VEGAS_GAMES)
         played in the time she has, about this many seconds a drop, never fewer than MIN of them. */
     VEGAS_DROP: 2.4,
@@ -184,6 +189,7 @@ export function doing(x, next, home) {
     you're following. */
 export class Watch {
     seed;
+    boards;
     racers;
     field;
     run = null;
@@ -191,8 +197,11 @@ export class Watch {
     follow = -1;
     /** What each racer's route takes, in order. */
     routes;
-    constructor(seed = Math.floor(Math.random() * 2 ** 31), racers = WATCHED) {
+    /** `boards`: each racer's Sailing played on a real board (src/race-sailor.ts, boardSailor), as the page shows it; off,
+        drawn from its odds (quicker: for tests that don't look at the boards). */
+    constructor(seed = Math.floor(Math.random() * 2 ** 31), racers = WATCHED, boards = true) {
         this.seed = seed;
+        this.boards = boards;
         if (racers.length < FIELD.LEAST || racers.length > FIELD.MOST)
             throw new Error(`a race is ${FIELD.LEAST} to ${FIELD.MOST} racers`);
         this.racers = racers;
@@ -209,7 +218,7 @@ export class Watch {
         const out = this.field.tick(dt);
         if (this.field.state === 'on' && !this.run) {
             this.run = sail({
-                field: this.field, you: false, seed: this.seed,
+                field: this.field, you: false, seed: this.seed, boards: this.boards,
                 racers: this.racers.map((r) => ({ route: route(r.racer.route), style: style(r.racer.style), skill: r.racer.skill, spot: r.spot })),
             });
         }
@@ -221,6 +230,13 @@ export class Watch {
     info(i) { return this.run?.info(i) ?? null; }
     /** Her board, if she's puzzling (or Sailing on the pilot). */
     board(i) { return this.field.racers[i].state === 'finished' ? null : boardOf(this.info(i)); }
+    /** Her very Sailing board, while she's under way and Sailing on it (on the pilot, or building a combo for a
+        gap): the simulation's own (src/race-sailor.ts, boardSailor), whose every clear carries her. Null when the
+        board on show is one built at a stop (a Vegas at the whirlpools' mouth, a Double finished at its gap). */
+    sailor(i) {
+        const x = this.info(i), b = this.board(i);
+        return x && b?.puzzle === 'sailing' && x.mode === 'sail' ? this.run?.sailor(i) ?? null : null;
+    }
     /** The next shortcut her route takes from where she's got to, if any. */
     nextCut(i) {
         const done = this.info(i)?.done ?? [];

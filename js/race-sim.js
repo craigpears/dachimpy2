@@ -14,14 +14,22 @@
    make sure they all have a relatively equal chance of winning."
 
    How it's played (RACE.md §8, "Simulation", has the reasoning and the numbers):
-   - The course, as the bots see it: the long way's route (LONG_ROUTE, from the long way's own spot on the
-     starting line), sailed at the pace that brings her round in the time the helm takes the long way
-     (SIM.LONG, measured by the helm; the test checks it). Each racer's progress is how far round the long
-     way she's got, in seconds of it (tau). Under way, she's on a leg's first row; the second is for
-     passing a sloop that's stopped.
-   - The start: each racer picks a spot on the starting line (Entrant.spot), and gets through the start's
-     field in the time the helm takes from there (SIM.SPOTS, measured), ahead of or behind the long way's own.
-     The quickest line is the crowded one: racers starting beside each other jostle (SIM.JOSTLE).
+   - Every racer sails as your own sloop does (12 Nov: "It's supposed to be like moves, like forward, left,
+     right"): a helm of her own (src/den-sail.ts, Helm), square to square, a move at a time, on the race's
+     sea (its start's field laid from the race's seed: its slow winds and whirlpools; the trade winds; every
+     shortcut's way through shut, so the pilot never wanders into one), the pilot steering her round the long
+     way from pin to pin (LONG_PINS, as tools/race-measure.mjs sails it), hopping the trade wind back up the
+     course with a Double. Each racer's progress is how far round the long way she's got, in seconds of it
+     (tau, progressAt her square): what her route's shortcuts, the snakes and the places go by.
+   - Her Sailing on the pilot (src/race-sailor.ts): a drop at her skill's pace, and every clear's gust carries
+     her on the moment it's made (carry, src/den-sailing.ts: a clear a square, a Double two, a Triple three),
+     as yours does, on the pilot or building a combo for a gap; not while she loads a shot by Gunnery.
+   - Off the helm (a shortcut's trip, a snake's sweep, into the spot she stops at), she's moved along its
+     squares a square at a time (Walk), never slid: wherever she is, she's on a square or on a move between
+     two (motion).
+   - The start: each racer picks a spot on the starting line (Entrant.spot), and the pilot sails her down
+     through the start's field from there. The quickest line is the crowded one: racers starting beside each
+     other jostle (SIM.JOSTLE: she sets off a move later).
    - Each shortcut (CUTS): where she leaves the long way and where she rejoins it, from LAY.RACE; her own
      trip through (the gust, the crane, the tunnel, the locks' water and gates, the gap's light airs);
      and what it saves, the long way between less the trip (as tests/den-race.test.ts measures it with
@@ -39,9 +47,9 @@
      great) round a decent player's (SIM.PUZZLE, sources there), spread as people are (SIM.SPREAD). A Vegas
      comes off only so often (SIM.VEGAS); one that doesn't sends her back to the mouth, to try again
      quicker (the board half built), or after SIM.TRIES she gives up and sails on.
-   - On the move she's on the pilot: Sailing on it (any racer, whenever she's free: SIM.CHAIN) carries her
-     on ahead by its chains' gusts; a combo built for the gun gap, or her guns loaded by Gunnery, takes
-     that time instead, and she sails a little slower while she's at it (SIM.OVERLAP).
+   - On the move she's on the pilot, Sailing: a combo built for a gap is built on the same board, its drops'
+     clears carrying her as ever, and broken at the gap (a Quad rushing the gun gap, a Double or Triple hopping
+     its gap); loading her guns by Gunnery, she's not Sailing, so nothing carries her but the pilot.
    - A racer is a route (ROUTES: the shortcuts she takes) and a style (STYLES: when she fires, whether she
      loads more, whether she'll stop in the open with someone close behind).
    - Shooting, by the field's rules (src/den-racers.ts: a broadside, three squares out of her side,
@@ -54,10 +62,14 @@
      her, till nobody's near. Their marks are all in the spit: the long way goes by clear of them.
    - No gambles (12 Nov: they went, "not really in the ... good sportsman-like spirit").
    - Deterministic: one seed, one race. */
-import { LAY, SAIL, layRace } from './den-sail.js';
-import { RACE, LONG_ROUTE, longRoute, routeRow, rocksDown } from './den-race.js';
+import { LAY, SAIL, Sea, Helm, layRace, poseAt } from './den-sail.js';
+import { RACE, LONG_ROUTE, longRoute, routeRow, rocksDown, spotPose } from './den-race.js';
+import { gustPath, carry } from './den-sailing.js';
+import { fieldFor } from './start-field.js';
+import { PilotChart } from './race-pilot.js';
+import { boardSailor, drawnSailor, gustRate, SAILOR } from './race-sailor.js';
 import { DEFAULT_COURSE } from './race-course.js';
-import { Field, FIELD, sheltered, courseSea } from './den-racers.js';
+import { Field, FIELD, sheltered, courseSea, stretchAt } from './den-racers.js';
 import { DOOR } from './den-door.js';
 import { BRIBE, towPath } from './den-bribe.js';
 import { CHECK } from './den-checkpoint.js';
@@ -90,21 +102,14 @@ export const SIM = {
         field, the pilot's quickest way (measured 11 Nov, tools/race-measure.mjs; tested). The long way's own spot
         (RACE.LONG_SPOT) is the long way's own start. */
     SPOTS: [22.2, 22.0, 21.7, 21.4, 21.1, 20.8, 20.6, 20.3, 20.0, 19.7, 19.4, 19.2, 18.9, 18.6, 17.5, 16.1, 14.8, 14.4, 12.8, 13.8, 12.0, 13.8, 13.0, 13.9, 15.3, 16.6],
-    /** Racers starting within a square of each other jostle through the field: each after the first loses
-        this many seconds, a move given way. Assumed. */
+    /** Racers starting within a square of each other jostle through the field: each after the first sets off
+        this many seconds later, a move given way. Assumed. */
     JOSTLE: 1.5,
-    /** A racer's sailing a little better or worse than another's (the pins she drops, her turns): her
-        pace's spread, as a fraction. */
+    /** A racer's Sailing a little quicker or slower than another's of her skill: her drops' pace's spread, as
+        a fraction. */
     STEER: 0.02,
-    /** Puzzling on the move at something other than Sailing (a combo held for the gun gap, Gunnery), she
-        sails on at this fraction of her speed: the pilot sails her, but the bends and the gap want her
-        (RACE.md §8: on-the-move time overlaps the sailing). Assumed. */
-    OVERLAP: 0.85,
-    /** Sailing on the pilot whenever she's free: the squares a second its chains' gusts carry her on, by
-        skill. From tools/sail-bots.mjs (40 to 47 squares every 100 drops for the two-ply and builder bots),
-        at a drop every 2.5 s or so, less what's lost at the bends: decent 0.06, good 0.09, great 0.12.
-        Assumed; CHAIN=0 in the runner tries the race with nobody doing it. */
-    CHAIN: { decent: 0.06, good: 0.09, great: 0.12 },
+    /* (Sailing on the pilot was a steady bit of extra speed, CHAIN, and a combo built on the move slowed her,
+       OVERLAP, till 12 Nov: now each drop's clear carries her by its gust, src/race-sailor.ts.) */
     /** Puzzle time by skill, as a fraction of a decent player's. */
     SKILL: { decent: 1, good: 0.75, great: 0.55 },
     /** How puzzle times spread about their mean (a log-normal's sigma). */
@@ -312,6 +317,81 @@ const TOW = 1 + towPath({ c: RC.BRIBE.GATE[0], r: RC.BRIBE.GATE[1] }).length * S
 const HOPS = { decent: 0.5, good: 0.75, great: 1 };
 /** Pieces in the crane's three frames (about five squares a piece), as big as the course has them. */
 const CRANE_PIECES = Math.round(CRANES[RC.COURSE.frames].reduce((n, p) => n + p.rows.join('').split('#').length - 1, 0) / 5);
+/* ---- Sailing her: the helm, the pilot, and a square at a time off it ---- */
+const P = RC.SPITS;
+/** The long way's pins, in order, as the pilot sails it (tools/race-measure.mjs, tests/race-helpers.ts's
+    longWay): round each spit's end, to beside the trade wind back up the course (`hop`: hopped with a Double),
+    and on to the finish line. */
+export const LONG_PINS = [
+    { at: [SAIL.COLS - 2, P[0].r0] }, { at: [3, P[1].r1] }, { at: [RC.SNAKES.MID[0][0] - 1, S[2].r + 1], hop: true },
+    { at: [SAIL.COLS - 2, P[2].r1] }, { at: [3, P[3].r1] }, { at: [SAIL.COLS - 2, P[4].r1] }, { at: [RC.FINISH[0], RC.FINISH[1]] },
+];
+/** Every shortcut's way through the spits: shut on the pilot's sea, so the pilot never takes one (she takes
+    her route's by its trip). */
+const WAYS = [...RC.GUNS.way, ...RC.HEADWIND, ...RC.LOCKS.map((l) => l.at), ...RC.DOUBLE.WAY];
+const shutWays = (s) => { for (const [c, r] of WAYS)
+    s.rocks.add(`${c},${r}`); s.touch(); return s; };
+/** The pilot's sea once she's down on the course: no start's field (one, made once: its pilot's reckoning
+    kept from race to race). Down the start's field, each race's own sea, its field laid (fieldSea). */
+let open = null;
+const courseWater = () => (open ??= shutWays(new Sea(9)));
+/** The race's sea with its start's field (src/start-field.ts, from its seed), as everyone racing it has it. */
+const fieldSea = (seed) => { const s = shutWays(new Sea(9)); s.layField(fieldFor(seed)); return s; };
+/** The pilot's chart to a square on the course (src/race-pilot.ts: a pin, a shortcut's way in), charted once. */
+const charts = new Map();
+function courseChart(at) {
+    const k = `${at[0]},${at[1]}`;
+    let ch = charts.get(k);
+    if (!ch)
+        charts.set(k, ch = new PilotChart(courseWater(), at, S[0].r, courseWater().rows - 1));
+    return ch;
+}
+/** Squares along a run of them, a square at a time (across, then along). */
+function unitSteps(pts) {
+    const out = [[Math.round(pts[0][0]), Math.round(pts[0][1])]];
+    for (const [c1, r1] of pts.slice(1).map(([c, r]) => [Math.round(c), Math.round(r)])) {
+        let [c, r] = out[out.length - 1];
+        while (c !== c1) {
+            c += Math.sign(c1 - c);
+            out.push([c, r]);
+        }
+        while (r !== r1) {
+            r += Math.sign(r1 - r);
+            out.push([c, r]);
+        }
+    }
+    return out;
+}
+const walkOf = (pts, secs, d) => ({ pts: unitSteps(pts), t: 0, secs, d });
+const walkDone = (w) => w.t >= w.secs * (w.pts.length - 1) - 1e-9;
+const headOf = (a, b, d) => (b[1] > a[1] ? 0 : b[0] > a[0] ? 1 : b[1] < a[1] ? 2 : b[0] < a[0] ? 3 : d);
+/** Where a walk has her: the step she's on (from and to, neighbouring squares) and how far through it. */
+function walkAt(w) {
+    const n = w.pts.length - 1, k = Math.min(n - 1, Math.floor(w.t / w.secs));
+    if (n <= 0) {
+        const [c, r] = w.pts[0];
+        return { from: { c, r, d: w.d }, to: { c, r, d: w.d }, m: 'W', u: 1 };
+    }
+    const a = w.pts[k], b = w.pts[k + 1], u = Math.min(1, (w.t - k * w.secs) / w.secs), d = headOf(a, b, w.d);
+    return { from: { c: a[0], r: a[1], d }, to: { c: b[0], r: b[1], d }, m: 'W', u, secs: w.secs };
+}
+/** Where a motion has her, for drawing: on a square, or partway along a move between two neighbouring ones
+    (a turn sweeps a quarter circle, as your sloop's does: poseAt). `d`, the way she faces, in quarter turns. */
+export function motionPose(x) {
+    if (x.m !== 'W') {
+        const p = poseAt(x.from, x.m, x.u, x.from.c === x.to.c && x.from.r === x.to.r);
+        return { c: p.c, r: p.r, d: ((p.a % 4) + 4) % 4 };
+    }
+    const e = x.u <= 0 ? 0 : x.u >= 1 ? 1 : x.u * x.u * (3 - 2 * x.u), turn = ((x.to.d - x.from.d + 6) % 4) - 2;
+    return { c: x.from.c + (x.to.c - x.from.c) * e, r: x.from.r + (x.to.r - x.from.r) * e, d: (((x.from.d + turn * Math.min(1, x.u * 1.5)) % 4) + 4) % 4 };
+}
+/** A helm's motion just now (as Helm.now draws it): a bot's, or yours, sent to a race's room (src/race-net.ts). */
+export function helmMotion(h) {
+    const c = h.cur;
+    if (!c || c.done)
+        return { from: { ...h.pose }, to: { ...h.pose }, m: 'F', u: 0 };
+    return { from: { ...c.from }, to: { ...c.to }, m: c.m, u: Math.min(1, h.t / c.secs), secs: c.secs };
+}
 export const ROUTES = [
     { name: 'long', cuts: ['zigzag'] },
     { name: 'gap-run', cuts: ['guns'], gap: 'run' },
@@ -351,10 +431,10 @@ export const style = (name) => byName(STYLES, name);
 export const bestAt = (e) => (e.route.name === 'every' ? e.skill : SKILLS[Math.min(SKILLS.length - 1, SKILLS.indexOf(e.skill) + 1)]);
 const STATE = { sail: 'sailing', stop: 'puzzling', wait: 'waiting', trip: 'carried', daze: 'dazed', done: 'finished' };
 /* ---- Where a bot is ----
-   Under way she's on the long way (routePose); down through the start's field, from her own spot on the
-   line: straight down to the first leg and along it to where the long way runs (startPose). On a trip
-   through a shortcut, along its own water (TRIPS: the gap, the lock, the crane's swing over the neck...)
-   from where she was to where she rejoins the long way (tripPose). */
+   Under way, where her helm has her: on a square, or on a move between two (motion). Off it, on the square
+   she's stopped at, waiting at, or walked to a square at a time: into the spot she stops at, through a
+   shortcut along its own water (TRIPS: the gap, the lock, the crane's swing over the neck...) from where
+   she was to where she rejoins the long way, or swept back by a snake. */
 /** The squares a shortcut's trip goes by, between where she starts it and where she rejoins the long way;
     the crane's lifted (`air`), the starlit door's under the course (`under`: nobody sees her). */
 const TRIPS = {
@@ -393,8 +473,9 @@ const downAt = (spot) => (spot < HOP.c0 - 1 || spot > HOP.c1 + 1 ? spot : spot -
 /** Where the long way joins her way down from spot `spot` (seconds round it): she meets the first leg
     below her spot (or beside the hop), or (left of the long way's own spot) runs along it to there. */
 const joinTau = (spot) => tauAt(0, Math.min(RC.BUOYS[0].at[0] + 0.5, Math.max(downAt(spot), RACE.LONG_SPOT)));
-/** Down through the start's field from her spot, `tau` seconds round the long way (from `tau0`, where
-    she started): straight down, round the hop's rocks if they're below her. */
+/** The way down through the start's field from her spot, `tau` seconds round the long way (from `tau0`,
+    where she started), as the course's own reckoning has it (startTau): straight down, round the hop's
+    rocks if they're below her. (The bots sail it by the pilot now: this is only the reckoning.) */
 export function startPose(spot, tau0, tau) {
     const S0 = S[0].r, down = downAt(spot), pts = [[spot, RC.LINE.r]];
     if (down !== spot)
@@ -421,9 +502,27 @@ export function progressAt(p) {
     const c = onIt ? Math.max(lo, Math.min(hi, p.c)) : S[s].d === 1 ? hi : lo;
     return tauAt(s, c);
 }
+/** How far round the long way each of the pilot's pins is. */
+const PIN_TAU = LONG_PINS.map((p) => progressAt({ c: p.at[0], r: p.at[1] }));
+const HOP_PIN = LONG_PINS.findIndex((p) => p.hop);
+/** The square on the long way `tau` seconds round it (a leg's first row), and the way along it. */
+function squareAt(tau) {
+    const p = routePose(Math.max(0, Math.min(SIM.LONG, tau)));
+    return { c: Math.round(p.c), r: Math.round(p.r), d: p.d };
+}
+/** Where she leaves the long way for each shortcut, the pilot sailing her there when her route takes it: her
+    square on the leg at its way in, on its second row, the spit's side (every shortcut goes down through a
+    spit, and the course's wind blows down it: from the second row there's no sailing back up onto the first);
+    or the first, or a column on, where that's a trade wind's. */
+const ENTRY = Object.fromEntries(Object.values(CUTS).map((c) => {
+    const p = squareAt(c.tIn), s = courseWater(), ok = ([x, y]) => s.open(x, y) && s.windAt(x, y) === undefined && !s.isLock(x, y);
+    const near = [[p.c, p.r + 1], [p.c, p.r], [p.c - 1, p.r + 1], [p.c + 1, p.r + 1], [p.c - 1, p.r], [p.c + 1, p.r]];
+    return [c.id, near.find(ok) ?? near[0]];
+}));
 /** A race set going: its bots (o.racers) on `o.field` if one's given (the den's: started, you racer 0,
-    moved by the helm, the bots racers 1 up), else on a field of their own. */
-export function sail(o) {
+    moved by the helm, the bots racers 1 up), else on a field of their own. `sea`: a sea to lay its start's
+    field on (every shortcut's way shut: simulate's own, kept from race to race), else a fresh one. */
+export function sail(o, sea) {
     const rand = seeded(o.seed), mode = o.mode ?? RACE.GAP.MODE, chains = o.chains ?? true, snakes = o.snakes ?? true;
     const gauss = () => Math.sqrt(-2 * Math.log(1 - rand())) * Math.cos(2 * Math.PI * rand());
     const draw = (mean, skill) => mean * SIM.SKILL[skill] * Math.exp(SIM.SPREAD * gauss() - SIM.SPREAD ** 2 / 2);
@@ -438,24 +537,34 @@ export function sail(o) {
     if (o.shots !== undefined)
         for (const r of field.racers)
             r.shots = o.shots;
-    // (where each starts: her spot's way through the field, less a move given way to each racer already
-    // starting beside her)
+    // The race's own sea down the start's field (its slow winds and whirlpools, from its seed), and its
+    // spots: each racer sets off from hers, a move later for each racer already starting beside her.
+    const sea0 = sea ? (sea.layField(fieldFor(o.seed)), sea) : fieldSea(o.seed);
     const spots = o.racers.map((r) => r.spot ?? RACE.LONG_SPOT);
-    const bots = o.racers.map((r, k) => {
-        const tau0 = startTau(spots[k]) - SIM.JOSTLE * spots.slice(0, k).filter((c) => Math.abs(c - spots[k]) <= 1).length;
+    const sailorFor = (i, skill, pace) => (o.boards ? boardSailor(SAILOR.DROP[skill] * pace, o.seed * 31 + i * 7 + 1) : drawnSailor(SAILOR.DROP[skill] * pace, rand));
+    const botFor = (i, e, at, start) => {
+        const best = bestAt(e), pace = 1 + SIM.STEER * gauss();
         return {
-            i: k + first, route: r.route, style: r.style, skill: r.skill, best: bestAt(r), pace: 1 + SIM.STEER * gauss(),
-            tau: tau0, mode: 'sail', was: 'sail', spot: spots[k], tau0, from: { c: spots[k], r: RC.LINE.r, d: 0 }, tripFull: 0,
+            i, route: e.route, style: e.style, skill: e.skill, best,
+            tau: progressAt(at), mode: 'sail', was: 'sail', spot: Math.round(at.c), delay: 0,
+            helm: new Helm(at.r < S[0].r ? sea0 : courseWater(), at), pin: '', goal: null, walk: null, sq: { ...at }, tripFull: 0, stuck: 0, plan: null, came: 0, carried: [],
+            sailor: sailorFor(i, e.route.name === 'long' ? best : e.skill, pace),
             cut: null, stage: 0, work: 0, full: 0, tries: 0, since: 0, lost: 0, move: null, combo: false, ready: new Set(), daze: 0, trip: 0, waited: 0,
             hopped: false, hop: 0, lefts: 0, purse: false, paid: false, owed: 0, done: new Set(), stop: null, inLine: new Set(), vegas: false, exit: 0,
-            res: { route: r.route.name, style: r.style.name, skill: r.skill, start: k, spot: spots[k], time: 0, place: 0, hitsTaken: 0, hitsGiven: 0, swept: [], cuts: [], exposed: [], rocks: { hits: 0, through: false, free: false } },
+            res: { route: e.route.name, style: e.style.name, skill: e.skill, start, spot: Math.round(at.c), time: 0, place: 0, hitsTaken: 0, hitsGiven: 0, swept: [], cuts: [], exposed: [], rocks: { hits: 0, through: false, free: false } },
         };
+    };
+    const bots = o.racers.map((r, k) => {
+        const b = botFor(k + first, r, spotPose(spots[k]), k);
+        b.delay = SIM.JOSTLE * spots.slice(0, k).filter((c) => Math.abs(c - spots[k]) <= 1).length;
+        return b;
     });
     const botOf = (i) => bots.find((b) => b.i === i);
     /** The players still sailing their own sloops (not home, not taken over by a bot). */
     const players = () => field.racers.slice(0, first).filter((r) => r.state !== 'finished' && !botOf(r.i));
-    /** What a second of her time is worth in Sailing on the pilot (seconds round the long way). */
-    const chainWorth = (b) => (chains ? SIM.CHAIN[b.route.name === 'long' ? b.best : b.skill] * (PACE - SAIL.PUSH) : 0);
+    /** What a second of her time is worth in Sailing on the pilot (seconds round the long way), on average:
+        what a shortcut's saving is reckoned against (her gusts themselves carry her: src/race-sailor.ts). */
+    const sailWorth = (b) => (chains ? gustRate(b.sailor.every) * (PACE - SAIL.PUSH) : 0);
     // The gap's guns: hits each has taken, quiet till, loading; roused; whom each has holed.
     const need = mode === 'shared' ? 1 : RACE.GAP.HARD;
     const guns = RC.GUNS.at.map((at) => ({ at, quiet: 0, hits: 0, wait: 0 }));
@@ -477,6 +586,45 @@ export function sail(o) {
         if (b.route.cuts.includes('rocks') && shots(b) < RACE.ROCKS.HITS)
             b.move = { kind: 'load', left: draw(SIM.PUZZLE.load, b.best) };
     }
+    /* Her helm, and off it. */
+    /** Under way on her helm (or dazed there, holding). */
+    const onHelm = (b) => b.mode === 'sail' || (b.mode === 'daze' && b.was === 'sail') || b.mode === 'done';
+    /** The square she's on (her helm's, under way; else where she's sat or been walked to). */
+    const here = (b) => (onHelm(b) ? { ...b.helm.pose } : { ...b.sq });
+    /** Back on her helm at `at`, the pilot to give her a pin; on the course's own sea once she's down off the
+        start's field. */
+    const toHelm = (b, at) => {
+        if (at.r >= S[0].r)
+            b.helm.sea = courseWater();
+        b.helm.moor(at);
+        b.pin = '';
+        b.walk = null;
+        b.stuck = 0;
+        b.plan = null;
+    };
+    /** Walked off her helm along these squares (from where she is), each step `secs`. */
+    const walk = (b, to, secs, total = 0) => {
+        const at = here(b), pts = unitSteps([[at.c, at.r], ...to]);
+        b.sq = { c: pts[pts.length - 1][0], r: pts[pts.length - 1][1], d: at.d };
+        b.walk = pts.length > 1 ? { pts, t: 0, secs: secs ?? total / (pts.length - 1), d: at.d } : null;
+        if (b.walk)
+            b.sq.d = walkAt({ ...b.walk, t: b.walk.secs * (pts.length - 1) }).to.d;
+    };
+    /** How she's moving now. */
+    const motionOf = (b) => {
+        if (b.walk)
+            return walkAt(b.walk);
+        if (onHelm(b))
+            return helmMotion(b.helm);
+        // (rowing up the headwind gap as she goes: a square at a time, a stroke's pull and a rest)
+        if (b.mode === 'stop' && b.cut?.id === 'headwind') {
+            const x = Math.max(0, Math.min(B.length - 1, (1 - b.work / Math.max(1e-9, b.full)) * (B.length - 1))), k = Math.min(B.length - 2, Math.floor(x));
+            const u = Math.max(0, Math.min(1, (x - k - 0.5) * 2)), [c0, r0] = B[k], [c1, r1] = B[k + 1], d = headOf([c0, r0], [c1, r1], 0);
+            return { from: { c: c0, r: r0, d }, to: { c: c1, r: r1, d }, m: 'W', u };
+        }
+        return { from: { ...b.sq }, to: { ...b.sq }, m: 'F', u: 0 };
+    };
+    const poseOf = (b) => motionPose(motionOf(b));
     /** Everyone still racing, how far round: the bots, and you. */
     const racing = () => [
         ...bots.filter((x) => x.mode !== 'done').map((x) => ({ b: x, tau: x.tau })),
@@ -500,16 +648,23 @@ export function sail(o) {
             t.work += (t.full - t.work) * SIM.HIT_LOSS;
         if (t.mode !== 'daze')
             t.was = t.mode;
+        // (holed under way, she finishes the move she's on and holds there till she's patched, as yours does)
+        if (t.was === 'sail')
+            t.helm.hit();
         t.mode = 'daze';
         t.daze = patchTime(t);
         return true;
     };
-    /** A snake has her: swept back to `tau`, the sweep's seconds on top. */
+    /** A snake has her: swept back to `tau`, a square at a time, the sweep's seconds all told. */
     const swept = (b, snake, tau, secs) => {
         b.res.swept.push(snake);
+        const at = here(b), to = squareAt(tau);
+        walk(b, [[to.c, at.r], [to.c, to.r]], null, secs);
+        b.sq.d = at.d;
         b.tau = tau;
         b.mode = 'trip';
         b.trip = secs;
+        b.tripFull = secs;
         b.cut = null;
         b.stop = null;
     };
@@ -525,9 +680,9 @@ export function sail(o) {
         r.done = done;
         if (id === 'door' && done)
             r.exit = b.exit;
-        // (what it saved: the long way between, less the time it took her from the turn-off, the sailing she
-        // lost puzzling on the move for it, and the Sailing on the pilot she'd have done meanwhile)
-        r.saved = (done ? tOutOf(b, c) - c.tIn : 0) - b.since * (1 + chainWorth(b)) - b.lost;
+        // (what it saved: the long way between, less the time it took her from the turn-off, the Sailing she
+        // missed loading shots for it, and the Sailing on the pilot she'd have done meanwhile, on average)
+        r.saved = (done ? tOutOf(b, c) - c.tIn : 0) - b.since * (1 + sailWorth(b)) - b.lost;
         // (the bribe: what hauling its coins up cost her is the gap's)
         if (id === 'guns') {
             r.saved -= b.owed;
@@ -536,7 +691,12 @@ export function sail(o) {
         b.since = 0;
         b.lost = 0;
     };
+    /** Stopped at shortcut `c` to puzzle `work` seconds: walked into its spot first, a move a square. */
     const go = (b, c, work) => {
+        walk(b, [[c.at.c, c.at.r]], SAIL.MOVE + SAIL.PAUSE);
+        // (those moves are the start of her trip through, as the helm measured it from the long way: CUTS)
+        b.came += b.walk ? b.walk.secs * (b.walk.pts.length - 1) : 0;
+        b.sq = { ...c.at };
         b.cut = c;
         b.stage = 0;
         b.work = work;
@@ -563,8 +723,29 @@ export function sail(o) {
             default: return 0;
         }
     };
-    /** On a trip through a shortcut (or swept by a snake) for `secs`, from where she is now. */
-    const tripFor = (b, secs) => { b.mode = 'trip'; b.trip = secs; b.tripFull = secs; b.from = { ...field.racers[b.i].pose }; };
+    /** On a trip through a shortcut for `secs`: along its water a square at a time, from where she is to where
+        she rejoins the long way (straight on to the leg's row and along it, so she never cuts a corner of the
+        land); under the course (the starlit door's tunnel), unseen, put straight there at its end. */
+    const tripFor = (b, trip) => {
+        const c = b.cut, T = TRIPS[c.id], end = squareAt(tOutOf(b, c)), at = here(b);
+        // (less the moves she made into its spot: already part of the trip as the helm measured it)
+        const secs = Math.max(trip * 0.4, trip - b.came);
+        b.came = 0;
+        b.sq = at;
+        if (T.under)
+            b.walk = null;
+        else {
+            const pts = [];
+            if (T.by.length)
+                pts.push([T.by[0][0], at.r], ...T.by);
+            const last = pts.length ? pts[pts.length - 1] : [at.c, at.r];
+            pts.push([last[0], end.r], [end.c, end.r]);
+            walk(b, pts, null, secs);
+        }
+        b.mode = 'trip';
+        b.trip = secs;
+        b.tripFull = secs;
+    };
     /** Her broadsides at the rocks as she comes by, as many as she has or it takes to bring them down, each
         landing as often as her aim: the seconds it took (her guns run out again between shots). */
     const fireRocks = (b) => {
@@ -580,7 +761,6 @@ export function sail(o) {
     /** She's come to a shortcut she means to take: in, waiting her turn, or (cautious, someone close
         behind) on by. The zigzag's hops are on the move: through, for what her Doubles save. */
     const arrive = (b, c) => {
-        b.tau = c.tIn;
         b.since = 0;
         b.lost = 0;
         if (c.id === 'zigzag') {
@@ -628,6 +808,9 @@ export function sail(o) {
         if (b.style.caution && !c.sheltered && behind(b, b.style.caution))
             return false;
         if (c.spot && field.claim(b.i, c.spot) === 'wait') {
+            // (waiting her turn: the locks' berth, sheltered; otherwise on the leg beside the way in)
+            const at = c.id === 'locks' ? { c: RC.BERTH[0], r: RC.BERTH[1], d: 0 } : { ...c.at, c: c.at.c + 1, r: c.at.r - 1 };
+            walk(b, [[at.c, at.r]], SAIL.MOVE + SAIL.PAUSE);
             b.cut = c;
             b.mode = 'wait';
             b.waited = 0;
@@ -638,9 +821,11 @@ export function sail(o) {
     };
     const through = (b, secs) => { tripFor(b, secs); b.stop = null; };
     const out = (b) => {
-        const c = b.cut;
+        const c = b.cut, end = c ? squareAt(tOutOf(b, c)) : { ...b.sq };
+        toHelm(b, end);
+        b.mode = 'sail';
         if (!c) {
-            b.mode = 'sail';
+            b.tau = progressAt(end);
             return;
         } // (a snake's sweep: on from where it put her)
         if (c.spot)
@@ -651,7 +836,7 @@ export function sail(o) {
         // (the wreck's coins aboard: what it cost her is counted against the gap she pays them at)
         if (c.id === 'wreck') {
             b.purse = true;
-            b.owed = b.since * (1 + chainWorth(b)) + b.lost - (tOutOf(b, c) - c.tIn);
+            b.owed = b.since * (1 + sailWorth(b)) + b.lost - (tOutOf(b, c) - c.tIn);
             b.since = 0;
             b.lost = 0;
         }
@@ -659,7 +844,6 @@ export function sail(o) {
             record(b, c.id, true);
         b.tau = tOutOf(b, c);
         b.cut = null;
-        b.mode = 'sail';
         // (rushing the gap, the tight water past it: one move too many)
         // (rushing it on a combo most of all; run a square at a time, half as often; its guns shot quiet, or
         // their guard paid, she goes through at her leisure)
@@ -675,6 +859,7 @@ export function sail(o) {
         }
         b.done.add(c.id);
         record(b, c.id, false);
+        toHelm(b, here(b));
         b.cut = null;
         b.mode = 'sail';
         b.stop = null;
@@ -684,7 +869,6 @@ export function sail(o) {
     const gap = (b) => {
         const c = cuts.guns;
         if (b.cut !== c) {
-            b.tau = c.tIn;
             b.since = 0;
             b.cut = c;
         }
@@ -764,39 +948,94 @@ export function sail(o) {
         }
         through(b, c.trip);
     };
-    /** Where a bot is drawn and reckoned: see "Where a bot is" above. */
-    const poseOf = (b) => {
-        if (b.mode === 'stop' || (b.mode === 'daze' && b.was === 'stop')) {
-            const at = { ...b.cut.at };
-            // (rowing up the headwind gap as she goes)
-            if (b.cut.id === 'headwind') {
-                const [c, r] = B[Math.min(B.length - 1, Math.floor((1 - b.work / Math.max(1e-9, b.full)) * B.length))];
-                at.c = c;
-                at.r = r;
-            }
-            return at;
+    /** Whether she's playing her Sailing board just now: under way along a leg, heading along it (a gust then
+        carries her on round the course), not round a bend (it'd carry her into the spit), nor coming up to the
+        trade wind back up the course (it'd carry her into it): there she steers. Nor down the start's field. */
+    const sailing = (b) => {
+        // (where a gust would start from: once the move she's on, and its trade wind, are done)
+        const p = b.helm.gustFrom(), s = stretchAt(p.c, p.r);
+        if (s < 0 || p.d !== S[s].d)
+            return false;
+        return !(s === 2 && !b.hopped && p.c >= LONG_PINS[HOP_PIN].at[0] - 4);
+    };
+    /** Over the trade wind back up the course: on leg 3 past it, or further on. */
+    const pastMid = (p) => p.r >= S[3].r || (p.r >= S[2].r && p.c > MID_C);
+    /** Lined up beside the trade wind back up the course: her Double, two squares over it (as yours hops it,
+        tests/race-helpers.ts); or a slip, and its loop has her a few squares back, to line up again. */
+    const hopIt = (b) => {
+        b.hopped = true;
+        if (snakes && rand() < SIM.SNAKE.mid[b.best]) {
+            swept(b, 'mid', MID_BACK, sweep(RC.SNAKES.MID.length));
+            b.hopped = false;
+            return;
         }
-        if (b.mode === 'wait' || (b.mode === 'daze' && b.was === 'wait')) {
-            // (waiting her turn: the locks' berth, sheltered; otherwise on the leg beside the way in)
-            const c = b.cut;
-            return c.id === 'locks' ? { c: RC.BERTH[0], r: RC.BERTH[1], d: 0 } : { ...c.at, c: c.at.c + 1, r: c.at.r - 1 };
+        b.helm.pose.d = S[2].d;
+        b.helm.gust(gustPath(b.helm.sea, b.helm.pose, runFor(2)));
+        b.helm.mine = [];
+        b.plan = null;
+    };
+    /** The next shortcut her route takes before the long way's pin `k`, if any (one she's just past, a few
+        squares, she goes back for: she came onto the leg beyond its way in). */
+    const goalOf = (b, k) => b.route.cuts
+        .filter((id) => id !== 'zigzag' && !b.done.has(id)).map((id) => cuts[id])
+        .filter((c) => c.tIn <= PIN_TAU[k] + 1e-6 && c.tIn >= b.tau - 6 * PACE)
+        .sort((x, y) => x.tIn - y.tIn)[0] ?? null;
+    /** The pilot's chart to a square: down the start's field, this race's own (its field's), handing on to the
+        course's below it; on the course, the course's (charted once). */
+    const starts = new Map();
+    const chartTo = (at, p) => {
+        if (p.r >= S[0].r)
+            return courseChart(at);
+        const k = `${at[0]},${at[1]}`;
+        let ch = starts.get(k);
+        if (!ch)
+            starts.set(k, ch = new PilotChart(sea0, at, RC.LINE.r - 1, S[0].r - 1, (q) => (q.r >= S[0].r ? courseChart(at).secs(q) : Infinity)));
+        return ch;
+    };
+    /** The pilot: for her route's next shortcut's way in, or else the long way's next pin from how far round
+        she's got, beside the trade wind back up the course till she's hopped it (and there, she lines up her
+        Double). Her next moves are read off its chart, as moves put in: a turn's worth ahead, always. */
+    const steer = (b) => {
+        const h = b.helm;
+        if (!b.hopped && pastMid(h.pose))
+            b.hopped = true;
+        let k = LONG_PINS.findIndex((_, j) => PIN_TAU[j] > b.tau + 1e-6 || (j === HOP_PIN && !b.hopped));
+        if (k < 0)
+            k = LONG_PINS.length - 1;
+        let g = goalOf(b, k);
+        // (a shortcut's way in that no sailing gets her to from here, the wind as it blows down the course, when
+        // the long way's still open to her: she goes on without it, as a player would, or rows: RACE.md §8)
+        while (g && chartTo(ENTRY[g.id], h.pose).secs(h.pose) === Infinity && chartTo(LONG_PINS[k].at, h.pose).secs(h.pose) < Infinity) {
+            const id = g.id;
+            b.done.add(id);
+            if (!b.res.cuts.some((x) => x.id === id))
+                b.res.cuts.push({ id, done: false, saved: 0 });
+            g = goalOf(b, k);
         }
-        if (b.mode === 'trip' && b.cut) {
-            const T = TRIPS[b.cut.id], end = routePose(b.cut.tOut);
-            if (T.under)
-                return { ...b.from };
-            // (square by square: along her row to the way in, through, then straight on to the leg's row and
-            // along it, so she never cuts a corner of the land)
-            const pts = [[b.from.c, b.from.r]];
-            if (T.by.length)
-                pts.push([T.by[0][0], b.from.r], ...T.by);
-            pts.push([pts[pts.length - 1][0], end.r], [end.c, end.r]);
-            return along(pts, 1 - b.trip / Math.max(1e-9, b.tripFull));
+        const at = g ? ENTRY[g.id] : LONG_PINS[k].at, goal = g ? g.id : `pin ${k}`;
+        b.goal = g?.id ?? null;
+        if (!g && k === HOP_PIN && h.pose.c === at[0] && h.pose.r === at[1] && h.idle() && !h.gusts.length) {
+            b.hop = draw(SIM.HOP, b.skill);
+            return;
         }
-        const at = b.tau < joinTau(b.spot) && b.lefts === 0 && !b.hopped ? startPose(b.spot, Math.min(b.tau0, b.tau), b.tau) : routePose(b.tau);
-        if (b.mode === 'daze')
-            at.r = Math.floor(at.r) + 1;
-        return at;
+        if (goal !== b.pin) {
+            b.pin = goal;
+            h.mine = [];
+            b.plan = null;
+        }
+        if (h.mine.length >= SAIL.SLOTS)
+            return;
+        // (from where the moves put in leave her; between turns with none, from where she is: a whirlpool or a
+        // slow wind may have moved her, resting)
+        let p = h.mine.length || h.slot >= 0 ? b.plan : null;
+        if (!p) {
+            p = h.after();
+            for (const m of h.mine)
+                p = h.sea.sail(p, m).to;
+        }
+        const got = chartTo(at, p).moves(p, SAIL.SLOTS - h.mine.length);
+        h.mine.push(...got.moves);
+        b.plan = got.at;
     };
     function step(dt) {
         events = [];
@@ -813,18 +1052,28 @@ export function sail(o) {
                 b.since += dt;
             if (b.mode === 'daze') {
                 b.daze -= dt;
+                if (b.was === 'sail')
+                    b.helm.tick(dt);
                 if (b.daze <= 0) {
                     field.patched(b.i);
                     b.mode = b.was;
+                    b.helm.hole = null;
                     grace.set(b.i, SAIL.GRACE);
                 }
             }
             else if (b.mode === 'trip') {
                 b.trip -= dt;
+                if (b.walk)
+                    b.walk.t += dt;
                 if (b.trip <= 0)
                     out(b);
             }
             else if (b.mode === 'wait') {
+                if (b.walk) {
+                    b.walk.t += dt;
+                    if (walkDone(b.walk))
+                        b.walk = null;
+                }
                 b.waited += dt;
                 if (field.holder(b.cut.spot) === b.i)
                     go(b, b.cut, firstWork(b, b.cut));
@@ -832,22 +1081,33 @@ export function sail(o) {
                     giveUp(b);
             }
             else if (b.mode === 'stop') {
+                // (walked into her spot first, then she puzzles)
+                if (b.walk) {
+                    b.walk.t += dt;
+                    if (walkDone(b.walk))
+                        b.walk = null;
+                    continue;
+                }
                 b.work -= dt;
                 if (b.work <= 0)
                     solved(b);
             }
             else if (b.mode === 'sail') {
-                // On the pilot: a combo held for the gap, or a shot loaded, slows her a little; otherwise her
-                // Sailing's gusts carry her on.
-                let speed = 1 + chainWorth(b);
+                // On her spot on the line still, giving way to a racer beside her.
+                if (b.delay > 0) {
+                    b.delay -= dt;
+                    continue;
+                }
+                // Puzzling on the move: loading a shot by Gunnery, or building a combo for a gap (on her Sailing
+                // board, its clears carrying her as ever).
                 if (!b.move && b.style.reload && shots(b) < FIELD.SHOTS)
                     b.move = { kind: 'load', left: draw(SIM.PUZZLE.load, b.skill) };
                 // (the next Double or Triple her route hops, built on the move, once the gap's combo's done with)
                 const hopId = b.route.cuts.find((id) => (id === 'double' || id === 'triple') && !b.done.has(id) && !b.ready.has(id));
                 if (!b.move && hopId && (b.route.gap !== 'combo' || b.done.has('guns')))
                     b.move = { kind: 'hop', id: hopId, left: draw(SIM.PUZZLE[hopId], b.best) };
+                const loading = b.move?.kind === 'load';
                 if (b.move) {
-                    speed = SIM.OVERLAP;
                     b.move.left -= dt;
                     if (b.move.left <= 0) {
                         if (b.move.kind === 'combo') {
@@ -866,34 +1126,72 @@ export function sail(o) {
                         }
                     }
                 }
-                // (the Sailing she'd have done, held for the gap's puzzle, counts against the gap)
-                if (b.move && b.route.gap && !b.done.has('guns'))
-                    b.lost += dt * (1 + chainWorth(b) - speed);
+                // (loading shots for the gap, the Sailing she isn't doing counts against the gap)
+                if (loading && b.route.gap && !b.done.has('guns'))
+                    b.lost += dt * sailWorth(b);
                 // (lining up her Double at the trade wind back up the course: she's held there till it's timed)
                 if (b.hop > 0) {
                     b.hop -= dt;
-                    if (b.hop <= 0) {
-                        b.hopped = true;
-                        if (snakes && rand() < SIM.SNAKE.mid[b.best]) {
-                            swept(b, 'mid', MID_BACK, sweep(RC.SNAKES.MID.length));
-                            b.hopped = false;
+                    if (b.hop <= 0)
+                        hopIt(b);
+                    continue;
+                }
+                // Her Sailing on the pilot: each drop's clear, its gust carrying her on there and then.
+                // (down on the course: through the start's field she's steering, not Sailing. After a gust, the rest of
+                // the turn she'd put in is let go, and she puts in her next moves from where it left her)
+                if (chains && !loading && sailing(b)) {
+                    for (const steps of b.sailor.tick(dt)) {
+                        if (steps <= 0)
+                            continue;
+                        const from = b.helm.gustFrom(), got = carry(b.helm, runFor(steps));
+                        b.carried.push({ t: field.t, steps, from, ...got });
+                        if (!got.went)
+                            continue;
+                        const h = b.helm;
+                        h.mine = [];
+                        b.plan = null;
+                        if (h.slot >= 0) {
+                            h.turn = h.turn.slice(0, h.slot + (h.cur ? 1 : 0));
+                            if (h.slot >= h.turn.length) {
+                                h.turn = [];
+                                h.slot = -1;
+                            }
                         }
                     }
+                }
+                steer(b);
+                if (b.hop > 0)
+                    continue;
+                const was = b.tau;
+                b.helm.tick(dt);
+                if (b.helm.pose.r >= S[0].r && b.helm.sea !== courseWater())
+                    b.helm.sea = courseWater();
+                b.tau = progressAt(b.helm.pose);
+                // (nowhere the pilot can take her: a last resort, walked on along the long way)
+                b.stuck = !b.helm.cur && b.helm.slot < 0 && !b.helm.mine.length && !b.helm.gusts.length ? b.stuck + dt : 0;
+                if (b.stuck > 8) {
+                    const to = squareAt(b.tau + 3 * PACE);
+                    walk(b, [[to.c, b.helm.pose.r], [to.c, to.r]], SAIL.MOVE);
+                    b.mode = 'trip';
+                    b.cut = null;
+                    b.trip = b.tripFull = (b.walk ? b.walk.pts.length - 1 : 0) * SAIL.MOVE;
+                    b.tau = progressAt(to);
                     continue;
                 }
-                const next = b.tau + (dt * speed) / b.pace;
-                if (b.route.gap && !b.done.has('guns') && b.tau < cuts.guns.tIn && next >= cuts.guns.tIn) {
+                // (come to a shortcut's way in: sailing past it, or onto it, the pilot having brought her there)
+                const there = b.goal ? b.helm.pose.c === ENTRY[b.goal][0] && b.helm.pose.r === ENTRY[b.goal][1] : false;
+                const comes = (c) => (was < c.tIn && b.tau >= c.tIn) || (there && b.goal === c.id);
+                if (b.tau === was && !there)
+                    continue;
+                if (b.route.gap && !b.done.has('guns') && comes(cuts.guns)) {
                     gap(b);
-                    continue;
-                }
-                if (!b.hopped && b.tau < MID_T && next >= MID_T) {
-                    b.tau = MID_T;
-                    b.hop = draw(SIM.HOP, b.skill);
                     continue;
                 }
                 // (the left-hand trade wind's loops: a careless turn at a left-hand bend, or on the run home, and she's
                 // carried a few squares back, to go round again)
-                if (snakes && b.lefts < LEFT_T.length && b.tau < LEFT_T[b.lefts] && next >= LEFT_T[b.lefts]) {
+                while (b.lefts < LEFT_T.length && LEFT_T[b.lefts] < was)
+                    b.lefts++;
+                if (snakes && b.lefts < LEFT_T.length && was < LEFT_T[b.lefts] && b.tau >= LEFT_T[b.lefts]) {
                     const at = LEFT_T[b.lefts++];
                     if (rand() < SIM.SNAKE.left[b.skill]) {
                         swept(b, 'left', at - LEFT_BACK * PACE, sweep(LEFT_BACK));
@@ -902,25 +1200,20 @@ export function sail(o) {
                 }
                 // (the rocks down, by anyone's guns: open to every racer who comes to them, a shortcut for free)
                 const rk = cuts.rocks;
-                if (rocksDown(field) && !b.done.has('rocks') && b.tau < rk.tIn && next >= rk.tIn) {
+                if (rocksDown(field) && !b.done.has('rocks') && was < rk.tIn && b.tau >= rk.tIn) {
                     b.done.add('rocks');
                     if (arrive(b, rk))
                         continue;
                 }
-                const due = b.route.cuts.map((id) => cuts[id]).filter((c) => c.id !== 'guns' && !b.done.has(c.id) && b.tau < c.tIn && next >= c.tIn).sort((x, y) => x.tIn - y.tIn)[0];
+                const due = b.route.cuts.map((id) => cuts[id]).filter((c) => c.id !== 'guns' && !b.done.has(c.id) && comes(c)).sort((x, y) => x.tIn - y.tIn)[0];
                 if (due) {
                     b.done.add(due.id);
                     if (arrive(b, due))
                         continue;
                 }
-                b.tau = next;
-                if (b.tau >= SIM.LONG) {
-                    b.mode = 'done';
-                    events.push(...field.home(b.i));
-                }
             }
         }
-        // Where each is, and what she's doing, for the field.
+        // Where each is, and what she's doing, for the field: home once she's over the finish line.
         for (const b of bots) {
             if (b.mode === 'done')
                 continue;
@@ -930,7 +1223,15 @@ export function sail(o) {
                 if (e.kind === 'finish')
                     events.push(e);
             }
-            field.racers[b.i].state = STATE[b.mode];
+            // (at the finish line's pin, home, should the field have missed a stretch of hers)
+            const fin = LONG_PINS[LONG_PINS.length - 1].at;
+            if (b.mode === 'sail' && b.helm.pose.c === fin[0] && b.helm.pose.r === fin[1]) {
+                events.push(...field.home(b.i));
+                b.mode = 'done';
+            }
+            // (walked into the spot she'll stop at, or her turn's berth, she's under way still: not sat there yet)
+            if (b.mode !== 'done')
+                field.racers[b.i].state = b.walk && (b.mode === 'stop' || b.mode === 'wait') ? 'sailing' : STATE[b.mode];
         }
         // The gap's guns, roused: an aimed shot on a racer in reach each time one's loaded, till nobody's near.
         if (roused) {
@@ -974,8 +1275,7 @@ export function sail(o) {
         return events;
     }
     /** A player's sloop taken over (she's dropped out of a race online): a bot of the long way, peaceful,
-        from where she's got to round it; anything she held or waited for let go. Down the start's field
-        still, she starts it again from her spot. */
+        from her square; anything she held or waited for let go. */
     const adopt = (i) => {
         const r = field.racers[i];
         if (botOf(i) || r.state === 'finished')
@@ -985,16 +1285,14 @@ export function sail(o) {
             field.leave(i, sp);
         }
         r.state = 'sailing';
-        const spot = Math.max(RC.LINE.c0, Math.min(RC.LINE.c1, Math.round(r.pose.c)));
-        const ahead = progressAt(r.pose), tau = ahead < joinTau(spot) ? startTau(spot) : ahead;
-        const rt = route('long'), st = style('peaceful');
-        bots.push({
-            i, route: rt, style: st, skill: 'decent', best: 'decent', pace: 1, tau, mode: 'sail', was: 'sail', spot, tau0: tau, from: { ...r.pose }, tripFull: 0,
-            cut: null, stage: 0, work: 0, full: 0, tries: 0, since: 0, lost: 0, move: null, combo: false, ready: new Set(), daze: 0, trip: 0, waited: 0,
-            hopped: tau >= MID_T, hop: 0, lefts: LEFT_T.filter((t) => t <= tau).length, purse: false, paid: false, owed: 0,
-            done: new Set(Object.values(cuts).filter((c) => c.tIn <= tau).map((c) => c.id)), stop: null, inLine: new Set(), vegas: false, exit: 0,
-            res: { route: rt.name, style: st.name, skill: 'decent', start: i, spot, time: 0, place: 0, hitsTaken: 0, hitsGiven: 0, swept: [], cuts: [], exposed: [], rocks: { hits: 0, through: false, free: false } },
-        });
+        const at = { c: Math.round(r.pose.c), r: Math.round(r.pose.r), d: ((Math.round(r.pose.d) % 4) + 4) % 4 };
+        const b = botFor(i, { route: route('long'), style: style('peaceful'), skill: 'decent' }, at, i);
+        b.hopped = pastMid(at);
+        b.lefts = LEFT_T.filter((t) => t <= b.tau).length;
+        for (const c of Object.values(cuts))
+            if (c.tIn <= b.tau)
+                b.done.add(c.id);
+        bots.push(b);
         return true;
     };
     return {
@@ -1008,26 +1306,39 @@ export function sail(o) {
             return Math.sin(Math.PI * Math.min(1, Math.max(0, 1 - b.trip / Math.max(1e-9, b.tripFull))));
         },
         results: (limit) => bots.map((b) => ({ ...b.res, time: field.racers[b.i].time ?? limit, place: field.racers[b.i].place ?? bots.length })),
+        motion: (i) => { const b = botOf(i); return b ? motionOf(b) : null; },
+        sailor: (i) => botOf(i)?.sailor ?? null,
+        carries: (i) => botOf(i)?.carried ?? [],
         info: (i) => {
             const b = botOf(i);
             if (!b)
                 return null;
             return {
                 mode: b.mode, was: b.was, cut: b.cut?.id ?? null, stage: b.stage, work: Math.max(0, b.work), full: b.full, tries: b.tries, daze: Math.max(0, b.daze),
-                move: b.move ? { ...b.move } : null, hop: Math.max(0, b.hop), route: b.route.name, style: b.style.name, best: b.best, skill: b.skill, done: [...b.done],
+                move: b.move ? { ...b.move } : null, hop: Math.max(0, b.hop), coming: (b.mode === 'stop' || b.mode === 'wait') && !!b.walk,
+                route: b.route.name, style: b.style.name, best: b.best, skill: b.skill, done: [...b.done],
             };
         },
     };
 }
 /** One race, start to finish: each racer's result, in starting order. */
 export function simulate(o) {
-    const run = sail(o), LIMIT = SIM.LONG * 4;
-    while (run.field.state === 'on' && run.field.t < LIMIT) {
-        run.field.tick(SIM.DT);
-        run.step(SIM.DT);
+    // (one race at a time, start to finish: the start's sea is the last race's, its field laid afresh)
+    const sea = spare ?? shutWays(new Sea(9));
+    spare = null;
+    try {
+        const run = sail(o, sea), LIMIT = SIM.LONG * 4;
+        while (run.field.state === 'on' && run.field.t < LIMIT) {
+            run.field.tick(SIM.DT);
+            run.step(SIM.DT);
+        }
+        return run.results(LIMIT);
     }
-    return run.results(LIMIT);
+    finally {
+        spare = sea;
+    }
 }
+let spare = null;
 /** The den's race (src/den-race.ts, its Race's `drive`): its rivals sailed by bots, each on her favourite
     route in her own style and skill (src/den-rivals.ts, her racer), from her spot on the line; you racer 0
     on the same field, moved by the helm, fired on as any racer is. A fresh seed each race. */

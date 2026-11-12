@@ -20,7 +20,7 @@
 // for everyone). The rocks' hits (race-rocks.js draws them) are the room's count of everyone's.
 import { NET, Mirror, mirrorDrive, meIn, poseUp, spotSquare, waitAt, peekText } from '../race-net.js';
 import { wsLink } from '../race-link.js';
-import { simDrive } from '../race-sim.js';
+import { simDrive, helmMotion } from '../race-sim.js';
 import { WATCHED, RIVALS } from '../den-rivals.js';
 import { LAY } from '../den-sail.js';
 import { FIELD } from '../den-racers.js';
@@ -278,7 +278,7 @@ function follow(dt, R, s, toLine) {
     // (her pose, a few times a second)
     if ((rnet.sendT -= dt) <= 0 && (R.state === 'count' || R.state === 'on' || R.state === 'done')) {
       rnet.sendT = 1 / NET.SEND;
-      send(poseUp(R.field, R.run?.took?.() ?? 0, sail.guns.shots('L') + sail.guns.shots('R'), stepsOf(), acts.splice(0, 60)));
+      send(poseUp(R.field, R.run?.took?.() ?? 0, sail.guns.shots('L') + sail.guns.shots('R'), stepsOf(), acts.splice(0, 60), helmMotion(sail.helm)));
     }
   }
   // (nothing from the room a couple of seconds: ask for the race as it is. Racing, snapshots come eight a
