@@ -825,6 +825,16 @@ Yeah, no hidden ... not for a proof of concept. It didn't really work"). Built t
 - **The door:** faint marks on a cliff off leg 2. Stop by it and press Space, and Duty Navigation stands
   on the rock as the night sky. Each constellation filled lights its stars on the carved wheel. Two small
   ones open it, about a minute's play. A booch pushes her off and darkens the stars.
+- **Back to simple, Navigation only (the user, 12 Nov, decided; replaces the tunnel's Vegas stretches below):**
+  "I love some of the animation and the styles on it, but I think it needs just probably to go back to being
+  simple... nav only shortcut that takes you just like one step through, and maybe can be tuned to be a bit
+  trickier. Because I could just imagine someone good at doing Vegas, it takes you out of the race. It's too
+  isolated otherwise." Navigation at the rock opens the door, and that alone carries her through one stretch
+  and up the cleft onto leg 3. No clear to get in, no Vegas under the cleft, no exit onto leg 5: a racer who's
+  good at Vegases can't sail under half the course out of everyone's reach. The look stays (the crag, the stars, the door
+  swinging open, the tunnel). Its Navigation can be made trickier so the door's saving stays in proportion with
+  the other shortcuts. They first found the tunnel's two stretches hard to read in play ("so it takes you fully
+  all the way through the course?").
 - **Getting in (12 Nov, the user's first try: "I'm just bumping into the rocks"):** sailing at the open
   door, or a pin on it, brings her into the doorway facing in, the Sailing board out, and the prompt says
   "any clear carries her in, a Vegas on through the dark"; never a bump. The doorway's as wide as the
