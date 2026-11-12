@@ -24,6 +24,7 @@ import { SHELTER, courseSea } from '../js/den-racers.js';
 import { CHECK } from '../js/den-checkpoint.js';
 import { RIVALS } from '../js/den-rivals.js';
 import { whirlpool } from '../js/den-whirl.js';
+import { DOOR } from '../js/den-door.js';
 
 const OUT = process.argv[2];
 if (!OUT) { console.error('usage: tools/race-map.mjs <out.html> [races] [size]'); process.exit(1); }
@@ -232,14 +233,32 @@ for (const [c, r] of RC.FORAGE.BARRIER) {
   add(`<g stroke="${INK}" stroke-width="2.4" fill="none" stroke-linecap="round"><path d="M${x + 6} ${y + 14}L${x + 12} ${y - 22}L${x + 18} ${y + 14}M${x + 12} ${y - 22}L${x - 18} ${y - 34}M${x - 16} ${y - 33}v12"/><path d="M${x - 21} ${y - 21}h10" stroke-width="3"/></g>`);
 }
 
-/* The starlit door: its carved face on the cliff, stars about it, the tunnel under to its far end. */
+/* The starlit door: its carved face on the cliff, stars about it, the tunnel under the course and a sea
+   cave up a cleft at each of its exits (DOOR.EXITS), the far end's the last. */
+const star = (x, y, s) => { let p = ''; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + (i * Math.PI) / 5, rr = i % 2 ? s * 0.42 : s; p += `${i ? 'L' : 'M'}${f(x + Math.cos(a) * rr)} ${f(y + Math.sin(a) * rr)}`; } return `<path d="${p}Z" fill="#e7c34a" stroke="${INK}" stroke-width="1.2"/>`; };
 {
-  const D = RC.DOOR, fx = (X(D.FACE[0][0]) + X(D.FACE[1][0])) / 2, fy = Y(D.FACE[0][1]) + SQ / 2, ox = fx, oy = Y(D.OUT[0][1]) - SQ / 2;
+  const D = RC.DOOR, fx = (X(D.FACE[0][0]) + X(D.FACE[1][0])) / 2, fy = Y(D.FACE[0][1]) + SQ / 2;
+  const caves = D.EXITS.map((e) => [fx, Y(e.OUT[0][1]) - SQ / 2]), [ox, oy] = caves[caves.length - 1];
   add(`<path d="M${fx} ${fy}L${ox} ${oy}" stroke="${DOOR_INK}" stroke-width="4" stroke-dasharray="1 8" stroke-linecap="round" opacity=".85"/>`);
-  add(`<path d="M${fx - 14} ${fy}v-14a14 14 0 0 1 28 0v14Z" fill="#2a2140" stroke="${INK}" stroke-width="2"/>`);
-  add(`<path d="M${ox - 14} ${oy}v14M${ox + 14} ${oy}v14M${ox - 14} ${oy}a14 14 0 0 1 28 0" fill="none" stroke="${INK}" stroke-width="2"/><rect x="${ox - 12}" y="${oy - 4}" width="24" height="16" fill="#2a2140"/>`);
-  const star = (x, y, s) => { let p = ''; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + (i * Math.PI) / 5, rr = i % 2 ? s * 0.42 : s; p += `${i ? 'L' : 'M'}${f(x + Math.cos(a) * rr)} ${f(y + Math.sin(a) * rr)}`; } return `<path d="${p}Z" fill="#e7c34a" stroke="${INK}" stroke-width="1.2"/>`; };
-  add(star(fx - 30, fy - 22, 8) + star(fx + 30, fy - 26, 6) + star(fx + 2, fy - 36, 7));
+  add(`<path d="M${fx - 12} ${fy}v-8a12 12 0 0 1 24 0v8Z" fill="#2a2140" stroke="${INK}" stroke-width="2"/>`);
+  // (each cave's mouth, a dark half-round in the cliff, and the way up out of it onto the leg)
+  for (const [x, y] of caves) add(`<path d="M${x - 12} ${y}a12 11 0 0 0 24 0Z" fill="#2a2140" stroke="${INK}" stroke-width="2"/><path d="M${x} ${y - 4}v-16m-6 6l6 -6l6 6" fill="none" stroke="${DOOR_INK}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`);
+  add(star(fx - 30, fy - 14, 7) + star(fx + 30, fy - 16, 6));
+}
+
+/* [A] The gun gap as an imperial gate: its towers either side of the way in, an arch and the Empire's flag
+   over it, its guard on the leg in front (paid with the wreck's coins: src/den-bribe.ts); the old wreck in
+   its notch off leg 1, where Treasure Haul brings the coins up. */
+{
+  const B = RC.BRIBE, [gc, gr] = B.GATE, ty = Y(B.TOWERS[0][1]);
+  for (const [c, r] of B.TOWERS) { const x = X(c), y = Y(r); add(`<g stroke="${INK}" stroke-width="2"><rect x="${x - 9}" y="${y - 14}" width="18" height="26" fill="#e6dcc4"/>${[0, 1, 2].map((i) => `<rect x="${x - 9 + i * 6.5}" y="${y - 19}" width="5" height="5" fill="#e6dcc4"/>`).join('')}<rect x="${x - 3.5}" y="${y - 9}" width="7" height="15" fill="#a3271c" stroke="none"/></g>`); }
+  const ax = X(gc);
+  add(`<g stroke="${INK}" stroke-width="2.4" fill="none"><path d="M${ax - SQ / 2 + 2} ${ty - 12}Q${ax} ${ty - 34} ${ax + SQ / 2 - 2} ${ty - 12}"/><path d="M${ax} ${ty - 23}v-18"/></g><path d="M${ax} ${ty - 41}l17 4l-17 5Z" fill="#a3271c" stroke="${INK}" stroke-width="1.6"/>`);
+  // (the guard, in crimson, on the square in front of it)
+  add(`<g stroke="${INK}" stroke-width="1.6"><circle cx="${X(gc)}" cy="${Y(gr) - 10}" r="4.5" fill="#e8c9a0"/><path d="M${X(gc) - 6} ${Y(gr) + 8}L${X(gc)} ${Y(gr) - 6}L${X(gc) + 6} ${Y(gr) + 8}Z" fill="#a3271c"/></g>`);
+  const [wc, wr] = B.WRECK, x = X(wc), y = Y(wr);
+  add(`<g transform="translate(${x} ${y + 4}) rotate(-14)" stroke="${INK}" stroke-width="2.2"><path d="M-17 -3h26l-6 9h-16Z" fill="#8a5a30"/><path d="M9 -3l5 -5M5 1l9 -1" fill="none"/><path d="M-4 -3l3 -16l7 -4" fill="none"/></g>`);
+  add(`<circle cx="${x + 12}" cy="${y - 10}" r="4" fill="#d9a93a" stroke="${INK}" stroke-width="1.2"/><circle cx="${x + 17}" cy="${y - 5}" r="3.4" fill="#d9a93a" stroke="${INK}" stroke-width="1.2"/>`);
 }
 
 /* The shortcuts' ways through, dotted green (the crane's swing above; the tunnel, the door's). */
@@ -247,6 +266,7 @@ for (const [c, r] of RC.FORAGE.BARRIER) {
   const S = RC.STRETCHES;
   const ways = [
     [[RC.GUNS.way[0][0], S[0].r + 1], [RC.GUNS.way[2][0], S[1].r]],
+    [[RC.BRIBE.NOTCH[0], S[0].r + 1], RC.BRIBE.NOTCH],
     [[RC.HEADWIND[0][0], S[1].r + 1], ...RC.HEADWIND, [RC.HEADWIND[RC.HEADWIND.length - 1][0], S[2].r]],
     [[RC.DOUBLE.WAY[0][0], S[1].r + 1], [RC.DOUBLE.WAY[0][0], S[2].r]],
     [[RC.WHIRLS.MOUTH.c, RC.WHIRLS.MOUTH.r], [RC.WHIRLS.OUT[0], RC.WHIRLS.OUT[1]]],
@@ -346,16 +366,16 @@ S.forEach((s, i) => {
 }
 const BIG = { size: 0.78, lh: 1.17 };
 // [A] spit 1: the gun gap.
-at(10, SP[0].r1, [T(`The gun gap \u00b7 saves ${sv('guns')}`), N('a Quad, its guns shot, or run it'), WIN(`Quad ${routeWin('gap-combo')} \u00b7 shot ${routeWin('gap-shot')} \u00b7 run ${routeWin('gap-run')}`)], BIG);
+at(9.6, SP[0].r1, [T(`The imperial gate \u00b7 saves ${sv('guns')}`), WIN(`Quad ${routeWin('gap-combo')} \u00b7 shot ${routeWin('gap-shot')} \u00b7 run ${routeWin('gap-run')}`), WIN(`bribe ${routeWin('bribe')}: haul the wreck \u25b8`)], BIG);
 at(25.6, SP[0].r0 - 0.95, [N('guns\u2019 reach')], { size: 0.5, anchor: 'end', col: SNAKE });
 // [B] spit 2: the Double's gap, the headwind gap, the trade wind up the middle (and the tight water below it).
 at(9, SP[1].r1, [T('Double\u2019s gap'), N(`a Double \u00b7 ${sv('double')}`), WIN(`doubles ${routeWin('doubles')}`)], BIG);
-at(16, SP[1].r1, [T('Headwind gap'), WIN(`row \u00b7 ${sv('headwind')} \u00b7 ${routeWin('headwind')}`)], { size: 0.68, lh: 1.25 });   // (two lines: the door's below)
+at(16, SP[1].r1 - 0.3, [T('Headwind gap'), WIN(`row \u00b7 ${sv('headwind')} \u00b7 ${routeWin('headwind')}`)], { size: 0.6, lh: 1.1 });   // (two lines: the door below, a cave above)
 at(23, SP[1].r1, [['SNAKE: trade wind', SNAKE, 700], N('hop on a Double'), N('or back to leg 2')], BIG);
 at(RC.SNAKES.TIGHT[0][0] - 0.6, RC.SNAKES.TIGHT[0][1], [['tight water ▸', SNAKE, 700]], { size: 0.6, anchor: 'end' });
 // [C] spit 3: the whirlpools, the starlit door, the barrier.
 at(4.5, SP[2].r1 - 0.1, [T('Whirlpool channel'), N('a Vegas carries her'), [`saves ${sv('whirls')}`, '#5a1a0c', 700], WIN(`Vegas ${routeWin('whirls')}`), N('stopped in the open:'), N('a sitting duck')], BIG);
-at(16, SP[2].r1 - 0.1, [['\u2605 Starlit door', DOOR_INK, 700], N('secret tunnel'), N('to leg 4'), N('Navigation, Vegas'), [`saves ${sv('door')}`, '#5a1a0c', 700], WIN(`door ${routeWin('door')}`)], BIG);
+at(16, SP[2].r1 - 0.1, [['\u2605 Starlit door', DOOR_INK, 700], N('Navigation, Vegas'), ...DOOR.EXITS.map((e, k) => [`${k ? 'or ' : 'up at '}leg ${e.to + 1}: ${Math.round(e.saves)} s`, '#5a1a0c', 700]), WIN(`door ${routeWin('door')}`)], BIG);
 at(22.5, SP[2].r1 - 0.1, [T('Barrier'), N('Foraging'), [`saves ${sv('forage')}`, '#5a1a0c', 700], WIN(`forage ${routeWin('forage')}`), N('sheltered')], BIG);
 // [D] spit 4: the zigzag below it (on the long way) and the locks.
 at(8, SP[3].r1, [T('The zigzag \u2193'), N(`hop on Doubles \u00b7 ${sv('zigzag')}`), WIN(`long way ${routeWin('long')}`)], BIG);
@@ -384,14 +404,15 @@ const PUZZLE = {
   'gap-run': ['Gun gap, run a square at a time', 'no puzzle; holed once, patched by Carpentry'],
   'gap-combo': ['Gun gap, rushed', 'a Quad (Sailing), held and broken as she’s lined up'],
   'gap-shot': ['Gun gap, its guns shot quiet', 'her two starting shots, a hit a gun (Gunnery loads more)'],
+  bribe: ['Gun gap, its guard bribed', 'Treasure Haul at the wreck in its notch off leg 1 (sheltered), then pay at the gate and be towed through'],
   headwind: ['Headwind gap, rowed', 'Rowing (mirror strokes); idle and she drifts back out'],
   doubles: ['The Double’s and Triple’s gaps', 'a Double, then a Triple, built on the move'],
   whirls: ['Whirlpool channel', 'a Sailing Vegas from its mouth; less sends her back'],
   forage: ['Barrier of driftwood', 'Foraging, from the notch in front of it'],
   locks: ['The locks', 'Bilge, pumping the up lock'],
   crane: ['The crane', 'Carpentry, building it a part at a time'],
-  door: ['★ The starlit door (secret)', 'Duty Navigation on the rock, then a Vegas through'],
-  every: ['Every shortcut it comes to', 'the gap’s Quad, the Double, the whirlpools, the locks, the crane'],
+  door: ['★ The starlit door (secret)', `Duty Navigation on the rock, then a Vegas each stretch of the tunnel: up at ${DOOR.EXITS.map((e) => `leg ${e.to + 1} saves ${Math.round(e.saves)} s`).join(', or ')}`],
+  every: ['Every shortcut it comes to', 'the wreck and the gate’s bribe, the Double, the whirlpools, the locks, the crane'],
 };
 const MOVE = new Set(['guns', 'double', 'triple', 'zigzag']);
 const kindOf = (id) => (MOVE.has(id) ? 'on the move' : id === 'headwind' ? 'rowing, slowly' : CUTS[id].sheltered ? 'stopped, sheltered' : 'stopped, exposed');
