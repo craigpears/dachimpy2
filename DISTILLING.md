@@ -294,6 +294,15 @@ you've run out of stuff to do." So, for the bots and the tutorial:
 - **Then the mirror:** later, with the junk run out, the same moves the other way round, whites heading
   right.
 
+**A technique is one smooth drag, not little swaps (12 Nov):** watching the bot, "I can see it's doing
+individual few swaps, but the whole point is everything's like one smooth motion. Like a human doesn't have
+time for those little swaps. That's very bot-like. A real player is like moving [browns] left, top, bottom,
+left, top, right ... just like zooming them along, but in one smooth, like one operation. That's the point of
+these techniques, is then it creates a way of doing things quickly and consistently." So a routine is played
+as one long drag (the piece held and swept along its whole path, a swap at each step as the mouse passes),
+or a pair's few drags in quick succession, never a pause and a fresh click per swap; the bots' pace counts
+drags, and a drag's swaps come at a hand's speed, and the tutorial shows each technique as that one sweep.
+
 **Skill is the techniques, not the strategy (12 Nov):** "The different skill levels [are] about the
 techniques as much as anything ... I don't think any technique would say start burning immediately. It's
 always whites to the left. There's no reason to do any other strategy." So every tier, the learner too,
