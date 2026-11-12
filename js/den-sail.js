@@ -709,6 +709,8 @@ const key = (c, r) => `${c},${r}`;
     moves alone made the wind free, so she'd ride the whole loop round to save a move: 9 Nov, "the
     autopilot is going crazy around them".) */
 const COST_TURN = SAIL.BREAK / SAIL.SLOTS, COST_PUSH = SAIL.PUSH;
+/** The same weights, for the pilot's reckoning charted ahead of time (the race's bots: src/race-pilot.ts). */
+export const PILOT_COST = { TURN: COST_TURN, PUSH: COST_PUSH };
 /** The pause after a move, by how long the move took: the full pause after a move of SAIL.MOVE or
     more, less after a quicker one, so running before the wind (or rowing like crazy) she's quick
     all the way, not just between the pauses (10 Nov: "I'm not seeing like a big speed difference"). */

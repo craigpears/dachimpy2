@@ -17,14 +17,17 @@
    - Your own sloop is sailed in your browser against your own sea, as alone: what comes from the room only
      says where everyone else is, whose turn it is, and what's hit you.
    - Everyone else's sloop is drawn only from snapshots, a moment behind the newest and in between two
-     (poseAt), never sailed on by itself: past the newest, she waits where it had her.
+     (poseAt), never sailed on by itself: past the newest, she waits where it had her. Each snapshot says the
+     move each racer's on (`mv`: from which square to which, forward, a turn or a square of wind, and how far
+     along), so she's drawn on her moves, square to square, as her own browser or the room's bot sails her,
+     never slid along between where two snapshots had her (12 Nov: "why are they going so smoothly?").
    What a browser sends is its own sloop's pose a few times a second (pose: where, what she's doing, the hits
    it's taken, home and when), and claims (a hit on someone); the room's answer is the next snapshot. */
 
 import { LAY, SAIL, type Pose } from './den-sail.js';
 import { FIELD, hittable, type Field, type FieldEvent, type RacerState, type Spot } from './den-racers.js';
 import type { Drive, Driver } from './den-race.js';
-import { progressAt } from './race-sim.js';
+import { progressAt, motionPose, type Motion } from './race-sim.js';
 
 const RC = LAY.RACE;
 
@@ -105,6 +108,34 @@ export interface SnapRacer {
   name: string; id: string | null; rv: number; bot: boolean; spot: number;
   c: number; r: number; d: number; leg: number; st: RacerState;
   shots: number; hits: number; time: number | null; place: number | null; prog: number; lift: number;
+  /** The move she's on, to draw her by (none: drawn between her poses). */
+  mv?: Mv;
+}
+/** A move as said between a browser and its room: from square and facing, to square and facing, the move
+    (0 forward, 1 left, 2 right, 3 a square of wind: a trade wind, a gust, a sweep), and how far along (0 to 1).
+    From and to the same, at 0: at rest. And the seconds the whole move takes. Only for drawing: nothing the
+    race's rules go by. */
+export type Mv = [fc: number, fr: number, fd: number, tc: number, tr: number, td: number, m: number, u: number, secs: number];
+const MOVE_OF = ['F', 'L', 'R', 'W'] as const;
+const q2 = (x: number) => Math.round(x * 100) / 100;
+export const mvOf = (x: Motion): Mv => [x.from.c, x.from.r, Math.round(x.from.d), x.to.c, x.to.r, Math.round(x.to.d), MOVE_OF.indexOf(x.m), q2(x.u), q2(Math.max(0.05, x.secs ?? SAIL.MOVE))];
+export const motionOfMv = (v: Mv): Motion => ({ from: { c: v[0], r: v[1], d: v[2] }, to: { c: v[3], r: v[4], d: v[5] }, m: MOVE_OF[v[6]] ?? 'W', u: v[7], secs: v[8] });
+const withU = (v: Mv, u: number): Mv => [v[0], v[1], v[2], v[3], v[4], v[5], v[6], Math.max(0, Math.min(1, u)), v[8]];
+const atRest = (v: Mv) => v[0] === v[3] && v[1] === v[4] && v[2] === v[5] && v[7] === 0;
+const sameMove = (a: Mv, b: Mv) => a.slice(0, 7).every((x, k) => x === b[k]);
+/** A move `secs` seconds on from when it was said (at its own pace, to its end at most): a player's, as the
+    room passes it on in a snapshot some moments after her browser said it. */
+export const mvLater = (v: Mv, secs: number): Mv => (atRest(v) ? v : withU(v, v[7] + Math.max(0, secs) / v[8]));
+/** Her move `w` of the way between two snapshots' moves (0 to 1): along the same move, or on from one move into
+    the next where it began; null if they're further apart than that (a jump, or a snapshot or two missed). */
+export function mvBetween(a: Mv, b: Mv, w: number): Motion | null {
+  const x = Math.max(0, Math.min(1, w));
+  if (sameMove(a, b)) return motionOfMv(withU(a, a[7] + (b[7] - a[7]) * x));
+  if (a[3] !== b[0] || a[4] !== b[1]) return null;
+  // (the rest of the first, then the next as far as it got: each at its own pace)
+  const left = atRest(a) ? 0 : (1 - a[7]) * a[8], on = atRest(b) ? 0 : b[7] * b[8], p = (left + on) * x;
+  if (p <= left && left > 0) return motionOfMv(withU(a, a[7] + p / a[8]));
+  return motionOfMv(atRest(b) ? b : withU(b, (p - left) / b[8]));
 }
 /** A broadside, numbered in the race: who fired (-1 a gun of the gap's), who it holed (-1 nobody), its squares. */
 export interface Shot { n: number; by: number; on: number; cells: [number, number][] }
@@ -146,7 +177,7 @@ export type Up =
       and her time once she's home (sent every time after: nothing that must arrive once); and what she's
       done at the helm since the last (`acts`, for the race's record: Act), and the race's steps she's sailed
       from the gun (`n`: src/race-replay.ts, STEP). */
-  | { t: 'pose'; c: number; r: number; d: number; st: RacerState; took: number; leg: number; sh: number; home: number | null; n: number; acts?: Act[] }
+  | { t: 'pose'; c: number; r: number; d: number; st: RacerState; took: number; leg: number; sh: number; home: number | null; n: number; acts?: Act[]; mv?: Mv }
   /** A claim: her broadside's come down on racer `on` (the room's number). */
   | { t: 'hit'; on: number }
   /** Her broadside's come down on the rocks across spit 3's gap: a hit on them, everyone's. */
@@ -206,9 +237,18 @@ export function parseUp(data: unknown): Up | null {
       home: typeof m.home === 'number' && Number.isFinite(m.home) && m.home > 0 ? m.home : null,
       n: Math.round(num(m.n, 0, 1e7)),
       acts: cleanActs(m.acts),
+      ...(cleanMv(m.mv) ? { mv: cleanMv(m.mv)! } : {}),
     };
     default: return null;
   }
+}
+/** A move as a browser said it (Mv), checked for shape; null if it isn't one. */
+function cleanMv(x: unknown): Mv | null {
+  if (!Array.isArray(x) || x.length !== 9 || !x.every((v) => typeof v === 'number' && Number.isFinite(v))) return null;
+  const [fc, fr, fd, tc, tr, td, m, u, secs] = x as number[];
+  if (Math.max(Math.abs(fc - tc), Math.abs(fr - tr)) > 1) return null;
+  const i = (v: number, hi: number) => Math.round(Math.max(0, Math.min(hi, v)));
+  return [i(fc, SAIL.COLS), i(fr, 200), i(fd, 3), i(tc, SAIL.COLS), i(tr, 200), i(td, 3), i(m, 3), Math.max(0, Math.min(1, u)), Math.max(0.05, Math.min(10, secs))];
 }
 
 /* ---- The spots, one racer's at a time (the locks, the crane, the barrier's notch, the wreck's) ---- */
@@ -271,19 +311,22 @@ export class Mirror {
     return n.s.phase === 'count' ? Math.max(0, n.s.clock - gone) : n.s.phase === 'on' ? n.s.clock + gone : n.s.clock;
   }
   /** Where racer `i` (the room's number) is drawn now: a moment behind the newest snapshot, between the two
-      either side of then; past the newest, where it has her. */
+      either side of then, on her move (mvBetween: square to square, as she's sailed); past the newest, where
+      it has her. */
   poseAt(i: number, now: number): Pose | null {
     const S = this.snaps;
     if (!S.length) return null;
     const t = this.roomAt(now) - NET.BEHIND;
     const at = (k: number) => S[k].s.racers[i];
     for (let k = S.length - 1; k > 0; k--) {
-      const a = S[k - 1].s, b = S[k].s;
-      if (a.at <= t && t <= b.at && at(k - 1) && at(k)) return lerpPose(at(k - 1), at(k), (t - a.at) / Math.max(1e-6, b.at - a.at));
+      const a = S[k - 1].s, b = S[k].s, A = at(k - 1), B = at(k);
+      if (!(a.at <= t && t <= b.at && A && B)) continue;
+      const w = (t - a.at) / Math.max(1e-6, b.at - a.at), m = A.mv && B.mv ? mvBetween(A.mv, B.mv, w) : null;
+      return m ? motionPose(m) : lerpPose(A, B, w);
     }
     const k = t >= S[S.length - 1].s.at ? S.length - 1 : S.findIndex((x) => x.s.racers[i]);
     const r = S[Math.max(0, k)].s.racers[i] ?? at(S.length - 1);
-    return r ? { c: r.c, r: r.r, d: r.d } : null;
+    return r ? (r.mv ? motionPose(motionOfMv(r.mv)) : { c: r.c, r: r.r, d: r.d }) : null;
   }
 }
 
@@ -291,12 +334,13 @@ export class Mirror {
 export const meIn = (s: Snapshot | null, id: string | null): number => (s && id ? s.racers.findIndex((r) => r.id === id && !r.bot) : -1);
 
 /** What your browser tells the room of your own sloop, from the race you're sailing (racer 0 of its
-    field): where, what she's doing, the hits taken, shots loaded, home and when. */
-export function poseUp(field: Field, took: number, shots: number, n: number, acts: Act[] = []): Extract<Up, { t: 'pose' }> {
+    field): where, what she's doing, the hits taken, shots loaded, home and when; and the move she's on (`mv`:
+    her helm's, helmMotion), for everyone else to draw her by. */
+export function poseUp(field: Field, took: number, shots: number, n: number, acts: Act[] = [], mv: Motion | null = null): Extract<Up, { t: 'pose' }> {
   const r = field.racers[0], fin = r.state === 'finished';
   const st: RacerState = fin || r.state === 'waiting' ? 'sailing' : r.state;
   const q = (x: number) => Math.round(x * 100) / 100;
-  return { t: 'pose', c: q(r.pose.c), r: q(r.pose.r), d: r.pose.d, st, took, leg: r.leg, sh: shots, home: fin && r.time !== null ? r.time : null, n, ...(acts.length ? { acts } : {}) };
+  return { t: 'pose', c: q(r.pose.c), r: q(r.pose.r), d: r.pose.d, st, took, leg: r.leg, sh: shots, home: fin && r.time !== null ? r.time : null, n, ...(acts.length ? { acts } : {}), ...(mv ? { mv: mvOf(mv) } : {}) };
 }
 
 /** What the race you sail is fed from its room: the snapshots (`mirror`), who you are in them (`me`, the

@@ -16,18 +16,18 @@ import { seeded } from '../src/mirror-row';
 
 const RC = LAY.RACE;
 /** A watched race from `seed`, ticked till everyone's home (or `secs`): what each racer's board was, in order. */
-function watched(seed: number, secs = 900) {
-  const W = new Watch(seed), boards = W.racers.map(() => [] as string[]), said = W.racers.map(() => new Set<string>());
+function watched(seed: number, secs = 900, boards = false) {
+  const W = new Watch(seed, undefined, boards), seen = W.racers.map(() => [] as string[]), said = W.racers.map(() => new Set<string>());
   for (let t = 0; t < secs && W.state !== 'done'; t += 0.1) {
     W.tick(0.1);
     W.racers.forEach((_, i) => {
       const b = W.board(i), k = b ? `${b.puzzle}/${b.why}` : '';
-      if (k && boards[i][boards[i].length - 1] !== k) boards[i].push(k);
+      if (k && seen[i][seen[i].length - 1] !== k) seen[i].push(k);
       W.pick(i);
       said[i].add(W.bar().doing);
     });
   }
-  return { W, boards, said };
+  return { W, boards: seen, said };
 }
 
 describe('a link to watch four bots race (12 Nov)', () => {
@@ -48,7 +48,7 @@ describe('a link to watch four bots race (12 Nov)', () => {
   });
 
   it('they wait for the starter\'s count, then race to the finish, all four home in a sensible time', () => {
-    const W = new Watch(3);
+    const W = new Watch(3, undefined, false);
     expect(W.state).toBe('count');
     W.tick(RACE.COUNT - 0.5);
     expect(W.run).toBeNull();
@@ -102,7 +102,7 @@ describe('jumping between racers, and a bar saying what each is doing (12 Nov)',
   });
 
   it('what she\'s doing, for each thing the simulation has her do', () => {
-    const x = (o: Partial<BotInfo>): BotInfo => ({ mode: 'sail', was: 'sail', cut: null, stage: 0, work: 0, full: 0, tries: 0, daze: 0, move: null, hop: 0, route: 'long', style: 'peaceful', best: 'good', skill: 'decent', done: [], ...o });
+    const x = (o: Partial<BotInfo>): BotInfo => ({ mode: 'sail', was: 'sail', cut: null, stage: 0, work: 0, full: 0, tries: 0, daze: 0, move: null, hop: 0, coming: false, route: 'long', style: 'peaceful', best: 'good', skill: 'decent', done: [], ...o });
     expect(doing(x({ mode: 'stop', cut: 'crane', route: 'crane' }), null, null)).toBe('building the crane (Carpentry)');
     expect(doing(x({ mode: 'wait', cut: 'locks' }), 'locks', null)).toBe('waiting her turn at the locks');
     expect(doing(x({ mode: 'daze' }), null, null)).toMatch(/Patching her deck/);
@@ -127,7 +127,7 @@ describe('seeing the puzzling: each racer\'s board, with real moves paced to the
   });
 
   it('a board\'s seconds are the simulation\'s, so the race\'s balance holds', () => {
-    const x = { mode: 'stop', was: 'stop', cut: 'locks', stage: 0, work: 12, full: 28, tries: 0, daze: 0, move: null, hop: 0, route: 'locks', style: 'cautious', best: 'great', skill: 'good', done: [] } as BotInfo;
+    const x = { mode: 'stop', was: 'stop', cut: 'locks', stage: 0, work: 12, full: 28, tries: 0, daze: 0, move: null, hop: 0, coming: false, route: 'locks', style: 'cautious', best: 'great', skill: 'good', done: [] } as BotInfo;
     expect(boardOf(x)).toEqual({ puzzle: 'bilge', why: 'lock', left: 12, full: 28, tries: 0 });
     expect(boardOf({ ...x, mode: 'sail', cut: null })?.left).toBe(Infinity);
     expect(boardOf({ ...x, mode: 'wait' })).toBeNull();

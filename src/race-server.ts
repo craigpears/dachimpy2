@@ -40,7 +40,7 @@ import { Field, FIELD, courseSea, hittable, type RacerState, type Spot, type Fie
 import { RACE, FIRST_SPOT, spotPose, rocksDown } from './den-race.js';
 import { sail as sailBots, route, style, progressAt, type SimRun } from './race-sim.js';
 import { WATCHED } from './den-rivals.js';
-import { NET, apart, spotOn, spotSquare, waitAt, parseUp, type Phase, type Shot, type Snapshot, type SnapRacer, type Up, type Down, type Act, type Peek } from './race-net.js';
+import { NET, apart, spotOn, spotSquare, waitAt, parseUp, mvOf, mvLater, type Mv, type Phase, type Shot, type Snapshot, type SnapRacer, type Up, type Down, type Act, type Peek } from './race-net.js';
 import { LAY } from './den-sail.js';
 import { PlayerSea } from './race-replay.js';
 
@@ -56,6 +56,9 @@ export interface Player {
   hits: number; holed: number;
   /** Her last pose heard, as it bears on the race (one the same again changes nothing, and isn't heard). */
   said?: string;
+  /** The move she said she's on, and when the room heard it (its seconds), to draw her by (nothing the race
+      goes by). */
+  mv?: Mv; mvAt?: number;
 }
 /** What the room keeps of a player on her socket, to wake up with (a Durable Object sleeps between races). */
 export interface Kept { id: string; name: string; look: unknown; ready: boolean; spot: number; joined: number; fill: number }
@@ -195,6 +198,8 @@ export class Referee {
       case 'pose': {
         if (!this.field || p.i < 0 || p.out) break;
         if (m.acts?.length) this.rec?.acted(p.i, m.acts);
+        // (the move she's on: only to draw her by, passed on to everyone in the snapshots)
+        if (m.mv) { p.mv = m.mv; p.mvAt = this.at; }
         // (the same pose again changes nothing: not heard, so not written down either)
         const said = JSON.stringify([m.c, m.r, m.d, m.st, m.took, m.sh, m.leg, m.home]);
         if (said === p.said) break;
@@ -421,7 +426,11 @@ export class Referee {
     const cast = F ? this.cast : this.lineUp();
     const racers: SnapRacer[] = cast.map((e, i) => {
       const r = F?.racers[i], pose = r?.pose ?? spotPose(e.spot), p = e.id ? this.player(e.id) : null;
+      // (the move she's on: a bot's, as the room sails her; a player's, as her browser said)
+      const bm = this.phase === 'on' ? this.run?.motion(i) : null;
+      const mv = bm ? mvOf(bm) : p?.mv && !p.out && this.phase === 'on' ? mvLater(p.mv, this.at - (p.mvAt ?? this.at)) : undefined;
       return {
+        ...(mv ? { mv } : {}),
         name: e.name, id: e.id, rv: e.rv, bot: !!p?.out, spot: e.spot,
         c: q(pose.c), r: q(pose.r), d: pose.d, leg: r?.leg ?? 0, st: r?.state ?? 'sailing',
         shots: r?.shots ?? FIELD.SHOTS, hits: r?.hits ?? 0, time: r?.time ?? null, place: r?.place ?? null,

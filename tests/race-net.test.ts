@@ -10,9 +10,9 @@ import { LAY } from '../src/den-sail';
 import { FIELD } from '../src/den-racers';
 import { Race, RACE } from '../src/den-race';
 import { WATCHED, type Rival } from '../src/den-rivals';
-import { routePose, startTau, SIM } from '../src/race-sim';
+import { routePose, startTau, SIM, motionPose } from '../src/race-sim';
 import { seeded } from '../src/mirror-row';
-import { NET, Mirror, mirrorDrive, meIn, poseUp, parseUp, localOf, roomOf, lerpPose, spotOn, waitAt, type Snapshot, type NetDriver, type Up, type Link, type Down } from '../src/race-net';
+import { NET, Mirror, mirrorDrive, meIn, poseUp, parseUp, localOf, roomOf, lerpPose, spotOn, waitAt, mvOf, mvBetween, mvLater, type Snapshot, type NetDriver, type Up, type Link, type Down } from '../src/race-net';
 import { Referee, RaceServer, type RaceRecord } from '../src/race-server';
 import { PlayerSea } from '../src/race-replay';
 import { LONG_ROUTE } from '../src/den-race';
@@ -293,6 +293,42 @@ describe('everyone else\'s sloop, drawn from snapshots (12 Nov)', () => {
 
   it('a gust or a sweep puts her straight there, never sliding across the land', () => {
     expect(lerpPose({ c: 2, r: 50, d: 1 }, { c: 2, r: 40, d: 2 }, 0.3)).toEqual({ c: 2, r: 40, d: 2 });
+  });
+
+  it('online too, racers sail square to square, never gliding (12 Nov: "it wasn\'t just in the watching"): drawn on the move each snapshot says she\'s on, a turn on its quarter circle, not slid across between', () => {
+    // (a turn to her right, from (5, 50) facing across the course to (6, 51) facing down, said a quarter, then
+    // three quarters of the way through: halfway between, she's on the turn's arc, not its chord)
+    const withMv = (seq: number, at: number, u: number): Snapshot => { const s = snap(seq, at, 5); s.racers[0].mv = mvOf({ from: { c: 5, r: 50, d: 0 }, to: { c: 6, r: 51, d: 1 }, m: 'R', u, secs: 1 }); return s; };
+    const M = new Mirror();
+    M.take(withMv(1, 10, 0.25), 100);
+    M.take(withMv(2, 10.5, 0.75), 100.5);
+    const p = M.poseAt(0, 100.5)!;   // (a moment behind the newest: halfway between the two)
+    expect(p).toEqual(motionPose({ from: { c: 5, r: 50, d: 0 }, to: { c: 6, r: 51, d: 1 }, m: 'R', u: 0.5 }));
+    expect(Math.hypot(p.c - 5.5, p.r - 50.5)).toBeGreaterThan(0.1);
+    // (from one move on into the next, where it began: the rest of the first, then the next, at their pace)
+    const a = mvOf({ from: { c: 5, r: 50, d: 1 }, to: { c: 6, r: 50, d: 1 }, m: 'F', u: 0.5, secs: 1 });
+    const b = mvOf({ from: { c: 6, r: 50, d: 1 }, to: { c: 7, r: 50, d: 1 }, m: 'F', u: 0.5, secs: 1 });
+    expect(mvBetween(a, b, 0.6)!.from.c).toBe(6);
+    expect(mvBetween(a, b, 0.6)!.u).toBeCloseTo(0.1);
+    expect(mvBetween(a, b, 0.25)).toMatchObject({ from: { c: 5 }, u: 0.75 });
+    // (further apart than a move: not drawn between by moves, put straight there as ever)
+    expect(mvBetween(a, mvOf({ from: { c: 9, r: 50, d: 1 }, to: { c: 10, r: 50, d: 1 }, m: 'F', u: 0.5 }), 0.5)).toBeNull();
+    // (a player's move, heard a moment before the snapshot, is brought on at its own pace)
+    expect(mvLater(a, 0.25)[7]).toBeCloseTo(0.75);
+  });
+
+  it('the room\'s bots are sent with the move each is on, square to square, and a player\'s as her browser said it', () => {
+    const R = room(['anne'], 3);
+    off(R);
+    for (let k = 0; k < (RACE.COUNT + 12) * NET.HZ; k++) R.tick(DT);
+    R.handle('anne', { t: 'pose', c: 13, r: 39, d: 0, st: 'sailing', took: 0, leg: 0, sh: 2, home: null, n: 1, mv: [13, 38, 0, 13, 39, 0, 0, 0.5, 1] });
+    const s = R.snapshot();
+    for (const x of s.racers) {
+      expect(x.mv).toBeDefined();
+      const [fc, fr, , tc, tr] = x.mv!;
+      expect(Math.max(Math.abs(fc - tc), Math.abs(fr - tr))).toBeLessThanOrEqual(1);
+    }
+    expect(s.racers.find((x) => x.id === 'anne')!.mv!.slice(0, 7)).toEqual([13, 38, 0, 13, 39, 0, 0]);
   });
 
   it('your number and the room\'s go back and forth (you\'re always first in your own race)', () => {

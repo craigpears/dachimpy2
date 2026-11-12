@@ -4,9 +4,11 @@
 // look, the same as wherever it's played:
 // - Sailing (src/sailing.ts; the bots src/sail-bots.ts) on the den's own Sailing board (sail-board.js), down
 //   the left of the screen as at sea, each pair steered down by the moves a player makes (src/balloons.ts,
-//   route; src/sail-pair.ts), on the pilot, for a Double or a Triple, a big combo for the gun gap; a Vegas
-//   at the whirlpools' mouth is one the staircase made (VEGAS_GAMES), its last drops played in her time,
-//   the last as it comes off.
+//   route; src/sail-pair.ts). Under way (on the pilot, building a combo for a gap) it's her very board, the
+//   race's own (W.sailor, src/race-sailor.ts), mirrored drop for drop: every clear on it is the gust that
+//   carries her sloop on, as it pops (12 Nov). Stopped to finish a Double or a combo, a board of its own; a
+//   Vegas at the whirlpools' mouth is one the staircase made (VEGAS_GAMES), its last drops played in her
+//   time, the last as it comes off.
 // - Bilge (src/bilge.ts; src/bilge-bot.ts) on the up lock's quay, the quay's own board (lock.js, quayBoard).
 // - Foraging (src/foraging.ts; src/foraging-bot.ts) stood on the barrier's jam, as yours is (race-forage.js).
 // - Gunnery (src/gunnery.ts; src/gunnery-bot.ts) on her deck, as yours is at sea (gundeck.js's look).
@@ -61,9 +63,51 @@ function sailDesk(D) {
   if (!D.sail) { const game = new Sailing(seeded(D.seed)); D.sail = { game, pair: new SailPair(game), route: null, done: 0, stepT: 0 }; }
   return D.sail;
 }
-function sailShow(D) {
+function sailShow(D, game = D.sail.game) {
   panel.B ||= sailBoardMake(null);
-  if (panel.of !== D.i || panel.game !== D.sail.game) { sailBoardLay(panel.B, D.sail.game); sailBoardSnap(panel.B); panel.of = D.i; panel.game = D.sail.game; }
+  if (panel.of !== D.i || panel.game !== game) { sailBoardLay(panel.B, game); sailBoardSnap(panel.B); panel.of = D.i; panel.game = game; }
+}
+/* Her very board, under way (W.sailor: src/race-sailor.ts): the race's own, laid here from the same deal and
+   played the same drops, so it's the same board; each pair steered down as the race chose it and landed as it
+   lands there, so the clear you see is the gust that carries her sloop on, at that moment. */
+function liveDesk(D, S) {
+  if (D.live?.seed !== S.seed) {
+    const game = new Sailing(seeded(S.seed));
+    D.live = { seed: S.seed, game, pair: new SailPair(game), n: 0, route: null, done: 0, stepT: 0, every: 0.08, aim: null };
+  }
+  const L = D.live;
+  // (behind, not followed meanwhile: the drops she's made laid at once, all but the newest)
+  if (S.drops.length - L.n > 1) {
+    while (L.n < S.drops.length - 1) { const d = S.drops[L.n++]; L.game.drop(d.col, d.turn, d.row); }
+    L.route = null; L.aim = null;
+    if (panel.game === L.game) { sailBoardLay(panel.B, L.game); sailBoardSnap(panel.B); }
+  }
+  return L;
+}
+/** Each tick under way: a drop the race has landed lands here (its chain pops); the next it's chosen, steered
+    down a move at a time, in the time it has before it lands. */
+function liveTick(L, S, dt) {
+  if (L.n < S.drops.length) {
+    const d = S.drops[L.n++], res = L.game.drop(d.col, d.turn, d.row);
+    L.route = null; L.aim = null; L.pair.reset();
+    if (panel.game === L.game) { sailBoardDrop(panel.B, res, L.game); sailBoardSnap(panel.B); }
+  }
+  if (S.aim && L.aim !== S.aim && L.n === S.drops.length) {
+    L.aim = S.aim;
+    L.pair.reset();
+    L.route = route(L.game, { pair: L.game.pair, col: S.aim.col, turn: S.aim.turn, row: S.aim.row }) ?? [];
+    L.done = 0; L.stepT = 0;
+    L.every = Math.max(0.03, Math.min(0.08, ((S.every - S.t) * 0.8) / Math.max(1, L.route.length)));
+  }
+  if (!L.route) return;
+  L.stepT += dt;
+  while (L.stepT > L.every && L.done < L.route.length) {
+    const st = L.route[L.done++], P = L.pair;
+    L.stepT -= L.every;
+    if (st === 'left') P.slide(-1); else if (st === 'right') P.slide(1);
+    else if (st === 'turnR') P.turnBy(1); else if (st === 'turnL') P.turnBy(-1);
+    else P.row++;
+  }
 }
 /** A drop to make: steered down its route a move at a time (sailStep), then landed. */
 function sailAim(Sd, drop) {
@@ -208,6 +252,9 @@ export function watchBoardsTick(dt, W, follow, boats) {
   panel.linger -= dt;
   const D = follow >= 0 ? deskOf(follow, W.seed) : null;
   const now = D ? W.board(follow) : null, info = D ? W.info(follow) : null, B = D ? boats[follow] : null;
+  // (under way, her very board: the race's own)
+  const S = D ? W.sailor(follow) : null;
+  if (D) D.liveNow = S ? liveDesk(D, S) : null;
   if (D) {
     const key = now ? `${now.puzzle}/${now.why}` : '';
     if (key !== D.key) {
@@ -224,17 +271,20 @@ export function watchBoardsTick(dt, W, follow, boats) {
     if (now) play(D, now, B, dt);
   }
   // The Sailing panel: the followed racer's, while she Sails (or her last drop's still popping).
-  const steering = !!(D?.sail?.route && panel.of === D.i);
+  const L = D?.liveNow ?? null, Sd = L ?? D?.sail;
+  const steering = !!(Sd?.route && panel.of === D.i);
   if (steering || now?.puzzle === 'sailing') panel.linger = 1.8;
-  const showPanel = !!(D && panel.B && panel.of === D.i && (now?.puzzle === 'sailing' || steering || (panel.linger > 0 && sailBoardBusy(panel.B))));
+  const showPanel = !!(D && Sd && panel.B && panel.of === D.i && (now?.puzzle === 'sailing' || steering || (panel.linger > 0 && sailBoardBusy(panel.B))));
   if (panel.B) panel.B.el.style.display = showPanel ? '' : 'none';
   if (showPanel) {
     if ((panel.lowT -= dt) <= 0) { panel.lowT = 0.5; panel.low = $('dock')?.getBoundingClientRect().top || innerHeight; panel.top = document.getElementById('watchbar')?.getBoundingClientRect().bottom ?? 0; }
     panel.layout = sailBoardLayout(panel.B, panel.low, panel.top, false);
-    const Sd = D.sail;
-    sailStep(Sd, dt);
+    if (L) liveTick(L, S, dt); else sailStep(Sd, dt);
     sailBoardTick(panel.B, dt, Sd.route ? Sd.pair : null);
-  } else panel.layout = null;
+  } else {
+    panel.layout = null;
+    if (L) liveTick(L, S, dt);
+  }
 }
 /** Her board's puzzle or reason changed: what was on show is finished with (a Vegas's last drop played
     as it comes off), and the new one set up. */
@@ -264,6 +314,8 @@ function play(D, now, B, dt) {
   const due = D.pacer.tick(dt);
   switch (now.puzzle) {
     case 'sailing': {
+      // (under way: her very board, the race's own, played as the race plays it: liveTick)
+      if (D.liveNow) { sailShow(D, D.liveNow.game); break; }
       if (now.why === 'vegas' && (!D.vegas || D.vegas.tries !== now.tries)) {
         // (each go, a board of its own: a go that didn't come off, and she's at it again)
         vegasLay(D, now);

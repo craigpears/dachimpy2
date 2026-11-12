@@ -39,7 +39,7 @@ import { Field, FIELD, courseSea, hittable } from './den-racers.js';
 import { RACE, FIRST_SPOT, spotPose, rocksDown } from './den-race.js';
 import { sail as sailBots, route, style, progressAt } from './race-sim.js';
 import { WATCHED } from './den-rivals.js';
-import { NET, apart, spotOn, spotSquare, waitAt, parseUp } from './race-net.js';
+import { NET, apart, spotOn, spotSquare, waitAt, parseUp, mvOf, mvLater } from './race-net.js';
 import { LAY } from './den-sail.js';
 import { PlayerSea } from './race-replay.js';
 const RC = LAY.RACE;
@@ -203,6 +203,11 @@ export class Referee {
                     break;
                 if (m.acts?.length)
                     this.rec?.acted(p.i, m.acts);
+                // (the move she's on: only to draw her by, passed on to everyone in the snapshots)
+                if (m.mv) {
+                    p.mv = m.mv;
+                    p.mvAt = this.at;
+                }
                 // (the same pose again changes nothing: not heard, so not written down either)
                 const said = JSON.stringify([m.c, m.r, m.d, m.st, m.took, m.sh, m.leg, m.home]);
                 if (said === p.said)
@@ -501,7 +506,11 @@ export class Referee {
         const cast = F ? this.cast : this.lineUp();
         const racers = cast.map((e, i) => {
             const r = F?.racers[i], pose = r?.pose ?? spotPose(e.spot), p = e.id ? this.player(e.id) : null;
+            // (the move she's on: a bot's, as the room sails her; a player's, as her browser said)
+            const bm = this.phase === 'on' ? this.run?.motion(i) : null;
+            const mv = bm ? mvOf(bm) : p?.mv && !p.out && this.phase === 'on' ? mvLater(p.mv, this.at - (p.mvAt ?? this.at)) : undefined;
             return {
+                ...(mv ? { mv } : {}),
                 name: e.name, id: e.id, rv: e.rv, bot: !!p?.out, spot: e.spot,
                 c: q(pose.c), r: q(pose.r), d: pose.d, leg: r?.leg ?? 0, st: r?.state ?? 'sailing',
                 shots: r?.shots ?? FIELD.SHOTS, hits: r?.hits ?? 0, time: r?.time ?? null, place: r?.place ?? null,
