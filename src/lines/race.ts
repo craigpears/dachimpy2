@@ -23,7 +23,7 @@ export const STARTER = {
     'Or cut through the spits, if ye dare. Every shortcut costs ye a puzzle: bilge up through a lock, build a crane, row the headwind gap',
     'Zoom over the whirlpools on a Vegas, hop a headwind with a Double, or haul up some treasure and pay off the guard at the gate',
     'Or blast the rocks off leg three with yer guns: three hits, anyone\'s, and they\'re open for everyone',
-    'Or, for a navigator, a starry door in the cliff off leg two, opened by Navigation, and a tunnel under the course. A Vegas carries ye on through the dark',
+    'Or, for a navigator, a starry door in the cliff off leg two, opened by Navigation, and a tunnel under the course up onto leg three',
     'Mind the winds that sweep ye back a few squares, the trade wind up the left most of all, and the run home runs right beside it',
     'And the others\'ll shoot ye if ye sit still in the open. Pick yer spot on the line, and Space for the count',
   ],
