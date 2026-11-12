@@ -2,7 +2,7 @@
 // the course in this worker's own link (?course=, read as the race's modules load: src/race-course.ts) raced
 // by the simulation's bots (src/race-sim.ts), a batch of races at a time, and summed up as the chart does
 // (src/race-editor.ts, balanceOf): each way round's wins, and what each shortcut saves.
-import { run, CUTS, BET_SAVES, SIM } from './race-sim.js';
+import { run, CUTS, SIM } from './race-sim.js';
 import { balanceOf, mergeReports } from './race-editor.js';
 
 const saves = Object.fromEntries(Object.entries(CUTS).map(([id, c]) => [id, c.saves]));
@@ -15,5 +15,5 @@ onmessage = (e) => {
     rep = rep ? mergeReports(rep, part) : part;
     postMessage({ done: k + n, races });
   }
-  postMessage({ done: races, races, balance: balanceOf(rep, SIM.LONG, saves, BET_SAVES) });
+  postMessage({ done: races, races, balance: balanceOf(rep, SIM.LONG, saves) });
 };

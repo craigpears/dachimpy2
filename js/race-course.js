@@ -11,22 +11,26 @@
 
    What's editable, as built:
    - the buoys: where each spit ends (its buoy, the long way round it), so a leg's long or short;
-   - where each shortcut, snake and gamble cuts through its spit (a column), and the finish line;
+   - where each shortcut and snake cuts through its spit (a column), and the finish line;
    - each shortcut's size: the Bilge clears to raise her in the up lock, the crane's frames (small, as
-     now, large), the driftwood barrier's bundles, the guard's price in coins; the veiled wind's odds and
-     the turning pool's beat.
-   Fixed for now: the starlit door (DOOR_COLS: on every course, where it is on the den's own), the rows (each leg two deep, each spit as deep as it is: the whirlpool channel's depth is
-   what makes it a Vegas), the start's field, the left-hand trade wind, the gun gap's Quad. */
+     now, large), the driftwood barrier's bundles, the guard's price in coins.
+   Fixed for now: the starlit door (DOOR_COLS: on every course, where it is on the den's own), the rows (each
+   leg two deep, each spit as deep as it is: the whirlpool channel's depth is what makes it a Vegas), the
+   start's field (laid fresh from each race's seed: src/start-field.ts) and its hop, the left-hand trade
+   wind's gentle loops, the gun gap's Quad, the rocks' three hits (ROCKS in src/den-race.ts).
+   No gambles since 12 Nov (RACE.md §4, "No gambles"): the veiled wind and the turning pool are gone, and so
+   are their numbers here (a share link made before then opens the den's own course). */
 export const CRANE_SIZES = ['small', 'standard', 'large'];
-/** The course as the den lays it (12 Nov): every square of it, as it was before it was data (tested). */
+/** The course as the den lays it: its third pass (12 Nov, "the race's next pass": no gambles, gentle snakes,
+    the rocks, each puzzle's shortcut cutting about the same stretch: RACE.md §8, "Shortcuts in proportion"). */
 export const DEFAULT_COURSE = {
     buoys: [25, 2, 25, 2, 25],
-    gun: 21, wreck: 16, turn: 8,
-    head: 12, double: 6, mid: 19,
-    whirl: 12, forage: 21,
+    gun: 19, wreck: 14,
+    head: 12, double: 6, mid: 23,
+    whirl: 12, rocks: 17, forage: 19,
     lock: 11,
-    crane: 12, triple: 22, veil: 18, veilBack: 6, finish: 4,
-    clears: 7, frames: 'standard', bundles: 2, coins: 40, veilOn: 50, beat: 4,
+    crane: 16, triple: 21, finish: 4,
+    clears: 6, frames: 'small', bundles: 2, coins: 40,
 };
 /** The starlit door's two columns (12 Nov, public: fixed in place, not edited): its face on spit 2 off leg 2, its
     tunnel straight on under the course, up onto leg 3 and leg 5 (LAY.RACE.DOOR). Nothing else may cut through
@@ -42,24 +46,24 @@ export const SIZES = {
     clears: { lo: 3, hi: 20, step: 1 },
     bundles: { lo: 1, hi: 4, step: 1 },
     coins: { lo: 10, hi: 100, step: 10 },
-    veilOn: { lo: 10, hi: 90, step: 10 },
-    beat: { lo: 2, hi: 8, step: 1 },
 };
 /** Where a buoy may go: a right-hand end from column 16 to 25 (spit 1's from 20, to leave room for its gate and
     wreck past the starting line's middle), a left-hand one from 2 to 10. */
 export const BUOY_RANGE = (spit) => (RIGHT(spit) ? [spit ? 16 : 20, W - 2] : [2, 10]);
-/** A spit's land: its first and last columns. */
-export const landOf = (k, spit) => (RIGHT(spit) ? [1, k.buoys[spit] - 1] : [k.buoys[spit] + 2, W - 1]);
-export const COL_KEYS = ['gun', 'wreck', 'turn', 'head', 'double', 'mid', 'whirl', 'forage', 'lock', 'crane', 'triple', 'veil', 'finish'];
-/** Which spit each is in (5: the run home), and its columns there from its own: [from, to]. The turning
-    pool's whirlpool takes two on leg 2; the headwind gap two; the whirlpool channel its whirlpools and the
-    way home to its left; the locks their berth to the right; the gun gap its guns either side. */
+/** A spit's land: its first and last columns. A right-hand spit's runs right to the left-hand edge (12 Nov:
+    the left-hand trade wind's gone from beside it, so nobody slips down the edge past it). */
+export const landOf = (k, spit) => (RIGHT(spit) ? [0, k.buoys[spit] - 1] : [k.buoys[spit] + 2, W - 1]);
+export const COL_KEYS = ['gun', 'wreck', 'head', 'double', 'mid', 'whirl', 'rocks', 'forage', 'lock', 'crane', 'triple', 'finish'];
+/** Which spit each is in (5: the run home), and its columns there from its own: [from, to]. The headwind gap
+    two; the trade wind back its loop up into spit 2, three columns back; the whirlpool channel its
+    whirlpools and the way home to its left; the locks their berth to the right; the gun gap its guns either
+    side. */
 export const PLACE = {
-    gun: { spit: 0, span: [-1, 1] }, wreck: { spit: 0, span: [0, 0] }, turn: { spit: 0, span: [0, 1] },
-    head: { spit: 1, span: [0, 1] }, double: { spit: 1, span: [0, 0] }, mid: { spit: 1, span: [0, 0] },
-    whirl: { spit: 2, span: [-3, 0] }, forage: { spit: 2, span: [0, 0] },
+    gun: { spit: 0, span: [-1, 1] }, wreck: { spit: 0, span: [0, 0] },
+    head: { spit: 1, span: [0, 1] }, double: { spit: 1, span: [0, 0] }, mid: { spit: 1, span: [-3, 0] },
+    whirl: { spit: 2, span: [-3, 0] }, rocks: { spit: 2, span: [0, 0] }, forage: { spit: 2, span: [0, 0] },
     lock: { spit: 3, span: [0, 2] },
-    crane: { spit: 4, span: [0, 0] }, triple: { spit: 4, span: [0, 0] }, veil: { spit: 4, span: [0, 0] },
+    crane: { spit: 4, span: [0, 0] }, triple: { spit: 4, span: [0, 0] },
     finish: { spit: 5, span: [0, 0] },
 };
 /** Its columns, from where it is. */
@@ -70,10 +74,10 @@ const cols = (k, id) => [k[id] + PLACE[id].span[0], k[id] + PLACE[id].span[1]];
 export function rangeOf(k, id) {
     const b = k.buoys, [s0, s1] = PLACE[id].span;
     if (id === 'finish')
-        return [2, Math.min(8, Math.min(k.crane, k.veil) - 2)];
+        return [2, Math.min(8, Math.min(k.crane, k.triple) - 2)];
     const [l0, l1] = landOf(k, PLACE[id].spit);
     // (inside its spit, a column of land either end)
-    let lo = l0 + 1 - s0, hi = l1 - 1 - s1;
+    let lo = Math.max(l0, 1) + 1 - s0, hi = l1 - 1 - s1;
     switch (id) {
         // (leg 1's long way starts at the starting line's column 13: the gate and the wreck past it)
         // (its tight water along leg 2 clear of the starlit door's water)
@@ -85,11 +89,6 @@ export function rangeOf(k, id) {
             lo = Math.max(lo, 13);
             hi = Math.min(hi, k.gun - 4);
             break;
-        // (its whirlpool on leg 2, before the gun gap's tight water; its cleft through spit 2)
-        case 'turn':
-            lo = Math.max(lo, b[1] + 3);
-            hi = Math.min(hi, k.gun - 3, b[2] - 2);
-            break;
         // (from leg 2, before the tight water past the gun gap, out onto leg 3 before buoy 3)
         case 'head':
             hi = Math.min(hi, k.gun - 3, b[2] - 3);
@@ -98,6 +97,7 @@ export function rangeOf(k, id) {
             hi = Math.min(hi, k.gun - 3, b[2] - 2);
             break;
         case 'mid':
+            lo = Math.max(lo, b[1] + 6);
             hi = Math.min(hi, b[2] - 2);
             break;
         // (from leg 3, onto leg 4 past its zigzag)
@@ -105,6 +105,7 @@ export function rangeOf(k, id) {
             lo = Math.max(lo, b[3] + 8, b[1] + 4);
             hi = Math.min(hi, b[2] - 2);
             break;
+        case 'rocks':
         case 'forage':
             lo = Math.max(lo, b[3] + 8, b[1] + 1);
             hi = Math.min(hi, b[2] - 2);
@@ -118,9 +119,6 @@ export function rangeOf(k, id) {
         case 'crane':
         case 'triple':
             lo = Math.max(lo, b[3] + 2, k.finish + 2);
-            break;
-        case 'veil':
-            lo = Math.max(lo, b[3] + 3, k.finish + 2, k.veilBack + 2);
             break;
         default: break;
     }
@@ -144,16 +142,11 @@ export function problems(k) {
         if (!Number.isInteger(c) || c < lo || c > hi)
             out.push(`${NAMES[id]} has to be between columns ${lo} and ${hi} where it is${lo > hi ? ' (there\'s no room: move what\'s round it)' : ''}.`);
     }
-    // (the veiled wind blows her back along leg 5, past buoy 4)
-    if (!(k.veilBack >= k.buoys[3] + 1 && k.veilBack <= k.veil - 2))
-        out.push(`The veiled wind has to blow her back to a column of leg 5 between ${k.buoys[3] + 1} and ${k.veil - 2}.`);
-    // Each spit's ways through, a column of land apart. The turning pool's cleft runs through spit 2.
+    // Each spit's ways through, a column of land apart.
     const bySpit = [[], [], [], [], []];
     for (const id of COL_KEYS)
         if (PLACE[id].spit < 5)
             bySpit[PLACE[id].spit].push([...cols(k, id), NAMES[id]]);
-    // (and its whirlpool on leg 2 above it, two columns: the Double's gap is lined up from beside it)
-    bySpit[1].push([k.turn, k.turn + 1, NAMES.turn]);
     // (the starlit door, fixed in place: its face in spit 2, and its far exit in spit 4)
     bySpit[1].push([DOOR_COLS[0], DOOR_COLS[1], DOOR_NAME]);
     bySpit[3].push([DOOR_COLS[0], DOOR_COLS[1], DOOR_NAME]);
@@ -162,21 +155,24 @@ export function problems(k) {
             for (let j = i + 1; j < spans.length; j++) {
                 const [a0, a1, an] = spans[i], [b0, b1, bn] = spans[j];
                 if (a0 <= b1 + 1 && b0 <= a1 + 1)
-                    out.push(`${an} and ${bn} run into each other ${s === 1 && (an === NAMES.turn || bn === NAMES.turn) ? 'by spit 2' : `on spit ${s + 1}`}: leave a column of land between.`);
+                    out.push(`${an} and ${bn} run into each other on spit ${s + 1}: leave a column of land between.`);
             }
     });
-    // Leg 3: the trade wind back up it crosses the whole leg, so nothing comes out onto the leg under it.
-    const leg3 = new Set([k.forage]);
-    for (let c = k.whirl - 3; c <= k.whirl; c++)
-        if (DOOR_COLS.includes(c))
-            out.push(`The whirlpool channel's way home crosses where ${DOOR_NAME.toLowerCase()}'s tunnel comes up onto leg 3.`);
-    if (DOOR_COLS.includes(k.forage))
-        out.push(`The barrier's notch is where ${DOOR_NAME.toLowerCase()}'s tunnel comes up onto leg 3.`);
-    for (let c = k.whirl - 3; c <= k.whirl; c++)
-        leg3.add(c);
-    for (const [c, n] of [[k.mid, NAMES.mid], [k.turn, 'The turning pool\'s cleft']])
-        if (leg3.has(c))
-            out.push(`${n} comes out onto leg 3 where the whirlpool channel or the barrier does.`);
+    // Leg 3: the trade wind back crosses the whole leg (its loop three columns back), so nothing goes into
+    // spit 3 under it; and the whirlpool channel's way home, the rocks' gap and the barrier's notch clear of
+    // where the starlit door's tunnel comes up onto leg 3.
+    const loop = new Set();
+    for (let c = k.mid - 3; c <= k.mid; c++)
+        loop.add(c);
+    for (const id of ['whirl', 'rocks', 'forage']) {
+        const [a, z] = cols(k, id);
+        for (let c = a; c <= z; c++) {
+            if (DOOR_COLS.includes(c))
+                out.push(`${NAMES[id]} is where ${DOOR_NAME.toLowerCase()}'s tunnel comes up onto leg 3.`);
+            if (loop.has(c))
+                out.push(`${NAMES[id]} is under the trade wind back's loop across leg 3.`);
+        }
+    }
     if (!CRANE_SIZES.includes(k.frames))
         out.push('The crane\'s frames are small, standard or large.');
     for (const key of Object.keys(SIZES)) {
@@ -188,40 +184,36 @@ export function problems(k) {
 }
 /** Each feature's name, as the editor shows it. */
 export const NAMES = {
-    gun: 'The imperial gate', wreck: 'The wreck', turn: 'The turning pool',
+    gun: 'The imperial gate', wreck: 'The wreck',
     head: 'The headwind gap', double: 'The Double\'s gap', mid: 'The trade wind back',
-    whirl: 'The whirlpool channel', forage: 'The barrier of driftwood',
+    whirl: 'The whirlpool channel', rocks: 'The rocks', forage: 'The barrier of driftwood',
     lock: 'The locks',
-    crane: 'The crane', triple: 'The Triple\'s gap', veil: 'The veiled wind', finish: 'The finish line',
+    crane: 'The crane', triple: 'The Triple\'s gap', finish: 'The finish line',
 };
 export const SIZE_NAMES = {
     clears: 'The locks\' Bilge clears', bundles: 'The barrier\'s bundles', coins: 'The guard\'s price',
-    veilOn: 'The veiled wind\'s odds', beat: 'The turning pool\'s beat',
 };
 /* ---- The share link ----
-   One character a number, base 36, in this order (new ones go on the end), after a version: about thirty
-   characters. Coins and odds in tens. */
-const ORDER = ['gun', 'wreck', 'turn', 'head', 'double', 'mid', 'whirl', 'forage', 'lock', 'crane', 'triple', 'veil', 'veilBack', 'finish'];
-const VERSION = '1';
+   One character a number, base 36, in this order (new ones go on the end), after a version: about twenty
+   characters. Coins in tens. Version 2 since 12 Nov (the gambles gone, the rocks in). */
+const ORDER = ['gun', 'wreck', 'head', 'double', 'mid', 'whirl', 'rocks', 'forage', 'lock', 'crane', 'triple', 'finish'];
+const VERSION = '2';
 /** A course packed into a share link's `course=`. */
 export function encodeCourse(k) {
-    const n = [
-        ...k.buoys, ...ORDER.map((id) => k[id]),
-        k.clears, CRANE_SIZES.indexOf(k.frames), k.bundles, k.coins / 10, k.veilOn / 10, k.beat,
-    ];
+    const n = [...k.buoys, ...ORDER.map((id) => k[id]), k.clears, CRANE_SIZES.indexOf(k.frames), k.bundles, k.coins / 10];
     return VERSION + n.map((x) => Math.max(0, Math.min(35, Math.round(x))).toString(36)).join('');
 }
 /** A share link's course, or null if it isn't one (or isn't a race: problems). */
 export function decodeCourse(code) {
     const s = String(code ?? '').trim().toLowerCase();
-    const len = 1 + 5 + ORDER.length + 6;
+    const len = 1 + 5 + ORDER.length + 4;
     if (s.length !== len || s[0] !== VERSION || !/^[0-9a-z]+$/.test(s))
         return null;
     const n = [...s.slice(1)].map((ch) => parseInt(ch, 36));
     const k = { ...DEFAULT_COURSE, buoys: n.slice(0, 5) };
     ORDER.forEach((id, i) => { k[id] = n[5 + i]; });
-    const [clears, frames, bundles, coins, veilOn, beat] = n.slice(5 + ORDER.length);
-    Object.assign(k, { clears, frames: CRANE_SIZES[frames] ?? 'x', bundles, coins: coins * 10, veilOn: veilOn * 10, beat });
+    const [clears, frames, bundles, coins] = n.slice(5 + ORDER.length);
+    Object.assign(k, { clears, frames: CRANE_SIZES[frames] ?? 'x', bundles, coins: coins * 10 });
     return problems(k).length ? null : k;
 }
 /** The same course. */

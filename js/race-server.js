@@ -21,14 +21,17 @@
      the field's rules have it): a player's taken from where she is, so it can't be missed;
    - hits: a player's claim on someone, checked (hittable, and in a broadside's reach); the bots' broadsides;
    - places and finish times;
-   - the race's seed: the bots' sailing and every gamble's tosses (src/den-gamble.ts) from it;
+   - the race's seed: the bots' sailing and the start's field (src/start-field.ts: everyone's the same) from
+     it, chosen for the next race as one ends, so the lobby shows the field to be raced;
+   - the rocks across spit 3's gap (12 Nov): everyone's hits on them, the bots' and the players', so once
+     they're down they're down for every racer;
    - the bots filling the empty places, sailed by the simulation (src/race-sim.ts), the same bots as race you
      alone: the den's characters (WATCHED), on their own favourite ways round;
    - a player who drops out: a few seconds to come back (NET.GRACE), then a bot sails her sloop home.
    No cheat-proofing: the players are friends, trusted with where they say they are. */
 import { SAIL } from './den-sail.js';
 import { Field, FIELD, courseSea, hittable } from './den-racers.js';
-import { RACE, FIRST_SPOT, spotPose } from './den-race.js';
+import { RACE, FIRST_SPOT, spotPose, rocksDown } from './den-race.js';
 import { sail as sailBots, route, style, progressAt } from './race-sim.js';
 import { WATCHED } from './den-rivals.js';
 import { NET, apart, spotOn, spotSquare, waitAt, parseUp } from './race-net.js';
@@ -183,6 +186,12 @@ export class Referee {
                     this.claim(p, m.on);
                 }
                 break;
+            case 'rock':
+                if (this.phase === 'on' && p.i >= 0 && !p.out) {
+                    this.rec?.input(this.k, [p.i, 'r']);
+                    this.blast(p);
+                }
+                break;
             case 'retire':
                 if (this.ticking && p.i >= 0 && !p.out) {
                     this.rec?.input(this.k, [p.i, 'o']);
@@ -192,7 +201,7 @@ export class Referee {
             default: break;
         }
     }
-    /** The count: the field lined up from the lobby, a fresh seed. */
+    /** The count: the field lined up from the lobby, on the seed the lobby's shown (its start's field). */
     begin() {
         this.cast = this.lineUp();
         const ps = this.here();
@@ -204,7 +213,6 @@ export class Referee {
         this.field.start();
         this.cast.forEach((e, i) => { this.field.racers[i].pose = spotPose(e.spot); });
         this.run = null;
-        this.seed = this.newSeed();
         this.shots = [];
         this.shotN = 0;
         this.been.clear();
@@ -224,9 +232,11 @@ export class Referee {
             this.done.push(this.rec.finish(this.field, this.k));
         this.rec = null;
     }
-    /** Back to the lobby: nobody ready, anyone gone let go. */
+    /** Back to the lobby: nobody ready, anyone gone let go; a race cut short, a fresh seed for the next. */
     toLobby() {
         this.written();
+        if (this.phase === 'count' || this.phase === 'on')
+            this.seed = this.newSeed();
         this.phase = 'lobby';
         this.field = null;
         this.run = null;
@@ -314,6 +324,14 @@ export class Referee {
             return;
         this.shot({ kind: 'shot', racer: p.i, cells: [[Math.round(t.pose.c), Math.round(t.pose.r)]], hit: on });
     }
+    /** Her broadside on the rocks: a hit on them, counted (once they're down, nothing more). */
+    blast(p) {
+        const F = this.field;
+        if (F.racers[p.i].state === 'finished' || rocksDown(F))
+            return;
+        if (F.blast(RACE.ROCKS.HITS))
+            this.rec?.event({ k: this.k, kind: 'rocks', i: p.i, hits: F.rocks });
+    }
     shot(e) {
         this.shots.push({ n: ++this.shotN, by: e.racer, on: e.hit, cells: e.cells, t: this.at });
         if (e.hit >= 0)
@@ -376,6 +394,7 @@ export class Referee {
             for (const p of this.players)
                 p.ready = false;
             this.written();
+            this.seed = this.newSeed();
         }
     }
     /** A race replayed from what was written down: the same field, seed and bots, each player's input heard at
@@ -401,6 +420,8 @@ export class Referee {
                 }
                 else if (what === 'h')
                     R.handle(id, { t: 'hit', on: x[0] });
+                else if (what === 'r')
+                    R.handle(id, { t: 'rock' });
                 else if (what === 'o')
                     R.handle(id, { t: 'retire' });
             }
@@ -424,7 +445,7 @@ export class Referee {
         return {
             t: 'snap', room: this.room, seq: ++this.seq, phase: this.phase, at: q(this.at), clock: q(F ? F.t : 0), seed: this.seed, fill: this.fill,
             players: this.players.map((p) => ({ id: p.id, name: p.name, look: p.look, ready: p.ready, on: p.on, racing: p.i >= 0 && !p.out })),
-            racers, holds: F ? [...F.holds.entries()] : [], shots: this.shots.map(({ n, by, on, cells }) => ({ n, by, on, cells })),
+            racers, holds: F ? [...F.holds.entries()] : [], shots: this.shots.map(({ n, by, on, cells }) => ({ n, by, on, cells })), rocks: F ? F.rocks : 0,
         };
     }
 }
@@ -515,10 +536,10 @@ export class RaceServer {
 /* ---- Races written down, to watch again ---- */
 /** A race written down (the user, 12 Nov: "people can see games that have been played, view them and see the
     replays"), kept small: "you don't need positions 4 times a second, you just need moves ... really all you
-    need is to save somebody's actions." So: its seed (every bot's sailing, and every gamble's toss, from it:
+    need is to save somebody's actions." So: its seed (every bot's sailing, and the start's field, from it:
     bots are written down as nothing more); its racers (names, looks, sails, spots); each player's actions at
     the helm with the race's clock (`acts`: src/race-net.ts, Act: moves, pins, moorings, broadsides); what the
-    room decided (`events`: hits, turns at the spots, gambles, finishes, a player's sloop taken over by a bot);
+    room decided (`events`: hits, turns at the spots, the rocks' hits, finishes, a player's sloop taken over by a bot);
     a keyframe of every racer's square, facing and what she's doing every RECORD.KEY seconds (to put right any
     drift in replaying, and to start watching from the middle); the places and times; and each racer's
     puzzle moves (`moves`: empty for now, to be filled in). `v`: the version, for a viewer to read it by. */
@@ -528,7 +549,7 @@ export class Recorder {
     rec;
     next = 0;
     holds = new Map();
-    bets = new Map();
+    rocks = 0;
     home = new Set();
     constructor(id, seed, racers) {
         this.rec = { v: RECORD.V, id, date: 0, seed, step: NET.STEP, steps: 0, key: RECORD.KEY, racers, inputs: [], acts: racers.map(() => []), events: [], keys: [], places: [], moves: racers.map(() => []) };
@@ -542,7 +563,8 @@ export class Recorder {
     keyframe(F, k) {
         this.rec.keys.push([k, ...F.racers.flatMap((r) => [Math.round(r.pose.c * 10), Math.round(r.pose.r * 10), r.pose.d, RECORD.STATES.indexOf(r.state)])]);
     }
-    /** Each step under way: a keyframe now and then; who's been given a spot, who's taken a gamble, who's home. */
+    /** Each step under way: a keyframe now and then; who's been given a spot, the rocks' hits (a bot's: a
+        player's is written as she makes it), who's home. */
     watch(F, run, k) {
         if (k >= this.next) {
             this.next = k + RECORD.KEY;
@@ -552,11 +574,11 @@ export class Recorder {
             if (this.holds.get(s) !== i)
                 this.event({ k, kind: 'turn', i, spot: s });
         this.holds = new Map(F.holds);
+        const said = this.rec.events.filter((e) => e.kind === 'rocks').length;
+        if (F.rocks > Math.max(this.rocks, said))
+            this.event({ k, kind: 'rocks', i: -1, hits: F.rocks });
+        this.rocks = F.rocks;
         F.racers.forEach((r, i) => {
-            const b = run.info(i)?.bet, key = b ? `${b.id}:${b.on}` : '';
-            if (b && key !== this.bets.get(i))
-                this.event({ k, kind: 'gamble', i, bet: b.id, on: b.on });
-            this.bets.set(i, key);
             if (r.time !== null && !this.home.has(i)) {
                 this.home.add(i);
                 this.event({ k, kind: 'finish', i, place: r.place ?? 0, time: r.time });

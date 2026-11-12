@@ -189,7 +189,7 @@ describe('the course\'s biggest shortcut (11 Nov; its exits 12 Nov)', () => {
       expect(fresh.windAt(c, r)).toBe(sea.windAt(c, r));
     }
     // Sailed along leg 2 past it, she goes by: the pilot's way along leg 2 runs past the mouth.
-    const g = sailTo(sea, { c: 20, r: D.OFF[0][1], d: 3 }, [3, D.OFF[0][1]]);
+    const g = sailTo(sea, { c: 18, r: D.OFF[0][1], d: 3 }, [3, D.OFF[0][1]]);
     expect([g.at.c, g.at.r]).toEqual([3, D.OFF[0][1]]);
     // A race that never goes through counts every stretch in order, as before (den-race.test.ts sails
     // the whole long way and its clock); one that does skips legs 3 and 4 only by Race.under.

@@ -123,22 +123,23 @@ export const SAIL = {
    Out past Primates Rule, behind a line of rocks across the sea (REEF) with one gate in it (GATE), right
    of the old wreck's wind, so nothing on the den's side of the line changes. Inside it:
    - The start (LINE, FIELD): a starting line across the course, each racer picking her spot along it
-     before the count, then a field of plain whirlpools and winds to eyeball a way through, as at a
-     blockade's opening ("you can kind of ... pick your starting spot along the starting edge"). Its
-     winds carry her on or hold her back; its whirlpools have her if she stops on one (src/den-whirl.ts),
-     and a gust zooms her over them. The quickest line, the conveyor across it, is the crowded one.
+     before the count, then a field of slow winds and whirlpools to eyeball a way through, as at a
+     blockade's opening ("you can kind of ... pick your starting spot along the starting edge"), laid fresh
+     from each race's seed (12 Nov: src/start-field.ts). Each move, her own first, then the square she's on
+     acts once: a slow wind pushes her a square, a whirlpool turns her to its far corner (src/den-whirl.ts);
+     a gust zooms her over them. And its hop: a Double over a row of headwinds into a lane down onto leg 1.
    - Six stretches two squares deep (STRETCHES: five legs and the run home), back and forth, the
      course's own breeze blowing out across them (every leg a reach, every bend a run); a spit of land
      between each pair (SPITS), the long way round its end, a numbered buoy at each bend (BUOYS).
-   - The left-hand trade wind (SNAKES.LEFT): up the whole left-hand side of the course to the starting
-     line. Legs 2 and 4 end hard by it, and the run home runs beside it, one square wide: a careless
-     turn or a gust too far, and she's swept back to the start (its sting grows down the course).
+   - The left-hand trade wind (SNAKES.LEFT): loops beside the left-hand bends and along the run home's
+     second row (the run home one square wide), each carrying her back a few squares, never further (12
+     Nov: snakes gentle, "I don't want it to be rage-inducing").
    - A shortcut through every spit, each a puzzle the den already has, by its one module, and each
      saving about what a decent player takes on it, so it pays only if it's your puzzle (RACE.DECENT):
      [A] spit 1: the gun gap (GUNS), three squares deep, a gun either side trained on its way in, the
          gap and its way out (none on the leg: the long way's clear of them), light airs in it. Just past
          it the water's tight (SNAKES.TIGHT): a wall ahead, and one move too many puts her in a wind that
-         sweeps her back along leg 2 to its start. It's an imperial gate (12 Nov), its guard bribed with
+         carries her three squares back along leg 2. It's an imperial gate (12 Nov), its guard bribed with
          coins hauled up by Treasure Haul from an old wreck in a notch off leg 1 (BRIBE), sheltered.
      [B] spit 2: the headwind gap (HEADWIND), rowed, with a dog-leg at its far end so it doesn't open
          straight onto leg 3 (no broadside from the leg ahead reaches a rower in it), far from the gun
@@ -164,32 +165,37 @@ export function layRace(K = DEFAULT_COURSE, custom = false) {
         home's second row is the left-hand trade wind's (SNAKES.LEFT): one square of water to sail. */
     const STRETCHES = [{ r: R0 + 8, d: 1 }, { r: R0 + 13, d: 3 }, { r: R0 + 18, d: 1 }, { r: R0 + 26, d: 3 }, { r: R0 + 31, d: 1 }, { r: R0 + 35, d: 3 }];
     /** Each spit: its rows, and the end she rounds it the long way ('R' the right, 'L' the left): two
-        squares of water round its end, then (on the left) the left-hand trade wind. */
+        squares of water round its end (on the left, the left-hand edge's water beside them). */
     const SPITS = [{ r0: R0 + 10, r1: R0 + 12, bend: 'R' }, { r0: R0 + 15, r1: R0 + 17, bend: 'L' }, { r0: R0 + 20, r1: R0 + 25, bend: 'R' }, { r0: R0 + 28, r1: R0 + 30, bend: 'L' }, { r0: R0 + 33, r1: R0 + 34, bend: 'R' }];
     const S = SPITS, T = STRETCHES;
     /** The columns everything's laid at (the few numbers to rework the course by). */
-    const GUN_C = K.gun, WRECK_C = K.wreck, HEAD_C = K.head, DOUBLE_C = K.double, MID_C = K.mid, DOOR_C = DOOR_COLS[0], WHIRL_C = K.whirl, FORAGE_C = K.forage, LOCK_C = K.lock, CRANE_C = K.crane, TRIPLE_C = K.triple, FIN_C = K.finish;
-    /** The gambles (12 Nov; src/den-gamble.ts): the turning pool's column on leg 2, the veiled wind's on spit 5,
-        and the column on leg 5 the veiled wind blows her back to. */
-    const TURN_C = K.turn, VEIL_C = K.veil, VEIL_BACK_C = K.veilBack;
+    const GUN_C = K.gun, WRECK_C = K.wreck, HEAD_C = K.head, DOUBLE_C = K.double, MID_C = K.mid, DOOR_C = DOOR_COLS[0], WHIRL_C = K.whirl, ROCK_C = K.rocks, FORAGE_C = K.forage, LOCK_C = K.lock, CRANE_C = K.crane, TRIPLE_C = K.triple, FIN_C = K.finish;
     const winds = [];
-    const wind = (c, r, d) => winds.push([c, r, d]);
-    // The left-hand trade wind: up the left-hand edge from the run home's second row to the starting
-    // line, and that row itself blowing into it.
+    /* The snakes, gentle since 12 Nov (the user: "it should send you back by a few tiles and basically make you
+       repeat the thing ... it sends you in a loop. Similar to where the Vegas [wells] are ... So it costs you a
+       tiny bit ... I don't want it to be rage-inducing"; and of the tight water past the gate, "the kind of
+       snakes and ladders level that's a good tune": 3 or 4 squares back). Each carries her back a few squares,
+       to the start of what she was doing; none sends her back a leg, or to the start. */
+    // The left-hand trade wind: beside each left-hand bend (spits 2 and 4), up the left-hand edge past the spit's
+    // end and back out onto the leg she was finishing, a few squares back round the bend; and along the run home's
+    // second row, back the way she came a few squares and up onto it again (a short run blowing back, then a
+    // square blowing up onto the run home, all along it).
     const RUN = T[5].r;
     const left = [];
-    for (let c = W - 1; c >= 1; c--)
-        left.push([c, RUN + 1, 3]);
-    for (let r = RUN + 1; r > LINE.r; r--)
-        left.push([0, r, 2]);
-    // Just past the gun gap [A]: leg 2's second row, from under the gap to the bend, blowing her back.
+    for (const s of [S[1], S[3]]) {
+        for (let r = s.r1; r >= s.r0; r--)
+            left.push([0, r, 2]);
+        left.push([0, s.r0 - 1, 1]);
+    }
+    for (let c = W - 1; c >= 0; c--)
+        left.push([c, RUN + 1, (W - 1 - c) % 4 === 0 ? 2 : 1]);
+    // Just past the gun gap [A]: leg 2's second row under the gap, three squares blowing her back toward the bend.
     const tight = [];
-    for (let c = GUN_C; c <= B[0] - 1; c++)
+    for (let c = GUN_C; c <= Math.min(GUN_C + 2, W - 2); c++)
         tight.push([c, T[1].r + 1, 1]);
-    // The trade wind back up the course: across leg 3 and up through spit 2, onto leg 2.
-    const mid = [];
-    for (let r = T[2].r + 1; r >= S[1].r0; r--)
-        mid.push([MID_C, r, 2]);
+    // The trade wind back: across leg 3 (both rows, blowing up) into a notch in spit 2's far face, back along it
+    // three columns and down onto the leg again: a loop, three squares back, to hop it again.
+    const mid = [[MID_C, T[2].r + 1, 2], [MID_C, T[2].r, 2], [MID_C, S[1].r1, 3], [MID_C - 1, S[1].r1, 3], [MID_C - 2, S[1].r1, 3], [MID_C - 3, S[1].r1, 0]];
     // [C] The whirlpool channel: a gust from MOUTH straight out down WHIRL_C, over three whirlpools beside
     // it (two squares across, at WHIRL_C - 2), each missing its far left corner, where a wind blows her into
     // the way home: up the column beside them (WHIRL_C - 3), across leg 3's first row and down into the
@@ -218,6 +224,12 @@ export function layRace(K = DEFAULT_COURSE, custom = false) {
     const forage = { NOTCH: [FORAGE_C, S[2].r0], BARRIER: [[FORAGE_C, S[2].r0 + 1]], GAP: [], OUT: [FORAGE_C, T[3].r] };
     for (let r = S[2].r0 + 2; r <= S[2].r1; r++)
         forage.GAP.push([FORAGE_C, r]);
+    // [C'] The rocks (12 Nov; src/den-race.ts, Rocks): a wall of rocks across the mouth of a gap in spit 3, off
+    // leg 3, shot down by her broadsides as she sails by (ROCKS.HITS), then open water for every racer; the gap
+    // beyond, straight down through the spit onto leg 4.
+    const rocks = { WALL: [[ROCK_C, S[2].r0]], GAP: [], OUT: [ROCK_C, T[3].r] };
+    for (let r = S[2].r0 + 1; r <= S[2].r1; r++)
+        rocks.GAP.push([ROCK_C, r]);
     // [D] The locks, straight down through spit 4: up a lock, a stretch of canal, down a lock; the berth.
     const locks = [{ at: [LOCK_C, S[3].r0], up: 0, low: 0 }, { at: [LOCK_C, S[3].r1], up: 2, low: 0 }];
     const pound = [];
@@ -233,66 +245,44 @@ export function layRace(K = DEFAULT_COURSE, custom = false) {
     // the water in front of its way in, on leg 1's second row; its gatehouse's towers either side of the way in.
     const bribe = {
         NOTCH: [WRECK_C, S[0].r0], WRECK: [WRECK_C, S[0].r0 + 1],
-        GATE: [GUN_C, T[0].r + 1], TOWERS: [[GUN_C - 1, S[0].r0], [GUN_C + 1, S[0].r0]],
+        GATE: [GUN_C, T[0].r + 1], TOWERS: [[GUN_C - 1, S[0].r0 + 1], [GUN_C + 1, S[0].r0 + 1]],
     };
-    // The start's field: a conveyor across it, blowing right (the crowded line: it carries her from the
-    // left of the line to the gap it drops her at), a trade wind blowing back left along its far side
-    // (cross it by that gap, ride it back to it, or hop it with a Double), headwinds over the gap, and
-    // plain whirlpools to go round or zoom over.
-    const fieldPools = [{ at: [6, FIELD_R0 + 2] }, { at: [11, FIELD_R0 + 4] }, { at: [21, FIELD_R0 + 1] }, { at: [24, FIELD_R0 + 2] }];
-    const fieldWinds = [];
-    const GAP_C = 18;
-    for (let c = 1; c < GAP_C; c++)
-        fieldWinds.push([c, FIELD_R0, 1]);
-    fieldWinds.push([GAP_C, FIELD_R0, 0]);
-    for (let c = GAP_C + 1; c < W; c++)
-        fieldWinds.push([c, FIELD_R0 + 4, 3]);
-    for (const c of [GAP_C - 1, GAP_C + 1])
-        fieldWinds.push([c, FIELD_R0 + 2, 2]);
-    // The gambles (12 Nov; src/den-gamble.ts: "you can go that way if you want to take a gamble"), each a way
-    // through a spit that's a bet, not a puzzle: a ladder or a snake.
-    // [G1] The turning pool, on leg 2: a whirlpool on its first row and spit 1's last (her way in its far right
-    // corner, sailing along the leg's first row; on its second she sails by), its spin turning back and forth.
-    // Its step leaves her on its near left corner, in the spit, facing on (clockwise) or back (anticlockwise),
-    // and it throws her that way: on, out across the leg and down a cleft through spit 2 (water only its throw
-    // gets to) onto leg 3; or back, up a wind lane through spit 1 onto leg 1.
-    const turnPool = { at: [TURN_C, S[0].r1] };
-    const turnFar = [TURN_C, S[0].r1];
-    const turnCleft = [];
-    for (let r = S[1].r0; r <= S[1].r1; r++)
-        turnCleft.push([TURN_C, r]);
-    const turnUp = [];
-    for (let r = S[0].r1 - 1; r >= S[0].r0; r--)
-        turnUp.push([TURN_C, r, 2]);
-    const turn = {
-        POOL: turnPool, FAR: turnFar, IN: [TURN_C + 1, T[1].r], CLEFT: turnCleft, UP: turnUp,
-        /** Its throws from its corner in the spit: on, out across leg 2 and down the cleft, out onto leg 3 facing
-            along it; back, up the lane up spit 1 and out onto leg 1, facing along it. */
-        ON: [{ c: TURN_C, r: T[1].r, d: 0 }, { c: TURN_C, r: T[1].r + 1, d: 0 }, ...turnCleft.map(([c, r]) => ({ c, r, d: 0 })), { c: TURN_C, r: S[1].r1 + 1, d: 1 }],
-        BACK: [...turnUp.map(([c, r]) => ({ c, r, d: 2 })), { c: TURN_C, r: T[0].r + 1, d: 1 }],
-    };
-    // [G2] The veiled wind, through spit 5: a lane across it that looks the same either way till she's on it,
-    // then blows her on through onto the run home (facing along it), or back out and along leg 5's second row
-    // to its start. A coin toss each time she sails onto it.
-    const veilWay = [[VEIL_C, S[4].r0], [VEIL_C, S[4].r1]];
-    const veilBack = [{ c: VEIL_C, r: T[4].r + 1, d: 2 }];
-    for (let c = VEIL_C - 1; c >= VEIL_BACK_C; c--)
-        veilBack.push({ c, r: T[4].r + 1, d: 3 });
-    const veil = {
-        WAY: veilWay,
-        ON: [{ c: VEIL_C, r: S[4].r1, d: 0 }, { c: VEIL_C, r: T[5].r, d: 3 }],
-        BACK: veilBack,
-    };
-    winds.push(...left, ...tight, ...mid, doubleWind, ...zigzag, ...triple, ...fieldWinds, ...turnUp);
-    // The land of each spit, but for its shortcuts' ways through it (the barrier's land till it's cleared:
-    // src/den-race.ts, Barrier).
+    // The start's field: its slow winds and whirlpools laid fresh from each race's seed (src/start-field.ts,
+    // Sea.layField), and one thing fixed in it, the hop (12 Nov: "that could have a nice hop to the ball thing to
+    // get started"): a trade wind lane across the field's fifth row, walled in by rocks, that runs her along and
+    // down onto leg 1 well toward buoy 1, behind a row of headwinds blowing back up onto the row above. A Double
+    // from that row, facing down, hops the headwinds into the lane; anything less and she's blown back up a square.
+    const HOP_C0 = 15, HOP_C1 = 20;
+    const hopHead = [], hopLane = [], hopRocks = [];
+    for (let c = HOP_C0; c <= HOP_C1; c++) {
+        hopHead.push([c, FIELD_R0 + 3, 2]);
+        hopLane.push([c, FIELD_R0 + 4, 1]);
+        hopRocks.push([c, FIELD_R1]);
+    }
+    hopLane.push([HOP_C1 + 1, FIELD_R0 + 4, 0], [HOP_C1 + 1, FIELD_R1, 0]);
+    for (let r = FIELD_R0 + 3; r <= FIELD_R1; r++)
+        hopRocks.push([HOP_C0 - 1, r]);
+    const hop = { HEAD: hopHead, LANE: hopLane, ROCKS: hopRocks, FROM: FIELD_R0 + 2, LANDS: [HOP_C1 + 1, T[0].r], c0: HOP_C0, c1: HOP_C1 };
+    // And two trade winds fixed in it, so no stretch of the line is far behind the rest (leg 1 runs right, from
+    // the long way's own column to buoy 1): on the left, a conveyor along its first row, blowing right, that sets
+    // her down above the hop, the field still to cross; on the right, past the hop, its last row
+    // blowing back left into the hop's lane as it comes down, onto leg 1 a few squares short of buoy 1, a row of
+    // headwinds above it blowing her back up (a Double hops them; or round by the hop's lane coming down).
+    const conveyor = [];
+    for (let c = 0; c < HOP_C0; c++)
+        conveyor.push([c, FIELD_R0, 1]);
+    const back = [];
+    for (let c = HOP_C1 + 2; c < W; c++)
+        back.push([c, FIELD_R1 - 1, 2], [c, FIELD_R1, 3]);
+    winds.push(...left, ...tight, ...mid, doubleWind, ...zigzag, ...triple, ...hopHead, ...hopLane, ...conveyor, ...back);
+    // The land of each spit, but for its shortcuts' ways through it (the barrier's and the rocks' land till
+    // they're cleared: src/den-race.ts, Barrier and Rocks).
     const notches = [forage.NOTCH, berth, [CRANE_C, S[4].r0], bribe.NOTCH];
     const open = new Set([
         ...[0, 1, 2].map((k) => `${GUN_C},${S[0].r0 + k}`), ...head.map(([c, r]) => `${c},${r}`), ...double.map(([c, r]) => `${c},${r}`),
-        ...mid.map(([c, r]) => `${c},${r}`), ...passage, ...[...forage.BARRIER, ...forage.GAP].map(([c, r]) => `${c},${r}`),
+        ...mid.map(([c, r]) => `${c},${r}`), ...passage, ...[...forage.BARRIER, ...forage.GAP, ...rocks.WALL, ...rocks.GAP].map(([c, r]) => `${c},${r}`),
         ...locks.map((l) => `${l.at[0]},${l.at[1]}`), ...pound.map(([c, r]) => `${c},${r}`), ...triple.map(([c, r]) => `${c},${r}`),
         ...notches.map(([c, r]) => `${c},${r}`),
-        `${TURN_C},${S[0].r1}`, `${TURN_C + 1},${S[0].r1}`, ...turnCleft.map(([c, r]) => `${c},${r}`), ...turnUp.map(([c, r]) => `${c},${r}`), ...veilWay.map(([c, r]) => `${c},${r}`),
     ]);
     const land = S.map((s, i) => {
         const out = [], [l0, l1] = landOf(K, i);
@@ -318,6 +308,8 @@ export function layRace(K = DEFAULT_COURSE, custom = false) {
         { from: sq(TRIPLE_C - 1, TRIPLE_C + 1, T[4].r, T[4].r + 1), start: { c: TRIPLE_C, r: T[4].r + 1, d: 0 }, need: 3 },
         // The zigzag's headwinds: from right behind one, or a square further back, sailing along at it.
         ...zigzag.map(([c, r]) => ({ from: [[c + 1, r], [c + 2, r]], start: { c: c + 1, r, d: 3 }, need: 2, facing: true })),
+        // The trade wind back across leg 3: from right behind it, or a square further back, on either row.
+        ...[T[2].r, T[2].r + 1].map((r) => ({ from: [[MID_C - 1, r], [MID_C - 2, r]], start: { c: MID_C - 1, r, d: 1 }, need: 2, facing: true })),
     ];
     return {
         /** The course it's laid from (src/race-course.ts): the den's own, or one from the course editor
@@ -336,16 +328,19 @@ export function layRace(K = DEFAULT_COURSE, custom = false) {
         START: { c0: 8, c1: 10, r0: R0 - 2, r1: R0 - 1 },
         /** The starting line: its row and its squares, each racer's spot one of them (src/den-race.ts). */
         LINE,
-        /** The start's field below it: its rows, its plain whirlpools (no corner missing: they have her
-            if she stops on one, and a gust zooms her over) and its winds ([c, r, the way it blows]). */
-        FIELD: { r0: FIELD_R0, r1: FIELD_R1, POOLS: fieldPools, WINDS: fieldWinds },
+        /** The start's field below it: its rows (its slow winds and whirlpools laid from each race's seed:
+            src/start-field.ts), and its hop (HOP: its headwinds, the lane behind them and the rocks walling it in,
+            the row she hops from, where it lands her on leg 1, and its columns). */
+        FIELD: { r0: FIELD_R0, r1: FIELD_R1, HOP: hop, CONVEYOR: conveyor, BACK: back },
         /** The land of each spit (works: drawn by js/den/race.js). */
         LAND: land,
-        /** Every square of the course that's a wind ([c, r, the way it blows]): the snakes, the headwinds
-            the Doubles hop, the field's; the whirlpool channel's are WHIRLS.WINDS. */
+        /** Every square of the course that's a trade wind ([c, r, the way it blows]): the snakes, the headwinds
+            the Doubles hop, the field's hop; the whirlpool channel's are WHIRLS.WINDS. (The field's slow winds are
+            each race's own: src/start-field.ts.) */
         WINDS: winds,
-        /** The snakes, winds that sweep her back (RACE.md §4): the left-hand trade wind, up to the start;
-            the tight water just past the gun gap; the trade wind back up the course mid-zigzag. */
+        /** The snakes, winds that carry her back a few squares (RACE.md §4): the left-hand trade wind's loops at
+            the left-hand bends and along the run home; the tight water just past the gun gap; the trade wind back
+            across leg 3. */
         SNAKES: { LEFT: left, TIGHT: tight, MID: mid },
         /** The finish line: across the run home at FINISH[0], crossed going left (src/den-race.ts, atFinish). */
         FINISH: [FIN_C, RUN],
@@ -368,11 +363,13 @@ export function layRace(K = DEFAULT_COURSE, custom = false) {
             { c0: Z - 1, c1: Z + 7, r0: T[3].r, r1: T[3].r + 1, d: 3, s: 2 },
             { c0: 0, c1: W - 1, r0: LINE.r, r1: RUN + 1, d: 0, s: 2 },
         ],
-        /** [A]: the gap (its middle square), its guns either side, and the squares each is trained on (gun 0
-            the way in and the way out, gun 1 the gap itself, as the checkpoint's: src/den-checkpoint.ts,
-            CHECK.MARKS): all three in the spit, none on a leg. */
+        /** [A]: the gap (its middle square), its guns either side of its way in (12 Nov: at its mouth, the
+            gatehouse's towers behind them either side of the gap's middle, so the gate could come along the spit
+            and still be out of reach of the starlit door's rock), and the squares each is trained on (gun 0 the
+            way in and the way out, gun 1 the gap itself, as the checkpoint's: src/den-checkpoint.ts, CHECK.MARKS):
+            all three in the spit, none on a leg. */
         GUNS: {
-            gap: [GUN_C, S[0].r0 + 1], at: [[GUN_C - 1, S[0].r0 + 1], [GUN_C + 1, S[0].r0 + 1]],
+            gap: [GUN_C, S[0].r0 + 1], at: [[GUN_C - 1, S[0].r0], [GUN_C + 1, S[0].r0]],
             marks: [[[GUN_C, S[0].r0], [GUN_C, S[0].r1]], [[GUN_C, S[0].r0 + 1]]],
             way: [0, 1, 2].map((k) => [GUN_C, S[0].r0 + k]),
         },
@@ -390,24 +387,22 @@ export function layRace(K = DEFAULT_COURSE, custom = false) {
         ZIGZAG: zigzag,
         /** [C]: the mouth (facing in), the whirlpools and their winds ([c, r, the way it blows]). */
         WHIRLS: { MOUTH: { c: WHIRL_C, r: mouthR, d: 0 }, POOLS: whirls, WINDS: pw, OUT: [WHIRL_C, T[3].r] },
-        /** The gambles (12 Nov; src/den-gamble.ts): the turning pool on leg 2 (TURN: the whirlpool, its far
-            corner, the square she comes into it by, the cleft it throws her on down and the lane up it throws her
-            back onto, and each throw's squares) and the veiled wind through spit 5 (VEIL: its squares, and its
-            carry each way). */
-        GAMBLES: { TURN: turn, VEIL: veil },
         /** [C]: the barrier of driftwood across a gap, cleared by Foraging from its notch (sheltered). */
         FORAGE: forage,
+        /** [C']: the rocks blasted open (12 Nov): their wall across the gap's mouth, the gap beyond it, and where
+            it comes out on leg 4. */
+        ROCKS: rocks,
         /** [D]: the locks and the canal between them (its level, a lock's lift up), and the berth beside the
             way in, where she waits her turn, sheltered. */
         LOCKS: locks, POUND: { level: 1, at: pound }, BERTH: berth,
         /** [E]: the crane's ledge, a notch in the spit off leg 5 (she lies in it), and where it sets her down
             on the run home, facing along it. */
         CRANE: { LEDGE: [CRANE_C, S[4].r0], TO: { c: CRANE_C, r: RUN, d: 3 } },
-        /** The starlit door (src/den-door.ts; Duty Navigation opens it): a plain cliff face on spit 2, off
+        /** The starlit door (src/den-door.ts; Duty Navigation opens it): a door in the cliff of spit 2, off
             leg 2 (FACE, the water off it OFF), and its tunnel's exits (12 Nov), straight on under the course
-            in the door's columns: each a sea cave in a spit's far face (OUT), the water off it on the next
-            leg (INTO): spit 2's onto leg 3, spit 3's onto leg 4, and the far end, spit 4's, onto leg 5. The
-            tunnel's no square of the sea: it runs under. */
+            in the door's columns: each a cleft in a spit's far face (OUT), the water off it on the next
+            leg (INTO): spit 2's onto leg 3, and the far end, spit 4's, onto leg 5. The tunnel's no square of
+            the sea: it runs under. */
         DOOR: {
             FACE: [[DOOR_C, S[1].r0], [DOOR_C + 1, S[1].r0]], OFF: [[DOOR_C, S[1].r0 - 1], [DOOR_C + 1, S[1].r0 - 1]],
             EXITS: [1, 3].map((s) => ({
@@ -776,10 +771,20 @@ export class Sea {
         else stops short of it, so sailing by you never stumble through: 11 Nov). */
     passage = new Set();
     mouths = [];
-    /** A wind that won't say which way it blows till she's on it (the sloop race's veiled wind, 12 Nov:
-        src/den-gamble.ts): water her own moves take her onto, never the pilot (it isn't open) nor a gust (it's
-        a way through: passage); on it, the helm's `takes` says where it carries her. */
-    veils = new Set();
+    /** Slow winds (12 Nov, as Puzzle Pirates' are: the sloop race's start's field, src/start-field.ts): the way
+        each square's blows. Not a trade wind's lane: after each of her moves (or a breather, idle) the one
+        she's on pushes her a single square its way, once (Sea.move, Helm's nudge). The user: "the trade wind
+        kind that really just blows you and you don't get the chance, but you also need the slower wind that
+        only nudges you one per turn." */
+    slow = new Map();
+    /** Bumped each time a field's laid (layField) or a square's opened or shut (touch), so the pilot works its
+        moves out afresh. */
+    laid = 0;
+    /** A square's been opened or shut by hand (the race's barrier cleared, its rocks blasted, each put back for
+        a new race): the pilot's reckoning is worked out afresh. */
+    touch() { this.laid++; }
+    /** The squares the field laid last (its whirlpools' and its slow winds'), to take up for the next. */
+    fieldSq = [];
     /** The wind gaps' mouths, where a gust lines her up to hop one (Lineup; the race's: LAY.RACE.LINEUPS). */
     lineups = [];
     /** The reef's rocks, drawn as one line of them (js/den/reef.js): the checkpoint's reef, out from
@@ -899,8 +904,7 @@ export class Sea {
         // The sloop race's course out past her (LAY.RACE; src/den-race.ts): its spits (land, drawn by
         // js/den/race.js) and the barrier of driftwood across a gap in one (works till it's cleared:
         // src/den-race.ts, Barrier), its whirlpool channel and the winds round it (a way through, as
-        // Kikkit's, its mouth on the third leg), the start's plain whirlpools (no passage: a gust zooms her
-        // over them), its locks and canal, its winds (the snakes and the headwinds the Doubles hop), and its
+        // Kikkit's, its mouth on the third leg), the start's hop, its locks and canal, its winds (the snakes and the headwinds the Doubles hop), and its
         // breezes. (Its line of rocks is the reef's: scatter.)
         const RC = LAY.RACE;
         for (const [c, r] of [...RC.LAND.flat(), ...RC.FORAGE.BARRIER])
@@ -918,34 +922,54 @@ export class Sea {
         }
         this.mouths.push({ ...RC.WHIRLS.MOUTH });
         this.lineups.push(...RC.LINEUPS);
-        for (const spot of RC.FIELD.POOLS) {
-            const w = whirlpool(spot);
-            for (const [c, r] of w.squares)
-                this.whirls.set(key(c, r), w);
-        }
         for (const [c, r, d] of RC.WINDS)
             this.wind.set(key(c, r), d);
+        // (the rocks walling in the start's hop, and the rocks across a gap in spit 3 till they're blasted:
+        // src/den-race.ts, Rocks)
+        for (const [c, r] of [...RC.FIELD.HOP.ROCKS, ...RC.ROCKS.WALL])
+            this.works.add(key(c, r));
         // (its up lock raised by the course's Bilge clears, if they're not the den's own: src/race-course.ts)
         this.locks.push(...RC.LOCKS.map((l) => ({ ...l, at: [...l.at], ...(RC.COURSE.clears !== LOCK.WORK ? { work: RC.COURSE.clears } : {}) })));
         for (const [c, r] of RC.POUND.at)
             this.pounds.set(key(c, r), RC.POUND.level);
         this.zones.push(...RC.ZONES.map((z) => ({ ...z })));
-        // The gambles (src/den-gamble.ts): the turning pool (a whirlpool whose spin the race's clock turns), the
-        // cleft below it that only its throw gets to, the lane up spit 1 it throws her back onto (no gust
-        // stumbles up or down either: passage), and the veiled wind's squares.
-        const GT = RC.GAMBLES.TURN, tp = whirlpool(GT.POOL);
-        for (const [c, r] of tp.squares)
-            this.whirls.set(key(c, r), tp);
-        for (const [c, r] of GT.CLEFT) {
-            this.pockets.add(key(c, r));
-            this.passage.add(key(c, r));
+    }
+    /** The sloop race's start's field laid on this sea (src/start-field.ts: a race's own, from its seed): its
+        whirlpools (plain ones: they have her if she comes to rest on one, a gust zooms her over) and its slow
+        winds, the last field's taken up first. */
+    layField(f) {
+        for (const k of this.fieldSq) {
+            this.whirls.delete(k);
+            this.slow.delete(k);
         }
-        for (const [c, r] of GT.UP)
-            this.passage.add(key(c, r));
-        for (const [c, r] of RC.GAMBLES.VEIL.WAY) {
-            this.veils.add(key(c, r));
-            this.passage.add(key(c, r));
+        this.fieldSq = [];
+        for (const spot of f.POOLS) {
+            const w = whirlpool(spot);
+            for (const [c, r] of w.squares) {
+                this.whirls.set(key(c, r), w);
+                this.fieldSq.push(key(c, r));
+            }
         }
+        for (const [c, r, d] of f.SLOW) {
+            this.slow.set(key(c, r), d);
+            this.fieldSq.push(key(c, r));
+        }
+        this.laid++;
+    }
+    /** The way the slow wind on this square blows, if there's one. */
+    slowAt(c, r) { return this.slow.get(key(c, r)); }
+    /** Where the square she's come to rest on pushes her, once (a slow wind's single square its way), and any
+        trade wind she's then on carries her on; none if it isn't a slow wind, or it'd push her into something
+        (with `whirls`, as she really goes, onto a whirlpool: it has her, next time). Each pose of it. */
+    nudge(p, whirls = false) {
+        const d = this.slowAt(p.c, p.r);
+        if (d === undefined)
+            return [];
+        const c = p.c + DC[d], r = p.r + DR[d], into = whirls && this.whirls.has(key(c, r));
+        if (!into && !this.open(c, r))
+            return [];
+        const to = { c, r, d: p.d, slow: true };
+        return into ? [to] : [to, ...this.ride(to, whirls)];
     }
     scatter(roll) {
         const laid = this.wind.size > 0, K = LAY.CHECKPOINT;
@@ -1042,21 +1066,27 @@ export class Sea {
         her; without, as the pilot reckons, they're in her way. */
     move(p, m, oars = false, whirls = false) {
         const { cells, to } = path(p, m);
-        if (this.irons(p, m, oars))
-            return { to: { c: p.c, r: p.r, d: m === 'F' ? p.d : to.d }, bump: true, ride: [], irons: true };
-        if (cells.every(([c, r]) => this.open(c, r) || (whirls && (this.whirls.has(key(c, r)) || this.veils.has(key(c, r))))))
-            return { to, bump: false, ride: this.ride(to, whirls) };
-        return { to: { c: p.c, r: p.r, d: to.d }, bump: true, ride: [] };
+        // (then, as in Puzzle Pirates, the square she's come to rest on acts once: a slow wind's push, after any
+        // trade wind's carried her on; bumped, in irons or into a rock, she's still on it, and it acts all the same)
+        const after = (at, ride) => [...ride, ...this.nudge(ride.length ? ride[ride.length - 1] : at, whirls)];
+        if (this.irons(p, m, oars)) {
+            const at = { c: p.c, r: p.r, d: m === 'F' ? p.d : to.d };
+            return { to: at, bump: true, ride: after(at, []), irons: true };
+        }
+        if (cells.every(([c, r]) => this.open(c, r) || (whirls && this.whirls.has(key(c, r)))))
+            return { to, bump: false, ride: after(to, this.ride(to, whirls)) };
+        const at = { c: p.c, r: p.r, d: to.d };
+        return { to: at, bump: true, ride: after(at, []) };
     }
     /** The whirlpool on this square, if there's one. */
     whirlAt(c, r) { return this.whirls.get(key(c, r)); }
     /** Whether a move from here would put her on a whirlpool, as she really goes (by its own squares
         or the trade wind after it): the pilot never makes it. */
     whirly(p, m, oars = false) {
-        if (!this.whirls.size && !this.veils.size)
+        if (!this.whirls.size)
             return false;
         const got = this.move(p, m, oars, true);
-        return !got.bump && [got.to, ...got.ride, ...path(p, m).cells.map(([c, r]) => ({ c, r }))].some((q) => this.whirls.has(key(q.c, q.r)) || this.veils.has(key(q.c, q.r)));
+        return [...(got.bump ? [] : [got.to, ...path(p, m).cells.map(([c, r]) => ({ c, r }))]), ...got.ride].some((q) => this.whirls.has(key(q.c, q.r)));
     }
     /** The seconds a move takes: at the oars (a square on its own: see Helm for a pile of them), or
         under sail in the wind there is, by how she lies to it on the way (a turn's two squares
@@ -1081,7 +1111,7 @@ export class Sea {
     /** On the board and not a rock. */
     open(c, r) {
         const k = key(c, r);
-        return c >= 0 && c < this.cols && r >= 0 && r < this.rows && !this.rocks.has(k) && !this.whirls.has(k) && !this.pockets.has(k) && !this.veils.has(k);
+        return c >= 0 && c < this.cols && r >= 0 && r < this.rows && !this.rocks.has(k) && !this.whirls.has(k) && !this.pockets.has(k);
     }
     isRock(c, r) { return this.rocks.has(key(c, r)); }
     /** Sailing a move from here: where she ends up, and whether she hit something. Forward into a
@@ -1129,7 +1159,7 @@ export class Sea {
             return null;
         if (!via && from.c === c && from.r === r)
             return [];
-        const memo = `${from.c},${from.r},${from.d}|${c},${r}|${via ?? ''}|${this.rocks.size},${this.wind.size}|${this.rig(oars)}`;
+        const memo = `${from.c},${from.r},${from.d}|${c},${r}|${via ?? ''}|${this.rocks.size},${this.wind.size},${this.laid}|${this.rig(oars)}`;
         if (!this.plots.has(memo)) {
             if (this.plots.size > 256)
                 this.plots.clear();
@@ -1166,7 +1196,7 @@ export class Sea {
     }
     edgesFor = '';
     from(id, oars) {
-        const sig = `${this.rocks.size},${this.wind.size},${this.zones.length}`;
+        const sig = `${this.rocks.size},${this.wind.size},${this.zones.length},${this.laid}`;
         if (sig !== this.edgesFor) {
             this.edges.clear();
             this.edgesFor = sig;
@@ -1366,13 +1396,11 @@ export class Helm {
         (12 Nov): "you do your own move, and then the [whirlpool] does an action to take you to the
         corner, and then your move happens again". */
     spun = false;
-    /** The squares of trade wind still to come after it. */
+    /** A slow wind's pushed her since her own last move (Sea.nudge): the square it put her on, a whirlpool or
+        another slow wind, waits for the next phase (YPPedia: "it has no effect for this phase"). */
+    nudged = false;
+    /** The squares of trade wind still to come after it (and a slow wind's push, `slow`, at the end of a move). */
     rides = [];
-    /** Squares that carry her on of their own when she comes to rest on them, if any are wired in (the sloop
-        race's gambles, src/den-gamble.ts: its veiled wind, and its turning pool's throw once its step has
-        turned her): given where she's come to rest and whether a whirl put her there, the squares it carries
-        her, played as a gust's are; or null. */
-    takes = null;
     /** The locks on her sea and their water (src/den-lock.ts), as LAY.LOCKS: they start drained. */
     locks;
     /** The hole the last hit knocked in her deck: she's dazed till it's patched. */
@@ -1551,6 +1579,7 @@ export class Helm {
         this.free = false;
         this.spins = 0;
         this.spun = false;
+        this.nudged = false;
         this.pose = { ...at };
     }
     /** Nothing playing and nothing to play. */
@@ -1620,7 +1649,7 @@ export class Helm {
             return { c: this.pose.c, r: this.pose.r, a: this.pose.d };
         const { from, to, m } = this.cur;
         if (m === 'W' && this.cur.via)
-            return whirlAt(from, to, Math.min(1, this.t / this.cur.secs), this.cur.spin);
+            return whirlAt(from, to, Math.min(1, this.t / this.cur.secs));
         if (m === 'W') {
             const u = Math.min(1, this.t / SAIL.PUSH), turn = ((to.d - from.d + 6) % 4) - 2;
             return { c: from.c + (to.c - from.c) * u, r: from.r + (to.r - from.r) * u, a: from.d + turn * Math.min(1, u * 1.5) };
@@ -1663,10 +1692,12 @@ export class Helm {
                     continue;
                 this.t = 0;
                 if (this.rides.length) {
-                    const to = this.rides.shift();
-                    this.spun = false;
-                    this.cur = { m: 'W', from: { ...this.pose }, to, bump: false, secs: SAIL.PUSH, pause: SAIL.PAUSE };
-                    out.push({ kind: 'push', from: { ...this.pose }, to: { ...to } });
+                    const { slow, ...to } = this.rides.shift();
+                    if (slow)
+                        this.nudged = true;
+                    this.spun = this.nudged;
+                    this.cur = { m: 'W', from: { ...this.pose }, to, bump: false, secs: SAIL.PUSH, pause: SAIL.PAUSE, slow: !!slow };
+                    out.push({ kind: 'push', from: { ...this.pose }, to: { ...to }, ...(slow ? { slow: true } : {}) });
                     continue;
                 }
                 // A gust after it (src/den-sailing.ts): its squares, as the trade winds' are.
@@ -1677,11 +1708,9 @@ export class Helm {
                 // Come to rest on a whirlpool: it has her (after the move, as in Puzzle Pirates), one step: to
                 // its far corner, a quarter turn, a beat of its own. Where that puts her, even on the pool
                 // still, it waits for her next move (or a breather) before it acts again (YPPedia: "it has no
-                // effect for this phase, but will act during the next phase").
-                if (!this.spun && this.twirl(out))
-                    continue;
-                // A square that carries her on of its own (src/den-gamble.ts): its squares, as a gust's.
-                if (this.taken(out))
+                // effect for this phase, but will act during the next phase"). (A slow wind's push came with the
+                // move: Sea.move; after a gust, here.)
+                if (!this.spun && this.step(out))
                     continue;
                 this.cur = null;
                 // (a gust that came with no move on is no step of the turn)
@@ -1707,8 +1736,8 @@ export class Helm {
                 this.blow(out);
                 continue;
             }
-            // Idle on a whirlpool (put there, say): it has her.
-            if (this.slot < 0 && !this.spun && !this.dazed() && this.twirl(out)) {
+            // Idle on a whirlpool or a slow wind (put there, say): it has her.
+            if (this.slot < 0 && !this.spun && !this.dazed() && this.step(out)) {
                 this.free = true;
                 continue;
             }
@@ -1752,9 +1781,10 @@ export class Helm {
             }
             const moves = this.next();
             if (!moves.length) {
-                // Nothing to play, resting where a whirl put her, on the pool still: a breather on, its next
-                // step (till it's turned her right round: WHIRL.MOST).
-                if (this.twirl(out)) {
+                // Nothing to play, resting where a whirl or a slow wind put her, on the pool or a slow wind still: a
+                // breather on, its next step (a pool's till it's turned her right round: WHIRL.MOST). Staying put is
+                // a move too, as in Puzzle Pirates: the square she's on acts each phase.
+                if (!this.dazed() && this.step(out)) {
                     this.free = true;
                     continue;
                 }
@@ -1789,33 +1819,42 @@ export class Helm {
     twirl(out) {
         if (!this.whirling())
             return false;
-        const w = this.sea.whirlAt(this.pose.c, this.pose.r), spin = w.turns?.() ?? 1, { via, to } = whirl(w, this.pose, spin);
+        const w = this.sea.whirlAt(this.pose.c, this.pose.r), { via, to } = whirl(w, this.pose);
         this.spins++;
         this.spun = true;
+        this.nudged = false;
         if (this.slot < 0)
             this.wait = Math.max(this.wait, SAIL.BREAK);
-        this.cur = { m: 'W', from: { ...this.pose }, to, via, spin, bump: false, secs: WHIRL.SECS, pause: pauseFor(WHIRL.SECS) };
+        this.cur = { m: 'W', from: { ...this.pose }, to, via, bump: false, secs: WHIRL.SECS, pause: pauseFor(WHIRL.SECS) };
         this.rides = this.sea.ride(to, true);
         this.t = 0;
         out.push({ kind: 'push', from: { ...this.pose }, to: { ...to }, whirl: true });
         return true;
     }
-    /** Come to rest where a square carries her on of its own (`takes`): its squares blow her on, as a gust's;
-        whether one did. */
-    taken(out) {
-        if (!this.takes || this.dazed() || !this.cur)
+    /** Whatever the square she's resting on does, one step: a whirlpool's whirl (twirl), or a slow wind's push
+        of a square (Sea.nudge). Whether it moved her. */
+    step(out) {
+        if (this.twirl(out))
+            return true;
+        const sq = this.sea.nudge(this.pose, true);
+        if (!sq.length)
             return false;
-        const sq = this.takes({ ...this.pose }, this.cur.m === 'W' && !!this.cur.via);
-        if (!sq?.length)
-            return false;
-        this.gust(sq);
-        this.blow(out);
+        const [{ slow: _, ...to }, ...rest] = sq;
+        this.spun = true;
+        this.nudged = true;
+        if (this.slot < 0)
+            this.wait = Math.max(this.wait, SAIL.BREAK);
+        this.cur = { m: 'W', from: { ...this.pose }, to, bump: false, secs: SAIL.PUSH, pause: pauseFor(SAIL.PUSH), slow: true };
+        this.rides = rest;
+        this.t = 0;
+        out.push({ kind: 'push', from: { ...this.pose }, to: { ...to }, slow: true });
         return true;
     }
     /** The next square of a gust. */
     blow(out) {
         const to = this.gusts.shift();
         this.spun = false;
+        this.nudged = false;
         this.cur = { m: 'W', from: { ...this.pose }, to, bump: false, secs: SAIL.PUSH, pause: SAIL.PAUSE };
         this.t = 0;
         out.push({ kind: 'push', from: { ...this.pose }, to: { ...to }, gust: true });
@@ -1824,6 +1863,7 @@ export class Helm {
         const m = this.turn[this.slot], { to, bump, ride, irons } = this.sea.move(this.pose, m, this.oars, true);
         this.spins = 0;
         this.spun = false;
+        this.nudged = false;
         // At the oars, the more squares rowed and waiting, the quicker she goes (a Vegas on each side
         // at once: as quick as the trade winds); under sail, by how she lies to the wind.
         const secs = this.oars ? this.pace : this.sea.moveSecs(false, this.pose, m);

@@ -35,18 +35,20 @@
      And the small gap beside it that a Double hops.
    - [C] the whirlpool channel: only a Vegas from its mouth carries her over (src/den-sailing.ts,
      gustPath); less, and a whirlpool has her and its winds carry her back to the mouth (src/den-whirl.ts).
-     And the barrier of driftwood across a gap (Barrier), cleared by Foraging (src/foraging.ts) from the
-     notch in front of it, sheltered.
+     The rocks across a gap (Rocks, 12 Nov), shot down by anyone's broadsides on the move, ROCKS.HITS of
+     them, then open to every racer. And the barrier of driftwood across a gap (Barrier), cleared by
+     Foraging (src/foraging.ts) from the notch in front of it, sheltered.
    - [D] the locks: up one, pumped by Bilge, and down the other (src/den-lock.ts), a berth beside the way
      in to wait your turn in; and the zigzag before them, headwinds a Double hops.
    - [E] the crane in its notch on the last spit: built by Carpentry, a part at a time (src/den-crane.ts,
      the cliff's crane's rules put down here), it hauls her over to the run home. And the gap a Triple
      hops.
-   Each shortcut saves about what a decent player takes on its puzzle (RACE.DECENT, tested), so it pays
-   only if it's your puzzle. The snakes (winds that sweep her back: RACE.md §4) sting more the further
-   down the course they are, the left-hand trade wind most: legs 2 and 4 end hard by it, the run home runs
-   beside it, and it carries her all the way back to the start. Home is a line across the run home
-   between two markers (atFinish).
+   Each stopped puzzle's shortcut skips about the same stretch of course and is sized to take about the
+   same time to play, the chain hops growing with their chain (RACE.DECENT, tested; RACE.md §8, "Shortcuts in
+   proportion"), so it pays only if it's your puzzle. The snakes (winds that carry her back: RACE.md §4) are
+   gentle since 12 Nov: each a loop of three or four squares back, to try again, never a leg or the start
+   ("I don't want it to be rage-inducing"). No gambles (12 Nov). Home is a line across the run home between
+   two markers (atFinish). The start's field is laid from the race's seed (src/start-field.ts): Race.seed.
    Your best time's kept in this browser. The race keeps a field of racers (src/den-racers.ts: two to
    four on one course, first come first served, shooting each other): you, and up to three rivals, the
    den's own characters (src/den-rivals.ts, how many picked on the line), each sailed by the
@@ -62,6 +64,7 @@ import { Crane, CRANES } from './den-crane.js';
 import { Field, FIELD, stretchAt, atFinish, courseSea, type FieldEvent } from './den-racers.js';
 import { RIVALS, type Rival } from './den-rivals.js';
 import type { Deal } from './foraging.js';
+import { fieldFor, type StartField } from './start-field.js';
 
 export { stretchAt, atFinish };
 
@@ -83,8 +86,13 @@ export const RACE = {
       squares rowed by mirror strokes; a Vegas; a lock pumped up by Bilge and another drained; three
       frames of Carpentry; a barrier cleared by Foraging; and the gaps a Double and a Triple hop. The
       locks' went from 26 to 31 (12 Nov) when their water and gates became a beat, not a wait (LOCK). The barrier's
-      from 15 to 12 (12 Nov) when it moved a column east, off the trade wind's hop. */
-  DECENT: { guns: 14, headwind: 25, whirls: 49, locks: 23, crane: 38, forage: 12, double: 9, triple: 9 },
+      from 15 to 12 (12 Nov) when it moved a column east, off the trade wind's hop.
+      The race's next pass (12 Nov, RACE.md §8, "Shortcuts in proportion": "each an element of puzzling surely
+      should be the same distance"): every stopped puzzle's shortcut skips about the same stretch, about 22 s
+      (the gate 22, the rowing gap 25, the rocks 25, the locks 23, the crane 27, the barrier 16: it sits where
+      spit 3 has room), each puzzle sized to about the same time (the locks 5 clears, the crane's small frames,
+      the bribe 30 coins); the chain hops grow with the chain: a Double 9, a Triple 14, a Vegas 48. */
+  DECENT: { guns: 22, headwind: 25, whirls: 48, rocks: 25, locks: 23, crane: 23, forage: 16, double: 9, triple: 14 },
   /** The long way's own spot on the starting line: where the long way's route starts (LONG_ROUTE), and
       what the simulation measures every other spot against (src/race-sim.ts, SIM.SPOTS). */
   LONG_SPOT: 13,
@@ -107,6 +115,9 @@ export const RACE = {
       to come; cleared when they've all dropped out of the bottom (src/foraging.ts: the board's done). As many as
       the course has (src/race-course.ts, bundles: two, the den's own). */
   FORAGE: { BUNDLES: ([[4, 2], [3, 4], [5, 5], [2, 1]] as [number, number][]).slice(0, RC.COURSE.bundles) },
+  /** The rocks across spit 3's gap (12 Nov): broadside hits to bring them down, anyone's (the user: "Maybe
+      you could do it with like 3 gunshots or something"). */
+  ROCKS: { HITS: 3 },
 } as const;
 
 /** With the Sailing board open at sea, Space and Enter are the board's (Space drops its pair faster), never
@@ -128,8 +139,8 @@ export const spotPose = (c: number): Pose => ({ c: Math.max(RC.LINE.c0, Math.min
 /** The spot she's taken in to from the buoy: the line's square below the gate. */
 export const FIRST_SPOT = RC.GATE[1][0];
 
-/** Which snake, if any, has this square: the left-hand trade wind, the tight water past the gun gap, or
-    the trade wind back up the course. */
+/** Which snake, if any, has this square: the left-hand trade wind's loops, the tight water past the gun gap,
+    or the trade wind back across leg 3 (each carries her back a few squares: RACE.md §4). */
 export type Snake = 'left' | 'tight' | 'mid';
 const snakes = new Map<string, Snake>([
   ...RC.SNAKES.LEFT.map(([c, r]): [string, Snake] => [key(c, r), 'left']),
@@ -172,8 +183,10 @@ export interface Driver {
   progress(i: number): number;
   hit(i: number, by: number): boolean;
   lift(i: number): number;
+  /** Your hit on the rocks, told on (a race online: to its room); the field's counted it already. */
+  rock?(): void;
 }
-export type Drive = (field: Field, rivals: readonly Rival[]) => Driver;
+export type Drive = (field: Field, rivals: readonly Rival[], seed: number) => Driver;
 
 /** You, each tick: your square (fractional as she sails), the way you face, and what holds you if
     anything (holed: 'dazed', patching; 'carried', on the crane's hook or a gust, out of reach). */
@@ -205,6 +218,9 @@ export class Race {
   /** Racing online (src/race-net.ts): everyone else on the course, in order, the other players and the
       room's bots, instead of your rivals (null: your rivals, the first `rivals` of them). */
   roster: readonly Rival[] | null = null;
+  /** The race's seed: its start's field (src/start-field.ts: the same seed, the same field, for everyone in a
+      race online), and your rivals' sailing (`drive`). A fresh one each time she's taken in to the line. */
+  seed = 1;
   /** The snake that has her now, if one does (said once a sweep). */
   private snake: Snake | null = null;
   /** How long she's sat on one square, and which. */
@@ -233,10 +249,13 @@ export class Race {
     if (boardHasKey(key, board) || (key !== ' ' && key !== 'enter')) return false;
     return atStart(h.pose.c, h.pose.r) && h.slot < 0 && !h.held() && this.state !== 'count' && this.state !== 'on';
   }
-  /** In to the starting line from the buoy, to pick her spot. Not while one's on. */
-  take(): boolean {
+  /** The start's field this race (its seed's). */
+  field0(): StartField { return fieldFor(this.seed); }
+  /** In to the starting line from the buoy, to pick her spot, a fresh seed (`seed`: a race online's, the
+      room's). Not while one's on. */
+  take(seed: number = 1 + Math.floor(Math.random() * 2 ** 30)): boolean {
     if (this.state === 'count' || this.state === 'on') return false;
-    Object.assign(this, { state: 'line', spot: FIRST_SPOT, won: false, entered: false, run: null });
+    Object.assign(this, { state: 'line', spot: FIRST_SPOT, won: false, entered: false, run: null, seed });
     this.field = this.lineUp();
     if (this.taken(this.spot)) this.shift(1);
     return true;
@@ -292,7 +311,7 @@ export class Race {
     if (this.state === 'count') {
       for (const e of this.field.tick(dt)) if (e.kind === 'count' || e.kind === 'go') out.push(e);
       this.t = this.field.t;
-      if (this.field.state === 'on') { this.state = 'on'; this.run = this.drive?.(this.field, this.racing()) ?? null; }
+      if (this.field.state === 'on') { this.state = 'on'; this.run = this.drive?.(this.field, this.racing(), this.seed) ?? null; }
       return out;
     }
     const rest = this.state === 'done' && this.field.state === 'on';
@@ -331,6 +350,14 @@ export class Race {
     return out;
   }
 
+  /** Your broadside's come down on the rocks (12 Nov): a hit on them, shared by the field. Whether it counted,
+      and whether they're down now. */
+  blast(): { hit: boolean; down: boolean } {
+    if (this.state !== 'on') return { hit: false, down: rocksDown(this.field) };
+    const hit = this.field.blast(RACE.ROCKS.HITS);
+    if (hit) this.run?.rock?.();
+    return { hit, down: rocksDown(this.field) };
+  }
   /** Who a broadside of yours over `cells` (in order, as it flies) would hit: the first rival on one who
       can be hit, before any rock or land; -1 nobody. */
   target(cells: [number, number][]): number { return this.state === 'on' ? this.field.firstOn(cells, 0) : -1; }
@@ -475,11 +502,34 @@ export class Barrier {
   /** Cleared: its squares open water on `sea`. */
   clear(sea: Sea) {
     for (const [c, r] of RC.FORAGE.BARRIER) { sea.works.delete(key(c, r)); sea.rocks.delete(key(c, r)); }
+    sea.touch();
     this.cleared = true;
   }
   /** Back across the gap, for a new race. */
   reset(sea: Sea) {
     for (const [c, r] of RC.FORAGE.BARRIER) { sea.works.add(key(c, r)); sea.rocks.add(key(c, r)); }
+    sea.touch();
     this.cleared = false;
   }
+}
+
+/* [C'] The rocks blasted open for everyone (12 Nov). The user: "if you had like a destructible obstacle there
+   ... somebody could start shooting it if they're first, but then ... once it's been destroyed, that opens it
+   up ... for everybody, not just them ... it's a way for the loser to catch up ... Maybe you could do it with
+   like 3 gunshots or something." A wall of rocks across the mouth of a gap in spit 3, off leg 3: land on the sea
+   till it's down. Anyone's broadside that comes down on it (fired as she sails by on leg 3: her port side going
+   along it) is a hit, counted by the race's field (Field.rocks, shared: online the room keeps it); at
+   ROCKS.HITS it's down, open water for every racer for the rest of the race. Her shots are her budget (she
+   starts with two, loaded by Gunnery), so blasting costs what she'd fire at rivals. A new race, it's back. */
+const rockSq = new Set(RC.ROCKS.WALL.map(([c, r]) => key(c, r)));
+/** One of the rocks' squares (where a broadside comes down on them). */
+export const onRocks = (c: number, r: number): boolean => rockSq.has(key(Math.round(c), Math.round(r)));
+/** The rocks are down, on this field. */
+export const rocksDown = (f: Field): boolean => f.rocks >= RACE.ROCKS.HITS;
+/** Down: their squares open water on `sea`; or back across the gap (`up`), for a new race. */
+export function rocksOn(sea: Sea, up: boolean) {
+  for (const [c, r] of RC.ROCKS.WALL) {
+    if (up) { sea.works.add(key(c, r)); sea.rocks.add(key(c, r)); } else { sea.works.delete(key(c, r)); sea.rocks.delete(key(c, r)); }
+  }
+  sea.touch();
 }

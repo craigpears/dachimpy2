@@ -47,8 +47,10 @@ export const BRIBE = {
   /** Moves a decent player takes to haul the price up (as measured above, for 40 coins; a course from the
       race's editor may ask more or fewer: src/race-course.ts, coins); src/race-sim.ts's haul time. */
   MOVES: (4.7 * LAY.RACE.COURSE.coins) / 40,
-  /** Seconds a move of Treasure Haul takes a decent player: seeing it, the swap, the coins going up. */
-  MOVE_SECS: 1.5,
+  /** Seconds a move of Treasure Haul takes a decent player: seeing it, the swap, the coins going up. 1.5 till
+      12 Nov; then 4, from the user's playtest ("doing an entire puzzle to get through one gate"): a haul for the
+      bribe feels a whole puzzle's worth, as long as the others' (RACE.md §8, "Shortcuts in proportion"). */
+  MOVE_SECS: 4,
   /** Gems now and then, as the den's other hauls; no chest. */
   ODDS: { ...HAUL.ODDS, chest: 0 } as Odds,
   /** Seconds at the gate to pay (src/race-sim.ts): a moment, stopped, before she's towed. */

@@ -31,7 +31,7 @@ describe('the simulated course is the helm\'s (11 Nov)', () => {
     }
     expect(leg).toBe(RC.STRETCHES.length - 1);
     const at = (t: number) => { const p = routePose(t); return stretchAt(Math.round(p.c), Math.round(p.r)); };
-    const legs: Record<CutId, number[]> = { guns: [0, 1], wreck: [0, 0], headwind: [1, 2], double: [1, 2], whirls: [2, 3], forage: [2, 3], locks: [3, 4], zigzag: [3, 3], crane: [4, 5], triple: [4, 5], door: [1, 4] };
+    const legs: Record<CutId, number[]> = { guns: [0, 1], wreck: [0, 0], headwind: [1, 2], double: [1, 2], whirls: [2, 3], rocks: [2, 3], forage: [2, 3], locks: [3, 4], zigzag: [3, 3], crane: [4, 5], triple: [4, 5], door: [1, 4] };
     for (const c of Object.values(CUTS)) expect([at(c.tIn), at(c.tOut)], c.id).toEqual(legs[c.id]);
     expect(tauAt(0, 20)).toBeLessThan(tauAt(1, 20));
   });
@@ -64,7 +64,7 @@ describe('the simulation (11 Nov: "just run through simulations quickly and easi
     const locks = route('locks'), peaceful = style('peaceful');
     let waited = 0;
     for (let seed = 1; seed <= 20; seed++) {
-      const [a, b] = simulate({ racers: [{ route: locks, style: peaceful, skill: 'great', spot: 12 }, { route: locks, style: peaceful, skill: 'great', spot: 12 }], seed, snakes: false, gambles: false });
+      const [a, b] = simulate({ racers: [{ route: locks, style: peaceful, skill: 'great', spot: 12 }, { route: locks, style: peaceful, skill: 'great', spot: 12 }], seed, snakes: false });
       const ta = a.cuts.find((c) => c.id === 'locks')!, tb = b.cuts.find((c) => c.id === 'locks')!;
       if (!ta.done || !tb.done || Math.min(ta.saved, tb.saved) < Math.max(ta.saved, tb.saved) - 10) waited++;
     }
@@ -143,15 +143,16 @@ describe('the bribe at the gate, simulated (12 Nov: "build the bribe gate ... to
       expect(b.cuts.find((c) => c.id === 'guns')?.done).toBe(true);
     }
   });
-  it('the haul is counted against the gap it pays for: a decent player saves less than a great one, and both save something', () => {
+  it('the haul is counted against the gap it pays for: a decent player saves less than a great one, about nothing (12 Nov: a whole puzzle\'s haul for a gate worth as much as the other shortcuts), a great one something', () => {
     const at = (skill: 'decent' | 'great') => {
       let n = 0;
       for (let seed = 1; seed <= 40; seed++) n += simulate({ racers: [{ route: route('every'), style: style('peaceful'), skill, spot: 13 }, { route: route('long'), style: style('peaceful'), skill: 'decent', spot: 3 }], seed, snakes: false })[0].cuts.find((c) => c.id === 'guns')!.saved;
       return n / 40;
     };
     const decent = at('decent'), great = at('great');
-    expect(decent).toBeGreaterThan(0);
+    expect(Math.abs(decent)).toBeLessThan(8);
     expect(great).toBeGreaterThan(decent);
+    expect(great).toBeGreaterThan(3);
     expect(great).toBeLessThan(RACE.DECENT.guns);
   });
 });
@@ -178,4 +179,31 @@ describe('snakes in the simulation (11 Nov: "I want the snakes and [ladders]")',
     for (const s of ['mid', 'tight', 'left']) expect(rep.bySnake[s]?.n ?? 0, s).toBeGreaterThan(0);
     expect(rep.bySnake.tight.wins).toBeGreaterThan(0);
   }, 60000);
+
+  it('a snake\'s never a lost race (12 Nov: "I don\'t want it to be rage-inducing"): racers a snake had still win, now and then', () => {
+    const rep = run(600, 4, { seed: 11 });
+    let n = 0, wins = 0;
+    for (const s of ['mid', 'tight', 'left']) { const x = rep.bySnake[s]; expect(x.n, s).toBeGreaterThan(5); n += x.n; wins += x.wins; }
+    expect(wins / n).toBeGreaterThan(0.02);
+  }, 60000);
+});
+
+describe('the rocks blasted open for everyone, simulated (12 Nov: "it\'s a way for the loser to catch up")', () => {
+  it('the rocks\' route loads her guns on the move and brings them down; once down, racers coming after go through free', () => {
+    const rep = run(400, 4, { seed: 21 });
+    expect(rep.rocks.down).toBeGreaterThan(40);
+    expect(rep.rocks.hit).toBeGreaterThan(0);
+    expect(rep.rocks.free).toBeGreaterThan(0);
+    expect(rep.rocks.through).toBeGreaterThan(rep.rocks.free);
+  }, 60000);
+
+  it('three hits, anyone\'s, shared by the field: a rocks racer and a free rider after her', () => {
+    let free = 0;
+    for (let seed = 1; seed <= 20; seed++) {
+      const [a, b] = simulate({ racers: [{ route: route('rocks'), style: style('peaceful'), skill: 'great', spot: 20 }, { route: route('long'), style: style('peaceful'), skill: 'decent', spot: 2 }], seed, snakes: false });
+      expect(a.rocks.hits).toBeLessThanOrEqual(RACE.ROCKS.HITS);
+      if (a.rocks.through && b.rocks.free) free++;
+    }
+    expect(free).toBeGreaterThan(5);
+  });
 });

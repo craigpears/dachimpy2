@@ -7,17 +7,18 @@
 // racing friends online (a lobby on the line, the room running the race) race-net.js; its marks (the numbered buoys, the finish line and the moment you cross it, everyone's places)
 // race-marks.js; the barrier of driftwood and its Foraging race-forage.js; the gun gap as an imperial gate,
 // its guard bribed with the coins of a wreck off leg 1, race-bribe.js; your rivals' sloops on the water,
-// their broadsides and yours, race-field.js; its gambles (the turning pool, the veiled wind), race-gamble.js.
+// their broadsides and yours, race-field.js; the rocks across spit 3's gap, blasted open for everyone,
+// race-rocks.js. (Its gambles went, 12 Nov.)
 // Everything it's made of is a shared piece: the sea draws its line of rocks (reef.js), the locks
 // (lock.js) and the winds (sea.js, windLane); a gun is a destructible turret (turret.js), a whirlpool
 // Kikkit's look (whirlpools.js), the sloop the sloop (sloop.js), the crane's frames played on the deck
-// patch's tray (sea-puzzles.js). The starlit door, hidden in the second spit's cliffs, is door.js's. Touches the rest only through a few hooks: sailing.js builds, ticks and
+// patch's tray (sea-puzzles.js). The starlit door, in the second spit's cliff, is door.js's. Touches the rest only through a few hooks: sailing.js builds, ticks and
 // asks it (keys, the prompt, her shots, what holds her), and a starting point (menus.js).
 import * as THREE from 'three';
 import { LAY, SAIL } from '../den-sail.js';
 import { whirlpool } from '../den-whirl.js';
 import { CRANE, travel } from '../den-crane.js';
-import { RACE, Race, GunGap, Drift, atStart, clockText, cleanBest, neckCrane, nextBuoy, stretchAt, readyLocks, boardHasKey } from '../den-race.js';
+import { RACE, Race, GunGap, Drift, atStart, onCourse, clockText, cleanBest, neckCrane, nextBuoy, stretchAt, readyLocks, boardHasKey } from '../den-race.js';
 import { station } from './sail-station.js';
 import { simDrive } from '../race-sim.js';
 import { FIELD } from '../den-racers.js';
@@ -36,10 +37,9 @@ import { marksWorld, marksTick, crossed, placings } from './race-marks.js';
 import { fieldWorld, fieldTick, fieldHome, fieldShot, fieldHit, fieldAt, fieldReset } from './race-field.js';
 import { forageWorld, forageKey, foragePrompt, forageHolds, forageTick, forageReset, forageCam, forageHover, forageClick } from './race-forage.js';
 import { bribeWorld, bribeKey, bribePrompt, bribeSpares, bribeTick, bribeReset, gateGun } from './race-bribe.js';
-import { gambleWorld, gambleTick, gambleReset } from './race-gamble.js';
+import { rocksWorld, rocksShot, rocksTick, rocksReset } from './race-rocks.js';
 import { netKey, netPrompt, netTick, netBefore, netInTick } from './race-net.js';
 import { NET } from '../race-net.js';
-import { gamble } from './race-gamble.js';
 
 const RC = LAY.RACE, CELL = SAIL.CELL, DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
 const NTH = (n) => (n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`);
@@ -135,10 +135,13 @@ function build() {
   // The starting buoy off the gate (the gate's flags and the finish flag there were are the numbered
   // buoys and the finish line now: race-marks.js).
   const b = buoy(); b.position.set(seaX(RC.BUOY[0]) + CELL * 0.4, 0.1, seaZ(RC.BUOY[1]) - CELL * 0.4); W.g.add(b);
-  // Its winds (the snakes, the headwinds the Doubles hop, the start's field's), the whirlpool channel's
-  // winds, and the channel's whirlpools and the field's.
+  // Its trade winds (the snakes, the headwinds the Doubles hop, the field's hop and its lane), the whirlpool
+  // channel's winds, and the channel's whirlpools. (The field's slow winds and whirlpools are each race's own:
+  // race-start.js.)
   for (const l of [...lanes(RC.WINDS), ...lanes(RC.WHIRLS.WINDS)]) { W.g.add(l.g); W.winds.push(l.tex); }
-  for (const spot of [...RC.WHIRLS.POOLS, ...RC.FIELD.POOLS]) { const o = pool(whirlpool(spot)); W.g.add(o); W.pools.push(o); }
+  for (const spot of RC.WHIRLS.POOLS) { const o = pool(whirlpool(spot)); W.g.add(o); W.pools.push(o); }
+  // The rocks walling in the field's hop: boulders, a couple to a square.
+  for (const [c, r] of RC.FIELD.HOP.ROCKS) for (let k = 0; k < 2; k++) W.g.add(rock(seaX(c) + (Math.random() - 0.5) * 2, 0.2, seaZ(r) + (Math.random() - 0.5) * 2, 0.9 + Math.random() * 0.4));
   // The gun gap: a turret either side on the spit, on the Empire's bastions (an imperial gate:
   // race-bribe.js), and the squares they're trained on.
   for (const [c, r] of RC.GUNS.at) { const V = gateGun(); V.g.position.set(seaX(c), LOOK[0].h - 0.3, seaZ(r)); W.g.add(V.g); W.guns.push(V); }
@@ -146,7 +149,7 @@ function build() {
   // The crane's footing on the neck.
   W.crane = craneMesh(); W.g.add(W.crane.g);
   scene.add(W.g);
-  startWorld(); marksWorld(); forageWorld(); bribeWorld(); fieldWorld(); gambleWorld();
+  startWorld(); marksWorld(); forageWorld(); bribeWorld(); fieldWorld(); rocksWorld(W.g);
   return W;
 }
 /** Built the first time the sea's drawn (sailing.js). */
@@ -247,17 +250,22 @@ export function raceKey(key) {
     return true;
   }
   if (race.rules.takes(key, h, station.on)) { intoLine(); toast('Pick yer spot on the line, and Space when ye\'re ready'); return true; }
+  // (home: the course runs one way, so Space takes her back out to the starting buoy for another go; 12 Nov,
+  // the left-hand trade wind that used to carry her back there is only a few gentle loops now)
+  if (go && homeAgain(h)) { raceCheat(); toast('Back out to the starting buoy'); return true; }
   return false;
 }
+/** Over the line and lying still on the course: Space takes her back to the buoy. */
+const homeAgain = (h) => race.rules.state === 'done' && race.doneT <= 0 && onCourse(h.pose.c, h.pose.r) && h.slot < 0 && !h.held() && !race.trip;
 /** In to the starting line from the buoy, everything on the course made ready for a new race (Space at the
     buoy; racing online, the room's lobby or its count: race-net.js). */
-function intoLine() {
-  takeLine(race.rules);
+function intoLine(seed) {
+  takeLine(race.rules, seed);   // (a fresh seed, or the room's: the start's field, race-start.js)
   race.gap = new GunGap();
   doorReset();   // (shut again, for a new race)
   forageReset();   // (the driftwood back across its gap)
   bribeReset();   // (the wreck's coins back down there, the gate unpaid)
-  gambleReset();   // (the turning pool's clock from the gun, fresh tosses of the veiled wind)
+  rocksReset();   // (the rocks back across their gap)
   readyLocks(sail.helm);   // (each lock's water at the side she'll come to it from)
 }
 export function racePrompt() {
@@ -273,6 +281,7 @@ export function racePrompt() {
     if (K().built()) return 'Under the crane · Space: haul her over the neck';
     return K().frame || K().up ? `Alongside the neck · Space: back to building the crane (its ${CRANE.PARTS[K().up].name})` : 'Alongside the neck · Space: build a crane to haul her over (Carpentry)';
   }
+  if (homeAgain(h)) return 'Home! · Space: back out to the starting buoy';
   if (atStart(h.pose.c, h.pose.r) && h.slot < 0 && R.state !== 'count' && R.state !== 'on') {
     return `The race buoy · Space: in to the starting line${R.best ? ` · your best ${clockText(R.best)}` : ''}`;
   }
@@ -290,6 +299,7 @@ export function raceHitRival(i) { if (race.rules.shoot(i)) fieldHit(i); }
 /* Her shot came down on (c, r) (sailing.js, sailFire): on one of the gun gap's guns, a hit on it; once
    she's fired on them they fire on her, as the checkpoint's do. Whether it was theirs. */
 export function raceShot(hit, at) {
+  if (rocksShot(race.rules, ...hit)) return true;   // (the rocks across spit 3's gap: race-rocks.js)
   const e = race.gap.shot(...hit);
   if (!e) return false;
   const fight = e.first ? ' It\'s a fight now: their guns are on her' : '';
@@ -340,7 +350,6 @@ export function raceHelm(h, dt) {
     steps.acc -= NET.STEP;
     const R = race.rules, on = R.state === 'on' || R.state === 'done';
     netBefore(h, R);   // (what's changed since the last step, written down: race-net.js)
-    if (on) gamble.k.t = steps.n * NET.STEP;   // (the turning pool's beat at this step)
     netInTick(true);
     out.push(...h.tick(NET.STEP));
     netInTick(false);
@@ -415,15 +424,15 @@ export function raceTick(dt) {
   // The starlit door: its board, its stars, its leaves, her trip along its tunnel (the race counts the legs
   // she passes under).
   doorTick(dt, (from, to) => R.under(from, to));
-  // The gambles: the turning pool's spin, the veiled wind, and the way one's just taken her.
-  gambleTick(dt, R);
+  // The rocks: knocked down a course a hit, open for everyone once they're down.
+  rocksTick(R);
   // Her trip over the neck, on the crane's hook.
   if (race.trip && sail.on) tripTick(dt);
   else if (K().built()) { const tip = W.crane.slew.localToWorld(TIP.clone()), l = W.crane.g.worldToLocal(tip); W.crane.hook.position.set(l.x, l.y - 1, l.z); }
   // Racing online: the room's race kept to, her pose sent, the lobby's panel (race-net.js).
   netTick(dt, R, intoLine, steps);
   // The start's line and card; the buoys, the next one lit; the finish's banner.
-  startTick(R, sail.on);
+  startTick(R, sail.on, dt);
   marksTick(dt, sail.on && R.state === 'on' ? nextBuoy(p.c, p.r) : -1);
   // Your rivals: on their spots on the line for the count, then racing, then moored past the finish line.
   fieldTick(dt, R, sail.on);
@@ -442,7 +451,7 @@ export function raceReset() {
   doorReset();
   forageReset();
   bribeReset();
-  gambleReset();
+  rocksReset();
   if (race.W) {
     for (const g of race.W.crane.parts) g.removeFromParent();
     race.W.crane.parts = [];

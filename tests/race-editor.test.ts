@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { LAY, layRace } from '../src/den-sail';
 import { DEFAULT_COURSE, decodeCourse, encodeCourse, problems } from '../src/race-course';
-import { run, CUTS, BET_SAVES, SIM } from '../src/race-sim';
+import { run, CUTS, SIM } from '../src/race-sim';
 import {
   FEATURES, ABOUT, featureAt, squaresOf, moved, sized, check, shareLink, raceLink, fresh, limitsOf, columnOf, balanceOf, mergeReports, mmss,
   ROUTE_NAMES, BAND,
@@ -58,11 +58,12 @@ describe('moving things (12 Nov)', () => {
     expect(layRace(k, true).BUOYS[3].at[0]).toBe(4);
   });
 
-  it('the veiled wind carries where it blows her back with it', () => {
-    const k = moved(DEFAULT_COURSE, 'veil', 16);
-    expect(k.veil).toBe(16);
-    expect(k.veilBack).toBe(4);
-    expect(problems(k)).toEqual([]);
+  it('the rocks move along spit 3, but never under the trade wind back\'s loop across leg 3 (12 Nov)', () => {
+    expect(featureAt(lay, ...lay.ROCKS.WALL[0])).toBe('rocks');
+    const k = moved(DEFAULT_COURSE, 'rocks', 14);
+    expect(k.rocks).toBe(14);
+    expect(check(k)).toEqual([]);
+    expect(problems({ ...DEFAULT_COURSE, rocks: 21, forage: 17 }).join(' ')).toMatch(/trade wind back/);
   });
 
   it('two shortcuts dragged into each other are flagged, not hidden', () => {
@@ -78,9 +79,8 @@ describe('the side panel\'s numbers (12 Nov)', () => {
     expect(sized(DEFAULT_COURSE, 'bundles', 0).bundles).toBe(1);
     expect(sized(DEFAULT_COURSE, 'coins', 47).coins).toBe(50);
     expect(sized(DEFAULT_COURSE, 'frames', 'large').frames).toBe('large');
-    expect(sized(DEFAULT_COURSE, 'frames', 'huge').frames).toBe('standard');
-    expect(sized(DEFAULT_COURSE, 'veilOn', 75).veilOn).toBe(80);
-    expect(problems(sized(sized(DEFAULT_COURSE, 'clears', 3), 'beat', 8))).toEqual([]);
+    expect(sized(DEFAULT_COURSE, 'frames', 'huge').frames).toBe(DEFAULT_COURSE.frames);
+    expect(problems(sized(sized(DEFAULT_COURSE, 'clears', 3), 'coins', 100))).toEqual([]);
   });
 });
 
@@ -111,20 +111,21 @@ describe('the balance check (12 Nov)', () => {
     const n = (r: typeof a) => Object.values(r.byRoute).reduce((x, t) => x + t.n, 0);
     expect(n(both)).toBe(n(a) + n(b));
     const saves = Object.fromEntries(Object.entries(CUTS).map(([id, c]) => [id, c.saves]));
-    const B = balanceOf(both, SIM.LONG, saves, BET_SAVES);
+    const B = balanceOf(both, SIM.LONG, saves);
     expect(B.fair).toBe(0.25);
-    expect(B.long).toBe(222);
+    expect(B.long).toBe(223.5);
     expect(B.routes.length).toBeGreaterThan(0);
     for (const r of B.routes) expect(ROUTE_NAMES[r.id]).toBe(r.name);
     expect(B.cuts.find((c) => c.id === 'locks')!.saves).toBe(23);
-    expect(B.bets.map((x) => x.id)).toEqual(['turn', 'veil']);
+    expect(B.cuts.find((c) => c.id === 'rocks')!.saves).toBe(25);
+    expect('bets' in B).toBe(false);
     expect(B.routes.every((r) => r.ok === (r.wins >= BAND[0] * B.fair && r.wins <= BAND[1] * B.fair))).toBe(true);
   });
 
   it('never lists a way round it has no name for', () => {
     const rep = run(2, 4, { seed: 3 });
     rep.byRoute.mystery = { n: 4, wins: 4, time: 0, hitsTaken: 0, hitsGiven: 0 };
-    expect(balanceOf(rep, 222, {}, BET_SAVES).routes.map((r) => r.id)).not.toContain('mystery');
+    expect(balanceOf(rep, 222, {}).routes.map((r) => r.id)).not.toContain('mystery');
   });
 
   it('a time on the clock to the second', () => {

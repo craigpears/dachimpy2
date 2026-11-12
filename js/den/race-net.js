@@ -8,20 +8,19 @@
 // room's snapshots (the race's Drive is the room's: mirrorDrive), and the spots that are one racer's at a
 // time (the locks, the crane, the barrier's notch, the wreck's) are shut to you while someone else has them.
 // Touches the rest only through race.js (its keys, prompt and tick), race-field.js (whose sloops are on the
-// water: fieldCast) and race-gamble.js (the race's seed for the veiled wind's tosses).
+// water: fieldCast). The race's seed (its start's field: race-start.js lays it) is the room's, the same for
+// everyone; the rocks' hits (race-rocks.js draws them) are the room's count of everyone's.
 import { NET, Mirror, mirrorDrive, meIn, poseUp, makeCode, spotSquare, waitAt } from '../race-net.js';
 import { wsLink } from '../race-link.js';
 import { simDrive } from '../race-sim.js';
 import { WATCHED, RIVALS } from '../den-rivals.js';
 import { LAY } from '../den-sail.js';
-import { gambleSeed } from '../race-replay.js';
 import { FIELD } from '../den-racers.js';
 import { spotPose, clockText } from '../den-race.js';
 import { STARTER } from '../lines/race.js';
 import { toast, myLook } from './world.js';
 import { sail } from './sea.js';
 import { fieldCast } from './race-field.js';
-import { gamble } from './race-gamble.js';
 import { linePrompt } from './race-start.js';
 
 const SPOT_NAME = { 'lock-up': 'the up lock', 'lock-down': 'the down lock', crane: 'the crane', forage: 'the barrier\'s notch', wreck: 'the wreck\'s notch' };
@@ -122,7 +121,7 @@ const acts = [];
 let noted = null, notedGuns = null, inTick = false, R0 = null;
 /** The race's steps sailed from the gun (race.js, steps). */
 const stepsOf = () => rnet.steps?.n ?? 0;
-const was = { dazed: false, breeze: '', clear: false };
+const was = { dazed: false, breeze: '', clear: false, rocks: false };
 const recording = () => online() && R0 && (R0.state === 'on' || R0.state === 'done') && rnet.me >= 0;
 const note = (...a) => { if (recording()) acts.push([stepsOf(), ...a]); };
 const copy = (x) => (x === undefined ? undefined : JSON.parse(JSON.stringify(x)));
@@ -132,10 +131,12 @@ export function netInTick(on) { inTick = on; }
 export function netBefore(h, R) {
   R0 = R;
   const dazed = h.dazed(), b = sail.sea.breeze, breeze = b ? `${b.d},${b.s}` : '', [bc, br] = LAY.RACE.FORAGE.BARRIER[0], clear = !sail.sea.rocks.has(`${bc},${br}`);
+  const [kc, kr] = LAY.RACE.ROCKS.WALL[0], rocks = !sail.sea.rocks.has(`${kc},${kr}`);
   if (was.dazed && !dazed) note('patched');
   if (b && breeze !== was.breeze) note('breeze', b.d, b.s);
   if (clear && !was.clear) note('clear');
-  Object.assign(was, { dazed, breeze, clear });
+  if (rocks && !was.rocks) note('rocks');
+  Object.assign(was, { dazed, breeze, clear, rocks });
 }
 function noting() {
   const h = sail.helm, g = sail.guns;
@@ -153,7 +154,7 @@ function noting() {
   }
 }
 /** A new race: nothing written down yet, the breeze as it is at the gun. */
-function fresh() { acts.length = 0; Object.assign(was, { dazed: false, breeze: '', clear: false }); }
+function fresh() { acts.length = 0; Object.assign(was, { dazed: false, breeze: '', clear: false, rocks: false }); }
 
 // ---------- who's racing ----------
 /** Everyone else on the course as the race lines them up (src/den-race.ts, Race.setRoster): the den's
@@ -190,6 +191,8 @@ function follow(dt, R, s, toLine) {
   noting();
   if (s.phase !== 'on' && R.state !== 'on' && R.state !== 'done') fresh();
   const me = rnet.me, mine = s.racers[me];
+  // (the race's seed, the room's: the start's field everyone races through, shown on the line before the count)
+  if (s.seed && R.seed !== s.seed && R.state !== 'on' && R.state !== 'count') R.seed = s.seed;
   // (the line-up: everyone else's sloop)
   const cast = me >= 0 ? roster(s) : null;
   const sig = JSON.stringify(cast?.map((x) => [x.key, x.spot]));
@@ -200,7 +203,7 @@ function follow(dt, R, s, toLine) {
   }
   if (s.phase === 'lobby' || s.phase === 'done') {
     if (s.phase === 'lobby' && (R.state === 'count' || R.state === 'on' || R.state === 'done')) { R.quit(); }
-    if (s.phase === 'lobby' && R.state === 'off') toLine();
+    if (s.phase === 'lobby' && R.state === 'off') toLine(s.seed);
     if (R.state === 'line' && mine && R.spot !== mine.spot) { R.spot = mine.spot; sail.helm.moor(spotPose(mine.spot)); }
     reopen();
   } else if (me < 0 || mine?.bot) {
@@ -212,15 +215,14 @@ function follow(dt, R, s, toLine) {
     send({ t: 'retire' });
   } else {
     rnet.out = false;
-    if (R.state === 'off' || (R.state === 'done' && s.phase === 'count')) toLine();
+    if (R.state === 'off' || (R.state === 'done' && s.phase === 'count')) toLine(s.seed);
     if (R.state === 'line') {
       R.spot = mine.spot;
       R.start();
       sail.helm.moor(spotPose(mine.spot));
       toast(STARTER.count[0]);
     }
-    // (the gambles' tosses: the race's seed, yours from it)
-    if (rnet.phase !== s.phase) gamble.k.reset(gambleSeed(s.seed, me));
+
     // (the count's the room's: the gun when it says)
     if (R.state === 'count') {
       const left = rnet.mirror.clock(now());

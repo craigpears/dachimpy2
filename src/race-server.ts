@@ -21,7 +21,10 @@
      the field's rules have it): a player's taken from where she is, so it can't be missed;
    - hits: a player's claim on someone, checked (hittable, and in a broadside's reach); the bots' broadsides;
    - places and finish times;
-   - the race's seed: the bots' sailing and every gamble's tosses (src/den-gamble.ts) from it;
+   - the race's seed: the bots' sailing and the start's field (src/start-field.ts: everyone's the same) from
+     it, chosen for the next race as one ends, so the lobby shows the field to be raced;
+   - the rocks across spit 3's gap (12 Nov): everyone's hits on them, the bots' and the players', so once
+     they're down they're down for every racer;
    - the bots filling the empty places, sailed by the simulation (src/race-sim.ts), the same bots as race you
      alone: the den's characters (WATCHED), on their own favourite ways round;
    - a player who drops out: a few seconds to come back (NET.GRACE), then a bot sails her sloop home.
@@ -29,7 +32,7 @@
 
 import { SAIL, type Pose } from './den-sail.js';
 import { Field, FIELD, courseSea, hittable, type RacerState, type Spot, type FieldEvent } from './den-racers.js';
-import { RACE, FIRST_SPOT, spotPose } from './den-race.js';
+import { RACE, FIRST_SPOT, spotPose, rocksDown } from './den-race.js';
 import { sail as sailBots, route, style, progressAt, type SimRun } from './race-sim.js';
 import { WATCHED } from './den-rivals.js';
 import { NET, apart, spotOn, spotSquare, waitAt, parseUp, type Phase, type Shot, type Snapshot, type SnapRacer, type Up, type Down, type Act } from './race-net.js';
@@ -170,12 +173,13 @@ export class Referee {
         break;
       }
       case 'hit': if (this.phase === 'on' && p.i >= 0 && !p.out) { this.rec?.input(this.k, [p.i, 'h', m.on]); this.claim(p, m.on); } break;
+      case 'rock': if (this.phase === 'on' && p.i >= 0 && !p.out) { this.rec?.input(this.k, [p.i, 'r']); this.blast(p); } break;
       case 'retire': if (this.ticking && p.i >= 0 && !p.out) { this.rec?.input(this.k, [p.i, 'o']); this.takeOver(p); } break;
       default: break;
     }
   }
 
-  /** The count: the field lined up from the lobby, a fresh seed. */
+  /** The count: the field lined up from the lobby, on the seed the lobby's shown (its start's field). */
   begin() {
     this.cast = this.lineUp();
     const ps = this.here();
@@ -185,7 +189,6 @@ export class Referee {
     this.field.start();
     this.cast.forEach((e, i) => { this.field!.racers[i].pose = spotPose(e.spot); });
     this.run = null;
-    this.seed = this.newSeed();
     this.shots = []; this.shotN = 0; this.been.clear(); this.k = 0; this.acc = 0;
     this.phase = ps.length ? 'count' : 'lobby';
     this.rec = this.phase === 'count' ? new Recorder(this.newId(), this.seed, this.cast.map((e, i) => {
@@ -200,9 +203,10 @@ export class Referee {
     if (this.rec && this.field && this.field.order.length) this.done.push(this.rec.finish(this.field, this.k));
     this.rec = null;
   }
-  /** Back to the lobby: nobody ready, anyone gone let go. */
+  /** Back to the lobby: nobody ready, anyone gone let go; a race cut short, a fresh seed for the next. */
   toLobby() {
     this.written();
+    if (this.phase === 'count' || this.phase === 'on') this.seed = this.newSeed();
     this.phase = 'lobby';
     this.field = null; this.run = null; this.cast = [];
     this.players = this.players.filter((p) => p.on);
@@ -270,6 +274,12 @@ export class Referee {
     if (!(this.run ? this.run.hit(on, p.i) : F.hit(on, p.i))) return;
     this.shot({ kind: 'shot', racer: p.i, cells: [[Math.round(t.pose.c), Math.round(t.pose.r)]], hit: on });
   }
+  /** Her broadside on the rocks: a hit on them, counted (once they're down, nothing more). */
+  private blast(p: Player) {
+    const F = this.field!;
+    if (F.racers[p.i].state === 'finished' || rocksDown(F)) return;
+    if (F.blast(RACE.ROCKS.HITS)) this.rec?.event({ k: this.k, kind: 'rocks', i: p.i, hits: F.rocks });
+  }
   private shot(e: Extract<FieldEvent, { kind: 'shot' }>) {
     this.shots.push({ n: ++this.shotN, by: e.racer, on: e.hit, cells: e.cells, t: this.at });
     if (e.hit >= 0) this.rec?.event({ k: this.k, kind: 'hit', by: e.racer, on: e.hit });
@@ -310,7 +320,7 @@ export class Referee {
     for (const p of this.players) if (p.i >= 0 && !p.out) this.stateOf(p);
     this.shots = this.shots.filter((x) => this.at - x.t <= NET.SHOTS);
     this.rec?.watch(F, this.run!, this.k);
-    if (F.state === 'done' || F.t > NET.LONGEST) { this.phase = 'done'; for (const p of this.players) p.ready = false; this.written(); }
+    if (F.state === 'done' || F.t > NET.LONGEST) { this.phase = 'done'; for (const p of this.players) p.ready = false; this.written(); this.seed = this.newSeed(); }
   }
 
   /** A race replayed from what was written down: the same field, seed and bots, each player's input heard at
@@ -333,6 +343,7 @@ export class Referee {
           const n = R.k + x[0], sq = seas[i]!.to(n);
           R.handle(id, { t: 'pose', c: sq.c, r: sq.r, d: sq.d, n, st: RECORD.STATES[x[1]], took: x[2], sh: x[3], leg: x[4], home: x[5] ?? null });
         } else if (what === 'h') R.handle(id, { t: 'hit', on: x[0] });
+        else if (what === 'r') R.handle(id, { t: 'rock' });
         else if (what === 'o') R.handle(id, { t: 'retire' });
       }
       R.step();
@@ -356,7 +367,7 @@ export class Referee {
     return {
       t: 'snap', room: this.room, seq: ++this.seq, phase: this.phase, at: q(this.at), clock: q(F ? F.t : 0), seed: this.seed, fill: this.fill,
       players: this.players.map((p) => ({ id: p.id, name: p.name, look: p.look, ready: p.ready, on: p.on, racing: p.i >= 0 && !p.out })),
-      racers, holds: F ? [...F.holds.entries()] : [], shots: this.shots.map(({ n, by, on, cells }) => ({ n, by, on, cells })),
+      racers, holds: F ? [...F.holds.entries()] : [], shots: this.shots.map(({ n, by, on, cells }) => ({ n, by, on, cells })), rocks: F ? F.rocks : 0,
     };
   }
 }
@@ -437,10 +448,10 @@ export class RaceServer {
 
 /** A race written down (the user, 12 Nov: "people can see games that have been played, view them and see the
     replays"), kept small: "you don't need positions 4 times a second, you just need moves ... really all you
-    need is to save somebody's actions." So: its seed (every bot's sailing, and every gamble's toss, from it:
+    need is to save somebody's actions." So: its seed (every bot's sailing, and the start's field, from it:
     bots are written down as nothing more); its racers (names, looks, sails, spots); each player's actions at
     the helm with the race's clock (`acts`: src/race-net.ts, Act: moves, pins, moorings, broadsides); what the
-    room decided (`events`: hits, turns at the spots, gambles, finishes, a player's sloop taken over by a bot);
+    room decided (`events`: hits, turns at the spots, the rocks' hits, finishes, a player's sloop taken over by a bot);
     a keyframe of every racer's square, facing and what she's doing every RECORD.KEY seconds (to put right any
     drift in replaying, and to start watching from the middle); the places and times; and each racer's
     puzzle moves (`moves`: empty for now, to be filled in). `v`: the version, for a viewer to read it by. */
@@ -450,15 +461,15 @@ export interface RecordRacer { name: string; id: string | null; rv: number; look
 export type RecordEvent =
   | { k: number; kind: 'hit'; by: number; on: number }
   | { k: number; kind: 'turn'; i: number; spot: Spot }
-  | { k: number; kind: 'gamble'; i: number; bet: string; on: boolean }
+  | { k: number; kind: 'rocks'; i: number; hits: number }
   | { k: number; kind: 'finish'; i: number; place: number; time: number }
   | { k: number; kind: 'out'; i: number };
 /** What a player said that changed the race, in order, each at the room's steps since the one before (`dk`),
     from whom (`i`): her pose (`p`: the steps she'd sailed, less the room's then; what she was doing as
     RECORD.STATES' number, the room's hits she'd taken, shots loaded, her stretch, and her time home once
-    she's home; her squares are her sloop's replay at those steps), a hit she claimed (`h`: on whom), out of
-    the race (`o`: a bot sails her sloop from here). */
-export type RecordInput = [dk: number, i: number, what: 'p' | 'h' | 'o', ...x: number[]];
+    she's home; her squares are her sloop's replay at those steps), a hit she claimed (`h`: on whom), a hit
+    on the rocks (`r`), out of the race (`o`: a bot sails her sloop from here). */
+export type RecordInput = [dk: number, i: number, what: 'p' | 'h' | 'r' | 'o', ...x: number[]];
 export interface RaceRecord {
   v: number; id: string; date: number; seed: number;
   /** The race's step (seconds: NET.STEP), the room's steps it ran (from the count), and the steps between
@@ -482,7 +493,7 @@ export class Recorder {
   readonly rec: RaceRecord;
   private next = 0;
   private holds = new Map<Spot, number>();
-  private bets = new Map<number, string>();
+  private rocks = 0;
   private home = new Set<number>();
   constructor(id: string, seed: number, racers: RecordRacer[]) {
     this.rec = { v: RECORD.V, id, date: 0, seed, step: NET.STEP, steps: 0, key: RECORD.KEY, racers, inputs: [], acts: racers.map(() => []), events: [], keys: [], places: [], moves: racers.map(() => []) };
@@ -490,21 +501,22 @@ export class Recorder {
   event(e: RecordEvent) { this.rec.events.push(e); }
   private lastK = 0;
   /** What a player said at the room's step `k`. */
-  input(k: number, x: [number, 'p' | 'h' | 'o', ...number[]]) { this.rec.inputs.push([k - this.lastK, ...x]); this.lastK = k; }
+  input(k: number, x: [number, 'p' | 'h' | 'r' | 'o', ...number[]]) { this.rec.inputs.push([k - this.lastK, ...x]); this.lastK = k; }
   /** A player's actions, as her browser sent them. */
   acted(i: number, acts: Act[]) { this.rec.acts[i]?.push(...acts); }
   private keyframe(F: Field, k: number) {
     this.rec.keys.push([k, ...F.racers.flatMap((r) => [Math.round(r.pose.c * 10), Math.round(r.pose.r * 10), r.pose.d, RECORD.STATES.indexOf(r.state)])]);
   }
-  /** Each step under way: a keyframe now and then; who's been given a spot, who's taken a gamble, who's home. */
+  /** Each step under way: a keyframe now and then; who's been given a spot, the rocks' hits (a bot's: a
+      player's is written as she makes it), who's home. */
   watch(F: Field, run: SimRun, k: number) {
     if (k >= this.next) { this.next = k + RECORD.KEY; this.keyframe(F, k); }
     for (const [s, i] of F.holds) if (this.holds.get(s) !== i) this.event({ k, kind: 'turn', i, spot: s });
     this.holds = new Map(F.holds);
+    const said = this.rec.events.filter((e) => e.kind === 'rocks').length;
+    if (F.rocks > Math.max(this.rocks, said)) this.event({ k, kind: 'rocks', i: -1, hits: F.rocks });
+    this.rocks = F.rocks;
     F.racers.forEach((r, i) => {
-      const b = run.info(i)?.bet, key = b ? `${b.id}:${b.on}` : '';
-      if (b && key !== this.bets.get(i)) this.event({ k, kind: 'gamble', i, bet: b.id, on: b.on });
-      this.bets.set(i, key);
       if (r.time !== null && !this.home.has(i)) { this.home.add(i); this.event({ k, kind: 'finish', i, place: r.place ?? 0, time: r.time }); }
     });
   }
