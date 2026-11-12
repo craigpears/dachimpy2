@@ -511,6 +511,22 @@ do and I'll feed back. That's probably going to be better than you brute force."
 running the bots over and over: the user watches them play on `distilling-test.html` and says what a
 real player would do instead, and the routines change from that.
 
+**Watching them, the first note (the user, 12 Nov, a screenshot of the Ultimate's board):** "the main
+thing is it just doesn't carry on the whole way to the right. It just kind of stops ... that black ... in
+the white, it was dragging the black diagonally down and it just stopped there. It's like, well, no, it
+should carry on as far as it can go. And you can see in the top as well, there's just like a lone white
+piece. So at the start ... there's plenty of moves. So it's like just drag the brown, drag all the black,
+drag everything over. It's just quick drag motions. You don't need to be surgically precise about it at
+the start, and that gives you a huge amount of speed difference." So:
+- **A drag goes as far as it can:** a black sent down through the whites keeps going, diagonally, to the
+  bottom and on to the right until nothing lets it further; a brown up the same; never parked one place
+  short in the middle of the whites, where it's a piece trapped on the next column's edge.
+- **The start is sweeping, not surgery:** in the first columns, with plenty of moves and time, the junk
+  is swept right in long rough drags one after another, every brown and black dragged over, with little
+  pause between them; precision comes later, when the furnace is close. That's where most of a real
+  player's speed comes from.
+- **No lone white left behind at the top:** the sweep brings the whites left with it.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
