@@ -839,6 +839,20 @@ column by column on the right".
   each completed junk column on the right with no white in it. Build that first, then add the rest above only
   where it shows it's needed.
 
+**The twelfth note: stuck, a solid line of colour makes a channel (the user, 12 Nov,
+`notes/distilling/22-stuck-bottom-right.webp`; a second screenshot of what came next was mentioned but didn't
+arrive).** "I don't know if this is the best example, but this is one where I was stuck in the bottom right on
+how to ... unstick myself on this. And like, I think what I've done is just made sure I had a solid line of
+coloured pieces, so blacks and browns, because ... once they're nice and connected. At least I can then start
+dragging all the blacks down. It creates a nice little channel to get through. But I certainly could start
+clearing the mess that is this kind of middle of the board." The board: colour mixed right across the middle
+and top, the right-hand columns junk with whites caught low in them and along the bottom, nothing a plain
+drag gets over.
+- **Getting unstuck:** first join the colour into one solid, connected line of blacks and browns; once it's
+  connected, blacks can be dragged down along it one after another, and the line becomes a channel for
+  pieces to get through. Then clear the mixed-up middle.
+- (The progression after this, in the second screenshot: to come.)
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
