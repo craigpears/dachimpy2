@@ -357,6 +357,15 @@ and puzzles in their own browser, sending where she is a few times a second. Eve
 on the starting line (a code to share, ready up, the count from the host). Kept apart from the rest: its
 rules a tested `src/` part, its wiring a `js/den/` file, a thin hook on the line. Trusting the players
 (friends, for playtests): no cheat-proofing to start.
+**Long term, a proper server (12 Nov):** "we need a proper server in future, so that ... it's not
+hackable, it's fair ... and it's reliable", because "if somebody misses one of the messages, someone else
+doesn't, then things get out of sync, and before you know it, you're on top of a rock. So yeah, long
+term, that definitely needs a proper technical thing, but yeah, it's fine. Proof of concept right now."
+So the room-run race is the proof of concept. Later, a hardened server: the server sails every sloop from
+the players' inputs and checks every puzzle's moves (the puzzles are seeded rules with no 3D, so it can
+replay them), so nothing a browser claims is simply believed; state sent as full snapshots that heal a
+missed message; reconnecting mid-race. Even the proof of concept sends full snapshots with a sequence
+number, never one-off messages that must all arrive, so a missed one is corrected a moment later.
 
 ## 7. The start: a field of whirlpools and winds (built 11 Nov)
 
