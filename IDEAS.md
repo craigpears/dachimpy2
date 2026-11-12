@@ -1182,6 +1182,22 @@ same thread as the museum's: helping and leading people, and growing into it.
   The two halves of trophies, each theirs: seeing what they mean, and getting your own. The den's
   trophies (what earns one, where they're kept) are the proof of concept, to work out when it's built.
 
+
+## Roobear's little house: Robert the kangaroo bear that roobs ears (12 Nov)
+
+The user (12 Nov): "This absolutely needs to be a memory later, she needs her little house in the game."
+**Roobear** (she; a real pirate, pirate name only; her pirate page and portrait to check before she's
+drawn, then into PIRATES and the wardrobe). From a chat the user shared: they were guessing what her name
+stands for, "a french sounding Robert, roo like kangaroo plus a bear, or did someone roob an ear?" (they
+asked Dignity too), and Roobear answered: "I could be Robert the kangaroo bear that roobs ears ... I like
+it."
+
+So a little house in the housing district (one more entry in HOUSES, its own scene, Roobear walking you
+round as Gravee does), its theme her name's story: Robert the kangaroo bear, half kangaroo and half bear,
+who rubs ears. Maybe he's there, a familiar or a plush on her shelf, and an ear rub is the house's
+welcome. Like every house, it should send you off with something to do (the section above). What that is,
+and how the name's joke is told without explaining it to death: to settle with the user. A small,
+warm one, the memory of a funny moment between friends kept in the den.
 ## Puzzles you can size up, and play by keys (11 Nov)
 
 From the same chat the user shared: a pirate whose mouse aim isn't steady said Puzzle Pirates'
