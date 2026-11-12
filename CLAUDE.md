@@ -100,3 +100,10 @@ particular, browser checks (screenshots are costly) go to a subagent that checks
 runs the build and tests, and leaves changes uncommitted; the main session reviews the diff, commits and pushes.
 Small edits, notes files and anything a few tool calls settle stay in the main session, where the context is.
 When a feature has independent parts, give each to its own subagent; when they touch the same files, do them in turn.
+
+Check before heavy work (the user, 12 Nov: "There's no heavy simulations or token heavy activity without
+checking"): before starting a new subagent, a bot or race simulation beyond a quick check (`tools/*-bots.mjs`,
+`tools/race-sim.mjs` over many seeds or boards), a browser screenshot session, or the full test suite again and
+again, say what it is and roughly how big, and ask. A subagent keeps its simulations to the runs its brief
+names, small first, and asks the main session before anything bigger. One full test run before a merge is fine.
+When work's done, nothing is left running: no stray node or vitest processes.
