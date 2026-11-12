@@ -843,7 +843,7 @@ The sensible one, after Kikkit: she shows you plainly how a big Vegas is built, 
   - "So close. Go on, you've got this!"
 - *In her bubble, showing you after all:* "Here, like this. Watch the yellow."
 - *In her bubble, once it's popped:* "Double! That's what zooms you over a whirlpool."
-- *An instruction, in the panel by her board, as it starts:* "The platform filling up: each balloon goes in a square of its own colour."
+- *An instruction, in the panel by her board, as it starts:* "The plan's on the board, faint till it's built: a gap, three blues, what drops where, and what pops when."
 - *Instructions, in the panel by her board, once her pair (counted from 0) is down:*
   - *2:* "See the empty square? That's the gap. She leaves it empty on purpose."
   - *3:* "Three blues stacked up. One more blue on top makes four in a line, and four in a line pop."
@@ -852,12 +852,12 @@ The sensible one, after Kikkit: she shows you plainly how a big Vegas is built, 
 
 ### Her lesson's last act: a Bingo, that Double with another on top, the last pair yours
 
-- *In her bubble, as it starts:* "Now a Bingo: that Double, with another on top."
+- *In her bubble, as it starts:* "Now a Bingo: that Double, with another on top to drop a blue onto it."
 - *In her bubble, as she blows up each pair:*
   - "Bottom one first, same as before. Puff, puff..."
   - "...puff, puff..."
   - "...white in, blue beside it..."
-  - "...three blues. Now, upstairs."
+  - "...three blues. They wait: a blue falls on them from upstairs."
   - "Top one. I'm leaving a gap in the middle again."
   - "White, blue, in their squares. I'm getting dizzy."
   - "White on the corner. That starts the next stack."
@@ -869,10 +869,10 @@ The sensible one, after Kikkit: she shows you plainly how a big Vegas is built, 
   - "Not quite. Pop the whites, and the rest falls into place. Again!"
   - "So close! Go on!"
 - *In her bubble, showing you after all:* "Like this. Then just watch it go."
-- *In her bubble, once it's popped:* "Bingo! Four pops in a row. Now go make a whirlpool jealous."
-- *An instruction, in the panel by her board, as it starts:* "The same Double at the bottom, then another platform on top of it."
+- *In her bubble, once it's popped:* "Bingo! Four pops. Two more and it's a Vegas: that's what gets you out to the penguins."
+- *An instruction, in the panel by her board, as it starts:* "The plan, faint till it's built: the Double at the bottom, a platform on top, and its pop drops a blue onto the bottom blues."
 - *Instructions, in the panel by her board, once her pair (counted from 0) is down:*
-  - *3:* "Same as before: the gap, and three blues."
+  - *3:* "Same as before: the gap, and three blues. They wait for a blue from the top platform."
   - *6:* "A gap in the top platform too. Nothing goes over it, so a balloon can drop straight in."
   - *7:* "Three whites stacked up. One more white on top pops them."
   - *8:* "This pair waits. When the top platform pops, it falls: blue onto the blues, yellow into the bottom gap."

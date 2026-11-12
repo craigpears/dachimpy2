@@ -215,37 +215,34 @@ export function plan(routine) {
     }
     return { gaps, lines, drops, pops, ghost };
 }
-/** What's marked on the board once `n` of the routine's twists are down, each mark as soon as there's
-    something on the board for it to point at, so it's seen before it's named (the user: "words like
-    'trigger' are shown before they're named"): a platform's gap once it's the only target left; a
-    stack as its first balloon's down, and the square for the fourth once there are three; a balloon's
-    drop once it's on the board. On your go (n the last), your pair's ghost too, its drops, and what
-    pops in what order. */
+/** What's marked on the board once `n` of the routine's twists are down: the whole plan from the start
+    (n 0), each part faint till what it points at is built, then solid, so it's seen before it's named
+    (the user: "words like 'trigger' are shown before they're named"): a platform's gap once it's the
+    only target left; a stack once its first balloon's down, and the square for the fourth once there
+    are three; a balloon's drop once it's on the board. On your go (n the last), your pair's ghost too,
+    and its drops and what pops in what order solid. */
 export function marks(routine, n) {
-    const P = plan(routine), last = routine.twists.length - 1, g = setup(routine, Math.min(n, last)), out = [];
+    const P = plan(routine), last = routine.twists.length - 1, yours = n >= last, g = setup(routine, Math.min(n, last)), out = [];
     const has = ([r, c], colour) => g.grid[r][c]?.c === colour;
+    // (solid once what it points at is there; till then, to come: faint)
+    const mark = (m, there) => { out.push(there ? m : { ...m, faint: true }); };
     for (const gap of P.gaps) {
         const p = g.platforms.find((q) => q.targets.some((t) => same([t.r, t.c], gap.at)));
-        if (p.targets.every((t) => same([t.r, t.c], gap.at) || has([t.r, t.c], t.colour)))
-            out.push({ kind: 'gap', ...gap });
+        mark({ kind: 'gap', ...gap }, p.targets.every((t) => same([t.r, t.c], gap.at) || has([t.r, t.c], t.colour)));
     }
     for (const l of P.lines) {
         const of = l.stack.filter((s) => has(s, l.colour)).length;
-        if (of)
-            out.push({ kind: 'stack', cells: l.stack, colour: l.colour, of });
-        if (of === l.stack.length)
-            for (const at of l.four)
-                out.push({ kind: 'four', at, colour: l.colour });
+        mark({ kind: 'stack', cells: l.stack, colour: l.colour, of }, of > 0);
+        for (const at of l.four)
+            mark({ kind: 'four', at, colour: l.colour }, of === l.stack.length);
     }
     for (const d of P.drops)
-        if (n >= last ? true : !d.yours && has(d.from, d.colour))
-            out.push({ kind: 'drop', from: d.from, to: d.to, colour: d.colour });
-    if (n >= last) {
+        mark({ kind: 'drop', from: d.from, to: d.to, colour: d.colour }, yours || (!d.yours && has(d.from, d.colour)));
+    if (yours)
         out.push({ kind: 'ghost', cells: P.ghost });
-        // (each pop's number by the top left of what pops)
-        for (const p of P.pops)
-            out.push({ kind: 'pop', n: p.n, at: p.cells.reduce((a, b) => (b[0] < a[0] || (b[0] === a[0] && b[1] < a[1]) ? b : a)) });
-    }
+    // (each pop's number by the top left of what pops)
+    for (const p of P.pops)
+        mark({ kind: 'pop', n: p.n, at: p.cells.reduce((a, b) => (b[0] < a[0] || (b[0] === a[0] && b[1] < a[1]) ? b : a)) }, yours);
     return out;
 }
 /** Seconds: a line to start; a twist in hand (the first balloon blown up and tied off, squeak; the
