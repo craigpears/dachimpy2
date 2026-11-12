@@ -291,34 +291,90 @@ describe('11 Nov, "it doesn\'t really visibly show you the plan": the plan, mark
     }
   });
 
-  it('11 Nov, "words like trigger are shown before they\'re named": the gap\'s marked once it\'s the only square left, a stack from its first balloon, its fourth once there are three', () => {
-    const at = (n: number) => marks(ROUTINES.double, n);
+  it('11 Nov, "words like trigger are shown before they\'re named": the gap\'s solid once it\'s the only square left, a stack from its first balloon, its fourth once there are three', () => {
+    const at = (n: number) => marks(ROUTINES.double, n).filter((m) => !m.faint);
     expect(at(0)).toEqual([]);
     expect(at(2).filter((m) => m.kind === 'gap')).toEqual([]);
     expect(at(3)).toEqual(expect.arrayContaining([{ kind: 'gap', at: [14, 2], colour: 1 }, { kind: 'stack', cells: expect.any(Array), colour: 0, of: 1 }]));
     expect(at(3).some((m) => m.kind === 'four')).toBe(false);
     expect(at(4)).toEqual(expect.arrayContaining([{ kind: 'four', at: [12, 3], colour: 0 }, { kind: 'stack', cells: expect.any(Array), colour: 0, of: 3 }]));
-    // (the Bingo's parked pair: its drops marked as soon as it's down)
-    const b = ROUTINES.bingo, last = b.twists.length - 1, drops = (n: number) => marks(b, n).filter((m) => m.kind === 'drop');
+    // (the Bingo's parked pair: its drops solid as soon as it's down)
+    const b = ROUTINES.bingo, last = b.twists.length - 1, drops = (n: number) => marks(b, n).filter((m) => m.kind === 'drop' && !m.faint);
     expect(drops(last - 1)).toEqual([]);
     expect(drops(last).map((m) => (m as { from: readonly number[] }).from)).toEqual(expect.arrayContaining([[9, 2], [9, 3]]));
   });
 
-  it('11 Nov: on your go, your pair\'s ghost, every drop and what pops in what order; never before', () => {
+  it('11 Nov: on your go, your pair\'s ghost, every drop and what pops in what order, all solid; the ghost never before, the pops only faint', () => {
     for (const r of Object.values(ROUTINES)) {
       const last = r.twists.length - 1;
-      for (let n = 0; n < last; n++) expect(marks(r, n).some((m) => m.kind === 'ghost' || m.kind === 'pop')).toBe(false);
+      for (let n = 0; n < last; n++) {
+        expect(marks(r, n).some((m) => m.kind === 'ghost')).toBe(false);
+        expect(marks(r, n).filter((m) => m.kind === 'pop').every((m) => m.faint)).toBe(true);
+      }
       const M = marks(r, last);
+      expect(M.some((m) => m.faint)).toBe(false);
       expect(M.filter((m) => m.kind === 'ghost')).toEqual([{ kind: 'ghost', cells: plan(r).ghost }]);
       expect(M.filter((m) => m.kind === 'pop').map((m) => (m as { n: number }).n)).toEqual(plan(r).pops.map((p) => p.n));
       expect(M.filter((m) => m.kind === 'drop')).toHaveLength(plan(r).drops.length);
     }
   });
 
-  it('a mark, once shown, stays while she builds (nothing she does takes the plan away)', () => {
+  it('a mark, once shown, stays while she builds (nothing she does takes the plan away), and once solid never goes faint again', () => {
+    const plain = (m: Mark) => key({ ...m, faint: undefined, of: undefined });
     for (const r of Object.values(ROUTINES)) for (let n = 1; n < r.twists.length; n++) {
-      const now = marks(r, n).filter((m) => m.kind !== 'stack').map(key);
-      for (const m of marks(r, n - 1).filter((x: Mark) => x.kind !== 'stack')) expect(now).toContain(key(m));
+      const now = marks(r, n), was = marks(r, n - 1);
+      for (const m of was) {
+        const same = now.find((x) => plain(x) === plain(m));
+        expect(same, key(m)).toBeDefined();
+        if (!m.faint) expect(same!.faint, key(m)).toBeUndefined();
+      }
+    }
+  });
+});
+
+/* The user, 12 Nov, of Tzz's Bingo: "when you've got the blues at the bottom, like where she's about to,
+   like, drop a blue onto it, but she's then, like, building the platform at the top and the gap first.
+   But it's like, well, hang on, what happened to the blues on the bottom? What's the plan? ... It kind of
+   gets revealed right at the end." Your go is "perfectly clear and fantastic"; "while she's building it,
+   it's a bit like, wait, why were you putting that there?" (RULES.md: a demonstration shows its plan
+   before it builds.) */
+describe('12 Nov, "what happened to the blues on the bottom? What\'s the plan?": the whole plan on the board from the start, to come faint', () => {
+  const key = (x: unknown) => JSON.stringify(x);
+  const plain = (m: Mark) => key({ ...m, faint: undefined, of: undefined });
+
+  it('12 Nov: as each act starts, every gap, stack, fourth, drop and pop is already marked (faint, still to come); only the ghost waits for your go', () => {
+    for (const r of Object.values(ROUTINES)) {
+      const P = plan(r), M = marks(r, 0), last = marks(r, r.twists.length - 1);
+      expect(M.filter((m) => m.kind === 'gap')).toHaveLength(P.gaps.length);
+      expect(M.filter((m) => m.kind === 'stack')).toHaveLength(P.lines.length);
+      expect(M.filter((m) => m.kind === 'four')).toHaveLength(P.lines.length);
+      expect(M.filter((m) => m.kind === 'drop')).toHaveLength(P.drops.length);
+      expect(M.filter((m) => m.kind === 'pop').map((m) => (m as { n: number }).n)).toEqual(P.pops.map((p) => p.n));
+      expect(M.every((m) => m.faint)).toBe(true);
+      // (the same marks as on your go, the ghost aside: the plan doesn't change, it fills in)
+      expect(M.map(plain).sort()).toEqual(last.filter((m) => m.kind !== 'ghost').map(plain).sort());
+    }
+  });
+
+  it('12 Nov: at the Bingo\'s first upstairs twist, the blue dropping onto the bottom blues and the pop order are already marked', () => {
+    const b = ROUTINES.bingo, P = plan(b), upstairs = b.twists.findIndex((t) => t.row <= 11), M = marks(b, upstairs);
+    expect(upstairs).toBe(4);
+    // (the bottom blues: their stack solid, built; the blue that falls onto them from the parked pair, to come)
+    const blues = P.lines.find((l) => l.colour === 0)!;
+    expect(M).toContainEqual({ kind: 'stack', cells: blues.stack, colour: 0, of: 3 });
+    const onto = P.drops.find((d) => d.colour === 0 && key(d.to) === key(blues.four[0]))!;
+    expect(onto.from[0]).toBeLessThan(12);
+    expect(M).toContainEqual({ kind: 'drop', from: onto.from, to: onto.to, colour: 0, faint: true });
+    expect(M.filter((m) => m.kind === 'pop').map((m) => (m as { n: number }).n)).toEqual([1, 2, 3, 4]);
+    // (and the top gap the yellow drops into, before she's built round it)
+    expect(M.some((m) => m.kind === 'gap' && m.at[0] === 10)).toBe(true);
+  });
+
+  it('12 Nov: each part goes solid as she builds it, and your go is as it was', () => {
+    for (const r of Object.values(ROUTINES)) {
+      const last = r.twists.length - 1, solid = (n: number) => marks(r, n).filter((m) => !m.faint).length;
+      for (let n = 1; n <= last; n++) expect(solid(n)).toBeGreaterThanOrEqual(solid(n - 1));
+      expect(solid(last)).toBe(marks(r, last).length);
     }
   });
 });

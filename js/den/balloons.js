@@ -10,9 +10,11 @@
    - the board: the den's own Sailing board (sail-board.js, drawn off the page onto a picture on a
      stand), its platforms, its balloons, its falling pair steered down by the moves a player makes,
      its pops and the chain's name climbing, exactly as at sea;
-   - the plan marked on the board as it's built (src/balloons.ts, marks; sail-board.js draws them): the
-     gap, a stack and the square for its fourth, a balloon's drop, and on your go your pair's ghost and
-     what pops in what order; and what's for you to do or watch in a panel by the board
+   - the plan marked on the board from the start of each act (src/balloons.ts, marks; sail-board.js
+     draws them), what's still to come faint, going solid as it's built (the user, 12 Nov: "while she's
+     building it, it's a bit like, wait, why were you putting that there?"): the gap, a stack and the
+     square for its fourth, each balloon's drop, what pops in what order, and on your go your pair's
+     ghost; and what's for you to do or watch in a panel by the board
      (lesson-panel.js), apart from the performer's chatter (the user, 11 Nov: "It's an actual
      instruction to you, and it should be more prominent and persistent");
    - then the last pair's yours ("she sets up the balloons, you do the pop"): it comes in at the top
