@@ -33,7 +33,7 @@ import { tzzWorld, tzzTick, tzzHail, tzzPrompt, tzzReset } from './balloon-isle.
 import { empireWorld, empireTick, empirePrompt, empireReset } from './imperial-isle.js';
 import { primatesTick, primatesReset } from './moored.js';
 import { smugglersWorld, smugglersTick, smugglersPrompt, smugglersReset } from './smugglers.js';
-import { raceWorld, raceTick, raceHelm, raceKey, racePrompt, raceShot, raceTarget, raceHitRival, raceHolds, raceReset, raceHover, raceClick } from './race.js';
+import { raceWorld, raceTick, raceHelm, raceKey, racePrompt, raceShot, raceTarget, raceHitRival, raceHolds, raceReset, raceHover, raceClick, race } from './race.js';
 import { watch, watchTick, watchStop } from './race-watch.js';
 
 // The old sloop's at anchor in the cove from the moment the siege is over, while their ship makes
@@ -201,7 +201,8 @@ export function sailKey(key) {
   if (key === '3') return rowToggle();
   if (key === 's' || key === 'arrowdown' || key === 'backspace') sail.helm.unput();
   else if (key === 'escape') { sail.helm.stop(); toast('Pin pulled up: she\'ll stop when this turn\'s done'); }
-  else if (key === 'h') { sail.helm.drop(SAIL.HOME.c, SAIL.HOME.r); if (sail.helm.pin) toast('Heading home to the cove'); }
+  else if (key === 'h' && race.rules.state === 'off') {   // (not in a race: home's no use there)
+    sail.helm.drop(SAIL.HOME.c, SAIL.HOME.r); if (sail.helm.pin) toast('Heading home to the cove'); }
   else if ((key === ' ' || key === 'enter') && canHaulWreck()) haulWreck();
   else if ((key === ' ' || key === 'enter') && canLand(sail.helm)) ashore();
   else if ((key === ' ' || key === 'enter') && canLandIsle(sail.helm)) isleAshore();   // (Mischievious's isle: isle.js)
@@ -269,7 +270,9 @@ function sailHud() {
   // guns, the oars (wind.js).
   $('sailhud').innerHTML = `<div class="turns">${windHud()}${gun('L', 'Q')}<div class="turn"><span>This turn</span>${toks(now, (i) => (i < h.slot ? 'done' : i === lit ? 'now' : ''))}</div>`
     + `<div class="turn"><span>Next</span>${toks(next, (i) => (i < mineN ? 'mine' : ''))}</div>${gun('R', 'E')}<button class="oars" id="rig-btn" title="Sailing: its chains carry her ahead (1)"><kbd>1</kbd>Sailing</button><button class="oars" id="guns-btn" title="Load her guns by Gunnery (2)"><kbd>2</kbd>Load</button>${oarsHud()}</div>`
-    + '<div class="help">Click the sea: drop a pin · <kbd>W</kbd> <kbd>A</kbd> <kbd>D</kbd>: forward, left, right yourself · <kbd>S</kbd>: take one back · <kbd>Q</kbd> <kbd>E</kbd>: fire port, starboard · <kbd>1</kbd>: Sailing · <kbd>2</kbd>: load her guns by Gunnery · <kbd>3</kbd>: oars out or in · <kbd>Esc</kbd>: pull up the pin · <kbd>H</kbd>: head home · wheel: zoom</div>';
+    // (racing, only the keys that apply: no heading home, and the puzzles' keys are on their buttons; den.html,
+    // body.racing hides `off-race`)
+    + '<div class="help">Click the sea: drop a pin · <kbd>W</kbd> <kbd>A</kbd> <kbd>D</kbd>: forward, left, right yourself · <kbd>S</kbd>: take one back · <kbd>Q</kbd> <kbd>E</kbd>: fire port, starboard<span class="off-race"> · <kbd>1</kbd>: Sailing · <kbd>2</kbd>: load her guns by Gunnery · <kbd>3</kbd>: oars out or in</span> · <kbd>Esc</kbd>: pull up the pin<span class="off-race"> · <kbd>H</kbd>: head home · wheel: zoom</span></div>';
 }
 export function sailTick(dt) {
   sail.rocks ||= seaRocks();

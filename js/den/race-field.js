@@ -11,7 +11,7 @@ import * as THREE from 'three';
 import { SAIL, LAY } from '../den-sail.js';
 import { RIVALS } from '../den-rivals.js';
 import { PIRATES } from '../den-look.js';
-import { scene, mat, mesh, V3, burst, tween, shake, worldLets } from './world.js';
+import { scene, mat, mesh, V3, burst, tween, shake, worldLets, camera } from './world.js';
 import { sail, seaX, seaZ, liftAt, sloopMesh, SLOOP_DECK } from './sea.js';
 import { deckHoleShape } from './sea-puzzles.js';
 import { capybaraMesh } from './foraging.js';
@@ -19,7 +19,7 @@ import { person } from './props-people.js';
 
 const RC = LAY.RACE, CELL = SAIL.CELL;
 /** Each rival's sloop (by her number in the field, 1 up), as drawn; how near you have to be to hear her. */
-export const field = { boats: [], said: '', hear: 14 };
+export const field = { boats: [], said: '', hear: 14, mine: null, mineTag: null, mineKey: '' };
 
 /** A rival's sloop: the sloop, her sails and flag in her colours, her pirate at the tiller, her crew.
     `shown(B)`: whether her lines show over her (near you, by default). Also the watched race's
@@ -55,7 +55,7 @@ export function fieldWorld() { if (!field.boats.length) fieldCast(RIVALS); }
     course, in order. Each sloop's built once (by `key`, or her name) and kept for when she races again. */
 const built = new Map();
 export function fieldCast(list) {
-  for (const B of field.boats) { B.g.visible = false; B.at = null; B.who.hush(); }
+  for (const B of field.boats) { B.g.visible = false; B.at = null; B.who.hush(); if (B.tag) B.tag.style.display = 'none'; }
   field.boats = list.map((R) => {
     const k = R.key ?? R.name;
     if (!built.has(k)) built.set(k, rivalBoat(R));
@@ -74,9 +74,50 @@ const xyz = (p, lift = 0) => V3(seaX(p.c), liftAt(Math.round(p.c), Math.round(p.
 /** Something said over her (a line of hers, once). Also the watched race's (race-watch.js). */
 export function boatSay(B, lines) { if (lines?.length) B.who.setLines([lines[Math.floor(Math.random() * lines.length)]], { loop: false, wait: 0.2 + Math.random() * 0.8 }); }
 
+/* Who's who on the water (the user, 12 Nov: "indicate who's who, because other than I can recognize
+   Kikkit's character, I don't know who's who here"): a name over every sloop in the race, small, over her
+   masthead: a pirate's in her sails' colour, a bot's dimmer and marked a bot. Yours too, racing online
+   (`field.mine`, race-net.js). The rivals racing you alone are the den's own racers: bots. */
+const TAG_UP = 6.2;
+const tagV = V3(0, 0, 0);
+function nameTag(name, sailCol, player) {
+  const el = document.createElement('div');
+  el.className = `tag boat${player ? ' pirate' : ' bot'}`;
+  el.style.borderColor = sailCol;
+  el.innerHTML = player ? '' : '<small>bot</small>';
+  el.prepend(name);
+  document.getElementById('tags').append(el);
+  return el;
+}
+/** A name over sloop `g`, where she's drawn (kept on the screen while she's on it), or hidden. */
+function placeTag(el, g, show) {
+  if (show) {
+    tagV.set(g.position.x, g.position.y, g.position.z).project(camera);
+    show = tagV.z < 1 && Math.abs(tagV.x) < 1.05 && Math.abs(tagV.y) < 1.05;
+  }
+  el.style.display = show ? '' : 'none';
+  if (!show) return;
+  tagV.set(g.position.x, g.position.y + TAG_UP, g.position.z).project(camera);
+  el.style.left = `${(tagV.x + 1) / 2 * innerWidth}px`;
+  el.style.top = `${Math.max(22, (1 - tagV.y) / 2 * innerHeight)}px`;
+}
+/** Each tick: every sloop's name over her, while the race is on the water. */
+function tagsTick(Rc, on) {
+  const racing = on && Rc.state !== 'off';
+  field.boats.forEach((B, k) => {
+    const show = racing && B.g.visible && k + 1 < Rc.field.racers.length;
+    if (show && !B.tag) B.tag = nameTag(B.R.name, B.R.sail, !!B.R.player);
+    if (B.tag) placeTag(B.tag, B.g, show);
+  });
+  const m = field.mine, key = m ? `${m.name}|${m.sail}` : '';
+  if (field.mineKey !== key) { field.mineTag?.remove(); field.mineTag = m ? nameTag(`${m.name} (you)`, m.sail, true) : null; field.mineKey = key; }
+  if (field.mineTag) placeTag(field.mineTag, sail.g, racing);
+}
+
 /** Each tick (race.js): her sloop where the field has her, smoothly; low and smoking while she's holed;
-    her lines. `on`: at sea. */
+    her lines; everyone's names. `on`: at sea. */
 export function fieldTick(dt, Rc, on) {
+  tagsTick(Rc, on);
   const t = performance.now() / 1000;
   // (the start's lines, as the count begins)
   const key = `${Rc.state}`;
@@ -177,5 +218,5 @@ export const fieldAt = (i) => sloopOf(i)?.localToWorld(V3(0, SLOOP_DECK + 0.3, 0
 /** A fresh voyage: none on the water, nothing said. */
 export function fieldReset() {
   field.said = '';
-  for (const B of field.boats) { B.g.visible = false; B.at = null; B.who.hush(); }
+  for (const B of field.boats) { B.g.visible = false; B.at = null; B.who.hush(); if (B.tag) B.tag.style.display = 'none'; }
 }
