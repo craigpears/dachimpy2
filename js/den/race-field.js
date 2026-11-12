@@ -29,7 +29,7 @@ export function rivalBoat(R, shown = null) {
   for (const arm of g.userData.sails) arm.children[0].material = mat(R.sail, { side: THREE.DoubleSide, roughness: 0.95 });
   const cloth = g.userData.rig[1].children[2];
   if (cloth) cloth.material = mat(R.flag, { side: THREE.DoubleSide, roughness: 0.9 });
-  const who = person({ look: PIRATES[R.look], parent: g, x: -1.15, y: SLOOP_DECK, z: 0, yaw: Math.PI / 2, idle: R.look === 'Kikkit' ? 'tipsy' : 'sway', bubble: 'page', tall: 2.3, shown: () => (shown ? shown(B) : near(B)) });
+  const who = person({ look: typeof R.look === 'string' ? PIRATES[R.look] : R.look, parent: g, x: -1.15, y: SLOOP_DECK, z: 0, yaw: Math.PI / 2, idle: R.look === 'Kikkit' ? 'tipsy' : 'sway', bubble: 'page', tall: 2.3, shown: () => (shown ? shown(B) : near(B)) });
   if (R.crew?.who === 'umami') {
     const u = capybaraMesh();
     u.scale.setScalar(0.62);
@@ -50,7 +50,18 @@ export function rivalBoat(R, shown = null) {
 }
 const near = (B) => B.g.visible && Math.hypot(B.g.position.x - sail.g.position.x, B.g.position.z - sail.g.position.z) < field.hear * CELL;
 /** Built with the race's course (race.js). */
-export function fieldWorld() { if (!field.boats.length) field.boats = RIVALS.map((R) => rivalBoat(R)); }
+export function fieldWorld() { if (!field.boats.length) fieldCast(RIVALS); }
+/** Whose sloops are on the water: your rivals (RIVALS), or racing online (race-net.js) everyone else on the
+    course, in order. Each sloop's built once (by `key`, or her name) and kept for when she races again. */
+const built = new Map();
+export function fieldCast(list) {
+  for (const B of field.boats) { B.g.visible = false; B.at = null; B.who.hush(); }
+  field.boats = list.map((R) => {
+    const k = R.key ?? R.name;
+    if (!built.has(k)) built.set(k, rivalBoat(R));
+    return built.get(k);
+  });
+}
 
 /** Where rival `i` is drawn: her place in the field, or parked past the finish line once she's home. */
 function spotOf(Rc, i) {

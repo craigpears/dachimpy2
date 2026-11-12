@@ -4,7 +4,7 @@
 // its winds (the snakes, the headwinds the Doubles hop, the start's field's), the field's whirlpools and the
 // whirlpool channel's, its gun gap's two guns, the crane in its notch on the last spit; the clock and your
 // place. Its start (the line, picking your spot and how many rivals, the starter's card) is race-start.js;
-// its marks (the numbered buoys, the finish line and the moment you cross it, everyone's places)
+// racing friends online (a lobby on the line, the room running the race) race-net.js; its marks (the numbered buoys, the finish line and the moment you cross it, everyone's places)
 // race-marks.js; the barrier of driftwood and its Foraging race-forage.js; the gun gap as an imperial gate,
 // its guard bribed with the coins of a wreck off leg 1, race-bribe.js; your rivals' sloops on the water,
 // their broadsides and yours, race-field.js; its gambles (the turning pool, the veiled wind), race-gamble.js.
@@ -37,6 +37,9 @@ import { fieldWorld, fieldTick, fieldHome, fieldShot, fieldHit, fieldAt, fieldRe
 import { forageWorld, forageKey, foragePrompt, forageHolds, forageTick, forageReset, forageCam, forageHover, forageClick } from './race-forage.js';
 import { bribeWorld, bribeKey, bribePrompt, bribeSpares, bribeTick, bribeReset, gateGun } from './race-bribe.js';
 import { gambleWorld, gambleTick, gambleReset } from './race-gamble.js';
+import { netKey, netPrompt, netTick, netBefore, netInTick } from './race-net.js';
+import { NET } from '../race-net.js';
+import { gamble } from './race-gamble.js';
 
 const RC = LAY.RACE, CELL = SAIL.CELL, DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
 const NTH = (n) => (n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`);
@@ -231,6 +234,7 @@ export function raceKey(key) {
   if (boardHasKey(key, station.on)) return false;   // (with the Sailing board open, Space is its: sail-station.js)
   if (!race.trip && !building() && forageKey(key)) return true;   // (the barrier of driftwood: race-forage.js)
   if (!race.trip && !building() && bribeKey(key)) return true;   // (the wreck's coins, the gate's guard: race-bribe.js)
+  if (netKey(key, race.rules)) return true;   // (racing online, on the line: race-net.js)
   if (lineKey(key, race.rules)) return true;   // (on the starting line: race-start.js)
   if (race.trip) { if (go || key === 'escape') { K().skip(); arrive(); } return !VIEW.includes(key); }
   if (building()) {
@@ -242,19 +246,19 @@ export function raceKey(key) {
     else { const first = !K().frame && K().up === 0; K().build(); if (first) toast('A crane, by Carpentry: first its foot'); }
     return true;
   }
-  const R = race.rules;
-  if (R.takes(key, h, station.on)) {
-    takeLine(R);
-    race.gap = new GunGap();
-    doorReset();   // (shut again, for a new race)
-    forageReset();   // (the driftwood back across its gap)
-    bribeReset();   // (the wreck's coins back down there, the gate unpaid)
-    gambleReset();   // (the turning pool's clock from the gun, fresh tosses of the veiled wind)
-    readyLocks(h);   // (each lock's water at the side she'll come to it from)
-    toast('Pick yer spot on the line, and Space when ye\'re ready');
-    return true;
-  }
+  if (race.rules.takes(key, h, station.on)) { intoLine(); toast('Pick yer spot on the line, and Space when ye\'re ready'); return true; }
   return false;
+}
+/** In to the starting line from the buoy, everything on the course made ready for a new race (Space at the
+    buoy; racing online, the room's lobby or its count: race-net.js). */
+function intoLine() {
+  takeLine(race.rules);
+  race.gap = new GunGap();
+  doorReset();   // (shut again, for a new race)
+  forageReset();   // (the driftwood back across its gap)
+  bribeReset();   // (the wreck's coins back down there, the gate unpaid)
+  gambleReset();   // (the turning pool's clock from the gun, fresh tosses of the veiled wind)
+  readyLocks(sail.helm);   // (each lock's water at the side she'll come to it from)
 }
 export function racePrompt() {
   if (!sail.on || !race.W) return '';
@@ -262,7 +266,7 @@ export function racePrompt() {
   if (race.trip) return 'Space: skip';
   const dp = doorPrompt();
   if (dp || doorHolds()) return dp;
-  const lp = linePrompt(R) || foragePrompt() || bribePrompt();
+  const lp = netPrompt(R) || linePrompt(R) || foragePrompt() || bribePrompt();
   if (lp) return lp;
   if (building() && !K().built()) return patchPrompt(`The crane's ${CRANE.PARTS[K().up].name} (${K().up + 1} of ${CRANE.PARTS.length}) · 1, 2, 3: a piece`, ' (the spare gets sawn off)', ' · Esc: leave it for now');
   if (K().alongside(h)) {
@@ -318,6 +322,35 @@ function hud() {
   const txt = R.state === 'count' ? `Race · ${Math.ceil(R.t)}...` : `Race ${clockText(R.clock())}${place} · ${where} · shots ${shots}${R.best ? ` · best ${clockText(R.best)}` : ''}`;
   if (race.hud.textContent !== txt) race.hud.textContent = txt;
 }
+/* ---------- the race in whole steps ----------
+   While a race is counting down or on, her helm and the race's field run in whole steps (NET.STEP, sixty a
+   second), the frame's time added up and the rest carried over, so a race replayed from her actions comes out
+   the same step for step (src/race-replay.ts; the user, 12 Nov: "everybody should always be on the same
+   turn"). At sixty frames a second that's a step a frame, as before. Outside a race the helm ticks as ever. */
+export const steps = { acc: 0, n: 0, queued: [] };
+const held = () => { const h = sail.helm; return h.dazed() ? 'dazed' : race.trip || h.gusts.length || doorCarried() ? 'carried' : null; };
+const stepping = () => sail.on && (['count', 'on'].includes(race.rules.state) || (race.rules.state === 'done' && race.rules.field.state === 'on'));
+/** The helm's tick at sea (sailing.js): in whole steps during a race, each with the race's own; what she
+    did (the helm's events). */
+export function raceHelm(h, dt) {
+  if (!stepping()) { steps.acc = 0; return h.tick(dt); }
+  steps.acc += dt;
+  const out = [];
+  while (steps.acc >= NET.STEP - 1e-9 && stepping()) {
+    steps.acc -= NET.STEP;
+    const R = race.rules, on = R.state === 'on' || R.state === 'done';
+    netBefore(h, R);   // (what's changed since the last step, written down: race-net.js)
+    if (on) gamble.k.t = steps.n * NET.STEP;   // (the turning pool's beat at this step)
+    netInTick(true);
+    out.push(...h.tick(NET.STEP));
+    netInTick(false);
+    steps.queued.push(...R.tick(NET.STEP, { c: h.pose.c, r: h.pose.r, d: h.pose.d, held: held() }));
+    if (on) steps.n++;
+    if (R.state === 'count') steps.n = 0;
+  }
+  return out;
+}
+
 /** Each tick at sea (sailing.js, after she's drawn where the helm has her, and the cliff's crane). */
 export function raceTick(dt) {
   const W = race.W;
@@ -328,9 +361,11 @@ export function raceTick(dt) {
   if (sail.on) {
     // The starter's hail, the first time she's by the buoy a voyage.
     if (atStart(h.pose.c, h.pose.r) && !race.said.hail && !cine && R.state === 'off') { race.said.hail = true; toast(STARTER.hail); }
-    // (what holds her, for the rivals' guns: holed and patching, or carried out of reach)
-    const held = h.dazed() ? 'dazed' : race.trip || h.gusts.length || doorCarried() ? 'carried' : null;
-    for (const e of R.tick(dt, { c: h.pose.c, r: h.pose.r, d: h.pose.d, held })) {
+    // (the race's events: from its steps, in a race; otherwise its tick, as ever, what holds her for the
+    // rivals' guns: holed and patching, or carried out of reach)
+    const evs = steps.queued.splice(0);
+    if (!stepping() && !evs.length) evs.push(...R.tick(dt, { c: h.pose.c, r: h.pose.r, d: h.pose.d, held: held() }));
+    for (const e of evs) {
       if (e.kind === 'count') toast(STARTER.count[RACE.COUNT - e.n] ?? '');
       if (e.kind === 'go') {
         toast(STARTER.go);
@@ -385,6 +420,8 @@ export function raceTick(dt) {
   // Her trip over the neck, on the crane's hook.
   if (race.trip && sail.on) tripTick(dt);
   else if (K().built()) { const tip = W.crane.slew.localToWorld(TIP.clone()), l = W.crane.g.worldToLocal(tip); W.crane.hook.position.set(l.x, l.y - 1, l.z); }
+  // Racing online: the room's race kept to, her pose sent, the lobby's panel (race-net.js).
+  netTick(dt, R, intoLine, steps);
   // The start's line and card; the buoys, the next one lit; the finish's banner.
   startTick(R, sail.on);
   marksTick(dt, sail.on && R.state === 'on' ? nextBuoy(p.c, p.r) : -1);

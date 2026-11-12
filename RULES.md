@@ -2327,6 +2327,30 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       boards aren't drawn yet (nobody watched rows). Only the racer you follow plays hers; each keeps her
       boards as she left them.
     - **The door stays a secret:** nobody watched takes it, and nothing said names it (tested).
+  - **Racing your friends online (12 Nov, a proof of concept for playtests).** "a handful of people playing
+    if we get to play testing it", never peer to peer: one room runs the race (RACE.md §6 has the build).
+    - **On the starting line,** O opens the panel: a pirate name (kept, as the crew's), Make a race (a code of
+      four letters) or a code and Join; `den.html?at=race&race=CODE` brings a friend straight there. In the
+      room: who's in (players, and the den's racers filling it, "(bot)"), A D your spot (never another
+      player's), Space ready, 2 to 6 or − + how many racers in all (four to start; bots fill what players
+      don't, one at least), G or "Start the count" once everyone's ready (anyone may), Copy the link, Esc or
+      Leave. Six players at most; one who comes in during a race races the next.
+    - **The count and the gun are the room's,** the same in every browser; then each sails and puzzles her own
+      sloop as alone, everyone else's sloop drawn a moment behind, in their own sails (players' by their
+      place in the room), their names over them at the count.
+    - **One at a time at a spot:** a lock, the crane's ledge, the barrier's notch or the wreck's is whoever's
+      who got there first; while it's someone else's it's shut to you ("Tzz has the up lock: wait yer turn")
+      and you're put in the locks' berth (still in line for it) or in front of it; it's yours when they're
+      through.
+    - **Hits:** your broadside on someone holes her in every browser; you can't hole her again till she's
+      patched. A bot's broadside or a friend's on you holes you, even if you missed seeing it fired.
+    - **Places and times** are the room's; the finish card fills in as they come home; "Race again" when
+      everyone's in.
+    - **A closed tab** has six seconds to come back; then a bot sails her sloop home ("A bot's sailing yer
+      sloop home now"). Sailing back out of the gate does the same at once. A lost room: back to racing alone.
+    - **Every race online is written down** (its seed, each player's actions by the race's steps, what the
+      room heard and decided) and kept, to replay exactly; the viewer's still to come. During a race the
+      helm runs in whole steps, sixty a second, alone or online.
   - **From the user's playtest (12 Nov), as built:**
     - **The locks a beat, not a wait:** "I was spending just as much time waiting for the ship to go forward
       ... it shouldn't feel like you're losing the race because you're waiting on the animation." A lock's

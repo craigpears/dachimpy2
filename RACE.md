@@ -393,7 +393,69 @@ you racer 0 on it: the same logic that's balance-tested races you.
   played by its bot in those times. Still to come: the bots' own play deciding the times, so they're the
   testers as well. And Daquan.
 
-**Real players racing each other online (asked about 12 Nov, not started).** "what would it take to make
+**Racing your friends online (built 12 Nov, a first proof of concept for playtests).** Up to six players in
+one race's room, bots (the den's own racers, `WATCHED`) filling the field up to however many racers it's set
+to (four by default, six at most). As built:
+- **A modular monolith** (the user, 12 Nov: the server kept apart from the client, to move to a proper server
+  later). All of the room's logic is pure, tested TypeScript with no Cloudflare, WebSocket or DOM in it, the
+  clock and the dice handed in: `src/race-server.ts` (`RaceServer`: `join`, `leave`, `message`, `tick(now)`,
+  each answering what to send to whom; `Referee`, the race's rules as the room keeps them). The Durable
+  Object, `worker/race-room.js` (`RaceRoom`, `/api/race/CODE`, its own migration `v2`), is only a thin
+  adapter: sockets, sleeping between races, a timer only while a race is counting down or on. What's said both
+  ways is `src/race-net.ts`. The browser talks to a `Link` (`send`, `onMessage`, `close`), never a socket:
+  `src/race-link.ts` has two, `wsLink` to the room and `LocalRoom`, the server run in the same tab (the tests'
+  pretend browsers; one day the race alone). The browser's end is `js/den/race-net.js`, hooked into race.js's
+  keys, prompt and tick, race-field.js (`fieldCast`: whose sloops are on the water) and the Race's `roster`
+  and `drive` (src/den-race.ts): single-player races are as they were.
+- **The room runs the race**: the lobby (who's in, spots on the line, ready, racers in all; anyone starts the
+  count once everyone's ready), the count and the clock, whose turn it is at a lock, the crane, the barrier's
+  notch or the wreck's (from where each player is: on its square she has it or waits her turn, the locks'
+  berth counting as waiting for the up lock; her browser shuts it to her while it's someone else's and puts her
+  in the berth or in front of it), hits (the shooter claims, the room checks it can be hit and is within a
+  broadside's reach; the bots' broadsides at players too), places and finish times, the race's seed (the bots'
+  sailing, every player's gambles' tosses from it), and the bots, sailed by the simulation (`sail`, now with
+  `humans`, any number of players at the front of the field).
+- **Healing itself** (the user, 12 Nov, on a missed message: "before you know it, you're on top of a rock"):
+  the room sends the whole race eight times a second (a numbered snapshot, its run's id so a restarted room's
+  numbers start again), never a change or a one-off event that must arrive: a hit is a count of hits taken (a
+  missed broadside is taken all the same), a turn is who holds the spot, a finish a time and a place. Your
+  own sloop is sailed in your browser against your own sea; everyone else's is drawn only from snapshots, a
+  quarter second behind the newest and between two, never sailed on by itself. Heard nothing for two seconds
+  (the room goes quiet once the race is done), a browser asks for the race again. Tested with a browser that
+  drops two snapshots in five all race long.
+- **Dropping out:** a closed tab has six seconds to come back (`NET.GRACE`), then a bot of the long way sails
+  her sloop home; sailing back out of the gate does the same at once. Everyone gone, the race is off.
+- **Whole steps** (the user, 12 Nov: "everybody should always be on the same turn"). During a race the helm
+  and the race's field run in fixed steps of a sixtieth of a second (`NET.STEP`), in the room and in every
+  browser, the frame's time added up and the rest carried over (`raceHelm`, race.js; at sixty frames a second
+  it's a step a frame, so the feel's unchanged); outside a race the helm ticks as ever.
+- **Every race written down, to watch again** (the user: "people can see games that have been played"; and
+  "you just need moves ... really all you need is to save somebody's actions"): a `RaceRecord`
+  (`src/race-server.ts`, versioned): the seed and the racers (names, looks, sails, spots); each player's
+  actions at the helm stamped with her steps sailed (moves, pins, moorings, gusts, oars, strokes, hits, locks
+  pumped, broadsides, patched, the barrier cleared, a spot shut or opened, the breeze); what each player said
+  that changed the race, at the room's step it heard it (her pose's steps and state, a claimed hit, out);
+  the room's decisions for a timeline (hits, turns, gambles, finishes, takeovers); a keyframe every five
+  seconds only to start watching from the middle quicker; places and times; and each racer's puzzle moves,
+  empty for now. `src/race-replay.ts` replays one exactly: each player's sloop from her actions through the
+  same helm (`PlayerSea`), the room's race through the same rules (`Referee.replay`): the same places, times
+  and squares, step for step (tested). About 20 KB for a seven-minute race of two players and two bots. The
+  room keeps it in its own storage, a row in D1's `races`; `GET /api/races` lists the recent ones, `GET
+  /api/races/:id` hands one out. The viewer is next.
+- **Not yet, or shaky:** a real player's replay is exact only so far as everything that moves her goes
+  through her helm: the puzzles' own boards (the Sailing board's pair, Bilge, Carpentry, Foraging) aren't
+  written down move by move yet (the record's `moves`, for the next step), so a viewer can replay where she
+  sailed but not yet her boards. The crane's trip and the starlit door's tunnel are moorings at either end.
+  Replays across browsers rest on `Math.sin` and friends giving the same bits everywhere, which they nearly
+  always do. No cheat-proofing (friends, trusted). Gambles taken by players aren't in the timeline (the bots'
+  are). Testing it locally: wrangler watches the whole site folder, so anything writing there (an agent's
+  build, `node_modules`' caches through a linked folder) restarts the server and closes every room.
+- **Cost on Cloudflare's free plan:** a race of about four minutes keeps its room awake about that long: at
+  128 MB that's about 30 GB-s of the 13,000 a day (some 400 races a day); and each player's five poses a
+  second, counted at twenty WebSocket messages to a request, are about 60 requests a player a race, of
+  100,000 a day (some 400 races a day of four players). Snapshots out are free. The lobby sleeps.
+
+**Real players racing each other online (asked about 12 Nov; built as above).** "what would it take to make
 the sloop race things multiplayer? So you can have like a handful of people playing if we get to play
 testing it." Not peer to peer (the user, 12 Nov: "peer-to-peer
 architecture was a major problem when I've done something before"): the den's co-op already has every

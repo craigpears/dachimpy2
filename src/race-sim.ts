@@ -432,6 +432,9 @@ export interface SimOptions {
   /** With a field given, whether racer 0 is you (true, the den's race) or the first bot (false: a race
       of bots only on a field of the caller's, watched: src/race-watch.ts). */
   you?: boolean;
+  /** With a field given, how many racers at its front are players, moved from outside (a race online:
+      src/race-server.ts), the bots after them; `you` is one. */
+  humans?: number;
 }
 
 /** How each racer got on. */
@@ -549,6 +552,8 @@ export interface SimRun {
   results(limit: number): RacerResult[];
   /** What bot `i` is up to just now (null for you): for watching her (src/race-watch.ts). */
   info(i: number): BotInfo | null;
+  /** Player `i`'s sloop sailed by a bot from here on (she's dropped out of a race online); whether it is. */
+  adopt(i: number): boolean;
 }
 
 /** What a bot's up to, as a spectator sees it: under way, stopped to puzzle at a shortcut, waiting her
@@ -604,7 +609,7 @@ export function sail(o: SimOptions): SimRun {
     const saves = o.saves?.[k as CutId];
     return [k, saves === undefined ? c : { ...c, saves, tOut: c.tIn + c.trip + saves }];
   })) as Record<CutId, Cut>;
-  const you = o.you ?? !!o.field, first = you ? 1 : 0;
+  const you = o.you ?? !!o.field, first = o.humans ?? (you ? 1 : 0);
   const field = o.field ?? new Field(o.racers.map((r) => `${r.route.name}/${r.style.name}`), courseSea(), 0);
   if (!o.field) field.start();
   if (o.shots !== undefined) for (const r of field.racers) r.shots = o.shots;
@@ -622,7 +627,9 @@ export function sail(o: SimOptions): SimRun {
       res: { route: r.route.name, style: r.style.name, skill: r.skill, start: k, spot: spots[k], time: 0, place: 0, hitsTaken: 0, hitsGiven: 0, swept: [], cuts: [], exposed: [], bets: [] },
     };
   });
-  const botOf = (i: number): Bot | undefined => bots[i - first];
+  const botOf = (i: number): Bot | undefined => bots.find((b) => b.i === i);
+  /** The players still sailing their own sloops (not home, not taken over by a bot). */
+  const players = () => field.racers.slice(0, first).filter((r) => r.state !== 'finished' && !botOf(r.i));
   /** What a second of her time is worth in Sailing on the pilot (seconds round the long way). */
   const chainWorth = (b: Bot) => (chains ? SIM.CHAIN[b.route.name === 'long' ? b.best : b.skill] * (PACE - SAIL.PUSH) : 0);
   /** The starlit door's exits (12 Nov): where she rejoins the long way out of each (seconds round it), its
@@ -658,7 +665,7 @@ export function sail(o: SimOptions): SimRun {
   /** Everyone still racing, how far round: the bots, and you. */
   const racing = (): { b: Bot | null; tau: number }[] => [
     ...bots.filter((x) => x.mode !== 'done').map((x) => ({ b: x, tau: x.tau })),
-    ...(you && field.racers[0].state !== 'finished' ? [{ b: null, tau: progressAt(field.racers[0].pose) }] : []),
+    ...players().map((r) => ({ b: null, tau: progressAt(r.pose) })),
   ];
   const rankOf = (b: Bot) => {
     const all = racing();
@@ -1018,8 +1025,30 @@ export function sail(o: SimOptions): SimRun {
     return events;
   }
 
+  /** A player's sloop taken over (she's dropped out of a race online): a bot of the long way, peaceful,
+      from where she's got to round it; anything she held or waited for let go. Down the start's field
+      still, she starts it again from her spot. */
+  const adopt = (i: number) => {
+    const r = field.racers[i];
+    if (botOf(i) || r.state === 'finished') return false;
+    for (const sp of Object.keys(FIELD.SPOTS) as Spot[]) { field.release(i, sp); field.leave(i, sp); }
+    r.state = 'sailing';
+    const spot = Math.max(RC.LINE.c0, Math.min(RC.LINE.c1, Math.round(r.pose.c)));
+    const ahead = progressAt(r.pose), tau = ahead < joinTau(spot) ? startTau(spot) : ahead;
+    const rt = route('long'), st = style('peaceful');
+    bots.push({
+      i, route: rt, style: st, skill: 'decent', best: 'decent', pace: 1, tau, mode: 'sail', was: 'sail', spot, tau0: tau, from: { ...r.pose }, tripFull: 0,
+      cut: null, stage: 0, work: 0, full: 0, tries: 0, since: 0, lost: 0, move: null, combo: false, ready: new Set(), daze: 0, trip: 0, waited: 0,
+      hopped: tau >= MID_T, hop: 0, lefts: LEFT_T.filter((t) => t <= tau).length, purse: false, paid: false, owed: 0,
+      done: new Set(Object.values(cuts).filter((c) => c.tIn <= tau).map((c) => c.id)), stop: null, inLine: new Set(), vegas: false, exit: 0,
+      bet: null, goes: { turn: 0, veil: 0 },
+      res: { route: rt.name, style: st.name, skill: 'decent', start: i, spot, time: 0, place: 0, hitsTaken: 0, hitsGiven: 0, swept: [], cuts: [], exposed: [], bets: [] },
+    });
+    return true;
+  };
+
   return {
-    field, step,
+    field, step, adopt,
     progress: (i) => { const b = botOf(i); return b ? (b.mode === 'done' ? SIM.LONG : b.tau) : progressAt(field.racers[i].pose); },
     hit: (i, by) => { const b = botOf(i); return b ? hitBot(b, by) : field.hit(i, by); },
     lift: (i) => {

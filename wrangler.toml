@@ -24,3 +24,13 @@ class_name = "DenCrew"
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["DenCrew"]
+
+# The sloop race online: one room per race code (worker/race-room.js), which runs the race itself (the
+# field, the bots, the clock) while one's on, and sleeps otherwise. SQLite-backed, free-plan friendly.
+[[durable_objects.bindings]]
+name = "RACE"
+class_name = "RaceRoom"
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["RaceRoom"]

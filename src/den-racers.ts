@@ -49,6 +49,8 @@ export const FIELD = {
   /** Racers on one course. */
   LEAST: 2,
   MOST: 4,
+  /** Racers on one course in a race online (src/race-net.ts): up to six players, bots filling the rest. */
+  ONLINE: 6,
   /** Shots every racer starts with, loaded (the user, 11 Nov: "a gun or two loaded"), and the most she
       holds: her Gunnery board's four guns, two a side (src/den-guns.ts), counted together here. */
   SHOTS: 2,
@@ -113,10 +115,11 @@ export class Field {
   holds = new Map<Spot, number>();
   queues = new Map<Spot, number[]>();
 
-  /** `names`: the racers, two to four; `count`, the starter's seconds (0: off at once); `sea`, for the
-      broadsides (rocks and land stop a shot): any sea with the race's course laid. */
-  constructor(names: string[], public sea: Sea | null = null, public count = 3) {
-    if (names.length < FIELD.LEAST || names.length > FIELD.MOST) throw new Error(`a race is ${FIELD.LEAST} to ${FIELD.MOST} racers`);
+  /** `names`: the racers, two to four (or to `most`: online, FIELD.ONLINE); `count`, the starter's seconds
+      (0: off at once); `sea`, for the broadsides (rocks and land stop a shot): any sea with the race's
+      course laid. */
+  constructor(names: string[], public sea: Sea | null = null, public count = 3, most: number = FIELD.MOST) {
+    if (names.length < FIELD.LEAST || names.length > most) throw new Error(`a race is ${FIELD.LEAST} to ${most} racers`);
     this.racers = names.map((name, i) => ({
       i, name, pose: { c: RC.BUOY[0], r: RC.BUOY[1], d: 0 }, leg: 0, state: 'sailing' as RacerState, spot: null,
       shots: FIELD.SHOTS, hits: 0, scored: 0, time: null, place: null,
