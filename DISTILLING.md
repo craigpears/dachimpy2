@@ -888,7 +888,7 @@ are for later, when this stops working.
 
 **The sixteenth note: when zigzags stop finishing columns, a brown pulls the blacks in (the user, 12 Nov,
 `notes/distilling/27-blacks-grouping-at-the-bottom.webp` and `28-a-brown-pulls-them-in.webp`, later in the same
-game; a picture of the result to come).** "I think this is here the difference. Like you can see as pieces
+game, and the result, `29-after-the-loops.webp`).** "I think this is here the difference. Like you can see as pieces
 are starting to spawn, more to the left. Like if I just keep doing black zigzagging down to the right, you can
 see I'm not completing columns. They're kind of grouping at the bottom more. This is when you start dragging
 browns down through the blacks to kind of pull them in. So yeah, using this example, I would start wanting to
@@ -901,6 +901,11 @@ arrows there".
   something cleverer is needed. A brown is dragged down through the row of blacks at the bottom (a brown sinks past a black: blacks rise, browns sink, §3), pulling them in, and loops
   round, as in the crawl and line pull (the fourth to sixth notes), to carry the blacks over into the junk
   side and finish its columns.
+- **After a few loops (the user):** "So after a few loop kind of things, see, this is kind of the shape I end
+  up with." In the picture the whites are one solid block on the left and top middle, the junk five columns
+  on the right, and the blacks that were lying along the bottom now sit packed at the foot of the junk side,
+  under the browns: the bottom row of the middle is colour joined to the junk, not blacks stranded under the
+  whites. The shape is back to upright bands, ready for the next junk columns to finish and burn.
 
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
