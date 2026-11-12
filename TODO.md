@@ -290,6 +290,10 @@ the site (`.assetsignore` skips `*.md`).
   exit, rejoin the leg or push on through the next Vegas "in relative peace"; a failed Vegas spills her
   out of the last exit passed, not back to the mouth (RACE.md §9).
 
+- **Sailing: the pair jumps back up the board after Space and a turn (12 Nov):** "if you hit the space bar
+  and then rotate the piece, it kind of jumps halfway back up the screen. So something's gone wrong
+  there." It should turn where it is and carry on falling from there.
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
