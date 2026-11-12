@@ -181,11 +181,20 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   to." So no cheat for what's a key away (Sailing's board: go sailing, then 1), and one per place, not
   one per spot in it: the housing district, not Gravee's house as well (one is kept "because you need
   it for the link", and the district's is the link the user's shared: Gravee's is a click from its list); Kikkit's island, not her whirlpools as well ("they're right next to each other").
+  Vegas Island and its penguins are a place of their own beside it, though (12 Nov: only a Vegas gets
+  there), and so are the smugglers' beach and the starlit door: each a cheat and a link (`penguins`,
+  `smugglers`, `door`), shown like everything else ("No hidden gems in the proof of concept").
+- **The cheats in sections (12 Nov).** "have a peek at the cheats menu to make sure it still looks
+  relatively organized ... all of the cheats ... can be grouped into sections at this point, and it's
+  probably quite a long menu." So the menu is a few short headed sections: a fresh den built up to a
+  stage, at the den, out to sea, the islands, the sloop race. Two columns of them on a laptop, all on
+  one screen without scrolling; one column on a phone. A new cheat goes in the section it belongs to
+  (`CHEAT_SECTIONS`, `js/den/menus.js`), keeping its own wording.
 - **Every starting point has a link, to share (10 Nov).** "Make it so that each starting point is
   something that I can put into the URL as well, so that I can share that animation with
   somebody." `den.html?at=` and a name opens the den straight there: the cheats' stages (`start`,
   `walk`, `gun-tower`, `built`) and their starts and scenes (`shack`, `map-scene`, `sea`,
-  `dignity`, `umami`, `wedding`, `married`). Choosing one from the cheats puts its link in the address bar, and its
+  `dignity`, `umami`, `wedding`, `married`, and since: `kikkit`, `penguins`, `tzz`, `imperial`, `smugglers`, `race`, `door`, `race-watch`, `lodgings`). Choosing one from the cheats puts its link in the address bar, and its
   button's tooltip shows it. A name that isn't one says so. A new scene or start gets a name too.
 - **The layout follows the screen's shape, not the device (11 Nov).** A tall, narrow window on a
   desktop gets the phone's layout (the wedding planner as a sheet along the bottom, say), and

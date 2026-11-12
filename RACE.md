@@ -74,7 +74,7 @@ mouth. Sitting there, you're a sitting duck for anyone coming up behind (§6).
 | Leg 4, the zigzag (on the long way) | Hop its headwinds with well-timed Doubles; weaving through is the no-puzzle way | On the move | 8 | Built |
 | Spit 5, the crane in a notch | Carpentry, building the crane a part at a time, which hauls her over | Stopped dead, sheltered | 38 | Built |
 | Spit 5, a gap with two winds blowing back across it | A Triple | On the move | 9 | Built |
-| The starlit door: a hidden tunnel from leg 2, up a cleft onto leg 3, or on under leg 4 to leg 5 (§9) | Duty Navigation on the rock (two small constellations); then any clear from the mouth spills her up onto leg 3, or a Vegas in and a Vegas on, built in peace under the cleft, to leg 5 | Stopped dead at the rock and the mouth, exposed; under the cleft, out of reach | 40 / 119 | Built, secret |
+| The starlit door: a tunnel from leg 2, up a cleft onto leg 3, or on under leg 4 to leg 5 (§9) | Duty Navigation on the rock (two small constellations); then any clear from the mouth spills her up onto leg 3, or a Vegas in and a Vegas on, built in peace under the cleft, to leg 5 | Stopped dead at the rock and the mouth, exposed; under the cleft, out of reach | 40 / 119 | Built |
 | Rocks across a gap, blasted away | Gunnery: her guns | On the move | ? | Idea |
 | A Rigging passage of shifting, gusty winds | Rigging, its six pulleys as her rigging lines (§11) | On the move | ? | Idea |
 
@@ -97,7 +97,7 @@ up to get through", and the locks' animation "frustrated and slowed down" (it wa
   sailed (it was 10). That made the locks save 31 s and win 41% (over the band), so they moved two squares
   toward the bend (`LOCK_C` 13 to 11): 23 s saved, 24% won (§8, "The playtest's fixes").
 Carpentry and Duty Navigation weren't come across on that go: the crane sits in a notch off leg 5, easy to
-sail past; the door is secret by design.
+sail past; the door was a secret by design then (public since 12 Nov, §9).
 
 The savings column is `RACE.DECENT` and the door's `DOOR.EXITS` (and the simulation's `SIM.ZIGZAG`), as measured by the
 helm and tested. Each is about what the simulation recommended (§8): a shortcut pays only for a player good
@@ -183,7 +183,7 @@ well-timed double, would be a lot more effective."
 
 **Findable, never marked (built 11 Nov: every way in is a gap beside a leg).** On a first go the user couldn't find the crane or the rowing gap ("There's a
 carpentry shortcut in here I've not seen it"). So the shortcuts should be plain to see as you sail past: a
-gap, the crane's footing. The starter names a few as examples. Only the starlit door is secret.
+gap, the crane's footing. The starter names a few as examples, and since 12 Nov the starlit door (§9): nothing's secret now.
 
 **The combo is what gets you through, not the puzzle.** At sea a heavy combo is what rushes her past
 guns, whirlpools and winds, whether sailed or rowed: "it's the combo, heavy combo that gets you through, not
@@ -253,8 +253,9 @@ might carry ye on or blow ye back, or a whirlpool that turns its spin. Catch it 
   crane, row the headwind gap, zoom over the whirlpools on a Vegas, hop a headwind with a Double, and since
   12 Nov haul up some treasure and pay off the guard at the gate, and the gambles in a line of their own, §4), and "Get
   it wrong and ye're back where ye started"; the winds that sweep you back, the left-hand trade wind most;
-  and that the others shoot you if you sit still in the open. Never the starlit door: a race's rules are
-  explained, its secret isn't (`src/lines/race.ts`, `STARTER.explain`).
+  and that the others shoot you if you sit still in the open. Since 12 Nov, the starlit door in a line
+  of its own: "a starry door in the cliff off leg two, opened by Navigation, and a tunnel under the course"
+  (§9; `src/lines/race.ts`, `STARTER.explain`).
 - **A ceremonious finish:** a line across the run home between two striped towers, gold balls on top, a
   chequered banner strung between them over the water and a chequered line on it. Crossing it, a burst of
   colour, and a card: "Over the line", her time, and her place.
@@ -675,11 +676,25 @@ puzzle and each leg, and the finish. That gives win rates by route, "like in Age
 for the user to balance by, not automatic balancing. "Balancing is going to be certainly, I think, for
 players to actually test."
 
-## 9. The secret: the starlit door (built)
+## 9. The starlit door (built)
 
 Built as a hidden gem, never hinted; **public since 12 Nov** (the user: "make the [starlit] door public.
-Yeah, no hidden ... not for a proof of concept. It didn't really work"): a cheat and a `?at=` link, in the
-changelog and on the design page and the public chart, and the starter names it among the shortcuts.
+Yeah, no hidden ... not for a proof of concept. It didn't really work"). Built that day:
+- **A link and a cheat:** `den.html?at=door` puts her on the race course stopped under the door's crag,
+  Space to look closer at the rock (no race running: the door's played as well out of a race as in one).
+  "The starlit door" in the cheats' race section (`js/den/menus.js`, `cheatDoor`; `js/den/door.js`,
+  `doorCheat`). `doorTest` stays, a console hook for what the cheat doesn't do (open it, play a gust).
+- **The starter names it,** among the shortcuts, a line of its own after the bribe's: "Or, for a navigator,
+  a starry door in the cliff off leg two, opened by Navigation, and a tunnel under the course. A Vegas
+  carries ye on through the dark." The tests that forbade it now check it's said (`tests/den-race.test.ts`).
+- **The chart shows it:** one chart, no `PUBLIC` mode (§13): the door and its stars, the tunnel dotted in
+  purple, the caves at its exits, its label and its route's wins.
+- **The changelog and the design page:** "The starlit door" under 11 November, where it was built, with
+  shots of the door open and the tunnel (`changelog/starlit-door.jpg`, `starlit-tunnel.jpg`), and a
+  section on `design.html`, "The starlit door: the long way round for a navigator".
+- **The bots still don't take it,** in the watched race or as your rivals: kept off their routes for
+  balance (the simulation's door bots, §8, are another matter), no longer a secret
+  (`tests/race-watch.test.ts`).
 - **The door:** faint marks on a cliff off leg 2. Stop by it and press Space, and Duty Navigation stands
   on the rock as the night sky. Each constellation filled lights its stars on the carved wheel. Two small
   ones open it, about a minute's play. A booch pushes her off and darkens the stars.
@@ -930,15 +945,13 @@ check, a share link, and the den's own race for 3D.
   simulation: the long way and its buoys, every shortcut with its puzzle, saving and its route's wins, the
   snakes and winds, the sheltered and exposed spots, the gun gap's reach, the start's spots, and a table of
   wins by route, style, skill and spot (2000 races, about a minute). The user: "a map of the course ... shows
-  where all the shortcuts and things are, and all the wins". It shows the starlit door, so it's private:
-  write it outside the site (a temp folder), never into it. Since 12 Nov it marks the gambles too (the
+  where all the shortcuts and things are, and all the wins". It shows the starlit door, its tunnel and its
+  route like any other (since 12 Nov: no hidden gems, §9). Since 12 Nov it marks the gambles too (the
   turning pool and the veiled wind, their ladders gold and snakes red).
-- **The public chart (12 Nov):** `PUBLIC=1` draws it with everything of the starlit door left out (the door,
-  its stars, the tunnel, the caves at its exits, the exposed square off it, its label, its route's and
-  shortcut's rows, the private note); the spit's land is drawn as any land, so nothing gives it away. Its
-  chart alone, 1280 wide (a headless browser's screenshot of the svg), is `changelog/race-map.jpg`, shown in
-  the changelog's 12 Nov entry and on `design.html`. Draw it again with 2000 races after the course changes,
-  and look it over for any trace of the door before it goes up.
+- **The chart on the site (12 Nov):** one chart, everything on it (the `PUBLIC=1` mode that left the door
+  out is gone, 12 Nov). Its chart alone, 1280 wide (a headless browser's screenshot of the svg, the svg
+  set to 1280 by 1822), is `changelog/race-map.jpg`, shown in the changelog's 12 Nov entry and on
+  `design.html`. Draw it again with 2000 races after the course changes.
 - **Drawn and played by:** `js/den/race.js`; its start (the line, your spot, the starter's card)
   `js/den/race-start.js`; its buoys and finish line `js/den/race-marks.js`; its barrier of driftwood and
   its Foraging `js/den/race-forage.js`; the gun gap's gate, its guard and the wreck's haul
@@ -949,7 +962,7 @@ check, a share link, and the den's own race for 3D.
   throw, `Gambles` wired to the helm's `takes`); their squares `LAY.RACE.GAMBLES`; drawn by
   `js/den/race-gamble.js`; tested in `tests/den-gamble.test.ts`.
 - **The starter's lines:** `src/lines/race.ts`.
-- **The starlit door:** `src/den-door.ts` and `js/den/door.js`.
+- **The starlit door:** `src/den-door.ts` and `js/den/door.js`; its starting point `den.html?at=door`.
 - **Watched (§10):** `src/race-watch.ts` (the race of four, who's followed, what she's doing, her board and
   its pace, the free camera); drawn by `js/den/race-watch.js` (the camera, the keys, the bar, the sloops)
   and `js/den/watch-boards.js` (each racer's board); the puzzles' bots `src/sail-bots.ts`, `bilge-bot.ts`,
@@ -957,4 +970,4 @@ check, a share link, and the den's own race for 3D.
 - **Tests:** `tests/den-race.test.ts`, `tests/den-bribe.test.ts`, `tests/den-door.test.ts`, `tests/den-racers.test.ts`,
   `tests/den-rivals.test.ts` (the rivals racing you, shooting, places), `tests/race-sim.test.ts` (the
   balance test), `tests/race-watch.test.ts` (watching) and `tests/puzzle-bots.test.ts` (the bots).
-- **Try it:** `den.html?at=race`; watch four race, `den.html?at=race-watch`.
+- **Try it:** `den.html?at=race`; the starlit door, `den.html?at=door`; watch four race, `den.html?at=race-watch`.
