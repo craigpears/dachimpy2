@@ -733,6 +733,15 @@ and it just works."
 - **For the bots:** score a technique's swaps by how many move a piece the wrong way (back left, or back over
   ground already won), and prefer a plan that brings in another free piece to one that loops, while free
   pieces are about.
+- **Don't sort what's about to burn (the user, following on):** "there's all these brown ... if I brought those
+  browns down in that last screenshot to the bottom left, like there's no point because things are all going
+  to get burned anyway. I've got like three or four rows of pieces ... so organizing stuff like that is just
+  not necessary yet because it's going to get burned. And I'm not going to waste my time organizing stuff
+  that's going to get burned. But once I start getting down to two or three columns, and things are a bit
+  scarcer, then ... it will start becoming more" (cut off; necessary, presumably; a concrete example to
+  come). So while three or four columns of junk are still waiting on the right, sorting junk (browns to the
+  bottom, blacks to the top, §3) is wasted swaps: it all burns as it is. Sorting earns its swaps only when
+  the junk is down to two or three columns and pieces are scarcer.
 
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
