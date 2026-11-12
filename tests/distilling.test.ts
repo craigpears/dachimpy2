@@ -149,6 +149,13 @@ describe('dragging (12 Nov)', () => {
     // Too little movement: nothing yet.
     expect(g.wayToward(3, 3, 0.3, 0.2)).toBeNull();
   });
+  it('a drag swaps into the next place only once the pointer is well into it (12 Nov: "Oh shoot! I just pulled it one thing too many. This is a bit sensitive")', () => {
+    const g = laid(put(sea('w'), [[3, 3, 'K']]));
+    // Just over the edge of the place down-right: not yet.
+    expect(g.wayToward(3, 3, 0.55, 0.28)).toBeNull();
+    // Well into it, two thirds of the way to its middle: now.
+    expect(g.wayToward(3, 3, 0.7, 0.35)).toBe(DOWN_RIGHT);
+  });
   it('moves a black and a brown level through whites together, three swaps a column (the crawl)', () => {
     // DISTILLING.md's sketch: brown at (1, 1) (short), black at (0, 2) (tall), in whites.
     const g = laid(put(sea('w'), [[1, 1, 'b'], [0, 2, 'K']]));

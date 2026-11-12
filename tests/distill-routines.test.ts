@@ -117,15 +117,25 @@ describe('the routines (12 Nov)', () => {
     expect(halfOf(after, bx, by)).toBeLessThanOrEqual(12);
     expect(Math.abs(bx - 4)).toBeLessThanOrEqual(1);
   });
-  it('pull a line up: a black at the front of a line of browns, the line pulled up a tile', () => {
-    const cols = board([[4, 7, 'K'], [3, 6, 'b'], [2, 6, 'b'], ...column(9, 'KKKKbbbb')]);
-    const height = (b: Board) => [...where(b, BLACK), ...where(b, BROWN)].filter(([x]) => x < 9).reduce((s, [x, y]) => s + halfOf(b, x, y), 0);
+  it('pull a line over: one black climbs through the browns, each dropping a place, and loops back round to park beside them again, one drag a pass (12 Nov: "you use kind of like one black to pull a whole row of browns over")', () => {
+    // notes/distilling/10-the-line-pull.webp: a line of browns up to the left, the black parked in the whites beside it.
+    const cols = board([[4, 5, 'K'], [3, 4, 'b'], [2, 4, 'b'], [1, 3, 'b'], ...column(8, 'KKKKbbbbb'), ...column(9, 'KKKKbbbb')]);
     const moves = find('linePull', cols, stageI(8));
     expect(moves.length).toBeGreaterThan(0);
-    const after = wholeDrags(cols, moves[0]);
-    expect(height(after)).toBeLessThanOrEqual(height(cols) - 6);
-  });
-  it('the leapfrog: a black swept sideways along browns stored at the top, in one drag', () => {
+    const m = moves[0];
+    expect(m.drags).toHaveLength(1);
+    expect(m.drags[0]).toMatchObject({ x: 4, y: 5 });
+    // Up through the browns first ("that pulls the browns down"), then round through the whites.
+    expect(m.drags[0].ways.slice(0, 3)).toEqual([UP_LEFT, UP_LEFT, UP_LEFT]);
+    const after = wholeDrags(cols, m);
+    // Every brown of the line a place across, and the black parked beside the line, ready to go again.
+    const browns = where(after, BROWN).filter(([x]) => x < 8);
+    expect(browns.map(([x]) => x).sort()).toEqual([2, 3, 4]);
+    let at: [number, number] = [4, 5];
+    for (const w of m.drags[0].ways) at = neighbourOn(cols, at[0], at[1], w)!;
+    const up = neighbourOn(after, at[0], at[1], UP_LEFT)!;
+    expect(after[up[0]][up[1]]).toBe(BROWN);
+  });  it('the leapfrog: a black swept sideways along browns stored at the top, in one drag', () => {
     const cols = board([[1, 0, 'K'], [2, 0, 'b'], [4, 0, 'b'], [6, 0, 'b'], ...column(9, 'KKKKbbbb')]);
     const moves = find('leapfrog', cols, stageI(9)).filter((m) => m.drags[0].x === 1);
     expect(moves).toHaveLength(1);

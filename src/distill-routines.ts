@@ -676,42 +676,54 @@ const figureEight: Routine = {
   },
 };
 
-/** The line pull: a black at the front of a line of browns in whites, the line pulled up a tile at a time
-    (the user, 12 Nov: "you pull a line of brown things up ... then with just the trailing brown, you can
-    bring the black up again ... to keep pulling it up one tile at a time"). */
+/** The line pull: one black pulls a line of browns over (the user, 12 Nov, the fifth note, drawn): parked
+    in the whites beside the line, the black climbs up through the browns, each brown dropping a place as
+    it goes by ("that pulls the browns down"), and so a place across; then it's looped back round through
+    the whites to park beside the line again, ready for the next pass. One drag a pass. "When you're in
+    this mid game ... you use kind of like one black to pull a whole row of browns over." */
 const linePull: Routine = {
-  name: 'linePull', label: 'Pull a line up',
-  about: 'A black at the front of a line of browns: the line pulled up through the whites a tile at a time.',
+  name: 'linePull', label: 'Pull a line over',
+  about: 'One black climbs up through a line of browns, each dropping a place as it passes, and loops back round through the whites to do it again: the line comes across.',
   find(cols, ctx) {
     const out: Move[] = [];
+    const side = junkSide(ctx);
     for (let x = 0; x < Math.min(ctx.burnFrom, COLS); x++) for (let y = 0; y < cols[x].length; y++) {
-      if (cols[x][y] !== BLACK || wantsVertical(cols, x, y, ctx) >= 0) continue;
-      // The line: browns linked one to the next from the black.
-      const line: [number, number][] = [[x, y]];
-      for (let k = 0; k < 2; k++) {
-        const [lx, ly] = line[line.length - 1];
-        let next: [number, number] | null = null;
-        for (let d = 0; d < 4 && !next; d++) {
-          const n = neighbourOn(cols, lx, ly, d);
-          if (n && cols[n[0]][n[1]] === BROWN && !line.some((q) => q[0] === n[0] && q[1] === n[1])) next = n;
+      if (cols[x][y] !== BLACK) continue;
+      // A line to climb: a brown on its up side away from where the browns should go.
+      const climb = side > 0 ? UP_LEFT : UP_RIGHT, first = neighbourOn(cols, x, y, climb);
+      if (!first || cols[first[0]][first[1]] !== BROWN) continue;
+      // The pass, traced: each brown the black climbs past moves a place the other way across.
+      const b = copyBoard(cols), path: number[] = [];
+      let best: { ways: number[]; score: number } | null = null, nodes = 0;
+      const dfs = (cx: number, cy: number, gain: number) => {
+        if (path.length >= ctx.reach || nodes++ > 3000) return;
+        for (const d of ALL) {
+          const n = neighbourOn(b, cx, cy, d);
+          if (!n) continue;
+          const other = b[n[0]][n[1]];
+          if (!swapIn(b, cx, cy, d)) continue;
+          path.push(d);
+          const g = gain + (other === BROWN ? -side * (n[0] - cx) : 0);
+          // Parked again beside the line, in the whites, a brown on its climbing side: ready for the next.
+          const nx = neighbourOn(b, n[0], n[1], climb);
+          const parked = !!nx && b[nx[0]][nx[1]] === BROWN && besideOn(b, n[0], n[1], side, (q) => q === WHITE);
+          if (g >= 2 && parked) {
+            const score = g * 4 - path.length * 0.1;
+            if (!best || score > best.score) best = { ways: [...path], score };
+          }
+          dfs(n[0], n[1], g);
+          path.pop();
+          const t = b[cx][cy]; b[cx][cy] = b[n[0]][n[1]]; b[n[0]][n[1]] = t;
         }
-        if (!next) break;
-        line.push(next);
-      }
-      if (line.length < 3) continue;
-      const h0 = line.reduce((s, [lx, ly]) => s + halfOf(cols, lx, ly), 0);
-      const found = groupSearch(cols, line, WHITE, Math.min(ctx.reach, 14), (pos) => {
-        const rise = h0 - pos.reduce((s, [px, py]) => s + halfOf(cols, px, py), 0);
-        if (rise < 2 * line.length || pos.some(([px]) => Math.abs(px - x) > 2)) return null;
-        return rise;
-      }, 3000);
-      if (!found) continue;
-      out.push({ routine: 'linePull', drags: dragsOf(cols, found.steps), reason: `pull the line of browns at ${placeName(x, y)} up a tile, the black at its front` });
+      };
+      dfs(x, y, 0);
+      const pass = best as { ways: number[]; score: number } | null;
+      if (!pass) continue;
+      out.push({ routine: 'linePull', drags: [drag(x, y, pass.ways)], reason: `pull the line of browns over: the black at ${placeName(x, y)} climbs up through them, each dropping a place, and loops back round to go again` });
     }
     return out;
   },
 };
-
 /** The leapfrog: a black swept sideways along browns stored at the top, up into each and down past it
     (the user, 12 Nov: "you keep three brown pieces at the top or bottom, and then drag a black along each
     one"), or a brown along blacks stored at the bottom. One drag; mid-game, with plenty of pieces. */

@@ -506,6 +506,29 @@ back:
   are: giving the Master every routine took its mean chain from 2.3 to 3.0 on 20 boards.
 - The learner burns whites (6.5 a session) not by choice but by waiting on the furnace with too few
   techniques to rescue them in time, which is the beginner the user described.
+
+### After the user's first notes (12 Nov, third run)
+From the five notes above: every junk drag carries on as far as it goes (`carryOn`), never parked partway
+into the whites; the diamond's drags go any way through (down and up through whites, the ladder up the
+right side's browns, a brown over the top and down through the blacks), aiming for browns at the bottom
+right and blacks at the top; the planner's phases are decided by the board: **the sweep** (plain long
+drags taking junk over, blind, a fifth to a half of a technique's pause between them) while it gets junk
+right, then **turning the right side over** (`turnOver`, blacks zigzagged up the side through the browns),
+then everything else hooking in; the crawl crawls a side-by-side pair as drawn (two drags in turn, down,
+up, down); the line pull is the drawn loop (one black up through the browns, each dropping a place, round
+through the whites to park beside them again, one drag a pass). Same 40 boards:
+
+| Tier | Longest chain: mean (best), was | CC^6+, was | CC^12 | Score a column, was | Minutes | Whites burned | Swaps a drag, was |
+|---|---|---|---|---|---|---|---|
+| Learner | 1.7 (4), was 1.5 (4) | 0/40, was 0 | 0/40 | 4.3, was 3.9 | 5.5 | 6.2 | 3.4, was 2.8 |
+| Able to Master | 2.7 (6), was 2.8 (6) | 2/40, was 4 | 0/40 | 8.8, was 8.6 | 3.4 | 1.9 | 4.1, was 3.1 |
+| Grand-Master to Legendary | 3.1 (7), was 2.7 (9) | 7/40, was 4 | 0/40 | 10.2, was 9.5 | 3.2 | 1.4 | 4.1, was 3.1 |
+| Ultimate | 3.5 (8), was 3.3 (9) | 14/40, was 8 | 0/40 | 11.3, was 10.5 | 3.2 | 1.6 | 4.1, was 3.1 |
+
+Drags are a third longer and the top tiers reach CC^6 more often (the Ultimate one run in 3), but the mean
+chain barely moves and CC^12 is still 0 in 40: the chains still break on a black stuck on the bottom or a
+brown on the top of a white column. Whether the line pull's loop frees the blacks stuck at the bottom (the fifth note's "we've got to
+try and rescue them") isn't shown: the bots play it under once a session.
 **Left here for now (the user, 12 Nov):** "I think that's fine for now. Just obviously I watch what they
 do and I'll feed back. That's probably going to be better than you brute force." So no more tuning by
 running the bots over and over: the user watches them play on `distilling-test.html` and says what a

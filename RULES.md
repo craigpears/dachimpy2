@@ -697,6 +697,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   game swapped only with the mouse near a piece's middle. And no column-shift glitch: the links are drawn
   from the rules' board every frame (the look only follows it), and nothing moves while the board
   slides, so a piece flung as the board shifts never loses its links.
+- **A Distilling drag stops where you mean it to (12 Nov).** The user, demonstrating: "Oh shoot! I just
+  pulled it one thing too many. This is a bit sensitive." A dragged piece swaps into the next place only
+  once the pointer is well into it, three quarters of a piece along the way (`DRAG_INTO`, two thirds of the
+  way to its middle), not as soon as it's over the edge; the smoothing of a sloppy path stays.
 - **Distilling burns while paused, for demos (12 Nov).** The user: "when I'm in pause mode as well, I need
   a burn button so I can demo these." Paused, the furnace's clock stands still, but a hand's swaps still
   land, a burn still goes and the board still slides (`settle` in `src/distilling.ts`), so a board can be
