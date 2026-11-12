@@ -29,8 +29,9 @@ export const SKIN = ['#f6d3b0', '#f0bf8e', '#d9a066', '#b57a4a', '#8a5530', '#5c
 export const HAIR = { black: '#1f1a17', 'dark brown': '#3b2414', brown: '#6a4020', 'light brown': '#94713c', auburn: '#7f2e16', red: '#9a0a08', ginger: '#c4642a', blonde: '#dcb565', grey: '#a09a92', white: '#ece8e0' };
 // Monkeys and squirrels only come in natural colours (YPPedia: Monkey), white (a champion's) and a
 // few limited editions (lavender, from a Booch Box; pink, Mischievious's monkey in "What is Love?").
-// A lavender monkey has a white face and tummy.
-export const FUR = { brown: '#6b4423', tan: '#ad8047', ginger: '#b5652a', grey: '#8a8a8a', black: '#2a2a2e', cream: '#e9dcc0', white: '#f7f5f0', lavender: '#b9a9ea', pink: '#be667f' };
+// A lavender monkey has a white face and tummy. (Plum: Helium's King, his Emerald pirate page's "plum"
+// monkey, a soft violet in his portrait, sampled from it, 12 Nov; not the plum dye, a magenta.)
+export const FUR = { brown: '#6b4423', tan: '#ad8047', ginger: '#b5652a', grey: '#8a8a8a', black: '#2a2a2e', cream: '#e9dcc0', white: '#f7f5f0', lavender: '#b9a9ea', pink: '#be667f', plum: '#865b91' };
 const FUR_FACE = { lavender: '#fbf8ff' };
 // Familiars in FUR's natural colours (the rest take any dye), and the colour each falls back to.
 export const FURRY = { monkey: 'brown', squirrel: 'grey' };
@@ -201,6 +202,17 @@ export const PIRATES = Object.fromEntries(Object.entries({
     body: 'f', skin: 1, hair: 'ponytail', hairCol: 'light brown', patch: true, earring: true, smile: true, pegleg: true,
     hat: 'none', top: 'rag', topCol: 'light blue', waist: 'none',
     legs: 'knickers', legsCol: 'blue', feet: 'bare', hand: 'none', fam: 'dragon', famCol: 'silver', famCol2: 'vibrant red',
+  },
+  // Helium (his Emerald pirate page's portrait, checked 12 Nov), who teaches Distilling at the still on his
+  // island past the checkpoint: dark skin, white hair swept up, the Feminine feline in black (a black eye
+  // mask with cat's ears), an eyepatch, a gold hoop earring, a blue starfish on the cheek, a black Vampire
+  // raiment (high collar, gold buttons, lined in gold), black pants, black fancy boots with plum tops, a
+  // hook for the left hand, and King, his plum monkey, on his shoulder. (In his right hand in the portrait,
+  // a glowing blue jar: not in the wardrobe, so left out.)
+  Helium: {
+    body: 'f', skin: 4, hair: 'bun', hairCol: 'white', patch: true, earring: true, smile: true, hook: true, starfish: true,
+    hat: 'feline', hatCol: 'black', hatCol2: 'black', top: 'raiment', topCol: 'black', topCol2: 'gold', waist: 'none',
+    legs: 'pants', legsCol: 'black', feet: 'fancy', feetCol: 'black', feetCol2: 'plum', hand: 'none', fam: 'monkey', famCol: 'plum',
   },
 }).map(([name, look]) => [name, cleanLook(look)]));
 

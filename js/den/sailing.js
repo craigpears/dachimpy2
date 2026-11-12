@@ -30,6 +30,7 @@ import { station, stationKey, stationToggle, stationTick, stationPrompt, station
 import { kikkitWorld, kikkitTick, kikkitShown, kikkitHail, kikkitPrompt, kikkitHolds, kikkitReset } from './whirlpools.js';
 import { inKikkitWaters } from '../den-kikkit.js';
 import { tzzWorld, tzzTick, tzzHail, tzzPrompt, tzzReset } from './balloon-isle.js';
+import { heliumWorld, heliumTick, heliumHail, heliumPrompt, heliumReset, heliumKey, heliumHover, heliumDown, heliumHolds } from './helium-isle.js';
 import { empireWorld, empireTick, empirePrompt, empireReset } from './imperial-isle.js';
 import { primatesTick, primatesReset } from './moored.js';
 import { smugglersWorld, smugglersTick, smugglersPrompt, smugglersReset } from './smugglers.js';
@@ -89,6 +90,7 @@ export function sailReset() {
   stationReset();
   kikkitReset();
   tzzReset();
+  heliumReset();
   empireReset();
   smugglersReset();
   primatesReset();
@@ -146,6 +148,7 @@ function seaCellAt(x, y) {
 }
 export function sailClick(x, y) {
   if (umamiClick(x, y)) return;   // (his board, and poling her along the lagoon's shore: capybara.js)
+  if (heliumDown(x, y)) return;   // (Distilling at Helium's still: helium-isle.js)
   if (raceClick(x, y)) return;   // (the race's barrier of driftwood, its Foraging board: race-forage.js)
   if (patch.on) { patchClick(x, y); return; }
   if (hold.mode) { holdHover(x, y); holdSwap(); return; }
@@ -159,7 +162,7 @@ export function sailClick(x, y) {
   else if (sail.helm.via) toast('She\'ll ride the trade winds: the pin\'s where they drop her off');
 }
 export function sailHover(x, y) {
-  if (umamiHover(x, y) || raceHover(x, y)) { sail.hover = null; return; }
+  if (umamiHover(x, y) || raceHover(x, y) || heliumHover(x, y)) { sail.hover = null; return; }
   if (patch.on) { patchHover(x, y); sail.hover = null; return; }
   if (hold.mode) { holdHover(x, y); sail.hover = null; return; }
   if (rowing.on) { rowHover(x, y); sail.hover = null; return; }
@@ -169,7 +172,7 @@ export function sailHover(x, y) {
   sail.hover = at && sail.sea.open(Math.round(at.c), Math.round(at.r)) ? [Math.round(at.c), Math.round(at.r)] : null;
 }
 // Something else has her, so the Sailing board's put away (sail-station.js).
-const rigBusy = () => haul.on || craneHolds() || raceHolds() || patch.on || !!hold.mode || umami.on || sail.helm.dazed() || kikkitHolds();
+const rigBusy = () => heliumHolds() || haul.on || craneHolds() || raceHolds() || patch.on || !!hold.mode || umami.on || sail.helm.dazed() || kikkitHolds();
 /* The puzzles at sea in one bank, the order of their buttons on the sailing bar: 1 Sailing, 2 Gunnery
    (her guns), 3 the oars (the user, 11 Nov: "surely they should at least all be in the same bank of keys
    for activating the puzzles ... I think 1, 2, 3 makes sense"; R, G and O were scattered among the
@@ -184,6 +187,7 @@ export function sailKey(key) {
   if (hold.mode && holdKey(key)) return;
   if (kikkitHolds() && key !== 'p') return;   // (round and round in a whirlpool: whirlpools.js)
   if (umamiKey(key)) return;   // (Umami's board, and her moorings in the lagoon: capybara.js)
+  if (heliumKey(key)) return;   // (Distilling at Helium's still: helium-isle.js)
   if (craneKey(key)) return;   // (the crane at the ledge, and the lagoon: crane.js)
   if (raceKey(key)) return;   // (the race: its buoy, and its crane on the neck: race.js)
   // The Sailing board: its keys while it's open; 1 or Esc puts it away (sail-station.js).
@@ -209,6 +213,7 @@ export function sailKey(key) {
   else if ((key === ' ' || key === 'enter') && canLandIsle(sail.helm)) isleAshore();   // (Mischievious's isle: isle.js)
   else if ((key === ' ' || key === 'enter') && kikkitHail()) { /* (Kikkit, off her island: whirlpools.js) */ }
   else if ((key === ' ' || key === 'enter') && tzzHail()) { /* (Tzz's lesson again, off her island: balloon-isle.js) */ }
+  else if ((key === ' ' || key === 'enter') && heliumHail()) { /* (to Helium's still, off his island: helium-isle.js) */ }
   else if (key === 'z' || key === 'c') keys.add(key);
   else if (key === 'p') setPaused(true);
   else if (key === 'v') Object.assign(view, { yaw: 0, pitch: 0, zoom: 1 });
@@ -222,7 +227,7 @@ export function sailPrompt() {
   if (rowing.on) return rowPrompt();
   if (gunnery.on) return gunneryPrompt();
   if (station.on) return stationPrompt();
-  const cp = umamiPrompt() || cranePrompt() || racePrompt() || kikkitPrompt() || tzzPrompt() || empirePrompt() || smugglersPrompt();
+  const cp = heliumPrompt() || umamiPrompt() || cranePrompt() || racePrompt() || kikkitPrompt() || tzzPrompt() || empirePrompt() || smugglersPrompt();
   if (cp) return cp;
   const h = sail.helm, held = h.held();
   if (held === 'daze') return patchPrompt('Holed! Patch her deck to sail on · 1, 2, 3: a piece from the crate', ' (it rests on the deck: boarded over)');
@@ -283,6 +288,7 @@ export function sailTick(dt) {
   isleWorld();   // (Mischievious's isle, out to the right of the lanes: isle.js)
   kikkitWorld();   // (Kikkit's island, her whirlpools and Vegas Island: whirlpools.js)
   tzzWorld();   // (Tzz's island, a hop from Kikkit's, and her balloon lesson: balloon-isle.js)
+  heliumWorld();   // (Helium's island by the smugglers' rocks, and Distilling at his still: helium-isle.js)
   empireWorld();   // (Port Decorum, the imperial island past the checkpoint: imperial-isle.js)
   smugglersWorld();   // (the smugglers' beach behind it: smugglers.js)
   raceWorld();   // (the sloop race's course, out past Primates Rule: race.js)
@@ -392,6 +398,7 @@ export function sailTick(dt) {
   craneTick(dt);   // (after she's drawn where the helm has her: up the cliff, the crane has her)
   kikkitTick(dt, events);   // (Kikkit, her whirlpools and the penguins: whirlpools.js)
   tzzTick(dt);   // (Tzz and her balloons: balloon-isle.js)
+  heliumTick(dt);   // (Helium and his still: helium-isle.js)
   empireTick(dt);   // (Port Decorum's guards: imperial-isle.js)
   smugglersTick();   // (the smugglers' beach, found: smugglers.js)
   raceTick(dt);   // (the race, its guns, its crane and the rival: race.js)

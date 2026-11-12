@@ -147,6 +147,9 @@ export const CHART = {
   /** Port Decorum (11 Nov), the imperial island past the checkpoint, where the shipping lane leads: no
       secret, so it's drawn, one point of interest (IMPERIAL), never named, nothing said of what's there. */
   empire: { shore: empireShore().map(([c, r]): Square => [c - 0.5, r - 0.5]) },
+  /** Helium's island (12 Nov), past the checkpoint by the smugglers' rocks, in open water: drawn, never
+      named, as Tzz's is. */
+  helium: { shore: shoreOf(LAY.HELIUM.LAND).map(([c, r]): Square => [c - 0.5, r - 0.5]) },
   /** The rocks shutting off Port Decorum's right-hand side and its back (11 Nov), drawn whole (`whole`:
       the run of water behind them and its cove drawn as rock too, as the cliffs are drawn without their
       canal) till you've found the smugglers' beach behind them; then the rocks alone (`rocks`), the

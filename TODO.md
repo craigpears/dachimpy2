@@ -186,6 +186,19 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     Smuggle Beach is ... I bet he just wants an island for him somewhere." First the puzzle, as
     real as the rest (researched, with bots), and a tutorial in the style of Tzz's Sailing guide;
     the user will point us to what the real tutorial looks like.
+    **First pass built (12 Nov), to be played:** the user, "are you able to crack on with adding Helium
+    and some of the tutorial elements in? I don't want to get too caught up on perfecting this bit."
+    Helium drawn from his Emerald portrait (IDEAS.md), his island past the checkpoint across the
+    smugglers' rocks from their cove (`?at=helium`), his still and the real board on a stand; a short
+    lesson (swap rule, whites left and junk right, a column burned, his mishap's bang), then your own
+    session there, "Help, Helium" on H or the button (`advise`, his line naming the technique, the drag
+    played on your board), and a bang with his line whenever a white burns. Panel's distiller is him now.
+    His opening first (12 Nov, the user's): the still blows up as you arrive, he shrugs it off, "is it
+    safe?", "of course it's safe", and the eyebrows. Your pirate's tense face isn't drawn (lines only).
+    Not yet: the smuggling ring and the penguin's link, the coached replay, a lesson per technique.
+    Watch: whether the lesson's pace and camera feel right, whether his help's drags read as one smooth
+    hand, and whether he should be "he" (his portrait is a woman's figure and "Lady of the flag"; the
+    user and Mischievious call him he).
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
   "is great"; Dalnoth redrawn from his portrait and the map's view cleared, not yet seen. Watch: whether the cutscene's timing and camera feel right (about ten

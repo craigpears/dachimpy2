@@ -3,8 +3,9 @@
 // src/distilling.ts (one copy of it); this only draws a board of it wherever its caller puts it (a plane
 // in the scene, its picture painted on a canvas) and plays it by the real keys and mouse. It knows
 // nothing of the den (it imports only three.js and the rules), so a test page plays it on its own
-// (distilling-test.html). It's to be Helium's still: the hooks below say when a column goes, up or
-// burned (a burnt one could be his still's little bang), when the furnace warns, and when it's over.
+// (distilling-test.html). It's Helium's still (js/den/helium-isle.js, his island): the hooks below say
+// when a column goes, up or burned (a white burned is his still's little bang), when the furnace warns,
+// and when it's over.
 import * as THREE from 'three';
 import {
   Distilling, COLS, TALL, SWAP_MS, SLIDE_MS, MESSAGES, WHITE, BROWN, BLACK, SPICE, BURNT, WAY,
@@ -12,7 +13,7 @@ import {
 
 /* Drawn after the real one (DISTILLING.md §2, from the client port's measures): a portrait panel 450
    by 600. The top strip, 135 high: "Distilling" in gold letters outlined dark, top centre; behind it
-   the shop: the distiller on the left by his barrels, a brass pot still (a tall polished cylinder, a
+   the shop: the distiller on the left by his barrels (Helium, since 12 Nov), a brass pot still (a tall polished cylinder, a
    domed lid, a tap), and right of it the flask, a glass cylinder (42 by 75 at 235, 55) with dark metal
    caps, tick marks up its right side and a white line at the level; a brass pipe from it to the right
    and down a chute at the board's top right, where columns sent up rise. The liquid rises with pieces
@@ -103,7 +104,7 @@ function panelCanvas() {
     g.fillStyle = lamp; g.fillRect(0, 0, PW, VY);
     // Barrels.
     for (const [bx, by, bw, bh] of [[92, 84, 38, 50], [118, 98, 34, 37]]) barrel(g, bx, by, bw, bh);
-    // The distiller: coat, sash, head, tricorn.
+    // The distiller: Helium, by his barrels.
     distiller(g, 50, 135);
     // The pot still: a polished brass cylinder, a domed lid, a swan neck to the flask, a tap.
     potStill(g);
@@ -156,15 +157,33 @@ function barrel(g, x, y, w, h) {
   for (const f of [0.2, 0.8]) { g.beginPath(); g.moveTo(x + 2, y + h * f); g.quadraticCurveTo(x + w / 2, y + h * f + 3, x + w - 2, y + h * f); g.stroke(); }
 }
 function distiller(g, x, y) {
-  // A pirate in a long green coat, red sash, tricorn, standing at the still.
-  g.fillStyle = '#2e4a2a'; g.beginPath(); g.moveTo(x - 22, y); g.lineTo(x - 16, y - 58); g.quadraticCurveTo(x, y - 66, x + 16, y - 58); g.lineTo(x + 24, y); g.fill();
-  g.fillStyle = '#a8261c'; g.fillRect(x - 17, y - 34, 34, 7);
-  g.fillStyle = '#e6c8a0'; g.beginPath(); g.arc(x + 1, y - 74, 12, 0, Math.PI * 2); g.fill();
-  g.fillStyle = '#3a2410'; g.beginPath(); g.arc(x - 2, y - 66, 8, 0, Math.PI); g.fill();   // beard
-  g.fillStyle = '#1a1410'; g.beginPath(); g.moveTo(x - 22, y - 82); g.quadraticCurveTo(x + 1, y - 104, x + 24, y - 82); g.quadraticCurveTo(x + 1, y - 90, x - 22, y - 82); g.fill();
-  g.strokeStyle = '#c8a040'; g.lineWidth = 1.2; g.stroke();
-  g.fillStyle = '#e6c8a0'; g.beginPath(); g.arc(x + 26, y - 40, 5, 0, Math.PI * 2); g.fill();   // a hand on the tap
-  g.strokeStyle = '#2e4a2a'; g.lineWidth = 7; g.beginPath(); g.moveTo(x + 12, y - 52); g.lineTo(x + 24, y - 42); g.stroke();
+  // Helium at his still (his Emerald portrait, 12 Nov; his look in the wardrobe, js/den-look.js's PIRATES):
+  // a black Vampire raiment lined in gold, dark skin, white hair swept up, a black cat-eared mask, and King,
+  // his plum monkey, on his shoulder. (A stand-in distiller till 12 Nov: green coat, red sash, tricorn.)
+  const skin = '#8a5530';
+  // The raiment's gold lining, flaring at the hem, then the coat over it.
+  g.fillStyle = '#d8a420'; g.beginPath(); g.moveTo(x - 25, y); g.lineTo(x - 15, y - 40); g.lineTo(x + 15, y - 40); g.lineTo(x + 27, y); g.fill();
+  g.fillStyle = '#1e1e22'; g.beginPath(); g.moveTo(x - 20, y); g.lineTo(x - 16, y - 58); g.quadraticCurveTo(x, y - 66, x + 16, y - 58); g.lineTo(x + 22, y); g.fill();
+  g.fillStyle = '#e8b62a';   // (gold buttons down the front)
+  for (let i = 0; i < 4; i++) { g.beginPath(); g.arc(x + 1, y - 52 + i * 8, 1.6, 0, Math.PI * 2); g.fill(); }
+  g.fillStyle = '#1e1e22'; g.fillRect(x - 9, y - 66, 20, 8);   // (the high collar)
+  // Head, white hair swept up in a bun, the black mask and its cat's ears.
+  g.fillStyle = '#ece8e0'; g.beginPath(); g.arc(x + 1, y - 78, 14, Math.PI, 0); g.fill();
+  g.beginPath(); g.arc(x + 1, y - 92, 6, 0, Math.PI * 2); g.fill();
+  g.fillStyle = skin; g.beginPath(); g.arc(x + 1, y - 74, 11.5, 0, Math.PI * 2); g.fill();
+  g.fillStyle = '#121214'; g.fillRect(x - 10, y - 79, 23, 6);
+  for (const ex of [-8, 10]) { g.beginPath(); g.moveTo(x + ex - 4, y - 86); g.lineTo(x + ex, y - 97); g.lineTo(x + ex + 4, y - 86); g.fill(); }
+  g.fillStyle = '#e8b62a'; g.beginPath(); g.arc(x - 10, y - 70, 2, 0, Math.PI * 2); g.fill();   // (a gold hoop)
+  // A hand on the tap.
+  g.strokeStyle = '#1e1e22'; g.lineWidth = 7; g.beginPath(); g.moveTo(x + 12, y - 52); g.lineTo(x + 24, y - 42); g.stroke();
+  g.fillStyle = skin; g.beginPath(); g.arc(x + 26, y - 40, 5, 0, Math.PI * 2); g.fill();
+  // King, on his left shoulder: a plum monkey, round head and ears, a curling tail.
+  const mx = x - 15, my = y - 64, fur = '#865b91';
+  g.strokeStyle = fur; g.lineWidth = 2.5; g.beginPath(); g.moveTo(mx - 4, my + 6); g.quadraticCurveTo(mx - 16, my + 10, mx - 12, my - 2); g.stroke();
+  g.fillStyle = fur; g.beginPath(); g.ellipse(mx, my + 2, 6, 7, 0, 0, Math.PI * 2); g.fill();
+  g.beginPath(); g.arc(mx, my - 8, 6, 0, Math.PI * 2); g.fill();
+  for (const ex of [-6, 6]) { g.beginPath(); g.arc(mx + ex, my - 9, 2.6, 0, Math.PI * 2); g.fill(); }
+  g.fillStyle = '#c9a8cf'; g.beginPath(); g.ellipse(mx, my - 6.5, 3.6, 3, 0, 0, Math.PI * 2); g.fill();
 }
 function potStill(g) {
   const x = 150, y = 58, w = 58, h = 72;

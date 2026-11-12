@@ -38,6 +38,7 @@ import { crane, craneCam } from './den/crane.js';
 import { doorCam } from './den/door.js';
 import { umami, umamiTick, umamiCam, umamiClick } from './den/capybara.js';
 import { forage as raceForage } from './den/race-forage.js';
+import { helium, heliumCam, heliumUp, heliumDown } from './den/helium-isle.js';
 import { raceCam, raceClick } from './den/race.js';
 import { watch, watchKey, watchCam } from './den/race-watch.js';
 import { net, online, guest, isHost, send, updateMates, sendMe, snapshot, followRaider, sendSync, onNet, joinCrew, leaveCrew } from './den/crew.js';
@@ -216,10 +217,12 @@ addEventListener('mouseup', (e) => {
   if (wed.on) { weddingUp(e); return; }
   if (e.button === 0 && gd?.press) chalkRelease(e.clientX, e.clientY);
   if (e.button === 0 && gunnery.on) gunneryUp(e.clientX, e.clientY);
+  if (e.button === 0) heliumUp(0);   // (a drag let go at Helium's still: helium-isle.js)
   if (e.button !== 2 || !drag) return;
   if (drag.deco) { if (!drag.moved) decoClick(drag.deco); drag = null; return; }
   if (!drag.moved && umami.on) umamiClick(e.clientX, e.clientY, 2);
   else if (!drag.moved && raceForage.on) raceClick(e.clientX, e.clientY, 2);
+  else if (!drag.moved && helium.on) heliumDown(e.clientX, e.clientY, 2);   // (a right-click burns now)
   else if (!drag.moved && gunnery.on) gunneryRub(e.clientX, e.clientY);
   else if (!drag.moved && patch.on && patch.hand) patchTurn(flip);
   else if (!drag.moved && carry && !G.over) turn(flip, 0);
@@ -697,8 +700,9 @@ function update(dt) {
     yaw = y0 + d * haulView;
   }
   // Freeing Umami: straight on to his bank and its board (js/den/capybara.js); or clearing the race's
-  // barrier of driftwood, its board the same (js/den/race-forage.js).
-  const uc = umamiCam() || raceCam();
+  // barrier of driftwood, its board the same (js/den/race-forage.js); or at Helium's still, Distilling
+  // (js/den/helium-isle.js).
+  const uc = umamiCam() || raceCam() || heliumCam();
   forageView += ((uc ? 1 : 0) - forageView) * Math.min(1, dt * 3);
   if (forageView > 0.001 && uc) {
     look.lerp(uc.look, forageView);

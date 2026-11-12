@@ -669,6 +669,17 @@ export const LAY = {
       [19, 33], [18, 33], [17, 33], [16, 33], [15, 33], [14, 32], [13, 32], [12, 32], [11, 32], [10, 32], [10, 31],
     ] as [number, number][],
   },
+  /** Helium's island (12 Nov; src/den-helium.ts, js/den/helium-isle.js): his still, where he teaches
+      Distilling. The user (12 Nov): "maybe he can just have his own little island ... Maybe that can link
+      into where the Smuggle Beach is ... I bet he just wants an island for him somewhere." So out past the
+      checkpoint, in the open water on the far side of the smugglers' rocks from their cove (where his rum
+      would go out, once smuggling's built), two squares clear of the rocks and open sea all round. Shaped
+      as Tzz's, three squares, and everything of his placed from LAND[0]. MOOR: where she's brought
+      alongside as his lesson begins, out of its shot. */
+  HELIUM: {
+    LAND: [[22, 28], [23, 28], [22, 29]] as [number, number][],
+    MOOR: { c: 21, r: 27, d: 2 } as Pose,
+  },
   /** Primates Rule, the user's war frigate (src/den-frigate.ts; src/den-moored.ts), at anchor, still to
       come (11 Nov: "add that to the scene somewhere so you can just, once you start getting out to sea,
       you just kind of see that out there and put [a mark] on it. [To] make it clear, it's kind of a
@@ -855,6 +866,8 @@ export class Sea {
     this.mouths = [{ ...KK.MOUTH }, { c: KK.OUT[0], r: KK.OUT[1], d: KK.MOUTH.d }];
     // Tzz's island, a hop from Kikkit's: land, and the water round it kept clear.
     for (const [c, r] of LAY.TZZ.LAND) { this.works.add(key(c, r)); near(c, r); }
+    // Helium's island, past the checkpoint by the smugglers' rocks: land, the same.
+    for (const [c, r] of LAY.HELIUM.LAND) { this.works.add(key(c, r)); near(c, r); }
     // Port Decorum, the imperial island: land, the same.
     for (const [c, r] of LAY.EMPIRE.LAND) { this.works.add(key(c, r)); near(c, r); }
     // The smugglers' run, its cove and beach, behind Port Decorum: water only the whirlpools get to,
