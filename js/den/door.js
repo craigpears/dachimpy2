@@ -11,32 +11,38 @@
 // cleft in the second spit's far face; she waits there in the dark, out of anyone's reach, and Space
 // brings her up the cleft onto leg 3, or the next Vegas carries her on to the far end. Less than a Vegas,
 // at the mouth or under the cleft, and the draught spills her up out of it. The clefts are plain cracks in
-// the rock from the course, dark, with nothing to say where they go. Touches the rest through race.js
-// (built, ticked, keys, prompt, held, reset, the legs she's passed under), the station's gust hook, and
-// den.js's camera (doorCam). No words to speak, no elvish.
+// the rock from the course, dark, with nothing to say where they go. Getting in (12 Nov): sailing or a pin
+// at the open door brings her into its doorway, the Sailing board out (src/den-door.ts, doorMove). Touches
+// the rest through race.js (built, ticked, keys, prompt, held, reset, the legs she's passed under), the
+// station's gust and prompt hooks, sailing.js's bump and pin hooks (sail.bumps, sail.pins), and den.js's
+// camera (doorCam). No words to speak, no elvish.
 import * as THREE from 'three';
 import { LAY, SAIL } from '../den-sail.js';
-import { DOOR, Door, Tunnel, offDoor, mouthOf } from '../den-door.js';
+import { DOOR, Door, Tunnel, offDoor, mouthOf, mouthPose, mouthNear, doorMove } from '../den-door.js';
 import { chainName, runFor } from '../sailing.js';
 import { RINGS, SPOKES } from '../navigation.js';
 import { scene, camera, mesh, V3, burst, toast, pirate } from './world.js';
 import { rock } from './land.js';
 import { sail, seaX, seaZ, stoneM, bankTop, SLOOP_DECK } from './sea.js';
 import { navBoard, placeXY, starCanvas } from './nav-board.js';
-import { station } from './sail-station.js';
+import { station, stationToggle } from './sail-station.js';
 
 const D = LAY.RACE.DOOR, CELL = SAIL.CELL;
 /** The door's middle across, and its face (the crag's sea-side face); each exit's cave's face (onto the leg
     below it), and under it, where she waits in the tunnel; the far end's. */
 const DX = (seaX(D.FACE[0][0]) + seaX(D.FACE[1][0])) / 2, FACE_Z = seaZ(D.FACE[0][1]) + CELL / 2;
 const DX_C = (D.FACE[0][0] + D.FACE[1][0]) / 2, CAVE_Z = D.EXITS.map((e) => seaZ(e.OUT[0][1]) - CELL / 2), UNDER_Z = CAVE_Z.map((z) => z + CELL / 2), LAST = D.EXITS.length - 1;
-/** The doorway (wide and tall enough for her mast), the crag, the carved wheel high above the door
+/** The doorway (wide and tall enough for her mast, which stands about 5.6 over the water: 12 Nov, the user,
+    "why does it look so big in the exit, but the entrance, I can't even get in it?", so it's as wide as the
+    clefts she comes up and a good deal taller than her), the crag, the carved wheel high above the door
     (its middle, and its width: the board's places at that size), and the board beside it. */
-const DW = 4.6, DH = 7.6, CRAG_H = 14.5, WHEEL = { y: 10.6, w: 5.6 }, BOARD = { x: DX - 8.4, y: 9.9, size: 4.4 };
+const DW = 6.2, DH = 9.6, CRAG_H = 16.5, WHEEL = { y: 12.6, w: 5.6 }, BOARD = { x: DX - 8.4, y: 11.9, size: 4.4 };
+/** How far into the doorway she sits at its mouth, from the middle of the square off it. */
+const INSET = 2.2;
 /** The tunnel, deep under the course: its water's height, its radius. */
 const TY = -42, TR = 5.5;
 /** Where the Sailing board's gust is taken: here. */
-export const door = { rules: new Door(), tunnel: new Tunnel(), W: null, board: null, on: false, trip: null, fade: null, said: {}, opening: 0, closing: 0, booched: 0, snap: false, behind: false };
+export const door = { rules: new Door(), tunnel: new Tunnel(), W: null, board: null, on: false, trip: null, fade: null, said: {}, opening: 0, closing: 0, booched: 0, snap: false, behind: false, aim: -1, inset: 0, drawn: null, toldT: 0 };
 
 // ---------- the look of it ----------
 const darkM = new THREE.MeshBasicMaterial({ color: '#07060a', fog: false });
@@ -247,16 +253,18 @@ function tunnel(g) {
 }
 
 function build() {
-  const W = { g: new THREE.Group(), front: null, glow: null, marks: [], lit: [], wheel: new THREE.Group() };
-  // The door's crag, its leaves and their seam; the carved wheel high over the door.
-  crag(W.g, FACE_Z, 1, 11.5, 6.5, CRAG_H);
-  W.front = leaves(W.g, FACE_Z, 1);
-  seam(W.g, FACE_Z, seamM);
-  W.glow = seam(W.g, FACE_Z + 0.01, new THREE.MeshBasicMaterial({ color: '#d8ecff', transparent: true, opacity: 0, toneMapped: false, depthWrite: false }));
+  const W = { g: new THREE.Group(), door: new THREE.Group(), front: null, glow: null, marks: [], lit: [], wheel: new THREE.Group() };
+  // The door's crag, its leaves and their seam; the carved wheel high over the door. (In a group of their
+  // own: a pin dropped on any of it is a pin on the door.)
+  crag(W.door, FACE_Z, 1, 11.5, 6.5, CRAG_H);
+  W.front = leaves(W.door, FACE_Z, 1);
+  seam(W.door, FACE_Z, seamM);
+  W.glow = seam(W.door, FACE_Z + 0.01, new THREE.MeshBasicMaterial({ color: '#d8ecff', transparent: true, opacity: 0, toneMapped: false, depthWrite: false }));
   const face = new THREE.Mesh(new THREE.PlaneGeometry(WHEEL.w, WHEEL.w), new THREE.MeshBasicMaterial({ map: marksTex(), transparent: true, depthWrite: false }));
   W.wheel.position.set(DX, WHEEL.y, FACE_Z + 0.03);
   W.wheel.add(face);
-  W.g.add(W.wheel);
+  W.door.add(W.wheel);
+  W.g.add(W.door);
   // Each exit: a cleft in a spit's far face (the first only a square deep: the door's crag is behind it).
   D.EXITS.forEach((e, k) => cleft(W.g, CAVE_Z[k], k === 0 ? CELL - 0.2 : CELL * 2, cleftH(k), 17 + k * 101));
   tunnel(W.g);
@@ -328,8 +336,8 @@ const lenTo = (k) => (k < 0 ? 0 : DOOR.EXITS[k].len);
 const zOf = (k) => (k < 0 ? FACE_Z - 3 : UNDER_Z[k]);
 const black = (p) => ({ secs: PH.dark, at: () => p, dark: () => 1 });
 function inBeat(from) {
-  const x0 = seaX(from.c), z0 = seaZ(from.r);
-  return { secs: PH.in, at: (u) => { const e = ease(u); return { x: x0 + (DX - x0) * Math.min(1, e * 1.4), y: 0, z: z0 + (FACE_Z - 3 - z0) * e }; }, dark: (u) => Math.max(0, (u * PH.in - (PH.in - 0.45)) / 0.45) };
+  // (from where she's drawn: in the doorway, if she was waiting there)
+  return { secs: PH.in, at: (u) => { const e = ease(u), x0 = from.x ?? seaX(from.c), z0 = from.z ?? seaZ(from.r); return { x: x0 + (DX - x0) * Math.min(1, e * 1.4), y: 0, z: z0 + (FACE_Z - 3 - z0) * e }; }, dark: (u) => Math.max(0, (u * PH.in - (PH.in - 0.45)) / 0.45) };
 }
 /** Along the tunnel from under `a` to under `b` (-1 the door), at a gust's pace; out of the black, if
     she's just gone in, and into it, if she's going up a cave next. */
@@ -379,6 +387,55 @@ function doorGust(res) {
   return { say: m.way === 'on' ? `${what} The gust carries her into the dark` : `${what} The gust carries her in, and the draught spills her up a cleft onto ${legName(m.exit)}`, went: m.went };
 }
 station.gusts.push(doorGust);
+
+// ---------- getting in (12 Nov) ----------
+/* The user's first try at it: "I can't actually get through the door ... I'm just bumping into the rocks.
+   And it won't let me autopilot through it either." So sailing at the open door, by her own moves or a pin
+   dropped on it, brings her into its mouth facing in (doorMove), drawn in the doorway; the Sailing board
+   comes out, and the prompt says what carries her on. Shut, it says what opens it. Never a bump against
+   rock. (The face stays no square of the sea: sailing.js's bump and pin hooks, sail.bumps and sail.pins.) */
+const IN_SAY = 'any clear carries her in, a Vegas on through the dark';
+const SHUT_SAY = 'The door\'s shut fast · Space, under the rock: Navigation opens it';
+function tell(s) { if (door.toldT <= 0) { toast(s); door.toldT = 2.5; } }
+/** In the doorway: at the open door's mouth, facing in, not under way. */
+function inDoorway() {
+  const h = sail.helm;
+  return door.rules.open && !door.trip && !door.on && mouthOf(h.pose) >= 0 && (!h.cur || h.cur.bump) && !h.gusts.length;
+}
+/** Into the doorway at the mouth `to`: made fast there, facing in, and the Sailing board out. */
+function intoDoorway(to) {
+  sail.helm.moor({ ...to });
+  station.told = true;   // (what's said here's the board's lesson: not drowned by its first-time toast)
+  if (!station.want) stationToggle();
+  tell(`In the doorway, a draught in her face: Sailing, ${IN_SAY}`);
+}
+/** A move that bumped (sailing.js): the door's, if it ran into its face. */
+function doorBump(e) {
+  if (!sail.on || !door.W || door.trip || door.on) return false;
+  const m = doorMove(e.from, e.m);
+  if (!m) return false;
+  if (m.way === 'in') { if (door.rules.open) intoDoorway(m.to); else tell(SHUT_SAY); }
+  return true;   // (a turn away from it, on the spot, as at any cliff: nothing said)
+}
+sail.bumps.push(doorBump);
+station.leads.push(() => (sail.on && door.W && inDoorway() ? `In the doorway · Sailing: ${IN_SAY}` : ''));
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+/** A pin dropped (sailing.js) on the door's crag, or on the water off it once it's open: she's piloted to
+    its nearer mouth, and there brought into the doorway (open) or left under the rock for Space (shut). */
+function doorPin(x, y, at) {
+  door.aim = -1;
+  if (!sail.on || !door.W) return false;
+  ndc.set(x / innerWidth * 2 - 1, -y / innerHeight * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const c = Math.round(at.c), r = Math.round(at.r), off = door.rules.open && offDoor(c, r);
+  if (!off && !ray.intersectObject(door.W.door, true).length) return false;
+  const h = sail.helm, i = off ? D.OFF.findIndex(([x0]) => x0 === c) : mouthNear(h.after().c);
+  if (door.rules.open) door.aim = i;   // (brought in once she's there: doorTick)
+  if (h.drop(...D.OFF[i])) toast(door.rules.open ? 'To the open door' : 'To the faint marks on the rock');
+  else if (!door.rules.open) tell(SHUT_SAY);
+  return true;
+}
+sail.pins.push(doorPin);
 /** Space under a cave: up she comes, onto the leg. */
 function comeUp() {
   const T = door.trip, m = door.tunnel.up();
@@ -406,6 +463,7 @@ function tripTick(dt, onLeg) {
     if (h.cur || h.gusts.length) return;
     T.wait = false;
     h.moor({ ...T.from });
+    if (door.drawn) Object.assign(T.from, door.drawn);
   }
   // (played out: waiting under a cave, her place there, or out of it onto the leg)
   if (T.hold < 0) {
@@ -464,6 +522,8 @@ export function doorKey(key) {
   }
   const h = sail.helm;
   if ((key === ' ' || key === 'enter') && !door.rules.open && offDoor(h.pose.c, h.pose.r) && h.slot < 0 && !h.cur && !h.held()) { boardUp(); return true; }
+  // (in the doorway, Space brings the Sailing board out too)
+  if ((key === ' ' || key === 'enter') && !station.want && inDoorway()) { stationToggle(); return true; }
   return false;
 }
 export function doorPrompt() {
@@ -473,8 +533,11 @@ export function doorPrompt() {
   if (door.on) return `${door.board.prompt()} · Esc: step back`;
   const h = sail.helm;
   if (!offDoor(h.pose.c, h.pose.r) || h.slot >= 0) return '';
-  if (door.rules.open) return mouthOf(h.pose) >= 0 ? 'The open door · a long dark tunnel, and a draught blowing out of it' : 'The door in the cliff stands open';
-  return 'Under the cliff · Space: look closer at the rock';
+  if (door.rules.open) {
+    if (mouthOf(h.pose) < 0) return 'The door stands open · sail at it, or drop a pin on it: into the doorway';
+    return station.on ? `In the doorway · Sailing: ${IN_SAY}` : `In the doorway · 1: Sailing · ${IN_SAY}`;
+  }
+  return 'Faint stars on the rock · Space: Navigation opens the door';
 }
 /** The camera (den.js): straight on to the board and the carved wheel; behind her going in; along the
     tunnel and waiting under a cave; and at the cave she comes up, watching her come out. */
@@ -486,7 +549,7 @@ export function doorCam() {
     return { look: V3(DX - 4.1, WHEEL.y - 0.6, FACE_Z), dist: Math.max(7.6 / Math.tan(hh), 4.3 / Math.tan(vh)), tilt: 0.12, yaw: 0 };
   }
   // (the door opening: the wheel lit, the outline glowing, the leaves swinging in)
-  if (door.opening > 0 && door.opening < 3.9 && !door.trip) return { look: V3(DX, 6.8, FACE_Z), dist: 21, tilt: 0.2, yaw: 0 };
+  if (door.opening > 0 && door.opening < 3.9 && !door.trip) return { look: V3(DX, 8, FACE_Z), dist: 25, tilt: 0.2, yaw: 0 };
   const T = door.trip;
   // (up out of the first cleft, the door's crag stands between her and the sea's own camera: watched
   // from the leg's side till she's sailed out from behind it)
@@ -515,6 +578,7 @@ export function doorTick(dt, onLeg) {
   if (door.booched && (door.booched -= dt) <= 0) { door.booched = 0; booched(); }
   if (door.trip && sail.on) tripTick(dt, onLeg);
   else fade(0);
+  doorwayTick(dt);
   // The stars on the rock coming up, twinkling.
   const t = performance.now() / 1000;
   W.lit.forEach((s, i) => {
@@ -533,12 +597,31 @@ export function doorTick(dt, onLeg) {
   } else W.glow.children.forEach((p) => { p.material.opacity = 0; });
 }
 
+/** Getting in, each tick: a pin on the door brings her into the doorway once she's there; and in the
+    doorway she's drawn in it, eased in from the square off it and lined up on the doorway's middle. */
+function doorwayTick(dt) {
+  door.toldT -= dt;
+  const h = sail.helm;
+  if (door.aim >= 0 && (!sail.on || door.trip || door.on)) door.aim = -1;
+  if (door.aim >= 0 && !h.pin && !h.cur && h.slot < 0 && !h.mine.length && !h.gusts.length) {
+    const i = D.OFF.findIndex(([c, r]) => c === h.pose.c && r === h.pose.r);
+    door.aim = -1;
+    if (i >= 0 && door.rules.open) intoDoorway(mouthPose(i));
+  }
+  door.inset += ((sail.on && inDoorway() ? 1 : 0) - door.inset) * Math.min(1, dt * 3);
+  if (door.trip || door.inset < 0.01) { door.drawn = null; return; }
+  const k = ease(Math.min(1, door.inset)), g = sail.g.position, dx = (DX - g.x) * k, dz = -INSET * k;
+  g.x += dx; g.z += dz;
+  pirate.x += dx; pirate.z += dz; pirate.g.position.x += dx; pirate.g.position.z += dz;
+  door.drawn = { x: g.x, z: g.z };
+}
+
 /** A new race, or a fresh voyage: shut, dark, the board gone, nobody in the tunnel. */
 export function doorReset() {
   door.rules.reset();
   door.tunnel.reset();
   door.said = {};
-  door.opening = 0; door.booched = 0; door.closing = 0; door.behind = false;
+  door.opening = 0; door.booched = 0; door.closing = 0; door.behind = false; door.aim = -1; door.inset = 0; door.drawn = null;
   if (door.trip) { door.trip = null; fade(0); }
   if (door.board) boardDown(true);
   if (door.W) {

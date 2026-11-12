@@ -2466,6 +2466,18 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     stars' pale blues and whites, a dark still water. No wind in it but a draught blowing out of the door,
     so no sail or oar gets her in: only a Sailing chain's gust from the mouth (off the door, facing it).
     The door's face is cliff to every move and gust otherwise, shut or open: the only way in.
+  - **Getting in, plain and forgiving (12 Nov).** Her first try: "I can't actually get through the door
+    ... I'm just bumping into the rocks. And it won't let me autopilot through it either", and the doorway
+    read smaller than the clefts she comes up. So a move into the open door's face (straight at it, or
+    turning in from alongside) is never a bump: she's brought into its mouth, facing in, drawn in the
+    doorway, and the Sailing board comes out; a pin on the door (its crag, or the water off it once open)
+    pilots her to the nearer mouth and does the same. The prompt: "In the doorway · 1: Sailing · any clear
+    carries her in, a Vegas on through the dark". A turn from the mouth turns her on the spot, her way out,
+    nothing said of rocks. Shut, W at it says "The door's shut fast · Space, under the rock: Navigation
+    opens it", and off it the prompt's "Faint stars on the rock · Space: Navigation opens the door". The
+    doorway's 6.2 wide and 9.6 tall (her mast's about 5.6), as wide as the clefts. The face is still no
+    square of the sea, so the pilot's routes and the simulation's door timings are unchanged
+    (`doorMove`, tests/den-door.test.ts).
   - **Its stretches and exits (12 Nov).** The user: "you should always get some benefit from going through
     it, similar to ... any other shortcut. So you then have the choice. You either rejoin ... the main leg,
     or you have the opportunity to go through the Vegases ... in relative peace". Two stretches, each

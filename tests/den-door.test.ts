@@ -5,7 +5,7 @@
    get through it in sailing". */
 import { describe, expect, it } from 'vitest';
 import { LAY, SAIL, Sea, Helm, type Pose } from '../src/den-sail';
-import { DOOR, Door, Tunnel, offDoor, mouthOf, exitPose, tunnelGust } from '../src/den-door';
+import { DOOR, Door, Tunnel, offDoor, mouthOf, exitPose, tunnelGust, doorMove, mouthPose, mouthNear } from '../src/den-door';
 import { RACE, Race, stretchAt } from '../src/den-race';
 import { gustPath } from '../src/den-sailing';
 import { runFor, RUN } from '../src/sailing';
@@ -78,6 +78,55 @@ describe('the door is the only way into the tunnel (11 Nov)', () => {
       expect(D.FACE.some(([x, y]) => x === c + DC[d] && y === r + DR[d])).toBe(true);
     }
     expect(mouths).toBe(2);
+  });
+});
+
+describe('getting in, plain and forgiving (12 Nov, her first try: "I can\'t actually get through the door ... I\'m just bumping into the rocks. And it won\'t let me autopilot through it either")', () => {
+  const MOVES = ['F', 'L', 'R'] as const;
+  it('sailing straight at the door from the water off it brings her into its mouth, facing in, not a bump against rock; and from there any clear carries her in', () => {
+    D.OFF.forEach(([c, r], i) => {
+      for (const d of [0, 1, 2, 3]) {
+        const got = doorMove({ c, r, d }, 'F');
+        if (d === 0) expect(got).toEqual({ way: 'in', to: mouthPose(i) });
+        else expect(got).toBeNull();
+      }
+      // (any clear at all from the mouth: in she goes, a Vegas on through the dark)
+      expect(tunnelGust(true, mouthPose(i), runFor(1))).toMatchObject({ way: 'out', exit: 0 });
+      expect(tunnelGust(true, mouthPose(i), runFor(RUN.VEGAS))).toMatchObject({ way: 'on', exit: 0 });
+    });
+    expect(mouthPose(0)).toEqual(MOUTH);
+  });
+
+  it('every move that runs into the door\'s face is the door\'s: turning in to it from alongside brings her into the mouth too, and a turn from the mouth turns her on the spot, her way back out', () => {
+    let ins = 0, turns = 0;
+    for (let c = D.OFF[0][0] - 3; c <= D.OFF[1][0] + 3; c++) for (let r = D.OFF[0][1] - 3; r <= D.OFF[0][1]; r++) for (let d = 0; d < 4; d++) for (const m of MOVES) {
+      const p = { c, r, d };
+      if (!sea.open(c, r)) continue;
+      const got = sea.move(p, m), mine = doorMove(p, m);
+      if (!mine) continue;
+      // (the sea itself still stops her: the face is no square of it)
+      expect(got.bump, `${c},${r},${d} ${m}`).toBe(true);
+      if (mine.way === 'in') { ins++; expect(mouthOf(mine.to)).toBeGreaterThanOrEqual(0); expect(tunnelGust(true, mine.to, runFor(1))).not.toBeNull(); }
+      else { turns++; expect(mouthOf(p)).toBeGreaterThanOrEqual(0); expect(mine.to).toEqual({ c, r, d: got.to.d }); expect(mine.to.d).not.toBe(0); }
+    }
+    expect(ins).toBeGreaterThanOrEqual(4);   // (straight in at each mouth, and turning in to each from alongside)
+    expect(turns).toBe(4);   // (left or right, at each mouth)
+    // A turn in off the leg beside the door: into the mouth of the column it ran into.
+    expect(doorMove({ c: D.OFF[0][0] - 1, r: D.OFF[0][1], d: 1 }, 'L')).toEqual({ way: 'in', to: mouthPose(0) });
+    // Moves nowhere near its face are none of the door's.
+    expect(doorMove({ c: D.OFF[0][0], r: D.OFF[0][1] - 2, d: 0 }, 'F')).toBeNull();
+    expect(doorMove({ ...MOUTH, d: 1 }, 'F')).toBeNull();
+  });
+
+  it('a pin on the door: the pilot brings her to the water off its nearer mouth from anywhere along leg 2, and there she\'s brought in', () => {
+    for (const from of [{ c: D.OFF[0][0] - 10, r: D.OFF[0][1], d: 1 }, { c: D.OFF[1][0] + 4, r: D.OFF[1][1] - 1, d: 3 }]) {
+      expect(sea.open(from.c, from.r)).toBe(true);
+      const i = mouthNear(from.c), { at } = sailTo(sea, from, D.OFF[i] as [number, number]);
+      expect([at.c, at.r]).toEqual(D.OFF[i]);
+      expect(mouthOf(mouthPose(i))).toBe(i);
+    }
+    expect(mouthNear(D.OFF[0][0] - 4)).toBe(0);
+    expect(mouthNear(D.OFF[1][0] + 4)).toBe(1);
   });
 });
 
