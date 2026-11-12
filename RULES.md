@@ -2359,12 +2359,32 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     - **The door stays a secret:** nobody watched takes it, and nothing said names it (tested).
   - **Racing your friends online (12 Nov, a proof of concept for playtests).** "a handful of people playing
     if we get to play testing it", never peer to peer: one room runs the race (RACE.md §6 has the build).
-    - **On the starting line,** O opens the panel: a pirate name (kept, as the crew's), Make a race (a code of
-      four letters) or a code and Join; `den.html?at=race&race=CODE` brings a friend straight there. In the
-      room: who's in (players, and the den's racers filling it, "(bot)"), A D your spot (never another
-      player's), Space ready, 2 to 6 or − + how many racers in all (four to start; bots fill what players
-      don't, one at least), G or "Start the count" once everyone's ready (anyone may), Copy the link, Esc or
-      Leave. Six players at most; one who comes in during a race races the next.
+    - **A real lobby, no codes (12 Nov, after the user's first try online:** "how do I know that people are
+      here instead of bots?", "you can either wait for people, start with bots", "I [don't] think I want
+      people to share codes. You should just see a lobby and be able to join it", and "I eventually found the
+      race online thing. That really was not clear"):
+      - **The way in:** Race online on the den's top panel (from anywhere: out to the race's buoy and in to the
+        line), on the starter's card at the line, or O there.
+      - **The open races** (three, `NET.LOBBIES`): each with what it's doing and who's in ("Waiting: Anne",
+        "Racing now · next: Cara", "Nobody yet", "Full"), and Join, one click. A pirate name once (kept, as
+        the crew's). No code to type or share; a private race's link, `den.html?at=race&race=CODE`, still works.
+      - **The room's lobby:** the course's chart; who's in, each row her sails, her name and PIRATE or BOT
+        plainly (a player's sloop a bot's taken over: "bot sailing"), Start ✓ or waiting; − + how many racers
+        in all (four to start, bots filling what players don't, one at least); and two choices, **Wait for
+        pirates** (where you start) or **Start now** (bots fill the empty places). Everyone's pressed Start:
+        the count at once. Someone has: "Anne pressed Start: off in 15s", whoever's pressed it by then racing,
+        the rest racing the next. A D your spot (never another player's), Space start or wait, Esc or Leave.
+      - **A race on that you're not in** (you came in during it, or a bot has your sloop): who's racing and
+        their places, and "Next race:" who's waiting for it, you among them; Race the next one to be in it.
+        Once every player in it is home or out, with someone waiting, the race is called 20 seconds later.
+      - **After a race:** the places for 15 seconds (Race again to be in the next; everyone pressing it goes
+        straight there), then the lobby again for the next race.
+    - **Racing and in the lobby, only what applies:** the den's top panel only its name, Race online and
+      Pause; the starter's card a line of the race and who's racing ye, the rest behind How it works; no
+      sailing bar on the line; the sailing bar's keys without H: head home (H does nothing in a race) and
+      without the puzzles' keys, already on its buttons.
+    - **Who's who on the water:** a name over every sloop in the race, small, over her masthead: a pirate's
+      in her sails' colour, a bot's dimmer and marked BOT; yours too online, "(you)".
     - **The count and the gun are the room's,** the same in every browser; then each sails and puzzles her own
       sloop as alone, everyone else's sloop drawn a moment behind, in their own sails (players' by their
       place in the room), their names over them at the count.
@@ -2374,8 +2394,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       through.
     - **Hits:** your broadside on someone holes her in every browser; you can't hole her again till she's
       patched. A bot's broadside or a friend's on you holes you, even if you missed seeing it fired.
-    - **Places and times** are the room's; the finish card fills in as they come home; "Race again" when
-      everyone's in.
+    - **Places and times** are the room's; the finish card fills in as they come home.
     - **A closed tab** has six seconds to come back; then a bot sails her sloop home ("A bot's sailing yer
       sloop home now"). Sailing back out of the gate does the same at once. A lost room: back to racing alone.
     - **Every race online is written down** (its seed, each player's actions by the race's steps, what the

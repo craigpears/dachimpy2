@@ -426,7 +426,7 @@ to (four by default, six at most). As built:
   missed broadside is taken all the same), a turn is who holds the spot, a finish a time and a place. Your
   own sloop is sailed in your browser against your own sea; everyone else's is drawn only from snapshots, a
   quarter second behind the newest and between two, never sailed on by itself. Heard nothing for two seconds
-  (the room goes quiet once the race is done), a browser asks for the race again. Tested with a browser that
+  (the room goes quiet in its lobby), a browser asks for the race again. Tested with a browser that
   drops two snapshots in five all race long.
 - **Dropping out:** a closed tab has six seconds to come back (`NET.GRACE`), then a bot of the long way sails
   her sloop home; sailing back out of the gate does the same at once. Everyone gone, the race is off.
@@ -459,6 +459,36 @@ to (four by default, six at most). As built:
   128 MB that's about 30 GB-s of the 13,000 a day (some 400 races a day); and each player's five poses a
   second, counted at twenty WebSocket messages to a request, are about 60 requests a player a race, of
   100,000 a day (some 400 races a day of four players). Snapshots out are free. The lobby sleeps.
+
+**The lobby, as built (12 Nov, after the user's first try online).** "it's not even clear like that you're in a
+lobby with people ... how do I know that people are here instead of bots?"; "much more lobby-like ... here's the
+map of the course, you've got people loading and waiting, or you can play with bots"; "the public lobby, where
+people can just come in"; then "I [don't] think I want people to share codes. You should just see a lobby and
+be able to join it", and "I eventually found the race online thing. That really was not clear". So:
+- **A plain way in:** Race online on the den's top panel (out to the race's buoy and in to the line from
+  anywhere), on the starter's card, or O on the line.
+- **Open races, no codes:** three rooms anyone walks into with a click (`NET.LOBBIES`, their codes reserved);
+  the list shows each one's state and who's in, looked at from outside (`Referee.peek`, `GET /api/race/CODE`
+  without a WebSocket; `GET /api/race-lobbies` all three; `peekText` its words). Private codes are only under
+  the hood now: a `?race=CODE` link still works, but the panel never asks for or shows one.
+- **The room's lobby** (js/den/race-net.js, den.html's `#racenet`): the course's chart
+  (`changelog/race-map.jpg`), who's in, each plainly PIRATE or BOT, and two choices, Blockade-style: **Wait
+  for pirates** or **Start now** (bots fill the empty places). The rule is the room's (`Referee.aboard`):
+  everyone's pressed Start, the count at once; someone has, the count in `NET.ABOARD` (15 s) with whoever has
+  by then, the rest racing the next; nobody, no clock and the room sleeps. Nobody idle can hold a public race up.
+- **The next race filling in view:** a pirate in during a race sees who's racing and who's waiting for the
+  next ("Next race: Cara ✓"), and can press Start for it while it's on. Once every player in the race is home
+  or out and someone's waiting, it's called `NET.CALL` (20 s) later; the places show `NET.RESULTS` (15 s) (or
+  less, if everyone presses Race again), then the room goes back to its lobby by itself, those who waited
+  still in for the next. Nobody waiting, the bots come home in their own time, as before. (The snapshot's
+  `soon` counts each of these down.)
+- **Only what applies** while racing or in the lobby: the den's top panel slimmed to its name, Race online
+  and Pause; the starter's card a line and who's racing, the rest behind How it works; no sailing bar on the
+  line; no H: head home (nor H itself) in a race.
+- **Names on the water:** over every sloop in the race, small, a pirate's in her sails' colour, a bot's dim
+  and marked BOT, yours "(you)" online (race-field.js).
+- Not yet: players "loading" (a socket opening) aren't shown till they've said hello; the open races' list is
+  looked at every three seconds while it's up (three small requests each time).
 
 **Real players racing each other online (asked about 12 Nov; built as above).** "what would it take to make
 the sloop race things multiplayer? So you can have like a handful of people playing if we get to play

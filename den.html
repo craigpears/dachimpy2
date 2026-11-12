@@ -52,6 +52,68 @@
     #watchbar .wb-who i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
     #watchbar .wb-keys { font-size: 12px; color: var(--dim); }
     @media (max-width: 620px) { #watchbar { font-size: 13px; } #watchbar .wb-keys { display: none; } }
+    /* The sloop race, racing or in its lobby: the den's panels slimmed to what applies (the user, 12 Nov: "a big
+       dump of text ... needs to be a lot lighter. Lot lighter. What does H head home mean in this context?").
+       body.racing: the den's top panel only its name, Race online and Pause; the sailing bar's keys without
+       the den's (H: head home, the puzzles' keys already on its buttons). body.raceline: on the line, held for
+       the count, no sailing bar at all. js/den/race-net.js sets them. */
+    body.racing .hud { padding: 4px 10px 6px; }
+    body.racing .hud h1 { font-size: 16px; }
+    body.racing .hud .stats, body.racing .hud .crew-line, body.racing .hud .mini:not(#race-btn):not(#pause-btn) { display: none; }
+    body.racing .sailhud .off-race { display: none; }
+    body.racing .sailhud .help { font-size: 13px; }
+    body.raceline .sailhud { display: none !important; }
+    /* The starter's card on the line (js/den/race-start.js): who's racing ye and the race in a line; the rest
+       behind How it works. */
+    #racecard { position: fixed; top: 84px; right: 14px; width: 290px; max-height: calc(100vh - 190px); overflow: auto; padding: 10px 14px; border-radius: 10px; background: var(--panel); border: 1px solid var(--gold); font: 500 15px/1.35 'Alegreya Sans', sans-serif; z-index: 3; }
+    #racecard[hidden] { display: none; }
+    #racecard .rc-head { font: 700 17px 'Alegreya', serif; color: var(--gold); margin-bottom: 4px; }
+    #racecard p { margin: 0 0 6px; }
+    #racecard .who { font-style: italic; color: var(--dim); }
+    #racecard .rc-btns { display: flex; gap: 6px; margin-top: 4px; }
+    #racecard button { font-size: 14px; padding: 5px 10px; border-radius: 6px; }
+    #racecard .rc-how { background: #3b2a1b; color: var(--ink); border: 1px solid #6b4e32; }
+    /* Racing online (js/den/race-net.js): the open races to join, then the room's lobby: the course, who's
+       in (a pirate or a bot, plainly), wait for pirates or start now; a race on that you're not in, and the
+       places. */
+    #racenet { position: fixed; top: 84px; left: 14px; width: 320px; max-width: calc(100vw - 28px); max-height: calc(100vh - 170px); overflow: auto; box-sizing: border-box; padding: 10px 12px; border-radius: 10px; background: var(--panel); border: 1px solid #4fb0c6; font: 500 15px/1.35 'Alegreya Sans', sans-serif; z-index: 3; }
+    #racenet[hidden] { display: none; }
+    #racenet button { font-size: 14px; padding: 5px 10px; border-radius: 6px; }
+    #racenet button:disabled { opacity: .45; cursor: default; }
+    #racenet .rn-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    #racenet .rn-head b { font: 700 18px 'Alegreya', serif; color: #8fd4e4; }
+    #racenet .rn-x { background: none; border: 1px solid #6b4e32; color: var(--dim); padding: 2px 8px; font-size: 13px; }
+    #racenet .rn-link { background: none; color: var(--dim); text-decoration: underline; padding: 0 2px; font-size: 13px; }
+    #racenet .rn-me { display: block; margin: 0 0 8px; color: var(--dim); }
+    #racenet .rn-me b { color: var(--ink); }
+    #racenet .rn-me input { display: block; width: 100%; box-sizing: border-box; margin-top: 3px; padding: 5px 7px; font: 500 15px 'Alegreya Sans'; }
+    #racenet ul { list-style: none; margin: 0; padding: 0; }
+    #racenet .rn-rooms li { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid #4a3522; }
+    #racenet .rn-rooms li b { display: block; }
+    #racenet .rn-rooms small { color: var(--dim); font-size: 13px; }
+    #racenet .rn-chart { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 6px; margin-bottom: 6px; background: #3b2a1b; }
+    #racenet .rn-sub { display: flex; justify-content: space-between; align-items: center; color: var(--dim); font-size: 14px; margin-bottom: 4px; }
+    #racenet .rn-fill button { background: #3b2a1b; color: var(--ink); border: 1px solid #6b4e32; padding: 0 7px; margin: 0 4px; font-size: 14px; }
+    #racenet .rn-fill b { color: var(--ink); }
+    #racenet .rn-who li { display: flex; align-items: center; gap: 7px; padding: 3px 0; }
+    #racenet .rn-who i { width: 11px; height: 11px; border-radius: 50%; flex: none; border: 1px solid rgba(255, 255, 255, .35); }
+    #racenet .rn-who span { flex: 1; font-weight: 700; }
+    #racenet .rn-who li.bot span { font-weight: 500; color: var(--dim); }
+    #racenet .rn-who li.you span { color: var(--gold); }
+    #racenet .rn-who em { font: 700 11px 'Alegreya Sans'; letter-spacing: 1px; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; background: #2f6f7d; color: #eaf8fb; }
+    #racenet .rn-who li.bot em { background: #4a3a2c; color: var(--dim); }
+    #racenet .rn-who b { min-width: 64px; text-align: right; font-size: 13px; color: var(--good); }
+    #racenet .rn-go { display: flex; gap: 6px; margin-top: 8px; }
+    #racenet .rn-go button { flex: 1; background: #3b2a1b; color: var(--ink); border: 1px solid #6b4e32; padding: 7px 8px; }
+    #racenet .rn-go button.on { background: var(--gold); color: #2a1d13; border-color: var(--gold); }
+    #racenet .rn-note, #racenet .rn-next { margin: 6px 0 0; color: var(--dim); font-size: 14px; }
+    #racenet .rn-err { margin: 6px 0 0; color: #ffcf6a; font-size: 14px; }
+    /* A name over every sloop in the race (js/den/race-field.js): a pirate's in her sails' colour, a bot's dim. */
+    .tag.boat { font-size: 12px; padding: 0 6px; border-width: 2px; border-radius: 5px; }
+    .tag.boat.bot { font-weight: 500; color: var(--dim); border-width: 1px; opacity: .85; }
+    .tag.boat small { font-size: 10px; margin-left: 4px; text-transform: uppercase; letter-spacing: 1px; opacity: .8; }
+    body.cine .tag.boat, body.watching .tag.boat { display: none !important; }
+    @media (max-width: 640px) { #racecard { width: auto; left: 14px; top: auto; bottom: 150px; max-height: 40vh; } #racenet { top: 70px; } }
     .sailhud .turns { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; align-items: center; }
     .sailhud .gun { position: relative; overflow: hidden; height: 34px; padding: 0 10px; border-radius: 6px; border: 1px solid #6b4e32; background: #2a1c11; display: flex; gap: 6px; align-items: center; font: 700 14px 'Alegreya Sans'; color: var(--dim); }
     .sailhud .gun.ready { color: #f3ecdc; border-color: var(--gold); }
@@ -424,7 +486,7 @@
     <h1>The Pirate Den</h1>
     <div class="stats"><span>Chest <b id="s-gold">50</b></span><span>Wave <b id="s-wave">0</b></span><span>★ <b id="s-master">0</b></span><span>Boarded <b id="s-board">0</b></span><span title="Vikings who gave up at your wall">Turned away <b id="s-turned">0</b></span></div>
     <div class="crew-line" id="crew-line"></div>
-    <button class="mini" id="look-btn">Your pirate</button><button class="mini" id="den-btn" title="Your flag, the landscape, the gun tower and your shack">Your den</button><button class="mini" id="deco-btn" title="Put up flags, banners, lanterns and barrels round the den (B)">Decorate</button><button class="mini" id="pause-btn" title="Pause (P)">Pause</button><button class="mini" id="crew-btn">Play with a crew</button><button class="mini" id="cheat-btn" title="Skip to a stage, or skip the wave (`)">Cheats</button><a class="mini" id="news-btn" href="changelog.html" target="_blank" rel="noopener" title="The bigger things added to the den, newest first">What's new</a>
+    <button class="mini" id="look-btn">Your pirate</button><button class="mini" id="den-btn" title="Your flag, the landscape, the gun tower and your shack">Your den</button><button class="mini" id="deco-btn" title="Put up flags, banners, lanterns and barrels round the den (B)">Decorate</button><button class="mini" id="pause-btn" title="Pause (P)">Pause</button><button class="mini" id="crew-btn">Play with a crew</button><button class="mini" id="race-btn" title="Race other pirates round the sloop race's course">Race online</button><button class="mini" id="cheat-btn" title="Skip to a stage, or skip the wave (`)">Cheats</button><a class="mini" id="news-btn" href="changelog.html" target="_blank" rel="noopener" title="The bigger things added to the den, newest first">What's new</a>
   </div>
   <div class="banner calm" id="banner"></div>
   <div class="intro" id="intro">Raiders are coming! Grab a piece from a crate and mend the wall.<br>Fill a hole exactly for a strong <b>Masterpiece</b>.</div>
@@ -443,6 +505,7 @@
   <div id="labels"></div>
   <div class="map-hint" id="map-hint"><kbd>M</kbd>, <kbd>Esc</kbd> or <kbd>Space</kbd>: roll it up</div><div class="cine-bar top"></div><div class="cine-bar bot">Space: skip</div>
   <div id="tags"></div>
+  <div id="racenet" hidden></div>
   <div class="crew cheats" id="cheats"><div>
     <h2>Cheats</h2>
     <p>For trying things out. Each starting point puts its link in the address bar, to share.</p>
@@ -515,7 +578,7 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.IWRMRWZK.js');
+    import(local ? './js/den.js' : './js/den.F6SR5QUY.js');
   </script>
 </body>
 </html>

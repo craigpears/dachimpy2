@@ -7,6 +7,7 @@ import * as harbour from './harbour.js';
 export { DenCrew } from './crew.js';
 export { RaceRoom } from './race-room.js';
 import { RACES_TABLE } from './race-room.js';
+import { NET } from '../js/race-net.js';
 
 const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS pirates (
@@ -89,8 +90,16 @@ export default {
     const crew = url.pathname.match(/^\/api\/crew\/([A-Z]{4})$/);
     if (crew) return env.CREW.get(env.CREW.idFromName(crew[1])).fetch(request);
     // The sloop race online: /api/race/CODE opens a WebSocket to that race's room, which runs the race.
+    // (a GET of it, no WebSocket: what the room's doing and who's in it)
     const race = url.pathname.match(/^\/api\/race\/([A-Z]{4})$/);
     if (race) return env.RACE.get(env.RACE.idFromName(race[1])).fetch(request);
+    // The open races, anyone's to walk into (NET.LOBBIES): each one's room looked at, for the list.
+    if (request.method === 'GET' && url.pathname === '/api/race-lobbies') {
+      const lobbies = await Promise.all(NET.LOBBIES.map(async (l) => {
+        try { return { ...l, peek: await (await env.RACE.get(env.RACE.idFromName(l.code)).fetch(new Request(`https://race-room/api/race/${l.code}`))).json() }; } catch { return { ...l, peek: null }; }
+      }));
+      return json({ lobbies });
+    }
     // Races run online, written down (src/race-server.ts, RaceRecord): the recent ones, and one by its id
     // (kept by the room it was raced in).
     if (request.method === 'GET' && (url.pathname === '/api/races' || url.pathname.startsWith('/api/races/'))) {
