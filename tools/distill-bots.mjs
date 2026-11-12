@@ -16,7 +16,10 @@
    9.5 / 10.5; minutes 5.6 / 3.3 / 3.0 / 3.0; whites burned 6.5 / 1.6 / 1.4 / 1.4 (the first, hill-climbing
    bots: chains 0.0 / 1.9 / 2.4 / 2.5). Chains break on junk trapped on the whites' edges (DISTILLING.md §4).
    After the user's notes (sweeping, carrying on, turning the right side over): chains 1.7 / 2.7 / 3.1 / 3.5,
-   CC^6+ 0 / 2 / 7 / 14 of 40, CC^12 none, swaps a drag 3.4 to 4.1. */
+   CC^6+ 0 / 2 / 7 / 14 of 40, CC^12 none, swaps a drag 3.4 to 4.1.
+   After the sixth to tenth notes (costs in a person's time, plain drags counted first, sorting and the slow
+   techniques only once colour's scarce): chains 1.4 / 2.4 / 2.9 / 2.9, CC^6+ 0 / 3 / 7 / 6 of 40, CC^12 none;
+   minutes 5.7 / 3.2 / 3.0 / 2.7. Allowing the sorting whenever it pays gave the Ultimate 4.1 on 20 boards. */
 
 import { Distilling } from '../js/distilling.js';
 import { TIERS, P, tierNamed, playSession } from '../js/distill-bots.js';
@@ -59,5 +62,16 @@ for (const name of NAMES) {
   const used = {};
   for (const r of runs) for (const [k, v] of Object.entries(r.used)) used[k] = (used[k] ?? 0) + v;
   console.log(`  routines a session: ${Object.entries(used).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${f1(v / GAMES)}`).join(', ')}`);
+  // Stage I's techniques: how often a session while colour was plentiful / middling / scarce, and a
+  // person's time per column of junk got over (the seventh and tenth notes' ranking).
+  const cost = {};
+  for (const r of runs) for (const [k, c] of Object.entries(r.cost)) {
+    const t = (cost[k] ??= { plenty: 0, middle: 0, scarce: 0, ms: 0, over: 0 });
+    for (const f of ['plenty', 'middle', 'scarce', 'ms', 'over']) t[f] += c[f];
+  }
+  console.log(`  Stage I, a session (colour plentiful/middling/scarce) and ms a column of junk over:`);
+  for (const [k, c] of Object.entries(cost).sort((a, b) => a[1].ms / Math.max(1, a[1].over) - b[1].ms / Math.max(1, b[1].over))) {
+    console.log(`    ${k.padEnd(12)} ${f1(c.plenty / GAMES)}/${f1(c.middle / GAMES)}/${f1(c.scarce / GAMES)}   ${c.over > 0 ? Math.round(c.ms / c.over) : '-'} ms`);
+  }
   console.log(`  ${runs.filter((r) => r.dismissed).length} dismissed, ${runs.filter((r) => r.finished && !r.dismissed).length} the flask full, ${runs.filter((r) => !r.finished).length} out of time`);
 }

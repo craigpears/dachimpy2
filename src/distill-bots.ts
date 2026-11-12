@@ -20,10 +20,10 @@
    `advise(board)` is the planner for anyone's board, a person's mid-game: the stage, the routine it would
    play now, why in a line, and its drags. "Help, Helium" will show that on the player's own board. */
 
-import { COLS, Distilling, SPICE, WHITE } from './distilling.js';
+import { COLS, Distilling, SPICE, WHITE, neighbourOn } from './distilling.js';
 import type { Board, Column, DistillEvent } from './distilling.js';
 import {
-  ROUTINES, burnsClean, clear, fillTarget, isJunk, junkTarget, measure, playDrags, swapsIn, whitesFrom,
+  M, ROUTINES, burnsClean, clear, colourLeft, fillTarget, isJunk, junkTarget, measure, playDrags, scarce, swapsIn, whitesFrom,
 } from './distill-routines.js';
 import type { Ctx, Drag, Move, RoutineName } from './distill-routines.js';
 
@@ -66,15 +66,20 @@ export const tierNamed = (name: string): Tier => {
 };
 
 /** The routines on the menu in each stage, in the order they're preferred when they'd do as well. */
+/** The slow techniques (the seventh note: "very action heavy"), played only once plain drags stop getting
+    much over. */
+export const SLOW: readonly RoutineName[] = ['crawl', 'turnOver', 'linePull', 'figureEight', 'hook', 'leapfrog'];
 export const MENU: Readonly<Record<'junk' | 'chain', readonly RoutineName[]>> = {
   junk: ['rescue', 'junkColumn', 'turnOver', 'crawl', 'diamond', 'leapfrog', 'hook', 'figureEight', 'linePull', 'store'],
   chain: ['rescue', 'junkColumn', 'crawl', 'channel', 'diamond', 'leapfrog', 'hook', 'figureEight', 'linePull'],
 };
 /** The planner's weights (exported to tune from tools/distill-bots.mjs's PLAN). */
 export const P = {
-  /** A routine's cost: each swap, and each drag (spotting it). */
+  /** A routine's cost: what each second of a person's time is worth (timeFor), and each turn within a drag;
+      SWAP the sweep's own cost a swap. */
+  PER_SEC: 1,
+  TURN_MS: 60,
   SWAP: 0.08,
-  DRAG: 0.5,
   /** The least a routine must better the board by to be worth it, and the most for a ready column to
       burn at once rather than wait while it's done. */
   MIN: 0.3,
@@ -93,10 +98,14 @@ export const P = {
   /** ... swept blind while it does nearly as well as the best thing to do (a careful rescue worth far more
       comes first). */
   SWEEP_AS_GOOD: 0.6,
+  /** Pieces plain drags could still get over at which it's sweeping time, and the slow techniques wait. */
+  PLENTY: 4,
+  /** Each swap that takes a piece back the wrong way. */
+  BACK: 0.6,
   /** Turning the right side over: played next unless something's worth more than this (a big rescue),
       and so long as it costs the board no more than this by the measure. */
   TURN_UNLESS: 12,
-  TURN_COST: 1,
+  TURN_COST: 3,
 };
 
 /** What the planner says to do now: its stage, and a routine's drags, a burn, a wait or a dismiss, with
@@ -150,6 +159,61 @@ export function sweepsOn(cols: Board, ctx: Ctx, style: Style, base = measure(col
   return out.sort((a, b) => b.value - a.value);
 }
 
+/** Turns within a move's drags: each change of way while a piece is held. */
+export const turnsIn = (drags: readonly Drag[]): number => drags.reduce((n, d) => n + d.ways.filter((w, i) => i > 0 && w !== d.ways[i - 1]).length, 0);
+/** The junk's whole way across: every junk piece's column, added up (a swap taking junk right adds one). */
+export function junkAcross(cols: Board): number {
+  let n = 0;
+  cols.forEach((c, x) => { for (const p of c) if (isJunk(p)) n += x; });
+  return n;
+}
+/** A move's cost in a person's time (the user, 12 Nov: "that kind of one smooth mouse motion is cheap. It's
+    quick"): a moment to spot and pick up each drag, its swaps at a hand's speed, a little for each turn. */
+export const timeFor = (drags: readonly Drag[], s: Style, sweep = false): number =>
+  drags.length * (sweep ? s.sweepSpot : s.spot) + (swapsIn(drags) * 1000) / s.rate + P.TURN_MS * turnsIn(drags);
+
+/** A move's swaps that take a piece the wrong way, back over ground already won (the user, 12 Nov, the tenth
+    note: "each time you kind of loop or go back, you're basically undoing some progress"): junk going back left
+    in Stage I (right in the chain), a white going back right (left in the chain). */
+export function backward(cols: Board, drags: readonly Drag[], stage: 'junk' | 'chain'): number {
+  const side = stage === 'junk' ? 1 : -1, b = cols.map((c) => [...c]);
+  let n = 0;
+  for (const d of drags) {
+    let [x, y] = [d.x, d.y];
+    for (const w of d.ways) {
+      const to = neighbourOn(b, x, y, w);
+      if (!to) break;
+      const p = b[x][y], dx = to[0] - x;
+      if ((isJunk(p) && dx * side < 0) || (p === WHITE && dx * side > 0)) n++;
+      b[x][y] = b[to[0]][to[1]]; b[to[0]][to[1]] = p;
+      [x, y] = to;
+    }
+  }
+  return n;
+}
+
+/** Every move of the routines the style knows, on the board now, weighed: how much it betters the board,
+    less the person's time it takes and the ground it gives back, best first. With time short on a column
+    that needs saving, only moves that save it in time. `find` is the context the routines look with (a
+    second look with colour taken as scarce, say); the board's always measured by `ctx`. */
+export function weigh(sit: Situation, ctx: Ctx, style: Style, find: Ctx = ctx): { move: Move; value: number }[] {
+  const { cols } = sit, last = COLS - 1, base = measure(cols, ctx), burning = ctx.burnFrom <= last;
+  const wrong = (b: Board) => (burning ? b[last].filter((p) => p === WHITE).length : junkAt(b[last]));
+  const urgent = sit.timeLeft < P.URGENT && wrong(cols) > 0;
+  const out: { move: Move; value: number }[] = [];
+  for (const name of MENU[find.stage]) {
+    if (!style.routines.includes(name)) continue;
+    for (const move of ROUTINES[name].find(cols, find)) {
+      const after = playDrags(cols, move.drags);
+      if (!after) continue;
+      if (urgent && (wrong(after) >= wrong(cols) || msFor(move.drags, style) > sit.timeLeft)) continue;
+      const value = measure(after, ctx) - base - P.PER_SEC * timeFor(move.drags, style) / 1000 - P.BACK * backward(cols, move.drags, find.stage);
+      out.push({ move, value });
+    }
+  }
+  return out.sort((a, b) => b.value - a.value);
+}
+
 /** Pick the routine for the board now (see the header). */
 export function choose(sit: Situation, ctx: Ctx, style: Style): Advice {
   const { cols } = sit, last = COLS - 1;
@@ -160,19 +224,19 @@ export function choose(sit: Situation, ctx: Ctx, style: Style): Advice {
   // What's wrong with the furnace's column, to save it when time's short.
   const wrong = (b: Board) => (burning ? b[last].filter((p) => p === WHITE).length : junkAt(b[last]));
   const urgent = sit.timeLeft < P.URGENT && wrong(cols) > 0;
-  const moves: { move: Move; value: number }[] = [];
-  for (const name of MENU[ctx.stage]) {
-    if (!style.routines.includes(name)) continue;
-    for (const move of ROUTINES[name].find(cols, ctx)) {
-      const after = playDrags(cols, move.drags);
-      if (!after) continue;
-      if (urgent && (wrong(after) >= wrong(cols) || msFor(move.drags, style) > sit.timeLeft)) continue;
-      const value = measure(after, ctx) - base - P.SWAP * swapsIn(move.drags) - P.DRAG * move.drags.length;
-      moves.push({ move, value });
-    }
+  const gen = (c: Ctx) => weigh(sit, ctx, style, c);
+  let moves = gen(ctx);
+  // Count first (the ninth note): how many pieces plain drags could still get over. While that's high it's
+  // sweeping time, whatever happened a drag ago, and the slow techniques wait.
+  const sweeps = ctx.stage === 'junk' && !urgent ? sweepsOn(cols, ctx, style, base) : [];
+  const plain = new Set(sweeps.map((s) => `${s.move.drags[0].x},${s.move.drags[0].y}`)).size;
+  if (plain >= P.PLENTY) moves = moves.filter((m) => !SLOW.includes(m.move.routine));
+  let best = moves[0] && moves[0].value > P.MIN ? moves[0] : null;
+  // Colour plentiful but nothing cheaper gets anything over: the slow techniques after all.
+  if (!best && !sweeps.length && ctx.stage === 'junk' && ctx.scarce === undefined && !scarce(cols, ctx)) {
+    moves = gen({ ...ctx, scarce: true });
+    best = moves[0] && moves[0].value > P.MIN ? moves[0] : null;
   }
-  moves.sort((a, b) => b.value - a.value);
-  const best = moves[0] && moves[0].value > P.MIN ? moves[0] : null;
   const advice = (kind: Advice['kind'], label: string, reason: string, m: { move: Move; value: number } | null = null): Advice => ({
     stage: ctx.stage, kind, routine: m?.move.routine ?? null, label, reason, drags: m?.move.drags ?? [], value: m?.value ?? 0, sweep: false,
   });
@@ -187,8 +251,9 @@ export function choose(sit: Situation, ctx: Ctx, style: Style): Advice {
   // The start is sweeping, decided by the board: while a plain long drag still takes a black or a brown
   // over to the junk, sweep blind and fast, the best such drag each time; the techniques come in only when
   // that stops getting junk right, or when the furnace's column needs saving.
-  const sweeps = ctx.stage === 'junk' && !urgent ? sweepsOn(cols, ctx, style, base) : [];
-  const sweeping = sweeps.length > 0 && (!best || sweeps[0].value >= P.SWEEP_AS_GOOD * best.value);
+  const sweeping = sweeps.length > 0 && (plain >= P.PLENTY
+    ? !(best && best.move.routine === 'rescue' && best.value > 2 * sweeps[0].value)
+    : !best || sweeps[0].value >= P.SWEEP_AS_GOOD * best.value);
   // Then, the sweep done, turn the right side over (blacks up its side, browns down), so what comes next
   // from the left can hook in; only a big rescue comes first.
   if (ctx.stage === 'junk' && !urgent && !sweeping) {
@@ -308,13 +373,17 @@ export interface Played {
   finished: boolean;
   /** How often each routine was played. */
   used: Partial<Record<RoutineName, number>>;
+  /** Each technique (a sweep counted as its own, 'sweep') in Stage I: how often it was played while colour
+      was plentiful, middling or scarce, the person's time it took (ms) and the junk it got over (columns
+      moved right, all its junk together). */
+  cost: Record<string, { plenty: number; middle: number; scarce: number; ms: number; over: number }>;
 }
 
 /** Play a session through with a bot: each drag a moment to spot, then swept at the tier's hand speed;
     the furnace runs on meanwhile. Stops at `cap` minutes of play. `onColumn` sees each column, `onPlan`
     each decision. */
 export function playSession(g: Distilling, tier: Tier, cap = 30, onColumn?: (c: Column) => void, onPlan?: (a: Advice) => void): Played {
-  const bot = new DistillBot(tier), swapMs = 1000 / tier.rate;
+  const bot = new DistillBot(tier), swapMs = 1000 / tier.rate, cost: Played['cost'] = {};
   let went = false;
   const handle = (ev: DistillEvent[]) => {
     for (const e of ev) if (e.kind === 'column') { went = true; bot.seen(e.column, g); onColumn?.(e.column); }
@@ -328,6 +397,7 @@ export function playSession(g: Distilling, tier: Tier, cap = 30, onColumn?: (c: 
     if (a.kind === 'wait') { handle(g.tick(Math.max(1, Math.min(250, g.timeLeft())))); continue; }
     went = false;
     let ok = true;
+    const was = a.stage === 'junk' ? junkAcross(g.cols) : 0, share = colourLeft(g.cols), t0 = g.time;
     for (const d of a.drags) {
       handle(g.tick(a.sweep ? tier.sweepSpot : tier.spot));
       bot.drags++;
@@ -341,10 +411,16 @@ export function playSession(g: Distilling, tier: Tier, cap = 30, onColumn?: (c: 
       }
       if (went || !ok) break;
     }
+    if (a.stage === 'junk' && !went && a.routine) {
+      const k = a.sweep ? 'sweep' : a.routine, c = (cost[k] ??= { plenty: 0, middle: 0, scarce: 0, ms: 0, over: 0 });
+      c[share > 0.45 ? 'plenty' : share > M.SCARCE ? 'middle' : 'scarce']++;
+      c.ms += g.time - t0 + P.TURN_MS * turnsIn(a.drags);
+      c.over += junkAcross(g.cols) - was;
+    }
   }
   return {
     tier: tier.name, longest: g.longest, score: g.score(), points: g.points, columnsUp: g.columnsUp,
     columnsBurned: g.columns.length - g.columnsUp, whitesBurned: g.whitesBurned, minutes: g.time / 60000,
-    swaps: g.swaps, drags: bot.drags, banked: bot.banked, dismissed: g.dismissed, finished: g.finished, used: bot.used,
+    swaps: g.swaps, drags: bot.drags, banked: bot.banked, dismissed: g.dismissed, finished: g.finished, used: bot.used, cost,
   };
 }
