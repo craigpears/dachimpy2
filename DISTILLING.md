@@ -325,6 +325,26 @@ along." A lone brown among whites at the top can't move (browns rise in whites: 
 and a brown together can, so the rescue brings a black up beside the brown and crawls the pair along,
 carrying the whites their way.
 
+### What each technique costs (12 Nov, measured)
+The user (the seventh note): "rank each of the techniques as to how move efficient they are, and therefore
+... which one you resort to depends on what options and what stage you're at"; and in a person's time, not
+swaps: "one smooth mouse motion is cheap. It's quick." Measured from the Ultimate's 40 sessions
+(`tools/distill-bots.mjs`, its pace: 250 ms to spot and pick up a drag, 6 swaps a second along it, 60 ms a
+turn), in Stage I, its time for each column a piece of junk was got across, cheapest first:
+
+| Technique | ms a column of junk across | What it's for |
+|---|---|---|
+| The sweep (one long plain drag) | 279 | the opening, and while four or more pieces can still be dragged straight over |
+| Finish the junk column | 357 | the last whites out of the furnace's column, a black on top |
+| Save the whites | 374 | a white in a column about to burn |
+| Other diamond runs (another piece brought in first) | 419 | a piece with no way over alone |
+| The crawl | 456 | a stuck pair, once plain drags stop getting much over |
+| The hook | 616 | junk trapped on an edge, pieces scarce |
+| The leapfrog | 674 | sideways along a stored row |
+| The turn-over, storing, the figure of eight, the line pull | no junk across: they sort it | only once colour is scarce (40% of the board or less) or three junk columns are left |
+
+So the planner plays the sweep while it works, then the cheaper techniques, and the sorting ones last.
+
 ### Decision time
 Keep burning full junk columns as long as you're sure the next one will be finished before the furnace;
 the more white columns you bank, the longer the chain. Near the end there's less room on the right to
@@ -535,6 +555,38 @@ Drags are a third longer and the top tiers reach CC^6 more often (the Ultimate o
 chain barely moves and CC^12 is still 0 in 40: the chains still break on a black stuck on the bottom or a
 brown on the top of a white column. Whether the line pull's loop frees the blacks stuck at the bottom (the fifth note's "we've got to
 try and rescue them") isn't shown: the bots play it under once a session.
+
+### After the sixth to tenth notes (12 Nov, fourth run)
+The line pull played as the pair's crawl and loop (the sixth note); each technique costed in a person's
+time (the tenth note's last bullet: a moment to spot each drag, its swaps at a hand's speed, a little for
+each turn, and swaps that give ground back charged as lost progress); the plain drags counted first (the
+ninth note: with four or more pieces a plain drag gets over, it's sweeping time and the slow techniques
+wait); the slow techniques (the turn-over, the line pull, the ladder) and the sorting (storing, the
+diamond's order) only once colour is scarce, 40% of the board or less, or the junk waiting on the right is
+down to three columns (the seventh note and the tenth's last bullet), or when nothing cheaper gets anything
+over; another piece brought in to make a way rather than a loop (the tenth note); colour on a diagonal
+marked down against upright bands (the eighth note). Same 40 boards:
+
+| Tier | Longest chain: mean (best), was | CC^6+, was | CC^12 | Score a column, was | Minutes | Whites burned |
+|---|---|---|---|---|---|---|
+| Learner | 1.4 (4), was 1.7 (4) | 0/40, was 0 | 0/40 | 3.7, was 4.3 | 5.7 | 7.4 |
+| Able to Master | 2.4 (7), was 2.7 (6) | 3/40, was 2 | 0/40 | 8.0, was 8.8 | 3.2 | 1.9 |
+| Grand-Master to Legendary | 2.9 (8), was 3.1 (7) | 7/40, was 7 | 0/40 | 9.5, was 10.2 | 3.0 | 1.8 |
+| Ultimate | 2.9 (8), was 3.6 (8) | 6/40, was 14 | 0/40 | 9.9, was 11.3 | 2.7 | 1.7 |
+
+How often each technique is played in Stage I, a session, while colour is plentiful (over 45%), middling, or
+scarce (40% or less); the Ultimate's: the sweep 20.4 / 4.1 / 2.9, saving whites 14.9 / 2.7 / 0.8, the crawl
+8.7 / 2.2 / 0.8, other diamond runs 7.7 / 0.9 / 0.2, the turn-over 3.7 / 0.6 / 0.6 (the plentiful ones when
+nothing cheaper got anything over), storing 3.6 / 0.3 / 0.1, the leapfrog 0.3, the hook and the line pull
+0.2 or less. The bots play faster (the Ultimate's sessions 2.7 minutes, were 3.2) and more as the user
+describes, **but the chains are shorter, and honestly that's the gating:** with the same code but the
+sorting and slow techniques allowed whenever they pay (`MEASURE='{"SORT_FROM":10,"SCARCE":1}'`), the
+Ultimate's mean chain on 20 boards is 4.1 against 2.8 with colour counted scarce only at 30%, and 3.2 at 40%
+(the setting kept), 3.6 at 45%. The bots bank about 6.5 columns of whites, so at decision time about 40% of
+the board is still colour: by the user's rule it's never yet time to sort, and the white block goes into
+the chain less tidy. A real player banks 8 and sorts in the last two or three columns; the bots can't yet
+bank 8 without burning whites (§4 above). The upright-bands term changes little either way (2.7 without
+it). The line pull is still too rare (0.2 a session) to say whether it frees the blacks stuck at the bottom.
 **Left here for now (the user, 12 Nov):** "I think that's fine for now. Just obviously I watch what they
 do and I'll feed back. That's probably going to be better than you brute force." So no more tuning by
 running the bots over and over: the user watches them play on `distilling-test.html` and says what a

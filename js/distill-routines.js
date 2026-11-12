@@ -112,6 +112,29 @@ function besideOn(cols, x, y, side, test) {
     }
     return false;
 }
+/** The share of the board that's colour (junk), 0 to 1. */
+export function colourLeft(cols) {
+    let junk = 0, all = 0;
+    for (const c of cols)
+        for (const p of c) {
+            all++;
+            if (isJunk(p))
+                junk++;
+        }
+    return junk / all;
+}
+/** Whether colour's scarce, the slow techniques' time: as the context says, or by the board. */
+export const scarce = (cols, ctx) => ctx.scarce ?? colourLeft(cols) <= M.SCARCE;
+/** Whether sorting the junk earns its swaps (the user, 12 Nov: "I'm not going to waste my time organizing stuff
+    that's going to get burned. But once I start getting down to two or three columns, and things are a bit
+    scarcer"): only once the junk waiting on the right is down to SORT_FROM columns or fewer, or colour's
+    scarce. Sorting is blacks up and browns down: storing, the turn-over, the diamond's order. */
+export const sortingTime = (cols, ctx) => ctx.scarce === true || COLS - rightFrom(cols) <= M.SORT_FROM || colourLeft(cols) <= M.SCARCE;
+/** Junk lying on a diagonal: whites straight above and below it in its own column. */
+export function onDiagonal(cols, x, y) {
+    const c = cols[x];
+    return isJunk(c[y]) && c[y - 1] === WHITE && c[y + 1] === WHITE;
+}
 /** Junk caught in the whites: whites beside it on both sides. */
 export const embedded = (cols, x, y) => isJunk(cols[x][y])
     && besideOn(cols, x, y, 1, (q) => q === WHITE) && besideOn(cols, x, y, -1, (q) => q === WHITE);
@@ -260,6 +283,14 @@ export const M = {
     STORE: 0.4,
     /** The junk columns in the diamond's order: blacks above, browns below. */
     ZONE_SORT: 2,
+    /** Colour lying on a diagonal, a piece of junk with whites straight above and below it in its column
+        (the user, 12 Nov: "you should not have a diagonal line of color and white above and below it"). */
+    BAND: 1.5,
+    /** Colour's scarce at this share of the board or less ("when you've got, like, half the board is color,
+        you don't need those techniques"). */
+    SCARCE: 0.4,
+    /** Sorting the junk waits till the junk waiting on the right is down to this many columns. */
+    SORT_FROM: 3,
     /** A burnt white not yet burned. */
     BURNT: 1,
     /** Stage I: whites drift left. */
@@ -274,7 +305,7 @@ const near = (x) => M.NEAR[Math.min(2, COLS - 1 - x)];
     drags by how much they raise it. */
 export function measure(cols, ctx) {
     let v = 0;
-    const two = ctx.stage === 'chain';
+    const two = ctx.stage === 'chain', sort = sortingTime(cols, ctx) ? 1 : 0;
     for (let x = 0; x < COLS; x++) {
         const col = cols[x], burning = x >= ctx.burnFrom;
         for (let y = 0; y < col.length; y++) {
@@ -288,9 +319,9 @@ export function measure(cols, ctx) {
                 if (p === WHITE)
                     v -= M.BURN_WHITE * near(x) + (canGo(cols, x, y, -1) ? 0 : M.STUCK);
                 else if (p === BLACK)
-                    v += (M.ZONE_SORT * (16 - h)) / 16;
+                    v += (sort * M.ZONE_SORT * (16 - h)) / 16;
                 else if (p === BROWN)
-                    v += (M.ZONE_SORT * h) / 16;
+                    v += (sort * M.ZONE_SORT * h) / 16;
                 continue;
             }
             if (!two) {
@@ -306,16 +337,19 @@ export function measure(cols, ctx) {
                     v -= M.BURNT;
                 else if (p === BLACK) {
                     v -= M.LOW * Math.min(2, Math.max(0, h + d - 16) / 3) + (h >= 15 ? M.EDGE : 0);
-                    v += (M.STORE * (16 - h)) / 16;
+                    v += (sort * M.STORE * (16 - h)) / 16;
                 }
                 else {
                     v -= M.LOW * Math.min(2, Math.max(0, d - h) / 3) + (h <= 1 ? M.EDGE : 0);
-                    v += (M.STORE * h) / 16;
+                    v += (sort * M.STORE * h) / 16;
                 }
                 if (!canGo(cols, x, y, 1) && !besideOn(cols, x, y, 1, isJunk))
                     v -= M.STUCK;
                 if (embedded(cols, x, y))
                     v -= M.EMBED;
+                // Upright bands, not a diagonal one: colour, white, colour across the board.
+                if (onDiagonal(cols, x, y))
+                    v -= M.BAND;
             }
             else if (p === WHITE) {
                 v += M.FLOW * x;
@@ -488,7 +522,7 @@ const diamond = {
     about: 'A black from the top left dragged down-right across the whites, then up through the browns to the blacks; a brown the other way round. Junk columns fill black above, brown below.',
     find(cols, ctx) {
         const out = [];
-        const side = junkSide(ctx);
+        const side = junkSide(ctx), right = rightFrom(cols);
         for (let x = 0; x < COLS; x++)
             for (let y = 0; y < cols[x].length; y++) {
                 const p = cols[x][y];
@@ -498,15 +532,45 @@ const diamond = {
                     continue;
                 if (side < 0 && (x >= ctx.burnFrom || !besideOn(cols, x, y, -1, (q) => q === WHITE)))
                     continue;
+                // Over: in the junk columns, or against the colour on the right (where its columns are at least half
+                // junk), nothing but junk on its right (the ninth note: "drag the blacks down, the browns up").
                 const arrived = side > 0
-                    ? (b, at) => at[0] >= ctx.burnFrom || (at[0] === ctx.burnFrom - 1 && besideOn(b, at[0], at[1], 1, isJunk) && !besideOn(b, at[0], at[1], 1, (q) => q === WHITE))
+                    ? (b, at) => at[0] >= ctx.burnFrom || (at[0] >= Math.min(ctx.burnFrom, right) - 1 && at[0] > x && besideOn(b, at[0], at[1], 1, isJunk) && !besideOn(b, at[0], at[1], 1, (q) => q === WHITE))
                     : (b, at) => at[0] < ctx.fill - 1 && (at[0] === 0 || !besideOn(b, at[0], at[1], -1, (q) => q === WHITE));
                 // Any way through, as a hand sweeps it: down and up through the whites, and on the junk's side the
                 // ladder, a black climbing through browns from one column to the next and a brown sinking through
                 // blacks (the user, 12 Nov: "that is how you get it up").
-                const paths = [...traceDrags(cols, x, y, towards(side), ctx.reach, arrived, 60), ...traceDrags(cols, x, y, ALL, ctx.reach, arrived, 80)];
-                if (!paths.length)
+                // While colour's plentiful, plain drags only (on across, up or down as the pieces allow); the ladder
+                // and the long ways round, any way through, only once it's scarce.
+                const paths = [...traceDrags(cols, x, y, towards(side), ctx.reach, arrived, 60), ...(scarce(cols, ctx) ? traceDrags(cols, x, y, ALL, ctx.reach, arrived, 80) : [])];
+                if (!paths.length) {
+                    // No way over alone: bring in another piece to make its way, a black dragged down (or a brown up)
+                    // into the gap, every swap the right way, rather than loop the pair back (the user, 12 Nov, the
+                    // tenth note: "I've got another black piece further up. I can just drag it down, fill in the gap,
+                    // and then go brown up, down, up. It's just far more space efficient").
+                    if (side < 0)
+                        continue;
+                    let found = 0;
+                    for (let hx = Math.max(0, x - 3); hx <= Math.min(ctx.burnFrom - 1, x + 2) && found < 2; hx++)
+                        for (let hy = 0; hy < cols[hx].length && found < 2; hy++) {
+                            const q = cols[hx][hy];
+                            if ((q !== BLACK && q !== BROWN) || (hx === x && hy === y))
+                                continue;
+                            for (const hw of traceDrags(cols, hx, hy, RIGHT, Math.min(ctx.reach, 8), () => true, 12)) {
+                                const b = playDrags(cols, [drag(hx, hy, hw)]);
+                                if (b[x][y] !== p)
+                                    continue;
+                                const on = traceDrags(b, x, y, RIGHT, ctx.reach, arrived, 20);
+                                if (!on.length)
+                                    continue;
+                                on.sort((a, c) => c.length - a.length);
+                                out.push({ routine: 'diamond', drags: [drag(hx, hy, hw), drag(x, y, on[0])], reason: `bring in another piece: drag the ${q === BLACK ? 'black' : 'brown'} at ${placeName(hx, hy)} into the gap, then the ${p === BLACK ? 'black' : 'brown'} at ${placeName(x, y)} over past it` });
+                                found++;
+                                break;
+                            }
+                        }
                     continue;
+                }
                 // Where the technique wants it: over with the junk, then the black as high and the brown as low as
                 // it goes ("browns at the bottom, blacks at the top"), the shorter the better.
                 const rate = (w) => {
@@ -547,7 +611,8 @@ const turnOver = {
     about: 'Blacks taken up the right-hand side, zigzagging up through the browns between its columns to the top, the browns sinking: then anything new from the left hooks in.',
     find(cols, ctx) {
         const out = [];
-        if (ctx.stage !== 'junk')
+        // Slow (the seventh note: "They're very action heavy"): only once colour's scarce.
+        if (ctx.stage !== 'junk' || !scarce(cols, ctx) || !sortingTime(cols, ctx))
             return out;
         const from = rightFrom(cols);
         if (from >= COLS - 1)
@@ -575,6 +640,9 @@ const store = {
     about: 'Junk on the left kept ready to cross: blacks lifted through browns to the top, browns left at the bottom.',
     find(cols, ctx) {
         const out = [];
+        // Not while plenty of junk is waiting on the right: it all burns as it is.
+        if (!sortingTime(cols, ctx))
+            return out;
         for (let x = 0; x < Math.min(ctx.burnFrom, ctx.stage === 'junk' ? ctx.burnFrom - 1 : ctx.fill - 1); x++)
             for (let y = 0; y < cols[x].length; y++) {
                 if (cols[x][y] !== BLACK)
@@ -777,6 +845,9 @@ const linePull = {
         const out = [];
         const side = junkSide(ctx);
         let tried = 0;
+        // Slow: only once colour's scarce (the seventh note).
+        if (!scarce(cols, ctx))
+            return out;
         for (let x = 0; x < Math.min(ctx.burnFrom, COLS); x++)
             for (let y = 0; y < cols[x].length; y++) {
                 if (cols[x][y] !== BLACK)

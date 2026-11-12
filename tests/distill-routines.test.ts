@@ -143,10 +143,12 @@ describe('the routines (12 Nov)', () => {
     ]);
     const line = lineOf(cols, [1, 3], [3, 3]);
     expect(line.length).toBeGreaterThanOrEqual(3);
-    const steps = pairPass(cols, [2, 4], [3, 3], line, stageI(8))!;
+    // (colour's scarce enough here for the slow techniques)
+    const scarceI = { ...stageI(8), scarce: true };
+    const steps = pairPass(cols, [2, 4], [3, 3], line, scarceI)!;
     expect(steps).not.toBeNull();
     // Played as the hand plays it: the black and the brown each dragged in turn, every swap legal.
-    const m = find('linePull', cols, stageI(8)).find((x) => /crawl up past them/.test(x.reason))!;
+    const m = find('linePull', cols, scarceI).find((x) => /crawl up past them/.test(x.reason))!;
     expect(m).toBeDefined();
     wholeDrags(cols, m);
     // Follow the line's browns through the pass: every one of them ends lower than it was.
@@ -227,7 +229,7 @@ describe('the routines (12 Nov)', () => {
   });
   it('turn the right side over: blacks zigzag up the side through the browns to the top (12 Nov: "zigzagging up the side is how you get them over")', () => {
     // The sweep's end: browns at the top right, blacks at the bottom (notes/distilling/4-end-of-the-sweep.webp).
-    const cols = board([...column(6, 'bbbbKKKKK'), ...column(7, 'bbbbKKKK'), ...column(8, 'bbbbKKKKK'), ...column(9, 'bbbbKKKK')]);
+    const cols = board([...column(7, 'bbbbKKKK'), ...column(8, 'bbbbKKKKK'), ...column(9, 'bbbbKKKK')]);
     const moves = find('turnOver', cols, stageI(4));
     expect(moves.length).toBeGreaterThan(0);
     const d = moves[0].drags[0];
