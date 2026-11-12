@@ -23,10 +23,10 @@ import { COLS, SPICE, WHITE } from './distilling.js';
 import { ROUTINES, burnsClean, clear, fillTarget, isJunk, junkTarget, measure, playDrags, swapsIn, whitesFrom, } from './distill-routines.js';
 const BASIC = ['rescue', 'junkColumn', 'diamond', 'channel'];
 export const TIERS = [
-    { name: 'learner', label: 'Learner', rate: 4, spot: 900, bank: 4, reach: 6, routines: BASIC, early: false, dismiss: false, gamble: false },
-    { name: 'master', label: 'Able to Master', rate: 5, spot: 500, bank: 6, reach: 10, routines: [...BASIC, 'crawl', 'store', 'leapfrog'], early: true, dismiss: true, gamble: false },
-    { name: 'grandmaster', label: 'Grand-Master to Legendary', rate: 6, spot: 350, bank: 6, reach: 14, routines: [...BASIC, 'crawl', 'store', 'leapfrog', 'figureEight', 'hook'], early: true, dismiss: true, gamble: true },
-    { name: 'ultimate', label: 'Ultimate', rate: 6, spot: 250, bank: 6, reach: 16, routines: [...BASIC, 'crawl', 'store', 'leapfrog', 'figureEight', 'hook', 'linePull'], early: true, dismiss: true, gamble: true },
+    { name: 'learner', label: 'Learner', rate: 4, spot: 900, sweepSpot: 400, bank: 4, reach: 6, routines: BASIC, early: false, dismiss: false, gamble: false },
+    { name: 'master', label: 'Able to Master', rate: 5, spot: 500, sweepSpot: 150, bank: 6, reach: 10, routines: [...BASIC, 'turnOver', 'crawl', 'store', 'leapfrog'], early: true, dismiss: true, gamble: false },
+    { name: 'grandmaster', label: 'Grand-Master to Legendary', rate: 6, spot: 350, sweepSpot: 100, bank: 6, reach: 14, routines: [...BASIC, 'turnOver', 'crawl', 'store', 'leapfrog', 'figureEight', 'hook'], early: true, dismiss: true, gamble: true },
+    { name: 'ultimate', label: 'Ultimate', rate: 6, spot: 250, sweepSpot: 80, bank: 6, reach: 16, routines: [...BASIC, 'turnOver', 'crawl', 'store', 'leapfrog', 'figureEight', 'hook', 'linePull'], early: true, dismiss: true, gamble: true },
 ];
 export const tierNamed = (name) => {
     const t = TIERS.find((x) => x.name === name);
@@ -36,7 +36,7 @@ export const tierNamed = (name) => {
 };
 /** The routines on the menu in each stage, in the order they're preferred when they'd do as well. */
 export const MENU = {
-    junk: ['rescue', 'junkColumn', 'crawl', 'diamond', 'leapfrog', 'hook', 'figureEight', 'linePull', 'store'],
+    junk: ['rescue', 'junkColumn', 'turnOver', 'crawl', 'diamond', 'leapfrog', 'hook', 'figureEight', 'linePull', 'store'],
     chain: ['rescue', 'junkColumn', 'crawl', 'channel', 'diamond', 'leapfrog', 'hook', 'figureEight', 'linePull'],
 };
 /** The planner's weights (exported to tune from tools/distill-bots.mjs's PLAN). */
@@ -57,11 +57,20 @@ export const P = {
     CASH_MS: 4000,
     /** Stage I: how many columns past the one being built are kept clear of whites too. */
     AHEAD: 1,
+    /** A sweep: a drag at least this long. */
+    SWEEP_LONG: 3,
+    /** ... swept blind while it does nearly as well as the best thing to do (a careful rescue worth far more
+        comes first). */
+    SWEEP_AS_GOOD: 0.6,
+    /** Turning the right side over: played next unless something's worth more than this (a big rescue),
+        and so long as it costs the board no more than this by the measure. */
+    TURN_UNLESS: 12,
+    TURN_COST: 1,
 };
 /** Junk in the furnace's column (spice is fine in a Crystal Clear). */
 const junkAt = (col) => col.filter((p) => p !== WHITE && p !== SPICE).length;
 /** The ms a move takes at a pace. */
-const msFor = (drags, s) => drags.length * s.spot + (swapsIn(drags) * 1000) / s.rate;
+const msFor = (drags, s, sweep = false) => drags.length * (sweep ? s.sweepSpot : s.spot) + (swapsIn(drags) * 1000) / s.rate;
 /** The context for a stage: Stage I, the junk column being built (and those done right of it) burn;
     Stage II, the last `burns` columns burn, and the rightmost left of them not yet clear is filled. */
 export function contextFor(cols, stage, burns, reach) {
@@ -73,6 +82,25 @@ export function contextFor(cols, stage, burns, reach) {
     }
     const burnFrom = COLS - burns;
     return { stage, burnFrom, fill: fillTarget(cols, burnFrom), reach };
+}
+/** The start's sweeps: plain long drags of a black or a brown right over to the junk (the diamond's run,
+    carried on as far as it goes), each worth it for its swaps, best first; spotting one costs next to
+    nothing, it's done blind. None: sweeping has stopped getting junk right. */
+export function sweepsOn(cols, ctx, style, base = measure(cols, ctx)) {
+    if (!style.routines.includes('diamond'))
+        return [];
+    const out = [];
+    for (const move of ROUTINES.diamond.find(cols, ctx)) {
+        if (move.drags.length !== 1 || move.drags[0].ways.length < P.SWEEP_LONG)
+            continue;
+        const after = playDrags(cols, move.drags);
+        if (!after)
+            continue;
+        const value = measure(after, ctx) - base - P.SWAP * swapsIn(move.drags);
+        if (value > P.MIN)
+            out.push({ move, value });
+    }
+    return out.sort((a, b) => b.value - a.value);
 }
 /** Pick the routine for the board now (see the header). */
 export function choose(sit, ctx, style) {
@@ -101,7 +129,7 @@ export function choose(sit, ctx, style) {
     moves.sort((a, b) => b.value - a.value);
     const best = moves[0] && moves[0].value > P.MIN ? moves[0] : null;
     const advice = (kind, label, reason, m = null) => ({
-        stage: ctx.stage, kind, routine: m?.move.routine ?? null, label, reason, drags: m?.move.drags ?? [], value: m?.value ?? 0,
+        stage: ctx.stage, kind, routine: m?.move.routine ?? null, label, reason, drags: m?.move.drags ?? [], value: m?.value ?? 0, sweep: false,
     });
     // The endgame's gamble: the next Crystal Clear can't be filled in time.
     if (style.gamble && !burning && sit.chain >= P.CASH_FROM && !ready && sit.timeLeft < P.CASH_MS) {
@@ -111,10 +139,26 @@ export function choose(sit, ctx, style) {
             return advice('dismiss', 'Cash in', `the gamble: CC^${sit.chain} so far, and the next column needs ${need} more white${need > 1 ? 's' : ''} in ${(sit.timeLeft / 1000).toFixed(0)} s. Poor odds: cash in now`);
         }
     }
+    // The start is sweeping, decided by the board: while a plain long drag still takes a black or a brown
+    // over to the junk, sweep blind and fast, the best such drag each time; the techniques come in only when
+    // that stops getting junk right, or when the furnace's column needs saving.
+    const sweeps = ctx.stage === 'junk' && !urgent ? sweepsOn(cols, ctx, style, base) : [];
+    const sweeping = sweeps.length > 0 && (!best || sweeps[0].value >= P.SWEEP_AS_GOOD * best.value);
+    // Then, the sweep done, turn the right side over (blacks up its side, browns down), so what comes next
+    // from the left can hook in; only a big rescue comes first.
+    if (ctx.stage === 'junk' && !urgent && !sweeping) {
+        const turn = moves.filter((m) => m.move.routine === 'turnOver' && m.value > -P.TURN_COST)[0];
+        if (turn && (!best || best.value < P.TURN_UNLESS))
+            return advice('move', ROUTINES.turnOver.label, turn.move.reason, turn);
+    }
     // Burn a ready column at once when nothing much is left to do; in the chain, only when nothing is (a
     // Crystal Clear burned early is time lost ferrying whites for the next).
     if (ready && style.early && (!best || (ctx.stage === 'junk' && best.value < P.SLACK))) {
         return advice('burn', 'Burn now', burning ? "the furnace's column is all junk: burn it now" : 'the column is Crystal Clear: send it up now');
+    }
+    if (sweeping) {
+        const sw = sweeps[0];
+        return { ...advice('move', 'The sweep', `go, go, go: ${sw.move.reason}`, sw), sweep: true };
     }
     if (best) {
         const gamble = !burning && sit.chain >= P.CASH_FROM && !ready && style.gamble
@@ -162,7 +206,7 @@ export function burnsLeft(cols) {
     return n;
 }
 /** The pace "Help, Helium" plays at, and every technique. */
-export const HELIUM = { routines: Object.keys(ROUTINES), reach: 16, rate: 6, spot: 250, early: true, gamble: true };
+export const HELIUM = { routines: Object.keys(ROUTINES), reach: 16, rate: 6, spot: 250, sweepSpot: 80, early: true, gamble: true };
 /** The planner on anyone's board mid-game, a person's: it reads the stage from the board (the chain
     started, or the whites banked, or the junk run out), then picks the routine as the bots do. */
 export function advise(g, o = {}) {
@@ -188,7 +232,7 @@ export class DistillBot {
     constructor(tier) { this.tier = tier; }
     plan(g) {
         if (this.quit)
-            return this.say({ stage: this.stage, kind: 'dismiss', routine: null, label: 'Dismiss', reason: 'the chain is over: dismiss and keep the score', drags: [], value: 0 });
+            return this.say({ stage: this.stage, kind: 'dismiss', routine: null, label: 'Dismiss', reason: 'the chain is over: dismiss and keep the score', drags: [], value: 0, sweep: false });
         if (this.stage === 'junk' && decisionTime(g.cols, this.tier.bank)) {
             this.stage = 'chain';
             this.burns = burnsLeft(g.cols);
@@ -253,7 +297,7 @@ export function playSession(g, tier, cap = 30, onColumn, onPlan) {
         went = false;
         let ok = true;
         for (const d of a.drags) {
-            handle(g.tick(tier.spot));
+            handle(g.tick(a.sweep ? tier.sweepSpot : tier.spot));
             bot.drags++;
             let x = d.x, y = d.y;
             for (const w of d.ways) {

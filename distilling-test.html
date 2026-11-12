@@ -47,6 +47,7 @@
     <button id="next">New board</button>
     <button id="dismiss">Dismiss</button>
     <button id="pause">Pause</button>
+    <button id="burn" title="Burn the furnace's column now, paused or not (X, right-click)">Burn</button>
   </div>
   <div class="row">
     <label for="bot">Watch a bot:</label>
@@ -106,7 +107,7 @@ function showKnows() {
 const log = (t) => { const li = document.createElement('li'); li.textContent = t; $('log').prepend(li); while ($('log').children.length > 9) $('log').lastChild.remove(); };
 const L = 'wbK*x';
 /** A bot playing through the board, at its tier's pace: a moment to spot each drag, then a swap each 1 / rate s. */
-let bot = null, botWait = 0, botSteps = [];
+let bot = null, botWait = 0, botSteps = [], botSpot = 0;
 
 function deal() {
   board?.dispose();
@@ -132,6 +133,7 @@ function deal() {
 $('restart').onclick = () => deal();
 $('next').onclick = () => { seed++; deal(); };
 $('dismiss').onclick = () => board.dismiss();
+$('burn').onclick = () => board.burn();
 $('pause').onclick = () => { board.paused = !board.paused; $('pause').classList.toggle('on', board.paused); };
 $('bot').onchange = () => { botName = $('bot').value; deal(); $('bot').blur(); };
 deal();
@@ -153,7 +155,7 @@ function driveBot(dt) {
     // The drag's done: let go, and a moment to spot the next.
     if (!botSteps.length || botSteps[0][0] !== to[0] || botSteps[0][1] !== to[1]) {
       board.letGo();
-      if (botSteps.length) botWait += t.spot;
+      if (botSteps.length) botWait += botSpot;
     }
     return;
   }
@@ -166,7 +168,9 @@ function driveBot(dt) {
     let x = d.x, y = d.y;
     for (const w of d.ways) { botSteps.push([x, y, w]); [x, y] = board.game.neighbour(x, y, w); }
   }
-  botWait = t.spot;
+  // A sweep is played blind, one drag straight after another; a technique is spotted first.
+  botSpot = p.sweep ? t.sweepSpot : t.spot;
+  botWait = botSpot;
 }
 addEventListener('keydown', (e) => {
   if (e.target.tagName === 'SELECT') return;

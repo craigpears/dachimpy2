@@ -407,7 +407,8 @@ export function distillBoard(o = {}) {
     const ms = dt * 1000;
     b.now += ms;
     clickBusy = Math.max(0, clickBusy - ms);
-    if (!b.paused && !over) handle(game.tick(ms));
+    // Paused, the furnace stands still, but swaps land, a burn goes and the board slides (for demos).
+    if (!over) handle(b.paused ? game.settle(ms) : game.tick(ms));
     for (const s of [...grid.flat(), ...leaving]) step(s);
     heatShown += (game.heat() - heatShown) * Math.min(1, dt * 10);
     messages = messages.filter((m) => m.hold || b.now - m.t0 < FLOAT_MS);

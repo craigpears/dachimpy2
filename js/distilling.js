@@ -53,6 +53,9 @@ export const MESSAGES = { clear: 'Crystal clear!', smooth: 'Smooooooth', blecch:
 export const UP_RIGHT = 0, UP_LEFT = 1, DOWN_LEFT = 2, DOWN_RIGHT = 3;
 /** Each way as it's drawn, in pieces: a column across and half a piece up or down (y down). */
 export const WAY = [[1, -0.5], [-1, -0.5], [-1, 0.5], [1, 0.5]];
+/** How far a dragging mouse must be along the way to the next place, in pieces, before the held piece
+    swaps into it: well into it (its middle is 1.12 away, its edge about 0.5). */
+export const DRAG_INTO = 0.75;
 /** How a piece swaps: white (and burnt white) 0, brown 1, black 2; spice never. */
 export const kindOf = (p) => (p === SPICE ? -128 : p === BURNT ? WHITE : p);
 /** Its weight: white and burnt white -1, black +1, the rest 0. */
@@ -283,16 +286,20 @@ export class Distilling {
     }
     /** Which way a held piece goes for a mouse (dx, dy) from its middle, in pieces (x right, y down): the
         way it can swap whose direction is nearest the mouse's, if the mouse is well on its way there
-        (over half a piece out, and within 50 degrees of it). Smooths a slightly sloppy drag where the
-        intent is clear (the user, 12 Nov: "certainly make it smooth. I want this enjoyable"), where the
-        real game swapped only with the mouse near a piece's middle. */
+        (within 50 degrees of it). Smooths a slightly sloppy drag where the intent is clear (the user, 12
+        Nov: "certainly make it smooth. I want this enjoyable"), where the real game swapped only with the
+        mouse near a piece's middle. But only once the mouse is well into the next place, DRAG_INTO of a
+        piece along the way there, two thirds of the way to its middle, not just over its edge (the user, 12
+        Nov: "Oh shoot! I just pulled it one thing too many. This is a bit sensitive"). */
     wayToward(x, y, dx, dy) {
         const len = Math.hypot(dx, dy);
         if (len < 0.55)
             return null;
         let best = null, bestCos = Math.cos((50 * Math.PI) / 180);
         for (let d = 0; d < 4; d++) {
-            const [wx, wy] = WAY[d], cos = (wx * dx + wy * dy) / (len * Math.hypot(wx, wy));
+            const [wx, wy] = WAY[d], wl = Math.hypot(wx, wy), cos = (wx * dx + wy * dy) / (len * wl);
+            if (len * cos < DRAG_INTO)
+                continue;
             const n = this.neighbour(x, y, d);
             if (cos > bestCos && n && this.canSwap(x, y, n[0], n[1])) {
                 best = d;
@@ -340,6 +347,21 @@ export class Distilling {
                 this.clock -= TICK_MS;
                 this.furnaceTick(ev);
             }
+        }
+        return ev;
+    }
+    /** Time passing with the furnace stopped (a board paused, for a demo): a swap lands, and a burn waiting
+        on it goes; the board slides. The furnace's clock and the time played don't move. */
+    settle(ms) {
+        const ev = [];
+        if (this.finished)
+            return ev;
+        if (this.sliding > 0)
+            this.sliding = Math.max(0, this.sliding - ms);
+        if (this.swapping > 0) {
+            this.swapping = Math.max(0, this.swapping - ms);
+            if (this.swapping === 0)
+                this.tryBurn(ev);
         }
         return ev;
     }

@@ -149,6 +149,13 @@ describe('dragging (12 Nov)', () => {
     // Too little movement: nothing yet.
     expect(g.wayToward(3, 3, 0.3, 0.2)).toBeNull();
   });
+  it('a drag swaps into the next place only once the pointer is well into it (12 Nov: "Oh shoot! I just pulled it one thing too many. This is a bit sensitive")', () => {
+    const g = laid(put(sea('w'), [[3, 3, 'K']]));
+    // Just over the edge of the place down-right: not yet.
+    expect(g.wayToward(3, 3, 0.55, 0.28)).toBeNull();
+    // Well into it, two thirds of the way to its middle: now.
+    expect(g.wayToward(3, 3, 0.7, 0.35)).toBe(DOWN_RIGHT);
+  });
   it('moves a black and a brown level through whites together, three swaps a column (the crawl)', () => {
     // DISTILLING.md's sketch: brown at (1, 1) (short), black at (0, 2) (tall), in whites.
     const g = laid(put(sea('w'), [[1, 1, 'b'], [0, 2, 'K']]));
@@ -367,5 +374,25 @@ describe('the flask (12 Nov)', () => {
     expect(a.level).toBeCloseTo(25 / 100);
     expect(a.alpha).toBeLessThan(0.1);
     expect(b.bri).toBeLessThan(0.5);
+  });
+});
+
+describe('paused, for demos (12 Nov)', () => {
+  it('a burn still goes while paused, the furnace standing still (the user: "when I\'m in pause mode as well, I need a burn button so I can demo these")', () => {
+    const g = new Distilling(seeded(4));
+    g.tick(2000);
+    const clock = g.clock, furnace = g.furnace, time = g.time;
+    // Paused: nothing but settle() passes. A swap made, then burn now: the swap lands and the burn goes.
+    const [x1, y1, x2, y2] = g.allSwaps()[0];
+    expect(g.swap(x1, y1, x2, y2)).toBe(true);
+    const ev = [...g.burnNow(), ...g.settle(SWAP_MS)];
+    expect(ev.some((e) => e.kind === 'column')).toBe(true);
+    expect(g.movable).toBe(false);
+    g.settle(SLIDE_MS);
+    expect(g.movable).toBe(true);
+    // ... and the time played hasn't moved; the furnace starts afresh only once it's running again.
+    expect(g.time).toBe(time);
+    expect(g.furnace).not.toBe(furnace + 1);
+    expect(clock).toBeGreaterThanOrEqual(0);
   });
 });
