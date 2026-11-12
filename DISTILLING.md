@@ -694,6 +694,22 @@ color and white above and below it. That's how you're going to get that. Just lo
   note). So a drag that would leave colour lying on a diagonal is worse than one that stacks it upright in a
   column, even when it gets over the same junk.
 
+**The ninth note: when the two halves are close, just drag (the user, 12 Nov, watching the bot,
+`notes/distilling/17-two-halves-close.webp`).** "here's a perfect example from watching the bot. So here, it's
+doing all kinds of crawling techniques in the middle of the board for some reason, whereas at this point, the
+two halves are really close to each other. Like, all you need to do is drag the blacks down, the browns up.
+You could get, like, 10 pieces over to the other side dead easy." The board: early, the left half a mix of
+whites and colour, the right half mostly junk, the gap of whites between them only a column or two wide. The
+user's drawing: green drags taking each black in the middle down-right through the whites into the junk on the
+right, one after another, and an orange one taking a brown up-right the same way.
+- **The sweep isn't done while the gap is narrow:** while blacks sit above whites and browns below them with
+  the junk side a short drag away, plain drags (blacks down, browns up) are the cheapest moves on the board,
+  each getting a piece over in a few swaps. The bot was crawling there instead, the slow technique for when
+  colour is scarce or the river is wide (the seventh note's ranking).
+- **What it means for the bots:** count what plain drags could still get over (how many pieces have a
+  straight run into the junk side) before reaching for any technique; with something like ten such pieces,
+  it's sweeping time, whatever happened a drag ago.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
