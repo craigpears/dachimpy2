@@ -692,6 +692,13 @@ question of whether a crane is everyone's), and the bribe gate as the final toll
   each other): `src/den-racers.ts`. Your rivals: `src/den-rivals.ts`, each one's racing in her file in
   `src/lines/` (`RACER`), sailed by `simDrive` in `src/race-sim.ts`.
 - **The simulation:** `src/race-sim.ts`, run by `tools/race-sim.mjs` (§8).
+- **A chart of the course (12 Nov):** `tools/race-map.mjs <out.html> [races] [size]` (Node 22:
+  `node_modules/node/bin/node.exe`) writes one page in the captain's map's look, drawn from `LAY.RACE` and the
+  simulation: the long way and its buoys, every shortcut with its puzzle, saving and its route's wins, the
+  snakes and winds, the sheltered and exposed spots, the gun gap's reach, the start's spots, and a table of
+  wins by route, style, skill and spot (2000 races, about a minute). The user: "a map of the course ... shows
+  where all the shortcuts and things are, and all the wins". It shows the starlit door, so it's private:
+  write it outside the site (a temp folder), never into it.
 - **Drawn and played by:** `js/den/race.js`; its start (the line, your spot, the starter's card)
   `js/den/race-start.js`; its buoys and finish line `js/den/race-marks.js`; its barrier of driftwood and
   its Foraging `js/den/race-forage.js`; the gun gap's gate, its guard and the wreck's haul
