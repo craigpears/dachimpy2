@@ -715,10 +715,11 @@ their times. A race could also be watched live.
 proof of concept thing where people can see games that have been played, view them and see the replays."
 So every online race is recorded by its room and kept. **Actions, not positions (12 Nov):** "you don't need
 [sloop] positions 4 times a second, you just need moves ... really all you need is to save somebody's
-actions." The record is the seeds and each racer's actions with their times (her helm's moves and pins,
-shots, puzzle moves), replayed through the same rules; plus a keyframe of where everyone is every few
-seconds, like a video's, to correct any small drift and to skip to the middle without replaying from the
-start. Live, the room still sends full snapshots, which heal a missed message; only what's kept is actions. a list of past
+actions." The record is the seeds and each racer's actions (her helm's moves and pins, shots, puzzle moves),
+replayed through the same rules. **No drift (12 Nov):** the race goes in fixed steps (60 a second), not
+by however long each screen frame took, and each action is stamped with its step, so a replay comes out
+exactly as the race did; "you can translate between number of moves and time", so skipping ahead is
+replaying the steps without drawing them. Live, the room still sends full snapshots, which heal a missed message; only what's kept is actions. a list of past
 races to pick from; and a viewer like watching (§10 below: the free camera, following a racer, her board
 played from her real moves), with pause, speed and a bar to skip along. After online racing lands, as
 the room's record is the replay.
