@@ -593,6 +593,27 @@ black beside it, does the same in its turn, and the pair travels along level thr
 round each other. It confirms "The crawl" in §3 as the user plays it: two drags in turn, each a down, up,
 down, not one piece dragged alone.
 
+**The fifth note: one black pulls a line of browns over (the user, 12 Nov, `notes/distilling/8-` to
+`10-*`).** "I've got to try and figure out exactly how you do it." The board: whites everywhere but the
+left, where browns fill the top two or three columns, blacks are stuck at the bottom ("we've got to try and
+rescue them"), and among all the browns there's one black.
+- **Red, freeing the one black:** it comes out of the browns over the top, along the side through the
+  browns, then down through the whites to low in the middle. ("Oh shoot! I just pulled it one thing too
+  many. This is a bit sensitive.")
+- **Teal, where it should have stopped:** lined up in the whites right beside the column of three browns.
+- **Orange, then up through the browns:** "I was going to go up through the browns. In that kind of orange
+  arrow direction, that pulls the browns down, and then you can loop it all back over again ... that's kind
+  of a way of pulling a line of pieces across the board." The black climbs past each brown (a black rises
+  past a brown), so each brown drops a place as it goes by; then the black's looped back over the top and
+  round to do it again, and the line of browns comes across.
+- **Mid game and late:** "when you're in this mid game, yeah, you use kind of like one black to pull a whole
+  row of browns over. And then once you get further on and pieces are rare, you just have one black and one
+  brown and do it like really quickly."
+- **The whole idea:** "using pieces together like that ... you can use a black and a brown to get things up
+  and down vertically, left and right, using these kind of combinations of these tricks." The user's name
+  for it escapes them; it's "Pull a line up" in §3 and in the bots (`linePull`), the loop done again and
+  again.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
