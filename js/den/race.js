@@ -5,7 +5,8 @@
 // whirlpool channel's, its gun gap's two guns, the crane in its notch on the last spit; the clock and your
 // place. Its start (the line, picking your spot and how many rivals, the starter's card) is race-start.js;
 // its marks (the numbered buoys, the finish line and the moment you cross it, everyone's places)
-// race-marks.js; the barrier of driftwood and its Foraging race-forage.js; your rivals' sloops on the water,
+// race-marks.js; the barrier of driftwood and its Foraging race-forage.js; the gun gap as an imperial gate,
+// its guard bribed with the coins of a wreck off leg 1, race-bribe.js; your rivals' sloops on the water,
 // their broadsides and yours, race-field.js.
 // Everything it's made of is a shared piece: the sea draws its line of rocks (reef.js), the locks
 // (lock.js) and the winds (sea.js, windLane); a gun is a destructible turret (turret.js), a whirlpool
@@ -23,7 +24,7 @@ import { STARTER } from '../lines/race.js';
 import { scene, mat, mesh, canvasTex, V3, burst, toast, flagpole, pirate } from './world.js';
 import { rock } from './land.js';
 import { sail, seaX, seaZ, windLane, bankTop, stoneM, grassM, SLOOP_DECK } from './sea.js';
-import { turretMesh, turretMark, turretView, turretWrecked, turretFire, turretLand, shotComing } from './turret.js';
+import { turretMark, turretView, turretWrecked, turretFire, turretLand, shotComing } from './turret.js';
 import { pool } from './whirlpools.js';
 import { patch, patchPrompt, deckHoleShape } from './sea-puzzles.js';
 import { bake } from './bake.js';
@@ -34,6 +35,7 @@ import { startWorld, takeLine, lineKey, linePrompt, startTick } from './race-sta
 import { marksWorld, marksTick, crossed, placings } from './race-marks.js';
 import { fieldWorld, fieldTick, fieldHome, fieldShot, fieldHit, fieldAt, fieldReset } from './race-field.js';
 import { forageWorld, forageKey, foragePrompt, forageHolds, forageTick, forageReset, forageCam, forageHover, forageClick } from './race-forage.js';
+import { bribeWorld, bribeKey, bribePrompt, bribeSpares, bribeTick, bribeReset, gateGun } from './race-bribe.js';
 
 const RC = LAY.RACE, CELL = SAIL.CELL, DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
 const NTH = (n) => (n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`);
@@ -133,13 +135,14 @@ function build() {
   // winds, and the channel's whirlpools and the field's.
   for (const l of [...lanes(RC.WINDS), ...lanes(RC.WHIRLS.WINDS)]) { W.g.add(l.g); W.winds.push(l.tex); }
   for (const spot of [...RC.WHIRLS.POOLS, ...RC.FIELD.POOLS]) { const o = pool(whirlpool(spot)); W.g.add(o); W.pools.push(o); }
-  // The gun gap: a turret either side on the spit, in plain stone, and the squares they're trained on.
-  for (const [c, r] of RC.GUNS.at) { const V = turretMesh({ rocks: 2 }); V.g.position.set(seaX(c), LOOK[0].h - 0.3, seaZ(r)); W.g.add(V.g); W.guns.push(V); }
+  // The gun gap: a turret either side on the spit, on the Empire's bastions (an imperial gate:
+  // race-bribe.js), and the squares they're trained on.
+  for (const [c, r] of RC.GUNS.at) { const V = gateGun(); V.g.position.set(seaX(c), LOOK[0].h - 0.3, seaZ(r)); W.g.add(V.g); W.guns.push(V); }
   RC.GUNS.marks.forEach((ms) => ms.forEach(([c, r]) => { const m = turretMark(seaX(c), seaZ(r)); W.g.add(m.g); W.rings.push({ c, r, m: m.m }); }));
   // The crane's footing on the neck.
   W.crane = craneMesh(); W.g.add(W.crane.g);
   scene.add(W.g);
-  startWorld(); marksWorld(); forageWorld(); fieldWorld();
+  startWorld(); marksWorld(); forageWorld(); bribeWorld(); fieldWorld();
   return W;
 }
 /** Built the first time the sea's drawn (sailing.js). */
@@ -225,6 +228,7 @@ export function raceKey(key) {
   const go = key === ' ' || key === 'enter', h = sail.helm;
   if (!race.trip && !building() && doorKey(key)) return true;   // (the starlit door: door.js)
   if (!race.trip && !building() && forageKey(key)) return true;   // (the barrier of driftwood: race-forage.js)
+  if (!race.trip && !building() && bribeKey(key)) return true;   // (the wreck's coins, the gate's guard: race-bribe.js)
   if (lineKey(key, race.rules)) return true;   // (on the starting line: race-start.js)
   if (race.trip) { if (go || key === 'escape') { K().skip(); arrive(); } return !VIEW.includes(key); }
   if (building()) {
@@ -242,6 +246,7 @@ export function raceKey(key) {
     race.gap = new GunGap();
     doorReset();   // (shut again, for a new race)
     forageReset();   // (the driftwood back across its gap)
+    bribeReset();   // (the wreck's coins back down there, the gate unpaid)
     toast('Pick yer spot on the line, and Space when ye\'re ready');
     return true;
   }
@@ -253,7 +258,7 @@ export function racePrompt() {
   if (race.trip) return 'Space: skip';
   const dp = doorPrompt();
   if (dp || doorHolds()) return dp;
-  const lp = linePrompt(R) || foragePrompt();
+  const lp = linePrompt(R) || foragePrompt() || bribePrompt();
   if (lp) return lp;
   if (building() && !K().built()) return patchPrompt(`The crane's ${CRANE.PARTS[K().up].name} (${K().up + 1} of ${CRANE.PARTS.length}) · 1, 2, 3: a piece`, ' (the spare gets sawn off)', ' · Esc: leave it for now');
   if (K().alongside(h)) {
@@ -349,7 +354,7 @@ export function raceTick(dt) {
     if (R.state === 'done' && atStart(h.pose.c, h.pose.r) && race.doneT <= 0 && !race.said.again) { race.said.again = true; toast(STARTER.again); }
     if (R.state !== 'done') race.said.again = false;
     // [A] the gun gap's guns fire on her marks (and on her, once it's a fight); a hit holes her.
-    for (const e of race.gap.tick(dt, h.spared() ? null : p, h.pose)) {
+    for (const e of race.gap.tick(dt, h.spared() || bribeSpares() ? null : p, h.pose)) {
       const V = W.guns[e.gun], where = V3(seaX(e.to[0]), 0, seaZ(e.to[1]));
       if (e.kind === 'fire') { turretFire(V, e, where); continue; }
       turretLand(V, e);
@@ -360,6 +365,7 @@ export function raceTick(dt) {
     // [B] idle in the headwind gap, she's blown back out of it.
     const back = race.drift.tick(dt, h);
     forageTick(dt);
+    bribeTick(dt);
     if (back) { h.gust([back]); if (!race.said.drift) { race.said.drift = true; toast('The wind\'s blowing her back out of the gap'); } }
   }
   race.doneT -= dt;
@@ -391,6 +397,7 @@ export function raceReset() {
   race.crane = neckCrane();
   doorReset();
   forageReset();
+  bribeReset();
   if (race.W) {
     for (const g of race.W.crane.parts) g.removeFromParent();
     race.W.crane.parts = [];

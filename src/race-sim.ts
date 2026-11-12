@@ -54,6 +54,7 @@ import { RACE, LONG_ROUTE, routeRow, type Driver } from './den-race.js';
 import { Field, FIELD, sheltered, courseSea, type Spot, type RacerState, type FieldEvent } from './den-racers.js';
 import type { Rival } from './den-rivals.js';
 import { DOOR } from './den-door.js';
+import { BRIBE, towPath } from './den-bribe.js';
 import { CHECK } from './den-checkpoint.js';
 import { CRANE, TRIP } from './den-crane.js';
 import { LOCK } from './den-lock.js';
@@ -66,7 +67,7 @@ const RC = LAY.RACE, S = RC.STRETCHES;
 
 export type Skill = 'decent' | 'good' | 'great';
 export const SKILLS: Skill[] = ['decent', 'good', 'great'];
-export type CutId = 'guns' | 'headwind' | 'double' | 'whirls' | 'forage' | 'locks' | 'crane' | 'triple' | 'zigzag' | 'door';
+export type CutId = 'guns' | 'wreck' | 'headwind' | 'double' | 'whirls' | 'forage' | 'locks' | 'crane' | 'triple' | 'zigzag' | 'door';
 
 export const SIM = {
   /** Seconds a tick. */
@@ -122,10 +123,12 @@ export const SIM = {
       - nav: the starlit door's two small constellations: 53 moves for the planner bot
         (tools/nav-bots.mjs, DOOR=1), at 1.2 s a move.
       - load: a shot loaded by Gunnery: 20 s. Assumed; the user: "just loading the guns and gunning
-        takes a long time". */
+        takes a long time".
+      - haul: the bribe's coins hauled up from the wreck by Treasure Haul: BRIBE.MOVES moves (measured
+        by a bot playing any line it sees) at BRIBE.MOVE_SECS a move (assumed). */
   PUZZLE: {
     combo: 32, vegas: 52, double: 22, triple: 28, row: RACE.DECENT.headwind,
-    bilge: LOCK.COST_UP, forage: RACE.DECENT.forage, piece: 4, nav: 53 * 1.2, load: 20,
+    bilge: LOCK.COST_UP, forage: RACE.DECENT.forage, piece: 4, nav: 53 * 1.2, load: 20, haul: BRIBE.MOVES * BRIBE.MOVE_SECS,
   },
   /** A Vegas's chance to come off, a go, by skill; the next go after one that doesn't takes this much of
       a fresh one's time; and the goes before she gives up and sails on. Assumed. */
@@ -225,20 +228,22 @@ export interface Cut {
     and tests/den-door.test.ts hold the course to; the zigzag's SIM.ZIGZAG): she rejoins the long way that
     much further round than she'd have got sailing it in the time her trip takes. (The long way's route
     is sailed at one pace, so its own distances would make a bend's runs as slow as a leg's reaches.) */
-const SAVES: Record<CutId, number> = { ...RACE.DECENT, door: DOOR.SAVES, zigzag: 0 };
+const SAVES: Record<CutId, number> = { ...RACE.DECENT, door: DOOR.SAVES, zigzag: 0, wreck: 0 };
 const cut = (id: CutId, s: number, c: number, to: number, cOut: number, trip: number, at: Pose, spot: Spot | null = null): Cut => {
   const tIn = tauAt(s, c), saves = id === 'zigzag' ? tauAt(to, cOut) - tIn - trip : SAVES[id];
   return { id, tIn, tOut: tIn + trip + saves, trip, saves, at, sheltered: sheltered(at.c, at.r), spot };
 };
-const G = RC.GUNS.way, B = RC.HEADWIND, M = RC.WHIRLS.MOUTH, L = RC.LOCKS, E = RC.CRANE, D = RC.DOOR, F = RC.FORAGE, D2 = RC.DOUBLE.WAY, T3 = RC.TRIPLE, Z = RC.ZIGZAG;
+const G = RC.GUNS.way, WR = RC.BRIBE.NOTCH, B = RC.HEADWIND, M = RC.WHIRLS.MOUTH, L = RC.LOCKS, E = RC.CRANE, D = RC.DOOR, F = RC.FORAGE, D2 = RC.DOUBLE.WAY, T3 = RC.TRIPLE, Z = RC.ZIGZAG;
 /** The course's shortcuts, as the bots take them. Their trips as the helm makes them (tools/race-measure.mjs):
     the gap rushed on a heavy combo's gust, the headwind's squares rowed at the oars' pace, a Double's and a
     Triple's hop and the water either side, the barrier's gap sailed once it's cleared, the locks' (10 s,
     pumped at once), the others' gusts, the crane's trip (TRIP) and the tunnel's (DOOR.TRIP); the zigzag's
     hops, on the long way, what they save (SIM.ZIGZAG). Stopped short of the gap, she waits two squares
-    before it, on the leg's second row. */
+    before it, on the leg's second row (and pays the gate's guard there). The wreck saves nothing itself: in
+    and out of its notch, its coins hauled up meanwhile, to pay the gate with (the gap's saving). */
 export const CUTS: Record<CutId, Cut> = {
   guns: cut('guns', 0, G[0][0], 1, G[0][0], 1 + SIM.COMBO * SAIL.PUSH, { c: G[0][0] - 2, r: S[0].r + 1, d: 1 }),
+  wreck: cut('wreck', 0, WR[0], 0, WR[0], 3, { c: WR[0], r: WR[1], d: 0 }, 'wreck'),
   headwind: cut('headwind', 1, B[0][0], 2, B[B.length - 1][0], 1 + (B.length + 2) * WIND.OARS, { c: B[0][0], r: B[0][1], d: 0 }),
   double: cut('double', 1, D2[0][0], 2, D2[0][0], 3.8, { c: D2[0][0], r: D2[0][1], d: 0 }),
   whirls: cut('whirls', 2, M.c, 3, M.c, runFor(RUN.VEGAS) * SAIL.PUSH, { ...M }),
@@ -258,6 +263,8 @@ const TIGHT_BACK = tauAt(1, SAIL.COLS - 2);
 const LEFT_T = [tauAt(1, 3), tauAt(3, 3), tauAt(5, RC.FINISH[0] + 3)];
 /** Seconds a sweep takes: a square of wind a trade wind's push. */
 const sweep = (n: number) => n * SAIL.PUSH;
+/** The bribe's tow through the gate, from in front of its way in: a gust's squares at the trade winds' pace. */
+const TOW = 1 + towPath({ c: RC.BRIBE.GATE[0], r: RC.BRIBE.GATE[1] }).length * SAIL.PUSH;
 /** How much of what the zigzag's hops can save a racer makes, by her skill at Sailing (SIM.ZIGZAG). */
 const HOPS: Record<Skill, number> = { decent: 0.5, good: 0.75, great: 1 };
 /** Pieces in the crane's three frames (about five squares a piece). */
@@ -267,13 +274,15 @@ const CRANE_PIECES = Math.round(CRANE.PARTS.reduce((n, p) => n + p.rows.join('')
 
 /** A route: the shortcuts it takes (each it comes to, in order), and how it takes the gun gap. The long
     way takes none, but hops the zigzag's headwinds with its Doubles as it goes (it's a Sailing player's
-    way round: "a well-timed double, would be a lot more effective"). */
-export interface Route { name: string; cuts: CutId[]; gap?: 'run' | 'combo' | 'shot' }
+    way round: "a well-timed double, would be a lot more effective"). The bribe hauls up the wreck's coins
+    on leg 1 and pays the gate's guard with them (src/den-bribe.ts); every shortcut at once bribes too. */
+export interface Route { name: string; cuts: CutId[]; gap?: 'run' | 'combo' | 'shot' | 'bribe' }
 export const ROUTES: Route[] = [
   { name: 'long', cuts: ['zigzag'] },
   { name: 'gap-run', cuts: ['guns'], gap: 'run' },
   { name: 'gap-combo', cuts: ['guns'], gap: 'combo' },
   { name: 'gap-shot', cuts: ['guns'], gap: 'shot' },
+  { name: 'bribe', cuts: ['wreck', 'guns'], gap: 'bribe' },
   { name: 'headwind', cuts: ['headwind'] },
   { name: 'doubles', cuts: ['double', 'triple'] },
   { name: 'whirls', cuts: ['whirls'] },
@@ -281,7 +290,7 @@ export const ROUTES: Route[] = [
   { name: 'locks', cuts: ['locks'] },
   { name: 'crane', cuts: ['crane'] },
   { name: 'door', cuts: ['door'] },
-  { name: 'every', cuts: ['guns', 'double', 'whirls', 'locks', 'crane'], gap: 'combo' },
+  { name: 'every', cuts: ['wreck', 'guns', 'double', 'whirls', 'locks', 'crane'], gap: 'bribe' },
 ];
 /** A racing style: whether she fires on a racer sitting still as she goes by, whether she loads more by
     Gunnery once she's fired hers (instead of Sailing on the pilot), and how near behind (seconds) another
@@ -366,6 +375,8 @@ interface Bot {
   ready: Set<CutId>; daze: number; trip: number; waited: number;
   /** The trade wind back up the course: hopped (or not yet), and the seconds still lining up her Double. */
   hopped: boolean; hop: number; lefts: number;
+  /** The bribe: the wreck's coins aboard; the gate paid; what the haul cost her, counted against the gap. */
+  purse: boolean; paid: boolean; owed: number;
   done: Set<CutId>; res: RacerResult; stop: RacerResult['exposed'][number] | null; inLine: Set<number>;
   /** Her spot on the line and where she started round the long way from it; on a trip, where it began
       and how long it takes all told. */
@@ -384,6 +395,7 @@ const STATE: Record<Mode, RacerState> = { sail: 'sailing', stop: 'puzzling', wai
     the crane's lifted (`air`), the starlit door's under the course (`under`: nobody sees her). */
 const TRIPS: Record<CutId, { by: [number, number][]; air?: boolean; under?: boolean }> = {
   guns: { by: G },
+  wreck: { by: [WR] },
   headwind: { by: [] },
   double: { by: D2 },
   whirls: { by: [[M.c, M.r + 1], RC.WHIRLS.OUT] },
@@ -502,7 +514,7 @@ export function sail(o: SimOptions): SimRun {
       i: k + first, route: r.route, style: r.style, skill: r.skill, best: bestAt(r), pace: 1 + SIM.STEER * gauss(),
       tau: tau0, mode: 'sail', was: 'sail', spot: spots[k], tau0, from: { c: spots[k], r: RC.LINE.r, d: 0 }, tripFull: 0,
       cut: null, stage: 0, work: 0, full: 0, tries: 0, since: 0, lost: 0, move: null, combo: false, ready: new Set(), daze: 0, trip: 0, waited: 0,
-      hopped: false, hop: 0, lefts: 0, done: new Set(), stop: null, inLine: new Set(),
+      hopped: false, hop: 0, lefts: 0, purse: false, paid: false, owed: 0, done: new Set(), stop: null, inLine: new Set(),
       res: { route: r.route.name, style: r.style.name, skill: r.skill, start: k, spot: spots[k], time: 0, place: 0, hitsTaken: 0, hitsGiven: 0, swept: [], cuts: [], exposed: [] },
     };
   });
@@ -562,6 +574,8 @@ export function sail(o: SimOptions): SimRun {
     // (what it saved: the long way between, less the time it took her from the turn-off, the sailing she
     // lost puzzling on the move for it, and the Sailing on the pilot she'd have done meanwhile)
     r.saved = (done ? c.tOut - c.tIn : 0) - b.since * (1 + chainWorth(b)) - b.lost;
+    // (the bribe: what hauling its coins up cost her is the gap's)
+    if (id === 'guns') { r.saved -= b.owed; b.owed = 0; }
     b.since = 0; b.lost = 0;
   };
   const go = (b: Bot, c: Cut, work: number) => {
@@ -578,6 +592,7 @@ export function sail(o: SimOptions): SimRun {
       case 'locks': return draw(SIM.PUZZLE.bilge, b.best);
       case 'crane': return draw(CRANE_PIECES * SIM.PUZZLE.piece, b.best);
       case 'door': return draw(SIM.PUZZLE.nav, b.best);
+      case 'wreck': return draw(SIM.PUZZLE.haul, b.best);
       default: return 0;
     }
   };
@@ -609,12 +624,15 @@ export function sail(o: SimOptions): SimRun {
     if (c.spot) field.release(b.i, c.spot);
     if (c.id === 'door') field.under(b.i, DOOR.FROM, DOOR.TO);
     b.done.add(c.id);
-    record(b, c.id, true);
+    // (the wreck's coins aboard: what it cost her is counted against the gap she pays them at)
+    if (c.id === 'wreck') { b.purse = true; b.owed = b.since * (1 + chainWorth(b)) + b.lost - (c.tOut - c.tIn); b.since = 0; b.lost = 0; }
+    else record(b, c.id, true);
     b.tau = c.tOut; b.cut = null; b.mode = 'sail';
     // (rushing the gap, the tight water past it: one move too many)
-    // (rushing it on a combo most of all; run a square at a time, half as often; its guns shot quiet, she
-    // goes through at her leisure)
-    if (c.id === 'guns' && snakes && b.route.gap !== 'shot' && rand() < SIM.SNAKE.tight[b.best] * (b.route.gap === 'run' ? 0.5 : 1)) swept(b, 'tight', TIGHT_BACK, sweep(SAIL.COLS - 2 - G[0][0]));
+    // (rushing it on a combo most of all; run a square at a time, half as often; its guns shot quiet, or
+    // their guard paid, she goes through at her leisure)
+    const run = b.route.gap === 'run' || (b.route.gap === 'bribe' && !b.paid), leisure = b.route.gap === 'shot' || b.paid;
+    if (c.id === 'guns' && snakes && !leisure && rand() < SIM.SNAKE.tight[b.best] * (run ? 0.5 : 1)) swept(b, 'tight', TIGHT_BACK, sweep(SAIL.COLS - 2 - G[0][0]));
   };
   const giveUp = (b: Bot) => {
     const c = b.cut!;
@@ -623,10 +641,12 @@ export function sail(o: SimOptions): SimRun {
     record(b, c.id, false);
     b.cut = null; b.mode = 'sail'; b.stop = null;
   };
-  /** Through the gap, by her route: rushed past on her combo, past its guns quietened, or run. */
+  /** Through the gap, by her route: rushed past on her combo, past its guns quietened, its guard paid
+      (with the wreck's coins aboard: a moment at its gate, and she's towed through), or run. */
   const gap = (b: Bot) => {
     const c = cuts.guns;
     if (b.cut !== c) { b.tau = c.tIn; b.since = 0; b.cut = c; }
+    if (b.route.gap === 'bribe' && b.purse) { b.paid = true; return through(b, BRIBE.PAY + TOW); }
     if (b.route.gap === 'combo') {
       if (b.combo) return through(b, c.trip);
       // (not built yet: stop short, off its marks, and finish it)

@@ -64,7 +64,8 @@ mouth. Sitting there, you're a sitting duck for anyone coming up behind (§6).
 
 | Shortcut | Puzzle | Kind | Saves (s) | State |
 |---|---|---|---|---|
-| Spit 1, the gun gap: three squares deep, a gun either side, its marks all in the spit | A Quad from the leg rushes her past (a big Sailing chain, or a Vegas rowed each side); or shoot its guns quiet; a square at a time she's holed | On the move | 14 | Built |
+| Spit 1, the gun gap: an imperial gate, three squares deep, a gun either side, its marks all in the spit | A Quad from the leg rushes her past (a big Sailing chain, or a Vegas rowed each side); or shoot its guns quiet; or pay its guard; a square at a time she's holed | On the move | 14 | Built |
+| Leg 1, an old wreck in a notch, for the gate's bribe (§3, below) | Treasure Haul: 40 coins hauled up, paid at the gate in a moment, and she's towed through | Stopped dead, sheltered (the haul); a moment at the gate | 14, the gap's | Built 12 Nov |
 | Spit 2, the headwind gap, a dog-leg at its far end | Rowing (mirror strokes); idle in it and the wind blows her back out | Rowing, slowly | 25 | Built |
 | Spit 2, a small gap, one wind blowing back across it | A Double, built on the move and broken as she's lined up | On the move | 8 | Built |
 | Spit 3, the whirlpool channel | Only a Sailing Vegas from its mouth carries her over; less sends her back to the mouth | Stopped at the mouth, exposed | 49 | Built |
@@ -89,7 +90,7 @@ helm and tested. Each is about what the simulation recommended (§8): a shortcut
 at its puzzle.
 
 **Every stretch has a shortcut a leader can play safely (built 11 Nov).** Sheltered or on the move: the gun
-gap's combo (spit 1), the Double's gap (spit 2), the barrier of driftwood (spit 3), the locks and the zigzag
+gap's combo or its bribe, hauled in the wreck's sheltered notch (spit 1), the Double's gap (spit 2), the barrier of driftwood (spit 3), the locks and the zigzag
 (spit 4, leg 4), the crane and the Triple's gap (spit 5). The simulation checks each saves a good player time.
 
 **The barrier of driftwood (built 11 Nov).** "it's not even macheting. You just have to clear the barrier."
@@ -100,6 +101,39 @@ into the spit between the gap's banks, so no broadside reaches her, and with the
 open, it's the leader's shortcut on that stretch. Umami's way round, when he races (§6). Once cleared it's
 open the rest of the race (the simulation has each racer clear her own, as with the crane: §8, "For the user
 to decide").
+
+**The gun gap as an imperial gate, and its bribe (built 12 Nov).** The user (12 Nov): "I can imagine you
+having treasure haul, and one of the shortcuts is then bribe, yeah, you can then use the treasure that you
+hold up to bribe somebody at a gate to get through", "maybe to keep it from being too overly busy in a
+course", and, agreeing it: "build the bribe gate ... I just want all the ideas in there ... to show how many
+different ways you have of really getting through the course." So the gun gap is three ways through one gate,
+not a new gap:
+- **The gate:** the Empire's look on it, as at the checkpoint: a gatehouse of pale stone over its way in,
+  crimson banners and the Empire's flag, its two guns on the Empire's bastions, and a guard on a step at the
+  foot of its left tower. He halts you ("Halt! Imperial gate. The guns are trained on the gap, pirate."),
+  grumbles now and then, names his price, and hints at the wreck ("Heard there's an old wreck back along the
+  leg. Not that I'd know."). Its old ways through are as they were: rush it on a combo, shoot its guns quiet,
+  or run it and be holed.
+- **The treasure:** an old wreck run aground at the back of a notch in spit 1, off leg 1, five squares before
+  the gate (out of its guns' reach). Lie in the notch and Space lays Treasure Haul's own board on the water
+  behind her: no chest, just the guard's price in coins to bring up. **Sheltered**, as the barrier's and the
+  crane's notches are, so it's a leader's way to puzzle safely and spend it at the exposed gate in a moment
+  (the thought the user weighed). One racer at a time in the notch; each racer hauls her own; a new race,
+  the coins are back.
+- **The price: 40 coins.** A chest takes twenty moves and more to raise, worth far more than the gap's 14 s,
+  so it's coins: about five moves of Treasure Haul for a player who plays any line he sees (a bot measured
+  4.7 on average), about 7 s for a decent player (1.5 s a move, assumed), quicker with the board's gems and
+  chains. Set by the simulation (§8): at 30 coins the bribe won 29% of its races, at 40, 27%.
+- **Paying:** by the gate (in front of its way in, or a square either side, on leg 1), stopped, Space hands
+  him the coins: "Pleasure doing business. Hold your fire, lads!" His guns hold their fire on her for the
+  rest of the race, and his men warp her through on the gate's line: a tow, as a gust carries her, through the
+  gap's three squares and out onto leg 2, out of anyone's reach while it lasts. Short of his price: "That's
+  short. The price is 40: go and haul up the rest." **Why the tow:** with the guns quiet but ghosting through
+  the gatehouse's light airs as slowly as running it (7 s against a combo's 2), the bribe won 9% of its
+  races at 50 coins and 13% at 30: never worth its haul, whatever the price. Paid and towed, it sits with the
+  combo.
+- **Not marked:** the gate's plain to see and the guard names his price and hints at the wreck; the starter's
+  card doesn't mention it (yet). No rival takes it (their routes are as they were).
 
 **Shortcuts not all created equal (built 11 Nov).** Shortcuts of every size, each needing a combo of its size. A
 tiny one a Double gets you through, bigger ones need a bigger combo, the biggest is the starlit door. "Are
@@ -350,7 +384,9 @@ balance held by `tests/race-sim.test.ts`.
   rowing the gap 30 s, a Carpentry piece 4 s, a shot loaded by Gunnery 20 s, a broadside landing 60/75/90%
   of the time. Free on the move, everyone Sails on the pilot, its chains carrying her on (from
   `tools/sail-bots.mjs`: 0.06 to 0.12 squares a second by skill; assumed); a combo or Gunnery on the move
-  takes that time instead and slows her to 85%.
+  takes that time instead and slows her to 85%. The bribe's haul (12 Nov): 4.7 moves of Treasure Haul for its
+  40 coins (measured by a bot playing any line it sees) at 1.5 s a move (assumed); a second at the gate to
+  pay, then the tow.
 - **What it reports:** win rates by route, by style, by skill, by place in the field when stopping in the
   open, and what each shortcut really saved.
 - **How it's used:** the course's next pass is tuned with it, before it's played.
@@ -441,7 +477,34 @@ barrier added; `NEXT` gone, the balance test racing on the course as laid. 3000 
 - `tools/race-measure.mjs` gives the course's numbers as the helm sails it; `tests/race-sim.test.ts` holds the
   balance (routes 0.5–1.6 of fair, styles 0.75–1.25, starting spots 0.6–1.4, the leader's safe shortcuts).
 
+**The bribe added (12 Nov).** A 'bribe' route (the wreck's 40 coins hauled, the gate paid, towed through), and
+every shortcut at once bribing at the gate instead of rushing it on a combo. 3000 races of four, fair 25%:
+
+| Route | Wins | Route | Wins |
+|---|---|---|---|
+| The long way | 31% | Doubles | 29% |
+| Gun gap, run | 14% | Whirlpools' Vegas | 34% |
+| Gun gap, combo | 29% | Barrier (Foraging) | 19% |
+| Gun gap, shot quiet | 22% | Locks | 27% |
+| **Bribe** | **27%** | Crane | 23% |
+| Headwind, rowed | 17% | Starlit door | 19% |
+| | | Every shortcut (bribing) | 34% |
+
+- **What the gap saved each way through it** (seconds, decent / good / great, a racer a level better at her
+  own route's puzzle): bribe 6 / 8 / 8 (its haul counted against it), combo 7 / 9 / 8, shot quiet 7 / 8 / 8,
+  run 1 / 3 / 2; every shortcut at once, bribing as an all-rounder, 4 / 5 / 7.
+- **Tuning it:** without the tow (ghosting through the light airs) the bribe won 9% (50 coins) and 13% (30
+  coins); with it, 29% at 30 coins and 27% at 40. The other routes moved a point or two: the barrier fell from
+  20% to 19%, shot quiet from 24% to 22%; every shortcut stayed at 34%.
+- **Styles:** peaceful 26%, opportunist 27%, aggressive 24%, cautious 24%. **Skill:** great 47%, good 24%,
+  decent 5%. **Starting spot:** left 23%, at the gap 27%, right 20%. Fields of two: every route 37–63% (fair
+  50%); of three, 20–46% (fair 33%), running the gap the weakest.
+- The balance test (`tests/race-sim.test.ts`) races the bribe with the rest, and checks a briber hauls
+  sheltered, is never holed by the gate's guns, and that her haul is counted against the gap.
+
 **For the user to decide:**
+- The bribe's price (40 coins) and Treasure Haul's pace (1.5 s a move) are guesses till it's played. Does the
+  starter's card name it ("pay off the guard at the gate")? Should a rival bribe her way through?
 - Once the crane's built in a race, is it built for everyone (the next racer just rides it, as the den's
   crane stays built), or does each racer build her own? The simulation has each build her own. The same
   for the starlit door once it's open.
@@ -542,8 +605,8 @@ question of whether a crane is everyone's), and the bribe gate as the final toll
   sail; all let go is sails down for a blow; one side hauled sheets her round. Its small, frequent clears
   suit constant adjusting, unlike Sailing's and rowing's heavy combos. SunnyKira to teach it. Another way:
   Rigging dealt with big clears already half-built, tuned to be as quick as a big Sailing chain.
-- **Treasure Haul, and a bribe at the gate (12 Nov; agreed, being built):** "I just want all the ideas in
-  there ... to show how many different ways you have of really getting through the course." haul up treasure, then use it to bribe a guard at
+- **Treasure Haul, and a bribe at the gate (12 Nov): built 12 Nov** (§3, "The gun gap as an imperial gate,
+  and its bribe"). The idea as it came: haul up treasure, then use it to bribe a guard at
   a gate to let you through. "I can imagine you having treasure haul, and one of the shortcuts is then
   bribe, yeah, you can then use the treasure that you hold up to bribe somebody at a gate to get through."
   So the course doesn't get too busy, it could be the gun gap itself made an imperial gate (the Empire's
@@ -587,15 +650,17 @@ question of whether a crane is everyone's), and the bribe gate as the final toll
 - **The simulation:** `src/race-sim.ts`, run by `tools/race-sim.mjs` (§8).
 - **Drawn and played by:** `js/den/race.js`; its start (the line, your spot, the starter's card)
   `js/den/race-start.js`; its buoys and finish line `js/den/race-marks.js`; its barrier of driftwood and
-  its Foraging `js/den/race-forage.js`; your rivals' sloops, their broadsides and yours
-  `js/den/race-field.js`.
+  its Foraging `js/den/race-forage.js`; the gun gap's gate, its guard and the wreck's haul
+  `js/den/race-bribe.js`; your rivals' sloops, their broadsides and yours `js/den/race-field.js`.
+- **The bribe:** `src/den-bribe.ts` (the wreck's coins, the price, the gate's answer, the tow); its squares
+  `LAY.RACE.BRIBE`; the guard's lines `src/lines/gate-guard.ts`.
 - **The starter's lines:** `src/lines/race.ts`.
 - **The starlit door:** `src/den-door.ts` and `js/den/door.js`.
 - **Watched (§10):** `src/race-watch.ts` (the race of four, who's followed, what she's doing, her board and
   its pace, the free camera); drawn by `js/den/race-watch.js` (the camera, the keys, the bar, the sloops)
   and `js/den/watch-boards.js` (each racer's board); the puzzles' bots `src/sail-bots.ts`, `bilge-bot.ts`,
   `foraging-bot.ts`, `gunnery-bot.ts`, `carpentry-bot.ts`, `row-bots.ts`, `nav-bots.ts`.
-- **Tests:** `tests/den-race.test.ts`, `tests/den-door.test.ts`, `tests/den-racers.test.ts`,
+- **Tests:** `tests/den-race.test.ts`, `tests/den-bribe.test.ts`, `tests/den-door.test.ts`, `tests/den-racers.test.ts`,
   `tests/den-rivals.test.ts` (the rivals racing you, shooting, places), `tests/race-sim.test.ts` (the
   balance test), `tests/race-watch.test.ts` (watching) and `tests/puzzle-bots.test.ts` (the bots).
 - **Try it:** `den.html?at=race`; watch four race, `den.html?at=race-watch`.

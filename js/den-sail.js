@@ -137,7 +137,8 @@ export const SAIL = {
      [A] spit 1: the gun gap (GUNS), three squares deep, a gun either side trained on its way in, the
          gap and its way out (none on the leg: the long way's clear of them), light airs in it. Just past
          it the water's tight (SNAKES.TIGHT): a wall ahead, and one move too many puts her in a wind that
-         sweeps her back along leg 2 to its start.
+         sweeps her back along leg 2 to its start. It's an imperial gate (12 Nov), its guard bribed with
+         coins hauled up by Treasure Haul from an old wreck in a notch off leg 1 (BRIBE), sheltered.
      [B] spit 2: the headwind gap (HEADWIND), rowed, with a dog-leg at its far end so it doesn't open
          straight onto leg 3 (no broadside from the leg ahead reaches a rower in it), far from the gun
          gap's guns. A small gap a Double hops (DOUBLE): one wind blowing back across it. The trade
@@ -166,7 +167,7 @@ const RACE_LAY = (() => {
     const SPITS = [{ r0: R0 + 10, r1: R0 + 12, bend: 'R' }, { r0: R0 + 15, r1: R0 + 17, bend: 'L' }, { r0: R0 + 20, r1: R0 + 25, bend: 'R' }, { r0: R0 + 28, r1: R0 + 30, bend: 'L' }, { r0: R0 + 33, r1: R0 + 34, bend: 'R' }];
     const S = SPITS, T = STRETCHES;
     /** The columns everything's laid at (the few numbers to rework the course by). */
-    const GUN_C = 21, HEAD_C = 12, DOUBLE_C = 6, MID_C = 19, DOOR_C = 15, WHIRL_C = 12, FORAGE_C = 20, LOCK_C = 13, CRANE_C = 12, TRIPLE_C = 22, FIN_C = 4;
+    const GUN_C = 21, WRECK_C = 16, HEAD_C = 12, DOUBLE_C = 6, MID_C = 19, DOOR_C = 15, WHIRL_C = 12, FORAGE_C = 20, LOCK_C = 13, CRANE_C = 12, TRIPLE_C = 22, FIN_C = 4;
     const winds = [];
     const wind = (c, r, d) => winds.push([c, r, d]);
     // The left-hand trade wind: up the left-hand edge from the run home's second row to the starting
@@ -223,6 +224,13 @@ const RACE_LAY = (() => {
     const zigzag = [[9, T[3].r, 1], [7, T[3].r + 1, 1], [5, T[3].r, 1], [3, T[3].r + 1, 1]];
     // [E] The crane's notch; the Triple's gap, two winds blowing back across it.
     const triple = [[TRIPLE_C, S[4].r0, 2], [TRIPLE_C, S[4].r1, 2]];
+    // [A'] The bribe (12 Nov; src/den-bribe.ts): an old wreck run aground at the back of a notch in spit 1,
+    // off leg 1 (she lies in the notch to haul, sheltered), and the gun gap's gate, where she pays its guard:
+    // the water in front of its way in, on leg 1's second row; its gatehouse's towers either side of the way in.
+    const bribe = {
+        NOTCH: [WRECK_C, S[0].r0], WRECK: [WRECK_C, S[0].r0 + 1],
+        GATE: [GUN_C, T[0].r + 1], TOWERS: [[GUN_C - 1, S[0].r0], [GUN_C + 1, S[0].r0]],
+    };
     // The start's field: a conveyor across it, blowing right (the crowded line: it carries her from the
     // left of the line to the gap it drops her at), a trade wind blowing back left along its far side
     // (cross it by that gap, ride it back to it, or hop it with a Double), headwinds over the gap, and
@@ -240,7 +248,7 @@ const RACE_LAY = (() => {
     winds.push(...left, ...tight, ...mid, doubleWind, ...zigzag, ...triple, ...fieldWinds);
     // The land of each spit, but for its shortcuts' ways through it (the barrier's land till it's cleared:
     // src/den-race.ts, Barrier).
-    const notches = [forage.NOTCH, berth, [CRANE_C, S[4].r0]];
+    const notches = [forage.NOTCH, berth, [CRANE_C, S[4].r0], bribe.NOTCH];
     const open = new Set([
         ...[0, 1, 2].map((k) => `${GUN_C},${S[0].r0 + k}`), ...head.map(([c, r]) => `${c},${r}`), ...double.map(([c, r]) => `${c},${r}`),
         ...mid.map(([c, r]) => `${c},${r}`), ...passage, ...[...forage.BARRIER, ...forage.GAP].map(([c, r]) => `${c},${r}`),
@@ -299,6 +307,7 @@ const RACE_LAY = (() => {
             { c0: FORAGE_C, c1: FORAGE_C, r0: T[2].r + 1, r1: S[2].r0, d: 1, s: 2 },
             { c0: berth[0], c1: berth[0], r0: T[3].r + 1, r1: S[3].r0, d: 3, s: 2 },
             { c0: CRANE_C, c1: CRANE_C, r0: T[4].r + 1, r1: S[4].r0, d: 1, s: 2 },
+            { c0: WRECK_C, c1: WRECK_C, r0: T[0].r + 1, r1: S[0].r0, d: 1, s: 2 },
             { c0: 1, c1: 9, r0: T[3].r, r1: T[3].r + 1, d: 3, s: 2 },
             { c0: 0, c1: W - 1, r0: LINE.r, r1: RUN + 1, d: 0, s: 2 },
         ],
@@ -310,6 +319,10 @@ const RACE_LAY = (() => {
             marks: [[[GUN_C, S[0].r0], [GUN_C, S[0].r1]], [[GUN_C, S[0].r0 + 1]]],
             way: [0, 1, 2].map((k) => [GUN_C, S[0].r0 + k]),
         },
+        /** [A']: the bribe (src/den-bribe.ts): the wreck's notch off leg 1 (she lies in it to haul, sheltered),
+            the wreck at its back (on the spit), where she pays the gate's guard (in front of the gun gap's way
+            in) and the gatehouse's towers either side of the way in. */
+        BRIBE: bribe,
         /** [B]: the gap's squares, the way in first, the dog-leg's last. */
         HEADWIND: head,
         /** The small gap a Double hops: its squares, the way in first, and the wind across it. */

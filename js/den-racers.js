@@ -47,15 +47,15 @@ export const FIELD = {
         holds: her Gunnery board's four guns, two a side (src/den-guns.ts), counted together here. */
     SHOTS: 2,
     HOLD: 4,
-    /** The squares that are one racer's at a time: each lock's chamber, the crane's ledge, and the notch
-        in front of the barrier of driftwood. */
-    SPOTS: { 'lock-up': RC.LOCKS[0].at, 'lock-down': RC.LOCKS[1].at, crane: RC.CRANE.LEDGE, forage: RC.FORAGE.NOTCH },
+    /** The squares that are one racer's at a time: each lock's chamber, the crane's ledge, the notch
+        in front of the barrier of driftwood, and the wreck's notch (src/den-bribe.ts). */
+    SPOTS: { 'lock-up': RC.LOCKS[0].at, 'lock-down': RC.LOCKS[1].at, crane: RC.CRANE.LEDGE, forage: RC.FORAGE.NOTCH, wreck: RC.BRIBE.NOTCH },
 };
 /** Sheltered squares: nobody's broadside reaches a racer on one (the locks' chambers and the canal
     between them, the berth beside the up lock's way in where she waits her turn, the crane's ledge in
-    its notch, and the notch in front of the barrier of driftwood: each tucked into the spit, off the
-    leg). */
-export const SHELTER = new Set([...RC.LOCKS.map((l) => l.at), ...RC.POUND.at, RC.BERTH, RC.CRANE.LEDGE, RC.FORAGE.NOTCH].map(([c, r]) => key(c, r)));
+    its notch, the notch in front of the barrier of driftwood, and the wreck's notch off leg 1: each tucked
+    into the spit, off the leg). */
+export const SHELTER = new Set([...RC.LOCKS.map((l) => l.at), ...RC.POUND.at, RC.BERTH, RC.CRANE.LEDGE, RC.FORAGE.NOTCH, RC.BRIBE.NOTCH].map(([c, r]) => key(c, r)));
 export const sheltered = (c, r) => SHELTER.has(key(Math.round(c), Math.round(r)));
 /** What a racer's doing sets whether a shot can hit her: not once she's home, nor while she's carried,
     nor dazed already (patching), nor sheltered. */

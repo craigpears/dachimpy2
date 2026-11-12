@@ -7,7 +7,7 @@ import { addFind, wayThrough, wayWrecked } from '../den-finds.js';
 import { passageAt } from '../den-kikkit.js';
 import { G, scene, mat, mesh, woodTex, V3, burst, toast, worldLets, shake, flagpole, warm } from './world.js';
 import { rock } from './land.js';
-import { CRIMSON, STONE, stone, flagMatImperial, banner, tower } from './empire.js';
+import { gatehouse, bastionLook } from './empire.js';
 import { turretMesh, turretMark, turretView, turretWrecked, turretFire, turretLand, turretShotsTick, turretShotsClear, shotComing } from './turret.js';
 import { hullGeo } from './hull.js';
 import { seaX, seaZ, sail, CLIFF_H, bankTop } from './sea.js';
@@ -36,7 +36,7 @@ const K = LAY.CHECKPOINT, GATE_Z = seaZ(K.ROW), ARCH_Y = 6.4;
 // A bastion: a destructible turret (js/den/turret.js) in the Empire's pale stone, a crimson band
 // under its battlements and its flag on top, on its rock.
 function bastion(c, r) {
-  const V = turretMesh({ stone: STONE, top: 1.5, foot: 1.8, height: 3.4, band: CRIMSON, flag: flagMatImperial(), rocks: 3, merlons: 10 });
+  const V = turretMesh(bastionLook());
   V.g.position.set(seaX(c), 0, seaZ(r));
   return V;
 }
@@ -61,18 +61,7 @@ function build() {
   const W = { g: new THREE.Group(), bastions: [], rings: [], wreck: null };
   // The gatehouse: a tower on each pier, an arch between them high over the gate, battlemented.
   const [p0, p1] = K.PIERS, xa = seaX(p0[0]), xb = seaX(p1[0]), TW = 3.4;
-  for (const x of [xa, xb]) {
-    const t = tower(TW, ARCH_Y + 1.6); t.position.set(x, 0, GATE_Z); W.g.add(t);
-    const b = banner(1.4, 3.6); b.position.set(x, ARCH_Y - 1.2, GATE_Z + TW / 2 + 0.03); W.g.add(b);
-    const b2 = b.clone(); b2.position.z = GATE_Z - TW / 2 - 0.03; b2.rotation.y = Math.PI; W.g.add(b2);
-  }
-  const span = xb - xa - TW, st = stone();
-  const arch = mesh(new THREE.BoxGeometry(span, 1.6, TW * 0.8), st); arch.position.set((xa + xb) / 2, ARCH_Y + 0.8, GATE_Z);
-  // (its underside curved: two haunches)
-  for (const s of [-1, 1]) { const h = mesh(new THREE.CylinderGeometry(0.9, 0.9, TW * 0.8, 10, 1, false, 0, Math.PI / 2), st); h.rotation.x = Math.PI / 2; h.rotation.z = s < 0 ? Math.PI / 2 : 0; h.position.set((xa + xb) / 2 + s * (span / 2 - 0.9), ARCH_Y + 0.9, GATE_Z); W.g.add(h); }
-  W.g.add(arch);
-  for (let i = 0; i < 4; i++) { const m = mesh(new THREE.BoxGeometry(0.5, 0.55, 0.5), st); m.position.set(xa + TW / 2 + 0.4 + i * (span - 0.8) / 3, ARCH_Y + 1.87, GATE_Z + TW * 0.4 - 0.25); W.g.add(m); }
-  const fl = flagpole(3, flagMatImperial()); fl.scale.setScalar(1.6); fl.position.set((xa + xb) / 2, ARCH_Y + 1.6, GATE_Z); W.g.add(fl);
+  W.g.add(gatehouse({ xa, xb, z: GATE_Z, archY: ARCH_Y, tw: TW }));
   // The boom: an iron chain between the piers, lying slack under the water (the bribe, later).
   const iron = mat('#2b2f34', { metalness: 0.6, roughness: 0.5 }), linkG = new THREE.TorusGeometry(0.22, 0.06, 5, 10);
   const L = xb - xa - TW, n = Math.round(L / 0.36);

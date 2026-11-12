@@ -2110,8 +2110,24 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     rest of the race (a new race, it's back). **Sheltered:** the notch is tucked into the spit, between the
     gap's banks, so no broadside reaches her there; with the whirlpools on the same spit out in the open, it's
     the leader's shortcut on that stretch.
+  - **The gun gap as an imperial gate, and its bribe (12 Nov: "build the bribe gate ... to show how many
+    different ways you have of really getting through the course"):** the gap wears the Empire's look, as the
+    checkpoint does (the same gatehouse and bastions: `js/den/empire.js`): a gatehouse of pale stone over its
+    way in, crimson banners, the Empire's flag over its arch, its guns on the Empire's bastions, and a guard in
+    the Empire's uniform on a step at the foot of its left tower. He halts you as you come up, grumbles now and
+    then, names his price and hints at a wreck back along the leg (`src/lines/gate-guard.ts`). Its ways through
+    are as they were, and a third: **pay him.** The coins come from an old wreck run aground at the back of a
+    notch in spit 1, off leg 1, before the gate: lie in the notch and Space lays Treasure Haul's own board on
+    the water behind her (`src/treasure-haul.ts`), no chest on it, just his price in coins to bring up (40,
+    `BRIBE.PRICE`); Esc leaves it as it is, to come back to. **Sheltered**, as the other notches are; one racer
+    at a time. With them aboard, stopped by the gate (in front of its way in, or a square either side, on leg
+    1), Space pays him: his guns hold their fire on her for the rest of the race, and his men warp her through
+    on the gate's line, through the gap's three squares and out onto leg 2, carried as a gust carries her (out
+    of anyone's reach). Short of his price, he sends her back to haul the rest; paid already, he waves her on.
+    Each racer hauls her own; a new race, the wreck's coins are back and the gate's unpaid. No rival takes it
+    yet. Rules: `src/den-bribe.ts` (its squares `LAY.RACE.BRIBE`); drawn and played by `js/den/race-bribe.js`.
   - **Sheltered spots off the leg:** the crane's ledge is a notch in spit 5, off leg 5; a racer waiting her
-    turn at the up lock waits in a berth, a notch beside its way in; the barrier's notch. Each has a wind along
+    turn at the up lock waits in a berth, a notch beside its way in; the barrier's notch; the wreck's notch. Each has a wind along
     the leg in front of it, so she can sail back out under sail.
   - **The finish (11 Nov: "a more ceremonious finish goal line"):** a line across the run home between two
     striped towers, one on spit 5 and one out past the left-hand trade wind, a chequered banner strung between
@@ -2149,15 +2165,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     race is you and your rivals. The clock's bar shows your place as you race ("2nd of 4"), by how far round
     the long way each has got; over the finish line the card lists everyone's places and times, those still
     racing filled in as they come home (shown again once they're all home).
-    - **First come, first served:** the up lock, the down lock, the crane and the barrier's notch are each
-      one racer's at a time; the next waits her turn, in the order they came ("If you got through it first,
+    - **First come, first served:** the up lock, the down lock, the crane, the barrier's notch and the
+      wreck's notch are each one racer's at a time; the next waits her turn, in the order they came ("If you got through it first,
       we get through it first").
     - **A broadside three squares out of her side** (`SAIL.RANGE`), stopped by rock or land (no shooting
       across a spit), holes the first racer on it who can be hit: dazed, still, till she's patched by
       Carpentry, never knocked out, and not hit again till she's patched. Every racer starts with two shots
       (`FIELD.SHOTS`), holds four, and loads more by Gunnery.
-    - **Sheltered:** in a lock's chamber, the canal between them, the berth, the crane's notch or the
-      barrier's notch, nobody's broadside reaches her; nor while she's carried. Everywhere else, stopped,
+    - **Sheltered:** in a lock's chamber, the canal between them, the berth, the crane's notch, the
+      barrier's notch or the wreck's notch, nobody's broadside reaches her; nor while she's carried. Everywhere else, stopped,
       she's a sitting duck for whoever comes by (the user: "Some can be safe, like ... the locks and the
       crane").
     - **The gun gap's guns take the same shots as racers,** a hit a gun to quieten (`RACE.GAP.MODE`

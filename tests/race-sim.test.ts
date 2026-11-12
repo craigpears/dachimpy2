@@ -31,15 +31,16 @@ describe('the simulated course is the helm\'s (11 Nov)', () => {
     }
     expect(leg).toBe(RC.STRETCHES.length - 1);
     const at = (t: number) => { const p = routePose(t); return stretchAt(Math.round(p.c), Math.round(p.r)); };
-    const legs: Record<CutId, number[]> = { guns: [0, 1], headwind: [1, 2], double: [1, 2], whirls: [2, 3], forage: [2, 3], locks: [3, 4], zigzag: [3, 3], crane: [4, 5], triple: [4, 5], door: [1, 3] };
+    const legs: Record<CutId, number[]> = { guns: [0, 1], wreck: [0, 0], headwind: [1, 2], double: [1, 2], whirls: [2, 3], forage: [2, 3], locks: [3, 4], zigzag: [3, 3], crane: [4, 5], triple: [4, 5], door: [1, 3] };
     for (const c of Object.values(CUTS)) expect([at(c.tIn), at(c.tOut)], c.id).toEqual(legs[c.id]);
     expect(tauAt(0, 20)).toBeLessThan(tauAt(1, 20));
   });
 
   it('each shortcut saves what the helm says it does (RACE.DECENT, as tests/den-race.test.ts holds the course)', () => {
-    for (const c of Object.values(CUTS)) expect(c.saves, c.id).toBeCloseTo(c.id === 'door' ? DOOR.SAVES : c.id === 'zigzag' ? SIM.ZIGZAG : RACE.DECENT[c.id], 5);
-    // (sheltered: the locks, the crane and the barrier's notch; the rest in the open, or on the move)
-    expect(Object.values(CUTS).filter((c) => c.sheltered).map((c) => c.id).sort()).toEqual(['crane', 'forage', 'locks']);
+    // (the wreck saves nothing itself: its coins pay the gun gap's guard, the gap's saving: 12 Nov)
+    for (const c of Object.values(CUTS)) expect(c.saves, c.id).toBeCloseTo(c.id === 'door' ? DOOR.SAVES : c.id === 'zigzag' ? SIM.ZIGZAG : c.id === 'wreck' ? 0 : RACE.DECENT[c.id], 5);
+    // (sheltered: the locks, the crane, the barrier's notch and the wreck's; the rest in the open, or on the move)
+    expect(Object.values(CUTS).filter((c) => c.sheltered).map((c) => c.id).sort()).toEqual(['crane', 'forage', 'locks', 'wreck']);
   });
 });
 
@@ -128,6 +129,30 @@ describe('balance: every way round a relatively equal chance of winning (11 Nov:
       const best = Math.max(...ids.map((id) => { const s = rep.cuts[id].saved.good; return s.secs / s.n; }));
       expect(best, ids.join()).toBeGreaterThan(0);
     }
+  });
+});
+
+describe('the bribe at the gate, simulated (12 Nov: "build the bribe gate ... to show how many different ways you have of really getting through the course")', () => {
+  it('a briber hauls the wreck\'s coins in its notch, sheltered, pays the gate and is towed through, never holed by its guns', () => {
+    const bribe = route('bribe'), peaceful = style('peaceful');
+    for (let seed = 1; seed <= 20; seed++) {
+      // (an aggressive racer on the long way beside her, firing on anyone sitting still in the open)
+      const [b] = simulate({ racers: [{ route: bribe, style: peaceful, skill: 'good', spot: 13 }, { route: route('long'), style: style('aggressive'), skill: 'good', spot: 14 }], seed, snakes: false });
+      expect(b.hitsTaken, `seed ${seed}`).toBe(0);
+      expect(b.exposed, `seed ${seed}`).toEqual([]);
+      expect(b.cuts.find((c) => c.id === 'guns')?.done).toBe(true);
+    }
+  });
+  it('the haul is counted against the gap it pays for: a decent player saves less than a great one, and both save something', () => {
+    const at = (skill: 'decent' | 'great') => {
+      let n = 0;
+      for (let seed = 1; seed <= 40; seed++) n += simulate({ racers: [{ route: route('every'), style: style('peaceful'), skill, spot: 13 }, { route: route('long'), style: style('peaceful'), skill: 'decent', spot: 3 }], seed, snakes: false })[0].cuts.find((c) => c.id === 'guns')!.saved;
+      return n / 40;
+    };
+    const decent = at('decent'), great = at('great');
+    expect(decent).toBeGreaterThan(0);
+    expect(great).toBeGreaterThan(decent);
+    expect(great).toBeLessThan(RACE.DECENT.guns);
   });
 });
 
