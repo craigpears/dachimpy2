@@ -381,6 +381,22 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     a Vegas biggest. RACE.md §8 has the principle.
 
 
+- **The course editor down to the tile (12 Nov):** "it looks cool, especially with the map. But just
+  moving stuff left to right isn't exactly much of a ... it doesn't really give you much control over,
+  like, how many legs do I do? ... more fine-grained control ... you get to the tile level of what tiles
+  you want where, what objects you want to move about and place. It needs to be a lot, give you a lot
+  more control." So the course becomes a grid you paint square by square (water, land, rock), with
+  objects you place, move and remove anywhere (buoys, the start and finish, winds of both kinds,
+  whirlpools, each shortcut and its puzzle), as many legs as you like; the race laid from that grid,
+  the checks (a way round, every shortcut sailable) and the balance check as now. With the race's next
+  pass, as that reworks the course anyway.
+- **A whirlpool that went the wrong way (12 Nov):** "I just saw people go ... they kind of went left into
+  it and then somehow came out as it was like into the right turn, wins, shortcut. Something went really
+  wrong there. That is not how a whirlpool works." Likely the turning pool, whose spin flips (it goes
+  with the gambles); but check every pool on the course turns her by Puzzle Pirates' rules, with a test
+  named after what the user saw.
+
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
@@ -389,3 +405,6 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
 - **Wave sizes for a crew** may need retuning after the cannon change; only solo was tested.
 - **Not checked yet:** the look and den messages between two real crewmates (only tried solo),
   and the shack on a narrow den (the left-hand crate could crowd its floor frames).
+- **The tests exit with an error though every test passes (12 Nov):** vitest reports "Timeout calling
+  onTaskUpdate" from a worker (twice in a full run) while agents run alongside on the same machine, so
+  `npm test` exits 1. Find what holds a worker up (a long test without a break) or cap the workers.
