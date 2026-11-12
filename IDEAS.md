@@ -1200,6 +1200,34 @@ who rubs ears. Maybe he's there, a familiar or a plush on her shelf, and an ear 
 welcome. Like every house, it should send you off with something to do (the section above). What that is,
 and how the name's joke is told without explaining it to death: to settle with the user. A small,
 warm one, the memory of a funny moment between friends kept in the den.
+- **A gallery of the guesses (the user, 12 Nov):** "I don't know if you can put that in portraits where
+  you've got all the interpretations of the guesses of her name. Or is she the Roobear that roobs ears?
+  You need that." So her walls hold a portrait for each guess, framed like Gravee's (portraits.js), each
+  painted of her in her own look:
+  - **Robert:** a French Robert, very much a monsieur.
+  - **Roo + bear:** half kangaroo, half bear.
+  - **Did someone roob an ear?:** the scene of the crime, an ear being rubbed.
+  - **Roo and bear from the books (Dignity's guess):** a baby kangaroo and a bear, drawn as our own and
+    never the books' characters.
+  - **The answer, her own:** Robert the kangaroo bear that roobs ears, the biggest frame, the one you
+    "need". Roobear herself as him, or with him.
+  She tells you which guess was whose as you walk past each one. Every portrait keeps her real look
+  (below).
+- **Her pirate page, checked (12 Nov):** Roobear is on the Emerald Ocean
+  (https://emerald.puzzlepirates.com/yoweb/pirate.wm?target=Roobear). Captain (and Prisoner) of the crew
+  Tea Time, of the flag Do Not Reply, a Lieutenant Commander in the Admiral Island Navy; a Grand-Master
+  Forager, a Master at Sailing and Bilging; trophies like Ultimate Forager and Heroic Hauler; nineteen
+  familiars (Bliss, Primrose, Cotton Candy, Sir Hiss, Rafiki among them). **She rooms at Bedside Manors,
+  Gravee's manor**, so her little house could be her room there, a door off Gravee's tour, rather than a
+  house of its own (to settle with the user).
+  - **Her portrait:** not all in black but **deep purple**; only her hair is black. Glossy black hair
+    pinned up with loose curls by the ears, crowned with a wreath of dark purple roses with gold leaves; a
+    gold hoop earring, no eyepatch, a small friendly smile. A strapless deep purple corset bodice, a dark
+    purple ruffled cuff on her upper arm, deep purple fitted trousers ending in ruffled flares below the
+    knee. A silver hook for her left hand; in her right, a blue-and-white lace china bowl heaped with
+    blueberries. On her shoulder a pale periwinkle crow (perhaps Bliss, periwinkle in her list: a guess).
+    Behind her, a pink sky over a violet, sparkling sea. Portrait image:
+    http://emerald.puzzlepirates.com/media/emerald/portraits/716/1d03d832a5428adc3b3d276dc5656.jpg
 ## Puzzles you can size up, and play by keys (11 Nov)
 
 From the same chat the user shared: a pirate whose mouse aim isn't steady said Puzzle Pirates'
