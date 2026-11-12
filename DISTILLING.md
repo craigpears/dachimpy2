@@ -704,6 +704,30 @@ right, one after another, and an orange one taking a brown up-right the same way
   straight run into the junk side) before reaching for any technique; with something like ten such pieces,
   it's sweeping time, whatever happened a drag ago.
 
+**The tenth note: early on, bring in another piece rather than loop back (the user, 12 Nov,
+`notes/distilling/18-another-black-not-a-loop.webp` and `19-the-diamond-forming.webp`, a few drags on from the
+ninth's board).** "Here's a great example of what I mean by early game efficiency ... that black top left black
+piece I dragged down bottom right. So what I could have done is I could have used a crawl technique to go brown
+down through the black, loop it around a bit, blah blah blah. But it's like, well, I don't need to, because
+I've got another black piece further up. I can just drag it down, fill in the gap, and then go brown up, down,
+up. It's just far more space efficient. Like each time you kind of loop or go back, you're basically undoing
+some progress in a way ... That makes it inefficient, whereas at this stage I can still just drag stuff down
+and then instead of following that red path, which would have been less efficient ... I've now pulled a black
+down, it's a bit simpler, but it's also got an extra move because the black, an extra piece, is now involved,
+and it just works."
+- **The picture:** low in the middle a brown sits left of a black the user had just dragged down. Orange, the
+  path not taken: the brown down through the black and looping round (a crawl). Green, what they did: another
+  black from higher up dragged down to fill the gap, then the brown up, down, up past it into the junk.
+- **The rule:** a loop or a step back undoes progress, so while there are free pieces higher up (early on,
+  colour's plentiful), drag one more down to make the brown's way, rather than loop the pair you've got. It
+  costs one more drag, but every swap in it moves something the right way.
+- **Where it leads:** "if I carry that to its conclusion, I then end up in this position ... the brown's there,
+  and you can see what I mean by that diamond shape kind of forming at the bottom." The second picture: the
+  junk on the right building up from the bottom in the diamond's shape (§3, "The diamond").
+- **For the bots:** score a technique's swaps by how many move a piece the wrong way (back left, or back over
+  ground already won), and prefer a plan that brings in another free piece to one that loops, while free
+  pieces are about.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
