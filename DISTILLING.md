@@ -801,6 +801,31 @@ and it just works."
   swaps long, is cheap; what costs is each new drag (finding the piece, picking it up), each turn back within
   one, and the thinking before a fiddly sequence. A long straight drag beats a few short ones that swap less.
 
+**The eleventh note: judge the board, as early chess programs did (the user, 12 Nov, watching the merged
+bots, `notes/distilling/20-blocked-middle-trapped-white.webp`).** "I'm not sure if it almost needs some
+heuristics, like I'm thinking, and I guess the early chess Deep Blue work. Like, for example, here I can see in
+the green in the middle, there's a lot of colours blocking movement from top to bottom in the middle of the
+board. I can also see in the bottom right, there's a trapped white ... ball. Like, those are very bad things.
+... you should be almost giving yourself bonus points for getting those first few columns on the right
+complete. You know, you don't have to necessarily strictly go that way, but as a heuristic ... almost min-max
+style things, I'm not saying implement them because they're expensive, but even just as a test of moves, being
+able to move pieces clearly, having trapped pieces, trapped holes, those are bad." And what they saw: "things
+aren't just dragged to the bottom. Again, there's just a lot of weird crawling rather than quick drag brown up,
+black down, done. And so as things are being actively dragged into the middle instead of trying to get things
+column by column on the right".
+- **The picture:** the green outline takes in the middle four columns, a mix of browns, blacks and whites
+  with colour scattered top to bottom, so nothing can cross them in one drag; the right-hand columns are
+  nearly all junk, but a white is caught low in them.
+- **What's bad on a board:** colour blocking the middle top to bottom (no clear lane for a drag); a white
+  trapped in the junk on the right (it burns, or costs a rescue); trapped pieces and holes in general;
+  pieces that can't move freely.
+- **What's good:** the rightmost columns complete, one by one, from the right (a bonus each); clear lanes,
+  so a brown can be dragged straight up and a black straight down; colour gathered on the right rather than
+  dragged into the middle.
+- **How to use it:** a score of the board from these, used as a test of each candidate drag (the board after
+  it, scored), not a deep search: "I'm not saying implement them because they're expensive". The cheap
+  plain drag that scores well wins over a crawl.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
