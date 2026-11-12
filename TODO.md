@@ -467,24 +467,6 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   the "Defend it again" button, while the den's now a whole sea of islands, puzzles and a race. (What it
   should say instead, and whether the quick siege still opens it, to pin down with the user: the message was
   cut off.)
-- **The online race needs a real lobby (12 Nov):** trying it online for the first time, "it's not even clear
-  like that you're in a lobby with people. Like, how do I know that people are here instead of bots? There's
-  no indication of that." The Pirate Den panel "is a bit heavy ... taking up valuable space ... that bit on the
-  right ... just a big dump of text ... this needs to be a lot lighter. Lot lighter. What does H head home mean
-  in this context? Is that even relevant in here?" And "much more lobby-like. Like, if you look at the
-  original thing, it would be like, here's the map of the course, you've got people loading and waiting, or
-  you can play with bots ... you can either wait for people, start with bots". So: a lobby screen of its own
-  (the course's chart, who's in and who's a bot, plainly; wait for people or start with bots), and in a race
-  the den's heavy panels and key lists slimmed right down, nothing that doesn't apply (no "head home").
-  Then, the idea it started from: "the public lobby, where people can just come in but it should be clear
-  when you're waiting for the next race who's waiting". So one open race anyone can walk into, the next race
-  filling up in view, besides the private codes. And on the water "indicate who's who, because other than I
-  can recognize Kikkit's character, I don't know who's who here": a name over every sloop, players' and bots'.
-  And finding it at all (12 Nov, later): "Okay, I eventually found the race online thing. That really was not
-  clear." Racing online wants a plain way in from the den (a button, and on the starter's card), not a key
-  you'd only know from the notes. Once found, the flow was "a bit closer than I thought".
-  No codes (12 Nov): "I [don't] think I want people to share codes. You should just see a lobby and be able to
-  join it." So the open lobby (or a short list of them, who's in each) to join with a click; codes out of sight.
 - **A hop to get going off the line (12 Nov):** on the start's field, "this initial opening thing as well,
   where you're trying to get in with these trade winds. Again, that could have a nice hop to the ball thing to
   get started." So a hop near the line (a wind or chain hop, like the ladders further on) that gets a good
