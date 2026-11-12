@@ -483,6 +483,8 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   And finding it at all (12 Nov, later): "Okay, I eventually found the race online thing. That really was not
   clear." Racing online wants a plain way in from the den (a button, and on the starter's card), not a key
   you'd only know from the notes. Once found, the flow was "a bit closer than I thought".
+  No codes (12 Nov): "I [don't] think I want people to share codes. You should just see a lobby and be able to
+  join it." So the open lobby (or a short list of them, who's in each) to join with a click; codes out of sight.
 - **A hop to get going off the line (12 Nov):** on the start's field, "this initial opening thing as well,
   where you're trying to get in with these trade winds. Again, that could have a nice hop to the ball thing to
   get started." So a hop near the line (a wind or chain hop, like the ladders further on) that gets a good
