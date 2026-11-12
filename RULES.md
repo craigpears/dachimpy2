@@ -1567,6 +1567,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       yes, right there, when you placed some of the furniture, I guess it gets her kind of
       promiscuous side in without it being overly, yeah, but dirty." A wink in a line about the
       furniture is the right amount; keep those ("Yes, yes, yes! There!", "Just there!").
+    - **Loopy about weddings (12 Nov):** "I'm going for like the loopy version where, you know, she's
+      just really excited to marry people and decorate ... she married a parrot to a capybara earlier
+      or something." She'll marry anything to anything: two crabs this morning (her welcome), a parrot
+      to a capybara after breakfast, two barrels of grog, a cannon to a rowboat; ask her "Who else have
+      you married off?", "Have you ever turned a wedding down?", "Do you ever take a day off?". Others'
+      weddings, never her own love life. A test checks.
   - **Five weddings today, for the fun of it (11 Nov):** "showing that ... you can keep doing it for
     fun all the time ... not in a promiscuous way, but in a this is a fun game ... tie it into the
     mechanics in a happy, fun way." She's been through six ceremonies today (five till the presents

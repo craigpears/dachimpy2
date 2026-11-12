@@ -173,10 +173,12 @@ Marry her, and she comes home with you: aboard the sloop, then at the den.
 > "you don't want her to seem demanding, but just make it fun ... maybe it can fit into the thing of like a wedding theme with lots and lots of gifts." (the user, 12 Nov)
 >
 > "Mischievous is correcting ... maybe she's a bit delusional, but she does think it's all about her. So I think she is happy with being a bit more attention-seeking and being the one wanting lots more gifts." (the user, 12 Nov)
+>
+> "I'm going for like the loopy version where, you know, she's just really excited to marry people and decorate that, you know, she married a parrot to a capybara earlier or something." (the user, 12 Nov)
 
 ### As you arrive, close on her: her greeting, what this is, and the tone's choice
 
-- "Ahoy! Welcome to my isle! Mind the crabs, they're guests too."
+- "Ahoy! Welcome to my isle! Mind the crabs, they're guests too. I married two of them this morning."
 - "This is my wedding venue. Pirates sail in from all over the Ocean to get hitched here."
 - "First things first: what sort of wedding are we having?"
 
@@ -348,6 +350,7 @@ Marry her, and she comes home with you: aboard the sloop, then at the den.
 - *You ask for a fresh crowd:*
   - "A whole new crowd! Where do they all come from?"
   - "Fresh faces! Hello, everyone!"
+  - "New guests! Any of you single? Or a parrot? I can do parrots."
 - *You add a chair:*
   - "A chair! For the guest with the one good knee."
 - *You add a throne:*
@@ -389,8 +392,10 @@ Marry her, and she comes home with you: aboard the sloop, then at the den.
   - "A band! There'll be dancing after. I've my dancing boots on already."
 - *You add a cannon:*
   - "A cannon! For the salute. Boom! Hee hee!"
+  - "A cannon! I wed one to a rowboat once. Bit of a bang at the reception."
 - *You add an anchor:*
   - "An anchor! For a couple who never want to leave."
+  - "An anchor! Ooh, it'd make a lovely bride for that cannon."
 - *You add skulls:*
   - *happy:*
     - "Skulls! Ooh, a bit spooky. I love it."
@@ -405,6 +410,7 @@ Marry her, and she comes home with you: aboard the sloop, then at the den.
   - "Oh, this one! I remember this one. Shall we do it again?"
 - *Planning another, after the portrait:*
   - "That was lovely. Shall we have another?"
+  - "Again! Again! I'll marry anything to anything. Ask the crabs."
 
 ### Asked things as you plan (your question, then her answer)
 
@@ -421,6 +427,11 @@ Marry her, and she comes home with you: aboard the sloop, then at the den.
 - *Any advice?:* "Say "I do", not "Arr". People mix them up."
 - *Can my familiar come?:* "Of course! Parrots in the front row. Monkeys at the back, near the cake."
 - *Who's doing the music?:* "A shanty-singer from the inn. He knows three songs. All about the sea."
+- *Who else have you married off?:*
+  - *happy:* "A parrot to a capybara, just after breakfast! He squawked "I do", she ate the bouquet. So happy together!"
+  - *dark:* "A parrot to a capybara, just after breakfast. She ate the bouquet. Then most of the guests."
+- *Have you ever turned a wedding down?:* "Never! I married two barrels of grog last week. Lovely couple. Well, one of them's empty now."
+- *Do you ever take a day off?:* "A day off? From weddings? Hee hee! Oh, you're serious. No!"
 
 ### As you plan, when something won't go, and moving things along
 

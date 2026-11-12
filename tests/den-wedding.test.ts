@@ -245,7 +245,7 @@ describe('Mischievious, gushing (10 Nov)', () => {
         expect(g.say(ev), `${tone} ${ev}`).toBeTruthy();
     }
     expect(new Gush('dark').say('suitorOne')).toMatch(/Barnaby/);
-    expect(new Gush('happy').say('again')).toBe('That was lovely. Shall we have another?');
+    expect(new Gush('happy').say('again')).toMatch(/another\?|anything to anything/);   // (the loopy one, 12 Nov)
   });
 });
 
@@ -337,6 +337,15 @@ it('she\'s the host, not the show: no lines about how often she\'s married, and 
   for (const line of all) expect(line).not.toMatch(/ever so many|keep this one alive|marry them|my last (one|husband|wife)/i);
   expect(ASK_HER.length).toBeGreaterThanOrEqual(6);
   for (const tone of ['happy', 'dark'] as const) ASK_HER.forEach((_, i) => expect(answer(i, tone).length).toBeGreaterThan(10));
+});
+
+// The user, 12 Nov: "I'm going for like the loopy version where, you know, she's just really excited to marry
+// people and decorate ... she married a parrot to a capybara earlier or something".
+it('she\'s loopy about weddings: she married a parrot to a capybara earlier, and she\'ll marry anything to anything (12 Nov)', () => {
+  const asked = ASK_HER.find((x) => /married off/.test(x.q))!;
+  for (const tone of ['happy', 'dark'] as const) expect(answer(ASK_HER.indexOf(asked), tone)).toMatch(/parrot to a capybara/);
+  expect(ARRIVE[0]).toMatch(/married two of them/);
+  expect((GUSH.again as readonly string[]).join(' ')).toMatch(/anything to anything/);
 });
 
 // The user, 11 Nov: "the first time I had this kind of wedding, second time it didn't quite go so well. The

@@ -2,7 +2,7 @@
     ... she explains to you what it is and what's going on"): her greeting, what this is, and her
     question, the tone's choice. Her voice, not yet either tone's. */
 export const ARRIVE = [
-    "Ahoy! Welcome to my isle! Mind the crabs, they're guests too.",
+    "Ahoy! Welcome to my isle! Mind the crabs, they're guests too. I married two of them this morning.",
     'This is my wedding venue. Pirates sail in from all over the Ocean to get hitched here.',
     'First things first: what sort of wedding are we having?',
 ];
@@ -70,7 +70,7 @@ export const GUSH = {
     size_large: ['Ooh, a crowd! I\'ll have the inn brew more grog.'],
     size_grand: ['Half the Ocean! I do hope the island doesn\'t tip over.', 'Everyone! Even a few from the next island over. Hee hee!'],
     guest_move: ['Ooh, they\'ll have a lovely view from there.', 'There! Perfect for the portrait.', 'Mingling! I love a mingle.'],
-    crowd: ['A whole new crowd! Where do they all come from?', 'Fresh faces! Hello, everyone!'],
+    crowd: ['A whole new crowd! Where do they all come from?', 'Fresh faces! Hello, everyone!', 'New guests! Any of you single? Or a parrot? I can do parrots.'],
     // (Each new thing from the furnisher's, as it's put down; the plain 'add' lines the rest of the time.)
     add_chair: ['A chair! For the guest with the one good knee.'],
     add_throne: ['A throne! Fit for a Governor. Or for tired feet.'],
@@ -91,13 +91,13 @@ export const GUSH = {
     add_gifts: ['Presents! Put the big ones by me. For safekeeping.'],
     add_piano: ['A piano! The shanty-singer knows three songs. Now he can play them louder.'],
     add_band: ['A band! There\'ll be dancing after. I\'ve my dancing boots on already.'],
-    add_cannon: ['A cannon! For the salute. Boom! Hee hee!'],
-    add_anchor: ['An anchor! For a couple who never want to leave.'],
+    add_cannon: ['A cannon! For the salute. Boom! Hee hee!', 'A cannon! I wed one to a rowboat once. Bit of a bang at the reception.'],
+    add_anchor: ['An anchor! For a couple who never want to leave.', 'An anchor! Ooh, it\'d make a lovely bride for that cannon.'],
     add_skulls: { happy: ['Skulls! Ooh, a bit spooky. I love it.'], dark: ['Skulls! Very tasteful. Nobody ask whose.'] },
     ready: ['Ooh, it\'s all ready! Shall we?', 'Everything\'s perfect. I\'m going to cry.'],
     back: ['You\'re back! I kept everything just as you left it.'],
     shared: ['Oh, this one! I remember this one. Shall we do it again?'],
-    again: ['That was lovely. Shall we have another?'],
+    again: ['That was lovely. Shall we have another?', 'Again! Again! I\'ll marry anything to anything. Ask the crabs.'],
 };
 /** When each of her GUSH pools is said, for LINES.md. */
 const GUSH_WHEN = {
@@ -130,6 +130,11 @@ export const ASK_HER = [
     { q: 'Any advice?', a: 'Say "I do", not "Arr". People mix them up.' },
     { q: 'Can my familiar come?', a: 'Of course! Parrots in the front row. Monkeys at the back, near the cake.' },
     { q: 'Who\'s doing the music?', a: 'A shanty-singer from the inn. He knows three songs. All about the sea.' },
+    // (12 Nov, the loopy version: "she's just really excited to marry people and decorate ... she married a
+    //  parrot to a capybara earlier or something")
+    { q: 'Who else have you married off?', a: { happy: 'A parrot to a capybara, just after breakfast! He squawked "I do", she ate the bouquet. So happy together!', dark: 'A parrot to a capybara, just after breakfast. She ate the bouquet. Then most of the guests.' } },
+    { q: 'Have you ever turned a wedding down?', a: 'Never! I married two barrels of grog last week. Lovely couple. Well, one of them\'s empty now.' },
+    { q: 'Do you ever take a day off?', a: 'A day off? From weddings? Hee hee! Oh, you\'re serious. No!' },
 ];
 /** As you plan, when something won't go where you put it, and to move things along. `{theme}`: the
     theme she suggests, by name. */
@@ -198,6 +203,7 @@ export const CHARACTER = {
         { on: '11 Nov', said: 'she\'s a primary character, but not the star of the show.' },
         { on: '12 Nov', said: 'you don\'t want her to seem demanding, but just make it fun ... maybe it can fit into the thing of like a wedding theme with lots and lots of gifts.' },
         { on: '12 Nov', said: 'Mischievous is correcting ... maybe she\'s a bit delusional, but she does think it\'s all about her. So I think she is happy with being a bit more attention-seeking and being the one wanting lots more gifts.' },
+        { on: '12 Nov', said: 'I\'m going for like the loopy version where, you know, she\'s just really excited to marry people and decorate that, you know, she married a parrot to a capybara earlier or something.' },
     ],
     lines: [
         { when: 'As you arrive, close on her: her greeting, what this is, and the tone\'s choice', says: ARRIVE },
