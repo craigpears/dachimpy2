@@ -116,6 +116,10 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 
 Unlisted for now: reachable only by its URL until the user says to put it in the nav.
 
+- **Never rage-inducing (12 Nov, a standing principle).** "even if it is a bit cute and funny, like, it should not be drastic and rage-inducing. That's always what I keep saying. That's almost like a constant principle here. It should not be rage-inducing." A setback is a little
+  "ah, damn it, not again": a few squares back, a wrong turn, a whirlpool going a bit squiffy and sending you
+  the wrong way, never one that throws away the race or a long stretch of play. Bad luck is mild; big
+  swings come only from choices you made. Check every snake, gamble, trap and penalty against it (RACE.md §1).
 - **Your pirate stays where you turn them (10 Nov).** In the pirate maker your pirate turns slowly
   on their own, but once you drag them round they stay put (the user: "it keeps rotating. I can't
   make it stay. That's really frustrating ... if you drag it, it should stick"), till it's next opened.

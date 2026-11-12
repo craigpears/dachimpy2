@@ -32,6 +32,11 @@ How it sits with the other notes:
   there needs to be some chance you can be pulled back in." See §9 for the door's tunnel, the first place
   this applies.
 - **Fun to watch.** "It would be so fantastic to watch. You could see everybody puzzling and racing."
+- **Never rage-inducing (12 Nov, "almost like a constant principle here").** Watching a whirlpool fling a
+  rival (the turning pool, which "just looked like a normal whirlpool to me"): "the gamble or the risk should be
+  the whirlpool went a bit squiffy, sent you the wrong way ... even if it is a bit cute and funny, it should not be
+  drastic and rage-inducing." Every snake 3 or 4 squares back at most, like the tight water past the gun gap
+  (§4); any risk a mild wrong way, never a race lost to luck.
 
 ## 2. The course (built: its second pass, 11 Nov)
 
