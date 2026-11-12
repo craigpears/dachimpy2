@@ -72,7 +72,9 @@ The changelog (the user, 11 Nov: "as each bigger feature's added, and it should 
 place, a character, a puzzle, a cutscene, a ship; not a bug fix or a tweak), add an entry: the date, a
 title, a teaser shot or two taken from its `?at=` link (by the subagent that checks it in the browser),
 and a few lines in plain words. Pirate names only. One entry per real feature (the user, 12 Nov): a later pass on a feature
-already there updates its entry, or joins a few passes into one, rather than adding another.
+already there updates its entry, or joins a few passes into one, rather than adding another. An addition to a
+feature (a new theme, a new look) is a smaller update: `article class="small"` under the day's "Smaller updates",
+one thumbnail and a line or two.
 Beside it, `design.html` ("How the Pirate Den is designed", 12 Nov), in the changelog's look and linked from its
 header: the thinking behind the den, high level and in plain words, a picture for each section (from
 `changelog/`), the sloop race first, then the den's wider principles. Keep it up to date with design thinking

@@ -163,6 +163,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   feature already in the changelog updates its entry (or joins a few passes into one), rather than adding
   another. The race's seven entries became three: the race itself (11 Nov), its bribe, gambles and chart,
   and watching it (12 Nov).
+  **Big features and smaller updates (12 Nov):** "you've got the [sloop race], which is great, but ... I
+  want things like showered in gifts ... in there, but ... that should be more like a smaller update ...
+  Mischievious's wedding was a big feature, but that is more of a smaller update ... but it's got the same
+  prominence as the giant features." So under each day's big features, "Smaller updates": a thumbnail and
+  a line or two (an addition to something already there, a new look, a model on a test page). Showered in
+  gifts, Primates Rule and Dalnoth's Vikings are smaller updates.
 - **The cheats jump to what's hard to get to, one per place (11 Nov).** "There's a lot there that are
   like basically the same thing ... these are supposed to help jump you to places that are hard to get
   to." So no cheat for what's a key away (Sailing's board: go sailing, then 1), and one per place, not
