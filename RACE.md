@@ -26,6 +26,11 @@ How it sits with the other notes:
   and the shortcuts are the maze, there to spot and work out, never marked.
 - **A race against people.** Several racers on one course, shooting each other: "I definitely want to be
   able to shoot other racers. That's absolutely part of this."
+- **One connected race, never puzzling apart (12 Nov).** A side shortcut stays tied to the main path, so
+  failing in it drops you back into the race rather than out of it: "I just don't like the idea. It's not
+  really a race. A connected race if you are completely separate and puzzling against each other. Like,
+  there needs to be some chance you can be pulled back in." See §9 for the door's tunnel, the first place
+  this applies.
 - **Fun to watch.** "It would be so fantastic to watch. You could see everybody puzzling and racing."
 
 ## 2. The course (built: its second pass, 11 Nov)
@@ -442,6 +447,17 @@ A hidden gem, never hinted. There's no cheat, no `?at=` link, no shot, and the s
   lands).
 - **Position matters most here (§6):** it's two stops, the rock and then the mouth. It's the back
   of the field's big chance, and a leader's big risk.
+
+- **Idea: keep the tunnel connected, failure pulling her back into the main path (12 Nov, to build
+  once agreed).** Today a failed Vegas only sends her back to the mouth, out of everyone's way. Instead,
+  the side route's winds and whirlpools spill her back into the main course: "it's very risky ... when you
+  go through the navigation door, but the winds and the whirlpools kind of pull you back into the main
+  path." Get shot, or slip into a whirlpool by a careless move, and "it will pull you into the main path if
+  you fail in that kind of side shortcut": "oh shoot, I got so far going through this way, and then ... you
+  get unlucky". Another way, or as well: "different doors back into it", so the tunnel has exits onto
+  the legs it passes under, and where you come out depends on how far you got. The same goes for any
+  later side route. "All subject to balancing. I'm just getting out ideas." For the simulation: a failed
+  side route lands her on a main leg, not at its mouth, and costs what that leg costs from there.
 
 ## 10. Watching and replays (idea)
 
