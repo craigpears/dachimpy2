@@ -112,13 +112,9 @@ if (process.argv[1].endsWith('race-measure.mjs')) {
       h.pose.d = 1; long += hop(h, 2);
       long += to(h, at);
     } else if (id === 'door') {
-      // (the first exit: leg 3 under its cave, on its second row, as far along; then on to the far end)
+      // (its one exit since 12 Nov: leg 3 under its cleft, on its second row, as far along)
       const E = Dr.EXITS[0].INTO[0];
       long = to(h, [3, P[1].r1]) + to(h, [E[0], E[1] + 1]);
-      console.log(`door, its first exit: long way ${long.toFixed(1)}  trip ${DOOR.EXITS[0].trip}  saves ${(long - DOOR.EXITS[0].trip).toFixed(1)}  (EXITS[0] ${DOOR.EXITS[0].saves})`);
-      long += to(h, [RC.SNAKES.MID[0][0] - 1, S[2].r + 1]);
-      h.pose.d = 1; long += hop(h, 2);
-      long += to(h, [SAIL.COLS - 2, P[2].r1]) + to(h, [3, P[3].r1]) + to(h, at);
     } else long = to(h, at);
     const trip = trips[id](), want = id === 'door' ? DOOR.SAVES : RACE.DECENT[id];
     console.log(`${id.padEnd(9)} long way ${long.toFixed(1).padStart(6)}  ended ${h.pose.c},${h.pose.r}  trip ${trip.toFixed(1).padStart(5)}  saves ${(long - trip).toFixed(1).padStart(6)}  (DECENT ${want})`);

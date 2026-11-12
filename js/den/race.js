@@ -56,8 +56,11 @@ export const race = { W: null, rules: newRace(), gap: new GunGap(), drift: new D
    (a few boulders on them), the second a high ridge of cliffs (the starlit door's face, kept plain:
    LAY.RACE.DOOR), the fourth a headland standing over the canal its locks cut through (its banks as the
    sea's cliffs are: bankTop). All baked into a mesh a material. (The
-   starlit door's squares, its face and the tunnel's far end, are its crags': door.js.) */
-const LOOK = [{ h: 0.9, low: true }, { h: 4.6 }, { h: 0.9, low: true }, { h: null }, { h: 1.0, low: true }];
+   starlit door's squares, its face and the tunnel's far end, are its crags': door.js.) The second spit's cliffs
+   low since 12 Nov (2.2, from 4.6), so the headwind gap through them reads as a channel, not a slot that ends
+   in a wall (the user: "it just looks like it's blocked. There's like a giant three-story cliff next to it");
+   the door's own crag stands tall over them. */
+const LOOK = [{ h: 0.9, low: true }, { h: 2.2 }, { h: 0.9, low: true }, { h: null }, { h: 1.0, low: true }];
 const sandM = mat('#d9c08a', { roughness: 1 }), lowGrass = mat('#7c9a52', { roughness: 1 });
 function land(g) {
   const S = CELL;
@@ -140,6 +143,9 @@ function build() {
   // race-start.js.)
   for (const l of [...lanes(RC.WINDS), ...lanes(RC.WHIRLS.WINDS)]) { W.g.add(l.g); W.winds.push(l.tex); }
   for (const spot of RC.WHIRLS.POOLS) { const o = pool(whirlpool(spot)); W.g.add(o); W.pools.push(o); }
+  // The headwind blowing back out through the headwind gap, round its dog-leg (12 Nov: so it reads as a channel
+  // with its headwind in it, to row against): a lane each straight run of it, as the course's winds are drawn.
+  for (const z of RC.ZONES.filter((x) => x.d === 2)) { const l = windLane(z.c0, z.r1, 2, z.r1 - z.r0 + 1); W.g.add(l.g); W.winds.push(l.tex); }
   // The rocks walling in the field's hop: boulders, a couple to a square.
   for (const [c, r] of RC.FIELD.HOP.ROCKS) for (let k = 0; k < 2; k++) W.g.add(rock(seaX(c) + (Math.random() - 0.5) * 2, 0.2, seaZ(r) + (Math.random() - 0.5) * 2, 0.9 + Math.random() * 0.4));
   // The gun gap: a turret either side on the spit, on the Empire's bastions (an imperial gate:

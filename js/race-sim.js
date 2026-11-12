@@ -131,8 +131,8 @@ export const SIM = {
           Assumed.
         - piece: a Carpentry piece fitted (the crane's thirteen, CRANE.PARTS; a hit's patch, PATCH.PIECES):
           4 s. Assumed; the user finds Carpentry quick.
-        - nav: the starlit door's two small constellations: 53 moves for the planner bot
-          (tools/nav-bots.mjs, DOOR=1), at 1.2 s a move.
+        - nav: the starlit door's constellations (DOOR.NAV): about 24 moves for a two-star one and 34 for a
+          three-star one, for the planner bot (tools/nav-bots.mjs, DOOR=1, 12 Nov), at 1.2 s a move.
         - load: a shot loaded by Gunnery: 20 s. Assumed; the user: "just loading the guns and gunning
           takes a long time".
         - haul: the bribe's coins hauled up from the wreck by Treasure Haul: BRIBE.MOVES moves (measured
@@ -141,7 +141,7 @@ export const SIM = {
           at its first exit (12 Nov): 8 s. Assumed. */
     PUZZLE: {
         combo: 32, vegas: 52, double: 22, triple: 28, row: 20,
-        bilge: (LOCK.COST_UP * RC.COURSE.clears) / LOCK.WORK, forage: (15 * RACE.FORAGE.BUNDLES.length) / 2, piece: 4, nav: 53 * 1.2, load: 20, haul: BRIBE.MOVES * BRIBE.MOVE_SECS, gust: 8,
+        bilge: (LOCK.COST_UP * RC.COURSE.clears) / LOCK.WORK, forage: (15 * RACE.FORAGE.BUNDLES.length) / 2, piece: 4, nav: (DOOR.NAV.sizes ?? [2, 3]).reduce((n, s) => n + (s <= 2 ? 24 : 34 + (s - 3) * 12), 0) * 1.2, load: 20, haul: BRIBE.MOVES * BRIBE.MOVE_SECS, gust: 8,
     },
     /** A Vegas's chance to come off, a go, by skill; the next go after one that doesn't takes this much of
         a fresh one's time; and the goes before she gives up and sails on. Assumed. */
@@ -456,19 +456,6 @@ export function sail(o) {
     const players = () => field.racers.slice(0, first).filter((r) => r.state !== 'finished' && !botOf(r.i));
     /** What a second of her time is worth in Sailing on the pilot (seconds round the long way). */
     const chainWorth = (b) => (chains ? SIM.CHAIN[b.route.name === 'long' ? b.best : b.skill] * (PACE - SAIL.PUSH) : 0);
-    /** The starlit door's exits (12 Nov): where she rejoins the long way out of each (seconds round it), its
-        savings scaled if the door's being tried at another. In the tunnel at exit `k`, she pushes on for the
-        next while its stretch pays her, a Vegas in peace by her skill at one; the aggressive (who load more
-        by Gunnery) come up at the first, back among the field. */
-    const doorSaves = DOOR.EXITS.map((e) => (e.saves * cuts.door.saves) / DOOR.SAVES);
-    const doorOut = DOOR.EXITS.map((e, k) => cuts.door.tIn + e.trip + doorSaves[k]);
-    const doorWorth = (b, k) => {
-        const p = SIM.VEGAS[b.best], on = k + 1 < DOOR.EXITS.length ? -SIM.PUZZLE.vegas * SIM.SKILL[b.best] + p * doorWorth(b, k + 1) + (1 - p) * doorSaves[k] : -Infinity;
-        return Math.max(doorSaves[k], on);
-    };
-    const pushOn = (b, k) => k < DOOR.EXITS.length - 1 && doorWorth(b, k) > doorSaves[k];
-    /** At the mouth: a Vegas, if what it opens up is worth more to her than the first exit for any clear. */
-    const vegasIn = (b) => SIM.VEGAS[b.best] * (doorWorth(b, 0) - doorSaves[0]) > (SIM.PUZZLE.vegas - SIM.PUZZLE.gust) * SIM.SKILL[b.best];
     // The gap's guns: hits each has taken, quiet till, loading; roused; whom each has holed.
     const need = mode === 'shared' ? 1 : RACE.GAP.HARD;
     const guns = RC.GUNS.at.map((at) => ({ at, quiet: 0, hits: 0, wait: 0 }));
@@ -526,8 +513,8 @@ export function sail(o) {
         b.cut = null;
         b.stop = null;
     };
-    /** Where she rejoins the long way out of shortcut `c` (the starlit door's: out of the exit she came up at). */
-    const tOutOf = (b, c) => (c.id === 'door' ? doorOut[b.exit] : c.tOut);
+    /** Where she rejoins the long way out of shortcut `c`. */
+    const tOutOf = (_b, c) => c.tOut;
     const record = (b, id, done) => {
         const c = cuts[id];
         let r = b.res.cuts.find((x) => x.id === id && !x.done && x.saved === 0);
@@ -750,29 +737,11 @@ export function sail(o) {
                 field.load(b.i, 2 * need - shots(b));
             return gap(b);
         }
-        // (the starlit door opened: at its mouth, a Vegas if she means to push on along the tunnel, or any
-        // clear just to come up at its first exit)
-        if (c.id === 'door' && b.stage === 0) {
-            b.stage = 1;
-            b.vegas = vegasIn(b);
-            b.work = b.full = draw(b.vegas ? SIM.PUZZLE.vegas : SIM.PUZZLE.gust, b.best);
-            return;
-        }
-        // (its tunnel: a Vegas that comes off carries her along the first stretch, where she waits in peace
-        // and pushes on stretch by stretch while it pays; less, or a Vegas that doesn't come off, and she's
-        // spilled up out of the last exit she passed: the first, from the mouth)
+        // (the starlit door opened by her Navigation: through the tunnel she goes, one stretch, up its cleft onto
+        // leg 3: back to simple, 12 Nov)
         if (c.id === 'door') {
-            let k = 0, secs = DOOR.EXITS[0].trip;
-            if (b.vegas && rand() < SIM.VEGAS[b.best]) {
-                while (pushOn(b, k)) {
-                    secs += draw(SIM.PUZZLE.vegas, b.best) + DOOR.EXITS[k + 1].trip - DOOR.EXITS[k].trip;
-                    if (rand() >= SIM.VEGAS[b.best])
-                        break;
-                    k++;
-                }
-            }
-            b.exit = k;
-            return through(b, secs);
+            b.exit = 0;
+            return through(b, DOOR.TRIP);
         }
         // (the rocks: loaded, she fires again; still up, she loads again, or gives up and sails on)
         if (c.id === 'rocks') {

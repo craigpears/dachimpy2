@@ -1,29 +1,22 @@
 // The starlit door, on the sloop race's course (its rules: src/den-door.ts; its squares LAY.RACE.DOOR in
-// src/den-sail.ts). A crag on the second spit off leg 2, plain rock, but for faint marks for anyone
-// looking closely: the places of a ship's wheel carved small round the face high up, and a hairline
-// seam below them. Stop off it and Space, and Duty Navigation stands on the rock beside them as the
-// night sky (nav-board.js, its one look); each constellation filled lights its stars in their places on
-// the carved wheel (placeXY, starCanvas). All lit, the door's outline glows and its two leaves swing in
-// on a tunnel, a long straight cavern lit by glowing stones, under legs 3 and 4 to a cleft in the
-// fourth spit's far face, out onto leg 5. A booch turns her about, pushed off, every star dark.
-// The tunnel's stretches (12 Nov, src/den-door.ts, Tunnel): a Vegas's gust from the mouth (the station's
-// gust hook: sail-station.js) carries her along the first, under leg 3, where daylight comes down a sea
-// cleft in the second spit's far face; she waits there in the dark, out of anyone's reach, and Space
-// brings her up the cleft onto leg 3, or the next Vegas carries her on to the far end. Less than a Vegas,
-// at the mouth or under the cleft, and the draught spills her up out of it. The clefts are plain cracks in
-// the rock from the course, dark, with nothing to say where they go. Touches the rest through race.js
-// (built, ticked, keys, prompt, held, reset, the legs she's passed under), the station's gust hook, and
-// den.js's camera (doorCam). No words to speak, no elvish.
+// src/den-sail.ts). A crag on the second spit off leg 2, a door plainly in it (public since 12 Nov: a pale
+// stone frame, iron-bound leaves, stars round it twinkling), the places of a ship's wheel carved over it.
+// Stop off it and Space, and Duty Navigation stands on the rock beside them as the night sky (nav-board.js,
+// its one look); the constellation filled lights its stars in their places on the carved wheel (placeXY,
+// starCanvas), the door's outline glows and its two leaves swing in on a tunnel, a long straight cavern lit
+// by glowing stones; and it carries her straight through, one stretch under the spit, up a cleft in its far
+// face onto leg 3 (back to simple, 12 Nov: "nav only shortcut that takes you just like one step through").
+// A booch turns her about, pushed off, every star dark. Touches the rest through race.js (built, ticked,
+// keys, prompt, held, reset, the legs she's passed under) and den.js's camera (doorCam). No words to speak,
+// no elvish.
 import * as THREE from 'three';
 import { LAY, SAIL } from '../den-sail.js';
-import { DOOR, Door, Tunnel, offDoor, mouthOf } from '../den-door.js';
-import { chainName, runFor } from '../sailing.js';
+import { DOOR, Door, offDoor, doorColumn, through } from '../den-door.js';
 import { RINGS, SPOKES } from '../navigation.js';
 import { scene, camera, mesh, V3, burst, toast, pirate } from './world.js';
 import { rock } from './land.js';
 import { sail, seaX, seaZ, stoneM, bankTop, SLOOP_DECK } from './sea.js';
 import { navBoard, placeXY, starCanvas } from './nav-board.js';
-import { station } from './sail-station.js';
 
 const D = LAY.RACE.DOOR, CELL = SAIL.CELL;
 /** The door's middle across, and its face (the crag's sea-side face); each exit's cave's face (onto the leg
@@ -35,12 +28,19 @@ const DX_C = (D.FACE[0][0] + D.FACE[1][0]) / 2, CAVE_Z = D.EXITS.map((e) => seaZ
 const DW = 4.6, DH = 7.6, CRAG_H = 14.5, WHEEL = { y: 10.6, w: 5.6 }, BOARD = { x: DX - 8.4, y: 9.9, size: 4.4 };
 /** The tunnel, deep under the course: its water's height, its radius. */
 const TY = -42, TR = 5.5;
-/** Where the Sailing board's gust is taken: here. */
-export const door = { rules: new Door(), tunnel: new Tunnel(), W: null, board: null, on: false, trip: null, fade: null, said: {}, opening: 0, closing: 0, booched: 0, snap: false, behind: false };
+/** The door's state: its rules, its look, the board, her trip through. */
+export const door = { rules: new Door(), W: null, board: null, on: false, trip: null, fade: null, said: {}, opening: 0, closing: 0, booched: 0, snap: false, behind: false };
 
 // ---------- the look of it ----------
 const darkM = new THREE.MeshBasicMaterial({ color: '#07060a', fog: false });
-const seamM = new THREE.MeshBasicMaterial({ color: '#2a241e', transparent: true, opacity: 0.22 });
+const seamM = new THREE.MeshBasicMaterial({ color: '#2a241e', transparent: true, opacity: 0.6 });
+/* Public since 12 Nov (the user: "Is there supposed to be a visible marker ...? Surely"): a door plainly in the
+   rock, its frame pale dressed stone, its leaves dark iron-bound timber, and stars round it, always there and
+   twinkling, as on Duty Navigation's own sky; and a pair over each of the tunnel's clefts, so the clefts read
+   as the door's way out, not an open gap. */
+const doorM = new THREE.MeshStandardMaterial({ color: '#4a2e1a', roughness: 0.85 });
+const ironM = new THREE.MeshStandardMaterial({ color: '#2b2b30', roughness: 0.5, metalness: 0.6 });
+const frameM = new THREE.MeshStandardMaterial({ color: '#d6cab0', roughness: 0.9 });
 /** A rough block of crag: a box of the cliff's stone, x0..x1 across, z0..z1, its foot under the water. */
 function block(g, x0, x1, z0, z1, h) {
   const b = mesh(new THREE.BoxGeometry(x1 - x0, h + 1.5, z1 - z0), stoneM);
@@ -102,9 +102,12 @@ function leaves(g, z, dir) {
   for (const side of [-1, 1]) {
     const pivot = new THREE.Group();
     pivot.position.set(DX + side * DW / 2, 0, z);
-    const leaf = mesh(new THREE.BoxGeometry(DW / 2, DH + 1.5, 0.5), stoneM);
+    const leaf = mesh(new THREE.BoxGeometry(DW / 2, DH + 1.5, 0.5), doorM);
     leaf.position.set(-side * DW / 4, (DH - 1.5) / 2, -dir * 0.25);
     pivot.add(leaf);
+    // (iron bands across it, and a ring for a handle)
+    for (const y of [1.2, DH * 0.5, DH - 1]) { const band = mesh(new THREE.BoxGeometry(DW / 2 - 0.1, 0.22, 0.12), ironM); band.position.set(-side * DW / 4, y, dir * 0.03); pivot.add(band); }
+    const ring = mesh(new THREE.TorusGeometry(0.3, 0.06, 6, 14), ironM); ring.position.set(-side * (DW / 2 - 0.45), DH * 0.42, dir * 0.12); pivot.add(ring);
     g.add(pivot);
     out.push(pivot);
   }
@@ -187,7 +190,7 @@ function cleft(g, z, deep, h, seed) {
 }
 /** How high each cleft's cliff stands: the spit's own, as race.js draws it (spit 2 a high ridge of
     cliffs; spit 4 a headland at its bank's height). */
-const cleftH = (k) => (D.EXITS[k].OUT[0][1] === LAY.RACE.SPITS[1].r1 ? 4.6 : bankTop(...D.EXITS[k].OUT[0]));
+const cleftH = (k) => (D.EXITS[k].OUT[0][1] === LAY.RACE.SPITS[1].r1 ? 2.2 : bankTop(...D.EXITS[k].OUT[0]));
 
 /** The tunnel, deep under the course: a long rough bore of dark rock, half full of black water, lit by
     glowing stones set in its walls; daylight down a shaft under each cave, and at its far end. */
@@ -257,8 +260,32 @@ function build() {
   W.wheel.position.set(DX, WHEEL.y, FACE_Z + 0.03);
   W.wheel.add(face);
   W.g.add(W.wheel);
-  // Each exit: a cleft in a spit's far face (the first only a square deep: the door's crag is behind it).
-  D.EXITS.forEach((e, k) => cleft(W.g, CAVE_Z[k], k === 0 ? CELL - 0.2 : CELL * 2, cleftH(k), 17 + k * 101));
+  // Its frame, proud of the rock: two jambs and a lintel of pale dressed stone.
+  for (const [w, h, x, y] of [[0.7, DH + 0.7, -DW / 2 - 0.35, DH / 2 - 0.35], [0.7, DH + 0.7, DW / 2 + 0.35, DH / 2 - 0.35], [DW + 1.4, 0.8, 0, DH + 0.4]]) {
+    const f = mesh(new THREE.BoxGeometry(w, h, 0.5), frameM); f.position.set(DX + x, y, FACE_Z + 0.15); W.g.add(f);
+  }
+  // Stars round it, always lit, twinkling (and lit again on the wheel above as its constellations are filled).
+  W.ring = [];
+  for (let i = 0; i < 9; i++) {
+    const a = Math.PI * (-0.08 + (1.16 * i) / 8), s = litStar(i % 5);
+    s.position.set(DX + Math.cos(a) * (DW * 0.95), DH * 0.55 + Math.sin(a) * (DH * 0.62), FACE_Z + 0.45);
+    s.scale.setScalar(1.5);
+    s.userData.ph = i * 1.7;
+    W.g.add(s); W.ring.push(s);
+  }
+  // Each exit: a cleft in a spit's far face (the first only a square deep: the door's crag is behind it),
+  // a pair of the door's stars over its mouth.
+  D.EXITS.forEach((e, k) => {
+    cleft(W.g, CAVE_Z[k], k === 0 ? CELL - 0.2 : CELL * 2, cleftH(k), 17 + k * 101);
+    for (const side of [-1, 1]) {
+      const s = litStar(k * 2 + (side > 0 ? 1 : 0));
+      s.position.set(DX + side * 3.1, cleftH(k) + 1.2, CAVE_Z[k] - 0.3);
+      s.rotation.y = Math.PI;
+      s.scale.setScalar(1.3);
+      s.userData.ph = k * 3 + side;
+      W.g.add(s); W.ring.push(s);
+    }
+  });
   tunnel(W.g);
   scene.add(W.g);
   return W;
@@ -319,7 +346,7 @@ function booched() {
 /* A trip is a run of beats played in turn, each `secs` long: where she is a way `u` through it (`at`: x,
    y, z; `under` in the tunnel; `cave`, coming up out of that one) and how black the screen is (`dark`).
    In at the door; along a stretch, deep under the course; a lurch as the draught catches her; up a cave
-   onto the leg. Played out, she waits under a cave (`hold`, its exit: till you choose), or she's out. */
+   onto the leg. Played out, she's out. */
 const PH = { in: 1.2, dark: 0.4, out: 1.2, lurch: 1.2, up: 0.4 };
 const ease = (u) => u * u * (3 - 2 * u);
 const under = (z) => ({ x: DX, y: TY, z, under: true });
@@ -337,55 +364,25 @@ function runBeat(a, b, fromBlack, toBlack) {
   const secs = Math.max(1.4, (lenTo(b) - lenTo(a)) * SAIL.PUSH);
   return { secs, at: (u) => under(zOf(a) + (zOf(b) - zOf(a)) * u), dark: (u) => Math.max(fromBlack ? 1 - (u * secs) / 0.35 : 0, toBlack ? (u * secs - (secs - 0.35)) / 0.35 : 0, 0) };
 }
-/** The draught catching her under exit `k`: on a little way, and swept back under the cave, and up. */
-function lurchBeat(k, went) {
-  const d = Math.min(1.5, Math.max(0.5, went)) * CELL * 0.6;
-  return { secs: PH.lurch, at: (u) => under(UNDER_Z[k] - d * Math.sin(u * Math.PI)), dark: (u) => Math.max(0, (u * PH.lurch - (PH.lurch - 0.35)) / 0.35) };
-}
-const upBeat = (k) => ({ secs: PH.up, at: () => under(UNDER_Z[k]), dark: (u) => u });
 /** Up out of cave `k` onto the leg, at `to`. */
 function outBeat(k, to) {
   const x1 = seaX(to.c), z1 = seaZ(to.r), z0 = CAVE_Z[k] + 1.5;
   return { secs: PH.out, at: (u) => { const e = ease(u); return { x: DX + (x1 - DX) * e, y: 0, z: z0 + (z1 - z0) * e, cave: k }; }, dark: (u) => Math.max(0, 1 - (u * PH.out) / 0.3) };
 }
-/** A move along the tunnel (src/den-door.ts, Tunnel) from under exit `at` (-1 the mouth, `from` her
-    pose there), as beats: on to wait under the next exit, or up out of one. */
-function tripFor(m, at, from, say) {
-  const beats = [];
-  if (at < 0) beats.push(inBeat(from), black(under(zOf(-1))));
-  if (m.exit !== at) beats.push(runBeat(at, m.exit, at < 0, m.way === 'out'));
-  else if (m.went > 0) beats.push(lurchBeat(at, m.went));
-  else beats.push(upBeat(at));
-  if (m.way === 'out') beats.push(black({ ...outBeat(m.exit, m.to).at(0) }), outBeat(m.exit, m.to));
-  return { beats, i: 0, t: 0, wait: at < 0, from, m, hold: -1, say, p: null };
+/** Her trip through (src/den-door.ts, through): in at the door from `from`, along the tunnel under the
+    spit, and up its cleft onto leg 3. */
+function tripFor(m, from, say) {
+  const beats = [inBeat(from), black(under(zOf(-1))), runBeat(-1, m.exit, true, true), black({ ...outBeat(m.exit, m.to).at(0) }), outBeat(m.exit, m.to)];
+  return { beats, i: 0, t: 0, wait: true, from, m, say, p: null };
 }
 const legName = (k) => `leg ${DOOR.EXITS[k].to + 1}`;
-/** The Sailing board's gust (sail-station.js), if it's the tunnel's: what's said, and how far it went. */
-function doorGust(res) {
-  if (!sail.on || !door.W) return null;
-  const name = chainName(res.steps).replace(/!+$/, ''), what = name ? `A ${name}!` : 'A clear!';
-  // (waiting under a cave: every gust is the tunnel's, a Vegas's on, less and she's spilled up it)
-  const T = door.trip;
-  if (T && T.hold >= 0) {
-    const at = T.hold, m = door.tunnel.gust(res.run);
-    if (!m) return null;
-    door.trip = tripFor(m, at, null, m.exit === at ? 'The draught is spilling her up out of the cleft' : 'On through the dark');
-    return { say: m.exit === at ? `${what} Not enough: the draught spills her up the cleft` : `${what} The gust carries her on through the dark`, went: m.went };
-  }
-  if (!door.rules.open || T || !sail.helm.gusty()) return null;
-  const from = sail.helm.gustFrom(), m = door.tunnel.enter(true, from, res.run);
-  if (!m) return null;
-  door.trip = tripFor(m, -1, from, m.way === 'on' ? 'Under the cliffs, through the dark' : 'The draught is spilling her up out of a cleft');
-  return { say: m.way === 'on' ? `${what} The gust carries her into the dark` : `${what} The gust carries her in, and the draught spills her up a cleft onto ${legName(m.exit)}`, went: m.went };
-}
-station.gusts.push(doorGust);
-/** Space under a cave: up she comes, onto the leg. */
-function comeUp() {
-  const T = door.trip, m = door.tunnel.up();
-  if (!T || !m) return;
-  door.trip = tripFor(m, T.hold, null, 'Up the cleft, into the daylight');
-}
-function fade(v) {
+/** Through the open door from off it: the door carries her. */
+function goThrough() {
+  const h = sail.helm, col = doorColumn(h.pose);
+  if (!door.rules.open || door.trip || col < 0 || h.dazed()) return false;
+  door.trip = tripFor(through(col), { ...h.pose }, 'Through the dark under the cliffs');
+  return true;
+}function fade(v) {
   if (!door.fade) {
     const el = door.fade = document.createElement('div');
     Object.assign(el.style, { position: 'fixed', inset: '0', background: '#000', opacity: '0', pointerEvents: 'none', zIndex: 15 });
@@ -398,7 +395,7 @@ function fade(v) {
     race counts the legs she's passed under, in order. */
 function reached(k, to, onLeg) {
   sail.helm.moor({ ...to });
-  onLeg?.(k > 0 ? DOOR.EXITS[k - 1].to : DOOR.FROM, DOOR.EXITS[k].to);
+  onLeg?.(DOOR.FROM, DOOR.EXITS[k].to);
 }
 function tripTick(dt, onLeg) {
   const T = door.trip, h = sail.helm;
@@ -407,26 +404,23 @@ function tripTick(dt, onLeg) {
     T.wait = false;
     h.moor({ ...T.from });
   }
-  // (played out: waiting under a cave, her place there, or out of it onto the leg)
-  if (T.hold < 0) {
-    T.t += dt;
-    while (T.i < T.beats.length && T.t >= T.beats[T.i].secs) {
-      T.t -= T.beats[T.i].secs;
-      T.i++;
-      door.snap = true;   // (the camera jumps a beat at a time: under the black, in and out)
-    }
-    if (T.i >= T.beats.length) {
-      reached(T.m.exit, T.m.to, onLeg);
-      if (T.m.way === 'out') { door.trip = null; door.behind = T.m.exit === 0; fade(0); toast(`Up out of a cleft in the rock, onto ${legName(T.m.exit)}`); return; }
-      T.hold = T.m.exit; T.t = 0;
-      toast(`Daylight down a cleft above: Space, up onto ${legName(T.hold)}, or a Vegas on through the dark`);
-    }
+  // (played out: up out of the cleft onto the leg)
+  T.t += dt;
+  while (T.i < T.beats.length && T.t >= T.beats[T.i].secs) {
+    T.t -= T.beats[T.i].secs;
+    T.i++;
+    door.snap = true;   // (the camera jumps a beat at a time: under the black, in and out)
   }
-  const B = T.hold < 0 ? T.beats[T.i] : null, u = B ? Math.min(1, T.t / B.secs) : 0;
-  const p = T.p = B ? B.at(u) : under(UNDER_Z[T.hold]);
+  if (T.i >= T.beats.length) {
+    reached(T.m.exit, T.m.to, onLeg);
+    door.trip = null; door.behind = true; fade(0); toast(`Up out of a cleft in the rock, onto ${legName(T.m.exit)}`);
+    return;
+  }
+  const B = T.beats[T.i], u = Math.min(1, T.t / B.secs);
+  const p = T.p = B.at(u);
   sail.g.position.set(p.x, p.y + Math.sin(performance.now() / 1000 * 0.9) * 0.06, p.z);
   sail.g.rotation.set(0, Math.PI / 2, 0);   // (facing in, along the tunnel, d 0)
-  fade(B ? Math.min(1, B.dark(u)) : 0);
+  fade(Math.min(1, B.dark(u)));
   sail.g.updateMatrixWorld(true);
   const at = sail.g.localToWorld(V3(-1.15, SLOOP_DECK, 0)), yaw = sail.g.rotation.y;
   pirate.x = at.x; pirate.z = at.z; pirate.g.position.copy(at);
@@ -434,26 +428,16 @@ function tripTick(dt, onLeg) {
 }
 
 // ---------- the keys, the prompt, the camera ----------
-/** Holding her: at the board, or on her way along the tunnel. (Waiting under a cave she's free to Sail:
-    doorInside.) */
-export const doorHolds = () => door.on || (!!door.trip && door.trip.hold < 0);
-/** Waiting under a cave, in the tunnel: the Sailing board's hers, but no pins, no moves, no guns. */
-export const doorInside = () => !!door.trip && door.trip.hold >= 0;
-/** In the tunnel, on her way or waiting under a cave: out of anyone's reach (race.js). */
+/** Holding her: at the board, or on her way through the tunnel. */
+export const doorHolds = () => door.on || !!door.trip;
+/** Inside the tunnel, waiting (no more, since 12 Nov: through she goes in one go); kept for race.js. */
+export const doorInside = () => false;
+/** In the tunnel: out of anyone's reach (race.js). */
 export const doorCarried = () => !!door.trip;
 const VIEW = ['z', 'c', 'v', '-', '_', '=', '+', 'p'];
-/** The Sailing board's own keys (sail-station.js, stationKey), let through to it under a cave. */
-const SAIL_KEYS = ['1', 'escape', 'enter', ' ', 'a', 'd', 'w', 'e', 's', 'q', 'arrowleft', 'arrowright', 'arrowup', 'arrowdown'];
 /** A key at sea, first: whether it was the door's. */
 export function doorKey(key) {
   if (!sail.on || !door.W) return false;
-  if (doorInside()) {
-    // (under a cave: 1 the Sailing board, its own keys while it's out; Space up the cave; nothing else)
-    if (VIEW.includes(key) || key === '1') return false;
-    if (station.on) return !SAIL_KEYS.includes(key);
-    if (key === ' ' || key === 'enter') comeUp();
-    return true;
-  }
   if (door.trip) return !VIEW.includes(key);
   if (door.on) {
     if (key === 'escape') { boardDown(); return true; }
@@ -463,18 +447,20 @@ export function doorKey(key) {
     return !VIEW.includes(key);
   }
   const h = sail.helm;
-  if ((key === ' ' || key === 'enter') && !door.rules.open && offDoor(h.pose.c, h.pose.r) && h.slot < 0 && !h.cur && !h.held()) { boardUp(); return true; }
+  if ((key === ' ' || key === 'enter') && offDoor(h.pose.c, h.pose.r) && h.slot < 0 && !h.cur && !h.held()) {
+    if (!door.rules.open) { boardUp(); return true; }
+    if (door.opening >= 3.9 && goThrough()) return true;
+  }
   return false;
 }
 export function doorPrompt() {
   if (!sail.on || !door.W) return '';
-  if (doorInside()) return `Under ${legName(door.trip.hold)}, daylight down a cleft above · Space: come up · 1: Sailing, a Vegas carries her on through the dark (less, and she's spilled up here)`;
   if (door.trip) return door.trip.say;
   if (door.on) return `${door.board.prompt()} · Esc: step back`;
   const h = sail.helm;
   if (!offDoor(h.pose.c, h.pose.r) || h.slot >= 0) return '';
-  if (door.rules.open) return mouthOf(h.pose) >= 0 ? 'The open door · a long dark tunnel, and a draught blowing out of it' : 'The door in the cliff stands open';
-  return 'Under the cliff · Space: look closer at the rock';
+  if (door.rules.open) return 'The door stands open · Space: through the tunnel, up onto leg 3';
+  return 'The starlit door · Space: Duty Navigation on the rock opens it';
 }
 /** The camera (den.js): straight on to the board and the carved wheel; behind her going in; along the
     tunnel and waiting under a cave; and at the cave she comes up, watching her come out. */
@@ -508,6 +494,9 @@ export function doorCam() {
 export function doorTick(dt, onLeg) {
   const W = door.W;
   if (!W) return;
+  // (the stars round the door and over its clefts, twinkling)
+  const tw = performance.now() / 1000;
+  for (const s of W.ring ?? []) s.userData.halo.material.opacity = 0.55 + 0.35 * Math.sin(tw * 1.8 + s.userData.ph);
   door.snap = false;
   document.body.classList.toggle('starlit', sail.on && (door.on || !!door.trip));   // (the sailing bar out of the way: den.html)
   if (door.on) door.board?.tick(dt);
@@ -530,13 +519,14 @@ export function doorTick(dt, onLeg) {
     W.glow.children.forEach((p) => { p.material.opacity = glow * (0.75 + 0.25 * Math.sin(t * 4)); });
     W.front[0].rotation.y = swing * 1.75; W.front[1].rotation.y = -swing * 1.75;
     if (door.opening > 1.2 && !door.said.open) { door.said.open = true; toast('The door swings open on a tunnel, long and dark'); burst(V3(DX, DH / 2, FACE_Z + 0.5), '#d8ecff', 30, 4); }
+    // (swung open, it carries her straight through, if she's still off it: Navigation's the whole of it)
+    if (door.opening >= 3.9 && !door.said.through && !door.on && sail.on) { door.said.through = true; goThrough(); }
   } else W.glow.children.forEach((p) => { p.material.opacity = 0; });
 }
 
 /** A new race, or a fresh voyage: shut, dark, the board gone, nobody in the tunnel. */
 export function doorReset() {
   door.rules.reset();
-  door.tunnel.reset();
   door.said = {};
   door.opening = 0; door.booched = 0; door.closing = 0; door.behind = false;
   if (door.trip) { door.trip = null; fade(0); }
@@ -557,12 +547,10 @@ export function doorCheat() {
 
 /* A test hook beside the cheat, for what the cheat doesn't do. From the console, locally:
    (await import('/js/den/door.js')).doorTest.open() lights the run's stars and opens it;
-   .off() puts her off the door, .mouth() at its mouth facing in; .gust(7) plays a chain of that many
-   steps at the tunnel, as the Sailing board's drop would (7 a Vegas). */
+   .off() puts her off the door; .through() carries her through it, once it's open. */
 export const doorTest = {
   off() { sail.helm.moor({ c: D.OFF[0][0], r: D.OFF[0][1], d: 3 }); },
-  mouth() { sail.helm.moor({ c: D.OFF[0][0], r: D.OFF[0][1], d: 0 }); },
-  gust(steps) { const said = doorGust({ run: runFor(steps), steps }); if (said) toast(said.say); return !!said; },
+  through() { return goThrough(); },
   open() {
     doorWorld();
     if (door.board) boardDown(true);

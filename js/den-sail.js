@@ -399,13 +399,12 @@ export function layRace(K = DEFAULT_COURSE, custom = false) {
             on the run home, facing along it. */
         CRANE: { LEDGE: [CRANE_C, S[4].r0], TO: { c: CRANE_C, r: RUN, d: 3 } },
         /** The starlit door (src/den-door.ts; Duty Navigation opens it): a door in the cliff of spit 2, off
-            leg 2 (FACE, the water off it OFF), and its tunnel's exits (12 Nov), straight on under the course
-            in the door's columns: each a cleft in a spit's far face (OUT), the water off it on the next
-            leg (INTO): spit 2's onto leg 3, and the far end, spit 4's, onto leg 5. The tunnel's no square of
-            the sea: it runs under. */
+            leg 2 (FACE, the water off it OFF), and its tunnel's one exit (back to simple, 12 Nov: one stretch),
+            straight on under the spit in the door's columns: a cleft in the spit's far face (OUT), the water off
+            it on leg 3 (INTO). The tunnel's no square of the sea: it runs under. */
         DOOR: {
             FACE: [[DOOR_C, S[1].r0], [DOOR_C + 1, S[1].r0]], OFF: [[DOOR_C, S[1].r0 - 1], [DOOR_C + 1, S[1].r0 - 1]],
-            EXITS: [1, 3].map((s) => ({
+            EXITS: [1].map((s) => ({
                 OUT: [[DOOR_C, S[s].r1], [DOOR_C + 1, S[s].r1]], INTO: [[DOOR_C, S[s].r1 + 1], [DOOR_C + 1, S[s].r1 + 1]],
             })),
         },

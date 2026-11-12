@@ -608,7 +608,7 @@ describe('the race: the clock, in order, a ceremonious finish line, your best ke
 });
 
 describe('the starlit door\'s place (11 Nov; the door itself: den-door.test.ts)', () => {
-  it('a plain cliff face off leg 2, and its tunnel\'s exits onto legs 3 and 5 (12 Nov), clear of every shortcut and out of the gun gap\'s reach', () => {
+  it('a door in the cliff off leg 2, and its tunnel\'s one exit onto leg 3 (one stretch since 12 Nov), clear of every shortcut and out of the gun gap\'s reach', () => {
     const D = RC.DOOR, OUT = D.EXITS.flatMap((e) => e.OUT);
     for (const [c, r] of [...D.FACE, ...OUT]) expect(sea.ground(c, r), `${c},${r}`).toBe(true);
     for (const [c, r] of D.OFF) { expect(sea.open(c, r)).toBe(true); expect(stretchAt(c, r)).toBe(1); expect(snakeAt(c, r)).toBeNull(); }

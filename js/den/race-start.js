@@ -33,9 +33,9 @@ const slowTex = () => (slowTexture ??= canvasTex(64, 64, (g, w, h) => {
   g.clearRect(0, 0, w, h);
   g.fillStyle = 'rgba(190,236,250,0.16)'; g.fillRect(4, 4, w - 8, h - 8);
   g.strokeStyle = 'rgba(232,250,255,0.75)'; g.lineWidth = 2; g.setLineDash([5, 5]); g.strokeRect(5, 5, w - 10, h - 10); g.setLineDash([]);
-  // (the arrow points down the texture: the way it's turned to blow, as a lane's streaks run)
+  // (the arrow points up the canvas: laid flat and turned as a lane is, that's the way it blows)
   g.fillStyle = 'rgba(245,252,255,0.9)';
-  g.beginPath(); g.moveTo(w / 2, h - 14); g.lineTo(w / 2 - 14, h / 2); g.lineTo(w / 2 - 6, h / 2); g.lineTo(w / 2 - 6, 14); g.lineTo(w / 2 + 6, 14); g.lineTo(w / 2 + 6, h / 2); g.lineTo(w / 2 + 14, h / 2); g.closePath(); g.fill();
+  g.beginPath(); g.moveTo(w / 2, 14); g.lineTo(w / 2 - 14, h / 2); g.lineTo(w / 2 - 6, h / 2); g.lineTo(w / 2 - 6, h - 14); g.lineTo(w / 2 + 6, h - 14); g.lineTo(w / 2 + 6, h / 2); g.lineTo(w / 2 + 14, h / 2); g.closePath(); g.fill();
 }));
 function slowTile(c, r, d) {
   const m = mesh(new THREE.PlaneGeometry(CELL * 0.9, CELL * 0.9).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: slowTex(), transparent: true, depthWrite: false, fog: false }), false);

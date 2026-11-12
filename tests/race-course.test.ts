@@ -182,7 +182,6 @@ describe('the race on a course from the editor (12 Nov)', () => {
 describe('the starlit door on an edited course (12 Nov: "make the [starlit] door public")', () => {
   it('nothing else may cut through a spit in its columns: it says so', () => {
     expect(problems({ ...DEFAULT_COURSE, head: 15 }).join(' ')).toMatch(/starlit door/);
-    expect(problems({ ...DEFAULT_COURSE, lock: 14 }).join(' ')).toMatch(/starlit door/);
     expect(problems({ ...DEFAULT_COURSE, mid: 16 }).join(' ')).toMatch(/starlit door/);
   });
 

@@ -147,9 +147,8 @@ export function problems(k) {
     for (const id of COL_KEYS)
         if (PLACE[id].spit < 5)
             bySpit[PLACE[id].spit].push([...cols(k, id), NAMES[id]]);
-    // (the starlit door, fixed in place: its face in spit 2, and its far exit in spit 4)
+    // (the starlit door, fixed in place: its face and its cleft in spit 2)
     bySpit[1].push([DOOR_COLS[0], DOOR_COLS[1], DOOR_NAME]);
-    bySpit[3].push([DOOR_COLS[0], DOOR_COLS[1], DOOR_NAME]);
     bySpit.forEach((spans, s) => {
         for (let i = 0; i < spans.length; i++)
             for (let j = i + 1; j < spans.length; j++) {

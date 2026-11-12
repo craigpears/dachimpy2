@@ -31,7 +31,7 @@ describe('the simulated course is the helm\'s (11 Nov)', () => {
     }
     expect(leg).toBe(RC.STRETCHES.length - 1);
     const at = (t: number) => { const p = routePose(t); return stretchAt(Math.round(p.c), Math.round(p.r)); };
-    const legs: Record<CutId, number[]> = { guns: [0, 1], wreck: [0, 0], headwind: [1, 2], double: [1, 2], whirls: [2, 3], rocks: [2, 3], forage: [2, 3], locks: [3, 4], zigzag: [3, 3], crane: [4, 5], triple: [4, 5], door: [1, 4] };
+    const legs: Record<CutId, number[]> = { guns: [0, 1], wreck: [0, 0], headwind: [1, 2], double: [1, 2], whirls: [2, 3], rocks: [2, 3], forage: [2, 3], locks: [3, 4], zigzag: [3, 3], crane: [4, 5], triple: [4, 5], door: [1, 2] };
     for (const c of Object.values(CUTS)) expect([at(c.tIn), at(c.tOut)], c.id).toEqual(legs[c.id]);
     expect(tauAt(0, 20)).toBeLessThan(tauAt(1, 20));
   });
@@ -157,19 +157,18 @@ describe('the bribe at the gate, simulated (12 Nov: "build the bribe gate ... to
   });
 });
 
-describe('the starlit door\'s tunnel, simulated (12 Nov: "you should always get some benefit from going through it")', () => {
+describe('the starlit door, simulated: Navigation only, one stretch through (12 Nov: "nav only shortcut that takes you just like one step through")', () => {
   const rep = run(400, 4, { seed: 12 });
-  it('whoever goes in always comes out ahead of the mouth, at one exit or the other, never sent back to it', () => {
+  it('whoever opens it comes up its cleft onto leg 3, back among the field, never further', () => {
     const d = rep.cuts.door;
     expect(d.done).toBe(d.tried);
-    const n = rep.exits.map((e) => e.decent + e.good + e.great);
-    expect(n.reduce((a, b) => a + b, 0)).toBe(d.done);
-    for (const [k, x] of n.entries()) expect(x, `exit ${k}`).toBeGreaterThan(0);
+    expect(rep.exits).toHaveLength(1);
+    const e = rep.exits[0];
+    expect(e.decent + e.good + e.great).toBe(d.done);
   });
-  it('she takes the exits by her skill and luck: the far end mostly the Vegas players good at it, and it wins more than coming up at the first', () => {
-    const [first, far] = rep.exits;
-    expect(far.great + far.good).toBeGreaterThan(far.decent);
-    expect(far.wins / (far.decent + far.good + far.great)).toBeGreaterThan(first.wins / (first.decent + first.good + first.great));
+  it('it pays for a navigator good at it, as any shortcut does for its puzzle: a great one saves more than a decent one', () => {
+    const s = rep.cuts.door.saved;
+    expect(s.great.secs / s.great.n).toBeGreaterThan(s.decent.secs / s.decent.n);
   });
 });
 
