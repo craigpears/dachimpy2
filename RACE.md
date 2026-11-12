@@ -365,7 +365,8 @@ So the room-run race is the proof of concept. Later, a hardened server: the serv
 the players' inputs and checks every puzzle's moves (the puzzles are seeded rules with no 3D, so it can
 replay them), so nothing a browser claims is simply believed; state sent as full snapshots that heal a
 missed message; reconnecting mid-race. Even the proof of concept sends full snapshots with a sequence
-number, never one-off messages that must all arrive, so a missed one is corrected a moment later.
+number, never one-off messages that must all arrive, so a missed one is corrected a moment later. The
+puzzles checked by the server, their timing too, and what it costs: IDEAS.md, "Puzzles the server can check".
 
 ## 7. The start: a field of whirlpools and winds (built 11 Nov)
 

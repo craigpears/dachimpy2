@@ -2280,3 +2280,31 @@ some banners or something and decorating." Their examples:
 - Little moments as you sail past, each in a speech bubble, cheap to add (the den's talking pirates and
   `Voices`, whom you hear at sea). Others to fit in: the starter at the line, Umami somewhere on a bank.
   Each a bit of config by the course, not a change to the race's rules.
+
+## Puzzles the server can check, so nobody can cheat (12 Nov)
+
+The user (12 Nov): "that is a problem that Puzzle Pirates really suffers from, is that everything is in a
+client, especially like running puzzles ... it makes it very vulnerable to hacks and like tampering with
+client-side code. So long term ... a great proof of concept, is creating puzzles and things like that that
+can be run efficiently within a server-based environment." Not only whether a result is possible, but
+whether its timing is: "you can't just say, oh yeah, I put the puzzle here, here, here, and here for
+sailing magically ... you've had 5 minutes to send your first move, then you suddenly made 90." And "how
+intensive is that? What network usage does that have?"
+
+- **How it would work:** you still play on your own screen, instantly, but each move goes to the server
+  too, and the server plays the same move on its own copy of the board (the puzzles are already rules
+  with no 3D in `src/`, so the same code runs there). The server deals the pieces and shows a browser only
+  what the puzzle shows (the next piece or two), so nobody can work out a run in advance. It times moves
+  by when they arrive, not by what the browser says, so ninety moves can't land at once after five
+  minutes of nothing. A move faster than a person could make is refused. If the two copies disagree, the
+  server's wins (it only happens to someone tampering).
+- **How much traffic (a rough sum, 12 Nov):** a move is a few bytes (which move, a turn, where), and a fast
+  player makes one to three a second. Sent in little batches four times a second, that's about 100 bytes a
+  second up: about 60 KB for a ten-minute race, less than one picture on the changelog. The server's
+  snapshots of six sloops back down are a kilobyte or so a second. Checking a move costs the server a
+  fraction of a millisecond.
+- **What it can't stop:** a program playing the puzzle for you in the browser (a bot) is making real,
+  legal moves at a person's pace. That's caught only by its patterns, as in any online game.
+- **Where it'd run:** Cloudflare, as the den's rooms already do. The free plan covers playtests; the paid
+  Workers plan ($5 a month, as last known) covers a lot of races before anything more is charged.
+- Racing first (RACE.md §6, "Long term, a proper server"), then every puzzle played online.
