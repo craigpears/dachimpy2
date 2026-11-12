@@ -7,14 +7,15 @@ export const STARTER = {
     /** Taken in to the starting line, before the off: the race explained (the user, 11 Nov: "Here are your
         options ... do you want to bilge through a [lock]? Or you can take the long way around or zoom over a
         whirlpool, risking a doomed return to the start if you ... get it wrong"). The long way, shortcuts
-        that cost a puzzle with a few named, the snakes, and the shooting. Never the starlit door: a race's
-        rules are explained, its secret isn't. Said a line at a time. The bribe at the gun gap's gate named
+        that cost a puzzle with a few named, the snakes, and the shooting. Said a line at a time. The starlit
+        door named among the shortcuts since 12 Nov (RULES.md, "No hidden gems in the proof of concept"). The bribe at the gun gap's gate named
         since 12 Nov, once it was built (RACE.md §3); and the gambles, the veiled wind and the turning pool,
         the same day (RACE.md §4). */
     explain: [
         'Here\'s the way of it. Round the numbered buoys, five legs and the run home: the long way, no puzzle, just sail her',
         'Or cut through the spits, if ye dare. Every shortcut costs ye a puzzle: bilge up through a lock, build a crane, row the headwind gap',
         'Zoom over the whirlpools on a Vegas, hop a headwind with a Double, or haul up some treasure and pay off the guard at the gate. Get it wrong and ye\'re back where ye started',
+        'Or, for a navigator, a starry door in the cliff off leg two, opened by Navigation, and a tunnel under the course. A Vegas carries ye on through the dark',
         'Or take a gamble: a veiled wind that might carry ye on or blow ye back, or a whirlpool that turns its spin. Catch it turning yer way',
         'Mind the winds that sweep ye back. The trade wind up the left takes ye all the way to the start, and the run home runs right beside it',
         'And the others\'ll shoot ye if ye sit still in the open. Pick yer spot on the line, and Space for the count',
@@ -46,8 +47,8 @@ export const CHARACTER = {
         + 'line, explains the race, counts you down, fires the gun, and calls the times at the finish line. Nameless '
         + 'for now: a real pirate needs the user\'s pick. (The rivals racing you are the den\'s own characters.)\n\n'
         + 'Explains the race\'s rules before the off (the long way, shortcuts that cost a puzzle, a few named as '
-        + 'examples, the snakes, the shooting), never where a shortcut is or how it\'s done beyond that, and never '
-        + 'the starlit door (RULES.md, "Hidden gems, never hinted").',
+        + 'examples, the starlit door among them, the snakes, the shooting), never where a shortcut is or how it\'s '
+        + 'done beyond that (RULES.md, "No hidden gems in the proof of concept").',
     theUser: [
         { on: '11 Nov', said: 'a winding, snakes and ladders, zigzagging kind of course, just with a lot of shortcuts, and each shortcut is a different puzzle' },
         { on: '11 Nov', said: 'Obviously, this will be out near where Primates Rule is, I guess ... We\'re going to have to go through several iterations of this course.' },

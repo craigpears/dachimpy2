@@ -15,9 +15,10 @@
    narrow run of water goes from beside the penguins' water (a Vegas over Kikkit's whirlpools is the one
    way there) down past the island to a little cove at its back, behind the warehouse: a sandy beach, a
    lantern, crates and barrels under a tarp, a rowboat drawn up. Nothing to do there yet: smuggling, and
-   Helium's rum, plug in later, here. A hidden gem (RULES.md, "Hidden gems, never hinted"): nothing names
-   it before you're there, and it's on the captain's map only once you've been (a hidden place found:
-   src/den-finds.ts). */
+   Helium's rum, plug in later, here. Built as a hidden gem: in the game nothing names it before you're
+   there, and it's on the captain's map only once you've been (a hidden place found: src/den-finds.ts).
+   Shown since 12 Nov outside the game (the changelog, a cheat, ?at=smugglers: RULES.md, "No hidden gems
+   in the proof of concept"). */
 import { LAY } from './den-sail.js';
 const S = LAY.SMUGGLERS;
 export const SMUGGLERS = {

@@ -19,7 +19,10 @@ in time the den becomes the thing itself (TODO.md, "Split the den off").
 - **Full of things to find.** "The game should be full of those little let's go explore,
   discover some Easter eggs" (the user, 10 Nov, "a top principle that we want to follow"). Off
   the track the story leads you along there's always something to stumble on (the lagoon behind
-  the locks, its wreck and the animal to rescue), never all signposted.
+  the locks, its wreck and the animal to rescue), never all signposted. But nothing's kept secret
+  in the proof of concept (the user, 12 Nov: "I think we get rid of the hidden gem idea ... I just
+  want to show stuff"): the starlit door, the penguins and the smugglers' beach are in the
+  changelog, each with a link and a cheat, like everything else (RULES.md).
 - **The way on pulls you; the side ways push back.** The main way should guide you naturally,
   easy to follow without a word; going off it to a side quest takes going against the grain, a
   bit of bumping and squeezing (the user, 10 Nov: "it should naturally pull you in a direction.
@@ -179,16 +182,16 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    the one you go looking for (nothing says where). And on from the penguins, a run of water behind
    the rocks leads to a smugglers' beach round the back of Port Decorum, the imperial island past the
    checkpoint (11 Nov): the back way into a port shut to pirates, where Helium's rum will one day be
-   smuggled ashore. Nothing to do there yet, and nothing says it's there.
+   smuggled ashore. Nothing to do there yet.
    And out past Primates Rule, a buoy and a gate in a line of rocks: the sloop race (11 Nov), the den's
    own characters racing you round a zigzag course, Kikkit greedy for her Vegas, Tzz steady on her
    Doubles, Dalnoth with Umami aboard to do his foraging, firing on whoever sits still in the open; the
    long way round every bend or a
    shortcut through it by a puzzle the den already has (guns, oars, whirlpools, locks, a crane), so the race
-   comes down to which puzzles you back yourself on. Minigames like this, not sea battles. And hidden in
-   its cliffs, never pointed out, the starlit door (11 Nov): Duty Navigation on the rock as the night sky,
-   two constellations lighting its stars, opens a tunnel under the course, its biggest shortcut, for whoever
-   finds it and can navigate (and then throw a Vegas).
+   comes down to which puzzles you back yourself on. Minigames like this, not sea battles. And in
+   its cliffs, the starlit door (11 Nov): Duty Navigation on the rock as the night sky,
+   two constellations lighting its stars, opens a tunnel under the course, its biggest shortcut, the long
+   way round for a navigator (who can then throw a Vegas). The starter names it among the shortcuts (12 Nov).
    *(11 Nov: on hold. Dalnoth is the Vikings' chief, his raids on the den Viking raids as Puzzle
    Pirates has them, and called on by Pandayay; going after him, steps 6 and 7, waits until a reason
    grows out of something else: IDEAS.md, "Her Vikings bring you back to the den".)*

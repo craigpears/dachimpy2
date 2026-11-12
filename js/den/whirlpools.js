@@ -252,4 +252,10 @@ export function kikkitCheat() {
   h.moor({ c: K.MOUTH.c, r: K.LANDING.r0, d: 0 });
   sail.riding = false;
 }
+/** Vegas Island's starting point (menus.js, ?at=penguins; public since 12 Nov): at sea in the penguins'
+    water past the whirlpools, as if a Vegas had just carried her there (their moment plays). */
+export function penguinsCheat() {
+  sail.helm.moor({ c: PENGUINS[0], r: PENGUINS[1], d: 2 });
+  sail.riding = false;
+}
 export { PENGUINS };

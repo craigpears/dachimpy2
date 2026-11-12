@@ -547,7 +547,15 @@ export function doorReset() {
   }
 }
 
-/* A test hook, not a cheat (no menu or ?at= names it: a hidden gem). From the console, locally:
+/** Its starting point (menus.js, ?at=door; public since 12 Nov, no hidden gems in the proof of concept):
+    on the race course, stopped under the door's crag, ready for Space. */
+export function doorCheat() {
+  doorWorld();
+  sail.helm.moor({ c: D.OFF[0][0], r: D.OFF[0][1], d: 3 });
+  sail.riding = false;
+}
+
+/* A test hook beside the cheat, for what the cheat doesn't do. From the console, locally:
    (await import('/js/den/door.js')).doorTest.open() lights the run's stars and opens it;
    .off() puts her off the door, .mouth() at its mouth facing in; .gust(7) plays a chain of that many
    steps at the tunnel, as the Sailing board's drop would (7 a Vegas). */

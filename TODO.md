@@ -18,7 +18,7 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   not even seen a visual or anything about those puzzles, the navigation puzzle that is." So: the crane
   built by Carpentry on the race; the bribe at the gate, the wreck's coins hauled by Treasure Haul; Duty
   Navigation itself (`navigation-test.html`); and the starlit door on the race course (its Navigation on
-  the rock, the door opening, the tunnel and its clefts).
+  the rock, the door opening, the tunnel and its clefts), straight there by `den.html?at=door` since 12 Nov.
 - **The race's chart (12 Nov):** `changelog/race-map.jpg` and its changelog entry, and the design
   page (`design.html`), for whether they read well.
 - **The course editor (12 Nov):** `race-editor.html`: move buoys and shortcuts, set each puzzle's size,
@@ -319,12 +319,6 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   between the Penguin Island and that back entrance. Like, it's only like one tile wide, it's tiny. I
   don't think you can even really navigate in there without bumping off the rocks. It looks silly."
   So the smugglers' run behind the rocks wide enough to sail without bumping (two or three squares).
-
-
-- **The cheats menu in sections (12 Nov):** "have a peek at the cheats menu to make sure it still looks
-  relatively organized ... all of the cheats ... can be grouped into sections at this point, and it's
-  probably quite a long menu with how the buttons worked." Grouped under a few headings, still fitting
-  on the screen. (Being done with the starlit door going public.)
 
 
 - **The race's chart kept in step with the course (12 Nov):** "hopefully we're keeping this [race map]

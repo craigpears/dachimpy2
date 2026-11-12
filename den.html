@@ -185,11 +185,14 @@
     .crew .row label { flex: 1; margin: 0; }
     .crew .err { color: var(--bad); min-height: 1.3em; margin: 10px 0 0; }
     .crew .err.calm { color: var(--dim); }
-    .cheats > div { max-width: 340px; padding: 14px 18px; }
+    .cheats > div { width: 640px; max-width: calc(100vw - 32px); max-height: calc(100vh - 32px); overflow: auto; box-sizing: border-box; padding: 14px 18px; }
     .cheats h2 { font-size: 22px; }
     .cheats p { font-size: 14px; margin-bottom: 8px; }
-    .cheats .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 0 0 10px; }
-    .cheats .grid button { font-size: 14px; padding: 8px 6px; min-height: 38px; border-radius: 6px; }
+    .cheat-groups { columns: 2 270px; column-gap: 18px; text-align: left; }
+    .cheat-groups section { break-inside: avoid; padding-bottom: 8px; }
+    .cheat-groups h3 { margin: 0 0 5px; font: 700 15px 'Alegreya', serif; color: var(--gold); letter-spacing: .3px; }
+    .cheats .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin: 0; }
+    .cheats .grid button { font-size: 13.5px; padding: 6px 5px; min-height: 34px; border-radius: 6px; line-height: 1.15; }
     .dress { position: fixed; inset: 0; display: none; place-items: center; background: rgba(10, 6, 3, .55); z-index: 6; }
     .dress.on { display: grid; }
     .dress-box { position: relative; display: flex; gap: 16px; background: #2a1d13; border: 2px solid var(--gold); border-radius: 12px; padding: 16px 18px; width: min(680px, calc(100vw - 32px)); box-sizing: border-box; max-height: calc(100vh - 32px); overflow: auto; }
@@ -442,10 +445,8 @@
   <div id="tags"></div>
   <div class="crew cheats" id="cheats"><div>
     <h2>Cheats</h2>
-    <p>For trying things out. Skip to a stage: the den starts afresh, built up to there. Each starting point puts its link in the address bar, to share.</p>
-    <div class="grid" id="cheat-stages"></div>
-    <p>Or skip ahead now:</p>
-    <div class="grid" id="cheat-now"></div>
+    <p>For trying things out. Each starting point puts its link in the address bar, to share.</p>
+    <div class="cheat-groups" id="cheat-groups"></div>
     <button class="link" id="cheats-close">Close</button>
   </div></div>
   <div class="crew" id="crew"><div>
@@ -514,7 +515,7 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.OYF37AZN.js');
+    import(local ? './js/den.js' : './js/den.DRRQRUTH.js');
   </script>
 </body>
 </html>
