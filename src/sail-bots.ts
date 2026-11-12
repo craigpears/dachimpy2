@@ -105,7 +105,7 @@ function trigger(s: Sailing, c: number, along?: number[]): number {
     if (!e.dropped || e.booched) continue;
     if (!along) { most = Math.max(most, e.steps); continue; }
     let n = 0;
-    for (const st of e.stages.filter((z) => z.kind !== 'land')) {
+    for (const st of e.stages.filter((z) => z.kind === 'line' || z.kind === 'platform')) {
       if (n >= along.length || st.cleared.filter((id) => colOf.get(id) === along[n]).length < 3) break;
       n++;
     }

@@ -147,8 +147,10 @@ export interface Drop { col: number; turn: 0 | 1 | 2 | 3; row?: number }
 /** One step as it's seen: what went (or, for 'land', nothing), then the board. And what it was, so it
     can be shown for what it is (the user, 11 Nov, of Tzz's board: "there was no chain of four or
     platform clear ... a yellow on a white block, and somehow it cleared a platform"): a line step's
-    lines, each its squares [row, col] where they popped; a platform step's platforms that went. */
-export interface Stage { kind: 'land' | 'platform' | 'line'; cleared: number[]; grid: (Piece | null)[][]; platforms: Platform[]; lines?: [number, number][][]; went?: Platform[] }
+    lines, each its squares [row, col] where they popped; a platform step's platforms that went. A
+    last 'fall', clearing nothing: what the chain's last clear left in the air come to rest, when
+    anything was (so the board shows it falling then, not when the next pair lands). */
+export interface Stage { kind: 'land' | 'platform' | 'line' | 'fall';cleared: number[]; grid: (Piece | null)[][]; platforms: Platform[]; lines?: [number, number][][]; went?: Platform[] }
 
 /** What a drop earned. */
 export interface Sail {
@@ -362,7 +364,7 @@ export class Sailing {
     // Lines first, round and round; platforms only once no line is left, then round again.
     let fill = 0, first = true;
     for (;;) {
-      this.fall();
+      const moved = this.fall();
       fill += this.fills();
       if (first) { this.stage(res, 'land', []); first = false; }
       const lines = this.lines();
@@ -382,7 +384,13 @@ export class Sailing {
         continue;
       }
       const done = this.platforms.filter((p) => p.targets.every((t) => { const x = this.grid[t.r][t.c]; return !!x && x.c === t.colour; }));
-      if (!done.length) break;
+      if (!done.length) {
+        // (what the last clear left in the air has fallen: a step of its own, so the board shows it
+        // falling now, not when the next pair lands; the user, 12 Nov: "when you clear a platform,
+        // pieces just kind of floating in the air until the next piece hits the ground")
+        if (moved && res.steps) this.stage(res, 'fall', []);
+        break;
+      }
       res.steps++;
       res.platforms += done.length;
       const ids: number[] = [];
@@ -422,9 +430,10 @@ export class Sailing {
   }
 
   /** Everything loose falls until it rests: a joined pair falls only when neither half is held up;
-      fixed pieces never fall; nothing falls through a shelf. */
-  fall(): void {
-    for (let moved = true; moved;) {
+      fixed pieces never fall; nothing falls through a shelf. True if anything moved. */
+  fall(): boolean {
+    let any = false;
+    for (let moved = true; moved; any ||= moved) {
       moved = false;
       const where = this.where();
       const seen = new Set<number>();
@@ -446,6 +455,7 @@ export class Sailing {
         moved = true;
       }
     }
+    return any;
   }
 
   /** Where each piece is, by id. */

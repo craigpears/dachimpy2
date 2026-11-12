@@ -257,6 +257,29 @@ describe('platforms', () => {
     s.drop(2, 0);
     expect(s.platforms.length).toBe(2);
   });
+  it('pieces on a platform fall as soon as it clears, not at the next drop (12 Nov: "when you clear a platform, pieces just kind of floating in the air until the next piece hits the ground")', () => {
+    // A platform two by two in rows 10 and 11, one target short (its top left, wanting water), a rope
+    // standing on its top right target. The pair (wind over water) fills the gap; the platform goes and
+    // the wind and the rope, left on nothing, fall to the floor. Another platform far off, so the board
+    // isn't cleared and dealt afresh.
+    const s = game(['........', '.1......', '.1......', '20......', '........', '........', '........', '........'],
+      [plat(10, 0, 2, 2, [[10, 0, 0], [10, 1, 1], [11, 0, 2], [11, 1, 0]]), plat(4, 6, 2, 2, [[4, 6, 0], [4, 7, 1], [5, 6, 1], [5, 7, 2]])], [2, 0]);
+    const m = s.drop(0, 1);
+    expect([m.platforms, m.steps]).toEqual([1, 1]);
+    expect(draw(s, H - 1)).toEqual(['21......']);
+    // (the board draws each step's grid in turn, sail-board.js: the last must be where everything rests,
+    // nothing left in the air for the next drop to bring down)
+    const last = m.stages[m.stages.length - 1];
+    expect(last.kind).toBe('fall');
+    expect(last.cleared).toEqual([]);
+    const ids = (g: (Piece | null)[][]) => g.map((row) => row.map((x) => x?.id ?? 0));
+    expect(ids(last.grid)).toEqual(ids(s.grid));
+    const settled = new Sailing(seeded(1), false);
+    settled.lay(last.grid.map((row) => row.slice()), last.platforms);
+    expect(settled.fall()).toBe(false);
+    // (and a drop that leaves nothing loose has no such step)
+    expect(game([], [plat(4, 6, 2, 2, [[4, 6, 0], [4, 7, 1], [5, 6, 1], [5, 7, 2]])], [0, 1]).drop(0, 0).stages.map((x) => x.kind)).toEqual(['land']);
+  });
   it('a non-target square\'s piece falls once its platform goes', () => {
     const s = game([], [plat(12, 2, 2, 1, [[12, 2, 1]]), plat(5, 6, 2, 1, [[5, 6, 1], [5, 7, 1]])], [1, 2]);
     const m = s.drop(2, 0);   // 1 into the target at column 2, 2 into the square beside it
@@ -467,7 +490,7 @@ describe('each step of a chain is a line or a platform, and says which (11 Nov)'
         const { m } = ms.reduce((a, b) => (b.pts > a.pts ? b : a)), prev = s.snap(), before = s.platforms.slice();
         const res = s.drop(m.col, m.turn, m.row);
         stagesAreWhatTheySay(prev, before, res);
-        for (const st of res.stages) if (st.kind !== 'land') seen[st.kind]++;
+        for (const st of res.stages) if (st.kind === 'line' || st.kind === 'platform') seen[st.kind]++;
       }
     }
     expect(seen.line).toBeGreaterThan(2);

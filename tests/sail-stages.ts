@@ -10,8 +10,19 @@ import { seeded } from '../src/mirror-row';
     line or platform it is.) */
 export function stagesAreWhatTheySay(prev: (Piece | null)[][], before: Platform[], res: Sail): void {
   let grid = prev, plats = before;
-  for (const st of res.stages) {
-    if (st.kind === 'land') { expect(st.cleared).toEqual([]); grid = st.grid; plats = st.platforms; continue; }
+  res.stages.forEach((st, i) => {
+    // (a 'fall' only last, after a clear, clearing nothing: the board as the clear left it, settled)
+    if (st.kind === 'fall') {
+      expect(i).toBe(res.stages.length - 1);
+      expect(i).toBeGreaterThan(1);
+      expect(st.cleared).toEqual([]);
+      const s = new Sailing(seeded(1), false);
+      s.lay(grid.map((row) => row.map((x) => (x ? { ...x } : null))), plats);
+      s.fall();
+      expect(st.grid.map((row) => row.map((x) => x?.id ?? 0))).toEqual(s.grid.map((row) => row.map((x) => x?.id ?? 0)));
+      return;
+    }
+    if (st.kind === 'land') { expect(st.cleared).toEqual([]); grid = st.grid; plats = st.platforms; return; }
     // (where each piece was when it went: the board as the step before left it, settled)
     const s = new Sailing(seeded(1), false);
     s.lay(grid.map((row) => row.map((x) => (x ? { ...x } : null))), plats);
@@ -46,6 +57,6 @@ export function stagesAreWhatTheySay(prev: (Piece | null)[][], before: Platform[
       expect(st.platforms.map((p) => p.id)).toEqual(plats.filter((p) => !st.went!.includes(p)).map((p) => p.id));
     }
     grid = st.grid; plats = st.platforms;
-  }
+  });
 }
 
