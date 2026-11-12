@@ -496,6 +496,15 @@ nice and illustrative". In order:
    mid-game a button asks him, and he plays the routine your board needs from where it stands (the same
    technique routines the bots and the lesson use), a few moves shown on your own board, then hands it
    back.
+   **Context-aware, better than a set lesson (12 Nov):** "helium should kind of detect what stage you're
+   at and show you what technique. So should you be getting things to the left? ... how you should be
+   organizing the pieces should you be using hooks? ... Oh, this is how I would rescue that piece. Look, I
+   would draw these together in this way, the brown and black working together. You should be showing you
+   like techniques relevant to the situation, I guess, is a lot better than a structured tutorial. It's
+   context aware." So Helium's teaching is mostly "Help, Helium": he reads your board (the planner's
+   stage and the routine it would pick, and why), says it in a line in his voice (whites left now; save
+   that white at the top; time for the hook), and plays it on your board as the one smooth drag. A short
+   opening lesson can still show the basics first.
    **The distiller in the panel becomes Helium (12 Nov).** The panel's top strip has a pirate distiller
    by the barrels, as the real one does; ours is a stand-in (a green coat, red sash, tricorn), drawn from
    the research's description, not anyone in particular. The user, seeing it: "I'm not sure what this
