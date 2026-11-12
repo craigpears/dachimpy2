@@ -736,6 +736,12 @@ and it just works."
   come). So while three or four columns of junk are still waiting on the right, sorting junk (browns to the
   bottom, blacks to the top, §3) is wasted swaps: it all burns as it is. Sorting earns its swaps only when
   the junk is down to two or three columns and pieces are scarcer.
+- **Cost in human terms, not swaps (the user, 12 Nov):** "obviously got to think in human terms, like, yeah,
+  fine, a bot can click as fast as possible, but for a human, that kind of muscle memory of drag, you know,
+  that kind of one smooth mouse motion is cheap. It's quick." So when the techniques are ranked by how
+  efficient they are, the cost is a person's time, not the count of swaps: one smooth drag, however many
+  swaps long, is cheap; what costs is each new drag (finding the piece, picking it up), each turn back within
+  one, and the thinking before a fiddly sequence. A long straight drag beats a few short ones that swap less.
 
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
