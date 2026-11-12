@@ -674,6 +674,20 @@ things are getting a bit trickier." What the Ultimate did wrong:
   the crawl early to carry the band of colour on to the right, and the turn-over, the right-hand ladder and
   the line pull only as colour gets scarce. (More examples to come from the user.)
 
+**The eighth note: the opening's shape, upright bands, never a diagonal (the user, 12 Nov).** "the rule at
+the start is kind of like white to the left. You want to fill those columns on the right as quickly.
+Certainly once you get 2 or 3, then you can just start dragging a bit more. But ... you want to be forming
+a line of color, white, color. Again, it's not a perfect idea, but you should not have a diagonal line of
+color and white above and below it. That's how you're going to get that. Just looks horrible to unstick."
+- **First, the right-hand columns full of junk, fast:** whites to the left, and the rightmost columns filled
+  with colour as quickly as possible (Stage I's opening, §3). Once 2 or 3 are full, you can drag more freely.
+- **Upright bands:** the board should read across as colour, white, colour: full junk columns on the right,
+  the white block in the middle, the new colour coming in on the left, each band standing up.
+- **Never a diagonal band:** a slanting line of colour with whites above and below it is what gets stuck
+  ("horrible to unstick"); it's the "one thick band of color in the middle" the Ultimate left (the seventh
+  note). So a drag that would leave colour lying on a diagonal is worse than one that stacks it upright in a
+  column, even when it gets over the same junk.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
