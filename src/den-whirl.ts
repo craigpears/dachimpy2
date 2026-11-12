@@ -42,8 +42,10 @@ export const WHIRL = {
 export interface WhirlSpot { at: [number, number]; gone?: [number, number] }
 
 /** A whirlpool: its corners clockwise from the far left one (as seen from above, out to sea up), the
-    squares that are whirlpool (all four but `gone`), and the middle of it. */
-export interface Whirlpool { corners: [number, number][]; squares: [number, number][]; gone: [number, number] | null; mid: [number, number] }
+    squares that are whirlpool (all four but `gone`), and the middle of it. And, for one that turns (the
+    sloop race's turning pool, 12 Nov: src/den-gamble.ts), the way it's spinning just now (`turns`: 1
+    clockwise, as every whirlpool does by YPPedia's rules, -1 anticlockwise); none, it's clockwise. */
+export interface Whirlpool { corners: [number, number][]; squares: [number, number][]; gone: [number, number] | null; mid: [number, number]; turns?: () => 1 | -1 }
 
 export function whirlpool(spot: WhirlSpot): Whirlpool {
   const [c, r] = spot.at, gone = spot.gone ?? null;
@@ -58,18 +60,19 @@ export function whirlpool(spot: WhirlSpot): Whirlpool {
 export const inWhirlpool = (w: Whirlpool, c: number, r: number): boolean => w.squares.some(([x, y]) => x === c && y === r);
 
 /** A whirl: from her square of it, clockwise round by the next corner (`via`) to the opposite one,
-    turned a quarter clockwise. */
-export function whirl(w: Whirlpool, p: Pose): { via: [number, number]; to: Pose } {
+    turned a quarter clockwise. Spinning the other way (`spin` -1: a turning pool, 12 Nov), round by the
+    other corner to the same opposite one, turned a quarter anticlockwise. */
+export function whirl(w: Whirlpool, p: Pose, spin: 1 | -1 = w.turns?.() ?? 1): { via: [number, number]; to: Pose } {
   const i = w.corners.findIndex(([x, y]) => x === p.c && y === p.r);
   if (i < 0) throw new Error(`not on the whirlpool: ${p.c},${p.r}`);
-  const via = w.corners[(i + 1) % 4], [c, r] = w.corners[(i + 2) % 4];
-  return { via: [...via], to: { c, r, d: (p.d + 1) % 4 } };
+  const via = w.corners[(i + 4 + spin) % 4], [c, r] = w.corners[(i + 2) % 4];
+  return { via: [...via], to: { c, r, d: (p.d + 4 + spin) % 4 } };
 }
 
 /** Where she is partway (u, 0 to 1) through a whirl, for drawing: swung round the middle of it,
-    clockwise, half a circle, turning a quarter as she goes. */
-export function whirlAt(from: Pose, to: Pose, u: number): { c: number; r: number; a: number } {
-  const e = u <= 0 ? 0 : u >= 1 ? 1 : u * u * (3 - 2 * u), th = e * Math.PI;
+    clockwise (or, `spin` -1, anticlockwise), half a circle, turning a quarter as she goes. */
+export function whirlAt(from: Pose, to: Pose, u: number, spin: 1 | -1 = 1): { c: number; r: number; a: number } {
+  const e = u <= 0 ? 0 : u >= 1 ? 1 : u * u * (3 - 2 * u), th = spin * e * Math.PI;
   const mc = (from.c + to.c) / 2, mr = (from.r + to.r) / 2, x = from.c - mc, y = from.r - mr;
-  return { c: mc + x * Math.cos(th) + y * Math.sin(th), r: mr - x * Math.sin(th) + y * Math.cos(th), a: from.d + e };
+  return { c: mc + x * Math.cos(th) + y * Math.sin(th), r: mr - x * Math.sin(th) + y * Math.cos(th), a: from.d + spin * e };
 }

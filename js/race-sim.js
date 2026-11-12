@@ -47,6 +47,11 @@
      rushes her past them; her shots quieten them (RACE.GAP.MODE: the same shots as for racers, a hit each;
      or more hits than a racer starts with) and rouse them: then they fire on any racer in reach, not only
      her, till nobody's near. Their marks are all in the spit: the long way goes by clear of them.
+   - The gambles (12 Nov; src/den-gamble.ts, BETS): the turning pool on leg 2 and the veiled wind through
+     spit 5, a bet rather than a puzzle. Coming to one, a racer takes it by her place and style (SIM.BET: the
+     back of the field the most willing, a cautious leader never); the veiled wind's a coin toss, the pool
+     comes off as often as she times it (she waits for its spin to turn her way, then goes in). Either way,
+     it carries her on (a ladder) or back (a snake) by what the helm measures (GAMBLE.SAVES).
    - Deterministic: one seed, one race. */
 import { LAY, SAIL } from './den-sail.js';
 import { RACE, LONG_ROUTE, routeRow } from './den-race.js';
@@ -60,6 +65,8 @@ import { PATCH } from './den-patch.js';
 import { WIND } from './den-wind.js';
 import { runFor, RUN } from './sailing.js';
 import { seeded } from './mirror-row.js';
+import { GAMBLE, spinWay, nextTurn } from './den-gamble.js';
+import { WHIRL, whirlpool } from './den-whirl.js';
 const RC = LAY.RACE, S = RC.STRETCHES;
 export const SKILLS = ['decent', 'good', 'great'];
 export const SIM = {
@@ -167,13 +174,27 @@ export const SIM = {
     /** A racer counts as ahead of another stopped in the open once she's this many seconds round the long
         way past her (a square: alongside isn't ahead). */
     AHEAD: 1.6,
+    /** The gambles (12 Nov; src/den-gamble.ts): how willing a racer is to take one she comes to, by her place
+        in the field (leading, in the pack, last: the back of the field the most willing, with least to lose),
+        the cautious half as willing and never in the lead, the aggressive a little more; how often she times
+        her way into the turning pool as its spin turns her way, by her skill (it's read, so it's timing: a
+        Sailing player's eye for a beat, as a well-timed Double is); and the most goes at each a race (thrown
+        back, she sails on by it the next time). Assumed. */
+    BET: {
+        WILL: { leader: 0.1, pack: 0.35, last: 0.7 },
+        TIMED: { decent: 0.65, good: 0.78, great: 0.9 },
+        MOST: 1,
+    },
 };
 /* ---- The course as the bots sail it ---- */
 const segs = LONG_ROUTE.slice(1).map((b, i) => { const a = LONG_ROUTE[i]; return { a, b, len: Math.abs(b[0] - a[0]) + Math.abs(b[1] - a[1]) }; });
 /** Seconds a square, the long way. */
 export const PACE = SIM.LONG / segs.reduce((n, x) => n + x.len, 0);
 const secsOf = (i) => segs[i].len * PACE;
-/** Where she is, `tau` seconds round the long way: on a leg, its first row, facing along it. */
+/** The squares on a leg the long way goes by on its other row: the turning pool's (src/den-gamble.ts). */
+const BY = new Set(whirlpool(RC.GAMBLES.TURN.POOL).squares.map(([c, r]) => `${c},${r}`));
+/** Where she is, `tau` seconds round the long way: on a leg, its first row (its second by the turning pool),
+    facing along it. */
 export function routePose(tau) {
     let left = Math.max(0, tau);
     for (let i = 0; i < segs.length; i++) {
@@ -182,7 +203,8 @@ export function routePose(tau) {
             const u = Math.min(1, left / secs);
             const dc = Math.sign(b[0] - a[0]), dr = Math.sign(b[1] - a[1]), d = dr > 0 ? 0 : dc > 0 ? 1 : dr < 0 ? 2 : 3;
             const c = a[0] + (b[0] - a[0]) * u, r = a[1] + (b[1] - a[1]) * u;
-            return { c, r: dr === 0 ? Math.floor(r) : r, d };
+            const row = Math.floor(r), by = dr === 0 && [Math.floor(c), Math.ceil(c)].some((x) => BY.has(`${x},${row}`));
+            return { c, r: dr === 0 ? row + (by ? 1 : 0) : r, d };
         }
         left -= secs;
     }
@@ -246,6 +268,18 @@ const sweep = (n) => n * SAIL.PUSH;
 const TOW = 1 + towPath({ c: RC.BRIBE.GATE[0], r: RC.BRIBE.GATE[1] }).length * SAIL.PUSH;
 /** How much of what the zigzag's hops can save a racer makes, by her skill at Sailing (SIM.ZIGZAG). */
 const HOPS = { decent: 0.5, good: 0.75, great: 1 };
+const sqs = (ps) => ps.map((p) => [p.c, p.r]);
+const TN = RC.GAMBLES.TURN, VL = RC.GAMBLES.VEIL;
+const bet = (id, s, c, on, back) => {
+    const tIn = tauAt(s, c), sv = GAMBLE.SAVES[id];
+    return { id, tIn, on: { t: tIn + on.secs + sv.on, trip: on.secs, by: on.by }, back: { t: tIn + back.secs + sv.back, trip: back.secs, by: back.by } };
+};
+export const BETS = [
+    // (the pool's step, then its throw: on, out across the leg and down the cleft; back, up the lane up spit 1)
+    bet('turn', 1, TN.IN[0], { secs: WHIRL.SECS + TN.ON.length * SAIL.PUSH, by: [TN.IN, TN.FAR, ...sqs(TN.ON)] }, { secs: WHIRL.SECS + TN.BACK.length * SAIL.PUSH, by: [TN.IN, TN.FAR, ...sqs(TN.BACK)] }),
+    // (onto the veiled wind from the leg, then its carry: on through onto the run home, or back along the leg)
+    bet('veil', 4, VL.WAY[0][0], { secs: (1 + VL.ON.length) * SAIL.PUSH, by: [VL.WAY[0], ...sqs(VL.ON)] }, { secs: (1 + VL.BACK.length) * SAIL.PUSH, by: [VL.WAY[0], ...sqs(VL.BACK)] }),
+];
 /** Pieces in the crane's three frames (about five squares a piece). */
 const CRANE_PIECES = Math.round(CRANE.PARTS.reduce((n, p) => n + p.rows.join('').split('#').length - 1, 0) / 5);
 export const ROUTES = [
@@ -349,7 +383,7 @@ export function progressAt(p) {
 /** A race set going: its bots (o.racers) on `o.field` if one's given (the den's: started, you racer 0,
     moved by the helm, the bots racers 1 up), else on a field of their own. */
 export function sail(o) {
-    const rand = seeded(o.seed), mode = o.mode ?? RACE.GAP.MODE, chains = o.chains ?? true, snakes = o.snakes ?? true;
+    const rand = seeded(o.seed), mode = o.mode ?? RACE.GAP.MODE, chains = o.chains ?? true, snakes = o.snakes ?? true, gambles = o.gambles ?? true;
     const gauss = () => Math.sqrt(-2 * Math.log(1 - rand())) * Math.cos(2 * Math.PI * rand());
     const draw = (mean, skill) => mean * SIM.SKILL[skill] * Math.exp(SIM.SPREAD * gauss() - SIM.SPREAD ** 2 / 2);
     const cuts = Object.fromEntries(Object.entries(CUTS).map(([k, c]) => {
@@ -373,7 +407,8 @@ export function sail(o) {
             tau: tau0, mode: 'sail', was: 'sail', spot: spots[k], tau0, from: { c: spots[k], r: RC.LINE.r, d: 0 }, tripFull: 0,
             cut: null, stage: 0, work: 0, full: 0, tries: 0, since: 0, lost: 0, move: null, combo: false, ready: new Set(), daze: 0, trip: 0, waited: 0,
             hopped: false, hop: 0, lefts: 0, purse: false, paid: false, owed: 0, done: new Set(), stop: null, inLine: new Set(), vegas: false, exit: 0,
-            res: { route: r.route.name, style: r.style.name, skill: r.skill, start: k, spot: spots[k], time: 0, place: 0, hitsTaken: 0, hitsGiven: 0, swept: [], cuts: [], exposed: [] },
+            bet: null, goes: { turn: 0, veil: 0 },
+            res: { route: r.route.name, style: r.style.name, skill: r.skill, start: k, spot: spots[k], time: 0, place: 0, hitsTaken: 0, hitsGiven: 0, swept: [], cuts: [], exposed: [], bets: [] },
         };
     });
     const botOf = (i) => bots[i - first];
@@ -535,6 +570,15 @@ export function sail(o) {
     };
     const through = (b, secs) => { tripFor(b, secs); b.stop = null; };
     const out = (b) => {
+        // (a gamble: she's where it put her, on or back; what it saved her, her Sailing meanwhile counted)
+        if (b.bet) {
+            const { b: g, on, tIn } = b.bet, w = on ? g.on : g.back;
+            b.res.bets.push({ id: g.id, on, saved: w.t - tIn - b.tripFull * (1 + chainWorth(b)), ...rankOf(b) });
+            b.tau = w.t;
+            b.bet = null;
+            b.mode = 'sail';
+            return;
+        }
         const c = b.cut;
         if (!c) {
             b.mode = 'sail';
@@ -575,6 +619,35 @@ export function sail(o) {
         b.cut = null;
         b.mode = 'sail';
         b.stop = null;
+    };
+    /** Coming to a gamble (BETS): whether she takes it, by her place and style (SIM.BET: the back of the field
+        the most willing, a cautious leader never); and if she does, its toss or her timing (she waits for the
+        pool's spin to turn her way, then goes in as it does, timed right as often as her skill), and she's
+        carried on or back. */
+    const gamble = (b, g) => {
+        if (b.goes[g.id] >= SIM.BET.MOST || b.move?.kind === 'combo')
+            return false;
+        const { rank, of } = rankOf(b), lead = rank === 0 && of > 1, last = of > 1 && rank === of - 1;
+        if (lead && b.style.caution)
+            return false;
+        const will = (lead ? SIM.BET.WILL.leader : last ? SIM.BET.WILL.last : SIM.BET.WILL.pack) * (b.style.reload ? 1.3 : 1);
+        if (rand() >= will)
+            return false;
+        b.goes[g.id]++;
+        let wait = 0, on;
+        if (g.id === 'veil')
+            on = rand() < GAMBLE.ON;
+        else {
+            // (her way is clockwise: she waits for it, if it isn't now, a beat at most)
+            if (spinWay(field.t) !== 1)
+                wait = nextTurn(field.t);
+            on = rand() < SIM.BET.TIMED[b.skill];
+        }
+        b.tau = g.tIn;
+        b.bet = { b: g, on, tIn: g.tIn };
+        tripFor(b, wait + (on ? g.on.trip : g.back.trip));
+        b.stop = null;
+        return true;
     };
     /** Through the gap, by her route: rushed past on her combo, past its guns quietened, its guard paid
         (with the wreck's coins aboard: a moment at its gate, and she's towed through), or run. */
@@ -682,6 +755,13 @@ export function sail(o) {
             // (waiting her turn: the locks' berth, sheltered; otherwise on the leg beside the way in)
             const c = b.cut;
             return c.id === 'locks' ? { c: RC.BERTH[0], r: RC.BERTH[1], d: 0 } : { ...c.at, c: c.at.c + 1, r: c.at.r - 1 };
+        }
+        if (b.mode === 'trip' && b.bet) {
+            // (carried by a gamble: from where she was, by its squares, then along the row it leaves her on to where
+            // it puts her)
+            const w = b.bet.on ? b.bet.b.on : b.bet.b.back, end = routePose(w.t), last = w.by[w.by.length - 1];
+            const pts = [[b.from.c, b.from.r], [w.by[0][0], b.from.r], ...w.by, [end.c, last[1]], [end.c, end.r]];
+            return along(pts, 1 - b.trip / Math.max(1e-9, b.tripFull));
         }
         if (b.mode === 'trip' && b.cut) {
             const T = TRIPS[b.cut.id], end = routePose(b.cut.tOut);
@@ -806,6 +886,10 @@ export function sail(o) {
                         continue;
                     }
                 }
+                // (a gamble she comes to: hers to take, or to sail on by)
+                const g = gambles ? BETS.find((x) => b.tau < x.tIn && next >= x.tIn) : undefined;
+                if (g && gamble(b, g))
+                    continue;
                 const due = b.route.cuts.map((id) => cuts[id]).filter((c) => c.id !== 'guns' && !b.done.has(c.id) && b.tau < c.tIn && next >= c.tIn).sort((x, y) => x.tIn - y.tIn)[0];
                 if (due) {
                     b.done.add(due.id);
@@ -890,6 +974,7 @@ export function sail(o) {
             return {
                 mode: b.mode, was: b.was, cut: b.cut?.id ?? null, stage: b.stage, work: Math.max(0, b.work), full: b.full, tries: b.tries, daze: Math.max(0, b.daze),
                 move: b.move ? { ...b.move } : null, hop: Math.max(0, b.hop), route: b.route.name, style: b.style.name, best: b.best, skill: b.skill, done: [...b.done],
+                bet: b.bet ? { id: b.bet.b.id, on: b.bet.on } : null,
             };
         },
     };
@@ -931,6 +1016,7 @@ export function run(races, size, opts = {}) {
     const rep = {
         races, size, byRoute: {}, byStyle: {}, bySkill: {}, bySpot: {}, bySnake: {}, cuts: {},
         exits: DOOR.EXITS.map(() => ({ decent: 0, good: 0, great: 0, wins: 0 })),
+        bets: Object.fromEntries(['turn', 'veil'].map((id) => [id, { taken: 0, on: 0, wins: 0, by: { leader: 0, pack: 0, last: 0 }, saved: { decent: { n: 0, secs: 0 }, good: { n: 0, secs: 0 }, great: { n: 0, secs: 0 } } }])),
         byPosition: { leader: { n: 0, hit: 0, wins: 0 }, pack: { n: 0, hit: 0, wins: 0 }, last: { n: 0, hit: 0, wins: 0 } },
     };
     const tally = (t, k, r) => {
@@ -970,6 +1056,15 @@ export function run(races, size, opts = {}) {
                     e[r.skill]++;
                     e.wins += r.place === 1 ? 1 : 0;
                 }
+            }
+            for (const x of r.bets) {
+                const t = rep.bets[x.id];
+                t.taken++;
+                t.on += x.on ? 1 : 0;
+                t.wins += r.place === 1 ? 1 : 0;
+                t.by[x.rank === 0 ? 'leader' : x.rank === x.of - 1 ? 'last' : 'pack']++;
+                t.saved[r.skill].n++;
+                t.saved[r.skill].secs += x.saved;
             }
         }
     }

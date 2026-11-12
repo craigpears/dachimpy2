@@ -21,7 +21,7 @@ import { WIND } from '../src/den-wind';
 import { Forage, seeded } from '../src/foraging';
 import { kikkitAt, onKikkitLanding } from '../src/den-kikkit';
 import { mooredAt } from '../src/den-moored';
-import { SIM, tauAt } from '../src/race-sim';
+import { SIM, tauAt, routePose } from '../src/race-sim';
 import { carp } from './helpers';
 import { k, DT, shut, WAYS, settle, sail, sailTo, hop, longWay, BEFORE_MID } from './race-helpers';
 import type { DeckHole } from '../src/den-patch';
@@ -211,8 +211,8 @@ describe('snakes: winds that sweep her back, their sting growing down the course
   it('the run home narrow beside a wind that sweeps her all the way back to the start ("If I accidentally misclick ... pushed into the trade winds that send you back right to the very start")', () => {
     const run = S[5].r;
     for (let c = 1; c < SAIL.COLS; c++) { expect(sea.open(c, run)).toBe(true); expect(snakeAt(c, run + 1)).toBe('left'); }
-    // (the spit beside it, but for the Triple's gap through it)
-    for (let c = 1; c < SAIL.COLS - 2; c++) expect(sea.ground(c, run - 1) || T3.some(([x, y]) => x === c && y === run - 1), `${c}`).toBe(true);
+    // (the spit beside it, but for the Triple's gap through it, and the veiled wind's since 12 Nov)
+    for (let c = 1; c < SAIL.COLS - 2; c++) expect(sea.ground(c, run - 1) || T3.some(([x, y]) => x === c && y === run - 1) || sea.veils.has(`${c},${run - 1}`), `${c}`).toBe(true);
     // A turn to starboard, a misclick, sailing home along it: back to the starting line.
     const h = new Helm(sea, { c: 15, r: run, d: 3 });
     h.put('R'); settle(h);
@@ -434,6 +434,8 @@ describe('the long way: the route the simulation\'s bots sail round (11 Nov)', (
       for (let j = 0; j <= n; j++) {
         const c = a[0] + (b[0] - a[0]) * j / n, r = a[1] + (b[1] - a[1]) * j / n;
         for (const [x, y] of [[Math.floor(c + 0.01), Math.floor(r + 0.01)], [Math.ceil(c - 0.01), Math.ceil(r - 0.01)]]) {
+          // (by the turning pool on leg 2's first row, 12 Nov, the bots go by on its second: routePose)
+          if (sea.whirlAt(x, y) === sea.whirlAt(...RC.GAMBLES.TURN.POOL.at) && !sea.whirlAt(x, y + 1)) { expect(routePose(tauAt(1, x)).r, `${x},${y}`).toBe(y + 1); continue; }
           expect(sea.ground(x, y) || sea.isRock(x, y) || !!sea.whirlAt(x, y), `${x},${y}`).toBe(false);
         }
       }
@@ -597,6 +599,16 @@ describe('Space at the race\'s start buoy, with the Sailing board open (12 Nov)'
     expect(race.takes('w', h, false)).toBe(false);
     race.start();
     expect(race.takes(' ', h, false)).toBe(false);   // (not with one on)
+  });
+});
+
+describe('the starter\'s card names the gambles (12 Nov): a veiled wind, on or back, and a whirlpool that turns', () => {
+  it('names them as gambles, in a few words, and still never the starlit door', () => {
+    const line = STARTER.explain.find((l) => /gamble/.test(l))!;
+    expect(line).toMatch(/veiled wind/);
+    expect(line).toMatch(/whirlpool that turns/);
+    expect(line.split(' ').length).toBeLessThan(35);
+    expect(STARTER.explain.join(' ')).not.toMatch(/\bdoor\b|\bstar(s|lit)?\b|navigation|tunnel/i);
   });
 });
 

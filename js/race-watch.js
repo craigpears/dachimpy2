@@ -151,6 +151,11 @@ const CARRIED = {
     crane: 'hauled over the neck by the crane', triple: 'hopping the gap on her Triple', zigzag: 'hopping the zigzag\'s headwinds',
     door: 'sailing the long way',
 };
+/** Taking a gamble (src/den-gamble.ts): on, or back. */
+const BET = {
+    turn: ['flung on by the turning whirlpool!', 'thrown back up the course by the turning whirlpool!'],
+    veil: ['carried on through by the veiled wind!', 'blown back along the leg by the veiled wind!'],
+};
 /** What a racer's up to, as the bar says it. `next`: the next shortcut her route takes, if any. */
 export function doing(x, next, home) {
     if (home !== null)
@@ -162,6 +167,8 @@ export function doing(x, next, home) {
         return 'holed! Patching her deck (Carpentry)';
     if (m === 'wait')
         return `waiting her turn at ${WHERE[x.cut ?? 'locks']}`;
+    if (m === 'trip' && x.bet)
+        return BET[x.bet.id][x.bet.on ? 0 : 1];
     if (m === 'trip')
         return x.cut ? CARRIED[x.cut] : 'swept back by the wind!';
     if (m === 'stop' && x.cut)

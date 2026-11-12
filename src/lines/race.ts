@@ -15,11 +15,13 @@ export const STARTER = {
       whirlpool, risking a doomed return to the start if you ... get it wrong"). The long way, shortcuts
       that cost a puzzle with a few named, the snakes, and the shooting. Never the starlit door: a race's
       rules are explained, its secret isn't. Said a line at a time. The bribe at the gun gap's gate named
-      since 12 Nov, once it was built (RACE.md §3). */
+      since 12 Nov, once it was built (RACE.md §3); and the gambles, the veiled wind and the turning pool,
+      the same day (RACE.md §4). */
   explain: [
     'Here\'s the way of it. Round the numbered buoys, five legs and the run home: the long way, no puzzle, just sail her',
     'Or cut through the spits, if ye dare. Every shortcut costs ye a puzzle: bilge up through a lock, build a crane, row the headwind gap',
     'Zoom over the whirlpools on a Vegas, hop a headwind with a Double, or haul up some treasure and pay off the guard at the gate. Get it wrong and ye\'re back where ye started',
+    'Or take a gamble: a veiled wind that might carry ye on or blow ye back, or a whirlpool that turns its spin. Catch it turning yer way',
     'Mind the winds that sweep ye back. The trade wind up the left takes ye all the way to the start, and the run home runs right beside it',
     'And the others\'ll shoot ye if ye sit still in the open. Pick yer spot on the line, and Space for the count',
   ],

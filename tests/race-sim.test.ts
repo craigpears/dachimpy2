@@ -64,7 +64,7 @@ describe('the simulation (11 Nov: "just run through simulations quickly and easi
     const locks = route('locks'), peaceful = style('peaceful');
     let waited = 0;
     for (let seed = 1; seed <= 20; seed++) {
-      const [a, b] = simulate({ racers: [{ route: locks, style: peaceful, skill: 'great', spot: 12 }, { route: locks, style: peaceful, skill: 'great', spot: 12 }], seed, snakes: false });
+      const [a, b] = simulate({ racers: [{ route: locks, style: peaceful, skill: 'great', spot: 12 }, { route: locks, style: peaceful, skill: 'great', spot: 12 }], seed, snakes: false, gambles: false });
       const ta = a.cuts.find((c) => c.id === 'locks')!, tb = b.cuts.find((c) => c.id === 'locks')!;
       if (!ta.done || !tb.done || Math.min(ta.saved, tb.saved) < Math.max(ta.saved, tb.saved) - 10) waited++;
     }

@@ -107,6 +107,9 @@ describe('jumping between racers, and a bar saying what each is doing (12 Nov)',
     expect(doing(x({ mode: 'wait', cut: 'locks' }), 'locks', null)).toBe('waiting her turn at the locks');
     expect(doing(x({ mode: 'daze' }), null, null)).toMatch(/Patching her deck/);
     expect(doing(x({ mode: 'trip', cut: null }), null, null)).toBe('swept back by the wind!');
+    // (the gambles, 12 Nov: on, or back)
+    expect(doing(x({ mode: 'trip', bet: { id: 'turn', on: true } }), null, null)).toMatch(/flung on by the turning whirlpool/);
+    expect(doing(x({ mode: 'trip', bet: { id: 'veil', on: false } }), null, null)).toMatch(/blown back along the leg by the veiled wind/);
     expect(doing(x({ route: 'locks' }), 'locks', null)).toBe('sailing for the locks (Sailing on the pilot)');
     expect(doing(x({ move: { kind: 'load', left: 3 } }), null, null)).toBe('loading a shot by Gunnery, under way');
     expect(doing(null, null, 2)).toBe('home, 2nd');
@@ -116,7 +119,8 @@ describe('jumping between racers, and a bar saying what each is doing (12 Nov)',
 describe('seeing the puzzling: each racer\'s board, with real moves paced to the simulation\'s times (12 Nov)', () => {
   it('her board is the puzzle she\'s at: Sailing under way and for her Vegas, Foraging at the barrier, Bilge at the lock, Gunnery loading, Carpentry patching', () => {
     const seen = new Set<string>();
-    for (const seed of [5, 6, 7]) for (const b of watched(seed).boards) for (const k of b) seen.add(k);
+    // (races where a rival fires and loads again by Gunnery: seeds 5 to 7 till the gambles, 12 Nov, moved who's where)
+    for (const seed of [3, 7, 8]) for (const b of watched(seed).boards) for (const k of b) seen.add(k);
     for (const k of ['sailing/pilot', 'sailing/vegas', 'sailing/double', 'sailing/triple', 'foraging/barrier', 'bilge/lock', 'gunnery/load', 'carpentry/patch']) expect(seen, k).toContain(k);
   });
 

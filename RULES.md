@@ -2279,6 +2279,33 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       `Race.takes`.
     - **The starter's card names the bribe:** "haul up some treasure and pay off the guard at the gate",
       among the ways through. The starlit door stays unmentioned.
+  - **The gambles (12 Nov: "sometimes maybe there should be a mysterious headwind. Half the time it pushes
+    you forward ... Sometimes ... it goes backwards. But maybe the whirlpool, the direction the whirlpool goes
+    is changes, so it goes back up ... So you can go that way if you want to take a gamble"):** two ways that
+    are a bet, not a puzzle, each a ladder or a snake, worth about nothing on average (RACE.md §4). Rules:
+    `src/den-gamble.ts`; squares `LAY.RACE.GAMBLES`; drawn by `js/den/race-gamble.js`.
+    - **The veiled wind:** a gap through spit 5 off leg 5 (column 18) under a pale shimmer, no streaks, no
+      arrow: it won't say which way it blows. Sailed onto by her own moves (never the pilot's, never a
+      chain's gust), it's a coin toss, a fresh one each time, seeded for the race: on, it blows her through
+      onto the run home facing along it; back, out of the gap and along leg 5's second row to column 6,
+      facing back the way it blew her. The way it went shows for a moment as a wind lane, gold or red, and
+      it's said ("The veiled wind's with her! ...", "... against her! Blown back along the leg").
+    - **The turning pool:** a whirlpool on leg 2's first row and spit 1's last (columns 8 and 9), by Puzzle
+      Pirates' rules, one step a move, but its spin turns on the race's clock: clockwise 4 s, slowing to a
+      stop, then anticlockwise 4 s (GAMBLE.BEAT), the same beat from the gun every race. Anticlockwise, its
+      step goes round by the other corner to the same far one and turns her a quarter left. Sailed into
+      along the leg's first row (sailing left), its step leaves her on its corner in the spit facing on or
+      back, and it throws her that way: clockwise, on across the leg and down a cleft through spit 2 onto
+      leg 3, facing along it; anticlockwise, back up a wind lane through spit 1 onto leg 1, facing along it.
+      On the leg's second row she sails by; sailed into any other way, it's a plain whirlpool turning her
+      about. Only its throw gets down the cleft (no move, pin or gust), and the lane's wind blows anyone
+      sailing down it straight back out onto leg 1. It's said ("Timed it! The whirlpool flings her on",
+      "Mistimed! The whirlpool throws her back up the course"), not Kikkit's whirlpool lines.
+    - **The rivals gamble too**, by their place in the field (the back of the field most, a cautious leader
+      never), at most once each a race (src/race-sim.ts, SIM.BET); watched, the bar says so ("flung on by the
+      turning whirlpool!").
+    - **The starter's card names them:** "Or take a gamble: a veiled wind that might carry ye on or blow ye
+      back, or a whirlpool that turns its spin. Catch it turning yer way".
   `?at=race` and one cheat. Rules: `src/den-race.ts`; drawn and played by `js/den/race.js`, its start
   `js/den/race-start.js`, its buoys and finish `js/den/race-marks.js`, its barrier `js/den/race-forage.js`;
   the starter's lines `src/lines/race.ts`.

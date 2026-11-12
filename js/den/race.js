@@ -7,7 +7,7 @@
 // its marks (the numbered buoys, the finish line and the moment you cross it, everyone's places)
 // race-marks.js; the barrier of driftwood and its Foraging race-forage.js; the gun gap as an imperial gate,
 // its guard bribed with the coins of a wreck off leg 1, race-bribe.js; your rivals' sloops on the water,
-// their broadsides and yours, race-field.js.
+// their broadsides and yours, race-field.js; its gambles (the turning pool, the veiled wind), race-gamble.js.
 // Everything it's made of is a shared piece: the sea draws its line of rocks (reef.js), the locks
 // (lock.js) and the winds (sea.js, windLane); a gun is a destructible turret (turret.js), a whirlpool
 // Kikkit's look (whirlpools.js), the sloop the sloop (sloop.js), the crane's frames played on the deck
@@ -36,6 +36,7 @@ import { marksWorld, marksTick, crossed, placings } from './race-marks.js';
 import { fieldWorld, fieldTick, fieldHome, fieldShot, fieldHit, fieldAt, fieldReset } from './race-field.js';
 import { forageWorld, forageKey, foragePrompt, forageHolds, forageTick, forageReset, forageCam, forageHover, forageClick } from './race-forage.js';
 import { bribeWorld, bribeKey, bribePrompt, bribeSpares, bribeTick, bribeReset, gateGun } from './race-bribe.js';
+import { gambleWorld, gambleTick, gambleReset } from './race-gamble.js';
 
 const RC = LAY.RACE, CELL = SAIL.CELL, DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
 const NTH = (n) => (n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`);
@@ -142,7 +143,7 @@ function build() {
   // The crane's footing on the neck.
   W.crane = craneMesh(); W.g.add(W.crane.g);
   scene.add(W.g);
-  startWorld(); marksWorld(); forageWorld(); bribeWorld(); fieldWorld();
+  startWorld(); marksWorld(); forageWorld(); bribeWorld(); fieldWorld(); gambleWorld();
   return W;
 }
 /** Built the first time the sea's drawn (sailing.js). */
@@ -248,6 +249,7 @@ export function raceKey(key) {
     doorReset();   // (shut again, for a new race)
     forageReset();   // (the driftwood back across its gap)
     bribeReset();   // (the wreck's coins back down there, the gate unpaid)
+    gambleReset();   // (the turning pool's clock from the gun, fresh tosses of the veiled wind)
     readyLocks(h);   // (each lock's water at the side she'll come to it from)
     toast('Pick yer spot on the line, and Space when ye\'re ready');
     return true;
@@ -378,6 +380,8 @@ export function raceTick(dt) {
   // The starlit door: its board, its stars, its leaves, her trip along its tunnel (the race counts the legs
   // she passes under).
   doorTick(dt, (from, to) => R.under(from, to));
+  // The gambles: the turning pool's spin, the veiled wind, and the way one's just taken her.
+  gambleTick(dt, R);
   // Her trip over the neck, on the crane's hook.
   if (race.trip && sail.on) tripTick(dt);
   else if (K().built()) { const tip = W.crane.slew.localToWorld(TIP.clone()), l = W.crane.g.worldToLocal(tip); W.crane.hook.position.set(l.x, l.y - 1, l.z); }
@@ -401,6 +405,7 @@ export function raceReset() {
   doorReset();
   forageReset();
   bribeReset();
+  gambleReset();
   if (race.W) {
     for (const g of race.W.crane.parts) g.removeFromParent();
     race.W.crane.parts = [];
