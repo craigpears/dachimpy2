@@ -23,7 +23,7 @@
 import { COLS, Distilling, SPICE, WHITE } from './distilling.js';
 import type { Board, Column, DistillEvent } from './distilling.js';
 import {
-  ROUTINES, burnsClean, clear, fillTarget, isJunk, junkTarget, measure, playDrags, swapsIn, whitesFrom,
+  ROUTINES, burnsClean, clear, fillTarget, isJunk, junkTarget, measure, playDrags, scarce, swapsIn, whitesFrom,
 } from './distill-routines.js';
 import type { Ctx, Drag, Move, RoutineName } from './distill-routines.js';
 
@@ -66,6 +66,9 @@ export const tierNamed = (name: string): Tier => {
 };
 
 /** The routines on the menu in each stage, in the order they're preferred when they'd do as well. */
+/** The slow techniques (the seventh note: "very action heavy"), played only once plain drags stop getting
+    much over. */
+export const SLOW: readonly RoutineName[] = ['crawl', 'turnOver', 'linePull', 'figureEight', 'hook', 'leapfrog'];
 export const MENU: Readonly<Record<'junk' | 'chain', readonly RoutineName[]>> = {
   junk: ['rescue', 'junkColumn', 'turnOver', 'crawl', 'diamond', 'leapfrog', 'hook', 'figureEight', 'linePull', 'store'],
   chain: ['rescue', 'junkColumn', 'crawl', 'channel', 'diamond', 'leapfrog', 'hook', 'figureEight', 'linePull'],
@@ -93,6 +96,8 @@ export const P = {
   /** ... swept blind while it does nearly as well as the best thing to do (a careful rescue worth far more
       comes first). */
   SWEEP_AS_GOOD: 0.6,
+  /** Pieces plain drags could still get over at which it's sweeping time, and the slow techniques wait. */
+  PLENTY: 4,
   /** Turning the right side over: played next unless something's worth more than this (a big rescue),
       and so long as it costs the board no more than this by the measure. */
   TURN_UNLESS: 12,
@@ -160,19 +165,32 @@ export function choose(sit: Situation, ctx: Ctx, style: Style): Advice {
   // What's wrong with the furnace's column, to save it when time's short.
   const wrong = (b: Board) => (burning ? b[last].filter((p) => p === WHITE).length : junkAt(b[last]));
   const urgent = sit.timeLeft < P.URGENT && wrong(cols) > 0;
-  const moves: { move: Move; value: number }[] = [];
-  for (const name of MENU[ctx.stage]) {
-    if (!style.routines.includes(name)) continue;
-    for (const move of ROUTINES[name].find(cols, ctx)) {
-      const after = playDrags(cols, move.drags);
-      if (!after) continue;
-      if (urgent && (wrong(after) >= wrong(cols) || msFor(move.drags, style) > sit.timeLeft)) continue;
-      const value = measure(after, ctx) - base - P.SWAP * swapsIn(move.drags) - P.DRAG * move.drags.length;
-      moves.push({ move, value });
+  const gen = (c: Ctx) => {
+    const out: { move: Move; value: number }[] = [];
+    for (const name of MENU[c.stage]) {
+      if (!style.routines.includes(name)) continue;
+      for (const move of ROUTINES[name].find(cols, c)) {
+        const after = playDrags(cols, move.drags);
+        if (!after) continue;
+        if (urgent && (wrong(after) >= wrong(cols) || msFor(move.drags, style) > sit.timeLeft)) continue;
+        const value = measure(after, ctx) - base - P.SWAP * swapsIn(move.drags) - P.DRAG * move.drags.length;
+        out.push({ move, value });
+      }
     }
+    return out.sort((a, b) => b.value - a.value);
+  };
+  let moves = gen(ctx);
+  // Count first (the ninth note): how many pieces plain drags could still get over. While that's high it's
+  // sweeping time, whatever happened a drag ago, and the slow techniques wait.
+  const sweeps = ctx.stage === 'junk' && !urgent ? sweepsOn(cols, ctx, style, base) : [];
+  const plain = new Set(sweeps.map((s) => `${s.move.drags[0].x},${s.move.drags[0].y}`)).size;
+  if (plain >= P.PLENTY) moves = moves.filter((m) => !SLOW.includes(m.move.routine));
+  let best = moves[0] && moves[0].value > P.MIN ? moves[0] : null;
+  // Colour plentiful but nothing cheaper gets anything over: the slow techniques after all.
+  if (!best && !sweeps.length && ctx.stage === 'junk' && ctx.scarce === undefined && !scarce(cols, ctx)) {
+    moves = gen({ ...ctx, scarce: true });
+    best = moves[0] && moves[0].value > P.MIN ? moves[0] : null;
   }
-  moves.sort((a, b) => b.value - a.value);
-  const best = moves[0] && moves[0].value > P.MIN ? moves[0] : null;
   const advice = (kind: Advice['kind'], label: string, reason: string, m: { move: Move; value: number } | null = null): Advice => ({
     stage: ctx.stage, kind, routine: m?.move.routine ?? null, label, reason, drags: m?.move.drags ?? [], value: m?.value ?? 0, sweep: false,
   });
@@ -187,8 +205,9 @@ export function choose(sit: Situation, ctx: Ctx, style: Style): Advice {
   // The start is sweeping, decided by the board: while a plain long drag still takes a black or a brown
   // over to the junk, sweep blind and fast, the best such drag each time; the techniques come in only when
   // that stops getting junk right, or when the furnace's column needs saving.
-  const sweeps = ctx.stage === 'junk' && !urgent ? sweepsOn(cols, ctx, style, base) : [];
-  const sweeping = sweeps.length > 0 && (!best || sweeps[0].value >= P.SWEEP_AS_GOOD * best.value);
+  const sweeping = sweeps.length > 0 && (plain >= P.PLENTY
+    ? !(best && best.move.routine === 'rescue' && best.value > 2 * sweeps[0].value)
+    : !best || sweeps[0].value >= P.SWEEP_AS_GOOD * best.value);
   // Then, the sweep done, turn the right side over (blacks up its side, browns down), so what comes next
   // from the left can hook in; only a big rescue comes first.
   if (ctx.stage === 'junk' && !urgent && !sweeping) {
