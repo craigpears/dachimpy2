@@ -21,6 +21,8 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   the rock, the door opening, the tunnel and its clefts).
 - **The race's chart (12 Nov):** `changelog/race-map.jpg` and its changelog entry, and the design
   page (`design.html`), for whether they read well.
+- **The course editor (12 Nov):** `race-editor.html`: move buoys and shortcuts, set each puzzle's size,
+  the balance check, then race it in 3D; and the barrier now a square along from the middle snake.
 - **Watching the race (12 Nov):** the replay / spectator mode, `?at=race-watch`: four racers, the
   free camera, following one, their boards.
 - **Penguin Island and sailing round there (12 Nov):** Kikkit's whirlpools, Vegas Island and the run
@@ -325,11 +327,6 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   on the screen. (Being done with the starlit door going public.)
 
 
-- **The driftwood barrier one square off (12 Nov):** "I don't like where the foraging is. Because, like,
-  how do you get to it? Like, you have to spin on the spot after jumping over the, that snake trade wind
-  thing. It just feels like it's one square off." Its gap sits right beside the middle snake, so a Double
-  over the snake lands you facing past it, and you turn on the spot into its notch. Move it a square on,
-  so one natural turn takes you in. (Being done with the course editor.)
 - **The race's chart kept in step with the course (12 Nov):** "hopefully we're keeping this [race map]
   JPEG in sync." Redraw `changelog/race-map.jpg` whenever the course changes, and have a test fail when
   it's out of date (the chart's drawing records which course it drew; the test compares with today's), as
