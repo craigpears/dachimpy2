@@ -321,12 +321,6 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   So the smugglers' run behind the rocks wide enough to sail without bumping (two or three squares).
 
 
-- **The cheats menu in sections (12 Nov):** "have a peek at the cheats menu to make sure it still looks
-  relatively organized ... all of the cheats ... can be grouped into sections at this point, and it's
-  probably quite a long menu with how the buttons worked." Grouped under a few headings, still fitting
-  on the screen. (Being done with the starlit door going public.)
-
-
 - **The race's chart kept in step with the course (12 Nov):** "hopefully we're keeping this [race map]
   JPEG in sync." Redraw `changelog/race-map.jpg` whenever the course changes, and have a test fail when
   it's out of date (the chart's drawing records which course it drew; the test compares with today's), as
