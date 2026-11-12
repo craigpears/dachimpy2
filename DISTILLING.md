@@ -907,6 +907,33 @@ arrows there".
   under the browns: the bottom row of the middle is colour joined to the junk, not blacks stranded under the
   whites. The shape is back to upright bands, ready for the next junk columns to finish and burn.
 
+**The seventeenth note: the late game, browns down then up, the loop again, and the hooks lined up for the
+end (the user, 12 Nov, the same game on, `notes/distilling/30-` to `34-*`).**
+- **Browns down, then back up (`30-browns-down-then-up.webp`, `31-the-browns-gone-up.webp`):** "This is when
+  I really start, you really start wanting to just drag the browns down, because you can see it has that
+  impact in pulling the shape up. And then you have a bunch of browns at the bottom. So they kind of swap
+  places, so then you go for the green arrows and you can get browns going back up ... Doesn't help that
+  there's a couple of black[s] over there. Get those blacks out of the way and then drag those browns up."
+  Red in the first picture: browns dragged down through the blacks packed at the bottom of the junk, which
+  lifts the blacks (the shape pulled up). Green: then the browns, now at the bottom, go back up through the
+  blacks. In the second, the browns ticked are the ones that went up.
+- **The loop again, through a thick blob of black (`32-loop-again-through-the-blacks.webp`):** "this is when
+  you start dragging them down, you can just repeat the whole process because you've got a nice big thick
+  blob of black piece[s] to pull them through. And you just can continue in that kind of a loop to get rid of
+  those diamond kind of edges." A brown zigzags down and back up through the mass of blacks on the right, over
+  and over, squaring off the diamond's slanted edges (§3, "The diamond") into full columns.
+- **Line the hooks up before the end (`33-hooks-aligned.webp`, `34-no-way-down-for-a-brown.webp`):** "you can
+  get to a point where you need to make sure you have like those bottom and top kind of bits where things hook
+  in, aligned, so you kind of resort things like this ... If you then start burning to the point where you
+  only have one or two columns left, you will see here, for example, there is no way to get browns down to
+  the bottom if you hadn't already gotten them there." The first picture: the junk re-sorted, blacks gathered
+  high in the columns next to the whites, browns low and on the far right, so that each column has a black at
+  the top and a brown at the bottom where the next pieces hook in. The second, later, with only two junk
+  columns left: a spice sits low in one and the green cross marks a brown that has no way down; with so
+  little junk left there's nothing to carry it. So the sorting (browns to the bottom, blacks to the top, the
+  second and third notes) is done here, in the late game, while there's still junk to do it with: this is the
+  "once you get down to two or three columns" of the tenth note.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
