@@ -4,7 +4,7 @@ Every character's lines, and who they are, made from `src/lines/` by `npm run bu
 (`tools/lines-doc.mjs`): change a line there, not here, and the game changes with it.
 This file's history in git shows every line as it's changed.
 
-[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava) · [Tzz](#tzz) · [Gravee](#gravee) · [The Count](#the-count) · [The imperial guards of Port Decorum](#the-imperial-guards-of-port-decorum) · [The race's starter](#the-races-starter) · [The guard at the race's gate](#the-guard-at-the-races-gate)
+[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava) · [Tzz](#tzz) · [Helium](#helium) · [Gravee](#gravee) · [The Count](#the-count) · [The imperial guards of Port Decorum](#the-imperial-guards-of-port-decorum) · [The race's starter](#the-races-starter) · [The guard at the race's gate](#the-guard-at-the-races-gate)
 
 ## Dalnoth
 
@@ -37,7 +37,7 @@ Beaten after the third wave, he leaves his cannon, rows in, stomps up the beach 
 
 ## You
 
-Your own pirate, dressed as you like from the wardrobe (or as any real pirate in it). You say little, and only at the den's short, cheesy moments: picking up the captain's map, and riding the crane up the cliff and down again, your own wedding, screaming at a vampire in Gravee's house, and sailing by Primates Rule, not ready yet, and coming into the smugglers' cove behind Port Decorum.
+Your own pirate, dressed as you like from the wardrobe (or as any real pirate in it). You say little, and only at the den's short, cheesy moments: picking up the captain's map, and riding the crane up the cliff and down again, your own wedding, screaming at a vampire in Gravee's house, and sailing by Primates Rule, not ready yet, coming into the smugglers' cove behind Port Decorum, and, warily, at Helium's still just after it's gone bang.
 
 ### Picking up the captain's map, at the end of Dalnoth's cutscene
 
@@ -68,6 +68,11 @@ Your own pirate, dressed as you like from the wardrobe (or as any real pirate in
 ### Sailing up near Primates Rule at anchor, still to come (once a voyage)
 
 - "Primates Rule, at anchor. She's not ready yet: coming soon!"
+
+### Off Helium's island the first time, his still just gone bang: between his lines
+
+- *safe:* "Is... is it safe?"
+- *brows:* "You've got no eyebrows left."
 
 ### Coming into the smugglers' cove behind Port Decorum, by way of the whirlpools (once a voyage)
 
@@ -899,6 +904,105 @@ The sensible one, after Kikkit: she shows you plainly how a big Vegas is built, 
   - "Told you. It's just balloons."
 - *lost:*
   - "Huh. Nap first, rematch after."
+
+## Helium
+
+On a little island of his own out past the checkpoint, by the smugglers' rocks, at a copper still with a board of Distilling on a stand beside it. A real Puzzle Pirates pirate (Helium of Emerald): Senior Officer of a crew of rum-makers, Revered at Distilling and Ultimate on the ocean, with distilleries on five islands and a tailoring stall beside Mischievious's. Drawn from his portrait: dark skin, white hair under a black cat-eared mask, an eyepatch, a gold hoop earring, a blue starfish on the cheek, a black Vampire raiment lined in gold, black pants, black fancy boots with plum tops, a hook for the left hand, and King, his plum monkey, on his shoulder.
+
+Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of his brews and unbothered when the balance goes wrong and the still goes bang ("Oops. That happens sometimes. Don't worry about it."). A short lesson on a real board, then it's yours, and "Help, Helium" while you play: he reads your board, says what he'd do and why, names the technique, and does it. Knows the others: a big order of rum for Mischievious's next wedding, Kikkit at his stash again.
+
+> "Maybe he's got a secret distillery operation going. If you find his house, he ... teaches you how to make some rum. But he's very kind of by the by" (the user, 11 Nov)
+>
+> "occasionally, distilleries have been known to blow up ... So, oops, that happened sometimes. Don't worry about it." (the user, 11 Nov)
+>
+> "Him being in a hidden house, maybe he can just have his own little island ... I bet he just wants an island for him somewhere." (the user, 12 Nov)
+>
+> "I have a large shipment of rum for one of Mischievious's weddings, or Kikkit's been at the stash again." (the user, 12 Nov)
+>
+> "playing and be able to press a button that says help helium and he starts showing you some moves on how you could get yourself out of the situation." (the user, 12 Nov)
+>
+> "helium should kind of detect what stage you're at and show you what technique ... It's context aware." (the user, 12 Nov)
+
+### Coming up off his island the first time: the still goes bang, and he shrugs it off (your lines between, src/lines/you.ts)
+
+- *mishap:* "Oh. Sorry about that. Just a little distilling mishap."
+- *offer:* "Would you like me to learn you some distilling? While you're here."
+- *safe:* "Of course it's safe. What would make you think it's not safe? Perfectly normal, this. It's fine."
+- *brows:* "None of us have got eyebrows. I keep asking the developers for some. Nothing yet."
+
+### His lesson begins, after his opening
+
+- "Right then. Distilling. Nothing to it. Watch."
+
+### His opening lesson at the still: in his bubble (says) and in the bar at the foot of the screen (note), beat by beat
+
+- *He swaps a white up past a black:*
+  - *says:* "One rule. The lower piece beats the upper one: white floats up past black."
+  - *note:* "The swap rule: a piece swaps up past the one it beats. White beats black, brown beats white, black beats brown."
+- *The rest of the rule:*
+  - *says:* "Brown past white, black past brown. Round and round. Can't swap it straight back, mind."
+  - *note:* "White over black, brown over white, black over brown: like rock, paper, scissors."
+- *He drags a white left:*
+  - *says:* "Whites go left, away from the fire. Junk goes right, toward it."
+  - *note:* "Whites left, junk right: drag a white along, swap after swap, and the junk steps the other way."
+- *He burns the all-black column:*
+  - *says:* "Furnace takes the right-hand column. All junk? Burn it now. X."
+  - *note:* "The furnace burns the right-hand column every 15 seconds, or now on X. More blacks than whites and it burns; the rest goes up into the flask."
+- *He burns the next, a white in it (his mishap follows):*
+  - *says:* "And the next one's mostly junk. One white in it. Eh. X."
+  - *note:* "A white in a column that burns is lost: burnt whites come back later, scorched, and spoil a column."
+- *Handing you the board:*
+  - *says:* "Right, your go. H if you want me. I'll be here. Probably."
+  - *note:* "Your go: whites left, junk right, burn the junk. H, or the button: Help, Helium."
+
+### A column burns with a white in it, and the still goes bang: the first time the first, then any
+
+- "Oops. That happens sometimes. Don't worry about it."
+- "Bang. Yep. The still's fine. Mostly."
+- "That white's gone up the flue. Happens."
+- "Eyebrows grow back."
+- "Bit much heat. Or not enough. One of those."
+
+### "Help, Helium" while you play: by the technique he'd play on your board now (then he plays it)
+
+- *rescue:* "Save the whites. That one's heading for the fire. Pull it left."
+- *junkColumn:* "Finish the junk column. All junk on the right, and it burns clean."
+- *diamond:* "Just sweep. Junk right, whites left, long drags. Quick and dirty."
+- *turnOver:* "Turn the right side over. Junk to the right, whites out of it. Like a pancake."
+- *store:* "Store the junk. Blacks up top-left, browns bottom-left. Out of the way till later."
+- *crawl:* "The crawl. Walk it across, swap by swap. Slow. Works."
+- *figureEight:* "The figure of eight. Round it goes, and out the other side."
+- *linePull:* "Pull a line of browns. Drag one and the line slides along with it."
+- *leapfrog:* "The leapfrog. Black hops the brown, brown hops the white. Off it goes."
+- *hook:* "The hook. Black and brown together, round the corner. My favourite."
+- *channel:* "Channels. A clear lane on the right for the whites. Then it's all Crystal Clear."
+
+### "Help, Helium" when it isn't a drag
+
+- *burn:* "Burn it now. It's all junk. Why wait?"
+- *wait:* "Nothing worth doing. Let it cook."
+- *dismiss:* "Call it. Bottle what we've got."
+- *stuck:* "Hm. Nothing. Even I'm stumped. Burn something?"
+- *busy:* "Hang on, it's still moving."
+
+### Now and then as your Crystal Clears go up, and when the flask's full
+
+- *clear:*
+  - "Crystal Clear. That's the stuff."
+  - "Another! Keep them coming."
+  - "Ooh. Smooth."
+- *finished:* "Flask's full. That's a batch. Mischievious will want ten more."
+
+### While you're within earshot of his island: round and round
+
+- "Big order of rum for Mischievious. Another wedding. She does keep getting married."
+- "Kikkit's been at the stash again. Explains her directions, really."
+- "Five distilleries, me. This is the quiet one."
+- "King, put that down. That's spice."
+- "Twelve Crystal Clears in a row and it just keeps going. Lovely."
+- "The still's only gone bang twice today. Good day."
+- "Space if you fancy a go at the still. I won't watch. Much."
+- "Whites left, junk right. That's most of it. The rest is just showing off."
 
 ## Gravee
 

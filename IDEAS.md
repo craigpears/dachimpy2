@@ -1055,6 +1055,16 @@ if nothing had. The humour's a layer on the real thing (RULES.md): it could even
 Distilling board looks like (the user's own Distilling Simulator was all about when columns get
 burnt), so a botched batch in the puzzle gets a little bang of its own.
 
+**His look, from his portrait (checked 12 Nov):** Helium of Emerald (Senior Officer of a rum-making
+crew, Revered at Distilling and Ultimate on the ocean, distilleries on five islands, a tailoring stall
+beside Mischievious's; familiars King, plum, and Serendipity, light blue). His portrait: dark skin, white
+hair swept up, the Feminine feline in black (a black eye mask with cat's ears), an eyepatch, a gold hoop
+earring, a blue starfish on the cheek, a black Vampire raiment (high collar, gold buttons, lined in gold),
+black pants, black fancy boots with plum tops, a hook for the left hand, King the plum (soft violet)
+monkey on the shoulder, and a glowing blue jar in the right hand (not in the wardrobe, left out); a night
+palace and a treasure hoard behind. In PIRATES and the wardrobe as that look. (The portrait's figure is a
+woman's, and his page has him "Lady of the flag"; the user and Mischievious say "he", so he's he here.)
+
 **An island of his own instead (12 Nov):** "I think I've changed my mind on it. Him being in a hidden
 house, maybe he can just have his own little island. That just seems to be the theme somewhere. Maybe
 that can link into where the Smuggle Beach is. I don't know. I bet he just wants an island for him

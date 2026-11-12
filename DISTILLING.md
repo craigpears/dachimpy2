@@ -997,6 +997,12 @@ nice and illustrative". In order:
    little island, perhaps by the smugglers' beach, his still on it, and his mishaps: when he gets the
    balance wrong, the still goes up with a bang ("Oops. That happens sometimes. Don't worry about it.").
    A burnt column in the puzzle could be its little bang.
+   **Built, a first pass (12 Nov):** his island past the checkpoint (`?at=helium`; src/den-helium.ts,
+   js/den/helium-isle.js), a short opening lesson on a real board (the swap rule, whites left and junk
+   right, the furnace's column burned, and a white burned: his bang and line), then your session at his
+   still, "Help, Helium" on H (`advise` said in his voice, naming the technique, its drags played on your
+   board), the bang whenever a white burns, and the panel's distiller drawn as him. Still to come: a
+   demonstration per technique, the coached replay (IDEAS.md), the smuggling ring.
 
 ## 6. Sources
 - YPPedia, Distilling: https://yppedia.puzzlepirates.com/Distilling (rules, scoring, CC^12, history, tips)

@@ -156,6 +156,7 @@ function mapTexture() {
   isle(CHART.kikkit.shore, SAND);
   isle(CHART.tzz.shore, SAND);   // (Tzz's, a hop away, unnamed)
   isle(CHART.empire.shore, LAND);   // (Port Decorum, the imperial island past the checkpoint, unnamed)
+  isle(CHART.helium.shore, SAND);   // (Helium's, by the smugglers' rocks, unnamed)
   {
     const [x, y] = Q([20, 17.2]);
     g.strokeStyle = INK; g.lineWidth = 2;
