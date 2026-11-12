@@ -422,6 +422,12 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   - **Nobody shoots:** "I'm not seeing anybody shoot anything either. Like, no cannon." Watched, the bots
     should fire on a racer sitting still in the open as they pass (as the rivals do in your race), with
     the shot, the hit and the patch shown.
+  - **Kikkit back at the start late on:** "Three of them finished, one of them vanished ... One's back at
+    the start. I don't know what happened to her. Did she get bumped? ... Is she doing like lap number 2
+    ... I'm pretty sure I thought she got through the Vegas' part." There are no laps; a failed Vegas only
+    sends her back to the channel's mouth. Likeliest: the left-hand trade wind (the snake down the left
+    edge, back to the start) caught her near buoy 4. Trace a watched race and account for every move that
+    looks wrong, with the bar saying what happened ("caught by the trade wind, back to the start").
   After the course's rework (the race's next pass), as the bots race whatever course it leaves.
 
 
