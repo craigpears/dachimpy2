@@ -275,14 +275,6 @@ the site (`.assetsignore` skips `*.md`).
   but "I kind of liked some of the coins". Which, if any, to put on the old board (to pin down with the
   user).
 
-- **The race's bribe gate, by Treasure Haul (12 Nov):** build it (RACE.md §11): "I'm sure it's going to be
-  a bit busy, but again, I just want all the ideas in there ... I want to see what the variety really
-  feels like to show how many different ways you have of really getting through the course."
-
-- **The starlit tunnel's exits back onto the course (12 Nov):** always some benefit from going in; at each
-  exit, rejoin the leg or push on through the next Vegas "in relative peace"; a failed Vegas spills her
-  out of the last exit passed, not back to the mouth (RACE.md §9).
-
 - **Sailing: the pair jumps back up the board after Space and a turn (12 Nov):** "if you hit the space bar
   and then rotate the piece, it kind of jumps halfway back up the screen. So something's gone wrong
   there." It should turn where it is and carry on falling from there.

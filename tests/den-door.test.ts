@@ -5,7 +5,7 @@
    get through it in sailing". */
 import { describe, expect, it } from 'vitest';
 import { LAY, SAIL, Sea, Helm, type Pose } from '../src/den-sail';
-import { DOOR, Door, offDoor, mouthOf, outOf, tunnelGust } from '../src/den-door';
+import { DOOR, Door, Tunnel, offDoor, mouthOf, exitPose, tunnelGust } from '../src/den-door';
 import { RACE, Race, stretchAt } from '../src/den-race';
 import { gustPath } from '../src/den-sailing';
 import { runFor, RUN } from '../src/sailing';
@@ -29,18 +29,21 @@ function sailTo(s: Sea, from: Pose, to: [number, number]): { t: number; at: Pose
 function shut(...sq: [number, number][]): Sea { const s = new Sea(9); for (const [c, r] of sq) s.rocks.add(k(c, r)); return s; }
 const done = (marks: Done['marks'], booched = false) => ({ marks, booched }) as Done;
 
-describe('where the door is: a plain cliff off leg 2, the tunnel out onto leg 4 (11 Nov; a leg sooner on the course\'s second pass)', () => {
-  it('its face is the second spit\'s cliff, the water off it leg 2; its far end the third spit\'s far face, onto leg 4', () => {
-    for (const [c, r] of [...D.FACE, ...D.OUT]) expect(sea.ground(c, r), `${c},${r}`).toBe(true);
+describe('where the door is: a plain cliff off leg 2; the tunnel\'s exits, sea caves onto leg 3 and, at its far end, leg 5 (12 Nov)', () => {
+  it('its face is the second spit\'s cliff, the water off it leg 2; each exit a spit\'s far face, the water off it a leg further along', () => {
+    for (const [c, r] of D.FACE) expect(sea.ground(c, r), `${c},${r}`).toBe(true);
     for (const [c, r] of D.OFF) { expect(offDoor(c, r)).toBe(true); expect(stretchAt(c, r)).toBe(DOOR.FROM); }
-    for (const [c, r] of D.INTO) { expect(sea.open(c, r)).toBe(true); expect(stretchAt(c, r)).toBe(DOOR.TO); }
     expect(DOOR.FROM).toBe(1);
-    expect(DOOR.TO).toBe(3);
-    // (a long straight passage: the same columns, door to far end, under leg 3)
-    D.FACE.forEach(([c], i) => { expect(D.OUT[i][0]).toBe(c); expect(outOf(i)).toEqual({ c, r: D.INTO[i][1], d: 0 }); });
-    expect(DOOR.LEN).toBe(D.INTO[0][1] - D.FACE[0][1] + 1);
-    expect(RC.STRETCHES[2].r).toBeGreaterThan(D.FACE[0][1]);
-    expect(RC.STRETCHES[2].r + 1).toBeLessThan(D.OUT[0][1]);
+    expect(DOOR.EXITS.map((e) => e.to)).toEqual([2, 4]);
+    expect(DOOR.TO).toBe(4);
+    D.EXITS.forEach((e, k) => {
+      for (const [c, r] of e.OUT) expect(sea.ground(c, r), `${c},${r}`).toBe(true);
+      for (const [c, r] of e.INTO) { expect(sea.open(c, r)).toBe(true); expect(stretchAt(c, r)).toBe(DOOR.EXITS[k].to); expect(sea.windAt(c, r)).toBeUndefined(); }
+      // (a long straight passage: the door's own columns, its face to each exit)
+      D.FACE.forEach(([c], i) => { expect(e.OUT[i][0]).toBe(c); expect(exitPose(k, i)).toEqual({ c, r: e.INTO[i][1], d: 0 }); });
+      expect(DOOR.EXITS[k].len).toBe(e.INTO[0][1] - D.FACE[0][1] + 1);
+    });
+    expect(DOOR.LEN).toBe(DOOR.EXITS[DOOR.EXITS.length - 1].len);
   });
 
   it('its mouth can be come to facing in, by her own moves along leg 2 (a turn in off its upper row)', () => {
@@ -78,31 +81,69 @@ describe('the door is the only way into the tunnel (11 Nov)', () => {
   });
 });
 
-describe('only a Vegas carries her through (11 Nov)', () => {
-  it('a Vegas from the mouth carries her the length of it, out onto leg 4; less, and the draught carries her back out to the mouth', () => {
+describe('the tunnel\'s stretches: always some gain for going in, then the choice at each exit (12 Nov: "You either rejoin ... the main leg, or you have the opportunity to go through the Vegases")', () => {
+  it('a Vegas from the mouth carries her along the first stretch to wait under its exit; anything less spills her up out of that first exit, never back to the mouth', () => {
     expect(DOOR.NEED).toBe(runFor(RUN.VEGAS));
     for (let steps = 1; steps <= RUN.VEGAS + 1; steps++) {
       const t = tunnelGust(true, MOUTH, runFor(steps))!;
-      if (steps >= RUN.VEGAS) expect(t, `steps ${steps}`).toEqual({ way: 'through', went: DOOR.LEN, to: outOf(0) });
-      else expect(t, `steps ${steps}`).toEqual({ way: 'back', went: runFor(steps), to: MOUTH });
+      if (steps >= RUN.VEGAS) expect(t, `steps ${steps}`).toEqual({ way: 'on', exit: 0, went: DOOR.EXITS[0].len, to: exitPose(0, 0) });
+      else expect(t, `steps ${steps}`).toEqual({ way: 'out', exit: 0, went: Math.min(runFor(steps), DOOR.EXITS[0].len), to: exitPose(0, 0) });
+      expect(t.to).not.toEqual(MOUTH);
     }
-    // (and from the other column, out of the other)
-    expect(tunnelGust(true, { c: D.OFF[1][0], r: D.OFF[1][1], d: 0 }, runFor(RUN.VEGAS))!.to).toEqual(outOf(1));
-    // Where it puts her: open water on leg 4, free to sail on.
-    for (const i of [0, 1]) { const o = outOf(i); expect(sea.open(o.c, o.r)).toBe(true); expect(new Helm(sea, o).put('R')).toBe(true); }
+    // (and from the other column, along the other)
+    expect(tunnelGust(true, { c: D.OFF[1][0], r: D.OFF[1][1], d: 0 }, runFor(RUN.VEGAS))!.to).toEqual(exitPose(0, 1));
   });
 
-  it('the race counts it: from leg 2 straight on to leg 4, and home from there', () => {
+  it('waiting under an exit she chooses: up onto the leg, keeping what she\'s gained, or a Vegas on to the next; less, and she\'s spilled up the exit she\'s under', () => {
+    const t = new Tunnel(), VEGAS = runFor(RUN.VEGAS), OTHER: Pose = { c: D.OFF[1][0], r: D.OFF[1][1], d: 0 };
+    // Up she comes, at the first exit.
+    expect(t.enter(true, MOUTH, VEGAS)).toMatchObject({ way: 'on', exit: 0 });
+    expect(t.inside()).toBe(true);
+    expect(t.up()).toEqual({ way: 'out', exit: 0, went: 0, to: exitPose(0, 0) });
+    expect(t.inside()).toBe(false);
+    expect(t.up()).toBeNull();
+    // On with a Vegas: out of the far end (in the column she came in by).
+    t.enter(true, OTHER, VEGAS);
+    expect(t.gust(VEGAS)).toEqual({ way: 'out', exit: 1, went: DOOR.EXITS[1].len - DOOR.EXITS[0].len, to: exitPose(1, 1) });
+    expect(t.inside()).toBe(false);
+    // Less than a Vegas under the first exit: spilled up it, not back to the mouth.
+    t.enter(true, MOUTH, VEGAS);
+    const m = t.gust(runFor(RUN.VEGAS - 1))!;
+    expect(m).toMatchObject({ way: 'out', exit: 0, to: exitPose(0, 0) });
+    expect(m.went).toBeLessThanOrEqual(DOOR.EXITS[1].len - DOOR.EXITS[0].len);
+    // (less from the mouth: straight out of the first; no gust, nothing; the door shut, nothing)
+    expect(t.enter(true, MOUTH, runFor(2))).toMatchObject({ way: 'out', exit: 0 });
+    expect(t.inside()).toBe(false);
+    expect(t.gust(VEGAS)).toBeNull();
+    expect(t.enter(false, MOUTH, VEGAS)).toBeNull();
+    t.enter(true, MOUTH, VEGAS); t.reset();
+    expect(t.inside()).toBe(false);
+  });
+
+  it('each exit puts her on open water on its leg, free to sail on, and each further along the course than the last', () => {
+    let was = -1;
+    D.EXITS.forEach((_, k) => {
+      for (const i of [0, 1]) { const o = exitPose(k, i); expect(sea.open(o.c, o.r)).toBe(true); expect(new Helm(sea, o).put('R')).toBe(true); expect(new Helm(sea, o).put('L')).toBe(true); }
+      expect(DOOR.EXITS[k].to).toBeGreaterThan(Math.max(DOOR.FROM, was));
+      expect(DOOR.EXITS[k].saves).toBeGreaterThan(k ? DOOR.EXITS[k - 1].saves : 0);
+      was = DOOR.EXITS[k].to;
+    });
+  });
+
+  it('the race counts each leg she passes under, in order: up at leg 3, or on under leg 4 to leg 5, and home from there', () => {
     const race = new Race();
     race.start(); race.tick(RACE.COUNT + 0.01, { c: RC.BUOY[0], r: RC.BUOY[1] });
     race.tick(1, { c: 10, r: RC.STRETCHES[1].r });
     expect(race.leg).toBe(1);
-    expect(race.under(DOOR.FROM, DOOR.TO)).toEqual([{ kind: 'leg', n: 3 }]);
-    expect(race.tick(1, { c: D.INTO[0][0], r: D.INTO[0][1] })).toEqual([]);
-    expect(race.tick(1, { c: 10, r: RC.STRETCHES[4].r })).toEqual([{ kind: 'leg', n: 4 }]);
+    // (waiting under the first exit, the helm's moored where it comes up: leg 3 reached)
+    expect(race.under(DOOR.FROM, DOOR.EXITS[0].to)).toEqual([{ kind: 'leg', n: 2 }]);
+    expect(race.tick(1, exitPose(0, 0))).toEqual([]);
+    // (on to the far end: leg 4 passed under, leg 5 reached)
+    expect(race.under(DOOR.EXITS[0].to, DOOR.EXITS[1].to)).toEqual([{ kind: 'leg', n: 4 }]);
+    expect(race.tick(1, exitPose(1, 0))).toEqual([]);
     expect(race.tick(1, { c: 10, r: RC.STRETCHES[5].r })).toEqual([{ kind: 'leg', n: 5 }]);
     expect(race.tick(1, { c: RC.FINISH[0], r: RC.FINISH[1] })[0]).toMatchObject({ kind: 'finish' });
-    // (not from anywhere but leg 2; not twice; not with no race on)
+    // (not from anywhere but leg 2; not with no race on)
     const r2 = new Race();
     r2.start(); r2.tick(RACE.COUNT + 0.01, { c: RC.BUOY[0], r: RC.BUOY[1] });
     expect(r2.under(DOOR.FROM, DOOR.TO)).toEqual([]);
@@ -110,25 +151,34 @@ describe('only a Vegas carries her through (11 Nov)', () => {
   });
 });
 
-describe('the course\'s biggest shortcut (11 Nov)', () => {
-  // The long way, mouth to where the tunnel puts her: round the second spit's end, back along leg 3 (a
-  // Double over the trade wind back up the course), round the third's, onto leg 4 (every shortcut shut).
+describe('the course\'s biggest shortcut (11 Nov; its exits 12 Nov)', () => {
+  // The long way, mouth to where each exit puts her: round the second spit's end and along leg 3 to under
+  // the first exit (its first row there's only come to from the leg's own start: the second row beside it
+  // is as far along); then on, a Double over the trade wind back up the course, round the third spit's
+  // end, along leg 4, round the fourth's, and along leg 5 to the far end (every shortcut shut).
   const ways = WAYS;
-  it(`saves about ${DOOR.SAVES} seconds of sailing, more than any other shortcut`, () => {
+  it(`coming up at the first exit saves about ${DOOR.EXITS[0].saves} seconds of sailing; on to the far end, about ${DOOR.SAVES}, more than any other shortcut`, () => {
     const s = shut(...ways);
     // (pins round each bend, as you'd drop them)
     const h = new Helm(s, { c: D.OFF[0][0], r: D.OFF[0][1], d: 3 });
     const go = (p: [number, number]) => { h.drop(...p); let t = 0; while ((h.pin || h.slot >= 0) && t < 900) { h.tick(DT); t += DT; } return t; };
-    let long = go([3, RC.SPITS[1].r1]) + go(BEFORE_MID);
+    const E = D.EXITS;
+    let long = go([3, RC.SPITS[1].r1]);
+    const first = long + go([E[0].INTO[0][0], E[0].INTO[0][1] + 1]);
+    expect([h.pose.c, h.pose.r]).toEqual([E[0].INTO[0][0], E[0].INTO[0][1] + 1]);
+    long = first + go(BEFORE_MID);
     long += hopFrom(h, 2, 1);
-    long += go([25, RC.SPITS[2].r1]) + go(D.INTO[0]);
-    expect([h.pose.c, h.pose.r]).toEqual(D.INTO[0]);
-    const saves = long - DOOR.TRIP;
-    expect(saves).toBeGreaterThan(DOOR.SAVES * 0.85);
-    expect(saves).toBeLessThan(DOOR.SAVES * 1.15);
-    expect(saves).toBeGreaterThan(Math.max(...Object.values(RACE.DECENT)) * 1.5);
-    // (her trip through, at a gust's pace, door to daylight)
-    expect(DOOR.TRIP).toBeCloseTo(DOOR.LEN * SAIL.PUSH + 2, 1);
+    long += go([25, RC.SPITS[2].r1]) + go([3, RC.SPITS[3].r1]) + go(E[1].INTO[0]);
+    expect([h.pose.c, h.pose.r]).toEqual(E[1].INTO[0]);
+    [first, long].forEach((secs, k) => {
+      const saves = secs - DOOR.EXITS[k].trip;
+      expect(saves, `exit ${k}`).toBeGreaterThan(DOOR.EXITS[k].saves * 0.9);
+      expect(saves, `exit ${k}`).toBeLessThan(DOOR.EXITS[k].saves * 1.1);
+      // (her trip there in one go, at a gust's pace, door to daylight)
+      expect(DOOR.EXITS[k].trip).toBeCloseTo(DOOR.EXITS[k].len * SAIL.PUSH + 2, 1);
+    });
+    expect(DOOR.SAVES).toBe(DOOR.EXITS[1].saves);
+    expect(DOOR.SAVES).toBeGreaterThan(Math.max(...Object.values(RACE.DECENT)) * 1.5);
   }, 120000);
 
   it('a long-way race is unchanged: the door, open or shut, is no square of the sea, and the pilot never sails her into it', () => {

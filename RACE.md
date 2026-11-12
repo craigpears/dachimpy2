@@ -74,18 +74,18 @@ mouth. Sitting there, you're a sitting duck for anyone coming up behind (§6).
 | Leg 4, the zigzag (on the long way) | Hop its headwinds with well-timed Doubles; weaving through is the no-puzzle way | On the move | 8 | Built |
 | Spit 5, the crane in a notch | Carpentry, building the crane a part at a time, which hauls her over | Stopped dead, sheltered | 38 | Built |
 | Spit 5, a gap with two winds blowing back across it | A Triple | On the move | 9 | Built |
+| The starlit door: a hidden tunnel from leg 2, up a cleft onto leg 3, or on under leg 4 to leg 5 (§9) | Duty Navigation on the rock (two small constellations); then any clear from the mouth spills her up onto leg 3, or a Vegas in and a Vegas on, built in peace under the cleft, to leg 5 | Stopped dead at the rock and the mouth, exposed; under the cleft, out of reach | 40 / 119 | Built, secret |
+| Rocks across a gap, blasted away | Gunnery: her guns | On the move | ? | Idea |
+| A Rigging passage of shifting, gusty winds | Rigging, its six pulleys as her rigging lines (§11) | On the move | ? | Idea |
 
 **Played (12 Nov).** The gun gap near the start, its imperial guns shot quiet by Gunnery, "felt a lot more
 balanced. It was really quick ... You could tell, you know, the trade-off there was a lot better": keep it
 as the model of a shortcut whose trade-off reads at once. The wind gaps were "a bit awkward to set the ship
-up to get through", and building (the crane) "frustrated and slowed down by the animation" (TODO.md).
+up to get through", and the locks' animation "frustrated and slowed down" (it was the canal, not building: "I was spending just as much time waiting for the ship to go forward"; TODO.md).
 Carpentry and Duty Navigation weren't come across on that go: the crane sits in a notch off leg 5, easy to
 sail past; the door is secret by design.
-| The starlit door: a hidden tunnel from leg 2 to leg 4 (§9) | Duty Navigation on the rock (two small constellations), then a Sailing Vegas through | Stopped dead, twice, exposed | 78 | Built, secret |
-| Rocks across a gap, blasted away | Gunnery: her guns | On the move | ? | Idea |
-| A Rigging passage of shifting, gusty winds | Rigging, its six pulleys as her rigging lines (§11) | On the move | ? | Idea |
 
-The savings column is `RACE.DECENT` and `DOOR.SAVES` (and the simulation's `SIM.ZIGZAG`), as measured by the
+The savings column is `RACE.DECENT` and the door's `DOOR.EXITS` (and the simulation's `SIM.ZIGZAG`), as measured by the
 helm and tested. Each is about what the simulation recommended (§8): a shortcut pays only for a player good
 at its puzzle.
 
@@ -502,6 +502,26 @@ every shortcut at once bribing at the gate instead of rushing it on a combo. 300
 - The balance test (`tests/race-sim.test.ts`) races the bribe with the rest, and checks a briber hauls
   sheltered, is never holed by the gate's guns, and that her haul is counted against the gap.
 
+**The starlit door's stretches (12 Nov, §9).** The door's route in the simulation: Navigation at the rock;
+then at the mouth, either any clear (`SIM.PUZZLE.gust`, 8 s, assumed) to come up at the first exit, or a
+Vegas, if what it opens up is worth more to her; under the cleft she pushes on with another Vegas while
+the next stretch pays her, by her skill at a Vegas and whether it comes off (a Vegas that doesn't spills
+her up the last cleft she passed, never back to the mouth). In the tunnel she's carried: nobody can shoot
+her. 3000 races of four, fair 25%:
+- **The door wins 23.3%** (it was 17.5% with one Vegas through to leg 4); fields of two 42% (fair 50%),
+  of three 28% (fair 33%). Every other route stays in its band, the styles 24–27%.
+- **Who comes up where:** about half at the first exit (leg 3; mostly decent players throwing any clear,
+  and Vegases that didn't come off), who almost never win (0.3%): it's the consolation, back in the race.
+  The other half go on to the far end (leg 5), good and great Vegas players, and win 56% of their races.
+- **What it saves:** a decent player still loses about 24 s on it all told, a good one 9, a great one 6
+  (the Navigation's minute at the rock is most of it); the far end's Vegas in peace is where it pays.
+- **Tried and dropped:** an exit under every leg (onto 3, 4 and 5): each stretch saved about 40 s, less
+  than a Vegas costs even a great player, so nobody pushed on and the door won 7%. Letting the aggressive
+  style come up at the first exit to get back to the fight left them only the consolation; style shows at
+  the door only as it does everywhere (the cautious don't stop at the rock with someone close behind).
+- `tools/race-sim.mjs` lists who came up at each exit; `tests/race-sim.test.ts` checks whoever goes in
+  always comes out at an exit, both are used, and the far end wins more often than the first.
+
 **For the user to decide:**
 - The bribe's price (40 coins) and Treasure Haul's pace (1.5 s a move) are guesses till it's played. Does the
   starter's card name it ("pay off the guard at the gate")? Should a rival bribe her way through?
@@ -523,19 +543,42 @@ A hidden gem, never hinted. There's no cheat, no `?at=` link, no shot, and the s
 - **The door:** faint marks on a cliff off leg 2. Stop by it and press Space, and Duty Navigation stands
   on the rock as the night sky. Each constellation filled lights its stars on the carved wheel. Two small
   ones open it, about a minute's play. A booch pushes her off and darkens the stars.
-- **The tunnel:** it runs under leg 3 to leg 4. Only a Sailing Vegas from the mouth carries her
-  through; anything less, and a draught carries her back to the mouth. It saves about 78 s of sailing (145
-  on the first draft, when it ran on to leg 5: the second pass brings it up a leg sooner, to what the
-  simulation said it should save).
+- **The tunnel (its stretches built 12 Nov):** straight on under the course in the door's columns, in two
+  stretches, each ending under a cleft in a spit's far face that comes up onto the course further along:
+  - **The first exit, onto leg 3:** a cleft in the second spit's far face, just past the leg's start. A
+    Vegas from the mouth carries her along the first stretch, and she waits under the cleft in the dark,
+    daylight coming down it, out of anyone's reach. Space brings her up it onto leg 3; she's saved about
+    40 s of sailing, and she's back among the field, in the open as anywhere, the trade wind up the middle
+    still to hop.
+  - **Or on, to the far end, onto leg 5:** under the cleft she builds the next Vegas in peace (the
+    Sailing board's hers there, nothing else: no pins, no guns), and it carries her on under leg 4 and up
+    a cleft in the fourth spit's far face, beside the down lock, onto leg 5: about 119 s saved in all.
+  - **Anything less than a Vegas spills her out, never back:** from the mouth, any clear at all carries
+    her in and the draught spills her up the first cleft onto leg 3; under the cleft, less than a Vegas
+    and she's spilled up it. Going in always gains something ("you should always get some benefit from
+    going through it"), and every way out puts her back on the course ("there needs to be some chance
+    you can be pulled back in").
+  - **Why two stretches, not three (the simulation, §8):** an exit under every leg (onto 3, 4 and 5)
+    made each stretch worth about 40 s, less than a Vegas costs even a great player, so nobody pushed on
+    and the door won 7%. With leg 4 passed under, the second Vegas is worth about 80 s, and it pays for a
+    player good at Vegases.
+  - **The exits give nothing away:** a cleft in the rock, its walls the cliff's own stone and height,
+    open to the sky (her mast clears it, and nothing stands over the leg to hide her), shadowed water
+    darkening to a dark back. Nothing lit, nothing carved, no door. (The first draft's far end was a door
+    of plain rock that swung open onto leg 4; it's gone.)
+  - On the first draft the tunnel ran from leg 2 to leg 5 in one go and saved 145 s on one Vegas, twice
+    its puzzling's worth; the second pass brought it up a leg sooner (78 s); the stretches take it back to
+    leg 5, a Vegas a stretch.
 - **Simplified (11 Nov) to be competitive.** It was first built with an evil constellation last, which took
   minutes of puzzling to save two and a half of sailing: "simplify the duty navigation down to be more
   competitive." The evil constellation is saved for elsewhere (IDEAS.md, with Umami's credit for when it
   lands).
 - **Position matters most here (§6):** it's two stops, the rock and then the mouth. It's the back
-  of the field's big chance, and a leader's big risk.
+  of the field's big chance, and a leader's big risk. Under the cleft she's safe: the Vegas she builds
+  there is the leader's as much as anyone's.
 
-- **Keep the tunnel connected, failure pulling her back into the main path (12 Nov, agreed, being
-  built).** Today a failed Vegas only sends her back to the mouth, out of everyone's way. Instead,
+- **Keep the tunnel connected, failure pulling her back into the main path (12 Nov, agreed; built as the
+  stretches above).** Before, a failed Vegas only sent her back to the mouth, out of everyone's way. Instead,
   the side route's winds and whirlpools spill her back into the main course: "it's very risky ... when you
   go through the navigation door, but the winds and the whirlpools kind of pull you back into the main
   path." Get shot, or slip into a whirlpool by a careless move, and "it will pull you into the main path if
@@ -637,7 +680,8 @@ question of whether a crane is everyone's), and the bribe gate as the final toll
 - The snakes' slips in the simulation are guesses (`SIM.SNAKE`); players will show how often they bite.
 - More than one lock or crane spot for 2–4 racers, and how the course's size changes with more racers.
 - How the starlit door's door and tunnel work with several racers: once one racer opens it, is it open for
-  everyone that race?
+  everyone that race? And two in the tunnel at once (none of your rivals takes it yet): can they shoot
+  each other under the cleft? For now nobody in the tunnel can be shot.
 - Where the race goes in the den's story, and what winning brings.
 
 ## 13. Where it lives

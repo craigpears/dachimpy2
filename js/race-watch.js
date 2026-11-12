@@ -128,12 +128,13 @@ export class Pacer {
 }
 /* ---- What she's doing, in plain words ---- */
 const WHERE = {
-    guns: 'the gun gap', headwind: 'the headwind gap', double: 'the Double\'s gap', whirls: 'the whirlpools',
+    guns: 'the gun gap', wreck: 'the old wreck', headwind: 'the headwind gap', double: 'the Double\'s gap', whirls: 'the whirlpools',
     forage: 'the barrier of driftwood', locks: 'the locks', crane: 'the crane', triple: 'the Triple\'s gap', zigzag: 'the zigzag',
     door: 'the long way', // (never: it's a secret, and nobody watched takes it)
 };
 const STOPPED = {
     guns: (x) => (x.route === 'gap-shot' ? 'loading shots for the gun gap (Gunnery)' : 'building a big combo for the gun gap (Sailing)'),
+    wreck: () => 'hauling coins from the wreck for the bribe (Treasure Haul)',
     headwind: () => 'rowing up the headwind gap',
     double: () => 'building a Double for the gap (Sailing)',
     triple: () => 'building a Triple for the gap (Sailing)',
@@ -145,7 +146,7 @@ const STOPPED = {
     door: () => 'sailing the long way',
 };
 const CARRIED = {
-    guns: 'rushing the gun gap', headwind: 'out of the headwind gap', double: 'hopping the gap on her Double',
+    guns: 'rushing the gun gap', wreck: 'off from the wreck, coins aboard', headwind: 'out of the headwind gap', double: 'hopping the gap on her Double',
     whirls: 'zooming over the whirlpools on her Vegas!', forage: 'through the barrier\'s gap', locks: 'up the locks and down',
     crane: 'hauled over the neck by the crane', triple: 'hopping the gap on her Triple', zigzag: 'hopping the zigzag\'s headwinds',
     door: 'sailing the long way',

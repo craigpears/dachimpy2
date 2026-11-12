@@ -2,5 +2,7 @@
 import { defineConfig, configDefaults } from 'vitest/config';
 
 export default defineConfig({
-  test: { exclude: [...configDefaults.exclude, '.claude/**'] },
+  // (20 s a test, not 5: the simulation's and the deal's heavier tests ran past 5 s while agents worked
+  // alongside on the same machine, 12 Nov)
+  test: { exclude: [...configDefaults.exclude, '.claude/**'], testTimeout: 20000 },
 });

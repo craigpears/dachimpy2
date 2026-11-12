@@ -29,8 +29,7 @@ import { pool } from './whirlpools.js';
 import { patch, patchPrompt, deckHoleShape } from './sea-puzzles.js';
 import { bake } from './bake.js';
 import { cine } from './cine.js';
-import { doorWorld, doorSquares, doorKey, doorPrompt, doorHolds, doorCarried, doorTick, doorReset } from './door.js';
-import { DOOR } from '../den-door.js';
+import { doorWorld, doorSquares, doorKey, doorPrompt, doorHolds, doorInside, doorCarried, doorTick, doorReset } from './door.js';
 import { startWorld, takeLine, lineKey, linePrompt, startTick } from './race-start.js';
 import { marksWorld, marksTick, crossed, placings } from './race-marks.js';
 import { fieldWorld, fieldTick, fieldHome, fieldShot, fieldHit, fieldAt, fieldReset } from './race-field.js';
@@ -373,8 +372,9 @@ export function raceTick(dt) {
   const t = performance.now() / 1000, [gc, gr] = RC.GUNS.gap, near = sail.on && Math.max(Math.abs(p.c - gc), Math.abs(p.r - gr)) <= RACE.SIGHT + 1;
   for (const ring of W.rings) ring.m.opacity = shotComing(ring.c, ring.r) ? 0.6 + 0.35 * Math.sin(t * 20) : 0.32 + 0.08 * Math.sin(t * 2);
   W.guns.forEach((V, i) => turretView(V, race.gap.guns[i], dt, near ? { x: seaX(p.c), z: seaZ(p.r) } : { x: seaX(gc), z: seaZ(gr) }));
-  // The starlit door: its board, its stars, its leaves, her trip through (out on leg 5: the race counts it).
-  doorTick(dt, () => R.under(DOOR.FROM, DOOR.TO));
+  // The starlit door: its board, its stars, its leaves, her trip along its tunnel (the race counts the legs
+  // she passes under).
+  doorTick(dt, (from, to) => R.under(from, to));
   // Her trip over the neck, on the crane's hook.
   if (race.trip && sail.on) tripTick(dt);
   else if (K().built()) { const tip = W.crane.slew.localToWorld(TIP.clone()), l = W.crane.g.worldToLocal(tip); W.crane.hook.position.set(l.x, l.y - 1, l.z); }
@@ -408,7 +408,9 @@ export function raceReset() {
 }
 
 /** The camera, the mouse: on the barrier's Foraging board (den.js, sailing.js). */
-export const raceCam = forageCam, raceHover = forageHover, raceClick = forageClick;
+export const raceCam = forageCam;
+// (under a cave in the starlit door's tunnel, no pins: door.js)
+export const raceHover = (x, y) => doorInside() || forageHover(x, y), raceClick = (x, y) => doorInside() || forageClick(x, y);
 
 /** A starting point (menus.js): at sea, by the race's buoy. */
 export function raceCheat() {

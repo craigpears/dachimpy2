@@ -2097,7 +2097,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     leg 3 and out of the gun gap's reach (30 s), and a small gap with one wind blowing back across it that a
     well-timed Double hops (8 s); spit 3, the whirlpool channel, only a Vegas from its mouth (46 s), and a
     barrier of driftwood across a gap, cleared by Foraging (15 s); spit 4, the locks (26 s); spit 5, the crane
-    (38 s), and a gap with two winds that a Triple hops (9 s); and the starlit door (78 s). On the long way,
+    (38 s), and a gap with two winds that a Triple hops (9 s); and the starlit door (40 s up at leg 3, 119 on to leg 5). On the long way,
     leg 4 before the locks is the zigzag: headwinds blowing back along it, alternating side to side with gaps
     between, a wind behind her there so she can weave either way; weaving through takes about 17 s, hopping
     each headwind with a well-timed Double about 9 ("getting over them with, like, a double, like a
@@ -2188,8 +2188,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     part of the starting line strays far from fair, or if a leader has no shortcut worth taking (sheltered
     or on the move) on some stretch. RACE.md §8 has the numbers.
   - **The starlit door:** a plain cliff face on the second spit off leg 2 (squares 16 and 17 across, 52 out)
-    and a tunnel's end on the third spit's far face onto leg 4 (16 and 17, 62 out), `LAY.RACE.DOOR`: "The
-    starlit door (11 Nov)", below.
+    and its tunnel's exits, clefts in the second spit's far face onto leg 3 (16 and 17, 54 out) and the
+    fourth's onto leg 5 (67 out), `LAY.RACE.DOOR`: "The starlit door (11 Nov)", below.
   - **Watched: four bots and no player (12 Nov):** "are you able to show me a link today to just see all four
     bots?", and as a spectator "I can see the puzzle, as I said, the puzzling, the just move around free
     camera, including jumping between watching each person in the race." `?at=race-watch` (and a cheat, "Watch
@@ -2244,18 +2244,39 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     in the world ... But yeah, simplify the duty navigation down to be more competitive." So it's just the
     two dealt ones; the evil constellation is kept in the puzzle's module for elsewhere (`given`,
     `bottomRow`, `needsCombo`; IDEAS.md, "The evil constellation").
-  - **The tunnel:** a long straight cavern under leg 3 and the whirlpools' spit, its walls lit by glowing stones of the
-    stars' pale blues and whites, a dark still water, daylight at the far door. No wind in it but a draught
-    blowing out of the door, so no sail or oar gets her in: only a Sailing chain's gust from the mouth (off
-    the door, facing it), and **only a Vegas's carries her through**, into the dark and out of a plain door
-    in the third spit's far face onto leg 4 (the race counts leg 3 as passed: `Race.under`). **Less,
-    and she's carried in that far and the draught carries her back out to the mouth**, facing in, to try
-    again (not stuck: the snake's here the Vegas you didn't throw). The door's face is cliff to every move
-    and gust otherwise, shut or open: the only way in. Her trip through is 5.4 seconds; **the long way,
-    legs 2 to 4, sails in about 83: it saves about 78 seconds**, twice the crane's (`DOOR.SAVES`,
-    tested), with the puzzling on top: a minute or so's Navigation and a Vegas. (On the first draft it ran
-    on under leg 4 to leg 5 and saved 145, twice its puzzling's worth; the course's second pass, 11 Nov,
-    brings it up a leg sooner, to what the simulation said it should save: RACE.md §8.)
+  - **The tunnel:** a long straight cavern under legs 3 and 4, its walls lit by glowing stones of the
+    stars' pale blues and whites, a dark still water. No wind in it but a draught blowing out of the door,
+    so no sail or oar gets her in: only a Sailing chain's gust from the mouth (off the door, facing it).
+    The door's face is cliff to every move and gust otherwise, shut or open: the only way in.
+  - **Its stretches and exits (12 Nov).** The user: "you should always get some benefit from going through
+    it, similar to ... any other shortcut. So you then have the choice. You either rejoin ... the main leg,
+    or you have the opportunity to go through the Vegases ... in relative peace". Two stretches, each
+    ending under a cleft in a spit's far face (`LAY.RACE.DOOR.EXITS`, `DOOR.EXITS`; `Tunnel` in
+    src/den-door.ts):
+    - **A Vegas from the mouth** carries her along the first stretch, and she waits under the first
+      cleft (in the second spit's far face, squares 16 and 17 across, 54 out), daylight coming down it.
+      The prompt: "Under leg 3, daylight down a cleft above · Space: come up · 1: Sailing, a Vegas carries
+      her on through the dark (less, and she's spilled up here)". There the Sailing board's hers (1 puts
+      it out and away) and nothing else: no pins, no moves, no guns. Nobody can shoot her in the tunnel.
+    - **Space under the cleft** brings her up it onto leg 3 (16 or 17 across, 55 out, the column she came
+      in by, facing straight on): about 40 seconds saved (`DOOR.EXITS[0].saves`, tested with the helm; her
+      trip 3.1 s). Back among the field, in the open as anywhere, the trade wind up the middle still to hop.
+      The camera watches her from the leg's side till she's out from behind the door's crag.
+    - **A Vegas under the cleft** carries her on under leg 4 and up the far cleft (in the fourth spit's
+      far face beside the down lock, 67 out) onto leg 5 (68 out): about 119 seconds saved in all
+      (`DOOR.SAVES`, tested; the long way, legs 2 to 5, sails in about 125, her trip 6.8 s).
+    - **Less than a Vegas, she's spilled up the last cleft she passed, never back to the mouth:** any
+      clear at all from the mouth carries her in and the draught spills her up the first cleft onto leg 3;
+      less than a Vegas under it, the draught catches her and spills her up it.
+    - The race counts each leg she passes under, in order (`Race.under`): leg 3 as she reaches the first
+      cleft, leg 4 as she goes on under it.
+    - **The clefts give nothing away:** the cliff's own stone and height split by a ragged crack open to
+      the sky, shadowed water darkening to a dark back, a few boulders at its foot. Nothing lit, carved or
+      shut: a door at an exit would say there's a way in. (The far end was a plain door onto leg 4.)
+    - Two stretches, not three: with an exit under every leg each Vegas saved about 40 s, less than it
+      costs, and the door won 7% in the simulation; with leg 4 passed under, it wins about its fair share
+      (RACE.md §8, §9). Before (11 Nov), one Vegas carried her straight through to leg 4 (78 s), and less
+      sent her back to the mouth; on the first draft it ran to leg 5 in one go (145 s).
   - **Ours, not the film's:** no words to speak, no elvish, just the stars. No changelog shot of it.
   Rules: `src/den-door.ts`; drawn and played by `js/den/door.js` (a console hook, `doorTest`, for testing).
 - **A hull's sides slant a little, top to bottom (11 Nov).** "I can definitely see the back of the
