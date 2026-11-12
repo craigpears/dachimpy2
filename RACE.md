@@ -419,7 +419,12 @@ distance", where today the imperial gate cuts a small corner, the locks about tw
 three times again. Each stopped puzzle is sized to take about the same time to play, so the only choice
 is which puzzle you're good at; only the chain hops scale with how hard their chain is (a Double, then a
 Triple, then a Vegas, biggest). This replaces "each saves about what it takes to play" where puzzles
-differed in length. (In TODO.md, the race's next pass.)
+differed in length. (In TODO.md, the race's next pass.) Not strictly uniform (the user, 12 Nov: "things don't have to be
+uniform, but ... we've not really got any real numbers on how long each puzzle takes"): roughly even, by
+the bots' and the simulation's times till there are real ones. **Real puzzle times, later:** "it would be
+good to maybe collect those if possible, but I guess that's more if you had a full server version and a
+database ... Especially ... because we're probably bug fixing stuff so rapidly at the moment anyway." So
+collecting players' times waits for the proper server (§6) and a steadier course.
 
 **What it's balanced for.** Every way round should have "a relatively equal chance of winning". The long way,
 each shortcut, and each racing style (greedy for combos, steady, aggressive with the guns) should each win

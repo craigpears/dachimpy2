@@ -252,6 +252,29 @@ dragging a whole row of one colour along with a single partner is a **row** or *
 "accelerated crawling" keeps a spare partner piece waiting at the board's edge. **(to confirm with the
 user:** is this your figure of eight, or the drills' "butterfly"?)
 
+### The user's own account of the techniques (12 Nov)
+- **The figure of eight is late-game, for moving pieces up and down:** "a way of getting a piece up and
+  down the board when it's mostly white. So you kind of have ... a black and a brown piece, and you kind
+  of loop them around in a figure of eight, and you can drag ... a pair of pieces up and down, vertically
+  up and down. I think it's like a relatively late game thing where you've got an almost [white] board
+  and only the occasional piece, and you've kind of got to do them together."
+- **Pulling a line up:** "you can also do it for like a line of pieces, so you can have like one black
+  piece at the front, and you kind of pull a line of brown things up, which makes it end up at the
+  bottom. And then with just the trailing brown, you can bring the black up again, bring it to the start
+  of the line ... and then repeat the process to keep pulling it up one tile at a time."
+- **Going sideways is mid-game, while there are plenty of pieces:** the leapfrog "happens, I think, more
+  mid-game, so it depends on how many pieces you've got left ... that relies on, for example, you keep
+  three brown pieces at the top or bottom, and then drag a black along each one. But again, that relies on
+  having a lot of pieces hanging around."
+- **The hook is for when pieces get scarce:** "the hook stuff comes in more, I think, when things get
+  more scarce."
+- **Smooth over the frustrations:** "certainly make it smooth. I want this enjoyable." So drags don't stop
+  on a slightly sloppy path where the intent is clear, and no column-shift glitch.
+So the techniques by stage: early, sort the junk (whites left, blacks top, browns bottom); mid-game, with
+plenty of pieces, travel sideways by leapfrogging along a stored row; late, on a nearly white board, the
+figure of eight for pairs up and down, the line pulled up a tile at a time, and the hook when pieces are
+scarce. The bots play by stage the same way.
+
 ### Decision time
 Keep burning full junk columns as long as you're sure the next one will be finished before the furnace;
 the more white columns you bank, the longer the chain. Near the end there's less room on the right to
