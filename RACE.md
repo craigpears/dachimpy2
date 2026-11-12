@@ -306,7 +306,7 @@ the race before deciding.
   lit buoy. Whether it marks the shortcuts and their puzzles reverses "shortcuts are never marked" above,
   so that's the user's call. Never the starlit door. Shares its drawing with the course editor's 2D view.
 
-- **Planning your route, then puzzling it through (idea, 12 Nov, to agree):** "if we are supposed to be
+- **Planning your route, then puzzling it through (agreed 12 Nov, to build):** "if we are supposed to be
   puzzling as you're going through as a person, some way of like pre-planning your route through the
   course ... there's no way you're going to get through this ... you should be able to, like, say, yeah, go at
   least halfway around the board and then be sailing to help speed it up or carping once you get to the
@@ -325,7 +325,7 @@ the race before deciding.
     "Maybe the ship auto stops when you hit those kind of obvious points or obstacles ... Maybe just put
     waypoints in. Certainly for ... the zigzagging bit ... See if you can figure something out." Shooting
     each other may get trickier or likelier with it; open.
-  - **Proposed (12 Nov, to agree):**
+  - **Agreed (12 Nov):** "I like that plan idea ... you plan by choosing those options, that works. That's really simple and easy." To build:
     - **A plan is choices, not a drawn line:** at each of the course's forks (each leg: the long way, or one
       of its shortcuts) you pick one. The pilot already knows the water, so it finds the way to each, move by
       move. Waypoints are an extra, only for a racer who wants a particular line.
