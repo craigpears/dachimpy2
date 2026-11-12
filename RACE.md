@@ -306,6 +306,26 @@ the race before deciding.
   lit buoy. Whether it marks the shortcuts and their puzzles reverses "shortcuts are never marked" above,
   so that's the user's call. Never the starlit door. Shares its drawing with the course editor's 2D view.
 
+- **Planning your route, then puzzling it through (idea, 12 Nov, to agree):** "if we are supposed to be
+  puzzling as you're going through as a person, some way of like pre-planning your route through the
+  course ... there's no way you're going to get through this ... you should be able to, like, say, yeah, go at
+  least halfway around the board and then be sailing to help speed it up or carping once you get to the
+  whatever ... there needs to be some kind of a planning phase where everybody plans what route they're
+  taking and then the puzzling's kind of the executing phase." Today you have to steer and puzzle at once,
+  and nobody can do both. The shape it suggests:
+  - **Plan:** before the start, everyone at once, on the course seen from above (the tactical view above),
+    lays down her route: the long way or a shortcut on each leg, as a line of waypoints, as far ahead as she
+    likes ("at least halfway around").
+  - **Execute:** the pilot sails the plan move by move (forward, left, right, the same moves as your own
+    helm), and your hands are on the boards: Sailing on the way, each clear's gust a jump along the plan,
+    and the shortcut's puzzle when she reaches it (Carpentry at the crane, Bilge at the locks).
+  - **To settle with the user:** how long the planning lasts and whether it's the count before the start;
+    whether you can re-plan in the race (from the tactical view's zoom-out, costing seconds as a look
+    does); what a plan's made of (whole legs' choices, or waypoints anywhere); what the pilot does when a
+    snake throws her off the plan (sails back onto it, most likely); and whether the others see your plan.
+    It fits the tactical view, the pins and the pilot already there, and the bots already race this way
+    (a route chosen at the start, puzzles on the way).
+
 ## 6. Racing each other: position and risk
 
 **Several racers (rules built 11 Nov; on the water, stage 3, 11 Nov).** Two to four on the course, you and
