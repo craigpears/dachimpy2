@@ -466,6 +466,11 @@ you're watching." A replay shows the sea and every sloop on it, with each racer'
 move. It's cheap to keep, because the puzzles are dealt from a seed: a run is its seeds and its moves with
 their times. A race could also be watched live.
 
+**Spectator mode (asked for 12 Nov, being built).** "As a spectator ... I can see the puzzle, as I said,
+the puzzling, the just move around free camera, including jumping between watching each person in the
+race." A link to watch four bots race with no player in it, a free camera, a key to jump between racers,
+and each racer's board on screen as she plays it, with real moves (the puzzles' bots), not a timer.
+
 ## 11. Puzzles still to fit in (ideas)
 
 - **Rigging:** a passage of shifting, gusty winds where you keep re-trimming. The six pulleys are six

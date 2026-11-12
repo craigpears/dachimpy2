@@ -275,6 +275,13 @@ the site (`.assetsignore` skips `*.md`).
   but "I kind of liked some of the coins". Which, if any, to put on the old board (to pin down with the
   user).
 
+- **Watching the race: a spectator mode, and a link to watch four bots race (12 Nov):** "are you able to
+  show me a link today to just see all four bots? ... I can give input into ... how realistic it looks."
+  As a spectator "I can see the puzzle, as I said, the puzzling", "just move around free camera,
+  including jumping between watching each person in the race." So a link where four bots race with no
+  player, a free camera, a key to jump to each racer in turn, and each racer's puzzle board shown with
+  their real moves as they play it (RACE.md §10).
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
