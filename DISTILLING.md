@@ -877,6 +877,15 @@ left, the colour packed on the right, the boundary between them upright. This co
 not one straight diagonal across it, which would leave the diagonal line of colour through the whites (the
 eighth note) that the bots were making.
 
+**The fifteenth note: the shape, by zigzags alone (the user, 12 Nov,
+`notes/distilling/26-the-shape-by-zigzags-alone.webp`, the end of the same game's opening).** "you can see, look,
+I kind of end up at this shape. Which is great, which is just ... browns and blacks just being zigzagged
+around. It's not required anything clever yet." In the picture the three left columns are solid white, the
+fourth nearly so, and the right five or six columns are all junk, browns and blacks mixed, with only a white
+or two at the boundary: Stage I done (§3), whites left and junk right in upright bands. Every move on the way
+was a plain zigzag drag (the fourteenth note); no crawl, hook, turn-over or line pull. The slow techniques
+are for later, when this stops working.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
