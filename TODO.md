@@ -480,6 +480,7 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   wind in front of it and was swept home. To make plain (how, to pin down with the user): honest distance
   only (the penguins 7 squares from the mouth, any gust that reaches them lands), or the Vegas rule kept
   and shown (on the water, and said when it stops her short).
+- **The starlit door doesn't say where it goes (12 Nov):** the user only understood it afterwards: "Obviously, it was not intuitive at play... so it takes you fully all the way through the course?" It doesn't: Navigation opens the door, any clear carries her in and up the first cleft onto leg 3 (about 40 s saved), and a second Vegas built safely under that cleft carries her on under leg 4 and up onto leg 5 (about 119 s in all). Nothing in play shows the two exits, what a clear gets you or what a Vegas gets you. It should be plain at the door before you commit (what you'd show: the tunnel's two stretches, the exits, a clear for leg 3, a Vegas on for leg 5), and plain again under the cleft (push on with a Vegas, or go up now). (How to show it: to pin down with the user.)
 
 ## Spotted along the way (not asked for)
 
