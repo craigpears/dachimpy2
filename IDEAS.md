@@ -2336,3 +2336,17 @@ fundamental way so that you don't have to think, oh, how are we going to detect 
 - **Make room for bots instead.** A bot league, labelled, with its own table (Dachimpy.com's simulators
   were half this already); ranked play only in rooms among people who know each other, or with a
   reputation to lose.
+
+## A commentator for the sloop race (12 Nov)
+
+The user, watching: "in spectator mode, obviously you should be able to toggle it off, but we need
+somebody to be a commentator ... That's a spot for someone. They can be the [sloop] race commentator, and
+they're off, and somebody, oh nope, they went over [a] Vegas through the whirlpool ... it's just
+commenting [on] all the actions. Those going the round way. Oh no, Kikkit went down. Oh, Kikkit took 5
+lefts again ... probably just a bit more action focused on actions than being too goofy." A commentator's
+voice over a watched race (and a replay), in speech bubbles from a booth or a boat by the course, calling
+what happens as it happens: the start, a Vegas over the whirlpools, someone taking the long way, a hit,
+a snake catching someone, a lead changing, the finish; with the racers' own quirks (Kikkit's lefts).
+Mostly the action, a little character. Can be turned off. **Who:** a spot kept open for a real pirate who
+wants to be involved ("certainly when ... somebody wants to be involved we can give them a space"); a
+stand-in voice till then. Their lines in `src/lines/`, called from what the race's events already say.

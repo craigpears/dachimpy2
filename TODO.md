@@ -369,6 +369,25 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     that it's not the same on every single thing": its pools and slow winds laid from the race's seed
     (the same seed for everyone in an online race), always with a way through.
   - **Rocks blasted away by her guns,** above.
+  - **Snakes a little setback, never a lost race (12 Nov):** "that's really too brutal. That sends you back
+    almost 2 legs worth. Like, it's supposed to be a small, funny thing ... maybe it catches you, sends
+    you back a small distance ... it should send you back by a few tiles and basically make you repeat the
+    thing ... where you've got to do the double hop, if you accidentally do one combo, it sends you in a
+    loop. Similar to where the Vegas [wells] are, where it sends you back to the start of that stage. So
+    it costs you a tiny bit ... I don't want it to be rage-inducing." So every snake (the left-hand trade
+    wind down the course's edge included) carries her back a few squares, to the start of what she was
+    doing, a loop to try again; none sends her back legs or to the start line.
+  - **Every shortcut reads as what it is, on the water (12 Nov):** "I can see kind of like a cove tunnel
+    thing, next to the docks. Is that supposed to be where the duty navigation entrance is? Because I
+    don't even see anything. Is there supposed to be a visible marker ...? Surely." And "there's still
+    this random little notch that I don't know what it's for. Is this supposed to be the rowing gap? ...
+    There's two tunnels. I don't know what they are ... It says it's the rowing gap, but it just looks
+    like it's blocked. There's like a giant three-story cliff next to it ... and then it looks like
+    there's a more open gap next to it that's just wide open ... Even as the creator, I've got no idea
+    what's going on here. So anyone else is surely going to be confused." So the starlit door plainly
+    marked now it's public (a door in the rock, stars round it), the rowing gap plainly a channel with
+    the headwind in it and no cliff closing it, the wreck's notch plainly the wreck's, and nothing that
+    looks open that isn't (or shut that's open). Each checked by eye in the browser.
   - **Every puzzle's shortcut cuts the same distance (12 Nov):** "other than things that are obviously
     should be bigger, like the Vegas or the triple hop ... they don't seem proportionate. Like each an
     element of puzzling surely should be the same distance. Like for example, the imperial gate ...
@@ -422,6 +441,8 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   - **Nobody shoots:** "I'm not seeing anybody shoot anything either. Like, no cannon." Watched, the bots
     should fire on a racer sitting still in the open as they pass (as the rivals do in your race), with
     the shot, the hit and the patch shown.
+  - **More variety in the ways round:** "I didn't even see anybody ... go do the rowing, go through the
+    driftwood. I love that Kikkit went through the sails, but there's a bit more variety needed there."
   - **Kikkit back at the start late on:** "Three of them finished, one of them vanished ... One's back at
     the start. I don't know what happened to her. Did she get bumped? ... Is she doing like lap number 2
     ... I'm pretty sure I thought she got through the Vegas' part." There are no laps; a failed Vegas only
