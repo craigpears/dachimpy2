@@ -857,6 +857,15 @@ drag gets over.
   of whites runs down the middle, colour on either side of it. One black at a time, each zigzagged right
   through, and the whites gather into the "river" (§3) with no grand plan.
 
+**The thirteenth note: free a white trapped behind spice first (the user, 12 Nov,
+`notes/distilling/24-white-behind-the-spice.webp`, the next moment of the same game).** "based on that
+heuristic, one of the first things I've done is cleared that white piece that's kind of trapped behind the
+spice at the top right. Like those kind of, especially because ... things burn, like those places become
+inaccessible. So that's certainly something what I've not seen the bots doing." Spice never swaps, so a white
+in a pocket behind it can only get out one way, and as the columns burn and the board slides, that way can
+close. So a white caught behind spice is rescued early, before it's walled in, and for the board's score it
+counts as one of the worst things to leave (with a white trapped in the junk on the right, the eleventh note).
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
