@@ -347,6 +347,13 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   - **Fewer gambles, none by the finish:** "I don't think we want that many gambles. That's far too near
     to the finish for a gamble. That will make people very cranky." The veiled wind through the last
     spit goes; the turning pool stays (to confirm: whether one gamble is the most, or another goes early).
+    **The turning pool too? (12 Nov):** "is that really a good idea? I love the snakes and ladders thing,
+    like where you have to double hop over it because it's more deterministic. But it just seems no cost
+    to taking that gamble right at the start ... are we going to ... create a situation whereby the only
+    way to win is to take that gamble, and if you don't, you rage quit? ... there's already enough
+    features ... It does not feel like a very game-worthy thing ... not really in the ... good
+    sportsman-like spirit." And "we're struggling for space already." Proposed: no gambles at all; the
+    turning pool's spit goes to the rocks blasted by Gunnery (to confirm with the user).
   - **The imperial gate's bribe isn't worth its puzzle:** "doing an entire puzzle to get through one gate
     that doesn't save you too much time, that doesn't feel like it's been balanced." The gate saves 14 s
     against a whole Treasure Haul: make the haul shorter or the gate worth more, checked by the
