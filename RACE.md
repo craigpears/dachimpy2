@@ -342,6 +342,18 @@ you racer 0 on it: the same logic that's balance-tested races you.
   played by its bot in those times. Still to come: the bots' own play deciding the times, so they're the
   testers as well. And Daquan.
 
+**Real players racing each other online (asked about 12 Nov, not started).** "what would it take to make
+the sloop race things multiplayer? So you can have like a handful of people playing if we get to play
+testing it." The plan as proposed: the den's co-op rooms (`worker/crew.js`, a Durable Object passing
+messages between up to four browsers, the first one in hosting) reused as a race room. Each player sails
+and puzzles in their own browser, sending where she is a few times a second; the host's browser keeps the
+field (whose turn at a lock or the crane, hits, places, the clock, the gambles' coin tosses from one shared
+seed) and sails the bots filling the empty places. Everyone else's sloop is a racer moved by what arrives
+(a `Drive` like the bots', fed from the room). A race room of its own, a few more places than four, a lobby
+on the starting line (a code to share, ready up, the count from the host). Kept apart from the rest: its
+rules a tested `src/` part, its wiring a `js/den/` file, a thin hook on the line. Trusting the players
+(friends, for playtests): no cheat-proofing to start.
+
 ## 7. The start: a field of whirlpools and winds (built 11 Nov)
 
 "In the opening of a blockade, one of the challenges is, right, you've got a bunch of winds and whirlpools
