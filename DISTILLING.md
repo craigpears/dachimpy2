@@ -560,6 +560,30 @@ browns still low in the middle.
   above, and any piece low in the middle brought over by the ladder. Never a piece left where it was
   dragged to.
 
+**The third note: the sweep's end, and turning the right side over (the user, 12 Nov, three screenshots:
+`notes/distilling/4-end-of-the-sweep.webp`, `5-nowhere-to-go.webp`, `6-blacks-up-the-right-side.webp`).**
+- **Where the sweep ends:** "by the end of the first ... phase, you should kind of end up with a board kind
+  of like this. So you can see brown's at the top, black's at the bottom, but that's not then where we want
+  them." Whites fill the left; on the right, the browns have risen to the top and the blacks sunk to the
+  bottom, as they do on their own through whites.
+- **Why that's stuck (after the next burn, a new column on the left):** green, a black from the left "wants
+  to go down but it's got nowhere to go": it sinks through the whites and meets the blacks at the bottom.
+  Red, a brown "going up, again, it's got nowhere to go": it rises through the whites into the browns at
+  the top. Nothing hooks in.
+- **Yellow, the fix: blacks up the right side.** "what I can do is take black pieces and move them up the
+  board on the right-hand side ... imagine if I had another brown there, I can do the same and bring
+  multiple of them. And then once there's a black at the top there, the brown can hook in and pull down."
+  A black climbs up through the browns (a black rises past a brown), zigzagging between the right-hand
+  columns to the top; several of them, one after another. With blacks at the top right, a brown arriving
+  there sinks through them and pulls down; with browns at the bottom, a black arriving low climbs.
+- **So the zigzag up the side does two jobs:** "zigzagging up the side is how you get them over. But it
+  also then is what allows you to hook things on the left and pull them in." It's the second phase: once
+  the sweep's done (browns top right, blacks bottom right), turn the right side over, blacks up and browns
+  down, by zigzags up the side, and from then on everything new from the left hooks in.
+- **A burn button while paused (the test page):** "when I'm in pause mode as well, I need a burn button so I
+  can demo these." On `distilling-test.html`, a Burn button that works while the game's paused, so a board
+  can be set up and burned to show the next stage.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
