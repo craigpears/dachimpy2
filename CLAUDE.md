@@ -43,6 +43,14 @@ Modular, no technical debt (the user, 10 Nov: "we need to make sure I'm not crea
   its own `js/den/` files, its lines in `src/lines/`), touching the rest only through a few thin hooks (a
   square on the sea, a quest line, a cheat, what comes home with you). Keep that seam thin as more are added.
 
+- Server and client kept apart, a modular monolith (the user, 12 Nov: "server code is separated from client
+  code in a way that it can easily be shifted later"). Rules in `src/` are shared and pure: no DOM, no
+  sockets, randomness and the clock passed in (`random = Math.random` only as a default), so the same code
+  can run in the browser, in a Cloudflare room, or on a proper server later. Anything a server does (a
+  room's logic) is a pure class in `src/` taking messages and the time and returning messages; `worker/`
+  holds only thin adapters around it (sockets, hibernation); the browser reaches it through a small link
+  (WebSocket, or in-process in the same tab for single-player and tests), never a socket directly.
+
 Read [STORY.md](STORY.md) for the den's story, its progression and the principles behind them, and keep it
 up to date as the story grows. Read [RULES.md](RULES.md) before changing gameplay or wording, and add to it whenever the user corrects a rule or gives design feedback.
 The sloop race has a design document of its own, [RACE.md](RACE.md) (the user, 11 Nov: "all these kind of
