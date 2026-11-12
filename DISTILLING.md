@@ -886,6 +886,22 @@ or two at the boundary: Stage I done (§3), whites left and junk right in uprigh
 was a plain zigzag drag (the fourteenth note); no crawl, hook, turn-over or line pull. The slow techniques
 are for later, when this stops working.
 
+**The sixteenth note: when zigzags stop finishing columns, a brown pulls the blacks in (the user, 12 Nov,
+`notes/distilling/27-blacks-grouping-at-the-bottom.webp` and `28-a-brown-pulls-them-in.webp`, later in the same
+game; a picture of the result to come).** "I think this is here the difference. Like you can see as pieces
+are starting to spawn, more to the left. Like if I just keep doing black zigzagging down to the right, you can
+see I'm not completing columns. They're kind of grouping at the bottom more. This is when you start dragging
+browns down through the blacks to kind of pull them in. So yeah, using this example, I would start wanting to
+... use this brown piece to kind of pull things in and kind of loop around. I think I've got too many green
+arrows there".
+- **The picture:** the whites are a solid block on the left, the junk on the right, but the new columns
+  come in with colour on the left, and the blacks zigzagged across have settled in a row along the bottom
+  of the middle columns, under the whites, rather than finishing a junk column on the right.
+- **The turn:** this is where the fifteenth note's zigzags stop being enough, the first point where
+  something cleverer is needed. A brown is dragged down through the row of blacks at the bottom (a brown sinks past a black: blacks rise, browns sink, §3), pulling them in, and loops
+  round, as in the crawl and line pull (the fourth to sixth notes), to carry the blacks over into the junk
+  side and finish its columns.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
