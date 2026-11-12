@@ -461,6 +461,21 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     the crane, guns loading, a patch), so you see it all at a glance from anywhere.
   After the course's rework (the race's next pass), as the bots race whatever course it leaves.
 
+- **The opening still says "defend the den" (12 Nov):** "The initial loading screen is more of a loading
+  screen because it keeps saying defend the den still, and like we're way past that now". What you first see
+  is the siege's: "Raiders are coming! Grab a piece from a crate and mend the wall", "Vikings attack in 1:00",
+  the "Defend it again" button, while the den's now a whole sea of islands, puzzles and a race. (What it
+  should say instead, and whether the quick siege still opens it, to pin down with the user: the message was
+  cut off.)
+- **The online race needs a real lobby (12 Nov):** trying it online for the first time, "it's not even clear
+  like that you're in a lobby with people. Like, how do I know that people are here instead of bots? There's
+  no indication of that." The Pirate Den panel "is a bit heavy ... taking up valuable space ... that bit on the
+  right ... just a big dump of text ... this needs to be a lot lighter. Lot lighter. What does H head home mean
+  in this context? Is that even relevant in here?" And "much more lobby-like. Like, if you look at the
+  original thing, it would be like, here's the map of the course, you've got people loading and waiting, or
+  you can play with bots ... you can either wait for people, start with bots". So: a lobby screen of its own
+  (the course's chart, who's in and who's a bot, plainly; wait for people or start with bots), and in a race
+  the den's heavy panels and key lists slimmed right down, nothing that doesn't apply (no "head home").
 
 ## Spotted along the way (not asked for)
 
