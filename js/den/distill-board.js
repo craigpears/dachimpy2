@@ -261,6 +261,10 @@ export function distillBoard(o = {}) {
     return true;
   };
   b.swapAt = (x, y, way) => { const n = game.neighbour(x, y, way); return !!n && trySwap(x, y, n[0], n[1]) && n; };
+  /** A hand's drag (a bot's, or Helium's): the piece at (x, y) held, glowing under the cursor as it's
+      swept along; `letGo()` when the drag's done. */
+  b.hold = (x, y) => { selected = grid[x]?.[y] ?? null; cursor = { col: x, row: y }; };
+  b.letGo = () => { selected = null; };
   b.burn = () => handle(game.burnNow());
 
   // A column goes: its pieces glide up into the pipe or down into the furnace (burned whites rolling

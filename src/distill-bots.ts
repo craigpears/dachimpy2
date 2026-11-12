@@ -1,62 +1,60 @@
-/* Bots that distil: Distilling (src/distilling.ts), played by the techniques (DISTILLING.md §3), knowing
-   nothing of where it's played. TypeScript, compiled to js/distill-bots.js; tested in
-   tests/distill-bots.test.ts; run over many seeded boards by tools/distill-bots.mjs, whose numbers are
-   DISTILLING.md §4's goals.
+/* Bots that distil, and the planner behind them and "Help, Helium": Distilling (src/distilling.ts) played
+   by its techniques, each a routine of src/distill-routines.ts, picked by stage. TypeScript, compiled to
+   js/distill-bots.js; tested in tests/distill-bots.test.ts; run over many seeded boards by
+   tools/distill-bots.mjs, whose numbers are DISTILLING.md §4's goals.
 
-   A bot sees the board as a player does and moves at a person's pace: a budget of swaps a second (at
-   most 6, a swap's 150 ms slide) and a moment to spot each drag. It never searches what a person
-   couldn't: it looks at drags of one piece at a time, tracing where a piece can slide (a player sees
-   "this black falls down-right through the whites"), and at the better tiers a drag that sets up the
-   next (two drags of a pair: the crawl, the leapfrog, the figure of eight, the hook). Nothing deeper.
+   Every tier plays the same plan, the user's (12 Nov: "It's always whites to the left. There's no
+   reason to do any other strategy"): whites left, junk right, a junk column at a time, never a white
+   burned on purpose; then, with enough whites banked, the chain, whites right. The tiers differ in which
+   techniques they can pull off (their routines) and how fast (a moment to spot each drag, and a hand's
+   speed along it), and how much they bank before the chain.
 
-   How it plays, by the user's stages (12 Nov, DISTILLING.md "The user's own account"):
-   - Stage I, burn the junk: whites to the left, browns and blacks to the right, blacks on top and
-     browns at the bottom (the junk sorts itself that way: blacks rise past browns; a black-topped
-     column burns and never floats up as a pure brown). The column by the furnace: its whites rescued
-     first, a black more than its whites, then burned as soon as it's ready (the better tiers).
-   - Decision time: when the whites on the board make the tier's columns (bank), or the junk runs low,
-     stop ferrying junk across; the junk columns still on the right burn as planned, then the chain.
-   - Stage II, the chain: whites to the right, every column out Crystal Clear, the junk piling up on
-     the left; the next column out filled first. When the chain breaks below CC^12, dismiss.
-   Its sense of the board is one score (`worth`): three zones (the junk columns to burn next, at most
-   KMAX built at once; the block of whites beside them, as wide as its whites fill; the rest, where new
-   columns come in), each piece worth more where it belongs, junk on the block's top or bottom edge worth
-   least (it gets stuck there), blacks up and browns down, a way out kept open, the next columns out
-   weighed most. Each go it picks the drag of one piece that gains most (less a little a swap); failing
-   that (the better tiers), two pieces moved together, up to six swaps (the crawl, the figure of eight),
-   or a drag that sets up the next. A hill-climb, not a plan: DISTILLING.md §4 says how far it gets (CC^2
-   typically, CC^6 at best, 12 Nov) and why. The techniques aren't separate routines yet (the tutorial
-   will want each as a scripted routine on a seeded board). */
+   The planner (`choose`): the stage says which routines are on the menu, the board which of them apply,
+   and each routine's drags are weighed by how much they better the board (distill-routines' `measure`)
+   for the swaps and drags they take; with time short, only what saves the furnace's column. A column
+   ready to go is burned at once when nothing worth doing is left (the better tiers). In the chain, past
+   a few Crystal Clears, the top tiers take the endgame's gamble the way a player does (the user, 12 Nov:
+   "like a game of Russian roulette"): chase the next column while the odds are fair, cash in (dismiss)
+   when it can't be filled in time.
 
-import {
-  BLACK, BROWN, BURNT, COLS, DOWN_LEFT, DOWN_RIGHT, Distilling, SPICE, TALL, UP_LEFT, UP_RIGHT, WHITE, canSwapOn, neighbourOn,
-} from './distilling.js';
+   `advise(board)` is the planner for anyone's board, a person's mid-game: the stage, the routine it would
+   play now, why in a line, and its drags. "Help, Helium" will show that on the player's own board. */
+
+import { COLS, Distilling, SPICE, WHITE } from './distilling.js';
 import type { Board, Column, DistillEvent } from './distilling.js';
+import {
+  ROUTINES, burnsClean, clear, fillTarget, isJunk, junkTarget, measure, playDrags, swapsIn, whitesFrom,
+} from './distill-routines.js';
+import type { Ctx, Drag, Move, RoutineName } from './distill-routines.js';
 
-/** A tier of distiller (DISTILLING.md §4). */
+/** A tier of distiller (DISTILLING.md §4): the techniques it can pull off and its pace. */
 export interface Tier {
   name: string;
   label: string;
-  /** Swaps a second at most, and ms to spot each drag before it starts. */
+  /** A hand's speed along a drag, swaps a second (at most 6: a swap slides 150 ms), and ms to spot each
+      drag before it starts. A drag is one operation: spotted once, then swept. */
   rate: number;
   spot: number;
-  /** Columns of whites to bank before the chain (0: no Stage I, every column sent up as it comes). */
+  /** Columns of whites to bank before the chain. */
   bank: number;
-  /** The longest drag it traces, in swaps. */
+  /** The longest drag it sweeps, in swaps. */
   reach: number;
-  /** Whether it sets one drag up for the next (two drags of a pair). */
-  pairs: boolean;
-  /** Whether it burns as soon as the column's ready (else it waits for the furnace). */
+  /** The techniques it knows. */
+  routines: readonly RoutineName[];
+  /** Whether it burns as soon as the column's ready and nothing's left worth doing (else it waits for the
+      furnace), dismisses when its chain breaks, and takes the endgame's gamble (cashes in a chain whose
+      next column can't be filled in time). */
   early: boolean;
-  /** Whether it dismisses when its chain breaks. */
   dismiss: boolean;
+  gamble: boolean;
 }
 
+const BASIC: RoutineName[] = ['rescue', 'junkColumn', 'diamond', 'channel'];
 export const TIERS: readonly Tier[] = [
-  { name: 'learner', label: 'Learner', rate: 2, spot: 600, bank: 0, reach: 2, pairs: false, early: false, dismiss: false },
-  { name: 'master', label: 'Able to Master', rate: 3.5, spot: 400, bank: 4, reach: 8, pairs: false, early: true, dismiss: true },
-  { name: 'grandmaster', label: 'Grand-Master to Legendary', rate: 5, spot: 250, bank: 4.5, reach: 12, pairs: true, early: true, dismiss: true },
-  { name: 'ultimate', label: 'Ultimate', rate: 6, spot: 150, bank: 5, reach: 16, pairs: true, early: true, dismiss: true },
+  { name: 'learner', label: 'Learner', rate: 4, spot: 900, bank: 4, reach: 6, routines: BASIC, early: false, dismiss: false, gamble: false },
+  { name: 'master', label: 'Able to Master', rate: 5, spot: 500, bank: 6, reach: 10, routines: [...BASIC, 'crawl', 'store', 'leapfrog'], early: true, dismiss: true, gamble: false },
+  { name: 'grandmaster', label: 'Grand-Master to Legendary', rate: 6, spot: 350, bank: 6, reach: 14, routines: [...BASIC, 'crawl', 'store', 'leapfrog', 'figureEight', 'hook'], early: true, dismiss: true, gamble: true },
+  { name: 'ultimate', label: 'Ultimate', rate: 6, spot: 250, bank: 6, reach: 16, routines: [...BASIC, 'crawl', 'store', 'leapfrog', 'figureEight', 'hook', 'linePull'], early: true, dismiss: true, gamble: true },
 ];
 export const tierNamed = (name: string): Tier => {
   const t = TIERS.find((x) => x.name === name);
@@ -64,373 +62,186 @@ export const tierNamed = (name: string): Tier => {
   return t;
 };
 
-const isJunk = (p: number) => p === BROWN || p === BLACK || p === BURNT;
-/** A piece's height on the board in half pieces, 0 the top of a tall column to 16 the bottom. */
-const half = (cols: Board, x: number, y: number) => 2 * y + (cols[x].length === TALL ? 0 : 1);
-
-/** What the bot is doing: 'junk' Stage I; 'chain' Stage II, with `burns` junk columns still to go
-    out on the right before the chain starts. And its zones: the junk columns to burn, from `junkFrom`
-    to the furnace (as many as the junk on the board fills); the block of whites, `whiteFrom` to
-    `whiteTo` (as many as its whites fill, in Stage II); the rest free, where new columns come in. */
-export interface Sense { stage: 'junk' | 'chain'; burns: number; junkFrom: number; whiteFrom: number; whiteTo: number }
-
-/** Weights of the bot's sense of the board (exported to tune: tools/distill-bots.mjs's WEIGHTS). */
-export const W = {
-  /** A free column's drift on each piece toward its side. */
-  PULL: 0.3,
-  /** A piece in the block of whites, or the junk columns, where it belongs or doesn't. */
-  ZONE: 6,
-  JZONE: 10,
-  /** Stage I's junk columns at most: the next ones to burn, built one at a time ("build evenly"). */
-  KMAX: 3,
-  /** Junk on the top or bottom edge of the block of whites, where it gets stuck ("blacks get stuck at
-      the bottom, browns at the top"). */
-  EDGE: 10,
-  /** Junk in the block of whites, drawn toward the way out (the junk columns in Stage I, the left after). */
-  PULL_IN: 0.5,
-  /** Moving two pieces together (the crawl, the figure of eight): swaps at most, and pairs looked at. */
-  PAIR_DEPTH: 6,
-  PAIRS: 24,
-  /** Blacks up, browns down. */
-  SORT: 0.6,
-  /** The next three columns out: a piece in the wrong one. */
-  NEXT: [15, 8, 4],
-  /** A junk column by the furnace that would float up. */
-  FLOAT: 12,
-  /** A piece with a way still open to where it wants to go. */
-  MOB: 2,
-  /** Setting a drag up for the next: how many first drags it weighs, and whether any piece's (else
-      only a junk pair's). */
-  SETUPS: 30,
-  ANY_SETUP: 0,
-  /** Each swap's cost, so the shorter drag wins. */
-  SWAP: 0.15,
+/** The routines on the menu in each stage, in the order they're preferred when they'd do as well. */
+export const MENU: Readonly<Record<'junk' | 'chain', readonly RoutineName[]>> = {
+  junk: ['rescue', 'junkColumn', 'crawl', 'diamond', 'leapfrog', 'hook', 'figureEight', 'linePull', 'store'],
+  chain: ['rescue', 'junkColumn', 'crawl', 'channel', 'diamond', 'leapfrog', 'hook', 'figureEight', 'linePull'],
+};
+/** The planner's weights (exported to tune from tools/distill-bots.mjs's PLAN). */
+export const P = {
+  /** A routine's cost: each swap, and each drag (spotting it). */
+  SWAP: 0.08,
+  DRAG: 0.5,
+  /** The least a routine must better the board by to be worth it, and the most for a ready column to
+      burn at once rather than wait while it's done. */
+  MIN: 0.3,
+  SLACK: 2,
+  /** ms left on the furnace below which only what saves its column counts. */
+  URGENT: 5000,
+  /** The gamble: from this many Crystal Clears in a row, a chain is cashed in when its next column can't
+      be filled in time. */
+  CASH_FROM: 3,
+  /** ... looked at only in its last few seconds, when what's left can be judged. */
+  CASH_MS: 4000,
+  /** Stage I: how many columns past the one being built are kept clear of whites too. */
+  AHEAD: 1,
 };
 
-/** One piece's worth where it is. */
-function pieceWorth(p: number, x: number, h: number, s: Sense): number {
-  if (p === SPICE) return 0;
-  let v: number;
-  const junk = isJunk(p);
-  // In the junk columns: junk at home, a white the worse the further in. In the block of whites: a
-  // white at home, junk out of place (its whereabouts in the block don't matter: only getting out).
-  // Free, where new columns come in: a little drift, junk toward the furnace in Stage I, whites
-  // toward the block in Stage II.
-  if (x >= s.junkFrom) v = junk ? W.JZONE + W.PULL * x : -W.JZONE - (x - s.junkFrom + 1);
-  else if (x >= s.whiteFrom && x < s.whiteTo) v = junk ? -W.ZONE - W.PULL_IN * (s.stage === 'junk' ? s.whiteTo - x : x - s.whiteFrom + 1) - (h <= 1 || h >= 15 ? W.EDGE : 0) : W.ZONE;
-  else if (s.stage === 'junk') v = junk ? W.PULL * x : 0;
-  else v = junk ? -W.PULL * x : W.PULL * x;
-  if (p === BLACK) v += (W.SORT * (16 - h)) / 16;
-  else if (p === BROWN) v += (W.SORT * h) / 16;
-  return v;
-}
-/** A column's worth beyond its pieces': the next ones out weighed by what's wrong in them. */
-function columnWorth(cols: Board, x: number, s: Sense): number {
-  const d = COLS - 1 - x;
-  if (d > 2) return 0;
-  const col = cols[x];
-  let whites = 0, junk = 0, weight = 0;
-  for (const p of col) {
-    if (p === WHITE) { whites++; weight--; } else if (p === BURNT) { junk++; weight--; } else if (p === BLACK) { junk++; weight++; } else if (p === BROWN) junk++;
-  }
-  const burning = s.stage === 'junk' || d < s.burns;
-  if (burning) return -W.NEXT[d] * whites - (d === 0 && weight <= 0 ? W.FLOAT : d === 1 && weight <= 0 ? W.FLOAT / 3 : 0);
-  return -W.NEXT[d] * junk;
-}
-/** The whole board's worth to the bot. */
-export function worth(cols: Board, s: Sense): number {
-  let v = 0;
-  for (let x = 0; x < COLS; x++) {
-    v += columnWorth(cols, x, s);
-    for (let y = 0; y < cols[x].length; y++) v += cellWorth(cols, x, y, s);
-  }
-  return v;
+/** What the planner says to do now: its stage, and a routine's drags, a burn, a wait or a dismiss, with
+    the routine's name for a player and the reason in a line. */
+export interface Advice {
+  stage: 'junk' | 'chain';
+  kind: 'move' | 'burn' | 'wait' | 'dismiss';
+  routine: RoutineName | null;
+  label: string;
+  reason: string;
+  drags: Drag[];
+  /** What the move betters the board by, for its cost. */
+  value: number;
 }
 
-/** A drag: the piece at (x, y), the ways it goes; what it gains, and the technique it's part of. */
-export interface Drag { x: number; y: number; ways: number[]; gain: number; setup?: boolean }
+/** The board as the planner sees it: the columns, the chain now, the furnace's ms left. */
+export interface Situation { cols: Board; chain: number; timeLeft: number }
+/** How the planner plays: the routines it knows, its reach and pace, and its habits (a Tier's). */
+export type Style = Pick<Tier, 'routines' | 'reach' | 'rate' | 'spot' | 'early' | 'gamble'>;
 
-/** Which way a piece wants to go across: -1 left, 1 right, 0 it's where it belongs. Stage I: whites
-    in the junk columns left, junk outside them right; Stage II: junk in the white block left, whites
-    outside it right (and out of the junk columns still to burn, left). */
-function wants(p: number, x: number, s: Sense): number {
-  if (p === SPICE) return 0;
-  const junk = isJunk(p);
-  if (x >= s.junkFrom) return junk ? 0 : -1;
-  if (x >= s.whiteFrom && x < s.whiteTo) return junk ? (s.stage === 'junk' ? 1 : -1) : 0;
-  if (s.stage === 'junk') return junk ? 1 : 0;
-  return junk ? -1 : 1;
-}
-/** A piece's way out: worth more while it can still swap the way it wants to go (a white in the junk
-    with a black above it or a brown below on the left, which a player keeps open; a black stored high
-    and a brown low, to cross the whites). A white shut in between browns above and blacks below is
-    stuck, the classic trap. */
-function mobility(cols: Board, x: number, y: number, s: Sense): number {
-  const dir = wants(cols[x][y], x, s);
-  if (!dir) return 0;
-  const ways = dir > 0 ? [UP_RIGHT, DOWN_RIGHT] : [UP_LEFT, DOWN_LEFT];
-  for (const d of ways) {
-    const n = neighbourOn(cols, x, y, d);
-    if (n && canSwapOn(cols, x, y, n[0], n[1])) return W.MOB;
-  }
-  return 0;
-}
-const cellWorth = (cols: Board, x: number, y: number, s: Sense) => pieceWorth(cols[x][y], x, half(cols, x, y), s) + mobility(cols, x, y, s);
-/** The places a swap touches the worth of: the two, and their neighbours (whose ways out change). */
-function touched(cols: Board, x1: number, y1: number, x2: number, y2: number): [number, number][] {
-  const out: [number, number][] = [[x1, y1], [x2, y2]];
-  for (const [x, y] of [[x1, y1], [x2, y2]]) for (let d = 0; d < 4; d++) {
-    const n = neighbourOn(cols, x, y, d);
-    if (n && !out.some(([a, b]) => a === n[0] && b === n[1])) out.push(n);
-  }
-  return out;
+/** Junk in the furnace's column (spice is fine in a Crystal Clear). */
+const junkAt = (col: readonly number[]) => col.filter((p) => p !== WHITE && p !== SPICE).length;
+/** The ms a move takes at a pace. */
+const msFor = (drags: readonly Drag[], s: Style) => drags.length * s.spot + (swapsIn(drags) * 1000) / s.rate;
+
+/** The context for a stage: Stage I, the junk column being built (and those done right of it) burn;
+    Stage II, the last `burns` columns burn, and the rightmost left of them not yet clear is filled. */
+export function contextFor(cols: Board, stage: 'junk' | 'chain', burns: number, reach: number): Ctx {
+  // Stage I: the junk column being built and the next one with it, so the next one's whites are out
+  // before it's the furnace's ("one column at a time ... to give yourself breathing room").
+  if (stage === 'junk') { const t = Math.max(0, junkTarget(cols) - P.AHEAD); return { stage, burnFrom: t, fill: t, reach }; }
+  const burnFrom = COLS - burns;
+  return { stage, burnFrom, fill: fillTarget(cols, burnFrom), reach };
 }
 
-/** What one swap changes in the board's worth (the places it touches and the two columns), done on
-    `cols`. */
-function swapGain(cols: Board, x1: number, y1: number, x2: number, y2: number, s: Sense): number {
-  const at = touched(cols, x1, y1, x2, y2);
-  let before = columnWorth(cols, x1, s) + columnWorth(cols, x2, s);
-  for (const [x, y] of at) before += cellWorth(cols, x, y, s);
-  const a = cols[x1][y1];
-  cols[x1][y1] = cols[x2][y2]; cols[x2][y2] = a;
-  let after = columnWorth(cols, x1, s) + columnWorth(cols, x2, s);
-  for (const [x, y] of at) after += cellWorth(cols, x, y, s);
-  return after - before;
-}
-
-/** The best drag of one piece at a time (reach swaps at most, always the same way across), on a copy
-    of the board. Each step of a drag is a swap a player can see is legal from where the piece is. */
-export function bestDrag(cols: Board, s: Sense, reach: number, floor = 0.1): Drag | null {
-  const b = cols.map((c) => [...c]);
-  let best: Drag | null = null;
-  const ways: number[] = [];
-  const dfs = (x: number, y: number, gain: number, side: number) => {
-    if (ways.length >= reach) return;
-    for (const d of side > 0 ? [UP_RIGHT, DOWN_RIGHT] : [UP_LEFT, DOWN_LEFT]) {
-      const n = neighbourOn(b, x, y, d);
-      if (!n || !canSwapOn(b, x, y, n[0], n[1])) continue;
-      const g = gain + swapGain(b, x, y, n[0], n[1], s);
-      ways.push(d);
-      const net = g - W.SWAP * ways.length;
-      if (net > floor && (!best || net > best.gain)) best = { x: x0, y: y0, ways: [...ways], gain: net };
-      dfs(n[0], n[1], g, side);
-      ways.pop();
-      // (undo)
-      const t = b[x][y]; b[x][y] = b[n[0]][n[1]]; b[n[0]][n[1]] = t;
-    }
-  };
-  let x0 = 0, y0 = 0;
-  for (x0 = 0; x0 < COLS; x0++) for (y0 = 0; y0 < b[x0].length; y0++) {
-    if (b[x0][y0] === SPICE) continue;
-    dfs(x0, y0, 0, 1);
-    dfs(x0, y0, 0, -1);
-  }
-  return best;
-}
-
-/** Every drag of one piece up to `reach` long, with its gain (for setting one up for the next). */
-function allDrags(cols: Board, s: Sense, reach: number): Drag[] {
-  const b = cols.map((c) => [...c]), out: Drag[] = [], ways: number[] = [];
-  let x0 = 0, y0 = 0;
-  const dfs = (x: number, y: number, gain: number, side: number) => {
-    if (ways.length >= reach) return;
-    for (const d of side > 0 ? [UP_RIGHT, DOWN_RIGHT] : [UP_LEFT, DOWN_LEFT]) {
-      const n = neighbourOn(b, x, y, d);
-      if (!n || !canSwapOn(b, x, y, n[0], n[1])) continue;
-      const g = gain + swapGain(b, x, y, n[0], n[1], s);
-      ways.push(d);
-      out.push({ x: x0, y: y0, ways: [...ways], gain: g - W.SWAP * ways.length });
-      dfs(n[0], n[1], g, side);
-      ways.pop();
-      const t = b[x][y]; b[x][y] = b[n[0]][n[1]]; b[n[0]][n[1]] = t;
-    }
-  };
-  for (x0 = 0; x0 < COLS; x0++) for (y0 = 0; y0 < b[x0].length; y0++) {
-    if (b[x0][y0] === SPICE) continue;
-    dfs(x0, y0, 0, 1);
-    dfs(x0, y0, 0, -1);
-  }
-  return out;
-}
-/** Whether a junk piece has a piece of the other junk colour beside it (a pair, to crawl with). */
-function pairAt(cols: Board, x: number, y: number): boolean {
-  const p = cols[x][y];
-  if (p !== BLACK && p !== BROWN) return false;
-  for (let w = 0; w < 4; w++) {
-    const n = neighbourOn(cols, x, y, w);
-    const q = n ? cols[n[0]][n[1]] : -1;
-    if ((p === BLACK && q === BROWN) || (p === BROWN && q === BLACK)) return true;
-  }
-  return false;
-}
-/** Make a drag on a board (a copy's), as the rules would. */
-function apply(cols: Board, d: Drag): void {
-  let x = d.x, y = d.y;
-  for (const w of d.ways) {
-    const n = neighbourOn(cols, x, y, w)!;
-    const t = cols[x][y]; cols[x][y] = cols[n[0]][n[1]]; cols[n[0]][n[1]] = t;
-    [x, y] = n;
-  }
-}
-
-/** A drag that sets up the next: when no single drag gains, the best pair of drags, the first one
-    allowed to cost a little (the crawl's first half, the leapfrog's, the figure of eight's). Only the
-    first is made; the second is then a plain drag. Junk pieces only, the few by a piece of the other
-    junk colour (a pair), as a player would look for them. */
-export function bestSetup(cols: Board, s: Sense, reach: number): Drag | null {
-  const firsts = allDrags(cols, s, Math.min(reach, 4)).filter((d) => d.gain >= -3 && (W.ANY_SETUP || pairAt(cols, d.x, d.y)))
-    .sort((a, b) => b.gain - a.gain).slice(0, W.SETUPS);
-  let best: Drag | null = null;
-  for (const f of firsts) {
-    const b = cols.map((c) => [...c]);
-    apply(b, f);
-    const then = bestDrag(b, s, reach);
-    if (!then) continue;
-    const total = f.gain + then.gain;
-    if (total > 0.5 && (!best || total > best.gain)) best = { ...f, gain: total, setup: true };
-  }
-  return best;
-}
-
-/** Swaps of two pieces moved together: each step [x, y, way], the piece at (x, y) swapped that way. */
-export interface PairMove { steps: [number, number, number][]; gain: number }
-
-/** Two pieces moved together, a few swaps of one then the other, as the crawl (a black and a brown
-    level through whites, three swaps a column), the figure of eight (a pair up or down through
-    whites) and the hook move them: for a piece out of place that no drag of its own gets out, with
-    each piece beside it of another colour as its partner. The pairs nearest the furnace first. */
-export function bestPair(cols: Board, s: Sense, depth = W.PAIR_DEPTH): PairMove | null {
-  const b = cols.map((c) => [...c]);
-  const lost: [number, number][] = [];
-  for (let x = COLS - 1; x >= 0; x--) for (let y = 0; y < b[x].length; y++) if (wants(b[x][y], x, s)) lost.push([x, y]);
-  let best: PairMove | null = null;
-  const steps: [number, number, number][] = [];
-  const pos: [number, number][] = [[0, 0], [0, 0]];
-  const dfs = (gain: number) => {
-    if (steps.length >= depth) return;
-    for (let i = 0; i < 2; i++) for (let d = 0; d < 4; d++) {
-      const [x, y] = pos[i], n = neighbourOn(b, x, y, d);
-      if (!n || !canSwapOn(b, x, y, n[0], n[1])) continue;
-      const g = gain + swapGain(b, x, y, n[0], n[1], s);
-      const j = 1 - i, other = pos[j][0] === n[0] && pos[j][1] === n[1];
-      steps.push([x, y, d]);
-      pos[i] = n; if (other) pos[j] = [x, y];
-      const net = g - W.SWAP * steps.length;
-      if (net > 0.5 && (!best || net > best.gain)) best = { steps: [...steps], gain: net };
-      dfs(g);
-      pos[i] = [x, y]; if (other) pos[j] = n;
-      steps.pop();
-      const t = b[x][y]; b[x][y] = b[n[0]][n[1]]; b[n[0]][n[1]] = t;
-    }
-  };
-  let tried = 0;
-  for (const [x, y] of lost) {
-    if (tried >= W.PAIRS) break;
-    const p = b[x][y];
-    for (let d = 0; d < 4; d++) {
-      const n = neighbourOn(b, x, y, d);
-      if (!n) continue;
-      const q = b[n[0]][n[1]];
-      if (q === SPICE || kindOfPiece(q) === kindOfPiece(p)) continue;
-      tried++;
-      pos[0] = [x, y]; pos[1] = n;
-      dfs(0);
+/** Pick the routine for the board now (see the header). */
+export function choose(sit: Situation, ctx: Ctx, style: Style): Advice {
+  const { cols } = sit, last = COLS - 1;
+  const base = measure(cols, ctx);
+  const burning = ctx.burnFrom <= last;
+  const furnace = cols[last];
+  const ready = burning ? burnsClean(furnace) : clear(furnace);
+  // What's wrong with the furnace's column, to save it when time's short.
+  const wrong = (b: Board) => (burning ? b[last].filter((p) => p === WHITE).length : junkAt(b[last]));
+  const urgent = sit.timeLeft < P.URGENT && wrong(cols) > 0;
+  const moves: { move: Move; value: number }[] = [];
+  for (const name of MENU[ctx.stage]) {
+    if (!style.routines.includes(name)) continue;
+    for (const move of ROUTINES[name].find(cols, ctx)) {
+      const after = playDrags(cols, move.drags);
+      if (!after) continue;
+      if (urgent && (wrong(after) >= wrong(cols) || msFor(move.drags, style) > sit.timeLeft)) continue;
+      const value = measure(after, ctx) - base - P.SWAP * swapsIn(move.drags) - P.DRAG * move.drags.length;
+      moves.push({ move, value });
     }
   }
-  return best;
+  moves.sort((a, b) => b.value - a.value);
+  const best = moves[0] && moves[0].value > P.MIN ? moves[0] : null;
+  const advice = (kind: Advice['kind'], label: string, reason: string, m: { move: Move; value: number } | null = null): Advice => ({
+    stage: ctx.stage, kind, routine: m?.move.routine ?? null, label, reason, drags: m?.move.drags ?? [], value: m?.value ?? 0,
+  });
+  // The endgame's gamble: the next Crystal Clear can't be filled in time.
+  if (style.gamble && !burning && sit.chain >= P.CASH_FROM && !ready && sit.timeLeft < P.CASH_MS) {
+    const need = junkAt(furnace), saving = moves.filter((m) => m.value > P.MIN && wrong(playDrags(cols, m.move.drags)!) < need);
+    const perFix = style.spot + 4000 / style.rate;
+    if (!saving.length || need * perFix > sit.timeLeft) {
+      return advice('dismiss', 'Cash in', `the gamble: CC^${sit.chain} so far, and the next column needs ${need} more white${need > 1 ? 's' : ''} in ${(sit.timeLeft / 1000).toFixed(0)} s. Poor odds: cash in now`);
+    }
+  }
+  // Burn a ready column at once when nothing much is left to do; in the chain, only when nothing is (a
+  // Crystal Clear burned early is time lost ferrying whites for the next).
+  if (ready && style.early && (!best || (ctx.stage === 'junk' && best.value < P.SLACK))) {
+    return advice('burn', 'Burn now', burning ? "the furnace's column is all junk: burn it now" : 'the column is Crystal Clear: send it up now');
+  }
+  if (best) {
+    const gamble = !burning && sit.chain >= P.CASH_FROM && !ready && style.gamble
+      ? ` (the gamble: CC^${sit.chain} so far, chasing the next while the odds are fair)` : '';
+    return advice('move', ROUTINES[best.move.routine].label, best.move.reason + gamble, best);
+  }
+  return advice('wait', 'Wait', ready ? 'the column is ready: let the furnace take it' : 'nothing worth moving: wait for the next column');
 }
-const kindOfPiece = (p: number) => (p === BURNT ? WHITE : p);
 
-/** The whites on the board (not burnt), and its junk. */
+/** Whites, and junk, on the board. */
 export function counts(cols: Board): { whites: number; junk: number } {
   let whites = 0, junk = 0;
   for (const c of cols) for (const p of c) { if (p === WHITE) whites++; else if (isJunk(p)) junk++; }
   return { whites, junk };
 }
-/** Whether the column by the furnace is ready to go: a junk column (no whites, and it burns), or a
-    Crystal Clear. */
-export function ready(cols: Board, s: Sense): boolean {
-  const col = cols[COLS - 1];
-  let whites = 0, junk = 0, weight = 0;
-  for (const p of col) { if (p === WHITE) { whites++; weight--; } else if (p === BURNT) { junk++; weight--; } else if (p === BLACK) { junk++; weight++; } else if (p === BROWN) junk++; }
-  return s.stage === 'junk' || s.burns > 0 ? whites === 0 && weight > 0 : junk === 0;
+/** Whether it's decision time in Stage I: the whites banked make `bank` columns, or too little junk is
+    left to finish the junk column being built. */
+export function decisionTime(cols: Board, bank: number): boolean {
+  const t = junkTarget(cols), { whites } = counts(cols);
+  let junkLeft = 0;
+  for (let x = 0; x < t; x++) for (const p of cols[x]) if (isJunk(p)) junkLeft++;
+  const need = cols[t].filter((p) => p === WHITE).length;
+  return whites >= bank * 8.5 || junkLeft < need;
+}
+/** The junk columns still to burn at decision time: the ones done on the right, and the one being built
+    if it's mostly junk. */
+export function burnsLeft(cols: Board): number {
+  // From the furnace, every column that's more junk than whites: those are finished as junk (their
+  // whites saved) and burned, so the chain starts on a column that's mostly white.
+  let n = 0;
+  while (n < COLS - 1) {
+    const col = cols[COLS - 1 - n], whites = col.filter((p) => p === WHITE).length;
+    if (whites * 2 >= col.length && !burnsClean(col)) break;
+    n++;
+  }
+  return n;
 }
 
-/** What the bot does next. */
-export type Plan = { kind: 'drag'; drag: Drag } | { kind: 'pair'; pair: PairMove } | { kind: 'burn' } | { kind: 'wait' } | { kind: 'dismiss' };
+/** The pace "Help, Helium" plays at, and every technique. */
+export const HELIUM: Style = { routines: Object.keys(ROUTINES) as RoutineName[], reach: 16, rate: 6, spot: 250, early: true, gamble: true };
 
-/** A distiller of a tier: its sense of where the session is, and its next move. */
+/** The planner on anyone's board mid-game, a person's: it reads the stage from the board (the chain
+    started, or the whites banked, or the junk run out), then picks the routine as the bots do. */
+export function advise(g: { cols: Board; chain?: number; timeLeft?: number }, o: { bank?: number } = {}): Advice {
+  const cols = g.cols, chain = g.chain ?? 0, timeLeft = g.timeLeft ?? Infinity;
+  const two = chain > 0 || decisionTime(cols, o.bank ?? 8);
+  const burns = chain > 0 ? 0 : two ? burnsLeft(cols) : 0;
+  return choose({ cols, chain, timeLeft }, contextFor(cols, two ? 'chain' : 'junk', burns, HELIUM.reach), HELIUM);
+}
+
+/** A distiller of a tier: where it is in its run, and its next move. */
 export class DistillBot {
   readonly tier: Tier;
-  sense: Sense;
-  /** Two drags of a pair made, by the stage of the game (early, mid, late, by the junk left). */
-  setups = { early: 0, mid: 0, late: 0 };
-  drags = 0;
+  stage: 'junk' | 'chain' = 'junk';
+  /** Stage II's junk columns still to go out before the chain. */
+  burns = 0;
   /** Whites on the board, in columns, as the chain started. */
   banked: number | null = null;
   quit = false;
+  /** Drags made, and how often each routine was played. */
+  drags = 0;
+  used: Partial<Record<RoutineName, number>> = {};
+  /** What it's doing now (the test page shows its label). */
+  last: Advice | null = null;
 
-  constructor(tier: Tier) {
-    this.tier = tier;
-    this.sense = { stage: tier.bank > 0 ? 'junk' : 'chain', burns: 0, junkFrom: COLS, whiteFrom: 0, whiteTo: 0 };
-  }
+  constructor(tier: Tier) { this.tier = tier; }
 
-  /** Lay out the zones for the board now: Stage I, as many junk columns by the furnace as the junk
-      fills; Stage II, the junk columns still to burn, then as many white columns left of them as the
-      whites fill. */
-  private zones(g: Distilling): void {
-    const { whites, junk } = counts(g.cols), s = this.sense;
-    if (s.stage === 'junk') {
-      const k = Math.max(1, Math.min(W.KMAX, Math.floor(junk / 8.5))), m = Math.floor(whites / 8.5);
-      this.sense = { ...s, junkFrom: COLS - k, whiteFrom: Math.max(0, COLS - k - m), whiteTo: COLS - k };
-    } else {
-      const jf = COLS - s.burns, m = Math.max(1, Math.floor(whites / 8.5));
-      this.sense = { ...s, junkFrom: jf, whiteFrom: Math.max(0, jf - m), whiteTo: jf };
-    }
+  plan(g: Distilling): Advice {
+    if (this.quit) return this.say({ stage: this.stage, kind: 'dismiss', routine: null, label: 'Dismiss', reason: 'the chain is over: dismiss and keep the score', drags: [], value: 0 });
+    if (this.stage === 'junk' && decisionTime(g.cols, this.tier.bank)) { this.stage = 'chain'; this.burns = burnsLeft(g.cols); }
+    const ctx = contextFor(g.cols, this.stage, this.burns, this.tier.reach);
+    const a = choose({ cols: g.cols, chain: g.chain, timeLeft: g.timeLeft() }, ctx, this.tier);
+    if (a.kind === 'dismiss') this.quit = true;
+    if (a.routine) this.used[a.routine] = (this.used[a.routine] ?? 0) + 1;
+    return this.say(a);
   }
-
-  /** Decision time: switch to the chain when the bank's made or the junk's running out. The junk
-      columns still on the right (more junk than whites) go out first. */
-  private decide(g: Distilling): void {
-    if (this.sense.stage !== 'junk') return;
-    const { whites, junk } = counts(g.cols);
-    if (whites < this.tier.bank * 8.5 && junk > 12) return;
-    let burns = 0;
-    for (let x = COLS - 1; x >= 0; x--) {
-      const c = g.cols[x];
-      const w = c.filter((p) => p === WHITE).length;
-      if (w * 2 >= c.length) break;
-      burns++;
-    }
-    this.sense = { ...this.sense, stage: 'chain', burns };
-  }
+  private say(a: Advice): Advice { this.last = a; return a; }
 
   /** A column went: count down the junk columns, note the bank, and quit when the chain breaks. */
   seen(col: Column, g: Distilling): void {
-    if (this.sense.stage === 'chain' && this.sense.burns > 0) this.sense = { ...this.sense, burns: this.sense.burns - 1 };
-    else if (this.sense.stage === 'chain' && col.chain === 1 && this.banked === null) this.banked = (counts(g.cols).whites + col.whites) / 8.5;
-    if (this.tier.dismiss && this.sense.stage === 'chain' && this.sense.burns === 0 && col.chain === 0 && g.longest > 0) this.quit = true;
-  }
-
-  plan(g: Distilling): Plan {
-    if (this.quit) return { kind: 'dismiss' };
-    this.decide(g);
-    this.zones(g);
-    const s = this.sense, t = this.tier;
-    const drag = bestDrag(g.cols, s, t.reach);
-    const isReady = ready(g.cols, s);
-    // Burn the column as soon as it's ready, unless there's still a drag worth making by it.
-    if (t.early && isReady && (!drag || drag.gain < 2)) return { kind: 'burn' };
-    if (drag) return { kind: 'drag', drag };
-    if (t.pairs) {
-      const junk = counts(g.cols).junk, stage = junk > 40 ? 'early' : junk > 18 ? 'mid' : 'late';
-      const pair = bestPair(g.cols, s);
-      if (pair) { this.setups[stage]++; return { kind: 'pair', pair }; }
-      const setup = bestSetup(g.cols, s, t.reach);
-      if (setup) { this.setups[stage]++; return { kind: 'drag', drag: setup }; }
-    }
-    return { kind: 'wait' };
+    if (this.stage !== 'chain') return;
+    if (this.burns > 0) { this.burns--; return; }
+    if (col.chain === 1 && this.banked === null) this.banked = (whitesFrom(g.cols, 0) + col.whites) / 8.5;
+    if (this.tier.dismiss && col.chain === 0 && g.longest > 0) this.quit = true;
   }
 }
 
@@ -443,18 +254,21 @@ export interface Played {
   columnsUp: number;
   columnsBurned: number;
   whitesBurned: number;
-  /** Minutes it took, swaps made, white columns banked as the chain started. */
+  /** Minutes it took, swaps and drags made, white columns banked as the chain started. */
   minutes: number;
   swaps: number;
+  drags: number;
   banked: number | null;
   dismissed: boolean;
   finished: boolean;
-  setups: { early: number; mid: number; late: number };
+  /** How often each routine was played. */
+  used: Partial<Record<RoutineName, number>>;
 }
 
-/** Play a session through with a bot: each swap takes 1 / rate of a second, each drag a moment to spot
-    first; the furnace runs on meanwhile. Stops at `cap` minutes of play. `onColumn` sees each column. */
-export function playSession(g: Distilling, tier: Tier, cap = 30, onColumn?: (c: Column) => void): Played {
+/** Play a session through with a bot: each drag a moment to spot, then swept at the tier's hand speed;
+    the furnace runs on meanwhile. Stops at `cap` minutes of play. `onColumn` sees each column, `onPlan`
+    each decision. */
+export function playSession(g: Distilling, tier: Tier, cap = 30, onColumn?: (c: Column) => void, onPlan?: (a: Advice) => void): Played {
   const bot = new DistillBot(tier), swapMs = 1000 / tier.rate;
   let went = false;
   const handle = (ev: DistillEvent[]) => {
@@ -462,38 +276,30 @@ export function playSession(g: Distilling, tier: Tier, cap = 30, onColumn?: (c: 
   };
   while (!g.finished && g.time < cap * 60000) {
     if (g.sliding > 0) { handle(g.tick(g.sliding)); continue; }
-    const p = bot.plan(g);
-    if (p.kind === 'dismiss') { g.dismiss(); break; }
-    if (p.kind === 'burn') { handle(g.burnNow()); handle(g.tick(tier.spot)); continue; }
-    if (p.kind === 'wait') { handle(g.tick(Math.max(1, Math.min(250, g.timeLeft())))); continue; }
+    const a = bot.plan(g);
+    onPlan?.(a);
+    if (a.kind === 'dismiss') { g.dismiss(); break; }
+    if (a.kind === 'burn') { handle(g.burnNow()); handle(g.tick(tier.spot)); continue; }
+    if (a.kind === 'wait') { handle(g.tick(Math.max(1, Math.min(250, g.timeLeft())))); continue; }
     went = false;
-    if (p.kind === 'pair') {
-      // Each run of swaps of one piece is a drag: a moment to spot it first.
-      let last: [number, number] | null = null;
-      for (const [x, y, w] of p.pair.steps) {
-        if (!last || last[0] !== x || last[1] !== y) { handle(g.tick(tier.spot)); bot.drags++; }
+    let ok = true;
+    for (const d of a.drags) {
+      handle(g.tick(tier.spot));
+      bot.drags++;
+      let x = d.x, y = d.y;
+      for (const w of d.ways) {
         if (went || !g.movable) break;
         const n = g.swapToward(x, y, w);
-        if (!n) break;
-        last = n;
+        if (!n) { ok = false; break; }
+        [x, y] = n;
         handle(g.tick(swapMs));
       }
-      continue;
-    }
-    handle(g.tick(tier.spot));
-    bot.drags++;
-    let x = p.drag.x, y = p.drag.y;
-    for (const w of p.drag.ways) {
-      if (went || !g.movable) break;
-      const n = g.swapToward(x, y, w);
-      if (!n) break;
-      [x, y] = n;
-      handle(g.tick(swapMs));
+      if (went || !ok) break;
     }
   }
   return {
     tier: tier.name, longest: g.longest, score: g.score(), points: g.points, columnsUp: g.columnsUp,
     columnsBurned: g.columns.length - g.columnsUp, whitesBurned: g.whitesBurned, minutes: g.time / 60000,
-    swaps: g.swaps, banked: bot.banked, dismissed: g.dismissed, finished: g.finished, setups: bot.setups,
+    swaps: g.swaps, drags: bot.drags, banked: bot.banked, dismissed: g.dismissed, finished: g.finished, used: bot.used,
   };
 }
