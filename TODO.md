@@ -490,6 +490,17 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   get started." So a hop near the line (a wind or chain hop, like the ladders further on) that gets a good
   start going. (Which "ball" and where it lands, to pin down with the user: maybe the first buoy.) The user
   liked how it's looking now: "they're definitely much more looking like" [a race].
+- **How far does a chain carry her? Vegas Island's hidden rule (12 Nov):** "I did a double to get over the
+  first one, and then I thought, well, it's 1, 2, 3 tiles to get to the penguins, so surely a bingo should
+  take me 3 tiles, right? ... What's the calculation?" The calculation is a square a step (Double 2,
+  Triple 3, Bingo 4, Donkey 5, a Vegas 7, a square more for each step past it), but the penguins' water
+  also has a hidden rule: only a Vegas's gust gets in, however near it is, so her Bingo stopped on the
+  wind in front of it and was swept home. To make plain (how, to pin down with the user): honest distance
+  only (the penguins 7 squares from the mouth, any gust that reaches them lands), or the Vegas rule kept
+  and shown (on the water, and said when it stops her short).
+
+## Spotted along the way (not asked for)
+
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
 - **Your den's preview** shows your flag on every tab. The Shack tab could show the shack itself
   (painted as you choose), and the Den tab the landscape.
