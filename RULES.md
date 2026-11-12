@@ -169,6 +169,13 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   prominence as the giant features." So under each day's big features, "Smaller updates": a thumbnail and
   a line or two (an addition to something already there, a new look, a model on a test page). Showered in
   gifts, Primates Rule and Dalnoth's Vikings are smaller updates.
+- **Behind-the-scenes rules stay behind the scenes (12 Nov).** Of the design page saying Mischievious is
+  "funny about herself, never run down; cheeky, never dirty": "don't mention like the behind-the-scenes
+  things ... we should not be exposing that even in the notes ... any pirate can be cheeky but never dirty.
+  That's a behind-the-scenes rule, not something I want in a design document. That's public, like easily
+  found." So the public pages (the changelog, the design page) never state how the characters are written:
+  their tone rules, what they're kept off (a love life), what the real pirates asked for or against. Those
+  live only in RULES.md and `src/lines/`. The design page talks about places, puzzles and the game.
 - **The cheats jump to what's hard to get to, one per place (11 Nov).** "There's a lot there that are
   like basically the same thing ... these are supposed to help jump you to places that are hard to get
   to." So no cheat for what's a key away (Sailing's board: go sailing, then 1), and one per place, not

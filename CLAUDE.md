@@ -82,7 +82,8 @@ header: the thinking behind the den, high level and in plain words, a picture fo
 `changelog/`), the sloop race first, then the den's wider principles. Keep it up to date with design thinking
 as it's decided (RACE.md, STORY.md, RULES.md hold the detail). No hidden gems in the proof of concept (the user,
 12 Nov: "I just want to show stuff"): the starlit door, the penguins and the smugglers' beach are shown on the
-public pages like everything else.
+public pages like everything else. But no behind-the-scenes rules on them (the user, 12 Nov): how the characters are
+written (their tone rules, what they're kept off) stays in RULES.md and `src/lines/`, never on a public page.
 
 Keeping context lean: the den is big, so hand off work that would flood the main session to subagents with a
 self-contained brief (what to read, what done looks like, what to report back, in a few hundred words). In
