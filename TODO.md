@@ -480,6 +480,14 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   when you're waiting for the next race who's waiting". So one open race anyone can walk into, the next race
   filling up in view, besides the private codes. And on the water "indicate who's who, because other than I
   can recognize Kikkit's character, I don't know who's who here": a name over every sloop, players' and bots'.
+  And finding it at all (12 Nov, later): "Okay, I eventually found the race online thing. That really was not
+  clear." Racing online wants a plain way in from the den (a button, and on the starter's card), not a key
+  you'd only know from the notes. Once found, the flow was "a bit closer than I thought".
+- **A hop to get going off the line (12 Nov):** on the start's field, "this initial opening thing as well,
+  where you're trying to get in with these trade winds. Again, that could have a nice hop to the ball thing to
+  get started." So a hop near the line (a wind or chain hop, like the ladders further on) that gets a good
+  start going. (Which "ball" and where it lands, to pin down with the user: maybe the first buoy.) The user
+  liked how it's looking now: "they're definitely much more looking like" [a race].
 
 ## Spotted along the way (not asked for)
 
