@@ -336,7 +336,9 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   wind. Each label beside what it names, not across the spit (the imperial gate's label sits on the
   spit's far end from the gate; "The locks" on the far end from the locks); the wreck labelled "haul the
   bribe here", the berth "wait for the lock", the headwind gap "row it"; the veiled wind's "?" named.
-- **Rocks blasted away by her guns, a shortcut part way round the race (12 Nov):** "we still haven't got
+- **Rocks blasted away by her guns, open to everyone once down (12 Nov):** a catch-up shortcut in spit 3
+  beside the whirlpool channel, about three hits from her broadsides on the move, then open to every
+  racer (RACE.md, "Rocks blasted open for everyone"). Earlier: "we still haven't got
   the destructible rocks. That was supposed to be part way through the course somewhere." Rocks across a
   gap, shot away by Gunnery loading her guns, on the move (RACE.md §3's table, "Rocks across a gap,
   blasted away", an idea till now). After the course editor lands, as it moves the course's numbers.
@@ -354,7 +356,7 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     features ... It does not feel like a very game-worthy thing ... not really in the ... good
     sportsman-like spirit." And "we're struggling for space already." **Agreed (12 Nov): "Yes, drop
     both."** No gambles at all: the veiled wind and the turning pool both go, and the turning pool's spit
-    takes the rocks blasted by Gunnery. Out of the changelog's entry and the design page too, and the
+    is just land again. Out of the changelog's entry and the design page too, and the
     simulation re-run.
   - **The imperial gate's bribe isn't worth its puzzle:** "doing an entire puzzle to get through one gate
     that doesn't save you too much time, that doesn't feel like it's been balanced." The gate saves 14 s

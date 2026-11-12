@@ -249,6 +249,21 @@ gamble. That will make people very cranky." Then "Yes, drop both." Snakes stay: 
 well-timed Double hops them. The turning pool's spit takes the rocks blasted by Gunnery. (TODO.md, the
 race's next pass.)
 
+**Rocks blasted open for everyone: a catch-up shortcut (idea, 12 Nov, the place to confirm):** "where
+you've got the Vegas whirlpool ... What would actually be cool is if you had like a destructible obstacle
+there ... somebody could start shooting it if they're first, but then ... once it's been destroyed, that
+opens it up ... for everybody, not just them ... it's a way for the loser to catch up. Because obviously,
+if you're the leader, you don't want to blow a hole in the wall that anyone can follow through ... But if
+you're at the back ... that would actually be a fantastic place to blast through. Maybe you could do it
+with like 3 gunshots or something." So: a wall of rocks across a gap in spit 3, beside the whirlpool
+channel (the Vegas keeps its own way over). Shot down on the move with her broadsides, about three hits,
+and once it's down it's open to every racer for the rest of the race (the room keeps it, online). Shots
+are her budget (she starts with 2, holds 4, loaded by Gunnery), so blasting costs what she'd fire at
+rivals. The leader won't open it for the field; someone at the back will, and whoever's just behind
+them gets it free too. This replaces "the rocks in the turning pool's spit" (its spit just land again,
+room to spare). The starlit door stays where it is (its tunnel is already the biggest win, a long
+Navigation for it).
+
 ## 5. Knowing where you're going (built 11 Nov)
 
 - **Clear buoys round the long way:** a tall red and white buoy at each bend, its number on a board above it,
