@@ -377,6 +377,40 @@ basic play is CC^5 and below, skilled CC^6+, expert CC^9+.
 | Grand-Master to Legendary | 7 to 8 | CC^9 to CC^11 | mostly early |
 | Ultimate | 8.5+ | CC^12+, with spice | under 3.5 minutes |
 
+### What the bots reach (12 Nov, first run)
+`tools/distill-bots.mjs 40`: each tier of `src/distill-bots.ts` on the same 40 seeded boards (seeds 5000
+to 5039), at its own pace (swaps a second, and a moment to spot each drag), on the real furnace.
+
+| Tier | Pace | Bank | Longest chain: mean (best) | CC^6+ | CC^12 | Score a column: mean (best) | Minutes a session | Whites burned |
+|---|---|---|---|---|---|---|---|---|
+| Learner | 2 swaps/s, timer only | none | 0.0 (1) | 0/40 | 0/40 | 1.3 (3.4) | 5.0 (flask full) | 14.0 |
+| Able to Master | 3.5/s, burns early | 4 columns | 1.9 (5) | 0/40 | 0/40 | 8.6 (15.2) | 1.7 (dismissed) | 0.7 |
+| Grand-Master to Legendary | 5/s, + pair moves | 4.5 | 2.4 (5) | 0/40 | 0/40 | 9.0 (14.7) | 1.8 | 1.0 |
+| Ultimate | 6/s, + pair moves | 5 | 2.5 (6) | 3/40 | 0/40 | 8.9 (17.6) | 1.9 | 1.6 |
+
+**Honestly: no bot gets near CC^12; the best reach CC^5 to CC^7 now and then, CC^2 typically.** So these
+are not yet goals for a player: a real Master's CC^6 to CC^8 is beyond every tier. What they do well and
+badly:
+- **Stage I works.** Junk columns burn with almost no whites in them (under one white a session from the
+  Master up), whites are banked, never a junk column floats up. 4 to 6 columns of whites are on the board
+  when the chain starts.
+- **Stage II is where they fail,** and not for speed: with unlimited swaps a second and the full 15.3 s a
+  column, the Master's chains are still CC^2 on average (CC^6 once in 16). The white block they bank is
+  dirty at its edges: browns that rose to its top and blacks that sank to its bottom while junk crossed it
+  ("browns get stuck at the top, blacks at the bottom"), one in most columns, so only one or two columns
+  in a row come out Crystal Clear, and the whites scattered in the junk on the left are rarely ferried
+  across in time.
+- **Why:** the bots play by a sense of the board (each piece pulled toward its zone: the junk columns to
+  burn, the block of whites, the rest; blacks up and browns down; a way out kept open) and pick the best
+  drag of one piece, or two pieces moved together (up to six swaps: the crawl, the figure of eight), or a
+  drag that sets up the next. That's a hill-climb: it can't plan the long multi-drag techniques that clean
+  a block (the line pulled up a tile at a time, the hook, leapfrogging along a stored row of browns), nor
+  keep junk out of the block's edges from the start. Banking more doesn't help (the chain stays about
+  CC^2 from a bank of 3.5 to 7 columns): the block's cleanliness is the limit, not its size.
+- **Next, to make them real goals:** each technique as its own scripted routine (the crawl, the figure of
+  eight, the line pull, the hook, the leapfrog, channels), which the tutorial needs anyway (§7, item 3),
+  and a planner that picks a routine by the stage of the game and what's out of place, rather than the
+  hill-climb choosing swaps.
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.

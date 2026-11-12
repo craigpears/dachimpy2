@@ -674,6 +674,19 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     gunwale and gold rail, crates of shot and red stores, the barrel, the four stores, yellow
     arrows). Only the powder bag changed: tied off at the top with a cord and a flared tuft, as
     the real one's sack, where it was a plain red ball.
+  - **Distilling** (`js/den/distill-board.js`, 12 Nov; not in the den yet, played on the unlinked
+    `distilling-test.html`): drawn after the real panel as DISTILLING.md §2 describes it, from the client
+    port's own measures (no picture of the real one was looked at side by side yet): the still and flask
+    above, 40 px glossy bubbles in the honeycomb, khaki nubs bridging swappable pairs, red corner brackets
+    for the cursor, the furnace's grille lit from the bottom as the burn nears, the copper trough.
+- **Distilling's rules are the real client's, made smooth (12 Nov).** The rules (`src/distilling.ts`)
+  are the game's own, from the port of its client (DISTILLING.md §1). Two of the real game's frustrations
+  are smoothed over, the user: "certainly make it smooth. I want this enjoyable." A drag doesn't stop on a
+  slightly sloppy path where the intent is clear: the piece held swaps toward the way nearest the mouse
+  it can go (within 50 degrees, once the mouse is over half a piece out: `wayToward`), where the real
+  game swapped only with the mouse near a piece's middle. And no column-shift glitch: the links are drawn
+  from the rules' board every frame (the look only follows it), and nothing moves while the board
+  slides, so a piece flung as the board shifts never loses its links.
 
 - **Messages stay up long enough to read (10 Nov).** The checkpoint's message "vanished very
   quickly": a longer message stays up longer (about 70 ms a letter, 1.8 to 7 seconds), and one
