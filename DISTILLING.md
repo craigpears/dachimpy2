@@ -1,0 +1,417 @@
+# Distilling: design document
+
+A draft, from research on 12 Nov, for recreating Puzzle Pirates' Distilling as a browser puzzle with
+bots. The rules below are pinned down well: besides YPPedia and the old guides, there is an open-source
+practice site whose Distilling was ported from the real game client (its `crafting/brew` code) and
+checked against it move for move (see Sources, "the client port"). Where that port gives a number, it
+is the game's own. Anything unclear is marked **(to confirm with the user)**.
+
+Piece letters in the sketches: `w` white, `b` brown, `K` black, `*` spice, `x` burnt white.
+
+## 1. What the real puzzle is
+
+### The board
+- **10 columns** of round pieces ("bubbles"), set like a honeycomb: columns alternate **9 tall and 8
+  short**, the short ones sitting half a piece lower. 85 pieces in all.
+- Every piece touches **four diagonal neighbours** (up-left, up-right, down-left, down-right), never the
+  pieces directly above or below it in its own column. Swaps only happen along those diagonals.
+- At the start, columns 1, 3, 5, 7, 9 (counting from the left as 1) are tall, the rest short. The
+  rightmost column, next to the furnace, **always starts all black**; the rest are random.
+- When the board shifts right, every column keeps its pieces, so the tall/short pattern flips each time;
+  the new column on the left is always the opposite height of its neighbour.
+
+```
+   w       K       b          a corner of the board: tall columns (1st, 3rd...)
+       b       w       K      sit half a piece higher than short ones (2nd, 4th...)
+   K       w       w          each piece links only to its four diagonal neighbours
+       w       b       w
+```
+
+### The pieces
+| Piece | Called | Weight | Points if sent up | Swaps? |
+|---|---|---|---|---|
+| White | light, "white" | light (-1) | +1 | yes |
+| Brown | medium, "brown" | neutral (0) | 0 | yes |
+| Black | heavy, "black" | heavy (+1) | -1 | yes |
+| Spice (orange) | spice | neutral (0) | +3 | **never moves** |
+| Burnt white | burnt | light (-1), like a white | **-3** | yes, exactly like a white |
+
+New pieces: each is white, brown or black with equal odds; **1 in 31 is a spice**, except that the
+first 17 pieces made (the two columns beside the all-black one) are never spice. (An older guide says
+"roll 1-30, a 30 is spice"; the client port's 1 in 31 is the game's own.)
+
+### The swap rule (the heart of it)
+Two linked pieces swap only if the **lower one "beats" the upper one**, rock-paper-scissors style:
+
+```
+  K           w           b         upper over lower: these three pairs swap,
+    w           b           K       and only these
+  (white      (brown      (black
+   rises       rises       rises
+   past black) past white) past brown)
+```
+- A **white rises through blacks** and **sinks through browns**.
+- A **brown rises through whites** and **sinks through blacks**.
+- A **black rises through browns** and **sinks through whites**.
+- Same colours never swap; spice never swaps. **No swap can be undone straight away** (the pair is now
+  the wrong way round), which is what makes it a puzzle.
+- Every swap moves a piece one column sideways and half a row up or down. So a lone piece in a sea of one
+  colour can only go one way: diagonally up (or down), left or right. A brown in whites rises; a black in
+  whites sinks. Going level needs a second colour (the crawl, section 3).
+- In the game, the links that can swap are drawn: each piece lights the corner facing every neighbour it
+  could swap with, so little khaki "bridges" show between swappable pairs.
+
+### Moving
+- **Click** a piece, then **click** a linked neighbour: they swap (150 ms animation).
+- **Drag**: press on a piece and drag it over a path of legal swaps; it keeps swapping as long as the
+  mouse crosses pieces it can swap with. Too fast or too sloppy and it stops; overshoot and you've made a
+  swap you can't take back. Experts only drag.
+- Keys: arrows or number pad move a cursor one hex, Space swaps, **X or right-click burns the column now**.
+- Input pauses while the board slides after a burn (900 ms).
+
+### The furnace: columns leaving
+- The furnace **ticks every 306 ms**; at tick 50 (**15.3 seconds**) the rightmost column leaves. A warning
+  sound plays at tick 40, about 3 seconds before. A burn waits for any swap still moving.
+- **Right-click (or X) burns at once**, whatever the timer, and restarts it. This is how fast players
+  play: the timer is only the slowest pace. (The user's own Distilling Simulator was built around
+  "control over when columns are burnt".)
+- The rightmost column goes **up into the batch** or **down into the furnace**; everything slides one
+  column right and a new random column comes in on the left.
+
+### Which way a column goes
+Add up its weights: whites (and burnt whites) -1, blacks +1, browns and spice 0.
+- **Total 0 or less: up into the batch.** That includes an equal number of whites and blacks, and a
+  column of **only browns** (a "pure brown", the classic accident: it goes up and spoils a chain).
+- **More blacks than whites: down into the furnace.** So every junk column you mean to burn needs at
+  least one black more than it has whites.
+
+### Burnt whites
+Whites that go into the furnace roll back out along the trough at the bottom, scorched. For **every two
+whites burned** (counted across the whole session), the next white the game makes becomes a **burnt
+white**. The 1st burned white makes nothing, the 2nd makes one burnt white, the 3rd nothing, and so on.
+A burnt white moves and weighs like a white but scores -3 and spoils a Crystal Clear. One guide reckons
+burning a white costs you about three whites in all.
+
+### Spice
+Spice never moves, so pieces boxed in by spices and the board's top or bottom edge can be **stuck for
+good** (the game makes no check for this). Spice sent up scores +3 and shows "Spicy!"; a spice in a
+column that burns is **wasted, -3**, "Wasted Spice". A spice does not stop a column being Crystal Clear.
+
+### What each column scores, and its message
+Only columns sent up score. Points = the sum of the piece values above, plus the chain bonus.
+
+| Column sent up | Message |
+|---|---|
+| only whites (and spice) | **"Crystal clear!"** with the chain count beside it from the 2nd: "Crystal clear!²", "³"... |
+| no blacks, more whites than browns | **"Smooooooth"** |
+| as many blacks as whites | **"Blecch!"** |
+| anything else that goes up (e.g. pure brown) | no message |
+| a column that burns with whites in it | **"Burnt!"** (drifts down) |
+| plus, if it had spice | **"Spicy!"** (orange) or **"Wasted Spice"** if it burned |
+
+**Crystal Clear chain bonus:** each Crystal Clear scores **+4 for every Crystal Clear straight before it**
+in the chain (the 2nd +4, the 3rd +8 ... the 12th +44). Any column that isn't Crystal Clear, sent up or
+burned, breaks the chain. Players write a chain of 12 as **CC^12** (or CC12).
+
+### The end of a session
+- The flask fills as pieces go up: the session ends once **100 pieces** are in it, which is the 12th column
+  sent up (YPPedia says "twelve columns"; same thing, since 12 columns hold about 102).
+- **Except:** if that column was the **12th Crystal Clear in a row or more**, it carries on until a
+  column that isn't Crystal Clear leaves (up or down), so CC^13, CC^14... are possible. That only
+  happens from CC^12; a CC^10 then a CC^2 ends normally. (Added 12 Dec 2007; before, it always stopped.)
+- You can **dismiss** (quit) any time and keep what you've sent up. No overall time limit, and time does
+  not affect the score. Abandoning after moving pieces costs standing (since July 2007).
+
+### The session's score and ratings
+- **Session score = total points / number of columns sent up** (YPPedia; the client port's simulator
+  shows the same). So a short brilliant chain beats it with a weaker run added: CC^8 then CC^4 averages
+  less than CC^8 alone, which is why players **dismiss as soon as a chain ends** (unless they're at
+  CC^12, which ends the session anyway).
+- The game turns that into a duty-report rating on the server, by comparing it with other players'
+  scores: **Booched, Poor, Fine, Good, Excellent, Incredible** (greenies see "Learning" for the bottom
+  two), plus the labour grade **basic, skilled or expert**. The thresholds were never published.
+- Over many sessions that becomes your **standing**: Able, Proficient, Distinguished, Respected, Master,
+  Renowned, Grand-Master, Legendary, Ultimate (and #1 on the ocean).
+- "Crystal clear" is the best **column**, not a session rating: the goal "crystal clear 12" is a CC^12.
+
+### What ruins a batch
+Sending up blacks or burnt whites; burning whites (each pair becomes a burnt white later); a pure-brown
+column sneaking up and breaking the chain; wasting spice; a spice trap (a spice with junk stuck behind
+it in a column you need clear); and starting the chain before the board can feed it to 12.
+
+### Where sources disagree or are unclear
+- Spice odds: 1 in 31 (client port) vs "1-30, 30 is spice" (Ryuken's guide). Going with 1 in 31.
+- Rating thresholds and how the server rates a score: unknown. **(to confirm with the user:** what
+  scores or chains gave Excellent and Incredible?)
+- YPPedia's older text says the timer is "every few seconds"; the client's is 15.3 s. Was it ever faster,
+  or did it change with standing? **(to confirm with the user)**
+
+## 2. How it looks
+
+The whole puzzle panel is **450 x 600**, portrait.
+- **Top strip (about 135 px):** the title "Distilling" in gold lettering with a dark outline, top
+  centre; behind it the shop: a pirate distiller on the left by barrels, a brass **pot still** (a tall
+  polished cylinder with a domed lid and a tap), and to its right the **flask**, a glass cylinder (42 x
+  75 at 235, 55) with dark metal caps, tick marks up its right side and a white line marking the level. A
+  brass pipe runs from it to the right and down a chute at the board's top-right corner: columns sent
+  up rise into it.
+- **The flask's liquid** rises with pieces sent up (full at 100) and is golden-yellow (hue about 49
+  degrees); the purer the batch, the paler and more see-through: all whites look nearly clear, blacks
+  make it dark and murky olive.
+- **The board (425 x 465 at 25, 135):** a dark brown, slightly burnished background, lighter and more
+  olive-gold in the middle, framed by thin double brass/olive lines. Pieces are **40 px glossy spheres**
+  with a dark outline and a highlight top-left; columns 40 px apart, the top row 23 px down, short
+  columns 20 px lower.
+  - white: pale cream-yellow; brown: rich amber gold; black: dark olive grey-green; spice: bright orange
+    with a darker red-orange swirl like an ember; burnt white: a dull, mottled khaki-brown white.
+  - Links: each piece lights the quarter facing every neighbour it can swap with, so small khaki-olive
+    nubs bridge swappable pairs.
+  - The selected piece glows, with **red corner brackets** round it (the cursor).
+- **Bottom (about 66 px):** at bottom-right the **furnace**, an iron box with a grille (109 x 66); its
+  glow rises from the bottom as the burn nears (orange slots lit) and is full just before a burn. To its
+  left a long **copper trough** along the bottom edge: burned whites drop in and roll back left in it,
+  turning burnt.
+- **Animations:** swaps slide 150 ms; a leaving column's pieces glide up off the top into the pipe, or
+  down into the furnace (0.4 px/ms); then the whole board slides right over 900 ms. Messages float up in
+  the centre of the board, 30 px over 1.5 s, fading in the second half ("Burnt!" and "Wasted Spice"
+  drift down). "Finished!" holds the board when the flask is full.
+- **Sounds** (the port has them): swap up, swap down, burn warning, burn, burnt, crystal clear (two),
+  smooth, blecch (two), spicy, finished.
+
+## 3. The techniques, step by step
+
+### The physics, in one line each
+In **whites**: browns rise, blacks sink. In **blacks**: whites rise, browns sink. In **browns**: blacks
+rise, whites sink. A lone piece always moves diagonally; it travels level only with a partner.
+
+### The two stages
+Every good game has the same shape (Fullbeard University's "Intro, Bridge, Finish"; Nickbush's "Stage I:
+burn, baby, burn" and "Stage II: all good rum goes to heaven"):
+1. **Stage I, burn the junk:** get all the whites over to the **left**, all the browns and blacks to the
+   **right**, and burn full columns of junk, never a white. Whites pile up on the board as a big block.
+2. **Decision time:** when the next junk column can't be finished before it burns, switch.
+3. **Stage II, the chain:** now send up only pure white columns, one after another, while every new
+   column from the left brings about 3 whites that must be ferried right to top up the block. Every
+   column that leaves must be Crystal Clear, so no more junk can burn: it piles up on the left.
+
+### Stage I, opening: rescue the whites
+The rightmost three columns burn first, so save the whites there first, moving them left, or think of
+it as pushing junk right in small moves. **Build evenly:** finish one junk column before starting the
+next. The starting all-black column is a gift: its blacks can be pulled back into the board (they make
+the "black tips" below) rather than just burned.
+
+### Sort the junk: blacks to the top, browns to the bottom
+In the junk on the right, a black and a brown swap whenever the black is below, so junk sorts itself:
+**blacks rise, browns sink** (Nickbush's "Mode III"). Keep it that way on purpose:
+- **Black tips:** top every junk column with a black. A column with a black at the top and the rest brown
+  still burns (more blacks than whites), and it can never become a pure brown that floats up.
+
+### Store blacks top-left, browns bottom-left: crossing the river in one drag
+Once the whites are a wide "river" in the middle, junk caught on the left has to cross it. A black sinks
+through whites, so a black kept at the **top** of the left side can be dragged in one straight diagonal
+**down-right** across the whole river (it has 16 half-rows to fall). A brown rises through whites, so a
+brown kept at the **bottom** crosses **up-right** the same way. A brown left high, or a black left low,
+gets stuck against the edge ("blacks get stuck at the bottom, browns at the top").
+
+```
+  K . . . . . . . . . .      black stored top-left: one drag down-right
+    \                        through the whites ...
+      \ . . . . . . . junk   ... reaches the bottom of the junk pile
+        \ . . . . . . junk
+  . . . . \ . . . . / junk   brown stored bottom-left: one drag
+          / . . . .          up-right through the whites
+  b . . /
+```
+
+### The hook (the user's technique)
+In the user's words: "if you drag the opposite colour all the way from the top left to the bottom white,
+you can kind of hook it in and then re-drag the brown back to the bottom." Reading it with the rules: a
+black dragged from the top-left falls diagonally to the bottom; there it meets a brown, and the black
+rises past the brown (they swap: the brown drops), so the black hooks into the junk and the brown is
+pushed back down, to be dragged on along the bottom again. **(to confirm with the user:** the exact
+order of the drags, and which brown gets re-dragged.)
+
+### The crawl ("figure of eight"?)
+A black and a brown together can travel **level** through whites forever, leapfrogging: the black climbs
+into the brown then falls into a white; the brown climbs into a white then falls into the black. Six
+swaps move the pair two columns (three swaps a column). Checked by brute force on the rules:
+
+```
+  w   w   w      w   w   w      w   w   w      w   w   w      w   w   w      w   w   w      w   w   w
+w   b   w      w   K   w      w   w   w      w   b   w      w   K   w      w   K   b      w   w   b
+  K   w   w      b   w   w      b   K   w      w   K   w      w   b   w      w   w   w      w   K   w
+start          1: K up        2: K down      3: b up        4: b down      5: b up        6: K down
+               through b      through w      through w      through K      through w      through w
+```
+As drags: the black up-right then down-right (one drag); the brown up-right, down-right (past the
+black, which pops back up-left) and up-right (one drag); the black down-right, and round again. Taking
+turns, the pair weaves round each other, a figure-of-eight path. The same works for
+any pair in a sea of the third colour: **a white and a brown through blacks, a white and a black through
+browns** (also checked), which is how whites cross junk in Stage II. Ryuken calls it **crawling**;
+dragging a whole row of one colour along with a single partner is a **row** or **train**. Ryuken's
+"accelerated crawling" keeps a spare partner piece waiting at the board's edge. **(to confirm with the
+user:** is this your figure of eight, or the drills' "butterfly"?)
+
+### Decision time
+Keep burning full junk columns as long as you're sure the next one will be finished before the furnace;
+the more white columns you bank, the longer the chain. Near the end there's less room on the right to
+shuffle blacks and browns, so the last junk columns are the hardest. The **"half push"**: when too few
+junk pieces are left to make a whole column, push them to the middle and leave them.
+
+### Stage II: channels to the top-right and bottom-right
+Now the whites must go right, through the junk piling up on the left. A white rises through blacks and
+sinks through browns, so arrange the junk into **channels**: a diagonal line of blacks running up-right
+lets a white climb all the way to the **top-right**; a line of browns running down-right lets it slide
+down to the **bottom-right**. The block of whites on the right is topped up from both corners. A
+channel survives being used, shifted one step down-left (checked):
+
+```
+b   b   b   b    b   b   b   b    b   b   b   b    b   b   b   b    b   b   b   b
+  b   b   K        b   b   K        b   b   K        b   b   K        b   b   w
+b   b   K   b    b   b   K   b    b   b   K   b    b   b   w   b    b   b   K   b
+  b   K   b        b   K   b        b   w   b        b   K   b        b   K   b
+b   K   b   b    b   w   b   b    b   K   b   b    b   K   b   b    b   K   b   b
+  w   b   b        K   b   b        K   b   b        K   b   b        K   b   b
+start            1                2                3                4: the white is top-right
+```
+Fill each Crystal Clear column completely before starting the next. Rescue a stuck white at once, if need
+be by borrowing one from a finished column.
+
+### Spice
+- Before a spice becomes a wall, flush the junk behind it: blacks behind a spice wall at the bottom,
+  browns behind one at the top, while they can still get out.
+- **Spice trap:** a spice with junk stuck behind it in a column that would go up mid-chain. Never send it
+  up (it can cost 7 or 8 whites); **"drown" it**: let that column burn, even with a white or two.
+- Spice in a white column is a bonus: +3 instead of +1, and it's still Crystal Clear. Experts go for
+  CC^12 with the most spice and the least wasted.
+
+### Burn timing
+Right-click to burn as soon as the right column is ready: in Stage I, as soon as the junk column is
+complete; in Stage II, as soon as the next white column is full. A fast game (under 3.5 minutes) is
+almost all early burns. In Stage II don't burn a column you can't fill in time.
+
+### Choosing boards, and when to stop
+Look at the starting board: beginners abandon boards with more than 5 whites in the rightmost three
+columns (hard to save); experts abandon boards with many spices. When a chain ends below CC^12,
+dismiss. (Abandoning at the start, before moving, is free; the real game counts a session once a piece
+is touched or a column burned.)
+
+### Names from the practice drills (to fill in)
+The practice site's drills (from a Python "Distilling_Sim") name more moves, worth asking about: two-
+and three-colour swaps; "staircase" (browns or blacks above or below, a white through a staircase,
+"reverse staircase", "staircase over spices"); "unboxing"; "save the corners!"; "crawling",
+"butterfly" and the two combined; "horizontal drag"; "classic noob stuck"; "raking the top", "raking
+the bottom"; "multiple brown crawl", "multiple black crawl"; "crawl under spices"; "rescuing stuck
+pieces", "evening board"; endgames; midgames by how much junk is left ("35 junk", Master; "18 junk",
+Grand-Master); and burn play: "finish burn", "crawling a burn", "walking the dog", "moving a burn
+up/down", "corner burns", "moving a burn wall", "walking the pack", and spice traps at different flask
+levels. **(to confirm with the user:** which of these you used, and how.)
+
+## 4. Ratings and target numbers
+
+### Worked scores (session score = points per column sent up)
+| Session | Points | Per column |
+|---|---|---|
+| CC^12, no spice (102 whites + bonus 4 x (0+1+...+11) = 264) | 366 | **30.5** |
+| CC^12 with 3 spices sent up (each +2 over a white) | 372 | 31.0 |
+| CC^8 then dismiss (68 + 112) | 180 | **22.5** |
+| CC^8 then CC^4 (180 + 34 + 24) | 238 | 19.8 |
+| 12 separate Crystal Clears, never two in a row | 102 | 8.5 |
+| 12 "Smooooooth" columns (say 6 whites, 2 browns) | 72 | 6 |
+
+### How good is good: whites banked before the chain
+The best measure (Nickbush's tutorial) is how many full **white columns** are on the board when the first
+one goes up, since every column after that must be white and each new column brings only about 3:
+| White columns on the board | Chains (only Legendary's is the tutorial's; the rest my estimates) | Standing |
+|---|---|---|
+| about 6 | CC^6 to CC^8 | Master / Renowned |
+| about 7 | CC^9 to CC^10 | Grand-Master |
+| 7.5 to 8 | CC^10 to CC^11, the odd CC^12 | Legendary |
+| 8 to 8.5, every game | CC^12 often | Ultimate |
+| 8.5 to 9 | | a shot at #1 on the ocean |
+
+The practice drills measure the same thing the other way round, by junk left on the board: their
+"Master" midgame has 35 junk pieces (about 6 columns of whites), their "Grand-Master" one 18 (nearer 7.5).
+
+Why 8 is the magic number: 8 columns hold about 68 whites; a CC^12 needs about 102, so the next 12 columns
+must bring 34 whites, which is just what 12 new columns bring on average (2.8 each). Ryuken's tiers match:
+basic play is CC^5 and below, skilled CC^6+, expert CC^9+.
+
+### Speed
+- By my reckoning a CC^12 session is about **30 columns** (about 20 junk columns burned, then the 12
+  up), so at the furnace's own pace roughly **8 minutes**, which matches YPPedia's "slow game".
+- Experts finish a CC^12 in **under 3.5 minutes** by burning early: so roughly 7 seconds a column.
+- Top distillers get CC^12 or better **more than half the time**.
+- Swaps take 150 ms, so a dragged piece moves at most about 6 swaps a second.
+- No source gives moves per minute for top players. **(to confirm with the user:** your own pace, and
+  what time you'd set as a target.)
+
+### Suggested bot and goal tiers (a starting point, to tune)
+| Tier | Whites banked | Typical result | Burns |
+|---|---|---|---|
+| Learner | never burns a white | Smooooooth columns, odd CC | waits for the timer |
+| Able to Master | 5 to 6 columns | CC^5 to CC^8, dismisses after | some early burns |
+| Grand-Master to Legendary | 7 to 8 | CC^9 to CC^11 | mostly early |
+| Ultimate | 8.5+ | CC^12+, with spice | under 3.5 minutes |
+
+## 5. Questions only the user can answer
+1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
+2. The hook: the exact drags, and where the black and the brown end up.
+3. Stage II channels: how you built them, and in what order the top-right and bottom-right fill.
+4. What score or chain earned Excellent and Incredible in your day, and is our own scale wanted?
+5. Your speed: minutes per CC^12, and how often you got one.
+6. Did the furnace's 15.3 s ever change (with standing, or by version)?
+7. Your 2010 simulator (on Flash Museum): its burn control was a key to burn now, or a timer you set?
+8. Should our version keep the real-game frustrations: drags that stop on a sloppy path, impossible
+   boards, the column-shift glitch? (The glitch: a piece flung as the board shifts loses its links.)
+
+## 7. What we'll build (12 Nov)
+
+The user (12 Nov): "start on the mechanics of building that puzzle, usual kind of modularized stuff",
+"check the real Puzzle Pirate visuals to make sure that it matches", "real structure ... and real
+challenges for like a timer ... if you actually run through, have some simulations of the puzzle ... this
+is how fast you need to do, yeah, the bot completed this to reach crystal clear X, Y, and Z", and the
+teaching "very tutorial-like, follow the same principles as in [Tzz's] sailing guide, where it's really
+nice and illustrative". In order:
+1. **The puzzle (`src/distilling.ts`):** the rules above exactly, knowing nothing of where it's played:
+   the honeycomb board, the swap rule, drags, the furnace's ticks and burning early, sending up or
+   burning, burnt whites, spice, scoring and chains, the end. Seeded, so a board is the same every time.
+   Its look as the real one (`js/den/distill-board.js`), played on its own on an unlinked
+   `distilling-test.html`, as Navigation and Foraging were.
+2. **Bots (`src/distill-bots.ts`, `tools/distill-bots.mjs`):** one per tier (section 4), each playing by
+   the techniques (sort the junk, store blacks top-left and browns bottom-left, the crawl, channels,
+   when to burn), not a search no person could do, run over many seeded boards for what each tier
+   reaches and how fast. Those runs become the goals: "the bot reached CC^12 in 3 min 20 s".
+3. **The tutorial,** after the user's pointer to the real one: Helium showing each technique on a real
+   board, animated, then "now you try", in the style of Tzz's balloon lesson.
+4. **Helium and his island** (IDEAS.md, "Helium, and Distilling"; his portrait checked first): his own
+   little island, perhaps by the smugglers' beach, his still on it, and his mishaps: when he gets the
+   balance wrong, the still goes up with a bang ("Oops. That happens sometimes. Don't worry about it.").
+   A burnt column in the puzzle could be its little bang.
+
+## 6. Sources
+- YPPedia, Distilling: https://yppedia.puzzlepirates.com/Distilling (rules, scoring, CC^12, history, tips)
+- YPPedia, the official game document: https://yppedia.puzzlepirates.com/Official:Distilling (controls,
+  weights, the flask, the successive-column bonus); its swap diagrams and flask pictures
+- YPPedia, Nickbush's tutorial: https://yppedia.puzzlepirates.com/User:Henryrules10/Distilling_tutorial
+  (modes of movement, stages, white columns banked by standing)
+- YPPedia, Puzzle scoring: https://yppedia.puzzlepirates.com/Puzzle_scoring ; Duty report:
+  https://yppedia.puzzlepirates.com/Duty_report ; Puzzle standing: https://yppedia.puzzlepirates.com/Gm
+- The client port: puzzle-practice's Puzzle_Practice, Distilling "on the client's rules", decompiled from
+  the game's `crafting/brew` and checked against the real classes on six seeds:
+  https://github.com/jared-morgan/Puzzle_Practice/pull/10 (now https://github.com/puzzle-practice/Puzzle_Practice,
+  `src/puzzles/distilling/logic.ts`, `index.ts`, `practice.ts`; site https://puzzle-practice.github.io/Puzzle_Practice/)
+- Ryuken's Illustrated Distilling Guide (a 2017 forum post, copied at
+  https://dopcaabsolute.weebly.com/puzzle-pirates-distilling-guide.html): crawling, rows, spice traps,
+  black tips, board choice
+- Fullbeard University, Distilling: Basic Strategy (2008):
+  https://fullbeardu.blogspot.com/2008/10/distilling-basic-strategy.html , and Sonnyz' videos:
+  https://fullbeardu.blogspot.com/2008/10/distilling-sonnyz-videos.html
+- The user's own Distilling Simulator (Dachimpy.com, 2010), playable at
+  https://flashmuseum.net/game/yohoho-puzzle-pirates-distilling-simulator-3tr/
+- Videos: SonnyZ Distilling Tutorial 1, https://www.youtube.com/watch?v=pg4JolCRHfk ; Yassenn's
+  "Distilling Tutorial: 1 The Basics", https://www.youtube.com/watch?v=-vFZX3HhdN0 ; a playlist,
+  https://www.youtube.com/playlist?list=PL83C33242A772CE01 (titles only seen, not watched)
+- Not reachable: the old Puzzle Pirates forums (403) and archive.org copies, so Sonnyz' "12 tips" thread
+  and the forum distilling tutorial (thread 16632) weren't read.
+- The crawl and channel sketches were checked by a small brute-force search on the swap rule.
