@@ -9,7 +9,7 @@ import { C, S, scene, camera, mat, mesh, woodTex, woodMat, cellBox, pieceGroup, 
 import { roomyShapes } from './wall.js';
 import { ghostMats } from './pieces.js';
 import { cursor } from './raids.js';
-import { SLOOP_DECK, sail } from './sea.js';
+import { SLOOP_DECK, sail, strike } from './sea.js';
 
 /* A hole in her deck (the user, 9 Nov: being dazed by a hit was over "way too quickly. Like, you
    know, one fix and it was done", and bilging was wrong for it: "what do you mean bilge? I've been
@@ -34,9 +34,7 @@ const PATCH_W = 1.3;   // metres across her deck the board may take, at most
 // A fresh hole for a hit: shaped for the common pieces, as the wall's are.
 export const deckHoleShape = () => roomyShapes(PATCH.PIECES, 6)[0] || C.genHole(PATCH.PIECES).hole;
 function struck(on) {
-  if (!sail.g) return;
-  for (const o of [...sail.g.userData.sails, ...sail.g.userData.rig]) o.visible = !on;
-  for (const side of ['L', 'R']) sail.g.userData.guns[side].visible = !on;
+  strike(on);
 }
 /* Every patch's planks off her deck (a new hole, or a new voyage). Every one on her, not just
    `patch.group` (whichever board is open): a crane frame opened since takes that over, and the old

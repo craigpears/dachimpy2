@@ -91,14 +91,14 @@ export function spouseTick(dt, onIsle) {
     if (was === 'den') spouse.stroll = null;   // (off with you again: a fresh spot when they're home)
     if (!sail.g) { g.visible = false; showLine(false); return; }
     if (g.parent !== sail.g) sail.g.add(g);
-    g.visible = true;
+    g.visible = !sail.struck;   // (out of the way while a puzzle's on her deck, as her mast is)
     // (stood just aft of her mast, looking ahead, swaying a little with her)
     const t = performance.now() / 1000;
     g.position.set(ABOARD.x, SLOOP_DECK, ABOARD.z);
     g.rotation.set(Math.sin(t * 1.3) * 0.03, Math.PI / 2 + Math.sin(t * 0.4) * 0.25, 0);
     animateWalk(f, false, dt);
     f.arms[0].rotation.x = -0.5 + Math.sin(t * 2) * 0.05;   // (a hand on the rail, the bouquet out)
-    showLine(true);
+    showLine(!sail.struck);
     return;
   }
   // At the den: stepped off her, they're home.

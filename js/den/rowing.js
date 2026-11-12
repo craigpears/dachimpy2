@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import { CREW, RowBoard, bearing, pullFor, leadFor, leaned, shownAt } from '../den-row.js';
 import { camera, makePirate, V3, keys, burst, toast, worldLets, shake, $, scene, canvasTex } from './world.js';
-import { sail, SLOOP_DECK } from './sea.js';
+import { sail, SLOOP_DECK, strike } from './sea.js';
 import { SWEEP_X, SWEEP_Z } from './wind.js';
 import { SAIL } from '../den-sail.js';
 import { patch } from './sea-puzzles.js';
@@ -73,9 +73,7 @@ function onLoom(r) {
 }
 // Her mast, sails and guns out of the way while she rows.
 function struck(on) {
-  if (!sail.g) return;
-  for (const o of [...sail.g.userData.sails, ...sail.g.userData.rig]) o.visible = !on;
-  for (const side of ['L', 'R']) sail.g.userData.guns[side].visible = !on;
+  strike(on);
 }
 /* Nothing of the deck patch shows while she rows (the user, 10 Nov: "when I've just clicked oars, I
    see the carpentry pieces for the repairing the damaged carpentry puzzle I've just played"): every

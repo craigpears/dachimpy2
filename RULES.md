@@ -1598,6 +1598,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     a new wedding bringing a new one. `?at=married` starts home, married. Rules: `src/den-spouse.ts`.
     **Aboard every trip (11 Nov):** not just the first sail home: whenever you set sail from the den
     they're on her deck with you, and back home they step off and stroll the den again.
+    **Out of the way of her deck's puzzles (12 Nov):** "the bride gets in the way of the puzzles on
+    deck on the ship." While her mast and guns are struck for a puzzle on her deck (Gunnery, a patch,
+    the oars, the crane), they step out of view too, and back when it's put away (`strike` in
+    `js/den/sea.js`, the one implementation the deck puzzles and the crane share).
   - **A collage of the whole wedding, not one portrait (11 Nov):** "you should get snapshots of all
     the key moments, so you have a nice kind of collage of the whole wedding." A snapshot at each of
     the plot's key moments as the ceremony plays, laid out as one keepsake with a big shot and the

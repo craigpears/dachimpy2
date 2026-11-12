@@ -34,6 +34,16 @@ export const seaX = (c) => SEA_X0 + (c + 0.5) * SAIL.CELL, seaZ = (r) => SAIL.Z0
     you hear the nearest (Kikkit's island and Tzz's are a hop apart). */
 export const voices = new Voices();
 export const sail = { on: false, sea: new Sea(9), helm: null, g: null, rocks: null, pin: null, hover: null, dots: [], sig: '', hudSig: '', seen: false, heel: 0, bumpT: 0, guns: new Broadside(), rockAt: new Map(), world: null, riding: false, said: {} };
+/** Her mast, sails and guns struck out of the way (true) or up again (false), and anyone standing on
+    her deck with them (`sail.struck`: your spouse steps out of view, 12 Nov: "the bride gets in the way
+    of the puzzles on deck"). The one implementation: a puzzle on her deck, the oars, the crane. */
+export function strike(on) {
+  sail.struck = on;
+  const g = sail.g;
+  if (!g) return;
+  for (const o of [...(g.userData.sails || []), ...(g.userData.rig || [])]) o.visible = !on;
+  for (const side of ['L', 'R']) if (g.userData.guns?.[side]) g.userData.guns[side].visible = !on;
+}
 // The wind she sails by (src/den-wind.ts; drawn in wind.js).
 sail.sea.breeze = new Wind(9);
 sail.helm = new Helm(sail.sea);

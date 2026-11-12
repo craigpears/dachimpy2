@@ -7,7 +7,7 @@ import { S, camera, mat, mesh, woodTex, keys, ray, toast, V3, v3 } from './world
 import { dressBoard, gunwale, setCrates, gunTick, drawBoard, gunSays, chalkOn, chalkRelease, wheelDeck } from './gundeck.js';
 import { GUNS, cantLoad } from '../den-guns.js';
 import { GUNNERY, DR, DC, k } from '../gunnery.js';
-import { sail, SLOOP_DECK } from './sea.js';
+import { sail, SLOOP_DECK, strike } from './sea.js';
 
 /* The user (10 Nov): "we should have to load the guns through the puzzle". G takes you to her guns:
    the Gunnery board is laid along her deck, its top row toward her bow and you looking down it from
@@ -49,9 +49,7 @@ function build() {
 }
 // Her mast, sails and own guns out of the way while the board's on her deck (as for the oars).
 function struck(on) {
-  if (!sail.g) return;
-  for (const o of [...sail.g.userData.sails, ...sail.g.userData.rig]) o.visible = !on;
-  for (const side of ['L', 'R']) sail.g.userData.guns[side].visible = !on;
+  strike(on);
 }
 function open() {
   if (gunnery.b !== sail.guns.board) build();

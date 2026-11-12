@@ -10,7 +10,7 @@ import { H as TH } from '../treasure-haul.js';
 import { S, scene, camera, mat, mesh, woodTex, woodMat, pieceGroup, V3, basis, pirate, G, burst, toast, outline, v3, animateWalk } from './world.js';
 import { rock } from './land.js';
 import { updateStats } from './wall.js';
-import { seaX, seaZ, SLOOP_DECK, SLOOP_BEAM, sail, COVE_Y } from './sea.js';
+import { seaX, seaZ, SLOOP_DECK, SLOOP_BEAM, sail, COVE_Y, strike } from './sea.js';
 import { patch, patchPrompt } from './sea-puzzles.js';
 import { haul, haulOpen } from './treasure.js';
 import { wreckMesh } from './checkpoint.js';
@@ -429,9 +429,7 @@ function haulUp() {
 }
 // Her mast, sails and guns struck while she hangs from the crane (they'd foul the jib), and up again.
 export function rigged(on) {
-  const g = sail.g;
-  for (const o of [...(g.userData.sails || []), ...(g.userData.rig || [])]) o.visible = on;
-  for (const side of ['L', 'R']) if (g.userData.guns?.[side]) g.userData.guns[side].visible = on;
+  strike(!on);
 }
 function arrive(where) {
   const go = crane.go;
