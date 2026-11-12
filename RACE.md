@@ -146,6 +146,19 @@ sweep.
 - **A snake's sting grows down the course** (tested): the tight water costs a few seconds, the trade wind up
   the middle a leg and a half, the left-hand one everything you'd sailed.
 
+**Gambles (12 Nov, agreed: "I just want all the ideas in there"; to build after the bribe gate and the
+tunnel's exits).** To go further with snakes and ladders, a few squares that are a bet rather than a
+puzzle:
+- **A mysterious wind:** "half the time it pushes you forward and helps you skip a bit. Sometimes you're
+  getting lucky and it goes backwards." It looks the same either way until you're in it, so you can't
+  read it. A coin toss: a ladder or a snake.
+- **A whirlpool that changes direction:** "the direction the whirlpool goes ... changes, so it goes back
+  up ... that goes back and forth. So you can go that way if you want to take a gamble." This one can be
+  read, its spin turning on a beat, so it's a bet on timing: go in as it turns your way and it flings you
+  on; mistime it and it throws you back.
+For the simulation: each gamble's average worth about nothing against the way round it, so it's a swing,
+not a shortcut: good for the back of the field, a risk for the leader.
+
 ## 5. Knowing where you're going (built 11 Nov)
 
 - **Clear buoys round the long way:** a tall red and white buoy at each bend, its number on a board above it,
