@@ -116,6 +116,11 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 
 Unlisted for now: reachable only by its URL until the user says to put it in the nav.
 
+- **A demonstration shows its plan before it builds (12 Nov).** In any tutorial (Tzz's balloons, Helium's
+  Distilling), the plan is on the board and said before the pieces go in, so every move is seen to serve
+  it, not explained only at the end: "while she's building it, it's a bit like, wait, why were you putting
+  that there? What was that doing?" The end's "here's the plan. This is where it's going to drop" is the
+  standard ("perfectly clear and fantastic"), shown from the start, the parts to come faint.
 - **Never rage-inducing (12 Nov, a standing principle).** "even if it is a bit cute and funny, like, it should not be drastic and rage-inducing. That's always what I keep saying. That's almost like a constant principle here. It should not be rage-inducing." A setback is a little
   "ah, damn it, not again": a few squares back, a wrong turn, a whirlpool going a bit squiffy and sending you
   the wrong way, never one that throws away the race or a long stretch of play. Bad luck is mild; big

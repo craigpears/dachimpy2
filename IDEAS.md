@@ -2371,3 +2371,11 @@ wants to be involved ("certainly when ... somebody wants to be involved we can g
 stand-in voice till then. **Reserved (12 Nov):** the user will ask a friend, amhduck on Discord (he),
 whether he'd like it. His pirate name and portrait to check before he's drawn or named in the game;
 only his pirate name ever appears on the site. Their lines in `src/lines/`, called from what the race's events already say.
+
+## Tutorials with pieces that don't come perfect (12 Nov)
+
+On Tzz's balloon lesson: "the pieces she's getting for this are like completely perfect for her plan, so
+she's kind of fine for this tutorial, but maybe for the ideas list, or at least later, that it's irking me a
+bit." Later, a lesson (hers, Helium's Distilling one) could show what a real player does with the pieces
+that actually come: parking an awkward pair out of the way, changing the plan when the wrong colour turns
+up, so the plan bends to the pieces rather than the pieces fitting the plan.

@@ -414,6 +414,8 @@ nice and illustrative". In order:
    user first had him drinking each demonstration's beer, then dropped it: "forget that part, I think
    we've already got the [Kikkit] being the drunk part, he's just the creator of these things." Helium's
    humour is the maker's: proud of his brews, his mishaps when the balance goes wrong (item 4).
+   Each demonstration shows its plan on the board before he starts (RULES.md, "A demonstration shows its
+   plan before it builds"), the lesson the user drew from Tzz's Bingo.
 4. **Helium and his island** (IDEAS.md, "Helium, and Distilling"; his portrait checked first): his own
    little island, perhaps by the smugglers' beach, his still on it, and his mishaps: when he gets the
    balance wrong, the still goes up with a bang ("Oops. That happens sometimes. Don't worry about it.").
