@@ -771,7 +771,14 @@ question of whether a crane is everyone's), and the bribe gate as the final toll
   snakes and winds, the sheltered and exposed spots, the gun gap's reach, the start's spots, and a table of
   wins by route, style, skill and spot (2000 races, about a minute). The user: "a map of the course ... shows
   where all the shortcuts and things are, and all the wins". It shows the starlit door, so it's private:
-  write it outside the site (a temp folder), never into it.
+  write it outside the site (a temp folder), never into it. Since 12 Nov it marks the gambles too (the
+  turning pool and the veiled wind, their ladders gold and snakes red).
+- **The public chart (12 Nov):** `PUBLIC=1` draws it with everything of the starlit door left out (the door,
+  its stars, the tunnel, the caves at its exits, the exposed square off it, its label, its route's and
+  shortcut's rows, the private note); the spit's land is drawn as any land, so nothing gives it away. Its
+  chart alone, 1280 wide (a headless browser's screenshot of the svg), is `changelog/race-map.jpg`, shown in
+  the changelog's 12 Nov entry and on `design.html`. Draw it again with 2000 races after the course changes,
+  and look it over for any trace of the door before it goes up.
 - **Drawn and played by:** `js/den/race.js`; its start (the line, your spot, the starter's card)
   `js/den/race-start.js`; its buoys and finish line `js/den/race-marks.js`; its barrier of driftwood and
   its Foraging `js/den/race-forage.js`; the gun gap's gate, its guard and the wreck's haul

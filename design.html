@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<base target="_blank">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pirate Den: how it's designed</title>
+<!-- The thinking behind the Pirate Den (CLAUDE.md, "The changelog"): high level, plain words, a picture for
+     each section from changelog/, in the changelog's own look. Kept up to date as the design grows; the
+     detail lives in RACE.md, STORY.md and RULES.md. Pirate names only, and nothing of the hidden gems. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,500&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #2a1d13; --ink2: #5b4330; --gold: #e0a92a; --cream: #f6ead2; --dim: #cbb894; --edge: #5a412a; --paper: #f3e3c3; --paper2: #e8d2a8; }
+  * { box-sizing: border-box; }
+  html { background: #140d08; }
+  body { margin: 0; min-height: 100vh; color: var(--cream); font: 500 17px/1.5 'Alegreya Sans', system-ui, sans-serif;
+    background: #140d08 repeating-linear-gradient(90deg, rgba(255, 220, 160, 0.025) 0 2px, transparent 2px 120px); }
+  a { color: var(--gold); }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 28px 16px 48px; }
+  header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 20px; margin-bottom: 8px; }
+  h1 { margin: 0; font: 700 clamp(30px, 6vw, 44px)/1.05 'Alegreya', serif; color: var(--gold); }
+  .lede { margin: 6px 0 0; color: var(--dim); max-width: 600px; }
+  .links { display: flex; flex-wrap: wrap; gap: 10px; }
+  .play { display: inline-block; font: 700 17px 'Alegreya Sans'; color: var(--ink); background: var(--gold); border-radius: 8px; padding: 9px 18px; text-decoration: none; white-space: nowrap; }
+  .play:hover { background: #f0bd44; }
+  .play.ghost { color: var(--gold); background: transparent; border: 2px solid var(--gold); padding: 7px 16px; }
+  .play.ghost:hover { color: var(--ink); background: var(--gold); }
+  nav.toc { margin: 18px 0 0; color: var(--dim); font-size: 15px; }
+  nav.toc a { margin-right: 4px; }
+  h2 { display: flex; align-items: center; gap: 14px; margin: 38px 0 14px; font: 700 22px 'Alegreya', serif; color: var(--dim); }
+  h2::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--edge), transparent); }
+  article { background: linear-gradient(170deg, var(--paper), var(--paper2)); color: var(--ink); border: 1px solid #c9a35c; border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 40px rgba(120, 80, 30, 0.18); padding: 14px; margin: 0 0 20px; }
+  .shots { display: grid; gap: 10px; grid-template-columns: 1fr; }
+  .shots.two { grid-template-columns: 1fr 1fr; }
+  .shots.three { grid-template-columns: 1fr 1fr 1fr; }
+  .shots a { display: block; border-radius: 7px; overflow: hidden; border: 2px solid #3b2a1b; background: #2a1c11; line-height: 0; }
+  .shots img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; transition: transform .25s; }
+  .shots a:hover img { transform: scale(1.02); }
+  h3 { margin: 12px 2px 4px; font: 700 25px/1.15 'Alegreya', serif; color: #6b2a12; }
+  article p, article li { color: var(--ink2); max-width: 70ch; }
+  article p { margin: 0 2px 6px; }
+  article ul { margin: 2px 0 8px; padding-left: 22px; }
+  article li { margin: 0 0 5px; }
+  article b { color: var(--ink); }
+  .ask { font: italic 700 20px/1.3 'Alegreya', serif; color: #8a4b0f; margin: 4px 2px 8px; }
+  .try { margin: 8px 2px 2px; font-weight: 700; font-size: 15px; }
+  .try a { color: #8a4b0f; }
+  .try code { font: 600 14px ui-monospace, Consolas, monospace; }
+  .note { font-style: italic; font-size: 15px; color: #7a6048; }
+  .note a { color: #8a4b0f; }
+  /* A tall picture (the race's chart) beside its words, not cropped. */
+  article.tall { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 4px 18px; align-items: start; }
+  article.tall .shots img { aspect-ratio: auto; }
+  article.tall h3 { margin-top: 4px; }
+  footer { margin-top: 40px; color: #8c7a60; font-size: 13px; text-align: center; }
+  @media (max-width: 640px) {
+    body { font-size: 16px; }
+    .shots.two, .shots.three { grid-template-columns: 1fr; }
+    h3 { font-size: 22px; }
+    article { padding: 10px; }
+    article.tall { grid-template-columns: 1fr; }
+    article.tall h3 { margin-top: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>How the Pirate Den is designed</h1>
+      <p class="lede">The thinking behind the den's places and puzzles, in plain words and pictures. It starts with the sloop race, where most of the thinking has gone lately.</p>
+    </div>
+    <div class="links">
+      <a class="play ghost" href="changelog.html" target="_self">What's new</a>
+      <a class="play" href="den.html">Play the den</a>
+    </div>
+  </header>
+  <nav class="toc">The race: <a href="#race" target="_self">snakes and ladders</a> · <a href="#fair" target="_self">every way can win</a> · <a href="#gates" target="_self">the gates</a> · <a href="#gambles" target="_self">the gambles</a> · <a href="#tactics" target="_self">racing each other</a> · <a href="#watch" target="_self">watching</a>. The den: <a href="#everywhere" target="_self">one puzzle everywhere</a> · <a href="#islands" target="_self">little islands</a> · <a href="#world" target="_self">in the world</a> · <a href="#host" target="_self">the host</a> · <a href="#pirates" target="_self">real pirates</a>.</nav>
+
+  <h2>The sloop race</h2>
+
+  <article class="tall" id="race">
+    <div class="shots">
+      <a href="changelog/race-map.jpg"><img src="changelog/race-map.jpg" width="1280" height="1822" alt="A parchment chart of the sloop race: five legs zigzagging up between spits of land from the starting line to the finish, the long way dashed round numbered buoys, each shortcut through a spit labelled with its puzzle, the seconds it saves and how often it wins, the snakes in red and the two gambles in gold"></a>
+    </div>
+    <div>
+      <h3>Snakes and ladders at sea</h3>
+      <p>The race is a winding course, five legs back and forth between spits of land and a run home to the finish. You can always sail the long way round the buoys without a single puzzle. Or you can cut through a spit by a shortcut, and every shortcut is a different puzzle.</p>
+      <p>Those are the ladders. The snakes are winds that sweep you back: a trade wind across the middle of the course that you have to hop with a Double, and the big one up the left-hand side, right beside the run home, that takes you all the way back to the start with the finish in sight.</p>
+      <p>The long way is plain to follow, with numbered buoys and the next one lit. The shortcuts are never marked: they're gaps in the land you can see as you sail past, there to spot and work out. So it's part course, part maze.</p>
+      <p><b>Back yourself on your puzzles.</b> Each shortcut saves about as much time as a decent player takes to play it. It only pays if it's one of your puzzles, so the race comes down to which puzzles you're good at, and when you dare to play them.</p>
+      <p class="try">Try it: <a href="den.html?at=race"><code>den.html?at=race</code></a></p>
+    </div>
+  </article>
+
+  <article id="fair">
+    <div class="shots">
+      <a href="changelog/race-finish.jpg"><img src="changelog/race-finish.jpg" width="1280" height="720" loading="lazy" alt="The sloop crossing the finish line between two red and white striped towers under a chequered banner"></a>
+    </div>
+    <h3>Every way round can win</h3>
+    <p>The aim is that every way round has a fair chance: the long way, each shortcut, and every style of racing. To check it, the race runs on its own with no pictures, thousands of times over, with bots racing each other. Each bot gets a way round, a style of racing and a skill, and is a bit better at its own way's puzzle, as a real player would be.</p>
+    <p>In races of four, a fair share is one win in four. Every way round wins somewhere between about one race in five and one in three. The peaceful, the opportunist, the aggressive and the cautious racer each win their fair share. Skill tells most: a great puzzler wins about two races in five, a decent one about one in eight.</p>
+    <p>The course was laid out, measured and tuned by those runs before it was ever played, then tuned again after each playtest. When a change pushed the locks to winning two races in five, they moved two squares along the spit until they saved a little less.</p>
+    <p class="try">Try it: <a href="den.html?at=race"><code>den.html?at=race</code></a></p>
+  </article>
+
+  <article id="gates">
+    <div class="shots three">
+      <a href="changelog/race-gun-gap.jpg"><img src="changelog/race-gun-gap.jpg" width="1280" height="720" loading="lazy" alt="The sloop on the race course's first leg, a gun on each side of a narrow gap in the spit ahead, their marks in red on the water"></a>
+      <a href="changelog/race-bribe-haul.jpg"><img src="changelog/race-bribe-haul.jpg" width="1280" height="720" loading="lazy" alt="The sloop lying in a notch in the spit, an old wreck aground behind her and a Treasure Haul board of coins on the water at her stern"></a>
+      <a href="changelog/race-whirlpools.jpg"><img src="changelog/race-whirlpools.jpg" width="1280" height="720" loading="lazy" alt="The sloop flying clean over a channel of three whirlpools cut through a spit of land, carried by a Sailing Vegas"></a>
+    </div>
+    <h3>The kinds of gates, and what each asks of you</h3>
+    <p>Every spit has a few ways through, each asking something different of you:</p>
+    <ul>
+      <li><b>The gun gap, an imperial gate.</b> Three ways through one gate: rush it on a big combo, shoot its guns quiet with the shots you start with, or run it a square at a time and take a hit you'll have to patch. Running it needs no puzzle, and wins least.</li>
+      <li><b>The bribe.</b> Back along the first leg an old wreck lies in a sheltered notch. Haul up 40 coins by Treasure Haul, pay the guard at the gate, and his men tow you through while his guns hold their fire. It splits the puzzle from the gate: you do the work somewhere safe and spend it in a moment.</li>
+      <li><b>The locks, by Bilge.</b> Pump the lock up and sail through the canal. Tucked between stone walls, it's safe to play even in the lead.</li>
+      <li><b>The crane, by Carpentry.</b> Build it a part at a time on a ledge behind a neck of land and it swings you over onto the run home. A long puzzle, and a big saving.</li>
+      <li><b>The barrier of driftwood, by Foraging.</b> Clear the jam of logs from the notch in front of it. Sheltered, so it's the leader's way past the whirlpools.</li>
+      <li><b>The whirlpool channel, by a Vegas.</b> Only a Sailing Vegas carries you clean over all three. The biggest saving on the course, but you build it stopped at the mouth, out in the open.</li>
+      <li><b>The wind gaps, by Doubles and Triples.</b> Little gaps with a wind across them, and a zigzag of headwinds on the long way. A Double or Triple broken at the right moment hops them, so quick small combos pay as well as big ones.</li>
+      <li><b>The headwind gap, by rowing.</b> Row up it on mirror strokes; stop rowing and the wind pushes you back out.</li>
+    </ul>
+    <p>Two ideas run through all of them. <b>On the move or stopped dead:</b> some you play while she keeps sailing, others make her sit still, so those have to save more. And <b>shortcuts aren't all equal:</b> a Double gets you through a small one, the biggest want a Vegas. Are you the player who breaks quick Doubles, or the one going for the giant combo?</p>
+    <p class="try">Try it: <a href="den.html?at=race"><code>den.html?at=race</code></a></p>
+  </article>
+
+  <article id="gambles">
+    <div class="shots">
+      <a href="changelog/race-gambles.jpg"><img src="changelog/race-gambles.jpg" width="1280" height="720" loading="lazy" alt="The sloop flung out of a whirlpool on the race's second leg, a golden wind lane carrying her on through a narrow cleft in the cliffs to the next leg"></a>
+    </div>
+    <h3>The gambles: snakes or ladders?</h3>
+    <p class="ask">Do you dare take the whirlpool?</p>
+    <p>On the second leg there's a whirlpool whose spin turns back and forth on a beat you can watch: one way for a few seconds, slowing to a stop, then the other. Sail in as it's spinning your way and it's a ladder: it flings you down a cleft onto the third leg, about 19 seconds saved. Mistime it and it's a snake: it throws you back up to the first leg, over a minute lost. It's a bet on your timing. For someone who gets it right three times in four it's about even, so a sharp eye wins and a careless one pays.</p>
+    <p>Through the last spit there's a veiled wind. It shimmers, but there's no telling which way it blows until you're on it. That one is a straight coin toss: half the time it carries you on to the run home, about 26 seconds saved; half the time it blows you back down the leg, about 27 lost. You can't read it, only decide whether to risk it.</p>
+    <p class="ask">What kind of gambles will you take?</p>
+    <p>Neither is worth anything on average, and that's the point: they're a swing, not a shortcut. In the lead, why risk it? At the back, a swing might be just what you need. The bots in the simulated races play them that way, hardly ever in the lead and most of the time in last place, and the gambles still come out about even.</p>
+    <p class="try">Try it: <a href="den.html?at=race"><code>den.html?at=race</code></a></p>
+  </article>
+
+  <article id="tactics">
+    <div class="shots two">
+      <a href="changelog/race-field.jpg"><img src="changelog/race-field.jpg" width="1280" height="720" loading="lazy" alt="Three sloops racing down through the start's whirlpools toward the first buoy and the gun gap: one with red sails, one with blue, and yours"></a>
+      <a href="changelog/race-start.jpg"><img src="changelog/race-start.jpg" width="1280" height="720" loading="lazy" alt="Two sloops on the race's starting line, a rope of red and white floats between two spits of rock, whirlpools and winds waiting in the water beyond"></a>
+    </div>
+    <h3>Racing each other</h3>
+    <p>Up to four sloops race the same course, and their guns are for each other as well as the gates.</p>
+    <ul>
+      <li><b>Sit still in the open and you'll be shot.</b> Guns fire to the side, and the course runs one way, so a sloop stopped to puzzle can only be shot by someone coming up behind her as they sail past. A hit leaves her dazed until it's patched by Carpentry.</li>
+      <li><b>So the lead isn't safe, and the back is free.</b> Stop out in the open in the lead and you're hit about three times in four; in last place, hardly ever. The back of the field can take the big exposed shortcuts at will. That's a catch-up the race doesn't have to fake: it grows out of the course, not out of a rule that helps the last place.</li>
+      <li><b>But the leader still gets to puzzle.</b> Every stretch has a shortcut she can play safely, sheltered (the locks, the crane's ledge, the barrier's notch, the wreck) or on the move (a Double, a big combo at the gate). Leaders who stopped in the open anyway still won about a third of their races.</li>
+      <li><b>First come, first served.</b> A lock, the crane or the barrier's notch is one racer's at a time. Get there first and the next one waits her turn in a sheltered berth.</li>
+      <li><b>Peace pays.</b> The same few shots quiet the gate's guns and hit your rivals, so leaving them alone is its own bonus.</li>
+      <li><b>Pick your spot on the line.</b> The start is a field of whirlpools and winds to eyeball. The quickest line through it is the crowded one, where the jostling is. No spot along the line always wins.</li>
+    </ul>
+    <p>Your rivals each race in their own way: Kikkit goes all out for the Vegas over the whirlpools and fires on anyone sitting still, Tzz hops the gaps on Doubles and never fires a shot, and Dalnoth goes through the driftwood with Umami the capybara doing his foraging, guns blazing.</p>
+    <p class="try">Try it: <a href="den.html?at=race"><code>den.html?at=race</code></a></p>
+  </article>
+
+  <article id="watch">
+    <div class="shots">
+      <a href="changelog/race-watch.jpg"><img src="changelog/race-watch.jpg" width="1280" height="720" loading="lazy" alt="Watching Kikkit at the whirlpools' mouth: her Sailing board down the left, her red-sailed sloop waiting by the three whirlpools, and a bar along the top with the four racers in their places"></a>
+    </div>
+    <h3>Fun to watch</h3>
+    <p>A race should be as much fun to watch as to sail: everyone puzzling and racing at once. Watch four racers go round with nobody else in it, fly the camera anywhere or follow one, and see her board as she plays it, move by move: her Sailing as she builds a Vegas, Bilge on the lock's quay, Foraging at the driftwood, a patch on her deck when she's hit.</p>
+    <p>The boards are played by little bots, paced to the time the simulated race gave each racer, so what you watch is the same race the balance is tested on. Later, the same idea could give replays: a puzzle is dealt from a seed, so a whole race is just its seeds and its moves.</p>
+    <p class="try">Try it: <a href="den.html?at=race-watch"><code>den.html?at=race-watch</code></a></p>
+  </article>
+
+  <h2>The den's wider thinking</h2>
+
+  <article id="everywhere">
+    <div class="shots three">
+      <a href="changelog/carpentry-wall.jpg"><img src="changelog/carpentry-wall.jpg" width="1280" height="720" loading="lazy" alt="Fitting a piece into a hole in the den's wall in the Carpentry view"></a>
+      <a href="changelog/gun-tower.jpg"><img src="changelog/gun-tower.jpg" width="1280" height="720" loading="lazy" alt="The gun tower's deck as a Gunnery board: four cannons, crates of stores, a powder barrel and buckets"></a>
+      <a href="changelog/capybara-crane.jpg"><img src="changelog/capybara-crane.jpg" width="1280" height="720" loading="lazy" alt="The crane built by Carpentry swinging the sloop down off the cliff into the lagoon"></a>
+    </div>
+    <h3>One puzzle, played everywhere</h3>
+    <p>The puzzles are Puzzle Pirates' own, played by their real rules and keys. What's new is where they happen and what they do in the world. And each puzzle is one piece of code, used everywhere it's played: Carpentry mends the den's wall, builds your shack, patches the sloop's deck and builds the cranes; Gunnery loads the gun tower and the sloop's guns; Bilge is the tide on the beach and the water in the locks; Foraging frees Umami and clears the race's driftwood.</p>
+    <p>So whatever's in your way, more than one puzzle can get you past it. Players love some puzzles and hate others, and nobody should be forced through one they hate.</p>
+    <p class="try">Try it: <a href="den.html?at=walk"><code>den.html?at=walk</code></a></p>
+  </article>
+
+  <article id="islands">
+    <div class="shots three">
+      <a href="changelog/wedding.jpg"><img src="changelog/wedding.jpg" width="1280" height="720" loading="lazy" alt="A beach wedding: guests on wooden benches, a flower arch, heart banners and a cake"></a>
+      <a href="changelog/tzz-lesson.jpg"><img src="changelog/tzz-lesson.jpg" width="1280" height="720" loading="lazy" alt="Tzz blowing up a balloon beside her Sailing board, the plan marked on the board"></a>
+      <a href="changelog/port-decorum.jpg"><img src="changelog/port-decorum.jpg" width="1280" height="720" loading="lazy" alt="Port Decorum's sandstone fort towering over the sloop beside its jetty"></a>
+    </div>
+    <h3>Places as little islands</h3>
+    <p>Each new place or event is a little island of its own: Mischievious's wedding, Tzz's balloon lesson, Port Decorum, the race. Each is built on its own and touches the rest of the den only in a few small places: a spot on the sea, a line in the story, something that comes home with you.</p>
+    <p>That way the den can keep growing without each new thing tangling with the last, and getting harder to change. A few mechanics are used many ways (the wind, the rocks, a lock, the duty puzzles) rather than each place bringing a mechanic of its own.</p>
+    <p class="try">Try it: <a href="den.html?at=wedding"><code>den.html?at=wedding</code></a></p>
+  </article>
+
+  <article id="world">
+    <div class="shots two">
+      <a href="changelog/bilge-raid.jpg"><img src="changelog/bilge-raid.jpg" width="1280" height="720" loading="lazy" alt="Vikings rowing in past a Bilge board in the shallows, soldiers meeting them on the beach, powder barrels on the sand"></a>
+      <a href="changelog/sloop.jpg"><img src="changelog/sloop.jpg" width="1280" height="720" loading="lazy" alt="The old sloop at the den's jetty, the Bilge board in the shallows beside her"></a>
+    </div>
+    <h3>In the world, with a reason to be there</h3>
+    <p>A puzzle is a thing in the world, never a separate screen: the hole in the wall, a frame on the floor, the tide on the beach, the deck of the gun tower. What you do in it shows in the den. The Bilge board is the tide, and good moves draw it back so rocks cut off the raiders rowing in.</p>
+    <p>Every puzzle needs a believable reason to be where it is: you dig where the X is, pump where the water is, shoot from a gun deck. If a puzzle can't be made to fit a place, it isn't used there. And it's a puzzle game, not an action game: the raiders bring a bit of pressure, but the pull is always the puzzle in front of you.</p>
+    <p class="try">Try it: <a href="den.html?at=built"><code>den.html?at=built</code></a>, then out through the gate to the beach</p>
+  </article>
+
+  <article id="host">
+    <div class="shots">
+      <a href="changelog/gravee.jpg"><img src="changelog/gravee.jpg" width="1280" height="720" loading="lazy" alt="Gravee, in a green dress and a polar bear pelt, showing you round her portraits by candlelight"></a>
+    </div>
+    <h3>The host, not the show</h3>
+    <p>The den's characters host its places and teach its puzzles: Mischievious runs the weddings, Gravee shows you round her house, Tzz teaches a Sailing chain with balloons, Kikkit explains whirlpools (taken literally). They need fun and personality, Puzzle Pirates personality most of all, but the place and the puzzle are the point, not them.</p>
+    <p>So Mischievious's lines are about the wedding and the Ocean (the tailor, the dyes and doubloons, the inn's grog) rather than her own love life. She's funny about herself, never run down; cheeky, never dirty.</p>
+    <p class="try">Try it: <a href="den.html?at=lodgings"><code>den.html?at=lodgings</code></a>, then Gravee's house</p>
+  </article>
+
+  <article id="pirates">
+    <div class="shots two">
+      <a href="changelog/wardrobe.jpg"><img src="changelog/wardrobe.jpg" width="1280" height="720" loading="lazy" alt="A line-up of pirates in their outfits: Tzz, Gravee, Dalnoth, a pirate in a bear hat, Dignity, Mischievious and Kikkit"></a>
+      <a href="changelog/dignity.jpg"><img src="changelog/dignity.jpg" width="1280" height="720" loading="lazy" alt="Dignity, with long blonde hair and her monkey Bella on her shoulder, peering through a spyglass"></a>
+    </div>
+    <h3>Real pirates, drawn from their portraits</h3>
+    <p>The characters are real Puzzle Pirates pirates, by their pirate names, drawn with affection from their pirate pages. Each one is checked against the portrait before being drawn, because a first guess is always far off.</p>
+    <p>Each is dressed from the same wardrobe as you, so you can wear anything they wear. Their familiars are characters too and do things in the scenes: Dignity's monkey Bella fires the checkpoint's warning shot.</p>
+    <p class="try">Try it: <a href="den.html"><code>den.html</code></a>, then "Your pirate"</p>
+  </article>
+
+  <p class="note" style="text-align:center">See what's landed lately in <a href="changelog.html" target="_self" style="color:var(--gold)">What's new in the Pirate Den</a>, or <a href="den.html" style="color:var(--gold)">play the den</a>.</p>
+
+  <footer>Puzzle Pirates™ © 2001–2026 Grey Havens, LLC, created by Three Rings Design.<br>An unofficial fan project, not affiliated with or endorsed by them.</footer>
+</div>
+</body>
+</html>

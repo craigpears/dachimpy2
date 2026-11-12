@@ -25,6 +25,9 @@
   .lede { margin: 6px 0 0; color: var(--dim); max-width: 560px; }
   .play { display: inline-block; font: 700 17px 'Alegreya Sans'; color: var(--ink); background: var(--gold); border-radius: 8px; padding: 9px 18px; text-decoration: none; white-space: nowrap; }
   .play:hover { background: #f0bd44; }
+  .links { display: flex; flex-wrap: wrap; gap: 10px; }
+  .play.ghost { color: var(--gold); background: transparent; border: 2px solid var(--gold); padding: 7px 16px; }
+  .play.ghost:hover { color: var(--ink); background: var(--gold); }
   h2 { display: flex; align-items: center; gap: 14px; margin: 38px 0 14px; font: 700 22px 'Alegreya', serif; color: var(--dim); }
   h2::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--edge), transparent); }
   article { background: linear-gradient(170deg, var(--paper), var(--paper2)); color: var(--ink); border: 1px solid #c9a35c; border-radius: 12px;
@@ -41,10 +44,17 @@
   .try a { color: #8a4b0f; }
   .try code { font: 600 14px ui-monospace, Consolas, monospace; }
   .note { font-style: italic; font-size: 15px; color: #7a6048; }
+  .note a { color: #8a4b0f; }
+  /* A tall picture (the race's chart) beside its words, not cropped. */
+  article.tall { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 4px 18px; align-items: start; }
+  article.tall .shots img { aspect-ratio: auto; }
+  article.tall h3 { margin-top: 4px; }
   footer { margin-top: 40px; color: #8c7a60; font-size: 13px; text-align: center; }
   @media (max-width: 640px) {
     body { font-size: 16px; }
     .shots.two, .shots.three { grid-template-columns: 1fr; }
+    article.tall { grid-template-columns: 1fr; }
+    article.tall h3 { margin-top: 12px; }
     h3 { font-size: 22px; }
     article { padding: 10px; }
   }
@@ -57,10 +67,27 @@
       <h1>What's new in the Pirate Den</h1>
       <p class="lede">The bigger things as they land, newest first: places, pirates, puzzles and cutscenes. Each has a link that drops you straight there.</p>
     </div>
-    <a class="play" href="den.html">Play the den</a>
+    <div class="links">
+      <a class="play ghost" href="design.html" target="_self">How it's designed</a>
+      <a class="play" href="den.html">Play the den</a>
+    </div>
   </header>
 
   <h2><time datetime="2026-11-12">12 November</time></h2>
+
+  <article class="tall">
+    <div class="shots">
+      <a href="changelog/race-map.jpg"><img src="changelog/race-map.jpg" width="1280" height="1822" alt="A parchment chart of the sloop race: five legs zigzagging up between spits of land from the starting line to the finish, the long way dashed round numbered buoys, each shortcut through a spit labelled with its puzzle, the seconds it saves and how often it wins, the snakes in red and the two gambles in gold"></a>
+    </div>
+    <div>
+      <h3>A chart of the race course</h3>
+      <p>The whole sloop race on one sheet of old parchment, drawn from the course itself: the long way round its five numbered buoys, and every shortcut through the spits, with the puzzle it takes and the seconds it saves.</p>
+      <p>The snakes are in red, the winds in blue and the two gambles in gold. Hatched green are the sheltered spots, where even the leader can stop and puzzle without being shot; hatched red are the spots out in the open.</p>
+      <p>Beside each way round is how often it wins, from thousands of races sailed by bots: every way wins between about one race in five and one in three, against a fair one in four. So pick the shortcuts that are your puzzles.</p>
+      <p class="note">More on the thinking behind it in <a href="design.html" target="_self">How the Pirate Den is designed</a>.</p>
+      <p class="try">Try it: <a href="den.html?at=race"><code>den.html?at=race</code></a></p>
+    </div>
+  </article>
 
   <article>
     <div class="shots">
