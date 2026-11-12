@@ -319,6 +319,12 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   So the smugglers' run behind the rocks wide enough to sail without bumping (two or three squares).
 
 
+- **The cheats menu in sections (12 Nov):** "have a peek at the cheats menu to make sure it still looks
+  relatively organized ... all of the cheats ... can be grouped into sections at this point, and it's
+  probably quite a long menu with how the buttons worked." Grouped under a few headings, still fitting
+  on the screen. (Being done with the starlit door going public.)
+
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
