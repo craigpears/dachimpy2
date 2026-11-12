@@ -154,8 +154,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   to help people see the kind of thinking that's gone into it." The changelog has the course's chart,
   drawn without anything of the starlit door (`PUBLIC=1` in tools/race-map.mjs); `design.html`, "How
   it's designed", linked from the changelog's header: the race's routes, gates, gambles ("Do you dare
-  take the whirlpool?") and tactics, then the den's wider principles, a picture each. Never a word of
-  the hidden gems on it.
+  take the whirlpool?") and tactics, then the den's wider principles, a picture each. (Since 12 Nov the
+  starlit door's on both, and the chart: no hidden gems in the proof of concept.)
 - **One changelog entry per real feature, not per step (12 Nov).** "be wary ... of how much we're actually
   adding in the change log. Like, I don't want it to be like, I've done this big thing on sl[o]op races 5
   times ... see if anything kind of needs compacting together so that it's ... actually each thing is
@@ -579,7 +579,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   finish things really one at a time", and "I want to reveal things one at a time." A feature is
   built, played by the user, fixed and finished before the next is started; the next ones wait in
   TODO.md, ready to start, not started.
-- **Hidden gems, never hinted (10 Nov).** The user, of the checkpoint's "I wonder if there's another
+- **No hidden gems in the proof of concept: show everything (12 Nov, replacing the rule below).** "make
+  the [starlit] door public. Yeah, no hidden. I think we get rid of the hidden gem idea ... I just want to
+  show stuff ... maybe in a full game, some of these things will be hidden gems, but not for a proof of
+  concept. It didn't really work." So the starlit door, the penguins and Vegas Island, and the smugglers'
+  beach are shown like everything else: in the changelog, on the design page and the race's public chart,
+  each with a `?at=` link and a cheat, and the race's starter names the door among the shortcuts. What
+  stays from the old rule: the den doesn't nag you with "try this" hints as you play; it just doesn't
+  keep anything secret. (The old rule, kept for a full game one day, below.)
+- **Hidden gems, never hinted (10 Nov; set aside for the proof of concept 12 Nov, above).** The user, of the checkpoint's "I wonder if there's another
   way round" and "Run it, row it, or knock its guns out": "I don't like it giving you a hint as to
   what you can do ... I like these just to be hidden gems that you work out ... make the fact that
   how you can get through and everything else discoverable." Nothing says what you could do to get

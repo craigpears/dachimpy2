@@ -649,7 +649,9 @@ players to actually test."
 
 ## 9. The secret: the starlit door (built)
 
-A hidden gem, never hinted. There's no cheat, no `?at=` link, no shot, and the starter doesn't mention it.
+Built as a hidden gem, never hinted; **public since 12 Nov** (the user: "make the [starlit] door public.
+Yeah, no hidden ... not for a proof of concept. It didn't really work"): a cheat and a `?at=` link, in the
+changelog and on the design page and the public chart, and the starter names it among the shortcuts.
 - **The door:** faint marks on a cliff off leg 2. Stop by it and press Space, and Duty Navigation stands
   on the rock as the night sky. Each constellation filled lights its stars on the carved wheel. Two small
   ones open it, about a minute's play. A booch pushes her off and darkens the stars.
