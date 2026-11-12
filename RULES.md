@@ -340,6 +340,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   anywhere." Every piece (a coffin, a portrait frame, an easel, a chair) is its own reusable object
   in a shared module, animated by its own little tick if it moves; a house or a scene only places
   pieces, never builds its own one-off copy.
+- **Every pirate their own house, as in Puzzle Pirates (the user, 12 Nov):** "It needs to be close to
+  Puzzle Pirates. Like, people have their own house, even if it's, you know, a bigger or smaller ... that's
+  the point. You should see, go visit those different pirates." A real pirate in the den gets a house of
+  her own on the housing district's list, sized to suit her, not a room in someone else's (Roobear's,
+  IDEAS.md, was nearly a room at Gravee's manor). Who lodges where can still be a line between them.
 - **The housing district, and Gravee's house (11 Nov).** "you have like the areas of houses and
   you have the enter a house stuff and you can choose whose house to go into. And maybe she's just
   one of them ... she can show you ... around her house. And the vampires and do the portrait

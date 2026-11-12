@@ -1183,7 +1183,7 @@ same thread as the museum's: helping and leading people, and growing into it.
   trophies (what earns one, where they're kept) are the proof of concept, to work out when it's built.
 
 
-## Roobear's room at Bedside Manors: Robert the kangaroo bear that roobs ears (12 Nov)
+## Roobear's little house: Robert the kangaroo bear that roobs ears (12 Nov)
 
 The user (12 Nov): "This absolutely needs to be a memory later, she needs her little house in the game."
 **Roobear** (she; a real pirate, pirate name only; her pirate page and portrait to check before she's
@@ -1194,8 +1194,8 @@ it." Dignity's guess: "or from winne the pooh - Roo was baby kanga and bear was 
 know." The user: "That's who I was thinking of when I thought Roo + Bear XD." (A line for Dignity, then, if she's in the house's story; the books' characters themselves stay out
 of the den.)
 
-So a little place of her own (her room at Gravee's manor, below; Roobear walking you round as Gravee
-does), its theme her name's story: Robert the kangaroo bear, half kangaroo and half bear,
+So a little house of her own in the housing district (one more entry in HOUSES, its own scene, Roobear
+walking you round as Gravee does), its theme her name's story: Robert the kangaroo bear, half kangaroo and half bear,
 who rubs ears. Maybe he's there, a familiar or a plush on her shelf, and an ear rub is the house's
 welcome. Like every house, it should send you off with something to do (the section above). What that is,
 and how the name's joke is told without explaining it to death: to settle with the user. A small,
@@ -1219,8 +1219,11 @@ warm one, the memory of a funny moment between friends kept in the den.
   Forager, a Master at Sailing and Bilging; trophies like Ultimate Forager and Heroic Hauler; nineteen
   familiars (Bliss, Primrose, Cotton Candy, Sir Hiss, Rafiki among them). **She rooms at Bedside Manors,
   Gravee's manor**, so her little house could be her room there, a door off Gravee's tour, rather than a
-  house of its own. **Decided (the user, 12 Nov): her room at the manor** ("a room can work for now, kind of
-  makes it more manor like feeling"): Gravee's tour passes her door, and Roobear shows you in.
+  house of its own. The user first chose a room at the manor, then changed their mind (12 Nov): **a house of her own**,
+  "It needs to be close to Puzzle Pirates. Like, people have their own house, even if it's ... bigger or
+  smaller ... that's the point. You should ... go visit those different pirates." So a house of her own in
+  the housing district, one more entry on its list, small or grand as suits her. (Rooming at Gravee's
+  could still be a line between them: Gravee mentions her lodger, or Roobear her landlady.)
   - **Her portrait:** not all in black but **deep purple**; only her hair is black. Glossy black hair
     pinned up with loose curls by the ears, crowned with a wreath of dark purple roses with gold leaves; a
     gold hoop earring, no eyepatch, a small friendly smile. A strapless deep purple corset bodice, a dark
