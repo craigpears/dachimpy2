@@ -5,6 +5,27 @@ New puzzles, new features and the user's unrefined ideas go in [IDEAS.md](IDEAS.
 When one's done, put its rule in [RULES.md](RULES.md) and delete it from here. Not published with
 the site (`.assetsignore` skips `*.md`).
 
+## Still to playtest (kept from 12 Nov)
+
+Built, but not yet played by the user (the user, 12 Nov: "keep a note of what is still to be play
+tested"). Struck off here once played; what the playtest corrects goes in RULES.md (or RACE.md).
+
+- **The sloop race, a full run (12 Nov):** the whole course with rivals, now with the locks a beat,
+  the buoys always seen, the wind gaps lined up, the bribe gate (the wreck's coins by Treasure Haul),
+  the driftwood barrier (Foraging), the crane, and the gambles (the turning pool and the veiled wind).
+- **The race's chart (12 Nov):** `changelog/race-map.jpg` and its changelog entry, and the design
+  page (`design.html`), for whether they read well.
+- **Watching the race (12 Nov):** the replay / spectator mode, `?at=race-watch`: four racers, the
+  free camera, following one, their boards.
+- **Penguin Island and sailing round there (12 Nov):** Kikkit's whirlpools, Vegas Island and the run
+  behind the rocks to the smugglers' beach. (The run's width is a fix too, under "Asked for".)
+- **Tzz's balloon lesson (11 Nov):** on her island (RULES.md, "Tzz's balloon lesson").
+- **The wedding, showered in gifts (12 Nov):** the gifts theme and plot, and Mischievious's newer
+  lines (the presents all for her, the loopy weddings).
+- **Primates Rule (11 Nov):** beside the sloop on the unlinked `frigate-test.html`.
+- **Older, still unseen:** the captain's map's cutscene with Dalnoth redrawn; the towers, lower
+  middle and night sky; the cove (each under "Asked for", below).
+
 ## Asked for
 
 - **Raiders getting through mustn't end the game (9 Nov):** rethink what happens when raiders get
@@ -147,6 +168,13 @@ the site (`.assetsignore` skips `*.md`).
     hidden Easter egg in his house, with the mishap ("Oops. That happens sometimes. Don't worry
     about it."). His portrait checked first. Smuggling the rum after still waits. (IDEAS.md,
     "Helium, and Distilling".)
+    **Started (12 Nov), and an island of his own, not a house:** "I think we can start doing his
+    thing ... I think you're ready enough to start on the mechanics of building that puzzle, usual
+    kind of modularized stuff." And "Him being in a hidden house, maybe he can just have his own
+    little island. That just seems to be the theme somewhere. Maybe that can link into where the
+    Smuggle Beach is ... I bet he just wants an island for him somewhere." First the puzzle, as
+    real as the rest (researched, with bots), and a tutorial in the style of Tzz's Sailing guide;
+    the user will point us to what the real tutorial looks like.
 
 - **The captain's map and its cutscene (9 Nov).** (RULES.md, "The captain's map".) Seen: the map
   "is great"; Dalnoth redrawn from his portrait and the map's view cleared, not yet seen. Watch: whether the cutscene's timing and camera feel right (about ten
@@ -274,6 +302,15 @@ the site (`.assetsignore` skips `*.md`).
 - **Treasure Haul: any of the redrawn coins to bring back? (12 Nov):** the old look is back (RULES.md),
   but "I kind of liked some of the coins". Which, if any, to put on the old board (to pin down with the
   user).
+
+
+- **Scale the far sea up and space it out (12 Nov):** "that whole area again needs to be scaled up.
+  Like the fort, that Imperial Island is still tiny. And again, I just want things a bit, generally, a
+  bit more spaced out now that they're getting busier." Port Decorum (its town, fort and quay) bigger,
+  and the places out there given more room between them. For example "that line of sail ...
+  between the Penguin Island and that back entrance. Like, it's only like one tile wide, it's tiny. I
+  don't think you can even really navigate in there without bumping off the rocks. It looks silly."
+  So the smugglers' run behind the rocks wide enough to sail without bumping (two or three squares).
 
 
 ## Spotted along the way (not asked for)

@@ -1055,6 +1055,14 @@ if nothing had. The humour's a layer on the real thing (RULES.md): it could even
 Distilling board looks like (the user's own Distilling Simulator was all about when columns get
 burnt), so a botched batch in the puzzle gets a little bang of its own.
 
+**An island of his own instead (12 Nov):** "I think I've changed my mind on it. Him being in a hidden
+house, maybe he can just have his own little island. That just seems to be the theme somewhere. Maybe
+that can link into where the Smuggle Beach is. I don't know. I bet he just wants an island for him
+somewhere." So Helium's still is on a little island of his (a place of its own in the code, as every
+island is), perhaps near the smugglers' beach, where his rum would go out. Whether it's hidden like the
+house would have been: to pin down with the user. **His mishaps (12 Nov):** "the kind of exploding kind
+of mishaps that I mentioned with the distilling, where he kind of gets the balance wrong."
+
 ## Every house means something: visiting gives you things to go and do (11 Nov)
 
 The user (11 Nov): "Obviously, each house needs a meaning, so maybe visiting them can give you some
