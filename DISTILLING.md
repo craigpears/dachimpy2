@@ -840,8 +840,8 @@ column by column on the right".
   where it shows it's needed.
 
 **The twelfth note: stuck, a solid line of colour makes a channel (the user, 12 Nov,
-`notes/distilling/22-stuck-bottom-right.webp`; a second screenshot of what came next was mentioned but didn't
-arrive).** "I don't know if this is the best example, but this is one where I was stuck in the bottom right on
+`notes/distilling/22-stuck-bottom-right.webp`; and what came next,
+`23-a-white-river-forming.webp`).** "I don't know if this is the best example, but this is one where I was stuck in the bottom right on
 how to ... unstick myself on this. And like, I think what I've done is just made sure I had a solid line of
 coloured pieces, so blacks and browns, because ... once they're nice and connected. At least I can then start
 dragging all the blacks down. It creates a nice little channel to get through. But I certainly could start
@@ -851,7 +851,11 @@ drag gets over.
 - **Getting unstuck:** first join the colour into one solid, connected line of blacks and browns; once it's
   connected, blacks can be dragged down along it one after another, and the line becomes a channel for
   pieces to get through. Then clear the mixed-up middle.
-- (The progression after this, in the second screenshot: to come.)
+- **What came next (the second screenshot):** "there's a nice separation of white forming down the middle,
+  because all I've been doing is taking individual blacks, zigzagging them through, being like right to the
+  top right and the bottom left, and it's forming this nice separation." In the picture a clean column or two
+  of whites runs down the middle, colour on either side of it. One black at a time, each zigzagged right
+  through, and the whites gather into the "river" (§3) with no grand plan.
 
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
