@@ -1082,6 +1082,15 @@ link up into one thread:
   Primates Rule). His lines go in `src/lines/penguin.ts`, Kikkit's knowing "told you so" in hers.
   (To shape with the user: what sneaking past the customs is as play, and what the ring gives you.)
 
+**The characters talk about each other (12 Nov):** "I really would love the idea of things being
+interconnected, like Helium saying ... I have a large shipment of rum for one of Mischievious's weddings, or
+Kikkit's been at the stash again. Those kind of interlinked things with the personalities". So Helium's
+lines point at the others: a big order of rum for Mischievious's next wedding (she does keep getting
+married), Kikkit at his stash again (which explains a lot about her directions), the smuggling ring's
+penguin waiting on his barrels. And the same the other way: a guest at a wedding toasting with Helium's
+rum, Kikkit swearing she only had a little. Each one in character, the joke true to who they are, and
+each a line in `src/lines/` (STORY.md, "The characters know each other").
+
 ## Every house means something: visiting gives you things to go and do (11 Nov)
 
 The user (11 Nov): "Obviously, each house needs a meaning, so maybe visiting them can give you some
