@@ -457,6 +457,17 @@ their times. A race could also be watched live.
   sail; all let go is sails down for a blow; one side hauled sheets her round. Its small, frequent clears
   suit constant adjusting, unlike Sailing's and rowing's heavy combos. SunnyKira to teach it. Another way:
   Rigging dealt with big clears already half-built, tuned to be as quick as a big Sailing chain.
+- **Treasure Haul, and a bribe at the gate (12 Nov):** haul up treasure, then use it to bribe a guard at
+  a gate to let you through. "I can imagine you having treasure haul, and one of the shortcuts is then
+  bribe, yeah, you can then use the treasure that you hold up to bribe somebody at a gate to get through."
+  So the course doesn't get too busy, it could be the gun gap itself made an imperial gate (the Empire's
+  look, as at the checkpoint), with three ways through one gate: rush past on a big combo, shoot its
+  destructible guns quiet, or pay the guard. "Maybe to keep it from being too overly busy in a course,
+  but it could vary." A thought to weigh: the haul and the bribe can be apart, the chest hauled
+  somewhere sheltered earlier (a wreck on a leg) and spent at the exposed gate in a moment, so it's a
+  way for the leader to do her puzzling safely and still take the gate. On the course's size: "for a
+  long [race], just do one big, I guess it can be one bigger fuller course" (one fuller course rather
+  than a short one and a long one).
 - **Shoot-away rocks** for Gunnery. Like the snakes, where they go decides how much they matter.
 - Not every puzzle needs a place: "not that we necessarily need to worry about adding every single puzzle,
   we've got enough concepts here."
