@@ -478,6 +478,17 @@ the puzzling, the just move around free camera, including jumping between watchi
 race." A link to watch four bots race with no player in it, a free camera, a key to jump between racers,
 and each racer's board on screen as she plays it, with real moves (the puzzles' bots), not a timer.
 
+**Idea for later: teams, a relay (12 Nov, not agreed to build).** Teams of sloops racing together, each
+member taking a different job: "one ship would go do some hauling, one could race ahead to build the
+carpentry thing ... someone helps build while somebody else is running the actual course." Clearing a
+section unlocks trade winds that carry teammates further up the course: "once somebody clears a certain
+section, it unlocks some trade wind so that their teammates can skip the course." So one races ahead to
+unlock the winds, one builds the crane by Carpentry, one hauls treasure by Treasure Haul and rides the
+unlocked winds to "really race ahead and get to the final toll gate", paying it with the treasure.
+Different tracks for different teams are possible too. "All just ideas." It would build on the field
+(several racers), shared shortcuts (one racer's crane or opened wind used by her team; §12's open
+question of whether a crane is everyone's), and the bribe gate as the final toll.
+
 ## 11. Puzzles still to fit in (ideas)
 
 - **Rigging:** a passage of shifting, gusty winds where you keep re-trimming. The six pulleys are six
