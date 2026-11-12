@@ -237,6 +237,7 @@ export function plan(routine: Routine): Plan {
   const landed = where(st[0].grid), mine = new Set([...landed.keys()].filter((id) => !before.flat().some((x) => x?.id === id)));
   const lines: Plan['lines'] = [], drops: Plan['drops'] = [], pops: Plan['pops'] = [];
   for (let k = 1; k < st.length; k++) {
+    if (st[k].kind === 'fall') continue;   // (nothing pops: the last clear's leftovers coming to rest)
     // (what this step pops is where the step before left it, once it's all fallen: as the board shows it)
     const sim = new Sailing(() => 0, false);
     sim.lay(st[k - 1].grid.map((line) => line.slice()), st[k - 1].platforms.slice());

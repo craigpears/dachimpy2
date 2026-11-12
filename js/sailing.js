@@ -328,7 +328,7 @@ export class Sailing {
         // Lines first, round and round; platforms only once no line is left, then round again.
         let fill = 0, first = true;
         for (;;) {
-            this.fall();
+            const moved = this.fall();
             fill += this.fills();
             if (first) {
                 this.stage(res, 'land', []);
@@ -357,8 +357,14 @@ export class Sailing {
                 continue;
             }
             const done = this.platforms.filter((p) => p.targets.every((t) => { const x = this.grid[t.r][t.c]; return !!x && x.c === t.colour; }));
-            if (!done.length)
+            if (!done.length) {
+                // (what the last clear left in the air has fallen: a step of its own, so the board shows it
+                // falling now, not when the next pair lands; the user, 12 Nov: "when you clear a platform,
+                // pieces just kind of floating in the air until the next piece hits the ground")
+                if (moved && res.steps)
+                    this.stage(res, 'fall', []);
                 break;
+            }
             res.steps++;
             res.platforms += done.length;
             const ids = [];
@@ -399,9 +405,10 @@ export class Sailing {
         return res;
     }
     /** Everything loose falls until it rests: a joined pair falls only when neither half is held up;
-        fixed pieces never fall; nothing falls through a shelf. */
+        fixed pieces never fall; nothing falls through a shelf. True if anything moved. */
     fall() {
-        for (let moved = true; moved;) {
+        let any = false;
+        for (let moved = true; moved; any ||= moved) {
             moved = false;
             const where = this.where();
             const seen = new Set();
@@ -433,6 +440,7 @@ export class Sailing {
                     moved = true;
                 }
         }
+        return any;
     }
     /** Where each piece is, by id. */
     where() {
