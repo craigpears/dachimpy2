@@ -1224,6 +1224,8 @@ warm one, the memory of a funny moment between friends kept in the den.
   smaller ... that's the point. You should ... go visit those different pirates." So a house of her own in
   the housing district, one more entry on its list, small or grand as suits her. (Rooming at Gravee's
   could still be a line between them: Gravee mentions her lodger, or Roobear her landlady.)
+  When the user told her they were giving her "a room in my game", Roobear: "a ROOm you mean? xD". A line
+  for her at the door, or a plaque over it: it's a house, but she'll call it her ROOm.
   - **Her portrait:** not all in black but **deep purple**; only her hair is black. Glossy black hair
     pinned up with loose curls by the ears, crowned with a wreath of dark purple roses with gold leaves; a
     gold hoop earring, no eyepatch, a small friendly smile. A strapless deep purple corset bodice, a dark
