@@ -526,6 +526,11 @@ the start, and that gives you a huge amount of speed difference." So:
   pause between them; precision comes later, when the furnace is close. That's where most of a real
   player's speed comes from.
 - **No lone white left behind at the top:** the sweep brings the whites left with it.
+- **When the sweeping stops working, the techniques start (the user, 12 Nov):** "it's only once you can't
+  just do that blind ... that you start needing to do things like having browns at the bottom to drag
+  things up so that you can pull stuff over easily. But at the start, it's easy. It's just go, go, go." So
+  the routines (browns kept at the bottom to bring things up, and the rest) come in only once plain sweeping
+  stops moving the junk right; until then it's blind, fast dragging.
 
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
