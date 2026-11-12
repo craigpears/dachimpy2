@@ -115,19 +115,22 @@ export const SIM = {
         - nav: the starlit door's two small constellations: 53 moves for the planner bot
           (tools/nav-bots.mjs, DOOR=1), at 1.2 s a move.
         - load: a shot loaded by Gunnery: 20 s. Assumed; the user: "just loading the guns and gunning
-          takes a long time". */
+          takes a long time".
+        - gust: any clear at all, thrown at the starlit door's mouth by a racer who means only to come up
+          at its first exit (12 Nov): 8 s. Assumed. */
     PUZZLE: {
         combo: 32, vegas: 52, double: 22, triple: 28, row: RACE.DECENT.headwind,
-        bilge: LOCK.COST_UP, forage: RACE.DECENT.forage, piece: 4, nav: 53 * 1.2, load: 20,
+        bilge: LOCK.COST_UP, forage: RACE.DECENT.forage, piece: 4, nav: 53 * 1.2, load: 20, gust: 8,
     },
     /** A Vegas's chance to come off, a go, by skill; the next go after one that doesn't takes this much of
         a fresh one's time; and the goes before she gives up and sails on. Assumed. */
     VEGAS: { decent: 0.55, good: 0.7, great: 0.85 },
     RETRY: 0.6,
     TRIES: 3,
-    /** Seconds back at the mouth after a Vegas that didn't come off: the whirlpools' winds (about ten
-        squares at the trade winds' pace, and the whirl); the tunnel's draught (DOOR.BACK). */
-    BACK: { whirls: 10 * SAIL.PUSH + 2, door: DOOR.BACK },
+    /** Seconds back at the whirlpools' mouth after a Vegas that didn't come off: their winds (about ten
+        squares at the trade winds' pace, and the whirl). (The starlit door's tunnel never sends her back:
+        it spills her out of the last exit she passed, 12 Nov.) */
+    BACK: { whirls: 10 * SAIL.PUSH + 2 },
     /** How much of a Vegas's board a hit costs her, built so far. Assumed. */
     HIT_LOSS: 0.5,
     /** How often a broadside fired as she goes by a racer sitting still lands, by skill (it's the timing).
@@ -223,7 +226,7 @@ export const CUTS = {
     crane: cut('crane', 4, E.LEDGE[0], 5, E.TO.c, TRIP + 1, { c: E.LEDGE[0], r: E.LEDGE[1], d: 0 }, 'crane'),
     triple: cut('triple', 4, T3[0][0], 5, T3[0][0], 1.7, { c: T3[0][0], r: T3[0][1] - 1, d: 0 }),
     zigzag: { ...cut('zigzag', 3, Z[0][0] + 1, 3, Math.min(...Z.map(([c]) => c)), 0, { c: Z[0][0] + 1, r: S[3].r, d: 3 }), saves: SIM.ZIGZAG },
-    door: cut('door', 1, D.OFF[0][0], 3, D.OFF[0][0], DOOR.TRIP, { c: D.OFF[0][0], r: D.OFF[0][1], d: 0 }),
+    door: cut('door', DOOR.FROM, D.OFF[0][0], DOOR.TO, D.OFF[0][0], DOOR.TRIP, { c: D.OFF[0][0], r: D.OFF[0][1], d: 0 }),
 };
 CUTS.zigzag.trip = CUTS.zigzag.tOut - CUTS.zigzag.tIn - SIM.ZIGZAG;
 /** Where the trade wind back up the course crosses the long way (every racer hops it), and where it puts
@@ -360,13 +363,26 @@ export function sail(o) {
             i: k + first, route: r.route, style: r.style, skill: r.skill, best: bestAt(r), pace: 1 + SIM.STEER * gauss(),
             tau: tau0, mode: 'sail', was: 'sail', spot: spots[k], tau0, from: { c: spots[k], r: RC.LINE.r, d: 0 }, tripFull: 0,
             cut: null, stage: 0, work: 0, full: 0, tries: 0, since: 0, lost: 0, move: null, combo: false, ready: new Set(), daze: 0, trip: 0, waited: 0,
-            hopped: false, hop: 0, lefts: 0, done: new Set(), stop: null, inLine: new Set(),
+            hopped: false, hop: 0, lefts: 0, done: new Set(), stop: null, inLine: new Set(), vegas: false, exit: 0,
             res: { route: r.route.name, style: r.style.name, skill: r.skill, start: k, spot: spots[k], time: 0, place: 0, hitsTaken: 0, hitsGiven: 0, swept: [], cuts: [], exposed: [] },
         };
     });
     const botOf = (i) => bots[i - first];
     /** What a second of her time is worth in Sailing on the pilot (seconds round the long way). */
     const chainWorth = (b) => (chains ? SIM.CHAIN[b.route.name === 'long' ? b.best : b.skill] * (PACE - SAIL.PUSH) : 0);
+    /** The starlit door's exits (12 Nov): where she rejoins the long way out of each (seconds round it), its
+        savings scaled if the door's being tried at another. In the tunnel at exit `k`, she pushes on for the
+        next while its stretch pays her, a Vegas in peace by her skill at one; the aggressive (who load more
+        by Gunnery) come up at the first, back among the field. */
+    const doorSaves = DOOR.EXITS.map((e) => (e.saves * cuts.door.saves) / DOOR.SAVES);
+    const doorOut = DOOR.EXITS.map((e, k) => cuts.door.tIn + e.trip + doorSaves[k]);
+    const doorWorth = (b, k) => {
+        const p = SIM.VEGAS[b.best], on = k + 1 < DOOR.EXITS.length ? -SIM.PUZZLE.vegas * SIM.SKILL[b.best] + p * doorWorth(b, k + 1) + (1 - p) * doorSaves[k] : -Infinity;
+        return Math.max(doorSaves[k], on);
+    };
+    const pushOn = (b, k) => k < DOOR.EXITS.length - 1 && doorWorth(b, k) > doorSaves[k];
+    /** At the mouth: a Vegas, if what it opens up is worth more to her than the first exit for any clear. */
+    const vegasIn = (b) => SIM.VEGAS[b.best] * (doorWorth(b, 0) - doorSaves[0]) > (SIM.PUZZLE.vegas - SIM.PUZZLE.gust) * SIM.SKILL[b.best];
     // The gap's guns: hits each has taken, quiet till, loading; roused; whom each has holed.
     const need = mode === 'shared' ? 1 : RACE.GAP.HARD;
     const guns = RC.GUNS.at.map((at) => ({ at, quiet: 0, hits: 0, wait: 0 }));
@@ -404,7 +420,7 @@ export function sail(o) {
             s.res.hitsGiven++;
         if (t.stop)
             t.stop.hit = true;
-        if (t.mode === 'stop' && t.cut && (t.cut.id === 'whirls' || (t.cut.id === 'door' && t.stage === 1)))
+        if (t.mode === 'stop' && t.cut && (t.cut.id === 'whirls' || (t.cut.id === 'door' && t.stage === 1 && t.vegas)))
             t.work += (t.full - t.work) * SIM.HIT_LOSS;
         if (t.mode !== 'daze')
             t.was = t.mode;
@@ -421,6 +437,8 @@ export function sail(o) {
         b.cut = null;
         b.stop = null;
     };
+    /** Where she rejoins the long way out of shortcut `c` (the starlit door's: out of the exit she came up at). */
+    const tOutOf = (b, c) => (c.id === 'door' ? doorOut[b.exit] : c.tOut);
     const record = (b, id, done) => {
         const c = cuts[id];
         let r = b.res.cuts.find((x) => x.id === id && !x.done && x.saved === 0);
@@ -429,9 +447,11 @@ export function sail(o) {
             b.res.cuts.push(r);
         }
         r.done = done;
+        if (id === 'door' && done)
+            r.exit = b.exit;
         // (what it saved: the long way between, less the time it took her from the turn-off, the sailing she
         // lost puzzling on the move for it, and the Sailing on the pilot she'd have done meanwhile)
-        r.saved = (done ? c.tOut - c.tIn : 0) - b.since * (1 + chainWorth(b)) - b.lost;
+        r.saved = (done ? tOutOf(b, c) - c.tIn : 0) - b.since * (1 + chainWorth(b)) - b.lost;
         b.since = 0;
         b.lost = 0;
     };
@@ -508,10 +528,10 @@ export function sail(o) {
         if (c.spot)
             field.release(b.i, c.spot);
         if (c.id === 'door')
-            field.under(b.i, DOOR.FROM, DOOR.TO);
+            field.under(b.i, DOOR.FROM, DOOR.EXITS[b.exit].to);
         b.done.add(c.id);
         record(b, c.id, true);
-        b.tau = c.tOut;
+        b.tau = tOutOf(b, c);
         b.cut = null;
         b.mode = 'sail';
         // (rushing the gap, the tight water past it: one move too many)
@@ -585,15 +605,34 @@ export function sail(o) {
                 field.load(b.i, 2 * need - shots(b));
             return gap(b);
         }
+        // (the starlit door opened: at its mouth, a Vegas if she means to push on along the tunnel, or any
+        // clear just to come up at its first exit)
         if (c.id === 'door' && b.stage === 0) {
             b.stage = 1;
-            b.work = b.full = draw(SIM.PUZZLE.vegas, b.best);
+            b.vegas = vegasIn(b);
+            b.work = b.full = draw(b.vegas ? SIM.PUZZLE.vegas : SIM.PUZZLE.gust, b.best);
             return;
         }
-        if ((c.id === 'whirls' || c.id === 'door') && rand() >= SIM.VEGAS[b.best]) {
+        // (its tunnel: a Vegas that comes off carries her along the first stretch, where she waits in peace
+        // and pushes on stretch by stretch while it pays; less, or a Vegas that doesn't come off, and she's
+        // spilled up out of the last exit she passed: the first, from the mouth)
+        if (c.id === 'door') {
+            let k = 0, secs = DOOR.EXITS[0].trip;
+            if (b.vegas && rand() < SIM.VEGAS[b.best]) {
+                while (pushOn(b, k)) {
+                    secs += draw(SIM.PUZZLE.vegas, b.best) + DOOR.EXITS[k + 1].trip - DOOR.EXITS[k].trip;
+                    if (rand() >= SIM.VEGAS[b.best])
+                        break;
+                    k++;
+                }
+            }
+            b.exit = k;
+            return through(b, secs);
+        }
+        if (c.id === 'whirls' && rand() >= SIM.VEGAS[b.best]) {
             if (++b.tries >= SIM.TRIES)
                 return giveUp(b);
-            b.work = b.full = SIM.BACK[c.id] + draw(SIM.PUZZLE.vegas * SIM.RETRY, b.best);
+            b.work = b.full = SIM.BACK.whirls + draw(SIM.PUZZLE.vegas * SIM.RETRY, b.best);
             return;
         }
         through(b, c.trip);
@@ -853,6 +892,7 @@ export function lineUp(size, seed, routes = ROUTES, styles = STYLES) {
 export function run(races, size, opts = {}) {
     const rep = {
         races, size, byRoute: {}, byStyle: {}, bySkill: {}, bySpot: {}, bySnake: {}, cuts: {},
+        exits: DOOR.EXITS.map(() => ({ decent: 0, good: 0, great: 0, wins: 0 })),
         byPosition: { leader: { n: 0, hit: 0, wins: 0 }, pack: { n: 0, hit: 0, wins: 0 }, last: { n: 0, hit: 0, wins: 0 } },
     };
     const tally = (t, k, r) => {
@@ -887,6 +927,11 @@ export function run(races, size, opts = {}) {
                 x.done += c.done ? 1 : 0;
                 x.saved[r.skill].n++;
                 x.saved[r.skill].secs += c.saved;
+                if (c.exit !== undefined) {
+                    const e = rep.exits[c.exit];
+                    e[r.skill]++;
+                    e.wins += r.place === 1 ? 1 : 0;
+                }
             }
         }
     }

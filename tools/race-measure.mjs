@@ -70,7 +70,7 @@ if (process.argv[1].endsWith('race-measure.mjs')) {
     locks: [{ c: Lk[0].at[0], r: Lk[0].at[1] - 1, d: 3 }, [Lk[1].at[0], Lk[1].at[1] + 1]],
     crane: [{ c: E.LEDGE[0], r: E.LEDGE[1] - 1, d: 1 }, [E.TO.c, E.TO.r]],
     triple: [{ c: T3[0][0], r: T3[0][1] - 1, d: 1 }, [T3[1][0], T3[1][1] + 1]],
-    door: [{ c: Dr.OFF[0][0], r: Dr.OFF[0][1], d: 3 }, Dr.INTO[0]],
+    door: [{ c: Dr.OFF[0][0], r: Dr.OFF[0][1], d: 3 }, Dr.EXITS[Dr.EXITS.length - 1].INTO[0]],
   };
   const trips = {
     guns: () => { const h = new Helm(sea, { ...bends.guns[0], r: bends.guns[0].r + 1, d: 0 }); return hop(h, 4) + 0.5; },
@@ -94,9 +94,13 @@ if (process.argv[1].endsWith('race-measure.mjs')) {
       h.pose.d = 1; long += hop(h, 2);
       long += to(h, at);
     } else if (id === 'door') {
-      long = to(h, [3, P[1].r1]) + to(h, [RC.SNAKES.MID[0][0] - 1, S[2].r + 1]);
+      // (the first exit: leg 3 under its cave, on its second row, as far along; then on to the far end)
+      const E = Dr.EXITS[0].INTO[0];
+      long = to(h, [3, P[1].r1]) + to(h, [E[0], E[1] + 1]);
+      console.log(`door, its first exit: long way ${long.toFixed(1)}  trip ${DOOR.EXITS[0].trip}  saves ${(long - DOOR.EXITS[0].trip).toFixed(1)}  (EXITS[0] ${DOOR.EXITS[0].saves})`);
+      long += to(h, [RC.SNAKES.MID[0][0] - 1, S[2].r + 1]);
       h.pose.d = 1; long += hop(h, 2);
-      long += to(h, [SAIL.COLS - 2, P[2].r1]) + to(h, at);
+      long += to(h, [SAIL.COLS - 2, P[2].r1]) + to(h, [3, P[3].r1]) + to(h, at);
     } else long = to(h, at);
     const trip = trips[id](), want = id === 'door' ? DOOR.SAVES : RACE.DECENT[id];
     console.log(`${id.padEnd(9)} long way ${long.toFixed(1).padStart(6)}  ended ${h.pose.c},${h.pose.r}  trip ${trip.toFixed(1).padStart(5)}  saves ${(long - trip).toFixed(1).padStart(6)}  (DECENT ${want})`);

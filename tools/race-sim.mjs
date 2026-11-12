@@ -17,6 +17,7 @@
 
 import { run, ROUTES, STYLES, CUTS, SKILLS, PACE, SIM } from '../js/race-sim.js';
 import { RACE } from '../js/den-race.js';
+import { DOOR } from '../js/den-door.js';
 
 const RACES = Number(process.argv[2]) || 2000, SIZE = Number(process.argv[3]) || 4, MODE = process.argv[4] || RACE.GAP.MODE;
 const saves = {};
@@ -57,3 +58,6 @@ for (const [id, c] of Object.entries(rep.cuts)) {
   const m = (k) => (c.saved[k].n ? (c.saved[k].secs / c.saved[k].n).toFixed(0) : '-').padStart(6);
   console.log(`${id.padEnd(9)} ${String(c.tried).padStart(8)} ${pct(c.done, c.tried)}  ${m('decent')} ${m('good')} ${m('great')}`);
 }
+
+console.log('\nThe starlit door\'s tunnel: who came up at each exit (by skill), and how many of them won');
+rep.exits.forEach((e, k) => { const n = e.decent + e.good + e.great; console.log(`exit ${k + 1} (leg ${DOOR.EXITS[k].to + 1})  ${String(n).padStart(5)}  decent ${e.decent}  good ${e.good}  great ${e.great}  won ${pct(e.wins, n)}`); });

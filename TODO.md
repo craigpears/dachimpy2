@@ -286,10 +286,6 @@ the site (`.assetsignore` skips `*.md`).
   a bit busy, but again, I just want all the ideas in there ... I want to see what the variety really
   feels like to show how many different ways you have of really getting through the course."
 
-- **The starlit tunnel's exits back onto the course (12 Nov):** always some benefit from going in; at each
-  exit, rejoin the leg or push on through the next Vegas "in relative peace"; a failed Vegas spills her
-  out of the last exit passed, not back to the mouth (RACE.md §9).
-
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.

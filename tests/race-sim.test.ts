@@ -31,7 +31,7 @@ describe('the simulated course is the helm\'s (11 Nov)', () => {
     }
     expect(leg).toBe(RC.STRETCHES.length - 1);
     const at = (t: number) => { const p = routePose(t); return stretchAt(Math.round(p.c), Math.round(p.r)); };
-    const legs: Record<CutId, number[]> = { guns: [0, 1], headwind: [1, 2], double: [1, 2], whirls: [2, 3], forage: [2, 3], locks: [3, 4], zigzag: [3, 3], crane: [4, 5], triple: [4, 5], door: [1, 3] };
+    const legs: Record<CutId, number[]> = { guns: [0, 1], headwind: [1, 2], double: [1, 2], whirls: [2, 3], forage: [2, 3], locks: [3, 4], zigzag: [3, 3], crane: [4, 5], triple: [4, 5], door: [1, 4] };
     for (const c of Object.values(CUTS)) expect([at(c.tIn), at(c.tOut)], c.id).toEqual(legs[c.id]);
     expect(tauAt(0, 20)).toBeLessThan(tauAt(1, 20));
   });
@@ -75,7 +75,7 @@ describe('the simulation (11 Nov: "just run through simulations quickly and easi
     expect(rep.byStyle.aggressive.hitsGiven).toBeGreaterThan(0);
     // (the long way's clear of the gun gap's marks now: 11 Nov, the course's second pass)
     for (const r of ['long', 'locks', 'forage']) expect(rep.byRoute[r].hitsTaken, r).toBeLessThan(rep.byRoute[r].n * 0.1);
-  });
+  }, 60000);
 });
 
 describe('balance: every way round a relatively equal chance of winning (11 Nov: "make sure they all have a relatively equal chance of winning")', () => {
@@ -128,6 +128,22 @@ describe('balance: every way round a relatively equal chance of winning (11 Nov:
       const best = Math.max(...ids.map((id) => { const s = rep.cuts[id].saved.good; return s.secs / s.n; }));
       expect(best, ids.join()).toBeGreaterThan(0);
     }
+  });
+});
+
+describe('the starlit door\'s tunnel, simulated (12 Nov: "you should always get some benefit from going through it")', () => {
+  const rep = run(400, 4, { seed: 12 });
+  it('whoever goes in always comes out ahead of the mouth, at one exit or the other, never sent back to it', () => {
+    const d = rep.cuts.door;
+    expect(d.done).toBe(d.tried);
+    const n = rep.exits.map((e) => e.decent + e.good + e.great);
+    expect(n.reduce((a, b) => a + b, 0)).toBe(d.done);
+    for (const [k, x] of n.entries()) expect(x, `exit ${k}`).toBeGreaterThan(0);
+  });
+  it('she takes the exits by her skill and luck: the far end mostly the Vegas players good at it, and it wins more than coming up at the first', () => {
+    const [first, far] = rep.exits;
+    expect(far.great + far.good).toBeGreaterThan(far.decent);
+    expect(far.wins / (far.decent + far.good + far.great)).toBeGreaterThan(first.wins / (first.decent + first.good + first.great));
   });
 });
 

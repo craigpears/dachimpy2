@@ -329,11 +329,15 @@ const RACE_LAY = (() => {
             on the run home, facing along it. */
         CRANE: { LEDGE: [CRANE_C, S[4].r0], TO: { c: CRANE_C, r: RUN, d: 3 } },
         /** The starlit door (src/den-door.ts; Duty Navigation opens it): a plain cliff face on spit 2, off
-            leg 2 (FACE, the water off it OFF), and its tunnel's end on spit 3's far face, out onto leg 4
-            (OUT, the water off it INTO). The tunnel's no square of the sea: it runs under. */
+            leg 2 (FACE, the water off it OFF), and its tunnel's exits (12 Nov), straight on under the course
+            in the door's columns: each a sea cave in a spit's far face (OUT), the water off it on the next
+            leg (INTO): spit 2's onto leg 3, spit 3's onto leg 4, and the far end, spit 4's, onto leg 5. The
+            tunnel's no square of the sea: it runs under. */
         DOOR: {
             FACE: [[DOOR_C, S[1].r0], [DOOR_C + 1, S[1].r0]], OFF: [[DOOR_C, S[1].r0 - 1], [DOOR_C + 1, S[1].r0 - 1]],
-            OUT: [[DOOR_C, S[2].r1], [DOOR_C + 1, S[2].r1]], INTO: [[DOOR_C, S[2].r1 + 1], [DOOR_C + 1, S[2].r1 + 1]],
+            EXITS: [1, 3].map((s) => ({
+                OUT: [[DOOR_C, S[s].r1], [DOOR_C + 1, S[s].r1]], INTO: [[DOOR_C, S[s].r1 + 1], [DOOR_C + 1, S[s].r1 + 1]],
+            })),
         },
     };
 })();

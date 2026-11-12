@@ -488,13 +488,13 @@ describe('the race: the clock, in order, a ceremonious finish line, your best ke
 });
 
 describe('the starlit door\'s place (11 Nov; the door itself: den-door.test.ts)', () => {
-  it('a plain cliff face off leg 2, and a tunnel\'s end onto leg 4, clear of every shortcut and out of the gun gap\'s reach', () => {
-    const D = RC.DOOR;
-    for (const [c, r] of [...D.FACE, ...D.OUT]) expect(sea.ground(c, r), `${c},${r}`).toBe(true);
+  it('a plain cliff face off leg 2, and its tunnel\'s exits onto legs 3 and 5 (12 Nov), clear of every shortcut and out of the gun gap\'s reach', () => {
+    const D = RC.DOOR, OUT = D.EXITS.flatMap((e) => e.OUT);
+    for (const [c, r] of [...D.FACE, ...OUT]) expect(sea.ground(c, r), `${c},${r}`).toBe(true);
     for (const [c, r] of D.OFF) { expect(sea.open(c, r)).toBe(true); expect(stretchAt(c, r)).toBe(1); expect(snakeAt(c, r)).toBeNull(); }
-    for (const [c, r] of D.INTO) { expect(sea.open(c, r)).toBe(true); expect(stretchAt(c, r)).toBe(3); expect(sea.windAt(c, r)).toBeUndefined(); }
+    D.EXITS.forEach((e, n) => { for (const [c, r] of e.INTO) { expect(sea.open(c, r)).toBe(true); expect(stretchAt(c, r)).toBe([2, 4][n]); expect(sea.windAt(c, r)).toBeUndefined(); expect(snakeAt(c, r)).toBeNull(); } });
     const ways = new Set([...G, ...RC.GUNS.at, ...B, ...D2, ...L.map((l) => l.at), ...RC.POUND.at, E.LEDGE, F.NOTCH, ...F.BARRIER, ...F.GAP, ...RC.SNAKES.MID, ...RC.WHIRLS.WINDS].map(([c, r]) => k(c, r)));
-    for (const [c, r] of [...D.FACE, ...D.OUT]) for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) expect(ways.has(k(c + a, r + b)), `${c + a},${r + b}`).toBe(false);
+    for (const [c, r] of [...D.FACE, ...OUT]) for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) expect(ways.has(k(c + a, r + b)), `${c + a},${r + b}`).toBe(false);
     for (const [gc, gr] of RC.GUNS.at) for (const [c, r] of D.OFF) expect(Math.max(Math.abs(c - gc), Math.abs(r - gr))).toBeGreaterThan(3);
   });
 });
