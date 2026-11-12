@@ -1191,7 +1191,7 @@ drawn, then into PIRATES and the wardrobe). From a chat the user shared: they we
 stands for, "a french sounding Robert, roo like kangaroo plus a bear, or did someone roob an ear?" (they
 asked Dignity too), and Roobear answered: "I could be Robert the kangaroo bear that roobs ears ... I like
 it." Dignity's guess: "or from winne the pooh - Roo was baby kanga and bear was winner? Yes abstract I
-know." (A line for Dignity, then, if she's in the house's story; the books' characters themselves stay out
+know." The user: "That's who I was thinking of when I thought Roo + Bear XD." (A line for Dignity, then, if she's in the house's story; the books' characters themselves stay out
 of the den.)
 
 So a little house in the housing district (one more entry in HOUSES, its own scene, Roobear walking you
