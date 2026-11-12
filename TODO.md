@@ -271,6 +271,9 @@ the site (`.assetsignore` skips `*.md`).
   everybody. The rivals with profiles (above) are these bots. Gunnery's gap wants to pay off better for
   its time, and the turrets once roused less relentless. Before the course's next pass, so that pass is
   tuned with it.
+- **Treasure Haul: any of the redrawn coins to bring back? (12 Nov):** the old look is back (RULES.md),
+  but "I kind of liked some of the coins". Which, if any, to put on the old board (to pin down with the
+  user).
 
 ## Spotted along the way (not asked for)
 

@@ -14,14 +14,14 @@ import { seaX, seaZ, SLOOP_DECK, SLOOP_BEAM, sail, liftAt } from './sea.js';
    it spilled are round it. A swap is the two squares of the upright cursor; Esc leaves it as it is,
    to come back to.
 
-   Drawn after Puzzle Pirates' own (YPPedia's screenshots, looked at 10 Nov, and side by side with
-   them again 11 Nov, when the coins and chest were redrawn from placeholders): the board is a rope
-   cargo net let down over the side, a close grey-brown diamond lattice behind the coins, a thin
-   silver frame round the grid, thick ropes down its sides and up to the rail, seaweed at its foot;
-   the coins each their own metal and design struck in relief (see COIN); a ruby cut as an
-   octagon, an emerald cut as an emerald; the chest an iron-framed lattice of pale crate wood with
-   a strap down to a big padlock, seen from above; the cursor red brackets lined in yellow. Coins
-   hauled fly up the board toward the hauler, as the real one's "coins flying up the screen".
+   Drawn after Puzzle Pirates' own (YPPedia's screenshots, looked at 10 Nov): the board is a rope
+   cargo net let down over the side, its squares the net's mesh, a thin silver frame round the
+   grid, thick ropes down its sides and up to the rail, seaweed at its foot; the coins flat and
+   bright, each its own design (an olive coin with a square hole, a silver one with crossed
+   cutlasses, a gold one with a cross, a tan eight-sided one with a crowned head); a ruby cut as an
+   octagon, an emerald cut as an emerald; the chest an iron-bound crate-wood chest with a big
+   padlock, seen from above; the cursor red brackets lined in yellow. Coins hauled fly up the board
+   toward the hauler, as the real one's "coins flying up the screen".
 
    haulOpen takes where the board goes and what to do when it's done, so any place can have one:
    the old wreck's beyond the checkpoint (haulWreck, below), the clifftop lagoon's wreck (crane.js).
@@ -32,97 +32,51 @@ const colX = (c) => c - (TW - 1) / 2, rowZ = (r) => r - (TH - 1) / 2;
 // ---------- the pieces: four coins, two gems and the chest ----------
 const tint = (hex, f) => { const n = parseInt(hex.slice(1), 16), ch = (s) => Math.max(0, Math.min(255, Math.round(((n >> s) & 255) * f))); return `rgb(${ch(16)},${ch(8)},${ch(0)})`; };
 const octagon = (g, c, r) => { g.beginPath(); for (let i = 0; i < 8; i++) { const a = Math.PI / 8 + i * Math.PI / 4; g.lineTo(c + Math.cos(a) * r, c + Math.sin(a) * r); } g.closePath(); };
-/* The four coins, as on the real board (the top of the texture is the top of the screen): each a
-   bright rim with a dark edge and a fine ring inside it, its design struck in relief, in its own
-   metal's lighter shade outlined in its darker. Olive: a square hole in a frame, a little skull
-   over it, scrolled handles either side and a goblet's foot under it. Silver: two cutlasses
-   crossed, hilts down, a skull over them. Gold: a scalloped ring, a cross quartering it and a
-   little emblem in each quarter. Tan, eight-sided: a crowned bust, white. */
-const COIN = [['#97aa30', 'hole', 'round'], ['#d3d7dc', 'swords', 'round'], ['#ead53a', 'cross', 'round'], ['#d8ae6a', 'king', 'octagon']];
+/* The four coins, as on the real board (the top of the texture is the top of the screen). */
+const COIN = [['#a3a43a', 'hole', 'round'], ['#cdd1d6', 'swords', 'round'], ['#e7d83a', 'cross', 'round'], ['#e2a868', 'king', 'octagon']];
 function coinFace(col, mark, shape) {
-  return canvasTex(256, 256, (g, w) => {
-    g.scale(w / 128, w / 128);   // (drawn on a 128 grid, at twice that for the detail)
-    const c = 64, ink = tint(col, 0.36), mid = tint(col, 0.72), lite = tint(col, 1.28), pale = tint(col, 1.5);
+  return canvasTex(128, 128, (g, w) => {
+    const c = w / 2, dark = tint(col, 0.42), mid = tint(col, 0.7), lite = tint(col, 1.35);
     const outline = (r) => { if (shape === 'octagon') octagon(g, c, r / Math.cos(Math.PI / 8)); else { g.beginPath(); g.arc(c, c, r, 0, Math.PI * 2); } };
-    g.lineCap = 'round'; g.lineJoin = 'round';
-    // The edge, the rim (lit from the top left), a fine dark ring, and the field inside it.
-    outline(62); g.fillStyle = ink; g.fill();
-    outline(59);
-    const rim = g.createLinearGradient(16, 10, 112, 118);
-    rim.addColorStop(0, pale); rim.addColorStop(0.45, col); rim.addColorStop(1, mid);
-    g.fillStyle = rim; g.fill();
-    outline(51); g.fillStyle = ink; g.fill();
-    outline(49);
-    const field = g.createRadialGradient(c - 14, c - 16, 4, c, c, 58);
-    field.addColorStop(0, lite); field.addColorStop(0.55, col); field.addColorStop(1, mid);
-    g.fillStyle = field; g.fill();
-    // Struck in relief: a raised part is the lighter shade, outlined in the dark.
-    const raise = (path, lw = 2.2) => { g.beginPath(); path(); g.fillStyle = lite; g.fill(); g.lineWidth = lw; g.strokeStyle = ink; g.stroke(); };
-    const ridge = (path, lw = 5) => { g.beginPath(); path(); g.lineWidth = lw + 2.6; g.strokeStyle = ink; g.stroke(); g.lineWidth = lw; g.strokeStyle = lite; g.stroke(); };
-    const skull = (x, y, r) => {
-      raise(() => { g.arc(x, y, r, 0, Math.PI * 2); });
-      raise(() => { g.rect(x - r * 0.55, y + r * 0.6, r * 1.1, r * 0.75); }, 1.6);
-      g.fillStyle = ink; for (const s of [-1, 1]) { g.beginPath(); g.arc(x + s * r * 0.42, y - r * 0.05, r * 0.27, 0, Math.PI * 2); g.fill(); }
-    };
+    // The coin, lit from the top left, a dark edge, a raised rim and a ring of beads inside it.
+    outline(60);
+    const body = g.createRadialGradient(c - 22, c - 26, 6, c, c, 70);
+    body.addColorStop(0, lite); body.addColorStop(0.5, col); body.addColorStop(1, mid);
+    g.fillStyle = body; g.fill();
+    g.lineWidth = 4; g.strokeStyle = dark; g.stroke();
+    outline(49); g.lineWidth = 3; g.strokeStyle = mid; g.stroke();
+    g.fillStyle = dark;
+    if (shape === 'round') for (let i = 0; i < 20; i++) { const a = i * Math.PI / 10; g.beginPath(); g.arc(c + Math.cos(a) * 55, c + Math.sin(a) * 55, 2.2, 0, Math.PI * 2); g.fill(); }
+    g.strokeStyle = dark; g.fillStyle = dark; g.lineCap = 'round'; g.lineJoin = 'round';
     if (mark === 'hole') {
-      skull(c, 25, 6.5);
-      // The scrolled handles, curling out and down either side of the hole.
-      for (const s of [-1, 1]) ridge(() => { g.moveTo(c + s * 17, c - 11); g.bezierCurveTo(c + s * 28, c - 19, c + s * 35, c - 5, c + s * 29, c + 4); g.bezierCurveTo(c + s * 25, c + 10, c + s * 20, c + 5, c + s * 24, c + 1); }, 2.6);
-      for (const s of [-1, 1]) ridge(() => { g.moveTo(c + s * 17, c + 13); g.quadraticCurveTo(c + s * 23, c + 22, c + s * 31, c + 17); }, 2.2);
-      // The goblet's stem and foot under it.
-      raise(() => { g.moveTo(c - 4, c + 17); g.lineTo(c + 4, c + 17); g.lineTo(c + 2.5, c + 30); g.lineTo(c + 12, c + 36); g.lineTo(c - 12, c + 36); g.lineTo(c - 2.5, c + 30); g.closePath(); }, 2);
-      // The square hole in its raised frame, dark right through.
-      raise(() => { g.rect(c - 17, c - 17, 34, 34); }, 2.6);
-      g.fillStyle = ink; g.fillRect(c - 10.5, c - 10.5, 21, 21);
-      g.fillStyle = '#1b2008'; g.fillRect(c - 8, c - 8, 16, 16);
+      // A cash coin: a square hole, bordered, and four studs.
+      g.lineWidth = 4; g.strokeRect(c - 20, c - 20, 40, 40);
+      g.fillStyle = '#2a2c12'; g.fillRect(c - 12, c - 12, 24, 24);
+      g.fillStyle = dark;
+      for (const [dx, dy] of [[0, -34], [0, 34], [-34, 0], [34, 0]]) { g.beginPath(); g.arc(c + dx, c + dy, 5, 0, Math.PI * 2); g.fill(); }
     } else if (mark === 'swords') {
-      skull(c, 27, 7.5);
+      // Crossed cutlasses, hilts at the bottom with their guards, a little skull over them.
       for (const s of [-1, 1]) {
-        // A cutlass: its hilt low on one side, the blade sweeping up across to the other.
-        const hx = c - s * 22, hy = c + 26;
-        raise(() => { g.moveTo(hx + s * 3, hy - 8); g.quadraticCurveTo(c - s * 2, c - 8, c + s * 31, c - 31); g.quadraticCurveTo(c + s * 26, c - 4, hx + s * 12, hy); g.closePath(); }, 2.6);
-        g.strokeStyle = mid; g.lineWidth = 1.4; g.beginPath(); g.moveTo(hx + s * 8, hy - 5); g.quadraticCurveTo(c + s * 6, c - 6, c + s * 27, c - 27); g.stroke();
-        ridge(() => { g.moveTo(hx - 3, hy - 13); g.lineTo(hx + s * 14, hy + 4); }, 3.2);                 // the guard
-        ridge(() => { g.moveTo(hx + s * 9, hy); g.quadraticCurveTo(hx + s * 2, hy + 14, hx - s * 9, hy + 10); }, 2.4);   // the knuckle bow
-        ridge(() => { g.moveTo(hx + s * 2, hy - 2); g.lineTo(hx - s * 7, hy + 9); }, 4.2);                // the grip
-        raise(() => { g.arc(hx - s * 8.5, hy + 11, 3.4, 0, Math.PI * 2); }, 1.6);                        // the pommel
+        g.lineWidth = 7; g.beginPath(); g.moveTo(c - s * 28, c + 30); g.quadraticCurveTo(c + s * 4, c - 4, c + s * 30, c - 30); g.stroke();
+        g.lineWidth = 5; g.beginPath(); g.moveTo(c - s * 36, c + 18); g.lineTo(c - s * 18, c + 38); g.stroke();
       }
+      g.beginPath(); g.arc(c, c - 26, 9, 0, Math.PI * 2); g.fill();
+      g.fillStyle = col; for (const s of [-1, 1]) { g.beginPath(); g.arc(c + s * 3.5, c - 27, 2.5, 0, Math.PI * 2); g.fill(); }
     } else if (mark === 'cross') {
-      // A scalloped ring inside the rim.
-      g.beginPath();
-      for (let i = 0; i <= 240; i++) { const a = i / 240 * Math.PI * 2, r = 42 + Math.abs(Math.sin(a * 12)) * 3.2; g.lineTo(c + Math.cos(a) * r, c + Math.sin(a) * r); }
-      g.lineWidth = 4.4; g.strokeStyle = ink; g.stroke(); g.lineWidth = 2; g.strokeStyle = lite; g.stroke();
-      // The cross, its arms a little flared, and the boss where they meet.
-      raise(() => { g.moveTo(c - 3, c - 39); g.lineTo(c + 3, c - 39); g.lineTo(c + 2.5, c - 3); g.lineTo(c + 39, c - 3); g.lineTo(c + 39, c + 3); g.lineTo(c + 2.5, c + 3); g.lineTo(c + 3, c + 39); g.lineTo(c - 3, c + 39); g.lineTo(c - 2.5, c + 3); g.lineTo(c - 39, c + 3); g.lineTo(c - 39, c - 3); g.lineTo(c - 2.5, c - 3); g.closePath(); }, 2);
-      raise(() => { g.arc(c, c, 6, 0, Math.PI * 2); }, 2);
-      // An emblem in each quarter: a crown, a trefoil, a star, a cross.
-      const q = 19;
-      raise(() => { const x = c - q, y = c - q; g.moveTo(x - 8, y + 6); g.lineTo(x - 8, y - 5); g.lineTo(x - 4, y); g.lineTo(x, y - 7); g.lineTo(x + 4, y); g.lineTo(x + 8, y - 5); g.lineTo(x + 8, y + 6); g.closePath(); }, 1.8);
-      for (const [dx, dy] of [[0, -5], [-5, 1], [5, 1]]) raise(() => { g.arc(c + q + dx, c - q + dy, 3.6, 0, Math.PI * 2); }, 1.6);
-      ridge(() => { g.moveTo(c + q, c - q + 3); g.lineTo(c + q, c - q + 10); }, 2.2);
-      ridge(() => { for (let i = 0; i < 4; i++) { const a = i * Math.PI / 4; g.moveTo(c - q + Math.cos(a) * 8, c + q + Math.sin(a) * 8); g.lineTo(c - q - Math.cos(a) * 8, c + q - Math.sin(a) * 8); } }, 2.2);
-      raise(() => { const x = c + q, y = c + q; g.moveTo(x - 2, y - 8); g.lineTo(x + 2, y - 8); g.lineTo(x + 1.5, y - 1.5); g.lineTo(x + 8, y - 2); g.lineTo(x + 8, y + 2); g.lineTo(x + 1.5, y + 1.5); g.lineTo(x + 2, y + 8); g.lineTo(x - 2, y + 8); g.lineTo(x - 1.5, y + 1.5); g.lineTo(x - 8, y + 2); g.lineTo(x - 8, y - 2); g.lineTo(x - 1.5, y - 1.5); g.closePath(); }, 1.6);
+      // Quartered by a cross, a boss in the middle and a stud in each quarter.
+      g.lineWidth = 7; g.beginPath(); g.moveTo(c, c - 44); g.lineTo(c, c + 44); g.moveTo(c - 44, c); g.lineTo(c + 44, c); g.stroke();
+      g.beginPath(); g.arc(c, c, 11, 0, Math.PI * 2); g.fill();
+      g.fillStyle = col; g.beginPath(); g.arc(c, c, 5, 0, Math.PI * 2); g.fill(); g.fillStyle = dark;
+      for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { g.beginPath(); g.arc(c + dx * 22, c + dy * 22, 6, 0, Math.PI * 2); g.fill(); }
     } else {
-      // A fine eight-sided ring inside the rim, and the crowned bust in white.
-      octagon(g, c, 45 / Math.cos(Math.PI / 8)); g.lineWidth = 1.6; g.strokeStyle = ink; g.stroke();
-      const white = '#f4f3ef', shadow = '#b9b8b4', line = '#4a3b26';
-      const part = (path, fill = white, lw = 2) => { g.beginPath(); path(); g.fillStyle = fill; g.fill(); g.lineWidth = lw; g.strokeStyle = line; g.stroke(); };
-      part(() => { g.moveTo(c - 27, c + 42); g.bezierCurveTo(c - 26, c + 26, c - 16, c + 21, c, c + 21); g.bezierCurveTo(c + 16, c + 21, c + 26, c + 26, c + 27, c + 42); g.closePath(); });   // shoulders
-      part(() => { g.rect(c - 6, c + 10, 12, 13); });   // neck
-      part(() => { g.ellipse(c, c + 1, 13.5, 15.5, 0, 0, Math.PI * 2); });   // head
-      part(() => { g.moveTo(c - 13, c - 2); g.quadraticCurveTo(c - 18, c + 10, c - 12, c + 16); g.lineTo(c - 9, c + 6); g.closePath(); }, shadow, 1.6);   // hair down the sides
-      part(() => { g.moveTo(c + 13, c - 2); g.quadraticCurveTo(c + 18, c + 10, c + 12, c + 16); g.lineTo(c + 9, c + 6); g.closePath(); }, shadow, 1.6);
-      // The crown: a band, five points each with a pearl on it.
-      part(() => { g.moveTo(c - 14, c - 8); g.lineTo(c - 17, c - 27); g.lineTo(c - 9, c - 17); g.lineTo(c - 5, c - 31); g.lineTo(c, c - 18); g.lineTo(c + 5, c - 31); g.lineTo(c + 9, c - 17); g.lineTo(c + 17, c - 27); g.lineTo(c + 14, c - 8); g.closePath(); });
-      part(() => { g.rect(c - 14.5, c - 12, 29, 5); }, shadow, 1.6);
-      for (const [x, y] of [[-17, -28], [-5, -32], [5, -32], [17, -28]]) part(() => { g.arc(c + x, c + y, 2.2, 0, Math.PI * 2); }, white, 1.2);
-      // A face: eyes, nose and a mouth; a fold down the front of the robe.
-      g.fillStyle = line; for (const s of [-1, 1]) { g.beginPath(); g.arc(c + s * 5, c + 1, 1.7, 0, Math.PI * 2); g.fill(); }
-      g.strokeStyle = line; g.lineWidth = 1.4;
-      g.beginPath(); g.moveTo(c, c + 3); g.lineTo(c - 1.5, c + 7); g.lineTo(c + 1, c + 7.5); g.stroke();
-      g.beginPath(); g.moveTo(c - 3.5, c + 11); g.quadraticCurveTo(c, c + 12.5, c + 3.5, c + 11); g.stroke();
-      g.beginPath(); g.moveTo(c - 10, c + 25); g.quadraticCurveTo(c, c + 33, c + 10, c + 25); g.stroke();
+      // A crowned head and shoulders, pale on the tan.
+      g.fillStyle = '#f6efe2'; g.strokeStyle = dark; g.lineWidth = 3;
+      g.beginPath(); g.ellipse(c, c + 36, 28, 16, 0, Math.PI, 0); g.closePath(); g.fill(); g.stroke();
+      g.beginPath(); g.arc(c, c + 6, 15, 0, Math.PI * 2); g.fill(); g.stroke();
+      g.beginPath(); g.moveTo(c - 16, c - 8); g.lineTo(c - 18, c - 30); g.lineTo(c - 8, c - 18); g.lineTo(c, c - 34); g.lineTo(c + 8, c - 18); g.lineTo(c + 18, c - 30); g.lineTo(c + 16, c - 8); g.closePath(); g.fill(); g.stroke();
+      g.fillStyle = dark; for (const s of [-1, 1]) { g.beginPath(); g.arc(c + s * 5, c + 5, 2, 0, Math.PI * 2); g.fill(); }
     }
+    g.fillStyle = 'rgba(255,255,255,0.7)'; g.beginPath(); g.ellipse(c - 28, c - 32, 9, 5, -0.6, 0, Math.PI * 2); g.fill();
   });
 }
 // A gem seen from above: the ruby cut as an octagon, the emerald as an emerald (cut corners).
@@ -142,51 +96,29 @@ function gemFace(col, cut) {
     g.fillStyle = 'rgba(255,255,255,0.75)'; g.beginPath(); g.moveTo(c - 26, c - 20); g.lineTo(c - 6, c - 30); g.lineTo(c - 18, c - 6); g.closePath(); g.fill();
   });
 }
-// The chest from above, as the real one: a dark iron frame round it, riveted at the corners, pale
-// crate-wood slats in a lattice inside it, an iron bar across and a strap down the middle to a big
-// round-shouldered padlock at the front (the bottom, nearest you), its keyplate like a face.
+// The chest from above: crate-wood in a lattice, iron bands down the sides and across, a hasp and
+// a big iron padlock at the front (the bottom, nearest you).
 const chestTop = canvasTex(256, 256, (g, w) => {
-  const black = '#1c1e20', iron = '#4a5157', ironLite = '#7b858d';
-  // The frame.
-  g.fillStyle = black; g.fillRect(0, 0, w, w);
-  g.fillStyle = iron; g.fillRect(4, 4, w - 8, w - 8);
-  g.fillStyle = ironLite; g.fillRect(4, 4, w - 8, 3); g.fillRect(4, 4, 3, w - 8);
-  g.fillStyle = black; g.fillRect(20, 20, w - 40, w - 40);
-  // The lattice: pale slats across and down, the dark of the chest between them.
-  g.fillStyle = '#2e1c0e'; g.fillRect(22, 22, w - 44, w - 44);
-  const slat = (x, y, sw, sh) => {
-    g.fillStyle = '#b98a55'; g.fillRect(x, y, sw, sh);
-    g.fillStyle = '#dcb07a'; if (sw < sh) g.fillRect(x, y, 3, sh); else g.fillRect(x, y, sw, 3);
-    g.fillStyle = '#7a5530'; if (sw < sh) g.fillRect(x + sw - 3, y, 3, sh); else g.fillRect(x, y + sh - 3, sw, 3);
+  g.fillStyle = '#2c2a2a'; g.fillRect(0, 0, w, w);
+  g.fillStyle = '#7a4f2a'; g.fillRect(14, 14, w - 28, w - 28);
+  g.strokeStyle = '#4a2c14'; g.lineWidth = 5;
+  for (let i = 14; i < w - 14; i += 22) { g.beginPath(); g.moveTo(i, 14); g.lineTo(i, w - 14); g.stroke(); g.beginPath(); g.moveTo(14, i); g.lineTo(w - 14, i); g.stroke(); }
+  g.strokeStyle = 'rgba(255,220,160,0.18)'; g.lineWidth = 2;
+  for (let i = 18; i < w - 14; i += 22) { g.beginPath(); g.moveTo(i, 14); g.lineTo(i, w - 14); g.stroke(); }
+  const iron = (x, y, ww, hh) => {
+    g.fillStyle = '#3d4a55'; g.fillRect(x, y, ww, hh);
+    g.fillStyle = '#6f7d88'; g.fillRect(x + 2, y + 2, ww - 4, 3);
+    g.fillStyle = '#1e2429';
+    for (const yy of [y + 8, y + hh - 10]) for (const xx of ww > hh ? [x + 8, x + ww - 10] : [x + ww / 2]) { g.beginPath(); g.arc(xx, yy, 3, 0, Math.PI * 2); g.fill(); }
   };
-  for (let y = 26; y < w - 30; y += 27) slat(22, y, w - 44, 15);
-  for (let x = 26; x < w - 30; x += 27) slat(x, 22, 15, w - 44);
-  // An iron bar across, and the strap down the middle.
-  const strap = (x, y, sw, sh) => {
-    g.fillStyle = black; g.fillRect(x - 2, y - 2, sw + 4, sh + 4);
-    g.fillStyle = iron; g.fillRect(x, y, sw, sh);
-    g.fillStyle = ironLite; g.fillRect(x, y, sw, 3); g.fillRect(x, y, 3, sh);
-  };
-  strap(22, 96, w - 44, 18);
-  strap(w / 2 - 13, 20, 26, 150);
-  // Rivets: the frame's corners, the bar's ends, the strap's.
-  const rivet = (x, y, r = 5) => { g.fillStyle = black; g.beginPath(); g.arc(x, y, r + 1.5, 0, Math.PI * 2); g.fill(); g.fillStyle = ironLite; g.beginPath(); g.arc(x - 1, y - 1, r, 0, Math.PI * 2); g.fill(); };
-  for (const x of [12, w - 12]) for (const y of [12, w - 12]) rivet(x, y);
-  for (const x of [30, w - 30]) rivet(x, 105, 4);
-  rivet(w / 2, 36, 4); rivet(w / 2, 105, 4);
-  // The padlock: its shackle through the strap's hasp, a round-shouldered body, the face-like
-  // keyplate (two round eyes and a keyhole for a nose).
-  g.lineWidth = 9; g.strokeStyle = black; g.beginPath(); g.arc(w / 2, 168, 22, Math.PI, 0); g.stroke();
-  g.lineWidth = 5; g.strokeStyle = ironLite; g.beginPath(); g.arc(w / 2, 168, 22, Math.PI, 0); g.stroke();
-  g.fillStyle = black; g.beginPath(); g.ellipse(w / 2, 200, 44, 40, 0, 0, Math.PI * 2); g.fill();
-  const body = g.createRadialGradient(w / 2 - 14, 186, 4, w / 2, 200, 44);
-  body.addColorStop(0, '#9aa3aa'); body.addColorStop(0.6, '#5f686f'); body.addColorStop(1, '#3a4146');
-  g.fillStyle = body; g.beginPath(); g.ellipse(w / 2, 200, 40, 36, 0, 0, Math.PI * 2); g.fill();
-  g.fillStyle = '#3a4146'; g.beginPath(); g.ellipse(w / 2, 204, 24, 26, 0, 0, Math.PI * 2); g.fill();
-  g.fillStyle = black;
-  for (const s of [-1, 1]) { g.beginPath(); g.arc(w / 2 + s * 11, 196, 6.5, 0, Math.PI * 2); g.fill(); }
-  g.beginPath(); g.arc(w / 2, 210, 4.5, 0, Math.PI * 2); g.fill();
-  g.beginPath(); g.moveTo(w / 2 - 3, 212); g.lineTo(w / 2 + 3, 212); g.lineTo(w / 2 + 5, 226); g.lineTo(w / 2 - 5, 226); g.closePath(); g.fill();
+  iron(48, 10, 22, w - 20); iron(w - 70, 10, 22, w - 20); iron(10, 112, w - 20, 22);
+  // The hasp, and the padlock with its face-like keyplate.
+  iron(w / 2 - 12, 120, 24, 70);
+  g.fillStyle = '#5b666e'; g.strokeStyle = '#1e2429'; g.lineWidth = 5;
+  g.beginPath(); g.arc(w / 2, 172, 18, Math.PI, 0); g.stroke();
+  g.beginPath(); g.roundRect(w / 2 - 34, 170, 68, 60, 14); g.fill(); g.stroke();
+  g.fillStyle = '#1e2429'; for (const s of [-1, 1]) { g.beginPath(); g.arc(w / 2 + s * 13, 190, 6, 0, Math.PI * 2); g.fill(); }
+  g.beginPath(); g.moveTo(w / 2 - 5, 200); g.lineTo(w / 2 + 5, 200); g.lineTo(w / 2 + 3, 220); g.lineTo(w / 2 - 3, 220); g.closePath(); g.fill();
 });
 const look = {
   rim: { round: new THREE.CylinderGeometry(0.46, 0.46, 0.1, 24), octagon: new THREE.CylinderGeometry(0.49, 0.49, 0.1, 8).rotateY(Math.PI / 8) },
@@ -200,7 +132,7 @@ const look = {
   gemGeo: { ruby: new THREE.CylinderGeometry(0.4, 0.44, 0.18, 8).rotateY(Math.PI / 8), emerald: new THREE.BoxGeometry(0.66, 0.18, 0.84) },
   gemSide: { ruby: mat('#8a0f1a', { roughness: 0.2 }), emerald: mat('#0f6a34', { roughness: 0.2 }) },
   chestGeo: new THREE.BoxGeometry(1.86, 0.5, 1.86),
-  chest: [mat('#33383c'), mat('#33383c'), new THREE.MeshStandardMaterial({ map: chestTop, roughness: 0.7 }), mat('#33383c'), mat('#6a4a2a'), mat('#6a4a2a')],
+  chest: [mat('#3d3634'), mat('#3d3634'), new THREE.MeshStandardMaterial({ map: chestTop, roughness: 0.8 }), mat('#3d3634'), mat('#5a3a20'), mat('#5a3a20')],
 };
 function pieceMesh(bit) {
   const g = new THREE.Group();
@@ -227,26 +159,23 @@ function pieceMesh(bit) {
 const spotX = (bit, c) => colX(c) + (bit.s === 'chest' ? 0.5 : 0), spotZ = (bit, r) => rowZ(r) + (bit.s === 'chest' ? 0.5 : 0);
 
 // ---------- the board: a cargo net let down over the side ----------
-// Grey-brown rope in a close diamond lattice, as the real net behind the coins: a tile to a square of
-// the board, two diamonds across it, on clear ground (it repeats).
-const NET_TILE = 1;   // (squares of the board to a tile)
+// Rope in a diamond mesh, two squares of the board to a tile, on clear ground (it repeats).
 const netTex = canvasTex(128, 128, (g, w) => {
-  g.lineCap = 'butt';
-  const strands = (dir) => { g.beginPath(); for (let k = -w; k <= w * 1.5; k += w / 2) { if (dir > 0) { g.moveTo(k, 0); g.lineTo(k + w, w); } else { g.moveTo(k + w, 0); g.lineTo(k, w); } } g.stroke(); };
-  // One way under, the other over, each dark-edged with a lit top.
-  for (const dir of [1, -1]) for (const [col, lw] of [['#2c2822', 15], ['#8c8576', 10], ['#bcb4a0', 3]]) { g.strokeStyle = col; g.lineWidth = lw; strands(dir); }
-  // The twist of the rope, a dash every so often along each strand.
-  g.strokeStyle = 'rgba(40,34,26,0.55)'; g.lineWidth = 1.5;
-  for (let k = -w; k <= w * 1.5; k += w / 2) for (let t = 0.1; t < 1; t += 0.14) {
-    const x = k + w - t * w, y = t * w;
-    g.beginPath(); g.moveTo(x - 3, y - 3); g.lineTo(x + 3, y + 3); g.stroke();
+  g.lineCap = 'round';
+  for (const [col, lw] of [['#2e2418', 14], ['#8a7656', 9], ['#b9a47e', 3]]) {
+    g.strokeStyle = col; g.lineWidth = lw;
+    g.beginPath();
+    g.moveTo(-w / 2, 0); g.lineTo(w / 2, w); g.moveTo(w / 2, 0); g.lineTo(w * 1.5, w);
+    g.moveTo(w / 2, 0); g.lineTo(-w / 2, w); g.moveTo(w * 1.5, 0); g.lineTo(w / 2, w);
+    g.stroke();
   }
+  g.fillStyle = '#5e4c33';   // knots where the strands cross
+  for (const [x, y] of [[0, w / 2], [w, w / 2], [w / 2, 0], [w / 2, w]]) { g.beginPath(); g.arc(x, y, 8, 0, Math.PI * 2); g.fill(); }
 });
-// The net over an area `sx` by `sy` squares of the board.
-function netMat(sx, sy) {
+function netMat(rx, ry) {
   const t = netTex.clone();
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  t.repeat.set(sx / NET_TILE, sy / NET_TILE);
+  t.repeat.set(rx, ry);
   t.needsUpdate = true;
   return new THREE.MeshStandardMaterial({ map: t, alphaTest: 0.4, roughness: 1, side: THREE.DoubleSide });
 }
@@ -259,12 +188,12 @@ function rope(a, b, r = 0.13) {
 }
 function haulMake() {
   const g = new THREE.Group();
-  // The deep water under the net, dark as the real board's ground behind its net, darker toward its foot.
-  const deepTex = canvasTex(64, 128, (x, cw, ch) => { const gr = x.createLinearGradient(0, 0, 0, ch); gr.addColorStop(0, '#2a3b36'); gr.addColorStop(1, '#0f1c1d'); x.fillStyle = gr; x.fillRect(0, 0, cw, ch); });
+  // The deep water under the net, darker toward its foot.
+  const deepTex = canvasTex(64, 128, (x, cw, ch) => { const gr = x.createLinearGradient(0, 0, 0, ch); gr.addColorStop(0, '#2c5c50'); gr.addColorStop(1, '#0e2a2c'); x.fillStyle = gr; x.fillRect(0, 0, cw, ch); });
   const deep = mesh(new THREE.PlaneGeometry(TW + 0.4, TH + 0.4).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ map: deepTex, roughness: 0.5 }), false);
   g.add(deep);
   // The net over it, a diamond to a square, under the coins.
-  const net = mesh(new THREE.PlaneGeometry(TW + 0.4, TH + 0.4).rotateX(-Math.PI / 2), netMat(TW + 0.4, TH + 0.4), false);
+  const net = mesh(new THREE.PlaneGeometry(TW + 0.4, TH + 0.4).rotateX(-Math.PI / 2), netMat((TW + 0.4) / 2, (TH + 0.4) / 2), false);
   net.position.y = 0.012;
   g.add(net);
   // The thin silver frame round the grid.
@@ -309,7 +238,7 @@ function haulRig(up, out) {
   if (haul.net) { haul.net.removeFromParent(); haul.net.traverse((o) => { if (o.geometry && o.material === ropeM) o.geometry.dispose(); }); haul.net = null; }
   if (!up) return;
   const sq = haul.sq, u = up / sq, o = out / sq, len = Math.hypot(u, o), z0 = -TH / 2 - 0.2, g = new THREE.Group();
-  const p = mesh(new THREE.PlaneGeometry(TW + 0.4, len), netMat(TW + 0.4, len), false);
+  const p = mesh(new THREE.PlaneGeometry(TW + 0.4, len), netMat((TW + 0.4) / 2, len / 2), false);
   p.position.set(0, u / 2, z0 - o / 2);
   p.rotation.x = Math.atan2(-o, u);
   g.add(p);

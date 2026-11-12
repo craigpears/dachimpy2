@@ -586,14 +586,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   **Checked side by side, 11 Nov** (each puzzle's YPPedia page and its piece pictures), one look
   per puzzle, shared wherever it's played:
   - **Treasure Haul** (`js/den/treasure.js`; the wreck beyond the checkpoint and the lagoon's
-    wreck): the coins were placeholders (olive and gold both yellow, a plain X, a white blob of a
-    king). Redrawn as the real ones, each design struck in relief: olive green, a square hole in a
-    frame with a skull over it, scrolled handles and a goblet's foot; silver, two cutlasses
-    crossed hilts down under a skull; lemon gold, a scalloped ring, a cross and an emblem in each
-    quarter; tan and eight-sided, a white crowned bust. The net behind them is the real close
-    grey-brown diamond lattice (it was a coarse brown net on green water), and the chest an iron
-    frame round pale lattice slats, a strap down the middle to the big face-like padlock. The
-    ruby, emerald, silver frame and red-and-yellow cursor already matched.
+    wreck) keeps its own look, not YPPedia's: its coins, net and chest were redrawn as the real ones
+    on 11 Nov and put back on 12 Nov, since the old look reads better: "There was a much better
+    contrast. I don't like the [YPPedia] version of that." Contrast on the board comes before
+    matching the real pieces. (The redraw is in git, 8e7a564, should any of its coins come back.)
   - **Bilge** (`js/den/bilge.js`, and the rowing boards that borrow its pieces): five of the
     seven match YPPedia's screenshots; three patterns were redrawn to them (the teal octagon's
     three curling waves, the blue sphere's white curling wave, the pale green sphere's three
