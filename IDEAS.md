@@ -1063,6 +1063,25 @@ island is), perhaps near the smugglers' beach, where his rum would go out. Wheth
 house would have been: to pin down with the user. **His mishaps (12 Nov):** "the kind of exploding kind
 of mishaps that I mentioned with the distilling, where he kind of gets the balance wrong."
 
+**The penguin in the balaclava leads you there: a smuggling ring (12 Nov).** "I feel like we've got to
+actually link in these things ... it fits to me that she kind of rambles about crazy things, but often turn
+out to be true. So when she says the penguin in the balaclava was up to something, maybe he's the one that
+can tell you about, hey ... don't tell anybody, you know, we're in a secret smuggling ring, and he tells you
+how to find the distilling island. Yeah, if you could bring us rum. We can show you how to sneak past the
+customs in the Imperial Outpost kind of thing. He's a shifty penguin. [Kikkit] was right." So the places
+link up into one thread:
+- **Vegas Island:** the penguin in the balaclava, caught with his sack, is in a secret smuggling ring, as
+  Kikkit always said ("up to something, he was. You can always tell"). Shifty, sworn to secrecy, telling
+  you anyway. Another of her rambles turning out true.
+- **His offer:** bring the ring rum, and they'll show you how to sneak past the customs at Port Decorum,
+  the imperial outpost (the way through the smugglers' beach, the back way into a port shut to pirates).
+- **Where the rum comes from:** he tells you how to find Helium's island, the distilling island. Helium
+  teaches you Distilling; the rum you distil goes back to the ring.
+- **So Kikkit leads to the penguin, the penguin to Helium, Helium's rum to the smugglers' beach and past
+  the customs into Port Decorum,** and smuggling becomes one of the den's ways of earning (below, under
+  Primates Rule). His lines go in `src/lines/penguin.ts`, Kikkit's knowing "told you so" in hers.
+  (To shape with the user: what sneaking past the customs is as play, and what the ring gives you.)
+
 ## Every house means something: visiting gives you things to go and do (11 Nov)
 
 The user (11 Nov): "Obviously, each house needs a meaning, so maybe visiting them can give you some

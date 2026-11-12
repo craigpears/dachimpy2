@@ -182,7 +182,10 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    the one you go looking for (nothing says where). And on from the penguins, a run of water behind
    the rocks leads to a smugglers' beach round the back of Port Decorum, the imperial island past the
    checkpoint (11 Nov): the back way into a port shut to pirates, where Helium's rum will one day be
-   smuggled ashore. Nothing to do there yet.
+   smuggled ashore. Nothing to do there yet. The thread that will tie them (12 Nov, an idea in IDEAS.md):
+   the penguin in the balaclava is in a secret smuggling ring, just as Kikkit said; bring the ring rum and
+   they'll show you how to sneak past Port Decorum's customs, and he tells you where to find Helium's
+   island, where you learn to distil it. "He's a shifty penguin. [Kikkit] was right."
    And out past Primates Rule, a buoy and a gate in a line of rocks: the sloop race (11 Nov), the den's
    own characters racing you round a zigzag course, Kikkit greedy for her Vegas, Tzz steady on her
    Doubles, Dalnoth with Umami aboard to do his foraging, firing on whoever sits still in the open; the
