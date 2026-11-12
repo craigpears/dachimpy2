@@ -1091,6 +1091,30 @@ penguin waiting on his barrels. And the same the other way: a guest at a wedding
 rum, Kikkit swearing she only had a little. Each one in character, the joke true to who they are, and
 each a line in `src/lines/` (STORY.md, "The characters know each other").
 
+**Helium goes over your session with you: a replay, and "where did we go wrong?" (12 Nov):** "as well as
+like getting help in the moment, is if you can have a replay of your puzzling session, and he can kind of
+give you hints, if you can ask him for hints during the replay of, well, what do you think, where do you
+think we went wrong? And it could say stuff like, well, at the start ... compared to the CC12, you know, you
+were making a lot of moves to get things over to the right, and you started using X technique a bit too
+early." And: "it should have some concept of ... splitting really in ... lots of phases to it, and when you
+kind of move into using different techniques associated with that phase, it should be able to like judge
+and be like ... you did a good timing in this phase, but you went into this mode and started like crawling
+or doing these techniques too early."
+- **Help in the moment, and afterwards:** as well as a hint while you play (the bots' `advise`), your whole
+  session is kept, and you can play it back with Helium beside you and ask him at any point what he thinks.
+- **Phases, read from your board:** he splits the session into its phases (the opening sweep, carrying colour
+  over, turning the right side, the late scarce-colour techniques; DISTILLING.md §3 and its seventh note) by
+  what was on the board, not by the clock, and says which technique you were using in each.
+- **Judged against a good player:** for each phase, how many moves you spent per piece of junk got over,
+  against what the best bot (a CC^12 run) would spend on the same board; and whether you switched technique
+  at the right time: "good timing in this phase", or "you started crawling too early, while half the board
+  was still colour, and a quick sweep would have done".
+- **In his voice:** offhand, as he teaches everything (his lines in `src/lines/`), never a lecture.
+- **What it builds on:** the bots' techniques, each recognised by name and ranked by how move-efficient it
+  is, and their idea of the stage the board's at (the Distilling pass running now, 12 Nov); a session
+  recorded move by move, as the race's replays are (`race-replay.ts`); and the replays-down-to-the-puzzling
+  idea further down. The bots could judge their own sessions the same way, a check that the coach is right.
+
 ## Every house means something: visiting gives you things to go and do (11 Nov)
 
 The user (11 Nov): "Obviously, each house needs a meaning, so maybe visiting them can give you some
