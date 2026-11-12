@@ -1188,6 +1188,11 @@ export class Helm {
   cur: { m: Move | 'W'; from: Pose; to: Pose; bump: boolean; secs: number; pause: number; irons?: boolean; done?: boolean; via?: [number, number] } | null = null;
   /** Whirls in a row since she last moved of her own accord or a gust took her (WHIRL.MOST). */
   spins = 0;
+  /** She's resting where a whirl put her, nothing having moved her since: the pool's had its step for
+      this beat, and her next move (or, with none, a breather) comes before it acts again. The user
+      (12 Nov): "you do your own move, and then the [whirlpool] does an action to take you to the
+      corner, and then your move happens again". */
+  private spun = false;
   /** The squares of trade wind still to come after it. */
   rides: Pose[] = [];
   /** The locks on her sea and their water (src/den-lock.ts), as LAY.LOCKS: they start drained. */
@@ -1341,7 +1346,7 @@ export class Helm {
       mooring, `at`: Mischievious's isle's, src/den-isle.ts). */
   moor(at: Pose = SAIL.HOME) {
     this.pin = null; this.via = null; this.mine = []; this.turn = []; this.slot = -1; this.t = 0;
-    this.cur = null; this.rides = []; this.strokes = []; this.wait = 0; this.gusts = []; this.free = false; this.spins = 0;
+    this.cur = null; this.rides = []; this.strokes = []; this.wait = 0; this.gusts = []; this.free = false; this.spins = 0; this.spun = false;
     this.pose = { ...at };
   }
 
@@ -1445,14 +1450,18 @@ export class Helm {
         this.t = 0;
         if (this.rides.length) {
           const to = this.rides.shift()!;
+          this.spun = false;
           this.cur = { m: 'W', from: { ...this.pose }, to, bump: false, secs: SAIL.PUSH, pause: SAIL.PAUSE };
           out.push({ kind: 'push', from: { ...this.pose }, to: { ...to } });
           continue;
         }
         // A gust after it (src/den-sailing.ts): its squares, as the trade winds' are.
         if (this.gusts.length) { this.blow(out); continue; }
-        // Come to rest on a whirlpool: it has her (after the move, as in Puzzle Pirates).
-        if (this.twirl(out)) continue;
+        // Come to rest on a whirlpool: it has her (after the move, as in Puzzle Pirates), one step: to
+        // its far corner, a quarter turn, a beat of its own. Where that puts her, even on the pool
+        // still, it waits for her next move (or a breather) before it acts again (YPPedia: "it has no
+        // effect for this phase, but will act during the next phase").
+        if (!this.spun && this.twirl(out)) continue;
         this.cur = null;
         // (a gust that came with no move on is no step of the turn)
         if (this.free) { this.free = false; continue; }
@@ -1466,7 +1475,7 @@ export class Helm {
       // A gust with no move on: it blows her straight away (in a calm too).
       if (this.gusts.length && !this.dazed()) { this.free = true; this.blow(out); continue; }
       // Idle on a whirlpool (put there, say): it has her.
-      if (this.slot < 0 && !this.dazed() && this.twirl(out)) { this.free = true; continue; }
+      if (this.slot < 0 && !this.spun && !this.dazed() && this.twirl(out)) { this.free = true; continue; }
       if (this.slot >= 0) {
         // The next move of the turn, unless she's dazed or waiting on a lock: to be pumped up (by
         // Bilge), or to drain down or fill from above (by itself), then for its gates.
@@ -1490,7 +1499,12 @@ export class Helm {
       // once. Rowing there is your call.
       if (!this.told && this.headwind()) { this.told = true; out.push({ kind: 'headwind' }); }
       const moves = this.next();
-      if (!moves.length) break;
+      if (!moves.length) {
+        // Nothing to play, resting where a whirl put her, on the pool still: a breather on, its next
+        // step (till it's turned her right round: WHIRL.MOST).
+        if (this.twirl(out)) { this.free = true; continue; }
+        break;
+      }
       if (this.oars) this.strokes.splice(0, moves.length);
       else this.mine.splice(0, Math.min(this.mine.length, moves.length));
       this.turn = moves; this.slot = 0; this.t = 0;
@@ -1513,13 +1527,15 @@ export class Helm {
   }
 
   /** A whirl, if she's on a whirlpool (src/den-whirl.ts): round by the next corner, clockwise, to the
-      opposite one, turned a quarter clockwise; then, if that's a wind, it takes her on. Whether it
-      had her. */
+      opposite one, turned a quarter clockwise, one step; then, if that's a wind, it takes her on.
+      With no turn on, a breather follows it, as a turn would be. Whether it had her. */
   private twirl(out: SailEvent[]): boolean {
     if (!this.whirling()) return false;
     const { via, to } = whirl(this.sea.whirlAt(this.pose.c, this.pose.r)!, this.pose);
     this.spins++;
-    this.cur = { m: 'W', from: { ...this.pose }, to, via, bump: false, secs: WHIRL.SECS, pause: SAIL.PAUSE };
+    this.spun = true;
+    if (this.slot < 0) this.wait = Math.max(this.wait, SAIL.BREAK);
+    this.cur = { m: 'W', from: { ...this.pose }, to, via, bump: false, secs: WHIRL.SECS, pause: pauseFor(WHIRL.SECS) };
     this.rides = this.sea.ride(to, true);
     this.t = 0;
     out.push({ kind: 'push', from: { ...this.pose }, to: { ...to }, whirl: true });
@@ -1529,6 +1545,7 @@ export class Helm {
   /** The next square of a gust. */
   private blow(out: SailEvent[]) {
     const to = this.gusts.shift()!;
+    this.spun = false;
     this.cur = { m: 'W', from: { ...this.pose }, to, bump: false, secs: SAIL.PUSH, pause: SAIL.PAUSE };
     this.t = 0;
     out.push({ kind: 'push', from: { ...this.pose }, to: { ...to }, gust: true });
@@ -1536,7 +1553,7 @@ export class Helm {
 
   private begin(out: SailEvent[]) {
     const m = this.turn[this.slot], { to, bump, ride, irons } = this.sea.move(this.pose, m, this.oars, true);
-    this.spins = 0;
+    this.spins = 0; this.spun = false;
     // At the oars, the more squares rowed and waiting, the quicker she goes (a Vegas on each side
     // at once: as quick as the trade winds); under sail, by how she lies to the wind.
     const secs = this.oars ? this.pace : this.sea.moveSecs(false, this.pose, m);

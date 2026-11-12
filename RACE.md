@@ -288,7 +288,10 @@ pick your starting spot along the starting edge based on that."
   the left edge to a gap, where it turns her down; a trade wind blows back left along its far side, right of
   the gap (cross it at the gap, ride it back there, or hop it with a Double); a headwind either side of the
   gap; plain whirlpools to go round, or zoom over with a gust (stop on one and it has her, by Puzzle Pirates'
-  rules, `src/den-whirl.ts`).
+  rules, `src/den-whirl.ts`). Since 12 Nov, one step between your moves: sail into one and it takes her to its
+  far corner, a quarter turn, then your next move plays from there (it used to whirl her four times, back to
+  where she came in). A pool can be a shortcut across the field now; the channel's Vegas and the simulation
+  (which reckons the channel's way back, never the helm's whirls) are unchanged.
 - **The best line is the crowded one:** the gap the conveyor drops her at is the quickest way through (14.5
   s to the first bend), so the spots by it are; the far left is about 5 s slower, the far right about 8. In the
   simulation half the racers make for the gap, and racers starting beside each other jostle (a move given way

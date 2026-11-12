@@ -27,8 +27,10 @@
 import type { Pose } from './den-sail.js';
 
 export const WHIRL = {
-  /** Seconds a whirl takes: a quarter turn, swung round to the far corner. */
-  SECS: 0.8,
+  /** Seconds a whirl takes: a quarter turn, swung round to the far corner. A beat of its own between
+      her moves, about as long as a quick one (12 Nov: 0.8 and a full pause after it was twice a
+      downwind move's beat). */
+  SECS: 0.6,
   /** Whirls in a row she can be held for (YPPedia: four and she's back as she was, a whole turn). In
       Puzzle Pirates you'd play a token to get out; here, so she's never held for ever, a whirlpool
       lets her go after a whole turn round, till she next moves of her own accord. */
