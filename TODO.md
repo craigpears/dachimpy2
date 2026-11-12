@@ -476,6 +476,10 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   you can play with bots ... you can either wait for people, start with bots". So: a lobby screen of its own
   (the course's chart, who's in and who's a bot, plainly; wait for people or start with bots), and in a race
   the den's heavy panels and key lists slimmed right down, nothing that doesn't apply (no "head home").
+  Then, the idea it started from: "the public lobby, where people can just come in but it should be clear
+  when you're waiting for the next race who's waiting". So one open race anyone can walk into, the next race
+  filling up in view, besides the private codes. And on the water "indicate who's who, because other than I
+  can recognize Kikkit's character, I don't know who's who here": a name over every sloop, players' and bots'.
 
 ## Spotted along the way (not asked for)
 
