@@ -294,6 +294,19 @@ you've run out of stuff to do." So, for the bots and the tutorial:
 - **Then the mirror:** later, with the junk run out, the same moves the other way round, whites heading
   right.
 
+**Skill is the techniques, not the strategy (12 Nov):** "The different skill levels [are] about the
+techniques as much as anything ... I don't think any technique would say start burning immediately. It's
+always whites to the left. There's no reason to do any other strategy." So every tier, the learner too,
+plays the same plan (whites left, junk right, never a white burnt on purpose); a beginner only does less
+of it ("might start trying to like just burn one or two white columns"), and the tiers differ in which
+techniques they can pull off and how fast. **Whites stuck at the top are rescued by the crawl:** "if
+you've just got whites stuck at the top of the screen, that's where you need to kind of crawl things along
+with white, browns and blacks working together. Because if you have a brown at the top next to two whites,
+it does nothing. If you have a black next to it, all of a sudden they can work together and they can crawl
+along." A lone brown among whites at the top can't move (browns rise in whites: it's already up); a black
+and a brown together can, so the rescue brings a black up beside the brown and crawls the pair along,
+carrying the whites their way.
+
 ### Decision time
 Keep burning full junk columns as long as you're sure the next one will be finished before the furnace;
 the more white columns you bank, the longer the chain. Near the end there's less room on the right to
