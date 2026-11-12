@@ -498,20 +498,6 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   Sailing clear from the mouth, against a draught, and nothing says so; the doorway reads smaller than the
   clefts she comes out of. So: getting in plain and forgiving (sailing at the open door works, or says
   plainly what will), and the doorway looking like the way in it is.
-- **Tzz's Bingo doesn't tell you the plan till the end (12 Nov):** "when you get to the bingo bit, it
-  doesn't really clue you in on the plan. So, like, when you've got the blues at the bottom ... she's then,
-  like, building the platform at the top and the gap first. But it's like, well, hang on, what happened to
-  the blues on the bottom? What's the plan? ... It kind of gets revealed right at the end." Your go is
-  "perfectly clear and fantastic" ("here's the plan. This is where it's going to drop"), but "while she's
-  building it, it's a bit like, wait, why were you putting that there? What was that doing?" So the plan's
-  on the board from the start of each act, the parts still to come shown faintly (the gaps, the stacks and
-  the square for each fourth, what drops where, what pops in what order), filling in as she builds; and she
-  says the plan in a line before she builds it (the blues wait for a blue to fall onto them from upstairs).
-  And her send-off (12 Nov): "she says, bingo, go clear some whirlpools, but we need a Vegas to get that
-  far." So after the Bingo she points you on to a Vegas, what really gets you out to the penguins.
-
-## Spotted along the way (not asked for)
-
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
 - **Your den's preview** shows your flag on every tab. The Shack tab could show the shack itself
   (painted as you choose), and the Den tab the landscape.

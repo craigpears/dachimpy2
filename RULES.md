@@ -121,6 +121,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   it, not explained only at the end: "while she's building it, it's a bit like, wait, why were you putting
   that there? What was that doing?" The end's "here's the plan. This is where it's going to drop" is the
   standard ("perfectly clear and fantastic"), shown from the start, the parts to come faint.
+  Built first in Tzz's lesson (12 Nov): her whole plan's on the board from the start of the Double and
+  the Bingo, faint till it's built (`marks()` in src/balloons.ts, `faint`), and she says it first: the
+  Bingo's bottom blues "wait: a blue falls on them from upstairs". Her Bingo send-off points you on, since
+  a Bingo won't get you to the penguins ("she says, bingo, go clear some whirlpools, but we need a Vegas"):
+  "Two more and it's a Vegas: that's what gets you out to the penguins."
 - **Never rage-inducing (12 Nov, a standing principle).** "even if it is a bit cute and funny, like, it should not be drastic and rage-inducing. That's always what I keep saying. That's almost like a constant principle here. It should not be rage-inducing." A setback is a little
   "ah, damn it, not again": a few squares back, a wrong turn, a whirlpool going a bit squiffy and sending you
   the wrong way, never one that throws away the race or a long stretch of play. Bad luck is mild; big
