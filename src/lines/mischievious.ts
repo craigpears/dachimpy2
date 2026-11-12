@@ -19,13 +19,13 @@ export const ARRIVE: readonly string[] = [
     question. Giggly and romantic, or not in the least bothered by the blood and guts. */
 export const WELCOME: Record<ToneId, readonly string[]> = {
   happy: [
-    "Ooh, happy and cheesy! Roses, ribbons, the lot. I've done five today, just for the fun of it!",
+    "Ooh, happy and cheesy! Roses, ribbons, the lot. I've done six today, just for the fun of it!",
     "You plan it your way: who, where, the look, and how it goes. I'll help. Then it plays out, and you get a portrait!",
     'So! How are you? Would you like to get married?',
   ],
   dark: [
     "Ooh, dark humour! Don't mind the blood and guts. The last wedding went a bit... bloody and gory.",
-    "It's fine. Five weddings today, and only the one got raided. We've hired a bit of extra security.",
+    "It's fine. Six weddings today, and only the one got raided. We've hired a bit of extra security.",
     "You plan it your way: who, where, the look, and how it goes. Then it plays out, and you get a portrait. Mop's in the corner.",
     'So! How are you? Would you like to get married?',
   ],
@@ -61,10 +61,13 @@ export const GUSH: Record<string, Pool> = {
   theme_rosy: ['Happy and rosy! Pink everywhere! I could burst!', 'Roses! I adore roses.', 'Just like my first today! Roses all down the aisle.'],
   theme_gory: { happy: ['Bloody and gory! Ooh, daring. I love it.', 'Like my second today! That one went a bit red.'], dark: ['Bloody and gory! Saves on tidying up, really.', 'Red goes with everything. Especially blood.', 'Like my second today! The raiders saw to the red.'] },
   theme_drunk: ['A drunkards\' fest! Grog for everyone!', 'Barrels! Lovely, lovely barrels.', 'I\'ve had the inn send over every drop they\'ve got.', 'Like my third today! Grog in the punch, grog in the cake.'],
-  plot_sweet: { happy: ['Sweet and blissful! Oh, I\'m welling up already.', 'My fifth today went just like that. I cried!'], dark: ['Sweet and blissful? Ooh, that\'d make a change.', 'My fifth today went just like that. Made a nice change!'] },
+  // (Showered in gifts, 12 Nov: the presents are the couple's, and she's delighted by the heap, never asking for it)
+  theme_gifts: ['Showered in gifts! Ribbons on everything. Even the cake.', 'A present in every hand! Bows on the bows!', 'Like my fifth today! The presents went up past the arch.'],
+  plot_sweet: { happy: ['Sweet and blissful! Oh, I\'m welling up already.', 'My last today went just like that. I cried!'], dark: ['Sweet and blissful? Ooh, that\'d make a change.', 'My last today went just like that. Made a nice change!'] },
   plot_raiders: { happy: ['Raiders! How exciting! Good thing I hired security.', 'Like my second today! They came right up the aisle.'], dark: ['Raiders! Just like last time. I\'ll tell the guards.', 'Like my second today! They came right up the aisle.'] },
   plot_drunk: ['Somebody\'s drunk! There\'s always one. Hee hee!', 'Hee hee! I\'ll put the cake somewhere safe. Or not.', 'Like my third today! Face first in the cake.'],
   plot_brawl: { happy: ['A brawl? Ooh, a lively one!', 'Like my fourth today! Benches everywhere. Lovely day, though.'], dark: ['A brawl! Proper wedding, that.', 'Like my fourth today! Benches everywhere. Lovely day, though.'] },
+  plot_gifts: { happy: ['Everyone brought a present. Everyone! I do hope you\'ve room in the hold.', 'Like my fifth today! We had to dig the couple out.'], dark: ['Everyone brought a present. Let\'s hope none of them ticks.', 'Like my fifth today! We dug the couple out. Eventually.'] },
   add: ['More! More is always better.', 'Oh, that\'s gorgeous there.', 'Yes! Just there!', 'Ooh, I wouldn\'t have thought of that!', 'Straight from the furnisher\'s, that!'],
   move: ['Ooh, much better there.', 'Perfect! Well, nearly perfect. No, perfect!', 'Yes, yes, yes! There!', 'Oh, that\'s much more you.'],
   turn: ['Ooh, a different angle!', 'Twirly! I love it.'],
@@ -112,8 +115,8 @@ const GUSH_WHEN: Record<keyof typeof GUSH & string, string> = {
   ask: 'Asking who you\'ll marry, after her welcome', her: 'You choose to marry her', version: 'You pick another of her looks',
   bachelors: 'The suitors walk in', suitor: 'You pick a suitor', suitorOne: 'You pick Bachelor number one', own: 'You choose someone of your own',
   venue_beach: 'You choose the beach', venue_chapel: 'You choose the clifftop chapel', venue_deck: 'You choose the ship\'s deck',
-  theme_rosy: 'You choose Happy and rosy', theme_gory: 'You choose Bloody and gory', theme_drunk: 'You choose Drunkards\' fest',
-  plot_sweet: 'You choose Sweet and blissful', plot_raiders: 'You choose Raiders crash it', plot_drunk: 'You choose Somebody\'s drunk', plot_brawl: 'You choose A brawl breaks out',
+  theme_rosy: 'You choose Happy and rosy', theme_gory: 'You choose Bloody and gory', theme_drunk: 'You choose Drunkards\' fest', theme_gifts: 'You choose Showered in gifts',
+  plot_sweet: 'You choose Sweet and blissful', plot_raiders: 'You choose Raiders crash it', plot_drunk: 'You choose Somebody\'s drunk', plot_brawl: 'You choose A brawl breaks out', plot_gifts: 'You choose Showered in gifts',
   add: 'You add a prop (one she hasn\'t a line of its own for, or has just said)', move: 'You move a prop', turn: 'You turn a prop', colour: 'You dye a prop', remove: 'You take a prop away', dress: 'You dress a guest',
   size_cosy: 'You choose Cosy', size_small: 'You choose Small', size_big: 'You choose Big', size_large: 'You choose Large', size_grand: 'You choose Grand',
   guest_move: 'You move a guest', crowd: 'You ask for a fresh crowd',
@@ -130,7 +133,7 @@ const GUSH_WHEN: Record<keyof typeof GUSH & string, string> = {
     interactive. You could ask her"). Same in both tones but where the tone gives her another answer.
     (The questions are yours, over your head, and the buttons in the planner's foot.) */
 export const ASK_HER: readonly { q: string; a: string | Record<ToneId, string> }[] = [
-  { q: 'How were today\'s weddings?', a: 'Five so far! Roses on the beach, raiders at the chapel, cake on the deck, a lovely brawl, and a sweet one to finish. Every one a treat!' },
+  { q: 'How were today\'s weddings?', a: 'Six so far! Roses on the beach, raiders at the chapel, cake on the deck, a lovely brawl, a mountain of presents, and a sweet one to finish. Every one a treat!' },
   { q: 'Who\'s on the guest list?', a: 'Anyone with a clean shirt. Well, a shirt.' },
   { q: 'What\'s the dress code?', a: 'Whatever the tailor had in! Dyed to match, ideally. Black if you\'re showing off.' },
   { q: 'Who\'s paying for all this?', a: 'The crew\'s coffers, love. Don\'t tell the purser.' },
@@ -167,6 +170,9 @@ export const CEREMONY = {
   cake: '...and that\'s the cake.',
   down: '...and down they go.',
   benches: 'Not the benches! They\'re hired!',
+  presents: 'Ooh, look at it all! Somebody fetch a bigger hold.',
+  stillThere: 'Hello? Still in there, you two?',
+  thankYous: 'Thank-you notes later, loves. Now, where were we?',
   doYou: 'Do you take {partner}, through bilge and broadside?',
   kiss: 'Then you may kiss!',
   love: 'Eee! I love weddings!',
@@ -193,7 +199,7 @@ export const CHARACTER: Character = {
     + 'mean about herself (the dress already on, "a dress that\'s hardly been bled on"). Cheeky, never dirty: a '
     + 'wink in a line about the furniture is the right amount. She\'s the host, not the show: her chatter is the '
     + 'wedding\'s and the Ocean\'s (the tailor, dyes and doubloons, the inn\'s grog, the furnisher, security '
-    + 'earning their pay), not her own love life. She\'s been through five ceremonies today for the fun of it, '
+    + 'earning their pay), not her own love life. She\'s been through six ceremonies today for the fun of it, '
     + 'each one of the wedding\'s own options, so her stories show you what you can choose.\n\n'
     + 'In Happy and cheesy she\'s all giggles and romance; in Dark humour, not in the least bothered by the blood '
     + 'and guts of the last wedding, with a bit of extra security hired and the mop in the corner.\n\n'
@@ -206,6 +212,7 @@ export const CHARACTER: Character = {
     { on: '11 Nov', said: 'I love ... the more funny lines where she\'s got, oh, yes, yes, right there, when you placed some of the furniture, I guess it gets her kind of promiscuous side in without it being overly, yeah, but dirty.' },
     { on: '11 Nov', said: 'showing that ... you can keep doing it for fun all the time ... not in a promiscuous way, but in a this is a fun game' },
     { on: '11 Nov', said: 'she\'s a primary character, but not the star of the show.' },
+    { on: '12 Nov', said: 'you don\'t want her to seem demanding, but just make it fun ... maybe it can fit into the thing of like a wedding theme with lots and lots of gifts.' },
   ],
   lines: [
     { when: 'As you arrive, close on her: her greeting, what this is, and the tone\'s choice', says: ARRIVE },
@@ -228,7 +235,9 @@ export const CHARACTER: Character = {
         places: 'Everyone seated (as the officiant)', beloved: 'The vows begin (as the officiant)',
         calm: 'Sweet and blissful: after the vows', security: 'Raiders crash it: the fight', whereWereWe: 'Raiders crash it: cleared (as the officiant)',
         hadAFew: 'Somebody\'s drunk: staggering about', cake: 'Somebody\'s drunk: face first into the cake', down: 'Somebody\'s drunk: down they go, with no cake to fall in',
-        benches: 'A brawl breaks out', doYou: '"I do" (as the officiant)', kiss: 'The kiss (as the officiant)', love: 'The cheer',
+        benches: 'A brawl breaks out', presents: 'Showered in gifts: the guests filing up with their presents',
+        stillThere: 'Showered in gifts: the couple buried in them up to the neck (as the officiant)', thankYous: 'Showered in gifts: the pile topples (as the officiant)',
+        doYou: '"I do" (as the officiant)', kiss: 'The kiss (as the officiant)', love: 'The cheer',
       },
     },
     {

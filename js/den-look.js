@@ -77,10 +77,10 @@ export const PARTS = {
     m: [['boots', 'Boots'], ['shoes', 'Buckle shoes'], ['fancy', 'Fancy boots', 1], ['curled', 'Curled boots'], ['bare', 'Bare feet']],
     f: [['boots', 'Boots'], ['shoes', 'Buckle shoes'], ['fancy', 'Fancy boots', 1], ['curled', 'Curled slippers'], ['bare', 'Bare feet']],
   },
-  // In the right hand: props, not clothing (only a bouquet takes a colour, its flowers').
+  // In the right hand: props, not clothing (only a bouquet and a present take a colour: its flowers', its paper).
   hand: {
-    m: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug'], ['candle', 'Candle']],
-    f: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug'], ['candle', 'Candle']],
+    m: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug'], ['candle', 'Candle'], ['gift', 'Present']],
+    f: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug'], ['candle', 'Candle'], ['gift', 'Present']],
   },
   // (Squirrel, bat, krakling: real familiars, from expeditions and treasure chests: YPPedia, Familiar.
   // Dragon: from gold boxes; its first colour is its horns', its second its body's, as YPPedia says
@@ -91,7 +91,7 @@ export const PARTS = {
   },
 };
 // The props that take a colour (the rest are what they're made of).
-export const HAND_DYED = ['bouquet'];
+export const HAND_DYED = ['bouquet', 'gift'];
 // Earrings: none, one (in the left ear, as ever) or one in each ear.
 export const EARRINGS = [[false, 'None'], [true, 'One'], ['both', 'Both ears']];
 // `hook`: a hook for a left hand (Mischievious has one in nearly every portrait). `tongue` out, blue
@@ -1028,6 +1028,15 @@ export function dressPirate(look, opts = {}) {
     bq.rotation.x = 0.35;
     arms[0].add(bq);
     held = bq;
+  } else if (L.hand === 'gift') {
+    // A present, held out in front: a box wrapped in its colour, a ribbon round it both ways and a bow on
+    // top (white ribbon, or gold on white paper). Showered in gifts, at the wedding (12 Nov).
+    const pr = new THREE.Group(), paper = M(L.handCol), rib = L.handCol === 'white' ? M('#e8b23a', { metalness: 0.5, roughness: 0.35 }) : white;
+    pr.add(part(new THREE.BoxGeometry(0.2, 0.17, 0.2), paper, 0, 0.06), part(new THREE.BoxGeometry(0.21, 0.175, 0.04), rib, 0, 0.06), part(new THREE.BoxGeometry(0.04, 0.175, 0.21), rib, 0, 0.06));
+    for (const d of [-1, 1]) { const loop = part(new THREE.TorusGeometry(0.035, 0.012, 6, 10), rib, d * 0.035, 0.17); loop.rotation.y = Math.PI / 2; loop.rotation.x = d * 0.5; pr.add(loop); }
+    pr.position.set(0, -0.58, 0.12);
+    arms[0].add(pr);
+    held = pr;
   } else if (L.hand === 'pistol') {
     // A flintlock pistol, held up: a wooden grip, a steel barrel pointing up and forward.
     const pg = new THREE.Group(), wood = M('#6b4226'), steel = M('#9aa0a6', { metalness: 0.8, roughness: 0.3 });

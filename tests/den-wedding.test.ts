@@ -30,11 +30,11 @@ describe('the wedding\'s choices (10 Nov)', () => {
     for (const c of used) expect(DYE_NAMES).toContain(c);
   });
 
-  it('offers two tones, three venues on her island, three themes and four plots', () => {
+  it('offers two tones, three venues on her island, four themes and five plots (the gifts: 12 Nov)', () => {
     expect(TONES.map((t) => t.name)).toEqual(['Happy and cheesy', 'Dark humour']);
     expect(VENUES.map((v) => v.id)).toEqual(['beach', 'chapel', 'deck']);
-    expect(THEMES.map((t) => t.name)).toEqual(['Happy and rosy', 'Bloody and gory', 'Drunkards\' fest']);
-    expect(PLOTS.map((p) => p.name)).toEqual(['Sweet and blissful', 'Raiders crash it', 'Somebody\'s drunk', 'A brawl breaks out']);
+    expect(THEMES.map((t) => t.name)).toEqual(['Happy and rosy', 'Bloody and gory', 'Drunkards\' fest', 'Showered in gifts']);
+    expect(PLOTS.map((p) => p.name)).toEqual(['Sweet and blissful', 'Raiders crash it', 'Somebody\'s drunk', 'A brawl breaks out', 'Showered in gifts']);
   });
 
   it('gives every theme a starting layout at every venue, all inside the venue, and its guests dressed to suit', () => {
@@ -92,7 +92,8 @@ describe('the tone, chosen first (11 Nov)', () => {
   });
 
   it('flavours what she suggests first, but leaves every theme and plot open', () => {
-    expect(SUGGEST.happy).toEqual({ theme: 'rosy', plots: ['sweet'] });
+    expect(SUGGEST.happy).toEqual({ theme: 'rosy', plots: ['sweet', 'gifts'] });
+    expect(fresh('happy').plot).toBe('sweet');
     expect(SUGGEST.dark.theme).toBe('gory');
     expect(SUGGEST.dark.plots).toEqual(['raiders', 'brawl']);
     expect(fresh('dark').plot).toBe('raiders');
@@ -178,7 +179,7 @@ describe('nobody stands in anything, and the front is kept clear for her and the
 
 describe('the plots, as cheesy cutscenes (10 Nov)', () => {
   it('each runs procession, vows, its own twist, I do, the kiss, the cheer and the portrait', () => {
-    const twist = { sweet: 'sweet', raiders: 'fight', drunk: 'topple', brawl: 'brawl' } as const;
+    const twist = { sweet: 'sweet', raiders: 'fight', drunk: 'topple', brawl: 'brawl', gifts: 'heap' } as const;
     for (const p of PLOTS) {
       const s = plotScript(p.id), beats = s.map((b) => b.beat);
       expect(beats.slice(0, 3)).toEqual(['seated', 'procession', 'vows']);
@@ -340,8 +341,8 @@ it('she\'s the host, not the show: no lines about how often she\'s married, and 
 
 // The user, 11 Nov: "the first time I had this kind of wedding, second time it didn't quite go so well. The
 // Raiders came and it was bloody gory ... tie it into the mechanics in a happy, fun way".
-it('her five weddings today show off every venue, theme and plot, and she recalls one whenever you choose (11 Nov)', () => {
-  expect(TODAY).toHaveLength(5);
+it('her six weddings today show off every venue, theme and plot, and she recalls one whenever you choose (11 Nov; the sixth, showered in gifts, 12 Nov)', () => {
+  expect(TODAY).toHaveLength(6);
   for (const [key, list] of [['venue', VENUES], ['theme', THEMES], ['plot', PLOTS]] as const) {
     const ids = list.map((x: { id: string }) => x.id);
     expect(new Set(TODAY.map((w) => w[key]))).toEqual(new Set(ids));
@@ -349,7 +350,7 @@ it('her five weddings today show off every venue, theme and plot, and she recall
       expect(new Gush(tone).pool(`${key}_${id}`).some((l) => /today/.test(l))).toBe(true);
     }
   }
-  expect(WELCOME.happy.join(' ')).toMatch(/five today/);
+  expect(WELCOME.happy.join(' ')).toMatch(/six today/);
 });
 
 // The user, 11 Nov: "check that's cohesive ... One joked about a parrot that swears coming as a set, but she
@@ -638,7 +639,7 @@ describe('old share links still open (11 Nov)', () => {
 
 describe('a collage of the whole wedding, not just one picture (11 Nov: "snapshots of all the key moments")', () => {
   it('takes the walk up the aisle, the vows, the plot\'s big moment, the kiss and the cheer, in order, each once', () => {
-    const big = { sweet: 'sweet', raiders: 'raiders', drunk: 'drunk', brawl: 'brawl' } as const;
+    const big = { sweet: 'sweet', raiders: 'raiders', drunk: 'drunk', brawl: 'brawl', gifts: 'gifts' } as const;
     for (const p of PLOTS) {
       expect(moments(p.id).map((m) => m.id)).toEqual(['aisle', 'vows', big[p.id], 'kiss', 'cheer']);
       for (const cake of [true, false]) {

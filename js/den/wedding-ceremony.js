@@ -2,13 +2,15 @@
 // (src/den-wedding.ts: plotScript's beats and lines). Everyone seated, your partner up the aisle, the
 // vows begun; then the twist: raiders storm in and the security guards see them off into the sea, a
 // guest staggers about with a tankard and topples into the cake, or words are had, then fists, then
-// benches. Then "I do", the kiss, hearts and confetti, and everyone gathered for the portrait, the last
+// benches, or every guest brings a present till the couple are buried in them up to the neck
+// (wedding-gifts.js). Then "I do", the kiss, hearts and confetti, and everyone gathered for the portrait, the last
 // shot held for wedding.js to frame. Skipped (Space), it goes straight to that last shot, the plot's
 // aftermath and all.
 import { plotScript, plotAt, momentsDue, fill, COUPLE, ALTAR, AISLE_FOOT, GUARDS, PROP_R } from '../den-wedding.js';
 import { V3, burst, wearLook } from './world.js';
 import { cinePlay, cineEnd, stepTo } from './cine.js';
 import { poseFig, restArms, heartsUp, roomy } from './wedding-scene.js';
+import { giftsPlot } from './wedding-gifts.js';
 
 /** The portrait's shot, and where everyone stands for it (the couple in the middle under the arch). */
 export const PORTRAIT_CAM = { look: V3(0, 1.25, -3.7), dist: 8.4, tilt: 0.14, yaw: 0 };
@@ -42,6 +44,9 @@ export function ceremony(W, done) {
   // Everyone to their places: seated, you at the altar, your partner at the aisle's foot.
   // (each guest drawn whole knows which they are, gi: a big wedding's crowd is drawn on its own, W.crowd)
   F.guests.forEach((g) => Object.assign(g, { x: seats[g.gi].x, z: seats[g.gi].z, yaw: seats[g.gi].yaw, sit: seats[g.gi].sit, y: 0 }));
+  // (Showered in gifts: the presents, and the first two up the aisle say the guests' lines)
+  const gifts = plot === 'gifts' ? giftsPlot(W, F) : null;
+  if (gifts) { who.guest = gifts.speakers[0] || who.guest; who.guest2 = gifts.speakers[1] || who.guest2; }
   Object.assign(F.you, { x: COUPLE.you.x, z: COUPLE.you.z, yaw: Math.PI / 2 });
   Object.assign(F.partner, { x: AISLE_FOOT.x, z: AISLE_FOOT.z, yaw: Math.PI });
   Object.assign(off, { x: ALTAR.x, z: ALTAR.z, yaw: 0 });
@@ -102,6 +107,7 @@ export function ceremony(W, done) {
     } else if (b === 'storm' || b === 'fight' || b === 'cleared') raid(b, u, L, dt, go, moving);
     else if (b === 'stagger' || b === 'topple') tipsy(b, u, L, t, dt, go, moving);
     else if (b === 'argue' || b === 'brawl' || b === 'sorry') brawl(b, u, L, t, dt, go, moving);
+    else if (b === 'bring' || b === 'heap' || b === 'tumble') { const S = gifts.tick(b, u, L, t, dt, go, moving); shot(...S.look, S.dist, S.tilt, S.yaw); }
     else if (b === 'kiss') {
       const k = ease(u * 2.5);
       F.you.x = COUPLE.you.x + 0.33 * k; F.partner.x = COUPLE.partner.x - 0.33 * k;
@@ -115,6 +121,7 @@ export function ceremony(W, done) {
     for (const p of all) if (!moving.has(p)) still(p, dt);
     for (const r of F.raiders) if (r.g.visible && !moving.has(r) && !r.fly) still(r, dt);
     if (b !== 'kiss' && b !== 'portrait') { F.you.body.rotation.x = 0; F.partner.body.rotation.x = 0; }
+    if (gifts && b !== 'heap' && b !== 'tumble') { F.you.y = 0; F.partner.y = 0; }
     // A snapshot at each key moment, everyone posed (src/den-wedding.ts, moments): the keepsake's.
     for (const m of momentsDue(script, plot, t - dt, t)) W.snap?.(m);
   }
@@ -254,6 +261,7 @@ export function ceremony(W, done) {
     W.play = null;
     W.crowd?.('portrait', 0);
     W.say(null);
+    gifts?.end();
     if (skip) {
       F.raiders.forEach((r) => { r.g.visible = false; });
       if (plot === 'brawl') benches.forEach((bg, i) => { bg.position.set(bg.position.x + Math.cos(i * 2.4) * 2.4, 0.24, bg.position.z + Math.sin(i * 2.4) * 2); bg.rotation.set(Math.PI / 2 * (i % 2 ? 1 : -1), bg.rotation.y, 0); });

@@ -1561,9 +1561,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       furniture is the right amount; keep those ("Yes, yes, yes! There!", "Just there!").
   - **Five weddings today, for the fun of it (11 Nov):** "showing that ... you can keep doing it for
     fun all the time ... not in a promiscuous way, but in a this is a fun game ... tie it into the
-    mechanics in a happy, fun way." She's been through five ceremonies today because she enjoys them,
-    and each is one of the wedding's own options: roses on the beach, raiders at the chapel ("it
-    didn't quite go so well"), cake on the deck, a brawl, a sweet one to finish. She says so in her
+    mechanics in a happy, fun way." She's been through six ceremonies today (five till the presents
+    came, 12 Nov) because she enjoys them, and each is one of the wedding's own options: roses on the
+    beach, raiders at the chapel ("it didn't quite go so well"), cake on the deck, a brawl, a mountain of
+    presents on the deck, a sweet one to finish. She says so in her
     welcome, recalls the matching one whenever you choose a venue, theme or plot, and tells them all
     if asked: her stories show you what you can choose (`TODAY`; a test checks every option's there).
   - **On a phone (11 Nov):** "I can't look at that on the mobile ... the dialogue covers up
@@ -1622,10 +1623,28 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     the plot's key moments as the ceremony plays, laid out as one keepsake with a big shot and the
     rest round it, a caption each in the tone; skip the ceremony and it's the one portrait.
   - **The plots:** sweet and blissful; raiders crash it (the guards knock them into the sea); somebody's
-    drunk (face first into the cake); a brawl (benches flying). Each ends in "I do", the kiss,
+    drunk (face first into the cake); a brawl (benches flying); showered in gifts (below). Each ends in "I do", the kiss,
     hearts and confetti, and a group shot framed in gilt as the wedding portrait: save the picture,
     copy a link (`?at=wedding&w=...`, the whole set-up, opening ready to play it again), or plan
     another. The set-up's kept as you go.
+  - **Showered in gifts (12 Nov), fun, never demanding.** Mischievious herself, laughing, of her
+    weddings: "Something fun (not expected) maybe that I expect everyone to shower me with gifts 😂".
+    The user: "you don't want her to seem demanding, but just make it fun ... maybe it can fit into the
+    thing of like a wedding theme with lots and lots of gifts." So the presents are the couple's, never
+    hers to ask for:
+    - **A fourth theme, Showered in gifts:** bright ribbon colours (red, gold, aqua, magenta, lime),
+      gilded benches, a stack of presents either side of the arch, a mountain of them beside the couple
+      (a treasure chest in it), more up the aisle between the rows and by the back row, the cake; and a
+      present in every guest's hand, the big crowd's too (the wardrobe's hand item Present, its paper
+      dyed as a bouquet's flowers are).
+    - **A fifth plot, Showered in gifts: "Everyone brought a present. Everyone."** After the vows, the
+      guests file up the aisle and lay theirs at the couple's feet, outdoing each other ("I got them a
+      cannon!" "I got them TWO cannons."); then the rest come flying in from the crowd till the couple
+      are in them up to the neck, arms waving out of the top ("Mmf! Lovely! Thank you all! Mmf!"); then
+      the pile tumbles over, spilling across the front, and the ceremony carries on. With any theme (in
+      another, the presents are its colours). Its keepsake snapshot: buried to the neck.
+    - **Her lines:** delighted by the heap ("Somebody fetch a bigger hold"), never asking for it; a
+      test checks none of hers says "for me", "I want" and the like. The guests do the outdoing.
   - **The clothes are Puzzle Pirates'** ("There isn't officially anything in Puzzle Pirates for any of
     this stuff, other than clothing and obviously furniture"): Dress top, Gown, Veil, Tiara,
     Butterfly, Frilly shirt with sash, from YPPedia; the bouquet, the props and the plots are ours.

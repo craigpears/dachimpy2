@@ -13,9 +13,11 @@ export const CRANE_RIDE = {
     lagoon: 'Ooh, a lagoon!',
     cove: 'Home sweet cove',
 };
-/** Your wedding, on the Wedding Isle: your vow (Sweet and blissful) and your "I do". */
+/** Your wedding, on the Wedding Isle: your vow (Sweet and blissful), from under the presents (Showered in
+    gifts), and your "I do". */
 export const AT_YOUR_WEDDING = {
     vow: 'And I promise to mend your wall. Every time.',
+    buried: 'Mmf! Lovely! Thank you all! Mmf!',
     ido: 'I do!',
 };
 /** In Gravee's house (js/den/gravee-house.js): down her endless gallery, and when the Count sits up. */
@@ -59,7 +61,7 @@ export const CHARACTER = {
         },
         {
             when: 'Your wedding, on the Wedding Isle', says: AT_YOUR_WEDDING,
-            each: { vow: 'Sweet and blissful: your vow, after your sweetheart\'s', ido: '"I do"' },
+            each: { vow: 'Sweet and blissful: your vow, after your sweetheart\'s', buried: 'Showered in gifts: from under the pile, up to your neck in presents', ido: '"I do"' },
         },
         { when: 'Off Kikkit\'s island, once she\'s told her whole ramble the first time (wondering aloud)', says: [AFTER_KIKKIT] },
         { when: 'Sailing up near Primates Rule at anchor, still to come (once a voyage)', says: [BY_PRIMATES_RULE] },

@@ -168,7 +168,31 @@ const DRUNK = {
         f: { hat: ['sleeping', 'bandana', 'wide', 'none'], top: ['belt', 'corset', 'striped', 'vest'], legs: ['flare', 'short', 'knickers', 'long'], feet: ['boots', 'curled', 'shoes'], hand: ['tankard'] },
     },
 };
-export const THEMES = [ROSY, GORY, DRUNK];
+/* Showered in gifts (12 Nov). Mischievious herself, laughing: "Something fun (not expected) maybe that I
+   expect everyone to shower me with gifts 😂"; and the user: "you don't want her to seem demanding, but
+   just make it fun ... maybe it can fit into the thing of like a wedding theme with lots and lots of
+   gifts." So the presents are the couple's, every guest bringing one: bright ribbon colours, gilded
+   benches, a present in every hand and presents piled everywhere. */
+const GIFTS = {
+    id: 'gifts', name: 'Showered in gifts', blurb: 'Presents piled everywhere, and every guest brings one.',
+    dyes: ['red', 'gold', 'aqua', 'magenta', 'lime'],
+    guests: [
+        { body: 'f', hair: 'bun', hairCol: 'blonde', hat: 'tiara', hatCol: 'gold', top: 'dresstop', topCol: 'magenta', topCol2: 'gold', legs: 'gown', legsCol: 'magenta', feet: 'shoes', feetCol: 'gold', hand: 'gift', handCol: 'aqua', smile: true, patch: false },
+        { body: 'm', hair: 'short', hairCol: 'brown', beard: 'goatee', hat: 'tricorne', hatCol: 'red', top: 'swashbuckler', topCol: 'aqua', topCol2: 'gold', legs: 'pants', legsCol: 'white', feet: 'boots', feetCol: 'black', hand: 'gift', handCol: 'red', smile: true, patch: false },
+        { body: 'f', hair: 'braids', hairCol: 'black', hat: 'feathered', hatCol: 'lime', hatCol2: 'magenta', top: 'corset', topCol: 'lime', topCol2: 'white', legs: 'long', legsCol: 'aqua', feet: 'fancy', feetCol: 'white', feetCol2: 'lime', hand: 'gift', handCol: 'magenta', smile: true, patch: false },
+        { body: 'm', hair: 'wavy', hairCol: 'ginger', beard: 'full', hat: 'captain', hatCol: 'magenta', hatCol2: 'gold', top: 'captain', topCol: 'magenta', topCol2: 'gold', legs: 'pantaloons', legsCol: 'gold', feet: 'curled', feetCol: 'gold', hand: 'gift', handCol: 'lime', smile: true, patch: false, fam: 'parrot', famCol: 'red', famCol2: 'gold' },
+        { body: 'f', hair: 'ponytail', hairCol: 'auburn', hat: 'wide', hatCol: 'aqua', hatCol2: 'red', top: 'frilly', topCol: 'white', topCol2: 'aqua', legs: 'gown', legsCol: 'aqua', feet: 'shoes', feetCol: 'aqua', hand: 'gift', handCol: 'gold', smile: true, patch: false },
+        { body: 'm', hair: 'long', hairCol: 'black', beard: 'moustache', hat: 'feathered', hatCol: 'gold', hatCol2: 'red', top: 'sash', topCol: 'white', topCol2: 'red', legs: 'pants', legsCol: 'red', feet: 'fancy', feetCol: 'black', feetCol2: 'gold', hand: 'gift', handCol: 'aqua', smile: true, patch: false },
+        { body: 'f', hair: 'wavy', hairCol: 'grey', hat: 'butterfly', hatCol: 'magenta', top: 'buccaneer', topCol: 'red', topCol2: 'gold', legs: 'short', legsCol: 'red', feet: 'boots', feetCol: 'gold', hand: 'gift', handCol: 'lime', smile: true, patch: false },
+        { body: 'm', hair: 'bald', hairCol: 'grey', beard: 'long', hat: 'fez', hatCol: 'red', top: 'vest', topCol: 'lime', topCol2: 'aqua', legs: 'kilt', legsCol: 'aqua', legsCol2: 'lime', feet: 'shoes', feetCol: 'black', hand: 'gift', handCol: 'magenta', smile: true, patch: false },
+    ],
+    wear: {
+        m: { hat: ['tricorne', 'feathered', 'captain', 'fez'], top: ['swashbuckler', 'captain', 'sash', 'vest'], legs: ['pants', 'pantaloons', 'kilt'], feet: ['boots', 'fancy', 'curled', 'shoes'], hand: ['gift'] },
+        f: { hat: ['tiara', 'feathered', 'wide', 'butterfly'], top: ['dresstop', 'corset', 'frilly', 'buccaneer'], legs: ['gown', 'long', 'short'], feet: ['shoes', 'fancy', 'boots'], hand: ['gift'] },
+    },
+};
+/** The themes. Their order is the share link's: new ones go on the end. */
+export const THEMES = [ROSY, GORY, DRUNK, GIFTS];
 export const themeOf = (id) => THEMES.find((t) => t.id === id) ?? null;
 /** The guests each theme dresses itself (and a small wedding's size). */
 export const GUESTS = 8;
@@ -233,6 +257,16 @@ export function layout(venue, theme) {
         out.push(P('banner', -3.8, -5.4, c, 0), P('banner', 3.8, -5.4, c, 0), P('flowers', -1.0, -4.6, a), P('flowers', 1.0, -4.6, a), P('lantern', -4.4, -1.6, c), P('lantern', 4.4, -1.6, c), P('candles', -1.8, -5.0, b), P('candles', 1.8, -5.0, b), P('barrel', -4.8, 5.2, b), P('table', 4.6, 5.0, b), P('cake', 4.6, 5.0, c));
         // (torches by the front, and a pile of skulls or two)
         out.push(P('torch', -3.4, -1.2, c), P('torch', 3.4, -1.2, c), P('skulls', 5.4, 3.6, 'white', 1), P('skulls', -5.4, 1.4, 'white', 6));
+    }
+    else if (theme === 'gifts') {
+        // (a stack either side of the arch, then a mountain of them beside the couple, a treasure chest in it)
+        out.push(P('gifts', -2.0, -5.0, c), P('gifts', 2.0, -5.0, a));
+        for (const [x, z, k] of [[2.5, -4.0, 2], [3.5, -3.5, 4], [4.5, -4.5, 0], [3.25, -5.5, 3], [-2.5, -4.0, 3], [-4.5, -4.5, 2], [-3.25, -5.5, 4]])
+            out.push(P('gifts', x, z, T.dyes[k]));
+        out.push(P('chest', -3.5, -3.5, 'gold'));
+        // (presents up the aisle, between the rows; the cake, and more by the back row)
+        [0.95, 2.45, 3.95].forEach((z, i) => out.push(P('gifts', -0.8, z, [c, d, e(T)][i]), P('gifts', 0.8, z, [d, e(T), a][i])));
+        out.push(P('table', 4.6, 5.0, 'white'), P('cake', 4.6, 5.0, a), P('gifts', -4.6, 5.0, d));
     }
     else {
         for (const [x, z] of [[-4.6, -1.6], [4.6, -1.6], [-4.8, 1.5], [4.8, 1.5], [-4.6, 5.4], [-3.8, 6.2]])
@@ -463,6 +497,7 @@ export const PLOTS = [
     { id: 'raiders', name: 'Raiders crash it', blurb: 'Halfway through, raiders storm in. Good thing there\'s security.' },
     { id: 'drunk', name: 'Somebody\'s drunk', blurb: 'One of the guests has had a few. Mind the cake.' },
     { id: 'brawl', name: 'A brawl breaks out', blurb: 'Words are had. Then fists. Then benches.' },
+    { id: 'gifts', name: 'Showered in gifts', blurb: 'Everyone brought a present. Everyone.' },
 ];
 /** How long a line stays up: long enough to read. */
 export const readSecs = (text) => Math.min(5, Math.max(1.6, text.length * 0.06));
@@ -493,6 +528,13 @@ const TWIST = {
         { beat: 'brawl', secs: 6.4, lines: [L('mis', 1.0, MIS.benches)] },
         { beat: 'sorry', secs: 2.6, lines: [L('guest', 0.3, GUEST.sorry)] },
     ],
+    // (the guests file up the aisle and lay their presents; the rest come flying in from the crowd till
+    // the couple are in them up to the neck; then the pile tumbles over and the ceremony carries on)
+    gifts: [
+        { beat: 'bring', secs: 10.5, lines: [L('guest', 1.0, GUEST.cannon), L('guest2', 3.2, GUEST.twoCannons), L('mis', 5.6, MIS.presents)] },
+        { beat: 'heap', secs: 7.6, lines: [L('guest', 0.3, GUEST.oneMore), L('off', 3.0, MIS.stillThere), L('you', 5.6, YOURS.buried)] },
+        { beat: 'tumble', secs: 5, lines: [L('off', 1.8, MIS.thankYous)] },
+    ],
 };
 /** And every one ends the same, cheesily: I do, the kiss, hearts and confetti, the portrait. */
 const CLOSE = [
@@ -506,6 +548,57 @@ export function plotScript(plot, cake = true) {
     return [...OPEN, ...TWIST[plot], ...CLOSE].map((b) => ({ ...b, lines: b.lines.filter((l) => l.cake === undefined || l.cake === cake) }));
 }
 export const scriptSecs = (s) => s.reduce((a, b) => a + b.secs, 0);
+/** How high the pile comes on the couple: up to their necks (a pirate's head's at about 1.56). */
+export const NECK = 1.3;
+/** Where the presents spill to when the pile tumbles: low, across the front, clear of where the guests
+    gather round for the portrait (just behind it) and of the benches (in front of it). */
+export const SPILL = { x: 2.7, z0: -2.7, z1: -0.9, y: 0.6 };
+/** A heap: presents dropped one at a time onto whichever cell's furthest below what it wants (a little
+    jiggle in it, so it's not a wall), each sitting on what's there. `sizes`: theirs, if they're given
+    (else each picked as it's dropped), and how many; or, without, until every cell's about full. */
+function heap(cells, rand, sizes, max = 120) {
+    const h = cells.map(() => 0), out = [];
+    for (let n = 0; sizes ? n < sizes.length : n < max; n++) {
+        let best = 0, bv = -Infinity;
+        cells.forEach((c, i) => { const v = c.want - h[i] + rand() * 0.12; if (v > bv) {
+            bv = v;
+            best = i;
+        } });
+        if (!sizes && bv < 0.2)
+            break;
+        const c = cells[best], s = sizes ? sizes[n] : 0.28 + rand() * 0.16;
+        out.push({ x: c.x + (rand() - 0.5) * 0.1, y: h[best], z: c.z + (rand() - 0.5) * 0.1, s, r: (rand() - 0.5) * 1.2, paper: rand(), ribbon: rand() });
+        h[best] += s * 0.94; // (each settles a little into the ones under it)
+    }
+    return out;
+}
+const grid = (x0, x1, z0, z1, step, want) => {
+    const out = [];
+    for (let x = x0; x <= x1 + 1e-9; x += step)
+        for (let z = z0; z <= z1 + 1e-9; z += step) {
+            const w = want(x, z);
+            if (w > 0)
+                out.push({ x, z, want: w });
+        }
+    return out;
+};
+/** The mountain round the couple, in the order it's laid (the bottom first): a dome over each of them,
+    up to their necks where they stand, lower round its edges. */
+export function giftPile(seed = 1) {
+    const want = (x, z) => {
+        const d = Math.min(...[COUPLE.you, COUPLE.partner].map((c) => Math.hypot((x - c.x) / 1.25, (z - c.z) / 1.05)));
+        // (the officiant at the altar, behind them, in it no more than waist deep: they've the rest to say)
+        return d >= 1 ? 0 : Math.min(NECK * Math.sqrt(1 - d * d), Math.hypot(x - ALTAR.x, z - ALTAR.z) < 0.75 ? 0.55 : NECK);
+    };
+    return heap(grid(-1.8, 1.8, -4.6, -2.35, 0.45, want), seeded(seed * 7 + 3));
+}
+/** Where each of the pile's presents lands as it tumbles (each the same size, in the pile's order),
+    spilled low across the front: the top of the pile comes off first, so it's the bottom of the spill. */
+export function giftSpill(pile, seed = 1) {
+    const want = (x, z) => SPILL.y * (1 - (x / (SPILL.x + 0.6)) ** 2) * (1 - ((z - (SPILL.z0 + SPILL.z1) / 2) / 1.6) ** 2);
+    const n = pile.length, out = heap(grid(-SPILL.x, SPILL.x, SPILL.z0, SPILL.z1, 0.45, want), seeded(seed * 13 + 5), pile.map((_, j) => pile[n - 1 - j].s));
+    return pile.map((g, i) => ({ ...out[n - 1 - i], paper: g.paper, ribbon: g.ribbon }));
+}
 /** Where a ceremony is `t` seconds in: the beat, how far through it (u), its own time, its index, the
     line being said (each up till the next comes, the beat ends or it's been read), and done once
     it's over. */
@@ -534,6 +627,7 @@ const MOMENT_TWIST = {
     raiders: [{ id: 'raiders', beat: 'fight', at: 3.6 }], // (one in the sea, another on his way)
     drunk: [{ id: 'drunk', beat: 'topple', at: 2.8 }], // (face first in the cake)
     brawl: [{ id: 'brawl', beat: 'brawl', at: 4.2 }], // (benches flying)
+    gifts: [{ id: 'gifts', beat: 'heap', at: 4.8 }], // (buried in presents up to the neck)
 };
 const MOMENT_CLOSE = [{ id: 'kiss', beat: 'kiss', at: 2.4 }, { id: 'cheer', beat: 'cheer', at: 2.8 }];
 /** A plot's key moments, in the order they come. */
@@ -607,11 +701,12 @@ export const TODAY = [
     { venue: 'chapel', theme: 'gory', plot: 'raiders' },
     { venue: 'deck', theme: 'drunk', plot: 'drunk' },
     { venue: 'beach', theme: 'drunk', plot: 'brawl' },
+    { venue: 'deck', theme: 'gifts', plot: 'gifts' },
     { venue: 'chapel', theme: 'rosy', plot: 'sweet' },
 ];
 /** What she suggests first in each tone (every theme and plot is open in either). */
 export const SUGGEST = {
-    happy: { theme: 'rosy', plots: ['sweet'] },
+    happy: { theme: 'rosy', plots: ['sweet', 'gifts'] },
     dark: { theme: 'gory', plots: ['raiders', 'brawl'] },
 };
 /* Her reactions as you plan (GUSH, a pool for each event, the same in both tones or one for each) and
@@ -650,7 +745,7 @@ export const STAND_INS = {
     hat: { veil: ['none'], tiara: ['none'], butterfly: ['feathered', 'none'] },
     top: { dresstop: ['corset', 'belt', 'plain'], frilly: ['corset', 'belt', 'plain'] },
     legs: { gown: ['long', 'pants'] },
-    hand: { bouquet: ['none'] },
+    hand: { bouquet: ['none'], gift: ['none'] },
     fam: { squirrel: ['none'] },
 };
 /** A look with whatever the wardrobe hasn't got (has(slot, body, id) says) swapped for a stand-in. */
@@ -680,6 +775,9 @@ export function themeLook(theme, body, rand = Math.random) {
         L.beard = pick(['full', 'goatee', 'moustache', 'none']);
     L.hair = pick(body === 'm' ? ['short', 'ponytail', 'long', 'wavy', 'bald'] : ['long', 'ponytail', 'bun', 'braids', 'wavy']);
     L.hairCol = pick(['black', 'dark brown', 'brown', 'auburn', 'ginger', 'blonde', 'grey']);
+    // (a present's paper, in the theme's colours: picked last, so the other themes' crowds are as they were)
+    if (L.hand === 'gift')
+        L.handCol = pick(T.dyes);
     return L;
 }
 // ---------- the whole set-up ----------

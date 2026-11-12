@@ -58,6 +58,7 @@ Your own pirate, dressed as you like from the wardrobe (or as any real pirate in
 ### Your wedding, on the Wedding Isle
 
 - *Sweet and blissful: your vow, after your sweetheart's:* "And I promise to mend your wall. Every time."
+- *Showered in gifts: from under the pile, up to your neck in presents:* "Mmf! Lovely! Thank you all! Mmf!"
 - *"I do":* "I do!"
 
 ### Off Kikkit's island, once she's told her whole ramble the first time (wondering aloud)
@@ -149,7 +150,7 @@ He doesn't speak (yet): his lines are what's said of him.
 
 Host of the Wedding Isle, out at sea on the den's side of the checkpoint: she runs the wedding venue on her island and is always planning the next one. A real Puzzle Pirates pirate (Mischievious of Emerald, with the extra i), drawn from five of her portraits, and you choose which of her you'd marry, each by its own title: "Son of a Nutcracker!", "What is Love?", "Taco Princess", "Wicked" and "Hotter Than Hell".
 
-Giggly, gushing, delighted with whatever you do: never a rule you can fail. Funny about herself, never mean about herself (the dress already on, "a dress that's hardly been bled on"). Cheeky, never dirty: a wink in a line about the furniture is the right amount. She's the host, not the show: her chatter is the wedding's and the Ocean's (the tailor, dyes and doubloons, the inn's grog, the furnisher, security earning their pay), not her own love life. She's been through five ceremonies today for the fun of it, each one of the wedding's own options, so her stories show you what you can choose.
+Giggly, gushing, delighted with whatever you do: never a rule you can fail. Funny about herself, never mean about herself (the dress already on, "a dress that's hardly been bled on"). Cheeky, never dirty: a wink in a line about the furniture is the right amount. She's the host, not the show: her chatter is the wedding's and the Ocean's (the tailor, dyes and doubloons, the inn's grog, the furnisher, security earning their pay), not her own love life. She's been through six ceremonies today for the fun of it, each one of the wedding's own options, so her stories show you what you can choose.
 
 In Happy and cheesy she's all giggles and romance; in Dark humour, not in the least bothered by the blood and guts of the last wedding, with a bit of extra security hired and the mop in the corner.
 
@@ -168,6 +169,8 @@ Marry her, and she comes home with you: aboard the sloop, then at the den.
 > "showing that ... you can keep doing it for fun all the time ... not in a promiscuous way, but in a this is a fun game" (the user, 11 Nov)
 >
 > "she's a primary character, but not the star of the show." (the user, 11 Nov)
+>
+> "you don't want her to seem demanding, but just make it fun ... maybe it can fit into the thing of like a wedding theme with lots and lots of gifts." (the user, 12 Nov)
 
 ### As you arrive, close on her: her greeting, what this is, and the tone's choice
 
@@ -178,12 +181,12 @@ Marry her, and she comes home with you: aboard the sloop, then at the den.
 ### Her welcome, once you've chosen the tone
 
 - *Happy and cheesy:*
-  - "Ooh, happy and cheesy! Roses, ribbons, the lot. I've done five today, just for the fun of it!"
+  - "Ooh, happy and cheesy! Roses, ribbons, the lot. I've done six today, just for the fun of it!"
   - "You plan it your way: who, where, the look, and how it goes. I'll help. Then it plays out, and you get a portrait!"
   - "So! How are you? Would you like to get married?"
 - *Dark humour:*
   - "Ooh, dark humour! Don't mind the blood and guts. The last wedding went a bit... bloody and gory."
-  - "It's fine. Five weddings today, and only the one got raided. We've hired a bit of extra security."
+  - "It's fine. Six weddings today, and only the one got raided. We've hired a bit of extra security."
   - "You plan it your way: who, where, the look, and how it goes. Then it plays out, and you get a portrait. Mop's in the corner."
   - "So! How are you? Would you like to get married?"
 
@@ -260,13 +263,17 @@ Marry her, and she comes home with you: aboard the sloop, then at the den.
   - "Barrels! Lovely, lovely barrels."
   - "I've had the inn send over every drop they've got."
   - "Like my third today! Grog in the punch, grog in the cake."
+- *You choose Showered in gifts:*
+  - "Showered in gifts! Ribbons on everything. Even the cake."
+  - "A present in every hand! Bows on the bows!"
+  - "Like my fifth today! The presents went up past the arch."
 - *You choose Sweet and blissful:*
   - *happy:*
     - "Sweet and blissful! Oh, I'm welling up already."
-    - "My fifth today went just like that. I cried!"
+    - "My last today went just like that. I cried!"
   - *dark:*
     - "Sweet and blissful? Ooh, that'd make a change."
-    - "My fifth today went just like that. Made a nice change!"
+    - "My last today went just like that. Made a nice change!"
 - *You choose Raiders crash it:*
   - *happy:*
     - "Raiders! How exciting! Good thing I hired security."
@@ -285,6 +292,13 @@ Marry her, and she comes home with you: aboard the sloop, then at the den.
   - *dark:*
     - "A brawl! Proper wedding, that."
     - "Like my fourth today! Benches everywhere. Lovely day, though."
+- *You choose Showered in gifts:*
+  - *happy:*
+    - "Everyone brought a present. Everyone! I do hope you've room in the hold."
+    - "Like my fifth today! We had to dig the couple out."
+  - *dark:*
+    - "Everyone brought a present. Let's hope none of them ticks."
+    - "Like my fifth today! We dug the couple out. Eventually."
 - *You add a prop (one she hasn't a line of its own for, or has just said):*
   - "More! More is always better."
   - "Oh, that's gorgeous there."
@@ -392,7 +406,7 @@ Marry her, and she comes home with you: aboard the sloop, then at the den.
 
 ### Asked things as you plan (your question, then her answer)
 
-- *How were today's weddings?:* "Five so far! Roses on the beach, raiders at the chapel, cake on the deck, a lovely brawl, and a sweet one to finish. Every one a treat!"
+- *How were today's weddings?:* "Six so far! Roses on the beach, raiders at the chapel, cake on the deck, a lovely brawl, a mountain of presents, and a sweet one to finish. Every one a treat!"
 - *Who's on the guest list?:* "Anyone with a clean shirt. Well, a shirt."
 - *What's the dress code?:* "Whatever the tailor had in! Dyed to match, ideally. Black if you're showing off."
 - *Who's paying for all this?:* "The crew's coffers, love. Don't tell the purser."
@@ -428,6 +442,9 @@ Marry her, and she comes home with you: aboard the sloop, then at the den.
 - *Somebody's drunk: face first into the cake:* "...and that's the cake."
 - *Somebody's drunk: down they go, with no cake to fall in:* "...and down they go."
 - *A brawl breaks out:* "Not the benches! They're hired!"
+- *Showered in gifts: the guests filing up with their presents:* "Ooh, look at it all! Somebody fetch a bigger hold."
+- *Showered in gifts: the couple buried in them up to the neck (as the officiant):* "Hello? Still in there, you two?"
+- *Showered in gifts: the pile topples (as the officiant):* "Thank-you notes later, loves. Now, where were we?"
 - *"I do" (as the officiant):* "Do you take {partner}, through bilge and broadside?"
 - *The kiss (as the officiant):* "Then you may kiss!"
 - *The cheer:* "Eee! I love weddings!"
@@ -540,7 +557,7 @@ Then they come home with you, in their wedding look: aboard the sloop off the is
 
 ## The wedding's guests
 
-Everyone else at a wedding on the Wedding Isle: the guests, dressed by the theme or by you (six of them, or half the Ocean), two hired security guards in black and grey, cutlasses at their sides, and the raiders who crash it if that's how you chose it to go. The guests coo, sniff, argue over grog and cheer; one may have had a few; the raiders want the cake; the guards earn their doubloons. (A guard stands in as the officiant when it's Mischievious you marry.)
+Everyone else at a wedding on the Wedding Isle: the guests, dressed by the theme or by you (six of them, or half the Ocean), two hired security guards in black and grey, cutlasses at their sides, and the raiders who crash it if that's how you chose it to go. The guests coo, sniff, argue over grog and cheer; they bring presents, each outdoing the last; one may have had a few; the raiders want the cake; the guards earn their doubloons. (A guard stands in as the officiant when it's Mischievious you marry.)
 
 ### The ceremony: the guests
 
@@ -551,6 +568,9 @@ Everyone else at a wedding on the Wedding Isle: the guests, dressed by the theme
 - *A brawl breaks out: the reply:* "You spilt your FACE!"
 - *A brawl breaks out: after it:* "...sorry."
 - *The cheer:* "Hooray!"
+- *Showered in gifts: filing up the aisle with their present:* "I got them a cannon!"
+- *Showered in gifts: the next one up, not to be outdone:* "I got them TWO cannons."
+- *Showered in gifts: throwing in another, the pile already up to the couple's chests:* "One more! It's only a little one!"
 
 ### The ceremony, Somebody's drunk: the drunk, staggering up
 
@@ -590,6 +610,9 @@ Not someone you meet: the captions on the keepsake you're given at the end of a 
 - *A brawl breaks out: benches flying:*
   - *happy:* "A lively one! Benches everywhere"
   - *dark:* "A proper brawl. The benches were hired."
+- *Showered in gifts: the couple buried in presents up to the neck:*
+  - *happy:* "Showered in gifts, up to the neck"
+  - *dark:* "Buried alive. In presents, luckily."
 - *The kiss:*
   - *happy:* "The kiss!"
   - *dark:* "The kiss! Still all in one piece."
