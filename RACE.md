@@ -134,6 +134,8 @@ sweep.
   Every racer hops it with a Double ("you have to get a double in sailing and basically jump over the trade
   winds"); anything less sweeps her back up onto leg 2, a leg and a half lost ("back a significant like one
   leg"). The pilot can't take her round it: it's to be jumped.
+  Played (12 Nov), and it lands: "I love that, near the driftwood, how you have to do a combo over it,
+  otherwise it takes you back. Perfect." Keep it.
 - **The left-hand trade wind**, up the whole left-hand side to the starting line: a real snake on the way
   out. Legs 2 and 4 end hard by it, so a careless turn or a gust too far there sweeps her back to the start
   ("I want the snakes and [ladders]").
