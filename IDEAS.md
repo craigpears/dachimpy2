@@ -2308,3 +2308,31 @@ intensive is that? What network usage does that have?"
 - **Where it'd run:** Cloudflare, as the den's rooms already do. The free plan covers playtests; the paid
   Workers plan ($5 a month, as last known) covers a lot of races before anything more is charged.
 - Racing first (RACE.md §6, "Long term, a proper server"), then every puzzle played online.
+
+**But a bot client still plays legally (12 Nov):** "what's to stop ... some kind of botted client from ...
+determining the perfect ideal placement of a piece and slotting it in exactly at the right spot ... and
+just sending the message back"; bilging is the clearest case, "it's so easy to detect a bilge move for a
+bot and ... execute" it rapid fire. "Is there any way of architecturing and structuring it in a more
+fundamental way so that you don't have to think, oh, how are we going to detect hacks and unfair play?
+... experiment with technical security solutions." Thoughts to experiment with:
+- **Nothing makes it impossible.** If a person can see the board and answer with a move, so can a
+  program. Chess is the proof: the whole board is public and the server checks every move, and cheating is
+  still caught only by detection. So the server stops *impossible* play (tampering, too fast, moves sent in
+  bulk, seeing the future); what's left is a bot playing *possible* moves very well.
+- **Cap the speed at a human's best.** The server takes moves no faster than a top player makes them
+  (Bilge's swaps a second, Sailing's drops), so a bot is at best a flawless top player, never a machine
+  gun. The gap left is only in the choices.
+- **Bound what puzzling is worth.** Design so a perfect puzzle can't win on its own: a shortcut saves at
+  most so much (the race already works so: each saves about what it takes to play), and a lock or a crane
+  takes some seconds whatever you do. Then the rest is routing, timing a gamble, shooting, reading the
+  others: judgment a puzzle bot doesn't have.
+- **Catch it as chess does, by agreement with a bot.** We have bots for every puzzle already (`src/*-bot.ts`):
+  the server can score how often your moves are the bot's best one, and how your thinking time follows how
+  hard the board is (people slow down on a hard board and speed up on an easy one; a bot's even). A person
+  agrees with the best move now and then; a bot nearly always. Quiet, after the race, never accusing on
+  one result.
+- **Raw input, not decisions.** Send the pointer's path and key timings, and the server replays the input
+  rather than trusting "piece here". A bot then has to fake a human hand as well: harder, not impossible.
+- **Make room for bots instead.** A bot league, labelled, with its own table (Dachimpy.com's simulators
+  were half this already); ranked play only in rooms among people who know each other, or with a
+  reputation to lose.
