@@ -344,11 +344,15 @@ you racer 0 on it: the same logic that's balance-tested races you.
 
 **Real players racing each other online (asked about 12 Nov, not started).** "what would it take to make
 the sloop race things multiplayer? So you can have like a handful of people playing if we get to play
-testing it." The plan as proposed: the den's co-op rooms (`worker/crew.js`, a Durable Object passing
-messages between up to four browsers, the first one in hosting) reused as a race room. Each player sails
-and puzzles in their own browser, sending where she is a few times a second; the host's browser keeps the
-field (whose turn at a lock or the crane, hits, places, the clock, the gambles' coin tosses from one shared
-seed) and sails the bots filling the empty places. Everyone else's sloop is a racer moved by what arrives
+testing it." Not peer to peer (the user, 12 Nov: "peer-to-peer
+architecture was a major problem when I've done something before"): the den's co-op already has every
+browser talk only to a small room on Cloudflare (`worker/crew.js`, a Durable Object), never to each other,
+though the room only passes messages on and the first browser in does the sums. **For the race, the room
+runs the race itself** (agreed 12 Nov, "absolutely go for it"): the field's rules are plain code with no
+3D (`src/den-racers.ts`), so the room keeps the field (whose turn at a lock or the crane, hits, places, the
+clock, the gambles' coin tosses from one shared seed) and sails the bots filling the empty places; one fair
+referee, no host to lose, nothing stalling when someone's tab is in the background. Each player still sails
+and puzzles in their own browser, sending where she is a few times a second. Everyone else's sloop is a racer moved by what arrives
 (a `Drive` like the bots', fed from the room). A race room of its own, a few more places than four, a lobby
 on the starting line (a code to share, ready up, the count from the host). Kept apart from the rest: its
 rules a tested `src/` part, its wiring a `js/den/` file, a thin hook on the line. Trusting the players

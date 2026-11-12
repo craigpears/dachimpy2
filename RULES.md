@@ -156,6 +156,13 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   it's designed", linked from the changelog's header: the race's routes, gates, gambles ("Do you dare
   take the whirlpool?") and tactics, then the den's wider principles, a picture each. Never a word of
   the hidden gems on it.
+- **One changelog entry per real feature, not per step (12 Nov).** "be wary ... of how much we're actually
+  adding in the change log. Like, I don't want it to be like, I've done this big thing on sl[o]op races 5
+  times ... see if anything kind of needs compacting together so that it's ... actually each thing is
+  meaningful as a new feature, not just ... steps and iterations on a feature." So a later pass on a
+  feature already in the changelog updates its entry (or joins a few passes into one), rather than adding
+  another. The race's seven entries became three: the race itself (11 Nov), its bribe, gambles and chart,
+  and watching it (12 Nov).
 - **The cheats jump to what's hard to get to, one per place (11 Nov).** "There's a lot there that are
   like basically the same thing ... these are supposed to help jump you to places that are hard to get
   to." So no cheat for what's a key away (Sailing's board: go sailing, then 1), and one per place, not
