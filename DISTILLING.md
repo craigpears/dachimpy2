@@ -275,6 +275,25 @@ plenty of pieces, travel sideways by leapfrogging along a stored row; late, on a
 figure of eight for pairs up and down, the line pulled up a tile at a time, and the hook when pieces are
 scarce. The bots play by stage the same way.
 
+**Watching the first bots (12 Nov), the user's own plan for a run:** the bot "just went down and burnt"
+a white ("you would never leave a white piece in the top"): "fine, you might be swapping quickly, but
+you're not following the strategy of [whites] to the left, clearing ... roughly one column at a time to
+give yourself breathing room." And the shape to keep: "blacks ... you want on the right-hand side, when
+you're getting whites to the left, you want browns near the bottom because then from the left you drag a
+black from the top left down to the bottom right, up through the browns on the right-hand side, and you
+kind of drag it up through the browns until it [meets] the black at the top. So you end up in a situation
+where the top right is black, the bottom right is brown in a kind of an almost diamond shape, and then
+when you get later, you kind of do the mirror effect of that, trying to get whites to the right when
+you've run out of stuff to do." So, for the bots and the tutorial:
+- **Never burn a white:** whites near the top of a burning column are saved first.
+- **One column at a time:** finish the next junk column for the furnace before starting another, for
+  breathing room, whites always heading left.
+- **The diamond:** blacks stored top-right, browns bottom-right. A black taken from the top-left goes
+  down-right across the whites to the bottom-right, then up through the browns (blacks rise in browns)
+  till it joins the blacks at the top: so the junk columns on the right fill black above, brown below.
+- **Then the mirror:** later, with the junk run out, the same moves the other way round, whites heading
+  right.
+
 ### Decision time
 Keep burning full junk columns as long as you're sure the next one will be finished before the furnace;
 the more white columns you bank, the longer the chain. Near the end there's less room on the right to
@@ -450,6 +469,11 @@ nice and illustrative". In order:
    humour is the maker's: proud of his brews, his mishaps when the balance goes wrong (item 4).
    Each demonstration shows its plan on the board before he starts (RULES.md, "A demonstration shows its
    plan before it builds"), the lesson the user drew from Tzz's Bingo.
+   **"Help, Helium" while you play (12 Nov):** "playing and be able to press a button that says help
+   helium and he starts showing you some moves on how you could get yourself out of the situation." So
+   mid-game a button asks him, and he plays the routine your board needs from where it stands (the same
+   technique routines the bots and the lesson use), a few moves shown on your own board, then hands it
+   back.
 4. **Helium and his island** (IDEAS.md, "Helium, and Distilling"; his portrait checked first): his own
    little island, perhaps by the smugglers' beach, his still on it, and his mishaps: when he gets the
    balance wrong, the still goes up with a bang ("Oops. That happens sometimes. Don't worry about it.").
