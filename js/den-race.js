@@ -77,8 +77,9 @@ export const RACE = {
         shortcut pays only for a player good at its puzzle. A heavy combo through the gun gap; a few
         squares rowed by mirror strokes; a Vegas; a lock pumped up by Bilge and another drained; three
         frames of Carpentry; a barrier cleared by Foraging; and the gaps a Double and a Triple hop. The
-        locks' went from 26 to 31 (12 Nov) when their water and gates became a beat, not a wait (LOCK). */
-    DECENT: { guns: 14, headwind: 25, whirls: 49, locks: 23, crane: 38, forage: 15, double: 9, triple: 9 },
+        locks' went from 26 to 31 (12 Nov) when their water and gates became a beat, not a wait (LOCK). The barrier's
+        from 15 to 12 (12 Nov) when it moved a column east, off the trade wind's hop. */
+    DECENT: { guns: 14, headwind: 25, whirls: 49, locks: 23, crane: 38, forage: 12, double: 9, triple: 9 },
     /** The long way's own spot on the starting line: where the long way's route starts (LONG_ROUTE), and
         what the simulation measures every other spot against (src/race-sim.ts, SIM.SPOTS). */
     LONG_SPOT: 13,

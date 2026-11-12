@@ -23,7 +23,7 @@ export const DEFAULT_COURSE = {
     buoys: [25, 2, 25, 2, 25],
     gun: 21, wreck: 16, turn: 8,
     head: 12, double: 6, mid: 19,
-    whirl: 12, forage: 20,
+    whirl: 12, forage: 21,
     lock: 11,
     crane: 12, triple: 22, veil: 18, veilBack: 6, finish: 4,
     clears: 7, frames: 'standard', bundles: 2, coins: 40, veilOn: 50, beat: 4,

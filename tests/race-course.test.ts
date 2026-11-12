@@ -4,7 +4,7 @@
    pieces or complexity of each carpentry lift". */
 import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { LAY, layRace } from '../src/den-sail';
+import { LAY, layRace, path, type Pose } from '../src/den-sail';
 import { DOOR } from '../src/den-door';
 import { Lock } from '../src/den-lock';
 import { CRANES, CRANE, Crane, partCells } from '../src/den-crane';
@@ -19,8 +19,9 @@ const DOOR_SAVES = DOOR.SAVES;
 const squares = (route: [number, number][]) => route.slice(1).reduce((n, b, i) => n + Math.abs(b[0] - route[i][0]) + Math.abs(b[1] - route[i][1]), 0);
 
 describe('the den\'s own course, now laid out from data (12 Nov)', () => {
-  it('is the same course to sail, every square of it as it was before it could be edited', () => {
-    // (the race's layout as it was, saved before the change: every square of land, wind, buoy, gap...)
+  it('is the same course to sail, every square of it as it was before it could be edited (the barrier since a column east)', () => {
+    // (the race's layout as it was, saved before the change: every square of land, wind, buoy, gap...; saved
+    // again when the barrier moved a column east, 12 Nov)
     for (const lay of [LAY.RACE, layRace(DEFAULT_COURSE)]) {
       for (const [k, v] of Object.entries(BEFORE)) expect(json((lay as Record<string, unknown>)[k]), k).toEqual(v);
     }
@@ -31,6 +32,29 @@ describe('the den\'s own course, now laid out from data (12 Nov)', () => {
   it('is a race the editor would allow: nothing out of place, the long way open to the finish', () => {
     expect(problems(DEFAULT_COURSE)).toEqual([]);
     expect(waterProblems(LAY.RACE)).toEqual([]);
+  });
+});
+
+describe('the barrier "just feels like it\'s one square off" (12 Nov)', () => {
+  // The user, at the race's chart: "how do you get to it? Like, you have to spin on the spot after jumping over
+  // the, that snake trade wind thing."
+  it('a Double over the trade wind back up leg 3 lands her a square short, and one turn takes her up into its notch', () => {
+    const RC = LAY.RACE, mid = RC.SNAKES.MID[0][0], leg3 = RC.STRETCHES[2].r;
+    expect(RC.FORAGE.NOTCH[0]).toBe(mid + 2);
+    // (hopped from in front of the wind, a Double's two squares over it, along either row of leg 3)
+    for (const r of [leg3, leg3 + 1]) {
+      let p: Pose = { c: mid - 1, r, d: 1 };
+      p = path(p, 'F').to; p = path(p, 'F').to;
+      expect(p.c).toBe(mid + 1);
+      expect(RC.WINDS.some(([c, y]) => c === p.c && y === p.r)).toBe(false);
+      // (then a turn to port, out of the leg toward the spit: the notch from leg 3's second row; a square
+      // before it from the first)
+      const q = path(p, 'L').to;
+      expect(q.d).toBe(0);
+      expect(q.c).toBe(RC.FORAGE.NOTCH[0]);
+      if (r === leg3 + 1) expect([q.c, q.r]).toEqual(RC.FORAGE.NOTCH);
+      else expect(path(q, 'F').to).toMatchObject({ c: RC.FORAGE.NOTCH[0], r: RC.FORAGE.NOTCH[1] });
+    }
   });
 });
 
@@ -151,7 +175,7 @@ describe('the race on a course from the editor (12 Nov)', () => {
   });
 
   it('keeps the starlit door where it is, fixed, its tunnel coming up on legs the editor has moved, and racers going through it', async () => {
-    const m = await load({ ...DEFAULT_COURSE, buoys: [25, 2, 22, 2, 25] });
+    const m = await load({ ...DEFAULT_COURSE, buoys: [25, 2, 23, 2, 25] });
     expect(m.sail.LAY.RACE.CUSTOM).toBe(true);
     expect(m.sim.ROUTES.map((r) => r.name)).toContain('door');
     expect(json(m.sail.LAY.RACE.DOOR)).toEqual(BEFORE.DOOR);

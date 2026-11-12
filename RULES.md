@@ -2174,7 +2174,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     them quiet (14 s); spit 2, the headwind gap, rowed, its far end a dog-leg so it doesn't open straight onto
     leg 3 and out of the gun gap's reach (30 s), and a small gap with one wind blowing back across it that a
     well-timed Double hops (9 s); spit 3, the whirlpool channel, only a Vegas from its mouth (46 s), and a
-    barrier of driftwood across a gap, cleared by Foraging (15 s); spit 4, the locks (23 s); spit 5, the crane
+    barrier of driftwood across a gap, cleared by Foraging (12 s since it moved a column east, 12 Nov: below); spit 4, the locks (23 s); spit 5, the crane
     (38 s), and a gap with two winds that a Triple hops (9 s); and the starlit door (40 s up at leg 3, 119 on to leg 5). On the long way,
     leg 4 before the locks is the zigzag: headwinds blowing back along it, alternating side to side with gaps
     between, a wind behind her there so she can weave either way; weaving through takes about 17 s, hopping
@@ -2323,6 +2323,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       `Race.takes`.
     - **The starter's card names the bribe:** "haul up some treasure and pay off the guard at the gate",
       among the ways through. The starlit door stays unmentioned.
+    - **The barrier a square along (12 Nov: "how do you get to it? Like, you have to spin on the spot after
+      jumping over the, that snake trade wind thing. It just feels like it's one square off"):** it, its notch
+      and its gap moved a column east (column 21), two past the trade wind back up the course. A Double over
+      that wind along leg 3 lands her a square short of it, and one turn to port takes her up into the notch
+      from the leg's second row (from its first, a turn and a move). It saves 12 s now (it was 15; the helm's).
   - **The gambles (12 Nov: "sometimes maybe there should be a mysterious headwind. Half the time it pushes
     you forward ... Sometimes ... it goes backwards. But maybe the whirlpool, the direction the whirlpool goes
     is changes, so it goes back up ... So you can go that way if you want to take a gamble"):** two ways that

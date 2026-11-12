@@ -132,7 +132,8 @@ export const SIM = {
       - row: the headwind gap's few squares by mirror strokes: RACE.DECENT.headwind. Assumed.
       - bilge: a lock pumped up: LOCK.COST_UP, the pilot's own reckoning of a go of Bilge (LOCK.WORK
         moves' worth). The user finds it quick.
-      - forage: the barrier's bundles of driftwood cleared down off a Foraging board: RACE.DECENT.forage.
+      - forage: the barrier's two bundles of driftwood cleared down off a Foraging board: 15 s (what the barrier
+        saved till it moved a column east, 12 Nov; now it saves 12), more or less for more or fewer bundles.
         Assumed.
       - piece: a Carpentry piece fitted (the crane's thirteen, CRANE.PARTS; a hit's patch, PATCH.PIECES):
         4 s. Assumed; the user finds Carpentry quick.
@@ -146,7 +147,7 @@ export const SIM = {
         at its first exit (12 Nov): 8 s. Assumed. */
   PUZZLE: {
     combo: 32, vegas: 52, double: 22, triple: 28, row: RACE.DECENT.headwind,
-    bilge: (LOCK.COST_UP * RC.COURSE.clears) / LOCK.WORK, forage: (RACE.DECENT.forage * RACE.FORAGE.BUNDLES.length) / 2, piece: 4, nav: 53 * 1.2, load: 20, haul: BRIBE.MOVES * BRIBE.MOVE_SECS, gust: 8,
+    bilge: (LOCK.COST_UP * RC.COURSE.clears) / LOCK.WORK, forage: (15 * RACE.FORAGE.BUNDLES.length) / 2, piece: 4, nav: 53 * 1.2, load: 20, haul: BRIBE.MOVES * BRIBE.MOVE_SECS, gust: 8,
   },
   /** A Vegas's chance to come off, a go, by skill; the next go after one that doesn't takes this much of
       a fresh one's time; and the goes before she gives up and sails on. Assumed. */
