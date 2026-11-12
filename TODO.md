@@ -278,6 +278,14 @@ the site (`.assetsignore` skips `*.md`).
 
 
 
+- **A wedding showered in gifts (12 Nov):** from Mischievious, the real pirate, about her weddings:
+  "Something fun (not expected) maybe that I expect everyone to shower me with gifts 😂". The user:
+  "you don't want her to seem demanding, but just make it fun ... maybe it can fit into the thing of
+  like a wedding theme with lots and lots of gifts." So a fourth theme, "Showered in gifts": wrapped
+  presents piled everywhere and every guest bringing one, and a plot where the guests lay their gifts
+  until the pile gets out of hand. It's your wedding's gifts, not hers to demand; she stays the host,
+  not the show, and any line of hers is breezy and fond of presents, never grabby.
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
