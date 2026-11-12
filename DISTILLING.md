@@ -229,7 +229,10 @@ you can kind of hook it in and then re-drag the brown back to the bottom." Readi
 black dragged from the top-left falls diagonally to the bottom; there it meets a brown, and the black
 rises past the brown (they swap: the brown drops), so the black hooks into the junk and the brown is
 pushed back down, to be dragged on along the bottom again. **(to confirm with the user:** the exact
-order of the drags, and which brown gets re-dragged.)
+order of the drags, and which brown gets re-dragged.) As built for the bots (12 Nov, `hook` in
+`src/distill-routines.ts`): a black dragged down through the whites hooks up past a brown, then the brown
+is dragged on; and in the chain, a piece trapped on the whites' edge is freed with two partners, one
+hooked in beside it.
 
 ### The crawl ("figure of eight"?)
 A black and a brown together can travel **level** through whites forever, leapfrogging: the black climbs
@@ -463,6 +466,46 @@ badly:
   eight, the line pull, the hook, the leapfrog, channels), which the tutorial needs anyway (§7, item 3),
   and a planner that picks a routine by the stage of the game and what's out of place, rather than the
   hill-climb choosing swaps.
+
+### What the routine bots reach (12 Nov, second run)
+Each technique is now a routine of its own (`src/distill-routines.ts`: save the whites, finish the junk
+column, the diamond and its mirror, store the junk, the crawl, the figure of eight, pull a line up, the
+leapfrog, the hook, channels), each knowing where it applies on any board and returning whole drags. A
+planner (`choose` in `src/distill-bots.ts`) puts the stage's routines on the menu and plays the one that
+betters the board most for its drags; `advise(board)` is the same planner on anyone's board, for "Help,
+Helium". Every tier plays the same plan (whites left, never a white burned on purpose); they differ in the
+routines they know (the learner only the four basic ones, the Master adds the crawl, storing and the
+leapfrog, the Grand-Master the figure of eight and the hook, the Ultimate the line pull), their pace (a
+moment to spot each drag, then swept at 4 to 6 swaps a second), and burning early. The top two take the
+endgame's gamble: in the chain, with a few seconds left and the next column out of reach, cash in.
+`tools/distill-bots.mjs 40`, the same 40 boards (seeds 5000 to 5039):
+
+| Tier | Longest chain: mean (best), was | CC^6+ | CC^12 | Score a column: mean (best) | Minutes | Whites burned | White columns banked |
+|---|---|---|---|---|---|---|---|
+| Learner | 1.5 (4), was 0.0 (1) | 0/40 | 0/40 | 3.9 (6.2) | 5.6 (flask full) | 6.5 | 5.0 |
+| Able to Master | 2.8 (6), was 1.9 (5) | 4/40 | 0/40 | 8.6 (16.3) | 3.3 | 1.6 | 6.8 |
+| Grand-Master to Legendary | 2.7 (9), was 2.4 (5) | 4/40 | 0/40 | 9.5 (22.4) | 3.0 | 1.4 | 6.6 |
+| Ultimate | 3.3 (9), was 2.5 (6) | 8/40 | 0/40 | 10.5 (22.8) | 3.0 | 1.4 | 6.5 |
+
+**Honestly: better, but still far from the goals.** CC^12 is reached in no run of 40 by any tier (a rate of
+0 in 40); the Ultimate reaches CC^6 or more one run in 5 and CC^9 once, where a real Master's CC^6 to
+CC^8 is typical. Banking more (7 or 8 columns) made every tier worse, so all bank 6. What still holds them
+back:
+- **Junk trapped on the whites' edges.** Almost every chain breaks on a column of whites with one black on
+  its bottom or one brown on its top. A black in whites only sinks and a brown only rises, so each piece of
+  junk left in the white block ends on an edge, and there it can't move at all: a black on the bottom can
+  only rise through a brown, and a brown can never get down to it through whites. They come from new
+  columns (a black low on the left as whites close round it), and from the techniques themselves (every
+  white ferried up through blacks pushes a black down; channels push browns up and blacks down).
+- **What frees them is a three-piece job.** The hook as built frees some (a partner dragged down beside
+  the trapped piece, a brown hooked in past it, then the crawl), but only with junk close by. Players keep
+  the edges clean as they go ("store blacks top-left, browns bottom-left"); the bots don't plan far enough
+  ahead to: the next step is a staircase of blacks down to the bottom for a brown to sink through, which
+  the drills name ("staircase", "raking the top/bottom").
+- **Speed isn't the limit:** the Master at three times its pace reaches the same chains. The techniques
+  are: giving the Master every routine took its mean chain from 2.3 to 3.0 on 20 boards.
+- The learner burns whites (6.5 a session) not by choice but by waiting on the furnace with too few
+  techniques to rescue them in time, which is the beginner the user described.
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
