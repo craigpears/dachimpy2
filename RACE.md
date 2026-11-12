@@ -67,10 +67,10 @@ mouth. Sitting there, you're a sitting duck for anyone coming up behind (§6).
 | Spit 1, the gun gap: an imperial gate, three squares deep, a gun either side, its marks all in the spit | A Quad from the leg rushes her past (a big Sailing chain, or a Vegas rowed each side); or shoot its guns quiet; or pay its guard; a square at a time she's holed | On the move | 14 | Built |
 | Leg 1, an old wreck in a notch, for the gate's bribe (§3, below) | Treasure Haul: 40 coins hauled up, paid at the gate in a moment, and she's towed through | Stopped dead, sheltered (the haul); a moment at the gate | 14, the gap's | Built 12 Nov |
 | Spit 2, the headwind gap, a dog-leg at its far end | Rowing (mirror strokes); idle in it and the wind blows her back out | Rowing, slowly | 25 | Built |
-| Spit 2, a small gap, one wind blowing back across it | A Double, built on the move and broken as she's lined up | On the move | 8 | Built |
+| Spit 2, a small gap, one wind blowing back across it | A Double, built on the move and broken in its mouth (it lines her up: 12 Nov) | On the move | 9 | Built |
 | Spit 3, the whirlpool channel | Only a Sailing Vegas from its mouth carries her over; less sends her back to the mouth | Stopped at the mouth, exposed | 49 | Built |
 | Spit 3, a barrier of driftwood across a gap | Foraging clears it, from the notch in front of it | Stopped dead, sheltered | 15 | Built |
-| Spit 4, the locks: a lock up and a lock down | Bilge, pumping the up lock; a sheltered berth to wait your turn in | Stopped dead, sheltered | 26 | Built |
+| Spit 4, the locks: a lock up and a lock down | Bilge, pumping the up lock; a sheltered berth to wait your turn in | Stopped dead, sheltered | 23 | Built |
 | Leg 4, the zigzag (on the long way) | Hop its headwinds with well-timed Doubles; weaving through is the no-puzzle way | On the move | 8 | Built |
 | Spit 5, the crane in a notch | Carpentry, building the crane a part at a time, which hauls her over | Stopped dead, sheltered | 38 | Built |
 | Spit 5, a gap with two winds blowing back across it | A Triple | On the move | 9 | Built |
@@ -81,7 +81,21 @@ mouth. Sitting there, you're a sitting duck for anyone coming up behind (§6).
 **Played (12 Nov).** The gun gap near the start, its imperial guns shot quiet by Gunnery, "felt a lot more
 balanced. It was really quick ... You could tell, you know, the trade-off there was a lot better": keep it
 as the model of a shortcut whose trade-off reads at once. The wind gaps were "a bit awkward to set the ship
-up to get through", and the locks' animation "frustrated and slowed down" (it was the canal, not building: "I was spending just as much time waiting for the ship to go forward"; TODO.md).
+up to get through", and the locks' animation "frustrated and slowed down" (it was the canal, not building: "I was spending just as much time waiting for the ship to go forward"). Both fixed the same day:
+- **The wind gaps line her up (decided 12 Nov).** Of the ways offered (a wider mouth, a lane funnelling her
+  to the right square, a mark where to wait, the gust lining her up), the gust: a gust big enough for the
+  hop, broken anywhere in the gap's mouth (either row of the leg, a column either side; a zigzag headwind
+  from right behind it or a square back), swings her onto the square in front of it, facing through, and
+  carries her over (`LAY.RACE.LINEUPS`, `lineUp` in `src/den-sailing.ts`). So it's the Double or Triple
+  built in time that counts, not stopping on one square facing the right way. Nothing marked (shortcuts
+  never are); no course re-laid. Only a gust that carries her clean over is lined up: a Quad in the
+  Triple's mouth would land her in the left-hand trade wind beyond, so it's a plain gust along the leg.
+  The Double's gap, broken as she sails by, saves 9 s now (8 before, when she had to stop in its mouth).
+- **The locks a beat (decided 12 Nov).** Every lock's water and gates quicker (draining or filling 0.8 s,
+  gates 0.4 s, a pumped lift's last there in a moment), and the race's two made ready each race (the up lock
+  drained, the down lock full), so only Bilge and one drain stand between her and leg 5: through in 4.3 s
+  sailed (it was 10). That made the locks save 31 s and win 41% (over the band), so they moved two squares
+  toward the bend (`LOCK_C` 13 to 11): 23 s saved, 24% won (§8, "The playtest's fixes").
 Carpentry and Duty Navigation weren't come across on that go: the crane sits in a notch off leg 5, easy to
 sail past; the door is secret by design.
 
@@ -132,8 +146,8 @@ not a new gap:
   the gatehouse's light airs as slowly as running it (7 s against a combo's 2), the bribe won 9% of its
   races at 50 coins and 13% at 30: never worth its haul, whatever the price. Paid and towed, it sits with the
   combo.
-- **Not marked:** the gate's plain to see and the guard names his price and hints at the wreck; the starter's
-  card doesn't mention it (yet). No rival takes it (their routes are as they were).
+- **Not marked:** the gate's plain to see and the guard names his price and hints at the wreck; since 12 Nov the
+  starter's card names it among the ways through ("haul up some treasure and pay off the guard at the gate"). No rival takes it (their routes are as they were).
 
 **Shortcuts not all created equal (built 11 Nov).** Shortcuts of every size, each needing a combo of its size. A
 tiny one a Double gets you through, bigger ones need a bigger combo, the biggest is the starlit door. "Are
@@ -211,7 +225,8 @@ not a shortcut: good for the back of the field, a risk for the leader.
   marked.
 - **The race explained at the start:** on the line, the starter's card: the long way round the buoys, no
   puzzle; shortcuts through the spits that cost a puzzle, a few named (bilge up through a lock, build a
-  crane, row the headwind gap, zoom over the whirlpools on a Vegas, hop a headwind with a Double), and "Get
+  crane, row the headwind gap, zoom over the whirlpools on a Vegas, hop a headwind with a Double, and since
+  12 Nov haul up some treasure and pay off the guard at the gate), and "Get
   it wrong and ye're back where ye started"; the winds that sweep you back, the left-hand trade wind most;
   and that the others shoot you if you sit still in the open. Never the starlit door: a race's rules are
   explained, its secret isn't (`src/lines/race.ts`, `STARTER.explain`).
@@ -505,6 +520,14 @@ every shortcut at once bribing at the gate instead of rushing it on a combo. 300
 - The balance test (`tests/race-sim.test.ts`) races the bribe with the rest, and checks a briber hauls
   sheltered, is never holed by the gate's guns, and that her haul is counted against the gap.
 
+**The playtest's fixes (12 Nov).** The locks' trip 10 s to 4.3 (their water and gates a beat, and made
+ready each race), and the Double's gap lined up from the leg (its trip 3.8 s to 2.2). With the locks where
+they were (saving 31 s) they won 41.2%, 1.65 of fair, over the band; a column toward the bend (28 s) 35.6%;
+two (23 s, `LOCK_C` 11) 24.1%, kept. 2000 races of four, fair 25%: the long way 30%, gap run 16%, combo 29%,
+shot quiet 21%, bribe 25%, headwind 17%, doubles 30%, whirlpools 35%, barrier 19%, locks 24%, crane 21%, door
+24%, every shortcut 32%. Styles 23–27%; skill great 46%, good 25%, decent 5%; spots left 23%, gap 27%, right
+19%. The locks save a decent player about −1 s, good and great 4 (they were −5 and +3 on the first pass).
+
 **The starlit door's stretches (12 Nov, §9).** The door's route in the simulation: Navigation at the rock;
 then at the mouth, either any clear (`SIM.PUZZLE.gust`, 8 s, assumed) to come up at the first exit, or a
 Vegas, if what it opens up is worth more to her; under the cleft she pushes on with another Vegas while
@@ -526,8 +549,8 @@ her. 3000 races of four, fair 25%:
   always comes out at an exit, both are used, and the far end wins more often than the first.
 
 **For the user to decide:**
-- The bribe's price (40 coins) and Treasure Haul's pace (1.5 s a move) are guesses till it's played. Does the
-  starter's card name it ("pay off the guard at the gate")? Should a rival bribe her way through?
+- The bribe's price (40 coins) and Treasure Haul's pace (1.5 s a move) are guesses till it's played. Should a
+  rival bribe her way through? (The starter's card names it, since 12 Nov.)
 - Once the crane's built in a race, is it built for everyone (the next racer just rides it, as the den's
   crane stays built), or does each racer build her own? The simulation has each build her own. The same
   for the starlit door once it's open.
@@ -555,7 +578,7 @@ A hidden gem, never hinted. There's no cheat, no `?at=` link, no shot, and the s
     still to hop.
   - **Or on, to the far end, onto leg 5:** under the cleft she builds the next Vegas in peace (the
     Sailing board's hers there, nothing else: no pins, no guns), and it carries her on under leg 4 and up
-    a cleft in the fourth spit's far face, beside the down lock, onto leg 5: about 119 s saved in all.
+    a cleft in the fourth spit's far face, a few squares along from the down lock, onto leg 5: about 119 s saved in all.
   - **Anything less than a Vegas spills her out, never back:** from the mouth, any clear at all carries
     her in and the draught spills her up the first cleft onto leg 3; under the cleft, less than a Vegas
     and she's spilled up it. Going in always gains something ("you should always get some benefit from

@@ -9,7 +9,7 @@
 // never marked. Touches the rest only through race.js.
 import * as THREE from 'three';
 import { LAY, SAIL } from '../den-sail.js';
-import { scene, mat, mesh, canvasTex, V3, burst } from './world.js';
+import { scene, camera, mat, mesh, canvasTex, V3, burst } from './world.js';
 import { seaX, seaZ } from './sea.js';
 
 const RC = LAY.RACE, CELL = SAIL.CELL;
@@ -31,13 +31,33 @@ function buoy(b) {
   const g = new THREE.Group(), red = mat('#c8372a', { roughness: 0.6 }), white = mat('#f4f1e8', { roughness: 0.6 });
   for (let i = 0; i < 3; i++) { const band = mesh(new THREE.CylinderGeometry(0.62 - i * 0.08, 0.7 - i * 0.08, 0.5, 14), i % 2 ? white : red); band.position.y = 0.2 + i * 0.5; g.add(band); }
   const pole = mesh(new THREE.CylinderGeometry(0.07, 0.07, 3.6, 6), mat('#3a3330')); pole.position.y = 2.9; g.add(pole);
-  const sm = [numberTex(b.n, false), numberTex(b.n, true)].map((t) => new THREE.SpriteMaterial({ map: t, depthWrite: false }));
-  const sign = new THREE.Sprite(sm[0]); sign.scale.set(2.4, 2.4, 1); sign.position.y = 4.2; g.add(sign);
-  const lamp = mesh(new THREE.SphereGeometry(0.22, 12, 8), new THREE.MeshStandardMaterial({ color: '#ffe9a0', emissive: '#ffcc33', emissiveIntensity: 0 })); lamp.position.y = 5.7; g.add(lamp);
+  // (its number's board: out of the fog, and drawn after the sea's see-through water and winds, which
+  // painted over it, since a sprite doesn't keep its depth: "usually vanish unless you're at the right
+  // distance", the user, 12 Nov. On the scene, not the buoy, so marksTick can keep it in sight: SIGN.)
+  const sm = [numberTex(b.n, false), numberTex(b.n, true)].map((t) => new THREE.SpriteMaterial({ map: t, depthWrite: false, fog: false }));
+  const sign = new THREE.Sprite(sm[0]); sign.scale.set(SIGN.SIZE, SIGN.SIZE, 1); sign.renderOrder = SIGN.ORDER; scene.add(sign);
+  const lamp = mesh(new THREE.SphereGeometry(0.22, 12, 8), new THREE.MeshStandardMaterial({ color: '#ffe9a0', emissive: '#ffcc33', emissiveIntensity: 0, fog: false })); lamp.position.y = 5.7; g.add(lamp);
   const [c, r] = b.at, toTip = b.bend === 'R' ? -1 : 1;
   g.position.set(seaX(c) + toTip * CELL * 0.35, 0, seaZ(r));
   scene.add(g);
   return { g, sign, sm, lamp, n: b.n };
+}
+/* A buoy's number in sight at any distance she'd sail by it (the user, 12 Nov: "[Buoy] markers aren't really
+   rendering properly. They're like usually vanish unless you're at the right distance"). Three things hid
+   it: the sea's see-through water and wind lanes drawn over it (drawn after them now, ORDER); the fog (it
+   has none: a mark to sail for, as the lit lamp is); and the camera's far plane, 100 out, nearer than a leg's
+   far buoy from a wide view (past NEAR it's drawn nearer along its own line of sight, scaled to look the same).
+   And far off it's never smaller than MIN of the view's height, so its number still reads. */
+const SIGN = { SIZE: 2.4, LIT: 3, Y: 4.2, ORDER: 6, NEAR: 80, MIN: 0.035 };
+const _p = new THREE.Vector3();
+function signTick(b, on, t) {
+  _p.set(0, SIGN.Y, 0); b.g.localToWorld(_p);
+  const d = _p.distanceTo(camera.position), k = d > SIGN.NEAR ? SIGN.NEAR / d : 1;
+  const view = 2 * d * Math.tan((camera.fov * Math.PI) / 360);
+  const size = Math.max(on ? SIGN.LIT + Math.sin(t * 3) * 0.15 : SIGN.SIZE, view * SIGN.MIN * (on ? 1.25 : 1));
+  if (k < 1) _p.sub(camera.position).multiplyScalar(k).add(camera.position);
+  b.sign.position.copy(_p);
+  b.sign.scale.set(size * k, size * k, 1);
 }
 /** Chequered cloth. */
 const chequer = (cols, rows) => new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, roughness: 0.9, map: canvasTex(cols * 8, rows * 8, (x) => { for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) { x.fillStyle = (i + j) % 2 ? '#111' : '#f4f1e8'; x.fillRect(i * 8, j * 8, 8, 8); } }) });
@@ -113,9 +133,10 @@ export function marksTick(dt, next) {
     const on = b.n === next;
     if (on !== (marks.lit === b.n)) b.sign.material = b.sm[on ? 1 : 0];
     b.lamp.material.emissiveIntensity = on ? 1.4 + Math.sin(t * 5) * 0.6 : 0;
-    b.sign.scale.setScalar(on ? 3 + Math.sin(t * 3) * 0.15 : 2.4);
     b.g.position.y = Math.sin(t * 1.3 + i) * 0.08;
     b.g.rotation.z = Math.sin(t * 0.9 + i) * 0.04;
+    b.g.updateMatrixWorld();
+    signTick(b, on, t);
   });
   marks.lit = next;
   const B = marks.banner;

@@ -9,8 +9,10 @@ import { describe, expect, it } from 'vitest';
 import { LAY, SAIL, Sea, Helm, type Pose } from '../src/den-sail';
 import {
   RACE, Race, GunGap, Drift, Barrier, LONG_ROUTE, stretchAt, atStart, atFinish, cleanBest, clockText, neckCrane,
-  onLine, spotPose, snakeAt, nextBuoy, barrierDeal, atNotch, FIRST_SPOT,
+  onLine, spotPose, snakeAt, nextBuoy, barrierDeal, atNotch, FIRST_SPOT, readyLocks, boardHasKey,
 } from '../src/den-race';
+import { LOCK } from '../src/den-lock';
+import { STARTER } from '../src/lines/race';
 import { sheltered } from '../src/den-racers';
 import { gustPath } from '../src/den-sailing';
 import { runFor, RUN } from '../src/sailing';
@@ -32,6 +34,23 @@ const fill = (hole: DeckHole) => { for (const p of carp.solve(hole.open(), 1)[0]
 /** Where the sweep that has her on this square leaves her. */
 const swept = (c: number, r: number, d = 0): Pose => { const h = new Helm(sea, { c, r, d }); h.gust([{ c, r, d }]); settle(h); return { ...h.pose }; };
 const G = RC.GUNS.way, B = RC.HEADWIND, M = RC.WHIRLS.MOUTH, L = RC.LOCKS, E = RC.CRANE, F = RC.FORAGE, D2 = RC.DOUBLE.WAY, T3 = RC.TRIPLE;
+/** Through the race's locks, made ready for a race, from the leg before them out onto the next, pumped at
+    once: the seconds, and the longest she sat waiting on any one thing (their water or their gates). */
+function throughLocks() {
+  const h = new Helm(sea, { c: L[0].at[0], r: L[0].at[1] - 1, d: 0 });
+  readyLocks(h);
+  for (let i = 0; i < 4; i++) h.put('F');
+  let t = 0, wait = 0, most = 0, was: string | null = null;
+  for (; t < 60 && h.pose.r < L[1].at[1] + 1; t += DT) {
+    if (h.held() === 'up') h.pump(99);
+    const held = h.held();
+    wait = held && held === was ? wait + DT : held ? DT : 0;
+    most = Math.max(most, wait);
+    was = held;
+    h.tick(DT);
+  }
+  return { t, most, at: [h.pose.c, h.pose.r] };
+}
 
 describe('where the course is: out past Primates Rule, a place of its own (11 Nov)', () => {
   it('lies past Primates Rule, behind a line of rocks with one gate, its buoy off the gate on the open sea', () => {
@@ -383,10 +402,11 @@ describe('each shortcut saves about what a decent player takes on its puzzle (11
   const cases: Record<keyof typeof RACE.DECENT, { from: Pose; to: [number, number]; trip: () => number; mid?: boolean }> = {
     guns: { from: { c: G[0][0], r: S[0].r, d: 1 }, to: [G[0][0], G[2][1] + 1], trip: () => 1 + runFor(4) * SAIL.PUSH },
     headwind: { from: { c: B[0][0], r: B[0][1] - 1, d: 3 }, to: [B[3][0], S[2].r + 1], trip: () => 1 + (B.length + 2) * WIND.OARS },
-    double: { from: { c: D2[0][0], r: D2[0][1] - 1, d: 3 }, to: [D2[2][0], S[2].r], trip: () => { const h = new Helm(sea, { c: D2[0][0], r: D2[0][1] - 1, d: 0 }); return sail(h, D2[0]) + hop(h, 2, 0) + sail(h, [D2[2][0], S[2].r]); } },
+    // (broken as she sails by on the leg: lined up and carried over, 12 Nov)
+    double: { from: { c: D2[0][0], r: D2[0][1] - 1, d: 3 }, to: [D2[2][0], S[2].r], trip: () => { const h = new Helm(sea, { c: D2[0][0], r: D2[0][1] - 1, d: 3 }); return hop(h, 2) + sail(h, [D2[2][0], S[2].r]); } },
     whirls: { from: { ...M }, to: RC.WHIRLS.OUT, trip: () => runFor(RUN.VEGAS) * SAIL.PUSH, mid: true },
     forage: { from: { c: F.NOTCH[0], r: S[2].r + 1, d: 1 }, to: F.OUT, trip: () => { const s = new Sea(9); new Barrier().clear(s); return sailTo(s, { c: F.NOTCH[0], r: S[2].r + 1, d: 0 }, F.OUT).t; } },
-    locks: { from: { c: L[0].at[0], r: L[0].at[1] - 1, d: 3 }, to: [L[1].at[0], L[1].at[1] + 1], trip: () => 10 },
+    locks: { from: { c: L[0].at[0], r: L[0].at[1] - 1, d: 3 }, to: [L[1].at[0], L[1].at[1] + 1], trip: () => throughLocks().t },
     crane: { from: { c: E.LEDGE[0], r: S[4].r + 1, d: 1 }, to: [E.TO.c, E.TO.r], trip: () => TRIP + 1 },
     triple: { from: { c: T3[0][0], r: S[4].r + 1, d: 1 }, to: [T3[0][0], S[5].r], trip: () => 1 + runFor(3) * SAIL.PUSH },
   };
@@ -496,5 +516,95 @@ describe('the starlit door\'s place (11 Nov; the door itself: den-door.test.ts)'
     const ways = new Set([...G, ...RC.GUNS.at, ...B, ...D2, ...L.map((l) => l.at), ...RC.POUND.at, E.LEDGE, F.NOTCH, ...F.BARRIER, ...F.GAP, ...RC.SNAKES.MID, ...RC.WHIRLS.WINDS].map(([c, r]) => k(c, r)));
     for (const [c, r] of [...D.FACE, ...OUT]) for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) expect(ways.has(k(c + a, r + b)), `${c + a},${r + b}`).toBe(false);
     for (const [gc, gr] of RC.GUNS.at) for (const [c, r] of D.OFF) expect(Math.max(Math.abs(c - gc), Math.abs(r - gr))).toBeGreaterThan(3);
+  });
+});
+
+/* The user's playtest of the race, 12 Nov. */
+describe('the race\'s locks: too long waiting on the animation (12 Nov)', () => {
+  // "I was spending just as much time waiting for the ship to go forward, and it was like, come on, come
+  // on ... it shouldn't feel like you're losing the race because you're waiting on the animation."
+  it('through the race\'s locks, pumped at once, in a beat: no wait on their water or gates over a second', () => {
+    const x = throughLocks();
+    expect(x.at).toEqual([L[1].at[0], L[1].at[1] + 1]);
+    expect(x.most).toBeLessThanOrEqual(1);
+    expect(x.t).toBeLessThan(5);   // (it was 10 s: 2 s to fill the down lock from above, 2 to drain it...)
+    expect(LOCK.DRAIN).toBeLessThanOrEqual(1);
+    expect(LOCK.GATES).toBeLessThanOrEqual(0.5);
+  });
+
+  it('made ready for each race: the up lock drained for her to go in, the down lock full from the canal above', () => {
+    const h = new Helm(sea);
+    const up = h.lockAt(...L[0].at)!, down = h.lockAt(...L[1].at)!;
+    up.set(1); down.set(0);   // (as a race before left them)
+    readyLocks(h);
+    expect([up.level, down.level]).toEqual([0, 1]);
+    // (and the canal's own locks, by the checkpoint, left as they were)
+    expect(h.locks.slice(0, LAY.LOCKS.length).every((l) => l.level === 0)).toBe(true);
+  });
+});
+
+describe('the race\'s wind gaps are awkward to line up for (12 Nov)', () => {
+  // "some of these wind shortcuts, it's a bit awkward to set the ship up to get through them."
+  const at = (p: Pose) => [p.c, p.r];
+  it('the Double\'s gap: a Double broken anywhere in its mouth on leg 2 lines her up and carries her over', () => {
+    for (let c = D2[0][0] - 1; c <= D2[0][0] + 1; c++) for (const r of [S[1].r, S[1].r + 1]) for (const d of [1, 3]) {
+      const g = gustPath(sea, { c, r, d }, runFor(2));
+      expect(at(g[g.length - 1]), `${c},${r} facing ${d}`).toEqual(D2[2]);
+      expect(sea.windAt(...D2[2])).toBeUndefined();
+    }
+    // From further along the leg, a Double's just a Double along it.
+    expect(at(gustPath(sea, { c: D2[0][0] + 3, r: S[1].r + 1, d: 3 }, runFor(2)).at(-1)!)).toEqual([D2[0][0] + 1, S[1].r + 1]);
+    // And played out on the helm, from the leg she's over and onto leg 3 in a couple of seconds.
+    const h = new Helm(sea, { c: D2[0][0] + 1, r: S[1].r + 1, d: 3 });
+    expect(hop(h, runFor(2))).toBeLessThan(2.5);
+    expect([h.pose.c, h.pose.r]).toEqual(D2[2]);
+  });
+
+  it('the Triple\'s gap: a Triple broken in its mouth on leg 5 lines her up and lands her on the run home; a bigger gust that would land her in the trade wind goes on along the leg', () => {
+    for (let c = T3[0][0] - 1; c <= T3[0][0] + 1; c++) for (const r of [S[4].r, S[4].r + 1]) {
+      const g = gustPath(sea, { c, r, d: 1 }, runFor(3));
+      expect(at(g[g.length - 1]), `${c},${r}`).toEqual([T3[0][0], S[5].r]);
+    }
+    for (const p of gustPath(sea, { c: T3[0][0] - 1, r: S[4].r + 1, d: 1 }, runFor(4))) expect(snakeAt(p.c, p.r)).toBeNull();
+    // (a Double's too little for it: just a Double along the leg)
+    expect(gustPath(sea, { c: T3[0][0], r: S[4].r + 1, d: 1 }, runFor(2)).every((p) => p.r === S[4].r + 1)).toBe(true);
+  });
+
+  it('the zigzag: a Double broken right behind a headwind, or a square further back, hops it', () => {
+    for (const [c, r] of RC.ZIGZAG) for (const back of [1, 2]) {
+      const g = gustPath(sea, { c: c + back, r, d: 3 }, runFor(2));
+      expect(at(g[g.length - 1]), `${c},${r} from ${back} back`).toEqual([c - 1, r]);
+      expect(sea.windAt(c - 1, r)).toBeUndefined();
+    }
+  });
+
+  it('their savings stay in band: the Double\'s gap from the leg saves about RACE.DECENT.double', () => {
+    const h = new Helm(shut(...WAYS), { c: D2[0][0], r: D2[0][1] - 1, d: 3 }), long = sail(h, [D2[2][0], S[2].r]);
+    const g = new Helm(sea, { c: D2[0][0], r: D2[0][1] - 1, d: 3 }), trip = hop(g, runFor(2)) + sail(g, [D2[2][0], S[2].r]);
+    expect(long - trip).toBeGreaterThan(RACE.DECENT.double * 0.75);
+    expect(long - trip).toBeLessThan(RACE.DECENT.double * 1.25);
+  });
+});
+
+describe('Space at the race\'s start buoy, with the Sailing board open (12 Nov)', () => {
+  it('goes to the board, not in to the starting line; with it put away, Space takes her in', () => {
+    const race = new Race(), h = new Helm(sea, { c: RC.BUOY[0], r: RC.BUOY[1], d: 0 });
+    expect(race.takes(' ', h, true)).toBe(false);
+    expect(race.takes('enter', h, true)).toBe(false);
+    expect(boardHasKey(' ', true)).toBe(true);
+    expect(race.takes(' ', h, false)).toBe(true);
+    expect(boardHasKey(' ', false)).toBe(false);
+    expect(race.takes('w', h, false)).toBe(false);
+    race.start();
+    expect(race.takes(' ', h, false)).toBe(false);   // (not with one on)
+  });
+});
+
+describe('the starter\'s card names the bribe at the gate (12 Nov)', () => {
+  it('pay off the guard at the gate, among the ways through; never the starlit door', () => {
+    const card = STARTER.explain.join(' ');
+    expect(card).toMatch(/pay off the guard at the gate/);
+    expect(card).toMatch(/treasure/);
+    expect(card).not.toMatch(/\bdoor\b|\bstar(s|lit)?\b|navigation|tunnel/i);
   });
 });

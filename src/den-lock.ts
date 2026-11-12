@@ -24,18 +24,25 @@ export const LOCK = {
       locks are incredibly [bilge] heavy now because we've got the rowing to get in ... a bit of
       balancing on how much bilging is needed"). */
   WORK: 7,
+  /* Its water and its gates are a beat, not a wait (the user, 12 Nov, racing through the race's locks:
+     "I was spending just as much time waiting for the ship to go forward, and it was like, come on, come
+     on ... there should be a bit of an animation, but, like, it shouldn't feel like you're losing the
+     race because you're waiting on the animation"). They were 2 s to drain or fill, 0.8 s for the gates,
+     and the last of a pumped lift easing in over a second and more. */
   /** Seconds it takes to drain down, or to fill from above, by itself. */
-  DRAIN: 2,
+  DRAIN: 0.8,
   /** Its water rising to what's been pumped (see lockRise): at least this much of the lift a
-      second, quicker the further it has to go, so each clear lifts it a step you can see. */
-  RISE: 0.15,
+      second, quicker the further it has to go (RISE_K of what's left a second), so each clear lifts it
+      a step you can see, and it's there in a moment. */
+  RISE: 0.6,
+  RISE_K: 7,
   /** Seconds the gates take to swing open once its water's where she needs it. */
-  GATES: 0.8,
+  GATES: 0.4,
   /** What the pilot reckons a lock costs her, in seconds (src/den-sail.ts weighs a course by the
       clock): going up, a go of Bilge; going down, the water running out and the gates. So she never
       goes through locks she has no need to, and the secret way round is yours to find. */
   COST_UP: 28,
-  COST_DOWN: 4,
+  COST_DOWN: 2,
 } as const;
 
 /** Where a lock stands on the sea's board: its square, the way from its low side to its high side
@@ -55,7 +62,7 @@ export function ends(s: LockSpot): { low: [number, number]; high: [number, numbe
 /** Its water, rising (or falling) towards where it's headed: a step at a time as each clear is
     pumped in, smoothly, never in one jump, and there within a second or so. */
 export function lockRise(level: number, to: number, dt: number): number {
-  const d = to - level, step = Math.max(LOCK.RISE * dt, Math.abs(d) * Math.min(1, dt * 3));
+  const d = to - level, step = Math.max(LOCK.RISE * dt, Math.abs(d) * Math.min(1, dt * LOCK.RISE_K));
   return Math.abs(d) <= step ? to : level + Math.sign(d) * step;
 }
 
@@ -117,6 +124,10 @@ export class Lock {
     this.gates = 0;
     return dt - use;
   }
+
+  /** Set to `level` (0 drained, 1 full), still, its gates at rest: ready for whoever comes next (the
+      race's locks, for each new race: src/den-race.ts, readyLocks). */
+  set(level: 0 | 1) { this.level = this.fill = level; this.gates = 0; }
 
   /** Which of its ends are open (for drawing): the low side's when its water's down, the high
       side's when it's up. */

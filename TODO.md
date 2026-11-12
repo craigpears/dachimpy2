@@ -280,27 +280,12 @@ the site (`.assetsignore` skips `*.md`).
   carries her forward and half the time back, and a whirlpool whose spin goes back and forth, to time a
   gamble on (RACE.md §4, "Gambles"). After the bribe gate and the tunnel's exits are in.
 
-- **The race's wind gaps are awkward to line up for (12 Nov):** "some of these wind shortcuts, it's a bit
-  awkward to set the ship up to get through them." The Double's and Triple's gaps (and the zigzag's
-  hops) want to be easy to get lined up for, so the puzzle's the challenge, not the steering.
-- **The race's locks: too long waiting on the animation (12 Nov):** "the animation I'm talking about is
-  [bilging]. So when you're going through the canal ... I was spending just as much time waiting for the
-  ship to go forward, and it was like, come on, come on ... there should be a bit of an animation, but,
-  like, it shouldn't feel like you're losing the race because you're waiting on the animation." So the
-  lock's filling, gates and her moving through it quick, a beat rather than a wait.
-- **The race's buoy markers vanish (12 Nov):** "[Buoy] markers aren't really rendering properly. They're
-  like usually vanish unless you're at the right distance." The numbered buoys and the next one lit
-  should show at any distance you'd sail by them.
-
 - **The sea's fog shading jumps about as the camera turns (12 Nov):** "At different camera angles, the
   kind of ... fog of war kind of shading seems to jump about. It's like bouncing back and forth, like you
   can't decide where it's going to shade." The shading should stay put on the water as the camera moves.
   (Seen alongside: the distant water looking oddly dark in wide shots, 11 Nov.)
 
 ## Spotted along the way (not asked for)
-
-- **Space at the race's start buoy, with the Sailing board open (12 Nov, spotted by the agent fixing
-  Sailing):** it takes you to the starting line rather than going to the board.
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
 - **Your den's preview** shows your flag on every tab. The Shack tab could show the shack itself

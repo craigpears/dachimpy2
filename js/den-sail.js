@@ -167,7 +167,7 @@ const RACE_LAY = (() => {
     const SPITS = [{ r0: R0 + 10, r1: R0 + 12, bend: 'R' }, { r0: R0 + 15, r1: R0 + 17, bend: 'L' }, { r0: R0 + 20, r1: R0 + 25, bend: 'R' }, { r0: R0 + 28, r1: R0 + 30, bend: 'L' }, { r0: R0 + 33, r1: R0 + 34, bend: 'R' }];
     const S = SPITS, T = STRETCHES;
     /** The columns everything's laid at (the few numbers to rework the course by). */
-    const GUN_C = 21, WRECK_C = 16, HEAD_C = 12, DOUBLE_C = 6, MID_C = 19, DOOR_C = 15, WHIRL_C = 12, FORAGE_C = 20, LOCK_C = 13, CRANE_C = 12, TRIPLE_C = 22, FIN_C = 4;
+    const GUN_C = 21, WRECK_C = 16, HEAD_C = 12, DOUBLE_C = 6, MID_C = 19, DOOR_C = 15, WHIRL_C = 12, FORAGE_C = 20, LOCK_C = 11, CRANE_C = 12, TRIPLE_C = 22, FIN_C = 4;
     const winds = [];
     const wind = (c, r, d) => winds.push([c, r, d]);
     // The left-hand trade wind: up the left-hand edge from the run home's second row to the starting
@@ -268,8 +268,24 @@ const RACE_LAY = (() => {
         if (c !== 8 && c !== 9)
             reef.push([c, R0]);
     const bendC = (s) => (s.bend === 'R' ? W - 2 : 2);
+    // The wind gaps' mouths (12 Nov: "it's a bit awkward to set the ship up to get through them"): a gust
+    // big enough to hop one, broken anywhere in its mouth, lines her up and carries her over (Lineup).
+    const sq = (c0, c1, r0, r1) => { const o = []; for (let c = c0; c <= c1; c++)
+        for (let r = r0; r <= r1; r++)
+            o.push([c, r]); return o; };
+    const lineups = [
+        // [B] the Double's gap: from leg 2, either row, a column either side of it (and its way in).
+        { from: [...sq(DOUBLE_C - 1, DOUBLE_C + 1, T[1].r, T[1].r + 1), double[0]], start: { c: double[0][0], r: double[0][1], d: 0 }, need: 2 },
+        // [E] the Triple's gap: from leg 5, either row, a column either side of it.
+        { from: sq(TRIPLE_C - 1, TRIPLE_C + 1, T[4].r, T[4].r + 1), start: { c: TRIPLE_C, r: T[4].r + 1, d: 0 }, need: 3 },
+        // The zigzag's headwinds: from right behind one, or a square further back, sailing along at it.
+        ...zigzag.map(([c, r]) => ({ from: [[c + 1, r], [c + 2, r]], start: { c: c + 1, r, d: 3 }, need: 2, facing: true })),
+    ];
     return {
         R0, STRETCHES, SPITS,
+        /** The wind gaps' mouths: from any of a mouth's squares, a gust of a hop's size lines her up and
+            carries her over (src/den-sailing.ts, gustPath). */
+        LINEUPS: lineups,
         /** The line of rocks across the sea in front of it, and its gate (from the open sea). */
         REEF: reef,
         GATE: [[8, R0], [9, R0]],
@@ -710,6 +726,8 @@ export class Sea {
         else stops short of it, so sailing by you never stumble through: 11 Nov). */
     passage = new Set();
     mouths = [];
+    /** The wind gaps' mouths, where a gust lines her up to hop one (Lineup; the race's: LAY.RACE.LINEUPS). */
+    lineups = [];
     /** The reef's rocks, drawn as one line of them (js/den/reef.js): the checkpoint's reef, out from
         its right-hand gun to the sea's edge but where the passage runs through it, and the rocks round
         the whirlpools and round Vegas Island. Rocks like any other to sail by. */
@@ -845,6 +863,7 @@ export class Sea {
             this.passage.add(key(c, r));
         }
         this.mouths.push({ ...RC.WHIRLS.MOUTH });
+        this.lineups.push(...RC.LINEUPS);
         for (const spot of RC.FIELD.POOLS) {
             const w = whirlpool(spot);
             for (const [c, r] of w.squares)

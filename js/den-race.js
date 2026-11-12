@@ -76,8 +76,9 @@ export const RACE = {
         the course's second pass) to what the simulation recommended (src/race-sim.ts, RACE.md §8): a
         shortcut pays only for a player good at its puzzle. A heavy combo through the gun gap; a few
         squares rowed by mirror strokes; a Vegas; a lock pumped up by Bilge and another drained; three
-        frames of Carpentry; a barrier cleared by Foraging; and the gaps a Double and a Triple hop. */
-    DECENT: { guns: 14, headwind: 25, whirls: 49, locks: 26, crane: 38, forage: 15, double: 8, triple: 9 },
+        frames of Carpentry; a barrier cleared by Foraging; and the gaps a Double and a Triple hop. The
+        locks' went from 26 to 31 (12 Nov) when their water and gates became a beat, not a wait (LOCK). */
+    DECENT: { guns: 14, headwind: 25, whirls: 49, locks: 23, crane: 38, forage: 15, double: 9, triple: 9 },
     /** The long way's own spot on the starting line: where the long way's route starts (LONG_ROUTE), and
         what the simulation measures every other spot against (src/race-sim.ts, SIM.SPOTS). */
     LONG_SPOT: 13,
@@ -100,6 +101,11 @@ export const RACE = {
         to come; cleared when they've all dropped out of the bottom (src/foraging.ts: the board's done). */
     FORAGE: { BUNDLES: [[4, 2], [3, 4]] },
 };
+/** With the Sailing board open at sea, Space and Enter are the board's (Space drops its pair faster), never
+    the race's: not the buoy's, the gate's guard's, the crane's or the barrier's (the user's playtest, 12 Nov:
+    Space at the start buoy with the board open took her in to the starting line). Under the starlit door's
+    cleft the board's hers as well (js/den/door.js lets its keys through). */
+export const boardHasKey = (key, board) => board && (key === ' ' || key === 'enter');
 /** By the starting buoy: where Space takes her in to the starting line. */
 export const atStart = (c, r) => c >= RC.START.c0 && c <= RC.START.c1 && r >= RC.START.r0 && r <= RC.START.r1;
 /** Anywhere on the course: behind its line of rocks. */
@@ -170,6 +176,14 @@ export class Race {
     taken(c) { return this.racing().some((r) => r.spot === c); }
     /** The furthest stretch she's reached in order (0 the first leg): every one counts, a shortcut's or not. */
     get leg() { return this.field.racers[0].leg; }
+    /** Whether Space (`key`, as js/den gets it) by the buoy takes her in to the starting line: by it, lying
+        still, no race on, and the Sailing board not open (`board`): with it open, Space is the board's,
+        dropping its pair faster (12 Nov: Space at the buoy with the board open took her to the line). */
+    takes(key, h, board) {
+        if (boardHasKey(key, board) || (key !== ' ' && key !== 'enter'))
+            return false;
+        return atStart(h.pose.c, h.pose.r) && h.slot < 0 && !h.held() && this.state !== 'count' && this.state !== 'on';
+    }
     /** In to the starting line from the buoy, to pick her spot. Not while one's on. */
     take() {
         if (this.state === 'count' || this.state === 'on')
@@ -390,6 +404,20 @@ export class Drift {
         this.idle = 0;
         const i = RC.HEADWIND.findIndex(([c, r]) => c === p.c && r === p.r), [c, r] = i > 0 ? RC.HEADWIND[i - 1] : [p.c, p.r - 1];
         return { c, r, d: p.d };
+    }
+}
+/** [D] The locks made ready for a race: each one's water at the side she comes to it from, so going down
+    the course she's let in as she comes (the up lock drained, the down lock full from the canal above), and
+    only Bilge and the down lock draining stand between her and the far side. Before (12 Nov), the down lock
+    lay drained as they all start, and she sat while it filled from above before it drained again: "it
+    shouldn't feel like you're losing the race because you're waiting on the animation." `h`'s locks, the
+    race's (LAY.RACE.LOCKS) only. */
+export function readyLocks(h) {
+    for (const s of RC.LOCKS) {
+        const l = h.lockAt(...s.at);
+        // (she comes to each from the row before it: one whose high side is that way, 2, she goes into full)
+        if (l)
+            l.set(s.up === 2 ? 1 : 0);
     }
 }
 /** [E] The crane in its notch: the cliff's crane's rules (src/den-crane.ts), its ledge here: she lies in

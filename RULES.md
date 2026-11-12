@@ -772,8 +772,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       and water gushing into the lock as you bilge ("we need the actual bilge pump"). The board
       reads the right way up from the quay (9 Nov: it looked "upside down"). Once it's full the
       top gates swing open and, once they're open, she sails on up the canal behind the cliff, its
-      water higher. Coming back down, the lock drains by itself in a couple of seconds, and she
-      waits for the gates again before she sails out. Esc while she waits lets her off. (A
+      water higher. Coming back down, the lock drains by itself in under a second, and she
+      waits for the gates again before she sails out. Its water and gates are a beat, never a wait
+      (12 Nov, racing: "it shouldn't feel like you're losing the race because you're waiting on the
+      animation"): draining or filling by itself 0.8 s, its gates 0.4 s, and the last of a pumped lift
+      there in a moment (`LOCK` in `src/den-lock.ts`; they were 2 s, 0.8 s and over a second). Esc while she waits lets her off. (A
       shortcut that costs puzzle work, not reflexes: IDEAS.md, "Locks on a canal".)
     - **A chain of locks, the secret way round the checkpoint (10 Nov).** The user: "make it a bit
       more of a journey ... be more than just the one lock ... maybe there's 4 or 5 or something in
@@ -2114,8 +2117,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     way's clear of them): a Quad from the leg rushes her past them, a square at a time she's holed, or shoot
     them quiet (14 s); spit 2, the headwind gap, rowed, its far end a dog-leg so it doesn't open straight onto
     leg 3 and out of the gun gap's reach (30 s), and a small gap with one wind blowing back across it that a
-    well-timed Double hops (8 s); spit 3, the whirlpool channel, only a Vegas from its mouth (46 s), and a
-    barrier of driftwood across a gap, cleared by Foraging (15 s); spit 4, the locks (26 s); spit 5, the crane
+    well-timed Double hops (9 s); spit 3, the whirlpool channel, only a Vegas from its mouth (46 s), and a
+    barrier of driftwood across a gap, cleared by Foraging (15 s); spit 4, the locks (23 s); spit 5, the crane
     (38 s), and a gap with two winds that a Triple hops (9 s); and the starlit door (40 s up at leg 3, 119 on to leg 5). On the long way,
     leg 4 before the locks is the zigzag: headwinds blowing back along it, alternating side to side with gaps
     between, a wind behind her there so she can weave either way; weaving through takes about 17 s, hopping
@@ -2168,8 +2171,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     browser.
   - **The race explained (11 Nov: "Here are your options"):** the starter's card on the line: the long way,
     shortcuts that cost a puzzle with a few named (bilge up through a lock, build a crane, row the headwind
-    gap, zoom over the whirlpools on a Vegas, hop a headwind with a Double), the snakes, and that the others
-    shoot you if you sit still in the open. Never where a shortcut is or how beyond that, and never the
+    gap, zoom over the whirlpools on a Vegas, hop a headwind with a Double, and since 12 Nov haul up some
+    treasure and pay off the guard at the gate), the snakes, and that the others shoot you if you sit still
+    in the open. Never where a shortcut is or how beyond that, and never the
     starlit door.
   - **Racers shoot each other (11 Nov):** "I definitely want to be able to shoot other racers. That's
     absolutely part of this." Q and E fire her broadside, as anywhere at sea: a rival on its squares, before
@@ -2237,6 +2241,32 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       boards aren't drawn yet (nobody watched rows). Only the racer you follow plays hers; each keeps her
       boards as she left them.
     - **The door stays a secret:** nobody watched takes it, and nothing said names it (tested).
+  - **From the user's playtest (12 Nov), as built:**
+    - **The locks a beat, not a wait:** "I was spending just as much time waiting for the ship to go forward
+      ... it shouldn't feel like you're losing the race because you're waiting on the animation." A lock's
+      water and gates are quick wherever locks are (above: 0.8 s to drain or fill, 0.4 s its gates, the
+      last of a lift there in a moment), and the race's locks are made ready for each race (`readyLocks`):
+      the up lock drained to go into, the down lock full from the canal to go into, so nothing fills that
+      only drains again. Pumped up, she's through both and out on leg 5 in about two and a half seconds
+      (the whole trip, sailed, 4.3 s; it was 10). The locks moved two squares toward the bend (column 11)
+      to keep their saving honest (23 s; RACE.md §8).
+    - **The buoys' numbers seen at any distance:** "[Buoy] markers ... usually vanish unless you're at the
+      right distance." Their boards were painted over by the sea's see-through water and wind lanes (a
+      sprite keeps no depth), faded by the fog, and past the camera's far plane from a wide view. Now drawn
+      after the water, out of the fog, kept inside the far plane along their own line of sight (looking
+      the same size), and never smaller than about a thirtieth of the view's height (`js/den/race-marks.js`).
+    - **The wind gaps lined up for you:** "it's a bit awkward to set the ship up to get through them." A
+      gust big enough to hop a gap, broken anywhere in its mouth, swings her onto the square in front of it,
+      facing through, and carries her on over (`LAY.RACE.LINEUPS`; `src/den-sailing.ts`, `lineUp`): the
+      Double's gap from either row of leg 2 a column either side of it, the Triple's from either row of leg
+      5 a column either side; a zigzag headwind from right behind it or a square further back, sailing at
+      it. Only if it carries her clean over (ending clear of any wind or whirlpool); else it's a plain gust.
+      Never marked. The Double's gap saves 9 s now (it was 8).
+    - **Space at the start buoy with the Sailing board open is the board's:** it speeds the pair, never takes
+      her in to the starting line (or pays the gate's guard, or anything of the race's): `boardHasKey`,
+      `Race.takes`.
+    - **The starter's card names the bribe:** "haul up some treasure and pay off the guard at the gate",
+      among the ways through. The starlit door stays unmentioned.
   `?at=race` and one cheat. Rules: `src/den-race.ts`; drawn and played by `js/den/race.js`, its start
   `js/den/race-start.js`, its buoys and finish `js/den/race-marks.js`, its barrier `js/den/race-forage.js`;
   the starter's lines `src/lines/race.ts`.
@@ -2282,7 +2312,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       trip 3.1 s). Back among the field, in the open as anywhere, the trade wind up the middle still to hop.
       The camera watches her from the leg's side till she's out from behind the door's crag.
     - **A Vegas under the cleft** carries her on under leg 4 and up the far cleft (in the fourth spit's
-      far face beside the down lock, 67 out) onto leg 5 (68 out): about 119 seconds saved in all
+      far face a few squares along from the down lock, 67 out) onto leg 5 (68 out): about 119 seconds saved in all
       (`DOOR.SAVES`, tested; the long way, legs 2 to 5, sails in about 125, her trip 6.8 s).
     - **Less than a Vegas, she's spilled up the last cleft she passed, never back to the mouth:** any
       clear at all from the mouth carries her in and the draught spills her up the first cleft onto leg 3;

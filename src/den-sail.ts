@@ -28,6 +28,12 @@ export type Move = 'F' | 'L' | 'R';
 /** Where she is: a square of the board (c across, r out to sea from the cove) and the way she's
     facing (0 out to sea, 1 right as seen from the den, 2 back in to the cove, 3 left). */
 export interface Pose { c: number; r: number; d: number }
+/** A wind gap's mouth (the race's, 12 Nov): a gust of at least `need` squares, given while she's on one of
+    its squares `from` (and facing as `start` does, if `facing`), first swings her onto `start`, lined up,
+    and then carries her its squares on from there: over the gap, as if she'd stopped there just so
+    (src/den-sailing.ts, gustPath). The user: "some of these wind shortcuts, it's a bit awkward to set the
+    ship up to get through them": the puzzle's the challenge, not the steering. */
+export interface Lineup { from: [number, number][]; start: Pose; need: number; facing?: boolean }
 
 export const SAIL = {
   /** The board: squares across and out to sea. Grown (10 Nov) from 16 by 14 to make room for the
@@ -178,7 +184,7 @@ const RACE_LAY = (() => {
   const SPITS = [{ r0: R0 + 10, r1: R0 + 12, bend: 'R' }, { r0: R0 + 15, r1: R0 + 17, bend: 'L' }, { r0: R0 + 20, r1: R0 + 25, bend: 'R' }, { r0: R0 + 28, r1: R0 + 30, bend: 'L' }, { r0: R0 + 33, r1: R0 + 34, bend: 'R' }] as const;
   const S = SPITS, T = STRETCHES;
   /** The columns everything's laid at (the few numbers to rework the course by). */
-  const GUN_C = 21, WRECK_C = 16, HEAD_C = 12, DOUBLE_C = 6, MID_C = 19, DOOR_C = 15, WHIRL_C = 12, FORAGE_C = 20, LOCK_C = 13, CRANE_C = 12, TRIPLE_C = 22, FIN_C = 4;
+  const GUN_C = 21, WRECK_C = 16, HEAD_C = 12, DOUBLE_C = 6, MID_C = 19, DOOR_C = 15, WHIRL_C = 12, FORAGE_C = 20, LOCK_C = 11, CRANE_C = 12, TRIPLE_C = 22, FIN_C = 4;
   const winds: [number, number, number][] = [];
   const wind = (c: number, r: number, d: number) => winds.push([c, r, d]);
 
@@ -266,8 +272,22 @@ const RACE_LAY = (() => {
   const reef: [number, number][] = [];
   for (let c = 0; c < W; c++) if (c !== 8 && c !== 9) reef.push([c, R0]);
   const bendC = (s: (typeof S)[number]) => (s.bend === 'R' ? W - 2 : 2);
+  // The wind gaps' mouths (12 Nov: "it's a bit awkward to set the ship up to get through them"): a gust
+  // big enough to hop one, broken anywhere in its mouth, lines her up and carries her over (Lineup).
+  const sq = (c0: number, c1: number, r0: number, r1: number) => { const o: [number, number][] = []; for (let c = c0; c <= c1; c++) for (let r = r0; r <= r1; r++) o.push([c, r]); return o; };
+  const lineups: Lineup[] = [
+    // [B] the Double's gap: from leg 2, either row, a column either side of it (and its way in).
+    { from: [...sq(DOUBLE_C - 1, DOUBLE_C + 1, T[1].r, T[1].r + 1), double[0]], start: { c: double[0][0], r: double[0][1], d: 0 }, need: 2 },
+    // [E] the Triple's gap: from leg 5, either row, a column either side of it.
+    { from: sq(TRIPLE_C - 1, TRIPLE_C + 1, T[4].r, T[4].r + 1), start: { c: TRIPLE_C, r: T[4].r + 1, d: 0 }, need: 3 },
+    // The zigzag's headwinds: from right behind one, or a square further back, sailing along at it.
+    ...zigzag.map(([c, r]): Lineup => ({ from: [[c + 1, r], [c + 2, r]], start: { c: c + 1, r, d: 3 }, need: 2, facing: true })),
+  ];
   return {
     R0, STRETCHES, SPITS,
+    /** The wind gaps' mouths: from any of a mouth's squares, a gust of a hop's size lines her up and
+        carries her over (src/den-sailing.ts, gustPath). */
+    LINEUPS: lineups,
     /** The line of rocks across the sea in front of it, and its gate (from the open sea). */
     REEF: reef,
     GATE: [[8, R0], [9, R0]] as [number, number][],
@@ -712,6 +732,8 @@ export class Sea {
       else stops short of it, so sailing by you never stumble through: 11 Nov). */
   passage = new Set<string>();
   mouths: Pose[] = [];
+  /** The wind gaps' mouths, where a gust lines her up to hop one (Lineup; the race's: LAY.RACE.LINEUPS). */
+  lineups: Lineup[] = [];
   /** The reef's rocks, drawn as one line of them (js/den/reef.js): the checkpoint's reef, out from
       its right-hand gun to the sea's edge but where the passage runs through it, and the rocks round
       the whirlpools and round Vegas Island. Rocks like any other to sail by. */
@@ -802,6 +824,7 @@ export class Sea {
     }
     for (const [c, r, d] of RC.WHIRLS.WINDS) { this.wind.set(key(c, r), d); this.passage.add(key(c, r)); }
     this.mouths.push({ ...RC.WHIRLS.MOUTH });
+    this.lineups.push(...RC.LINEUPS);
     for (const spot of RC.FIELD.POOLS) { const w = whirlpool(spot); for (const [c, r] of w.squares) this.whirls.set(key(c, r), w); }
     for (const [c, r, d] of RC.WINDS) this.wind.set(key(c, r), d);
     this.locks.push(...RC.LOCKS.map((l) => ({ ...l, at: [...l.at] as [number, number] })));
