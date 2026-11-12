@@ -714,6 +714,12 @@ Different tracks for different teams are possible too. "All just ideas." It woul
 (several racers), shared shortcuts (one racer's crane or opened wind used by her team; §12's open
 question of whether a crane is everyone's), and the bribe gate as the final toll.
 
+- **The den's characters along the course (idea, 12 Nov):** "making the course have a bit more
+  personality and come alive ... bring in the different characters", even just lines in speech bubbles
+  as you pass: Gravee painting the race, its best moments her paintings at the finish; Helium (once he's
+  in) providing the rum; Mischievious putting up banners and styling the event. Scenery and talk only,
+  never a change to the racing. IDEAS.md, "The race course coming alive".
+
 ## 11. Puzzles still to fit in (ideas)
 
 - **Rigging:** a passage of shifting, gusty winds where you keep re-trimming. The six pulleys are six
