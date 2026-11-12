@@ -13,7 +13,8 @@
 
    So:
    - The door: a stretch of plain cliff on the second spit, off leg 2 (FACE, the water off it OFF), with
-     faint marks in the rock for anyone looking closely, never pointed out ("Hidden gems, never hinted").
+     faint marks in the rock for anyone looking closely (built as a hidden gem; since 12 Nov the starter
+     names it, and it has a cheat and ?at=door: RULES.md, "No hidden gems in the proof of concept").
      Stop off it and Space, and Duty Navigation (src/navigation.ts, its one module) stands in front of
      the rock as the night sky; each constellation filled lights its stars on the rock, in their places
      on the wheel. Its run is two small ones dealt as ever (NAV), about a minute's navigating, so it pays
