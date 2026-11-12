@@ -345,6 +345,30 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   blasted away", an idea till now). After the course editor lands, as it moves the course's numbers.
 
 
+- **The race's next pass, from reading the chart (12 Nov).** After the course editor and online racing
+  land, as all of it moves the course's numbers:
+  - **Fewer gambles, none by the finish:** "I don't think we want that many gambles. That's far too near
+    to the finish for a gamble. That will make people very cranky." The veiled wind through the last
+    spit goes; the turning pool stays (to confirm: whether one gamble is the most, or another goes early).
+  - **The imperial gate's bribe isn't worth its puzzle:** "doing an entire puzzle to get through one gate
+    that doesn't save you too much time, that doesn't feel like it's been balanced." The gate saves 14 s
+    against a whole Treasure Haul: make the haul shorter or the gate worth more, checked by the
+    simulation.
+  - **Slow winds, as Puzzle Pirates' are, besides the trade winds:** "we need two different kinds of
+    [winds]. Like the trade wind kind that really just blows you and you don't get the chance, but you
+    also need the slower wind that only nudges you one per turn." So the sea's moves go in Puzzle Pirates'
+    order: each move, first the sloop's own (left, forward, right, or stay), then the square she's on acts
+    once: a slow wind pushes her one square its way, a whirlpool turns her to its opposite corner (as it
+    already does). Trade winds stay instant (the snakes, and the lanes a Vegas or a Double hops). The
+    start's field is slow winds and whirlpools: "you would say left into a whirlpool because the wind
+    action then takes you one tile further up, so that kind of navigating and eyeballing the route",
+    which is what the starter's "plan the fastest way in" was meant to be and today isn't.
+  - **The start's field different each race:** "there should be some element of randomness to it so
+    that it's not the same on every single thing": its pools and slow winds laid from the race's seed
+    (the same seed for everyone in an online race), always with a way through.
+  - **Rocks blasted away by her guns,** above.
+
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.

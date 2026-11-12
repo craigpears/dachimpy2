@@ -783,6 +783,13 @@ question of whether a crane is everyone's), and the bribe gate as the final toll
   what each shortcut saves). Replays (above) are cheap for the same reason the boards are: seeds and moves.
   Not started; after the first course has been playtested.
 
+- **Shortcuts that change from race to race (idea, 12 Nov):** "if [this] does get too complicated as a
+  course, you can always have shortcuts be different each time. Like some of them can be a double hop for
+  sails ... These little sections are all ... relatively interchangeable at points." So a spit's gap
+  could hold any of a pool of shortcuts (a Double's hop, rowing, a barrier, rocks to blast, a lock),
+  picked from the race's seed, the course's shape staying the same: every race a little different, and
+  the simulation checking each mix stays fair. Builds on the course editor's course-as-data.
+
 ## 11. Puzzles still to fit in (ideas)
 
 - **Rigging:** a passage of shifting, gusty winds where you keep re-trimming. The six pulleys are six
