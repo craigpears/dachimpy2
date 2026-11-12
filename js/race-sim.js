@@ -1034,6 +1034,20 @@ export function simulate(o) {
 export function simDrive(field, rivals, seed = Math.floor(Math.random() * 2 ** 31)) {
     return sail({ field, seed, racers: rivals.map((r) => ({ route: route(r.racer.route), style: style(r.racer.style), skill: r.racer.skill, spot: r.spot })) });
 }
+/** The course's fingerprint, as the race's chart records it (tools/race-map.mjs, changelog/race-map.jpg's JPEG
+    comment; tests/race-chart.test.ts compares them, 12 Nov: "hopefully we're keeping this [race map] JPEG in
+    sync"): a short hash of everything the chart draws from, the den's own course as laid (every square of it)
+    and what each shortcut saves. */
+export function chartFingerprint(lay = DEFAULT_LAY) {
+    const { COURSE: _k, CUSTOM: _c, CODE: _d, ...squares } = lay;
+    const s = JSON.stringify({ squares, decent: RACE.DECENT, door: DOOR.SAVES, zigzag: SIM.ZIGZAG, long: SIM.LONG });
+    let h = 0x811c9dc5;
+    for (let i = 0; i < s.length; i++) {
+        h ^= s.charCodeAt(i);
+        h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    return h.toString(16).padStart(8, '0');
+}
 export const zoneOf = (c) => (c < 16 ? 'left' : c <= 20 ? 'gap' : 'right');
 /** A standard field of `size` from seed `seed`: each racer a route drawn at random (no two alike), a
     style and a skill drawn at random, and a spot on the line: half go for the field's gap (the quickest

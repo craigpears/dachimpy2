@@ -1028,6 +1028,18 @@ export function simDrive(field: Field, rivals: readonly Rival[], seed = Math.flo
   return sail({ field, seed, racers: rivals.map((r) => ({ route: route(r.racer.route), style: style(r.racer.style), skill: r.racer.skill, spot: r.spot })) });
 }
 
+/** The course's fingerprint, as the race's chart records it (tools/race-map.mjs, changelog/race-map.jpg's JPEG
+    comment; tests/race-chart.test.ts compares them, 12 Nov: "hopefully we're keeping this [race map] JPEG in
+    sync"): a short hash of everything the chart draws from, the den's own course as laid (every square of it)
+    and what each shortcut saves. */
+export function chartFingerprint(lay: RaceLay = DEFAULT_LAY): string {
+  const { COURSE: _k, CUSTOM: _c, CODE: _d, ...squares } = lay;
+  const s = JSON.stringify({ squares, decent: RACE.DECENT, door: DOOR.SAVES, zigzag: SIM.ZIGZAG, long: SIM.LONG });
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+  return h.toString(16).padStart(8, '0');
+}
+
 /* ---- Many races ---- */
 
 export interface Tally { n: number; wins: number; time: number; hitsTaken: number; hitsGiven: number }

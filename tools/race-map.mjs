@@ -15,18 +15,26 @@
 
    Run on the compiled js (npm run build first) with Node 22:
      node_modules/node/bin/node.exe tools/race-map.mjs <out.html> [races] [size]
-   races (default 2000, about a minute) and size (racers in each, default 4) as tools/race-sim.mjs. */
+   races (default 2000, about a minute) and size (racers in each, default 4) as tools/race-sim.mjs. With
+   JPG=changelog/race-map.jpg it also writes the chart alone as that picture (1280 wide, by sharp), stamped with
+   the course's fingerprint (chartFingerprint, src/race-sim.ts) in a JPEG comment, so tests/race-chart.test.ts
+   fails when the course has changed since it was drawn (12 Nov: "hopefully we're keeping this [race map] JPEG
+   in sync").
+
+   Each label sits beside what it names (12 Nov: the user couldn't tell the gate's or the locks' labels were
+   theirs, nor what the wreck was for). The start's field is each race's own (src/start-field.ts): one drawn,
+   from seed 1. */
 
 import { writeFileSync } from 'node:fs';
 import { LAY, SAIL } from '../js/den-sail.js';
 import { RACE, LONG_ROUTE } from '../js/den-race.js';
-import { run, ROUTES, STYLES, SKILLS, CUTS, SIM, PACE, zoneOf } from '../js/race-sim.js';
+import { run, ROUTES, STYLES, SKILLS, CUTS, SIM, PACE, zoneOf, chartFingerprint } from '../js/race-sim.js';
 import { SHELTER, courseSea } from '../js/den-racers.js';
 import { CHECK } from '../js/den-checkpoint.js';
 import { RIVALS } from '../js/den-rivals.js';
 import { whirlpool } from '../js/den-whirl.js';
 import { DOOR } from '../js/den-door.js';
-import { GAMBLE } from '../js/den-gamble.js';
+import { fieldFor } from '../js/start-field.js';
 
 const OUT = process.argv[2];
 if (!OUT) { console.error('usage: tools/race-map.mjs <out.html> [races] [size]'); process.exit(1); }
@@ -42,7 +50,8 @@ const pc = (x) => `${Math.round(100 * x)}%`;
 const routeWin = (name) => pc(winOf(rep.byRoute[name]));
 
 /* ---- The course ---- */
-const RC = LAY.RACE, sea = courseSea(), W = SAIL.COLS;
+const RC = LAY.RACE, sea = courseSea(), W = SAIL.COLS, FIELD = fieldFor(1);
+sea.layField(FIELD);
 const R0 = RC.R0, RTOP = RC.STRETCHES[RC.STRETCHES.length - 1].r + 1, RBOT = RC.START.r0;
 const key = (c, r) => `${c},${r}`;
 const SQ = 40;
@@ -55,11 +64,11 @@ let seed = 12;
 const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
 const f = (n) => Math.round(n * 10) / 10;
 
-const barrier = new Set(RC.FORAGE.BARRIER.map(([c, r]) => key(c, r)));
+const barrier = new Set([...RC.FORAGE.BARRIER, ...RC.ROCKS.WALL, ...RC.FIELD.HOP.ROCKS].map(([c, r]) => key(c, r)));
 const isLand = (c, r) => c >= 0 && c < W && r > R0 && r <= RTOP && sea.ground(c, r) && !barrier.has(key(c, r));
 const reef = new Set(RC.REEF.map(([c, r]) => key(c, r)));
 const whirlSq = new Set();
-const pools = [...RC.FIELD.POOLS, ...RC.WHIRLS.POOLS].map((p) => whirlpool(p));
+const pools = [...FIELD.POOLS, ...RC.WHIRLS.POOLS].map((p) => whirlpool(p));
 for (const w of pools) for (const [c, r] of w.squares) whirlSq.add(key(c, r));
 
 // What each wind is: a snake, the whirlpool channel's, a headwind to hop, the start's field.
@@ -69,8 +78,8 @@ for (const [c, r] of RC.SNAKES.TIGHT) kind.set(key(c, r), 'tight');
 for (const [c, r] of RC.SNAKES.MID) kind.set(key(c, r), 'mid');
 for (const [c, r] of RC.WHIRLS.WINDS) kind.set(key(c, r), 'whirls');
 for (const [c, r] of [RC.DOUBLE.WIND, ...RC.TRIPLE, ...RC.ZIGZAG]) kind.set(key(c, r), 'hop');
-for (const [c, r] of RC.FIELD.WINDS) kind.set(key(c, r), 'field');
-for (const [c, r] of RC.GAMBLES.TURN.UP) kind.set(key(c, r), 'gamble');
+for (const [c, r] of [...RC.FIELD.HOP.HEAD, ...RC.FIELD.HOP.LANE]) kind.set(key(c, r), 'hop');
+for (const [c, r] of [...RC.FIELD.CONVEYOR, ...RC.FIELD.BACK]) kind.set(key(c, r), 'field');
 
 const svg = [];
 const add = (s) => svg.push(s);
@@ -126,7 +135,7 @@ add(`<defs>
 
 /* The winds: each square tinted, an arrow the way it blows. Snakes red, the rest in blue ink. */
 {
-  const tint = { left: 'rgba(170,45,20,.16)', tight: 'rgba(170,45,20,.16)', mid: 'rgba(170,45,20,.16)', gamble: 'rgba(170,45,20,.16)', whirls: 'rgba(40,74,96,.1)', hop: 'rgba(40,74,96,.16)', field: 'rgba(40,74,96,.12)' };
+  const tint = { left: 'rgba(170,45,20,.16)', tight: 'rgba(170,45,20,.16)', mid: 'rgba(170,45,20,.16)', whirls: 'rgba(40,74,96,.1)', hop: 'rgba(40,74,96,.16)', field: 'rgba(40,74,96,.12)' };
   let arrows = { snake: '', blue: '' };
   for (let r = RBOT; r <= RTOP; r++) for (let c = 0; c < W; c++) {
     const d = sea.windAt(c, r);
@@ -135,10 +144,18 @@ add(`<defs>
     add(`<rect x="${f(x - SQ / 2)}" y="${f(y - SQ / 2)}" width="${SQ}" height="${SQ}" fill="${tint[k]}"/>`);
     const a = SQ * 0.32, h = SQ * 0.17;
     const s = `M${f(x - ux * a)} ${f(y - uy * a)}L${f(x + ux * a)} ${f(y + uy * a)}M${f(x + ux * (a - h) + sx * h)} ${f(y + uy * (a - h) + sy * h)}L${f(x + ux * a)} ${f(y + uy * a)}L${f(x + ux * (a - h) - sx * h)} ${f(y + uy * (a - h) - sy * h)}`;
-    if (k === 'left' || k === 'tight' || k === 'mid' || k === 'gamble') arrows.snake += s; else arrows.blue += s;
+    if (k === 'left' || k === 'tight' || k === 'mid') arrows.snake += s; else arrows.blue += s;
   }
   add(`<path d="${arrows.blue}" fill="none" stroke="${BLUE}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>`);
   add(`<path d="${arrows.snake}" fill="none" stroke="${SNAKE}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>`);
+  // The start's slow winds (one race's: seed 1): a dotted square and one short arrow, a nudge, not a lane.
+  let slow = '';
+  for (const [c, r, d] of FIELD.SLOW) {
+    const x = X(c), y = Y(r), ux = DX[d], uy = DY[d], sx = -uy, sy = ux, a = SQ * 0.2, h = SQ * 0.13;
+    add(`<rect x="${f(x - SQ / 2 + 4)}" y="${f(y - SQ / 2 + 4)}" width="${SQ - 8}" height="${SQ - 8}" fill="rgba(40,74,96,.07)" stroke="${BLUE}" stroke-width="1.4" stroke-dasharray="3 3"/>`);
+    slow += `M${f(x - ux * a)} ${f(y - uy * a)}L${f(x + ux * a)} ${f(y + uy * a)}M${f(x + ux * (a - h) + sx * h)} ${f(y + uy * (a - h) + sy * h)}L${f(x + ux * a)} ${f(y + uy * a)}L${f(x + ux * (a - h) - sx * h)} ${f(y + uy * (a - h) - sy * h)}`;
+  }
+  add(`<path d="${slow}" fill="none" stroke="${BLUE}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>`);
 }
 
 /* The land: each spit, filled, its coast inked with a cliff's hachures, a few hills. */
@@ -200,37 +217,17 @@ for (const w of pools) {
   add(`<path d="${d}" fill="none" stroke="${BLUE}" stroke-width="2.4" stroke-linecap="round"/>`);
 }
 
-/* The gambles (src/den-gamble.ts): the turning pool, a spiral with an arrow each way round its rim (its spin
-   turns), its throw on (gold, down the cleft onto leg 3) and back (the red lane up spit 1, drawn with the
-   winds); the veiled wind's gap, a shimmer and a question mark, its carry on (gold) and back (red, along
-   leg 5). */
-const GOLD = '#a8780f';
-const way = (poses, col) => `<path d="M${poses.map((p) => `${f(X(p.c))} ${f(Y(p.r))}`).join('L')}" fill="none" stroke="${col}" stroke-width="3.4" stroke-dasharray="2 7" stroke-linecap="round" stroke-linejoin="round"/>`;
+/* The rocks: across the rocks' gap in spit 3 (blasted open in a race, anyone's three hits), and walling in the
+   start's hop. Boulders, inked. */
 {
-  const G = RC.GAMBLES, tp = whirlpool(G.TURN.POOL), [mc, mr] = tp.mid, cx = X(mc), cy = Y(mr);
-  add(`<circle cx="${f(cx)}" cy="${f(cy)}" r="${SQ * 0.9}" fill="rgba(184,134,26,.18)" stroke="${GOLD}" stroke-width="2" stroke-dasharray="4 4"/>`);
-  let d = '';
-  for (let t = 0; t <= 2.6 * Math.PI * 2; t += 0.25) { const rad = 3 + t * 1.7, x = cx + Math.cos(t) * rad, y = cy + Math.sin(t) * rad; d += `${d ? 'L' : 'M'}${f(x)} ${f(y)}`; }
-  add(`<path d="${d}" fill="none" stroke="${BLUE}" stroke-width="2.4" stroke-linecap="round"/>`);
-  const R = SQ * 0.9 + 7, P = (a) => `${f(cx + R * Math.cos(a))} ${f(cy + R * Math.sin(a))}`;
-  add(`<g fill="none" stroke="${INK}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M${P(-2.5)}A${R} ${R} 0 0 1 ${P(-0.7)}"/><path d="M${P(2.5)}A${R} ${R} 0 0 1 ${P(0.7)}"/></g>`);
-  // (the arrowheads: clockwise at the top's end, anticlockwise at the bottom's)
-  for (const [a, s] of [[-0.7, 1], [0.7, -1]]) {
-    const x = cx + R * Math.cos(a), y = cy + R * Math.sin(a), tx = -Math.sin(a) * s, ty = Math.cos(a) * s, nx = Math.cos(a), ny = Math.sin(a);
-    add(`<path d="M${f(x - tx * 9 + nx * 6)} ${f(y - ty * 9 + ny * 6)}L${f(x)} ${f(y)}L${f(x - tx * 9 - nx * 6)} ${f(y - ty * 9 - ny * 6)}" fill="none" stroke="${INK}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>`);
+  let p = '';
+  for (const [c, r] of [...RC.ROCKS.WALL, ...RC.FIELD.HOP.ROCKS]) for (let k = 0; k < 3; k++) {
+    const x = X(c) + (rnd() - 0.5) * 18, y = Y(r) + (rnd() - 0.5) * 14, s = 7 + rnd() * 5;
+    p += `M${f(x - s)} ${f(y + s * 0.6)}L${f(x - s * 0.5)} ${f(y - s * 0.7)}L${f(x + s * 0.4)} ${f(y - s * 0.8)}L${f(x + s)} ${f(y + s * 0.6)}Z`;
   }
-  add(way([{ c: G.TURN.FAR[0], r: G.TURN.FAR[1] }, ...G.TURN.ON], GOLD));
-  // The veiled wind: its squares shimmering, a question mark; on to the run home, or back along leg 5.
-  for (const [c, r] of G.VEIL.WAY) {
-    add(`<rect x="${f(X(c) - SQ / 2)}" y="${f(Y(r) - SQ / 2)}" width="${SQ}" height="${SQ}" fill="rgba(184,134,26,.24)"/>`);
-    for (let k = 0; k < 5; k++) add(`<circle cx="${f(X(c) + (rnd() - 0.5) * SQ * 0.8)}" cy="${f(Y(r) + (rnd() - 0.5) * SQ * 0.8)}" r="1.8" fill="${GOLD}"/>`);
-  }
-  const [vc0, vr0] = G.VEIL.WAY[0];
-  add(way([{ c: vc0, r: vr0 }, ...G.VEIL.ON], GOLD));
-  add(way(G.VEIL.BACK, SNAKE));
-  add(label(X(vc0), (Y(vr0) + Y(G.VEIL.WAY[G.VEIL.WAY.length - 1][1])) / 2 + SQ * 0.33, ['?'], { size: 0.95, weight: 700, col: '#5a1a0c' }));
+  add(`<path d="${p}" fill="#a39684" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>`);
 }
-
+const GOLD = '#a8780f';
 /* [A] The gun gap's guns: their reach (any way, CHECK.REACH squares), the squares they're trained on. */
 {
   const G = RC.GUNS, R = CHECK.REACH;
@@ -305,6 +302,8 @@ const star = (x, y, s) => { let p = ''; for (let i = 0; i < 10; i++) { const a =
     [[RC.DOUBLE.WAY[0][0], S[1].r + 1], [RC.DOUBLE.WAY[0][0], S[2].r]],
     [[RC.WHIRLS.MOUTH.c, RC.WHIRLS.MOUTH.r], [RC.WHIRLS.OUT[0], RC.WHIRLS.OUT[1]]],
     [[RC.FORAGE.NOTCH[0], S[2].r + 1], RC.FORAGE.NOTCH, RC.FORAGE.OUT],
+    [[RC.ROCKS.WALL[0][0], S[2].r + 1], RC.ROCKS.OUT],
+    [[RC.FIELD.HOP.c0 + 1, RC.FIELD.HOP.FROM], [RC.FIELD.HOP.c0 + 1, RC.FIELD.HOP.FROM + 2], [RC.FIELD.HOP.LANDS[0], RC.FIELD.HOP.FROM + 2], RC.FIELD.HOP.LANDS],
     [[RC.LOCKS[0].at[0], S[3].r], [RC.LOCKS[1].at[0], S[4].r]],
     [[RC.CRANE.LEDGE[0], S[4].r], RC.CRANE.LEDGE],
     [[RC.TRIPLE[0][0], S[4].r + 1], [RC.TRIPLE[0][0], S[5].r]],
@@ -382,50 +381,51 @@ S.forEach((s, i) => {
   at(right ? 1.6 : W - 2.6, s.r, [[right ? `${name} \u2192` : `\u2190 ${name}`, '#5a1a0c', 700]], { size: 0.74, anchor: right ? 'start' : 'end', style: 'italic' });
 });
 // The start.
+const HOP = RC.FIELD.HOP;
 {
   const L = RC.LINE;
-  at(L.c0 - 1.1, RC.BUOY[1] + 0.05, [T('\u2191 starting line: pick a spot')], { size: 0.6, anchor: 'start' });
+  at(L.c0 - 1.1, RC.BUOY[1] + 0.05, [T('↑ starting line: pick a spot')], { size: 0.6, anchor: 'start' });
   const zones = { left: [L.c0, 15], gap: [16, 20], right: [21, L.c1] };
   for (const [z, [a, b]] of Object.entries(zones)) {
     if (zoneOf(a) !== z || zoneOf(b) !== z) throw new Error(`the starting spots' zones have moved: ${z}`);
-    at((a + b) / 2, RC.START.r0 - 0.2, [WIN(`${z === 'gap' ? 'by the gap' : z} ${pc(winOf(rep.bySpot[z]))}`)], { size: 0.66 });
+    at((a + b) / 2, RC.START.r0 - 0.2, [WIN(`${z === 'gap' ? 'above the hop' : z} ${pc(winOf(rep.bySpot[z]))}`)], { size: 0.66 });
     add(`<path d="M${X(a) - SQ / 2 + 4} ${Y(RC.START.r0) - SQ * 0.72}v6H${X(b) + SQ / 2 - 4}v-6" fill="none" stroke="#8a1c10" stroke-width="2"/>`);
   }
   at(RC.BUOY[0] + 0.7, RC.BUOY[1] + 0.05, [N('Space by the buoy')], { size: 0.56, anchor: 'start' });
   for (const R of RIVALS) at(R.spot + 0.45, L.r + 0.7, [[R.name, INK, 700]], { size: 0.55, anchor: 'start' });
-  at(RACE.LONG_SPOT, L.r - 0.66, [N('long way\u2019s spot')], { size: 0.45 });
-  const F = RC.FIELD;
-  at(W - 1.6, F.r0 + 4.5, [N('trade wind back')], { size: 0.55, anchor: 'end' });
-  at(4, F.r0 + 0.5, [N('the conveyor \u2192 the crowded line')], { size: 0.55, anchor: 'start' });
+  at(RACE.LONG_SPOT, L.r - 0.66, [N('long way’s spot')], { size: 0.45 });
+  // (the field: its slow winds and whirlpools each race's own; its conveyor, its hop, its wind back on the right)
+  at(6, RC.FIELD.r0 + 0.55, [N('conveyor → to above the hop')], { size: 0.5 });
+  at(6, RC.FIELD.r0 + 4.6, [T('The field'), N('slow winds nudge a square,'), N('whirlpools turn her round:'), N('fresh each race (one shown)')], { size: 0.5, lh: 1.1 });
+  at((HOP.c0 + HOP.c1) / 2, HOP.FROM - 0.05, [T('The hop ↓ a Double'), N('over its headwinds, into a lane'), N('down onto leg 1 · about 10 s')], { size: 0.46, lh: 1.08 });
+  at(W - 1.4, RC.FIELD.r1 + 0.05, [N('wind back → the hop’s lane')], { size: 0.46, anchor: 'end' });
 }
-const BIG = { size: 0.78, lh: 1.17 };
-// [A] spit 1: the gun gap.
-// (the gate's words on the spit's far left, clear of the turning pool and the wreck; the pool's beside it)
-at(0.7, SP[0].r1 + 0.05, [T(`The imperial gate · ${sv('guns')} ▸`), WIN(`Quad ${routeWin('gap-combo')} · shot ${routeWin('gap-shot')}`), WIN(`run ${routeWin('gap-run')} · bribe ${routeWin('bribe')}`), N('the bribe: haul the wreck')], { size: 0.56, lh: 1.12, anchor: 'start' });
-// The gambles: the turning pool on leg 2, the veiled wind through spit 5 (what each way saves, GAMBLE.SAVES).
-const GS = GAMBLE.SAVES, sgn = (n) => (n < 0 ? `−${-n}` : `+${n}`);
-at(12.7, SP[0].r1 + 0.05, [T('◂ Turning pool'), N('a gamble: time its spin'), [`on to leg 3 · ${sgn(GS.turn.on)} s`, GOLD, 700], [`back to leg 1 · ${sgn(GS.turn.back)} s`, SNAKE, 700]], { size: 0.52, lh: 1.12 });
-at(25.6, SP[0].r0 - 0.95, [N('guns\u2019 reach')], { size: 0.5, anchor: 'end', col: SNAKE });
-// [B] spit 2: the Double's gap, the headwind gap, the trade wind up the middle (and the tight water below it).
-at(9, SP[1].r1, [T('Double\u2019s gap'), N(`a Double \u00b7 ${sv('double')}`), WIN(`doubles ${routeWin('doubles')}`)], BIG);
-at(16, SP[1].r1 - 0.3, [T('Headwind gap'), WIN(`row \u00b7 ${sv('headwind')} \u00b7 ${routeWin('headwind')}`)], { size: 0.6, lh: 1.1 });   // (two lines: the door below, a cave above)
-at(23, SP[1].r1, [['SNAKE: trade wind', SNAKE, 700], N('hop on a Double'), N('or back to leg 2')], BIG);
-at(RC.SNAKES.TIGHT[0][0] - 0.6, RC.SNAKES.TIGHT[0][1], [['tight water ▸', SNAKE, 700]], { size: 0.6, anchor: 'end' });
-// [C] spit 3: the whirlpools, the starlit door, the barrier.
-at(4.5, SP[2].r1 - 0.1, [T('Whirlpool channel'), N('a Vegas carries her'), [`saves ${sv('whirls')}`, '#5a1a0c', 700], WIN(`Vegas ${routeWin('whirls')}`), N('stopped in the open:'), N('a sitting duck')], BIG);
-at(16, SP[2].r1 - 0.1, [['\u2605 Starlit door', DOOR_INK, 700], N('Navigation, Vegas'), ...DOOR.EXITS.map((e, k) => [`${k ? 'or ' : 'up at '}leg ${e.to + 1}: ${Math.round(e.saves)} s`, '#5a1a0c', 700]), WIN(`door ${routeWin('door')}`)], BIG);
-at(22.5, SP[2].r1 - 0.1, [T('Barrier'), N('Foraging'), [`saves ${sv('forage')}`, '#5a1a0c', 700], WIN(`forage ${routeWin('forage')}`), N('sheltered')], BIG);
-// [D] spit 4: the zigzag below it (on the long way) and the locks.
-at(8, SP[3].r1, [T('The zigzag \u2193'), N(`hop on Doubles \u00b7 ${sv('zigzag')}`), WIN(`long way ${routeWin('long')}`)], BIG);
-at(21, SP[3].r1, [T(`The locks \u00b7 saves ${sv('locks')}`), N('Bilge \u00b7 sheltered'), WIN(`locks ${routeWin('locks')}`)], BIG);
+const BIG = { size: 0.56, lh: 1.12 };
+const sp = (k) => (SP[k].r0 + SP[k].r1) / 2;
+// [A] spit 1: the imperial gate (its words on the spit beside it), the wreck in its notch.
+at(RC.GUNS.gap[0] + 3.4, sp(0) - 0.55, [T(`◂ The imperial gate · ${sv('guns')}`), WIN(`Quad ${routeWin('gap-combo')} · shot ${routeWin('gap-shot')}`), WIN(`run ${routeWin('gap-run')} · bribe ${routeWin('bribe')}`)], { size: 0.46, lh: 1.1 });
+at(RC.BRIBE.NOTCH[0] - 3.6, sp(0) - 0.55, [T('The wreck ▸'), N('haul the bribe here'), N('(Treasure Haul,'), N('sheltered)')], { size: 0.46, lh: 1.08 });
+at(RC.SNAKES.TIGHT[0][0] - 0.6, RC.SNAKES.TIGHT[0][1], [['tight water ▸', SNAKE, 700]], { size: 0.5, anchor: 'end' });
+// [B] spit 2: the Double's gap and the headwind gap (stacked between them), the starlit door, the trade wind back.
+at((RC.DOUBLE.WAY[0][0] + RC.HEADWIND[0][0]) / 2, SP[1].r0 + 0.05, [T('◂ Double’s gap'), N(`a Double · ${sv('double')}`)], { size: 0.44, lh: 1.05 });
+at((RC.DOUBLE.WAY[0][0] + RC.HEADWIND[0][0]) / 2, SP[1].r1 + 0.05, [T('Headwind gap ▸'), N(`row it · ${sv('headwind')} · ${routeWin('headwind')}`)], { size: 0.44, lh: 1.05 });
+at(RC.DOOR.FACE[1][0] + 2.6, sp(1) - 0.45, [['◂ ★ Starlit door', DOOR_INK, 700], N('Navigation opens it'), [`up on leg 3 · ${Math.round(DOOR.SAVES)} s`, '#5a1a0c', 700]], { size: 0.44, lh: 1.05 });
+at(RC.SNAKES.MID[0][0] + 1.7, sp(1) - 0.45, [['SNAKE ▾', SNAKE, 700], N('hop it on a'), N('Double, or 3 back')], { size: 0.42, lh: 1.05 });
+// [C] spit 3: the whirlpools, the rocks, the barrier.
+at(4.5, sp(2) - 1.5, [T('Whirlpool channel ▸'), N('a Vegas carries her'), [`saves ${sv('whirls')}`, '#5a1a0c', 700], WIN(`Vegas ${routeWin('whirls')}`), N('in the open')], BIG);
+at(RC.ROCKS.WALL[0][0] - 2.1, sp(2) - 1.2, [T('The rocks ▸'), N('3 hits, anyone’s,'), N('then open to all'), [`saves ${sv('rocks')}`, '#5a1a0c', 700], WIN(`rocks ${routeWin('rocks')}`)], { size: 0.46, lh: 1.08 });
+at(RC.FORAGE.NOTCH[0] + 3.2, sp(2) - 1.2, [T('◂ Barrier'), N('Foraging'), [`saves ${sv('forage')}`, '#5a1a0c', 700], WIN(`forage ${routeWin('forage')}`), N('sheltered')], { size: 0.5, lh: 1.1 });
+// [D] spit 4: the zigzag below it (on the long way), the locks and their berth.
+at(7, sp(3) - 0.5, [T('The zigzag ↓'), N(`hop on Doubles · ${sv('zigzag')}`), WIN(`long way ${routeWin('long')}`)], { size: 0.46, lh: 1.08 });
+at(RC.BERTH[0] + 4.3, sp(3) - 0.6, [T(`◂ The locks · ${sv('locks')}`), N('Bilge · sheltered'), WIN(`locks ${routeWin('locks')}`)], { size: 0.46, lh: 1.08 });
+at(RC.BERTH[0] + 0.6, SP[3].r0 + 1.05, [N('▴ the berth: wait for the lock')], { size: 0.38, anchor: 'start' });
 // [E] spit 5: the crane and the Triple's gap.
-at(6, SP[4].r1, [T(`The crane \u00b7 saves ${sv('crane')}`), WIN(`Carpentry \u00b7 crane ${routeWin('crane')}`)], BIG);
-at(20, SP[4].r1 + 0.05, [T('Triple’s gap'), N(`a Triple · ${sv('triple')}`), WIN(`doubles ${routeWin('doubles')}`)], { size: 0.46, lh: 1.12 });
-at(15.3, SP[4].r1 + 0.1, [T('Veiled wind ▸'), N('a gamble: a coin toss'), [`${sgn(GS.veil.on)} s or ${sgn(GS.veil.back)} s`, '#5a1a0c', 700]], { size: 0.52, lh: 1.1 });
-// The finish, and the left-hand trade wind up the whole left side.
+at(RC.CRANE.LEDGE[0] - 4.4, sp(4) - 0.35, [T(`The crane · ${sv('crane')} ▸`), WIN(`Carpentry · ${routeWin('crane')}`)], { size: 0.46, lh: 1.08 });
+at(RC.TRIPLE[0][0] + 2.2, sp(4) - 0.35, [T('◂ Triple'), N(sv('triple'))], { size: 0.42, lh: 1.05 });
+// The finish, and the left-hand trade wind's gentle loops.
 at(RC.FINISH[0] + 0.8, RC.FINISH[1], [['FINISH', '#5a1a0c', 700]], { size: 0.7, anchor: 'start' });
-at(14, S[5].r + 1, [['SNAKE: the left-hand trade wind, back to the start', SNAKE, 700]], { size: 0.6 });
-for (const r of [S[0].r + 3, S[2].r + 4.5, S[4].r - 2]) add(label(X(0) + 7, Y(r), ['SNAKE: back to the start \u2193'], { size: 0.55, weight: 700, col: SNAKE, rotate: -90 }));
+at(15, S[5].r + 1, [['SNAKE: a misclick, a few squares back up onto the run home', SNAKE, 700]], { size: 0.5 });
+for (const k of [1, 3]) add(label(X(0) + 7, Y(sp(k)), ['SNAKE: a few back'], { size: 0.42, weight: 700, col: SNAKE, rotate: -90 }));
 
 // A compass in the open water left of the start's field; out past Primates Rule, bottom left.
 {
@@ -450,10 +450,11 @@ const PUZZLE = {
   forage: ['Barrier of driftwood', 'Foraging, from the notch in front of it'],
   locks: ['The locks', 'Bilge, pumping the up lock'],
   crane: ['The crane', 'Carpentry, building it a part at a time'],
-  door: ['★ The starlit door', `Duty Navigation on the rock, then a Vegas each stretch of the tunnel: up at ${DOOR.EXITS.map((e) => `leg ${e.to + 1} saves ${Math.round(e.saves)} s`).join(', or ')}`],
+  door: ['★ The starlit door', `Duty Navigation on the rock opens it, and it carries her through: up its cleft on leg 3, ${Math.round(DOOR.SAVES)} s`],
+  rocks: ['The rocks', 'her broadsides (Gunnery loads more): three hits, anyone’s, and they’re open to every racer'],
   every: ['Every shortcut it comes to', 'the wreck and the gate’s bribe, the Double, the whirlpools, the locks, the crane'],
 };
-const MOVE = new Set(['guns', 'double', 'triple', 'zigzag']);
+const MOVE = new Set(['guns', 'double', 'triple', 'zigzag', 'rocks']);
 const kindOf = (id) => (MOVE.has(id) ? 'on the move' : id === 'headwind' ? 'rowing, slowly' : CUTS[id].sheltered ? 'stopped, sheltered' : 'stopped, exposed');
 const racedBy = (name) => RIVALS.filter((R) => R.racer.route === name).map((R) => R.name).join(', ');
 const maxWin = Math.max(...ROUTES.map((r) => winOf(rep.byRoute[r.name])), fair * 1.6);
@@ -467,8 +468,8 @@ const rows = ROUTES.map((R) => {
 }).join('');
 const small = (title, list, by) => `<table class="mini"><tr><th colspan="2">${title}</th></tr>${list.map((k) => `<tr><td>${esc(k)}</td><td class="n">${pc(winOf(by[k]))}</td></tr>`).join('')}</table>`;
 const cutRows = Object.entries(rep.cuts).map(([id, c]) => `<tr><td>${esc(id)}</td><td class="n">${Math.round(CUTS[id].saves)}</td><td class="n">${pc(c.tried ? c.done / c.tried : 0)}</td>${SKILLS.map((k) => `<td class="n">${c.saved[k].n ? Math.round(c.saved[k].secs / c.saved[k].n) : '-'}</td>`).join('')}</tr>`).join('');
-const snakes = Object.entries(rep.bySnake).map(([k, x]) => `${k === 'left' ? 'the left-hand trade wind' : k === 'mid' ? 'the trade wind up the middle' : 'the tight water'}: ${x.n} swept (${pc(x.n / (RACES * SIZE))} of racers), ${pc(x.n ? x.wins / x.n : 0)} still won`).join('; ');
-const gambles = Object.entries(rep.bets).map(([id, b]) => `${id === 'turn' ? 'the turning pool' : 'the veiled wind'}: taken ${b.taken} times (by the leader ${b.by.leader}, the pack ${b.by.pack}, the last ${b.by.last}), ${pc(b.taken ? b.on / b.taken : 0)} carried her on`).join('; ');
+const snakes = Object.entries(rep.bySnake).map(([k, x]) => `${k === 'left' ? 'the left-hand trade wind' : k === 'mid' ? 'the trade wind back across leg 3' : 'the tight water'}: ${x.n} swept (${pc(x.n / (RACES * SIZE))} of racers), ${pc(x.n ? x.wins / x.n : 0)} still won`).join('; ');
+const K = rep.rocks, rocks = `down in ${pc(K.down / RACES)} of races; ${K.through} racers went through them, ${K.free} of them free on someone else\u2019s hits (they won ${pc(K.free ? K.freeWins / K.free : 0)})`;
 const today = new Date().toISOString().slice(0, 10);
 
 const html = `<!doctype html>
@@ -503,20 +504,20 @@ const html = `<!doctype html>
 </style></head>
 <body><main>
 <h1>The Sloop Race: a chart of the course</h1>
-<p class="sub">Every shortcut, snake and wind, and who wins by which way round: ${RACES} races of ${SIZE} simulated. Out to sea is up; the race starts at the bottom and winds up to the finish.</p>
+<p class="sub">Every shortcut, snake and wind (no gambles), and who wins by which way round: ${RACES} races of ${SIZE} simulated. Out to sea is up; the race starts at the bottom and winds up to the finish.</p>
 <svg viewBox="${f(x0)} ${f(y0)} ${f(VW)} ${f(VH)}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Chart of the sloop race course">${svg.join('\n')}</svg>
 <div class="card"><h2>The key</h2><div class="key">
   <div><svg viewBox="0 0 34 22"><path d="M2 11h30" stroke="${RED}" stroke-width="3" stroke-dasharray="8 5"/></svg>the long way, round the numbered buoys (${RT(SIM.LONG)}, ${f(PACE)} s a square)</div>
   <div><svg viewBox="0 0 34 22"><path d="M2 11h30" stroke="${GREEN}" stroke-width="3.4" stroke-dasharray="2 7" stroke-linecap="round"/></svg>a shortcut's way through a spit</div>
-  <div><svg viewBox="0 0 34 22"><rect x="6" y="0" width="22" height="22" fill="rgba(170,45,20,.16)"/><path d="M8 11h17m-6 -5l6 5l-6 5" stroke="${SNAKE}" stroke-width="3" fill="none"/></svg>a snake: a wind that sweeps her back</div>
+  <div><svg viewBox="0 0 34 22"><rect x="6" y="0" width="22" height="22" fill="rgba(170,45,20,.16)"/><path d="M8 11h17m-6 -5l6 5l-6 5" stroke="${SNAKE}" stroke-width="3" fill="none"/></svg>a snake: a wind that carries her a few squares back</div>
   <div><svg viewBox="0 0 34 22"><rect x="6" y="0" width="22" height="22" fill="rgba(40,74,96,.16)"/><path d="M8 11h17m-6 -5l6 5l-6 5" stroke="${BLUE}" stroke-width="2.6" fill="none"/></svg>a wind, the way it blows (a headwind to hop, the start's field, the whirlpools')</div>
   <div><svg viewBox="0 0 34 22"><rect x="6" y="0" width="22" height="22" fill="url(#k-shelter)" stroke="rgba(47,90,36,.7)"/><defs><pattern id="k-shelter" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="rgba(70,120,50,.18)"/><line x1="0" y1="0" x2="0" y2="8" stroke="rgba(47,90,36,.55)" stroke-width="3"/></pattern></defs></svg>sheltered: safe to puzzle, even in the lead</div>
   <div><svg viewBox="0 0 34 22"><rect x="6" y="0" width="22" height="22" fill="url(#k-exp)" stroke="rgba(155,42,20,.7)"/><defs><pattern id="k-exp" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="8" height="8" fill="rgba(170,40,20,.12)"/><line x1="0" y1="0" x2="0" y2="8" stroke="rgba(155,42,20,.5)" stroke-width="2.5"/></pattern></defs></svg>stopped in the open: a sitting duck for anyone behind</div>
   <div><svg viewBox="0 0 34 22"><rect x="2" y="2" width="30" height="18" rx="3" fill="none" stroke="${SNAKE}" stroke-width="2" stroke-dasharray="6 4"/></svg>a gun gap gun's reach (${CHECK.REACH} squares any way); crosshairs: the squares it's trained on</div>
   <div><svg viewBox="0 0 34 22"><circle cx="17" cy="11" r="9" fill="none" stroke="${BLUE}" stroke-width="2"/><path d="M17 11m-3 0a3 3 0 1 1 6 0a6 6 0 1 1 -12 0" fill="none" stroke="${BLUE}" stroke-width="2"/></svg>a whirlpool: stop on one and it has her; a gust zooms her over</div>
   <div><svg viewBox="0 0 34 22"><path d="M10 20v-26" stroke="${INK}"/><path d="M10 4l14 5l-14 5Z" fill="#b8322a" stroke="${INK}"/></svg>a rival's spot on the line (Kikkit red, Tzz blue, Dalnoth gold); the gold ring, the long way's</div>
-  <div><svg viewBox="0 0 34 22"><path d="M2 11h30" stroke="${GOLD}" stroke-width="3.4" stroke-dasharray="2 7" stroke-linecap="round"/></svg>a gamble's ladder: where it carries her on</div>
-  <div><svg viewBox="0 0 34 22"><path d="M2 11h30" stroke="${SNAKE}" stroke-width="3.4" stroke-dasharray="2 7" stroke-linecap="round"/></svg>a gamble's snake: where it sends her back</div>
+  <div><svg viewBox="0 0 34 22"><rect x="8" y="2" width="18" height="18" fill="none" stroke="${BLUE}" stroke-width="1.4" stroke-dasharray="3 3"/><path d="M12 11h10m-4 -4l4 4l-4 4" stroke="${BLUE}" stroke-width="2.2" fill="none"/></svg>a slow wind: a nudge of a square after each move</div>
+  <div><svg viewBox="0 0 34 22"><path d="M6 18L10 6L17 4L24 7L28 18Z" fill="#a39684" stroke="${INK}" stroke-width="1.6"/></svg>rocks: across the rocks' gap, blasted open in a race</div>
 </div></div>
 <div class="card"><h2>Who wins, by which way round</h2>
 <p class="fair">Fair is ${pc(fair)}: one race in ${SIZE}, in fields of ${SIZE}, each racer a different way round, a racing style and a skill drawn at random, and a level better at her own way's puzzle. The dashed line on each bar is fair; green is more than a quarter over it, red more than a quarter under. "Saves" is over the long way, for a decent player's puzzling (the puzzle's time is on top).</p>
@@ -528,7 +529,7 @@ ${small('By starting spot', ['left', 'gap', 'right'], rep.bySpot)}
 ${small('Stopped in the open, won the race', ['leader', 'pack', 'last'], Object.fromEntries(Object.entries(rep.byPosition).map(([k, p]) => [k, { n: p.n, wins: p.wins }])))}
 </div>
 <p><small><b>Snakes:</b> ${esc(snakes) || 'none bit'}.</small></p>
-<p><small><b>Gambles:</b> ${esc(gambles)}.</small></p>
+<p><small><b>The rocks:</b> ${esc(rocks)}.</small></p>
 <p><small><b>Stopped in the open, hit there:</b> leader ${pc(rep.byPosition.leader.n ? rep.byPosition.leader.hit / rep.byPosition.leader.n : 0)}, in the pack ${pc(rep.byPosition.pack.n ? rep.byPosition.pack.hit / rep.byPosition.pack.n : 0)}, last ${pc(rep.byPosition.last.n ? rep.byPosition.last.hit / rep.byPosition.last.n : 0)}.</small></p>
 <h2>What each shortcut really saved</h2>
 <table><tr><th>Shortcut</th><th class="n">Laid to save</th><th class="n">Done</th><th class="n">decent</th><th class="n">good</th><th class="n">great</th></tr>${cutRows}</table>
@@ -538,3 +539,24 @@ ${small('Stopped in the open, won the race', ['leader', 'pack', 'last'], Object.
 `;
 writeFileSync(OUT, html);
 console.log(`Wrote ${OUT}`);
+
+/* The chart alone as a picture (JPG=...): the svg 1280 wide, a headless Chrome's screenshot of it (CHROME=its
+   path, or the usual place on Windows), stamped with the course's fingerprint in a JPEG comment (FF FE), read
+   back by tests/race-chart.test.ts. */
+if (process.env.JPG) {
+  const { execFileSync } = await import('node:child_process');
+  const { readFileSync, rmSync } = await import('node:fs');
+  const { pathToFileURL } = await import('node:url');
+  const WPX = 1280, HPX = Math.round((WPX * VH) / VW);
+  const page = `${OUT}.chart.html`, shot = `${OUT}.chart.jpg`;
+  writeFileSync(page, `<!doctype html><html><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,500&display=swap" rel="stylesheet"><style>html,body{margin:0;background:#2b1a0e}svg{display:block;width:${WPX}px;height:${HPX}px;font-family:Alegreya,Georgia,serif}</style></head><body><svg viewBox="${f(x0)} ${f(y0)} ${f(VW)} ${f(VH)}" xmlns="http://www.w3.org/2000/svg">${svg.join('\n')}</svg></body></html>`);
+  const chrome = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
+  execFileSync(chrome, ['--headless=new', '--disable-gpu', '--hide-scrollbars', `--window-size=${WPX},${HPX}`, '--virtual-time-budget=6000', `--screenshot=${shot}`, pathToFileURL(page).href], { stdio: 'ignore' });
+  const jpg = readFileSync(shot);
+  rmSync(page); rmSync(shot);
+  if (jpg[0] !== 0xff || jpg[1] !== 0xd8) throw new Error('the screenshot isn\'t a JPEG');
+  const note = Buffer.from(`race-course:${chartFingerprint()}`, 'latin1'), seg = Buffer.alloc(4);
+  seg.writeUInt16BE(0xfffe, 0); seg.writeUInt16BE(note.length + 2, 2);
+  writeFileSync(process.env.JPG, Buffer.concat([jpg.subarray(0, 2), seg, note, jpg.subarray(2)]));
+  console.log(`Wrote ${process.env.JPG} (${WPX} by ${HPX}), course ${chartFingerprint()}`);
+}
