@@ -265,6 +265,12 @@ user:** is this your figure of eight, or the drills' "butterfly"?)
   piece at the front, and you kind of pull a line of brown things up, which makes it end up at the
   bottom. And then with just the trailing brown, you can bring the black up again, bring it to the start
   of the line ... and then repeat the process to keep pulling it up one tile at a time."
+  As built (12 Nov, after the fifth and sixth notes, `linePull`, labelled "Pull a line of browns"): with a
+  brown beside the black, the pair crawls up past the line, every brown of it ending lower, and loops round
+  until the black has a brown above it to climb again (`pairPass`: the black and the brown dragged in turn,
+  the fewest drags and swaps that do it, by the rules). With no brown beside it, one black climbs up
+  through the browns and loops back through the whites to park beside them (the fifth note). Each pass
+  is one move; the planner plays it again while it keeps bettering the board.
 - **Going sideways is mid-game, while there are plenty of pieces:** the leapfrog "happens, I think, more
   mid-game, so it depends on how many pieces you've got left ... that relies on, for example, you keep
   three brown pieces at the top or bottom, and then drag a black along each one. But again, that relies on

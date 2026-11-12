@@ -763,17 +763,20 @@ const figureEight = {
         return out;
     },
 };
-/** The line pull: one black pulls a line of browns over (the user, 12 Nov, the fifth note, drawn): parked
+/** The line pull. With a brown beside the black, the pair's way (the sixth note, `pairPass`): they crawl
+    up past the line, every brown a place lower, and loop round to go again. Alone, the fifth note's way:
+    one black pulls a line of browns over (the user, 12 Nov, drawn): parked
     in the whites beside the line, the black climbs up through the browns, each brown dropping a place as
     it goes by ("that pulls the browns down"), and so a place across; then it's looped back round through
     the whites to park beside the line again, ready for the next pass. One drag a pass. "When you're in
     this mid game ... you use kind of like one black to pull a whole row of browns over." */
 const linePull = {
-    name: 'linePull', label: 'Pull a line over',
-    about: 'One black climbs up through a line of browns, each dropping a place as it passes, and loops back round through the whites to do it again: the line comes across.',
+    name: 'linePull', label: 'Pull a line of browns',
+    about: 'A black, with a brown beside it, crawls up past a line of browns, every one dropping a place, and loops back round to do it again; or one black alone climbs through them and loops back through the whites.',
     find(cols, ctx) {
         const out = [];
         const side = junkSide(ctx);
+        let tried = 0;
         for (let x = 0; x < Math.min(ctx.burnFrom, COLS); x++)
             for (let y = 0; y < cols[x].length; y++) {
                 if (cols[x][y] !== BLACK)
@@ -812,6 +815,15 @@ const linePull = {
                         b[n[0]][n[1]] = t;
                     }
                 };
+                // With a brown beside the black, the pair's way (the sixth note): a crawl up past the line, then the
+                // loop round, the whole line a place lower.
+                const partner = ALL.map((d) => neighbourOn(cols, x, y, d)).find((n) => !!n && cols[n[0]][n[1]] === BROWN && (n[0] !== first[0] || n[1] !== first[1]));
+                const line = lineOf(cols, first, partner ?? null);
+                const pair = partner && line.length >= 2 && tried++ < 2 ? pairPass(cols, [x, y], partner, line, ctx) : null;
+                if (pair) {
+                    out.push({ routine: 'linePull', drags: dragsOf(cols, pair), reason: `pull the line of browns down: the black at ${placeName(x, y)} and the brown beside it crawl up past them, every brown a place lower, then loop round to go again` });
+                    continue;
+                }
                 dfs(x, y, 0);
                 const pass = best;
                 if (!pass)
@@ -821,6 +833,64 @@ const linePull = {
         return out;
     },
 };
+/** The line of browns linked to one, up to five, the partner left out. */
+export function lineOf(cols, first, skip) {
+    const line = [first], same = (a, b) => !!b && a[0] === b[0] && a[1] === b[1];
+    for (let i = 0; i < line.length && line.length < 5; i++)
+        for (const d of ALL) {
+            const n = neighbourOn(cols, line[i][0], line[i][1], d);
+            if (n && cols[n[0]][n[1]] === BROWN && !same(n, skip) && !line.some((q) => same(q, n)) && line.length < 5)
+                line.push(n);
+        }
+    return line;
+}
+/** One pass of the line pull with a pair (the user, 12 Nov, the sixth note: "That's basically the
+    equivalent of a crawl. But then you can kind of see how all the browns are one lower, and then I can
+    loop the brown back again, up through, do kind of a crawl at the top, black down, round the bottom, up
+    again, and drag all of those brown pieces down"): the black and the brown beside it, each dragged in
+    turn through whatever's there, until every brown of the line is lower than it was and the black can
+    climb again. The fewest drags and swaps, by the rules; null when there's no such pass. */
+export function pairPass(cols, black, partner, line, ctx) {
+    const h0 = line.map(([lx, ly]) => halfOf(cols, lx, ly));
+    const buckets = [[{ b: copyBoard(cols), pos: [black, partner, ...line], steps: [], last: -1, cost: 0 }]];
+    const seen = new Map();
+    let best = null, states = 0;
+    for (let c = 0; c < buckets.length && states < 5000; c++)
+        for (const node of buckets[c] ?? []) {
+            if (states++ >= 5000)
+                break;
+            if (node.steps.length >= Math.min(ctx.reach, 16))
+                continue;
+            for (let i = 0; i < 2; i++)
+                for (let d = 0; d < 4; d++) {
+                    const [px, py] = node.pos[i], n = neighbourOn(node.b, px, py, d);
+                    if (!n || !canSwapOn(node.b, px, py, n[0], n[1]))
+                        continue;
+                    const b = copyBoard(node.b);
+                    swapIn(b, px, py, d);
+                    const pos = node.pos.map((q) => (q[0] === n[0] && q[1] === n[1] ? [px, py] : q));
+                    pos[i] = [n[0], n[1]];
+                    const cost = node.cost + 1 + (node.last === i ? 0 : 2);
+                    const key = `${b.map((col) => col.join('')).join('|')}:${i}`;
+                    if ((seen.get(key) ?? Infinity) <= cost)
+                        continue;
+                    seen.set(key, cost);
+                    const steps = [...node.steps, [px, py, d]];
+                    // Done when every brown of the line is lower, none gone into a column to burn, and the black has a
+                    // brown above it to climb again.
+                    const drops = pos.slice(2).map(([lx, ly], k) => halfOf(b, lx, ly) - h0[k]);
+                    const [bx, by] = pos[0];
+                    const again = [UP_LEFT, UP_RIGHT].some((w) => { const q = neighbourOn(b, bx, by, w); return !!q && b[q[0]][q[1]] === BROWN; });
+                    if (drops.every((v) => v >= 1) && again && pos.every(([qx]) => qx < ctx.burnFrom)) {
+                        const value = drops.reduce((s, v) => s + v, 0) * 2 - cost * 0.1;
+                        if (!best || value > best.value)
+                            best = { steps, value };
+                    }
+                    (buckets[cost] ??= []).push({ b, pos, steps, last: i, cost });
+                }
+        }
+    return best?.steps ?? null;
+}
 /** The leapfrog: a black swept sideways along browns stored at the top, up into each and down past it
     (the user, 12 Nov: "you keep three brown pieces at the top or bottom, and then drag a black along each
     one"), or a brown along blacks stored at the bottom. One drag; mid-game, with plenty of pieces. */

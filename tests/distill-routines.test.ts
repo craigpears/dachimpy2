@@ -3,7 +3,7 @@
    (w b K), on a sea of whites. */
 import { describe, expect, it } from 'vitest';
 import { BLACK, BROWN, COLS, DOWN_LEFT, DOWN_RIGHT, SHORT, TALL, UP_LEFT, UP_RIGHT, WHITE, canSwapOn, neighbourOn, parseBoard } from '../src/distilling';
-import { ROUTINES, burnsClean, canGo, carryOn, halfOf, playDrags, stepsOf, swapsIn } from '../src/distill-routines';
+import { ROUTINES, burnsClean, canGo, carryOn, halfOf, lineOf, pairPass, playDrags, stepsOf, swapsIn } from '../src/distill-routines';
 import type { Board } from '../src/distilling';
 import type { Ctx, Move, RoutineName } from '../src/distill-routines';
 
@@ -135,6 +135,32 @@ describe('the routines (12 Nov)', () => {
     for (const w of m.drags[0].ways) at = neighbourOn(cols, at[0], at[1], w)!;
     const up = neighbourOn(after, at[0], at[1], UP_LEFT)!;
     expect(after[up[0]][up[1]]).toBe(BROWN);
+  });  it('pull a line down, the sixth note: "That\'s basically the equivalent of a crawl. But then you can kind of see how all the browns are one lower, and then I can loop the brown back again" (12 Nov)', () => {
+    // Mid game: browns fill the top left, a black below them with a brown beside it, blacks stuck at the bottom.
+    const cols = board([
+      ...[0, 1, 2].flatMap((x) => [0, 1, 2, 3].map((y) => [x, y, 'b'] as [number, number, string])),
+      [2, 4, 'K'], [3, 3, 'b'], [0, 8, 'K'], [1, 7, 'K'], ...column(8, 'KKKKbbbbb'), ...column(9, 'KKKKbbbb'),
+    ]);
+    const line = lineOf(cols, [1, 3], [3, 3]);
+    expect(line.length).toBeGreaterThanOrEqual(3);
+    const steps = pairPass(cols, [2, 4], [3, 3], line, stageI(8))!;
+    expect(steps).not.toBeNull();
+    // Played as the hand plays it: the black and the brown each dragged in turn, every swap legal.
+    const m = find('linePull', cols, stageI(8)).find((x) => /crawl up past them/.test(x.reason))!;
+    expect(m).toBeDefined();
+    wholeDrags(cols, m);
+    // Follow the line's browns through the pass: every one of them ends lower than it was.
+    const b = cols.map((c) => [...c]), pos = line.map(([x, y]) => [x, y] as [number, number]);
+    for (const [x, y, w] of steps) {
+      const n = neighbourOn(b, x, y, w)!;
+      expect(canSwapOn(b, x, y, n[0], n[1])).toBe(true);
+      const t = b[x][y]; b[x][y] = b[n[0]][n[1]]; b[n[0]][n[1]] = t;
+      for (const q of pos) if (q[0] === n[0] && q[1] === n[1]) { q[0] = x; q[1] = y; }
+    }
+    pos.forEach(([x, y], k) => {
+      expect(b[x][y]).toBe(BROWN);
+      expect(halfOf(b, x, y)).toBeGreaterThan(halfOf(cols, line[k][0], line[k][1]));
+    });
   });  it('the leapfrog: a black swept sideways along browns stored at the top, in one drag', () => {
     const cols = board([[1, 0, 'K'], [2, 0, 'b'], [4, 0, 'b'], [6, 0, 'b'], ...column(9, 'KKKKbbbb')]);
     const moves = find('leapfrog', cols, stageI(9)).filter((m) => m.drags[0].x === 1);
