@@ -487,6 +487,12 @@ nice and illustrative". In order:
    mid-game a button asks him, and he plays the routine your board needs from where it stands (the same
    technique routines the bots and the lesson use), a few moves shown on your own board, then hands it
    back.
+   **The distiller in the panel becomes Helium (12 Nov).** The panel's top strip has a pirate distiller
+   by the barrels, as the real one does; ours is a stand-in (a green coat, red sash, tricorn), drawn from
+   the research's description, not anyone in particular. The user, seeing it: "I'm not sure what this
+   graphic is either ... some kind of distilling sensei figure? ... it could work." So once Helium's drawn
+   (from his portrait, checked first), he's the one standing at the still, and the one who steps in on
+   "Help, Helium".
 4. **Helium and his island** (IDEAS.md, "Helium, and Distilling"; his portrait checked first): his own
    little island, perhaps by the smugglers' beach, his still on it, and his mishaps: when he gets the
    balance wrong, the still goes up with a bang ("Oops. That happens sometimes. Don't worry about it.").
