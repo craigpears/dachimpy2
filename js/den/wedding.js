@@ -607,7 +607,7 @@ function startWedding() {
   wed.step = 'playing';
   panel();
   ceremony({
-    get w() { return wed.w; }, root: wed.root, fig: wed.fig, propG: wed.propG,
+    get w() { return wed.w; }, root: wed.root, fig: wed.fig, propG: wed.propG, propsG: wed.propsG,
     names: () => ({ you: yourName(), partner: partnerName() }), seats, dyes: () => themeOf(wed.w.theme)?.dyes.slice(0, 4) || ['rose', 'pink', 'white'],
     hex, say: (f, text) => say(f, text, 99), snap, shake: () => { worldLets.shake = Math.max(shake, 0.15); }, set play(v) { wed.play = v; },
     // (the crowd: turned to the camera for the cheer and the portrait, bouncing as they cheer)

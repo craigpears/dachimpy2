@@ -6,6 +6,7 @@ export const CAPTIONS = {
     raiders: { happy: 'Uninvited guests, shown the sea', dark: 'Raiders again. Into the sea they went.' },
     drunk: { happy: 'Somebody found the cake. Face first.', dark: 'The cake didn\'t make it. Nor did they.' },
     brawl: { happy: 'A lively one! Benches everywhere', dark: 'A proper brawl. The benches were hired.' },
+    gifts: { happy: 'Showered in gifts, up to the neck', dark: 'Buried alive. In presents, luckily.' },
     kiss: { happy: 'The kiss!', dark: 'The kiss! Still all in one piece.' },
     cheer: { happy: 'Hooray! Hearts and confetti', dark: 'Hooray! The confetti, mostly not red' },
 };
@@ -26,7 +27,8 @@ export const CHARACTER = {
             each: {
                 aisle: 'Your sweetheart walking up the aisle', vows: 'The vows begun', sweet: 'Sweet and blissful: hand in hand',
                 raiders: 'Raiders crash it: the guards see them off into the sea', drunk: 'Somebody\'s drunk: into the cake',
-                brawl: 'A brawl breaks out: benches flying', kiss: 'The kiss', cheer: 'The cheer',
+                brawl: 'A brawl breaks out: benches flying', gifts: 'Showered in gifts: the couple buried in presents up to the neck',
+                kiss: 'The kiss', cheer: 'The cheer',
             },
         },
         { when: 'Across its foot, under the couple\'s names', says: [SIGNED] },

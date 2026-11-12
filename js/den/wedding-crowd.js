@@ -24,6 +24,9 @@ const PARTS = [
   { id: 'hair', geo: () => new THREE.SphereGeometry(0.215, 12, 6, 0, Math.PI * 2, 0, Math.PI * 0.5).rotateX(-0.35).translate(0, 1.58, -0.02), col: (L) => LOOK.HAIR[L.hairCol] || '#3b2414', has: (L) => L.hair !== 'bald' },
   { id: 'hat', geo: () => mergeGeometries([new THREE.CylinderGeometry(0.3, 0.3, 0.04, 14).translate(0, 1.74, 0), new THREE.CylinderGeometry(0.15, 0.18, 0.18, 12).translate(0, 1.84, 0)]), col: (L) => col(L.hatCol), has: (L) => L.hat && L.hat !== 'none' },
   { id: 'eyes', geo: () => two(() => new THREE.SphereGeometry(0.028, 6, 5).translate(0, 1.6, 0.18), 0.07), col: () => '#1d1a18' },
+  // (a present held out in front, Showered in gifts: its paper, and its ribbon and bow)
+  { id: 'gift', geo: () => new THREE.BoxGeometry(0.24, 0.2, 0.22).translate(0, 0.86, 0.3), col: (L) => col(L.handCol), has: (L) => L.hand === 'gift' },
+  { id: 'giftRibbon', geo: () => mergeGeometries([new THREE.BoxGeometry(0.25, 0.205, 0.045), new THREE.BoxGeometry(0.045, 0.205, 0.23), new THREE.SphereGeometry(0.05, 8, 6).translate(0, 0.11, 0)]).translate(0, 0.86, 0.3), col: (L) => (L.handCol === 'white' ? '#e8b23a' : '#f6f2ea'), has: (L) => L.hand === 'gift' },
 ];
 const M4 = new THREE.Matrix4(), Q = new THREE.Quaternion(), P3 = new THREE.Vector3(), ONE = new THREE.Vector3(1, 1, 1), NONE = new THREE.Vector3(0, 0, 0), UP = new THREE.Vector3(0, 1, 0), C = new THREE.Color();
 

@@ -164,7 +164,8 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    fight; every theft angers them more, and that's what brings the raids back.
    Or sail out to the Wedding Isle, where Mischievious is always planning the next wedding (built as a
    proof of concept, 10 Nov): lay out the venue, dress the guests, pick who you marry and how it
-   goes, and keep a collage of the day. Whoever you marry sails home with you and lives at the den.
+   goes (raiders, a brawl, or every guest bringing a present till you're buried in them), and keep a
+   collage of the day. Whoever you marry sails home with you and lives at the den.
    Or knock at the houses in the den's cliff (a proof of concept, 11 Nov): the first is Gravee's,
    Bedside Manors, where she shows you round her portraits, the vampire sits up in his coffin, and
    she paints you scared to death for her wall. Each house is a friend's little scene of their own.
