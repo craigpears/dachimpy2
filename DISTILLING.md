@@ -349,6 +349,17 @@ be by borrowing one from a finished column.
 - Spice in a white column is a bonus: +3 instead of +1, and it's still Crystal Clear. Experts go for
   CC^12 with the most spice and the least wasted.
 
+### The endgame's gamble (the user, 12 Nov)
+"The difference between even a legendary, ultimate, whatever, like the CC10 and the CC12 ... it's almost
+like it becomes like a game of Russian roulette. Like ... you've got a column of 8 whites on the right-hand
+side. When the new column appears on the left where there were 2 whites, and you have to get them over as
+fast as you can, and it's like, oh, do I risk burning a thing to try and chase that next thing that will
+set me up for a longer CC without ruining my entire game?" So past about CC^10 it's no longer skill alone:
+each new column is a bet, ferry its whites right in time or not, and a burn there ends the chain. For the
+bots: the top tiers take that bet the way a player would (chase the chain while the odds are fair, cash in
+when they're not), so a tier's CC^12 rate is a probability, and the goals are set from it ("reached CC^12
+in 1 run of 4"), not a promise. For Helium: his advice at that point is the bet, plainly put.
+
 ### Burn timing
 Right-click to burn as soon as the right column is ready: in Stage I, as soon as the junk column is
 complete; in Stage II, as soon as the next white column is full. A fast game (under 3.5 minutes) is
