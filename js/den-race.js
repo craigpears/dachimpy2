@@ -58,7 +58,7 @@ import { LAY, SAIL } from './den-sail.js';
 import { CHECK } from './den-checkpoint.js';
 import { Turret } from './den-turret.js';
 import { Crane } from './den-crane.js';
-import { Field, stretchAt, atFinish, courseSea } from './den-racers.js';
+import { Field, FIELD, stretchAt, atFinish, courseSea } from './den-racers.js';
 import { RIVALS } from './den-rivals.js';
 export { stretchAt, atFinish };
 const RC = LAY.RACE;
@@ -154,6 +154,9 @@ export class Race {
     field;
     /** The rivals' sailing, from the gun. */
     run = null;
+    /** Racing online (src/race-net.ts): everyone else on the course, in order, the other players and the
+        room's bots, instead of your rivals (null: your rivals, the first `rivals` of them). */
+    roster = null;
     /** The snake that has her now, if one does (said once a sweep). */
     snake = null;
     /** How long she's sat on one square, and which. */
@@ -165,10 +168,10 @@ export class Race {
         this.field = this.lineUp();
     }
     /** Your rivals this race, in their order. */
-    racing() { return RIVALS.slice(0, this.rivals); }
+    racing() { return this.roster ?? RIVALS.slice(0, this.rivals); }
     /** A fresh field: you, and your rivals on their spots. */
     lineUp() {
-        const f = new Field(['you', ...this.racing().map((r) => r.name)], courseSea(), RACE.COUNT);
+        const f = new Field(['you', ...this.racing().map((r) => r.name)], courseSea(), RACE.COUNT, FIELD.ONLINE);
         this.racing().forEach((r, k) => { f.racers[k + 1].pose = spotPose(r.spot); });
         return f;
     }
@@ -197,13 +200,20 @@ export class Race {
     /** On the line: how many rivals race you, one to all of them (RIVALS). Your spot moves along if one of
         theirs is it now. How many now. */
     setRivals(n) {
-        if (this.state !== 'line')
+        if (this.state !== 'line' || this.roster)
             return this.rivals;
         this.rivals = Math.max(1, Math.min(RIVALS.length, Math.round(n)));
         this.field = this.lineUp();
         if (this.taken(this.spot))
             this.shift(this.spot < RC.LINE.c1 ? 1 : -1);
         return this.rivals;
+    }
+    /** Racing online: everyone else on the course (the room's line-up, you not in it), or null to race your
+        rivals again. On the line, they're lined up on their spots now. */
+    setRoster(roster) {
+        this.roster = roster;
+        if (this.state === 'line' || this.state === 'off')
+            this.field = this.lineUp();
     }
     /** Along the line a square, left (-1) or right (+1), or to spot `to`: never onto a rival's (she goes past
         it). Where she is now. */

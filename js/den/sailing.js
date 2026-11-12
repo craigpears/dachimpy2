@@ -33,7 +33,7 @@ import { tzzWorld, tzzTick, tzzHail, tzzPrompt, tzzReset } from './balloon-isle.
 import { empireWorld, empireTick, empirePrompt, empireReset } from './imperial-isle.js';
 import { primatesTick, primatesReset } from './moored.js';
 import { smugglersWorld, smugglersTick, smugglersPrompt, smugglersReset } from './smugglers.js';
-import { raceWorld, raceTick, raceKey, racePrompt, raceShot, raceTarget, raceHitRival, raceHolds, raceReset, raceHover, raceClick } from './race.js';
+import { raceWorld, raceTick, raceHelm, raceKey, racePrompt, raceShot, raceTarget, raceHitRival, raceHolds, raceReset, raceHover, raceClick } from './race.js';
 import { watch, watchTick, watchStop } from './race-watch.js';
 
 // The old sloop's at anchor in the cove from the moment the siege is over, while their ship makes
@@ -294,7 +294,7 @@ export function sailTick(dt) {
   let events = [];
   if (sail.on) {
     const heldWas = h.held();
-    events = h.tick(dt);
+    events = raceHelm(h, dt);   // (in whole steps during a race: race.js)
     for (const e of events) {
       windSay(e);
       if (e.kind === 'move' && e.bump && !e.irons) sail.bumpT = e.secs * 0.45;   // (felt as she hits)

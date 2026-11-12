@@ -5,6 +5,8 @@
    The shared betting table lives in harbour.js. */
 import * as harbour from './harbour.js';
 export { DenCrew } from './crew.js';
+export { RaceRoom } from './race-room.js';
+import { RACES_TABLE } from './race-room.js';
 
 const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS pirates (
@@ -86,6 +88,26 @@ export default {
     // The Pirate Den's co-op: /api/crew/CODE opens a WebSocket to that crew's room.
     const crew = url.pathname.match(/^\/api\/crew\/([A-Z]{4})$/);
     if (crew) return env.CREW.get(env.CREW.idFromName(crew[1])).fetch(request);
+    // The sloop race online: /api/race/CODE opens a WebSocket to that race's room, which runs the race.
+    const race = url.pathname.match(/^\/api\/race\/([A-Z]{4})$/);
+    if (race) return env.RACE.get(env.RACE.idFromName(race[1])).fetch(request);
+    // Races run online, written down (src/race-server.ts, RaceRecord): the recent ones, and one by its id
+    // (kept by the room it was raced in).
+    if (request.method === 'GET' && (url.pathname === '/api/races' || url.pathname.startsWith('/api/races/'))) {
+      try {
+        await env.DB.prepare(RACES_TABLE).run();
+        const one = url.pathname.match(/^\/api\/races\/([a-z0-9]{10})$/);
+        if (!one) {
+          const { results } = await env.DB.prepare('SELECT id, date, code, racers, winner, time, size FROM races ORDER BY date DESC LIMIT 30').all();
+          return json({ races: results });
+        }
+        const row = await env.DB.prepare('SELECT code FROM races WHERE id = ?').bind(one[1]).first();
+        if (!row) return json({ error: 'not found' }, 404);
+        return env.RACE.get(env.RACE.idFromName(row.code)).fetch(new Request(`https://race-room/record/${one[1]}`));
+      } catch (e) {
+        return json({ error: 'server', message: String(e && e.message || e) }, 500);
+      }
+    }
     try {
       await ensureSchema(env.DB);
       const route = `${request.method} ${url.pathname}`;
