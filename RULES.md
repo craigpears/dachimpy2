@@ -2350,6 +2350,29 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       turning whirlpool!").
     - **The starter's card names them:** "Or take a gamble: a veiled wind that might carry ye on or blow ye
       back, or a whirlpool that turns its spin. Catch it turning yer way".
+  - **Your own course (12 Nov: "having a map editor are going to be like the top of demands ... you'd need to
+    be able to switch between 2D and 3D views"):** `race-editor.html` (RACE.md §10 has the detail).
+    - **The chart:** the course in 2D in the race chart's look. Click a buoy, a shortcut or a gamble (or its
+      name) to pick it, outlined in gold; drag it along its spit, or ◂ ▸ (the arrow keys too); Esc lets go.
+      Its numbers are in the side panel: the up lock's Bilge clears (3 to 20), the crane's frames (small,
+      standard, large), the barrier's bundles (1 to 4), the guard's price (10 to 100 coins, in tens), the
+      veiled wind's odds (10 to 90%) and where it blows her back to, the turning pool's beat (2 to 8 s).
+    - **Always a race:** each way through inside its spit, a column of land either end and between it and
+      the next way through, where the legs either side reach it; the long way open round every buoy, every
+      shortcut sailable. Anything out of place is listed in plain words and the chart's edged in red; it
+      can't be shared or raced till it's put right.
+    - **3D:** "Race it in 3D" (or the 3D tab) opens `den.html?at=race&course=...`: the den's race laid from
+      the course, read once as the page loads, rivals and all. "Back to the course editor (2D)", top right,
+      goes back with it. Its best time is kept apart from the den's own course's.
+    - **Share:** "Copy share link" (`race-editor.html?course=` and about 26 characters); the page's own
+      address keeps the course too. Reset goes back to the den's own course. A link that's garbled, or not a
+      race, opens the den's own.
+    - **Balance check:** 300 races of four of the simulation's bots, in a worker, about ten seconds: each way
+      round's wins against its fair share (red outside half to 1.6 times it), what each shortcut saves on the
+      course and really saved a decent, good and great racer, the gambles each way; each feature's wins on
+      the chart too.
+    - **The starlit door stays where it is** on every course (public since 12 Nov), drawn on the chart with its
+      tunnel and raced in the balance check; nothing else cuts through a spit in its columns.
   `?at=race` and one cheat. Rules: `src/den-race.ts`; drawn and played by `js/den/race.js`, its start
   `js/den/race-start.js`, its buoys and finish `js/den/race-marks.js`, its barrier `js/den/race-forage.js`;
   the starter's lines `src/lines/race.ts`.

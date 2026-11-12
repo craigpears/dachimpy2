@@ -53,13 +53,14 @@
      comes off as often as she times it (she waits for its spin to turn her way, then goes in). Either way,
      it carries her on (a ladder) or back (a snake) by what the helm measures (GAMBLE.SAVES).
    - Deterministic: one seed, one race. */
-import { LAY, SAIL } from './den-sail.js';
-import { RACE, LONG_ROUTE, routeRow } from './den-race.js';
+import { LAY, SAIL, layRace } from './den-sail.js';
+import { RACE, LONG_ROUTE, longRoute, routeRow } from './den-race.js';
+import { DEFAULT_COURSE } from './race-course.js';
 import { Field, FIELD, sheltered, courseSea } from './den-racers.js';
 import { DOOR } from './den-door.js';
 import { BRIBE, towPath } from './den-bribe.js';
 import { CHECK } from './den-checkpoint.js';
-import { CRANE, TRIP } from './den-crane.js';
+import { CRANES, TRIP } from './den-crane.js';
 import { LOCK } from './den-lock.js';
 import { PATCH } from './den-patch.js';
 import { WIND } from './den-wind.js';
@@ -68,6 +69,13 @@ import { seeded } from './mirror-row.js';
 import { GAMBLE, spinWay, nextTurn } from './den-gamble.js';
 import { WHIRL, whirlpool } from './den-whirl.js';
 const RC = LAY.RACE, S = RC.STRETCHES;
+/** The den's own course, laid out: what the helm measured the race's numbers on (a course from the race's
+    editor, src/race-course.ts, has them shifted by how much further round each goes: SHIFT). */
+const DEFAULT_LAY = layRace(DEFAULT_COURSE);
+/** Squares along a route. */
+function squaresOf(route) {
+    return route.slice(1).reduce((n, b, i) => n + Math.abs(b[0] - route[i][0]) + Math.abs(b[1] - route[i][1]), 0);
+}
 export const SKILLS = ['decent', 'good', 'great'];
 export const SIM = {
     /** Seconds a tick. */
@@ -75,8 +83,9 @@ export const SIM = {
     /** Seconds the helm takes the long way round, gun to finish line, no puzzle, from the long way's own spot on
         the starting line, hopping the trade wind back up the course with a Double and weaving through the
         zigzag (measured 11 Nov, the course's second pass: 221.9 s, tools/race-measure.mjs;
-        tests/race-sim.test.ts measures it again and holds this to it). */
-    LONG: 222,
+        tests/race-sim.test.ts measures it again and holds this to it). A course from the race's editor
+        (src/race-course.ts): at the same pace, for its own long way's squares. */
+    LONG: 222 * squaresOf(LONG_ROUTE) / squaresOf(longRoute(DEFAULT_LAY)),
     /** Seconds from each spot on the starting line (LINE.c0 up) to the first bend, through the start's
         field, the pilot's quickest way (measured 11 Nov, tools/race-measure.mjs; tested). The long way's own spot
         (RACE.LONG_SPOT) is the long way's own start. */
@@ -130,7 +139,7 @@ export const SIM = {
           at its first exit (12 Nov): 8 s. Assumed. */
     PUZZLE: {
         combo: 32, vegas: 52, double: 22, triple: 28, row: RACE.DECENT.headwind,
-        bilge: LOCK.COST_UP, forage: RACE.DECENT.forage, piece: 4, nav: 53 * 1.2, load: 20, haul: BRIBE.MOVES * BRIBE.MOVE_SECS, gust: 8,
+        bilge: (LOCK.COST_UP * RC.COURSE.clears) / LOCK.WORK, forage: (RACE.DECENT.forage * RACE.FORAGE.BUNDLES.length) / 2, piece: 4, nav: 53 * 1.2, load: 20, haul: BRIBE.MOVES * BRIBE.MOVE_SECS, gust: 8,
     },
     /** A Vegas's chance to come off, a go, by skill; the next go after one that doesn't takes this much of
         a fresh one's time; and the goes before she gives up and sails on. Assumed. */
@@ -229,7 +238,46 @@ export const startTau = (c) => SIM.SPOTS[RACE.LONG_SPOT - RC.LINE.c0] - SIM.SPOT
     and tests/den-door.test.ts hold the course to; the zigzag's SIM.ZIGZAG): she rejoins the long way that
     much further round than she'd have got sailing it in the time her trip takes. (The long way's route
     is sailed at one pace, so its own distances would make a bend's runs as slow as a leg's reaches.) */
-const SAVES = { ...RACE.DECENT, door: DOOR.SAVES, zigzag: 0, wreck: 0 };
+/* A course from the race's editor (src/race-course.ts, 12 Nov): nobody's measured it with the helm, so each
+   shortcut's and gamble's saving is the den's own course's, shifted by how much more or less of the long way
+   it cuts out there (squares round it, at its pace). On the den's own, nothing shifts. */
+/** Squares round the long way of a laid course to column `c` of stretch `s` (along its row, on past its ends). */
+function roundTo(lay, route, s, c) {
+    const row = routeRow(s);
+    let t = 0;
+    for (let i = 1; i < route.length; i++) {
+        const a = route[i - 1], b = route[i];
+        if (a[1] === row && b[1] === row)
+            return t + (c - a[0]) * Math.sign(b[0] - a[0] || 1);
+        t += Math.abs(b[0] - a[0]) + Math.abs(b[1] - a[1]);
+    }
+    throw new Error(`no stretch ${s} on ${lay.CODE || 'the course'}`);
+}
+/** How far round the long way (squares) each shortcut and each way of each gamble carries her on a course. */
+function reach(lay) {
+    const route = longRoute(lay), at = (s, c) => roundTo(lay, route, s, c);
+    const h = lay.HEADWIND, tn = lay.GAMBLES.TURN, vl = lay.GAMBLES.VEIL, last = (x) => x[x.length - 1];
+    const [g, d2, m, f, l, e, t3] = [lay.GUNS.way[0][0], lay.DOUBLE.WAY[0][0], lay.WHIRLS.MOUTH.c, lay.FORAGE.NOTCH[0], lay.LOCKS[0].at[0], lay.CRANE, lay.TRIPLE[0][0]];
+    return {
+        guns: at(1, g) - at(0, g), headwind: at(2, last(h)[0]) - at(1, h[0][0]), double: at(2, d2) - at(1, d2), whirls: at(3, m) - at(2, m),
+        forage: at(3, f) - at(2, f), locks: at(4, l) - at(3, l), crane: at(5, e.TO.c) - at(4, e.LEDGE[0]), triple: at(5, t3) - at(4, t3),
+        turnOn: at(2, last(tn.ON).c) - at(1, tn.IN[0]), turnBack: at(0, last(tn.BACK).c) - at(1, tn.IN[0]),
+        door: at(4, lay.DOOR.OFF[0][0]) - at(1, lay.DOOR.OFF[0][0]),
+        veilOn: at(5, last(vl.ON).c) - at(4, vl.WAY[0][0]), veilBack: at(4, last(vl.BACK).c) - at(4, vl.WAY[0][0]),
+    };
+}
+/** Seconds each shortcut and gamble's saving shifts by on this page's course (none on the den's own). */
+const SHIFT = (() => {
+    const a = reach(RC), b = reach(DEFAULT_LAY);
+    return Object.fromEntries(Object.keys(a).map((k) => [k, (a[k] - b[k]) * PACE]));
+})();
+const shifted = (id) => (id in SHIFT ? SHIFT[id] : 0);
+const SAVES = Object.fromEntries(Object.entries({ ...RACE.DECENT, door: DOOR.SAVES, zigzag: 0, wreck: 0 }).map(([id, s]) => [id, s + shifted(id)]));
+/** What each gamble's ways save or cost on this page's course (GAMBLE.SAVES, the den's own, shifted). */
+export const BET_SAVES = {
+    turn: { on: GAMBLE.SAVES.turn.on + SHIFT.turnOn, back: GAMBLE.SAVES.turn.back + SHIFT.turnBack },
+    veil: { on: GAMBLE.SAVES.veil.on + SHIFT.veilOn, back: GAMBLE.SAVES.veil.back + SHIFT.veilBack },
+};
 const cut = (id, s, c, to, cOut, trip, at, spot = null) => {
     const tIn = tauAt(s, c), saves = id === 'zigzag' ? tauAt(to, cOut) - tIn - trip : SAVES[id];
     return { id, tIn, tOut: tIn + trip + saves, trip, saves, at, sheltered: sheltered(at.c, at.r), spot };
@@ -260,8 +308,8 @@ CUTS.zigzag.trip = CUTS.zigzag.tOut - CUTS.zigzag.tIn - SIM.ZIGZAG;
     her back if she slips; the tight water past the gun gap, and where it puts her; the left-hand bends and
     the run home, where the left-hand trade wind waits. */
 const MID_T = tauAt(2, RC.SNAKES.MID[0][0] - 1), MID_BACK = tauAt(1, RC.SNAKES.MID[0][0]);
-const TIGHT_BACK = tauAt(1, SAIL.COLS - 2);
-const LEFT_T = [tauAt(1, 3), tauAt(3, 3), tauAt(5, RC.FINISH[0] + 3)];
+const TIGHT_BACK = tauAt(1, RC.BUOYS[0].at[0]);
+const LEFT_T = [tauAt(1, RC.BUOYS[1].at[0] + 1), tauAt(3, RC.BUOYS[3].at[0] + 1), tauAt(5, RC.FINISH[0] + 3)];
 /** Seconds a sweep takes: a square of wind a trade wind's push. */
 const sweep = (n) => n * SAIL.PUSH;
 /** The bribe's tow through the gate, from in front of its way in: a gust's squares at the trade winds' pace. */
@@ -271,7 +319,7 @@ const HOPS = { decent: 0.5, good: 0.75, great: 1 };
 const sqs = (ps) => ps.map((p) => [p.c, p.r]);
 const TN = RC.GAMBLES.TURN, VL = RC.GAMBLES.VEIL;
 const bet = (id, s, c, on, back) => {
-    const tIn = tauAt(s, c), sv = GAMBLE.SAVES[id];
+    const tIn = tauAt(s, c), sv = BET_SAVES[id];
     return { id, tIn, on: { t: tIn + on.secs + sv.on, trip: on.secs, by: on.by }, back: { t: tIn + back.secs + sv.back, trip: back.secs, by: back.by } };
 };
 export const BETS = [
@@ -280,8 +328,8 @@ export const BETS = [
     // (onto the veiled wind from the leg, then its carry: on through onto the run home, or back along the leg)
     bet('veil', 4, VL.WAY[0][0], { secs: (1 + VL.ON.length) * SAIL.PUSH, by: [VL.WAY[0], ...sqs(VL.ON)] }, { secs: (1 + VL.BACK.length) * SAIL.PUSH, by: [VL.WAY[0], ...sqs(VL.BACK)] }),
 ];
-/** Pieces in the crane's three frames (about five squares a piece). */
-const CRANE_PIECES = Math.round(CRANE.PARTS.reduce((n, p) => n + p.rows.join('').split('#').length - 1, 0) / 5);
+/** Pieces in the crane's three frames (about five squares a piece), as big as the course has them. */
+const CRANE_PIECES = Math.round(CRANES[RC.COURSE.frames].reduce((n, p) => n + p.rows.join('').split('#').length - 1, 0) / 5);
 export const ROUTES = [
     { name: 'long', cuts: ['zigzag'] },
     { name: 'gap-run', cuts: ['guns'], gap: 'run' },
@@ -354,7 +402,7 @@ function along(pts, u) {
 }
 /** Where the long way joins her way down from spot `spot` (seconds round it): she meets the first leg
     below her spot, or (left of the long way's own spot) runs along it to there. */
-const joinTau = (spot) => tauAt(0, Math.min(SAIL.COLS - 1.5, Math.max(spot, RACE.LONG_SPOT)));
+const joinTau = (spot) => tauAt(0, Math.min(RC.BUOYS[0].at[0] + 0.5, Math.max(spot, RACE.LONG_SPOT)));
 /** Down through the start's field from her spot, `tau` seconds round the long way (from `tau0`, where
     she started). */
 export function startPose(spot, tau0, tau) {
@@ -606,7 +654,7 @@ export function sail(o) {
         // their guard paid, she goes through at her leisure)
         const run = b.route.gap === 'run' || (b.route.gap === 'bribe' && !b.paid), leisure = b.route.gap === 'shot' || b.paid;
         if (c.id === 'guns' && snakes && !leisure && rand() < SIM.SNAKE.tight[b.best] * (run ? 0.5 : 1))
-            swept(b, 'tight', TIGHT_BACK, sweep(SAIL.COLS - 2 - G[0][0]));
+            swept(b, 'tight', TIGHT_BACK, sweep(RC.BUOYS[0].at[0] - G[0][0]));
     };
     const giveUp = (b) => {
         const c = b.cut;

@@ -17,9 +17,10 @@
    then a breather before the next. You drop a pin and the pilot works out the moves to get there;
    you can put in moves yourself as well (they're played first), for when you want to steer. */
 import { DeckHole } from './den-patch.js';
-import { Lock, lockCost } from './den-lock.js';
+import { LOCK, Lock, lockCost } from './den-lock.js';
 import { WIND, against, inZone, lie, rowTime, sailTime, weather, zoneAir } from './den-wind.js';
 import { WHIRL, whirl, whirlAt, whirlpool } from './den-whirl.js';
+import { DEFAULT_COURSE, DOOR_COLS, courseFromPage, encodeCourse, landOf } from './race-course.js';
 export const SAIL = {
     /** The board: squares across and out to sea. Grown (10 Nov) from 16 by 14 to make room for the
         imperial checkpoint and the open sea beyond it (the user wanted "a bit of the map, not just
@@ -155,8 +156,8 @@ export const SAIL = {
    - The finish (FINISH): a line across the run home, between two markers, by the left-hand trade
      wind, which then carries her back to the start for another go.
    Laid out at r0 (the line of rocks' row), 27 squares across. */
-const RACE_LAY = (() => {
-    const R0 = 37, W = 27;
+export function layRace(K = DEFAULT_COURSE, custom = false) {
+    const R0 = 37, W = 27, B = K.buoys;
     /** The starting line's row, and the start's field of whirlpools and winds below it. */
     const LINE = { r: R0 + 1, c0: 1, c1: W - 1 }, FIELD_R0 = R0 + 2, FIELD_R1 = R0 + 7;
     /** Each stretch: its first row (it's two deep) and the way it's sailed (1 right, 3 left). The run
@@ -167,10 +168,10 @@ const RACE_LAY = (() => {
     const SPITS = [{ r0: R0 + 10, r1: R0 + 12, bend: 'R' }, { r0: R0 + 15, r1: R0 + 17, bend: 'L' }, { r0: R0 + 20, r1: R0 + 25, bend: 'R' }, { r0: R0 + 28, r1: R0 + 30, bend: 'L' }, { r0: R0 + 33, r1: R0 + 34, bend: 'R' }];
     const S = SPITS, T = STRETCHES;
     /** The columns everything's laid at (the few numbers to rework the course by). */
-    const GUN_C = 21, WRECK_C = 16, HEAD_C = 12, DOUBLE_C = 6, MID_C = 19, DOOR_C = 15, WHIRL_C = 12, FORAGE_C = 20, LOCK_C = 11, CRANE_C = 12, TRIPLE_C = 22, FIN_C = 4;
+    const GUN_C = K.gun, WRECK_C = K.wreck, HEAD_C = K.head, DOUBLE_C = K.double, MID_C = K.mid, DOOR_C = DOOR_COLS[0], WHIRL_C = K.whirl, FORAGE_C = K.forage, LOCK_C = K.lock, CRANE_C = K.crane, TRIPLE_C = K.triple, FIN_C = K.finish;
     /** The gambles (12 Nov; src/den-gamble.ts): the turning pool's column on leg 2, the veiled wind's on spit 5,
         and the column on leg 5 the veiled wind blows her back to. */
-    const TURN_C = 8, VEIL_C = 18, VEIL_BACK_C = 6;
+    const TURN_C = K.turn, VEIL_C = K.veil, VEIL_BACK_C = K.veilBack;
     const winds = [];
     const wind = (c, r, d) => winds.push([c, r, d]);
     // The left-hand trade wind: up the left-hand edge from the run home's second row to the starting
@@ -183,7 +184,7 @@ const RACE_LAY = (() => {
         left.push([0, r, 2]);
     // Just past the gun gap [A]: leg 2's second row, from under the gap to the bend, blowing her back.
     const tight = [];
-    for (let c = GUN_C; c <= W - 3; c++)
+    for (let c = GUN_C; c <= B[0] - 1; c++)
         tight.push([c, T[1].r + 1, 1]);
     // The trade wind back up the course: across leg 3 and up through spit 2, onto leg 2.
     const mid = [];
@@ -224,7 +225,7 @@ const RACE_LAY = (() => {
         pound.push([LOCK_C, r]);
     const berth = [LOCK_C + 2, S[3].r0];
     // The zigzag on leg 4 before the locks: headwinds blowing back along it (right), alternating side to side.
-    const zigzag = [[9, T[3].r, 1], [7, T[3].r + 1, 1], [5, T[3].r, 1], [3, T[3].r + 1, 1]];
+    const Z = B[3], zigzag = [[Z + 7, T[3].r, 1], [Z + 5, T[3].r + 1, 1], [Z + 3, T[3].r, 1], [Z + 1, T[3].r + 1, 1]];
     // [E] The crane's notch; the Triple's gap, two winds blowing back across it.
     const triple = [[TRIPLE_C, S[4].r0, 2], [TRIPLE_C, S[4].r1, 2]];
     // [A'] The bribe (12 Nov; src/den-bribe.ts): an old wreck run aground at the back of a notch in spit 1,
@@ -293,10 +294,10 @@ const RACE_LAY = (() => {
         ...notches.map(([c, r]) => `${c},${r}`),
         `${TURN_C},${S[0].r1}`, `${TURN_C + 1},${S[0].r1}`, ...turnCleft.map(([c, r]) => `${c},${r}`), ...turnUp.map(([c, r]) => `${c},${r}`), ...veilWay.map(([c, r]) => `${c},${r}`),
     ]);
-    const land = S.map((s) => {
-        const out = [];
+    const land = S.map((s, i) => {
+        const out = [], [l0, l1] = landOf(K, i);
         for (let r = s.r0; r <= s.r1; r++)
-            for (let c = s.bend === 'R' ? 1 : 4; c <= (s.bend === 'R' ? W - 3 : W - 1); c++)
+            for (let c = l0; c <= l1; c++)
                 if (!open.has(`${c},${r}`))
                     out.push([c, r]);
         return out;
@@ -305,7 +306,6 @@ const RACE_LAY = (() => {
     for (let c = 0; c < W; c++)
         if (c !== 8 && c !== 9)
             reef.push([c, R0]);
-    const bendC = (s) => (s.bend === 'R' ? W - 2 : 2);
     // The wind gaps' mouths (12 Nov: "it's a bit awkward to set the ship up to get through them"): a gust
     // big enough to hop one, broken anywhere in its mouth, lines her up and carries her over (Lineup).
     const sq = (c0, c1, r0, r1) => { const o = []; for (let c = c0; c <= c1; c++)
@@ -320,6 +320,9 @@ const RACE_LAY = (() => {
         ...zigzag.map(([c, r]) => ({ from: [[c + 1, r], [c + 2, r]], start: { c: c + 1, r, d: 3 }, need: 2, facing: true })),
     ];
     return {
+        /** The course it's laid from (src/race-course.ts): the den's own, or one from the course editor
+            (CUSTOM; its share link CODE, so the race keeps a best time of its own for it). */
+        COURSE: K, CUSTOM: custom, CODE: custom ? encodeCourse(K) : '',
         R0, STRETCHES, SPITS,
         /** The wind gaps' mouths: from any of a mouth's squares, a gust of a hop's size lines her up and
             carries her over (src/den-sailing.ts, gustPath). */
@@ -348,7 +351,7 @@ const RACE_LAY = (() => {
         FINISH: [FIN_C, RUN],
         /** A numbered buoy at each bend of the long way, the square she rounds it by (the long way plain to
             follow: "clearer [buoys] for the main route"); the next is the finish. */
-        BUOYS: S.map((s, i) => ({ n: i + 1, at: [bendC(s), Math.round((s.r0 + s.r1) / 2)], bend: s.bend })),
+        BUOYS: S.map((s, i) => ({ n: i + 1, at: [B[i], Math.round((s.r0 + s.r1) / 2)], bend: s.bend })),
         /** The course's own breeze, out across it, with patches of its own (the first that has a square is
             the one she feels: src/den-sail.ts, Sea.zoneAt): light airs across the gun gap's middle (as under
             the checkpoint's gatehouse); the headwind back through the headwind gap; a wind along the leg in front
@@ -362,7 +365,7 @@ const RACE_LAY = (() => {
             { c0: berth[0], c1: berth[0], r0: T[3].r + 1, r1: S[3].r0, d: 3, s: 2 },
             { c0: CRANE_C, c1: CRANE_C, r0: T[4].r + 1, r1: S[4].r0, d: 1, s: 2 },
             { c0: WRECK_C, c1: WRECK_C, r0: T[0].r + 1, r1: S[0].r0, d: 1, s: 2 },
-            { c0: 1, c1: 9, r0: T[3].r, r1: T[3].r + 1, d: 3, s: 2 },
+            { c0: Z - 1, c1: Z + 7, r0: T[3].r, r1: T[3].r + 1, d: 3, s: 2 },
             { c0: 0, c1: W - 1, r0: LINE.r, r1: RUN + 1, d: 0, s: 2 },
         ],
         /** [A]: the gap (its middle square), its guns either side, and the squares each is trained on (gun 0
@@ -412,7 +415,11 @@ const RACE_LAY = (() => {
             })),
         },
     };
-})();
+}
+/** The course this page was opened with (?course=, from the course editor: src/race-course.ts), read once
+    before the race is made; or the den's own. */
+const PAGE_COURSE = courseFromPage();
+const RACE_LAY = layRace(PAGE_COURSE ?? DEFAULT_COURSE, !!PAGE_COURSE);
 export const LAY = {
     /** The trade winds: where each starts, the way it blows, and how many squares long. Out from off
         the beach to the junction; on from the junction, the main shipping lane, out to the imperial
@@ -918,7 +925,8 @@ export class Sea {
         }
         for (const [c, r, d] of RC.WINDS)
             this.wind.set(key(c, r), d);
-        this.locks.push(...RC.LOCKS.map((l) => ({ ...l, at: [...l.at] })));
+        // (its up lock raised by the course's Bilge clears, if they're not the den's own: src/race-course.ts)
+        this.locks.push(...RC.LOCKS.map((l) => ({ ...l, at: [...l.at], ...(RC.COURSE.clears !== LOCK.WORK ? { work: RC.COURSE.clears } : {}) })));
         for (const [c, r] of RC.POUND.at)
             this.pounds.set(key(c, r), RC.POUND.level);
         this.zones.push(...RC.ZONES.map((z) => ({ ...z })));

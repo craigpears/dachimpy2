@@ -28,12 +28,13 @@ const key = (c, r) => `${c},${r}`;
 export const GAMBLE = {
     /** Seconds the turning pool spins each way before it turns (a beat: slowing to a stop and picking up the
         other way). Long enough to read and time a way in; short enough that a racer coming up to it waits a
-        little at most. Assumed. */
-    BEAT: 4,
+        little at most. Assumed. (A course from the race's editor may set its own: src/race-course.ts.) */
+    BEAT: RC.COURSE.beat,
     /** Its spin at full speed, in radians a second (js/den/race-gamble.js): a plain pool's. */
     SPEED: 1.6,
-    /** The veiled wind's chance of blowing her on: a coin toss. */
-    ON: 0.5,
+    /** The veiled wind's chance of blowing her on: a coin toss (or a course's own odds, from the race's
+        editor: src/race-course.ts). */
+    ON: RC.COURSE.veilOn / 100,
     /** What each saves (on, a ladder) or costs (back, a snake), in seconds, over sailing on the long way from
         a few squares before it to well past it, as the helm measures it (tests/den-gamble.test.ts holds the
         course to it; the simulation's bots go by it, src/race-sim.ts). The veiled wind about the same either

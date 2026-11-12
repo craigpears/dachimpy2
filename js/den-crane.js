@@ -45,6 +45,23 @@ export const CRANE = {
         into the water on the other side; you leap down onto her deck; a look round. */
     BEATS: { leap: 0.9, rise: 2.4, swing: 2.4, lower: 1.8, back: 0.9, look: 1.2 },
 };
+/** The crane's frames by size, for the sloop race's crane (a course from its editor, 12 Nov:
+    src/race-course.ts, frames): the den's own (CRANE.PARTS, thirteen pieces), or small (two pieces a frame,
+    six in all) or large (six a frame, eighteen). Each, as the den's, filled exactly with a square jutting
+    out where a rare piece goes, and built foot, post and jib (tests/den-crane.test.ts). */
+export const CRANES = {
+    small: [
+        { name: 'foot', rows: ['#####.', '.#####'] },
+        { name: 'post', rows: ['.####.', '######'] },
+        { name: 'jib', rows: ['#######.', '.###....'] },
+    ],
+    standard: CRANE.PARTS,
+    large: [
+        { name: 'foot', rows: ['######..', '########', '#######.', '.#####..', '..####..'] },
+        { name: 'post', rows: ['.##########', '###########', '.#########.'] },
+        { name: 'jib', rows: ['############', '.##########.', '.########...'] },
+    ],
+};
 /** The lagoon, up on the headland to the left of the hidden cove: off the sea's board (squares to
     the left of its first column), so nothing on the sea is in the way of it. */
 export const LAGOON = {
@@ -52,9 +69,9 @@ export const LAGOON = {
     WRECK: [-4, 11],
 };
 /** A part's frame, as squares [row, column]. */
-export function partCells(i) {
+export function partCells(i, parts = CRANE.PARTS) {
     const out = [];
-    CRANE.PARTS[i].rows.forEach((row, r) => [...row].forEach((ch, c) => { if (ch === '#')
+    parts[i].rows.forEach((row, r) => [...row].forEach((ch, c) => { if (ch === '#')
         out.push([r, c]); }));
     return out;
 }
@@ -83,6 +100,7 @@ export function travel(t) {
 /** The crane: how much of it is up, the frame being filled, and her trips up and down. */
 export class Crane {
     ledge;
+    parts;
     /** Parts up so far (all of CRANE.PARTS: it's built). */
     up = 0;
     /** The next part's frame, on the ledge, once you've started on it (kept as you left it). */
@@ -97,11 +115,13 @@ export class Crane {
     /** `ledge`: the square she lies alongside it on (the hidden cove's ledge, CRANE.LEDGE, unless it's put
         down somewhere else: the sloop race's, over the neck of its last spit, src/den-race.ts). There,
         'cove' is the side she's hauled from and 'lagoon' the side she's set down on. */
-    constructor(random = Math.random, ledge = CRANE.LEDGE) {
+    /** parts: its frames (CRANE.PARTS; the race's as its course has them, CRANES: src/race-course.ts). */
+    constructor(random = Math.random, ledge = CRANE.LEDGE, parts = CRANE.PARTS) {
         this.ledge = ledge;
+        this.parts = parts;
         this.salvage = new Salvage(LAGOON.WRECK, random);
     }
-    built() { return this.up >= CRANE.PARTS.length; }
+    built() { return this.up >= this.parts.length; }
     /** She's alongside the ledge, in the cove: on its square, stopped, nothing holding her up, her
         oars shipped (as for hauling a chest). */
     alongside(ship) {
@@ -112,7 +132,7 @@ export class Crane {
         if (this.built())
             return null;
         this.building = true;
-        return (this.frame ??= new CraneFrame(partCells(this.up)));
+        return (this.frame ??= new CraneFrame(partCells(this.up, this.parts)));
     }
     /** Leave the frame as it is, to come back to. */
     leave() { this.building = false; }

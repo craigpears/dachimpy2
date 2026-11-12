@@ -48,7 +48,12 @@ export const LOCK = {
 /** Where a lock stands on the sea's board: its square, the way from its low side to its high side
     (0 out to sea, 1 right as seen from the den, 2 back in, 3 left), and the level of its low side
     (the sea's 0; its high side is a level up). Its other two sides are the canal's banks. */
-export interface LockSpot { at: [number, number]; up: number; low: number }
+export interface LockSpot {
+  at: [number, number]; up: number; low: number;
+  /** Moves' worth of Bilge to raise her in it, if not LOCK.WORK (a course from the race's editor, 12 Nov:
+      src/race-course.ts, clears). */
+  work?: number;
+}
 
 /** Across and out for each way (as in src/den-sail.ts). */
 const DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
@@ -95,7 +100,7 @@ export class Lock {
   }
 
   /** A move's worth of Bilge pumped in, with her waiting in it to go up. */
-  pump(w: number) { this.fill = Math.min(1, Math.max(this.fill, this.level) + w / LOCK.WORK); }
+  pump(w: number) { this.fill = Math.min(1, Math.max(this.fill, this.level) + w / (this.spot.work ?? LOCK.WORK)); }
 
   /** Its water rising to what's been pumped in; full, the top gates swing open. */
   rise(dt: number) {

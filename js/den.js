@@ -46,6 +46,7 @@ import { wed, weddingKey, weddingDown, weddingMove, weddingUp, weddingWheel, wed
 import { house, houseKey, houseTick, houseCam, houseEnter } from './den/house.js';
 import { lodgings, lodgingsOpen, lodgingsKey, nearLodgings, lodgingsTick } from './den/lodgings.js';
 import { deco, decoMode, decoMove, decoClick, decoTurn, dress, dressPanel, dressRows, lookChanged, applyDen, buildAll, tileFor, fillFrame, cheats, skipTo, cheatPanel, startAt } from './den/menus.js';
+import './den/course-back.js';   // (a course from the race's editor: the way back to it)
 
 export function newGame() {
   if (guest()) return send('host', { t: 'again' });
