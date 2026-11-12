@@ -644,7 +644,7 @@ rescue them"), and among all the browns there's one black.
   again.
 
 **The sixth note: the line pull as a sequence, a crawl and a loop (the user, 12 Nov, six screenshots drawn on
-in orange and green; not saved to `notes/`, as they came in mid-task).** "let's say it's 6 to 7. That's
+in orange and green, `notes/distilling/11-` to `16-*`).** "let's say it's 6 to 7. That's
 basically the equivalent of a crawl. But then you can kind of see how all the browns are one lower, and then
 I can loop the brown back again, up through, do kind of a crawl at the top, black down, round the bottom, up
 again, and drag all of those brown pieces down." ("6 to 7" may be the shape drawn in orange on the first
@@ -659,6 +659,40 @@ fifth note: browns filling the top left, one black among them, blacks stuck at t
 - **What it adds to "Pull a line up" (§3, `linePull`):** it isn't one black's loop alone. A black and a brown
   together crawl to shift the line one place, then loop round and go again, each pass lowering every brown in
   the line by one, until the line's where it's wanted.
+
+**The seventh note: the techniques by stage, the cheapest that still works (the user, 12 Nov, watching the
+new Ultimate).** Browns to the bottom and blacks to the top (the second and third notes) aren't for the whole
+game: "you don't need the blacks at the top and the browns at the bottom when you've still got, like, 4 or 5
+columns. Like, if you move really fast, like, there's lots of color there ... you only need to do that when
+things are getting a bit trickier." What the Ultimate did wrong:
+- **Black to the bottom well, then no crawl:** "it's doing black to the bottom very well, but it's then not
+  kind of crawled it." It crawled on a second go, but the first time "it wasn't one smooth motion".
+- **Whites left on the right:** "it's just leaving a lot of whites on the right hand side with one thick band
+  of color in the middle. It's not taking the opportunity to crawl very early."
+- **The turn-over too soon:** "even just after a few columns burn, black ... zigzagging a black on the right
+  hand side. That's what I mean. When you've got, like, half the board is color, you don't need those
+  techniques."
+- **The rule:** "They're very action heavy. They're slow, so you don't do them until they become more and
+  more necessary. There are faster ways of doing it when the board is full. So ... rank each of the
+  techniques as to how move efficient they are, and therefore ... which one you resort to depends on what
+  options and what stage you're at." So each technique has a cost in swaps for what it gets over, and a bot
+  plays the cheapest one that still works on the board in front of it: the sweep while colour's plentiful,
+  the crawl early to carry the band of colour on to the right, and the turn-over, the right-hand ladder and
+  the line pull only as colour gets scarce. (More examples to come from the user.)
+
+**The eighth note: the opening's shape, upright bands, never a diagonal (the user, 12 Nov).** "the rule at
+the start is kind of like white to the left. You want to fill those columns on the right as quickly.
+Certainly once you get 2 or 3, then you can just start dragging a bit more. But ... you want to be forming
+a line of color, white, color. Again, it's not a perfect idea, but you should not have a diagonal line of
+color and white above and below it. That's how you're going to get that. Just looks horrible to unstick."
+- **First, the right-hand columns full of junk, fast:** whites to the left, and the rightmost columns filled
+  with colour as quickly as possible (Stage I's opening, §3). Once 2 or 3 are full, you can drag more freely.
+- **Upright bands:** the board should read across as colour, white, colour: full junk columns on the right,
+  the white block in the middle, the new colour coming in on the left, each band standing up.
+- **Never a diagonal band:** a slanting line of colour with whites above and below it is what gets stuck
+  ("horrible to unstick"); it's the "one thick band of color in the middle" the Ultimate left (the seventh
+  note). So a drag that would leave colour lying on a diagonal is worse than one that stacks it upright in a
+  column, even when it gets over the same junk.
 
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
