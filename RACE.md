@@ -478,7 +478,8 @@ and each racer's board on screen as she plays it, with real moves (the puzzles' 
   sail; all let go is sails down for a blow; one side hauled sheets her round. Its small, frequent clears
   suit constant adjusting, unlike Sailing's and rowing's heavy combos. SunnyKira to teach it. Another way:
   Rigging dealt with big clears already half-built, tuned to be as quick as a big Sailing chain.
-- **Treasure Haul, and a bribe at the gate (12 Nov):** haul up treasure, then use it to bribe a guard at
+- **Treasure Haul, and a bribe at the gate (12 Nov; agreed, being built):** "I just want all the ideas in
+  there ... to show how many different ways you have of really getting through the course." haul up treasure, then use it to bribe a guard at
   a gate to let you through. "I can imagine you having treasure haul, and one of the shortcuts is then
   bribe, yeah, you can then use the treasure that you hold up to bribe somebody at a gate to get through."
   So the course doesn't get too busy, it could be the gun gap itself made an imperial gate (the Empire's

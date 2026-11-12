@@ -282,6 +282,10 @@ the site (`.assetsignore` skips `*.md`).
   player, a free camera, a key to jump to each racer in turn, and each racer's puzzle board shown with
   their real moves as they play it (RACE.md §10).
 
+- **The race's bribe gate, by Treasure Haul (12 Nov):** build it (RACE.md §11): "I'm sure it's going to be
+  a bit busy, but again, I just want all the ideas in there ... I want to see what the variety really
+  feels like to show how many different ways you have of really getting through the course."
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
