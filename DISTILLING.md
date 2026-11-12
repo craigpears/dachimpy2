@@ -584,6 +584,15 @@ browns still low in the middle.
   can demo these." On `distilling-test.html`, a Burn button that works while the game's paused, so a board
   can be set up and burned to show the next stage.
 
+**The fourth note: the crawl, drawn (the user, 12 Nov, `notes/distilling/7-the-crawl.png`).** "this is what I
+mean by crawling along. So you can see the black can go down, up, down. And then the brown can essentially
+do a very similar motion because it's got the black next to it. So it manages to kind of crawl together and
+they can loop around." In the picture a black and a brown sit side by side low in the whites: the black
+goes down through a white, up past the brown, and down through the next white; then the brown, with the
+black beside it, does the same in its turn, and the pair travels along level through the whites, looping
+round each other. It confirms "The crawl" in §3 as the user plays it: two drags in turn, each a down, up,
+down, not one piece dragged alone.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
