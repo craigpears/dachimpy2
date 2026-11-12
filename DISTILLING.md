@@ -532,6 +532,34 @@ the start, and that gives you a huge amount of speed difference." So:
   the routines (browns kept at the bottom to bring things up, and the rest) come in only once plain sweeping
   stops moving the junk right; until then it's blind, fast dragging.
 
+**The second note: browns to the bottom, blacks to the top, and climbing the right-hand wall (the user,
+12 Nov, two screenshots drawn on: `notes/distilling/2-brown-over-the-top.webp` and
+`3-brown-down-and-black-zigzag.webp`; the first note's is `1-black-stopped-short.webp`).** The board: the
+left and middle nearly all white, the junk in the last two or three columns on the right, a few blacks and
+browns still low in the middle.
+- **Red, a brown sent over the top:** the brown low on the left goes down through the black beside it,
+  then up through the whites on a long diagonal to the top of the right-hand side ("so that it aligns all
+  the way up"), and then down through the blacks there. One drag, across the whole board.
+- **Yellow, the second stage: and on down to the bottom.** "you can then drag it all the way down again
+  ... you kind of drag the brown to the bottom. And then you could even like catch that black that's
+  currently trapped behind a brown": the brown sinks on through the blacks to the bottom of the right
+  side, and on its way can free a black stuck behind a brown.
+- **The point:** "you don't just drag it to the right and leave it there. You get, once you got to this
+  stage of the board, you need browns at the bottom, blacks at the top. Otherwise, you've got no way of
+  kind of hooking things in." With the junk in a few columns on the right, it's arranged: browns low,
+  blacks high, so anything else can be hooked in through them.
+- **Green, a black climbing the right-hand wall:** a black low in the middle goes "down, up, down through
+  the whites", and on reaching "the kind of brown wall at the right, you can go up through browns, and that
+  kind of gets you up. And ... if there was a line of blacks there, you can kind of zigzag your way up to
+  get to the top. And that's how you, once you get down to a few columns of color on the right, that is
+  how you get it up." So the right-hand columns are a ladder: a black climbs through browns, zigzagging
+  across into the next column where the browns are, up to the top. With browns at the bottom and blacks at
+  the top (above), there's always a way up and a way down.
+- **For the bots:** in this stage (the sweeping done, the junk in a few columns on the right), every junk
+  piece is taken all the way: browns to the bottom of the right side, blacks to the top, by the long drags
+  above, and any piece low in the middle brought over by the ladder. Never a piece left where it was
+  dragged to.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
