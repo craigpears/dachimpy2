@@ -250,6 +250,17 @@ might carry ye on or blow ye back, or a whirlpool that turns its spin. Catch it 
   chequered banner strung between them over the water and a chequered line on it. Crossing it, a burst of
   colour, and a card: "Over the line", her time, and her place.
 
+- **Studying the course: a tactical view (idea, 12 Nov, to agree):** "having some kind of a map of the
+  course ... maybe you get a moment before the race to study the course ... I think originally I liked the
+  mystery, but maybe making it a bit less mysterious ... like in ... Total War, where you kind of go out to
+  the tactical view ... a minimap ... seems fairly useless in this context. It would need too much detail."
+  Proposed: no minimap; instead the camera pulls up high over the real course, the whole of it in view.
+  On the line, before the count, as long as you like (the starter's card could become a fly-over of the
+  legs). In the race, a key to zoom out and back, the sloop sailing on meanwhile, so a look costs you
+  seconds and a leader can't study at leisure. Buoys numbered, the racers' sloops with their names, the
+  lit buoy. Whether it marks the shortcuts and their puzzles reverses "shortcuts are never marked" above,
+  so that's the user's call. Never the starlit door. Shares its drawing with the course editor's 2D view.
+
 ## 6. Racing each other: position and risk
 
 **Several racers (rules built 11 Nov; on the water, stage 3, 11 Nov).** Two to four on the course, you and
