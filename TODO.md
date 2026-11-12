@@ -507,6 +507,8 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   on the board from the start of each act, the parts still to come shown faintly (the gaps, the stacks and
   the square for each fourth, what drops where, what pops in what order), filling in as she builds; and she
   says the plan in a line before she builds it (the blues wait for a blue to fall onto them from upstairs).
+  And her send-off (12 Nov): "she says, bingo, go clear some whirlpools, but we need a Vegas to get that
+  far." So after the Bingo she points you on to a Vegas, what really gets you out to the penguins.
 
 ## Spotted along the way (not asked for)
 
