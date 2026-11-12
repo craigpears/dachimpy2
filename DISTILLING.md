@@ -407,6 +407,13 @@ nice and illustrative". In order:
    reaches and how fast. Those runs become the goals: "the bot reached CC^12 in 3 min 20 s".
 3. **The tutorial,** after the user's pointer to the real one: Helium showing each technique on a real
    board, animated, then "now you try", in the style of Tzz's balloon lesson.
+   **Each technique demonstrated, and funny (12 Nov):** "I'd love to see like demonstrating each of the
+   techniques, like the hook, clearing each stage, obviously each thing should be funny." So a short
+   demonstration per technique (the hook, the crawl, the figure of eight, the leapfrog, channels, when
+   to burn) and per stage of a run (§3), each a little scene with its own joke. **Not drunk jokes:** the
+   user first had him drinking each demonstration's beer, then dropped it: "forget that part, I think
+   we've already got the [Kikkit] being the drunk part, he's just the creator of these things." Helium's
+   humour is the maker's: proud of his brews, his mishaps when the balance goes wrong (item 4).
 4. **Helium and his island** (IDEAS.md, "Helium, and Distilling"; his portrait checked first): his own
    little island, perhaps by the smugglers' beach, his still on it, and his mishaps: when he gets the
    balance wrong, the still goes up with a bang ("Oops. That happens sometimes. Don't worry about it.").
