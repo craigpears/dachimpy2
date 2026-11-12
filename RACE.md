@@ -700,6 +700,13 @@ A hidden gem, never hinted. There's no cheat, no `?at=` link, no shot, and the s
 you're watching." A replay shows the sea and every sloop on it, with each racer's board beside them, move by
 move. It's cheap to keep, because the puzzles are dealt from a seed: a run is its seeds and its moves with
 their times. A race could also be watched live.
+**Past races to watch, online (agreed 12 Nov):** "if we actually put this into a multiplayer, even like
+proof of concept thing where people can see games that have been played, view them and see the replays."
+So every online race is recorded by its room (the seed, the racers, their sloops' positions a few times a
+second, the hits, turns and gambles, the places, and each racer's puzzle moves) and kept; a list of past
+races to pick from; and a viewer like watching (§10 below: the free camera, following a racer, her board
+played from her real moves), with pause, speed and a bar to skip along. After online racing lands, as
+the room's record is the replay.
 
 **Spectator mode (built 12 Nov).** "As a spectator ... I can see the puzzle, as I said, the puzzling, the
 just move around free camera, including jumping between watching each person in the race." And "are you
