@@ -367,6 +367,16 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     that it's not the same on every single thing": its pools and slow winds laid from the race's seed
     (the same seed for everyone in an online race), always with a way through.
   - **Rocks blasted away by her guns,** above.
+  - **Every puzzle's shortcut cuts the same distance (12 Nov):** "other than things that are obviously
+    should be bigger, like the Vegas or the triple hop ... they don't seem proportionate. Like each an
+    element of puzzling surely should be the same distance. Like for example, the imperial gate ...
+    distance-wise ... that's a relatively small corner ... Whereas the [locks] are maybe like twice as big
+    distance-wise, and then the cranes 3 times again. They are not even." So each stopped puzzle (the
+    gate's bribe or guns, the barrier, the locks, the crane, rowing the headwind gap) skips about the same
+    stretch of course, and each is sized to take about the same time to play (fewer frames for the
+    crane, fewer clears for the locks, fewer coins for the bribe), so the choice is only which puzzle is
+    yours. The chain hops grow with the chain: a Double small, a Triple bigger (today it saves only 9 s),
+    a Vegas biggest. RACE.md §8 has the principle.
 
 
 ## Spotted along the way (not asked for)

@@ -404,6 +404,14 @@ pick your starting spot along the starting edge based on that."
 
 ## 8. Balance
 
+**Shortcuts in proportion (the user, 12 Nov):** every puzzle's shortcut should skip about the same stretch
+of course, so on the chart they look even: "each an element of puzzling surely should be the same
+distance", where today the imperial gate cuts a small corner, the locks about twice that and the crane
+three times again. Each stopped puzzle is sized to take about the same time to play, so the only choice
+is which puzzle you're good at; only the chain hops scale with how hard their chain is (a Double, then a
+Triple, then a Vegas, biggest). This replaces "each saves about what it takes to play" where puzzles
+differed in length. (In TODO.md, the race's next pass.)
+
 **What it's balanced for.** Every way round should have "a relatively equal chance of winning". The long way,
 each shortcut, and each racing style (greedy for combos, steady, aggressive with the guns) should each win
 about as often, for a player who's decent at the puzzles it needs.
