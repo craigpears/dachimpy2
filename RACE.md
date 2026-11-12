@@ -73,6 +73,13 @@ mouth. Sitting there, you're a sitting duck for anyone coming up behind (§6).
 | Leg 4, the zigzag (on the long way) | Hop its headwinds with well-timed Doubles; weaving through is the no-puzzle way | On the move | 8 | Built |
 | Spit 5, the crane in a notch | Carpentry, building the crane a part at a time, which hauls her over | Stopped dead, sheltered | 38 | Built |
 | Spit 5, a gap with two winds blowing back across it | A Triple | On the move | 9 | Built |
+
+**Played (12 Nov).** The gun gap near the start, its imperial guns shot quiet by Gunnery, "felt a lot more
+balanced. It was really quick ... You could tell, you know, the trade-off there was a lot better": keep it
+as the model of a shortcut whose trade-off reads at once. The wind gaps were "a bit awkward to set the ship
+up to get through", and building (the crane) "frustrated and slowed down by the animation" (TODO.md).
+Carpentry and Duty Navigation weren't come across on that go: the crane sits in a notch off leg 5, easy to
+sail past; the door is secret by design.
 | The starlit door: a hidden tunnel from leg 2 to leg 4 (§9) | Duty Navigation on the rock (two small constellations), then a Sailing Vegas through | Stopped dead, twice, exposed | 78 | Built, secret |
 | Rocks across a gap, blasted away | Gunnery: her guns | On the move | ? | Idea |
 | A Rigging passage of shifting, gusty winds | Rigging, its six pulleys as her rigging lines (§11) | On the move | ? | Idea |

@@ -298,6 +298,17 @@ the site (`.assetsignore` skips `*.md`).
   carries her forward and half the time back, and a whirlpool whose spin goes back and forth, to time a
   gamble on (RACE.md §4, "Gambles"). After the bribe gate and the tunnel's exits are in.
 
+- **The race's wind gaps are awkward to line up for (12 Nov):** "some of these wind shortcuts, it's a bit
+  awkward to set the ship up to get through them." The Double's and Triple's gaps (and the zigzag's
+  hops) want to be easy to get lined up for, so the puzzle's the challenge, not the steering.
+- **Building in the race slowed by its animation (12 Nov):** "Building, I don't know, I guess I feel a bit
+  frustrated and slowed down by the animation." Which animation exactly (the crane going up a part at a
+  time, or swinging her over) to pin down with the user; quicker, or skippable.
+
+- **The race's buoy markers vanish (12 Nov):** "[Buoy] markers aren't really rendering properly. They're
+  like usually vanish unless you're at the right distance." The numbered buoys and the next one lit
+  should show at any distance you'd sail by them.
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
