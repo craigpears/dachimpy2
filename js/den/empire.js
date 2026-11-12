@@ -1,9 +1,9 @@
 // The Empire's look, the same wherever it's built (RULES.md, "The same thing looks the same everywhere"):
 // its pale stone, its crimson and gold, its flag, a banner down a wall, a battlemented tower. The
-// imperial checkpoint (checkpoint.js) and Port Decorum, the imperial island (imperial-isle.js), are
-// built from these.
+// imperial checkpoint (checkpoint.js), Port Decorum, the imperial island (imperial-isle.js), and the
+// sloop race's gate at its gun gap (race-bribe.js) are built from these: a gatehouse, a gun's bastion.
 import * as THREE from 'three';
-import { mat, mesh, canvasTex } from './world.js';
+import { mat, mesh, canvasTex, flagpole } from './world.js';
 
 export const CRIMSON = '#9e1b24', GOLD = '#e0b53a', STONE = '#d3c9b2';
 /** Its pale stone, faceted. */
@@ -56,3 +56,27 @@ export function tower(w, h, { merlon = 0.5, st = stone(), band = mat(CRIMSON, { 
   }
   return g;
 }
+
+/** A gatehouse over a way through: a tower each side (centred at x `xa` and `xb`, `tw` wide, at z `z`), a
+    crimson banner down each tower's faces, a battlemented arch between them `archY` up (high enough for her
+    mast), and the Empire's flag over it. As the checkpoint's; the sloop race's gate has a smaller one. */
+export function gatehouse({ xa, xb, z, archY = 6.4, tw = 3.4, bannerH = 3.6 }) {
+  const g = new THREE.Group(), st = stone();
+  for (const x of [xa, xb]) {
+    const t = tower(tw, archY + 1.6); t.position.set(x, 0, z); g.add(t);
+    const b = banner(1.4 * tw / 3.4, bannerH); b.position.set(x, archY - 1.2, z + tw / 2 + 0.03); g.add(b);
+    const b2 = b.clone(); b2.position.z = z - tw / 2 - 0.03; b2.rotation.y = Math.PI; g.add(b2);
+  }
+  const span = xb - xa - tw, mid = (xa + xb) / 2;
+  const arch = mesh(new THREE.BoxGeometry(span, 1.6, tw * 0.8), st); arch.position.set(mid, archY + 0.8, z);
+  // (its underside curved: two haunches)
+  for (const s of [-1, 1]) { const h = mesh(new THREE.CylinderGeometry(0.9, 0.9, tw * 0.8, 10, 1, false, 0, Math.PI / 2), st); h.rotation.x = Math.PI / 2; h.rotation.z = s < 0 ? Math.PI / 2 : 0; h.position.set(mid + s * (span / 2 - 0.9), archY + 0.9, z); g.add(h); }
+  g.add(arch);
+  for (let i = 0; i < 4; i++) { const m = mesh(new THREE.BoxGeometry(0.5, 0.55, 0.5), st); m.position.set(xa + tw / 2 + 0.4 + i * (span - 0.8) / 3, archY + 1.87, z + tw * 0.4 - 0.25); g.add(m); }
+  const fl = flagpole(3, flagMatImperial()); fl.scale.setScalar(1.6); fl.position.set(mid, archY + 1.6, z); g.add(fl);
+  return g;
+}
+
+/** A gun's bastion in the Empire's look, for a destructible turret (turret.js's turretMesh): its pale stone,
+    a crimson band under its battlements, its flag on top. The checkpoint's, and the race's gun gap's. */
+export const bastionLook = (o = {}) => ({ stone: STONE, top: 1.5, foot: 1.8, height: 3.4, band: CRIMSON, flag: flagMatImperial(), rocks: 3, merlons: 10, ...o });
