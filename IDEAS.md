@@ -1091,6 +1091,22 @@ penguin waiting on his barrels. And the same the other way: a guest at a wedding
 rum, Kikkit swearing she only had a little. Each one in character, the joke true to who they are, and
 each a line in `src/lines/` (STORY.md, "The characters know each other").
 
+**Helium's opening scene: the still blows up, and no eyebrows (12 Nov):** "the first time you come across
+Helium's Island, I feel like the good opening scene, you know, has to be the distillery exploding and Helium
+just treating it as kind of a casual everyday event, just like, oh, sorry, just a little distilling mishap.
+It's like, oh, would you like me to teach you some distilling or something? And I guess your pirate's face
+could just kind of look very tense, just like, is it safe? ... of course it's safe. What would make you think
+it's not safe? This is perfectly normal. It's fine." And: "they just obviously would need to make the joke of
+you've got no eyebrows left, and they can make the joke back ... none of us have got eyebrows. It's, you know,
+... I keep asking the developers for some, but I've not gotten them yet. Also the implication that you could
+joke that they've been burned off by the explosions, but, you know, actually we just don't. None of us have got
+any. Double check that joke. I'm pretty sure it's true." So the first visit: the bang, soot and copper; Helium
+unfazed, offering a lesson; your pirate tense ("is it safe?"); "Of course it's safe. What would make you think
+it's not?"; your pirate on his missing eyebrows, burned off surely; and him: none of us have any, he keeps asking
+the developers. Then the lesson. (Given to the Helium pass, 12 Nov.) **The joke's fact, to check:** that no
+pirate in Puzzle Pirates has eyebrows; a web search (12 Nov) found nothing either way, so it's to be checked on
+real portraits before the line goes in as fact.
+
 **Helium goes over your session with you: a replay, and "where did we go wrong?" (12 Nov):** "as well as
 like getting help in the moment, is if you can have a replay of your puzzling session, and he can kind of
 give you hints, if you can ask him for hints during the replay of, well, what do you think, where do you
