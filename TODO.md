@@ -286,6 +286,17 @@ the site (`.assetsignore` skips `*.md`).
   until the pile gets out of hand. It's your wedding's gifts, not hers to demand; she stays the host,
   not the show, and any line of hers is breezy and fond of presents, never grabby.
 
+- **The race's features in the changelog, and a game design page (12 Nov):** "make sure that's in
+  the change log with a nice picture and link. Same as the race map ... each of these are like worthy
+  ... like the bribe gate. I'm sure you can combine some of those." Spectator mode, the bribe gate
+  and the gambles have entries; the course map wants one too, drawn without the starlit door (a
+  hidden gem). And a page of its own for the thinking behind the game: "a separate game design for
+  all that stuff ... the different kinds of gates, the different tactics and game thinking ... similar
+  to the change log where it's relatively high level with pictures just to help people see the kind
+  of thinking that's gone into it", the gambles put the fun way: "do you dare take the whirlpool?
+  Half the time it goes up like a ladder, half the time it sends you back like a snake. What kind of
+  gambles will you take?" (The message was cut off after "And the": to pin down with the user.)
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
