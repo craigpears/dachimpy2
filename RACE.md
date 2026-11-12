@@ -319,12 +319,30 @@ the race before deciding.
   - **Execute:** the pilot sails the plan move by move (forward, left, right, the same moves as your own
     helm), and your hands are on the boards: Sailing on the way, each clear's gust a jump along the plan,
     and the shortcut's puzzle when she reaches it (Carpentry at the crane, Bilge at the locks).
-  - **To settle with the user:** how long the planning lasts and whether it's the count before the start;
-    whether you can re-plan in the race (from the tactical view's zoom-out, costing seconds as a look
-    does); what a plan's made of (whole legs' choices, or waypoints anywhere); what the pilot does when a
-    snake throws her off the plan (sails back onto it, most likely); and whether the others see your plan.
-    It fits the tactical view, the pins and the pilot already there, and the bots already race this way
-    (a route chosen at the start, puzzles on the way).
+  - **The user's answers (12 Nov):** the plan is hidden from the others ("definitely"); it can be changed in
+    the race, but changing it mustn't cost puzzling time ("then that just creates that kind of
+    frustration"). Planning every pause by hand would be tedious ("I ought to get to here and then pause"):
+    "Maybe the ship auto stops when you hit those kind of obvious points or obstacles ... Maybe just put
+    waypoints in. Certainly for ... the zigzagging bit ... See if you can figure something out." Shooting
+    each other may get trickier or likelier with it; open.
+  - **Proposed (12 Nov, to agree):**
+    - **A plan is choices, not a drawn line:** at each of the course's forks (each leg: the long way, or one
+      of its shortcuts) you pick one. The pilot already knows the water, so it finds the way to each, move by
+      move. Waypoints are an extra, only for a racer who wants a particular line.
+    - **The obstacles make the stops, never the plan:** each shortcut or hop has a spot she stops at (the
+      trade wind's hop, each of the zigzag's headwinds, a lock, the crane's notch, the barrier, the
+      whirlpools' mouth, the door's rock). The pilot sails up to it, lines her up, holds her there and puts up
+      the board it asks for. When it's done (the Double thrown, the lock pumped) she goes on by herself. A
+      Double or Triple built on the way and held is used without stopping. So the zigzag needs no planning:
+      it's a few hop spots in a row, a stop at each.
+    - **Changing the plan without leaving the board:** a strip along the screen's edge shows the legs still to
+      come and your choice on each. One click on a leg changes it, and the board stays live under your hands.
+      The view from above is there for a look, never needed to change anything.
+    - **Planning at the start is optional:** the plan starts as the long way everywhere, and you change it
+      on the line during the count and in the race. So there's no planning phase of its own.
+    - **Shooting:** with a plan hidden, a rival can't tell where you'll stop, but every stop is at a known
+      spot, so the spots are where you'd lie in wait. For the simulation to settle (§8), with the guns
+      firing when one's loaded and a rival's in range.
 
 ## 6. Racing each other: position and risk
 
