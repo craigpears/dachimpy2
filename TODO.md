@@ -276,9 +276,6 @@ the site (`.assetsignore` skips `*.md`).
   user).
 
 
-- **The race's gambles: a mysterious wind and a whirlpool that turns (12 Nov):** a wind that half the time
-  carries her forward and half the time back, and a whirlpool whose spin goes back and forth, to time a
-  gamble on (RACE.md §4, "Gambles"). After the bribe gate and the tunnel's exits are in.
 
 
 ## Spotted along the way (not asked for)

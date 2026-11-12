@@ -203,18 +203,34 @@ sweep.
 - **A snake's sting grows down the course** (tested): the tight water costs a few seconds, the trade wind up
   the middle a leg and a half, the left-hand one everything you'd sailed.
 
-**Gambles (12 Nov, agreed: "I just want all the ideas in there"; to build after the bribe gate and the
-tunnel's exits).** To go further with snakes and ladders, a few squares that are a bet rather than a
-puzzle:
-- **A mysterious wind:** "half the time it pushes you forward and helps you skip a bit. Sometimes you're
-  getting lucky and it goes backwards." It looks the same either way until you're in it, so you can't
-  read it. A coin toss: a ladder or a snake.
-- **A whirlpool that changes direction:** "the direction the whirlpool goes ... changes, so it goes back
-  up ... that goes back and forth. So you can go that way if you want to take a gamble." This one can be
-  read, its spin turning on a beat, so it's a bet on timing: go in as it turns your way and it flings you
-  on; mistime it and it throws you back.
-For the simulation: each gamble's average worth about nothing against the way round it, so it's a swing,
-not a shortcut: good for the back of the field, a risk for the leader.
+**Gambles (built 12 Nov).** To go further with snakes and ladders, squares that are a bet rather than a
+puzzle (agreed: "I just want all the ideas in there"). Each is a ladder or a snake, and each is worth about
+nothing on average against the way round it, so it's a swing, not a shortcut: good for the back of the
+field, a risk for the leader. Rules: `src/den-gamble.ts`; squares `LAY.RACE.GAMBLES`; drawn by
+`js/den/race-gamble.js`. The starter's card names them in a line ("Or take a gamble: a veiled wind that
+might carry ye on or blow ye back, or a whirlpool that turns its spin. Catch it turning yer way").
+- **The veiled wind (spit 5, column 18):** "half the time it pushes you forward and helps you skip a bit.
+  Sometimes you're getting lucky and it goes backwards." A gap through the last spit, off leg 5, under a
+  pale shimmer of glints with no streaks and no arrow, so it can't be read. Sail onto it and it's a coin toss
+  (seeded per race, a fresh toss each time she comes onto it): on, it blows her through onto the run home,
+  facing along it (saves 26 s); back, it blows her out of the gap and along leg 5's second row to column 6
+  (costs 27 s). The way it went shows for a moment as a wind lane, gold on, red back. Only on purpose: the
+  pilot never takes her onto it and a chain's gust stops short of it.
+- **The turning pool (leg 2, column 8):** "the direction the whirlpool goes ... changes, so it goes back up
+  ... that goes back and forth. So you can go that way if you want to take a gamble." A whirlpool on leg 2's
+  first row and spit 1's last, by Puzzle Pirates' rules (one step a move to its far corner), whose spin turns
+  on a beat you can watch: clockwise 4 s, slowing to a stop, anticlockwise 4 s. Sailed into along the leg's
+  first row, its step leaves her on its corner in the spit facing on (clockwise) or back (anticlockwise),
+  and it throws her that way: on, across the leg and down a cleft through spit 2 onto leg 3 (saves 19 s);
+  back, up a wind lane through spit 1 onto leg 1 (costs 67 s: "so it goes back up"). On the leg's second
+  row she sails by it; sailed into any other way it's a plain whirlpool. Read, so a bet on timing: about
+  even for a racer who times it three goes in four, a loss for one who doesn't, a gain for one who does
+  better. Only its throw gets down the cleft, and the lane's wind blows anyone sailing down it straight back.
+- **Why there:** each is a real choice beside the safe way round (the veiled wind's gap beside leg 5, the
+  pool on one row of leg 2 with the other free), placed where the measured ladder and snake come out about
+  even (the veiled wind) or even for a decent timer (the pool), and clear of the shortcuts and the starlit
+  door's clefts. The pool's snake is the bigger because its spin can be read and its ladder can't be missed
+  by a good eye.
 
 ## 5. Knowing where you're going (built 11 Nov)
 
@@ -226,7 +242,7 @@ not a shortcut: good for the back of the field, a risk for the leader.
 - **The race explained at the start:** on the line, the starter's card: the long way round the buoys, no
   puzzle; shortcuts through the spits that cost a puzzle, a few named (bilge up through a lock, build a
   crane, row the headwind gap, zoom over the whirlpools on a Vegas, hop a headwind with a Double, and since
-  12 Nov haul up some treasure and pay off the guard at the gate), and "Get
+  12 Nov haul up some treasure and pay off the guard at the gate, and the gambles in a line of their own, §4), and "Get
   it wrong and ye're back where ye started"; the winds that sweep you back, the left-hand trade wind most;
   and that the others shoot you if you sit still in the open. Never the starlit door: a race's rules are
   explained, its secret isn't (`src/lines/race.ts`, `STARTER.explain`).
@@ -548,7 +564,38 @@ her. 3000 races of four, fair 25%:
 - `tools/race-sim.mjs` lists who came up at each exit; `tests/race-sim.test.ts` checks whoever goes in
   always comes out at an exit, both are used, and the far end wins more often than the first.
 
+**The gambles added (12 Nov, §4).** In the simulation (`BETS`, `SIM.BET`), a racer coming to a gamble takes
+it by her place: leading 10% of the time, in the pack 35%, last 70%; the aggressive a little more willing, a
+cautious leader never (at first the cautious were half as willing everywhere: they then won 19%, under the
+band, so now they only never gamble in the lead). The veiled wind's a coin toss; at the pool she waits for its
+spin to turn her way and goes in, timed right 65 / 78 / 90% of the time by skill (assumed). Each racer takes
+each at most once a race (twice let a rival be thrown back twice, home in over 400 s). Each way's saving is
+the helm's (`GAMBLE.SAVES`, tested). Bots past the pool on leg 2 are drawn on its second row. 2000 races of
+four, fair 25%:
+
+| Route | Wins | Route | Wins |
+|---|---|---|---|
+| The long way | 32% | Doubles | 28% |
+| Gun gap, run | 20% | Whirlpools' Vegas | 34% |
+| Gun gap, combo | 25% | Barrier (Foraging) | 24% |
+| Gun gap, shot quiet | 21% | Locks | 28% |
+| Bribe | 26% | Crane | 21% |
+| Headwind, rowed | 18% | Starlit door | 23% |
+| | | Every shortcut | 25% |
+
+- **The gambles:** the turning pool taken 2193 times, came off 77%, saving decent / good / great −12 / 0 /
+  +8 s on average; the veiled wind taken 2063 times, came off 51%, saving about 0 / −2 / +1. Taken by the
+  leader 137 and 367 times, the pack 1287 and 1216, the last 769 and 480.
+- **Styles** 24.7–25.3%; **skill** great 39%, good 25%, decent 12%; **spots** left 25%, gap 26%, right 22%.
+  Fields of two: every route 45–54% (fair 50%); of three, 25–43% (fair 33%).
+- `tools/race-sim.mjs` lists the gambles (`GAMBLES=0` races without them); `tests/den-gamble.test.ts` checks
+  both are taken and come off as often as they should, the back of the field takes them more than the
+  leader, a cautious leader never, and each is worth about nothing on average.
+
 **For the user to decide:**
+- The gambles: the pool's beat (4 s each way), how often a racer times it (assumed), and its snake back to
+  leg 1 three and a half times its ladder: is that the right sting for a bet you can read? Should the veiled
+  wind's toss be fairer or crueller than half and half?
 - The bribe's price (40 coins) and Treasure Haul's pace (1.5 s a move) are guesses till it's played. Should a
   rival bribe her way through? (The starter's card names it, since 12 Nov.)
 - Once the crane's built in a race, is it built for everyone (the next racer just rides it, as the den's
@@ -731,6 +778,9 @@ question of whether a crane is everyone's), and the bribe gate as the final toll
   `js/den/race-bribe.js`; your rivals' sloops, their broadsides and yours `js/den/race-field.js`.
 - **The bribe:** `src/den-bribe.ts` (the wreck's coins, the price, the gate's answer, the tow); its squares
   `LAY.RACE.BRIBE`; the guard's lines `src/lines/gate-guard.ts`.
+- **The gambles (§4):** `src/den-gamble.ts` (the veiled wind's toss and carry, the turning pool's spin and
+  throw, `Gambles` wired to the helm's `takes`); their squares `LAY.RACE.GAMBLES`; drawn by
+  `js/den/race-gamble.js`; tested in `tests/den-gamble.test.ts`.
 - **The starter's lines:** `src/lines/race.ts`.
 - **The starlit door:** `src/den-door.ts` and `js/den/door.js`.
 - **Watched (§10):** `src/race-watch.ts` (the race of four, who's followed, what she's doing, her board and

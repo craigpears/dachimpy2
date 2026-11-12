@@ -32,6 +32,7 @@ import { WATCHED, type Rival } from './den-rivals.js';
 import { sail, route, style, SIM, type BotInfo, type CutId, type SimRun, type Skill } from './race-sim.js';
 import { LOCK } from './den-lock.js';
 import { PATCH } from './den-patch.js';
+import type { BetId } from './den-gamble.js';
 
 const RC = LAY.RACE;
 
@@ -163,6 +164,12 @@ const CARRIED: Record<CutId, string> = {
   door: 'sailing the long way',
 };
 
+/** Taking a gamble (src/den-gamble.ts): on, or back. */
+const BET: Record<BetId, [string, string]> = {
+  turn: ['flung on by the turning whirlpool!', 'thrown back up the course by the turning whirlpool!'],
+  veil: ['carried on through by the veiled wind!', 'blown back along the leg by the veiled wind!'],
+};
+
 /** What a racer's up to, as the bar says it. `next`: the next shortcut her route takes, if any. */
 export function doing(x: BotInfo | null, next: CutId | null, home: number | null): string {
   if (home !== null) return `home, ${['1st', '2nd', '3rd'][home - 1] ?? `${home}th`}`;
@@ -170,6 +177,7 @@ export function doing(x: BotInfo | null, next: CutId | null, home: number | null
   const m = x.mode === 'daze' ? 'daze' : x.mode;
   if (m === 'daze') return 'holed! Patching her deck (Carpentry)';
   if (m === 'wait') return `waiting her turn at ${WHERE[x.cut ?? 'locks']}`;
+  if (m === 'trip' && x.bet) return BET[x.bet.id][x.bet.on ? 0 : 1];
   if (m === 'trip') return x.cut ? CARRIED[x.cut] : 'swept back by the wind!';
   if (m === 'stop' && x.cut) return STOPPED[x.cut](x);
   if (x.hop > 0) return 'lining up a Double over the trade wind';

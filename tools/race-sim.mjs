@@ -13,7 +13,8 @@
    she'll stop in the open with someone close behind), each reported on its own.
    SAVES=locks:30,crane:60 tries the course with those shortcuts saving those seconds instead (a course
    before it's laid). ROUTES=long,locks races just those routes. CHAIN=0: nobody Sails on the pilot.
-   SHOTS=n: racers start with n shots. SNAKES=0: no snakes. */
+   SHOTS=n: racers start with n shots. SNAKES=0: no snakes. GAMBLES=0: nobody takes a gamble (the turning
+   pool, the veiled wind: src/den-gamble.ts). */
 
 import { run, ROUTES, STYLES, CUTS, SKILLS, PACE, SIM } from '../js/race-sim.js';
 import { RACE } from '../js/den-race.js';
@@ -23,7 +24,7 @@ const RACES = Number(process.argv[2]) || 2000, SIZE = Number(process.argv[3]) ||
 const saves = {};
 Object.assign(saves, Object.fromEntries((process.env.SAVES || '').split(',').filter(Boolean).map((kv) => { const [k, v] = kv.split(':'); return [k, Number(v)]; })));
 const routes = process.env.ROUTES ? ROUTES.filter((s) => process.env.ROUTES.split(',').includes(s.name)) : ROUTES;
-const opts = { mode: MODE, saves, routes, chains: process.env.CHAIN !== '0', snakes: process.env.SNAKES !== '0', ...(process.env.SHOTS ? { shots: Number(process.env.SHOTS) } : {}) };
+const opts = { mode: MODE, saves, routes, chains: process.env.CHAIN !== '0', snakes: process.env.SNAKES !== '0', gambles: process.env.GAMBLES !== '0', ...(process.env.SHOTS ? { shots: Number(process.env.SHOTS) } : {}) };
 
 const t0 = Date.now();
 const rep = run(RACES, SIZE, opts);
@@ -61,3 +62,10 @@ for (const [id, c] of Object.entries(rep.cuts)) {
 
 console.log('\nThe starlit door\'s tunnel: who came up at each exit (by skill), and how many of them won');
 rep.exits.forEach((e, k) => { const n = e.decent + e.good + e.great; console.log(`exit ${k + 1} (leg ${DOOR.EXITS[k].to + 1})  ${String(n).padStart(5)}  decent ${e.decent}  good ${e.good}  great ${e.great}  won ${pct(e.wins, n)}`); });
+
+console.log('\nThe gambles (12 Nov): taken, came off (on), by place then, what they saved (mean, by skill), and how many who took one won');
+console.log('gamble   taken      on  leader  pack  last  decent   good  great     won');
+for (const [id, g] of Object.entries(rep.bets)) {
+  const m = (k) => (g.saved[k].n ? (g.saved[k].secs / g.saved[k].n).toFixed(0) : '-').padStart(6);
+  console.log(`${id.padEnd(7)} ${String(g.taken).padStart(6)} ${pct(g.on, g.taken)}  ${String(g.by.leader).padStart(6)} ${String(g.by.pack).padStart(5)} ${String(g.by.last).padStart(5)}  ${m('decent')} ${m('good')} ${m('great')}  ${pct(g.wins, g.taken)}`);
+}
