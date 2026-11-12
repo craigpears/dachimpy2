@@ -866,6 +866,17 @@ in a pocket behind it can only get out one way, and as the columns burn and the 
 close. So a white caught behind spice is rescued early, before it's walled in, and for the board's score it
 counts as one of the worst things to leave (with a white trapped in the junk on the right, the eleventh note).
 
+**The fourteenth note: a zigzag, not a diagonal, keeps the wall of white (the user, 12 Nov,
+`notes/distilling/25-zigzag-keeps-the-wall.webp`, further on in the same game).** "it's not quite just what I
+said of like drag straight down. I'm like zigzagging so I can maintain a nice wall of white so I'm not
+creating that line in the middle that I think is what was emerging maybe from my earlier simplistic
+instructions of saying drag blacks down, diagonally. I think it's not just a diagonal, it's a zigzag to
+maintain the shape and separation." In the picture the whites stand as a solid block down the middle and
+left, the colour packed on the right, the boundary between them upright. This corrects the ninth note's
+"drag the blacks down": a black goes down and right in a zigzag that follows the edge of the white block,
+not one straight diagonal across it, which would leave the diagonal line of colour through the whites (the
+eighth note) that the bots were making.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
