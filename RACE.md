@@ -713,8 +713,12 @@ move. It's cheap to keep, because the puzzles are dealt from a seed: a run is it
 their times. A race could also be watched live.
 **Past races to watch, online (agreed 12 Nov):** "if we actually put this into a multiplayer, even like
 proof of concept thing where people can see games that have been played, view them and see the replays."
-So every online race is recorded by its room (the seed, the racers, their sloops' positions a few times a
-second, the hits, turns and gambles, the places, and each racer's puzzle moves) and kept; a list of past
+So every online race is recorded by its room and kept. **Actions, not positions (12 Nov):** "you don't need
+[sloop] positions 4 times a second, you just need moves ... really all you need is to save somebody's
+actions." The record is the seeds and each racer's actions with their times (her helm's moves and pins,
+shots, puzzle moves), replayed through the same rules; plus a keyframe of where everyone is every few
+seconds, like a video's, to correct any small drift and to skip to the middle without replaying from the
+start. Live, the room still sends full snapshots, which heal a missed message; only what's kept is actions. a list of past
 races to pick from; and a viewer like watching (§10 below: the free camera, following a racer, her board
 played from her real moves), with pause, speed and a bar to skip along. After online racing lands, as
 the room's record is the replay.
