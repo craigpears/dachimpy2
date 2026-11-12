@@ -167,16 +167,16 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   kinds of gates, the different tactics and game thinking ... relatively high level with pictures just
   to help people see the kind of thinking that's gone into it." The changelog has the course's chart,
   drawn without anything of the starlit door (`PUBLIC=1` in tools/race-map.mjs); `design.html`, "How
-  it's designed", linked from the changelog's header: the race's routes, gates, gambles ("Do you dare
-  take the whirlpool?") and tactics, then the den's wider principles, a picture each. (Since 12 Nov the
-  starlit door's on both, and the chart: no hidden gems in the proof of concept.)
+  it's designed", linked from the changelog's header: the race's routes, gates and tactics, then the den's
+  wider principles, a picture each. (Since 12 Nov the starlit door's on both, and the chart: no hidden gems
+  in the proof of concept; and no gambles, since the race's next pass the same day.)
 - **One changelog entry per real feature, not per step (12 Nov).** "be wary ... of how much we're actually
   adding in the change log. Like, I don't want it to be like, I've done this big thing on sl[o]op races 5
   times ... see if anything kind of needs compacting together so that it's ... actually each thing is
   meaningful as a new feature, not just ... steps and iterations on a feature." So a later pass on a
   feature already in the changelog updates its entry (or joins a few passes into one), rather than adding
-  another. The race's seven entries became three: the race itself (11 Nov), its bribe, gambles and chart,
-  and watching it (12 Nov).
+  another. The race's seven entries became three: the race itself (11 Nov), its next pass (the bribe, the
+  rocks, the chart: 12 Nov), and watching it (12 Nov).
   **Big features and smaller updates (12 Nov):** "you've got the [sloop race], which is great, but ... I
   want things like showered in gifts ... in there, but ... that should be more like a smaller update ...
   Mischievious's wedding was a big feature, but that is more of a smaller update ... but it's got the same
@@ -2214,11 +2214,30 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **The start (11 Nov: "pick your starting spot along the starting edge"):** Space by the buoy off the
     gate takes her in to the starting line, behind the line of rocks; A and D move her along it (never onto
     a rival's spot), 1 to 3 pick how many rivals race her; the starter's card explains the race and says
-    who's racing; Space, and he counts you down. Below the line,
-    a field of plain whirlpools and winds by Puzzle Pirates' rules, to ride, not to fear: a conveyor across
-    it blowing right, dropping her at a gap in a trade wind blowing back along its far side, headwinds by the
-    gap, plain whirlpools (stop on one and it has her; a gust zooms her over). The gap is the quickest line,
-    so the crowded one; a spot on her own is a few seconds slower (no spot more than ten from the best).
+    who's racing; Space, and he counts you down.
+  - **The start's field, fresh each race (12 Nov: "there should be some element of randomness to it so that
+    it's not the same on every single thing"):** six rows below the line of slow winds and whirlpools to
+    eyeball a way through ("you would say left into a whirlpool because the wind action then takes you one
+    tile further up"), laid from the race's seed (`src/start-field.ts`, `Race.seed`; online, the room's, so
+    everyone's is the same, shown in the lobby before the count), always with a way through from every spot
+    (checked with the pilot; a draw that fails is laid again). Two or three plain whirlpools and six to nine
+    short runs of slow winds, leaning toward buoy 1 on the left, back on the right. Fixed in it: a conveyor
+    along its first row from the left-hand edge that sets her down above the hop; on the right past the hop, a
+    row of headwinds and, under them, a wind back into the hop's lane; and **the hop** (12 Nov: "that could
+    have a nice hop to the ball thing to get started"): a row of headwinds over a walled lane (columns 15 to
+    20) that runs her along and down onto leg 1 at column 21, toward buoy 1. A Double from the row above,
+    facing down, hops the headwinds into the lane (about 10 s saved, as the Double's gap); anything less and
+    she's blown back up a square. The quickest spots are above the hop and on the right; the far left is about
+    ten seconds slower (`SIM.SPOTS`, the mean over many fields).
+  - **Two kinds of wind, in Puzzle Pirates' order (12 Nov: "the trade wind kind that really just blows you
+    and you don't get the chance, but you also need the slower wind that only nudges you one per turn"):**
+    each move goes her own move first (left, forward, right; or staying put, idle, after a breather), then
+    the square she comes to rest on acts once: a slow wind pushes her one square its way (`Sea.nudge`), a
+    whirlpool turns her clockwise to its opposite corner, a quarter turn clockwise (`src/den-whirl.ts`). A
+    square that puts her on another special square acts no more that phase (YPPedia: "it has no effect for
+    this phase"). Trade winds stay instant: the snakes, the lanes a Double, Triple or Vegas hops, the hop's
+    lane. Slow winds are drawn as soft dotted tiles each with one arrow, nudging the way they blow; trade
+    winds as racing streaks. The pilot reckons with both.
   - **The course:** five legs, two squares deep, back and forth, a spit of land between each pair, the long
     way round its end; the course's own breeze blowing out across it (every leg a reach, every bend a run).
     The run home is one square wide, sailed left to the finish line. About 3:42 the long way.
@@ -2226,30 +2245,48 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     each bend of the long way, on the outside of its turn; the one she's sailing for lit, its lamp and its
     number bright; the clock's bar says "Leg 2 of 5 · to buoy 2". The gate's flags and the finish flag are
     gone. Shortcuts are never marked.
-  - **Snakes, winds that sweep her back, their sting growing down the course (11 Nov: "I want the snakes and
-    [ladders]"):** the left-hand trade wind up the whole left-hand side to the starting line: legs 2 and 4
-    end hard by it (a gust too far, a careless turn, and she's back at the start), and the run home runs
-    beside it, so a misclick there, with the finish in sight, sends her all the way back ("pushed into the
-    trade winds that send you back right to the very start"). The trade wind back up the course crosses all
-    of leg 3 and runs up through a gap in spit 2 onto leg 2: every racer hops it with a Double ("you have to
-    get a double in sailing and basically jump over the trade winds"); anything less and it sweeps her back
-    up onto leg 2, a leg and a half lost. The tight water just past the gun gap: a wall ahead and, a move too
-    far, a wind sweeping her back along leg 2 to its bend ("you accidentally clicked one too many"); out of
-    the gap, a turn to port is the way on. The starter calls out each sweep.
+  - **Snakes, gentle: a few squares back, to try again, never a lost race (12 Nov: "that's really too brutal.
+    That sends you back almost 2 legs worth ... it should send you back by a few tiles and basically make you
+    repeat the thing ... I don't want it to be rage-inducing"; the tight water's "3 or 4 squares ... that's the
+    kind of snakes and ladders level that's a good tune"):** each carries her three or four squares back, to
+    the start of what she was doing (tested, `tests/den-race.test.ts`):
+    - **The tight water past the gun gap:** a move too far out of the gap, and its wind along leg 2's second
+      row carries her three squares back toward the bend; a turn to port out of the gap is the way on.
+    - **The trade wind back across leg 3:** a wind across both rows of leg 3 (column 23) up into a notch in
+      spit 2's far face, back along it three columns and down onto the leg again: a loop. A Double from right
+      behind it or a square further back, either row, hops it (lined up, as the wind gaps are); less, and
+      she's three squares back to hop it again. Every racer on the long way meets it.
+    - **The left-hand trade wind:** beside each left-hand bend (spits 2 and 4), up the left-hand edge past the
+      spit's end and back out onto the leg she was finishing; and along the run home's second row, a few
+      squares blowing back the way she came, then one blowing her up onto the run home again. Beside spits 1,
+      3 and 5 the edge is land now, so nothing's swept down it.
+    The starter calls out each one ("A few squares back: round ye go again").
   - **A shortcut through each spit, and every size of them,** each a puzzle the den already has, by its
-    one module, each saving about what a decent player takes on it (`RACE.DECENT`, tested), so it pays only
-    if it's your puzzle: spit 1, the gun gap, three squares deep, its guns' marks all in the spit (the long
-    way's clear of them): a Quad from the leg rushes her past them, a square at a time she's holed, or shoot
-    them quiet (14 s); spit 2, the headwind gap, rowed, its far end a dog-leg so it doesn't open straight onto
-    leg 3 and out of the gun gap's reach (30 s), and a small gap with one wind blowing back across it that a
-    well-timed Double hops (9 s); spit 3, the whirlpool channel, only a Vegas from its mouth (46 s), and a
-    barrier of driftwood across a gap, cleared by Foraging (12 s since it moved a column east, 12 Nov: below); spit 4, the locks (23 s); spit 5, the crane
-    (38 s), and a gap with two winds that a Triple hops (9 s); and the starlit door (40 s up at leg 3, 119 on to leg 5). On the long way,
-    leg 4 before the locks is the zigzag: headwinds blowing back along it, alternating side to side with gaps
-    between, a wind behind her there so she can weave either way; weaving through takes about 17 s, hopping
-    each headwind with a well-timed Double about 9 ("getting over them with, like, a double, like a
-    well-timed double, would be a lot more effective"). Every shortcut's way in is a gap beside a leg, plain
-    to see as she sails by.
+    one module (`RACE.DECENT`, tested). **In proportion (12 Nov: "each an element of puzzling surely should be
+    the same distance"):** every stopped puzzle's shortcut skips about the same stretch, about 22 seconds, each
+    puzzle sized to about the same time to play, a decent player about breaking even, a good one gaining; the
+    chain hops grow with their chain. As laid: spit 1, the imperial gate (column 19), its Quad, its guns shot
+    quiet, run, or its guard bribed with the wreck's 40 coins (22 s); spit 2, the headwind gap, rowed (25 s),
+    and the Double's gap (9 s); spit 3, the whirlpool channel's Vegas (48 s), the rocks (25 s) and the barrier
+    of driftwood (16 s, where spit 3 has room); spit 4, the locks, 6 Bilge clears to raise her (23 s); spit 5,
+    the crane, its small frames (23 s), and the Triple's gap (14 s, "a Triple clearly bigger"); and the starlit
+    door (40 s up on leg 3). On the long way, leg 4 before the locks is the zigzag: headwinds blowing back along
+    it, alternating side to side; weaving through takes about 17 s, hopping each with a well-timed Double
+    about 9. Every shortcut's way in is a gap beside a leg, plain to see as she sails by, and reads as what
+    it is (12 Nov): the starlit door a door, the headwind gap a channel with its wind drawn in it (spit 2's
+    cliffs low), the wreck in its own notch.
+  - **The rocks blasted open for everyone (12 Nov: "once it's been destroyed, that opens it up ... for
+    everybody, not just them ... it's a way for the loser to catch up ... Maybe you could do it with like 3
+    gunshots or something"):** a wall of grey boulders across the mouth of a gap in spit 3 (column 17), off leg
+    3, along from the whirlpool channel. A broadside that comes down on it (her port side, sailing along leg
+    3, either row) is a hit, anyone's, counted by the race's field (`Field.rocks`); each knocks a course of
+    boulders off with a burst of stone; at three (`RACE.ROCKS.HITS`) the wall falls, rubble heaped against
+    the banks, and the gap's open water for every racer for the rest of the race: down through spit 3 onto
+    leg 4 (25 s). Out in the open. Her shots are her budget (two at the gun, four at most, more by Gunnery),
+    so blasting costs what she'd fire at rivals. Online, the room keeps the count, everyone's, in its
+    snapshot. The rivals' bots of the rocks' route load their shots on the move and fire as they come by;
+    any racer who comes to them down goes through, free. A new race, they're back. Rules: `Rocks` in
+    `src/den-race.ts`; drawn by `js/den/race-rocks.js`.
   - **The barrier of driftwood (11 Nov: "You just have to clear the barrier"):** a jam of logs across a gap
     in spit 3. She sails into the notch in front of it and Space stands a board of Foraging on the jam
     (`src/foraging.ts`, played as Umami's), dealt with two bundles of driftwood on it and nothing more to
@@ -2279,7 +2316,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **The finish (11 Nov: "a more ceremonious finish goal line"):** a line across the run home between two
     striped towers, one on spit 5 and one out past the left-hand trade wind, a chequered banner strung between
     them and a chequered line on the water. Over it, a burst of colour and a card with her time and place.
-    Past it, the left-hand trade wind carries her back to the start for another go.
+    Past it, Space takes her back out to the starting buoy for another go.
   - **Your rivals, the den's own characters (11 Nov: "Everyone's got their own little profile and way they
     approach it"):** up to three sloops racing you, three to start with, one to three picked on the line
     (one is Kikkit; two, Kikkit and Tzz). Each is the sloop's own look in her colours (Kikkit's red sails and
@@ -2291,15 +2328,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     capybara aboard on her foredeck doing his foraging, and firing on anyone sitting still, loading more by
     Gunnery. Each is a level better at her own route's puzzle. A rival builds her own crane and clears her own
     barrier; none takes the starlit door. Each has a line on the line before the gun and one over the finish
-    line, in a bubble over her sloop. Home in about 3:13 (Kikkit, her Vegas a gamble: 3:00 to 3:45), 3:24 (Tzz)
+    line, in a bubble over her sloop. Home in about 3:13 (Kikkit, her Vegas chancy: 3:00 to 3:45), 3:24 (Tzz)
     and 3:36 (Dalnoth), against the long way's 3:42 sailed. Your best time's kept in this
     browser.
-  - **The race explained (11 Nov: "Here are your options"):** the starter's card on the line: the long way,
-    shortcuts that cost a puzzle with a few named (bilge up through a lock, build a crane, row the headwind
-    gap, zoom over the whirlpools on a Vegas, hop a headwind with a Double, and since 12 Nov haul up some
-    treasure and pay off the guard at the gate), the snakes, and that the others shoot you if you sit still
-    in the open. Never where a shortcut is or how beyond that, and never the
-    starlit door.
+  - **The race explained (11 Nov: "Here are your options"):** the starter's card on the line: the long way;
+    the field (slow winds and whirlpools, fresh every race, and its hop); shortcuts that cost a puzzle with a
+    few named (bilge up through a lock, build a crane, row the headwind gap, zoom over the whirlpools on a
+    Vegas, hop a headwind with a Double, haul up some treasure and pay off the guard at the gate, blast the
+    rocks off leg three, three hits and they're open for everyone, and the starlit door); the winds that
+    sweep ye back a few squares; and that the others shoot you if you sit still in the open.
   - **Racers shoot each other (11 Nov):** "I definitely want to be able to shoot other racers. That's
     absolutely part of this." Q and E fire her broadside, as anywhere at sea: a rival on its squares, before
     any rock or land, is holed, sits low and smoking with stars over her till she's patched, then races on.
@@ -2335,9 +2372,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     fails if a route wins under half or over 1.6 times its fair share in a field of four, if a style or a
     part of the starting line strays far from fair, or if a leader has no shortcut worth taking (sheltered
     or on the move) on some stretch. RACE.md §8 has the numbers.
-  - **The starlit door:** a plain cliff face on the second spit off leg 2 (squares 16 and 17 across, 52 out)
-    and its tunnel's exits, clefts in the second spit's far face onto leg 3 (16 and 17, 54 out) and the
-    fourth's onto leg 5 (67 out), `LAY.RACE.DOOR`: "The starlit door (11 Nov)", below.
+  - **The starlit door:** a door in the cliff of the second spit off leg 2 (squares 15 and 16 across, 52 out)
+    and its tunnel's one exit, a cleft in the spit's far face onto leg 3 (54 out), `LAY.RACE.DOOR`: "The
+    starlit door (11 Nov)", below.
   - **Watched: four bots and no player (12 Nov):** "are you able to show me a link today to just see all four
     bots?", and as a spectator "I can see the puzzle, as I said, the puzzling, the just move around free
     camera, including jumping between watching each person in the race." `?at=race-watch` (and a cheat, "Watch
@@ -2440,40 +2477,20 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       and its gap moved a column east (column 21), two past the trade wind back up the course. A Double over
       that wind along leg 3 lands her a square short of it, and one turn to port takes her up into the notch
       from the leg's second row (from its first, a turn and a move). It saves 12 s now (it was 15; the helm's).
-  - **The gambles (12 Nov: "sometimes maybe there should be a mysterious headwind. Half the time it pushes
-    you forward ... Sometimes ... it goes backwards. But maybe the whirlpool, the direction the whirlpool goes
-    is changes, so it goes back up ... So you can go that way if you want to take a gamble"):** two ways that
-    are a bet, not a puzzle, each a ladder or a snake, worth about nothing on average (RACE.md §4). Rules:
-    `src/den-gamble.ts`; squares `LAY.RACE.GAMBLES`; drawn by `js/den/race-gamble.js`.
-    - **The veiled wind:** a gap through spit 5 off leg 5 (column 18) under a pale shimmer, no streaks, no
-      arrow: it won't say which way it blows. Sailed onto by her own moves (never the pilot's, never a
-      chain's gust), it's a coin toss, a fresh one each time, seeded for the race: on, it blows her through
-      onto the run home facing along it; back, out of the gap and along leg 5's second row to column 6,
-      facing back the way it blew her. The way it went shows for a moment as a wind lane, gold or red, and
-      it's said ("The veiled wind's with her! ...", "... against her! Blown back along the leg").
-    - **The turning pool:** a whirlpool on leg 2's first row and spit 1's last (columns 8 and 9), by Puzzle
-      Pirates' rules, one step a move, but its spin turns on the race's clock: clockwise 4 s, slowing to a
-      stop, then anticlockwise 4 s (GAMBLE.BEAT), the same beat from the gun every race. Anticlockwise, its
-      step goes round by the other corner to the same far one and turns her a quarter left. Sailed into
-      along the leg's first row (sailing left), its step leaves her on its corner in the spit facing on or
-      back, and it throws her that way: clockwise, on across the leg and down a cleft through spit 2 onto
-      leg 3, facing along it; anticlockwise, back up a wind lane through spit 1 onto leg 1, facing along it.
-      On the leg's second row she sails by; sailed into any other way, it's a plain whirlpool turning her
-      about. Only its throw gets down the cleft (no move, pin or gust), and the lane's wind blows anyone
-      sailing down it straight back out onto leg 1. It's said ("Timed it! The whirlpool flings her on",
-      "Mistimed! The whirlpool throws her back up the course"), not Kikkit's whirlpool lines.
-    - **The rivals gamble too**, by their place in the field (the back of the field most, a cautious leader
-      never), at most once each a race (src/race-sim.ts, SIM.BET); watched, the bar says so ("flung on by the
-      turning whirlpool!").
-    - **The starter's card names them:** "Or take a gamble: a veiled wind that might carry ye on or blow ye
-      back, or a whirlpool that turns its spin. Catch it turning yer way".
+  - **No gambles (12 Nov: "it just seems no cost to taking that gamble right at the start ... not really in
+    the ... good sportsman-like spirit", and "Yes, drop both"):** the veiled wind and the turning pool are
+    gone, the turning pool's spit plain land again. Never rage-inducing (above): any risk left on the course is
+    mild, a whirlpool turning her a bit the wrong way or a snake a few squares back, never a race lost to luck;
+    every whirlpool turns the same way, clockwise (12 Nov, of a rival in the turning pool: "they kind of went
+    left into it and then ... came out as it was like into the right turn ... That is not how a whirlpool
+    works").
   - **Your own course (12 Nov: "having a map editor are going to be like the top of demands ... you'd need to
     be able to switch between 2D and 3D views"):** `race-editor.html` (RACE.md §10 has the detail).
-    - **The chart:** the course in 2D in the race chart's look. Click a buoy, a shortcut or a gamble (or its
+    - **The chart:** the course in 2D in the race chart's look. Click a buoy, a shortcut or a snake (or its
       name) to pick it, outlined in gold; drag it along its spit, or ◂ ▸ (the arrow keys too); Esc lets go.
       Its numbers are in the side panel: the up lock's Bilge clears (3 to 20), the crane's frames (small,
-      standard, large), the barrier's bundles (1 to 4), the guard's price (10 to 100 coins, in tens), the
-      veiled wind's odds (10 to 90%) and where it blows her back to, the turning pool's beat (2 to 8 s).
+      standard, large), the barrier's bundles (1 to 4), the guard's price (10 to 100 coins, in tens). The rocks move
+      along spit 3 too. The start's field isn't edited (each race's own).
     - **Always a race:** each way through inside its spit, a column of land either end and between it and
       the next way through, where the legs either side reach it; the long way open round every buoy, every
       shortcut sailable. Anything out of place is listed in plain words and the chart's edged in red; it
@@ -2481,87 +2498,60 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     - **3D:** "Race it in 3D" (or the 3D tab) opens `den.html?at=race&course=...`: the den's race laid from
       the course, read once as the page loads, rivals and all. "Back to the course editor (2D)", top right,
       goes back with it. Its best time is kept apart from the den's own course's.
-    - **Share:** "Copy share link" (`race-editor.html?course=` and about 26 characters); the page's own
+    - **Share:** "Copy share link" (`race-editor.html?course=` and about 22 characters; a link from before 12 Nov opens the den's own); the page's own
       address keeps the course too. Reset goes back to the den's own course. A link that's garbled, or not a
       race, opens the den's own.
     - **Balance check:** 300 races of four of the simulation's bots, in a worker, about ten seconds: each way
       round's wins against its fair share (red outside half to 1.6 times it), what each shortcut saves on the
-      course and really saved a decent, good and great racer, the gambles each way; each feature's wins on
+      course and really saved a decent, good and great racer; each feature's wins on
       the chart too.
     - **The starlit door stays where it is** on every course (public since 12 Nov), drawn on the chart with its
       tunnel and raced in the balance check; nothing else cuts through a spit in its columns.
   `?at=race` and one cheat. Rules: `src/den-race.ts`; drawn and played by `js/den/race.js`, its start
   `js/den/race-start.js`, its buoys and finish `js/den/race-marks.js`, its barrier `js/den/race-forage.js`;
   the starter's lines `src/lines/race.ts`.
+- **The camera's yours again after the tunnel (12 Nov).** "after you go through the tunnel, it's got really
+  breaks the camera angle. And you don't seem to be able to change it." Coming up the cleft, the door's
+  shot from the leg's side lasts at most 2 s, and lets go as soon as she moves or you turn, tilt or zoom
+  (js/den/door.js).
 - **The starlit door (11 Nov).** "Can we do a similar kind of thing [as Moria's door by starlight] and use
   duty navigation as the puzzle for how you find the door and have it discoverable in some way similar to
   the carpentry spots?", and of the tunnel: "a really long, straight passage. But it requires some like more
   hardcore puzzling ... you've got to do like big Vegas". The race course's hidden gem (not the starter's,
   not the map's, no cheat or `?at=`):
-  - **The door:** a crag on the second spit off leg 2, plain rock but for faint marks you'd see looking
-    close: the wheel's 24 places carved small high up the face, and a hairline seam below them. Nothing's
-    said till she's stopped off it; then only "Under the cliff · Space: look closer at the rock".
-  - **Space there** stands Duty Navigation on the rock beside the carved wheel, as the night sky, in the
-    world (no separate screen; the camera straight on to both). Its run is two constellations dealt as
-    ever, two stars then three, the puzzle's own five colours: about 53 moves for the bots
-    (tools/nav-bots.mjs, DOOR=1), a minute or so. Each filled lights its stars on the carved wheel, in their
-    places (`placeXY`, `starCanvas`). The second lit, the door's outline glows and its two leaves swing in on
-    a dark tunnel. Esc steps back, the board kept as it is. Open, it stays open that race; a new race (or
-    a fresh voyage) shuts it again.
-  - **A booch** turns her about, away from the cliff, pushed off a square; the board's gone and every star
-    on the rock dark: the run starts again.
-  - **Simple, to be competitive (11 Nov):** built first with an evil constellation last (six of a colour
-    side by side on the inner ring, only to be filled by a combo), its run took minutes of puzzling to
-    save two and a half of sailing. The user: "Maybe save the evil [constellation] idea for somewhere else
-    in the world ... But yeah, simplify the duty navigation down to be more competitive." So it's just the
-    two dealt ones; the evil constellation is kept in the puzzle's module for elsewhere (`given`,
-    `bottomRow`, `needsCombo`; IDEAS.md, "The evil constellation").
-  - **The tunnel:** a long straight cavern under legs 3 and 4, its walls lit by glowing stones of the
-    stars' pale blues and whites, a dark still water. No wind in it but a draught blowing out of the door,
-    so no sail or oar gets her in: only a Sailing chain's gust from the mouth (off the door, facing it).
-    The door's face is cliff to every move and gust otherwise, shut or open: the only way in.
-  - **Getting in, plain and forgiving (12 Nov).** Her first try: "I can't actually get through the door
-    ... I'm just bumping into the rocks. And it won't let me autopilot through it either", and the doorway
-    read smaller than the clefts she comes up. So a move into the open door's face (straight at it, or
-    turning in from alongside) is never a bump: she's brought into its mouth, facing in, drawn in the
-    doorway, and the Sailing board comes out; a pin on the door (its crag, or the water off it once open)
-    pilots her to the nearer mouth and does the same. The prompt: "In the doorway · 1: Sailing · any clear
-    carries her in, a Vegas on through the dark". A turn from the mouth turns her on the spot, her way out,
-    nothing said of rocks. Shut, W at it says "The door's shut fast · Space, under the rock: Navigation
-    opens it", and off it the prompt's "Faint stars on the rock · Space: Navigation opens the door". The
-    doorway's 6.2 wide and 9.6 tall (her mast's about 5.6), as wide as the clefts. The face is still no
-    square of the sea, so the pilot's routes and the simulation's door timings are unchanged
-    (`doorMove`, tests/den-door.test.ts).
-  - **Its stretches and exits (12 Nov).** The user: "you should always get some benefit from going through
-    it, similar to ... any other shortcut. So you then have the choice. You either rejoin ... the main leg,
-    or you have the opportunity to go through the Vegases ... in relative peace". Two stretches, each
-    ending under a cleft in a spit's far face (`LAY.RACE.DOOR.EXITS`, `DOOR.EXITS`; `Tunnel` in
-    src/den-door.ts):
-    - **A Vegas from the mouth** carries her along the first stretch, and she waits under the first
-      cleft (in the second spit's far face, squares 16 and 17 across, 54 out), daylight coming down it.
-      The prompt: "Under leg 3, daylight down a cleft above · Space: come up · 1: Sailing, a Vegas carries
-      her on through the dark (less, and she's spilled up here)". There the Sailing board's hers (1 puts
-      it out and away) and nothing else: no pins, no moves, no guns. Nobody can shoot her in the tunnel.
-    - **Space under the cleft** brings her up it onto leg 3 (16 or 17 across, 55 out, the column she came
-      in by, facing straight on): about 40 seconds saved (`DOOR.EXITS[0].saves`, tested with the helm; her
-      trip 3.1 s). Back among the field, in the open as anywhere, the trade wind up the middle still to hop.
-      The camera watches her from the leg's side till she's out from behind the door's crag.
-    - **A Vegas under the cleft** carries her on under leg 4 and up the far cleft (in the fourth spit's
-      far face a few squares along from the down lock, 67 out) onto leg 5 (68 out): about 119 seconds saved in all
-      (`DOOR.SAVES`, tested; the long way, legs 2 to 5, sails in about 125, her trip 6.8 s).
-    - **Less than a Vegas, she's spilled up the last cleft she passed, never back to the mouth:** any
-      clear at all from the mouth carries her in and the draught spills her up the first cleft onto leg 3;
-      less than a Vegas under it, the draught catches her and spills her up it.
-    - The race counts each leg she passes under, in order (`Race.under`): leg 3 as she reaches the first
-      cleft, leg 4 as she goes on under it.
-    - **The clefts give nothing away:** the cliff's own stone and height split by a ragged crack open to
-      the sky, shadowed water darkening to a dark back, a few boulders at its foot. Nothing lit, carved or
-      shut: a door at an exit would say there's a way in. (The far end was a plain door onto leg 4.)
-    - Two stretches, not three: with an exit under every leg each Vegas saved about 40 s, less than it
-      costs, and the door won 7% in the simulation; with leg 4 passed under, it wins about its fair share
-      (RACE.md §8, §9). Before (11 Nov), one Vegas carried her straight through to leg 4 (78 s), and less
-      sent her back to the mouth; on the first draft it ran to leg 5 in one go (145 s).
-  - **Ours, not the film's:** no words to speak, no elvish, just the stars. No changelog shot of it.
+  - **Back to simple, Navigation only (12 Nov: "I love some of the animation and the styles on it, but I think
+    it needs just probably to go back to being simple... nav only shortcut that takes you just like one step
+    through, and maybe can be tuned to be a bit trickier. Because I could just imagine someone good at doing
+    Vegas, it takes you out of the race. It's too isolated otherwise"):** the stretches, the Sailing clear to get
+    in, the Vegas under the cleft, the far end onto leg 5 and the Sailing board in the doorway (with "Getting
+    in, plain and forgiving", the same day, which they made unneeded) are gone. As built now:
+  - **The door:** a crag on the second spit off leg 2, a door plainly in it (public since 12 Nov: "Is there
+    supposed to be a visible marker ...? Surely"): a frame of pale dressed stone, two iron-bound timber leaves,
+    stars round it twinkling, and the wheel's 24 places carved high up the face. Off it: "The starlit door ·
+    Space: Duty Navigation on the rock opens it".
+  - **Space there** stands Duty Navigation on the rock beside the carved wheel, as the night sky, in the world
+    (the camera straight on to both). Its run is one constellation of three stars, dealt as ever, the puzzle's
+    own five colours: about 34 moves for the bots (`tools/nav-bots.mjs`, `DOOR=1`), about forty seconds,
+    sized by the simulation so the door's saving is in proportion (two small ones, the day before's, left it
+    winning 3% of its races, a constellation more 2%; RACE.md §8, §9). Filled, its stars light on the carved
+    wheel, the door's outline glows and its two leaves swing in on the tunnel. Esc steps back, the board kept
+    as it is. Open, it stays open that race; a new race (or a fresh voyage) shuts it again.
+  - **A booch** turns her about, away from the cliff, pushed off a square; the board's gone and every star on
+    the rock dark: the run starts again.
+  - **Through, one stretch:** swung open, the door carries her straight through (`through` in
+    `src/den-door.ts`), in at the door, along the tunnel's cavern under the spit (its walls lit by glowing
+    stones, a dark still water) and up its cleft onto leg 3 (squares 15 or 16 across, 55 out, the column she
+    was off, facing straight on): about 40 seconds saved (`DOOR.SAVES`, tested with the helm; her trip 3.1 s).
+    Off it again later with it open, Space takes her through. Nobody can shoot her in the tunnel; out of it
+    she's back among the field, in the open as anywhere, the trade wind back across leg 3 still to hop. The
+    race counts leg 3 reached (`Race.under`). The camera watches her come up from the leg's side.
+  - **The cleft** is the door's: two of its stars over its mouth, so it reads as the door's way out, not an
+    open gap.
+  - **Simple, to be competitive (11 Nov):** built first with an evil constellation last (six of a colour side
+    by side on the inner ring, only to be filled by a combo), its run took minutes of puzzling to save two and
+    a half of sailing: "simplify the duty navigation down to be more competitive." The evil constellation is
+    kept in the puzzle's module for elsewhere (`given`, `bottomRow`, `needsCombo`; IDEAS.md).
+  - **Ours, not the film's:** no words to speak, no elvish, just the stars.
   Rules: `src/den-door.ts`; drawn and played by `js/den/door.js` (a console hook, `doorTest`, for testing).
 - **A hull's sides slant a little, top to bottom (11 Nov).** "I can definitely see the back of the
   ship has gotten a lot more curved, but I'm talking about, like, the top to bottom ... that's still

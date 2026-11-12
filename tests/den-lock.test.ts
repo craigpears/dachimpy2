@@ -88,7 +88,9 @@ describe('"be more than just the one lock": a chain of them, the secret way roun
     expect(LAY.LOCKS.length).toBe(4);
     const h = new Helm(sea);
     // (the canal's; then the race course's, out past Primates Rule, 11 Nov: tests/den-race.test.ts)
-    expect(h.locks.map((l) => l.spot)).toEqual([...LAY.LOCKS, ...LAY.RACE.LOCKS]);
+    expect(h.locks.map(({ spot: { at, up, low } }) => ({ at, up, low }))).toEqual([...LAY.LOCKS, ...LAY.RACE.LOCKS]);
+    // (the race's up lock raised by the course's own Bilge clears: 6 since its third pass, 12 Nov)
+    expect(h.locks[LAY.LOCKS.length].spot.work).toBe(LAY.RACE.COURSE.clears);
     for (const s of LAY.LOCKS) {
       const { low, high } = ends(s), [c, r] = s.at;
       // Its ends are water a level apart; its banks are rock, so she only ever goes through it

@@ -113,11 +113,13 @@ export interface Shot { n: number; by: number; on: number; cells: [number, numbe
     seconds (for drawing between snapshots); `clock`: the count's seconds left, or the race's clock. In the
     lobby, `racers` is the line-up as it would race. `soon`: seconds till the room moves on by itself (in the
     lobby, the count once someone's pressed Start; racing, the race called once every player's home; done,
-    back to the lobby), or null. */
+    back to the lobby), or null. `seed`: the race's (its start's field, src/start-field.ts, the same for
+    everyone, laid from it in the lobby too: the next race's). `rocks`: the hits on the rocks across spit 3's
+    gap, everyone's (12 Nov: down at ROCKS.HITS, open to every racer). */
 export interface Snapshot {
   t: 'snap'; room: string; seq: number; phase: Phase; at: number; clock: number; seed: number; fill: number;
   soon: number | null;
-  players: SnapPlayer[]; racers: SnapRacer[]; holds: [Spot, number][]; shots: Shot[];
+  players: SnapPlayer[]; racers: SnapRacer[]; holds: [Spot, number][]; shots: Shot[]; rocks: number;
 }
 /** A race's room seen from outside, before going in (the open races' list): what it's doing, its clock, how
     soon it moves on, who's in (racing now, or waiting: ready to start or not), its racers in all. */
@@ -147,6 +149,8 @@ export type Up =
   | { t: 'pose'; c: number; r: number; d: number; st: RacerState; took: number; leg: number; sh: number; home: number | null; n: number; acts?: Act[] }
   /** A claim: her broadside's come down on racer `on` (the room's number). */
   | { t: 'hit'; on: number }
+  /** Her broadside's come down on the rocks across spit 3's gap: a hit on them, everyone's. */
+  | { t: 'rock' }
   /** Out of the race (sailed back out through the gate): a bot takes her sloop. */
   | { t: 'retire' }
   /** Send me the race as it is. */
@@ -160,9 +164,10 @@ export type Act = [n: number, a: ActKind, ...args: unknown[]];
     its name and its arguments as they were (put, unput, stop, drop a pin, moor, a gust, the oars out or in, a
     stroke, holed, a lock pumped); a broadside fired (`fire`, L or R); patched (`patched`); the barrier of
     driftwood cleared (`clear`); a square shut to her or opened (someone else's spot: `shut`, `open`); the
-    breeze as it changed (`breeze`, its way and strength). Stamped with the steps sailed before it. */
-export type ActKind = 'put' | 'unput' | 'stop' | 'drop' | 'moor' | 'gust' | 'row' | 'stroke' | 'hit' | 'pump' | 'fire' | 'patched' | 'clear' | 'shut' | 'open' | 'breeze';
-export const ACTS: ReadonlySet<string> = new Set<ActKind>(['put', 'unput', 'stop', 'drop', 'moor', 'gust', 'row', 'stroke', 'hit', 'pump', 'fire', 'patched', 'clear', 'shut', 'open', 'breeze']);
+    breeze as it changed (`breeze`, its way and strength); the rocks come down on her sea (`rocks`, whoever's
+    shots it was). Stamped with the steps sailed before it. */
+export type ActKind = 'put' | 'unput' | 'stop' | 'drop' | 'moor' | 'gust' | 'row' | 'stroke' | 'hit' | 'pump' | 'fire' | 'patched' | 'clear' | 'shut' | 'open' | 'breeze' | 'rocks';
+export const ACTS: ReadonlySet<string> = new Set<ActKind>(['put', 'unput', 'stop', 'drop', 'moor', 'gust', 'row', 'stroke', 'hit', 'pump', 'fire', 'patched', 'clear', 'shut', 'open', 'breeze', 'rocks']);
 /** Actions as they came, checked for shape: at most 60 at once, each a step, a kind, and small arguments. */
 export function cleanActs(x: unknown): Act[] {
   if (!Array.isArray(x)) return [];
@@ -192,7 +197,7 @@ export function parseUp(data: unknown): Up | null {
     case 'spot': return { t: 'spot', c: Math.round(num(m.c, RC.LINE.c0, RC.LINE.c1, RC.LINE.c0)) };
     case 'fill': return { t: 'fill', n: Math.round(num(m.n, FIELD.LEAST, FIELD.ONLINE, NET.FILL)) };
     case 'ready': return { t: 'ready', on: !!m.on };
-    case 'go': case 'again': case 'retire': case 'sync': return { t: m.t };
+    case 'go': case 'again': case 'retire': case 'sync': case 'rock': return { t: m.t };
     case 'hit': return { t: 'hit', on: Math.round(num(m.on, 0, FIELD.ONLINE - 1, -1)) };
     case 'pose': return {
       t: 'pose', c: num(m.c, 0, SAIL.COLS), r: num(m.r, 0, 200), d: Math.round(num(m.d, 0, 3)),
@@ -334,6 +339,8 @@ export function mirrorDrive(link: Feed): Drive {
           if (sh.on === me) took++;
           out.push({ kind: 'shot', racer: sh.by < 0 ? -1 : localOf(sh.by, me), cells: sh.cells, hit: sh.on < 0 ? -1 : localOf(sh.on, me) });
         }
+        // (the rocks: everyone's hits on them, as the room counts them; never fewer than you've seen)
+        field.rocks = Math.max(field.rocks, s.rocks ?? 0);
         // (the room's count of hits on you: one whose broadside you missed, taken now all the same)
         const mine = s.racers[me];
         while (mine && took < mine.hits) { took++; out.push({ kind: 'shot', racer: -1, cells: [], hit: 0 }); }
@@ -349,6 +356,7 @@ export function mirrorDrive(link: Feed): Drive {
         return true;
       },
       lift: (k) => snap()?.racers[roomOf(k, link.me())]?.lift ?? 0,
+      rock: () => link.send({ t: 'rock' }),
     };
   };
 }

@@ -38,7 +38,7 @@ function chart(lay, problems) {
   add(`<rect x="-6" y="-6" width="${VW + 12}" height="${VH + 12}" rx="10" fill="url(#paper)"/>`);
 
   // Winds: a tinted square and an arrow the way each blows; snakes red, the rest blue.
-  const snake = new Set([...lay.SNAKES.LEFT, ...lay.SNAKES.TIGHT, ...lay.SNAKES.MID, ...lay.GAMBLES.TURN.UP].map(([c, r]) => key(c, r)));
+  const snake = new Set([...lay.SNAKES.LEFT, ...lay.SNAKES.TIGHT, ...lay.SNAKES.MID].map(([c, r]) => key(c, r)));
   let blue = '', red = '';
   for (const [c, r, d] of [...lay.WINDS, ...lay.WHIRLS.WINDS]) {
     if (r <= R0) continue;
@@ -74,26 +74,17 @@ function chart(lay, problems) {
   // Sheltered spots.
   for (const [c, r] of [...lay.LOCKS.map((l) => l.at), ...lay.POUND.at, lay.BERTH, lay.CRANE.LEDGE, lay.FORAGE.NOTCH, lay.BRIBE.NOTCH]) add(`<rect x="${X(c) - SQ / 2}" y="${Y(r) - SQ / 2}" width="${SQ}" height="${SQ}" fill="url(#shelter)"/>`);
 
-  // Whirlpools: a spiral over each (the turning pool's ringed gold, an arrow each way round).
+  // Whirlpools: a spiral over each (the whirlpool channel's; the start's field's are each race's own).
   const spiral = (cx, cy, turns, k) => { let d = ''; for (let t = 0; t <= turns * Math.PI * 2; t += 0.3) d += `${d ? 'L' : 'M'}${f(cx + Math.cos(t) * (2 + t * k))} ${f(cy + Math.sin(t) * (2 + t * k))}`; return d; };
-  for (const p of [...lay.FIELD.POOLS, ...lay.WHIRLS.POOLS]) {
+  for (const p of lay.WHIRLS.POOLS) {
     const [mc, mr] = whirlpool(p).mid, cx = X(mc), cy = Y(mr);
     add(`<circle cx="${f(cx)}" cy="${f(cy)}" r="${SQ * 0.9}" fill="rgba(40,74,96,.12)" stroke="rgba(40,74,96,.5)" stroke-dasharray="3 3"/><path d="${spiral(cx, cy, 3, 1.05)}" fill="none" stroke="${BLUE}" stroke-width="1.8"/>`);
   }
-  {
-    const T = lay.GAMBLES.TURN, [mc, mr] = whirlpool(T.POOL).mid, cx = X(mc), cy = Y(mr);
-    add(`<circle cx="${f(cx)}" cy="${f(cy)}" r="${SQ * 0.9}" fill="rgba(184,134,26,.18)" stroke="${GOLD}" stroke-width="1.6" stroke-dasharray="3 3"/><path d="${spiral(cx, cy, 2.6, 1.1)}" fill="none" stroke="${BLUE}" stroke-width="1.8"/>`);
-    add(way([{ c: T.FAR[0], r: T.FAR[1] }, ...T.ON], GOLD));
-  }
-  function way(poses, col) { return `<path d="M${poses.map((p) => `${f(X(p.c))} ${f(Y(p.r))}`).join('L')}" fill="none" stroke="${col}" stroke-width="2.6" stroke-dasharray="2 6" stroke-linecap="round" stroke-linejoin="round"/>`; }
-
-  // The veiled wind: a shimmer and a question mark; its carry on (gold) and back (red).
-  {
-    const V = lay.GAMBLES.VEIL;
-    for (const [c, r] of V.WAY) add(`<rect x="${X(c) - SQ / 2}" y="${Y(r) - SQ / 2}" width="${SQ}" height="${SQ}" fill="rgba(184,134,26,.3)"/>`);
-    add(way([{ c: V.WAY[0][0], r: V.WAY[0][1] }, ...V.ON], GOLD) + way(V.BACK, SNAKE));
-    add(`<text x="${X(V.WAY[0][0])}" y="${(Y(V.WAY[0][1]) + Y(V.WAY[1][1])) / 2 + 7}" font-size="19" font-weight="700" text-anchor="middle" fill="#5a1a0c">?</text>`);
-  }
+  // Rocks: the wall across the rocks' gap (blasted down in a race), and those walling in the field's hop.
+  const boulders = (c, r, col) => { const x = X(c), y = Y(r); return `<path d="M${x - 10} ${y + 7}L${x - 6} ${y - 4}L${x} ${y - 9}L${x + 7} ${y - 5}L${x + 10} ${y + 7}Z" fill="${col}" stroke="${INK}" stroke-width="1.6" stroke-linejoin="round"/><path d="M${x - 4} ${y + 7}L${x - 1} ${y}L${x + 4} ${y + 7}" fill="none" stroke="${INK}" stroke-width="1.2"/>`; };
+  for (const [c, r] of lay.ROCKS.WALL) add(boulders(c, r, '#a39684'));
+  for (const [c, r] of lay.FIELD.HOP.ROCKS) add(boulders(c, r, '#b5aa98'));
+  add(label(X((lay.FIELD.HOP.c0 + lay.FIELD.HOP.c1) / 2), Y(lay.LINE.r + 1) + 5, 'the field: slow winds and whirlpools, fresh each race', { size: 11.5, italic: true }));
 
   // The gun gap's guns and the gate's towers; the wreck in its notch.
   for (const [c, r] of lay.GUNS.at) { const x = X(c), y = Y(r); add(`<g stroke="${INK}" stroke-width="1.8"><rect x="${x - 9}" y="${y - 8}" width="18" height="16" fill="#b89a6a"/><path d="M${x} ${y}h${Math.sign(lay.GUNS.gap[0] - c) * 15}" stroke-width="5" stroke-linecap="round"/></g>`); }
@@ -138,6 +129,8 @@ function chart(lay, problems) {
       [[lay.DOUBLE.WAY[0][0], S[1].r + 1], [lay.DOUBLE.WAY[0][0], S[2].r]],
       [[lay.WHIRLS.MOUTH.c, lay.WHIRLS.MOUTH.r], lay.WHIRLS.OUT],
       [[lay.FORAGE.NOTCH[0], S[2].r + 1], lay.FORAGE.NOTCH, lay.FORAGE.OUT],
+      [[lay.ROCKS.WALL[0][0], S[2].r + 1], lay.ROCKS.OUT],
+      [[lay.FIELD.HOP.c0, lay.FIELD.HOP.FROM], [lay.FIELD.HOP.c0, lay.FIELD.HOP.FROM + 2], [lay.FIELD.HOP.c1 + 1, lay.FIELD.HOP.FROM + 2], lay.FIELD.HOP.LANDS],
       [[lay.LOCKS[0].at[0], S[3].r], [lay.LOCKS[1].at[0], S[4].r]],
       [[lay.CRANE.LEDGE[0], S[4].r], lay.CRANE.LEDGE],
       [[lay.TRIPLE[0][0], S[4].r + 1], [lay.TRIPLE[0][0], S[5].r]],
@@ -190,7 +183,7 @@ function chart(lay, problems) {
   const K = course;
   tag('gun', K.gun - 1.6, SP[0].r1, [`Gate · ${K.coins} coins`], 'end');
   tag('wreck', K.wreck, SP[0].r1 + 0.1, ['Wreck']);
-  tag('turn', K.turn + 0.5, SP[0].r0 + 0.1, ['Turning pool', `${K.beat} s a way`]);
+
   tag('head', K.head + 0.5, SP[1].r1 + 0.2, ['Headwind gap']);
   tag('double', K.double, SP[1].r0 + 0.4, ['Double']);
   tag('mid', K.mid + 0.6, SP[1].r0 + 0.1, ['Snake'], 'start');
@@ -199,11 +192,12 @@ function chart(lay, problems) {
     add(label(X(c), Y(SP[1].r0 + 1.1) + 4, ['Starlit door', 'fixed in place', ...w], { size: 12.5, lead: true }));
   }
   tag('whirl', K.whirl - 1.5, SP[2].r1 - 2.6, ['Whirlpools', 'a Vegas']);
+  tag('rocks', K.rocks, SP[2].r1 - 2.6, ['Rocks', 'blasted, 3 hits']);
   tag('forage', K.forage, SP[2].r1 - 0.2, ['Barrier', `${K.bundles} bundle${K.bundles > 1 ? 's' : ''}`]);
   tag('lock', K.lock + 3.4, SP[3].r1 - 0.3, ['Locks', `${K.clears} clears`], 'start');
   tag('crane', K.crane, SP[4].r1 + 0.1, ['Crane', K.frames]);
   tag('triple', K.triple, SP[4].r1 + 0.1, ['Triple']);
-  tag('veil', K.veil, SP[4].r0 - 1.25, ['Veiled wind', `${K.veilOn}% on`]);
+
   S.forEach((s, i) => add(label(s.d === 1 ? X(1.4) : X(W - 2.4), Y(s.r) + 4, i === S.length - 1 ? '← the run home' : s.d === 1 ? `leg ${i + 1} →` : `← leg ${i + 1}`, { size: 13, anchor: s.d === 1 ? 'start' : 'end', italic: true })));
 
   // The picked feature: its squares outlined, and a handle to drag it along its spit.
@@ -246,17 +240,17 @@ function render() {
 function pickedPanel() {
   const el = $('picked');
   if (!picked) {
-    el.innerHTML = `<h2>Pick something</h2><p>Click a buoy, a shortcut or a gamble on the chart, or one of these. Drag it along its spit, or use ◂ ▸ (the arrow keys too). The starlit door stays where it is, its tunnel under the course: nothing else cuts through a spit in its columns.</p>
+    el.innerHTML = `<h2>Pick something</h2><p>Click a buoy, a shortcut or a snake on the chart, or one of these. Drag it along its spit, or use ◂ ▸ (the arrow keys too). The starlit door stays where it is, its tunnel under the course: nothing else cuts through a spit in its columns.</p>
       <div class="chips">${FEATURES.map((id) => `<button data-pick="${id}">${esc(ABOUT[id].name)}</button>`).join('')}</div>`;
     return;
   }
   const A = ABOUT[picked], [lo, hi] = limitsOf(course, picked), col = columnOf(course, picked);
   const rows = A.sizes.map((s) => {
     if (s === 'frames') return `<div class="row"><label for="sz-frames">The crane's frames</label><select id="sz-frames" data-size="frames">${CRANE_SIZES.map((x) => `<option value="${x}"${course.frames === x ? ' selected' : ''}>${FRAME_NAMES[x]}</option>`).join('')}</select></div>`;
-    const R = SIZES[s], unit = { clears: ' moves', bundles: '', coins: ' coins', veilOn: '%', beat: ' s' }[s];
+    const R = SIZES[s], unit = { clears: ' moves', bundles: '', coins: ' coins' }[s];
     return `<div class="row"><label for="sz-${s}">${esc(SIZE_NAMES[s])}</label><input type="range" id="sz-${s}" data-size="${s}" min="${R.lo}" max="${R.hi}" step="${R.step}" value="${course[s]}"><output>${course[s]}${unit}</output></div>`;
   });
-  if (picked === 'veil') rows.push(`<div class="row"><label>Blows her back to</label><button class="ghost small" data-back="-1">◂</button><output>column ${course.veilBack}</output><button class="ghost small" data-back="1">▸</button></div>`);
+
   el.innerHTML = `<h2>${esc(A.name)}</h2><p>${esc(A.what)}</p>
     <div class="row"><label>Where</label><button class="ghost small" data-nudge="-1" title="Move it left">◂</button><output>column ${col}</output><button class="ghost small" data-nudge="1" title="Move it right">▸</button><span class="note">${lo > hi ? 'no room here' : `${lo} to ${hi}`}</span></div>
     ${rows.join('')}
@@ -289,9 +283,7 @@ function balancePanel() {
     <h3>What each shortcut saves (s)</h3>
     <table><tr><th></th><th class="n">course</th><th class="n">decent</th><th class="n">good</th><th class="n">great</th></tr>
     ${B.cuts.map((c) => `<tr><td>${esc(c.name)}</td><td class="n">${s(c.saves)}</td><td class="n">${s(c.by.decent)}</td><td class="n">${s(c.by.good)}</td><td class="n">${s(c.by.great)}</td></tr>`).join('')}</table>
-    <p class="note">"Course": the long way it cuts out, less the trip through (measured on the den's own course, shifted for this one). By skill: what it really saved a racer that good, her puzzling counted against it.</p>
-    <h3>The gambles</h3>
-    <table>${B.bets.map((g) => `<tr><td>${esc(g.name)}</td><td class="n">on ${s(g.on)} s</td><td class="n">back ${s(g.back)} s</td><td class="n">came off ${pc(g.came)}</td></tr>`).join('')}</table>`;
+    <p class="note">"Course": the long way it cuts out, less the trip through (measured on the den's own course, shifted for this one). By skill: what it really saved a racer that good, her puzzling counted against it.</p>`;
 }
 
 function runBalance() {
@@ -343,7 +335,7 @@ document.addEventListener('click', (ev) => {
   if (!t) return;
   if (t.dataset.pick !== undefined && !t.closest('#chart')) { picked = t.dataset.pick || null; render(); }
   else if (t.dataset.nudge) moveTo(columnOf(course, picked) + Number(t.dataset.nudge));
-  else if (t.dataset.back) { course = sized(course, 'veilBack', course.veilBack + Number(t.dataset.back)); render(); }
+
   else if (t.id === 'reset') { course = fresh(); picked = null; render(); toast('Back to the den\'s own course'); }
   else if (t.id === 'run') runBalance();
   else if (t.id === 'share') {

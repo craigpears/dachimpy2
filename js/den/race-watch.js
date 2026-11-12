@@ -39,6 +39,7 @@ export function watchStart() {
   watchBoardsReset(watch.boards);
   watch.on = true;
   watch.W = new Watch(watch.W || !linkSeed ? undefined : linkSeed);
+  race.rules.seed = watch.W.seed;   // (the start's field this race's, as any race's: race-start.js lays it)
   if (!watch.boats.length) watch.boats = WATCHED.map((R) => rivalBoat(R, near));
   for (const B of watch.boats) { B.at = null; B.who.hush(); }
   watch.cam ||= new FreeCam(course());

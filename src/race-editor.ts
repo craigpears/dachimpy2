@@ -17,7 +17,6 @@ import {
   type ColKey, type Course, type CraneSize, type SizeKey,
 } from './race-course.js';
 import type { CutId, Report, Skill } from './race-sim.js';
-import type { BetId } from './den-gamble.js';
 
 /** A thing on the course to select: a feature (by the column that places it), or a buoy (0 to 4). */
 export type FeatureId = ColKey | `buoy${0 | 1 | 2 | 3 | 4}`;
@@ -34,16 +33,17 @@ export const ABOUT: Record<FeatureId, { name: string; what: string; sizes: (Size
   buoy4: { name: 'Buoy 5', what: 'Where spit 5 ends, on the right: the last bend before the run home.', sizes: [] },
   gun: { name: NAMES.gun, what: 'The gun gap through spit 1, a gun either side: rush it on a Quad, shoot its guns quiet, run it and be holed, or pay its guard.', sizes: ['coins'] },
   wreck: { name: NAMES.wreck, what: 'An old wreck in a notch off leg 1, sheltered: Treasure Haul brings up the coins to bribe the gate\'s guard.', sizes: ['coins'] },
-  turn: { name: NAMES.turn, what: 'A gamble on leg 2: a whirlpool whose spin turns on a beat. Caught turning your way, it throws you down a cleft onto leg 3; the other way, back up to leg 1.', sizes: ['beat'] },
+
   head: { name: NAMES.head, what: 'Rowed through spit 2 against the wind (mirror strokes), its dog-leg at the far end.', sizes: [] },
   double: { name: NAMES.double, what: 'A small gap through spit 2, one wind blowing back across it: a Double hops it.', sizes: [] },
-  mid: { name: NAMES.mid, what: 'A snake: a trade wind up through spit 2 and across leg 3. Hop it with a Double, or it sweeps you back to leg 2.', sizes: [] },
+  mid: { name: NAMES.mid, what: 'A gentle snake: a trade wind across leg 3, up into a notch in spit 2 and back down three squares back. Hop it with a Double, or go round its loop and try again.', sizes: [] },
   whirl: { name: NAMES.whirl, what: 'Three whirlpools through spit 3: only a Sailing Vegas from its mouth carries you over (the spit\'s depth makes it a Vegas). Out in the open.', sizes: [] },
+  rocks: { name: NAMES.rocks, what: 'A wall of rocks across a gap in spit 3: three broadside hits, anyone\'s, shot on the move from leg 3, and it\'s open to every racer for the rest of the race.', sizes: [] },
   forage: { name: NAMES.forage, what: 'A jam of logs across a gap in spit 3, cleared by Foraging from the notch in front of it, sheltered.', sizes: ['bundles'] },
   lock: { name: NAMES.lock, what: 'Up a lock and down another through spit 4, pumped by Bilge, a sheltered berth beside the way in.', sizes: ['clears'] },
   crane: { name: NAMES.crane, what: 'Built by Carpentry on a ledge in a notch off leg 5, a frame at a time: it swings you over onto the run home.', sizes: ['frames'] },
   triple: { name: NAMES.triple, what: 'A gap through spit 5, two winds blowing back across it: a Triple hops it.', sizes: [] },
-  veil: { name: NAMES.veil, what: 'A gamble through spit 5: a coin toss blows you on to the run home, or back along leg 5.', sizes: ['veilOn'] },
+
   finish: { name: NAMES.finish, what: 'The line across the run home, between two towers.', sizes: [] },
 };
 /** The crane's frames, in words. */
@@ -66,16 +66,17 @@ export function squaresOf(lay: RaceLay, id: FeatureId): Sq[] {
   switch (id as ColKey) {
     case 'gun': return [...lay.GUNS.way, ...lay.GUNS.at, ...lay.BRIBE.TOWERS, lay.BRIBE.GATE];
     case 'wreck': return [lay.BRIBE.NOTCH, lay.BRIBE.WRECK];
-    case 'turn': return [...pool(lay.GAMBLES.TURN.POOL), ...lay.GAMBLES.TURN.CLEFT, ...lay.GAMBLES.TURN.UP.map(([c, r]): Sq => [c, r])];
+
     case 'head': return lay.HEADWIND;
     case 'double': return lay.DOUBLE.WAY;
     case 'mid': return lay.SNAKES.MID.map(([c, r]): Sq => [c, r]);
     case 'whirl': return [...lay.WHIRLS.POOLS.flatMap(pool), ...lay.WHIRLS.WINDS.map(([c, r]): Sq => [c, r]), [lay.WHIRLS.MOUTH.c, lay.WHIRLS.MOUTH.r]];
+    case 'rocks': return [...lay.ROCKS.WALL, ...lay.ROCKS.GAP];
     case 'forage': return [lay.FORAGE.NOTCH, ...lay.FORAGE.BARRIER, ...lay.FORAGE.GAP];
     case 'lock': return [...lay.LOCKS.map((l) => l.at), ...lay.POUND.at, lay.BERTH];
     case 'crane': return [lay.CRANE.LEDGE, [lay.CRANE.LEDGE[0], lay.CRANE.LEDGE[1] + 1]];
     case 'triple': return lay.TRIPLE.map(([c, r]): Sq => [c, r]);
-    case 'veil': return lay.GAMBLES.VEIL.WAY;
+
     case 'finish': return [lay.FINISH, [lay.FINISH[0], lay.FINISH[1] + 1]];
     default: return [];
   }
@@ -97,16 +98,12 @@ export function moved(k: Course, id: FeatureId, c: number): Course {
   const [lo, hi] = limitsOf(k, id), to = Math.max(lo, Math.min(hi, Math.round(c))), b = buoyOf(id);
   if (lo > hi) return k;
   if (b >= 0) { const buoys = [...k.buoys]; buoys[b] = to; return { ...k, buoys }; }
-  const out = { ...k, [id]: to } as Course;
-  // (the veiled wind carries its way back with it)
-  if (id === 'veil') out.veilBack = Math.max(k.buoys[3] + 1, Math.min(to - 2, k.veilBack + to - k.veil));
-  return out;
+  return { ...k, [id]: to } as Course;
 }
 
 /** The course with a size set (kept within what it may be). */
-export function sized(k: Course, size: SizeKey | 'frames' | 'veilBack', v: number | string): Course {
+export function sized(k: Course, size: SizeKey | 'frames', v: number | string): Course {
   if (size === 'frames') return CRANE_SIZES.includes(v as CraneSize) ? { ...k, frames: v as CraneSize } : k;
-  if (size === 'veilBack') return { ...k, veilBack: Math.max(k.buoys[3] + 1, Math.min(k.veil - 2, Math.round(Number(v)))) };
   const { lo, hi, step } = SIZES[size], n = Number(v);
   if (!Number.isFinite(n)) return k;
   return { ...k, [size]: Math.max(lo, Math.min(hi, lo + Math.round((n - lo) / step) * step)) };
@@ -116,7 +113,7 @@ export function sized(k: Course, size: SizeKey | 'frames' | 'veilBack', v: numbe
     from the starting line to the finish, every buoy on it; and whether every shortcut's way in is water
     she can get to. (problems keeps everything inside its spit; this checks the water itself.) */
 export function waterProblems(lay: RaceLay): string[] {
-  const land = new Set([...lay.LAND.flat(), ...lay.FORAGE.BARRIER].map(([c, r]) => key(c, r)));
+  const land = new Set([...lay.LAND.flat(), ...lay.FORAGE.BARRIER, ...lay.ROCKS.WALL, ...lay.FIELD.HOP.ROCKS].map(([c, r]) => key(c, r)));
   const R1 = lay.FINISH[1] + 1, W = 27;
   const water = (c: number, r: number) => c >= 0 && c < W && r > lay.R0 && r <= R1 && !land.has(key(c, r));
   // (the long way: a spit's rows only round its end, past its buoy)
@@ -140,8 +137,8 @@ export function waterProblems(lay: RaceLay): string[] {
   const all = reach(water);
   const ways: [string, Sq][] = [
     [NAMES.gun, lay.GUNS.way[0]], [NAMES.wreck, lay.BRIBE.NOTCH], [NAMES.head, lay.HEADWIND[0]], [NAMES.double, lay.DOUBLE.WAY[0]],
-    [NAMES.whirl, [lay.WHIRLS.MOUTH.c, lay.WHIRLS.MOUTH.r]], [NAMES.forage, lay.FORAGE.NOTCH], [NAMES.lock, lay.BERTH], [NAMES.crane, lay.CRANE.LEDGE],
-    [NAMES.triple, [lay.TRIPLE[0][0], lay.TRIPLE[0][1] - 1]], [NAMES.veil, lay.GAMBLES.VEIL.WAY[0]], [NAMES.turn, lay.GAMBLES.TURN.IN],
+    [NAMES.whirl, [lay.WHIRLS.MOUTH.c, lay.WHIRLS.MOUTH.r]], [NAMES.rocks, [lay.ROCKS.WALL[0][0], lay.ROCKS.WALL[0][1] - 1]], [NAMES.forage, lay.FORAGE.NOTCH], [NAMES.lock, lay.BERTH], [NAMES.crane, lay.CRANE.LEDGE],
+    [NAMES.triple, [lay.TRIPLE[0][0], lay.TRIPLE[0][1] - 1]],
   ];
   for (const [n, sq] of ways) if (!all.has(key(...sq))) out.push(`${n} can't be sailed to.`);
   return out;
@@ -167,17 +164,17 @@ export const fresh = (): Course => ({ ...DEFAULT_COURSE, buoys: [...DEFAULT_COUR
 export const ROUTE_NAMES: Record<string, string> = {
   long: 'The long way (hopping the zigzag)', 'gap-run': 'Gun gap, run a square at a time', 'gap-combo': 'Gun gap, rushed on a Quad',
   'gap-shot': 'Gun gap, its guns shot quiet', bribe: 'Gun gap, its guard bribed', headwind: 'Headwind gap, rowed',
-  doubles: 'The Double\'s and Triple\'s gaps', whirls: 'Whirlpools, a Vegas', forage: 'Barrier, Foraging', locks: 'Locks, Bilge',
+  doubles: 'The Double\'s and Triple\'s gaps', whirls: 'Whirlpools, a Vegas', rocks: 'Rocks, blasted (Gunnery)', forage: 'Barrier, Foraging', locks: 'Locks, Bilge',
   crane: 'Crane, Carpentry', door: 'The starlit door', every: 'Every shortcut it comes to',
 };
 /** Each shortcut, as the balance check names it. */
 export const CUT_NAMES: Partial<Record<CutId, string>> = {
-  guns: NAMES.gun, headwind: NAMES.head, double: NAMES.double, whirls: NAMES.whirl, forage: NAMES.forage,
+  guns: NAMES.gun, headwind: NAMES.head, double: NAMES.double, whirls: NAMES.whirl, rocks: NAMES.rocks, forage: NAMES.forage,
   locks: NAMES.lock, crane: NAMES.crane, triple: NAMES.triple, zigzag: 'Leg 4\'s zigzag, hopped', door: DOOR_NAME,
 };
 /** Which way round each feature is (to put its wins on the chart). */
 export const ROUTE_OF: Partial<Record<FeatureId, string>> = {
-  gun: 'gap-combo', wreck: 'bribe', head: 'headwind', double: 'doubles', triple: 'doubles', whirl: 'whirls', forage: 'forage', lock: 'locks', crane: 'crane',
+  gun: 'gap-combo', wreck: 'bribe', head: 'headwind', double: 'doubles', triple: 'doubles', whirl: 'whirls', rocks: 'rocks', forage: 'forage', lock: 'locks', crane: 'crane',
 };
 
 export interface Balance {
@@ -188,7 +185,6 @@ export interface Balance {
   long: number;
   routes: { id: string; name: string; wins: number; n: number; ok: boolean }[];
   cuts: { id: CutId; name: string; saves: number; by: Record<Skill, number | null> }[];
-  bets: { id: BetId; name: string; on: number; back: number; taken: number; came: number }[];
 }
 /** The balance test's band (tests/race-sim.test.ts): a way round winning between half and 1.6 times its fair share. */
 export const BAND: [number, number] = [0.5, 1.6];
@@ -210,23 +206,19 @@ export function mergeReports(a: Report, b: Report): Report {
     o.tried += c.tried; o.done += c.done;
     for (const s of ['decent', 'good', 'great'] as Skill[]) { o.saved[s].n += c.saved[s].n; o.saved[s].secs += c.saved[s].secs; }
   }
-  const bets = JSON.parse(JSON.stringify(a.bets)) as Report['bets'];
-  for (const [id, t] of Object.entries(b.bets) as [BetId, Report['bets'][BetId]][]) {
-    const o = bets[id];
-    o.taken += t.taken; o.on += t.on; o.wins += t.wins;
-    for (const s of ['decent', 'good', 'great'] as Skill[]) { o.saved[s].n += t.saved[s].n; o.saved[s].secs += t.saved[s].secs; }
-  }
+  const rocks = { ...a.rocks };
+  for (const [k, v] of Object.entries(b.rocks) as [keyof Report['rocks'], number][]) rocks[k] += v;
   return {
     ...a, races: a.races + b.races,
     byRoute: tallies(a.byRoute, b.byRoute), byStyle: tallies(a.byStyle, b.byStyle), bySkill: tallies(a.bySkill, b.bySkill), bySpot: tallies(a.bySpot, b.bySpot),
-    cuts, bets,
+    cuts, rocks,
   };
 }
 
-/** What the check shows, from its races (`rep`), the course's long way (`long`, seconds), what each
-    shortcut saves on it (`saves`, CUTS) and each gamble each way (`bets`, BET_SAVES). Only the ways round
-    and shortcuts named here (ROUTE_NAMES, CUT_NAMES). */
-export function balanceOf(rep: Report, long: number, saves: Partial<Record<CutId, number>>, bets: Record<BetId, { on: number; back: number }>): Balance {
+/** What the check shows, from its races (`rep`), the course's long way (`long`, seconds) and what each
+    shortcut saves on it (`saves`, CUTS). Only the ways round and shortcuts named here (ROUTE_NAMES,
+    CUT_NAMES). */
+export function balanceOf(rep: Report, long: number, saves: Partial<Record<CutId, number>>): Balance {
   const fair = 1 / rep.size;
   const routes = Object.entries(rep.byRoute).filter(([id]) => id in ROUTE_NAMES).map(([id, t]) => {
     const wins = t.n ? t.wins / t.n : 0;
@@ -236,11 +228,7 @@ export function balanceOf(rep: Report, long: number, saves: Partial<Record<CutId
     const c = rep.cuts[id], by = Object.fromEntries((['decent', 'good', 'great'] as Skill[]).map((s) => [s, c && c.saved[s].n ? c.saved[s].secs / c.saved[s].n : null])) as Record<Skill, number | null>;
     return { id, name: CUT_NAMES[id]!, saves: saves[id]!, by };
   });
-  const betNames: Record<BetId, string> = { turn: NAMES.turn, veil: NAMES.veil };
-  return {
-    races: rep.races, fair, long, routes, cuts,
-    bets: (['turn', 'veil'] as BetId[]).map((id) => ({ id, name: betNames[id], on: bets[id].on, back: bets[id].back, taken: rep.bets[id].taken, came: rep.bets[id].taken ? rep.bets[id].on / rep.bets[id].taken : 0 })),
-  };
+  return { races: rep.races, fair, long, routes, cuts };
 }
 
 /** A time as the clock shows it, to the second: 3:42. */

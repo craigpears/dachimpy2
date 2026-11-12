@@ -6,20 +6,57 @@
 // explaining as well at the start ... Here are your options". So Space at the buoy takes her in to the line
 // (a rope of floats across the course behind the line of rocks, her spot ringed on the water); A and D (or the
 // arrows) move her along it, the field's whirlpools and winds below to eyeball; the starter's card says what
-// the race is; Space and he counts you down. The field's whirlpools and winds themselves are drawn with the
-// course's (race.js). Touches the rest only through race.js.
+// the race is; Space and he counts you down.
+// The field itself (12 Nov) is laid fresh from each race's seed (src/start-field.ts: its slow winds and plain
+// whirlpools; online, the room's seed, the same for everyone), laid on her sea and drawn here: its whirlpools as
+// every whirlpool, its slow winds as soft tiles each with one arrow, nudging the way it blows, so they read as
+// different from the trade winds' racing streaks (the user: "the trade wind kind that really just blows you ...
+// but you also need the slower wind that only nudges you one per turn"). Its hop's lane and headwinds are trade
+// winds, drawn with the course's (race.js), its rocks too. Touches the rest only through race.js.
 import * as THREE from 'three';
 import { LAY, SAIL } from '../den-sail.js';
 import { spotPose } from '../den-race.js';
+import { whirlpool } from '../den-whirl.js';
 import { MOST_RIVALS } from '../den-rivals.js';
 import { STARTER } from '../lines/race.js';
-import { scene, mat, mesh, toast } from './world.js';
+import { scene, mat, mesh, toast, canvasTex } from './world.js';
 import { sail, seaX, seaZ } from './sea.js';
+import { pool } from './whirlpools.js';
 
 const RC = LAY.RACE, L = RC.LINE, CELL = SAIL.CELL;
 /** `online`: racing online opened (race-net.js sets it); `lobby`: in a room online, whose lobby takes the
-    card's place. */
-export const start = { W: null, card: null, online: null, lobby: false, more: false };
+    card's place; the start's field drawn (its seed, its whirlpools and slow winds' tiles). */
+export const start = { W: null, card: null, online: null, lobby: false, more: false, seed: null, field: null, pools: [], tiles: [] };
+
+/* ---- the field: its slow winds and whirlpools, from the race's seed ---- */
+// A slow wind's tile: a soft square, its edge dotted, one fat arrow in the middle the way it blows.
+let slowTexture = null;
+const slowTex = () => (slowTexture ??= canvasTex(64, 64, (g, w, h) => {
+  g.clearRect(0, 0, w, h);
+  g.fillStyle = 'rgba(190,236,250,0.16)'; g.fillRect(4, 4, w - 8, h - 8);
+  g.strokeStyle = 'rgba(232,250,255,0.75)'; g.lineWidth = 2; g.setLineDash([5, 5]); g.strokeRect(5, 5, w - 10, h - 10); g.setLineDash([]);
+  // (the arrow points up the canvas: laid flat and turned as a lane is, that's the way it blows)
+  g.fillStyle = 'rgba(245,252,255,0.9)';
+  g.beginPath(); g.moveTo(w / 2, 14); g.lineTo(w / 2 - 14, h / 2); g.lineTo(w / 2 - 6, h / 2); g.lineTo(w / 2 - 6, h - 14); g.lineTo(w / 2 + 6, h - 14); g.lineTo(w / 2 + 6, h / 2); g.lineTo(w / 2 + 14, h / 2); g.closePath(); g.fill();
+}));
+function slowTile(c, r, d) {
+  const m = mesh(new THREE.PlaneGeometry(CELL * 0.9, CELL * 0.9).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: slowTex(), transparent: true, depthWrite: false, fog: false }), false);
+  m.position.set(seaX(c), 0.075, seaZ(r));
+  m.rotation.y = -d * Math.PI / 2;
+  m.renderOrder = 2;
+  m.userData = { x: seaX(c), z: seaZ(r), d };
+  return m;
+}
+/** The race's field laid on her sea and drawn (each time its seed changes: a new race, or the room's). */
+function layField(R) {
+  const f = R.field0();
+  sail.sea.layField(f);
+  if (!start.field) { start.field = new THREE.Group(); scene.add(start.field); }
+  for (const o of [...start.field.children]) start.field.remove(o);
+  start.pools = f.POOLS.map((spot) => { const o = pool(whirlpool(spot)); start.field.add(o); return o; });
+  start.tiles = f.SLOW.map(([c, r, d]) => { const t = slowTile(c, r, d); start.field.add(t); return t; });
+  start.seed = R.seed;
+}
 
 /** The line: a rope of red and white floats along the row's far edge, a tall post at either end. */
 function build() {
@@ -64,9 +101,10 @@ function card(show, R) {
   start.card.hidden = !show;
 }
 
-/** In to the line from the buoy (race.js, Space there): her spot, the card. */
-export function takeLine(R) {
-  if (!R.take()) return false;
+/** In to the line from the buoy (race.js, Space there): her spot, the card; the race's seed (`seed`: online,
+    the room's; alone, a fresh one), so its start's field. */
+export function takeLine(R, seed) {
+  if (!R.take(seed)) return false;
   sail.helm.moor(spotPose(R.spot));
   sail.riding = false;
   return true;
@@ -86,8 +124,13 @@ export function lineKey(key, R) {
 }
 export const linePrompt = (R) => (R.state === 'line' ? `The starting line, spot ${R.spot} · A D: along it · 1 to ${MOST_RIVALS}: rivals (${R.rivals}) · Space: the count · Esc: back out` : R.state === 'count' ? 'On the line: wait for the gun' : '');
 /** Each tick: her spot's ring, and the card while she's on the line. */
-export function startTick(R, on) {
+export function startTick(R, on, dt = 0) {
   if (!start.W) return;
+  if (start.seed !== R.seed && sail.sea) layField(R);
+  // (the field's whirlpools turning; its slow winds nudging, a square's breath the way they blow)
+  for (const o of start.pools) o.rotation.z += dt * o.userData.speed;
+  const t0 = performance.now() / 1000, DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
+  for (const m of start.tiles) { const { x, z, d } = m.userData, k = 0.12 * CELL * Math.max(0, Math.sin(t0 * 2.4)); m.position.x = x + DC[d] * k; m.position.z = z + Math.sign(seaZ(1) - seaZ(0)) * DR[d] * k; }
   const t = performance.now() / 1000, show = on && (R.state === 'line' || R.state === 'count');
   start.W.ring.visible = show;
   if (show) { start.W.ring.position.set(seaX(R.spot), 0.09, seaZ(L.r)); start.W.ring.material.opacity = 0.55 + Math.sin(t * 4) * 0.2; }

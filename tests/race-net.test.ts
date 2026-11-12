@@ -81,8 +81,7 @@ class Browser {
 }
 
 /** A player who sails a real helm on the race's course (src/race-replay.ts, PlayerSea), as js/den/race.js
-    does: in whole steps, the frame's time added up; each step the gambles' clock and the helm's step, then her
-    race's. Her pirate drops pins round the long way, a buoy at a time; holed, she patches in three seconds.
+    does: in whole steps, the frame's time added up; each step the helm's step, then her race's. Her pirate drops pins round the long way, a buoy at a time; holed, she patches in three seconds.
     Everything done to her helm is written down with the steps she's sailed and sent with her pose. (A simple
     pin-dropper, she doesn't get round the whole course alone: out of pins, she retires and a bot sails her
     sloop home, so a takeover's in the race replayed as well.) */
@@ -111,7 +110,7 @@ class Helmsman extends Browser {
   line() {
     super.line();
     const s = this.mirror.latest!;
-    // (her sea's gambles from the race's seed, as her browser has them)
+    // (her sea, its start's field from the race's seed, as her browser has it)
     this.ps = new PlayerSea(s.racers[this.me].spot, [], s.seed, this.me);
   }
   tick(dt: number) {
@@ -125,7 +124,6 @@ class Helmsman extends Browser {
       if (on && h.idle() && this.way.length) { const [c, r] = this.way.shift()!; this.act('drop', c, r); if (h.idle()) this.act('drop', c, r + 1); }
       // (out of pins and going nowhere: she gives up, and a bot sails her sloop home)
       if (on && h.idle() && !this.way.length && !this.retired) { this.retired = true; this.say({ t: 'retire' }); }
-      if (on) this.ps.gambles.t = this.n * NET.STEP;
       h.tick(NET.STEP);
       for (const e of this.R.tick(NET.STEP, { c: h.pose.c, r: h.pose.r, d: h.pose.d, held: h.dazed() ? 'dazed' : h.gusts.length ? 'carried' : null })) {
         this.events.push(e as never);
@@ -231,6 +229,22 @@ describe('the room runs the race: the count, the clock, the bots (12 Nov)', () =
     expect(s.racers[1].prog).toBeGreaterThan(5);
   });
 
+  it('a player\'s broadsides on the rocks are counted by the room and kept in its snapshot, for everyone (12 Nov)', () => {
+    const R = room(['anne', 'bart'], 2);
+    off(R);
+    for (let k = 0; k < (RACE.COUNT + 1) * NET.HZ && R.phase !== 'on'; k++) R.tick(DT);
+    expect(R.phase).toBe('on');
+    expect(R.snapshot().rocks).toBe(0);
+    R.handle('anne', { t: 'rock' });
+    R.handle('bart', { t: 'rock' });
+    expect(R.snapshot().rocks).toBe(2);
+    R.handle('anne', { t: 'rock' });
+    expect(R.snapshot().rocks).toBe(RACE.ROCKS.HITS);
+    // (down, they stay down: more shots count for nothing)
+    R.handle('bart', { t: 'rock' });
+    expect(R.snapshot().rocks).toBe(RACE.ROCKS.HITS);
+  });
+
   it('stops ticking once the race is done and its places shown, back in its lobby, so the room can sleep', () => {
     const R = room(['anne'], 2);
     off(R);
@@ -244,7 +258,7 @@ describe('the room runs the race: the count, the clock, the bots (12 Nov)', () =
 });
 
 describe('everyone else\'s sloop, drawn from snapshots (12 Nov)', () => {
-  const snap = (seq: number, at: number, c: number, room = 'r1'): Snapshot => ({ t: 'snap', room, seq, phase: 'on', at, clock: at, seed: 1, fill: 2, soon: null, players: [], racers: [{ name: 'x', id: null, rv: 0, bot: false, spot: 1, c, r: 50, d: 1, leg: 0, st: 'sailing', shots: 2, hits: 0, time: null, place: null, prog: 0, lift: 0 }], holds: [], shots: [] });
+  const snap = (seq: number, at: number, c: number, room = 'r1'): Snapshot => ({ t: 'snap', room, seq, phase: 'on', at, clock: at, seed: 1, fill: 2, soon: null, players: [], racers: [{ name: 'x', id: null, rv: 0, bot: false, spot: 1, c, r: 50, d: 1, leg: 0, st: 'sailing', shots: 2, hits: 0, time: null, place: null, prog: 0, lift: 0 }], holds: [], shots: [], rocks: 0 });
 
   it('glides between two snapshots, a moment behind the newest', () => {
     const M = new Mirror();

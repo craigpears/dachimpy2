@@ -10,40 +10,34 @@
    fed what each player said when it heard it (the record's `inputs`, stamped with the room's steps), her
    squares at each from her sloop's replay.
 
-   PlayerSea is a player's sloop on the race's course: her helm, its sea (its breeze as written down, its
-   spots shut and opened as they were), the gambles' tosses from her seed. The den's race (js/den/race.js)
-   steps her the same way: the gambles' clock at the step, then the helm's step. */
+   PlayerSea is a player's sloop on the race's course: her helm, its sea (its start's field from the race's
+   seed, its breeze as written down, its spots shut and opened as they were, the rocks down when they came
+   down on it). The den's race (js/den/race.js) steps her the same way, a helm's step at a time. */
 import { Sea, Helm } from './den-sail.js';
-import { Barrier, readyLocks, spotPose } from './den-race.js';
-import { Gambles } from './den-gamble.js';
+import { Barrier, readyLocks, spotPose, rocksOn } from './den-race.js';
 import { Wind } from './den-wind.js';
-import { LAY } from './den-sail.js';
+import { fieldFor } from './start-field.js';
 import { NET } from './race-net.js';
-const TN = LAY.RACE.GAMBLES.TURN;
-/** A player's gambles' seed: the race's, and her number in it (the same in her browser: js/den/race-net.js). */
-export const gambleSeed = (seed, i) => (seed + i * 7919) % 2 ** 31;
 export class PlayerSea {
     acts;
+    i;
     sea = new Sea(9);
     helm;
-    gambles;
     /** Steps sailed from the gun, and the actions applied so far. */
     n = 0;
     k = 0;
-    /** From her spot on the line at the gun; her actions, in order; the race's seed and her number in it. */
+    /** From her spot on the line at the gun; her actions, in order; the race's seed (its start's field) and her
+        number in it. */
     constructor(spot, acts, seed, i) {
         this.acts = acts;
+        this.i = i;
         // (the breeze as the den's sea has one, js/den/sea.js: a calm stops her. Here it changes only as written
         // down, from the way it was at the gun)
         this.sea.breeze = new Wind(9);
         this.sea.breeze.tick = () => [];
+        this.sea.layField(fieldFor(seed));
         this.helm = new Helm(this.sea, spotPose(spot));
         readyLocks(this.helm);
-        this.gambles = new Gambles(gambleSeed(seed, i));
-        this.helm.takes = (p, whirled) => this.gambles.takes(p, whirled);
-        const w = this.sea.whirlAt(...TN.POOL.at);
-        if (w)
-            w.turns = () => this.gambles.way();
     }
     /** One action, done to her helm or her sea. */
     act(a) {
@@ -87,19 +81,23 @@ export class PlayerSea {
                 break;
             case 'shut':
                 this.sea.rocks.add(sq);
+                this.sea.touch();
                 break;
             case 'open':
                 this.sea.rocks.delete(sq);
+                this.sea.touch();
                 break;
             case 'breeze':
                 Object.assign(this.sea.breeze, { d: x[0], s: x[1] });
                 break;
+            case 'rocks':
+                rocksOn(this.sea, false);
+                break;
             default: break; // ('fire': her broadside moves nothing of hers)
         }
     }
-    /** One step: the gambles' clock at it, then the helm's. */
+    /** One step: the helm's. */
     step() {
-        this.gambles.t = this.n * NET.STEP;
         this.helm.tick(NET.STEP);
         this.n++;
     }

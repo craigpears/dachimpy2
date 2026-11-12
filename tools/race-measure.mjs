@@ -13,6 +13,7 @@ import { runFor, RUN } from '../js/sailing.js';
 import { gustPath } from '../js/den-sailing.js';
 import { TRIP } from '../js/den-crane.js';
 import { DOOR } from '../js/den-door.js';
+import { fieldFor } from '../js/start-field.js';
 
 const RC = LAY.RACE, S = RC.STRETCHES, P = RC.SPITS, k = (c, r) => `${c},${r}`, DT = 0.05;
 const shut = (...sq) => { const s = new Sea(9); for (const [c, r] of sq) s.rocks.add(k(c, r)); return s; };
@@ -52,21 +53,36 @@ if (process.argv[1].endsWith('race-measure.mjs')) {
   const sea = new Sea(9);
   const L = longWay(RACE.LONG_SPOT, true);
   console.log(`The long way from spot ${RACE.LONG_SPOT}: ${L.t.toFixed(1)} s, ends ${L.at.c},${L.at.r}`);
-  // Each spot on the line: the seconds to the first bend (and to the gun gap's way in).
-  const spots = [];
+  // Each spot on the line: the seconds to the first bend through the start's field, on average over the
+  // fields of FIELDS seeds (each race's own: src/start-field.ts), and on a plain field.
+  const FIELDS = Number(process.env.FIELDS || 40), spots = [], avg = [];
+  const fs = shut(...WAYS);
   for (let c = RC.LINE.c0; c <= RC.LINE.c1; c++) {
-    const h = new Helm(shut(...WAYS), spotPose(c)), t = to(h, [SAIL.COLS - 2, P[0].r0]);
-    const g = new Helm(sea, spotPose(c)), tg = to(g, [RC.GUNS.way[0][0], S[0].r + 1]);
-    spots.push(`${c}:${t.toFixed(1)}/${tg.toFixed(1)}`);
+    let sum = 0;
+    for (let s = 1; s <= FIELDS; s++) { fs.layField(fieldFor(s)); sum += to(new Helm(fs, spotPose(c)), [SAIL.COLS - 2, P[0].r0]); }
+    fs.layField({ POOLS: [], SLOW: [] });
+    const plain = to(new Helm(fs, spotPose(c)), [SAIL.COLS - 2, P[0].r0]);
+    avg.push((sum / FIELDS).toFixed(1));
+    spots.push(`${c}:${(sum / FIELDS).toFixed(1)}/${plain.toFixed(1)}`);
   }
-  console.log('Spots (to the first bend / to the gun gap):', spots.join(' '));
+  console.log(`Spots (to the first bend: mean over ${FIELDS} fields / plain field):`, spots.join(' '));
+  console.log(`SIM.SPOTS: [${avg.join(', ')}]`);
+  // The field's hop: from above its headwinds, facing down, a Double into its lane; or round it under sail.
+  {
+    const H = RC.FIELD.HOP, c = H.c0 + 1, hs = new Helm(sea, { c, r: H.FROM, d: 0 });
+    hs.gust(gustPath(sea, hs.pose, runFor(2)));
+    const hop = settle(hs) + to(hs, [SAIL.COLS - 2, P[0].r0]);
+    const round = to(new Helm(sea, { c, r: H.FROM, d: 0 }), [SAIL.COLS - 2, P[0].r0]);
+    console.log(`the field's hop from column ${c}: hopped ${hop.toFixed(1)} s, round it ${round.toFixed(1)} s, saves ${(round - hop).toFixed(1)}`);
+  }
   // Each shortcut: the long way between, and her trip through.
-  const G = RC.GUNS.way, B = RC.HEADWIND, M = RC.WHIRLS.MOUTH, Lk = RC.LOCKS, E = RC.CRANE, F = RC.FORAGE, D2 = RC.DOUBLE.WAY, T3 = RC.TRIPLE, Dr = RC.DOOR;
+  const G = RC.GUNS.way, B = RC.HEADWIND, M = RC.WHIRLS.MOUTH, Lk = RC.LOCKS, E = RC.CRANE, F = RC.FORAGE, D2 = RC.DOUBLE.WAY, T3 = RC.TRIPLE, Dr = RC.DOOR, Kr = RC.ROCKS;
   const bends = {
     guns: [{ c: G[0][0], r: G[0][1] - 2, d: 1 }, [G[0][0], G[2][1] + 1]],
     headwind: [{ c: B[0][0], r: B[0][1] - 1, d: 3 }, [B[3][0], B[3][1] + 2]],
     double: [{ c: D2[0][0], r: D2[0][1] - 1, d: 3 }, [D2[2][0], D2[2][1] + 1]],
     whirls: [{ ...M }, RC.WHIRLS.OUT],
+    rocks: [{ c: Kr.WALL[0][0], r: Kr.WALL[0][1] - 1, d: 1 }, Kr.OUT],
     forage: [{ c: F.NOTCH[0], r: F.NOTCH[1] - 1, d: 1 }, F.OUT],
     locks: [{ c: Lk[0].at[0], r: Lk[0].at[1] - 1, d: 3 }, [Lk[1].at[0], Lk[1].at[1] + 1]],
     crane: [{ c: E.LEDGE[0], r: E.LEDGE[1] - 1, d: 1 }, [E.TO.c, E.TO.r]],
@@ -79,6 +95,7 @@ if (process.argv[1].endsWith('race-measure.mjs')) {
     headwind: () => 1 + (B.length + 2) * WIND.OARS,
     double: () => { const h = new Helm(sea, bends.double[0]); h.gust(gustPath(sea, h.pose, runFor(2))); return settle(h) + to(h, bends.double[1]); },   // (lined up from the leg: 12 Nov)
     whirls: () => runFor(RUN.VEGAS) * SAIL.PUSH,
+    rocks: () => { const s = new Sea(9); for (const [c, r] of Kr.WALL) { s.rocks.delete(k(c, r)); s.works.delete(k(c, r)); } s.touch(); const h = new Helm(s, { ...bends.rocks[0], d: 0 }); return to(h, Kr.OUT); },
     forage: () => { const s = new Sea(9); for (const [c, r] of F.BARRIER) { s.rocks.delete(k(c, r)); s.works.delete(k(c, r)); } const h = new Helm(s, { ...bends.forage[0], d: 0 }); return to(h, F.OUT); },
     locks: () => { const h = new Helm(sea, { ...bends.locks[0], d: 0 }); readyLocks(h); for (let i = 0; i < 4; i++) h.put('F'); let t = 0; for (; t < 90 && h.pose.r < bends.locks[1][1]; t += DT) { if (h.held() === 'up') h.pump(99); h.tick(DT); } return t; },
     crane: () => TRIP + 1,
@@ -90,18 +107,14 @@ if (process.argv[1].endsWith('race-measure.mjs')) {
     // (the long way round: every shortcut shut; across the trade wind back up the course with a Double)
     const h = new Helm(shut(...WAYS), from);
     let long;
-    if (id === 'whirls') {
+    if (id === 'whirls' || id === 'rocks' || id === 'forage') {
       long = to(h, [RC.SNAKES.MID[0][0] - 1, S[2].r + 1]);
       h.pose.d = 1; long += hop(h, 2);
       long += to(h, at);
     } else if (id === 'door') {
-      // (the first exit: leg 3 under its cave, on its second row, as far along; then on to the far end)
+      // (its one exit since 12 Nov: leg 3 under its cleft, on its second row, as far along)
       const E = Dr.EXITS[0].INTO[0];
       long = to(h, [3, P[1].r1]) + to(h, [E[0], E[1] + 1]);
-      console.log(`door, its first exit: long way ${long.toFixed(1)}  trip ${DOOR.EXITS[0].trip}  saves ${(long - DOOR.EXITS[0].trip).toFixed(1)}  (EXITS[0] ${DOOR.EXITS[0].saves})`);
-      long += to(h, [RC.SNAKES.MID[0][0] - 1, S[2].r + 1]);
-      h.pose.d = 1; long += hop(h, 2);
-      long += to(h, [SAIL.COLS - 2, P[2].r1]) + to(h, [3, P[3].r1]) + to(h, at);
     } else long = to(h, at);
     const trip = trips[id](), want = id === 'door' ? DOOR.SAVES : RACE.DECENT[id];
     console.log(`${id.padEnd(9)} long way ${long.toFixed(1).padStart(6)}  ended ${h.pose.c},${h.pose.r}  trip ${trip.toFixed(1).padStart(5)}  saves ${(long - trip).toFixed(1).padStart(6)}  (DECENT ${want})`);

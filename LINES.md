@@ -1069,14 +1069,15 @@ Explains the race's rules before the off (the long way, shortcuts that cost a pu
 ### At the buoy, and the race
 
 - *Sailing up to the buoy, the first time a voyage:* "A race round the course? Five legs out and back behind them rocks, round the buoys. Space when ye're ready"
-- *By the buoy again, after a race:* "Another go? Space when ye're ready"
+- *By the buoy again, after a race (Space past the finish line takes her back there):* "Another go? Space when ye're ready"
 - *Taken in to the starting line, before the off: the race explained, a line at a time:*
   - "Here's the way of it. Round the numbered buoys, five legs and the run home: the long way, no puzzle, just sail her"
+  - "First the field: slow winds that nudge ye a square, whirlpools that turn ye round, fresh every race. Eyeball a way through, or hop the headwinds with a Double for a ride"
   - "Or cut through the spits, if ye dare. Every shortcut costs ye a puzzle: bilge up through a lock, build a crane, row the headwind gap"
-  - "Zoom over the whirlpools on a Vegas, hop a headwind with a Double, or haul up some treasure and pay off the guard at the gate. Get it wrong and ye're back where ye started"
-  - "Or, for a navigator, a starry door in the cliff off leg two, opened by Navigation, and a tunnel under the course. A Vegas carries ye on through the dark"
-  - "Or take a gamble: a veiled wind that might carry ye on or blow ye back, or a whirlpool that turns its spin. Catch it turning yer way"
-  - "Mind the winds that sweep ye back. The trade wind up the left takes ye all the way to the start, and the run home runs right beside it"
+  - "Zoom over the whirlpools on a Vegas, hop a headwind with a Double, or haul up some treasure and pay off the guard at the gate"
+  - "Or blast the rocks off leg three with yer guns: three hits, anyone's, and they're open for everyone"
+  - "Or, for a navigator, a starry door in the cliff off leg two, opened by Navigation, and a tunnel under the course up onto leg three"
+  - "Mind the winds that sweep ye back a few squares, the trade wind up the left most of all, and the run home runs right beside it"
   - "And the others'll shoot ye if ye sit still in the open. Pick yer spot on the line, and Space for the count"
 - *The count, a second each:*
   - "Three..."
@@ -1085,10 +1086,10 @@ Explains the race's rules before the off (the long way, shortcuts that cost a pu
 - *The gun:* "Go!"
 - *On the starter's card, on the line: who's racing you:* "Racing ye: {names}"
 - *When a rival's over the finish line:* "{name}'s over the line: {place}, {time}"
-- *When a snake has her: the left-hand trade wind, the tight water past the gun gap, the trade wind back up the course:*
-  - *left:* "The trade wind's got ye! All the way back to the start"
-  - *tight:* "One too many! The wind's sweeping ye back to the bend"
-  - *mid:* "Caught in the trade wind! Back up to leg two wi' ye"
+- *When a snake has her, a few squares back: the left-hand trade wind, the tight water past the gun gap, the trade wind back across leg 3:*
+  - *left:* "The trade wind's got ye! A few squares back: round ye go again"
+  - *tight:* "One too many! The wind's nudging ye back a few squares"
+  - *mid:* "Caught in the trade wind! Round its loop and have another go at that hop"
 - *Over the finish line before everyone else:* "Over the line, and home first! {time}"
 - *Over it after someone:* "Over the line in {time}: {place}. Beaten to it, this time"
 - *Your best time yet, kept in this browser:* "Yer best yet: {time}"

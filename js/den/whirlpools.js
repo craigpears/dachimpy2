@@ -201,9 +201,7 @@ function atSea(dt, events) {
   kik.on = off;
   // Through the reef, to the penguins, and a whirlpool having her: the helm plays it, as Puzzle
   // Pirates' whirlpools go (src/den-whirl.ts), and its winds bring her back (src/den-kikkit.ts).
-  // (the sloop race's turning pool says its own when it has her: race-gamble.js)
-  const turning = sail.sea.whirlAt(...LAY.RACE.GAMBLES.TURN.POOL.at);
-  for (const e of kik.pool.watch(events.filter((x) => !(x.kind === 'push' && x.whirl && sail.sea.whirlAt(x.from.c, x.from.r) === turning)), h)) {
+  for (const e of kik.pool.watch(events, h)) {
     if (e === 'through') { G.found = addFind(G.found, 'whirlpools'); onceToast('through', OF_HIM.through); }
     if (e === 'penguins') penguinMoment();
     if (e === 'caught') { kik.held = true; keys.clear(); toast('A whirlpool has her! A quarter turn, and round to its far corner'); }

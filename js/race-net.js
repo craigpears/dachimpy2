@@ -105,7 +105,7 @@ export function peekText(p) {
         return { open: true, says: 'Nobody yet' };
     return { open: true, says: `Waiting: ${waiting.join(', ')}` };
 }
-export const ACTS = new Set(['put', 'unput', 'stop', 'drop', 'moor', 'gust', 'row', 'stroke', 'hit', 'pump', 'fire', 'patched', 'clear', 'shut', 'open', 'breeze']);
+export const ACTS = new Set(['put', 'unput', 'stop', 'drop', 'moor', 'gust', 'row', 'stroke', 'hit', 'pump', 'fire', 'patched', 'clear', 'shut', 'open', 'breeze', 'rocks']);
 /** Actions as they came, checked for shape: at most 60 at once, each a step, a kind, and small arguments. */
 export function cleanActs(x) {
     if (!Array.isArray(x))
@@ -136,7 +136,8 @@ export function parseUp(data) {
         case 'go':
         case 'again':
         case 'retire':
-        case 'sync': return { t: m.t };
+        case 'sync':
+        case 'rock': return { t: m.t };
         case 'hit': return { t: 'hit', on: Math.round(num(m.on, 0, FIELD.ONLINE - 1, -1)) };
         case 'pose': return {
             t: 'pose', c: num(m.c, 0, SAIL.COLS), r: num(m.r, 0, 200), d: Math.round(num(m.d, 0, 3)),
@@ -282,6 +283,8 @@ export function mirrorDrive(link) {
                         took++;
                     out.push({ kind: 'shot', racer: sh.by < 0 ? -1 : localOf(sh.by, me), cells: sh.cells, hit: sh.on < 0 ? -1 : localOf(sh.on, me) });
                 }
+                // (the rocks: everyone's hits on them, as the room counts them; never fewer than you've seen)
+                field.rocks = Math.max(field.rocks, s.rocks ?? 0);
                 // (the room's count of hits on you: one whose broadside you missed, taken now all the same)
                 const mine = s.racers[me];
                 while (mine && took < mine.hits) {
@@ -301,6 +304,7 @@ export function mirrorDrive(link) {
                 return true;
             },
             lift: (k) => snap()?.racers[roomOf(k, link.me())]?.lift ?? 0,
+            rock: () => link.send({ t: 'rock' }),
         };
     };
 }

@@ -76,6 +76,9 @@ export class Field {
     /** Who holds each spot, and who's waiting for it, in the order they came. */
     holds = new Map();
     queues = new Map();
+    /** Hits on the rocks across spit 3's gap (12 Nov), anyone's, shared by the whole field: once there are
+        ROCKS.HITS (src/den-race.ts) they're down, and open to every racer for the rest of the race. */
+    rocks = 0;
     /** `names`: the racers, two to four (or to `most`: online, FIELD.ONLINE); `count`, the starter's seconds
         (0: off at once); `sea`, for the broadsides (rocks and land stop a shot): any sea with the race's
         course laid. */
@@ -96,6 +99,7 @@ export class Field {
         this.order = [];
         this.holds.clear();
         this.queues.clear();
+        this.rocks = 0;
         for (const r of this.racers)
             Object.assign(r, { leg: 0, state: 'sailing', spot: null, shots: FIELD.SHOTS, hits: 0, scored: 0, time: null, place: null });
         if (this.state === 'on') {
@@ -268,6 +272,14 @@ export class Field {
         const r = this.racers[i];
         if (r.state === 'dazed')
             r.state = r.spot && this.holds.get(r.spot) === i ? 'puzzling' : 'sailing';
+    }
+    /** A hit on the rocks (anyone's, `need` to bring them down): whether it counted (not once they're down, nor
+        before the gun). */
+    blast(need) {
+        if (this.state !== 'on' || this.rocks >= need)
+            return false;
+        this.rocks++;
+        return true;
     }
     /** Shots loaded by Gunnery: up to what she holds. */
     load(i, n = 1) { const r = this.racers[i]; r.shots = Math.min(FIELD.HOLD, r.shots + n); }

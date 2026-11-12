@@ -506,6 +506,11 @@ back:
   are: giving the Master every routine took its mean chain from 2.3 to 3.0 on 20 boards.
 - The learner burns whites (6.5 a session) not by choice but by waiting on the furnace with too few
   techniques to rescue them in time, which is the beginner the user described.
+**Left here for now (the user, 12 Nov):** "I think that's fine for now. Just obviously I watch what they
+do and I'll feed back. That's probably going to be better than you brute force." So no more tuning by
+running the bots over and over: the user watches them play on `distilling-test.html` and says what a
+real player would do instead, and the routines change from that.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.

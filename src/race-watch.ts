@@ -32,7 +32,6 @@ import { WATCHED, type Rival } from './den-rivals.js';
 import { sail, route, style, SIM, type BotInfo, type CutId, type SimRun, type Skill } from './race-sim.js';
 import { LOCK } from './den-lock.js';
 import { PATCH } from './den-patch.js';
-import type { BetId } from './den-gamble.js';
 
 const RC = LAY.RACE;
 
@@ -140,7 +139,7 @@ export class Pacer {
 /* ---- What she's doing, in plain words ---- */
 
 const WHERE: Record<CutId, string> = {
-  guns: 'the gun gap', wreck: 'the old wreck', headwind: 'the headwind gap', double: 'the Double\'s gap', whirls: 'the whirlpools',
+  guns: 'the gun gap', wreck: 'the old wreck', headwind: 'the headwind gap', double: 'the Double\'s gap', whirls: 'the whirlpools', rocks: 'the rocks',
   forage: 'the barrier of driftwood', locks: 'the locks', crane: 'the crane', triple: 'the Triple\'s gap', zigzag: 'the zigzag',
   door: 'the long way',   // (never: it's a secret, and nobody watched takes it)
 };
@@ -151,6 +150,7 @@ const STOPPED: Record<CutId, (x: BotInfo) => string> = {
   double: () => 'building a Double for the gap (Sailing)',
   triple: () => 'building a Triple for the gap (Sailing)',
   whirls: (x) => `building a Vegas at the whirlpools' mouth (Sailing)${x.tries ? `, go ${x.tries + 1}` : ''}`,
+  rocks: () => 'loading her guns by the rocks, to blast them (Gunnery)',
   forage: () => 'clearing the barrier of driftwood (Foraging)',
   locks: () => 'pumping the lock (Bilge)',
   crane: () => 'building the crane (Carpentry)',
@@ -159,16 +159,11 @@ const STOPPED: Record<CutId, (x: BotInfo) => string> = {
 };
 const CARRIED: Record<CutId, string> = {
   guns: 'rushing the gun gap', wreck: 'off from the wreck, coins aboard', headwind: 'out of the headwind gap', double: 'hopping the gap on her Double',
-  whirls: 'zooming over the whirlpools on her Vegas!', forage: 'through the barrier\'s gap', locks: 'up the locks and down',
+  whirls: 'zooming over the whirlpools on her Vegas!', rocks: 'through the gap the rocks were blasted out of', forage: 'through the barrier\'s gap', locks: 'up the locks and down',
   crane: 'hauled over the neck by the crane', triple: 'hopping the gap on her Triple', zigzag: 'hopping the zigzag\'s headwinds',
   door: 'sailing the long way',
 };
 
-/** Taking a gamble (src/den-gamble.ts): on, or back. */
-const BET: Record<BetId, [string, string]> = {
-  turn: ['flung on by the turning whirlpool!', 'thrown back up the course by the turning whirlpool!'],
-  veil: ['carried on through by the veiled wind!', 'blown back along the leg by the veiled wind!'],
-};
 
 /** What a racer's up to, as the bar says it. `next`: the next shortcut her route takes, if any. */
 export function doing(x: BotInfo | null, next: CutId | null, home: number | null): string {
@@ -177,8 +172,7 @@ export function doing(x: BotInfo | null, next: CutId | null, home: number | null
   const m = x.mode === 'daze' ? 'daze' : x.mode;
   if (m === 'daze') return 'holed! Patching her deck (Carpentry)';
   if (m === 'wait') return `waiting her turn at ${WHERE[x.cut ?? 'locks']}`;
-  if (m === 'trip' && x.bet) return BET[x.bet.id][x.bet.on ? 0 : 1];
-  if (m === 'trip') return x.cut ? CARRIED[x.cut] : 'swept back by the wind!';
+  if (m === 'trip') return x.cut ? CARRIED[x.cut] : 'carried a few squares back by the wind!';
   if (m === 'stop' && x.cut) return STOPPED[x.cut](x);
   if (x.hop > 0) return 'lining up a Double over the trade wind';
   if (x.move?.kind === 'combo') return 'building a big combo for the gun gap (Sailing, on the move)';

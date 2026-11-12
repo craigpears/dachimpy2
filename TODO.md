@@ -12,7 +12,10 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
 
 - **The sloop race, a full run (12 Nov):** the whole course with rivals, now with the locks a beat,
   the buoys always seen, the wind gaps lined up, the bribe gate (the wreck's coins by Treasure Haul),
-  the driftwood barrier (Foraging), the crane, and the gambles (the turning pool and the veiled wind).
+  the driftwood barrier (Foraging), the crane. And the race's next pass (12 Nov): no gambles; the snakes a
+  few squares back; the start's field of slow winds and whirlpools, fresh each race, and its hop; the rocks
+  off leg 3 blasted open for everyone; every stopped puzzle's shortcut about the same stretch; the starlit
+  door a plain door, Navigation only, one stretch through; the headwind gap's lower cliffs and its wind.
 - **The race's puzzle shortcuts, not yet seen at all (12 Nov):** "I've definitely got to check things
   like the starlit door and the crane and [Treasure Haul] ... I've not seen any of that stuff yet. I've
   not even seen a visual or anything about those puzzles, the navigation puzzle that is." So: the crane
@@ -22,7 +25,7 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
 - **The race's chart (12 Nov):** `changelog/race-map.jpg` and its changelog entry, and the design
   page (`design.html`), for whether they read well.
 - **The course editor (12 Nov):** `race-editor.html`: move buoys and shortcuts, set each puzzle's size,
-  the balance check, then race it in 3D; and the barrier now a square along from the middle snake.
+  the balance check, then race it in 3D; the rocks movable along spit 3 since the race's next pass.
 - **Watching the race (12 Nov):** the replay / spectator mode, `?at=race-watch`: four racers, the
   free camera, following one, their boards.
 - **Penguin Island and sailing round there (12 Nov):** Kikkit's whirlpools, Vegas Island and the run
@@ -321,88 +324,6 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   So the smugglers' run behind the rocks wide enough to sail without bumping (two or three squares).
 
 
-- **The race's chart kept in step with the course (12 Nov):** "hopefully we're keeping this [race map]
-  JPEG in sync." Redraw `changelog/race-map.jpg` whenever the course changes, and have a test fail when
-  it's out of date (the chart's drawing records which course it drew; the test compares with today's), as
-  `tests/build.test.ts` does for the compiled js.
-  **And clearer (12 Nov):** reading the chart, the user couldn't tell what the wreck by the start was for,
-  took the locks' berth on leg 4 for the starlit door, and didn't find the rowing shortcut or the veiled
-  wind. Each label beside what it names, not across the spit (the imperial gate's label sits on the
-  spit's far end from the gate; "The locks" on the far end from the locks); the wreck labelled "haul the
-  bribe here", the berth "wait for the lock", the headwind gap "row it"; the veiled wind's "?" named.
-- **Rocks blasted away by her guns, open to everyone once down (12 Nov):** a catch-up shortcut in spit 3
-  beside the whirlpool channel, about three hits from her broadsides on the move, then open to every
-  racer (RACE.md, "Rocks blasted open for everyone"). Earlier: "we still haven't got
-  the destructible rocks. That was supposed to be part way through the course somewhere." Rocks across a
-  gap, shot away by Gunnery loading her guns, on the move (RACE.md §3's table, "Rocks across a gap,
-  blasted away", an idea till now). After the course editor lands, as it moves the course's numbers.
-
-
-- **The race's next pass, from reading the chart (12 Nov).** After the course editor and online racing
-  land, as all of it moves the course's numbers:
-  - **Fewer gambles, none by the finish:** "I don't think we want that many gambles. That's far too near
-    to the finish for a gamble. That will make people very cranky." The veiled wind through the last
-    spit goes; the turning pool stays (to confirm: whether one gamble is the most, or another goes early).
-    **The turning pool too? (12 Nov):** "is that really a good idea? I love the snakes and ladders thing,
-    like where you have to double hop over it because it's more deterministic. But it just seems no cost
-    to taking that gamble right at the start ... are we going to ... create a situation whereby the only
-    way to win is to take that gamble, and if you don't, you rage quit? ... there's already enough
-    features ... It does not feel like a very game-worthy thing ... not really in the ... good
-    sportsman-like spirit." And "we're struggling for space already." **Agreed (12 Nov): "Yes, drop
-    both."** No gambles at all: the veiled wind and the turning pool both go, and the turning pool's spit
-    is just land again. Out of the changelog's entry and the design page too, and the
-    simulation re-run.
-  - **The imperial gate's bribe isn't worth its puzzle:** "doing an entire puzzle to get through one gate
-    that doesn't save you too much time, that doesn't feel like it's been balanced." The gate saves 14 s
-    against a whole Treasure Haul: make the haul shorter or the gate worth more, checked by the
-    simulation.
-  - **Slow winds, as Puzzle Pirates' are, besides the trade winds:** "we need two different kinds of
-    [winds]. Like the trade wind kind that really just blows you and you don't get the chance, but you
-    also need the slower wind that only nudges you one per turn." So the sea's moves go in Puzzle Pirates'
-    order: each move, first the sloop's own (left, forward, right, or stay), then the square she's on acts
-    once: a slow wind pushes her one square its way, a whirlpool turns her to its opposite corner (as it
-    already does). Trade winds stay instant (the snakes, and the lanes a Vegas or a Double hops). The
-    start's field is slow winds and whirlpools: "you would say left into a whirlpool because the wind
-    action then takes you one tile further up, so that kind of navigating and eyeballing the route",
-    which is what the starter's "plan the fastest way in" was meant to be and today isn't.
-  - **The start's field different each race:** "there should be some element of randomness to it so
-    that it's not the same on every single thing": its pools and slow winds laid from the race's seed
-    (the same seed for everyone in an online race), always with a way through.
-  - **Rocks blasted away by her guns,** above.
-  - **Snakes a little setback, never a lost race (12 Nov):** "that's really too brutal. That sends you back
-    almost 2 legs worth. Like, it's supposed to be a small, funny thing ... maybe it catches you, sends
-    you back a small distance ... it should send you back by a few tiles and basically make you repeat the
-    thing ... where you've got to do the double hop, if you accidentally do one combo, it sends you in a
-    loop. Similar to where the Vegas [wells] are, where it sends you back to the start of that stage. So
-    it costs you a tiny bit ... I don't want it to be rage-inducing." So every snake (the left-hand trade
-    wind down the course's edge included) carries her back a few squares, to the start of what she was
-    doing, a loop to try again; none sends her back legs or to the start line.
-    **The right strength (12 Nov):** "I like the [tight] water feature that just sends you back 3 or 4
-    squares ... that's the kind of snakes and ladders level that's a good tune, so it's not quite as
-    rage-inducing, but it is kind of like, ah, damn it, not again." Every snake tuned to that.
-  - **Every shortcut reads as what it is, on the water (12 Nov):** "I can see kind of like a cove tunnel
-    thing, next to the docks. Is that supposed to be where the duty navigation entrance is? Because I
-    don't even see anything. Is there supposed to be a visible marker ...? Surely." And "there's still
-    this random little notch that I don't know what it's for. Is this supposed to be the rowing gap? ...
-    There's two tunnels. I don't know what they are ... It says it's the rowing gap, but it just looks
-    like it's blocked. There's like a giant three-story cliff next to it ... and then it looks like
-    there's a more open gap next to it that's just wide open ... Even as the creator, I've got no idea
-    what's going on here. So anyone else is surely going to be confused." So the starlit door plainly
-    marked now it's public (a door in the rock, stars round it), the rowing gap plainly a channel with
-    the headwind in it and no cliff closing it, the wreck's notch plainly the wreck's, and nothing that
-    looks open that isn't (or shut that's open). Each checked by eye in the browser.
-  - **Every puzzle's shortcut cuts the same distance (12 Nov):** "other than things that are obviously
-    should be bigger, like the Vegas or the triple hop ... they don't seem proportionate. Like each an
-    element of puzzling surely should be the same distance. Like for example, the imperial gate ...
-    distance-wise ... that's a relatively small corner ... Whereas the [locks] are maybe like twice as big
-    distance-wise, and then the cranes 3 times again. They are not even." So each stopped puzzle (the
-    gate's bribe or guns, the barrier, the locks, the crane, rowing the headwind gap) skips about the same
-    stretch of course, and each is sized to take about the same time to play (fewer frames for the
-    crane, fewer clears for the locks, fewer coins for the bribe), so the choice is only which puzzle is
-    yours. The chain hops grow with the chain: a Double small, a Triple bigger (today it saves only 9 s),
-    a Vegas biggest. RACE.md §8 has the principle.
-
-
 - **The course editor down to the tile (12 Nov):** "it looks cool, especially with the map. But just
   moving stuff left to right isn't exactly much of a ... it doesn't really give you much control over,
   like, how many legs do I do? ... more fine-grained control ... you get to the tile level of what tiles
@@ -412,11 +333,6 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   whirlpools, each shortcut and its puzzle), as many legs as you like; the race laid from that grid,
   the checks (a way round, every shortcut sailable) and the balance check as now. With the race's next
   pass, as that reworks the course anyway.
-- **A whirlpool that went the wrong way (12 Nov):** "I just saw people go ... they kind of went left into
-  it and then somehow came out as it was like into the right turn, wins, shortcut. Something went really
-  wrong there. That is not how a whirlpool works." Likely the turning pool, whose spin flips (it goes
-  with the gambles); but check every pool on the course turns her by Puzzle Pirates' rules, with a test
-  named after what the user saw.
 
 
 - **A rival's Sailing shows on her sails (12 Nov):** "you should be able to see the [sailing] puzzle in the
@@ -467,11 +383,6 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   the "Defend it again" button, while the den's now a whole sea of islands, puzzles and a race. (What it
   should say instead, and whether the quick siege still opens it, to pin down with the user: the message was
   cut off.)
-- **A hop to get going off the line (12 Nov):** on the start's field, "this initial opening thing as well,
-  where you're trying to get in with these trade winds. Again, that could have a nice hop to the ball thing to
-  get started." So a hop near the line (a wind or chain hop, like the ladders further on) that gets a good
-  start going. (Which "ball" and where it lands, to pin down with the user: maybe the first buoy.) The user
-  liked how it's looking now: "they're definitely much more looking like" [a race].
 - **How far does a chain carry her? Vegas Island's hidden rule (12 Nov):** "I did a double to get over the
   first one, and then I thought, well, it's 1, 2, 3 tiles to get to the penguins, so surely a bingo should
   take me 3 tiles, right? ... What's the calculation?" The calculation is a square a step (Double 2,
@@ -480,11 +391,9 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   wind in front of it and was swept home. To make plain (how, to pin down with the user): honest distance
   only (the penguins 7 squares from the mouth, any gust that reaches them lands), or the Vegas rule kept
   and shown (on the water, and said when it stops her short).
-- **The starlit door: back to a simple Navigation-only shortcut (12 Nov):** the user only understood the tunnel afterwards ("it was not intuitive at play"), and then decided against it: "I love some of the animation and the styles on it, but I think it needs just probably to go back to being simple... nav only shortcut that takes you just like one step through, and maybe can be tuned to be a bit trickier. Because I could just imagine someone good at doing Vegas, it takes you out of the race. It's too isolated otherwise." So: Navigation opens the door and that alone takes her through, one stretch, up the cleft onto leg 3. No Sailing clear to get in, no Vegas under the cleft, no second stretch to leg 5. Keep the door's look (the crag, the stars, the door swinging open, the tunnel). The Navigation can be made trickier so the saving stays in proportion with the other shortcuts.
 - **Watched racers' Doubles and Triples don't zoom them along (12 Nov):** watching Kikkit in the race: "she's doing lots of Doubles and Triples, but that's supposed to be zooming your ship along in any context." And: "if you do a Double or Triple, even just in a normal lane, it's supposed to speed you along a bit." (Your own sloop already does this; the racers you watch, and the rivals, don't.) Her board shows real clears, but her sloop doesn't jump for them. The simulation averages Sailing on the pilot into a steady bit of extra speed, and while she builds a Double or Triple for a gap she's slowed, not carried. What should happen: every clear on a racer's board carries her sloop on by its gust, as the player's own does (a Double two squares, a Triple three, and so on), visibly and at the moment of the clear, whatever she's building it for. The simulation's balance should come from the same gusts, so what you watch is what the numbers count. (After the course pass, which has the same files open.)
 - **Watched racers glide instead of making moves (12 Nov):** "why are they going so smoothly? Like, they look like they're gliding along. It's supposed to be like moves, like forward, left, right when you're watching." The racers you watch (and the rivals) slide along the course in one continuous motion. They should sail the way your own sloop does: a move at a time, a square forward or a turn left or right, with each clear's gust a jump on top (the entry above). (With that entry, after the course pass.)
 - **Plan your race route, then puzzle it through (12 Nov, agreed):** you can't steer and puzzle at once, so the race gets a plan: one choice for each leg (the long way or one of its shortcuts), hidden from the others, changed any time from a strip along the screen's edge with one click and no time lost from the board. The pilot sails it move by move, stops by itself at each obstacle's spot (a hop, each of the zigzag's headwinds, a lock, the crane, the barrier, the whirlpools, the door) with the board it needs up, and goes on once it's done. "That's really simple and easy." The design is in RACE.md §5. (After the course pass and the racers' moves and gusts, which use the same files.)
-- **The camera's broken after the starlit door's tunnel (12 Nov):** "after you go through the tunnel, it's got really breaks the camera angle. And you don't seem to be able to change it." Once she's up the cleft and back on the course, the camera should be the sea's usual one behind her, and turning or zooming it should work as anywhere else.
 
 ## Spotted along the way (not asked for)
 

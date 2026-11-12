@@ -45,19 +45,18 @@ export function whirlpool(spot) {
 /** On one of its squares (the missing corner isn't). */
 export const inWhirlpool = (w, c, r) => w.squares.some(([x, y]) => x === c && y === r);
 /** A whirl: from her square of it, clockwise round by the next corner (`via`) to the opposite one,
-    turned a quarter clockwise. Spinning the other way (`spin` -1: a turning pool, 12 Nov), round by the
-    other corner to the same opposite one, turned a quarter anticlockwise. */
-export function whirl(w, p, spin = w.turns?.() ?? 1) {
+    turned a quarter clockwise. */
+export function whirl(w, p) {
     const i = w.corners.findIndex(([x, y]) => x === p.c && y === p.r);
     if (i < 0)
         throw new Error(`not on the whirlpool: ${p.c},${p.r}`);
-    const via = w.corners[(i + 4 + spin) % 4], [c, r] = w.corners[(i + 2) % 4];
-    return { via: [...via], to: { c, r, d: (p.d + 4 + spin) % 4 } };
+    const via = w.corners[(i + 1) % 4], [c, r] = w.corners[(i + 2) % 4];
+    return { via: [...via], to: { c, r, d: (p.d + 1) % 4 } };
 }
 /** Where she is partway (u, 0 to 1) through a whirl, for drawing: swung round the middle of it,
-    clockwise (or, `spin` -1, anticlockwise), half a circle, turning a quarter as she goes. */
-export function whirlAt(from, to, u, spin = 1) {
-    const e = u <= 0 ? 0 : u >= 1 ? 1 : u * u * (3 - 2 * u), th = spin * e * Math.PI;
+    clockwise, half a circle, turning a quarter as she goes. */
+export function whirlAt(from, to, u) {
+    const e = u <= 0 ? 0 : u >= 1 ? 1 : u * u * (3 - 2 * u), th = e * Math.PI;
     const mc = (from.c + to.c) / 2, mr = (from.r + to.r) / 2, x = from.c - mc, y = from.r - mr;
-    return { c: mc + x * Math.cos(th) + y * Math.sin(th), r: mr - x * Math.sin(th) + y * Math.cos(th), a: from.d + spin * e };
+    return { c: mc + x * Math.cos(th) + y * Math.sin(th), r: mr - x * Math.sin(th) + y * Math.cos(th), a: from.d + e };
 }
