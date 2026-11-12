@@ -419,6 +419,9 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     the race: behind, they take the bigger shortcuts and the catch-up rocks; ahead, they play safe and
     sheltered; they take the little Doubles and Triples on the way when their chain allows; they hop the
     zigzag and use the winds that help.
+  - **Nobody shoots:** "I'm not seeing anybody shoot anything either. Like, no cannon." Watched, the bots
+    should fire on a racer sitting still in the open as they pass (as the rivals do in your race), with
+    the shot, the hit and the patch shown.
   After the course's rework (the race's next pass), as the bots race whatever course it leaves.
 
 
