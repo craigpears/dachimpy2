@@ -241,6 +241,14 @@ might carry ye on or blow ye back, or a whirlpool that turns its spin. Catch it 
   door's clefts. The pool's snake is the bigger because its spin can be read and its ladder can't be missed
   by a good eye.
 
+**No gambles (agreed 12 Nov, replacing the gambles above):** "it just seems no cost to taking that gamble
+right at the start ... are we going to ... create a situation whereby the only way to win is to take that
+gamble, and if you don't, you rage quit? ... It does not feel like a very game-worthy thing ... not
+really in the ... good sportsman-like spirit", and of the veiled wind, "far too near to the finish for a
+gamble. That will make people very cranky." Then "Yes, drop both." Snakes stay: they're deterministic, a
+well-timed Double hops them. The turning pool's spit takes the rocks blasted by Gunnery. (TODO.md, the
+race's next pass.)
+
 ## 5. Knowing where you're going (built 11 Nov)
 
 - **Clear buoys round the long way:** a tall red and white buoy at each bend, its number on a board above it,

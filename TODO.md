@@ -352,8 +352,10 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     to taking that gamble right at the start ... are we going to ... create a situation whereby the only
     way to win is to take that gamble, and if you don't, you rage quit? ... there's already enough
     features ... It does not feel like a very game-worthy thing ... not really in the ... good
-    sportsman-like spirit." And "we're struggling for space already." Proposed: no gambles at all; the
-    turning pool's spit goes to the rocks blasted by Gunnery (to confirm with the user).
+    sportsman-like spirit." And "we're struggling for space already." **Agreed (12 Nov): "Yes, drop
+    both."** No gambles at all: the veiled wind and the turning pool both go, and the turning pool's spit
+    takes the rocks blasted by Gunnery. Out of the changelog's entry and the design page too, and the
+    simulation re-run.
   - **The imperial gate's bribe isn't worth its puzzle:** "doing an entire puzzle to get through one gate
     that doesn't save you too much time, that doesn't feel like it's been balanced." The gate saves 14 s
     against a whole Treasure Haul: make the haul shorter or the gate worth more, checked by the
