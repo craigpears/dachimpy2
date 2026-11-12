@@ -24,6 +24,7 @@ import { tzzCheat } from './balloon-isle.js';
 import { empireCheat } from './imperial-isle.js';
 import { smugglersCheat } from './smugglers.js';
 import { raceCheat } from './race.js';
+import { watchStart, watchStop } from './race-watch.js';
 import { cp } from './checkpoint.js';
 import { board, sailReset } from './sailing.js';
 import { online, guest, myId, send } from './crew.js';
@@ -594,6 +595,14 @@ function cheatRace() {
   raceCheat();
   cp.check.side = 'far';
 }
+/* The sloop race watched (js/den/race-watch.js): four racers and no player in it, a free camera and a
+   key to jump between them, each one's board as she plays it. At sea by the race's buoy first, as for
+   the race. */
+function cheatRaceWatch() {
+  if (cine) return;
+  cheatRace();
+  watchStart();
+}
 /* Mischievious's wedding (js/den/wedding.js): the siege put to rest and their ship gone, and off to
    her island. */
 function cheatWedding() {
@@ -671,6 +680,7 @@ const CHEATS = [
   ['The imperial island', cheatEmpire, 'imperial'],
   ["The smugglers' beach", cheatSmugglers, 'smugglers'],
   ['The sloop race', cheatRace, 'race'],
+  ['Watch the sloop race', cheatRaceWatch, 'race-watch'],
   ['Home, married', cheatMarried, 'married'],
   ['The housing district', cheatLodgings, 'lodgings'],
 ];
@@ -706,7 +716,7 @@ const cheatButtons = (el, list) => $(el).replaceChildren(...list.map(([name], i)
   b.textContent = name;
   const at = el === 'cheat-stages' ? STAGE_AT[i] : CHEATS[i][2];
   if (at) b.title = `Link: den.html?at=${at}`;
-  b.onclick = () => { cheatPanel(false); if (wed.on && at !== 'wedding') weddingLeave(); if (house.on) houseLeave(); (el === 'cheat-stages' ? skipTo : (j) => CHEATS[j][1]())(i); if (at) linkTo(at); };
+  b.onclick = () => { cheatPanel(false); watchStop(); if (wed.on && at !== 'wedding') weddingLeave(); if (house.on) houseLeave(); (el === 'cheat-stages' ? skipTo : (j) => CHEATS[j][1]())(i); if (at) linkTo(at); };
   return b;
 }));
 cheatButtons('cheat-stages', STAGES);

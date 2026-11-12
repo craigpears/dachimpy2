@@ -92,6 +92,21 @@ export const ON_A_PROOF = [
 ];
 /** Seeing you out. */
 export const GOODBYE = 'Come back soon! Bring your face!';
+/** Racing in the sloop race, watched (src/den-rivals.ts, WATCHED: the fourth racer when four bots race
+    with no player in it, on a way round none of the others take): up through the locks, pumping the up
+    lock by Bilge on its quay, sheltered between its walls. A house with cellars, so she knows a pump; and
+    she'll stop in the open only with nobody close behind her. */
+export const RACER = {
+    how: 'Up through the locks, pumping the up lock by Bilge on its quay, sheltered between its walls, waiting her '
+        + 'turn in the berth if someone\'s in it. Fires on anyone sitting still, but only stops in the open with '
+        + 'nobody close behind.',
+    route: 'locks', style: 'cautious', skill: 'good',
+    says: {
+        start: ['Bedside Manors has cellars. I know a pump when I see one.', 'Spud, hold the candle. No, the OTHER way up.'],
+        won: ['First! Oh, I must have a portrait of this.'],
+        lost: ['Never mind. I\'ll paint myself winning.'],
+    },
+};
 export const CHARACTER = {
     name: 'Gravee',
     who: 'A real pirate of the Emerald Ocean (by her pirate name only): captain of Just In Time, Lady of the '
@@ -137,5 +152,6 @@ export const CHARACTER = {
         },
         { when: 'About a yeti proof ("Definitive Proof of ..."), each in turn', says: ON_A_PROOF },
         { when: 'As you leave', says: [GOODBYE] },
+        { when: 'Racing in the sloop race when four race with no player in it (watched), over her sloop: on the starting line, and over the finish line first or after', says: RACER.says },
     ],
 };

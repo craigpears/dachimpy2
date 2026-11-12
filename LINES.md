@@ -964,6 +964,16 @@ Sweet and excitable, far more excited about adding you to her collection than wo
 
 - "Come back soon! Bring your face!"
 
+### Racing in the sloop race when four race with no player in it (watched), over her sloop: on the starting line, and over the finish line first or after
+
+- *start:*
+  - "Bedside Manors has cellars. I know a pump when I see one."
+  - "Spud, hold the candle. No, the OTHER way up."
+- *won:*
+  - "First! Oh, I must have a portrait of this."
+- *lost:*
+  - "Never mind. I'll paint myself winning."
+
 ## The Count
 
 The vampire who sleeps in the coffin at the bedside in Gravee's house (Bedside Manors). Not a real pirate: a look from the wardrobe (a black Vampire raiment lined red), deathly pale. His portrait over the coffin follows you with its eyes. Lift his lid and he sits bolt upright, and you both scream at each other; then he lies back down. Grumpy before sunset, harmless after it. (No vampire game yet: IDEAS.md, "The vampire in the coffin".)

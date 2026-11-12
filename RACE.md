@@ -273,8 +273,9 @@ you racer 0 on it: the same logic that's balance-tested races you.
   Decent, so good at the Foraging. **Daquan has no look yet** (his portrait's still to check), so Dalnoth
   races in his place for now; Umami rides with him rather than racing a sloop of his own.
 - One rival is Kikkit; two, Kikkit and Tzz. None takes the starlit door (it's never shown or hinted).
-- Still to come: their puzzles played as real moves where the puzzles have bots (Sailing, rowing,
-  Navigation), so they're the testers as well; today they take the simulation's drawn times. And Daquan.
+- Their puzzling is the simulation's drawn times; watched (§10, since 12 Nov) each one's board is shown
+  played by its bot in those times. Still to come: the bots' own play deciding the times, so they're the
+  testers as well. And Daquan.
 
 ## 7. The start: a field of whirlpools and winds (built 11 Nov)
 
@@ -488,17 +489,40 @@ A hidden gem, never hinted. There's no cheat, no `?at=` link, no shot, and the s
   push on with the next Vegas for more, in peace unless someone else came this way. A failed Vegas spills
   her out of the last exit she passed, never back to the start: always some gain for having gone in.
 
-## 10. Watching and replays (idea)
+## 10. Watching (built) and replays (idea)
 
 "Replays, and ... that would go down to the detail of the actual puzzling, because that's kind of what
 you're watching." A replay shows the sea and every sloop on it, with each racer's board beside them, move by
 move. It's cheap to keep, because the puzzles are dealt from a seed: a run is its seeds and its moves with
 their times. A race could also be watched live.
 
-**Spectator mode (asked for 12 Nov, being built).** "As a spectator ... I can see the puzzle, as I said,
-the puzzling, the just move around free camera, including jumping between watching each person in the
-race." A link to watch four bots race with no player in it, a free camera, a key to jump between racers,
-and each racer's board on screen as she plays it, with real moves (the puzzles' bots), not a timer.
+**Spectator mode (built 12 Nov).** "As a spectator ... I can see the puzzle, as I said, the puzzling, the
+just move around free camera, including jumping between watching each person in the race." And "are you
+able to show me a link today to just see all four bots? ... I can give input into ... how realistic it
+looks." `den.html?at=race-watch` (`&seed=` names a race: one seed, one race, to show someone the same one).
+- **Who races:** your three rivals and Gravee (`WATCHED`, `src/den-rivals.ts`), the fourth on a way round
+  none of them takes: up through the locks, Bilge on the quay ("Bedside Manors has cellars"), cautious, good.
+  A watched race only: a race of yours is still you and up to three. Sailed by the simulation's own bots on
+  a field of their own (`sail(..., you: false)`), so what you watch is what the balance test races.
+- **The camera and the bar:** a free camera (W A S D, Q E, drag, wheel, pinch), 1 to 4 to follow a racer,
+  Tab the next, 0 back to free; the bar says who, her place, her leg and what she's doing in plain words
+  (`src/race-watch.ts`, `doing`). RULES.md, "Watched", has the keys.
+- **The puzzling, with real moves:** her board as she plays it, each puzzle's own rules played by its own bot
+  and drawn by its own look, paced to the simulation's drawn seconds, so the balance holds: the board is a
+  picture of the time the simulation gave her, not what decides it. Sailing on the pilot is the shallow bot
+  (`src/sail-bots.ts`: one drop ahead, the builder's sense at a thirtieth of its cost, a Double every 60 drops
+  or so against the builder's 20; the builder's third of a second a drop stutters the browser). A Vegas is
+  one the staircase bot made (`VEGAS_GAMES`, three recorded), its last drops played in her time and the last
+  held till the simulation says it came off. Bilge, Foraging, Gunnery and Carpentry have simple greedy bots
+  of their own (`src/bilge-bot.ts`, `foraging-bot.ts`, `gunnery-bot.ts`, `carpentry-bot.ts`); rowing's and
+  Navigation's moved into `src/` too (`row-bots.ts`, `nav-bots.ts`), though nobody watched rows, and
+  nobody takes the door.
+- **Not yet:** the rowing boards aren't drawn when watching (nobody watched rows). A built crane isn't
+  drawn going up for a bot (its frame shows on her deck). The lock's own water doesn't rise as a bot pumps
+  (the board's water goes down). Boards are only played for the racer followed.
+- **For the user to judge:** how realistic it looks; whether the boards' pace reads right (the bots don't
+  decide when a puzzle's done, the simulation does: a board can look half done when she sails on, or wait
+  done a few seconds).
 
 **Idea for later: teams, a relay (12 Nov, not agreed to build).** Teams of sloops racing together, each
 member taking a different job: "one ship would go do some hauling, one could race ahead to build the
@@ -567,7 +591,11 @@ question of whether a crane is everyone's), and the bribe gate as the final toll
   `js/den/race-field.js`.
 - **The starter's lines:** `src/lines/race.ts`.
 - **The starlit door:** `src/den-door.ts` and `js/den/door.js`.
+- **Watched (§10):** `src/race-watch.ts` (the race of four, who's followed, what she's doing, her board and
+  its pace, the free camera); drawn by `js/den/race-watch.js` (the camera, the keys, the bar, the sloops)
+  and `js/den/watch-boards.js` (each racer's board); the puzzles' bots `src/sail-bots.ts`, `bilge-bot.ts`,
+  `foraging-bot.ts`, `gunnery-bot.ts`, `carpentry-bot.ts`, `row-bots.ts`, `nav-bots.ts`.
 - **Tests:** `tests/den-race.test.ts`, `tests/den-door.test.ts`, `tests/den-racers.test.ts`,
-  `tests/den-rivals.test.ts` (the rivals racing you, shooting, places) and `tests/race-sim.test.ts` (the
-  balance test).
-- **Try it:** `den.html?at=race`.
+  `tests/den-rivals.test.ts` (the rivals racing you, shooting, places), `tests/race-sim.test.ts` (the
+  balance test), `tests/race-watch.test.ts` (watching) and `tests/puzzle-bots.test.ts` (the bots).
+- **Try it:** `den.html?at=race`; watch four race, `den.html?at=race-watch`.

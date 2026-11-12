@@ -344,7 +344,7 @@ export function sail(o) {
         const saves = o.saves?.[k];
         return [k, saves === undefined ? c : { ...c, saves, tOut: c.tIn + c.trip + saves }];
     }));
-    const you = !!o.field, first = you ? 1 : 0;
+    const you = o.you ?? !!o.field, first = you ? 1 : 0;
     const field = o.field ?? new Field(o.racers.map((r) => `${r.route.name}/${r.style.name}`), courseSea(), 0);
     if (!o.field)
         field.start();
@@ -815,6 +815,15 @@ export function sail(o) {
             return Math.sin(Math.PI * Math.min(1, Math.max(0, 1 - b.trip / Math.max(1e-9, b.tripFull))));
         },
         results: (limit) => bots.map((b) => ({ ...b.res, time: field.racers[b.i].time ?? limit, place: field.racers[b.i].place ?? bots.length })),
+        info: (i) => {
+            const b = botOf(i);
+            if (!b)
+                return null;
+            return {
+                mode: b.mode, was: b.was, cut: b.cut?.id ?? null, stage: b.stage, work: Math.max(0, b.work), full: b.full, tries: b.tries, daze: Math.max(0, b.daze),
+                move: b.move ? { ...b.move } : null, hop: Math.max(0, b.hop), route: b.route.name, style: b.style.name, best: b.best, skill: b.skill, done: [...b.done],
+            };
+        },
     };
 }
 /** One race, start to finish: each racer's result, in starting order. */

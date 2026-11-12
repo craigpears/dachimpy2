@@ -56,10 +56,13 @@ export function forageWorld() { forage.jam ||= jam(); }
 // ---------- its board ----------
 // (stood up on the jam, leant back, so the camera looks at it over her, her mast struck as at Umami's bank)
 const SQ = 0.42, AT = () => V3(seaX(F.BARRIER[0][0]), 3.4, seaZ(F.BARRIER[0][1]) - 0.4);
+/** Where its board stands and how it's dressed, for forageBoard: yours, and a racer's when the race is
+    watched (watch-boards.js). */
+export const barrierStand = () => ({ at: AT(), yaw: 0, lean: 0.55, sq: SQ, skin: () => bundle(), bananas: false });
 function open() {
   if (forage.bar.cleared) return;
   if (!forage.board) {
-    forage.board = forageBoard({ game: new Forage(barrierDeal()), at: AT(), yaw: 0, lean: 0.55, sq: SQ, skin: () => bundle(), bananas: false, onDone: done });
+    forage.board = forageBoard({ game: new Forage(barrierDeal()), ...barrierStand(), onDone: done });
     scene.add(forage.board.group);
   }
   forage.board.idle = false;

@@ -34,6 +34,7 @@ import { empireWorld, empireTick, empirePrompt, empireReset } from './imperial-i
 import { primatesTick, primatesReset } from './moored.js';
 import { smugglersWorld, smugglersTick, smugglersPrompt, smugglersReset } from './smugglers.js';
 import { raceWorld, raceTick, raceKey, racePrompt, raceShot, raceTarget, raceHitRival, raceHolds, raceReset, raceHover, raceClick } from './race.js';
+import { watch, watchTick, watchStop } from './race-watch.js';
 
 // The old sloop's at anchor in the cove from the moment the siege is over, while their ship makes
 // sail in the background (the user, 9 Nov: "I'm sat here quite a while waiting for his sloop to sail
@@ -92,6 +93,7 @@ export function sailReset() {
   smugglersReset();
   primatesReset();
   raceReset();
+  watchStop();   // (the race watched: race-watch.js)
   denLets.sailView = 0;
 }
 // A shot out of her side, from where she is right now: it flies straight out and comes down in the
@@ -388,7 +390,8 @@ export function sailTick(dt) {
   empireTick(dt);   // (Port Decorum's guards: imperial-isle.js)
   smugglersTick();   // (the smugglers' beach, found: smugglers.js)
   raceTick(dt);   // (the race, its guns, its crane and the rival: race.js)
-  if (sail.on) sailHud();
+  watchTick(dt);   // (the race watched, four racers and no player: race-watch.js)
+  if (sail.on && !watch.on) sailHud();
 }
 // The oars' button on the sailing bar (on mousedown: the bar's redrawn as the tokens change, so a
 // click could be lost between press and release).

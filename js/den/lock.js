@@ -148,12 +148,28 @@ export function lockTick(dt) {
    of what the move's worth (as on the beach) as it washes away, the pump's handle working and water
    gushing from its spout into the lock, till the lock's up; then it's gone and she sails on. One
    board, laid on the quay of whichever lock she's waiting in. */
-export const hold = { mode: null, lock: null, at: null, board: null, group: null, pieces: null, meshes: new Map(), queue: [], holdT: 0, shown: null, cur: { r: 5, c: 2 }, water: null, cursor: null };
+export const hold = { mode: null, lock: null, at: null, board: null, group: null, view: null, queue: [], holdT: 0, shown: false, cur: { r: 5, c: 2 } };
 const holdX = (c) => c - (BW - 1) / 2, holdZ = (r) => r - (BH - 1) / 2;
 // The lock she's waiting in to be pumped up, if she is.
 const holdWanted = () => (sail.on ? sail.helm.working() : null);
 const holdRows = () => 3 + (1 - (hold.lock?.level ?? 0)) * 6;
-function holdMake() {
+/* A Bilge piece on the quay's board. The pieces are drawn the right way up for the beach's board,
+   which you look at from the sea; the quay's you look at from behind her as she waits to go up (from
+   the den side, at the first two), so they're turned the other way round here, or they read upside
+   down (the user, 9 Nov: "the bilge puzzle looks like it's upside down"). Their shadows fall the same way as on the beach, down and to the left. */
+function holdBit(bit) {
+  const m = bitMesh(bit);
+  m.userData.face.rotation.z = 0;
+  m.children[0].position.set(-0.05, 0.012, -0.05);
+  return m;
+}
+/* The quay's Bilge board, its look: a bed of planks, its pieces, the water over its bottom rows still to
+   pump, and the orange cursor. Yours at a lock (`hold`, below), and a racer's at the race's lock when the
+   race is watched (watch-boards.js). A square a unit: put its group where it goes, scaled.
+   `lay(board)` lays a Bilge board's pieces as they are; `step(st)` plays a move's stage (what's cleared
+   washes away, the rest float up, new ones come in from under the bottom edge); `tick(dt, rows, cur)`
+   moves them on, the water `rows` deep and the cursor at `cur`; `moving()` while they're still going. */
+export function quayBoard() {
   const g = new THREE.Group();
   const bedTex = canvasTex(BW * 32, BH * 32, (x, cw, ch) => {
     x.fillStyle = '#5a4128'; x.fillRect(0, 0, cw, ch);
@@ -165,25 +181,74 @@ function holdMake() {
   const bed = mesh(new THREE.PlaneGeometry(BW + 0.3, BH + 0.3).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ map: bedTex, roughness: 1 }), false);
   bed.position.y = 0.005;
   g.add(bed);
-  hold.pieces = new THREE.Group();
-  g.add(hold.pieces);
-  hold.water = mesh(new THREE.PlaneGeometry(BW + 0.3, 1).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#2a6fd8', transparent: true, opacity: 0.4, depthWrite: false }), false);
-  hold.water.renderOrder = 4;
-  g.add(hold.water);
-  hold.cursor = new THREE.Group();
+  const pieces = new THREE.Group();
+  g.add(pieces);
+  const water = mesh(new THREE.PlaneGeometry(BW + 0.3, 1).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#2a6fd8', transparent: true, opacity: 0.4, depthWrite: false }), false);
+  water.renderOrder = 4;
+  g.add(water);
+  const cursor = new THREE.Group();
   const orange = new THREE.MeshBasicMaterial({ color: '#f39a2b' }), t = 0.07, len = 0.28;
-  const bar = (x, z, sx, sz) => { const m = mesh(new THREE.BoxGeometry(sx, 0.03, sz), orange, false); m.position.set(x, 0.07, z); hold.cursor.add(m); };
+  const bar = (x, z, sx, sz) => { const m = mesh(new THREE.BoxGeometry(sx, 0.03, sz), orange, false); m.position.set(x, 0.07, z); cursor.add(m); };
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) { bar(sx * (1 - len / 2), sz / 2, len, t); bar(sx, sz * (0.5 - len / 2), t, len); }
   for (const sz of [-1, 1]) bar(0, sz * (0.5 - len / 2), t, len);
-  g.add(hold.cursor);
-  hold.group = g;
+  g.add(cursor);
+  const meshes = new Map();
+  const Q = {
+    group: g,
+    clear() { for (const m of meshes.values()) pieces.remove(m); meshes.clear(); },
+    lay(board) {
+      Q.clear();
+      const grid = board.snap();
+      for (let r = 0; r < BH; r++) for (let c = 0; c < BW; c++) { const bit = grid[r][c], m = holdBit(bit); m.position.set(holdX(c), 0.01, holdZ(r)); pieces.add(m); meshes.set(bit.id, m); }
+    },
+    moving() {
+      for (const m of meshes.values()) if (m.userData.tz !== undefined && Math.abs(m.position.z - m.userData.tz) + Math.abs(m.position.x - m.userData.tx) > 0.02) return true;
+      return false;
+    },
+    step(st) {
+      for (const id of st.cleared) {
+        const m = meshes.get(id);
+        if (!m) continue;
+        burst(m.getWorldPosition(new THREE.Vector3()).setY(m.getWorldPosition(new THREE.Vector3()).y + 0.2), '#dff3f6', 4, 1.2);
+        pieces.remove(m);
+        meshes.delete(id);
+      }
+      const fresh = Array(BW).fill(0);
+      for (let r = 0; r < BH; r++) for (let c = 0; c < BW; c++) {
+        const bit = st.grid[r][c];
+        let m = meshes.get(bit.id);
+        if (!m) { m = holdBit(bit); m.position.set(holdX(c), 0.01, holdZ(BH + fresh[c]++)); pieces.add(m); meshes.set(bit.id, m); }
+        m.userData.tx = holdX(c); m.userData.tz = holdZ(r);
+      }
+    },
+    /** A crab that won't budge does a little jig. */
+    jig(bit) { const m = meshes.get(bit?.id); if (m) m.userData.jig = 0.6; },
+    tick(dt, rows, cur) {
+      for (const m of meshes.values()) {
+        const tx = m.userData.tx ?? m.position.x, tz = m.userData.tz ?? m.position.z;
+        const dx = tx - m.position.x, dz = tz - m.position.z, d = Math.hypot(dx, dz);
+        if (d > 1e-3) { const k = Math.min(1, 6 * dt / d); m.position.x += dx * k; m.position.z += dz * k; }
+        m.visible = m.position.z < holdZ(BH - 1) + 0.6;   // (new ones come in from under the bottom edge)
+        if (m.userData.jig > 0) { m.userData.jig -= dt; m.rotation.y = Math.sin(m.userData.jig * 40) * 0.4; } else m.rotation.y = 0;
+      }
+      // The water over the bottom rows: what's still to pump.
+      const n = Math.min(BH, rows);
+      water.scale.z = n;
+      water.position.set(0, 0.042, (BH / 2) - n / 2);
+      cursor.position.set((holdX(cur.c) + holdX(cur.c + 1)) / 2, 0, holdZ(cur.r));
+    },
+  };
+  return Q;
+}
+function holdMake() {
+  hold.view = quayBoard();
+  hold.group = hold.view.group;
 }
 function holdOpen(lk) {
   if (!hold.group) holdMake();
   hold.board = new Bilge(Math.random, oddsFor(0));
-  for (const m of hold.meshes.values()) hold.pieces.remove(m);
-  hold.meshes.clear();
-  hold.queue = []; hold.shown = null; hold.cur = { r: 5, c: 2 };
+  hold.view.clear();
+  hold.queue = []; hold.shown = false; hold.cur = { r: 5, c: 2 };
   // On its quay, its top row toward the lock's high side, seen from behind her (js/den.js).
   const L = lockWorld()[sail.helm.locks.indexOf(lk)], g = hold.group;
   scene.add(g);
@@ -199,16 +264,6 @@ export function holdShut() {
   hold.mode = null; hold.lock = null;
   hold.queue = [];
   document.body.classList.remove('quay');
-}
-/* A Bilge piece on the quay's board. The pieces are drawn the right way up for the beach's board,
-   which you look at from the sea; the quay's you look at from behind her as she waits to go up (from
-   the den side, at the first two), so they're turned the other way round here, or they read upside
-   down (the user, 9 Nov: "the bilge puzzle looks like it's upside down"). Their shadows fall the same way as on the beach, down and to the left. */
-function holdBit(bit) {
-  const m = bitMesh(bit);
-  m.userData.face.rotation.z = 0;
-  m.children[0].position.set(-0.05, 0.012, -0.05);
-  return m;
 }
 export function holdKey(key) {
   const mv = { arrowleft: [0, -1], a: [0, -1], arrowright: [0, 1], d: [0, 1], arrowup: [-1, 0], w: [-1, 0], arrowdown: [1, 0], s: [1, 0] }[key];
@@ -233,7 +288,7 @@ export function holdSwap() {
   b.water = Math.round(rows);
   const m = b.swap(r, c);
   if (!m.moved) {
-    for (const bit of [b.grid[r][c], b.grid[r][c + 1]]) if (bit?.s === 'crab') { const mm = hold.meshes.get(bit.id); if (mm) mm.userData.jig = 0.6; }
+    for (const bit of [b.grid[r][c], b.grid[r][c + 1]]) if (bit?.s === 'crab') hold.view.jig(bit);
     return;
   }
   // What the move's worth, pumped a share at a time as each clear washes away (holdTick), so the
@@ -247,47 +302,16 @@ export function holdTick(dt) {
   const want = holdWanted();
   if (want !== hold.lock) { holdShut(); if (want) holdOpen(want); }
   if (!hold.mode) return;
-  const b = hold.board;
-  if (!hold.shown) {
-    hold.shown = b.snap();
-    for (let r = 0; r < BH; r++) for (let c = 0; c < BW; c++) { const bit = hold.shown[r][c], m = holdBit(bit); m.position.set(holdX(c), 0.01, holdZ(r)); hold.pieces.add(m); hold.meshes.set(bit.id, m); }
-  }
+  if (!hold.shown) { hold.view.lay(hold.board); hold.shown = true; }
   // A move a step at a time, as on the beach: what's cleared washes away, the rest float up.
   hold.holdT += dt;
-  let moving = false;
-  for (const m of hold.meshes.values()) if (m.userData.tz !== undefined && Math.abs(m.position.z - m.userData.tz) + Math.abs(m.position.x - m.userData.tx) > 0.02) moving = true;
-  if (hold.queue.length && hold.holdT > 0.18 && !moving) {
+  if (hold.queue.length && hold.holdT > 0.18 && !hold.view.moving()) {
     const st = hold.queue.shift();
     hold.holdT = 0;
     if (st.w > 0 && sail.helm.pump(st.w)) pumpStroke(lockWorld()[sail.helm.locks.indexOf(hold.lock)]);
-    for (const id of st.cleared) {
-      const m = hold.meshes.get(id);
-      if (!m) continue;
-      burst(m.getWorldPosition(new THREE.Vector3()).setY(m.getWorldPosition(new THREE.Vector3()).y + 0.2), '#dff3f6', 4, 1.2);
-      hold.pieces.remove(m);
-      hold.meshes.delete(id);
-    }
-    hold.shown = st.grid;
-    const fresh = Array(BW).fill(0);
-    for (let r = 0; r < BH; r++) for (let c = 0; c < BW; c++) {
-      const bit = st.grid[r][c];
-      let m = hold.meshes.get(bit.id);
-      if (!m) { m = holdBit(bit); m.position.set(holdX(c), 0.01, holdZ(BH + fresh[c]++)); hold.pieces.add(m); hold.meshes.set(bit.id, m); }
-      m.userData.tx = holdX(c); m.userData.tz = holdZ(r);
-    }
+    hold.view.step(st);
   }
-  for (const m of hold.meshes.values()) {
-    const tx = m.userData.tx ?? m.position.x, tz = m.userData.tz ?? m.position.z;
-    const dx = tx - m.position.x, dz = tz - m.position.z, d = Math.hypot(dx, dz);
-    if (d > 1e-3) { const k = Math.min(1, 6 * dt / d); m.position.x += dx * k; m.position.z += dz * k; }
-    m.visible = m.position.z < holdZ(BH - 1) + 0.6;   // (new ones come in from under the bottom edge)
-    if (m.userData.jig > 0) { m.userData.jig -= dt; m.rotation.y = Math.sin(m.userData.jig * 40) * 0.4; } else m.rotation.y = 0;
-  }
-  // The water over the bottom rows: what's still to pump.
-  const rows = Math.min(BH, holdRows());
-  hold.water.scale.z = rows;
-  hold.water.position.set(0, 0.042, (BH / 2) - rows / 2);
-  hold.cursor.position.set((holdX(hold.cur.c) + holdX(hold.cur.c + 1)) / 2, 0, holdZ(hold.cur.r));
+  hold.view.tick(dt, holdRows(), hold.cur);
 }
 
 /* What's said of the locks as she goes: the first lock she's to be pumped up in, and each other one

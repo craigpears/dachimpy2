@@ -42,6 +42,16 @@
     body.sailing.sailboard .dock { left: 64%; max-width: 46vw; }
     body.sailing.sailboard .prompt { white-space: normal; text-align: center; font-size: 15px; }
     @media (max-aspect-ratio: 21/20) { body.sailing.sailboard .dock { left: 50%; max-width: calc(100vw - 32px); } body.sailing.sailboard .prompt { font-size: 13px; padding: 6px 10px; } }   /* (along the bottom, above the prompt) */
+    /* The sloop race watched (js/den/race-watch.js): its bar along the top, nothing of your own sailing. */
+    body.watching .sailhud, body.watching .dock, body.watching .hud, body.watching #racehud { display: none !important; }
+    #watchbar { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 24px); z-index: 6; background: var(--panel); border: 1px solid #5a412a; border-radius: 10px; padding: 6px 12px; color: #f3ecdc; font: 600 15px/1.35 'Alegreya Sans', sans-serif; text-align: center; }
+    #watchbar .wb-now b { color: var(--gold); }
+    #watchbar .wb-who { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 5px 0 3px; }
+    #watchbar .wb-who button { font: 600 13px 'Alegreya Sans', sans-serif; color: #f3ecdc; background: #2a1c11; border: 1px solid #6b4e32; border-radius: 6px; padding: 2px 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+    #watchbar .wb-who button.on { border-color: var(--gold); background: #4a3220; }
+    #watchbar .wb-who i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    #watchbar .wb-keys { font-size: 12px; color: var(--dim); }
+    @media (max-width: 620px) { #watchbar { font-size: 13px; } #watchbar .wb-keys { display: none; } }
     .sailhud .turns { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; align-items: center; }
     .sailhud .gun { position: relative; overflow: hidden; height: 34px; padding: 0 10px; border-radius: 6px; border: 1px solid #6b4e32; background: #2a1c11; display: flex; gap: 6px; align-items: center; font: 700 14px 'Alegreya Sans'; color: var(--dim); }
     .sailhud .gun.ready { color: #f3ecdc; border-color: var(--gold); }
@@ -504,7 +514,7 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.RN37A3R4.js');
+    import(local ? './js/den.js' : './js/den.3OXHIZUL.js');
   </script>
 </body>
 </html>

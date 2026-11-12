@@ -275,13 +275,6 @@ the site (`.assetsignore` skips `*.md`).
   but "I kind of liked some of the coins". Which, if any, to put on the old board (to pin down with the
   user).
 
-- **Watching the race: a spectator mode, and a link to watch four bots race (12 Nov):** "are you able to
-  show me a link today to just see all four bots? ... I can give input into ... how realistic it looks."
-  As a spectator "I can see the puzzle, as I said, the puzzling", "just move around free camera,
-  including jumping between watching each person in the race." So a link where four bots race with no
-  player, a free camera, a key to jump to each racer in turn, and each racer's puzzle board shown with
-  their real moves as they play it (RACE.md §10).
-
 - **The race's bribe gate, by Treasure Haul (12 Nov):** build it (RACE.md §11): "I'm sure it's going to be
   a bit busy, but again, I just want all the ideas in there ... I want to see what the variety really
   feels like to show how many different ways you have of really getting through the course."
@@ -309,12 +302,12 @@ the site (`.assetsignore` skips `*.md`).
 - **The race's buoy markers vanish (12 Nov):** "[Buoy] markers aren't really rendering properly. They're
   like usually vanish unless you're at the right distance." The numbered buoys and the next one lit
   should show at any distance you'd sail by them.
+
 - **Whirlpools at sea: one step, between your moves (12 Nov):** "taking you to the opposite corner is like
   one turn, so you like do your own move, and then the [whirlpool] does an action to take you to the
   corner, and then your move happens again. So, for example, if I do like forward into a whirlpool, it
   should be like take me into the whirlpool, then to the other corner, rotate it a bit, and then my next
   forward should happen." Today it doesn't work like that (to pin down exactly how it goes wrong).
-
 
 ## Spotted along the way (not asked for)
 

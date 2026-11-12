@@ -2174,6 +2174,34 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **The starlit door:** a plain cliff face on the second spit off leg 2 (squares 16 and 17 across, 52 out)
     and a tunnel's end on the third spit's far face onto leg 4 (16 and 17, 62 out), `LAY.RACE.DOOR`: "The
     starlit door (11 Nov)", below.
+  - **Watched: four bots and no player (12 Nov):** "are you able to show me a link today to just see all four
+    bots?", and as a spectator "I can see the puzzle, as I said, the puzzling, the just move around free
+    camera, including jumping between watching each person in the race." `?at=race-watch` (and a cheat, "Watch
+    the sloop race"; `&seed=` a race of its own, the same every time): Kikkit, Tzz, Dalnoth with Umami, and
+    Gravee (`WATCHED`, `src/den-rivals.ts`; her racing in `src/lines/gravee.ts`), up through the locks,
+    pumping the up lock by Bilge, cautious, from spot 10, a way round none of the three takes. They race on a
+    field of their own, sailed by the same bots as race you (`sail`, `you: false`); your sloop waits out of
+    sight by the buoy.
+    - **The camera:** free (W A S D or the arrows move it over the course, Q E or a drag turn and tilt it, the
+      wheel, - = or a pinch zoom), or following a racer: 1 to 4, Tab the next (from the free camera, the
+      leader), Shift+Tab back, 0, F or Esc the free camera again. Following, the same turns and zoom go round
+      her. N another race, X stop watching (back at the helm by the buoy), P pauses.
+    - **The bar** along the top: the clock, who you're watching, her place ("2nd of 4"), her leg, and what
+      she's doing in plain words ("pumping the lock (Bilge)", "building a Vegas at the whirlpools' mouth",
+      "sailing the long way (Sailing on the pilot)", "holed! Patching her deck"); and the four of them in
+      their places, a click to follow one.
+    - **Her board as she plays it:** the puzzle she's at, its moves the puzzle's own bot's on its own rules,
+      drawn by its own look, paced to the simulation's seconds (`src/race-watch.ts`, `boardOf`, `paceOf`),
+      so the race is the one the balance test runs: Sailing down the left of the screen, as at sea, a pair
+      steered down a move at a time (on the pilot, a Double or Triple built on the move, a big combo for
+      the gap; a Vegas at the whirlpools' mouth is one the staircase bot made, its last drops played in her
+      time, the last as it comes off, a fresh one for each go); Bilge on the up lock's quay, its water going
+      down as she pumps; Foraging on the barrier's jam; Gunnery on her deck while she loads (a shot she
+      fires is a gun fired on her board); Carpentry on her deck patching a hole (a piece lifted back out if
+      a gap's shut in). Her mast is struck and she stands at her stern while a board's on her. Rowing's
+      boards aren't drawn yet (nobody watched rows). Only the racer you follow plays hers; each keeps her
+      boards as she left them.
+    - **The door stays a secret:** nobody watched takes it, and nothing said names it (tested).
   `?at=race` and one cheat. Rules: `src/den-race.ts`; drawn and played by `js/den/race.js`, its start
   `js/den/race-start.js`, its buoys and finish `js/den/race-marks.js`, its barrier `js/den/race-forage.js`;
   the starter's lines `src/lines/race.ts`.

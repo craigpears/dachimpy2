@@ -327,6 +327,9 @@ export interface SimOptions {
   /** The den's race: its field, started, you racer 0 (moved by the helm), the bots racers 1 up; none,
       they race on a field of their own. */
   field?: Field;
+  /** With a field given, whether racer 0 is you (true, the den's race) or the first bot (false: a race
+      of bots only on a field of the caller's, watched: src/race-watch.ts). */
+  you?: boolean;
 }
 
 /** How each racer got on. */
@@ -431,6 +434,34 @@ export interface SimRun {
   lift(i: number): number;
   /** Each bot's result, in starting order. */
   results(limit: number): RacerResult[];
+  /** What bot `i` is up to just now (null for you): for watching her (src/race-watch.ts). */
+  info(i: number): BotInfo | null;
+}
+
+/** What a bot's up to, as a spectator sees it: under way, stopped to puzzle at a shortcut, waiting her
+    turn, carried through one, dazed (patching), or home; the shortcut she's at or on, its stage (the
+    starlit door's Navigation, then its Vegas), the seconds of puzzling left and all told, the goes she's
+    had at a Vegas; and what she's puzzling at on the move (a combo for the gun gap, a Double or Triple
+    for a hop, a shot loaded by Gunnery) and its seconds left; the trade wind's Double being lined up. */
+export interface BotInfo {
+  mode: 'sail' | 'stop' | 'wait' | 'trip' | 'daze' | 'done';
+  /** Before the daze, what she was doing. */
+  was: 'sail' | 'stop' | 'wait' | 'trip' | 'daze' | 'done';
+  cut: CutId | null;
+  stage: number;
+  work: number;
+  full: number;
+  tries: number;
+  daze: number;
+  move: { kind: 'combo' | 'load' | 'hop'; left: number; id?: CutId } | null;
+  hop: number;
+  /** Her route's and style's names, and how good she is at her own route's puzzle and the rest. */
+  route: string;
+  style: string;
+  best: Skill;
+  skill: Skill;
+  /** The shortcuts she's been to (taken or given up). */
+  done: CutId[];
 }
 
 /** How far round the long way a racer at `p` is (seconds of it), going by the stretch she's on, or the
@@ -458,7 +489,7 @@ export function sail(o: SimOptions): SimRun {
     const saves = o.saves?.[k as CutId];
     return [k, saves === undefined ? c : { ...c, saves, tOut: c.tIn + c.trip + saves }];
   })) as Record<CutId, Cut>;
-  const you = !!o.field, first = you ? 1 : 0;
+  const you = o.you ?? !!o.field, first = you ? 1 : 0;
   const field = o.field ?? new Field(o.racers.map((r) => `${r.route.name}/${r.style.name}`), courseSea(), 0);
   if (!o.field) field.start();
   if (o.shots !== undefined) for (const r of field.racers) r.shots = o.shots;
@@ -795,6 +826,14 @@ export function sail(o: SimOptions): SimRun {
       return Math.sin(Math.PI * Math.min(1, Math.max(0, 1 - b.trip / Math.max(1e-9, b.tripFull))));
     },
     results: (limit) => bots.map((b) => ({ ...b.res, time: field.racers[b.i].time ?? limit, place: field.racers[b.i].place ?? bots.length })),
+    info: (i) => {
+      const b = botOf(i);
+      if (!b) return null;
+      return {
+        mode: b.mode, was: b.was, cut: b.cut?.id ?? null, stage: b.stage, work: Math.max(0, b.work), full: b.full, tries: b.tries, daze: Math.max(0, b.daze),
+        move: b.move ? { ...b.move } : null, hop: Math.max(0, b.hop), route: b.route.name, style: b.style.name, best: b.best, skill: b.skill, done: [...b.done],
+      };
+    },
   };
 }
 

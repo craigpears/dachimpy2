@@ -11,7 +11,7 @@
      kinds: kinds of piece on each board (default KINDS_DEFAULT; Bilge's own is 7), specials:
      'specials' for pufferfish, crabs and jellyfish at the den's late odds (default none).
 
-   The bots:
+   The bots (src/row-bots.ts, moved there 12 Nov so the browser can use them):
    - random: any swap.
    - greedy: the swap worth most now, tried on copies of the boards (it sees the boards, not what
      comes in at the bottom, so the copies get new pieces of their own).
@@ -26,97 +26,18 @@
    Balance (BALANCE in src/mirror-row.ts) can be tried without a build: TURN=6 KEEL=0.25 before the
    command (environment variables). */
 
-import { BALANCE, Course, KINDS_DEFAULT, MirrorRow, SplitRow, seeded } from '../js/mirror-row.js';
+import { BALANCE, KINDS_DEFAULT, MirrorRow, SplitRow, seeded } from '../js/mirror-row.js';
 import { H, W } from '../js/bilge.js';
+import { ROW_BOTS, twoPly } from '../js/row-bots.js';
 
 const GAMES = Number(process.argv[2]) || 40, MOVES = Number(process.argv[3]) || 60;
 const WIDTH = Number(process.argv[4]) || H * (W - 1);
-const ALL = [];
-for (let r = 0; r < H; r++) for (let c = 0; c < W - 1; c++) ALL.push([r, c]);
 
 if (process.env.TURN) BALANCE.TURN = Number(process.env.TURN);
 if (process.env.KEEL) BALANCE.KEEL = Number(process.env.KEEL);
 
-/** Her heading in quarter turns (to starboard more than nothing), wrapped to a half circle either way. */
-const wrap = (q) => ((q + 2) % 4 + 4) % 4 - 2;
-/** Squares up the course a quarter turn off it is reckoned to cost (she has to be turned back). */
-const OFF = 1;
-const DY = [1, 0, -1, 0];
-
-/** Where she stands: how far up the course, pull still building counted as part of a square, less
-    for heading off it (pull still waiting for the other side counted as turning her). */
-function standing(st) {
-  const b = st.oars.building();
-  return st.y + DY[st.heading] * b.ahead - OFF * Math.abs(wrap(st.turned + b.turn));
-}
-/** How far round to starboard she is, or about to be (the turner's worth). */
-const round = (st) => st.turned + st.oars.building().turn;
-
-/** The state after a stroke of pull p, rowed as the den rows her. */
-function after(st, p) {
-  const oars = st.oars.copy();
-  const c = Object.assign(new Course(), { x: 0, y: st.y, heading: st.heading, turned: st.turned });
-  for (const step of oars.row(p)) c.go(step);
-  return { y: c.y, heading: c.heading, turned: c.turned, oars };
-}
-
-const stateOf = (row) => ({ y: row.course.y, heading: row.course.heading, turned: row.course.turned, oars: row.stroke });
-
-/** What a stroke's worth, from state st: how much further up the course it leaves her. */
-function worth(p, st) {
-  const n = after(st, p);
-  return { v: standing(n) - standing(st), h: n };
-}
-
-const pick = (xs, rnd) => xs[Math.floor(rnd() * xs.length)];
-
-function best(row, h, rnd) {
-  let top = -Infinity, at = [];
-  for (const [r, c] of ALL) {
-    const t = row.tryMove(r, c, rnd), w = worth(t.pull, h);
-    if (w.v > top + 1e-9) { top = w.v; at = [[r, c]]; } else if (Math.abs(w.v - top) <= 1e-9) at.push([r, c]);
-  }
-  return { v: top, move: pick(at, rnd) };
-}
-
-const BOTS = {
-  random: (row, rnd) => pick(ALL, rnd),
-  naive: (row, rnd) => {
-    let top = -Infinity, at = [];
-    for (const [r, c] of ALL) {
-      const p = row.tryMove(r, c, rnd).pull, v = p.port + p.starboard;
-      if (v > top + 1e-9) { top = v; at = [[r, c]]; } else if (Math.abs(v - top) <= 1e-9) at.push([r, c]);
-    }
-    return pick(at, rnd);
-  },
-  turner: (row, rnd) => {
-    const h = stateOf(row);
-    let top = -Infinity, at = [];
-    for (const [r, c] of ALL) {
-      const v = round(after(h, row.tryMove(r, c, rnd).pull));
-      if (v > top + 1e-9) { top = v; at = [[r, c]]; } else if (Math.abs(v - top) <= 1e-9) at.push([r, c]);
-    }
-    return pick(at, rnd);
-  },
-  greedy: (row, rnd) => best(row, stateOf(row), rnd).move,
-  'two-ply': (row, rnd) => {
-    const h = stateOf(row);
-    let first = ALL.map(([r, c]) => { const t = row.tryMove(r, c, rnd), w = worth(t.pull, h); return { r, c, t, w }; });
-    if (WIDTH < first.length) {
-      // The best by one ply, and a few of the moves that clear nothing (the setting-up ones) at random.
-      first.sort((a, b) => b.w.v - a.w.v);
-      const quiet = first.filter((f) => Math.abs(f.w.v) < 1e-9), keep = first.slice(0, Math.ceil(WIDTH / 2));
-      while (keep.length < WIDTH && quiet.length) keep.push(quiet.splice(Math.floor(rnd() * quiet.length), 1)[0]);
-      first = keep;
-    }
-    let top = -Infinity, at = [];
-    for (const f of first) {
-      const v = f.w.v + best(f.t.copy, f.w.h, rnd).v;
-      if (v > top + 1e-9) { top = v; at = [[f.r, f.c]]; } else if (Math.abs(v - top) <= 1e-9) at.push([f.r, f.c]);
-    }
-    return pick(at, rnd);
-  },
-};
+// (the bots themselves are src/row-bots.ts, so the browser can use them too)
+const BOTS = { ...ROW_BOTS, 'two-ply': twoPly(WIDTH) };
 
 /** Each board paired move by move ('move'), or as the den's oars pair them ('clocked'). */
 const VARIANTS = (process.argv[5] ?? 'split move,mirror move,split clocked,mirror clocked').split(',');

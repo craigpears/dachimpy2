@@ -48,20 +48,20 @@ export function patchClear() {
   }
   if (!patch.at) patch.group = patch.face = patch.wood = null;
 }
-function patchOpen(hole, away = null) {
-  if (!away) patchClear();
-  Object.assign(patch, { on: true, hole, hand: null, lift: -1, ghostKey: '', keyAt: null, at: away });
-  const b = hole.board, sq = patch.sq = away ? away.sq : Math.min(0.22, PATCH_W / b.w);
-  // In cell space (rows down, as pieceGroup draws them), laid flat on her deck, the top row toward
-  // her bow and the board's middle where the deck's is.
-  const g = patch.group = new THREE.Group();
-  g.position.set(0.05, SLOOP_DECK + 0.03, 0);
-  g.rotation.y = -Math.PI / 2;
-  g.scale.setScalar(sq / S);
+/* A Carpentry frame's look, laid flat on a sloop's deck: in cell space (rows down, as pieceGroup draws
+   them), the top row toward her bow and the board's middle where the deck's is, `sq` metres a square.
+   The hole's dark water down through it (or, `away`, its own dress: the crane's frames), its rim, and a
+   group for the wood fitted into it (`fit` lays a piece there, as patchPlace does). Yours (patchOpen), and
+   a racer's patch or crane frame when the race is watched (watch-boards.js). */
+export function patchLook(hole, sq, away = null) {
+  const b = hole.board, group = new THREE.Group();
+  group.position.set(0.05, SLOOP_DECK + 0.03, 0);
+  group.rotation.y = -Math.PI / 2;
+  group.scale.setScalar(sq / S);
   const flatG = new THREE.Group();
   flatG.rotation.x = -Math.PI / 2;
-  g.add(flatG);
-  const face = patch.face = new THREE.Group();
+  group.add(flatG);
+  const face = new THREE.Group();
   face.position.set(-(b.c0 + b.w / 2) * S, (b.r0 + b.h / 2) * S, 0);
   flatG.add(face);
   // The hole: dark water down through it, splintered planks round its edge (the wall's hole colour).
@@ -70,12 +70,29 @@ function patchOpen(hole, away = null) {
     const dark = new THREE.MeshBasicMaterial({ color: '#0d1a20' }), sqGeo = new THREE.PlaneGeometry(S, S);
     for (const [r, c] of hole.cells) { const m = new THREE.Mesh(sqGeo, dark); m.position.set((c + 0.5) * S, -(r + 0.5) * S, 0.01); face.add(m); }
   }
-  patch.rim = outline(hole.cells, 0.03, '#ffd58a');
-  face.add(patch.rim);
+  const rim = outline(hole.cells, 0.03, '#ffd58a');
+  face.add(rim);
+  const wood = new THREE.Group();
+  face.add(wood);
+  /** A piece fitted, its squares `cells` at the top left, at (r, c): flush, or resting proud (`over`). */
+  const fit = (letter, cells, r, c, over = false) => {
+    const p = pieceGroup(cells, woodMat(letter));
+    p.position.set(c * S, -r * S, over ? 0.3 : 0.05);
+    wood.add(p);
+    const bb = C.bbox(cells);
+    return face.localToWorld(V3((c + bb.w / 2) * S, -(r + bb.h / 2) * S, 0.4));
+  };
+  return { group, face, rim, wood, fit };
+}
+function patchOpen(hole, away = null) {
+  if (!away) patchClear();
+  Object.assign(patch, { on: true, hole, hand: null, lift: -1, ghostKey: '', keyAt: null, at: away });
+  const b = hole.board, sq = patch.sq = away ? away.sq : Math.min(0.22, PATCH_W / b.w);
+  const L = patchLook(hole, sq, away);
+  patch.group = L.group; patch.face = L.face; patch.rim = L.rim; patch.wood = L.wood;
+  const g = L.group, face = L.face;
   // The deck round it a piece may rest on, chalked as every frame's room is (world.js: roomMarks).
   patch.chalk = redrawRoom(face, null, hole, 0.02, 0.015);
-  patch.wood = new THREE.Group();
-  face.add(patch.wood);
   if (away) { away.mount(g); finishOpen(); return; }
   g.userData.deckPatch = true;   // (under the rowing board while she rows: rowing.js hides it)
   sail.g.add(g);

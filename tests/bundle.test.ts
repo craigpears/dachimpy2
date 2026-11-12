@@ -20,6 +20,8 @@ describe('the den in one file (10 Nov: "shouldn\'t there be some build process t
     const { files } = await bundled() as { name: string; files: { name: string; text: string }[] };
     const js = files.find((f) => f.name.endsWith('.js'))!;
     expect(js.text).not.toMatch(/WebGLRenderer\s*=\s*class|REVISION\s*=\s*"160"/);
-    expect(js.text.split('\n').length).toBeLessThan(20);
+    // (its few line breaks are the blank lines inside characters' `who` in src/lines/: Gravee's joined the
+    // main bundle on 12 Nov, racing in the race watched)
+    expect(js.text.split('\n').length).toBeLessThan(24);
   }, 30000);
 });

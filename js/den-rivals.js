@@ -17,6 +17,7 @@ import { RACER as KIKKIT } from './lines/kikkit.js';
 import { RACER as TZZ } from './lines/tzz.js';
 import { RACER as DALNOTH } from './lines/dalnoth.js';
 import { RACING as UMAMI } from './lines/capybara.js';
+import { RACER as GRAVEE } from './lines/gravee.js';
 /** In the order they're lined up: one rival is Kikkit, two Kikkit and Tzz, three all of them. Their spots
     clear of the field's whirlpools' columns (they come down the field from them) and of the spot you're
     taken in to (FIRST_SPOT). */
@@ -27,3 +28,11 @@ export const RIVALS = [
 ];
 /** How many rivals race you, at most and by default. */
 export const MOST_RIVALS = RIVALS.length;
+/** Four racing with no player in it, to watch (src/race-watch.ts; den.html?at=race-watch): your three
+    rivals, and a fourth on a way round none of them takes. Gravee, up through the locks (her house has
+    cellars: she knows a pump), in her gown's green, a wine-dark flag; her spot on the line clear of the
+    field's whirlpools. Watched only: a race of yours is you and up to three (FIELD.MOST, four in all). */
+export const WATCHED = [
+    ...RIVALS,
+    { name: 'Gravee', look: 'Gravee', spot: 10, sail: '#4f9a5c', flag: '#6e2233', crew: null, racer: GRAVEE },
+];
