@@ -404,6 +404,24 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   players alike.
 
 
+- **Watching the race: the bots and what's shown (12 Nov, from the user watching).**
+  - **Missing animations, the puzzling not seen:** at the lock "it's missing the animation ... missing
+    some of the animations, puzzle visibility": the lock's water doesn't rise as a bot pumps, a built
+    crane isn't drawn going up, the boards only show for the racer followed (RACE.md §10, "Not yet").
+  - **Odd moves:** "why did that bot just go out the lock and to the left? That was a bit crazy", and
+    "why did a ship just zoom right from the right-hand side to the left? ... like someone just went on
+    Zoomies". (The zoom is likely the left-hand trade wind, the snake along the top back to the start,
+    with nothing to show it's a snake that caught her; the lock exit to pin down.) Each racer's way out of
+    a shortcut should look like a sailor's, and a snake catching her should read as one.
+  - **No tactics:** "I'm not seeing people use the tiny [shortcuts]", "nobody's exactly behaving tactically
+    between these bots ... Gravee is out in the lead. So the only way you're going to catch up with her is
+    to take a gamble ... Nobody's even using the [winds] at the top to get to first." So the bots race by
+    the race: behind, they take the bigger shortcuts and the catch-up rocks; ahead, they play safe and
+    sheltered; they take the little Doubles and Triples on the way when their chain allows; they hop the
+    zigzag and use the winds that help.
+  After the course's rework (the race's next pass), as the bots race whatever course it leaves.
+
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
