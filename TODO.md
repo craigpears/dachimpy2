@@ -13,6 +13,12 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
 - **The sloop race, a full run (12 Nov):** the whole course with rivals, now with the locks a beat,
   the buoys always seen, the wind gaps lined up, the bribe gate (the wreck's coins by Treasure Haul),
   the driftwood barrier (Foraging), the crane, and the gambles (the turning pool and the veiled wind).
+- **The race's puzzle shortcuts, not yet seen at all (12 Nov):** "I've definitely got to check things
+  like the starlit door and the crane and [Treasure Haul] ... I've not seen any of that stuff yet. I've
+  not even seen a visual or anything about those puzzles, the navigation puzzle that is." So: the crane
+  built by Carpentry on the race; the bribe at the gate, the wreck's coins hauled by Treasure Haul; Duty
+  Navigation itself (`navigation-test.html`); and the starlit door on the race course (its Navigation on
+  the rock, the door opening, the tunnel and its clefts).
 - **The race's chart (12 Nov):** `changelog/race-map.jpg` and its changelog entry, and the design
   page (`design.html`), for whether they read well.
 - **Watching the race (12 Nov):** the replay / spectator mode, `?at=race-watch`: four racers, the
