@@ -732,6 +732,18 @@ question of whether a crane is everyone's), and the bribe gate as the final toll
   in) providing the rum; Mischievious putting up banners and styling the event. Scenery and talk only,
   never a change to the racing. IDEAS.md, "The race course coming alive".
 
+- **Replays and a course editor, likely the first things players ask for (idea, 12 Nov):** "being able to
+  do things like [re]plays, and having a map editor are going to be like the top of demands if people
+  start to enjoy it once we get past testing this initial course." The editor goes "down to the details
+  of how many it takes to clear each thing, like ... the number of bilge clears required on the locks,
+  or the number of pieces or complexity of each carpentry lift". Mostly a 2D job, but "you'd need to be
+  able to switch between 2D and 3D views". What's there to build on: the course is already laid out
+  from a few numbers (`LAY.RACE`, meant to be reworked freely); the chart (`tools/race-map.mjs`) already
+  draws it in 2D; each shortcut's size (lock clears, the crane's frames, the barrier, the coins) is
+  already config; and the simulation could test an edited course's balance before it's raced (win rates,
+  what each shortcut saves). Replays (above) are cheap for the same reason the boards are: seeds and moves.
+  Not started; after the first course has been playtested.
+
 ## 11. Puzzles still to fit in (ideas)
 
 - **Rigging:** a passage of shifting, gusty winds where you keep re-trimming. The six pulleys are six
