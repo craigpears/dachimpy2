@@ -301,13 +301,20 @@ the site (`.assetsignore` skips `*.md`).
 - **The race's wind gaps are awkward to line up for (12 Nov):** "some of these wind shortcuts, it's a bit
   awkward to set the ship up to get through them." The Double's and Triple's gaps (and the zigzag's
   hops) want to be easy to get lined up for, so the puzzle's the challenge, not the steering.
-- **Building in the race slowed by its animation (12 Nov):** "Building, I don't know, I guess I feel a bit
-  frustrated and slowed down by the animation." Which animation exactly (the crane going up a part at a
-  time, or swinging her over) to pin down with the user; quicker, or skippable.
-
+- **The race's locks: too long waiting on the animation (12 Nov):** "the animation I'm talking about is
+  [bilging]. So when you're going through the canal ... I was spending just as much time waiting for the
+  ship to go forward, and it was like, come on, come on ... there should be a bit of an animation, but,
+  like, it shouldn't feel like you're losing the race because you're waiting on the animation." So the
+  lock's filling, gates and her moving through it quick, a beat rather than a wait.
 - **The race's buoy markers vanish (12 Nov):** "[Buoy] markers aren't really rendering properly. They're
   like usually vanish unless you're at the right distance." The numbered buoys and the next one lit
   should show at any distance you'd sail by them.
+- **Whirlpools at sea: one step, between your moves (12 Nov):** "taking you to the opposite corner is like
+  one turn, so you like do your own move, and then the [whirlpool] does an action to take you to the
+  corner, and then your move happens again. So, for example, if I do like forward into a whirlpool, it
+  should be like take me into the whirlpool, then to the other corner, rotate it a bit, and then my next
+  forward should happen." Today it doesn't work like that (to pin down exactly how it goes wrong).
+
 
 ## Spotted along the way (not asked for)
 
