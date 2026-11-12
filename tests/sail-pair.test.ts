@@ -1,7 +1,7 @@
 /* The Sailing pair steered live as it falls (src/sail-pair.ts): its steps are moves()'s, so where it
    comes to rest is a place moves() has, and it's dropped there. */
 import { describe, expect, it } from 'vitest';
-import { H, SPAWN, Sailing, W, type Piece, type Platform } from '../src/sailing';
+import { H, SPAWN, Sailing, W, type Drop, type Piece, type Platform } from '../src/sailing';
 import { FALL, SailPair } from '../src/sail-pair';
 
 /** An empty board (no platforms) with the pair `pair` coming in, and a dice that deals 0s after. */
@@ -164,6 +164,57 @@ describe("the drop is smooth, not a row at a time (11 Nov: \"could also be a lot
     while (q.row < q.rest()) q.tick(FALL.SECS);
     q.tick(FALL.SECS * 0.5);
     expect(q.y()).toBe(q.row);   // (resting on something: drawn on its row, not sunk into it)
+  });
+});
+
+/* TODO.md (12 Nov): "if you hit the space bar and then rotate the piece, it kind of jumps halfway back up
+   the screen." A turn pushing off a piece (turnBy's kick) could put the pair in a nook moves() didn't
+   know, so where it came to rest wasn't a place Sailing.drop would take, and it was dropped straight down
+   its column from the top instead: on top of whatever's over the nook, up the board. */
+describe('rotating after Space jumps the pair halfway back up the board (the user, 12 Nov 2026)', () => {
+  it('pushed off a piece into a nook under a ledge, it lands in the nook', () => {
+    // A ledge over column 2 at row 13, a stack on it up to row 8; under it a nook two deep, walled by a
+    // pair in column 3 and reached only by turning from a flat pair beside it, on the floor at the left.
+    const ledge: Platform = { id: 1, r: 13, c: 2, w: 1, h: 1, targets: [{ r: 13, c: 2, colour: 1 }] };
+    const stack: [number, number, number][] = [8, 9, 10, 11, 12, 13].map((r, i) => [r, 2, i % 2 ? 0 : 2]);
+    const s = game([1, 0], [ledge], [[15, 0, 2], [15, 1, 2], [14, 3, 1], [15, 3, 1], ...stack]), p = new SailPair(s);
+    while (p.col > 0) p.slide(-1);
+    p.rush();   // (Space: down fast, on the floor at the left)
+    while (p.row < H - 2) p.tick(1 / 60);
+    expect(p.slide(1)).toBe(true);   // (half under the stack)
+    expect(p.turnBy(1)).toBe(true);   // (upright, it'd go through the floor: it pushes off into the nook)
+    expect([p.row, p.col]).toEqual([H - 2, 2]);
+    let res = null;
+    for (let i = 0; i < 60 && !res; i++) res = p.tick(1 / 60);
+    expect(res?.dropped).toBe(true);
+    expect(s.grid[H - 2][2]?.c).toBe(1);   // (where it was turned, not up on the stack)
+    expect(s.grid[H - 1][2]?.c).toBe(0);
+    expect(s.grid[7][2]).toBeNull();
+  });
+  it('wherever it can be steered to rest, turning and pushing off, is a place moves() has', () => {
+    let seed = 12;
+    const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    for (let n = 0; n < 80; n++) {
+      const s = new Sailing(rnd, true);
+      for (let d = Math.floor(rnd() * 8); d > 0; d--) {
+        const ms = s.moves();
+        if (!ms.length) break;
+        const m = ms[Math.floor(rnd() * ms.length)];
+        s.drop(m.col, m.turn, m.row);
+      }
+      if (!s.open(0, SPAWN[0], 0)) continue;
+      const same = s.pair[0] === s.pair[1], has = new Set(s.moves().map((m) => `${m.row},${m.col},${m.turn}`));
+      // Every place the pair's own steps reach (SailPair's slide, turnBy and a row down), from where it comes in.
+      const p = new SailPair(s), seen = new Set<string>([`0,${SPAWN[0]},0`]), todo: [number, number, Drop['turn']][] = [[0, SPAWN[0], 0]];
+      while (todo.length) {
+        const [r, c, t] = todo.pop()!, at = () => { p.row = r; p.col = c; p.turn = t; };
+        const next: [number, number, Drop['turn']][] = [];
+        for (const step of [() => p.slide(-1), () => p.slide(1), () => p.turnBy(1), () => p.turnBy(-1)]) { at(); if (step()) next.push([p.row, p.col, p.turn]); }
+        if (s.sinks(r, c, t) && s.open(r + 1, c, t)) next.push([r + 1, c, t]);
+        else expect(has.has(`${r},${c},${same ? t & 1 : t}`), `rests at ${r},${c} turned ${t}`).toBe(true);
+        for (const q of next) if (!seen.has(q.join())) { seen.add(q.join()); todo.push(q); }
+      }
+    }
   });
 });
 

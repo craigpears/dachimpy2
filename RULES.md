@@ -1942,7 +1942,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **Sailing's pair pushes off a wall as it turns (11 Nov).** "it doesn't turn when it's against the
   wall. If you rotate it and it's against the wall, it should kind of push away from the wall." A turn
   that would put a half into the wall or a piece steps the pair a column away (from the nearer side
-  first, then the other), or a row up (src/sail-pair.ts).
+  first, then the other), or a row up (Sailing.turned in src/sailing.ts, used by the pair as it falls and
+  by moves() alike).
+  - **Fixed: the pair jumped back up the board after Space and a turn (12 Nov).** "if you hit the space
+    bar and then rotate the piece, it kind of jumps halfway back up the screen." Pushing off a piece
+    could put the pair in a nook (under a ledge or a pair's overhang) that moves() didn't search, since
+    it only turned in place; where it came to rest wasn't a place Sailing.drop would take, so it was
+    dropped straight down its column from the top instead, landing on whatever was over the nook. Now
+    moves() turns the way the pair does, so it lands where it was turned (tests/sail-pair.test.ts).
 - **Sailing's platforms are blocks, never a little row (11 Nov).** "Platforms never look that small.
   Like, they're always like 2 by 3 or 3 by 3, aren't they? I mean, check the actual official pages."
   YPPedia's "Sailing" page gives no sizes in words; its "typical sailing board" picture shows a 2 by

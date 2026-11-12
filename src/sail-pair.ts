@@ -5,13 +5,13 @@
 
    The rules are src/sailing.ts's: this only keeps the falling pair's place and clock, moving it by the
    same steps Sailing.moves() searches (a column either way, a turn either way about its first square,
-   a row down when it can sink), so wherever it comes to rest is a place moves() has, and it's dropped
+   pushing off what's in the way as Sailing.turned has it, a row down when it can sink), so wherever it comes to rest is a place moves() has, and it's dropped
    there (Sailing.drop with its row). It comes in at the top of the middle columns (SPAWN), turned 0,
    and falls a row every FALL.SECS by itself. Space speeds it (rush, ease: TODO.md, "Sailing's keys as
    the real game's", 11 Nov), never straight to the bottom: no key drops it. (slam() is for a pair
    steered by a show, Tzz's own, not for a key.) */
 
-import { SPAWN, W, type Drop, type Sail, type Sailing } from './sailing.js';
+import { SPAWN, type Drop, type Sail, type Sailing } from './sailing.js';
 
 export const FALL = {
   /** Seconds a row as it falls by itself (YPPedia: pieces fall steadily, and can be sped up). */
@@ -63,17 +63,13 @@ export class SailPair {
 
   /** A quarter turn clockwise (1) or back (-1), about its first square. Against a wall or a piece it
       pushes off it, as the real game does (the user, 11 Nov: "it doesn't turn when it's against the
-      wall. If you rotate it and it's against the wall, it should kind of push away from the wall"): a
-      column away from the side it's nearer first, then the other, then a row up. */
+      wall. If you rotate it and it's against the wall, it should kind of push away from the wall"):
+      Sailing.turned, the same turn moves() searches. */
   turnBy(dir: 1 | -1): boolean {
-    const t = ((this.turn + (dir > 0 ? 1 : 3)) % 4) as Turn;
-    const away = this.col < W / 2 ? 1 : -1;
-    for (const [dr, dc] of [[0, 0], [0, away], [0, -away], [-1, 0]] as const) {
-      if (this.row + dr < 0 || !this.game.open(this.row + dr, this.col + dc, t)) continue;
-      this.row += dr; this.col += dc; this.turn = t;
-      return true;
-    }
-    return false;
+    const to = this.game.turned(this.row, this.col, this.turn, dir);
+    if (!to) return false;
+    [this.row, this.col, this.turn] = to;
+    return true;
   }
 
   private sinks(): boolean {
@@ -119,7 +115,8 @@ export class SailPair {
   private land(): Sail {
     const [a, b] = this.game.pair, turn = (a === b ? this.turn & 1 : this.turn) as Turn;
     let res = this.game.drop(this.col, turn, this.row);
-    // (never seen: a place moves() hasn't, so straight down its column rather than stuck)
+    // (a place moves() hasn't, so straight down its column rather than stuck: never, now its turns are
+    // Sailing.turned too; before, a pair pushed into a nook under a ledge was put up on the ledge, 12 Nov)
     if (!res.dropped) res = this.game.drop(this.col, turn);
     this.reset();
     return res;

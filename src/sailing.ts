@@ -296,8 +296,26 @@ export class Sailing {
     return { col, turn, row };
   }
 
-  /** Every place the pair can be steered to and come to rest, sliding and turning as it falls from
-      the middle columns (a pair of one colour has only two ways round). */
+  /** A quarter turn clockwise (1) or back (-1) of the pair at (row, col) turned `turn`, about its first
+      square: where it ends up, or null if it can't turn. Against a wall or a piece it pushes off it, as
+      the real game does (the user, 11 Nov: "If you rotate it and it's against the wall, it should kind
+      of push away from the wall"): a column away from the side it's nearer first, then the other, then
+      a row up. The one turn, for a pair steered live (src/sail-pair.ts) and for moves(): a pair pushed
+      off a piece into a nook under a ledge used to come to rest somewhere moves() didn't know, and was
+      dropped straight down its column instead, on top of the ledge (the user, 12 Nov: "if you hit the
+      space bar and then rotate the piece, it kind of jumps halfway back up the screen"). */
+  turned(row: number, col: number, turn: Drop['turn'], dir: 1 | -1): [number, number, Drop['turn']] | null {
+    const t = ((turn + (dir > 0 ? 1 : 3)) % 4) as Drop['turn'];
+    const away = col < W / 2 ? 1 : -1;
+    for (const [dr, dc] of [[0, 0], [0, away], [0, -away], [-1, 0]] as const) {
+      if (row + dr >= 0 && this.open(row + dr, col + dc, t)) return [row + dr, col + dc, t];
+    }
+    return null;
+  }
+
+  /** Every place the pair can be steered to and come to rest, sliding and turning (turned(), pushing
+      off what's in the way) as it falls from the middle columns (a pair of one colour has only two
+      ways round). */
   moves(): Drop[] {
     const out: Drop[] = [];
     if (!this.open(0, SPAWN[0], 0)) return out;
@@ -312,7 +330,8 @@ export class Sailing {
       const [r, c, t] = todo.pop()!;
       const falls = this.sinks(r, c, t), tt = (same ? t & 1 : t) as Drop['turn'];
       if (!falls && !rests.has(id(r, c, tt))) { rests.add(id(r, c, tt)); out.push({ col: c, turn: tt, row: r }); }
-      const next: [number, number, Drop['turn']][] = [[r, c - 1, t], [r, c + 1, t], [r, c, ((t + 1) % 4) as Drop['turn']], [r, c, ((t + 3) % 4) as Drop['turn']]];
+      const next: [number, number, Drop['turn']][] = [[r, c - 1, t], [r, c + 1, t]];
+      for (const dir of [1, -1] as const) { const to = this.turned(r, c, t, dir); if (to) next.push(to); }
       if (falls) next.push([r + 1, c, t]);
       for (const [nr, nc, nt] of next) {
         const k = id(nr, nc, nt);

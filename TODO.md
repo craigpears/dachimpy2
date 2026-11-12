@@ -290,10 +290,6 @@ the site (`.assetsignore` skips `*.md`).
   exit, rejoin the leg or push on through the next Vegas "in relative peace"; a failed Vegas spills her
   out of the last exit passed, not back to the mouth (RACE.md §9).
 
-- **Sailing: the pair jumps back up the board after Space and a turn (12 Nov):** "if you hit the space bar
-  and then rotate the piece, it kind of jumps halfway back up the screen. So something's gone wrong
-  there." It should turn where it is and carry on falling from there.
-
 - **The race's gambles: a mysterious wind and a whirlpool that turns (12 Nov):** a wind that half the time
   carries her forward and half the time back, and a whirlpool whose spin goes back and forth, to time a
   gamble on (RACE.md §4, "Gambles"). After the bribe gate and the tunnel's exits are in.
