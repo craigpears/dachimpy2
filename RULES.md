@@ -2049,6 +2049,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     camera's no different. And on a phone the den's big toast covered the Sailing board for a moment
     after a chain: with the board out, toasts go in the sea it leaves, no wider than it, and on a
     tall screen smaller, just under the den's panel, so they're never over the board.
+- **A quick tap of Space is a nudge (12 Nov).** "A quick tap of the spacebar also seems a bit overpowered in
+  sailing. It's like, whoa". The pair falls a row every 0.06 s while Space speeds it (it was 0.04), so a
+  quick tap is three or four rows, not five or more; held, it still races down (`FALL.FAST`, src/sail-pair.ts).
 - **Sailing's pair pushes off a wall as it turns (11 Nov).** "it doesn't turn when it's against the
   wall. If you rotate it and it's against the wall, it should kind of push away from the wall." A turn
   that would put a half into the wall or a piece steps the pair a column away (from the nearer side

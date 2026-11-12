@@ -114,11 +114,20 @@ describe("Space speeds the drop, it doesn't drop it entirely (the user, 11 Nov 2
     p.tick(FALL.SECS * 0.9);
     expect(p.row).toBeLessThanOrEqual(r + 1);   // (at most the row it was partway to)
   });
+  it('a quick tap is a nudge of three or four rows, not most of the board (12 Nov: "a bit overpowered ... whoa")', () => {
+    const { p } = fallen(1);
+    p.rush();
+    for (let i = 0; i < 6; i++) p.tick(1 / 60);   // (a tenth of a second down)
+    p.ease();
+    for (let i = 0; i < 18; i++) p.tick(1 / 60);   // (the burst plays out, a little of its own pace after)
+    expect(p.row - 1).toBeGreaterThanOrEqual(3);
+    expect(p.row - 1).toBeLessThanOrEqual(4);
+  });
   it("held, it keeps falling fast till it's let go", () => {
     const { p } = fallen(0);
     p.rush();
     for (let i = 0; i < 15; i++) p.tick(1 / 60);   // (a quarter of a second, held)
-    expect(p.row).toBeGreaterThanOrEqual(5);
+    expect(p.row).toBeGreaterThanOrEqual(4);
     const r = p.row;
     p.ease();
     p.tick(FALL.SECS * 0.9);
