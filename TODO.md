@@ -428,6 +428,13 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     sends her back to the channel's mouth. Likeliest: the left-hand trade wind (the snake down the left
     edge, back to the start) caught her near buoy 4. Trace a watched race and account for every move that
     looks wrong, with the bar saying what happened ("caught by the trade wind, back to the start").
+  - **Follow whoever you've zoomed in on, and see what everyone's doing (12 Nov):** "it should almost look
+    like ... whoever you're closest to, if there's only one obvious person there, it should do that kind
+    of following thing, follow [the racer], if you've zoomed in on them. Otherwise ... at least you should
+    see some little representation of what they're doing." So with the free camera close in on one
+    sloop and nobody else near, it eases into following her (her board shown); and every racer always
+    has a little sign over her sloop of what she's doing (a tiny board filling as she puzzles, a lock,
+    the crane, guns loading, a patch), so you see it all at a glance from anywhere.
   After the course's rework (the race's next pass), as the bots race whatever course it leaves.
 
 
