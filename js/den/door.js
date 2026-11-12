@@ -13,7 +13,7 @@ import * as THREE from 'three';
 import { LAY, SAIL } from '../den-sail.js';
 import { DOOR, Door, offDoor, doorColumn, through } from '../den-door.js';
 import { RINGS, SPOKES } from '../navigation.js';
-import { scene, camera, mesh, V3, burst, toast, pirate } from './world.js';
+import { scene, camera, mesh, V3, burst, toast, pirate, view } from './world.js';
 import { rock } from './land.js';
 import { sail, seaX, seaZ, stoneM, bankTop, SLOOP_DECK } from './sea.js';
 import { navBoard, placeXY, starCanvas } from './nav-board.js';
@@ -29,7 +29,7 @@ const DW = 4.6, DH = 7.6, CRAG_H = 14.5, WHEEL = { y: 10.6, w: 5.6 }, BOARD = { 
 /** The tunnel, deep under the course: its water's height, its radius. */
 const TY = -42, TR = 5.5;
 /** The door's state: its rules, its look, the board, her trip through. */
-export const door = { rules: new Door(), W: null, board: null, on: false, trip: null, fade: null, said: {}, opening: 0, closing: 0, booched: 0, snap: false, behind: false };
+export const door = { rules: new Door(), W: null, board: null, on: false, trip: null, fade: null, said: {}, opening: 0, closing: 0, booched: 0, snap: false, behind: null };
 
 // ---------- the look of it ----------
 const darkM = new THREE.MeshBasicMaterial({ color: '#07060a', fog: false });
@@ -413,7 +413,7 @@ function tripTick(dt, onLeg) {
   }
   if (T.i >= T.beats.length) {
     reached(T.m.exit, T.m.to, onLeg);
-    door.trip = null; door.behind = true; fade(0); toast(`Up out of a cleft in the rock, onto ${legName(T.m.exit)}`);
+    door.trip = null; door.behind = { t: BEHIND_SECS, at: { ...sail.helm.pose }, view: { ...view } }; fade(0); toast(`Up out of a cleft in the rock, onto ${legName(T.m.exit)}`);
     return;
   }
   const B = T.beats[T.i], u = Math.min(1, T.t / B.secs);
@@ -464,6 +464,8 @@ export function doorPrompt() {
 }
 /** The camera (den.js): straight on to the board and the carved wheel; behind her going in; along the
     tunnel and waiting under a cave; and at the cave she comes up, watching her come out. */
+/** How long she's watched from the leg's side, up out of the cleft, before the sea's camera has her back. */
+const BEHIND_SECS = 2;
 export function doorCam() {
   if (!sail.on || !door.W) return null;
   if (door.on && door.board) {
@@ -475,11 +477,14 @@ export function doorCam() {
   if (door.opening > 0 && door.opening < 3.9 && !door.trip) return { look: V3(DX, 6.8, FACE_Z), dist: 21, tilt: 0.2, yaw: 0 };
   const T = door.trip;
   // (up out of the first cleft, the door's crag stands between her and the sea's own camera: watched
-  // from the leg's side till she's sailed out from behind it)
+  // from the leg's side for a moment only (12 Nov: it held the camera and wouldn't let it turn): it lets
+  // go as she sails on, or the player turns, tilts or zooms, and the sea's own camera, theirs, is back)
   if (!T && door.behind) {
-    const p = sail.helm.pose, R = D.EXITS[0].INTO[0][1];
-    if ((p.r === R || p.r === R + 1) && Math.abs(p.c - DX_C) <= 3) return { look: sail.g.position.clone().setY(2), dist: 17, tilt: 0.34, yaw: Math.PI };
-    door.behind = false;
+    const B = door.behind, p = sail.helm.pose, v = B.view;
+    if (B.t > 0 && p.c === B.at.c && p.r === B.at.r && view.yaw === v.yaw && view.zoom === v.zoom && view.pitch === v.pitch) {
+      return { look: sail.g.position.clone().setY(2), dist: 17 * view.zoom, tilt: 0.34, yaw: Math.PI };
+    }
+    door.behind = null;
   }
   if (!T || T.wait || !T.p) return null;
   const p = T.p, snap = door.snap;
@@ -498,6 +503,7 @@ export function doorTick(dt, onLeg) {
   const tw = performance.now() / 1000;
   for (const s of W.ring ?? []) s.userData.halo.material.opacity = 0.55 + 0.35 * Math.sin(tw * 1.8 + s.userData.ph);
   door.snap = false;
+  if (door.behind) door.behind.t -= dt;
   document.body.classList.toggle('starlit', sail.on && (door.on || !!door.trip));   // (the sailing bar out of the way: den.html)
   if (door.on) door.board?.tick(dt);
   if (door.closing > 0 && (door.closing -= dt) <= 0) boardDown();
@@ -528,7 +534,7 @@ export function doorTick(dt, onLeg) {
 export function doorReset() {
   door.rules.reset();
   door.said = {};
-  door.opening = 0; door.booched = 0; door.closing = 0; door.behind = false;
+  door.opening = 0; door.booched = 0; door.closing = 0; door.behind = null;
   if (door.trip) { door.trip = null; fade(0); }
   if (door.board) boardDown(true);
   if (door.W) {

@@ -229,6 +229,22 @@ describe('the room runs the race: the count, the clock, the bots (12 Nov)', () =
     expect(s.racers[1].prog).toBeGreaterThan(5);
   });
 
+  it('a player\'s broadsides on the rocks are counted by the room and kept in its snapshot, for everyone (12 Nov)', () => {
+    const R = room(['anne', 'bart'], 2);
+    off(R);
+    for (let k = 0; k < (RACE.COUNT + 1) * NET.HZ && R.phase !== 'on'; k++) R.tick(DT);
+    expect(R.phase).toBe('on');
+    expect(R.snapshot().rocks).toBe(0);
+    R.handle('anne', { t: 'rock' });
+    R.handle('bart', { t: 'rock' });
+    expect(R.snapshot().rocks).toBe(2);
+    R.handle('anne', { t: 'rock' });
+    expect(R.snapshot().rocks).toBe(RACE.ROCKS.HITS);
+    // (down, they stay down: more shots count for nothing)
+    R.handle('bart', { t: 'rock' });
+    expect(R.snapshot().rocks).toBe(RACE.ROCKS.HITS);
+  });
+
   it('stops ticking once the race is done and its places shown, back in its lobby, so the room can sleep', () => {
     const R = room(['anne'], 2);
     off(R);
