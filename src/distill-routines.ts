@@ -39,6 +39,7 @@ import {
   BLACK, BROWN, BURNT, COLS, DOWN_LEFT, DOWN_RIGHT, SPICE, TALL, UP_LEFT, UP_RIGHT, WHITE, beats, canSwapOn, linkedOn, neighbourOn, weightOf,
 } from './distilling.js';
 import type { Board } from './distilling.js';
+import { junkDone } from './distill-score.js';
 
 /** A swap: the piece at (x, y) swapped one way (UP_RIGHT...). */
 export type Step = [number, number, number];
@@ -149,12 +150,6 @@ export const scarce = (cols: Board, ctx: Ctx): boolean => ctx.scarce ?? colourLe
     scarcer"): only once the junk waiting on the right is down to SORT_FROM columns or fewer, or colour's
     scarce. Sorting is blacks up and browns down: storing, the turn-over, the diamond's order. */
 export const sortingTime = (cols: Board, ctx: Ctx): boolean => ctx.scarce === true || COLS - rightFrom(cols) <= M.SORT_FROM || colourLeft(cols) <= M.SCARCE;
-/** Junk lying on a diagonal: whites straight above and below it in its own column. */
-export function onDiagonal(cols: Board, x: number, y: number): boolean {
-  const c = cols[x];
-  return isJunk(c[y]) && c[y - 1] === WHITE && c[y + 1] === WHITE;
-}
-
 /** Junk caught in the whites: whites beside it on both sides. */
 export const embedded = (cols: Board, x: number, y: number): boolean => isJunk(cols[x][y])
   && besideOn(cols, x, y, 1, (q) => q === WHITE) && besideOn(cols, x, y, -1, (q) => q === WHITE);
@@ -232,12 +227,9 @@ function groupSearch(cols: Board, movers: readonly [number, number][], sea: numb
 
 // ---------------------------------------------------------------- reading the board
 
-/** A column ready to burn: no whites, and more blacks than whites (burnt whites count as whites). */
-export function burnsClean(col: readonly number[]): boolean {
-  let w = 0, weight = 0;
-  for (const p of col) { if (p === WHITE) w++; weight += weightOf(p); }
-  return w === 0 && weight > 0;
-}
+/** A column ready to burn: no whites, and more blacks than whites (burnt whites count as whites): the
+    board score's junk column done. */
+export const burnsClean = junkDone;
 /** A column ready to go up Crystal Clear: only whites and spice. */
 export const clear = (col: readonly number[]): boolean => col.every((p) => p === WHITE || p === SPICE);
 /** Stage I's junk column being built: the rightmost not yet ready to burn (those right of it are). */
@@ -261,32 +253,23 @@ export function whitesFrom(cols: Board, x: number): number {
 
 // ---------------------------------------------------------------- how good a board is
 
-/** The weights of `measure` (exported to tune from tools/distill-bots.mjs). */
+/** The weights of `measure`, the chain's judge of a board (exported to tune from tools/distill-bots.mjs).
+    Stage I is judged by the board score instead (src/distill-score.ts). */
 export const M = {
   /** A white in a column to burn, times NEAR by how close the furnace is (its column, the next, the rest). */
   BURN_WHITE: 12,
   NEAR: [3, 1.6, 1] as number[],
   /** The furnace's column would float up (no whites but no black more): a pure brown. */
   FLOAT: 15,
-  /** Stage I: junk not yet in the junk columns, and a little more a column further off. */
-  JUNK: 1.5,
-  JUNK_FAR: 0.25,
   /** A black too low (or a brown too high) to cross the whites on its own before it hits the edge. */
   LOW: 2.5,
   /** ... and on the edge itself, a black on the bottom or a brown on the top: trapped once whites close
       round it ("blacks get stuck at the bottom, browns at the top"). */
   EDGE: 5,
-  /** Stage I: junk caught in the whites (whites both sides), where it'll be trapped as they close round. */
-  EMBED: 3,
   /** A piece among the others that can't move the way it has to go: stuck. */
   STUCK: 4,
-  /** Stage I: blacks high, browns low on the left (ready to cross: "store blacks top-left"). */
-  STORE: 0.4,
   /** The junk columns in the diamond's order: blacks above, browns below. */
   ZONE_SORT: 2,
-  /** Colour lying on a diagonal, a piece of junk with whites straight above and below it in its column
-      (the user, 12 Nov: "you should not have a diagonal line of color and white above and below it"). */
-  BAND: 1.5,
   /** Colour's scarce at this share of the board or less ("when you've got, like, half the board is color,
       you don't need those techniques"). */
   SCARCE: 0.4,
@@ -294,8 +277,6 @@ export const M = {
   SORT_FROM: 3,
   /** A burnt white not yet burned. */
   BURNT: 1,
-  /** Stage I: whites drift left. */
-  WHITE_LEFT: 0.05,
   /** Stage II: junk in the column being filled (and less in the one after), and every white a column
       right (every junk a column left). */
   FILL_JUNK: 10,
@@ -303,11 +284,12 @@ export const M = {
 };
 const near = (x: number) => M.NEAR[Math.min(2, COLS - 1 - x)];
 
-/** How good a board is for what the player's after: higher is better. The planner weighs a routine's
-    drags by how much they raise it. */
+/** How good a board is in the chain (Stage II), whites heading right: higher is better. The planner weighs
+    a routine's drags there by how much they raise it; Stage I is judged by the board score
+    (src/distill-score.ts). */
 export function measure(cols: Board, ctx: Ctx): number {
   let v = 0;
-  const two = ctx.stage === 'chain', sort = sortingTime(cols, ctx) ? 1 : 0;
+  const sort = sortingTime(cols, ctx) ? 1 : 0;
   for (let x = 0; x < COLS; x++) {
     const col = cols[x], burning = x >= ctx.burnFrom;
     for (let y = 0; y < col.length; y++) {
@@ -322,20 +304,7 @@ export function measure(cols: Board, ctx: Ctx): number {
         else if (p === BROWN) v += (sort * M.ZONE_SORT * h) / 16;
         continue;
       }
-      if (!two) {
-        if (p === WHITE) { v -= M.WHITE_LEFT * x; continue; }
-        const d = ctx.burnFrom - x;
-        v -= M.JUNK + M.JUNK_FAR * d;
-        // A black too low to cross before the bottom (a brown too high), the worse the further, and worst
-        // on the edge itself, where it's trapped once whites close round it.
-        if (p === BURNT) v -= M.BURNT;
-        else if (p === BLACK) { v -= M.LOW * Math.min(2, Math.max(0, h + d - 16) / 3) + (h >= 15 ? M.EDGE : 0); v += (sort * M.STORE * (16 - h)) / 16; }
-        else { v -= M.LOW * Math.min(2, Math.max(0, d - h) / 3) + (h <= 1 ? M.EDGE : 0); v += (sort * M.STORE * h) / 16; }
-        if (!canGo(cols, x, y, 1) && !besideOn(cols, x, y, 1, isJunk)) v -= M.STUCK;
-        if (embedded(cols, x, y)) v -= M.EMBED;
-        // Upright bands, not a diagonal one: colour, white, colour across the board.
-        if (onDiagonal(cols, x, y)) v -= M.BAND;
-      } else if (p === WHITE) {
+      if (p === WHITE) {
         v += M.FLOW * x;
         if (x < ctx.fill && !canGo(cols, x, y, 1) && !besideOn(cols, x, y, 1, (q) => q === WHITE)) v -= M.STUCK;
       } else {
@@ -520,9 +489,22 @@ const diamond: Routine = {
         }
         continue;
       }
-      // Where the technique wants it: over with the junk, then the black as high and the brown as low as
-      // it goes ("browns at the bottom, blacks at the top"), the shorter the better.
+      // Stage I, the board score's way (the eleventh note): what the drag gets over for its swaps, every
+      // white it passes a column left and the junk a column right; a black sent up through the browns gets
+      // nothing over ("you want blacks to the bottom right at this stage"), so it's never the drag offered.
+      // The mirror: over with the junk, then the black as high and the brown as low as it goes, the shorter
+      // the better.
       const rate = (w: number[]) => {
+        if (side > 0) {
+          const b = copyBoard(cols);
+          let at: [number, number] = [x, y], gain = 0;
+          for (const d of w) {
+            const n = neighbourOn(b, at[0], at[1], d)!;
+            if (b[n[0]][n[1]] === WHITE) gain += 2 * (n[0] - at[0]);
+            swapIn(b, at[0], at[1], d); at = n;
+          }
+          return gain / (w.length + 2);
+        }
         let cx = x, cy = y;
         for (const d of w) [cx, cy] = neighbourOn(cols, cx, cy, d)!;
         const h = halfOf(cols, cx, cy), v = p === BLACK ? -h : h;

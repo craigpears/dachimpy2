@@ -343,7 +343,37 @@ turn), in Stage I, its time for each column a piece of junk was got across, chea
 | The leapfrog | 674 | sideways along a stored row |
 | The turn-over, storing, the figure of eight, the line pull | no junk across: they sort it | only once colour is scarce (40% of the board or less) or three junk columns are left |
 
-So the planner plays the sweep while it works, then the cheaper techniques, and the sorting ones last.
+So the planner plays the sweep while it works, then the cheaper techniques, and the sorting ones last. (Since
+the eleventh note this ranking isn't written into the planner: it falls out of the board score below.)
+
+### The board score (12 Nov, the eleventh to fourteenth notes)
+The user: "the scoring should just be as simple as like how many whites have moved to the left, how many other
+pieces have moved to the right. For burning, and it's bonus for completing columns ... Like completed brown
+black columns with no whites in on the right, good." Built as `boardScore` in `src/distill-score.ts`:
+- **Whites left, junk right:** each white scores the columns to its right, each brown, black or burnt white the
+  columns to its left. A swap carrying junk right past a white is +2; two pieces of junk swapped (a black up
+  through the browns, sorting) is 0; junk back left is -2.
+- **Junk columns done, from the right:** +8 for each column with no white that's sure to burn (a pure brown
+  isn't), counted from the furnace's column in and stopping at the first that isn't done.
+- **Junk trapped in the whites:** -2 for a brown or a black with whites on its right that no swap takes right
+  (a black on the bottom of the whites, a brown on the top). Added after a look at the bots: without it the
+  white block went into the chain full of these.
+- **A white behind spice:** -12 for a white on the top or bottom of its column with a spice just inside it (the
+  thirteenth note: free it before the board slides and walls it in).
+- **The wall:** -0.5 for each place a white meets junk, so the whites stay one block behind an upright wall,
+  not cut by a line of colour (the fourteenth note's zigzag).
+
+In Stage I the bots judge every move they could make, a plain drag or a technique alike, by the score of the
+board it leaves, a second of a person's time (a pause to spot each drag, a sweep's shorter one for one long
+plain drag all one way across, its swaps at a hand's speed, a little for each turn); one look ahead, no search
+("I'm not saying implement them because they're expensive, but even just as a test of moves"). A drag is let go
+where that's best: on while each swap still gets something over, never on up through the junk for nothing. So a
+plain drag beats a crawl that gets the same junk over, and a black dragged up gets nothing. The planner's stand-
+ins for judging the board are gone (the sweeping phase, "plain drags first", the turn-over played next, the
+second look with colour taken as scarce, the ground-given-back charge); the routines themselves still offer the
+turn-over, the line pull, storing and the long ways round only once colour's scarce, which keeps the look ahead
+cheap. Sorting the junk scores nothing, so the turn-over is now rarely played. The chain (Stage II) is still
+weighed by the old `measure`, whites heading right.
 
 ### Decision time
 Keep burning full junk columns as long as you're sure the next one will be finished before the furnace;
@@ -591,6 +621,28 @@ it). The line pull is still too rare (0.2 a session) to say whether it frees the
 do and I'll feed back. That's probably going to be better than you brute force." So no more tuning by
 running the bots over and over: the user watches them play on `distilling-test.html` and says what a
 real player would do instead, and the routines change from that.
+
+### Judged by the board score (12 Nov, fifth run)
+After the eleventh to fourteenth notes, Stage I judged by the board score (§3, "The board score"), one look
+ahead, the planner's stand-in rules dropped. Same 40 boards, run once before and once after:
+
+| Tier | Longest chain: mean (best), was | CC^6+, was | CC^12 | Minutes, was | Whites burned, was | White columns banked, was |
+|---|---|---|---|---|---|---|
+| Learner | 1.7 (5), was 1.4 (4) | 0/40, was 0 | 0/40 | 6.0, was 5.7 | 6.5, was 7.4 | 5.3, was 4.9 |
+| Able to Master | 1.1 (3), was 2.4 (7) | 0/40, was 3 | 0/40 | 3.1, was 3.2 | 2.3, was 1.9 | 5.9, was 6.5 |
+| Grand-Master to Legendary | 1.6 (4), was 2.9 (8) | 0/40, was 7 | 0/40 | 2.7, was 3.0 | 2.2, was 1.8 | 5.8, was 6.7 |
+| Ultimate | 1.8 (6), was 2.9 (8) | 1/40, was 6 | 0/40 | 2.8, was 2.7 | 1.9, was 1.7 | 5.7, was 6.7 |
+
+- **What it fixed:** blacks go down early. Over the Ultimate's first four sessions, Stage I's drags of a black
+  that ended higher than they began fell from 40 to 3 (130 went down, 172 before). The
+  turn-over and storing are all but gone (0.1 a session, were 4 to 6), the sweep is played more (25 a session
+  while colour's plentiful, was 20) and is cheaper a column of junk (204 ms, was 279).
+- **What it cost, honestly:** the chains. Every tier but the learner chains shorter (the Ultimate 1.8, was 2.9;
+  the Master 1.1, was 2.4), banks about a column less before the chain, and burns a few more whites. The old
+  measure's terms for a clean white block (a black too low to cross, junk on the whites' edges, junk caught in
+  the whites) did work the simple score doesn't yet; the trapped-junk and wall terms win back only part of it.
+  Not tuned further (the user's cost rule): the next step is the user watching them on `distilling-test.html`,
+  and likely a term for the white block's top and bottom edges kept clean.
 
 **Watching them, the first note (the user, 12 Nov, a screenshot of the Ultimate's board):** "the main
 thing is it just doesn't carry on the whole way to the right. It just kind of stops ... that black ... in
