@@ -30,8 +30,53 @@
 import { path } from './den-sail.js';
 import { chainName, runFor, RUN } from './sailing.js';
 /** The squares a gust of `n` takes her, from `from` straight ahead, a pose each; short of the first
-    square she can't go to (and none if it's the first). */
+    square she can't go to (and none if it's the first). From a wind gap's mouth, lined up first and
+    carried over it (lineUp). */
 export function gustPath(sea, from, n) {
+    return lineUp(sea, from, n) ?? straight(sea, from, n);
+}
+/* A wind gap's mouth (the race's Double's and Triple's gaps, and the zigzag's headwinds: LAY.RACE.LINEUPS).
+   The user, 12 Nov: "some of these wind shortcuts, it's a bit awkward to set the ship up to get through
+   them." Before, she had to stop on the one square in front of the gap, facing through it, and only then
+   break her combo: a square short, or facing along the leg, and the gust took her along the leg or onto
+   the gap's wind, which blew her back. Now a gust big enough for the hop, broken anywhere in its mouth (a
+   leg's two rows, a column either side; a square behind a zigzag's headwind as well as right behind it),
+   swings her onto that square, lined up, and carries her on over from there. Only when it carries her
+   clean over (all its squares on, ending clear of any wind or whirlpool): a bigger gust that would land
+   her in the left-hand trade wind beyond goes straight on as ever. The lining up is free, as a turn
+   into the wind's own lane is: the puzzle's the challenge, not the steering. */
+/** From a wind gap's mouth with a gust big enough to hop it: the squares lining her up, then the gust's
+    `n` on over from there; null if she's not in one, or it wouldn't carry her clean over. */
+export function lineUp(sea, from, n) {
+    for (const L of sea.lineups) {
+        if (n < L.need || (L.facing && from.d !== L.start.d) || !L.from.some(([c, r]) => c === from.c && r === from.r))
+            continue;
+        // (along her row to its column, then along the column to it, facing the way she goes; then turned
+        // to face through)
+        const pre = [], S = L.start;
+        let { c, r } = from;
+        while (c !== S.c) {
+            c += Math.sign(S.c - c);
+            pre.push({ c, r, d: S.c > from.c ? 1 : 3 });
+        }
+        while (r !== S.r) {
+            r += Math.sign(S.r - r);
+            pre.push({ c, r, d: S.r > from.r ? 0 : 2 });
+        }
+        if (pre.some((p) => !sea.open(p.c, p.r) || sea.isLock(p.c, p.r) || sea.level(p.c, p.r) !== sea.level(from.c, from.r)))
+            continue;
+        if (pre.length)
+            pre[pre.length - 1] = { ...S };
+        else if (from.d !== S.d)
+            pre.push({ ...S });
+        const on = straight(sea, S, n), end = on[on.length - 1];
+        if (on.length < n || sea.windAt(end.c, end.r) !== undefined || sea.whirlAt(end.c, end.r))
+            continue;
+        return [...pre, ...on];
+    }
+    return null;
+}
+function straight(sea, from, n) {
     const out = [], level = sea.level(from.c, from.r);
     if (sea.isLock(from.c, from.r))
         return out;

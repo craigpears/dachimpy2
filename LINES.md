@@ -1037,7 +1037,7 @@ Explains the race's rules before the off (the long way, shortcuts that cost a pu
 - *Taken in to the starting line, before the off: the race explained, a line at a time:*
   - "Here's the way of it. Round the numbered buoys, five legs and the run home: the long way, no puzzle, just sail her"
   - "Or cut through the spits, if ye dare. Every shortcut costs ye a puzzle: bilge up through a lock, build a crane, row the headwind gap"
-  - "Zoom over the whirlpools on a Vegas, hop a headwind with a Double. Get it wrong and ye're back where ye started"
+  - "Zoom over the whirlpools on a Vegas, hop a headwind with a Double, or haul up some treasure and pay off the guard at the gate. Get it wrong and ye're back where ye started"
   - "Mind the winds that sweep ye back. The trade wind up the left takes ye all the way to the start, and the run home runs right beside it"
   - "And the others'll shoot ye if ye sit still in the open. Pick yer spot on the line, and Space for the count"
 - *The count, a second each:*

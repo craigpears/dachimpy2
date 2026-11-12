@@ -17,7 +17,8 @@ import * as THREE from 'three';
 import { LAY, SAIL } from '../den-sail.js';
 import { whirlpool } from '../den-whirl.js';
 import { CRANE, travel } from '../den-crane.js';
-import { RACE, Race, GunGap, Drift, atStart, clockText, cleanBest, neckCrane, nextBuoy, stretchAt } from '../den-race.js';
+import { RACE, Race, GunGap, Drift, atStart, clockText, cleanBest, neckCrane, nextBuoy, stretchAt, readyLocks, boardHasKey } from '../den-race.js';
+import { station } from './sail-station.js';
 import { simDrive } from '../race-sim.js';
 import { FIELD } from '../den-racers.js';
 import { STARTER } from '../lines/race.js';
@@ -226,6 +227,7 @@ export function raceKey(key) {
   if (!sail.on || !race.W) return false;
   const go = key === ' ' || key === 'enter', h = sail.helm;
   if (!race.trip && !building() && doorKey(key)) return true;   // (the starlit door: door.js)
+  if (boardHasKey(key, station.on)) return false;   // (with the Sailing board open, Space is its: sail-station.js)
   if (!race.trip && !building() && forageKey(key)) return true;   // (the barrier of driftwood: race-forage.js)
   if (!race.trip && !building() && bribeKey(key)) return true;   // (the wreck's coins, the gate's guard: race-bribe.js)
   if (lineKey(key, race.rules)) return true;   // (on the starting line: race-start.js)
@@ -240,12 +242,13 @@ export function raceKey(key) {
     return true;
   }
   const R = race.rules;
-  if (go && atStart(h.pose.c, h.pose.r) && h.slot < 0 && !h.held() && R.state !== 'count' && R.state !== 'on') {
+  if (R.takes(key, h, station.on)) {
     takeLine(R);
     race.gap = new GunGap();
     doorReset();   // (shut again, for a new race)
     forageReset();   // (the driftwood back across its gap)
     bribeReset();   // (the wreck's coins back down there, the gate unpaid)
+    readyLocks(h);   // (each lock's water at the side she'll come to it from)
     toast('Pick yer spot on the line, and Space when ye\'re ready');
     return true;
   }

@@ -125,7 +125,8 @@ export function lockTick(dt) {
     for (const [end, gt] of Object.entries(L.gates)) {
       // (a staircase's gates open once the water's the same both sides: the lock below full)
       const open = lk.openAt(end) && (end !== 'low' || L.below < 0 || h.locks[L.below].openAt('high'));
-      gt.open += ((open ? 1 : 0) - gt.open) * Math.min(1, dt * 2.5);
+      // (swung as quick as the helm's LOCK.GATES, so she's not drawn lying back once she's let through)
+      gt.open += ((open ? 1 : 0) - gt.open) * Math.min(1, dt * 7);
       for (const lf of gt.leaves) lf.rotation.y = -gt.open * lf.userData.sz * Math.PI / 2;
     }
     const P = L.pump, s = P.userData.stroke ?? 0;

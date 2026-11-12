@@ -7,9 +7,10 @@
    Run on the compiled js (npm run build first) with Node 22: node_modules/node/bin/node.exe tools/race-measure.mjs */
 
 import { LAY, SAIL, Sea, Helm } from '../js/den-sail.js';
-import { RACE, Race, spotPose } from '../js/den-race.js';
+import { RACE, Race, spotPose, readyLocks } from '../js/den-race.js';
 import { WIND } from '../js/den-wind.js';
 import { runFor, RUN } from '../js/sailing.js';
+import { gustPath } from '../js/den-sailing.js';
 import { TRIP } from '../js/den-crane.js';
 import { DOOR } from '../js/den-door.js';
 
@@ -76,10 +77,10 @@ if (process.argv[1].endsWith('race-measure.mjs')) {
     guns: () => { const h = new Helm(sea, { ...bends.guns[0], r: bends.guns[0].r + 1, d: 0 }); return hop(h, 4) + 0.5; },
     run: () => { const h = new Helm(sea, bends.guns[0]); return to(h, bends.guns[1]); },
     headwind: () => 1 + (B.length + 2) * WIND.OARS,
-    double: () => { const h = new Helm(sea, { ...bends.double[0], d: 0 }); let t = to(h, D2[0]); h.pose.d = 0; t += hop(h, 2); return t + to(h, bends.double[1]); },
+    double: () => { const h = new Helm(sea, bends.double[0]); h.gust(gustPath(sea, h.pose, runFor(2))); return settle(h) + to(h, bends.double[1]); },   // (lined up from the leg: 12 Nov)
     whirls: () => runFor(RUN.VEGAS) * SAIL.PUSH,
     forage: () => { const s = new Sea(9); for (const [c, r] of F.BARRIER) { s.rocks.delete(k(c, r)); s.works.delete(k(c, r)); } const h = new Helm(s, { ...bends.forage[0], d: 0 }); return to(h, F.OUT); },
-    locks: () => { const h = new Helm(sea, { ...bends.locks[0], d: 0 }); for (let i = 0; i < 4; i++) h.put('F'); let t = 0; for (; t < 90 && h.pose.r < bends.locks[1][1]; t += DT) { if (h.held() === 'up') h.pump(99); h.tick(DT); } return t; },
+    locks: () => { const h = new Helm(sea, { ...bends.locks[0], d: 0 }); readyLocks(h); for (let i = 0; i < 4; i++) h.put('F'); let t = 0; for (; t < 90 && h.pose.r < bends.locks[1][1]; t += DT) { if (h.held() === 'up') h.pump(99); h.tick(DT); } return t; },
     crane: () => TRIP + 1,
     triple: () => { const h = new Helm(sea, { ...bends.triple[0], d: 0 }); return hop(h, 3) + 0.5; },
     door: () => DOOR.TRIP,

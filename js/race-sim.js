@@ -215,8 +215,8 @@ const cut = (id, s, c, to, cOut, trip, at, spot = null) => {
 const G = RC.GUNS.way, WR = RC.BRIBE.NOTCH, B = RC.HEADWIND, M = RC.WHIRLS.MOUTH, L = RC.LOCKS, E = RC.CRANE, D = RC.DOOR, F = RC.FORAGE, D2 = RC.DOUBLE.WAY, T3 = RC.TRIPLE, Z = RC.ZIGZAG;
 /** The course's shortcuts, as the bots take them. Their trips as the helm makes them (tools/race-measure.mjs):
     the gap rushed on a heavy combo's gust, the headwind's squares rowed at the oars' pace, a Double's and a
-    Triple's hop and the water either side, the barrier's gap sailed once it's cleared, the locks' (10 s,
-    pumped at once), the others' gusts, the crane's trip (TRIP) and the tunnel's (DOOR.TRIP); the zigzag's
+    Triple's hop and the water either side, the barrier's gap sailed once it's cleared, the locks' (4.3 s,
+    pumped at once, made ready for the race; 10 s till 12 Nov, waiting on their water and gates), the others' gusts, the crane's trip (TRIP) and the tunnel's (DOOR.TRIP); the zigzag's
     hops, on the long way, what they save (SIM.ZIGZAG). Stopped short of the gap, she waits two squares
     before it, on the leg's second row (and pays the gate's guard there). The wreck saves nothing itself: in
     and out of its notch, its coins hauled up meanwhile, to pay the gate with (the gap's saving). */
@@ -224,10 +224,10 @@ export const CUTS = {
     guns: cut('guns', 0, G[0][0], 1, G[0][0], 1 + SIM.COMBO * SAIL.PUSH, { c: G[0][0] - 2, r: S[0].r + 1, d: 1 }),
     wreck: cut('wreck', 0, WR[0], 0, WR[0], 3, { c: WR[0], r: WR[1], d: 0 }, 'wreck'),
     headwind: cut('headwind', 1, B[0][0], 2, B[B.length - 1][0], 1 + (B.length + 2) * WIND.OARS, { c: B[0][0], r: B[0][1], d: 0 }),
-    double: cut('double', 1, D2[0][0], 2, D2[0][0], 3.8, { c: D2[0][0], r: D2[0][1], d: 0 }),
+    double: cut('double', 1, D2[0][0], 2, D2[0][0], 2.2, { c: D2[0][0], r: D2[0][1], d: 0 }),
     whirls: cut('whirls', 2, M.c, 3, M.c, runFor(RUN.VEGAS) * SAIL.PUSH, { ...M }),
     forage: cut('forage', 2, F.NOTCH[0], 3, F.NOTCH[0], 6.2, { c: F.NOTCH[0], r: F.NOTCH[1], d: 0 }, 'forage'),
-    locks: cut('locks', 3, L[0].at[0], 4, L[0].at[0], 10, { c: L[0].at[0], r: L[0].at[1], d: 0 }, 'lock-up'),
+    locks: cut('locks', 3, L[0].at[0], 4, L[0].at[0], 4.3, { c: L[0].at[0], r: L[0].at[1], d: 0 }, 'lock-up'),
     crane: cut('crane', 4, E.LEDGE[0], 5, E.TO.c, TRIP + 1, { c: E.LEDGE[0], r: E.LEDGE[1], d: 0 }, 'crane'),
     triple: cut('triple', 4, T3[0][0], 5, T3[0][0], 1.7, { c: T3[0][0], r: T3[0][1] - 1, d: 0 }),
     zigzag: { ...cut('zigzag', 3, Z[0][0] + 1, 3, Math.min(...Z.map(([c]) => c)), 0, { c: Z[0][0] + 1, r: S[3].r, d: 3 }), saves: SIM.ZIGZAG },
