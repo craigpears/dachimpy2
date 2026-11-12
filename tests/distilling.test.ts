@@ -369,3 +369,23 @@ describe('the flask (12 Nov)', () => {
     expect(b.bri).toBeLessThan(0.5);
   });
 });
+
+describe('paused, for demos (12 Nov)', () => {
+  it('a burn still goes while paused, the furnace standing still (the user: "when I\'m in pause mode as well, I need a burn button so I can demo these")', () => {
+    const g = new Distilling(seeded(4));
+    g.tick(2000);
+    const clock = g.clock, furnace = g.furnace, time = g.time;
+    // Paused: nothing but settle() passes. A swap made, then burn now: the swap lands and the burn goes.
+    const [x1, y1, x2, y2] = g.allSwaps()[0];
+    expect(g.swap(x1, y1, x2, y2)).toBe(true);
+    const ev = [...g.burnNow(), ...g.settle(SWAP_MS)];
+    expect(ev.some((e) => e.kind === 'column')).toBe(true);
+    expect(g.movable).toBe(false);
+    g.settle(SLIDE_MS);
+    expect(g.movable).toBe(true);
+    // ... and the time played hasn't moved; the furnace starts afresh only once it's running again.
+    expect(g.time).toBe(time);
+    expect(g.furnace).not.toBe(furnace + 1);
+    expect(clock).toBeGreaterThanOrEqual(0);
+  });
+});

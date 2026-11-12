@@ -44,7 +44,7 @@ import type { Board } from './distilling.js';
 export type Step = [number, number, number];
 /** A drag: the piece at (x, y) held and swept along `ways`, a swap at each. */
 export interface Drag { x: number; y: number; ways: number[] }
-export type RoutineName = 'rescue' | 'junkColumn' | 'diamond' | 'store' | 'crawl' | 'figureEight' | 'linePull' | 'leapfrog' | 'hook' | 'channel';
+export type RoutineName = 'rescue' | 'junkColumn' | 'diamond' | 'turnOver' | 'store' | 'crawl' | 'figureEight' | 'linePull' | 'leapfrog' | 'hook' | 'channel';
 /** A routine's moves from where the board stands: its drags in order, and why, in plain words. */
 export interface Move { routine: RoutineName; drags: Drag[]; reason: string }
 
@@ -139,10 +139,11 @@ export const embedded = (cols: Board, x: number, y: number): boolean => isJunk(c
     the board it leaves (the piece then at `at`). A player traces these by eye: "this black falls
     down-right through the whites". */
 function traceDrags(cols: Board, x: number, y: number, ways: readonly number[], reach: number,
-  keep: (b: Board, at: [number, number], n: number) => boolean, max = 120): number[][] {
+  keep: (b: Board, at: [number, number], n: number) => boolean, max = 120, budget = 3000): number[][] {
   const b = copyBoard(cols), out: number[][] = [], path: number[] = [];
+  let nodes = 0;
   const dfs = (cx: number, cy: number) => {
-    if (path.length >= reach || out.length >= max) return;
+    if (path.length >= reach || out.length >= max || nodes++ > budget) return;
     for (const d of ways) {
       const n = swapIn(b, cx, cy, d);
       if (!n) continue;
@@ -454,21 +455,61 @@ const diamond: Routine = {
       const arrived = side > 0
         ? (b: Board, at: [number, number]) => at[0] >= ctx.burnFrom || (at[0] === ctx.burnFrom - 1 && besideOn(b, at[0], at[1], 1, isJunk) && !besideOn(b, at[0], at[1], 1, (q) => q === WHITE))
         : (b: Board, at: [number, number]) => at[0] < ctx.fill - 1 && (at[0] === 0 || !besideOn(b, at[0], at[1], -1, (q) => q === WHITE));
-      const paths = traceDrags(cols, x, y, towards(side), ctx.reach, arrived, 60);
+      // Any way through, as a hand sweeps it: down and up through the whites, and on the junk's side the
+      // ladder, a black climbing through browns from one column to the next and a brown sinking through
+      // blacks (the user, 12 Nov: "that is how you get it up").
+      const paths = traceDrags(cols, x, y, ALL, ctx.reach, arrived, 80);
       if (!paths.length) continue;
-      // The run as the technique has it: furthest across, the black ending high (the brown low), shortest.
+      // Where the technique wants it: over with the junk, then the black as high and the brown as low as
+      // it goes ("browns at the bottom, blacks at the top"), the shorter the better.
       const rate = (w: number[]) => {
         let cx = x, cy = y;
         for (const d of w) [cx, cy] = neighbourOn(cols, cx, cy, d)!;
-        const h = halfOf(cols, cx, cy);
-        return side * cx * 4 + (p === BLACK ? -h : h) * 0.3 - w.length * 0.1;
+        const h = halfOf(cols, cx, cy), v = p === BLACK ? -h : h;
+        const over = side > 0 ? cx >= ctx.burnFrom : cx < ctx.fill - 1;
+        return (over ? 40 + v : side * cx * 4 + v * 0.3) - w.length * 0.05;
       };
       paths.sort((a, b) => rate(b) - rate(a));
-      const w = paths[0], name = p === BLACK ? 'black' : 'brown';
+      const name = p === BLACK ? 'black' : 'brown';
       const how = side > 0
         ? (p === BLACK ? 'down-right across the whites, then up through the browns to the blacks' : 'up-right across the whites, then down through the blacks to the browns')
         : (p === BLACK ? 'down-left out of the whites to the junk on the left' : 'up-left out of the whites to the junk on the left');
-      out.push({ routine: 'diamond', drags: [drag(x, y, w)], reason: `${side > 0 ? 'whites left, junk right' : 'the mirror, whites right'}: the ${name} at ${placeName(x, y)} ${how}` });
+      for (const w of paths.slice(0, 3)) out.push({ routine: 'diamond', drags: [drag(x, y, w)], reason: `${side > 0 ? 'whites left, junk right' : 'the mirror, whites right'}: the ${name} at ${placeName(x, y)} ${how}` });
+    }
+    return out;
+  },
+};
+
+/** The right side's junk: from the furnace leftward, every column at least half junk (COLS: none). */
+export function rightFrom(cols: Board): number {
+  let x = COLS;
+  while (x > 0 && cols[x - 1].filter(isJunk).length * 2 >= cols[x - 1].length) x--;
+  return x;
+}
+
+/** Turn the right side over (the user, 12 Nov, the third note): the sweep leaves browns at the top right
+    and blacks at the bottom (browns rise and blacks sink through whites), and then nothing new hooks in: a
+    black from the left sinks into the blacks, a brown rises into the browns, "nowhere to go". So blacks are
+    taken up the right-hand side, a black rising past each brown, zigzagging between its columns to the
+    top, one after another; the browns sink. Then a brown arriving at the top hooks in down through the
+    blacks, and a black arriving low climbs the browns: "zigzagging up the side is how you get them over.
+    But it also then is what allows you to hook things on the left and pull them in." */
+const turnOver: Routine = {
+  name: 'turnOver', label: 'Turn the right side over',
+  about: 'Blacks taken up the right-hand side, zigzagging up through the browns between its columns to the top, the browns sinking: then anything new from the left hooks in.',
+  find(cols, ctx) {
+    const out: Move[] = [];
+    if (ctx.stage !== 'junk') return out;
+    const from = rightFrom(cols);
+    if (from >= COLS - 1) return out;
+    for (let x = from; x < COLS; x++) for (let y = 0; y < cols[x].length; y++) {
+      if (cols[x][y] !== BLACK) continue;
+      const h0 = halfOf(cols, x, y);
+      const ups = traceDrags(cols, x, y, [UP_RIGHT, UP_LEFT], ctx.reach, (b, at) => at[0] >= from && halfOf(b, at[0], at[1]) <= h0 - 4, 30);
+      if (!ups.length) continue;
+      const top = (w: number[]) => { let cx = x, cy = y; for (const d of w) [cx, cy] = neighbourOn(cols, cx, cy, d)!; return halfOf(cols, cx, cy); };
+      ups.sort((a, b) => top(a) - top(b) || a.length - b.length);
+      out.push({ routine: 'turnOver', drags: [drag(x, y, ups[0])], reason: `turn the right side over: take the black at ${placeName(x, y)} up through the browns, zigzagging up the side to the top` });
     }
     return out;
   },
@@ -804,10 +845,52 @@ export function joinDrags(cols: Board, drags: readonly Drag[]): Drag[] {
   }
   return out;
 }
-/** A routine whose moves always come out as whole drags. */
-const whole = (r: Routine): Routine => ({ ...r, find: (cols, ctx) => r.find(cols, ctx).map((m) => ({ ...m, drags: joinDrags(cols, m.drags) })) });
+/** A move's last drag carried on as far as it goes (the user, 12 Nov: "it should carry on as far as it
+    can go"): from where it stops, the held piece swept on the same way across, the same diagonal first,
+    until no swap takes it further, never stopped partway into the whites. A white is never carried into
+    a column to burn. */
+export function carryOn(cols: Board, drags: readonly Drag[], ctx: Ctx): Drag[] {
+  const out = drags.map((d) => ({ x: d.x, y: d.y, ways: [...d.ways] }));
+  const last = out[out.length - 1];
+  if (!last?.ways.length) return out;
+  const b = playDrags(cols, out);
+  if (!b) return out;
+  let at: [number, number] = [last.x, last.y];
+  for (const w of last.ways) at = neighbourOn(cols, at[0], at[1], w)!;
+  const piece = b[at[0]][at[1]];
+  if (piece !== BLACK && piece !== BROWN) return out;
+  // On toward the junk's own side (right in Stage I, left in the chain), the same diagonal first.
+  const side = junkSide(ctx);
+  let w = last.ways[last.ways.length - 1];
+  while (last.ways.length < 24) {
+    const ways = towards(side).includes(w) ? [w, ...towards(side).filter((v) => v !== w)] : towards(side);
+    let moved = false;
+    for (const v of ways) {
+      const n = neighbourOn(b, at[0], at[1], v);
+      if (!n) continue;
+      if (!swapIn(b, at[0], at[1], v)) continue;
+      last.ways.push(v); at = n; w = v; moved = true;
+      break;
+    }
+    if (!moved) break;
+  }
+  return out;
+}
+/** The routines that move a piece up or down on the spot, whose drags stop where they mean to. */
+const ON_THE_SPOT: readonly RoutineName[] = ['figureEight', 'linePull', 'turnOver'];
+/** A routine whose moves always come out as whole drags, the last carried on as far as it goes. */
+const whole = (r: Routine): Routine => ({
+  ...r,
+  find: (cols, ctx) => {
+    const seen = new Set<string>();
+    return r.find(cols, ctx).map((m) => {
+      const drags = joinDrags(cols, m.drags);
+      return { ...m, drags: ON_THE_SPOT.includes(r.name) ? drags : carryOn(cols, drags, ctx) };
+    }).filter((m) => { const k = JSON.stringify(m.drags); return !seen.has(k) && !!seen.add(k); });
+  },
+});
 
 export const ROUTINES: Readonly<Record<RoutineName, Routine>> = Object.fromEntries(
-  [rescue, junkColumn, diamond, store, crawl, figureEight, linePull, leapfrog, hook, channel].map((r) => [r.name, whole(r)]),
+  [rescue, junkColumn, diamond, turnOver, store, crawl, figureEight, linePull, leapfrog, hook, channel].map((r) => [r.name, whole(r)]),
 ) as Record<RoutineName, Routine>;
 export const routineNamed = (name: RoutineName): Routine => ROUTINES[name];

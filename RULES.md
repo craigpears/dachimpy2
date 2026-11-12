@@ -697,6 +697,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   game swapped only with the mouse near a piece's middle. And no column-shift glitch: the links are drawn
   from the rules' board every frame (the look only follows it), and nothing moves while the board
   slides, so a piece flung as the board shifts never loses its links.
+- **Distilling burns while paused, for demos (12 Nov).** The user: "when I'm in pause mode as well, I need
+  a burn button so I can demo these." Paused, the furnace's clock stands still, but a hand's swaps still
+  land, a burn still goes and the board still slides (`settle` in `src/distilling.ts`), so a board can be
+  set up and burned to show the next stage: the test page's Burn button, or X / right-click.
 
 - **Messages stay up long enough to read (10 Nov).** The checkpoint's message "vanished very
   quickly": a longer message stays up longer (about 70 ms a letter, 1.8 to 7 seconds), and one

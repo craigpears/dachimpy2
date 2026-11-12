@@ -340,6 +340,18 @@ export class Distilling {
     }
     return ev;
   }
+  /** Time passing with the furnace stopped (a board paused, for a demo): a swap lands, and a burn waiting
+      on it goes; the board slides. The furnace's clock and the time played don't move. */
+  settle(ms: number): DistillEvent[] {
+    const ev: DistillEvent[] = [];
+    if (this.finished) return ev;
+    if (this.sliding > 0) this.sliding = Math.max(0, this.sliding - ms);
+    if (this.swapping > 0) {
+      this.swapping = Math.max(0, this.swapping - ms);
+      if (this.swapping === 0) this.tryBurn(ev);
+    }
+    return ev;
+  }
   /** One tick of the furnace (BrewController's): the warning at WARN_TICK, the burn after BURN_TICKS. */
   furnaceTick(ev: DistillEvent[] = []): DistillEvent[] {
     if (this.finished) return ev;

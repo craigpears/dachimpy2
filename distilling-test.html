@@ -47,6 +47,7 @@
     <button id="next">New board</button>
     <button id="dismiss">Dismiss</button>
     <button id="pause">Pause</button>
+    <button id="burn" title="Burn the furnace's column now, paused or not (X, right-click)">Burn</button>
   </div>
   <div class="row">
     <label for="bot">Watch a bot:</label>
@@ -132,6 +133,7 @@ function deal() {
 $('restart').onclick = () => deal();
 $('next').onclick = () => { seed++; deal(); };
 $('dismiss').onclick = () => board.dismiss();
+$('burn').onclick = () => board.burn();
 $('pause').onclick = () => { board.paused = !board.paused; $('pause').classList.toggle('on', board.paused); };
 $('bot').onchange = () => { botName = $('bot').value; deal(); $('bot').blur(); };
 deal();
