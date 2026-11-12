@@ -2349,6 +2349,6 @@ what happens as it happens: the start, a Vegas over the whirlpools, someone taki
 a snake catching someone, a lead changing, the finish; with the racers' own quirks (Kikkit's lefts).
 Mostly the action, a little character. Can be turned off. **Who:** a spot kept open for a real pirate who
 wants to be involved ("certainly when ... somebody wants to be involved we can give them a space"); a
-stand-in voice till then. **Reserved for Imaduck (12 Nov):** "Maybe I can reserve that for [Imaduck]
-and see if he's" up for it: the user will ask him. (He; a real pirate, drawn from his portrait if he
-takes it.) Their lines in `src/lines/`, called from what the race's events already say.
+stand-in voice till then. **Reserved (12 Nov):** the user will ask a friend, amhduck on Discord (he),
+whether he'd like it. His pirate name and portrait to check before he's drawn or named in the game;
+only his pirate name ever appears on the site. Their lines in `src/lines/`, called from what the race's events already say.
