@@ -263,6 +263,13 @@ rivals. The leader won't open it for the field; someone at the back will, and wh
 them gets it free too. This replaces "the rocks in the turning pool's spit" (its spit just land again,
 room to spare). The starlit door stays where it is (its tunnel is already the biggest win, a long
 Navigation for it).
+The user, unsure (12 Nov): "it's possibly something that drags back ... the leader ... They've got to
+choose between stopping and shooting that or taking the long way around and somebody else taking the
+choice to shoot it. That's a weird position. I don't know if I like that." Thoughts: it's shot on the
+move (broadsides as she sails past the rocks), so it needn't stop anyone; a leader who opens it gains as
+much as anyone, just not over those close behind; and a softer version, if wanted, lets the rubble settle
+back after half a minute or so, so only whoever's close behind the shooter gets through free. To try in
+the race before deciding.
 
 ## 5. Knowing where you're going (built 11 Nov)
 
