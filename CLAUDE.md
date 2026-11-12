@@ -64,6 +64,12 @@ The changelog (the user, 11 Nov: "as each bigger feature's added, and it should 
 place, a character, a puzzle, a cutscene, a ship; not a bug fix or a tweak), add an entry: the date, a
 title, a teaser shot or two taken from its `?at=` link (by the subagent that checks it in the browser),
 and a few lines in plain words. Pirate names only.
+Beside it, `design.html` ("How the Pirate Den is designed", 12 Nov), in the changelog's look and linked from its
+header: the thinking behind the den, high level and in plain words, a picture for each section (from
+`changelog/`), the sloop race first, then the den's wider principles. Keep it up to date with design thinking
+as it's decided (RACE.md, STORY.md, RULES.md hold the detail). Like every public page, it never shows, names or
+hints at a hidden gem (the starlit door, the penguins, the smugglers' beach), not even that there are secrets;
+the race's public chart, `changelog/race-map.jpg`, is drawn by `PUBLIC=1 tools/race-map.mjs` for that reason.
 
 Keeping context lean: the den is big, so hand off work that would flood the main session to subagents with a
 self-contained brief (what to read, what done looks like, what to report back, in a few hundred words). In

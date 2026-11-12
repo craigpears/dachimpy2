@@ -12,8 +12,14 @@
    It shows the starlit door and its tunnel: the page is private, for the user's design work, never put on
    the site (tools/ isn't published; write it outside the site's root).
 
+   PUBLIC=1 draws the public chart instead (12 Nov, for changelog/race-map.jpg and design.html): everything
+   of the starlit door left out, its door and stars, the tunnel, the caves at its exits, the exposed square
+   off it, its label, its route's row and its shortcut's, and the private note, so nothing gives it away
+   (a hidden gem: CLAUDE.md, STORY.md). Its land is the spit's own, drawn as any land.
+
    Run on the compiled js (npm run build first) with Node 22:
      node_modules/node/bin/node.exe tools/race-map.mjs <out.html> [races] [size]
+     PUBLIC=1 node_modules/node/bin/node.exe tools/race-map.mjs <out.html> [races] [size]
    races (default 2000, about a minute) and size (racers in each, default 4) as tools/race-sim.mjs. */
 
 import { writeFileSync } from 'node:fs';
@@ -25,10 +31,15 @@ import { CHECK } from '../js/den-checkpoint.js';
 import { RIVALS } from '../js/den-rivals.js';
 import { whirlpool } from '../js/den-whirl.js';
 import { DOOR } from '../js/den-door.js';
+import { GAMBLE } from '../js/den-gamble.js';
 
 const OUT = process.argv[2];
 if (!OUT) { console.error('usage: tools/race-map.mjs <out.html> [races] [size]'); process.exit(1); }
 const RACES = Number(process.argv[3]) || 2000, SIZE = Number(process.argv[4]) || 4;
+/** The public chart: nothing of the starlit door (above). */
+const PUBLIC = process.env.PUBLIC === '1';
+/** A way round or shortcut shown on it: all of them, or in public all but the door's. */
+const shown = (name) => !(PUBLIC && name === 'door');
 
 /* ---- The wins ---- */
 const t0 = Date.now();
@@ -68,6 +79,7 @@ for (const [c, r] of RC.SNAKES.MID) kind.set(key(c, r), 'mid');
 for (const [c, r] of RC.WHIRLS.WINDS) kind.set(key(c, r), 'whirls');
 for (const [c, r] of [RC.DOUBLE.WIND, ...RC.TRIPLE, ...RC.ZIGZAG]) kind.set(key(c, r), 'hop');
 for (const [c, r] of RC.FIELD.WINDS) kind.set(key(c, r), 'field');
+for (const [c, r] of RC.GAMBLES.TURN.UP) kind.set(key(c, r), 'gamble');
 
 const svg = [];
 const add = (s) => svg.push(s);
@@ -123,7 +135,7 @@ add(`<defs>
 
 /* The winds: each square tinted, an arrow the way it blows. Snakes red, the rest in blue ink. */
 {
-  const tint = { left: 'rgba(170,45,20,.16)', tight: 'rgba(170,45,20,.16)', mid: 'rgba(170,45,20,.16)', whirls: 'rgba(40,74,96,.1)', hop: 'rgba(40,74,96,.16)', field: 'rgba(40,74,96,.12)' };
+  const tint = { left: 'rgba(170,45,20,.16)', tight: 'rgba(170,45,20,.16)', mid: 'rgba(170,45,20,.16)', gamble: 'rgba(170,45,20,.16)', whirls: 'rgba(40,74,96,.1)', hop: 'rgba(40,74,96,.16)', field: 'rgba(40,74,96,.12)' };
   let arrows = { snake: '', blue: '' };
   for (let r = RBOT; r <= RTOP; r++) for (let c = 0; c < W; c++) {
     const d = sea.windAt(c, r);
@@ -132,7 +144,7 @@ add(`<defs>
     add(`<rect x="${f(x - SQ / 2)}" y="${f(y - SQ / 2)}" width="${SQ}" height="${SQ}" fill="${tint[k]}"/>`);
     const a = SQ * 0.32, h = SQ * 0.17;
     const s = `M${f(x - ux * a)} ${f(y - uy * a)}L${f(x + ux * a)} ${f(y + uy * a)}M${f(x + ux * (a - h) + sx * h)} ${f(y + uy * (a - h) + sy * h)}L${f(x + ux * a)} ${f(y + uy * a)}L${f(x + ux * (a - h) - sx * h)} ${f(y + uy * (a - h) - sy * h)}`;
-    if (k === 'left' || k === 'tight' || k === 'mid') arrows.snake += s; else arrows.blue += s;
+    if (k === 'left' || k === 'tight' || k === 'mid' || k === 'gamble') arrows.snake += s; else arrows.blue += s;
   }
   add(`<path d="${arrows.blue}" fill="none" stroke="${BLUE}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>`);
   add(`<path d="${arrows.snake}" fill="none" stroke="${SNAKE}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>`);
@@ -184,7 +196,7 @@ add(`<defs>
 /* Sheltered spots, shaded; the open-water stops (sitting ducks), hatched red. */
 {
   for (const k of SHELTER) { const [c, r] = k.split(',').map(Number); add(`<rect x="${X(c) - SQ / 2}" y="${Y(r) - SQ / 2}" width="${SQ}" height="${SQ}" fill="url(#shelter)" stroke="rgba(47,90,36,.7)" stroke-width="1.5"/>`); }
-  const stops = ['whirls', 'door', 'headwind'];
+  const stops = ['whirls', 'headwind', 'door'].filter(shown);
   for (const id of stops) { const { c, r } = CUTS[id].at; if (!CUTS[id].sheltered) add(`<rect x="${X(c) - SQ / 2}" y="${Y(r) - SQ / 2}" width="${SQ}" height="${SQ}" fill="url(#exposed)" stroke="rgba(155,42,20,.7)" stroke-width="1.5"/>`); }
 }
 
@@ -195,6 +207,37 @@ for (const w of pools) {
   for (let t = 0; t <= 3.2 * Math.PI * 2; t += 0.25) { const rad = 3 + t * 1.55, x = cx + Math.cos(t) * rad, y = cy + Math.sin(t) * rad; d += `${d ? 'L' : 'M'}${f(x)} ${f(y)}`; }
   add(`<circle cx="${f(cx)}" cy="${f(cy)}" r="${SQ * 0.9}" fill="rgba(40,74,96,.12)" stroke="rgba(40,74,96,.5)" stroke-width="1.5" stroke-dasharray="4 4"/>`);
   add(`<path d="${d}" fill="none" stroke="${BLUE}" stroke-width="2.4" stroke-linecap="round"/>`);
+}
+
+/* The gambles (src/den-gamble.ts): the turning pool, a spiral with an arrow each way round its rim (its spin
+   turns), its throw on (gold, down the cleft onto leg 3) and back (the red lane up spit 1, drawn with the
+   winds); the veiled wind's gap, a shimmer and a question mark, its carry on (gold) and back (red, along
+   leg 5). */
+const GOLD = '#a8780f';
+const way = (poses, col) => `<path d="M${poses.map((p) => `${f(X(p.c))} ${f(Y(p.r))}`).join('L')}" fill="none" stroke="${col}" stroke-width="3.4" stroke-dasharray="2 7" stroke-linecap="round" stroke-linejoin="round"/>`;
+{
+  const G = RC.GAMBLES, tp = whirlpool(G.TURN.POOL), [mc, mr] = tp.mid, cx = X(mc), cy = Y(mr);
+  add(`<circle cx="${f(cx)}" cy="${f(cy)}" r="${SQ * 0.9}" fill="rgba(184,134,26,.18)" stroke="${GOLD}" stroke-width="2" stroke-dasharray="4 4"/>`);
+  let d = '';
+  for (let t = 0; t <= 2.6 * Math.PI * 2; t += 0.25) { const rad = 3 + t * 1.7, x = cx + Math.cos(t) * rad, y = cy + Math.sin(t) * rad; d += `${d ? 'L' : 'M'}${f(x)} ${f(y)}`; }
+  add(`<path d="${d}" fill="none" stroke="${BLUE}" stroke-width="2.4" stroke-linecap="round"/>`);
+  const R = SQ * 0.9 + 7, P = (a) => `${f(cx + R * Math.cos(a))} ${f(cy + R * Math.sin(a))}`;
+  add(`<g fill="none" stroke="${INK}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M${P(-2.5)}A${R} ${R} 0 0 1 ${P(-0.7)}"/><path d="M${P(2.5)}A${R} ${R} 0 0 1 ${P(0.7)}"/></g>`);
+  // (the arrowheads: clockwise at the top's end, anticlockwise at the bottom's)
+  for (const [a, s] of [[-0.7, 1], [0.7, -1]]) {
+    const x = cx + R * Math.cos(a), y = cy + R * Math.sin(a), tx = -Math.sin(a) * s, ty = Math.cos(a) * s, nx = Math.cos(a), ny = Math.sin(a);
+    add(`<path d="M${f(x - tx * 9 + nx * 6)} ${f(y - ty * 9 + ny * 6)}L${f(x)} ${f(y)}L${f(x - tx * 9 - nx * 6)} ${f(y - ty * 9 - ny * 6)}" fill="none" stroke="${INK}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>`);
+  }
+  add(way([{ c: G.TURN.FAR[0], r: G.TURN.FAR[1] }, ...G.TURN.ON], GOLD));
+  // The veiled wind: its squares shimmering, a question mark; on to the run home, or back along leg 5.
+  for (const [c, r] of G.VEIL.WAY) {
+    add(`<rect x="${f(X(c) - SQ / 2)}" y="${f(Y(r) - SQ / 2)}" width="${SQ}" height="${SQ}" fill="rgba(184,134,26,.24)"/>`);
+    for (let k = 0; k < 5; k++) add(`<circle cx="${f(X(c) + (rnd() - 0.5) * SQ * 0.8)}" cy="${f(Y(r) + (rnd() - 0.5) * SQ * 0.8)}" r="1.8" fill="${GOLD}"/>`);
+  }
+  const [vc0, vr0] = G.VEIL.WAY[0];
+  add(way([{ c: vc0, r: vr0 }, ...G.VEIL.ON], GOLD));
+  add(way(G.VEIL.BACK, SNAKE));
+  add(label(X(vc0), (Y(vr0) + Y(G.VEIL.WAY[G.VEIL.WAY.length - 1][1])) / 2 + SQ * 0.33, ['?'], { size: 0.95, weight: 700, col: '#5a1a0c' }));
 }
 
 /* [A] The gun gap's guns: their reach (any way, CHECK.REACH squares), the squares they're trained on. */
@@ -234,9 +277,9 @@ for (const [c, r] of RC.FORAGE.BARRIER) {
 }
 
 /* The starlit door: its carved face on the cliff, stars about it, the tunnel under the course and a sea
-   cave up a cleft at each of its exits (DOOR.EXITS), the far end's the last. */
+   cave up a cleft at each of its exits (DOOR.EXITS), the far end's the last. Never on the public chart. */
 const star = (x, y, s) => { let p = ''; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + (i * Math.PI) / 5, rr = i % 2 ? s * 0.42 : s; p += `${i ? 'L' : 'M'}${f(x + Math.cos(a) * rr)} ${f(y + Math.sin(a) * rr)}`; } return `<path d="${p}Z" fill="#e7c34a" stroke="${INK}" stroke-width="1.2"/>`; };
-{
+if (!PUBLIC) {
   const D = RC.DOOR, fx = (X(D.FACE[0][0]) + X(D.FACE[1][0])) / 2, fy = Y(D.FACE[0][1]) + SQ / 2;
   const caves = D.EXITS.map((e) => [fx, Y(e.OUT[0][1]) - SQ / 2]), [ox, oy] = caves[caves.length - 1];
   add(`<path d="M${fx} ${fy}L${ox} ${oy}" stroke="${DOOR_INK}" stroke-width="4" stroke-dasharray="1 8" stroke-linecap="round" opacity=".85"/>`);
@@ -366,7 +409,11 @@ S.forEach((s, i) => {
 }
 const BIG = { size: 0.78, lh: 1.17 };
 // [A] spit 1: the gun gap.
-at(9.6, SP[0].r1, [T(`The imperial gate \u00b7 saves ${sv('guns')}`), WIN(`Quad ${routeWin('gap-combo')} \u00b7 shot ${routeWin('gap-shot')} \u00b7 run ${routeWin('gap-run')}`), WIN(`bribe ${routeWin('bribe')}: haul the wreck \u25b8`)], BIG);
+// (the gate's words on the spit's far left, clear of the turning pool and the wreck; the pool's beside it)
+at(0.7, SP[0].r1 + 0.05, [T(`The imperial gate · ${sv('guns')} ▸`), WIN(`Quad ${routeWin('gap-combo')} · shot ${routeWin('gap-shot')}`), WIN(`run ${routeWin('gap-run')} · bribe ${routeWin('bribe')}`), N('the bribe: haul the wreck')], { size: 0.56, lh: 1.12, anchor: 'start' });
+// The gambles: the turning pool on leg 2, the veiled wind through spit 5 (what each way saves, GAMBLE.SAVES).
+const GS = GAMBLE.SAVES, sgn = (n) => (n < 0 ? `−${-n}` : `+${n}`);
+at(12.7, SP[0].r1 + 0.05, [T('◂ Turning pool'), N('a gamble: time its spin'), [`on to leg 3 · ${sgn(GS.turn.on)} s`, GOLD, 700], [`back to leg 1 · ${sgn(GS.turn.back)} s`, SNAKE, 700]], { size: 0.52, lh: 1.12 });
 at(25.6, SP[0].r0 - 0.95, [N('guns\u2019 reach')], { size: 0.5, anchor: 'end', col: SNAKE });
 // [B] spit 2: the Double's gap, the headwind gap, the trade wind up the middle (and the tight water below it).
 at(9, SP[1].r1, [T('Double\u2019s gap'), N(`a Double \u00b7 ${sv('double')}`), WIN(`doubles ${routeWin('doubles')}`)], BIG);
@@ -375,14 +422,15 @@ at(23, SP[1].r1, [['SNAKE: trade wind', SNAKE, 700], N('hop on a Double'), N('or
 at(RC.SNAKES.TIGHT[0][0] - 0.6, RC.SNAKES.TIGHT[0][1], [['tight water ▸', SNAKE, 700]], { size: 0.6, anchor: 'end' });
 // [C] spit 3: the whirlpools, the starlit door, the barrier.
 at(4.5, SP[2].r1 - 0.1, [T('Whirlpool channel'), N('a Vegas carries her'), [`saves ${sv('whirls')}`, '#5a1a0c', 700], WIN(`Vegas ${routeWin('whirls')}`), N('stopped in the open:'), N('a sitting duck')], BIG);
-at(16, SP[2].r1 - 0.1, [['\u2605 Starlit door', DOOR_INK, 700], N('Navigation, Vegas'), ...DOOR.EXITS.map((e, k) => [`${k ? 'or ' : 'up at '}leg ${e.to + 1}: ${Math.round(e.saves)} s`, '#5a1a0c', 700]), WIN(`door ${routeWin('door')}`)], BIG);
+if (!PUBLIC) at(16, SP[2].r1 - 0.1, [['\u2605 Starlit door', DOOR_INK, 700], N('Navigation, Vegas'), ...DOOR.EXITS.map((e, k) => [`${k ? 'or ' : 'up at '}leg ${e.to + 1}: ${Math.round(e.saves)} s`, '#5a1a0c', 700]), WIN(`door ${routeWin('door')}`)], BIG);
 at(22.5, SP[2].r1 - 0.1, [T('Barrier'), N('Foraging'), [`saves ${sv('forage')}`, '#5a1a0c', 700], WIN(`forage ${routeWin('forage')}`), N('sheltered')], BIG);
 // [D] spit 4: the zigzag below it (on the long way) and the locks.
 at(8, SP[3].r1, [T('The zigzag \u2193'), N(`hop on Doubles \u00b7 ${sv('zigzag')}`), WIN(`long way ${routeWin('long')}`)], BIG);
 at(21, SP[3].r1, [T(`The locks \u00b7 saves ${sv('locks')}`), N('Bilge \u00b7 sheltered'), WIN(`locks ${routeWin('locks')}`)], BIG);
 // [E] spit 5: the crane and the Triple's gap.
 at(6, SP[4].r1, [T(`The crane \u00b7 saves ${sv('crane')}`), WIN(`Carpentry \u00b7 crane ${routeWin('crane')}`)], BIG);
-at(17, SP[4].r1, [T(`Triple\u2019s gap \u00b7 ${sv('triple')}`), WIN(`a Triple \u00b7 doubles ${routeWin('doubles')}`)], BIG);
+at(20, SP[4].r1 + 0.05, [T('Triple’s gap'), N(`a Triple · ${sv('triple')}`), WIN(`doubles ${routeWin('doubles')}`)], { size: 0.46, lh: 1.12 });
+at(15.3, SP[4].r1 + 0.1, [T('Veiled wind ▸'), N('a gamble: a coin toss'), [`${sgn(GS.veil.on)} s or ${sgn(GS.veil.back)} s`, '#5a1a0c', 700]], { size: 0.52, lh: 1.1 });
 // The finish, and the left-hand trade wind up the whole left side.
 at(RC.FINISH[0] + 0.8, RC.FINISH[1], [['FINISH', '#5a1a0c', 700]], { size: 0.7, anchor: 'start' });
 at(14, S[5].r + 1, [['SNAKE: the left-hand trade wind, back to the start', SNAKE, 700]], { size: 0.6 });
@@ -417,9 +465,9 @@ const PUZZLE = {
 const MOVE = new Set(['guns', 'double', 'triple', 'zigzag']);
 const kindOf = (id) => (MOVE.has(id) ? 'on the move' : id === 'headwind' ? 'rowing, slowly' : CUTS[id].sheltered ? 'stopped, sheltered' : 'stopped, exposed');
 const racedBy = (name) => RIVALS.filter((R) => R.racer.route === name).map((R) => R.name).join(', ');
-const maxWin = Math.max(...ROUTES.map((r) => winOf(rep.byRoute[r.name])), fair * 1.6);
+const maxWin = Math.max(...ROUTES.filter((r) => shown(r.name)).map((r) => winOf(rep.byRoute[r.name])), fair * 1.6);
 const bar = (w) => `<div class="bar"><span style="width:${f((100 * w) / maxWin)}%" class="${w / fair < 0.75 ? 'lo' : w / fair > 1.25 ? 'hi' : ''}"></span><i style="left:${f((100 * fair) / maxWin)}%"></i></div>`;
-const rows = ROUTES.map((R) => {
+const rows = ROUTES.filter((R) => shown(R.name)).map((R) => {
   const t = rep.byRoute[R.name], w = winOf(t), saves = R.cuts.reduce((n, id) => n + CUTS[id].saves, 0);
   const [name, how] = PUZZLE[R.name] ?? [R.name, ''];
   const kinds = [...new Set(R.cuts.map(kindOf))].join('; ');
@@ -427,8 +475,9 @@ const rows = ROUTES.map((R) => {
   return `<tr><td><b>${esc(name)}</b><br><small>${esc(how)}${kinds ? ` · ${esc(kinds)}` : ''}${by ? ` · <em>${esc(by)}’s way</em>` : ''}</small>${bar(w)}</td><td class="n">${Math.round(saves)} s</td><td class="n"><b>${pc(w)}</b><br><small>${t ? f(w / fair).toFixed(2) : '-'}× fair</small></td></tr>`;
 }).join('');
 const small = (title, list, by) => `<table class="mini"><tr><th colspan="2">${title}</th></tr>${list.map((k) => `<tr><td>${esc(k)}</td><td class="n">${pc(winOf(by[k]))}</td></tr>`).join('')}</table>`;
-const cutRows = Object.entries(rep.cuts).map(([id, c]) => `<tr><td>${esc(id)}</td><td class="n">${Math.round(CUTS[id].saves)}</td><td class="n">${pc(c.tried ? c.done / c.tried : 0)}</td>${SKILLS.map((k) => `<td class="n">${c.saved[k].n ? Math.round(c.saved[k].secs / c.saved[k].n) : '-'}</td>`).join('')}</tr>`).join('');
+const cutRows = Object.entries(rep.cuts).filter(([id]) => shown(id)).map(([id, c]) => `<tr><td>${esc(id)}</td><td class="n">${Math.round(CUTS[id].saves)}</td><td class="n">${pc(c.tried ? c.done / c.tried : 0)}</td>${SKILLS.map((k) => `<td class="n">${c.saved[k].n ? Math.round(c.saved[k].secs / c.saved[k].n) : '-'}</td>`).join('')}</tr>`).join('');
 const snakes = Object.entries(rep.bySnake).map(([k, x]) => `${k === 'left' ? 'the left-hand trade wind' : k === 'mid' ? 'the trade wind up the middle' : 'the tight water'}: ${x.n} swept (${pc(x.n / (RACES * SIZE))} of racers), ${pc(x.n ? x.wins / x.n : 0)} still won`).join('; ');
+const gambles = Object.entries(rep.bets).map(([id, b]) => `${id === 'turn' ? 'the turning pool' : 'the veiled wind'}: taken ${b.taken} times (by the leader ${b.by.leader}, the pack ${b.by.pack}, the last ${b.by.last}), ${pc(b.taken ? b.on / b.taken : 0)} carried her on`).join('; ');
 const today = new Date().toISOString().slice(0, 10);
 
 const html = `<!doctype html>
@@ -475,6 +524,8 @@ const html = `<!doctype html>
   <div><svg viewBox="0 0 34 22"><rect x="2" y="2" width="30" height="18" rx="3" fill="none" stroke="${SNAKE}" stroke-width="2" stroke-dasharray="6 4"/></svg>a gun gap gun's reach (${CHECK.REACH} squares any way); crosshairs: the squares it's trained on</div>
   <div><svg viewBox="0 0 34 22"><circle cx="17" cy="11" r="9" fill="none" stroke="${BLUE}" stroke-width="2"/><path d="M17 11m-3 0a3 3 0 1 1 6 0a6 6 0 1 1 -12 0" fill="none" stroke="${BLUE}" stroke-width="2"/></svg>a whirlpool: stop on one and it has her; a gust zooms her over</div>
   <div><svg viewBox="0 0 34 22"><path d="M10 20v-26" stroke="${INK}"/><path d="M10 4l14 5l-14 5Z" fill="#b8322a" stroke="${INK}"/></svg>a rival's spot on the line (Kikkit red, Tzz blue, Dalnoth gold); the gold ring, the long way's</div>
+  <div><svg viewBox="0 0 34 22"><path d="M2 11h30" stroke="${GOLD}" stroke-width="3.4" stroke-dasharray="2 7" stroke-linecap="round"/></svg>a gamble's ladder: where it carries her on</div>
+  <div><svg viewBox="0 0 34 22"><path d="M2 11h30" stroke="${SNAKE}" stroke-width="3.4" stroke-dasharray="2 7" stroke-linecap="round"/></svg>a gamble's snake: where it sends her back</div>
 </div></div>
 <div class="card"><h2>Who wins, by which way round</h2>
 <p class="fair">Fair is ${pc(fair)}: one race in ${SIZE}, in fields of ${SIZE}, each racer a different way round, a racing style and a skill drawn at random, and a level better at her own way's puzzle. The dashed line on each bar is fair; green is more than a quarter over it, red more than a quarter under. "Saves" is over the long way, for a decent player's puzzling (the puzzle's time is on top).</p>
@@ -486,11 +537,12 @@ ${small('By starting spot', ['left', 'gap', 'right'], rep.bySpot)}
 ${small('Stopped in the open, won the race', ['leader', 'pack', 'last'], Object.fromEntries(Object.entries(rep.byPosition).map(([k, p]) => [k, { n: p.n, wins: p.wins }])))}
 </div>
 <p><small><b>Snakes:</b> ${esc(snakes) || 'none bit'}.</small></p>
+<p><small><b>Gambles:</b> ${esc(gambles)}.</small></p>
 <p><small><b>Stopped in the open, hit there:</b> leader ${pc(rep.byPosition.leader.n ? rep.byPosition.leader.hit / rep.byPosition.leader.n : 0)}, in the pack ${pc(rep.byPosition.pack.n ? rep.byPosition.pack.hit / rep.byPosition.pack.n : 0)}, last ${pc(rep.byPosition.last.n ? rep.byPosition.last.hit / rep.byPosition.last.n : 0)}.</small></p>
 <h2>What each shortcut really saved</h2>
 <table><tr><th>Shortcut</th><th class="n">Laid to save</th><th class="n">Done</th><th class="n">decent</th><th class="n">good</th><th class="n">great</th></tr>${cutRows}</table>
 <p><small>Seconds, mean, by the racer's skill, her puzzling counted; less than nothing, it cost her.</small></p></div>
-<p class="fine">Private, for designing the race: it shows the starlit door and its tunnel, the race's secret, so it's never put on the site. Drawn ${today} by tools/race-map.mjs from the course as laid (LAY.RACE) and src/race-sim.ts's bots (gun gap guns '${RACE.GAP.MODE}'); run it again after a change to the course.</p>
+<p class="fine">${PUBLIC ? 'Drawn for the Pirate Den’s changelog.' : 'Private, for designing the race: it shows the starlit door and its tunnel, the race’s secret, so it’s never put on the site.'} Drawn ${today} by tools/race-map.mjs from the course as laid (LAY.RACE) and src/race-sim.ts's bots (gun gap guns '${RACE.GAP.MODE}'); run it again after a change to the course.</p>
 </main></body></html>
 `;
 writeFileSync(OUT, html);
