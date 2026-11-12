@@ -18,11 +18,13 @@ export const FALL = {
   SECS: 0.6,
   /** Seconds a row while Space speeds it (YPPedia's Sailing, Controls: "Space bar: Increase the pair's
       falling speed"), still steerable as it goes. */
-  FAST: 0.04,
+  FAST: 0.06,
   /** A tap of Space: this long falling FAST, a few rows (five), never to the bottom from up the board.
       The user, 11 Nov: "the space usually kind of speeds up the drop. It doesn't drop it entirely ...
       you normally tap space just so you zoom kind of near the bottom but not at the bottom." Held, it
-      keeps falling FAST till it's let go (ease). */
+      keeps falling FAST till it's let go (ease). The user, 12 Nov: "A quick tap of the spacebar also seems
+      a bit overpowered in sailing. It's like, whoa", so FAST went from 0.04 to 0.06 s a row: a quick tap
+      (a tenth of a second down) is three or four rows now, not five or more. */
   BURST: 0.2,
 };
 

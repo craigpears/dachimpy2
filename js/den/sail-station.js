@@ -175,7 +175,12 @@ function seaToast(L) {
   document.body.classList.toggle('sailtall', !L.wide);
 }
 
+/* station.leads: a place where a chain does something of its own (the starlit door's doorway: door.js) says
+   so first, in place of "a chain carries her ahead": each hook returns its words, or ''. */
+station.leads = [];
 export function stationPrompt() {
+  const lead = station.leads.map((f) => f()).find(Boolean);
+  if (lead) return `${lead} · ← → move · ↑ ↓ turn · Space: faster · 1 or Esc: back to the helm`;
   return 'Sailing · ← → move · ↑ ↓ turn · Space: faster · a chain carries her ahead · 1 or Esc: back to the helm';
 }
 

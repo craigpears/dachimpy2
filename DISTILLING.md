@@ -275,6 +275,47 @@ plenty of pieces, travel sideways by leapfrogging along a stored row; late, on a
 figure of eight for pairs up and down, the line pulled up a tile at a time, and the hook when pieces are
 scarce. The bots play by stage the same way.
 
+**Watching the first bots (12 Nov), the user's own plan for a run:** the bot "just went down and burnt"
+a white ("you would never leave a white piece in the top"): "fine, you might be swapping quickly, but
+you're not following the strategy of [whites] to the left, clearing ... roughly one column at a time to
+give yourself breathing room." And the shape to keep: "blacks ... you want on the right-hand side, when
+you're getting whites to the left, you want browns near the bottom because then from the left you drag a
+black from the top left down to the bottom right, up through the browns on the right-hand side, and you
+kind of drag it up through the browns until it [meets] the black at the top. So you end up in a situation
+where the top right is black, the bottom right is brown in a kind of an almost diamond shape, and then
+when you get later, you kind of do the mirror effect of that, trying to get whites to the right when
+you've run out of stuff to do." So, for the bots and the tutorial:
+- **Never burn a white:** whites near the top of a burning column are saved first.
+- **One column at a time:** finish the next junk column for the furnace before starting another, for
+  breathing room, whites always heading left.
+- **The diamond:** blacks stored top-right, browns bottom-right. A black taken from the top-left goes
+  down-right across the whites to the bottom-right, then up through the browns (blacks rise in browns)
+  till it joins the blacks at the top: so the junk columns on the right fill black above, brown below.
+- **Then the mirror:** later, with the junk run out, the same moves the other way round, whites heading
+  right.
+
+**A technique is one smooth drag, not little swaps (12 Nov):** watching the bot, "I can see it's doing
+individual few swaps, but the whole point is everything's like one smooth motion. Like a human doesn't have
+time for those little swaps. That's very bot-like. A real player is like moving [browns] left, top, bottom,
+left, top, right ... just like zooming them along, but in one smooth, like one operation. That's the point of
+these techniques, is then it creates a way of doing things quickly and consistently." So a routine is played
+as one long drag (the piece held and swept along its whole path, a swap at each step as the mouse passes),
+or a pair's few drags in quick succession, never a pause and a fresh click per swap; the bots' pace counts
+drags, and a drag's swaps come at a hand's speed, and the tutorial shows each technique as that one sweep.
+
+**Skill is the techniques, not the strategy (12 Nov):** "The different skill levels [are] about the
+techniques as much as anything ... I don't think any technique would say start burning immediately. It's
+always whites to the left. There's no reason to do any other strategy." So every tier, the learner too,
+plays the same plan (whites left, junk right, never a white burnt on purpose); a beginner only does less
+of it ("might start trying to like just burn one or two white columns"), and the tiers differ in which
+techniques they can pull off and how fast. **Whites stuck at the top are rescued by the crawl:** "if
+you've just got whites stuck at the top of the screen, that's where you need to kind of crawl things along
+with white, browns and blacks working together. Because if you have a brown at the top next to two whites,
+it does nothing. If you have a black next to it, all of a sudden they can work together and they can crawl
+along." A lone brown among whites at the top can't move (browns rise in whites: it's already up); a black
+and a brown together can, so the rescue brings a black up beside the brown and crawls the pair along,
+carrying the whites their way.
+
 ### Decision time
 Keep burning full junk columns as long as you're sure the next one will be finished before the furnace;
 the more white columns you bank, the longer the chain. Near the end there's less room on the right to
@@ -307,6 +348,17 @@ be by borrowing one from a finished column.
   up (it can cost 7 or 8 whites); **"drown" it**: let that column burn, even with a white or two.
 - Spice in a white column is a bonus: +3 instead of +1, and it's still Crystal Clear. Experts go for
   CC^12 with the most spice and the least wasted.
+
+### The endgame's gamble (the user, 12 Nov)
+"The difference between even a legendary, ultimate, whatever, like the CC10 and the CC12 ... it's almost
+like it becomes like a game of Russian roulette. Like ... you've got a column of 8 whites on the right-hand
+side. When the new column appears on the left where there were 2 whites, and you have to get them over as
+fast as you can, and it's like, oh, do I risk burning a thing to try and chase that next thing that will
+set me up for a longer CC without ruining my entire game?" So past about CC^10 it's no longer skill alone:
+each new column is a bet, ferry its whites right in time or not, and a burn there ends the chain. For the
+bots: the top tiers take that bet the way a player would (chase the chain while the odds are fair, cash in
+when they're not), so a tier's CC^12 rate is a probability, and the goals are set from it ("reached CC^12
+in 1 run of 4"), not a promise. For Helium: his advice at that point is the bet, plainly put.
 
 ### Burn timing
 Right-click to burn as soon as the right column is ready: in Stage I, as soon as the junk column is
@@ -377,6 +429,40 @@ basic play is CC^5 and below, skilled CC^6+, expert CC^9+.
 | Grand-Master to Legendary | 7 to 8 | CC^9 to CC^11 | mostly early |
 | Ultimate | 8.5+ | CC^12+, with spice | under 3.5 minutes |
 
+### What the bots reach (12 Nov, first run)
+`tools/distill-bots.mjs 40`: each tier of `src/distill-bots.ts` on the same 40 seeded boards (seeds 5000
+to 5039), at its own pace (swaps a second, and a moment to spot each drag), on the real furnace.
+
+| Tier | Pace | Bank | Longest chain: mean (best) | CC^6+ | CC^12 | Score a column: mean (best) | Minutes a session | Whites burned |
+|---|---|---|---|---|---|---|---|---|
+| Learner | 2 swaps/s, timer only | none | 0.0 (1) | 0/40 | 0/40 | 1.3 (3.4) | 5.0 (flask full) | 14.0 |
+| Able to Master | 3.5/s, burns early | 4 columns | 1.9 (5) | 0/40 | 0/40 | 8.6 (15.2) | 1.7 (dismissed) | 0.7 |
+| Grand-Master to Legendary | 5/s, + pair moves | 4.5 | 2.4 (5) | 0/40 | 0/40 | 9.0 (14.7) | 1.8 | 1.0 |
+| Ultimate | 6/s, + pair moves | 5 | 2.5 (6) | 3/40 | 0/40 | 8.9 (17.6) | 1.9 | 1.6 |
+
+**Honestly: no bot gets near CC^12; the best reach CC^5 to CC^7 now and then, CC^2 typically.** So these
+are not yet goals for a player: a real Master's CC^6 to CC^8 is beyond every tier. What they do well and
+badly:
+- **Stage I works.** Junk columns burn with almost no whites in them (under one white a session from the
+  Master up), whites are banked, never a junk column floats up. 4 to 6 columns of whites are on the board
+  when the chain starts.
+- **Stage II is where they fail,** and not for speed: with unlimited swaps a second and the full 15.3 s a
+  column, the Master's chains are still CC^2 on average (CC^6 once in 16). The white block they bank is
+  dirty at its edges: browns that rose to its top and blacks that sank to its bottom while junk crossed it
+  ("browns get stuck at the top, blacks at the bottom"), one in most columns, so only one or two columns
+  in a row come out Crystal Clear, and the whites scattered in the junk on the left are rarely ferried
+  across in time.
+- **Why:** the bots play by a sense of the board (each piece pulled toward its zone: the junk columns to
+  burn, the block of whites, the rest; blacks up and browns down; a way out kept open) and pick the best
+  drag of one piece, or two pieces moved together (up to six swaps: the crawl, the figure of eight), or a
+  drag that sets up the next. That's a hill-climb: it can't plan the long multi-drag techniques that clean
+  a block (the line pulled up a tile at a time, the hook, leapfrogging along a stored row of browns), nor
+  keep junk out of the block's edges from the start. Banking more doesn't help (the chain stays about
+  CC^2 from a bank of 3.5 to 7 columns): the block's cleanliness is the limit, not its size.
+- **Next, to make them real goals:** each technique as its own scripted routine (the crawl, the figure of
+  eight, the line pull, the hook, the leapfrog, channels), which the tutorial needs anyway (§7, item 3),
+  and a planner that picks a routine by the stage of the game and what's out of place, rather than the
+  hill-climb choosing swaps.
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
@@ -407,6 +493,35 @@ nice and illustrative". In order:
    reaches and how fast. Those runs become the goals: "the bot reached CC^12 in 3 min 20 s".
 3. **The tutorial,** after the user's pointer to the real one: Helium showing each technique on a real
    board, animated, then "now you try", in the style of Tzz's balloon lesson.
+   **Each technique demonstrated, and funny (12 Nov):** "I'd love to see like demonstrating each of the
+   techniques, like the hook, clearing each stage, obviously each thing should be funny." So a short
+   demonstration per technique (the hook, the crawl, the figure of eight, the leapfrog, channels, when
+   to burn) and per stage of a run (§3), each a little scene with its own joke. **Not drunk jokes:** the
+   user first had him drinking each demonstration's beer, then dropped it: "forget that part, I think
+   we've already got the [Kikkit] being the drunk part, he's just the creator of these things." Helium's
+   humour is the maker's: proud of his brews, his mishaps when the balance goes wrong (item 4).
+   Each demonstration shows its plan on the board before he starts (RULES.md, "A demonstration shows its
+   plan before it builds"), the lesson the user drew from Tzz's Bingo.
+   **"Help, Helium" while you play (12 Nov):** "playing and be able to press a button that says help
+   helium and he starts showing you some moves on how you could get yourself out of the situation." So
+   mid-game a button asks him, and he plays the routine your board needs from where it stands (the same
+   technique routines the bots and the lesson use), a few moves shown on your own board, then hands it
+   back.
+   **Context-aware, better than a set lesson (12 Nov):** "helium should kind of detect what stage you're
+   at and show you what technique. So should you be getting things to the left? ... how you should be
+   organizing the pieces should you be using hooks? ... Oh, this is how I would rescue that piece. Look, I
+   would draw these together in this way, the brown and black working together. You should be showing you
+   like techniques relevant to the situation, I guess, is a lot better than a structured tutorial. It's
+   context aware." So Helium's teaching is mostly "Help, Helium": he reads your board (the planner's
+   stage and the routine it would pick, and why), says it in a line in his voice (whites left now; save
+   that white at the top; time for the hook), and plays it on your board as the one smooth drag. A short
+   opening lesson can still show the basics first.
+   **The distiller in the panel becomes Helium (12 Nov).** The panel's top strip has a pirate distiller
+   by the barrels, as the real one does; ours is a stand-in (a green coat, red sash, tricorn), drawn from
+   the research's description, not anyone in particular. The user, seeing it: "I'm not sure what this
+   graphic is either ... some kind of distilling sensei figure? ... it could work." So once Helium's drawn
+   (from his portrait, checked first), he's the one standing at the still, and the one who steps in on
+   "Help, Helium".
 4. **Helium and his island** (IDEAS.md, "Helium, and Distilling"; his portrait checked first): his own
    little island, perhaps by the smugglers' beach, his still on it, and his mishaps: when he gets the
    balance wrong, the still goes up with a bang ("Oops. That happens sometimes. Don't worry about it.").

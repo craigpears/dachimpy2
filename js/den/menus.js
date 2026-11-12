@@ -23,9 +23,10 @@ import { lodgingsOpen } from './lodgings.js';
 import { tzzCheat } from './balloon-isle.js';
 import { empireCheat } from './imperial-isle.js';
 import { smugglersCheat } from './smugglers.js';
-import { raceCheat } from './race.js';
+import { raceCheat, race } from './race.js';
 import { doorCheat } from './door.js';
 import { watchStart, watchStop } from './race-watch.js';
+import { raceOnline, online as racingOnline } from './race-net.js';
 import { cp } from './checkpoint.js';
 import { board, sailReset } from './sailing.js';
 import { online, guest, myId, send } from './crew.js';
@@ -762,4 +763,12 @@ $('cheat-groups').replaceChildren(
   ...CHEAT_SECTIONS.map(([title, list]) => cheatSection(title, list)),
 );
 $('cheat-btn').onclick = () => cheatPanel(!cheats.open);
+/* Racing online (js/den/race-net.js), a plain way in from the den's top panel (the user, 12 Nov: "I eventually
+   found the race online thing. That really was not clear"): out to the race's buoy, as its starting point,
+   then in to the line with the open races up. Already in a race's room: its lobby. */
+$('race-btn').onclick = (e) => {
+  e.currentTarget.blur();
+  if (!racingOnline() && !(sail.on && race.rules.state !== 'off')) { cheatRace(); linkTo('race'); }
+  raceOnline();
+};
 $('cheats-close').onclick = () => cheatPanel(false);

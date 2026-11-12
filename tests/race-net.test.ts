@@ -229,18 +229,20 @@ describe('the room runs the race: the count, the clock, the bots (12 Nov)', () =
     expect(s.racers[1].prog).toBeGreaterThan(5);
   });
 
-  it('stops ticking once the race is done, so the room can sleep', () => {
+  it('stops ticking once the race is done and its places shown, back in its lobby, so the room can sleep', () => {
     const R = room(['anne'], 2);
     off(R);
     R.handle('anne', { t: 'retire' });
-    for (let k = 0; k < 2000 * NET.HZ && R.ticking; k++) R.tick(DT);
-    expect(R.phase).toBe('done');
+    let done = false;
+    for (let k = 0; k < 2000 * NET.HZ && R.ticking; k++) { R.tick(DT); done ||= R.phase === 'done'; }
+    expect(done).toBe(true);
+    expect(R.phase).toBe('lobby');
     expect(R.ticking).toBe(false);
   });
 });
 
 describe('everyone else\'s sloop, drawn from snapshots (12 Nov)', () => {
-  const snap = (seq: number, at: number, c: number, room = 'r1'): Snapshot => ({ t: 'snap', room, seq, phase: 'on', at, clock: at, seed: 1, fill: 2, players: [], racers: [{ name: 'x', id: null, rv: 0, bot: false, spot: 1, c, r: 50, d: 1, leg: 0, st: 'sailing', shots: 2, hits: 0, time: null, place: null, prog: 0, lift: 0 }], holds: [], shots: [], rocks: 0 });
+  const snap = (seq: number, at: number, c: number, room = 'r1'): Snapshot => ({ t: 'snap', room, seq, phase: 'on', at, clock: at, seed: 1, fill: 2, soon: null, players: [], racers: [{ name: 'x', id: null, rv: 0, bot: false, spot: 1, c, r: 50, d: 1, leg: 0, st: 'sailing', shots: 2, hits: 0, time: null, place: null, prog: 0, lift: 0 }], holds: [], shots: [], rocks: 0 });
 
   it('glides between two snapshots, a moment behind the newest', () => {
     const M = new Mirror();

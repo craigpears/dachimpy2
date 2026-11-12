@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Distilling test</title>
+<!-- A test page for Puzzle Pirates' Distilling, unlinked like den.html. The rules are src/distilling.ts
+     (compiled to js/distilling.js); the board's look is js/den/distill-board.js, the one Helium's still
+     will use. This page only stands it up on its own, with a seed in the address (?seed=7), a restart,
+     and the bots of src/distill-bots.ts to watch at their own pace (?bot=ultimate). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #f6ead2; --dim: #cbb894; --gold: #e0a92a; --panel: rgba(26, 16, 8, 0.88); --edge: #6a4a24; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #140c06; font: 500 16px/1.4 'Alegreya Sans', system-ui, sans-serif; color: var(--ink); }
+  canvas { display: block; }
+  .ui { position: fixed; left: 12px; top: 12px; width: min(330px, calc(100vw - 24px)); background: var(--panel); border: 1px solid var(--edge); border-radius: 10px; padding: 10px 12px; }
+  h1 { font: 700 22px 'Alegreya', serif; color: var(--gold); margin: 0 0 4px; }
+  p { margin: 0 0 8px; color: var(--dim); font-size: 14px; }
+  .row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; align-items: center; }
+  button, select { font: 700 14px 'Alegreya Sans', sans-serif; color: var(--ink); background: #3a2410; border: 1px solid #a88050; border-radius: 6px; padding: 3px 9px; cursor: pointer; }
+  button.on { background: #6a4418; }
+  #stats b { color: var(--gold); }
+  #log { list-style: none; padding: 0; margin: 6px 0 0; font-size: 14px; color: var(--dim); max-height: 11em; overflow: hidden; }
+  #log li:first-child { color: var(--ink); font-weight: 700; }
+  #prompt { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); background: var(--panel); border: 1px solid var(--edge); border-radius: 8px; padding: 4px 12px; font-size: 15px; color: var(--dim); white-space: nowrap; max-width: calc(100vw - 24px); overflow: hidden; text-overflow: ellipsis; }
+  @media (max-width: 900px) { .ui { top: auto; bottom: 48px; } .ui p { display: none; } }
+</style>
+</head>
+<body>
+<div class="ui">
+  <h1>Distilling</h1>
+  <p>Puzzle Pirates' Distilling, by its real rules and keys. Click a piece, then a neighbour, to swap them (or hold
+    and drag it through swaps). The lower piece must beat the upper: white rises past black, brown past white, black
+    past brown. Arrows or the number pad move the cursor, Space swaps, X or right-click burns the column now. A
+    column with more blacks than whites burns; the rest go up into the flask. Only whites: Crystal clear!</p>
+  <div class="row">
+    <button id="restart">Restart</button>
+    <button id="next">New board</button>
+    <button id="dismiss">Dismiss</button>
+    <button id="pause">Pause</button>
+  </div>
+  <div class="row">
+    <label for="bot">Watch a bot:</label>
+    <select id="bot"><option value="">no, I'll play</option></select>
+  </div>
+  <div id="stats"></div>
+  <ul id="log"></ul>
+</div>
+<div id="prompt"></div>
+<script type="importmap">
+  { "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { seeded } from './js/mirror-row.js';
+import { Distilling, MESSAGES } from './js/distilling.js';
+import { TIERS, tierNamed, DistillBot } from './js/distill-bots.js';
+import { distillBoard } from './js/den/distill-board.js';
+
+const $ = (id) => document.getElementById(id);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+document.body.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#140c06');
+const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+
+const params = new URLSearchParams(location.search);
+/** Where a place on the board is on the screen (for checking it by hand from the console). */
+window.screenAt = (col, row) => {
+  const gm = board.game, tall = gm.cols[col].length === 9, u = 25 + col * 40 + 20, v = 135 + 23 + row * 40 + (tall ? 0 : 20) + 20;
+  const p = new THREE.Vector3(u / 450 - 0.5, (600 / 450) / 2 - v / 450, 0);
+  board.group.localToWorld(p); p.project(camera);
+  return [(p.x + 1) / 2 * innerWidth, (1 - p.y) / 2 * innerHeight];
+};
+let seed = Number(params.get('seed')) || 1, board = null, botName = params.get('bot') || '';
+// ?shot: the board alone in the middle, no panel (for a picture of it).
+const shot = params.has('shot');
+// ?fast=n: time n times as fast (to watch a bot's whole session quickly).
+const fast = Number(params.get('fast')) || 1;
+if (shot) for (const el of document.querySelectorAll('.ui, #prompt')) el.style.display = 'none';
+for (const t of TIERS) { const o = document.createElement('option'); o.value = t.name; o.textContent = `${t.label} (${t.rate} swaps/s)`; $('bot').append(o); }
+$('bot').value = botName;
+
+const log = (t) => { const li = document.createElement('li'); li.textContent = t; $('log').prepend(li); while ($('log').children.length > 9) $('log').lastChild.remove(); };
+const L = 'wbK*x';
+/** A bot playing through the board, at its tier's pace: a moment to spot each drag, then a swap each 1 / rate s. */
+let bot = null, botWait = 0, botSteps = [];
+
+function deal() {
+  board?.dispose();
+  $('log').innerHTML = '';
+  board = distillBoard({
+    game: new Distilling(seeded(seed)), at: new THREE.Vector3(0, 0, 0), size: 3,
+    onColumn: (c, finished) => {
+      const what = c.message ? (c.message === 'clear' && c.chain > 1 ? `${MESSAGES.clear} x${c.chain}` : MESSAGES[c.message]) : c.up ? 'up' : 'burned';
+      log(`${c.up ? 'up' : 'burned'}: ${c.pieces.map((p) => L[p]).join('')}, ${what}${c.spice ? `, ${MESSAGES[c.spice]}` : ''}, ${c.points + c.bonus} points`);
+      bot?.seen(c, board.game);
+      botSteps = [];
+      if (finished) log(`finished: ${board.game.points} points in ${board.game.columnsUp} columns, ${board.game.score().toFixed(2)} a column`);
+    },
+    onFinish: (gm) => { if (gm.dismissed) log(`dismissed: ${gm.points} points in ${gm.columnsUp} columns, ${gm.score().toFixed(2)} a column`); },
+  });
+  scene.add(board.group);
+  bot = botName ? new DistillBot(tierNamed(botName)) : null;
+  botWait = 600; botSteps = [];
+  history.replaceState(null, '', `?seed=${seed}${botName ? `&bot=${botName}` : ''}`);
+}
+$('restart').onclick = () => deal();
+$('next').onclick = () => { seed++; deal(); };
+$('dismiss').onclick = () => board.dismiss();
+$('pause').onclick = () => { board.paused = !board.paused; $('pause').classList.toggle('on', board.paused); };
+$('bot').onchange = () => { botName = $('bot').value; deal(); $('bot').blur(); };
+deal();
+
+function driveBot(dt) {
+  if (!bot || board.game.finished || board.paused) return;
+  botWait -= dt * 1000;
+  if (botWait > 0 || !board.game.movable) return;
+  const t = bot.tier;
+  if (botSteps.length) {
+    const [x, y, w] = botSteps.shift();
+    const to = board.swapAt(x, y, w);
+    if (!to) botSteps = [];
+    botWait = 1000 / t.rate;
+    // A step of another piece is another drag: a moment to spot it.
+    if (to && botSteps.length && (botSteps[0][0] !== to[0] || botSteps[0][1] !== to[1])) botWait += t.spot;
+    return;
+  }
+  const p = bot.plan(board.game);
+  if (p.kind === 'dismiss') { board.dismiss(); return; }
+  if (p.kind === 'burn') { board.burn(); botWait = t.spot; return; }
+  if (p.kind === 'wait') { botWait = 250; return; }
+  if (p.kind === 'pair') botSteps = p.pair.steps.map((s) => [...s]);
+  else {
+    let x = p.drag.x, y = p.drag.y;
+    for (const w of p.drag.ways) { botSteps.push([x, y, w]); const n = board.game.neighbour(x, y, w); [x, y] = n; }
+  }
+  botWait = t.spot;
+}
+addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'SELECT') return;
+  if (e.target.tagName === 'BUTTON') e.target.blur();
+  if (board.key(e.key, e)) e.preventDefault();
+});
+const canvas = renderer.domElement;
+const ndc = (e) => [e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1];
+canvas.addEventListener('pointermove', (e) => board.pointer(...ndc(e), camera));
+canvas.addEventListener('pointerdown', (e) => { board.pointer(...ndc(e), camera); board.press(e.button); canvas.setPointerCapture(e.pointerId); });
+canvas.addEventListener('pointerup', (e) => board.release(e.button));
+canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+function fit() {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+}
+addEventListener('resize', fit);
+fit();
+
+const clock = new THREE.Clock();
+function frame() {
+  const dt = Math.min(0.05, clock.getDelta()) * fast;
+  driveBot(dt);
+  board.tick(dt);
+  // Straight on to the board, a little left of the middle so the panel doesn't cover it.
+  const v = board.camView(camera), wide = innerWidth > 900, side = shot ? 0 : wide ? -0.9 : 0, low = !shot && !wide ? -0.8 : 0;
+  camera.position.copy(v.from).add(new THREE.Vector3(side, low, wide ? 0.3 : 1.2));
+  camera.lookAt(v.look.clone().add(new THREE.Vector3(side, low, 0)));
+  const gm = board.game, left = gm.timeLeft();
+  $('stats').innerHTML = `Seed <b>${seed}</b> · <b>${(gm.time / 1000).toFixed(0)}</b> s · burn in <b>${Number.isFinite(left) ? (left / 1000).toFixed(1) : '-'}</b> s<br>`
+    + `Flask <b>${gm.flask}</b> / 100 · up <b>${gm.columnsUp}</b>, burned <b>${gm.columns.length - gm.columnsUp}</b><br>`
+    + `Points <b>${gm.points}</b> · score <b>${gm.score().toFixed(2)}</b> · chain <b>${gm.chain}</b> (best ${gm.longest})`;
+  $('prompt').textContent = board.prompt();
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+frame();
+window.db = () => board;   // (for poking at it from the console)
+window.cam = camera;
+</script>
+</body>
+</html>

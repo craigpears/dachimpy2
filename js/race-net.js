@@ -63,14 +63,48 @@ export const NET = {
     FLAG: '#1d1a18',
     /** A pirate's name, as everywhere in the den: three to sixteen letters. */
     NAME: /^[A-Za-z]{3,16}$/,
+    /** The open races anyone walks into with a click, no code (the user, 12 Nov: "the public lobby, where people
+        can just come in", and "I [don't] think I want people to share codes. You should just see a lobby and be
+        able to join it"). Each a room like any other, its code reserved; a private race's code (a ?race= link)
+        still works, but nobody's asked to type or share one. */
+    LOBBIES: [{ code: 'OPEN', name: 'The open race' }, { code: 'GALE', name: 'Gale race' }, { code: 'TIDE', name: 'Tide race' }],
+    /** Seconds from the first pirate pressing Start (not everyone has) to the count: anyone else in the lobby
+        can press it too and race; whoever's still waiting for pirates races the next one. */
+    ABOARD: 15,
+    /** Seconds the race goes on once every player in it is home or out (the bots still coming in), when someone
+        in the room is waiting for the next race, before the room calls it: she isn't kept waiting long. */
+    CALL: 20,
+    /** Seconds the places are shown once the race is done, before the room's back to its lobby for the next. */
+    RESULTS: 15,
 };
+/** Whether a race's code is one of the open races'. */
+export const isOpen = (code) => NET.LOBBIES.some((l) => l.code === code);
 /** A fresh race code. */
-export const makeCode = (random = Math.random) => Array.from({ length: 4 }, () => NET.LETTERS[Math.floor(random() * NET.LETTERS.length)]).join('');
+export function makeCode(random = Math.random) {
+    for (;;) {
+        const c = Array.from({ length: 4 }, () => NET.LETTERS[Math.floor(random() * NET.LETTERS.length)]).join('');
+        if (!isOpen(c))
+            return c;
+    }
+}
 /** A name as the den writes it: a capital, then small letters ('Deckhand' if it isn't one). */
 export const tidyName = (s) => {
     const t = String(s ?? '').trim();
     return NET.NAME.test(t) ? t[0].toUpperCase() + t.slice(1).toLowerCase() : 'Deckhand';
 };
+/** A room's line in the open races' list, in a few words: whether there's room in it, and what it's doing. */
+export function peekText(p) {
+    if (!p)
+        return { open: false, says: 'Can\'t reach it' };
+    const n = p.players.length, waiting = p.players.filter((x) => !x.racing).map((x) => x.name);
+    if (n >= p.most)
+        return { open: false, says: 'Full' };
+    if (p.phase === 'count' || p.phase === 'on')
+        return { open: true, says: `Racing now${waiting.length ? ` · next: ${waiting.join(', ')}` : ''}` };
+    if (!n)
+        return { open: true, says: 'Nobody yet' };
+    return { open: true, says: `Waiting: ${waiting.join(', ')}` };
+}
 export const ACTS = new Set(['put', 'unput', 'stop', 'drop', 'moor', 'gust', 'row', 'stroke', 'hit', 'pump', 'fire', 'patched', 'clear', 'shut', 'open', 'breeze', 'rocks']);
 /** Actions as they came, checked for shape: at most 60 at once, each a step, a kind, and small arguments. */
 export function cleanActs(x) {

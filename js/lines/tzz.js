@@ -19,7 +19,11 @@ export const GREET = {
     by her twist, once it's down and its mark's shown on the board (src/balloons.ts, marks: shown, then
     named); `task` on your go; `chain` once you've set it off. In plain words (the user: "she's using the
     right terminology, like the trigger or what triggers what. But ... that doesn't mean anything to
-    most"): "trigger" only once the gap's been shown, and said what it is. */
+    most"): "trigger" only once the gap's been shown, and said what it is.
+    And the plan said before she builds it (the user, 12 Nov, of the Bingo: "hang on, what happened to
+    the blues on the bottom? What's the plan? ... It kind of gets revealed right at the end"): each act's
+    start and brief say it, its whole plan faint on the board; the Bingo's bottom blues wait for a blue
+    from upstairs, said as she leaves them. */
 export const DOUBLE = {
     start: 'First, a Double. A platform one short, and a line to set it off.',
     twists: [
@@ -36,7 +40,7 @@ export const DOUBLE = {
     ],
     help: 'Here, like this. Watch the yellow.',
     popped: 'Double! That\'s what zooms you over a whirlpool.',
-    brief: 'The platform filling up: each balloon goes in a square of its own colour.',
+    brief: 'The plan\'s on the board, faint till it\'s built: a gap, three blues, what drops where, and what pops when.',
     watch: {
         2: 'See the empty square? That\'s the gap. She leaves it empty on purpose.',
         3: 'Three blues stacked up. One more blue on top makes four in a line, and four in a line pop.',
@@ -45,12 +49,12 @@ export const DOUBLE = {
     chain: '1, the four blues pop. 2, the yellow drops into the gap, and the platform pops.',
 };
 export const BINGO = {
-    start: 'Now a Bingo: that Double, with another on top.',
+    start: 'Now a Bingo: that Double, with another on top to drop a blue onto it.',
     twists: [
         'Bottom one first, same as before. Puff, puff...',
         '...puff, puff...',
         '...white in, blue beside it...',
-        '...three blues. Now, upstairs.',
+        '...three blues. They wait: a blue falls on them from upstairs.',
         'Top one. I\'m leaving a gap in the middle again.',
         'White, blue, in their squares. I\'m getting dizzy.',
         'White on the corner. That starts the next stack.',
@@ -64,10 +68,10 @@ export const BINGO = {
         'So close! Go on!',
     ],
     help: 'Like this. Then just watch it go.',
-    popped: 'Bingo! Four pops in a row. Now go make a whirlpool jealous.',
-    brief: 'The same Double at the bottom, then another platform on top of it.',
+    popped: 'Bingo! Four pops. Two more and it\'s a Vegas: that\'s what gets you out to the penguins.',
+    brief: 'The plan, faint till it\'s built: the Double at the bottom, a platform on top, and its pop drops a blue onto the bottom blues.',
     watch: {
-        3: 'Same as before: the gap, and three blues.',
+        3: 'Same as before: the gap, and three blues. They wait for a blue from the top platform.',
         6: 'A gap in the top platform too. Nothing goes over it, so a balloon can drop straight in.',
         7: 'Three whites stacked up. One more white on top pops them.',
         8: 'This pair waits. When the top platform pops, it falls: blue onto the blues, yellow into the bottom gap.',

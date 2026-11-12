@@ -467,29 +467,23 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   the "Defend it again" button, while the den's now a whole sea of islands, puzzles and a race. (What it
   should say instead, and whether the quick siege still opens it, to pin down with the user: the message was
   cut off.)
-- **The online race needs a real lobby (12 Nov):** trying it online for the first time, "it's not even clear
-  like that you're in a lobby with people. Like, how do I know that people are here instead of bots? There's
-  no indication of that." The Pirate Den panel "is a bit heavy ... taking up valuable space ... that bit on the
-  right ... just a big dump of text ... this needs to be a lot lighter. Lot lighter. What does H head home mean
-  in this context? Is that even relevant in here?" And "much more lobby-like. Like, if you look at the
-  original thing, it would be like, here's the map of the course, you've got people loading and waiting, or
-  you can play with bots ... you can either wait for people, start with bots". So: a lobby screen of its own
-  (the course's chart, who's in and who's a bot, plainly; wait for people or start with bots), and in a race
-  the den's heavy panels and key lists slimmed right down, nothing that doesn't apply (no "head home").
-  Then, the idea it started from: "the public lobby, where people can just come in but it should be clear
-  when you're waiting for the next race who's waiting". So one open race anyone can walk into, the next race
-  filling up in view, besides the private codes. And on the water "indicate who's who, because other than I
-  can recognize Kikkit's character, I don't know who's who here": a name over every sloop, players' and bots'.
-  And finding it at all (12 Nov, later): "Okay, I eventually found the race online thing. That really was not
-  clear." Racing online wants a plain way in from the den (a button, and on the starter's card), not a key
-  you'd only know from the notes. Once found, the flow was "a bit closer than I thought".
-  No codes (12 Nov): "I [don't] think I want people to share codes. You should just see a lobby and be able to
-  join it." So the open lobby (or a short list of them, who's in each) to join with a click; codes out of sight.
 - **A hop to get going off the line (12 Nov):** on the start's field, "this initial opening thing as well,
   where you're trying to get in with these trade winds. Again, that could have a nice hop to the ball thing to
   get started." So a hop near the line (a wind or chain hop, like the ladders further on) that gets a good
   start going. (Which "ball" and where it lands, to pin down with the user: maybe the first buoy.) The user
   liked how it's looking now: "they're definitely much more looking like" [a race].
+- **How far does a chain carry her? Vegas Island's hidden rule (12 Nov):** "I did a double to get over the
+  first one, and then I thought, well, it's 1, 2, 3 tiles to get to the penguins, so surely a bingo should
+  take me 3 tiles, right? ... What's the calculation?" The calculation is a square a step (Double 2,
+  Triple 3, Bingo 4, Donkey 5, a Vegas 7, a square more for each step past it), but the penguins' water
+  also has a hidden rule: only a Vegas's gust gets in, however near it is, so her Bingo stopped on the
+  wind in front of it and was swept home. To make plain (how, to pin down with the user): honest distance
+  only (the penguins 7 squares from the mouth, any gust that reaches them lands), or the Vegas rule kept
+  and shown (on the water, and said when it stops her short).
+- **The starlit door: back to a simple Navigation-only shortcut (12 Nov):** the user only understood the tunnel afterwards ("it was not intuitive at play"), and then decided against it: "I love some of the animation and the styles on it, but I think it needs just probably to go back to being simple... nav only shortcut that takes you just like one step through, and maybe can be tuned to be a bit trickier. Because I could just imagine someone good at doing Vegas, it takes you out of the race. It's too isolated otherwise." So: Navigation opens the door and that alone takes her through, one stretch, up the cleft onto leg 3. No Sailing clear to get in, no Vegas under the cleft, no second stretch to leg 5. Keep the door's look (the crag, the stars, the door swinging open, the tunnel). The Navigation can be made trickier so the saving stays in proportion with the other shortcuts.
+- **Watched racers' Doubles and Triples don't zoom them along (12 Nov):** watching Kikkit in the race: "she's doing lots of Doubles and Triples, but that's supposed to be zooming your ship along in any context." And: "if you do a Double or Triple, even just in a normal lane, it's supposed to speed you along a bit." (Your own sloop already does this; the racers you watch, and the rivals, don't.) Her board shows real clears, but her sloop doesn't jump for them. The simulation averages Sailing on the pilot into a steady bit of extra speed, and while she builds a Double or Triple for a gap she's slowed, not carried. What should happen: every clear on a racer's board carries her sloop on by its gust, as the player's own does (a Double two squares, a Triple three, and so on), visibly and at the moment of the clear, whatever she's building it for. The simulation's balance should come from the same gusts, so what you watch is what the numbers count. (After the course pass, which has the same files open.)
+- **Watched racers glide instead of making moves (12 Nov):** "why are they going so smoothly? Like, they look like they're gliding along. It's supposed to be like moves, like forward, left, right when you're watching." The racers you watch (and the rivals) slide along the course in one continuous motion. They should sail the way your own sloop does: a move at a time, a square forward or a turn left or right, with each clear's gust a jump on top (the entry above). (With that entry, after the course pass.)
+- **Plan your race route, then puzzle it through (12 Nov, agreed):** you can't steer and puzzle at once, so the race gets a plan: one choice for each leg (the long way or one of its shortcuts), hidden from the others, changed any time from a strip along the screen's edge with one click and no time lost from the board. The pilot sails it move by move, stops by itself at each obstacle's spot (a hop, each of the zigzag's headwinds, a lock, the crane, the barrier, the whirlpools, the door) with the board it needs up, and goes on once it's done. "That's really simple and easy." The design is in RACE.md §5. (After the course pass and the racers' moves and gusts, which use the same files.)
 
 ## Spotted along the way (not asked for)
 

@@ -67,10 +67,27 @@ export const NET = {
   FLAG: '#1d1a18',
   /** A pirate's name, as everywhere in the den: three to sixteen letters. */
   NAME: /^[A-Za-z]{3,16}$/,
+  /** The open races anyone walks into with a click, no code (the user, 12 Nov: "the public lobby, where people
+      can just come in", and "I [don't] think I want people to share codes. You should just see a lobby and be
+      able to join it"). Each a room like any other, its code reserved; a private race's code (a ?race= link)
+      still works, but nobody's asked to type or share one. */
+  LOBBIES: [{ code: 'OPEN', name: 'The open race' }, { code: 'GALE', name: 'Gale race' }, { code: 'TIDE', name: 'Tide race' }],
+  /** Seconds from the first pirate pressing Start (not everyone has) to the count: anyone else in the lobby
+      can press it too and race; whoever's still waiting for pirates races the next one. */
+  ABOARD: 15,
+  /** Seconds the race goes on once every player in it is home or out (the bots still coming in), when someone
+      in the room is waiting for the next race, before the room calls it: she isn't kept waiting long. */
+  CALL: 20,
+  /** Seconds the places are shown once the race is done, before the room's back to its lobby for the next. */
+  RESULTS: 15,
 } as const;
+/** Whether a race's code is one of the open races'. */
+export const isOpen = (code: string): boolean => NET.LOBBIES.some((l) => l.code === code);
 
 /** A fresh race code. */
-export const makeCode = (random: () => number = Math.random): string => Array.from({ length: 4 }, () => NET.LETTERS[Math.floor(random() * NET.LETTERS.length)]).join('');
+export function makeCode(random: () => number = Math.random): string {
+  for (;;) { const c = Array.from({ length: 4 }, () => NET.LETTERS[Math.floor(random() * NET.LETTERS.length)]).join(''); if (!isOpen(c)) return c; }
+}
 /** A name as the den writes it: a capital, then small letters ('Deckhand' if it isn't one). */
 export const tidyName = (s: unknown): string => {
   const t = String(s ?? '').trim();
@@ -94,12 +111,27 @@ export interface Shot { n: number; by: number; on: number; cells: [number, numbe
 /** The whole race, every time. `room`: this run of the room (a room that's slept or been moved starts its
     numbers again, so a browser starts afresh when it changes); `seq`, numbered in it. `at`: the room's own
     seconds (for drawing between snapshots); `clock`: the count's seconds left, or the race's clock. In the
-    lobby, `racers` is the line-up as it would race. `seed`: the race's (its start's field, src/start-field.ts,
-    the same for everyone, laid from it in the lobby too: the next race's). `rocks`: the hits on the rocks across
-    spit 3's gap, everyone's (12 Nov: down at ROCKS.HITS, open to every racer). */
+    lobby, `racers` is the line-up as it would race. `soon`: seconds till the room moves on by itself (in the
+    lobby, the count once someone's pressed Start; racing, the race called once every player's home; done,
+    back to the lobby), or null. `seed`: the race's (its start's field, src/start-field.ts, the same for
+    everyone, laid from it in the lobby too: the next race's). `rocks`: the hits on the rocks across spit 3's
+    gap, everyone's (12 Nov: down at ROCKS.HITS, open to every racer). */
 export interface Snapshot {
   t: 'snap'; room: string; seq: number; phase: Phase; at: number; clock: number; seed: number; fill: number;
+  soon: number | null;
   players: SnapPlayer[]; racers: SnapRacer[]; holds: [Spot, number][]; shots: Shot[]; rocks: number;
+}
+/** A race's room seen from outside, before going in (the open races' list): what it's doing, its clock, how
+    soon it moves on, who's in (racing now, or waiting: ready to start or not), its racers in all. */
+export interface Peek { phase: Phase; clock: number; soon: number | null; fill: number; most: number; players: { name: string; ready: boolean; racing: boolean }[] }
+/** A room's line in the open races' list, in a few words: whether there's room in it, and what it's doing. */
+export function peekText(p: Peek | null): { open: boolean; says: string } {
+  if (!p) return { open: false, says: 'Can\'t reach it' };
+  const n = p.players.length, waiting = p.players.filter((x) => !x.racing).map((x) => x.name);
+  if (n >= p.most) return { open: false, says: 'Full' };
+  if (p.phase === 'count' || p.phase === 'on') return { open: true, says: `Racing now${waiting.length ? ` · next: ${waiting.join(', ')}` : ''}` };
+  if (!n) return { open: true, says: 'Nobody yet' };
+  return { open: true, says: `Waiting: ${waiting.join(', ')}` };
 }
 
 /** What a browser sends. */

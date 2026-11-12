@@ -95,8 +95,9 @@ export class RaceRoom {
     const url = new URL(request.url);
     const rec = url.pathname.match(/^\/record\/([a-z0-9]{10})$/);
     if (rec) return this.record(rec[1]);
-    if (request.headers.get('Upgrade') !== 'websocket') return new Response('Expected a WebSocket', { status: 426 });
     const code = url.pathname.split('/').pop();
+    // (looked at from outside, for the open races' list: what it's doing and who's in)
+    if (request.headers.get('Upgrade') !== 'websocket') return new Response(JSON.stringify(this.room(code).peek()), { headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
     const [client, server] = Object.values(new WebSocketPair());
     this.ctx.acceptWebSocket(server);
     const conn = crypto.randomUUID();

@@ -14,8 +14,13 @@
    The user (12 Nov), agreeing the room runs the race ("absolutely go for it"): one fair referee, no host
    browser to lose, nothing stalling when someone's tab is in the background. So the room keeps the race's
    field (src/den-racers.ts) and decides:
-   - the lobby: who's in (six players at most), their spots on the line, ready or not, how many racers the
-     bots fill the field to; anyone starts the count once everyone's ready;
+   - the lobby: who's in (six players at most), their spots on the line, how many racers the bots fill the
+     field to; each waiting for pirates or pressing Start (Referee.aboard: everyone's pressed it, the count;
+     someone has, the count in NET.ABOARD seconds with whoever has, the rest racing the next one);
+   - after a race: called once every player in it is home or out if someone's waiting for the next
+     (NET.CALL), its places shown (NET.RESULTS), then the lobby again; whoever pressed Start while waiting
+     through it still has, for the next. The open races (NET.LOBBIES) are rooms like any other;
+     `peek`, the room seen from outside for their list;
    - the count and the clock;
    - whose turn it is at a lock, the crane, the barrier's notch, the wreck's (first come, first served, as
      the field's rules have it): a player's taken from where she is, so it can't be missed;
@@ -35,7 +40,7 @@ import { Field, FIELD, courseSea, hittable, type RacerState, type Spot, type Fie
 import { RACE, FIRST_SPOT, spotPose, rocksDown } from './den-race.js';
 import { sail as sailBots, route, style, progressAt, type SimRun } from './race-sim.js';
 import { WATCHED } from './den-rivals.js';
-import { NET, apart, spotOn, spotSquare, waitAt, parseUp, type Phase, type Shot, type Snapshot, type SnapRacer, type Up, type Down, type Act } from './race-net.js';
+import { NET, apart, spotOn, spotSquare, waitAt, parseUp, type Phase, type Shot, type Snapshot, type SnapRacer, type Up, type Down, type Act, type Peek } from './race-net.js';
 import { LAY } from './den-sail.js';
 import { PlayerSea } from './race-replay.js';
 
@@ -90,8 +95,14 @@ export class Referee {
   }
   private newSeed() { return 1 + Math.floor(this.random() * 2 ** 30); }
 
-  /** Counting down or racing: the room ticks (NET.HZ) and sends snapshots. Otherwise it's quiet. */
-  get ticking(): boolean { return this.phase === 'count' || this.phase === 'on'; }
+  /** The room's seconds when it moves on by itself (Snapshot, `soon`): in the lobby, the count once someone's
+      pressed Start; racing, the race called once every player in it is home or out; done, the lobby again. */
+  soonAt: number | null = null;
+  /** Counting down or racing, the places up, or the lobby's clock running: the room ticks (NET.HZ) and sends
+      snapshots. Otherwise it's quiet. */
+  get ticking(): boolean { return this.racing || this.phase === 'done' || this.soonAt !== null; }
+  /** Counting down or racing. */
+  get racing(): boolean { return this.phase === 'count' || this.phase === 'on'; }
   player(id: string): Player | undefined { return this.players.find((p) => p.id === id); }
   /** Players in the room, connected, in the order they came. */
   private here(): Player[] { return this.players.filter((p) => p.on).sort((a, b) => a.joined - b.joined); }
@@ -131,15 +142,28 @@ export class Referee {
     const p = this.player(id);
     if (!p) return;
     p.on = false; p.gone = 0;
-    if (!this.ticking || p.i < 0) this.players = this.players.filter((x) => x !== p);
+    if (!this.racing || p.i < 0) this.players = this.players.filter((x) => x !== p);
     // (nobody left racing: the race is off, and the room can sleep)
-    if (this.ticking && !this.players.some((x) => x.on && x.i >= 0)) this.toLobby();
+    if (this.racing && !this.players.some((x) => x.on && x.i >= 0)) this.toLobby();
+    else this.aboard();
   }
 
-  /** The line-up: the players in the room, then bots (the den's characters, in order) up to `fill`, at
-      least one if she's alone, on their own spots or the nearest free. */
-  lineUp(): Entry[] {
-    const ps = this.here();
+  /** The lobby's start, Blockade-style (the user, 12 Nov: "you can either wait for people, start with bots"):
+      each pirate in it is waiting for pirates, or has pressed Start (ready). Everyone's pressed it: the count,
+      at once, bots filling the empty places. Someone has: the count in NET.ABOARD seconds, whoever's pressed
+      Start by then in it, the rest racing the next one. Nobody has: nothing, and no clock. */
+  private aboard() {
+    if (this.phase !== 'lobby') return;
+    const ps = this.here(), ready = ps.filter((p) => p.ready);
+    if (!ready.length) this.soonAt = null;
+    else if (ready.length === ps.length) this.begin();
+    else this.soonAt ??= this.at + NET.ABOARD;
+  }
+
+  /** The line-up: the players in the room (or those given: the ones who've pressed Start), then bots (the
+      den's characters, in order) up to `fill`, at least one if she's alone, on their own spots or the nearest
+      free. */
+  lineUp(ps: Player[] = this.here()): Entry[] {
     const out: Entry[] = ps.map((p) => ({ id: p.id, rv: -1, name: p.name, spot: p.spot }));
     const bots = Math.min(WATCHED.length, FIELD.ONLINE - ps.length, Math.max(this.fill - ps.length, FIELD.LEAST - ps.length, 0));
     for (let k = 0; k < bots; k++) {
@@ -158,8 +182,15 @@ export class Referee {
     switch (m.t) {
       case 'spot': if (this.phase === 'lobby' || this.phase === 'done') p.spot = this.free(m.c, m.c >= p.spot ? 1 : -1, p); break;
       case 'fill': if (this.phase === 'lobby' || this.phase === 'done') this.fill = m.n; break;
-      case 'ready': if (this.phase === 'lobby' || this.phase === 'done') p.ready = m.on; break;
-      case 'go': if ((this.phase === 'lobby' || this.phase === 'done') && this.here().every((x) => x.ready)) this.begin(); break;
+      // (Start, or waiting for pirates: in the lobby; once the race is done, for the next one; and, while a
+      // race is on that she's not in, for the next one too)
+      case 'go': case 'ready': {
+        const on = m.t === 'go' || m.on;
+        if (this.phase === 'lobby' || this.phase === 'done' || p.i < 0 || p.out) p.ready = on;
+        if (this.phase === 'done' && this.here().every((x) => x.ready)) this.toLobby();
+        this.aboard();
+        break;
+      }
       case 'again': if (this.phase === 'done' || (this.phase === 'on' && this.players.every((x) => x.i < 0 || x.out || this.field!.racers[x.i].state === 'finished'))) this.toLobby(); break;
       case 'pose': {
         if (!this.field || p.i < 0 || p.out) break;
@@ -174,15 +205,17 @@ export class Referee {
       }
       case 'hit': if (this.phase === 'on' && p.i >= 0 && !p.out) { this.rec?.input(this.k, [p.i, 'h', m.on]); this.claim(p, m.on); } break;
       case 'rock': if (this.phase === 'on' && p.i >= 0 && !p.out) { this.rec?.input(this.k, [p.i, 'r']); this.blast(p); } break;
-      case 'retire': if (this.ticking && p.i >= 0 && !p.out) { this.rec?.input(this.k, [p.i, 'o']); this.takeOver(p); } break;
+      case 'retire': if (this.racing && p.i >= 0 && !p.out) { this.rec?.input(this.k, [p.i, 'o']); this.takeOver(p); } break;
       default: break;
     }
   }
 
-  /** The count: the field lined up from the lobby, on the seed the lobby's shown (its start's field). */
+  /** The count: the field lined up from the lobby (whoever's pressed Start), on the seed the lobby's shown (its
+      start's field). */
   begin() {
-    this.cast = this.lineUp();
-    const ps = this.here();
+    const ps = this.here().filter((p) => p.ready);
+    this.cast = this.lineUp(ps);
+    this.soonAt = null;
     for (const p of this.players) Object.assign(p, { i: -1, out: false, took: 0, st: 'sailing', gone: 0, hits: 0, holed: 0, said: undefined });
     this.cast.forEach((e, i) => { const p = e.id ? this.player(e.id) : null; if (p) p.i = i; });
     this.field = new Field(this.cast.map((e) => e.name), courseSea(), RACE.COUNT, FIELD.ONLINE);
@@ -203,14 +236,17 @@ export class Referee {
     if (this.rec && this.field && this.field.order.length) this.done.push(this.rec.finish(this.field, this.k));
     this.rec = null;
   }
-  /** Back to the lobby: nobody ready, anyone gone let go; a race cut short, a fresh seed for the next. */
+  /** Back to the lobby for the next race, anyone gone let go: whoever's pressed Start for it still has (those
+      who waited through the race, say), and its clock starts if anyone has; a race cut short, a fresh seed for
+      the next. */
   toLobby() {
     this.written();
     if (this.phase === 'count' || this.phase === 'on') this.seed = this.newSeed();
     this.phase = 'lobby';
-    this.field = null; this.run = null; this.cast = [];
+    this.field = null; this.run = null; this.cast = []; this.soonAt = null;
     this.players = this.players.filter((p) => p.on);
-    for (const p of this.players) Object.assign(p, { ready: false, i: -1, out: false, gone: 0, took: 0 });
+    for (const p of this.players) Object.assign(p, { i: -1, out: false, gone: 0, took: 0 });
+    this.aboard();
   }
 
   /** A player's sloop sailed by a bot from now on (or, before the gun, as soon as it goes). */
@@ -289,9 +325,15 @@ export class Referee {
       (NET.STEP), the rest carried to the next tick. */
   tick(dt: number) {
     this.at += dt;
-    if (!this.field || !this.ticking) { this.acc = 0; return; }
+    // (the lobby's clock run out: the count, whoever's pressed Start in it; the places shown long enough:
+    // the lobby again, for the next race)
+    if (this.soonAt !== null && this.at >= this.soonAt - 1e-9) {
+      if (this.phase === 'lobby') this.begin();
+      else if (this.phase === 'done') this.toLobby();
+    }
+    if (!this.field || !this.racing) { this.acc = 0; return; }
     this.acc += dt;
-    while (this.acc >= NET.STEP - 1e-9 && this.ticking) { this.acc -= NET.STEP; this.step(); }
+    while (this.acc >= NET.STEP - 1e-9 && this.racing) { this.acc -= NET.STEP; this.step(); }
   }
   /** One step of the race: the count, then the race, its bots, the dropped. A player dropped too long is
       taken over first, at the step's start, as if she'd said so between steps. */
@@ -320,7 +362,20 @@ export class Referee {
     for (const p of this.players) if (p.i >= 0 && !p.out) this.stateOf(p);
     this.shots = this.shots.filter((x) => this.at - x.t <= NET.SHOTS);
     this.rec?.watch(F, this.run!, this.k);
-    if (F.state === 'done' || F.t > NET.LONGEST) { this.phase = 'done'; for (const p of this.players) p.ready = false; this.written(); this.seed = this.newSeed(); }
+    // (every player in it home or out, and someone's come in waiting for the next race: the bots have
+    // NET.CALL seconds more to come in, then it's called)
+    const home = this.players.every((p) => p.i < 0 || p.out || F.racers[p.i].state === 'finished');
+    if (home && this.soonAt === null && this.players.some((p) => p.on && p.i < 0)) this.soonAt = this.at + NET.CALL;
+    if (F.state === 'done' || F.t > NET.LONGEST || (this.soonAt !== null && this.at >= this.soonAt)) this.over();
+  }
+  /** The race over (or called): its places shown for NET.RESULTS seconds, then the lobby for the next.
+      Those who raced it are waiting again; those who waited through it for the next still want it. */
+  private over() {
+    this.phase = 'done';
+    for (const p of this.players) if (p.i >= 0) p.ready = false;
+    this.soonAt = this.at + NET.RESULTS;
+    this.written();
+    this.seed = this.newSeed();   // (the next race's start's field, shown in the lobby)
   }
 
   /** A race replayed from what was written down: the same field, seed and bots, each player's input heard at
@@ -351,6 +406,15 @@ export class Referee {
     return R.field;
   }
 
+  /** Seconds till the room moves on by itself, or null. */
+  private soon(): number | null { return this.soonAt === null ? null : Math.max(0, Math.round((this.soonAt - this.at) * 10) / 10); }
+  /** The room seen from outside (the open races' list): what it's doing, and who's in, racing or waiting. */
+  peek(): Peek {
+    return {
+      phase: this.phase, clock: Math.round(this.field ? this.field.t : 0), soon: this.soon(), fill: this.fill, most: NET.MOST,
+      players: this.here().map((p) => ({ name: p.name, ready: p.ready, racing: p.i >= 0 && !p.out && this.racing })),
+    };
+  }
   /** The whole race as it is now, numbered. */
   snapshot(): Snapshot {
     const F = this.field, q = (x: number) => Math.round(x * 100) / 100;
@@ -366,6 +430,7 @@ export class Referee {
     });
     return {
       t: 'snap', room: this.room, seq: ++this.seq, phase: this.phase, at: q(this.at), clock: q(F ? F.t : 0), seed: this.seed, fill: this.fill,
+      soon: this.soon(),
       players: this.players.map((p) => ({ id: p.id, name: p.name, look: p.look, ready: p.ready, on: p.on, racing: p.i >= 0 && !p.out })),
       racers, holds: F ? [...F.holds.entries()] : [], shots: this.shots.map(({ n, by, on, cells }) => ({ n, by, on, cells })), rocks: F ? F.rocks : 0,
     };
@@ -388,6 +453,8 @@ export class RaceServer {
   get ticking(): boolean { return this.race.ticking; }
   /** Races finished since last asked, written down (RaceRecord), for the host to keep. */
   records(): RaceRecord[] { return this.race.done.splice(0); }
+  /** The room seen from outside, for the open races' list (Referee.peek). */
+  peek(): Peek { return this.race.peek(); }
 
   /** Everyone who's said hello, the race as it is now. */
   private everyone(): Out[] {

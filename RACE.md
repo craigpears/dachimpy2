@@ -306,6 +306,44 @@ the race before deciding.
   lit buoy. Whether it marks the shortcuts and their puzzles reverses "shortcuts are never marked" above,
   so that's the user's call. Never the starlit door. Shares its drawing with the course editor's 2D view.
 
+- **Planning your route, then puzzling it through (agreed 12 Nov, to build):** "if we are supposed to be
+  puzzling as you're going through as a person, some way of like pre-planning your route through the
+  course ... there's no way you're going to get through this ... you should be able to, like, say, yeah, go at
+  least halfway around the board and then be sailing to help speed it up or carping once you get to the
+  whatever ... there needs to be some kind of a planning phase where everybody plans what route they're
+  taking and then the puzzling's kind of the executing phase." Today you have to steer and puzzle at once,
+  and nobody can do both. The shape it suggests:
+  - **Plan:** before the start, everyone at once, on the course seen from above (the tactical view above),
+    lays down her route: the long way or a shortcut on each leg, as a line of waypoints, as far ahead as she
+    likes ("at least halfway around").
+  - **Execute:** the pilot sails the plan move by move (forward, left, right, the same moves as your own
+    helm), and your hands are on the boards: Sailing on the way, each clear's gust a jump along the plan,
+    and the shortcut's puzzle when she reaches it (Carpentry at the crane, Bilge at the locks).
+  - **The user's answers (12 Nov):** the plan is hidden from the others ("definitely"); it can be changed in
+    the race, but changing it mustn't cost puzzling time ("then that just creates that kind of
+    frustration"). Planning every pause by hand would be tedious ("I ought to get to here and then pause"):
+    "Maybe the ship auto stops when you hit those kind of obvious points or obstacles ... Maybe just put
+    waypoints in. Certainly for ... the zigzagging bit ... See if you can figure something out." Shooting
+    each other may get trickier or likelier with it; open.
+  - **Agreed (12 Nov):** "I like that plan idea ... you plan by choosing those options, that works. That's really simple and easy." To build:
+    - **A plan is choices, not a drawn line:** at each of the course's forks (each leg: the long way, or one
+      of its shortcuts) you pick one. The pilot already knows the water, so it finds the way to each, move by
+      move. Waypoints are an extra, only for a racer who wants a particular line.
+    - **The obstacles make the stops, never the plan:** each shortcut or hop has a spot she stops at (the
+      trade wind's hop, each of the zigzag's headwinds, a lock, the crane's notch, the barrier, the
+      whirlpools' mouth, the door's rock). The pilot sails up to it, lines her up, holds her there and puts up
+      the board it asks for. When it's done (the Double thrown, the lock pumped) she goes on by herself. A
+      Double or Triple built on the way and held is used without stopping. So the zigzag needs no planning:
+      it's a few hop spots in a row, a stop at each.
+    - **Changing the plan without leaving the board:** a strip along the screen's edge shows the legs still to
+      come and your choice on each. One click on a leg changes it, and the board stays live under your hands.
+      The view from above is there for a look, never needed to change anything.
+    - **Planning at the start is optional:** the plan starts as the long way everywhere, and you change it
+      on the line during the count and in the race. So there's no planning phase of its own.
+    - **Shooting:** with a plan hidden, a rival can't tell where you'll stop, but every stop is at a known
+      spot, so the spots are where you'd lie in wait. For the simulation to settle (§8), with the guns
+      firing when one's loaded and a rival's in range.
+
 ## 6. Racing each other: position and risk
 
 **Several racers (rules built 11 Nov; on the water, stage 3, 11 Nov).** Two to four on the course, you and
@@ -426,7 +464,7 @@ to (four by default, six at most). As built:
   missed broadside is taken all the same), a turn is who holds the spot, a finish a time and a place. Your
   own sloop is sailed in your browser against your own sea; everyone else's is drawn only from snapshots, a
   quarter second behind the newest and between two, never sailed on by itself. Heard nothing for two seconds
-  (the room goes quiet once the race is done), a browser asks for the race again. Tested with a browser that
+  (the room goes quiet in its lobby), a browser asks for the race again. Tested with a browser that
   drops two snapshots in five all race long.
 - **Dropping out:** a closed tab has six seconds to come back (`NET.GRACE`), then a bot of the long way sails
   her sloop home; sailing back out of the gate does the same at once. Everyone gone, the race is off.
@@ -459,6 +497,36 @@ to (four by default, six at most). As built:
   128 MB that's about 30 GB-s of the 13,000 a day (some 400 races a day); and each player's five poses a
   second, counted at twenty WebSocket messages to a request, are about 60 requests a player a race, of
   100,000 a day (some 400 races a day of four players). Snapshots out are free. The lobby sleeps.
+
+**The lobby, as built (12 Nov, after the user's first try online).** "it's not even clear like that you're in a
+lobby with people ... how do I know that people are here instead of bots?"; "much more lobby-like ... here's the
+map of the course, you've got people loading and waiting, or you can play with bots"; "the public lobby, where
+people can just come in"; then "I [don't] think I want people to share codes. You should just see a lobby and
+be able to join it", and "I eventually found the race online thing. That really was not clear". So:
+- **A plain way in:** Race online on the den's top panel (out to the race's buoy and in to the line from
+  anywhere), on the starter's card, or O on the line.
+- **Open races, no codes:** three rooms anyone walks into with a click (`NET.LOBBIES`, their codes reserved);
+  the list shows each one's state and who's in, looked at from outside (`Referee.peek`, `GET /api/race/CODE`
+  without a WebSocket; `GET /api/race-lobbies` all three; `peekText` its words). Private codes are only under
+  the hood now: a `?race=CODE` link still works, but the panel never asks for or shows one.
+- **The room's lobby** (js/den/race-net.js, den.html's `#racenet`): the course's chart
+  (`changelog/race-map.jpg`), who's in, each plainly PIRATE or BOT, and two choices, Blockade-style: **Wait
+  for pirates** or **Start now** (bots fill the empty places). The rule is the room's (`Referee.aboard`):
+  everyone's pressed Start, the count at once; someone has, the count in `NET.ABOARD` (15 s) with whoever has
+  by then, the rest racing the next; nobody, no clock and the room sleeps. Nobody idle can hold a public race up.
+- **The next race filling in view:** a pirate in during a race sees who's racing and who's waiting for the
+  next ("Next race: Cara ✓"), and can press Start for it while it's on. Once every player in the race is home
+  or out and someone's waiting, it's called `NET.CALL` (20 s) later; the places show `NET.RESULTS` (15 s) (or
+  less, if everyone presses Race again), then the room goes back to its lobby by itself, those who waited
+  still in for the next. Nobody waiting, the bots come home in their own time, as before. (The snapshot's
+  `soon` counts each of these down.)
+- **Only what applies** while racing or in the lobby: the den's top panel slimmed to its name, Race online
+  and Pause; the starter's card a line and who's racing, the rest behind How it works; no sailing bar on the
+  line; no H: head home (nor H itself) in a race.
+- **Names on the water:** over every sloop in the race, small, a pirate's in her sails' colour, a bot's dim
+  and marked BOT, yours "(you)" online (race-field.js).
+- Not yet: players "loading" (a socket opening) aren't shown till they've said hello; the open races' list is
+  looked at every three seconds while it's up (three small requests each time).
 
 **Real players racing each other online (asked about 12 Nov; built as above).** "what would it take to make
 the sloop race things multiplayer? So you can have like a handful of people playing if we get to play
@@ -795,6 +863,21 @@ Yeah, no hidden ... not for a proof of concept. It didn't really work"). Built t
 - **The door:** faint marks on a cliff off leg 2. Stop by it and press Space, and Duty Navigation stands
   on the rock as the night sky. Each constellation filled lights its stars on the carved wheel. Two small
   ones open it, about a minute's play. A booch pushes her off and darkens the stars.
+- **Back to simple, Navigation only (the user, 12 Nov, decided; replaces the tunnel's Vegas stretches below):**
+  "I love some of the animation and the styles on it, but I think it needs just probably to go back to being
+  simple... nav only shortcut that takes you just like one step through, and maybe can be tuned to be a bit
+  trickier. Because I could just imagine someone good at doing Vegas, it takes you out of the race. It's too
+  isolated otherwise." Navigation at the rock opens the door, and that alone carries her through one stretch
+  and up the cleft onto leg 3. No clear to get in, no Vegas under the cleft, no exit onto leg 5: a racer who's
+  good at Vegases can't sail under half the course out of everyone's reach. The look stays (the crag, the stars, the door
+  swinging open, the tunnel). Its Navigation can be made trickier so the door's saving stays in proportion with
+  the other shortcuts. They first found the tunnel's two stretches hard to read in play ("so it takes you fully
+  all the way through the course?").
+- **Getting in (12 Nov, the user's first try: "I'm just bumping into the rocks"):** sailing at the open
+  door, or a pin on it, brings her into the doorway facing in, the Sailing board out, and the prompt says
+  "any clear carries her in, a Vegas on through the dark"; never a bump. The doorway's as wide as the
+  clefts and tall for her mast. The design's as it was (Navigation, a clear in, a Vegas a stretch), and the
+  simulation's door timings unchanged. RULES.md, "Getting in, plain and forgiving".
 - **The tunnel (its stretches built 12 Nov):** straight on under the course in the door's columns, in two
   stretches, each ending under a cleft in a spit's far face that comes up onto the course further along:
   - **The first exit, onto leg 3:** a cleft in the second spit's far face, just past the leg's start. A

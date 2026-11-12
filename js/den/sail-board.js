@@ -260,11 +260,12 @@ export const SAIL_BOARD = { W: BW, H: BH, x: (c) => px(c) + CELL / 2, y: (r) => 
 
 /** A lesson's plan marked on the board (src/balloons.ts, marks: the gap, a stack and the square for its
     fourth, a balloon's drop, your pair's ghost, what pops in what order), or none (null or []). Marks
-    new since the last fade in. */
+    new since the last fade in; one still to come (`faint`) is drawn faintly, and brightens once it's
+    built (its fade carried over: the same mark, solid now). */
 export function sailBoardMarks(B, marks) {
-  const key = (m) => JSON.stringify({ ...m, t: undefined });
-  const was = new Map((B.marks ?? []).map((m) => [key(m), m.t]));
-  B.marks = (marks ?? []).map((m) => ({ ...m, t: was.get(key(m)) ?? 0 }));
+  const key = (m) => JSON.stringify({ ...m, t: undefined, s: undefined, faint: undefined, of: undefined });
+  const was = new Map((B.marks ?? []).map((m) => [key(m), m]));
+  B.marks = (marks ?? []).map((m) => ({ ...m, t: was.get(key(m))?.t ?? 0, s: was.get(key(m))?.s }));
 }
 
 /** A board drawn off the page, to stand in the world as a picture (balloons.js: a lesson's board on its
@@ -607,6 +608,8 @@ function drawLit(g, what, u, now) {
    it drops; your pair as a ghost, "you"; and the order things pop, numbered gold badges. Each fades in
    (`t`) as it's first shown, and pulses gently. */
 const MARK_IN = 0.45;
+// How bright a mark still to come is (src/balloons.ts, marks: `faint`), of a solid one.
+const MARK_FAINT = 0.4;
 function tag(g, x, y, text, col, a) {
   g.save();
   g.globalAlpha = a;
@@ -625,7 +628,10 @@ function drawMarks(g, marks, now, dt) {
   const order = { ghost: 0, stack: 1, drop: 2, gap: 3, four: 4, pop: 5 };
   for (const m of [...marks].sort((a, b) => order[a.kind] - order[b.kind])) {
     m.t = Math.min(1, (m.t ?? 0) + dt / MARK_IN);
-    const a = m.t * m.t * (3 - 2 * m.t), col = BRACKET[m.colour ?? 2];
+    // (still to come, faint; brightening as it's built)
+    const to = m.faint ? MARK_FAINT : 1;
+    m.s = m.s === undefined ? to : m.s + Math.sign(to - m.s) * Math.min(Math.abs(to - m.s), dt / MARK_IN);
+    const a = m.t * m.t * (3 - 2 * m.t) * m.s, col = BRACKET[m.colour ?? 2];
     g.save();
     g.lineJoin = 'round'; g.lineCap = 'round';
     if (m.kind === 'ghost') {

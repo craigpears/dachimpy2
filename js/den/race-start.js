@@ -24,7 +24,9 @@ import { sail, seaX, seaZ } from './sea.js';
 import { pool } from './whirlpools.js';
 
 const RC = LAY.RACE, L = RC.LINE, CELL = SAIL.CELL;
-export const start = { W: null, card: null, seed: null, field: null, pools: [], tiles: [] };
+/** `online`: racing online opened (race-net.js sets it); `lobby`: in a room online, whose lobby takes the
+    card's place; the start's field drawn (its seed, its whirlpools and slow winds' tiles). */
+export const start = { W: null, card: null, online: null, lobby: false, more: false, seed: null, field: null, pools: [], tiles: [] };
 
 /* ---- the field: its slow winds and whirlpools, from the race's seed ---- */
 // A slow wind's tile: a soft square, its edge dotted, one fat arrow in the middle the way it blows.
@@ -78,19 +80,25 @@ export function startWorld() { start.W ||= build(); }
 
 /** Who's racing you, as the card says it: each rival, and who's aboard with them. */
 const names = (R) => R.racing().map((x) => (x.crew ? `${x.name} (${x.crew.said})` : x.name)).join(', ');
-/** The starter's card, while she's on the line: what the race is, who's racing you, and the keys. */
+/** The starter's card, while she's on the line: who's racing you, the race in a line (the rest of what he
+    says behind How it works), and racing online. Light (the user, 12 Nov, of the card as it was: "a big
+    dump of text ... needs to be a lot lighter"); its look is den.html's (#racecard). Online, the room's lobby
+    takes its place (race-net.js). */
 function card(show, R) {
   if (!start.card) {
     const el = start.card = document.createElement('div');
     el.id = 'racecard';
-    Object.assign(el.style, { position: 'fixed', top: '150px', right: '18px', width: '340px', padding: '14px 18px', borderRadius: '10px', background: 'rgba(20,14,9,.84)', color: '#f4e9cf', font: '15px/1.4 Georgia, serif', zIndex: 20, pointerEvents: 'none', display: 'none', border: '2px solid #e8b52a' });
-    el.innerHTML = `<div style="font:700 13px system-ui,sans-serif;letter-spacing:3px;color:#e8b52a;margin-bottom:6px">THE STARTER</div>${STARTER.explain.map((l) => `<p style="margin:0 0 7px">${l}</p>`).join('')}<p class="who" style="margin:0 0 7px;font-style:italic"></p><div style="font:600 13px system-ui,sans-serif;color:#e8b52a;margin-top:8px">A D: along the line · 1 to ${MOST_RIVALS}: how many race ye · Space: the count · Esc: back to the buoy</div>`;
+    el.innerHTML = `<div class="rc-head">The starter</div><p class="who"></p><p>${STARTER.explain[0]}</p><div class="rc-more" hidden>${STARTER.explain.slice(1).map((l) => `<p>${l}</p>`).join('')}</div>`
+      + '<div class="rc-btns"><button class="rc-how">How it works</button><button class="rc-online">Race online</button></div>';
+    el.querySelector('.rc-how').onclick = (e) => { start.more = !start.more; el.querySelector('.rc-more').hidden = !start.more; e.target.textContent = start.more ? 'Less' : 'How it works'; e.target.blur(); };
+    el.querySelector('.rc-online').onclick = (e) => { start.online?.(); e.target.blur(); };
     document.body.appendChild(el);
   }
+  show &&= !start.lobby;
   const who = STARTER.field.replace('{names}', names(R));
   const p = start.card.querySelector('.who');
   if (show && p.textContent !== who) p.textContent = who;
-  start.card.style.display = show ? 'block' : 'none';
+  start.card.hidden = !show;
 }
 
 /** In to the line from the buoy (race.js, Space there): her spot, the card; the race's seed (`seed`: online,

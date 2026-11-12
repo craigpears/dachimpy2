@@ -116,6 +116,16 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 
 Unlisted for now: reachable only by its URL until the user says to put it in the nav.
 
+- **A demonstration shows its plan before it builds (12 Nov).** In any tutorial (Tzz's balloons, Helium's
+  Distilling), the plan is on the board and said before the pieces go in, so every move is seen to serve
+  it, not explained only at the end: "while she's building it, it's a bit like, wait, why were you putting
+  that there? What was that doing?" The end's "here's the plan. This is where it's going to drop" is the
+  standard ("perfectly clear and fantastic"), shown from the start, the parts to come faint.
+  Built first in Tzz's lesson (12 Nov): her whole plan's on the board from the start of the Double and
+  the Bingo, faint till it's built (`marks()` in src/balloons.ts, `faint`), and she says it first: the
+  Bingo's bottom blues "wait: a blue falls on them from upstairs". Her Bingo send-off points you on, since
+  a Bingo won't get you to the penguins ("she says, bingo, go clear some whirlpools, but we need a Vegas"):
+  "Two more and it's a Vegas: that's what gets you out to the penguins."
 - **Never rage-inducing (12 Nov, a standing principle).** "even if it is a bit cute and funny, like, it should not be drastic and rage-inducing. That's always what I keep saying. That's almost like a constant principle here. It should not be rage-inducing." A setback is a little
   "ah, damn it, not again": a few squares back, a wrong turn, a whirlpool going a bit squiffy and sending you
   the wrong way, never one that throws away the race or a long stretch of play. Bad luck is mild; big
@@ -669,6 +679,19 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     gunwale and gold rail, crates of shot and red stores, the barrel, the four stores, yellow
     arrows). Only the powder bag changed: tied off at the top with a cord and a flared tuft, as
     the real one's sack, where it was a plain red ball.
+  - **Distilling** (`js/den/distill-board.js`, 12 Nov; not in the den yet, played on the unlinked
+    `distilling-test.html`): drawn after the real panel as DISTILLING.md §2 describes it, from the client
+    port's own measures (no picture of the real one was looked at side by side yet): the still and flask
+    above, 40 px glossy bubbles in the honeycomb, khaki nubs bridging swappable pairs, red corner brackets
+    for the cursor, the furnace's grille lit from the bottom as the burn nears, the copper trough.
+- **Distilling's rules are the real client's, made smooth (12 Nov).** The rules (`src/distilling.ts`)
+  are the game's own, from the port of its client (DISTILLING.md §1). Two of the real game's frustrations
+  are smoothed over, the user: "certainly make it smooth. I want this enjoyable." A drag doesn't stop on a
+  slightly sloppy path where the intent is clear: the piece held swaps toward the way nearest the mouse
+  it can go (within 50 degrees, once the mouse is over half a piece out: `wayToward`), where the real
+  game swapped only with the mouse near a piece's middle. And no column-shift glitch: the links are drawn
+  from the rules' board every frame (the look only follows it), and nothing moves while the board
+  slides, so a piece flung as the board shifts never loses its links.
 
 - **Messages stay up long enough to read (10 Nov).** The checkpoint's message "vanished very
   quickly": a longer message stays up longer (about 70 ms a letter, 1.8 to 7 seconds), and one
@@ -2044,6 +2067,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     camera's no different. And on a phone the den's big toast covered the Sailing board for a moment
     after a chain: with the board out, toasts go in the sea it leaves, no wider than it, and on a
     tall screen smaller, just under the den's panel, so they're never over the board.
+- **A quick tap of Space is a nudge (12 Nov).** "A quick tap of the spacebar also seems a bit overpowered in
+  sailing. It's like, whoa". The pair falls a row every 0.06 s while Space speeds it (it was 0.04), so a
+  quick tap is three or four rows, not five or more; held, it still races down (`FALL.FAST`, src/sail-pair.ts).
 - **Sailing's pair pushes off a wall as it turns (11 Nov).** "it doesn't turn when it's against the
   wall. If you rotate it and it's against the wall, it should kind of push away from the wall." A turn
   that would put a half into the wall or a piece steps the pair a column away (from the nearer side
@@ -2333,12 +2359,32 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     - **The door stays a secret:** nobody watched takes it, and nothing said names it (tested).
   - **Racing your friends online (12 Nov, a proof of concept for playtests).** "a handful of people playing
     if we get to play testing it", never peer to peer: one room runs the race (RACE.md §6 has the build).
-    - **On the starting line,** O opens the panel: a pirate name (kept, as the crew's), Make a race (a code of
-      four letters) or a code and Join; `den.html?at=race&race=CODE` brings a friend straight there. In the
-      room: who's in (players, and the den's racers filling it, "(bot)"), A D your spot (never another
-      player's), Space ready, 2 to 6 or − + how many racers in all (four to start; bots fill what players
-      don't, one at least), G or "Start the count" once everyone's ready (anyone may), Copy the link, Esc or
-      Leave. Six players at most; one who comes in during a race races the next.
+    - **A real lobby, no codes (12 Nov, after the user's first try online:** "how do I know that people are
+      here instead of bots?", "you can either wait for people, start with bots", "I [don't] think I want
+      people to share codes. You should just see a lobby and be able to join it", and "I eventually found the
+      race online thing. That really was not clear"):
+      - **The way in:** Race online on the den's top panel (from anywhere: out to the race's buoy and in to the
+        line), on the starter's card at the line, or O there.
+      - **The open races** (three, `NET.LOBBIES`): each with what it's doing and who's in ("Waiting: Anne",
+        "Racing now · next: Cara", "Nobody yet", "Full"), and Join, one click. A pirate name once (kept, as
+        the crew's). No code to type or share; a private race's link, `den.html?at=race&race=CODE`, still works.
+      - **The room's lobby:** the course's chart; who's in, each row her sails, her name and PIRATE or BOT
+        plainly (a player's sloop a bot's taken over: "bot sailing"), Start ✓ or waiting; − + how many racers
+        in all (four to start, bots filling what players don't, one at least); and two choices, **Wait for
+        pirates** (where you start) or **Start now** (bots fill the empty places). Everyone's pressed Start:
+        the count at once. Someone has: "Anne pressed Start: off in 15s", whoever's pressed it by then racing,
+        the rest racing the next. A D your spot (never another player's), Space start or wait, Esc or Leave.
+      - **A race on that you're not in** (you came in during it, or a bot has your sloop): who's racing and
+        their places, and "Next race:" who's waiting for it, you among them; Race the next one to be in it.
+        Once every player in it is home or out, with someone waiting, the race is called 20 seconds later.
+      - **After a race:** the places for 15 seconds (Race again to be in the next; everyone pressing it goes
+        straight there), then the lobby again for the next race.
+    - **Racing and in the lobby, only what applies:** the den's top panel only its name, Race online and
+      Pause; the starter's card a line of the race and who's racing ye, the rest behind How it works; no
+      sailing bar on the line; the sailing bar's keys without H: head home (H does nothing in a race) and
+      without the puzzles' keys, already on its buttons.
+    - **Who's who on the water:** a name over every sloop in the race, small, over her masthead: a pirate's
+      in her sails' colour, a bot's dimmer and marked BOT; yours too online, "(you)".
     - **The count and the gun are the room's,** the same in every browser; then each sails and puzzles her own
       sloop as alone, everyone else's sloop drawn a moment behind, in their own sails (players' by their
       place in the room), their names over them at the count.
@@ -2348,8 +2394,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       through.
     - **Hits:** your broadside on someone holes her in every browser; you can't hole her again till she's
       patched. A bot's broadside or a friend's on you holes you, even if you missed seeing it fired.
-    - **Places and times** are the room's; the finish card fills in as they come home; "Race again" when
-      everyone's in.
+    - **Places and times** are the room's; the finish card fills in as they come home.
     - **A closed tab** has six seconds to come back; then a bot sails her sloop home ("A bot's sailing yer
       sloop home now"). Sailing back out of the gate does the same at once. A lost room: back to racing alone.
     - **Every race online is written down** (its seed, each player's actions by the race's steps, what the
@@ -2466,6 +2511,18 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     stars' pale blues and whites, a dark still water. No wind in it but a draught blowing out of the door,
     so no sail or oar gets her in: only a Sailing chain's gust from the mouth (off the door, facing it).
     The door's face is cliff to every move and gust otherwise, shut or open: the only way in.
+  - **Getting in, plain and forgiving (12 Nov).** Her first try: "I can't actually get through the door
+    ... I'm just bumping into the rocks. And it won't let me autopilot through it either", and the doorway
+    read smaller than the clefts she comes up. So a move into the open door's face (straight at it, or
+    turning in from alongside) is never a bump: she's brought into its mouth, facing in, drawn in the
+    doorway, and the Sailing board comes out; a pin on the door (its crag, or the water off it once open)
+    pilots her to the nearer mouth and does the same. The prompt: "In the doorway · 1: Sailing · any clear
+    carries her in, a Vegas on through the dark". A turn from the mouth turns her on the spot, her way out,
+    nothing said of rocks. Shut, W at it says "The door's shut fast · Space, under the rock: Navigation
+    opens it", and off it the prompt's "Faint stars on the rock · Space: Navigation opens the door". The
+    doorway's 6.2 wide and 9.6 tall (her mast's about 5.6), as wide as the clefts. The face is still no
+    square of the sea, so the pilot's routes and the simulation's door timings are unchanged
+    (`doorMove`, tests/den-door.test.ts).
   - **Its stretches and exits (12 Nov).** The user: "you should always get some benefit from going through
     it, similar to ... any other shortcut. So you then have the choice. You either rejoin ... the main leg,
     or you have the opportunity to go through the Vegases ... in relative peace". Two stretches, each

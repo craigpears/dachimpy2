@@ -1063,6 +1063,34 @@ island is), perhaps near the smugglers' beach, where his rum would go out. Wheth
 house would have been: to pin down with the user. **His mishaps (12 Nov):** "the kind of exploding kind
 of mishaps that I mentioned with the distilling, where he kind of gets the balance wrong."
 
+**The penguin in the balaclava leads you there: a smuggling ring (12 Nov).** "I feel like we've got to
+actually link in these things ... it fits to me that she kind of rambles about crazy things, but often turn
+out to be true. So when she says the penguin in the balaclava was up to something, maybe he's the one that
+can tell you about, hey ... don't tell anybody, you know, we're in a secret smuggling ring, and he tells you
+how to find the distilling island. Yeah, if you could bring us rum. We can show you how to sneak past the
+customs in the Imperial Outpost kind of thing. He's a shifty penguin. [Kikkit] was right." So the places
+link up into one thread:
+- **Vegas Island:** the penguin in the balaclava, caught with his sack, is in a secret smuggling ring, as
+  Kikkit always said ("up to something, he was. You can always tell"). Shifty, sworn to secrecy, telling
+  you anyway. Another of her rambles turning out true.
+- **His offer:** bring the ring rum, and they'll show you how to sneak past the customs at Port Decorum,
+  the imperial outpost (the way through the smugglers' beach, the back way into a port shut to pirates).
+- **Where the rum comes from:** he tells you how to find Helium's island, the distilling island. Helium
+  teaches you Distilling; the rum you distil goes back to the ring.
+- **So Kikkit leads to the penguin, the penguin to Helium, Helium's rum to the smugglers' beach and past
+  the customs into Port Decorum,** and smuggling becomes one of the den's ways of earning (below, under
+  Primates Rule). His lines go in `src/lines/penguin.ts`, Kikkit's knowing "told you so" in hers.
+  (To shape with the user: what sneaking past the customs is as play, and what the ring gives you.)
+
+**The characters talk about each other (12 Nov):** "I really would love the idea of things being
+interconnected, like Helium saying ... I have a large shipment of rum for one of Mischievious's weddings, or
+Kikkit's been at the stash again. Those kind of interlinked things with the personalities". So Helium's
+lines point at the others: a big order of rum for Mischievious's next wedding (she does keep getting
+married), Kikkit at his stash again (which explains a lot about her directions), the smuggling ring's
+penguin waiting on his barrels. And the same the other way: a guest at a wedding toasting with Helium's
+rum, Kikkit swearing she only had a little. Each one in character, the joke true to who they are, and
+each a line in `src/lines/` (STORY.md, "The characters know each other").
+
 ## Every house means something: visiting gives you things to go and do (11 Nov)
 
 The user (11 Nov): "Obviously, each house needs a meaning, so maybe visiting them can give you some
@@ -1154,6 +1182,52 @@ same thread as the museum's: helping and leading people, and growing into it.
   The two halves of trophies, each theirs: seeing what they mean, and getting your own. The den's
   trophies (what earns one, where they're kept) are the proof of concept, to work out when it's built.
 
+
+## Roobear's little house: Robert the kangaroo bear that roobs ears (12 Nov)
+
+The user (12 Nov): "This absolutely needs to be a memory later, she needs her little house in the game."
+**Roobear** (she; a real pirate, pirate name only; her pirate page and portrait to check before she's
+drawn, then into PIRATES and the wardrobe). From a chat the user shared: they were guessing what her name
+stands for, "a french sounding Robert, roo like kangaroo plus a bear, or did someone roob an ear?" (they
+asked Dignity too), and Roobear answered: "I could be Robert the kangaroo bear that roobs ears ... I like
+it." Dignity's guess: "or from winne the pooh - Roo was baby kanga and bear was winner? Yes abstract I
+know." The user: "That's who I was thinking of when I thought Roo + Bear XD." (A line for Dignity, then, if she's in the house's story; the books' characters themselves stay out
+of the den.)
+
+So a little house in the housing district (one more entry in HOUSES, its own scene, Roobear walking you
+round as Gravee does), its theme her name's story: Robert the kangaroo bear, half kangaroo and half bear,
+who rubs ears. Maybe he's there, a familiar or a plush on her shelf, and an ear rub is the house's
+welcome. Like every house, it should send you off with something to do (the section above). What that is,
+and how the name's joke is told without explaining it to death: to settle with the user. A small,
+warm one, the memory of a funny moment between friends kept in the den.
+- **A gallery of the guesses (the user, 12 Nov):** "I don't know if you can put that in portraits where
+  you've got all the interpretations of the guesses of her name. Or is she the Roobear that roobs ears?
+  You need that." So her walls hold a portrait for each guess, framed like Gravee's (portraits.js), each
+  painted of her in her own look:
+  - **Robert:** a French Robert, very much a monsieur.
+  - **Roo + bear:** half kangaroo, half bear.
+  - **Did someone roob an ear?:** the scene of the crime, an ear being rubbed.
+  - **Roo and bear from the books (Dignity's guess):** a baby kangaroo and a bear, drawn as our own and
+    never the books' characters.
+  - **The answer, her own:** Robert the kangaroo bear that roobs ears, the biggest frame, the one you
+    "need". Roobear herself as him, or with him.
+  She tells you which guess was whose as you walk past each one. Every portrait keeps her real look
+  (below).
+- **Her pirate page, checked (12 Nov):** Roobear is on the Emerald Ocean
+  (https://emerald.puzzlepirates.com/yoweb/pirate.wm?target=Roobear). Captain (and Prisoner) of the crew
+  Tea Time, of the flag Do Not Reply, a Lieutenant Commander in the Admiral Island Navy; a Grand-Master
+  Forager, a Master at Sailing and Bilging; trophies like Ultimate Forager and Heroic Hauler; nineteen
+  familiars (Bliss, Primrose, Cotton Candy, Sir Hiss, Rafiki among them). **She rooms at Bedside Manors,
+  Gravee's manor**, so her little house could be her room there, a door off Gravee's tour, rather than a
+  house of its own (to settle with the user).
+  - **Her portrait:** not all in black but **deep purple**; only her hair is black. Glossy black hair
+    pinned up with loose curls by the ears, crowned with a wreath of dark purple roses with gold leaves; a
+    gold hoop earring, no eyepatch, a small friendly smile. A strapless deep purple corset bodice, a dark
+    purple ruffled cuff on her upper arm, deep purple fitted trousers ending in ruffled flares below the
+    knee. A silver hook for her left hand; in her right, a blue-and-white lace china bowl heaped with
+    blueberries. On her shoulder a pale periwinkle crow (perhaps Bliss, periwinkle in her list: a guess).
+    Behind her, a pink sky over a violet, sparkling sea. Portrait image:
+    http://emerald.puzzlepirates.com/media/emerald/portraits/716/1d03d832a5428adc3b3d276dc5656.jpg
 ## Puzzles you can size up, and play by keys (11 Nov)
 
 From the same chat the user shared: a pirate whose mouse aim isn't steady said Puzzle Pirates'
@@ -2352,3 +2426,11 @@ wants to be involved ("certainly when ... somebody wants to be involved we can g
 stand-in voice till then. **Reserved (12 Nov):** the user will ask a friend, amhduck on Discord (he),
 whether he'd like it. His pirate name and portrait to check before he's drawn or named in the game;
 only his pirate name ever appears on the site. Their lines in `src/lines/`, called from what the race's events already say.
+
+## Tutorials with pieces that don't come perfect (12 Nov)
+
+On Tzz's balloon lesson: "the pieces she's getting for this are like completely perfect for her plan, so
+she's kind of fine for this tutorial, but maybe for the ideas list, or at least later, that it's irking me a
+bit." Later, a lesson (hers, Helium's Distilling one) could show what a real player does with the pieces
+that actually come: parking an awkward pair out of the way, changing the plan when the wrong colour turns
+up, so the plan bends to the pieces rather than the pieces fitting the plan.

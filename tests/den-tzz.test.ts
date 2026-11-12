@@ -208,6 +208,22 @@ describe('her lesson: a Double, then a Bingo, on a real board; she sets them up,
     // (no ledges or stairs any more: those were the bodged routines)
     expect(JSON.stringify([DOUBLE, BINGO, AFTER])).not.toMatch(/ledge|\bstairs?\b/i);
   });
+  it('12 Nov, "she says, bingo, go clear some whirlpools, but we need a Vegas to get that far": her Bingo send-off points you on to a Vegas', () => {
+    const end = BINGO.popped;
+    expect(end).toMatch(/Vegas/);
+    // (true to the rules: a Bingo is four pops, a Vegas six, two more)
+    expect(end).toMatch(/Four pops/);
+    expect(end).toMatch(/Two more/);
+    expect(perform(ROUTINES.bingo).name).toBe('Bingo!');
+    // (and none of her lines has a Bingo, or anything short of a Vegas, getting you through the whirlpools)
+    for (const l of [...Object.values(BINGO).flat(), ...AFTER]) if (/whirl/i.test(String(l)) && !/Vegas/.test(String(l))) expect(String(l)).not.toMatch(/Bingo|clear|through/i);
+  });
+  it('12 Nov, "what\'s the plan?": she says the Bingo\'s plan before she builds upstairs: the bottom blues wait for a blue from upstairs', () => {
+    expect(BINGO.start).toMatch(/drop a blue onto it/);
+    expect(BINGO.twists[3]).toMatch(/wait.*blue.*upstairs/i);
+    expect(BINGO.brief).toMatch(/plan/i);
+    expect(DOUBLE.brief).toMatch(/plan/i);
+  });
   it('11 Nov: her lesson ends in character, not on a key to press ("it still says r for sailing which seems odd")', () => {
     const L = lesson(false), end = L[L.length - 1].says?.popped ?? '';
     expect(end).not.toMatch(/\bR\b|press|key/);
@@ -248,7 +264,7 @@ describe('her lesson: a Double, then a Bingo, on a real board; she sets them up,
       for (const [i, text] of Object.entries(S.watch ?? {})) {
         const n = Number(i) + 1, now = marks(r, n), was = marks(r, n - 1).map((m) => JSON.stringify(m));
         expect(now.some((m) => !was.includes(JSON.stringify(m))), text).toBe(true);
-        if (/\bgap\b/.test(text)) expect(now.some((m) => m.kind === 'gap'), text).toBe(true);
+        if (/\bgap\b/.test(text)) expect(now.some((m) => m.kind === 'gap' && !m.faint), text).toBe(true);
       }
       // (her lines in the order they come, each with how many of her pairs are down by then)
       const said: [number, string][] = [
@@ -258,7 +274,7 @@ describe('her lesson: a Double, then a Bingo, on a real board; she sets them up,
       ];
       const first = said.find(([, x]) => /trigger/i.test(x));
       expect(first).toBeDefined();
-      expect(marks(r, first![0]).some((m) => m.kind === 'gap')).toBe(true);
+      expect(marks(r, first![0]).some((m) => m.kind === 'gap' && !m.faint)).toBe(true);
     }
     // (and the first time, what a trigger is, simply)
     expect(DOUBLE.yours).toMatch(/gap's the trigger: fill it last, and the whole lot pops/);
