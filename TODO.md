@@ -490,14 +490,6 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   get started." So a hop near the line (a wind or chain hop, like the ladders further on) that gets a good
   start going. (Which "ball" and where it lands, to pin down with the user: maybe the first buoy.) The user
   liked how it's looking now: "they're definitely much more looking like" [a race].
-- **Can't get in through the starlit door (12 Nov):** trying it for the first time, "I do actually kind of
-  like that it said, maybe you should just see the really tiny, like, faint stars on the rock. I can't
-  actually get through the door, though. And why does it look so big in the exit, but the entrance, I can't
-  even get in it? ... I don't know how I'm supposed to get through here. I'm just bumping into the rocks. And
-  it won't let me autopilot through it either, for better or worse." Today she's carried in only by a
-  Sailing clear from the mouth, against a draught, and nothing says so; the doorway reads smaller than the
-  clefts she comes out of. So: getting in plain and forgiving (sailing at the open door works, or says
-  plainly what will), and the doorway looking like the way in it is.
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
 - **Your den's preview** shows your flag on every tab. The Shack tab could show the shack itself
   (painted as you choose), and the Den tab the landscape.
