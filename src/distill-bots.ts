@@ -96,7 +96,7 @@ export interface Level extends Style {
 /** The one pace every bot plays at (the user, 13 Nov: the levels are their targets, not their speed): a hand's
     5 swaps a second along a drag, 350 ms to spot one, 100 ms between the start's blind sweeps, drags up to 14
     swaps long. */
-export const PACE = { rate: 5, spot: 350, sweepSpot: 100, reach: 14 } as const;
+export const PACE = { rate: 5, spot: 350, sweepSpot: 100, reach: 40 } as const;   // (reach 40: no cap a drag would meet; the user, 13 Nov: "don't have any limits on how long an individual pull can be")
 const BASIC: RoutineName[] = ['rescue', 'junkColumn', 'diamond', 'channel'];
 /** The techniques each target needs (the thirtieth note: "a CC^2 with the simple ones, the crawls and hooks only
     for the longer chains"; the twenty-eighth: crawls are "for ... mid or late game"). */
@@ -107,7 +107,7 @@ const KNOWS: Readonly<Record<number, readonly RoutineName[]>> = {
   5: [...BASIC, 'turnOver', 'store', 'leapfrog', 'crawl', 'hook'],
   8: [...BASIC, 'turnOver', 'store', 'leapfrog', 'crawl', 'hook', 'figureEight', 'linePull'],
 };
-const level = (target: number): Level => ({ name: `cc${target}`, label: `CC^${target}`, target, routines: KNOWS[target], ...PACE, path: true, early: true, gamble: false });
+const level = (target: number): Level => ({ name: `cc${target}`, label: `CC^${target}`, target, routines: KNOWS[target], ...PACE, path: true, early: false, gamble: false });
 /** The bots, a target chain each, lowest first. */
 export const LEVELS: readonly Level[] = [1, 2, 3, 5, 8].map(level);
 /** The bots' old names, for links made before the levels (`?bot=ultimate`): each the level nearest it. */
@@ -127,7 +127,10 @@ export const tierNamed = levelNamed;
     columns bring whites too as it goes (DISTILLING.md §4: about 8 columns banked for a CC^12). Never more than 6
     for now: banking 7 left the CC^8 bot in Stage I nearly all session (the twelfth run, 0.3 chains a session),
     as banking more did in the second run; it gets its longer chains from its techniques. */
-export const bankFor = (target: number): number => Math.min(6, 3.5 + target / 2);
+export const bankFor = (target: number): number => Math.max(1, Math.min(6, target));
+/* (Was 3.5 + target / 2: CC^1 banked four columns before it sent one up. The user, 13 Nov: "I've got the bot on
+   aiming for CC1, but it's just going and going ... it would highlight a column and say, look, I'm aiming to build
+   a crystal clear one here." So a column of whites a Crystal Clear of the target, six at the most.) */
 /** The whites a column holds, on average (tall and short in turn). */
 export const PER_COLUMN = 8.5;
 
@@ -221,6 +224,9 @@ export interface Advice {
       pieces"). */
   target?: number;
   whitesNeeded?: number;
+  /** In the chain, the column it's filling with whites to go up Crystal Clear next: the one to point out (the user,
+      13 Nov: "it would highlight a column and say, look, I'm aiming to build a crystal clear one here"). */
+  column?: number;
 }
 
 /** The board as the planner sees it: the columns, the chain now, the furnace's ms left. */
@@ -350,15 +356,21 @@ export function judge(cols: Board, drags: readonly Drag[], style: Style, base?: 
   base ??= boardScore(cols, block);
   if (!drags.length) return null;
   const init = drags.slice(0, -1), last = drags[drags.length - 1];
-  let best: { drags: Drag[]; value: number } | null = null;
+  let best: { drags: Drag[]; value: number } | null = null, bestScore: number | null = null;
   for (let k = last.ways.length; k >= 1; k--) {
     const d = [...init, { x: last.x, y: last.y, ways: last.ways.slice(0, k) }];
     const after = playDrags(cols, d);
     if (!after) continue;
     // In the block phase each drag costs a person more: a small move has to earn its place (the twenty-third note:
     // "a lot of small, intricate moves ... I would just start pulling, like treating it more like blocks").
-    const value = (boardScore(after, block) - base) / ((timeFor(d, style, plainDrag(d)) + (block ? P.BLOCK_DRAG_MS * d.length : 0)) / 1000);
-    if (!best || value > best.value) best = { drags: d, value };
+    // Let go where the board's best, the longest of the drags that leave it so (the user, 13 Nov: "Please keep
+    // running things until it stops ... don't have any limits on how long an individual pull can be"); its worth
+    // against other moves still its gain a second.
+    const score = boardScore(after, block);
+    if (bestScore === null || score > bestScore) {
+      bestScore = score;
+      best = { drags: d, value: (score - base) / ((timeFor(d, style, plainDrag(d)) + (block ? P.BLOCK_DRAG_MS * d.length : 0)) / 1000) };
+    }
   }
   // Carried on toward where its junk belongs (the user, 13 Nov, the thirty-second note: "it doesn't really still
   // finish dragging things all the way to the right when it's got the opportunity ... you could go one step further,
@@ -632,6 +644,7 @@ export function choose(sit: Situation, ctx: Ctx, style: Style): Advice {
     stage: ctx.stage, phase: phaseOf(cols, ctx.stage), kind, routine: !m ? null : m.move.routine === 'path' ? 'hook' : m.move.routine, technique: m?.move.routine ?? null,
     label, reason, drags: m?.move.drags ?? [], value: m?.value ?? 0, sweep: false, ...((m as Weighed | null)?.tie ? { tie: true } : {}),
     ...((m as Weighed | null)?.weighted ? { weighted: true } : {}),
+    ...(ctx.stage === 'chain' && ctx.fill >= 0 && ctx.fill < COLS ? { column: ctx.fill } : {}),
   });
   // The endgame's gamble: the next Crystal Clear can't be filled in time.
   if (style.gamble && !burning && sit.chain >= P.CASH_FROM && !ready && sit.timeLeft < P.CASH_MS) {
@@ -641,11 +654,9 @@ export function choose(sit: Situation, ctx: Ctx, style: Style): Advice {
       return advice('dismiss', 'Cash in', `the gamble: CC^${sit.chain} so far, and the next column needs ${need} more white${need > 1 ? 's' : ''} in ${(sit.timeLeft / 1000).toFixed(0)} s. Poor odds: cash in now`);
     }
   }
-  // Burn a ready column at once when nothing much is left to do; in the chain, only when nothing is (a
-  // Crystal Clear burned early is time lost ferrying whites for the next).
-  if (ready && style.early && (ctx.stage === 'chain' || clearComingUp(cols)) && (!best || (ctx.stage === 'junk' && best.value < P.SLACK))) {
-    return advice('burn', 'Burn now', burning ? "the furnace's column is all junk: burn it now" : 'the column is Crystal Clear: send it up now');
-  }
+  // Never a column burned by hand (the user, 13 Nov: "definitely get rid of manual burns. Why is it manually
+  // burning when it wants to do something? ... that's why no one's getting past CC2 ... just don't ever do that.
+  // Never."): the furnace takes each column in its own time, and that time goes on the next.
   // A plain long drag that wins is the sweep, swept blind: no technique needed, "quick drag brown up, black
   // down, done" (the eleventh note).
   if (best && ctx.stage === 'junk' && plainDrag(best.move.drags)) {
@@ -691,7 +702,7 @@ export function burnsLeft(cols: Board): number {
 }
 
 /** The pace "Help, Helium" plays at, and every technique. */
-export const HELIUM: Style = { routines: Object.keys(ROUTINES) as RoutineName[], path: true, reach: 16, rate: 6, spot: 250, sweepSpot: 80, early: true, gamble: true };
+export const HELIUM: Style = { routines: Object.keys(ROUTINES) as RoutineName[], path: true, reach: 40, rate: 6, spot: 250, sweepSpot: 80, early: false, gamble: true };
 /** The target "Help, Helium" plays to when none is given: the top level's, every technique. */
 export const DEFAULT_TARGET = LEVELS[LEVELS.length - 1].target;
 

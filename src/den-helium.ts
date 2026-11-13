@@ -64,8 +64,8 @@ export const HELIUM_ARRIVE: Pose = { c: O[0] - 1, r: O[1] + 1, d: 1 };
 
 /** When their lesson plays: the first time you come up off their island (a cutscene), never while something
     else is playing or you're carried past at speed; after it, Space there takes you to the still. */
-/** Their lesson seen, kept in this browser, so it plays the first time only, not every voyage (the user, 13 Nov:
-    "I wouldn't want that playing every time"). */
+/** Their lesson seen: once a visit to the page, a refresh plays it again (the user, 13 Nov: "if I refresh the
+    browser there, it should. I don't want it to be stored in local storage"); the key only to clear the old mark. */
 export const SEEN_STORE = 'den-helium-seen';
 export class Visit {
   /** Their lesson's been seen (in this browser, when read from SEEN_STORE). */

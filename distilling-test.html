@@ -145,7 +145,16 @@ function showRoutine(p) {
   $('routine').innerHTML = ''; const b = document.createElement('b'); b.textContent = p.label;
   // Its target, and the whites still needed for it (to bank, or to fill the columns going up).
   const need = p.whitesNeeded ? `${p.whitesNeeded} more white${p.whitesNeeded > 1 ? 's' : ''} ${p.stage === 'junk' ? 'to bank' : 'to fill it'}` : p.stage === 'junk' ? 'banked' : 'on its way';
-  $('routine').append(b, `: ${p.reason}${p.target ? ` (CC^${p.target}: ${need})` : ''}`);
+  // Its aim first, plainly: banking whites for its Crystal Clear, or the column it's building it in, shaded gold on
+  // the board (the user, 13 Nov: "it would highlight a column and say, look, I'm aiming to build a crystal clear
+  // one here").
+  const aim = document.createElement('div');
+  aim.style.cssText = 'color:#ffd75a;font-weight:bold;margin-bottom:2px';
+  aim.textContent = !p.target ? '' : p.column != null
+    ? `Aiming for CC^${p.target}: building a Crystal Clear in column ${p.column + 1} (shaded)${p.whitesNeeded ? `, ${need}` : ''}`
+    : `Aiming for CC^${p.target}: banking whites first${p.whitesNeeded ? `, ${need}` : ''}`;
+  board.column = p.column ?? null;
+  $('routine').append(aim, b, `: ${p.reason}`);
 }
 function driveBot(dt) {
   if (!bot || board.game.finished || board.paused) return;

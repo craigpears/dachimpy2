@@ -45,9 +45,11 @@ const SAND = { y0: -0.4, h: 0.62 }, GROUND = SAND.y0 + SAND.h + 0.25;
 /* Your best Crystal Clear here, kept in this browser (src/den-helium.ts, beatBest). */
 const readBest = () => { try { return cleanBestChain(localStorage.getItem(BEST_STORE)); } catch { return 0; } };
 const keepBest = (n) => { try { localStorage.setItem(BEST_STORE, String(n)); } catch { /* (no storage: kept this voyage only) */ } };
-/* Their lesson seen, in this browser: it plays the first time only. */
-const readSeen = () => { try { return localStorage.getItem(SEEN_STORE) === '1'; } catch { return false; } };
-const keepSeen = () => { try { localStorage.setItem(SEEN_STORE, '1'); } catch { /* (no storage: this voyage only) */ } };
+/* Their lesson seen this visit to the page only: a refresh plays it again (the user, 13 Nov: "if I refresh the
+   browser there, it should. I don't want it to be stored in local storage"). Any old mark of it cleared. */
+try { localStorage.removeItem(SEEN_STORE); } catch { /* (no storage) */ }
+const readSeen = () => false;
+const keepSeen = () => {};
 export const helium = { W: null, visit: new Visit(readSeen()), play: null, on: false, board: null, hand: [], handT: 0, handDone: null, bangs: 0, bigBang: 0, note: '', noteT: 0, cower: 0, shrug: 0, nervy: 0, nerves: new Nerves(), fretCol: null, held: true, fireTips: 0, cellar: new Cellar(), hint: null, routes: null, watch: null, best: readBest() };
 
 function build() {
@@ -200,7 +202,7 @@ function handTick(dt) {
    distillery: the furnace takes its column, then the next, a white in it ringed, and as the white goes into
    the furnace the still goes bang; they shrug it off; your own lines in it (`who: 'you'`) over your head on
    the sloop, kept on the screen. It's only ever seen once: their lesson plays the first time you come up
-   off their island, never again in this browser (SEEN_STORE). */
+   off their island, never again till the page is loaded afresh. */
 function lessonPlay() {
   const W = helium.W, P = PACE_LESSON;
   sail.helm.moor(HELIUM_MOOR);

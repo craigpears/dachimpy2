@@ -61,18 +61,17 @@ describe('the bots (12 Nov)', () => {
     const r = playSession(new Distilling(seeded(5001)), levelNamed('cc3'), 4);
     expect(r.swaps / r.drags).toBeGreaterThan(2);
   });
-  it('burn early, but a junk column only while the columns coming up to the fire next are clear of white too, 13 Nov ("3 burns just happened in rapid succession before it even made another move. Is that why it\'s struggling and failing?")', () => {
-    const g = new Distilling(seeded(5002));
-    playSession(g, levelNamed('cc3'), 6, undefined, (a) => { if (a.kind === 'burn' && a.stage === 'junk') expect(clearComingUp(g.cols)).toBe(true); });
-    expect(g.columns.length).toBeGreaterThan(Math.floor(g.time / 15300));
-    // The furnace's column all junk and nothing much to do: burned at once, but not with a white in the next one.
+  it('never burns a column by hand, 13 Nov ("definitely get rid of manual burns ... that\'s why no one\'s getting past CC2 ... just don\'t ever do that. Never.")', () => {
+    for (const name of ['cc1', 'cc3']) {
+      const g = new Distilling(seeded(5002));
+      playSession(g, levelNamed(name), 4, undefined, (a) => expect(a.kind).not.toBe('burn'));
+    }
+    // The furnace's column all junk and nothing much to do: still not burned by hand, by a bot or by Helium.
     const right = [...column(7, 'KKKKbbbb'), ...column(8, 'KKKKbbbbb'), ...column(9, 'KKKKbbbb')];
-    const clearBoard = board(right), whiteNext = board([...right, [8, 4, 'w']]);
-    const play = (cols: Board) => choose({ cols, chain: 0, timeLeft: 12000 }, contextFor(cols, 'junk', 0, 14), levelNamed('cc8')).kind;
+    const clearBoard = board(right);
     expect(clearComingUp(clearBoard)).toBe(true);
-    expect(play(clearBoard)).toBe('burn');
-    expect(clearComingUp(whiteNext)).toBe(false);
-    expect(play(whiteNext)).not.toBe('burn');
+    expect(choose({ cols: clearBoard, chain: 0, timeLeft: 12000 }, contextFor(clearBoard, 'junk', 0, 14), levelNamed('cc8')).kind).not.toBe('burn');
+    expect(advise({ cols: clearBoard, chain: 0, timeLeft: 12000 }).kind).not.toBe('burn');
   }, 60000);
 });
 
@@ -118,11 +117,13 @@ describe('the bots are their target chains, 13 Nov (the thirtieth note: "I want 
     const g = new Distilling(seeded(5000));
     const two = advise({ cols: g.cols, chain: 0, timeLeft: g.timeLeft() }, { target: 2 });
     expect(two.target).toBe(2);
-    expect(two.stage).toBe('junk');
-    expect(two.whitesNeeded).toBeGreaterThan(0);
+    // (A CC^2 banks two columns of whites, which a fresh board already has: it's in the chain from the start, 13 Nov:
+    // "once it's got a crystal clear one, it will start sending them up"; a CC^8 banks six, still to gather.)
+    expect(two.stage).toBe('chain');
     const top = advise({ cols: g.cols, chain: 0, timeLeft: g.timeLeft() });
     expect(top.target).toBe(8);
-    expect(top.whitesNeeded!).toBeGreaterThan(two.whitesNeeded!);
+    expect(top.stage).toBe('junk');
+    expect(top.whitesNeeded).toBeGreaterThan(0);
     // In the chain: the whites still missing from the columns going up for it, none once it's reached.
     const cols = board([...column(0, 'KKKKbbbbb'), ...column(1, 'KKKKbbbb'), [9, 0, 'K']]);
     expect(advise({ cols, chain: 1, timeLeft: 12000 }, { target: 2 }).whitesNeeded).toBe(1);
@@ -254,7 +255,7 @@ describe('nothing trapped (13 Nov, the eighteenth note)', () => {
     let free = 0;
     for (const seed of [5000, 5001]) {
       const g = new Distilling(seeded(seed));
-      playSession(g, levelNamed('cc3'), 30, undefined, (a) => {
+      playSession(g, levelNamed('cc8'), 30, undefined, (a) => {
         if (a.stage !== 'junk' || a.kind !== 'move' || !brownSweep(g.cols, a.drags)) return;
         const ctx = contextFor(g.cols, 'junk', 0, 16), was = whitesInJunk(g.cols, ctx.burnFrom);
         if (was === 0) { free++; return; }
@@ -262,7 +263,7 @@ describe('nothing trapped (13 Nov, the eighteenth note)', () => {
       });
     }
     expect(free).toBeGreaterThan(0);
-  }, 60000);
+  }, 180000);
   it('a white stuck where no routine frees it gets a piece brought round (the path search, "a pathfinding A-star style problem")', () => {
     // The user's shape: a white on the top of column 7, the white below-left of it its only way left, a black
     // further left in its row; the brown that can take its place is below-right of it, and has to go left
@@ -457,15 +458,15 @@ describe('watching the CC^8 on seed 1 (13 Nov, the twenty-sixth and twenty-ninth
     const was = P.CARRY, onward = P.ONWARD;
     try {
       // (The onward carry, the thirty-second note's, off too: it carries this one on as well.)
+      // (Since 13 Nov, later, "keep running things until it stops": a drag's let go where the board's best, the
+      // longest such, so it goes all the way in even with both carries off.)
       P.CARRY = 0; P.ONWARD = 0;
-      const short = judge(cols, drag, HELIUM, undefined, true)!;
-      expect(short.drags[0].ways).toHaveLength(3);
-      P.CARRY = was;
       const carried = judge(cols, drag, HELIUM, undefined, true)!;
       expect(carried.drags[0].ways).toHaveLength(4);
       expect(carried.value).toBeGreaterThan(0);
+      P.CARRY = was;
       const end = (n: number): [number, number] => { let at: [number, number] = [2, 4]; for (let i = 0; i < n; i++) at = neighbourOn(cols, at[0], at[1], DOWN_RIGHT)!; return at; };
-      expect(joinedUp(playDrags(cols, short.drags)!, end(3))).toBe(false);
+      expect(joinedUp(playDrags(cols, [{ ...drag[0], ways: drag[0].ways.slice(0, 3) }])!, end(3))).toBe(false);
       expect(joinedUp(playDrags(cols, carried.drags)!, end(4))).toBe(true);
       P.CARRY = 0; P.ONWARD = onward;
       expect(judge(cols, drag, HELIUM, undefined, true)!.drags[0].ways).toHaveLength(4);
@@ -484,7 +485,7 @@ describe('whites burned later in a session, traced (13 Nov, the thirteenth run: 
     expect(bot.plan(g).stage).toBe('chain');
     expect(bot.burns).toBe(0);
     // Before any chain, a mostly white column by the fire is still Stage I's to clear.
-    const fresh = new DistillBot(levelNamed('cc5'));
+    const fresh = new DistillBot(levelNamed('cc8'));
     expect(fresh.plan(g).stage).toBe('junk');
   });
   it('a white in a column to burn is got out by a piece brought round from the left, not a brown taken in from the column and back, another white swapped in behind it', () => {

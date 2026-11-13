@@ -519,6 +519,14 @@ export function distillBoard(o = {}) {
         g.fillStyle = gl; g.fillRect(s.x - 10, s.y - 10, 60, 60);
       }
     }
+    // A column pointed out (b.column, its index): a soft gold band behind it, the column a bot's building its
+    // Crystal Clear in (the user, 13 Nov: "it would highlight a column and say, look, I'm aiming to build a
+    // crystal clear one here").
+    if (b.column != null && grid[b.column]?.length) {
+      const cx = grid[b.column][0].x;
+      g.fillStyle = 'rgba(255,215,90,0.2)'; g.fillRect(cx - 5, 0, CELL + 10, VH);
+      g.strokeStyle = 'rgba(255,215,90,0.85)'; g.lineWidth = 2.5; g.strokeRect(cx - 5, 1.5, CELL + 10, VH - 3);
+    }
     for (const s of [...grid.flat(), ...leaving]) g.drawImage(pieceCanvas(s.p), s.x, s.y, CELL, CELL);
     // Pieces pointed out (b.mark): a gold ring round each, pulsing.
     if (b.mark) {
