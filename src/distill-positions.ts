@@ -22,7 +22,7 @@
    Places are as the board's arrays have them: x the column, 0 the left and 9 the furnace's; y the row, 0 the top.
    The page numbers columns 1 to 10 and rows from 1 at the top, so a place on it is [x + 1, y + 1] here. */
 
-import { WHITE, neighbourOn, parseBoard } from './distilling.js';
+import { BLACK, BROWN, TALL, WHITE, neighbourOn, parseBoard } from './distilling.js';
 import type { Board } from './distilling.js';
 import { choose, contextFor, levelNamed } from './distill-bots.js';
 import type { Advice, Technique } from './distill-bots.js';
@@ -92,6 +92,8 @@ export interface Expect {
   /** Its first drag starts somewhere in this area: columns x[0] to x[1], rows y[0] to y[1] (a corner to work in,
       when the verdict is where to work rather than the exact piece). */
   startsIn?: { x: readonly [number, number]; y: readonly [number, number] };
+  /** Its first drag is a quick sorting move: it carries a black down, or a brown up. */
+  sorts?: boolean;
   /** A white freed: given a column, fewer whites in it after the move; given a place, the white there gone from it
       (junk raced into its place, or the white moved on). */
   frees?: number | [number, number];
@@ -209,9 +211,9 @@ export const VERDICTS: Readonly<Record<string, readonly Verdict[]>> = {
     expect: { phase: 'fire', startsIn: { x: [5, 9], y: [0, 2] }, noBurn: true }, open: true,
   }],
   P3: [{
-    date: '13 Nov', from: 'DISTILLING.md, the twenty-second note',
-    note: 'Whites low in the column by the fire are the urgent work: the one at the bottom of column 9 comes out first.',
-    expect: { frees: 8, noBurn: true },
+    date: '13 Nov',
+    note: "No hurry for column 9's whites with column 10 to go first: quick, simple, easy moves. Drag the blacks down, like the two in column 8, down, down, then along the columns going down, and the browns up.",
+    expect: { kind: 'move', sorts: true, noBurn: true }, open: true,
   }],
   P6: [{
     date: '13 Nov', from: 'DISTILLING.md, the twenty-sixth note',
@@ -267,6 +269,12 @@ export function check(p: Position, m: BotMove, e: Expect): string[] {
     if (!first || first.x < x0 || first.x > x1 || first.y < y0 || first.y > y1) {
       out.push(`its first drag starts ${first ? `at ${place([first.x, first.y])}` : 'nowhere'}, not in columns ${x0 + 1} to ${x1 + 1}, rows ${y0 + 1} to ${y1 + 1}`);
     }
+  }
+  if (e.sorts) {
+    const held = first && cols[first.x][first.y], end = first && dragEnd(cols, first);
+    const h = (x: number, y: number) => y + (cols[x].length === TALL ? 0 : 0.5);
+    const ok = !!first && !!end && ((held === BLACK && h(...end) > h(first.x, first.y)) || (held === BROWN && h(...end) < h(first.x, first.y)));
+    if (!ok) out.push("its first drag isn't a black taken down or a brown taken up");
   }
   if (e.ends) {
     const end = first && dragEnd(cols, first);

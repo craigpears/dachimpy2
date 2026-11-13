@@ -1649,6 +1649,18 @@ state of that board. Alarm bells going off that column 9 has got a white at the 
 reflection of something that's gone wrong far, far earlier, but I think ... the same theme still is risk management
 and priorities are not there." The same verdict on `P2`: the top right first. And the deeper lesson: the top right
 going bad is the snowball the bots must see coming, from the first look at a fresh board.
+And on P3, two whites low in column 9 with 7 s before column 10 goes (the bot dragged one out left): "I'll just be
+dragging the blacks down, like the two in column 8. I'll just be going down, down, and then going all along the
+columns ... just going down, browns up, they're just really fast, quick, simple, easy moves. I'll just be doing
+those." So while nothing's about to burn, the default is the quick sorting moves, blacks down and browns up, not a
+careful rescue; the verdict on `P3` (it replaces the one first drawn from the twenty-second note): the first drag
+takes a black down or a brown up.
+The theme the user drew from P1 to P3: "you need some kind of little agent or something that detects, traps, and
+risks and prioritizes which white pieces to try and rescue seems to be the outcome of this." So the bots want a risk
+reader of its own: for every white, how trapped it is (no move beside it, blacks round it, walled in from above or
+below), how soon its column burns, and how much worse it gets if left; the whites ranked by that, the most at risk
+worked first (the top right before a white lower down that can wait), and the quick sorting moves when nothing is at
+risk yet. The open verdicts on P1, P2, P3, P6 and P7 are its tests.
 
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
