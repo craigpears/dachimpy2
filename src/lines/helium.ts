@@ -306,6 +306,56 @@ export const SPOT = {
   note: 'Blue rings: the same trick works there too',
 } as const;
 
+/** Their rum run (src/den-rumrun.ts; the user, 13 Nov, IDEAS.md "Helium's rum run"): once you've filled some casks
+    at their still, they ask you to help get it where it's going, hop aboard your sloop with the barrels, and play it
+    all innocent past the Empire: "nothing suspicious at all", whistling "whoop-de-doop-de-doop-de-doo". Still
+    offhand: it's not smuggling to them, it's delivering. `ask`, off their island as you leave the still; `aboard`,
+    as the barrels are rolled aboard; `atSea`, now and then while you sail; `tune` and `innocent`, sailing by the
+    checkpoint or Port Decorum with barrels aboard (the tune, then a line in turn); `notYet`, at Port Decorum
+    before the other two have theirs; at each stop (`wedding`, `kikkit`, `quay` brazening it out at Port Decorum's
+    jetty, `cove` landing it quietly at the smugglers' beach); `last`, the barrels all gone; `home`, back off their
+    island, hopping off. */
+export const RUM_RUN = {
+  ask: [
+    'That\'s a few casks. Mischievious wants a wedding\'s worth. Kikkit wants... Kikkit wants.',
+    'And the rest goes to Port Decorum. The Empire loves rum. Just not where it comes from.',
+    'Fancy a run? Your sloop, my barrels. I\'ll come along. Keep an eye on them.',
+  ],
+  smuggling: 'Smuggling? No. Delivering. With extra whistling.',
+  aboard: 'Right. Mischievious and Kikkit, either way round. Then Port Decorum. Mind the corners.',
+  atSea: [
+    'Easy on the waves. That\'s a wedding\'s worth by the mast.',
+    'If anyone asks, it\'s ballast. Very tasty ballast.',
+    'Lovely sloop. Smells of rum now. You\'re welcome.',
+    'Don\'t sit on that one. That one\'s for the Empire.',
+  ],
+  tune: 'Whoop-de-doop-de-doop-de-doo...',
+  innocent: [
+    'Nothing suspicious at all.',
+    'Just sailing. With some barrels. Of... sea.',
+    'Lovely day for not smuggling anything.',
+  ],
+  notYet: 'Mischievious and Kikkit first. The Empire can wait. It\'s very good at waiting.',
+  wedding: {
+    hello: 'Two barrels, as ordered. One for the guests.',
+    other: 'And one for whoever\'s getting married. Bit of luck, that.',
+  },
+  kikkit: {
+    hello: 'One barrel. Not a stash, Kikkit. A barrel.',
+    monkey: 'Rodrigo\'s a monkey.',
+  },
+  quay: {
+    water: 'Water.',
+    fort: 'For the fort. Very thirsty, your fort. Nothing suspicious at all.',
+  },
+  cove: {
+    quiet: 'Nobody about. Lovely. Up the beach they go.',
+    after: 'Someone\'ll be along for them. Someone always is.',
+  },
+  last: 'That\'s the lot. Drop me home, would you? The still won\'t blow itself up.',
+  home: 'Ta. More casks, another run. Bring the sloop.',
+} as const;
+
 /** While you're within earshot of their island, before or after: round and round. */
 export const AFTER = [
   'Big order of rum for Mischievious. Another wedding. She does keep getting married.',
@@ -333,7 +383,9 @@ export const CHARACTER: Character = {
     + 'when the balance goes wrong and the still goes bang ("Oops. That happens sometimes. Don\'t worry about '
     + 'it."). A short lesson on a real board, then it\'s yours, and "Help, Helium" while you play: they read '
     + 'your board, say what they\'d do and why, name the technique, and do it. Knows the others: a big '
-    + 'order of rum for Mischievious\'s next wedding, Kikkit at their stash again.',
+    + 'order of rum for Mischievious\'s next wedding, Kikkit at their stash again. Fill a couple of casks and they '
+    + 'take it on a run aboard your sloop, to Mischievious, to Kikkit, and past the Empire to Port Decorum, all '
+    + 'innocence and whistling: "Nothing suspicious at all."',
   theUser: [
     { on: '11 Nov', said: 'Maybe he\'s got a secret distillery operation going. If you find his house, he ... teaches you how to make some rum. But he\'s very kind of by the by' },
     { on: '11 Nov', said: 'occasionally, distilleries have been known to blow up ... So, oops, that happened sometimes. Don\'t worry about it.' },
@@ -410,5 +462,17 @@ export const CHARACTER: Character = {
       each: { one: 'One more', two: 'Two more', three: 'Three more', many: 'More than the rings show', note: 'In the bar' },
     },
     { when: 'While you\'re within earshot of their island: round and round', says: AFTER },
+    {
+      when: 'Their rum run (src/den-rumrun.ts): once you\'ve filled some casks, asking you, aboard your sloop with the barrels, past the Empire, and at each stop',
+      says: RUM_RUN,
+      each: {
+        ask: 'Off their island as you leave the still, the casks filled: asking you along', smuggling: 'After you ask whether it\'s smuggling',
+        aboard: 'The barrels rolled aboard, and them with them', atSea: 'Now and then while you sail, barrels aboard',
+        tune: 'Sailing by the checkpoint or Port Decorum with barrels aboard: whistling', innocent: 'Then, in turn',
+        notYet: 'At Port Decorum before Mischievious and Kikkit have theirs', wedding: 'Off the Wedding Isle, Mischievious on the jetty',
+        kikkit: 'Off Kikkit\'s island', quay: 'Brazening it out at Port Decorum\'s jetty, its guard asking what\'s in the barrels',
+        cove: 'Landing it quietly at the smugglers\' beach behind Port Decorum', last: 'The barrels all gone', home: 'Back off their island, hopping off',
+      },
+    },
   ],
 };

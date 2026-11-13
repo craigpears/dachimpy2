@@ -418,6 +418,13 @@ export function dignityWatch(ship) {
   if (e === 'scene') dignityScene();
   else if (e === 'closer') speak(SAYS.closer, 'closer');
 }
+/* A remark from her gate about something going by (Helium's rum run whistling past: rumrun.js), over her head,
+   as her own lines are; not over a line of hers already up, nor in a cutscene. */
+export function dignityRemark(text) {
+  dig.W ||= build();
+  if (cine || dig.play || dig.line) return;
+  speak(text, 'closer');
+}
 // Something's happened at the checkpoint (its own events: a shot of hers on it, or what she's done).
 export function dignityHeard(e) {
   const line = heard(e);

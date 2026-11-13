@@ -12,6 +12,14 @@ export const GRUMBLES = [
     'Everything ashore is imperial property. Every last crate.',
     'Papers? No? Then no.',
 ];
+/** Helium's rum run (src/den-rumrun.ts), brazened out at the jetty: the guard on its end asks what's in the
+    barrels, takes Helium's word for it, and isn't happy about it. `what` as you come alongside, `water` after
+    Helium's "Water.", `fine` after the thirsty fort. */
+export const RUM_RUN = {
+    what: 'Halt! No pirates in the harbour. And what\'s in the barrels?',
+    water: 'Water.',
+    fine: '...Leave them on the jetty. And move along. Before I think about it.',
+};
 export const CHARACTER = {
     name: 'The imperial guards of Port Decorum',
     who: 'Soldiers of the Empire in its crimson and gold, standing guard over Port Decorum, the imperial port '
@@ -27,5 +35,9 @@ export const CHARACTER = {
         { when: 'The first time you come up off the island on a voyage, as the status line', says: SIGHTED },
         { when: 'The jetty guard, as you first come within earshot', says: HALT },
         { when: 'Then, while you\'re within earshot, round and round', says: GRUMBLES },
+        {
+            when: 'Helium\'s rum run, brazened out at the jetty: its guard and Helium', says: RUM_RUN,
+            each: { what: 'As you come alongside with the barrels', water: 'After Helium\'s "Water."', fine: 'After the thirsty fort' },
+        },
     ],
 };

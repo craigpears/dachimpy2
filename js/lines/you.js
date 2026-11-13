@@ -44,6 +44,10 @@ export const AT_HELIUMS = {
     safe: 'Is... is it safe?',
     brows: 'You\'ve got no eyebrows left.',
 };
+/** Helium's rum run (src/den-rumrun.ts): as they ask you along, warily. */
+export const ON_THE_RUM_RUN = {
+    smuggling: 'Is... is this smuggling?',
+};
 export const CHARACTER = {
     name: 'You',
     who: 'Your own pirate, dressed as you like from the wardrobe (or as any real pirate in it). You say little, '
@@ -75,5 +79,6 @@ export const CHARACTER = {
         { when: 'Sailing up near Primates Rule at anchor, still to come (once a voyage)', says: [BY_PRIMATES_RULE] },
         { when: 'Off Helium\'s island the first time, their still just gone bang: between their lines', says: AT_HELIUMS },
         { when: 'Coming into the smugglers\' cove behind Port Decorum, by way of the whirlpools (once a voyage)', says: [AT_SMUGGLERS_BEACH] },
+        { when: 'Helium\'s rum run: as they ask you along, before their "Delivering"', says: ON_THE_RUM_RUN },
     ],
 };

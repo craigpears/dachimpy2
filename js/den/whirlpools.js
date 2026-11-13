@@ -143,6 +143,15 @@ export function kikkitPrompt() {
   if (!canHail()) return '';
   return kik.W?.her.talking() ? 'Off Kikkit\'s island · Space: and then?' : 'Off Kikkit\'s island · Space: hail her · 1: Sailing';
 }
+/** Hushed while someone else's scene talks with her (true: Helium's rum run, rumrun.js), or chattering again;
+    her figure's group, to put a line over. */
+export function kikkitQuiet(on) {
+  const her = kik.W?.her;
+  if (!her) return null;
+  her.chatty = !on;
+  if (on) her.hush();
+  return her.p.g;
+}
 /** A whirlpool has her: Sailing's board is put away meanwhile (sailing.js). */
 export const kikkitHolds = () => !!kik.held;
 

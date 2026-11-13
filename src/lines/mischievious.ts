@@ -195,6 +195,13 @@ export const AT_HOME = {
   ],
 } as const;
 
+/** Helium's rum run (src/den-rumrun.ts): on her jetty as you bring their barrels in for her weddings, a
+    wedding's worth. `hello` as you come alongside, `thanks` once they're rolled ashore. */
+export const RUM_RUN = {
+  hello: 'Ooh, Helium\'s rum! Just in time. Three weddings before lunch!',
+  thanks: 'Who\'s getting married? Never mind. I\'ll find somebody. Hee hee!',
+} as const;
+
 export const CHARACTER: Character = {
   name: 'Mischievious',
   who: 'Host of the Wedding Isle, out at sea on the den\'s side of the checkpoint: she runs the wedding venue on '
@@ -251,6 +258,10 @@ export const CHARACTER: Character = {
     {
       when: 'Married to her, at home (whoever you married comes home with you, 11 Nov)', says: AT_HOME,
       each: { aboard: 'Coming aboard the sloop with you, off her isle', den: 'Walking up to her at the den' },
+    },
+    {
+      when: 'Helium\'s rum run: on her jetty as their barrels come in for her weddings', says: RUM_RUN,
+      each: { hello: 'As you come alongside', thanks: 'The barrels rolled ashore, after Helium\'s' },
     },
   ],
 };

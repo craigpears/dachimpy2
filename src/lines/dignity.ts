@@ -19,6 +19,14 @@ export const LATER = {
   canal: 'Nobody uses the canal. Nobody!',
 } as const;
 
+/** Helium's rum run (src/den-rumrun.ts): watching from her gate as you sail by with a deck of barrels, Helium
+    whistling. One a pass, in turn. */
+export const RUM_RUN = [
+  'Barrels. And whistling. It\'s always the whistling.',
+  'I\'m writing down "whistled". In very small, very suspicious handwriting.',
+  'That sloop is lower in the water than she was. Hm.',
+] as const;
+
 export const CHARACTER: Character = {
   name: 'Dignity',
   who: 'The imperial checkpoint\'s dutiful commander, peering down from the top of its gatehouse, the '
@@ -53,5 +61,6 @@ export const CHARACTER: Character = {
         canal: 'You come out round her by the locks (even if she never saw you sail up)',
       },
     },
+    { when: 'Helium\'s rum run: you sail by her gate with a deck of barrels, Helium whistling (one a pass, in turn)', says: RUM_RUN },
   ],
 };

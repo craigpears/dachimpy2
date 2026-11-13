@@ -35,6 +35,7 @@ import { heliumWorld, heliumTick, heliumHail, heliumPrompt, heliumReset, heliumK
 import { empireWorld, empireTick, empirePrompt, empireReset } from './imperial-isle.js';
 import { primatesTick, primatesReset } from './moored.js';
 import { smugglersWorld, smugglersTick, smugglersPrompt, smugglersReset } from './smugglers.js';
+import { rumTick, rumKey, rumPrompt, rumGoal, rumReset } from './rumrun.js';
 import { raceWorld, raceTick, raceHelm, raceKey, racePrompt, raceShot, raceTarget, raceHitRival, raceHolds, raceReset, raceHover, raceClick, race } from './race.js';
 import { watch, watchTick, watchStop } from './race-watch.js';
 import { planTake } from './race-plan.js';   // (your moves take the helm from the race's pilot)
@@ -95,6 +96,7 @@ export function sailReset() {
   heliumReset();
   empireReset();
   smugglersReset();
+  rumReset();   // (Helium's rum run: rumrun.js)
   primatesReset();
   raceReset();
   watchStop();   // (the race watched: race-watch.js)
@@ -190,6 +192,7 @@ export function sailKey(key) {
   if (kikkitHolds() && key !== 'p') return;   // (round and round in a whirlpool: whirlpools.js)
   if (umamiKey(key)) return;   // (Umami's board, and her moorings in the lagoon: capybara.js)
   if (heliumKey(key)) return;   // (Distilling at Helium's still: helium-isle.js)
+  if (rumKey(key)) return;   // (Helium's rum run: taking it aboard, a stop's barrels ashore, them home: rumrun.js)
   if (craneKey(key)) return;   // (the crane at the ledge, and the lagoon: crane.js)
   if (raceKey(key)) return;   // (the race: its buoy, and its crane on the neck: race.js)
   // The Sailing board: its keys while it's open; 1 or Esc puts it away (sail-station.js).
@@ -229,7 +232,7 @@ export function sailPrompt() {
   if (rowing.on) return rowPrompt();
   if (gunnery.on) return gunneryPrompt();
   if (station.on) return stationPrompt();
-  const cp = heliumPrompt() || umamiPrompt() || cranePrompt() || racePrompt() || kikkitPrompt() || tzzPrompt() || empirePrompt() || smugglersPrompt();
+  const cp = rumPrompt() || heliumPrompt() || umamiPrompt() || cranePrompt() || racePrompt() || kikkitPrompt() || tzzPrompt() || empirePrompt() || smugglersPrompt();
   if (cp) return cp;
   const h = sail.helm, held = h.held();
   if (held === 'daze') return patchPrompt('Holed! Patch her deck to sail on · 1, 2, 3: a piece from the crate', ' (it rests on the deck: boarded over)');
@@ -242,9 +245,9 @@ export function sailPrompt() {
   if (canLandIsle(h)) return h.slot < 0 ? 'Off the Wedding Isle · Space: go ashore · click the sea to drop a pin' : 'Under way off the Wedding Isle · Space: go ashore';
   if (canHaulWreck()) return 'The old wreck · Space: haul up its treasure (Treasure Haul) · click the sea to drop a pin';
   if (h.slot < 0 && h.headwind()) return headwindPrompt();
-  if (h.pin) return h.oars ? 'Rowing to the pin' : 'Under way to the pin';
+  if (h.pin) return rumGoal() + (h.oars ? 'Rowing to the pin' : 'Under way to the pin');
   if (h.slot >= 0) return 'Under way';
-  return 'Click the sea to drop a pin, or put in moves with W A D · Q E: fire · 1: Sailing · 2: load her guns (Gunnery) · 3: oars';
+  return rumGoal() + 'Click the sea to drop a pin, or put in moves with W A D · Q E: fire · 1: Sailing · 2: load her guns (Gunnery) · 3: oars';
 }
 /* What there is to start just now, offered on the thing itself where you're looking (js/den/start-mark.js:
    the user, 10 Nov, "it should be in the middle of the screen where I'm looking so that I can click on
@@ -405,6 +408,7 @@ export function sailTick(dt) {
   kikkitTick(dt, events);   // (Kikkit, her whirlpools and the penguins: whirlpools.js)
   tzzTick(dt);   // (Tzz and her balloons: balloon-isle.js)
   heliumTick(dt);   // (Helium and their still: helium-isle.js)
+  rumTick(dt);   // (Helium's rum run, its barrels and Helium aboard: rumrun.js)
   empireTick(dt);   // (Port Decorum's guards: imperial-isle.js)
   smugglersTick();   // (the smugglers' beach, found: smugglers.js)
   raceTick(dt);   // (the race, its guns, its crane and the rival: race.js)

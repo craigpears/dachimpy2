@@ -5,9 +5,10 @@
 import { spouseOf, cleanSpouse, homeLines, homeNews, leaving, settle, reopened, ABOARD, STROLL, Stroll, Chatter } from '../den-spouse.js';
 import { scene, keep, toast, burst, V3, bounds, obstacles, pirate, animateWalk, WALL_Z } from './world.js';
 import { heightAt } from './land.js';
-import { sail, SLOOP_DECK } from './sea.js';
+import { sail } from './sea.js';
 import { bubble, bubbleAt } from './cine.js';
 import { figure, dropFigure } from './wedding-scene.js';
+import { standAboard } from './aboard.js';
 
 const KEY = 'carp.den.spouse';
 const kept = () => { try { return cleanSpouse(JSON.parse(localStorage.getItem(KEY))); } catch { return null; } };
@@ -89,16 +90,9 @@ export function spouseTick(dt, onIsle) {
   if (spouse.where === 'isle') { g.visible = false; showLine(false); return; }
   if (spouse.where === 'aboard') {
     if (was === 'den') spouse.stroll = null;   // (off with you again: a fresh spot when they're home)
-    if (!sail.g) { g.visible = false; showLine(false); return; }
-    if (g.parent !== sail.g) sail.g.add(g);
-    g.visible = !sail.struck;   // (out of the way while a puzzle's on her deck, as her mast is)
-    // (stood just aft of her mast, looking ahead, swaying a little with her)
-    const t = performance.now() / 1000;
-    g.position.set(ABOARD.x, SLOOP_DECK, ABOARD.z);
-    g.rotation.set(Math.sin(t * 1.3) * 0.03, Math.PI / 2 + Math.sin(t * 0.4) * 0.25, 0);
-    animateWalk(f, false, dt);
-    f.arms[0].rotation.x = -0.5 + Math.sin(t * 2) * 0.05;   // (a hand on the rail, the bouquet out)
-    showLine(!sail.struck);
+    // (stood just aft of her mast, looking ahead, swaying a little with her, a hand on the rail, the bouquet out:
+    // aboard.js, as anyone aboard is)
+    showLine(standAboard(f, ABOARD, dt));
     return;
   }
   // At the den: stepped off her, they're home.
