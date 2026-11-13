@@ -18,6 +18,8 @@
    - The user's tricks: each on a board where it shows, marked by the planner's own reading of it (`dangerZones`,
      `edgeWhites`, `keptTools`, `clearComingUp`); the sorted right side's one fluid motion (the thirty-first note)
      found on a sorted board by `fluidMotion` and checked by `isFluid`.
+   - Reading the board (src/distill-read.ts): its states and tactics, on the positions the user critiqued, each read
+     as the planner reads it, with the bot's move there now (`readingExamples`).
    - The page's order (`PLAN`, 13 Nov): the rules and a target, then each phase in a game's order with its own
      tricks and techniques under it, simplest first.
    - Helium's lines, quoted from src/lines/helium.ts.
@@ -33,6 +35,8 @@ import { bringRound, pairRescue, stuck } from './distill-path.js';
 import { STEP_ONE_CTX, afterOpening, beforeBang, lessonPlan, opening, lessonGame } from './den-helium.js';
 import { BEST, HELP, HELP_ELSE, NERVES, ONWARD, OPENING, PHASE, SPOT, STEP_ONE, TEACH, TELL } from './lines/helium.js';
 import { POSITIONS } from './distill-guide-boards.js';
+import { POSITIONS as POSITIONS_SEEN, boardOf, botAt } from './distill-positions.js';
+import { STATES, TACTICS, readBoard } from './distill-read.js';
 /** The user's tricks (DISTILLING.md §3, the twentieth to twenty-ninth notes, the thirty-first's fluid motion, and the
     pair rescue in the chain, 13 Nov). */
 export const TRICKS = ['white', 'danger', 'edge', 'flick', 'blocks', 'kept', 'burnEarly', 'fluid', 'pair'];
@@ -371,6 +375,22 @@ export function trickExamples() {
     }
     return out;
 }
+/** The positions the page reads (src/distill-positions.ts, the user's own critiques): a white trapped by the fire, the
+    ladder about to be lost, a cracked board, damage control. */
+export const READ_EXAMPLES = ['P2', 'P8', 'P10', 'P7'];
+/** Each READ_EXAMPLES position read, as the planner reads it, with the bot's move there now. */
+export function readingExamples() {
+    return READ_EXAMPLES.map((id) => {
+        const p = POSITIONS_SEEN.find((q) => q.id === id), cols = boardOf(p), r = readBoard(cols, { stage: p.stage, timeLeft: p.timeLeft }), a = botAt(p);
+        const rings = r.tactic === 'sortLadder' ? [] : r.targets.slice(0, 6).map((t) => [t.x, t.y]);
+        const shade = r.tactic === 'sortLadder' ? [COLS - 2, COLS - 1] : r.tactic === 'fixCracks' ? [] : [...new Set(r.targets.map((t) => t.x))];
+        const s = Math.round(p.ms / 1000);
+        return {
+            id, state: r.state, tactic: r.tactic, stateLabel: STATES[r.state].label, tacticLabel: TACTICS[r.tactic].label, about: TACTICS[r.tactic].about, why: r.why,
+            picture: { cols, drags: a.drags, rings, shade, from: `A real deal (seed ${p.seed}), ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')} in, ${(p.timeLeft / 1000).toFixed(1)} s on the furnace; ${id} of the positions` },
+        };
+    });
+}
 // ---------------------------------------------------------------- Helium's lines, and the whole guide
 /** Helium's lines the page quotes, from src/lines/helium.ts. */
 export const QUOTES = { goal: BEST.none, stepOne: STEP_ONE.says, why: STEP_ONE.why, onward: ONWARD, tell: TELL, trick: TEACH.lift.why, spot: SPOT.three };
@@ -378,6 +398,6 @@ export const QUOTES = { goal: BEST.none, stepOne: STEP_ONE.says, why: STEP_ONE.w
 export function guide() {
     return {
         pieces: PIECES, swaps: SWAPS, furnaceSecs: FURNACE_SECS, chainBonus: CHAIN_BONUS, flask: FLASK, carryOn: CARRY_ON, columns: sampleColumns(),
-        phases: phaseExamples(), levels: levelRows(), techniques: techniqueExamples(), tricks: trickExamples(), quotes: QUOTES, plan: PLAN,
+        phases: phaseExamples(), levels: levelRows(), techniques: techniqueExamples(), tricks: trickExamples(), quotes: QUOTES, plan: PLAN, reading: readingExamples(),
     };
 }

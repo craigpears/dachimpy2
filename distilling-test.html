@@ -71,6 +71,7 @@ import { seeded } from './js/mirror-row.js';
 import { Distilling, MESSAGES } from './js/distilling.js';
 import { LEVELS, levelNamed, bankFor, PER_COLUMN, DistillBot } from './js/distill-bots.js';
 import { ROUTINES } from './js/distill-routines.js';
+import { STATES, TACTICS } from './js/distill-read.js';
 import { distillBoard } from './js/den/distill-board.js';
 
 const $ = (id) => document.getElementById(id);
@@ -153,6 +154,9 @@ function showRoutine(p) {
   aim.textContent = !p.target ? '' : p.column != null
     ? `Aiming for CC^${p.target}: building a Crystal Clear in column ${p.column + 1} (shaded)${p.whitesNeeded ? `, ${need}` : ''}`
     : `Aiming for CC^${p.target}: banking whites first${p.whitesNeeded ? `, ${need}` : ''}`;
+  // How it reads the board (src/distill-read.ts): its state and the tactic in play, and why (the user, 13 Nov: "what
+  // kind of tactics are in play").
+  if (p.state && p.stage === 'junk') aim.textContent += ` · ${STATES[p.state].label}: ${TACTICS[p.tactic].label.toLowerCase()} (${p.read})`;
   board.column = p.column ?? null;
   $('routine').append(aim, b, `: ${p.reason}`);
 }

@@ -21,7 +21,7 @@ import { COLS, Distilling, SPICE, WHITE, BROWN, BLACK, writeBoard } from '../js/
 import { DistillBot, contextFor, edgeWhites, levelNamed } from '../js/distill-bots.js';
 import { canGo, isJunk } from '../js/distill-routines.js';
 import { stuck } from '../js/distill-path.js';
-import { POSITIONS, VERDICTS, botAt, moveOf } from '../js/distill-positions.js';
+import { POSITIONS, SKIPPED, VERDICTS, botAt, moveOf } from '../js/distill-positions.js';
 import { seeded } from '../js/mirror-row.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -165,7 +165,7 @@ if (!PICK) {
     console.log(`${name} seed ${seed}: ${((Date.now() - t0) / 1000).toFixed(1)} s, ${(g.time / 60000).toFixed(1)} min of play; found ${Object.keys(top).join(', ') || 'nothing'}`);
   }
   // Keep the positions with verdicts; fill each kind up to EACH with the most telling, from different sessions.
-  const kept = POSITIONS.filter((p) => VERDICTS[p.id]?.length);
+  const kept = POSITIONS.filter((p) => VERDICTS[p.id]?.length || SKIPPED[p.id]);
   const list = [];
   for (const kind of KINDS) {
     const mine = kept.filter((p) => p.moment === kind);

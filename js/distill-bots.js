@@ -33,15 +33,21 @@
    blocks and the V, the chain), which tilts the techniques' worth (the user, 13 Nov: "different techniques
    have different weights depending on the stage"), all even only while a white's in danger (the
    twenty-eighth note); the advice says it, for Helium to say aloud, with its target and the whites still
-   needed for it.
+   needed for it. And in Stage I it reads the board (src/distill-read.ts, from src/distill-risk.ts and
+   src/distill-patterns.ts; the user, 13 Nov: "a feature that tells you there's a risk and detects it ... but also
+   what kind of tactics are in play"): its state (healthy, at risk, cracked, damage control) and the tactic in play,
+   whose own measure of progress ranks the moves first (`byTactic`); the advice carries both. Two drags a player
+   would make as one are made one (src/distill-teach.ts, `joinPairs`, the one implementation the teaching picker uses too).
 
    `advise(board)` is the planner for anyone's board, a person's mid-game: the stage, the routine it would
    play now, why in a line, and its drags. "Help, Helium" will show that on the player's own board. */
 import { BLACK, BROWN, COLS, DOWN_LEFT, DOWN_RIGHT, SPICE, TALL, UP_LEFT, UP_RIGHT, WHITE, neighbourOn } from './distilling.js';
 import { M, ROUTINES, burnsClean, canGo, clear, colourLeft, fillTarget, isJunk, junkTarget, measure, playDrags, swapsIn, whitesFrom, } from './distill-routines.js';
-import { blockPhase, boardScore, keptTools } from './distill-score.js';
+import { blockPhase, boardScore, keptTools, trappedWhite, wall } from './distill-score.js';
 import { PATH, freed, pairRescue, pathMoves, stuck } from './distill-path.js';
 import { phaseOf, weightIn } from './distill-phase.js';
+import { TACTICS, ladderDrags, moves as movesAny, nearDrags, progress, quickFills, readBoard, tailDrags, toolBrowns } from './distill-read.js';
+import { joinPairs } from './distill-teach.js';
 /** The path search when a white in the furnace's column has no other way out: longer drags, a wider look
     for a piece to move out of the way first. Run only then. */
 export const PATH_WIDE = { ...PATH, SWAPS: 16, NODES: 6000, ENABLE_NEAR: 6, ENABLE_BOARDS: 200, ENABLE_NODES: 600 };
@@ -154,6 +160,11 @@ export const P = {
     /** The chain: junk stuck in a column of whites going up next, or the one after, freed first, by the pair rescue
         if need be (`chainZones`, `pairRescue`; 0 off). */
     PAIR: 1,
+    /** Stage I: the board reader's tactic (src/distill-read.ts) sets the priorities (`byTactic`; 0 off). */
+    READ: 1,
+    /** Healthy, quick sorting: a short drag taking a black down or a brown up ranks this much higher. */
+    QUICK: 1.25,
+    QUICK_SWAPS: 6,
 };
 /** Junk in the furnace's column (spice is fine in a Crystal Clear). */
 const junkAt = (col) => col.filter((p) => p !== WHITE && p !== SPICE).length;
@@ -180,12 +191,13 @@ export function plainDrag(drags) {
     return drags[0].ways.every((w) => right(w) === r);
 }
 /** The brown sweep: a brown taken up through the whites and back down through the blacks, to the bottom right
-    (the diamond's brown run). */
+    (the diamond's brown run): let go right of where it started. (Not a brown looped round under a white and back to
+    its own column, the board reader's way to free a white trapped at the top, 13 Nov.) */
 export function brownSweep(cols, drags) {
     if (!drags.length || cols[drags[0].x][drags[0].y] !== BROWN)
         return false;
     const ways = drags[0].ways, up = ways.findIndex((w) => w === UP_RIGHT || w === UP_LEFT);
-    return up >= 0 && ways.slice(up + 1).some((w) => w === DOWN_RIGHT || w === DOWN_LEFT);
+    return up >= 0 && ways.slice(up + 1).some((w) => w === DOWN_RIGHT || w === DOWN_LEFT) && endOf(cols, drags[0])[0] > drags[0].x;
 }
 /** Whites left in the junk columns from x on (those more junk than white): the columns next to burn still to
     clear. */
@@ -434,7 +446,7 @@ export function backward(cols, drags, stage) {
     a column earlier for a white that's hard to reach (`dangerZones`). Among the saving moves, those freeing a
     hard-to-reach white come first ("the harder to reach, the sooner to start"); when nothing can save the
     furnace's whites, the next column's hard ones get the time rather than easy work elsewhere. */
-export function weigh(sit, ctx, style) {
+export function weigh(sit, ctx, style, reading) {
     const { cols } = sit, last = COLS - 1, burning = ctx.burnFrom <= last, one = ctx.stage === 'junk';
     const block = one && blockPhase(cols), base = one ? boardScore(cols, block) : measure(cols, ctx);
     const wrong = (b) => (burning ? b[last].filter((p) => p === WHITE).length : junkAt(b[last]));
@@ -449,32 +461,36 @@ export function weigh(sit, ctx, style) {
     // out easily ... Why have you blocked it all in?"), nor puts another white there.
     const edges = one ? edgeWhites(cols) : [], open = edges.filter((w) => canGo(cols, w.x, w.y, -1));
     const tools = keptTools(cols);
-    const consider = (found) => {
-        const j = one ? judge(cols, found.drags, style, base, block) : null;
-        const move = j ? { ...found, drags: j.drags } : found;
-        const after = playDrags(cols, move.drags);
-        if (!after || (one && !j))
-            return;
-        if (urgent && (wrong(after) >= wrong(cols) || msFor(move.drags, style, plainDrag(move.drags)) > sit.timeLeft))
-            return;
+    // What no move may do, wherever it comes from (a routine, the path search, the board reader's tactic).
+    const admissible = (drags, after) => {
+        if (urgent && (wrong(after) >= wrong(cols) || msFor(drags, style, plainDrag(drags)) > sit.timeLeft))
+            return false;
         if ((burning && wrong(after) > wrong(cols)) || whitesFrom(after, guard) > whitesFrom(cols, guard))
-            return;
+            return false;
         // (A white got out of the two columns nearest the fire is more urgent, wherever it lands.)
         if (one && whitesFrom(after, last - 1) >= whitesFrom(cols, last - 1)
             && (edgeWhites(after).length > edges.length || open.some((w) => after[w.x][w.y] === WHITE && !canGo(after, w.x, w.y, -1))))
-            return;
+            return false;
         // The block phase's corner tools, a brown bottom-left and a black top-left, are spent only to save a white in
         // danger (the twenty-fourth note: "you don't want to just get too greedy"; a long drag across the board always
         // scored more than keeping one).
         if (block && !zones.length) {
             const k = keptTools(after);
             if ((tools.brown && !k.brown) || (tools.black && !k.black))
-                return;
+                return false;
         }
         // The brown sweep waits till the columns next to burn are clear of white (the user, 13 Nov: "it's very good.
         // But it's just like it leaves one or two trapped whites ... it's being applied a bit too quickly before those
         // columns have been cleared"): till then it's played only when it takes a white out of them.
-        if (one && near > 0 && brownSweep(cols, move.drags) && whitesInJunk(after, ctx.burnFrom) >= near)
+        if (one && near > 0 && brownSweep(cols, drags) && whitesInJunk(after, ctx.burnFrom) >= near)
+            return false;
+        return true;
+    };
+    const consider = (found) => {
+        const j = one ? judge(cols, found.drags, style, base, block) : null;
+        const move = j ? { ...found, drags: j.drags } : found;
+        const after = playDrags(cols, move.drags);
+        if (!after || (one && !j) || !admissible(move.drags, after))
             return;
         const value = j ? j.value : measure(after, ctx) - base - P.PER_SEC * timeFor(move.drags, style) / 1000 - P.BACK * backward(cols, move.drags, ctx.stage);
         out.push({ move, value, after });
@@ -506,7 +522,26 @@ export function weigh(sit, ctx, style) {
     // stuck anywhere: something nearly always is, and the weights hardly ever applied (the twenty-eighth note: crawls
     // "still being done at an early stage when there are much simpler techniques").
     const phase = phaseOf(cols, ctx.stage), even = !P.PHASES || zones.length > 0;
-    const rank = (m) => (even || m.value <= 0 ? m.value : m.value * weightIn(phase, m.move.routine));
+    // The board read (the user, 13 Nov, the thirty-third and thirty-fourth notes): its tactic sets the priorities.
+    // Freeing the whites at risk, fixing a cracked board and sorting the ladder before it's lost come before the
+    // danger zones (the zones' whites are among those the reader weighs); sorting the V's tail after them; the quick
+    // sorting moves are preferred when nothing's at risk.
+    const r = one && P.READ && !urgent ? (reading ?? readBoard(cols, { stage: ctx.stage, timeLeft: sit.timeLeft })) : null;
+    let keep = [];
+    if (r && (r.tactic === 'fillGaps' || r.tactic === 'freeTrapped' || r.tactic === 'fixCracks' || r.tactic === 'sortLadder')) {
+        const t = byTactic(sit, ctx, style, r, out, admissible);
+        if (t.length)
+            return t;
+        if (r.tactic === 'fixCracks')
+            keep = toolBrowns(cols, r);
+    }
+    const quick = (m) => (r?.tactic === 'quickSort' && quickSort(cols, m.move.drags) ? P.QUICK : 1);
+    const rank = (m) => (even || m.value <= 0 ? m.value : m.value * weightIn(phase, m.move.routine) * quick(m));
+    // A cracked board's tools, the browns in the middle, aren't spent on anything but freeing the stranded junk.
+    if (keep.length)
+        for (let i = out.length - 1; i >= 0; i--)
+            if (movesAny(cols, out[i].after, keep))
+                out.splice(i, 1);
     // The danger zones in turn: only what saves a white of the first that can be saved (the furnace's in time),
     // the hard-to-reach first; if nothing does yet, the wider search for its whites. The edge whites' zone is saved
     // by one of them getting out (junk raced into its place), not any white.
@@ -541,6 +576,12 @@ export function weigh(sit, ctx, style) {
         if (plan)
             return [plan];
     }
+    // The V's tail sorted, so the next sweep runs through (P9), once no white's in danger.
+    if (r && r.tactic === 'sortTail') {
+        const t = byTactic(sit, ctx, style, r, out, admissible);
+        if (t.length)
+            return t;
+    }
     // The chain's danger (the user, 13 Nov, a brown stuck at the top of the column going up: "this is absolute danger
     // mode ... the first thing I would be doing here is just rescuing that brown piece ... there was lots of time to
     // rescue it even before now"): junk stuck in a column of whites going up next, or the one after, comes before
@@ -560,6 +601,98 @@ export function weigh(sit, ctx, style) {
                 return saves.map((m) => ({ ...m, saves: true })).sort((a, b) => b.value - a.value);
         }
     return out.sort((a, b) => rank(b) - rank(a)).map((m) => (even ? m : { ...m, weighted: true }));
+}
+/** A quick sorting move (the user, 13 Nov, P3: "just going down, browns up, they're just really fast, quick, simple,
+    easy moves"): one drag, P.QUICK_SWAPS swaps at most, taking a black down or a brown up. */
+export function quickSort(cols, drags) {
+    if (drags.length !== 1 || drags[0].ways.length > P.QUICK_SWAPS)
+        return false;
+    const d = drags[0], p = cols[d.x][d.y], end = endOf(cols, d), h = (x, y) => 2 * y + (cols[x].length === TALL ? 0 : 1);
+    return (p === BLACK && h(...end) > h(d.x, d.y)) || (p === BROWN && h(...end) < h(d.x, d.y));
+}
+/** The moves the board reader's tactic wants (src/distill-read.ts, `progress`), best first: of the moves on offer and
+    those the tactic looks for itself when the style searches (the quick fills and short drags into a trapped white's
+    place, a piece brought round to it, the ladder's and the tail's drags), each that gets something done for the
+    tactic, ranked by what it gets done a second of a person's time. Each must be `admissible` (what no move may do:
+    a white into the danger zones or the furnace's column, the corner tools spent...). Freeing whites, and the ladder
+    about to be lost, are played whatever they score (`saves`); the rest must be worth a move. Empty when nothing does. */
+export function byTactic(sit, ctx, style, r, out, admissible) {
+    const { cols } = sit, last = COLS - 1;
+    const cands = [];
+    for (const m of out)
+        if (m.after)
+            cands.push({ move: m.move, after: m.after });
+    // The tactic's own drags, named for the routine they are: junk into a white's place is a rescue, sorting the right
+    // side or the V's bottom a turning over.
+    const own = (drags, routine, reason) => {
+        const list = [];
+        if (style.path)
+            for (const d of drags) {
+                const after = playDrags(cols, d);
+                if (after)
+                    list.push({ move: { routine, drags: d, reason }, after });
+            }
+        return list;
+    };
+    const place = (t) => `column ${t.x + 1}, row ${t.y + 1}`;
+    if (r.tactic === 'fillGaps')
+        cands.push(...own(quickFills(cols, r.targets), 'rescue', `junk raced into a white's place (${r.targets.slice(0, 3).map(place).join(', ')}), and it's out left`));
+    else if (r.tactic === 'sortLadder')
+        cands.push(...own(ladderDrags(cols), 'turnOver', `columns ${COLS - 1} and ${COLS} sorted, blacks over browns, the ladder the zigzag climbs, before column ${COLS} goes`));
+    else if (r.tactic === 'sortTail')
+        cands.push(...own(tailDrags(cols, r), 'turnOver', 'a brown sunk down through the blacks at the V\'s bottom, so the next sweep runs through'));
+    const forced = r.tactic === 'fillGaps' || r.tactic === 'freeTrapped' || r.tactic === 'sortLadder';
+    const trappedNow = (b) => { const at = wall(b).at; let n = 0; b.forEach((c, x) => c.forEach((_, y) => { if (trappedWhite(b, x, y, at))
+        n++; })); return n; };
+    const trapped0 = trappedNow(cols), block = blockPhase(cols);
+    const ranked = (list, target, opening = false) => {
+        const res = [], seen = new Set();
+        for (const c of list) {
+            // (The same drags found twice, the first kept: a routine's or the path search's name over the tactic's own.)
+            const key = JSON.stringify(c.move.drags);
+            if (seen.has(key))
+                continue;
+            seen.add(key);
+            if (!c.after || !admissible(c.move.drags, c.after))
+                continue;
+            // (No white left trapped on an edge instead, further from the fire: the eighteenth note's "white trap right at
+            // the top".)
+            if (trappedNow(c.after) > trapped0)
+                continue;
+            if (r.targets.some((t) => t.x === last) && msFor(c.move.drags, style) > sit.timeLeft)
+                continue;
+            const g = progress(r, cols, c.after, c.move.drags, target, opening);
+            if (g <= 0)
+                continue;
+            // (In the block phase each drag costs a person more, as judge has it: a small move has to earn its place.)
+            const value = g / ((timeFor(c.move.drags, style, plainDrag(c.move.drags)) + (block ? P.BLOCK_DRAG_MS * c.move.drags.length : 0)) / 1000);
+            if (!forced && value <= P.RATE_MIN)
+                continue;
+            res.push({ move: c.move, after: c.after, value, tactic: r.tactic, ...(forced ? { saves: true } : {}) });
+        }
+        return res.sort((a, b) => b.value - a.value);
+    };
+    if (r.tactic !== 'freeTrapped')
+        return ranked(cands);
+    // The trapped whites one at a time, the most at risk first ("the top right first"): what frees it, a piece brought
+    // round to it, the quick fills and short drags into its place among them; failing all of them, what opens the way to
+    // the worst, or sets the pieces round it moving.
+    for (const t of r.targets) {
+        const list = [...cands];
+        list.push(...own(quickFills(cols, [t]), 'rescue', `junk raced into the white's place at ${place(t)}, and it's out left`));
+        list.push(...own(nearDrags(cols, t), 'rescue', `a piece near the white at ${place(t)} taken round into its place`));
+        if (style.path)
+            for (const m of pathMoves(cols, ctx, style, [{ x: t.x, y: t.y, side: -1 }]))
+                list.push({ move: m, after: playDrags(cols, m.drags) });
+        const res = ranked(list, t);
+        if (res.length)
+            return res;
+        // Nothing frees it cleanly yet: open the way to it, or set the pieces round it moving, before a white that can wait.
+        const opening = ranked([...cands, ...own(nearDrags(cols, t), 'rescue', 'a short drag beside it, the pieces round it set moving')], t, true);
+        if (opening.length)
+            return opening.map((m) => ({ ...m, move: { ...m.move, reason: `nothing frees the white at ${place(t)} yet: open the way to it: ${m.move.reason}` } }));
+    }
+    return [];
 }
 /** The chain's danger zones (`weigh`): the column being filled and the one after it, each while it's mostly white
     with a piece of junk in it that can't go left on its own (a brown on the top, a black on the bottom), the
@@ -674,15 +807,17 @@ export function choose(sit, ctx, style) {
     const ready = burning ? burnsClean(furnace) : clear(furnace);
     // What's wrong with the furnace's column, to save it when time's short.
     const wrong = (b) => (burning ? b[last].filter((p) => p === WHITE).length : junkAt(b[last]));
-    const moves = weigh(sit, ctx, style);
+    const reading = readBoard(cols, { stage: ctx.stage, timeLeft: sit.timeLeft });
+    const moves = weigh(sit, ctx, style, reading);
     // A move saving a white from the furnace is played whatever it scores.
     const top = moves[0] && (moves[0].saves || moves[0].value > (ctx.stage === 'junk' ? P.RATE_MIN : P.MIN)) ? moves[0] : null;
-    const best = top && ctx.stage === 'junk' && !top.saves ? tieBreak(cols, moves, top, blockPhase(cols)) : top;
+    const best = top && ctx.stage === 'junk' && !top.saves && !top.tactic ? tieBreak(cols, moves, top, blockPhase(cols)) : top;
     const advice = (kind, label, reason, m = null) => ({
         stage: ctx.stage, phase: phaseOf(cols, ctx.stage), kind, routine: !m ? null : m.move.routine === 'path' ? 'hook' : m.move.routine, technique: m?.move.routine ?? null,
-        label, reason, drags: m?.move.drags ?? [], value: m?.value ?? 0, sweep: false, ...(m?.tie ? { tie: true } : {}),
+        label, reason, drags: m ? joinPairs(cols, m.move.drags) : [], value: m?.value ?? 0, sweep: false, ...(m?.tie ? { tie: true } : {}),
         ...(m?.weighted ? { weighted: true } : {}),
         ...(ctx.stage === 'chain' && ctx.fill >= 0 && ctx.fill < COLS ? { column: ctx.fill } : {}),
+        state: reading.state, tactic: reading.tactic, read: reading.why,
     });
     // The endgame's gamble: the next Crystal Clear can't be filled in time.
     if (style.gamble && !burning && sit.chain >= P.CASH_FROM && !ready && sit.timeLeft < P.CASH_MS) {
@@ -698,13 +833,15 @@ export function choose(sit, ctx, style) {
     // A plain long drag that wins is the sweep, swept blind: no technique needed, "quick drag brown up, black
     // down, done" (the eleventh note).
     if (best && ctx.stage === 'junk' && plainDrag(best.move.drags)) {
-        return { ...advice('move', SWEEP_LABEL, `go, go, go: ${best.move.reason}`, best), sweep: true };
+        return { ...advice('move', SWEEP_LABEL, `go, go, go: ${best.tactic ? `${TACTICS[best.tactic].label.toLowerCase()}: ` : ''}${best.move.reason}`, best), sweep: true };
     }
     if (best) {
         const gamble = !burning && sit.chain >= P.CASH_FROM && !ready && style.gamble
             ? ` (the gamble: CC^${sit.chain} so far, chasing the next while the odds are fair)` : '';
         const label = best.move.routine === 'path' ? (best.move.pair ? PAIR_LABEL : PATH_LABEL) : ROUTINES[best.move.routine].label;
-        return advice('move', label, best.move.reason + gamble, best);
+        // A move the tactic picked says so first.
+        const why = best.tactic ? `${TACTICS[best.tactic].label.toLowerCase()}: ${best.move.reason}` : best.move.reason;
+        return advice('move', label, why + gamble, best);
     }
     return advice('wait', 'Wait', ready ? 'the column is ready: let the furnace take it' : 'nothing worth moving: wait for the next column');
 }

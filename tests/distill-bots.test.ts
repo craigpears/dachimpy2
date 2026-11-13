@@ -58,7 +58,8 @@ describe('the bots (12 Nov)', () => {
       expect(g.finished || g.time >= 3 * 60000).toBe(true);
       expect(r.columnsUp + r.columnsBurned).toBe(g.columns.length);
     }
-  }, 60000);
+    // (the board reader made the high levels' sessions slower to plan: 62 s under a full run's load, 13 Nov)
+  }, 180000);
   it('play techniques as whole drags, several swaps each, not a click a swap (the user, 12 Nov: "a human doesn\'t have time for those little swaps")', () => {
     const r = playSession(new Distilling(seeded(5001)), levelNamed('cc3'), 4);
     expect(r.swaps / r.drags).toBeGreaterThan(2);
@@ -226,7 +227,12 @@ describe('the cheapest technique that still works (12 Nov, the seventh to tenth 
     // Its way up-right is shut by a spice; a black dragged down into the gap below opens it.
     const cols = board([[3, 7, 'b'], [5, 6, '*'], [2, 6, 'K'], ...column(7, 'wwwwwbbb'), ...column(8, 'wwwwwwbbb'), ...column(9, 'KKKKbbbb')]);
     const ctx = ctxOf(cols, false);
-    const ranked = weigh({ cols, chain: 0, timeLeft: 12000 }, ctx, HELIUM);
+    // (The routines' own ranking, beneath the board reader: since 13 Nov the reader sees column 9's top whites over
+    // browns, 27 s from the fire, and works them first, tests/distill-read.test.ts.)
+    const was = P.READ;
+    P.READ = 0;
+    let ranked: ReturnType<typeof weigh>;
+    try { ranked = weigh({ cols, chain: 0, timeLeft: 12000 }, ctx, HELIUM); } finally { P.READ = was; }
     const way = ranked.find((m) => m.move.drags.length === 2 && m.move.drags[1].x === 3 && m.move.drags[1].y === 7 && /another piece/.test(m.move.reason));
     expect(way).toBeDefined();
     // The black first, into the gap; every swap of the plan goes the right way.
@@ -363,8 +369,11 @@ describe('the block phase: the junk in blocks, the V, a brown kept bottom-left (
   it('once the whites are mostly left, fewer small fiddly drags: the junk moved in long ones, 13 Nov ("it\'s doing a lot of little fiddly things ... I would just start pulling, like treating it more like blocks of things to move")', () => {
     const cols = board40();
     expect(blockPhase(cols)).toBe(true);
-    const was = P.BLOCK_DRAG_MS;
+    // (The drag's cost on the routines' own ranking, beneath the board reader: since 13 Nov the reader sorts the V's
+    // tail here first, tests/distill-read.test.ts, its drags costed the same way.)
+    const was = P.BLOCK_DRAG_MS, read = P.READ;
     try {
+      P.READ = 0;
       P.BLOCK_DRAG_MS = 0;
       const fiddly = play(cols, 8);
       P.BLOCK_DRAG_MS = was;
@@ -372,7 +381,7 @@ describe('the block phase: the junk in blocks, the V, a brown kept bottom-left (
       const small = (d: number[]) => d.filter((n) => n <= 2).length;
       expect(small(blocks.drags)).toBeLessThan(small(fiddly.drags));
       expect(blocks.drags.length).toBeLessThan(fiddly.drags.length);
-    } finally { P.BLOCK_DRAG_MS = was; }
+    } finally { P.BLOCK_DRAG_MS = was; P.READ = read; }
   });
   it('the brown in the bottom-left and the black in the top-left are kept as tools, 13 Nov ("one black in the top left, one brown in the bottom left can be useful ... you don\'t want to just get too greedy")', () => {
     const cols = board40();

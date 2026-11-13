@@ -12,8 +12,10 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   PLAN, SORTED_RIGHT, STUCK_ON_TOP, TRICKS, pairOn, amongBlacks, endOf, firstLevel, fluidMotion, guide, isFluid, liveMove, phaseExamples, position, sameMove,
-  techniqueExamples, techniqueOrder, trickExamples, levelRows, unsorted,
+  techniqueExamples, techniqueOrder, trickExamples, levelRows, unsorted, READ_EXAMPLES, readingExamples,
 } from '../src/distill-guide';
+import { STATES, TACTICS, readBoard } from '../src/distill-read';
+import { POSITIONS as POS } from '../src/distill-positions';
 import type { GuideItem, Technique } from '../src/distill-guide';
 import { POSITIONS } from '../src/distill-guide-boards';
 import { BLACK, BROWN, CHAIN_BONUS, DOWN_LEFT, DOWN_RIGHT, MESSAGES, UP_LEFT, UP_RIGHT, WHITE, parseBoard } from '../src/distilling';
@@ -275,5 +277,28 @@ describe('the pair rescue in the chain (13 Nov: "this is absolute danger mode ..
   it('sits in the chain, straight after the channels, with words of its own', () => {
     expect(PLAN.chain[1]).toEqual({ kind: 'trick', name: 'pair' });
     expect(words(section('data-trick', 'pair')!).join(' ').length).toBeGreaterThan(60);
+  });
+});
+
+describe('reading the board, in the read version (13 Nov, the board reader: "what kind of tactics are in play")', () => {
+  it('has a section on reading the board, its states in plain words, before the phases', () => {
+    const i = page.indexOf('id="reading"');
+    expect(i).toBeGreaterThan(0);
+    expect(i).toBeLessThan(page.indexOf('id="phases"'));
+    expect(page).toContain('data-reading');
+    for (const s of Object.values(STATES)) expect(page).toContain(`<b>${s.label}:</b>`);
+  });
+  it('reads each position as the planner reads it, a different state each, the bot\'s move drawn on it', () => {
+    const r = readingExamples();
+    expect(r.map((e) => e.id)).toEqual([...READ_EXAMPLES]);
+    expect(new Set(r.map((e) => e.state)).size).toBeGreaterThanOrEqual(3);
+    for (const e of r) {
+      const p = POS.find((q) => q.id === e.id)!;
+      expect(readBoard(e.picture.cols, { stage: p.stage, timeLeft: p.timeLeft }).tactic).toBe(e.tactic);
+      expect(e.picture.drags.length, e.id).toBeGreaterThan(0);
+      expect(playDrags(e.picture.cols, e.picture.drags), e.id).not.toBeNull();
+      expect(e.tacticLabel).toBe(TACTICS[e.tactic].label);
+    }
+    expect(g.reading).toHaveLength(READ_EXAMPLES.length);
   });
 });
