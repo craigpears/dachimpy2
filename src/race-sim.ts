@@ -835,6 +835,9 @@ export function sail(o: SimOptions, sea?: Sea): SimRun {
   };
   /** Where she rejoins the long way out of shortcut `c`. */
   const tOutOf = (_b: Bot, c: Cut) => c.tOut;
+  /** Where she rejoins the long way out of a shortcut: on along it; or, out of the wreck's notch (a dead end),
+      back where she went in, facing up out of it, to turn either way for the gate, wherever it is (13 Nov). */
+  const rejoin = (b: Bot, c: Cut): Pose => (c.id === 'wreck' ? { c: ENTRY.wreck[0], r: ENTRY.wreck[1], d: 2 } : squareAt(tOutOf(b, c)));
   const record = (b: Bot, id: CutId, done: boolean) => {
     const c = cuts[id];
     let r = b.res.cuts.find((x) => x.id === id && !x.done && x.saved === 0);
@@ -876,7 +879,7 @@ export function sail(o: SimOptions, sea?: Sea): SimRun {
       she rejoins the long way (straight on to the leg's row and along it, so she never cuts a corner of the
       land); under the course (the starlit door's tunnel), unseen, put straight there at its end. */
   const tripFor = (b: Bot, trip: number) => {
-    const c = b.cut!, T = TRIPS[c.id], end = squareAt(tOutOf(b, c)), at = here(b);
+    const c = b.cut!, T = TRIPS[c.id], end = rejoin(b, c), at = here(b);
     // (less the moves she made into its spot: already part of the trip as the helm measured it)
     const secs = Math.max(trip * 0.4, trip - b.came);
     b.came = 0;
@@ -939,7 +942,7 @@ export function sail(o: SimOptions, sea?: Sea): SimRun {
   };
   const through = (b: Bot, secs: number) => { tripFor(b, secs); b.stop = null; };
   const out = (b: Bot) => {
-    const c = b.cut, end = c ? squareAt(tOutOf(b, c)) : { ...b.sq };
+    const c = b.cut, end = c ? rejoin(b, c) : { ...b.sq };
     toHelm(b, end);
     b.mode = 'sail';
     if (!c) { b.tau = progressAt(end); return; }   // (a snake's sweep: on from where it put her)
@@ -949,12 +952,15 @@ export function sail(o: SimOptions, sea?: Sea): SimRun {
     // (the wreck's coins aboard: what it cost her is counted against the gap she pays them at)
     if (c.id === 'wreck') { b.purse = true; b.owed = b.since * (1 + sailWorth(b)) + b.lost - (tOutOf(b, c) - c.tIn); b.since = 0; b.lost = 0; }
     else record(b, c.id, true);
-    b.tau = tOutOf(b, c); b.cut = null;
+    b.tau = c.id === 'wreck' ? progressAt(end) : tOutOf(b, c); b.cut = null;
     // (rushing the gap, the tight water past it: one move too many)
     // (rushing it on a combo most of all; run a square at a time, half as often; its guns shot quiet, or
     // their guard paid, she goes through at her leisure)
     const run = b.gap === 'run' || (b.gap === 'bribe' && !b.paid), leisure = b.gap === 'shot' || b.paid;
     if (c.id === 'guns' && snakes && !leisure && rand() < SIM.SNAKE.tight[b.best] * (run ? 0.5 : 1)) swept(b, 'tight', TIGHT_BACK, sweep(RC.SNAKES.TIGHT.length));
+    // (the coins aboard, out of a wreck past the gate: on to the gate, as any racer who comes onto leg 1 past it
+    // is, the few squares back to it part of the way through)
+    if (c.id === 'wreck' && b.gap === 'bribe' && !b.done.has('guns') && b.tau >= cuts.guns.tIn) gap(b);
   };
   /** Her plan changed on the leg of shortcut `id`: given up, or put by (a cautious racer with someone close
       behind, a way in she can't sail to): the long way there instead (src/race-plan.ts, fallback). */
@@ -1177,9 +1183,12 @@ export function sail(o: SimOptions, sea?: Sea): SimRun {
         if (b.stuck > 8) { const to = squareAt(b.tau + 3 * PACE); walk(b, [[to.c, b.helm.pose.r], [to.c, to.r]], SAIL.MOVE); b.mode = 'trip'; b.cut = null; b.trip = b.tripFull = (b.walk ? b.walk.pts.length - 1 : 0) * SAIL.MOVE; b.tau = progressAt(to); continue; }
         // (come to a shortcut's way in: sailing past it, or onto it, the pilot having brought her there)
         const there = b.goal ? b.helm.pose.c === ENTRY[b.goal][0] && b.helm.pose.r === ENTRY[b.goal][1] : false;
-        const comes = (c: Cut) => (was < c.tIn && b.tau >= c.tIn) || (there && b.goal === c.id);
+        // (the wreck's notch only by sailing into its way in, as yours: coming down onto leg 1 by the start's hop
+        // she's past it, and the gate, and goes back for its coins before the gate: 13 Nov)
+        const comes = (c: Cut) => (c.id !== 'wreck' && was < c.tIn && b.tau >= c.tIn) || (there && b.goal === c.id);
         if (b.tau === was && !there) continue;
-        if (b.gap && !b.done.has('guns') && comes(cuts.guns)) { gap(b); continue; }
+        const forWreck = b.gap === 'bribe' && !b.purse && b.cuts.includes('wreck') && !b.done.has('wreck');
+        if (b.gap && !b.done.has('guns') && !forWreck && comes(cuts.guns)) { gap(b); continue; }
         // (the left-hand trade wind's loops: a careless turn at a left-hand bend, or on the run home, and she's
         // carried a few squares back, to go round again)
         while (b.lefts < LEFT_T.length && LEFT_T[b.lefts] < was) b.lefts++;
@@ -1215,9 +1224,10 @@ export function sail(o: SimOptions, sea?: Sea): SimRun {
       if (b.mode !== 'done') field.racers[b.i].state = b.walk && (b.mode === 'stop' || b.mode === 'wait') ? 'sailing' : STATE[b.mode];
     }
 
-    // The gap's guns, roused: an aimed shot on a racer in reach each time one's loaded, till nobody's near.
+    // The gap's guns, roused: an aimed shot on a racer in reach each time one's loaded, till nobody's near (never
+    // one in a sheltered notch: the wreck's, tucked in behind the gate's bastion since 13 Nov).
     if (roused) {
-      const near = (b: Bot, c: number, r: number, n: number) => Math.max(Math.abs(field.racers[b.i].pose.c - c), Math.abs(field.racers[b.i].pose.r - r)) <= n;
+      const near = (b: Bot, c: number, r: number, n: number) => Math.max(Math.abs(field.racers[b.i].pose.c - c), Math.abs(field.racers[b.i].pose.r - r)) <= n && !sheltered(field.racers[b.i].pose.c, field.racers[b.i].pose.r);
       const [gc, gr] = RC.GUNS.gap;
       if (!bots.some((b) => b.mode !== 'done' && near(b, gc, gr, RACE.SIGHT + 1))) roused = false;
       for (const g of guns) {

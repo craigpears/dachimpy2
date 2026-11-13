@@ -16,11 +16,14 @@
      his men warp her through on the gate's line (towPath), out of the gatehouse's light airs and out of
      anyone's reach while she's towed, as a gust carries her. Without the tow she'd ghost through the light
      airs as slowly as running it, and the bribe would never be worth its haul (src/race-sim.ts).
-   - The money's apart from the gate: an old wreck run aground at the back of a notch off leg 1, before the
-     gate, where she lies to haul up its coins by Treasure Haul (src/treasure-haul.ts, the real puzzle; the
-     board laid on the water beside her, as at the den's other wrecks). The notch is sheltered (as the
-     barrier's and the crane's are: src/den-racers.ts, SHELTER), so a leader can do her puzzling there in
-     safety and spend it at the exposed gate in a moment.
+   - The money's apart from the gate: an old wreck run aground at the back of a notch off leg 1, just along
+     from the gate (13 Nov: past it, where most of the field comes down onto leg 1 by the start's hop; it was
+     five columns before it, out of sailing's reach from most of the line), where she lies to haul up its
+     coins by Treasure Haul (src/treasure-haul.ts, the real puzzle; the board laid on the water beside her, as
+     at the den's other wrecks). Every racer goes for its coins before the gate, wherever it lies
+     (src/race-plan.ts, goalOf). The notch is sheltered (as the barrier's and the crane's are:
+     src/den-racers.ts, SHELTER; the gate's guns never fire into it either), so a leader can do her puzzling
+     there in safety and spend it at the exposed gate in a moment.
    - The price (BRIBE.PRICE): so many coins, the board's coins hauled up and nothing else down there (no
      chest: a chest takes twenty moves and more to raise, worth far more than the gap saves). Set by the
      simulation (src/race-sim.ts, RACE.md §8) so the bribe's way through the gap wins about its fair share:
@@ -42,7 +45,9 @@ export const BRIBE = {
       many up in about 5 moves (measured 12 Nov: 4.7 on average, 7 at the slow end, for a bot playing a
       random clearing swap with the den's gems; the best swap each time takes 2.5), so about 7 s at a
       decent player's 1.5 s a move. Set by the simulation (RACE.md §8): the bribe won 29% of its races at 30
-      coins, 27% at 40 (fair 25%). */
+      coins, 27% at 40 (fair 25%), on 12 Nov; since every racer sails as your sloop does, in and out of the
+      wreck's dead-end notch and back to the gate cost it what the other stopped shortcuts don't, and with the
+      wreck reachable (13 Nov) it won 10% at 40 coins, 14% at 30 and 15% at 20: 20 since. */
   PRICE: LAY.RACE.COURSE.coins,
   /** Moves a decent player takes to haul the price up (as measured above, for 40 coins; a course from the
       race's editor may ask more or fewer: src/race-course.ts, coins); src/race-sim.ts's haul time. */

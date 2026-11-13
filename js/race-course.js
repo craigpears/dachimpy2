@@ -22,15 +22,19 @@
    are their numbers here (a share link made before then opens the den's own course). */
 export const CRANE_SIZES = ['small', 'standard', 'large'];
 /** The course as the den lays it: its third pass (12 Nov, "the race's next pass": no gambles, gentle snakes,
-    the rocks, each puzzle's shortcut cutting about the same stretch: RACE.md §8, "Shortcuts in proportion"). */
+    the rocks, each puzzle's shortcut cutting about the same stretch: RACE.md §8, "Shortcuts in proportion").
+    The wreck just along from the gate since 13 Nov (it was at 14, five columns before it: out of sailing's reach
+    from most of the line), where most of the field comes down onto leg 1 by the start's hop; and the guard's
+    price 20 coins (it was 40: the bribe's in and out of a dead-end notch and back to the gate cost it what the
+    other stopped shortcuts don't, RACE.md §8). */
 export const DEFAULT_COURSE = {
     buoys: [25, 2, 25, 2, 25],
-    gun: 19, wreck: 14,
+    gun: 19, wreck: 22,
     head: 12, double: 6, mid: 23,
     whirl: 12, rocks: 17, forage: 19,
     lock: 11,
     crane: 16, triple: 21, finish: 4,
-    clears: 6, frames: 'small', bundles: 2, coins: 40,
+    clears: 6, frames: 'small', bundles: 2, coins: 20,
 };
 /** The starlit door's two columns (12 Nov, public: fixed in place, not edited): its face on spit 2 off leg 2, its
     tunnel straight on under the course, up onto leg 3 and leg 5 (LAY.RACE.DOOR). Nothing else may cut through
@@ -79,7 +83,9 @@ export function rangeOf(k, id) {
     // (inside its spit, a column of land either end)
     let lo = Math.max(l0, 1) + 1 - s0, hi = l1 - 1 - s1;
     switch (id) {
-        // (leg 1's long way starts at the starting line's column 13: the gate and the wreck past it)
+        // (leg 1's long way starts at the starting line's column 13: the gate and the wreck past it; the wreck either
+        // side of the gate, a column of land between (problems): every racer goes for its coins first, wherever it is,
+        // back along the leg if need be: src/race-plan.ts, goalOf)
         // (its tight water along leg 2 clear of the starlit door's water)
         case 'gun':
             lo = Math.max(lo, DOOR_COLS[1] + 2);
@@ -87,7 +93,6 @@ export function rangeOf(k, id) {
             break;
         case 'wreck':
             lo = Math.max(lo, 13);
-            hi = Math.min(hi, k.gun - 4);
             break;
         // (from leg 2, before the tight water past the gun gap, out onto leg 3 before buoy 3)
         case 'head':

@@ -185,10 +185,11 @@ describe('balance: every way round a relatively equal chance of winning (11 Nov:
   // Out of the band since every racer sails as your sloop does (12 Nov: square to square on a helm of her own,
   // every clear a gust), left for the user to decide, not tuned away (RACE.md §8, "Moves and gusts"): the
   // Doubles' gaps, built on the move at no cost now that her clears carry her while she builds; the gap's combo,
-  // not built yet when the real pilot gets her to the gap, so stopped short in the open; the bribe, its wreck
-  // behind the field's hop and the conveyor from most of the line, so mostly given up and the gap run. Each held
-  // to a wider band, so a further slide still shows.
-  const OUT: Record<string, [number, number]> = { 'gap-combo': [0.25, 1.6], bribe: [0.1, 1.6], doubles: [0.5, 3.2] };
+  // not built yet when the real pilot gets her to the gap, so stopped short in the open. Each held to a wider
+  // band, so a further slide still shows. (The bribe was a third, 0.1 to 1.6, till 13 Nov: its wreck out of
+  // sailing's reach from most of the line. Moved just along from the gate, its way in opened and its price 20
+  // coins, it's back in the band.)
+  const OUT: Record<string, [number, number]> = { 'gap-combo': [0.25, 1.6], doubles: [0.5, 3.2] };
   for (const r of ROUTES) {
     const [lo, hi] = OUT[r.name] ?? [0.5, 1.6];
     it(`the ${r.name} route wins between ${lo} and ${hi} times its fair share`, () => {
@@ -240,13 +241,13 @@ describe('the bribe at the gate, simulated (12 Nov: "build the bribe gate ... to
       const [b] = simulate({ racers: [{ route: bribe, style: peaceful, skill: 'good', spot: 13 }, { route: route('long'), style: style('aggressive'), skill: 'good', spot: 14 }], seed, snakes: false });
       expect(b.exposed, `seed ${seed}`).toEqual([]);
       expect(b.cuts.find((c) => c.id === 'guns')?.done).toBe(true);
-      // (12 Nov, moves: from the line, the wreck's notch is sailed to only where the start's field lets her; where
-      // it doesn't, she goes on without the coins and runs the gap instead)
-      if (b.cuts.some((c) => c.id === 'wreck' && !c.done)) continue;
+      // (13 Nov: the wreck's notch is sailed to from every spot on the line, whatever the start's field: she
+      // always hauls, never runs the gap instead)
+      expect(b.cuts.some((c) => c.id === 'wreck' && !c.done), `seed ${seed}`).toBe(false);
       hauled++;
       expect(b.hitsTaken, `seed ${seed}`).toBe(0);
     }
-    expect(hauled).toBeGreaterThan(0);
+    expect(hauled).toBe(20);
   });
   it('the haul is counted against the gap it pays for: a decent player saves less than a great one, about nothing (12 Nov: a whole puzzle\'s haul for a gate worth as much as the other shortcuts), a great one something', () => {
     const at = (skill: 'decent' | 'great') => {

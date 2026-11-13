@@ -350,7 +350,10 @@ export function layRace(K: Course = DEFAULT_COURSE, custom = false) {
         the one she feels: src/den-sail.ts, Sea.zoneAt): light airs across the gun gap's middle (as under
         the checkpoint's gatehouse); the headwind back through the headwind gap; a wind along the leg in front
         of each notch, so she can sail back out of one; and the zigzag's wind behind her, so she can weave
-        either way. */
+        either way. The wreck's notch (13 Nov) has a breath of wind up out of its mouth instead, so she sails
+        out of it, and comes to it along the leg's second row from either way: most of the field comes down
+        onto leg 1 past it, by the start's hop (a wind along the leg there had her in irons coming back to it,
+        so from most of the line no sailing reached it). Not drawn: shortcuts are never marked. */
     ZONES: [
       { c0: GUN_C, c1: GUN_C, r0: S[0].r0 + 1, r1: S[0].r0 + 1, d: 0, s: 1 },
       { c0: HEAD_C, c1: HEAD_C, r0: S[1].r0, r1: S[1].r0 + 1, d: 2, s: 2 },
@@ -358,7 +361,7 @@ export function layRace(K: Course = DEFAULT_COURSE, custom = false) {
       { c0: FORAGE_C, c1: FORAGE_C, r0: T[2].r + 1, r1: S[2].r0, d: 1, s: 2 },
       { c0: berth[0], c1: berth[0], r0: T[3].r + 1, r1: S[3].r0, d: 3, s: 2 },
       { c0: CRANE_C, c1: CRANE_C, r0: T[4].r + 1, r1: S[4].r0, d: 1, s: 2 },
-      { c0: WRECK_C, c1: WRECK_C, r0: T[0].r + 1, r1: S[0].r0, d: 1, s: 2 },
+      { c0: WRECK_C, c1: WRECK_C, r0: T[0].r + 1, r1: T[0].r + 1, d: 2, s: 2 },
       { c0: Z - 1, c1: Z + 7, r0: T[3].r, r1: T[3].r + 1, d: 3, s: 2 },
       { c0: 0, c1: W - 1, r0: LINE.r, r1: RUN + 1, d: 0, s: 2 },
     ] as WindZone[],
