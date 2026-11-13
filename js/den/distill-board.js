@@ -8,7 +8,7 @@
 // and when it's over.
 import * as THREE from 'three';
 import {
-  Distilling, COLS, TALL, SWAP_MS, SLIDE_MS, MESSAGES, WHITE, BROWN, BLACK, SPICE, BURNT, WAY,
+  Distilling, COLS, TALL, SWAP_MS, SLIDE_MS, MESSAGES, WHITE, BROWN, BLACK, SPICE, BURNT, WAY, neighbourOn,
 } from '../distilling.js';
 
 /* Drawn after the real one (DISTILLING.md §2, from the client port's measures): a portrait panel 450
@@ -45,6 +45,9 @@ const COL = {
   [SPICE]: { base: '#f47a14', light: '#ffd08a', dark: '#b8300a', edge: '#5a1404' },
   [BURNT]: { base: '#b4a674', light: '#e2d6a8', dark: '#6e6238', edge: '#3a3014' },
 };
+
+/** Arrows' colours (b.arrow): a plan's drags gold, a route into a white's place pale blue. */
+const ARROW = { plan: '#ffd23a', route: '#8ee4ff' };
 
 const canvas = (w, h, draw) => { const cv = document.createElement('canvas'); cv.width = w; cv.height = h; draw(cv.getContext('2d'), w, h); return cv; };
 const ease = (u) => u * u * (3 - 2 * u);
@@ -288,6 +291,45 @@ export function distillBoard(o = {}) {
   b.hold = (x, y) => { selected = grid[x]?.[y] ?? null; cursor = { col: x, row: y }; };
   b.letGo = () => { selected = null; };
   b.burn = () => handle(game.burnNow());
+  /** Arrows over the pieces: a drag's route, the path its piece takes swap by swap (`{ x, y, ways }`, as the
+      planner and the path search give them), drawn from the piece to where it's let go, not played. `o.color`
+      ('plan', gold, the default; 'route', pale blue; or any CSS colour), `o.n` a number at its start (its turn
+      in a plan). Kept till `clearArrows()`, or till a column goes and the board slides under them. */
+  b.arrows = [];
+  b.arrow = (drag, o = {}) => { const a = { x: drag.x, y: drag.y, ways: [...drag.ways], color: ARROW[o.color ?? 'plan'] ?? o.color, n: o.n ?? null }; b.arrows.push(a); return a; };
+  b.clearArrows = () => { b.arrows = []; };
+  /** An arrow's points, the middle of each place its piece passes through, in the board view's pixels. */
+  const arrowPts = (a) => {
+    const pts = [], at = (x, y) => { const [sx, sy] = spot(x, y); pts.push([sx + CELL / 2, sy + CELL / 2]); };
+    let x = a.x, y = a.y;
+    if (!game.cols[x] || y >= game.cols[x].length) return pts;
+    at(x, y);
+    for (const w of a.ways) { const n = neighbourOn(game.cols, x, y, w); if (!n) break; [x, y] = n; at(x, y); }
+    return pts;
+  };
+  function drawArrow(a) {
+    const pts = arrowPts(a);
+    if (pts.length < 2) return;
+    const trace = () => { g.beginPath(); g.moveTo(...pts[0]); for (const p of pts.slice(1)) g.lineTo(...p); };
+    // (shortened at its head, so the head sits in the last place, not past it)
+    const [ex, ey] = pts[pts.length - 1], [px, py] = pts[pts.length - 2], ang = Math.atan2(ey - py, ex - px);
+    g.lineJoin = 'round'; g.lineCap = 'round';
+    trace(); g.strokeStyle = 'rgba(20,10,2,0.75)'; g.lineWidth = 9; g.stroke();
+    trace(); g.strokeStyle = a.color; g.lineWidth = 5; g.stroke();
+    // (a flow along it, the way it goes)
+    g.save(); g.setLineDash([4, 10]); g.lineDashOffset = -b.now / 40; trace(); g.strokeStyle = 'rgba(255,255,255,0.8)'; g.lineWidth = 2; g.stroke(); g.restore();
+    // The head, and a ring round the piece it starts at.
+    const H = 13;
+    g.beginPath(); g.moveTo(ex + Math.cos(ang) * 6, ey + Math.sin(ang) * 6);
+    g.lineTo(ex - Math.cos(ang - 0.5) * H, ey - Math.sin(ang - 0.5) * H); g.lineTo(ex - Math.cos(ang + 0.5) * H, ey - Math.sin(ang + 0.5) * H); g.closePath();
+    g.fillStyle = a.color; g.strokeStyle = 'rgba(20,10,2,0.85)'; g.lineWidth = 2; g.fill(); g.stroke();
+    g.beginPath(); g.arc(...pts[0], CELL / 2 - 1, 0, Math.PI * 2); g.strokeStyle = a.color; g.lineWidth = 3; g.stroke();
+    if (a.n !== null) {
+      const [sx, sy] = pts[0], bx = sx - CELL / 2 + 6, by = sy - CELL / 2 + 6;
+      g.beginPath(); g.arc(bx, by, 8, 0, Math.PI * 2); g.fillStyle = a.color; g.fill(); g.strokeStyle = 'rgba(20,10,2,0.9)'; g.lineWidth = 1.5; g.stroke();
+      g.fillStyle = '#1a0c02'; g.font = '700 12px Alegreya, Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(String(a.n), bx, by + 1);
+    }
+  }
 
   // A column goes: its pieces glide up into the pipe or down into the furnace (burned whites rolling
   // back left along the trough, scorched), the board slides right, a new column comes in.
@@ -305,6 +347,7 @@ export function distillBoard(o = {}) {
       leaving.push(s);
     }
     grid.pop();
+    b.arrows = [];   // (the places they named have moved on)
     grid.unshift(game.cols[0].map((_, row) => sprite(0, row, -CELL)));
     grid.forEach((col, x) => col.forEach((s) => { s.col = x; const [tx, ty] = spot(x, s.row); line(s, [tx, ty], SLIDE_MS); }));
     if (cursor.col < COLS - 1) cursor = { col: cursor.col + 1, row: Math.min(cursor.row, game.cols[cursor.col + 1].length - 1) };
@@ -500,6 +543,8 @@ export function distillBoard(o = {}) {
         g.beginPath(); g.ellipse(cx, cy, 5, 3.4, Math.atan2(wy, wx), 0, Math.PI * 2); g.fill(); g.stroke();
       }
     }
+    // Arrows (b.arrow): drags' routes, over the pieces, on resting boards only (a sliding board moves under them).
+    if (!over && !game.sliding) for (const a of b.arrows) drawArrow(a);
     // The cursor: red brackets at its corners.
     if (!over && !b.idle) {
       const c = pieceAt(cursor);
