@@ -104,6 +104,7 @@ function whitesTrapped(c, near = false) {
   return n;
 }
 
+const EARLY = 3; // the first few columns gone, up or burned: a white burned among them is a disaster
 const avg = (a) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : NaN);
 const med = (a) => { const s = [...a].sort((x, y) => x - y); return s.length ? s[Math.floor(s.length / 2)] : NaN; };
 const f1 = (n) => (Number.isFinite(n) ? n.toFixed(1) : '-');
@@ -143,10 +144,18 @@ for (const name of NAMES) {
       }
       if (trace && process.env.TRACE === '2') { const s = `${a.stage} ${a.kind} ${a.label}: ${a.reason}`; if (s !== lastRoutine) console.log(`        ${s}`); lastRoutine = s; }
     };
-    const r = playSession(g, tier, CAP,
-      trace ? (c) => console.log(`  ${(g.time / 1000).toFixed(0).padStart(4)}s ${c.up ? 'up  ' : 'burn'} ${c.pieces.map((p) => L[p]).join('')} ${c.message ?? ''}${c.chain > 1 ? ` x${c.chain}` : ''} ${c.points + c.bonus}`) : undefined,
-      onPlan);
-    runs.push({ ...r, watch });
+    // When the first white burned (the twentieth note: "how many like mixed brown black columns you burn before
+    // you burned a white ... if you burn a white on the first column or the second column that goes up or down,
+    // that's catastrophic"): the columns gone (up or burned) before it, and the junk columns burned before it.
+    const first = { gone: 0, junk: 0, at: null, junkBefore: null };
+    const onColumn = (c) => {
+      if (first.at === null && !c.up && c.whites > 0) { first.at = first.gone + 1; first.junkBefore = first.junk; }
+      first.gone++;
+      if (!c.up && !(c.whites > 0)) first.junk++;
+      if (trace) console.log(`  ${(g.time / 1000).toFixed(0).padStart(4)}s ${c.up ? 'up  ' : 'burn'} ${c.pieces.map((p) => L[p]).join('')} ${c.message ?? ''}${c.chain > 1 ? ` x${c.chain}` : ''} ${c.points + c.bonus}`);
+    };
+    const r = playSession(g, tier, CAP, onColumn, onPlan);
+    runs.push({ ...r, watch, first });
   }
   const chains = runs.map((r) => r.longest), at = (n) => runs.filter((r) => r.longest >= n).length;
   const full = runs.filter((r) => r.longest >= 12);
@@ -155,6 +164,10 @@ for (const name of NAMES) {
   console.log(`\n${tier.label} (${tier.name}: ${tier.rate} swaps/s along a drag, ${tier.spot} ms to spot one, bank ${tier.bank} columns; ${((Date.now() - t0) / 1000).toFixed(1)}s to run)`);
   console.log(`  longest chain: mean ${f1(avg(chains))}, median ${med(chains)}, best ${Math.max(...chains)}; CC^6+ ${at(6)}/${GAMES}, CC^9+ ${at(9)}/${GAMES}, CC^12+ ${at(12)}/${GAMES}${at(12) ? ` (1 run in ${f1(GAMES / at(12))})` : ''}`);
   console.log(`  chains: ${Object.entries(hist).map(([k, v]) => `CC^${k} x${v}`).join(', ')}`);
+  // Whites burned, by when (the twentieth note): none at all is the aim; one in the first few columns gone is a
+  // disaster ("game ending"); later, still bad.
+  const fb = runs.map((r) => r.first), burnt = fb.filter((x) => x.at !== null);
+  console.log(`  whites burned: sessions with none ${GAMES - burnt.length}/${GAMES}; the first one burned in the first 3 columns gone (a disaster) ${burnt.filter((x) => x.at <= EARLY).length}/${GAMES}; junk columns burned before the first, where one burned: median ${med(burnt.map((x) => x.junkBefore))} (fewest ${burnt.length ? Math.min(...burnt.map((x) => x.junkBefore)) : '-'}); whites burned a session ${f1(avg(runs.map((r) => r.whitesBurned)))}`);
   console.log(`  session score: mean ${f1(avg(runs.map((r) => r.score)))}, best ${f1(Math.max(...runs.map((r) => r.score)))}`);
   console.log(`  minutes a session: mean ${f1(avg(runs.map((r) => r.minutes)))}${full.length ? `; a CC^12 in ${f1(avg(full.map((r) => r.minutes)))}` : ''}; columns burned ${f1(avg(runs.map((r) => r.columnsBurned)))}, sent up ${f1(avg(runs.map((r) => r.columnsUp)))}`);
   console.log(`  whites burned ${f1(avg(runs.map((r) => r.whitesBurned)))}; white columns banked as the chain began ${f1(avg(runs.filter((r) => r.banked !== null).map((r) => r.banked)))}; drags a minute ${f1(avg(runs.map((r) => r.drags / r.minutes)))}, swaps a drag ${f1(avg(runs.map((r) => r.swaps / Math.max(1, r.drags))))}`);

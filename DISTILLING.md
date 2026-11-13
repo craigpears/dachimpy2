@@ -760,6 +760,21 @@ furnace's cost.
   is worse than the burn (a white put on top of a spice, say): letting it go is right there. The search itself
   is played under twice a session: most stuck whites are freed by a routine first.
 
+### Whites burned, by when (13 Nov, the seventh run measured again)
+After the twentieth note (§3): the same code as the seventh run, the same 20 boards a tier, measured by when the
+first white burned. "Columns gone" counts every column, up or burned; a white burned in the first 3 is a disaster.
+
+| Tier | Sessions with no white burned | A white burned in the first 3 columns (a disaster) | Junk columns burned before the first white, where one burned: median (fewest) | Whites burned a session |
+|---|---|---|---|---|
+| Learner | 3/20 | 2/20 | 5 (1) | 6.5 |
+| Able to Master | 12/20 | 1/20 | 9 (2) | 0.7 |
+| Grand-Master to Legendary | 13/20 | 0/20 | 10 (5) | 0.7 |
+| Ultimate | 15/20 | 0/20 | 8 (7) | 0.3 |
+
+- **Against the user's bar** ("If you're playing well, you should never burn a white"): no tier is there. Even
+  the Ultimate burns one in a quarter of its sessions, though never early (7 junk columns burned first at
+  the least). The Able to Master has one early disaster in 20, after 2 junk columns.
+
 **Watching them, the first note (the user, 12 Nov, a screenshot of the Ultimate's board):** "the main
 thing is it just doesn't carry on the whole way to the right. It just kind of stops ... that black ... in
 the white, it was dragging the black diagonally down and it just stopped there. It's like, well, no, it
@@ -1156,6 +1171,15 @@ way of getting to this piece, what's a single thing that could move, like in thi
 that would allow me to get to that path." So the next step for the search: when no one drag brings a junk
 piece into a white's place, look for one enabling drag first (one piece moved out of the way) that opens
 such a path, and play the two together, costed as a person's two drags.
+
+**The twentieth note: measure whites burned by when, not how many (the user, 13 Nov, on the seventh run's
+table).** "why it's burned in itself doesn't feel like it means much. Like, for example, I would measure like the
+early game by how many like mixed brown black columns you burn before you burned a white. Like if you burn a white
+on the first column or the second column that goes up or down, that's catastrophic. That's game ending. If you
+accidentally burn a white on the 10th or whatever ... it's still bad ... If you're playing well, you should never
+burn a white. That's just really bad." So the runner's yardstick: sessions with no white burned at all (the aim,
+every one); the junk columns burned before the first white burned; and how many sessions burned one in the first
+few columns gone, up or down, counted as a disaster. The bare count of whites burned is kept but no longer leads.
 
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
