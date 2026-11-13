@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import {
   HELIUM, HELIUM_ARRIVE, HELIUM_CAST, HELIUM_MOOR, HELIUM_STANDS, LESSON_SEED, Visit, askHelium, bangs, heliumAt, heliumShore, helpFor,
   inHeliumEarshot, lessonGame, lessonPlan, lessonSecs, mishapLine, onHeliumLanding, opening, lessonBeats, afterOpening, ringed, holdSecs, actAfter, stepDoneLines,
-  Cellar, OPENING_BANG, RUM, lineSpot, pileSpot, praiseFor, worksFor, STEPS, whitesOnFireSide, beatSecs, PACE_LESSON, Nerves, NERVE, onScreen,
+  Cellar, OPENING_BANG, RUM, lineSpot, pileSpot, praiseFor, worksFor, STEPS, whitesOnFireSide, beatSecs, PACE_LESSON, Nerves, NERVE, onScreen, cleanBestChain, bestToBeat, beatBest,
 } from '../src/den-helium';
 import { AT_HELIUMS } from '../src/lines/you';
 import { LAY, SAIL, Sea } from '../src/den-sail';
@@ -15,7 +15,7 @@ import { smugglersAt } from '../src/den-smugglers';
 import { BURNT, COLS, Distilling, WHITE, neighbourOn, canSwapOn, parseBoard } from '../src/distilling';
 import { isJunk } from '../src/distill-routines';
 import type { Advice } from '../src/distill-bots';
-import { AFTER, FIRE, HELP, HELP_ELSE, LESSON, MISHAP, NERVES, ONWARD, OPENING, STEP_ONE, TELL } from '../src/lines/helium';
+import { AFTER, BEST, FIRE, HELP, HELP_ELSE, LESSON, MISHAP, NERVES, ONWARD, OPENING, STEP_ONE, TELL } from '../src/lines/helium';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -485,5 +485,28 @@ describe('holding the fire to take it slowly (the user, 13 Nov: "pause auto burn
   it('13 Nov: with the fire held they don\'t get nervous: nothing\'s burning', () => {
     const n = new Nerves();
     expect(n.tick(0, 2, Infinity)).toBeNull();
+  });
+});
+
+describe('your best Crystal Clear remembered, 13 Nov ("save it in the local memory, so [they remember] what your best crystal clear is ... each time you come back, you\'ll try to work on that breaking that personal best")', () => {
+  it('reads only a real chain from the browser, anything else as none', () => {
+    expect(cleanBestChain('3')).toBe(3);
+    expect(cleanBestChain(5)).toBe(5);
+    for (const bad of [null, '', 'x', '-1', '0', '2.5', '1e9', undefined, {}]) expect(cleanBestChain(bad)).toBe(0);
+  });
+  it('coming back, they say your best to beat, or the first goal (one column of whites) with none yet', () => {
+    expect(bestToBeat(0)).toBe(BEST.none);
+    expect(bestToBeat(0)).toMatch(/one column of whites/);
+    expect(bestToBeat(4)).toBe("Your best's a Crystal Clear 4. Let's beat it.");
+  });
+  it('a chain beating it is the new best, your first said as your first; equal or less is nothing', () => {
+    expect(beatBest(1, 0)).toEqual({ best: 1, says: BEST.first });
+    expect(beatBest(3, 2)).toEqual({ best: 3, says: 'Crystal Clear 3! Your best yet. I\'ll remember that.' });
+    expect(beatBest(2, 2)).toBeNull();
+    expect(beatBest(1, 2)).toBeNull();
+    expect(beatBest(0, 0)).toBeNull();
+  });
+  it('keeps Helium "they", and short enough for a phone bubble', () => {
+    for (const l of Object.values(BEST)) { expect(l).not.toMatch(/\b(he|she|him|her|his)\b/i); expect(l.length).toBeLessThanOrEqual(90); }
   });
 });

@@ -1089,6 +1089,13 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
   - "Ooh. Smooth."
 - *finished:* "Flask's full. That's a batch. Mischievious will want ten more."
 
+### Your best Crystal Clear, kept in this browser: as you sit down at the still, with none yet (none) or your best to beat (toBeat); as a chain beats it, your first (first) or a new best (beaten)
+
+- *At the still, no Crystal Clear yet:* "Goal for now: one column of whites, sent up. A Crystal Clear. Then we go for more."
+- *At the still, your best to beat:* "Your best's a Crystal Clear {n}. Let's beat it."
+- *Your first Crystal Clear:* "Your first Crystal Clear! I'll remember that one."
+- *A new best chain:* "Crystal Clear {n}! Your best yet. I'll remember that."
+
 ### While you're within earshot of their island: round and round
 
 - "Big order of rum for Mischievious. Another wedding. She does keep getting married."

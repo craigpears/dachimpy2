@@ -19,6 +19,7 @@ import {
   HELIUM_CAST, HELIUM, HELIUM_STANDS, HELIUM_MOOR, HELIUM_ARRIVE, Visit, lessonGame, lessonBeats, lessonSecs, mishapLine, askHelium,
   onHeliumLanding, inHeliumEarshot, heliumShore, worksFor, praiseFor, Cellar, OPENING_BANG, lineSpot, PACE_LESSON, whitesOnFireSide,
   actAfter, holdSecs, ringed, stepDoneLines, Nerves, NERVE, whitesInFurnace, onScreen, hintFor, hintLeft, routesToFire, Watch, PACE_WATCH,
+  BEST_STORE, cleanBestChain, bestToBeat, beatBest,
 } from '../den-helium.js';
 import { LAY } from '../den-sail.js';
 import { Distilling, WHITE } from '../distilling.js';
@@ -41,7 +42,10 @@ import { cine, cinePlay, cineEnd, bubble, bubbleAt } from './cine.js';
 const SAND = { y0: -0.4, h: 0.62 }, GROUND = SAND.y0 + SAND.h + 0.25;
 /* `on`: at the still, playing; `board`: Distilling's board on its stand (the lesson's, then yours); `hand`:
    their drags being played on it (lesson or help), a swap at a time; `note`: what the bar says, a while. */
-export const helium = { W: null, visit: new Visit(), play: null, on: false, board: null, hand: [], handT: 0, handDone: null, bangs: 0, bigBang: 0, note: '', noteT: 0, cower: 0, shrug: 0, nervy: 0, nerves: new Nerves(), fretCol: null, held: true, fireTips: 0, cellar: new Cellar(), hint: null, routes: null, watch: null };
+/* Your best Crystal Clear here, kept in this browser (src/den-helium.ts, beatBest). */
+const readBest = () => { try { return cleanBestChain(localStorage.getItem(BEST_STORE)); } catch { return 0; } };
+const keepBest = (n) => { try { localStorage.setItem(BEST_STORE, String(n)); } catch { /* (no storage: kept this voyage only) */ } };
+export const helium = { W: null, visit: new Visit(), play: null, on: false, board: null, hand: [], handT: 0, handDone: null, bangs: 0, bigBang: 0, note: '', noteT: 0, cower: 0, shrug: 0, nervy: 0, nerves: new Nerves(), fretCol: null, held: true, fireTips: 0, cellar: new Cellar(), hint: null, routes: null, watch: null, best: readBest() };
 
 function build() {
   const g = new THREE.Group(), sand = mat('#e6cf96', { roughness: 1 }), wet = mat('#c9ad78', { roughness: 1 });
@@ -123,7 +127,10 @@ function newBoard(game, yours) {
       const w = worksFor(c);
       if (w.kind === 'rum') {
         W.distillery.pour(helium.cellar.pour(w.measures));
-        const line = yours && praiseFor(c.chain, Math.random());
+        // Your best beaten (not while they're playing it for you): remembered, and said instead of their praise.
+        const beat = yours && !helium.watch && c.up ? beatBest(c.chain, helium.best) : null;
+        if (beat) { helium.best = beat.best; keepBest(beat.best); }
+        const line = beat ? beat.says : yours && praiseFor(c.chain, Math.random());
         if (line) say(line);
       }
       if (yours && finished) say(PRAISE.finished);
@@ -276,7 +283,11 @@ const free = () => sail.on && !cine && !sail.helm.cur?.via && !sail.helm.gusts?.
 // ---------- the still, yours ----------
 /** At the still, a board of your own: a fresh deal if there's none yet (or the last's finished). */
 function atStill(fresh = false) {
-  if (fresh || !helium.board || helium.board.game.finished || helium.board.game.timer === false) { newBoard(new Distilling(Math.random), true); helium.stepDone = false; helium.nerves = new Nerves(); }
+  if (fresh || !helium.board || helium.board.game.finished || helium.board.game.timer === false) {
+    newBoard(new Distilling(Math.random), true); helium.stepDone = false; helium.nerves = new Nerves();
+    // Back for another go (not straight after their lesson, which has its own last word): your best to beat.
+    if (!fresh) say(bestToBeat(helium.best));
+  }
   helium.board.paused = helium.held;
   helium.on = true;
   keys.clear();

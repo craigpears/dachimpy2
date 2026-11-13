@@ -25,7 +25,7 @@ import { HELIUM as HAND, advise } from './distill-bots.js';
 import { ROUTINES, isJunk, playDrags } from './distill-routines.js';
 import { routesInto } from './distill-path.js';
 import { PHASES } from './distill-phase.js';
-import { AFTER, HELP, HELP_ELSE, HINT, LESSON, MISHAP, NERVES, ONWARD, OPENING, PHASE, PRAISE, STEP_ONE, TELL, WATCH } from './lines/helium.js';
+import { AFTER, BEST, HELP, HELP_ELSE, HINT, LESSON, MISHAP, NERVES, ONWARD, OPENING, PHASE, PRAISE, STEP_ONE, TELL, WATCH } from './lines/helium.js';
 import { AT_HELIUMS } from './lines/you.js';
 const H = LAY.HELIUM;
 export const HELIUM = {
@@ -312,6 +312,22 @@ export function worksFor(c) {
 export const praiseFor = (chain, roll) => (chain >= 2 && roll < 0.35 ? PRAISE.clear[chain % PRAISE.clear.length] : null);
 /** The casks at their distillery: the one under the spout filling, and those filled (the first PILE on the
     pile). */
+/** Your best Crystal Clear at their still, kept in this browser under BEST_STORE (the user, 13 Nov: "save it in
+    the local memory, so [they remember] what your best crystal clear is. So the idea is each time you come back,
+    you'll try to work on that breaking that personal best"). Anything stored that isn't a chain reads as none. */
+export const BEST_STORE = 'den-helium-best';
+export const cleanBestChain = (raw) => {
+    const n = typeof raw === 'string' && raw.trim() ? Number(raw) : typeof raw === 'number' ? raw : NaN;
+    return Number.isInteger(n) && n > 0 && n < 100 ? n : 0;
+};
+/** Their line as you sit down at the still: your best to beat, or the first goal when there's none yet. */
+export const bestToBeat = (best) => (best > 0 ? BEST.toBeat.replace('{n}', String(best)) : BEST.none);
+/** A column sent up in a chain: the new best (and their line) when it beats yours, or null. */
+export function beatBest(chain, best) {
+    if (chain <= best || chain < 1)
+        return null;
+    return { best: chain, says: best > 0 ? BEST.beaten.replace('{n}', String(chain)) : BEST.first };
+}
 export class Cellar {
     /** Measures in the cask under the spout. */
     fill = 0;

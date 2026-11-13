@@ -210,6 +210,16 @@ export const PRAISE = {
   finished: 'Flask\'s full. That\'s a batch. Mischievious will want ten more.',
 } as const;
 
+/** Your best Crystal Clear at their still, remembered in this browser (the user, 13 Nov: "so [they remember] what
+    your best crystal clear is ... each time you come back, you'll try to work on that breaking that personal
+    best"). {n} is the chain. */
+export const BEST = {
+  none: 'Goal for now: one column of whites, sent up. A Crystal Clear. Then we go for more.',
+  toBeat: 'Your best\'s a Crystal Clear {n}. Let\'s beat it.',
+  first: 'Your first Crystal Clear! I\'ll remember that one.',
+  beaten: 'Crystal Clear {n}! Your best yet. I\'ll remember that.',
+} as const;
+
 /** While you're within earshot of their island, before or after: round and round. */
 export const AFTER = [
   'Big order of rum for Mischievious. Another wedding. She does keep getting married.',
@@ -279,6 +289,11 @@ export const CHARACTER: Character = {
     },
     { when: 'A hint: the bar when the arrows show the pieces that could take a white\'s place by the fire (routes), or there\'s nothing to show (none)', says: HINT },
     { when: 'Now and then as your Crystal Clears go up, and when the flask\'s full', says: PRAISE },
+    {
+      when: 'Your best Crystal Clear, kept in this browser: as you sit down at the still, with none yet (none) or your best to beat (toBeat); as a chain beats it, your first (first) or a new best (beaten)',
+      says: BEST,
+      each: { none: 'At the still, no Crystal Clear yet', toBeat: 'At the still, your best to beat', first: 'Your first Crystal Clear', beaten: 'A new best chain' },
+    },
     { when: 'While you\'re within earshot of their island: round and round', says: AFTER },
   ],
 };
