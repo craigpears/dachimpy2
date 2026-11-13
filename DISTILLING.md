@@ -1195,6 +1195,19 @@ a row lower, a black lifted above it. So a tie-breaker, not a goal: among moves 
 the same time (a swap or two more at most), prefer the one that leaves browns lower and blacks higher on the
 right-hand side; never spend real moves on it this early.
 
+**The twenty-second note: urgency where the danger is, low down by the fire (the user, 13 Nov, watching the
+bots, `notes/distilling/39-no-urgency-whites-low-by-the-fire.webp`).** "there's no urgency in this script. Like,
+it doesn't seem fussed that you're only one column away from a couple of whites burning at the bottom, and it's
+not clearing the boundary thing at the bottom, that chunk at the bottom. It seems to be working ... the top part
+of the board still, and it's like, well, the top board's safe. Moves are easy there. You've got a spice and a bunch
+of stuff blocking things at the bottom. Like, that's your danger area that's hard to reach ... I wouldn't put my
+money on this being a much more likely risk area for whites to get burned." The picture: the right-hand column is
+all junk; the next one, to burn after it, has whites low down, and the bottom middle (circled) is a knot of whites
+round a spice with junk pieces cut off, hard to reach. The bot was busy near the top. So: the whites in the next
+columns to burn, and how hard they are to reach, set the priority. When they are one column from the fire and hard
+to reach (low down, behind a spice, boxed in), that's the urgent work, before anything easy elsewhere; the harder
+to reach, the sooner to start, since it takes more moves.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
