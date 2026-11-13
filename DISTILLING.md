@@ -1018,6 +1018,13 @@ end (the user, 12 Nov, the same game on, `notes/distilling/30-` to `34-*`).**
   many junk columns are filled on the right (no white in them); second, once a wall between white and colour
   has formed, how straight and upright it is. No separate credit for whites moving left: that follows from
   colour being pulled right.
+- **The brown sweep is right, but too early (the same day, watching on):** "once you get past the first few
+  columns, the way that [the bot's] sweeping browns up back down to the bottom right is right now is very
+  good. But it's just like it leaves one or two trapped whites. So I feel like this is probably more of the
+  right technique, but it's being applied a bit too quickly before those columns have been cleared." So keep
+  the sweep of browns down to the bottom right, but only once the first few right-hand columns are clear of
+  white; until then, clearing them (step one of Helium's lesson) comes first, and a sweep that leaves a white
+  trapped is worse than it looks.
 
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
