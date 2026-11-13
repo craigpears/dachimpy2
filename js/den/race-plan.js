@@ -1,8 +1,8 @@
 // Your race route, planned, then puzzled through (RACE.md §5; the rules, the pilot and its stops:
-// src/race-plan.ts; each choice's time and line: src/race-sim.ts, choiceTime and choiceLines). The user, 12 Nov:
+// src/race-plan.ts; each choice's line: src/race-sim.ts, choiceLines). The user, 12 Nov:
 // "you plan by choosing those options, that works. That's really simple and easy." Here: the plan's strip along
-// the screen's right-hand edge (the course drawn small with your route on it, each leg's choices with their time
-// against the long way, one click to pick one, the board under your hands staying live), and the pilot wired to
+// the screen's right-hand edge (the course drawn small with your route on it, each leg's choices and their puzzles,
+// one click to pick one, the board under your hands staying live), and the pilot wired to
 // your sloop: it sails the plan a move at a time on your own helm, holds her at each obstacle's stop with the board
 // it asks for put up, and lets her go on once it's done. You can still take the helm: W A D or a click on the sea
 // and she sails your moves or your pin, and the pilot carries on once they're played out; or the strip's Pilot
@@ -10,7 +10,7 @@
 // the race (planStep), draws its strip (planTick) and starts it afresh each race (planReset); sailing.js tells it
 // you've taken the helm (planTake); the Sailing board holds a gust it mustn't carry (station.gusts).
 import { Pilot, LEGS, choose, optionOf, stretchOf, courseChart, readPlan, writePlan, PLAN_STORE } from '../race-plan.js';
-import { choiceTime, choiceLines, planLines, planTime } from '../race-sim.js';
+import { choiceLines, planLines } from '../race-sim.js';
 import { rocksDown } from '../den-race.js';
 import { BRIBE } from '../den-bribe.js';
 import { chainName } from '../sailing.js';
@@ -120,8 +120,9 @@ station.leads.push(() => (plan.racing && P().order.kind === 'stop' && P().order.
 // ---------- the strip ----------
 /* Along the screen's right-hand edge, on the line and in the race (the user, 13 Nov: "if you're changing the
    [plan], you need to be able to see the length. This is very disconnected"): the course drawn small, your route on
-   it in gold and where she is; then each leg still to come with its choices side by side, each with its time against
-   the long way (src/race-sim.ts, choiceTime), yours lit. Pointing at a choice (or picking one) draws its line on the
+   it in gold and where she is; then each leg still to come with its choices side by side, each with its puzzle, yours
+   lit. No times (the user, 13 Nov: "I don't know why you've got the timings on there ... that's just a
+   behind-the-scenes balance thing. There's no reason to display that"; they stay the simulation's, src/race-sim.ts). Pointing at a choice (or picking one) draws its line on the
    course. One click (or tap) picks it, the board under your hands staying live (on the press, never focused, so
    Space and the keys stay the board's).
    Never over a board (the user, 13 Nov: "your plan is covering the right hand row board"): while a board other than
@@ -184,24 +185,15 @@ function drawHot() {
   g.innerHTML = H ? choiceLines(H.leg, H.id).map((l) => `<polyline points="${pts(l)}"/>`).join('') : '';
   if (d) d.innerHTML = H ? detail(H.leg, H.id) : totalText();
 }
-const secs = (x) => `${Math.round(Math.abs(x))} s`;
-/** A choice's time against the long way, in a word: "−9 s", "+12 s", or "·" for the long way itself. */
-function netText(leg, id) {
-  if (id === 'long') return '·';
-  const n = Math.round(choiceTime(leg, id).net);
-  return n === 0 ? '±0 s' : `${n < 0 ? '−' : '+'}${Math.abs(n)} s`;
-}
-/** What it does, said: "Leg 2 · The headwind gap (rowing): cuts out 25 s of sailing; rowing ~20 s · 5 s quicker". */
+/** What a choice is, said: "Leg 2 · The headwind gap · rowing". */
 function detail(leg, id) {
-  const o = optionOf(leg, id), t = choiceTime(leg, id);
-  if (id === 'long') return `<b>Leg ${leg + 1} · ${o.name}</b> · ${o.puzzle}`;
-  const n = Math.round(t.net), verdict = n < 0 ? `<em>${secs(n)} quicker</em>` : n > 0 ? `<em class="slow">${secs(n)} slower</em>` : '<em>about even</em>';
-  const work = t.move ? `${o.puzzle}, built on the move` : t.puzzle > 0.5 ? `${o.puzzle} ~${secs(t.puzzle)}` : o.puzzle;
-  return `<b>Leg ${leg + 1} · ${o.name}</b> · cuts ${secs(t.saves)} of sailing · ${work} · ${verdict}`;
+  const o = optionOf(leg, id);
+  return `<b>Leg ${leg + 1} · ${o.name}</b> · ${o.puzzle}`;
 }
+/** Your route, said: the puzzles it stops for, in order, or the long way round. */
 function totalText() {
-  const n = Math.round(planTime(P().plan));
-  return n < 0 ? `Your route: about <em>${secs(n)} quicker</em> than the long way, for a decent puzzler` : n > 0 ? `Your route: about <em class="slow">${secs(n)} slower</em> than the long way` : 'Your route: the long way round, no stops';
+  const ps = P().plan.map((id, leg) => (id === 'long' ? null : optionOf(leg, id).puzzle)).filter(Boolean);
+  return ps.length ? `Your route: ${ps.join(' · ')}` : 'Your route: the long way round, no stops';
 }
 
 /** Each frame (race.js): the strip, shown on the line and in the race. */
@@ -219,7 +211,8 @@ export function planTick(R, show) {
   const fold = (busy || phone()) && !plan.peek;
   plan.el.classList.toggle('folded', fold);
   plan.el.classList.toggle('sheet', phone() && plan.peek);
-  // (down the edge under the starter's card while it's up, above the prompt along the bottom; scrolling if it must)
+  // (down the edge under the starter's card while it's up, above the prompt along the bottom; never scrolling: the
+  // course drawn small gives up height first)
   if (!phone()) {
     const card = document.getElementById('racecard')?.getBoundingClientRect(), cb = card && card.height > 0 ? card.bottom : 0;
     const top = Math.max(150, cb + 8), low = document.getElementById('dock')?.getBoundingClientRect().top || innerHeight;
@@ -243,8 +236,8 @@ export function planTick(R, show) {
   const legs = P().plan.map((id, leg) => ({ leg, id })).filter((x) => x.leg >= from);
   plan.el.innerHTML = `<div class="rp-head"><b>Your plan</b><button class="rp-pilot${P().on ? ' on' : ''}" title="T">Pilot ${P().on ? 'on' : 'off'}</button>${busy || phone() ? '<button class="rp-fold" title="Fold it away">✕</button>' : ''}</div>`
     + `<div class="rp-now">${now}</div>${chartSvg()}<div class="rp-detail"></div>`
-    + legs.map((x) => `<div class="rp-leg${x.leg === from && R.state === 'on' ? ' now' : ''}"><i>Leg ${x.leg + 1}</i><span>`
-      + LEGS[x.leg].options.map((op) => `<button data-leg="${x.leg}" data-pick="${op.id}" class="rp-opt${op.id === x.id ? ' on' : ''}" title="${op.name}: ${op.puzzle}">${op.short}<small>${netText(x.leg, op.id)}</small></button>`).join('')
+    + legs.map((x) => `<div class="rp-leg${x.leg === from && R.state === 'on' ? ' now' : ''}"><i title="Leg ${x.leg + 1}">${x.leg + 1}</i><span>`
+      + LEGS[x.leg].options.map((op) => `<button data-leg="${x.leg}" data-pick="${op.id}" class="rp-opt${op.id === x.id ? ' on' : ''}" title="${op.name}: ${op.puzzle}">${op.short}</button>`).join('')
       + '</span></div>').join('')
     + `<div class="rp-help">${phone() ? 'Tap a choice to take it' : 'Point at a choice to see it on the course · click to take it'}</div>`;
   drawRoute();
