@@ -231,6 +231,12 @@ export function person({
       p.g.getWorldPosition(v);
       bubbleAt(el, !!L && shown(), v.x, v.y + tall * scale, v.z);
       if (L && parseFloat(el.style.top) < 90) el.style.top = '90px';
+      // (kept whole on the screen, side to side: its middle is at `left`; the user, 13 Nov, of Helium's: "really
+      // off the edge of the screen ... two-thirds of them are on the screen, half")
+      if (L && el.style.display !== 'none') {
+        const half = el.offsetWidth / 2, x = parseFloat(el.style.left);
+        if (Number.isFinite(x)) el.style.left = `${Math.max(half + 8, Math.min(innerWidth - half - 8, x))}px`;
+      }
     },
   };
   /** Puts what an idle holds in its right hand (PROPS, by name), its own put away meanwhile; or none. */

@@ -44,6 +44,7 @@
     @media (max-aspect-ratio: 21/20) { body.sailing.sailboard .dock { left: 50%; max-width: calc(100vw - 32px); } body.sailing.sailboard .prompt { font-size: 13px; padding: 6px 10px; } }   /* (along the bottom, above the prompt) */
     /* The sloop race watched (js/den/race-watch.js): its bar along the top, nothing of your own sailing. */
     body.watching .sailhud, body.watching .dock, body.watching .hud, body.watching #racehud { display: none !important; }
+    body.at-board .hud { display: none !important; }
     #watchbar { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 24px); z-index: 6; background: var(--panel); border: 1px solid #5a412a; border-radius: 10px; padding: 6px 12px; color: #f3ecdc; font: 600 15px/1.35 'Alegreya Sans', sans-serif; text-align: center; }
     #watchbar .wb-now b { color: var(--gold); }
     #watchbar .wb-who { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 5px 0 3px; }
@@ -335,7 +336,7 @@
     .label.say::after { content: ''; position: absolute; left: 50%; bottom: -11px; margin-left: -9px; border: 9px solid transparent; border-top-color: #2a1a0c; border-bottom: 0; }
     .label.say.chat { font-size: 15px; padding: 2px 10px; background: #f3e9ff; border-color: #4a3170; color: #3a2160; }
     .label.say.chat::after { border-top-color: #4a3170; }
-    .label.say.wrap { white-space: normal; width: max-content; max-width: 380px; text-align: center; }
+    .label.say.wrap { white-space: normal; width: max-content; max-width: min(380px, calc(100vw - 56px)); text-align: center; }
     .label.say.spouse { font-size: 17px; max-width: min(320px, 80vw); }
     /* Mischievious's wedding, on her island (js/den/wedding.js): none of the den's own buttons, the
        planner down the right, the portrait over everything at the end. */
@@ -578,7 +579,7 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.DIEXOFFE.js');
+    import(local ? './js/den.js' : './js/den.FU7EKVBY.js');
   </script>
 </body>
 </html>

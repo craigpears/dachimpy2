@@ -16,7 +16,7 @@ import * as THREE from 'three';
 import {
   HELIUM_CAST, HELIUM, HELIUM_STANDS, HELIUM_MOOR, HELIUM_ARRIVE, Visit, lessonGame, lessonBeats, lessonSecs, mishapLine, askHelium,
   onHeliumLanding, inHeliumEarshot, heliumShore, worksFor, praiseFor, Cellar, OPENING_BANG, lineSpot, PACE_LESSON, whitesOnFireSide,
-  actAfter, holdSecs, ringed, stepDoneLines, Nerves, NERVE, whitesInFurnace,
+  actAfter, holdSecs, ringed, stepDoneLines, Nerves, NERVE, whitesInFurnace, onScreen,
 } from '../den-helium.js';
 import { LAY } from '../den-sail.js';
 import { Distilling, WHITE } from '../distilling.js';
@@ -39,7 +39,7 @@ import { cine, cinePlay, cineEnd, bubble, bubbleAt } from './cine.js';
 const SAND = { y0: -0.4, h: 0.62 }, GROUND = SAND.y0 + SAND.h + 0.25;
 /* `on`: at the still, playing; `board`: Distilling's board on its stand (the lesson's, then yours); `hand`:
    their drags being played on it (lesson or help), a swap at a time; `note`: what the bar says, a while. */
-export const helium = { W: null, visit: new Visit(), play: null, on: false, board: null, hand: [], handT: 0, handDone: null, bangs: 0, bigBang: 0, note: '', noteT: 0, cower: 0, shrug: 0, nervy: 0, nerves: new Nerves(), cellar: new Cellar() };
+export const helium = { W: null, visit: new Visit(), play: null, on: false, board: null, hand: [], handT: 0, handDone: null, bangs: 0, bigBang: 0, note: '', noteT: 0, cower: 0, shrug: 0, nervy: 0, nerves: new Nerves(), fretCol: null, cellar: new Cellar() };
 
 function build() {
   const g = new THREE.Group(), sand = mat('#e6cf96', { roughness: 1 }), wet = mat('#c9ad78', { roughness: 1 });
@@ -353,12 +353,13 @@ export function heliumUp(button = 0) { if (helium.on) helium.board?.release(butt
 /** The camera while you're at the still: straight on to the board (den.js, with Umami's). */
 export function heliumCam() {
   if (!helium.on || !helium.board) return null;
-  // (pulled back and the board a little low, clear of the den's panel at the top left)
-  // (on a wide screen, the board a little left of the middle: Helium beside it on the right, their cask and
-  // the distillery behind, their line in the room there)
+  // (the den's panel is hidden here, so the board fills the screen; the user, 13 Nov: "I can't see helium at
+  // all ... still need to see more of the puzzle ... you don't need like the menu at the top again in these
+  // views". As the screen widens, the board slides left of the middle and Helium comes in beside it on the
+  // right, their cask and the distillery behind, their line in the room there; on a tall phone, the board alone)
   const v = helium.board.camView(camera), d = v.from.clone().sub(v.look).normalize(), W = helium.W;
-  const aside = camera.aspect >= 1.5 ? W.size * 0.32 : 0, right = V3(Math.cos(W.yaw), 0, -Math.sin(W.yaw));
-  return { look: v.look.clone().add(V3(0, 0.3, 0)).addScaledVector(right, aside), dist: v.dist * 1.35, tilt: Math.asin(d.y), yaw: Math.atan2(d.x, d.z) };
+  const k = Math.max(0, Math.min(1, (camera.aspect - 0.95) / 0.55)), right = V3(Math.cos(W.yaw), 0, -Math.sin(W.yaw));
+  return { look: v.look.clone().add(V3(0, 0.1, 0)).addScaledVector(right, W.size * 0.32 * k), dist: v.dist * (1.12 + 0.2 * k), tilt: Math.asin(d.y), yaw: Math.atan2(d.x, d.z) };
 }
 export function heliumPrompt() {
   if (!sail.on || !helium.W) return '';
@@ -404,10 +405,16 @@ export function heliumTick(dt) {
   if (helium.on && g && g.movable && !helium.hand.length) {
     const n = helium.nerves.tick(g.columns.length, whitesInFurnace(g.cols), g.timeLeft());
     if (n) { say(n.says); if (n.level === 'panic') helium.nervy = NERVE.COWER; }
+    // ...and the whites they're fretting about ringed on the board (the user, 13 Nov: "When they say do you see
+    // that [white] ... it should like visually indicate like highlight the pieces"), till they're out or burned.
+    if (n && n.level !== 'phew') { helium.fretCol = g.columns.length; helium.board.mark = (x, y, p, gone) => !gone && x === g.cols.length - 1 && p === WHITE; }
+    else if (helium.fretCol !== null && (helium.fretCol !== g.columns.length || !whitesInFurnace(g.cols))) { helium.fretCol = null; helium.board.mark = null; }
   }
   // Step one done, at your still: the three columns next to the fire clear of white. They say so, once a batch.
   if (helium.on && !helium.stepDone && helium.board?.game.movable && !whitesOnFireSide(helium.board.game.cols)) { helium.stepDone = true; say(...stepDoneLines()); }
   W.them.tick(dt);
+  // (no den panel at the top while you're at their board, in the lesson or at your still)
+  document.body.classList.toggle('at-board', helium.on || !!helium.play);
   placeLine();
   W.distillery.tick(dt);
   for (const o of W.props) o.tick?.(dt);
@@ -419,7 +426,18 @@ export function heliumTick(dt) {
 const corners = [V3(0, 0, 0), V3(0, 0, 0), V3(0, 0, 0), V3(0, 0, 0)];
 function placeLine() {
   const W = helium.W, el = W.them.el;
-  if (!el || el.style.display === 'none' || !(helium.on || helium.play)) { if (el) el.style.maxWidth = ''; return; }
+  if (!el || el.style.display === 'none') return;
+  if (!(helium.on || helium.play)) {
+    // (over their head, away from the board: narrow enough for the screen, and kept whole on it)
+    el.style.maxWidth = `${Math.min(380, innerWidth - 24) - 32}px`;
+    const head = { x: parseFloat(el.style.left), y: parseFloat(el.style.top) };
+    if (!Number.isFinite(head.x) || !Number.isFinite(head.y)) return;
+    const hud = document.querySelector('.hud')?.getBoundingClientRect();
+    const p = onScreen(head, { w: el.offsetWidth, h: el.offsetHeight + 12 }, { w: innerWidth, h: innerHeight }, { top: hud && hud.bottom > 0 && hud.bottom < innerHeight / 2 ? hud.bottom + 6 : 70 });
+    el.style.left = `${p.x}px`;
+    el.style.top = `${p.y}px`;
+    return;
+  }
   const right = V3(Math.cos(W.yaw), 0, -Math.sin(W.yaw)), half = W.size / 2;
   const box = { l: Infinity, t: Infinity, r: -Infinity, b: -Infinity };
   corners.forEach((p, i) => {

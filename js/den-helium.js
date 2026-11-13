@@ -342,6 +342,17 @@ const overlaps = (a, b) => a.l < b.r && a.r > b.l && a.t < b.b && a.b > b.t;
 /** Where their bubble goes: its bottom middle (the bubble's drawn up from there), given where their head is on
     the screen (`head`), the bubble's size, the board's box on the screen and the screen's; `top` and `bottom`
     kept clear (the den's panel, the bar and the help button), `tail` the bubble's pointer below it. */
+/** Their line over their head when it's not by the board (their chatter after the lesson, before or after your
+    go at the still), kept whole on the screen (the user, 13 Nov: "at the end again. The speech [bubbles] are
+    really off the edge of the screen ... two-thirds of them are on the screen, half"): `head` where its tail
+    points, the bubble's size; where it goes (its bottom middle, as the bubble's drawn). */
+export function onScreen(head, bubble, screen, o = {}) {
+    const { top = 8, bottom = 8, margin = 8 } = o, { w, h } = bubble;
+    return {
+        x: Math.max(w / 2 + margin, Math.min(screen.w - w / 2 - margin, head.x)),
+        y: Math.max(top + h, Math.min(screen.h - bottom, head.y)),
+    };
+}
 export function lineSpot(head, bubble, board, screen, o = {}) {
     const { top = 90, bottom = 70, margin = 8, tail = 12 } = o, { w, h } = bubble;
     const clampX = (x) => Math.max(w / 2 + margin, Math.min(screen.w - w / 2 - margin, x));

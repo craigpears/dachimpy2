@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import {
   HELIUM, HELIUM_ARRIVE, HELIUM_CAST, HELIUM_MOOR, HELIUM_STANDS, LESSON_SEED, Visit, askHelium, bangs, heliumAt, heliumShore, helpFor,
   inHeliumEarshot, lessonGame, lessonPlan, lessonSecs, mishapLine, onHeliumLanding, opening, lessonBeats, afterOpening, ringed, holdSecs, actAfter, stepDoneLines,
-  Cellar, OPENING_BANG, RUM, lineSpot, pileSpot, praiseFor, worksFor, STEPS, whitesOnFireSide, beatSecs, PACE_LESSON, Nerves, NERVE,
+  Cellar, OPENING_BANG, RUM, lineSpot, pileSpot, praiseFor, worksFor, STEPS, whitesOnFireSide, beatSecs, PACE_LESSON, Nerves, NERVE, onScreen,
 } from '../src/den-helium';
 import { AT_HELIUMS } from '../src/lines/you';
 import { LAY, SAIL, Sea } from '../src/den-sail';
@@ -452,5 +452,18 @@ describe('their nerves at your still (the user, 13 Nov: "imagine Helium getting 
     expect(n.tick(0, 0, 4000)).toEqual({ says: NERVES.phew[0], level: 'phew' });
     expect(n.tick(0, 0, 2000)).toBeNull();
     expect(n.tick(1, 0, 2000)).toBeNull();
+  });
+});
+
+describe('their line kept whole on the screen (the user, 13 Nov: "The speech [bubbles] are really off the edge of the screen")', () => {
+  it('13 Nov: over their head near the right edge, the bubble is pulled back on, all of it', () => {
+    const screen = { w: 800, h: 600 }, bubble = { w: 300, h: 80 };
+    const p = onScreen({ x: 760, y: 300 }, bubble, screen);
+    expect(p.x + bubble.w / 2).toBeLessThanOrEqual(screen.w);
+    expect(p.x - bubble.w / 2).toBeGreaterThanOrEqual(0);
+    const q = onScreen({ x: -50, y: 20 }, bubble, screen, { top: 70 });
+    expect(q.x - bubble.w / 2).toBeGreaterThanOrEqual(0);
+    expect(q.y - bubble.h).toBeGreaterThanOrEqual(70);
+    expect(onScreen({ x: 400, y: 300 }, bubble, screen)).toEqual({ x: 400, y: 300 });   // (on already: left be)
   });
 });
