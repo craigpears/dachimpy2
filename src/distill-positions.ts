@@ -94,6 +94,8 @@ export interface Expect {
   startsIn?: { x: readonly [number, number]; y: readonly [number, number] };
   /** Its first drag is a quick sorting move: it carries a black down, or a brown up. */
   sorts?: boolean;
+  /** Its first drag sorts the right side into the ladder the zigzag climbs: a black carried up, or a brown down. */
+  ladder?: boolean;
   /** Its first drag carries junk (a brown or a black) into this column (or one of these), into a white's place: a
       gap filled. */
   fills?: number | readonly number[];
@@ -240,6 +242,11 @@ export const VERDICTS: Readonly<Record<string, readonly Verdict[]>> = {
     note: "A board where things have gone really wrong: blacks all at the bottom, browns at the top, not enough movement; the blacks low in columns 5 and 6 and the brown at the top of column 5 at risk of being stranded and ruining the Crystal Clear. Panic, and damage control: quick, easy moves first to fill columns 8 and 9 however you can, the two blacks pulled down into them and the browns up; then the blacks and that brown out of the way to the left.",
     expect: { kind: 'move', fills: [7, 8], noBurn: true }, open: true,
   }],
+  P8: [{
+    date: '13 Nov',
+    note: "Pull the browns in columns 9 and 10 to the bottom and the blacks up to the top, quickly: the zigzag needs two columns of solid colour, and once column 10 burns you've lost the column you need to move blacks and browns up and down. Then the blacks down at the bottom left, fixing up the V, and the same at the top. The V left too long, the pieces not sorted.",
+    expect: { kind: 'move', startsIn: { x: [8, 9], y: [0, 8] }, ladder: true, noBurn: true }, open: true,
+  }],
 };
 
 /** The board of a position. */
@@ -296,6 +303,12 @@ export function check(p: Position, m: BotMove, e: Expect): string[] {
     const want = typeof e.fills === 'number' ? [e.fills] : e.fills;
     const ok = !!end && (held === BLACK || held === BROWN) && want.includes(end[0]) && cols[end[0]][end[1]] === WHITE;
     if (!ok) out.push(`its first drag doesn${"'"}t carry junk into a white${"'"}s place in column ${want.map((x) => x + 1).join(' or ')}`);
+  }
+  if (e.ladder) {
+    const held = first && cols[first.x][first.y], end = first && dragEnd(cols, first);
+    const h = (x: number, y: number) => y + (cols[x].length === TALL ? 0 : 0.5);
+    const ok = !!first && !!end && ((held === BLACK && h(...end) < h(first.x, first.y)) || (held === BROWN && h(...end) > h(first.x, first.y)));
+    if (!ok) out.push("its first drag isn't a black taken up or a brown taken down");
   }
   if (e.ends) {
     const end = first && dragEnd(cols, first);

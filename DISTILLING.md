@@ -1709,6 +1709,18 @@ columns, a brown at the top of one), which ruins the Crystal Clear. In damage co
 the left, aiming for the best chain still in reach, not the target. The verdict on `P7` (it replaces the one first
 drawn from the thirty-second note): it moves, its first drag filling a white's place in column 8 or 9.
 
+And on P8, CC^8 at 198 s with 0.9 s before column 10 goes: whites everywhere on the left, columns 9 and 10 junk but
+unsorted (column 10 browns at the top and blacks below); the bot waits: "I would be pulling in columns 9 and 10 the
+browns really quickly to the bottom and some blacks really quickly up to the top, because to make that zigzag
+technique work, you need 2 columns of solid color. And those columns are about to be burned, and once that 1 column
+is burned, next you can't then pull the black, move the blacks and browns vertically, because you've lost that column
+you need. And then I'd start pulling the blacks down the bottom left, fixing up that V, doing the same at the top. This
+is definitely the you've left the V for too long, you've not sorted your pieces situation." So the right-hand pair of
+columns is a tool to keep sorted (blacks over browns, the ladder the zigzag climbs) before one of them burns, and the
+V sorted well before the late game. In the board's state (the thirty-fourth note), unsorted junk on the right and a V
+left too long count as risk too. The verdict on `P8`: it moves, its first drag in column 9 or 10 taking a black up or a
+brown down.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
