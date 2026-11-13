@@ -128,6 +128,17 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   Hunters' (the user, 13 Nov: "these are the starter things, but ... these guys are amazing. They stream on
   Twitch a lot ... link up to the community, especially in the Discord channels"). Umami too, to settle how,
   since he doesn't speak.
+- **Every tutorial has a read version, kept in sync (13 Nov).** Each teacher's lesson (Helium's Distilling,
+  Tzz's balloon animals, Sailing's doubles, Bingos and Vegases, any later) has a static guide beside the animated
+  one: a page to read, its rules, phases, techniques and tricks in plain words with 2D pictures of the board, to
+  point people to. The two, and the bots behind them, are kept in sync: the guide is drawn from the same code
+  and data as the lesson (its boards, its lines, the phases and techniques) wherever it can be, so a change to
+  one shows in the other; and when a lesson or a bot's strategy changes, its guide changes in the same work.
+  (The user, 13 Nov: "it would be quite good to actually have that as a document anyway to point to if people
+  just want to go have a read version ... a 2D static version of the guide, and ... everything's just kept in
+  sync, like the animated version, the 2D static version ... I think that's true of everything ... for all
+  tutorials, that needs to be a rule somewhere. So we could do the same with the TZZ tutorial of how to do
+  doubles and bingos or Vegas.")
 
 - **A demonstration shows its plan before it builds (12 Nov).** In any tutorial (Tzz's balloons, Helium's
   Distilling), the plan is on the board and said before the pieces go in, so every move is seen to serve

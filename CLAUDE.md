@@ -61,6 +61,10 @@ Modular, no technical debt (the user, 10 Nov: "we need to make sure I'm not crea
   holds only thin adapters around it (sockets, hibernation); the browser reaches it through a small link
   (WebSocket, or in-process in the same tab for single-player and tests), never a socket directly.
 
+Every tutorial has a read version (the user, 13 Nov; RULES.md): a static guide page beside each animated lesson,
+its rules, phases and techniques in plain words with 2D pictures, drawn from the same code and data as the lesson
+and the bots wherever it can be, and changed in the same work whenever the lesson or the strategy changes.
+
 Read [STORY.md](STORY.md) for the den's story, its progression and the principles behind them, and keep it
 up to date as the story grows. Read [RULES.md](RULES.md) before changing gameplay or wording, and add to it whenever the user corrects a rule or gives design feedback.
 Distilling, the puzzle Helium teaches, has one too, [DISTILLING.md](DISTILLING.md) (its real rules, look, techniques
