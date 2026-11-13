@@ -2023,6 +2023,28 @@ it only opens the way to: that white freed); tested per position to reach the ai
 on it. All but P1 do; P1's plan frees its white by move 4, but move 3 turns to column 8's bottom white first (the
 board read ranks it the more at risk then): open (tests/distill-ahead.test.ts).
 
+**A batch to judge, P13 to P30, and the theme challenge (13 Nov).** The user: "build up the list of examples ... we
+could definitely go with a lot more and speed through them"; "here's a challenge. Can you find one or two others in the
+same theme and different boards to see that that feature is detecting those themes is working?" Picked by
+`tools/distill-positions.mjs batch 8` from fresh play: the CC^2, CC^5 and CC^8 bots on seeds 4 to 9 (18 sessions, 8
+minutes of play each, about 8 minutes to run), no two from the same session within 30 s, nothing in the first 6 s.
+- **Random, P13 to P20:** one of each telling moment (early, low, edge, stuck, block, and a new one, the chain under
+  way), each from a different deal, then a second stuck and a second edge.
+- **The theme challenge, P21 to P30:** at each Stage I move past the opening, the board reader's reading compared with
+  the judged positions'; a board reading as one does is kept `like` the nearest (its targets in the same places, the
+  same time of the session, the furnace's time near), one or two a theme from different deals. Found: trapped (like P5,
+  like P6), quick sorting (two like P3), fill fast (two like P4: one a white in the furnace's column, the bot waiting),
+  damage control (two like P7, both CC^8 in the block phase), the patterns (like P8, the ladder; like P9, the tail).
+  **Not found: cracked.** In all 18 sessions the reader never read a board as cracked (half the free junk stranded, 12
+  pieces at least): only P10 has.
+- Each card on the page (a "To judge" section, first) is cut down for a phone: the board, the reader's line (state,
+  tactic, top three risks), the bot's move and its next five, and one question, "Is this the right idea? If not, what
+  would you do?", answered in chat by number. No verdicts yet; one added later becomes a test as before.
+- Tested (tests/distill-positions.test.ts): every challenge board reads as its judged position does (the detector
+  check), each judged theme has one or two or is listed as not found (cracked), different deals within a theme. Three of
+  the batch have the bot waiting (P16, P19: something stuck; P26: a white in the furnace's column); their plan has
+  nothing to see through, so tests/distill-ahead.test.ts checks it says it waits.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.

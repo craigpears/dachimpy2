@@ -3,10 +3,11 @@
 // `board`, from js/distill-guide-view.js, whose own drawing finds nothing to fill on this page but sets up the
 // pieces' colours), with the bot's move as numbered arrows, the column it's filling shaded, its phase and reason,
 // how it reads the board (its state and tactic, src/distill-read.ts), and any verdicts the user has given there (or
-// that they skipped it).
+// that they skipped it). A batch still to judge comes first, each card cut down to be quick on a phone: the board, the
+// bot's move and plan, the reader's reading in a line (read here, live, by src/distill-read.ts), and one question.
 import { board } from './distill-guide-view.js';
-import { MOMENTS, POSITIONS, SKIPPED, THEMED, THEMES, VERDICTS } from './distill-positions.js';
-import { STATES, TACTICS } from './distill-read.js';
+import { BATCHES, MOMENTS, POSITIONS, QUESTION, SKIPPED, THEMED, THEMES, VERDICTS } from './distill-positions.js';
+import { STATES, TACTICS, readBoard } from './distill-read.js';
 import { PHASES } from './distill-phase.js';
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -111,12 +112,93 @@ function position(p) {
   return a;
 }
 
+/** The reader's reading of a position in a line: its state, the tactic, and the top risks (src/distill-read.ts, live). */
+function readerLine(p) {
+  const r = readBoard(parse(p.cols), { stage: p.stage, timeLeft: p.timeLeft });
+  const risks = r.whites.slice(0, 3).map((w) => `column ${w.x + 1}, row ${w.y + 1} (${w.risk.toFixed(1)}${r.flagged.includes(w) ? ', flagged' : ''})`);
+  return `${STATES[r.state]?.label ?? r.state}; ${(TACTICS[r.tactic]?.label ?? r.tactic).toLowerCase()}. ${r.stage === 'chain' ? 'In the chain: no whites read.' : risks.length ? `Top risks: ${risks.join(', ')}.` : 'No whites by the fire.'}`;
+}
+
+/** A position still to judge, cut down to be quick: the board, the reader's line, the bot's move and plan, the question. */
+function toJudge(p) {
+  const bot = p.bot, a = html('article', { id: p.id.toLowerCase(), className: 'judge' });
+  const h = html('h3');
+  h.appendChild(html('span', { className: 'pid' }, p.id));
+  h.appendChild(document.createTextNode(p.batch === 'challenge' ? `${THEMES[THEMED[p.like]?.theme]?.name ?? 'A theme'}?` : MOMENTS[p.moment]));
+  a.appendChild(h);
+  if (p.batch === 'challenge') {
+    const like = html('p', { className: 'like' });
+    like.appendChild(document.createTextNode('The reader thinks this is like '));
+    like.appendChild(html('a', { href: `#${p.like.toLowerCase()}`, target: '_self' }, p.like));
+    const v = VERDICTS[p.like]?.[0];
+    if (v) like.appendChild(document.createTextNode(`. Your verdict there: “${v.note.split(/(?<=[.!?])\s/)[0]}”`));
+    a.appendChild(like);
+  } else a.appendChild(html('p', { className: 'what' }, p.what));
+  const fig = html('figure', { className: 'pic' });
+  fig.appendChild(drawn(p));
+  a.appendChild(fig);
+  const dl = html('dl');
+  const row = (k, v) => {
+    dl.appendChild(html('dt', {}, k));
+    const dd = typeof v === 'string' ? html('dd', {}, v) : html('dd');
+    if (typeof v !== 'string') dd.appendChild(v);
+    dl.appendChild(dd);
+  };
+  row('Reader', readerLine(p));
+  row('Bot', bot.kind === 'move' ? `${bot.label}${bot.drags.length > 1 ? `, in ${bot.drags.length} drags` : ''}` : `${KIND[bot.kind] ?? bot.kind}: ${bot.reason}`);
+  if (bot.steps?.length) {
+    const ol = html('ol', { className: 'steps' });
+    for (const st of bot.steps) {
+      const li = html('li');
+      li.appendChild(html('b', {}, `${st.name[0].toUpperCase()}${st.name.slice(1)}`));
+      li.appendChild(document.createTextNode(`: ${st.goal ?? 'no goal (a half move)'}`));
+      ol.appendChild(li);
+    }
+    row(bot.steps.length > 1 ? 'Drags' : 'Drag', ol);
+  }
+  row('Where', `${levelLabel(p.level)} bot, seed ${p.seed}, ${secs(p.ms)} in; ${secs(p.timeLeft)} on the furnace${p.chain ? `; the chain at CC^${p.chain}` : ''}${bot.column !== undefined ? `; filling column ${bot.column + 1} (shaded)` : ''}`);
+  a.appendChild(dl);
+  if (p.plan) a.appendChild(planBox(p));
+  const q = html('p', { className: 'question' });
+  q.appendChild(html('b', {}, `${p.id}: ${QUESTION}`));
+  q.appendChild(html('span', {}, `Answer in chat: “${p.id} yes”, or “${p.id} the blacks down first”.`));
+  a.appendChild(q);
+  return a;
+}
+
 function draw() {
   // Grouped by the themes the verdicts fell into (the user, 13 Nov: "kind of organize them into the themes"), each
   // under its heading; any position with no theme yet last.
   const list = document.querySelector('[data-positions]'), toc = document.querySelector('[data-toc]');
+  // A batch to judge first, in its parts, under one heading (13 Nov: a batch to speed through).
+  const fresh = POSITIONS.filter((p) => p.batch && !THEMED[p.id] && !VERDICTS[p.id]?.length && !SKIPPED[p.id]);
+  if (fresh.length) {
+    const top = html('section', { className: 'theme tojudge', id: 'to-judge' });
+    top.appendChild(html('h2', {}, `To judge: ${fresh[0].id} to ${fresh[fresh.length - 1].id}`));
+    top.appendChild(html('p', { className: 'about' }, `${fresh.length} new positions. For each: is the bot's idea right? Answer in chat by number, as briefly as you like: “${fresh[0].id} yes, ${fresh[1]?.id ?? fresh[0].id} the blacks down first”.`));
+    list.appendChild(top);
+    const line = html('div', { className: 'tojudge' });
+    line.appendChild(html('a', { href: '#to-judge', target: '_self' }, 'To judge'));
+    for (const [key, b] of Object.entries(BATCHES)) {
+      const ps = fresh.filter((p) => p.batch === key);
+      if (!ps.length) continue;
+      const head = html('section', { className: 'part', id: `batch-${key}` });
+      head.appendChild(html('h2', {}, b.name));
+      head.appendChild(html('p', { className: 'about' }, b.about));
+      list.appendChild(head);
+      for (const p of ps) list.appendChild(toJudge(p));
+      line.appendChild(document.createTextNode(' · '));
+      line.appendChild(html('a', { href: `#batch-${key}`, target: '_self' }, b.name.replace(/^The /, '').replace(/^./, (c) => c.toLowerCase())));
+      line.appendChild(document.createTextNode(': '));
+      ps.forEach((p, i) => {
+        if (i) line.appendChild(document.createTextNode(' · '));
+        line.appendChild(html('a', { href: `#${p.id.toLowerCase()}`, target: '_self', title: p.like ? `like ${p.like}` : MOMENTS[p.moment] }, p.id));
+      });
+    }
+    toc.appendChild(line);
+  }
   const groups = Object.entries(THEMES).map(([key, t]) => ({ key, t, ps: POSITIONS.filter((p) => THEMED[p.id]?.theme === key) }));
-  const rest = POSITIONS.filter((p) => !THEMED[p.id]);
+  const rest = POSITIONS.filter((p) => !THEMED[p.id] && !fresh.includes(p));
   if (rest.length) groups.push({ key: 'new', t: { name: 'Not judged yet', about: 'new positions, waiting for your verdict' }, ps: rest });
   for (const { key, t, ps } of groups) {
     if (!ps.length) continue;

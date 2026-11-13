@@ -59,6 +59,17 @@
   .verdicts ul { margin: 4px 0 0; padding-left: 20px; }
   .ask { margin: 10px 2px 0; padding-top: 8px; border-top: 1px dashed #b08a3c; font-size: 15px; font-style: italic; color: #7a6048; }
   .failed { color: #ffb08a; }
+  section.tojudge h2 { color: var(--gold); }
+  section.part { margin: 22px 0 8px; }
+  section.part h2 { margin: 0 0 4px; font-size: 22px; }
+  section.part p.about { margin: 0 0 10px; color: var(--dim); }
+  nav.toc .tojudge { color: var(--cream); }
+  article.judge { border-color: var(--gold); }
+  .like { margin: 0 2px 10px; color: var(--ink2); }
+  .like a { color: #6b2a12; font-weight: 700; }
+  .question { margin: 10px 2px 0; padding: 10px; border-radius: 8px; background: #6b2a12; color: var(--paper); font-size: 16px; }
+  .question b { display: block; font-size: 17px; }
+  .question span { color: #ecd3a8; font-size: 14px; }
   @media (max-width: 520px) {
     body { font-size: 16px; }
     article { padding: 10px; }
@@ -71,7 +82,7 @@
 <body>
 <div class="wrap">
   <h1>Distilling positions</h1>
-  <p class="lede">Moments from the bots' own games, frozen: whites low by the fire, a white walled in near it, a bot waiting with something stuck, a column about to go up with junk in it, the block phase, the fire's side early on. Each shows the bot's move there now. <b>Say what it should do instead, in chat</b>, and it becomes a test the bots have to pass from then on.</p>
+  <p class="lede">Moments from the bots' own games, frozen: whites low by the fire, a white walled in near it, a bot waiting with something stuck, a column about to go up with junk in it, the block phase, the fire's side early on. Each shows the bot's move there now. <b>Say what it should do instead, in chat</b>, and it becomes a test the bots have to pass from then on. New ones, still to judge, come first; the ones you've judged follow, by theme.</p>
   <nav class="toc" data-toc></nav>
   <p class="failed" id="broken" hidden>The boards couldn't be drawn here. Try a newer browser.</p>
   <div data-positions></div>
