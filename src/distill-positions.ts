@@ -99,6 +99,8 @@ export interface Expect {
   /** A white freed: given a column, fewer whites in it after the move; given a place, the white there gone from it
       (junk raced into its place, or the white moved on). */
   frees?: number | [number, number];
+  /** At least one of these whites freed (junk raced into its place, or the white moved on). */
+  freesAny?: readonly (readonly [number, number])[];
   /** After its move, no junk (brown, black, burnt white) left in this column. */
   clean?: number;
   /** The technique it plays, and those it mustn't. */
@@ -222,6 +224,11 @@ export const VERDICTS: Readonly<Record<string, readonly Verdict[]>> = {
     note: "Fill the right-hand columns' gaps as fast as you can: a brown that can go up and a black that can go down fill both whites' places in column 9 in two moves, rather than dragging one white as far as it goes and still leaving gaps on the right to fill.",
     expect: { fills: 8, frees: 8, noBurn: true }, open: true,
   }],
+  P5: [{
+    date: '13 Nov',
+    note: "Closer, and the move itself is fine, but it misses the bigger danger: the top two whites in column 8 are the risk, with no way of getting a brown up to them. Why is there so much white in the gap? Fix those first.",
+    expect: { freesAny: [[7, 0], [7, 1]], noBurn: true }, open: true,
+  }],
   P6: [{
     date: '13 Nov', from: 'DISTILLING.md, the twenty-sixth note',
     note: 'A white at the top of the third column from the fire is in danger already: race junk into its place before it\'s walled in.',
@@ -294,6 +301,7 @@ export function check(p: Position, m: BotMove, e: Expect): string[] {
   }
   if (typeof e.frees === 'number' && whitesIn(after, e.frees) >= whitesIn(cols, e.frees)) out.push(`no white leaves column ${e.frees + 1}`);
   if (Array.isArray(e.frees) && after[e.frees[0]][e.frees[1]] === WHITE) out.push(`the white at ${place(e.frees)} is still there`);
+  if (e.freesAny && e.freesAny.every(([x, y]) => after[x][y] === WHITE)) out.push(`none of the whites at ${e.freesAny.map(place).join(' or ')} is freed`);
   if (e.clean !== undefined && after[e.clean].some(isJunk)) out.push(`column ${e.clean + 1} still holds junk`);
   if (e.uses && m.technique !== e.uses) out.push(`it plays ${m.technique ?? 'nothing'}, not ${e.uses}`);
   if (e.avoids && m.technique && e.avoids.includes(m.technique)) out.push(`it plays ${m.technique}`);

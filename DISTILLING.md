@@ -1669,6 +1669,13 @@ rather than worrying about how far I can drag this one white piece that's then s
 of gaps on the right that I still need to fill." So by the fire, the measure is gaps filled per move: junk raced into
 the whites' places, the quickest drags first, not one white dragged a long way. The verdict on `P4`: the first drag
 carries junk into a white's place in column 9.
+And on P5, CC^8 at 171 s: column 8 white from top to bottom, column 9 with a white at row 3; the bot brought a brown
+round, looping, to free column 9's white: "it's a lot closer ... in column 8, there is a piece kind of trapped ...
+there's no way of getting an [brown] up to those two at the top of [column] 8 ... Like, why is there so much white in
+the gap? ... So I would be, yeah, fixing those top two in column 8, because those seem like the biggest risks. Even
+the move itself seems fine, but again, it's missing the bigger danger and priority." The same lesson as P1 and P2: the
+whites at the top of the columns near the fire, with no way for junk to reach them, come first. The verdict on `P5`:
+one of column 8's top two whites freed.
 
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
