@@ -1010,6 +1010,14 @@ end (the user, 12 Nov, the same game on, `notes/distilling/30-` to `34-*`).**
   place, the moves a person would make, costed in their time (one smooth drag cheap, the eleventh note), and
   loops allowed in the path. The named routines stay as the shapes such a search tends to find; the search
   covers what they miss.
+- **A simpler score to try (the same day):** "maybe we try just see how the bots do [with] simpler metrics ...
+  forget about dragging whites to the left. It is about filling those right-hand columns of black and brown
+  ... I still want it to be human-like ... you just want to pull things from the left to the right. Metric is
+  how many columns are filled, second metric, how straight and vertical is the ... wall where the white meets
+  the color. Once that starts emerging, that's another metric." So the board score, tried simpler: first, how
+  many junk columns are filled on the right (no white in them); second, once a wall between white and colour
+  has formed, how straight and upright it is. No separate credit for whites moving left: that follows from
+  colour being pulled right.
 
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
