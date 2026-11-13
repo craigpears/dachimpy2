@@ -2439,7 +2439,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     the same distance"):** every stopped puzzle's shortcut skips about the same stretch, about 22 seconds, each
     puzzle sized to about the same time to play, a decent player about breaking even, a good one gaining; the
     chain hops grow with their chain. As laid: spit 1, the imperial gate (column 19), its Quad, its guns shot
-    quiet, run, or its guard bribed with the wreck's 40 coins (22 s); spit 2, the headwind gap, rowed (25 s),
+    quiet, run, or its guard bribed with the wreck's 20 coins (22 s; 40 till 13 Nov); spit 2, the headwind gap, rowed (25 s),
     and the Double's gap (9 s); spit 3, the whirlpool channel's Vegas (48 s), the rocks (25 s) and the barrier
     of driftwood (16 s, where spit 3 has room); spit 4, the locks, 6 Bilge clears to raise her (23 s); spit 5,
     the crane, its small frames (23 s), and the Triple's gap (14 s, "a Triple clearly bigger"); and the starlit
@@ -2472,17 +2472,29 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     checkpoint does (the same gatehouse and bastions: `js/den/empire.js`): a gatehouse of pale stone over its
     way in, crimson banners, the Empire's flag over its arch, its guns on the Empire's bastions, and a guard in
     the Empire's uniform on a step at the foot of its left tower. He halts you as you come up, grumbles now and
-    then, names his price and hints at a wreck back along the leg (`src/lines/gate-guard.ts`). Its ways through
+    then, names his price and hints at a wreck just along from the gate (`src/lines/gate-guard.ts`). Its ways through
     are as they were, and a third: **pay him.** The coins come from an old wreck run aground at the back of a
-    notch in spit 1, off leg 1, before the gate: lie in the notch and Space lays Treasure Haul's own board on
-    the water behind her (`src/treasure-haul.ts`), no chest on it, just his price in coins to bring up (40,
-    `BRIBE.PRICE`); Esc leaves it as it is, to come back to. **Sheltered**, as the other notches are; one racer
-    at a time. With them aboard, stopped by the gate (in front of its way in, or a square either side, on leg
+    notch in spit 1, off leg 1, just along from the gate (column 22, a column of land between it and the gate's
+    right-hand bastion: 13 Nov, see below): lie in the notch and Space lays Treasure Haul's own board on the
+    water behind her (`src/treasure-haul.ts`), no chest on it, just his price in coins to bring up (20,
+    `BRIBE.PRICE`; 40 till 13 Nov); Esc leaves it as it is, to come back to. **Sheltered**, as the other notches
+    are (the gate's guns never fire into it, even roused); one racer at a time. With them aboard, stopped by the gate (in front of its way in, or a square either side, on leg
     1), Space pays him: his guns hold their fire on her for the rest of the race, and his men warp her through
     on the gate's line, through the gap's three squares and out onto leg 2, carried as a gust carries her (out
     of anyone's reach). Short of his price, he sends her back to haul the rest; paid already, he waves her on.
     Each racer hauls her own; a new race, the wreck's coins are back and the gate's unpaid. No rival takes it
     yet. Rules: `src/den-bribe.ts` (its squares `LAY.RACE.BRIBE`); drawn and played by `js/den/race-bribe.js`.
+    - **The wreck made usable (13 Nov: "I definitely need to fix the bribe so it's more usable. I mean, I think
+      that was obvious"):** it was at column 14, five before the gate, with a wind along the leg in front of
+      its notch; most of the field comes down onto leg 1 by the start's hop at column 21, past it, and coming
+      back along the leg's second row into that wind she was in irons, so from most of the line no sailing
+      reached it and the pilot put the bribe by. Now it's just past the gate, beside where the hop comes down,
+      and in front of its notch a breath of wind blows up out of it instead (not drawn: shortcuts are never
+      marked), so she sails into it along the leg's second row from either way, and out of it again. Bribing,
+      every racer (yours on the pilot, the bots) goes for the wreck's coins first, wherever it lies, and back
+      along leg 1 however far for it and then the gate (`goalOf`, `src/race-plan.ts`). The price halved to 20:
+      in and out of a dead-end notch and back to the gate cost the bribe what the other stopped shortcuts don't
+      (RACE.md §8). In the course editor the wreck may go either side of the gate.
   - **Sheltered spots off the leg:** the crane's ledge is a notch in spit 5, off leg 5; a racer waiting her
     turn at the up lock waits in a berth, a notch beside its way in; the barrier's notch; the wreck's notch. Each has a wind along
     the leg in front of it, so she can sail back out under sail.
@@ -2729,7 +2741,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       ledge, the Triple's gap. Held there, the board it asks for is put up once; she goes on once it's done. At a
       hop's stop a chain too small for it holds her there rather than carrying her into the wind ("Held here for
       the hop: it takes a Double"); a Double or Triple thrown on the way in lines her up and hops it with no
-      stop. A shortcut she can't sail to from where she is is put by: the plan says the long way there.
+      stop. A shortcut she can't sail to from where she is is put by: the plan says the long way there. (The
+      bribe's wreck is reached from every spot on the line since 13 Nov, so it's no longer put by; tested.)
     - **The helm's still yours:** W A D or a click on the sea, and she sails your moves or pin; once they're
       played out, the pilot carries on. T or the strip's Pilot button turns the pilot off and on.
     - **Everyone races by a plan:** your rivals, the simulation's bots and the race watched, by the same rule for

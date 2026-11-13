@@ -132,10 +132,15 @@ export function pinOf(at, hopped, pinAt) {
 /** The next shortcut a plan's cuts take before the long way's pin `k`, if any: not done, not the zigzag (it's
     on the long way's water), and not one she's well past (`back`: a few squares, she goes back for one she
     came onto the leg beyond). Measured round the long way by `cutAt` and `pinAt`, the caller's measure (the
-    simulation's seconds; squares). The same rule for every racer. */
+    simulation's seconds; squares). The same rule for every racer. Bribing the gate, she hauls the wreck's coins
+    first, wherever it lies, and goes back along leg 1 however far for the wreck and then the gate (13 Nov: most of
+    the field comes down onto leg 1 by the start's hop, past them both; and out of the wreck's notch, she's counted
+    as far round as the leg goes). */
 export function goalOf(cuts, done, at, k, pinAt, cutAt, back) {
-    return cuts.filter((id) => id !== 'zigzag' && !done.has(id))
-        .filter((id) => cutAt(id) <= pinAt[k] + 1e-6 && cutAt(id) >= at - back)
+    const bribing = cuts.includes('wreck'), forGate = (id) => bribing && (id === 'wreck' || id === 'guns');
+    const wreckFirst = bribing && !done.has('wreck');
+    return cuts.filter((id) => id !== 'zigzag' && !done.has(id) && !(id === 'guns' && wreckFirst))
+        .filter((id) => cutAt(id) <= pinAt[k] + 1e-6 && (cutAt(id) >= at - back || forGate(id)))
         .sort((x, y) => cutAt(x) - cutAt(y))[0] ?? null;
 }
 /* ---- How far round the long way, in squares (the pilot's measure; the simulation's, progressAt, is the same

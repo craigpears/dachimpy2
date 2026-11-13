@@ -403,8 +403,11 @@ const HOP = RC.FIELD.HOP;
 const BIG = { size: 0.56, lh: 1.12 };
 const sp = (k) => (SP[k].r0 + SP[k].r1) / 2;
 // [A] spit 1: the imperial gate (its words on the spit beside it), the wreck in its notch.
-at(RC.GUNS.gap[0] + 3.4, sp(0) - 0.55, [T(`◂ The imperial gate · ${sv('guns')}`), WIN(`Quad ${routeWin('gap-combo')} · shot ${routeWin('gap-shot')}`), WIN(`run ${routeWin('gap-run')} · bribe ${routeWin('bribe')}`)], { size: 0.46, lh: 1.1 });
-at(RC.BRIBE.NOTCH[0] - 3.6, sp(0) - 0.55, [T('The wreck ▸'), N('haul the bribe here'), N('(Treasure Haul,'), N('sheltered)')], { size: 0.46, lh: 1.08 });
+// (each on the far side from the other: the wreck just along from the gate since 13 Nov, either side of it in
+// a course from the editor)
+const wreckRight = RC.BRIBE.NOTCH[0] > RC.GUNS.gap[0];
+at(RC.GUNS.gap[0] + (wreckRight ? -1.6 : 1.6), sp(0) - 0.55, [T(wreckRight ? `The imperial gate · ${sv('guns')} ▸` : `◂ The imperial gate · ${sv('guns')}`), WIN(`Quad ${routeWin('gap-combo')} · shot ${routeWin('gap-shot')}`), WIN(`run ${routeWin('gap-run')} · bribe ${routeWin('bribe')}`)], { size: 0.46, lh: 1.1, anchor: wreckRight ? 'end' : 'start' });
+at(RC.BRIBE.NOTCH[0] + (wreckRight ? 0.6 : -0.6), sp(0) - 0.55, [T(wreckRight ? '◂ The wreck' : 'The wreck ▸'), N('haul the bribe'), N('(Treasure Haul,'), N('sheltered)')], { size: 0.42, lh: 1.08, anchor: wreckRight ? 'start' : 'end' });
 at(RC.SNAKES.TIGHT[0][0] - 0.6, RC.SNAKES.TIGHT[0][1], [['tight water ▸', SNAKE, 700]], { size: 0.5, anchor: 'end' });
 // [B] spit 2: the Double's gap and the headwind gap (stacked between them), the starlit door, the trade wind back.
 at((RC.DOUBLE.WAY[0][0] + RC.HEADWIND[0][0]) / 2, SP[1].r0 + 0.05, [T('◂ Double’s gap'), N(`a Double · ${sv('double')}`)], { size: 0.44, lh: 1.05 });

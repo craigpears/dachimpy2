@@ -31,19 +31,23 @@ function haulOut(p: Purse, most = 500) {
 }
 
 describe('the gate and the wreck on the course (12 Nov)', () => {
-  it('the wreck\'s notch is off leg 1 before the gun gap, open water, sheltered, one racer\'s at a time; the wreck itself is on the spit', () => {
+  it('the wreck\'s notch is off leg 1 just along from the gun gap, where the field comes down onto it, open water, sheltered, one racer\'s at a time; the wreck itself is on the spit', () => {
     const sea = new Sea(9);
     const [c, r] = RB.NOTCH;
     expect(r).toBe(RC.SPITS[0].r0);
-    expect(c).toBeLessThan(RC.GUNS.gap[0]);
+    // (13 Nov: past the gate, beside where the start's hop and its winds bring the field down onto leg 1)
+    expect(c).toBeGreaterThan(RC.GUNS.gap[0]);
+    expect(Math.abs(c - RC.FIELD.HOP.LANDS[0])).toBeLessThanOrEqual(1);
     expect(sea.isRock(c, r)).toBe(false);
     expect(sea.isRock(c, r - 1)).toBe(false);
     expect(sea.isRock(...RB.WRECK)).toBe(true);
     expect(sea.isRock(c - 1, r) && sea.isRock(c + 1, r)).toBe(true);
     expect(sheltered(c, r)).toBe(true);
     expect(FIELD.SPOTS.wreck).toEqual(RB.NOTCH);
-    // (out of reach of the gap's guns, as the checkpoint's reach goes: three squares)
-    for (const [gc, gr] of RC.GUNS.at) expect(Math.max(Math.abs(gc - c), Math.abs(gr - r))).toBeGreaterThan(3);
+    // (never one of the gap's guns' marks, and a column of land between it and the gate's bastion; their aimed
+    // shots, once roused, never come into a sheltered notch: src/race-sim.ts, js/den/race.js)
+    for (const ms of RC.GUNS.marks) expect(ms.some(([x, y]) => x === c && y === r)).toBe(false);
+    for (const [gc] of RC.GUNS.at) expect(Math.abs(gc - c)).toBeGreaterThan(1);
   });
   it('she pays by the gate, on leg 1 in front of the gap\'s way in; the guard\'s heard from a few squares off', () => {
     const [gc, gr] = RB.GATE;
@@ -52,7 +56,7 @@ describe('the gate and the wreck on the course (12 Nov)', () => {
     expect(atGate(gc, gr + 1)).toBe(false);   // (in the gap: too late)
     expect(atGate(...RB.NOTCH)).toBe(false);
     expect(inEarshot(gc - 3, gr)).toBe(true);
-    expect(inEarshot(...RB.NOTCH)).toBe(false);
+    expect(inEarshot(gc - 4, gr)).toBe(false);
     expect(atWreck(...RB.NOTCH) && !atWreck(gc, gr)).toBe(true);
   });
   it('paid, she\'s towed from the gate through the gap\'s three squares and out onto leg 2, a square at a time', () => {

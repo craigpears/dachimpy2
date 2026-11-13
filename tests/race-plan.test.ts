@@ -17,9 +17,11 @@ const RC = LAY.RACE, S = RC.STRETCHES, DT = 0.05;
 
 /** Sails a plan with the pilot from a spot on the line to the finish, a person at each stop doing what it asks
     there at once (a Sailing hop's gust, the lock pumped, the driftwood cleared...). The stops she was held at. */
-function sailPlan(plan: Plan, spot = RACE.LONG_SPOT, seed = 5, limit = 700) {
+function sailPlan(plan: Plan, spot = RACE.LONG_SPOT, seed = 5, limit = 700, opt: { until?: (stops: string[]) => boolean; shut?: [number, number][] } = {}) {
   const sea = new Sea(9);
   sea.layField(fieldFor(seed));
+  for (const [c, r] of opt.shut ?? []) sea.rocks.add(`${c},${r}`);
+  sea.touch();
   const h = new Helm(sea, spotPose(spot)), P = new Pilot(plan);
   readyLocks(h);
   let coins = 0, paid = false, cleared = false;
@@ -29,6 +31,7 @@ function sailPlan(plan: Plan, spot = RACE.LONG_SPOT, seed = 5, limit = 700) {
   for (; t < limit; t += DT) {
     const p = h.pose;
     if (stretchAt(p.c, p.r) === S.length - 1 && p.c <= RC.FINISH[0]) break;
+    if (opt.until?.(stops)) break;
     const o = P.steer(h, w);
     if (o.kind === 'stop') {
       const st = o.stop;
@@ -147,14 +150,23 @@ describe('the pilot sails your plan and stops at the obstacles (12 Nov, agreed: 
     expect(r.stops[0]).toBe('quad');
     expect(r.at.r).toBe(S[5].r);
   }, 120000);
-  it('a shortcut she can\'t sail to from where she is is put by, and her plan says so: the bribe\'s wreck, behind the field\'s hop (RACE.md §8), the gate run instead', () => {
-    const r = sailPlan(['bribe', 'long', 'long', 'long', 'long'], 18);
-    if (!r.stops.includes('wreck')) {
-      expect(r.plan[0]).toBe('run');
-      expect(r.changes[0]).toMatchObject({ leg: 0, from: 'bribe', to: 'run' });
-    } else expect(r.stops.slice(0, 2)).toEqual(['wreck', 'pay']);
+  it('a shortcut she can\'t sail to from where she is is put by, and her plan says so: the bribe\'s wreck with its notch shut, the gate run instead', () => {
+    const r = sailPlan(['bribe', 'long', 'long', 'long', 'long'], 18, 5, 700, { shut: [RC.BRIBE.NOTCH] });
+    expect(r.stops).not.toContain('wreck');
+    expect(r.plan[0]).toBe('run');
+    expect(r.changes[0]).toMatchObject({ leg: 0, from: 'bribe', to: 'run' });
     expect(r.at.r).toBe(S[5].r);
   }, 120000);
+  it('the bribe\'s wreck is reached from every spot on the line, never put by (13 Nov: "I definitely need to fix the bribe so it\'s more usable. I mean, I think that was obvious")', () => {
+    // (every spot, on fields of all sorts, those whose slow winds shut the left-hand way down onto leg 1 too:
+    // she hauls at the wreck, then pays at the gate, her plan the bribe throughout)
+    for (let spot = RC.LINE.c0; spot <= RC.LINE.c1; spot++) for (const seed of [1, 3, 5, 6]) {
+      const r = sailPlan(['bribe', 'long', 'long', 'long', 'long'], spot, seed, 120, { until: (s) => s.includes('pay') });
+      expect(r.changes, `spot ${spot}, seed ${seed}`).toEqual([]);
+      expect(r.plan[0]).toBe('bribe');
+      expect(r.stops.slice(0, 2), `spot ${spot}, seed ${seed}`).toEqual(['wreck', 'pay']);
+    }
+  }, 240000);
   it('held at a hop, a clear too small for it doesn\'t carry her into the wind; a big enough one does', () => {
     const o = { kind: 'stop' as const, stop: STOPS.mid };
     expect(holds(o, 1)).toBe(true);

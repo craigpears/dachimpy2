@@ -21,7 +21,7 @@ import { CRANE, travel } from '../den-crane.js';
 import { RACE, Race, GunGap, Drift, atStart, onCourse, clockText, cleanBest, neckCrane, nextBuoy, stretchAt, readyLocks, boardHasKey } from '../den-race.js';
 import { station } from './sail-station.js';
 import { simDrive } from '../race-sim.js';
-import { FIELD } from '../den-racers.js';
+import { FIELD, sheltered } from '../den-racers.js';
 import { STARTER } from '../lines/race.js';
 import { scene, mat, mesh, canvasTex, V3, burst, toast, flagpole, pirate } from './world.js';
 import { rock } from './land.js';
@@ -146,7 +146,8 @@ function build() {
   for (const spot of RC.WHIRLS.POOLS) { const o = pool(whirlpool(spot)); W.g.add(o); W.pools.push(o); }
   // The headwind blowing back out through the headwind gap, round its dog-leg (12 Nov: so it reads as a channel
   // with its headwind in it, to row against): a lane each straight run of it, as the course's winds are drawn.
-  for (const z of RC.ZONES.filter((x) => x.d === 2)) { const l = windLane(z.c0, z.r1, 2, z.r1 - z.r0 + 1); W.g.add(l.g); W.winds.push(l.tex); }
+  // (not the breath of wind up out of the wreck's notch: shortcuts are never marked)
+  for (const z of RC.ZONES.filter((x) => x.d === 2 && RC.HEADWIND.some(([c, r]) => c === x.c0 && r >= x.r0 && r <= x.r1))) { const l = windLane(z.c0, z.r1, 2, z.r1 - z.r0 + 1); W.g.add(l.g); W.winds.push(l.tex); }
   // The rocks walling in the field's hop: boulders, a couple to a square.
   for (const [c, r] of RC.FIELD.HOP.ROCKS) for (let k = 0; k < 2; k++) W.g.add(rock(seaX(c) + (Math.random() - 0.5) * 2, 0.2, seaZ(r) + (Math.random() - 0.5) * 2, 0.9 + Math.random() * 0.4));
   // The gun gap: a turret either side on the spit, on the Empire's bastions (an imperial gate:
@@ -423,7 +424,8 @@ export function raceTick(dt) {
     if (R.state === 'done' && atStart(h.pose.c, h.pose.r) && race.doneT <= 0 && !race.said.again) { race.said.again = true; toast(STARTER.again); }
     if (R.state !== 'done') race.said.again = false;
     // [A] the gun gap's guns fire on her marks (and on her, once it's a fight); a hit holes her.
-    for (const e of race.gap.tick(dt, h.spared() || bribeSpares() ? null : p, h.pose)) {
+    // (never in a sheltered notch: the wreck's, beside the gate since 13 Nov)
+    for (const e of race.gap.tick(dt, h.spared() || bribeSpares() || sheltered(h.pose.c, h.pose.r) ? null : p, h.pose)) {
       const V = W.guns[e.gun], where = V3(seaX(e.to[0]), 0, seaZ(e.to[1]));
       if (e.kind === 'fire') { turretFire(V, e, where); continue; }
       turretLand(V, e);

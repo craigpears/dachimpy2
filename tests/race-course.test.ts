@@ -21,7 +21,8 @@ const squares = (route: [number, number][]) => route.slice(1).reduce((n, b, i) =
 describe('the den\'s own course, now laid out from data (12 Nov)', () => {
   it('is the same course to sail, every square of it as laid on its third pass (12 Nov, the race\'s next pass)', () => {
     // (the race's layout, saved: every square of land, wind, buoy, gap...; saved again on each pass that moves
-    // the course, last on the third: no gambles, gentle snakes, the rocks, the field's hop, shortcuts in proportion)
+    // the course, last on the third: no gambles, gentle snakes, the rocks, the field's hop, shortcuts in proportion;
+    // and on 13 Nov, the bribe's wreck moved just along from the gate, its way in opened)
     for (const lay of [LAY.RACE, layRace(DEFAULT_COURSE)]) {
       for (const [k, v] of Object.entries(BEFORE)) expect(json((lay as Record<string, unknown>)[k]), k).toEqual(v);
     }

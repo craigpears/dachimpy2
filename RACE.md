@@ -71,7 +71,7 @@ mouth. Sitting there, you're a sitting duck for anyone coming up behind (§6).
 | Shortcut | Puzzle | Kind | Saves (s) | State |
 |---|---|---|---|---|
 | Spit 1, the gun gap (column 19): an imperial gate, three squares deep, a gun either side of its mouth, its marks all in the spit | A Quad from the leg rushes her past (a big Sailing chain, or a Vegas rowed each side); or shoot its guns quiet; or pay its guard; a square at a time she's holed | On the move | 22 | Built (moved two columns in, 12 Nov) |
-| Leg 1, an old wreck in a notch (column 14), for the gate's bribe (§3, below) | Treasure Haul: 40 coins hauled up (about 19 s, 4 s a move: 12 Nov), paid at the gate in a moment, and she's towed through | Stopped dead, sheltered (the haul); a moment at the gate | 22, the gap's | Built 12 Nov |
+| Leg 1, an old wreck in a notch just along from the gate (column 22), for the gate's bribe (§3, below) | Treasure Haul: 20 coins hauled up (about 9 s, 4 s a move; 40 till 13 Nov), paid at the gate in a moment, and she's towed through | Stopped dead, sheltered (the haul); a moment at the gate | 22, the gap's | Built 12 Nov (moved, its way in opened, 13 Nov) |
 | Spit 2, the headwind gap, a dog-leg at its far end | Rowing (mirror strokes); idle in it and the wind blows her back out | Rowing, slowly | 25 | Built (its cliffs low and its wind drawn, 12 Nov) |
 | Spit 2, a small gap, one wind blowing back across it | A Double, built on the move and broken in its mouth (it lines her up: 12 Nov) | On the move | 9 | Built |
 | The start's hop (§7) | A Double over its headwinds into its lane, down onto leg 1 toward buoy 1 | On the move | 10 | Built 12 Nov |
@@ -152,16 +152,19 @@ not a new gap:
   grumbles now and then, names his price, and hints at the wreck ("Heard there's an old wreck back along the
   leg. Not that I'd know."). Its old ways through are as they were: rush it on a combo, shoot its guns quiet,
   or run it and be holed.
-- **The treasure:** an old wreck run aground at the back of a notch in spit 1, off leg 1, five squares before
-  the gate (out of its guns' reach). Lie in the notch and Space lays Treasure Haul's own board on the water
+- **The treasure:** an old wreck run aground at the back of a notch in spit 1, off leg 1, just along from the
+  gate (column 22, since 13 Nov: "The wreck made usable", below; it was five squares before the gate, out of
+  its guns' reach). Lie in the notch and Space lays Treasure Haul's own board on the water
   behind her: no chest, just the guard's price in coins to bring up. **Sheltered**, as the barrier's and the
   crane's notches are, so it's a leader's way to puzzle safely and spend it at the exposed gate in a moment
   (the thought the user weighed). One racer at a time in the notch; each racer hauls her own; a new race,
   the coins are back.
-- **The price: 40 coins.** A chest takes twenty moves and more to raise, worth far more than the gap's 14 s,
-  so it's coins: about five moves of Treasure Haul for a player who plays any line he sees (a bot measured
-  4.7 on average), about 7 s for a decent player (1.5 s a move, assumed), quicker with the board's gems and
-  chains. Set by the simulation (§8): at 30 coins the bribe won 29% of its races, at 40, 27%.
+- **The price: 20 coins (40 till 13 Nov).** A chest takes twenty moves and more to raise, worth far more than
+  the gap's 14 s, so it's coins: about five moves of Treasure Haul for 40 for a player who plays any line he
+  sees (a bot measured 4.7 on average), two or three for 20, 4 s a move for a decent player since the playtest
+  (§8), quicker with the board's gems and chains. Set by the simulation (§8): at 30 coins the bribe won 29% of
+  its races, at 40, 27% (12 Nov); with every racer sailing as your sloop does and the wreck made reachable,
+  10% at 40, 14% at 30, 15% at 20 (13 Nov), so 20.
 - **Paying:** by the gate (in front of its way in, or a square either side, on leg 1), stopped, Space hands
   him the coins: "Pleasure doing business. Hold your fire, lads!" His guns hold their fire on her for the
   rest of the race, and his men warp her through on the gate's line: a tow, as a gust carries her, through the
@@ -172,6 +175,26 @@ not a new gap:
   combo.
 - **Not marked:** the gate's plain to see and the guard names his price and hints at the wreck; since 12 Nov the
   starter's card names it among the ways through ("haul up some treasure and pay off the guard at the gate"). No rival takes it (their routes are as they were).
+- **The wreck made usable (13 Nov).** Route planning (§5) found the wreck out of sailing's reach from most of
+  the line, so the pilot put the bribe by and ran the gate. The user: "I definitely need to fix the bribe so
+  it's more usable. I mean, I think that was obvious." Why: it was at column 14 with a wind along leg 1 in front
+  of its notch (as every notch has, to sail back out); most of the field comes down onto leg 1 by the start's
+  hop at column 21, past it, and the course's wind blows down, so she can't get back up to the leg's first row;
+  coming back along the second row into that wind she was in irons. Only where the start's field left the
+  left-hand way down open (about half the fields) did anyone reach it. So:
+  - **Moved** just along from the gate, column 22, beside where the hop and the field's winds bring the field
+    down (a column of land between it and the gate's right-hand bastion). Still sheltered: the gate's guns
+    never fire into a sheltered notch, even roused (in the simulation and the den). The guard hints at "an old
+    wreck just along from the gate".
+  - **Its way in opened:** in front of its notch a breath of wind blows up out of it instead (not drawn), so she
+    comes to it along the leg's second row from either way, and sails out again.
+  - **Coins first:** bribing, every racer (yours on the pilot, the bots) goes for the wreck before the gate,
+    wherever it lies, back along leg 1 however far for it and then for the gate (`goalOf`). In the course
+    editor the wreck may go either side of the gate.
+  - **The price 20** (§8): in and out of a dead-end notch and back three squares to the gate cost the bribe
+    what the other stopped shortcuts, whose puzzle is on their way through, don't.
+  Tested: from every spot on the line, on fields that shut the left-hand way too, a plan with the bribe hauls at
+  the wreck and pays at the gate, never put by (`tests/race-plan.test.ts`).
 
 **Shortcuts not all created equal (built 11 Nov).** Shortcuts of every size, each needing a combo of its size. A
 tiny one a Double gets you through, bigger ones need a bigger combo, the biggest is the starlit door. "Are
@@ -376,9 +399,9 @@ the rubble settle back after half a minute.
       Triple at the gate) doesn't carry her into the wind she's lined up on: "Held here for the hop: it takes a
       Double". The pilot's holding her, as agreed. Not at the whirlpools' mouth: their loop back to it is their
       own price.
-    - **Put by:** a shortcut whose way in no sailing gets her to from where she is (the wreck's notch from most of
-      the line: §8) is put by and her plan says so, the long way there (the gate run, for the bribe), with a toast.
-      The bots do the same.
+    - **Put by:** a shortcut whose way in no sailing gets her to from where she is is put by and her plan says
+      so, the long way there (the gate run, for the bribe), with a toast. The bots do the same. (The wreck's notch
+      was the one from most of the line till 13 Nov; it's reached from every spot now: §3.)
     - **Taking the helm:** W A D or a click on the sea, and her own moves or pin are sailed (the pilot's let go);
       once they're played out the pilot carries on from wherever she is. T, or the strip's Pilot button, turns it
       off (the helm's yours all race) and on again.
@@ -395,8 +418,7 @@ the rubble settle back after half a minute.
       change; and 'letGo'), kept in the race's record and replayed (`PlayerSea.plans`, `plan()`), never sent on
       to the other racers (the room keeps actions only in its record; tested). The room has no watchers yet, so
       nobody else sees a plan live; a replay viewer would.
-    - **Left open:** the bribe's wreck is out of sailing's reach from most of the line (§8), so the pilot puts it
-      by there (a player who wants the bribe from there would row); hopping the zigzag by stops saves nothing
+    - **Left open:** (the bribe's wreck out of sailing's reach from most of the line: fixed 13 Nov, §3); hopping the zigzag by stops saves nothing
       over weaving even with Doubles ready (above: for the user, whether its headwinds want moving, or the hop
       left to Doubles thrown on the way in); shooting a stopped
       racer is unchanged (§6), and whether bots should lie in wait at the known stops is still for the
@@ -976,11 +998,36 @@ races of four, fair 25% (before → after):
 - **Running it:** about two minutes for 2000 races (it was 30 s): the pilot's charts are made once per pin and
   per race for the start's field.
 
+**The wreck made usable (13 Nov, §3).** The wreck just along from the gate (column 22), its way in opened,
+coins before the gate for every briber; in the simulation, out of its dead-end notch she rejoins where she went
+in (not along the leg past it), and with the gate behind her goes on to it as any racer coming onto leg 1 past it
+does; the gate's roused guns never fire into a sheltered notch. The balance test's race (800 races of four, seed
+1), the bribe: 6.6% before (the wreck never reached: put by, or the gap run); 2.6% with only its way in opened
+at column 14 (now reached, but back seven squares from the hop's landing); 4.8% moved to column 22; 10.0% with
+the simulation's rejoin; at 30 coins 14.0%, at 20 coins 15.3% (0.61 of fair), kept: 20. Its band in the test
+back to 0.5–1.6. 2000 races of four (`tools/race-map.mjs`), fair 25% (before → after):
+
+| Route | Before | After | Route | Before | After |
+|---|---|---|---|---|---|
+| The long way | 22.0% | 19% | Doubles | 64.7% | 62% |
+| Gun gap, run | 21.6% | 20% | Whirlpools' Vegas | 27.0% | 28% |
+| Gun gap, Quad | 12.2% | 9% | Rocks | 22.0% | 24% |
+| Gun gap, shot quiet | 33.9% | 32% | Barrier (Foraging) | 15.4% | 14% |
+| **Bribe** | **7.3%** | **15%** | Locks | 24.0% | 22% |
+| Headwind, rowed | 18.1% | 17% | Crane | 36.7% | 34% |
+| Starlit door | 24.9% | 26% | Every shortcut | 20.3% | 29% |
+
+- Styles 22–26%; skill great 39%, good 25%, decent 11%; spots left 19%, above the hop 27%, right 30%. The
+  barrier (0.56 of fair, 0.52 in the test's race) is now the nearest the band's floor of the routes held to it.
+
 **For the user to decide:**
-- Moves and gusts (above): the Doubles, the gap's Quad and the bribe out of the band.
+- Moves and gusts (above): the Doubles and the gap's Quad out of the band (the bribe back in it since 13 Nov).
+- The bribe's price, 20 coins since 13 Nov (two or three moves of Treasure Haul): is it still a puzzle worth the
+  gate, after the playtest's "doing an entire puzzle to get through one gate"? Raising it pushes the bribe back
+  under the band unless the gate pays it more (a longer tow, say).
 - The rocks: should the rubble settle back after half a minute or so, so only whoever's close behind the
   shooter gets through free (§4)? And should a rival make for them when she's behind?
-- The bribe's price (40 coins) and Treasure Haul's pace (1.5 s a move) are guesses till it's played. Should a
+- The bribe's price (20 coins) and Treasure Haul's pace (4 s a move) are guesses till it's played. Should a
   rival bribe her way through? (The starter's card names it, since 12 Nov.)
 - Once the crane's built in a race, is it built for everyone (the next racer just rides it, as the den's
   crane stays built), or does each racer build her own? The simulation has each build her own. The same
