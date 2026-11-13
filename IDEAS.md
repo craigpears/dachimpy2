@@ -2490,3 +2490,22 @@ she's kind of fine for this tutorial, but maybe for the ideas list, or at least 
 bit." Later, a lesson (hers, Helium's Distilling one) could show what a real player does with the pieces
 that actually come: parking an awkward pair out of the way, changing the plan when the wrong colour turns
 up, so the plan bends to the pieces rather than the pieces fitting the plan.
+
+## What Puzzle Pirates Adventures should have been: many little adventures (13 Nov)
+
+Someone said to the user that the den is "basically like what Puzzle Pirates Adventures should have been".
+The user found a wiki page on it: an attempt at this kind of idea from around 2008 that apparently didn't go
+very well (the user doesn't remember it, and the page has few details). The thought: the den as several
+different adventures, "especially since it's relatively cheap to design them now". It fits how the den is
+already built, each place and event a little island of its own (CLAUDE.md), so more adventures don't
+compound in complexity. (To shape with the user: what an adventure is, start to end, and how they're found.)
+
+## The grand frigate and the tunnel: "we can fix that later" (13 Nov)
+
+A funny one, for Primates Rule or a ship like her, perhaps a trading character's mission: sailing a grand
+frigate up to a long cave tunnel. You look at it: "I don't think the ship's going to fit in there". The
+captain: the ship'll be fine. Then someone goes up the mast and starts taking a giant saw to it, you watching
+in horror; the mast falls and cracks on the deck. "Don't worry about it, we can fix that later. Let's get
+going." A cutscene (js/den/cine.js) on the way into a tunnel (like the starlit door's, sized for a frigate),
+with the damage still there after: perhaps Carpentry to patch the deck, and the mast to put back.
+(Whose mission and who's captain: to shape with the user.)
