@@ -1236,6 +1236,21 @@ not every piece of junk on the left is swept right: a brown kept at the bottom-l
 top-left) are tools for later, to haul junk across the whites (§3, "Store blacks top-left, browns bottom-left").
 Don't be greedy clearing the left; more specifics to come.
 
+**The twenty-fifth note: with the V there, pull the browns in along the bottom, the blacks over (the user, 13 Nov,
+two pictures, `notes/distilling/42-a-brown-looped-in-along-the-bottom.webp` and `43-the-v-browns-in-blacks-over.webp`).**
+"once I've got this V shape, that's when I start pulling the browns in, then the blacks down, so you kind of end
+up kind of like this, where you can see I've looped some of the browns around, the blacks are then moving over and
+again it's like tidying. You can have a bit of a V shape, but ... especially like blacks hanging around at the
+bottom left, like you want the V to be made of, this is when you do start wanting browns there, preferably more
+than blacks. But at least ... there's enough three columns on the right, so it's still easy to go grab a brown
+and pull it over when you need it. And vice versa." The first picture: a drag (orange) from a brown in the
+right-hand junk, looped down and along the bottom to the left under the whites, and a short hook at the
+bottom-left. The second, after: the whites a block top-left; the junk wraps them, the three right-hand columns
+and a row along the bottom, browns looped in at the bottom-left beside the kept black. So the V is the junk
+round the whites, the right-hand columns and the bottom; once it's there, its bottom arm should be browns more
+than blacks (a brown at the bottom can still rise through the whites; a black there is stuck, the swap rule),
+and the three right-hand columns of junk are the store to grab a brown, or a black, from when one is wanted.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
