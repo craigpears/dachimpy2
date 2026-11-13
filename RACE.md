@@ -1304,6 +1304,9 @@ check, a share link, and the den's own race for 3D.
   takes nothing from the door. But a gate cutting a much bigger stretch would skip leg 2, its door, headwind gap
   and Double's gap with it. To decide: every shortcut saving a lot; and a course that branches, a big cut that
   passes other shortcuts by against a run of smaller ones, rather than one cut per spit in a row.
+  The user (13 Nov): "That was my point, is that you would skip leg 2 so therefore you never get to the door ...
+  just try it. Try reworking the gate just see where we end up with. This is an experiment." Tried on a branch
+  of its own, kept only if the user likes it.
 
 ## 13. Where it lives
 
