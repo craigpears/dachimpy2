@@ -29,7 +29,7 @@ export const SKIN = ['#f6d3b0', '#f0bf8e', '#d9a066', '#b57a4a', '#8a5530', '#5c
 export const HAIR = { black: '#1f1a17', 'dark brown': '#3b2414', brown: '#6a4020', 'light brown': '#94713c', auburn: '#7f2e16', red: '#9a0a08', ginger: '#c4642a', blonde: '#dcb565', grey: '#a09a92', white: '#ece8e0' };
 // Monkeys and squirrels only come in natural colours (YPPedia: Monkey), white (a champion's) and a
 // few limited editions (lavender, from a Booch Box; pink, Mischievious's monkey in "What is Love?").
-// A lavender monkey has a white face and tummy. (Plum: Helium's King, her Emerald pirate page's "plum"
+// A lavender monkey has a white face and tummy. (Plum: Helium's King, their Emerald pirate page's "plum"
 // monkey, a soft violet in his portrait, sampled from it, 12 Nov; not the plum dye, a magenta.)
 export const FUR = { brown: '#6b4423', tan: '#ad8047', ginger: '#b5652a', grey: '#8a8a8a', black: '#2a2a2e', cream: '#e9dcc0', white: '#f7f5f0', lavender: '#b9a9ea', pink: '#be667f', plum: '#865b91' };
 const FUR_FACE = { lavender: '#fbf8ff' };
@@ -203,7 +203,7 @@ export const PIRATES = Object.fromEntries(Object.entries({
     hat: 'none', top: 'rag', topCol: 'light blue', waist: 'none',
     legs: 'knickers', legsCol: 'blue', feet: 'bare', hand: 'none', fam: 'dragon', famCol: 'silver', famCol2: 'vibrant red',
   },
-  // Helium (her Emerald pirate page's portrait, checked 12 Nov), who teaches Distilling at the still on her
+  // Helium (their Emerald pirate page's portrait, checked 12 Nov), who teaches Distilling at the still on their
   // island past the checkpoint: dark skin, white hair swept up, the Feminine feline in black (a black eye
   // mask with cat's ears), an eyepatch, a gold hoop earring, a blue starfish on the cheek, a black Vampire
   // raiment (high collar, gold buttons, lined in gold), black pants, black fancy boots with plum tops, a

@@ -69,7 +69,7 @@ Your own pirate, dressed as you like from the wardrobe (or as any real pirate in
 
 - "Primates Rule, at anchor. She's not ready yet: coming soon!"
 
-### Off Helium's island the first time, her still just gone bang: between her lines
+### Off Helium's island the first time, their still just gone bang: between their lines
 
 - *safe:* "Is... is it safe?"
 - *brows:* "You've got no eyebrows left."
@@ -907,9 +907,9 @@ The sensible one, after Kikkit: she shows you plainly how a big Vegas is built, 
 
 ## Helium
 
-On a little island of her own out past the checkpoint, by the smugglers' rocks, at a copper still with a board of Distilling on a stand beside it. A real Puzzle Pirates pirate (Helium of Emerald): Senior Officer of a crew of rum-makers, Revered at Distilling and Ultimate on the ocean, with distilleries on five islands and a tailoring stall beside Mischievious's. Drawn from her portrait: dark skin, white hair under a black cat-eared mask, an eyepatch, a gold hoop earring, a blue starfish on the cheek, a black Vampire raiment lined in gold, black pants, black fancy boots with plum tops, a hook for the left hand, and King, her plum monkey, on her shoulder.
+On a little island of their own out past the checkpoint, by the smugglers' rocks, at a copper still with a board of Distilling on a stand beside it. A real Puzzle Pirates pirate (Helium of Emerald): Senior Officer of a crew of rum-makers, Revered at Distilling and Ultimate on the ocean, with distilleries on five islands and a tailoring stall beside Mischievious's. Drawn from their portrait: dark skin, white hair under a black cat-eared mask, an eyepatch, a gold hoop earring, a blue starfish on the cheek, a black Vampire raiment lined in gold, black pants, black fancy boots with plum tops, a hook for the left hand, and King, their plum monkey, on their shoulder.
 
-Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of her brews and unbothered when the balance goes wrong and the still goes bang ("Oops. That happens sometimes. Don't worry about it."). A short lesson on a real board, then it's yours, and "Help, Helium" while you play: she reads your board, says what she'd do and why, names the technique, and does it. Knows the others: a big order of rum for Mischievious's next wedding, Kikkit at her stash again.
+Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of their brews and unbothered when the balance goes wrong and the still goes bang ("Oops. That happens sometimes. Don't worry about it."). A short lesson on a real board, then it's yours, and "Help, Helium" while you play: they read your board, say what they'd do and why, name the technique, and do it. Knows the others: a big order of rum for Mischievious's next wedding, Kikkit at their stash again.
 
 > "Maybe he's got a secret distillery operation going. If you find his house, he ... teaches you how to make some rum. But he's very kind of by the by" (the user, 11 Nov)
 >
@@ -925,32 +925,32 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of h
 >
 > "helium should kind of detect what stage you're at and show you what technique ... It's context aware." (the user, 12 Nov)
 
-### Coming up off her island the first time: the still goes bang, and she shrugs it off (your lines between, src/lines/you.ts)
+### Coming up off their island the first time: the still goes bang, and they shrug it off (your lines between, src/lines/you.ts)
 
 - *mishap:* "Oh. Sorry about that. Just a little distilling mishap."
 - *offer:* "Would you like me to learn you some distilling? While you're here."
 - *safe:* "Of course it's safe. What would make you think it's not safe? Perfectly normal, this. It's fine."
 - *brows:* "None of us have got eyebrows. I keep asking the developers for some. Nothing yet."
 
-### Her lesson begins, after her opening
+### Their lesson begins, after their opening
 
 - "Right then. Distilling. Nothing to it. Watch."
 
-### Her opening lesson at the still: in her bubble (says) and in the bar at the foot of the screen (note), beat by beat
+### Their opening lesson at the still: in their bubble (says) and in the bar at the foot of the screen (note), beat by beat
 
-- *She swaps a white up past a black:*
+- *They swap a white up past a black:*
   - *says:* "One rule. The lower piece beats the upper one: white floats up past black."
   - *note:* "The swap rule: a piece swaps up past the one it beats. White beats black, brown beats white, black beats brown."
 - *The rest of the rule:*
   - *says:* "Brown past white, black past brown. Round and round. Can't swap it straight back, mind."
   - *note:* "White over black, brown over white, black over brown: like rock, paper, scissors."
-- *She drags a white left:*
+- *They drag a white left:*
   - *says:* "Whites go left, away from the fire. Junk goes right, toward it."
   - *note:* "Whites left, junk right: drag a white along, swap after swap, and the junk steps the other way."
-- *She burns the all-black column:*
+- *They burn the all-black column:*
   - *says:* "Furnace takes the right-hand column. All junk? Burn it now. X."
   - *note:* "The furnace burns the right-hand column every 15 seconds, or now on X. More blacks than whites and it burns; the rest goes up into the flask."
-- *She burns the next, a white in it (her mishap follows):*
+- *They burn the next, a white in it (their mishap follows):*
   - *says:* "And the next one's mostly junk. One white in it. Eh. X."
   - *note:* "A white in a column that burns is lost: burnt whites come back later, scorched, and spoil a column."
 - *Handing you the board:*
@@ -965,7 +965,7 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of h
 - "Eyebrows grow back."
 - "Bit much heat. Or not enough. One of those."
 
-### "Help, Helium" while you play: by the technique she'd play on your board now (then she plays it)
+### "Help, Helium" while you play: by the technique they'd play on your board now (then they play it)
 
 - *rescue:* "Save the whites. That one's heading for the fire. Pull it left."
 - *junkColumn:* "Finish the junk column. All junk on the right, and it burns clean."
@@ -995,7 +995,7 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of h
   - "Ooh. Smooth."
 - *finished:* "Flask's full. That's a batch. Mischievious will want ten more."
 
-### While you're within earshot of her island: round and round
+### While you're within earshot of their island: round and round
 
 - "Big order of rum for Mischievious. Another wedding. She does keep getting married."
 - "Kikkit's been at the stash again. Explains her directions, really."

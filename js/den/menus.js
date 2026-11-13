@@ -584,7 +584,7 @@ function cheatTzz() {
   tzzCheat();
 }
 /* Helium's island (js/den/helium-isle.js), past the checkpoint by the smugglers' rocks: at sea, just off
-   it, where her Distilling lesson begins; the checkpoint told she's beyond it, as for Port Decorum. */
+   it, where their Distilling lesson begins; the checkpoint told she's beyond it, as for Port Decorum. */
 function cheatHelium() {
   if (cine) return;
   if (!sail.on) cheatSail();

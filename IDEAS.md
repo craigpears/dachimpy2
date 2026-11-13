@@ -1026,9 +1026,9 @@ Global Cade Sim.
 
 Mischievious (the real pirate, giving feedback on her wedding): "Wanted to mention helium. He has a
 lot of puzzle talents and really loves distilling if there were certain tutorials and such."
-**Helium**, a real pirate (portrait and ocean to check on YPPedia before she's drawn; then into
+**Helium**, a real pirate (portrait and ocean to check on YPPedia before they're drawn; then into
 PIRATES and the wardrobe), as the one who teaches a puzzle, Distilling above all: a still on an
-island of hers, or a corner of the den, where she shows you how it's done and plays it with you.
+island of theirs, or a corner of the den, where they show you how it's done and play it with you.
 Distilling would be a new puzzle module of its own (rules in `src/`, knowing nothing of where it's
 played), as every puzzle is. It goes with the museum's Distilling Simulator (the user's own, "with
 control over when columns are burnt"), and with smuggling's cheap rum, made yourself. The user
@@ -1042,7 +1042,7 @@ you how to make some rum. But he's very kind of by the by, and that leads into s
 smuggling things where you can smuggle the rum to the other island or some side mission." So
 Helium's is one of the houses in the housing district (the doorway in the den's cliff), with
 nothing to say it's special: inside, a secret still (hidden behind something, found by poking
-about). She's offhand about it, teaches you Distilling as if it were nothing, and the rum you make
+about). They're offhand about it, and teach you Distilling as if it were nothing, and the rum you make
 is the start of smuggling (below: taxes, embargoes and the back beaches), run to another island as
 a side mission. Hidden, never hinted (RULES.md).
 
@@ -1055,22 +1055,22 @@ if nothing had. The humour's a layer on the real thing (RULES.md): it could even
 Distilling board looks like (the user's own Distilling Simulator was all about when columns get
 burnt), so a botched batch in the puzzle gets a little bang of its own.
 
-**Her look, from her portrait (checked 12 Nov):** Helium of Emerald (Senior Officer of a rum-making
+**Their look, from their portrait (checked 12 Nov):** Helium of Emerald (Senior Officer of a rum-making
 crew, Revered at Distilling and Ultimate on the ocean, distilleries on five islands, a tailoring stall
-beside Mischievious's; familiars King, plum, and Serendipity, light blue). Her portrait: dark skin, white
+beside Mischievious's; familiars King, plum, and Serendipity, light blue). Their portrait: dark skin, white
 hair swept up, the Feminine feline in black (a black eye mask with cat's ears), an eyepatch, a gold hoop
 earring, a blue starfish on the cheek, a black Vampire raiment (high collar, gold buttons, lined in gold),
 black pants, black fancy boots with plum tops, a hook for the left hand, King the plum (soft violet)
 monkey on the shoulder, and a glowing blue jar in the right hand (not in the wardrobe, left out); a night
 palace and a treasure hoard behind. In PIRATES and the wardrobe as that look. (The portrait's figure is a
-woman's, and her page has her "Lady of the flag": the pirate is a woman, so Helium is "she", 13 Nov.)
+woman's, and the page says "Lady of the flag": drawn as a woman, called "they" in the den's words, 13 Nov.)
 
 **An island of his own instead (12 Nov):** "I think I've changed my mind on it. Him being in a hidden
 house, maybe he can just have his own little island. That just seems to be the theme somewhere. Maybe
 that can link into where the Smuggle Beach is. I don't know. I bet he just wants an island for him
-somewhere." So Helium's still is on a little island of hers (a place of its own in the code, as every
-island is), perhaps near the smugglers' beach, where her rum would go out. Whether it's hidden like the
-house would have been: to pin down with the user. **Her mishaps (12 Nov):** "the kind of exploding kind
+somewhere." So Helium's still is on a little island of theirs (a place of its own in the code, as every
+island is), perhaps near the smugglers' beach, where their rum would go out. Whether it's hidden like the
+house would have been: to pin down with the user. **Their mishaps (12 Nov):** "the kind of exploding kind
 of mishaps that I mentioned with the distilling, where he kind of gets the balance wrong."
 
 **The penguin in the balaclava leads you there: a smuggling ring (12 Nov).** "I feel like we've got to
@@ -1096,8 +1096,8 @@ link up into one thread:
 interconnected, like Helium saying ... I have a large shipment of rum for one of Mischievious's weddings, or
 Kikkit's been at the stash again. Those kind of interlinked things with the personalities". So Helium's
 lines point at the others: a big order of rum for Mischievious's next wedding (she does keep getting
-married), Kikkit at her stash again (which explains a lot about her directions), the smuggling ring's
-penguin waiting on her barrels. And the same the other way: a guest at a wedding toasting with Helium's
+married), Kikkit at their stash again (which explains a lot about her directions), the smuggling ring's
+penguin waiting on their barrels. And the same the other way: a guest at a wedding toasting with Helium's
 rum, Kikkit swearing she only had a little. Each one in character, the joke true to who they are, and
 each a line in `src/lines/` (STORY.md, "The characters know each other").
 
@@ -1112,7 +1112,7 @@ you've got no eyebrows left, and they can make the joke back ... none of us have
 joke that they've been burned off by the explosions, but, you know, actually we just don't. None of us have got
 any. Double check that joke. I'm pretty sure it's true." So the first visit: the bang, soot and copper; Helium
 unfazed, offering a lesson; your pirate tense ("is it safe?"); "Of course it's safe. What would make you think
-it's not?"; your pirate on her missing eyebrows, burned off surely; and her: none of us have any, she keeps asking
+it's not?"; your pirate on their missing eyebrows, burned off surely; and them: none of us have any, they keep asking
 the developers. Then the lesson. (Given to the Helium pass, 12 Nov.) **The joke's fact, to check:** that no
 pirate in Puzzle Pirates has eyebrows; a web search (12 Nov) found nothing either way, so it's to be checked on
 real portraits before the line goes in as fact.
@@ -1127,7 +1127,7 @@ kind of move into using different techniques associated with that phase, it shou
 and be like ... you did a good timing in this phase, but you went into this mode and started like crawling
 or doing these techniques too early."
 - **Help in the moment, and afterwards:** as well as a hint while you play (the bots' `advise`), your whole
-  session is kept, and you can play it back with Helium beside you and ask her at any point what she thinks.
+  session is kept, and you can play it back with Helium beside you and ask them at any point what they think.
 - **Phases, read from your board:** he splits the session into its phases (the opening sweep, carrying colour
   over, turning the right side, the late scarce-colour techniques; DISTILLING.md §3 and its seventh note) by
   what was on the board, not by the clock, and says which technique you were using in each.
@@ -2403,7 +2403,7 @@ some banners or something and decorating." Their examples:
   painted by [Gravee]." An easel by the course, and at the finish the race's best moments as her
   paintings (like the wedding's collage of key moments, painted flat as her portraits are). She's the
   fourth racer when the race is watched, so she'd paint when she isn't racing, or someone else races.
-- **Helium providing the rum,** once she's in (she's on hold with Distilling, and drawn from her portrait
+- **Helium providing the rum,** once they're in (they're on hold with Distilling, and drawn from their portrait
   first): a stall or a barge of barrels along the course.
 - **Mischievious decorating and styling the event:** banners and bunting going up as you pass a corner,
   her chatting about the colours. The host, not the show, as at her wedding.

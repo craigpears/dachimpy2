@@ -213,7 +213,7 @@ export function sailKey(key) {
   else if ((key === ' ' || key === 'enter') && canLandIsle(sail.helm)) isleAshore();   // (Mischievious's isle: isle.js)
   else if ((key === ' ' || key === 'enter') && kikkitHail()) { /* (Kikkit, off her island: whirlpools.js) */ }
   else if ((key === ' ' || key === 'enter') && tzzHail()) { /* (Tzz's lesson again, off her island: balloon-isle.js) */ }
-  else if ((key === ' ' || key === 'enter') && heliumHail()) { /* (to Helium's still, off her island: helium-isle.js) */ }
+  else if ((key === ' ' || key === 'enter') && heliumHail()) { /* (to Helium's still, off their island: helium-isle.js) */ }
   else if (key === 'z' || key === 'c') keys.add(key);
   else if (key === 'p') setPaused(true);
   else if (key === 'v') Object.assign(view, { yaw: 0, pitch: 0, zoom: 1 });
@@ -288,7 +288,7 @@ export function sailTick(dt) {
   isleWorld();   // (Mischievious's isle, out to the right of the lanes: isle.js)
   kikkitWorld();   // (Kikkit's island, her whirlpools and Vegas Island: whirlpools.js)
   tzzWorld();   // (Tzz's island, a hop from Kikkit's, and her balloon lesson: balloon-isle.js)
-  heliumWorld();   // (Helium's island by the smugglers' rocks, and Distilling at her still: helium-isle.js)
+  heliumWorld();   // (Helium's island by the smugglers' rocks, and Distilling at their still: helium-isle.js)
   empireWorld();   // (Port Decorum, the imperial island past the checkpoint: imperial-isle.js)
   smugglersWorld();   // (the smugglers' beach behind it: smugglers.js)
   raceWorld();   // (the sloop race's course, out past Primates Rule: race.js)
@@ -398,7 +398,7 @@ export function sailTick(dt) {
   craneTick(dt);   // (after she's drawn where the helm has her: up the cliff, the crane has her)
   kikkitTick(dt, events);   // (Kikkit, her whirlpools and the penguins: whirlpools.js)
   tzzTick(dt);   // (Tzz and her balloons: balloon-isle.js)
-  heliumTick(dt);   // (Helium and her still: helium-isle.js)
+  heliumTick(dt);   // (Helium and their still: helium-isle.js)
   empireTick(dt);   // (Port Decorum's guards: imperial-isle.js)
   smugglersTick();   // (the smugglers' beach, found: smugglers.js)
   raceTick(dt);   // (the race, its guns, its crane and the rival: race.js)

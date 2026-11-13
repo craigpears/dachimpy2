@@ -573,38 +573,43 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     here's a point of interest. It's ... a different way through. That's about all ... That's for you
     to discover." Their islands are drawn, and one note, "Whirlpools: another way through?", marks
     them; whose islands they are, and what's on them, isn't said.
-- **Helium's island and her Distilling lesson (12 Nov), a first pass.** The user: "are you able to crack
+- **Helium is "they" (13 Nov).** The user: "just refer to Helium as [neutral], get the physical
+  appearance [and] gender of the pirate correct and just use gender neutral terms when referring to
+  them. I think that makes it less confusing." So Helium is drawn as the pirate is, a woman (her
+  portrait, "Lady of the flag"), and every word about Helium, in lines, notes and public pages, says
+  "they" and "their". Quotes of the user's own words stay as said.
+- **Helium's island and their Distilling lesson (12 Nov), a first pass.** The user: "are you able to crack
   on with adding Helium and some of the tutorial elements in? I don't want to get too caught up on
-  perfecting this bit." Helium (her Emerald portrait, IDEAS.md) on a little island of her own out past the
+  perfecting this bit." Helium (their Emerald portrait, IDEAS.md) on a little island of their own out past the
   checkpoint, across the smugglers' rocks from their cove (LAY.HELIUM: three squares, in open water, on the
-  captain's map unnamed, as Tzz's is). Her copper still beside her and Distilling's own board on a stand.
-  - **Her opening, the first time (12 Nov):** "the distillery exploding and Helium just treating it as
+  captain's map unnamed, as Tzz's is). Their copper still beside them and Distilling's own board on a stand.
+  - **Their opening, the first time (12 Nov):** "the distillery exploding and Helium just treating it as
     kind of a casual everyday event". As you come up the still goes bang (soot, sparks, bits of copper);
-    "Oh. Sorry about that. Just a little distilling mishap." She offers to "learn you some distilling";
+    "Oh. Sorry about that. Just a little distilling mishap." They offer to "learn you some distilling";
     you, warily, "Is... is it safe?"; "Of course it's safe. What would make you think it's not safe?
-    Perfectly normal, this. It's fine." You: "You've got no eyebrows left." She: none of us have, she keeps
+    Perfectly normal, this. It's fine." You: "You've got no eyebrows left." They: none of us have, they keep
     asking the developers for some. (True: no pirate in Puzzle Pirates has eyebrows, nor any in the den;
-    checked on Helium's and Roobear's portraits, 12 Nov.) Then her lesson. Seen once only.
+    checked on Helium's and Roobear's portraits, 12 Nov.) Then their lesson. Seen once only.
   - **His lesson:** the first time you come up beside his island, a little cutscene on a real board (the
     same deal every time, its furnace stopped), each beat worked out by the real rules
     (src/den-helium.ts, lessonPlan): the swap rule shown by one swap (a white up past a black), the rest
     of it said; whites left, a white dragged as far left as it goes; the furnace's all-black column
     burned; the next, mostly junk with one white in it, burned too: bang, "Oops. That happens sometimes.
-    Don't worry about it." Then "your go". Her line in her bubble, what it shows in plain words in the bar.
+    Don't worry about it." Then "your go". Their line in their bubble, what it shows in plain words in the bar.
     Space skips it; either way the still's yours after.
   - **The still, yours:** a real session (the furnace running), played with the board's own keys and
     mouse, the camera straight on to it; Esc leaves it (the furnace waits), Space off his island comes
     back to it. The panel's distiller is Helium now, not the stand-in.
-  - **"Help, Helium" (H, or the button):** she reads your board with the bots' planner (`advise`: the
-    stage it's at and the routine it would play), says in one line what she'd do and why, naming the
-    technique, in her voice ("The hook. Black and brown together, round the corner. My favourite."), the
+  - **"Help, Helium" (H, or the button):** they read your board with the bots' planner (`advise`: the
+    stage it's at and the routine it would play), say in one line what they'd do and why, naming the
+    technique, in their voice ("The hook. Black and brown together, round the corner. My favourite."), the
     planner's own reason in the bar, and plays its drags on your board as a hand would, the furnace
-    waiting while she does. A burn she does; a dismiss she only says (never ends your session for you).
+    waiting while they do. A burn they do; a dismiss they only say (never ends your session for you).
   - **His mishaps:** whenever a column burns with a white (or a burnt white) in it, the still goes bang
     (soot and sparks out of its head, it shakes, he flinches) and he shrugs it off, his own line first,
     then others. The humour's the maker's, never drink (that's Kikkit's).
   - **He knows the others:** a big order of rum for Mischievious's next wedding, Kikkit at his stash
-    again (src/lines/helium.ts). Not yet: the smuggling ring and the penguin's link to her, the coached
+    again (src/lines/helium.ts). Not yet: the smuggling ring and the penguin's link to them, the coached
     replay, a demonstration per technique.
 - **Port Decorum, an island under imperial control, sketched (11 Nov).** "start sketching out even just
   like, even if it's just an empty island or something where you can't interact yet, is just some island

@@ -193,15 +193,15 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    the penguin in the balaclava is in a secret smuggling ring, just as Kikkit said; bring the ring rum and
    they'll show you how to sneak past Port Decorum's customs, and he tells you where to find Helium's
    island, where you learn to distil it. "He's a shifty penguin. [Kikkit] was right."
-   Helium's island is there already (12 Nov): a little one of her own out past the checkpoint, across the
-   smugglers' rocks from their cove, her copper still on it and a board of Distilling on a stand. The
-   first time you come up off it the still blows up as you arrive, and she treats it as an everyday thing
-   ("of course it's safe"; and the eyebrows none of us have). Then she shows you, offhand, as if it were nothing: the swap rule, whites left
+   Helium's island is there already (12 Nov): a little one of their own out past the checkpoint, across the
+   smugglers' rocks from their cove, their copper still on it and a board of Distilling on a stand. The
+   first time you come up off it the still blows up as you arrive, and they treat it as an everyday thing
+   ("of course it's safe"; and the eyebrows none of us have). Then they show you, offhand, as if it were nothing: the swap rule, whites left
    and junk right, the junk column burned, and the next burned with a white in it, bang ("Oops. That
-   happens sometimes. Don't worry about it."). Then it's yours, and "Help, Helium" while you play: she reads
-   your board, says what she'd do and why, names the technique and does it. She mentions the others: a big
-   order of rum for Mischievious's next wedding, Kikkit at her stash again. (The ring that leads you to
-   her, and where her rum goes, still to come.)
+   happens sometimes. Don't worry about it."). Then it's yours, and "Help, Helium" while you play: they read
+   your board, say what they'd do and why, name the technique, and do it. They mention the others: a big
+   order of rum for Mischievious's next wedding, Kikkit at their stash again. (The ring that leads you to
+   them, and where their rum goes, still to come.)
    And out past Primates Rule, a buoy and a gate in a line of rocks: the sloop race (11 Nov), the den's
    own characters racing you round a zigzag course, Kikkit greedy for her Vegas, Tzz steady on her
    Doubles, Dalnoth with Umami aboard to do his foraging, firing on whoever sits still in the open; the
@@ -242,6 +242,6 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
 | Break fused chests at the armoury | Soldiers, up to a handful (more as the den grows: to come) |
 | Break loose crates | Planks that mend the wall for good |
 | Walk into the plot | Your shack, built the same way, any time |
-| Come up off Helium's island, past the checkpoint | Her Distilling lesson, then her still to play at, her help on H |
+| Come up off Helium's island, past the checkpoint | Their Distilling lesson, then their still to play at, their help on H |
 | Build the crane at the hidden cove's ledge | Her way up the cliff to the clifftop lagoon, and its wreck's treasure (by Treasure Haul) |
 | Get past Dalnoth (to come) | His treasure, and his white monkey on your shoulder |

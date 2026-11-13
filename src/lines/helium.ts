@@ -1,17 +1,17 @@
-/* Pirate Den: Helium's lines (src/lines/character.ts says how these files go). When she says them is
-   src/den-helium.ts's (HELIUM_CAST: her opening lesson at the still, "Help, Helium" while you play, her
-   mishaps, then her chatter, played by src/chatter.ts); js/den/helium-isle.js shows them over her head.
+/* Pirate Den: Helium's lines (src/lines/character.ts says how these files go). When they say them is
+   src/den-helium.ts's (HELIUM_CAST: their opening lesson at the still, "Help, Helium" while you play, their
+   mishaps, then their chatter, played by src/chatter.ts); js/den/helium-isle.js shows them over their head.
 
-   The user (11 and 12 Nov, IDEAS.md "Helium, and Distilling"): she "teaches you how to make some rum. But
+   The user (11 and 12 Nov, IDEAS.md "Helium, and Distilling"): Helium "teaches you how to make some rum. But
    he's very kind of by the by": offhand, as if it were nothing. Not drunk jokes (that's Kikkit): "he's
-   just the creator of these things", proud of her brews, unbothered by her mishaps ("So, oops, that
-   happened sometimes. Don't worry about it"). And she knows the others: "I have a large shipment of rum
-   for one of Mischievious's weddings, or Kikkit's been at the stash again." Each line's a bubble over her
+   just the creator of these things", proud of their brews, unbothered by their mishaps ("So, oops, that
+   happened sometimes. Don't worry about it"). And they know the others: "I have a large shipment of rum
+   for one of Mischievious's weddings, or Kikkit's been at the stash again." Each line's a bubble over their
    head: short, on a phone too. */
 import type { Character } from './character.js';
 
-/** Coming up off her island the first time (src/den-helium.ts, opening): the still goes bang as you
-    arrive, and she treats it as an everyday thing. The user (12 Nov): "the distillery exploding and Helium
+/** Coming up off their island the first time (src/den-helium.ts, opening): the still goes bang as you
+    arrive, and they treat it as an everyday thing. The user (12 Nov): "the distillery exploding and Helium
     just treating it as kind of a casual everyday event, just like, oh, sorry, just a little distilling
     mishap ... would you like me to teach you some distilling", then, to your "is it safe?", "of course it's
     safe. What would make you think it's not safe? This is perfectly normal. It's fine." And the eyebrows:
@@ -25,13 +25,13 @@ export const OPENING = {
   brows: 'None of us have got eyebrows. I keep asking the developers for some. Nothing yet.',
 } as const;
 
-/** Her lesson begins, after her opening. */
+/** Their lesson begins, after their opening. */
 export const GREET = 'Right then. Distilling. Nothing to it. Watch.';
 
-/** Her opening lesson, on a real board at her still (src/den-helium.ts, lessonPlan): a line in her bubble
+/** Their opening lesson, on a real board at their still (src/den-helium.ts, lessonPlan): a line in their bubble
     as each beat starts (`says`), and what it shows in plain words, in the bar at the foot of the screen
     (`note`). The swap rule, whites left and junk right, the furnace's column burned, and a white burned
-    with it: her mishap. Then it's yours. */
+    with it: their mishap. Then it's yours. */
 export const LESSON = {
   rule: {
     says: 'One rule. The lower piece beats the upper one: white floats up past black.',
@@ -69,9 +69,9 @@ export const MISHAP = [
   'Bit much heat. Or not enough. One of those.',
 ] as const;
 
-/** "Help, Helium" (H, or the button while you play): what she'd do now, and why, naming the technique,
+/** "Help, Helium" (H, or the button while you play): what they'd do now, and why, naming the technique,
     by the routine the planner picks for your board (src/distill-bots.ts, advise; the routines' names
-    src/distill-routines.ts). Then she plays it on your board. */
+    src/distill-routines.ts). Then they play it on your board. */
 export const HELP = {
   rescue: 'Save the whites. That one\'s heading for the fire. Pull it left.',
   junkColumn: 'Finish the junk column. All junk on the right, and it burns clean.',
@@ -100,7 +100,7 @@ export const PRAISE = {
   finished: 'Flask\'s full. That\'s a batch. Mischievious will want ten more.',
 } as const;
 
-/** While you're within earshot of her island, before or after: round and round. */
+/** While you're within earshot of their island, before or after: round and round. */
 export const AFTER = [
   'Big order of rum for Mischievious. Another wedding. She does keep getting married.',
   'Kikkit\'s been at the stash again. Explains her directions, really.',
@@ -115,18 +115,18 @@ export const AFTER = [
 
 export const CHARACTER: Character = {
   name: 'Helium',
-  who: 'On a little island of her own out past the checkpoint, by the smugglers\' rocks, at a copper still with '
+  who: 'On a little island of their own out past the checkpoint, by the smugglers\' rocks, at a copper still with '
     + 'a board of Distilling on a stand beside it. A real Puzzle Pirates pirate (Helium of Emerald): Senior '
     + 'Officer of a crew of rum-makers, Revered at Distilling and Ultimate on the ocean, with distilleries on '
-    + 'five islands and a tailoring stall beside Mischievious\'s. Drawn from her portrait: dark skin, white hair '
+    + 'five islands and a tailoring stall beside Mischievious\'s. Drawn from their portrait: dark skin, white hair '
     + 'under a black cat-eared mask, an eyepatch, a gold hoop earring, a blue starfish on the cheek, a black '
     + 'Vampire raiment lined in gold, black pants, black fancy boots with plum tops, a hook for the left hand, '
-    + 'and King, her plum monkey, on her shoulder.\n\n'
-    + 'Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of her brews and unbothered '
+    + 'and King, their plum monkey, on their shoulder.\n\n'
+    + 'Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of their brews and unbothered '
     + 'when the balance goes wrong and the still goes bang ("Oops. That happens sometimes. Don\'t worry about '
-    + 'it."). A short lesson on a real board, then it\'s yours, and "Help, Helium" while you play: she reads '
-    + 'your board, says what she\'d do and why, names the technique, and does it. Knows the others: a big '
-    + 'order of rum for Mischievious\'s next wedding, Kikkit at her stash again.',
+    + 'it."). A short lesson on a real board, then it\'s yours, and "Help, Helium" while you play: they read '
+    + 'your board, say what they\'d do and why, name the technique, and do it. Knows the others: a big '
+    + 'order of rum for Mischievious\'s next wedding, Kikkit at their stash again.',
   theUser: [
     { on: '11 Nov', said: 'Maybe he\'s got a secret distillery operation going. If you find his house, he ... teaches you how to make some rum. But he\'s very kind of by the by' },
     { on: '11 Nov', said: 'occasionally, distilleries have been known to blow up ... So, oops, that happened sometimes. Don\'t worry about it.' },
@@ -137,16 +137,16 @@ export const CHARACTER: Character = {
     { on: '12 Nov', said: 'helium should kind of detect what stage you\'re at and show you what technique ... It\'s context aware.' },
   ],
   lines: [
-    { when: 'Coming up off her island the first time: the still goes bang, and she shrugs it off (your lines between, src/lines/you.ts)', says: OPENING },
-    { when: 'Her lesson begins, after her opening', says: GREET },
+    { when: 'Coming up off their island the first time: the still goes bang, and they shrug it off (your lines between, src/lines/you.ts)', says: OPENING },
+    { when: 'Their lesson begins, after their opening', says: GREET },
     {
-      when: 'Her opening lesson at the still: in her bubble (says) and in the bar at the foot of the screen (note), beat by beat', says: LESSON,
-      each: { rule: 'She swaps a white up past a black', ruleAfter: 'The rest of the rule', left: 'She drags a white left', furnace: 'She burns the all-black column', mishapSetup: 'She burns the next, a white in it (her mishap follows)', yours: 'Handing you the board' },
+      when: 'Their opening lesson at the still: in their bubble (says) and in the bar at the foot of the screen (note), beat by beat', says: LESSON,
+      each: { rule: 'They swap a white up past a black', ruleAfter: 'The rest of the rule', left: 'They drag a white left', furnace: 'They burn the all-black column', mishapSetup: 'They burn the next, a white in it (their mishap follows)', yours: 'Handing you the board' },
     },
     { when: 'A column burns with a white in it, and the still goes bang: the first time the first, then any', says: MISHAP },
-    { when: '"Help, Helium" while you play: by the technique she\'d play on your board now (then she plays it)', says: HELP },
+    { when: '"Help, Helium" while you play: by the technique they\'d play on your board now (then they play it)', says: HELP },
     { when: '"Help, Helium" when it isn\'t a drag', says: HELP_ELSE },
     { when: 'Now and then as your Crystal Clears go up, and when the flask\'s full', says: PRAISE },
-    { when: 'While you\'re within earshot of her island: round and round', says: AFTER },
+    { when: 'While you\'re within earshot of their island: round and round', says: AFTER },
   ],
 };

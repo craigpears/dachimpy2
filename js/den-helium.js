@@ -1,20 +1,20 @@
-/* Pirate Den: Helium's island, her still, and Distilling taught at it. TypeScript, compiled to
+/* Pirate Den: Helium's island, their still, and Distilling taught at it. TypeScript, compiled to
    js/den-helium.js; tested in tests/den-helium.test.ts. js/den/helium-isle.js draws the island and places
-   her from HELIUM_CAST (below), plain data; the squares are LAY.HELIUM in src/den-sail.ts; the puzzle is
-   src/distilling.ts (its look js/den/distill-board.js), the planner her help reads your board with
-   src/distill-bots.ts's `advise`; her lines src/lines/helium.ts.
+   them from HELIUM_CAST (below), plain data; the squares are LAY.HELIUM in src/den-sail.ts; the puzzle is
+   src/distilling.ts (its look js/den/distill-board.js), the planner their help reads your board with
+   src/distill-bots.ts's `advise`; their lines src/lines/helium.ts.
 
    The user (11 and 12 Nov, IDEAS.md "Helium, and Distilling"; DISTILLING.md §7, items 3 and 4): Helium, a
    real pirate who "really loves distilling", teaches it "very kind of by the by", on "his own little
-   island ... I bet he just wants an island for him somewhere", near the smugglers' beach where her rum
-   would one day go out. The first time you come up off it she gives a short lesson on a real board, a
+   island ... I bet he just wants an island for him somewhere", near the smugglers' beach where their rum
+   would one day go out. The first time you come up off it they give a short lesson on a real board, a
    little cutscene: the swap rule, whites left and junk right, the furnace's column burned, and a white
-   burned with the next, her mishap ("Oops. That happens sometimes. Don't worry about it."). Then "now
+   burned with the next, their mishap ("Oops. That happens sometimes. Don't worry about it."). Then "now
    you try": the still's yours, a real session, and "Help, Helium" while you play: "helium should kind of
-   detect what stage you're at and show you what technique ... It's context aware". She reads your board
-   (`advise`), says in a line what she'd do and why, naming the technique, and plays it on your board.
-   Space off her island again and you're back at the still. Not yet: the smuggling ring, the penguin's
-   link to her, the coached replay (IDEAS.md). */
+   detect what stage you're at and show you what technique ... It's context aware". They read your board
+   (`advise`), say in a line what they'd do and why, naming the technique, and play it on your board.
+   Space off their island again and you're back at the still. Not yet: the smuggling ring, the penguin's
+   link to them, the coached replay (IDEAS.md). */
 import { LAY } from './den-sail.js';
 import { shoreOf } from './den-isle.js';
 import { PACE } from './chatter.js';
@@ -28,57 +28,57 @@ const H = LAY.HELIUM;
 export const HELIUM = {
     /** Its name, at the foot of the screen off it. */
     NAME: "Helium's Island",
-    /** Within earshot: squares from where she stands. */
+    /** Within earshot: squares from where they stand. */
     EARSHOT: 4,
 };
 const key = (c, r) => `${c},${r}`;
 const land = new Set(H.LAND.map(([c, r]) => key(c, r)));
-/** Her island's first square: she, her still, her board and the lesson's camera are placed from it, so the
+/** Their island's first square: they, their still, their board and the lesson's camera are placed from it, so the
     island moves as one. */
 const O = H.LAND[0];
 const off = (c, r) => [O[0] + c, O[1] + r];
-/** Her island's squares. */
+/** Their island's squares. */
 export const heliumAt = (c, r) => land.has(key(c, r));
-/** The water round her island, every square beside it (diagonally too): where her lesson's seen, and
+/** The water round their island, every square beside it (diagonally too): where their lesson's seen, and
     Space takes you to the still (as round Tzz's). */
 export function onHeliumLanding(c, r) {
     return !heliumAt(c, r) && H.LAND.some(([x, y]) => Math.abs(x - c) <= 1 && Math.abs(y - r) <= 1);
 }
-/** Her island's shore, for the 3D and the captain's map (src/den-isle.ts, shoreOf). */
+/** Their island's shore, for the 3D and the captain's map (src/den-isle.ts, shoreOf). */
 export const heliumShore = () => shoreOf(H.LAND);
-/** Where she stands, at her still, on the sand toward the sloop's side. */
+/** Where they stand, at their still, on the sand toward the sloop's side. */
 export const HELIUM_STANDS = { c: O[0] - 0.05, r: O[1] + 0.3 };
 export const inHeliumEarshot = (c, r) => Math.hypot(c - HELIUM_STANDS.c, r - HELIUM_STANDS.r) <= HELIUM.EARSHOT;
-/** Where the sloop's brought alongside as her lesson begins, out of its shot. */
+/** Where the sloop's brought alongside as their lesson begins, out of its shot. */
 export const HELIUM_MOOR = H.MOOR;
-/** Where a starting point puts the sloop (den.html?at=helium: js/den/menus.js): beside her island, her lesson
+/** Where a starting point puts her (den.html?at=helium: js/den/menus.js): beside their island, their lesson
     about to begin. */
 export const HELIUM_ARRIVE = { c: O[0] - 1, r: O[1] + 1, d: 1 };
-/** When her lesson plays: the first time you come up off her island (a cutscene), never while something
+/** When their lesson plays: the first time you come up off their island (a cutscene), never while something
     else is playing or you're carried past at speed; after it, Space there takes you to the still. */
 export class Visit {
-    /** Her lesson's been seen. */
+    /** Their lesson's been seen. */
     seen = false;
-    /** Each tick: off her island (`off`), free to watch (`free`). True when her lesson should begin now. */
+    /** Each tick: off their island (`off`), free to watch (`free`). True when their lesson should begin now. */
     arrive(off, free) {
         if (!off || !free || this.seen)
             return false;
         this.seen = true;
         return true;
     }
-    /** Space off her island, once her lesson's been seen: to the still. */
+    /** Space off their island, once their lesson's been seen: to the still. */
     again(off, free) { return off && free && this.seen; }
 }
-// ---------- her lesson ----------
+// ---------- their lesson ----------
 /** The lesson's board: a real deal, the same every time (this seed's furnace column all black, as every
-    board starts, and the one after it mostly junk with a white in it, for her mishap), its furnace's clock
-    stopped, so the columns go only when she burns them. */
+    board starts, and the one after it mostly junk with a white in it, for their mishap), its furnace's clock
+    stopped, so the columns go only when they burn them. */
 export const LESSON_SEED = 21;
 export const lessonGame = () => new Distilling(seeded(LESSON_SEED), { timer: false });
-/** Her opening, the first time you come up off her island, before her lesson (the user, 12 Nov): the still
-    goes bang (no line, a moment for it); she shrugs it off and offers to teach you; you ask, warily, if it's
-    safe (`who: 'you'`, over your head); of course it is; you note her eyebrows are gone; none of us have
-    any, she says. */
+/** Their opening, the first time you come up off their island, before their lesson (the user, 12 Nov): the still
+    goes bang (no line, a moment for it); they shrug it off and offer to teach you; you ask, warily, if it's
+    safe (`who: 'you'`, over your head); of course it is; you note their eyebrows are gone; none of us have
+    any, they say. */
 export function opening() {
     const note = 'Helium\'s island.', none = { kind: 'none' };
     return [
@@ -116,11 +116,11 @@ function walkLeft(b, x, y, most = 6) {
     return ways;
 }
 const copy = (b) => b.map((c) => [...c]);
-/** Her lesson on a board (the lesson's deal, `lessonGame().cols`), worked out by the real rules: the greeting; the
+/** Their lesson on a board (the lesson's deal, `lessonGame().cols`), worked out by the real rules: the greeting; the
     swap rule shown by one swap, a white rising past a black and a step to the left; the rest of the rule;
     whites left, a white dragged as far left as it goes (all in the columns clear of the furnace's next
     two, so they stay as dealt); the furnace's column, all black, burned; the next, mostly junk with a
-    white in it, burned too: her mishap, and her line for it; then it's yours. */
+    white in it, burned too: their mishap, and their line for it; then it's yours. */
 export function lessonPlan(start) {
     const b = copy(start), beats = [{ name: 'greet', says: GREET, note: 'Helium\'s still: Distilling.', act: { kind: 'none' } }];
     const say = (name, act = { kind: 'none' }, mishap = false) => ({ name, ...LESSON[name], act, ...(mishap ? { mishap } : {}) });
@@ -161,17 +161,17 @@ export function lessonPlan(start) {
     beats.push(say('yours'));
     return beats;
 }
-/** How long each line of her is up, a beat at the least: offhand, unhurried, long enough to read. */
+/** How long each line of their is up, a beat at the least: offhand, unhurried, long enough to read. */
 export const lessonSecs = (text) => (text ? 1.4 + text.length * 0.05 : 1.6);
-// ---------- her mishaps ----------
+// ---------- their mishaps ----------
 /** A column's gone: whether the still goes bang (it burned with a white in it, or a burnt white). */
 export const bangs = (c) => !c.up && c.whites + c.burnt > 0;
-/** Her line for the `n`th bang (0 the first): the first always her own, "Oops. That happens sometimes.";
+/** Their line for the `n`th bang (0 the first): the first always their own, "Oops. That happens sometimes.";
     after that, round the rest. */
 export const mishapLine = (n) => (n <= 0 ? MISHAP[0] : MISHAP[1 + ((n - 1) % (MISHAP.length - 1))]);
 // ---------- "Help, Helium" ----------
-/** What she says to the planner's advice: her line (naming the technique, why, in her voice) and, in the
-    bar, the technique's name and the planner's own reason; and whether she plays anything (drags, or a burn). */
+/** What they say to the planner's advice: their line (naming the technique, why, in their voice) and, in the
+    bar, the technique's name and the planner's own reason; and whether they play anything (drags, or a burn). */
 export function helpFor(a) {
     const note = a.reason ? `${a.label}: ${a.reason}` : a.label;
     if (a.kind === 'move') {
@@ -186,29 +186,29 @@ export function helpFor(a) {
     return { says: HELP_ELSE.wait, note, plays: null };
 }
 /** "Help, Helium" on a board as it stands (a person's, mid-game): the planner reads its stage and picks the
-    routine (src/distill-bots.ts, advise), and she says it. Nothing while it's sliding. */
+    routine (src/distill-bots.ts, advise), and they say it. Nothing while it's sliding. */
 export function askHelium(g) {
     if (!g.movable)
         return { advice: null, says: HELP_ELSE.busy, note: '', plays: null };
     const advice = advise({ cols: g.cols, chain: g.chain, timeLeft: g.timeLeft() });
     return { advice, ...helpFor(advice) };
 }
-/** While you're within earshot of her island, lesson or none: a line now and then, round and round. */
+/** While you're within earshot of their island, lesson or none: a line now and then, round and round. */
 export const HELIUM_SAYS = { loop: AFTER };
-/* Who's on her island, placed: a character is only config (RULES.md). js/den/helium-isle.js puts them
-   there through the shared pieces: a talking pirate (props-people.js's person()), her still (furniture.js)
+/* Who's on their island, placed: a character is only config (RULES.md). js/den/helium-isle.js puts them
+   there through the shared pieces: a talking pirate (props-people.js's person()), their still (furniture.js)
    and Distilling's board (distill-board.js). Squares on the sloop's sea (`at`: [c, r]); `yaw` the way they
    face (0: out to sea). */
 export const HELIUM_CAST = {
-    /** Helium: her look (PIRATES's), on the sand at her still, a touch big so she reads from the sea, turned
-        to you while you're within earshot; her lines. */
-    her: { look: 'Helium', at: [HELIUM_STANDS.c, HELIUM_STANDS.r], scale: 1.15, yaw: -1.4, idle: 'stand', earshot: HELIUM.EARSHOT, says: HELIUM_SAYS, gap: PACE.ASIDE },
-    /** Her board: Distilling's own panel on a stand beside her, its face to the water off her island's left;
-        `size`, its width in metres (taller than she is), `lift` its bottom edge over the sand. */
+    /** Helium: their look (PIRATES's), on the sand at their still, a touch big so they read from the sea, turned
+        to you while you're within earshot; their lines. */
+    them: { look: 'Helium', at: [HELIUM_STANDS.c, HELIUM_STANDS.r], scale: 1.15, yaw: -1.4, idle: 'stand', earshot: HELIUM.EARSHOT, says: HELIUM_SAYS, gap: PACE.ASIDE },
+    /** Their board: Distilling's own panel on a stand beside them, its face to the water off their island's left;
+        `size`, its width in metres (taller than they are), `lift` its bottom edge over the sand. */
     board: { at: off(-0.1, 1.15), size: 2.6, lift: 0.5 },
-    /** Behind her, her copper still; and a palm. */
+    /** Behind them, their copper still; and a palm. */
     props: [{ kind: 'still', at: off(0.7, 0.4), yaw: -1.9 }],
     palm: off(1.15, -0.2),
-    /** Where her board and the lesson's camera face: out over the water on her island's left (squares). */
+    /** Where their board and the lesson's camera face: out over the water on their island's left (squares). */
     facing: off(-3.5, 0.8),
 };
