@@ -1531,6 +1531,20 @@ white column, and it will be like, right, and then it will start working on the 
 targets: a bot is its target chain, CC^1, CC^2, CC^3 and on; it banks the whites for that chain, sends it up, then
 goes back to building toward the next one, and it's judged by its mean chain against its target.
 
+**The thirty-first note: a sorted right side, and new junk brought in in one fluid motion (the user, 13 Nov,
+playing Helium's still, `notes/distilling/45-sorted-right-side-one-fluid-motion.webp`).** "once you get to this
+nice, organized right-hand side, brown [bottom] and black top, it becomes one fluid motion to bring in new pieces
+and keep them sorted. So here you can see you can bring the black down. It's on the right-hand side, but then it's
+just super easy. Just you drag it all the way up that channel of brown pieces, and it keeps everything sorted. It's
+just so easy to keep. So once there's a nice clear separation, it's just down, up and back up again." The picture:
+the whites a solid block on the left and middle; the right four columns junk, sorted, browns low and in the
+middle, blacks along the top; the user's drag takes a black from the far left, down and right under the whites to
+the bottom of the junk, then up through the browns, zigzagging, to join the blacks at the top. So once the right
+side is sorted (browns low, blacks high, the twenty-first note's order, done properly), it's a conveyor: a black
+from the left goes down, along and up the brown channel to the blacks in one drag, a brown the other way, and the
+sort keeps itself. Not one of the bots' named techniques yet; it's the reason the right side's order matters, and
+the payoff of the block phase. Helium's lesson and the read version should say so.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
