@@ -215,21 +215,23 @@ export const lessonBeats = (game: Distilling = lessonGame()): Beat[] => [...open
    a time slow enough to follow, and a breath between beats. Space, Enter or a click goes on once the line's
    up a moment; Esc skips the lot. */
 export const PACE_LESSON = {
-  /** Seconds a line's up: MIN at the least, else LEAD plus PER_WORD a word (about 2.5 words a second). */
-  MIN: 3.2, LEAD: 1.4, PER_WORD: 0.4,
+  /** Seconds a line's up: MIN at the least, else LEAD plus PER_WORD a word (about 3.3 words a second; it was
+      2.5, and then hung about: the user, 13 Nov, "by the time you get to is it safe ... come on, get on with the
+      puzzle"). */
+  MIN: 2.5, LEAD: 1, PER_WORD: 0.3,
   /** The opening's bang, once the white's gone into the furnace, before anyone speaks: its moment. */
-  BANG: 3.5,
+  BANG: 3,
   /** A beat with no line: a moment before they do it (the white ringed a moment before it goes), and at the
       least this long for a plain one (the furnace taking an all-junk column). */
   QUIET_LEAD: 1, QUIET: 1.2,
   /** A burned column's fall into the furnace (distill-board.js: 0.4 px a ms, about a second at the most). */
   FALL: 1,
   /** After a line's up, before they do anything on the board. */
-  ACT_AFTER: 1.6,
+  ACT_AFTER: 1.2,
   /** A swap of theirs: the piece held, then each swap this long; a breath between drags. */
   HOLD: 0.6, SWAP: 0.55, BETWEEN: 0.8,
   /** A quiet breath between beats. */
-  GAP: 0.6,
+  GAP: 0.4,
   /** Going on (Space, Enter, a click) works once a line's been up this long. */
   READ_FIRST: 0.8,
 } as const;

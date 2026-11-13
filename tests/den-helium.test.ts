@@ -234,11 +234,16 @@ describe('Helium\'s lesson as step one, and only step one (the user, 13 Nov: "le
 
 describe('Helium\'s lesson over in half a second (the user, 13 Nov: "it\'s supposed to be a little cutscene, and it\'s like half a second")', () => {
   const beats = lessonBeats();
-  it('keeps every line up long enough to read: a few seconds at the least, about 2.5 words a second', () => {
+  it('13 Nov, later ("by the time you get to is it safe, it\'s a bit like, well, come on, get on with the puzzle"): no line hangs about', () => {
+    // (the opening's lines; the lesson's last, the keys, is longer and can be gone on from with Space)
+    for (const b of beats.slice(0, beats.findIndex((x) => x.step))) if (b.says) expect(lessonSecs(b.says), b.says).toBeLessThanOrEqual(6.5);
+    expect(lessonSecs(OPENING.safe)).toBeLessThanOrEqual(6);
+  });
+  it('keeps every line up long enough to read: a few seconds at the least, about 3.3 words a second', () => {
     for (const b of beats) {
       const words = b.says.split(/\s+/).filter(Boolean).length;
-      expect(lessonSecs(b.says)).toBeGreaterThanOrEqual(3);
-      expect(lessonSecs(b.says)).toBeGreaterThanOrEqual(words / 2.5);
+      expect(lessonSecs(b.says)).toBeGreaterThanOrEqual(2.5);
+      expect(lessonSecs(b.says)).toBeGreaterThanOrEqual(words / 3.4);
     }
   });
   it('gives the opening\'s bang its moment before anyone speaks', () => {
