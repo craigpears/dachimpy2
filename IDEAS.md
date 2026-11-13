@@ -2507,6 +2507,19 @@ compound in complexity. The den's adventures so far, as the user sees them (13 N
 The sloop race is something else: "more of a full-on fun feature", not an adventure.
 (To shape with the user: what an adventure is, start to end, and how they're found.)
 
+## Helium's rum run: deliveries, then smuggled past the Empire (13 Nov)
+
+Once you've done some distilling, Helium asks: could you help them smuggle it to the island? They jump
+aboard your sloop, and her deck's "slightly full of barrels just piled all in the deck". The run: a delivery
+to Mischievious for her wedding, some for Kikkit, then the rest smuggled to the island (Port Decorum) past
+the imperial outposts, Helium all innocence as you go by: "nothing suspicious at all", whistling, "whoop-de-
+doop-de-doop-de-doo". "That would be cool and sweet." The adventure after the sailing Vegas one (above):
+Distilling, the smuggling and the imperial island as one. Helium aboard as the spouse is (js/den/spouse.js),
+the barrels a deck load that shows (and might shift or go over in a rough sea), each stop its own little
+scene with that character's lines, and the checkpoint's guards (Dignity's) looking on as you sail past. (To
+shape with the user: what getting past the outposts is as play, perhaps the smugglers' back way through the
+beach, and what the run earns.)
+
 ## The grand frigate and the tunnel: "we can fix that later" (13 Nov)
 
 A funny one, for Primates Rule or a ship like her, perhaps a trading character's mission: sailing a grand
