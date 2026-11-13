@@ -1545,6 +1545,23 @@ from the left goes down, along and up the brown channel to the blacks in one dra
 sort keeps itself. Not one of the bots' named techniques yet; it's the reason the right side's order matters, and
 the payoff of the block phase. Helium's lesson and the read version should say so.
 
+**The thirty-second note: frozen, whites left at the bottom, the blacks' diagonal never cleared; and drags not
+carried all the way (the user, 13 Nov, watching a bot, `notes/distilling/46-frozen-whites-at-the-bottom-blacks-left-on-the-diagonal.webp`).**
+"Don't know what happened to the bottom of this one. It seems to have just frozen ... It seemed to really neglect
+clearing out the diagonal of blacks. It just left them a long time ... those diagonals of blacks on the right-hand
+side. And then eventually you end up with these white gaps at the bottom. And it just gets frozen ... there is a
+[brown] piece there ... maybe it's stuck because it requires maybe a few moves just to kind of get the brown into
+the right position. And then you can use it to drag across a few blacks and then just mass drag them down and
+things get easier from there." And again: "it's very bot-like ... it doesn't really still finish dragging things
+all the way to the right when it's got the opportunity ... you could go one step further, just do it. Why does it
+seem to be limited?" The picture: the right-hand columns junk, but a diagonal of blacks running down through them
+left uncleared; whites in the bottom rows under the junk, in the columns by the fire; a brown low in the middle
+the user would set first, then use to drag blacks across and the blacks pulled down in one go. So: (1) a stall
+with whites low by the fire is the worst case, and a plan of a few moves (set a brown, then the drags it opens)
+must be found when no single move helps; (2) the blacks' diagonal through the junk wants clearing early, before
+it boxes whites in below; (3) a drag that can carry a piece further right, toward where it belongs, should,
+rather than stopping where one look ahead scores best.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
