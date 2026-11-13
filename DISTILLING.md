@@ -1181,6 +1181,20 @@ burn a white. That's just really bad." So the runner's yardstick: sessions with 
 every one); the junk columns burned before the first white burned; and how many sessions burned one in the first
 few columns gone, up or down, counted as a disaster. The bare count of whites burned is kept but no longer leads.
 
+**The twenty-first note: a brown a flick lower when it costs next to nothing (the user, 13 Nov, watching the
+bots' first move, `notes/distilling/38-brown-a-flick-lower-instead.webp`).** "the first move that jumped out to
+me was how this brown piece just got dragged up, I guess, on the simplest diagonal ... I would have put it further
+down ... that to me provides so many more opportunities later, because it gets that black piece up. It creates
+... a more connected board on that right hand side. I feel like you can then drag browns down. You've got a gap
+that's then easier to fill afterwards if you do get another brown in ... one of the heuristics is browns being
+lower down the board. Like, you don't want to really actively be going out of your way, spending extra moves to
+sort them at this point. But it's still preferable if it costs you very little. Like in this case, it's a little
+flick and a swish, and the brown can be one level lower." The picture: near the top right, the bot dragged a
+brown up and right along the plain diagonal (green); the user's way (orange) is a short hook that ends the brown
+a row lower, a black lifted above it. So a tie-breaker, not a goal: among moves that do the same job for about
+the same time (a swap or two more at most), prefer the one that leaves browns lower and blacks higher on the
+right-hand side; never spend real moves on it this early.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
