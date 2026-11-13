@@ -25,7 +25,8 @@ import { HELIUM as HAND, advise, burnsLeft } from './distill-bots.js';
 import { ROUTINES, clear, isJunk, junkTarget, playDrags } from './distill-routines.js';
 import { routesInto } from './distill-path.js';
 import { PHASES } from './distill-phase.js';
-import { AFTER, BEST, GOAL, HELP, HELP_ELSE, HINT, LESSON, MISHAP, NERVES, ONWARD, OPENING, PHASE, PLAN, PRAISE, STEP_ONE, TELL, WATCH } from './lines/helium.js';
+import { teach } from './distill-teach.js';
+import { AFTER, BEST, GOAL, HELP, HELP_ELSE, HINT, LESSON, MISHAP, NERVES, ONWARD, OPENING, PHASE, PLAN, PRAISE, SPOT, STEP_ONE, TEACH, TELL, WATCH } from './lines/helium.js';
 import { AT_HELIUMS } from './lines/you.js';
 const H = LAY.HELIUM;
 export const HELIUM = {
@@ -634,15 +635,22 @@ const whereIn = (cols, xs, is) => xs.flatMap((x) => cols[x].flatMap((p, y) => (i
     (whites still to bank) the junk columns are the three next to the fire, then the junk being built from the right
     (junkTarget); in the chain, the columns it burns before the chain (burnsLeft) and the column it's filling
     (Advice's `column`). */
-export function planFor(g, goal, timeLeft = Infinity) {
+export function planFor(g, goal, timeLeft = Infinity, last = null) {
     const cols = g.cols, target = planTarget(goal, g.chain);
     const advice = advise({ cols, chain: g.chain, timeLeft }, { target });
-    const drags = advice.kind === 'move' ? advice.drags.map(copyDrag) : [];
+    const theirs = advice.kind === 'move' ? advice.drags.map(copyDrag) : [];
     const isWhite = (p) => p === WHITE, junk = (p) => p !== WHITE && p !== SPICE;
     const make = (step, column, burn, ring, left) => {
         const n = PLAN_STEPS.indexOf(step) + 1, L = PLAN[step];
         const detail = step === 'send' && !burn.length ? PLAN.send.up : L.note.replace('{k}', String(left));
-        return { step, n, target, column, burn, ring, left, drags, advice, note: `Step ${n} of ${PLAN_STEPS.length}, ${L.name}: ${detail}` };
+        // (the move shown: a plain trick for the step, the goal setting how plain; none to send it up, that's X)
+        const t = step === 'send' ? null : teach(cols, aimFor(cols, burn, column, target - g.chain, step === 'build' ? 'into' : 'out'), goal, theirs, last);
+        const m = t?.move ?? null, how = m ? shownNote(m.trick, advice) : '';
+        return {
+            step, n, target, column, burn, ring, left, drags: m ? m.drags.map(copyDrag) : [], advice,
+            note: `Step ${n} of ${PLAN_STEPS.length}, ${L.name}: ${detail}${how ? ` · ${how}` : ''}`,
+            teach: m, spots: t?.spots ?? [], more: t?.more ?? 0, why: m ? whyFor(m.trick, advice) : '',
+        };
     };
     if (advice.stage === 'junk') {
         const fire = range(COLS - STEPS[0].cols, COLS), out = whereIn(cols, fire, isWhite);
@@ -660,6 +668,68 @@ export function planFor(g, goal, timeLeft = Infinity) {
     }
     const next = COLS - burn.length - 1;
     return make('send', next >= 0 && clear(cols[next]) ? next : column, burn, [], burn.length);
+}
+/** What a step of the plan is after, for the move shown (src/distill-teach.ts, Aim): whites out of the columns to
+    burn (`burn`); and once the gold column's known, junk out of it (and of any clear ones right of it, going up first),
+    and, half as much, out of the columns left of it the chain still needs (`rest` columns in all), and a quarter as
+    much out of the one after those, where the next whites gather. `focus`, the part the step's about (building, the
+    gold column; else the junk columns). */
+export function aimFor(cols, burn, column, rest = 1, focus) {
+    const into = [];
+    if (column !== null && column >= 0) {
+        const from = burn.length ? Math.min(...burn) : COLS;
+        for (let x = column; x < from; x++)
+            into.push({ x, w: 1 });
+        let x = column - 1;
+        for (let k = into.length; k < rest && x >= 0; k++, x--)
+            into.push({ x, w: 0.5 });
+        // (and a little, the column next left of them: whites gathered there are the next ones in)
+        if (x >= 0)
+            into.push({ x, w: 0.25 });
+    }
+    return { out: [...burn], into, focus };
+}
+/** The bots' own move's technique, as their HELP lines key it. */
+const techniqueOf = (a) => (a.technique === 'path' ? 'path' : a.routine);
+/** The move shown, in the bar: the trick's name and what you do; the planner's own by its label. */
+export function shownNote(trick, a) {
+    if (trick !== 'bots')
+        return `${TEACH[trick].name}: ${TEACH[trick].how}`;
+    return a.label;
+}
+/** Why the move shown works, in their voice: the trick's rule; the planner's own, their HELP line for it. */
+export function whyFor(trick, a) {
+    if (trick !== 'bots')
+        return TEACH[trick].why;
+    const t = techniqueOf(a);
+    return t ? HELP[t] : HELP_ELSE.stuck;
+}
+/** Their line for the other places the same trick works (`shown` ringed, `more` in all), or none. */
+export function spotLine(shown, more) {
+    if (shown <= 0)
+        return null;
+    if (more > shown)
+        return SPOT.many;
+    return shown === 1 ? SPOT.one : shown === 2 ? SPOT.two : SPOT.three;
+}
+/** Seconds the move's arrow is up on its own before the other places its trick works are ringed: a moment to look
+    for them first. */
+export const SPOT_AFTER = 2.5;
+/** Their lines for the move shown: why it works and where else it does (spotLine), the first time each trick's shown
+    in a batch; after that, nothing (the bar says it, the rings show it). The planner's own move, its line once a
+    technique. */
+export class TeachLines {
+    said = new Set();
+    next(p) {
+        if (!p.teach)
+            return [];
+        const key = p.teach.trick === 'bots' ? `bots:${techniqueOf(p.advice) ?? ''}` : p.teach.trick;
+        if (this.said.has(key))
+            return [];
+        this.said.add(key);
+        const spot = spotLine(p.spots.length, p.more);
+        return [p.why, ...(spot ? [spot] : [])];
+    }
 }
 /** Their line as a step of the plan starts: in full the first time in a batch, `again` when it comes round for a
     later column of the chain; nothing when it's the step already going, or one said already for this column (the

@@ -1132,6 +1132,41 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
   - *note:* "X burns the shaded junk, then the gold column goes up"
   - *up:* "X sends the gold column up"
 
+### The move their plan shows you, a plain trick: its name and what you do in the bar (name, how), why it works in their bubble the first time it's shown in a batch (why)
+
+- *A white dragged up through blacks:*
+  - *name:* "The climb"
+  - *how:* "drag the white up, over the black"
+  - *why:* "A white climbs past a black. Any black just above a white is a step up."
+- *A white dragged down through browns:*
+  - *name:* "The sink"
+  - *how:* "drag the white down, under the brown"
+  - *why:* "A white sinks past a brown. Any brown just below a white is a step down."
+- *A brown dragged up through whites:*
+  - *name:* "The lift"
+  - *how:* "drag the brown up through the whites"
+  - *why:* "A brown rises past a white. So any brown under a white can lift it along."
+- *A black dragged down through whites:*
+  - *name:* "The drop"
+  - *how:* "drag the black down through the whites"
+  - *why:* "A black sinks past a white. Drop one through, and each white steps up round it."
+- *A white up over blacks and down under browns in one drag:*
+  - *name:* "The weave"
+  - *how:* "the white up over blacks, down under browns"
+  - *why:* "Up over a black, down under a brown. A white weaves through junk like that."
+- *Nothing plain helps yet: a short drag first (1) that opens the way for a plain one (2):*
+  - *name:* "Make way"
+  - *how:* "1 opens the way, then 2"
+  - *why:* "Stuck? Move a piece beside it first. Then it's got a way through."
+
+### With the move shown, the other places the same trick works now ringed: their line after the why (by how many), and the bar's
+
+- *One more:* "One more like that on the board. Find it."
+- *Two more:* "Two more like that. Find them."
+- *Three more:* "Three more like that. Find them."
+- *More than the rings show:* "Plenty more like that. Here's a few. Find them."
+- *In the bar:* "Blue rings: the same trick works there too"
+
 ### While you're within earshot of their island: round and round
 
 - "Big order of rum for Mischievious. Another wedding. She does keep getting married."

@@ -20,7 +20,7 @@ import { BLACK, BROWN, CHAIN_BONUS, DOWN_LEFT, DOWN_RIGHT, MESSAGES, UP_LEFT, UP
 import { ROUTINES, playDrags, rightFrom, whitesFrom } from '../src/distill-routines';
 import { PHASES, PHASE_ORDER, phaseOf } from '../src/distill-phase';
 import { LEVELS, PATH_LABEL, SWEEP_LABEL, bankFor, choose, contextFor } from '../src/distill-bots';
-import { HELP, ONWARD, PHASE, TELL, BEST } from '../src/lines/helium';
+import { HELP, ONWARD, PHASE, TELL, BEST, SPOT, TEACH } from '../src/lines/helium';
 import { STEP_ONE_CTX, afterOpening, lessonPlan } from '../src/den-helium';
 
 const ROOT = join(__dirname, '..');
@@ -80,6 +80,15 @@ describe('the read version: a section for everything the code has (13 Nov, "ever
     expect(page).toContain('data-quote="tell"');
     expect(g.quotes.onward).toBe(ONWARD);
     expect(g.quotes.tell).toBe(TELL);
+  });
+  it('says the lesson shows plain moves first and asks you to spot more (13 Nov: "am I supposed to be able to figure out and spot similar things?")', () => {
+    const at = page.indexOf('id="goal"'), goal = page.slice(at, page.indexOf('</article>', at));
+    expect(goal).toMatch(/plain moves first/);
+    expect(goal).toMatch(/for you to find/);
+    expect(goal).toContain('data-quote="trick"');
+    expect(goal).toContain('data-quote="spot"');
+    expect(g.quotes.trick).toBe(TEACH.lift.why);
+    expect(g.quotes.spot).toBe(SPOT.three);
   });
   it('writes no names or lines of the code\'s into the page by hand: they\'re drawn in', () => {
     for (const line of [...Object.values(HELP), ONWARD, TELL, BEST.none, ...PHASE_ORDER.map((p) => PHASE[p].first), ...PHASE_ORDER.map((p) => PHASES[p].plan)]) {

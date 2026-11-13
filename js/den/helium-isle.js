@@ -24,10 +24,11 @@ import {
   actAfter, holdSecs, ringed, Nerves, NERVE, whitesInFurnace, onScreen, hintFor, hintLeft, routesToFire, Watch, PACE_WATCH,
   BEST_STORE, cleanBestChain, beatBest, SEEN_STORE,
   goalFor, biggerGoal, goalLines, fillIn, Batch, planFor, planTarget, PlanLines, crystalClears, flaskLevel, FLASK_STEPS,
+  TeachLines, SPOT_AFTER,
 } from '../den-helium.js';
 import { LAY } from '../den-sail.js';
 import { Distilling, WHITE } from '../distilling.js';
-import { FIRE, GOAL, HINT, WATCH } from '../lines/helium.js';
+import { FIRE, GOAL, HINT, SPOT, WATCH } from '../lines/helium.js';
 import { readSecs } from '../den-dignity.js';
 import { PACE } from '../chatter.js';
 import { PIRATES } from '../den-look.js';
@@ -57,7 +58,10 @@ const keepSeen = () => {};
 export const helium = { W: null, visit: new Visit(readSeen()), play: null, on: false, board: null, hand: [], handT: 0, handDone: null, bangs: 0, bigBang: 0, note: '', noteT: 0, cower: 0, shrug: 0, nervy: 0, nerves: new Nerves(), fretCol: null, held: true, fireTips: 0, cellar: new Cellar(), hint: null, routes: null, watch: null, best: readBest(),
   // Your goal at the still and the batch going for it, their plan for it on your board (its board's key, a moment's
   // wait after a change before it's worked out again), and the batches done this visit (src/den-helium.ts, Batch, planFor).
-  goal: 0, batch: null, plan: null, planKey: '', planWait: 0, planLines: null, batches: 0, fretMark: null };
+  goal: 0, batch: null, plan: null, planKey: '', planWait: 0, planLines: null, batches: 0, fretMark: null,
+  // The move their plan shows: its trick's lines said once a batch (src/den-helium.ts, TeachLines), the trick shown last
+  // (kept while it does well), and how long it's been up (the other places it works ringed after SPOT_AFTER).
+  teachLines: null, lastTrick: null, spotT: 0 };
 
 function build() {
   const g = new THREE.Group(), sand = mat('#e6cf96', { roughness: 1 }), wet = mat('#c9ad78', { roughness: 1 });
@@ -321,9 +325,10 @@ function freshBatch(goal, lines = []) {
   newBoard(new Distilling(Math.random), true);
   helium.nerves = new Nerves();
   helium.goal = goal; helium.batch = new Batch(goal); helium.planLines = new PlanLines(); helium.plan = null; helium.stepNote = ''; helium.hint = null;
+  helium.teachLines = new TeachLines(); helium.lastTrick = null;
   helium.board.paused = helium.held;
   const first = planNow();
-  if (lines.length || first) say(...lines, ...(first ? [first] : []));
+  if (lines.length || first.length) say(...lines, ...first);
   helpButton(helium.on);
 }
 /** The batch done: the board stops (Finished), their well done or not, and the question: the same goal again (R)
@@ -350,25 +355,32 @@ function nextBatch(bigger) {
 /* Their plan for your goal on your board (src/den-helium.ts, planFor; the user, 13 Nov: "try and get those three
    columns of blacks out of the way and start getting all the white pieces over here and like highlighting some
    column ... and arrows of where they think the white pieces should go"): the junk to burn first shaded red, the
-   Crystal Clear's column gold once it's known, the pieces the step's about ringed, the planner's next drags as
-   arrows, the step in the bar, and their line as each step starts. Worked out again a moment after the board
-   changes (not while it's sliding, while a piece is held, or while their own hand plays). */
+   Crystal Clear's column gold once it's known, the pieces the step's about ringed, the move to make as arrows (a
+   plain trick for it, src/distill-teach.ts; the user, 13 Nov: "it's giving you really complicated moves ... am I
+   supposed to be able to figure out and spot similar things?"), the step in the bar, their line as each step
+   starts, and why the move works the first time its trick's shown; a moment later (SPOT_AFTER) the other places
+   the same trick works now ringed, for you to find. Worked out again a moment after the board changes (not while
+   it's sliding, while a piece is held, or while their own hand plays). */
 const boardKey = (g) => `${g.columns.length}:${g.swaps}:${g.chain}`;
-/** Works their plan out on the board as it stands; their line for it if a step's starting. */
+/** Works their plan out on the board as it stands; their lines for it: the step's if it's starting, and the move's
+    why (and where else it works) the first time its trick's shown. */
 function planNow() {
   const B = helium.board, g = B?.game;
-  if (!g || !helium.batch || helium.batch.done) return null;
-  const p = planFor(g, helium.goal, helium.held ? Infinity : g.timeLeft());
-  helium.plan = p; helium.planKey = boardKey(g); helium.planWait = 0; helium.stepNote = p.note;
+  if (!g || !helium.batch || helium.batch.done) return [];
+  const p = planFor(g, helium.goal, helium.held ? Infinity : g.timeLeft(), helium.lastTrick);
+  helium.plan = p; helium.planKey = boardKey(g); helium.planWait = 0; helium.stepNote = p.note; helium.spotT = 0;
+  if (p.teach) helium.lastTrick = p.teach.trick;
   const ring = new Set(p.ring.map(([x, y]) => `${x},${y}`));
   p.mark = (x, y, _p, gone) => !gone && ring.has(`${x},${y}`);
   B.column = p.column; B.burnCols = p.burn;
-  return helium.planLines.next(p, g.chain);
+  const step = helium.planLines.next(p, g.chain);
+  return [...(step ? [step] : []), ...helium.teachLines.next(p)];
 }
 function planTick(dt) {
   const B = helium.board, g = B?.game;
   if (!helium.on || !g || !helium.batch || helium.batch.done || helium.watch || helium.hand.length) return;
   const key = boardKey(g);
+  if (key === helium.planKey && helium.plan) helium.spotT += dt;
   if (key !== helium.planKey) {
     // (a column gone, the board's slid under the shading: off till it's worked out again)
     if (helium.planKey.split(':')[0] !== String(g.columns.length)) { B.column = null; B.burnCols = []; }
@@ -377,8 +389,8 @@ function planTick(dt) {
   }
   if (helium.planWait <= 0 || !g.movable || B.busy() || B.selected()) return;
   if ((helium.planWait -= dt) > 0) return;
-  const line = planNow();
-  if (line) say(line);
+  const lines = planNow();
+  if (lines.length) say(...lines);
 }
 function leave() {
   stopWatch(false);
@@ -435,6 +447,11 @@ function arrowsTick() {
   B.clearArrows();
   const plan = helium.plan && helium.planKey === boardKey(g) ? helium.plan : null;
   if (helium.on && !helium.watch && helium.batch) B.mark = helium.fretMark ?? plan?.mark ?? null;
+  // (the other places the plan's trick works, ringed once its arrow's been up a moment; not with a hint up, nor
+  // while they play)
+  const spots = helium.on && plan && !helium.watch && !helium.hint && !helium.hand.length && g.movable && helium.spotT >= SPOT_AFTER ? plan.spots : [];
+  B.spots = spots;
+  if (plan) helium.stepNote = spots.length ? `${plan.note} · ${SPOT.note}` : plan.note;
   if (!helium.on || !g.movable) return;
   // Watching them: only their move's arrow, up just before they drag it.
   if (helium.watch) {
