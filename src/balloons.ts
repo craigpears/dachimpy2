@@ -305,6 +305,8 @@ export function marks(routine: Routine, n: number): Mark[] {
     `chain` once it's set off. */
 export interface Says {
   start?: string; twists?: readonly string[]; yours?: string; again?: readonly string[]; help?: string; popped?: string;
+  /** Said after `popped`, each in its own bubble: what comes after the act (the last act's send-off). */
+  then?: readonly string[];
   brief?: string; watch?: Readonly<Record<number, string>>; task?: string; chain?: string;
 }
 /** An act of a show: a routine, what's said, and whether the last twist is yours to drop (`you`: she
@@ -364,6 +366,7 @@ export function beats(acts: readonly Act[], secs: (text: string) => number): Bea
     if (a.you) add(k, 'yours', n - 1, SHOW.YOURS, S.yours);
     add(k, 'pop', 0, P.steps * SHOW.POP);
     add(k, 'after', 0, SHOW.AFTER, S.popped);
+    S.then?.forEach((line, i) => add(k, 'after', i + 1, SHOW.AFTER, line));
   });
   return out;
 }

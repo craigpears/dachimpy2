@@ -828,6 +828,8 @@ The sensible one, after Kikkit: she shows you plainly how a big Vegas is built, 
 >
 > "Maybe it would be simpler just to be like, they're balloons and she's blowing them up. Would that be easier? Maybe my balloon animal thing was a bit too complicated." (the user, 11 Nov)
 >
+> "these are the starter things, but, you know, these guys are amazing. They stream on Twitch a lot. Check out ... link up to the community, especially in the Discord channels ... The official Puzzle Pirate one and the Trophy Hunter community." (the user, 13 Nov)
+>
 > "Tzz (the real one, in the game) to the user: "i just want to stream and talk about puzzles while i play"; the user: "\<3 that's always the heart of the game", and then "I think that's enough to actually add the spirit ... because that does need expressing."" (the user, 13 Nov)
 
 ### Sailing up to her island, her lesson begins (or Space there, again)
@@ -885,6 +887,11 @@ The sensible one, after Kikkit: she shows you plainly how a big Vegas is built, 
   - *8:* "This pair waits. When the top platform pops, it falls: blue onto the blues, yellow into the bottom gap."
 - *Your instruction on your go, in the panel by her board:* "White on top of the whites, yellow over the top gap."
 - *An instruction, in the panel by her board, once you've set it off:* "1, the whites pop. 2, the top platform. 3, the blues. 4, the bottom platform."
+
+### The end of her lesson, after the Bingo's popped: the starter stuff, and where the community is
+
+- "That's the starter stuff, that. The real show's on Twitch: loads of us stream. Come and watch."
+- "And the Discords. The official Puzzle Pirates one, and the Trophy Hunters'. That's where it all gets sorted."
 
 ### After her lesson, while you're within earshot of her island: round and round
 

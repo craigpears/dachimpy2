@@ -9,13 +9,13 @@ import { TZZ, TZZ_CAST, TZZ_MOOR, TZZ_SAYS, TZZ_STANDS, Visit, inTzzEarshot, les
 import { KIKKIT, KIKKIT_CAST, KIKKIT_SAYS, KIKKIT_STANDS, kikkitAt, onKikkitLanding, inEarshot, youWonder } from '../src/den-kikkit';
 import { LAY, SAIL, Sea, checkpointWorks } from '../src/den-sail';
 import { isleAt, onIsleLanding } from '../src/den-isle';
-import { BalloonShow, ROUTINES, marks, perform, plan } from '../src/balloons';
+import { BalloonShow, ROUTINES, beats, marks, perform, plan } from '../src/balloons';
 import { Chatter, Voices } from '../src/chatter';
 import { readSecs } from '../src/den-dignity';
 import { CHART, NOTES, WHIRLPOOLS } from '../src/den-map';
 import { RAMBLE, TANGENTS } from '../src/lines/kikkit';
 import { AFTER_KIKKIT } from '../src/lines/you';
-import { GREET, DOUBLE, BINGO, AFTER } from '../src/lines/tzz';
+import { GREET, DOUBLE, BINGO, AFTER, ONWARD } from '../src/lines/tzz';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -302,6 +302,14 @@ describe('her lesson: a Double, then a Bingo, on a real board; she sets them up,
     expect(v.arrive(true, true)).toBe(false);   // (once a voyage by itself)
     expect(v.again(true, true)).toBe(true);
     expect(v.again(false, true)).toBe(false);
+  });
+  it('13 Nov: her lesson ends by sending you on to the community, Twitch and the Discords', () => {
+    const last = lesson(false).at(-1)!;
+    expect(last.says?.then).toEqual(ONWARD);
+    expect(ONWARD.join(' ')).toMatch(/Twitch/);
+    expect(ONWARD.join(' ')).toMatch(/Discord/);
+    const b = beats(lesson(false), lessonSecs);
+    expect(b.slice(-ONWARD.length).map((x) => x.line)).toEqual([...ONWARD]);
   });
   it('after it, her tips round and round while you\'re near', () => {
     expect(TZZ_SAYS.loop).toEqual(AFTER);

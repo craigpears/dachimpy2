@@ -86,6 +86,15 @@ const LESSON_EACH = {
     brief: 'An instruction, in the panel by her board, as it starts', watch: 'Instructions, in the panel by her board, once her pair (counted from 0) is down',
     task: 'Your instruction on your go, in the panel by her board', chain: 'An instruction, in the panel by her board, once you\'ve set it off',
 };
+/** The end of her lesson, after the Bingo's popped (src/den-tzz.ts, lesson): that was the starter stuff, and where the community is
+    (the user, 13 Nov: "these are the starter things, but, you know, these guys are amazing. They stream on
+    Twitch a lot ... link up to the community, especially in the Discord channels ... The official Puzzle
+    Pirate one and the Trophy Hunter community ... where people coordinate things, puts Twitch streams and
+    such"; RULES.md, "The den sends you to other pirates"). */
+export const ONWARD = [
+    'That\'s the starter stuff, that. The real show\'s on Twitch: loads of us stream. Come and watch.',
+    'And the Discords. The official Puzzle Pirates one, and the Trophy Hunters\'. That\'s where it all gets sorted.',
+];
 /** After her lesson, while you're within earshot: a tip now and then, round and round. */
 export const AFTER = [
     'Space if you want it again. Balloons are cheap.',
@@ -137,12 +146,14 @@ export const CHARACTER = {
         { on: '11 Nov', said: 'it should definitely be like a now you try thing. And, you know, she sets up the balloons, you do the pop.' },
         { on: '11 Nov', said: 'I don\'t think they need to be aboard, to be honest. I like Kikkit just kind of on her island. It works.' },
         { on: '11 Nov', said: 'Maybe it would be simpler just to be like, they\'re balloons and she\'s blowing them up. Would that be easier? Maybe my balloon animal thing was a bit too complicated.' },
+        { on: '13 Nov', said: 'these are the starter things, but, you know, these guys are amazing. They stream on Twitch a lot. Check out ... link up to the community, especially in the Discord channels ... The official Puzzle Pirate one and the Trophy Hunter community.' },
         { on: '13 Nov', said: 'Tzz (the real one, in the game) to the user: "i just want to stream and talk about puzzles while i play"; the user: "<3 that\'s always the heart of the game", and then "I think that\'s enough to actually add the spirit ... because that does need expressing."' },
     ],
     lines: [
         { when: 'Sailing up to her island, her lesson begins (or Space there, again)', says: GREET, each: { plain: 'If you\'ve not heard Kikkit out', heard: 'If you have' } },
         { when: 'Her lesson\'s first act: she blows up a Double\'s balloons onto her board, and you drop the pair that pops it', says: DOUBLE, each: LESSON_EACH },
         { when: 'Her lesson\'s last act: a Bingo, that Double with another on top, the last pair yours', says: BINGO, each: LESSON_EACH },
+        { when: 'The end of her lesson, after the Bingo\'s popped: the starter stuff, and where the community is', says: ONWARD },
         { when: 'After her lesson, while you\'re within earshot of her island: round and round', says: AFTER },
         { when: 'Racing you in the sloop race, over her sloop: on the starting line, and over the finish line first or after', says: RACER.says },
     ],

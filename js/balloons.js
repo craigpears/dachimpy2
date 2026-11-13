@@ -279,6 +279,7 @@ export function beats(acts, secs) {
             add(k, 'yours', n - 1, SHOW.YOURS, S.yours);
         add(k, 'pop', 0, P.steps * SHOW.POP);
         add(k, 'after', 0, SHOW.AFTER, S.popped);
+        S.then?.forEach((line, i) => add(k, 'after', i + 1, SHOW.AFTER, line));
     });
     return out;
 }

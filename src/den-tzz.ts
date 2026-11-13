@@ -18,7 +18,7 @@
 import { LAY, SAIL, type Pose } from './den-sail.js';
 import { shoreOf } from './den-isle.js';
 import { ROUTINES, type Act } from './balloons.js';
-import { GREET, DOUBLE, BINGO, AFTER } from './lines/tzz.js';
+import { GREET, DOUBLE, BINGO, AFTER, ONWARD } from './lines/tzz.js';
 import { PACE, type Script } from './chatter.js';
 
 const T = LAY.TZZ;
@@ -69,7 +69,7 @@ export const TZZ_ARRIVE: Pose = { c: O[0] - 1, r: O[1] + 1, d: 1 };
 export function lesson(heard: boolean): Act[] {
   return [
     { routine: ROUTINES.double, says: { ...DOUBLE, start: `${heard ? GREET.heard : GREET.plain} ${DOUBLE.start}` }, you: true },
-    { routine: ROUTINES.bingo, says: BINGO, you: true },
+    { routine: ROUTINES.bingo, says: { ...BINGO, then: ONWARD }, you: true },
   ];
 }
 

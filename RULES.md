@@ -122,7 +122,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   framed as the place to learn it all (the user, 13 Nov: "don't forget, you know, the greatest love of the game
   is talking to other pirates ... this is not a replacement for the game ... this is a tool, a side adventure.
   It's not something that's trying to get the main focus ... we should never be trying to learn exclusively
-  here. We should be watching people, looking at YouTube videos, talk to people").
+  here. We should be watching people, looking at YouTube videos, talk to people"). Each teacher's lesson ends
+  that way: Helium with "the rest's from other pirates" and "send me a tell on Emerald"; Tzz with the starter
+  stuff done, the real show on Twitch, and the Discords, the official Puzzle Pirates one and the Trophy
+  Hunters' (the user, 13 Nov: "these are the starter things, but ... these guys are amazing. They stream on
+  Twitch a lot ... link up to the community, especially in the Discord channels"). Umami too, to settle how,
+  since he doesn't speak.
 
 - **A demonstration shows its plan before it builds (12 Nov).** In any tutorial (Tzz's balloons, Helium's
   Distilling), the plan is on the board and said before the pieces go in, so every move is seen to serve
