@@ -709,6 +709,13 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     only when the whole of it does something for the step. Never one drag shown split in two: a one-swap
     drag onto a piece then that piece dragged on, or one piece dragged on from where it stopped, is shown as
     the one drag (`joinPairs`). The arrows' drawing is unchanged ("the drawing of the arrows was all fine").
+    Making way says what drag 1 sets up for drag 2, by the trick 2 is (13 Nov: "first do this, so because
+    white goes up into black, so you need a black piece there"): "First 1: a white only climbs past a black,
+    so it needs one above it. Then 2, and up it goes." (`MAKE_WAY`). And once a Crystal Clear's gone up with
+    the next column junk, the plan starts over at step one, the junk columns by the fire and the whites built
+    further left, never a column of junk to make white (13 Nov: "Why on earth is it trying to get me to pull
+    the white piece all the way into the first column? ... we should be restarting to three columns of
+    junk"; `chainOver`).
   - **Their mishaps:** whenever a column burns with a white (or a burnt white) in it, the distillery blows
     up (the bang, above) and they shrug it off, their own line first, then others. The humour's the
     maker's, never drink (that's Kikkit's).

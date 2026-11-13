@@ -63,7 +63,7 @@ export function cost(cols: Board, aim: Aim, part?: 'out' | 'into'): number {
 
 /** A move a learner's shown: the trick (or the bots' own), its one drag (the bots' may be more from CC^5), what it
     brings the step's cost down by, and its swaps. */
-export interface TeachMove { trick: Shown; drags: Drag[]; value: number; swaps: number }
+export interface TeachMove { trick: Shown; drags: Drag[]; value: number; swaps: number; /** Make way: the trick its second drag is. */ then?: Trick }
 
 const up = (w: number) => w === UP_LEFT || w === UP_RIGHT;
 const right = (w: number) => w === UP_RIGHT || w === DOWN_RIGHT;
@@ -251,7 +251,7 @@ export function makeWay(cols: Board, aim: Aim, level: TeachLevel): TeachMove | n
     const then = best(plainMoves(after, aim, level), { x: d.x, y: d.y });
     if (!then || joinPairs(cols, [d, then.drags[0]]).length < 2) return;
     const value = first + then.value, swaps = d.ways.length + then.swaps;
-    if (!top || value > top.value + 1e-9 || (value > top.value - 1e-9 && swaps < top.swaps)) top = { trick: 'makeWay', drags: [d, then.drags[0]], value, swaps };
+    if (!top || value > top.value + 1e-9 || (value > top.value - 1e-9 && swaps < top.swaps)) top = { trick: 'makeWay', drags: [d, then.drags[0]], value, swaps, then: then.trick as Trick };
   }, nearAim(aim, MAKE_WAY_NEAR));
   return top;
 }

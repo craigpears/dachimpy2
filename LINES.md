@@ -1159,6 +1159,24 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
   - *how:* "1 opens the way, then 2"
   - *why:* "Stuck? Move a piece beside it first. Then it's got a way through."
 
+### Make way, said for the trick it makes way for: what the first drag (1) sets up for the second (2), in the bar (how) and their bubble (why)
+
+- *Making way for the climb:*
+  - *how:* "1 brings a black above the white, then 2 climbs it"
+  - *why:* "First 1: a white only climbs past a black, so it needs one above it. Then 2, and up it goes."
+- *Making way for the sink:*
+  - *how:* "1 brings a brown below the white, then 2 sinks it"
+  - *why:* "First 1: a white only sinks past a brown, so it needs one below it. Then 2, and down it goes."
+- *Making way for the lift:*
+  - *how:* "1 brings a white above the brown, then 2 lifts it"
+  - *why:* "First 1: a brown only rises past a white, so it needs one above it. Then 2, and up it comes."
+- *Making way for the drop:*
+  - *how:* "1 brings a white below the black, then 2 drops it"
+  - *why:* "First 1: a black only sinks past a white, so it needs one below it. Then 2, and down it goes."
+- *Making way for the weave:*
+  - *how:* "1 opens a gap in the junk, then 2 weaves the white through"
+  - *why:* "First 1, to open a gap in the junk. Then 2: up over the blacks, down under the browns."
+
 ### With the move shown, the other places the same trick works now ringed: their line after the why (by how many), and the bar's
 
 - *One more:* "One more like that on the board. Find it."

@@ -5,10 +5,11 @@
    "drag the brown to the right, and then the white to the left ... why isn't that just one move?" */
 import { describe, expect, it } from 'vitest';
 import { Batch, PlanLines, TeachLines, aimFor, planFor, spotLine, type Plan } from '../src/den-helium';
-import { BLACK, BROWN, Distilling, UP_LEFT, WHITE, neighbourOn, parseBoard, type Board } from '../src/distilling';
+import { BLACK, BROWN, COLS, Distilling, UP_LEFT, WHITE, neighbourOn, parseBoard, type Board } from '../src/distilling';
 import { playDrags, type Drag } from '../src/distill-routines';
 import { SPOT_MOST, TEACH_LEVELS, TRICKS, cost, joinPairs, plainMoves, teach, teachLevel, touched, trickOf, type Shown } from '../src/distill-teach';
-import { SPOT, TEACH } from '../src/lines/helium';
+import { MAKE_WAY, SPOT, TEACH } from '../src/lines/helium';
+import { advise } from '../src/distill-bots';
 import { seeded } from '../src/mirror-row';
 
 const words = (s: string) => s.trim().split(/\s+/).length;
@@ -155,13 +156,14 @@ describe('why it works, in a line in Helium\'s voice (13 Nov: "each with why it 
   it('the why is the move\'s own: a plain trick\'s rule, and it\'s in the bar by name', () => {
     for (const { plans } of runs) for (const { p } of plans) {
       if (!p.teach || p.teach.trick === 'bots') continue;
-      expect(p.why).toBe(TEACH[p.teach.trick].why);
+      // (Make way's own why, by the trick it makes way for: see "a lack of explanation" below)
+      expect(p.why).toBe(p.teach.trick === 'makeWay' ? MAKE_WAY[p.teach.then!].why : TEACH[p.teach.trick].why);
       expect(p.note).toContain(TEACH[p.teach.trick].name);
     }
   });
   it('said the first time each trick\'s shown in a batch, not every move', () => {
     for (const { plans, said } of runs) {
-      const whys = said.flat().filter((l) => Object.values(TEACH).some((t) => t.why === l));
+      const whys = said.flat().filter((l) => [...Object.values(TEACH), ...Object.values(MAKE_WAY)].some((t) => t.why === l));
       expect(new Set(whys).size).toBe(whys.length);
       expect(whys.length).toBeGreaterThan(1);
       const first = plans.findIndex(({ p }) => p.teach && p.teach.trick !== 'bots');
@@ -222,5 +224,37 @@ describe('the plain tricks are the swap rule', () => {
   });
   it('PlanLines still says each step as it starts', () => {
     expect(new PlanLines().next({ step: 'clear' }, 0)).not.toBeNull();
+  });
+});
+
+describe('"I\'ve just done the crystal clear one. Why on earth is it trying to get me to pull the white piece all the way into the first column?" (13 Nov)', () => {
+  // A board with the column by the fire all junk, a Crystal Clear just gone up (the chain at 1).
+  const cols = parseBoard(['wKwwKwKK', 'KKbKwKKKK', 'bbKbbbwK', 'bbbbbbbbK', 'KbwwbwKK', 'K*bwwwwwK', 'wbbwKwwK', 'wKbbbwKKb', 'bKKKbKww', 'KKKbb*bKK']);
+  it('the planner alone would carry the chain on into that column of junk', () => {
+    const a = advise({ cols, chain: 1, timeLeft: Infinity }, { target: 2 });
+    expect(a.stage).toBe('chain');
+    expect(a.column).toBe(COLS - 1);
+  });
+  it('their plan starts over instead: "restarting to three columns of junk and then building the white pieces further to the left"', () => {
+    const p = planFor({ cols, chain: 1 }, 1), fresh = planFor({ cols, chain: 0 }, 1);
+    expect(p.column === null || p.column < COLS - 1).toBe(true);
+    expect(p.step).toBe(fresh.step);
+    expect(p.column).toBe(fresh.column);
+    expect(p.burn).toEqual(fresh.burn);
+  });
+});
+
+describe('"a lack of explanation as to, oh, first do this, so because white goes up into black, so you need a black piece there" (13 Nov): Make way explained', () => {
+  it('says what drag 1 sets up for drag 2, by the trick drag 2 is, in the bar and in their bubble', () => {
+    let seen = 0;
+    for (const { plans } of runs) for (const { p } of plans) {
+      if (p.teach?.trick !== 'makeWay') continue;
+      seen++;
+      const then = p.teach.then!;
+      expect(TRICKS).toContain(then);
+      expect(p.why).toBe(MAKE_WAY[then].why);
+      expect(p.note).toContain(MAKE_WAY[then].how);
+    }
+    expect(seen).toBeGreaterThan(0);
   });
 });

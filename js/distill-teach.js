@@ -273,7 +273,7 @@ export function makeWay(cols, aim, level) {
             return;
         const value = first + then.value, swaps = d.ways.length + then.swaps;
         if (!top || value > top.value + 1e-9 || (value > top.value - 1e-9 && swaps < top.swaps))
-            top = { trick: 'makeWay', drags: [d, then.drags[0]], value, swaps };
+            top = { trick: 'makeWay', drags: [d, then.drags[0]], value, swaps, then: then.trick };
     }, nearAim(aim, MAKE_WAY_NEAR));
     return top;
 }

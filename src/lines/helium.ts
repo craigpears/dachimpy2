@@ -284,6 +284,16 @@ export const TEACH = {
   weave: { name: 'The weave', how: 'the white up over blacks, down under browns', why: 'Up over a black, down under a brown. A white weaves through junk like that.' },
   makeWay: { name: 'Make way', how: '1 opens the way, then 2', why: 'Stuck? Move a piece beside it first. Then it\'s got a way through.' },
 } as const;
+/** "Make way" said for the trick it makes way for: what 1 sets up for 2, and why (the user, 13 Nov: "a lack of
+    explanation as to, oh, first do this, so because white goes up into black, so you need a black piece there ...
+    that's obviously wordy, but I feel like it could help"). `how` in the bar, `why` in their bubble. */
+export const MAKE_WAY = {
+  climb: { how: '1 brings a black above the white, then 2 climbs it', why: 'First 1: a white only climbs past a black, so it needs one above it. Then 2, and up it goes.' },
+  sink: { how: '1 brings a brown below the white, then 2 sinks it', why: 'First 1: a white only sinks past a brown, so it needs one below it. Then 2, and down it goes.' },
+  lift: { how: '1 brings a white above the brown, then 2 lifts it', why: 'First 1: a brown only rises past a white, so it needs one above it. Then 2, and up it comes.' },
+  drop: { how: '1 brings a white below the black, then 2 drops it', why: 'First 1: a black only sinks past a white, so it needs one below it. Then 2, and down it goes.' },
+  weave: { how: '1 opens a gap in the junk, then 2 weaves the white through', why: 'First 1, to open a gap in the junk. Then 2: up over the blacks, down under the browns.' },
+} as const;
 /** Then, with the move shown, the other places the same trick works now ringed on the board (a few at the most), and
     their line for it with the why: so you spot the next one yourself. `many` when there are more than the rings
     show; `note` in the bar. */
@@ -387,6 +397,11 @@ export const CHARACTER: Character = {
       when: 'The move their plan shows you, a plain trick: its name and what you do in the bar (name, how), why it works in their bubble the first time it\'s shown in a batch (why)',
       says: TEACH,
       each: { climb: 'A white dragged up through blacks', sink: 'A white dragged down through browns', lift: 'A brown dragged up through whites', drop: 'A black dragged down through whites', weave: 'A white up over blacks and down under browns in one drag', makeWay: 'Nothing plain helps yet: a short drag first (1) that opens the way for a plain one (2)' },
+    },
+    {
+      when: 'Make way, said for the trick it makes way for: what the first drag (1) sets up for the second (2), in the bar (how) and their bubble (why)',
+      says: MAKE_WAY,
+      each: { climb: 'Making way for the climb', sink: 'Making way for the sink', lift: 'Making way for the lift', drop: 'Making way for the drop', weave: 'Making way for the weave' },
     },
     {
       when: 'With the move shown, the other places the same trick works now ringed: their line after the why (by how many), and the bar\'s',
