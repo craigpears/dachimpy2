@@ -45,7 +45,7 @@ export function rocksWorld(parent) { rocks.W ||= build(parent); }
     counts it, shared), shown at the tick. Whether it was theirs. */
 export function rocksShot(R, c, r) {
   if (!onRocks(c, r)) return false;
-  if (R.state !== 'on') { toast('A hit on the rocks! (They come down in a race, three hits: anyone\'s)'); return true; }
+  if (R.state !== 'on') { toast(`A hit on the rocks! (They come down in a race: ${RACE.ROCKS.HITS} hits, anyone's)`); return true; }
   const { hit, down } = R.blast();
   if (!hit && down) return true;
   if (!down) toast(`A hit on the rocks! ${RACE.ROCKS.HITS - R.field.rocks} more and they're down, for everyone`);
@@ -73,6 +73,8 @@ export function rocksTick(R) {
   if (!rocks.open && rocksDown(R.field) && (R.state === 'on' || R.state === 'done')) {
     rocks.open = true;
     rocksOn(sail.sea, false);
+    // (every course still standing comes down with the last hit, should there be fewer hits than courses)
+    for (const cg of rocks.W.courses) if (cg.visible) crumble(cg);
     rocks.W.rubble.visible = true;
     burst(rocks.W.at, '#b8b2a6', 24, 4);
     toast('The rocks are down! The gap\'s open, for everyone');
