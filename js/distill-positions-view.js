@@ -2,9 +2,11 @@
 // src/distill-positions.ts's positions (js/distill-positions.js) flat, as the read version draws its boards (its
 // `board`, from js/distill-guide-view.js, whose own drawing finds nothing to fill on this page but sets up the
 // pieces' colours), with the bot's move as numbered arrows, the column it's filling shaded, its phase and reason,
-// and any verdicts the user has given there.
+// how it reads the board (its state and tactic, src/distill-read.ts), and any verdicts the user has given there (or
+// that they skipped it).
 import { board } from './distill-guide-view.js';
-import { MOMENTS, POSITIONS, VERDICTS } from './distill-positions.js';
+import { MOMENTS, POSITIONS, SKIPPED, VERDICTS } from './distill-positions.js';
+import { STATES, TACTICS } from './distill-read.js';
 import { PHASES } from './distill-phase.js';
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -46,12 +48,15 @@ function position(p) {
   const dl = html('dl');
   const row = (k, v) => { dl.appendChild(html('dt', {}, k)); dl.appendChild(html('dd', {}, v)); };
   row('Phase', `${PHASES[bot.phase]?.label ?? bot.phase}: ${PHASES[bot.phase]?.plan ?? ''}`);
+  // The board read (src/distill-read.ts): its state, the tactic in play, and why.
+  if (bot.state) row('Reads', `${STATES[bot.state]?.label ?? bot.state}; ${(TACTICS[bot.tactic]?.label ?? bot.tactic).toLowerCase()}: ${bot.read}`);
   row('Does', bot.kind === 'move' ? `${bot.label}${bot.drags.length > 1 ? `, in ${bot.drags.length} drags` : ''}` : (KIND[bot.kind] ?? bot.kind));
   row('Why', bot.reason);
   if (bot.column !== undefined) row('Filling', `column ${bot.column + 1} (shaded), to go up Crystal Clear`);
   row('Where', `the ${levelLabel(p.level)} bot, seed ${p.seed}, ${secs(p.ms)} in; ${secs(p.timeLeft)} on the furnace${p.chain ? `; the chain at CC^${p.chain}` : ''}`);
   a.appendChild(dl);
   const verdicts = VERDICTS[p.id] ?? [];
+  if (!verdicts.length && SKIPPED[p.id]) a.appendChild(html('div', { className: 'verdicts' }, `Skipped by you, ${SKIPPED[p.id].date}: ${SKIPPED[p.id].note}`));
   if (verdicts.length) {
     const box = html('div', { className: 'verdicts' });
     box.appendChild(html('b', {}, 'Your verdicts, tested:'));

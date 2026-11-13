@@ -39,73 +39,73 @@ export const POSITIONS = [
         id: "P1", moment: "early", level: "cc8", seed: 1, ms: 16300, stage: "junk", burns: 0, chain: 0, timeLeft: 14300,
         what: "16.3 s into the session: 4 whites still in the three columns by the fire, 14.3 s before the first goes.",
         cols: ["wwbKwbKb", "KwKKKb*Kw", "bbwwKwww", "*bwwKKbwb", "wwwKbwbb", "K*KKbwwbb", "wKKbbKww", "bwwKKKbww", "bbKbbbbb", "KKbKKKKKK"],
-        bot: { "phase": "fire", "kind": "move", "technique": "rescue", "label": "Save the whites", "reason": "a white stuck in a column to burn: set the black at column 4, row 6 on its diagonal, then sweep it down onto the white", "drags": [{ "x": 3, "y": 5, "ways": [3, 3, 3, 3, 2, 3, 0] }] },
+        bot: { "phase": "fire", "kind": "move", "technique": "rescue", "label": "Save the whites", "reason": "free the trapped whites: nothing frees the white at column 8, row 2 yet: open the way to it: a short drag beside it, the pieces round it set moving", "drags": [{ "x": 8, "y": 2, "ways": [0] }], "state": "atRisk", "tactic": "freeTrapped", "read": "2 whites trapped near the fire (column 8, row 2, column 8, row 9), the worst first" },
     },
     {
         id: "P2", moment: "early", level: "cc3", seed: 3, ms: 16200, stage: "junk", burns: 0, chain: 0, timeLeft: 14400,
         what: "16.2 s into the session: 3 whites still in the three columns by the fire, 14.4 s before the first goes.",
         cols: ["bKKbwbwK", "bKKwKwKwK", "KKwbKbwK", "KKKwww*ww", "KbbKwKbw", "wKKwwwwKK", "KKbbbKbw", "wKKbbbKwb", "wKKKKKKK", "bbbKbKKKb"],
-        bot: { "phase": "fire", "kind": "move", "technique": "diamond", "label": "The diamond", "reason": "first, to open the way to the white by the fire: bring in another piece: drag the brown at column 3, row 4 into the gap, then the black at column 1, row 3 over past it", "drags": [{ "x": 2, "y": 3, "ways": [0] }, { "x": 0, "y": 2, "ways": [3, 3, 3, 3, 3, 0, 0] }] },
+        bot: { "phase": "fire", "kind": "move", "technique": "rescue", "label": "Save the whites", "reason": "free the trapped whites: a piece near the white at column 9, row 1 taken round into its place", "drags": [{ "x": 9, "y": 1, "ways": [1, 2, 3, 0] }], "state": "atRisk", "tactic": "freeTrapped", "read": "2 whites trapped near the fire (column 9, row 1, column 8, row 1), the worst first" },
     },
     {
         id: "P3", moment: "low", level: "cc3", seed: 2, ms: 207200, stage: "junk", burns: 0, chain: 0, timeLeft: 7000,
         what: "2 whites in the bottom rows of the two columns by the fire, 7.0 s before the furnace takes column 10.",
         cols: ["wKwwKwKK", "KKbKwKKKK", "bbKbbbwK", "bbbbbbbbK", "KbwwbwKK", "K*bwwwwwK", "wbbwKwwK", "wKbbbwKKb", "bKKKbKww", "KKKbb*bKK"],
-        bot: { "phase": "fire", "kind": "move", "technique": "rescue", "label": "Save the whites", "reason": "a white in a column to burn: drag it out left, down through the browns", "drags": [{ "x": 8, "y": 7, "ways": [2, 1] }] },
+        bot: { "phase": "fire", "kind": "move", "technique": "rescue", "label": "Save the whites", "reason": "fill the gaps: junk raced into a white's place (column 9, row 8, column 9, row 7), and it's out left", "drags": [{ "x": 7, "y": 7, "ways": [3] }], "state": "atRisk", "tactic": "fillGaps", "read": "2 whites by the fire with their columns burning soon (column 9, row 8, column 9, row 7): junk into their places, the quickest first" },
     },
     {
         id: "P4", moment: "low", level: "cc3", seed: 1, ms: 5650, stage: "junk", burns: 0, chain: 0, timeLeft: 9650,
         what: "2 whites in the bottom rows of the two columns by the fire, 9.7 s before the furnace takes column 10.",
         cols: ["KwKKKb*Kw", "bbwbKwww", "*bwwKKbwb", "bKwKbbKb", "K*wKbbwKb", "wKKbKKbw", "wwwKKbbww", "bwKbwbbK", "KKbKKKwbw", "KKKKKKKK"],
-        bot: { "phase": "fire", "kind": "move", "technique": "rescue", "label": "Save the whites", "reason": "a white stuck in a column to burn: bring the black at column 5, row 8 beside it, then drag it out left", "drags": [{ "x": 4, "y": 7, "ways": [0, 0, 0] }, { "x": 8, "y": 6, "ways": [1, 2] }] },
+        bot: { "phase": "fire", "kind": "move", "technique": "rescue", "label": "Save the whites", "reason": "fill the gaps: junk raced into a white's place (column 9, row 7, column 9, row 9), and it's out left", "drags": [{ "x": 7, "y": 6, "ways": [0] }], "state": "atRisk", "tactic": "fillGaps", "read": "2 whites by the fire with their columns burning soon (column 9, row 7, column 9, row 9): junk into their places, the quickest first" },
     },
     {
         id: "P5", moment: "edge", level: "cc8", seed: 3, ms: 170750, stage: "junk", burns: 0, chain: 0, timeLeft: 12850,
         what: "A white at the top of column 8, 2 columns from the fire, and 4 more whites on an edge or by a spice near it; 12.8 s on the furnace.",
         cols: ["xbKKKwww", "wbbbKwwww", "K*xwKwKK", "KwwwwKwKw", "bwwwwwww", "bbwwwwwKw", "b*wwwwbw", "wwwwwwwww", "bbwbbKKK", "b***KKKKK"],
-        bot: { "phase": "block", "kind": "move", "technique": "path", "label": "Bring a piece round", "reason": "the white at column 9, row 3 is stuck: bring the brown at column 7, row 7 round, looping, to take its place, and it's out left", "drags": [{ "x": 6, "y": 6, "ways": [1, 1, 0, 0, 0, 1, 0, 0] }] },
+        bot: { "phase": "block", "kind": "move", "technique": "diamond", "label": "The diamond", "reason": "free the trapped whites: bring in another piece: drag the black at column 3, row 1 into the gap, then the brown at column 6, row 2 over past it", "drags": [{ "x": 2, "y": 0, "ways": [3, 3, 0, 0, 3] }, { "x": 5, "y": 1, "ways": [0] }], "state": "atRisk", "tactic": "freeTrapped", "read": "3 whites trapped near the fire (column 8, row 2, column 9, row 3, column 8, row 3), the worst first" },
     },
     {
         id: "P6", moment: "edge", level: "cc3", seed: 2, ms: 200900, stage: "junk", burns: 0, chain: 0, timeLeft: 13300,
         what: "A white at the top of column 8, 2 columns from the fire, and 4 more whites on an edge or by a spice near it; 13.3 s on the furnace.",
         cols: ["wKwwKwKK", "KKbKwKKKK", "bbKbKKwK", "bbbbbbbbK", "KbwbbbKK", "b*bwbbwwK", "KbbwwwwK", "wKbbwwKKb", "wKKKwwww", "KKKbb*bKK"],
-        bot: { "phase": "fire", "kind": "move", "technique": "diamond", "label": "The diamond", "reason": "bring in another piece: drag the black at column 3, row 6 into the gap, then the black at column 3, row 5 over past it", "drags": [{ "x": 2, "y": 5, "ways": [0, 0, 0, 3, 3, 3] }, { "x": 2, "y": 4, "ways": [0, 0, 3, 3, 3] }] },
+        bot: { "phase": "fire", "kind": "move", "technique": "rescue", "label": "Save the whites", "reason": "free the trapped whites: a white stuck in a column to burn: bring the brown at column 6, row 1 beside it, then drag it out left", "drags": [{ "x": 5, "y": 0, "ways": [3, 3] }, { "x": 8, "y": 0, "ways": [2, 1] }], "state": "atRisk", "tactic": "freeTrapped", "read": "4 whites trapped near the fire (column 9, row 1, column 9, row 6, column 9, row 5 and 1 more), the worst first" },
     },
     {
         id: "P7", moment: "stuck", level: "cc8", seed: 2, ms: 588900, stage: "junk", burns: 0, chain: 0, timeLeft: 7800,
         what: "The bot waits, with 8 pieces stuck (white and brown and black), 5 whites in columns 8 and 9 by the fire with no way out left on their own, 2 of them low down; 7.8 s on the furnace.",
         cols: ["bwKwKKwKK", "Kw*wwwbw", "ww*www*Kw", "bwwwwwww", "bwwwwww*K", "wwwwwwwK", "wwwwbwKww", "bwbwwKwK", "bwwwbwwKK", "bbbKbKKK"],
-        bot: { "phase": "block", "kind": "wait", "technique": null, "label": "Wait", "reason": "the column is ready: let the furnace take it", "drags": [] },
+        bot: { "phase": "block", "kind": "move", "technique": "rescue", "label": "Save the whites", "reason": "fill the gaps: junk raced into a white's place (column 9, row 6, column 9, row 2, column 9, row 4), and it's out left", "drags": [{ "x": 6, "y": 4, "ways": [0, 0] }], "state": "damageControl", "tactic": "fillGaps", "read": "5 whites still in column 9, 23 s from the fire, and junk free for 1 column: fill its gaps however you can, the quickest first" },
     },
     {
         id: "P8", moment: "stuck", level: "cc8", seed: 3, ms: 197950, stage: "junk", burns: 0, chain: 0, timeLeft: 950,
         what: "The bot waits, with 9 pieces stuck (white), 4 whites in column 8 by the fire with no way out left on their own, 2 of them low down; 0.9 s on the furnace.",
         cols: ["bKwwwwK*w", "xbwwwwww", "wbxwwwwww", "w*wwwwKK", "wwwwwwwww", "bwwwwwKK", "bbwwwwwww", "b*wwKwwK", "bKbbbKKKK", "bbbKKKKK"],
-        bot: { "phase": "block", "kind": "wait", "technique": null, "label": "Wait", "reason": "the column is ready: let the furnace take it", "drags": [] },
+        bot: { "phase": "block", "kind": "move", "technique": "turnOver", "label": "Turn the right side over", "reason": "sort the ladder: columns 9 and 10 sorted, blacks over browns, the ladder the zigzag climbs, before column 10 goes", "drags": [{ "x": 8, "y": 1, "ways": [0] }], "state": "atRisk", "tactic": "sortLadder", "read": "columns 9 and 10 aren't sorted blacks over browns, and column 10 goes in 0.9 s: sort the ladder before it's lost" },
     },
     {
         id: "P9", moment: "block", level: "cc8", seed: 1, ms: 102000, stage: "junk", burns: 0, chain: 0, timeLeft: 5100,
         what: "Whites mostly left (40 on the board); the junk being moved in blocks and wrapped round them in a V. 5.1 s on the furnace.",
         cols: ["KwwwKKwbw", "ww*wbwKK", "wbwww*bKw", "bwwwwwww", "wwwwwwwwK", "wwwwKbKK", "wbbwww*bw", "bwbwbKbK", "*KKKKKKKK", "bKKKKKbK"],
-        bot: { "phase": "block", "kind": "move", "technique": "sweep", "label": "The sweep", "reason": "go, go, go: a white stuck in a column to burn: sweep the brown at column 7, row 3 onto it, and it's out", "drags": [{ "x": 6, "y": 2, "ways": [0, 3, 3] }] },
+        bot: { "phase": "block", "kind": "move", "technique": "turnOver", "label": "Turn the right side over", "reason": "sort the tail: a brown sunk down through the blacks at the V's bottom, so the next sweep runs through", "drags": [{ "x": 7, "y": 6, "ways": [3, 3, 2] }], "state": "atRisk", "tactic": "sortTail", "read": "the V's tail unsorted (column 7, row 8, column 8, row 7): browns down through the blacks, so the next sweep runs through" },
     },
     {
         id: "P10", moment: "block", level: "cc8", seed: 2, ms: 160050, stage: "junk", burns: 0, chain: 0, timeLeft: 8250,
         what: "Whites mostly left (44 on the board); the junk being moved in blocks and wrapped round them in a V. 8.3 s on the furnace.",
         cols: ["bbwwbwwKK", "wbbbwwww", "K*wwwwwwK", "wbbwwwww", "wwwwwwKww", "bwwwbwww", "wwwwb*wwK", "bbwwwbKK", "bbbbbbbK*", "bbbKbbbK"],
-        bot: { "phase": "block", "kind": "move", "technique": "rescue", "label": "Save the whites", "reason": "first, to open the way to the white by the fire: a white in a column to burn: drag it out left, down through the browns", "drags": [{ "x": 7, "y": 3, "ways": [2] }] },
+        bot: { "phase": "block", "kind": "move", "technique": "store", "label": "Store the junk", "reason": "fix the cracks: store the junk: the black at column 3, row 1 can't cross yet: take it back to the junk on the left before it's trapped", "drags": [{ "x": 2, "y": 0, "ways": [2] }], "state": "cracked", "tactic": "fixCracks", "read": "14 pieces of junk stranded among the whites (column 1, row 1, column 1, row 2, column 1, row 5 and 11 more): free them, keeping the browns in the middle to do it with" },
     },
     {
         id: "P11", moment: "junkUp", level: "cc3", seed: 1, ms: 135200, stage: "chain", burns: 0, chain: 2, timeLeft: 2500,
         what: "The chain at CC^2; column 10 goes up next with 1 brown in it, 2.5 s before it goes.",
         cols: ["wwKbKbbKb", "KKbKbKbK", "bbwbKbKbK", "bK*KbwKK", "bKKwK*KKb", "wKwKbKKK", "wwwKKbKKb", "wwwbbKbw", "bwwwwK*ww", "wwwwwbww"],
-        bot: { "phase": "chain", "kind": "move", "technique": "path", "label": "Bring a piece round", "reason": "the brown at column 10, row 6 is stuck: bring the white at column 8, row 8 round, looping, to take its place, and it's out left", "drags": [{ "x": 7, "y": 7, "ways": [1, 1, 0, 0, 0, 3] }], "column": 9 },
+        bot: { "phase": "chain", "kind": "move", "technique": "path", "label": "Bring a piece round", "reason": "the brown at column 10, row 6 is stuck: bring the white at column 8, row 8 round, looping, to take its place, and it's out left", "drags": [{ "x": 7, "y": 7, "ways": [1, 1, 0, 0, 0, 3] }], "column": 9, "state": "healthy", "tactic": "chain", "read": "the chain: whites right" },
     },
     {
         id: "P12", moment: "junkUp", level: "cc8", seed: 2, ms: 303450, stage: "chain", burns: 0, chain: 1, timeLeft: 2550,
         what: "The chain at CC^1; column 10 goes up next with 1 brown in it, 2.5 s before it goes.",
         cols: ["wbKwwbKK", "KbKbwwbKK", "KKKbwKKK", "bKbbbbKKK", "bbbbwKKb", "KbbKbwwKb", "wbwwwwKK", "wwwwwwKKK", "wwwwwwww", "wbwwwwwww"],
-        bot: { "phase": "chain", "kind": "wait", "technique": null, "label": "Wait", "reason": "nothing worth moving: wait for the next column", "drags": [], "column": 9 },
+        bot: { "phase": "chain", "kind": "wait", "technique": null, "label": "Wait", "reason": "nothing worth moving: wait for the next column", "drags": [], "column": 9, "state": "healthy", "tactic": "chain", "read": "the chain: whites right" },
     },
 ];
 // ---- end of POSITIONS ----
@@ -116,53 +116,58 @@ export const VERDICTS = {
     P1: [{
             date: '13 Nov',
             note: "Nothing wrong with saving that white, but the top right comes first: its whites have blacks round them and no move beside them, so they'll be trapped. Drag the blacks there down, and column 10's top blacks through the browns and back, until the top right flows (the thirty-third note).",
-            expect: { phase: 'fire', startsIn: { x: [5, 9], y: [0, 2] }, noBurn: true }, open: true,
+            expect: { phase: 'fire', startsIn: { x: [5, 9], y: [0, 2] }, noBurn: true },
         }],
     P2: [{
             date: '13 Nov',
             note: "The same as P1: risk management and priorities. Alarm bells that column 9 has a white at the top, walled in by blacks; a board like this is something gone wrong far earlier, but the work now is the top right, freeing its whites, before anything else (the thirty-third note).",
-            expect: { phase: 'fire', startsIn: { x: [5, 9], y: [0, 2] }, noBurn: true }, open: true,
+            expect: { phase: 'fire', startsIn: { x: [5, 9], y: [0, 2] }, noBurn: true },
         }],
     P3: [{
             date: '13 Nov',
             note: "No hurry for column 9's whites with column 10 to go first: quick, simple, easy moves. Drag the blacks down, like the two in column 8, down, down, then along the columns going down, and the browns up.",
-            expect: { kind: 'move', sorts: true, noBurn: true }, open: true,
+            expect: { kind: 'move', sorts: true, noBurn: true },
         }],
     P4: [{
             date: '13 Nov',
             note: "Fill the right-hand columns' gaps as fast as you can: a brown that can go up and a black that can go down fill both whites' places in column 9 in two moves, rather than dragging one white as far as it goes and still leaving gaps on the right to fill.",
-            expect: { fills: 8, frees: 8, noBurn: true }, open: true,
+            expect: { fills: 8, frees: 8, noBurn: true },
         }],
     P5: [{
             date: '13 Nov',
             note: "Closer, and the move itself is fine, but it misses the bigger danger: the top two whites in column 8 are the risk, with no way of getting a brown up to them. Why is there so much white in the gap? Fix those first.",
-            expect: { freesAny: [[7, 0], [7, 1]], noBurn: true }, open: true,
+            expect: { freesAny: [[7, 0], [7, 1]], noBurn: true },
         }],
     P6: [{
             date: '13 Nov',
             note: "Why big, long, complicated moves? Pull the blacks down at the bottom of column 8. Better yet, the whites isolated and trapped at the top of columns 8 and 9 come first: something has gone wrong to even be in that situation, and all the focus goes on those trapped whites.",
-            expect: { freesAny: [[7, 0], [8, 0]], avoids: ['diamond'], noBurn: true }, open: true,
+            expect: { freesAny: [[7, 0], [8, 0]], avoids: ['diamond'], noBurn: true },
         }],
     P7: [{
             date: '13 Nov',
             note: "A board where things have gone really wrong: blacks all at the bottom, browns at the top, not enough movement; the blacks low in columns 5 and 6 and the brown at the top of column 5 at risk of being stranded and ruining the Crystal Clear. Panic, and damage control: quick, easy moves first to fill columns 8 and 9 however you can, the two blacks pulled down into them and the browns up; then the blacks and that brown out of the way to the left.",
-            expect: { kind: 'move', fills: [7, 8], noBurn: true }, open: true,
+            expect: { kind: 'move', fills: [7, 8], noBurn: true },
         }],
     P8: [{
             date: '13 Nov',
             note: "Pull the browns in columns 9 and 10 to the bottom and the blacks up to the top, quickly: the zigzag needs two columns of solid colour, and once column 10 burns you've lost the column you need to move blacks and browns up and down. Then the blacks down at the bottom left, fixing up the V, and the same at the top. The V left too long, the pieces not sorted.",
-            expect: { kind: 'move', startsIn: { x: [8, 9], y: [0, 8] }, ladder: true, noBurn: true }, open: true,
+            expect: { kind: 'move', startsIn: { x: [8, 9], y: [0, 8] }, ladder: true, noBurn: true },
         }],
     P9: [{
             date: '13 Nov',
             note: "Not bad, it goes for the white that's the priority, but it feels like it's just stopped: keep dragging that brown down through the blacks to really reach the bottom. The better move is the tail at the bottom left: drag the browns at the bottom of columns 7 and 8 down first, so that when you come to the move at the top you can drag that brown all the way down through. The efficiency of sorting that bottom bit out.",
-            expect: { kind: 'move', startsIn: { x: [6, 7], y: [6, 8] }, ladder: true, noBurn: true }, open: true,
+            expect: { kind: 'move', startsIn: { x: [6, 7], y: [6, 8] }, ladder: true, noBurn: true },
         }],
     P10: [{
             date: '13 Nov',
             note: "The move itself is fine, but the board is in a bad state, something chosen wrong to get here: so many trapped pieces, blacks at the bottom surrounded by whites, browns at the top. How do I get those blacks out? Hold off: move those browns up to the right and they may be the browns needed to rescue the trapped blacks. Switch from filling the white columns to fixing the cracked pieces.",
-            expect: { keeps: [[5, 4], [6, 4]], noBurn: true }, open: true,
+            expect: { keeps: [[5, 4], [6, 4]], noBurn: true },
         }],
+};
+/** Positions the user chose not to give a verdict on, and why: kept, and not asked about again. */
+export const SKIPPED = {
+    P11: { date: '13 Nov', note: "Not a real situation: with junk everywhere and whites scattered this late, you're just losing, and something went wrong long before. Its lesson is upstream: the risk reader's job is never to arrive there." },
+    P12: { date: '13 Nov', note: "Skipped too: what really went wrong is far earlier. A brown in the column going up with 2.5 s left: maybe a black and a brown crawled over to it, but that's a big if, and you wouldn't get into that situation if you're any good." },
 };
 /** The board of a position. */
 export const boardOf = (p) => parseBoard(p.cols);
@@ -176,6 +181,7 @@ export function moveOf(a) {
     return {
         phase: a.phase, kind: a.kind, technique: a.sweep ? 'sweep' : (a.technique ?? a.routine ?? null), label: a.label, reason: a.reason,
         drags: a.drags.map((d) => ({ x: d.x, y: d.y, ways: [...d.ways] })), ...(a.column !== undefined ? { column: a.column } : {}),
+        ...(a.state ? { state: a.state, tactic: a.tactic, read: a.read } : {}),
     };
 }
 /** Where a drag lets its piece go. */

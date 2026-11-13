@@ -12,7 +12,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { MOMENTS, POSITIONS, VERDICTS, boardOf, botAt, check, moveOf } from '../src/distill-positions';
+import { MOMENTS, POSITIONS, SKIPPED, VERDICTS, boardOf, botAt, check, moveOf } from '../src/distill-positions';
 import { COLS, TALL } from '../src/distilling';
 import { playDrags } from '../src/distill-routines';
 
@@ -48,6 +48,7 @@ describe('the positions (picked by tools/distill-positions.mjs)', () => {
 describe('what the bot should do at each position (the user\'s verdicts)', () => {
   for (const p of POSITIONS) {
     const verdicts = VERDICTS[p.id] ?? [];
+    if (!verdicts.length && SKIPPED[p.id]) { it.skip(`${p.id}: skipped by the user, ${SKIPPED[p.id].date}: ${SKIPPED[p.id].note}`, () => {}); continue; }
     if (!verdicts.length) { it.todo(`${p.id}: ${MOMENTS[p.moment].toLowerCase()} (${p.level}, seed ${p.seed}), no verdict yet`); continue; }
     for (const v of verdicts) {
       const name = `${p.id}, ${v.date}: ${v.note}`;

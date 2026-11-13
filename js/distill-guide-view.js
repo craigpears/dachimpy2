@@ -259,6 +259,21 @@ function draw() {
     quote(sec, t.says);
     sec.querySelector('[data-picture]')?.replaceWith(figure(t.picture, 'a real board showing it'));
   }
+  // Reading the board (src/distill-read.ts): each position read as the planner reads it, its state and tactic, why,
+  // and the bot's move there.
+  for (const box of document.querySelectorAll('[data-reading]')) for (const r of g.reading) {
+    const a = html('article', { className: 'board-side', id: `r-${r.id.toLowerCase()}` });
+    a.appendChild(figure(r.picture, `${r.stateLabel}: ${r.tacticLabel.toLowerCase()}, on a real board`));
+    const text = html('div');
+    text.appendChild(html('h3', {}, `${r.stateLabel}: ${r.tacticLabel.toLowerCase()}`));
+    text.appendChild(html('p', { className: 'sub' }, r.about));
+    const why = html('p');
+    why.appendChild(html('span', { className: 'state' }, 'Read: '));
+    why.appendChild(document.createTextNode(r.why));
+    text.appendChild(why);
+    a.appendChild(text);
+    box.appendChild(a);
+  }
   // The table of contents: each phase's tricks and techniques, in the page's order, by their headings.
   for (const [phase, items] of Object.entries(g.plan)) {
     const box = document.querySelector(`[data-toc-phase="${phase}"] [data-toc-items]`);

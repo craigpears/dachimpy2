@@ -84,6 +84,8 @@
   .try { margin: 8px 2px 2px; font-weight: 700; font-size: 15px; }
   .try code { font: 600 14px ui-monospace, Consolas, monospace; }
   .note { font-style: italic; font-size: 15px; color: #7a6048; }
+  ul.states li { margin: 4px 0; }
+  article .state { font-weight: 700; color: #8a4b0f; }
   .failed { color: #ffb08a; }
   footer { margin-top: 40px; color: #8c7a60; font-size: 13px; text-align: center; }
   @media (max-width: 640px) {
@@ -108,7 +110,7 @@
     </div>
   </header>
   <nav class="toc">
-    <p><a href="#rules" target="_self">The rules</a> · <a href="#target" target="_self">Setting a target</a> · <a href="#phases" target="_self">A game, phase by phase</a> · <a href="#then" target="_self">And then</a></p>
+    <p><a href="#rules" target="_self">The rules</a> · <a href="#target" target="_self">Setting a target</a> · <a href="#reading" target="_self">Reading the board</a> · <a href="#phases" target="_self">A game, phase by phase</a> · <a href="#then" target="_self">And then</a></p>
     <p data-toc-phase="fire"><a href="#ph-fire" target="_self">1. The fire's side</a>: <span data-toc-items></span></p>
     <p data-toc-phase="fill"><a href="#ph-fill" target="_self">2. Filling the junk columns</a>: <span data-toc-items></span></p>
     <p data-toc-phase="block"><a href="#ph-block" target="_self">3. Blocks and the V</a>: <span data-toc-items></span></p>
@@ -176,6 +178,20 @@
     <p>Then, a moment later, a few more places where the same trick works are ringed in blue for you to find yourself.</p>
     <blockquote data-quote="spot"></blockquote>
   </article>
+
+  <h2 id="reading">Reading the board</h2>
+  <p class="intro">Before each move, look at the board as a whole and ask how it's doing. Not one piece at a time: which whites near the fire are in danger, and which way trouble is heading. Helium does this every move, and so do the bots.</p>
+  <p class="intro"><b>One white at a time.</b> For each white in the three columns by the fire: how trapped it is (on the top row with blacks round it, beside a spice, walled in), how many swaps it would take any junk to reach it and take its place, and how soon its column burns. A white at the top with blacks round it comes before one lower down that junk can still flow to. The higher up and the more boxed in, the sooner it needs help.</p>
+  <p class="intro"><b>Patterns.</b> Some trouble is a group of pieces: blacks stuck at the bottom and browns at the top among the whites, with no way out on their own; how many pieces are stuck; how many columns the free junk can still fill; the bottom of the V left unsorted; and the two right-hand columns not sorted blacks over browns. That pair is the ladder the zigzag climbs, and when the right-hand column burns it's gone. The closer it gets to the fire unsorted, the bigger the risk.</p>
+  <p class="intro">From those, the board is in one of four states, and each state has a plan:</p>
+  <ul class="states">
+    <li><b>Healthy:</b> nothing at risk. Quick, simple moves: blacks down, browns up. Once the whites are mostly left, move the junk in blocks.</li>
+    <li><b>At risk:</b> a white near the fire in danger, or the ladder about to be lost. Free the trapped whites first, the worst first. Fill the gaps by the fire with the quickest junk moves. Sort the ladder before its column goes.</li>
+    <li><b>Cracked:</b> a lot of junk stranded among the whites. Stop filling the columns and fix the cracks. The browns in the middle are your tools for getting the blacks out, so don't send them off to the right.</li>
+    <li><b>Damage control:</b> too many whites by the fire for the time and junk left. Fill the gaps however you can, the quickest first, then clear the stranded junk out of the way, and go for the best chain still in reach.</li>
+  </ul>
+  <p class="intro">Each board below is one the bots really reached. The pieces it's about are ringed, and the arrow is the move they make there now.</p>
+  <div data-reading></div>
 
   <h2 id="phases">A game, phase by phase</h2>
   <p class="intro">A game runs through four phases. The board says which one you're in, and each wants different moves. You'll be back in the first every time a column burns and brings a new one onto the fire's side. Under each phase are its own tricks and techniques, simplest first; the tag says the first target that needs one.</p>

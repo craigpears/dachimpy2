@@ -1140,6 +1140,37 @@ Plainly:
 - **Its cost:** the search is about 20 ms where it runs, kept while the board's unchanged, and what found nothing kept
   for the same pieces round the column; the runs took 2 to 4 minutes for CC^1 to CC^3 (was about 1.5).
 
+### The board reader (13 Nov, fifteenth run)
+After the thirty-third to thirty-fifth notes (§3, "The board reader, built"): the bots read the board in Stage I, its
+state and the tactic in play setting the priorities (`byTactic`), and two drags a player makes as one joined
+(`joinPairs`). Every open verdict, P1 to P10, passes. 20 boards a level (seeds 5000 on), against the fourteenth run's
+round 1. Not a clean comparison: main changed after that run (the chain's danger zone waiting while a white's still in
+the junk columns burning out, checked then on 5 boards only, CC^1 chains 3.6 and 0.4 whites burned), and that's in
+both rows here; CC^1 banks one column and never plays Stage I, so its row is that change alone.
+
+| Bot | Longest chain: mean (best) | Target reached | Sessions with no white burned | Whites burned (first 3 min) | Points a minute | Chain waits a session (s) | Columns up not Crystal Clear |
+|---|---|---|---|---|---|---|---|
+| CC^1, fourteenth run | 3.7 (6) | 20/20 | 15/20 | 0.4 (0.1) | 13.8 | 1,154 (311) | 4.3 |
+| **CC^1, fifteenth** | 3.6 (6) | 20/20 | 14/20 | 0.6 (0.3) | 13.1 | 1,180 (319) | 4.7 |
+| CC^2, fourteenth run | 3.5 (6) | 20/20 | 16/20 | 0.3 (0.1) | 13.6 | 1,116 (301) | 4.4 |
+| **CC^2, fifteenth** | **4.0 (6)** | 20/20 | 9/20 | 0.8 (0.3) | **14.0** | 1,156 (312) | **4.0** |
+| CC^3, fourteenth run | 3.9 (7) | 19/20 | 11/20 | 0.6 (0.3) | 13.6 | 1,033 (277) | 4.5 |
+| **CC^3, fifteenth** | 3.4 (5) | 16/20 | **14/20** | 0.7 (0.3) | 12.3 | 1,009 (271) | 4.9 |
+| CC^5, fourteenth run | 4.7 (7) | 13/20 | 18/20 | 0.1 (0.1) | 16.3 | 634 (170) | 4.0 |
+| **CC^5, fifteenth** | 4.5 (6) | 12/20 | **19/20** | 0.1 (**0.0**) | 15.6 | 651 (175) | 4.3 |
+| CC^8, fourteenth run | 3.9 (8) | 1/20 | 13/20 | 0.5 (0.1) | 13.3 | 614 (165) | 5.5 |
+| **CC^8, fifteenth** | **4.3 (7)** | 0/20 | **17/20** | **0.1 (0.0)** | **13.7** | 613 (165) | **4.5** |
+
+No disasters. Plainly:
+- **CC^8 and CC^5, the levels that spend longest in Stage I, burn fewer whites**: CC^8 0.5 to 0.1 a session, 17 of 20
+  sessions with none (was 13), none in the first 3 minutes at either; CC^8's chains up 3.9 to 4.3, its columns up not
+  Crystal Clear down 5.5 to 4.5. CC^5 much the same, chains a little shorter (4.7 to 4.5).
+- **CC^2 and CC^3 are mixed**: CC^2's chains up (3.5 to 4.0) but more whites burned (0.3 to 0.8, sessions with none 16
+  to 9); CC^3's chains down (3.9 to 3.4, target 19 to 16 of 20) with fewer sessions burning any (11 to 14). CC^1's own
+  row moved the same way as CC^2's whites (0.4 to 0.6) with no Stage I at all, so part of it is main's chain change, not
+  the reader; a run with the reader off (`PLAN='{"READ":0}'`) would split the two. Not run: asked first.
+- **Slower to run**: CC^5 9 minutes for 20 boards, CC^8 7 (was 2 to 4): the risk read per candidate move, the quick
+  fills and the path search per trapped white.
 **Watching them, the first note (the user, 12 Nov, a screenshot of the Ultimate's board):** "the main
 thing is it just doesn't carry on the whole way to the right. It just kind of stops ... that black ... in
 the white, it was dragging the black diagonally down and it just stopped there. It's like, well, no, it
@@ -1864,6 +1895,55 @@ noting of mine. They need to be like little modules that the bot uses to have in
 doing", with tests that it "identifies the right, phases, risks, both at the individual piece level and that middle
 pattern level". So each level of the reader is a small pure module of its own with its own tests on the positions'
 boards (pieces, patterns, the state and tactic), and the planner decides by their numbers, not by labels.
+
+**The board reader, built (13 Nov).** From the thirty-third and thirty-fourth notes and the user's brief ("a feature
+that tells you there's a risk and detects it ... but also what kind of tactics are in play ... an individual piece
+that's trapped, but also thinking on a bigger group level"; "those need to be actual features and calculations, not
+just things of note ... little modules that the bot uses"). Three small pure modules, tested on the positions' boards
+(`tests/distill-read.test.ts`):
+- **The piece level** (`src/distill-risk.ts`): every white in the three columns by the fire read as numbers. Its
+  reach: the fewest swaps for junk to take its place from the left (a black brought to its up-left place, a brown to
+  its down-left, through the board as it stands, never through the white itself; 1, it can go now; none, nothing can).
+  Its trap: the reach, more near the top (most on the top row, less each half row down: "there's blacks at the top and
+  there's just no way for things to move as freely up there"), on the bottom row, beside a spice, boxed, each piece of
+  junk round it, walled off by spice. Its urgency: how soon its column burns (the furnace's time and 15.3 s a column).
+  Its risk: (1 + trap) times urgency; at 4 or more it's flagged. P2 flags column 9's top white first (nothing can reach
+  it), P5 column 8's top two, P1 the top right before the white low in column 8.
+- **The pattern level** (`src/distill-patterns.ts`): junk stranded among the whites (left of the wall, a black in its
+  column's bottom half or a brown in its top half, mostly whites round it, unable to make its own way to the colour:
+  P10's blacks in columns 1, 3, 5 and 7 and its browns at the top); stuck pieces; the columns the free junk can still
+  fill; the V's tail (a brown over a black it could sink past, in the bottom three rows); the right-hand ladder (columns
+  9 and 10, both junk: how unsorted, 0 to 1, and its risk, that times how near column 10 is to going, peaking just
+  before it goes: "when you're at risk of losing the ability to do the Z thing").
+- **The state and the tactic** (`src/distill-read.ts`): damage control (the column being built holds 4 whites or more,
+  burns within 25 s, and the free junk fills a column at most: P7), cracked (half the free junk or more stranded, and 12
+  pieces or more: P10; the user's own block-phase picture, 40-*, has 11 and isn't), at risk (a white flagged, or the
+  ladder's risk 0.5 or more in the block phase: P8), healthy. The tactic, in order: fill the gaps (damage control, or a
+  white in the furnace's column), fix the cracks, sort the ladder, free the trapped whites (a flagged white 2 swaps or
+  more from junk, whose column burns within 30 s), fill the gaps (a flagged white easy to reach, burning within 30 s:
+  P3, P4), free the trapped whites (the rest: P1, P5), sort the tail (block phase: P9), and with nothing at risk quick
+  sorting (blacks down, browns up) or, in the block phase, blocks.
+- **The planner uses it** (`byTactic` in `src/distill-bots.ts`): each tactic has its own measure of progress
+  (`progress`): the whites' risk by the fire taken away by junk raced into a target's place (fill the gaps); the target
+  freed, the most at risk first, or failing that the way to it opened or the pieces round it set moving (free the
+  trapped whites); the ladder's inversions sorted with no white let in; the bottom's order (browns down) bettered; the
+  stranded junk freed. Moves on offer and the tactic's own (the quick fills, short drags beside a trapped white, the
+  ladder's and the tail's drags) are ranked by it a second of a person's time, never a white into the danger zones, the
+  furnace's column, or trapped on an edge further off. Fill, free and the ladder are played whatever they score; the
+  rest must be worth a move. On a cracked board the browns in the middle are kept as tools, moved only to free stranded
+  junk. Healthy, a short sorting drag ranks a quarter higher. The Advice carries the state, the tactic and why
+  (`state`, `tactic`, `read`), shown on distilling-test.html's aim line and distilling-positions.html; the read version
+  has a section on it. Every open verdict, P1 to P10, now passes.
+
+**Two drags a player makes as one (the user, 13 Nov).** "drag the brown to the right, and then the white to the left.
+When to me, it's like, well, why isn't that just one move?" A drag of one swap, a piece onto its neighbour, then a drag
+of the piece it displaced from where it now is, is one drag of that piece: its first swap, back the other way, is the
+same swap. One implementation, `joinPairs` (src/distill-teach.ts, from Helium's teaching), joins them in the bots'
+Advice too (`choose`), so Helium's "Help", the test page and the positions page show one drag; tested on P4's board.
+Counted 13 Nov: no plan of that shape in four 3-minute sessions (CC^3 and CC^8, seeds 5000 and 5001, 356 moves) or
+Helium's step one, so the drags stopping short in the notes (the twenty-ninth and thirty-second) aren't this. P6's
+plan (a brown brought down-right beside column 9's top white, then the white dragged down-left and up-left) is the
+nearest: its white's second swap is its own, so it stays two drags.
 
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
