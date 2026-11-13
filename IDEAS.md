@@ -2483,6 +2483,10 @@ stand-in voice till then. **Reserved (12 Nov):** the user will ask a friend, amh
 whether he'd like it. His pirate name and portrait to check before he's drawn or named in the game;
 only his pirate name ever appears on the site. Their lines in `src/lines/`, called from what the race's events already say.
 
+- **Who (13 Nov):** "Will let [Disengaged] be the commentator perhaps" (a real pirate, from Reverie by the
+  user's earlier "Who in Reverie could be"; pirate name only; their pirate page and portrait to check before
+  they're drawn, then into PIRATES; "perhaps", to confirm).
+
 ## Tutorials with pieces that don't come perfect (12 Nov)
 
 On Tzz's balloon lesson: "the pieces she's getting for this are like completely perfect for her plan, so
