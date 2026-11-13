@@ -380,10 +380,11 @@ export function remark(G: Gaze, seen: string | null, dt: number, still: boolean,
    with a backdrop behind. */
 type Dress = Record<string, string | number | boolean>;
 /** Someone beside a portrait's sitter (js/den/creatures.js draws the beasts): Robert the kangaroo bear, a
-    joey, a bear, or a pirate in a look; where they stand (`x` across, `z` toward you, metres from the
+    joey, a bear, or a pirate in a look (a real pirate by `name`, their look in PIRATES, `look` over it:
+    Dachimpy beside their friends); where they stand (`x` across, `z` toward you, metres from the
     sitter), turned `yaw`; `pose`: 'rub' (a paw, or a hand, up at the sitter's ear) or 'bliss' (eyes shut,
     smiling: having it rubbed). */
-export interface Company { kind: 'robert' | 'joey' | 'bear' | 'pirate'; look?: Dress; x: number; z: number; yaw?: number; pose?: 'rub' | 'bliss' }
+export interface Company { kind: 'robert' | 'joey' | 'bear' | 'pirate'; look?: Dress; name?: string; x: number; z: number; yaw?: number; pose?: 'rub' | 'bliss' }
 /** Who's in a portrait: a real pirate (their look in PIRATES, `dress` over it; `costume`: something on
     over that, the kangaroo bear's ears and tail, say; `pose`: as Company's; `company`: who's beside them); a
     yeti, beside Gravee; the vampire; or you. */

@@ -98,34 +98,42 @@ export const ON_AN_EXHIBIT = {
   gone: 'The new one works perfectly. Shame, really.',
 } as const;
 
-/** About each friend's portrait (src/den-dachimpy.ts's FRIENDS), by id, as you stop by it; and their
-    titles on the frames. Pirate names only. */
+/** Their friends' portraits' titles, by id (src/den-dachimpy.ts's FRIENDS): the den's pirates by a title of
+    Dachimpy's, and Dachimpy's own portraits with friends by their real titles (IDEAS.md, "Dachimpy's pirate
+    pages and portraits, both oceans"). Pirate names only. */
 export const FRIEND_TITLES = {
   dalnoth: 'Dalnoth, First on the Board',
   dignity: 'Dignity, Never Off Duty',
   mischievious: 'Mischievious, at a Wedding',
-  gravee: 'Gravee, Who Paints Everyone',
-  kikkit: 'Kikkit',
-  zizzy: 'Zizzy',
-  sanne: 'Sanne',
+  monkeyMan: 'The Monkey Man',
+  gravee: 'Oh, Gawd!',
+  kikkit: 'Kikkit: Cursed & Cookied',
+  zizzy: 'Zizzy: Pinky and the Pink',
+  sanne: 'Sanne: Monkey Couple',
   tzz: 'Tzz, and D\'rizzle',
   helium: 'Helium, Eyebrows Pending',
   roobear: 'Roobear, Ears Roobed',
+  welcomeBack: 'Welcome Back Dachimpy!',
   thanks: 'Thank You',
 } as const;
+/** About each friend's portrait, by id, as you stop by it (once a visit each). */
 export const ON_A_FRIEND = {
   dalnoth: 'Dalnoth. He was on my very first boards. He took it well.',
   dignity: 'Dignity. She runs the checkpoint. Very firmly. Bella helps.',
   mischievious: 'Mischievious. Always a wedding somewhere.',
-  gravee: 'Gravee. She\'ll paint you too. Mind the coffin.',
-  kikkit: 'Kikkit. Truly special. She gets the middle, and the roses.',
-  zizzy: 'Zizzy. Truly special. I\'ll paint her properly when I can do her justice.',
-  sanne: 'Sanne. Truly special. Their portrait\'s to come: I want to get them just right.',
+  monkeyMan: 'The Monkey Man. That\'s me, 2007. Some things never change.',
+  gravee: 'Oh, Gawd! Gravee and me, aboard her Familiar Plaice. That face says it all.',
+  kikkit: 'Kikkit. Truly special. Every Valentine\'s, a portrait, and always cookies.',
+  zizzy: 'Zizzy. Truly special. Pinky and the pink: both of us in pink, of course.',
+  sanne: 'Sanne. Truly special. Monkey Couple, 2007: matching red, a monkey each.',
   tzz: 'Tzz. She gave me my best teaming tip: don\'t stall. Ever.',
   helium: 'Helium. Ask about the eyebrows. Actually, don\'t.',
   roobear: 'Roobear. Robert roobed my ears too.',
+  welcomeBack: 'Fable welcomed me back, last June. It was good to be home.',
   thanks: 'That one\'s for everyone. It\'s the people that made it.',
 } as const;
+/** The page for "Welcome Back Dachimpy!" (with Fable, whose look's still to check: no figure). */
+export const WELCOME_BACK = 'With Fable, June 2025.';
 /** The thank-you, on a page in the friends' room: to everyone who makes Puzzle Pirates what it is. */
 export const THANKS = 'To my friends on these walls, and everyone who isn\'t: everyone who makes Puzzle Pirates such an awesome place. Thank you.';
 /** The sign over the truly special ones, in the middle of the friends' wall. */
@@ -170,7 +178,7 @@ export const CHARACTER: Character = {
     { when: 'About the exhibit you\'ve stopped by or turned to look at (once a visit each), and under it close up', says: ON_AN_EXHIBIT },
     { when: 'The titles on their friends\' portraits', says: FRIEND_TITLES },
     { when: 'About the friend\'s portrait you\'ve stopped by (once a visit each)', says: ON_A_FRIEND },
-    { when: 'The thank-you on the friends\' wall, and the sign over the truly special ones', says: { thanks: THANKS, special: SPECIAL } },
+    { when: 'The thank-you on the friends\' wall, and the sign over the truly special ones', says: { thanks: THANKS, special: SPECIAL, welcomeBack: WELCOME_BACK } },
     { when: 'Now and then, as you wander after the tour', says: CHATTER },
     { when: 'As you leave', says: [GOODBYE] },
   ],

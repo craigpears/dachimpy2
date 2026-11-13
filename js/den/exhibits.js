@@ -58,9 +58,12 @@ export function paintPage({ title = '', text = '', kind = 'parchment', withHeart
     g.fillStyle = 'rgba(255, 244, 207, .35)';
     for (let i = 0; i < 9; i++) g.fillRect(W * 0.74 - 30 + Math.sin(i * 2.3) * 14, H * 0.7 + i * 18, 60 - i * 4, 3);
     g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#ffffff';
-    g.font = 'italic 700 92px Alegreya, Georgia, serif';
     g.shadowColor = 'rgba(255, 200, 230, .7)'; g.shadowBlur = 18;
-    g.fillText(title, W / 2, H * 0.43);
+    // (as big as fits: on two lines if it's long)
+    const words = title.split(' '), two = words.length > 2 ? [words.slice(0, Math.ceil(words.length / 2)).join(' '), words.slice(Math.ceil(words.length / 2)).join(' ')] : [title];
+    let px = 92;
+    do g.font = `italic 700 ${px}px Alegreya, Georgia, serif`; while (two.some((l) => g.measureText(l).width > W - 60) && --px > 20);
+    two.forEach((l, i) => g.fillText(l, W / 2, H * 0.43 + (i - (two.length - 1) / 2) * px * 1.05));
     g.shadowBlur = 0;
     g.font = 'italic 30px Alegreya, Georgia, serif'; g.fillStyle = '#f2d9e6';
     g.fillText(text, W / 2, H * 0.55);

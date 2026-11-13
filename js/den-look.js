@@ -30,8 +30,9 @@ export const DYES = {
 // drew them orange.)
 export const SKIN = ['#f6d3b0', '#f0bf8e', '#d9a066', '#b57a4a', '#8a5530', '#5c3a22', '#9a887c'];
 // (Red: Mischievious's deep red curls, from her portraits, 11 Nov. Light brown: Tzz's, sampled from hers.
-// Silver: Helium's, sampled from theirs, 13 Nov: a grey-white, not Gravee's white.)
-export const HAIR = { black: '#1f1a17', 'dark brown': '#3b2414', brown: '#6a4020', 'light brown': '#8e7543', auburn: '#7f2e16', red: '#9a0a08', ginger: '#c4642a', blonde: '#dcb565', grey: '#a09a92', silver: '#b2b9c6', white: '#ece8e0' };
+// Silver: Helium's, sampled from theirs, 13 Nov: a grey-white, not Gravee's white. Pink: Zizzy's, from "Pinky and
+// the pink", 13 Nov.)
+export const HAIR = { black: '#1f1a17', 'dark brown': '#3b2414', brown: '#6a4020', 'light brown': '#8e7543', auburn: '#7f2e16', red: '#9a0a08', ginger: '#c4642a', blonde: '#dcb565', grey: '#a09a92', silver: '#b2b9c6', white: '#ece8e0', pink: '#e8609a' };
 // Monkeys and squirrels only come in natural colours (YPPedia: Monkey), white (a champion's) and a
 // few limited editions (lavender, from a Booch Box; pink, Mischievious's monkey in "What is Love?").
 // A lavender monkey has a white face and tummy. (Plum: Helium's King, their Emerald pirate page's "plum"
@@ -257,6 +258,21 @@ export const PIRATES = Object.fromEntries(Object.entries({
     body: 'm', skin: 2, hair: 'short', hairCol: 'brown', beard: 'full', patch: false, earring: false, smile: true, bareLegs: true,
     hat: 'beehive', hatCol: 'rose', hatCol2: 'purple', top: 'braces', topCol: 'purple', waist: 'belt', waistCol: 'black',
     legs: 'kilt', legsCol: 'pink', legsCol2: 'purple', feet: 'shoes', feetCol: 'pink', hand: 'none', fam: 'none',
+  },
+  // Sanne (Meridian), one of Dachimpy's truly special ones, from "Monkey Couple" (5 Jan 2007, the two of them in
+  // matching red on a beach; checked 13 Nov): fair skin, blonde hair tied back, gold hoops, a red shirt and red
+  // trousers, a belt with a big gold buckle, white boots, a brown monkey on her shoulder.
+  Sanne: {
+    body: 'f', skin: 0, hair: 'ponytail', hairCol: 'blonde', patch: false, earring: 'both', smile: true,
+    hat: 'none', top: 'belt', topCol: 'red', waist: 'buckle', waistCol: 'red',
+    legs: 'pants', legsCol: 'red', feet: 'boots', feetCol: 'white', hand: 'none', fam: 'monkey', famCol: 'brown',
+  },
+  // Zizzy (Meridian), one of Dachimpy's truly special ones, from "Pinky and the pink" (2012; checked 13 Nov): fair
+  // skin, long pink curls, a pink Dress top off the shoulder trimmed white, a pink Gown with a white panel.
+  Zizzy: {
+    body: 'f', skin: 0, hair: 'curly', hairCol: 'pink', patch: false, earring: false, smile: true,
+    hat: 'none', top: 'dresstop', topCol: 'pink', topCol2: 'white', waist: 'none',
+    legs: 'gown', legsCol: 'pink', legsCol2: 'white', feet: 'shoes', feetCol: 'pink', hand: 'none', fam: 'none',
   },
 }).map(([name, look]) => [name, cleanLook(look)]));
 

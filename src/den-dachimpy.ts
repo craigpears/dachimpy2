@@ -28,7 +28,7 @@ import { ON_AN_EXHIBIT, ON_A_FRIEND, FRIEND_TITLES } from './lines/dachimpy.js';
 const M0 = 4.5;
 /** How long the museum is: room for every exhibit, a step at either end. */
 export const MUSEUM_LEN = 25;
-const M1 = M0 + MUSEUM_LEN, F1 = M1 + 14;
+const M1 = M0 + MUSEUM_LEN, F1 = M1 + 16;
 /** Three rooms in a row, the camera looking in from the front (their front walls cut low, a doll's house):
     the hall you come in at, the museum, and their friends' room. */
 export const PLAN: Plan = {
@@ -125,27 +125,41 @@ export function hang(): Record<string, Hung> {
 export const exhibitLine = (id: string): string | null => (ON_AN_EXHIBIT as Record<string, string>)[id] ?? (ON_A_FRIEND as Record<string, string>)[id] ?? null;
 
 // ---------- the friends' room ----------
-/* Their friends on the wall (the real pirates already in the den, each from their look in PIRATES: pirate
-   names only), the truly special ones in the middle, bigger, under a sign of their own: Kikkit, Zizzy and Sanne
-   (Zizzy and Sanne not drawn: their portraits are still to check, so a page each with their name on it). Then a
-   page of thanks to everyone who makes Puzzle Pirates what it is. */
+/* Their friends on the wall, each painted from their look in PIRATES (pirate names only): the real pirates
+   already in the den, and some of Dachimpy's own portraits with friends, recreated under their real titles
+   (IDEAS.md, "Dachimpy's pirate pages and portraits, both oceans", checked 13 Nov). The truly special ones in
+   the middle, bigger, under a sign of their own, each in a portrait they shared with Dachimpy: Kikkit, Zizzy
+   and Sanne. A portrait with someone whose look isn't known is a titled page, no figure ("Welcome Back
+   Dachimpy!", with Fable). Then a page of thanks to everyone who makes Puzzle Pirates what it is. */
 export type FriendId = keyof typeof FRIEND_TITLES;
-export interface Friend { id: FriendId; title: string; x: number; y: number; w: number; h: number; special?: boolean; portrait?: Portrait; page?: 'zizzy' | 'sanne' | 'thanks' }
+export interface Friend { id: FriendId; title: string; x: number; y: number; w: number; h: number; special?: boolean; portrait?: Portrait; page?: 'welcomeBack' | 'thanks' }
 const FC = (M1 + F1) / 2, SMALL = { w: 0.72, h: 0.9, y: 1.75 }, BIG = { w: 1.05, h: 1.31, y: 1.8 };
 const friend = (id: FriendId, x: number, o: Partial<Friend>): Friend => ({ id, title: FRIEND_TITLES[id], x, ...SMALL, ...o });
-const sat = (name: string, backdrop: Portrait['backdrop']): Portrait => ({ id: name.toLowerCase(), title: name, backdrop, sitter: { who: 'pirate', name } });
+type Dress = Record<string, string | number | boolean>;
+/** A friend's portrait: them (their look in PIRATES, `dress` over it), and Dachimpy beside them if they
+    shared it (`with`: Dachimpy's look, dressed for that sitting). */
+const sat = (name: string, backdrop: Portrait['backdrop'], o: { dress?: Dress; with?: Dress } = {}): Portrait => ({
+  id: name.toLowerCase(), title: name, backdrop,
+  sitter: { who: 'pirate', name, ...(o.dress ? { dress: o.dress } : {}), ...(o.with ? { company: [{ kind: 'pirate', name: 'Dachimpy', look: o.with, x: -0.78, z: -0.1, yaw: 0.35 }] } : {}) },
+});
+/** Dachimpy in "Monkey Couple" (2007): in red to match her, a white sash, curls, a monkey. */
+export const IN_RED: Dress = { hat: 'none', hair: 'curly', hairCol: 'dark brown', top: 'sash', topCol: 'red', topCol2: 'white', waist: 'none', legs: 'pants', legsCol: 'red', bareLegs: false, feet: 'boots', feetCol: 'red', fam: 'monkey', famCol: 'brown' };
+/** Dachimpy as they are (the pink beehive, the kilt and braces), beside whoever they sat with. */
+const AS_THEY_ARE: Dress = {};
 export const FRIENDS: readonly Friend[] = [
-  friend('dalnoth', FC - 5.9, { portrait: sat('Dalnoth', 'sea') }),
-  friend('dignity', FC - 4.9, { portrait: sat('Dignity', 'den') }),
-  friend('mischievious', FC - 3.9, { portrait: sat('Mischievious', 'cafe') }),
-  friend('gravee', FC - 2.9, { portrait: sat('Gravee', 'crypt') }),
-  friend('kikkit', FC - 1.45, { ...BIG, special: true, portrait: sat('Kikkit', 'beach') }),
-  friend('zizzy', FC, { ...BIG, special: true, page: 'zizzy' }),
-  friend('sanne', FC + 1.45, { ...BIG, special: true, page: 'sanne' }),
+  friend('dalnoth', FC - 6.9, { portrait: sat('Dalnoth', 'sea') }),
+  friend('dignity', FC - 5.9, { portrait: sat('Dignity', 'den') }),
+  friend('mischievious', FC - 4.9, { portrait: sat('Mischievious', 'cafe') }),
+  friend('monkeyMan', FC - 3.9, { portrait: sat('Dachimpy', 'beach', { dress: { fam: 'monkey', famCol: 'brown' } }) }),
+  friend('gravee', FC - 2.9, { portrait: sat('Gravee', 'sea', { with: AS_THEY_ARE }) }),
+  friend('kikkit', FC - 1.45, { ...BIG, special: true, portrait: sat('Kikkit', 'pinksea', { with: AS_THEY_ARE }) }),
+  friend('zizzy', FC, { ...BIG, special: true, portrait: sat('Zizzy', 'night', { with: AS_THEY_ARE }) }),
+  friend('sanne', FC + 1.45, { ...BIG, special: true, portrait: sat('Sanne', 'beach', { with: IN_RED }) }),
   friend('tzz', FC + 2.9, { portrait: sat('Tzz', 'autumn') }),
   friend('helium', FC + 3.9, { portrait: sat('Helium', 'night') }),
   friend('roobear', FC + 4.9, { portrait: sat('Roobear', 'pinksea') }),
-  friend('thanks', FC + 5.9, { page: 'thanks' }),
+  friend('welcomeBack', FC + 5.9, { page: 'welcomeBack' }),
+  friend('thanks', FC + 6.9, { page: 'thanks' }),
 ];
 /** The friends' wall (its face's z). */
 export const FRIENDS_WALL = FROOM.z0 + WALL_T;
@@ -208,8 +222,9 @@ export function stopAt(from: number, x: number, z: number): number {
    one, and they take you on into the museum. While it lasts you stand still. `side`: how far to your side
    they stand to hug; `secs`: how long the hug lasts; `said`: when you say yours. */
 export const HUG = { side: 0.62, secs: 3.0, said: 1.2 } as const;
-/** The cookie's beats, seconds from when they hold out the plate: yours, and the end. */
-export const COOKIE = { said: 1.2, done: 2.4 } as const;
+/** The cookie's beats, seconds after their line about it's been up long enough to read (so the two never talk over
+    each other): yours, and the end. */
+export const COOKIE = { said: 0.1, done: 1.8 } as const;
 /** Where they stand to hug you: beside you, to your left if there's room, else your right (`side`: -1 left,
     +1 right), facing you (`yaw`: 0 faces +z); you turned to face them (`youYaw`). */
 export function hugSpot(plan: Plan, you: { x: number; z: number }, blocks: readonly Block[] = []): { x: number; z: number; yaw: number; youYaw: number; side: number } {

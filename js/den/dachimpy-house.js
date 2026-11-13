@@ -12,7 +12,7 @@ import {
   HUG, COOKIE, hugSpot, atCookies, MUSEUM_LEN,
 } from '../den-dachimpy.js';
 import { blocksOf, readSecs } from '../den-houses.js';
-import { AT_THE_DOOR, THE_COOKIE, ANOTHER_COOKIE, TOUR_LINES, PLAQUES, PANELS, CHATTER, GOODBYE, THANKS, SPECIAL } from '../lines/dachimpy.js';
+import { AT_THE_DOOR, THE_COOKIE, ANOTHER_COOKIE, TOUR_LINES, PLAQUES, PANELS, CHATTER, GOODBYE, THANKS, SPECIAL, WELCOME_BACK } from '../lines/dachimpy.js';
 import { IN_DACHIMPYS_HOUSE } from '../lines/you.js';
 import { PACE } from '../chatter.js';
 import { FURNITURE, place } from './furniture.js';
@@ -23,11 +23,10 @@ import { photoTexture, photoArt, paintPage, pageTexture } from './exhibits.js';
 import { cine } from './cine.js';
 import { V3 } from './world.js';
 
-/** The pages: the museum's panels of story, Zizzy's and Sanne's (not drawn till their portraits are checked),
-    and the thank-you (src/lines/dachimpy.ts). */
+/** The pages: the museum's panels of story, the portrait with Fable (whose look's still to check: its title,
+    no figure), and the thank-you (src/lines/dachimpy.ts). */
 const pageOf = (id) => {
-  if (id === 'zizzy') return paintPage({ title: 'Zizzy', text: 'of the Meridian Ocean', kind: 'night' });
-  if (id === 'sanne') return paintPage({ title: 'Sanne', text: 'Truly special', kind: 'night' });
+  if (id === 'welcomeBack') return paintPage({ title: 'Welcome Back Dachimpy!', text: WELCOME_BACK, kind: 'night' });
   if (id === 'thanks') return paintPage({ title: 'Thank You', text: THANKS, withHeart: true });
   return paintPage({ title: PANELS[id].title, text: PANELS[id].text, withHeart: id === 'began' });
 };
@@ -130,13 +129,14 @@ export const DACHIMPY_HOUSE = {
           bliss(you, false); IDLES.stand(you);
           G.themP.setIdle('offer');
           g.line = g.first ? THE_COOKIE.first : THE_COOKIE.again[G.cookies++ % THE_COOKIE.again.length];
-          H.say(them, g.line, Math.max(readSecs(g.line), COOKIE.done) + 0.4);
+          g.read = readSecs(g.line);
+          H.say(them, g.line, g.read);
         }
         return;
       }
       // the cookie
-      if (g.t >= COOKIE.said && !g.said) { g.said = true; H.say(you, IN_DACHIMPYS_HOUSE.cookie, 1.8); }
-      if (g.t >= Math.max(COOKIE.done, readSecs(g.line))) {
+      if (g.t >= g.read + COOKIE.said && !g.said) { g.said = true; H.say(you, IN_DACHIMPYS_HOUSE.cookie, 1.8); }
+      if (g.t >= g.read + COOKIE.done) {
         const was = endGreet();
         if (was.first || G.tour < TOUR.length) H.talk(them, [THE_COOKIE.onward]);
       }
@@ -202,7 +202,7 @@ export const DACHIMPY_HOUSE = {
       cam() {
         if (!G.greet || G.greet.phase === 'come') return null;
         const you = H.you, them = G.them, C = H.home();
-        return { look: V3((you.x + them.x) / 2, 1.25, (you.z + them.z) / 2), dist: Math.min(C.dist, 4.4), tilt: 0.24, yaw: 0 };
+        return { look: V3((you.x + them.x) / 2, 1.3, (you.z + them.z) / 2), dist: Math.min(C.dist, 4.4), tilt: 0.22, yaw: -G.greet.spot.side * 0.35 };   // (round to see their face)
       },
       // (Space moves their talk on first: the cookies are offered only when no one's talking.)
       prompt() {

@@ -1547,13 +1547,15 @@ Warm, proud of everything they built, bugs and all, and well known for hugs and 
 - *dalnoth:* "Dalnoth, First on the Board"
 - *dignity:* "Dignity, Never Off Duty"
 - *mischievious:* "Mischievious, at a Wedding"
-- *gravee:* "Gravee, Who Paints Everyone"
-- *kikkit:* "Kikkit"
-- *zizzy:* "Zizzy"
-- *sanne:* "Sanne"
+- *monkeyMan:* "The Monkey Man"
+- *gravee:* "Oh, Gawd!"
+- *kikkit:* "Kikkit: Cursed & Cookied"
+- *zizzy:* "Zizzy: Pinky and the Pink"
+- *sanne:* "Sanne: Monkey Couple"
 - *tzz:* "Tzz, and D'rizzle"
 - *helium:* "Helium, Eyebrows Pending"
 - *roobear:* "Roobear, Ears Roobed"
+- *welcomeBack:* "Welcome Back Dachimpy!"
 - *thanks:* "Thank You"
 
 ### About the friend's portrait you've stopped by (once a visit each)
@@ -1561,19 +1563,22 @@ Warm, proud of everything they built, bugs and all, and well known for hugs and 
 - *dalnoth:* "Dalnoth. He was on my very first boards. He took it well."
 - *dignity:* "Dignity. She runs the checkpoint. Very firmly. Bella helps."
 - *mischievious:* "Mischievious. Always a wedding somewhere."
-- *gravee:* "Gravee. She'll paint you too. Mind the coffin."
-- *kikkit:* "Kikkit. Truly special. She gets the middle, and the roses."
-- *zizzy:* "Zizzy. Truly special. I'll paint her properly when I can do her justice."
-- *sanne:* "Sanne. Truly special. Their portrait's to come: I want to get them just right."
+- *monkeyMan:* "The Monkey Man. That's me, 2007. Some things never change."
+- *gravee:* "Oh, Gawd! Gravee and me, aboard her Familiar Plaice. That face says it all."
+- *kikkit:* "Kikkit. Truly special. Every Valentine's, a portrait, and always cookies."
+- *zizzy:* "Zizzy. Truly special. Pinky and the pink: both of us in pink, of course."
+- *sanne:* "Sanne. Truly special. Monkey Couple, 2007: matching red, a monkey each."
 - *tzz:* "Tzz. She gave me my best teaming tip: don't stall. Ever."
 - *helium:* "Helium. Ask about the eyebrows. Actually, don't."
 - *roobear:* "Roobear. Robert roobed my ears too."
+- *welcomeBack:* "Fable welcomed me back, last June. It was good to be home."
 - *thanks:* "That one's for everyone. It's the people that made it."
 
 ### The thank-you on the friends' wall, and the sign over the truly special ones
 
 - *thanks:* "To my friends on these walls, and everyone who isn't: everyone who makes Puzzle Pirates such an awesome place. Thank you."
 - *special:* "Truly special"
+- *welcomeBack:* "With Fable, June 2025."
 
 ### Now and then, as you wander after the tour
 

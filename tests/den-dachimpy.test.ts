@@ -185,7 +185,7 @@ describe('the museum: the old Blockade Simulator and Dachimpy.com, oldest first 
 });
 
 describe('their friends\' room: the trinkets and the portraits (IDEAS.md, "The tribute moves home")', () => {
-  it('hangs the real pirates already in the den, from their looks in PIRATES, pirate names only', () => {
+  it('paints only pirates whose looks are in PIRATES (with Dachimpy beside them), pirate names only; anyone else a titled page', () => {
     const pirates = LOOK_JS.match(/export const PIRATES = [\s\S]*?\n\}\)/)![0];
     for (const f of FRIENDS) {
       expect(f.title).toBe(FRIEND_TITLES[f.id]);
@@ -193,10 +193,24 @@ describe('their friends\' room: the trinkets and the portraits (IDEAS.md, "The t
       expect(exhibitLine(f.id)).toBe(ON_A_FRIEND[f.id]);
       if (f.portrait) {
         expect(f.portrait.sitter.who).toBe('pirate');
-        const name = f.portrait.sitter.who === 'pirate' ? f.portrait.sitter.name : '';
-        expect(pirates, name).toMatch(new RegExp(`\\n  ${name}: \\{`));
+        const s = f.portrait.sitter.who === 'pirate' ? f.portrait.sitter : null;
+        for (const name of [s!.name, ...(s!.company ?? []).map((c) => c.name ?? '')]) expect(pirates, name).toMatch(new RegExp(`\\n  ${name}: \\{`));
         expect(BACKDROPS).toContain(f.portrait.backdrop);
-      } else expect(['zizzy', 'sanne', 'thanks']).toContain(f.page);
+      } else expect(['welcomeBack', 'thanks']).toContain(f.page);
+    }
+    // (Fable's look isn't known: "Welcome Back Dachimpy!" is its title on a page, no figure)
+    expect(FRIENDS.find((f) => f.id === 'welcomeBack')).toMatchObject({ page: 'welcomeBack' });
+  });
+
+  it('recreates Dachimpy\'s own portraits with friends under their real titles (IDEAS.md, both oceans, 13 Nov)', () => {
+    expect(FRIEND_TITLES.gravee).toBe('Oh, Gawd!');
+    expect(FRIEND_TITLES.kikkit).toMatch(/Cursed & Cookied/);
+    expect(FRIEND_TITLES.sanne).toMatch(/Monkey Couple/);
+    expect(FRIEND_TITLES.zizzy).toMatch(/Pinky and the Pink/);
+    expect(FRIEND_TITLES.welcomeBack).toBe('Welcome Back Dachimpy!');
+    for (const id of ['gravee', 'kikkit', 'zizzy', 'sanne'] as const) {
+      const s = FRIENDS.find((f) => f.id === id)!.portrait!.sitter;
+      expect(s.who === 'pirate' && s.company?.[0], id).toMatchObject({ kind: 'pirate', name: 'Dachimpy' });
     }
   });
 
@@ -209,10 +223,16 @@ describe('their friends\' room: the trinkets and the portraits (IDEAS.md, "The t
       for (const s of FRIENDS.filter((g) => g.special)) expect(s.w * s.h).toBeGreaterThan(f.w * f.h);
     }
     expect(SPECIAL_SIGN.x).toBeCloseTo(mid, 5);
-    // (Zizzy and Sanne aren't drawn till their portraits are checked: a page each, their name on it; Sanne "they")
-    expect(FRIENDS.find((f) => f.id === 'zizzy')).toMatchObject({ page: 'zizzy' });
-    expect(FRIENDS.find((f) => f.id === 'sanne')).toMatchObject({ page: 'sanne' });
-    expect(ON_A_FRIEND.sanne).toMatch(/\bthem\b/);
+  });
+
+  it('has Sanne and Zizzy in the wardrobe from their Meridian portraits (13 Nov)', () => {
+    const sanne = LOOK_JS.match(/\n {2}Sanne: \{([\s\S]*?)\n {2}\},/)![1], zizzy = LOOK_JS.match(/\n {2}Zizzy: \{([\s\S]*?)\n {2}\},/)![1];
+    expect(sanne).toMatch(/hairCol: 'blonde'/);
+    expect(sanne).toMatch(/topCol: 'red'/);
+    expect(sanne).toMatch(/feet: 'boots', feetCol: 'white'/);
+    expect(sanne).toMatch(/fam: 'monkey'/);
+    expect(zizzy).toMatch(/hairCol: 'pink'/);
+    expect(zizzy).toMatch(/legs: 'gown', legsCol: 'pink'/);
   });
 
   it('hangs them along the back wall without overlapping, inside the room, under the sign', () => {
