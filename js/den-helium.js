@@ -139,13 +139,16 @@ export const whitesOnFireSide = (cols) => cols.reduce((n, col, x) => n + (fireSi
 /** What they say once you've done step one yourself, in turn: that's it done, and the rest is from other
     pirates (the user, 13 Nov: "this is not a replacement for the game ... talk to people"). */
 export const stepDoneLines = () => [STEP_ONE.done, ONWARD, TELL];
+/** What step one is after, as the routines read it: Stage I, the fire's side the columns to burn, drags of 8 at most
+    (the read version, distilling-guide.html, draws saving the whites on the lesson's board by it too). */
+export const STEP_ONE_CTX = { stage: 'junk', burnFrom: COLS - STEPS[0].cols, fill: 0, reach: 8 };
 /** Whites walked out of the fire's side, left, swap by swap: the drags that do it on board `b` (changed as
     they're made), rightmost first, at most `most`; a white that can't get clear isn't dragged. */
 function clearFireSide(b, most = 16) {
     // (the bots' own rescue, src/distill-routines.ts: a white dragged out left, up through blacks or down
     // through browns, a helper's drag first when it can't go on its own; each time the move that saves the
     // most whites from the fire's side for the fewest swaps, tried on a real board)
-    const ctx = { stage: 'junk', burnFrom: COLS - STEPS[0].cols, fill: 0, reach: 8 }, drags = [];
+    const ctx = STEP_ONE_CTX, drags = [];
     const play = (cols, ds) => {
         const t = new Distilling(() => 0.5, { timer: false }).lay(copy(cols));
         for (const d of ds) {
@@ -172,6 +175,10 @@ function clearFireSide(b, most = 16) {
     }
     return drags;
 }
+/** The lesson's board just before their opening's bang: its first column, all junk, burned, the next (a white in
+    it) at the fire. The read version (distilling-guide.html) draws it. */
+export const beforeBang = () => { const g = lessonGame(); if (g.cols[COLS - 1].every(isJunk))
+    burnOn(g); return g; };
 /** The lesson's board as their opening leaves it: its two columns burned. */
 export const afterOpening = () => { const g = lessonGame(); opening(g); return g; };
 /** Their lesson, after their opening, on its board as the opening left it (`game`, played on as it goes),

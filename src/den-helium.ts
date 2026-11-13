@@ -156,13 +156,17 @@ export const stepDoneLines = (): string[] => [STEP_ONE.done, ONWARD, TELL];
 /** A drag, as the planner gives them: the piece at (x, y) swapped each way in turn. */
 export type Drag = { x: number; y: number; ways: number[] };
 
+/** What step one is after, as the routines read it: Stage I, the fire's side the columns to burn, drags of 8 at most
+    (the read version, distilling-guide.html, draws saving the whites on the lesson's board by it too). */
+export const STEP_ONE_CTX = { stage: 'junk' as const, burnFrom: COLS - STEPS[0].cols, fill: 0, reach: 8 };
+
 /** Whites walked out of the fire's side, left, swap by swap: the drags that do it on board `b` (changed as
     they're made), rightmost first, at most `most`; a white that can't get clear isn't dragged. */
 function clearFireSide(b: Board, most = 16): Drag[] {
   // (the bots' own rescue, src/distill-routines.ts: a white dragged out left, up through blacks or down
   // through browns, a helper's drag first when it can't go on its own; each time the move that saves the
   // most whites from the fire's side for the fewest swaps, tried on a real board)
-  const ctx = { stage: 'junk' as const, burnFrom: COLS - STEPS[0].cols, fill: 0, reach: 8 }, drags: Drag[] = [];
+  const ctx = STEP_ONE_CTX, drags: Drag[] = [];
   const play = (cols: Board, ds: readonly Drag[]): Distilling | null => {
     const t = new Distilling(() => 0.5, { timer: false }).lay(copy(cols));
     for (const d of ds) { if (t.dragWays(d.x, d.y, d.ways).swaps !== d.ways.length) return null; t.settle(1000); }
@@ -183,6 +187,9 @@ function clearFireSide(b: Board, most = 16): Drag[] {
   return drags;
 }
 
+/** The lesson's board just before their opening's bang: its first column, all junk, burned, the next (a white in
+    it) at the fire. The read version (distilling-guide.html) draws it. */
+export const beforeBang = (): Distilling => { const g = lessonGame(); if (g.cols[COLS - 1].every(isJunk)) burnOn(g); return g; };
 /** The lesson's board as their opening leaves it: its two columns burned. */
 export const afterOpening = (): Distilling => { const g = lessonGame(); opening(g); return g; };
 

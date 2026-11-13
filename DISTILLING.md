@@ -6,6 +6,13 @@ practice site whose Distilling was ported from the real game client (its `crafti
 checked against it move for move (see Sources, "the client port"). Where that port gives a number, it
 is the game's own. Anything unclear is marked **(to confirm with the user)**.
 
+**The read version (13 Nov):** [distilling-guide.html](distilling-guide.html), the public guide to the strategy as
+the bots and Helium play it: the rules in brief, a target and the levels, the four phases, every technique drawn as its
+drag on a real board, the user's tricks, and the way on to other pirates. Its boards, names and Helium's lines come
+from the code (`src/distill-guide.ts`; the later boards picked from bot play by `tools/distill-guide.mjs` into
+`src/distill-guide-boards.ts`), and `tests/distill-guide.test.ts` fails when a routine, phase, level or trick has no
+section or its board stops showing its move. Change it in the same work as any change to the lesson or the strategy.
+
 Piece letters in the sketches: `w` white, `b` brown, `K` black, `*` spice, `x` burnt white.
 
 ## 1. What the real puzzle is

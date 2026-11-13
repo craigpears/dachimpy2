@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<base target="_blank">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Distilling, the read version</title>
+<!-- Distilling's read version (RULES.md, "Every tutorial has a read version, kept in sync", 13 Nov): Helium's lesson
+     and the bots' plan written down, in design.html's look. The words are the page's own, by hand. Every board,
+     every technique's, phase's and level's name, and every line of Helium's are drawn in by js/distill-guide-view.js
+     from src/distill-guide.ts, which works them out from the same code as the lesson and the bots;
+     tests/distill-guide.test.ts fails if a routine, phase, level or trick has no section here, or its board doesn't
+     show it. Pirate names only; Helium is "they". -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,500&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #2a1d13; --ink2: #5b4330; --gold: #e0a92a; --cream: #f6ead2; --dim: #cbb894; --edge: #5a412a; --paper: #f3e3c3; --paper2: #e8d2a8; }
+  * { box-sizing: border-box; }
+  html { background: #140d08; }
+  body { margin: 0; min-height: 100vh; color: var(--cream); font: 500 17px/1.5 'Alegreya Sans', system-ui, sans-serif;
+    background: #140d08 repeating-linear-gradient(90deg, rgba(255, 220, 160, 0.025) 0 2px, transparent 2px 120px); }
+  a { color: var(--gold); }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 28px 16px 48px; }
+  header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 20px; margin-bottom: 8px; }
+  h1 { margin: 0; font: 700 clamp(30px, 6vw, 44px)/1.05 'Alegreya', serif; color: var(--gold); }
+  .lede { margin: 6px 0 0; color: var(--dim); max-width: 620px; }
+  .links { display: flex; flex-wrap: wrap; gap: 10px; }
+  .play { display: inline-block; font: 700 17px 'Alegreya Sans'; color: var(--ink); background: var(--gold); border-radius: 8px; padding: 9px 18px; text-decoration: none; white-space: nowrap; }
+  .play:hover { background: #f0bd44; }
+  .play.ghost { color: var(--gold); background: transparent; border: 2px solid var(--gold); padding: 7px 16px; }
+  .play.ghost:hover { color: var(--ink); background: var(--gold); }
+  nav.toc { margin: 18px 0 0; color: var(--dim); font-size: 15px; }
+  nav.toc a { margin-right: 2px; }
+  nav.toc p { margin: 0 0 4px; }
+  h2 { display: flex; align-items: center; gap: 14px; margin: 38px 0 14px; font: 700 22px 'Alegreya', serif; color: var(--dim); }
+  h2::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--edge), transparent); }
+  .intro { color: var(--dim); max-width: 70ch; margin: -4px 2px 16px; }
+  article { background: linear-gradient(170deg, var(--paper), var(--paper2)); color: var(--ink); border: 1px solid #c9a35c; border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 40px rgba(120, 80, 30, 0.18); padding: 14px; margin: 0 0 20px; }
+  h3 { margin: 4px 2px 4px; font: 700 25px/1.15 'Alegreya', serif; color: #6b2a12; }
+  .sub { margin: 0 2px 8px; font-style: italic; color: #7a6048; }
+  .lvl { display: inline-block; margin: 0 2px 6px; padding: 1px 9px; border-radius: 99px; background: #6b2a12; color: var(--paper); font: 700 13px 'Alegreya Sans'; letter-spacing: .03em; }
+  .lvl:empty { display: none; }
+  article p, article li { color: var(--ink2); max-width: 70ch; }
+  article p { margin: 0 2px 6px; }
+  article b { color: var(--ink); }
+  blockquote { margin: 8px 2px 4px; padding: 6px 12px; border-left: 4px solid #b08a3c; background: rgba(255, 250, 235, 0.55); border-radius: 0 8px 8px 0;
+    font: italic 500 18px/1.35 'Alegreya', serif; color: #6b2a12; max-width: 62ch; }
+  blockquote::after { content: ' \2014 Helium'; font: 500 14px 'Alegreya Sans'; color: #7a6048; font-style: normal; }
+  /* A board beside its words; stacked on a phone. */
+  article.board-side { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 4px 20px; align-items: start; }
+  figure { margin: 0; }
+  figure.pic svg.board { display: block; width: 100%; max-width: 420px; height: auto; margin: 0 auto; }
+  figure.pic figcaption { margin: 4px 2px 0; font-size: 13px; color: #7a6048; text-align: center; }
+  .placeholder { aspect-ratio: 408 / 398; max-width: 420px; border-radius: 10px; background: #4a3520; opacity: .35; }
+  svg .fire-label { font: 700 12px 'Alegreya Sans'; fill: #f6ead2; }
+  svg .num { font: 700 12px 'Alegreya Sans'; fill: #ffd23a; }
+  /* The rules' figures. */
+  ul.pieces { list-style: none; margin: 6px 0 8px; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px 14px; }
+  ul.pieces li { display: grid; grid-template-columns: 34px 1fr; gap: 0 8px; align-items: center; margin: 0; }
+  ul.pieces svg { width: 34px; height: 34px; grid-row: span 2; }
+  ul.pieces span { font-size: 14px; }
+  .swaps { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 6px 0 8px; }
+  .swaps figure { text-align: center; }
+  .swaps svg { width: 90px; height: 80px; }
+  .swaps figcaption { font-size: 14px; color: var(--ink2); }
+  .columns { display: flex; flex-wrap: wrap; gap: 10px 14px; margin: 8px 0 6px; }
+  .columns figure { display: flex; flex-direction: column; align-items: center; width: 74px; text-align: center; }
+  .columns svg { width: 30px; height: auto; background: #4a3520; border-radius: 6px; padding: 2px 0; }
+  .columns figcaption { font-size: 13px; line-height: 1.25; color: var(--ink2); margin-top: 4px; }
+  .columns figcaption b, .columns figcaption small, .columns figcaption i { display: block; }
+  .columns figcaption i { color: #6b2a12; font-weight: 700; }
+  ul.levels { list-style: none; padding: 0; margin: 8px 0 4px; }
+  ul.levels li { margin: 0 0 10px; padding: 8px 10px; border-radius: 8px; background: rgba(255, 250, 235, 0.5); }
+  ul.levels li b[data-name] { font: 700 19px 'Alegreya', serif; color: #6b2a12; margin-right: 8px; }
+  ul.levels [data-bank] { font-weight: 700; color: var(--ink2); }
+  ul.levels [data-adds] { display: block; font-size: 15px; }
+  ul.levels [data-adds] a, article a { color: #8a4b0f; }
+  .try { margin: 8px 2px 2px; font-weight: 700; font-size: 15px; }
+  .try code { font: 600 14px ui-monospace, Consolas, monospace; }
+  .note { font-style: italic; font-size: 15px; color: #7a6048; }
+  .failed { color: #ffb08a; }
+  footer { margin-top: 40px; color: #8c7a60; font-size: 13px; text-align: center; }
+  @media (max-width: 640px) {
+    body { font-size: 16px; }
+    h3 { font-size: 22px; }
+    article { padding: 10px; }
+    article.board-side { grid-template-columns: 1fr; }
+    blockquote { font-size: 17px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Distilling, the read version</h1>
+      <p class="lede">Helium's lesson, written down: the rules in brief, a target to aim for, the four phases of a game, every technique and a few tricks. Every board here is a real one, from Helium's lesson or a bot's game, and every move is one they'd play, so this page changes when they do.</p>
+    </div>
+    <div class="links">
+      <a class="play ghost" href="design.html" target="_self">How it's designed</a>
+      <a class="play" href="den.html?at=helium">Learn it from Helium</a>
+    </div>
+  </header>
+  <nav class="toc">
+    <p><a href="#rules" target="_self">The rules</a> · <a href="#target" target="_self">Setting a target</a> · <a href="#phases" target="_self">The four phases</a> · <a href="#techniques" target="_self">The techniques</a> · <a href="#tricks" target="_self">Tricks</a> · <a href="#then" target="_self">And then</a></p>
+    <p>Techniques: <span data-toc-techniques></span></p>
+  </nav>
+  <p class="failed" data-failed hidden>The boards couldn't be drawn here. Try a newer browser, or open the page from the den's own site.</p>
+
+  <h2 id="rules">The rules in brief</h2>
+  <p class="intro">Just enough to follow the rest. Puzzle Pirates' own tutorial teaches the basics properly.</p>
+
+  <article>
+    <h3>The pieces</h3>
+    <p>Ten columns of bubbles, set like a honeycomb, tall and short in turn. Each bubble touches four others on its diagonals, never the ones straight above or below it. Whites are the rum. Browns and blacks are junk. Spice never moves and is worth a lot if it goes up. A burnt white moves like a white but spoils whatever it's in.</p>
+    <div data-rules="pieces"></div>
+    <p>A piece's weight says which way its column goes when it leaves; its points count only if it goes up.</p>
+  </article>
+
+  <article>
+    <h3>The swap rule</h3>
+    <p>Two touching bubbles swap only when the lower one beats the upper one, like rock, paper, scissors:</p>
+    <div data-rules="swaps"></div>
+    <p>So a white rises through blacks and sinks through browns, a brown rises through whites, a black rises through browns. A swap can't be undone straight away: the pair's now the wrong way round. Hold a bubble and drag, and it keeps swapping as long as it can, so a whole move is one smooth sweep.</p>
+  </article>
+
+  <article>
+    <h3>The furnace</h3>
+    <p>Every <b data-n="furnace">15</b> seconds the right-hand column leaves. More blacks than whites and it goes down into the furnace; otherwise up into the flask. You can burn it sooner yourself (X, or right-click). Then the board slides right and a new column comes in on the left.</p>
+    <p>A white that goes down the furnace is lost, and every second one burned comes back later as a burnt white.</p>
+  </article>
+
+  <article>
+    <h3>Crystal Clears and chains</h3>
+    <p>A column of only whites sent up, spice and all, is a Crystal Clear. Each one straight after another scores <b data-n="bonus">4</b> more for every one before it: that's a chain, written CC^2, CC^3 and on. Anything else that leaves, up or down, breaks it. Columns as the game judges them:</p>
+    <div data-rules="columns"></div>
+    <p>The flask's full at <b data-n="flask">100</b> pieces, about twelve columns, and that's the batch. On a chain of <b data-n="carry">12</b> or more it carries on until the chain breaks.</p>
+  </article>
+
+  <h2 id="target">Setting a target</h2>
+  <article>
+    <h3>A Crystal Clear to aim for</h3>
+    <p>Before you start, pick the chain you're after. Not twelve: start with one.</p>
+    <blockquote data-quote="goal"></blockquote>
+    <p>The target says how long you build. You bank whites on the left until there's enough for that chain, then send them up one Crystal Clear after another. When the chain breaks, go back to building for the next. Once you make your target every time, aim one higher. The longer the chain, the more whites you bank first and the more techniques it takes. The den's bots play at these same levels.</p>
+    <ul class="levels">
+      <li data-level="cc1"><b data-name>CC^1</b><span data-bank></span><p>One column of whites, sent up. The simple techniques are all it takes.</p><span data-adds></span></li>
+      <li data-level="cc2"><b data-name>CC^2</b><span data-bank></span><p>Two in a row. Start sorting the junk: blacks up, browns down, some kept back for later.</p><span data-adds></span></li>
+      <li data-level="cc3"><b data-name>CC^3</b><span data-bank></span><p>Three. Junk carried sideways along a row in one go.</p><span data-adds></span></li>
+      <li data-level="cc5"><b data-name>CC^5</b><span data-bank></span><p>Five. Pairs of junk working together, and pieces hooked round corners, for when pieces get scarce.</p><span data-adds></span></li>
+      <li data-level="cc8"><b data-name>CC^8</b><span data-bank></span><p>Eight. Pairs looped up and down a nearly white board, and lines of browns pulled along.</p><span data-adds></span></li>
+    </ul>
+  </article>
+
+  <h2 id="phases">The four phases</h2>
+  <p class="intro">A game runs through four phases. The board says which one you're in, and each wants different moves. You'll be back in the first every time a column burns and brings a new one onto the fire's side. Shaded columns are the ones the phase is about; ringed bubbles are the ones to watch.</p>
+
+  <article class="board-side" data-phase="fire" id="p-fire">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3 data-name>The fire's side</h3>
+      <p class="sub" data-plan></p>
+      <blockquote data-says></blockquote>
+      <p><b>When:</b> any white in the three columns next to the fire. They burn first, so every white in them goes left before anything else.</p>
+      <p>This is Helium's own step one, on their lesson board: the whites ringed, and the drags they use to walk them out, in order.</p>
+    </div>
+  </article>
+
+  <article class="board-side" data-phase="fill" id="p-fill">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3 data-name>Filling the junk columns</h3>
+      <p class="sub" data-plan></p>
+      <blockquote data-says></blockquote>
+      <p><b>When:</b> the fire's side is clear of white. Now fill the right-hand columns with junk, from the fire in, one column at a time, each finished before the next. Sweep the junk over in long rough drags; there's no need to be neat yet.</p>
+      <p>The same lesson board once step one's done: shaded, the columns that are junk now and the one being filled.</p>
+    </div>
+  </article>
+
+  <article class="board-side" data-phase="block" id="p-block">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3 data-name>Blocks</h3>
+      <p class="sub" data-plan></p>
+      <blockquote data-says></blockquote>
+      <p><b>When:</b> the whites are mostly on the left and colour's down to half the board or so. Stop fiddling with single pieces. Move the junk in blocks, browns up together, blacks down together, and wrap it round the whites in a V: the right-hand columns and a row along the bottom.</p>
+      <p>Ringed, the corner tools: a brown kept at the bottom-left and a black at the top-left, for later.</p>
+    </div>
+  </article>
+
+  <article class="board-side" data-phase="chain" id="p-chain">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3 data-name>The chain</h3>
+      <p class="sub" data-plan></p>
+      <blockquote data-says></blockquote>
+      <p><b>When:</b> enough whites are banked for your target. Now it all turns round: whites go right, to fill each column before it leaves, and the junk piles up on the left. Every column has to go up Crystal Clear, so nothing more can burn.</p>
+      <p>Shaded, a column of whites ready to go up.</p>
+    </div>
+  </article>
+
+  <h2 id="techniques">The techniques</h2>
+  <p class="intro">Each is one smooth drag, or a few in quick succession: never a pause and a click per swap. The arrow is the drag: start at the dot and follow the line. Numbers give the order when there's more than one. Each board is real, and the move is the one the technique finds on it. The tag says the first target that needs it.</p>
+
+  <article class="board-side" data-technique="sweep" id="t-sweep">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3 data-name>The sweep</h3>
+      <span class="lvl" data-level-of></span>
+      <p>At the start there's plenty of junk and plenty of time. Grab a brown or a black and drag it right as far as it'll go, then the next, one after another, hardly stopping to look. Rough is fine: speed matters more than neatness this early.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-technique="rescue" id="t-rescue">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3 data-name>Saving the whites</h3>
+      <span class="lvl" data-level-of></span>
+      <p>A white in a column about to burn is dragged out left: up through blacks, down through browns. If it can't move on its own, another piece is moved first to open its way. This board is Helium's lesson, and this is their first move.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-technique="junkColumn" id="t-junkColumn">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3 data-name>Finishing the junk column</h3>
+      <span class="lvl" data-level-of></span>
+      <p>The column next to burn is finished before you start another: its last whites swapped out for junk beside them, and a black on top, so it's sure to burn and can't float up as a column of only browns.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-technique="diamond" id="t-diamond">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3 data-name>The diamond</h3>
+      <span class="lvl" data-level-of></span>
+      <p>A black from the left falls down-right across the whites, then climbs up through the browns on the right to join the blacks at the top. A brown goes the other way round: up across the whites, down through the blacks. So the junk columns fill black above and brown below, a diamond on its side.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-technique="channel" id="t-channel">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3 data-name>Channels</h3>
+      <span class="lvl" data-level-of></span>
+      <p>In the chain: whites on the left are ferried right through the junk, climbing through blacks and sliding down through browns, to fill the next column to go up. A line of blacks running up-right takes them to the top; a line of browns running down-right to the bottom.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-technique="turnOver" id="t-turnOver">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3 data-name>Turning the right side over</h3>
+      <span class="lvl" data-level-of></span>
+      <p>Blacks taken up the right-hand side, zigzagging up through the browns to the top while the browns sink. Then whatever comes over from the left can hook straight in.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-technique="store" id="t-store">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3 data-name>Storing the junk</h3>
+      <span class="lvl" data-level-of></span>
+      <p>Junk on the left kept ready to cross later: blacks lifted to the top, browns left at the bottom. From the top-left a black can fall all the way across the whites in one drag; from the bottom-left a brown can climb across. Left high, a brown gets stuck; left low, so does a black.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-technique="leapfrog" id="t-leapfrog">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3 data-name>The leapfrog</h3>
+      <span class="lvl" data-level-of></span>
+      <p>Sideways along a stored row: a black dragged along a row of browns, up into each and down past it, all in one drag (or a brown along a row of blacks). It needs plenty of pieces about, so it's a mid-game move.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-technique="crawl" id="t-crawl">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3 data-name>The crawl</h3>
+      <span class="lvl" data-level-of></span>
+      <p>A black and a brown together can travel level through whites, each climbing past the other in turn. On its own, a brown at the top among whites can't move at all; with a black beside it the pair crawls along, and the whites go the other way. Slow, but it gets stuck whites out. Not one for early on, when a plain drag would do.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-technique="hook" id="t-hook">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3 data-name>The hook</h3>
+      <span class="lvl" data-level-of></span>
+      <p>A black dragged down through the whites hooks up past a brown, pushing the brown down, and then the brown's dragged on. For when pieces get scarce, and for hooking junk in through the V in one big sweep instead of crawling it across.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-technique="figureEight" id="t-figureEight">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3 data-name>The figure of eight</h3>
+      <span class="lvl" data-level-of></span>
+      <p>Late in a game, on a nearly white board: a black and a brown looped round each other carry a pair of pieces straight up or down through the whites.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-technique="linePull" id="t-linePull">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3 data-name>Pulling a line of browns</h3>
+      <span class="lvl" data-level-of></span>
+      <p>A black at the front of a line of browns climbs past them, every brown dropping a place, then loops back round to do it again: the line pulled along a tile at a time.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-technique="path" id="t-path">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3 data-name>Bringing a piece round</h3>
+      <span class="lvl" data-level-of></span>
+      <p>When a piece is stuck and none of the named techniques frees it, look for any piece that can be brought round, along any path the swaps allow, loops and all, into its place. Sometimes one piece has to move out of the way first.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <h2 id="tricks">Tricks worth knowing</h2>
+  <p class="intro">Small habits that keep a game safe, from watching good distillers play.</p>
+
+  <article class="board-side" data-trick="white" id="k-white">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3>Never a white down the fire</h3>
+      <p>The one thing to know. A white burned is a white lost, and every second one comes back as a burnt white. Burn one in the first few columns and the game's as good as over. Played well, you never burn a white at all.</p>
+      <p>Helium's opening board: this column, with its white, goes down the furnace, and the still goes bang.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-trick="danger" id="k-danger">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3>The danger low by the fire first</h3>
+      <p>Whites in the column next to burn that can't get out on their own, low down, boxed in or behind a spice, are the hardest to reach, so start on them first, before easy work anywhere else. The top of the board is safe and easy; the bottom by the fire is where whites get burned.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-trick="edge" id="k-edge">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3>Nothing walled in at the edges or by a spice</h3>
+      <p>In the three columns by the fire, a white on the top or bottom edge, or beside a spice, has few ways out, and they close as the board slides. Race junk into its place while you can, from far off if need be, and never make a move that blocks its way out.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-trick="flick" id="k-flick">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3>A brown a flick lower</h3>
+      <p>When two moves do the same job for about the same effort, take the one that leaves browns lower and blacks higher on the right. A little flick and a swish and the brown sits a row lower: the right side stays connected, and the gap's easier to fill later. A tie-breaker, never worth extra moves.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-trick="blocks" id="k-blocks">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3>Junk in blocks, into the V</h3>
+      <p>Once the whites are mostly left, stop the small fiddly moves. Pull the junk across in big drags, and carry each drag on until the piece joins the junk on its right, tucked into the corner or the row, not left one short among the whites.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-trick="kept" id="k-kept">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3>A brown kept bottom-left</h3>
+      <p>Don't be greedy clearing the left. A brown in the bottom-left corner (ringed) can climb right across the whites later, and a black in the top-left can fall across: tools for hauling junk over, and for the V's bottom arm, which wants browns more than blacks.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-trick="burnEarly" id="k-burnEarly">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3>Burn early only with the next columns clear</h3>
+      <p>Burning a finished junk column early saves time, but each burn brings the whites a column closer to the fire. So burn early only while the two columns coming up after it are clear of white too, as here.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <h2 id="then">And then</h2>
+  <article>
+    <h3>The rest is from other pirates</h3>
+    <p>That's Helium's lesson, and it's how the den's bots play. To see it move, sail out to Helium's island past the checkpoint and let them walk you through step one, then try their still: they'll help, hint, or play your board while you watch.</p>
+    <p>But this is only a start. The real tricks are out on the ocean, with the pirates who play.</p>
+    <blockquote data-quote="onward"></blockquote>
+    <blockquote data-quote="tell"></blockquote>
+    <p class="try">Try it: <a href="den.html?at=helium"><code>den.html?at=helium</code></a></p>
+  </article>
+
+  <p class="note" style="text-align:center">Every board on this page is drawn live from the den's own Distilling, so when Helium's lesson or the bots change, it changes with them. See <a href="design.html" target="_self">how the den is designed</a> and <a href="changelog.html" target="_self">what's new</a>.</p>
+
+  <footer>Puzzle Pirates™ © 2001–2026 Grey Havens, LLC, created by Three Rings Design.<br>An unofficial fan project, not affiliated with or endorsed by them.</footer>
+</div>
+<script type="module" src="js/distill-guide-view.js"></script>
+</body>
+</html>

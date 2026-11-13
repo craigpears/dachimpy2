@@ -59,6 +59,8 @@ export interface Weighed { move: Move | PathMove; value: number; saves?: boolean
 export const PATH_WIDE = { ...PATH, SWAPS: 16, NODES: 6000, ENABLE_NEAR: 6, ENABLE_BOARDS: 200, ENABLE_NODES: 600 };
 /** The path search's name for a player. */
 export const PATH_LABEL = 'Bring a piece round';
+/** A long plain drag's name for a player: no technique, just swept over (`plainDrag`). */
+export const SWEEP_LABEL = 'The sweep';
 
 /** How a bot plays: the techniques it knows, its reach and pace, and its habits. */
 export interface Style {
@@ -552,7 +554,7 @@ export function choose(sit: Situation, ctx: Ctx, style: Style): Advice {
   // A plain long drag that wins is the sweep, swept blind: no technique needed, "quick drag brown up, black
   // down, done" (the eleventh note).
   if (best && ctx.stage === 'junk' && plainDrag(best.move.drags)) {
-    return { ...advice('move', 'The sweep', `go, go, go: ${best.move.reason}`, best), sweep: true };
+    return { ...advice('move', SWEEP_LABEL, `go, go, go: ${best.move.reason}`, best), sweep: true };
   }
   if (best) {
     const gamble = !burning && sit.chain >= P.CASH_FROM && !ready && style.gamble
