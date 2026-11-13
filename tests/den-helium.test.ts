@@ -433,6 +433,11 @@ describe('their chatter', () => {
     expect(v.again(true, true)).toBe(true);
     expect(v.again(false, true)).toBe(false);
   });
+  it('13 Nov ("I wouldn\'t want that playing every time"): seen before in this browser, no lesson, straight to the still', () => {
+    const v = new Visit(true);
+    expect(v.arrive(true, true)).toBe(false);
+    expect(v.again(true, true)).toBe(true);
+  });
 });
 
 describe('their nerves at your still (the user, 13 Nov: "imagine Helium getting nervous if you\'re not really clearing out the whites")', () => {

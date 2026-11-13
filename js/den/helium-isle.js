@@ -19,7 +19,7 @@ import {
   HELIUM_CAST, HELIUM, HELIUM_STANDS, HELIUM_MOOR, HELIUM_ARRIVE, Visit, lessonGame, lessonBeats, lessonSecs, mishapLine, askHelium,
   onHeliumLanding, inHeliumEarshot, heliumShore, worksFor, praiseFor, Cellar, OPENING_BANG, lineSpot, PACE_LESSON, whitesOnFireSide,
   actAfter, holdSecs, ringed, stepDoneLines, Nerves, NERVE, whitesInFurnace, onScreen, hintFor, hintLeft, routesToFire, Watch, PACE_WATCH,
-  BEST_STORE, cleanBestChain, bestToBeat, beatBest,
+  BEST_STORE, cleanBestChain, bestToBeat, beatBest, SEEN_STORE,
 } from '../den-helium.js';
 import { LAY } from '../den-sail.js';
 import { Distilling, WHITE } from '../distilling.js';
@@ -45,7 +45,10 @@ const SAND = { y0: -0.4, h: 0.62 }, GROUND = SAND.y0 + SAND.h + 0.25;
 /* Your best Crystal Clear here, kept in this browser (src/den-helium.ts, beatBest). */
 const readBest = () => { try { return cleanBestChain(localStorage.getItem(BEST_STORE)); } catch { return 0; } };
 const keepBest = (n) => { try { localStorage.setItem(BEST_STORE, String(n)); } catch { /* (no storage: kept this voyage only) */ } };
-export const helium = { W: null, visit: new Visit(), play: null, on: false, board: null, hand: [], handT: 0, handDone: null, bangs: 0, bigBang: 0, note: '', noteT: 0, cower: 0, shrug: 0, nervy: 0, nerves: new Nerves(), fretCol: null, held: true, fireTips: 0, cellar: new Cellar(), hint: null, routes: null, watch: null, best: readBest() };
+/* Their lesson seen, in this browser: it plays the first time only. */
+const readSeen = () => { try { return localStorage.getItem(SEEN_STORE) === '1'; } catch { return false; } };
+const keepSeen = () => { try { localStorage.setItem(SEEN_STORE, '1'); } catch { /* (no storage: this voyage only) */ } };
+export const helium = { W: null, visit: new Visit(readSeen()), play: null, on: false, board: null, hand: [], handT: 0, handDone: null, bangs: 0, bigBang: 0, note: '', noteT: 0, cower: 0, shrug: 0, nervy: 0, nerves: new Nerves(), fretCol: null, held: true, fireTips: 0, cellar: new Cellar(), hint: null, routes: null, watch: null, best: readBest() };
 
 function build() {
   const g = new THREE.Group(), sand = mat('#e6cf96', { roughness: 1 }), wet = mat('#c9ad78', { roughness: 1 });
@@ -197,7 +200,7 @@ function handTick(dt) {
    distillery: the furnace takes its column, then the next, a white in it ringed, and as the white goes into
    the furnace the still goes bang; they shrug it off; your own lines in it (`who: 'you'`) over your head on
    the sloop, kept on the screen. It's only ever seen once: their lesson plays the first time you come up
-   off their island, never again. */
+   off their island, never again in this browser (SEEN_STORE). */
 function lessonPlay() {
   const W = helium.W, P = PACE_LESSON;
   sail.helm.moor(HELIUM_MOOR);
@@ -208,11 +211,10 @@ function lessonPlay() {
   const them = W.them.p.g.getWorldPosition(V3(0, 0, 0)).add(V3(0, 1.9, 0)), at = W.boardAt.clone();
   const look = them.lerp(at, 0.6), dist = W.size * 2.7;
   // (the opening's shot, wider: their board and the still in its yard both in it, the still a little to the
-  // side behind; then in to the board for the lesson)
+  // side behind; then in on the board for the lesson, boardView)
   const still = W.distillery.g.getWorldPosition(V3(0, 0, 0)).add(V3(0, 1.8, 0));
   const wide = { look: at.clone().lerp(still, 0.45), dist: Math.max(dist * 1.25, at.distanceTo(still) * 2.1), tilt: 0.16, yaw: W.yaw + 0.22 };
-  const close = { look, dist, tilt: 0.12, yaw: W.yaw };
-  let i = -1, t = 0, need = 0, acted = true, gap = 0, on = false, burned = false;
+  let i = -1, t = 0, need = 0, acted = true, gap = 0, on = false, burned = false, zoom = false;
   W.them.lookAt = { x: look.x + Math.sin(W.yaw) * dist, z: look.z + Math.cos(W.yaw) * dist };   // (to the camera, their audience)
   const goOn = () => { if (i >= 0 && t >= P.READ_FIRST) on = true; };
   const click = (e) => { if (e.button === 0) goOn(); };
@@ -224,6 +226,7 @@ function lessonPlay() {
     key(k) { if (k === ' ' || k === 'enter') { goOn(); return true; } return false; },
     tick(dt) {
       t += dt;
+      if (zoom) c.cam = boardView();
       // (not till the camera's flown out to their island: the bang's the first thing to see)
       if (i < 0 && t < 12 && camera.position.distanceTo(c.cam.look) > c.cam.dist * 1.6) return;
       const b = beats[i];
@@ -248,7 +251,9 @@ function lessonPlay() {
       // (once it's burned, only the white going down: the column sliding in after it isn't)
       burned = false;
       B.mark = n.marks === undefined ? null : (x, y, p, gone) => (gone ? burned && p === WHITE : !burned && ringed(n.marks, x, p));
-      if (i === lesson) c.cam = close;
+      // (from step one, in on the board, as at your still: the whites they're moving close enough to follow;
+      // the user, 13 Nov: "when he starts moving pieces ... it really should be zooming in on the board")
+      if (i === lesson) zoom = true;
       noteFor(n.step ? `Step ${n.step}: ${n.note.replace(/^Step \d+: /, '')}` : n.note, 99);
       t = 0; gap = 0; on = false; need = holdSecs(n); acted = n.act.kind === 'none' || n.act.kind === 'bang';
     },
@@ -508,6 +513,10 @@ export function heliumUp(button = 0) { if (helium.on) helium.board?.release(butt
 /** The camera while you're at the still: straight on to the board (den.js, with Umami's). */
 export function heliumCam() {
   if (!helium.on || !helium.board) return null;
+  return boardView();
+}
+/** Straight on to their board, as at the still (heliumCam), and from their lesson's step one on. */
+function boardView() {
   // (the den's panel is hidden here, so the board fills the screen; the user, 13 Nov: "I can't see helium at
   // all ... still need to see more of the puzzle ... you don't need like the menu at the top again in these
   // views". As the screen widens, the board slides left of the middle and Helium comes in beside it on the
@@ -582,7 +591,7 @@ export function heliumTick(dt) {
     const p = sail.helm.pose;
     // The first time you come up beside their island, anywhere round it, settled and not at the Sailing
     // board: their lesson.
-    if (helium.visit.arrive(onHeliumLanding(p.c, p.r), free() && sail.helm.slot < 0 && !station.on)) lessonPlay();
+    if (helium.visit.arrive(onHeliumLanding(p.c, p.r), free() && sail.helm.slot < 0 && !station.on)) { keepSeen(); lessonPlay(); }
   }
   if (helium.play) bar(`${helium.note} · Space: go on · Esc: skip`);
   watchTick(dt);
@@ -667,7 +676,7 @@ function placeLine() {
 
 /** A fresh voyage: their lesson not seen yet, the still left, the lesson's deal back on their board. */
 export function heliumReset() {
-  helium.visit = new Visit();
+  helium.visit = new Visit(readSeen());
   if (helium.play && cine === helium.play) cineEnd(true);
   leave();
   helium.cellar = new Cellar();

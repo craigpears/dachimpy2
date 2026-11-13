@@ -60,9 +60,13 @@ export const HELIUM_MOOR = H.MOOR;
 export const HELIUM_ARRIVE = { c: O[0] - 1, r: O[1] + 1, d: 1 };
 /** When their lesson plays: the first time you come up off their island (a cutscene), never while something
     else is playing or you're carried past at speed; after it, Space there takes you to the still. */
+/** Their lesson seen, kept in this browser, so it plays the first time only, not every voyage (the user, 13 Nov:
+    "I wouldn't want that playing every time"). */
+export const SEEN_STORE = 'den-helium-seen';
 export class Visit {
-    /** Their lesson's been seen. */
-    seen = false;
+    /** Their lesson's been seen (in this browser, when read from SEEN_STORE). */
+    seen;
+    constructor(seen = false) { this.seen = seen; }
     /** Each tick: off their island (`off`), free to watch (`free`). True when their lesson should begin now. */
     arrive(off, free) {
         if (!off || !free || this.seen)
