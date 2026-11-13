@@ -924,46 +924,36 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 > "playing and be able to press a button that says help helium and he starts showing you some moves on how you could get yourself out of the situation." (the user, 12 Nov)
 >
 > "helium should kind of detect what stage you're at and show you what technique ... It's context aware." (the user, 12 Nov)
+>
+> "helium said to teach you some tricks, but ... don't forget, you know, the greatest love of the game is talking to other pirates ... this is not a replacement for the game ... this is a tool, a side adventure ... We should be watching people, looking at YouTube videos, talk to people, just whatever." (the user, 13 Nov)
 
 ### Coming up off their island the first time: the still goes bang, and they shrug it off (your lines between, src/lines/you.ts)
 
-- *mishap:* "Oh. Sorry about that. Just a little distilling mishap."
+- *mishap:* "Oh. Sorry about that. Let a white go down the furnace. Just a little distilling mishap."
 - *offer:* "Would you like me to teach you some distilling? While you're here."
-- *safe:* "Of course it's safe. What would make you think it's not safe? Perfectly normal, this. It's fine."
+- *safe:* "Of course it's safe. Just don't send whites down the furnace. Perfectly normal, this. It's fine."
 - *brows:* "None of us have got eyebrows. I keep asking the developers for some. Nothing yet."
 
-### Their lesson begins, after their opening
+### Their lesson's step one, straight after their opening, the whites on the fire's side ringed: as it starts (says), as they drag the whites out of the three columns next to the fire (clear), why (why), in the bar (note); when you've cleared them yourself (done); your goal in the bar while you play (goal)
 
-- "Right then. Distilling. Nothing to it. Watch."
+- *says:* "Right. First things first. See all these whites on the right? Next in the fire, every one."
+- *clear:* "So out of the way they go. Left, away from the fire, swap by swap."
+- *why:* "Otherwise, silly mishaps. Bang. And I've already got no eyebrows."
+- *note:* "Step 1: get every white (ringed) out of the three right-hand columns, the next to burn."
+- *done:* "There. Step one. Nothing on the fire's side worth losing."
+- *goal:* "Step 1: clear the whites out of the 3 right-hand columns"
 
-### Their opening lesson at the still: in their bubble (says) and in the bar at the foot of the screen (note), beat by beat
+### Once you've done step one yourself, after their "done": the rest is from other pirates
 
-- *They swap a white up past a black:*
-  - *says:* "One rule. The lower piece beats the upper one: white floats up past black."
-  - *note:* "The swap rule: a piece swaps up past the one it beats. White beats black, brown beats white, black beats brown."
-- *The rest of the rule:*
-  - *says:* "Brown past white, black past brown. Round and round. Can't swap it straight back, mind."
-  - *note:* "White over black, brown over white, black over brown: like rock, paper, scissors."
-- *They burn the all-black column:*
-  - *says:* "Furnace takes the right-hand column. All junk? Burn it now. X."
-  - *note:* "The furnace burns the right-hand column every 15 seconds, or now on X. More blacks than whites and it burns; the rest goes up into the flask."
-- *They burn the next, a white in it (their mishap follows):*
-  - *says:* "And the next one's mostly junk. One white in it. Eh. X."
-  - *note:* "A white in a column that burns is lost: burnt whites come back later, scorched, and spoil a column."
+- "Few of my tricks, that. The rest's from other pirates. Ask about. Watch them play. Find their videos."
+
+### The end of their lesson: in their bubble (says) and in the bar at the foot of the screen (note)
+
 - *Handing you the board, step one the goal:*
   - *says:* "Right, your go. Keep those three clear of white. H if you want me. I'll be here. Probably."
   - *note:* "Your go: keep the three right-hand columns clear of white, and burn them once they're all junk. H: Help, Helium."
 
-### Their lesson's step one, after the mishap: as it starts (says), as they drag the whites out of the three columns next to the fire (clear), why (why), in the bar (note); when you've cleared them yourself (done); your goal in the bar while you play (goal)
-
-- *says:* "Which is step one, really. The three columns next to the fire: no whites in them. None."
-- *clear:* "Whites go left, away from the fire. Walk them out, swap by swap. Junk steps the other way."
-- *why:* "Otherwise the still goes bang. And I've already got no eyebrows."
-- *note:* "Step 1: clear every white out of the three right-hand columns, the next to burn."
-- *done:* "There. Step one. Nothing on the fire's side worth losing."
-- *goal:* "Step 1: clear the whites out of the 3 right-hand columns"
-
-### A column burns with a white in it, and the still goes bang: the first time the first, then any
+### At your still, a column burns with a white in it, and the still goes bang: the first time the first, then any
 
 - "Oops. That happens sometimes. Don't worry about it."
 - "Bang. Yep. The still's fine. Mostly."
@@ -1012,6 +1002,7 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 - "The still's only gone bang twice today. Good day."
 - "Space if you fancy a go at the still. I won't watch. Much."
 - "Whites left, junk right. That's most of it. The rest is just showing off."
+- "Ask about, mind. Other pirates know tricks I've never seen."
 
 ## Gravee
 

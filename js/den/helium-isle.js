@@ -14,11 +14,12 @@
 // point (menus.js).
 import * as THREE from 'three';
 import {
-  HELIUM_CAST, HELIUM, HELIUM_STANDS, HELIUM_MOOR, HELIUM_ARRIVE, Visit, lessonGame, lessonPlan, lessonSecs, mishapLine, askHelium,
-  onHeliumLanding, inHeliumEarshot, heliumShore, opening, worksFor, praiseFor, Cellar, OPENING_BANG, lineSpot, PACE_LESSON, whitesOnFireSide,
+  HELIUM_CAST, HELIUM, HELIUM_STANDS, HELIUM_MOOR, HELIUM_ARRIVE, Visit, lessonGame, lessonBeats, lessonSecs, mishapLine, askHelium,
+  onHeliumLanding, inHeliumEarshot, heliumShore, worksFor, praiseFor, Cellar, OPENING_BANG, lineSpot, PACE_LESSON, whitesOnFireSide,
+  actAfter, holdSecs, ringed, stepDoneLines,
 } from '../den-helium.js';
 import { LAY } from '../den-sail.js';
-import { Distilling } from '../distilling.js';
+import { Distilling, WHITE } from '../distilling.js';
 import { PRAISE, STEP_ONE } from '../lines/helium.js';
 import { readSecs } from '../den-dignity.js';
 import { PACE } from '../chatter.js';
@@ -38,7 +39,7 @@ import { cine, cinePlay, cineEnd, bubble, bubbleAt } from './cine.js';
 const SAND = { y0: -0.4, h: 0.62 }, GROUND = SAND.y0 + SAND.h + 0.25;
 /* `on`: at the still, playing; `board`: Distilling's board on its stand (the lesson's, then yours); `hand`:
    their drags being played on it (lesson or help), a swap at a time; `note`: what the bar says, a while. */
-export const helium = { W: null, visit: new Visit(), play: null, on: false, board: null, hand: [], handT: 0, handDone: null, bangs: 0, note: '', noteT: 0, cower: 0, shrug: 0, cellar: new Cellar() };
+export const helium = { W: null, visit: new Visit(), play: null, on: false, board: null, hand: [], handT: 0, handDone: null, bangs: 0, bigBang: 0, note: '', noteT: 0, cower: 0, shrug: 0, cellar: new Cellar() };
 
 function build() {
   const g = new THREE.Group(), sand = mat('#e6cf96', { roughness: 1 }), wet = mat('#c9ad78', { roughness: 1 });
@@ -109,12 +110,16 @@ function newBoard(game, yours) {
   if (helium.board) helium.board.dispose();  helium.hand = []; helium.handDone = null;
   helium.board = distillBoard({
     game, at: W.boardAt, yaw: W.yaw, size: W.size,
-    // Each column gone, their distillery answers (src/den-helium.ts, worksFor): a white burned, it blows up;
-    // whites sent up, rum runs off into the cask, and full casks go on the pile.
+    // Each column gone, their distillery answers (src/den-helium.ts, worksFor): a white burned, it blows up
+    // as the white goes into the furnace (the opening's bigger: bigBang); whites sent up, rum runs off into
+    // the cask, and full casks go on the pile.
+    onFurnace: (c) => {
+      const w = worksFor(c);
+      if (w.kind === 'bang') { bang(yours, Math.max(w.size, helium.bigBang)); helium.bigBang = 0; }
+    },
     onColumn: (c, finished) => {
       const w = worksFor(c);
-      if (w.kind === 'bang') bang(yours, w.size);
-      else if (w.kind === 'rum') {
+      if (w.kind === 'rum') {
         W.distillery.pour(helium.cellar.pour(w.measures));
         const line = yours && praiseFor(c.chain, Math.random());
         if (line) say(line);
@@ -135,10 +140,10 @@ function bang(yours, size = 1) {
   if (yours) say(mishapLine(helium.bangs++));
   else helium.bangs++;
 }
-/** Says one thing now, over whatever they were saying, then back to their chatter in a while. */
-function say(text) {
+/** Says one thing now (or a few in turn), over whatever they were saying, then back to their chatter in a while. */
+function say(...texts) {
   const them = helium.W.them;
-  them.setScript({ intro: [text], loop: HELIUM_CAST.them.says.loop }, { secs: (t) => (t === text ? lessonSecs(t) : readSecs(t)), wait: 0, gap: PACE.ASIDE });
+  them.setScript({ intro: texts, loop: HELIUM_CAST.them.says.loop }, { secs: (t) => (texts.includes(t) ? lessonSecs(t) : readSecs(t)), wait: 0, gap: PACE.ASIDE });
 }
 /** What the bar at the foot says a while: a lesson beat's note, or their help's technique and reason. */
 const noteFor = (text, secs = 9) => { helium.note = text; helium.noteT = secs; };
@@ -178,39 +183,46 @@ function handTick(dt) {
    beat holds till its line's read and the board's still, then a breath; its pace is src/den-helium.ts's
    PACE_LESSON (the user, 13 Nov: it went by "like half a second"). Space, Enter or a click goes on once
    you've read the line; Esc skips the lot (cine.js); either way, the still's yours after. From the mishap on
-   it's step one (STEPS), said in the bar.
-   First, their opening (src/den-helium.ts, opening): the still goes bang as you come up, and they shrug it
-   off; your own lines in it (`who: 'you'`) over your head on the sloop, kept on the screen. It's only ever
-   seen once: their lesson plays the first time you come up off their island, never again. */
+   it's step one (STEPS), said in the bar; a beat's `marks` ring the whites it's about on the board.
+   First, their opening (src/den-helium.ts, opening), the camera wider to take in their board and their
+   distillery: the furnace takes its column, then the next, a white in it ringed, and as the white goes into
+   the furnace the still goes bang; they shrug it off; your own lines in it (`who: 'you'`) over your head on
+   the sloop, kept on the screen. It's only ever seen once: their lesson plays the first time you come up
+   off their island, never again. */
 function lessonPlay() {
   const W = helium.W, P = PACE_LESSON;
   sail.helm.moor(HELIUM_MOOR);
   sail.riding = false;
   helium.on = false;
   newBoard(lessonGame(), false);
-  const B = helium.board, beats = [...opening(), ...lessonPlan()];
+  const B = helium.board, beats = lessonBeats(), lesson = beats.findIndex((b) => b.step);
   const them = W.them.p.g.getWorldPosition(V3(0, 0, 0)).add(V3(0, 1.9, 0)), at = W.boardAt.clone();
   const look = them.lerp(at, 0.6), dist = W.size * 2.7;
-  let i = -1, t = 0, need = 0, acted = true, gap = 0, on = false;
+  // (the opening's shot, wider: their board and the still in its yard both in it, the still a little to the
+  // side behind; then in to the board for the lesson)
+  const still = W.distillery.g.getWorldPosition(V3(0, 0, 0)).add(V3(0, 1.8, 0));
+  const wide = { look: at.clone().lerp(still, 0.45), dist: Math.max(dist * 1.25, at.distanceTo(still) * 2.1), tilt: 0.16, yaw: W.yaw + 0.22 };
+  const close = { look, dist, tilt: 0.12, yaw: W.yaw };
+  let i = -1, t = 0, need = 0, acted = true, gap = 0, on = false, burned = false;
   W.them.lookAt = { x: look.x + Math.sin(W.yaw) * dist, z: look.z + Math.cos(W.yaw) * dist };   // (to the camera, their audience)
   const goOn = () => { if (i >= 0 && t >= P.READ_FIRST) on = true; };
   const click = (e) => { if (e.button === 0) goOn(); };
   addEventListener('pointerdown', click);
   const c = {
-    cam: { look, dist, tilt: 0.12, yaw: W.yaw },
+    cam: wide,
     started: performance.now(),
     /** Space or Enter: on to the next line, once this one's been up a moment (Esc still skips: cine.js). */
     key(k) { if (k === ' ' || k === 'enter') { goOn(); return true; } return false; },
     tick(dt) {
       t += dt;
       // (not till the camera's flown out to their island: the bang's the first thing to see)
-      if (i < 0 && t < 12 && camera.position.distanceTo(look) > dist * 1.6) return;
+      if (i < 0 && t < 12 && camera.position.distanceTo(c.cam.look) > c.cam.dist * 1.6) return;
       const b = beats[i];
-      if (b && !acted && (t >= P.ACT_AFTER || on)) {
+      if (b && !acted && (t >= actAfter(b) || on)) {
         acted = true;
         if (b.act.kind === 'drag') play([b.act], null, P);
         else if (b.act.kind === 'drags') play(b.act.drags, null, P);
-        else if (b.act.kind === 'burn') B.burn();
+        else if (b.act.kind === 'burn') { helium.bigBang = b.bang ?? 0; burned = true; B.burn(); }
       }
       if (i >= 0) {
         if ((t < need && !on) || !acted || helium.hand.length || B.busy()) return;
@@ -222,14 +234,19 @@ function lessonPlay() {
       if (n.who === 'you') { you.text(n.says, lessonSecs(n.says)); W.them.hush(); }
       else if (n.says) say(n.says);
       else W.them.hush();
-      if (n.act.kind === 'bang') bang(false, OPENING_BANG);
+      if (n.act.kind === 'bang') bang(false, n.bang ?? OPENING_BANG);
+      // (the whites it's about ringed on the board, a white burning till it's gone in)
+      // (once it's burned, only the white going down: the column sliding in after it isn't)
+      burned = false;
+      B.mark = n.marks === undefined ? null : (x, y, p, gone) => (gone ? burned && p === WHITE : !burned && ringed(n.marks, x, p));
+      if (i === lesson) c.cam = close;
       noteFor(n.step ? `Step ${n.step}: ${n.note.replace(/^Step \d+: /, '')}` : n.note, 99);
-      t = 0; gap = 0; on = false; need = lessonSecs(n.says); acted = n.act.kind === 'none' || n.act.kind === 'bang';
+      t = 0; gap = 0; on = false; need = holdSecs(n); acted = n.act.kind === 'none' || n.act.kind === 'bang';
     },
     end() {
       removeEventListener('pointerdown', click);
       helium.lessonSecs = (performance.now() - c.started) / 1000;   // (how long it ran, for a check)
-      helium.play = null; helium.hand = []; W.them.lookAt = null; atStill(true);
+      helium.play = null; helium.hand = []; helium.bigBang = 0; W.them.lookAt = null; atStill(true);
     },
   };
   helium.play = c;
@@ -381,7 +398,7 @@ export function heliumTick(dt) {
   // (at the still, turned to you, at the board; tending, to the cask)
   if (!helium.play) W.them.lookAt = tending ? W.distillery.caskAt() : helium.on ? camera.position : null;
   // Step one done, at your still: the three columns next to the fire clear of white. They say so, once a batch.
-  if (helium.on && !helium.stepDone && helium.board?.game.movable && !whitesOnFireSide(helium.board.game.cols)) { helium.stepDone = true; say(STEP_ONE.done); }
+  if (helium.on && !helium.stepDone && helium.board?.game.movable && !whitesOnFireSide(helium.board.game.cols)) { helium.stepDone = true; say(...stepDoneLines()); }
   W.them.tick(dt);
   placeLine();
   W.distillery.tick(dt);

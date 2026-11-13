@@ -1,59 +1,51 @@
-/** Coming up off their island the first time (src/den-helium.ts, opening): the still goes bang as you
-    arrive, and they treat it as an everyday thing. The user (12 Nov): "the distillery exploding and Helium
+/** Coming up off their island the first time (src/den-helium.ts, opening): a white goes down the furnace
+    on their board as you arrive, the still goes bang, and they treat it as an everyday thing. The user (12 Nov): "the distillery exploding and Helium
     just treating it as kind of a casual everyday event, just like, oh, sorry, just a little distilling
     mishap ... would you like me to teach you some distilling", then, to your "is it safe?", "of course it's
     safe. What would make you think it's not safe? This is perfectly normal. It's fine." And the eyebrows:
     "none of us have got eyebrows ... I keep asking the developers for some, but I've not gotten them yet"
     (true: no pirate in Puzzle Pirates has any, checked on Helium's and Roobear's portraits, 12 Nov; it only
-    sounds like the bangs took them). Your lines between are src/lines/you.ts's AT_HELIUMS. */
+    sounds like the bangs took them). Then (13 Nov): "maybe there should be a bit more of a link in the
+    initial dialogue to the idea of just make sure you don't send any white pieces down into the burner": the
+    mishap was a white let go down, and the one thing to know, said in passing, is don't. Your lines between
+    are src/lines/you.ts's AT_HELIUMS. */
 export const OPENING = {
-    mishap: 'Oh. Sorry about that. Just a little distilling mishap.',
+    mishap: 'Oh. Sorry about that. Let a white go down the furnace. Just a little distilling mishap.',
     offer: 'Would you like me to teach you some distilling? While you\'re here.',
-    safe: 'Of course it\'s safe. What would make you think it\'s not safe? Perfectly normal, this. It\'s fine.',
+    safe: 'Of course it\'s safe. Just don\'t send whites down the furnace. Perfectly normal, this. It\'s fine.',
     brows: 'None of us have got eyebrows. I keep asking the developers for some. Nothing yet.',
 };
-/** Their lesson begins, after their opening. */
-export const GREET = 'Right then. Distilling. Nothing to it. Watch.';
-/** Their opening lesson, on a real board at their still (src/den-helium.ts, lessonPlan): a line in their bubble
-    as each beat starts (`says`), and what it shows in plain words, in the bar at the foot of the screen
-    (`note`). The swap rule, whites left and junk right, the furnace's column burned, and a white burned
-    with it: their mishap. Then it's yours. */
+/** Their lesson, on a real board at their still after their opening (src/den-helium.ts, lessonPlan): a line in
+    their bubble (`says`), and what it shows in plain words, in the bar at the foot of the screen (`note`).
+    No basics (the user, 13 Nov: "basic move mechanics ... Puzzle Pirates does that. That tutorial exists"):
+    step one (STEP_ONE, below), then it's yours. */
 export const LESSON = {
-    rule: {
-        says: 'One rule. The lower piece beats the upper one: white floats up past black.',
-        note: 'The swap rule: a piece swaps up past the one it beats. White beats black, brown beats white, black beats brown.',
-    },
-    ruleAfter: {
-        says: 'Brown past white, black past brown. Round and round. Can\'t swap it straight back, mind.',
-        note: 'White over black, brown over white, black over brown: like rock, paper, scissors.',
-    },
-    furnace: {
-        says: 'Furnace takes the right-hand column. All junk? Burn it now. X.',
-        note: 'The furnace burns the right-hand column every 15 seconds, or now on X. More blacks than whites and it burns; the rest goes up into the flask.',
-    },
-    mishapSetup: {
-        says: 'And the next one\'s mostly junk. One white in it. Eh. X.',
-        note: 'A white in a column that burns is lost: burnt whites come back later, scorched, and spoil a column.',
-    },
     yours: {
         says: 'Right, your go. Keep those three clear of white. H if you want me. I\'ll be here. Probably.',
         note: 'Your go: keep the three right-hand columns clear of white, and burn them once they\'re all junk. H: Help, Helium.',
     },
 };
-/** Step one, the first of the puzzle's steps (src/den-helium.ts, STEPS), after the mishap shows what comes of
-    skipping it: the three columns next to the fire cleared of every white. The user (13 Nov): "step one is
-    getting a few columns on the right-hand side that are about to burn completely free of white pieces ...
-    because otherwise, yeah, the furnace blows up and, you know, I've already got no eyebrows." `says` as it
-    starts, `clear` as they drag the whites out, `why` after, `note` in the bar, `done` when you've cleared
-    them yourself, `goal` in the bar while you play. */
+/** Step one, the first of the puzzle's steps (src/den-helium.ts, STEPS), straight after their opening showed
+    what comes of skipping it: the three columns next to the fire cleared of every white, each ringed on the
+    board. The user (13 Nov): "step one is getting a few columns on the right-hand side that are about to burn
+    completely free of white pieces ... because otherwise, yeah, the furnace blows up and, you know, I've
+    already got no eyebrows", and later "First things first. See all these whites on the right, you know,
+    highlight them all. Right, we want to get them out of the way because ... otherwise ... silly mishaps
+    happen." `says` as it starts, `clear` as they drag the whites out, `why` after, `note` in the bar, `done`
+    when you've cleared them yourself, `goal` in the bar while you play. */
 export const STEP_ONE = {
-    says: 'Which is step one, really. The three columns next to the fire: no whites in them. None.',
-    clear: 'Whites go left, away from the fire. Walk them out, swap by swap. Junk steps the other way.',
-    why: 'Otherwise the still goes bang. And I\'ve already got no eyebrows.',
-    note: 'Step 1: clear every white out of the three right-hand columns, the next to burn.',
+    says: 'Right. First things first. See all these whites on the right? Next in the fire, every one.',
+    clear: 'So out of the way they go. Left, away from the fire, swap by swap.',
+    why: 'Otherwise, silly mishaps. Bang. And I\'ve already got no eyebrows.',
+    note: 'Step 1: get every white (ringed) out of the three right-hand columns, the next to burn.',
     done: 'There. Step one. Nothing on the fire\'s side worth losing.',
     goal: 'Step 1: clear the whites out of the 3 right-hand columns',
 };
+/** Sending you on to other pirates (the user, 13 Nov: "the greatest love of the game is talking to other
+    pirates ... this is not a replacement for the game ... this is a tool, a side adventure ... We should be
+    watching people, looking at YouTube videos, talk to people"): said once you've done step one yourself,
+    after `done` (src/den-helium.ts, stepDoneLines). Offhand, as everything they say. */
+export const ONWARD = 'Few of my tricks, that. The rest\'s from other pirates. Ask about. Watch them play. Find their videos.';
 /** A column burns with a white in it (the still goes bang): the first time, and then any of these. The
     user (11 Nov): "just for the comedic layer ... occasionally, distilleries have been known to blow up". */
 export const MISHAP = [
@@ -103,6 +95,7 @@ export const AFTER = [
     'The still\'s only gone bang twice today. Good day.',
     'Space if you fancy a go at the still. I won\'t watch. Much.',
     'Whites left, junk right. That\'s most of it. The rest is just showing off.',
+    'Ask about, mind. Other pirates know tricks I\'ve never seen.',
 ];
 export const CHARACTER = {
     name: 'Helium',
@@ -126,16 +119,17 @@ export const CHARACTER = {
         { on: '13 Nov', said: 'if you are joking about her drinking, that it\'s like, oh, ... explains her behaviour really, but hang on, ... she was like that before she\'s drunk ... she\'s not that way because she\'s drinking, she\'s just that way anyway.' },
         { on: '12 Nov', said: 'playing and be able to press a button that says help helium and he starts showing you some moves on how you could get yourself out of the situation.' },
         { on: '12 Nov', said: 'helium should kind of detect what stage you\'re at and show you what technique ... It\'s context aware.' },
+        { on: '13 Nov', said: 'helium said to teach you some tricks, but ... don\'t forget, you know, the greatest love of the game is talking to other pirates ... this is not a replacement for the game ... this is a tool, a side adventure ... We should be watching people, looking at YouTube videos, talk to people, just whatever.' },
     ],
     lines: [
         { when: 'Coming up off their island the first time: the still goes bang, and they shrug it off (your lines between, src/lines/you.ts)', says: OPENING },
-        { when: 'Their lesson begins, after their opening', says: GREET },
+        { when: 'Their lesson\'s step one, straight after their opening, the whites on the fire\'s side ringed: as it starts (says), as they drag the whites out of the three columns next to the fire (clear), why (why), in the bar (note); when you\'ve cleared them yourself (done); your goal in the bar while you play (goal)', says: STEP_ONE },
+        { when: 'Once you\'ve done step one yourself, after their "done": the rest is from other pirates', says: [ONWARD] },
         {
-            when: 'Their opening lesson at the still: in their bubble (says) and in the bar at the foot of the screen (note), beat by beat', says: LESSON,
-            each: { rule: 'They swap a white up past a black', ruleAfter: 'The rest of the rule', furnace: 'They burn the all-black column', mishapSetup: 'They burn the next, a white in it (their mishap follows)', yours: 'Handing you the board, step one the goal' },
+            when: 'The end of their lesson: in their bubble (says) and in the bar at the foot of the screen (note)', says: LESSON,
+            each: { yours: 'Handing you the board, step one the goal' },
         },
-        { when: 'Their lesson\'s step one, after the mishap: as it starts (says), as they drag the whites out of the three columns next to the fire (clear), why (why), in the bar (note); when you\'ve cleared them yourself (done); your goal in the bar while you play (goal)', says: STEP_ONE },
-        { when: 'A column burns with a white in it, and the still goes bang: the first time the first, then any', says: MISHAP },
+        { when: 'At your still, a column burns with a white in it, and the still goes bang: the first time the first, then any', says: MISHAP },
         { when: '"Help, Helium" while you play: by the technique they\'d play on your board now (then they play it)', says: HELP },
         { when: '"Help, Helium" when it isn\'t a drag', says: HELP_ELSE },
         { when: 'Now and then as your Crystal Clears go up, and when the flask\'s full', says: PRAISE },

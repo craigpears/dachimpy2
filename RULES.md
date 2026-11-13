@@ -599,11 +599,16 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     a pipe out to the spout over a cask on a stillage with a sight glass, and the pile of full casks. Big
     enough to read from the sea; the island's eastern square, behind them.
   - **Their opening, the first time (12 Nov):** "the distillery exploding and Helium just treating it as
-    kind of a casual everyday event". As you come up the still blows up; "Oh. Sorry about that. Just a
-    little distilling mishap." They offer to "teach you some distilling" (not "learn you", the user, 13 Nov);
-    you, warily, "Is... is it safe?"; "Of course it's safe. What would make you think it's not safe?
-    Perfectly normal, this. It's fine." You: "You've got no eyebrows left." They: none of us have, they keep
-    asking the developers for some. (True: no pirate in Puzzle Pirates has eyebrows, nor any in the den;
+    kind of a casual everyday event". As you come up, the camera wide on their board and their still
+    together, the furnace takes its column, all junk; then the next, one white in it, ringed, goes down, and
+    as the white goes into the furnace the still blows up (13 Nov: "you actually see some white being
+    burnt, and that's what causes the explosion"; the bang comes as the white goes in, at your still too).
+    No words over either. Then their lines make the link (13 Nov: "a bit more of a link in the initial
+    dialogue to the idea of just make sure you don't send any white pieces down into the burner"): "Oh.
+    Sorry about that. Let a white go down the furnace. Just a little distilling mishap." They offer to
+    "teach you some distilling" (not "learn you", the user, 13 Nov); you, warily, "Is... is it safe?"; "Of
+    course it's safe. Just don't send whites down the furnace. Perfectly normal, this. It's fine." You:
+    "You've got no eyebrows left." They: none of us have, they keep asking the developers for some. (True: no pirate in Puzzle Pirates has eyebrows, nor any in the den;
     checked on Helium's and Roobear's portraits, 12 Nov.) Then their lesson. Seen once only.
   - **The bang (13 Nov: "the explosion needs to be more dramatic"):** funny, not grim (js/den/blast.js): a
     flash on the screen, a fireball, sparks, a dark cloud that hangs about, copper, staves and shingles
@@ -620,19 +625,25 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     getting a few columns on the right-hand side that are about to burn completely free of white pieces
     ... let's just really take it one step at a time." The first time you come up beside their island, a
     little cutscene on a real board (the same deal every time, its furnace stopped, LESSON_SEED picked so
-    step one clears in a few drags), each beat worked out by the real rules (src/den-helium.ts,
-    lessonPlan): the swap rule shown by one swap (a white up past a black), the rest of it said; the
-    furnace's all-black column burned; the next, mostly junk with one white in it, burned too: bang,
-    "Oops. That happens sometimes. Don't worry about it." (what skipping step one does). Then step one,
-    "Step 1" in the bar (STEPS, only it built): every white walked out of the three columns next to the
-    fire (the bots' rescue), and why, the user's joke: "Otherwise the still goes bang. And I've already got
-    no eyebrows." Then "your go", step one the goal at the foot of the screen (whites to go), their line
-    when you've done it. Their line in their bubble, what it shows in plain words in the bar.
+    step one clears in a few drags), each beat worked out by the real rules (src/den-helium.ts, opening
+    and lessonPlan, on one board). No basic mechanics (13 Nov: "blacks up, [browns] down ... basic move
+    mechanics ... Puzzle Pirates does that. That tutorial exists. I'm sure people can work that out. This
+    is more about technique"): no swap rule, no whites-left talk, one bang (the opening's). Straight after
+    the opening, step one, "Step 1" in the bar (STEPS, only it built): "Right. First things first. See all
+    these whites on the right? Next in the fire, every one.", every white (and burnt white) in the three
+    columns next to the fire ringed on the board (distill-board.js's `mark`, a pulsing gold ring, for any
+    board), walked out swap by swap (the bots' rescue), the ring staying on each till it's out, and why:
+    "Otherwise, silly mishaps. Bang. And I've already got no eyebrows." Then "your go", step one the goal
+    at the foot of the screen (whites to go); when you've done it, "There. Step one...", then the rest is
+    from other pirates (ONWARD: "Few of my tricks, that. The rest's from other pirates. Ask about. Watch
+    them play. Find their videos."; one of their chatter lines says it too). Their line in their bubble,
+    what it shows in plain words in the bar.
   - **Its pace (13 Nov: "it's supposed to be a little cutscene, and it's like half a second"):** a line's
-    up at a reading pace, 3.2 s at the least (about 2.5 words a second); the opening's bang 3.5 s on its
-    own; what they do on the board starts 1.6 s into the line, 0.55 s a swap; a breath between beats
-    (PACE_LESSON, tested: no beat shorter than its reading time). Space, Enter or a click goes on once
-    you've read a line; Esc skips it all; either way the still's yours after. About two minutes in all.
+    up at a reading pace, 3.2 s at the least (about 2.5 words a second); the opening's burns with no
+    words, the white ringed a second before it goes, its fall, then 3.5 s for the bang; what they do on the
+    board starts 1.6 s into a line, 0.55 s a swap; a breath between beats (PACE_LESSON, tested: no beat
+    shorter than its reading time). Space, Enter or a click goes on once you've read a line; Esc skips it
+    all; either way the still's yours after. About a minute and a half in all (timed 13 Nov).
   - **The still, yours:** a real session (the furnace running), played with the board's own keys and
     mouse, the camera straight on to it (on a wide screen the board a little left, them beside it); Esc
     leaves it (the furnace waits), Space off their island comes back to it. The panel's distiller is

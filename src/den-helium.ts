@@ -7,10 +7,10 @@
    The user (11 and 12 Nov, IDEAS.md "Helium, and Distilling"; DISTILLING.md §7, items 3 and 4): Helium, a
    real pirate who "really loves distilling", teaches it "very kind of by the by", on "his own little
    island ... I bet he just wants an island for him somewhere", near the smugglers' beach where their rum
-   would one day go out. The first time you come up off it they give a short lesson on a real board, a
-   little cutscene: the swap rule, whites left and junk right, the furnace's column burned, and a white
-   burned with the next, their mishap ("Oops. That happens sometimes. Don't worry about it."). Then "now
-   you try": the still's yours, a real session, and "Help, Helium" while you play: "helium should kind of
+   would one day go out. The first time you come up off it, a little cutscene on a real board: a column with
+   a white in it goes down into the furnace and the still goes bang, which they shrug off ("Let a white go
+   down the furnace. Just a little distilling mishap."); then their lesson, technique not the basics (13
+   Nov): step one, the whites on the fire's side ringed and walked out. Then "now you try": the still's yours, a real session, and "Help, Helium" while you play: "helium should kind of
    detect what stage you're at and show you what technique ... It's context aware". They read your board
    (`advise`), say in a line what they'd do and why, naming the technique, and play it on your board.
    Space off their island again and you're back at the still. Their distillery answers the board (13 Nov,
@@ -21,10 +21,10 @@ import { LAY, type Pose } from './den-sail.js';
 import { shoreOf } from './den-isle.js';
 import { PACE, type Script } from './chatter.js';
 import { seeded } from './mirror-row.js';
-import { BLACK, BURNT, COLS, Distilling, UP_LEFT, WHITE, canSwapOn, goesUp, neighbourOn, type Board } from './distilling.js';
+import { BURNT, COLS, Distilling, WHITE, goesUp, type Board } from './distilling.js';
 import { advise, type Advice } from './distill-bots.js';
 import { ROUTINES, isJunk } from './distill-routines.js';
-import { AFTER, GREET, HELP, HELP_ELSE, LESSON, MISHAP, OPENING, PRAISE, STEP_ONE } from './lines/helium.js';
+import { AFTER, HELP, HELP_ELSE, LESSON, MISHAP, ONWARD, OPENING, PRAISE, STEP_ONE } from './lines/helium.js';
 import { AT_HELIUMS } from './lines/you.js';
 
 const H = LAY.HELIUM;
@@ -77,28 +77,46 @@ export class Visit {
 
 // ---------- their lesson ----------
 /** The lesson's board: a real deal, the same every time (this seed's furnace column all black, as every
-    board starts, the one after it mostly junk with a white in it, for their mishap, and the three after that
-    clear of white in a few drags, for step one: picked from the first 600 seeds, 13 Nov), its furnace's clock
-    stopped, so the columns go only when they burn them. */
+    board starts, the one after it mostly junk with a white in it, for the opening's bang, and the three after
+    that clear of white in a few drags, for step one: picked from the first 600 seeds, 13 Nov), its furnace's
+    clock stopped, so the columns go only when they burn them. */
 export const LESSON_SEED = 269;
 export const lessonGame = (seed = LESSON_SEED): Distilling => new Distilling(seeded(seed), { timer: false });
 
 /** What a beat of their lesson does on the board: a drag (the piece at x, y swapped each way in turn), the
-    furnace's column burned now, or nothing (they talk). */
+    furnace's column burned now, the still going bang on its own (a board with no white to burn), or nothing
+    (they talk). */
 export type LessonAct = { kind: 'drag'; x: number; y: number; ways: number[] } | { kind: 'drags'; drags: { x: number; y: number; ways: number[] }[] } | { kind: 'burn' } | { kind: 'bang' } | { kind: 'none' };
-/** A beat of their lesson: their line (`says`, in their bubble), what it shows in plain words (`note`, in the
-    bar), and what they do. `mishap`: the column they burn has a white in it (the still goes bang). `step`:
-    the puzzle's step it's teaching (STEPS), shown in the bar. */
-export interface Beat { name: string; says: string; note: string; act: LessonAct; mishap?: boolean; who?: 'you'; step?: number }
+/** A beat of their lesson: their line (`says`, in their bubble; none, a moment with no words), what it shows
+    in plain words (`note`, in the bar), and what they do. `mishap`: the column they burn has a white in it (the
+    still goes bang as it goes into the furnace), `bang` how big. `marks`: the whites (and burnt whites) in
+    the columns from this one rightward are ringed on the board while it's up (`ringed`). `step`: the
+    puzzle's step it's teaching (STEPS), shown in the bar. */
+export interface Beat { name: string; says: string; note: string; act: LessonAct; mishap?: boolean; bang?: number; marks?: number; who?: 'you'; step?: number }
+/** Whether a piece in column `x` is ringed by a beat's `marks`: a white or burnt white from that column on. */
+export const ringed = (marks: number | undefined, x: number, p: number): boolean => marks !== undefined && x >= marks && (p === WHITE || p === BURNT);
 
-/** Their opening, the first time you come up off their island, before their lesson (the user, 12 Nov): the still
-    goes bang (no line, a moment for it); they shrug it off and offer to teach you; you ask, warily, if it's
-    safe (`who: 'you'`, over your head); of course it is; you note their eyebrows are gone; none of us have
-    any, they say. */
-export function opening(): Beat[] {
-  const note = 'Helium\'s island.', none: LessonAct = { kind: 'none' };
+const copy = (b: Board): Board => b.map((c) => [...c]);
+/** A burn on a lesson's board, played out. */
+const burnOn = (g: Distilling) => { const ev = g.burnNow(); g.settle(5000); return ev; };
+
+/** Their opening, the first time you come up off their island, before their lesson (the user, 12 Nov), on
+    their board (`game`, played on as it goes): the furnace takes its column, all junk; then the next, a white
+    in it, ringed, goes down into the furnace, and the still goes bang (the user, 13 Nov: "in the initial
+    opening animation, you actually see some white being burnt, and that's what causes the explosion"); no
+    words for either, a moment for the bang. They shrug it off (a white let go down: the link to the one thing
+    to know), offer to teach you; you ask, warily, if it's safe (`who: 'you'`, over your head); of course it is,
+    just don't send whites down; you note their eyebrows are gone; none of us have any, they say. */
+export function opening(game: Distilling = lessonGame()): Beat[] {
+  const g = game, note = 'Helium\'s island.', none: LessonAct = { kind: 'none' }, beats: Beat[] = [];
+  if (g.cols[COLS - 1].every(isJunk)) { beats.push({ name: 'furnace', says: '', note: OPENING_NOTES.furnace, act: { kind: 'burn' } }); burnOn(g); }
+  const next = g.cols[COLS - 1];
+  if (next.includes(WHITE) && !goesUp(next)) {
+    beats.push({ name: 'bang', says: '', note: OPENING_NOTES.bang, act: { kind: 'burn' }, mishap: true, bang: OPENING_BANG, marks: COLS - 1 });
+    burnOn(g);
+  } else beats.push({ name: 'bang', says: '', note, act: { kind: 'bang' }, bang: OPENING_BANG });
   return [
-    { name: 'bang', says: '', note, act: { kind: 'bang' } },
+    ...beats,
     { name: 'mishap', says: OPENING.mishap, note, act: none },
     { name: 'offer', says: OPENING.offer, note, act: none },
     { name: 'safe?', says: AT_HELIUMS.safe, note, act: none, who: 'you' },
@@ -108,7 +126,11 @@ export function opening(): Beat[] {
   ];
 }
 
-const copy = (b: Board): Board => b.map((c) => [...c]);
+/** The bar under their opening's two burns, in plain words. */
+const OPENING_NOTES = {
+  furnace: 'Helium\'s island. The furnace takes the right-hand column.',
+  bang: 'A white in that one: a white burned, and the still goes bang.',
+} as const;
 
 /* The puzzle taught a step at a time (the user, 13 Nov: "we could tab through the steps and say, like, step
    one is getting a few columns on the right-hand side that are about to burn completely free of white pieces
@@ -122,6 +144,9 @@ export const STEPS = [
 export const fireSide = (x: number): boolean => x >= COLS - STEPS[0].cols;
 /** Whites (and burnt whites) left in step one's columns, on a board as it stands: none, and it's done. */
 export const whitesOnFireSide = (cols: Board): number => cols.reduce((n, col, x) => n + (fireSide(x) ? col.filter((p) => p === WHITE || p === BURNT).length : 0), 0);
+/** What they say once you've done step one yourself, in turn: that's it done, and the rest is from other
+    pirates (the user, 13 Nov: "this is not a replacement for the game ... talk to people"). */
+export const stepDoneLines = (): string[] => [STEP_ONE.done, ONWARD];
 /** A drag, as the planner gives them: the piece at (x, y) swapped each way in turn. */
 export type Drag = { x: number; y: number; ways: number[] };
 
@@ -152,46 +177,30 @@ function clearFireSide(b: Board, most = 16): Drag[] {
   return drags;
 }
 
-/** Their lesson on its board (`lessonGame()`, played on as it goes), worked out by the real rules: the
-    greeting; the swap rule shown by one swap, a white rising past a black, and the rest of the rule said;
-    the furnace's column, all black, burned; the next, mostly junk with a white in it, burned too: bang, their
-    mishap (what comes of skipping step one); then step one, the whites walked out of the three columns next
-    to the fire, and why (the still goes bang, and they've no eyebrows left); then it's yours, step one the goal. */
-export function lessonPlan(game: Distilling = lessonGame()): Beat[] {
-  const g = game, beats: Beat[] = [{ name: 'greet', says: GREET, note: 'Helium\'s still: Distilling.', act: { kind: 'none' } }];
-  const say = (name: keyof typeof LESSON, act: LessonAct = { kind: 'none' }, mishap = false): Beat => ({ name, ...LESSON[name], act, ...(mishap ? { mishap } : {}) });
-  const drag = (d: Drag) => { g.dragWays(d.x, d.y, d.ways); g.settle(1000); };
-  const burn = () => { const ev = g.burnNow(); g.settle(5000); return ev; };
-  // The swap rule: a white under a black, up-left past it (clear of the furnace's next two columns).
-  let rule: [number, number] | null = null;
-  for (let x = 1; x <= COLS - 3 && !rule; x++) for (let y = 0; y < g.cols[x].length && !rule; y++) {
-    const n = neighbourOn(g.cols, x, y, UP_LEFT);
-    if (g.cols[x][y] === WHITE && n && g.cols[n[0]][n[1]] === BLACK && canSwapOn(g.cols, x, y, n[0], n[1])) rule = [x, y];
-  }
-  if (rule) {
-    const d = { x: rule[0], y: rule[1], ways: [UP_LEFT] };
-    drag(d);
-    beats.push(say('rule', { kind: 'drag', ...d }), say('ruleAfter'));
-  }
-  // The furnace's column, all junk: burned.
-  if (g.cols[COLS - 1].every(isJunk)) { beats.push(say('furnace', { kind: 'burn' })); burn(); }
-  // The next one in: mostly junk, a white in it. Burned all the same: bang (step one skipped).
-  const next = g.cols[COLS - 1];
-  if (next.includes(WHITE) && !goesUp(next)) {
-    beats.push(say('mishapSetup', { kind: 'burn' }, true), { name: 'mishap', says: MISHAP[0], note: LESSON.mishapSetup.note, act: { kind: 'none' } });
-    burn();
-  }
-  // Step one: the whites out of the three columns next to the fire, and why.
-  const S = STEPS[0], drags = clearFireSide(copy(g.cols));
-  beats.push({ name: 'step', says: S.says, note: S.note, act: { kind: 'none' }, step: S.n });
+/** The lesson's board as their opening leaves it: its two columns burned. */
+export const afterOpening = (): Distilling => { const g = lessonGame(); opening(g); return g; };
+
+/** Their lesson, after their opening, on its board as the opening left it (`game`, played on as it goes),
+    worked out by the real rules. Technique, not the basics (the user, 13 Nov: "basic move mechanics ...
+    Puzzle Pirates does that. That tutorial exists ... This is more about technique to get to [Crystal Clears]
+    and opening up with the right. First things first. See all these whites on the right, you know, highlight
+    them all."): no swap rule; straight to step one, every white in the three columns next to the fire ringed,
+    walked out swap by swap (the ring staying on each till it's out), and why (silly mishaps, the still goes
+    bang, and they've no eyebrows left); then it's yours, step one the goal. */
+export function lessonPlan(game: Distilling = afterOpening()): Beat[] {
+  const g = game, S = STEPS[0], marks = COLS - S.cols, beats: Beat[] = [];
+  const drags = clearFireSide(copy(g.cols));
+  beats.push({ name: 'step', says: S.says, note: S.note, act: { kind: 'none' }, step: S.n, marks });
   if (drags.length) {
-    for (const d of drags) drag(d);
-    beats.push({ name: 'clear', says: S.clear, note: S.note, act: { kind: 'drags', drags }, step: S.n });
+    for (const d of drags) { g.dragWays(d.x, d.y, d.ways); g.settle(1000); }
+    beats.push({ name: 'clear', says: S.clear, note: S.note, act: { kind: 'drags', drags }, step: S.n, marks });
   }
   beats.push({ name: 'why', says: S.why, note: S.note, act: { kind: 'none' }, step: S.n });
-  beats.push({ ...say('yours'), step: S.n });
+  beats.push({ name: 'yours', ...LESSON.yours, act: { kind: 'none' }, step: S.n });
   return beats;
 }
+/** Their opening and lesson together, in order, on one board (`game`, played on as they go). */
+export const lessonBeats = (game: Distilling = lessonGame()): Beat[] => [...opening(game), ...lessonPlan(game)];
 
 /* Their lesson's pace (the user, 13 Nov: "the speech and the animation is over so quickly. Like, it's
    supposed to be a little cutscene, and it's like half a second."). A line is up at a reading pace, a few
@@ -201,8 +210,13 @@ export function lessonPlan(game: Distilling = lessonGame()): Beat[] {
 export const PACE_LESSON = {
   /** Seconds a line's up: MIN at the least, else LEAD plus PER_WORD a word (about 2.5 words a second). */
   MIN: 3.2, LEAD: 1.4, PER_WORD: 0.4,
-  /** The opening's bang, before anyone speaks: its moment. */
+  /** The opening's bang, once the white's gone into the furnace, before anyone speaks: its moment. */
   BANG: 3.5,
+  /** A beat with no line: a moment before they do it (the white ringed a moment before it goes), and at the
+      least this long for a plain one (the furnace taking an all-junk column). */
+  QUIET_LEAD: 1, QUIET: 1.2,
+  /** A burned column's fall into the furnace (distill-board.js: 0.4 px a ms, about a second at the most). */
+  FALL: 1,
   /** After a line's up, before they do anything on the board. */
   ACT_AFTER: 1.6,
   /** A swap of theirs: the piece held, then each swap this long; a breath between drags. */
@@ -219,19 +233,29 @@ export const lessonSecs = (text: string): number => {
   if (!text) return P.BANG;
   return Math.max(P.MIN, P.LEAD + text.trim().split(/\s+/).length * P.PER_WORD);
 };
+/** When a beat does what it does on the board: once its line's had a moment, or, with no line, a moment in. */
+export const actAfter = (b: Beat): number => (b.says ? PACE_LESSON.ACT_AFTER : PACE_LESSON.QUIET_LEAD);
+/** How long a beat holds at the least before going on: its line read; with no line, the bang's moment after the
+    white's fall into the furnace (or the bang on its own), else a short moment. */
+export function holdSecs(b: Beat): number {
+  const P = PACE_LESSON;
+  if (b.says) return lessonSecs(b.says);
+  if (b.mishap) return P.QUIET_LEAD + P.FALL + P.BANG;
+  return b.act.kind === 'bang' ? P.BANG : P.QUIET;
+}
 /** How long a beat of the lesson takes at the least: its line read, and what it does on the board played out
-    at the lesson's pace (a drag's swaps each SWAP, a breath between drags; a burn's slide), then the gap. */
+    at the lesson's pace (a drag's swaps each SWAP, a breath between drags; a burn's fall), then the gap. */
 export function beatSecs(b: Beat): number {
   const P = PACE_LESSON, drags = b.act.kind === 'drag' ? [b.act] : b.act.kind === 'drags' ? b.act.drags : [];
-  const acting = drags.length ? P.ACT_AFTER + drags.reduce((s, d) => s + P.HOLD + d.ways.length * P.SWAP + P.BETWEEN, 0) : b.act.kind === 'burn' ? P.ACT_AFTER + 1 : 0;
-  return Math.max(lessonSecs(b.says), acting) + P.GAP;
+  const acting = drags.length ? actAfter(b) + drags.reduce((s, d) => s + P.HOLD + d.ways.length * P.SWAP + P.BETWEEN, 0) : b.act.kind === 'burn' ? actAfter(b) + P.FALL : 0;
+  return Math.max(holdSecs(b), acting) + P.GAP;
 }
 
 // ---------- their mishaps ----------
 /** A column's gone: whether the still goes bang (it burned with a white in it, or a burnt white). */
 export const bangs = (c: { up: boolean; whites: number; burnt: number }): boolean => !c.up && c.whites + c.burnt > 0;
-/** Their line for the `n`th bang (0 the first): the first always their own, "Oops. That happens sometimes.";
-    after that, round the rest. */
+/** Their line for the `n`th bang at your still (0 the first): the first always their own, "Oops. That happens
+    sometimes."; after that, round the rest. */
 export const mishapLine = (n: number): string => (n <= 0 ? MISHAP[0] : MISHAP[1 + ((n - 1) % (MISHAP.length - 1))]);
 
 // ---------- their distillery, answering the board ----------
