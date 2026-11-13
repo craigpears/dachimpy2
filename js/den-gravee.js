@@ -1,3 +1,4 @@
+export { blocksOf } from './den-houses.js';
 import { toPaint } from './den-houses.js';
 import { ON_A_PORTRAIT, ON_A_PROOF } from './lines/gravee.js';
 // ---------- the house ----------
@@ -23,6 +24,8 @@ export const PLAN = {
 export const ARRIVE = { you: { x: 0, z: 2.0 }, her: { x: 0.9, z: 0.6 } };
 /** How high the walls are, and the front walls cut low so you can see in. */
 export const WALLS = { high: 3.2, low: 0.45 };
+/** Her furniture, by kind (js/den/furniture.js has one of each, for anywhere: src/den-houses.ts's Piece):
+    where it stands, turned to face. The house only places it. */
 export const COFFIN = { x: G1 + 7.6, z: -1.9, yaw: 0 };
 export const EASEL = { x: G1 + 4.6, z: 0.6, yaw: -0.6 };
 export const BED = { x: G1 + 3.2, z: -2.1 };
@@ -45,31 +48,7 @@ export const FURNISH = [
     { kind: 'candelabra', x: G1 + 5.7, z: -3.0 },
     { kind: 'chair', x: G1 + 8.6, z: 1.8, yaw: -2.6 },
 ];
-/** What you walk round: each piece's footprint, by kind (a coffin and a bed are long: two circles). */
-export function blocksOf(pieces) {
-    const out = [];
-    for (const p of pieces) {
-        const along = (r, half) => {
-            const y = p.yaw ?? 0, dx = Math.sin(y) * half, dz = Math.cos(y) * half;
-            out.push({ x: p.x + dx, z: p.z + dz, r }, { x: p.x - dx, z: p.z - dz, r });
-        };
-        if (p.kind === 'coffin')
-            along(0.38, 0.55);
-        else if (p.kind === 'bed')
-            along(0.95, 0.45);
-        else if (p.kind === 'armchair' || p.kind === 'table')
-            out.push({ x: p.x, z: p.z, r: 0.5 });
-        else if (p.kind === 'easel')
-            out.push({ x: p.x, z: p.z, r: 0.4 });
-        else if (p.kind === 'chair')
-            out.push({ x: p.x, z: p.z, r: 0.35 });
-        else if (p.kind === 'candelabra')
-            out.push({ x: p.x, z: p.z, r: 0.22 });
-        // (rugs and runners you walk over)
-    }
-    return out;
-}
-export const BACKDROPS = ['bloodmoon', 'snow', 'beach', 'crypt', 'autumn', 'witch', 'sea', 'den', 'night'];
+export { BACKDROPS } from './den-houses.js';
 /* Her looks, from her gallery (Emerald, checked 11 Nov), each by its own title: what's over her look as
    she is now (her pirate page's portrait: PIRATES.Gravee in js/den-look.js). */
 // "Busy This Weekend?": the Berserker pelt and a Gown in light blue, a mug of something hot.

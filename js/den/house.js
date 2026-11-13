@@ -31,13 +31,14 @@ import { step, walkable, atWayOut, houseById, readSecs, LODGINGS, YOUR_PACE, hos
 import { $, scene, camera, renderer, hemi, skyDome, paintSky, myLook, V3, toast as denToast, toastQuiet, toastHush, warm, sunOver, makePirate, animateWalk, faceTo, keys, mat, mesh, woodTex, ray, pirate } from './world.js';
 import { cine, cinePlay, cineEnd, cineLets, bubble, bubbleAt, stepTo } from './cine.js';
 import { GRAVEE_HOUSE } from './gravee-house.js';
+import { ROOBEAR_HOUSE } from './roobear-house.js';
 import { pictures, picturesOpen, picturesClose, picturesKey } from './picture-view.js';
 import { startAt } from '../picture-view.js';
 
 /** Where the houses are: well out of sight of the den, the sea and the Wedding Isle (at +400). */
 export const HOUSE_AT = V3(-400, 0, 0);
 /** Each house's scene, by its id in HOUSES. */
-const SCENES = { gravee: GRAVEE_HOUSE };
+const SCENES = { gravee: GRAVEE_HOUSE, roobear: ROOBEAR_HOUSE };
 
 const toast = (text, bad = false) => denToast(text, bad, false, true);
 /** All there is of the house you're in. */

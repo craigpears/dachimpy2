@@ -719,9 +719,9 @@ describe('Mischievious: "I\'m usually wearing a monkey but maybe I could switch 
     for (const body of famsIn('fam')) expect([...body].sort()).toEqual([...FAMS].sort());
   });
   it('offers her look\'s own first, then a monkey (she usually wears one), the rest, none last', () => {
-    expect(herFams(HER[0].look)).toEqual(['squirrel', 'monkey', 'parrot', 'octopus', 'bat', 'krakling', 'dragon', 'none']);
+    expect(herFams(HER[0].look)).toEqual(['squirrel', 'monkey', 'parrot', 'octopus', 'bat', 'krakling', 'dragon', 'crow', 'none']);
     expect(herFams(HER[1].look)[0]).toBe('monkey');
-    expect(herFams(HER[3].look)).toEqual(['none', 'monkey', 'parrot', 'octopus', 'squirrel', 'bat', 'krakling', 'dragon']);
+    expect(herFams(HER[3].look)).toEqual(['none', 'monkey', 'parrot', 'octopus', 'squirrel', 'bat', 'krakling', 'dragon', 'crow']);
     for (const v of HER) expect([...herFams(v.look)].sort()).toEqual([...FAMS].sort());
   });
   it('puts it on her in the colours another of her looks has it in, else the wardrobe\'s own', () => {

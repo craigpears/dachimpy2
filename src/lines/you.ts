@@ -35,6 +35,12 @@ export const IN_GRAVEES_HOUSE = {
   scream: 'AAAAAH!',
 } as const;
 
+/** In Roobear's ROOm, Robert the kangaroo bear roobing your ear: the first time, and when you ask again. */
+export const IN_ROOBEARS_HOUSE = {
+  rubbed: 'Oh! ...Oh, that\'s actually lovely.',
+  again: '...Yes. Still lovely.',
+} as const;
+
 /** Once Kikkit's told her ramble (all of it, the first time), you wonder aloud, the joke on her
     tangents (the user, 11 Nov: "now I wonder if I can find somebody that can explain how to get past
     all these ... whirlpools and winds that makes a bit more sense, or goes on fewer tangents"). It
@@ -62,7 +68,7 @@ export const CHARACTER: Character = {
   name: 'You',
   who: 'Your own pirate, dressed as you like from the wardrobe (or as any real pirate in it). You say little, '
     + 'and only at the den\'s short, cheesy moments: picking up the captain\'s map, and riding the crane '
-    + 'up the cliff and down again, your own wedding, screaming at a vampire in Gravee\'s house, and sailing '
+    + 'up the cliff and down again, your own wedding, screaming at a vampire in Gravee\'s house, having an ear roobed in Roobear\'s, and sailing '
     + 'by Primates Rule, not ready yet, coming into the smugglers\' cove behind Port Decorum, and, warily, at '
     + 'Helium\'s still just after it\'s gone bang.',
   lines: [
@@ -89,5 +95,6 @@ export const CHARACTER: Character = {
     { when: 'Sailing up near Primates Rule at anchor, still to come (once a voyage)', says: [BY_PRIMATES_RULE] },
     { when: 'Off Helium\'s island the first time, their still just gone bang: between their lines', says: AT_HELIUMS },
     { when: 'Coming into the smugglers\' cove behind Port Decorum, by way of the whirlpools (once a voyage)', says: [AT_SMUGGLERS_BEACH] },
+    { when: 'Robert the kangaroo bear roobing your ear, in Roobear\'s ROOm', says: IN_ROOBEARS_HOUSE, each: { rubbed: 'The first time, at her door', again: 'Asking him for another' } },
   ],
 };

@@ -33,8 +33,8 @@ import { board, sailReset } from './sailing.js';
 import { online, guest, myId, send } from './crew.js';
 import { wed, weddingEnter, weddingLeave, plannedSpouse } from './wedding.js';
 import { spouse, spouseCheat } from './spouse.js';
-import { house, houseLeave } from './house.js';
-import { LODGINGS } from '../den-houses.js';
+import { house, houseLeave, houseEnter } from './house.js';
+import { LODGINGS, houseById } from '../den-houses.js';
 import { newGame } from '../den.js';
 
 // ---------- decorating the den ----------
@@ -690,6 +690,14 @@ function cheatLodgings() {
   toLodgings();
   lodgingsOpen(true);
 }
+/* Straight into a friend's house (den.html?at= and its id in HOUSES: ?at=roobear, ?at=gravee), to send them:
+   the den as for the housing district, and in through its door. A link, not a cheat button: the district's
+   is the one per place (RULES.md, "The cheats jump to what's hard to get to, one per place"). */
+function toHouse(id) {
+  if (cine || house.on) return;
+  toLodgings();
+  houseEnter(id);
+}
 /* [name, what it does, its link's name if it's a starting point (den.html?at=...)], in the menu's
    sections (the user, 12 Nov: "all of the cheats ... can be grouped into sections at this point, and
    it's probably quite a long menu"). Only jumps to what's hard to get to, one per place (the user, 11
@@ -744,6 +752,7 @@ export function startAt(at) {
   const s = STAGE_AT.indexOf(at), c = CHEATS.find((x) => x[2] === at);
   if (s >= 0) skipTo(s);
   else if (c) c[1]();
+  else if (houseById(at)) toHouse(at);
   else return false;
   return true;
 }

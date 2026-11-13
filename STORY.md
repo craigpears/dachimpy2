@@ -189,6 +189,12 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    Or knock at the houses in the den's cliff (a proof of concept, 11 Nov): the first is Gravee's,
    Bedside Manors, where she shows you round her portraits, the vampire sits up in his coffin, and
    she paints you scared to death for her wall. Each house is a friend's little scene of their own.
+   The second is Roobear's (13 Nov), a little one she calls her ROOm, kept as the memory of a sweet,
+   funny moment between friends: asked what her name stands for, she said she could be Robert the
+   kangaroo bear that roobs ears, and liked it. So Robert, half kangaroo and half bear, roobs your ear
+   at her door, and her walls hold everyone's guesses at her name (Dachimpy's three, Dignity's from
+   the books), her own answer the biggest frame. She rooms at Gravee's too. No adventure of hers yet:
+   the small house only, to see where it goes.
    Or find Kikkit on her little island right of the checkpoint, rambling the real way through her
    whirlpools (taken literally), and, with a Vegas, the penguins of Vegas Island beyond them. Once
    she's told it all you wonder aloud whether anyone could explain it with fewer tangents, and a hop

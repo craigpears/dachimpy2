@@ -1,5 +1,6 @@
 /* Creatures that aren't pirates, for any scene (and any portrait): the yeti of Gravee's definitive proof,
-   and the vampire, a pirate from the wardrobe made undead. Each returns what a pirate from the wardrobe
+   and the vampire, a pirate from the wardrobe made undead. And Roobear's: Robert the kangaroo bear, a joey and a bear;
+   and a pirate's face roobed (bliss), dressed as a kangaroo bear (rooBear), posed for a portrait (pose). Each returns what a pirate from the wardrobe
    does ({ g, legs, arms, body }), so the coffin, a portrait or a cutscene can pose it the same way. */
 import * as THREE from 'three';
 import { SKIN, HAIR, cleanLook, familiar, familiarTick } from '../den-look.js';
@@ -76,6 +77,132 @@ export function vampire(look) {
   return p;
 }
 
+/* Eyes shut and smiling, for any pirate from the wardrobe: having an ear roobed (Roobear's ROOm, and her
+   gallery). Lids over the eyes in the skin's colour, a dark line of lashes along each. `on` false opens them. */
+export function bliss(p, on = true) {
+  const L = p.look || {}, hr = L.body === 'f' ? 0.235 : 0.25;
+  if (!p.blissed) {
+    const grp = new THREE.Group(), lid = mat(SKIN[L.skin] || SKIN[1]), lash = mat('#1d1a18');
+    for (const x of [0.085, -0.085]) {
+      const l = at(mesh(new THREE.SphereGeometry(0.046, 10, 8), lid), x, 0.952, hr - 0.03); l.scale.set(1, 0.9, 0.78); grp.add(l);   // (over the eye, which stands out to the head's radius)
+      const c = at(mesh(new THREE.TorusGeometry(0.03, 0.006, 4, 10, Math.PI), lash), x, 0.955, hr + 0.008); c.rotation.z = Math.PI; grp.add(c);
+    }
+    p.body.add(grp);
+    p.blissed = grp;
+  }
+  p.blissed.visible = on;
+}
+
+/* A kangaroo, a bear, and Robert, who's half of each (Roobear's: "Robert the kangaroo bear that roobs
+   ears"): one build, its body a kangaroo's (big hind feet, a thick tail to lean on, a pouch, little arms)
+   or a bear's (round, on stubby legs), its head a kangaroo's (long ears, a long snout) or a bear's (round
+   ears, a short muzzle and a black nose). Our own beasts, never anyone's from a book. Facing +z, standing
+   on its origin; `body` is lifted for a hop, `arms` [its right, its left] swing from the shoulder, `ears`
+   twitch, `tail` sways. pose(name, t) poses it: 'rub', hopping on the spot with a paw up roobing an ear at
+   about a pirate's ear height, at the top of each hop (`t` seconds in); 'hop', hopping along; anything
+   else, standing. */
+const BEASTS = {
+  robert: { body: 'roo', head: 'bear', fur: '#8a5a36', pale: '#e2c29a', size: 1.2 },
+  joey: { body: 'roo', head: 'roo', fur: '#a09282', pale: '#e8ddce', size: 0.65 },
+  bear: { body: 'bear', head: 'bear', fur: '#4a3020', pale: '#7a5638', size: 1.4 },
+};
+export function beast(kind = 'robert') {
+  const B = BEASTS[kind] || BEASTS.robert, roo = B.body === 'roo';
+  const g = new THREE.Group(), body = new THREE.Group(), fur = mat(B.fur, { roughness: 1 }), pale = mat(B.pale, { roughness: 1 }), black = mat('#1d1a18'), white = mat('#ffffff');
+  const ball = (r, m, x, y, z, sx = 1, sy = 1, sz = 1, parent = body) => { const b = at(mesh(new THREE.SphereGeometry(r, 12, 10), m), x, y, z); b.scale.set(sx, sy, sz); parent.add(b); return b; };
+  g.add(body);
+  let tailG;
+  // The body: a kangaroo's pear, leaning a little forward, a pouch; or a bear's round barrel.
+  if (roo) {
+    ball(0.2, fur, 0, 0.62, 0, 1, 1.45, 0.95).rotation.x = 0.15;
+    ball(0.13, pale, 0, 0.55, 0.11, 0.95, 1.3, 0.55);
+    const pouch = at(mesh(new THREE.TorusGeometry(0.08, 0.018, 6, 14, Math.PI), pale), 0, 0.45, 0.17); pouch.rotation.set(-0.2, 0, Math.PI); body.add(pouch);
+    for (const s of [-1, 1]) {
+      ball(0.13, fur, 0.12 * s, 0.32, -0.02, 0.85, 1.25, 1.2);   // (the big haunches)
+      ball(0.05, fur, 0.12 * s, 0.05, 0.12, 0.9, 0.55, 3.0);     // (the long feet)
+    }
+    tailG = new THREE.Group(); tailG.position.set(0, 0.3, -0.14); body.add(tailG);
+    const t0 = at(mesh(new THREE.ConeGeometry(0.075, 0.6, 10), fur), 0, -0.13, -0.24); t0.rotation.x = -2.1; tailG.add(t0);
+  } else {
+    ball(0.27, fur, 0, 0.55, 0, 1, 1.2, 0.9);
+    ball(0.19, pale, 0, 0.52, 0.1, 0.95, 1.1, 0.6);
+    for (const s of [-1, 1]) { ball(0.1, fur, 0.14 * s, 0.17, 0, 1, 1.7, 1); ball(0.09, pale, 0.14 * s, 0.04, 0.06, 1, 0.5, 1.4); }
+    tailG = new THREE.Group(); ball(0.05, fur, 0, 0.4, -0.24, 1, 1, 1, tailG); body.add(tailG);
+  }
+  // The head: up on top, a little forward.
+  const head = new THREE.Group(); head.position.set(0, 0.98, roo ? 0.06 : 0.04); body.add(head);
+  const ears = [];
+  if (B.head === 'bear') {
+    ball(0.15, fur, 0, 0, 0, 1, 0.95, 0.95, head);
+    ball(0.07, pale, 0, -0.04, 0.12, 1.15, 0.85, 0.9, head);
+    ball(0.025, black, 0, -0.01, 0.19, 1.3, 0.9, 1, head);
+    for (const s of [-1, 1]) {
+      const e = new THREE.Group(); e.position.set(0.11 * s, 0.11, -0.01); head.add(e);
+      ball(0.055, fur, 0, 0, 0, 1, 1, 0.55, e); ball(0.032, pale, 0, 0, 0.02, 1, 1, 0.4, e);
+      ears.push(e);
+    }
+  } else {
+    ball(0.11, fur, 0, 0, 0, 1, 0.95, 1.05, head);
+    ball(0.065, fur, 0, -0.04, 0.1, 0.85, 0.8, 1.3, head);
+    ball(0.022, black, 0, -0.03, 0.18, 1.3, 0.8, 1, head);
+    for (const s of [-1, 1]) {
+      const e = new THREE.Group(); e.position.set(0.055 * s, 0.08, -0.02); head.add(e);
+      const c = at(mesh(new THREE.ConeGeometry(0.035, 0.18, 8), fur), 0, 0.08, 0); c.scale.z = 0.5; e.add(c);
+      e.rotation.z = -0.25 * s;
+      ears.push(e);
+    }
+  }
+  for (const s of [-1, 1]) { ball(0.022, black, 0.055 * s, 0.03, B.head === 'bear' ? 0.12 : 0.085, 1, 1, 1, head); ball(0.007, white, 0.06 * s, 0.038, B.head === 'bear' ? 0.14 : 0.105, 1, 1, 1, head); }
+  // Little arms (a bear's thicker), [0] its right, as a pirate's.
+  const arms = [-1, 1].map((s) => {
+    const a = new THREE.Group(); a.position.set(0.15 * s * (roo ? 1 : 1.5), roo ? 0.8 : 0.72, roo ? 0.1 : 0.06); body.add(a);
+    const len = roo ? 0.3 : 0.28, r = roo ? 0.035 : 0.06;
+    a.add(at(mesh(new THREE.CapsuleGeometry(r, len - r, 4, 8), fur), 0, -len / 2, 0), at(mesh(new THREE.SphereGeometry(r * 1.25, 8, 6), pale), 0, -len, 0));
+    a.rotation.set(-0.5, 0, 0.15 * s);
+    return a;
+  });
+  g.scale.setScalar(B.size);
+  g.traverse((o) => { if (o.isMesh) o.castShadow = true; });
+  const F = { g, body, head, arms, ears, tail: tailG, kind, size: B.size };
+  /** Posed `name` at `t` seconds: 'rub', 'hop', or standing. */
+  F.pose = (name, t = 0) => {
+    const hop = name === 'rub' || name === 'hop' ? Math.abs(Math.sin(t * (name === 'rub' ? 6.5 : 8))) : 0;
+    body.position.y = hop * (name === 'rub' ? 0.4 : 0.16);   // (a big hop, to reach)
+    body.rotation.x = name === 'hop' ? 0.25 : 0;
+    if (F.tail) F.tail.rotation.x = -hop * 0.5 + Math.sin(t * 1.3) * 0.05;
+    F.ears.forEach((e, i) => { e.rotation.x = Math.max(0, Math.sin(t * 2.1 + i * 2)) ** 12 * 0.6; });
+    head.rotation.y = name === 'rub' ? 0 : Math.sin(t * 0.7) * 0.35;
+    if (name === 'rub') {
+      // The paw up and forward to an ear, roobing round and round; the other at his chest.
+      arms[0].rotation.set(-2.35 + Math.sin(t * 11) * 0.12, 0, Math.cos(t * 11) * 0.14);
+      arms[1].rotation.set(-0.9, 0, 0.15);
+    } else arms.forEach((a, i) => a.rotation.set(-0.5 + (name === 'hop' ? hop * 0.3 : 0), 0, (i ? 1 : -1) * 0.15));
+  };
+  F.pose('stand');
+  return F;
+}
+
+/* Dressed up as half a kangaroo and half a bear, any pirate from the wardrobe (Roobear's gallery, "Roo +
+   Bear"): a kangaroo's long ear on one side of the head, a bear's round one on the other, and a kangaroo's
+   tail, all in Robert's brown. */
+export function rooBear(p) {
+  const L = p.look || {}, hr = L.body === 'f' ? 0.235 : 0.25, fur = mat(BEASTS.robert.fur, { roughness: 1 }), pale = mat(BEASTS.robert.pale, { roughness: 1 });
+  const roo = new THREE.Group(); roo.position.set(-hr * 0.55, 1.12, -0.03); roo.rotation.z = 0.35; p.body.add(roo);
+  const c = at(mesh(new THREE.ConeGeometry(0.05, 0.26, 8), fur), 0, 0.12, 0); c.scale.z = 0.5; roo.add(c);
+  const ci = at(mesh(new THREE.ConeGeometry(0.03, 0.18, 6), pale), 0, 0.1, 0.012); ci.scale.z = 0.3; roo.add(ci);
+  const bear = at(mesh(new THREE.SphereGeometry(0.085, 10, 8), fur), hr * 0.72, 1.16, 0.0); bear.scale.z = 0.5; p.body.add(bear);
+  const bi = at(mesh(new THREE.SphereGeometry(0.05, 8, 6), pale), hr * 0.72, 1.16, 0.03); bi.scale.z = 0.3; p.body.add(bi);
+  const tail = at(mesh(new THREE.ConeGeometry(0.07, 0.62, 10), fur), 0.36, -0.38, -0.2); tail.rotation.z = -2.0; p.body.add(tail);   // (out to one side, to be seen)
+}
+
+/* Posed for a portrait or a scene, any figure (a pirate from the wardrobe, or a beast above): 'rub', a hand
+   (or a paw) up at someone's ear beside it; 'bliss', eyes shut, enjoying having theirs roobed. */
+export function pose(fig, name) {
+  if (fig.pose) { fig.pose(name, 0.24); return; }   // (a beast: at the top of a hop)
+  if (name === 'rub') { fig.arms[0].rotation.set(-0.25, 0, -2.25); return; }
+  if (name === 'bliss') bliss(fig, true);
+}
+
 /** A penguin, standing about (Vegas Island's); `balaclava`: in one, his eyes darting in its slit, a
     bobble on top; `sack`: a sack of swag over his shoulder. About 0.95 tall. Its parts (head, flips, eyes,
     sack) for creature()'s idles to move. */
@@ -118,6 +245,7 @@ export function penguin({ balaclava = false, sack = false } = {}) {
    size. Each does a named behaviour (opts.idle), the same wherever it's placed:
    - 'yeti': opts.idle 'sway' (arms swinging) or 'still'.
    - 'vampire': opts.look (a look from the wardrobe, made undead).
+   - 'robert', 'joey', 'bear' (beast() above): its `moving` and `rubbing` set by its scene; opts.idle 'stand'.
    - a familiar on its own ('bat', 'monkey', 'parrot', 'squirrel', 'octopus', 'krakling'), in opts.col (and
      opts.col2, a parrot's second): opts.idle 'perch' (sat where it's put, fidgeting), 'hop' (a hop now
      and then, opts.rate how often, opts.height how high) or 'flutter' (round and round a circle opts.r
@@ -135,6 +263,14 @@ export function creature(kind, o = {}) {
   }
   if (kind === 'vampire') { const v = vampire(o.look || {}); g.add(v.g); return { g, fig: v, tick() {} }; }
   if (kind === 'penguin') return penguinCreature(g, o);
+  if (BEASTS[kind]) {
+    // A kangaroo, a bear or Robert (beast() above): `moving` hops it along, `rubbing` roobs an ear (its
+    // scene moves it about and says when); else it stands, ears twitching, looking about.
+    const b = beast(kind); g.add(b.g);
+    let t = Math.random() * 9;
+    const C = { g, fig: b, moving: false, rubbing: false, tick(dt) { t += dt; b.pose(C.rubbing ? 'rub' : C.moving ? 'hop' : o.idle || 'stand', t); } };
+    return C;
+  }
   const f = familiar({ fam: kind, famCol: o.col || 'black', famCol2: o.col2 });
   if (!f) return { g, tick() {} };
   const s = o.scale ?? 1.4, holder = new THREE.Group();

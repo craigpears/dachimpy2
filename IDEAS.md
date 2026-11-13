@@ -1235,6 +1235,14 @@ same thread as the museum's: helping and leading people, and growing into it.
 
 ## Roobear's little house: Robert the kangaroo bear that roobs ears (12 Nov)
 
+**Built, 13 Nov: the small house only** (RULES.md, "Roobear's house, her ROOm"; `den.html?at=roobear`): her
+ROOm (a sign, and her hello), Robert roobing your ear as the welcome and whenever you ask, the gallery of
+guesses with her line on whose each was, her answer the biggest frame; her in PIRATES from the description
+below. **Still open:** her look checked side by side against her real portrait (her skin and feet are
+guesses; the crow's colour too); something to send you off with (the house has no quest or keepsake yet);
+whether Dignity says her own guess somewhere (for now Roobear credits it); a line between her and Gravee
+the other way (Gravee on her lodger); and whether the crow is Bliss.
+
 The user (12 Nov): "This absolutely needs to be a memory later, she needs her little house in the game."
 **Roobear** (she; a real pirate, pirate name only; her pirate page and portrait to check before she's
 drawn, then into PIRATES and the wardrobe). From a chat the user shared: they were guessing what her name

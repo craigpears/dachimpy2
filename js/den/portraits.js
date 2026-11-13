@@ -16,7 +16,7 @@
 import * as THREE from 'three';
 import { PIRATES, cleanLook } from '../den-look.js';
 import { renderer, makePirate } from './world.js';
-import { yeti, vampire, fright } from './creatures.js';
+import { yeti, vampire, fright, beast, rooBear, pose } from './creatures.js';
 import { coffin } from './furniture.js';
 import { VAMPIRE } from '../den-gravee.js';
 import { eyesToward, pirateEyes } from '../eyes.js';
@@ -69,6 +69,19 @@ const BACK = {
   witch: (g, W, H) => { sky(g, W, H, '#1a0a2e', '#4a1a5a'); disc(g, W * 0.25, H * 0.16, W * 0.14, '#f2a03a'); g.fillStyle = '#120818'; g.fillRect(0, H * 0.8, W, H); },
   sea: (g, W, H) => { sky(g, W, H, '#0e3a52', '#2a7a8a'); g.strokeStyle = 'rgba(255,255,255,.25)'; g.lineWidth = 4 * W / 512; for (let y = H * 0.55; y < H; y += H / 19) { g.beginPath(); for (let x = 0; x <= W; x += W / 25) g.lineTo(x, y + Math.sin(x / (W / 17) + y) * H / 100); g.stroke(); } },
   den: (g, W, H) => { sky(g, W, H, '#3a2414', '#6a4024'); for (const x of [W * 0.12, W * 0.88]) { const gr = g.createRadialGradient(x, H * 0.3, 4, x, H * 0.3, W * 0.24); gr.addColorStop(0, 'rgba(255,190,90,.9)'); gr.addColorStop(1, 'rgba(255,190,90,0)'); g.fillStyle = gr; g.fillRect(0, 0, W, H); } },
+  // Roobear's portrait's: a pink sky over a violet sea, sparkling.
+  pinksea: (g, W, H) => {
+    sky(g, W, H, '#f4a6c8', '#f7d2e2'); g.fillStyle = '#7a4a9e'; g.fillRect(0, H * 0.6, W, H);
+    const sea = g.createLinearGradient(0, H * 0.6, 0, H); sea.addColorStop(0, '#9a63c0'); sea.addColorStop(1, '#5a2f7e'); g.fillStyle = sea; g.fillRect(0, H * 0.6, W, H);
+    for (let i = 0; i < 46; i++) disc(g, (i * 157) % W, H * 0.62 + ((i * 89) % (H * 0.38)), (1 + (i % 3)) * W / 512 * 2, 'rgba(255,240,255,.85)');
+  },
+  // A monsieur's: a café's cream wall under a striped awning.
+  cafe: (g, W, H) => {
+    sky(g, W, H, '#efe2c4', '#d9c49a');
+    const n = 8, sw = W / n; for (let i = 0; i < n; i++) { g.fillStyle = i % 2 ? '#f6f2ea' : '#5b2c6f'; g.fillRect(i * sw, 0, sw, H * 0.16); }
+    for (let i = 0; i < n; i++) { g.fillStyle = i % 2 ? '#f6f2ea' : '#5b2c6f'; g.beginPath(); g.arc(i * sw + sw / 2, H * 0.16, sw / 2, 0, Math.PI); g.fill(); }
+    g.fillStyle = '#7a5a3a'; g.fillRect(0, H * 0.82, W, H);
+  },
   night: (g, W, H) => { sky(g, W, H, '#05070f', '#141c38'); for (let i = 0; i < 60; i++) disc(g, (i * 211) % W, (i * 97) % (H * 0.7), (1.5 + (i % 2)) * W / 512, '#e8ecff'); disc(g, W * 0.8, H * 0.12, W * 0.09, '#e8e4d0'); },
 };
 const vignette = (g, W, H) => {
@@ -135,8 +148,18 @@ function compose(portrait, you) {
   let eyes = null;
   if (s.who === 'pirate') {
     const look = lookOf(s.name, s.dress), p = sitFor(makePirate({ look }));
+    if (s.costume === 'roo-bear') rooBear(p);
+    if (s.pose) pose(p, s.pose);
     objs.push(p.g);
-    if (portrait.watch) {
+    // Whoever's beside them (Robert, a joey, a bear, a pirate), and the camera back to fit them in.
+    for (const c of s.company || []) {
+      const f = c.kind === 'pirate' ? makePirate({ look: cleanLook(c.look || {}) }) : beast(c.kind);
+      f.g.position.set(c.x, 0, c.z); f.g.rotation.y = c.yaw ?? 0;
+      if (c.pose) pose(f, c.pose);
+      objs.push(f.g);
+    }
+    if (s.company?.length) { const cx = s.company.reduce((a, c) => a + c.x, 0) / (s.company.length + 1) * 0.8; aim(cx, 1.15, 5.4, cx, 1.0, 0); }
+    else if (portrait.watch) {
       // Head and shoulders, close enough to see the eyes move.
       aim(0.25, 1.62, 2.3, 0, 1.5, 0);
       eyes = eyesOn(p, pirateEyes(look), '#1a1208');
