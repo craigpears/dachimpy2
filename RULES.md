@@ -1598,6 +1598,16 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       Dye names come from YPPedia (Clothing palette); their colours are sampled from the game's
       own portraits (a flat mid-tone of the garment), since the wiki's swatches aren't faithful.
       Added so far: shadow and atlantean, from Dignity's portrait.
+    - **Side by side with the portrait, piece by piece (13 Nov).** Of Helium beside their portrait: "I
+      don't feel like the character really does her any justice ... the whole tone and colour of
+      everything, like the shading", and the same of Tzz: "the quality of their appearance really needs
+      working on". So a real pirate's look is checked against a close crop of the portrait: each piece's
+      shape (hair as it's really worn: Helium's swept up, no bun; Tzz's twisted locks), the colours
+      sampled as rendered under the den's warm light (skin, hair, a familiar's fur), and anything in
+      hand (Helium's Atlantis trinket). Every pirate is shaded the same way (js/den-look.js,
+      `pirateShade`): undersides falling a little into shade and a soft sheen round the edges, so black
+      clothes read and figures stand out; they cast shadows but take none, lit whole as in a portrait.
+      A single earring is in the right ear, the eyepatch's side, as the portraits have it.
 - **Dignity at the checkpoint, and her little cutscene (10 Nov).** "Adding [her] as the dutiful
   commander of the imperial checkpost, kind of peering down from the gates ... give her a little
   cutscene similar to Dalnoth ... come up with something witty for her"; "I need to give it a bit

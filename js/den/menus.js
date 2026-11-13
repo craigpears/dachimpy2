@@ -340,6 +340,7 @@ export function dressRows() {
     toggle(row('Peg leg'), L.pegleg, look('pegleg'));   // (for the right leg, as Tzz has)
     chooser(row('Earrings'), EARRINGS, L.earring, look('earring'));
     toggle(row('Smile'), L.smile, look('smile'));
+    toggle(row('Grin'), L.grin, look('grin'));   // (the mouth open, laughing: Tzz's)
     toggle(row('Tongue out'), L.tongue, look('tongue'));   // (Kikkit's, as are the tattoos and the wristband)
     toggle(row('Tattoos'), L.tattoos, look('tattoos'));
     toggle(row('Wristband'), L.wristband, look('wristband'));
