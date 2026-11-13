@@ -18,8 +18,9 @@
    - chain: Stage II, the Crystal Clears.
    Each phase weighs the techniques (`PHASE_WEIGHTS`): a move's worth is multiplied by its technique's weight
    when it's ranked. The weights only tilt the choice; every technique stays on the menu, and while a white's in
-   danger they're all even (src/distill-bots.ts, `weigh`; till 13 Nov a piece stuck anywhere evened them too, and
-   something nearly always was, so they hardly ever applied: the twenty-eighth note).
+   danger only the moves that save it are offered, ranked by the weights that hold a technique back (src/distill-bots.ts,
+   `weigh` and `rankSaves`, the thirteenth run; till 13 Nov a piece stuck anywhere evened them, and something nearly
+   always was, so they hardly ever applied: the twenty-eighth note).
 
    Pure: no randomness, no clock. */
 import { COLS, WHITE } from './distilling.js';

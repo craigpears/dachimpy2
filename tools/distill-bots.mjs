@@ -51,7 +51,9 @@
    1.2 / 0.2 / 0.6; points a minute 9.6 / 8.8 / 12.2 / 18.5 (were 9.6 / 8.9 / 12.0 / 16.1) (DISTILLING.md §4,
    eleventh run).
    The bots as target chains (13 Nov, the thirtieth note), and the twenty-sixth to twenty-ninth notes' fixes: see
-   DISTILLING.md §4, twelfth run. */
+   DISTILLING.md §4, twelfth run. Whites burned later in a session traced and fixed (the bank left after a chain
+   breaks chained again, a way out of a danger zone only when it leaves fewer whites, whites walled in by spice),
+   and a danger zone's saving moves ranked by the phase's weights: DISTILLING.md §4, thirteenth run. */
 
 import { Distilling, WHITE, BROWN, BLACK, BURNT, TALL, UP_LEFT, DOWN_LEFT, neighbourOn, canSwapOn } from '../js/distilling.js';
 import { LEVELS, P, bankFor, levelNamed, playSession } from '../js/distill-bots.js';

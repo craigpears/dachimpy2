@@ -10,8 +10,9 @@
    try and work towards it"): CC^1, CC^2, CC^3, CC^5, CC^8 (`LEVELS`). The target sets the whites it banks
    before the chain (`bankFor`), so how long Stage I lasts, and the techniques it uses: the simple ones for
    the low targets, the crawl and the hook from CC^5, the figure of eight and the line pull for CC^8. When a
-   chain breaks it doesn't dismiss: it goes back to building toward the next one ("once it's got a crystal
-   clear one, it will start sending them up ... then it will start working on the next one"). All play at
+   chain breaks it doesn't dismiss: it sends up what's still banked on the right as a new chain, then goes back
+   to building toward the next one ("once it's got a crystal clear one, it will start sending them up ... then
+   it will start working on the next one"). All play at
    one pace (a moment to spot each drag, a hand's speed along it).
 
    The planner (`choose`): the stage says which routines are on the menu, the board which of them apply.
@@ -44,7 +45,7 @@ import {
 } from './distill-routines.js';
 import { blockPhase, boardScore, keptTools } from './distill-score.js';
 import { PATH, pathMoves, stuck } from './distill-path.js';
-import type { PathMove } from './distill-path.js';
+import type { PathMove, Stuck } from './distill-path.js';
 import { phaseOf, weightIn } from './distill-phase.js';
 import type { Phase } from './distill-phase.js';
 import type { Ctx, Drag, Move, RoutineName } from './distill-routines.js';
@@ -53,7 +54,7 @@ import type { Ctx, Drag, Move, RoutineName } from './distill-routines.js';
     (src/distill-path.ts). */
 export type Technique = RoutineName | 'path';
 /** A move weighed: its value, and whether it takes a white out of the furnace's column in time. */
-export interface Weighed { move: Move | PathMove; value: number; saves?: boolean; after?: Board; tie?: boolean; weighted?: boolean }
+export interface Weighed { move: Move | PathMove; value: number; saves?: boolean; after?: Board; tie?: boolean; weighted?: boolean; setup?: boolean }
 /** The path search when a white in the furnace's column has no other way out: longer drags, a wider look
     for a piece to move out of the way first. Run only then. */
 export const PATH_WIDE = { ...PATH, SWAPS: 16, NODES: 6000, ENABLE_NEAR: 6, ENABLE_BOARDS: 200, ENABLE_NODES: 600 };
@@ -181,6 +182,13 @@ export const P = {
   BACK: 0.6,
   /** The phases' weights on the techniques (src/distill-phase.ts; 0 off, every technique even). */
   PHASES: 1,
+  /** A danger zone nothing saves in one move: the best this many moves on offer are tried as the first of a short
+      plan, a move setting up the save (`setUp`, the thirty-second note; 0 off). */
+  SETUP: 8,
+  /** Stage I: a drag carried on past where one look ahead scores best, while each swap more takes its junk further
+      right and the board scores no worse (`judge`, the thirty-second note: "you could go one step further, just do
+      it"; 0 off). */
+  ONWARD: 1,
 };
 
 /** What the planner says to do now: its stage, and a routine's drags, a burn, a wait or a dismiss, with
@@ -352,6 +360,31 @@ export function judge(cols: Board, drags: readonly Drag[], style: Style, base?: 
     const value = (boardScore(after, block) - base) / ((timeFor(d, style, plainDrag(d)) + (block ? P.BLOCK_DRAG_MS * d.length : 0)) / 1000);
     if (!best || value > best.value) best = { drags: d, value };
   }
+  // Carried on toward where its junk belongs (the user, 13 Nov, the thirty-second note: "it doesn't really still
+  // finish dragging things all the way to the right when it's got the opportunity ... you could go one step further,
+  // just do it. Why does it seem to be limited?"): one look ahead lets a drag go where its score a second peaks, and
+  // a swap more costs a fifth of a second; so while each swap more takes the junk further right and leaves the board
+  // scoring no worse, it's played on.
+  if (best && P.ONWARD) {
+    const k = best.drags[best.drags.length - 1].ways.length, before = playDrags(cols, init);
+    if (before && isJunk(before[last.x][last.y]) && k < last.ways.length) {
+      let at = endOf(cols, last, k), top = boardScore(playDrags(cols, best.drags)!, block), go = k;
+      for (let more = k + 1; more <= last.ways.length; more++) {
+        const to = endOf(cols, last, more);
+        if (to[0] <= at[0]) break;
+        const d = [...init, { x: last.x, y: last.y, ways: last.ways.slice(0, more) }], after = playDrags(cols, d);
+        if (!after) break;
+        const s = boardScore(after, block);
+        if (s < top) break;
+        top = s; go = more; at = to;
+      }
+      if (go > k) {
+        const d = [...init, { x: last.x, y: last.y, ways: last.ways.slice(0, go) }];
+        const value = (top - base) / ((timeFor(d, style, plainDrag(d)) + (block ? P.BLOCK_DRAG_MS * d.length : 0)) / 1000);
+        if (value > 0) return { drags: d, value };
+      }
+    }
+  }
   // A block move carried on to where the junk joins up (the user, 13 Nov, the twenty-ninth note: "It has decided
   // to just leave it one short. Why? Like, there was an extra move there. You could have gotten that right, nice,
   // tucked into the corner"): let go among the whites, and a swap or two more of the same drag takes it in against
@@ -501,17 +534,79 @@ export function weigh(sit: Situation, ctx: Ctx, style: Style): Weighed[] {
       && (!edgeOnly || edgeWhites(m.after!, zone).length < edgeWhites(cols, zone).length)
       && (zone < last || msFor(m.move.drags, style, plainDrag(m.move.drags)) <= sit.timeLeft);
     if (!out.some(saving) && style.path) {
-      const whites: { x: number; y: number; side: number }[] = [];
+      const whites: Stuck[] = [];
       if (edgeOnly) for (const w of edgeWhites(cols, zone)) whites.push({ ...w, side: -1 });
-      else cols[zone].forEach((p, y) => { if (p === WHITE) whites.push({ x: zone, y, side: -1 }); });
+      else cols[zone].forEach((p, y) => { if (p === WHITE) whites.push({ x: zone, y, side: -1, zone }); });
       for (const found of pathMoves(cols, ctx, style, whites, PATH_WIDE)) consider(found);
     }
     const saves = out.filter(saving);
     if (!saves.length) continue;
-    const hard = (m: Weighed) => hardIn(cols, zone) - hardIn(m.after!, zone);
-    return saves.map((m) => ({ ...m, saves: true })).sort((a, b) => hard(b) - hard(a) || b.value - a.value);
+    return rankSaves(cols, zone, phase, saves);
+  }
+  // Nothing saves a white in danger in one move: a short plan, a move that sets up the save and the save it opens
+  // (the user, 13 Nov, the thirty-second note, a bot frozen with whites low by the fire: "maybe it's stuck because it
+  // requires maybe a few moves just to kind of get the brown into the right position. And then you can use it to
+  // drag across a few blacks"). The setting-up move is played; the save is found again next move.
+  for (const zone of zones) {
+    const plan = setUp(sit, ctx, style, out, zone, zone === edgeAt && zone < last - 1, base, block);
+    if (plan) return [plan];
   }
   return out.sort((a, b) => rank(b) - rank(a)).map((m) => (even ? m : { ...m, weighted: true }));
+}
+/** The routines a short plan's second move is looked for among (`setUp`). */
+const SAVERS: readonly RoutineName[] = ['rescue', 'junkColumn', 'diamond', 'channel'];
+/** A short plan for a danger zone nothing saves in one move (`weigh`): of the moves on offer (`out`, the best
+    P.SETUP by worth) that put no white into the zone, the one after which some move (a routine's, or a piece brought
+    round) saves one of its whites, both in time; judged by the board score a second in Stage I, the quickest in the
+    chain. Null if none. */
+export function setUp(sit: Situation, ctx: Ctx, style: Style, out: readonly Weighed[], zone: number, edgeOnly: boolean, base: number, block: boolean): Weighed | null {
+  if (!P.SETUP) return null;
+  const { cols } = sit, last = COLS - 1, one = ctx.stage === 'junk';
+  const w0 = whitesFrom(cols, zone), e0 = edgeWhites(cols, zone).length;
+  const saved = (b: Board) => whitesFrom(b, zone) < w0 && (!edgeOnly || edgeWhites(b, zone).length < e0);
+  const firsts = out.filter((m) => m.after && whitesFrom(m.after, zone) <= w0 && (!edgeOnly || edgeWhites(m.after, zone).length <= e0))
+    .sort((a, b) => b.value - a.value).slice(0, P.SETUP);
+  let best: { m: Weighed; v: number } | null = null;
+  for (const m of firsts) {
+    const b = m.after!, t1 = msFor(m.move.drags, style, plainDrag(m.move.drags));
+    if (zone === last && t1 >= sit.timeLeft) continue;
+    const seconds: Drag[][] = [];
+    // The save: a plain one (a rescue, the junk column, the diamond's runs) or a piece brought round; the slow
+    // techniques' searches are left out, to keep the look cheap.
+    for (const name of SAVERS) if (style.routines.includes(name)) for (const f of ROUTINES[name].find(b, ctx)) seconds.push(f.drags);
+    if (style.path) {
+      const whites: Stuck[] = [];
+      if (edgeOnly) for (const w of edgeWhites(b, zone)) whites.push({ ...w, side: -1 });
+      else b[zone].forEach((p, y) => { if (p === WHITE) whites.push({ x: zone, y, side: -1, zone }); });
+      for (const f of pathMoves(b, ctx, style, whites)) seconds.push(f.drags);
+    }
+    for (const found of seconds) {
+      // Let go where the planner would let it go next move, so the save it finds then is this one.
+      const d = one ? judge(b, found, style, undefined, block)?.drags : found;
+      if (!d) continue;
+      const b2 = playDrags(b, d);
+      if (!b2 || !saved(b2)) continue;
+      const t = t1 + msFor(d, style, plainDrag(d));
+      if (zone === last && t > sit.timeLeft) continue;
+      const v = one ? (boardScore(b2, block) - base) / (t / 1000) : -t;
+      if (!best || v > best.v) best = { m, v };
+    }
+  }
+  if (!best) return null;
+  return { ...best.m, saves: true, setup: true, move: { ...best.m.move, reason: `first, to open the way to the white by the fire: ${best.m.move.reason}` } };
+}
+/** A danger zone's saving moves, best first: those freeing the most hard-to-reach whites in it first ("the harder
+    to reach, the sooner to start"), then by their worth weighed by the phase's weights (the thirteenth run: with
+    the zones evened, crawls by the fire rose to 12 to 16 a session; the user, 13 Nov: through the V, "one big giant
+    sweeping motion. That's really easy. You don't need to crawl things across"), so a plain drag or a hook that
+    saves the white beats a crawl that saves it as well. Only the weights that hold a technique back count here
+    (saving is the job, so a rescue's own lift doesn't), and a long plain drag counts in full, whatever routine
+    found it: a sweep that gets the white out is the simplest move there is. */
+export function rankSaves(cols: Board, zone: number, phase: Phase, saves: readonly Weighed[]): Weighed[] {
+  const hard = (m: Weighed) => hardIn(cols, zone) - hardIn(m.after!, zone);
+  const weight = (m: Weighed) => (plainDrag(m.move.drags) ? 1 : Math.min(1, weightIn(phase, m.move.routine)));
+  const ranked = (m: Weighed): number => (!P.PHASES || m.value <= 0 ? m.value : m.value * weight(m));
+  return saves.map((m) => ({ ...m, saves: true, ...(P.PHASES ? { weighted: true } : {}) })).sort((a, b) => hard(b) - hard(a) || ranked(b) - ranked(a));
 }
 /** The columns coming up to the fire after the furnace's, clear of white (`P.EARLY_CLEAR` of them): only then is
     a junk column burned early (the user, 13 Nov, the twenty-seventh note: "3 burns just happened in rapid
@@ -579,6 +674,8 @@ export function decisionTime(cols: Board, bank: number): boolean {
   const need = cols[t].filter((p) => p === WHITE).length;
   return whites >= bank * PER_COLUMN || junkLeft < need;
 }
+/** A column at least half white: it goes up as it is, never burns (the bank, after a chain). */
+export const mostlyWhite = (col: readonly number[]): boolean => col.filter((p) => p === WHITE).length * 2 >= col.length;
 /** The junk columns still to burn at decision time: the ones done on the right, and the one being built
     if it's mostly junk. */
 export function burnsLeft(cols: Board): number {
@@ -635,6 +732,9 @@ export class DistillBot {
   used: Partial<Record<Technique, number>> = {};
   /** Every chain it's sent up, its length, and the one going now. */
   chains: number[] = [];
+  /** Whether it's started a chain yet: from then, the whites left banked on the right after a break are chained
+      again, not rebuilt. */
+  chained = false;
   private run = 0;
   /** What it's doing now (the test page shows its label). */
   last: Advice | null = null;
@@ -643,7 +743,12 @@ export class DistillBot {
 
   plan(g: Distilling): Advice {
     const target = this.level.target;
-    if (this.stage === 'junk' && decisionTime(g.cols, bankFor(target))) { this.stage = 'chain'; this.burns = burnsLeft(g.cols); }
+    if (this.stage === 'junk' && decisionTime(g.cols, bankFor(target))) { this.stage = 'chain'; this.burns = burnsLeft(g.cols); this.chained = true; }
+    // After a chain broke, the whites still banked on the right are sent up, a new chain, not turned into junk
+    // columns to burn (the thirteenth run, traced 13 Nov: back in Stage I with the bank still on the right, every
+    // column reaching the fire was mostly white, and the bot filled it with junk to burn, a white or two burned
+    // with it each time: 20 in one CC^5 session).
+    else if (this.stage === 'junk' && this.chained && mostlyWhite(g.cols[COLS - 1])) { this.stage = 'chain'; this.burns = 0; }
     const ctx = contextFor(g.cols, this.stage, this.burns, this.level.reach);
     const a = choose({ cols: g.cols, chain: g.chain, timeLeft: g.timeLeft() }, ctx, this.level);
     const t = a.technique ?? a.routine;
