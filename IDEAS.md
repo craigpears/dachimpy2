@@ -2566,3 +2566,8 @@ orientation; on an iPhone only after a tap to allow it, and only on https, which
 hand turns a quarter each time the phone's turned past 45 degrees one way or the other, with a little give so
 it doesn't flicker, and tilting it nudges the piece across the frame. A mode, never the normal controls; maybe
 someone's dizzy game (Kikkit's, after the stash?), the whole den swaying with it.
+The user loved it (13 Nov): "It can be the, yeah, Kikit's Dizzy Carpentry ... Of like, right, we're going to
+make you really dizzy. We've tried porting carpentry to [mobile, to perfection?], so this adventure needs to be
+played on a mobile phone with carpentry. That would be hilarious. That's fantastic as an idea." So: **Kikkit's
+Dizzy Carpentry**, an adventure of its own that has to be played on a phone, turning it to turn the pieces;
+Kikkit's joke being that Carpentry's been "ported to mobile" at last. (One of the little adventures, above.)
