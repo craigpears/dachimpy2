@@ -165,7 +165,9 @@ export const CHARACTER: Character = {
     + 'crowned with red roses, an eyepatch, gold hoops, her tongue out, blue swirling tattoos on her arms and '
     + 'middle, a red top tied at the front, a red wristband, a ragged black skirt on a gold-buckled belt, bare '
     + 'feet, and a stone jug marked XXX. Rodrigo, her monkey, on her shoulder (her ship\'s named for him).\n\n'
-    + 'Loopy, a bit drunk, and off on twenty tangents at once, she can\'t get her lefts and rights right. She '
+    + 'Loopy and off on twenty tangents at once, she can\'t get her lefts and rights right. A bit drunk too, '
+    + 'but that\'s not why: she\'s like that sober, and a joke about her drinking always turns on that ("then '
+    + 'again, she was like that before she\'d had any"). She '
     + 'really, really wants a penguin. And every word of her nonsense is the real way through her whirlpools, '
     + 'if you take it literally: the funny part is finding out she was right all along. She draws out the '
     + 'words she loves, like a child: a whirlpool doesn\'t twirl you, it twirlehhhs you; it was all sparklehhh.',

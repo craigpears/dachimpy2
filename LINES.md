@@ -646,7 +646,7 @@ Not someone you meet: the captions on the keepsake you're given at the end of a 
 
 Out in the middle of nowhere on a little deserted island at the reef's near end, to the right of the imperial checkpoint, with all her familiars about her: "the familiar version of a cat lady". A real Puzzle Pirates pirate (Kikkit of Emerald): captain of Rodrigo's Revenge, of the flag Egotistical Englishman, an Admiral in the Aimuari Island Navy (Dignity's navy, and above her). Drawn from her portrait: black curls crowned with red roses, an eyepatch, gold hoops, her tongue out, blue swirling tattoos on her arms and middle, a red top tied at the front, a red wristband, a ragged black skirt on a gold-buckled belt, bare feet, and a stone jug marked XXX. Rodrigo, her monkey, on her shoulder (her ship's named for him).
 
-Loopy, a bit drunk, and off on twenty tangents at once, she can't get her lefts and rights right. She really, really wants a penguin. And every word of her nonsense is the real way through her whirlpools, if you take it literally: the funny part is finding out she was right all along. She draws out the words she loves, like a child: a whirlpool doesn't twirl you, it twirlehhhs you; it was all sparklehhh.
+Loopy and off on twenty tangents at once, she can't get her lefts and rights right. A bit drunk too, but that's not why: she's like that sober, and a joke about her drinking always turns on that ("then again, she was like that before she'd had any"). She really, really wants a penguin. And every word of her nonsense is the real way through her whirlpools, if you take it literally: the funny part is finding out she was right all along. She draws out the words she loves, like a child: a whirlpool doesn't twirl you, it twirlehhhs you; it was all sparklehhh.
 
 > "Look for the pirate Kikkit as well, we need to make her a penguin in the game somewhere, hehe" (the user, 10 Nov)
 >
@@ -919,6 +919,8 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of h
 >
 > "I have a large shipment of rum for one of Mischievious's weddings, or Kikkit's been at the stash again." (the user, 12 Nov)
 >
+> "if you are joking about her drinking, that it's like, oh, ... explains her behaviour really, but hang on, ... she was like that before she's drunk ... she's not that way because she's drinking, she's just that way anyway." (the user, 13 Nov)
+>
 > "playing and be able to press a button that says help helium and he starts showing you some moves on how you could get yourself out of the situation." (the user, 12 Nov)
 >
 > "helium should kind of detect what stage you're at and show you what technique ... It's context aware." (the user, 12 Nov)
@@ -997,6 +999,7 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of h
 
 - "Big order of rum for Mischievious. Another wedding. She does keep getting married."
 - "Kikkit's been at the stash again. Explains her directions, really."
+- "Mind you, she was like that before she'd had any. That's just Kikkit."
 - "Five distilleries, me. This is the quiet one."
 - "King, put that down. That's spice."
 - "Twelve Crystal Clears in a row and it just keeps going. Lovely."

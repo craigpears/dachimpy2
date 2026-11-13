@@ -481,6 +481,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   round, the ramble retold after the last, Space skipping on to the next. Out of earshot she
   finishes her line and stops; come back and she starts up again. Keep adding to the list; a bit of
   the real way can hide in them, never a hint at anything else.
+- **Kikkit's tangents aren't the drink (13 Nov).** A joke about her drinking always turns on itself:
+  "oh, ... explains her behaviour really, but hang on, ... she was like that before she's drunk ...
+  she's not that way because she's drinking, she's just that way anyway." So anyone who blames the
+  rum takes it back in the next breath (Helium: "Kikkit's been at the stash again. Explains her
+  directions, really." then "Mind you, she was like that before she'd had any. That's just Kikkit.").
+  Her rambling is who she is, never something wrong with her.
 - **Tzz's balloon lesson (11 Nov).** The sensible one after Kikkit, on a little island of her own a
   hop from hers (IDEAS.md, "Tzz's huge Vegas"): once Kikkit's told her ramble you wonder aloud, a line
   of your own, whether anyone could explain it with fewer tangents (never who or where). Nobody comes

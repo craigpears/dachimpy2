@@ -104,6 +104,7 @@ export const PRAISE = {
 export const AFTER = [
   'Big order of rum for Mischievious. Another wedding. She does keep getting married.',
   'Kikkit\'s been at the stash again. Explains her directions, really.',
+  'Mind you, she was like that before she\'d had any. That\'s just Kikkit.',
   'Five distilleries, me. This is the quiet one.',
   'King, put that down. That\'s spice.',
   'Twelve Crystal Clears in a row and it just keeps going. Lovely.',
@@ -131,6 +132,7 @@ export const CHARACTER: Character = {
     { on: '11 Nov', said: 'occasionally, distilleries have been known to blow up ... So, oops, that happened sometimes. Don\'t worry about it.' },
     { on: '12 Nov', said: 'Him being in a hidden house, maybe he can just have his own little island ... I bet he just wants an island for him somewhere.' },
     { on: '12 Nov', said: 'I have a large shipment of rum for one of Mischievious\'s weddings, or Kikkit\'s been at the stash again.' },
+    { on: '13 Nov', said: 'if you are joking about her drinking, that it\'s like, oh, ... explains her behaviour really, but hang on, ... she was like that before she\'s drunk ... she\'s not that way because she\'s drinking, she\'s just that way anyway.' },
     { on: '12 Nov', said: 'playing and be able to press a button that says help helium and he starts showing you some moves on how you could get yourself out of the situation.' },
     { on: '12 Nov', said: 'helium should kind of detect what stage you\'re at and show you what technique ... It\'s context aware.' },
   ],
