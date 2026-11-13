@@ -928,7 +928,7 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 ### Coming up off their island the first time: the still goes bang, and they shrug it off (your lines between, src/lines/you.ts)
 
 - *mishap:* "Oh. Sorry about that. Just a little distilling mishap."
-- *offer:* "Would you like me to learn you some distilling? While you're here."
+- *offer:* "Would you like me to teach you some distilling? While you're here."
 - *safe:* "Of course it's safe. What would make you think it's not safe? Perfectly normal, this. It's fine."
 - *brows:* "None of us have got eyebrows. I keep asking the developers for some. Nothing yet."
 

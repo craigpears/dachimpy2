@@ -8,7 +8,7 @@
     sounds like the bangs took them). Your lines between are src/lines/you.ts's AT_HELIUMS. */
 export const OPENING = {
     mishap: 'Oh. Sorry about that. Just a little distilling mishap.',
-    offer: 'Would you like me to learn you some distilling? While you\'re here.',
+    offer: 'Would you like me to teach you some distilling? While you\'re here.',
     safe: 'Of course it\'s safe. What would make you think it\'s not safe? Perfectly normal, this. It\'s fine.',
     brows: 'None of us have got eyebrows. I keep asking the developers for some. Nothing yet.',
 };

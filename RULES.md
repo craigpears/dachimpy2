@@ -592,7 +592,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     enough to read from the sea; the island's eastern square, behind them.
   - **Their opening, the first time (12 Nov):** "the distillery exploding and Helium just treating it as
     kind of a casual everyday event". As you come up the still blows up; "Oh. Sorry about that. Just a
-    little distilling mishap." They offer to "learn you some distilling";
+    little distilling mishap." They offer to "teach you some distilling" (not "learn you", the user, 13 Nov);
     you, warily, "Is... is it safe?"; "Of course it's safe. What would make you think it's not safe?
     Perfectly normal, this. It's fine." You: "You've got no eyebrows left." They: none of us have, they keep
     asking the developers for some. (True: no pirate in Puzzle Pirates has eyebrows, nor any in the den;
