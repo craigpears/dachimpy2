@@ -77,6 +77,12 @@
   .columns figcaption i { color: #6b2a12; font-weight: 700; }
   ul.levels { list-style: none; padding: 0; margin: 8px 0 4px; }
   ul.levels li { margin: 0 0 10px; padding: 8px 10px; border-radius: 8px; background: rgba(255, 250, 235, 0.5); }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin: 10px 0 14px; }
+  .tiles figure { margin: 0; padding: 6px; border-radius: 10px; background: rgba(255, 250, 235, 0.55); }
+  .tiles svg.tile { display: block; width: 100%; height: 120px; }
+  .tiles figcaption { font-size: 14px; line-height: 1.3; margin-top: 4px; }
+  .tiles figcaption b { display: block; font: 700 17px 'Alegreya', serif; color: #6b2a12; }
+  .tiles figcaption i { display: block; color: var(--ink2); font-size: 13px; }
   ul.levels li b[data-name] { font: 700 19px 'Alegreya', serif; color: #6b2a12; margin-right: 8px; }
   ul.levels [data-bank] { font-weight: 700; color: var(--ink2); }
   ul.levels [data-adds] { display: block; font-size: 15px; }
@@ -175,6 +181,8 @@
     </ol>
     <p>The arrows show plain moves first: one short drag, one of a few tricks that are each the swap rule seen once (the climb, a white up through blacks; the sink, a white down through browns; the lift, a brown up through whites; the drop, a black down through whites; the weave, a white up and down in one drag), with why it works. Longer moves and the bots' own techniques come only with bigger goals. When nothing plain helps yet, a short drag first makes way, the two numbered.</p>
     <blockquote data-quote="trick"></blockquote>
+    <p id="tricks">The tricks side by side, each one drag on Helium's lesson board and its rule in their words. The bots use the same ones: every drag they make is one of these tricks, or a run of them, and each has a goal, so none is a half move for nothing. The sixth, the ladder, is junk past junk: it moves no white, so the lesson never shows it as a move to make, but the bots sort with it.</p>
+    <div class="tiles" data-trick-tiles></div>
     <p>Then, a moment later, a few more places where the same trick works are ringed in blue for you to find yourself.</p>
     <blockquote data-quote="spot"></blockquote>
   </article>

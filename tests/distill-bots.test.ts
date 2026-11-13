@@ -3,7 +3,7 @@
    What each reaches is tools/distill-bots.mjs's to measure (DISTILLING.md §4). */
 import { describe, expect, it } from 'vitest';
 import { BLACK, BROWN, BURN_TICKS, COLS, DOWN_RIGHT, Distilling, SHORT, TALL, UP_LEFT, UP_RIGHT, WHITE, neighbourOn, parseBoard } from '../src/distilling';
-import { DistillBot, HELIUM, LEVELS, MENU, P, PAIR_LABEL, chainZones, bankFor, brownSweep, clearComingUp, dangerZones, edgeWhites, joinedUp, levelFor, rightOrder, tieBreak, whitesInJunk, advise, backward, choose, contextFor, judge, junkAcross, levelNamed, playSession, tierNamed, turnsIn, weigh } from '../src/distill-bots';
+import { DistillBot, HELIUM, LEVELS, MENU, P, PAIR_LABEL, chainContext, chainOver, chainZones, nextChainAt, bankFor, brownSweep, clearComingUp, dangerZones, edgeWhites, joinedUp, levelFor, rightOrder, tieBreak, whitesInJunk, advise, backward, choose, contextFor, judge, junkAcross, levelNamed, playSession, tierNamed, turnsIn, weigh } from '../src/distill-bots';
 import type { Advice } from '../src/distill-bots';
 import { ROUTINES, canGo, colourLeft, playDrags } from '../src/distill-routines';
 import { behindSpice, blockPhase, boardScore, keptTools, trappedWhite } from '../src/distill-score';
@@ -12,6 +12,7 @@ import type { Board } from '../src/distilling';
 import { seeded } from '../src/mirror-row';
 import { bringRound, pairRescue } from '../src/distill-path';
 import { STUCK_ON_TOP } from '../src/distill-guide';
+import { chainOver as heliumChainOver } from '../src/den-helium';
 
 /** The slow techniques (the seventh note: "very action heavy"). */
 const SLOW: readonly RoutineName[] = ['crawl', 'turnOver', 'linePull', 'figureEight', 'hook', 'leapfrog'];
@@ -371,9 +372,12 @@ describe('the block phase: the junk in blocks, the V, a brown kept bottom-left (
     expect(blockPhase(cols)).toBe(true);
     // (The drag's cost on the routines' own ranking, beneath the board reader: since 13 Nov the reader sorts the V's
     // tail here first, tests/distill-read.test.ts, its drags costed the same way.)
-    const was = P.BLOCK_DRAG_MS, read = P.READ;
+    // (And beneath the goals, src/distill-goals.ts: since 13 Nov no drag is a half move, which takes most of the fiddly
+    // ones away by itself, tests/distill-goals.test.ts.)
+    const was = P.BLOCK_DRAG_MS, read = P.READ, goals = P.GOALS;
     try {
       P.READ = 0;
+      P.GOALS = 0;
       P.BLOCK_DRAG_MS = 0;
       const fiddly = play(cols, 8);
       P.BLOCK_DRAG_MS = was;
@@ -381,7 +385,7 @@ describe('the block phase: the junk in blocks, the V, a brown kept bottom-left (
       const small = (d: number[]) => d.filter((n) => n <= 2).length;
       expect(small(blocks.drags)).toBeLessThan(small(fiddly.drags));
       expect(blocks.drags.length).toBeLessThan(fiddly.drags.length);
-    } finally { P.BLOCK_DRAG_MS = was; P.READ = read; }
+    } finally { P.BLOCK_DRAG_MS = was; P.READ = read; P.GOALS = goals; }
   });
   it('the brown in the bottom-left and the black in the top-left are kept as tools, 13 Nov ("one black in the top left, one brown in the bottom left can be useful ... you don\'t want to just get too greedy")', () => {
     const cols = board40();
@@ -605,5 +609,60 @@ describe('a brown stuck at the top of the column going up, rescued (13 Nov: "thi
     const [m] = weigh({ cols: early, chain: 1, timeLeft: 15000 }, ctx, levelNamed('cc1'));
     expect(m.saves).toBe(true);
     expect(m.after![last - 1].every((p) => p === WHITE)).toBe(true);
+  });
+});
+
+describe('the chain\'s rule of thumb, shared with Helium (13 Nov: "if you\'ve got a completely junk column, you don\'t try and build a whites into it. Yeah, you build further left. You start a new chain as far left as you can. Obviously, in the context of CC^1, you don\'t need to. But like, if you\'re going for the maximalist one, absolutely")', () => {
+  // Column 10 all junk just after a Crystal Clear; columns 9 to 6 mostly white, not yet clear.
+  const cols = parseBoard(['wKwwKwKK', 'KKbKwKKKK', 'bbKbbbwK', 'bbbbbbbbK', 'KbwwbwKK', 'wwwwwwwwK', 'wwwwwKbw', 'wwwwwwwKb', 'wwwwwwKb', 'KKKbbKKKK']);
+  it('one function, the bots\' and Helium\'s plan\'s: more junk than white in the next column and the chain can\'t go on', () => {
+    expect(heliumChainOver).toBe(chainOver);
+    expect(chainOver(cols, COLS - 1)).toBe(true);
+    expect(chainOver(cols, COLS - 2)).toBe(false);
+  });
+  it('the next chain starts further left the bigger the target: CC^1 right beside the junk, CC^8 three columns in', () => {
+    expect(nextChainAt(cols, COLS - 1, 1)).toBe(8);
+    expect(nextChainAt(cols, COLS - 1, 2)).toBe(8);
+    expect(nextChainAt(cols, COLS - 1, 3)).toBe(7);
+    expect(nextChainAt(cols, COLS - 1, 5)).toBe(7);
+    expect(nextChainAt(cols, COLS - 1, 8)).toBe(6);
+    // (never past a column of junk next to it, whatever the target)
+    const two = cols.map((c) => [...c]);
+    two[8] = [...'KKKbbKbw'].map((ch) => 'wbK*x'.indexOf(ch));
+    expect(nextChainAt(two, COLS - 1, 1)).toBe(7);
+  });
+  it('after a Crystal Clear, the bot lets the chain go: the columns from there to the fire burn, no white built into the junk', () => {
+    for (const [target, from] of [[1, 8], [8, 6]] as const) {
+      const c = chainContext(cols, 1, 0, target, 40);
+      expect(c.letGo).toBe(true);
+      expect(c.burns).toBe(COLS - 1 - from);
+      expect(c.ctx.fill).toBe(from);
+      const a = choose({ cols, chain: 1, timeLeft: 12000 }, c.ctx, levelFor(target));
+      if (a.kind === 'move') expect(playDrags(cols, a.drags)![COLS - 1].filter((p) => p === WHITE).length).toBe(0);
+    }
+    // (no chain going: nothing to let go)
+    expect(chainContext(cols, 0, 0, 8, 40).letGo).toBe(false);
+  });
+  it('with a Crystal Clear still to go up first, it goes, and no white is built into the junk column after it', () => {
+    const b = cols.map((c) => [...c]);
+    b[9] = b[9].map(() => WHITE);
+    b[8] = [...'KKKbbKbw'].map((ch) => 'wbK*x'.indexOf(ch));
+    expect(chainContext(b, 1, 0, 2, 40).ctx.over).toEqual([8, 8]);
+    const c = chainContext(b, 1, 0, 3, 40);
+    expect(c.letGo).toBe(true);
+    expect(c.ctx.over).toEqual([7, 8]);
+    expect(c.ctx.fill).toBe(6);
+    const a = choose({ cols: b, chain: 1, timeLeft: 12000 }, c.ctx, levelFor(3));
+    if (a.kind === 'move') {
+      const after = playDrags(b, a.drags)!, whites = (x: Board, i: number) => x[i].filter((p) => p === WHITE).length;
+      expect(whites(after, 8) + whites(after, 7)).toBeLessThanOrEqual(whites(b, 8) + whites(b, 7));
+      expect(after[9].every((p) => p === WHITE)).toBe(true);
+    }
+  });
+  it('advise says so: let go, and the column the next chain starts in', () => {
+    const a = advise({ cols, chain: 1, timeLeft: 12000 }, { target: 8 });
+    expect(a.letGo).toBe(true);
+    expect(a.column).toBe(6);
+    expect(a.read).toMatch(/can't go on into column 10/);
   });
 });

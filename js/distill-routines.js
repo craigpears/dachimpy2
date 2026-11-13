@@ -286,7 +286,7 @@ export function measure(cols, ctx) {
     let v = 0;
     const sort = sortingTime(cols, ctx) ? 1 : 0;
     for (let x = 0; x < COLS; x++) {
-        const col = cols[x], burning = x >= ctx.burnFrom;
+        const col = cols[x], burning = x >= ctx.burnFrom || (!!ctx.over && x >= ctx.over[0] && x <= ctx.over[1]);
         for (let y = 0; y < col.length; y++) {
             const p = col[y];
             if (p === SPICE)

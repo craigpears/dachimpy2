@@ -78,6 +78,35 @@ export function trickOf(p: number, ways: readonly number[]): Trick | null {
   if (p === BLACK && none) return 'drop';
   return null;
 }
+/** The ladder (the bots' sixth trick, 13 Nov): junk past junk, a black climbing up through browns or a brown stepping
+    down through blacks, the third pair of the swap rule; the right-hand columns sorted blacks over browns, the ladder the
+    zigzag climbs (DISTILLING.md §3, the second note). Never a teaching move: it moves no white. */
+export const LADDER = 'ladder' as const;
+/** A trick a drag can be, anyone's: a plain trick, or the ladder. */
+export type DragTrick = Trick | typeof LADDER;
+/** Every trick a drag can be, in the guide's order: the five plain ones, then the ladder. */
+export const DRAG_TRICKS: readonly DragTrick[] = [...TRICKS, LADDER];
+/** The trick a single swap of piece `p` along `way` is: every legal swap is one (a white up past a black, the climb;
+    down past a brown, the sink; a brown up past a white, the lift; a black down past a white, the drop; junk past junk,
+    the ladder). */
+export function swapTrick(p: number, way: number): DragTrick {
+  if (whiteish(p)) return up(way) ? 'climb' : 'sink';
+  if (p === BROWN) return up(way) ? 'lift' : LADDER;
+  return up(way) ? LADDER : 'drop';
+}
+/** The tricks a whole drag is, in order (the user, 13 Nov: every move "linked to one of those more abstract moves"):
+    a white's drag one trick (the climb, the sink, or the weave when it goes both ways, as `trickOf` has it); a brown's
+    or black's, its runs of one trick each (a brown lifted up through the whites and then down through the blacks, the
+    lift then the ladder). Played on board `cols`, as the pieces it passes are. */
+export function dragTricks(cols: Board, d: Drag): DragTrick[] {
+  const p = cols[d.x][d.y];
+  if (!d.ways.length) return [];
+  if (whiteish(p)) return [trickOf(p, d.ways)!];
+  const out: DragTrick[] = [];
+  for (const w of d.ways) { const t = swapTrick(p, w); if (out[out.length - 1] !== t) out.push(t); }
+  return out;
+}
+
 /** Whether a drag's swaps keep to one side (never back on itself). */
 const shapeOk = (ways: readonly number[]): boolean => ways.every((w) => right(w) === right(ways[0]));
 

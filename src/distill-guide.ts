@@ -39,7 +39,9 @@ import type { Phase } from './distill-phase.js';
 import { LEVELS, PATH_LABEL, PER_COLUMN, SWEEP_LABEL, bankFor, chainZones, clearComingUp, contextFor, dangerZones, edgeWhites, levelNamed, plainDrag } from './distill-bots.js';
 import { blockPhase, keptTools } from './distill-score.js';
 import { bringRound, pairRescue, stuck } from './distill-path.js';
-import { STEP_ONE_CTX, afterOpening, beforeBang, lessonPlan, opening, lessonGame } from './den-helium.js';
+import { STEP_ONE_CTX, afterOpening, aimFor, beforeBang, lessonPlan, opening, lessonGame } from './den-helium.js';
+import { DRAG_TRICKS, LADDER, dragTricks, makeWay, teachLevel } from './distill-teach.js';
+import type { DragTrick } from './distill-teach.js';
 import { BEST, HELP, HELP_ELSE, NERVES, ONWARD, OPENING, PHASE, SPOT, STEP_ONE, TEACH, TELL } from './lines/helium.js';
 import { POSITIONS } from './distill-guide-boards.js';
 import type { Position } from './distill-guide-boards.js';
@@ -423,6 +425,58 @@ export function readingExamples(): ReadingExample[] {
 
 // ---------------------------------------------------------------- Helium's lines, and the whole guide
 
+// ---------------------------------------------------------------- the tricks, side by side
+
+/** A trick drawn small (the user, 13 Nov: "that can appear in the guide quite well as small things next to each
+    other"): its name, what you do and its one-line rule in Helium's words (src/lines/helium.ts, TEACH), and a picture
+    of it on the board their lesson's played on, cropped round it (`crop`: the columns and rows shown). The five plain
+    tricks their lesson shows, then the ladder (`bots`: the bots' sixth, junk past junk; never shown as a move to make),
+    then making way. Every drag the bots make is one of these tricks or a run of them, with a goal
+    (src/distill-goals.ts). */
+export interface TrickTile { trick: DragTrick | 'makeWay'; name: string; how: string; rule: string; bots: boolean; picture: Picture; crop: { x: [number, number]; y: [number, number] } }
+/** Every drag of one piece on a board, up to `most` swaps, each swap legal after the last. */
+function everyDrag(cols: Board, most: number, visit: (d: Drag) => boolean): void {
+  const walk = (b: Board, x0: number, y0: number, x: number, y: number, ways: number[]): boolean => {
+    if (ways.length && visit({ x: x0, y: y0, ways: [...ways] })) return true;
+    if (ways.length >= most) return false;
+    for (const w of [UP_RIGHT, UP_LEFT, DOWN_LEFT, DOWN_RIGHT]) {
+      const n = neighbourOn(b, x, y, w);
+      if (!n || !canSwapOn(b, x, y, n[0], n[1])) continue;
+      const nb = copyBoard(b); nb[n[0]][n[1]] = b[x][y]; nb[x][y] = b[n[0]][n[1]];
+      if (walk(nb, x0, y0, n[0], n[1], [...ways, w])) return true;
+    }
+    return false;
+  };
+  for (let x = 1; x < COLS - 1; x++) for (let y = 1; y < cols[x].length - 1; y++) if (walk(cols, x, y, x, y, [])) return;
+}
+/** The columns and rows round some drags, a piece either side. */
+function cropOf(cols: Board, drags: readonly Drag[]): TrickTile['crop'] {
+  const cells = drags.flatMap((d) => { const out: [number, number][] = [[d.x, d.y]]; let at: [number, number] = [d.x, d.y]; for (const w of d.ways) { at = neighbourOn(cols, at[0], at[1], w)!; out.push(at); } return out; });
+  const xs = cells.map((c) => c[0]), ys = cells.map((c) => c[1]);
+  return { x: [Math.max(0, Math.min(...xs) - 1), Math.min(COLS - 1, Math.max(...xs) + 1)], y: [Math.max(0, Math.min(...ys) - 1), Math.min(8, Math.max(...ys) + 1)] };
+}
+/** The tricks side by side: each found on the lesson's board after its opening (a drag of two swaps that's that trick
+    alone, the first from the left; three for the weave if need be), making way as their lesson finds it for step one. */
+export function trickTiles(): TrickTile[] {
+  const cols = afterOpening().cols, out: TrickTile[] = [];
+  const tile = (trick: TrickTile['trick'], drags: Drag[], bots = false): TrickTile => {
+    const t = TEACH[trick];
+    return { trick, name: t.name, how: t.how, rule: t.why, bots, picture: { cols, drags, rings: [], shade: [], from: LESSON_FROM }, crop: cropOf(cols, drags) };
+  };
+  for (const trick of DRAG_TRICKS) {
+    let found: Drag | null = null;
+    for (const most of [2, 3]) {
+      everyDrag(cols, most, (d) => { const ts = dragTricks(cols, d); if (d.ways.length === most && ts.length === 1 && ts[0] === trick) { found = d; return true; } return false; });
+      if (found) break;
+    }
+    if (found) out.push(tile(trick, [found], trick === LADDER));
+  }
+  const fire = Array.from({ length: FIRE_COLS }, (_, i) => COLS - FIRE_COLS + i);
+  const way = makeWay(cols, aimFor(cols, fire, null, 1, 'out'), teachLevel(1));
+  if (way) out.push(tile('makeWay', way.drags));
+  return out;
+}
+
 /** Helium's lines the page quotes, from src/lines/helium.ts. */
 export const QUOTES = { goal: BEST.none, stepOne: STEP_ONE.says, why: STEP_ONE.why, onward: ONWARD, tell: TELL, trick: TEACH.lift.why, spot: SPOT.three } as const;
 
@@ -431,5 +485,6 @@ export function guide() {
   return {
     pieces: PIECES, swaps: SWAPS, furnaceSecs: FURNACE_SECS, chainBonus: CHAIN_BONUS, flask: FLASK, carryOn: CARRY_ON, columns: sampleColumns(),
     phases: phaseExamples(), levels: levelRows(), techniques: techniqueExamples(), tricks: trickExamples(), quotes: QUOTES, plan: PLAN, reading: readingExamples(),
+    trickTiles: trickTiles(),
   };
 }

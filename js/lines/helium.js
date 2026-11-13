@@ -255,6 +255,7 @@ export const TEACH = {
     drop: { name: 'The drop', how: 'drag the black down through the whites', why: 'A black sinks past a white. Drop one through, and each white steps up round it.' },
     weave: { name: 'The weave', how: 'the white up over blacks, down under browns', why: 'Up over a black, down under a brown. A white weaves through junk like that.' },
     makeWay: { name: 'Make way', how: '1 opens the way, then 2', why: 'Stuck? Move a piece beside it first. Then it\'s got a way through.' },
+    ladder: { name: 'The ladder', how: 'a black up through the browns, a brown down through the blacks', why: 'A black climbs past a brown. Sort the junk that way: blacks over browns, a ladder.' },
 };
 /** "Make way" said for the trick it makes way for: what 1 sets up for 2, and why (the user, 13 Nov: "a lack of
     explanation as to, oh, first do this, so because white goes up into black, so you need a black piece there ...
@@ -366,7 +367,7 @@ export const CHARACTER = {
         {
             when: 'The move their plan shows you, a plain trick: its name and what you do in the bar (name, how), why it works in their bubble the first time it\'s shown in a batch (why)',
             says: TEACH,
-            each: { climb: 'A white dragged up through blacks', sink: 'A white dragged down through browns', lift: 'A brown dragged up through whites', drop: 'A black dragged down through whites', weave: 'A white up over blacks and down under browns in one drag', makeWay: 'Nothing plain helps yet: a short drag first (1) that opens the way for a plain one (2)' },
+            each: { climb: 'A white dragged up through blacks', sink: 'A white dragged down through browns', lift: 'A brown dragged up through whites', drop: 'A black dragged down through whites', weave: 'A white up over blacks and down under browns in one drag', makeWay: 'Nothing plain helps yet: a short drag first (1) that opens the way for a plain one (2)', ladder: "Junk past junk, a black up through browns or a brown down through blacks: never shown as a move to make, it moves no white; named on the bots' moves and in the read version" },
         },
         {
             when: 'Make way, said for the trick it makes way for: what the first drag (1) sets up for the second (2), in the bar (how) and their bubble (why)',

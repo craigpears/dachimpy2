@@ -1171,6 +1171,38 @@ No disasters. Plainly:
   the reader; a run with the reader off (`PLAN='{"READ":0}'`) would split the two. Not run: asked first.
 - **Slower to run**: CC^5 9 minutes for 20 boards, CC^8 7 (was 2 to 4): the risk read per candidate move, the quick
   fills and the path search per trapped white.
+
+### Every drag a named trick with a goal, and the chain let go (13 Nov, sixteenth run)
+After §3's notes of 13 Nov ("The chain let go", "Every drag a named trick with a goal", "P3 is quick sorting"): no
+half move chosen and every drag let go where it gets something done (`P.GOALS`, src/distill-goals.ts), a chain whose
+next column is more junk than white let go and the next started further left the bigger the target (`chainContext`),
+and P3's quick sorting read (with time in hand, the edge whites wait and the quick sorting fills are on offer). All
+measured together. 20 boards a level, seeds 5000 on, against the fifteenth run.
+
+| Bot | Longest chain: mean (best) | Target reached | Sessions with no white burned | Whites burned (first 3 min) | Points a minute | Chain waits a session (s) | Columns up not Crystal Clear |
+|---|---|---|---|---|---|---|---|
+| CC^1, fifteenth | 3.6 (6) | 20/20 | 14/20 | 0.6 (0.3) | 13.1 | 1,180 (319) | 4.7 |
+| **CC^1, sixteenth** | 3.6 (6) | 20/20 | 14/20 | 0.5 (0.3) | 13.1 | 1,164 (315) | 4.5 |
+| CC^2, fifteenth | 4.0 (6) | 20/20 | 9/20 | 0.8 (0.3) | 14.0 | 1,156 (312) | 4.0 |
+| **CC^2, sixteenth** | 3.8 (6) | 20/20 | **12/20** | 0.7 (0.3) | 13.6 | 1,106 (298) | 4.7 |
+| CC^3, fifteenth | 3.4 (5) | 16/20 | 14/20 | 0.7 (0.3) | 12.3 | 1,009 (271) | 4.9 |
+| **CC^3, sixteenth** | 3.4 (6) | 17/20 | 14/20 | 0.5 (0.3) | **13.5** | 1,032 (277) | 4.6 |
+| CC^5, fifteenth | 4.5 (6) | 12/20 | 19/20 | 0.1 (0.0) | 15.6 | 651 (175) | 4.3 |
+| **CC^5, sixteenth** | 4.3 (7) | 10/20 | 17/20 | 0.3 (0.1) | 15.2 | 704 (189) | 3.9 |
+| CC^8, fifteenth | 4.3 (7) | 0/20 | 17/20 | 0.1 (0.0) | 13.7 | 613 (165) | 4.5 |
+| **CC^8, sixteenth** | 4.1 (7) | 0/20 | 15/20 | 0.3 (0.1) | 14.2 | 666 (179) | 4.5 |
+
+No disasters, and no clear change either way: within a session's noise at every level. Plainly:
+- **CC^1 to CC^3 hold or improve a little**: whites burned down at all three (0.6 / 0.8 / 0.7 to 0.5 / 0.7 / 0.5),
+  CC^2's sessions with none 9 to 12, CC^3's points a minute 12.3 to 13.5 and its target 16 to 17 of 20; CC^2's chains
+  a little shorter (4.0 to 3.8).
+- **CC^5 and CC^8 a little worse on whites**: 0.1 to 0.3 burned a session at both (sessions with none 19 to 17, 17 to
+  15), chains 4.5 to 4.3 and 4.3 to 4.1; CC^5's best up to 7, CC^8's points a minute up (13.7 to 14.2). The chain let
+  go is theirs: in a check of two 10-minute sessions it decided 221 of CC^8's moves and none of CC^1's or CC^3's (their
+  chains rarely meet a junk column ahead); the extra columns CC^8 burns to start further left carry whites to get out.
+  Splitting the two (`PLAN='{"GOALS":0}'`, or `letGoFor` at 1 for every target) wasn't run: asked first.
+- **Half moves gone**: none chosen (they were 2% of moves at CC^1 to CC^3, 9% at CC^5, 7% at CC^8, §3).
+- **Quicker to run**: CC^5 7.7 minutes for 20 boards, CC^8 7.9 (were 9 and 7).
 **Watching them, the first note (the user, 12 Nov, a screenshot of the Ultimate's board):** "the main
 thing is it just doesn't carry on the whole way to the right. It just kind of stops ... that black ... in
 the white, it was dragging the black diagonally down and it just stopped there. It's like, well, no, it
@@ -1944,6 +1976,52 @@ Counted 13 Nov: no plan of that shape in four 3-minute sessions (CC^3 and CC^8, 
 Helium's step one, so the drags stopping short in the notes (the twenty-ninth and thirty-second) aren't this. P6's
 plan (a brown brought down-right beside column 9's top white, then the white dragged down-left and up-left) is the
 nearest: its white's second swap is its own, so it stays two drags.
+
+**The chain let go, one rule of thumb (the user, 13 Nov).** After Helium's plan chased a Crystal Clear into a column
+of junk: "if you've got a completely junk column, you don't try and build a whites into it. Yeah, you build further
+left. You start a new chain as far left as you can. Obviously, in the context of CC^1, you don't need to. But like, if
+you're going for the maximalist one, absolutely"; then, asked about an odds model: "I wouldn't make it more
+complicated unless we find some problems." Built: `chainOver` (src/distill-bots.ts), more junk than white in the
+column the chain goes into next, used by the bots, "Help, Helium" and Helium's plan alike. A chain going whose next
+column's like that is let go (`chainContext`): never a white built into it; the next chain starts left of it and of
+every column next to it the chain can't go on into either, and the bigger the target the further left (`letGoFor`:
+one column for CC^1 and CC^2, two for CC^3 and CC^5, three for CC^8), never past a column already clear; with nothing
+clear left to go up first, the columns from there to the fire burn as at a chain's start (their whites got out, the
+danger zones as ever); with Crystal Clears still ahead, they go up first and no white goes into the columns let go
+(`Ctx.over`). Helium's plan does what it did: it starts over at step one (tests/distill-teach.test.ts, on the user's
+board).
+
+**Every drag a named trick with a goal (the user, 13 Nov).** "if the bot follows, again, that is integrated into those
+same tricks, that it's not going to do a half move for no reason, like everything ... has got a goal and a reason and
+like linked to one of those more abstract moves." Built: every legal swap is one of six tricks (src/distill-teach.ts,
+`swapTrick`): the climb (a white up past a black), the sink (a white down past a brown), the lift (a brown up past a
+white), the drop (a black down past a white), and the ladder (junk past junk, a black up through browns or a brown down
+through blacks: the bots' sixth, never a teaching move); a white's drag is one trick (the weave when it goes both
+ways), a junk piece's its runs ("the lift, then the ladder", the diamond's brown run). Each drag of a bot's move carries
+its tricks and its goal (src/distill-goals.ts, `ownGoal`): the board read's own first (free or fill a target white,
+the ladder or the tail sorted, a stranded piece freed, the way opened to a trapped white), then a white out of the
+columns to burn or further from the fire, the chain's columns cleared, a stuck piece freed, junk to the colour (let go
+against junk or in the columns being built, never stranded), a white brought left out of a junk column, junk sorted or
+stored; a drag with none makes way for a later one, or sets up next move's save. A move with a drag left over, a half
+move, isn't chosen (`P.GOALS`), and `judge` lets a drag go only where it gets something done.
+The half moves found (counted 13 Nov, the planner with the goals off, two 6-minute sessions a level, seeds 5000 and
+5001): about 2% of moves at CC^1 to CC^3, 9% at CC^5, 7% at CC^8. Most were Stage I drags let go where one look ahead
+scored best, a piece left among the whites partway: the diamond's brown or black run cut to one swap (13 at CC^5, 9 at
+CC^8), the sweep stopped after three (5 at CC^5), the diamond's and the crawl's last drag cut to a swap; storing's one
+swap back left that doesn't reach the junk on the left; and in the chain, the path search bringing a piece round to a
+stuck one's place that swaps one stuck piece of junk in the column being filled for another just as stuck (seen at
+CC^1 and CC^5). With the goals on, none.
+
+**P3 is quick sorting, and a plan seen through (the user, 13 Nov).** "I think [P3] was quick sorting." The board read
+(src/distill-read.ts): with the whites burning soon all free to go left, their column not the furnace's, and every
+quick fill of their places itself a black down or a brown up, it reads quick sorting, not fill the gaps (P4's fills
+aren't all sorting moves, so it stays fill the gaps); then the edge whites by the fire wait, and the quick sorting
+fills are on offer. And on the positions page: "show like a short plan of next steps ... make sure it actually follows
+through rather than just making a step towards it." Built: src/distill-ahead.ts plays the planner forward five moves
+on a copy of the board (the furnace's time running down by each move's time), its aim the first move's goal (a white
+it only opens the way to: that white freed); tested per position to reach the aim with every move on the way working
+on it. All but P1 do; P1's plan frees its white by move 4, but move 3 turns to column 8's bottom white first (the
+board read ranks it the more at risk then): open (tests/distill-ahead.test.ts).
 
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
