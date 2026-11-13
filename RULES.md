@@ -582,35 +582,67 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   on with adding Helium and some of the tutorial elements in? I don't want to get too caught up on
   perfecting this bit." Helium (their Emerald portrait, IDEAS.md) on a little island of their own out past the
   checkpoint, across the smugglers' rocks from their cove (LAY.HELIUM: three squares, in open water, on the
-  captain's map unnamed, as Tzz's is). Their copper still beside them and Distilling's own board on a stand.
+  captain's map unnamed, as Tzz's is). Their distillery behind them and Distilling's own board on a stand.
+  - **Their distillery (13 Nov):** "If you look up a distillery on Puzzle Pirates, I think [Helium] needs to
+    have at least a bigger setup. That little object that blows up in the background is very tiny." A
+    distillery as the game's are (js/den/distillery.js, placed from HELIUM_CAST): a timber building open at
+    the front, shingled roof, a sign, a brick chimney smoking; inside a smaller still, racked barrels,
+    bottles; in its yard the big copper pot still on its furnace, the swan neck to the worm tub and its coil,
+    a pipe out to the spout over a cask on a stillage with a sight glass, and the pile of full casks. Big
+    enough to read from the sea; the island's eastern square, behind them.
   - **Their opening, the first time (12 Nov):** "the distillery exploding and Helium just treating it as
-    kind of a casual everyday event". As you come up the still goes bang (soot, sparks, bits of copper);
-    "Oh. Sorry about that. Just a little distilling mishap." They offer to "learn you some distilling";
+    kind of a casual everyday event". As you come up the still blows up; "Oh. Sorry about that. Just a
+    little distilling mishap." They offer to "learn you some distilling";
     you, warily, "Is... is it safe?"; "Of course it's safe. What would make you think it's not safe?
     Perfectly normal, this. It's fine." You: "You've got no eyebrows left." They: none of us have, they keep
     asking the developers for some. (True: no pirate in Puzzle Pirates has eyebrows, nor any in the den;
     checked on Helium's and Roobear's portraits, 12 Nov.) Then their lesson. Seen once only.
-  - **His lesson:** the first time you come up beside his island, a little cutscene on a real board (the
-    same deal every time, its furnace stopped), each beat worked out by the real rules
-    (src/den-helium.ts, lessonPlan): the swap rule shown by one swap (a white up past a black), the rest
-    of it said; whites left, a white dragged as far left as it goes; the furnace's all-black column
-    burned; the next, mostly junk with one white in it, burned too: bang, "Oops. That happens sometimes.
-    Don't worry about it." Then "your go". Their line in their bubble, what it shows in plain words in the bar.
-    Space skips it; either way the still's yours after.
+  - **The bang (13 Nov: "the explosion needs to be more dramatic"):** funny, not grim (js/den/blast.js): a
+    flash on the screen, a fireball, sparks, a dark cloud that hangs about, copper, staves and shingles
+    flying and lying a while, the camera shaken if it's near; the still shakes hard, its head flies off and
+    lands back on, the copper's sooted black and comes back; they cower, then shrug. The opening's is the
+    biggest (OPENING_BANG); a white burned in play, "If white goes down, it should cause like that explosion
+    animation as well", the same, bigger the more whites went (worksFor).
+  - **Rum (13 Nov):** "some meaningful animation that happens if you start sending up the white ... Helium
+    should start, you know, distilling out some rum and filling some barrels". A column up with whites in
+    it runs rum from the spout into the cask, a measure a white, twice for a Crystal Clear (RUM, worksFor);
+    a full cask (16 measures) is capped, tipped and rolled onto the pile (3, 2, 1; past six, off behind it:
+    Cellar); they turn to tend it while it runs, and praise a Crystal Clear chain now and then.
+  - **Their lesson, step one only (13 Nov):** "we could tab through the steps and say, like, step one is
+    getting a few columns on the right-hand side that are about to burn completely free of white pieces
+    ... let's just really take it one step at a time." The first time you come up beside their island, a
+    little cutscene on a real board (the same deal every time, its furnace stopped, LESSON_SEED picked so
+    step one clears in a few drags), each beat worked out by the real rules (src/den-helium.ts,
+    lessonPlan): the swap rule shown by one swap (a white up past a black), the rest of it said; the
+    furnace's all-black column burned; the next, mostly junk with one white in it, burned too: bang,
+    "Oops. That happens sometimes. Don't worry about it." (what skipping step one does). Then step one,
+    "Step 1" in the bar (STEPS, only it built): every white walked out of the three columns next to the
+    fire (the bots' rescue), and why, the user's joke: "Otherwise the still goes bang. And I've already got
+    no eyebrows." Then "your go", step one the goal at the foot of the screen (whites to go), their line
+    when you've done it. Their line in their bubble, what it shows in plain words in the bar.
+  - **Its pace (13 Nov: "it's supposed to be a little cutscene, and it's like half a second"):** a line's
+    up at a reading pace, 3.2 s at the least (about 2.5 words a second); the opening's bang 3.5 s on its
+    own; what they do on the board starts 1.6 s into the line, 0.55 s a swap; a breath between beats
+    (PACE_LESSON, tested: no beat shorter than its reading time). Space, Enter or a click goes on once
+    you've read a line; Esc skips it all; either way the still's yours after. About two minutes in all.
   - **The still, yours:** a real session (the furnace running), played with the board's own keys and
-    mouse, the camera straight on to it; Esc leaves it (the furnace waits), Space off his island comes
-    back to it. The panel's distiller is Helium now, not the stand-in.
+    mouse, the camera straight on to it (on a wide screen the board a little left, them beside it); Esc
+    leaves it (the furnace waits), Space off their island comes back to it. The panel's distiller is
+    Helium now, not the stand-in.
   - **"Help, Helium" (H, or the button):** they read your board with the bots' planner (`advise`: the
     stage it's at and the routine it would play), say in one line what they'd do and why, naming the
     technique, in their voice ("The hook. Black and brown together, round the corner. My favourite."), the
     planner's own reason in the bar, and plays its drags on your board as a hand would, the furnace
     waiting while they do. A burn they do; a dismiss they only say (never ends your session for you).
-  - **His mishaps:** whenever a column burns with a white (or a burnt white) in it, the still goes bang
-    (soot and sparks out of its head, it shakes, he flinches) and he shrugs it off, his own line first,
-    then others. The humour's the maker's, never drink (that's Kikkit's).
-  - **He knows the others:** a big order of rum for Mischievious's next wedding, Kikkit at his stash
+    Their words where you can read them (13 Nov: "they are too far to the right for the help bubble to
+    really appear"): they stand just beside the board, turned to you, and their bubble's kept on the screen
+    and off the board (lineSpot): beside it on their side, or below or above it on a phone.
+  - **Their mishaps:** whenever a column burns with a white (or a burnt white) in it, the distillery blows
+    up (the bang, above) and they shrug it off, their own line first, then others. The humour's the
+    maker's, never drink (that's Kikkit's).
+  - **They know the others:** a big order of rum for Mischievious's next wedding, Kikkit at their stash
     again (src/lines/helium.ts). Not yet: the smuggling ring and the penguin's link to them, the coached
-    replay, a demonstration per technique.
+    replay, a demonstration per technique, the lesson's later steps.
 - **Port Decorum, an island under imperial control, sketched (11 Nov).** "start sketching out even just
   like, even if it's just an empty island or something where you can't interact yet, is just some island
   that's, say, under imperial control ... to create trading mechanics, looting mechanics, smuggling

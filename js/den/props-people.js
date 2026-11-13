@@ -79,6 +79,11 @@ export const IDLES = {
   giggle: (p, t) => { rest(p); p.arms.forEach((a, i) => a.rotation.set(-1.25, 0, (i ? -1 : 1) * 0.45)); p.body.position.y = 0.72 + Math.abs(Math.sin(t * 9)) * 0.035; },
   /** Cowering: hunched, hands up over the face, trembling. */
   cower: (p, t) => { rest(p); p.body.rotation.x = 0.25; p.arms.forEach((a, i) => a.rotation.set(-2.2, 0, (i ? -1 : 1) * 0.6 + Math.sin(t * 40) * 0.03)); },
+  /** A shrug: hands out, palms up, shoulders up and down: "happens" (Helium after a bang). */
+  shrug: (p, t) => { rest(p); const k = Math.max(0, Math.sin(t * 3)); p.arms.forEach((a, i) => a.rotation.set(-0.75, 0, (i ? -1 : 1) * (0.75 + k * 0.15))); p.body.position.y = 0.72 + k * 0.03; },
+  /** Busy at something in front: both hands working at it, turning a tap, knocking a bung in (Helium at
+      their cask). */
+  tend: (p, t) => { rest(p); p.arms.forEach((a, i) => a.rotation.set(-1.0 + Math.sin(t * 6 + i * 2) * 0.25, 0, (i ? -1 : 1) * 0.2)); p.body.rotation.x = 0.12; },
   /** Twisting a balloon: both hands together in front, wrists turning against each other (balloons.js). */
   twist: (p, t) => {
     rest(p);
@@ -145,6 +150,8 @@ export function person({
   let pace = { secs, gap, wait };
   const P = {
     p, idle, t: Math.random() * 10, yaw,
+    /** Its own bubble on the page (`bubble: 'page'`), for a scene that places it itself after show(). */
+    el,
     /** What it says, and when (src/chatter.ts). */
     chatter: null,
     /** Say its lines just now? (A scene can hush it a while.) */

@@ -1,10 +1,11 @@
 // Helium's island, out past the checkpoint by the smugglers' rocks (src/den-helium.ts; its squares
 // LAY.HELIUM in src/den-sail.ts), and Distilling at their still. Only the place's own look and its one
 // mechanic are here: the island, a palm, their lesson as a little cutscene the first time you come up off it,
-// then the still yours to play, "Help, Helium" while you do, and the still's bang when a white burns.
+// then the still yours to play, "Help, Helium" while you do (their line kept where you can read it), and
+// their distillery answering each column: it blows up when a white burns, and runs rum when whites go up.
 // Who's on it is config (src/den-helium.ts, HELIUM_CAST: their look, where they, their still and their board go;
 // their lesson's beats worked out on a real board, lessonPlan; their lines src/lines/helium.ts), placed through
-// the shared pieces: props-people.js's person(), furniture.js's still and Distilling's own board
+// the shared pieces: props-people.js's person(), distillery.js and Distilling's own board
 // (distill-board.js, the one look of the puzzle, src/distilling.ts its rules). Their help reads your board
 // with the bots' planner (src/distill-bots.ts, advise, through src/den-helium.ts's askHelium) and plays
 // its drags with the board's own hand (swapAt, hold, letGo), as distilling-test.html's bots do.
@@ -13,21 +14,23 @@
 // point (menus.js).
 import * as THREE from 'three';
 import {
-  HELIUM_CAST, HELIUM, HELIUM_STANDS, HELIUM_MOOR, HELIUM_ARRIVE, Visit, lessonGame, lessonPlan, lessonSecs, bangs, mishapLine, askHelium,
-  onHeliumLanding, inHeliumEarshot, heliumShore, opening,
+  HELIUM_CAST, HELIUM, HELIUM_STANDS, HELIUM_MOOR, HELIUM_ARRIVE, Visit, lessonGame, lessonPlan, lessonSecs, mishapLine, askHelium,
+  onHeliumLanding, inHeliumEarshot, heliumShore, opening, worksFor, praiseFor, Cellar, OPENING_BANG, lineSpot, PACE_LESSON, whitesOnFireSide,
 } from '../den-helium.js';
+import { LAY } from '../den-sail.js';
 import { Distilling } from '../distilling.js';
-import { PRAISE } from '../lines/helium.js';
+import { PRAISE, STEP_ONE } from '../lines/helium.js';
 import { readSecs } from '../den-dignity.js';
 import { PACE } from '../chatter.js';
 import { PIRATES } from '../den-look.js';
-import { scene, camera, mat, mesh, woodTex, V3, burst, keys, pirate } from './world.js';
+import { scene, camera, mat, mesh, woodTex, V3, keys, pirate } from './world.js';
 import { sail, seaX, seaZ, voices } from './sea.js';
 import { station } from './sail-station.js';
 import { outline, slab } from './isle.js';
 import { palm } from './wedding-scene.js';
 import { person } from './props-people.js';
 import { FURNITURE } from './furniture.js';
+import { distillery } from './distillery.js';
 import { distillBoard } from './distill-board.js';
 import { cine, cinePlay, cineEnd, bubble, bubbleAt } from './cine.js';
 
@@ -35,7 +38,7 @@ import { cine, cinePlay, cineEnd, bubble, bubbleAt } from './cine.js';
 const SAND = { y0: -0.4, h: 0.62 }, GROUND = SAND.y0 + SAND.h + 0.25;
 /* `on`: at the still, playing; `board`: Distilling's board on its stand (the lesson's, then yours); `hand`:
    their drags being played on it (lesson or help), a swap at a time; `note`: what the bar says, a while. */
-export const helium = { W: null, visit: new Visit(), play: null, on: false, board: null, hand: [], handT: 0, handDone: null, bangs: 0, note: '', noteT: 0, shake: 0, cower: 0 };
+export const helium = { W: null, visit: new Visit(), play: null, on: false, board: null, hand: [], handT: 0, handDone: null, bangs: 0, note: '', noteT: 0, cower: 0, shrug: 0, cellar: new Cellar() };
 
 function build() {
   const g = new THREE.Group(), sand = mat('#e6cf96', { roughness: 1 }), wet = mat('#c9ad78', { roughness: 1 });
@@ -61,6 +64,13 @@ function build() {
     g.add(piece.g);
     return piece;
   });
+  // Their distillery, its front turned the way their board faces (to the water off the island's left).
+  const D = distillery(), dx = seaX(C.distillery.at[0]), dz = seaZ(C.distillery.at[1]);
+  D.g.position.set(dx, GROUND, dz);
+  D.g.rotation.y = Math.atan2(seaX(C.facing[0]) - dx, seaZ(C.facing[1]) - dz);
+  // (what flies off it lands on their sand, or sinks in the sea)
+  D.ground = (x, z) => (H_LAND.some(([c, r]) => Math.abs(x - seaX(c)) < 2.3 && Math.abs(z - seaZ(r)) < 2.3) ? GROUND : -1);
+  g.add(D.g);
   // Their board's stand: a wooden back and two legs, its face toward the water off their island's left.
   const B = C.board, bx = seaX(B.at[0]), bz = seaZ(B.at[1]);
   const yaw = Math.atan2(seaX(C.facing[0]) - bx, seaZ(C.facing[1]) - bz), tall = B.size * 600 / 450;
@@ -80,8 +90,9 @@ function build() {
   const boardAt = V3(bx, GROUND + B.lift + tall / 2, bz);
   voices.add('helium', { c: HELIUM_STANDS.c, r: HELIUM_STANDS.r, earshot: HELIUM.EARSHOT });
   scene.add(g);
-  return { g, them, props, still: props[0], boardAt, yaw, size: B.size };
+  return { g, them, props, distillery: D, boardAt, yaw, size: B.size, tall };
 }
+const H_LAND = LAY.HELIUM.LAND;
 
 /** Built the first time the sea's drawn (sailing.js), seen from afar too; their board up on its stand, the
     lesson's deal waiting on it. */
@@ -95,27 +106,31 @@ export function heliumWorld() {
 // ---------- the board on their stand ----------
 function newBoard(game, yours) {
   const W = helium.W;
-  if (helium.board) helium.board.dispose();
-  helium.hand = []; helium.handDone = null;
+  if (helium.board) helium.board.dispose();  helium.hand = []; helium.handDone = null;
   helium.board = distillBoard({
     game, at: W.boardAt, yaw: W.yaw, size: W.size,
+    // Each column gone, their distillery answers (src/den-helium.ts, worksFor): a white burned, it blows up;
+    // whites sent up, rum runs off into the cask, and full casks go on the pile.
     onColumn: (c, finished) => {
-      if (bangs(c)) bang(yours);
-      else if (yours && c.message === 'clear' && c.chain >= 2 && Math.random() < 0.35) say(PRAISE.clear[c.chain % PRAISE.clear.length]);
+      const w = worksFor(c);
+      if (w.kind === 'bang') bang(yours, w.size);
+      else if (w.kind === 'rum') {
+        W.distillery.pour(helium.cellar.pour(w.measures));
+        const line = yours && praiseFor(c.chain, Math.random());
+        if (line) say(line);
+      }
       if (yours && finished) say(PRAISE.finished);
     },
   });
   scene.add(helium.board.group);
 }
-/** The still goes bang: soot and sparks out of its head, it shakes, they flinch; and, at your board, their
-    line for it (in their lesson, the next beat says it). */
-function bang(yours) {
-  const S = helium.W.still.g, at = S.getWorldPosition(V3(0, 0, 0)).add(V3(0, 1.6, 0));
-  burst(at, '#2b2622', 26, 4);
-  burst(at, '#ff9a3a', 14, 5);
-  burst(at, '#c4743a', 10, 6);   // (bits of copper)
-  helium.shake = 0.7;
+/** Their distillery blows up (distillery.js: the flash, the fireball, smoke, bits flying, the still's head
+    off and back on); they flinch, then shrug it off; and, at your board, their line for it (in their lesson,
+    the next beat says it). */
+function bang(yours, size = 1) {
+  helium.W.distillery.bang(size);
   helium.cower = 1.1;
+  helium.shrug = 0;
   helium.W.them.setIdle('cower');
   if (yours) say(mishapLine(helium.bangs++));
   else helium.bangs++;
@@ -129,76 +144,97 @@ function say(text) {
 const noteFor = (text, secs = 9) => { helium.note = text; helium.noteT = secs; };
 
 /** Drags played as a hand would (a bot's, distilling-test.html's): the piece held and swept along, a swap
-    as it passes each place, a breath between drags; `done` once they're played. */
-function play(drags, done) {
+    as it passes each place, a breath between drags; `done` once they're played. `pace`: how long it holds a
+    piece before the first swap, each swap, and the breath between drags (their help's quick hand, or the
+    lesson's slower one, src/den-helium.ts's PACE_LESSON). */
+const HELP_HAND = { HOLD: 0.35, SWAP: 0.25, BETWEEN: 0.5 };
+function play(drags, done, pace = HELP_HAND) {
   helium.hand = drags.map((d) => ({ x: d.x, y: d.y, ways: [...d.ways] }));
-  helium.handT = 0.35;
+  helium.handPace = pace;
+  helium.handT = pace.HOLD;
   helium.handDone = done;
   if (helium.hand[0]) helium.board.hold(helium.hand[0].x, helium.hand[0].y);
 }
 function handTick(dt) {
-  const B = helium.board;
+  const B = helium.board, P = helium.handPace ?? HELP_HAND;
   if (!helium.hand.length || !B) return;
   helium.handT -= dt;
   if (helium.handT > 0 || !B.game.movable) return;
   const d = helium.hand[0], to = d.ways.length ? B.swapAt(d.x, d.y, d.ways.shift()) : null;
   if (to) { d.x = to[0]; d.y = to[1]; B.hold(...to); }
-  helium.handT = 0.2;   // (a swap's slide, quick as their hand)
+  helium.handT = P.SWAP;   // (a swap's slide, at their hand's pace)
   if (to && d.ways.length) return;
   // That drag's done (or it couldn't go on): let go, a breath, and the next one picked up.
   helium.hand.shift();
   B.letGo();
-  helium.handT = 0.5;
+  helium.handT = P.BETWEEN;
   if (helium.hand[0]) B.hold(helium.hand[0].x, helium.hand[0].y);
   else { const done = helium.handDone; helium.handDone = null; done?.(); }
 }
 
 // ---------- their lesson: a little cutscene ----------
-/* Beat by beat (src/den-helium.ts, lessonPlan): their line in their bubble, the note in the bar, then after a
-   moment what they do on the board (a drag, played swap by swap; a burn). Each beat holds till its line's
-   read and the board's still. Space or Esc skips it (cine.js); either way, the still's yours after.
+/* Beat by beat (src/den-helium.ts, lessonPlan): their line in their bubble, the note in the bar, then once
+   you've had a moment with the line what they do on the board (a drag, played swap by swap; a burn). Each
+   beat holds till its line's read and the board's still, then a breath; its pace is src/den-helium.ts's
+   PACE_LESSON (the user, 13 Nov: it went by "like half a second"). Space, Enter or a click goes on once
+   you've read the line; Esc skips the lot (cine.js); either way, the still's yours after. From the mishap on
+   it's step one (STEPS), said in the bar.
    First, their opening (src/den-helium.ts, opening): the still goes bang as you come up, and they shrug it
    off; your own lines in it (`who: 'you'`) over your head on the sloop, kept on the screen. It's only ever
    seen once: their lesson plays the first time you come up off their island, never again. */
 function lessonPlay() {
-  const W = helium.W;
+  const W = helium.W, P = PACE_LESSON;
   sail.helm.moor(HELIUM_MOOR);
   sail.riding = false;
   helium.on = false;
   newBoard(lessonGame(), false);
-  const B = helium.board, beats = [...opening(), ...lessonPlan(B.game.cols)];
+  const B = helium.board, beats = [...opening(), ...lessonPlan()];
   const them = W.them.p.g.getWorldPosition(V3(0, 0, 0)).add(V3(0, 1.9, 0)), at = W.boardAt.clone();
   const look = them.lerp(at, 0.6), dist = W.size * 2.7;
-  let i = -1, t = 0, need = 0, acted = true;
+  let i = -1, t = 0, need = 0, acted = true, gap = 0, on = false;
   W.them.lookAt = { x: look.x + Math.sin(W.yaw) * dist, z: look.z + Math.cos(W.yaw) * dist };   // (to the camera, their audience)
+  const goOn = () => { if (i >= 0 && t >= P.READ_FIRST) on = true; };
+  const click = (e) => { if (e.button === 0) goOn(); };
+  addEventListener('pointerdown', click);
   const c = {
     cam: { look, dist, tilt: 0.12, yaw: W.yaw },
+    started: performance.now(),
+    /** Space or Enter: on to the next line, once this one's been up a moment (Esc still skips: cine.js). */
+    key(k) { if (k === ' ' || k === 'enter') { goOn(); return true; } return false; },
     tick(dt) {
       t += dt;
       // (not till the camera's flown out to their island: the bang's the first thing to see)
       if (i < 0 && t < 12 && camera.position.distanceTo(look) > dist * 1.6) return;
       const b = beats[i];
-      if (b && !acted && t >= 1.1) {
+      if (b && !acted && (t >= P.ACT_AFTER || on)) {
         acted = true;
-        if (b.act.kind === 'drag') play([b.act], null);
+        if (b.act.kind === 'drag') play([b.act], null, P);
+        else if (b.act.kind === 'drags') play(b.act.drags, null, P);
         else if (b.act.kind === 'burn') B.burn();
       }
-      if (i >= 0 && (t < need || !acted || helium.hand.length || B.busy())) return;
+      if (i >= 0) {
+        if ((t < need && !on) || !acted || helium.hand.length || B.busy()) return;
+        if ((gap += dt) < P.GAP) return;
+      }
       i++;
       if (i >= beats.length) { cineEnd(false); return; }
       const n = beats[i];
       if (n.who === 'you') { you.text(n.says, lessonSecs(n.says)); W.them.hush(); }
       else if (n.says) say(n.says);
-      if (n.act.kind === 'bang') bang(false);
-      noteFor(n.note, 99);
-      t = 0; need = lessonSecs(n.says); acted = n.act.kind === 'none';
+      else W.them.hush();
+      if (n.act.kind === 'bang') bang(false, OPENING_BANG);
+      noteFor(n.step ? `Step ${n.step}: ${n.note.replace(/^Step \d+: /, '')}` : n.note, 99);
+      t = 0; gap = 0; on = false; need = lessonSecs(n.says); acted = n.act.kind === 'none' || n.act.kind === 'bang';
     },
-    end() { helium.play = null; helium.hand = []; W.them.lookAt = null; atStill(true); },
+    end() {
+      removeEventListener('pointerdown', click);
+      helium.lessonSecs = (performance.now() - c.started) / 1000;   // (how long it ran, for a check)
+      helium.play = null; helium.hand = []; W.them.lookAt = null; atStill(true);
+    },
   };
   helium.play = c;
   cinePlay(c);
-}
-/* Your own line over your head on the sloop, a few seconds, kept on the screen (you may be just out of the
+}/* Your own line over your head on the sloop, a few seconds, kept on the screen (you may be just out of the
    shot). */
 const you = {
   el: null, t: 0, at: V3(0, 0, 0),
@@ -221,7 +257,7 @@ const free = () => sail.on && !cine && !sail.helm.cur?.via && !sail.helm.gusts?.
 // ---------- the still, yours ----------
 /** At the still, a board of your own: a fresh deal if there's none yet (or the last's finished). */
 function atStill(fresh = false) {
-  if (fresh || !helium.board || helium.board.game.finished || helium.board.game.timer === false) newBoard(new Distilling(Math.random), true);
+  if (fresh || !helium.board || helium.board.game.finished || helium.board.game.timer === false) { newBoard(new Distilling(Math.random), true); helium.stepDone = false; }
   helium.board.paused = false;
   helium.on = true;
   keys.clear();
@@ -301,13 +337,19 @@ export function heliumUp(button = 0) { if (helium.on) helium.board?.release(butt
 export function heliumCam() {
   if (!helium.on || !helium.board) return null;
   // (pulled back and the board a little low, clear of the den's panel at the top left)
-  const v = helium.board.camView(camera), d = v.from.clone().sub(v.look).normalize();
-  return { look: v.look.clone().add(V3(0, 0.3, 0)), dist: v.dist * 1.35, tilt: Math.asin(d.y), yaw: Math.atan2(d.x, d.z) };
+  // (on a wide screen, the board a little left of the middle: Helium beside it on the right, their cask and
+  // the distillery behind, their line in the room there)
+  const v = helium.board.camView(camera), d = v.from.clone().sub(v.look).normalize(), W = helium.W;
+  const aside = camera.aspect >= 1.5 ? W.size * 0.32 : 0, right = V3(Math.cos(W.yaw), 0, -Math.sin(W.yaw));
+  return { look: v.look.clone().add(V3(0, 0.3, 0)).addScaledVector(right, aside), dist: v.dist * 1.35, tilt: Math.asin(d.y), yaw: Math.atan2(d.x, d.z) };
 }
 export function heliumPrompt() {
   if (!sail.on || !helium.W) return '';
   if (helium.on) {
-    const B = helium.board, lead = helium.noteT > 0 && helium.note ? helium.note : B.game.finished ? 'Finished! Esc, then Space for another batch' : B.prompt();
+    // (step one the goal, and how far off it you are: src/den-helium.ts, STEPS)
+    const B = helium.board, left = whitesOnFireSide(B.game.cols);
+    const goal = left ? `${STEP_ONE.goal}: ${left} to go` : `Step 1 done: the fire's side is clear of white`;
+    const lead = helium.noteT > 0 && helium.note ? helium.note : B.game.finished ? 'Finished! Esc, then Space for another batch' : `${goal} · drag to swap · X: burn`;
     return `${lead} · H: Help, Helium · Esc: leave the still`;
   }
   const p = sail.helm.pose;
@@ -325,21 +367,53 @@ export function heliumTick(dt) {
     // board: their lesson.
     if (helium.visit.arrive(onHeliumLanding(p.c, p.r), free() && sail.helm.slot < 0 && !station.on)) lessonPlay();
   }
-  if (helium.play) bar(`${helium.note} · Space: skip`);
+  if (helium.play) bar(`${helium.note} · Space: go on · Esc: skip`);
   handTick(dt);
   you.tick(dt);
   helium.board?.tick(dt);
   helium.noteT = Math.max(0, helium.noteT - dt);
-  // The bang: the still shakes, they flinch, then they're back at it.
-  if (helium.shake > 0) {
-    helium.shake -= dt;
-    const S = W.still.g, k = Math.max(0, helium.shake) * 0.08;
-    S.rotation.z = (Math.random() - 0.5) * k; S.rotation.x = (Math.random() - 0.5) * k;
-    if (helium.shake <= 0) S.rotation.set(0, S.rotation.y, 0);
-  }
-  if (helium.cower > 0 && (helium.cower -= dt) <= 0) W.them.setIdle(HELIUM_CAST.them.idle);
+  // The bang: they flinch, then shrug it off, then they're back at it. Rum running at your still: they tend
+  // the cask, turned to it.
+  const tending = helium.on && !helium.play && !helium.hand.length && W.distillery.busy();
+  if (helium.cower > 0) { if ((helium.cower -= dt) <= 0) { helium.shrug = 1.6; W.them.setIdle('shrug'); } }
+  else if (helium.shrug > 0) { if ((helium.shrug -= dt) <= 0) W.them.setIdle(HELIUM_CAST.them.idle); }
+  else W.them.setIdle(tending ? 'tend' : HELIUM_CAST.them.idle);
+  // (at the still, turned to you, at the board; tending, to the cask)
+  if (!helium.play) W.them.lookAt = tending ? W.distillery.caskAt() : helium.on ? camera.position : null;
+  // Step one done, at your still: the three columns next to the fire clear of white. They say so, once a batch.
+  if (helium.on && !helium.stepDone && helium.board?.game.movable && !whitesOnFireSide(helium.board.game.cols)) { helium.stepDone = true; say(STEP_ONE.done); }
   W.them.tick(dt);
+  placeLine();
+  W.distillery.tick(dt);
   for (const o of W.props) o.tick?.(dt);
+}
+
+/* Their line where you can read it (the user, 13 Nov: "too far to the right for the help bubble to really
+   appear"): at the still and in their lesson, kept on the screen and off the board (src/den-helium.ts,
+   lineSpot), on a phone above or below it. */
+const corners = [V3(0, 0, 0), V3(0, 0, 0), V3(0, 0, 0), V3(0, 0, 0)];
+function placeLine() {
+  const W = helium.W, el = W.them.el;
+  if (!el || el.style.display === 'none' || !(helium.on || helium.play)) { if (el) el.style.maxWidth = ''; return; }
+  const right = V3(Math.cos(W.yaw), 0, -Math.sin(W.yaw)), half = W.size / 2;
+  const box = { l: Infinity, t: Infinity, r: -Infinity, b: -Infinity };
+  corners.forEach((p, i) => {
+    p.copy(W.boardAt).addScaledVector(right, i % 2 ? half : -half).add(V3(0, i < 2 ? W.tall / 2 : -W.tall / 2, 0)).project(camera);
+    const x = (p.x + 1) / 2 * innerWidth, y = (1 - p.y) / 2 * innerHeight;
+    box.l = Math.min(box.l, x); box.r = Math.max(box.r, x); box.t = Math.min(box.t, y); box.b = Math.max(box.b, y);
+  });
+  const head = { x: parseFloat(el.style.left), y: parseFloat(el.style.top) };
+  if (!Number.isFinite(head.x) || !Number.isFinite(head.y)) return;
+  // (narrower, a few more lines, to fit beside the board on their side when there's a strip of room there)
+  // (its padding and border are on top of its max-width: 32px)
+  const side = innerWidth - box.r - 16;
+  el.style.maxWidth = `${Math.min(380, innerWidth - 24, side >= 170 && head.x > box.r - 40 ? side : 380) - 32}px`;
+  // (clear of the den's panel at the top, and the bar and the help button at the foot, wherever they are)
+  const hud = document.querySelector('.hud')?.getBoundingClientRect(), foot = Math.min(btn?.getBoundingClientRect().top || innerHeight, document.getElementById('map-hint')?.getBoundingClientRect().top || innerHeight);
+  const top = hud && hud.bottom > 0 && hud.bottom < innerHeight / 2 ? hud.bottom + 6 : 70;
+  const p = lineSpot(head, { w: el.offsetWidth, h: el.offsetHeight }, box, { w: innerWidth, h: innerHeight }, { top, bottom: innerHeight - foot + 6 });
+  el.style.left = `${p.x}px`;
+  el.style.top = `${p.y}px`;
 }
 
 /** A fresh voyage: their lesson not seen yet, the still left, the lesson's deal back on their board. */
@@ -347,7 +421,8 @@ export function heliumReset() {
   helium.visit = new Visit();
   if (helium.play && cine === helium.play) cineEnd(true);
   leave();
-  if (helium.W) { newBoard(lessonGame(), false); helium.board.paused = true; }
+  helium.cellar = new Cellar();
+  if (helium.W) { helium.W.distillery.reset(); newBoard(lessonGame(), false); helium.board.paused = true; }
 }
 
 /** A starting point (menus.js): at sea, come up beside their island, so their lesson begins. */

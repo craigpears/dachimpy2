@@ -41,10 +41,6 @@ export const LESSON = {
     says: 'Brown past white, black past brown. Round and round. Can\'t swap it straight back, mind.',
     note: 'White over black, brown over white, black over brown: like rock, paper, scissors.',
   },
-  left: {
-    says: 'Whites go left, away from the fire. Junk goes right, toward it.',
-    note: 'Whites left, junk right: drag a white along, swap after swap, and the junk steps the other way.',
-  },
   furnace: {
     says: 'Furnace takes the right-hand column. All junk? Burn it now. X.',
     note: 'The furnace burns the right-hand column every 15 seconds, or now on X. More blacks than whites and it burns; the rest goes up into the flask.',
@@ -54,9 +50,24 @@ export const LESSON = {
     note: 'A white in a column that burns is lost: burnt whites come back later, scorched, and spoil a column.',
   },
   yours: {
-    says: 'Right, your go. H if you want me. I\'ll be here. Probably.',
-    note: 'Your go: whites left, junk right, burn the junk. H, or the button: Help, Helium.',
+    says: 'Right, your go. Keep those three clear of white. H if you want me. I\'ll be here. Probably.',
+    note: 'Your go: keep the three right-hand columns clear of white, and burn them once they\'re all junk. H: Help, Helium.',
   },
+} as const;
+
+/** Step one, the first of the puzzle's steps (src/den-helium.ts, STEPS), after the mishap shows what comes of
+    skipping it: the three columns next to the fire cleared of every white. The user (13 Nov): "step one is
+    getting a few columns on the right-hand side that are about to burn completely free of white pieces ...
+    because otherwise, yeah, the furnace blows up and, you know, I've already got no eyebrows." `says` as it
+    starts, `clear` as they drag the whites out, `why` after, `note` in the bar, `done` when you've cleared
+    them yourself, `goal` in the bar while you play. */
+export const STEP_ONE = {
+  says: 'Which is step one, really. The three columns next to the fire: no whites in them. None.',
+  clear: 'Whites go left, away from the fire. Walk them out, swap by swap. Junk steps the other way.',
+  why: 'Otherwise the still goes bang. And I\'ve already got no eyebrows.',
+  note: 'Step 1: clear every white out of the three right-hand columns, the next to burn.',
+  done: 'There. Step one. Nothing on the fire\'s side worth losing.',
+  goal: 'Step 1: clear the whites out of the 3 right-hand columns',
 } as const;
 
 /** A column burns with a white in it (the still goes bang): the first time, and then any of these. The
@@ -141,8 +152,9 @@ export const CHARACTER: Character = {
     { when: 'Their lesson begins, after their opening', says: GREET },
     {
       when: 'Their opening lesson at the still: in their bubble (says) and in the bar at the foot of the screen (note), beat by beat', says: LESSON,
-      each: { rule: 'They swap a white up past a black', ruleAfter: 'The rest of the rule', left: 'They drag a white left', furnace: 'They burn the all-black column', mishapSetup: 'They burn the next, a white in it (their mishap follows)', yours: 'Handing you the board' },
+      each: { rule: 'They swap a white up past a black', ruleAfter: 'The rest of the rule', furnace: 'They burn the all-black column', mishapSetup: 'They burn the next, a white in it (their mishap follows)', yours: 'Handing you the board, step one the goal' },
     },
+    { when: 'Their lesson\'s step one, after the mishap: as it starts (says), as they drag the whites out of the three columns next to the fire (clear), why (why), in the bar (note); when you\'ve cleared them yourself (done); your goal in the bar while you play (goal)', says: STEP_ONE },
     { when: 'A column burns with a white in it, and the still goes bang: the first time the first, then any', says: MISHAP },
     { when: '"Help, Helium" while you play: by the technique they\'d play on your board now (then they play it)', says: HELP },
     { when: '"Help, Helium" when it isn\'t a drag', says: HELP_ELSE },
