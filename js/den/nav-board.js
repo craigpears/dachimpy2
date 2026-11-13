@@ -339,7 +339,9 @@ export function navBoard(o = {}) {
 
   // Begin showing a stage.
   const begin = (st) => {
-    b.prevTurn = st.kind === 'turn' && b.lastKind === 'turn' && b.time - (b.endedAt ?? -1) < 0.05;   // (straight on from a turn just ended) b.stage = st; b.t = 0; b.T = TIME[st.kind];
+    // (straight on from a turn just ended)
+    b.prevTurn = st.kind === 'turn' && b.lastKind === 'turn' && b.time - (b.endedAt ?? -1) < 0.05;
+    b.stage = st; b.t = 0; b.T = TIME[st.kind];
     if (st.kind === 'turn') b.ringGlow[st.ring] = 1;
     if (st.kind === 'booch') {
       b.dropFrom.shift();
