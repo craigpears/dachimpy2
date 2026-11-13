@@ -293,7 +293,7 @@ the rubble settle back after half a minute.
   lit buoy. Whether it marks the shortcuts and their puzzles reverses "shortcuts are never marked" above,
   so that's the user's call. Never the starlit door. Shares its drawing with the course editor's 2D view.
 
-- **Planning your route, then puzzling it through (agreed 12 Nov, to build):** "if we are supposed to be
+- **Planning your route, then puzzling it through (agreed 12 Nov; built 13 Nov, as below):** "if we are supposed to be
   puzzling as you're going through as a person, some way of like pre-planning your route through the
   course ... there's no way you're going to get through this ... you should be able to, like, say, yeah, go at
   least halfway around the board and then be sailing to help speed it up or carping once you get to the
@@ -330,6 +330,77 @@ the rubble settle back after half a minute.
     - **Shooting:** with a plan hidden, a rival can't tell where you'll stop, but every stop is at a known
       spot, so the spots are where you'd lie in wait. For the simulation to settle (§8), with the guns
       firing when one's loaded and a rival's in range.
+  - **One plan system for every racer (the user, 13 Nov, correcting the brief):** "it should all be in the same
+    thing. So if you're watching the race, you should I'm guessing be able to see what people's plans are,
+    because that keeps it interesting ... online, local should all be the same." So your sloop, your rivals, the
+    simulation's bots, the race watched and racers online all race by a plan, by the one module.
+  - **As built (13 Nov):** `src/race-plan.ts` (tested in `tests/race-plan.test.ts`); its strip and the pilot's
+    wiring `js/den/race-plan.js`.
+    - **The legs and their choices** (`LEGS`): leg 1 the long way, the wreck then bribe the gate, rush the gate
+      (a Quad), shoot the gate quiet (Gunnery), run the gate; leg 2 the long way, the headwind gap (rowing), the
+      starlit door (Navigation), the Double's gap; leg 3 the long way, the whirlpools (a Vegas), the rocks (her
+      broadsides), the driftwood (Foraging); leg 4 the long way (weaving the zigzag, no puzzle), hop the zigzag
+      (a Double a headwind), the locks (Bilge); leg 5 the long way, the crane (Carpentry), the Triple's gap. It
+      starts as the long way everywhere (`longPlan`); a choice not of that leg's is the long way (`cleanPlan`).
+      **The zigzag a choice, not stops on the long way (a departure from the agreed text above):** as stops,
+      sailed by the pilot with a Double thrown the moment she's held, hopping the zigzag came out no quicker than
+      weaving (223.6 s home against 221.7: each stop's breather and the gust's beat eat what the hop saves), so
+      making every racer on the long way stop four times would only slow the long way. Hopping it is leg 4's own
+      choice instead, a stop behind each headwind on the row she's sailing (they alternate rows, so two: the
+      others aren't in her way), and a Double broken on the way in still lines her up and hops one without a
+      stop. The simulation's long-way bots keep hopping it (their route's plan chooses it), as before.
+    - **The strip:** down the screen's right-hand edge, on the line (under the starter's card) and in the race:
+      "Your plan", the pilot's switch, what it's doing ("The Double's gap · a Double hops her over"), and a
+      button a leg still to come, the one she's on lit. A click (a tap) is that leg's next choice, a right click
+      the one before; on the press, never focused, so the board's keys and Space stay the board's. On a phone,
+      narrower, under the race's bar, names only.
+    - **The pilot** (`Pilot`): each of the race's steps it puts in her next moves with `Helm.put`, as yours are
+      (so online they're written down as yours are), read off the pilot's chart (`PilotChart`, which now takes a
+      way to face at the pin too: a stop that needs her lined up) on a copy of her own sea with every way through
+      a spit shut but the one she's taking. Where to head is the same rule as the bots': the long way's next pin
+      (`LONG_PINS`, `pinOf`), or her plan's next shortcut's way in (`goalOf`, `WAY_IN`). After a gust it lets the
+      rest of her turn go (`Helm.letGo`) and goes on from where it left her. At the gun it puts the Sailing board
+      up: your hands are on it, every clear a gust along the plan.
+    - **The stops** (`STOPS`): behind the trade wind back up the course facing along leg 3 (on the long way);
+      behind each of the zigzag's headwinds on her row, facing along leg 4 (hopping it; one she can't line up
+      for, she weaves by); in front of the gate facing in (the Quad); off the gate's first gun (shoot
+      it quiet, Q, port); the wreck's notch (Treasure Haul) then the gate (paying); the headwind gap's way in
+      (the oars run out; shipped again once she's out on leg 3); the Double's gap; the starlit door's rock;
+      the whirlpools' mouth facing in; off the rocks facing along leg 3 (Q, port; Gunnery up if she has no shot);
+      the driftwood's notch; in the up lock (its Bilge on the quay comes up as ever); the crane's ledge; the
+      Triple's gap. At each she's held, the board put up once as she comes to rest (Space pressed for her at the
+      notches, the rock and the gate); put away, it stays away (Space as ever). She goes on once it's done: a gust
+      over, the lock pumped, the coins aboard, the driftwood cleared, the rocks down, the door open (through it
+      she goes), the crane built (over she swings).
+    - **Held at a hop** (`holds`): at a hop's stop a chain too small for it (a clear behind the trade wind back, a
+      Triple at the gate) doesn't carry her into the wind she's lined up on: "Held here for the hop: it takes a
+      Double". The pilot's holding her, as agreed. Not at the whirlpools' mouth: their loop back to it is their
+      own price.
+    - **Put by:** a shortcut whose way in no sailing gets her to from where she is (the wreck's notch from most of
+      the line: §8) is put by and her plan says so, the long way there (the gate run, for the bribe), with a toast.
+      The bots do the same.
+    - **Taking the helm:** W A D or a click on the sea, and her own moves or pin are sailed (the pilot's let go);
+      once they're played out the pilot carries on from wherever she is. T, or the strip's Pilot button, turns it
+      off (the helm's yours all race) and on again.
+    - **The bots race by plans** (`src/race-sim.ts`): a route is a named plan (`ROUTES`, `planned`), its
+      shortcuts and the gate's way the plan's (`cutsOf`, `gapOf`); each bot has her own copy and changes it when
+      she gives a shortcut up (waited too long, a Vegas that won't come off), puts one by she can't sail to, or
+      (cautious) passes an exposed one with someone close behind (`change`, `fallback`). Where she heads is the
+      plan's rule, her way in the plan's. Raced against the simulation before plans, race for race (40 seeded
+      races of four), every time and place came out the same: the balance test's numbers don't move.
+    - **Watched:** the bar shows the followed racer's plan, the legs still to come with her choice on each (the
+      leg she's on lit), and anyone's change of plan as it happens, for eight seconds ("Kikkit changes her plan:
+      leg 3, the whirlpools → the long way"; `Watch.plan`, `planChange`).
+    - **Online:** her plan goes through the room like any other action (`ActKind` 'plan', at the gun and at each
+      change; and 'letGo'), kept in the race's record and replayed (`PlayerSea.plans`, `plan()`), never sent on
+      to the other racers (the room keeps actions only in its record; tested). The room has no watchers yet, so
+      nobody else sees a plan live; a replay viewer would.
+    - **Left open:** the bribe's wreck is out of sailing's reach from most of the line (§8), so the pilot puts it
+      by there (a player who wants the bribe from there would row); hopping the zigzag by stops saves nothing
+      over weaving even with Doubles ready (above: for the user, whether its headwinds want moving, or the hop
+      left to Doubles thrown on the way in); shooting a stopped
+      racer is unchanged (§6), and whether bots should lie in wait at the known stops is still for the
+      simulation (§8). Bots don't change plans of their own accord mid-race beyond giving up and putting by.
 
 ## 6. Racing each other: position and risk
 
@@ -1172,6 +1243,9 @@ check, a share link, and the den's own race for 3D.
 
 ## 13. Where it lives
 
+- **Your plan (13 Nov, §5):** `src/race-plan.ts` (the legs and their choices, every racer's; where the pilot
+  heads, `goalOf`, the ways in, `WAY_IN`; the stops and the `Pilot` that sails you by it), tested in
+  `tests/race-plan.test.ts`; its strip and wiring `js/den/race-plan.js`.
 - **The race's rules:** `src/den-race.ts` (the line and your spot, the clock, the snakes, the buoys, the
   finish line, the barrier). Its course is `LAY.RACE` in `src/den-sail.ts`, measured by
   `tools/race-measure.mjs`. Its field of racers (several on one course, first come first served, shooting

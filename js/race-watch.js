@@ -34,10 +34,13 @@ import { Field, FIELD, courseSea } from './den-racers.js';
 import { WATCHED } from './den-rivals.js';
 import { sail, route, style, SIM } from './race-sim.js';
 import { SAILOR } from './race-sailor.js';
+import { cutsOf, optionOf } from './race-plan.js';
 import { LOCK } from './den-lock.js';
 import { PATCH } from './den-patch.js';
 const RC = LAY.RACE;
 export const WATCH = {
+    /** Seconds a racer's change of plan is said on the bar. */
+    CHANGED: 8,
     /** Seconds between the drops of a Sailing board, by skill: the racers' own pace (src/race-sailor.ts). Under
         way it's her very board (the simulation's sailor, `sailor`), at her own pace; this is a board's at a stop. */
     DROP: SAILOR.DROP,
@@ -157,6 +160,11 @@ const CARRIED = {
     crane: 'hauled over the neck by the crane', triple: 'hopping the gap on her Triple', zigzag: 'hopping the zigzag\'s headwinds',
     door: 'sailing the long way',
 };
+/** A change of plan, said: "Tzz changes her plan: leg 4, the locks → the long way, weaving". */
+export function planChange(name, c) {
+    const a = optionOf(c.leg, c.from)?.name ?? c.from, b = optionOf(c.leg, c.to)?.name ?? c.to, lc = (s) => s.replace(/^The /, 'the ');
+    return `${name} changes her plan: leg ${c.leg + 1}, ${lc(a)} → ${lc(b)}`;
+}
 /** What a racer's up to, as the bar says it. `next`: the next shortcut her route takes, if any. */
 export function doing(x, next, home) {
     if (home !== null)
@@ -237,10 +245,21 @@ export class Watch {
         const x = this.info(i), b = this.board(i);
         return x && b?.puzzle === 'sailing' && x.mode === 'sail' ? this.run?.sailor(i) ?? null : null;
     }
-    /** The next shortcut her route takes from where she's got to, if any. */
+    /** The next shortcut her plan takes from where she's got to, if any. */
     nextCut(i) {
-        const done = this.info(i)?.done ?? [];
-        return this.routes[i].find((id) => !done.includes(id)) ?? null;
+        const x = this.info(i), done = x?.done ?? [];
+        return (x ? cutsOf(x.plan) : this.routes[i]).find((id) => !done.includes(id)) ?? null;
+    }
+    /** Her plan (13 Nov: "if you're watching the race, you should ... be able to see what people's plans are,
+        because that keeps it interesting"): each leg still to come and her choice on it, the one she's on first;
+        and her last change to it, while it's fresh (WATCH.CHANGED seconds). */
+    plan(i) {
+        const x = this.info(i), r = this.field.racers[i], plan = x?.plan ?? route(this.racers[i].racer.route).plan;
+        const from = r.state === 'finished' ? plan.length : Math.min(plan.length, Math.max(0, r.leg));
+        const legs = plan.slice(from).map((id, k) => { const o = optionOf(from + k, id); return { leg: from + k + 1, name: o.name, puzzle: o.puzzle, now: k === 0 }; });
+        const c = x?.changes[x.changes.length - 1];
+        const changed = c && this.field.t - c.t < WATCH.CHANGED ? planChange(r.name, c) : '';
+        return { legs, changed };
     }
     /** Everyone's place: those home by their times, then the rest by how far round they've got. */
     standings() {

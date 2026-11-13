@@ -1484,6 +1484,13 @@ export class Helm {
   }
   /** Take back the last move you put in. */
   unput(): Move | undefined { return this.mine.pop(); }
+  /** A gust's carrying her somewhere the moves put in weren't for (the planned race's pilot: src/race-plan.ts):
+      the moves put in let go, and the rest of the turn after the move she's on, so she goes on from where it
+      leaves her (as the race's bots do: src/race-sim.ts). */
+  letGo() {
+    this.mine = [];
+    if (this.slot >= 0) { this.turn = this.turn.slice(0, this.slot + (this.cur ? 1 : 0)); if (this.slot >= this.turn.length) { this.turn = []; this.slot = -1; } }
+  }
   /** Pull up the pin and forget your moves: she stops when this turn's done (or straight away,
       if she's waiting at a lock). */
   stop() {

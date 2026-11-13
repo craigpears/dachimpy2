@@ -2710,6 +2710,32 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       the chart too.
     - **The starlit door stays where it is** on every course (public since 12 Nov), drawn on the chart with its
       tunnel and raced in the balance check; nothing else cuts through a spit in its columns.
+  - **Plan your route, then puzzle it through (agreed 12 Nov: "you plan by choosing those options ... That's
+    really simple and easy"; built 13 Nov; and "it should all be in the same thing ... online, local should all
+    be the same"):** RACE.md §5 has the detail.
+    - **A plan is a choice for each leg:** the long way or one of its shortcuts (leg 1 the long way, the wreck
+      then bribe the gate, rush the gate on a Quad, shoot it quiet, run it; leg 2 the long way, the headwind gap,
+      the starlit door, the Double's gap; leg 3 the long way, the whirlpools, the rocks, the driftwood; leg 4 the
+      long way weaving the zigzag, hop the zigzag, the locks; leg 5 the long way, the crane, the Triple's gap).
+      It starts as the long way everywhere; no planning phase.
+    - **The strip** down the right-hand edge, on the line and in the race: the legs still to come, your choice
+      on each, the one you're on lit, what the pilot's doing, and its switch. A click on a leg is its next choice
+      (a right click the one before), the board under your hands live all the while.
+    - **The pilot sails it,** move by move on your own helm, the same moves as yours, and puts the Sailing board
+      up at the gun. **The obstacles make the stops:** behind the trade wind back up the course, behind the
+      zigzag's headwinds on her row (hopping it), in front of the gate (a Quad), off its gun (shooting it), the
+      wreck's notch then the gate (the bribe), the headwind gap's way in (the oars out), the Double's gap, the
+      starlit door's rock, the whirlpools' mouth, off the rocks, the driftwood's notch, the up lock, the crane's
+      ledge, the Triple's gap. Held there, the board it asks for is put up once; she goes on once it's done. At a
+      hop's stop a chain too small for it holds her there rather than carrying her into the wind ("Held here for
+      the hop: it takes a Double"); a Double or Triple thrown on the way in lines her up and hops it with no
+      stop. A shortcut she can't sail to from where she is is put by: the plan says the long way there.
+    - **The helm's still yours:** W A D or a click on the sea, and she sails your moves or pin; once they're
+      played out, the pilot carries on. T or the strip's Pilot button turns the pilot off and on.
+    - **Everyone races by a plan:** your rivals, the simulation's bots and the race watched, by the same rule for
+      where to head and the same ways in; a bot that gives a shortcut up changes her plan. **Watched,** the bar
+      shows the followed racer's plan and anyone's change as she makes it. **Online,** your plan goes to the room
+      and its record like any other action, never to the other racers.
   `?at=race` and one cheat. Rules: `src/den-race.ts`; drawn and played by `js/den/race.js`, its start
   `js/den/race-start.js`, its buoys and finish `js/den/race-marks.js`, its barrier `js/den/race-forage.js`;
   the starter's lines `src/lines/race.ts`.

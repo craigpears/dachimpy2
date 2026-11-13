@@ -11,7 +11,10 @@
    quickest way), on the same sea, played by her own helm (Helm.mine, as moves you put in yourself).
 
    A chart covers some rows of the sea (r0 to r1); a move that leaves them is worth what `beyond` says (another
-   chart's seconds: the start's field, charted for each race, hands on to the course below it, charted once). */
+   chart's seconds: the start's field, charted for each race, hands on to the course below it, charted once).
+
+   A pin is a square, facing any way; or, with `face`, a square facing that way (13 Nov: a stop the planned
+   race's pilot holds her at, lined up for what's there: src/race-plan.ts). */
 
 import { PILOT_COST, pauseFor, type Move, type Pose, type Sea } from './den-sail.js';
 
@@ -27,13 +30,13 @@ export class PilotChart {
   /** Where each move ends, as a pose, when it's off the chart's rows. */
   private off = new Map<number, Pose>();
 
-  constructor(readonly sea: Sea, readonly goal: [number, number], readonly r0: number, readonly r1: number, readonly beyond: (p: Pose) => number = () => Infinity) {
+  constructor(readonly sea: Sea, readonly goal: [number, number], readonly r0: number, readonly r1: number, readonly beyond: (p: Pose) => number = () => Infinity, readonly face?: number) {
     const { cols, rows } = sea, N = cols * rows * 4;
     this.dist = new Float64Array(N).fill(Infinity);
     this.end = new Int32Array(N * 3).fill(-1);
     this.w = new Float64Array(N * 3);
     const id = (p: Pose) => (p.c * rows + p.r) * 4 + p.d, inRows = (r: number) => r >= r0 && r <= r1;
-    const goalSq = goal[0] * rows + goal[1];
+    const goalSq = goal[0] * rows + goal[1], isGoal = (sq: number, d: number) => sq === goalSq && (face === undefined || d === face);
     // Each pose's moves, and who comes to each pose: the pilot's own weights (Sea.quickest).
     const preds: number[][] = Array.from({ length: N }, () => []);
     const seeds: [number, number][] = [];
@@ -41,7 +44,7 @@ export class PilotChart {
       if (!sea.open(c, r)) continue;
       for (let d = 0; d < 4; d++) {
         const p = { c, r, d }, at = id(p);
-        if (c * rows + r === goalSq) { this.dist[at] = 0; continue; }
+        if (isGoal(c * rows + r, d)) { this.dist[at] = 0; continue; }
         let best = Infinity;
         MOVES.forEach((m, k) => {
           if (sea.whirly(p, m)) return;
@@ -49,7 +52,7 @@ export class PilotChart {
           const secs = sea.moveSecs(false, p, m), w = secs + pauseFor(secs) + PILOT_COST.TURN + ride.length * PILOT_COST.PUSH;
           const to2 = id(e);
           this.end[at * 3 + k] = to2; this.w[at * 3 + k] = w;
-          if (e.c * rows + e.r === goalSq) best = Math.min(best, w);
+          if (isGoal(e.c * rows + e.r, e.d)) best = Math.min(best, w);
           else if (!inRows(e.r)) { this.off.set(to2, { c: e.c, r: e.r, d: e.d }); best = Math.min(best, w + beyond(e)); }
           else preds[to2].push(at * 3 + k);
         });
@@ -68,11 +71,11 @@ export class PilotChart {
       return top;
     };
     for (const [t, at] of seeds) if (t < this.dist[at]) { this.dist[at] = t; push([t, at]); }
-    for (let d = 0; d < 4; d++) { const at = goalSq * 4 + d; for (const e of preds[at]) { const q = Math.floor(e / 3), t = this.w[e]; if (t < this.dist[q]) { this.dist[q] = t; push([t, q]); } } }
+    for (let d = 0; d < 4; d++) { const at = goalSq * 4 + d; if (!isGoal(goalSq, d)) continue; for (const e of preds[at]) { const q = Math.floor(e / 3), t = this.w[e]; if (t < this.dist[q]) { this.dist[q] = t; push([t, q]); } } }
     while (heap.length) {
       const [t, at] = pop();
       if (t > this.dist[at]) continue;
-      if (Math.floor(at / 4) === goalSq) continue;
+      if (isGoal(Math.floor(at / 4), at % 4)) continue;
       for (const e of preds[at]) {
         const q = Math.floor(e / 3), u = t + this.w[e];
         if (u < this.dist[q] - 1e-12) { this.dist[q] = u; push([u, q]); }
@@ -80,9 +83,11 @@ export class PilotChart {
     }
   }
 
+  /** At the pin (facing as it asks, if it does). */
+  at(p: Pose): boolean { return p.c === this.goal[0] && p.r === this.goal[1] && (this.face === undefined || p.d === this.face); }
   /** Seconds to the pin from a pose (off its rows, what `beyond` says). */
   secs(p: Pose): number {
-    if (p.c === this.goal[0] && p.r === this.goal[1]) return 0;
+    if (this.at(p)) return 0;
     if (p.r < this.r0 || p.r > this.r1) return this.beyond(p);
     return this.dist[(p.c * this.sea.rows + p.r) * 4 + p.d];
   }
@@ -93,7 +98,7 @@ export class PilotChart {
     const out: Move[] = [], rows = this.sea.rows;
     let p = { ...from };
     for (let i = 0; i < n; i++) {
-      if (p.c === this.goal[0] && p.r === this.goal[1]) break;
+      if (this.at(p)) break;
       if (p.r < this.r0 || p.r > this.r1) break;
       const at = (p.c * rows + p.r) * 4 + p.d;
       let bestK = -1, best = Infinity;

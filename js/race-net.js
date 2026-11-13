@@ -132,7 +132,7 @@ export function peekText(p) {
         return { open: true, says: 'Nobody yet' };
     return { open: true, says: `Waiting: ${waiting.join(', ')}` };
 }
-export const ACTS = new Set(['put', 'unput', 'stop', 'drop', 'moor', 'gust', 'row', 'stroke', 'hit', 'pump', 'fire', 'patched', 'clear', 'shut', 'open', 'breeze', 'rocks']);
+export const ACTS = new Set(['put', 'unput', 'stop', 'drop', 'moor', 'gust', 'row', 'stroke', 'hit', 'pump', 'fire', 'patched', 'clear', 'shut', 'open', 'breeze', 'rocks', 'letGo', 'plan']);
 /** Actions as they came, checked for shape: at most 60 at once, each a step, a kind, and small arguments. */
 export function cleanActs(x) {
     if (!Array.isArray(x))

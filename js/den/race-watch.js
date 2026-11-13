@@ -118,7 +118,7 @@ function bar() {
   if (!watch.bar) {
     const el = watch.bar = document.createElement('div');
     el.id = 'watchbar';
-    el.innerHTML = '<div class="wb-now"></div><div class="wb-who"></div><div class="wb-keys">1–4 follow a racer · Tab next · 0 free camera · W A S D move · Q E or drag turn · wheel zoom · N another race · X stop watching</div>';
+    el.innerHTML = '<div class="wb-now"></div><div class="wb-plan"></div><div class="wb-who"></div><div class="wb-keys">1–4 follow a racer · Tab next · 0 free camera · W A S D move · Q E or drag turn · wheel zoom · N another race · X stop watching</div>';
     el.querySelector('.wb-who').addEventListener('click', (e) => { const b = e.target.closest('[data-i]'); if (b) follow(Number(b.dataset.i)); });
     document.body.appendChild(el);
   }
@@ -126,9 +126,17 @@ function bar() {
   const W = watch.W, b = W.bar();
   const now = W.follow < 0 ? `<b>${b.clock}</b> · Free camera${b.doing ? ` · ${b.doing}` : ''}` : `<b>${b.clock}</b> · Watching <b style="color:${W.racers[W.follow].sail}">${b.who}</b> · ${b.place} · ${b.leg} · ${b.doing}`;
   const who = W.standings().map((s) => `<button data-i="${s.i}" class="${s.i === W.follow ? 'on' : ''}"><i style="background:${W.racers[s.i].sail}"></i>${s.i + 1} ${s.name}${s.time !== null ? ` ${['1st', '2nd', '3rd', '4th'][s.place - 1]}` : ''}</button>`).join('');
-  const sig = now + who;
+  // Her plan (src/race-plan.ts): the legs still to come and her choice on each, the one she's on lit; and anyone's
+  // change of plan as it happens (13 Nov: "if you're watching the race, you should ... be able to see what
+  // people's plans are"). Following nobody, just the changes.
+  const plans = W.racers.map((_, i) => W.plan(i)), changed = (W.follow >= 0 ? [plans[W.follow].changed] : plans.map((p) => p.changed)).filter(Boolean);
+  const legs = W.follow >= 0 && W.state !== 'count' ? plans[W.follow].legs : [];
+  const plan = (legs.length ? `<span class="wb-label">Plan</span> ${legs.map((l) => `<span class="${l.now ? 'now' : ''}" title="${l.puzzle}">${l.leg} ${l.name.replace(/^The /, '')}</span>`).join(' ')}` : '')
+    + changed.map((c) => `<em>${c}</em>`).join('');
+  const sig = now + plan + who;
   if (watch.bar.dataset.sig === sig) return;
   watch.bar.dataset.sig = sig;
+  watch.bar.querySelector('.wb-plan').innerHTML = plan;
   watch.bar.querySelector('.wb-now').innerHTML = now;
   watch.bar.querySelector('.wb-who').innerHTML = who;
 }
