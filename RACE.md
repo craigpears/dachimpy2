@@ -1307,6 +1307,13 @@ check, a share link, and the den's own race for 3D.
   The user (13 Nov): "That was my point, is that you would skip leg 2 so therefore you never get to the door ...
   just try it. Try reworking the gate just see where we end up with. This is an experiment." Tried on a branch
   of its own, kept only if the user likes it.
+  Then (13 Nov), on the gate cutting leg 2 out: "To choose which route I do, including ... combining whichever
+  puzzles I like the best. It makes me sad I don't want to have to choose, but I do want that to be more meaningful
+  again, that gate. Maybe is the fix that between each leg there's a tradewind that just takes you, like a
+  typewriter, that just kind of resets you off to the right hand side again, so that we don't have these choices.
+  Would that work?" The typewriter: each leg a row of its own, a trade wind carrying everyone back to its start
+  between legs, so no shortcut can skip another leg's, and a leg's shortcut can save a lot by that leg's long way
+  being long.
 
 ## 13. Where it lives
 
