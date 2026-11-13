@@ -27,19 +27,24 @@
    `advise(board)` is the planner for anyone's board, a person's mid-game: the stage, the routine it would
    play now, why in a line, and its drags. "Help, Helium" will show that on the player's own board. */
 
-import { BROWN, COLS, DOWN_LEFT, DOWN_RIGHT, Distilling, SPICE, UP_LEFT, UP_RIGHT, WHITE, neighbourOn } from './distilling.js';
+import { BLACK, BROWN, COLS, DOWN_LEFT, DOWN_RIGHT, Distilling, SPICE, TALL, UP_LEFT, UP_RIGHT, WHITE, neighbourOn } from './distilling.js';
 import type { Board, Column, DistillEvent } from './distilling.js';
 import {
-  M, ROUTINES, burnsClean, clear, colourLeft, fillTarget, isJunk, junkTarget, measure, playDrags, swapsIn, whitesFrom,
+  M, ROUTINES, burnsClean, canGo, clear, colourLeft, fillTarget, isJunk, junkTarget, measure, playDrags, swapsIn, whitesFrom,
 } from './distill-routines.js';
 import { boardScore } from './distill-score.js';
-import { pathMoves, stuck } from './distill-path.js';
+import { PATH, pathMoves, stuck } from './distill-path.js';
 import type { PathMove } from './distill-path.js';
 import type { Ctx, Drag, Move, RoutineName } from './distill-routines.js';
 
 /** A technique the planner can play: a named routine, or 'path', a piece brought round by the search
     (src/distill-path.ts). */
 export type Technique = RoutineName | 'path';
+/** A move weighed: its value, and whether it takes a white out of the furnace's column in time. */
+export interface Weighed { move: Move | PathMove; value: number; saves?: boolean; after?: Board; tie?: boolean }
+/** The path search when a white in the furnace's column has no other way out: longer drags, a wider look
+    for a piece to move out of the way first. Run only then. */
+export const PATH_WIDE = { ...PATH, SWAPS: 16, NODES: 6000, ENABLE_NEAR: 6, ENABLE_BOARDS: 200, ENABLE_NODES: 600 };
 /** The path search's name for a player. */
 export const PATH_LABEL = 'Bring a piece round';
 
@@ -112,6 +117,13 @@ export const P = {
   AHEAD: 1,
   /** A sweep: one plain drag at least this long, all one way across, swept blind (no pause to think). */
   SWEEP_LONG: 3,
+  /** The tie-breaker (`tieBreak`): a move doing the same job (its board score gain at most this much less) in
+      the same drags and at most TIE_SWAPS more swaps; the right-hand columns it sorts, from the edge in. */
+  TIE_SCORE: 0.25,
+  TIE_SWAPS: 2,
+  TIE_COLS: 4,
+  /** Stage I: whites in the column before the furnace's, hard to reach, saved first too (`dangerZones`; 0 off). */
+  ZONE2: 1,
   /** The chain: each swap that takes a piece back the wrong way. */
   BACK: 0.6,
 };
@@ -134,6 +146,8 @@ export interface Advice {
   value: number;
   /** Swept blind: the start's plain long drags, one after another with hardly a pause. */
   sweep: boolean;
+  /** Chosen by the tie-breaker (`tieBreak`) over the move that scored best a second. */
+  tie?: boolean;
 }
 
 /** The board as the planner sees it: the columns, the chain now, the furnace's ms left. */
@@ -182,6 +196,55 @@ export function whitesInJunk(cols: Board, x: number): number {
   }
   return n;
 }
+
+/** The whites in danger, in the order they're saved (the user, 13 Nov, the twentieth and twenty-second notes:
+    "If you're playing well, you should never burn a white"; "it doesn't seem fussed that you're only one column
+    away from a couple of whites burning at the bottom ... that's your danger area that's hard to reach"): first
+    the furnace's own column, a column to burn, while it has a white; then (Stage I) the column before it, a junk
+    column, while a white there is hard to reach, with no way out left on its own (low down, boxed in, behind
+    spice): it takes longest to free, so it's started soonest. Each zone is its first column; its whites are those
+    from there to the furnace. */
+export function dangerZones(cols: Board, stage: 'junk' | 'chain', burning: boolean): number[] {
+  const last = COLS - 1, out: number[] = [];
+  const whites = (x: number) => cols[x].map((p, y) => (p === WHITE ? y : -1)).filter((y) => y >= 0);
+  if (burning && whites(last).length) out.push(last);
+  if (stage === 'junk' && P.ZONE2) {
+    const x = last - 1, w = whites(x);
+    if (w.length && cols[x].filter(isJunk).length > w.length && w.some((y) => !canGo(cols, x, y, -1))) out.push(x);
+  }
+  return out;
+}
+/** The right-hand columns' order (the user, 13 Nov, the twenty-first note: "one of the heuristics is browns being
+    lower down the board"): every brown's depth in half pieces, less every black's, in the last TIE_COLS columns.
+    Higher is browns lower and blacks higher. */
+export function rightOrder(cols: Board): number {
+  let v = 0;
+  for (let x = COLS - P.TIE_COLS; x < COLS; x++) cols[x].forEach((p, y) => {
+    const h = 2 * y + (cols[x].length === TALL ? 0 : 1);
+    if (p === BROWN) v += h; else if (p === BLACK) v -= h;
+  });
+  return v;
+}
+/** A tie-breaker, never a goal (the twenty-first note: "you don't want to really actively be going out of your
+    way, spending extra moves to sort them at this point. But it's still preferable if it costs you very little
+    ... a little flick and a swish, and the brown can be one level lower"): among moves doing the best one's job
+    (its board score gain, within TIE_SCORE) in as many drags and at most TIE_SWAPS more swaps, the one leaving
+    the right-hand side in the best order, browns lower and blacks higher; the best itself when none is better. */
+export function tieBreak(cols: Board, moves: readonly Weighed[], best: Weighed): Weighed {
+  if (!best.after) return best;
+  const base = boardScore(cols), gain = boardScore(best.after) - base, swaps = swapsIn(best.move.drags);
+  let pick = best, order = rightOrder(best.after);
+  for (const m of moves) {
+    if (m === best || !m.after || m.move.drags.length !== best.move.drags.length) continue;
+    if (swapsIn(m.move.drags) > swaps + P.TIE_SWAPS || boardScore(m.after) - base < gain - P.TIE_SCORE) continue;
+    const o = rightOrder(m.after);
+    if (o > order) { pick = m; order = o; }
+  }
+  return pick === best ? best : { ...pick, tie: true };
+}
+
+/** Hard-to-reach whites in a column: no way out left on their own. */
+const hardIn = (cols: Board, x: number): number => cols[x].reduce((n, p, y) => n + (p === WHITE && !canGo(cols, x, y, -1) ? 1 : 0), 0);
 
 /** Stage I: a move judged by the board it leaves (src/distill-score.ts), the score it gains a second of a
     person's time (the user, 12 Nov, the eleventh note: "even just as a test of moves"). One look ahead, no
@@ -237,13 +300,24 @@ export function backward(cols: Board, drags: readonly Drag[], stage: 'junk' | 'c
 /** Every move of the routines the style knows, on the board now, weighed, best first. Stage I: by the board
     score it gains a second of a person's time (`judge`), its last drag let go where that's best. The chain:
     how much it betters the board (`measure`), less the person's time it takes and the ground it gives back.
-    With time short on a column that needs saving, only moves that save it in time. */
-export function weigh(sit: Situation, ctx: Ctx, style: Style): { move: Move | PathMove; value: number }[] {
+    With time short on a column that needs saving, only moves that save it in time.
+
+    A white in the furnace's column, a column to burn, is never let burn while anything can get it out (the
+    user, 13 Nov, the twentieth note: "If you're playing well, you should never burn a white"): then only the
+    moves that take a white out of it, in time, are offered (`saves`), whatever they score, the wider path
+    search (PATH_WIDE) if nothing else does; and no move ever puts a white into it. In Stage I the same holds
+    a column earlier for a white that's hard to reach (`dangerZones`). Among the saving moves, those freeing a
+    hard-to-reach white come first ("the harder to reach, the sooner to start"); when nothing can save the
+    furnace's whites, the next column's hard ones get the time rather than easy work elsewhere. */
+export function weigh(sit: Situation, ctx: Ctx, style: Style): Weighed[] {
   const { cols } = sit, last = COLS - 1, burning = ctx.burnFrom <= last, one = ctx.stage === 'junk';
   const base = one ? boardScore(cols) : measure(cols, ctx);
   const wrong = (b: Board) => (burning ? b[last].filter((p) => p === WHITE).length : junkAt(b[last]));
   const urgent = sit.timeLeft < P.URGENT && wrong(cols) > 0;
-  const out: { move: Move | PathMove; value: number }[] = [];
+  const zones = dangerZones(cols, ctx.stage, burning);
+  // Never a white into a danger zone (the furnace's column always, when it burns).
+  const guard = zones.length ? Math.min(...zones) : burning ? last : COLS;
+  const out: Weighed[] = [];
   const near = one ? whitesInJunk(cols, ctx.burnFrom) : 0;
   const consider = (found: Move | PathMove) => {
     const j = one ? judge(cols, found.drags, style, base) : null;
@@ -251,12 +325,13 @@ export function weigh(sit: Situation, ctx: Ctx, style: Style): { move: Move | Pa
     const after = playDrags(cols, move.drags);
     if (!after || (one && !j)) return;
     if (urgent && (wrong(after) >= wrong(cols) || msFor(move.drags, style, plainDrag(move.drags)) > sit.timeLeft)) return;
+    if ((burning && wrong(after) > wrong(cols)) || whitesFrom(after, guard) > whitesFrom(cols, guard)) return;
     // The brown sweep waits till the columns next to burn are clear of white (the user, 13 Nov: "it's very good.
     // But it's just like it leaves one or two trapped whites ... it's being applied a bit too quickly before those
     // columns have been cleared"): till then it's played only when it takes a white out of them.
     if (one && near > 0 && brownSweep(cols, move.drags) && whitesInJunk(after, ctx.burnFrom) >= near) return;
     const value = j ? j.value : measure(after, ctx) - base - P.PER_SEC * timeFor(move.drags, style) / 1000 - P.BACK * backward(cols, move.drags, ctx.stage);
-    out.push({ move, value });
+    out.push({ move, value, after });
   };
   for (const name of MENU[ctx.stage]) {
     if (!style.routines.includes(name)) continue;
@@ -274,6 +349,21 @@ export function weigh(sit: Situation, ctx: Ctx, style: Style): { move: Move | Pa
     }
     if (left.length) for (const found of pathMoves(cols, ctx, style, left)) consider(found);
   }
+  // The danger zones in turn: only what saves a white of the first that can be saved (the furnace's in time),
+  // the hard-to-reach first; if nothing does yet, the wider search for its whites.
+  for (const zone of zones) {
+    const saving = (m: Weighed) => whitesFrom(m.after!, zone) < whitesFrom(cols, zone)
+      && (zone < last || msFor(m.move.drags, style, plainDrag(m.move.drags)) <= sit.timeLeft);
+    if (!out.some(saving) && style.path) {
+      const whites: { x: number; y: number; side: number }[] = [];
+      cols[zone].forEach((p, y) => { if (p === WHITE) whites.push({ x: zone, y, side: -1 }); });
+      for (const found of pathMoves(cols, ctx, style, whites, PATH_WIDE)) consider(found);
+    }
+    const saves = out.filter(saving);
+    if (!saves.length) continue;
+    const hard = (m: Weighed) => hardIn(cols, zone) - hardIn(m.after!, zone);
+    return saves.map((m) => ({ ...m, saves: true })).sort((a, b) => hard(b) - hard(a) || b.value - a.value);
+  }
   return out.sort((a, b) => b.value - a.value);
 }
 
@@ -286,10 +376,12 @@ export function choose(sit: Situation, ctx: Ctx, style: Style): Advice {
   // What's wrong with the furnace's column, to save it when time's short.
   const wrong = (b: Board) => (burning ? b[last].filter((p) => p === WHITE).length : junkAt(b[last]));
   const moves = weigh(sit, ctx, style);
-  const best = moves[0] && moves[0].value > (ctx.stage === 'junk' ? P.RATE_MIN : P.MIN) ? moves[0] : null;
+  // A move saving a white from the furnace is played whatever it scores.
+  const top = moves[0] && (moves[0].saves || moves[0].value > (ctx.stage === 'junk' ? P.RATE_MIN : P.MIN)) ? moves[0] : null;
+  const best = top && ctx.stage === 'junk' && !top.saves ? tieBreak(cols, moves, top) : top;
   const advice = (kind: Advice['kind'], label: string, reason: string, m: { move: Move | PathMove; value: number } | null = null): Advice => ({
     stage: ctx.stage, kind, routine: !m ? null : m.move.routine === 'path' ? 'hook' : m.move.routine, technique: m?.move.routine ?? null,
-    label, reason, drags: m?.move.drags ?? [], value: m?.value ?? 0, sweep: false,
+    label, reason, drags: m?.move.drags ?? [], value: m?.value ?? 0, sweep: false, ...((m as Weighed | null)?.tie ? { tie: true } : {}),
   });
   // The endgame's gamble: the next Crystal Clear can't be filled in time.
   if (style.gamble && !burning && sit.chain >= P.CASH_FROM && !ready && sit.timeLeft < P.CASH_MS) {
