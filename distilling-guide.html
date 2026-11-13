@@ -42,6 +42,10 @@
   .sub { margin: 0 2px 8px; font-style: italic; color: #7a6048; }
   .lvl { display: inline-block; margin: 0 2px 6px; padding: 1px 9px; border-radius: 99px; background: #6b2a12; color: var(--paper); font: 700 13px 'Alegreya Sans'; letter-spacing: .03em; }
   .lvl:empty { display: none; }
+  .lvl.longer { background: #3c4a66; }
+  /* A phase's heading: its number in a gold disc. */
+  h2.phase { margin-top: 46px; font-size: 26px; color: var(--gold); }
+  h2.phase .pn { display: inline-grid; place-items: center; flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--gold); color: var(--ink); font: 700 20px 'Alegreya', serif; }
   article p, article li { color: var(--ink2); max-width: 70ch; }
   article p { margin: 0 2px 6px; }
   article b { color: var(--ink); }
@@ -55,7 +59,7 @@
   figure.pic figcaption { margin: 4px 2px 0; font-size: 13px; color: #7a6048; text-align: center; }
   .placeholder { aspect-ratio: 408 / 398; max-width: 420px; border-radius: 10px; background: #4a3520; opacity: .35; }
   svg .fire-label { font: 700 12px 'Alegreya Sans'; fill: #f6ead2; }
-  svg .num { font: 700 12px 'Alegreya Sans'; fill: #ffd23a; }
+  svg .num { font: 700 12px 'Alegreya Sans'; fill: #1a0e04; }
   /* The rules' figures. */
   ul.pieces { list-style: none; margin: 6px 0 8px; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px 14px; }
   ul.pieces li { display: grid; grid-template-columns: 34px 1fr; gap: 0 8px; align-items: center; margin: 0; }
@@ -96,7 +100,7 @@
   <header>
     <div>
       <h1>Distilling, the read version</h1>
-      <p class="lede">Helium's lesson, written down: the rules in brief, a target to aim for, the four phases of a game, every technique and a few tricks. Every board here is a real one, from Helium's lesson or a bot's game, and every move is one they'd play, so this page changes when they do.</p>
+      <p class="lede">Helium's lesson, written down: the rules in brief, a target to aim for, then a game phase by phase, each with its own tricks and techniques. Every board here is a real one, from Helium's lesson or a bot's game, and every move is one they'd play, so this page changes when they do.</p>
     </div>
     <div class="links">
       <a class="play ghost" href="design.html" target="_self">How it's designed</a>
@@ -104,8 +108,11 @@
     </div>
   </header>
   <nav class="toc">
-    <p><a href="#rules" target="_self">The rules</a> · <a href="#target" target="_self">Setting a target</a> · <a href="#phases" target="_self">The four phases</a> · <a href="#techniques" target="_self">The techniques</a> · <a href="#tricks" target="_self">Tricks</a> · <a href="#then" target="_self">And then</a></p>
-    <p>Techniques: <span data-toc-techniques></span></p>
+    <p><a href="#rules" target="_self">The rules</a> · <a href="#target" target="_self">Setting a target</a> · <a href="#phases" target="_self">A game, phase by phase</a> · <a href="#then" target="_self">And then</a></p>
+    <p data-toc-phase="fire"><a href="#ph-fire" target="_self">1. The fire's side</a>: <span data-toc-items></span></p>
+    <p data-toc-phase="fill"><a href="#ph-fill" target="_self">2. Filling the junk columns</a>: <span data-toc-items></span></p>
+    <p data-toc-phase="block"><a href="#ph-block" target="_self">3. Blocks and the V</a>: <span data-toc-items></span></p>
+    <p data-toc-phase="chain"><a href="#ph-chain" target="_self">4. The chain</a>: <span data-toc-items></span></p>
   </nav>
   <p class="failed" data-failed hidden>The boards couldn't be drawn here. Try a newer browser, or open the page from the den's own site.</p>
 
@@ -154,8 +161,11 @@
     </ul>
   </article>
 
-  <h2 id="phases">The four phases</h2>
-  <p class="intro">A game runs through four phases. The board says which one you're in, and each wants different moves. You'll be back in the first every time a column burns and brings a new one onto the fire's side. Shaded columns are the ones the phase is about; ringed bubbles are the ones to watch.</p>
+  <h2 id="phases">A game, phase by phase</h2>
+  <p class="intro">A game runs through four phases. The board says which one you're in, and each wants different moves. You'll be back in the first every time a column burns and brings a new one onto the fire's side. Under each phase are its own tricks and techniques, simplest first; the tag says the first target that needs one.</p>
+  <p class="intro">Every board is real, and every move is one that's played on it. An arrow is one drag: pick the piece up at the dot and follow the line to the arrowhead without letting go. Each drag has its own colour, numbered in order when there's more than one. Shaded columns are the ones it's about; ringed bubbles are the ones to watch.</p>
+
+  <h2 class="phase" id="ph-fire"><span class="pn">1</span>The fire's side</h2>
 
   <article class="board-side" data-phase="fire" id="p-fire">
     <div data-picture class="placeholder"></div>
@@ -168,48 +178,33 @@
     </div>
   </article>
 
-  <article class="board-side" data-phase="fill" id="p-fill">
+  <article class="board-side" data-trick="white" id="k-white">
     <div data-picture class="placeholder"></div>
     <div>
-      <h3 data-name>Filling the junk columns</h3>
-      <p class="sub" data-plan></p>
-      <blockquote data-says></blockquote>
-      <p><b>When:</b> the fire's side is clear of white. Now fill the right-hand columns with junk, from the fire in, one column at a time, each finished before the next. Sweep the junk over in long rough drags; there's no need to be neat yet.</p>
-      <p>The same lesson board once step one's done: shaded, the columns that are junk now and the one being filled.</p>
-    </div>
-  </article>
-
-  <article class="board-side" data-phase="block" id="p-block">
-    <div data-picture class="placeholder"></div>
-    <div>
-      <h3 data-name>Blocks</h3>
-      <p class="sub" data-plan></p>
-      <blockquote data-says></blockquote>
-      <p><b>When:</b> the whites are mostly on the left and colour's down to half the board or so. Stop fiddling with single pieces. Move the junk in blocks, browns up together, blacks down together, and wrap it round the whites in a V: the right-hand columns and a row along the bottom.</p>
-      <p>Ringed, the corner tools: a brown kept at the bottom-left and a black at the top-left, for later.</p>
-    </div>
-  </article>
-
-  <article class="board-side" data-phase="chain" id="p-chain">
-    <div data-picture class="placeholder"></div>
-    <div>
-      <h3 data-name>The chain</h3>
-      <p class="sub" data-plan></p>
-      <blockquote data-says></blockquote>
-      <p><b>When:</b> enough whites are banked for your target. Now it all turns round: whites go right, to fill each column before it leaves, and the junk piles up on the left. Every column has to go up Crystal Clear, so nothing more can burn.</p>
-      <p>Shaded, a column of whites ready to go up.</p>
-    </div>
-  </article>
-
-  <h2 id="techniques">The techniques</h2>
-  <p class="intro">Each is one smooth drag, or a few in quick succession: never a pause and a click per swap. The arrow is the drag: start at the dot and follow the line. Numbers give the order when there's more than one. Each board is real, and the move is the one the technique finds on it. The tag says the first target that needs it.</p>
-
-  <article class="board-side" data-technique="sweep" id="t-sweep">
-    <div data-picture class="placeholder"></div>
-    <div>
-      <h3 data-name>The sweep</h3>
+      <h3>Never a white down the fire</h3>
       <span class="lvl" data-level-of></span>
-      <p>At the start there's plenty of junk and plenty of time. Grab a brown or a black and drag it right as far as it'll go, then the next, one after another, hardly stopping to look. Rough is fine: speed matters more than neatness this early.</p>
+      <p>The one thing to know. A white burned is a white lost, and every second one comes back as a burnt white. Burn one in the first few columns and the game's as good as over. Played well, you never burn a white at all.</p>
+      <p>Helium's opening board: this column, with its white, goes down the furnace, and the still goes bang.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-trick="danger" id="k-danger">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3>The danger low by the fire first</h3>
+      <span class="lvl" data-level-of></span>
+      <p>Whites in the column next to burn that can't get out on their own, low down, boxed in or behind a spice, are the hardest to reach, so start on them first, before easy work anywhere else. The top of the board is safe and easy; the bottom by the fire is where whites get burned.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-trick="edge" id="k-edge">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3>Nothing walled in at the edges or by a spice</h3>
+      <span class="lvl" data-level-of></span>
+      <p>In the three columns by the fire, a white on the top or bottom edge, or beside a spice, has few ways out, and they close as the board slides. Race junk into its place while you can, from far off if need be, and never make a move that blocks its way out.</p>
       <blockquote data-says></blockquote>
     </div>
   </article>
@@ -221,6 +216,29 @@
       <span class="lvl" data-level-of></span>
       <p>A white in a column about to burn is dragged out left: up through blacks, down through browns. If it can't move on its own, another piece is moved first to open its way. This board is Helium's lesson, and this is their first move.</p>
       <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-technique="sweep" id="t-sweep">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3 data-name>The sweep</h3>
+      <span class="lvl" data-level-of></span>
+      <p>At the start there's plenty of junk and plenty of time. Grab a brown or a black and drag it right as far as it'll go, then the next, one after another, hardly stopping to look. Rough is fine: speed matters more than neatness this early.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <h2 class="phase" id="ph-fill"><span class="pn">2</span>Filling the junk columns</h2>
+
+  <article class="board-side" data-phase="fill" id="p-fill">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3 data-name>Filling the junk columns</h3>
+      <p class="sub" data-plan></p>
+      <blockquote data-says></blockquote>
+      <p><b>When:</b> the fire's side is clear of white. Now fill the right-hand columns with junk, from the fire in, one column at a time, each finished before the next. Sweep the junk over in long rough drags; there's no need to be neat yet.</p>
+      <p>The same lesson board once step one's done: shaded, the columns that are junk now and the one being filled.</p>
     </div>
   </article>
 
@@ -244,12 +262,22 @@
     </div>
   </article>
 
-  <article class="board-side" data-technique="channel" id="t-channel">
+  <article class="board-side" data-trick="flick" id="k-flick">
     <div data-picture class="placeholder"></div>
     <div>
-      <h3 data-name>Channels</h3>
+      <h3>A brown a flick lower</h3>
       <span class="lvl" data-level-of></span>
-      <p>In the chain: whites on the left are ferried right through the junk, climbing through blacks and sliding down through browns, to fill the next column to go up. A line of blacks running up-right takes them to the top; a line of browns running down-right to the bottom.</p>
+      <p>When two moves do the same job for about the same effort, take the one that leaves browns lower and blacks higher on the right. A little flick and a swish and the brown sits a row lower: the right side stays connected, and the gap's easier to fill later. A tie-breaker, never worth extra moves.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-trick="burnEarly" id="k-burnEarly">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3>Burn early only with the next columns clear</h3>
+      <span class="lvl" data-level-of></span>
+      <p>Burning a finished junk column early saves time, but each burn brings the whites a column closer to the fire. So burn early only while the two columns coming up after it are clear of white too, as here.</p>
       <blockquote data-says></blockquote>
     </div>
   </article>
@@ -260,6 +288,39 @@
       <h3 data-name>Turning the right side over</h3>
       <span class="lvl" data-level-of></span>
       <p>Blacks taken up the right-hand side, zigzagging up through the browns to the top while the browns sink. Then whatever comes over from the left can hook straight in.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <h2 class="phase" id="ph-block"><span class="pn">3</span>Blocks and the V</h2>
+
+  <article class="board-side" data-phase="block" id="p-block">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3 data-name>Blocks</h3>
+      <p class="sub" data-plan></p>
+      <blockquote data-says></blockquote>
+      <p><b>When:</b> the whites are mostly on the left and colour's down to half the board or so. Stop fiddling with single pieces. Move the junk in blocks, browns up together, blacks down together, and wrap it round the whites in a V: the right-hand columns and a row along the bottom.</p>
+      <p>Ringed, the corner tools: a brown kept at the bottom-left and a black at the top-left, for later.</p>
+    </div>
+  </article>
+
+  <article class="board-side" data-trick="blocks" id="k-blocks">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3>Junk in blocks, into the V</h3>
+      <span class="lvl" data-level-of></span>
+      <p>Once the whites are mostly left, stop the small fiddly moves. Pull the junk across in big drags, and carry each drag on until the piece joins the junk on its right, tucked into the corner or the row, not left one short among the whites.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-trick="kept" id="k-kept">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3>A brown kept bottom-left</h3>
+      <span class="lvl" data-level-of></span>
+      <p>Don't be greedy clearing the left. A brown in the bottom-left corner (ringed) can climb right across the whites later, and a black in the top-left can fall across: tools for hauling junk over, and for the V's bottom arm, which wants browns more than blacks.</p>
       <blockquote data-says></blockquote>
     </div>
   </article>
@@ -280,6 +341,39 @@
       <h3 data-name>The leapfrog</h3>
       <span class="lvl" data-level-of></span>
       <p>Sideways along a stored row: a black dragged along a row of browns, up into each and down past it, all in one drag (or a brown along a row of blacks). It needs plenty of pieces about, so it's a mid-game move.</p>
+      <blockquote data-says></blockquote>
+    </div>
+  </article>
+
+  <article class="board-side" data-trick="fluid" id="k-fluid">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3>One fluid motion, once the right side's sorted</h3>
+      <span class="lvl" data-level-of></span>
+      <p>Once the right side's sorted, blacks along the top and browns low, new junk comes in with a single drag. Take a black from the far left down under the whites, then up the channel of browns until it joins the blacks: down, up and back up again. Every brown it climbs past drops a place, so the sort keeps itself. A brown goes the other way: up over the whites, then down through the blacks to the browns.</p>
+      <p>It's the payoff for turning the right side over and keeping browns low. Here, the black's drag as the den's own Distilling finds it: it ends among the blacks, and the right side's as sorted as before.</p>
+    </div>
+  </article>
+
+  <h2 class="phase" id="ph-chain"><span class="pn">4</span>The chain</h2>
+
+  <article class="board-side" data-phase="chain" id="p-chain">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3 data-name>The chain</h3>
+      <p class="sub" data-plan></p>
+      <blockquote data-says></blockquote>
+      <p><b>When:</b> enough whites are banked for your target. Now it all turns round: whites go right, to fill each column before it leaves, and the junk piles up on the left. Every column has to go up Crystal Clear, so nothing more can burn.</p>
+      <p>Shaded, a column of whites ready to go up. Channels come first; the slower techniques after them are tagged for longer chains, and a Crystal Clear or two never needs them.</p>
+    </div>
+  </article>
+
+  <article class="board-side" data-technique="channel" id="t-channel">
+    <div data-picture class="placeholder"></div>
+    <div>
+      <h3 data-name>Channels</h3>
+      <span class="lvl" data-level-of></span>
+      <p>In the chain: whites on the left are ferried right through the junk, climbing through blacks and sliding down through browns, to fill the next column to go up. A line of blacks running up-right takes them to the top; a line of browns running down-right to the bottom.</p>
       <blockquote data-says></blockquote>
     </div>
   </article>
@@ -330,73 +424,6 @@
       <h3 data-name>Bringing a piece round</h3>
       <span class="lvl" data-level-of></span>
       <p>When a piece is stuck and none of the named techniques frees it, look for any piece that can be brought round, along any path the swaps allow, loops and all, into its place. Sometimes one piece has to move out of the way first.</p>
-      <blockquote data-says></blockquote>
-    </div>
-  </article>
-
-  <h2 id="tricks">Tricks worth knowing</h2>
-  <p class="intro">Small habits that keep a game safe, from watching good distillers play.</p>
-
-  <article class="board-side" data-trick="white" id="k-white">
-    <div data-picture class="placeholder"></div>
-    <div>
-      <h3>Never a white down the fire</h3>
-      <p>The one thing to know. A white burned is a white lost, and every second one comes back as a burnt white. Burn one in the first few columns and the game's as good as over. Played well, you never burn a white at all.</p>
-      <p>Helium's opening board: this column, with its white, goes down the furnace, and the still goes bang.</p>
-      <blockquote data-says></blockquote>
-    </div>
-  </article>
-
-  <article class="board-side" data-trick="danger" id="k-danger">
-    <div data-picture class="placeholder"></div>
-    <div>
-      <h3>The danger low by the fire first</h3>
-      <p>Whites in the column next to burn that can't get out on their own, low down, boxed in or behind a spice, are the hardest to reach, so start on them first, before easy work anywhere else. The top of the board is safe and easy; the bottom by the fire is where whites get burned.</p>
-      <blockquote data-says></blockquote>
-    </div>
-  </article>
-
-  <article class="board-side" data-trick="edge" id="k-edge">
-    <div data-picture class="placeholder"></div>
-    <div>
-      <h3>Nothing walled in at the edges or by a spice</h3>
-      <p>In the three columns by the fire, a white on the top or bottom edge, or beside a spice, has few ways out, and they close as the board slides. Race junk into its place while you can, from far off if need be, and never make a move that blocks its way out.</p>
-      <blockquote data-says></blockquote>
-    </div>
-  </article>
-
-  <article class="board-side" data-trick="flick" id="k-flick">
-    <div data-picture class="placeholder"></div>
-    <div>
-      <h3>A brown a flick lower</h3>
-      <p>When two moves do the same job for about the same effort, take the one that leaves browns lower and blacks higher on the right. A little flick and a swish and the brown sits a row lower: the right side stays connected, and the gap's easier to fill later. A tie-breaker, never worth extra moves.</p>
-      <blockquote data-says></blockquote>
-    </div>
-  </article>
-
-  <article class="board-side" data-trick="blocks" id="k-blocks">
-    <div data-picture class="placeholder"></div>
-    <div>
-      <h3>Junk in blocks, into the V</h3>
-      <p>Once the whites are mostly left, stop the small fiddly moves. Pull the junk across in big drags, and carry each drag on until the piece joins the junk on its right, tucked into the corner or the row, not left one short among the whites.</p>
-      <blockquote data-says></blockquote>
-    </div>
-  </article>
-
-  <article class="board-side" data-trick="kept" id="k-kept">
-    <div data-picture class="placeholder"></div>
-    <div>
-      <h3>A brown kept bottom-left</h3>
-      <p>Don't be greedy clearing the left. A brown in the bottom-left corner (ringed) can climb right across the whites later, and a black in the top-left can fall across: tools for hauling junk over, and for the V's bottom arm, which wants browns more than blacks.</p>
-      <blockquote data-says></blockquote>
-    </div>
-  </article>
-
-  <article class="board-side" data-trick="burnEarly" id="k-burnEarly">
-    <div data-picture class="placeholder"></div>
-    <div>
-      <h3>Burn early only with the next columns clear</h3>
-      <p>Burning a finished junk column early saves time, but each burn brings the whites a column closer to the fire. So burn early only while the two columns coming up after it are clear of white too, as here.</p>
       <blockquote data-says></blockquote>
     </div>
   </article>

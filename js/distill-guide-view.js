@@ -18,6 +18,10 @@ const COL = {
 /** The pieces' names, in plain words. */
 const NAMES = { [WHITE]: 'white', [BROWN]: 'brown', [BLACK]: 'black', [SPICE]: 'spice', [BURNT]: 'burnt white' };
 const CELL = 40, R = 17;
+/** Each drag in its own colour, in order (then round again): gold, sky, rose, lime, violet, teal. */
+const DRAG_COLOURS = ['#ffd23a', '#5fb8ff', '#ff6fb8', '#a6e85c', '#b98cff', '#3ee8c8'];
+/** How far a stretch of a drag gone over twice is set aside, so there and back are two lanes. */
+const LANE = 4.5;
 
 const el = (tag, attrs = {}, parent) => {
   const e = document.createElementNS(NS, tag);
@@ -38,8 +42,13 @@ function defs() {
     el('stop', { offset: '0.45', 'stop-color': c.base }, g);
     el('stop', { offset: '1', 'stop-color': c.dark }, g);
   }
-  const m = el('marker', { id: 'dg-head', viewBox: '0 0 10 10', refX: '5', refY: '5', markerWidth: '3.2', markerHeight: '3.2', orient: 'auto-start-reverse' }, d);
-  el('path', { d: 'M0,0 L10,5 L0,10 z', fill: '#ffd23a', stroke: '#3a2004', 'stroke-width': '1' }, m);
+  const m = el('marker', { id: 'dg-head', viewBox: '0 0 10 10', refX: '5', refY: '5', markerWidth: '3.2', markerHeight: '3.2', orient: 'auto' }, d);
+  el('path', { d: 'M0,0 L10,5 L0,10 z', fill: '#8a4b0f', stroke: '#3a2004', 'stroke-width': '1' }, m);
+  // A drag's arrowhead, one in each drag's colour, only ever at its end.
+  DRAG_COLOURS.forEach((c, i) => {
+    const mk = el('marker', { id: `dg-head-${i}`, viewBox: '0 0 10 10', refX: '6', refY: '5', markerWidth: '3', markerHeight: '3', orient: 'auto', markerUnits: 'strokeWidth' }, d);
+    el('path', { d: 'M0,0 L10,5 L0,10 z', fill: c, stroke: '#1a0e04', 'stroke-width': '1.2', 'stroke-linejoin': 'round' }, mk);
+  });
   const bg = el('linearGradient', { id: 'dg-board', x1: '0', y1: '0', x2: '0', y2: '1' }, d);
   el('stop', { offset: '0', 'stop-color': '#4a3520' }, bg);
   el('stop', { offset: '0.5', 'stop-color': '#5c4628' }, bg);
@@ -75,23 +84,69 @@ export function board(pic, label) {
   cols.forEach((col, x) => col.forEach((p, y) => { const [cx, cy] = at(cols, x, y); piece(svg, p, cx, cy); }));
   shade(true);
   for (const [x, y] of pic.rings) { const [cx, cy] = at(cols, x, y); el('circle', { cx, cy, r: R + 3.5, fill: 'none', stroke: '#ff4a2a', 'stroke-width': 3.2 }, svg); }
-  // The drags: each from its piece along every way it swaps, the path the held piece takes.
-  pic.drags.forEach((d, i) => {
-    let px = d.x, py = d.y;
-    const pts = [at(cols, px, py)];
-    for (const w of d.ways) { const n = neighbourOn(cols, px, py, w); if (!n) break; [px, py] = n; pts.push(at(cols, px, py)); }
-    const points = pts.map(([a, b]) => `${a},${b}`).join(' ');
-    el('polyline', { points, fill: 'none', stroke: '#3a2004', 'stroke-width': 8, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', opacity: 0.75 }, svg);
-    el('polyline', { points, fill: 'none', stroke: '#ffd23a', 'stroke-width': 4.5, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', 'marker-end': 'url(#dg-head)' }, svg);
-    const [sx, sy] = pts[0];
-    el('circle', { cx: sx, cy: sy, r: 6, fill: '#ffd23a', stroke: '#3a2004', 'stroke-width': 2 }, svg);
-    if (pic.drags.length > 1) {
-      el('circle', { cx: sx - 13, cy: sy - 13, r: 9, fill: '#3a2004', stroke: '#ffd23a', 'stroke-width': 1.5 }, svg);
-      const n = el('text', { x: sx - 13, y: sy - 9, 'text-anchor': 'middle', class: 'num' }, svg);
-      n.textContent = String(i + 1);
-    }
-  });
+  drags(svg, cols, pic.drags, W, H - 32);
   return svg;
+}
+
+/** The drags: each the path its held piece takes, through every place it swaps into, in its own colour. A dot where
+    it's picked up, an arrowhead only where it's let go, and, when there's more than one, its number in a disc of its
+    colour beside the dot, placed clear of the other numbers, dots and its own line. A stretch gone over twice (there
+    and back) is drawn as two lanes, each set to its own side, so neither hides the other. Lines first, then the dots,
+    then the numbers, so nothing's drawn over a label. */
+function drags(svg, cols, list, W, H) {
+  const paths = list.map((d) => {
+    let px = d.x, py = d.y;
+    const cells = [[px, py]];
+    for (const w of d.ways) { const n = neighbourOn(cols, px, py, w); if (!n) break; [px, py] = n; cells.push([px, py]); }
+    return cells;
+  });
+  // Stretches gone over more than once, by any drag.
+  const key = (a, b) => (a[0] * 16 + a[1] < b[0] * 16 + b[1] ? `${a}|${b}` : `${b}|${a}`);
+  const uses = new Map();
+  for (const cells of paths) for (let k = 1; k < cells.length; k++) { const s = key(cells[k - 1], cells[k]); uses.set(s, (uses.get(s) ?? 0) + 1); }
+  const lines = paths.map((cells) => {
+    const pts = [];
+    for (let k = 1; k < cells.length; k++) {
+      const [ax, ay] = at(cols, ...cells[k - 1]), [bx, by] = at(cols, ...cells[k]);
+      let ox = 0, oy = 0;
+      if (uses.get(key(cells[k - 1], cells[k])) > 1) {
+        const len = Math.hypot(bx - ax, by - ay);
+        ox = (-(by - ay) / len) * LANE; oy = ((bx - ax) / len) * LANE;
+      }
+      const a = [ax + ox, ay + oy], b = [bx + ox, by + oy];
+      if (!pts.length || Math.hypot(pts[pts.length - 1][0] - a[0], pts[pts.length - 1][1] - a[1]) > 0.5) pts.push(a);
+      pts.push(b);
+    }
+    return pts;
+  });
+  lines.forEach((pts, i) => {
+    if (pts.length < 2) return;
+    const points = pts.map(([a, b]) => `${a.toFixed(1)},${b.toFixed(1)}`).join(' ');
+    el('polyline', { points, fill: 'none', stroke: '#1a0e04', 'stroke-width': 8, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', opacity: 0.7 }, svg);
+    el('polyline', { points, fill: 'none', stroke: DRAG_COLOURS[i % DRAG_COLOURS.length], 'stroke-width': 4.5, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', 'marker-end': `url(#dg-head-${i % DRAG_COLOURS.length})` }, svg);
+  });
+  const starts = paths.map((cells) => at(cols, ...cells[0]));
+  starts.forEach(([sx, sy], i) => el('circle', { cx: sx, cy: sy, r: 6.5, fill: DRAG_COLOURS[i % DRAG_COLOURS.length], stroke: '#1a0e04', 'stroke-width': 2.2 }, svg));
+  if (list.length < 2) return;
+  // The numbers: round each dot, the spot furthest from the other numbers, the dots and every line.
+  const placed = [];
+  const near = (x, y, pts, r) => pts.reduce((s, [px, py]) => { const dd = Math.hypot(px - x, py - y); return s + (dd < r ? r - dd : 0); }, 0);
+  const allPts = lines.flat();
+  starts.forEach(([sx, sy], i) => {
+    let best = null;
+    for (let k = 0; k < 8; k++) {
+      const ang = (Math.PI / 4) * k - (3 * Math.PI) / 4, x = sx + 17 * Math.cos(ang), y = sy + 17 * Math.sin(ang);
+      if (x < 11 || x > W - 11 || y < 11 || y > H - 11) continue;
+      const cost = 6 * near(x, y, placed, 22) + 3 * near(x, y, starts.filter((_, j) => j !== i), 18) + near(x, y, allPts, 14) + 2 * near(x, y, lines[i].slice(0, 2), 16) + k * 0.01;
+      if (!best || cost < best.cost) best = { x, y, cost };
+    }
+    if (!best) best = { x: sx, y: sy - 17 };
+    placed.push([best.x, best.y]);
+    const c = DRAG_COLOURS[i % DRAG_COLOURS.length];
+    el('circle', { cx: best.x, cy: best.y, r: 9, fill: c, stroke: '#1a0e04', 'stroke-width': 2 }, svg);
+    const n = el('text', { x: best.x, y: best.y + 4.2, 'text-anchor': 'middle', class: 'num' }, svg);
+    n.textContent = String(i + 1);
+  });
 }
 
 /** A picture with where its board's from. */
@@ -186,26 +241,34 @@ function draw() {
       });
     }
   }
+  // The techniques only the longer chains need, as the page's plan marks them.
+  const longer = new Set(Object.values(g.plan).flat().filter((i) => i.kind === 'technique' && i.longer).map((i) => i.name));
   for (const t of g.techniques) {
     const sec = document.querySelector(`[data-technique="${t.name}"]`);
     if (!sec) continue;
     fill(sec, '[data-name]', t.label);
-    fill(sec, '[data-level-of]', t.level ? `from ${t.level}` : '');
+    const tag = fill(sec, '[data-level-of]', t.level ? `${longer.has(t.name) ? 'for longer chains, ' : ''}from ${t.level}` : '');
+    if (tag && longer.has(t.name)) tag.classList.add('longer');
     quote(sec, t.says);
     sec.querySelector('[data-picture]')?.replaceWith(figure(t.picture, `${t.label}, drawn as its drag on a real board`));
   }
   for (const t of g.tricks) {
     const sec = document.querySelector(`[data-trick="${t.trick}"]`);
     if (!sec) continue;
+    fill(sec, '[data-level-of]', t.level ? `from ${t.level}` : '');
     quote(sec, t.says);
     sec.querySelector('[data-picture]')?.replaceWith(figure(t.picture, 'a real board showing it'));
   }
-  // The table of contents' technique links, by their names.
-  const toc = document.querySelector('[data-toc-techniques]');
-  if (toc) g.techniques.forEach((t, i) => {
-    if (i) toc.appendChild(document.createTextNode(' · '));
-    toc.appendChild(html('a', { href: `#t-${t.name}`, target: '_self' }, t.label));
-  });
+  // The table of contents: each phase's tricks and techniques, in the page's order, by their headings.
+  for (const [phase, items] of Object.entries(g.plan)) {
+    const box = document.querySelector(`[data-toc-phase="${phase}"] [data-toc-items]`);
+    if (!box) continue;
+    items.forEach((it, i) => {
+      const id = `${it.kind === 'trick' ? 'k' : 't'}-${it.name}`, h = document.getElementById(id)?.querySelector('h3');
+      if (i) box.appendChild(document.createTextNode(' · '));
+      box.appendChild(html('a', { href: `#${id}`, target: '_self' }, h?.textContent ?? it.name));
+    });
+  }
   document.body.classList.add('drawn');
 }
 

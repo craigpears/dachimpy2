@@ -16,17 +16,21 @@
    - The techniques (src/distill-routines.ts, ROUTINES, with the sweep and the path search): each drawn on a real
      board with the move its own `find` offers there, the move the bot played or the lesson plays.
    - The user's tricks: each on a board where it shows, marked by the planner's own reading of it (`dangerZones`,
-     `edgeWhites`, `keptTools`, `clearComingUp`).
+     `edgeWhites`, `keptTools`, `clearComingUp`); the sorted right side's one fluid motion (the thirty-first note)
+     found on a sorted board by `fluidMotion` and checked by `isFluid`.
+   - The page's order (`PLAN`, 13 Nov): the rules and a target, then each phase in a game's order with its own
+     tricks and techniques under it, simplest first.
    - Helium's lines, quoted from src/lines/helium.ts.
    The words round them are the page's own, written by hand.
 
    Pure: no randomness (the lesson's deal is seeded), no clock, no DOM. */
 
 import {
-  BLACK, BROWN, BURNT, BURN_TICKS, CARRY_ON, CHAIN_BONUS, COLS, FLASK, MESSAGES, POINTS, SPICE, TICK_MS, WHITE, beats, goesUp, judge, parseBoard, weightOf,
+  BLACK, BROWN, BURNT, BURN_TICKS, CARRY_ON, CHAIN_BONUS, COLS, DOWN_LEFT, DOWN_RIGHT, FLASK, MESSAGES, POINTS, SPICE, TICK_MS, UP_LEFT, UP_RIGHT, WHITE,
+  beats, canSwapOn, goesUp, judge, neighbourOn, parseBoard, weightOf,
 } from './distilling.js';
 import type { Board } from './distilling.js';
-import { ROUTINES, canGo, clear, copyBoard, junkTarget, playDrags, burnsClean } from './distill-routines.js';
+import { ROUTINES, canGo, clear, copyBoard, junkTarget, playDrags, burnsClean, rightFrom, whitesFrom } from './distill-routines.js';
 import type { Ctx, Drag, RoutineName } from './distill-routines.js';
 import { FIRE_COLS, PHASES, PHASE_ORDER, phaseOf } from './distill-phase.js';
 import type { Phase } from './distill-phase.js';
@@ -40,9 +44,26 @@ import type { Position } from './distill-guide-boards.js';
 
 /** A technique on the page: a routine, the sweep (a long plain drag) or the path search (a piece brought round). */
 export type Technique = RoutineName | 'sweep' | 'path';
-/** The user's tricks (DISTILLING.md §3, the twentieth to twenty-ninth notes), in the page's order. */
-export const TRICKS = ['white', 'danger', 'edge', 'flick', 'blocks', 'kept', 'burnEarly'] as const;
+/** The user's tricks (DISTILLING.md §3, the twentieth to twenty-ninth notes, and the thirty-first's fluid motion). */
+export const TRICKS = ['white', 'danger', 'edge', 'flick', 'blocks', 'kept', 'burnEarly', 'fluid'] as const;
 export type Trick = typeof TRICKS[number];
+
+/** A section of the page under a phase: a technique or a trick; `longer`, one only the longer chains need. */
+export type GuideItem = { kind: 'technique'; name: Technique; longer?: boolean } | { kind: 'trick'; name: Trick };
+const tech = (name: Technique, longer = false): GuideItem => (longer ? { kind: 'technique', name, longer } : { kind: 'technique', name });
+const trick = (name: Trick): GuideItem => ({ kind: 'trick', name });
+/** The page in the course of a game (the user, 13 Nov: "a few of the simple things are a bit out of order ...
+    progression's a bit weird"): each phase in a game's order, and under it its own tricks and techniques, simplest
+    first. The first things a player needs (never a white down the fire, the danger by the fire) come first; the
+    chain's channels in the chain. Storing and the leapfrog sit with the blocks, not the fill: the fill weighs storing
+    down and the blocks weigh both up (src/distill-phase.ts, PHASE_WEIGHTS), storing waits till the junk on the right
+    is down to a few columns (`sortingTime`), and the leapfrog runs along a stored row. */
+export const PLAN: Readonly<Record<Phase, readonly GuideItem[]>> = {
+  fire: [trick('white'), trick('danger'), trick('edge'), tech('rescue'), tech('sweep')],
+  fill: [tech('junkColumn'), tech('diamond'), trick('flick'), trick('burnEarly'), tech('turnOver')],
+  block: [trick('blocks'), trick('kept'), tech('store'), tech('leapfrog'), trick('fluid')],
+  chain: [tech('channel'), tech('crawl', true), tech('hook', true), tech('figureEight', true), tech('linePull', true), tech('path')],
+};
 
 /** A board to draw: its pieces, the drags on it (arrows, numbered in order), pieces ringed, columns shaded, the
     furnace's column burning (`burn`), and where the board's from, in plain words. */
@@ -219,7 +240,72 @@ export function techniqueExamples(): TechniqueExample[] {
 
 // ---------------------------------------------------------------- the user's tricks
 
-export interface TrickExample { trick: Trick; says: string | null; picture: Picture; shows: boolean }
+export interface TrickExample { trick: Trick; says: string | null; level: string | null; picture: Picture; shows: boolean }
+
+// ---------------------------------------------------------------- the sorted right side's one fluid motion
+
+/** A sorted right side (DISTILLING.md, the thirty-first note), as a real game at Helium's still had it
+    (notes/distilling/45-sorted-right-side-one-fluid-motion.webp): the whites a block on the left and middle, the
+    right-hand columns junk, blacks along the top and browns low. */
+export const SORTED_RIGHT: readonly string[] = ['bKKwKwwK', 'wwwwwwwww', 'wwwwwwww', 'wwwwwwwww', 'wKwwwwww', 'KKKwwwbbb', 'KKbbwbbb', 'KKKbbbbbb', 'KbKbbbbK', 'bbKKKKKK*'];
+
+/** How far the right side (from `from`) is out of its order: each brown above a black in the same column. */
+export function unsorted(cols: Board, from: number): number {
+  let n = 0;
+  for (let x = from; x < COLS; x++) cols[x].forEach((p, i) => { if (p === BROWN) for (let j = i + 1; j < cols[x].length; j++) if (cols[x][j] === BLACK) n++; });
+  return n;
+}
+/** A black that's joined the blacks: nothing but blacks (or the edge, or a spice) above it, so it climbs no further. */
+export function amongBlacks(cols: Board, x: number, y: number): boolean {
+  if (cols[x][y] !== BLACK || (y > 0 && cols[x][y - 1] !== BLACK)) return false;
+  return [UP_RIGHT, UP_LEFT].every((w) => { const n = neighbourOn(cols, x, y, w); return !n || cols[n[0]][n[1]] === BLACK || cols[n[0]][n[1]] === SPICE; });
+}
+const isDown = (w: number) => w === DOWN_LEFT || w === DOWN_RIGHT;
+/** Where a drag leaves its piece. */
+export function endOf(cols: Board, d: Drag): [number, number] {
+  let at: [number, number] = [d.x, d.y];
+  for (const w of d.ways) at = neighbourOn(cols, at[0], at[1], w)!;
+  return at;
+}
+
+/** The fluid motion (the user, 13 Nov: "once there's a nice clear separation, it's just down, up and back up
+    again"): on a sorted right side, a black from the far left (not a corner tool kept top-left) dragged down
+    through the whites, then up through the browns, in one drag, until it's joined the blacks on the right, with the
+    right side no less sorted and no white let into it. The fewest swaps. */
+export function fluidMotion(cols: Board, reach = 20): Drag | null {
+  const from = rightFrom(cols), order = unsorted(cols, from), whites = whitesFrom(cols, from);
+  let best: Drag | null = null;
+  for (let x0 = 0; x0 < 2; x0++) for (let y0 = 2; y0 < cols[x0].length; y0++) {
+    if (cols[x0][y0] !== BLACK) continue;
+    const b = copyBoard(cols), ways: number[] = [], seen = new Set<number>([x0 * 16 + y0]);
+    let nodes = 0;
+    const dfs = (x: number, y: number, rising: boolean) => {
+      if (ways.length >= reach || (best && ways.length >= best.ways.length) || nodes++ > 20000) return;
+      for (const w of [DOWN_RIGHT, UP_RIGHT, DOWN_LEFT, UP_LEFT]) {
+        if (rising && isDown(w)) continue;
+        const n = neighbourOn(b, x, y, w);
+        if (!n || seen.has(n[0] * 16 + n[1]) || !canSwapOn(b, x, y, n[0], n[1])) continue;
+        const t = b[x][y]; b[x][y] = b[n[0]][n[1]]; b[n[0]][n[1]] = t; ways.push(w); seen.add(n[0] * 16 + n[1]);
+        if (n[0] >= from && ways.some(isDown) && !isDown(w) && amongBlacks(b, n[0], n[1]) && unsorted(b, from) <= order && whitesFrom(b, from) <= whites
+          && (!best || ways.length < best.ways.length)) best = { x: x0, y: y0, ways: [...ways] };
+        else dfs(n[0], n[1], rising || !isDown(w));
+        seen.delete(n[0] * 16 + n[1]); ways.pop(); b[n[0]][n[1]] = b[x][y]; b[x][y] = t;
+      }
+    };
+    dfs(x0, y0, false);
+  }
+  return best;
+}
+/** Whether a drag is the fluid motion on its board: legal, a black, down first and then only up, ending among the
+    blacks on the right with the right side no less sorted. */
+export function isFluid(cols: Board, d: Drag): boolean {
+  const after = playDrags(cols, [d]), from = rightFrom(cols);
+  if (!after || cols[d.x][d.y] !== BLACK || !d.ways.length || !isDown(d.ways[0])) return false;
+  const turn = d.ways.findIndex((w) => !isDown(w));
+  if (turn < 0 || d.ways.slice(turn).some(isDown)) return false;
+  const [ex, ey] = endOf(cols, d);
+  return ex >= from && amongBlacks(after, ex, ey) && unsorted(after, from) <= unsorted(cols, from) && whitesFrom(after, from) <= whitesFrom(cols, from);
+}
 
 /** The corner tools (keptTools): a brown in the bottom-left corner, a black in the top-left. */
 function toolsAt(cols: Board): [number, number][] {
@@ -233,31 +319,45 @@ const whitesIn = (cols: Board, x: number) => cols[x].filter((p) => p === WHITE).
 export function trickExamples(): TrickExample[] {
   const kept = (key: string) => { const p = position(key), cols = parseBoard(p.cols); return { p, cols, drags: liveMove(p).played, from: fromPosition(p) }; };
   const out: TrickExample[] = [];
+  // Every bot plays the tricks (the planner's own), so each comes in at the first level; the fluid motion once the
+  // right side's turned over.
+  const every = levelRows()[0].label;
   for (const trick of TRICKS) {
     if (trick === 'white') {
       // The opening's board, the column at the fire with a white in it: the bang.
       const cols = copyBoard(beforeBang().cols), last = COLS - 1;
       const rings = cols[last].flatMap((p, y) => (p === WHITE ? [[last, y] as [number, number]] : []));
       const bang = opening(lessonGame()).some((b) => b.mishap);
-      out.push({ trick, says: OPENING.safe, picture: { cols, drags: [], rings, shade: [last], burn: true, from: `${LESSON_FROM}, Helium's opening` }, shows: bang && rings.length > 0 && !goesUp(cols[last]) });
+      out.push({ trick, says: OPENING.safe, level: every, picture: { cols, drags: [], rings, shade: [last], burn: true, from: `${LESSON_FROM}, Helium's opening` }, shows: bang && rings.length > 0 && !goesUp(cols[last]) });
+      continue;
+    }
+    if (trick === 'fluid') {
+      // A sorted right side, the black's one drag found on it, live.
+      const cols = parseBoard(SORTED_RIGHT), d = fluidMotion(cols), from = rightFrom(cols);
+      out.push({
+        trick, says: null, level: firstLevel('turnOver')?.label ?? null,
+        picture: { cols, drags: d ? [d] : [], rings: [], shade: range(from, COLS), from: 'A real game at Helium\'s still, the right side sorted' },
+        shows: !!d && isFluid(cols, d),
+      });
       continue;
     }
     const k = kept(`trick:${trick}`), { cols, drags } = k, after = drags.length ? playDrags(cols, drags) : cols;
     const pic = (rings: [number, number][], shade: number[], burn = false): Picture => ({ cols, drags, rings, shade, burn, from: k.from });
+    const push = (says: string | null, picture: Picture, shows: boolean) => out.push({ trick, says, level: every, picture, shows });
     if (trick === 'danger') {
       const x = COLS - 2;
-      out.push({ trick, says: NERVES.uneasy[1], picture: pic(hardWhites(cols, x), [x, COLS - 1]), shows: dangerZones(cols, 'junk', true).includes(x) && !!after && whitesIn(after, x) < whitesIn(cols, x) });
+      push(NERVES.uneasy[1], pic(hardWhites(cols, x), [x, COLS - 1]), dangerZones(cols, 'junk', true).includes(x) && !!after && whitesIn(after, x) < whitesIn(cols, x));
     } else if (trick === 'edge') {
       const e = edgeWhites(cols);
-      out.push({ trick, says: null, picture: pic(e.map((w) => [w.x, w.y] as [number, number]), range(COLS - FIRE_COLS, COLS)), shows: e.length > 0 && !!after && edgeWhites(after).length < e.length });
+      push(null, pic(e.map((w) => [w.x, w.y] as [number, number]), range(COLS - FIRE_COLS, COLS)), e.length > 0 && !!after && edgeWhites(after).length < e.length);
     } else if (trick === 'flick') {
-      out.push({ trick, says: null, picture: pic([], range(COLS - 4, COLS)), shows: !!after && drags.length > 0 });
+      push(null, pic([], range(COLS - 4, COLS)), !!after && drags.length > 0);
     } else if (trick === 'blocks') {
-      out.push({ trick, says: PHASE.block.first, picture: pic([], []), shows: blockPhase(cols) && !!after });
+      push(PHASE.block.first, pic([], []), blockPhase(cols) && !!after);
     } else if (trick === 'kept') {
-      out.push({ trick, says: HELP.store, picture: pic(toolsAt(cols), [0, 1]), shows: blockPhase(cols) && keptTools(cols).brown && !!after && keptTools(after).brown });
+      push(HELP.store, pic(toolsAt(cols), [0, 1]), blockPhase(cols) && keptTools(cols).brown && !!after && keptTools(after).brown);
     } else {
-      out.push({ trick, says: HELP_ELSE.burn, picture: pic([], [COLS - 1, COLS - 2, COLS - 3], true), shows: burnsClean(cols[COLS - 1]) && clearComingUp(cols) });
+      push(HELP_ELSE.burn, pic([], [COLS - 1, COLS - 2, COLS - 3], true), burnsClean(cols[COLS - 1]) && clearComingUp(cols));
     }
   }
   return out;
@@ -272,6 +372,6 @@ export const QUOTES = { goal: BEST.none, stepOne: STEP_ONE.says, why: STEP_ONE.w
 export function guide() {
   return {
     pieces: PIECES, swaps: SWAPS, furnaceSecs: FURNACE_SECS, chainBonus: CHAIN_BONUS, flask: FLASK, carryOn: CARRY_ON, columns: sampleColumns(),
-    phases: phaseExamples(), levels: levelRows(), techniques: techniqueExamples(), tricks: trickExamples(), quotes: QUOTES,
+    phases: phaseExamples(), levels: levelRows(), techniques: techniqueExamples(), tricks: trickExamples(), quotes: QUOTES, plan: PLAN,
   };
 }
