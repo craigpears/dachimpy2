@@ -549,6 +549,9 @@ basic play is CC^5 and below, skilled CC^6+, expert CC^9+.
   what time you'd set as a target.)
 
 ### Suggested bot and goal tiers (a starting point, to tune)
+(Since 13 Nov the bots aren't named by these tiers: each is its target chain, CC^1 to CC^8, the twelfth run below.
+The table stays as the real game's standings.)
+
 | Tier | Whites banked | Typical result | Burns |
 |---|---|---|---|
 | Learner | never burns a white | Smooooooth columns, odd CC | waits for the timer |
@@ -900,6 +903,83 @@ PHASE). A burned column brings a new one onto the fire's side, so Stage I goes f
   noise.
 - **What it didn't:** the weights are mild on purpose and change few choices; whether stronger ones would play
   better isn't tried (`PHASE_W='{"block":{"hook":1.3}}'` on tools/distill-bots.mjs tries others).
+
+### The bots as target chains, and the twenty-sixth to twenty-ninth notes (13 Nov, twelfth run)
+The tiers are gone (the thirtieth note: "I don't want to say able blah blah blah"). Each bot is its target chain,
+`LEVELS` in `src/distill-bots.ts`: **CC^1, CC^2, CC^3, CC^5, CC^8** (`?bot=cc2` on distilling-test.html; the old
+names still open the nearest, learner CC^1, master CC^3, grandmaster CC^5, ultimate CC^8).
+- **The target sets the bank:** the whites banked before the chain, `bankFor`: 4 columns for CC^1, 4.5, 5, then 6
+  for CC^5 and CC^8 (7 was tried for CC^8 and kept it in Stage I nearly all session, below).
+- **The target sets the techniques:** CC^1 the four simple ones (save the whites, finish the junk column, the
+  diamond and the sweep, channels); CC^2 adds the turn-over and storing; CC^3 the leapfrog; CC^5 the crawl and the
+  hook; CC^8 the figure of eight and the line pull. All search for a piece to bring round when a white's stuck.
+- **It never dismisses:** it sends its chain up, and when the chain breaks it goes back to Stage I, banking for the
+  next ("then it will start working on the next one"). A session ends with the flask full.
+- **One pace for all:** 5 swaps a second along a drag, 350 ms to spot one, 100 ms between the start's blind sweeps,
+  drags up to 14 swaps. Every bot burns early (now safe, the second fix below); none takes the endgame's gamble
+  (Helium's advice still can).
+- **Its target on the advice:** every Advice from a bot or `advise` carries `target` and `whitesNeeded` (still to
+  bank in Stage I; still missing from the columns going up in the chain, 0 once reached), for Helium to say aloud.
+  `advise(board, { target })`: Helium's pace, the techniques of the level for that target; CC^8 if none is given.
+
+The four fixes:
+1. **A white walled in by the fire (26th):** in the three columns next to the fire a white on its column's top or
+   bottom, or beside a spice, is in danger already (`edgeWhites`); its column is a danger zone, saved only by that
+   white getting out (junk brought into its place, the wide path search if need be). No move takes such a white's
+   way out away or puts another white there, unless it gets a white out of the two columns nearest the fire. On the
+   user's board both such whites are out in two moves (the bottom one by a crawl, then the top one).
+2. **Early burns (27th):** a junk column is burned early only while the two columns coming up to the fire after it
+   have no white (`clearComingUp`).
+3. **Phase weights (28th):** they give way only for a danger zone, no longer for any stuck piece. The crawl is
+   weighed down in the fire and fill phases (0.8) and in the block phase (0.85, the hook 1.2).
+4. **One short (29th):** in the block phase a drag let go among the whites is carried on a swap or two more when
+   that takes the piece in against the junk on its right (`joinedUp`) and still gains. Carrying on showed a greedy
+   streak: later drags spent the last corner tool for a long pull across, so the corner tools (the twenty-fourth
+   note) are now spent only to save a white in danger.
+
+20 boards each (seeds 5000 on). Before: the eleventh run's tiers; after: the levels.
+
+| Bot | Target reached (sessions) | Longest chain: mean (best) | Chains a session, mean length | Sessions with no white burned | Disasters | Whites burned a session (first 3 min) | Points a minute |
+|---|---|---|---|---|---|---|---|
+| Learner, before | - | 1.1 (4) | - | 1/20 | 1 | 5.3 | 9.6 |
+| Able to Master, before | - | 1.0 (2) | - | 14/20 | 0 | 1.2 | 8.8 |
+| Grand-Master, before | - | 1.5 (5) | - | 17/20 | 0 | 0.2 | 12.2 |
+| Ultimate, before | - | 2.1 (5) | - | 13/20 | 0 | 0.6 | 18.5 |
+| **CC^1** | 20/20 | 2.3 (4) | 2.8, 1.6 | 4/20 | 0 | 2.0 (0.8) | 12.9 |
+| **CC^2** | 11/20 | 2.1 (5) | 2.5, 1.5 | 6/20 | 0 | 2.9 (0.6) | 10.9 |
+| **CC^3** | 10/20 | 2.3 (5) | 2.9, 1.5 | 0/20 | 0 | 4.2 (0.7) | 9.8 |
+| **CC^5** | 5/20 | 2.5 (7) | 2.0, 1.9 | 0/20 | 0 | 8.7 (1.0) | 8.6 |
+| **CC^8**, banking 7 | 0/20 | 0.6 (3) | 0.3, 1.7 | 0/20 | 0 | 12.3 (1.3) | 1.8 |
+| CC^8 banking 6 (5 boards only) | 0/5 | 3.0 (5) | 1.8, 2.3 | 0/5 | 0 | 9.0 (0.4) | 9.7 |
+
+Early burns, the phase weights, and the techniques by phase (a session):
+
+| Bot | Early burns: in all, within 3 s of the last, with whites in the next two columns | Stage I moves ranked with the weights on | Crawls in fire / fill / block / chain |
+|---|---|---|---|
+| Master / Grand-Master / Ultimate, before | 6.9, 1.9, 4.3 / 7.5, 1.3, 3.7 / 7.1, 2.0, 3.9 | 0 of about 1,500 each | Ultimate 2.2 / 3.8 / 1.3 / 2.9 |
+| CC^1 / CC^2 / CC^3 | 4.8, 0.3, 0 / 5.0, 0.3, 0 / 5.5, 0.3, 0 | 49% / 43% / 40% | none (they don't know it) |
+| CC^5 / CC^8 | 5.5, 0.6, 0 / 4.3, 0.6, 0 | 36% / 28% | 15.7 / 1.8 / 6.2 / 5.4 and 11.8 / 1.6 / 7.5 / 0.8 |
+
+What the low targets play: the sweep, saving whites and the diamond in Stage I (CC^1: 49 sweeps, 37 rescues, 18
+diamonds a session in the fire phase), channels and the diamond in the chain.
+
+Plainly:
+- **Targets:** CC^1 is reached every session (every one of its 55 chains); CC^2 about half the sessions, CC^3
+  half, CC^5 a quarter. CC^8 isn't reached. Means sit near CC^2 for all of them: the chains are still limited by
+  the white block's dirty edges (the second run), not the bank.
+- **Whites burned went up, honestly the main cost.** Sessions now run to the flask full (6.5 to 8.6 minutes, where
+  the old bots dismissed at about 3), and most whites burn after the first chain, when the bot goes back to Stage I
+  on a mixed board and waits with a white it can't reach by the fire. In the first 3 minutes it's 0.6 to 1.3, near
+  the old 0.2 to 1.2 a (3-minute) session; no disasters. Sessions with no white burned at all fell (0 to 6 of 20).
+- **Early burns:** none now with whites in the next two columns (was 33 of 46 on seeds 1 to 5), and back to back
+  burns down from about 2 a session to 0.3 to 0.6.
+- **Weights:** they now rank 28% to 49% of Stage I moves (was 1 in about 1,500). Crawls in the fill phase halved
+  (Ultimate 3.8, now 1.6 to 1.8), but in the fire phase rose for CC^5 and CC^8 (to 12 to 16): the new danger zone
+  for an edge white turns up often, every technique is even there, and a crawl is often the saving move.
+- **CC^8 banking 7 failed** (0.3 chains a session); 6, measured on 5 boards only, gave chains of 3.0 and is what
+  ships. To measure on 20 boards next.
+- **Next:** rescuing a white that's let go in a rebuild (whites burned later in a session); ranking the saving
+  moves of an edge zone by the phase's weights too, so a hook or a plain drag beats a crawl there.
 
 **Watching them, the first note (the user, 12 Nov, a screenshot of the Ultimate's board):** "the main
 thing is it just doesn't carry on the whole way to the right. It just kind of stops ... that black ... in

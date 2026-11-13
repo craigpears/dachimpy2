@@ -7,7 +7,7 @@
 <!-- A test page for Puzzle Pirates' Distilling, unlinked like den.html. The rules are src/distilling.ts
      (compiled to js/distilling.js); the board's look is js/den/distill-board.js, the one Helium's still
      will use. This page only stands it up on its own, with a seed in the address (?seed=7), a restart,
-     and the bots of src/distill-bots.ts to watch at their own pace (?bot=ultimate): each drag swept as a
+     and the bots of src/distill-bots.ts to watch at their own pace (?bot=cc3, each named by its target chain): each drag swept as a
      hand would, the piece held, and the routine it's playing (src/distill-routines.ts) in small text. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -69,7 +69,7 @@
 import * as THREE from 'three';
 import { seeded } from './js/mirror-row.js';
 import { Distilling, MESSAGES } from './js/distilling.js';
-import { TIERS, tierNamed, DistillBot } from './js/distill-bots.js';
+import { LEVELS, levelNamed, bankFor, PER_COLUMN, DistillBot } from './js/distill-bots.js';
 import { ROUTINES } from './js/distill-routines.js';
 import { distillBoard } from './js/den/distill-board.js';
 
@@ -95,18 +95,20 @@ const shot = params.has('shot');
 // ?fast=n: time n times as fast (to watch a bot's whole session quickly).
 const fast = Number(params.get('fast')) || 1;
 if (shot) for (const el of document.querySelectorAll('.ui, #prompt')) el.style.display = 'none';
-for (const t of TIERS) { const o = document.createElement('option'); o.value = t.name; o.textContent = t.label; $('bot').append(o); }
+for (const t of LEVELS) { const o = document.createElement('option'); o.value = t.name; o.textContent = `aiming for ${t.label}`; $('bot').append(o); }
+// (an old tier's name in the address, ?bot=ultimate, is the level nearest it)
+if (botName) botName = levelNamed(botName).name;
 $('bot').value = botName;
-/** What the bot watched knows: its techniques by name, and whether it takes the endgame's bet (the user,
-    12 Nov: the levels are the techniques, "not swaps per second"). */
+/** What the bot watched is after and knows: its target chain, the whites it banks for it, and its techniques by
+    name (the user, 13 Nov: "what is the bot's target crystal clear and it will try and work towards it"). */
 function showKnows() {
-  const t = botName ? tierNamed(botName) : null;
-  $('knows').textContent = t ? `Knows: ${t.routines.map((r) => ROUTINES[r].label[0].toLowerCase() + ROUTINES[r].label.slice(1)).join(', ')}.${t.gamble ? ' Takes the endgame’s bet.' : ''}` : '';
+  const t = botName ? levelNamed(botName) : null;
+  $('knows').textContent = t ? `Aims for ${t.label}, banking about ${Math.round(bankFor(t.target) * PER_COLUMN)} whites first. Knows: ${t.routines.map((r) => ROUTINES[r].label[0].toLowerCase() + ROUTINES[r].label.slice(1)).join(', ')}.` : '';
 }
 
 const log = (t) => { const li = document.createElement('li'); li.textContent = t; $('log').prepend(li); while ($('log').children.length > 9) $('log').lastChild.remove(); };
 const L = 'wbK*x';
-/** A bot playing through the board, at its tier's pace: a moment to spot each drag, then a swap each 1 / rate s. */
+/** A bot playing through the board, at its pace: a moment to spot each drag, then a swap each 1 / rate s. */
 let bot = null, botWait = 0, botSteps = [], botSpot = 0;
 
 function deal() {
@@ -124,7 +126,7 @@ function deal() {
     onFinish: (gm) => { if (gm.dismissed) log(`dismissed: ${gm.points} points in ${gm.columnsUp} columns, ${gm.score().toFixed(2)} a column`); },
   });
   scene.add(board.group);
-  bot = botName ? new DistillBot(tierNamed(botName)) : null;
+  bot = botName ? new DistillBot(levelNamed(botName)) : null;
   showKnows();
   botWait = 600; botSteps = [];
   $('routine').textContent = '';
@@ -139,12 +141,17 @@ $('bot').onchange = () => { botName = $('bot').value; deal(); $('bot').blur(); }
 deal();
 
 /** The routine the bot's playing, in small text under the stats, so its plan can be followed. */
-function showRoutine(p) { $('routine').innerHTML = ''; const b = document.createElement('b'); b.textContent = p.label; $('routine').append(b, `: ${p.reason}`); }
+function showRoutine(p) {
+  $('routine').innerHTML = ''; const b = document.createElement('b'); b.textContent = p.label;
+  // Its target, and the whites still needed for it (to bank, or to fill the columns going up).
+  const need = p.whitesNeeded ? `${p.whitesNeeded} more white${p.whitesNeeded > 1 ? 's' : ''} ${p.stage === 'junk' ? 'to bank' : 'to fill it'}` : p.stage === 'junk' ? 'banked' : 'on its way';
+  $('routine').append(b, `: ${p.reason}${p.target ? ` (CC^${p.target}: ${need})` : ''}`);
+}
 function driveBot(dt) {
   if (!bot || board.game.finished || board.paused) return;
   botWait -= dt * 1000;
   if (botWait > 0 || !board.game.movable) return;
-  const t = bot.tier;
+  const t = bot.level;
   if (botSteps.length) {
     // A drag as a hand sweeps it: the piece held, a swap as the mouse passes each place, no pause.
     const [x, y, w] = botSteps.shift();

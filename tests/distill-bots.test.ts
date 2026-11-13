@@ -1,11 +1,11 @@
-/* Distilling's bots and their planner (src/distill-bots.ts): every tier the same plan, its techniques
-   the routines of src/distill-routines.ts picked by stage, at a person's pace, by the rules (12 Nov). What
-   each tier reaches is tools/distill-bots.mjs's to measure (DISTILLING.md §4). */
+/* Distilling's bots and their planner (src/distill-bots.ts): every bot the same plan, a target chain each, its
+   techniques the routines of src/distill-routines.ts picked by stage, at a person's pace, by the rules (12 Nov).
+   What each reaches is tools/distill-bots.mjs's to measure (DISTILLING.md §4). */
 import { describe, expect, it } from 'vitest';
 import { BLACK, BURN_TICKS, COLS, DOWN_RIGHT, Distilling, SHORT, TALL, UP_LEFT, UP_RIGHT, WHITE, neighbourOn, parseBoard } from '../src/distilling';
-import { DistillBot, HELIUM, MENU, P, brownSweep, dangerZones, rightOrder, tieBreak, whitesInJunk, TIERS, advise, backward, choose, contextFor, judge, junkAcross, playSession, tierNamed, turnsIn, weigh } from '../src/distill-bots';
+import { DistillBot, HELIUM, LEVELS, MENU, P, bankFor, brownSweep, clearComingUp, dangerZones, edgeWhites, joinedUp, levelFor, rightOrder, tieBreak, whitesInJunk, advise, backward, choose, contextFor, judge, junkAcross, levelNamed, playSession, tierNamed, turnsIn, weigh } from '../src/distill-bots';
 import type { Advice } from '../src/distill-bots';
-import { ROUTINES, colourLeft, playDrags } from '../src/distill-routines';
+import { ROUTINES, canGo, colourLeft, playDrags } from '../src/distill-routines';
 import { blockPhase, boardScore, keptTools, trappedWhite } from '../src/distill-score';
 import type { Drag, RoutineName } from '../src/distill-routines';
 import type { Board } from '../src/distilling';
@@ -23,17 +23,16 @@ function board(at: [number, number, string][], cols = sea('w')): Board {
 const column = (x: number, s: string): [number, number, string][] => [...s].map((ch, y) => [x, y, ch]);
 
 describe('the bots (12 Nov)', () => {
-  it('are four tiers, none faster than 6 swaps a second along a drag (a swap slides 150 ms)', () => {
-    expect(TIERS.map((t) => t.name)).toEqual(['learner', 'master', 'grandmaster', 'ultimate']);
-    for (const t of TIERS) expect(t.rate).toBeLessThanOrEqual(6);
+  it('none faster than 6 swaps a second along a drag (a swap slides 150 ms)', () => {
+    for (const t of LEVELS) expect(t.rate).toBeLessThanOrEqual(6);
   });
-  it('every tier plays the same plan, only with fewer techniques lower down (the user: "It\'s always whites to the left")', () => {
-    for (const t of TIERS) for (const r of ['rescue', 'junkColumn', 'diamond', 'channel'] as const) expect(t.routines).toContain(r);
-    for (let i = 1; i < TIERS.length; i++) for (const r of TIERS[i - 1].routines) expect(TIERS[i].routines).toContain(r);
+  it('every bot plays the same plan, only with fewer techniques lower down (the user: "It\'s always whites to the left")', () => {
+    for (const t of LEVELS) for (const r of ['rescue', 'junkColumn', 'diamond', 'channel'] as const) expect(t.routines).toContain(r);
+    for (let i = 1; i < LEVELS.length; i++) for (const r of LEVELS[i - 1].routines) expect(LEVELS[i].routines).toContain(r);
   });
   it('never burn a white when a rescue was possible (12 Nov: the bot "just went down and burnt" a white)', () => {
     // A white in the furnace's column, one swap from safety, and under two seconds on the furnace.
-    for (const t of TIERS) {
+    for (const t of LEVELS) {
       const g = new Distilling(seeded(3)).lay(board([...column(9, 'KKKwKKKK'), [8, 3, 'K'], ...column(0, 'KbKbKbKbK'), ...column(1, 'bKbKbKbK')]));
       g.furnace = BURN_TICKS - 5;
       expect(g.timeLeft()).toBeLessThan(2000);
@@ -44,13 +43,13 @@ describe('the bots (12 Nov)', () => {
     }
   });
   it('never burn a column with a white in it on purpose', () => {
-    for (const t of TIERS.slice(1)) {
+    for (const t of LEVELS.slice(1)) {
       const g = new Distilling(seeded(5003));
       playSession(g, t, 3, undefined, (a) => { if (a.kind === 'burn' && a.stage === 'junk') expect(g.cols[COLS - 1]).not.toContain(WHITE); });
     }
   }, 60000);
   it('play a whole session by the rules at their own pace, and it ends', () => {
-    for (const t of TIERS) {
+    for (const t of LEVELS) {
       const g = new Distilling(seeded(5000));
       const r = playSession(g, t, 3);
       expect(r.swaps / (r.minutes * 60)).toBeLessThanOrEqual(t.rate);
@@ -59,21 +58,75 @@ describe('the bots (12 Nov)', () => {
     }
   }, 60000);
   it('play techniques as whole drags, several swaps each, not a click a swap (the user, 12 Nov: "a human doesn\'t have time for those little swaps")', () => {
-    const r = playSession(new Distilling(seeded(5001)), tierNamed('master'), 4);
+    const r = playSession(new Distilling(seeded(5001)), levelNamed('cc3'), 4);
     expect(r.swaps / r.drags).toBeGreaterThan(2);
   });
-  it('the learner never burns early: its columns go at the furnace\'s pace', () => {
-    const g = new Distilling(seeded(5001)), at: number[] = [];
-    playSession(g, tierNamed('learner'), 4, () => at.push(g.time));
-    expect(at.length).toBeGreaterThan(10);
-    // (seen at the end of the drag or wait it came in)
-    for (let i = 1; i < at.length; i++) expect(at[i] - at[i - 1]).toBeGreaterThanOrEqual(15300 - 1500);
-  });
-  it('the better tiers burn early, and dismiss once their chain breaks or isn\'t worth chasing', () => {
+  it('burn early, but a junk column only while the columns coming up to the fire next are clear of white too, 13 Nov ("3 burns just happened in rapid succession before it even made another move. Is that why it\'s struggling and failing?")', () => {
     const g = new Distilling(seeded(5002));
-    const r = playSession(g, tierNamed('master'), 20);
+    playSession(g, levelNamed('cc3'), 6, undefined, (a) => { if (a.kind === 'burn' && a.stage === 'junk') expect(clearComingUp(g.cols)).toBe(true); });
     expect(g.columns.length).toBeGreaterThan(Math.floor(g.time / 15300));
-    if (r.dismissed && g.longest > 0) expect(g.columns[g.columns.length - 1].chain === 0 || g.chain > 0).toBe(true);
+    // The furnace's column all junk and nothing much to do: burned at once, but not with a white in the next one.
+    const right = [...column(7, 'KKKKbbbb'), ...column(8, 'KKKKbbbbb'), ...column(9, 'KKKKbbbb')];
+    const clearBoard = board(right), whiteNext = board([...right, [8, 4, 'w']]);
+    const play = (cols: Board) => choose({ cols, chain: 0, timeLeft: 12000 }, contextFor(cols, 'junk', 0, 14), levelNamed('cc8')).kind;
+    expect(clearComingUp(clearBoard)).toBe(true);
+    expect(play(clearBoard)).toBe('burn');
+    expect(clearComingUp(whiteNext)).toBe(false);
+    expect(play(whiteNext)).not.toBe('burn');
+  }, 60000);
+});
+
+describe('the bots are their target chains, 13 Nov (the thirtieth note: "I want to say what is the bot\'s target crystal clear and it will try and work towards it")', () => {
+  it('a ladder of targets, CC^1 up, named by them, the old tier names the nearest level', () => {
+    expect(LEVELS.map((l) => l.target)).toEqual([1, 2, 3, 5, 8]);
+    expect(LEVELS.map((l) => l.name)).toEqual(['cc1', 'cc2', 'cc3', 'cc5', 'cc8']);
+    expect(levelNamed('cc2').label).toBe('CC^2');
+    expect(levelNamed('ultimate').target).toBe(8);
+    expect(levelNamed('learner').target).toBe(1);
+    expect(tierNamed('master')).toBe(levelNamed('cc3'));
+    expect(levelFor(4).target).toBe(3);
+    // One pace for all: the levels are their targets, not their speed.
+    for (const l of LEVELS) { expect(l.rate).toBe(LEVELS[0].rate); expect(l.spot).toBe(LEVELS[0].spot); }
+  });
+  it('the higher the target, the more whites banked before the chain, up to 6 columns', () => {
+    for (let i = 1; i < LEVELS.length; i++) expect(bankFor(LEVELS[i].target)).toBeGreaterThanOrEqual(bankFor(LEVELS[i - 1].target));
+    expect(bankFor(3)).toBeGreaterThan(bankFor(1));
+    // Never more than 6 columns: banking 7 left the CC^8 bot in Stage I nearly all session (13 Nov, the twelfth run),
+    // as banking 7 or 8 made every bot worse in the second run (12 Nov).
+    for (const l of LEVELS) expect(bankFor(l.target)).toBeLessThanOrEqual(6);
+  });
+  it('low targets use the simple techniques; the crawl and the hook from CC^5, the figure of eight and line pull for CC^8 ("a CC^2 with the simple ones, the crawls and hooks only for the longer chains")', () => {
+    for (const l of LEVELS.filter((x) => x.target < 5)) for (const r of ['crawl', 'hook', 'figureEight', 'linePull'] as const) expect(l.routines).not.toContain(r);
+    expect(levelNamed('cc5').routines).toEqual(expect.arrayContaining(['crawl', 'hook']));
+    expect(levelNamed('cc8').routines).toEqual(expect.arrayContaining(['figureEight', 'linePull']));
+    expect([...levelNamed('cc8').routines].sort()).toEqual(Object.keys(ROUTINES).sort());
+  });
+  it('never dismisses: when a chain breaks it goes back to building toward the next ("then it will start working on the next one")', () => {
+    let chained = false, rebuilt = false;
+    const r = playSession(new Distilling(seeded(5002)), levelNamed('cc2'), 8, undefined, (a) => {
+      expect(a.kind).not.toBe('dismiss');
+      expect(a.target).toBe(2);
+      expect(a.whitesNeeded).toBeGreaterThanOrEqual(0);
+      if (a.stage === 'chain') chained = true; else if (chained) rebuilt = true;
+    });
+    expect(chained).toBe(true);
+    expect(rebuilt).toBe(true);
+    expect(r.dismissed).toBe(false);
+    expect(r.chains.length).toBeGreaterThan(0);
+  }, 60000);
+  it('advise says its target and the whites still needed for it, for Helium to say ("our goal is to get one column full of white pieces")', () => {
+    const g = new Distilling(seeded(5000));
+    const two = advise({ cols: g.cols, chain: 0, timeLeft: g.timeLeft() }, { target: 2 });
+    expect(two.target).toBe(2);
+    expect(two.stage).toBe('junk');
+    expect(two.whitesNeeded).toBeGreaterThan(0);
+    const top = advise({ cols: g.cols, chain: 0, timeLeft: g.timeLeft() });
+    expect(top.target).toBe(8);
+    expect(top.whitesNeeded!).toBeGreaterThan(two.whitesNeeded!);
+    // In the chain: the whites still missing from the columns going up for it, none once it's reached.
+    const cols = board([...column(0, 'KKKKbbbbb'), ...column(1, 'KKKKbbbb'), [9, 0, 'K']]);
+    expect(advise({ cols, chain: 1, timeLeft: 12000 }, { target: 2 }).whitesNeeded).toBe(1);
+    expect(advise({ cols, chain: 2, timeLeft: 12000 }, { target: 2 }).whitesNeeded).toBe(0);
   });
 });
 
@@ -121,13 +174,13 @@ describe('the start is sweeping, the techniques after (12 Nov)', () => {
     expect(a.drags).toHaveLength(1);
     expect(whites(playDrags(g.cols, a.drags)!)).toBeLessThan(whites(g.cols));
     // Swept blind: hardly a pause between them, every tier (the lower ones a bit slower).
-    for (const t of TIERS) expect(t.sweepSpot).toBeLessThan(t.spot / 2);
+    for (const t of LEVELS) expect(t.sweepSpot).toBeLessThan(t.spot / 2);
     // A bot's first move is one quick drag (since 13 Nov, with the score "about filling those right-hand
     // columns", that can be a white saved out of the column next to burn, finishing it), never a slow
     // technique, and at the start plain drags (sweeps, the diamond's runs) come at least as often as the slow
     // techniques.
     const plans: Advice[] = [];
-    playSession(new Distilling(seeded(5001)), tierNamed('master'), 1, undefined, (p) => { if (p.kind === 'move') plans.push(p); });
+    playSession(new Distilling(seeded(5001)), levelNamed('cc3'), 1, undefined, (p) => { if (p.kind === 'move') plans.push(p); });
     const first = plans.slice(0, 20);
     expect(first[0].drags).toHaveLength(1);
     expect(SLOW).not.toContain(first[0].routine);
@@ -186,7 +239,7 @@ describe('nothing trapped (13 Nov, the eighteenth note)', () => {
     // notes/distilling/35- and 36-*: the test page's first board (seed 1). The old first move took the white
     // second from the top of the second column from the right up-left twice, to the top of column 7, where its
     // only way left was a white: trapped.
-    for (const t of TIERS) for (let seed = 1; seed <= 6; seed++) {
+    for (const t of LEVELS) for (let seed = 1; seed <= 6; seed++) {
       const g = new Distilling(seeded(seed)), cols = g.cols;
       const a = new DistillBot(t).plan(g);
       if (a.kind !== 'move') continue;
@@ -201,7 +254,7 @@ describe('nothing trapped (13 Nov, the eighteenth note)', () => {
     let free = 0;
     for (const seed of [5000, 5001]) {
       const g = new Distilling(seeded(seed));
-      playSession(g, tierNamed('master'), 30, undefined, (a) => {
+      playSession(g, levelNamed('cc3'), 30, undefined, (a) => {
         if (a.stage !== 'junk' || a.kind !== 'move' || !brownSweep(g.cols, a.drags)) return;
         const ctx = contextFor(g.cols, 'junk', 0, 16), was = whitesInJunk(g.cols, ctx.burnFrom);
         if (was === 0) { free++; return; }
@@ -237,7 +290,7 @@ describe('never a white burned (13 Nov, the twentieth and twenty-second notes)',
     // notes/distilling/37-*: whites low in the furnace's column, no one drag reaching them; with 12 s left the
     // planner used to sweep elsewhere and leave the two-drag rescue for the last seconds.
     const cols = parseBoard(['KKKwwKbKK', 'wwwKwbww', 'KwwKKw*Kw', 'bbwwbwbK', '*wKwKKbwb', 'bKwKbwKb', 'b*wKbbKbw', 'KwKbbKbw', 'KbwKKKbwK', 'bbKbbbww']);
-    for (const style of [HELIUM, tierNamed('master'), tierNamed('ultimate')]) {
+    for (const style of [HELIUM, levelNamed('cc3'), levelNamed('cc8')]) {
       const a = choose({ cols, chain: 0, timeLeft: 12000 }, ctxOf(cols), style);
       expect(a.kind).toBe('move');
       const whites = (b: Board) => b[COLS - 1].filter((p) => p === WHITE).length;
@@ -248,16 +301,17 @@ describe('never a white burned (13 Nov, the twentieth and twenty-second notes)',
     // notes/distilling/39-*, read off the picture: the furnace's column all junk; the next has two whites low
     // down with no way out left on their own; a knot of whites round a spice in the bottom middle.
     const cols = parseBoard(['Kw*bbKKb', 'wbwww*KKw', 'bwwwwKKw', 'wKKwKKwwK', 'KwwwwwwK', 'wwbKbw*bw', 'bbKwwKww', '*wwwKKbww', 'bbKKbKww', 'b*bKbbbbK']);
-    expect(dangerZones(cols, 'junk', true)).toEqual([COLS - 2]);
+    // (the column before the fire first; since 13 Nov the next one too, for a white on its edge, the twenty-sixth note)
+    expect(dangerZones(cols, 'junk', true)[0]).toBe(COLS - 2);
     const a = choose({ cols, chain: 0, timeLeft: 12000 }, ctxOf(cols), HELIUM);
     const nearFire = (b: Board) => b[COLS - 2].filter((p) => p === WHITE).length + b[COLS - 1].filter((p) => p === WHITE).length;
     expect(nearFire(playDrags(cols, a.drags)!)).toBeLessThan(nearFire(cols));
   });
   it('an early white must not burn: the Master on the board where it burned one in the first three columns gone, 13 Nov ("if you burn a white on the first column or the second column that goes up or down, that\'s catastrophic")', () => {
-    for (const [tier, seed] of [['master', 5007]] as const) {
+    for (const [tier, seed] of [['cc3', 5007]] as const) {
       const g = new Distilling(seeded(seed));
       let gone = 0, early = 0;
-      playSession(g, tierNamed(tier), 2, (c) => { gone++; if (gone <= 3 && !c.up && c.whites > 0) early++; });
+      playSession(g, levelNamed(tier), 2, (c) => { gone++; if (gone <= 3 && !c.up && c.whites > 0) early++; });
       expect(early, `${tier} on ${seed}`).toBe(0);
     }
   }, 60000);
@@ -368,5 +422,50 @@ describe('judging the board, one drag ahead (12 Nov, the eleventh note)', () => 
     expect(plainAfter).not.toBeNull();
     expect(junkAcross(plainAfter)).toBe(junkAcross(after));
     expect(judge(cols, plain, HELIUM)!.value).toBeGreaterThan(judge(cols, crawl, HELIUM)!.value);
+  });
+});
+
+describe('watching the CC^8 on seed 1 (13 Nov, the twenty-sixth and twenty-ninth notes)', () => {
+  // The user's board, seed 1 replayed with the Ultimate to its 27th plan: a white at the top of the third column
+  // from the fire, a spice below-left of it, another white on that column's bottom.
+  const user = () => parseBoard('KKKwwKbKK wwKwwbKb wwbwwb*ww bwwwwwww *KwwKwbwb bwwKbKbK K*KKbbKbw wbKbbKKw KbbKKKbKK bKKbbbbb'.split(' '));
+  it('a white at the top by the fire, beside a spice, is got out before it\'s walled in, 13 Nov ("It even moved some blacks in the way at the top that actually block getting that white piece out easily ... Why have you blocked it all in?")', () => {
+    let cols = user();
+    expect(edgeWhites(cols)).toContainEqual({ x: 7, y: 0 });
+    expect(dangerZones(cols, 'junk', true)).toContain(7);
+    expect(canGo(cols, 7, 0, -1)).toBe(true);
+    const ctx = () => contextFor(cols, 'junk', 0, 14);
+    // No move it would weigh takes the white's way out away.
+    for (const m of weigh({ cols, chain: 0, timeLeft: 12000 }, ctx(), levelNamed('cc8'))) {
+      expect(m.after![7][0] !== WHITE || canGo(m.after!, 7, 0, -1), JSON.stringify(m.move.drags)).toBe(true);
+    }
+    // Played on: within a move or two both whites on the column's edges are out of the fire's side, each move
+    // getting one of them out.
+    for (let i = 0; i < 2 && edgeWhites(cols).length; i++) {
+      const was = edgeWhites(cols).length, a = choose({ cols, chain: 0, timeLeft: 12000 }, ctx(), levelNamed('cc8'));
+      expect(a.kind).toBe('move');
+      cols = playDrags(cols, a.drags)!;
+      expect(edgeWhites(cols).length).toBeLessThan(was);
+    }
+    expect(cols[7][0]).not.toBe(WHITE);
+  });
+  it('a block move is carried on into the junk, not let go one short among the whites, 13 Nov ("It has decided to just leave it one short. Why? Like, there was an extra move there")', () => {
+    // The whites a block on the left, the junk the right three columns; a black among the whites dragged down-right.
+    const cols = parseBoard(['KwwwwwwwK', 'wwwwwwww', 'wwwwKwwww', 'wwwwwwww', 'wwwwwwwww', 'wwwwwwwb', 'wwwwwwwwK', 'bbbbKKKK', 'bbbbKKKKK', 'bbbbKKKK']);
+    expect(blockPhase(cols)).toBe(true);
+    const drag = [{ x: 2, y: 4, ways: [DOWN_RIGHT, DOWN_RIGHT, DOWN_RIGHT, DOWN_RIGHT] }];
+    const was = P.CARRY;
+    try {
+      P.CARRY = 0;
+      const short = judge(cols, drag, HELIUM, undefined, true)!;
+      expect(short.drags[0].ways).toHaveLength(3);
+      P.CARRY = was;
+      const carried = judge(cols, drag, HELIUM, undefined, true)!;
+      expect(carried.drags[0].ways).toHaveLength(4);
+      expect(carried.value).toBeGreaterThan(0);
+      const end = (n: number): [number, number] => { let at: [number, number] = [2, 4]; for (let i = 0; i < n; i++) at = neighbourOn(cols, at[0], at[1], DOWN_RIGHT)!; return at; };
+      expect(joinedUp(playDrags(cols, short.drags)!, end(3))).toBe(false);
+      expect(joinedUp(playDrags(cols, carried.drags)!, end(4))).toBe(true);
+    } finally { P.CARRY = was; }
   });
 });
