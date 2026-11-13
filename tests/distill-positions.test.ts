@@ -13,7 +13,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { BATCHES, MOMENTS, POSITIONS, QUESTION, SKIPPED, THEMED, THEMES, VERDICTS, boardOf, botAt, challengeReads, check, moveOf, type Theme } from '../src/distill-positions';
-import { STATES, TACTICS, readBoard } from '../src/distill-read';
+import { STATES, TACTICS, inTrouble, readBoard } from '../src/distill-read';
 import { COLS, TALL } from '../src/distilling';
 import { playDrags } from '../src/distill-routines';
 
@@ -95,7 +95,15 @@ const NOT_FOUND: Readonly<Record<string, string>> = {
   // 18 sessions (CC^2, CC^5 and CC^8 on seeds 4 to 9, 8 minutes each): the reader never read a board as cracked
   // (half the free junk stranded, 12 pieces at least). P10's own board came from CC^8 seed 2 at 160 s.
   cracked: 'none of the 18 sessions read cracked: the bots rarely strand that much junk',
+  // The two found, P21 (like P5) and P22 (like P6), the user judged not trapped (13 Nov: "there's a two-step solution
+  // ... trapped I define as being much more challenging than that"): moved to "close", and the reader no longer reads
+  // them as trapped.
+  trapped: 'the two found (P21, P22) were judged not trapped, 13 Nov, and moved to "close"',
+  // A theme from the batch's own verdicts (P17), after the challenge was picked: none looked for yet.
+  hoist: 'a theme first judged in the batch itself (P17), 13 Nov: no challenge board looked for yet',
 };
+/** A challenge board the user judged as another theme than the one it was found like. */
+const moved = (p: { id: string; like?: string }) => !!THEMED[p.id] && !!p.like && THEMED[p.id].theme !== THEMED[p.like]?.theme;
 describe('the batch to judge', () => {
   it('numbered on from the judged positions, in its two parts, every one a real moment on a deal not judged before', () => {
     const judged = POSITIONS.filter((p) => !p.batch);
@@ -121,6 +129,13 @@ describe('the theme challenge: the board reader finds each judged theme on other
   const challenge = BATCH.filter((p) => p.batch === 'challenge');
   for (const p of challenge) {
     const reads = challengeReads(p);
+    if (moved(p)) {
+      it(`${p.id} was found as like ${p.like}, judged ${THEMES[THEMED[p.id].theme].name.toLowerCase()} (13 Nov): the reader no longer reads it as ${p.like} does`, () => {
+        const r = readBoard(boardOf(p), { stage: p.stage, timeLeft: p.timeLeft });
+        expect(reads?.tactic && r.tactic === reads.tactic && (!reads.state || r.state === reads.state), p.id).toBe(false);
+      });
+      continue;
+    }
     const want = reads ? [reads.state && STATES[reads.state].label, reads.tactic && TACTICS[reads.tactic].label].filter(Boolean).join(', ') : '?';
     it(`${p.id} (${p.level}, seed ${p.seed}, ${(p.ms / 1000).toFixed(1)} s in) reads as ${p.like} does: ${want}`, () => {
       expect(reads, `${p.id}: like ${p.like}, a judged position with a reading`).toBeTruthy();
@@ -133,7 +148,7 @@ describe('the theme challenge: the board reader finds each judged theme on other
   it('every judged theme has a board or two from another game, or says why not', () => {
     const themes = new Set(Object.entries(THEMED).filter(([id, t]) => t.reads && VERDICTS[id]?.length).map(([, t]) => t.theme));
     for (const theme of themes) {
-      const n = challenge.filter((p) => THEMED[p.like!]?.theme === theme).length;
+      const n = challenge.filter((p) => !moved(p) && THEMED[p.like!]?.theme === theme).length;
       if (NOT_FOUND[theme]) expect(n, theme).toBe(0);
       else { expect(n, theme).toBeGreaterThanOrEqual(1); expect(n, theme).toBeLessThanOrEqual(2); }
     }
@@ -143,4 +158,25 @@ describe('the theme challenge: the board reader finds each judged theme on other
       if (a !== b && THEMED[a.like!]?.theme === THEMED[b.like!]?.theme) expect(a.seed, `${a.id} and ${b.id}`).not.toBe(b.seed);
     }
   });
+});
+
+// The lead-up, 13 Nov (tools/distill-positions.mjs's `leadup`): the user, "the ones I really want to be judging are the
+// things that have gotten me into that position beforehand ... you're showing me examples after the problem already
+// looks irreversible"; and "try and get earlier in".
+describe('the lead-up: the move that puts a white in trouble, from before the damage', () => {
+  const LEAD = POSITIONS.filter((p) => p.batch === 'leadup');
+  it('about a dozen, mostly from the early and middle game (the first three minutes), from several deals', () => {
+    expect(LEAD.length).toBeGreaterThanOrEqual(8);
+    expect(LEAD.filter((p) => p.ms <= 180000).length * 2).toBeGreaterThanOrEqual(LEAD.length);
+    expect(new Set(LEAD.map((p) => p.seed)).size).toBeGreaterThanOrEqual(5);
+  });
+  for (const p of LEAD) {
+    it(`${p.id} (${p.level}, seed ${p.seed}, ${(p.ms / 1000).toFixed(1)} s in): the ringed white is out of trouble before the bot's move and in it after, the move as the bot makes it now`, () => {
+      const cols = boardOf(p), after = playDrags(cols, p.bot.drags)!;
+      expect(p.shut?.length, p.id).toBeGreaterThan(0);
+      expect(moveOf(botAt(p)).drags, `${p.id}: run tools/distill-positions.mjs`).toEqual(p.bot.drags);
+      const trouble = (b: typeof cols) => { let n = 0; for (let x = 4; x < COLS; x++) b[x].forEach((_, y) => { if (inTrouble(b, x, y, p.timeLeft)) n++; }); return n; };
+      expect(trouble(after), p.id).toBeGreaterThan(trouble(cols));
+    });
+  }
 });

@@ -22,6 +22,12 @@
        (its reading's targets in the same places, the same time of the session), from different deals.
      No two from the same session within 30 s of each other. Deterministic. Then the refresh above, then `npm run build`.
 
+   node_modules/node/bin/node.exe tools/distill-positions.mjs leadup [minutes]
+     The lead-up (13 Nov): fresh play by the CC^3, CC^5 and CC^8 bots on seeds 10 to 21 (`minutes` each, default 4, the
+     early and middle game; about 8 minutes to run), and the moves that put a white in trouble (`inTrouble`): the last
+     board where it was still free enough, the move drawn, the white ringed (`shut`). About 12 added, the earliest first.
+     Then the refresh above, then `npm run build`.
+
    Each way it rewrites only the lines between the POSITIONS markers in src/distill-positions.ts. */
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -32,14 +38,14 @@ import { DistillBot, contextFor, edgeWhites, levelNamed } from '../js/distill-bo
 import { canGo, isJunk } from '../js/distill-routines.js';
 import { stuck } from '../js/distill-path.js';
 import { POSITIONS, SKIPPED, THEMED, VERDICTS, botAt, moveOf, planOf } from '../js/distill-positions.js';
-import { readBoard } from '../js/distill-read.js';
+import { inTrouble, readBoard } from '../js/distill-read.js';
 import { seeded } from '../js/mirror-row.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FILE = join(ROOT, 'src/distill-positions.ts');
 const START = '// ---- POSITIONS:', END = '// ---- end of POSITIONS ----';
 const MODE = process.argv[2] ?? 'refresh', PICK = MODE === 'pick', BATCH = MODE === 'batch';
-const CAP = Number(process.argv[3] ?? (BATCH ? 5 : 12));
+const CAP = Number(process.argv[3] ?? (BATCH ? 5 : MODE === 'leadup' ? 4 : 12));
 /** The sessions positions are picked from, in order: CC^3 and CC^8, seeds 1 to 3. */
 const SESSIONS = [['cc3', 1], ['cc8', 1], ['cc3', 2], ['cc8', 2], ['cc3', 3], ['cc8', 3]];
 /** How many of each kind of moment, in the page's order. */
@@ -117,7 +123,7 @@ const MOMENT = {
 
 /** A position as written in the file, a few readable lines. */
 function format(p) {
-  const head = ['id', 'moment', 'level', 'seed', 'ms', 'stage', 'burns', 'chain', 'timeLeft', 'batch', 'like'].filter((k) => p[k] !== undefined).map((k) => `${k}: ${JSON.stringify(p[k])}`).join(', ');
+  const head = ['id', 'moment', 'level', 'seed', 'ms', 'stage', 'burns', 'chain', 'timeLeft', 'batch', 'like', 'shut'].filter((k) => p[k] !== undefined).map((k) => `${k}: ${JSON.stringify(p[k])}`).join(', ');
   return `  {\n    ${head},\n    what: ${JSON.stringify(p.what)},\n    cols: ${JSON.stringify(p.cols)},\n    bot: ${JSON.stringify(p.bot)},${p.plan ? `\n    plan: ${JSON.stringify(p.plan)},` : ''}\n  },`;
 }
 function write(list) {
@@ -140,7 +146,7 @@ function play(name, seed, cap, visit) {
     const a = bot.plan(g);
     const ctx = contextFor(cols, bot.stage, bot.burns, level.reach);
     if (a.phase === 'block' && a.kind === 'move') blockMoves++;
-    visit({ cols, timeLeft, chain, ms: Math.round(g.time), stage: bot.stage, burns: bot.burns, ctx, advice: a, blockMoves });
+    visit({ cols, timeLeft, chain, ms: Math.round(g.time), stage: bot.stage, burns: bot.burns, ctx, advice: a, blockMoves, gone: g.columns.length });
     if (a.kind === 'dismiss') { g.dismiss(); break; }
     if (a.kind === 'burn') { handle(g.burnNow()); handle(g.tick(level.spot)); continue; }
     if (a.kind === 'wait') { handle(g.tick(Math.max(1, Math.min(250, g.timeLeft())))); continue; }
@@ -300,4 +306,81 @@ if (MODE === 'refresh') {
   console.log(`${DRY ? 'would add' : 'added'} ${randomList.length} random and ${challengeList.length} challenge positions:`);
   for (const p of [...randomList, ...challengeList]) console.log(`  ${p.id} ${p.batch} ${p.moment}${p.like ? ` like ${p.like}` : ''} ${p.level} seed ${p.seed} at ${secs(p.ms)}: ${p.bot.label} (${p.bot.kind}, ${p.bot.phase}); ${p.what}`);
   console.log('Now npm run build.');
-} else throw new Error(`unknown mode ${MODE}: refresh (none), pick or batch`);
+} else if (MODE === 'leadup') {
+  // The lead-up (13 Nov): "the ones I really want to be judging are the things that have gotten me into that position
+  // beforehand ... you're showing me examples after the problem already looks irreversible"; "give me options earlier in
+  // the game". Fresh play (LEVELS, SEEDS; `minutes` each, default 4: the early and middle game); at every bot move in
+  // Stage I, the whites from column 5 on in trouble (src/distill-read.ts, `inTrouble`: trapped, a complicated way out of
+  // many swaps or none; or in the furnace's column, past saving in the time left) counted before and after it. A move
+  // after which one more is is the moment: the last board where that white was still free enough, and the move that put
+  // it in trouble: the first move toward trouble, not the last board before it's lost (the user, 13 Nov: "try and get
+  // earlier in ... the most common theme was this is all coming too late"). A white burned that wasn't seen so: the move
+  // that left its column with a white in trouble, looked for back to a column before. About COUNT kept (default 12), the
+  // earliest in the session first, two a session at most, 30 s apart, each deal once before any twice.
+  const LEVELS = (process.env.LEVELS ?? 'cc3,cc5,cc8').split(','), SEEDS = (process.env.SEEDS ?? '10,11,12,13,14,15,16,17,18,19,20,21').split(',').map(Number);
+  const COUNT = Number(process.env.COUNT ?? 12), DRY = !!process.env.DRY, FROM = 4;
+  const lostIn = (cols, x0 = FROM, x1 = COLS - 1, timeLeft = Infinity) => {
+    const out = [];
+    for (let x = Math.max(1, x0); x <= x1; x++) cols[x].forEach((_, y) => { if (inTrouble(cols, x, y, timeLeft)) out.push([x, y]); });
+    return out;
+  };
+  const found = [];
+  for (const name of LEVELS) for (const seed of SEEDS) {
+    const t0 = Date.now(), moments = [];
+    const g = play(name, seed, CAP, (c) => { moments.push(c); });
+    const events = [];
+    for (let i = 0; i + 1 < moments.length; i++) {
+      const c = moments[i], n = moments[i + 1];
+      if (c.stage !== 'junk' || c.advice.kind !== 'move' || c.ms < 6000 || n.gone !== c.gone) continue;
+      const before = lostIn(c.cols, FROM, COLS - 1, c.timeLeft), after = lostIn(n.cols, FROM, COLS - 1, n.timeLeft);
+      if (after.length <= before.length) continue;
+      // The whites shut in by the move: where they stand after it, on the board before it (a held white at its start).
+      const was = new Set(before.map(([x, y]) => `${x},${y}`));
+      const shut = after.filter(([x, y]) => !was.has(`${x},${y}`)).map(([x, y]) => {
+        if (c.cols[x][y] === WHITE) return [x, y];
+        const held = c.advice.drags.find((d) => c.cols[d.x][d.y] === WHITE);
+        return held ? [held.x, held.y] : [x, y];
+      });
+      events.push({ c, shut, why: 'shut' });
+    }
+    // Whites burned: the column they burned in, looked back at over the moves while it was one of the two columns by the
+    // fire, for the last move that left a white in it nothing could free (one not already counted above).
+    g.columns.forEach((col, k) => {
+      if (col.up || !col.whites) return;
+      for (let i = moments.length - 2; i >= 0; i--) {
+        const c = moments[i], n = moments[i + 1], x = COLS - 1 - (k - c.gone);
+        if (c.gone > k || n.gone !== c.gone || c.stage !== 'junk' || c.advice.kind !== 'move' || c.ms < 6000) continue;
+        if (x < COLS - 2) break;
+        if (events.some((e) => e.c === c)) break;
+        const before = lostIn(c.cols, x, x, c.timeLeft), after = lostIn(n.cols, x, x, n.timeLeft);
+        if (after.length > before.length) { events.push({ c, shut: after.filter(([ax, ay]) => !before.some(([bx, by]) => bx === ax && by === ay)), why: 'burned', at: secs(n.ms) }); break; }
+      }
+    });
+    for (const e of events) {
+      const position = positionAt(e.c, name, seed, 'leadup', '');
+      position.batch = 'leadup';
+      position.shut = e.shut;
+      if (!again(position)) continue;
+      const where = e.shut.map(([x, y]) => `column ${x + 1}, row ${y + 1}`).join(' and ');
+      position.what = `${secs(e.c.ms)} in, ${secs(e.c.timeLeft)} on the furnace: the white${e.shut.length > 1 ? 's' : ''} at ${where} (ringed) ${e.shut.length > 1 ? 'are' : 'is'} free enough here; after the bot's move ${e.shut.length > 1 ? 'they are' : 'it is'} trapped (a long, complicated way out, or none)${e.why === 'burned' ? ', and it burns' : ''}.`;
+      found.push(position);
+    }
+    console.log(`${name} seed ${seed}: ${((Date.now() - t0) / 1000).toFixed(1)} s, ${(g.time / 60000).toFixed(1)} min of play, ${moments.length} moments; ${events.length} whites shut in, at ${events.map((e) => secs(e.c.ms)).join(', ') || 'none'}; whites burned ${g.whitesBurned}`);
+  }
+  // The earliest first; two a session at most, 30 s apart, nothing near a position already there; each deal once
+  // before any twice.
+  found.sort((a, b) => a.ms - b.ms);
+  const picked = [], clash = (q) => picked.some((p) => near(p, q)) || POSITIONS.some((p) => near(p, q));
+  const perSession = (q) => picked.filter((p) => p.level === q.level && p.seed === q.seed).length;
+  for (const pass of [1, 2]) for (const q of found) {
+    if (picked.length >= COUNT || picked.includes(q) || clash(q) || perSession(q) >= pass || (pass === 1 && picked.some((p) => p.seed === q.seed))) continue;
+    picked.push(q);
+  }
+  picked.sort((a, b) => a.ms - b.ms);
+  let next = Math.max(0, ...POSITIONS.map((p) => Number(p.id.slice(1)))) + 1;
+  for (const p of picked) { p.id = `P${next++}`; p.plan = planOf(p); }
+  if (!DRY) write([...POSITIONS, ...picked]);
+  console.log(`${DRY ? 'would add' : 'added'} ${picked.length} lead-up positions (of ${found.length} found):`);
+  for (const p of picked) console.log(`  ${p.id} ${p.level} seed ${p.seed} at ${secs(p.ms)}: ${p.bot.label}; ${p.what}`);
+  console.log('Now npm run build.');
+} else throw new Error(`unknown mode ${MODE}: refresh (none), pick, batch or leadup`);

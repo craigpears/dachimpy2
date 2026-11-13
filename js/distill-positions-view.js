@@ -6,7 +6,7 @@
 // that they skipped it). A batch still to judge comes first, each card cut down to be quick on a phone: the board, the
 // bot's move and plan, the reader's reading in a line (read here, live, by src/distill-read.ts), and one question.
 import { board } from './distill-guide-view.js';
-import { BATCHES, MOMENTS, POSITIONS, QUESTION, SKIPPED, THEMED, THEMES, VERDICTS } from './distill-positions.js';
+import { BATCHES, LEADUP_QUESTION, MOMENTS, POSITIONS, QUESTION, SKIPPED, THEMED, THEMES, VERDICTS } from './distill-positions.js';
 import { STATES, TACTICS, readBoard } from './distill-read.js';
 import { PHASES } from './distill-phase.js';
 
@@ -21,7 +21,8 @@ const KIND = { wait: 'Waits', burn: 'Burns the column now', dismiss: 'Cashes in'
 /** The board, its columns numbered 1 to 10 above it, so a column can be named in chat. */
 function drawn(p) {
   const cols = parse(p.cols), bot = p.bot;
-  const svg = board({ cols, drags: bot.drags, shade: bot.column !== undefined ? [bot.column] : [], rings: [], burn: bot.kind === 'burn' },
+  // (The lead-up's whites the move shuts in, ringed.)
+  const svg = board({ cols, drags: bot.drags, shade: bot.column !== undefined ? [bot.column] : [], rings: p.shut ?? [], burn: bot.kind === 'burn' },
     `${p.id}: the board, and the bot's move drawn on it`);
   const [x0, y0, w, h] = svg.getAttribute('viewBox').split(' ').map(Number);
   svg.setAttribute('viewBox', `${x0} ${y0 - 18} ${w} ${h + 18}`);
@@ -160,8 +161,9 @@ function toJudge(p) {
   a.appendChild(dl);
   if (p.plan) a.appendChild(planBox(p));
   const q = html('p', { className: 'question' });
-  q.appendChild(html('b', {}, `${p.id}: ${QUESTION}`));
-  q.appendChild(html('span', {}, `Answer in chat: “${p.id} yes”, or “${p.id} the blacks down first”.`));
+  const lead = p.batch === 'leadup';
+  q.appendChild(html('b', {}, `${p.id}: ${lead ? LEADUP_QUESTION : QUESTION}`));
+  q.appendChild(html('span', {}, lead ? `Answer in chat: “${p.id} the brown up first, then …”, or a screenshot with your drag drawn on.` : `Answer in chat: “${p.id} yes”, or “${p.id} the blacks down first”.`));
   a.appendChild(q);
   return a;
 }
@@ -175,7 +177,9 @@ function draw() {
   if (fresh.length) {
     const top = html('section', { className: 'theme tojudge', id: 'to-judge' });
     top.appendChild(html('h2', {}, `To judge: ${fresh[0].id} to ${fresh[fresh.length - 1].id}`));
-    top.appendChild(html('p', { className: 'about' }, `${fresh.length} new positions. For each: is the bot's idea right? Answer in chat by number, as briefly as you like: “${fresh[0].id} yes, ${fresh[1]?.id ?? fresh[0].id} the blacks down first”.`));
+    top.appendChild(html('p', { className: 'about' }, fresh.every((p) => p.batch === 'leadup')
+      ? `${fresh.length} new positions, from before the damage: in each, the bot's move (drawn) shuts in the ringed white. What should it have done instead? Answer in chat by number, as briefly as you like: “${fresh[0].id} the blacks down first”.`
+      : `${fresh.length} new positions. For each: is the bot's idea right? Answer in chat by number, as briefly as you like: “${fresh[0].id} yes, ${fresh[1]?.id ?? fresh[0].id} the blacks down first”.`));
     list.appendChild(top);
     const line = html('div', { className: 'tojudge' });
     line.appendChild(html('a', { href: '#to-judge', target: '_self' }, 'To judge'));

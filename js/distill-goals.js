@@ -27,17 +27,17 @@
    goal.
 
    Pure: no randomness, no clock; knows nothing of the den. */
-import { COLS, WHITE, neighbourOn } from './distilling.js';
+import { BROWN, COLS, WHITE, neighbourOn } from './distilling.js';
 import { isJunk, junkTarget, playDrags } from './distill-routines.js';
 import { dragTricks } from './distill-teach.js';
-import { flow } from './distill-read.js';
+import { flow, hoistOrder, vTip } from './distill-read.js';
 import { whiteRisk } from './distill-risk.js';
 import { disorder, ladderBad, stranded, tailOrder } from './distill-patterns.js';
 import { stuck } from './distill-path.js';
 /** Each goal's kind in a word or two, for the pages. */
 export const GOALS = {
     save: 'Save a white', fill: 'Fill a gap', free: 'Free a white', open: 'Open the way', build: 'Build the Crystal Clear', untrap: 'Free a stuck piece',
-    pull: 'Junk to the colour', bank: 'A white to the others', ladder: 'Sort the junk', tail: 'Sort the tail', cracks: 'Fix a crack', store: 'Store the junk',
+    pull: 'Junk to the colour', bank: 'A white to the others', hoist: 'Hoist', ladder: 'Sort the junk', tail: 'Sort the tail', cracks: 'Fix a crack', store: 'Store the junk',
     makeWay: 'Make way', setUp: 'Set up the save',
 };
 /** The trick names, as a player says them. */
@@ -113,6 +113,12 @@ export function ownGoal(b, d, a, aims) {
             if (t)
                 return r.tactic === 'fillGaps' ? { kind: 'fill', says: `fill column ${t.x + 1}'s gap: ${whiteAt(b, t.x, t.y)} out left`, at: { x: t.x, y: t.y } } : { kind: 'free', says: `free ${whiteAt(b, t.x, t.y)}`, at: { x: t.x, y: t.y } };
         }
+        if (r.tactic === 'sortLadder' || r.tactic === 'sortTail') {
+            // A brown brought down to the V's tip, in for the black there (P29, P30).
+            const tip = vTip(b, r);
+            if (tip && p === BROWN && end[0] === tip.x && end[1] === tip.y && a[tip.x][tip.y] === BROWN)
+                return { kind: 'tail', says: `the brown down to the V's tip, column ${tip.x + 1}, row ${tip.y + 1}, in for the black there` };
+        }
         if (r.tactic === 'sortLadder' && ladderBad(a) < ladderBad(b))
             return { kind: 'ladder', says: `sort columns ${COLS - 1} and ${COLS}, blacks over browns, before column ${COLS} goes` };
         if (r.tactic === 'sortTail' && tailOrder(a, r.patterns.tail.from) > tailOrder(b, r.patterns.tail.from))
@@ -181,6 +187,11 @@ export function ownGoal(b, d, a, aims) {
     }
     if (p === WHITE && end[0] < d.x && junkIn(b, d.x) > whitesIn(b, d.x) && !strands()) {
         return { kind: 'bank', says: `bring ${whiteAt(b, d.x, d.y)} left, out of the junk` };
+    }
+    // The hoist: blacks and browns brought together left of the column being built, a brown sunk through blacks or a black
+    // lifted through browns (the user, 13 Nov, P17, P20, P27).
+    if (isJunk(p) && d.x < building && end[0] < building && hoistOrder(a, building) > hoistOrder(b, building) && !strands()) {
+        return { kind: 'hoist', says: p === BROWN ? `hoist: the brown sunk through the blacks, lifting them, blacks and browns together` : `hoist: the black lifted up through the browns, blacks and browns together` };
     }
     const touched = new Set([d.x, end[0]]);
     for (const x of touched) {

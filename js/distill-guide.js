@@ -377,8 +377,9 @@ export function trickExamples() {
     return out;
 }
 /** The positions the page reads (src/distill-positions.ts, the user's own critiques): a white trapped by the fire, the
-    ladder about to be lost, a cracked board, damage control. */
-export const READ_EXAMPLES = ['P2', 'P8', 'P10', 'P7'];
+    ladder about to be lost, a cracked board, damage control, and damage control met by the hoist (13 Nov, P27: browns
+    sunk through blacks, lifting them, where a brown swept off to the top right would split them further). */
+export const READ_EXAMPLES = ['P2', 'P8', 'P10', 'P7', 'P27'];
 /** Each READ_EXAMPLES position read, as the planner reads it, with the bot's move there now. */
 export function readingExamples() {
     return READ_EXAMPLES.map((id) => {

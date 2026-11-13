@@ -13,7 +13,9 @@
      free junk fills a column at most ("things have gone really wrong ... damage control", P7);
    - cracked: STRANDED of the free junk or more stranded among the whites, STRANDED_MIN pieces at least ("a board in bad
      state ... because there's so many trapped pieces", P10);
-   - atRisk: a white flagged (src/distill-risk.ts), or in the block phase the right-hand ladder's risk LADDER or more (P8);
+   - atRisk: a white flagged (src/distill-risk.ts), the junk the wrong way up (`upsideDown`, P17, P23), or in the block
+     phase the right-hand ladder's risk LADDER or more (P8);
+   A white in the furnace's column past saving (`doomed`) is given up as junk first, and read no more (P26).
    - healthy: none of those.
    The tactics, in order:
    - fillGaps (damage control, or a white in the furnace's column): junk raced into the whites' places, the quickest
@@ -22,8 +24,9 @@
    - fixCracks (cracked): the stranded junk freed; the browns in the middle kept as tools, moved only to free it (P10);
    - sortLadder (the block phase, the ladder's risk): the right-hand pair sorted blacks over browns before its column
      burns (P8);
-   - freeTrapped (a flagged white that's trapped, TRAPPED_REACH swaps or more from junk, or walled in, whose column burns
-     within URGENT_MS): those whites freed first, the most at risk first (P2, P6: "the top right first");
+   - freeTrapped (a flagged white that's trapped, by what it takes to free it (`isTrapped`, 13 Nov: a complicated way out
+     or none; P20 to P22 aren't), whose column burns within URGENT_MS): those whites freed first, the most at risk first
+     (P2, P6: "the top right first"); then any trapped white that can still be freed, before the quick fills (P5);
    - quickSort (those whites all free, their column not the furnace's, and every quick fill a black down or a brown up:
      the sorting fills them, P3: "I think [P3] was quick sorting");
    - fillGaps (a flagged white easy to reach whose column burns within URGENT_MS): the quick fills (P4:
@@ -39,8 +42,8 @@
    Pure: no randomness, no clock; knows nothing of the den. */
 import { BLACK, BROWN, COLS, DOWN_LEFT, DOWN_RIGHT, UP_LEFT, UP_RIGHT, WHITE, canSwapOn, neighbourOn } from './distilling.js';
 import { copyBoard, halfOf, isJunk, junkTarget, playDrags } from './distill-routines.js';
-import { RISK, burnsIn, flagged, whiteRisk, whiteRisks } from './distill-risk.js';
-import { ladderBad, patternsOf, stranded, tailOrder } from './distill-patterns.js';
+import { RISK, burnsIn, flagged, freeCost, whiteRisk, whiteRisks } from './distill-risk.js';
+import { PATTERN, ladderBad, patternsOf, stranded, tailOrder } from './distill-patterns.js';
 import { blockPhase } from './distill-score.js';
 /** Each state and tactic in plain words, for the pages and Helium. */
 export const STATES = {
@@ -69,7 +72,22 @@ export const READ = {
     STRANDED_MIN: 12,
     LADDER: 0.5,
     URGENT_MS: 30000,
-    TRAPPED_REACH: 2,
+    /** Trapped, by what it takes to free a white (src/distill-risk.ts, `freeCost`; the user, 13 Nov, on P20 to P22:
+        "trapped I define as being much more challenging than that, like requiring a complicated move and high number of
+        swaps"): nothing frees it in two drags, or its way out costs TRAPPED_COST or more; or near the top (TOP_HALF half
+        rows down at most), junk round it on TOP_ROUND sides or more and its way out more than a quick drag (TOP_COST):
+        "there's blacks at the top and there's just no way for things to move as freely up there" (P1, P6). */
+    TRAPPED_COST: 14,
+    TOP_HALF: 2,
+    TOP_ROUND: 3,
+    TOP_COST: 4,
+    /** Damage control's fills: junk from this many columns of the gap at most; junk further off is kept for hoisting (the
+        user, 13 Nov, P27: "its first move is to drag a brown up to the top right. That's reinforcing the damage"). */
+    DAMAGE_NEAR: 2,
+    /** A white in trouble (`inTrouble`): its way out this many swaps or more (a drag's spot counted as two). */
+    TROUBLE: 8,
+    /** Hoisting's drags, at most. */
+    HOIST_SWAPS: 6,
     /** The quick fills searched: drags this many swaps long at most, of junk this many columns from the whites. */
     FILL_SWAPS: 6,
     FILL_NEAR: 4,
@@ -79,6 +97,31 @@ export const READ = {
     FLOW_NEAR: 2,
 };
 const place = (p) => `column ${p.x + 1}, row ${p.y + 1}`;
+/** Whether a flagged white is trapped (READ.TRAPPED_COST and the rest): what it takes to free it, not whether it can move
+    this moment. */
+export function isTrapped(cols, w) {
+    const cost = w.cost ?? (w.walled ? Infinity : freeCost(cols, w.x, w.y));
+    if (w.walled || cost >= READ.TRAPPED_COST)
+        return true;
+    return halfOf(cols, w.x, w.y) <= READ.TOP_HALF && w.round >= READ.TOP_ROUND && cost >= READ.TOP_COST;
+}
+/** A white heading into trouble (the lead-up's measure, tools/distill-positions.mjs, 13 Nov: "the things that have gotten
+    me into that position beforehand"): trapped (`isTrapped`), or its way out READ.TROUBLE swaps or more; in the furnace's
+    column, past saving in the time left (`doomed`). */
+export function inTrouble(cols, x, y, timeLeft) {
+    if (cols[x][y] !== WHITE || x === 0)
+        return false;
+    const w = whiteRisk(cols, x, y, timeLeft);
+    return isTrapped(cols, w) || freeCost(cols, x, y) >= READ.TROUBLE || (x === COLS - 1 && Number.isFinite(timeLeft) && doomed(cols, w, timeLeft));
+}
+/** A white in the furnace's column past saving: nothing frees it in two drags, or not in the time left (a drag's spot
+    and a swap's slide at the bots' pace, FREE.DRAG swaps a drag). */
+export function doomed(cols, w, timeLeft) {
+    if (w.walled)
+        return true;
+    const cost = freeCost(cols, w.x, w.y);
+    return cost === Infinity || cost * 200 > timeLeft;
+}
 const list = (ps, most = 3) => ps.slice(0, most).map(place).join(', ') + (ps.length > most ? ` and ${ps.length - most} more` : '');
 /** Read a board (see the header). */
 export function readBoard(cols, o) {
@@ -87,13 +130,22 @@ export function readBoard(cols, o) {
     const base = { stage, patterns, building, timeLeft };
     if (stage === 'chain')
         return { ...base, state: 'healthy', tactic: 'chain', why: 'the chain: whites right', whites: [], flagged: [], targets: [] };
-    const whites = whiteRisks(cols, timeLeft), flags = flagged(whites);
-    const read = (state, tactic, why, targets) => ({ ...base, state, tactic, why, whites, flagged: flags, targets });
-    const inBuilding = cols[building].filter((p) => p === WHITE).length;
+    // A white in the furnace's column that nothing can free before it goes is given up as junk (the user, 13 Nov, P26:
+    // "it's just completely doomed ... You should at least just say, well, you're doomed on that white, that's going to be
+    // junk. But you can at least start getting the ones in column 9 out of the way"): it isn't read, so the board's read
+    // as if it were junk, and the bot never waits on it.
+    const all = whiteRisks(cols, timeLeft), lost = all.filter((w) => w.x === COLS - 1 && doomed(cols, w, timeLeft));
+    const whites = all.filter((w) => !lost.includes(w)), flags = flagged(whites);
+    for (const w of flags)
+        w.cost = w.walled ? Infinity : freeCost(cols, w.x, w.y);
+    const given = lost.length ? `${lost.length === 1 ? `column ${COLS}'s white` : `${lost.length} whites in column ${COLS}`} past saving, given up as junk; ` : '';
+    const upside = patterns.upsideDown.flagged ? `; the junk the wrong way up (${patterns.upsideDown.wrong.length} browns high and blacks low): hoist the blacks with the browns before they strand` : '';
+    const read = (state, tactic, why, targets) => ({ ...base, state, tactic, why: given + why + upside, whites, flagged: flags, targets, given: lost });
+    const inBuilding = cols[building].filter((p) => p === WHITE).length - lost.filter((w) => w.x === building).length;
     const fireWhites = whites.filter((w) => w.x === COLS - 1);
-    const trapped = flags.filter((w) => w.reach >= READ.TRAPPED_REACH || w.walled), soon = (w) => w.burnsIn <= READ.URGENT_MS;
+    const trapped = flags.filter((w) => isTrapped(cols, w)), soon = (w) => w.burnsIn <= READ.URGENT_MS;
     const urgent = flags.filter(soon);
-    const state = flags.length || (blockPhase(cols) && (patterns.ladder?.risk ?? 0) >= READ.LADDER) ? 'atRisk' : 'healthy';
+    const state = flags.length || patterns.upsideDown.flagged || (blockPhase(cols) && (patterns.ladder?.risk ?? 0) >= READ.LADDER) ? 'atRisk' : 'healthy';
     if (inBuilding >= READ.DAMAGE_WHITES && burnsIn(building, timeLeft) <= READ.DAMAGE_MS && patterns.fillable.columns <= READ.DAMAGE_FILL) {
         const t = whites.filter((w) => w.x >= building);
         return read('damageControl', 'fillGaps', `${inBuilding} whites still in column ${building + 1}, ${Math.round(burnsIn(building, timeLeft) / 1000)} s from the fire, and junk free for ${patterns.fillable.columns} column${patterns.fillable.columns === 1 ? '' : 's'}: fill its gaps however you can, the quickest first`, t);
@@ -123,6 +175,11 @@ export function readBoard(cols, o) {
             return read(state, 'quickSort', `${urgent.length === 1 ? 'a white' : `${urgent.length} whites`} by the fire free to go, with time in hand (${list(urgent)}): the quick sorting moves, blacks down and browns up, fill their places`, urgent);
         }
     }
+    // A white trapped that can still be freed (in two drags, if not cheaply) before the quick fills: it only gets harder
+    // (P5: "fixing those top two in column 8, because those seem like the biggest risks"); one past freeing waits.
+    const freeable = trapped.filter((w) => (w.cost ?? Infinity) < Infinity);
+    if (freeable.length)
+        return free(freeable);
     if (urgent.length)
         return read('atRisk', 'fillGaps', `${urgent.length === 1 ? 'a white' : `${urgent.length} whites`} by the fire with ${urgent.length === 1 ? 'its column' : 'their columns'} burning soon (${list(urgent)}): junk into their places, the quickest first`, urgent);
     if (trapped.length)
@@ -197,6 +254,9 @@ export function progress(r, cols, after, drags = [], target, opening = false) {
                 return 0;
             const [ex, ey] = endOf(cols, last), before = drags.length > 1 ? playDrags(cols, drags.slice(0, -1)) : cols;
             if (!before || before[ex][ey] !== WHITE || !isJunk(after[ex][ey]) || !r.targets.some((t) => t.x === ex && t.y === ey))
+                return 0;
+            // (Damage control: junk from near the gap only; junk further off is kept to hoist with.)
+            if (r.state === 'damageControl' && last.x < ex - READ.DAMAGE_NEAR)
                 return 0;
             return riskSum(cols, r.timeLeft) - riskSum(after, r.timeLeft);
         }
@@ -309,6 +369,69 @@ export function tailDrags(cols, r) {
                 out.push([d]);
         }
     }
+    return out;
+}
+/** Hoisting's order (the user, 13 Nov, P17, P20, P27: "using the brown to kind of hoist up some in column 2 and 3";
+    "you've got to do like hoisting things up and down with the browns"): in columns 0 to `to` - 1, every brown's depth
+    in half pieces less every black's. A brown sunk a swap through a black (the black rising past it) adds 2; a brown
+    risen through whites or a black dropped through them takes away. */
+export function hoistOrder(cols, to) {
+    let v = 0;
+    for (let x = 0; x < Math.min(to, COLS); x++)
+        cols[x].forEach((p, y) => { if (p === BROWN)
+            v += halfOf(cols, x, y);
+        else if (p === BLACK)
+            v -= halfOf(cols, x, y); });
+    return v;
+}
+/** Hoisting's drags: a brown sunk down through blacks, lifting them, or a black lifted up through browns, left of column
+    `to` (the colour, or the gaps being filled), READ.HOIST_SWAPS swaps at most, bringing blacks and browns together
+    rather than splitting them further: each piece's drag that betters `hoistOrder` the most a swap, nothing stranded. */
+export function hoistDrags(cols, to) {
+    const out = [], base = hoistOrder(cols, to), s0 = stranded(cols).length;
+    for (let x = 0; x < Math.min(to, COLS); x++)
+        cols[x].forEach((p, y) => {
+            if (p !== BROWN && p !== BLACK)
+                return;
+            let best = null;
+            for (const d of trace(cols, x, y, READ.HOIST_SWAPS, (n) => n[0] < to, (b) => hoistOrder(b, to) > base, 120)) {
+                const v = (hoistOrder(playDrags(cols, [d]), to) - base) / (d.ways.length + 2);
+                if (!best || v > best.v)
+                    best = { d, v };
+            }
+            if (best && stranded(playDrags(cols, [best.d])).length <= s0)
+                out.push([best.d]);
+        });
+    return out;
+}
+/** The V's tip (the user, 13 Nov, P29, P30: "the point of the browns down is you want them at that kind of bottom left
+    tip. So that black, for example, at the bottom of column 7 is what you would want to swap with the drag the brown
+    into"): the leftmost black in the V's tail, its bottom rows. Null if none. */
+export function vTip(cols, r) {
+    const t = r.patterns.tail;
+    // (Joined to the junk on its right, a piece of the V: not a black stranded on its own further left.)
+    const joined = (x, y) => [UP_RIGHT, DOWN_RIGHT].some((w) => { const n = neighbourOn(cols, x, y, w); return !!n && isJunk(cols[n[0]][n[1]]); });
+    for (let x = t.from; x <= Math.min(t.to + 1, COLS - 1); x++) {
+        for (let y = cols[x].length - 1; y >= cols[x].length - PATTERN.TAIL_ROWS; y--)
+            if (cols[x][y] === BLACK && joined(x, y))
+                return { x, y };
+    }
+    return null;
+}
+/** A brown brought down to the V's tip, swapped in for the black there (the black lifted): READ.SORT_SWAPS swaps at most. */
+export function tipDrags(cols, r) {
+    const tip = vTip(cols, r), out = [];
+    if (!tip)
+        return out;
+    for (let x = 0; x < COLS; x++)
+        cols[x].forEach((p, y) => {
+            if (p !== BROWN)
+                return;
+            const ds = trace(cols, x, y, READ.SORT_SWAPS, () => true, (b, at) => at[0] === tip.x && at[1] === tip.y && b[tip.x][tip.y] === BROWN, 200);
+            ds.sort((a, b) => a.ways.length - b.ways.length);
+            if (ds.length)
+                out.push([ds[0]]);
+        });
     return out;
 }
 /** A quick sorting drag (P3): a black taken down, or a brown up. */

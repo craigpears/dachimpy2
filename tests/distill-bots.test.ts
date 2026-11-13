@@ -253,8 +253,10 @@ describe('nothing trapped (13 Nov, the eighteenth note)', () => {
     // only way left was a white: trapped.
     for (const t of LEVELS) for (let seed = 1; seed <= 6; seed++) {
       const g = new Distilling(seeded(seed)), cols = g.cols;
-      const a = new DistillBot(t).plan(g);
-      if (a.kind !== 'move') continue;
+      const bot = new DistillBot(t), a = bot.plan(g);
+      // (Stage I's rule: a bot already in the chain from the first look, CC^1 and CC^2 with a column or two banked on a
+      // fresh board, brings whites right, out of the buffer columns into the one it fills, 13 Nov.)
+      if (a.kind !== 'move' || bot.stage === 'chain') continue;
       const after = playDrags(cols, a.drags)!;
       expect(trappedWhites(after), `${t.name} on seed ${seed}`).toBeLessThanOrEqual(trappedWhites(cols));
       if (seed === 1) expect(after[6][0] === WHITE && cols[6][0] !== WHITE, t.name).toBe(false);
@@ -664,5 +666,26 @@ describe('the chain\'s rule of thumb, shared with Helium (13 Nov: "if you\'ve go
     expect(a.letGo).toBe(true);
     expect(a.column).toBe(6);
     expect(a.read).toMatch(/can't go on into column 10/);
+  });
+});
+
+describe('the CC^1 opening (the user, 13 Nov, watching CC^1: "it should be like trying to build it in the second or third column, like close to what\'s being burnt, just to have a bit of burnt buffer")', () => {
+  it('on a fresh board the first chain\'s column is two or three in from the fire, the columns right of it burning first as a buffer, 13 Nov', () => {
+    for (let seed = 1; seed <= 6; seed++) {
+      const g = new Distilling(seeded(seed)), bot = new DistillBot(levelNamed('cc1')), a = bot.plan(g);
+      expect(bot.stage, `seed ${seed}`).toBe('chain');
+      expect(bot.burns, `seed ${seed}`).toBeGreaterThanOrEqual(P.BUFFER);
+      expect(a.column, `seed ${seed}`).toBeLessThanOrEqual(COLS - 1 - P.BUFFER);
+    }
+  });
+  it('never a white moved back out of the column it\'s filling, 13 Nov ("it doesn\'t seem to actually try and get the whites there ... and then it\'s just moved that out")', () => {
+    for (let seed = 1; seed <= 2; seed++) {
+      const g = new Distilling(seeded(seed));
+      playSession(g, levelNamed('cc1'), 0.5, undefined, (a) => {
+        if (a.stage !== 'chain' || a.kind !== 'move' || a.column === undefined) return;
+        const after = playDrags(g.cols, a.drags);
+        if (after) expect(after[a.column].filter((p) => p === WHITE).length, `seed ${seed}`).toBeGreaterThanOrEqual(g.cols[a.column].filter((p) => p === WHITE).length);
+      });
+    }
   });
 });

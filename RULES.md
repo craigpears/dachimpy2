@@ -888,6 +888,34 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   the bot's next five moves, played forward on a copy of its board (src/distill-ahead.ts), each on its own
   small board with its drags' tricks and goals, and the aim its first move sets out on (a white it only opens
   the way to, freed); tested to reach it with every move on the way working on it.
+- **Distilling: trapped is what it takes to free a white (13 Nov, on P20 to P22).** The user: "trapped I
+  define as being much more challenging than that, like requiring a complicated move and high number of
+  swaps"; "there's a two-step solution, which is just drag the blacks in 6 and 7 down". The board reader
+  (src/distill-read.ts, `isTrapped`) counts a white trapped by its cheapest way out in one drag or two
+  (src/distill-risk.ts, `freeCost`: the swaps, two more a drag): none, or 14 or more; or near the top with junk
+  on three sides or more and more than a quick drag out (P1, P6: "there's just no way for things to move as
+  freely up there"). A white a short drag or two from free isn't trapped, whether it can move this moment or not.
+  A trapped white that can still be freed comes before the quick fills by the fire (P5).
+- **Distilling: a doomed white is junk; never wait on it (13 Nov, P26).** "You should at least just say, well,
+  you're doomed on that white, that's going to be junk. But you can at least start getting the ones in column 9
+  out of the way." A white in the furnace's column that nothing frees in time is given up: the reader reads the
+  board without it and the bot plays the quick fills instead of waiting.
+- **Distilling: the junk the wrong way up is a risk (13 Nov, P17, P23).** Browns high and blacks low never meet
+  (a brown can't sink through whites, nor a black rise): the blacks strand, and the whites' way up closes. The
+  reader flags it (`upsideDown` in src/distill-patterns.ts) and reads the board as at risk.
+- **Distilling: the hoist (13 Nov, P17, P20, P27, P28).** "you've got to do like hoisting things up and down with
+  the browns": a brown sunk through blacks, lifting them (or a black lifted through browns), so blacks and browns
+  come together rather than split further. A named move with its own goal (src/distill-goals.ts, 'hoist'). In
+  damage control the fills come from junk near the gaps only (two columns); with none, the bot hoists rather than
+  sweep a brown from far off to the top right ("reinforcing the damage"). In the block phase with the junk the
+  wrong way up, hoists are on offer too.
+- **Distilling: a brown brought down goes to the V's tip (13 Nov, P29, P30).** "the point of the browns down is
+  you want them at that kind of bottom left tip": sorting the ladder or the tail, a brown brought down to the
+  leftmost black of the V's bottom, in for it, comes first.
+- **Distilling: the first chain's column two or three in from the fire (13 Nov, watching CC^1).** "build it in the
+  second or third column, like close to what's being burnt, just to have a bit of burnt buffer": a bot's first
+  chain leaves at least two columns by the fire to burn as junk first (any with two pieces of junk or more), and
+  never takes a white back out of the column it's filling.
 
 - **Messages stay up long enough to read (10 Nov).** The checkpoint's message "vanished very
   quickly": a longer message stays up longer (about 70 ms a letter, 1.8 to 7 seconds), and one
