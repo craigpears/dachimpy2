@@ -944,18 +944,24 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 - *The rest of the rule:*
   - *says:* "Brown past white, black past brown. Round and round. Can't swap it straight back, mind."
   - *note:* "White over black, brown over white, black over brown: like rock, paper, scissors."
-- *They drag a white left:*
-  - *says:* "Whites go left, away from the fire. Junk goes right, toward it."
-  - *note:* "Whites left, junk right: drag a white along, swap after swap, and the junk steps the other way."
 - *They burn the all-black column:*
   - *says:* "Furnace takes the right-hand column. All junk? Burn it now. X."
   - *note:* "The furnace burns the right-hand column every 15 seconds, or now on X. More blacks than whites and it burns; the rest goes up into the flask."
 - *They burn the next, a white in it (their mishap follows):*
   - *says:* "And the next one's mostly junk. One white in it. Eh. X."
   - *note:* "A white in a column that burns is lost: burnt whites come back later, scorched, and spoil a column."
-- *Handing you the board:*
-  - *says:* "Right, your go. H if you want me. I'll be here. Probably."
-  - *note:* "Your go: whites left, junk right, burn the junk. H, or the button: Help, Helium."
+- *Handing you the board, step one the goal:*
+  - *says:* "Right, your go. Keep those three clear of white. H if you want me. I'll be here. Probably."
+  - *note:* "Your go: keep the three right-hand columns clear of white, and burn them once they're all junk. H: Help, Helium."
+
+### Their lesson's step one, after the mishap: as it starts (says), as they drag the whites out of the three columns next to the fire (clear), why (why), in the bar (note); when you've cleared them yourself (done); your goal in the bar while you play (goal)
+
+- *says:* "Which is step one, really. The three columns next to the fire: no whites in them. None."
+- *clear:* "Whites go left, away from the fire. Walk them out, swap by swap. Junk steps the other way."
+- *why:* "Otherwise the still goes bang. And I've already got no eyebrows."
+- *note:* "Step 1: clear every white out of the three right-hand columns, the next to burn."
+- *done:* "There. Step one. Nothing on the fire's side worth losing."
+- *goal:* "Step 1: clear the whites out of the 3 right-hand columns"
 
 ### A column burns with a white in it, and the still goes bang: the first time the first, then any
 
