@@ -22,7 +22,7 @@ import {
 } from '../den-helium.js';
 import { LAY } from '../den-sail.js';
 import { Distilling, WHITE } from '../distilling.js';
-import { HINT, PRAISE, STEP_ONE, WATCH } from '../lines/helium.js';
+import { FIRE, HINT, PRAISE, STEP_ONE, WATCH } from '../lines/helium.js';
 import { readSecs } from '../den-dignity.js';
 import { PACE } from '../chatter.js';
 import { PIRATES } from '../den-look.js';
@@ -41,7 +41,7 @@ import { cine, cinePlay, cineEnd, bubble, bubbleAt } from './cine.js';
 const SAND = { y0: -0.4, h: 0.62 }, GROUND = SAND.y0 + SAND.h + 0.25;
 /* `on`: at the still, playing; `board`: Distilling's board on its stand (the lesson's, then yours); `hand`:
    their drags being played on it (lesson or help), a swap at a time; `note`: what the bar says, a while. */
-export const helium = { W: null, visit: new Visit(), play: null, on: false, board: null, hand: [], handT: 0, handDone: null, bangs: 0, bigBang: 0, note: '', noteT: 0, cower: 0, shrug: 0, nervy: 0, nerves: new Nerves(), fretCol: null, cellar: new Cellar(), hint: null, routes: null, watch: null };
+export const helium = { W: null, visit: new Visit(), play: null, on: false, board: null, hand: [], handT: 0, handDone: null, bangs: 0, bigBang: 0, note: '', noteT: 0, cower: 0, shrug: 0, nervy: 0, nerves: new Nerves(), fretCol: null, held: false, fireTips: 0, cellar: new Cellar(), hint: null, routes: null, watch: null };
 
 function build() {
   const g = new THREE.Group(), sand = mat('#e6cf96', { roughness: 1 }), wet = mat('#c9ad78', { roughness: 1 });
@@ -277,7 +277,7 @@ const free = () => sail.on && !cine && !sail.helm.cur?.via && !sail.helm.gusts?.
 /** At the still, a board of your own: a fresh deal if there's none yet (or the last's finished). */
 function atStill(fresh = false) {
   if (fresh || !helium.board || helium.board.game.finished || helium.board.game.timer === false) { newBoard(new Distilling(Math.random), true); helium.stepDone = false; helium.nerves = new Nerves(); }
-  helium.board.paused = false;
+  helium.board.paused = helium.held;
   helium.on = true;
   keys.clear();
   helpButton(true);
@@ -309,7 +309,7 @@ export function heliumHelp() {
   if (h.plays === 'drags') {
     B.letGo();
     B.paused = true;   // (the furnace waits while they show you)
-    play(h.advice.drags, () => { B.paused = false; });
+    play(h.advice.drags, () => { B.paused = helium.held; });
   } else if (h.plays === 'burn') B.burn();
 }
 
@@ -385,7 +385,7 @@ function stopWatch(said = true) {
   const B = helium.board;
   if (!helium.watch) return;
   helium.watch = null; helium.hand = []; helium.handDone = null;
-  if (B) { B.letGo(); B.clearArrows(); B.paused = !helium.on; }
+  if (B) { B.letGo(); B.clearArrows(); B.paused = !helium.on || helium.held; }
   if (said) say(WATCH.done);
   noteFor('', 0);
   helpButton(helium.on);
@@ -403,11 +403,11 @@ function watchTick(dt) {
     else if (beat.kind === 'burn') B.burn();
   }
   // (the furnace runs only while there's nothing worth doing)
-  B.paused = !(beat && beat.kind === 'wait');
+  B.paused = helium.held || !(beat && beat.kind === 'wait');
   if (w.t < w.need || helium.hand.length || B.busy() || !B.game.movable) return;
   const n = w.w.next(B.game);
   if (n.kind === 'busy') return;
-  if (n.kind === 'dismiss') { say(n.says); noteFor(n.note, 8); helium.watch = null; B.paused = false; helpButton(true); return; }
+  if (n.kind === 'dismiss') { say(n.says); noteFor(n.note, 8); helium.watch = null; B.paused = helium.held; helpButton(true); return; }
   w.beat = n; w.t = 0;
   w.acted = n.kind !== 'move' && n.kind !== 'burn';
   w.arrows = n.kind === 'move' ? n.drags : [];
@@ -446,6 +446,15 @@ function helpButton(on) {
 const KEYS = { arrowleft: 'ArrowLeft', arrowright: 'ArrowRight', arrowup: 'ArrowUp', arrowdown: 'ArrowDown', home: 'Home', end: 'End', pageup: 'PageUp', pagedown: 'PageDown' };
 const VIEW = ['z', 'c', 'v', '-', '_', '=', '+', 'p'];
 /** A key at sea (sailing.js): the board's while you're at the still; Space off their island to it. */
+/** Holding the fire (F): the furnace waits, and the end column burns only when you burn it (X), to take it
+    slowly (the user, 13 Nov: "Should have the ability to pause auto burning and burn manually if you'd like to
+    slow down"); F again and it's back on its fifteen seconds. Kept for the still, batch to batch. */
+export function holdFire(on) {
+  helium.held = on;
+  if (helium.board && !helium.hand.length && !helium.watch) helium.board.paused = on;
+  say(on ? FIRE.held : FIRE.going);
+  noteFor(on ? FIRE.heldNote : FIRE.goingNote, 6);
+}
 export function heliumKey(key) {
   if (!helium.on) return false;
   if (key === 'w') { heliumWatch(); return true; }
@@ -454,6 +463,7 @@ export function heliumKey(key) {
   if (key === 'escape') { leave(); return true; }
   if (key === 'h') { heliumHelp(); return true; }
   if (key === 'g') { heliumHint(); return true; }
+  if (key === 'f') { holdFire(!helium.held); return true; }
   if (helium.hand.length) return !VIEW.includes(key);
   if (helium.board?.key(KEYS[key] ?? key, { repeat: false })) return true;
   return !VIEW.includes(key);
@@ -538,7 +548,7 @@ export function heliumPrompt() {
     const B = helium.board, left = whitesOnFireSide(B.game.cols);
     if (helium.watch) return `Watching Helium${helium.note ? ` · ${helium.note}` : ''} · W or Esc: your board back`;
     const goal = left ? `${STEP_ONE.goal}: ${left} to go` : `Step 1 done: the fire's side is clear of white`;
-    const lead = helium.noteT > 0 && helium.note ? helium.note : B.game.finished ? 'Finished! Esc, then Space for another batch' : `${goal} · drag to swap · X: burn`;
+    const lead = helium.noteT > 0 && helium.note ? helium.note : B.game.finished ? 'Finished! Esc, then Space for another batch' : `${goal} · drag to swap · X: burn · ${helium.held ? 'F: fire held, F to let it go' : 'F: hold the fire'}`;
     return `${lead} · G: hint · W: watch Helium · H: Help, Helium · Esc: leave the still`;
   }
   const p = sail.helm.pose;
@@ -576,8 +586,9 @@ export function heliumTick(dt) {
   const g = helium.board?.game;
   // (not while they're playing it for you to watch: it's their own hand then)
   if (helium.on && g && g.movable && !helium.hand.length && !helium.watch) {
-    const n = helium.nerves.tick(g.columns.length, whitesInFurnace(g.cols), g.timeLeft());
-    if (n) { say(n.says); if (n.level === 'panic') helium.nervy = NERVE.COWER; }
+    const n = helium.nerves.tick(g.columns.length, whitesInFurnace(g.cols), helium.held ? Infinity : g.timeLeft());
+    // (the first time or two they panic, the keys for taking it slower: F holds the fire, X burns)
+    if (n) { say(...(n.level === 'panic' && helium.fireTips < 2 ? (helium.fireTips++, [n.says, FIRE.tip]) : [n.says])); if (n.level === 'panic') helium.nervy = NERVE.COWER; }
     // ...and the whites they're fretting about ringed on the board (the user, 13 Nov: "When they say do you see
     // that [white] ... it should like visually indicate like highlight the pieces"), till they're out or burned.
     if (n && n.level !== 'phew') { helium.fretCol = g.columns.length; helium.board.mark = (x, y, p, gone) => !gone && x === g.cols.length - 1 && p === WHITE; }

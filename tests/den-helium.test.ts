@@ -15,7 +15,7 @@ import { smugglersAt } from '../src/den-smugglers';
 import { BURNT, COLS, Distilling, WHITE, neighbourOn, canSwapOn, parseBoard } from '../src/distilling';
 import { isJunk } from '../src/distill-routines';
 import type { Advice } from '../src/distill-bots';
-import { AFTER, HELP, HELP_ELSE, LESSON, MISHAP, NERVES, ONWARD, OPENING, STEP_ONE, TELL } from '../src/lines/helium';
+import { AFTER, FIRE, HELP, HELP_ELSE, LESSON, MISHAP, NERVES, ONWARD, OPENING, STEP_ONE, TELL } from '../src/lines/helium';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -465,5 +465,21 @@ describe('their line kept whole on the screen (the user, 13 Nov: "The speech [bu
     expect(q.x - bubble.w / 2).toBeGreaterThanOrEqual(0);
     expect(q.y - bubble.h).toBeGreaterThanOrEqual(70);
     expect(onScreen({ x: 400, y: 300 }, bubble, screen)).toEqual({ x: 400, y: 300 });   // (on already: left be)
+  });
+});
+
+describe('holding the fire to take it slowly (the user, 13 Nov: "pause auto burning and burn manually if you\'d like to slow down, helium should reference the keyboard shortcuts for it at points")', () => {
+  it('13 Nov: they name the keys: F holds the fire, X burns by hand, when you hold it, in their tip, and as they hand you the board', () => {
+    expect(FIRE.held).toMatch(/X/);
+    expect(FIRE.heldNote).toMatch(/X/);
+    expect(FIRE.heldNote).toMatch(/F/);
+    expect(FIRE.tip).toMatch(/F holds the fire/);
+    expect(FIRE.tip).toMatch(/X/);
+    expect(LESSON.yours.says).toMatch(/F to hold the fire/);
+    expect(LESSON.yours.note).toMatch(/F: hold the fire/);
+  });
+  it('13 Nov: with the fire held they don\'t get nervous: nothing\'s burning', () => {
+    const n = new Nerves();
+    expect(n.tick(0, 2, Infinity)).toBeNull();
   });
 });

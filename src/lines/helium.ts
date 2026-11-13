@@ -34,8 +34,8 @@ export const OPENING = {
     step one (STEP_ONE, below), then it's yours. */
 export const LESSON = {
   yours: {
-    says: 'Right, your go. Keep those three clear of white. H if you want me. I\'ll be here. Probably.',
-    note: 'Your go: keep the three right-hand columns clear of white, and burn them once they\'re all junk. H: Help, Helium. G: a hint. W: watch Helium play.',
+    says: 'Right, your go. Keep those three clear of white. H if you want me, F to hold the fire. I\'ll be here. Probably.',
+    note: 'Your go: keep the three right-hand columns clear of white, and burn them once they\'re all junk. H: Help, Helium. G: a hint. W: watch Helium play. F: hold the fire, X: burn by hand.',
   },
 } as const;
 
@@ -186,6 +186,18 @@ export const HINT = {
   none: 'Nothing worth showing. Let it cook.',
 } as const;
 
+/** Holding the fire (F) to take it slowly, burning by hand (X) (the user, 13 Nov: "Should have the ability to pause
+    auto burning and burn manually if you'd like to slow down, helium should reference the keyboard shortcuts for
+    it at points"): as you hold it (`held`) and let it go (`going`), and in the bar; `tip`, said after they panic
+    the first time or two in a while, the keys for slowing down. */
+export const FIRE = {
+  held: 'Fire\'s held. Take your time. X burns the end column when you\'re ready.',
+  going: 'Fire\'s back on. Fifteen seconds a column, mind.',
+  heldNote: 'The fire\'s held: nothing burns till you press X. F lets it go again.',
+  goingNote: 'The fire\'s on: the end column burns every 15 seconds. F holds it.',
+  tip: 'Psst. F holds the fire. X burns when you\'re ready. No shame in it.',
+} as const;
+
 /** Each column you send up as a Crystal Clear chain grows, now and then; the flask full. */
 export const PRAISE = {
   clear: ['Crystal Clear. That\'s the stuff.', 'Another! Keep them coming.', 'Ooh. Smooth.'],
@@ -255,6 +267,10 @@ export const CHARACTER: Character = {
       each: { fire: 'Whites on the fire\'s side, the three columns next to it', fill: 'The fire\'s side clear, colour all over', block: 'The whites mostly left', chain: 'The chain' },
     },
     { when: 'Playing your board for you to watch: as it starts (start), before each move the technique and why (again when it\'s the same as the move before), and as they hand it back (done)', says: WATCH },
+    {
+      when: 'Holding the fire (F) to take it slowly and burning by hand (X): their line and the bar\'s as you hold it and let it go; the tip after they panic the first time or two', says: FIRE,
+      each: { held: 'You hold the fire', going: 'You let it go again', heldNote: 'In the bar, held', goingNote: 'In the bar, let go', tip: 'After their panic, the first time or two' },
+    },
     { when: 'A hint: the bar when the arrows show the pieces that could take a white\'s place by the fire (routes), or there\'s nothing to show (none)', says: HINT },
     { when: 'Now and then as your Crystal Clears go up, and when the flask\'s full', says: PRAISE },
     { when: 'While you\'re within earshot of their island: round and round', says: AFTER },
