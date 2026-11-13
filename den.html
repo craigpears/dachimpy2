@@ -45,6 +45,9 @@
     /* The sloop race watched (js/den/race-watch.js): its bar along the top, nothing of your own sailing. */
     body.watching .sailhud, body.watching .dock, body.watching .hud, body.watching #racehud { display: none !important; }
     body.at-board .hud { display: none !important; }
+    /* At Helium's board on a phone, no letterbox bar at the top: it covered their window and their line (the
+       user, 13 Nov: "a black bar in the top of the screen ... blocking all the chat and the animation"). */
+    @media (orientation: portrait) { body.at-board .cine-bar.top { height: 0 !important; } }
     #watchbar { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 24px); z-index: 6; background: var(--panel); border: 1px solid #5a412a; border-radius: 10px; padding: 6px 12px; color: #f3ecdc; font: 600 15px/1.35 'Alegreya Sans', sans-serif; text-align: center; }
     #watchbar .wb-now b { color: var(--gold); }
     #watchbar .wb-who { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 5px 0 3px; }
