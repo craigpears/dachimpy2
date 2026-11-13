@@ -18,10 +18,16 @@ export const OPENING = {
 /** Their lesson, on a real board at their still after their opening (src/den-helium.ts, lessonPlan): a line in
     their bubble (`says`), and what it shows in plain words, in the bar at the foot of the screen (`note`).
     No basics (the user, 13 Nov: "basic move mechanics ... Puzzle Pirates does that. That tutorial exists"):
-    step one (STEP_ONE, below), then it's yours. */
+    step one (STEP_ONE, below), then it's yours: first they hold the burner, to save you any mishaps (`burner`; the
+    user, 13 Nov: "Should be funny saying I'm gonna hold the automatic burner so we don't have any of these
+    mishaps. But you know, when you feel ready, hit [F] and it can start burning automatically"), then your go. */
 export const LESSON = {
+    burner: {
+        says: 'Tell you what. I\'ll hold the burner for now. So we don\'t have any more of those... mishaps.',
+        note: 'The fire\'s held: nothing burns till you press X. F starts it burning on its own.',
+    },
     yours: {
-        says: 'Right, your go. Keep those three clear of white. Fire\'s held for now: X burns. F when you want it burning on its own. H for me.',
+        says: 'X burns it by hand. When you feel ready, F, and it burns on its own. Your go: keep those three clear. H for me.',
         note: 'Your go: keep the three right-hand columns clear of white, and burn them (X) once they\'re all junk. The fire\'s held to start: F starts it burning on its own. H: Help, Helium. G: a hint. W: watch Helium play.',
     },
 };
@@ -227,7 +233,7 @@ export const CHARACTER = {
         { when: 'The last thing they say when a lesson ends, always, after the other pirates', says: [TELL] },
         {
             when: 'The end of their lesson: in their bubble (says) and in the bar at the foot of the screen (note)', says: LESSON,
-            each: { yours: 'Handing you the board, step one the goal' },
+            each: { burner: 'Before handing you the board: they hold the burner, the fire held to start', yours: 'Handing you the board, step one the goal' },
         },
         {
             when: 'At your still, a white left in the furnace\'s column as the fire comes round: uneasy with a while to go, panic just before (they cower), phew if you get it out in time; each in turn', says: NERVES,

@@ -972,8 +972,11 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 
 ### The end of their lesson: in their bubble (says) and in the bar at the foot of the screen (note)
 
+- *Before handing you the board: they hold the burner, the fire held to start:*
+  - *says:* "Tell you what. I'll hold the burner for now. So we don't have any more of those... mishaps."
+  - *note:* "The fire's held: nothing burns till you press X. F starts it burning on its own."
 - *Handing you the board, step one the goal:*
-  - *says:* "Right, your go. Keep those three clear of white. Fire's held for now: X burns. F when you want it burning on its own. H for me."
+  - *says:* "X burns it by hand. When you feel ready, F, and it burns on its own. Your go: keep those three clear. H for me."
   - *note:* "Your go: keep the three right-hand columns clear of white, and burn them (X) once they're all junk. The fire's held to start: F starts it burning on its own. H: Help, Helium. G: a hint. W: watch Helium play."
 
 ### At your still, a white left in the furnace's column as the fire comes round: uneasy with a while to go, panic just before (they cower), phew if you get it out in time; each in turn

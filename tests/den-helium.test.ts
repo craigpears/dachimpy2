@@ -92,7 +92,7 @@ describe('their lesson: a real board, by the real rules', () => {
     expect(LESSON_SEED).toBeGreaterThan(0);
   });
   it('goes straight to step one after the opening: the whites ringed, walked out, why, your go', () => {
-    expect(plan.map((b) => b.name)).toEqual(['step', 'clear', 'why', 'yours']);
+    expect(plan.map((b) => b.name)).toEqual(['step', 'clear', 'why', 'burner', 'yours']);
     for (const b of plan) { expect(b.says.length).toBeGreaterThan(0); expect(b.note.length).toBeGreaterThan(0); }
   });
   it('plays every move legally on the board, opening and lesson, and burns one white, the opening\'s', () => {
@@ -162,7 +162,7 @@ describe('Helium\'s lesson without the basics (the user, 13 Nov)', () => {
   it('"basic move mechanics ... Puzzle Pirates does that. That tutorial exists. I\'m sure people can work that out" (13 Nov)', () => {
     const words = JSON.stringify(lessonBeats().map((b) => [b.says, b.note]));
     expect(words).not.toMatch(/beats|past black|rock, paper|swap rule|round and round/i);
-    expect(Object.keys(LESSON)).toEqual(['yours']);
+    expect(Object.keys(LESSON)).toEqual(['burner', 'yours']);
   });
   it('"First things first. See all these whites on the right, you know, highlight them all" (13 Nov)', () => {
     expect(plan[0].says).toMatch(/^Right\. First things first/);
@@ -476,9 +476,11 @@ describe('holding the fire to take it slowly (the user, 13 Nov: "pause auto burn
     expect(FIRE.tip).toMatch(/F holds the fire/);
     expect(FIRE.tip).toMatch(/X/);
     // (held to start with, 13 Nov: "it's paused by default. I think that's much more tutorial-like")
-    expect(LESSON.yours.says).toMatch(/held for now/);
+    // (and, 13 Nov, "funny saying I'm gonna hold the automatic burner so we don't have any of these mishaps")
+    expect(LESSON.burner.says).toMatch(/hold the burner/);
+    expect(LESSON.burner.says).toMatch(/mishaps/);
     expect(LESSON.yours.says).toMatch(/X burns/);
-    expect(LESSON.yours.says).toMatch(/F when you want it burning on its own/);
+    expect(LESSON.yours.says).toMatch(/F, and it burns on its own/);
   });
   it('13 Nov: with the fire held they don\'t get nervous: nothing\'s burning', () => {
     const n = new Nerves();

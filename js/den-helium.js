@@ -189,6 +189,7 @@ export function lessonPlan(game = afterOpening()) {
         beats.push({ name: 'clear', says: S.clear, note: S.note, act: { kind: 'drags', drags }, step: S.n, marks });
     }
     beats.push({ name: 'why', says: S.why, note: S.note, act: { kind: 'none' }, step: S.n });
+    beats.push({ name: 'burner', ...LESSON.burner, act: { kind: 'none' }, step: S.n });
     beats.push({ name: 'yours', ...LESSON.yours, act: { kind: 'none' }, step: S.n });
     return beats;
 }
