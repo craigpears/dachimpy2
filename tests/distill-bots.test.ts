@@ -6,7 +6,7 @@ import { BLACK, BURN_TICKS, COLS, DOWN_RIGHT, Distilling, SHORT, TALL, UP_LEFT, 
 import { DistillBot, HELIUM, LEVELS, MENU, P, bankFor, brownSweep, clearComingUp, dangerZones, edgeWhites, joinedUp, levelFor, rightOrder, tieBreak, whitesInJunk, advise, backward, choose, contextFor, judge, junkAcross, levelNamed, playSession, tierNamed, turnsIn, weigh } from '../src/distill-bots';
 import type { Advice } from '../src/distill-bots';
 import { ROUTINES, canGo, colourLeft, playDrags } from '../src/distill-routines';
-import { blockPhase, boardScore, keptTools, trappedWhite } from '../src/distill-score';
+import { behindSpice, blockPhase, boardScore, keptTools, trappedWhite } from '../src/distill-score';
 import type { Drag, RoutineName } from '../src/distill-routines';
 import type { Board } from '../src/distilling';
 import { seeded } from '../src/mirror-row';
@@ -454,9 +454,10 @@ describe('watching the CC^8 on seed 1 (13 Nov, the twenty-sixth and twenty-ninth
     const cols = parseBoard(['KwwwwwwwK', 'wwwwwwww', 'wwwwKwwww', 'wwwwwwww', 'wwwwwwwww', 'wwwwwwwb', 'wwwwwwwwK', 'bbbbKKKK', 'bbbbKKKKK', 'bbbbKKKK']);
     expect(blockPhase(cols)).toBe(true);
     const drag = [{ x: 2, y: 4, ways: [DOWN_RIGHT, DOWN_RIGHT, DOWN_RIGHT, DOWN_RIGHT] }];
-    const was = P.CARRY;
+    const was = P.CARRY, onward = P.ONWARD;
     try {
-      P.CARRY = 0;
+      // (The onward carry, the thirty-second note's, off too: it carries this one on as well.)
+      P.CARRY = 0; P.ONWARD = 0;
       const short = judge(cols, drag, HELIUM, undefined, true)!;
       expect(short.drags[0].ways).toHaveLength(3);
       P.CARRY = was;
@@ -466,6 +467,72 @@ describe('watching the CC^8 on seed 1 (13 Nov, the twenty-sixth and twenty-ninth
       const end = (n: number): [number, number] => { let at: [number, number] = [2, 4]; for (let i = 0; i < n; i++) at = neighbourOn(cols, at[0], at[1], DOWN_RIGHT)!; return at; };
       expect(joinedUp(playDrags(cols, short.drags)!, end(3))).toBe(false);
       expect(joinedUp(playDrags(cols, carried.drags)!, end(4))).toBe(true);
-    } finally { P.CARRY = was; }
+      P.CARRY = 0; P.ONWARD = onward;
+      expect(judge(cols, drag, HELIUM, undefined, true)!.drags[0].ways).toHaveLength(4);
+    } finally { P.CARRY = was; P.ONWARD = onward; }
+  });
+});
+describe('whites burned later in a session, traced (13 Nov, the thirteenth run: "If you\'re playing well, you should never burn a white")', () => {
+  it('after a chain breaks, the whites still banked on the right are sent up as a new chain, not filled with junk and burned', () => {
+    // CC^5 on seed 5001 (the twelfth run's code): one chain, then back in Stage I with the bank still on the right,
+    // every column that reached the fire mostly white, filled with junk by the bot and burned, a white or two each
+    // time: 20 in the session.
+    const g = new Distilling(seeded(5001)), bot = new DistillBot(levelNamed('cc5'));
+    // The right-hand six columns the bank's leftovers, the junk on the left: too few whites for a fresh bank.
+    g.cols = parseBoard(['KKKKbbbbb', 'KKKKbbbb', 'KKKKbbbbb', 'KKKKbbbb', 'wwwwwwwww', 'wwwwwwww', 'wwwwwwwww', 'wwwwwwwK', 'bwwwwwwwK', 'wwwwwwwK']);
+    bot.chained = true;
+    expect(bot.plan(g).stage).toBe('chain');
+    expect(bot.burns).toBe(0);
+    // Before any chain, a mostly white column by the fire is still Stage I's to clear.
+    const fresh = new DistillBot(levelNamed('cc5'));
+    expect(fresh.plan(g).stage).toBe('junk');
+  });
+  it('a white in a column to burn is got out by a piece brought round from the left, not a brown taken in from the column and back, another white swapped in behind it', () => {
+    // CC^3 on seed 5000 (the twelfth run's code): the chain's last junk column to burn, a white stuck in it; the
+    // path search's cheapest move took the brown below it out and back, the white out and another in, so it saved
+    // nothing, and the bot waited 15 s while it burned.
+    const cols = parseBoard(['w*bbKbwK', 'bbbK*bKKb', 'bKb*bwKK', 'KwwbbbKwb', 'wwwwKwww', 'wwwwwwwww', 'ww*wwwww', 'wwwwwwwww', 'wwwwwwww', 'bwbKbKb**']);
+    const ctx = contextFor(cols, 'chain', 1, 14);
+    const [best] = weigh({ cols, chain: 0, timeLeft: 12700 }, ctx, levelNamed('cc3'));
+    expect(best.saves).toBe(true);
+    expect(best.after![COLS - 1].filter((p) => p === WHITE).length).toBe(0);
+  });
+  it('a white with spice on both its ways left is walled off for good, scored as a white behind spice', () => {
+    // CC^8 on seed 5000: a white at the bottom of a short column, the tall one left of it spice at its bottom two:
+    // it drifted right with the board till it burned.
+    const walled = board([[4, 7, '*'], [4, 8, '*'], [6, 0, 'K']]), pocketJunk = board([[4, 7, '*'], [4, 8, '*'], [5, 7, 'K']]);
+    expect(behindSpice(walled, 5, 7)).toBe(true);
+    expect(behindSpice(walled, 5, 6)).toBe(false); // a white beside it on its left: a way out
+    expect(boardScore(walled)).toBeLessThan(boardScore(pocketJunk));
+  });
+});
+
+describe('frozen by the fire, and drags stopping short (13 Nov, the thirty-second note: "It seems to have just frozen ... maybe it\'s stuck because it requires maybe a few moves just to kind of get the brown into the right position"; "you could go one step further, just do it")', () => {
+  it('when no one move saves a white by the fire, it plays the move that sets up the save, and the save comes next', () => {
+    // CC^3 on seed 5001, 208 s in: a white low in the furnace's column, nothing reaching it in one move.
+    const cols = parseBoard(['wbbwKKKKw', 'wbwbbKwK', '*wwwbbwKK', 'bwwwwwKw', 'wwwwwwwwK', 'wwwwwww*', 'bwwww*w*K', 'bbbK*wKw', 'bbbKbbwKK', 'KbbKbwwK']);
+    const style = levelNamed('cc3'), ctx = contextFor(cols, 'junk', 0, style.reach);
+    const moves = weigh({ cols, chain: 0, timeLeft: 10800 }, ctx, style);
+    expect(moves).toHaveLength(1);
+    expect(moves[0].setup).toBe(true);
+    const after = moves[0].after!;
+    const [next] = weigh({ cols: after, chain: 0, timeLeft: 7000 }, contextFor(after, 'junk', 0, style.reach), style);
+    expect(next.saves).toBe(true);
+    expect(next.setup).toBeFalsy();
+  });
+  it('a drag is carried on to the right while the board scores no worse, not let go where one look ahead peaks', () => {
+    // A black at the top left of a board of whites, sent down-right all the way: it goes on to the far side.
+    const cols = board([[0, 0, 'K'], [9, 4, 'K'], [9, 5, 'K'], [9, 6, 'K'], [9, 7, 'K']]);
+    const drags = [{ x: 0, y: 0, ways: Array(8).fill(DOWN_RIGHT) }], style = levelNamed('cc3');
+    const was = P.ONWARD;
+    try {
+      P.ONWARD = 0;
+      const peak = judge(cols, drags, style)!;
+      P.ONWARD = 1;
+      const onward = judge(cols, drags, style)!;
+      expect(onward.drags[0].ways.length).toBeGreaterThanOrEqual(peak.drags[0].ways.length);
+      expect(boardScore(playDrags(cols, onward.drags)!)).toBeGreaterThanOrEqual(boardScore(playDrags(cols, peak.drags)!));
+      expect(onward.drags[0].ways.length).toBe(8);
+    } finally { P.ONWARD = was; }
   });
 });

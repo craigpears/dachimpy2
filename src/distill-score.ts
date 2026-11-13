@@ -130,11 +130,27 @@ export function trappedWhite(cols: Board, x: number, y: number, at = wall(cols).
 /** A white in a pocket behind spice (the user, 12 Nov, the thirteenth note: "that white piece that's kind of
     trapped behind the spice at the top right ... things burn, like those places become inaccessible"): on the
     top or bottom of its column with a spice just inside it in its column. Spice never swaps, so it has two
-    ways out at most, along the edge, and those close as the board slides. */
+    ways out at most, along the edge, and those close as the board slides. Or anywhere with spice on both its ways
+    left (or spice on one and the board's edge on the other): walled off from the left for good, since spice never
+    moves and the board slides as a whole, it can only drift right till it burns (the thirteenth run, traced 13
+    Nov: a third of the CC^8's whites still burned were walled in so). */
 export function behindSpice(cols: Board, x: number, y: number): boolean {
   const c = cols[x];
-  if (c[y] !== WHITE || (y !== 0 && y !== c.length - 1)) return false;
-  return c[y === 0 ? 1 : y - 1] === SPICE;
+  if (c[y] !== WHITE) return false;
+  if ((y === 0 || y === c.length - 1) && c[y === 0 ? 1 : y - 1] === SPICE) return true;
+  return walledBySpice(cols, x, y);
+}
+/** A white with spice on both its ways left (or spice on one, the board's edge on the other). */
+export function walledBySpice(cols: Board, x: number, y: number): boolean {
+  if (x === 0 || cols[x][y] !== WHITE) return false;
+  let spice = false;
+  for (const d of [UP_LEFT, DOWN_LEFT]) {
+    const n = neighbourOn(cols, x, y, d);
+    if (!n) continue;
+    if (cols[n[0]][n[1]] !== SPICE) return false;
+    spice = true;
+  }
+  return spice;
 }
 
 /** Pieces on the wrong side of a wall standing left of column b in a row (junk left of it, whites right of

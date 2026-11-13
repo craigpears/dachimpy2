@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import { COLS, Distilling, WHITE, parseBoard } from '../src/distilling';
 import { FIRE_COLS, PHASES, PHASE_ORDER, PHASE_WEIGHTS, phaseOf, whitesByFire } from '../src/distill-phase';
-import { DistillBot, HELIUM, P, advise, contextFor, dangerZones, levelNamed, weigh } from '../src/distill-bots';
+import { DistillBot, HELIUM, P, advise, contextFor, dangerZones, levelNamed, rankSaves, weigh } from '../src/distill-bots';
 import { stuck } from '../src/distill-path';
 import { ROUTINES } from '../src/distill-routines';
 import type { Board } from '../src/distilling';
@@ -79,9 +79,28 @@ describe('each phase weighs the techniques, never rules one out, 13 Nov ("differ
     const moves = weigh({ cols, chain: 0, timeLeft: 12000 }, ctx, HELIUM);
     expect(moves.length).toBeGreaterThan(0);
     for (const m of moves) expect(m.weighted).toBe(true);
-    // A white in the furnace's column: danger, every technique even.
+    // A white in the furnace's column: danger, only the moves that save it (13 Nov, the thirteenth run: ranked by
+    // the weights too, after saving it).
     const fire = parseBoard(['wwwwwwwww', 'wwwwwwww', 'wwwwwwwww', 'wwwwwwww', 'Kwwwwwwww', 'wwKKKKKK', 'wwKKKKKKK', 'KbKKKKKK', 'KKKKbbbbb', 'KKKwbbbb']);
-    for (const m of weigh({ cols: fire, chain: 0, timeLeft: 12000 }, contextFor(fire, 'junk', 0, 16), HELIUM)) expect(m.weighted).toBeFalsy();
+    const saves = weigh({ cols: fire, chain: 0, timeLeft: 12000 }, contextFor(fire, 'junk', 0, 16), HELIUM);
+    expect(saves.length).toBeGreaterThan(0);
+    for (const m of saves) expect(m.saves).toBe(true);
+  });
+  it('by the fire, a plain drag or a hook that saves the white beats a crawl that saves it as well, 13 Nov (crawls by the fire rose to 12 to 16 a session with the danger zones evened; the user: "one big giant sweeping motion. That\'s really easy. You don\'t need to crawl things across")', () => {
+    // The fire board above, its white in the furnace's column; two moves that each save it, freeing as many
+    // hard-to-reach whites: a crawl worth a little more, and a plain drag (the diamond's) or a hook.
+    const cols = parseBoard(['wwwwwwwww', 'wwwwwwww', 'wwwwwwwww', 'wwwwwwww', 'Kwwwwwwww', 'wwKKKKKK', 'wwKKKKKKK', 'KbKKKKKK', 'KKKKbbbbb', 'KKKwbbbb']);
+    const after = parseBoard(['wwwwwwwww', 'wwwwwwww', 'wwwwwwwww', 'wwwwwwww', 'Kwwwwwwww', 'wwKKKKKK', 'wwKKKKKKK', 'KbKKKKKK', 'KKKwbbbbb', 'KKKKbbbb']);
+    const move = (routine: 'crawl' | 'diamond' | 'hook', value: number) => ({ move: { routine, drags: [], reason: '' }, value, after });
+    for (const other of ['diamond', 'hook'] as const) {
+      const ranked = rankSaves(cols, COLS - 1, 'fire', [move('crawl', 1), move(other, 0.95)]);
+      expect(ranked.map((m) => m.move.routine)).toEqual([other, 'crawl']);
+      expect(ranked.every((m) => m.saves)).toBe(true);
+    }
+    // Weights off, the crawl's worth wins as before.
+    const was = P.PHASES;
+    P.PHASES = 0;
+    try { expect(rankSaves(cols, COLS - 1, 'fire', [move('crawl', 1), move('diamond', 0.95)])[0].move.routine).toBe('crawl'); } finally { P.PHASES = was; }
   });
   it('crawls are for later: weighed down while the fire\'s side is cleared and the junk columns filled, and through the V a hook beats a crawl, 13 Nov ("You don\'t need to crawl things across. That\'s for ... mid or late game")', () => {
     expect(PHASE_WEIGHTS.fire.crawl!).toBeLessThan(1);

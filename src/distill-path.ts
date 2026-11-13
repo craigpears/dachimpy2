@@ -30,7 +30,7 @@
 import { COLS, DOWN_LEFT, DOWN_RIGHT, SPICE, UP_LEFT, UP_RIGHT, WHITE, canSwapOn, neighbourOn } from './distilling.js';
 import type { Board } from './distilling.js';
 import { trapped, trappedWhite, wall } from './distill-score.js';
-import { canGo, halfOf, isJunk, placeName, playDrags } from './distill-routines.js';
+import { canGo, halfOf, isJunk, placeName, playDrags, whitesFrom } from './distill-routines.js';
 import type { Ctx, Drag } from './distill-routines.js';
 
 /** A move the search found: one drag, and why. Its technique is 'path', beside the named routines. */
@@ -59,8 +59,11 @@ export const PATH = {
 const ALL = [UP_RIGHT, UP_LEFT, DOWN_LEFT, DOWN_RIGHT];
 const LEFT = [UP_LEFT, DOWN_LEFT], RIGHT = [UP_RIGHT, DOWN_RIGHT];
 
-/** A stuck piece, and the side it has to go (-1 left, 1 right). */
-export interface Stuck { x: number; y: number; side: number }
+/** A stuck piece, and the side it has to go (-1 left, 1 right). A white in a danger zone has its zone, the first
+    column of it: a way out only counts when it leaves fewer whites from there on, not another white swapped in
+    behind it (the thirteenth run, traced 13 Nov: the cheapest way out of the furnace's column took a brown in
+    from it and back, the white out and another white in, and nothing else was looked for while it burned). */
+export interface Stuck { x: number; y: number; side: number; zone?: number }
 
 /** The pieces stuck where they can't go the way they have to (see the header), the furnace's side first. */
 export function stuck(cols: Board, ctx: Ctx): Stuck[] {
@@ -89,7 +92,7 @@ export function bringRound(cols: Board, s: Stuck, pace: Pace, limits = PATH): Dr
 
 /** bringRound's search: the drag and its cost in ms, a person's. */
 function search(cols: Board, s: Stuck, pace: Pace, limits: typeof PATH, nodes: number, skip?: ReadonlySet<string>): { drags: Drag[]; ms: number } | null {
-  const swapMs = 1000 / pace.rate, q = cols[s.x][s.y];
+  const swapMs = 1000 / pace.rate, q = cols[s.x][s.y], before = s.zone === undefined ? 0 : whitesFrom(cols, s.zone);
   // Where the piece brought round must stand to swap the stuck one its way: beside it on that side.
   const goals = (s.side < 0 ? LEFT : RIGHT).map((d) => neighbourOn(cols, s.x, s.y, d)).filter((n): n is [number, number] => !!n);
   if (!goals.length) return null;
@@ -134,7 +137,7 @@ function search(cols: Board, s: Stuck, pace: Pace, limits: typeof PATH, nodes: n
     if (goals.some((g) => g[0] === n.at[0] && g[1] === n.at[1])) {
       for (const d of ALL) {
         const t = neighbourOn(n.b, n.at[0], n.at[1], d);
-        if (t && t[0] === s.x && t[1] === s.y && n.b[s.x][s.y] === q && canSwapOn(n.b, n.at[0], n.at[1], s.x, s.y)) {
+        if (t && t[0] === s.x && t[1] === s.y && n.b[s.x][s.y] === q && canSwapOn(n.b, n.at[0], n.at[1], s.x, s.y) && leaves(n.b, s, n.at, before)) {
           return { drags: [{ x: n.from[0], y: n.from[1], ways: [...n.ways, d] }], ms: n.cost + swapMs + (n.ways.length && n.ways[n.ways.length - 1] !== d ? limits.TURN_MS : 0) };
         }
       }
@@ -152,6 +155,15 @@ function search(cols: Board, s: Stuck, pace: Pace, limits: typeof PATH, nodes: n
     }
   }
   return null;
+}
+
+/** A danger zone's white got out by the last swap, the piece at `at` into its place on board b: fewer whites from
+    its zone on than `before`. No zone, always. */
+function leaves(b: Board, s: Stuck, at: [number, number], before: number): boolean {
+  if (s.zone === undefined) return true;
+  const after = b.map((c) => c.slice());
+  after[s.x][s.y] = b[at[0]][at[1]]; after[at[0]][at[1]] = b[s.x][s.y];
+  return whitesFrom(after, s.zone) < before;
 }
 
 /** A few ways into a piece's place, each the cheapest drag of a different piece, cheapest first: to show, not
@@ -226,8 +238,9 @@ export function pathMoves(cols: Board, ctx: Ctx, pace: Pace, targets: readonly S
       });
       continue;
     }
-    // No one drag gets there: a white in the columns next to burn gets a piece moved out of the way first.
-    if (ctx.stage !== 'junk' || cols[s.x][s.y] !== WHITE || s.x < ctx.burnFrom) continue;
+    // No one drag gets there: a white in the columns next to burn (or a danger zone's, in the chain's junk columns
+    // too) gets a piece moved out of the way first.
+    if (cols[s.x][s.y] !== WHITE || (s.zone === undefined && (ctx.stage !== 'junk' || s.x < ctx.burnFrom))) continue;
     const two = openWay(cols, s, pace, limits);
     if (!two) continue;
     const [a, b] = two, after = playDrags(cols, [a]);

@@ -28,7 +28,7 @@
    Pure: no randomness, no clock. */
 import { COLS, DOWN_LEFT, DOWN_RIGHT, SPICE, UP_LEFT, UP_RIGHT, WHITE, canSwapOn, neighbourOn } from './distilling.js';
 import { trapped, trappedWhite, wall } from './distill-score.js';
-import { canGo, halfOf, isJunk, placeName, playDrags } from './distill-routines.js';
+import { canGo, halfOf, isJunk, placeName, playDrags, whitesFrom } from './distill-routines.js';
 /** The search's limits and a turn's cost. */
 export const PATH = {
     /** The longest drag searched, in swaps. */
@@ -74,7 +74,7 @@ export function bringRound(cols, s, pace, limits = PATH) {
 }
 /** bringRound's search: the drag and its cost in ms, a person's. */
 function search(cols, s, pace, limits, nodes, skip) {
-    const swapMs = 1000 / pace.rate, q = cols[s.x][s.y];
+    const swapMs = 1000 / pace.rate, q = cols[s.x][s.y], before = s.zone === undefined ? 0 : whitesFrom(cols, s.zone);
     // Where the piece brought round must stand to swap the stuck one its way: beside it on that side.
     const goals = (s.side < 0 ? LEFT : RIGHT).map((d) => neighbourOn(cols, s.x, s.y, d)).filter((n) => !!n);
     if (!goals.length)
@@ -134,7 +134,7 @@ function search(cols, s, pace, limits, nodes, skip) {
         if (goals.some((g) => g[0] === n.at[0] && g[1] === n.at[1])) {
             for (const d of ALL) {
                 const t = neighbourOn(n.b, n.at[0], n.at[1], d);
-                if (t && t[0] === s.x && t[1] === s.y && n.b[s.x][s.y] === q && canSwapOn(n.b, n.at[0], n.at[1], s.x, s.y)) {
+                if (t && t[0] === s.x && t[1] === s.y && n.b[s.x][s.y] === q && canSwapOn(n.b, n.at[0], n.at[1], s.x, s.y) && leaves(n.b, s, n.at, before)) {
                     return { drags: [{ x: n.from[0], y: n.from[1], ways: [...n.ways, d] }], ms: n.cost + swapMs + (n.ways.length && n.ways[n.ways.length - 1] !== d ? limits.TURN_MS : 0) };
                 }
             }
@@ -156,6 +156,16 @@ function search(cols, s, pace, limits, nodes, skip) {
         }
     }
     return null;
+}
+/** A danger zone's white got out by the last swap, the piece at `at` into its place on board b: fewer whites from
+    its zone on than `before`. No zone, always. */
+function leaves(b, s, at, before) {
+    if (s.zone === undefined)
+        return true;
+    const after = b.map((c) => c.slice());
+    after[s.x][s.y] = b[at[0]][at[1]];
+    after[at[0]][at[1]] = b[s.x][s.y];
+    return whitesFrom(after, s.zone) < before;
 }
 /** A few ways into a piece's place, each the cheapest drag of a different piece, cheapest first: to show, not
     to play (the user, 13 Nov, of Helium ringing a white by the fire: "maybe it should show some arrows of nearby
@@ -235,8 +245,9 @@ export function pathMoves(cols, ctx, pace, targets = stuck(cols, ctx), limits = 
             });
             continue;
         }
-        // No one drag gets there: a white in the columns next to burn gets a piece moved out of the way first.
-        if (ctx.stage !== 'junk' || cols[s.x][s.y] !== WHITE || s.x < ctx.burnFrom)
+        // No one drag gets there: a white in the columns next to burn (or a danger zone's, in the chain's junk columns
+        // too) gets a piece moved out of the way first.
+        if (cols[s.x][s.y] !== WHITE || (s.zone === undefined && (ctx.stage !== 'junk' || s.x < ctx.burnFrom)))
             continue;
         const two = openWay(cols, s, pace, limits);
         if (!two)

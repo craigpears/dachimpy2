@@ -988,6 +988,72 @@ Plainly:
 - **Next:** rescuing a white that's let go in a rebuild (whites burned later in a session); ranking the saving
   moves of an edge zone by the phase's weights too, so a hook or a plain drag beats a crawl there.
 
+### Whites burned later in a session, traced; and the thirty-second note (13 Nov, thirteenth run)
+Burns traced back to the moves before them (CC^3 and CC^8 on seeds 5000 to 5009, and CC^5 on 5001, which burned 20
+whites in one session), and what was found:
+1. **The bank turned into junk after a chain broke (the main cause).** Back in Stage I, the bot treated every column
+   reaching the fire as a junk column to finish, but after a chain the right-hand side is the bank's leftover whites:
+   each column was mostly white, the bot moved junk into it, and a white or two burned with it, column after column.
+   Now, once it has chained, a mostly white column at the fire (`mostlyWhite`) puts it back in the chain, a new one
+   (`DistillBot.chained`); Stage I resumes only when junk reaches the fire. No white is burned that way: a mostly white
+   column goes up whatever happens.
+2. **A way out that saved nothing.** In a danger zone the path search's cheapest move often took the junk under the
+   white out of the column and back, the white out and another white in behind it; it counted as a way out, so nothing
+   else was looked for while the column burned (one CC^3 board waited 15 s so). Now a danger zone's white is searched
+   for with its zone (`Stuck.zone`): a way out counts only when it leaves fewer whites there, and the move a piece out
+   of the way first (`openWay`) is tried for the chain's junk columns too. On that board it now brings a brown round
+   from the left, eight swaps.
+3. **Whites walled in by spice.** A third of the CC^8's remaining burns were whites with spice on both their ways
+   left: spice never moves and the board slides as a whole, so such a white can only drift right till it burns.
+   `behindSpice` now counts it (-12, as a white behind spice at the top or bottom), so no move puts a white there.
+   One already walled in from the deal can't be saved.
+
+And the brief's other points:
+- **The saving moves ranked by the phase's weights** (`rankSaves`): the hard-to-reach first as before, then by worth
+  weighed, only the weights holding a technique back counting (the rescue's own lift doesn't), and a long plain drag
+  in full, so a sweep or a hook that saves the white beats a crawl that saves it as well. (Tried first with every
+  weight, round one: a rescue's two drags beat one plain sweep that saved the same white better.)
+- **The thirty-second note:** (1) frozen with whites low by the fire: when nothing saves a white in danger in one
+  move, a short plan (`setUp`): of the best 8 moves on offer, the one after which a plain save or a piece brought round
+  saves it, both in time, the save judged as the planner will play it next move. About 2.5 a session (CC^3). (3)
+  drags stopping short: in Stage I a drag is carried on past where its score a second peaks while each swap more takes
+  its junk further right and the board scores no worse (`P.ONWARD`). (2) the blacks' diagonal through the right-hand
+  junk isn't addressed as such: whatever it boxes in by the fire is now a short plan's to free, but nothing clears it
+  early.
+
+20 boards each (seeds 5000 on), CC^8 banking 6 (item 4 of the brief). Before: the twelfth run; round 1 the three
+fixes and the first ranking; after: everything above (round 3).
+
+| Bot | Longest chain: mean (best), was | Target reached (sessions), was | Sessions with no white burned, was | Disasters | Whites burned a session (first 3 min), was | Points a minute, was |
+|---|---|---|---|---|---|---|
+| **CC^1** | 1.9 (4), was 2.3 (4) | 20/20, was 20/20 | 13/20, was 4/20 | 0 | 0.6 (0.1), was 2.0 (0.8) | 15.7, was 12.9 |
+| **CC^2** | 2.6 (5), was 2.1 (5) | 15/20, was 11/20 | 15/20, was 6/20 | 0 | 0.6 (0.0), was 2.9 (0.6) | 16.7, was 10.9 |
+| **CC^3** | 2.0 (4), was 2.3 (5) | 6/20, was 10/20 | 14/20, was 0/20 | 0 | 0.6 (0.1), was 4.2 (0.7) | 14.1, was 9.8 |
+| **CC^5** | 2.5 (5), was 2.5 (7) | 3/20, was 5/20 | 10/20, was 0/20 | 0 | 0.7 (0.1), was 8.7 (1.0) | 12.2, was 8.6 |
+| **CC^8** (bank 6) | 2.6 (5), was 0.6 (3) at bank 7 | 0/20, was 0/20 | 11/20, was 0/20 | 0 | 0.7 (0.1), was 12.3 (1.3) | 12.4, was 1.8 |
+
+Round 1 (the three fixes alone) had whites burned 0.3 / 0.6 / 0.3 / 0.9 / 0.8, sessions with none 14 / 12 / 15 / 12 /
+14, chains 2.0 / 2.3 / 2.2 / 2.8 / 2.8: the rounds differ within 20 boards' noise.
+
+Crawls a session in the fire / fill / block / chain phases: CC^5 5.1 / 4.4 / 4.9 / 6.2 (was 15.7 / 1.8 / 6.2 / 5.4),
+CC^8 4.8 / 4.6 / 5.3 / 6.5 (was 11.8 / 1.6 / 7.5 / 0.8). Round 1, before the onward carry and the short plan, had CC^5
+3.4 / 2.7 / 5.0 / 6.4 and CC^8 3.4 / 2.8 / 4.3 / 6.9.
+
+Plainly:
+- **Whites burned fell by two thirds to nine tenths** at every level, half to three quarters of sessions burn none,
+  and in the first 3 minutes it's 0.1 or less a session (CC^8 0.1, the old Ultimate's 0.6). No disasters. Points a
+  minute rose for every level, CC^8's most (its rebuilds no longer stall).
+- **Crawls by the fire are down to a third** (12 to 16 a session, now about 5). In the fill phase they rose (1.6 to 1.8,
+  now about 4.5), with the onward carry and the short plans in; not traced yet.
+- **CC^8 at bank 6, on 20 boards:** chains 2.6 (best 5), never its target. It ships at 6.
+- **The targets still aren't reached past CC^2:** every level's mean chain sits at 2 to 2.6. Traced on CC^1 and CC^5
+  (4 sessions each): in the chain the bot waits, nothing worth moving, about 300 times a session (some 75 s) with junk
+  in the column going up, mostly a brown or a black stuck on its top or bottom edge, and that column then goes up
+  not Crystal Clear (7 or 8 breaks a session). Such a piece needs a pair working together (a black brought under a
+  brown at the top, then a white under the black), which no chain routine finds and the path search's one drag can't.
+  That's the next lever for the chains; and while it waits in the chain the bot could be building on the left.
+- The runs got slower (2 to 3 minutes a level for 20 boards, was about 1): the short plans' look ahead.
+
 **Watching them, the first note (the user, 12 Nov, a screenshot of the Ultimate's board):** "the main
 thing is it just doesn't carry on the whole way to the right. It just kind of stops ... that black ... in
 the white, it was dragging the black diagonally down and it just stopped there. It's like, well, no, it
