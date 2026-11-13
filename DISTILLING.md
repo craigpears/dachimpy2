@@ -375,6 +375,56 @@ turn-over, the line pull, storing and the long ways round only once colour's sca
 cheap. Sorting the junk scores nothing, so the turn-over is now rarely played. The chain (Stage II) is still
 weighed by the old `measure`, whites heading right.
 
+**The simpler score (13 Nov, the eighteenth note), as built now** (`boardScore`, replacing the list above; the
+weights are `S` in `src/distill-score.ts`):
+- **First, the columns filled on the right:** +15 for each junk column done (no white, sure to burn), counted from
+  the furnace in; +1 for each piece of junk in the column being filled (the first not done), +0.5 in the one left
+  of it. The last piece that finishes a column is the bonus.
+- **Colour pulled right:** +0.5 for each column a piece of junk is further right ("you just want to pull things
+  from the left to the right"). No credit for whites going left: "forget about dragging whites to the left".
+- **Second, the wall, once it's formed:** each row (the y-th piece of every column) has its own best split, whites
+  left of it and colour right; it has formed once at most one piece of the row is on the wrong side. The straight
+  wall is the one upright split of the whole board with fewest on the wrong side. -1 for each column a formed
+  row's split stands off it. On the opening's mixed board no row has formed, so it counts nothing.
+- **Nothing trapped:** -3 for a white trapped (`trappedWhite`: no swap taking it left, junk left of it in its
+  row, on the colour's side of the straight wall, and on the top or bottom edge of a tall column, or lower down
+  with junk on both its left), counted in the column being filled and the two left of it, next to burn; -1 for
+  junk trapped in the whites (as before); -12 for a white behind spice (as before). The seams term is gone, the
+  wall standing in for it. Whites boxed in further left aren't counted: tried on the whole board, the bots carried
+  whites back right just to give them a way out.
+- **The brown sweep waits (the user, 13 Nov, watching the bots: "the way that [the bot's] sweeping browns up back
+  down to the bottom right is right now is very good. But it's just like it leaves one or two trapped whites ...
+  it's being applied a bit too quickly before those columns have been cleared"):** a brown taken up through the
+  whites and back down through the blacks (`brownSweep`) is played as before, but while whites are left in the
+  junk columns next to burn (`whitesInJunk`, the columns more junk than white from the one before the column
+  being built), only when it takes one of them out. Clearing those columns comes first.
+- The planner's thresholds scaled to it: a move must gain 0.15 a second (was 0.5), and a ready column burns at
+  once unless a move gains 1 a second (was 3).
+
+**Why the first move trapped a white (13 Nov):** the old score had no term for a trapped white at all (its
+"trapped" was junk among the whites, and the white behind spice), and every swap of a white left past junk was +2.
+On the test page's first board (seed 1) the rescue took the white from the second column from the right up-left
+twice, each swap +2, to the top of column 7, where its only way left was the white below it: stuck until a brown
+comes under it. Now that second swap costs 3 more than it gains, and the rescue stops after one swap, where the
+white can still go on up-left into a black.
+
+### Bringing a piece round: the path search (13 Nov, the eighteenth note)
+"Find the path of a piece that could take that white's place. But obviously that pathfinding can involve loops."
+Built as `src/distill-path.ts`: a piece is **stuck** (`stuck`) when it can't go its way: in Stage I a trapped white
+(above), junk trapped in the whites, or a white in a column about to burn with no way left; in the chain, junk in a
+column still to go up with no way left. `bringRound` searches, A\*, for the one drag of some other piece, cheapest
+in a person's time (a moment to pick it up, 6 swaps a second along it, 60 ms a turn), along legal swaps and
+ending in a swap with the stuck piece that sends it its way. Each board the drag leaves is a node, so the same
+square with the board changed behind it is a new one, and loops come out of it; the heuristic is the squares
+still to go. At most 12 swaps and 2,500 boards a stuck piece, four stuck pieces a move: about 2 ms a board in
+Node. On the user's board it finds their move exactly: the brown below-right of the trapped white up-left,
+up-left through the whites, and up-right into its place, the white dropping out left.
+
+The planner offers it as a fallback (`weigh`): only for a stuck piece that's still stuck after every move the
+routines it knows offer, and then its move is judged like the rest. The Able to Master and up, and Helium, know
+it (`path` on a tier); its label is "Bring a piece round". For anyone keyed by the routines' names ("Help,
+Helium"'s lines) the advice names the hook, the nearest named technique, with `technique: 'path'` beside it.
+
 ### Decision time
 Keep burning full junk columns as long as you're sure the next one will be finished before the furnace;
 the more white columns you bank, the longer the chain. Near the end there's less room on the right to
@@ -643,6 +693,33 @@ ahead, the planner's stand-in rules dropped. Same 40 boards, run once before and
   the whites) did work the simple score doesn't yet; the trapped-junk and wall terms win back only part of it.
   Not tuned further (the user's cost rule): the next step is the user watching them on `distilling-test.html`,
   and likely a term for the white block's top and bottom edges kept clean.
+
+### The simpler score, nothing trapped, the path search (13 Nov, sixth run)
+After the eighteenth note (§3, "The simpler score", "Bringing a piece round"), and the user's note on the brown
+sweep. 20 boards a tier (seeds 5000 on), the old code and the new run by the same runner. "Trapping moves" are
+Stage I moves leaving more whites trapped than before them, by the score's test (no way left, cut off, on the
+edge or boxed in by junk, in the three columns next to burn); the runner also counts a broader one, any white
+anywhere with no way left and junk left of it, on the edge or boxed in.
+
+| Tier | Longest chain: mean (best), was | Whites burned, was | Trapping moves a session, was (broader, was) | Brown sweeps leaving one trapped, was | Session score, was | Points a minute, was | Junk columns burned a minute of Stage I, was |
+|---|---|---|---|---|---|---|---|
+| Learner | 1.1 (2), was 1.6 (5) | 6.5, was 6.3 | 1.7, was 2.3 (3.7, was 3.0) | 0.1 of 1.9, was 0.3 of 2.9 | 4.2, was 4.8 | 9.0, was 9.9 | 3.8, was 3.8 |
+| Able to Master | 1.1 (3), was 1.2 (3) | 0.8, was 1.8 | 2.4, was 3.9 (7.3, was 5.0) | 0.1 of 4.3, was 0.4 of 5.0 | 5.7, was 5.9 | 9.5, was 9.1 | 5.6, was 5.8 |
+| Grand-Master to Legendary | 1.6 (5), was 1.3 (4) | 0.9, was 1.9 | 1.6, was 3.1 (8.1, was 4.8) | 0.1 of 3.8, was 0.5 of 3.7 | 7.2, was 6.0 | 15.2, was 11.0 | 6.0, was 6.3 |
+| Ultimate | 2.0 (5), was 2.0 (6) | 0.9, was 1.1 | 1.9, was 4.0 (7.7, was 5.3) | 0.1 of 2.5, was 0.2 of 2.1 | 9.0, was 7.2 | 21.0, was 16.1 | 6.1, was 6.4 |
+
+- **The first move:** on the test page's board (seed 1) no tier drags the white to the top any more; over seeds 1
+  to 20, first moves leaving a white trapped on the edge fell from 3 or 4 of 20 a tier to 1 or 2 (seed 20's is a
+  rescued white dropped to the bottom of column 5, far from the furnace, which the score doesn't count).
+- **What it fixed:** trapping moves by the furnace halved for the three upper tiers, brown sweeps leaving a white
+  trapped all but stopped, whites burned halved (the Master 1.8 to 0.8, the Grand-Master 1.9 to 0.9), and the
+  session's points a minute rose a quarter for the top two tiers, at about the same pace burning junk.
+- **What it didn't, honestly:** the chains are the same within the noise of 20 boards (the Ultimate 2.0 both,
+  its best 5 against 6; the learner shorter, 1.1 against 1.6). The broader count of trapped whites went up for the
+  upper tiers (about 8 a session against 5): with no credit for whites going left, whites further from the furnace
+  are left boxed in more, which the score doesn't count (counting them everywhere had the bots carrying whites back
+  right to free them). The path search is played about once a session (the upper tiers); most stuck pieces are
+  freed by a routine first. 20 boards can't tell a chain change of a few tenths; a 40-board run would, if wanted.
 
 **Watching them, the first note (the user, 12 Nov, a screenshot of the Ultimate's board):** "the main
 thing is it just doesn't carry on the whole way to the right. It just kind of stops ... that black ... in
