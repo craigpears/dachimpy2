@@ -2558,3 +2558,11 @@ drags, its board now filling a phone's width at Helium's still, Helium in a litt
 and what isn't (Carpentry's pieces picked, turned and placed on a small grid; the rumble, to look into), and
 ways round each: bigger targets, drag-and-drop with a held preview, a piece turned by a tap on it, a zoomed-in
 view of the part of the board you're working, the den's menus folded away (TODO.md, the hamburger menu).
+
+Carpentry by turning the phone, for a laugh (the user, 13 Nov: "would you be able to do carpentry with phone
+control? So it's like you're dizzy. Like you could rotate the pieces by turning your phone. That'd be horribly
+impractical, but it would be funny"). It can be done: the browser reports the phone's tilt and turn (device
+orientation; on an iPhone only after a tap to allow it, and only on https, which the site is). The piece in
+hand turns a quarter each time the phone's turned past 45 degrees one way or the other, with a little give so
+it doesn't flicker, and tilting it nudges the piece across the frame. A mode, never the normal controls; maybe
+someone's dizzy game (Kikkit's, after the stash?), the whole den swaying with it.
