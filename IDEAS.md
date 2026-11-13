@@ -1001,7 +1001,30 @@ Zizzy; her portrait to check on YPPedia (Meridian) before she's drawn). The real
 cuddly monkeys, Mini above all, from the user's photos. The museum keeps the story of the sims;
 the house keeps the people.
 **And Sanne (13 Nov):** "Sanne needs to be in the truly special board as well." So Sanne beside Kikkit and Zizzy in
-pride of place (a real pirate, pirate name only; their portrait to check before they're drawn).
+pride of place (a real pirate, pirate name only; she, from her portraits below).
+**Dachimpy's pirate pages and portraits, both oceans (checked 13 Nov, at the user's asking: "Check my profile on
+Meridian ... Also check all my portraits for connections to other friends on both oceans"):**
+- **Emerald:** Senior Officer and Bait of the crew **Reverie**, of the flag Crash Out; Captain in the Admiral Island
+  Navy. Its gallery, 11 portraits, with: **Kikkit** (four, every Valentine's Day 2008 to 2010: "For love of sex and
+  cookies" with Alkazzar and Jennielise; "United in cookies, marriage too"; "Swan Molestation", "That swan never saw
+  what was coming"; "Cursed & Cookied", hers), Milleh ("Happy bday mille", 2007), Scabard's group (Fordenis, Scabard,
+  **Daquan**, 2008), **Gravee** ("Oh, Gawd!", on her vessel Familiar Plaice, 2025), Demonologist and Hielo ("One of us,
+  one of us, one of us!", 2025); and Dachimpy alone ("The monkey man", 2007; two more). One 2008 sitting was at The
+  Mausoleum "under the fine governance of Dalnoth".
+- **Meridian:** Captain of the crew Swinging Pink Bananas, Lord of the flag Necessary Roughness, Admiral in the Kirin
+  Island Navy; familiars Arthur and Fable. Its gallery, 16 portraits, with: **Sanne** ("Monkey Couple", 5 Jan 2007,
+  the two in matching red on a beach, each with a monkey on the shoulder; "I love you babae", hers, Valentine's 2007,
+  she crowned with a sceptre and a monkey, he in a green kilt holding a deed: "yup i got the deed to her heart <3"),
+  **Zizzy** ("Pinky and the pink", 2012, as Dachimpy-East: her long pink hair and pink gown; and "Dachimpy-East's group"
+  at Zizzy's Villa with Gibbs, Angelforyou and Wasabia), Adicia (three, 2006), Huppel (two, 2006: "the chef ... don't
+  miss his Elite brig pilages"), Peppyredhair, Nikogold, Anchovia, Kookiez ("Dachimpy and his sweet kookiez"), Melilea,
+  Tera and Zionng ("Sexy Treats"), and Fable ("Welcome Back Dachimpy!", June 2025).
+- **The pink wig and kilt** are Dachimpy's on Meridian since 2007 (the pink beehive in "Peppy and her Monkey",
+  "Anchy's HAWT pink moment", "Pinky and the pink"), a kilt in "I love you babae". And on Emerald "Reverie" is the crew
+  (the user's "Who in Reverie could be" the race commentator).
+- **Sanne's look** (Meridian portraits): fair skin, blonde hair tied back, a monkey on her shoulder; matching red
+  (shirt, trousers, a gold buckle, white boots) in "Monkey Couple"; a gold crown and sceptre, green and black, in
+  "I love you babae". **Zizzy's:** fair skin, long pink hair, a pink off-shoulder gown.
 
 **Cookies and hugs at the door; the house doubles as the museum (11 Nov):** "a random thing about
 myself as well is I'm very well known for giving just like hugs and cookies ... anyone that comes
