@@ -2529,3 +2529,15 @@ in horror; the mast falls and cracks on the deck. "Don't worry about it, we can 
 going." A cutscene (js/den/cine.js) on the way into a tunnel (like the starlit door's, sized for a frigate),
 with the damage still there after: perhaps Carpentry to patch the deck, and the mast to put back.
 (Whose mission and who's captain: to shape with the user.)
+
+## A Puzzle Pirates tutor AI, with everything we've taught the den in it (13 Nov)
+
+The user (13 Nov): "It would be really nice eventually to have our own kind of puzzle pirate tutorial AI ...
+all these things that obviously we're training into the distilling thing or the puzzle, the pirate knowledge
+questions, you know, to have that all encoded in there." Eventually, one tutor that knows what the den has
+learned: each puzzle's rules and techniques as the bots play them (DISTILLING.md and its bots, Sailing's,
+Navigation's, rowing's, the greedy ones), the user's corrections on where a bot went wrong, and the pirate
+knowledge (the real pirates, the islands, the lore). You could ask it about your own board and it would read
+it, name the technique and show it, as "Help, Helium" does for Distilling, but for every puzzle, and answer
+questions about the game besides. A start that's already there: the bots' `advise` and Helium's lines. How
+it's built (in the den, a page of its own, or both) is to shape with the user.
