@@ -4,10 +4,12 @@
 import { describe, expect, it } from 'vitest';
 import { BLACK, BROWN, COLS, DOWN_LEFT, Distilling, SHORT, TALL, UP_LEFT, UP_RIGHT, WHITE, parseBoard } from '../src/distilling';
 import type { Board } from '../src/distilling';
-import { PATH, bringRound, pathMoves, stuck } from '../src/distill-path';
+import { PATH, bringRound, openWay, pathMoves, stuck } from '../src/distill-path';
 import { playDrags } from '../src/distill-routines';
 import type { Ctx } from '../src/distill-routines';
-import { HELIUM, contextFor } from '../src/distill-bots';
+import { HELIUM, choose, contextFor, weigh } from '../src/distill-bots';
+import { helpFor } from '../src/den-helium';
+import { HELP } from '../src/lines/helium';
 import { trappedWhite } from '../src/distill-score';
 import { seeded } from '../src/mirror-row';
 
@@ -66,6 +68,35 @@ describe('bringing a piece round (13 Nov, the eighteenth note)', () => {
       expect(playDrags(cols, m.drags)).not.toBeNull();
       expect(m.reason).toMatch(/stuck: bring the (brown|black|white) at column \d+, row \d+ round/);
     }
+  });
+  it('when no single drag reaches the whites at the bottom right, a brown is moved up first to open the way, 13 Nov ("you have to drag that brown upwards so then you could drag a black over and into that spot")', () => {
+    // notes/distilling/37-move-a-brown-to-open-the-path.webp, read off the picture: whites low in the two
+    // right-hand columns, next to burn, and no junk piece with a drag of its own down to them.
+    const cols = parseBoard(['KKKwwKbKK', 'wwwKwbww', 'KwwKKw*Kw', 'bbwwbwbK', '*wKwKKbwb', 'bKwKbwKb', 'b*wKbbKbw', 'KwKbbKbw', 'KbwKKKbwK', 'bbKbbbww']);
+    const ctx = junkCtx(cols), s = { x: 9, y: 6, side: -1 };
+    expect(stuck(cols, ctx)).toContainEqual(s);
+    expect(bringRound(cols, s, HELIUM)).toBeNull();
+    const t = performance.now();
+    const two = openWay(cols, s, HELIUM)!;
+    expect(performance.now() - t).toBeLessThan(250);
+    expect(two).toHaveLength(2);
+    // As drawn: the brown low in the middle moved up, then the black left of it along the bottom, right and up,
+    // into the white's place.
+    expect(cols[two[0].x][two[0].y]).toBe(BROWN);
+    expect([UP_LEFT, UP_RIGHT]).toContain(two[0].ways[0]);
+    const between = playDrags(cols, [two[0]])!;
+    expect(between[two[1].x][two[1].y]).toBe(BLACK);
+    expect(bringRound(between, s, HELIUM)).not.toBeNull();
+    const after = playDrags(cols, two)!;
+    expect(after[9][6]).toBe(BLACK);
+    expect(after[8][6] === WHITE || after[8][7] === WHITE).toBe(true);
+    // The planner offers the pair; with the furnace close it plays it, and Helium says so in their words.
+    expect(weigh({ cols, chain: 0, timeLeft: 12000 }, ctx, HELIUM).some((m) => m.move.routine === 'path' && m.move.drags.length === 2)).toBe(true);
+    const a = choose({ cols, chain: 0, timeLeft: 4000 }, ctx, HELIUM);
+    expect(a.technique).toBe('path');
+    expect(a.drags).toHaveLength(2);
+    expect(a.reason).toMatch(/out of the way/);
+    expect(helpFor(a).says).toBe(HELP.path);
   });
   it('cheap enough to run on every move in the browser', () => {
     let worst = 0;

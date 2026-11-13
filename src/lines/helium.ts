@@ -87,6 +87,9 @@ export const HELP = {
   leapfrog: 'The leapfrog. Black hops the brown, brown hops the white. Off it goes.',
   hook: 'The hook. Black and brown together, round the corner. My favourite.',
   channel: 'Channels. A clear lane on the right for the whites. Then it\'s all Crystal Clear.',
+  /** The path search (src/distill-path.ts): a piece brought round into a stuck one's place, a piece moved out
+      of the way first when nothing reaches it. */
+  path: 'Shift that one first. Then there\'s a way through.',
 } as const;
 /** "Help, Helium" when it isn't a drag: burn now, wait, call it a day, or nothing to be done. */
 export const HELP_ELSE = {

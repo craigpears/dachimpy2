@@ -29,7 +29,11 @@
    straight upright wall; nothing trapped), the brown sweep gated, the path search, 20 boards a tier: chains 1.1 /
    1.1 / 1.6 / 2.0 (were 1.6 / 1.2 / 1.3 / 2.0); whites burned 6.5 / 0.8 / 0.9 / 0.9 (were 6.3 / 1.8 / 1.9 / 1.1);
    moves trapping a white by the furnace 1.7 / 2.4 / 1.6 / 1.9 a session (were 2.3 / 3.9 / 3.1 / 4.0); points a
-   minute 9.0 / 9.5 / 15.2 / 21.0 (were 9.9 / 9.1 / 11.0 / 16.1) (DISTILLING.md §4, sixth run). */
+   minute 9.0 / 9.5 / 15.2 / 21.0 (were 9.9 / 9.1 / 11.0 / 16.1) (DISTILLING.md §4, sixth run).
+   A piece moved to open the way, and the furnace's whites costing more (13 Nov, the nineteenth note), 20 boards
+   a tier: waits with whites left in the columns next to burn 9.3 / 24.3 / 16.5 / 8.9 a session (were 11.4 /
+   17.1 / 25.4 / 17.6); whites burned 6.5 / 0.7 / 0.7 / 0.3 (were 6.5 / 0.8 / 0.9 / 0.9); chains 1.1 / 1.1 / 1.4
+   / 1.9 (were 1.1 / 1.1 / 1.6 / 2.0) (DISTILLING.md §4, seventh run). */
 
 import { Distilling, WHITE, BROWN, BLACK, BURNT, TALL, UP_LEFT, DOWN_LEFT, neighbourOn, canSwapOn } from '../js/distilling.js';
 import { TIERS, P, tierNamed, playSession } from '../js/distill-bots.js';
@@ -66,6 +70,19 @@ function wallAt(c) {
   }
   return at;
 }
+// Whites left in the junk columns next to burn (the nineteenth note: "it did seem to get stuck"): from the
+// column before the one being built, those more junk than white.
+function whitesNextToBurn(c) {
+  const done = (col) => !col.some((p) => p === WHITE) && col.reduce((s, p) => s + (p === BLACK ? 1 : p === WHITE || p === BURNT ? -1 : 0), 0) > 0;
+  let t = c.length - 1;
+  while (t > 0 && done(c[t])) t--;
+  let n = 0;
+  for (let x = Math.max(0, t - 1); x < c.length; x++) {
+    const w = c[x].filter((p) => p === WHITE).length;
+    if (c[x].filter(junkP).length > w) n += w;
+  }
+  return n;
+}
 function whitesTrapped(c, near = false) {
   let done = 0;
   for (let x = c.length - 1; x >= 0; x--) {
@@ -100,9 +117,15 @@ for (const name of NAMES) {
     let lastRoutine = '';
     // Stage I watched: moves that leave more whites trapped than before them (no column gone between), the
     // whites trapped as the chain starts, and the junk columns burned a minute of Stage I.
-    const watch = { trapping: 0, trappingNear: 0, sweeps: 0, sweepsTrapping: 0, moves: 0, atChain: null, stageOneMs: null, burnedInOne: 0 };
+    const watch = { leftMs: 0, stuckWaits: 0, trapping: 0, trappingNear: 0, sweeps: 0, sweepsTrapping: 0, moves: 0, atChain: null, stageOneMs: null, burnedInOne: 0 };
     let before = null;
+    let lastPlan = null;
     const onPlan = (a) => {
+      // Stage I time with whites left in the junk columns next to burn, and waits (nothing worth doing) then.
+      const left = a.stage === 'junk' ? whitesNextToBurn(g.cols) : 0;
+      if (lastPlan && lastPlan.left) watch.leftMs += g.time - lastPlan.t;
+      if (left && a.kind === 'wait') watch.stuckWaits++;
+      lastPlan = { t: g.time, left: left > 0 };
       const now = whitesTrapped(g.cols), near = whitesTrapped(g.cols, true), cols = g.columns.length;
       if (before && before.cols === cols && now > before.n) watch.trapping++;
       if (before && before.cols === cols && near > before.near) watch.trappingNear++;
@@ -137,6 +160,7 @@ for (const name of NAMES) {
   console.log(`  whites burned ${f1(avg(runs.map((r) => r.whitesBurned)))}; white columns banked as the chain began ${f1(avg(runs.filter((r) => r.banked !== null).map((r) => r.banked)))}; drags a minute ${f1(avg(runs.map((r) => r.drags / r.minutes)))}, swaps a drag ${f1(avg(runs.map((r) => r.swaps / Math.max(1, r.drags))))}`);
   const w = runs.map((r) => r.watch), one = w.filter((x) => x.stageOneMs);
   console.log(`  trapped whites (no way left, cut off): moves in Stage I leaving more than before ${f1(avg(w.map((x) => x.trapping)))} a session (of ${f1(avg(w.map((x) => x.moves)))} moves), by the furnace (the score's test) ${f1(avg(w.map((x) => x.trappingNear)))}; on the board as the chain starts ${f1(avg(one.map((x) => x.atChain)))}`);
+  console.log(`  Stage I with whites left in the junk columns next to burn: ${f1(avg(w.map((x) => x.leftMs / 1000)))} s a session; waits then (stuck) ${f1(avg(w.map((x) => x.stuckWaits)))}; sessions with any such wait ${w.filter((x) => x.stuckWaits > 0).length}/${GAMES}`);
   console.log(`  brown sweeps (a brown up, then down to the bottom right) in Stage I ${f1(avg(w.map((x) => x.sweeps)))} a session, leaving a white trapped by the furnace ${f1(avg(w.map((x) => x.sweepsTrapping)))}`);
   console.log(`  Stage I: ${f1(avg(one.map((x) => x.stageOneMs / 60000)))} minutes, junk columns burned a minute of it ${f1(avg(one.map((x) => x.burnedInOne / (x.stageOneMs / 60000))))}; session points a minute ${f1(avg(runs.map((r) => r.points / r.minutes)))}`);
   const used = {};

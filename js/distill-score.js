@@ -33,6 +33,12 @@ export const S = {
         of it. */
     FILL: 1,
     NEXT: 0.5,
+    /** Each white in the furnace's column while it's a junk column being filled, beyond the junk it keeps out:
+        burned if it stays. More than a trapped white, so a white is worth getting out even into a tight spot one
+        column left (the nineteenth note: the bots waited with whites left in the columns next to burn, every way
+        out of the furnace's column scoring below letting them burn). Only that column, so finishing it never
+        moves the cost onto the next. */
+    FIRE: 4,
     /** Each piece of junk, a column further right: colour pulled from the left to the right. */
     PULL: 0.5,
     /** Each column a row's wall stands off the straight upright one, once it's formed in that row. */
@@ -186,10 +192,13 @@ export function wall(cols) {
 export function boardScore(cols) {
     const done = doneFromRight(cols), filling = COLS - 1 - done, w = wall(cols);
     let v = S.COLUMN * done - S.WALL * w.off;
+    const last = cols[COLS - 1], fire = filling === COLS - 1 && last.filter(junk).length > last.filter((p) => p === WHITE).length;
     for (let x = 0; x < COLS; x++)
         for (let y = 0; y < cols[x].length; y++) {
             const p = cols[x][y];
             if (p === WHITE) {
+                if (fire && x === COLS - 1)
+                    v -= S.FIRE;
                 if (behindSpice(cols, x, y))
                     v -= S.POCKET;
                 else if (x >= filling - S.NEAR && trappedWhite(cols, x, y, w.at, true))

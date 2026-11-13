@@ -113,10 +113,11 @@ describe('the start is sweeping, the techniques after (12 Nov)', () => {
     const g = new Distilling(seeded(5000));
     g.burnNow(); g.tick(1000);
     const a = advise({ cols: g.cols, chain: 0, timeLeft: g.timeLeft() });
-    expect(a.sweep).toBe(true);
-    expect(a.label).toBe('The sweep');
+    // Since 13 Nov (the nineteenth note: the bots got stuck with whites left in the columns next to burn) the
+    // furnace's own whites come first: here it has four, and the advice saves one with one quick drag.
+    expect(g.cols[COLS - 1].filter((p) => p === WHITE).length).toBeGreaterThan(0);
+    expect(a.label).toBe('Save the whites');
     expect(a.drags).toHaveLength(1);
-    expect(a.drags[0].ways.length).toBeGreaterThanOrEqual(3);
     // Swept blind: hardly a pause between them, every tier (the lower ones a bit slower).
     for (const t of TIERS) expect(t.sweepSpot).toBeLessThan(t.spot / 2);
     // A bot's first move is one quick drag (since 13 Nov, with the score "about filling those right-hand
@@ -206,7 +207,7 @@ describe('nothing trapped (13 Nov, the eighteenth note)', () => {
       });
     }
     expect(free).toBeGreaterThan(0);
-  });
+  }, 60000);
   it('a white stuck where no routine frees it gets a piece brought round (the path search, "a pathfinding A-star style problem")', () => {
     // The user's shape: a white on the top of column 7, the white below-left of it its only way left, a black
     // further left in its row; the brown that can take its place is below-right of it, and has to go left

@@ -974,6 +974,7 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 - *leapfrog:* "The leapfrog. Black hops the brown, brown hops the white. Off it goes."
 - *hook:* "The hook. Black and brown together, round the corner. My favourite."
 - *channel:* "Channels. A clear lane on the right for the whites. Then it's all Crystal Clear."
+- *path:* "Shift that one first. Then there's a way through."
 
 ### "Help, Helium" when it isn't a drag
 
