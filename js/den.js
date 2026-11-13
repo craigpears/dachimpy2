@@ -38,7 +38,7 @@ import { crane, craneCam } from './den/crane.js';
 import { doorCam } from './den/door.js';
 import { umami, umamiTick, umamiCam, umamiClick } from './den/capybara.js';
 import { forage as raceForage } from './den/race-forage.js';
-import { helium, heliumCam, heliumUp, heliumDown } from './den/helium-isle.js';
+import { helium, heliumCam, heliumUp, heliumDown, heliumInset } from './den/helium-isle.js';
 import { raceCam, raceClick } from './den/race.js';
 import { watch, watchKey, watchCam } from './den/race-watch.js';
 import { net, online, guest, isHost, send, updateMates, sendMe, snapshot, followRaider, sendSync, onNet, joinCrew, leaveCrew } from './den/crew.js';
@@ -373,6 +373,17 @@ function frame() {
   // Something new to start, offered on the thing itself where you're looking (js/den/start-mark.js).
   startMark(sailOffer(), paused || cheats.open || G.over || !!cine || chart.on || deco.on || dress.open || lodgings.open || wed.on || house.on, 1 / 60);
   renderer.render(scene, camera);
+  // Helium in the corner box when they're off the screen at their board (js/den/helium-isle.js, heliumInset).
+  const inset = sail.on ? heliumInset() : null;
+  if (inset) {
+    const { x, y, w, h } = inset.rect, by = innerHeight - y - h;
+    renderer.setScissorTest(true);
+    renderer.setScissor(x, by, w, h);
+    renderer.setViewport(x, by, w, h);
+    renderer.render(scene, inset.cam);
+    renderer.setScissorTest(false);
+    renderer.setViewport(0, 0, innerWidth, innerHeight);
+  }
   requestAnimationFrame(frame);
 }
 setInterval(() => { if (online() && performance.now() - lastT > 250) tick(); }, 200);

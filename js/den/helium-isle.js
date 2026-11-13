@@ -361,6 +361,46 @@ export function heliumCam() {
   const k = Math.max(0, Math.min(1, (camera.aspect - 0.95) / 0.55)), right = V3(Math.cos(W.yaw), 0, -Math.sin(W.yaw));
   return { look: v.look.clone().add(V3(0, 0.1, 0)).addScaledVector(right, W.size * 0.32 * k), dist: v.dist * (1.12 + 0.2 * k), tilt: Math.asin(d.y), yaw: Math.atan2(d.x, d.z) };
 }
+/* Helium in a little window in the corner when they're off the screen at their board (the user, 13 Nov: "on
+   mobile, I can't see helium at all"): on a tall phone the board takes the width and they stand off to its
+   right, so a second camera looks them in the face and den.js draws it into a corner box, gold-framed, their
+   line's tail pointing at it. Null while they're on the screen anyway (a wide one). */
+const faceCam = new THREE.PerspectiveCamera(26, 1, 0.1, 50);
+let faceBox = null;
+const FACE = { W: 112, H: 128 };
+export function heliumInset() {
+  const W = helium.W, show = !!W && (helium.on || !!helium.play);
+  const head = show ? W.them.p.g.getWorldPosition(V3(0, 0, 0)).add(V3(0, 2.05 * HELIUM_CAST.them.scale, 0)) : null;
+  const p = head && head.clone().project(camera);
+  const off = !!p && (p.z > 1 || p.x > 0.92 || p.x < -0.92 || p.y > 0.95 || p.y < -0.95);
+  if (!faceBox) {
+    faceBox = document.createElement('div');
+    faceBox.style.cssText = 'position:fixed;border:2px solid #c9a35c;border-radius:12px;pointer-events:none;box-shadow:0 2px 8px #0008;z-index:2;display:none';
+    document.body.appendChild(faceBox);
+  }
+  if (!off) { faceBox.style.display = 'none'; return null; }
+  // (top left, in the room above the board, clear of the furnace at its bottom right; their line beside it)
+  const r = { x: 10, y: 10, w: FACE.W, h: FACE.H };
+  Object.assign(faceBox.style, { display: '', left: `${r.x}px`, top: `${r.y}px`, width: `${r.w}px`, height: `${r.h}px` });
+  // (face on, from where they're looking: toward you, a little above)
+  const to = camera.position.clone().sub(head).setY(0).normalize();
+  faceCam.aspect = r.w / r.h;
+  faceCam.position.copy(head).addScaledVector(to, 3.2).add(V3(0, 0.15, 0));
+  faceCam.lookAt(head.clone().add(V3(0, -0.25, 0)));
+  faceCam.updateProjectionMatrix();
+  return { cam: faceCam, rect: r };
+}
+/** Their line beside the corner box when they're in it (true), its left edge by the box, level with its bottom. */
+function lineByInset(el) {
+  const on = !!faceBox && faceBox.style.display !== 'none';
+  el.classList.toggle('no-tail', on);   // (beside the box, it doesn't point down into the board)
+  if (!on) return false;
+  const left = parseFloat(faceBox.style.left) + FACE.W + 12;
+  el.style.maxWidth = `${innerWidth - left - 8 - 32}px`;
+  el.style.left = `${left + el.offsetWidth / 2}px`;
+  el.style.top = `${parseFloat(faceBox.style.top) + FACE.H}px`;
+  return true;
+}
 export function heliumPrompt() {
   if (!sail.on || !helium.W) return '';
   if (helium.on) {
@@ -429,6 +469,7 @@ function placeLine() {
   if (!el || el.style.display === 'none') return;
   if (!(helium.on || helium.play)) {
     // (over their head, away from the board: narrow enough for the screen, and kept whole on it)
+    el.classList.remove('no-tail');
     el.style.maxWidth = `${Math.min(380, innerWidth - 24) - 32}px`;
     const head = { x: parseFloat(el.style.left), y: parseFloat(el.style.top) };
     if (!Number.isFinite(head.x) || !Number.isFinite(head.y)) return;
@@ -445,6 +486,7 @@ function placeLine() {
     const x = (p.x + 1) / 2 * innerWidth, y = (1 - p.y) / 2 * innerHeight;
     box.l = Math.min(box.l, x); box.r = Math.max(box.r, x); box.t = Math.min(box.t, y); box.b = Math.max(box.b, y);
   });
+  if (lineByInset(el)) return;
   const head = { x: parseFloat(el.style.left), y: parseFloat(el.style.top) };
   if (!Number.isFinite(head.x) || !Number.isFinite(head.y)) return;
   // (narrower, a few more lines, to fit beside the board on their side when there's a strip of room there)

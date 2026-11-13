@@ -336,6 +336,7 @@
     .label.say::after { content: ''; position: absolute; left: 50%; bottom: -11px; margin-left: -9px; border: 9px solid transparent; border-top-color: #2a1a0c; border-bottom: 0; }
     .label.say.chat { font-size: 15px; padding: 2px 10px; background: #f3e9ff; border-color: #4a3170; color: #3a2160; }
     .label.say.chat::after { border-top-color: #4a3170; }
+    .label.say.no-tail::after { display: none; }
     .label.say.wrap { white-space: normal; width: max-content; max-width: min(380px, calc(100vw - 56px)); text-align: center; }
     .label.say.spouse { font-size: 17px; max-width: min(320px, 80vw); }
     /* Mischievious's wedding, on her island (js/den/wedding.js): none of the den's own buttons, the
@@ -579,7 +580,7 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.IE4LS6P5.js');
+    import(local ? './js/den.js' : './js/den.EFJK2KI6.js');
   </script>
 </body>
 </html>
