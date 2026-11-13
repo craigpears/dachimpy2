@@ -1,7 +1,8 @@
 // Helium's island, out past the checkpoint by the smugglers' rocks (src/den-helium.ts; its squares
 // LAY.HELIUM in src/den-sail.ts), and Distilling at their still. Only the place's own look and its one
 // mechanic are here: the island, a palm, their lesson as a little cutscene the first time you come up off it,
-// then the still yours to play, "Help, Helium" while you do (their line kept where you can read it), and
+// then the still yours to play, "Help, Helium" while you do (their line kept where you can read it), hints
+// (the planner's next drags as arrows on your board, and the routes into a white's place by the fire), and
 // their distillery answering each column: it blows up when a white burns, and runs rum when whites go up.
 // Who's on it is config (src/den-helium.ts, HELIUM_CAST: their look, where they, their still and their board go;
 // their lesson's beats worked out on a real board, lessonPlan; their lines src/lines/helium.ts), placed through
@@ -16,11 +17,11 @@ import * as THREE from 'three';
 import {
   HELIUM_CAST, HELIUM, HELIUM_STANDS, HELIUM_MOOR, HELIUM_ARRIVE, Visit, lessonGame, lessonBeats, lessonSecs, mishapLine, askHelium,
   onHeliumLanding, inHeliumEarshot, heliumShore, worksFor, praiseFor, Cellar, OPENING_BANG, lineSpot, PACE_LESSON, whitesOnFireSide,
-  actAfter, holdSecs, ringed, stepDoneLines, Nerves, NERVE, whitesInFurnace, onScreen,
+  actAfter, holdSecs, ringed, stepDoneLines, Nerves, NERVE, whitesInFurnace, onScreen, hintFor, hintLeft, routesToFire,
 } from '../den-helium.js';
 import { LAY } from '../den-sail.js';
 import { Distilling, WHITE } from '../distilling.js';
-import { PRAISE, STEP_ONE } from '../lines/helium.js';
+import { HINT, PRAISE, STEP_ONE } from '../lines/helium.js';
 import { readSecs } from '../den-dignity.js';
 import { PACE } from '../chatter.js';
 import { PIRATES } from '../den-look.js';
@@ -39,7 +40,7 @@ import { cine, cinePlay, cineEnd, bubble, bubbleAt } from './cine.js';
 const SAND = { y0: -0.4, h: 0.62 }, GROUND = SAND.y0 + SAND.h + 0.25;
 /* `on`: at the still, playing; `board`: Distilling's board on its stand (the lesson's, then yours); `hand`:
    their drags being played on it (lesson or help), a swap at a time; `note`: what the bar says, a while. */
-export const helium = { W: null, visit: new Visit(), play: null, on: false, board: null, hand: [], handT: 0, handDone: null, bangs: 0, bigBang: 0, note: '', noteT: 0, cower: 0, shrug: 0, nervy: 0, nerves: new Nerves(), fretCol: null, cellar: new Cellar() };
+export const helium = { W: null, visit: new Visit(), play: null, on: false, board: null, hand: [], handT: 0, handDone: null, bangs: 0, bigBang: 0, note: '', noteT: 0, cower: 0, shrug: 0, nervy: 0, nerves: new Nerves(), fretCol: null, cellar: new Cellar(), hint: null, routes: null };
 
 function build() {
   const g = new THREE.Group(), sand = mat('#e6cf96', { roughness: 1 }), wet = mat('#c9ad78', { roughness: 1 });
@@ -285,7 +286,8 @@ function atStill(fresh = false) {
 function leave() {
   helium.on = false;
   helium.hand = [];
-  if (helium.board) { helium.board.paused = true; helium.board.letGo(); }
+  helium.hint = null;
+  if (helium.board) { helium.board.paused = true; helium.board.letGo(); helium.board.clearArrows(); }
   helpButton(false);
   hud(true);
 }
@@ -307,17 +309,63 @@ export function heliumHelp() {
     play(h.advice.drags, () => { B.paused = false; });
   } else if (h.plays === 'burn') B.burn();
 }
+
+/* A hint (the user, 13 Nov: "hinting as well, so it shows you the path. Of what the next moves are they would
+   do"): the planner's next drag or two drawn on your board as gold arrows, numbered, not played; their line the
+   phase and what they're after (src/den-helium.ts, hintFor). The arrows follow you as you play them and go once
+   you've done something else (hintLeft). And while their nerves ring a white in the furnace's column, pale blue
+   arrows from the junk pieces that could take its place ("arrows of nearby routes of pieces that can be dragged
+   into the spots": routesToFire), redrawn as the board changes, gone once it's out or burned. */
+export function heliumHint() {
+  const B = helium.board;
+  if (!helium.on || !B || helium.hand.length || B.game.finished) return;
+  const h = hintFor(B.game);
+  say(h.says);
+  noteFor(h.note, 12);
+  helium.hint = h.drags.length ? h : null;
+}
+/** The arrows on your board now: the hint's drags still to play, and the routes into the white they're fretting
+    about (searched again only when the board's changed). */
+function arrowsTick() {
+  const B = helium.board, g = B?.game;
+  if (!B) return;
+  B.clearArrows();
+  if (!helium.on || !g.movable || helium.hand.length) return;
+  if (helium.hint) {
+    const left = hintLeft(helium.hint, g.cols), done = helium.hint.drags.length - left.length;
+    if (!left.length) helium.hint = null;
+    for (const [i, d] of left.entries()) B.arrow(d, { n: helium.hint && helium.hint.drags.length > 1 ? done + i + 1 : null });
+  }
+  if (helium.fretCol !== null && whitesInFurnace(g.cols)) {
+    const key = `${g.columns.length}:${g.swaps}`;
+    if (helium.routes?.key !== key) {
+      helium.routes = { key, drags: routesToFire(g.cols) };
+      if (helium.routes.drags.length) noteFor(HINT.routes, 8);
+    }
+    for (const d of helium.routes.drags) B.arrow(d, { color: 'route' });
+  } else helium.routes = null;
+}
+
+/* The buttons beside the board: Hint, and Help, Helium. */
 let btn = null;
+const BTN = 'font:700 15px "Alegreya Sans",system-ui,sans-serif;color:#f6ead2;background:#3a2410;border:1px solid #c8a050;border-radius:8px;padding:6px 12px;cursor:pointer';
 function helpButton(on) {
   if (!btn) {
-    btn = document.createElement('button');
-    btn.id = 'helium-help';
-    btn.textContent = 'Help, Helium (H)';
-    btn.style.cssText = 'position:fixed;right:16px;bottom:64px;z-index:20;font:700 15px "Alegreya Sans",system-ui,sans-serif;color:#f6ead2;background:#3a2410;border:1px solid #c8a050;border-radius:8px;padding:6px 12px;cursor:pointer;display:none';
-    btn.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); heliumHelp(); });
+    btn = document.createElement('div');
+    btn.id = 'helium-buttons';
+    btn.style.cssText = 'position:fixed;right:16px;bottom:64px;z-index:20;display:none;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:calc(100vw - 32px)';
+    const add = (id, text, fn) => {
+      const b = document.createElement('button');
+      b.id = id; b.textContent = text; b.style.cssText = BTN;
+      b.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); fn(); });
+      btn.append(b);
+      return b;
+    };
+    add('helium-hint', 'Hint (G)', heliumHint);
+    add('helium-help', 'Help, Helium (H)', heliumHelp);
     document.body.append(btn);
   }
-  btn.style.display = on ? '' : 'none';
+  btn.style.display = on ? 'flex' : 'none';
 }
 
 // ---------- hooks: keys, the mouse, Space, the prompt ----------
@@ -329,6 +377,7 @@ export function heliumKey(key) {
   if (!helium.on) return false;
   if (key === 'escape') { leave(); return true; }
   if (key === 'h') { heliumHelp(); return true; }
+  if (key === 'g') { heliumHint(); return true; }
   if (helium.hand.length) return !VIEW.includes(key);
   if (helium.board?.key(KEYS[key] ?? key, { repeat: false })) return true;
   return !VIEW.includes(key);
@@ -411,7 +460,7 @@ export function heliumPrompt() {
     const B = helium.board, left = whitesOnFireSide(B.game.cols);
     const goal = left ? `${STEP_ONE.goal}: ${left} to go` : `Step 1 done: the fire's side is clear of white`;
     const lead = helium.noteT > 0 && helium.note ? helium.note : B.game.finished ? 'Finished! Esc, then Space for another batch' : `${goal} · drag to swap · X: burn`;
-    return `${lead} · H: Help, Helium · Esc: leave the still`;
+    return `${lead} · G: hint · H: Help, Helium · Esc: leave the still`;
   }
   const p = sail.helm.pose;
   if (!onHeliumLanding(p.c, p.r) || !helium.visit.seen || helium.play) return '';
@@ -453,6 +502,7 @@ export function heliumTick(dt) {
     if (n && n.level !== 'phew') { helium.fretCol = g.columns.length; helium.board.mark = (x, y, p, gone) => !gone && x === g.cols.length - 1 && p === WHITE; }
     else if (helium.fretCol !== null && (helium.fretCol !== g.columns.length || !whitesInFurnace(g.cols))) { helium.fretCol = null; helium.board.mark = null; }
   }
+  arrowsTick();
   // Step one done, at your still: the three columns next to the fire clear of white. They say so, once a batch.
   if (helium.on && !helium.stepDone && helium.board?.game.movable && !whitesOnFireSide(helium.board.game.cols)) { helium.stepDone = true; say(...stepDoneLines()); }
   W.them.tick(dt);

@@ -938,6 +938,10 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 >
 > "to really mess with Helium, I feel like we should always end with, if you got any questions, you can always send me a tell on Emerald." (the user, 13 Nov)
 >
+> "as well as helium helping, they can be hinting as well, so it shows you the path. Of what the next moves are they would do. And maybe ... plans out a few of like, well, this is the thing I will do at this part of the game" (the user, 13 Nov)
+>
+> "when he's kind of highlighting the white pieces, yeah, maybe it should show some arrows of nearby routes of pieces that can be dragged into the spots" (the user, 13 Nov)
+>
 > "helium said to teach you some tricks, but ... don't forget, you know, the greatest love of the game is talking to other pirates ... this is not a replacement for the game ... this is a tool, a side adventure ... We should be watching people, looking at YouTube videos, talk to people, just whatever." (the user, 13 Nov)
 
 ### Coming up off their island the first time: the still goes bang, and they shrug it off (your lines between, src/lines/you.ts)
@@ -968,7 +972,7 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 
 - *Handing you the board, step one the goal:*
   - *says:* "Right, your go. Keep those three clear of white. H if you want me. I'll be here. Probably."
-  - *note:* "Your go: keep the three right-hand columns clear of white, and burn them once they're all junk. H: Help, Helium."
+  - *note:* "Your go: keep the three right-hand columns clear of white, and burn them once they're all junk. H: Help, Helium. G: a hint."
 
 ### At your still, a white left in the furnace's column as the fire comes round: uneasy with a while to go, panic just before (they cower), phew if you get it out in time; each in turn
 
@@ -1017,6 +1021,26 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 - *dismiss:* "Call it. Bottle what we've got."
 - *stuck:* "Hm. Nothing. Even I'm stumped. Burn something?"
 - *busy:* "Hang on, it's still moving."
+
+### The phase they think the game's in, and what they're working towards: as it starts while they play your board for you to watch (first; again, back in one already said), and a hint's line (first)
+
+- *Whites on the fire's side, the three columns next to it:*
+  - *first:* "First things first: the whites out of these three. Away from the fire."
+  - *again:* "New column, new whites. Out of the fire's side first."
+- *The fire's side clear, colour all over:*
+  - *first:* "Fire's side is clear. Now fill the right-hand columns with junk. Long drags."
+  - *again:* "Clear again. Back to piling junk on the right."
+- *The whites mostly left:*
+  - *first:* "Whites mostly left now. So blocks: big drags, the junk round them in a V."
+  - *again:* "Back to blocks. Big drags. Keep the V."
+- *The chain:*
+  - *first:* "Plenty of whites banked. Now the chain: Crystal Clears, one after another."
+  - *again:* "Back on the chain. Whites right."
+
+### A hint: the bar when the arrows show the pieces that could take a white's place by the fire (routes), or there's nothing to show (none)
+
+- *routes:* "Blue arrows: pieces that could take that white's place. Then it drops out left."
+- *none:* "Nothing worth showing. Let it cook."
 
 ### Now and then as your Crystal Clears go up, and when the flask's full
 
