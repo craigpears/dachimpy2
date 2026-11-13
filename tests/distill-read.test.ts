@@ -9,7 +9,7 @@ import { POSITIONS, boardOf } from '../src/distill-positions';
 import { BLACK, BROWN, WHITE, parseBoard } from '../src/distilling';
 import { RISK, burnsIn, flagged, reachOf, urgency, whiteRisks } from '../src/distill-risk';
 import { disorder, ladder, patternsOf, stranded, tail } from '../src/distill-patterns';
-import { READ, progress, readBoard } from '../src/distill-read';
+import { READ, progress, quickFills, readBoard, sorts } from '../src/distill-read';
 import { P, choose, contextFor, levelNamed } from '../src/distill-bots';
 import { playDrags } from '../src/distill-routines';
 import { joinPairs } from '../src/distill-teach';
@@ -100,12 +100,22 @@ describe('the board\'s state and the tactic in play (src/distill-read.ts)', () =
     for (const id of ['P1', 'P2', 'P5', 'P6']) expect(read(id), id).toMatchObject({ state: 'atRisk', tactic: 'freeTrapped' });
     expect(at(read('P2').targets)[0]).toBe('8,0');
   });
-  it('P3 and P4 fill the gaps in column 9 quickly, 13 Nov ("prioritising filling those right-hand columns with as much speed as I could")', () => {
-    for (const id of ['P3', 'P4']) {
-      const r = read(id);
-      expect(r.tactic, id).toBe('fillGaps');
-      expect(r.targets.every((t) => t.x === 8), id).toBe(true);
-    }
+  it('P4 fills the gaps in column 9 quickly, 13 Nov ("prioritising filling those right-hand columns with as much speed as I could")', () => {
+    const r = read('P4');
+    expect(r.tactic).toBe('fillGaps');
+    expect(r.targets.every((t) => t.x === 8)).toBe(true);
+  });
+  it('P3 is quick sorting, 13 Nov ("I think [P3] was quick sorting"): its whites by the fire free, time in hand, and every quick fill a black down or a brown up', () => {
+    const r = read('P3');
+    expect(r.tactic).toBe('quickSort');
+    expect(r.targets.every((t) => t.x === 8)).toBe(true);
+    const cols = boardOf(POSITIONS.find((p) => p.id === 'P3')!);
+    const fills = quickFills(cols, r.targets);
+    expect(fills.length).toBeGreaterThan(0);
+    expect(fills.every((d) => sorts(cols, d[0]))).toBe(true);
+    // (P4's quick fills aren't all sorting moves: the gaps there are filled as gaps)
+    const p4 = boardOf(POSITIONS.find((p) => p.id === 'P4')!);
+    expect(quickFills(p4, read('P4').targets).every((d) => sorts(p4, d[0]))).toBe(false);
   });
   it('P8 sorts the ladder, P9 the tail, 13 Nov ("you\'ve left the V for too long, you\'ve not sorted your pieces"; "the efficiency of sorting that bottom bit out")', () => {
     expect(read('P8')).toMatchObject({ state: 'atRisk', tactic: 'sortLadder' });

@@ -3,8 +3,8 @@
    doing at that point"). Two ways to run it, on the compiled js (npm run build first) with Node 22:
 
    node_modules/node/bin/node.exe tools/distill-positions.mjs
-     Refresh: each position's `bot`, what the bot does there now, worked out again by the planner (`botAt`), after
-     the bots change. The boards stay as they are. Then `npm run build`.
+     Refresh: each position's `bot`, what the bot does there now, worked out again by the planner (`botAt`), and its
+     `plan`, its next few moves played forward (`planOf`), after the bots change. The boards stay as they are. Then `npm run build`.
 
    node_modules/node/bin/node.exe tools/distill-positions.mjs pick [minutes]
      Pick the positions again from play: the CC^3 and CC^8 bots on seeds 1 to 3 (six sessions, about 15 s each,
@@ -21,7 +21,7 @@ import { COLS, Distilling, SPICE, WHITE, BROWN, BLACK, writeBoard } from '../js/
 import { DistillBot, contextFor, edgeWhites, levelNamed } from '../js/distill-bots.js';
 import { canGo, isJunk } from '../js/distill-routines.js';
 import { stuck } from '../js/distill-path.js';
-import { POSITIONS, SKIPPED, VERDICTS, botAt, moveOf } from '../js/distill-positions.js';
+import { POSITIONS, SKIPPED, VERDICTS, botAt, moveOf, planOf } from '../js/distill-positions.js';
 import { seeded } from '../js/mirror-row.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -100,7 +100,7 @@ const MOMENT = {
 /** A position as written in the file, a few readable lines. */
 function format(p) {
   const head = ['id', 'moment', 'level', 'seed', 'ms', 'stage', 'burns', 'chain', 'timeLeft'].map((k) => `${k}: ${JSON.stringify(p[k])}`).join(', ');
-  return `  {\n    ${head},\n    what: ${JSON.stringify(p.what)},\n    cols: ${JSON.stringify(p.cols)},\n    bot: ${JSON.stringify(p.bot)},\n  },`;
+  return `  {\n    ${head},\n    what: ${JSON.stringify(p.what)},\n    cols: ${JSON.stringify(p.cols)},\n    bot: ${JSON.stringify(p.bot)},${p.plan ? `\n    plan: ${JSON.stringify(p.plan)},` : ''}\n  },`;
 }
 function write(list) {
   const src = readFileSync(FILE, 'utf8'), i = src.indexOf(START), j = src.indexOf(END);
@@ -114,9 +114,10 @@ if (!PICK) {
   // Refresh what the bot does at each position now.
   let changed = 0;
   const list = POSITIONS.map((p) => {
-    const bot = moveOf(botAt(p));
+    const bot = moveOf(botAt(p)), plan = planOf(p);
     if (!same(bot, p.bot)) { changed++; console.log(`${p.id}: was ${p.bot.label} (${p.bot.kind}), now ${bot.label} (${bot.kind})`); }
-    return { ...p, bot };
+    console.log(`${p.id}: plan of ${plan.moves.length}, aim ${plan.aim ?? 'none'}, ${plan.reached ? `reached by move ${plan.reached}` : 'not reached'}${plan.reached && !plan.through ? ', not seen through' : ''} (${plan.ends})`);
+    return { ...p, bot, plan };
   });
   write(list);
   console.log(`refreshed ${list.length} positions, ${changed} changed. Now npm run build.`);

@@ -860,6 +860,34 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   a burn button so I can demo these." Paused, the furnace's clock stands still, but a hand's swaps still
   land, a burn still goes and the board still slides (`settle` in `src/distilling.ts`), so a board can be
   set up and burned to show the next stage: the test page's Burn button, or X / right-click.
+- **Distilling's bots: a chain let go when its next column's junk (13 Nov).** The user: "if you've got a
+  completely junk column, you don't try and build a whites into it. Yeah, you build further left. You start
+  a new chain as far left as you can. Obviously, in the context of CC^1, you don't need to. But like, if
+  you're going for the maximalist one, absolutely"; and "I wouldn't make it more complicated unless we find
+  some problems". One rule of thumb, no odds model, shared by the bots and Helium's plan (`chainOver` in
+  src/distill-bots.ts): more junk than white in the column the chain goes into next and the chain can't go
+  on. A bot (and "Help, Helium") then lets it go: never a white built into that column; the columns from it
+  to the next chain's start burn, their whites got out; the next chain starts left of every junk column next
+  to it, and the bigger the target the further left (`letGoFor`: CC^1 and CC^2 right beside it, CC^3 and
+  CC^5 two columns in, CC^8 three), never past a column already clear. With Crystal Clears still to go up
+  ahead of it, they go first, and no white goes into the columns let go meanwhile. Helium's plan does as it
+  did: it starts over at step one.
+- **Distilling's bots: every drag a named trick with a goal (13 Nov).** The user: "if the bot follows,
+  again, that is integrated into those same tricks, that it's not going to do a half move for no reason,
+  like everything ... has got a goal and a reason and like linked to one of those more abstract moves."
+  Every drag of a bot's move is named by the tricks it is (src/distill-teach.ts: the climb, the sink, the
+  lift, the drop, the weave, and the bots' sixth, the ladder, junk past junk; a junk piece's drag its runs of
+  them, "the lift, then the ladder") and the goal it serves (src/distill-goals.ts: save or free a white, fill a
+  gap, open the way to a white, build the Crystal Clear, free a stuck piece, junk to the colour, a white to the
+  others, sort or store the junk, the board read's tactic first), and a drag with none that makes way for the
+  next. A move with a drag that has no goal, a half move, is never chosen, and a drag is let go only where it
+  gets something done. The test page and the positions page list each drag with its trick and goal; the
+  guide shows the tricks side by side, a small picture and a line each.
+- **Distilling's positions: a plan seen through (13 Nov).** The user: "show like a short plan of next steps
+  ... make sure it actually follows through rather than just making a step towards it." Each position shows
+  the bot's next five moves, played forward on a copy of its board (src/distill-ahead.ts), each on its own
+  small board with its drags' tricks and goals, and the aim its first move sets out on (a white it only opens
+  the way to, freed); tested to reach it with every move on the way working on it.
 
 - **Messages stay up long enough to read (10 Nov).** The checkpoint's message "vanished very
   quickly": a longer message stays up longer (about 70 ms a letter, 1.8 to 7 seconds), and one

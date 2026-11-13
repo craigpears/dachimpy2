@@ -33,6 +33,33 @@ function drawn(p) {
   return svg;
 }
 
+/** The bot's next few moves, played forward (src/distill-ahead.ts, kept by tools/distill-positions.mjs): its aim and
+    whether it's seen through, each move numbered on its own small board, and each listed with its drags' tricks and
+    goals (the user, 13 Nov: "show like a short plan of next steps ... make sure it actually follows through"). */
+function planBox(p) {
+  const plan = p.plan, box = html('div', { className: 'plan' });
+  box.appendChild(html('b', {}, `Its plan, the next ${plan.moves.length} move${plan.moves.length === 1 ? '' : 's'}`));
+  const aim = !plan.aim ? 'no aim: it waits'
+    : plan.reached === null ? `aim: ${plan.aim}; not reached in these moves`
+    : plan.reached === 1 ? `aim: ${plan.aim}; done by move 1`
+    : `aim: ${plan.aim}; done by move ${plan.reached}${plan.through ? ', every move working on it' : ', but not every move on the way works on it'}`;
+  box.appendChild(html('p', { className: plan.reached && plan.through !== false ? 'aim' : 'aim off' }, `${aim[0].toUpperCase()}${aim.slice(1)}.${/^\d+ moves$/.test(plan.ends) ? '' : ` Then ${plan.ends}.`}`));
+  const strip = html('div', { className: 'strip' }), ol = html('ol', { className: 'moves' });
+  plan.moves.forEach((m, i) => {
+    const f = html('figure');
+    f.appendChild(board({ cols: parse(m.cols), drags: m.drags, shade: [], rings: [], burn: false }, `${p.id}, move ${i + 1} of its plan`));
+    f.appendChild(html('figcaption', {}, `${i + 1}${plan.reached === i + 1 ? ' ✓' : ''}`));
+    strip.appendChild(f);
+    const li = html('li');
+    li.appendChild(html('b', {}, m.label));
+    li.appendChild(document.createTextNode(`: ${m.steps.map((st) => `${st.name}, to ${st.goal ?? '(no goal)'}`).join('; then ')}`));
+    ol.appendChild(li);
+  });
+  box.appendChild(strip);
+  box.appendChild(ol);
+  return box;
+}
+
 function position(p) {
   const bot = p.bot, a = html('article', { id: p.id.toLowerCase() });
   const h = html('h3');
@@ -52,9 +79,24 @@ function position(p) {
   if (bot.state) row('Reads', `${STATES[bot.state]?.label ?? bot.state}; ${(TACTICS[bot.tactic]?.label ?? bot.tactic).toLowerCase()}: ${bot.read}`);
   row('Does', bot.kind === 'move' ? `${bot.label}${bot.drags.length > 1 ? `, in ${bot.drags.length} drags` : ''}` : (KIND[bot.kind] ?? bot.kind));
   row('Why', bot.reason);
+  // Each drag a named trick with a goal (src/distill-goals.ts, 13 Nov), numbered as the arrows are.
+  if (bot.steps?.length) {
+    const ol = html('ol', { className: 'steps' });
+    for (const st of bot.steps) {
+      const li = html('li');
+      li.appendChild(html('b', {}, `${st.name[0].toUpperCase()}${st.name.slice(1)}`));
+      li.appendChild(document.createTextNode(`: ${st.goal ?? 'no goal (a half move)'}`));
+      ol.appendChild(li);
+    }
+    dl.appendChild(html('dt', {}, bot.steps.length > 1 ? 'Drags' : 'Drag'));
+    const dd = html('dd');
+    dd.appendChild(ol);
+    dl.appendChild(dd);
+  }
   if (bot.column !== undefined) row('Filling', `column ${bot.column + 1} (shaded), to go up Crystal Clear`);
   row('Where', `the ${levelLabel(p.level)} bot, seed ${p.seed}, ${secs(p.ms)} in; ${secs(p.timeLeft)} on the furnace${p.chain ? `; the chain at CC^${p.chain}` : ''}`);
   a.appendChild(dl);
+  if (p.plan) a.appendChild(planBox(p));
   const verdicts = VERDICTS[p.id] ?? [];
   if (!verdicts.length && SKIPPED[p.id]) a.appendChild(html('div', { className: 'verdicts' }, `Skipped by you, ${SKIPPED[p.id].date}: ${SKIPPED[p.id].note}`));
   if (verdicts.length) {

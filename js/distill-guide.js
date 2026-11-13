@@ -32,7 +32,8 @@ import { FIRE_COLS, PHASES, PHASE_ORDER } from './distill-phase.js';
 import { LEVELS, PATH_LABEL, PER_COLUMN, SWEEP_LABEL, bankFor, chainZones, clearComingUp, contextFor, dangerZones, edgeWhites, levelNamed, plainDrag } from './distill-bots.js';
 import { blockPhase, keptTools } from './distill-score.js';
 import { bringRound, pairRescue, stuck } from './distill-path.js';
-import { STEP_ONE_CTX, afterOpening, beforeBang, lessonPlan, opening, lessonGame } from './den-helium.js';
+import { STEP_ONE_CTX, afterOpening, aimFor, beforeBang, lessonPlan, opening, lessonGame } from './den-helium.js';
+import { DRAG_TRICKS, LADDER, dragTricks, makeWay, teachLevel } from './distill-teach.js';
 import { BEST, HELP, HELP_ELSE, NERVES, ONWARD, OPENING, PHASE, SPOT, STEP_ONE, TEACH, TELL } from './lines/helium.js';
 import { POSITIONS } from './distill-guide-boards.js';
 import { POSITIONS as POSITIONS_SEEN, boardOf, botAt } from './distill-positions.js';
@@ -391,7 +392,66 @@ export function readingExamples() {
         };
     });
 }
-// ---------------------------------------------------------------- Helium's lines, and the whole guide
+/** Every drag of one piece on a board, up to `most` swaps, each swap legal after the last. */
+function everyDrag(cols, most, visit) {
+    const walk = (b, x0, y0, x, y, ways) => {
+        if (ways.length && visit({ x: x0, y: y0, ways: [...ways] }))
+            return true;
+        if (ways.length >= most)
+            return false;
+        for (const w of [UP_RIGHT, UP_LEFT, DOWN_LEFT, DOWN_RIGHT]) {
+            const n = neighbourOn(b, x, y, w);
+            if (!n || !canSwapOn(b, x, y, n[0], n[1]))
+                continue;
+            const nb = copyBoard(b);
+            nb[n[0]][n[1]] = b[x][y];
+            nb[x][y] = b[n[0]][n[1]];
+            if (walk(nb, x0, y0, n[0], n[1], [...ways, w]))
+                return true;
+        }
+        return false;
+    };
+    for (let x = 1; x < COLS - 1; x++)
+        for (let y = 1; y < cols[x].length - 1; y++)
+            if (walk(cols, x, y, x, y, []))
+                return;
+}
+/** The columns and rows round some drags, a piece either side. */
+function cropOf(cols, drags) {
+    const cells = drags.flatMap((d) => { const out = [[d.x, d.y]]; let at = [d.x, d.y]; for (const w of d.ways) {
+        at = neighbourOn(cols, at[0], at[1], w);
+        out.push(at);
+    } return out; });
+    const xs = cells.map((c) => c[0]), ys = cells.map((c) => c[1]);
+    return { x: [Math.max(0, Math.min(...xs) - 1), Math.min(COLS - 1, Math.max(...xs) + 1)], y: [Math.max(0, Math.min(...ys) - 1), Math.min(8, Math.max(...ys) + 1)] };
+}
+/** The tricks side by side: each found on the lesson's board after its opening (a drag of two swaps that's that trick
+    alone, the first from the left; three for the weave if need be), making way as their lesson finds it for step one. */
+export function trickTiles() {
+    const cols = afterOpening().cols, out = [];
+    const tile = (trick, drags, bots = false) => {
+        const t = TEACH[trick];
+        return { trick, name: t.name, how: t.how, rule: t.why, bots, picture: { cols, drags, rings: [], shade: [], from: LESSON_FROM }, crop: cropOf(cols, drags) };
+    };
+    for (const trick of DRAG_TRICKS) {
+        let found = null;
+        for (const most of [2, 3]) {
+            everyDrag(cols, most, (d) => { const ts = dragTricks(cols, d); if (d.ways.length === most && ts.length === 1 && ts[0] === trick) {
+                found = d;
+                return true;
+            } return false; });
+            if (found)
+                break;
+        }
+        if (found)
+            out.push(tile(trick, [found], trick === LADDER));
+    }
+    const fire = Array.from({ length: FIRE_COLS }, (_, i) => COLS - FIRE_COLS + i);
+    const way = makeWay(cols, aimFor(cols, fire, null, 1, 'out'), teachLevel(1));
+    if (way)
+        out.push(tile('makeWay', way.drags));
+    return out;
+}
 /** Helium's lines the page quotes, from src/lines/helium.ts. */
 export const QUOTES = { goal: BEST.none, stepOne: STEP_ONE.says, why: STEP_ONE.why, onward: ONWARD, tell: TELL, trick: TEACH.lift.why, spot: SPOT.three };
 /** Everything the page draws. */
@@ -399,5 +459,6 @@ export function guide() {
     return {
         pieces: PIECES, swaps: SWAPS, furnaceSecs: FURNACE_SECS, chainBonus: CHAIN_BONUS, flask: FLASK, carryOn: CARRY_ON, columns: sampleColumns(),
         phases: phaseExamples(), levels: levelRows(), techniques: techniqueExamples(), tricks: trickExamples(), quotes: QUOTES, plan: PLAN, reading: readingExamples(),
+        trickTiles: trickTiles(),
     };
 }

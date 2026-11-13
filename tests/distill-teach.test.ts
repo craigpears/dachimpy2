@@ -4,7 +4,7 @@
    clear one, those were complicated moves. Maybe for later, sure, but for crystal clear one starting, no."; and
    "drag the brown to the right, and then the white to the left ... why isn't that just one move?" */
 import { describe, expect, it } from 'vitest';
-import { Batch, PlanLines, TeachLines, aimFor, planFor, spotLine, type Plan } from '../src/den-helium';
+import { Batch, PlanLines, TeachLines, aimFor, chainOver, planFor, spotLine, type Plan } from '../src/den-helium';
 import { BLACK, BROWN, COLS, Distilling, UP_LEFT, WHITE, neighbourOn, parseBoard, type Board } from '../src/distilling';
 import { playDrags, type Drag } from '../src/distill-routines';
 import { SPOT_MOST, TEACH_LEVELS, TRICKS, cost, joinPairs, plainMoves, teach, teachLevel, touched, trickOf, type Shown } from '../src/distill-teach';
@@ -230,10 +230,15 @@ describe('the plain tricks are the swap rule', () => {
 describe('"I\'ve just done the crystal clear one. Why on earth is it trying to get me to pull the white piece all the way into the first column?" (13 Nov)', () => {
   // A board with the column by the fire all junk, a Crystal Clear just gone up (the chain at 1).
   const cols = parseBoard(['wKwwKwKK', 'KKbKwKKKK', 'bbKbbbwK', 'bbbbbbbbK', 'KbwwbwKK', 'K*bwwwwwK', 'wbbwKwwK', 'wKbbbwKKb', 'bKKKbKww', 'KKKbb*bKK']);
-  it('the planner alone would carry the chain on into that column of junk', () => {
-    const a = advise({ cols, chain: 1, timeLeft: Infinity }, { target: 2 });
-    expect(a.stage).toBe('chain');
-    expect(a.column).toBe(COLS - 1);
+  it('the planner lets the chain go there too, by the same rule (`chainOver`, shared): no white built into that column of junk, the next chain started left of it', () => {
+    expect(chainOver(cols, COLS - 1)).toBe(true);
+    for (const target of [1, 2, 8]) {
+      const a = advise({ cols, chain: 1, timeLeft: Infinity }, { target });
+      expect(a.letGo, `CC^${target}`).toBe(true);
+      expect(a.column!, `CC^${target}`).toBeLessThan(COLS - 1);
+      const after = playDrags(cols, a.drags)!;
+      expect(after[COLS - 1].filter((p) => p === WHITE).length).toBeLessThanOrEqual(cols[COLS - 1].filter((p) => p === WHITE).length);
+    }
   });
   it('their plan starts over instead: "restarting to three columns of junk and then building the white pieces further to the left"', () => {
     const p = planFor({ cols, chain: 1 }, 1), fresh = planFor({ cols, chain: 0 }, 1);

@@ -24,6 +24,8 @@ import { PHASES, PHASE_ORDER, phaseOf } from '../src/distill-phase';
 import { LEVELS, PATH_LABEL, SWEEP_LABEL, bankFor, choose, contextFor } from '../src/distill-bots';
 import { HELP, ONWARD, PHASE, TELL, BEST, SPOT, TEACH } from '../src/lines/helium';
 import { STEP_ONE_CTX, afterOpening, lessonPlan } from '../src/den-helium';
+import { trickTiles } from '../src/distill-guide';
+import { DRAG_TRICKS, dragTricks } from '../src/distill-teach';
 
 const ROOT = join(__dirname, '..');
 const page = readFileSync(join(ROOT, 'distilling-guide.html'), 'utf8');
@@ -300,5 +302,31 @@ describe('reading the board, in the read version (13 Nov, the board reader: "wha
       expect(e.tacticLabel).toBe(TACTICS[e.tactic].label);
     }
     expect(g.reading).toHaveLength(READ_EXAMPLES.length);
+  });
+});
+
+describe('the tricks side by side, 13 Nov ("that can appear in the guide quite well as small things next to each other")', () => {
+  const tiles = trickTiles();
+  it('one small picture a trick, the five the lesson shows, the bots\' ladder and making way, each with its rule in Helium\'s words', () => {
+    expect(tiles.map((t) => t.trick)).toEqual([...DRAG_TRICKS, 'makeWay']);
+    for (const t of tiles) {
+      expect(t.rule).toBe(TEACH[t.trick].why);
+      expect(t.name).toBe(TEACH[t.trick].name);
+      expect(t.bots).toBe(t.trick === 'ladder');
+    }
+    expect(page).toContain('data-trick-tiles');
+  });
+  it('each drawn as that trick on the lesson\'s own board, by the same code that names the bots\' drags', () => {
+    const cols = afterOpening().cols;
+    for (const t of tiles) {
+      expect(playDrags(cols, t.picture.drags), t.trick).not.toBeNull();
+      if (t.trick === 'makeWay') { expect(t.picture.drags.length).toBe(2); continue; }
+      expect(t.picture.drags.length).toBe(1);
+      expect(dragTricks(cols, t.picture.drags[0]), t.trick).toEqual([t.trick]);
+      const { x, y } = t.crop;
+      expect(x[0]).toBeLessThanOrEqual(t.picture.drags[0].x);
+      expect(x[1]).toBeGreaterThanOrEqual(t.picture.drags[0].x);
+      expect(y[0]).toBeLessThanOrEqual(t.picture.drags[0].y);
+    }
   });
 });

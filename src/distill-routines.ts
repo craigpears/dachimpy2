@@ -58,6 +58,9 @@ export interface Ctx {
   /** Colour scarce: the slow techniques' time (the user, 12 Nov: "you only need to do that when things are
       getting a bit trickier"). Left out, it's read from the board (scarce). */
   scarce?: boolean;
+  /** The chain let go (src/distill-bots.ts, `chainContext`): columns over[0] to over[1], more junk than white, burn once
+      the Crystal Clears right of them have gone up; the next chain is built left of them (`fill`). */
+  over?: readonly [number, number];
 }
 
 export interface Routine {
@@ -291,7 +294,7 @@ export function measure(cols: Board, ctx: Ctx): number {
   let v = 0;
   const sort = sortingTime(cols, ctx) ? 1 : 0;
   for (let x = 0; x < COLS; x++) {
-    const col = cols[x], burning = x >= ctx.burnFrom;
+    const col = cols[x], burning = x >= ctx.burnFrom || (!!ctx.over && x >= ctx.over[0] && x <= ctx.over[1]);
     for (let y = 0; y < col.length; y++) {
       const p = col[y];
       if (p === SPICE) continue;

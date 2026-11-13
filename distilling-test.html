@@ -72,6 +72,7 @@ import { Distilling, MESSAGES } from './js/distilling.js';
 import { LEVELS, levelNamed, bankFor, PER_COLUMN, DistillBot } from './js/distill-bots.js';
 import { ROUTINES } from './js/distill-routines.js';
 import { STATES, TACTICS } from './js/distill-read.js';
+import { stepLines } from './js/distill-goals.js';
 import { distillBoard } from './js/den/distill-board.js';
 
 const $ = (id) => document.getElementById(id);
@@ -157,8 +158,19 @@ function showRoutine(p) {
   // How it reads the board (src/distill-read.ts): its state and the tactic in play, and why (the user, 13 Nov: "what
   // kind of tactics are in play").
   if (p.state && p.stage === 'junk') aim.textContent += ` · ${STATES[p.state].label}: ${TACTICS[p.tactic].label.toLowerCase()} (${p.read})`;
+  // The chain let go (the user, 13 Nov: "if you've got a completely junk column, you don't try and build a whites into
+  // it ... You start a new chain as far left as you can").
+  if (p.letGo) aim.textContent += ` · Let go: ${p.read}`;
   board.column = p.column ?? null;
   $('routine').append(aim, b, `: ${p.reason}`);
+  // Each drag a named trick with a goal (src/distill-goals.ts; the user, 13 Nov: "everything ... has got a goal and a
+  // reason and like linked to one of those more abstract moves").
+  if (p.steps?.length) {
+    const ol = document.createElement('ol');
+    ol.style.cssText = 'margin:3px 0 0;padding-left:18px';
+    for (const line of stepLines(p.steps)) { const li = document.createElement('li'); li.textContent = line.replace(/^\d+\. /, ''); ol.append(li); }
+    $('routine').append(ol);
+  }
 }
 function driveBot(dt) {
   if (!bot || board.game.finished || board.paused) return;

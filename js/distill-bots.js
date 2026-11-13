@@ -38,6 +38,10 @@
    what kind of tactics are in play"): its state (healthy, at risk, cracked, damage control) and the tactic in play,
    whose own measure of progress ranks the moves first (`byTactic`); the advice carries both. Two drags a player
    would make as one are made one (src/distill-teach.ts, `joinPairs`, the one implementation the teaching picker uses too).
+   Every drag of a move is a named trick with a goal (src/distill-goals.ts; the user, 13 Nov: "it's not going to do a
+   half move for no reason"): a move with a drag that has none isn't chosen, and a drag's let go only where it gets
+   something done (`judge`). And the chain's rule of thumb, shared with Helium's plan (`chainOver`, `chainContext`): a
+   next column with more junk than white lets the chain go, the next started further left the bigger the target.
 
    `advise(board)` is the planner for anyone's board, a person's mid-game: the stage, the routine it would
    play now, why in a line, and its drags. "Help, Helium" will show that on the player's own board. */
@@ -46,8 +50,9 @@ import { M, ROUTINES, burnsClean, canGo, clear, colourLeft, fillTarget, isJunk, 
 import { blockPhase, boardScore, keptTools, trappedWhite, wall } from './distill-score.js';
 import { PATH, freed, pairRescue, pathMoves, stuck } from './distill-path.js';
 import { phaseOf, weightIn } from './distill-phase.js';
-import { TACTICS, ladderDrags, moves as movesAny, nearDrags, progress, quickFills, readBoard, tailDrags, toolBrowns } from './distill-read.js';
+import { TACTICS, ladderDrags, moves as movesAny, nearDrags, progress, quickFills, readBoard, sorts, tailDrags, toolBrowns } from './distill-read.js';
 import { joinPairs } from './distill-teach.js';
+import { ownGoal, purposeful, stepsFor } from './distill-goals.js';
 /** The path search when a white in the furnace's column has no other way out: longer drags, a wider look
     for a piece to move out of the way first. Run only then. */
 export const PATH_WIDE = { ...PATH, SWAPS: 16, NODES: 6000, ENABLE_NEAR: 6, ENABLE_BOARDS: 200, ENABLE_NODES: 600 };
@@ -165,6 +170,11 @@ export const P = {
     /** Healthy, quick sorting: a short drag taking a black down or a brown up ranks this much higher. */
     QUICK: 1.25,
     QUICK_SWAPS: 6,
+    /** Every drag a named trick with a goal (src/distill-goals.ts, the user, 13 Nov: "it's not going to do a half move for
+        no reason"): a move with a drag that has none isn't chosen; the best GOAL_LOOK moves on offer are looked at for
+        one that has (0 off). */
+    GOALS: 1,
+    GOAL_LOOK: 30,
 };
 /** Junk in the furnace's column (spice is fine in a Crystal Clear). */
 const junkAt = (col) => col.filter((p) => p !== WHITE && p !== SPICE).length;
@@ -182,6 +192,46 @@ export function contextFor(cols, stage, burns, reach) {
     const burnFrom = COLS - burns;
     return { stage, burnFrom, fill: fillTarget(cols, burnFrom), reach };
 }
+/* The chain's rule of thumb, the one the bots and Helium's plan both use (the user, 13 Nov, after Helium's plan chased a
+   Crystal Clear into a column of junk: "if you've got a completely junk column, you don't try and build a whites into
+   it. Yeah, you build further left. You start a new chain as far left as you can. Obviously, in the context of CC^1,
+   you don't need to. But like, if you're going for the maximalist one, absolutely"; and "I wouldn't make it more
+   complicated unless we find some problems"): no odds model, just more junk than white in the next column. */
+/** Whether the chain can't go on into column x, the next to go up: more junk in it than whites. */
+export const chainOver = (cols, x) => x >= 0 && x < COLS && cols[x].filter(isJunk).length > cols[x].filter((p) => p === WHITE).length;
+/** How many columns the chain's let go over at the least, the one it can't go on into among them, by the target: the
+    bigger, the further left the next chain starts (CC^1 and CC^2 that column alone, CC^3 and CC^5 two, CC^8 three). */
+export const letGoFor = (target) => (target >= 8 ? 3 : target >= 3 ? 2 : 1);
+/** Where the next chain starts when the chain can't go on into column x: left of x, of every column next to it the chain
+    can't go on into either, and of letGoFor(target) columns in all; never past a column already clear (a Crystal Clear
+    ready to send up). -1: nowhere on the board. */
+export function nextChainAt(cols, x, target) {
+    const most = x - letGoFor(target);
+    let s = x - 1;
+    while (s >= 0 && !clear(cols[s]) && (chainOver(cols, s) || s > most))
+        s--;
+    return s;
+}
+/** The chain's context with the rule of thumb applied: a chain going (`chain` > 0) whose next column can't be filled
+    (`chainOver`) is let go (`letGo`), never a white built into that junk: with nothing clear left to go up before it,
+    the columns from the next chain's start to the fire burn now, as at a chain's start (`burns`, more of them); with
+    Crystal Clears still to go up first, they go, the columns let go wait to burn after them (`over`: no white into
+    them, their whites out), and the next chain's built left of them. */
+export function chainContext(cols, chain, burns, target, reach) {
+    const ctx = contextFor(cols, 'chain', burns, reach), x = ctx.fill;
+    if (chain <= 0 || !chainOver(cols, x))
+        return { ctx, burns, letGo: false };
+    const s = nextChainAt(cols, x, target);
+    if (s < 0)
+        return { ctx, burns, letGo: false };
+    if (x === ctx.burnFrom - 1) {
+        const n = COLS - 1 - s;
+        return { ctx: contextFor(cols, 'chain', n, reach), burns: n, letGo: true, at: x };
+    }
+    return { ctx: { ...ctx, fill: s, over: [s + 1, x] }, burns, letGo: true, at: x };
+}
+/** The let go in words, for the read: the column the chain can't go on into (`at`), and where the next starts. */
+const letGoRead = (ctx, chain, at) => `the chain at CC^${chain} can't go on into column ${at + 1}, more junk than white: let it go there, and start the next one in column ${ctx.fill + 1}`;
 /** A sweep: one plain drag, long, every swap the same way across (left or right), so it's swept blind with
     hardly a pause (the user, 12 Nov: "It's just quick drag motions ... go, go, go"). */
 export function plainDrag(drags) {
@@ -279,7 +329,7 @@ export function rightOrder(cols) {
     ... a little flick and a swish, and the brown can be one level lower"): among moves doing the best one's job
     (its board score gain, within TIE_SCORE) in as many drags and at most TIE_SWAPS more swaps, the one leaving
     the right-hand side in the best order, browns lower and blacks higher; the best itself when none is better. */
-export function tieBreak(cols, moves, best, block = false) {
+export function tieBreak(cols, moves, best, block = false, accept = () => true) {
     if (!best.after)
         return best;
     const base = boardScore(cols, block), gain = boardScore(best.after, block) - base, swaps = swapsIn(best.move.drags);
@@ -290,7 +340,7 @@ export function tieBreak(cols, moves, best, block = false) {
         if (swapsIn(m.move.drags) > swaps + P.TIE_SWAPS || boardScore(m.after, block) - base < gain - P.TIE_SCORE)
             continue;
         const o = rightOrder(m.after);
-        if (o > order) {
+        if (o > order && accept(m)) {
             pick = m;
             order = o;
         }
@@ -303,8 +353,34 @@ const hardIn = (cols, x) => cols[x].reduce((n, p, y) => n + (p === WHITE && !can
     person's time (the user, 12 Nov, the eleventh note: "even just as a test of moves"). One look ahead, no
     search. Its last drag is let go where that's best: carried on while each swap still gets something over,
     stopped before it only climbs through the junk (a black sent on up through the browns gets nothing). */
-export function judge(cols, drags, style, base, block = false) {
+export function judge(cols, drags, style, base, block = false, goal) {
     base ??= boardScore(cols, block);
+    const j = letGoAt(cols, drags, style, base, block);
+    if (!j || !goal || !P.GOALS)
+        return j;
+    // Never let go where the drag's a half move (src/distill-goals.ts; the user, 13 Nov, P10: "Why are things only half
+    // moving?"): where it scores best but gets nothing done, it's let go instead where it does, the best of those.
+    const init = j.drags.slice(0, -1), before = init.length ? playDrags(cols, init) : cols, last = j.drags[j.drags.length - 1];
+    if (!before)
+        return j;
+    const now = playDrags(before, [last]);
+    if (now && goal(before, last, now))
+        return j;
+    const full = drags[drags.length - 1];
+    let pick = null;
+    for (let k = full.ways.length; k >= 1; k--) {
+        const d = { x: full.x, y: full.y, ways: full.ways.slice(0, k) }, after = playDrags(before, [d]);
+        if (!after || !goal(before, d, after))
+            continue;
+        const all = [...init, d];
+        const value = (boardScore(after, block) - base) / ((timeFor(all, style, plainDrag(all)) + (block ? P.BLOCK_DRAG_MS * all.length : 0)) / 1000);
+        if (!pick || value > pick.value)
+            pick = { drags: all, value };
+    }
+    return pick && pick.value > 0 ? pick : j;
+}
+/** Where a move's last drag is let go: where the board scores best a second of a person's time (`judge`). */
+function letGoAt(cols, drags, style, base, block) {
     if (!drags.length)
         return null;
     const init = drags.slice(0, -1), last = drags[drags.length - 1];
@@ -461,8 +537,15 @@ export function weigh(sit, ctx, style, reading) {
     // out easily ... Why have you blocked it all in?"), nor puts another white there.
     const edges = one ? edgeWhites(cols) : [], open = edges.filter((w) => canGo(cols, w.x, w.y, -1));
     const tools = keptTools(cols);
+    // The chain let go (`chainContext`): never a white built into the columns let go.
+    const over = (b) => { let n = 0; if (ctx.over)
+        for (let x = ctx.over[0]; x <= ctx.over[1]; x++)
+            n += b[x].filter((p) => p === WHITE).length; return n; };
+    const over0 = over(cols);
     // What no move may do, wherever it comes from (a routine, the path search, the board reader's tactic).
     const admissible = (drags, after) => {
+        if (ctx.over && over(after) > over0)
+            return false;
         if (urgent && (wrong(after) >= wrong(cols) || msFor(drags, style, plainDrag(drags)) > sit.timeLeft))
             return false;
         if ((burning && wrong(after) > wrong(cols)) || whitesFrom(after, guard) > whitesFrom(cols, guard))
@@ -486,8 +569,13 @@ export function weigh(sit, ctx, style, reading) {
             return false;
         return true;
     };
+    // The board read, once (the user, 13 Nov, the thirty-third and thirty-fourth notes), and every drag let go where it
+    // gets something done (src/distill-goals.ts).
+    const read = one && P.READ && !urgent ? (reading ?? readBoard(cols, { stage: ctx.stage, timeLeft: sit.timeLeft })) : null;
+    const aims = { ctx, reading: one ? (reading ?? read) : null };
+    const goal = (b, d, a) => ownGoal(b, d, a, aims) !== null;
     const consider = (found) => {
-        const j = one ? judge(cols, found.drags, style, base, block) : null;
+        const j = one ? judge(cols, found.drags, style, base, block, goal) : null;
         const move = j ? { ...found, drags: j.drags } : found;
         const after = playDrags(cols, move.drags);
         if (!after || (one && !j) || !admissible(move.drags, after))
@@ -500,6 +588,15 @@ export function weigh(sit, ctx, style, reading) {
             continue;
         for (const found of ROUTINES[name].find(cols, ctx))
             consider(found);
+    }
+    // Quick sorting with time in hand (the board read, P3: "I'll just be going down, browns up"): its blacks down and
+    // browns up into the places of the whites by the fire.
+    if (read?.tactic === 'quickSort' && read.targets.length && style.path) {
+        for (const d of quickFills(cols, read.targets))
+            if (sorts(cols, d[0])) {
+                const p = cols[d[0].x][d[0].y] === BLACK ? 'black' : 'brown';
+                consider({ routine: 'rescue', drags: d, reason: `quick sorting: the ${p} at column ${d[0].x + 1}, row ${d[0].y + 1} ${p === 'black' ? 'down' : 'up'} into a white's place by the fire, and it's out left` });
+            }
     }
     // The fallback: a piece stuck that nothing the routines offer unsticks (it's still stuck where it is after
     // every one of them): bring a piece round to take its place.
@@ -526,7 +623,7 @@ export function weigh(sit, ctx, style, reading) {
     // Freeing the whites at risk, fixing a cracked board and sorting the ladder before it's lost come before the
     // danger zones (the zones' whites are among those the reader weighs); sorting the V's tail after them; the quick
     // sorting moves are preferred when nothing's at risk.
-    const r = one && P.READ && !urgent ? (reading ?? readBoard(cols, { stage: ctx.stage, timeLeft: sit.timeLeft })) : null;
+    const r = read;
     let keep = [];
     if (r && (r.tactic === 'fillGaps' || r.tactic === 'freeTrapped' || r.tactic === 'fixCracks' || r.tactic === 'sortLadder')) {
         const t = byTactic(sit, ctx, style, r, out, admissible);
@@ -546,7 +643,11 @@ export function weigh(sit, ctx, style, reading) {
     // the hard-to-reach first; if nothing does yet, the wider search for its whites. The edge whites' zone is saved
     // by one of them getting out (junk raced into its place), not any white.
     const edgeAt = one ? edgeZone(cols) : null;
+    // (With time in hand and nothing at real risk, the board read's quick sorting, the edge whites wait: P3, "No hurry".)
+    const calm = (zone) => read?.tactic === 'quickSort' && zone === edgeAt && zone < last - 1;
     for (const zone of zones) {
+        if (calm(zone))
+            continue;
         const edgeOnly = zone === edgeAt && zone < last - 1;
         const saving = (m) => whitesFrom(m.after, zone) < whitesFrom(cols, zone)
             && (!edgeOnly || edgeWhites(m.after, zone).length < edgeWhites(cols, zone).length)
@@ -565,13 +666,15 @@ export function weigh(sit, ctx, style, reading) {
         const saves = out.filter(saving);
         if (!saves.length)
             continue;
-        return rankSaves(cols, zone, phase, saves);
+        return rankSaves(cols, zone, phase, saves, quick);
     }
     // Nothing saves a white in danger in one move: a short plan, a move that sets up the save and the save it opens
     // (the user, 13 Nov, the thirty-second note, a bot frozen with whites low by the fire: "maybe it's stuck because it
     // requires maybe a few moves just to kind of get the brown into the right position. And then you can use it to
     // drag across a few blacks"). The setting-up move is played; the save is found again next move.
     for (const zone of zones) {
+        if (calm(zone))
+            continue;
         const plan = setUp(sit, ctx, style, out, zone, zone === edgeAt && zone < last - 1, base, block);
         if (plan)
             return [plan];
@@ -784,10 +887,10 @@ export function setUp(sit, ctx, style, out, zone, edgeOnly, base, block) {
     saves the white beats a crawl that saves it as well. Only the weights that hold a technique back count here
     (saving is the job, so a rescue's own lift doesn't), and a long plain drag counts in full, whatever routine
     found it: a sweep that gets the white out is the simplest move there is. */
-export function rankSaves(cols, zone, phase, saves) {
+export function rankSaves(cols, zone, phase, saves, boost = () => 1) {
     const hard = (m) => hardIn(cols, zone) - hardIn(m.after, zone);
     const weight = (m) => (plainDrag(m.move.drags) ? 1 : Math.min(1, weightIn(phase, m.move.routine)));
-    const ranked = (m) => (!P.PHASES || m.value <= 0 ? m.value : m.value * weight(m));
+    const ranked = (m) => (m.value <= 0 ? m.value : m.value * (P.PHASES ? weight(m) : 1) * boost(m));
     return saves.map((m) => ({ ...m, saves: true, ...(P.PHASES ? { weighted: true } : {}) })).sort((a, b) => hard(b) - hard(a) || ranked(b) - ranked(a));
 }
 /** The columns coming up to the fire after the furnace's, clear of white (`P.EARLY_CLEAR` of them): only then is
@@ -799,6 +902,8 @@ export function clearComingUp(cols) {
             return false;
     return true;
 }
+/** A set-up move's goal (`setUp`): next move's save, which it opens. */
+const SETUP_GOAL = "set up next move's save of the white by the fire";
 /** Pick the routine for the board now (see the header). */
 export function choose(sit, ctx, style) {
     const { cols } = sit, last = COLS - 1;
@@ -809,12 +914,28 @@ export function choose(sit, ctx, style) {
     const wrong = (b) => (burning ? b[last].filter((p) => p === WHITE).length : junkAt(b[last]));
     const reading = readBoard(cols, { stage: ctx.stage, timeLeft: sit.timeLeft });
     const moves = weigh(sit, ctx, style, reading);
+    // Every drag a named trick with a goal (src/distill-goals.ts): a move with a drag that has none, a half move, isn't
+    // chosen; the first on offer whose drags all have one is (the user, 13 Nov: "it's not going to do a half move for no
+    // reason, like everything ... has got a goal and a reason").
+    const aims = { ctx, reading: ctx.stage === 'junk' ? reading : null };
+    const named = new Map();
+    const stepsOf = (m) => {
+        let st = named.get(m);
+        if (!st) {
+            st = stepsFor(cols, joinPairs(cols, m.move.drags), m.setup ? { ...aims, setup: SETUP_GOAL } : aims);
+            named.set(m, st);
+        }
+        return st;
+    };
+    const ok = (m) => !P.GOALS || purposeful(stepsOf(m));
+    const first = P.GOALS ? moves.slice(0, P.GOAL_LOOK).find(ok) : moves[0];
     // A move saving a white from the furnace is played whatever it scores.
-    const top = moves[0] && (moves[0].saves || moves[0].value > (ctx.stage === 'junk' ? P.RATE_MIN : P.MIN)) ? moves[0] : null;
-    const best = top && ctx.stage === 'junk' && !top.saves && !top.tactic ? tieBreak(cols, moves, top, blockPhase(cols)) : top;
+    const top = first && (first.saves || first.value > (ctx.stage === 'junk' ? P.RATE_MIN : P.MIN)) ? first : null;
+    const best = top && ctx.stage === 'junk' && !top.saves && !top.tactic ? tieBreak(cols, moves, top, blockPhase(cols), ok) : top;
     const advice = (kind, label, reason, m = null) => ({
         stage: ctx.stage, phase: phaseOf(cols, ctx.stage), kind, routine: !m ? null : m.move.routine === 'path' ? 'hook' : m.move.routine, technique: m?.move.routine ?? null,
         label, reason, drags: m ? joinPairs(cols, m.move.drags) : [], value: m?.value ?? 0, sweep: false, ...(m?.tie ? { tie: true } : {}),
+        ...(m ? { steps: stepsOf(m), how: stepsOf(m).map((x) => x.name).join('; then ') } : {}),
         ...(m?.weighted ? { weighted: true } : {}),
         ...(ctx.stage === 'chain' && ctx.fill >= 0 && ctx.fill < COLS ? { column: ctx.fill } : {}),
         state: reading.state, tactic: reading.tactic, read: reading.why,
@@ -907,10 +1028,18 @@ export function whitesNeededFor(cols, stage, chain, target, burns = 0) {
 export function advise(g, o = {}) {
     const cols = g.cols, chain = g.chain ?? 0, timeLeft = g.timeLeft ?? Infinity, target = o.target ?? DEFAULT_TARGET;
     const two = chain > 0 || decisionTime(cols, bankFor(target));
-    const burns = chain > 0 ? 0 : two ? burnsLeft(cols) : 0, stage = two ? 'chain' : 'junk';
+    const burns0 = chain > 0 ? 0 : two ? burnsLeft(cols) : 0, stage = two ? 'chain' : 'junk';
     const style = target === DEFAULT_TARGET ? HELIUM : { ...HELIUM, routines: levelFor(target).routines };
-    const a = choose({ cols, chain, timeLeft }, contextFor(cols, stage, burns, HELIUM.reach), style);
-    return { ...a, target, whitesNeeded: whitesNeededFor(cols, stage, chain, target, burns) };
+    // The chain's rule of thumb: a next column of junk lets the chain go (`chainContext`).
+    const c = stage === 'chain' ? chainContext(cols, chain, burns0, target, HELIUM.reach) : { ctx: contextFor(cols, stage, burns0, HELIUM.reach), burns: burns0, letGo: false };
+    const a = choose({ cols, chain, timeLeft }, c.ctx, style);
+    return { ...a, target, ...letGoNote(cols, c, chain, target, stage) };
+}
+/** The advice's whites still needed, and the chain let go said: the whites for the next chain, from its column. */
+function letGoNote(cols, c, chain, target, stage) {
+    if (!c.letGo)
+        return { whitesNeeded: whitesNeededFor(cols, stage, chain, target, c.burns) };
+    return { whitesNeeded: whitesNeededFor(cols, 'chain', 0, target, COLS - 1 - c.ctx.fill), letGo: true, read: letGoRead(c.ctx, chain, c.at) };
 }
 /** A distiller at a level: where it is in its run, and its next move. It banks the whites for its target, sends
     the chain up, and when the chain breaks goes back to building toward the next one; it never dismisses. */
@@ -930,6 +1059,8 @@ export class DistillBot {
         again, not rebuilt. */
     chained = false;
     run = 0;
+    /** Decisions made with the chain let go (`chainContext`). */
+    letGo = 0;
     /** What it's doing now (the test page shows its label). */
     last = null;
     constructor(level) { this.level = level; }
@@ -948,12 +1079,18 @@ export class DistillBot {
             this.stage = 'chain';
             this.burns = 0;
         }
-        const ctx = contextFor(g.cols, this.stage, this.burns, this.level.reach);
-        const a = choose({ cols: g.cols, chain: g.chain, timeLeft: g.timeLeft() }, ctx, this.level);
+        // The chain's rule of thumb (`chainContext`): its next column junk, the chain's let go and the next started further
+        // left, the columns between burning first.
+        const c = this.stage === 'chain' ? chainContext(g.cols, g.chain, this.burns, target, this.level.reach)
+            : { ctx: contextFor(g.cols, this.stage, this.burns, this.level.reach), burns: this.burns, letGo: false };
+        this.burns = c.burns;
+        if (c.letGo)
+            this.letGo++;
+        const a = choose({ cols: g.cols, chain: g.chain, timeLeft: g.timeLeft() }, c.ctx, this.level);
         const t = a.technique ?? a.routine;
         if (t)
             this.used[t] = (this.used[t] ?? 0) + 1;
-        this.last = { ...a, target, whitesNeeded: whitesNeededFor(g.cols, this.stage, g.chain, target, this.burns) };
+        this.last = { ...a, target, ...letGoNote(g.cols, c, g.chain, target, this.stage) };
         return this.last;
     }
     /** A column went: note the chain, count down the junk columns before it, note the bank, and when the chain

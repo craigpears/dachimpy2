@@ -24,7 +24,9 @@
      burns (P8);
    - freeTrapped (a flagged white that's trapped, TRAPPED_REACH swaps or more from junk, or walled in, whose column burns
      within URGENT_MS): those whites freed first, the most at risk first (P2, P6: "the top right first");
-   - fillGaps (a flagged white easy to reach whose column burns within URGENT_MS): the quick fills (P3, P4:
+   - quickSort (those whites all free, their column not the furnace's, and every quick fill a black down or a brown up:
+     the sorting fills them, P3: "I think [P3] was quick sorting");
+   - fillGaps (a flagged white easy to reach whose column burns within URGENT_MS): the quick fills (P4:
      "prioritising filling those right-hand columns with as much speed as I could");
    - freeTrapped (the trapped whites further off: P1, P5);
    - sortTail (the block phase, the V's tail unsorted): its browns sunk through its blacks, so the next sweep runs
@@ -111,6 +113,16 @@ export function readBoard(cols, o) {
     const free = (ts) => read('atRisk', 'freeTrapped', `${ts.length === 1 ? 'a white' : `${ts.length} whites`} trapped near the fire (${list(ts)}), the worst first`, ts);
     if (trapped.some(soon))
         return free(trapped);
+    // Time in hand and nothing at real risk (the user, 13 Nov, on P3: "No hurry ... I'll just be going down, browns up,
+    // they're just really fast, quick, simple, easy moves"; "I think [P3] was quick sorting"): the whites burning soon all
+    // free to go left now, their column not the furnace's, and every quick fill of their places itself a quick sorting
+    // move, a black down or a brown up: the sorting fills them, so it's quick sorting.
+    if (urgent.length && urgent.every((w) => w.free && w.burnsIn >= RISK.BURN_MS)) {
+        const fills = quickFills(cols, urgent);
+        if (fills.length && fills.every((d) => sorts(cols, d[0]))) {
+            return read(state, 'quickSort', `${urgent.length === 1 ? 'a white' : `${urgent.length} whites`} by the fire free to go, with time in hand (${list(urgent)}): the quick sorting moves, blacks down and browns up, fill their places`, urgent);
+        }
+    }
     if (urgent.length)
         return read('atRisk', 'fillGaps', `${urgent.length === 1 ? 'a white' : `${urgent.length} whites`} by the fire with ${urgent.length === 1 ? 'its column' : 'their columns'} burning soon (${list(urgent)}): junk into their places, the quickest first`, urgent);
     if (trapped.length)
@@ -298,6 +310,11 @@ export function tailDrags(cols, r) {
         }
     }
     return out;
+}
+/** A quick sorting drag (P3): a black taken down, or a brown up. */
+export function sorts(cols, d) {
+    const p = cols[d.x][d.y], [ex, ey] = endOf(cols, d);
+    return (p === BLACK && halfOf(cols, ex, ey) > halfOf(cols, d.x, d.y)) || (p === BROWN && halfOf(cols, ex, ey) < halfOf(cols, d.x, d.y));
 }
 /** Whether a move moves any of these pieces. */
 export const moves = (cols, after, ps) => ps.some((p) => after[p.x][p.y] !== cols[p.x][p.y]);

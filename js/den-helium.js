@@ -21,7 +21,7 @@ import { shoreOf } from './den-isle.js';
 import { PACE } from './chatter.js';
 import { seeded } from './mirror-row.js';
 import { BURNT, CARRY_ON, COLS, Distilling, SPICE, WHITE, goesUp, neighbourOn } from './distilling.js';
-import { HELIUM as HAND, advise, burnsLeft } from './distill-bots.js';
+import { HELIUM as HAND, advise, burnsLeft, chainOver } from './distill-bots.js';
 import { ROUTINES, clear, isJunk, junkTarget, playDrags } from './distill-routines.js';
 import { routesInto } from './distill-path.js';
 import { PHASES } from './distill-phase.js';
@@ -657,7 +657,9 @@ export function planFor(g, goal, timeLeft = Infinity, last = null) {
     // done the crystal clear one. Why on earth is it trying to get me to pull the white piece all the way into the first
     // column? ... we should be restarting to three columns of junk and then building the white pieces further to the
     // left").
-    if (g.chain > 0 && advice.stage === 'chain' && advice.column != null && chainOver(cols, advice.column))
+    // (The rule of thumb is the bots' own, `chainOver` in src/distill-bots.ts: the planner lets the chain go there itself,
+    // `letGo`, and their plan starts over.)
+    if (g.chain > 0 && (advice.letGo || (advice.stage === 'chain' && advice.column != null && chainOver(cols, advice.column))))
         return planFor({ cols, chain: 0 }, goal, timeLeft, last);
     if (advice.stage === 'junk') {
         const fire = range(COLS - STEPS[0].cols, COLS), out = whereIn(cols, fire, isWhite);
@@ -676,8 +678,8 @@ export function planFor(g, goal, timeLeft = Infinity, last = null) {
     const next = COLS - burn.length - 1;
     return make('send', next >= 0 && clear(cols[next]) ? next : column, burn, [], burn.length);
 }
-/** Whether the chain can't go on into column x, the next to go up: more junk in it than whites. */
-export const chainOver = (cols, x) => cols[x].filter(isJunk).length > cols[x].filter((p) => p === WHITE).length;
+/** Whether the chain can't go on into column x: the bots' rule of thumb, shared (src/distill-bots.ts). */
+export { chainOver };
 /** What a step of the plan is after, for the move shown (src/distill-teach.ts, Aim): whites out of the columns to
     burn (`burn`); and once the gold column's known, junk out of it (and of any clear ones right of it, going up first),
     and, half as much, out of the columns left of it the chain still needs (`rest` columns in all), and a quarter as

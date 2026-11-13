@@ -57,7 +57,10 @@
    The pair rescue in the chain (13 Nov: junk stuck on the edge of a column going up, freed first): chains 3.7 / 3.5 /
    3.9 / 4.7 / 3.9 (were 2.4 / 2.4 / 2.5 / 3.6 / 3.0), columns up not Crystal Clear 4.3 / 4.4 / 4.5 / 4.0 / 5.5 a session
    (were 7.0 / 7.3 / 7.8 / 6.1 / 7.0); the CHAIN line counts the chain's waits and those columns (DISTILLING.md §4,
-   fourteenth run). */
+   fourteenth run). The board reader: fifteenth run. Every drag a named trick with a goal (no half move chosen), and
+   a chain let go when its next column's junk (13 Nov): chains 3.6 / 3.8 / 3.4 / 4.3 / 4.1 (were 3.6 / 4.0 / 3.4 / 4.5 /
+   4.3), whites burned 0.5 / 0.7 / 0.5 / 0.3 / 0.3 (were 0.6 / 0.8 / 0.7 / 0.1 / 0.1) (DISTILLING.md §4, sixteenth
+   run). */
 
 import { Distilling, WHITE, BROWN, BLACK, BURNT, TALL, UP_LEFT, DOWN_LEFT, neighbourOn, canSwapOn } from '../js/distilling.js';
 import { LEVELS, P, bankFor, levelNamed, playSession } from '../js/distill-bots.js';

@@ -259,6 +259,22 @@ function draw() {
     quote(sec, t.says);
     sec.querySelector('[data-picture]')?.replaceWith(figure(t.picture, 'a real board showing it'));
   }
+  // The tricks side by side (src/distill-guide.ts, trickTiles): each a small picture, cropped from the lesson's board,
+  // its name, what you do and its rule in Helium's words.
+  for (const box of document.querySelectorAll('[data-trick-tiles]')) for (const t of g.trickTiles) {
+    const f = html('figure', { id: `trick-${t.trick}` });
+    const svg = board(t.picture, `${t.name}: ${t.how}`);
+    const { x: [x0, x1], y: [y0, y1] } = t.crop;
+    svg.setAttribute('viewBox', `${2 + x0 * CELL} ${2 + y0 * CELL} ${(x1 - x0 + 1) * CELL + 4} ${(y1 - y0 + 1) * CELL + CELL / 2 + 4}`);
+    svg.setAttribute('class', 'tile');
+    f.appendChild(svg);
+    const cap = html('figcaption');
+    cap.appendChild(html('b', {}, t.name));
+    cap.appendChild(html('i', {}, `${t.how}${t.bots ? ' (the bots’ own)' : ''}`));
+    cap.appendChild(document.createTextNode(t.rule));
+    f.appendChild(cap);
+    box.appendChild(f);
+  }
   // Reading the board (src/distill-read.ts): each position read as the planner reads it, its state and tactic, why,
   // and the bot's move there.
   for (const box of document.querySelectorAll('[data-reading]')) for (const r of g.reading) {
