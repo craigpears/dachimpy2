@@ -970,6 +970,23 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
   - *says:* "Right, your go. Keep those three clear of white. H if you want me. I'll be here. Probably."
   - *note:* "Your go: keep the three right-hand columns clear of white, and burn them once they're all junk. H: Help, Helium."
 
+### At your still, a white left in the furnace's column as the fire comes round: uneasy with a while to go, panic just before (they cower), phew if you get it out in time; each in turn
+
+- *About 9 seconds before it burns:*
+  - "Er. That end column. Still a white in it."
+  - "You do see that white, yes? Right by the fire."
+  - "Hm. White by the furnace. Just saying. No pressure."
+  - "Not to fuss, but. That white."
+- *About 3 seconds before:*
+  - "White! White! The fire!"
+  - "Get it out, get it out, get it out..."
+  - "Oh no. Oh no no no. My eyebrows. Again."
+  - "It's going to go. It's going to GO."
+- *You got the white out in time, after they'd got nervous:*
+  - "Phew. Fine. Totally fine. Wasn't worried."
+  - "There. See? Perfectly normal. I knew you had it."
+  - "Ha. Right. Good. Breathing again."
+
 ### At your still, a column burns with a white in it, and the still goes bang: the first time the first, then any
 
 - "Oops. That happens sometimes. Don't worry about it."

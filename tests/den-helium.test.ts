@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import {
   HELIUM, HELIUM_ARRIVE, HELIUM_CAST, HELIUM_MOOR, HELIUM_STANDS, LESSON_SEED, Visit, askHelium, bangs, heliumAt, heliumShore, helpFor,
   inHeliumEarshot, lessonGame, lessonPlan, lessonSecs, mishapLine, onHeliumLanding, opening, lessonBeats, afterOpening, ringed, holdSecs, actAfter, stepDoneLines,
-  Cellar, OPENING_BANG, RUM, lineSpot, pileSpot, praiseFor, worksFor, STEPS, whitesOnFireSide, beatSecs, PACE_LESSON,
+  Cellar, OPENING_BANG, RUM, lineSpot, pileSpot, praiseFor, worksFor, STEPS, whitesOnFireSide, beatSecs, PACE_LESSON, Nerves, NERVE,
 } from '../src/den-helium';
 import { AT_HELIUMS } from '../src/lines/you';
 import { LAY, SAIL, Sea } from '../src/den-sail';
@@ -15,7 +15,7 @@ import { smugglersAt } from '../src/den-smugglers';
 import { BURNT, COLS, Distilling, WHITE, neighbourOn, canSwapOn, parseBoard } from '../src/distilling';
 import { isJunk } from '../src/distill-routines';
 import type { Advice } from '../src/distill-bots';
-import { AFTER, HELP, HELP_ELSE, LESSON, MISHAP, ONWARD, OPENING, STEP_ONE, TELL } from '../src/lines/helium';
+import { AFTER, HELP, HELP_ELSE, LESSON, MISHAP, NERVES, ONWARD, OPENING, STEP_ONE, TELL } from '../src/lines/helium';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -432,5 +432,25 @@ describe('their chatter', () => {
     expect(v.arrive(true, true)).toBe(false);
     expect(v.again(true, true)).toBe(true);
     expect(v.again(false, true)).toBe(false);
+  });
+});
+
+describe('their nerves at your still (the user, 13 Nov: "imagine Helium getting nervous if you\'re not really clearing out the whites")', () => {
+  it('13 Nov: a white left in the furnace\'s column: uneasy with a while to go, then panic, once each a column', () => {
+    const n = new Nerves();
+    expect(n.tick(0, 1, 14000)).toBeNull();
+    expect(n.tick(0, 1, NERVE.UNEASY_MS)).toEqual({ says: NERVES.uneasy[0], level: 'uneasy' });
+    expect(n.tick(0, 1, 6000)).toBeNull();
+    expect(n.tick(0, 1, NERVE.PANIC_MS)).toEqual({ says: NERVES.panic[0], level: 'panic' });
+    expect(n.tick(0, 1, 1000)).toBeNull();
+    // it burns; the next column comes round with a white in it too: nervous again, the next line
+    expect(n.tick(1, 2, 8000)).toEqual({ says: NERVES.uneasy[1], level: 'uneasy' });
+  });
+  it('13 Nov: get the white out in time after they\'ve worried, and it\'s phew; no white, no nerves', () => {
+    const n = new Nerves();
+    expect(n.tick(0, 1, 5000)?.level).toBe('uneasy');
+    expect(n.tick(0, 0, 4000)).toEqual({ says: NERVES.phew[0], level: 'phew' });
+    expect(n.tick(0, 0, 2000)).toBeNull();
+    expect(n.tick(1, 0, 2000)).toBeNull();
   });
 });

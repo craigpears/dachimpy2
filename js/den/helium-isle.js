@@ -16,7 +16,7 @@ import * as THREE from 'three';
 import {
   HELIUM_CAST, HELIUM, HELIUM_STANDS, HELIUM_MOOR, HELIUM_ARRIVE, Visit, lessonGame, lessonBeats, lessonSecs, mishapLine, askHelium,
   onHeliumLanding, inHeliumEarshot, heliumShore, worksFor, praiseFor, Cellar, OPENING_BANG, lineSpot, PACE_LESSON, whitesOnFireSide,
-  actAfter, holdSecs, ringed, stepDoneLines,
+  actAfter, holdSecs, ringed, stepDoneLines, Nerves, NERVE, whitesInFurnace,
 } from '../den-helium.js';
 import { LAY } from '../den-sail.js';
 import { Distilling, WHITE } from '../distilling.js';
@@ -39,7 +39,7 @@ import { cine, cinePlay, cineEnd, bubble, bubbleAt } from './cine.js';
 const SAND = { y0: -0.4, h: 0.62 }, GROUND = SAND.y0 + SAND.h + 0.25;
 /* `on`: at the still, playing; `board`: Distilling's board on its stand (the lesson's, then yours); `hand`:
    their drags being played on it (lesson or help), a swap at a time; `note`: what the bar says, a while. */
-export const helium = { W: null, visit: new Visit(), play: null, on: false, board: null, hand: [], handT: 0, handDone: null, bangs: 0, bigBang: 0, note: '', noteT: 0, cower: 0, shrug: 0, cellar: new Cellar() };
+export const helium = { W: null, visit: new Visit(), play: null, on: false, board: null, hand: [], handT: 0, handDone: null, bangs: 0, bigBang: 0, note: '', noteT: 0, cower: 0, shrug: 0, nervy: 0, nerves: new Nerves(), cellar: new Cellar() };
 
 function build() {
   const g = new THREE.Group(), sand = mat('#e6cf96', { roughness: 1 }), wet = mat('#c9ad78', { roughness: 1 });
@@ -274,7 +274,7 @@ const free = () => sail.on && !cine && !sail.helm.cur?.via && !sail.helm.gusts?.
 // ---------- the still, yours ----------
 /** At the still, a board of your own: a fresh deal if there's none yet (or the last's finished). */
 function atStill(fresh = false) {
-  if (fresh || !helium.board || helium.board.game.finished || helium.board.game.timer === false) { newBoard(new Distilling(Math.random), true); helium.stepDone = false; }
+  if (fresh || !helium.board || helium.board.game.finished || helium.board.game.timer === false) { newBoard(new Distilling(Math.random), true); helium.stepDone = false; helium.nerves = new Nerves(); }
   helium.board.paused = false;
   helium.on = true;
   keys.clear();
@@ -394,9 +394,17 @@ export function heliumTick(dt) {
   const tending = helium.on && !helium.play && !helium.hand.length && W.distillery.busy();
   if (helium.cower > 0) { if ((helium.cower -= dt) <= 0) { helium.shrug = 1.6; W.them.setIdle('shrug'); } }
   else if (helium.shrug > 0) { if ((helium.shrug -= dt) <= 0) W.them.setIdle(HELIUM_CAST.them.idle); }
+  else if (helium.nervy > 0) { helium.nervy -= dt; W.them.setIdle('cower'); }
   else W.them.setIdle(tending ? 'tend' : HELIUM_CAST.them.idle);
   // (at the still, turned to you, at the board; tending, to the cask)
   if (!helium.play) W.them.lookAt = tending ? W.distillery.caskAt() : helium.on ? camera.position : null;
+  // Nervous at your still while a white sits in the furnace's column and the fire comes round (src/den-helium.ts,
+  // Nerves): uneasy, then panicking and cowering, or phew once you've got it out. Not while their own hand plays.
+  const g = helium.board?.game;
+  if (helium.on && g && g.movable && !helium.hand.length) {
+    const n = helium.nerves.tick(g.columns.length, whitesInFurnace(g.cols), g.timeLeft());
+    if (n) { say(n.says); if (n.level === 'panic') helium.nervy = NERVE.COWER; }
+  }
   // Step one done, at your still: the three columns next to the fire clear of white. They say so, once a batch.
   if (helium.on && !helium.stepDone && helium.board?.game.movable && !whitesOnFireSide(helium.board.game.cols)) { helium.stepDone = true; say(...stepDoneLines()); }
   W.them.tick(dt);

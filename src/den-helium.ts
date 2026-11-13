@@ -24,7 +24,7 @@ import { seeded } from './mirror-row.js';
 import { BURNT, COLS, Distilling, WHITE, goesUp, type Board } from './distilling.js';
 import { advise, type Advice } from './distill-bots.js';
 import { ROUTINES, isJunk } from './distill-routines.js';
-import { AFTER, HELP, HELP_ELSE, LESSON, MISHAP, ONWARD, OPENING, PRAISE, STEP_ONE, TELL } from './lines/helium.js';
+import { AFTER, HELP, HELP_ELSE, LESSON, MISHAP, NERVES, ONWARD, OPENING, PRAISE, STEP_ONE, TELL } from './lines/helium.js';
 import { AT_HELIUMS } from './lines/you.js';
 
 const H = LAY.HELIUM;
@@ -257,6 +257,34 @@ export const bangs = (c: { up: boolean; whites: number; burnt: number }): boolea
 /** Their line for the `n`th bang at your still (0 the first): the first always their own, "Oops. That happens
     sometimes."; after that, round the rest. */
 export const mishapLine = (n: number): string => (n <= 0 ? MISHAP[0] : MISHAP[1 + ((n - 1) % (MISHAP.length - 1))]);
+
+/** When they get nervous at your still (the user, 13 Nov: "imagine Helium getting nervous if you're not really
+    clearing out the whites"): ms left before the furnace's column burns with a white still in it, uneasy at
+    UNEASY_MS, panicking (and cowering COWER seconds) at PANIC_MS; a burn's 15.3 s round. */
+export const NERVE = { UNEASY_MS: 9000, PANIC_MS: 3500, COWER: 2.5 } as const;
+export type Nerve = { says: string; level: 'uneasy' | 'panic' | 'phew' };
+/** Their nerves at your still, a furnace column at a time: each tick, how many columns have gone (a new one
+    in the furnace resets them), whites in the furnace's column, and ms till it burns; a line when they get
+    uneasy, then panic, or say phew once you've got the white out after they'd worried; else null. Once each
+    a column, the lines in turn. */
+export class Nerves {
+  private col = -1;
+  private level = 0;
+  private n = { uneasy: 0, panic: 0, phew: 0 };
+  tick(gone: number, whites: number, msLeft: number): Nerve | null {
+    if (gone !== this.col) { this.col = gone; this.level = 0; }
+    if (whites <= 0) return this.level > 0 && this.level < 3 ? (this.level = 3, this.line('phew')) : null;
+    if (this.level < 2 && msLeft <= NERVE.PANIC_MS) { this.level = 2; return this.line('panic'); }
+    if (this.level < 1 && msLeft <= NERVE.UNEASY_MS) { this.level = 1; return this.line('uneasy'); }
+    return null;
+  }
+  private line(level: Nerve['level']): Nerve {
+    const pool = NERVES[level];
+    return { says: pool[this.n[level]++ % pool.length], level };
+  }
+}
+/** Whites in the furnace's column, the right-hand one, the next to burn. */
+export const whitesInFurnace = (cols: Board): number => cols[COLS - 1].filter((p) => p === WHITE).length;
 
 // ---------- their distillery, answering the board ----------
 /* The user (13 Nov): "If white goes down, it should cause like that explosion animation as well", and the

@@ -50,6 +50,30 @@ export const ONWARD = 'Few of my tricks, that. The rest\'s from other pirates. A
     Helium, I feel like we should always end with, if you got any questions, you can always send me a tell on
     Emerald"). The real Helium, on Emerald, can expect a few tells. */
 export const TELL = 'Any questions, send me a tell on Emerald. Any time.';
+/** At your still, getting nervous as a white sits in the furnace's column and the fire comes round (the user,
+    13 Nov: "imagine Helium getting nervous if you're not really clearing out the whites, because Helium's going
+    to be nervous that the distiller is going to have a mishap"). For all their "perfectly normal", it's their
+    still. `uneasy` with a while to go, `panic` just before it burns (they cower), `phew` if you get it out in
+    time after all: each in turn, round again. */
+export const NERVES = {
+    uneasy: [
+        'Er. That end column. Still a white in it.',
+        'You do see that white, yes? Right by the fire.',
+        'Hm. White by the furnace. Just saying. No pressure.',
+        'Not to fuss, but. That white.',
+    ],
+    panic: [
+        'White! White! The fire!',
+        'Get it out, get it out, get it out...',
+        'Oh no. Oh no no no. My eyebrows. Again.',
+        'It\'s going to go. It\'s going to GO.',
+    ],
+    phew: [
+        'Phew. Fine. Totally fine. Wasn\'t worried.',
+        'There. See? Perfectly normal. I knew you had it.',
+        'Ha. Right. Good. Breathing again.',
+    ],
+};
 /** A column burns with a white in it (the still goes bang): the first time, and then any of these. The
     user (11 Nov): "just for the comedic layer ... occasionally, distilleries have been known to blow up". */
 export const MISHAP = [
@@ -137,6 +161,10 @@ export const CHARACTER = {
         {
             when: 'The end of their lesson: in their bubble (says) and in the bar at the foot of the screen (note)', says: LESSON,
             each: { yours: 'Handing you the board, step one the goal' },
+        },
+        {
+            when: 'At your still, a white left in the furnace\'s column as the fire comes round: uneasy with a while to go, panic just before (they cower), phew if you get it out in time; each in turn', says: NERVES,
+            each: { uneasy: 'About 9 seconds before it burns', panic: 'About 3 seconds before', phew: 'You got the white out in time, after they\'d got nervous' },
         },
         { when: 'At your still, a column burns with a white in it, and the still goes bang: the first time the first, then any', says: MISHAP },
         { when: '"Help, Helium" while you play: by the technique they\'d play on your board now (then they play it)', says: HELP },
