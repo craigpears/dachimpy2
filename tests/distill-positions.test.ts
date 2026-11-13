@@ -12,7 +12,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { MOMENTS, POSITIONS, SKIPPED, THEMED, THEMES, VERDICTS, boardOf, botAt, check, moveOf, type Theme } from '../src/distill-positions';
+import { BATCHES, MOMENTS, POSITIONS, QUESTION, SKIPPED, THEMED, THEMES, VERDICTS, boardOf, botAt, challengeReads, check, moveOf, type Theme } from '../src/distill-positions';
 import { STATES, TACTICS, readBoard } from '../src/distill-read';
 import { COLS, TALL } from '../src/distilling';
 import { playDrags } from '../src/distill-routines';
@@ -80,8 +80,67 @@ for (const [theme, t] of Object.entries(THEMES) as [Theme, (typeof THEMES)[Theme
   });
 }
 describe('every position has a theme', () => {
-  it('each position is in one of the themes, and every theme has a position', () => {
-    for (const p of POSITIONS) expect(THEMED[p.id], p.id).toBeTruthy();
+  it('each position is in one of the themes (but a batch still to judge), and every theme has a position', () => {
+    for (const p of POSITIONS) if (!p.batch || VERDICTS[p.id]?.length) expect(THEMED[p.id], p.id).toBeTruthy();
     for (const t of Object.keys(THEMES)) expect(POSITIONS.some((p) => THEMED[p.id]?.theme === t), t).toBe(true);
+  });
+});
+
+// The batch to judge, 13 Nov (tools/distill-positions.mjs's `batch`): the user, "build up the list of examples ... a
+// new batch", and "here's a challenge. Can you find one or two others in the same theme and different boards to see
+// that that feature is detecting those themes is working?"
+const BATCH = POSITIONS.filter((p) => p.batch);
+/** Judged themes the challenge found no board for, and why. */
+const NOT_FOUND: Readonly<Record<string, string>> = {
+  // 18 sessions (CC^2, CC^5 and CC^8 on seeds 4 to 9, 8 minutes each): the reader never read a board as cracked
+  // (half the free junk stranded, 12 pieces at least). P10's own board came from CC^8 seed 2 at 160 s.
+  cracked: 'none of the 18 sessions read cracked: the bots rarely strand that much junk',
+};
+describe('the batch to judge', () => {
+  it('numbered on from the judged positions, in its two parts, every one a real moment on a deal not judged before', () => {
+    const judged = POSITIONS.filter((p) => !p.batch);
+    expect(BATCH.length).toBeGreaterThanOrEqual(12);
+    expect(Math.min(...BATCH.map((p) => Number(p.id.slice(1))))).toBeGreaterThan(Math.max(...judged.map((p) => Number(p.id.slice(1)))));
+    for (const part of Object.keys(BATCHES)) expect(BATCH.some((p) => p.batch === part), part).toBe(true);
+    for (const p of BATCH) expect(judged.some((q) => q.seed === p.seed), p.id).toBe(false);
+  });
+  it('no two near each other: from the same session, 30 s apart at least', () => {
+    for (const a of BATCH) for (const b of BATCH) {
+      if (a !== b && a.level === b.level && a.seed === b.seed) expect(Math.abs(a.ms - b.ms), `${a.id} and ${b.id}`).toBeGreaterThanOrEqual(30000);
+    }
+  });
+  it('each asks the one question, and the page says to answer by number in chat', () => {
+    expect(QUESTION).toBe('Is this the right idea? If not, what would you do?');
+    const view = readFileSync(join(__dirname, '..', 'js', 'distill-positions-view.js'), 'utf8');
+    expect(view).toContain('QUESTION');
+  });
+  for (const p of BATCH) if (!VERDICTS[p.id]?.length && !SKIPPED[p.id]) it.todo(`${p.id}: ${p.batch === 'challenge' ? `like ${p.like}` : MOMENTS[p.moment].toLowerCase()} (${p.level}, seed ${p.seed}), no verdict yet`);
+});
+
+describe('the theme challenge: the board reader finds each judged theme on other boards', () => {
+  const challenge = BATCH.filter((p) => p.batch === 'challenge');
+  for (const p of challenge) {
+    const reads = challengeReads(p);
+    const want = reads ? [reads.state && STATES[reads.state].label, reads.tactic && TACTICS[reads.tactic].label].filter(Boolean).join(', ') : '?';
+    it(`${p.id} (${p.level}, seed ${p.seed}, ${(p.ms / 1000).toFixed(1)} s in) reads as ${p.like} does: ${want}`, () => {
+      expect(reads, `${p.id}: like ${p.like}, a judged position with a reading`).toBeTruthy();
+      expect(VERDICTS[p.like!]?.length, p.like).toBeGreaterThan(0);
+      const r = readBoard(boardOf(p), { stage: p.stage, timeLeft: p.timeLeft });
+      if (reads!.state) expect(r.state, p.id).toBe(reads!.state);
+      if (reads!.tactic) expect(r.tactic, p.id).toBe(reads!.tactic);
+    });
+  }
+  it('every judged theme has a board or two from another game, or says why not', () => {
+    const themes = new Set(Object.entries(THEMED).filter(([id, t]) => t.reads && VERDICTS[id]?.length).map(([, t]) => t.theme));
+    for (const theme of themes) {
+      const n = challenge.filter((p) => THEMED[p.like!]?.theme === theme).length;
+      if (NOT_FOUND[theme]) expect(n, theme).toBe(0);
+      else { expect(n, theme).toBeGreaterThanOrEqual(1); expect(n, theme).toBeLessThanOrEqual(2); }
+    }
+  });
+  it('a theme\'s boards come from different deals', () => {
+    for (const a of challenge) for (const b of challenge) {
+      if (a !== b && THEMED[a.like!]?.theme === THEMED[b.like!]?.theme) expect(a.seed, `${a.id} and ${b.id}`).not.toBe(b.seed);
+    }
   });
 });

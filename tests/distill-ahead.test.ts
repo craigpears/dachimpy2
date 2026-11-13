@@ -26,7 +26,7 @@ describe('the plan: the bot\'s next moves, played forward', () => {
       expect(p.plan, `${p.id}: run tools/distill-positions.mjs`).toEqual(plan);
       expect(plan.moves.length).toBeLessThanOrEqual(AHEAD.MOVES);
     }
-  });
+  }, 90000);   // every position's plan played again: 30 positions since the batch of 13 Nov, 24 s in a full run
   it('each move of it played on the board the last one left, each drag named with its trick and goal', () => {
     for (const p of POSITIONS) {
       const plan = planOf(p);
@@ -49,6 +49,16 @@ describe('the plan: the bot\'s next moves, played forward', () => {
 describe('"make sure it actually follows through rather than just making a step towards it" (13 Nov)', () => {
   for (const p of POSITIONS) {
     if (SKIPPED[p.id] && !VERDICTS[p.id]?.length) { it.skip(`${p.id}: skipped by the user`, () => {}); continue; }
+    // A bot that waits there (the batch of 13 Nov has three: waiting with something stuck, or a white in the furnace's
+    // column) has no plan to see through: its plan says so, and whether waiting's right is the user's to judge.
+    if (botAt(p).kind === 'wait') {
+      it(`${p.id}: the bot waits there, and its plan says so`, () => {
+        const plan = planOf(p);
+        expect(plan.moves, p.id).toEqual([]);
+        expect(plan.ends, p.id).toBe('it waits');
+      });
+      continue;
+    }
     const run = () => {
       const plan = planOf(p);
       expect(boardOf(p)).toBeTruthy();
