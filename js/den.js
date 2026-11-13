@@ -630,14 +630,16 @@ function update(dt) {
   // Bilging at a lock: down onto the board on its quay from behind her, the way she faces waiting to
   // go up (its top row's way: the user, 10 Nov, coming back up through the headland, had her bow
   // coming at you and couldn't see the board), drawn back to take in the lock beside it and the pump,
-  // so you see her rise as you pump (js/den/lock.js).
+  // so you see her rise as you pump (js/den/lock.js). Closer since (the user, 13 Nov: "[Bilging] at the canal,
+  // you definitely need to be zoomed in more. It's so tiny, the puzzle"): the board filling most of the screen,
+  // the lock a glimpse beside it, and your zoom at sea not shrinking it (as her deck patch).
   holdView += ((hold.mode ? 1 : 0) - holdView) * Math.min(1, dt * 3);
   if (holdView > 0.001 && hold.group?.parent) {
     const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect), sq = hold.group.scale.x;
     hold.group.getWorldPosition(L2);
-    L2.lerp(V3(hold.at.x, L2.y, hold.at.z), 0.12);
+    L2.lerp(V3(hold.at.x, L2.y, hold.at.z), 0.05);
     look.lerp(L2, holdView);
-    dist += (Math.max((BH * sq / 2 + 0.5 * sq * 4) / Math.tan(vh), (BW * sq / 2 + sq * 2) / Math.tan(hh)) * 1.75 * view.zoom - dist) * holdView;
+    dist += (Math.max((BH * sq / 2 + 0.5 * sq * 4) / Math.tan(vh), (BW * sq / 2 + sq * 2) / Math.tan(hh)) * 1.1 - dist) * holdView;
     tilt += (1.2 - tilt) * holdView;
     const y0 = Math.atan2(Math.sin(yaw), Math.cos(yaw));
     let d = hold.group.rotation.y - y0;
