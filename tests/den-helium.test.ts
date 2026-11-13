@@ -475,8 +475,10 @@ describe('holding the fire to take it slowly (the user, 13 Nov: "pause auto burn
     expect(FIRE.heldNote).toMatch(/F/);
     expect(FIRE.tip).toMatch(/F holds the fire/);
     expect(FIRE.tip).toMatch(/X/);
-    expect(LESSON.yours.says).toMatch(/F to hold the fire/);
-    expect(LESSON.yours.note).toMatch(/F: hold the fire/);
+    // (held to start with, 13 Nov: "it's paused by default. I think that's much more tutorial-like")
+    expect(LESSON.yours.says).toMatch(/held for now/);
+    expect(LESSON.yours.says).toMatch(/X burns/);
+    expect(LESSON.yours.says).toMatch(/F when you want it burning on its own/);
   });
   it('13 Nov: with the fire held they don\'t get nervous: nothing\'s burning', () => {
     const n = new Nerves();

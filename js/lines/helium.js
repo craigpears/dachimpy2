@@ -21,8 +21,8 @@ export const OPENING = {
     step one (STEP_ONE, below), then it's yours. */
 export const LESSON = {
     yours: {
-        says: 'Right, your go. Keep those three clear of white. H if you want me, F to hold the fire. I\'ll be here. Probably.',
-        note: 'Your go: keep the three right-hand columns clear of white, and burn them once they\'re all junk. H: Help, Helium. G: a hint. W: watch Helium play. F: hold the fire, X: burn by hand.',
+        says: 'Right, your go. Keep those three clear of white. Fire\'s held for now: X burns. F when you want it burning on its own. H for me.',
+        note: 'Your go: keep the three right-hand columns clear of white, and burn them (X) once they\'re all junk. The fire\'s held to start: F starts it burning on its own. H: Help, Helium. G: a hint. W: watch Helium play.',
     },
 };
 /** Step one, the first of the puzzle's steps (src/den-helium.ts, STEPS), straight after their opening showed
@@ -165,12 +165,12 @@ export const HINT = {
 };
 /** Holding the fire (F) to take it slowly, burning by hand (X) (the user, 13 Nov: "Should have the ability to pause
     auto burning and burn manually if you'd like to slow down, helium should reference the keyboard shortcuts for
-    it at points"): as you hold it (`held`) and let it go (`going`), and in the bar; `tip`, said after they panic
+    it at points"; held to start with, "it's paused by default. I think that's much more tutorial-like"): as you hold it (`held`) and let it go (`going`), and in the bar; `tip`, said after they panic
     the first time or two in a while, the keys for slowing down. */
 export const FIRE = {
     held: 'Fire\'s held. Take your time. X burns the end column when you\'re ready.',
-    going: 'Fire\'s back on. Fifteen seconds a column, mind.',
-    heldNote: 'The fire\'s held: nothing burns till you press X. F lets it go again.',
+    going: 'Fire\'s going. Fifteen seconds a column now, mind. F to hold it again.',
+    heldNote: 'The fire\'s held: nothing burns till you press X. F starts it burning on its own.',
     goingNote: 'The fire\'s on: the end column burns every 15 seconds. F holds it.',
     tip: 'Psst. F holds the fire. X burns when you\'re ready. No shame in it.',
 };

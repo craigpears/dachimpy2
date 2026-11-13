@@ -41,7 +41,7 @@ import { cine, cinePlay, cineEnd, bubble, bubbleAt } from './cine.js';
 const SAND = { y0: -0.4, h: 0.62 }, GROUND = SAND.y0 + SAND.h + 0.25;
 /* `on`: at the still, playing; `board`: Distilling's board on its stand (the lesson's, then yours); `hand`:
    their drags being played on it (lesson or help), a swap at a time; `note`: what the bar says, a while. */
-export const helium = { W: null, visit: new Visit(), play: null, on: false, board: null, hand: [], handT: 0, handDone: null, bangs: 0, bigBang: 0, note: '', noteT: 0, cower: 0, shrug: 0, nervy: 0, nerves: new Nerves(), fretCol: null, held: false, fireTips: 0, cellar: new Cellar(), hint: null, routes: null, watch: null };
+export const helium = { W: null, visit: new Visit(), play: null, on: false, board: null, hand: [], handT: 0, handDone: null, bangs: 0, bigBang: 0, note: '', noteT: 0, cower: 0, shrug: 0, nervy: 0, nerves: new Nerves(), fretCol: null, held: true, fireTips: 0, cellar: new Cellar(), hint: null, routes: null, watch: null };
 
 function build() {
   const g = new THREE.Group(), sand = mat('#e6cf96', { roughness: 1 }), wet = mat('#c9ad78', { roughness: 1 });
@@ -402,8 +402,8 @@ function watchTick(dt) {
     if (beat.kind === 'move') play(beat.drags, null, PACE_WATCH);
     else if (beat.kind === 'burn') B.burn();
   }
-  // (the furnace runs only while there's nothing worth doing)
-  B.paused = helium.held || !(beat && beat.kind === 'wait');
+  // (the furnace runs only while there's nothing worth doing: their board while they play it, held or not)
+  B.paused = !(beat && beat.kind === 'wait');
   if (w.t < w.need || helium.hand.length || B.busy() || !B.game.movable) return;
   const n = w.w.next(B.game);
   if (n.kind === 'busy') return;
@@ -418,7 +418,7 @@ function watchTick(dt) {
 }
 
 /* The buttons beside the board: Hint, Watch Helium, and Help, Helium. */
-let btn = null, watchBtn = null;
+let btn = null, watchBtn = null, burnBtn = null, fireBtn = null;
 const BTN = 'font:700 15px "Alegreya Sans",system-ui,sans-serif;color:#f6ead2;background:#3a2410;border:1px solid #c8a050;border-radius:8px;padding:6px 12px;cursor:pointer';
 function helpButton(on) {
   if (!btn) {
@@ -435,10 +435,15 @@ function helpButton(on) {
     add('helium-hint', 'Hint (G)', heliumHint);
     watchBtn = add('helium-watch', 'Watch Helium (W)', heliumWatch);
     add('helium-help', 'Help, Helium (H)', heliumHelp);
+    // (the fire, for a phone: held to start with, the tutorial's way; and burning by hand while it's held)
+    burnBtn = add('helium-burn', 'Burn now (X)', () => { if (helium.on && !helium.hand.length) helium.board?.burn(); });
+    fireBtn = add('helium-fire', '', () => holdFire(!helium.held));
     document.body.append(btn);
   }
   btn.style.display = on ? 'flex' : 'none';
   watchBtn.textContent = helium.watch ? 'Your board back (W)' : 'Watch Helium (W)';
+  fireBtn.textContent = helium.held ? 'Start the fire (F)' : 'Hold the fire (F)';
+  burnBtn.style.display = helium.held ? '' : 'none';
 }
 
 // ---------- hooks: keys, the mouse, Space, the prompt ----------
@@ -448,12 +453,14 @@ const VIEW = ['z', 'c', 'v', '-', '_', '=', '+', 'p'];
 /** A key at sea (sailing.js): the board's while you're at the still; Space off their island to it. */
 /** Holding the fire (F): the furnace waits, and the end column burns only when you burn it (X), to take it
     slowly (the user, 13 Nov: "Should have the ability to pause auto burning and burn manually if you'd like to
-    slow down"); F again and it's back on its fifteen seconds. Kept for the still, batch to batch. */
+    slow down"); F again and it's back on its fifteen seconds. Held to start with ("it's paused by default. I think
+    that's much more tutorial-like"); kept for the still, batch to batch. */
 export function holdFire(on) {
   helium.held = on;
   if (helium.board && !helium.hand.length && !helium.watch) helium.board.paused = on;
   say(on ? FIRE.held : FIRE.going);
   noteFor(on ? FIRE.heldNote : FIRE.goingNote, 6);
+  helpButton(helium.on);
 }
 export function heliumKey(key) {
   if (!helium.on) return false;
@@ -548,7 +555,7 @@ export function heliumPrompt() {
     const B = helium.board, left = whitesOnFireSide(B.game.cols);
     if (helium.watch) return `Watching Helium${helium.note ? ` · ${helium.note}` : ''} · W or Esc: your board back`;
     const goal = left ? `${STEP_ONE.goal}: ${left} to go` : `Step 1 done: the fire's side is clear of white`;
-    const lead = helium.noteT > 0 && helium.note ? helium.note : B.game.finished ? 'Finished! Esc, then Space for another batch' : `${goal} · drag to swap · X: burn · ${helium.held ? 'F: fire held, F to let it go' : 'F: hold the fire'}`;
+    const lead = helium.noteT > 0 && helium.note ? helium.note : B.game.finished ? 'Finished! Esc, then Space for another batch' : `${goal} · drag to swap · X: burn · ${helium.held ? 'fire held: F to start it' : 'F: hold the fire'}`;
     return `${lead} · G: hint · W: watch Helium · H: Help, Helium · Esc: leave the still`;
   }
   const p = sail.helm.pose;

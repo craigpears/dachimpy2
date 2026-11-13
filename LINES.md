@@ -973,8 +973,8 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 ### The end of their lesson: in their bubble (says) and in the bar at the foot of the screen (note)
 
 - *Handing you the board, step one the goal:*
-  - *says:* "Right, your go. Keep those three clear of white. H if you want me, F to hold the fire. I'll be here. Probably."
-  - *note:* "Your go: keep the three right-hand columns clear of white, and burn them once they're all junk. H: Help, Helium. G: a hint. W: watch Helium play. F: hold the fire, X: burn by hand."
+  - *says:* "Right, your go. Keep those three clear of white. Fire's held for now: X burns. F when you want it burning on its own. H for me."
+  - *note:* "Your go: keep the three right-hand columns clear of white, and burn them (X) once they're all junk. The fire's held to start: F starts it burning on its own. H: Help, Helium. G: a hint. W: watch Helium play."
 
 ### At your still, a white left in the furnace's column as the fire comes round: uneasy with a while to go, panic just before (they cower), phew if you get it out in time; each in turn
 
@@ -1068,8 +1068,8 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 ### Holding the fire (F) to take it slowly and burning by hand (X): their line and the bar's as you hold it and let it go; the tip after they panic the first time or two
 
 - *You hold the fire:* "Fire's held. Take your time. X burns the end column when you're ready."
-- *You let it go again:* "Fire's back on. Fifteen seconds a column, mind."
-- *In the bar, held:* "The fire's held: nothing burns till you press X. F lets it go again."
+- *You let it go again:* "Fire's going. Fifteen seconds a column now, mind. F to hold it again."
+- *In the bar, held:* "The fire's held: nothing burns till you press X. F starts it burning on its own."
 - *In the bar, let go:* "The fire's on: the end column burns every 15 seconds. F holds it."
 - *After their panic, the first time or two:* "Psst. F holds the fire. X burns when you're ready. No shame in it."
 
