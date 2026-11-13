@@ -36,6 +36,7 @@ import { primatesTick, primatesReset } from './moored.js';
 import { smugglersWorld, smugglersTick, smugglersPrompt, smugglersReset } from './smugglers.js';
 import { raceWorld, raceTick, raceHelm, raceKey, racePrompt, raceShot, raceTarget, raceHitRival, raceHolds, raceReset, raceHover, raceClick, race } from './race.js';
 import { watch, watchTick, watchStop } from './race-watch.js';
+import { planTake } from './race-plan.js';   // (your moves take the helm from the race's pilot)
 
 // The old sloop's at anchor in the cove from the moment the siege is over, while their ship makes
 // sail in the background (the user, 9 Nov: "I'm sat here quite a while waiting for his sloop to sail
@@ -201,7 +202,7 @@ export function sailKey(key) {
   if (gunneryKey(key)) return;
   if (key === '2') return gunneryToggle(haul.on || craneHolds());
   const m = { w: 'F', arrowup: 'F', a: 'L', arrowleft: 'L', d: 'R', arrowright: 'R' }[key];
-  if (m) { if (!sail.helm.put(m)) toast('That\'s a turn\'s worth put in already', true); return; }
+  if (m) { planTake(); if (!sail.helm.put(m)) toast('That\'s a turn\'s worth put in already', true); return; }
   if (key === 'q' || key === 'e') return sailFire(key === 'q' ? 'L' : 'R');
   if (key === '3') return rowToggle();
   if (key === 's' || key === 'arrowdown' || key === 'backspace') sail.helm.unput();

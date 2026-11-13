@@ -97,6 +97,7 @@ class Helmsman extends Browser {
   });
   holed = 0;
   retired = false;
+  planned = false;
   constructor(room: Room, id: string, spot: number) {
     super(room, id);
     this.ps = new PlayerSea(spot, [], 0, 0);
@@ -120,6 +121,8 @@ class Helmsman extends Browser {
       this.acc -= NET.STEP;
       const on = this.R.state === 'on' || this.R.state === 'done', h = this.ps.helm;
       if (this.holed > 0 && (this.holed -= NET.STEP) <= 0) this.act('patched');
+      // (her plan, set at the gun, as the den's race-plan.js writes it down: src/race-plan.ts)
+      if (on && !this.planned) { this.planned = true; this.act('plan', ['long', 'door', 'whirls', 'locks', 'crane']); }
       // (no way there along a leg's first row, the turning pool in it, say: along its second)
       if (on && h.idle() && this.way.length) { const [c, r] = this.way.shift()!; this.act('drop', c, r); if (h.idle()) this.act('drop', c, r + 1); }
       // (out of pins and going nowhere: she gives up, and a bot sails her sloop home)
@@ -524,6 +527,15 @@ describe('a race online written down, and replayed exactly (12 Nov: "everybody s
     const size = JSON.stringify(rec).length;
     console.log(`a race's record: ${size} characters, ${rec.steps} steps (${(rec.steps * NET.STEP).toFixed(0)} s), ${rec.inputs.length} inputs, ${rec.acts.map((a) => a.length).join('/')} actions, ${rec.keys.length} keyframes`);
     expect(size).toBeLessThan(150_000);
+  });
+
+  it('a player\'s plan goes to the room and into the record, kept in the replay, and never on to the other racers (13 Nov: "online, local should all be the same"; RACE.md §5: hidden from the others)', () => {
+    const plan = rec.acts[0].find((a) => a[1] === 'plan');
+    expect(plan?.[2]).toEqual(['long', 'door', 'whirls', 'locks', 'crane']);
+    const ps = new PlayerSea(rec.racers[0].spot, rec.acts[0], rec.seed, 0);
+    ps.to(plan![0] + 1);
+    expect(ps.plan()).toEqual(['long', 'door', 'whirls', 'locks', 'crane']);
+    expect(JSON.stringify(B.heard)).not.toContain('whirls');
   });
 
   it('replayed through the same rules, it comes out the same: every place, time and square', () => {

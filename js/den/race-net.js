@@ -155,6 +155,9 @@ const recording = () => online() && R0 && (R0.state === 'on' || R0.state === 'do
 const note = (...a) => { if (recording()) acts.push([stepsOf(), ...a]); };
 const copy = (x) => (x === undefined ? undefined : JSON.parse(JSON.stringify(x)));
 export function netInTick(on) { inTick = on; }
+/** Her plan as she sets it (race-plan.js; at the gun, and at each change): to the room and its record like any
+    other action, never on to the other racers (src/race-net.ts, ActKind 'plan'). */
+export function netPlan(plan) { note('plan', [...plan]); }
 /** Before each of the race's steps (race.js): its count, and what's changed since that isn't a call on the
     helm (patched, the breeze, the barrier cleared). */
 export function netBefore(h, R) {
@@ -171,7 +174,7 @@ function noting() {
   const h = sail.helm, g = sail.guns;
   if (h && noted !== h) {
     noted = h;
-    for (const k of ['put', 'unput', 'stop', 'drop', 'moor', 'gust', 'row', 'stroke', 'hit', 'pump']) {
+    for (const k of ['put', 'unput', 'stop', 'drop', 'moor', 'gust', 'row', 'stroke', 'hit', 'pump', 'letGo']) {
       const f = h[k].bind(h);
       h[k] = (...a) => { if (!inTick) note(k, ...a.map(copy)); return f(...a); };
     }

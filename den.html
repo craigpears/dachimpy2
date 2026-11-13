@@ -58,6 +58,33 @@
     #watchbar .wb-who button.on { border-color: var(--gold); background: #4a3220; }
     #watchbar .wb-who i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
     #watchbar .wb-keys { font-size: 12px; color: var(--dim); }
+    /* Your race plan's strip (js/den/race-plan.js): down the right-hand edge, a leg a button, a click its next choice. */
+    #raceplan { position: fixed; right: 10px; top: 150px; width: 210px; z-index: 5; display: flex; flex-direction: column; gap: 4px; padding: 8px; border-radius: 10px; background: var(--panel); border: 1px solid #5a412a; color: #f3ecdc; font: 500 14px/1.25 'Alegreya Sans', sans-serif; box-sizing: border-box; }
+    #raceplan[hidden], body.watching #raceplan { display: none; }
+    body.raceline #raceplan { top: auto; bottom: 74px; }   /* (on the line, under the starter's card) */
+    #raceplan .rp-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+    #raceplan .rp-head b { color: var(--gold); }
+    #raceplan .rp-pilot { font: 600 12px 'Alegreya Sans', sans-serif; color: var(--dim); background: #2a1c11; border: 1px solid #6b4e32; border-radius: 6px; padding: 1px 7px; cursor: pointer; }
+    #raceplan .rp-pilot.on { color: #9fe0a0; border-color: #4f8a50; }
+    #raceplan .rp-now { font-size: 12px; color: #ffd27a; min-height: 1.2em; }
+    #raceplan .rp-leg { text-align: left; font: 600 14px/1.2 'Alegreya Sans', sans-serif; color: #f3ecdc; background: #2a1c11; border: 1px solid #6b4e32; border-radius: 7px; padding: 4px 8px; cursor: pointer; }
+    #raceplan .rp-leg:hover { border-color: #b88a4a; }
+    #raceplan .rp-leg.now { border-color: var(--gold); background: #4a3220; }
+    #raceplan .rp-leg i { display: block; font-style: normal; font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: .04em; }
+    #raceplan .rp-leg small { display: block; font-weight: 500; font-size: 12px; color: var(--dim); }
+    #raceplan .rp-help { font-size: 11px; color: var(--dim); text-align: center; }
+    @media (max-width: 620px) {
+      #raceplan { width: 128px; top: 152px; right: 6px; padding: 5px; gap: 3px; font-size: 12px; }
+      #raceplan .rp-leg { font-size: 12px; padding: 3px 5px; }
+      #raceplan .rp-leg small, #raceplan .rp-help { display: none; }
+      #raceplan .rp-now { font-size: 11px; }
+    }
+    #watchbar .wb-plan { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 6px; margin-top: 4px; font-size: 13px; font-weight: 500; }
+    #watchbar .wb-plan:empty { display: none; }
+    #watchbar .wb-plan span { background: #2a1c11; border: 1px solid #4a3622; border-radius: 5px; padding: 0 6px; color: var(--dim); }
+    #watchbar .wb-plan span.now { color: #f3ecdc; border-color: var(--gold); }
+    #watchbar .wb-plan .wb-label { background: none; border: none; color: var(--gold); padding: 0; }
+    #watchbar .wb-plan em { flex-basis: 100%; color: #ffd27a; font-style: normal; }
     @media (max-width: 620px) { #watchbar { font-size: 13px; } #watchbar .wb-keys { display: none; } }
     /* The sloop race, racing or in its lobby: the den's panels slimmed to what applies (the user, 12 Nov: "a big
        dump of text ... needs to be a lot lighter. Lot lighter. What does H head home mean in this context?").
@@ -586,7 +613,7 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.YBJ7R7FW.js');
+    import(local ? './js/den.js' : './js/den.P6VOHAB6.js');
   </script>
 </body>
 </html>

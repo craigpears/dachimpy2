@@ -40,6 +40,7 @@ import { bribeWorld, bribeKey, bribePrompt, bribeSpares, bribeTick, bribeReset, 
 import { rocksWorld, rocksShot, rocksTick, rocksReset } from './race-rocks.js';
 import { netKey, netPrompt, netTick, netBefore, netInTick } from './race-net.js';
 import { NET } from '../race-net.js';
+import { planStep, planTick, planReset, planKey } from './race-plan.js';
 
 const RC = LAY.RACE, CELL = SAIL.CELL, DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
 const NTH = (n) => (n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`);
@@ -250,23 +251,35 @@ export function raceKey(key) {
     if (key === 'escape') { K().leave(); toast('The frame can wait: it stays on the neck as it is'); return true; }
     return false;   // (the tray's keys: sea-puzzles.js)
   }
-  if (go && K().alongside(h)) {
-    if (K().built()) haulOver();
-    else { const first = !K().frame && K().up === 0; K().build(); if (first) toast('A crane, by Carpentry: first its foot'); }
-    return true;
-  }
+  if (go && craneSpace(h)) return true;
+  if (planKey(key, race.rules)) return true;   // (T: the pilot on or off: race-plan.js)
   if (race.rules.takes(key, h, station.on)) { intoLine(); toast('Pick yer spot on the line, and Space when ye\'re ready'); return true; }
   // (home: the course runs one way, so Space takes her back out to the starting buoy for another go; 12 Nov,
   // the left-hand trade wind that used to carry her back there is only a few gentle loops now)
   if (go && homeAgain(h)) { raceCheat(); toast('Back out to the starting buoy'); return true; }
   return false;
 }
+/** Space alongside the neck: the crane built a part, or (built) her trip over it. */
+function craneSpace(h) {
+  if (!K().alongside(h)) return false;
+  if (K().built()) haulOver();
+  else { const first = !K().frame && K().up === 0; K().build(); if (first) toast('A crane, by Carpentry: first its foot'); }
+  return true;
+}
+/** Space at a stop, for the pilot (race-plan.js): the stop's own, whatever board's open (the Sailing board's
+    Space is its own when you press it). */
+const spaceHere = () => {
+  const h = sail.helm;
+  if (race.trip || building()) return false;
+  return doorKey(' ') || forageKey(' ') || bribeKey(' ') || craneSpace(h);
+};
 /** Over the line and lying still on the course: Space takes her back to the buoy. */
 const homeAgain = (h) => race.rules.state === 'done' && race.doneT <= 0 && onCourse(h.pose.c, h.pose.r) && h.slot < 0 && !h.held() && !race.trip;
 /** In to the starting line from the buoy, everything on the course made ready for a new race (Space at the
     buoy; racing online, the room's lobby or its count: race-net.js). */
 function intoLine(seed) {
   takeLine(race.rules, seed);   // (a fresh seed, or the room's: the start's field, race-start.js)
+  planReset();   // (your plan kept, nothing of it done: race-plan.js)
   race.gap = new GunGap();
   doorReset();   // (shut again, for a new race)
   forageReset();   // (the driftwood back across its gap)
@@ -355,6 +368,8 @@ export function raceHelm(h, dt) {
   while (steps.acc >= NET.STEP - 1e-9 && stepping()) {
     steps.acc -= NET.STEP;
     const R = race.rules, on = R.state === 'on' || R.state === 'done';
+    // (your plan's pilot: her next moves put in, or held at a stop with its board up; race-plan.js)
+    planStep(h, R, { gap: race.gap, crane: K(), trip: () => !!race.trip, space: spaceHere });
     netBefore(h, R);   // (what's changed since the last step, written down: race-net.js)
     netInTick(true);
     out.push(...h.tick(NET.STEP));
@@ -442,12 +457,15 @@ export function raceTick(dt) {
   marksTick(dt, sail.on && R.state === 'on' ? nextBuoy(p.c, p.r) : -1);
   // Your rivals: on their spots on the line for the count, then racing, then moored past the finish line.
   fieldTick(dt, R, sail.on);
+  // Your plan's strip along the right-hand edge, on the line and in the race (race-plan.js).
+  planTick(R, !cine);
   hud();
 }
 
 /** A fresh voyage: no race on, the guns and the crane as they were, said again. Your best is kept. */
 export function raceReset() {
   race.rules = newRace();
+  planReset();
   fieldReset();
   race.gap = new GunGap();
   race.drift = new Drift();

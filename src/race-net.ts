@@ -196,9 +196,12 @@ export type Act = [n: number, a: ActKind, ...args: unknown[]];
     stroke, holed, a lock pumped); a broadside fired (`fire`, L or R); patched (`patched`); the barrier of
     driftwood cleared (`clear`); a square shut to her or opened (someone else's spot: `shut`, `open`); the
     breeze as it changed (`breeze`, its way and strength); the rocks come down on her sea (`rocks`, whoever's
-    shots it was). Stamped with the steps sailed before it. */
-export type ActKind = 'put' | 'unput' | 'stop' | 'drop' | 'moor' | 'gust' | 'row' | 'stroke' | 'hit' | 'pump' | 'fire' | 'patched' | 'clear' | 'shut' | 'open' | 'breeze' | 'rocks';
-export const ACTS: ReadonlySet<string> = new Set<ActKind>(['put', 'unput', 'stop', 'drop', 'moor', 'gust', 'row', 'stroke', 'hit', 'pump', 'fire', 'patched', 'clear', 'shut', 'open', 'breeze', 'rocks']);
+    shots it was). Stamped with the steps sailed before it. Since 13 Nov, her plan (src/race-plan.ts): the moves
+    let go after a gust (`letGo`), and her plan as she set it (`plan`, the five legs' choices), which goes to the
+    room and into the race's record like any other action, never to the other racers (RACE.md §5: "hidden from
+    the others"). */
+export type ActKind = 'put' | 'unput' | 'stop' | 'drop' | 'moor' | 'gust' | 'row' | 'stroke' | 'hit' | 'pump' | 'fire' | 'patched' | 'clear' | 'shut' | 'open' | 'breeze' | 'rocks' | 'letGo' | 'plan';
+export const ACTS: ReadonlySet<string> = new Set<ActKind>(['put', 'unput', 'stop', 'drop', 'moor', 'gust', 'row', 'stroke', 'hit', 'pump', 'fire', 'patched', 'clear', 'shut', 'open', 'breeze', 'rocks', 'letGo', 'plan']);
 /** Actions as they came, checked for shape: at most 60 at once, each a step, a kind, and small arguments. */
 export function cleanActs(x: unknown): Act[] {
   if (!Array.isArray(x)) return [];

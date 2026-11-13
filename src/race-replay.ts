@@ -19,6 +19,7 @@ import { Barrier, readyLocks, spotPose, rocksOn } from './den-race.js';
 import { Wind } from './den-wind.js';
 import { fieldFor } from './start-field.js';
 import { NET, type Act } from './race-net.js';
+import { cleanPlan, longPlan, type Plan } from './race-plan.js';
 
 export class PlayerSea {
   readonly sea = new Sea(9);
@@ -26,6 +27,11 @@ export class PlayerSea {
   /** Steps sailed from the gun, and the actions applied so far. */
   n = 0;
   private k = 0;
+  /** Her plan as she set it through the race (src/race-plan.ts), stamped with the steps sailed: the long way
+      everywhere till she changed it. */
+  plans: { n: number; plan: Plan }[] = [];
+  /** Her plan as it stood at the steps sailed so far. */
+  plan(): Plan { return this.plans.length ? this.plans[this.plans.length - 1].plan : longPlan(); }
   /** From her spot on the line at the gun; her actions, in order; the race's seed (its start's field) and her
       number in it. */
   constructor(spot: number, readonly acts: Act[], seed: number, readonly i: number) {
@@ -57,6 +63,10 @@ export class PlayerSea {
       case 'open': this.sea.rocks.delete(sq); this.sea.touch(); break;
       case 'breeze': Object.assign(this.sea.breeze!, { d: x[0], s: x[1] }); break;
       case 'rocks': rocksOn(this.sea, false); break;
+      case 'letGo': h.letGo(); break;
+      // (her plan as she set it, kept for whoever watches the replay: it moves nothing itself, her pilot's moves
+      // being written down as moves)
+      case 'plan': this.plans.push({ n: a[0], plan: cleanPlan(x[0]) }); break;
       default: break;   // ('fire': her broadside moves nothing of hers)
     }
   }
