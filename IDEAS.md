@@ -2546,3 +2546,15 @@ But a side adventure, never the place to learn it all (the user, the same day: "
 love of the game is talking to other pirates ... this is not a replacement for the game ... a tool, a side
 adventure ... We should be watching people, looking at YouTube videos, talk to people"). The tutor would
 say so itself, and point you to other pirates (STORY.md, the principles).
+
+## Making the puzzles mobile friendly, the hard ones too (13 Nov)
+
+The user (13 Nov): "any kind of ideas to try and make things more mobile friendly. I think they tried it and
+failed to try and make it more mobile friendly. So I think it works well for some puzzles, I believe, like
+bilging. Like that's very easy, but others, I'm guessing like carpentry and rumbling were a lot harder to adapt.
+So any kind of ideas later that we could figure out for those things would be great concepts to explore." A
+place to gather ideas, puzzle by puzzle: what's easy on a touch screen already (Bilge's swaps; Distilling's
+drags, its board now filling a phone's width at Helium's still, Helium in a little window at the top left),
+and what isn't (Carpentry's pieces picked, turned and placed on a small grid; the rumble, to look into), and
+ways round each: bigger targets, drag-and-drop with a held preview, a piece turned by a tap on it, a zoomed-in
+view of the part of the board you're working, the den's menus folded away (TODO.md, the hamburger menu).

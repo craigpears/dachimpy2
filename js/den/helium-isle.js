@@ -359,7 +359,10 @@ export function heliumCam() {
   // right, their cask and the distillery behind, their line in the room there; on a tall phone, the board alone)
   const v = helium.board.camView(camera), d = v.from.clone().sub(v.look).normalize(), W = helium.W;
   const k = Math.max(0, Math.min(1, (camera.aspect - 0.95) / 0.55)), right = V3(Math.cos(W.yaw), 0, -Math.sin(W.yaw));
-  return { look: v.look.clone().add(V3(0, 0.1, 0)).addScaledVector(right, W.size * 0.32 * k), dist: v.dist * (1.12 + 0.2 * k), tilt: Math.asin(d.y), yaw: Math.atan2(d.x, d.z) };
+  // (on a phone, closer still: the board the screen's width, little sea either side, the still's picture at
+  // its top tucked up beside Helium's window at the top left; the user, 13 Nov: "a bit bigger ... removing
+  // more of the dead space")
+  return { look: v.look.clone().add(V3(0, 0.1 - 0.12 * (1 - k), 0)).addScaledVector(right, W.size * 0.32 * k), dist: v.dist * (0.98 + 0.34 * k), tilt: Math.asin(d.y), yaw: Math.atan2(d.x, d.z) };
 }
 /* Helium in a little window in the corner when they're off the screen at their board (the user, 13 Nov: "on
    mobile, I can't see helium at all"): on a tall phone the board takes the width and they stand off to its
