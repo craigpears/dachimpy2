@@ -832,6 +832,40 @@ built by hand. Same 20 boards, the eighth run's code with and without it:
   even. Whether the right-hand side really ends up better connected for later (the note's reason) isn't measured
   here; watching it on `distilling-test.html` would show it.
 
+### The block phase: junk in blocks, the V, a brown kept bottom-left (13 Nov, tenth run)
+After the twenty-third to twenty-fifth notes. Reading the pictures (`40-` to `43-*`): the V is the junk wrapping
+the white block, the three right-hand columns and a row along the bottom, a brown and a black kept in the left-hand
+corners. As built (`blockPhase`, `keptTools` in `src/distill-score.ts`; `P.BLOCK_DRAG_MS` in the planner):
+- **When:** Stage I, once colour is half the board or less ("more white than anything else") and three in four
+  whites are left of the last three columns. The user's picture 40 is at 48% colour.
+- **Blocks, not fiddling:** each drag costs a person 400 ms more there, so a small move has to earn its place and
+  the long drags (browns up, blacks down, together) win.
+- **Toward the V:** +0.5 for each brown on the bottom row under the whites (the bottom arm, browns more than
+  blacks).
+- **The tools:** +1.5 each for still having a brown in the bottom-left corner (the first two columns' lowest two
+  pieces) and a black in the top-left; the last one is spent only for a real gain.
+- **Not done:** the twenty-fifth note's next step, looping browns from the right-hand store along the bottom under
+  the whites, isn't a move of its own; the V term rewards it when a routine or the path search offers it. Keeping
+  whites out of the last columns' corners (the eighth run's open question) didn't come out of these shapes, and is
+  left.
+
+20 boards a tier, the ninth run's code (before) and with the block phase (after); "in the block phase" counts only
+moves made there (the Learner never gets there: it starts its chain at 4 columns banked).
+
+| Tier | Block phase reached | Small drags (1–2 swaps) there, a session, was | Drags there, was | Swaps a drag there, was | Moves a minute there, was | Sessions with no white burned, was | Whites burned a session, was | Longest chain mean (best), was | Points a minute, was |
+|---|---|---|---|---|---|---|---|---|---|
+| Learner | 0/20 | - | - | - | - | 1/20, was 1 | 5.3, was 5.3 | 1.1 (4), was 1.1 (4) | 9.6, was 9.6 |
+| Able to Master | 20/20 | 3.8, was 6.8 | 14.2, was 21.5 | 4.4, was 3.9 | 28.5, was 33.4 | 14/20, was 11 | 1.2, was 0.7 | 1.0 (2), was 1.0 (3) | 8.9, was 9.5 |
+| Grand-Master to Legendary | 19/20 | 7.7, was 11.7 | 21.2, was 29.1 | 3.9, was 3.5 | 44.8, was 47.8 | 17/20, was 14 | 0.2, was 0.7 | 1.5 (5), was 1.6 (5) | 12.0, was 13.4 |
+| Ultimate | 19/20 | 7.8, was 12.5 | 21.0, was 29.4 | 4.0, was 3.6 | 47.6, was 54.8 | 13/20, was 14 | 0.6, was 0.8 | 1.9 (5), was 1.9 (6) | 16.1, was 16.2 |
+
+- **What it did:** in the block phase the bots play about a third fewer drags and 40% fewer small ones, each a
+  little longer, the note's "a lot of small, intricate moves" cut back; on the user's own board the planner goes
+  from seven small moves to two (one a long 8-swap drag) and keeps both corner tools.
+- **What it didn't, honestly:** chains and points a minute are the same within 20 boards' noise (the Grand-Master
+  12.0 against 13.4); whites burned mixed (the Grand-Master's clean sessions 14 to 17, the Master's whites a session
+  0.7 to 1.2). Whether the V it leaves feeds the chain better isn't shown by these numbers.
+
 **Watching them, the first note (the user, 12 Nov, a screenshot of the Ultimate's board):** "the main
 thing is it just doesn't carry on the whole way to the right. It just kind of stops ... that black ... in
 the white, it was dragging the black diagonally down and it just stopped there. It's like, well, no, it

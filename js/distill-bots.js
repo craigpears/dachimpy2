@@ -28,7 +28,7 @@
    play now, why in a line, and its drags. "Help, Helium" will show that on the player's own board. */
 import { BLACK, BROWN, COLS, DOWN_LEFT, DOWN_RIGHT, SPICE, TALL, UP_LEFT, UP_RIGHT, WHITE, neighbourOn } from './distilling.js';
 import { M, ROUTINES, burnsClean, canGo, clear, colourLeft, fillTarget, isJunk, junkTarget, measure, playDrags, swapsIn, whitesFrom, } from './distill-routines.js';
-import { boardScore } from './distill-score.js';
+import { blockPhase, boardScore } from './distill-score.js';
 import { PATH, pathMoves, stuck } from './distill-path.js';
 /** The path search when a white in the furnace's column has no other way out: longer drags, a wider look
     for a piece to move out of the way first. Run only then. */
@@ -82,6 +82,8 @@ export const P = {
     TIE_SCORE: 0.25,
     TIE_SWAPS: 2,
     TIE_COLS: 4,
+    /** The block phase: what each drag costs a person on top (`judge`), so a small move earns its place. */
+    BLOCK_DRAG_MS: 400,
     /** Stage I: whites in the column before the furnace's, hard to reach, saved first too (`dangerZones`; 0 off). */
     ZONE2: 1,
     /** The chain: each swap that takes a piece back the wrong way. */
@@ -169,15 +171,15 @@ export function rightOrder(cols) {
     ... a little flick and a swish, and the brown can be one level lower"): among moves doing the best one's job
     (its board score gain, within TIE_SCORE) in as many drags and at most TIE_SWAPS more swaps, the one leaving
     the right-hand side in the best order, browns lower and blacks higher; the best itself when none is better. */
-export function tieBreak(cols, moves, best) {
+export function tieBreak(cols, moves, best, block = false) {
     if (!best.after)
         return best;
-    const base = boardScore(cols), gain = boardScore(best.after) - base, swaps = swapsIn(best.move.drags);
+    const base = boardScore(cols, block), gain = boardScore(best.after, block) - base, swaps = swapsIn(best.move.drags);
     let pick = best, order = rightOrder(best.after);
     for (const m of moves) {
         if (m === best || !m.after || m.move.drags.length !== best.move.drags.length)
             continue;
-        if (swapsIn(m.move.drags) > swaps + P.TIE_SWAPS || boardScore(m.after) - base < gain - P.TIE_SCORE)
+        if (swapsIn(m.move.drags) > swaps + P.TIE_SWAPS || boardScore(m.after, block) - base < gain - P.TIE_SCORE)
             continue;
         const o = rightOrder(m.after);
         if (o > order) {
@@ -193,7 +195,8 @@ const hardIn = (cols, x) => cols[x].reduce((n, p, y) => n + (p === WHITE && !can
     person's time (the user, 12 Nov, the eleventh note: "even just as a test of moves"). One look ahead, no
     search. Its last drag is let go where that's best: carried on while each swap still gets something over,
     stopped before it only climbs through the junk (a black sent on up through the browns gets nothing). */
-export function judge(cols, drags, style, base = boardScore(cols)) {
+export function judge(cols, drags, style, base, block = false) {
+    base ??= boardScore(cols, block);
     if (!drags.length)
         return null;
     const init = drags.slice(0, -1), last = drags[drags.length - 1];
@@ -203,7 +206,9 @@ export function judge(cols, drags, style, base = boardScore(cols)) {
         const after = playDrags(cols, d);
         if (!after)
             continue;
-        const value = (boardScore(after) - base) / (timeFor(d, style, plainDrag(d)) / 1000);
+        // In the block phase each drag costs a person more: a small move has to earn its place (the twenty-third note:
+        // "a lot of small, intricate moves ... I would just start pulling, like treating it more like blocks").
+        const value = (boardScore(after, block) - base) / ((timeFor(d, style, plainDrag(d)) + (block ? P.BLOCK_DRAG_MS * d.length : 0)) / 1000);
         if (!best || value > best.value)
             best = { drags: d, value };
     }
@@ -258,7 +263,7 @@ export function backward(cols, drags, stage) {
     furnace's whites, the next column's hard ones get the time rather than easy work elsewhere. */
 export function weigh(sit, ctx, style) {
     const { cols } = sit, last = COLS - 1, burning = ctx.burnFrom <= last, one = ctx.stage === 'junk';
-    const base = one ? boardScore(cols) : measure(cols, ctx);
+    const block = one && blockPhase(cols), base = one ? boardScore(cols, block) : measure(cols, ctx);
     const wrong = (b) => (burning ? b[last].filter((p) => p === WHITE).length : junkAt(b[last]));
     const urgent = sit.timeLeft < P.URGENT && wrong(cols) > 0;
     const zones = dangerZones(cols, ctx.stage, burning);
@@ -267,7 +272,7 @@ export function weigh(sit, ctx, style) {
     const out = [];
     const near = one ? whitesInJunk(cols, ctx.burnFrom) : 0;
     const consider = (found) => {
-        const j = one ? judge(cols, found.drags, style, base) : null;
+        const j = one ? judge(cols, found.drags, style, base, block) : null;
         const move = j ? { ...found, drags: j.drags } : found;
         const after = playDrags(cols, move.drags);
         if (!after || (one && !j))
@@ -336,7 +341,7 @@ export function choose(sit, ctx, style) {
     const moves = weigh(sit, ctx, style);
     // A move saving a white from the furnace is played whatever it scores.
     const top = moves[0] && (moves[0].saves || moves[0].value > (ctx.stage === 'junk' ? P.RATE_MIN : P.MIN)) ? moves[0] : null;
-    const best = top && ctx.stage === 'junk' && !top.saves ? tieBreak(cols, moves, top) : top;
+    const best = top && ctx.stage === 'junk' && !top.saves ? tieBreak(cols, moves, top, blockPhase(cols)) : top;
     const advice = (kind, label, reason, m = null) => ({
         stage: ctx.stage, kind, routine: !m ? null : m.move.routine === 'path' ? 'hook' : m.move.routine, technique: m?.move.routine ?? null,
         label, reason, drags: m?.move.drags ?? [], value: m?.value ?? 0, sweep: false, ...(m?.tie ? { tie: true } : {}),
