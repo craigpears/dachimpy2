@@ -2085,6 +2085,39 @@ minutes of play each, about 8 minutes to run), no two from the same session with
     many swaps. The reader's trap measure (src/distill-risk.ts) to change, P20 to P22 its tests.
   - **And earlier boards:** "I feel like you need to give me options earlier in the game because they're still
     clearly big early game problems."
+  - **P23 (like P3):** quick sorting, "but with an element of suspicion as to why there are so many blacks at the
+    bottom, browns at the top ... quick getting a few of those whites out, but ... needing to actually sort it so more
+    browns are at the bottom. It just feels like you get those whites only so far and then they're going to get a bit
+    stuck." A risk the reader doesn't see: junk sorted the wrong way up (browns high, blacks low), the whites' way up
+    soon blocked.
+  - **P24 (like P3):** "definitely good quick sorting time. Get the browns up, the blacks down. I would agree", "with a
+    low degree of confidence that there are some risks not quite being identified there."
+  - **P25 (like P4):** right: "that's definitely one. Certainly that one at the top of column 9 ... Save the whites,
+    absolutely", and the one at the bottom of column 8. "Again, something's gone horribly wrong to get to that state,
+    but the classification ... absolutely."
+  - **P26 (like P4, the bot waiting):** wrong: "I wouldn't say [fill] by the fire, it's just completely doomed. I don't
+    know why it gets stuck though. You should at least just say, well, you're doomed on that white, that's going to be
+    junk. But you can at least start getting the ones in column 9 out of the way and dragging those blacks down ...
+    fill by the fire, but just in quick drag the black down motions." Never wait: a white past saving given up as junk,
+    and the quick fills played.
+  - **P27 (like P7):** "Damage control is absolutely what I was thinking. Yet it doesn't seem to do anything to deal
+    with the damage ... its first move is to drag a brown up to the top right. That's reinforcing the damage that
+    blacks and browns are all separated from each other. And there's not any time to zigzag stuff around, so you've got
+    to do like hoisting things up and down with the browns ... a nice perfect cluster on the left of like browns and
+    blacks close to each other in the middle ... hoist the black so that you get that diagonal of browns in ... 4, 5, 6
+    down a bit, enough to pull them up. Or similarly sorting all those blacks at the bottom middle. So yes, on the
+    classification, plan is terrible."
+  - **P28 (like P7):** the same: damage control right, "just doing what you can. Not quite as dire, but again ... How
+    are we getting into so many of these?"
+  - **The patterns (P29, P30):** "I think it's got the classification right again, but the move wrong. Like the point
+    of the browns down is you want them at that kind of bottom left tip. So that black, for example, at the bottom of
+    column 7 is what you would want to swap with the drag the brown into. Where it's just kind of pulling a random
+    brown piece down at the moment. It's not really achieving the goal." A brown brought down goes to the V's tip,
+    swapped in for the black there.
+- **What the batch says, all told:** the reader's state and tactic mostly right (trapped the exception: P20 to P22);
+  the plans not (P15, P26, P27, P28, P29, P30); too many boards past saving ("How are we getting into so many of
+  these?"). Hoisting comes up again and again (P17, P20, P27): a brown used to lift the blacks, blacks and browns
+  brought together, not split further.
 - **Watching the CC^1 bot (13 Nov), the opening:** "for the fresh board, it just created kind of like a weird V shape
   of whites, and ... it should be like trying to build it in the second or third column, like close to what's being
   burnt, just to have a bit of burnt buffer. You build some fully [junk] columns, and then build behind it, but this
