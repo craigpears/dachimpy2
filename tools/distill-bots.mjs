@@ -38,7 +38,12 @@
    rule, the hard-to-reach first, and a hard white a column earlier the same way), then the twenty-first note's
    tie-breaker, 20 boards a tier: sessions with no white burned 2 / 12 / 14 / 12, then 1 / 11 / 14 / 14 (were
    3 / 12 / 13 / 15); disasters 1 / 0 / 0 / 0 (were 2 / 1 / 0 / 0); points a minute 8.9 / 12.9 / 11.4 / 16.9, then
-   9.6 / 9.5 / 13.4 / 16.2 (were 9.0 / 9.8 / 13.8 / 20.7) (DISTILLING.md §4, eighth and ninth runs). */
+   9.6 / 9.5 / 13.4 / 16.2 (were 9.0 / 9.8 / 13.8 / 20.7) (DISTILLING.md §4, eighth and ninth runs).
+   The block phase (13 Nov, the twenty-third to twenty-fifth notes: junk in blocks, the V, the corner tools kept),
+   20 boards a tier: small drags there 3.8 / 7.7 / 7.8 a session for the master / grandmaster / ultimate (were
+   6.8 / 11.7 / 12.5), drags there 14.2 / 21.2 / 21.0 (were 21.5 / 29.1 / 29.4); sessions with no white burned
+   1 / 14 / 17 / 13 (were 1 / 11 / 14 / 14); points a minute 9.6 / 8.9 / 12.0 / 16.1 (were 9.6 / 9.5 / 13.4 / 16.2)
+   (DISTILLING.md §4, tenth run). */
 
 import { Distilling, WHITE, BROWN, BLACK, BURNT, TALL, UP_LEFT, DOWN_LEFT, neighbourOn, canSwapOn } from '../js/distilling.js';
 import { TIERS, P, tierNamed, playSession } from '../js/distill-bots.js';
@@ -96,6 +101,14 @@ function hardOneFromFire(c) {
   if (last.some((p) => p === WHITE) || last.reduce((s, p) => s + (p === BLACK ? 1 : p === WHITE || p === BURNT ? -1 : 0), 0) <= 0) return false;
   return next.some((p, y) => p === WHITE && ![UP_LEFT, DOWN_LEFT].some((d) => { const n = neighbourOn(c, x, y, d); return n && canSwapOn(c, x, y, n[0], n[1]); }));
 }
+// The block phase (the twenty-third note: "you've got the whites mostly over to the left. This is where you just
+// start ... treating it more like blocks"): colour half the board or less, and three in four whites left of the
+// last three columns. The same test as src/distill-score.ts's `blockPhase`.
+function blockPhase(c) {
+  let junk = 0, all = 0, whites = 0, left = 0;
+  c.forEach((col, x) => col.forEach((p) => { all++; if (junkP(p)) junk++; if (p === WHITE) { whites++; if (x < c.length - 3) left++; } }));
+  return junk / all <= 0.5 && whites > 0 && left / whites >= 0.75;
+}
 const whitesFromCol = (c, x) => c.slice(x).reduce((n, col) => n + col.filter((p) => p === WHITE).length, 0);
 function whitesTrapped(c, near = false) {
   let done = 0;
@@ -132,7 +145,7 @@ for (const name of NAMES) {
     let lastRoutine = '';
     // Stage I watched: moves that leave more whites trapped than before them (no column gone between), the
     // whites trapped as the chain starts, and the junk columns burned a minute of Stage I.
-    const watch = { ties: 0, elsewhere: 0, leftMs: 0, stuckWaits: 0, trapping: 0, trappingNear: 0, sweeps: 0, sweepsTrapping: 0, moves: 0, atChain: null, stageOneMs: null, burnedInOne: 0 };
+    const watch = { block: { moves: 0, small: 0, swaps: 0, ms: 0, from: null }, ties: 0, elsewhere: 0, leftMs: 0, stuckWaits: 0, trapping: 0, trappingNear: 0, sweeps: 0, sweepsTrapping: 0, moves: 0, atChain: null, stageOneMs: null, burnedInOne: 0 };
     let before = null;
     let lastPlan = null;
     const onPlan = (a) => {
@@ -148,6 +161,15 @@ for (const name of NAMES) {
       if (a.stage === 'junk' && a.kind === 'move') {
         watch.moves++;
         if (a.tie) watch.ties++;
+        // The block phase (the twenty-third note): moves, swaps, and small drags (1 or 2 swaps) there.
+        if (blockPhase(g.cols)) {
+          const b = watch.block;
+          if (b.from === null) b.from = g.time;
+          b.ms = g.time - b.from;
+          b.moves++;
+          for (const d of a.drags) { b.swaps += d.ways.length; if (d.ways.length <= 2) b.small++; }
+          b.drags = (b.drags ?? 0) + a.drags.length;
+        }
         // A move that takes no white out of the last two columns while a hard one sits one from the fire.
         if (hardOneFromFire(g.cols)) {
           const after = playDrags(g.cols, a.drags);
@@ -194,6 +216,8 @@ for (const name of NAMES) {
   const w = runs.map((r) => r.watch), one = w.filter((x) => x.stageOneMs);
   console.log(`  trapped whites (no way left, cut off): moves in Stage I leaving more than before ${f1(avg(w.map((x) => x.trapping)))} a session (of ${f1(avg(w.map((x) => x.moves)))} moves), by the furnace (the score's test) ${f1(avg(w.map((x) => x.trappingNear)))}; on the board as the chain starts ${f1(avg(one.map((x) => x.atChain)))}`);
   console.log(`  Stage I with whites left in the junk columns next to burn: ${f1(avg(w.map((x) => x.leftMs / 1000)))} s a session; waits then (stuck) ${f1(avg(w.map((x) => x.stuckWaits)))}; sessions with any such wait ${w.filter((x) => x.stuckWaits > 0).length}/${GAMES}`);
+  const bl = w.map((x) => x.block).filter((b) => b.moves > 0);
+  console.log(`  the block phase (whites the bulk and mostly left): reached in ${bl.length}/${GAMES} sessions; there, moves a minute ${f1(avg(bl.filter((b) => b.ms > 0).map((b) => b.moves / (b.ms / 60000))))}, swaps a drag ${f1(avg(bl.map((b) => b.swaps / Math.max(1, b.drags ?? 0))))}, small drags (1 or 2 swaps) ${f1(avg(bl.map((b) => b.small)))} a session of ${f1(avg(bl.map((b) => b.drags ?? 0)))}`);
   console.log(`  the tie-breaker (browns lower, blacks higher on the right, for next to nothing) changed the choice ${f1(avg(w.map((x) => x.ties)))} times a session (of ${f1(avg(w.map((x) => x.moves)))} moves)`);
   console.log(`  moves made elsewhere while a hard-to-reach white sat one column from the fire ${f1(avg(w.map((x) => x.elsewhere)))} a session`);
   console.log(`  brown sweeps (a brown up, then down to the bottom right) in Stage I ${f1(avg(w.map((x) => x.sweeps)))} a session, leaving a white trapped by the furnace ${f1(avg(w.map((x) => x.sweepsTrapping)))}`);

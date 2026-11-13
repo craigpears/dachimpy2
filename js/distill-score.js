@@ -54,6 +54,12 @@ export const S = {
     TRAPPED: 1,
     /** A white in a pocket behind spice (`behindSpice`), one of the worst things to leave. */
     POCKET: 12,
+    /** The block phase (`blockPhase`, the twenty-third to twenty-fifth notes), its terms only then: each brown on
+        the bottom row under the whites, the V's bottom arm ("you want the V to be made of ... browns there,
+        preferably more than blacks"); and having a brown kept in the bottom-left corner and a black in the
+        top-left, tools for later ("one black in the top left, one brown in the bottom left can be useful"), each. */
+    V_BROWN: 0.5,
+    KEEP: 1.5,
 };
 const junk = (p) => p === BROWN || p === BLACK || p === BURNT;
 /** A column done as junk: no white in it, and sure to burn (more blacks than whites, burnt whites counted
@@ -188,8 +194,37 @@ export function wall(cols) {
     }
     return { at, rows, off };
 }
-/** The board's score: higher is better (see the header). */
-export function boardScore(cols) {
+/** The block phase (the user, 13 Nov, the twenty-third note: "you've got the whites mostly over to the left.
+    This is where you just start ... treating it more like blocks of things to move"): colour half the board or
+    less, and three in four whites left of the last three columns. */
+export function blockPhase(cols) {
+    let junkN = 0, all = 0, whites = 0, left = 0;
+    cols.forEach((col, x) => col.forEach((p) => { all++; if (junk(p))
+        junkN++; if (p === WHITE) {
+        whites++;
+        if (x < COLS - 3)
+            left++;
+    } }));
+    return junkN / all <= 0.5 && whites > 0 && left / whites >= 0.75;
+}
+/** The bottom row: the last piece of a tall column, the last of a short one. */
+const bottom = (cols, x, y) => y === cols[x].length - 1;
+/** The corners' tools (the twenty-fourth note): a brown in the bottom-left corner (the first two columns' lowest
+    two pieces) and a black in the top-left (their top two). */
+export function keptTools(cols) {
+    let brown = false, black = false;
+    for (let x = 0; x < 2; x++)
+        cols[x].forEach((p, y) => {
+            if (p === BROWN && y >= cols[x].length - 2)
+                brown = true;
+            if (p === BLACK && y <= 1)
+                black = true;
+        });
+    return { brown, black };
+}
+/** The board's score: higher is better (see the header). In the block phase (`block`, read off the board before
+    the move being judged, so a move and the board it leaves are scored alike), the V's terms too. */
+export function boardScore(cols, block = false) {
     const done = doneFromRight(cols), filling = COLS - 1 - done, w = wall(cols);
     let v = S.COLUMN * done - S.WALL * w.off;
     const last = cols[COLS - 1], fire = filling === COLS - 1 && last.filter(junk).length > last.filter((p) => p === WHITE).length;
@@ -212,7 +247,13 @@ export function boardScore(cols) {
                     v += S.NEXT;
                 if (trapped(cols, x, y))
                     v -= S.TRAPPED;
+                if (block && p === BROWN && x < w.at && bottom(cols, x, y))
+                    v += S.V_BROWN;
             }
         }
+    if (block) {
+        const k = keptTools(cols);
+        v += S.KEEP * (Number(k.brown) + Number(k.black));
+    }
     return v;
 }

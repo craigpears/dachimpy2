@@ -3,10 +3,10 @@
    each tier reaches is tools/distill-bots.mjs's to measure (DISTILLING.md §4). */
 import { describe, expect, it } from 'vitest';
 import { BLACK, BURN_TICKS, COLS, DOWN_RIGHT, Distilling, SHORT, TALL, UP_LEFT, UP_RIGHT, WHITE, neighbourOn, parseBoard } from '../src/distilling';
-import { DistillBot, HELIUM, MENU, brownSweep, dangerZones, rightOrder, tieBreak, whitesInJunk, TIERS, advise, backward, choose, contextFor, judge, junkAcross, playSession, tierNamed, turnsIn, weigh } from '../src/distill-bots';
+import { DistillBot, HELIUM, MENU, P, brownSweep, dangerZones, rightOrder, tieBreak, whitesInJunk, TIERS, advise, backward, choose, contextFor, judge, junkAcross, playSession, tierNamed, turnsIn, weigh } from '../src/distill-bots';
 import type { Advice } from '../src/distill-bots';
 import { ROUTINES, colourLeft, playDrags } from '../src/distill-routines';
-import { boardScore, trappedWhite } from '../src/distill-score';
+import { blockPhase, boardScore, keptTools, trappedWhite } from '../src/distill-score';
 import type { Drag, RoutineName } from '../src/distill-routines';
 import type { Board } from '../src/distilling';
 import { seeded } from '../src/mirror-row';
@@ -283,6 +283,51 @@ describe('a brown a flick lower, for next to nothing (13 Nov, the twenty-first n
     // Nor a move doing less of the job.
     const less = { ...hook, after: right('KbKKKbbbw') };
     expect(tieBreak(cols, [plain, less], plain).move).toBe(plain.move);
+  });
+});
+
+describe('the block phase: the junk in blocks, the V, a brown kept bottom-left (13 Nov, the twenty-third to twenty-fifth notes)', () => {
+  // notes/distilling/40-whites-left-now-move-junk-in-blocks.webp, read off the picture: the whites a big block on
+  // the left and middle, the right three columns junk, a brown and a black in the left-hand corners.
+  const board40 = () => parseBoard(['KwwwKwwbK', 'Kw*wwKKw', 'wbwww*wKw', 'KwwwwwwK', 'wwwbwwwKw', 'wbbwwwww', 'bwwwww*wK', 'bbKKKKbK', '*bKbKKbKK', 'bbKKbKbK']);
+  const play = (cols: Board, n: number) => {
+    const drags: number[] = [];
+    let b = cols;
+    for (let i = 0; i < n; i++) {
+      const a = choose({ cols: b, chain: 0, timeLeft: 12000 }, contextFor(b, 'junk', 0, 16), HELIUM);
+      if (a.kind !== 'move') break;
+      for (const d of a.drags) drags.push(d.ways.length);
+      b = playDrags(b, a.drags)!;
+    }
+    return { drags, b };
+  };
+  it('once the whites are mostly left, fewer small fiddly drags: the junk moved in long ones, 13 Nov ("it\'s doing a lot of little fiddly things ... I would just start pulling, like treating it more like blocks of things to move")', () => {
+    const cols = board40();
+    expect(blockPhase(cols)).toBe(true);
+    const was = P.BLOCK_DRAG_MS;
+    try {
+      P.BLOCK_DRAG_MS = 0;
+      const fiddly = play(cols, 8);
+      P.BLOCK_DRAG_MS = was;
+      const blocks = play(cols, 8);
+      const small = (d: number[]) => d.filter((n) => n <= 2).length;
+      expect(small(blocks.drags)).toBeLessThan(small(fiddly.drags));
+      expect(blocks.drags.length).toBeLessThan(fiddly.drags.length);
+    } finally { P.BLOCK_DRAG_MS = was; }
+  });
+  it('the brown in the bottom-left and the black in the top-left are kept as tools, 13 Nov ("one black in the top left, one brown in the bottom left can be useful ... you don\'t want to just get too greedy")', () => {
+    const cols = board40();
+    expect(keptTools(cols)).toEqual({ brown: true, black: true });
+    expect(keptTools(play(cols, 8).b)).toEqual({ brown: true, black: true });
+    // Spending the last one costs the score, in the block phase only.
+    const spent = parseBoard(['KwwwKwwwK', 'Kw*wwKKw', 'wbwww*wKw', 'KwwwwwwK', 'wwwbwwwKw', 'wbbwwwww', 'bwwwww*wK', 'bbKKKKbK', '*bKbKKbKK', 'bbKKbKbb']);
+    expect(boardScore(cols, true) - boardScore(spent, true)).toBeGreaterThan(boardScore(cols) - boardScore(spent));
+  });
+  it('the V\'s bottom arm: a brown along the bottom under the whites scores, a black there doesn\'t, 13 Nov ("you want the V to be made of ... browns there, preferably more than blacks")', () => {
+    const right = [...column(7, 'KKKKbbbb'), ...column(8, 'KKKKbbbbb'), ...column(9, 'KKKKbbbb')];
+    const brown = board([[3, 7, 'b'], ...right]), black = board([[3, 7, 'K'], ...right]);
+    const vTerm = (b: Board) => boardScore(b, true) - boardScore(b);
+    expect(vTerm(brown)).toBeGreaterThan(vTerm(black));
   });
 });
 
