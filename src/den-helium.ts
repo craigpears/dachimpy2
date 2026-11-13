@@ -26,7 +26,7 @@ import { HELIUM as HAND, advise, type Advice } from './distill-bots.js';
 import { ROUTINES, isJunk, playDrags } from './distill-routines.js';
 import { routesInto } from './distill-path.js';
 import { PHASES, type Phase } from './distill-phase.js';
-import { AFTER, HELP, HELP_ELSE, HINT, LESSON, MISHAP, NERVES, ONWARD, OPENING, PHASE, PRAISE, STEP_ONE, TELL } from './lines/helium.js';
+import { AFTER, HELP, HELP_ELSE, HINT, LESSON, MISHAP, NERVES, ONWARD, OPENING, PHASE, PRAISE, STEP_ONE, TELL, WATCH } from './lines/helium.js';
 import { AT_HELIUMS } from './lines/you.js';
 
 const H = LAY.HELIUM;
@@ -458,6 +458,47 @@ export function routesToFire(cols: Board, most = 4): Drag[] {
   const out: Drag[] = [], x = COLS - 1;
   cols[x].forEach((p, y) => { if (p === WHITE && out.length < most) out.push(...routesInto(cols, { x, y, side: -1 }, HAND, Math.min(2, most - out.length))); });
   return out;
+}
+
+/** Watching them play your board: how long a move's arrow is up before they drag it, their hand's pace (slower
+    than their help's quick one, to follow), a breath between beats, and how long they let the furnace run when
+    there's nothing worth doing before they look again. Each line's up at the lesson's reading pace (lessonSecs). */
+export const PACE_WATCH = { ARROW: 1.4, HOLD: 0.45, SWAP: 0.3, BETWEEN: 0.5, GAP: 0.5, WAIT: 2.5 } as const;
+/** A beat of theirs as you watch: a phase starting (its line), a move (its line, the technique and why, and its
+    drags, the arrow shown just before), a burn, a wait (the furnace runs on), a dismiss they only say, or nothing
+    while the board's sliding. */
+export interface WatchBeat { kind: 'phase' | 'move' | 'burn' | 'wait' | 'dismiss' | 'busy'; says: string; note: string; phase: Phase | null; drags: Drag[] }
+/** Them playing your board for you to watch, a beat at a time (`next` on the board as it stands): before each
+    phase, the phase and its plan ("first of all ... get rid of all the white pieces in all these columns"); before
+    each move, the technique and why, a short line ("again" when it's the same as before); a wait said once. */
+export class Watch {
+  phase: Phase | null = null;
+  private said = new Set<Phase>();
+  private last: string | null = null;
+  private agains = 0;
+  private waited = false;
+  next(g: Pick<Distilling, 'cols' | 'chain' | 'timeLeft' | 'movable'>): WatchBeat {
+    if (!g.movable) return { kind: 'busy', says: '', note: '', phase: this.phase, drags: [] };
+    const a = advise({ cols: g.cols, chain: g.chain, timeLeft: g.timeLeft() }), phase = a.phase;
+    if (phase !== this.phase) {
+      const says = this.said.has(phase) ? PHASE[phase].again : PHASE[phase].first;
+      this.said.add(phase); this.phase = phase; this.last = null; this.waited = false;
+      return { kind: 'phase', says, note: phaseNote(phase), phase, drags: [] };
+    }
+    const note = a.reason ? `${a.label}: ${a.reason}` : a.label;
+    if (a.kind === 'move' && a.drags.length) {
+      const t = a.sweep ? 'diamond' : a.technique === 'path' ? 'path' : a.routine ?? 'diamond';
+      const says = t === this.last ? WATCH.again[this.agains++ % WATCH.again.length] : WATCH[t];
+      this.last = t; this.waited = false;
+      return { kind: 'move', says, note, phase, drags: a.drags.map(copyDrag) };
+    }
+    this.last = null;
+    if (a.kind === 'burn') { this.waited = false; return { kind: 'burn', says: WATCH.burn, note, phase, drags: [] }; }
+    if (a.kind === 'dismiss') return { kind: 'dismiss', says: WATCH.dismiss, note, phase, drags: [] };
+    const says = this.waited ? '' : a.kind === 'move' ? WATCH.stuck : WATCH.wait;
+    this.waited = true;
+    return { kind: 'wait', says, note, phase, drags: [] };
+  }
 }
 
 /** While you're within earshot of their island, lesson or none: a line now and then, round and round. */

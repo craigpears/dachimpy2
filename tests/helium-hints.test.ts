@@ -1,11 +1,13 @@
-/* Helium's hints (src/den-helium.ts: hintFor, hintLeft, routesToFire; the user, 13 Nov). */
+/* Helium's hints and watching them play (src/den-helium.ts: hintFor, hintLeft, routesToFire, Watch; the user, 13 Nov). */
 import { describe, expect, it } from 'vitest';
 import { COLS, Distilling, WHITE, canSwapOn, neighbourOn, parseBoard } from '../src/distilling';
 import type { Board } from '../src/distilling';
 import { advise } from '../src/distill-bots';
 import { playDrags } from '../src/distill-routines';
-import { HINT_DRAGS, hintFor, hintLeft, routesToFire } from '../src/den-helium';
-import { HINT, PHASE } from '../src/lines/helium';
+import { HINT_DRAGS, Watch, hintFor, hintLeft, routesToFire } from '../src/den-helium';
+import type { WatchBeat } from '../src/den-helium';
+import { phaseOf } from '../src/distill-phase';
+import { HINT, PHASE, WATCH } from '../src/lines/helium';
 import { seeded } from '../src/mirror-row';
 
 const fresh = (seed = 5000) => new Distilling(seeded(seed));
@@ -83,11 +85,73 @@ describe('arrows into a white\'s place by the fire, 13 Nov ("maybe it should sho
 });
 
 describe('their new lines, 13 Nov', () => {
-  const lines = (): string[] => [...Object.values(PHASE).flatMap((p) => [p.first, p.again]), ...Object.values(HINT)];
+  const lines = (): string[] => [...Object.values(PHASE).flatMap((p) => [p.first, p.again]), ...Object.values(WATCH).flat(), ...Object.values(HINT)];
   it('are short enough for a phone bubble', () => {
     for (const l of lines()) { expect(l.length, l).toBeLessThanOrEqual(90); expect(words(l), l).toBeLessThanOrEqual(16); }
   });
   it('keep Helium "they": no he or she', () => {
     for (const l of lines()) expect(l, l).not.toMatch(/\b(he|she|him|her|his)\b/i);
+  });
+});
+
+describe('watching Helium play, 13 Nov ("first of all ... I\'m going to try and get rid of all the white pieces in all these columns, and then just kind of step by step what you\'re thinking")', () => {
+  /** A session watched: each beat, played on the board as their hand would. */
+  const cache = new Map<string, { beats: WatchBeat[]; phases: string[] }>();
+  const watched = (seed: number, most: number) => {
+    const k = `${seed}:${most}`;
+    if (!cache.has(k)) cache.set(k, watch(seed, most));
+    return cache.get(k)!;
+  };
+  function watch(seed: number, most: number): { beats: WatchBeat[]; phases: string[] } {
+    const g = fresh(seed), w = new Watch(), beats: WatchBeat[] = [], phases: string[] = [];
+    for (let i = 0; i < most && !g.finished; i++) {
+      const b = w.next(g);
+      if (b.kind === 'busy') { g.tick(1000); continue; }
+      beats.push(b);
+      if (b.kind === 'move') {
+        phases.push(phaseOf(g.cols, b.phase === 'chain' ? 'chain' : 'junk'));
+        for (const d of b.drags) { g.dragWays(d.x, d.y, d.ways); g.settle(1000); }
+      } else if (b.kind === 'burn') { g.burnNow(); g.settle(5000); }
+      else if (b.kind === 'wait') g.tick(2500);
+      else if (b.kind === 'dismiss') break;
+    }
+    return { beats, phases };
+  }
+  it('says the phase and its plan first, then a line before each move', () => {
+    const { beats } = watched(5000, 150);
+    expect(beats[0]).toMatchObject({ kind: 'phase', phase: 'fire', says: PHASE.fire.first });
+    expect(beats[1].kind).toBe('move');
+    expect(beats[1].says.length).toBeGreaterThan(0);
+  });
+  it('a phase line whenever the phase changes, and every move in the phase last said', () => {
+    for (const seed of [5000, 5003]) {
+      const { beats } = watched(seed, 150);
+      let now: string | null = null;
+      for (const b of beats) {
+        if (b.kind === 'phase') { expect(b.phase).not.toBe(now); now = b.phase; continue; }
+        expect(b.phase, `seed ${seed}`).toBe(now);
+      }
+      // It gets past the opening: more than one phase said.
+      expect(new Set(beats.filter((b) => b.kind === 'phase').map((b) => b.phase)).size).toBeGreaterThan(1);
+    }
+  });
+  it('the first time a phase starts it\'s said in full, back in it the shorter "again"', () => {
+    const { beats } = watched(5000, 150), seen = new Set<string>();
+    for (const b of beats.filter((x) => x.kind === 'phase')) {
+      const p = b.phase as keyof typeof PHASE;
+      expect(b.says).toBe(seen.has(p) ? PHASE[p].again : PHASE[p].first);
+      seen.add(p);
+    }
+  });
+  it('each move line names its technique; the same again is "again", not the same line twice running', () => {
+    const { beats } = watched(5000, 150), moves = beats.filter((b) => b.kind === 'move');
+    expect(moves.length).toBeGreaterThan(10);
+    const known = new Set<string>([...Object.values(WATCH).filter((v): v is string => typeof v === 'string'), ...WATCH.again]);
+    for (const m of moves) expect(known.has(m.says), m.says).toBe(true);
+    for (let i = 1; i < beats.length; i++) if (beats[i].kind === 'move' && beats[i - 1].kind === 'move') expect(beats[i].says).not.toBe(beats[i - 1].says);
+  });
+  it('a wait is said once, not every look', () => {
+    const { beats } = watched(5000, 150);
+    for (let i = 1; i < beats.length; i++) if (beats[i].kind === 'wait' && beats[i - 1].kind === 'wait') expect(beats[i].says).toBe('');
   });
 });

@@ -673,6 +673,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     pale blue arrows from up to four junk pieces whose drag would take its place, a different piece each, so it
     drops out left (the path search's, `routesToFire`), redrawn as the board changes, gone once it's out or
     burned; the bar says what they are.
+  - **Watch Helium play (W, or the button; 13 Nov: "the watch helium play option where he explains ... first
+    of all ... I'm going to try and get rid of all the white pieces in all these columns, and then just kind
+    of step by step"):** they play your board at a pace to follow (`Watch`, PACE_WATCH): as each phase starts
+    they say it and its plan (the first time in full, back in it a shorter "again"); before each move, a
+    short line on the technique and why ("Same again." when it repeats), its arrow up 1.4 s, then their hand
+    along it, slower than their help's; a burn they do; with nothing worth doing the furnace runs on a while,
+    said once. The furnace waits otherwise. W again, Esc, or any move of your own (a key or click on the board,
+    Hint, Help) hands the board back ("Your board. Off you go."); a dismiss they only say. Their nerves and
+    step one's "There." keep quiet while it's their own hand.
   - **Their mishaps:** whenever a column burns with a white (or a burnt white) in it, the distillery blows
     up (the bang, above) and they shrug it off, their own line first, then others. The humour's the
     maker's, never drink (that's Kikkit's).
