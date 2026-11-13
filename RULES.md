@@ -661,6 +661,27 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     Their words where you can read them (13 Nov: "they are too far to the right for the help bubble to
     really appear"): they stand just beside the board, turned to you, and their bubble's kept on the screen
     and off the board (lineSpot): beside it on their side, or below or above it on a phone.
+  - **A hint (G, or the button; 13 Nov: "hinting as well, so it shows you the path. Of what the next moves
+    are they would do"):** the planner's next drag or two drawn on your board as gold arrows, numbered, the
+    path each piece takes swap by swap, not played (`hintFor`: the advice's drags, then the move after it on
+    the board the first leaves). Their line is the phase the game's in and what they're after (src/
+    distill-phase.ts, their PHASE lines: "First things first: the whites out of these three. Away from the
+    fire."), the bar the phase's plan and the move's technique and reason. The arrows follow you as you play
+    them and go once you've done something else (`hintLeft`).
+  - **Routes into a white's place by the fire (13 Nov: "maybe it should show some arrows of nearby routes of
+    pieces that can be dragged into the spots"):** while their nerves ring a white in the furnace's column,
+    pale blue arrows from up to four junk pieces whose drag would take its place, a different piece each, so it
+    drops out left (the path search's, `routesToFire`), redrawn as the board changes, gone once it's out or
+    burned; the bar says what they are.
+  - **Watch Helium play (W, or the button; 13 Nov: "the watch helium play option where he explains ... first
+    of all ... I'm going to try and get rid of all the white pieces in all these columns, and then just kind
+    of step by step"):** they play your board at a pace to follow (`Watch`, PACE_WATCH): as each phase starts
+    they say it and its plan (the first time in full, back in it a shorter "again"); before each move, a
+    short line on the technique and why ("Same again." when it repeats), its arrow up 1.4 s, then their hand
+    along it, slower than their help's; a burn they do; with nothing worth doing the furnace runs on a while,
+    said once. The furnace waits otherwise. W again, Esc, or any move of your own (a key or click on the board,
+    Hint, Help) hands the board back ("Your board. Off you go."); a dismiss they only say. Their nerves and
+    step one's "There." keep quiet while it's their own hand.
   - **Their mishaps:** whenever a column burns with a white (or a burnt white) in it, the distillery blows
     up (the bang, above) and they shrug it off, their own line first, then others. The humour's the
     maker's, never drink (that's Kikkit's).

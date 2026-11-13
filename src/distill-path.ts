@@ -88,7 +88,7 @@ export function bringRound(cols: Board, s: Stuck, pace: Pace, limits = PATH): Dr
 }
 
 /** bringRound's search: the drag and its cost in ms, a person's. */
-function search(cols: Board, s: Stuck, pace: Pace, limits: typeof PATH, nodes: number): { drags: Drag[]; ms: number } | null {
+function search(cols: Board, s: Stuck, pace: Pace, limits: typeof PATH, nodes: number, skip?: ReadonlySet<string>): { drags: Drag[]; ms: number } | null {
   const swapMs = 1000 / pace.rate, q = cols[s.x][s.y];
   // Where the piece brought round must stand to swap the stuck one its way: beside it on that side.
   const goals = (s.side < 0 ? LEFT : RIGHT).map((d) => neighbourOn(cols, s.x, s.y, d)).filter((n): n is [number, number] => !!n);
@@ -117,7 +117,7 @@ function search(cols: Board, s: Stuck, pace: Pace, limits: typeof PATH, nodes: n
   // Every other piece that could reach in time and swaps with something: a place to start.
   for (let x = 0; x < COLS; x++) for (let y = 0; y < cols[x].length; y++) {
     const p = cols[x][y];
-    if (p === SPICE || (x === s.x && y === s.y) || p === q) continue;
+    if (p === SPICE || (x === s.x && y === s.y) || p === q || skip?.has(`${x},${y}`)) continue;
     const at: [number, number] = [x, y];
     if (apart(cols, at, goals[0]) > limits.SWAPS && (goals.length < 2 || apart(cols, at, goals[1]) > limits.SWAPS)) continue;
     push({ b: cols, at, ways: [], cost: pace.spot, f: pace.spot + h(cols, at), from: at });
@@ -152,6 +152,20 @@ function search(cols: Board, s: Stuck, pace: Pace, limits: typeof PATH, nodes: n
     }
   }
   return null;
+}
+
+/** A few ways into a piece's place, each the cheapest drag of a different piece, cheapest first: to show, not
+    to play (the user, 13 Nov, of Helium ringing a white by the fire: "maybe it should show some arrows of nearby
+    routes of pieces that can be dragged into the spots"). At most `most`; none if nothing reaches it. */
+export function routesInto(cols: Board, s: Stuck, pace: Pace, most = 3, limits = PATH): Drag[] {
+  const out: Drag[] = [], skip = new Set<string>();
+  while (out.length < most) {
+    const r = search(cols, s, pace, limits, limits.NODES, skip);
+    if (!r) break;
+    out.push(r.drags[0]);
+    skip.add(`${r.drags[0].x},${r.drags[0].y}`);
+  }
+  return out;
 }
 
 /** When no one drag brings a piece round to the stuck one: the cheapest pair, in a person's time, of a piece

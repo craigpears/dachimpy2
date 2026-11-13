@@ -22,7 +22,10 @@
    when it can't be filled in time. When a piece is stuck where it can't go its way (a white trapped at the
    top, junk in a column still to go up) and none of the routines it knows unsticks anything, the better
    tiers search for a piece to bring round into its place (src/distill-path.ts, the user, 13 Nov: "model it
-   as a path ... A-star"), judged like any other move.
+   as a path ... A-star"), judged like any other move. Each move it reads the phase the game's in
+   (src/distill-phase.ts: the fire's side, filling the junk columns, blocks and the V, the chain), which tilts the
+   techniques' worth (the user, 13 Nov: "different techniques have different weights depending on the stage"),
+   all even when a piece is stuck or a white's in danger; the advice says it, for Helium to say aloud.
 
    `advise(board)` is the planner for anyone's board, a person's mid-game: the stage, the routine it would
    play now, why in a line, and its drags. "Help, Helium" will show that on the player's own board. */
@@ -30,6 +33,7 @@ import { BLACK, BROWN, COLS, DOWN_LEFT, DOWN_RIGHT, SPICE, TALL, UP_LEFT, UP_RIG
 import { M, ROUTINES, burnsClean, canGo, clear, colourLeft, fillTarget, isJunk, junkTarget, measure, playDrags, swapsIn, whitesFrom, } from './distill-routines.js';
 import { blockPhase, boardScore } from './distill-score.js';
 import { PATH, pathMoves, stuck } from './distill-path.js';
+import { phaseOf, weightIn } from './distill-phase.js';
 /** The path search when a white in the furnace's column has no other way out: longer drags, a wider look
     for a piece to move out of the way first. Run only then. */
 export const PATH_WIDE = { ...PATH, SWAPS: 16, NODES: 6000, ENABLE_NEAR: 6, ENABLE_BOARDS: 200, ENABLE_NODES: 600 };
@@ -88,6 +92,8 @@ export const P = {
     ZONE2: 1,
     /** The chain: each swap that takes a piece back the wrong way. */
     BACK: 0.6,
+    /** The phases' weights on the techniques (src/distill-phase.ts; 0 off, every technique even). */
+    PHASES: 1,
 };
 /** Junk in the furnace's column (spice is fine in a Crystal Clear). */
 const junkAt = (col) => col.filter((p) => p !== WHITE && p !== SPICE).length;
@@ -310,6 +316,11 @@ export function weigh(sit, ctx, style) {
             for (const found of pathMoves(cols, ctx, style, left))
                 consider(found);
     }
+    // The phase's weights on the techniques, for ranking (the user, 13 Nov: "different techniques have different
+    // weights depending on the stage"), but every one even when a piece is stuck or a white's in danger ("it can
+    // always use all the techniques if it absolutely needs to, like it gets stuck or there's a blocked white").
+    const phase = phaseOf(cols, ctx.stage), even = !P.PHASES || zones.length > 0 || stuck(cols, ctx).length > 0;
+    const rank = (m) => (even || m.value <= 0 ? m.value : m.value * weightIn(phase, m.move.routine));
     // The danger zones in turn: only what saves a white of the first that can be saved (the furnace's in time),
     // the hard-to-reach first; if nothing does yet, the wider search for its whites.
     for (const zone of zones) {
@@ -328,7 +339,7 @@ export function weigh(sit, ctx, style) {
         const hard = (m) => hardIn(cols, zone) - hardIn(m.after, zone);
         return saves.map((m) => ({ ...m, saves: true })).sort((a, b) => hard(b) - hard(a) || b.value - a.value);
     }
-    return out.sort((a, b) => b.value - a.value);
+    return out.sort((a, b) => rank(b) - rank(a));
 }
 /** Pick the routine for the board now (see the header). */
 export function choose(sit, ctx, style) {
@@ -343,7 +354,7 @@ export function choose(sit, ctx, style) {
     const top = moves[0] && (moves[0].saves || moves[0].value > (ctx.stage === 'junk' ? P.RATE_MIN : P.MIN)) ? moves[0] : null;
     const best = top && ctx.stage === 'junk' && !top.saves ? tieBreak(cols, moves, top, blockPhase(cols)) : top;
     const advice = (kind, label, reason, m = null) => ({
-        stage: ctx.stage, kind, routine: !m ? null : m.move.routine === 'path' ? 'hook' : m.move.routine, technique: m?.move.routine ?? null,
+        stage: ctx.stage, phase: phaseOf(cols, ctx.stage), kind, routine: !m ? null : m.move.routine === 'path' ? 'hook' : m.move.routine, technique: m?.move.routine ?? null,
         label, reason, drags: m?.move.drags ?? [], value: m?.value ?? 0, sweep: false, ...(m?.tie ? { tie: true } : {}),
     });
     // The endgame's gamble: the next Crystal Clear can't be filled in time.
@@ -436,7 +447,7 @@ export class DistillBot {
     constructor(tier) { this.tier = tier; }
     plan(g) {
         if (this.quit)
-            return this.say({ stage: this.stage, kind: 'dismiss', routine: null, label: 'Dismiss', reason: 'the chain is over: dismiss and keep the score', drags: [], value: 0, sweep: false });
+            return this.say({ stage: this.stage, phase: phaseOf(g.cols, this.stage), kind: 'dismiss', routine: null, label: 'Dismiss', reason: 'the chain is over: dismiss and keep the score', drags: [], value: 0, sweep: false });
         if (this.stage === 'junk' && decisionTime(g.cols, this.tier.bank)) {
             this.stage = 'chain';
             this.burns = burnsLeft(g.cols);

@@ -21,9 +21,11 @@ import { shoreOf } from './den-isle.js';
 import { PACE } from './chatter.js';
 import { seeded } from './mirror-row.js';
 import { BURNT, COLS, Distilling, WHITE, goesUp } from './distilling.js';
-import { advise } from './distill-bots.js';
-import { ROUTINES, isJunk } from './distill-routines.js';
-import { AFTER, HELP, HELP_ELSE, LESSON, MISHAP, NERVES, ONWARD, OPENING, PRAISE, STEP_ONE, TELL } from './lines/helium.js';
+import { HELIUM as HAND, advise } from './distill-bots.js';
+import { ROUTINES, isJunk, playDrags } from './distill-routines.js';
+import { routesInto } from './distill-path.js';
+import { PHASES } from './distill-phase.js';
+import { AFTER, HELP, HELP_ELSE, HINT, LESSON, MISHAP, NERVES, ONWARD, OPENING, PHASE, PRAISE, STEP_ONE, TELL, WATCH } from './lines/helium.js';
 import { AT_HELIUMS } from './lines/you.js';
 const H = LAY.HELIUM;
 export const HELIUM = {
@@ -394,6 +396,108 @@ export function askHelium(g) {
         return { advice: null, says: HELP_ELSE.busy, note: '', plays: null };
     const advice = advise({ cols: g.cols, chain: g.chain, timeLeft: g.timeLeft() });
     return { advice, ...helpFor(advice) };
+}
+// ---------- hints, and watching them play ----------
+/* The user (13 Nov): "as well as helium helping, they can be hinting as well, so it shows you the path. Of what
+   the next moves are they would do. And maybe ... plans out a few of like, well, this is the thing I will do at
+   this part of the game"; "when he's kind of highlighting the white pieces ... maybe it should show some arrows
+   of nearby routes of pieces that can be dragged into the spots"; and "the watch helium play option where he
+   explains ... first of all ... I'm going to try and get rid of all the white pieces in all these columns, and
+   then just kind of step by step". So three ways at the still: Help (they play the move), a hint (the next drags
+   drawn as arrows, not played, their line the phase and what they're after), and watching them play your board,
+   saying each phase as it starts and each move's technique before it. All read your board with the planner
+   (src/distill-bots.ts, advise) and its phase (src/distill-phase.ts). */
+/** A hint's drags at the most: the next one or two the planner would play. */
+export const HINT_DRAGS = 2;
+const copyDrag = (d) => ({ x: d.x, y: d.y, ways: [...d.ways] });
+/** The phase in the bar: its name and plan. */
+const phaseNote = (p) => `${PHASES[p].label}: ${PHASES[p].plan}`;
+/** A hint on a board as it stands: the planner's next drag or two (its move's, then the move after it, looked
+    ahead on the board the first leaves), and their line naming the phase. Nothing while it's sliding. */
+export function hintFor(g) {
+    if (!g.movable)
+        return { advice: null, says: HELP_ELSE.busy, note: '', drags: [], boards: [] };
+    const chain = g.chain, timeLeft = g.timeLeft(), a = advise({ cols: g.cols, chain, timeLeft });
+    if (a.kind !== 'move' || !a.drags.length) {
+        return { advice: a, says: a.kind === 'move' ? HINT.none : helpFor(a).says, note: `${phaseNote(a.phase)} · now: ${a.label}`, drags: [], boards: [] };
+    }
+    const drags = a.drags.slice(0, HINT_DRAGS).map(copyDrag), boards = [copy(g.cols)];
+    for (const d of drags)
+        boards.push(playDrags(boards[boards.length - 1], [d]));
+    if (drags.length < HINT_DRAGS) {
+        const next = advise({ cols: boards[boards.length - 1], chain, timeLeft });
+        if (next.kind === 'move' && next.drags.length) {
+            const d = copyDrag(next.drags[0]), after = playDrags(boards[boards.length - 1], [d]);
+            if (after) {
+                drags.push(d);
+                boards.push(after);
+            }
+        }
+    }
+    return { advice: a, says: PHASE[a.phase].first, note: `${phaseNote(a.phase)} · next: ${a.label}: ${a.reason}`, drags, boards };
+}
+const same = (a, b) => a.length === b.length && a.every((c, x) => c.length === b[x].length && c.every((p, y) => p === b[x][y]));
+/** The hint's drags still to show on the board now: from the one you're up to, as you follow them; none once
+    you've played them all, or done something else. */
+export function hintLeft(h, cols) {
+    for (let k = h.boards.length - 1; k >= 0; k--)
+        if (same(h.boards[k], cols))
+            return h.drags.slice(k);
+    return [];
+}
+/** Routes into the places of the whites in the furnace's column, the ones their nerves ring: for each, a few
+    junk pieces' drags that would take its place (it then drops out left), the path search's (src/distill-path.ts,
+    routesInto), cheapest first; at most `most` in all. */
+export function routesToFire(cols, most = 4) {
+    const out = [], x = COLS - 1;
+    cols[x].forEach((p, y) => { if (p === WHITE && out.length < most)
+        out.push(...routesInto(cols, { x, y, side: -1 }, HAND, Math.min(2, most - out.length))); });
+    return out;
+}
+/** Watching them play your board: how long a move's arrow is up before they drag it, their hand's pace (slower
+    than their help's quick one, to follow), a breath between beats, and how long they let the furnace run when
+    there's nothing worth doing before they look again. Each line's up at the lesson's reading pace (lessonSecs). */
+export const PACE_WATCH = { ARROW: 1.4, HOLD: 0.45, SWAP: 0.3, BETWEEN: 0.5, GAP: 0.5, WAIT: 2.5 };
+/** Them playing your board for you to watch, a beat at a time (`next` on the board as it stands): before each
+    phase, the phase and its plan ("first of all ... get rid of all the white pieces in all these columns"); before
+    each move, the technique and why, a short line ("again" when it's the same as before); a wait said once. */
+export class Watch {
+    phase = null;
+    said = new Set();
+    last = null;
+    agains = 0;
+    waited = false;
+    next(g) {
+        if (!g.movable)
+            return { kind: 'busy', says: '', note: '', phase: this.phase, drags: [] };
+        const a = advise({ cols: g.cols, chain: g.chain, timeLeft: g.timeLeft() }), phase = a.phase;
+        if (phase !== this.phase) {
+            const says = this.said.has(phase) ? PHASE[phase].again : PHASE[phase].first;
+            this.said.add(phase);
+            this.phase = phase;
+            this.last = null;
+            this.waited = false;
+            return { kind: 'phase', says, note: phaseNote(phase), phase, drags: [] };
+        }
+        const note = a.reason ? `${a.label}: ${a.reason}` : a.label;
+        if (a.kind === 'move' && a.drags.length) {
+            const t = a.sweep ? 'diamond' : a.technique === 'path' ? 'path' : a.routine ?? 'diamond';
+            const says = t === this.last ? WATCH.again[this.agains++ % WATCH.again.length] : WATCH[t];
+            this.last = t;
+            this.waited = false;
+            return { kind: 'move', says, note, phase, drags: a.drags.map(copyDrag) };
+        }
+        this.last = null;
+        if (a.kind === 'burn') {
+            this.waited = false;
+            return { kind: 'burn', says: WATCH.burn, note, phase, drags: [] };
+        }
+        if (a.kind === 'dismiss')
+            return { kind: 'dismiss', says: WATCH.dismiss, note, phase, drags: [] };
+        const says = this.waited ? '' : a.kind === 'move' ? WATCH.stuck : WATCH.wait;
+        this.waited = true;
+        return { kind: 'wait', says, note, phase, drags: [] };
+    }
 }
 /** While you're within earshot of their island, lesson or none: a line now and then, round and round. */
 export const HELIUM_SAYS = { loop: AFTER };
