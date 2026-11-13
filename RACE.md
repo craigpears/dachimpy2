@@ -1352,6 +1352,13 @@ check, a share link, and the den's own race for 3D.
   Would that work?" The typewriter: each leg a row of its own, a trade wind carrying everyone back to its start
   between legs, so no shortcut can skip another leg's, and a leg's shortcut can save a lot by that leg's long way
   being long.
+  But (the user, 13 Nov): the typewriter "is the simple version. But ... it loses a lot of the character ... Just
+  think of more creative ways of making that work that maintains some character." Chosen ("do what you think's
+  best"): meeting points, not resets. Every shortcut rejoins the long way before its leg's buoy, so none skips
+  another leg's choices, and the water between can wind as it likes; the gate cuts across the mouth of a big bay
+  that the long way goes round, the Empire's fort on its shore, both coming out at the same buoy. And scenic:
+  "reusing some of the assets ... we've got elsewhere to make the race a bit more scenic ... crossing the Imperial
+  Fort would be cool" (Port Decorum's fort and town, the Empire's look). The experiment redirected to it.
 
 ## 13. Where it lives
 
