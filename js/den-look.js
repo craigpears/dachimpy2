@@ -52,11 +52,12 @@ export const PARTS = {
   // Halloween masks and hats, women's only: YPPedia, Clothing (hats). Berserker pelt: a bear's head and
   // its fur, either body, a prize from a 2011 event made since from a design: YPPedia; Gravee's, white. Crown of
   // roses: the roses in its first colour, the leaves in its second: Kikkit's red and green, Roobear's purple and
-  // gold. Beret: a monsieur's, for Roobear's gallery, 13 Nov.)
+  // gold. Beret: a monsieur's, for Roobear's gallery, 13 Nov. Beehive wig: Dachimpy's, a tall wig piled up, a band
+  // round it in its second colour, from their in-game picture, 13 Nov.)
   hat: {
-    m: [['none', 'No hat'], ['bandana', 'Bandana'], ['tricorne', 'Tricorne'], ['feathered', 'Feathered hat', 1], ['captain', "Captain's hat", 1], ['sleeping', 'Sleeping hat'], ['fez', 'Fez'], ['viking', 'Viking helmet'], ['roses', 'Crown of roses', 1], ['pelt', 'Berserker pelt'], ['beret', 'Beret']],
+    m: [['none', 'No hat'], ['bandana', 'Bandana'], ['tricorne', 'Tricorne'], ['feathered', 'Feathered hat', 1], ['captain', "Captain's hat", 1], ['sleeping', 'Sleeping hat'], ['fez', 'Fez'], ['viking', 'Viking helmet'], ['roses', 'Crown of roses', 1], ['pelt', 'Berserker pelt'], ['beret', 'Beret'], ['beehive', 'Beehive wig', 1]],
     f: [['none', 'No hat'], ['bandana', 'Bandana'], ['tricorne', 'Tricorne'], ['feathered', 'Feathered hat', 1], ['captain', "Captain's hat", 1], ['sleeping', 'Sleeping hat'], ['wide', 'Wide-brimmed hat', 1], ['viking', 'Viking helmet'],
-      ['veil', 'Veil', 1], ['tiara', 'Tiara', 1], ['butterfly', 'Butterfly'], ['feline', 'Feminine feline', 1], ['witch', 'Wicked witch', 1], ['roses', 'Crown of roses', 1], ['pelt', 'Berserker pelt'], ['beret', 'Beret']],
+      ['veil', 'Veil', 1], ['tiara', 'Tiara', 1], ['butterfly', 'Butterfly'], ['feline', 'Feminine feline', 1], ['witch', 'Wicked witch', 1], ['roses', 'Crown of roses', 1], ['pelt', 'Berserker pelt'], ['beret', 'Beret'], ['beehive', 'Beehive wig', 1]],
   },
   // (Swept up: Helium's, swept up off the face and over the crown, a fall of it by one cheek, 13 Nov. Twists:
   // Tzz's, twisted locks drawn back over the head and tied behind, 13 Nov. Pinned up: Roobear's, a knot of curls
@@ -71,7 +72,7 @@ export const PARTS = {
   },
   top: {
     m: [['striped', 'Striped shirt', 1], ['plain', 'Plain shirt'], ['sash', 'Shirt with sash', 1], ['vest', 'Striped shirt with vest', 1], ['swashbuckler', "Swashbuckler's jacket", 1], ['buccaneer', 'Buccaneer jacket', 1], ['captain', "Captain's jacket", 1],
-      ['frilly', 'Frilly shirt with sash', 1], ['raiment', 'Vampire raiment', 1], ['rag', 'Rag shirt']],
+      ['frilly', 'Frilly shirt with sash', 1], ['raiment', 'Vampire raiment', 1], ['rag', 'Rag shirt'], ['braces', 'Braces']],
     f: [['striped', 'Striped shirt', 1], ['belt', 'Shirt with belt'], ['corset', 'Corset', 1], ['vest', 'Striped shirt with vest', 1], ['buccaneer', 'Buccaneer jacket', 1], ['swashbuckler', "Swashbuckler's jacket", 1], ['captain', "Captain's jacket", 1],
       ['dresstop', 'Dress top', 1], ['frilly', 'Frilly shirt with sash', 1], ['midriff', 'Midriff blouse with scarf', 1], ['raiment', 'Vampire raiment', 1], ['tied', 'Top tied at the front'], ['rag', 'Rag shirt'], ['strapless', 'Strapless corset', 1]],
   },
@@ -117,7 +118,7 @@ export const EARRINGS = [[false, 'None'], [true, 'One'], ['both', 'Both ears']];
 // starfish are Puzzle Pirates' four injuries, from being sunk (YPPedia: Injury). A `grin`, the mouth wide
 // open, laughing: Tzz's (her portrait, 13 Nov).
 export const DEFAULT_LOOK = {
-  body: 'm', skin: 1, hair: 'short', hairCol: 'brown', beard: 'full', patch: true, earring: true, smile: false, grin: false, hook: false, tongue: false, tattoos: false, wristband: false, starfish: false, pegleg: false,
+  body: 'm', skin: 1, hair: 'short', hairCol: 'brown', beard: 'full', patch: true, earring: true, smile: false, grin: false, hook: false, tongue: false, tattoos: false, wristband: false, starfish: false, pegleg: false, bareLegs: false,
   hat: 'bandana', hatCol: 'red', hatCol2: 'white', top: 'striped', topCol: 'red', topCol2: 'white', waist: 'belt', waistCol: 'black',
   legs: 'pants', legsCol: 'navy', legsCol2: 'tan', feet: 'boots', feetCol: 'black', feetCol2: 'black', hand: 'none', handCol: 'red', fam: 'none', famCol: 'green', famCol2: 'red',
 };
@@ -136,7 +137,7 @@ export function cleanLook(o) {
   if (!DYES[src.feetCol2]) L.feetCol2 = L.feetCol;   // (fancy boots' tops were the boots' own colour)
   if (HAIR[src.hairCol]) L.hairCol = src.hairCol;
   if (Number.isInteger(src.skin) && SKIN[src.skin]) L.skin = src.skin;
-  for (const kk of ['patch', 'smile', 'grin', 'hook', 'tongue', 'tattoos', 'wristband', 'starfish', 'pegleg']) if (typeof src[kk] === 'boolean') L[kk] = src[kk];
+  for (const kk of ['patch', 'smile', 'grin', 'hook', 'tongue', 'tattoos', 'wristband', 'starfish', 'pegleg', 'bareLegs']) if (typeof src[kk] === 'boolean') L[kk] = src[kk];
   if (EARRINGS.some(([v]) => v === src.earring)) L.earring = src.earring;
   if (FURRY[L.fam]) L.famCol = FUR[src.famCol] ? src.famCol : FURRY[L.fam];
   return L;
@@ -246,6 +247,16 @@ export const PIRATES = Object.fromEntries(Object.entries({
     body: 'f', skin: 0, hair: 'pinned', hairCol: 'black', patch: false, earring: true, smile: true, hook: true,
     hat: 'roses', hatCol: 'purple', hatCol2: 'gold', top: 'strapless', topCol: 'purple', topCol2: 'purple', waist: 'none',
     legs: 'flare', legsCol: 'purple', feet: 'boots', feetCol: 'black', hand: 'blueberries', fam: 'crow', famCol: 'atlantean',
+  },
+  // Dachimpy, the user's own pirate (they/them), whose house in the den's district doubles as a museum: "me ...
+  // with my pink and purple wig, kilt, belt and braces, and shoes" (the user, 13 Nov, with an in-game picture of
+  // them beside Dignity; the first go, from words alone, "absolutely does not look like me"): a tall pale pink
+  // beehive wig with a purple band, tan skin, a brown beard and moustache, purple braces over a bare chest, a dark
+  // belt, a pink kilt in a purple tartan, bare legs, pink shoes; nothing in hand, no familiar.
+  Dachimpy: {
+    body: 'm', skin: 2, hair: 'short', hairCol: 'brown', beard: 'full', patch: false, earring: false, smile: true, bareLegs: true,
+    hat: 'beehive', hatCol: 'rose', hatCol2: 'purple', top: 'braces', topCol: 'purple', waist: 'belt', waistCol: 'black',
+    legs: 'kilt', legsCol: 'pink', legsCol2: 'purple', feet: 'shoes', feetCol: 'pink', hand: 'none', fam: 'none',
   },
 }).map(([name, look]) => [name, cleanLook(look)]));
 
@@ -398,7 +409,7 @@ export function dressPirate(look, opts = {}) {
   const hairHex = hexOf(HAIR[L.hairCol] || L.hairCol), hairM = M('#ffffff', { map: hairTex(hairHex) }), hairPlain = M(hairHex);
   const top = L.topCol, top2 = L.topCol2;
   const shirtM = {
-    striped: () => M('#ffffff', { map: stripeTex(top2, top) }), plain: () => M(top), sash: () => M(top), belt: () => M(top),
+    striped: () => M('#ffffff', { map: stripeTex(top2, top) }), plain: () => M(top), sash: () => M(top), belt: () => M(top), braces: () => (L.tattoos ? inked : skin),
     vest: () => M('#ffffff', { map: stripeTex('white', top2) }), swashbuckler: () => M('white'), buccaneer: () => M('white'), captain: () => M('white'), corset: () => M('white'),
     dresstop: () => skin, midriff: () => skin, frilly: () => M('white'), raiment: () => M(top),   // (off the shoulder and a bare midriff: skin under them)
     tied: () => (L.tattoos ? inked : skin), strapless: () => (L.tattoos ? inked : skin),   // (bare shoulders over a strapless corset)
@@ -413,7 +424,8 @@ export function dressPirate(look, opts = {}) {
     pantaloons: () => M(L.legsCol), flare: () => M(L.legsCol), kilt: () => skin, long: () => M(L.legsCol), short: () => M('white'), ragged: () => skin,
     gown: () => M(L.legsCol), bloomers: () => M(L.legsCol) }[L.legs]?.() || M(L.legsCol);
   // (Stockings under knickers and the like; bare legs over bare feet.)
-  const shinM = { knickers: L.feet === 'bare' ? skin : white, pantaloons: white, kilt: white, short: white }[L.legs] || thighM;
+  // (`bareLegs`: none, bare from the hem down: Dachimpy's under their kilt, 13 Nov.)
+  const shinM = L.bareLegs && ['knickers', 'pantaloons', 'kilt', 'short'].includes(L.legs) ? skin : { knickers: L.feet === 'bare' ? skin : white, pantaloons: white, kilt: white, short: white }[L.legs] || thighM;
   const legs = [-1, 1].map((s) => {
     const hip = new THREE.Group();
     hip.position.set((F ? 0.12 : 0.13) * s, 0.72, 0);
@@ -610,6 +622,20 @@ export function dressPirate(look, opts = {}) {
         lace.rotation.z = 0.5 * s;
         body.add(lace);
       }
+    }
+  } else if (L.top === 'braces') {
+    // Braces (Dachimpy's "belt and braces", 13 Nov, from their in-game picture): over a bare chest, two straps in
+    // its colour from the waistband up the front, over each shoulder and down the back, a button at each end in front.
+    const strapM = M(top), y0 = 0.04, y1 = 0.6, out = (y, x) => Math.sqrt(Math.max(0, rAt(y) ** 2 - x * x)) + 0.012;
+    for (const s of [-1, 1]) {
+      const x = 0.1 * s, z0 = out(y0, x), z1 = out(y1, x), len = Math.hypot(y1 - y0, z0 - z1), lean = Math.atan2(z0 - z1, y1 - y0);
+      for (const side of [1, -1]) {
+        const strap = part(new THREE.BoxGeometry(0.045, len, 0.012), strapM, x, (y0 + y1) / 2, side * (z0 + z1) / 2);
+        strap.rotation.x = -side * lean;
+        body.add(strap);
+      }
+      body.add(part(new THREE.BoxGeometry(0.045, 0.014, z1 * 2), strapM, x, y1 + 0.03, 0));   // (over the shoulder)
+      body.add(part(new THREE.SphereGeometry(0.014, 6, 5), brass, x, y0 + 0.03, z0 + 0.004));
     }
   }
   if (L.top === 'vest') {
@@ -1095,6 +1121,17 @@ export function dressPirate(look, opts = {}) {
       lf.scale.set(1.4, 0.4, 0.7);
       hat.add(rose, lf);
     }
+  } else if (L.hat === 'beehive') {
+    // A beehive wig (Dachimpy's, 13 Nov): a cap of it over the head, piled up high and round above, a band round
+    // its foot in its second colour, a curl over each ear; the face clear under it.
+    const cap = part(new THREE.SphereGeometry(hr + 0.025, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2.2), hc, 0, 0.94, -0.01);
+    cap.rotation.x = -0.18;
+    const pile = part(new THREE.SphereGeometry(0.27, 20, 14), hc, 0, 1.33, -0.04);
+    pile.scale.set(1, 1.3, 1);
+    const band = part(new THREE.TorusGeometry(0.235, 0.032, 8, 26), hc2, 0, 1.12, -0.03);
+    band.rotation.x = Math.PI / 2;
+    hat.add(cap, pile, band);
+    for (const sx of [-1, 1]) hat.add(part(new THREE.SphereGeometry(0.075, 10, 8), hc, sx * (hr - 0.01), 0.9, -0.05));
   } else if (L.hat === 'beret') {
     // A beret: a soft flat round cap worn tipped to one side, a little stalk on top (a monsieur's: Roobear's
     // gallery, "Robert, a Monsieur").

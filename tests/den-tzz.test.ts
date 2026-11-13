@@ -331,6 +331,6 @@ describe('she\'s only config, and the wardrobe has all she wears (RULES.md, "A c
     expect(parts.match(/\['dragon', 'Dragon', 1\]/g)).toHaveLength(2);
     expect(LOOK_JS).toMatch(/silver: '#[0-9a-f]{6}', 'vibrant red': '#[0-9a-f]{6}'/);
     expect(LOOK_JS).toMatch(/'light brown': '#[0-9a-f]{6}'/);
-    expect(LOOK_JS).toContain("['patch', 'smile', 'grin', 'hook', 'tongue', 'tattoos', 'wristband', 'starfish', 'pegleg']");
+    expect(LOOK_JS).toContain("['patch', 'smile', 'grin', 'hook', 'tongue', 'tattoos', 'wristband', 'starfish', 'pegleg', 'bareLegs']");
   });
 });

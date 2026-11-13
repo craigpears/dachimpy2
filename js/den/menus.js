@@ -339,6 +339,7 @@ export function dressRows() {
     toggle(row('Eyepatch'), L.patch, look('patch'));
     toggle(row('Hook'), L.hook, look('hook'));   // (for the left hand, as Mischievious has)
     toggle(row('Peg leg'), L.pegleg, look('pegleg'));   // (for the right leg, as Tzz has)
+    toggle(row('Bare legs'), L.bareLegs, look('bareLegs'));   // (no stockings under a kilt or knickers: Dachimpy's)
     chooser(row('Earrings'), EARRINGS, L.earring, look('earring'));
     toggle(row('Smile'), L.smile, look('smile'));
     toggle(row('Grin'), L.grin, look('grin'));   // (the mouth open, laughing: Tzz's)

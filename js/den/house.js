@@ -21,7 +21,7 @@
    walls ({ id, x, y, z }: src/den-houses.ts's Exhibit), `remark(id)` what the host says of one;
    `pictures` its pictures to look through close up, flat (picture-view.js: Tab, or the button), as
    { name, who (says what's said of them), list() ({ id, title, x, z }, in the order they hang), art(picture)
-   (a canvas) }; `host` { who (a person(): props-people.js), idle,
+   (a canvas, or an image), note(picture) (its plaque, if any) }; `host` { who (a person(): props-people.js), idle,
    showing() (a ShowSpot, or null), still() (true: the scene has them just now) }; `stretch` a Stretch
    with `titles` ({ x, title }: shown as they go by) and `lines` ({ ask: yours the first time, answer:
    the host's then, back: theirs coming back }). H is the shell's side: the root to build in, you,
@@ -32,13 +32,14 @@ import { $, scene, camera, renderer, hemi, skyDome, paintSky, myLook, V3, toast 
 import { cine, cinePlay, cineEnd, cineLets, bubble, bubbleAt, stepTo } from './cine.js';
 import { GRAVEE_HOUSE } from './gravee-house.js';
 import { ROOBEAR_HOUSE } from './roobear-house.js';
+import { DACHIMPY_HOUSE } from './dachimpy-house.js';
 import { pictures, picturesOpen, picturesClose, picturesKey } from './picture-view.js';
 import { startAt } from '../picture-view.js';
 
 /** Where the houses are: well out of sight of the den, the sea and the Wedding Isle (at +400). */
 export const HOUSE_AT = V3(-400, 0, 0);
 /** Each house's scene, by its id in HOUSES. */
-const SCENES = { gravee: GRAVEE_HOUSE, roobear: ROOBEAR_HOUSE };
+const SCENES = { gravee: GRAVEE_HOUSE, roobear: ROOBEAR_HOUSE, dachimpy: DACHIMPY_HOUSE };
 
 const toast = (text, bad = false) => denToast(text, bad, false, true);
 /** All there is of the house you're in. */
@@ -390,7 +391,7 @@ function openPictures() {
   const list = P.list(), Y = house.you, c = camera.position, d = camera.getWorldDirection(V3());
   const seen = I.exhibits ? lookingAt(I.exhibits, Y, { x: c.x - HOUSE_AT.x, y: c.y - HOUSE_AT.y, z: c.z - HOUSE_AT.z }, d) : null;
   keys.clear(); house.to = null;
-  return picturesOpen({ list, at: startAt(list, seen?.id ?? null, Y), art: P.art, line: I.remark ? (p) => I.remark(p.id) : null, who: P.who || '', done: () => keys.clear() });
+  return picturesOpen({ list, at: startAt(list, seen?.id ?? null, Y), art: P.art, note: P.note || null, line: I.remark ? (p) => I.remark(p.id) : null, who: P.who || '', done: () => keys.clear() });
 }
 
 // ---------- your keys, clicks and taps ----------

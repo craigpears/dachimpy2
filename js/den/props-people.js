@@ -6,8 +6,9 @@
    person({ look, parent, x, y, z, yaw, scale, idle, script, lines, loop, random, gap, wait, secs, begun,
    say, bubble, shown, tall, earshot, face }) is a pirate from a look standing in a scene doing an idle
    animation picked by name from IDLES (swaying, a tipsy sway with a swig, talking, waving, clapping,
-   painting, giggling, cowering, screaming, twisting a balloon, ta-da...), holding what that idle holds
-   (HOLDS: a brush to paint), and, if it's given something to say, saying it:
+   painting, giggling, cowering, screaming, twisting a balloon, ta-da, a hug, holding something out...),
+   holding what that idle holds (HOLDS: a brush to paint, a plate of cookies to offer), and, if it's given
+   something to say, saying it:
    - what, and in what order: `script` (src/chatter.ts's Script: an intro once, then a loop for ever, the
      intro retold after each time round if it says, asides by name), or just `lines`, round and round
      (`loop`, in turn or `random`) or once; a pause between (`gap`, seconds, or [least, most]), `wait`
@@ -27,6 +28,7 @@ import { Chatter, PACE } from '../chatter.js';
 import { readSecs, CANVAS, BRUSH, brushReach } from '../den-houses.js';
 import { fright } from './creatures.js';
 import { bubble as pageBubble, bubbleAt } from './cine.js';
+import { cookiePlate } from './furniture.js';
 
 const rest = (p) => {
   p.arms.forEach((a) => a.rotation.set(0, 0, 0));
@@ -102,6 +104,23 @@ export const IDLES = {
   tada: (p, t) => { rest(p); p.arms.forEach((a, i) => a.rotation.set(-2.25, 0, (i ? 1 : -1) * 0.55)); p.body.position.y = 0.72 + Math.abs(Math.sin(t * 5)) * 0.02; },
   /** Scared to death: hair on end, mouth open, arms flung up (creatures.js's fright). */
   scream: (p) => fright(p, true),
+  /** A hug: both arms out round whoever's in front, a gentle squeeze, rocking a little side to side
+      (Dachimpy's, at their door). */
+  hug: (p, t) => {
+    rest(p);
+    const squeeze = Math.max(0, Math.sin(t * 2.2)) * 0.08;
+    p.arms.forEach((a, i) => a.rotation.set(-1.25 - squeeze, (i ? 1 : -1) * 0.25, (i ? 1 : -1) * (0.42 + squeeze)));
+    p.body.rotation.z = Math.sin(t * 1.6) * 0.05;
+    p.body.rotation.x = 0.06;
+  },
+  /** Holding something out to you in the right hand (HOLDS: a plate of cookies), the other hand open. */
+  offer: (p, t, talking, plate) => {
+    rest(p);
+    p.arms[0].rotation.set(-1.15 + Math.sin(t * 2) * 0.03, 0, 0.08);
+    if (plate) plate.rotation.x = 1.15 - Math.sin(t * 2) * 0.03;   // (kept level, whatever the arm's doing)
+    p.arms[1].rotation.set(-0.45, 0, -0.3);
+    if (talking) p.body.rotation.x = Math.sin(t * 4.2) * 0.03;
+  },
 };
 
 /** Points an arm (hanging down from its shoulder, as the wardrobe's do) along (dx, dy, dz), in its
@@ -129,9 +148,17 @@ const PROPS = {
     g.position.y = -0.5;   // (in the hand: the 'paint' idle slides it along a touch to dab)
     return g;
   },
+  /** A plate of cookies (furniture.js's cookiePlate), on the palm: the 'offer' idle keeps it level. */
+  cookies() {
+    const g = new THREE.Group(), plate = cookiePlate({ n: 5 });
+    plate.position.set(0, 0.0, 0.07);
+    g.add(plate);
+    g.position.y = -0.6;
+    return g;
+  },
 };
 /** By idle: what it holds (PROPS). */
-export const HOLDS = { paint: 'brush' };
+export const HOLDS = { paint: 'brush', offer: 'cookies' };
 
 const v = new THREE.Vector3();
 

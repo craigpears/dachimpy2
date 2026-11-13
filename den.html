@@ -526,6 +526,10 @@
     .pic-view figcaption small { font-size: 13px; opacity: .75; }
     .pic-line { margin: 0; max-width: min(560px, calc(100vw - 40px)); text-align: center; font-size: 17px; color: #f6ecd2; line-height: 1.35; }
     .pic-line[hidden] { display: none; }
+    /* (a photo keeps its own shape, as big as the view allows: a museum's screenshots, js/den/exhibits.js; and its plaque under it) */
+    .pic-art img.pic-photo { display: block; width: min(calc(100vw - 150px), calc(min(100dvh - 330px, 600px) * var(--a, 1.333))); height: auto; aspect-ratio: var(--a, 1.333); border: 10px solid #a8761f; border-radius: 3px; box-shadow: 0 0 0 3px #f2cf6a inset, 0 10px 30px rgba(0,0,0,.7); background: #1a110b; }
+    .pic-note { margin: 0; max-width: min(620px, calc(100vw - 40px)); text-align: center; font: italic 16px/1.35 'Alegreya', serif; color: #3a2210; background: #efe2bd; border: 2px solid #7a5216; border-radius: 5px; padding: 6px 14px; box-sizing: border-box; }
+    .pic-note[hidden] { display: none; }
     .pic-step { font-size: 40px; line-height: 1; width: 48px; height: 72px; padding: 0; border-radius: 10px; flex: none; }
     .pic-foot { display: flex; align-items: center; gap: 12px; color: #d8c8a0; font-size: 14px; }
     .pic-foot span[hidden] { display: none; }
@@ -637,7 +641,7 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.UBICT6WR.js');
+    import(local ? './js/den.js' : './js/den.MSF2HUNS.js');
   </script>
 </body>
 </html>
