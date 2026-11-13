@@ -3,9 +3,10 @@
    each tier reaches is tools/distill-bots.mjs's to measure (DISTILLING.md §4). */
 import { describe, expect, it } from 'vitest';
 import { BLACK, BURN_TICKS, COLS, DOWN_RIGHT, Distilling, SHORT, TALL, UP_LEFT, UP_RIGHT, WHITE, neighbourOn, parseBoard } from '../src/distilling';
-import { HELIUM, MENU, TIERS, advise, backward, choose, contextFor, judge, junkAcross, playSession, tierNamed, turnsIn, weigh } from '../src/distill-bots';
+import { DistillBot, HELIUM, MENU, brownSweep, whitesInJunk, TIERS, advise, backward, choose, contextFor, judge, junkAcross, playSession, tierNamed, turnsIn, weigh } from '../src/distill-bots';
 import type { Advice } from '../src/distill-bots';
 import { ROUTINES, colourLeft, playDrags } from '../src/distill-routines';
+import { trappedWhite } from '../src/distill-score';
 import type { Drag, RoutineName } from '../src/distill-routines';
 import type { Board } from '../src/distilling';
 import { seeded } from '../src/mirror-row';
@@ -118,12 +119,15 @@ describe('the start is sweeping, the techniques after (12 Nov)', () => {
     expect(a.drags[0].ways.length).toBeGreaterThanOrEqual(3);
     // Swept blind: hardly a pause between them, every tier (the lower ones a bit slower).
     for (const t of TIERS) expect(t.sweepSpot).toBeLessThan(t.spot / 2);
-    // A bot's first move is a sweep, and at the start plain drags (sweeps, the diamond's runs) come at least as
-    // often as the slow techniques.
+    // A bot's first move is one quick drag (since 13 Nov, with the score "about filling those right-hand
+    // columns", that can be a white saved out of the column next to burn, finishing it), never a slow
+    // technique, and at the start plain drags (sweeps, the diamond's runs) come at least as often as the slow
+    // techniques.
     const plans: Advice[] = [];
     playSession(new Distilling(seeded(5001)), tierNamed('master'), 1, undefined, (p) => { if (p.kind === 'move') plans.push(p); });
     const first = plans.slice(0, 20);
-    expect(first[0].label).toBe('The sweep');
+    expect(first[0].drags).toHaveLength(1);
+    expect(SLOW).not.toContain(first[0].routine);
     const plain = first.filter((p) => p.routine === 'diamond').length, slow = first.filter((p) => SLOW.includes(p.routine!)).length;
     expect(plain).toBeGreaterThanOrEqual(slow);
   });
@@ -169,6 +173,58 @@ describe('the cheapest technique that still works (12 Nov, the seventh to tenth 
     expect(backward(cols, way!.move.drags, 'junk')).toBe(0);
     const loop = ranked.find((m) => m.move.routine === 'crawl');
     if (loop) expect(way!.value).toBeGreaterThan(loop.value);
+  });
+});
+
+describe('nothing trapped (13 Nov, the eighteenth note)', () => {
+  /** Whites trapped on a board (src/distill-score.ts, trappedWhite). */
+  const trappedWhites = (cols: Board) => cols.flatMap((c, x) => c.map((_, y) => [x, y] as const)).filter(([x, y]) => trappedWhite(cols, x, y)).length;
+  it('the bot\'s very first move doesn\'t drag a white up to the top and trap it, 13 Nov ("the very first thing they did was to drag this white upwards ... so that there was a white trap right at the top. So I don\'t know how that\'s following the instruction of don\'t trap things")', () => {
+    // notes/distilling/35- and 36-*: the test page's first board (seed 1). The old first move took the white
+    // second from the top of the second column from the right up-left twice, to the top of column 7, where its
+    // only way left was a white: trapped.
+    for (const t of TIERS) for (let seed = 1; seed <= 6; seed++) {
+      const g = new Distilling(seeded(seed)), cols = g.cols;
+      const a = new DistillBot(t).plan(g);
+      if (a.kind !== 'move') continue;
+      const after = playDrags(cols, a.drags)!;
+      expect(trappedWhites(after), `${t.name} on seed ${seed}`).toBeLessThanOrEqual(trappedWhites(cols));
+      if (seed === 1) expect(after[6][0] === WHITE && cols[6][0] !== WHITE, t.name).toBe(false);
+    }
+  });
+  it('the brown sweep to the bottom right waits till the columns next to burn are clear of white, 13 Nov ("it\'s very good. But it\'s just like it leaves one or two trapped whites ... it\'s being applied a bit too quickly before those columns have been cleared")', () => {
+    // Played over whole sessions: every brown sweep made while a white was still in the junk columns next to
+    // burn took a white out of them; once they were clear, the sweep was played as before.
+    let free = 0;
+    for (const seed of [5000, 5001]) {
+      const g = new Distilling(seeded(seed));
+      playSession(g, tierNamed('master'), 30, undefined, (a) => {
+        if (a.stage !== 'junk' || a.kind !== 'move' || !brownSweep(g.cols, a.drags)) return;
+        const ctx = contextFor(g.cols, 'junk', 0, 16), was = whitesInJunk(g.cols, ctx.burnFrom);
+        if (was === 0) { free++; return; }
+        expect(whitesInJunk(playDrags(g.cols, a.drags)!, ctx.burnFrom)).toBeLessThan(was);
+      });
+    }
+    expect(free).toBeGreaterThan(0);
+  });
+  it('a white stuck where no routine frees it gets a piece brought round (the path search, "a pathfinding A-star style problem")', () => {
+    // The user's shape: a white on the top of column 7, the white below-left of it its only way left, a black
+    // further left in its row; the brown that can take its place is below-right of it, and has to go left
+    // first. A planner knowing no routines that would free it (none here) searches, and plays it.
+    const cols = parseBoard(['wwwwwwwww', 'wwwwwwww', 'wwwwwwwww', 'wwwwwwww', 'Kwwwwwwww', 'wwKKKKKK', 'wwKKKKKKK', 'KbKKKKKK', 'KKKKbbbbb', 'KKKKbbbb']);
+    expect(trappedWhite(cols, 6, 0)).toBe(true);
+    const ctx = contextFor(cols, 'junk', 0, 16);
+    const searching = { ...HELIUM, routines: [] };
+    const loop = weigh({ cols, chain: 0, timeLeft: 12000 }, ctx, searching).find((m) => m.move.routine === 'path' && m.move.drags[0].x === 7);
+    expect(loop?.move.drags).toEqual([{ x: 7, y: 1, ways: [UP_LEFT, UP_LEFT, UP_RIGHT] }]);
+    expect(trappedWhites(playDrags(cols, loop!.move.drags)!)).toBeLessThan(trappedWhites(cols));
+    const a = choose({ cols, chain: 0, timeLeft: 12000 }, ctx, searching);
+    expect(a.technique).toBe('path');
+    expect(a.label).toBe('Bring a piece round');
+    // Named for anyone keyed by the routines' names ("Help, Helium"): the nearest, the hook.
+    expect(a.routine).toBe('hook');
+    // Without the search, nothing.
+    expect(choose({ cols, chain: 0, timeLeft: 12000 }, ctx, { ...HELIUM, routines: [], path: false }).kind).not.toBe('move');
   });
 });
 

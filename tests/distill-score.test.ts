@@ -1,10 +1,12 @@
-/* The board score Stage I is judged by (src/distill-score.ts; the user, 12 Nov, the eleventh note: "how many
-   whites have moved to the left, how many other pieces have moved to the right ... Like completed brown black
-   columns with no whites in on the right, good"). */
+/* The board score Stage I is judged by (src/distill-score.ts; the user, 12 Nov, the eleventh note: "Like
+   completed brown black columns with no whites in on the right, good"; and simpler, 13 Nov, the eighteenth:
+   "Metric is how many columns are filled, second metric, how straight and vertical is the ... wall"). */
 import { describe, expect, it } from 'vitest';
-import { COLS, SHORT, TALL, parseBoard } from '../src/distilling';
+import { COLS, Distilling, SHORT, TALL, parseBoard } from '../src/distilling';
 import type { Board } from '../src/distilling';
-import { S, behindSpice, boardScore, doneFromRight, junkDone, seams, trapped } from '../src/distill-score';
+import { S, behindSpice, boardScore, doneFromRight, junkDone, trapped, trappedWhite, wall } from '../src/distill-score';
+import { playDrags } from '../src/distill-routines';
+import { seeded } from '../src/mirror-row';
 
 const sea = (ch: string) => Array.from({ length: COLS }, (_, x) => ch.repeat(x % 2 === 0 ? TALL : SHORT));
 function board(at: [number, number, string][], cols = sea('w')): Board {
@@ -15,11 +17,18 @@ function board(at: [number, number, string][], cols = sea('w')): Board {
 const column = (x: number, s: string): [number, number, string][] => [...s].map((ch, y) => [x, y, ch]);
 
 describe('the board score (12 Nov)', () => {
-  it('whites further left and junk further right score more ("how many whites have moved to the left, how many other pieces have moved to the right")', () => {
+  it('colour pulled from the left to the right scores, and no more for the white it passes going left, 13 Nov ("forget about dragging whites to the left ... you just want to pull things from the left to the right")', () => {
     // One black and the white beside it, swapped a column across: the black right, the white left.
     const left = board([[3, 4, 'K']]), right = board([[4, 4, 'K']]);
-    expect(seams(right)).toBe(seams(left));
-    expect(boardScore(right) - boardScore(left)).toBe(S.WHITE + S.JUNK);
+    expect(boardScore(right) - boardScore(left)).toBe(S.PULL);
+  });
+  it('the column being filled on the right counts each piece of junk in it, 13 Nov ("Metric is how many columns are filled")', () => {
+    // The last two columns junk but for one white in the furnace's: a black swapped in for it from the left.
+    const one = board([...column(8, 'KKKKbbbbb'), ...column(9, 'KKKKbbbw'), [8, 8, 'K']]);
+    const two = board([...column(8, 'KKKKbbbbw'), ...column(9, 'KKKKbbbK')]);
+    expect(doneFromRight(one)).toBe(0);
+    expect(doneFromRight(two)).toBe(1);
+    expect(boardScore(two) - boardScore(one)).toBeGreaterThan(S.COLUMN - TALL * S.FILL);
   });
   it('a completed junk column with no white scores above one with a white in it, 12 Nov ("completed brown black columns with no whites in on the right, good")', () => {
     // The same pieces: one brown and one white swapped across between the last two columns.
@@ -53,18 +62,42 @@ describe('the board score (12 Nov)', () => {
     // Freeing it is worth far more than the column it moved.
     expect(boardScore(freed) - boardScore(pocket)).toBeGreaterThanOrEqual(S.POCKET);
   });
-  it('the same colour stacked against the junk scores above a line of it through the whites, 12 Nov ("zigzagging so I can maintain a nice wall of white so I\'m not creating that line in the middle")', () => {
-    // Three blacks in each of columns 5 to 7 both times: stacked low against the junk, the whites above them one
-    // block; or a slanting line of them across the whites, whites above and below it.
-    const junkRight = [...column(8, 'KKKKbbbbb'), ...column(9, 'KKKKbbbb')];
-    const wall = board([...column(4, 'wwwwwwKKK'), ...column(5, 'wwwwwKKK'), ...column(6, 'wwwwwwKKK'), ...junkRight]);
-    const line = board([...column(4, 'wKKKwwwww'), ...column(5, 'wwKKKwww'), ...column(6, 'wwwwKKKww'), ...junkRight]);
-    expect(seams(line)).toBeGreaterThan(seams(wall));
-    expect(boardScore(wall)).toBeGreaterThan(boardScore(line));
+  it('once the wall between the whites and the colour has formed, a straight upright one scores above a slanting one, 13 Nov ("how straight and vertical is the ... wall where the white meets the color")', () => {
+    // The colour on the right: stood upright in the last three columns, or slanting, two columns wide at the top
+    // and four at the bottom.
+    const upright = board([7, 8, 9].flatMap((x) => column(x, x % 2 === 0 ? 'KKKKbbbbb' : 'KKKKbbbb')));
+    const slant = board([...column(6, 'wwwwwKKKK'), ...column(7, 'wwKKbbbb'), ...column(8, 'KKKKbbbbb'), ...column(9, 'KKKKbbbb')]);
+    expect(wall(upright).off).toBe(0);
+    expect(wall(slant).off).toBeGreaterThan(0);
+    expect(wall(upright).rows.every((b) => b === 7)).toBe(true);
+    expect(boardScore(upright)).toBeGreaterThan(boardScore(slant));
+  });
+  it('before a wall has formed, there is none to judge: a mixed board scores nothing for it', () => {
+    const g = new Distilling(seeded(1));
+    expect(wall(g.cols).off).toBe(0);
+    expect(wall(g.cols).rows.every((b) => b === null)).toBe(true);
   });
   it('a black on the bottom of the whites, with no way right, is trapped', () => {
     const cols = board([[4, 8, 'K'], [3, 3, 'K']]);
     expect(trapped(cols, 4, 8)).toBe(true);
     expect(trapped(cols, 3, 3)).toBe(false);
+  });
+  it('a white dragged up to the top among the blacks is trapped, 13 Nov (the bot\'s first move "went the entire way so that there was a white trap right at the top. So I don\'t know how that\'s following the instruction of don\'t trap things")', () => {
+    // notes/distilling/35- and 36-*: the test page's first board (seed 1), and the bots' old first move: the white
+    // second from the top of the second column from the right, dragged up-left twice to the top of column 7.
+    const cols = new Distilling(seeded(1)).cols;
+    const once = playDrags(cols, [{ x: 8, y: 1, ways: [1] }])!, twice = playDrags(cols, [{ x: 8, y: 1, ways: [1, 1] }])!;
+    expect(trappedWhite(twice, 6, 0)).toBe(true);
+    // One swap up-left it can still go on left (up into the black above it); the second leaves it on the top
+    // edge, the white below it its only way left: stuck till a brown is brought round under it.
+    expect(trappedWhite(once, 7, 0)).toBe(false);
+    expect(boardScore(once)).toBeGreaterThan(boardScore(twice));
+  });
+  it('whites at the top of the whites\' own side aren\'t trapped: only on the colour\'s side', () => {
+    // A river of whites in the middle, colour coming in on the left: its top whites have junk far left in their
+    // row, but they're home.
+    const cols = parseBoard(['KwwwKbwbw', 'KwKwwbwb', 'wwKwwwbwb', 'wKwwwwbw', 'wwwwwwwww', 'wwwwwwww', 'KbKbKKbbb', 'KKbKbKbb', 'KbKbKKbbK', 'bKKKbbbb']);
+    expect(trappedWhite(cols, 4, 0)).toBe(false);
+    expect(trappedWhite(cols, 4, 8)).toBe(false);
   });
 });

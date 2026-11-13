@@ -11,26 +11,37 @@
 
    The planner (`choose`): the stage says which routines are on the menu, the board which of them apply.
    In Stage I every move they offer, a plain drag or a technique alike, is judged by the board it leaves
-   (src/distill-score.ts: whites left, junk right, junk columns done from the right), the score it gains a
-   second of a person's time, one look ahead (the user, 12 Nov, the eleventh note: "even just as a test of
+   (src/distill-score.ts: junk columns filled from the right, colour pulled right, then a straight upright
+   wall; nothing trapped), the score it gains a second of a person's time, one look ahead (the user, 12 Nov, the eleventh note: "even just as a test of
    moves"); the cheap plain drag that does as well wins, and a long plain one is the sweep, swept blind. In
    the chain, a move is weighed by how much it betters the board (distill-routines' `measure`) less the
    time it takes. With time short, only what saves the furnace's column. A column
    ready to go is burned at once when nothing worth doing is left (the better tiers). In the chain, past
    a few Crystal Clears, the top tiers take the endgame's gamble the way a player does (the user, 12 Nov:
    "like a game of Russian roulette"): chase the next column while the odds are fair, cash in (dismiss)
-   when it can't be filled in time.
+   when it can't be filled in time. When a piece is stuck where it can't go its way (a white trapped at the
+   top, junk in a column still to go up) and none of the routines it knows unsticks anything, the better
+   tiers search for a piece to bring round into its place (src/distill-path.ts, the user, 13 Nov: "model it
+   as a path ... A-star"), judged like any other move.
 
    `advise(board)` is the planner for anyone's board, a person's mid-game: the stage, the routine it would
    play now, why in a line, and its drags. "Help, Helium" will show that on the player's own board. */
 
-import { COLS, DOWN_RIGHT, Distilling, SPICE, UP_RIGHT, WHITE, neighbourOn } from './distilling.js';
+import { BROWN, COLS, DOWN_LEFT, DOWN_RIGHT, Distilling, SPICE, UP_LEFT, UP_RIGHT, WHITE, neighbourOn } from './distilling.js';
 import type { Board, Column, DistillEvent } from './distilling.js';
 import {
   M, ROUTINES, burnsClean, clear, colourLeft, fillTarget, isJunk, junkTarget, measure, playDrags, swapsIn, whitesFrom,
 } from './distill-routines.js';
 import { boardScore } from './distill-score.js';
+import { pathMoves, stuck } from './distill-path.js';
+import type { PathMove } from './distill-path.js';
 import type { Ctx, Drag, Move, RoutineName } from './distill-routines.js';
+
+/** A technique the planner can play: a named routine, or 'path', a piece brought round by the search
+    (src/distill-path.ts). */
+export type Technique = RoutineName | 'path';
+/** The path search's name for a player. */
+export const PATH_LABEL = 'Bring a piece round';
 
 /** A tier of distiller (DISTILLING.md §4): the techniques it can pull off and its pace. */
 export interface Tier {
@@ -49,6 +60,8 @@ export interface Tier {
   reach: number;
   /** The techniques it knows. */
   routines: readonly RoutineName[];
+  /** Whether it searches for a piece to bring round when nothing it knows unsticks a stuck one. */
+  path?: boolean;
   /** Whether it burns as soon as the column's ready and nothing's left worth doing (else it waits for the
       furnace), dismisses when its chain breaks, and takes the endgame's gamble (cashes in a chain whose
       next column can't be filled in time). */
@@ -60,9 +73,9 @@ export interface Tier {
 const BASIC: RoutineName[] = ['rescue', 'junkColumn', 'diamond', 'channel'];
 export const TIERS: readonly Tier[] = [
   { name: 'learner', label: 'Learner', rate: 4, spot: 900, sweepSpot: 400, bank: 4, reach: 6, routines: BASIC, early: false, dismiss: false, gamble: false },
-  { name: 'master', label: 'Able to Master', rate: 5, spot: 500, sweepSpot: 150, bank: 6, reach: 10, routines: [...BASIC, 'turnOver', 'crawl', 'store', 'leapfrog'], early: true, dismiss: true, gamble: false },
-  { name: 'grandmaster', label: 'Grand-Master to Legendary', rate: 6, spot: 350, sweepSpot: 100, bank: 6, reach: 14, routines: [...BASIC, 'turnOver', 'crawl', 'store', 'leapfrog', 'figureEight', 'hook'], early: true, dismiss: true, gamble: true },
-  { name: 'ultimate', label: 'Ultimate', rate: 6, spot: 250, sweepSpot: 80, bank: 6, reach: 16, routines: [...BASIC, 'turnOver', 'crawl', 'store', 'leapfrog', 'figureEight', 'hook', 'linePull'], early: true, dismiss: true, gamble: true },
+  { name: 'master', label: 'Able to Master', rate: 5, spot: 500, sweepSpot: 150, bank: 6, reach: 10, routines: [...BASIC, 'turnOver', 'crawl', 'store', 'leapfrog'], path: true, early: true, dismiss: true, gamble: false },
+  { name: 'grandmaster', label: 'Grand-Master to Legendary', rate: 6, spot: 350, sweepSpot: 100, bank: 6, reach: 14, routines: [...BASIC, 'turnOver', 'crawl', 'store', 'leapfrog', 'figureEight', 'hook'], path: true, early: true, dismiss: true, gamble: true },
+  { name: 'ultimate', label: 'Ultimate', rate: 6, spot: 250, sweepSpot: 80, bank: 6, reach: 16, routines: [...BASIC, 'turnOver', 'crawl', 'store', 'leapfrog', 'figureEight', 'hook', 'linePull'], path: true, early: true, dismiss: true, gamble: true },
 ];
 export const tierNamed = (name: string): Tier => {
   const t = TIERS.find((x) => x.name === name);
@@ -86,8 +99,8 @@ export const P = {
   /** Stage I, judged by the board score (src/distill-score.ts) a second of a person's time: the least a
       move must get to be worth it, and the most for a ready column to burn at once rather than wait while
       it's done. */
-  RATE_MIN: 0.5,
-  SLACK: 3,
+  RATE_MIN: 0.15,
+  SLACK: 1,
   /** ms left on the furnace below which only what saves its column counts. */
   URGENT: 5000,
   /** The gamble: from this many Crystal Clears in a row, a chain is cashed in when its next column can't
@@ -108,7 +121,12 @@ export const P = {
 export interface Advice {
   stage: 'junk' | 'chain';
   kind: 'move' | 'burn' | 'wait' | 'dismiss';
+  /** The named routine played. A move found by the path search names the hook, the nearest named technique
+      (a piece taken round a corner), for anyone keyed by the routines' names ("Help, Helium"'s lines); its
+      `technique` says 'path'. */
   routine: RoutineName | null;
+  /** The technique played: the routine, or 'path' for the path search's move (its label PATH_LABEL). */
+  technique?: Technique | null;
   label: string;
   reason: string;
   drags: Drag[];
@@ -121,7 +139,7 @@ export interface Advice {
 /** The board as the planner sees it: the columns, the chain now, the furnace's ms left. */
 export interface Situation { cols: Board; chain: number; timeLeft: number }
 /** How the planner plays: the routines it knows, its reach and pace, and its habits (a Tier's). */
-export type Style = Pick<Tier, 'routines' | 'reach' | 'rate' | 'spot' | 'sweepSpot' | 'early' | 'gamble'>;
+export type Style = Pick<Tier, 'routines' | 'path' | 'reach' | 'rate' | 'spot' | 'sweepSpot' | 'early' | 'gamble'>;
 
 /** Junk in the furnace's column (spice is fine in a Crystal Clear). */
 const junkAt = (col: readonly number[]) => col.filter((p) => p !== WHITE && p !== SPICE).length;
@@ -144,6 +162,25 @@ export function plainDrag(drags: readonly Drag[]): boolean {
   if (drags.length !== 1 || drags[0].ways.length < P.SWEEP_LONG) return false;
   const right = (w: number) => w === UP_RIGHT || w === DOWN_RIGHT, r = right(drags[0].ways[0]);
   return drags[0].ways.every((w) => right(w) === r);
+}
+
+/** The brown sweep: a brown taken up through the whites and back down through the blacks, to the bottom right
+    (the diamond's brown run). */
+export function brownSweep(cols: Board, drags: readonly Drag[]): boolean {
+  if (!drags.length || cols[drags[0].x][drags[0].y] !== BROWN) return false;
+  const ways = drags[0].ways, up = ways.findIndex((w) => w === UP_RIGHT || w === UP_LEFT);
+  return up >= 0 && ways.slice(up + 1).some((w) => w === DOWN_RIGHT || w === DOWN_LEFT);
+}
+
+/** Whites left in the junk columns from x on (those more junk than white): the columns next to burn still to
+    clear. */
+export function whitesInJunk(cols: Board, x: number): number {
+  let n = 0;
+  for (let i = Math.max(0, x); i < COLS; i++) {
+    const w = cols[i].filter((p) => p === WHITE).length;
+    if (cols[i].filter(isJunk).length > w) n += w;
+  }
+  return n;
 }
 
 /** Stage I: a move judged by the board it leaves (src/distill-score.ts), the score it gains a second of a
@@ -201,23 +238,41 @@ export function backward(cols: Board, drags: readonly Drag[], stage: 'junk' | 'c
     score it gains a second of a person's time (`judge`), its last drag let go where that's best. The chain:
     how much it betters the board (`measure`), less the person's time it takes and the ground it gives back.
     With time short on a column that needs saving, only moves that save it in time. */
-export function weigh(sit: Situation, ctx: Ctx, style: Style): { move: Move; value: number }[] {
+export function weigh(sit: Situation, ctx: Ctx, style: Style): { move: Move | PathMove; value: number }[] {
   const { cols } = sit, last = COLS - 1, burning = ctx.burnFrom <= last, one = ctx.stage === 'junk';
   const base = one ? boardScore(cols) : measure(cols, ctx);
   const wrong = (b: Board) => (burning ? b[last].filter((p) => p === WHITE).length : junkAt(b[last]));
   const urgent = sit.timeLeft < P.URGENT && wrong(cols) > 0;
-  const out: { move: Move; value: number }[] = [];
+  const out: { move: Move | PathMove; value: number }[] = [];
+  const near = one ? whitesInJunk(cols, ctx.burnFrom) : 0;
+  const consider = (found: Move | PathMove) => {
+    const j = one ? judge(cols, found.drags, style, base) : null;
+    const move = j ? { ...found, drags: j.drags } : found;
+    const after = playDrags(cols, move.drags);
+    if (!after || (one && !j)) return;
+    if (urgent && (wrong(after) >= wrong(cols) || msFor(move.drags, style, plainDrag(move.drags)) > sit.timeLeft)) return;
+    // The brown sweep waits till the columns next to burn are clear of white (the user, 13 Nov: "it's very good.
+    // But it's just like it leaves one or two trapped whites ... it's being applied a bit too quickly before those
+    // columns have been cleared"): till then it's played only when it takes a white out of them.
+    if (one && near > 0 && brownSweep(cols, move.drags) && whitesInJunk(after, ctx.burnFrom) >= near) return;
+    const value = j ? j.value : measure(after, ctx) - base - P.PER_SEC * timeFor(move.drags, style) / 1000 - P.BACK * backward(cols, move.drags, ctx.stage);
+    out.push({ move, value });
+  };
   for (const name of MENU[ctx.stage]) {
     if (!style.routines.includes(name)) continue;
-    for (const found of ROUTINES[name].find(cols, ctx)) {
-      const j = one ? judge(cols, found.drags, style, base) : null;
-      const move = j ? { ...found, drags: j.drags } : found;
-      const after = playDrags(cols, move.drags);
-      if (!after || (one && !j)) continue;
-      if (urgent && (wrong(after) >= wrong(cols) || msFor(move.drags, style, plainDrag(move.drags)) > sit.timeLeft)) continue;
-      const value = j ? j.value : measure(after, ctx) - base - P.PER_SEC * timeFor(move.drags, style) / 1000 - P.BACK * backward(cols, move.drags, ctx.stage);
-      out.push({ move, value });
+    for (const found of ROUTINES[name].find(cols, ctx)) consider(found);
+  }
+  // The fallback: a piece stuck that nothing the routines offer unsticks (it's still stuck where it is after
+  // every one of them): bring a piece round to take its place.
+  if (style.path) {
+    let left = stuck(cols, ctx);
+    const at = (s: { x: number; y: number }) => `${s.x},${s.y}`;
+    for (const m of out) {
+      if (!left.length) break;
+      const still = new Set(stuck(playDrags(cols, m.move.drags)!, ctx).map(at));
+      left = left.filter((s) => still.has(at(s)));
     }
+    if (left.length) for (const found of pathMoves(cols, ctx, style, left)) consider(found);
   }
   return out.sort((a, b) => b.value - a.value);
 }
@@ -232,8 +287,9 @@ export function choose(sit: Situation, ctx: Ctx, style: Style): Advice {
   const wrong = (b: Board) => (burning ? b[last].filter((p) => p === WHITE).length : junkAt(b[last]));
   const moves = weigh(sit, ctx, style);
   const best = moves[0] && moves[0].value > (ctx.stage === 'junk' ? P.RATE_MIN : P.MIN) ? moves[0] : null;
-  const advice = (kind: Advice['kind'], label: string, reason: string, m: { move: Move; value: number } | null = null): Advice => ({
-    stage: ctx.stage, kind, routine: m?.move.routine ?? null, label, reason, drags: m?.move.drags ?? [], value: m?.value ?? 0, sweep: false,
+  const advice = (kind: Advice['kind'], label: string, reason: string, m: { move: Move | PathMove; value: number } | null = null): Advice => ({
+    stage: ctx.stage, kind, routine: !m ? null : m.move.routine === 'path' ? 'hook' : m.move.routine, technique: m?.move.routine ?? null,
+    label, reason, drags: m?.move.drags ?? [], value: m?.value ?? 0, sweep: false,
   });
   // The endgame's gamble: the next Crystal Clear can't be filled in time.
   if (style.gamble && !burning && sit.chain >= P.CASH_FROM && !ready && sit.timeLeft < P.CASH_MS) {
@@ -256,7 +312,7 @@ export function choose(sit: Situation, ctx: Ctx, style: Style): Advice {
   if (best) {
     const gamble = !burning && sit.chain >= P.CASH_FROM && !ready && style.gamble
       ? ` (the gamble: CC^${sit.chain} so far, chasing the next while the odds are fair)` : '';
-    return advice('move', ROUTINES[best.move.routine].label, best.move.reason + gamble, best);
+    return advice('move', best.move.routine === 'path' ? PATH_LABEL : ROUTINES[best.move.routine].label, best.move.reason + gamble, best);
   }
   return advice('wait', 'Wait', ready ? 'the column is ready: let the furnace take it' : 'nothing worth moving: wait for the next column');
 }
@@ -291,7 +347,7 @@ export function burnsLeft(cols: Board): number {
 }
 
 /** The pace "Help, Helium" plays at, and every technique. */
-export const HELIUM: Style = { routines: Object.keys(ROUTINES) as RoutineName[], reach: 16, rate: 6, spot: 250, sweepSpot: 80, early: true, gamble: true };
+export const HELIUM: Style = { routines: Object.keys(ROUTINES) as RoutineName[], path: true, reach: 16, rate: 6, spot: 250, sweepSpot: 80, early: true, gamble: true };
 
 /** The planner on anyone's board mid-game, a person's: it reads the stage from the board (the chain
     started, or the whites banked, or the junk run out), then picks the routine as the bots do. */
@@ -313,7 +369,7 @@ export class DistillBot {
   quit = false;
   /** Drags made, and how often each routine was played. */
   drags = 0;
-  used: Partial<Record<RoutineName, number>> = {};
+  used: Partial<Record<Technique, number>> = {};
   /** What it's doing now (the test page shows its label). */
   last: Advice | null = null;
 
@@ -325,7 +381,8 @@ export class DistillBot {
     const ctx = contextFor(g.cols, this.stage, this.burns, this.tier.reach);
     const a = choose({ cols: g.cols, chain: g.chain, timeLeft: g.timeLeft() }, ctx, this.tier);
     if (a.kind === 'dismiss') this.quit = true;
-    if (a.routine) this.used[a.routine] = (this.used[a.routine] ?? 0) + 1;
+    const t = a.technique ?? a.routine;
+    if (t) this.used[t] = (this.used[t] ?? 0) + 1;
     return this.say(a);
   }
   private say(a: Advice): Advice { this.last = a; return a; }
@@ -356,7 +413,7 @@ export interface Played {
   dismissed: boolean;
   finished: boolean;
   /** How often each routine was played. */
-  used: Partial<Record<RoutineName, number>>;
+  used: Partial<Record<Technique, number>>;
   /** Each technique (a sweep counted as its own, 'sweep') in Stage I: how often it was played while colour
       was plentiful, middling or scarce, the person's time it took (ms) and the junk it got over (columns
       moved right, all its junk together). */
@@ -396,7 +453,7 @@ export function playSession(g: Distilling, tier: Tier, cap = 30, onColumn?: (c: 
       if (went || !ok) break;
     }
     if (a.stage === 'junk' && !went && a.routine) {
-      const k = a.sweep ? 'sweep' : a.routine, c = (cost[k] ??= { plenty: 0, middle: 0, scarce: 0, ms: 0, over: 0 });
+      const k = a.sweep ? 'sweep' : (a.technique ?? a.routine), c = (cost[k] ??= { plenty: 0, middle: 0, scarce: 0, ms: 0, over: 0 });
       c[share > 0.45 ? 'plenty' : share > M.SCARCE ? 'middle' : 'scarce']++;
       c.ms += g.time - t0 + P.TURN_MS * turnsIn(a.drags);
       c.over += junkAcross(g.cols) - was;

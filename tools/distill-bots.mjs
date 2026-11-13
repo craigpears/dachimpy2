@@ -24,11 +24,16 @@
    Judged by the board score (the eleventh to fourteenth notes: Stage I's moves by src/distill-score.ts, one
    look ahead, a second of a person's time): chains 1.7 / 1.1 / 1.6 / 1.8, best 5 / 3 / 4 / 6, CC^6+ 0 / 0 / 0 /
    1 of 40, CC^12 none; minutes 6.0 / 3.1 / 2.7 / 2.8; blacks no longer dragged up early, but the white block
-   banked smaller and less clean (DISTILLING.md §4, fifth run). */
+   banked smaller and less clean (DISTILLING.md §4, fifth run).
+   The simpler score (13 Nov, the eighteenth note: columns filled on the right, colour pulled right, then a
+   straight upright wall; nothing trapped), the brown sweep gated, the path search, 20 boards a tier: chains 1.1 /
+   1.1 / 1.6 / 2.0 (were 1.6 / 1.2 / 1.3 / 2.0); whites burned 6.5 / 0.8 / 0.9 / 0.9 (were 6.3 / 1.8 / 1.9 / 1.1);
+   moves trapping a white by the furnace 1.7 / 2.4 / 1.6 / 1.9 a session (were 2.3 / 3.9 / 3.1 / 4.0); points a
+   minute 9.0 / 9.5 / 15.2 / 21.0 (were 9.9 / 9.1 / 11.0 / 16.1) (DISTILLING.md §4, sixth run). */
 
-import { Distilling } from '../js/distilling.js';
+import { Distilling, WHITE, BROWN, BLACK, BURNT, TALL, UP_LEFT, DOWN_LEFT, neighbourOn, canSwapOn } from '../js/distilling.js';
 import { TIERS, P, tierNamed, playSession } from '../js/distill-bots.js';
-import { M } from '../js/distill-routines.js';
+import { M, playDrags } from '../js/distill-routines.js';
 import { S } from '../js/distill-score.js';
 import { seeded } from '../js/mirror-row.js';
 
@@ -39,6 +44,48 @@ const L = 'wbK*x';
 if (process.env.MEASURE) Object.assign(M, JSON.parse(process.env.MEASURE));
 if (process.env.PLAN) Object.assign(P, JSON.parse(process.env.PLAN));
 if (process.env.SCORE) Object.assign(S, JSON.parse(process.env.SCORE));
+
+// A white trapped, measured here so a run before a change and one after use the same yardstick (the user,
+// 13 Nov, the eighteenth note: the bot's first move "went the entire way so that there was a white trap right
+// at the top"): no swap takes it left, junk lies left of it in its row, and it's on the top or bottom edge or
+// has no white beside it on its left (broader than src/distill-score.ts's `trappedWhite`, which is the edge
+// alone, on the colour's side).
+const junkP = (p) => p === BROWN || p === BLACK || p === BURNT;
+// The brown sweep (the user, 13 Nov: "the way that [the bot's] sweeping browns up back down to the bottom right
+// ... is very good. But it's just like it leaves one or two trapped whites"): a brown up, then down.
+const brownSweep = (c, drags) => drags.length > 0 && c[drags[0].x][drags[0].y] === BROWN
+  && drags[0].ways.some((w, i) => (w === 0 || w === 1) && drags[0].ways.slice(i + 1).some((v) => v === 2 || v === 3));
+// `near`: only those in the column being filled on the right or the two left of it, next to burn, on the colour's
+// side of the straight wall: src/distill-score.ts's `trappedWhite` where its score counts it.
+function wallAt(c) {
+  let at = 0, fewest = Infinity;
+  for (let b = 0; b <= c.length; b++) {
+    let n = 0;
+    for (let x = 0; x < c.length; x++) for (const p of c[x]) if (x < b ? junkP(p) : p === WHITE) n++;
+    if (n < fewest) { fewest = n; at = b; }
+  }
+  return at;
+}
+function whitesTrapped(c, near = false) {
+  let done = 0;
+  for (let x = c.length - 1; x >= 0; x--) {
+    if (c[x].some((p) => p === WHITE) || c[x].reduce((s, p) => s + (p === BLACK ? 1 : p === WHITE || p === BURNT ? -1 : 0), 0) <= 0) break;
+    done++;
+  }
+  const from = near ? Math.max(c.length - 1 - done - 2, wallAt(c)) : 1;
+  let n = 0;
+  for (let x = Math.max(1, from); x < c.length; x++) for (let y = 0; y < c[x].length; y++) {
+    if (c[x][y] !== WHITE) continue;
+    const left = [UP_LEFT, DOWN_LEFT].map((d) => neighbourOn(c, x, y, d)).filter(Boolean);
+    if (left.some(([a, b]) => canSwapOn(c, x, y, a, b))) continue;
+    let cut = false;
+    for (let i = 0; i < x && !cut; i++) if (y < c[i].length && junkP(c[i][y])) cut = true;
+    if (!cut) continue;
+    const edge = c[x].length === TALL && (y === 0 || y === TALL - 1);
+    if (edge || left.every(([a, b]) => c[a][b] !== WHITE)) n++;
+  }
+  return n;
+}
 
 const avg = (a) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : NaN);
 const med = (a) => { const s = [...a].sort((x, y) => x - y); return s.length ? s[Math.floor(s.length / 2)] : NaN; };
@@ -51,10 +98,32 @@ for (const name of NAMES) {
     const g = new Distilling(seeded(SEED + i));
     const trace = process.env.TRACE && i === 0;
     let lastRoutine = '';
+    // Stage I watched: moves that leave more whites trapped than before them (no column gone between), the
+    // whites trapped as the chain starts, and the junk columns burned a minute of Stage I.
+    const watch = { trapping: 0, trappingNear: 0, sweeps: 0, sweepsTrapping: 0, moves: 0, atChain: null, stageOneMs: null, burnedInOne: 0 };
+    let before = null;
+    const onPlan = (a) => {
+      const now = whitesTrapped(g.cols), near = whitesTrapped(g.cols, true), cols = g.columns.length;
+      if (before && before.cols === cols && now > before.n) watch.trapping++;
+      if (before && before.cols === cols && near > before.near) watch.trappingNear++;
+      before = a.stage === 'junk' && a.kind === 'move' ? { n: now, near, cols } : null;
+      if (a.stage === 'junk' && a.kind === 'move') {
+        watch.moves++;
+        if (brownSweep(g.cols, a.drags)) {
+          watch.sweeps++;
+          const after = playDrags(g.cols, a.drags);
+          if (after && whitesTrapped(after, true) > near) watch.sweepsTrapping++;
+        }
+      }
+      if (a.stage === 'chain' && watch.atChain === null) {
+        watch.atChain = now; watch.stageOneMs = g.time; watch.burnedInOne = g.columns.length - g.columnsUp;
+      }
+      if (trace && process.env.TRACE === '2') { const s = `${a.stage} ${a.kind} ${a.label}: ${a.reason}`; if (s !== lastRoutine) console.log(`        ${s}`); lastRoutine = s; }
+    };
     const r = playSession(g, tier, CAP,
       trace ? (c) => console.log(`  ${(g.time / 1000).toFixed(0).padStart(4)}s ${c.up ? 'up  ' : 'burn'} ${c.pieces.map((p) => L[p]).join('')} ${c.message ?? ''}${c.chain > 1 ? ` x${c.chain}` : ''} ${c.points + c.bonus}`) : undefined,
-      trace && process.env.TRACE === '2' ? (a) => { const s = `${a.stage} ${a.kind} ${a.label}: ${a.reason}`; if (s !== lastRoutine) console.log(`        ${s}`); lastRoutine = s; } : undefined);
-    runs.push(r);
+      onPlan);
+    runs.push({ ...r, watch });
   }
   const chains = runs.map((r) => r.longest), at = (n) => runs.filter((r) => r.longest >= n).length;
   const full = runs.filter((r) => r.longest >= 12);
@@ -66,6 +135,10 @@ for (const name of NAMES) {
   console.log(`  session score: mean ${f1(avg(runs.map((r) => r.score)))}, best ${f1(Math.max(...runs.map((r) => r.score)))}`);
   console.log(`  minutes a session: mean ${f1(avg(runs.map((r) => r.minutes)))}${full.length ? `; a CC^12 in ${f1(avg(full.map((r) => r.minutes)))}` : ''}; columns burned ${f1(avg(runs.map((r) => r.columnsBurned)))}, sent up ${f1(avg(runs.map((r) => r.columnsUp)))}`);
   console.log(`  whites burned ${f1(avg(runs.map((r) => r.whitesBurned)))}; white columns banked as the chain began ${f1(avg(runs.filter((r) => r.banked !== null).map((r) => r.banked)))}; drags a minute ${f1(avg(runs.map((r) => r.drags / r.minutes)))}, swaps a drag ${f1(avg(runs.map((r) => r.swaps / Math.max(1, r.drags))))}`);
+  const w = runs.map((r) => r.watch), one = w.filter((x) => x.stageOneMs);
+  console.log(`  trapped whites (no way left, cut off): moves in Stage I leaving more than before ${f1(avg(w.map((x) => x.trapping)))} a session (of ${f1(avg(w.map((x) => x.moves)))} moves), by the furnace (the score's test) ${f1(avg(w.map((x) => x.trappingNear)))}; on the board as the chain starts ${f1(avg(one.map((x) => x.atChain)))}`);
+  console.log(`  brown sweeps (a brown up, then down to the bottom right) in Stage I ${f1(avg(w.map((x) => x.sweeps)))} a session, leaving a white trapped by the furnace ${f1(avg(w.map((x) => x.sweepsTrapping)))}`);
+  console.log(`  Stage I: ${f1(avg(one.map((x) => x.stageOneMs / 60000)))} minutes, junk columns burned a minute of it ${f1(avg(one.map((x) => x.burnedInOne / (x.stageOneMs / 60000))))}; session points a minute ${f1(avg(runs.map((r) => r.points / r.minutes)))}`);
   const used = {};
   for (const r of runs) for (const [k, v] of Object.entries(r.used)) used[k] = (used[k] ?? 0) + v;
   console.log(`  routines a session: ${Object.entries(used).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${f1(v / GAMES)}`).join(', ')}`);
