@@ -401,6 +401,10 @@ the rubble settle back after half a minute.
       left to Doubles thrown on the way in); shooting a stopped
       racer is unchanged (§6), and whether bots should lie in wait at the known stops is still for the
       simulation (§8). Bots don't change plans of their own accord mid-race beyond giving up and putting by.
+  - **Too disconnected to plan with (the user, 13 Nov, on the line):** "you need to be able to see the length. This
+    is very disconnected. At the moment ... it requires you to really know the course to actually be able to do
+    anything with this." The strip names the choices and nothing more. To do: the course drawn small with your
+    route on it, each choice's line as you change it, and each choice's time against the long way (TODO.md).
 
 ## 6. Racing each other: position and risk
 
