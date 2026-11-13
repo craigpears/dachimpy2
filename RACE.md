@@ -1295,6 +1295,15 @@ check, a share link, and the den's own race for 3D.
   everyone that race? And two in the tunnel at once (none of your rivals takes it yet): can they shoot
   each other under the cleft? For now nobody in the tunnel can be shot.
 - Where the race goes in the den's story, and what winning brings.
+- **The shortcuts' sizes and shape (the user, 13 Nov, open):** on the gate saving too little: "you're saving a
+  couple of tiles for the time you're spending quite a long time in the puzzle. It needs to be much more
+  significant"; and on making it bigger and running it harder: "Will that then not mean ... you couldn't do the
+  navigation door? So ... maybe we need all the shortcuts to be relatively a lot ... But I want some variety. I
+  don't just want them all to be in a straight line. That's awkward." Today each spit has its own choices, one
+  leg's choice independent of the next (the gate on spit 1, the door on spit 2), so a harder run at the gate
+  takes nothing from the door. But a gate cutting a much bigger stretch would skip leg 2, its door, headwind gap
+  and Double's gap with it. To decide: every shortcut saving a lot; and a course that branches, a big cut that
+  passes other shortcuts by against a run of smaller ones, rather than one cut per spit in a row.
 
 ## 13. Where it lives
 
