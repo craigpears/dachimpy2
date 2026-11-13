@@ -1223,6 +1223,19 @@ Stage II: a line of blacks running up-right and a line of browns running down-ri
 whites climb and slide through them to the right; to confirm with the user if it's not that). And fewer fiddly
 moves in general: a small move should earn its place.
 
+**The twenty-fourth note: where the block moves end up, and a brown kept bottom-left (the user, 13 Nov, the board
+after their own next moves from the twenty-third note's, `notes/distilling/41-the-blocks-done-a-brown-kept-bottom-left.webp`).**
+"this is kind of where I would end up with as my kind of next set of moves after that. But ... note that I've left
+the brown at the bottom left ... I don't know if this is necessary at this point, but certainly becomes relevant
+later, because I want to use that to haul black pieces up potentially ... one black in the top left, one brown in
+the bottom left can be useful ... maybe for a little bit later of a phase, but you don't want to just get too
+greedy." The picture: whites a solid block over the left two-thirds; the right three columns all junk, browns
+along the top, blacks below; a few blacks along the bottom under the whites; and, circled, a brown and a black
+left at the bottom-left corner. So the target of the block moves is that shape (the twenty-third note), and
+not every piece of junk on the left is swept right: a brown kept at the bottom-left (and a black at the
+top-left) are tools for later, to haul junk across the whites (§3, "Store blacks top-left, browns bottom-left").
+Don't be greedy clearing the left; more specifics to come.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
