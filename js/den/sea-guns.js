@@ -4,7 +4,7 @@
 // lies, the camera, the keys and the mouse.
 import * as THREE from 'three';
 import { S, camera, mat, mesh, woodTex, keys, ray, toast, V3, v3 } from './world.js';
-import { dressBoard, gunwale, setCrates, gunTick, drawBoard, gunSays, chalkOn, chalkRelease, wheelDeck } from './gundeck.js';
+import { dressBoard, gunwale, setCrates, gunTick, drawBoard, gunSays, chalkOn, chalkRelease, wheelDeck, pointChalk } from './gundeck.js';
 import { GUNS, cantLoad } from '../den-guns.js';
 import { GUNNERY, DR, DC, k } from '../gunnery.js';
 import { sail, SLOOP_DECK, strike } from './sea.js';
@@ -116,6 +116,10 @@ export function gunneryTick(dt, busy = false) {
 
 // ----- keys and the mouse -----
 const move = { arrowleft: [0, -1], arrowright: [0, 1], arrowup: [-1, 0], arrowdown: [1, 0] };
+/* WASD point the chalk arrow the way you press, on the screen, as on the gun tower; they don't steer her while
+   you're at the guns (the user, 13 Nov: "in guns, [WASD] should be controlling the arrow direction, not turning
+   the ship"). */
+const point = { w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0] };
 // A click on a plank: an arrow the way the ghost shows, or an arrow there turned a quarter.
 function chalkHere(r, c) {
   const b = gunnery.b, a = b.arrows.get(k(r, c)), dir = a ? (a.dir + 1) % 4 : b.pen;
@@ -125,6 +129,7 @@ function chalkHere(r, c) {
 export function gunneryKey(key) {
   if (!gunnery.on) return false;
   const b = gunnery.b, mv = move[key];
+  if (point[key]) { b.hover ??= [6, 2]; pointChalk(...point[key], b); return true; }
   if (mv) { const [r, c] = b.hover ?? [6, 2]; b.hover = [Math.max(0, Math.min(GUNNERY.ROWS - 1, r + mv[0])), Math.max(0, Math.min(GUNNERY.COLS - 1, c + mv[1]))]; return true; }
   if ((key === ' ' || key === 'enter') && b.hover) { chalkHere(...b.hover); return true; }
   if ((key === 'backspace' || key === 'delete') && b.hover) { chalkOn(b, ...b.hover, -1); return true; }
@@ -169,5 +174,5 @@ export function gunCam() {
 }
 export function gunneryPrompt() {
   const g = sail.guns;
-  return `Gunnery · load her guns: left side port, right side starboard (loaded: port ${g.shots('L')}, starboard ${g.shots('R')}) · click a plank: chalk an arrow (drag to point it, wheel turns it, right-click rubs it out) · arrows and Space chalk too · Q E: fire · Esc: leave the guns`;
+  return `Gunnery · load her guns: left side port, right side starboard (loaded: port ${g.shots('L')}, starboard ${g.shots('R')}) · click a plank: chalk an arrow (drag to point it, wheel turns it, right-click rubs it out) · arrows move, W A S D point the chalk, Space chalks · Q E: fire · Esc: leave the guns`;
 }

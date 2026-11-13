@@ -196,7 +196,7 @@ export function sailKey(key) {
   // Rowing: the board's keys; Esc or 3 ships the oars.
   if (rowing.on && (key === 'escape' || key === '3')) return rowToggle();
   if (rowing.on && rowKey(key)) return;
-  // At her guns: the board's keys (W A D still steer, Q E fire); 3 goes to the oars instead.
+  // At her guns: the board's keys (W A S D point the chalk, the arrows move it; Q E fire); 3 goes to the oars instead.
   if (gunnery.on && key === '3') { gunneryToggle(); return rowToggle(); }
   if (gunneryKey(key)) return;
   if (key === '2') return gunneryToggle(haul.on || craneHolds());

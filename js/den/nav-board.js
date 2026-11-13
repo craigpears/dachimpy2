@@ -254,7 +254,10 @@ const ease = (u) => u * u * (3 - 2 * u);
 const xy = (r, a) => [C + Math.cos(a) * r, C + Math.sin(a) * r];
 
 /** How long each kind of stage plays, in seconds. */
-const TIME = { turn: 0.13, drop: 0.12, fall: 0.16, line: 0.42, constellation: 0.9, deal: 0.35, booch: 0.9 };
+const TIME = { turn: 0.24, drop: 0.12, fall: 0.16, line: 0.42, constellation: 0.9, deal: 0.35, booch: 0.9 };
+/* A star dropping in, or falling, goes at a steady, slow pace: this many seconds a ring's width, so it's seen
+   sliding in rather than snapping (the user, 13 Nov: "the pieces are supposed to slowly drop"). */
+const DROP_PER_RING = 0.32, RING_W = RING_R[1] - RING_R[0];
 
 /* A Navigation board. `game` (a Navigation already made) or `random` and `options` (its NavOptions:
    sizes, colours) to make one. `at` (a Vector3, the board's middle), `yaw` (turned about the world's
@@ -336,7 +339,7 @@ export function navBoard(o = {}) {
 
   // Begin showing a stage.
   const begin = (st) => {
-    b.stage = st; b.t = 0;
+    b.prevTurn = st.kind === 'turn' && b.lastKind === 'turn' && b.time - (b.endedAt ?? -1) < 0.05;   // (straight on from a turn just ended) b.stage = st; b.t = 0; b.T = TIME[st.kind];
     if (st.kind === 'turn') b.ringGlow[st.ring] = 1;
     if (st.kind === 'booch') {
       b.dropFrom.shift();
@@ -349,6 +352,12 @@ export function navBoard(o = {}) {
     if (st.kind === 'constellation') { b.conFlare = 1; b.onConstellation?.(st.done); return; }
     if (st.kind === 'deal') { b.shownCon = st.constellation; b.conFade = 0; b.onDeal?.(st.constellation); return; }
     aim(st.grid, st.kind === 'drop' ? b.dropFrom.shift() : null);
+    // (a drop or a fall: as long as the furthest star has to go, at a steady pace)
+    if (st.kind === 'drop' || st.kind === 'fall') {
+      let far = 0;
+      for (const s of b.stars.values()) far = Math.max(far, Math.abs(s.tr - s.fr));
+      b.T = Math.max(TIME[st.kind], DROP_PER_RING * far / RING_W);
+    }
   };
   // Finish a stage: everything where it ends up.
   const end = (st) => {
@@ -356,6 +365,7 @@ export function navBoard(o = {}) {
     if (st.kind === 'line') { for (const id of st.cleared) burst(id); b.lit = null; }
     if (st.kind === 'constellation') { for (const id of st.cleared) burst(id, 16, true); b.shownCon = null; }
     if (st.kind === 'booch') layNow(st.grid);
+    b.lastKind = st.kind; b.endedAt = b.time;
     b.stage = null;
   };
 
@@ -407,10 +417,15 @@ export function navBoard(o = {}) {
     if (!b.stage && b.queue.length) begin(b.queue.shift());
     if (b.stage) {
       b.t += dt * fast;
-      const T = TIME[b.stage.kind], u = Math.min(1, b.t / T);
+      const T = b.T, u = Math.min(1, b.t / T);
       const moving = b.stage.kind === 'turn' || b.stage.kind === 'drop' || b.stage.kind === 'fall' || b.stage.kind === 'booch';
       if (moving) {
-        const k = b.stage.kind === 'fall' ? u * u : ease(u);
+        // (a drop or a fall at a steady pace; a turn eased in and out, but carried straight on into the next turn
+        // when one's waiting, and straight on from the last, so turning a ring round and round flows instead of
+        // stopping at every spoke: the user, 13 Nov, "the turning animation ... very jumpy and jagged")
+        const turn = b.stage.kind === 'turn', on = turn && b.queue[0]?.kind === 'turn', from = turn && b.prevTurn;
+        const k = !turn ? (b.stage.kind === 'fall' || b.stage.kind === 'drop' ? u : ease(u))
+          : on && from ? u : on ? u * u * (2 - u) : from ? u * (1 + u - u * u) : ease(u);
         for (const s of b.stars.values()) { s.r = s.fr + (s.tr - s.fr) * k; s.a = s.fa + (s.ta - s.fa) * k; }
       }
       if (b.stage.kind === 'deal') b.conFade = u;
@@ -436,14 +451,24 @@ export function navBoard(o = {}) {
     g.save();
     g.translate(0, OFF);
     g.drawImage(wheelCanvas(), 0, 0);
-    // The ring selected, a little brighter (and one just turned, brighter still for a moment).
+    // The ring selected, plainly: its band lit and a bright gold edge either side of it (one just turned,
+    // brighter still for a moment). It was only a little brighter, hard to tell (the user, 13 Nov: "the
+    // highlight between the selected ring and a non-selected ring is relatively minimal, so it's making it
+    // hard to tell what ring").
     for (let r = 0; r < RINGS; r++) {
-      const sel = r === game.ring && !b.idle, lift = Math.max(sel ? 0.22 + 0.05 * Math.sin(b.time * 3) : 0, b.ringGlow[r] * 0.55);
+      const sel = r === game.ring && !b.idle, lift = Math.max(sel ? 0.5 + 0.08 * Math.sin(b.time * 3) : 0, b.ringGlow[r] * 0.6);
       if (lift <= 0) continue;
+      const w = r ? 46 : 30;
       g.save(); g.globalCompositeOperation = 'lighter';
-      g.lineWidth = r ? 46 : 10; g.strokeStyle = `rgba(150,130,60,${lift})`;
+      g.lineWidth = w; g.strokeStyle = `rgba(150,130,60,${lift})`;
       g.beginPath(); g.arc(C, C, RING_R[r], 0, Math.PI * 2); g.stroke();
       g.restore();
+      if (sel) {
+        g.save(); g.lineWidth = 4; g.strokeStyle = `rgba(255,214,106,${0.85 + 0.15 * Math.sin(b.time * 3)})`;
+        g.shadowColor = '#ffd66a'; g.shadowBlur = 12;
+        for (const e of [-1, 1]) { g.beginPath(); g.arc(C, C, RING_R[r] + e * (w / 2 + 2), 0, Math.PI * 2); g.stroke(); }
+        g.restore();
+      }
     }
     // The constellation's places.
     const con = b.shownCon;
