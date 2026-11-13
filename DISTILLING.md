@@ -1103,6 +1103,21 @@ end (the user, 12 Nov, the same game on, `notes/distilling/30-` to `34-*`).**
   white; until then, clearing them (step one of Helium's lesson) comes first, and a sweep that leaves a white
   trapped is worse than it looks.
 
+**The nineteenth note: when no single drag gets there, move one piece to open the way (the user, 13 Nov,
+watching the bots after the simpler score and the path search were merged,
+`notes/distilling/37-move-a-brown-to-open-the-path.webp`).** "the distilling bot did a lot better at that
+first phase. But then it did seem to get stuck ... once it gets to the point where there's no single piece
+path that can be dragged to the bottom right where these whites are, it's not doing stuff like ... you have
+to drag that brown upwards so then you could drag a black over and into that spot." The picture: whites low
+in the two right-hand columns, the next to burn; no junk piece has a clear drag down to them. The green
+arrows: first a brown in the lower middle dragged up (the short hooked arrow), which opens a way; then a black
+dragged along the bottom, right and up, into the whites' place at the bottom right. "clearing [and] filling
+in with single piece drags definitely is there, huge improvement. Now it's got to work on ... if there's no
+way of getting to this piece, what's a single thing that could move, like in this example, that brown piece
+that would allow me to get to that path." So the next step for the search: when no one drag brings a junk
+piece into a white's place, look for one enabling drag first (one piece moved out of the way) that opens
+such a path, and play the two together, costed as a person's two drags.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
