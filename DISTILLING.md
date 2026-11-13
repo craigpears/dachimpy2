@@ -2044,6 +2044,31 @@ minutes of play each, about 8 minutes to run), no two from the same session with
   check), each judged theme has one or two or is listed as not found (cracked), different deals within a theme. Three of
   the batch have the bot waiting (P16, P19: something stuck; P26: a white in the furnace's column); their plan has
   nothing to see through, so tests/distill-ahead.test.ts checks it says it waits.
+- **The user's first verdicts on it (13 Nov), and what's wrong with the batch.** "how is it still getting in these
+  positions? Because I feel like the ones I really want to be judging are the things that have gotten me into that
+  position beforehand ... I don't feel like these are good quality batches because it hides how it got into this mess.
+  Like the problem that you're showing me examples after the problem already looks irreversible." So the next batch is
+  picked from the lead-up: where a white ends up trapped beyond saving or burned, the play rewound to the moves that
+  set it up (the last board where it was still free, and the move that shut it in), and that board judged.
+  - **P13:** "There's a lot of crap ... how is it still getting in these positions?" Past saving; its lead-up wanted.
+  - **P14:** "How are we finding these boards with so many trapped holes? ... not terrible ideas for P14 ... the white
+    at the top of column 9 and the bottom of column 8 ... insanely trapped. Obviously, the one in column 10 is
+    impossible by this point." The bot's ideas fine; the board too late.
+  - **P15:** the reader right: "I like that it's flagged the column 9 and things as the risks. Yes, that's absolutely
+    what you've kind of got to dig out." The plan's start right, then it wanders: "the whites going up in step 1 ...
+    step 2 and 3 are about right. You're bringing the brown ... so then you can bring the black down, which is what
+    frees the white piece ... that plan then just seems to kind of get three steps close and then gets completely
+    distracted." What it should do: "the black in column 9 you want to replace with a brown, the same [row] as where
+    the white is in column 8. Because then you've got a line of brown, so then you can replace the browns with
+    blacks, which allows the whites to get up." A plan seen through to that white freed.
+- **Watching the CC^1 bot (13 Nov), the opening:** "for the fresh board, it just created kind of like a weird V shape
+  of whites, and ... it should be like trying to build it in the second or third column, like close to what's being
+  burnt, just to have a bit of burnt buffer. You build some fully [junk] columns, and then build behind it, but this
+  did not seem to have a plan. It just seems to have picked a random column, not worrying about what whites are going
+  to be burnt to the right." And its target column lit, "it doesn't seem to actually try and get the whites there ...
+  and then it's just moved that out": a white taken back out of the target. So the opening: the goal's column two or
+  three in from the fire, the columns to its right let burn as junk (a buffer), every white to the right of it brought
+  left before its column goes; and never a white moved out of the target column.
 
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
