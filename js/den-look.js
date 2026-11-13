@@ -8,8 +8,10 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 // The tailor's standard palette (YPPedia: Clothing palette).
 export const DYES = {
-  aqua: '#65c9c9', black: '#2a2a2e', blue: '#2a6fd7', brown: '#7d5c35', gold: '#ffbe00', green: '#3b6c2c', grey: '#cbcdd1',
-  lavender: '#d9b0ff', 'light blue': '#a8f2ff', 'light green': '#669619', lime: '#3fd837', lemon: '#fffbbf', magenta: '#c9227b',
+  // (Blue and light blue sampled from Tzz's portrait, 13 Nov: her knickers' stripes and her Rag shirt; the
+  // wiki's swatches were a deep royal blue and an icy cyan the game doesn't draw.)
+  aqua: '#65c9c9', black: '#2a2a2e', blue: '#4d78cf', brown: '#7d5c35', gold: '#ffbe00', green: '#3b6c2c', grey: '#cbcdd1',
+  lavender: '#d9b0ff', 'light blue': '#8cc8f6', 'light green': '#669619', lime: '#3fd837', lemon: '#fffbbf', magenta: '#c9227b',
   maroon: '#9e171b', mint: '#90ffb9', navy: '#434ca2', orange: '#f57c09', peach: '#ffd5a8', persimmon: '#ff5300', pink: '#fe79a4',
   purple: '#6104ad', red: '#d72c22', rose: '#ffc4d6', tan: '#ad8047', violet: '#bf3bc4', white: '#f6f2ea', yellow: '#f8ff35',
   // Limited editions real pirates wear: named as on YPPedia (Clothing palette), coloured as the game
@@ -24,15 +26,19 @@ export const DYES = {
   // Clothing palette). Sampled from her portrait: his horns, and his body.
   silver: '#a6a9bf', 'vibrant red': '#d7094a',
 };
-export const SKIN = ['#f6d3b0', '#f0bf8e', '#d9a066', '#b57a4a', '#8a5530', '#5c3a22'];
-// (Red: Mischievious's deep red curls, from her portraits, 11 Nov. Light brown: Tzz's, sampled from hers.)
-export const HAIR = { black: '#1f1a17', 'dark brown': '#3b2414', brown: '#6a4020', 'light brown': '#94713c', auburn: '#7f2e16', red: '#9a0a08', ginger: '#c4642a', blonde: '#dcb565', grey: '#a09a92', white: '#ece8e0' };
+// (The last, a cool deep brown: Helium's, sampled from their portrait, 13 Nov; the warmer browns before it
+// drew them orange.)
+export const SKIN = ['#f6d3b0', '#f0bf8e', '#d9a066', '#b57a4a', '#8a5530', '#5c3a22', '#9a887c'];
+// (Red: Mischievious's deep red curls, from her portraits, 11 Nov. Light brown: Tzz's, sampled from hers.
+// Silver: Helium's, sampled from theirs, 13 Nov: a grey-white, not Gravee's white.)
+export const HAIR = { black: '#1f1a17', 'dark brown': '#3b2414', brown: '#6a4020', 'light brown': '#8e7543', auburn: '#7f2e16', red: '#9a0a08', ginger: '#c4642a', blonde: '#dcb565', grey: '#a09a92', silver: '#b2b9c6', white: '#ece8e0' };
 // Monkeys and squirrels only come in natural colours (YPPedia: Monkey), white (a champion's) and a
 // few limited editions (lavender, from a Booch Box; pink, Mischievious's monkey in "What is Love?").
 // A lavender monkey has a white face and tummy. (Plum: Helium's King, their Emerald pirate page's "plum"
-// monkey, a soft violet in his portrait, sampled from it, 12 Nov; not the plum dye, a magenta.)
-export const FUR = { brown: '#6b4423', tan: '#ad8047', ginger: '#b5652a', grey: '#8a8a8a', black: '#2a2a2e', cream: '#e9dcc0', white: '#f7f5f0', lavender: '#b9a9ea', pink: '#be667f', plum: '#865b91' };
-const FUR_FACE = { lavender: '#fbf8ff' };
+// monkey, a violet in his portrait, sampled from it, 12 Nov, and again closer, 13 Nov: a deeper, bluer purple
+// than first drawn, his face and tummy a pale lilac; not the plum dye, a magenta.)
+export const FUR = { brown: '#6b4423', tan: '#ad8047', ginger: '#b5652a', grey: '#8a8a8a', black: '#2a2a2e', cream: '#e9dcc0', white: '#f7f5f0', lavender: '#b9a9ea', pink: '#be667f', plum: '#734b91' };
+const FUR_FACE = { lavender: '#fbf8ff', plum: '#a98bc4' };
 // Familiars in FUR's natural colours (the rest take any dye), and the colour each falls back to.
 export const FURRY = { monkey: 'brown', squirrel: 'grey' };
 // The palette a slot's first colour is chosen from, for the wardrobe: FUR for a furry familiar.
@@ -50,9 +56,11 @@ export const PARTS = {
     f: [['none', 'No hat'], ['bandana', 'Bandana'], ['tricorne', 'Tricorne'], ['feathered', 'Feathered hat', 1], ['captain', "Captain's hat", 1], ['sleeping', 'Sleeping hat'], ['wide', 'Wide-brimmed hat', 1], ['viking', 'Viking helmet'],
       ['veil', 'Veil', 1], ['tiara', 'Tiara', 1], ['butterfly', 'Butterfly'], ['feline', 'Feminine feline', 1], ['witch', 'Wicked witch', 1], ['roses', 'Crown of roses', 1], ['pelt', 'Berserker pelt']],
   },
+  // (Swept up: Helium's, swept up off the face and over the crown, a fall of it by one cheek, 13 Nov. Twists:
+  // Tzz's, twisted locks drawn back over the head and tied behind, 13 Nov.)
   hair: {
-    m: [['short', 'Short'], ['ponytail', 'Ponytail'], ['long', 'Long'], ['wavy', 'Wavy'], ['curly', 'Curly'], ['bald', 'Bald']],
-    f: [['long', 'Long'], ['ponytail', 'Ponytail'], ['bun', 'Bun'], ['braids', 'Braids'], ['wavy', 'Wavy'], ['curly', 'Curly'], ['short', 'Short']],
+    m: [['short', 'Short'], ['ponytail', 'Ponytail'], ['long', 'Long'], ['wavy', 'Wavy'], ['curly', 'Curly'], ['swept', 'Swept up'], ['twists', 'Twists'], ['bald', 'Bald']],
+    f: [['long', 'Long'], ['ponytail', 'Ponytail'], ['bun', 'Bun'], ['braids', 'Braids'], ['wavy', 'Wavy'], ['curly', 'Curly'], ['swept', 'Swept up'], ['twists', 'Twists'], ['short', 'Short']],
   },
   beard: {
     m: [['full', 'Full beard'], ['bushy', 'Bushy beard'], ['goatee', 'Goatee'], ['moustache', 'Moustache'], ['long', 'Long beard'], ['none', 'Clean-shaven']],
@@ -79,9 +87,10 @@ export const PARTS = {
     f: [['boots', 'Boots'], ['shoes', 'Buckle shoes'], ['fancy', 'Fancy boots', 1], ['curled', 'Curled slippers'], ['bare', 'Bare feet']],
   },
   // In the right hand: props, not clothing (only a bouquet and a present take a colour: its flowers', its paper).
+  // (The Atlantis trinket: Helium's, a glowing blue jar worked in gold, from their portrait, 13 Nov.)
   hand: {
-    m: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug'], ['candle', 'Candle'], ['gift', 'Present']],
-    f: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug'], ['candle', 'Candle'], ['gift', 'Present']],
+    m: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug'], ['candle', 'Candle'], ['gift', 'Present'], ['atlantis', 'Atlantis trinket']],
+    f: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug'], ['candle', 'Candle'], ['gift', 'Present'], ['atlantis', 'Atlantis trinket']],
   },
   // (Squirrel, bat, krakling: real familiars, from expeditions and treasure chests: YPPedia, Familiar.
   // Dragon: from gold boxes; its first colour is its horns', its second its body's, as YPPedia says
@@ -93,16 +102,18 @@ export const PARTS = {
 };
 // The props that take a colour (the rest are what they're made of).
 export const HAND_DYED = ['bouquet', 'gift'];
-// Earrings: none, one (in the left ear, as ever) or one in each ear.
+// Earrings: none, one or one in each ear. One is in the right ear, the eyepatch's side, as the portraits
+// have it (Tzz's and Helium's, 13 Nov).
 export const EARRINGS = [[false, 'None'], [true, 'One'], ['both', 'Both ears']];
 // `hook`: a hook for a left hand (Mischievious has one in nearly every portrait). `tongue` out, blue
 // swirling `tattoos` (on whatever skin a top leaves bare) and a `wristband` (in the top's colour, on
 // the right wrist): Kikkit's (11 Nov). A blue `starfish` stuck to the cheek: Gravee's (her portrait, 11
 // Nov; a starfish on the face is a Puzzle Pirates thing: YPPedia lists Starfish repellent for it). A
 // `pegleg` for the right leg: Tzz's (her portrait, 11 Nov). The eyepatch, the hook, the pegleg and the
-// starfish are Puzzle Pirates' four injuries, from being sunk (YPPedia: Injury).
+// starfish are Puzzle Pirates' four injuries, from being sunk (YPPedia: Injury). A `grin`, the mouth wide
+// open, laughing: Tzz's (her portrait, 13 Nov).
 export const DEFAULT_LOOK = {
-  body: 'm', skin: 1, hair: 'short', hairCol: 'brown', beard: 'full', patch: true, earring: true, smile: false, hook: false, tongue: false, tattoos: false, wristband: false, starfish: false, pegleg: false,
+  body: 'm', skin: 1, hair: 'short', hairCol: 'brown', beard: 'full', patch: true, earring: true, smile: false, grin: false, hook: false, tongue: false, tattoos: false, wristband: false, starfish: false, pegleg: false,
   hat: 'bandana', hatCol: 'red', hatCol2: 'white', top: 'striped', topCol: 'red', topCol2: 'white', waist: 'belt', waistCol: 'black',
   legs: 'pants', legsCol: 'navy', legsCol2: 'tan', feet: 'boots', feetCol: 'black', feetCol2: 'black', hand: 'none', handCol: 'red', fam: 'none', famCol: 'green', famCol2: 'red',
 };
@@ -121,7 +132,7 @@ export function cleanLook(o) {
   if (!DYES[src.feetCol2]) L.feetCol2 = L.feetCol;   // (fancy boots' tops were the boots' own colour)
   if (HAIR[src.hairCol]) L.hairCol = src.hairCol;
   if (Number.isInteger(src.skin) && SKIN[src.skin]) L.skin = src.skin;
-  for (const kk of ['patch', 'smile', 'hook', 'tongue', 'tattoos', 'wristband', 'starfish', 'pegleg']) if (typeof src[kk] === 'boolean') L[kk] = src[kk];
+  for (const kk of ['patch', 'smile', 'grin', 'hook', 'tongue', 'tattoos', 'wristband', 'starfish', 'pegleg']) if (typeof src[kk] === 'boolean') L[kk] = src[kk];
   if (EARRINGS.some(([v]) => v === src.earring)) L.earring = src.earring;
   if (FURRY[L.fam]) L.famCol = FUR[src.famCol] ? src.famCol : FURRY[L.fam];
   return L;
@@ -129,7 +140,7 @@ export function cleanLook(o) {
 const pickOf = (o) => Object.keys(o)[Math.floor(Math.random() * Object.keys(o).length)];
 const pickIn = (list) => list[Math.floor(Math.random() * list.length)][0];
 export function randomLook(body = Math.random() < 0.5 ? 'm' : 'f') {
-  const L = { body, skin: Math.floor(Math.random() * SKIN.length), hairCol: pickOf(HAIR), patch: Math.random() < 0.4, earring: pickIn(EARRINGS), smile: Math.random() < 0.5, hook: Math.random() < 0.15,
+  const L = { body, skin: Math.floor(Math.random() * SKIN.length), hairCol: pickOf(HAIR), patch: Math.random() < 0.4, earring: pickIn(EARRINGS), smile: Math.random() < 0.5, grin: Math.random() < 0.15, hook: Math.random() < 0.15,
     tongue: Math.random() < 0.08, tattoos: Math.random() < 0.15, wristband: Math.random() < 0.15, starfish: Math.random() < 0.05, pegleg: Math.random() < 0.08 };
   for (const slot of Object.keys(PARTS)) L[slot] = pickIn(PARTS[slot][body]);
   for (const kk of DYE_KEYS) L[kk] = pickOf(DYES);
@@ -198,8 +209,10 @@ export const PIRATES = Object.fromEntries(Object.entries({
   // her island by Kikkit's: light brown hair tied back, an eyepatch, a gold hoop earring, a big grin, a
   // ragged light blue Rag shirt off one shoulder, blue-and-white Stripy knickers to below the knee, a peg
   // leg, a bare foot, and on her shoulder D'rizzle, a red dragon with silver horns (silver, vibrant red).
+  // (Looked at again closely, 13 Nov, the user: the quality "really needs working on": her hair's twisted
+  // locks drawn back, not a smooth ponytail; her grin's open, laughing; a blue starfish on her cheek too.)
   Tzz: {
-    body: 'f', skin: 1, hair: 'ponytail', hairCol: 'light brown', patch: true, earring: true, smile: true, pegleg: true,
+    body: 'f', skin: 1, hair: 'twists', hairCol: 'light brown', patch: true, earring: true, smile: true, grin: true, starfish: true, pegleg: true,
     hat: 'none', top: 'rag', topCol: 'light blue', waist: 'none',
     legs: 'knickers', legsCol: 'blue', feet: 'bare', hand: 'none', fam: 'dragon', famCol: 'silver', famCol2: 'vibrant red',
   },
@@ -207,12 +220,16 @@ export const PIRATES = Object.fromEntries(Object.entries({
   // island past the checkpoint: dark skin, white hair swept up, the Feminine feline in black (a black eye
   // mask with cat's ears), an eyepatch, a gold hoop earring, a blue starfish on the cheek, a black Vampire
   // raiment (high collar, gold buttons, lined in gold), black pants, black fancy boots with plum tops, a
-  // hook for the left hand, and King, his plum monkey, on his shoulder. (In his right hand in the portrait,
-  // a glowing blue jar: not in the wardrobe, so left out.)
+  // hook for the left hand, and King, their plum monkey, on their shoulder. Drawn as the pirate is, a woman.
+  // Looked at again closely, 13 Nov (the user: the portrait "looks really good, but her character in the game
+  // really does not"): their skin a cool deep brown, not orange; their hair silver and swept up off the face
+  // over the crown, a fall of it by the right cheek (no bun: there's none in the portrait); the raiment cut
+  // low at the front, its gold-lined tails flaring out at the hips; and in their right hand the glowing blue
+  // Atlantis trinket, a jar worked in gold, a wardrobe item now.
   Helium: {
-    body: 'f', skin: 4, hair: 'bun', hairCol: 'white', patch: true, earring: true, smile: true, hook: true, starfish: true,
+    body: 'f', skin: 6, hair: 'swept', hairCol: 'silver', patch: true, earring: true, smile: true, hook: true, starfish: true,
     hat: 'feline', hatCol: 'black', hatCol2: 'black', top: 'raiment', topCol: 'black', topCol2: 'gold', waist: 'none',
-    legs: 'pants', legsCol: 'black', feet: 'fancy', feetCol: 'black', feetCol2: 'plum', hand: 'none', fam: 'monkey', famCol: 'plum',
+    legs: 'pants', legsCol: 'black', feet: 'fancy', feetCol: 'black', feetCol2: 'plum', hand: 'atlantis', fam: 'monkey', famCol: 'plum',
   },
 }).map(([name, look]) => [name, cleanLook(look)]));
 
@@ -241,12 +258,34 @@ export const MISCHIEVIOUS_VERSIONS = [
 ].map((v) => ({ ...v, look: cleanLook(v.look) }));
 
 // ---------- building one ----------
-const hexOf = (c) => DYES[c] || HAIR[c] || FUR[c] || (/^#[0-9a-f]{6}$/i.test(c) ? c : '#888888');
-const M = (c, o = {}) => new THREE.MeshStandardMaterial({ color: hexOf(c), roughness: 0.85, ...o });
+// (Three-digit hex too: '#fff', the white under a textured garment, fell to grey here and drew Stripy knickers,
+// patched pants, a kilt and a sleeping hat at a quarter of their brightness, till 13 Nov.)
+const hexOf = (c) => DYES[c] || HAIR[c] || FUR[c] || (/^#([0-9a-f]{3}){1,2}$/i.test(c) ? c : '#888888');
+/* A pirate's shading, every part of them and their familiar (the user, 13 Nov, of Helium and Tzz beside
+   their portraits: "the whole tone and colour of everything, like the shading"): the den's own light, then
+   two cheap touches in the same shader, no extra lights or meshes. Undersides fall a little into shade, as
+   a portrait's painted shading does, so each part has its form; and a soft sheen round the edges, half of it
+   the part's own colour, so black clothes read as cloth and a figure stands out from what's behind it. */
+function pirateShade(sh) {
+  // (Lines joined, not a template's: the bundle keeps its line breaks few, tests/bundle.test.ts.)
+  sh.fragmentShader = sh.fragmentShader.replace('#include <opaque_fragment>', [
+    '{',
+    '  vec3 wn = inverseTransformDirection( normal, viewMatrix );',
+    '  outgoingLight *= mix( 0.78, 1.0, smoothstep( -0.85, 0.35, wn.y ) );',
+    '  float rim = pow( 1.0 - saturate( dot( normal, normalize( vViewPosition ) ) ), 3.0 );',
+    '  outgoingLight += rim * 0.3 * mix( vec3( 0.86, 0.9, 1.0 ), diffuseColor.rgb, 0.4 );',
+    '}',
+    '#include <opaque_fragment>',
+  ].join('\n'));
+}
+const PIRATE_SHADE = () => 'pirate-shade';
+const M = (c, o = {}) => Object.assign(new THREE.MeshStandardMaterial({ color: hexOf(c), roughness: 0.85, ...o }), { onBeforeCompile: pirateShade, customProgramCacheKey: PIRATE_SHADE });
 function part(geo, m, x = 0, y = 0, z = 0) {
   const p = new THREE.Mesh(geo, m);
   p.position.set(x, y, z);
-  p.castShadow = true; p.receiveShadow = true;
+  // (A pirate casts a shadow but takes none, even their own: lit whole, as in a portrait. Their own body's
+  // shadow left everything below the waist murky: 13 Nov, beside Tzz's and Helium's portraits.)
+  p.castShadow = true; p.receiveShadow = false;
   return p;
 }
 function tex(w, h, draw) {
@@ -286,6 +325,24 @@ const tattooTex = (sk) => cached(`ink${sk}`, () => tex(128, 128, (g, w, h) => {
     g.stroke();
   }
 }));
+// Hair's strands: its colour, streaked lighter and darker across (down a head's cap, its strands fall from the
+// crown), one per colour.
+const hairTex = (c) => cached(`hair${c}`, () => tex(128, 4, (g, w, h) => {
+  const base = new THREE.Color(hexOf(c)), k = new THREE.Color();
+  let seed = 11, v = 0;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let x = 0; x < w; x++) {
+    v = v * 0.55 + (rnd() - 0.5) * 0.6;
+    k.copy(base).offsetHSL(0, 0, v * 0.14);
+    g.fillStyle = `#${k.getHexString()}`; g.fillRect(x, 0, 1, h);
+  }
+}));
+// A soft round glow, bright in the middle and gone at the edge (something glowing: Helium's trinket).
+const glowTex = () => cached('glow', () => tex(64, 64, (g, w, h) => {
+  const gr = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.35, 'rgba(255,255,255,0.45)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+}));
 // A stone jug's glaze, XXX on it.
 const jugTex = () => cached('jug', () => tex(64, 64, (g, w, h) => {
   g.fillStyle = '#cdbd9a'; g.fillRect(0, 0, w, h);
@@ -310,7 +367,8 @@ export function dressPirate(look, opts = {}) {
   // Blue swirling tattoos, on skin a top leaves bare (Kikkit's arms and middle).
   const inked = L.tattoos ? M('#ffffff', { map: tattooTex(SKIN[L.skin] || SKIN[1]) }) : skin;
   const gold = M('#e8b23a', { metalness: 0.7, roughness: 0.3 });
-  const hairM = M(HAIR[L.hairCol] || L.hairCol);
+  // (Streaked with strands on a cap or a fall; plain on locks and curls, each its own strand.)
+  const hairHex = hexOf(HAIR[L.hairCol] || L.hairCol), hairM = M('#ffffff', { map: hairTex(hairHex) }), hairPlain = M(hairHex);
   const top = L.topCol, top2 = L.topCol2;
   const shirtM = {
     striped: () => M('#ffffff', { map: stripeTex(top2, top) }), plain: () => M(top), sash: () => M(top), belt: () => M(top),
@@ -324,7 +382,7 @@ export function dressPirate(look, opts = {}) {
 
   // Legs: a thigh and a shin, from the hip, then the feet.
   const thinner = F ? 0.88 : 1;
-  const thighM = { pants: () => M(L.legsCol), patched: () => M('#fff', { map: patchTex(L.legsCol, L.legsCol2) }), knickers: () => M('#fff', { map: vstripeTex('white', L.legsCol) }),
+  const thighM = { pants: () => M(L.legsCol), patched: () => M('#fff', { map: patchTex(L.legsCol, L.legsCol2) }), knickers: () => M('#fff', { map: vstripeTex('white', L.legsCol, 6) }),
     pantaloons: () => M(L.legsCol), flare: () => M(L.legsCol), kilt: () => skin, long: () => M(L.legsCol), short: () => M('white'), ragged: () => skin,
     gown: () => M(L.legsCol), bloomers: () => M(L.legsCol) }[L.legs]?.() || M(L.legsCol);
   // (Stockings under knickers and the like; bare legs over bare feet.)
@@ -333,7 +391,9 @@ export function dressPirate(look, opts = {}) {
     const hip = new THREE.Group();
     hip.position.set((F ? 0.12 : 0.13) * s, 0.72, 0);
     const puffy = L.legs === 'pantaloons' || L.legs === 'bloomers';
-    const thigh = puffy ? part(new THREE.SphereGeometry(0.13, 12, 10), thighM, 0, -0.16) : part(new THREE.CylinderGeometry(0.095 * thinner, 0.09 * thinner, 0.31, 10), thighM, 0, -0.15);
+    // (Stripy knickers are loose: Tzz's portrait, 13 Nov.)
+    const knick = L.legs === 'knickers', loose = knick ? 1.15 : 1;
+    const thigh = puffy ? part(new THREE.SphereGeometry(0.13, 12, 10), thighM, 0, -0.16) : part(new THREE.CylinderGeometry(0.095 * thinner * loose, 0.09 * thinner * loose, 0.31, 12), thighM, 0, -0.15);
     if (puffy) thigh.scale.set(1, 1.45, 1);
     // Bloomers: full and loose to the ankle, gathered there into a cuff in their second colour.
     const shin = L.legs === 'bloomers' ? part(new THREE.SphereGeometry(0.12, 12, 10), thighM, 0, -0.42) : part(new THREE.CylinderGeometry(0.088 * thinner, L.legs === 'flare' ? 0.14 : 0.08 * thinner, 0.29, 10), shinM, 0, -0.44);
@@ -342,15 +402,20 @@ export function dressPirate(look, opts = {}) {
       hip.add(part(new THREE.CylinderGeometry(0.075, 0.08, 0.05, 10), M(L.legsCol2), 0, -0.55));
     }
     // A peg leg for the right leg (Tzz's): from under the knee, a leather cup and a wooden peg, no foot.
-    const peg = L.pegleg && s === -1;
+    // (Under Stripy knickers, which come to the middle of the shin, the peg starts below them.)
+    const peg = L.pegleg && s === -1, pegTop = knick ? -0.5 : -0.36;
     hip.add(thigh);
     if (peg) {
       const wood = M('#94621c', { roughness: 0.7 });
-      hip.add(part(new THREE.CylinderGeometry(0.085 * thinner, 0.06, 0.1, 10), M('#5a3a22'), 0, -0.36));
-      hip.add(part(new THREE.CylinderGeometry(0.05, 0.03, 0.3, 8), wood, 0, -0.55));
+      hip.add(part(new THREE.CylinderGeometry(0.085 * thinner, 0.06, 0.1, 10), M('#5a3a22'), 0, pegTop));
+      hip.add(part(new THREE.CylinderGeometry(0.05, 0.03, pegTop + 0.66, 8), wood, 0, (pegTop - 0.74) / 2));
       hip.add(part(new THREE.CylinderGeometry(0.036, 0.036, 0.03, 8), M('#3a2a1a'), 0, -0.7));
     } else hip.add(shin);
-    if (L.legs === 'knickers') hip.add(part(new THREE.CylinderGeometry(0.1 * thinner, 0.1 * thinner, 0.04, 10), M(L.legsCol), 0, -0.3));
+    // Stripy knickers: on down over the knee to the middle of the shin, a band at the hem.
+    if (knick) {
+      hip.add(part(new THREE.CylinderGeometry(0.09 * thinner * loose, 0.098 * thinner * loose, 0.17, 12), thighM, 0, -0.38));
+      hip.add(part(new THREE.CylinderGeometry(0.1 * thinner * loose, 0.1 * thinner * loose, 0.04, 12), M(L.legsCol), 0, -0.47));
+    }
     const fc = M(L.feetCol);
     // (Under a dress the feet come a little further forward, so they peep out from under it.)
     const fz = L.legs === 'long' || L.legs === 'short' || L.legs === 'ragged' ? 0.1 : L.legs === 'gown' ? 0.16 : 0.05;
@@ -472,15 +537,32 @@ export function dressPirate(look, opts = {}) {
   } else if (L.top === 'raiment') {
     // The Vampire raiment: fitted to the waist, buttoned down the front, a tall collar standing round
     // the neck, and tails behind the hips lined in the second colour.
+    // (A woman's cut low at the front, in a V to the bust, buttoned in two rows below it, as Helium's portrait
+    // has it; and the tails flare out from the hips, their lining showing either side from the front: 13 Nov.)
     const collar = part(new THREE.CylinderGeometry(0.16, 0.1, 0.14, 18, 1, true, Math.PI * 0.25, Math.PI * 1.5), M(top, { side: THREE.DoubleSide }), 0, 0.71);
     body.add(collar);
-    for (let i = 0; i < 5; i++) { const y = 0.12 + i * 0.08; body.add(part(new THREE.SphereGeometry(0.018, 8, 6), M(top2, { metalness: 0.5, roughness: 0.4 }), 0, y, rAt(y - 0.02) + 0.012)); }
+    const buttonM = M(top2, { metalness: 0.5, roughness: 0.4 });
+    if (F) {
+      // The V of skin, laid on the torso's curve: rows from its top (wide) down to its point.
+      const vTop = 0.6, vPt = 0.42, rows = 5, vs = [], idx = [];
+      for (let j = 0; j <= rows; j++) {
+        const y = vTop - (vTop - vPt) * j / rows, w = 0.09 * (1 - j / rows), r = rAt(y - 0.02) + 0.004;
+        for (const x of [-w, 0, w]) vs.push(x, y + 0.02, Math.sqrt(Math.max(0, r * r - x * x)));
+        if (j) { const a = (j - 1) * 3, b = j * 3; idx.push(a, b, a + 1, a + 1, b, b + 1, a + 1, b + 1, a + 2, a + 2, b + 1, b + 2); }
+      }
+      const vg = new THREE.BufferGeometry();
+      vg.setAttribute('position', new THREE.Float32BufferAttribute(vs, 3));
+      vg.setIndex(idx);
+      vg.computeVertexNormals();
+      body.add(part(vg, skin));
+      for (let i = 0; i < 4; i++) for (const s of [-1, 1]) { const y = 0.13 + i * 0.075, x = 0.04 * s; body.add(part(new THREE.SphereGeometry(0.016, 8, 6), buttonM, x, y, Math.sqrt(rAt(y - 0.02) ** 2 - x * x) + 0.01)); }
+    } else for (let i = 0; i < 5; i++) { const y = 0.12 + i * 0.08; body.add(part(new THREE.SphereGeometry(0.018, 8, 6), buttonM, 0, y, rAt(y - 0.02) + 0.012)); }
     for (const s of [-1, 1]) {
       const tail = new THREE.Group();
-      tail.position.set(0.17 * s, 0.1, -0.16);
-      tail.rotation.set(0.25, 0.5 * s, 0.25 * s);
-      const outer = part(new THREE.BoxGeometry(0.16, 0.36, 0.02), M(top), 0, -0.18, -0.006);
-      const lining = part(new THREE.BoxGeometry(0.15, 0.35, 0.012), M(top2), 0, -0.18, 0.01);
+      tail.position.set(0.19 * s, 0.14, -0.15);
+      tail.rotation.set(0.15, 0.75 * s, 0.3 * s, 'YXZ');
+      const outer = part(new THREE.BoxGeometry(0.13, 0.44, 0.02), M(top), 0, -0.22, -0.006);
+      const lining = part(new THREE.BoxGeometry(0.118, 0.42, 0.012), M(top2), 0, -0.22, 0.01);
       tail.add(outer, lining);
       body.add(tail);
     }
@@ -592,12 +674,28 @@ export function dressPirate(look, opts = {}) {
     strap.rotation.set(Math.PI / 2 - 0.25, 0.35, 0);
     body.add(pt, strap);
   } else body.add(eye(-0.085));
-  if (L.smile) {
-    const smile = part(new THREE.TorusGeometry(0.055, 0.011, 6, 14, Math.PI * 0.8), M(F ? '#b8473f' : '#5a2c22'), 0, F ? 0.83 : 0.835, hr - 0.02);
+  // (A woman's lips a rose drawn from her own skin, so they sit right on any of it: a bright red stood out like
+  // paint on Helium's, 13 Nov.)
+  const lipCol = `#${new THREE.Color(SKIN[L.skin] || SKIN[1]).lerp(new THREE.Color('#8a2020'), 0.6).getHexString()}`;
+  if (L.grin) {
+    // A grin: the mouth wide open, laughing, a D on its side (its flat edge the top lip), dark inside, a
+    // tongue at the bottom (Tzz's).
+    const mouth = new THREE.Shape();
+    mouth.moveTo(-0.075, 0.012); mouth.lineTo(0.075, 0.012);
+    mouth.absarc(0, 0.012, 0.075, 0, -Math.PI, true);
+    const lip = part(new THREE.ExtrudeGeometry(mouth, { depth: 0.012, bevelEnabled: false }), M('#3a0f12', { roughness: 0.6 }), 0, 0.825, hr - 0.018);
+    lip.scale.set(1, 0.85, 1);
+    lip.rotation.x = 0.45;
+    const tg = part(new THREE.SphereGeometry(0.04, 10, 6), M('#d0606a'), 0, 0.785, hr - 0.026);
+    tg.scale.set(1.15, 0.45, 0.3);
+    tg.rotation.x = 0.45;
+    body.add(lip, tg);
+  } else if (L.smile) {
+    const smile = part(new THREE.TorusGeometry(0.055, 0.011, 6, 14, Math.PI * 0.8), M(F ? lipCol : '#5a2c22'), 0, F ? 0.83 : 0.835, hr - 0.02);
     smile.rotation.z = Math.PI * 1.1;
     body.add(smile);
   } else if (F) {
-    const lips = part(new THREE.SphereGeometry(0.05, 10, 6), M('#b8473f'), 0, 0.815, hr - 0.025);
+    const lips = part(new THREE.SphereGeometry(0.05, 10, 6), M(lipCol), 0, 0.815, hr - 0.025);
     lips.scale.set(1, 0.42, 0.5);
     body.add(lips);
   }
@@ -615,7 +713,7 @@ export function dressPirate(look, opts = {}) {
     tg.rotation.set(1.1, 0, 0.25);
     body.add(tg);
   }
-  for (const s of L.earring === 'both' ? [1, -1] : L.earring ? [1] : []) {
+  for (const s of L.earring === 'both' ? [1, -1] : L.earring ? [-1] : []) {
     const ring = part(new THREE.TorusGeometry(0.04, 0.012, 6, 16), gold, hr * s, 0.83, 0);
     ring.rotation.y = Math.PI / 2;
     body.add(ring);
@@ -624,7 +722,8 @@ export function dressPirate(look, opts = {}) {
   // Hair, tilted back so the face shows.
   if (L.hair !== 'bald') {
     const cap = part(new THREE.SphereGeometry(hr + 0.014, 20, 12, 0, Math.PI * 2, 0, Math.PI * (F ? 0.6 : 0.55)), hairM, 0, 0.9, -0.005);
-    cap.rotation.x = -0.5;
+    // (Hair drawn back off the face starts higher on the brow, and comes further down the nape.)
+    cap.rotation.x = L.hair === 'swept' || L.hair === 'twists' ? -0.85 : -0.5;
     body.add(cap);
   }
   if (L.hair === 'long') {
@@ -702,7 +801,59 @@ export function dressPirate(look, opts = {}) {
     }
     // A few curls tumbling over the brow, to one side.
     if (!capped) for (const [x, y] of [[-0.12, 1.05], [-0.04, 1.08], [0.06, 1.07], [0.15, 1.02]]) ball(x, y, 0.17, 0.055);
-    body.add(part(mergeGeometries(curls), hairM, 0, 0, 0));
+    body.add(part(mergeGeometries(curls), hairPlain, 0, 0, 0));
+  } else if (L.hair === 'swept' || L.hair === 'twists') {
+    // Hair laid over the head in strands, each along a path over it: from where it starts (a direction from
+    // the head's middle: `az` round from the face, + to the left, `el` up), up over `top`, to where it goes,
+    // lifted `lift` off the scalp at its middle. All one mesh, to stay cheap.
+    const dir = (az, el) => new THREE.Vector3(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el));
+    // (`peak` under 1 lifts it most early on: a wave rising off the brow.)
+    const over = (a, top, b, lift, n = 9, peak = 1) => {
+      const pts = [];
+      for (let i = 0; i <= n; i++) {
+        const t = i / n, d = t < 0.5 ? a.clone().lerp(top, t * 2) : top.clone().lerp(b, t * 2 - 1);
+        pts.push(d.normalize().multiplyScalar(hr + 0.012 + lift * Math.sin(Math.PI * t ** peak)).add(new THREE.Vector3(0, 0.9, -0.005)));
+      }
+      return pts;
+    };
+    const strands = [];
+    // A strand as a tube tapering to a point at both ends (so no open end shows), `r` thick at its middle;
+    // `ribs`, swelling and narrowing that many times along it, as a twisted lock does.
+    const tube = (pts, r, ends = 0.25, ribs = 0) => {
+      const curve = new THREE.CatmullRomCurve3(pts), segs = ribs ? ribs * 4 : 14, rad = 7, geo = new THREE.TubeGeometry(curve, segs, r, rad), q = geo.attributes.position, c = new THREE.Vector3();
+      for (let i = 0; i <= segs; i++) {
+        const t = i / segs, k = (ends + (1 - ends) * Math.sin(Math.PI * t) ** 0.5) * (ribs ? 0.78 + 0.22 * Math.abs(Math.sin(Math.PI * ribs * t)) : 1);
+        curve.getPointAt(t, c);
+        for (let j = 0; j <= rad; j++) { const x = i * (rad + 1) + j; q.setXYZ(x, c.x + (q.getX(x) - c.x) * k, c.y + (q.getY(x) - c.y) * k, c.z + (q.getZ(x) - c.z) * k); }
+      }
+      geo.computeVertexNormals();
+      strands.push(geo);
+    };
+    const twist = (pts, r) => tube(pts, r, 0.4, Math.max(3, Math.round(new THREE.CatmullRomCurve3(pts).getLength() / (r * 1.7))));
+    const from = (az, el, out = 0.02) => dir(az, el).multiplyScalar(hr + out).add(new THREE.Vector3(0, 0.9, 0));
+    if (L.hair === 'swept') {
+      // Swept up (Helium's portrait, 13 Nov): drawn up off the brow in a full wave from a low side part on the
+      // right, over the crown and back to the nape; a fall of it down by the right cheek; tucked behind the left ear.
+      for (const [a0, e0, lift, r] of [[-1.4, 0.32, 0.05, 0.045], [-1.05, 0.52, 0.075, 0.05], [-0.68, 0.66, 0.1, 0.055], [-0.28, 0.74, 0.115, 0.055], [0.12, 0.76, 0.11, 0.055], [0.52, 0.7, 0.085, 0.05], [0.9, 0.56, 0.055, 0.045], [1.25, 0.38, 0.035, 0.04]]) {
+        tube(over(dir(a0, e0), dir(a0 * 0.3 + 0.75, 1.2), dir(Math.PI - 0.5 + a0 * 0.2, -0.25), lift * 1.3, 10, 0.5), r, 0.12);
+      }
+      // (the fall by the right cheek, from the parting down past the ear)
+      for (const [dz, len] of [[0.04, 0.17], [-0.03, 0.2]]) {
+        tube([from(-1.2, 0.45), new THREE.Vector3(-hr - 0.03, 0.9, dz + 0.02), new THREE.Vector3(-hr - 0.03, 0.9 - len * 0.6, dz), new THREE.Vector3(-hr + 0.01, 0.9 - len, dz - 0.02)], 0.036, 0.3);
+      }
+    } else {
+      // Twists (Tzz's portrait, 13 Nov): twisted locks from the hairline drawn back over the head, tied behind
+      // and hanging a little way down her back, one loose by the right ear.
+      const tie = dir(Math.PI, -0.15);
+      for (let i = 0; i < 9; i++) {
+        const a = -1.5 + i * (3 / 8), e = 0.62 - 0.36 * Math.abs(a) / 1.5;
+        twist(over(dir(a, e), dir(a * 0.5, 1.15), tie, 0.03 + 0.015 * Math.cos(a), 10), 0.034);
+      }
+      const knot = from(Math.PI, -0.15, 0.04);
+      for (const dx of [-0.05, 0, 0.05]) twist([knot, knot.clone().add(new THREE.Vector3(dx * 0.6, -0.12, -0.03)), knot.clone().add(new THREE.Vector3(dx, -0.3, -0.02))], 0.032);
+      twist([from(-1.5, 0.3, 0.03), new THREE.Vector3(-hr - 0.03, 0.8, -0.05), new THREE.Vector3(-hr + 0.01, 0.64, -0.08)], 0.03);
+    }
+    body.add(part(mergeGeometries(strands), hairPlain, 0, 0, 0));
   } else if (L.hair === 'bun') body.add(part(new THREE.SphereGeometry(0.11, 12, 10), hairM, 0, 1.03, -0.17));
   else if (L.hair === 'braids') {
     for (const s of [-1, 1]) {
@@ -836,17 +987,24 @@ export function dressPirate(look, opts = {}) {
     }
     if (L.hat === 'feline') {
       // The Feminine feline: a cat's eye mask in its first colour, cat's ears in its second.
-      const mask = part(new THREE.SphereGeometry(hr + 0.008, 24, 6, Math.PI / 2 - 1.1, 2.2, 1.06, 0.52), hc, 0, 0.9);
+      // (Looked at closely beside Helium's portrait, 13 Nov: a band right across both eyes, its outer corners
+      // flicked up as a cat's eye is; the ears big and rounded, their insides a lighter shade of them.)
+      const mask = part(new THREE.SphereGeometry(hr + 0.008, 24, 6, Math.PI / 2 - 1.25, 2.5, 1.04, 0.56), hc, 0, 0.9);
       mask.material.side = THREE.DoubleSide;
       hat.add(mask);
+      const innerCol = `#${new THREE.Color(hexOf(L.hatCol2)).lerp(new THREE.Color('#a4a4ac'), 0.3).getHexString()}`;
       for (const s of [-1, 1]) {
+        const flick = part(new THREE.ConeGeometry(0.03, 0.09, 8), hc, s * 0.2, 0.985, 0.095);
+        flick.rotation.set(0, 0, -s * 0.9);
+        flick.scale.z = 0.4;
+        hat.add(flick);
         // (Up out of any hair.)
-        const ear = part(new THREE.ConeGeometry(0.085, 0.17, 4), hc2, s * 0.15, 1.2, 0.02);
-        ear.rotation.set(0, Math.PI / 4, -s * 0.4);
-        ear.scale.z = 0.5;
+        const ear = part(new THREE.ConeGeometry(0.1, 0.21, 12), hc2, s * 0.16, 1.2, 0.0);
+        ear.rotation.set(0, 0, -s * 0.38);
+        ear.scale.z = 0.42;
         hat.add(ear);
-        const inner = part(new THREE.ConeGeometry(0.05, 0.1, 4), M('#e89aa8'), s * 0.145, 1.18, 0.05);
-        inner.rotation.set(0, Math.PI / 4, -s * 0.4);
+        const inner = part(new THREE.ConeGeometry(0.062, 0.13, 10), M(innerCol, { roughness: 0.95 }), s * 0.155, 1.18, 0.03);
+        inner.rotation.set(0, 0, -s * 0.38);
         inner.scale.z = 0.3;
         hat.add(inner);
       }
@@ -1101,6 +1259,26 @@ export function dressPirate(look, opts = {}) {
     sc.rotation.x = 0.25;
     arms[0].add(sc);
     held = sc;
+  } else if (L.hand === 'atlantis') {
+    // The Atlantis trinket (Helium's portrait, 13 Nov): a jar of glowing blue crystal, gold scrollwork curling
+    // over its front, gold bands round its top and foot, and a soft glow about it (a sprite: no light, cheap).
+    const at = new THREE.Group(), gilt = M('#e8b23a', { metalness: 0.7, roughness: 0.3 });
+    const jar = part(new THREE.CylinderGeometry(0.07, 0.062, 0.17, 12), M('#3c9cff', { emissive: '#1a68f0', emissiveIntensity: 1.3, roughness: 0.2, metalness: 0.1 }), 0, 0.09);
+    jar.scale.z = 0.8;
+    at.add(jar, part(new THREE.CylinderGeometry(0.074, 0.074, 0.02, 12), gilt, 0, 0.18), part(new THREE.CylinderGeometry(0.066, 0.07, 0.02, 12), gilt, 0, 0.0),
+      part(new THREE.SphereGeometry(0.02, 8, 6), gilt, 0, 0.205));
+    for (const [x, y, r] of [[-0.03, 0.12, 0.022], [0.02, 0.08, 0.026], [-0.015, 0.045, 0.018]]) {
+      const curl = part(new THREE.TorusGeometry(r, 0.0055, 4, 12, Math.PI * 1.5), gilt, x, y, 0.058);
+      curl.rotation.z = x * 30;
+      at.add(curl);
+    }
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex(), color: '#6ec8ff', blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.55 }));
+    glow.position.y = 0.09; glow.scale.setScalar(0.42);
+    at.add(glow);
+    at.position.set(0, -0.62, 0.1);
+    at.scale.setScalar(1.3);   // (a good handful, as in the portrait)
+    arms[0].add(at);
+    held = at;
   }
   // A familiar rides on the left shoulder, as in Puzzle Pirates' portraits.
   const fam = makeFamiliar(L);

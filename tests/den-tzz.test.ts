@@ -313,7 +313,7 @@ describe('she\'s only config, and the wardrobe has all she wears (RULES.md, "A c
   it('her look is a wardrobe look: PIRATES.Tzz, from her portrait', () => {
     expect(TZZ_CAST.her.look).toBe('Tzz');
     const her = LOOK_JS.match(/\n {2}Tzz: \{([\s\S]*?)\n {2}\},/)![1];
-    for (const bit of ["body: 'f'", "hair: 'ponytail'", "hairCol: 'light brown'", 'patch: true', 'earring: true', 'smile: true', 'pegleg: true',
+    for (const bit of ["body: 'f'", "hair: 'twists'", "hairCol: 'light brown'", 'patch: true', 'earring: true', 'smile: true', 'grin: true', 'starfish: true', 'pegleg: true',
       "top: 'rag'", "topCol: 'light blue'", "legs: 'knickers'", "legsCol: 'blue'", "feet: 'bare'", "fam: 'dragon'", "famCol: 'silver'", "famCol2: 'vibrant red'"]) expect(her).toContain(bit);
   });
   it('the Rag shirt, Stripy knickers and the dragon are in the wardrobe for anyone, by YPPedia\'s names; the peg leg an injury like the hook', () => {
@@ -323,6 +323,6 @@ describe('she\'s only config, and the wardrobe has all she wears (RULES.md, "A c
     expect(parts.match(/\['dragon', 'Dragon', 1\]/g)).toHaveLength(2);
     expect(LOOK_JS).toMatch(/silver: '#[0-9a-f]{6}', 'vibrant red': '#[0-9a-f]{6}'/);
     expect(LOOK_JS).toMatch(/'light brown': '#[0-9a-f]{6}'/);
-    expect(LOOK_JS).toContain("['patch', 'smile', 'hook', 'tongue', 'tattoos', 'wristband', 'starfish', 'pegleg']");
+    expect(LOOK_JS).toContain("['patch', 'smile', 'grin', 'hook', 'tongue', 'tattoos', 'wristband', 'starfish', 'pegleg']");
   });
 });
