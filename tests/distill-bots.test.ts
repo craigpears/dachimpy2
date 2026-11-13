@@ -3,10 +3,10 @@
    each tier reaches is tools/distill-bots.mjs's to measure (DISTILLING.md §4). */
 import { describe, expect, it } from 'vitest';
 import { BLACK, BURN_TICKS, COLS, DOWN_RIGHT, Distilling, SHORT, TALL, UP_LEFT, UP_RIGHT, WHITE, neighbourOn, parseBoard } from '../src/distilling';
-import { DistillBot, HELIUM, MENU, brownSweep, whitesInJunk, TIERS, advise, backward, choose, contextFor, judge, junkAcross, playSession, tierNamed, turnsIn, weigh } from '../src/distill-bots';
+import { DistillBot, HELIUM, MENU, brownSweep, dangerZones, rightOrder, tieBreak, whitesInJunk, TIERS, advise, backward, choose, contextFor, judge, junkAcross, playSession, tierNamed, turnsIn, weigh } from '../src/distill-bots';
 import type { Advice } from '../src/distill-bots';
 import { ROUTINES, colourLeft, playDrags } from '../src/distill-routines';
-import { trappedWhite } from '../src/distill-score';
+import { boardScore, trappedWhite } from '../src/distill-score';
 import type { Drag, RoutineName } from '../src/distill-routines';
 import type { Board } from '../src/distilling';
 import { seeded } from '../src/mirror-row';
@@ -114,10 +114,12 @@ describe('the start is sweeping, the techniques after (12 Nov)', () => {
     g.burnNow(); g.tick(1000);
     const a = advise({ cols: g.cols, chain: 0, timeLeft: g.timeLeft() });
     // Since 13 Nov (the nineteenth note: the bots got stuck with whites left in the columns next to burn) the
-    // furnace's own whites come first: here it has four, and the advice saves one with one quick drag.
-    expect(g.cols[COLS - 1].filter((p) => p === WHITE).length).toBeGreaterThan(0);
-    expect(a.label).toBe('Save the whites');
+    // furnace's own whites come first: here it has four, and the advice saves one with one quick drag (a long
+    // plain one is still the sweep).
+    const whites = (b: typeof g.cols) => b[COLS - 1].filter((p) => p === WHITE).length;
+    expect(whites(g.cols)).toBeGreaterThan(0);
     expect(a.drags).toHaveLength(1);
+    expect(whites(playDrags(g.cols, a.drags)!)).toBeLessThan(whites(g.cols));
     // Swept blind: hardly a pause between them, every tier (the lower ones a bit slower).
     for (const t of TIERS) expect(t.sweepSpot).toBeLessThan(t.spot / 2);
     // A bot's first move is one quick drag (since 13 Nov, with the score "about filling those right-hand
@@ -226,6 +228,61 @@ describe('nothing trapped (13 Nov, the eighteenth note)', () => {
     expect(a.routine).toBe('hook');
     // Without the search, nothing.
     expect(choose({ cols, chain: 0, timeLeft: 12000 }, ctx, { ...HELIUM, routines: [], path: false }).kind).not.toBe('move');
+  });
+});
+
+describe('never a white burned (13 Nov, the twentieth and twenty-second notes)', () => {
+  const ctxOf = (cols: Board) => contextFor(cols, 'junk', 0, 16);
+  it('a white in the furnace\'s column is got out first, with the furnace far off and a sweep on offer, 13 Nov ("If you\'re playing well, you should never burn a white")', () => {
+    // notes/distilling/37-*: whites low in the furnace's column, no one drag reaching them; with 12 s left the
+    // planner used to sweep elsewhere and leave the two-drag rescue for the last seconds.
+    const cols = parseBoard(['KKKwwKbKK', 'wwwKwbww', 'KwwKKw*Kw', 'bbwwbwbK', '*wKwKKbwb', 'bKwKbwKb', 'b*wKbbKbw', 'KwKbbKbw', 'KbwKKKbwK', 'bbKbbbww']);
+    for (const style of [HELIUM, tierNamed('master'), tierNamed('ultimate')]) {
+      const a = choose({ cols, chain: 0, timeLeft: 12000 }, ctxOf(cols), style);
+      expect(a.kind).toBe('move');
+      const whites = (b: Board) => b[COLS - 1].filter((p) => p === WHITE).length;
+      expect(whites(playDrags(cols, a.drags)!)).toBeLessThan(whites(cols));
+    }
+  });
+  it('whites low in the column before the fire, hard to reach, come before easy work up top, 13 Nov ("it doesn\'t seem fussed that you\'re only one column away from a couple of whites burning at the bottom ... that\'s your danger area that\'s hard to reach")', () => {
+    // notes/distilling/39-*, read off the picture: the furnace's column all junk; the next has two whites low
+    // down with no way out left on their own; a knot of whites round a spice in the bottom middle.
+    const cols = parseBoard(['Kw*bbKKb', 'wbwww*KKw', 'bwwwwKKw', 'wKKwKKwwK', 'KwwwwwwK', 'wwbKbw*bw', 'bbKwwKww', '*wwwKKbww', 'bbKKbKww', 'b*bKbbbbK']);
+    expect(dangerZones(cols, 'junk', true)).toEqual([COLS - 2]);
+    const a = choose({ cols, chain: 0, timeLeft: 12000 }, ctxOf(cols), HELIUM);
+    const nearFire = (b: Board) => b[COLS - 2].filter((p) => p === WHITE).length + b[COLS - 1].filter((p) => p === WHITE).length;
+    expect(nearFire(playDrags(cols, a.drags)!)).toBeLessThan(nearFire(cols));
+  });
+  it('an early white must not burn: the Master on the board where it burned one in the first three columns gone, 13 Nov ("if you burn a white on the first column or the second column that goes up or down, that\'s catastrophic")', () => {
+    for (const [tier, seed] of [['master', 5007]] as const) {
+      const g = new Distilling(seeded(seed));
+      let gone = 0, early = 0;
+      playSession(g, tierNamed(tier), 2, (c) => { gone++; if (gone <= 3 && !c.up && c.whites > 0) early++; });
+      expect(early, `${tier} on ${seed}`).toBe(0);
+    }
+  }, 60000);
+});
+
+describe('a brown a flick lower, for next to nothing (13 Nov, the twenty-first note)', () => {
+  it('between two moves doing the same job, a swap or two apart, the one leaving the brown lower and a black above it wins; never one costing more, 13 Nov ("it\'s a little flick and a swish, and the brown can be one level lower")', () => {
+    // notes/distilling/38-*: the bot's plain diagonal left a brown high on the right; the user's hook, a swap or two
+    // longer, left it a row lower with a black lifted above it. Here the same two outcomes: the right-hand junk the
+    // same pieces, the brown at the top of column 9, or one place lower under a black.
+    const right = (c9: string) => board([...column(7, 'KKKKbbbb'), ...column(8, c9), ...column(9, 'KKKKbbbb')]);
+    const cols = right('KKKKKbbbb');
+    const plain = { move: { routine: 'diamond' as const, drags: [{ x: 0, y: 0, ways: [0, 0, 0] }], reason: '' }, value: 3, after: right('bKKKKbbbK') };
+    const hook = { move: { routine: 'diamond' as const, drags: [{ x: 0, y: 0, ways: [0, 0, 3, 0, 3] }], reason: '' }, value: 2.4, after: right('KbKKKbbbK') };
+    const long = { move: { routine: 'diamond' as const, drags: [{ x: 0, y: 0, ways: [0, 3, 0, 3, 0, 3] }], reason: '' }, value: 2, after: right('KKKKbbbbK') };
+    expect(boardScore(hook.after)).toBe(boardScore(plain.after));
+    expect(rightOrder(hook.after)).toBeGreaterThan(rightOrder(plain.after));
+    const pick = tieBreak(cols, [plain, hook, long], plain);
+    expect(pick.move).toBe(hook.move);
+    expect(pick.tie).toBe(true);
+    // Three swaps more is real moves: not taken, however tidy.
+    expect(tieBreak(cols, [plain, long], plain).move).toBe(plain.move);
+    // Nor a move doing less of the job.
+    const less = { ...hook, after: right('KbKKKbbbw') };
+    expect(tieBreak(cols, [plain, less], plain).move).toBe(plain.move);
   });
 });
 

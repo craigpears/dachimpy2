@@ -775,6 +775,63 @@ first white burned. "Columns gone" counts every column, up or burned; a white bu
   the Ultimate burns one in a quarter of its sessions, though never early (7 junk columns burned first at
   the least). The Able to Master has one early disaster in 20, after 2 junk columns.
 
+### Never a white burned: the furnace's whites first, and the danger by the fire (13 Nov, eighth run)
+After the twentieth and twenty-second notes. Why the Master and the Ultimate burned whites (each burn traced back):
+nearly always a move had existed that would get the white out, often as the column reached the furnace with 14 s
+left, but the bot took a sweep elsewhere that scored more a second, or saved the easy white first and left the
+hard one, which by then no one or two drags could reach; and while the furnace's column still had whites, hard
+ones in the column before it got no attention at all, so they reached the furnace already lost (the user's
+picture, `39-*`). Rules now, not weights (`weigh`, `dangerZones`):
+- **The furnace's whites first:** while the furnace's column (a column to burn) has a white, only moves that take
+  one out in time are played, whatever they score, the one freeing a hard-to-reach white first (no way out left on
+  its own); if no routine or path does, the wider path search (`PATH_WIDE`: drags to 16 swaps, a piece up to 6
+  squares off moved first). No move ever puts a white into it.
+- **The danger a column earlier:** in Stage I, a white hard to reach in the column before the furnace's (low down,
+  boxed in, behind spice) is next in line the same way, before easy work elsewhere, even while the furnace's
+  column still has whites no move can save. `P.ZONE2` switches it off.
+- Tried and dropped: forbidding any move that leaves a white in the last two columns harder to reach (no effect on
+  20 boards a tier).
+
+20 boards a tier, before and after, the runner's lines; "elsewhere" is moves taking no white out of the last two
+columns while a hard-to-reach white sat one column from the fire. In brackets, the furnace rule alone (`ZONE2` 0).
+
+| Tier | Sessions with no white burned, was | Disasters (first 3 columns), was | Junk columns burned before the first: median, was | Whites burned a session, was | Elsewhere a session, was | Longest chain mean, was | Points a minute, was |
+|---|---|---|---|---|---|---|---|
+| Learner | 2/20, was 3 | 1, was 2 | 6, was 5 | 6.5, was 6.5 | 1.3, was 3.5 | 1.4, was 1.1 | 8.9, was 9.0 |
+| Able to Master | 12/20, was 12 (14) | 0, was 1 | 9, was 9 | 0.7, was 0.7 (0.3) | 7.8, was 11.7 (10.1) | 1.3, was 1.1 (1.1) | 12.9, was 9.8 (11.3) |
+| Grand-Master to Legendary | 14/20, was 13 (13) | 0, was 0 | 8, was 10 | 0.3, was 0.7 (0.6) | 7.2, was 9.3 (11.2) | 1.4, was 1.4 (1.3) | 11.4, was 13.8 (14.0) |
+| Ultimate | 12/20, was 15 (14) | 0, was 0 | 9, was 8 | 0.6, was 0.3 (0.3) | 4.8, was 8.1 (8.7) | 1.6, was 1.9 (2.4) | 16.9, was 20.7 (21.3) |
+
+- **What it did:** no early disaster for any tier but the Learner's one (was 2, and the Master's 1); the Master's
+  old disaster board (seed 5007) is clean; the bots spend far less time elsewhere with a hard white by the fire
+  (the Ultimate 8.1 to 4.8 a session), which is the twenty-second note's complaint.
+- **What it didn't, honestly:** "never" isn't reached: 12 to 14 clean sessions in 20 for the top three, about as
+  before, and within 20 boards' noise either way. The Ultimate is worse with the next-column rule (12 clean,
+  points a minute 16.9 against 20.7); with the furnace rule alone it's 14 and 21.3. What's left: a hard white
+  that's already beyond any one or two drags when its column comes up (a black or a brown would have to be brought
+  from far off, three drags or more); the cure is earlier, keeping whites out of the last columns' corners while
+  they fill, which this doesn't yet do. The Learner's burns are mostly after its chain starts (it never dismisses),
+  which this touches little.
+
+### A brown a flick lower, as a tie-breaker (13 Nov, ninth run)
+After the twenty-first note. In Stage I, once the best move is picked, `tieBreak` looks for another doing its job
+(its board score gain within 0.25) in as many drags and at most two more swaps that leaves the last four columns
+in better order, browns lower and blacks higher (`rightOrder`); it's played instead when there is one. Never when
+a white's being saved. The picture's own board is a crop that couldn't be placed, so its test is the same choice
+built by hand. Same 20 boards, the eighth run's code with and without it:
+
+| Tier | Tie-breaker changed the choice, a session | Sessions with no white burned, was | Whites burned a session, was | Longest chain mean (best), was | Points a minute, was |
+|---|---|---|---|---|---|
+| Learner | 2.8 of 33 moves | 1/20, was 2 | 5.3, was 6.5 | 1.1 (4), was 1.4 (4) | 9.6, was 8.9 |
+| Able to Master | 7.0 of 76 | 11/20, was 12 | 0.7, was 0.7 | 1.0 (3), was 1.3 (6) | 9.5, was 12.9 |
+| Grand-Master to Legendary | 5.8 of 77 | 14/20, was 14 | 0.7, was 0.3 | 1.6 (5), was 1.4 (4) | 13.4, was 11.4 |
+| Ultimate | 6.0 of 81 | 14/20, was 12 | 0.8, was 0.6 | 1.9 (6), was 1.6 (6) | 16.2, was 16.9 |
+
+- It changes about one Stage I move in twelve, at no more than two swaps each. On 20 boards its effect on
+  outcomes can't be told from noise: the Master lost points a minute, the Grand-Master gained them, the rest about
+  even. Whether the right-hand side really ends up better connected for later (the note's reason) isn't measured
+  here; watching it on `distilling-test.html` would show it.
+
 **Watching them, the first note (the user, 12 Nov, a screenshot of the Ultimate's board):** "the main
 thing is it just doesn't carry on the whole way to the right. It just kind of stops ... that black ... in
 the white, it was dragging the black diagonally down and it just stopped there. It's like, well, no, it
