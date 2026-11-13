@@ -1859,6 +1859,11 @@ one piece." So the bots get a board reader of its own, before any move is weighe
 - **The board's state**, one of a few named (healthy, at risk, cracked, damage control; the thirty-fourth note),
   and **the tactic in play**, named in words (free the trapped whites, fill by the fire, sort, fix the V, sort the
   ladder, rescue the stranded junk, keep the tools), which every move's weighing then reads.
+And after the last position: "those need to be actual features and calculations, not just things of note you're
+noting of mine. They need to be like little modules that the bot uses to have information and determine what it's
+doing", with tests that it "identifies the right, phases, risks, both at the individual piece level and that middle
+pattern level". So each level of the reader is a small pure module of its own with its own tests on the positions'
+boards (pieces, patterns, the state and tactic), and the planner decides by their numbers, not by labels.
 
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
