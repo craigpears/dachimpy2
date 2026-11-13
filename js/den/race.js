@@ -41,6 +41,7 @@ import { rocksWorld, rocksShot, rocksTick, rocksReset } from './race-rocks.js';
 import { netKey, netPrompt, netTick, netBefore, netInTick } from './race-net.js';
 import { NET } from '../race-net.js';
 import { planStep, planTick, planReset, planKey } from './race-plan.js';
+import { pop } from './pop-board.js';
 
 const RC = LAY.RACE, CELL = SAIL.CELL, DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
 const NTH = (n) => (n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`);
@@ -63,6 +64,24 @@ export const race = { W: null, rules: newRace(), gap: new GunGap(), drift: new D
    the door's own crag stands tall over them. */
 const LOOK = [{ h: 0.9, low: true }, { h: 2.2 }, { h: 0.9, low: true }, { h: null }, { h: 1.0, low: true }];
 const sandM = mat('#d9c08a', { roughness: 1 }), lowGrass = mat('#7c9a52', { roughness: 1 });
+/* The headwind gap's way through plain from the water (the user, 13 Nov: "I can't even see a way through"): the
+   cliffs either side of it stepped down to low shoulders (a square off it, then two), so it reads as a cut through
+   the ridge from leg 2, and its water a paler channel down it (gapChannel). How high land at (c, r) may stand. */
+function gapShoulder(c, r) {
+  const d = Math.min(...RC.HEADWIND.map(([x, y]) => Math.max(Math.abs(x - c), Math.abs(y - r))));
+  return d <= 1 ? 0.55 : d === 2 ? 1.2 : Infinity;
+}
+function gapChannel(g) {
+  const m = new THREE.MeshBasicMaterial({ color: '#8fd3d6', transparent: true, opacity: 0.32, depthWrite: false });
+  const [c0, r0] = RC.HEADWIND[0], [c1, r1] = RC.HEADWIND[RC.HEADWIND.length - 1];
+  // (its squares, and the one above its mouth on leg 2 and below its foot on leg 3: the way in and the way out)
+  for (const [c, r] of [[c0, r0 - 1], ...RC.HEADWIND, [c1, r1 + 1]]) {
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(CELL * 0.86, CELL * 0.86).rotateX(-Math.PI / 2), m);
+    p.position.set(seaX(c), 0.07, seaZ(r));
+    p.renderOrder = 2;
+    g.add(p);
+  }
+}
 function land(g) {
   const S = CELL;
   const square = (c, r, h, side, top) => {
@@ -74,7 +93,7 @@ function land(g) {
     const L = LOOK[i];
     for (const [c, r] of sq) {
       if (doorSquares.has(`${c},${r}`)) continue;
-      const h = L.h ?? bankTop(c, r);
+      const h = Math.min(L.h ?? bankTop(c, r), gapShoulder(c, r));
       square(c, r, h, L.low ? sandM : stoneM, L.low ? lowGrass : grassM);
       if (L.low && (c * 7 + r * 3) % 4 === 0) g.add(rock(seaX(c) + (Math.random() - 0.5) * 2.5, h, seaZ(r) + (Math.random() - 0.5) * 2.5, 0.5 + Math.random() * 0.4));
       if (!L.low && (c * 5 + r) % 3 === 0) g.add(rock(seaX(c) + (Math.random() - 0.5) * 3, h * (0.3 + Math.random() * 0.5), seaZ(r) + (Math.random() - 0.5) * 3, 0.8 + Math.random() * 0.6));
@@ -148,6 +167,7 @@ function build() {
   // with its headwind in it, to row against): a lane each straight run of it, as the course's winds are drawn.
   // (not the breath of wind up out of the wreck's notch: shortcuts are never marked)
   for (const z of RC.ZONES.filter((x) => x.d === 2 && RC.HEADWIND.some(([c, r]) => c === x.c0 && r >= x.r0 && r <= x.r1))) { const l = windLane(z.c0, z.r1, 2, z.r1 - z.r0 + 1); W.g.add(l.g); W.winds.push(l.tex); }
+  gapChannel(W.g);
   // The rocks walling in the field's hop: boulders, a couple to a square.
   for (const [c, r] of RC.FIELD.HOP.ROCKS) for (let k = 0; k < 2; k++) W.g.add(rock(seaX(c) + (Math.random() - 0.5) * 2, 0.2, seaZ(r) + (Math.random() - 0.5) * 2, 0.9 + Math.random() * 0.4));
   // The gun gap: a turret either side on the spit, on the Empire's bastions (an imperial gate:
@@ -389,6 +409,8 @@ export function raceTick(dt) {
   for (const tex of W.winds) tex.offset.y -= dt * 2.2;   // (as the trade winds' lanes race: sailing.js)
   for (const o of W.pools) o.rotation.z += dt * o.userData.speed;
   const h = sail.helm, R = race.rules, p = h.now();
+  // (racing your own sloop, from the line to over it: her guns and the patch come up popped out, pop-board.js)
+  pop.race = sail.on && R.state !== 'off';
   if (sail.on) {
     // The starter's hail, the first time she's by the buoy a voyage.
     if (atStart(h.pose.c, h.pose.r) && !race.said.hail && !cine && R.state === 'off') { race.said.hail = true; toast(STARTER.hail); }

@@ -5,6 +5,7 @@
 import { W, H } from '../bilge.js';
 import { mirrorCol } from '../mirror-row.js';
 import { bitArt } from './bilge.js';
+import { edges } from './world.js';
 
 /* The user (10 Nov), on the first rowing board, laid along her deck: "I know it's like zoomed in is
    good to see the puzzle, but like I can't see where I'm rowing." So the boards stand either side
@@ -80,7 +81,8 @@ export function boardsMake() {
    left above the prompt; `top`: below the den's panel at the top. Says where the sea shows: `free`,
    a rectangle in pixels. */
 export function boardsLayout(B, low, top) {
-  const w = innerWidth, h = innerHeight, gap = 10;
+  // (clear of a panel along the right-hand edge: the race plan's strip, world.js's edges)
+  const w = innerWidth - edges.right, h = innerHeight, gap = 10;
   top = Math.max(gap, top + gap);
   let k, wide = w > h * 1.05;
   if (wide) {

@@ -372,11 +372,36 @@ the rubble settle back after half a minute.
       choice instead, a stop behind each headwind on the row she's sailing (they alternate rows, so two: the
       others aren't in her way), and a Double broken on the way in still lines her up and hops one without a
       stop. The simulation's long-way bots keep hopping it (their route's plan chooses it), as before.
-    - **The strip:** down the screen's right-hand edge, on the line (under the starter's card) and in the race:
-      "Your plan", the pilot's switch, what it's doing ("The Double's gap · a Double hops her over"), and a
-      button a leg still to come, the one she's on lit. A click (a tap) is that leg's next choice, a right click
-      the one before; on the press, never focused, so the board's keys and Space stay the board's. On a phone,
-      narrower, under the race's bar, names only.
+    - **The strip (reworked 13 Nov, below: "Too disconnected to plan with"):** down the screen's right-hand edge,
+      on the line (under the starter's card) and in the race: "Your plan", the pilot's switch, what it's doing
+      ("The Double's gap · a Double hops her over"); the course drawn small (`courseChart`: its land; the long way
+      dashed; your route in gold, `planLines`; a dot where she is); a line saying the choice you're pointing at, or
+      your route's total against the long way (`planTime`); then each leg still to come, its choices side by side
+      (`Option.short`), yours lit, the leg she's on outlined, each with its seconds against the long way
+      (`choiceTime`). Pointing at a choice draws its line on the course in blue (`choiceLines`) and says it ("Leg 2
+      · The headwind gap · cuts 25 s of sailing · rowing ~20 s · 5 s quicker"); a click or tap takes it (and draws
+      its line a few seconds); on the press, never focused, so the board's keys and Space stay the board's.
+    - **Its times, from the simulation (`src/race-sim.ts`, `choiceTime`; tested):** a choice's saving is what its
+      shortcut cuts out of the sailing as the helm measured it, net of her trip through (`CUTS[...].saves`; the
+      gate's three ways by their own trips through it: run or shot quiet square by square, the bribe's tow and the
+      wreck's detour), and its puzzle a decent player's (`SIM.PUZZLE`, as the bots draw it), with what it likely
+      costs besides (running the gate, a hit's patch at its odds; the gate's guns or the rocks, the shots still to
+      load past the two she starts with; the whirlpools, a Vegas that doesn't come off the first go, at a decent
+      player's odds). Its net is the puzzle less the saving. A chain hop (the Quad, a Double's or Triple's gap, the
+      zigzag's Doubles) is built on the move as the bots build theirs: its net is the saving alone. Never a number
+      of its own: a change to the course or the simulation's measures changes them. As laid on 13 Nov: leg 1 bribe
+      −9 s, Quad −22, shoot −17, run −6; leg 2 row −5, door +1, Double −9; leg 3 Vegas +20, rocks −5, driftwood
+      −1; leg 4 hop −4, locks +1; leg 5 crane +1, Triple −14. (For the user: the Vegas reads slow and shooting the
+      gate quick for a decent player; the bots' win rates are what balance goes by, §8.)
+    - **Never over a board (13 Nov, at the headwind gap: "your plan is covering the right hand row board"):**
+      while a board other than Sailing's is up (the oars, her guns, the patch, any stop's board) it folds to a
+      tab at the edge ("Plan · Leg 2: Row"), a click opening it a while (✕ folds it again). Whatever it keeps
+      along the edge, the boards at sea lay themselves out clear of (`edges.right`, world.js: the Sailing board,
+      the rowing boards, a popped-out board). **On a phone** it's always the tab, under the race's bar, opening
+      as a sheet across the top, the chart and the choices big enough to tap.
+    - **Your last plan kept (the user, 13 Nov: "persist the last plan you chose so that you don't need to do it
+      every time"):** in this browser (`PLAN_STORE`, `writePlan`, `readPlan`: cleaned, a stale or broken one the
+      long way); each race starts from it. Only your own choices are kept, never a shortcut the pilot put by.
     - **The pilot** (`Pilot`): each of the race's steps it puts in her next moves with `Helm.put`, as yours are
       (so online they're written down as yours are), read off the pilot's chart (`PilotChart`, which now takes a
       way to face at the pin too: a stop that needs her lined up) on a copy of her own sea with every way through
@@ -388,7 +413,10 @@ the rubble settle back after half a minute.
       behind each of the zigzag's headwinds on her row, facing along leg 4 (hopping it; one she can't line up
       for, she weaves by); in front of the gate facing in (the Quad); off the gate's first gun (shoot
       it quiet, Q, port); the wreck's notch (Treasure Haul) then the gate (paying); the headwind gap's way in
-      (the oars run out; shipped again once she's out on leg 3); the Double's gap; the starlit door's rock;
+      (the oars run out; shipped again once she's out on leg 3; since 13 Nov lined up first on the square above
+      the gap facing down it, so the oars take her along it: the user, "the rowboat is perpendicular to the actual
+      gap, so you're not even going forward"; Sailing's board away while she rows, the camera hers to turn, the
+      gap's cliffs stepped down and its water a paler channel so the way through shows from the leg); the Double's gap; the starlit door's rock;
       the whirlpools' mouth facing in; off the rocks facing along leg 3 (Q, port; Gunnery up if she has no shot);
       the driftwood's notch; in the up lock (its Bilge on the quay comes up as ever); the crane's ledge; the
       Triple's gap. At each she's held, the board put up once as she comes to rest (Space pressed for her at the
@@ -399,6 +427,11 @@ the rubble settle back after half a minute.
       Triple at the gate) doesn't carry her into the wind she's lined up on: "Held here for the hop: it takes a
       Double". The pilot's holding her, as agreed. Not at the whirlpools' mouth: their loop back to it is their
       own price.
+    - **No gust through a way her plan isn't taking (13 Nov, `Pilot.gustHeld`; tested):** in the browser, the plan
+      changed while she was held facing into the gate for the Quad, and a Sailing gust carried her straight
+      through it without paying or shooting. A gust now goes into a shortcut's way through only if it's the one
+      she's in, or the one the pilot's taking her to and she may go through now (the gate on its Quad or run, its
+      gun quiet, its guard paid); otherwise it's held and the pilot turns her onto the leg, the next gust along it.
     - **Put by:** a shortcut whose way in no sailing gets her to from where she is is put by and her plan says
       so, the long way there (the gate run, for the bribe), with a toast. The bots do the same. (The wreck's notch
       was the one from most of the line till 13 Nov; it's reached from every spot now: §3.)
@@ -425,8 +458,9 @@ the rubble settle back after half a minute.
       simulation (§8). Bots don't change plans of their own accord mid-race beyond giving up and putting by.
   - **Too disconnected to plan with (the user, 13 Nov, on the line):** "you need to be able to see the length. This
     is very disconnected. At the moment ... it requires you to really know the course to actually be able to do
-    anything with this." The strip names the choices and nothing more. To do: the course drawn small with your
-    route on it, each choice's line as you change it, and each choice's time against the long way (TODO.md).
+    anything with this." The strip named the choices and nothing more. **Done 13 Nov** (the strip, above): the
+    course drawn small with your route on it, each choice's line as you point at it or take it, each choice's
+    seconds against the long way from the simulation's measures, on a phone too; and your last plan kept.
 
 ## 6. Racing each other: position and risk
 
@@ -447,8 +481,12 @@ one square a second and a half in the open (`RACE.STILL`): a flash on her, and t
 (`Broadside.stock`). Hits are shown on the sloops, never as wordy toasts.
 **Your own boards popped out (the user, 13 Nov, racing):** shot on the move, the camera swung down onto her deck for
 the patch, "absolutely chaotic. I don't know what happened"; Gunnery and the patch "definitely just needs to be a puzzle
-... my controls need to be more like sailing is, where it's popped out." To do: your Gunnery and deck patch as a board
-put up as Sailing's is, the race still in view; on her deck only for spectators (TODO.md).
+... my controls need to be more like sailing is, where it's popped out." **Done 13 Nov** (`js/den/pop-board.js`): racing
+your own sloop, her Gunnery and the patch's Carpentry come up in a gold frame where Sailing's board goes, a camera of their
+own looking straight down on the board on her deck (her bow at the top, anything higher than her deck cut away), the
+pointer reaching the board through it; the race camera stays out over the water, her slid into the sea the frame leaves.
+The same boards and puzzles on her deck, so spectators (the race watched) still see them played there; away from a race,
+on her deck as before.
 Her guns fire a broadside, three squares out of her side (`SAIL.RANGE`, as everywhere at sea), stopped by
 rock or land, so nobody shoots across a spit. A hit holes her: she's dazed, still, till she's patched by
 Carpentry, but is never knocked out, and can't be hit again till she's patched. Every racer starts with two

@@ -34,6 +34,7 @@ import { haul, haulKey, haulHover, haulSwap, haulTick, haulCam } from './den/tre
 import { gunnery, gunCam, gunneryUp, gunneryRub, gunneryWheel } from './den/sea-guns.js';
 import { rowing, rowCam, rowPull } from './den/rowing.js';
 import { station, stationShift } from './den/sail-station.js';
+import { pop, popShift, popInset } from './den/pop-board.js';
 import { crane, craneCam } from './den/crane.js';
 import { doorCam } from './den/door.js';
 import { umami, umamiTick, umamiCam, umamiClick } from './den/capybara.js';
@@ -314,7 +315,7 @@ export let sailView = 0, holdView = 0, haulView = 0, forageView = 0;
 export const denLets = {
   get sailView() { return sailView; }, set sailView(v) { sailView = v; },
 };
-export let patchView = 0, rowView = 0, gunView = 0, stationView = 0;
+export let patchView = 0, rowView = 0, gunView = 0, stationView = 0, popView = 0;
 let craneView = 0, craneShot = null, doorView = 0, doorShot = null;
 /* The Carpentry view's camera: straight on to the board, close enough to puzzle in. On the wall, a
    stretch of it round the piece, its whole height; on a frame on the floor, looking down on it from
@@ -373,9 +374,10 @@ function frame() {
   // Something new to start, offered on the thing itself where you're looking (js/den/start-mark.js).
   startMark(sailOffer(), paused || cheats.open || G.over || !!cine || chart.on || deco.on || dress.open || lodgings.open || wed.on || house.on, 1 / 60);
   renderer.render(scene, camera);
-  // Helium in the corner box when they're off the screen at their board (js/den/helium-isle.js, heliumInset).
-  const inset = sail.on ? heliumInset() : null;
-  if (inset) {
+  // Helium in the corner box when they're off the screen at their board (js/den/helium-isle.js, heliumInset); a
+  // board on her deck popped out in a race, in its frame (js/den/pop-board.js, popInset).
+  for (const inset of [sail.on ? heliumInset() : null, popInset()]) {
+    if (!inset) continue;
     const { x, y, w, h } = inset.rect, by = innerHeight - y - h;
     renderer.setScissorTest(true);
     renderer.setScissor(x, by, w, h);
@@ -627,6 +629,11 @@ function update(dt) {
   stationView += ((station.on ? 1 : 0) - stationView) * Math.min(1, dt * 3);
   const rig = stationView > 0.001 && stationShift(yaw, tilt, dist);
   if (rig) look.addScaledVector(rig, -stationView);
+  // A board on her deck popped out in a race (her guns, the patch): the camera stays out over the race, her slid
+  // into the sea the board's frame leaves, and no swing down onto her deck (js/den/pop-board.js).
+  popView += ((pop.on ? 1 : 0) - popView) * Math.min(1, dt * 3);
+  const popped = popView > 0.001 && popShift(yaw, tilt, dist);
+  if (popped) look.addScaledVector(popped, -popView);
   // Bilging at a lock: down onto the board on its quay from behind her, the way she faces waiting to
   // go up (its top row's way: the user, 10 Nov, coming back up through the headland, had her bow
   // coming at you and couldn't see the board), drawn back to take in the lock beside it and the pump,
@@ -651,7 +658,7 @@ function update(dt) {
   // 9 Nov: it was "a bit tiny, and it's making my head hurt"; zooming out at sea doesn't shrink it),
   // and sitting just above the tray along the bottom ("your eyes really have to go down to the
   // bottom of the screen to see it").
-  patchView += ((patch.on ? 1 : 0) - patchView) * Math.min(1, dt * 3);
+  patchView += ((patch.on && !pop.on ? 1 : 0) - patchView) * Math.min(1, dt * 3);
   if (patchView > 0.001 && patch.group?.parent && patch.hole) {
     const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect), sq = patch.sq, b = patch.hole.board;
     const far = Math.min(wallViewDist().dist * sq / S, Math.max((b.h * sq / 2 + 0.3) / Math.tan(vh), (b.w * sq / 2 + 0.3) / Math.tan(hh)) * 1.6);
@@ -689,7 +696,7 @@ function update(dt) {
   }
   // At her guns: down onto the Gunnery board on her deck from over her stern, turned with her
   // (js/den/sea-guns.js).
-  gunView += ((gunnery.on ? 1 : 0) - gunView) * Math.min(1, dt * 3);
+  gunView += ((gunnery.on && !pop.on ? 1 : 0) - gunView) * Math.min(1, dt * 3);
   if (gunView > 0.001 && gunnery.group?.parent) {
     const gc = gunCam();
     look.lerp(gc.look, gunView);

@@ -10,6 +10,7 @@ import { roomyShapes } from './wall.js';
 import { ghostMats } from './pieces.js';
 import { cursor } from './raids.js';
 import { SLOOP_DECK, sail, strike } from './sea.js';
+import { aimAt } from './pop-board.js';
 
 /* A hole in her deck (the user, 9 Nov: being dazed by a hit was over "way too quickly. Like, you
    know, one fix and it was done", and bilging was wrong for it: "what do you mean bilge? I've been
@@ -265,7 +266,7 @@ export function patchKey(key, e) {
 export function patchHover(x, y) {
   if (!patch.face) return;
   if (patch.keyAt) { if (Math.hypot(x - patch.keyAt.x, y - patch.keyAt.y) < 24) return; patch.keyAt = null; }
-  ray.setFromCamera(new THREE.Vector2(x / innerWidth * 2 - 1, -y / innerHeight * 2 + 1), camera);
+  if (!aimAt(x, y)) return;   // (through its frame when it's popped out in a race: pop-board.js)
   patch.face.updateMatrixWorld(true);
   const o = new THREE.Vector3().setFromMatrixPosition(patch.face.matrixWorld), n = new THREE.Vector3(0, 0, 1).transformDirection(patch.face.matrixWorld);
   const p = new THREE.Vector3();
@@ -276,6 +277,16 @@ export function patchHover(x, y) {
   const b = C.bbox(patch.hand.cells);
   const [r, c] = centreOn(at, b.h, b.w);
   if (patch.hole.fit(patch.hand.cells, r, c)) { patch.r = r; patch.c = c; patchClamp(); } else patchSnap(at, 1.2);
+}
+/** Her deck's patch, for its frame when it's popped out in a race (pop-board.js): the board's middle, her bow's
+    way, and the metres it takes with the deck round it. Not a frame away from her deck (the crane's). */
+export function patchShot() {
+  if (!patch.on || patch.at || !patch.face || !patch.hole) return null;
+  const b = patch.hole.board, sq = patch.sq;
+  patch.face.updateMatrixWorld(true);
+  const centre = patch.face.localToWorld(V3((b.c0 + b.w / 2) * S, -(b.r0 + b.h / 2) * S, 0));
+  const bow = V3(0, 1, 0).transformDirection(patch.face.matrixWorld).setY(0).normalize();
+  return { centre, bow, w: (b.w + 2) * sq, h: (b.h + 2) * sq };
 }
 export function patchTick(dt) {
   const away = !sail.helm.dazed() ? patch.aways.find((a) => a.hole()) ?? null : null;

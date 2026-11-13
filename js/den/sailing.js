@@ -12,12 +12,13 @@ import { chart } from './map.js';
 import { canLand, canBoard, ashoreAt } from '../den-beach.js';
 import { cine } from './cine.js';
 import { SEA_X0, seaX, seaZ, SLOOP_DECK, sail, liftAt, sloopMesh, seaRocks, seaWorld, pinMesh, dotMat, dotMine, dotGeo, hoverMat, TOK } from './sea.js';
-import { patch, deckHoleShape, patchClear, patchShut, patchClick, patchHover, patchTick, patchPrompt } from './sea-puzzles.js';
+import { patch, deckHoleShape, patchClear, patchShut, patchClick, patchHover, patchTick, patchPrompt, patchShot } from './sea-puzzles.js';
+import { popTick } from './pop-board.js';
 import { hold, holdShut, holdKey, holdHover, holdSwap, holdTick, lockWorld, lockTick, lockSay, lockClear } from './lock.js';
 import { online } from './crew.js';
 import { haul, haulShut, haulPrompt, canHaulWreck, haulWreck } from './treasure.js';
 import { checkpointReset, checkpointTick, checkpointShot } from './checkpoint.js';
-import { gunnery, gunneryReset, gunneryToggle, gunneryTick, gunneryKey, gunneryHover, gunneryDown, gunneryPrompt } from './sea-guns.js';
+import { gunnery, gunneryReset, gunneryToggle, gunneryTick, gunneryKey, gunneryHover, gunneryDown, gunneryPrompt, gunShot } from './sea-guns.js';
 import { deco, decoMode } from './menus.js';
 import { sailView, patchView, setPaused, denLets } from '../den.js';
 import { WIND } from '../den-wind.js';
@@ -217,7 +218,7 @@ export function sailKey(key) {
   else if ((key === ' ' || key === 'enter') && heliumHail()) { /* (to Helium's still, off their island: helium-isle.js) */ }
   else if (key === 'z' || key === 'c') keys.add(key);
   else if (key === 'p') setPaused(true);
-  else if (key === 'v') Object.assign(view, { yaw: 0, pitch: 0, zoom: 1 });
+  else if (key === 'v') { Object.assign(view, { yaw: 0, pitch: 0, zoom: 1 }); rowing.yaw0 = 0; rowing.pitch0 = 0; }   // (at the oars, behind her again: rowCam)
   else if (key === '-' || key === '_') view.zoom = Math.min(2, view.zoom * 1.15);
   else if (key === '=' || key === '+') view.zoom = Math.max(0.55, view.zoom / 1.15);
 }
@@ -336,7 +337,11 @@ export function sailTick(dt) {
   patchTick(dt);
   rowTick(dt, haul.on);
   gunneryTick(dt, haul.on || craneHolds());
-  stationTick(dt, rigBusy());
+  // (racing, her guns and the patch popped out in front of you, as Sailing's board is: pop-board.js)
+  popTick(dt, gunShot() ?? patchShot());
+  // (and put away while her oars are out or you're at her guns: their boards have the screen; the user, 13 Nov,
+  // at the headwind gap: "the left one for some reason has sailing underneath it". It comes back after.)
+  stationTick(dt, rigBusy() || h.oars || gunnery.want);
   // The locks: each one's water at its level, its gates, and the quay pump at work (lock.js).
   lockTick(dt);
   isleTick();

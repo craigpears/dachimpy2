@@ -8,6 +8,7 @@ import { dressBoard, gunwale, setCrates, gunTick, drawBoard, gunSays, chalkOn, c
 import { GUNS, cantLoad } from '../den-guns.js';
 import { GUNNERY, DR, DC, k } from '../gunnery.js';
 import { sail, SLOOP_DECK, strike } from './sea.js';
+import { pop, aimAt, popProject } from './pop-board.js';
 
 /* The user (10 Nov): "we should have to load the guns through the puzzle". G takes you to her guns:
    the Gunnery board is laid along her deck, its top row toward her bow and you looking down it from
@@ -100,6 +101,7 @@ export function gunneryTick(dt, busy = false) {
   if (show !== gunnery.on) { if (show) open(); else shut(); }
   if (!gunnery.on) return;
   const b = gunnery.b;
+  b.cam = pop.on ? pop.cam : null;   // (a drag's way read as it's seen: in its frame, popped out)
   b.tickT += dt / GUNNERY.TICK;
   if (b.tickT >= 1) { b.tickT = Math.min(b.tickT - 1, 0.5); gunTick(b); }
   drawBoard(b, dt, true);
@@ -107,11 +109,20 @@ export function gunneryTick(dt, busy = false) {
   for (const g of b.guns) {
     const [cls, html] = gunSays(g), sig = cls + html;
     if (g.sig !== sig) { g.sig = sig; g.label.className = cls; g.label.innerHTML = html; }
-    v3.copy(gunnery.group.localToWorld(b.at(g.port[0] + DR[g.d] * 1.6, g.port[1] + DC[g.d] * 1.6, 0.5))).project(camera);
-    g.label.style.left = `${(v3.x + 1) / 2 * innerWidth}px`;
-    g.label.style.top = `${(1 - v3.y) / 2 * innerHeight}px`;
-    g.label.style.display = v3.z > 1 ? 'none' : '';
+    // (where it shows: in the board's frame while it's popped out, pop-board.js)
+    const s = popProject(gunnery.group.localToWorld(b.at(g.port[0] + DR[g.d] * 1.6, g.port[1] + DC[g.d] * 1.6, 0.5)));
+    g.label.style.left = `${s.x}px`;
+    g.label.style.top = `${s.y}px`;
+    g.label.style.display = s.off ? 'none' : '';
   }
+}
+/** The board on her deck, for its frame when it's popped out (pop-board.js): its middle, her bow's way, and the
+    metres it takes with her guns either side and their labels. */
+export function gunShot() {
+  if (!gunnery.on) return null;
+  gunnery.group.updateMatrixWorld(true);
+  const bow = V3(1, 0, 0).transformDirection(sail.g.matrixWorld).setY(0).normalize();
+  return { centre: gunnery.group.localToWorld(V3(0, 0, 0)), bow, w: GUNNERY.COLS * gunnery.sq * 1.5, h: GUNNERY.ROWS * gunnery.sq * 1.12 };
 }
 
 // ----- keys and the mouse -----
@@ -138,8 +149,7 @@ export function gunneryKey(key) {
 }
 // The board's square under the pointer.
 export function gunneryHover(x, y) {
-  if (!gunnery.on) return;
-  ray.setFromCamera(new THREE.Vector2(x / innerWidth * 2 - 1, -y / innerHeight * 2 + 1), camera);
+  if (!gunnery.on || !aimAt(x, y)) return;   // (through its frame when it's popped out: pop-board.js)
   const g = gunnery.group;
   g.updateMatrixWorld(true);
   const o = new THREE.Vector3().setFromMatrixPosition(g.matrixWorld), n = new THREE.Vector3(0, 1, 0).transformDirection(g.matrixWorld), p = new THREE.Vector3();

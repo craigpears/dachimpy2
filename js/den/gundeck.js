@@ -701,10 +701,11 @@ export function turnArrowAhead(t) {
    (the wheel turns it), or drag from the plank the way you want it to point. Click an arrow to turn
    it a quarter clockwise; the wheel over one turns it too. Right-click rubs one out. */
 function screenDir(b, r, c, dx, dy) {
-  const p0 = bWorld(b, r, c).project(camera);
+  // (as it's seen: through the camera it's shown by, `b.cam`, a board popped out in its frame: pop-board.js)
+  const cam = b.cam ?? camera, p0 = bWorld(b, r, c).project(cam);
   let best = 0, bd = -Infinity;
   for (let d = 0; d < 4; d++) {
-    const p = bWorld(b, r + DR[d], c + DC[d]).project(camera), sx = p.x - p0.x, sy = p0.y - p.y, n = Math.hypot(sx, sy) || 1;
+    const p = bWorld(b, r + DR[d], c + DC[d]).project(cam), sx = p.x - p0.x, sy = p0.y - p.y, n = Math.hypot(sx, sy) || 1;
     const dot = (sx * dx + sy * dy) / n;
     if (dot > bd) { bd = dot; best = d; }
   }
