@@ -49,9 +49,10 @@ export const SAIL = {
       to its left (LAY.PRIMATES), open sea round her: everything already there staying put. And again
       (11 Nov) from 37 to 65, for the sloop race's course out past her (LAY.RACE), behind a line of
       rocks with one gate in it: everything already there staying put. And again (11 Nov) from 65 to 74,
-      for the race's second pass: its start's field, and the course re-laid (LAY.RACE). */
+      for the race's second pass: its start's field, and the course re-laid (LAY.RACE). And (13 Nov) from 74 to
+      79, for the fort's bay in the race's first spit (an experiment: RACE.md §3). */
   COLS: 27,
-  ROWS: 74,
+  ROWS: 79,
   /** The sea as the captain's map shows it: the rows it had before the race's course was laid out
       past Primates Rule (src/den-map.ts). The course is a place of its own, off the map. */
   CHARTED: { ROWS: 37 },
@@ -154,10 +155,14 @@ export const SAIL = {
    - A shortcut through every spit, each a puzzle the den already has, by its one module, and each
      saving about what a decent player takes on it, so it pays only if it's your puzzle (RACE.DECENT):
      [A] spit 1: the gun gap (GUNS), three squares deep, a gun either side trained on its way in, the
-         gap and its way out (none on the leg: the long way's clear of them), light airs in it. Just past
-         it the water's tight (SNAKES.TIGHT): a wall ahead, and one move too many puts her in a wind that
-         carries her three squares back along leg 2. It's an imperial gate (12 Nov), its guard bribed with
-         coins hauled up by Treasure Haul from an old wreck in a notch off leg 1 (BRIBE), sheltered.
+         gap and its way out (none on the long way: it's clear of them), light airs in it. It's an imperial
+         gate (12 Nov), its guard bribed with coins hauled up by Treasure Haul from an old wreck in a notch off
+         leg 1 (BRIBE), sheltered. Since 13 Nov (an experiment: RACE.md §3, "The gate across the fort's bay")
+         spit 1 is deep, a bay in it (BAY): past leg 1's end the long way turns into the bay, sails west along
+         its north side, round the end of the Empire's mole and back east along its south side to buoy 1, and
+         on down to leg 2. The gate cuts straight through the fort at the mole's root, by the bend: in from the
+         bay's north side, out at buoy 1. Both come out at the same buoy, so leg 2's shortcuts are all still
+         there after it. (The tight water past the old gate's way out onto leg 2 went with it.)
      [B] spit 2: the headwind gap (HEADWIND), rowed, with a dog-leg at its far end so it doesn't open
          straight onto leg 3 (no broadside from the leg ahead reaches a rower in it), far from the gun
          gap's guns. A small gap a Double hops (DOUBLE): one wind blowing back across it. The trade
@@ -180,13 +185,15 @@ export function layRace(K: Course = DEFAULT_COURSE, custom = false) {
   const LINE = { r: R0 + 1, c0: 1, c1: W - 1 }, FIELD_R0 = R0 + 2, FIELD_R1 = R0 + 7;
   /** Each stretch: its first row (it's two deep) and the way it's sailed (1 right, 3 left). The run
       home's second row is the left-hand trade wind's (SNAKES.LEFT): one square of water to sail. */
-  const STRETCHES = [{ r: R0 + 8, d: 1 }, { r: R0 + 13, d: 3 }, { r: R0 + 18, d: 1 }, { r: R0 + 26, d: 3 }, { r: R0 + 31, d: 1 }, { r: R0 + 35, d: 3 }];
+  const STRETCHES = [{ r: R0 + 8, d: 1 }, { r: R0 + 18, d: 3 }, { r: R0 + 23, d: 1 }, { r: R0 + 31, d: 3 }, { r: R0 + 36, d: 1 }, { r: R0 + 40, d: 3 }];
   /** Each spit: its rows, and the end she rounds it the long way ('R' the right, 'L' the left): two
       squares of water round its end (on the left, the left-hand edge's water beside them). */
-  const SPITS = [{ r0: R0 + 10, r1: R0 + 12, bend: 'R' }, { r0: R0 + 15, r1: R0 + 17, bend: 'L' }, { r0: R0 + 20, r1: R0 + 25, bend: 'R' }, { r0: R0 + 28, r1: R0 + 30, bend: 'L' }, { r0: R0 + 33, r1: R0 + 34, bend: 'R' }] as const;
+  /* (Spit 1 eight rows deep since 13 Nov, the fort's bay in it: BAY.) */
+  const SPITS = [{ r0: R0 + 10, r1: R0 + 17, bend: 'R' }, { r0: R0 + 20, r1: R0 + 22, bend: 'L' }, { r0: R0 + 25, r1: R0 + 30, bend: 'R' }, { r0: R0 + 33, r1: R0 + 35, bend: 'L' }, { r0: R0 + 38, r1: R0 + 39, bend: 'R' }] as const;
   const S = SPITS, T = STRETCHES;
   /** The columns everything's laid at (the few numbers to rework the course by). */
-  const GUN_C = K.gun, WRECK_C = K.wreck, HEAD_C = K.head, DOUBLE_C = K.double, MID_C = K.mid, DOOR_C = DOOR_COLS[0], WHIRL_C = K.whirl, ROCK_C = K.rocks, FORAGE_C = K.forage, LOCK_C = K.lock, CRANE_C = K.crane, TRIPLE_C = K.triple, FIN_C = K.finish;
+  /** The gate at buoy 1's column, by the bend; the mole's end (the bay's head) at the course's `gun`. */
+  const GUN_C = B[0], TIP = K.gun, WRECK_C = K.wreck, HEAD_C = K.head, DOUBLE_C = K.double, MID_C = K.mid, DOOR_C = DOOR_COLS[0], WHIRL_C = K.whirl, ROCK_C = K.rocks, FORAGE_C = K.forage, LOCK_C = K.lock, CRANE_C = K.crane, TRIPLE_C = K.triple, FIN_C = K.finish;
   const winds: [number, number, number][] = [];
 
   /* The snakes, gentle since 12 Nov (the user: "it should send you back by a few tiles and basically make you
@@ -205,9 +212,8 @@ export function layRace(K: Course = DEFAULT_COURSE, custom = false) {
     left.push([0, s.r0 - 1, 1]);
   }
   for (let c = W - 1; c >= 0; c--) left.push([c, RUN + 1, (W - 1 - c) % 4 === 0 ? 2 : 1]);
-  // Just past the gun gap [A]: leg 2's second row under the gap, three squares blowing her back toward the bend.
-  const tight: [number, number, number][] = [];
-  for (let c = GUN_C; c <= Math.min(GUN_C + 2, W - 2); c++) tight.push([c, T[1].r + 1, 1]);
+  // (Just past the gun gap [A] there was tight water on leg 2 till 13 Nov, three squares blowing her back toward
+  // the bend: the gate comes out at buoy 1 now, in the fort's bay.)
   // The trade wind back: across leg 3 (both rows, blowing up) into a notch in spit 2's far face, back along it
   // three columns and down onto the leg again: a loop, three squares back, to hop it again.
   const mid: [number, number, number][] = [[MID_C, T[2].r + 1, 2], [MID_C, T[2].r, 2], [MID_C, S[1].r1, 3], [MID_C - 1, S[1].r1, 3], [MID_C - 2, S[1].r1, 3], [MID_C - 3, S[1].r1, 0]];
@@ -252,9 +258,21 @@ export function layRace(K: Course = DEFAULT_COURSE, custom = false) {
   // [A'] The bribe (12 Nov; src/den-bribe.ts): an old wreck run aground at the back of a notch in spit 1,
   // off leg 1 (she lies in the notch to haul, sheltered), and the gun gap's gate, where she pays its guard:
   // the water in front of its way in, on leg 1's second row; its gatehouse's towers either side of the way in.
+  // [A''] The fort's bay (13 Nov): spit 1's rows from the top, two of land (the wreck's notch in them, off leg 1),
+  // the bay's north side (UP, two rows), the Empire's mole (MOLE) out from the fort at the bend to its end at TIP,
+  // the bay's south side (two rows, LOW its second), a row of land, and leg 2. The fort stands across the mole's
+  // root by the bend, a row either side of it (the north side and the south one a row wide there), the gate's way
+  // through it in buoy 1's column. Round the mole's end, the turn (TURN). The bend's water past buoy 1's column:
+  // down from leg 1 into the bay's north side, and from its south side down to leg 2.
+  const P0 = S[0], BAY = { UP: P0.r0 + 2, MOLE: P0.r0 + 4, LOW: P0.r1 - 1, TIP, TURN: [TIP - 2, P0.r0 + 4] as [number, number], WATER: [] as [number, number][], MOLE_AT: [] as [number, number][] };
+  for (let c = TIP - 2; c < W; c++) for (const r of [BAY.UP, BAY.UP + 1, BAY.LOW - 1, BAY.LOW]) {
+    if (!(c >= GUN_C - 1 && (r === BAY.UP + 1 || r === BAY.LOW - 1))) BAY.WATER.push([c, r]);
+  }
+  BAY.WATER.push([TIP - 2, BAY.MOLE], [TIP - 1, BAY.MOLE]);
+  for (let c = TIP; c < W; c++) for (const r of [BAY.MOLE - 1, BAY.MOLE, BAY.MOLE + 1]) if (c !== GUN_C && (r === BAY.MOLE || c >= GUN_C - 1)) BAY.MOLE_AT.push([c, r]);
   const bribe = {
-    NOTCH: [WRECK_C, S[0].r0] as [number, number], WRECK: [WRECK_C, S[0].r0 + 1] as [number, number],
-    GATE: [GUN_C, T[0].r + 1] as [number, number], TOWERS: [[GUN_C - 1, S[0].r0 + 1], [GUN_C + 1, S[0].r0 + 1]] as [number, number][],
+    NOTCH: [WRECK_C, P0.r0] as [number, number], WRECK: [WRECK_C, P0.r0 + 1] as [number, number],
+    GATE: [GUN_C, BAY.UP] as [number, number], TOWERS: [[GUN_C - 1, BAY.MOLE], [GUN_C + 1, BAY.MOLE]] as [number, number][],
   };
 
   // The start's field: its slow winds and whirlpools laid fresh from each race's seed (src/start-field.ts,
@@ -278,20 +296,25 @@ export function layRace(K: Course = DEFAULT_COURSE, custom = false) {
   const back: [number, number, number][] = [];
   for (let c = HOP_C1 + 2; c < W; c++) back.push([c, FIELD_R1 - 1, 2], [c, FIELD_R1, 3]);
 
-  winds.push(...left, ...tight, ...mid, doubleWind, ...zigzag, ...triple, ...hopHead, ...hopLane, ...conveyor, ...back);
+  winds.push(...left, ...mid, doubleWind, ...zigzag, ...triple, ...hopHead, ...hopLane, ...conveyor, ...back);
 
   // The land of each spit, but for its shortcuts' ways through it (the barrier's and the rocks' land till
   // they're cleared: src/den-race.ts, Barrier and Rocks).
   const notches = [forage.NOTCH, berth, [CRANE_C, S[4].r0] as [number, number], bribe.NOTCH];
   const open = new Set<string>([
-    ...[0, 1, 2].map((k) => `${GUN_C},${S[0].r0 + k}`), ...head.map(([c, r]) => `${c},${r}`), ...double.map(([c, r]) => `${c},${r}`),
+    ...[-1, 0, 1].map((k) => `${GUN_C},${BAY.MOLE + k}`), ...head.map(([c, r]) => `${c},${r}`), ...double.map(([c, r]) => `${c},${r}`),
     ...mid.map(([c, r]) => `${c},${r}`), ...passage, ...[...forage.BARRIER, ...forage.GAP, ...rocks.WALL, ...rocks.GAP].map(([c, r]) => `${c},${r}`),
     ...locks.map((l) => `${l.at[0]},${l.at[1]}`), ...pound.map(([c, r]) => `${c},${r}`), ...triple.map(([c, r]) => `${c},${r}`),
     ...notches.map(([c, r]) => `${c},${r}`),
   ]);
+  // (spit 1, the fort's bay's: all land but the bay's water, the bend's past buoy 1's column and the notch)
+  const bayOpen = new Set([...BAY.WATER].map(([c, r]) => `${c},${r}`));
   const land: [number, number][][] = S.map((s, i) => {
-    const out: [number, number][] = [], [l0, l1] = landOf(K, i);
-    for (let r = s.r0; r <= s.r1; r++) for (let c = l0; c <= l1; c++) if (!open.has(`${c},${r}`)) out.push([c, r]);
+    const out: [number, number][] = [], [l0, l1] = i === 0 ? [0, W - 1] : landOf(K, i);
+    for (let r = s.r0; r <= s.r1; r++) for (let c = l0; c <= l1; c++) {
+      if (open.has(`${c},${r}`) || (i === 0 && (bayOpen.has(`${c},${r}`) || (c >= B[0] && (r <= s.r0 + 1 || r === s.r1))))) continue;
+      out.push([c, r]);
+    }
     return out;
   });
   const reef: [number, number][] = [];
@@ -338,14 +361,14 @@ export function layRace(K: Course = DEFAULT_COURSE, custom = false) {
         each race's own: src/start-field.ts.) */
     WINDS: winds,
     /** The snakes, winds that carry her back a few squares (RACE.md §4): the left-hand trade wind's loops at
-        the left-hand bends and along the run home; the tight water just past the gun gap; the trade wind back
-        across leg 3. */
-    SNAKES: { LEFT: left, TIGHT: tight, MID: mid },
+        the left-hand bends and along the run home; the trade wind back across leg 3. (The tight water just past
+        the gun gap went with the gate's move into the fort's bay, 13 Nov.) */
+    SNAKES: { LEFT: left, MID: mid },
     /** The finish line: across the run home at FINISH[0], crossed going left (src/den-race.ts, atFinish). */
     FINISH: [FIN_C, RUN] as [number, number],
     /** A numbered buoy at each bend of the long way, the square she rounds it by (the long way plain to
         follow: "clearer [buoys] for the main route"); the next is the finish. */
-    BUOYS: S.map((s, i) => ({ n: i + 1, at: [B[i], Math.round((s.r0 + s.r1) / 2)] as [number, number], bend: s.bend })),
+    BUOYS: S.map((s, i) => ({ n: i + 1, at: [B[i], i ? Math.round((s.r0 + s.r1) / 2) : BAY.LOW] as [number, number], bend: s.bend })),
     /** The course's own breeze, out across it, with patches of its own (the first that has a square is
         the one she feels: src/den-sail.ts, Sea.zoneAt): light airs across the gun gap's middle (as under
         the checkpoint's gatehouse); the headwind back through the headwind gap; a wind along the leg in front
@@ -355,7 +378,7 @@ export function layRace(K: Course = DEFAULT_COURSE, custom = false) {
         onto leg 1 past it, by the start's hop (a wind along the leg there had her in irons coming back to it,
         so from most of the line no sailing reached it). Not drawn: shortcuts are never marked. */
     ZONES: [
-      { c0: GUN_C, c1: GUN_C, r0: S[0].r0 + 1, r1: S[0].r0 + 1, d: 0, s: 1 },
+      { c0: GUN_C, c1: GUN_C, r0: BAY.MOLE - 1, r1: BAY.MOLE + 1, d: 0, s: 1 },
       { c0: HEAD_C, c1: HEAD_C, r0: S[1].r0, r1: S[1].r0 + 1, d: 2, s: 2 },
       { c0: HEAD_C + 1, c1: HEAD_C + 1, r0: S[1].r0 + 1, r1: S[1].r1, d: 2, s: 2 },
       { c0: FORAGE_C, c1: FORAGE_C, r0: T[2].r + 1, r1: S[2].r0, d: 1, s: 2 },
@@ -366,15 +389,20 @@ export function layRace(K: Course = DEFAULT_COURSE, custom = false) {
       { c0: 0, c1: W - 1, r0: LINE.r, r1: RUN + 1, d: 0, s: 2 },
     ] as WindZone[],
     /** [A]: the gap (its middle square), its guns either side of its way in (12 Nov: at its mouth, the
-        gatehouse's towers behind them either side of the gap's middle, so the gate could come along the spit
-        and still be out of reach of the starlit door's rock), and the squares each is trained on (gun 0 the
-        way in and the way out, gun 1 the gap itself, as the checkpoint's: src/den-checkpoint.ts, CHECK.MARKS):
-        all three in the spit, none on a leg. */
+        gatehouse's towers behind them either side of the gap's middle), and the squares each is trained on: since
+        13 Nov gun 0 the gap's way in and gun 1 its middle, the fort's light airs all through it (she's slow
+        into each square), so run a square at a time she's holed by one, patches, and is holed by the other (till then gun 0 the way in and out, which a sloop under
+        way was gone from before its shot came down: one hit, "a quick [Carpentry] puzzle"). All in the fort,
+        none on the long way. */
     GUNS: {
-      gap: [GUN_C, S[0].r0 + 1] as [number, number], at: [[GUN_C - 1, S[0].r0], [GUN_C + 1, S[0].r0]] as [number, number][],
-      marks: [[[GUN_C, S[0].r0], [GUN_C, S[0].r1]], [[GUN_C, S[0].r0 + 1]]] as [number, number][][],
-      way: [0, 1, 2].map((k) => [GUN_C, S[0].r0 + k]) as [number, number][],
+      gap: [GUN_C, BAY.MOLE] as [number, number], at: [[GUN_C - 1, BAY.MOLE - 1], [GUN_C + 1, BAY.MOLE - 1]] as [number, number][],
+      marks: [[[GUN_C, BAY.MOLE - 1]], [[GUN_C, BAY.MOLE]]] as [number, number][][],
+      way: [-1, 0, 1].map((k) => [GUN_C, BAY.MOLE + k]) as [number, number][],
     },
+    /** [A'']: the fort's bay (13 Nov): its rows (the north side's first, the mole's, the south side's second, the
+        long way's rows through it), the mole's end (TIP) and the turn round it (TURN), its water (WATER: both
+        sides and the turn) and the mole and fort's land (MOLE_AT, drawn as the Empire's stone: js/den/race-bay.js). */
+    BAY,
     /** [A']: the bribe (src/den-bribe.ts): the wreck's notch off leg 1 (she lies in it to haul, sheltered),
         the wreck at its back (on the spit), where she pays the gate's guard (in front of the gun gap's way
         in) and the gatehouse's towers either side of the way in. */

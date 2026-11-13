@@ -57,17 +57,20 @@ describe('a course\'s share link (12 Nov)', () => {
 });
 
 describe('moving a buoy (12 Nov)', () => {
-  it('in toward the start shortens the long way, once the gate\'s moved out of its way', () => {
+  it('in toward the start shortens the long way, once the wreck and the fort\'s bay are moved out of its way', () => {
     let k = moved(DEFAULT_COURSE, 'buoy0', 21);
     expect(k.buoys[0]).toBe(21);
+    expect(check(k).some((p) => p.startsWith('The wreck'))).toBe(true);
     expect(check(k).some((p) => p.startsWith('The imperial gate'))).toBe(true);
-    k = moved(k, 'gun', 18);
-    k = moved(k, 'wreck', 14);
+    k = moved(k, 'wreck', 18);
+    k = moved(k, 'gun', 15);
     expect(check(k)).toEqual([]);
-    expect(squares(longRoute(layRace(k, true)))).toBe(squares(longRoute(LAY.RACE)) - 2 * 4);
-    // (the spit's land ends a column before its buoy)
-    const spit = layRace(k, true).LAND[0];
-    expect(Math.max(...spit.map(([c]) => c))).toBe(20);
+    // (leg 1 and leg 2 four squares shorter, and since 13 Nov the fort's bay's two sides as well, each three: the
+    // bay runs from its mole's end, a column further out, to the bend)
+    expect(squares(longRoute(layRace(k, true)))).toBe(squares(longRoute(LAY.RACE)) - 2 * 4 - 2 * 3);
+    // (the spit's land by leg 1 ends a column before its buoy; the mole and fort run on to the edge)
+    const lay = layRace(k, true), spit = lay.LAND[0];
+    expect(Math.max(...spit.filter(([, r]) => r === lay.SPITS[0].r0).map(([c]) => c))).toBe(20);
   });
 
   it('can\'t go past the edge of the course', () => {
@@ -164,7 +167,7 @@ describe('the race on a course from the editor (12 Nov)', () => {
     const den = await load(DEFAULT_COURSE);
     const base = { saves: Object.fromEntries(Object.entries(den.sim.CUTS).map(([id, c]) => [id, c.saves])), puzzle: { ...den.sim.SIM.PUZZLE }, long: den.sim.SIM.LONG };
     // (the den's own, read from a link, races as the den's own: the same numbers)
-    expect(base.long).toBe(223.5);
+    expect(base.long).toBe(265.8);
     expect(base.saves.locks).toBe(23);
     const k: Course = { ...DEFAULT_COURSE, lock: 18, clears: 12, bundles: 4, frames: 'large', buoys: [25, 2, 25, 2, 21], crane: 10, triple: 17 };
     expect(problems(k)).toEqual([]);
@@ -174,7 +177,7 @@ describe('the race on a course from the editor (12 Nov)', () => {
     expect(m.sim.SIM.PUZZLE.forage).toBe(base.puzzle.forage * 2);
     // (the locks further from their bend save more; the last leg shorter, so the long way's quicker)
     expect(m.sim.CUTS.locks.saves).toBeGreaterThan(base.saves.locks);
-    expect(m.sim.SIM.LONG).toBeLessThan(223.5);
+    expect(m.sim.SIM.LONG).toBeLessThan(265.8);
     const rep = m.sim.run(6, 4, {});
     expect(Object.values(rep.byRoute).reduce((n, t) => n + t.n, 0)).toBe(24);
   });

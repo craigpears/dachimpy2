@@ -2451,8 +2451,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     repeat the thing ... I don't want it to be rage-inducing"; the tight water's "3 or 4 squares ... that's the
     kind of snakes and ladders level that's a good tune"):** each carries her three or four squares back, to
     the start of what she was doing (tested, `tests/den-race.test.ts`):
-    - **The tight water past the gun gap:** a move too far out of the gap, and its wind along leg 2's second
-      row carries her three squares back toward the bend; a turn to port out of the gap is the way on.
+    - **The tight water past the gun gap** (till 13 Nov, gone with the gate's move into the fort's bay, below):
+      a move too far out of the gap, and its wind along leg 2's second row carried her three squares back.
     - **The trade wind back across leg 3:** a wind across both rows of leg 3 (column 23) up into a notch in
       spit 2's far face, back along it three columns and down onto the leg again: a loop. A Double from right
       behind it or a square further back, either row, hops it (lined up, as the wind gaps are); less, and
@@ -2467,7 +2467,13 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     the same distance"):** every stopped puzzle's shortcut skips about the same stretch, about 22 seconds, each
     puzzle sized to about the same time to play, a decent player about breaking even, a good one gaining; the
     chain hops grow with their chain. As laid: spit 1, the imperial gate (column 19), its Quad, its guns shot
-    quiet, run, or its guard bribed with the wreck's 20 coins (22 s; 40 till 13 Nov); spit 2, the headwind gap, rowed (25 s),
+    quiet, run, or its guard bribed with the wreck's 20 coins (22 s; 40 till 13 Nov; **on the experiment's branch,
+    13 Nov, the gate across the fort's bay:** spit 1 eight rows deep, a bay in it past leg 1's end that the long way
+    goes right round, west along its north side, round the end of the Empire's mole (column 16) and back east to
+    buoy 1; the gate through the fort at the mole's root by the bend, coming out at buoy 1, 33 s; the Quad gone;
+    run a square at a time, both its guns hole her, one after the other, each hole five pieces of Carpentry; its
+    guns quietened two hits a gun; the bribe 100 coins; the wreck at column 22, on leg 1 before the gate; RACE.md
+    §3); spit 2, the headwind gap, rowed (25 s),
     and the Double's gap (9 s); spit 3, the whirlpool channel's Vegas (48 s), the rocks (25 s) and the barrier
     of driftwood (16 s, where spit 3 has room); spit 4, the locks, 6 Bilge clears to raise her (23 s); spit 5,
     the crane, its small frames (23 s), and the Triple's gap (14 s, "a Triple clearly bigger"); and the starlit

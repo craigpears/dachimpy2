@@ -1377,6 +1377,7 @@ Explains the race's rules before the off (the long way, shortcuts that cost a pu
   - "First the field: slow winds that nudge ye a square, whirlpools that turn ye round, fresh every race. Eyeball a way through, or hop the headwinds with a Double for a ride"
   - "Or cut through the spits, if ye dare. Every shortcut costs ye a puzzle: bilge up through a lock, build a crane, row the headwind gap"
   - "Zoom over the whirlpools on a Vegas, hop a headwind with a Double, or haul up some treasure and pay off the guard at the gate"
+  - "That gate's through the Empire's fort, straight across the bay the long way goes round. Run it, and both its guns'll hole ye"
   - "Or blast the rocks off leg three with yer guns: three hits, anyone's, and they're open for everyone"
   - "Or, for a navigator, a starry door in the cliff off leg two, opened by Navigation, and a tunnel under the course up onto leg three"
   - "Mind the winds that sweep ye back a few squares, the trade wind up the left most of all, and the run home runs right beside it"
@@ -1388,9 +1389,8 @@ Explains the race's rules before the off (the long way, shortcuts that cost a pu
 - *The gun:* "Go!"
 - *On the starter's card, on the line: who's racing you:* "Racing ye: {names}"
 - *When a rival's over the finish line:* "{name}'s over the line: {place}, {time}"
-- *When a snake has her, a few squares back: the left-hand trade wind, the tight water past the gun gap, the trade wind back across leg 3:*
+- *When a snake has her, a few squares back: the left-hand trade wind, the trade wind back across leg 3:*
   - *left:* "The trade wind's got ye! A few squares back: round ye go again"
-  - *tight:* "One too many! The wind's nudging ye back a few squares"
   - *mid:* "Caught in the trade wind! Round its loop and have another go at that hop"
 - *Over the finish line before everyone else:* "Over the line, and home first! {time}"
 - *Over it after someone:* "Over the line in {time}: {place}. Beaten to it, this time"
@@ -1399,7 +1399,7 @@ Explains the race's rules before the off (the long way, shortcuts that cost a pu
 
 ## The guard at the race's gate
 
-An imperial soldier in the Empire's crimson and gold, posted at the gun gap on the sloop race's first spit, made an imperial gate: its guns trained on the way through. By the book, till there's a purse in it: pay him off with coins hauled up from the old wreck just along from the gate, and his guns look the other way while you sail through.
+An imperial soldier in the Empire's crimson and gold, posted at the gun gap on the sloop race's first spit, made an imperial gate: its guns trained on the way through. By the book, till there's a purse in it: pay him off with coins hauled up from the old wreck back along leg 1, and his guns look the other way while his men warp you through the fort, across the bay the long way goes round.
 
 > "I can imagine you having treasure haul, and one of the shortcuts is then bribe, yeah, you can then use the treasure that you hold up to bribe somebody at a gate to get through." (the user, 12 Nov)
 >
@@ -1414,8 +1414,9 @@ An imperial soldier in the Empire's crimson and gold, posted at the gun gap on t
 - "Long way round's that way. Unless you make it worth my while."
 - "{price} coins, and I might just be looking the other way."
 - "A guard's pay is a pittance. A pittance, I tell you."
-- "Heard there's an old wreck just along from the gate. Not that I'd know."
+- "Heard there's an old wreck back along the leg. Not that I'd know."
 - "Nobody gets through without the Empire's say-so. Or mine."
+- "Long way's right round the bay. Through here, you're out by the buoy."
 
 ### Paid, the gate's guns holding their fire on you
 

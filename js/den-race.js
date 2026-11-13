@@ -25,11 +25,12 @@
    way round each spit's end by its numbered buoy (no puzzle, a reach every leg), or through it by a
    shortcut, each a puzzle the den already has, played by its one module:
    - [A] the gun gap: two guns trained on it, as the imperial checkpoint's are (its numbers, CHECK; each
-     a destructible turret, src/den-turret.ts). It's the combo that gets you through: a heavy one (a big
-     Sailing chain's boost, or a Vegas rowed each side) rushes her past their marks; a square at a time
-     she's a sitting duck, holed (patched by Carpentry: src/den-patch.ts). Or knock them out with her
-     own guns, loaded by Gunnery. Just past it, one move too many and the tight water's wind sweeps her
-     back along leg 2.
+     a destructible turret, src/den-turret.ts). Run a square at a time, both guns hole her, one after the
+     other (patched by Carpentry: src/den-patch.ts; GunGap.spares). Or quieten them with her own guns,
+     loaded by Gunnery, two hits a gun (RACE.GAP), or pay its guard (src/den-bribe.ts). Since 13 Nov (an
+     experiment) it's the gate through the Empire's fort at the root of a mole across a bay in spit 1, which
+     the long way goes right round; both come out at buoy 1 (LAY.RACE.BAY). (Rushing it on a Quad went the
+     same day: "far too close to set up a combo and with little benefit"; and the tight water past it.)
    - [B] the headwind gap: the wind blows straight back through it, so no sail gets her through; row it,
      by mirror strokes (src/den-row.ts). Sit idle in it and she drifts back a square at a time (Drift).
      And the small gap beside it that a Double hops.
@@ -86,8 +87,11 @@ export const RACE = {
         should be the same distance"): every stopped puzzle's shortcut skips about the same stretch, about 22 s
         (the gate 22, the rowing gap 25, the rocks 25, the locks 23, the crane 27, the barrier 16: it sits where
         spit 3 has room), each puzzle sized to about the same time (the locks 5 clears, the crane's small frames,
-        the bribe 30 coins); the chain hops grow with the chain: a Double 9, a Triple 14, a Vegas 48. */
-    DECENT: { guns: 22, headwind: 25, whirls: 48, rocks: 25, locks: 23, crane: 23, forage: 16, double: 9, triple: 14 },
+        the bribe 30 coins); the chain hops grow with the chain: a Double 9, a Triple 14, a Vegas 48.
+        The gate 33 since 13 Nov (an experiment: RACE.md §3): through the fort at the root of its mole, it cuts out
+        the fort's bay that the long way goes right round (41 with the mole out to column 14 put every way through
+        the gate over the balance band: RACE.md §8). */
+    DECENT: { guns: 33, headwind: 25, whirls: 48, rocks: 25, locks: 23, crane: 23, forage: 16, double: 9, triple: 14 },
     /** The long way's own spot on the starting line: where the long way's route starts (LONG_ROUTE), and
         what the simulation measures every other spot against (src/race-sim.ts, SIM.SPOTS). */
     LONG_SPOT: 13,
@@ -103,8 +107,15 @@ export const RACE = {
         ways through even with each other; with more hits, shooting them out was the worst way round. And
         once roused, the seconds a gun takes to load again after an aimed shot: slower than the checkpoint's
         (CHECK.AIMED_RELOAD, 4), since in a race it fires on whoever comes near, not only on the racer who
-        roused it (the user, 11 Nov: "If they're aggroed, they are very relentless"). */
-    GAP: { MODE: 'shared', HARD: 2, AIMED_RELOAD: 6 },
+        roused it (the user, 11 Nov: "If they're aggroed, they are very relentless").
+        Since the gate crosses the fort's bay (13 Nov, saving far more: RACE.md §8), 'hits': two hits a gun to
+        quieten it (HARD), so four shots, two more than she starts with, loaded by Gunnery; the den's gate the same
+        (GunGap.shot: a live gun's first hit only dents it). And its guns heavy: a hit from one knocks a bigger hole
+        in her deck than a racer's broadside (HOLE pieces of Carpentry to patch, PATCH.PIECES elsewhere), so running
+        it, holed by both, costs about what the other ways through do (RACE.md §8). Their shots on their marks come
+        down quicker than the checkpoint's (FLIGHT, seconds), so the second gun's has her as she pulls away from
+        patching the first's hole (with the checkpoint's 0.9 s she'd be off its mark: one hit, not two). */
+    GAP: { MODE: 'hits', HARD: 2, AIMED_RELOAD: 6, HOLE: 5, FLIGHT: 0.5 },
     /** The barrier of driftwood across a gap [C], as Foraging deals it: its bundles of driftwood on the
         board from the start ([row, column], a crate each, the puzzle's smallest container), nothing more
         to come; cleared when they've all dropped out of the bottom (src/foraging.ts: the board's done). As many as
@@ -134,7 +145,6 @@ export const spotPose = (c) => ({ c: Math.max(RC.LINE.c0, Math.min(RC.LINE.c1, M
 export const FIRST_SPOT = RC.GATE[1][0];
 const snakes = new Map([
     ...RC.SNAKES.LEFT.map(([c, r]) => [key(c, r), 'left']),
-    ...RC.SNAKES.TIGHT.map(([c, r]) => [key(c, r), 'tight']),
     ...RC.SNAKES.MID.map(([c, r]) => [key(c, r), 'mid']),
 ]);
 export const snakeAt = (c, r) => snakes.get(key(Math.round(c), Math.round(r))) ?? null;
@@ -381,28 +391,65 @@ const S = RC.STRETCHES;
 /** The row the long way runs along a stretch: the middle of its two, or the run home's one. */
 export const routeRow = (i) => (i === S.length - 1 ? S[i].r : S[i].r + 0.5);
 /** The long way round a course laid out (this page's, or any from the race's editor: src/race-course.ts),
-    round each buoy. */
+    round each buoy; and (13 Nov) round the fort's bay between leg 1 and buoy 1: down into its north side, west
+    along it, round the mole's end, east along its south side, and down to leg 2 (its rows the ones open all the
+    way along, past the fort too). */
 export function longRoute(lay = RC) {
     const out = [[RACE.LONG_SPOT, lay.LINE.r], [RACE.LONG_SPOT, routeRow(0)]];
     lay.STRETCHES.forEach((s, i) => {
         const end = i === S.length - 1 ? lay.FINISH[0] : lay.BUOYS[i].at[0] + 0.5;
         out.push([end, routeRow(i)]);
+        if (i === 0) {
+            const Y = lay.BAY, x = Y.TURN[0] + 0.5;
+            out.push([end, Y.UP], [x, Y.UP], [x, Y.LOW], [end, Y.LOW]);
+        }
         if (i + 1 < S.length)
             out.push([end, routeRow(i + 1)]);
     });
     return out;
 }
 export const LONG_ROUTE = longRoute();
+/** How far round the long way (squares) a square of the fort's bay is (its water, the bend's past buoy 1's column
+    either side of it, the gate's way through the fort), on its stretch of the long way, the nearest point along
+    it (the later on a tie: in the gate's middle, she's through); null for anywhere else. On a course laid out
+    and its long way (the page's, by default). */
+export function bayAlong(c, r, lay = RC, route = LONG_ROUTE) {
+    const x = Math.round(c), y = Math.round(r), P = lay.SPITS[0], b0 = lay.BUOYS[0].at[0];
+    if (y < P.r0 || y > P.r1)
+        return null;
+    const inBay = (x >= b0 && (y <= P.r0 + 1 || y === P.r1)) || lay.BAY.WATER.some(([p, q]) => p === x && q === y) || lay.GUNS.way.some(([p, q]) => p === x && q === y);
+    if (!inBay)
+        return null;
+    // (the long way's legs from leg 1's end to leg 2's row: the bend, the north side, the turn, the south side, the bend)
+    const i0 = route.findIndex(([, q]) => q === routeRow(0)) + 1, i1 = route.findIndex(([, q]) => q === routeRow(1));
+    let t = 0, best = Infinity, at = 0;
+    for (let i = 1; i < route.length; i++) {
+        const a = route[i - 1], z = route[i], len = Math.abs(z[0] - a[0]) + Math.abs(z[1] - a[1]);
+        if (i > i0 && i <= i1) {
+            const u = len ? Math.max(0, Math.min(1, ((x - a[0]) * (z[0] - a[0]) + (y - a[1]) * (z[1] - a[1])) / (len * len))) : 0;
+            const d = Math.hypot(a[0] + (z[0] - a[0]) * u - x, a[1] + (z[1] - a[1]) * u - y);
+            if (d <= best + 1e-9) {
+                best = d;
+                at = t + u * len;
+            }
+        }
+        t += len;
+    }
+    return at;
+}
 export class GunGap {
     guns = RC.GUNS.at.map((at, g) => new Turret({
         at, marks: RC.GUNS.marks[g], alert: false, reach: CHECK.REACH,
-        flight: CHECK.AIMED, reload: RACE.GAP.AIMED_RELOAD, markFlight: CHECK.FLIGHT, markReload: CHECK.RELOAD,
+        flight: CHECK.AIMED, reload: RACE.GAP.AIMED_RELOAD, markFlight: RACE.GAP.FLIGHT, markReload: CHECK.RELOAD,
         quiet: CHECK.QUIET, wreck: CHECK.WRECK,
     }));
     scored = this.guns.map(() => false);
+    /** Hits on each gun since it was last quietened: in 'hits' mode it takes RACE.GAP.HARD to quieten one. */
+    dents = this.guns.map(() => 0);
     /** The gun on this square, or -1. */
     gunAt(c, r) { return this.guns.findIndex((t) => t.at[0] === c && t.at[1] === r); }
-    /** Her shot came down on (c, r): a hit on a gun (see Turret.hit), it's a fight now; null if it isn't one. */
+    /** Her shot came down on (c, r): a hit on a gun (see Turret.hit), it's a fight now; null if it isn't one.
+        In 'hits' mode a live gun's first hit only dents it ('dented'): the next quietens it. */
     shot(c, r) {
         const g = this.gunAt(c, r);
         if (g < 0)
@@ -410,8 +457,17 @@ export class GunGap {
         const first = !this.guns.some((t) => t.roused);
         for (const t of this.guns)
             t.rouse();
-        return { gun: g, did: this.guns[g].hit(), first };
+        const t = this.guns[g], hard = RACE.GAP.MODE === 'hits' ? RACE.GAP.HARD : 1;
+        if (t.live() && ++this.dents[g] < hard)
+            return { gun: g, did: 'dented', first };
+        this.dents[g] = 0;
+        return { gun: g, did: t.hit(), first };
     }
+    /** Whether its guns hold their fire on her (`h`): while she's holed and patching; and once it's a fight (her
+        shots have roused them), a while after she's patched too (Helm.spared). Off a fight, a gun whose mark she's
+        on fires though she's just patched from the other's hit: run a square at a time, both guns hole her, one
+        after the other (13 Nov: "you can just run it and just do a quick [Carpentry] puzzle to heal the damage"). */
+    spares(h) { return this.guns.some((t) => t.roused) ? h.spared() : h.dazed(); }
     /** Both wrecked: the gap's safe. */
     silenced() { return this.guns.every((t) => t.wrecked); }
     /** `ship`: where she is (Helm.now), or null when they shouldn't fire on her (Helm.spared). */

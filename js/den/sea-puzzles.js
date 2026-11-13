@@ -33,7 +33,9 @@ export const patch = { on: false, hole: null, group: null, face: null, wood: nul
    they're left where they are when it's shut. */
 const PATCH_W = 1.3;   // metres across her deck the board may take, at most
 // A fresh hole for a hit: shaped for the common pieces, as the wall's are.
-export const deckHoleShape = () => roomyShapes(PATCH.PIECES, 6)[0] || C.genHole(PATCH.PIECES).hole;
+/** A hole's shape, 
+ pieces' worth (PATCH.PIECES; the race's imperial gate's heavy guns more: RACE.GAP.HOLE). */
+export const deckHoleShape = (n = PATCH.PIECES) => roomyShapes(n, 6)[0] || C.genHole(n).hole;
 function struck(on) {
   strike(on);
 }

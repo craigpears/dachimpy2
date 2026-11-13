@@ -248,18 +248,23 @@ describe('snakes: gentle, a few squares back to try again (12 Nov: "it should se
     }
   });
 
-  it('the tight water just past the gun gap: one move too many and it carries her three squares back along leg 2 (12 Nov: "that\'s the kind of snakes and ladders level that\'s a good tune")', () => {
-    const [gc, gr] = G[G.length - 1];
-    expect(sea.ground(gc, gr + 3)).toBe(true);
-    expect(snakeAt(gc, gr + 2)).toBe('tight');
-    expect(swept(gc, gr + 2, 1)).toMatchObject({ c: gc + 3, r: gr + 2 });
-    // A heavy combo of just the right size from the leg before lands her clear.
-    expect(gustPath(sea, { c: gc, r: S[0].r + 1, d: 0 }, runFor(4)).at(-1)).toMatchObject({ c: gc, r: gr + 1 });
-    // Out of it, the way on is a turn to port, along leg 2.
-    const h = new Helm(sea, { c: gc, r: gr + 1, d: 0 });
-    h.put('L'); settle(h);
-    expect([h.pose.c, h.pose.r]).toEqual([gc - 1, gr + 2]);
-  });
+  it('the fort\'s bay (13 Nov, an experiment): past leg 1\'s end the long way goes right round it, west along its north side, round the mole\'s end, east along its south side to buoy 1; the gate through the fort comes out at buoy 1 too, so leg 2\'s shortcuts are all still ahead', () => {
+    const Y = RC.BAY, [gc] = G[0], [bc, br] = RC.BUOYS[0].at;
+    // (no way down from the bay's north side to its south but round the mole's end, or through the gate)
+    const shutGate = shut(...G);
+    for (let c = Y.TIP; c < SAIL.COLS; c++) expect(shutGate.open(c, Y.MOLE), `${c}`).toBe(false);
+    expect(shutGate.open(Y.TURN[0], Y.MOLE) && shutGate.open(Y.TURN[0] + 1, Y.MOLE)).toBe(true);
+    // (the gate's way out is beside buoy 1, where the long way comes round the bay; nothing of leg 2's before it)
+    expect([G[2][0], G[2][1] + 1]).toEqual([bc, br]);
+    expect(gc).toBe(bc);
+    for (const [c, r] of [...B, ...D2, ...RC.DOOR.FACE]) expect(r).toBeGreaterThan(RC.SPITS[0].r1);
+    // (sailed round, the long way passes the mole's end and comes to buoy 1 from the west)
+    const h = new Helm(shutGate, { c: gc, r: S[0].r + 1, d: 1 });
+    let west: number = SAIL.COLS;
+    sail(h, [bc, br], 600, () => { west = Math.min(west, h.pose.c); });
+    expect([h.pose.c, h.pose.r]).toEqual([bc, br]);
+    expect(west).toBeLessThanOrEqual(Y.TIP - 1);
+  }, 60000);
 
   it('the run home narrow beside the left-hand trade wind: a misclick into it and she\'s carried a few squares back and up onto the run home again', () => {
     const run = S[5].r;
@@ -277,9 +282,8 @@ describe('snakes: gentle, a few squares back to try again (12 Nov: "it should se
   it('snakes a little setback, never a lost race (12 Nov: "that\'s really too brutal. That sends you back almost 2 legs worth"): every snake, the left-hand trade wind\'s too, carries her at most four squares back round the long way', () => {
     // (how far round the long way each puts her back: seconds of it, as the simulation reckons them, in squares)
     const sqBack = (s: number, c: number, to: Pose) => (tauAt(s, Math.min(25.5, c)) - tauAt(stretchAt(to.c, to.r), Math.max(2.5, Math.min(25.5, to.c)))) / PACE;
-    const [gc, gr] = G[G.length - 1], [mc] = RC.SNAKES.MID[0];
+    const [mc] = RC.SNAKES.MID[0];
     const backs = {
-      tight: sqBack(1, gc, swept(gc, gr + 2, 1)),
       mid: sqBack(2, mc, swept(mc, S[2].r + 1, 2)),
       home: sqBack(5, RC.FINISH[0] + 3, swept(RC.FINISH[0] + 3, S[5].r + 1, 3)),
     };
@@ -296,33 +300,39 @@ describe('snakes: gentle, a few squares back to try again (12 Nov: "it should se
 });
 
 describe('each shortcut only passable by its puzzle, every size of them (11 Nov: "Are you a person that can break quick double triples? ... Or do you want to go for those giant" ones)', () => {
-  it('[A] the gun gap: its marks all in the spit (the long way\'s clear of them); a square at a time she\'s a sitting duck; a heavy combo rushes her past; or knock its guns out by Gunnery', () => {
+  it('[A] the gun gap: its marks all off the long way; run a square at a time, both its guns hole her, one after the other (13 Nov: "you can just run it and just do a quick [Carpentry] puzzle to heal the damage"); its guns quietened by hers, two hits a gun; or wrecked', () => {
     for (const m of RC.GUNS.marks.flat()) expect(stretchAt(m[0], m[1]), `${m}`).toBe(-1);
+    for (const m of RC.GUNS.marks.flat()) expect(RC.BAY.WATER.some(([c, r]) => c === m[0] && r === m[1]), `${m}`).toBe(false);
     const run = (gap: GunGap, h: Helm, secs: number) => {
       let hits = 0;
       for (let t = 0; t < secs; t += 1 / 60) {
         h.tick(1 / 60);
-        for (const e of gap.tick(1 / 60, h.spared() ? null : h.now(), h.pose)) if (e.kind === 'land' && e.hit) { h.hit(); hits++; }
+        for (const e of gap.tick(1 / 60, gap.spares(h) ? null : h.now(), h.pose)) if (e.kind === 'land' && e.hit) { h.hit(); hits++; }
         if (h.dazed()) fill(h.hole!);
       }
       return hits;
     };
-    const [gc] = G[0], out = G[G.length - 1][1] + 1;
-    // Square at a time: she's hit.
-    let gap = new GunGap(), h = new Helm(sea, { c: gc, r: S[0].r + 1, d: 0 });
+    const [gc, gr] = G[0], out = G[G.length - 1][1] + 1;
+    // Square at a time, from in front of it: both guns have her, and she's through.
+    let gap = new GunGap(), h = new Helm(sea, { c: gc, r: gr - 1, d: 0 });
     for (let i = 0; i < 4; i++) h.put('F');
-    expect(run(gap, h, 25)).toBeGreaterThan(0);
+    expect(run(gap, h, 40)).toBe(2);
     expect([h.pose.c, h.pose.r]).toEqual([gc, out]);
-    // A heavy combo from the leg: clean past their marks.
-    gap = new GunGap(); h = new Helm(sea, { c: gc, r: S[0].r + 1, d: 0 });
-    h.gust(gustPath(sea, h.pose, runFor(4)));
-    expect(run(gap, h, 6)).toBe(0);
-    expect([h.pose.c, h.pose.r]).toEqual([gc, out]);
-    // Its guns knocked out by hers (loaded by Gunnery): three hits each, and the gap's safe.
+    // Its guns quietened by hers: a first hit only dents one, still firing; the second quietens it.
     gap = new GunGap();
-    for (const [c, r] of RC.GUNS.at) for (let i = 0; i < 3; i++) gap.shot(c, r);
+    for (const [c, r] of RC.GUNS.at) {
+      const g = gap.gunAt(c, r);
+      expect(gap.shot(c, r)!.did).toBe('dented');
+      expect(gap.guns[g].live()).toBe(true);
+      expect(gap.shot(c, r)!.did).toBe('quiet');
+      expect(gap.guns[g].live()).toBe(false);
+    }
+    expect(RACE.GAP.MODE).toBe('hits');
+    // Wrecked: three quietenings a gun, and the gap's safe.
+    gap = new GunGap();
+    for (const [c, r] of RC.GUNS.at) for (let i = 0; i < 3 * RACE.GAP.HARD; i++) gap.shot(c, r);
     expect(gap.silenced()).toBe(true);
-    h = new Helm(sea, { c: gc, r: S[0].r + 1, d: 0 });
+    h = new Helm(sea, { c: gc, r: gr - 1, d: 0 });
     for (let i = 0; i < 4; i++) h.put('F');
     expect(run(gap, h, 25)).toBe(0);
   });
@@ -483,14 +493,20 @@ describe('each shortcut only passable by its puzzle, every size of them (11 Nov:
   });
 
   it('each findable: plain to see as she sails by, every way through a gap in the spit beside a leg', () => {
-    const mouths: [number, number][] = [G[0], B[0], D2[0], F.NOTCH, K.WALL[0], [M.c, M.r + 1], L[0].at, E.LEDGE, [T3[0][0], T3[0][1]]];
+    const mouths: [number, number][] = [B[0], D2[0], F.NOTCH, K.WALL[0], [M.c, M.r + 1], L[0].at, E.LEDGE, [T3[0][0], T3[0][1]]];
     for (const [c, r] of mouths) expect([stretchAt(c, r - 1), stretchAt(c, r)].some((x) => x >= 0), `${c},${r}`).toBe(true);
+    // (the gate's beside the long way's own water in the fort's bay, 13 Nov)
+    expect(RC.BAY.WATER.some(([c, r]) => c === G[0][0] && r === G[0][1] - 1)).toBe(true);
   });
 });
 
 describe('each shortcut saves about what a decent player takes on its puzzle (11 Nov), and the stopped ones about the same stretch (12 Nov: "each an element of puzzling surely should be the same distance")', () => {
   it('every stopped puzzle\'s shortcut saves about the same, the chain hops growing with the chain: a Double small, a Triple bigger, a Vegas biggest', () => {
-    const D = RACE.DECENT, stopped = [D.guns, D.headwind, D.rocks, D.forage, D.locks, D.crane];
+    // (the gate's apart since 13 Nov, an experiment: across the fort's bay it saves more than any stopped puzzle's,
+    // and less than the Vegas)
+    const D = RACE.DECENT, stopped = [D.headwind, D.rocks, D.forage, D.locks, D.crane];
+    expect(D.guns).toBeGreaterThan(Math.max(...stopped));
+    expect(D.guns).toBeLessThan(D.whirls);
     expect(Math.max(...stopped) / Math.min(...stopped)).toBeLessThan(1.8);
     for (const s of stopped) expect(Math.abs(s - 22)).toBeLessThan(7);
     expect(D.double).toBeLessThan(D.triple);
@@ -499,7 +515,8 @@ describe('each shortcut saves about what a decent player takes on its puzzle (11
   });
   // The long way round its bend, sailed, less the shortcut's own trip: within a quarter of RACE.DECENT.
   const cases: Record<keyof typeof RACE.DECENT, { from: Pose; to: [number, number]; trip: () => number; mid?: boolean }> = {
-    guns: { from: { c: G[0][0], r: S[0].r, d: 1 }, to: [G[0][0], G[2][1] + 1], trip: () => 1 + runFor(4) * SAIL.PUSH },
+    // (from leg 1's end round the fort's bay to buoy 1; through the gate square by square, its light airs and all)
+    guns: { from: { c: G[0][0], r: S[0].r + 1, d: 1 }, to: [G[0][0], G[2][1] + 1], trip: () => { const h = new Helm(sea, { c: G[0][0], r: S[0].r + 1, d: 1 }); return sail(h, [G[0][0], G[2][1] + 1]); } },
     headwind: { from: { c: B[0][0], r: B[0][1] - 1, d: 3 }, to: [B[3][0], S[2].r + 1], trip: () => 1 + (B.length + 2) * WIND.OARS },
     // (broken as she sails by on the leg: lined up and carried over, 12 Nov)
     double: { from: { c: D2[0][0], r: D2[0][1] - 1, d: 3 }, to: [D2[2][0], S[2].r], trip: () => { const h = new Helm(sea, { c: D2[0][0], r: D2[0][1] - 1, d: 3 }); return hop(h, 2) + sail(h, [D2[2][0], S[2].r]); } },

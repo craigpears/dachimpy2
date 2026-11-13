@@ -31,12 +31,13 @@ function haulOut(p: Purse, most = 500) {
 }
 
 describe('the gate and the wreck on the course (12 Nov)', () => {
-  it('the wreck\'s notch is off leg 1 just along from the gun gap, where the field comes down onto it, open water, sheltered, one racer\'s at a time; the wreck itself is on the spit', () => {
+  it('the wreck\'s notch is off leg 1 on the way to the gate (on its left, 13 Nov), where the field comes down onto it, open water, sheltered, one racer\'s at a time; the wreck itself is on the spit', () => {
     const sea = new Sea(9);
     const [c, r] = RB.NOTCH;
     expect(r).toBe(RC.SPITS[0].r0);
-    // (13 Nov: past the gate, beside where the start's hop and its winds bring the field down onto leg 1)
-    expect(c).toBeGreaterThan(RC.GUNS.gap[0]);
+    // (13 Nov: beside where the start's hop and its winds bring the field down onto leg 1; and since the gate went
+    // into the fort's bay by buoy 1, before the gate, on the way to it: the user, "almost like on the left-hand side")
+    expect(c).toBeLessThan(RC.GUNS.gap[0]);
     expect(Math.abs(c - RC.FIELD.HOP.LANDS[0])).toBeLessThanOrEqual(1);
     expect(sea.isRock(c, r)).toBe(false);
     expect(sea.isRock(c, r - 1)).toBe(false);
@@ -49,23 +50,25 @@ describe('the gate and the wreck on the course (12 Nov)', () => {
     for (const ms of RC.GUNS.marks) expect(ms.some(([x, y]) => x === c && y === r)).toBe(false);
     for (const [gc] of RC.GUNS.at) expect(Math.abs(gc - c)).toBeGreaterThan(1);
   });
-  it('she pays by the gate, on leg 1 in front of the gap\'s way in; the guard\'s heard from a few squares off', () => {
+  it('she pays by the gate, in front of its way in (on the fort\'s bay\'s north side since 13 Nov); the guard\'s heard from a few squares off', () => {
     const [gc, gr] = RB.GATE;
-    expect(stretchAt(gc, gr)).toBe(0);
-    expect(atGate(gc, gr) && atGate(gc - 1, gr - 1) && atGate(gc + 1, gr)).toBe(true);
+    expect(gr).toBe(RC.BAY.UP);
+    expect(new Sea(9).open(gc, gr)).toBe(true);
+    expect(atGate(gc, gr) && atGate(gc - 1, gr) && atGate(gc + 1, gr)).toBe(true);
+    expect(atGate(gc, gr - 1)).toBe(false);
     expect(atGate(gc, gr + 1)).toBe(false);   // (in the gap: too late)
     expect(atGate(...RB.NOTCH)).toBe(false);
     expect(inEarshot(gc - 3, gr)).toBe(true);
     expect(inEarshot(gc - 4, gr)).toBe(false);
     expect(atWreck(...RB.NOTCH) && !atWreck(gc, gr)).toBe(true);
   });
-  it('paid, she\'s towed from the gate through the gap\'s three squares and out onto leg 2, a square at a time', () => {
-    for (const from of [{ c: RB.GATE[0], r: RB.GATE[1] }, { c: RB.GATE[0] - 1, r: RB.GATE[1] - 1 }, { c: RB.GATE[0] + 1, r: RB.GATE[1] }]) {
+  it('paid, she\'s towed from the gate through the fort\'s three squares and out by buoy 1, a square at a time', () => {
+    for (const from of [{ c: RB.GATE[0], r: RB.GATE[1] }, { c: RB.GATE[0] - 1, r: RB.GATE[1] }, { c: RB.GATE[0] + 1, r: RB.GATE[1] }]) {
       const p = towPath(from);
       let at = from;
       for (const q of p) { expect(Math.abs(q.c - at.c) + Math.abs(q.r - at.r)).toBe(1); at = q; }
       for (const w of RC.GUNS.way) expect(p.some((q) => q.c === w[0] && q.r === w[1])).toBe(true);
-      expect(stretchAt(at.c, at.r)).toBe(1);
+      expect([at.c, at.r]).toEqual(RC.BUOYS[0].at);
     }
   });
 });
