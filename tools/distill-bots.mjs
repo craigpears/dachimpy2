@@ -10,7 +10,8 @@
    TRACE=1 prints each column of the first game as it goes (TRACE=2 each routine played too). CAP=n stops
    a session at n minutes (30). SCORE='{"TRAPPED":4}' (Stage I's board score, src/distill-score.ts),
    MEASURE='{"STUCK":6}' (the chain's), PLAN='{"SLACK":1}' and TIER='{"bank":7}' try other weights, planner
-   settings and tier settings. SEED=n starts the boards at seed n.
+   settings and tier settings; PHASE_W='{"block":{"hook":1.3}}' a phase's weights on the techniques
+   (src/distill-phase.ts; PLAN='{"PHASES":0}' switches them off). SEED=n starts the boards at seed n.
 
    Run of 12 Nov (40 boards a tier), learner / master / grandmaster / ultimate: longest chain mean 1.5 /
    2.8 / 2.7 / 3.3, best 4 / 6 / 9 / 9, CC^6+ 0 / 4 / 4 / 8 of 40, CC^12 none; score a column 3.9 / 8.6 /
@@ -43,12 +44,17 @@
    20 boards a tier: small drags there 3.8 / 7.7 / 7.8 a session for the master / grandmaster / ultimate (were
    6.8 / 11.7 / 12.5), drags there 14.2 / 21.2 / 21.0 (were 21.5 / 29.1 / 29.4); sessions with no white burned
    1 / 14 / 17 / 13 (were 1 / 11 / 14 / 14); points a minute 9.6 / 8.9 / 12.0 / 16.1 (were 9.6 / 9.5 / 13.4 / 16.2)
-   (DISTILLING.md §4, tenth run). */
+   (DISTILLING.md §4, tenth run).
+   Phases the bots say aloud (13 Nov: fire, fill, block, chain; src/distill-phase.ts), each weighing the
+   techniques, 20 boards a tier: whites burned unchanged, sessions with none 1 / 14 / 17 / 13, whites a session 5.3 /
+   1.2 / 0.2 / 0.6; points a minute 9.6 / 8.8 / 12.2 / 18.5 (were 9.6 / 8.9 / 12.0 / 16.1) (DISTILLING.md §4,
+   eleventh run). */
 
 import { Distilling, WHITE, BROWN, BLACK, BURNT, TALL, UP_LEFT, DOWN_LEFT, neighbourOn, canSwapOn } from '../js/distilling.js';
 import { TIERS, P, tierNamed, playSession } from '../js/distill-bots.js';
 import { M, playDrags } from '../js/distill-routines.js';
 import { S } from '../js/distill-score.js';
+import { PHASE_WEIGHTS } from '../js/distill-phase.js';
 import { seeded } from '../js/mirror-row.js';
 
 const GAMES = Number(process.argv[2]) || 40;
@@ -58,6 +64,7 @@ const L = 'wbK*x';
 if (process.env.MEASURE) Object.assign(M, JSON.parse(process.env.MEASURE));
 if (process.env.PLAN) Object.assign(P, JSON.parse(process.env.PLAN));
 if (process.env.SCORE) Object.assign(S, JSON.parse(process.env.SCORE));
+if (process.env.PHASE_W) for (const [k, v] of Object.entries(JSON.parse(process.env.PHASE_W))) PHASE_WEIGHTS[k] = v;
 
 // A white trapped, measured here so a run before a change and one after use the same yardstick (the user,
 // 13 Nov, the eighteenth note: the bot's first move "went the entire way so that there was a white trap right
@@ -145,7 +152,7 @@ for (const name of NAMES) {
     let lastRoutine = '';
     // Stage I watched: moves that leave more whites trapped than before them (no column gone between), the
     // whites trapped as the chain starts, and the junk columns burned a minute of Stage I.
-    const watch = { block: { moves: 0, small: 0, swaps: 0, ms: 0, from: null }, ties: 0, elsewhere: 0, leftMs: 0, stuckWaits: 0, trapping: 0, trappingNear: 0, sweeps: 0, sweepsTrapping: 0, moves: 0, atChain: null, stageOneMs: null, burnedInOne: 0 };
+    const watch = { block: { moves: 0, small: 0, swaps: 0, ms: 0, from: null }, ties: 0, phases: {}, elsewhere: 0, leftMs: 0, stuckWaits: 0, trapping: 0, trappingNear: 0, sweeps: 0, sweepsTrapping: 0, moves: 0, atChain: null, stageOneMs: null, burnedInOne: 0 };
     let before = null;
     let lastPlan = null;
     const onPlan = (a) => {
@@ -158,6 +165,8 @@ for (const name of NAMES) {
       if (before && before.cols === cols && now > before.n) watch.trapping++;
       if (before && before.cols === cols && near > before.near) watch.trappingNear++;
       before = a.stage === 'junk' && a.kind === 'move' ? { n: now, near, cols } : null;
+      // The phase it thought it was in (src/distill-phase.ts), a move at a time.
+      if (a.kind === 'move') watch.phases[a.phase] = (watch.phases[a.phase] ?? 0) + 1;
       if (a.stage === 'junk' && a.kind === 'move') {
         watch.moves++;
         if (a.tie) watch.ties++;
@@ -222,6 +231,9 @@ for (const name of NAMES) {
   console.log(`  moves made elsewhere while a hard-to-reach white sat one column from the fire ${f1(avg(w.map((x) => x.elsewhere)))} a session`);
   console.log(`  brown sweeps (a brown up, then down to the bottom right) in Stage I ${f1(avg(w.map((x) => x.sweeps)))} a session, leaving a white trapped by the furnace ${f1(avg(w.map((x) => x.sweepsTrapping)))}`);
   console.log(`  Stage I: ${f1(avg(one.map((x) => x.stageOneMs / 60000)))} minutes, junk columns burned a minute of it ${f1(avg(one.map((x) => x.burnedInOne / (x.stageOneMs / 60000))))}; session points a minute ${f1(avg(runs.map((r) => r.points / r.minutes)))}`);
+  const ph = {};
+  for (const x of w) for (const [k, v] of Object.entries(x.phases)) ph[k] = (ph[k] ?? 0) + v;
+  console.log(`  moves a session in each phase (src/distill-phase.ts): ${['fire', 'fill', 'block', 'chain'].map((k) => `${k} ${f1((ph[k] ?? 0) / GAMES)}`).join(', ')}${P.PHASES ? '' : ' (its weights off)'}`);
   const used = {};
   for (const r of runs) for (const [k, v] of Object.entries(r.used)) used[k] = (used[k] ?? 0) + v;
   console.log(`  routines a session: ${Object.entries(used).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${f1(v / GAMES)}`).join(', ')}`);

@@ -866,6 +866,41 @@ moves made there (the Learner never gets there: it starts its chain at 4 columns
   12.0 against 13.4); whites burned mixed (the Grand-Master's clean sessions 14 to 17, the Master's whites a session
   0.7 to 1.2). Whether the V it leaves feeds the chain better isn't shown by these numbers.
 
+### Phases the bots say aloud, each weighing the techniques (13 Nov, eleventh run)
+The user (13 Nov): "the bot should have this is the current phase I think I'm in, and that obviously changes the
+strategy and techniques that it starts using. Obviously, it can always use all the techniques if it absolutely needs
+to, like it gets stuck or there's a blocked white piece. But ... different techniques have different weights
+depending on the stage." Built as `src/distill-phase.ts` (`phaseOf`), read off the board each move, on the planner's
+own stages, not a parallel system:
+- **fire** (Stage I, a white in the three columns next to the fire, Helium's step one): rescue 1.3, junk column
+  1.15, the path search 1.15; the sweep 0.9, storing 0.75, the line pull, leapfrog and figure of eight 0.85.
+- **fill** (Stage I, the fire's side clear): the sweep (diamond) 1.2, junk column 1.15, turn-over 1.1; storing
+  0.75, the line pull and figure of eight 0.85, the hook 0.9.
+- **block** (Stage I, `blockPhase`, the whites mostly left): the hook 1.2, storing, the line pull, leapfrog and
+  figure of eight 1.15, the sweep 1.1; the turn-over 0.85.
+- **chain** (Stage II): the crawl and figure of eight 1.1, the hook 1.05. (The channels left even: tilting toward
+  them over the rescues cost the Learner whites, 5.5 a session against 5.3.)
+A move's worth (Stage I's score a second, the chain's betterment less its time) is multiplied by its technique's
+weight only to rank it, never for the least worth playing; every weight 1 while a piece is stuck or a white's in a
+danger zone (`weigh`), and the rules there (the furnace's whites first) unchanged. `P.PHASES` 0 switches them off.
+The advice carries its `phase`; "Help, Helium", their hints and watching them play say it (src/lines/helium.ts,
+PHASE). A burned column brings a new one onto the fire's side, so Stage I goes fire, fill, fire... a column at a time.
+
+20 boards a tier, the tenth run's code (before) and with the phases' weights (after); moves a session in each phase:
+
+| Tier | Moves in fire / fill / block / chain | Sessions with no white burned, was | Disasters, was | Whites burned a session, was | Longest chain mean (best), was | Points a minute, was |
+|---|---|---|---|---|---|---|
+| Learner | 18.6 / 14.1 / 0 / 57.5 | 1/20, was 1 | 1, was 1 | 5.3, was 5.3 | 1.1 (4), was 1.1 (4) | 9.6, was 9.6 |
+| Able to Master | 38.6 / 22.1 / 13.1 / 27.9 | 14/20, was 14 | 0, was 0 | 1.2, was 1.2 | 1.0 (2), was 1.0 (2) | 8.8, was 8.9 |
+| Grand-Master to Legendary | 25.5 / 31.6 / 16.9 / 26.1 | 17/20, was 17 | 0, was 0 | 0.2, was 0.2 | 1.5 (5), was 1.5 (5) | 12.2, was 12.0 |
+| Ultimate | 28.7 / 29.6 / 16.5 / 32.9 | 13/20, was 13 | 0, was 0 | 0.6, was 0.6 | 2.1 (5), was 1.9 (5) | 18.5, was 16.1 |
+
+- **What it did:** the whites burned lines are unchanged for every tier, and the bots now know (and say) where they
+  are. The Ultimate's chains and points a minute rose a little (2.1 against 1.9; 18.5 against 16.1), within 20 boards'
+  noise.
+- **What it didn't:** the weights are mild on purpose and change few choices; whether stronger ones would play
+  better isn't tried (`PHASE_W='{"block":{"hook":1.3}}'` on tools/distill-bots.mjs tries others).
+
 **Watching them, the first note (the user, 12 Nov, a screenshot of the Ultimate's board):** "the main
 thing is it just doesn't carry on the whole way to the right. It just kind of stops ... that black ... in
 the white, it was dragging the black diagonally down and it just stopped there. It's like, well, no, it
