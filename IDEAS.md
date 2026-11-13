@@ -1000,6 +1000,8 @@ that refers to them: **Kikkit**, and **Zizzy**, her most recent pirate, on the M
 Zizzy; her portrait to check on YPPedia (Meridian) before she's drawn). The real
 cuddly monkeys, Mini above all, from the user's photos. The museum keeps the story of the sims;
 the house keeps the people.
+**And Sanne (13 Nov):** "Sanne needs to be in the truly special board as well." So Sanne beside Kikkit and Zizzy in
+pride of place (a real pirate, pirate name only; their portrait to check before they're drawn).
 
 **Cookies and hugs at the door; the house doubles as the museum (11 Nov):** "a random thing about
 myself as well is I'm very well known for giving just like hugs and cookies ... anyone that comes
