@@ -11,11 +11,13 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
-  TRICKS, guide, liveMove, phaseExamples, position, sameMove, techniqueExamples, techniqueOrder, trickExamples, levelRows,
+  PLAN, SORTED_RIGHT, TRICKS, amongBlacks, endOf, firstLevel, fluidMotion, guide, isFluid, liveMove, phaseExamples, position, sameMove,
+  techniqueExamples, techniqueOrder, trickExamples, levelRows, unsorted,
 } from '../src/distill-guide';
+import type { GuideItem, Technique } from '../src/distill-guide';
 import { POSITIONS } from '../src/distill-guide-boards';
-import { BLACK, BROWN, CHAIN_BONUS, MESSAGES, WHITE, parseBoard } from '../src/distilling';
-import { ROUTINES, playDrags } from '../src/distill-routines';
+import { BLACK, BROWN, CHAIN_BONUS, DOWN_LEFT, DOWN_RIGHT, MESSAGES, UP_LEFT, UP_RIGHT, WHITE, parseBoard } from '../src/distilling';
+import { ROUTINES, playDrags, rightFrom, whitesFrom } from '../src/distill-routines';
 import { PHASES, PHASE_ORDER, phaseOf } from '../src/distill-phase';
 import { LEVELS, PATH_LABEL, SWEEP_LABEL, bankFor } from '../src/distill-bots';
 import { HELP, ONWARD, PHASE, TELL, BEST } from '../src/lines/helium';
@@ -65,7 +67,7 @@ describe('the read version: a section for everything the code has (13 Nov, "ever
     }
   });
   it('has a section for each of the user\'s tricks', () => {
-    expect(TRICKS).toHaveLength(7);
+    expect(TRICKS).toHaveLength(8);
     for (const t of TRICKS) {
       const s = section('data-trick', t);
       expect(s, `no section for the trick ${t}`).not.toBeNull();
@@ -139,6 +141,86 @@ describe('every board shows what it\'s there for', () => {
     for (const t of ex) expect(t.shows, `the trick ${t.trick} doesn't show on its board: run tools/distill-guide.mjs`).toBe(true);
     // Never a white down the fire: the opening's own white, at the fire.
     expect(ex[0].picture.rings.length).toBeGreaterThan(0);
+  });
+});
+
+describe('the guide in the course of a game (13 Nov, "a few of the simple things are a bit out of order ... progression\'s a bit weird")', () => {
+  const attrOf = (it: GuideItem) => `data-${it.kind}="${it.name}"`;
+  it('puts every technique and trick once, under its phase', () => {
+    const items = PHASE_ORDER.flatMap((p) => PLAN[p]);
+    const techs = items.filter((i) => i.kind === 'technique').map((i) => i.name), tricks = items.filter((i) => i.kind === 'trick').map((i) => i.name);
+    expect([...techs].sort()).toEqual([...techniqueOrder()].sort());
+    expect([...tricks].sort()).toEqual([...TRICKS].sort());
+    expect(g.plan).toBe(PLAN);
+  });
+  it('lays the page out as the plan: each phase\'s heading and board, then its own sections, in order', () => {
+    let last = page.indexOf('id="target"');
+    for (const [k, p] of PHASE_ORDER.entries()) {
+      const head = page.indexOf(`id="ph-${p}"`), board = page.indexOf(`data-phase="${p}"`);
+      const next = k + 1 < PHASE_ORDER.length ? page.indexOf(`id="ph-${PHASE_ORDER[k + 1]}"`) : page.indexOf('id="then"');
+      expect(head, `no heading for the phase ${p}`).toBeGreaterThan(last);
+      expect(board).toBeGreaterThan(head);
+      let at = board;
+      for (const it of PLAN[p]) {
+        const i = page.indexOf(attrOf(it));
+        expect(i, `${it.name} isn't under ${p}, in order`).toBeGreaterThan(at);
+        expect(i, `${it.name} isn't under ${p}`).toBeLessThan(next);
+        at = i;
+      }
+      last = at;
+    }
+  });
+  it('starts with what a player needs first, never a white down the fire and the danger by the fire, and keeps the channels in the chain', () => {
+    expect(PLAN.fire.slice(0, 2)).toEqual([{ kind: 'trick', name: 'white' }, { kind: 'trick', name: 'danger' }]);
+    expect(PLAN.chain[0]).toEqual({ kind: 'technique', name: 'channel' });
+    const firstTechnique = Math.min(...techniqueOrder().map((t) => page.indexOf(`data-technique="${t}"`)));
+    expect(page.indexOf('data-trick="white"')).toBeLessThan(firstTechnique);
+    expect(page.indexOf('data-trick="danger"')).toBeLessThan(firstTechnique);
+  });
+  it('simplest first: within a phase no technique comes before one a lower level brings in, and the ones marked for longer chains come in later than the channels', () => {
+    const target = (t: Technique) => firstLevel(t)!.target;
+    for (const p of PHASE_ORDER) {
+      const ts = PLAN[p].filter((i) => i.kind === 'technique' && !i.longer && i.name !== 'path').map((i) => target(i.name as Technique));
+      expect([...ts].sort((a, b) => a - b), p).toEqual(ts);
+    }
+    for (const i of PLAN.chain) if (i.kind === 'technique' && i.longer) expect(target(i.name)).toBeGreaterThan(target('channel'));
+  });
+});
+
+describe('the sorted right side\'s one fluid motion (13 Nov, "once there\'s a nice clear separation, it\'s just down, up and back up again")', () => {
+  const cols = parseBoard(SORTED_RIGHT), d = fluidMotion(cols)!;
+  it('finds the drag on a sorted right side: a black from the far left, down under the whites, then up through the browns', () => {
+    expect(d).not.toBeNull();
+    expect(d.x).toBeLessThan(2);
+    expect(cols[d.x][d.y]).toBe(BLACK);
+    const after = playDrags(cols, [d]);
+    expect(after, 'not a legal drag').not.toBeNull();
+    const turn = d.ways.findIndex((w) => w === UP_RIGHT || w === UP_LEFT);
+    expect(turn).toBeGreaterThan(0);
+    expect(d.ways.slice(0, turn).every((w) => w === DOWN_RIGHT || w === DOWN_LEFT)).toBe(true);
+    expect(d.ways.slice(turn).every((w) => w === UP_RIGHT || w === UP_LEFT)).toBe(true);
+    expect(isFluid(cols, d)).toBe(true);
+  });
+  it('ends with the black among the blacks on the right, and the sort keeps itself', () => {
+    const after = playDrags(cols, [d])!, [ex, ey] = endOf(cols, d), from = rightFrom(cols);
+    expect(ex).toBeGreaterThanOrEqual(from);
+    expect(after[ex][ey]).toBe(BLACK);
+    expect(amongBlacks(after, ex, ey)).toBe(true);
+    expect(unsorted(after, from)).toBeLessThanOrEqual(unsorted(cols, from));
+    expect(whitesFrom(after, from)).toBeLessThanOrEqual(whitesFrom(cols, from));
+  });
+  it('is drawn on the page in the blocks, its board the sorted one and its drag the one found', () => {
+    const t = trickExamples().find((x) => x.trick === 'fluid')!;
+    expect(t.shows).toBe(true);
+    expect(t.picture.cols).toEqual(cols);
+    expect(t.picture.drags).toEqual([d]);
+    expect(t.level).toBe(firstLevel('turnOver')!.label);
+    expect(PLAN.block.at(-1)).toEqual({ kind: 'trick', name: 'fluid' });
+    expect(words(section('data-trick', 'fluid')!).join(' ').length).toBeGreaterThan(60);
+  });
+  it('isn\'t fooled: a drag that stops short among the browns isn\'t it', () => {
+    const turn = d.ways.findIndex((w) => w === UP_RIGHT || w === UP_LEFT);
+    expect(isFluid(cols, { ...d, ways: d.ways.slice(0, turn + 1) })).toBe(false);
   });
 });
 

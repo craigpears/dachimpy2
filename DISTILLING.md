@@ -7,8 +7,10 @@ checked against it move for move (see Sources, "the client port"). Where that po
 is the game's own. Anything unclear is marked **(to confirm with the user)**.
 
 **The read version (13 Nov):** [distilling-guide.html](distilling-guide.html), the public guide to the strategy as
-the bots and Helium play it: the rules in brief, a target and the levels, the four phases, every technique drawn as its
-drag on a real board, the user's tricks, and the way on to other pirates. Its boards, names and Helium's lines come
+the bots and Helium play it: the rules in brief, a target and the levels, then the four phases in a game's order, each
+with its own tricks and techniques under it, simplest first and tagged with the level that brings each in (`PLAN`,
+reordered 13 Nov after the user found the progression "a bit weird"), every technique drawn as its drag on a real
+board, one colour a drag, and the way on to other pirates. Its boards, names and Helium's lines come
 from the code (`src/distill-guide.ts`; the later boards picked from bot play by `tools/distill-guide.mjs` into
 `src/distill-guide-boards.ts`), and `tests/distill-guide.test.ts` fails when a routine, phase, level or trick has no
 section or its board stops showing its move. Change it in the same work as any change to the lesson or the strategy.
@@ -1543,7 +1545,11 @@ the bottom of the junk, then up through the browns, zigzagging, to join the blac
 side is sorted (browns low, blacks high, the twenty-first note's order, done properly), it's a conveyor: a black
 from the left goes down, along and up the brown channel to the blacks in one drag, a brown the other way, and the
 sort keeps itself. Not one of the bots' named techniques yet; it's the reason the right side's order matters, and
-the payoff of the block phase. Helium's lesson and the read version should say so.
+the payoff of the block phase. Helium's lesson and the read version should say so. The read version does (13 Nov):
+the last of the block phase's sections, on the picture's own board (`SORTED_RIGHT`), the drag found by `fluidMotion`
+(the fewest swaps: a black from the far left, not a corner tool, down through the whites and then only up, joining the
+blacks with the right side no less sorted and no white let in) and checked by `isFluid`; it finds the user's own
+drag, down four and up eight to the blacks.
 
 **The thirty-second note: frozen, whites left at the bottom, the blacks' diagonal never cleared; and drags not
 carried all the way (the user, 13 Nov, watching a bot, `notes/distilling/46-frozen-whites-at-the-bottom-blacks-left-on-the-diagonal.webp`).**
