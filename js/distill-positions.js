@@ -113,6 +113,16 @@ export const POSITIONS = [
 export const VERDICTS = {
     // The first three are from notes the user had already given (DISTILLING.md §3), applied to these positions as
     // examples of the format, for the user to confirm or correct.
+    P1: [{
+            date: '13 Nov',
+            note: "Nothing wrong with saving that white, but the top right comes first: its whites have blacks round them and no move beside them, so they'll be trapped. Drag the blacks there down, and column 10's top blacks through the browns and back, until the top right flows (the thirty-third note).",
+            expect: { phase: 'fire', startsIn: { x: [5, 9], y: [0, 2] }, noBurn: true }, open: true,
+        }],
+    P2: [{
+            date: '13 Nov',
+            note: "The same as P1: risk management and priorities. Alarm bells that column 9 has a white at the top, walled in by blacks; a board like this is something gone wrong far earlier, but the work now is the top right, freeing its whites, before anything else (the thirty-third note).",
+            expect: { phase: 'fire', startsIn: { x: [5, 9], y: [0, 2] }, noBurn: true }, open: true,
+        }],
     P3: [{
             date: '13 Nov', from: 'DISTILLING.md, the twenty-second note',
             note: 'Whites low in the column by the fire are the urgent work: the one at the bottom of column 9 comes out first.',
@@ -168,6 +178,12 @@ export function check(p, m, e) {
         out.push('it burns');
     if (e.starts && (!first || first.x !== e.starts[0] || first.y !== e.starts[1])) {
         out.push(`its first drag starts ${first ? `at ${place([first.x, first.y])}` : 'nowhere'}, not ${place(e.starts)}`);
+    }
+    if (e.startsIn) {
+        const { x: [x0, x1], y: [y0, y1] } = e.startsIn;
+        if (!first || first.x < x0 || first.x > x1 || first.y < y0 || first.y > y1) {
+            out.push(`its first drag starts ${first ? `at ${place([first.x, first.y])}` : 'nowhere'}, not in columns ${x0 + 1} to ${x1 + 1}, rows ${y0 + 1} to ${y1 + 1}`);
+        }
     }
     if (e.ends) {
         const end = first && dragEnd(cols, first);

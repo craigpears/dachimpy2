@@ -1634,6 +1634,22 @@ must be found when no single move helps; (2) the blacks' diagonal through the ju
 it boxes whites in below; (3) a drag that can carry a piece further right, toward where it belongs, should,
 rather than stopping where one look ahead scores best.
 
+**The thirty-third note: early on, the top right first, before the whites there are trapped (the user, 13 Nov, on
+position P1 of `distilling-positions.html`).** The bot, 16 s in at CC^8, saved a white low in the middle by setting a
+black on its diagonal. "There's nothing wrong with the move that's been shown, but in itself, but priorities, I'd
+definitely be going at the top because I see the risk of traps. Because there's blacks at the top and there's just
+no way for things to move as freely up there. I'd maybe be dragging those blacks down, and then some of those blacks
+at the top from column 10, dragging those through the browns and back through, and just really fixing that top right
+corner to get those whites unstuck." So early in the fire phase, whites at the top of the right-hand columns with
+blacks round them and no move beside them come before a white lower down that can still be saved later: drag the
+blacks there down, and pull column 10's top blacks through the browns and back, until the top right flows again.
+Its verdict, `P1` in `src/distill-positions.ts`: the first drag starts in the top three rows of columns 6 to 10.
+And on P2, a CC^3 board 16 s in with a white at the top of column 9 above a wall of blacks: "That's shocking, the
+state of that board. Alarm bells going off that column 9 has got a white at the top ... I feel like this board is a
+reflection of something that's gone wrong far, far earlier, but I think ... the same theme still is risk management
+and priorities are not there." The same verdict on `P2`: the top right first. And the deeper lesson: the top right
+going bad is the snowball the bots must see coming, from the first look at a fresh board.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
