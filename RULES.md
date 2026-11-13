@@ -693,6 +693,22 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     said once. The furnace waits otherwise. W again, Esc, or any move of your own (a key or click on the board,
     Hint, Help) hands the board back ("Your board. Off you go."); a dismiss they only say. Their nerves and
     step one's "There." keep quiet while it's their own hand.
+  - **Their plan's moves teach, plain first (13 Nov: "it's giving you really complicated moves ... am I
+    supposed to be able to figure out and spot similar things?"; "for crystal clear one starting, no"; "drag
+    the brown to the right, and then the white to the left ... why isn't that just one move?"):** the arrows
+    their plan shows for your goal are a plain move for the step (src/distill-teach.ts), not the bots' plan:
+    one short drag, one of a few named tricks, each the swap rule seen once (the climb, a white up through
+    blacks; the sink, a white down through browns; the lift, a brown up through whites; the drop, a black
+    down through whites; the weave, a white up and down in one drag), the one that does most for the step's
+    columns, the same trick again while it still does well. Why it works is said once a batch a trick, the
+    rule in their voice ("A brown rises past a white. So any brown under a white can lift it along."), its
+    name in the bar. A moment later (2.5 s) up to three other places the same trick works now are ringed,
+    dashed pale blue, with "Three more like that. Find them." the first time. How plain scales with the
+    goal: three swaps at CC^1, four from CC^2, the bots' own techniques first only from CC^5. When nothing
+    plain helps, a short drag first that makes way, the two numbered; else the bots' move a drag at a time,
+    only when the whole of it does something for the step. Never one drag shown split in two: a one-swap
+    drag onto a piece then that piece dragged on, or one piece dragged on from where it stopped, is shown as
+    the one drag (`joinPairs`). The arrows' drawing is unchanged ("the drawing of the arrows was all fine").
   - **Their mishaps:** whenever a column burns with a white (or a burnt white) in it, the distillery blows
     up (the bang, above) and they shrug it off, their own line first, then others. The humour's the
     maker's, never drink (that's Kikkit's).

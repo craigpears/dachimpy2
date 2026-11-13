@@ -26,7 +26,8 @@ import { HELIUM as HAND, advise, burnsLeft, type Advice } from './distill-bots.j
 import { ROUTINES, clear, isJunk, junkTarget, playDrags } from './distill-routines.js';
 import { routesInto } from './distill-path.js';
 import { PHASES, type Phase } from './distill-phase.js';
-import { AFTER, BEST, GOAL, HELP, HELP_ELSE, HINT, LESSON, MISHAP, NERVES, ONWARD, OPENING, PHASE, PLAN, PRAISE, STEP_ONE, TELL, WATCH } from './lines/helium.js';
+import { teach, type Aim, type Shown, type TeachMove } from './distill-teach.js';
+import { AFTER, BEST, GOAL, HELP, HELP_ELSE, HINT, LESSON, MISHAP, NERVES, ONWARD, OPENING, PHASE, PLAN, PRAISE, SPOT, STEP_ONE, TEACH, TELL, WATCH } from './lines/helium.js';
 import { AT_HELIUMS } from './lines/you.js';
 
 const H = LAY.HELIUM;
@@ -620,11 +621,14 @@ export const PLAN_STEPS = ['clear', 'bank', 'build', 'send'] as const;
 export type PlanStep = (typeof PLAN_STEPS)[number];
 /** Their plan on a board as it stands: the step, the chain it's playing to (`target`), the column the Crystal Clear's
     built in (gold; null till it's known), the columns to burn first (shaded), the pieces to ring (the whites to get
-    out of the junk, or the junk to get out of the gold column), how many to go, the planner's next drags (the
-    arrows), its advice, and the bar's line. */
+    out of the junk, or the junk to get out of the gold column), how many to go, the move shown (the arrows: `teach`,
+    a plain trick or the planner's own, src/distill-teach.ts; its drags `drags`), the other places the same trick
+    works now (`spots`, ringed after a moment; `more` in all), why it works in their voice (`why`), the planner's
+    advice, and the bar's line. */
 export interface Plan {
   step: PlanStep; n: number; target: number; column: number | null; burn: number[];
   ring: [number, number][]; left: number; drags: Drag[]; advice: Advice; note: string;
+  teach: TeachMove | null; spots: Drag[]; more: number; why: string;
 }
 /** The chain they plan for: the goal, or once it's reached one more than the chain going ("more if you can"). */
 export const planTarget = (goal: number, chain: number): number => Math.max(goal, chain + 1);
@@ -636,15 +640,22 @@ const whereIn = (cols: Board, xs: readonly number[], is: (p: number) => boolean)
     (whites still to bank) the junk columns are the three next to the fire, then the junk being built from the right
     (junkTarget); in the chain, the columns it burns before the chain (burnsLeft) and the column it's filling
     (Advice's `column`). */
-export function planFor(g: { cols: Board; chain: number }, goal: number, timeLeft = Infinity): Plan {
+export function planFor(g: { cols: Board; chain: number }, goal: number, timeLeft = Infinity, last: Shown | null = null): Plan {
   const cols = g.cols, target = planTarget(goal, g.chain);
   const advice = advise({ cols, chain: g.chain, timeLeft }, { target });
-  const drags = advice.kind === 'move' ? advice.drags.map(copyDrag) : [];
+  const theirs = advice.kind === 'move' ? advice.drags.map(copyDrag) : [];
   const isWhite = (p: number) => p === WHITE, junk = (p: number) => p !== WHITE && p !== SPICE;
   const make = (step: PlanStep, column: number | null, burn: number[], ring: [number, number][], left: number): Plan => {
     const n = PLAN_STEPS.indexOf(step) + 1, L = PLAN[step];
     const detail = step === 'send' && !burn.length ? PLAN.send.up : L.note.replace('{k}', String(left));
-    return { step, n, target, column, burn, ring, left, drags, advice, note: `Step ${n} of ${PLAN_STEPS.length}, ${L.name}: ${detail}` };
+    // (the move shown: a plain trick for the step, the goal setting how plain; none to send it up, that's X)
+    const t = step === 'send' ? null : teach(cols, aimFor(cols, burn, column, target - g.chain, step === 'build' ? 'into' : 'out'), goal, theirs, last);
+    const m = t?.move ?? null, how = m ? shownNote(m.trick, advice) : '';
+    return {
+      step, n, target, column, burn, ring, left, drags: m ? m.drags.map(copyDrag) : [], advice,
+      note: `Step ${n} of ${PLAN_STEPS.length}, ${L.name}: ${detail}${how ? ` · ${how}` : ''}`,
+      teach: m, spots: t?.spots ?? [], more: t?.more ?? 0, why: m ? whyFor(m.trick, advice) : '',
+    };
   };
   if (advice.stage === 'junk') {
     const fire = range(COLS - STEPS[0].cols, COLS), out = whereIn(cols, fire, isWhite);
@@ -661,6 +672,60 @@ export function planFor(g: { cols: Board; chain: number }, goal: number, timeLef
   const next = COLS - burn.length - 1;
   return make('send', next >= 0 && clear(cols[next]) ? next : column, burn, [], burn.length);
 }
+/** What a step of the plan is after, for the move shown (src/distill-teach.ts, Aim): whites out of the columns to
+    burn (`burn`); and once the gold column's known, junk out of it (and of any clear ones right of it, going up first),
+    and, half as much, out of the columns left of it the chain still needs (`rest` columns in all), and a quarter as
+    much out of the one after those, where the next whites gather. `focus`, the part the step's about (building, the
+    gold column; else the junk columns). */
+export function aimFor(cols: Board, burn: readonly number[], column: number | null, rest = 1, focus?: 'out' | 'into'): Aim {
+  const into: { x: number; w: number }[] = [];
+  if (column !== null && column >= 0) {
+    const from = burn.length ? Math.min(...burn) : COLS;
+    for (let x = column; x < from; x++) into.push({ x, w: 1 });
+    let x = column - 1;
+    for (let k = into.length; k < rest && x >= 0; k++, x--) into.push({ x, w: 0.5 });
+    // (and a little, the column next left of them: whites gathered there are the next ones in)
+    if (x >= 0) into.push({ x, w: 0.25 });
+  }
+  return { out: [...burn], into, focus };
+}
+/** The bots' own move's technique, as their HELP lines key it. */
+const techniqueOf = (a: Advice): keyof typeof HELP | null => (a.technique === 'path' ? 'path' : a.routine);
+/** The move shown, in the bar: the trick's name and what you do; the planner's own by its label. */
+export function shownNote(trick: Shown, a: Advice): string {
+  if (trick !== 'bots') return `${TEACH[trick].name}: ${TEACH[trick].how}`;
+  return a.label;
+}
+/** Why the move shown works, in their voice: the trick's rule; the planner's own, their HELP line for it. */
+export function whyFor(trick: Shown, a: Advice): string {
+  if (trick !== 'bots') return TEACH[trick].why;
+  const t = techniqueOf(a);
+  return t ? HELP[t] : HELP_ELSE.stuck;
+}
+/** Their line for the other places the same trick works (`shown` ringed, `more` in all), or none. */
+export function spotLine(shown: number, more: number): string | null {
+  if (shown <= 0) return null;
+  if (more > shown) return SPOT.many;
+  return shown === 1 ? SPOT.one : shown === 2 ? SPOT.two : SPOT.three;
+}
+/** Seconds the move's arrow is up on its own before the other places its trick works are ringed: a moment to look
+    for them first. */
+export const SPOT_AFTER = 2.5;
+/** Their lines for the move shown: why it works and where else it does (spotLine), the first time each trick's shown
+    in a batch; after that, nothing (the bar says it, the rings show it). The planner's own move, its line once a
+    technique. */
+export class TeachLines {
+  private said = new Set<string>();
+  next(p: Pick<Plan, 'teach' | 'why' | 'spots' | 'more' | 'advice'>): string[] {
+    if (!p.teach) return [];
+    const key = p.teach.trick === 'bots' ? `bots:${techniqueOf(p.advice) ?? ''}` : p.teach.trick;
+    if (this.said.has(key)) return [];
+    this.said.add(key);
+    const spot = spotLine(p.spots.length, p.more);
+    return [p.why, ...(spot ? [spot] : [])];
+  }
+}
+
 /** Their line as a step of the plan starts: in full the first time in a batch, `again` when it comes round for a
     later column of the chain; nothing when it's the step already going, or one said already for this column (the
     board going back and forth between two steps). */

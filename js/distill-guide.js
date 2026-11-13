@@ -31,7 +31,7 @@ import { LEVELS, PATH_LABEL, PER_COLUMN, SWEEP_LABEL, bankFor, chainZones, clear
 import { blockPhase, keptTools } from './distill-score.js';
 import { bringRound, pairRescue, stuck } from './distill-path.js';
 import { STEP_ONE_CTX, afterOpening, beforeBang, lessonPlan, opening, lessonGame } from './den-helium.js';
-import { BEST, HELP, HELP_ELSE, NERVES, ONWARD, OPENING, PHASE, STEP_ONE, TELL } from './lines/helium.js';
+import { BEST, HELP, HELP_ELSE, NERVES, ONWARD, OPENING, PHASE, SPOT, STEP_ONE, TEACH, TELL } from './lines/helium.js';
 import { POSITIONS } from './distill-guide-boards.js';
 /** The user's tricks (DISTILLING.md §3, the twentieth to twenty-ninth notes, the thirty-first's fluid motion, and the
     pair rescue in the chain, 13 Nov). */
@@ -373,7 +373,7 @@ export function trickExamples() {
 }
 // ---------------------------------------------------------------- Helium's lines, and the whole guide
 /** Helium's lines the page quotes, from src/lines/helium.ts. */
-export const QUOTES = { goal: BEST.none, stepOne: STEP_ONE.says, why: STEP_ONE.why, onward: ONWARD, tell: TELL };
+export const QUOTES = { goal: BEST.none, stepOne: STEP_ONE.says, why: STEP_ONE.why, onward: ONWARD, tell: TELL, trick: TEACH.lift.why, spot: SPOT.three };
 /** Everything the page draws. */
 export function guide() {
     return {

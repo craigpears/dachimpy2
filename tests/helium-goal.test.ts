@@ -81,9 +81,11 @@ function follow(seed: number, goal: number, most = 80) {
     steps.push(p.step);
     const line = lines.next(p, g.chain);
     if (line) said.push(line);
-    // (what's shown is the planner's own, playing to the goal)
+    // (what's shown is a plain move for the step, src/distill-teach.ts, tests/distill-teach.test.ts; the planner's own
+    // advice, playing to the goal, behind it)
     const a = advise({ cols: g.cols, chain: g.chain, timeLeft: Infinity }, { target: planTarget(goal, g.chain) });
-    expect(p.drags).toEqual(a.kind === 'move' ? a.drags : []);
+    expect(p.advice.kind).toBe(a.kind);
+    expect(p.drags).toEqual(p.teach ? p.teach.drags : []);
     expect(p.target).toBe(planTarget(goal, g.chain));
     expect(p.note).toMatch(new RegExp(`^Step ${PLAN_STEPS.indexOf(p.step) + 1} of 4, `));
     if (p.step === 'clear') for (const [x, y] of p.ring) { expect(p.burn).toContain(x); expect(g.cols[x][y]).toBe(WHITE); }

@@ -233,6 +233,8 @@ const KEY_MOVES = {
    `mark`: pieces to ring, to point them out (a lesson's): null, or `(col, row, piece, gone)` true for
    each piece to ring, `gone` while it's leaving the board. `column` (an index, or null) shades a column gold, the
    one a Crystal Clear's being built in; `burnCols` (indexes) shade columns a dull red, the junk to burn first.
+   `spots` (`{ x, y }`s): pieces to find, each a dashed pale blue ring turning slowly, set apart from `mark`'s gold
+   (Helium's "Three more like that. Find them.": the other places a trick shown works).
    `flask(game)`: how full the flask's drawn, 0 to 1, in place of the pieces in it (Helium's still: a step a
    Crystal Clear), `flaskSteps` the marks up its side (10 by default).
    Returns the board: add `board.group` to the scene, call `tick(dt)` every frame (it drives the rules'
@@ -258,7 +260,7 @@ export function distillBoard(o = {}) {
   const b = {
     game, group, canvas: cv, size, paused: false, idle: false,
     onColumn: o.onColumn ?? null, onFurnace: o.onFurnace ?? null, onWarning: o.onWarning ?? null, onSwap: o.onSwap ?? null, onFinish: o.onFinish ?? null,
-    mark: o.mark ?? null, now: 0, column: null, burnCols: [],
+    mark: o.mark ?? null, now: 0, column: null, burnCols: [], spots: [],
   };
   /** Where a piece sits (its top left, in the board view): by column and row, the column's height as the game has it. */
   const spot = (col, row) => [col * CELL, TOP + row * CELL + (game.cols[col].length === TALL ? 0 : CELL / 2)];
@@ -547,6 +549,18 @@ export function distillBoard(o = {}) {
         g.strokeStyle = `rgba(255,${Math.round(150 + 60 * pulse)},40,${0.75 + 0.25 * pulse})`;
         g.beginPath(); g.arc(s.x + CELL / 2, s.y + CELL / 2, CELL / 2 + 1 + pulse * 2, 0, Math.PI * 2); g.stroke();
       }
+    }
+    // Pieces to find (b.spots): a dashed pale blue ring round each, turning, outside any gold one (resting boards only).
+    if (!over && !game.sliding && b.spots?.length) {
+      g.save(); g.setLineDash([7, 5]); g.lineDashOffset = -b.now / 60; g.lineCap = 'round';
+      for (const { x, y } of b.spots) {
+        const s = grid[x]?.[y];
+        if (!s) continue;
+        const cx = s.x + CELL / 2, cy = s.y + CELL / 2, r = CELL / 2 + 5;
+        g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.strokeStyle = 'rgba(20,10,2,0.7)'; g.lineWidth = 5; g.stroke();
+        g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.strokeStyle = ARROW.route; g.lineWidth = 3; g.stroke();
+      }
+      g.restore();
     }
     // The links: a khaki nub on each of a swappable pair, facing the other (resting pieces only).
     if (!over) for (const col of grid) for (const s of col) {

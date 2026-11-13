@@ -271,6 +271,30 @@ export const PLAN = {
   },
 } as const;
 
+/** The moves their plan shows you, plain ones a learner can see and repeat (src/distill-teach.ts; the user, 13 Nov:
+    "it's giving you really complicated moves ... am I supposed to be able to figure out and spot similar things?"):
+    each trick its name and what you do, in the bar (`name`, `how`), and why it works, the swap rule it is, in their
+    bubble the first time it's shown in a batch (`why`). The physics as DISTILLING.md §3 puts it: in blacks whites
+    rise, in whites browns rise and blacks sink, in browns whites sink. */
+export const TEACH = {
+  climb: { name: 'The climb', how: 'drag the white up, over the black', why: 'A white climbs past a black. Any black just above a white is a step up.' },
+  sink: { name: 'The sink', how: 'drag the white down, under the brown', why: 'A white sinks past a brown. Any brown just below a white is a step down.' },
+  lift: { name: 'The lift', how: 'drag the brown up through the whites', why: 'A brown rises past a white. So any brown under a white can lift it along.' },
+  drop: { name: 'The drop', how: 'drag the black down through the whites', why: 'A black sinks past a white. Drop one through, and each white steps up round it.' },
+  weave: { name: 'The weave', how: 'the white up over blacks, down under browns', why: 'Up over a black, down under a brown. A white weaves through junk like that.' },
+  makeWay: { name: 'Make way', how: '1 opens the way, then 2', why: 'Stuck? Move a piece beside it first. Then it\'s got a way through.' },
+} as const;
+/** Then, with the move shown, the other places the same trick works now ringed on the board (a few at the most), and
+    their line for it with the why: so you spot the next one yourself. `many` when there are more than the rings
+    show; `note` in the bar. */
+export const SPOT = {
+  one: 'One more like that on the board. Find it.',
+  two: 'Two more like that. Find them.',
+  three: 'Three more like that. Find them.',
+  many: 'Plenty more like that. Here\'s a few. Find them.',
+  note: 'Blue rings: the same trick works there too',
+} as const;
+
 /** While you're within earshot of their island, before or after: round and round. */
 export const AFTER = [
   'Big order of rum for Mischievious. Another wedding. She does keep getting married.',
@@ -358,6 +382,16 @@ export const CHARACTER: Character = {
       when: 'Their plan for your goal, a step at a time on your board: as each step starts (says), as it comes round again for the next column of the chain (again), and the bar\'s detail (note)',
       says: PLAN,
       each: { clear: 'Step 1: whites in the junk columns about to burn', bank: 'Step 2: banking whites before the chain', build: 'Step 3: the column shaded gold, the Crystal Clear being built', send: 'Step 4: the gold column all white, to send up' },
+    },
+    {
+      when: 'The move their plan shows you, a plain trick: its name and what you do in the bar (name, how), why it works in their bubble the first time it\'s shown in a batch (why)',
+      says: TEACH,
+      each: { climb: 'A white dragged up through blacks', sink: 'A white dragged down through browns', lift: 'A brown dragged up through whites', drop: 'A black dragged down through whites', weave: 'A white up over blacks and down under browns in one drag', makeWay: 'Nothing plain helps yet: a short drag first (1) that opens the way for a plain one (2)' },
+    },
+    {
+      when: 'With the move shown, the other places the same trick works now ringed: their line after the why (by how many), and the bar\'s',
+      says: SPOT,
+      each: { one: 'One more', two: 'Two more', three: 'Three more', many: 'More than the rings show', note: 'In the bar' },
     },
     { when: 'While you\'re within earshot of their island: round and round', says: AFTER },
   ],
