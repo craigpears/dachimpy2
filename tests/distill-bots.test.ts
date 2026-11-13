@@ -2,14 +2,16 @@
    techniques the routines of src/distill-routines.ts picked by stage, at a person's pace, by the rules (12 Nov).
    What each reaches is tools/distill-bots.mjs's to measure (DISTILLING.md §4). */
 import { describe, expect, it } from 'vitest';
-import { BLACK, BURN_TICKS, COLS, DOWN_RIGHT, Distilling, SHORT, TALL, UP_LEFT, UP_RIGHT, WHITE, neighbourOn, parseBoard } from '../src/distilling';
-import { DistillBot, HELIUM, LEVELS, MENU, P, bankFor, brownSweep, clearComingUp, dangerZones, edgeWhites, joinedUp, levelFor, rightOrder, tieBreak, whitesInJunk, advise, backward, choose, contextFor, judge, junkAcross, levelNamed, playSession, tierNamed, turnsIn, weigh } from '../src/distill-bots';
+import { BLACK, BROWN, BURN_TICKS, COLS, DOWN_RIGHT, Distilling, SHORT, TALL, UP_LEFT, UP_RIGHT, WHITE, neighbourOn, parseBoard } from '../src/distilling';
+import { DistillBot, HELIUM, LEVELS, MENU, P, PAIR_LABEL, chainZones, bankFor, brownSweep, clearComingUp, dangerZones, edgeWhites, joinedUp, levelFor, rightOrder, tieBreak, whitesInJunk, advise, backward, choose, contextFor, judge, junkAcross, levelNamed, playSession, tierNamed, turnsIn, weigh } from '../src/distill-bots';
 import type { Advice } from '../src/distill-bots';
 import { ROUTINES, canGo, colourLeft, playDrags } from '../src/distill-routines';
 import { behindSpice, blockPhase, boardScore, keptTools, trappedWhite } from '../src/distill-score';
 import type { Drag, RoutineName } from '../src/distill-routines';
 import type { Board } from '../src/distilling';
 import { seeded } from '../src/mirror-row';
+import { bringRound, pairRescue } from '../src/distill-path';
+import { STUCK_ON_TOP } from '../src/distill-guide';
 
 /** The slow techniques (the seventh note: "very action heavy"). */
 const SLOW: readonly RoutineName[] = ['crawl', 'turnOver', 'linePull', 'figureEight', 'hook', 'leapfrog'];
@@ -535,5 +537,62 @@ describe('frozen by the fire, and drags stopping short (13 Nov, the thirty-secon
       expect(boardScore(playDrags(cols, onward.drags)!)).toBeGreaterThanOrEqual(boardScore(playDrags(cols, peak.drags)!));
       expect(onward.drags[0].ways.length).toBe(8);
     } finally { P.ONWARD = was; }
+  });
+});
+
+describe('a brown stuck at the top of the column going up, rescued (13 Nov: "this is absolute danger mode ... the first thing I would be doing here is just rescuing that brown piece")', () => {
+  // The user's board: the furnace's column all white but a brown at its top, a black on the top row a few columns
+  // left, a brown below it that can move up. Every bot frees it, so the column goes up Crystal Clear.
+  const cols = parseBoard(STUCK_ON_TOP), last = COLS - 1;
+  it('the brown can\'t get out on its own, nor with any one piece brought round', () => {
+    const y = cols[last].indexOf(BROWN);
+    expect(y).toBe(0);
+    expect(canGo(cols, last, y, -1)).toBe(false);
+    expect(bringRound(cols, { x: last, y, side: -1 }, HELIUM)).toBeNull();
+    expect(chainZones(cols, contextFor(cols, 'chain', 0, HELIUM.reach))).toEqual([last]);
+  });
+  it('every bot sends that column up Crystal Clear, the brown rescued by a pair working together, 13 Nov', () => {
+    for (const t of LEVELS) {
+      const g = new Distilling(seeded(1)).lay(cols);
+      const out: number[][] = [];
+      playSession(g, t, 0.3, (c) => out.push(c.pieces));
+      expect(out.length, t.name).toBeGreaterThan(0);
+      expect(out[0].every((p) => p === WHITE), `${t.name} sent it up with the brown`).toBe(true);
+    }
+  });
+  it('urgent from the first look, before anything easy elsewhere: the low targets play the pair rescue straight away', () => {
+    for (const t of LEVELS.slice(0, 3)) {
+      const a = choose({ cols, chain: 0, timeLeft: 15000 }, contextFor(cols, 'chain', 0, t.reach), t);
+      expect(a.label, t.name).toBe(PAIR_LABEL);
+      expect(a.technique).toBe('path');
+      expect(a.drags.length).toBeGreaterThanOrEqual(2);
+      expect(a.column).toBe(last);
+      const after = playDrags(cols, a.drags)!;
+      expect(after[last].every((p) => p === WHITE)).toBe(true);
+      expect(after[last - 1].every((p) => p === WHITE), 'not just pushed on into the next column').toBe(true);
+    }
+  });
+  it('the mirror too: a black stuck at the bottom is freed with a brown brought along the bottom', () => {
+    // Upside down, browns and blacks swapped: the same puzzle by the rules.
+    const flip = STUCK_ON_TOP.map((c) => [...c].reverse().map((ch) => (ch === 'b' ? 'K' : ch === 'K' ? 'b' : ch)).join(''));
+    const m = parseBoard(flip);
+    expect(m[last][m[last].length - 1]).toBe(BLACK);
+    const plan = pairRescue(m, last, contextFor(m, 'chain', 0, HELIUM.reach), levelNamed('cc1'));
+    expect(plan).not.toBeNull();
+    expect(playDrags(m, plan!)![last].every((p) => p === WHITE)).toBe(true);
+    const g = new Distilling(seeded(1)).lay(m), out: number[][] = [];
+    playSession(g, levelNamed('cc1'), 0.3, (c) => out.push(c.pieces));
+    expect(out[0].every((p) => p === WHITE)).toBe(true);
+  });
+  it('the one after the column going up too, from as soon as there\'s time: a brown stuck at the top of it is freed first', () => {
+    // The user, 13 Nov: "there was lots of time to rescue it even before now." The same board a column earlier, a
+    // clear column of whites at the fire.
+    const early = parseBoard([...STUCK_ON_TOP.slice(1), 'wwwwwwww']);
+    const ctx = contextFor(early, 'chain', 0, HELIUM.reach);
+    expect(ctx.fill).toBe(last - 1);
+    expect(chainZones(early, ctx)).toEqual([last - 1]);
+    const [m] = weigh({ cols: early, chain: 1, timeLeft: 15000 }, ctx, levelNamed('cc1'));
+    expect(m.saves).toBe(true);
+    expect(m.after![last - 1].every((p) => p === WHITE)).toBe(true);
   });
 });

@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
-  PLAN, SORTED_RIGHT, TRICKS, amongBlacks, endOf, firstLevel, fluidMotion, guide, isFluid, liveMove, phaseExamples, position, sameMove,
+  PLAN, SORTED_RIGHT, STUCK_ON_TOP, TRICKS, pairOn, amongBlacks, endOf, firstLevel, fluidMotion, guide, isFluid, liveMove, phaseExamples, position, sameMove,
   techniqueExamples, techniqueOrder, trickExamples, levelRows, unsorted,
 } from '../src/distill-guide';
 import type { GuideItem, Technique } from '../src/distill-guide';
@@ -19,7 +19,7 @@ import { POSITIONS } from '../src/distill-guide-boards';
 import { BLACK, BROWN, CHAIN_BONUS, DOWN_LEFT, DOWN_RIGHT, MESSAGES, UP_LEFT, UP_RIGHT, WHITE, parseBoard } from '../src/distilling';
 import { ROUTINES, playDrags, rightFrom, whitesFrom } from '../src/distill-routines';
 import { PHASES, PHASE_ORDER, phaseOf } from '../src/distill-phase';
-import { LEVELS, PATH_LABEL, SWEEP_LABEL, bankFor } from '../src/distill-bots';
+import { LEVELS, PATH_LABEL, SWEEP_LABEL, bankFor, choose, contextFor } from '../src/distill-bots';
 import { HELP, ONWARD, PHASE, TELL, BEST } from '../src/lines/helium';
 import { STEP_ONE_CTX, afterOpening, lessonPlan } from '../src/den-helium';
 
@@ -67,7 +67,7 @@ describe('the read version: a section for everything the code has (13 Nov, "ever
     }
   });
   it('has a section for each of the user\'s tricks', () => {
-    expect(TRICKS).toHaveLength(8);
+    expect(TRICKS).toHaveLength(9);
     for (const t of TRICKS) {
       const s = section('data-trick', t);
       expect(s, `no section for the trick ${t}`).not.toBeNull();
@@ -241,5 +241,30 @@ describe('the rules and the levels, read off the code', () => {
     expect(rows.map((r) => r.name)).toEqual(LEVELS.map((l) => l.name));
     for (const r of rows) expect(r.bank).toBe(bankFor(r.target));
     expect(new Set(rows.flatMap((r) => r.adds))).toEqual(new Set(techniqueOrder()));
+  });
+});
+
+describe('the pair rescue in the chain (13 Nov: "this is absolute danger mode ... the first thing I would be doing here is just rescuing that brown piece")', () => {
+  const cols = parseBoard(STUCK_ON_TOP), last = cols.length - 1, p = pairOn(cols);
+  it('is drawn on the board of a brown stuck at the top of the column going up, the drags the bots find on it', () => {
+    const t = trickExamples().find((x) => x.trick === 'pair')!;
+    expect(t.shows).toBe(true);
+    expect(t.picture.cols).toEqual(cols);
+    expect(t.picture.rings).toEqual([[last, 0]]);
+    expect(cols[last][0]).toBe(BROWN);
+    expect(t.picture.shade).toEqual([last]);
+    expect(t.picture.drags).toEqual(p.drags);
+    expect(t.says).toBe(HELP.path);
+  });
+  it('the drags free the column, a pair working together where no one piece does, and they are the lowest bot\'s own move', () => {
+    expect(p.frees).toBe(true);
+    expect(p.drags.length).toBeGreaterThanOrEqual(2);
+    expect(playDrags(cols, p.drags)![last].every((x) => x === WHITE)).toBe(true);
+    const a = choose({ cols, chain: 0, timeLeft: 15000 }, contextFor(cols, 'chain', 0, LEVELS[0].reach), LEVELS[0]);
+    expect(a.drags).toEqual(p.drags);
+  });
+  it('sits in the chain, straight after the channels, with words of its own', () => {
+    expect(PLAN.chain[1]).toEqual({ kind: 'trick', name: 'pair' });
+    expect(words(section('data-trick', 'pair')!).join(' ').length).toBeGreaterThan(60);
   });
 });
