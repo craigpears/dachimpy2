@@ -4,7 +4,7 @@
 // in the scene, its picture painted on a canvas) and plays it by the real keys and mouse. It knows
 // nothing of the den (it imports only three.js and the rules), so a test page plays it on its own
 // (distilling-test.html). It's Helium's still (js/den/helium-isle.js, their island): the hooks below say
-// when a column goes, up or burned (a white burned is his still's little bang), when the furnace warns,
+// when a column goes, up or burned (a white burned is their still's bang), when the furnace warns,
 // and when it's over.
 import * as THREE from 'three';
 import {
@@ -159,7 +159,7 @@ function barrel(g, x, y, w, h) {
 function distiller(g, x, y) {
   // Helium at their still (their Emerald portrait, 12 Nov; their look in the wardrobe, js/den-look.js's PIRATES):
   // a black Vampire raiment lined in gold, dark skin, white hair swept up, a black cat-eared mask, and King,
-  // his plum monkey, on his shoulder. (A stand-in distiller till 12 Nov: green coat, red sash, tricorn.)
+  // their plum monkey, on their shoulder. (A stand-in distiller till 12 Nov: green coat, red sash, tricorn.)
   const skin = '#8a5530';
   // The raiment's gold lining, flaring at the hem, then the coat over it.
   g.fillStyle = '#d8a420'; g.beginPath(); g.moveTo(x - 25, y); g.lineTo(x - 15, y - 40); g.lineTo(x + 15, y - 40); g.lineTo(x + 27, y); g.fill();
@@ -177,7 +177,7 @@ function distiller(g, x, y) {
   // A hand on the tap.
   g.strokeStyle = '#1e1e22'; g.lineWidth = 7; g.beginPath(); g.moveTo(x + 12, y - 52); g.lineTo(x + 24, y - 42); g.stroke();
   g.fillStyle = skin; g.beginPath(); g.arc(x + 26, y - 40, 5, 0, Math.PI * 2); g.fill();
-  // King, on his left shoulder: a plum monkey, round head and ears, a curling tail.
+  // King, on their left shoulder: a plum monkey, round head and ears, a curling tail.
   const mx = x - 15, my = y - 64, fur = '#865b91';
   g.strokeStyle = fur; g.lineWidth = 2.5; g.beginPath(); g.moveTo(mx - 4, my + 6); g.quadraticCurveTo(mx - 16, my + 10, mx - 12, my - 2); g.stroke();
   g.fillStyle = fur; g.beginPath(); g.ellipse(mx, my + 2, 6, 7, 0, 0, Math.PI * 2); g.fill();
@@ -224,8 +224,11 @@ const KEY_MOVES = {
 };
 
 /* Hooks: `onColumn(column, finished)` as a column goes, up or burned (the rules' Column: up, points,
-   bonus, chain, message, spice); `onWarning()` as the furnace warns, about 3 s before; `onSwap(a, b)`
-   after each swap; `onFinish(game)` when the flask is full (or it's dismissed).
+   bonus, chain, message, spice); `onFurnace(column)` as a burned column's first white (or burnt white)
+   goes into the furnace, the moment a still would go bang; `onWarning()` as the furnace warns, about 3 s
+   before; `onSwap(a, b)` after each swap; `onFinish(game)` when the flask is full (or it's dismissed).
+   `mark`: pieces to ring, to point them out (a lesson's): null, or `(col, row, piece, gone)` true for
+   each piece to ring, `gone` while it's leaving the board.
    Returns the board: add `board.group` to the scene, call `tick(dt)` every frame (it drives the rules'
    clock: `paused` stops it), feed it `key`, `pointer`, `press` and `release`, and `dispose()` it when
    you're done. `game` is the rules' Distilling; `swapAt(x, y, way)` and `burn()` play it as a hand
@@ -248,8 +251,8 @@ export function distillBoard(o = {}) {
 
   const b = {
     game, group, canvas: cv, size, paused: false, idle: false,
-    onColumn: o.onColumn ?? null, onWarning: o.onWarning ?? null, onSwap: o.onSwap ?? null, onFinish: o.onFinish ?? null,
-    now: 0,
+    onColumn: o.onColumn ?? null, onFurnace: o.onFurnace ?? null, onWarning: o.onWarning ?? null, onSwap: o.onSwap ?? null, onFinish: o.onFinish ?? null,
+    mark: o.mark ?? null, now: 0,
   };
   /** Where a piece sits (its top left, in the board view): by column and row, the column's height as the game has it. */
   const spot = (col, row) => [col * CELL, TOP + row * CELL + (game.cols[col].length === TALL ? 0 : CELL / 2)];
@@ -289,13 +292,16 @@ export function distillBoard(o = {}) {
   // A column goes: its pieces glide up into the pipe or down into the furnace (burned whites rolling
   // back left along the trough, scorched), the board slides right, a new column comes in.
   function columnGone(c, finished) {
+    // (`onFurnace` once, as the first white or burnt white of a burned column reaches the furnace)
+    let hit = c.up ? null : () => { hit = null; b.onFurnace?.(c); };
     for (const s of grid[COLS - 1]) {
       if (s === selected) selected = null;
-      const burning = !c.up && s.p === WHITE, ey = c.up ? EXIT_UP : EXIT_DOWN;
+      const burning = !c.up && s.p === WHITE, scorched = !c.up && s.p === BURNT, ey = c.up ? EXIT_UP : EXIT_DOWN;
       const d1 = Math.hypot(EXIT_X - s.x, ey - s.y) / SPEED;
       const pts = [[EXIT_X, ey]], durs = [d1];
       if (burning) { pts.push([-CELL, ey]); durs.push((EXIT_X + CELL) / SPEED * 1.6); }
-      go(s, pts, durs, burning ? () => { s.p = BURNT; } : null, () => { leaving = leaving.filter((q) => q !== s); });
+      s.gone = true;
+      go(s, pts, durs, burning ? () => { s.p = BURNT; hit?.(); } : null, () => { if (scorched) hit?.(); leaving = leaving.filter((q) => q !== s); });
       leaving.push(s);
     }
     grid.pop();
@@ -471,6 +477,16 @@ export function distillBoard(o = {}) {
       }
     }
     for (const s of [...grid.flat(), ...leaving]) g.drawImage(pieceCanvas(s.p), s.x, s.y, CELL, CELL);
+    // Pieces pointed out (b.mark): a gold ring round each, pulsing.
+    if (b.mark) {
+      const pulse = 0.5 + 0.5 * Math.sin(b.now / 160);
+      g.lineWidth = 3 + pulse * 1.5;
+      for (const s of [...grid.flat(), ...leaving]) {
+        if (!b.mark(s.col, s.row, s.p, !!s.gone)) continue;
+        g.strokeStyle = `rgba(255,${Math.round(150 + 60 * pulse)},40,${0.75 + 0.25 * pulse})`;
+        g.beginPath(); g.arc(s.x + CELL / 2, s.y + CELL / 2, CELL / 2 + 1 + pulse * 2, 0, Math.PI * 2); g.stroke();
+      }
+    }
     // The links: a khaki nub on each of a swappable pair, facing the other (resting pieces only).
     if (!over) for (const col of grid) for (const s of col) {
       if (!resting(s) || s.p === SPICE) continue;

@@ -1,21 +1,21 @@
 /* Helium's island, their lesson at the still and "Help, Helium" (src/den-helium.ts), 12 Nov: their own little
-   island by the smugglers' rocks, a short lesson on a real board (the swap rule, whites left and junk
-   right, a column burned, and their mishap), then your go with them to ask. The user: "helium should kind of
+   island by the smugglers' rocks, an opening on a real board (a white burned, the still's bang), a short
+   lesson (step one: the whites on the fire's side ringed and walked out), then your go with them to ask. The user: "helium should kind of
    detect what stage you're at and show you what technique ... It's context aware." */
 import { describe, expect, it } from 'vitest';
 import {
   HELIUM, HELIUM_ARRIVE, HELIUM_CAST, HELIUM_MOOR, HELIUM_STANDS, LESSON_SEED, Visit, askHelium, bangs, heliumAt, heliumShore, helpFor,
-  inHeliumEarshot, lessonGame, lessonPlan, lessonSecs, mishapLine, onHeliumLanding, opening,
+  inHeliumEarshot, lessonGame, lessonPlan, lessonSecs, mishapLine, onHeliumLanding, opening, lessonBeats, afterOpening, ringed, holdSecs, actAfter, stepDoneLines,
   Cellar, OPENING_BANG, RUM, lineSpot, pileSpot, praiseFor, worksFor, STEPS, whitesOnFireSide, beatSecs, PACE_LESSON,
 } from '../src/den-helium';
 import { AT_HELIUMS } from '../src/lines/you';
 import { LAY, SAIL, Sea } from '../src/den-sail';
 import { onTzzLanding } from '../src/den-tzz';
 import { smugglersAt } from '../src/den-smugglers';
-import { BLACK, BURNT, COLS, Distilling, WHITE, goesUp, neighbourOn, canSwapOn, parseBoard } from '../src/distilling';
+import { BURNT, COLS, Distilling, WHITE, neighbourOn, canSwapOn, parseBoard } from '../src/distilling';
 import { isJunk } from '../src/distill-routines';
 import type { Advice } from '../src/distill-bots';
-import { AFTER, GREET, HELP, HELP_ELSE, LESSON, MISHAP, OPENING, STEP_ONE } from '../src/lines/helium';
+import { AFTER, HELP, HELP_ELSE, LESSON, MISHAP, ONWARD, OPENING, STEP_ONE } from '../src/lines/helium';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -75,6 +75,15 @@ describe('their look: from their portrait, in the wardrobe', () => {
   });
 });
 
+/** Every move of `beats` played on `game`, as the den plays them. */
+const playOut = (game: Distilling, beats: ReturnType<typeof lessonBeats>) => {
+  for (const b of beats) {
+    for (const d of b.act.kind === 'drag' ? [b.act] : b.act.kind === 'drags' ? b.act.drags : []) { game.dragWays(d.x, d.y, d.ways); game.settle(1000); }
+    if (b.act.kind === 'burn') { game.burnNow(); game.settle(5000); }
+  }
+  return game;
+};
+
 describe('their lesson: a real board, by the real rules', () => {
   const g = lessonGame(), plan = lessonPlan();
   it('is the same board every time, its furnace stopped', () => {
@@ -82,41 +91,106 @@ describe('their lesson: a real board, by the real rules', () => {
     expect(g.timeLeft()).toBe(Infinity);
     expect(LESSON_SEED).toBeGreaterThan(0);
   });
-  it('goes greeting, the swap rule, the furnace, their mishap, step one and why, your go', () => {
-    expect(plan.map((b) => b.name)).toEqual(['greet', 'rule', 'ruleAfter', 'furnace', 'mishapSetup', 'mishap', 'step', 'clear', 'why', 'yours']);
-    expect(plan[0].says).toBe(GREET);
-    expect(plan.find((b) => b.name === 'mishap')!.says).toBe('Oops. That happens sometimes. Don\'t worry about it.');
+  it('goes straight to step one after the opening: the whites ringed, walked out, why, your go', () => {
+    expect(plan.map((b) => b.name)).toEqual(['step', 'clear', 'why', 'yours']);
     for (const b of plan) { expect(b.says.length).toBeGreaterThan(0); expect(b.note.length).toBeGreaterThan(0); }
   });
-  it('plays every move legally on the board, and shows what it says', () => {
+  it('plays every move legally on the board, opening and lesson, and burns one white, the opening\'s', () => {
     const game = lessonGame();
-    const settle = () => game.settle(1000);
-    for (const b of plan) {
-      const drags = b.act.kind === 'drag' ? [b.act] : b.act.kind === 'drags' ? b.act.drags : [];
-      for (const { x, y, ways } of drags) {
-        if (b.name === 'rule') expect(game.at(x, y)).toBe(WHITE);
-        // (the swap rule: the white rises past a black)
-        if (b.name === 'rule') { const n = neighbourOn(game.cols, x, y, ways[0])!; expect(game.at(n[0], n[1])).toBe(BLACK); expect(n[1] <= y).toBe(true); }
+    for (const b of lessonBeats()) {
+      for (const { x, y, ways } of b.act.kind === 'drag' ? [b.act] : b.act.kind === 'drags' ? b.act.drags : []) {
         const r = game.dragWays(x, y, ways);
         expect(r.swaps).toBe(ways.length);
-        if (b.name === 'rule') expect(r.at[0]).toBe(x - ways.length);   // (a column left each swap)
-        settle();
+        game.settle(1000);
       }
       if (b.act.kind === 'burn') {
         const before = game.cols[COLS - 1].slice();
-        if (b.name === 'furnace') expect(before.every(isJunk)).toBe(true);
-        const ev = game.burnNow();
-        const col = ev.find((e) => e.kind === 'column');
+        const col = game.burnNow().find((e) => e.kind === 'column');
         expect(col && col.kind === 'column' && !col.column.up).toBe(true);
         if (col?.kind === 'column') expect(bangs(col.column)).toBe(!!b.mishap);
-        if (b.mishap) expect(before.filter((p) => p === WHITE).length).toBe(1);   // ("one white in it")
-        settle();
+        if (b.mishap) expect(before.filter((p) => p === WHITE).length).toBe(1);
+        game.settle(5000);
       }
     }
     expect(game.whitesBurned).toBe(1);
   });
-  it('has no mishap on a board whose next column would go up (worked out, not assumed)', () => {
-    expect(lessonPlan(new Distilling(() => 0.1, { timer: false })).some((b) => b.mishap)).toBe(false);   // (every piece white)
+});
+
+describe('Helium\'s opening: a white burned causing the bang, and said (the user, 13 Nov)', () => {
+  const o = opening();
+  it('"in the initial opening animation, you actually see some white being burnt, and that\'s what causes the explosion" (13 Nov)', () => {
+    // (the furnace takes its all-junk column quietly first; then the next, one white in it, ringed, goes down)
+    expect(o.slice(0, 2).map((b) => [b.name, b.act.kind, !!b.mishap])).toEqual([['furnace', 'burn', false], ['bang', 'burn', true]]);
+    const game = lessonGame();
+    expect(game.cols[COLS - 1].every(isJunk)).toBe(true);
+    game.burnNow(); game.settle(5000);
+    const going = game.cols[COLS - 1].slice();
+    expect(going.filter((p) => p === WHITE).length).toBe(1);
+    const bang = o[1];
+    expect(going.filter((p, y) => ringed(bang.marks, COLS - 1, p) && y >= 0).length).toBe(1);   // (the white, ringed)
+    expect(bang.bang).toBe(OPENING_BANG);
+    const col = game.burnNow().find((e) => e.kind === 'column');
+    expect(col?.kind === 'column' && worksFor(col.column)).toMatchObject({ kind: 'bang' });
+    // (no words over it: a moment for the white to go in and the still to go bang)
+    expect(o[0].says).toBe('');
+    expect(bang.says).toBe('');
+    expect(holdSecs(bang)).toBeGreaterThanOrEqual(PACE_LESSON.FALL + 3);
+    expect(actAfter(bang)).toBeGreaterThanOrEqual(0.5);   // (the white ringed a moment before it goes)
+  });
+  it('"a bit more of a link in the initial dialogue to the idea of just make sure you don\'t send any white pieces down into the burner" (13 Nov)', () => {
+    expect(OPENING.mishap).toMatch(/white/);
+    expect(OPENING.mishap).toMatch(/furnace/);
+    expect(OPENING.mishap).toMatch(/mishap/);
+    expect(OPENING.safe).toMatch(/Of course it's safe/);
+    expect(OPENING.safe).toMatch(/don't send whites down/);
+    expect(OPENING.safe).toMatch(/It's fine/);
+  });
+  it('one bang in all, the opening\'s: the lesson after it has none', () => {
+    const beats = lessonBeats();
+    expect(beats.filter((b) => b.mishap || b.act.kind === 'bang').map((b) => b.name)).toEqual(['bang']);
+    expect(playOut(lessonGame(), beats).whitesBurned).toBe(1);
+  });
+  it('still bangs on a board with no white to burn, but on its own (worked out, not assumed)', () => {
+    const plain = opening(new Distilling(() => 0.1, { timer: false }));   // (every piece white)
+    expect(plain.some((b) => b.mishap)).toBe(false);
+    expect(plain.filter((b) => b.act.kind === 'bang').length).toBe(1);
+  });
+});
+
+describe('Helium\'s lesson without the basics (the user, 13 Nov)', () => {
+  const plan = lessonPlan();
+  it('"basic move mechanics ... Puzzle Pirates does that. That tutorial exists. I\'m sure people can work that out" (13 Nov)', () => {
+    const words = JSON.stringify(lessonBeats().map((b) => [b.says, b.note]));
+    expect(words).not.toMatch(/beats|past black|rock, paper|swap rule|round and round/i);
+    expect(Object.keys(LESSON)).toEqual(['yours']);
+  });
+  it('"First things first. See all these whites on the right, you know, highlight them all" (13 Nov)', () => {
+    expect(plan[0].says).toMatch(/^Right\. First things first/);
+    expect(plan[0].marks).toBe(COLS - STEPS[0].cols);
+    // (every white on the fire's side ringed, and nothing else)
+    const board = afterOpening().cols;
+    const rings = board.reduce((n, col, x) => n + col.filter((p) => ringed(plan[0].marks, x, p)).length, 0);
+    expect(rings).toBe(whitesOnFireSide(board));
+    expect(rings).toBeGreaterThan(0);
+    expect(ringed(undefined, COLS - 1, WHITE)).toBe(false);
+    expect(ringed(COLS - 3, COLS - 4, WHITE)).toBe(false);
+    expect(ringed(COLS - 3, COLS - 1, BURNT)).toBe(true);
+    // (ringed still as they're walked out, till each is clear)
+    expect(plan.find((b) => b.name === 'clear')!.marks).toBe(plan[0].marks);
+  });
+  it('"we want to get them out of the way because ... otherwise ... silly mishaps happen" (13 Nov)', () => {
+    expect(STEP_ONE.why).toMatch(/silly mishaps/);
+  });
+});
+
+describe('Helium sends you on to other pirates (the user, 13 Nov: "this is not a replacement for the game ... talk to people")', () => {
+  it('says, once you\'ve done step one, that these are a few tricks and the rest is from other pirates', () => {
+    expect(stepDoneLines()).toEqual([STEP_ONE.done, ONWARD]);
+    expect(ONWARD).toMatch(/other pirates/);
+    expect(ONWARD).toMatch(/[Ww]atch them play/);
+    expect(ONWARD).toMatch(/videos/);
+    expect(ONWARD.split(/\s+/).length).toBeLessThanOrEqual(20);   // (a phone's bubble)
+    expect(AFTER.some((l) => /other pirates/i.test(l))).toBe(true);
   });
 });
 
@@ -124,29 +198,23 @@ describe('Helium\'s lesson as step one, and only step one (the user, 13 Nov: "le
   const plan = lessonPlan();
   it('"step one is getting a few columns on the right-hand side that are about to burn completely free of white pieces" (13 Nov)', () => {
     // (played out as the den plays it, the three columns next to the fire end with no white in them)
-    const game = lessonGame();
-    for (const b of plan) {
-      for (const d of b.act.kind === 'drag' ? [b.act] : b.act.kind === 'drags' ? b.act.drags : []) { game.dragWays(d.x, d.y, d.ways); game.settle(1000); }
-      if (b.act.kind === 'burn') { game.burnNow(); game.settle(1000); }
-    }
-    const before = lessonGame();
+    const game = playOut(lessonGame(), lessonBeats());
+    const before = afterOpening();
     expect(whitesOnFireSide(game.cols)).toBe(0);
     const clear = plan.find((b) => b.name === 'clear')!;
     expect(clear.act.kind === 'drags' && clear.act.drags.length).toBeGreaterThan(0);
     expect(whitesOnFireSide(before.cols)).toBeGreaterThan(0);
     expect(STEPS[0].cols).toBe(3);
   });
-  it('is the only step there is for now, shown as step 1 from the mishap on', () => {
+  it('is the only step there is for now, shown as step 1 from the end of the opening on', () => {
     expect(STEPS.map((s) => s.n)).toEqual([1]);
-    const from = plan.findIndex((b) => b.name === 'step');
-    expect(from).toBeGreaterThan(plan.findIndex((b) => b.name === 'mishap'));   // (the mishap: what skipping it does)
-    for (const b of plan.slice(from)) expect(b.step).toBe(1);
-    for (const b of plan.slice(0, from)) expect(b.step).toBeUndefined();
+    for (const b of plan) expect(b.step).toBe(1);
+    for (const b of opening()) expect(b.step).toBeUndefined();   // (the opening's bang: what skipping it does)
   });
   it('says why in their voice: "otherwise ... the furnace blows up and ... I\'ve already got no eyebrows" (13 Nov)', () => {
     const why = plan.find((b) => b.name === 'why')!;
     expect(why.says).toBe(STEP_ONE.why);
-    expect(STEP_ONE.why).toMatch(/bang/);
+    expect(STEP_ONE.why).toMatch(/bang/i);
     expect(STEP_ONE.why).toMatch(/eyebrows/);
     expect(plan.at(-1)!.says).toMatch(/three/);   // (your go: step one the goal)
   });
@@ -163,7 +231,7 @@ describe('Helium\'s lesson as step one, and only step one (the user, 13 Nov: "le
 });
 
 describe('Helium\'s lesson over in half a second (the user, 13 Nov: "it\'s supposed to be a little cutscene, and it\'s like half a second")', () => {
-  const beats = [...opening(), ...lessonPlan()];
+  const beats = lessonBeats();
   it('keeps every line up long enough to read: a few seconds at the least, about 2.5 words a second', () => {
     for (const b of beats) {
       const words = b.says.split(/\s+/).filter(Boolean).length;
@@ -173,40 +241,38 @@ describe('Helium\'s lesson over in half a second (the user, 13 Nov: "it\'s suppo
   });
   it('gives the opening\'s bang its moment before anyone speaks', () => {
     expect(lessonSecs('')).toBeGreaterThanOrEqual(3);
-    expect(beatSecs(beats[0])).toBeGreaterThanOrEqual(3);
+    expect(beatSecs(beats.find((b) => b.name === 'bang')!)).toBeGreaterThanOrEqual(PACE_LESSON.FALL + 3);
   });
   it('plays their drags swap by swap slowly enough to follow, a breath between beats', () => {
     expect(PACE_LESSON.SWAP).toBeGreaterThanOrEqual(0.4);
     expect(PACE_LESSON.GAP).toBeGreaterThan(0);
-    for (const b of beats) expect(beatSecs(b)).toBeGreaterThan(lessonSecs(b.says));
+    for (const b of beats) expect(beatSecs(b)).toBeGreaterThan(holdSecs(b));
+    for (const b of beats) if (b.says) expect(holdSecs(b)).toBe(lessonSecs(b.says));
     const clear = beats.find((b) => b.name === 'clear')!;
     if (clear.act.kind === 'drags') expect(beatSecs(clear)).toBeGreaterThanOrEqual(clear.act.drags.reduce((s, d) => s + d.ways.length, 0) * PACE_LESSON.SWAP);
   });
-  it('runs as a little cutscene, a minute or two in all, not seconds', () => {
+  it('runs as a little cutscene, a minute or so in all, not seconds', () => {
     const total = beats.reduce((s, b) => s + beatSecs(b), 0);
-    expect(total).toBeGreaterThan(60);
-    expect(total).toBeLessThan(180);
+    expect(total).toBeGreaterThan(45);
+    expect(total).toBeLessThan(150);
   });
 });
 
 describe('their opening, the first time: the still goes bang, and they shrug it off (the user, 12 Nov)', () => {
   const o = opening();
   it('starts with the bang, then their everyday mishap and their offer', () => {
-    expect(o[0].act.kind).toBe('bang');
-    expect(o[0].says).toBe('');
-    expect(o.slice(1, 3).map((b) => b.says)).toEqual([OPENING.mishap, OPENING.offer]);
+    expect(o.findIndex((b) => b.name === 'bang')).toBe(1);
+    expect(o.slice(2, 4).map((b) => b.says)).toEqual([OPENING.mishap, OPENING.offer]);
   });
   it('has you ask if it\'s safe and them say of course it is; then the eyebrows, and none of us have any', () => {
     expect(o.map((b) => [b.who ?? 'them', b.says])).toEqual([
-      ['them', ''], ['them', OPENING.mishap], ['them', OPENING.offer],
+      ['them', ''], ['them', ''], ['them', OPENING.mishap], ['them', OPENING.offer],
       ['you', AT_HELIUMS.safe], ['them', OPENING.safe], ['you', AT_HELIUMS.brows], ['them', OPENING.brows],
     ]);
-    expect(OPENING.safe).toMatch(/Of course it's safe/);
     expect(OPENING.brows).toMatch(/developers/);
   });
-  it('does nothing on the board: the lesson after it does', () => {
-    for (const b of o) expect(b.act.kind === 'bang' || b.act.kind === 'none').toBe(true);
-    expect(lessonSecs('')).toBeGreaterThan(1);
+  it('does only its two burns on the board: the lesson after it does the rest', () => {
+    expect(o.filter((b) => b.act.kind !== 'none').map((b) => b.act.kind)).toEqual(['burn', 'burn']);
   });
 });
 
