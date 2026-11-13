@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<base target="_blank">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Distilling positions</title>
+<!-- Distilling: positions to critique (the user, 13 Nov), unlinked like the other test pages. Each is a fixed moment
+     from a bot's game (src/distill-positions.ts, picked by tools/distill-positions.mjs), drawn by
+     js/distill-positions-view.js with the bot's move on it. The user's answers become verdicts in that file, each a
+     test in tests/distill-positions.test.ts. In the read version's look (distilling-guide.html). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #2a1d13; --ink2: #5b4330; --gold: #e0a92a; --cream: #f6ead2; --dim: #cbb894; --edge: #5a412a; --paper: #f3e3c3; --paper2: #e8d2a8; }
+  * { box-sizing: border-box; }
+  html { background: #140d08; }
+  body { margin: 0; min-height: 100vh; color: var(--cream); font: 500 17px/1.5 'Alegreya Sans', system-ui, sans-serif;
+    background: #140d08 repeating-linear-gradient(90deg, rgba(255, 220, 160, 0.025) 0 2px, transparent 2px 120px); }
+  a { color: var(--gold); }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { margin: 0; font: 700 clamp(28px, 6vw, 40px)/1.05 'Alegreya', serif; color: var(--gold); }
+  .lede { margin: 8px 0 0; color: var(--dim); }
+  .lede b { color: var(--cream); }
+  nav.toc { margin: 14px 0 22px; color: var(--dim); font-size: 16px; line-height: 1.9; }
+  nav.toc a { display: inline-block; min-width: 28px; text-align: center; }
+  article { background: linear-gradient(170deg, var(--paper), var(--paper2)); color: var(--ink); border: 1px solid #c9a35c; border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 40px rgba(120, 80, 30, 0.18); padding: 14px; margin: 0 0 22px; scroll-margin-top: 10px; }
+  h3 { display: flex; align-items: center; gap: 10px; margin: 2px 2px 4px; font: 700 23px/1.15 'Alegreya', serif; color: #6b2a12; }
+  .pid { display: inline-grid; place-items: center; flex: none; min-width: 42px; height: 34px; padding: 0 6px; border-radius: 8px; background: #6b2a12; color: var(--paper); font: 700 19px 'Alegreya Sans'; }
+  .what { margin: 0 2px 10px; color: var(--ink2); }
+  figure { margin: 0; }
+  figure.pic svg.board { display: block; width: 100%; max-width: 460px; height: auto; margin: 0 auto; }
+  figure.pic figcaption { margin: 4px 2px 0; font-size: 13px; color: #7a6048; text-align: center; }
+  svg .fire-label { font: 700 12px 'Alegreya Sans'; fill: #f6ead2; }
+  svg .num { font: 700 12px 'Alegreya Sans'; fill: #1a0e04; }
+  svg .colnum { font: 700 16px 'Alegreya Sans'; fill: #7a6048; }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 3px 12px; margin: 12px 2px 6px; }
+  dt { font-weight: 700; color: var(--ink); }
+  dd { margin: 0; color: var(--ink2); }
+  .verdicts { margin: 10px 2px 4px; padding: 8px 10px; border-radius: 8px; background: rgba(255, 250, 235, 0.55); color: var(--ink2); }
+  .verdicts ul { margin: 4px 0 0; padding-left: 20px; }
+  .ask { margin: 10px 2px 0; padding-top: 8px; border-top: 1px dashed #b08a3c; font-size: 15px; font-style: italic; color: #7a6048; }
+  .failed { color: #ffb08a; }
+  @media (max-width: 520px) {
+    body { font-size: 16px; }
+    article { padding: 10px; }
+    h3 { font-size: 20px; }
+    dl { grid-template-columns: 1fr; gap: 0; }
+    dd { margin-bottom: 6px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Distilling positions</h1>
+  <p class="lede">Moments from the bots' own games, frozen: whites low by the fire, a white walled in near it, a bot waiting with something stuck, a column about to go up with junk in it, the block phase, the fire's side early on. Each shows the bot's move there now. <b>Say what it should do instead, in chat</b>, and it becomes a test the bots have to pass from then on.</p>
+  <nav class="toc" data-toc></nav>
+  <p class="failed" id="broken" hidden>The boards couldn't be drawn here. Try a newer browser.</p>
+  <div data-positions></div>
+</div>
+<script type="module" src="js/distill-positions-view.js"></script>
+</body>
+</html>
