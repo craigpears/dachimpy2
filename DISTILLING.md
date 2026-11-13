@@ -1437,7 +1437,12 @@ CC^4, 2, 5, 5). So a CC^2 or CC^3 is about what they reach now. The idea: a targ
 you've managed before, or picked as the tutorial's level), and everything follows from it: the whites to bank, so
 how long Stage I lasts and when one more junk column stops being worth it; which techniques that level needs (a
 CC^2 with the simple ones, the crawls and hooks only for the longer chains); and Helium's lesson in levels, "this
-is how I build a Crystal Clear 2" first, the next level when you're ready.
+is how I build a Crystal Clear 2" first, the next level when you're ready. Then (the same day), the bots' levels too: "I don't
+want to say able blah blah blah. I want to say what is the bot's target crystal clear and it will try and work
+towards it. Like once it's got a crystal clear one, it will start sending them up ... it will just be like one
+white column, and it will be like, right, and then it will start working on the next one." So the tiers become
+targets: a bot is its target chain, CC^1, CC^2, CC^3 and on; it banks the whites for that chain, sends it up, then
+goes back to building toward the next one, and it's judged by its mean chain against its target.
 
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
