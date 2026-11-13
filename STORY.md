@@ -39,7 +39,9 @@ in time the den becomes the thing itself (TODO.md, "Split the den off").
   forget, you know, the greatest love of the game is talking to other pirates ... this is not a replacement for
   the game ... this is a tool, a side adventure. It's not something that's trying to get the main focus ... we
   should never be trying to learn exclusively here. We should be watching people, looking at YouTube videos,
-  talk to people").
+  talk to people"). Tzz, the real one, put the spirit in a line in the game (13 Nov): "i just want to stream
+  and talk about puzzles while i play"; and the user: "<3 that's always the heart of the game". Puzzles, and the
+  people you talk to while you play them: that's the heart of it. Her island says so too (src/lines/tzz.ts).
 - **Faithful to Puzzle Pirates.** The puzzles are the real ones, played by their real rules and
   with their real keys. What's new is where they happen and what they do in the world.
 - **Immersive, in the world, never a separate screen.** A puzzle is a thing in the den (the wall,

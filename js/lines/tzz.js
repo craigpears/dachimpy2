@@ -96,6 +96,8 @@ export const AFTER = [
     'I\'m a Nap Specialist, officially. This is my awake bit.',
     'Never put a balloon in the wrong colour. It just sulks there.',
     'Every pop\'s a gust. Six in a row and you\'re gone.',
+    'Me? I just want to stream and talk about puzzles while I play.',
+    'Best bit\'s the people. Come and puzzle with us sometime.',
 ];
 /** Racing you in the sloop race (src/den-rivals.ts): steady Sailing her own way (the user, 11 Nov: "[Tzz] goes
     another route"), hopping the Double's and the Triple's gaps on Doubles and Triples she builds on the move,
@@ -135,6 +137,7 @@ export const CHARACTER = {
         { on: '11 Nov', said: 'it should definitely be like a now you try thing. And, you know, she sets up the balloons, you do the pop.' },
         { on: '11 Nov', said: 'I don\'t think they need to be aboard, to be honest. I like Kikkit just kind of on her island. It works.' },
         { on: '11 Nov', said: 'Maybe it would be simpler just to be like, they\'re balloons and she\'s blowing them up. Would that be easier? Maybe my balloon animal thing was a bit too complicated.' },
+        { on: '13 Nov', said: 'Tzz (the real one, in the game) to the user: "i just want to stream and talk about puzzles while i play"; the user: "<3 that\'s always the heart of the game", and then "I think that\'s enough to actually add the spirit ... because that does need expressing."' },
     ],
     lines: [
         { when: 'Sailing up to her island, her lesson begins (or Space there, again)', says: GREET, each: { plain: 'If you\'ve not heard Kikkit out', heard: 'If you have' } },

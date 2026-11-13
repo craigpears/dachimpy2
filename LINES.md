@@ -827,6 +827,8 @@ The sensible one, after Kikkit: she shows you plainly how a big Vegas is built, 
 > "I don't think they need to be aboard, to be honest. I like Kikkit just kind of on her island. It works." (the user, 11 Nov)
 >
 > "Maybe it would be simpler just to be like, they're balloons and she's blowing them up. Would that be easier? Maybe my balloon animal thing was a bit too complicated." (the user, 11 Nov)
+>
+> "Tzz (the real one, in the game) to the user: "i just want to stream and talk about puzzles while i play"; the user: "\<3 that's always the heart of the game", and then "I think that's enough to actually add the spirit ... because that does need expressing."" (the user, 13 Nov)
 
 ### Sailing up to her island, her lesson begins (or Space there, again)
 
@@ -894,6 +896,8 @@ The sensible one, after Kikkit: she shows you plainly how a big Vegas is built, 
 - "I'm a Nap Specialist, officially. This is my awake bit."
 - "Never put a balloon in the wrong colour. It just sulks there."
 - "Every pop's a gust. Six in a row and you're gone."
+- "Me? I just want to stream and talk about puzzles while I play."
+- "Best bit's the people. Come and puzzle with us sometime."
 
 ### Racing you in the sloop race, over her sloop: on the starting line, and over the finish line first or after
 
