@@ -45,6 +45,9 @@
     /* The sloop race watched (js/den/race-watch.js): its bar along the top, nothing of your own sailing. */
     body.watching .sailhud, body.watching .dock, body.watching .hud, body.watching #racehud { display: none !important; }
     body.at-board .hud { display: none !important; }
+    /* At Helium's board, the bar wraps: your goal and their plan's step, kept on the screen (js/den/helium-isle.js). */
+    body.at-board .prompt { white-space: normal; text-align: center; font-size: 15px; }
+    @media (max-aspect-ratio: 21/20) { body.at-board .prompt { font-size: 13px; padding: 6px 10px; } }
     /* At Helium's board on a phone, no letterbox bar at the top: it covered their window and their line (the
        user, 13 Nov: "a black bar in the top of the screen ... blocking all the chat and the animation"). */
     @media (orientation: portrait) { body.at-board .cine-bar.top { height: 0 !important; } }
@@ -583,7 +586,7 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.3L7PCRKP.js');
+    import(local ? './js/den.js' : './js/den.YDDM53ND.js');
   </script>
 </body>
 </html>

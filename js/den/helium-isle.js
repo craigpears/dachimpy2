@@ -1,7 +1,10 @@
 // Helium's island, out past the checkpoint by the smugglers' rocks (src/den-helium.ts; its squares
 // LAY.HELIUM in src/den-sail.ts), and Distilling at their still. Only the place's own look and its one
 // mechanic are here: the island, a palm, their lesson as a little cutscene the first time you come up off it,
-// then the still yours to play, "Help, Helium" while you do (their line kept where you can read it), hints
+// then the still yours to play, a batch at a time with a goal (at least your best plus one Crystal Clear) and their
+// plan for it shown on your board step by step (the junk to burn shaded, the Crystal Clear's column gold, the
+// planner's next drags as arrows), the batch done once it's met and the chain ends, then the same goal again or a
+// bigger one; the flask filling a twelfth a Crystal Clear; "Help, Helium" while you do (their line kept where you can read it), hints
 // (the planner's next drags as arrows on your board, and the routes into a white's place by the fire),
 // watching them play your board (each phase and each move said before it's played), and
 // their distillery answering each column: it blows up when a white burns, and runs rum when whites go up.
@@ -17,13 +20,14 @@
 import * as THREE from 'three';
 import {
   HELIUM_CAST, HELIUM, HELIUM_STANDS, HELIUM_MOOR, HELIUM_ARRIVE, Visit, lessonGame, lessonBeats, lessonSecs, mishapLine, askHelium,
-  onHeliumLanding, inHeliumEarshot, heliumShore, worksFor, praiseFor, Cellar, OPENING_BANG, lineSpot, PACE_LESSON, whitesOnFireSide,
-  actAfter, holdSecs, ringed, stepDoneLines, Nerves, NERVE, whitesInFurnace, onScreen, hintFor, hintLeft, routesToFire, Watch, PACE_WATCH,
-  BEST_STORE, cleanBestChain, bestToBeat, beatBest, SEEN_STORE,
+  onHeliumLanding, inHeliumEarshot, heliumShore, worksFor, praiseFor, Cellar, OPENING_BANG, lineSpot, PACE_LESSON,
+  actAfter, holdSecs, ringed, Nerves, NERVE, whitesInFurnace, onScreen, hintFor, hintLeft, routesToFire, Watch, PACE_WATCH,
+  BEST_STORE, cleanBestChain, beatBest, SEEN_STORE,
+  goalFor, biggerGoal, goalLines, fillIn, Batch, planFor, planTarget, PlanLines, crystalClears, flaskLevel, FLASK_STEPS,
 } from '../den-helium.js';
 import { LAY } from '../den-sail.js';
 import { Distilling, WHITE } from '../distilling.js';
-import { FIRE, HINT, PRAISE, STEP_ONE, WATCH } from '../lines/helium.js';
+import { FIRE, GOAL, HINT, WATCH } from '../lines/helium.js';
 import { readSecs } from '../den-dignity.js';
 import { PACE } from '../chatter.js';
 import { PIRATES } from '../den-look.js';
@@ -50,7 +54,10 @@ const keepBest = (n) => { try { localStorage.setItem(BEST_STORE, String(n)); } c
 try { localStorage.removeItem(SEEN_STORE); } catch { /* (no storage) */ }
 const readSeen = () => false;
 const keepSeen = () => {};
-export const helium = { W: null, visit: new Visit(readSeen()), play: null, on: false, board: null, hand: [], handT: 0, handDone: null, bangs: 0, bigBang: 0, note: '', noteT: 0, cower: 0, shrug: 0, nervy: 0, nerves: new Nerves(), fretCol: null, held: true, fireTips: 0, cellar: new Cellar(), hint: null, routes: null, watch: null, best: readBest() };
+export const helium = { W: null, visit: new Visit(readSeen()), play: null, on: false, board: null, hand: [], handT: 0, handDone: null, bangs: 0, bigBang: 0, note: '', noteT: 0, cower: 0, shrug: 0, nervy: 0, nerves: new Nerves(), fretCol: null, held: true, fireTips: 0, cellar: new Cellar(), hint: null, routes: null, watch: null, best: readBest(),
+  // Your goal at the still and the batch going for it, their plan for it on your board (its board's key, a moment's
+  // wait after a change before it's worked out again), and the batches done this visit (src/den-helium.ts, Batch, planFor).
+  goal: 0, batch: null, plan: null, planKey: '', planWait: 0, planLines: null, batches: 0, fretMark: null };
 
 function build() {
   const g = new THREE.Group(), sand = mat('#e6cf96', { roughness: 1 }), wet = mat('#c9ad78', { roughness: 1 });
@@ -121,6 +128,9 @@ function newBoard(game, yours) {
   if (helium.board) helium.board.dispose();  helium.hand = []; helium.handDone = null;
   helium.board = distillBoard({
     game, at: W.boardAt, yaw: W.yaw, size: W.size,
+    // The flask fills a step for each Crystal Clear, a twelfth (the user, 13 Nov: "the jar thing at the top should
+    // fill up each time you do a crystal clear ... one nth"; src/den-helium.ts, flaskLevel).
+    flask: (gm) => flaskLevel(crystalClears(gm.columns)), flaskSteps: FLASK_STEPS,
     // Each column gone, their distillery answers (src/den-helium.ts, worksFor): a white burned, it blows up
     // as the white goes into the furnace (the opening's bigger: bigBang); whites sent up, rum runs off into
     // the cask, and full casks go on the pile.
@@ -129,16 +139,20 @@ function newBoard(game, yours) {
       if (w.kind === 'bang') { bang(yours, Math.max(w.size, helium.bigBang)); helium.bigBang = 0; }
     },
     onColumn: (c, finished) => {
-      const w = worksFor(c);
+      const w = worksFor(c), lines = [];
       if (w.kind === 'rum') {
         W.distillery.pour(helium.cellar.pour(w.measures));
         // Your best beaten (not while they're playing it for you): remembered, and said instead of their praise.
         const beat = yours && !helium.watch && c.up ? beatBest(c.chain, helium.best) : null;
         if (beat) { helium.best = beat.best; keepBest(beat.best); }
         const line = beat ? beat.says : yours && praiseFor(c.chain, Math.random());
-        if (line) say(line);
+        if (line) lines.push(line);
       }
-      if (yours && finished) say(PRAISE.finished);
+      // Your goal: met as the chain reaches it ("more if you can"), the batch done once the chain's ended after it.
+      const r = yours && helium.batch ? helium.batch.column(c, finished) : null;
+      if (r === 'met') { lines.push(fillIn(GOAL.met, c.chain)); noteFor(GOAL.metNote, 8); }
+      if (r === 'done') { batchDone(lines, finished); return; }
+      if (lines.length) say(...lines);
     },
   });
   scene.add(helium.board.group);
@@ -288,19 +302,83 @@ const bar = (text) => { const el = document.querySelector('.cine-bar.bot'); if (
 const free = () => sail.on && !cine && !sail.helm.cur?.via && !sail.helm.gusts?.length && !sail.helm.rides?.length;
 
 // ---------- the still, yours ----------
-/** At the still, a board of your own: a fresh deal if there's none yet (or the last's finished). */
+/** At the still, a board of your own: a fresh deal and a batch with your goal (at least your best plus one) if
+    there's none yet, or the last's finished; they say the goal (your best to beat, if you've one), then their
+    plan's first step. */
 function atStill(fresh = false) {
+  helium.on = true;
   if (fresh || !helium.board || helium.board.game.finished || helium.board.game.timer === false) {
-    newBoard(new Distilling(Math.random), true); helium.stepDone = false; helium.nerves = new Nerves();
-    // Back for another go (not straight after their lesson, which has its own last word): your best to beat.
-    if (!fresh) say(bestToBeat(helium.best));
+    freshBatch(goalFor(helium.best), goalLines(helium.best));
   }
   helium.board.paused = helium.held;
-  helium.on = true;
   keys.clear();
   helpButton(true);
   hud(false);
   noteFor(fresh ? helium.note : '', fresh ? 10 : 0);   // (after their lesson, its last note a while)
+}
+/** A fresh board and a batch with goal `goal`, their `lines` first, then their plan's first step (worked out now). */
+function freshBatch(goal, lines = []) {
+  newBoard(new Distilling(Math.random), true);
+  helium.nerves = new Nerves();
+  helium.goal = goal; helium.batch = new Batch(goal); helium.planLines = new PlanLines(); helium.plan = null; helium.stepNote = ''; helium.hint = null;
+  helium.board.paused = helium.held;
+  const first = planNow();
+  if (lines.length || first) say(...lines, ...(first ? [first] : []));
+  helpButton(helium.on);
+}
+/** The batch done: the board stops (Finished), their well done or not, and the question: the same goal again (R)
+    or a bigger one (N). `lines` theirs already for the column that did it; `full`, the flask filled. */
+function batchDone(lines, full) {
+  const B = helium.board, first = helium.batch.met && !helium.batches;
+  if (helium.batch.met) helium.batches++;
+  stopWatch(false);
+  helium.hand = []; helium.handDone = null; helium.hint = null; helium.plan = null;
+  B.letGo(); B.clearArrows(); B.column = null; B.burnCols = []; helium.fretMark = null;
+  if (!B.game.finished) B.dismiss();
+  say(...lines, ...helium.batch.doneLines(first, full));
+  noteFor('', 0);
+  helpButton(helium.on);
+}
+/** Batch done: R, the same goal again; N, a bigger one (only once it's met). */
+function nextBatch(bigger) {
+  const b = helium.batch;
+  if (!helium.on || !b?.done || (bigger && !b.met)) return;
+  const goal = bigger ? biggerGoal(b.goal, helium.best) : b.goal;
+  freshBatch(goal, [fillIn(bigger ? GOAL.bigger : GOAL.again, goal)]);
+}
+
+/* Their plan for your goal on your board (src/den-helium.ts, planFor; the user, 13 Nov: "try and get those three
+   columns of blacks out of the way and start getting all the white pieces over here and like highlighting some
+   column ... and arrows of where they think the white pieces should go"): the junk to burn first shaded red, the
+   Crystal Clear's column gold once it's known, the pieces the step's about ringed, the planner's next drags as
+   arrows, the step in the bar, and their line as each step starts. Worked out again a moment after the board
+   changes (not while it's sliding, while a piece is held, or while their own hand plays). */
+const boardKey = (g) => `${g.columns.length}:${g.swaps}:${g.chain}`;
+/** Works their plan out on the board as it stands; their line for it if a step's starting. */
+function planNow() {
+  const B = helium.board, g = B?.game;
+  if (!g || !helium.batch || helium.batch.done) return null;
+  const p = planFor(g, helium.goal, helium.held ? Infinity : g.timeLeft());
+  helium.plan = p; helium.planKey = boardKey(g); helium.planWait = 0; helium.stepNote = p.note;
+  const ring = new Set(p.ring.map(([x, y]) => `${x},${y}`));
+  p.mark = (x, y, _p, gone) => !gone && ring.has(`${x},${y}`);
+  B.column = p.column; B.burnCols = p.burn;
+  return helium.planLines.next(p, g.chain);
+}
+function planTick(dt) {
+  const B = helium.board, g = B?.game;
+  if (!helium.on || !g || !helium.batch || helium.batch.done || helium.watch || helium.hand.length) return;
+  const key = boardKey(g);
+  if (key !== helium.planKey) {
+    // (a column gone, the board's slid under the shading: off till it's worked out again)
+    if (helium.planKey.split(':')[0] !== String(g.columns.length)) { B.column = null; B.burnCols = []; }
+    helium.planKey = key; helium.planWait = 0.35; helium.plan = null;
+    return;
+  }
+  if (helium.planWait <= 0 || !g.movable || B.busy() || B.selected()) return;
+  if ((helium.planWait -= dt) > 0) return;
+  const line = planNow();
+  if (line) say(line);
 }
 function leave() {
   stopWatch(false);
@@ -321,7 +399,7 @@ export function heliumHelp() {
   stopWatch(false);
   const B = helium.board;
   if (!helium.on || !B || helium.hand.length || B.game.finished) return;
-  const h = askHelium(B.game);
+  const h = askHelium(B.game, aim());
   say(h.says);
   noteFor(h.note);
   if (h.plays === 'drags') {
@@ -341,17 +419,22 @@ export function heliumHint() {
   stopWatch(false);
   const B = helium.board;
   if (!helium.on || !B || helium.hand.length || B.game.finished) return;
-  const h = hintFor(B.game);
+  const h = hintFor(B.game, aim());
   say(h.says);
   noteFor(h.note, 12);
   helium.hint = h.drags.length ? h : null;
 }
-/** The arrows on your board now: the hint's drags still to play, and the routes into the white they're fretting
-    about (searched again only when the board's changed). */
+/** The chain they're playing to on your board: your goal, or once it's met one more (src/den-helium.ts, planTarget). */
+const aim = () => (helium.batch ? planTarget(helium.goal, helium.board?.game.chain ?? 0) : undefined);
+/** The arrows on your board now: the hint's drags still to play, else their plan's next move (while it's the plan
+    for the board as it stands), and the routes into the white they're fretting about (searched again only when the
+    board's changed). With them the pieces ringed: the whites they're fretting about, else the plan's. */
 function arrowsTick() {
   const B = helium.board, g = B?.game;
   if (!B) return;
   B.clearArrows();
+  const plan = helium.plan && helium.planKey === boardKey(g) ? helium.plan : null;
+  if (helium.on && !helium.watch && helium.batch) B.mark = helium.fretMark ?? plan?.mark ?? null;
   if (!helium.on || !g.movable) return;
   // Watching them: only their move's arrow, up just before they drag it.
   if (helium.watch) {
@@ -366,7 +449,7 @@ function arrowsTick() {
     for (const [i, d] of left.entries()) B.arrow(d, { n: helium.hint && helium.hint.drags.length > 1 ? done + i + 1 : null });
     // (and a pale route for each other white in those columns, while you've not started on the hint)
     if (helium.hint && done === 0) for (const d of helium.hint.routes) B.arrow(d, { color: 'route' });
-  }
+  } else if (plan) for (const [i, d] of plan.drags.entries()) B.arrow(d, { n: plan.drags.length > 1 ? i + 1 : null });
   if (helium.fretCol !== null && whitesInFurnace(g.cols)) {
     const key = `${g.columns.length}:${g.swaps}`;
     if (helium.routes?.key !== key) {
@@ -389,7 +472,7 @@ export function heliumWatch() {
   const B = helium.board;
   if (helium.watch) { stopWatch(); return; }
   if (!helium.on || !B || B.game.finished) return;
-  helium.hand = []; helium.handDone = null; helium.hint = null; helium.fretCol = null;
+  helium.hand = []; helium.handDone = null; helium.hint = null; helium.fretCol = null; helium.fretMark = null;
   B.letGo();
   B.mark = null;
   B.paused = true;
@@ -423,7 +506,7 @@ function watchTick(dt) {
   // (the furnace runs only while there's nothing worth doing: their board while they play it, held or not)
   B.paused = !(beat && beat.kind === 'wait');
   if (w.t < w.need || helium.hand.length || B.busy() || !B.game.movable) return;
-  const n = w.w.next(B.game);
+  const n = w.w.next(B.game, aim());
   if (n.kind === 'busy') return;
   if (n.kind === 'dismiss') { say(n.says); noteFor(n.note, 8); helium.watch = null; B.paused = helium.held; helpButton(true); return; }
   w.beat = n; w.t = 0;
@@ -435,8 +518,9 @@ function watchTick(dt) {
   noteFor(n.note, 99);
 }
 
-/* The buttons beside the board: Hint, Watch Helium, and Help, Helium. */
-let btn = null, watchBtn = null, burnBtn = null, fireBtn = null;
+/* The buttons beside the board: Hint, Watch Helium, and Help, Helium, the fire's two; and once a batch is done, the
+   same goal again or a bigger one in their place. */
+let btn = null, watchBtn = null, burnBtn = null, fireBtn = null, againBtn = null, biggerBtn = null;
 const BTN = 'font:700 15px "Alegreya Sans",system-ui,sans-serif;color:#f6ead2;background:#3a2410;border:1px solid #c8a050;border-radius:8px;padding:6px 12px;cursor:pointer';
 function helpButton(on) {
   if (!btn) {
@@ -456,12 +540,22 @@ function helpButton(on) {
     // (the fire, for a phone: held to start with, the tutorial's way; and burning by hand while it's held)
     burnBtn = add('helium-burn', 'Burn now (X)', () => { if (helium.on && !helium.hand.length) helium.board?.burn(); });
     fireBtn = add('helium-fire', '', () => holdFire(!helium.held));
+    againBtn = add('helium-again', '', () => nextBatch(false));
+    biggerBtn = add('helium-bigger', '', () => nextBatch(true));
     document.body.append(btn);
   }
+  const done = !!helium.batch?.done;
   btn.style.display = on ? 'flex' : 'none';
+  for (const b of btn.children) b.style.display = done ? 'none' : '';
   watchBtn.textContent = helium.watch ? 'Your board back (W)' : 'Watch Helium (W)';
   fireBtn.textContent = helium.held ? 'Start the fire (F)' : 'Hold the fire (F)';
-  burnBtn.style.display = helium.held ? '' : 'none';
+  burnBtn.style.display = helium.held && !done ? '' : 'none';
+  againBtn.style.display = done ? '' : 'none';
+  biggerBtn.style.display = done && helium.batch.met ? '' : 'none';
+  if (done) {
+    againBtn.textContent = `Again: Crystal Clear ${helium.batch.goal} (R)`;
+    biggerBtn.textContent = `Bigger goal: Crystal Clear ${biggerGoal(helium.batch.goal, helium.best)} (N)`;
+  }
 }
 
 // ---------- hooks: keys, the mouse, Space, the prompt ----------
@@ -489,6 +583,8 @@ export function heliumKey(key) {
   if (key === 'h') { heliumHelp(); return true; }
   if (key === 'g') { heliumHint(); return true; }
   if (key === 'f') { holdFire(!helium.held); return true; }
+  // (the batch done: R the same goal again, N a bigger one)
+  if (helium.batch?.done && (key === 'r' || key === 'n')) { nextBatch(key === 'n'); return true; }
   if (helium.hand.length) return !VIEW.includes(key);
   if (helium.board?.key(KEYS[key] ?? key, { repeat: false })) return true;
   return !VIEW.includes(key);
@@ -573,12 +669,14 @@ function lineByInset(el) {
 export function heliumPrompt() {
   if (!sail.on || !helium.W) return '';
   if (helium.on) {
-    // (step one the goal, and how far off it you are: src/den-helium.ts, STEPS)
-    const B = helium.board, left = whitesOnFireSide(B.game.cols);
+    // (your goal, and their plan's step on your board: src/den-helium.ts, planFor; the batch done, what next)
+    const B = helium.board, b = helium.batch;
     if (helium.watch) return `Watching Helium${helium.note ? ` · ${helium.note}` : ''} · W or Esc: your board back`;
-    const goal = left ? `${STEP_ONE.goal}: ${left} to go` : `Step 1 done: the fire's side is clear of white`;
-    const lead = helium.noteT > 0 && helium.note ? helium.note : B.game.finished ? 'Finished! Esc, then Space for another batch' : `${goal} · drag to swap · X: burn · ${helium.held ? 'fire held: F to start it' : 'F: hold the fire'}`;
-    return `${lead} · G: hint · W: watch Helium · H: Help, Helium · Esc: leave the still`;
+    if (b?.done) return `${fillIn(b.met ? GOAL.doneNote : GOAL.shortNote, b.goal, biggerGoal(b.goal, helium.best))} · Esc: leave the still`;
+    // (the keys are on the buttons above it: X, F, G, W, H)
+    const goal = b ? `${fillIn(GOAL.bar, b.goal)}${b.met ? ' (met!)' : ''}${helium.stepNote ? ` · ${helium.stepNote}` : ''}` : '';
+    const lead = helium.noteT > 0 && helium.note ? helium.note : B.game.finished ? 'Finished! Esc, then Space for another batch' : goal;
+    return `${lead} · Esc: leave the still`;
   }
   const p = sail.helm.pose;
   if (!onHeliumLanding(p.c, p.r) || !helium.visit.seen || helium.play) return '';
@@ -620,16 +718,18 @@ export function heliumTick(dt) {
     if (n) { say(...(n.level === 'panic' && helium.fireTips < 2 ? (helium.fireTips++, [n.says, FIRE.tip]) : [n.says])); if (n.level === 'panic') helium.nervy = NERVE.COWER; }
     // ...and the whites they're fretting about ringed on the board (the user, 13 Nov: "When they say do you see
     // that [white] ... it should like visually indicate like highlight the pieces"), till they're out or burned.
-    if (n && n.level !== 'phew') { helium.fretCol = g.columns.length; helium.board.mark = (x, y, p, gone) => !gone && x === g.cols.length - 1 && p === WHITE; }
-    else if (helium.fretCol !== null && (helium.fretCol !== g.columns.length || !whitesInFurnace(g.cols))) { helium.fretCol = null; helium.board.mark = null; }
+    if (n && n.level !== 'phew') { helium.fretCol = g.columns.length; helium.fretMark = (x, y, p, gone) => !gone && x === g.cols.length - 1 && p === WHITE; }
+    else if (helium.fretCol !== null && (helium.fretCol !== g.columns.length || !whitesInFurnace(g.cols))) { helium.fretCol = null; helium.fretMark = null; }
   }
   arrowsTick();
-  // Step one done, at your still: the three columns next to the fire clear of white. They say so, once a batch.
-  // (done by their hand while you watched, it's not yours to be told about)
-  if (helium.on && !helium.stepDone && helium.board?.game.movable && !whitesOnFireSide(helium.board.game.cols)) { helium.stepDone = true; if (!helium.watch) say(...stepDoneLines()); }
+  // Their plan for your goal, worked out again once the board's settled after a change.
+  planTick(dt);
   W.them.tick(dt);
   // (no den panel at the top while you're at their board, in the lesson or at your still)
   document.body.classList.toggle('at-board', helium.on || !!helium.play);
+  // (the buttons just above the bar, however many lines it wraps to)
+  const prompt = document.getElementById('prompt')?.getBoundingClientRect();
+  if (btn && helium.on && prompt?.height) btn.style.bottom = `${Math.max(64, innerHeight - prompt.top + 8)}px`;
   placeLine();
   W.distillery.tick(dt);
   for (const o of W.props) o.tick?.(dt);
@@ -682,6 +782,7 @@ export function heliumReset() {
   if (helium.play && cine === helium.play) cineEnd(true);
   leave();
   helium.cellar = new Cellar();
+  helium.batch = null; helium.plan = null; helium.stepNote = ''; helium.batches = 0; helium.fretMark = null;
   if (helium.W) { helium.W.distillery.reset(); newBoard(lessonGame(), false); helium.board.paused = true; }
 }
 

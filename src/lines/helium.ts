@@ -51,21 +51,19 @@ export const LESSON = {
     completely free of white pieces ... because otherwise, yeah, the furnace blows up and, you know, I've
     already got no eyebrows", and later "First things first. See all these whites on the right, you know,
     highlight them all. Right, we want to get them out of the way because ... otherwise ... silly mishaps
-    happen." `says` as it starts, `clear` as they drag the whites out, `why` after, `note` in the bar, `done`
-    when you've cleared them yourself, `goal` in the bar while you play. */
+    happen." `says` as it starts, `clear` as they drag the whites out, `why` after, `note` in the bar. At your
+    still it's the first step of their plan for your goal (PLAN, below). */
 export const STEP_ONE = {
   says: 'Right. First things first. See all these whites on the right? Next in the fire, every one.',
   clear: 'So out of the way they go. Left, away from the fire, swap by swap.',
   why: 'Otherwise, silly mishaps. Bang. And I\'ve already got no eyebrows.',
   note: 'Step 1: get every white (ringed) out of the three right-hand columns, the next to burn.',
-  done: 'There. Step one. Nothing on the fire\'s side worth losing.',
-  goal: 'Step 1: clear the whites out of the 3 right-hand columns',
 } as const;
 
 /** Sending you on to other pirates (the user, 13 Nov: "the greatest love of the game is talking to other
     pirates ... this is not a replacement for the game ... this is a tool, a side adventure ... We should be
-    watching people, looking at YouTube videos, talk to people"): said once you've done step one yourself,
-    after `done` (src/den-helium.ts, stepDoneLines). Offhand, as everything they say. */
+    watching people, looking at YouTube videos, talk to people"): said as your first batch at the still is done,
+    the goal met, after GOAL's `done` (src/den-helium.ts, batchDoneLines). Offhand, as everything they say. */
 export const ONWARD = 'Few of my tricks, that. The rest\'s from other pirates. Ask about. Watch them play. Find their videos.';
 
 /** And always the last thing they say when a lesson ends, after ONWARD (the user, 13 Nov: "to really mess with
@@ -220,6 +218,59 @@ export const BEST = {
   beaten: 'Crystal Clear {n}! Your best yet. I\'ll remember that.',
 } as const;
 
+/** Your goal at the still, a batch at a time (the user, 13 Nov: "if we're aiming for crystal clear one, the whole
+    thing should obviously just finish and then restart the next puzzle once you've hit that goal ... you're aiming
+    for at least one, but do a few more if you can"): at least your best plus one, a Crystal Clear 1 to start
+    (src/den-helium.ts, goalFor). {n} the goal (or the chain reached), {k} the bigger goal. `set` as you sit down,
+    `met` as the chain first reaches it, `done` once it's met and the chain's ended (the batch done), `short` when the
+    flask fills first, `ask` then, `again` and `bigger` as the fresh board's dealt; the rest in the bar. */
+export const GOAL = {
+  set: 'Goal: a Crystal Clear {n}. At least. More if you can.',
+  bar: 'Goal: Crystal Clear {n}, more if you can',
+  met: 'There. Crystal Clear {n}. Goal done. More if you can.',
+  metNote: 'Goal met! More if you can: the batch ends when a column that isn\'t Crystal Clear leaves.',
+  done: 'That\'s a batch. Crystal Clear {n}. Not bad at all.',
+  short: 'Flask\'s full, and no Crystal Clear {n}. Happens. Again?',
+  ask: 'Same again? Or a bigger goal? Your call.',
+  doneNote: 'Batch done · R: Crystal Clear {n} again · N: a bigger goal, Crystal Clear {k}',
+  shortNote: 'Batch done, the goal not met · R: Crystal Clear {n} again',
+  again: 'Same again, then. Crystal Clear {n}. Fresh board.',
+  bigger: 'Crystal Clear {n}, then. Fresh board.',
+} as const;
+
+/** Their plan for the goal, a step at a time, on your board (the user, 13 Nov: "what I will do is maybe ... try and
+    get those three columns of blacks out of the way and start getting all the white pieces over here and like
+    highlighting some column ... and arrows of where they think the white pieces should go"): the planner's own
+    (src/den-helium.ts, planFor). Each step: its name, their line as it starts (`says`; `again` when it comes round
+    for the next column of the chain), and the bar's detail (`note`, {k} how many to go). */
+export const PLAN = {
+  clear: {
+    name: 'Clear the junk columns',
+    says: 'Plan. The shaded ones on the right are junk, for the fire. Whites out of them first.',
+    again: 'Whites in the junk again. Out they come.',
+    note: 'the ringed whites out of the shaded columns, {k} to go',
+  },
+  bank: {
+    name: 'Bank the whites',
+    says: 'Now junk right, whites left. Bank enough whites for the chain.',
+    again: 'Back to banking. Junk right, whites left.',
+    note: 'junk right, whites left, {k} more to bank',
+  },
+  build: {
+    name: 'Build the Crystal Clear',
+    says: 'See the gold column? That\'s our Crystal Clear. Whites in, junk out. Follow my arrows.',
+    again: 'Next column. Same again. Whites in.',
+    note: 'whites into the gold column, the ringed junk out, {k} to go',
+  },
+  send: {
+    name: 'Send it up',
+    says: 'All white. X burns the junk in front of it, then up it goes.',
+    again: 'Ready. Send it up.',
+    note: 'X burns the shaded junk, then the gold column goes up',
+    up: 'X sends the gold column up',
+  },
+} as const;
+
 /** While you're within earshot of their island, before or after: round and round. */
 export const AFTER = [
   'Big order of rum for Mischievious. Another wedding. She does keep getting married.',
@@ -264,12 +315,12 @@ export const CHARACTER: Character = {
   ],
   lines: [
     { when: 'Coming up off their island the first time: the still goes bang, and they shrug it off (your lines between, src/lines/you.ts)', says: OPENING },
-    { when: 'Their lesson\'s step one, straight after their opening, the whites on the fire\'s side ringed: as it starts (says), as they drag the whites out of the three columns next to the fire (clear), why (why), in the bar (note); when you\'ve cleared them yourself (done); your goal in the bar while you play (goal)', says: STEP_ONE },
-    { when: 'Once you\'ve done step one yourself, after their "done": the rest is from other pirates', says: [ONWARD] },
+    { when: 'Their lesson\'s step one, straight after their opening, the whites on the fire\'s side ringed: as it starts (says), as they drag the whites out of the three columns next to the fire (clear), why (why), in the bar (note)', says: STEP_ONE },
+    { when: 'Your first batch at the still done, the goal met, after their "done": the rest is from other pirates', says: [ONWARD] },
     { when: 'The last thing they say when a lesson ends, always, after the other pirates', says: [TELL] },
     {
       when: 'The end of their lesson: in their bubble (says) and in the bar at the foot of the screen (note)', says: LESSON,
-      each: { burner: 'Before handing you the board: they hold the burner, the fire held to start', yours: 'Handing you the board, step one the goal' },
+      each: { burner: 'Before handing you the board: they hold the burner, the fire held to start', yours: 'Handing you the board: step one first, then your goal' },
     },
     {
       when: 'At your still, a white left in the furnace\'s column as the fire comes round: uneasy with a while to go, panic just before (they cower), phew if you get it out in time; each in turn', says: NERVES,
@@ -293,6 +344,20 @@ export const CHARACTER: Character = {
       when: 'Your best Crystal Clear, kept in this browser: as you sit down at the still, with none yet (none) or your best to beat (toBeat); as a chain beats it, your first (first) or a new best (beaten)',
       says: BEST,
       each: { none: 'At the still, no Crystal Clear yet', toBeat: 'At the still, your best to beat', first: 'Your first Crystal Clear', beaten: 'A new best chain' },
+    },
+    {
+      when: 'Your goal at the still, a batch at a time: at least your best plus one, more if you can; the batch done once it\'s met and the chain ends',
+      says: GOAL,
+      each: {
+        set: 'As you sit down at the still', bar: 'In the bar while you play', met: 'As the chain first reaches the goal', metNote: 'In the bar, the goal met',
+        done: 'The goal met and the chain ended: the batch done', short: 'The flask full before the goal', ask: 'Then, the batch done',
+        doneNote: 'In the bar, the batch done', shortNote: 'In the bar, the flask full before the goal', again: 'A fresh board, the same goal', bigger: 'A fresh board, a bigger goal',
+      },
+    },
+    {
+      when: 'Their plan for your goal, a step at a time on your board: as each step starts (says), as it comes round again for the next column of the chain (again), and the bar\'s detail (note)',
+      says: PLAN,
+      each: { clear: 'Step 1: whites in the junk columns about to burn', bank: 'Step 2: banking whites before the chain', build: 'Step 3: the column shaded gold, the Crystal Clear being built', send: 'Step 4: the gold column all white, to send up' },
     },
     { when: 'While you\'re within earshot of their island: round and round', says: AFTER },
   ],

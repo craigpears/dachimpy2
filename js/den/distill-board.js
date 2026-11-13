@@ -231,7 +231,10 @@ const KEY_MOVES = {
    goes into the furnace, the moment a still would go bang; `onWarning()` as the furnace warns, about 3 s
    before; `onSwap(a, b)` after each swap; `onFinish(game)` when the flask is full (or it's dismissed).
    `mark`: pieces to ring, to point them out (a lesson's): null, or `(col, row, piece, gone)` true for
-   each piece to ring, `gone` while it's leaving the board.
+   each piece to ring, `gone` while it's leaving the board. `column` (an index, or null) shades a column gold, the
+   one a Crystal Clear's being built in; `burnCols` (indexes) shade columns a dull red, the junk to burn first.
+   `flask(game)`: how full the flask's drawn, 0 to 1, in place of the pieces in it (Helium's still: a step a
+   Crystal Clear), `flaskSteps` the marks up its side (10 by default).
    Returns the board: add `board.group` to the scene, call `tick(dt)` every frame (it drives the rules'
    clock: `paused` stops it), feed it `key`, `pointer`, `press` and `release`, and `dispose()` it when
    you're done. `game` is the rules' Distilling; `swapAt(x, y, way)` and `burn()` play it as a hand
@@ -255,7 +258,7 @@ export function distillBoard(o = {}) {
   const b = {
     game, group, canvas: cv, size, paused: false, idle: false,
     onColumn: o.onColumn ?? null, onFurnace: o.onFurnace ?? null, onWarning: o.onWarning ?? null, onSwap: o.onSwap ?? null, onFinish: o.onFinish ?? null,
-    mark: o.mark ?? null, now: 0,
+    mark: o.mark ?? null, now: 0, column: null, burnCols: [],
   };
   /** Where a piece sits (its top left, in the board view): by column and row, the column's height as the game has it. */
   const spot = (col, row) => [col * CELL, TOP + row * CELL + (game.cols[col].length === TALL ? 0 : CELL / 2)];
@@ -527,6 +530,13 @@ export function distillBoard(o = {}) {
       g.fillStyle = 'rgba(255,215,90,0.2)'; g.fillRect(cx - 5, 0, CELL + 10, VH);
       g.strokeStyle = 'rgba(255,215,90,0.85)'; g.lineWidth = 2.5; g.strokeRect(cx - 5, 1.5, CELL + 10, VH - 3);
     }
+    // Columns to burn first (b.burnCols): a dull red band behind each, dashed.
+    for (const x of b.burnCols ?? []) {
+      if (!grid[x]?.length || x === b.column) continue;
+      const cx = grid[x][0].x;
+      g.fillStyle = 'rgba(200,60,30,0.16)'; g.fillRect(cx - 3, 0, CELL + 6, VH);
+      g.save(); g.setLineDash([6, 5]); g.strokeStyle = 'rgba(230,90,50,0.7)'; g.lineWidth = 2; g.strokeRect(cx - 3, 1.5, CELL + 6, VH - 3); g.restore();
+    }
     for (const s of [...grid.flat(), ...leaving]) g.drawImage(pieceCanvas(s.p), s.x, s.y, CELL, CELL);
     // Pieces pointed out (b.mark): a gold ring round each, pulsing.
     if (b.mark) {
@@ -586,9 +596,9 @@ export function distillBoard(o = {}) {
   function drawFlask() {
     const { x, y, w, h } = FLASK;
     g.fillStyle = 'rgba(20,24,28,0.75)'; g.beginPath(); g.roundRect(x, y, w, h, 6); g.fill();
-    const L = game.liquid();
-    if (game.flask > 0) {
-      const top = h - Math.round(L.level * h);
+    const L = game.liquid(), level = o.flask ? o.flask(game) : L.level;
+    if (game.flask > 0 && level > 0) {
+      const top = h - Math.round(level * h);
       g.save(); g.beginPath(); g.roundRect(x, y, w, h, 6); g.clip();
       g.globalAlpha = Math.max(0.12, L.alpha); g.fillStyle = hsb(L.hue, L.sat, L.bri); g.fillRect(x, y + top, w, h - top);
       g.globalAlpha = 1; g.fillStyle = '#fff'; g.fillRect(x, y + top - 1, w, 2);
@@ -600,7 +610,8 @@ export function distillBoard(o = {}) {
     g.fillStyle = gl; g.beginPath(); g.roundRect(x, y, w, h, 6); g.fill();
     g.strokeStyle = 'rgba(220,235,240,0.7)'; g.lineWidth = 1.2; g.stroke();
     g.strokeStyle = 'rgba(255,255,255,0.75)'; g.lineWidth = 1;
-    for (let i = 1; i < 10; i++) { const ty = y + h - (h * i) / 10, l = i % 5 === 0 ? 9 : 5; g.beginPath(); g.moveTo(x + w - 2 - l, ty); g.lineTo(x + w - 2, ty); g.stroke(); }
+    const steps = o.flaskSteps ?? 10;
+    for (let i = 1; i < steps; i++) { const ty = y + h - (h * i) / steps, l = i * 2 === steps ? 9 : 5; g.beginPath(); g.moveTo(x + w - 2 - l, ty); g.lineTo(x + w - 2, ty); g.stroke(); }
     g.fillStyle = '#2a2a30';
     g.beginPath(); g.roundRect(x - 4, y - 7, w + 8, 9, 3); g.fill();
     g.beginPath(); g.roundRect(x - 4, y + h - 2, w + 8, 9, 3); g.fill();

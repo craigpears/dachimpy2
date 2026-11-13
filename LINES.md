@@ -953,16 +953,14 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 - *safe:* "Of course it's safe. Just don't send whites down the furnace. Perfectly normal, this. It's fine."
 - *brows:* "None of us have got eyebrows. I keep asking the developers for some. Nothing yet."
 
-### Their lesson's step one, straight after their opening, the whites on the fire's side ringed: as it starts (says), as they drag the whites out of the three columns next to the fire (clear), why (why), in the bar (note); when you've cleared them yourself (done); your goal in the bar while you play (goal)
+### Their lesson's step one, straight after their opening, the whites on the fire's side ringed: as it starts (says), as they drag the whites out of the three columns next to the fire (clear), why (why), in the bar (note)
 
 - *says:* "Right. First things first. See all these whites on the right? Next in the fire, every one."
 - *clear:* "So out of the way they go. Left, away from the fire, swap by swap."
 - *why:* "Otherwise, silly mishaps. Bang. And I've already got no eyebrows."
 - *note:* "Step 1: get every white (ringed) out of the three right-hand columns, the next to burn."
-- *done:* "There. Step one. Nothing on the fire's side worth losing."
-- *goal:* "Step 1: clear the whites out of the 3 right-hand columns"
 
-### Once you've done step one yourself, after their "done": the rest is from other pirates
+### Your first batch at the still done, the goal met, after their "done": the rest is from other pirates
 
 - "Few of my tricks, that. The rest's from other pirates. Ask about. Watch them play. Find their videos."
 
@@ -975,7 +973,7 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 - *Before handing you the board: they hold the burner, the fire held to start:*
   - *says:* "Tell you what. I'll hold the burner for now. So we don't have any more of those... mishaps."
   - *note:* "The fire's held: nothing burns till you press X. F starts it burning on its own."
-- *Handing you the board, step one the goal:*
+- *Handing you the board: step one first, then your goal:*
   - *says:* "X burns it by hand. When you feel ready, F, and it burns on its own. Your go: keep those three clear. H for me."
   - *note:* "Your go: keep the three right-hand columns clear of white, and burn them (X) once they're all junk. The fire's held to start: F starts it burning on its own. H: Help, Helium. G: a hint. W: watch Helium play."
 
@@ -1095,6 +1093,44 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 - *At the still, your best to beat:* "Your best's a Crystal Clear {n}. Let's beat it."
 - *Your first Crystal Clear:* "Your first Crystal Clear! I'll remember that one."
 - *A new best chain:* "Crystal Clear {n}! Your best yet. I'll remember that."
+
+### Your goal at the still, a batch at a time: at least your best plus one, more if you can; the batch done once it's met and the chain ends
+
+- *As you sit down at the still:* "Goal: a Crystal Clear {n}. At least. More if you can."
+- *In the bar while you play:* "Goal: Crystal Clear {n}, more if you can"
+- *As the chain first reaches the goal:* "There. Crystal Clear {n}. Goal done. More if you can."
+- *In the bar, the goal met:* "Goal met! More if you can: the batch ends when a column that isn't Crystal Clear leaves."
+- *The goal met and the chain ended: the batch done:* "That's a batch. Crystal Clear {n}. Not bad at all."
+- *The flask full before the goal:* "Flask's full, and no Crystal Clear {n}. Happens. Again?"
+- *Then, the batch done:* "Same again? Or a bigger goal? Your call."
+- *In the bar, the batch done:* "Batch done · R: Crystal Clear {n} again · N: a bigger goal, Crystal Clear {k}"
+- *In the bar, the flask full before the goal:* "Batch done, the goal not met · R: Crystal Clear {n} again"
+- *A fresh board, the same goal:* "Same again, then. Crystal Clear {n}. Fresh board."
+- *A fresh board, a bigger goal:* "Crystal Clear {n}, then. Fresh board."
+
+### Their plan for your goal, a step at a time on your board: as each step starts (says), as it comes round again for the next column of the chain (again), and the bar's detail (note)
+
+- *Step 1: whites in the junk columns about to burn:*
+  - *name:* "Clear the junk columns"
+  - *says:* "Plan. The shaded ones on the right are junk, for the fire. Whites out of them first."
+  - *again:* "Whites in the junk again. Out they come."
+  - *note:* "the ringed whites out of the shaded columns, {k} to go"
+- *Step 2: banking whites before the chain:*
+  - *name:* "Bank the whites"
+  - *says:* "Now junk right, whites left. Bank enough whites for the chain."
+  - *again:* "Back to banking. Junk right, whites left."
+  - *note:* "junk right, whites left, {k} more to bank"
+- *Step 3: the column shaded gold, the Crystal Clear being built:*
+  - *name:* "Build the Crystal Clear"
+  - *says:* "See the gold column? That's our Crystal Clear. Whites in, junk out. Follow my arrows."
+  - *again:* "Next column. Same again. Whites in."
+  - *note:* "whites into the gold column, the ringed junk out, {k} to go"
+- *Step 4: the gold column all white, to send up:*
+  - *name:* "Send it up"
+  - *says:* "All white. X burns the junk in front of it, then up it goes."
+  - *again:* "Ready. Send it up."
+  - *note:* "X burns the shaded junk, then the gold column goes up"
+  - *up:* "X sends the gold column up"
 
 ### While you're within earshot of their island: round and round
 
