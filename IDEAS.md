@@ -2646,3 +2646,22 @@ knowing nothing of where it's played. Ideas to shape with the user:
 - **Duels:** two players on mirrored boards, a Crystal Clear of yours dropping a junk piece onto theirs.
 - **Blind pours:** the next column's pieces hidden till they slide in, so you plan for the unknown.
 Each with a bot tier tuned to it (src/distill-bots.ts), and a read version, as every tutorial has (RULES.md).
+
+## A war frigate and a sloop on one board, and a blockade board shaped for both (13 Nov, for the weekend)
+
+The user, 13 Nov, last thing: "random big ideas for tomorrow ... I think we started on primates rule, but yeah, even
+just like doing any kind of proof of concepts of what a big [war frig] on any kind of a board, like a navigation board,
+would look like next to a sloop, and just how they would look moving around, interacting with each other, having some
+kind of a blockade board whereby ... if you look at blockading, like where there's clusters that are ... clearly for
+war frigates because they're out big and in the open, but then there's smaller coves that only ... [are] accessible to
+small ships because of the narrower gaps. I think that would be a cool proof of concept to do over the weekend."
+
+- **A war frigate on the sea board beside the sloop:** Primates Rule (src/den-frigate.ts, js/den/frigate.js; on the
+  unlinked frigate-test.html, not yet at sea) sailing on the same square board as the sloop, at her size against the
+  sloop's (src/ships.ts, `hullFor`), taking more than one square; how the two look moving round each other, passing,
+  turning, side by side; a first look at them interacting (a broadside each, a frigate's bigger one).
+- **A blockade board shaped by ship size:** like Puzzle Pirates' blockades, its open water in clusters out in the open,
+  plainly frigate country, and small coves behind gaps too narrow for a frigate, a sloop's to hide in or hold. One
+  board, both ships on it, the shape of the sea deciding which goes where. Ties in with "Bigger ships ride out the
+  winds" (a deep-water mechanic) and Daquan's flotilla (the underdogs against the giant ship).
+- A proof of concept: something to look at and steer, not a full game; on its own test page, like frigate-test.html.
