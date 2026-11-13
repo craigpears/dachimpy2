@@ -67,7 +67,7 @@ import { RACE, LONG_ROUTE, longRoute, routeRow, rocksDown, spotPose } from './de
 import { gustPath, carry } from './den-sailing.js';
 import { fieldFor } from './start-field.js';
 import { PilotChart } from './race-pilot.js';
-import { LONG_PINS, HOP_PIN, WAY_IN, shutWays, goalOf as nextCut, pinOf, cutsOf, gapOf, legOf, fallback, longPlan } from './race-plan.js';
+import { LONG_PINS, HOP_PIN, WAY_IN, shutWays, goalOf as nextCut, pinOf, cutsOf, gapOf, legOf, fallback, longPlan, optionOf } from './race-plan.js';
 import { boardSailor, drawnSailor, gustRate, SAILOR } from './race-sailor.js';
 import { DEFAULT_COURSE } from './race-course.js';
 import { Field, FIELD, sheltered, courseSea, stretchAt } from './den-racers.js';
@@ -318,6 +318,84 @@ const TOW = 1 + towPath({ c: RC.BRIBE.GATE[0], r: RC.BRIBE.GATE[1] }).length * S
 const HOPS = { decent: 0.5, good: 0.75, great: 1 };
 /** Pieces in the crane's three frames (about five squares a piece), as big as the course has them. */
 const CRANE_PIECES = Math.round(CRANES[RC.COURSE.frames].reduce((n, p) => n + p.rows.join('').split('#').length - 1, 0) / 5);
+const timed = (saves, puzzle, move = false) => (move ? { saves, puzzle, net: -saves, move } : { saves, puzzle, net: puzzle - saves });
+/** The decent player's puzzle at each stopped shortcut (puzzleWork's, below). */
+const WORK = {
+    headwind: SIM.PUZZLE.row, forage: SIM.PUZZLE.forage,
+    locks: SIM.PUZZLE.bilge, crane: CRANE_PIECES * SIM.PUZZLE.piece, door: SIM.PUZZLE.nav,
+    whirls: SIM.PUZZLE.vegas + (1 - SIM.VEGAS.decent) * (SIM.BACK.whirls + SIM.PUZZLE.vegas * SIM.RETRY),
+};
+export function choiceTime(leg, id) {
+    // (the gate's saving as her own way through it goes: rushed on a combo, its trip; otherwise square by square)
+    const gate = (trip) => CUTS.guns.saves + CUTS.guns.trip - trip;
+    const loads = (shots) => Math.max(0, shots - FIELD.SHOTS) * SIM.PUZZLE.load;
+    const gunHits = RC.GUNS.at.length * (RACE.GAP.MODE === 'shared' ? 1 : RACE.GAP.HARD);
+    switch (id) {
+        case 'long': return timed(0, 0);
+        case 'quad': return timed(CUTS.guns.saves, SIM.PUZZLE.combo, true);
+        case 'double': return timed(CUTS.double.saves, SIM.PUZZLE.double, true);
+        case 'triple': return timed(CUTS.triple.saves, SIM.PUZZLE.triple, true);
+        case 'run': return timed(gate(SIM.GAP.RUN), SIM.GAP.RUN_HIT * PATCH.PIECES * SIM.PUZZLE.piece);
+        case 'shoot': return timed(gate(SIM.GAP.RUN), loads(gunHits));
+        case 'bribe': return timed(gate(BRIBE.PAY + TOW) - CUTS.wreck.trip, SIM.PUZZLE.haul);
+        case 'zigzag': return timed(SIM.ZIGZAG * HOPS.decent, 0, true);
+        case 'rocks': return timed(CUTS.rocks.saves, loads(RACE.ROCKS.HITS));
+        default: {
+            const c = optionOf(leg, id)?.cuts[0];
+            return c ? timed(CUTS[c].saves, WORK[c] ?? 0) : timed(0, 0);
+        }
+    }
+}
+/** A whole plan against the long way: its legs' nets added up. */
+export const planTime = (plan) => plan.reduce((n, id, leg) => n + choiceTime(leg, id).net, 0);
+/** Seconds round the long way at each of its corners (LONG_ROUTE's points). */
+const CORNER_T = segs.reduce((a, _, i) => [...a, a[i] + secsOf(i)], [0]);
+const sq = (t) => { const p = routePose(t); return [p.c, p.r]; };
+/** The long way's squares from `t0` to `t1` seconds round it, its corners between: a line to draw. */
+export function longBetween(t0, t1) {
+    return [sq(t0), ...LONG_ROUTE.filter((_, i) => CORNER_T[i] > t0 + 1e-6 && CORNER_T[i] < t1 - 1e-6), sq(t1)];
+}
+/** Seconds round the long way where each leg starts, and the finish (LEG_T[5]: the run home's start). */
+export const LEG_T = [0, ...[1, 2, 3, 4, 5].map((s) => CORNER_T[LONG_ROUTE.findIndex((p) => p[1] === routeRow(s))]), SIM.LONG];
+/** A shortcut's line: off the long way, through its own water (the headwind gap's dog-leg, the door's rock and
+    its tunnel's far end), and back onto it. */
+export function cutLine(id) {
+    const c = CUTS[id], by = id === 'headwind' ? RC.HEADWIND : id === 'door' ? [D.OFF[0]] : TRIPS[id].by;
+    // (the wreck: from the gate along the leg to its notch, in and out, and back to the gate, wherever it lies)
+    if (id === 'wreck') {
+        const g = sq(CUTS.guns.tIn), w = sq(c.tIn);
+        return [g, w, [WR[0], WR[1]], w, g];
+    }
+    return [sq(c.tIn), ...by.map(([x, y]) => [x, y]), sq(c.tOut)];
+}
+/** A leg's choice as a line on the course: the long way along the leg, or its shortcut's (and for the bribe, the
+    wreck's notch as well). */
+export function choiceLines(leg, id) {
+    const cuts = optionOf(leg, id)?.cuts.filter((c) => c !== 'zigzag') ?? [];
+    return cuts.length ? cuts.map(cutLine) : [longBetween(LEG_T[leg], LEG_T[leg + 1])];
+}
+/** A plan's whole route as lines on the course: the long way, but for each shortcut it takes, in order, its
+    own line from where it leaves the long way to where it rejoins it. */
+export function planLines(plan) {
+    const out = [];
+    let t = 0;
+    const cuts = cutsOf(plan);
+    for (const id of cuts) {
+        if (id === 'zigzag' || id === 'wreck')
+            continue;
+        const c = CUTS[id];
+        if (c.tIn < t - 1e-6)
+            continue;
+        out.push(longBetween(t, c.tIn));
+        // (bribing the gate: out to the wreck and back to it first)
+        if (id === 'guns' && cuts.includes('wreck'))
+            out.push(cutLine('wreck'));
+        out.push(cutLine(id));
+        t = c.tOut;
+    }
+    out.push(longBetween(t, SIM.LONG));
+    return out;
+}
 /* ---- Sailing her: the helm, the pilot, and a square at a time off it ---- */
 /* The long way's pins (LONG_PINS), every shortcut's way through shut on the pilot's sea so the pilot never takes
    one (shutWays: she takes her plan's by its trip), the ways in (WAY_IN) and where to head next (goalOf, pinOf)

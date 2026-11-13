@@ -7,8 +7,8 @@ import { RACE, Barrier, readyLocks, spotPose } from '../src/den-race';
 import { fieldFor } from '../src/start-field';
 import { gustPath } from '../src/den-sailing';
 import { stretchAt } from '../src/den-racers';
-import { CUTS, ROUTES, routePose, simulate, lineUp, sail } from '../src/race-sim';
-import { LEGS, STOPS, WAY_IN, Pilot, longPlan, cycle, choose, cleanPlan, cutsOf, gapOf, holds, shutWays, type Plan, type PlanWorld, type CutId } from '../src/race-plan';
+import { CUTS, ROUTES, SIM, routePose, simulate, lineUp, sail, choiceTime, planTime, choiceLines, planLines } from '../src/race-sim';
+import { LEGS, STOPS, WAY_IN, Pilot, longPlan, cycle, choose, cleanPlan, cutsOf, gapOf, holds, shutWays, readPlan, writePlan, courseChart, type Plan, type PlanWorld, type CutId } from '../src/race-plan';
 import { FIELD, Field, courseSea } from '../src/den-racers';
 import { Watch, planChange } from '../src/race-watch';
 import { WATCHED } from '../src/den-rivals';
@@ -188,6 +188,122 @@ describe('the pilot sails your plan and stops at the obstacles (12 Nov, agreed: 
     for (let t = 0; t < 20 && P.taken; t += DT) { P.steer(h, w); h.tick(DT); }
     expect(P.taken).toBe(false);
     expect(h.mine.length).toBeGreaterThan(0);
+  });
+});
+
+describe('racing by the plan, the user\'s playtest (13 Nov)', () => {
+  it('the headwind gap, 13 Nov: "the rowboat is perpendicular to the actual gap, so you\'re not even going forward": she\'s lined up facing down it before the oars go out, and rowing takes her through', () => {
+    const r = sailPlan(['long', 'headwind', 'long', 'long', 'long'], RACE.LONG_SPOT, 5, 200, { until: (s) => s.includes('headwind') });
+    expect(r.stops).toEqual(['headwind']);
+    // (held on the square above the gap's first, facing down into it: d 0, out to sea, along the gap)
+    expect([r.at.c, r.at.r]).toEqual(STOPS.headwind.at);
+    expect(r.at.d).toBe(0);
+    expect(STOPS.headwind.at).toEqual([RC.HEADWIND[0][0], RC.HEADWIND[0][1] - 1]);
+    // (the oars out there: even pulls row her ahead into the gap, and round its dog-leg onto leg 3)
+    const sea = new Sea(9);
+    const h = new Helm(sea, { ...r.at });
+    h.row(true);
+    h.stroke(['F']);
+    for (let t = 0; t < 5 && (h.cur || h.strokes.length || h.slot >= 0); t += DT) h.tick(DT);
+    expect([h.pose.c, h.pose.r]).toEqual(RC.HEADWIND[0]);
+    h.stroke(['R', 'L', 'F', 'F']);
+    for (let t = 0; t < 20 && (h.cur || h.strokes.length || h.slot >= 0); t += DT) h.tick(DT);
+    expect(stretchAt(h.pose.c, h.pose.r)).toBe(2);
+  }, 120000);
+  it('the gate, 13 Nov: changing the plan while she\'s held facing into the gate for the Quad, a Sailing gust no longer carries her straight through it without paying or shooting', () => {
+    const plan: Plan = ['quad', 'long', 'long', 'long', 'long'];
+    const sea = new Sea(9);
+    sea.layField(fieldFor(5));
+    sea.touch();
+    const h = new Helm(sea, spotPose(18)), P = new Pilot(plan);
+    readyLocks(h);
+    const w: PlanWorld = { seed: 5, sea, sig: '1', coins: () => 0, price: 20, paid: () => false, gunQuiet: () => false, rocksDown: () => false, cleared: () => false };
+    let t = 0;
+    for (; t < 120 && !(P.order.kind === 'stop' && P.order.stop.id === 'quad' && !h.cur && h.slot < 0); t += DT) { P.steer(h, w); h.tick(DT); }
+    expect(P.order.kind === 'stop' && P.order.stop.id).toBe('quad');
+    expect(h.pose.d).toBe(0);
+    // (held there for her Quad, a Quad would carry her through: that's the plan)
+    expect(P.gustHeld(h, w, 4)).toBe(null);
+    expect(P.gustHeld(h, w, 2)).toBe('hop');
+    // The plan changed to the long way on leg 1: any gust now, a Quad or more, is held till she's turned onto the leg.
+    P.set(choose(plan, 0, 'long'));
+    P.steer(h, w);
+    expect(P.gustHeld(h, w, 4)).toBe('way');
+    expect(P.gustHeld(h, w, 7)).toBe('way');
+    // And sailing on, a gust thrown whenever she's between moves, she goes the long way round the gate, never into it.
+    const gate = new Set(RC.GUNS.way.map(([c, r]) => `${c},${r}`));
+    let into = 0, gusts = 0;
+    for (t = 0; t < 60 && stretchAt(h.pose.c, h.pose.r) < 1; t += DT) {
+      P.steer(h, w);
+      if (!h.cur && !h.gusts.length && h.gusty() && !P.gustHeld(h, w, 4)) { h.gust(gustPath(sea, h.gustFrom(), 4)); gusts++; }
+      h.tick(DT);
+      if (gate.has(`${h.pose.c},${h.pose.r}`)) into++;
+    }
+    expect(into).toBe(0);
+    expect(gusts).toBeGreaterThan(0);
+    expect(stretchAt(h.pose.c, h.pose.r)).toBe(1);
+  }, 120000);
+  it('the gate: running it, a gust may carry her into it; bribing it, not till the guard\'s paid', () => {
+    const sea = new Sea(9), G = RC.GUNS.way;
+    const h = new Helm(sea, { c: G[0][0], r: G[0][1] - 1, d: 0 });
+    const w: PlanWorld = { seed: 5, sea, sig: '1', coins: () => 20, price: 20, paid: () => false, gunQuiet: () => false, rocksDown: () => false, cleared: () => false };
+    const run = new Pilot(['run', 'long', 'long', 'long', 'long']);
+    run.steer(h, w);
+    expect(run.gustHeld(h, w, 3)).toBe(null);
+    const bribe = new Pilot(['bribe', 'long', 'long', 'long', 'long']);
+    bribe.done.add('wreck');
+    bribe.steer(h, w);
+    expect(bribe.gustHeld(h, w, 3)).toBe('way');
+    expect(bribe.gustHeld(h, { ...w, paid: () => true }, 3)).toBe(null);
+  });
+  it('your last plan kept, 13 Nov: "persist the last plan you chose so that you don\'t need to do it every time"; anything stale or broken reads as the long way', () => {
+    const plan: Plan = ['bribe', 'headwind', 'whirls', 'locks', 'crane'];
+    expect(readPlan(writePlan(plan))).toEqual(plan);
+    expect(readPlan(null)).toEqual(longPlan());
+    expect(readPlan('')).toEqual(longPlan());
+    expect(readPlan('not json {')).toEqual(longPlan());
+    expect(readPlan('{"a":1}')).toEqual(longPlan());
+    expect(readPlan('["bribe","nonsense","whirls"]')).toEqual(['bribe', 'long', 'whirls', 'long', 'long']);
+    expect(readPlan('["crane","crane","crane","crane","crane"]')).toEqual(['long', 'long', 'long', 'long', 'crane']);
+  });
+});
+
+describe('the plan\'s strip: the course and each choice\'s time (13 Nov: "you need to be able to see the length. This is very disconnected")', () => {
+  it('each choice\'s time against the long way is the simulation\'s own: what its shortcut saves (CUTS) and a decent player\'s puzzle (SIM.PUZZLE)', () => {
+    expect(choiceTime(0, 'long')).toEqual({ saves: 0, puzzle: 0, net: 0 });
+    expect(choiceTime(1, 'headwind')).toEqual({ saves: CUTS.headwind.saves, puzzle: SIM.PUZZLE.row, net: SIM.PUZZLE.row - CUTS.headwind.saves });
+    expect(choiceTime(4, 'locks').saves).toBe(0);   // (not one of leg 5's)
+    expect(choiceTime(3, 'locks')).toMatchObject({ saves: CUTS.locks.saves, puzzle: SIM.PUZZLE.bilge });
+    expect(choiceTime(2, 'whirls').puzzle).toBeGreaterThan(SIM.PUZZLE.vegas);   // (a Vegas doesn't always come off the first go)
+    for (const [leg, L] of LEGS.entries()) for (const o of L.options) {
+      const x = choiceTime(leg, o.id);
+      expect(Number.isFinite(x.net), `${leg} ${o.id}`).toBe(true);
+      // (a chain hop's built on the move: no stop, its saving alone)
+      expect(x.net).toBeCloseTo(x.move ? -x.saves : x.puzzle - x.saves, 9);
+      expect(!!x.move, `${leg} ${o.id}`).toBe(['quad', 'double', 'triple', 'zigzag'].includes(o.id));
+      if (o.id !== 'long') expect(x.saves, `${leg} ${o.id}`).toBeGreaterThan(0);
+    }
+    const plan: Plan = ['quad', 'door', 'forage', 'zigzag', 'triple'];
+    expect(planTime(plan)).toBeCloseTo(plan.reduce((n, id, leg) => n + choiceTime(leg, id).net, 0), 9);
+    expect(planTime(longPlan())).toBe(0);
+  });
+  it('each choice\'s line on the course: the long way along its leg, a shortcut off it and back on, the headwind gap round its dog-leg', () => {
+    const near = (a: [number, number], b: [number, number]) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) < 1.01;
+    const head = choiceLines(1, 'headwind')[0];
+    for (const q of RC.HEADWIND) expect(head).toContainEqual(q);
+    const long2 = choiceLines(1, 'long')[0];
+    expect(near(long2[0], [long2[0][0], S[1].r])).toBe(true);
+    expect(choiceLines(0, 'bribe').length).toBe(2);   // (the wreck's notch, then the gate)
+    // (the whole long way, one line from the line to the finish; a plan's lines join up end to end)
+    expect(planLines(longPlan()).length).toBe(1);
+    const ls = planLines(['long', 'headwind', 'whirls', 'locks', 'crane']);
+    expect(ls.length).toBe(9);
+    for (let i = 1; i < ls.length; i++) expect(ls[i][0], `line ${i}`).toEqual(ls[i - 1][ls[i - 1].length - 1]);
+    // (the course drawn small: its land, the headwind gap open water through it)
+    const ch = courseChart();
+    const solid = (c: number, r: number) => ch.land.some(([y, a, b]) => y === r && a <= c && c <= b);
+    expect(solid(RC.HEADWIND[0][0] - 1, RC.HEADWIND[0][1])).toBe(true);
+    for (const [c, r] of RC.HEADWIND) expect(solid(c, r)).toBe(false);
   });
 });
 void FIELD; void Field; void courseSea;

@@ -9,7 +9,7 @@ import { SailPair } from '../sail-pair.js';
 import { carry, carrySay, Sparkle } from '../den-sailing.js';
 import { SAIL } from '../den-sail.js';
 import { sparkleTick, sparkleWhoosh } from './sail-sparkle.js';
-import { camera, keys, toast, $ } from './world.js';
+import { camera, keys, toast, $, edges } from './world.js';
 import { sail } from './sea.js';
 import { sailBoardMake, sailBoardLayout, sailBoardLay, sailBoardDrop, sailBoardBusy, sailBoardTick, sailBoardSnap } from './sail-board.js';
 
@@ -140,7 +140,7 @@ export function stationTick(dt, blocked = false) {
   // Where it goes: clear of the prompt at the bottom and the den's panel at the top (measured now
   // and then: they change as you go).
   if ((station.lowT -= dt) <= 0) { station.lowT = 0.5; station.low = $('dock').getBoundingClientRect().top; station.top = document.querySelector('.hud')?.getBoundingClientRect().bottom ?? 0; }
-  station.layout = sailBoardLayout(B, station.low || innerHeight, station.top);
+  station.layout = sailBoardLayout(B, station.low || innerHeight, station.top, undefined, edges.right);
   seaToast(station.layout);
   // A drop's pops played out: its run's given to her.
   if (station.run && !sailBoardBusy(B)) {
@@ -189,8 +189,11 @@ export function stationPrompt() {
    the camera's look point, given its yaw, tilt and distance. */
 const shift = new THREE.Vector3();
 export function stationShift(yaw, tilt, dist) {
-  const F = station.layout?.free;
-  if (!station.on || !F) return null;
+  return station.on ? seaShift(station.layout?.free, yaw, tilt, dist) : null;
+}
+/** The same for any board put up in front of you, leaving the sea `F` (a board popped out: pop-board.js). */
+export function seaShift(F, yaw, tilt, dist) {
+  if (!F) return null;
   const nx = ((F.x + F.w / 2) / innerWidth) * 2 - 1, ny = 1 - ((F.y + F.h * 0.55) / innerHeight) * 2;
   const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect);
   const a = nx * dist * Math.tan(hh), b = ny * dist * Math.tan(vh) / Math.max(0.3, Math.sin(tilt));

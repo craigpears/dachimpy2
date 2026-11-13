@@ -4,7 +4,7 @@
 // js/den/row-boards.js.)
 import * as THREE from 'three';
 import { CREW, RowBoard, bearing, pullFor, leadFor, leaned, shownAt } from '../den-row.js';
-import { camera, makePirate, V3, keys, burst, toast, worldLets, shake, $, scene, canvasTex } from './world.js';
+import { camera, makePirate, V3, keys, burst, toast, worldLets, shake, $, scene, canvasTex, view } from './world.js';
 import { sail, SLOOP_DECK, strike } from './sea.js';
 import { SWEEP_X, SWEEP_Z } from './wind.js';
 import { SAIL } from '../den-sail.js';
@@ -95,6 +95,7 @@ function rowOpen() {
   boardsLay(rowing.boards, rowing.board.row.boards);
   rowing.boards.el.style.display = '';
   rowing.lowT = 0;
+  rowing.yaw0 = view.yaw; rowing.pitch0 = view.pitch;   // (the camera behind her, turned from there as you turn it: rowCam)
   struck(true);
   underBoard(true);
   sail.rowRate = (side, under) => rowing.board.rate(side, under);
@@ -291,7 +292,10 @@ export function rowCam() {
   const TILT = 0.62, DIST = L.wide ? 20 : 15;
   const y = (L.free.y + L.free.h * (L.wide ? 0.74 : 0.6)) / innerHeight * 2 - 1, below = Math.atan(y * Math.tan(camera.fov * Math.PI / 360));
   const ahead = DIST * Math.cos(TILT) - DIST * Math.sin(TILT) / Math.tan(TILT + below);
-  return { look: at.addScaledVector(bow, ahead), dist: DIST, tilt: TILT, yaw: Math.atan2(-Math.cos(ry), Math.sin(ry)) };
+  // Turned and tilted as you turn and tilt it since the oars went out (right-drag, Z and C), as anywhere at sea:
+  // the user, 13 Nov, at the headwind gap: "I can't move the camera". V puts it back behind her.
+  const turn = view.yaw - (rowing.yaw0 ?? view.yaw), lift = view.pitch - (rowing.pitch0 ?? view.pitch);
+  return { look: at.addScaledVector(bow, ahead), dist: DIST, tilt: Math.max(0.2, Math.min(1.45, TILT + lift)), yaw: Math.atan2(-Math.cos(ry), Math.sin(ry)) + turn };
 }
 const PULL = { port: 'pull harder on port (the left board)', starboard: 'pull harder on starboard (the right board)', either: 'row one side harder to bring her round' };
 export function rowPrompt() {

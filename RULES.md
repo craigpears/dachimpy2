@@ -2528,6 +2528,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     Your rivals fire on you by their styles when you've sat on one square a second and a half in the open: a
     flash and smoke on her, and you patch her deck as after any hit (knocked off the starlit door's board, if
     she was at it). At the gun she's loaded up to two shots, one a side; the clock's bar shows her shots.
+  - **Your Gunnery and deck patch popped out in a race (13 Nov):** "I got shot, and then all I could see was the
+    mast and [the deck] ... absolutely chaotic ... my controls need to be more like sailing is, where it's popped
+    out." Racing your own sloop (from the line to over it), her guns (2) and the patch after a hit come up as a
+    board in a gold frame where Sailing's goes (on the left on a wide screen, along the bottom on a tall one),
+    looked straight down on, her bow at the top, her port guns on its left; the camera stays out over the race,
+    her slid into the sea the frame leaves, never swung down onto her deck. The pointer and the keys play it as
+    ever. It's the same board on her deck, the same puzzles: anyone watching (the race watched) still sees it
+    played there. Away from a race, her guns and the patch are on her deck as before.
   - **Two to four racers on one course (11 Nov; on the water since stage 3):** "start adding multiple players
     to this first, even if it's like 2 to 4 players with some bots". The field (`src/den-racers.ts`): each
     racer's pose, the stretches she's reached in order, what she's doing (sailing, waiting her turn,
@@ -2729,10 +2737,23 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       then bribe the gate, rush the gate on a Quad, shoot it quiet, run it; leg 2 the long way, the headwind gap,
       the starlit door, the Double's gap; leg 3 the long way, the whirlpools, the rocks, the driftwood; leg 4 the
       long way weaving the zigzag, hop the zigzag, the locks; leg 5 the long way, the crane, the Triple's gap).
-      It starts as the long way everywhere; no planning phase.
-    - **The strip** down the right-hand edge, on the line and in the race: the legs still to come, your choice
-      on each, the one you're on lit, what the pilot's doing, and its switch. A click on a leg is its next choice
-      (a right click the one before), the board under your hands live all the while.
+      No planning phase. Your last plan is kept in this browser and each race starts from it (13 Nov: "persist
+      the last plan you chose so that you don't need to do it every time"); the first time, the long way everywhere.
+      Only what you choose is kept, never a shortcut the pilot put by; a stale or broken one reads as the long way.
+    - **The strip** down the right-hand edge, on the line (under the starter's card) and in the race (reworked 13
+      Nov: "you need to be able to see the length. This is very disconnected ... it requires you to really know
+      the course"): the course drawn small, the long way dashed, your route on it in gold and where she is; under
+      it each leg still to come with its choices side by side, yours lit, the leg you're on outlined. Each choice
+      shows its time against the long way in seconds ("−5 s", "+20 s"), from the simulation's own measures: what
+      its shortcut cuts out of the sailing less a decent player's puzzle there (a chain hop, the Quad, a Double,
+      a Triple or the zigzag's, built on the move: its saving alone). Pointing at a choice draws its line on the
+      course in blue and says it ("Leg 2 · The headwind gap · cuts 25 s of sailing · rowing ~20 s · 5 s quicker");
+      a click (a tap) takes it, the board under your hands live all the while. With nothing pointed at, the
+      route's total against the long way.
+    - **The strip never covers a board** (13 Nov: "your plan is covering the right hand row board"): while any
+      board but Sailing's is up it folds to a tab at the edge ("Plan · Leg 2: Row"), a click opening it a while
+      (✕ folds it again), and the boards put up at sea lay themselves out clear of what it keeps. On a phone it's
+      always the tab, under the race's bar, opening as a sheet across the top.
     - **The pilot sails it,** move by move on your own helm, the same moves as yours, and puts the Sailing board
       up at the gun. **The obstacles make the stops:** behind the trade wind back up the course, behind the
       zigzag's headwinds on her row (hopping it), in front of the gate (a Quad), off its gun (shooting it), the
@@ -2743,6 +2764,19 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       the hop: it takes a Double"); a Double or Triple thrown on the way in lines her up and hops it with no
       stop. A shortcut she can't sail to from where she is is put by: the plan says the long way there. (The
       bribe's wreck is reached from every spot on the line since 13 Nov, so it's no longer put by; tested.)
+    - **No gust through a way her plan isn't taking (13 Nov):** a plan changed while she was held facing into the
+      gate for the Quad, and a Sailing gust carried her straight through it without paying or shooting. A gust
+      now carries her into a shortcut's way through only if it's the one she's in, or the one she's going for and
+      may go through now (the gate rushed on its Quad or run, its gun shot quiet, its guard paid); otherwise it's
+      held ("Held: that's not her plan's way through. The pilot's turning her onto the leg") and the pilot turns
+      her onto the leg.
+    - **The headwind gap's stop (13 Nov: "the rowboat is perpendicular to the actual gap, so you're not even going
+      forward"):** the pilot lines her up on the square above the gap facing down it before the oars go out, so
+      even clears row her into it; round its dog-leg a stroke one way, then the other (a turn against its wall
+      turns her on the spot). Sailing's board is put away while her oars are out (or you're at her guns), back
+      after; the camera's turned and tilted as anywhere at sea (right-drag, Z and C; V puts it behind her). From
+      the water its way through is plain: the cliffs either side step down to low shoulders, and its water's a
+      paler channel from leg 2 down to leg 3. (Its "in irons" wind is unchanged: open with the user.)
     - **The helm's still yours:** W A D or a click on the sea, and she sails your moves or pin; once they're
       played out, the pilot carries on. T or the strip's Pilot button turns the pilot off and on.
     - **Everyone races by a plan:** your rivals, the simulation's bots and the race watched, by the same rule for

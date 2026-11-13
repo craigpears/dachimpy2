@@ -58,26 +58,48 @@
     #watchbar .wb-who button.on { border-color: var(--gold); background: #4a3220; }
     #watchbar .wb-who i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
     #watchbar .wb-keys { font-size: 12px; color: var(--dim); }
-    /* Your race plan's strip (js/den/race-plan.js): down the right-hand edge, a leg a button, a click its next choice. */
-    #raceplan { position: fixed; right: 10px; top: 150px; width: 210px; z-index: 5; display: flex; flex-direction: column; gap: 4px; padding: 8px; border-radius: 10px; background: var(--panel); border: 1px solid #5a412a; color: #f3ecdc; font: 500 14px/1.25 'Alegreya Sans', sans-serif; box-sizing: border-box; }
+    /* Your race plan's strip (js/den/race-plan.js): down the right-hand edge, the course drawn small with your route on
+       it, each leg's choices side by side with their time against the long way; folded to a tab while another board's
+       up, and on a phone, where it opens as a sheet. */
+    #raceplan { position: fixed; right: 10px; top: 150px; width: 252px; max-height: calc(100vh - 160px); overflow-y: auto; z-index: 5; display: flex; flex-direction: column; gap: 4px; padding: 8px; border-radius: 10px; background: var(--panel); border: 1px solid #5a412a; color: #f3ecdc; font: 500 14px/1.25 'Alegreya Sans', sans-serif; box-sizing: border-box; }
     #raceplan[hidden], body.watching #raceplan { display: none; }
-    body.raceline #raceplan { top: auto; bottom: 74px; }   /* (on the line, under the starter's card) */
-    #raceplan .rp-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
-    #raceplan .rp-head b { color: var(--gold); }
-    #raceplan .rp-pilot { font: 600 12px 'Alegreya Sans', sans-serif; color: var(--dim); background: #2a1c11; border: 1px solid #6b4e32; border-radius: 6px; padding: 1px 7px; cursor: pointer; }
+    #raceplan .rp-head { display: flex; align-items: center; gap: 6px; }
+    #raceplan .rp-head b { color: var(--gold); flex: 1; }
+    #raceplan .rp-pilot, #raceplan .rp-fold { font: 600 12px 'Alegreya Sans', sans-serif; color: var(--dim); background: #2a1c11; border: 1px solid #6b4e32; border-radius: 6px; padding: 1px 7px; cursor: pointer; }
     #raceplan .rp-pilot.on { color: #9fe0a0; border-color: #4f8a50; }
     #raceplan .rp-now { font-size: 12px; color: #ffd27a; min-height: 1.2em; }
-    #raceplan .rp-leg { text-align: left; font: 600 14px/1.2 'Alegreya Sans', sans-serif; color: #f3ecdc; background: #2a1c11; border: 1px solid #6b4e32; border-radius: 7px; padding: 4px 8px; cursor: pointer; }
-    #raceplan .rp-leg:hover { border-color: #b88a4a; }
-    #raceplan .rp-leg.now { border-color: var(--gold); background: #4a3220; }
-    #raceplan .rp-leg i { display: block; font-style: normal; font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: .04em; }
-    #raceplan .rp-leg small { display: block; font-weight: 500; font-size: 12px; color: var(--dim); }
+    #raceplan > * { flex-shrink: 0; }
+    #raceplan .rp-chart { width: 100%; height: 26vh; display: block; border-radius: 6px; }
+    #raceplan .rp-sea { fill: #1c4656; }
+    #raceplan .rp-land rect { fill: #a98c5a; }
+    #raceplan polyline { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    #raceplan .rp-long polyline { stroke: #e9dfc6; stroke-opacity: .35; stroke-width: .35; stroke-dasharray: .7 .6; }
+    #raceplan .rp-route polyline { stroke: #ffd27a; stroke-width: .6; }
+    #raceplan .rp-hot polyline { stroke: #7fe8ff; stroke-width: .95; }
+    #raceplan .rp-me { fill: #fff; stroke: #c0392b; stroke-width: .35; }
+    #raceplan .rp-detail { font-size: 12px; color: var(--dim); min-height: 2.5em; }
+    #raceplan .rp-detail b { color: #f3ecdc; font-weight: 600; }
+    #raceplan em { font-style: normal; color: #9fe0a0; font-weight: 600; }
+    #raceplan em.slow { color: #f0a080; }
+    #raceplan .rp-leg { display: flex; flex-direction: column; gap: 3px; padding: 3px 4px; border-radius: 7px; border: 1px solid transparent; }
+    #raceplan .rp-leg.now { border-color: var(--gold); background: #3a2818; }
+    #raceplan .rp-leg i { font-style: normal; font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: .04em; }
+    #raceplan .rp-leg span { display: flex; flex-wrap: wrap; gap: 3px; }
+    #raceplan .rp-opt { flex: 1 1 auto; min-width: 44px; font: 600 13px/1.1 'Alegreya Sans', sans-serif; color: #f3ecdc; background: #2a1c11; border: 1px solid #6b4e32; border-radius: 6px; padding: 3px 5px; cursor: pointer; }
+    #raceplan .rp-opt:hover { border-color: #7fe8ff; }
+    #raceplan .rp-opt.on { border-color: var(--gold); background: #5a3d20; color: #ffd27a; }
+    #raceplan .rp-opt small { display: block; font-weight: 500; font-size: 11px; color: var(--dim); }
     #raceplan .rp-help { font-size: 11px; color: var(--dim); text-align: center; }
-    @media (max-width: 620px) {
-      #raceplan { width: 128px; top: 152px; right: 6px; padding: 5px; gap: 3px; font-size: 12px; }
-      #raceplan .rp-leg { font-size: 12px; padding: 3px 5px; }
-      #raceplan .rp-leg small, #raceplan .rp-help { display: none; }
-      #raceplan .rp-now { font-size: 11px; }
+    /* Folded to a tab at the edge while another board's up (and always on a phone): a click opens it a while. */
+    #raceplan.folded { width: auto; padding: 0; overflow: visible; background: none; border: 0; }
+    #raceplan .rp-tab { writing-mode: vertical-rl; font: 700 13px 'Alegreya Sans', sans-serif; color: var(--gold); background: var(--panel); border: 1px solid #5a412a; border-radius: 8px; padding: 8px 4px; cursor: pointer; }
+    #raceplan .rp-tab small { font-weight: 500; font-size: 11px; color: var(--dim); margin-top: 4px; }
+    /* On a phone: the tab under the race's bar, and opened, a sheet across the top of the screen. */
+    #raceplan.sheet { left: 6px; right: 6px; width: auto; top: 8px; bottom: auto; max-height: calc(100vh - 16px); z-index: 30; }
+    #raceplan.sheet .rp-chart { height: 30vh; }
+    @media (max-width: 720px), (max-height: 520px) {
+      #raceplan.folded { top: 132px; right: 6px; }
+      #raceplan .rp-opt { min-height: 36px; }
     }
     #watchbar .wb-plan { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 6px; margin-top: 4px; font-size: 13px; font-weight: 500; }
     #watchbar .wb-plan:empty { display: none; }
@@ -613,7 +635,7 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.ELLSUBGD.js');
+    import(local ? './js/den.js' : './js/den.E2MMZ6NL.js');
   </script>
 </body>
 </html>

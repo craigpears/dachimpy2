@@ -306,8 +306,9 @@ export function sailBoardMake(onPad) {
    touch pad goes beside it, on a tall screen always, on a wide one only for a touch screen. `low`:
    the screen's height left above the prompt; `top`: below the den's panel at the top. Says where
    the sea shows: `free`, a rectangle in pixels. */
-export function sailBoardLayout(B, low, top, touch = matchMedia('(pointer: coarse)').matches) {
-  const w = innerWidth, h = innerHeight, gap = 10;
+export function sailBoardLayout(B, low, top, touch = matchMedia('(pointer: coarse)').matches, right = 0) {
+  // (`right`: pixels along the screen's right-hand edge kept clear, a panel's: the race plan's strip)
+  const w = innerWidth - right, h = innerHeight, gap = 10;
   top = Math.max(gap, top + gap);
   const wide = w > h * 1.05, pad = touch || !wide;
   let k, x, y;

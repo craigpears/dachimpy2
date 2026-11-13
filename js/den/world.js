@@ -427,6 +427,9 @@ export function flagpole(h = 2, m = flagMat) {
 export const pirate = Object.assign(makePirate({ look: myLook }), { x: 0, z: 8, bonkT: 0, h: 0, hs: 0, hop: null });
 export const STEP = 0.62, HOP = 1.2;   // metres: walked up / hopped up (a stair square is about 0.53)
 export const view = { yaw: 0, pitch: 0, zoom: 1 };   // the player's own turn, tilt and zoom of the camera
+// Pixels along the screen's right-hand edge a panel keeps for itself (the race plan's strip: race-plan.js), which
+// the boards put up at sea lay themselves out clear of (the user, 13 Nov: "your plan is covering the right hand row board").
+export const edges = { right: 0 };
 pirate.g.rotation.y = Math.PI;
 scene.add(pirate.g);
 export let carry = null;   // { letter, cells, from, group, mat }
