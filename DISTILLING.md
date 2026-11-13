@@ -1422,6 +1422,23 @@ corner, and then a brown low in the middle sweeps in along the bottom, the botto
 move is carried on to where the junk joins up (the corner, the row) when it's a swap or two more, not let go
 where the board score happens to peak.
 
+**The thirtieth note: set a target first, a Crystal Clear to aim for, and build up to it (the user, 13 Nov).**
+"some of the things I do in my tutorials, I think really needs breaking down ideally in this as well. It's just
+kind of setting a target ... what is your goal? For example, like what masterpieces is this bot getting to?
+Because that will determine then ... at what point do you keep trying to build just one more column to be burnt
+compared with other options ... we're going to start off just trying to ... get enough whites to do like a
+crystal clear 2 or 3 or something, because what your goal is based on ... precedent of what you've managed before
+depends on how long you stay in each stage or the simplicity or how complex the tricks you use are ... this is
+supposed to be a tutorial, not a straight to crystal clear 12 in one go. You want to kind of build up and start
+saying, this is how I build a crystal clear 2. That's the initial tutorial, and then you can control what level of
+tutorial you want." Where the bots stand (the eleventh run): no target, only `bank`, the columns of whites to bank
+before the chain (4 for the Learner, 6 for the rest); their longest chains average CC^1.1, 1.0, 1.5 and 2.1 (best
+CC^4, 2, 5, 5). So a CC^2 or CC^3 is about what they reach now. The idea: a target chain set first (from what
+you've managed before, or picked as the tutorial's level), and everything follows from it: the whites to bank, so
+how long Stage I lasts and when one more junk column stops being worth it; which techniques that level needs (a
+CC^2 with the simple ones, the crawls and hooks only for the longer chains); and Helium's lesson in levels, "this
+is how I build a Crystal Clear 2" first, the next level when you're ready.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
