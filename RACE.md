@@ -445,6 +445,10 @@ and smoking with stars over her till she's patched. Rivals fire on you by their 
 one square a second and a half in the open (`RACE.STILL`): a flash on her, and the deck patch, as any hit
 (knocked off the starlit door's board, if she was at it). At the gun she's loaded up to two, one a side
 (`Broadside.stock`). Hits are shown on the sloops, never as wordy toasts.
+**Your own boards popped out (the user, 13 Nov, racing):** shot on the move, the camera swung down onto her deck for
+the patch, "absolutely chaotic. I don't know what happened"; Gunnery and the patch "definitely just needs to be a puzzle
+... my controls need to be more like sailing is, where it's popped out." To do: your Gunnery and deck patch as a board
+put up as Sailing's is, the race still in view; on her deck only for spectators (TODO.md).
 Her guns fire a broadside, three squares out of her side (`SAIL.RANGE`, as everywhere at sea), stopped by
 rock or land, so nobody shoots across a spit. A hit holes her: she's dazed, still, till she's patched by
 Carpentry, but is never knocked out, and can't be hit again till she's patched. Every racer starts with two
