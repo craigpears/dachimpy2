@@ -12,7 +12,8 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { MOMENTS, POSITIONS, SKIPPED, VERDICTS, boardOf, botAt, check, moveOf } from '../src/distill-positions';
+import { MOMENTS, POSITIONS, SKIPPED, THEMED, THEMES, VERDICTS, boardOf, botAt, check, moveOf, type Theme } from '../src/distill-positions';
+import { STATES, TACTICS, readBoard } from '../src/distill-read';
 import { COLS, TALL } from '../src/distilling';
 import { playDrags } from '../src/distill-routines';
 
@@ -45,19 +46,42 @@ describe('the positions (picked by tools/distill-positions.mjs)', () => {
   });
 });
 
-describe('what the bot should do at each position (the user\'s verdicts)', () => {
-  for (const p of POSITIONS) {
-    const verdicts = VERDICTS[p.id] ?? [];
-    if (!verdicts.length && SKIPPED[p.id]) { it.skip(`${p.id}: skipped by the user, ${SKIPPED[p.id].date}: ${SKIPPED[p.id].note}`, () => {}); continue; }
-    if (!verdicts.length) { it.todo(`${p.id}: ${MOMENTS[p.moment].toLowerCase()} (${p.level}, seed ${p.seed}), no verdict yet`); continue; }
-    for (const v of verdicts) {
-      const name = `${p.id}, ${v.date}: ${v.note}`;
-      const run = () => {
-        const misses = check(p, moveOf(botAt(p)), v.expect);
-        expect(misses, `${p.id}: ${misses.join('; ')}`).toEqual([]);
-      };
-      if (v.open) it.fails(`${name} (open: the bots don't do this yet; once this fails, they do, so take "open" off)`, run);
-      else it(name, run);
+// Grouped by the themes the verdicts fell into (the user, 13 Nov: "kind of organize them into the themes for those
+// test examples ... we'll test that those are behaving and categorizing the way we want"): in each, what the board
+// reader reads there, then what the bot does.
+for (const [theme, t] of Object.entries(THEMES) as [Theme, (typeof THEMES)[Theme]][]) {
+  describe(`${t.name}: ${t.about}`, () => {
+    for (const p of POSITIONS.filter((q) => THEMED[q.id]?.theme === theme)) {
+      const verdicts = VERDICTS[p.id] ?? [], th = THEMED[p.id];
+      if (!verdicts.length && SKIPPED[p.id]) { it.skip(`${p.id}: skipped by the user, ${SKIPPED[p.id].date}: ${SKIPPED[p.id].note}`, () => {}); continue; }
+      if (th.reads) {
+        const reads = th.reads;
+        const want = [reads.state && STATES[reads.state].label, reads.tactic && TACTICS[reads.tactic].label].filter(Boolean).join(', ');
+        const name = `${p.id}: the board reader reads it as ${want}`;
+        const run = () => {
+          const r = readBoard(boardOf(p), { stage: p.stage, timeLeft: p.timeLeft });
+          if (reads.state) expect(r.state, p.id).toBe(reads.state);
+          if (reads.tactic) expect(r.tactic, p.id).toBe(reads.tactic);
+        };
+        if (th.open) it.fails(`${name} (open: the reader doesn't yet; once this fails, it does, so take "open" off)`, run);
+        else it(name, run);
+      }
+      if (!verdicts.length) { it.todo(`${p.id}: ${MOMENTS[p.moment].toLowerCase()} (${p.level}, seed ${p.seed}), no verdict yet`); continue; }
+      for (const v of verdicts) {
+        const name = `${p.id}, ${v.date}: ${v.note}`;
+        const run = () => {
+          const misses = check(p, moveOf(botAt(p)), v.expect);
+          expect(misses, `${p.id}: ${misses.join('; ')}`).toEqual([]);
+        };
+        if (v.open) it.fails(`${name} (open: the bots don't do this yet; once this fails, they do, so take "open" off)`, run);
+        else it(name, run);
+      }
     }
-  }
+  });
+}
+describe('every position has a theme', () => {
+  it('each position is in one of the themes, and every theme has a position', () => {
+    for (const p of POSITIONS) expect(THEMED[p.id], p.id).toBeTruthy();
+    for (const t of Object.keys(THEMES)) expect(POSITIONS.some((p) => THEMED[p.id]?.theme === t), t).toBe(true);
+  });
 });

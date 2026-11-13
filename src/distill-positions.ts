@@ -272,6 +272,38 @@ export const SKIPPED: Readonly<Record<string, { date: string; note: string }>> =
   P12: { date: '13 Nov', note: "Skipped too: what really went wrong is far earlier. A brown in the column going up with 2.5 s left: maybe a black and a brown crawled over to it, but that's a big if, and you wouldn't get into that situation if you're any good." },
 };
 
+/* The themes the user's verdicts fell into (13 Nov: "kind of organize them into the themes for those test
+   examples ... we'll test that those are behaving and categorizing the way we want"): each position's theme, and
+   what the board reader (src/distill-read.ts) should read there, its state or the tactic in play, tested in
+   tests/distill-positions.test.ts. A reading the reader doesn't give yet is `open`, as a verdict is. */
+export type Theme = 'trapped' | 'fillFast' | 'quickSort' | 'damage' | 'cracked' | 'patterns' | 'skipped';
+/** The themes in order, each in plain words for the page. */
+export const THEMES: Readonly<Record<Theme, { name: string; about: string }>> = {
+  trapped: { name: 'Trapped whites near the fire, first', about: 'whites at the top of the columns by the fire, junk round them and no way for it to reach them: freed before anything else' },
+  fillFast: { name: 'Fill by the fire, fast', about: 'the gaps in the columns by the fire filled with the quickest junk moves, not one white dragged a long way' },
+  quickSort: { name: 'Quick sorting while nothing\'s at risk', about: 'time in hand: blacks down, browns up, short and simple' },
+  damage: { name: 'Damage control', about: 'a board gone really wrong: the columns by the fire filled however you can, then the stranded junk out left' },
+  cracked: { name: 'A cracked board: keep the tools', about: 'junk stranded among the whites: fix it, and keep the browns in the middle to fix it with' },
+  patterns: { name: 'The patterns: the ladder and the V', about: 'the right-hand pair sorted into the zigzag\'s ladder before one burns; the V\'s tail sorted so the next sweep runs through' },
+  skipped: { name: 'Skipped: lost boards', about: 'boards you\'d never reach if you\'re any good; their lesson is earlier' },
+};
+/** Each position's theme, and what the board reader should read there. */
+export const THEMED: Readonly<Record<string, { theme: Theme; reads?: { state?: BoardState; tactic?: Tactic }; open?: boolean }>> = {
+  P1: { theme: 'trapped', reads: { tactic: 'freeTrapped' } },
+  P2: { theme: 'trapped', reads: { tactic: 'freeTrapped' } },
+  P5: { theme: 'trapped', reads: { tactic: 'freeTrapped' } },
+  P6: { theme: 'trapped', reads: { tactic: 'freeTrapped' } },
+  P4: { theme: 'fillFast', reads: { tactic: 'fillGaps' } },
+  // (the reader says fill the gaps here; the user's verdict was quick sorting: to put to them, 13 Nov)
+  P3: { theme: 'quickSort', reads: { tactic: 'quickSort' }, open: true },
+  P7: { theme: 'damage', reads: { state: 'damageControl' } },
+  P10: { theme: 'cracked', reads: { state: 'cracked', tactic: 'fixCracks' } },
+  P8: { theme: 'patterns', reads: { tactic: 'sortLadder' } },
+  P9: { theme: 'patterns', reads: { tactic: 'sortTail' } },
+  P11: { theme: 'skipped' },
+  P12: { theme: 'skipped' },
+};
+
 /** The board of a position. */
 export const boardOf = (p: Position): Board => parseBoard(p.cols);
 

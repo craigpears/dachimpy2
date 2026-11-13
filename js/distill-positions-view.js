@@ -5,7 +5,7 @@
 // how it reads the board (its state and tactic, src/distill-read.ts), and any verdicts the user has given there (or
 // that they skipped it).
 import { board } from './distill-guide-view.js';
-import { MOMENTS, POSITIONS, SKIPPED, VERDICTS } from './distill-positions.js';
+import { MOMENTS, POSITIONS, SKIPPED, THEMED, THEMES, VERDICTS } from './distill-positions.js';
 import { STATES, TACTICS } from './distill-read.js';
 import { PHASES } from './distill-phase.js';
 
@@ -70,12 +70,28 @@ function position(p) {
 }
 
 function draw() {
+  // Grouped by the themes the verdicts fell into (the user, 13 Nov: "kind of organize them into the themes"), each
+  // under its heading; any position with no theme yet last.
   const list = document.querySelector('[data-positions]'), toc = document.querySelector('[data-toc]');
-  POSITIONS.forEach((p, i) => {
-    list.appendChild(position(p));
-    if (i) toc.appendChild(document.createTextNode(' · '));
-    toc.appendChild(html('a', { href: `#${p.id.toLowerCase()}`, target: '_self', title: MOMENTS[p.moment] }, p.id));
-  });
+  const groups = Object.entries(THEMES).map(([key, t]) => ({ key, t, ps: POSITIONS.filter((p) => THEMED[p.id]?.theme === key) }));
+  const rest = POSITIONS.filter((p) => !THEMED[p.id]);
+  if (rest.length) groups.push({ key: 'new', t: { name: 'Not judged yet', about: 'new positions, waiting for your verdict' }, ps: rest });
+  for (const { key, t, ps } of groups) {
+    if (!ps.length) continue;
+    const head = html('section', { className: 'theme', id: `theme-${key}` });
+    head.appendChild(html('h2', {}, t.name));
+    head.appendChild(html('p', { className: 'about' }, t.about));
+    list.appendChild(head);
+    for (const p of ps) list.appendChild(position(p));
+    const line = html('div');
+    line.appendChild(html('a', { href: `#theme-${key}`, target: '_self' }, t.name));
+    line.appendChild(document.createTextNode(': '));
+    ps.forEach((p, i) => {
+      if (i) line.appendChild(document.createTextNode(' · '));
+      line.appendChild(html('a', { href: `#${p.id.toLowerCase()}`, target: '_self', title: MOMENTS[p.moment] }, p.id));
+    });
+    toc.appendChild(line);
+  }
   if (!POSITIONS.length) list.appendChild(html('p', { className: 'intro' }, 'No positions picked yet.'));
 }
 
