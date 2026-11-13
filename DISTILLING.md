@@ -422,8 +422,26 @@ up-left through the whites, and up-right into its place, the white dropping out 
 
 The planner offers it as a fallback (`weigh`): only for a stuck piece that's still stuck after every move the
 routines it knows offer, and then its move is judged like the rest. The Able to Master and up, and Helium, know
-it (`path` on a tier); its label is "Bring a piece round". For anyone keyed by the routines' names ("Help,
-Helium"'s lines) the advice names the hook, the nearest named technique, with `technique: 'path'` beside it.
+it (`path` on a tier); its label is "Bring a piece round". For anyone keyed by the routines' names the advice
+names the hook, the nearest named technique, with `technique: 'path'` beside it; "Help, Helium" looks that up for
+their own line, "Shift that one first. Then there's a way through." (13 Nov).
+
+**Moving one piece to open the way (13 Nov, the nineteenth note).** When no single drag brings a piece into a
+white's place in the junk columns next to burn, `openWay` tries one piece moved out of the way first: every
+piece within four squares of the white, dragged one or two swaps, the cheapest 80 of those boards, each searched
+on with 300 boards; the pair played together, costed as a person's two drags (two moments to spot, their swaps
+and turns). About 10 to 25 ms a stuck white in Node, and only when the single search found nothing. On the user's
+board (`37-move-a-brown-to-open-the-path.webp`, read off the picture) it finds their move: the brown low in the
+middle moved up a swap, then the black left of it dragged along the bottom, right and up, into the white's place
+at the bottom right. The planner weighs the pair like any move: with sweeping still to do it waits, and it's
+played as the furnace nears (the urgent look takes only what saves the furnace's column).
+
+**Whites in the furnace's column cost more (13 Nov, from the same note).** Watching why the bots still waited
+with whites left: every way out of the furnace's column put the white boxed in one column left (-3, trapped),
+while leaving it to burn cost only the one piece of junk it kept out (-1), so waiting scored best and it burned.
+Now each white in the furnace's column, while it's a junk column being filled, costs 4 more (`S.FIRE`); only
+that column, so finishing it never moves the cost onto the next (tried on the column being filled, wherever it
+was, the bots stopped finishing columns).
 
 ### Decision time
 Keep burning full junk columns as long as you're sure the next one will be finished before the furnace;
@@ -720,6 +738,27 @@ anywhere with no way left and junk left of it, on the edge or boxed in.
   are left boxed in more, which the score doesn't count (counting them everywhere had the bots carrying whites back
   right to free them). The path search is played about once a session (the upper tiers); most stuck pieces are
   freed by a routine first. 20 boards can't tell a chain change of a few tenths; a 40-board run would, if wanted.
+
+### Opening the way, and the furnace's whites first (13 Nov, seventh run)
+After the nineteenth note (§3, "Moving one piece to open the way", "Whites in the furnace's column cost more").
+20 boards a tier, the code before and after run by the same runner. "Stuck" is a Stage I decision to wait while
+whites are left in the junk columns next to burn. The middle column is the two-drag search alone, without the
+furnace's cost.
+
+| Tier | Stuck waits a session, was (two-drag alone) | Sessions with one, was | Whites burned, was | Longest chain: mean (best), was | Points a minute, was | Path moves a session, was |
+|---|---|---|---|---|---|---|
+| Learner (no path search) | 9.3, was 11.4 (11.4) | 5/20, was 5 | 6.5, was 6.5 | 1.1 (2), was 1.1 (2) | 9.0, was 9.0 | - |
+| Able to Master | 24.3, was 17.1 (11.4) | 11/20, was 11 | 0.7, was 0.8 | 1.1 (3), was 1.1 (3) | 9.8, was 9.5 | 1.9, was 1.2 |
+| Grand-Master to Legendary | 16.5, was 25.4 (24.2) | 9/20, was 11 | 0.7, was 0.9 | 1.4 (4), was 1.6 (5) | 13.8, was 15.2 | 1.5, was 1.1 |
+| Ultimate | 8.9, was 17.6 (17.6) | 4/20, was 6 | 0.3, was 0.9 | 1.9 (5), was 2.0 (5) | 20.7, was 21.0 | 1.3, was 1.1 |
+
+- **What it did:** the Ultimate waits half as often with whites in the way and burns a third as many whites; the
+  Grand-Master a third less often. On the user's own board the pair is found as they drew it.
+- **What it didn't, honestly:** the Able to Master waits more with the furnace's cost (24.3 a session, against
+  11.4 with the two-drag search alone), for no fewer whites burned; and the chains and points a minute are the
+  same within 20 boards' noise. Most of the waits left are boards where the only way out of the furnace's column
+  is worse than the burn (a white put on top of a spice, say): letting it go is right there. The search itself
+  is played under twice a session: most stuck whites are freed by a routine first.
 
 **Watching them, the first note (the user, 12 Nov, a screenshot of the Ultimate's board):** "the main
 thing is it just doesn't carry on the whole way to the right. It just kind of stops ... that black ... in

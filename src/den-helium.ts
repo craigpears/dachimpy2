@@ -325,7 +325,7 @@ export function lineSpot(head: { x: number; y: number }, bubble: { w: number; h:
 export function helpFor(a: Advice): { says: string; note: string; plays: 'drags' | 'burn' | null } {
   const note = a.reason ? `${a.label}: ${a.reason}` : a.label;
   if (a.kind === 'move') {
-    if (a.routine && a.drags.length) return { says: HELP[a.routine], note, plays: 'drags' };
+    if (a.routine && a.drags.length) return { says: HELP[a.technique === 'path' ? 'path' : a.routine], note, plays: 'drags' };
     return { says: HELP_ELSE.stuck, note, plays: null };
   }
   if (a.kind === 'burn') return { says: HELP_ELSE.burn, note, plays: 'burn' };

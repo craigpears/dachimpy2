@@ -100,4 +100,13 @@ describe('the board score (12 Nov)', () => {
     expect(trappedWhite(cols, 4, 0)).toBe(false);
     expect(trappedWhite(cols, 4, 8)).toBe(false);
   });
+  it('a white got out of the furnace\'s column scores above leaving it to burn, even into a tight spot, 13 Nov (the bots "did seem to get stuck" with whites left in the columns next to burn)', () => {
+    // A board the Ultimate waited on, whites in the furnace's column: the way out puts one boxed in a column left,
+    // which used to score below leaving it there.
+    const cols = parseBoard(['KKbbwwww', 'KbbwwwK**', 'wbbwwwwK', 'bKwwbKwwK', 'K*wbwbKK', 'wwwwbbKKw', 'wwKKbKbK', 'bbbKbb*bK', 'KKKbKKwK', 'bKKbbKKww']);
+    const out = playDrags(cols, [{ x: 7, y: 7, ways: [3] }, { x: 9, y: 7, ways: [2, 1] }])!;
+    const whites = (b: Board) => b[COLS - 1].filter((p) => p === 0).length;
+    expect(whites(out)).toBeLessThan(whites(cols));
+    expect(boardScore(out)).toBeGreaterThan(boardScore(cols));
+  });
 });

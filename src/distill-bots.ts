@@ -122,8 +122,8 @@ export interface Advice {
   stage: 'junk' | 'chain';
   kind: 'move' | 'burn' | 'wait' | 'dismiss';
   /** The named routine played. A move found by the path search names the hook, the nearest named technique
-      (a piece taken round a corner), for anyone keyed by the routines' names ("Help, Helium"'s lines); its
-      `technique` says 'path'. */
+      (a piece taken round a corner), for anyone keyed by the routines' names; its `technique` says 'path', which
+      "Help, Helium" looks up for their own line. */
   routine: RoutineName | null;
   /** The technique played: the routine, or 'path' for the path search's move (its label PATH_LABEL). */
   technique?: Technique | null;

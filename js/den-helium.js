@@ -308,7 +308,7 @@ export function helpFor(a) {
     const note = a.reason ? `${a.label}: ${a.reason}` : a.label;
     if (a.kind === 'move') {
         if (a.routine && a.drags.length)
-            return { says: HELP[a.routine], note, plays: 'drags' };
+            return { says: HELP[a.technique === 'path' ? 'path' : a.routine], note, plays: 'drags' };
         return { says: HELP_ELSE.stuck, note, plays: null };
     }
     if (a.kind === 'burn')
