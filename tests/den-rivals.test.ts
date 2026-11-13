@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 import { LAY, Sea } from '../src/den-sail';
 import { RACE, Race, FIRST_SPOT, spotPose } from '../src/den-race';
 import { RIVALS, MOST_RIVALS } from '../src/den-rivals';
-import { ROUTES, STYLES, CUTS, startPose, simDrive, progressAt, tauAt } from '../src/race-sim';
+import { ROUTES, STYLES, CUTS, SIM, startPose, simDrive, progressAt, tauAt } from '../src/race-sim';
 import { sheltered } from '../src/den-racers';
 
 const RC = LAY.RACE, S = RC.STRETCHES, sea = new Sea(9);
@@ -191,7 +191,7 @@ describe('places: yours as you race, everyone\'s at the finish (11 Nov)', () => 
     t.sort((a, b) => a - b);
     const mid = t[Math.floor(t.length / 2)];
     expect(mid).toBeGreaterThan(170);
-    expect(mid).toBeLessThan(235);
+    expect(mid).toBeLessThan(SIM.LONG);   // (235 till 13 Nov, the long way 223.5 s: round the fort's bay it's longer)
     expect(CUTS.whirls.saves).toBeGreaterThan(0);
   }, 60000);
 });

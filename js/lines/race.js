@@ -10,12 +10,15 @@ export const STARTER = {
         that cost a puzzle with a few named, the snakes, and the shooting. Said a line at a time. The starlit
         door named among the shortcuts since 12 Nov (RULES.md, "No hidden gems in the proof of concept"). The bribe at the gun gap's gate named
         since 12 Nov, once it was built (RACE.md §3). The race's next pass (12 Nov): the gambles gone, the rocks
-        blasted open for everyone named, the field fresh each race and its hop, and the snakes gentle. */
+        blasted open for everyone named, the field fresh each race and its hop, and the snakes gentle. The gate
+        through the fort across its bay named (13 Nov, an experiment: RACE.md §3), and that both its guns hole you if
+        you run it. */
     explain: [
         'Here\'s the way of it. Round the numbered buoys, five legs and the run home: the long way, no puzzle, just sail her',
         'First the field: slow winds that nudge ye a square, whirlpools that turn ye round, fresh every race. Eyeball a way through, or hop the headwinds with a Double for a ride',
         'Or cut through the spits, if ye dare. Every shortcut costs ye a puzzle: bilge up through a lock, build a crane, row the headwind gap',
         'Zoom over the whirlpools on a Vegas, hop a headwind with a Double, or haul up some treasure and pay off the guard at the gate',
+        'That gate\'s through the Empire\'s fort, straight across the bay the long way goes round. Run it, and both its guns\'ll hole ye',
         'Or blast the rocks off leg three with yer guns: three hits, anyone\'s, and they\'re open for everyone',
         'Or, for a navigator, a starry door in the cliff off leg two, opened by Navigation, and a tunnel under the course up onto leg three',
         'Mind the winds that sweep ye back a few squares, the trade wind up the left most of all, and the run home runs right beside it',
@@ -29,10 +32,9 @@ export const STARTER = {
     /** A rival's home ({name}, her place and time). */
     home: '{name}\'s over the line: {place}, {time}',
     /** A snake has her (a few squares back, since 12 Nov: never rage-inducing): the left-hand trade wind's
-        loops, the tight water past the gun gap, the trade wind back across leg 3. */
+        loops, the trade wind back across leg 3. (The tight water past the gun gap went 13 Nov.) */
     swept: {
         left: 'The trade wind\'s got ye! A few squares back: round ye go again',
-        tight: 'One too many! The wind\'s nudging ye back a few squares',
         mid: 'Caught in the trade wind! Round its loop and have another go at that hop',
     },
     /** Over the finish line: first, or not; and a best. */
@@ -66,7 +68,7 @@ export const CHARACTER = {
                 go: 'The gun',
                 field: 'On the starter\'s card, on the line: who\'s racing you',
                 home: 'When a rival\'s over the finish line',
-                swept: 'When a snake has her, a few squares back: the left-hand trade wind, the tight water past the gun gap, the trade wind back across leg 3',
+                swept: 'When a snake has her, a few squares back: the left-hand trade wind, the trade wind back across leg 3',
                 won: 'Over the finish line before everyone else',
                 lost: 'Over it after someone',
                 best: 'Your best time yet, kept in this browser',

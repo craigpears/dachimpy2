@@ -9,6 +9,7 @@ import { DOOR } from '../src/den-door';
 import { SIM, CUTS, ROUTES, STYLES, run, simulate, lineUp, route, style, routePose, tauAt, sail, motionPose, type CutId, type SimRun } from '../src/race-sim';
 import { SAILOR, gustRate } from '../src/race-sailor';
 import { stretchAt } from '../src/den-racers';
+import { legOf } from '../src/race-plan';
 import { SAIL } from '../src/den-sail';
 import { Sailing, runFor } from '../src/sailing';
 import { seeded } from '../src/mirror-row';
@@ -35,9 +36,21 @@ describe('the simulated course is the helm\'s (11 Nov)', () => {
     }
     expect(leg).toBe(RC.STRETCHES.length - 1);
     const at = (t: number) => { const p = routePose(t); return stretchAt(Math.round(p.c), Math.round(p.r)); };
-    const legs: Record<CutId, number[]> = { guns: [0, 1], wreck: [0, 0], headwind: [1, 2], double: [1, 2], whirls: [2, 3], rocks: [2, 3], forage: [2, 3], locks: [3, 4], zigzag: [3, 3], crane: [4, 5], triple: [4, 5], door: [1, 2] };
+    // (the gate rejoins at buoy 1, in the fort's bay before leg 2, since 13 Nov: -1, on no leg)
+    const legs: Record<CutId, number[]> = { guns: [0, -1], wreck: [0, 0], headwind: [1, 2], double: [1, 2], whirls: [2, 3], rocks: [2, 3], forage: [2, 3], locks: [3, 4], zigzag: [3, 3], crane: [4, 5], triple: [4, 5], door: [1, 2] };
     for (const c of Object.values(CUTS)) expect([at(c.tIn), at(c.tOut)], c.id).toEqual(legs[c.id]);
     expect(tauAt(0, 20)).toBeLessThan(tauAt(1, 20));
+  });
+
+  it('the course\'s rule since 13 Nov: a shortcut rejoins the long way before the next leg\'s choices, so none skips another leg\'s (the user: "To choose which route I do, including ... combining whichever puzzles I like the best"); the gate across the fort\'s bay keeps it, and the starlit door doesn\'t yet (up past the whirlpools\' mouth), listed here till it\'s reworked; the headwind gap comes up a column past their mouth, a square back for it', () => {
+    const skips: string[] = [];
+    const cuts = Object.values(CUTS).filter((c) => c.id !== 'wreck' && c.id !== 'zigzag');
+    for (const c of cuts) for (const d of Object.values(CUTS)) {
+      if (d.id === c.id || d.id === 'wreck' || legOf(d.id) === legOf(c.id)) continue;
+      if (d.tIn > c.tIn + 1e-6 && d.tIn < c.tOut - 1e-6) skips.push(`${c.id} skips ${d.id}`);
+    }
+    expect(skips.filter((s) => s.startsWith('guns'))).toEqual([]);
+    expect(skips.sort()).toEqual(['door skips whirls']);
   });
 
   it('each shortcut saves what the helm says it does (RACE.DECENT, as tests/den-race.test.ts holds the course)', () => {
@@ -185,11 +198,11 @@ describe('balance: every way round a relatively equal chance of winning (11 Nov:
   // Out of the band since every racer sails as your sloop does (12 Nov: square to square on a helm of her own,
   // every clear a gust), left for the user to decide, not tuned away (RACE.md §8, "Moves and gusts"): the
   // Doubles' gaps, built on the move at no cost now that her clears carry her while she builds; the gap's combo,
-  // not built yet when the real pilot gets her to the gap, so stopped short in the open. Each held to a wider
-  // band, so a further slide still shows. (The bribe was a third, 0.1 to 1.6, till 13 Nov: its wreck out of
-  // sailing's reach from most of the line. Moved just along from the gate, its way in opened and its price 20
-  // coins, it's back in the band.)
-  const OUT: Record<string, [number, number]> = { 'gap-combo': [0.25, 1.6], doubles: [0.5, 3.2] };
+  // not built yet when the real pilot gets her to the gap, so stopped short in the open (the Quad went 13 Nov).
+  // Held to a wider band, so a further slide still shows. (The bribe was a third, 0.1 to 1.6, till 13 Nov: its
+  // wreck out of sailing's reach from most of the line. Moved just along from the gate, its way in opened and its
+  // price 20 coins, it's back in the band.)
+  const OUT: Record<string, [number, number]> = { doubles: [0.5, 3.2] };
   for (const r of ROUTES) {
     const [lo, hi] = OUT[r.name] ?? [0.5, 1.6];
     it(`the ${r.name} route wins between ${lo} and ${hi} times its fair share`, () => {
@@ -255,10 +268,11 @@ describe('the bribe at the gate, simulated (12 Nov: "build the bribe gate ... to
       for (let seed = 1; seed <= 40; seed++) n += simulate({ racers: [{ route: route('every'), style: style('peaceful'), skill, spot: 13 }, { route: route('long'), style: style('peaceful'), skill: 'decent', spot: 3 }], seed, snakes: false })[0].cuts.find((c) => c.id === 'guns')!.saved;
       return n / 40;
     };
+    // (since 13 Nov, the gate across the fort's bay saving 33 s for a 100-coin haul: a decent all-rounder, a jack of
+    // all trades, loses on it; a great one about breaks even)
     const decent = at('decent'), great = at('great');
-    expect(Math.abs(decent)).toBeLessThan(8);
-    expect(great).toBeGreaterThan(decent);
-    expect(great).toBeGreaterThan(3);
+    expect(decent).toBeLessThan(0);
+    expect(great).toBeGreaterThan(decent + 10);
     expect(great).toBeLessThan(RACE.DECENT.guns);
   });
 });
@@ -279,16 +293,16 @@ describe('the starlit door, simulated: Navigation only, one stretch through (12 
 });
 
 describe('snakes in the simulation (11 Nov: "I want the snakes and [ladders]")', () => {
-  it('each snake has a few racers in a standard field; the tight water by the gun gap, near the start, costs least', () => {
+  it('each snake has a few racers in a standard field (the tight water by the gun gap went 13 Nov)', () => {
     const rep = run(400, 4, { seed: 3 });
-    for (const s of ['mid', 'tight', 'left']) expect(rep.bySnake[s]?.n ?? 0, s).toBeGreaterThan(0);
-    expect(rep.bySnake.tight.wins).toBeGreaterThan(0);
+    for (const s of ['mid', 'left']) expect(rep.bySnake[s]?.n ?? 0, s).toBeGreaterThan(0);
+    expect(rep.bySnake.tight).toBeUndefined();
   }, 240000);
 
   it('a snake\'s never a lost race (12 Nov: "I don\'t want it to be rage-inducing"): racers a snake had still win, now and then', () => {
     const rep = run(600, 4, { seed: 11 });
     let n = 0, wins = 0;
-    for (const s of ['mid', 'tight', 'left']) { const x = rep.bySnake[s]; expect(x.n, s).toBeGreaterThan(5); n += x.n; wins += x.wins; }
+    for (const s of ['mid', 'left']) { const x = rep.bySnake[s]; expect(x.n, s).toBeGreaterThan(5); n += x.n; wins += x.wins; }
     expect(wins / n).toBeGreaterThan(0.02);
   }, 240000);
 });

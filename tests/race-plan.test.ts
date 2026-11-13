@@ -17,7 +17,7 @@ const RC = LAY.RACE, S = RC.STRETCHES, DT = 0.05;
 
 /** Sails a plan with the pilot from a spot on the line to the finish, a person at each stop doing what it asks
     there at once (a Sailing hop's gust, the lock pumped, the driftwood cleared...). The stops she was held at. */
-function sailPlan(plan: Plan, spot = RACE.LONG_SPOT, seed = 5, limit = 700, opt: { until?: (stops: string[]) => boolean; shut?: [number, number][] } = {}) {
+function sailPlan(plan: Plan, spot = RACE.LONG_SPOT, seed = 5, limit = 700, opt: { until?: (stops: string[]) => boolean; shut?: [number, number][]; upTo?: number } = {}) {
   const sea = new Sea(9);
   sea.layField(fieldFor(seed));
   for (const [c, r] of opt.shut ?? []) sea.rocks.add(`${c},${r}`);
@@ -26,11 +26,13 @@ function sailPlan(plan: Plan, spot = RACE.LONG_SPOT, seed = 5, limit = 700, opt:
   readyLocks(h);
   let coins = 0, paid = false, cleared = false;
   const w: PlanWorld = { seed, sea, get sig() { return `${sea.rocks.size}`; }, coins: () => coins, price: 40, paid: () => paid, gunQuiet: () => false, rocksDown: () => false, cleared: () => cleared };
-  const stops: string[] = [];
-  let t = 0;
+  const stops: string[] = [], gate = new Set(RC.GUNS.way.map(([c, r]) => `${c},${r}`));
+  let t = 0, through = false;
   for (; t < limit; t += DT) {
     const p = h.pose;
+    if (gate.has(`${p.c},${p.r}`)) through = true;
     if (stretchAt(p.c, p.r) === S.length - 1 && p.c <= RC.FINISH[0]) break;
+    if (opt.upTo !== undefined && stretchAt(p.c, p.r) >= opt.upTo) break;
     if (opt.until?.(stops)) break;
     const o = P.steer(h, w);
     if (o.kind === 'stop') {
@@ -46,7 +48,7 @@ function sailPlan(plan: Plan, spot = RACE.LONG_SPOT, seed = 5, limit = 700, opt:
     }
     h.tick(DT);
   }
-  return { t, stops, at: { ...h.pose } as Pose, plan: P.plan, changes: P.changes };
+  return { t, stops, at: { ...h.pose } as Pose, plan: P.plan, changes: P.changes, through };
 }
 
 describe('a plan is a choice for each leg (12 Nov, agreed)', () => {
@@ -66,8 +68,9 @@ describe('a plan is a choice for each leg (12 Nov, agreed)', () => {
     expect(choose(longPlan(), 4, 'locks')).toEqual(longPlan());   // (not one of leg 5's)
     expect(cleanPlan(['bribe', 'nonsense', 'whirls'])).toEqual(['bribe', 'long', 'whirls', 'long', 'long']);
   });
-  it('the gun gap four ways: run, rushed on a Quad, shot quiet, bribed', () => {
-    expect(['run', 'quad', 'shoot', 'bribe'].map((id) => gapOf(choose(longPlan(), 0, id as Plan[number])))).toEqual(['run', 'combo', 'shot', 'bribe']);
+  it('the gun gap three ways: run, shot quiet, bribed (the Quad went, 13 Nov: "far too close to set up a combo and with little benefit")', () => {
+    expect(['run', 'shoot', 'bribe'].map((id) => gapOf(choose(longPlan(), 0, id as Plan[number])))).toEqual(['run', 'shot', 'bribe']);
+    expect(LEGS[0].options.map((o) => o.id)).toEqual(['long', 'bribe', 'shoot', 'run']);
     expect(cutsOf(choose(longPlan(), 0, 'bribe'))).toEqual(['wreck', 'guns']);
   });
 });
@@ -75,7 +78,7 @@ describe('a plan is a choice for each leg (12 Nov, agreed)', () => {
 describe('every racer races by a plan (13 Nov: "it should all be in the same thing")', () => {
   it('each of the simulation\'s routes is a plan, taking the shortcuts it always took', () => {
     const was: Record<string, CutId[]> = {
-      long: ['zigzag'], 'gap-run': ['guns'], 'gap-combo': ['guns'], 'gap-shot': ['guns'], bribe: ['wreck', 'guns'], headwind: ['headwind'],
+      long: ['zigzag'], 'gap-run': ['guns'], 'gap-shot': ['guns'], bribe: ['wreck', 'guns'], headwind: ['headwind'],
       doubles: ['double', 'triple'], whirls: ['whirls'], rocks: ['rocks'], forage: ['forage'], locks: ['locks'], crane: ['crane'], door: ['door'],
       every: ['wreck', 'guns', 'double', 'whirls', 'locks', 'crane'],
     };
@@ -122,7 +125,7 @@ describe('the pilot sails your plan and stops at the obstacles (12 Nov, agreed: 
     expect(stretchAt(r.at.c, r.at.r)).toBe(S.length - 1);
     expect(r.at.c).toBeLessThanOrEqual(RC.FINISH[0]);
     expect(r.stops).toEqual(['mid']);
-    expect(r.t).toBeLessThan(260);
+    expect(r.t).toBeLessThan(320);   // (round the fort's bay since 13 Nov)
   }, 120000);
   it('hopping the zigzag: held behind each of its headwinds on her row (every other one: they alternate rows), a Double over each, and no slower than weaving with Doubles ready', () => {
     const r = sailPlan(choose(longPlan(), 3, 'zigzag')), w = sailPlan(longPlan());
@@ -145,10 +148,14 @@ describe('the pilot sails your plan and stops at the obstacles (12 Nov, agreed: 
     expect(b.stops).toContain('forage');
     expect(b.at.r).toBe(S[5].r);
   }, 120000);
-  it('rushing the gate: held in front of it facing in, a Quad carries her through', () => {
-    const r = sailPlan(['quad', 'long', 'long', 'long', 'long'], 18);
-    expect(r.stops[0]).toBe('quad');
-    expect(r.at.r).toBe(S[5].r);
+  it('running the gate (13 Nov): down the bend past leg 1\'s end and straight through the fort, out at buoy 1, quicker than round the fort\'s bay', () => {
+    const run = sailPlan(['run', 'long', 'long', 'long', 'long'], 18, 5, 200, { until: () => false, upTo: 1 });
+    const long = sailPlan(longPlan(), 18, 5, 200, { until: () => false, upTo: 1 });
+    expect(run.at.r).toBeGreaterThanOrEqual(S[1].r);
+    expect(long.at.r).toBeGreaterThanOrEqual(S[1].r);
+    expect(run.t).toBeLessThan(long.t - 25);
+    expect(run.through).toBe(true);
+    expect(long.through).toBe(false);
   }, 120000);
   it('a shortcut she can\'t sail to from where she is is put by, and her plan says so: the bribe\'s wreck with its notch shut, the gate run instead', () => {
     const r = sailPlan(['bribe', 'long', 'long', 'long', 'long'], 18, 5, 700, { shut: [RC.BRIBE.NOTCH] });
@@ -210,8 +217,8 @@ describe('racing by the plan, the user\'s playtest (13 Nov)', () => {
     for (let t = 0; t < 20 && (h.cur || h.strokes.length || h.slot >= 0); t += DT) h.tick(DT);
     expect(stretchAt(h.pose.c, h.pose.r)).toBe(2);
   }, 120000);
-  it('the gate, 13 Nov: changing the plan while she\'s held facing into the gate for the Quad, a Sailing gust no longer carries her straight through it without paying or shooting', () => {
-    const plan: Plan = ['quad', 'long', 'long', 'long', 'long'];
+  it('the gate, 13 Nov: changing the plan while she\'s held off the gate to shoot it, a Sailing gust no longer carries her straight through it without paying or shooting', () => {
+    const plan: Plan = ['shoot', 'long', 'long', 'long', 'long'];
     const sea = new Sea(9);
     sea.layField(fieldFor(5));
     sea.touch();
@@ -219,21 +226,20 @@ describe('racing by the plan, the user\'s playtest (13 Nov)', () => {
     readyLocks(h);
     const w: PlanWorld = { seed: 5, sea, sig: '1', coins: () => 0, price: 20, paid: () => false, gunQuiet: () => false, rocksDown: () => false, cleared: () => false };
     let t = 0;
-    for (; t < 120 && !(P.order.kind === 'stop' && P.order.stop.id === 'quad' && !h.cur && h.slot < 0); t += DT) { P.steer(h, w); h.tick(DT); }
-    expect(P.order.kind === 'stop' && P.order.stop.id).toBe('quad');
-    expect(h.pose.d).toBe(0);
-    // (held there for her Quad, a Quad would carry her through: that's the plan)
-    expect(P.gustHeld(h, w, 4)).toBe(null);
-    expect(P.gustHeld(h, w, 2)).toBe('hop');
-    // The plan changed to the long way on leg 1: any gust now, a Quad or more, is held till she's turned onto the leg.
+    for (; t < 120 && !(P.order.kind === 'stop' && P.order.stop.id === 'shoot' && !h.cur && h.slot < 0); t += DT) { P.steer(h, w); h.tick(DT); }
+    expect(P.order.kind === 'stop' && P.order.stop.id).toBe('shoot');
+    // (a gust down into the gate from beside it, its gun not yet quiet: held)
+    const above: Pose = { c: RC.GUNS.way[0][0], r: RC.GUNS.way[0][1] - 1, d: 0 };
+    const at = new Helm(sea, above);
+    expect(P.gustHeld(at, w, 4)).toBe('way');
+    // The plan changed to the long way on leg 1: she goes the long way round the fort's bay.
     P.set(choose(plan, 0, 'long'));
     P.steer(h, w);
-    expect(P.gustHeld(h, w, 4)).toBe('way');
-    expect(P.gustHeld(h, w, 7)).toBe('way');
+    expect(P.gustHeld(at, w, 4)).toBe('way');
     // And sailing on, a gust thrown whenever she's between moves, she goes the long way round the gate, never into it.
     const gate = new Set(RC.GUNS.way.map(([c, r]) => `${c},${r}`));
     let into = 0, gusts = 0;
-    for (t = 0; t < 60 && stretchAt(h.pose.c, h.pose.r) < 1; t += DT) {
+    for (t = 0; t < 150 && stretchAt(h.pose.c, h.pose.r) < 1; t += DT) {
       P.steer(h, w);
       if (!h.cur && !h.gusts.length && h.gusty() && !P.gustHeld(h, w, 4)) { h.gust(gustPath(sea, h.gustFrom(), 4)); gusts++; }
       h.tick(DT);
@@ -243,13 +249,13 @@ describe('racing by the plan, the user\'s playtest (13 Nov)', () => {
     expect(gusts).toBeGreaterThan(0);
     expect(stretchAt(h.pose.c, h.pose.r)).toBe(1);
   }, 120000);
-  it('the gate: running it, a gust may carry her into it; bribing it, not till the guard\'s paid', () => {
+  it('the gate: running it, no gust carries her into it (square by square: the Quad went, 13 Nov); bribing it, not till the guard\'s paid', () => {
     const sea = new Sea(9), G = RC.GUNS.way;
     const h = new Helm(sea, { c: G[0][0], r: G[0][1] - 1, d: 0 });
     const w: PlanWorld = { seed: 5, sea, sig: '1', coins: () => 20, price: 20, paid: () => false, gunQuiet: () => false, rocksDown: () => false, cleared: () => false };
     const run = new Pilot(['run', 'long', 'long', 'long', 'long']);
     run.steer(h, w);
-    expect(run.gustHeld(h, w, 3)).toBe(null);
+    expect(run.gustHeld(h, w, 3)).toBe('way');
     const bribe = new Pilot(['bribe', 'long', 'long', 'long', 'long']);
     bribe.done.add('wreck');
     bribe.steer(h, w);
@@ -280,10 +286,10 @@ describe('the plan\'s strip: the course and each choice\'s time (13 Nov: "you ne
       expect(Number.isFinite(x.net), `${leg} ${o.id}`).toBe(true);
       // (a chain hop's built on the move: no stop, its saving alone)
       expect(x.net).toBeCloseTo(x.move ? -x.saves : x.puzzle - x.saves, 9);
-      expect(!!x.move, `${leg} ${o.id}`).toBe(['quad', 'double', 'triple', 'zigzag'].includes(o.id));
+      expect(!!x.move, `${leg} ${o.id}`).toBe(['double', 'triple', 'zigzag'].includes(o.id));
       if (o.id !== 'long') expect(x.saves, `${leg} ${o.id}`).toBeGreaterThan(0);
     }
-    const plan: Plan = ['quad', 'door', 'forage', 'zigzag', 'triple'];
+    const plan: Plan = ['run', 'door', 'forage', 'zigzag', 'triple'];
     expect(planTime(plan)).toBeCloseTo(plan.reduce((n, id, leg) => n + choiceTime(leg, id).net, 0), 9);
     expect(planTime(longPlan())).toBe(0);
   });

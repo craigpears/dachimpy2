@@ -23,7 +23,7 @@
      (tau, progressAt her square): what her route's shortcuts, the snakes and the places go by.
    - Her Sailing on the pilot (src/race-sailor.ts): a drop at her skill's pace, and every clear's gust carries
      her on the moment it's made (carry, src/den-sailing.ts: a clear a square, a Double two, a Triple three),
-     as yours does, on the pilot or building a combo for a gap; not while she loads a shot by Gunnery.
+     as yours does, on the pilot or building a Double or Triple for a gap; not while she loads a shot by Gunnery.
    - Off the helm (a shortcut's trip, a snake's sweep, into the spot she stops at), she's moved along its
      squares a square at a time (Walk), never slid: wherever she is, she's on a square or on a move between
      two (motion).
@@ -36,9 +36,9 @@
      the helm). Where she sits to puzzle, if she stops, and whether that's sheltered.
    - The snakes (SIM.SNAKE), gentle since 12 Nov, each a few squares back: the trade wind back across leg 3,
      which every racer on the long way hops with a Double (a few seconds' timing, SIM.HOP; a slip and its loop
-     sets her three squares back, to hop again); the tight water past the gun gap (a slip rushing the gap,
-     three squares back along leg 2); and the left-hand trade wind's loops at the left-hand bends and along
-     the run home (a slip, a few squares back).
+     sets her three squares back, to hop again); and the left-hand trade wind's loops at the left-hand bends
+     and along the run home (a slip, a few squares back). (The tight water past the gun gap went with the
+     gate's move into the fort's bay, 13 Nov.)
    - The rocks across spit 3's gap (12 Nov): shot down by broadsides, anyone's hits counted on the field
      (Field.rocks); a racer of the rocks' route loads her shots on the move and fires them as she comes by
      (stopping, in the open, to load more if they're not down yet); once they're down, every racer who comes
@@ -48,23 +48,23 @@
      comes off only so often (SIM.VEGAS); one that doesn't sends her back to the mouth, to try again
      quicker (the board half built), or after SIM.TRIES she gives up and sails on.
    - On the move she's on the pilot, Sailing: a combo built for a gap is built on the same board, its drops'
-     clears carrying her as ever, and broken at the gap (a Quad rushing the gun gap, a Double or Triple hopping
-     its gap); loading her guns by Gunnery, she's not Sailing, so nothing carries her but the pilot.
+     clears carrying her as ever, and broken at the gap (a Double or Triple hopping its gap; the gate's Quad
+     went, 13 Nov); loading her guns by Gunnery, she's not Sailing, so nothing carries her but the pilot.
    - A racer is a route (ROUTES: the shortcuts she takes) and a style (STYLES: when she fires, whether she
      loads more, whether she'll stop in the open with someone close behind).
    - Shooting, by the field's rules (src/den-racers.ts: a broadside, three squares out of her side,
      stopped by land; sheltered spots out of reach): a bot fires on a racer sitting still as it goes by,
      the broadside landing as often as its skill times it (SIM.AIM). A hit dazes her till she's patched (a
      Carpentry patch's time); a Vegas being built loses some of its board.
-   - The gun gap's guns (SIM.GAP): run square by square, each gun's mark shot may hole her; a heavy combo
-     rushes her past them; her shots quieten them (RACE.GAP.MODE: the same shots as for racers, a hit each;
+   - The gun gap's guns (SIM.GAP): run square by square, each gun's mark shot may hole her, both of them (13
+     Nov); her shots quieten them (RACE.GAP.MODE: the same shots as for racers, a hit each;
      or more hits than a racer starts with) and rouse them: then they fire on any racer in reach, not only
      her, till nobody's near. Their marks are all in the spit: the long way goes by clear of them.
    - No gambles (12 Nov: they went, "not really in the ... good sportsman-like spirit").
    - Deterministic: one seed, one race. */
 
 import { LAY, SAIL, Sea, Helm, layRace, poseAt, type Pose, type Move, type RaceLay } from './den-sail.js';
-import { RACE, LONG_ROUTE, longRoute, routeRow, rocksDown, spotPose, type Driver } from './den-race.js';
+import { RACE, LONG_ROUTE, longRoute, routeRow, rocksDown, spotPose, bayAlong, type Driver } from './den-race.js';
 import { gustPath, carry, type Carried } from './den-sailing.js';
 import { fieldFor } from './start-field.js';
 import { PilotChart } from './race-pilot.js';
@@ -102,10 +102,11 @@ export const SIM = {
   DT: 0.1,
   /** Seconds the helm takes the long way round, gun to finish line, no puzzle, from the long way's own spot on
       the starting line, hopping the trade wind back up the course with a Double and weaving through the
-      zigzag (measured 11 Nov, the course's second pass: 221.9 s, tools/race-measure.mjs;
+      zigzag (measured 11 Nov, the course's second pass: 221.9 s; 265.8 s since 13 Nov, round the fort's bay;
+      tools/race-measure.mjs;
       tests/race-sim.test.ts measures it again and holds this to it). A course from the race's editor
       (src/race-course.ts): at the same pace, for its own long way's squares. */
-  LONG: 223.5 * squaresOf(LONG_ROUTE) / squaresOf(longRoute(DEFAULT_LAY)),
+  LONG: 265.8 * squaresOf(LONG_ROUTE) / squaresOf(longRoute(DEFAULT_LAY)),
   /** Seconds from each spot on the starting line (LINE.c0 up) to the first bend, through the start's
       field, the pilot's quickest way (measured 11 Nov, tools/race-measure.mjs; tested). The long way's own spot
       (RACE.LONG_SPOT) is the long way's own start. */
@@ -124,10 +125,7 @@ export const SIM = {
   SPREAD: 0.3,
   /** A decent player's seconds at each puzzle, as the race asks for it. Where a bot measured it, that;
       otherwise RACE.DECENT's own figure (the design: each shortcut saves about what a decent player
-      takes) or a guess:
-      - combo: a heavy Sailing chain (worth four squares) on the sea's own board, held and broken just as
-        she's lined up on the gap: 32 s. Assumed (at RACE.DECENT.guns, rushing the gap on the move won
-        nearly half the races: 11 Nov).
+      takes) or a guess (the gate's Quad, `combo`, went 13 Nov):
       - vegas: a Sailing Vegas on the sea's own board: 52 s, a little over what the whirlpools save
         (RACE.DECENT.whirls). Assumed (tools/sail-bots.mjs's
         best bot, the staircase, makes one every 170 drops or so; people do far better: the user builds
@@ -153,7 +151,7 @@ export const SIM = {
       - gust: any clear at all, thrown at the starlit door's mouth by a racer who means only to come up
         at its first exit (12 Nov): 8 s. Assumed. */
   PUZZLE: {
-    combo: 32, vegas: 52, double: 22, triple: 28, row: 20,
+    vegas: 52, double: 22, triple: 28, row: 20,
     bilge: (LOCK.COST_UP * RC.COURSE.clears) / LOCK.WORK, forage: (15 * RACE.FORAGE.BUNDLES.length) / 2, piece: 4, nav: (DOOR.NAV.sizes ?? [2, 3]).reduce((n, s) => n + (s <= 2 ? 24 : 34 + (s - 3) * 12), 0) * 1.2, load: 20, haul: BRIBE.MOVES * BRIBE.MOVE_SECS, gust: 8,
   },
   /** A Vegas's chance to come off, a go, by skill; the next go after one that doesn't takes this much of
@@ -174,22 +172,20 @@ export const SIM = {
       long way. */
   WAIT: 20,
   /** The gun gap's guns as the bots meet them (their own numbers are the checkpoint's, CHECK): the
-      chance she's holed sailing through square by square (once, as the user found, "one hit, one patch";
-      patched, she's spared a while, and she's through); and an aimed shot from a roused gun, on a sloop
+      chance each holes her sailing through square by square (till 13 Nov once, as the user found, "one hit,
+      one patch"; since, each of the two, one after the other: GunGap.spares); and an aimed shot from a roused gun, on a sloop
       under way (in the air CHECK.AIMED seconds: she's often gone; assumed) and on one sitting still.
-      RUN: her trip through it square by square, light airs in its middle (measured, 7.0 s). */
-  GAP: { RUN_HIT: 0.9, AIMED_HIT: 0.3, STILL_HIT: 0.95, RUN: 7 },
-  /** The squares-worth of the heavy combo that rushes her past the guns (src/den-sailing.ts). */
-  COMBO: runFor(4),
+      RUN: her trip through it square by square, light airs in its middle (measured, 7.0 s; since 13 Nov from
+      leg 1's end down the bend, through the fort's gate to buoy 1: measured again, tests/den-race.test.ts). */
+  GAP: { RUN_HIT: 0.9, AIMED_HIT: 0.3, STILL_HIT: 0.95, RUN: 9.3 },
   /** Every racer hops the trade wind back up the course with a Double: the seconds lining it up, a
       decent player's (on the move: Sailing on the pilot). Assumed. */
   HOP: 4,
   /** The snakes: the chance, by skill, she slips into one where it waits (RACE.md §4; assumed): the
-      trade wind back up the course, hopping it; the tight water past the gun gap, rushing the gap on a
-      combo or running it; the left-hand trade wind, at each left-hand bend and on the run home. */
+      trade wind back up the course, hopping it; the left-hand trade wind, at each left-hand bend and on the
+      run home. (The tight water past the gun gap went 13 Nov.) */
   SNAKE: {
     mid: { decent: 0.08, good: 0.04, great: 0.015 } as Record<Skill, number>,
-    tight: { decent: 0.2, good: 0.1, great: 0.04 } as Record<Skill, number>,
     left: { decent: 0.02, good: 0.01, great: 0.004 } as Record<Skill, number>,
   },
   /** The zigzag on leg 4, hopped with Doubles rather than woven through: the seconds it saves, a great
@@ -283,7 +279,7 @@ function reach(lay: RaceLay) {
   const h = lay.HEADWIND, last = <T>(x: T[]) => x[x.length - 1];
   const [g, d2, m, k, f, l, e, t3] = [lay.GUNS.way[0][0], lay.DOUBLE.WAY[0][0], lay.WHIRLS.MOUTH.c, lay.ROCKS.WALL[0][0], lay.FORAGE.NOTCH[0], lay.LOCKS[0].at[0], lay.CRANE, lay.TRIPLE[0][0]];
   return {
-    guns: at(1, g) - at(0, g), headwind: at(2, last(h)[0]) - at(1, h[0][0]), double: at(2, d2) - at(1, d2), whirls: at(3, m) - at(2, m),
+    guns: bayAlong(lay.GUNS.way[2][0], lay.GUNS.way[2][1] + 1, lay, route)! - at(0, g), headwind: at(2, last(h)[0]) - at(1, h[0][0]), double: at(2, d2) - at(1, d2), whirls: at(3, m) - at(2, m),
     rocks: at(3, k) - at(2, k), forage: at(3, f) - at(2, f), locks: at(4, l) - at(3, l), crane: at(5, e.TO.c) - at(4, e.LEDGE[0]), triple: at(5, t3) - at(4, t3),
     door: at(4, lay.DOOR.OFF[0][0]) - at(1, lay.DOOR.OFF[0][0]),
   };
@@ -302,14 +298,15 @@ const cut = (id: CutId, s: number, c: number, to: number, cOut: number, trip: nu
 };
 const G = RC.GUNS.way, WR = RC.BRIBE.NOTCH, B = RC.HEADWIND, M = RC.WHIRLS.MOUTH, K = RC.ROCKS, L = RC.LOCKS, E = RC.CRANE, D = RC.DOOR, F = RC.FORAGE, D2 = RC.DOUBLE.WAY, T3 = RC.TRIPLE, Z = RC.ZIGZAG;
 /** The course's shortcuts, as the bots take them. Their trips as the helm makes them (tools/race-measure.mjs):
-    the gap rushed on a heavy combo's gust, the headwind's squares rowed at the oars' pace, a Double's and a
+    the gate run square by square from leg 1's end through the fort to buoy 1 (SIM.GAP.RUN; a heavy combo's gust
+    rushing it till 13 Nov), the headwind's squares rowed at the oars' pace, a Double's and a
     Triple's hop and the water either side, the barrier's gap sailed once it's cleared, the locks' (4.3 s,
     pumped at once, made ready for the race; 10 s till 12 Nov, waiting on their water and gates), the others' gusts, the crane's trip (TRIP) and the tunnel's (DOOR.TRIP); the zigzag's
     hops, on the long way, what they save (SIM.ZIGZAG). Stopped short of the gap, she waits two squares
     before it, on the leg's second row (and pays the gate's guard there). The wreck saves nothing itself: in
     and out of its notch, its coins hauled up meanwhile, to pay the gate with (the gap's saving). */
 export const CUTS: Record<CutId, Cut> = {
-  guns: cut('guns', 0, G[0][0], 1, G[0][0], 1 + SIM.COMBO * SAIL.PUSH, { c: G[0][0] - 2, r: S[0].r + 1, d: 1 }),
+  guns: cut('guns', 0, G[0][0], 1, G[0][0], SIM.GAP.RUN, { c: G[0][0] - 2, r: S[0].r + 1, d: 1 }),
   wreck: cut('wreck', 0, WR[0], 0, WR[0], 3, { c: WR[0], r: WR[1], d: 0 }, 'wreck'),
   headwind: cut('headwind', 1, B[0][0], 2, B[B.length - 1][0], 1 + (B.length + 2) * WIND.OARS, { c: B[0][0], r: B[0][1], d: 0 }),
   double: cut('double', 1, D2[0][0], 2, D2[0][0], 2.2, { c: D2[0][0], r: D2[0][1], d: 0 }),
@@ -326,11 +323,9 @@ export const CUTS: Record<CutId, Cut> = {
 };
 CUTS.zigzag.trip = CUTS.zigzag.tOut - CUTS.zigzag.tIn - SIM.ZIGZAG;
 /** Where the trade wind back across leg 3 crosses the long way (every racer on it hops it), and where its loop
-    puts her back if she slips (three squares back along the leg, 12 Nov); the tight water past the gun gap,
-    and where it puts her (three squares back); the left-hand bends and the run home, where the left-hand trade
+    puts her back if she slips (three squares back along the leg, 12 Nov); the left-hand bends and the run home, where the left-hand trade
     wind's loops wait (a few squares back). */
 const MID_C = RC.SNAKES.MID[0][0], MID_T = tauAt(2, MID_C - 1), MID_BACK = tauAt(2, MID_C - 3);
-const TIGHT_BACK = tauAt(1, Math.min(RC.BUOYS[0].at[0], G[0][0] + RC.SNAKES.TIGHT.length));
 const LEFT_T = [tauAt(1, RC.BUOYS[1].at[0] + 1), tauAt(3, RC.BUOYS[3].at[0] + 1), tauAt(5, RC.FINISH[0] + 3)];
 /** Squares a slip into the left-hand trade wind's loops sets her back. */
 const LEFT_BACK = 4;
@@ -352,7 +347,7 @@ const CRANE_PIECES = Math.round(CRANES[RC.COURSE.frames].reduce((n, p) => n + p.
     trip through); `puzzle`, a decent player's seconds at what it asks (SIM.PUZZLE, as the bots draw them), with
     what else it likely costs her (a hit's patch running the gate, the shots still to load for the gate's guns
     or the rocks, a Vegas that doesn't come off the first go); `net`, the two together: below nothing, quicker
-    than the long way. A chain hop (`move`: the Quad at the gate, a Double or a Triple's gap, the zigzag's Doubles)
+    than the long way. A chain hop (`move`: a Double or a Triple's gap, the zigzag's Doubles)
     is built on the Sailing board as she sails on the pilot and broken as she's lined up, as the bots build theirs,
     so its puzzle costs her no stop: its net is the saving alone (if it isn't ready by then, she's held there till
     it is). */
@@ -365,17 +360,16 @@ const WORK: Partial<Record<CutId, number>> = {
   whirls: SIM.PUZZLE.vegas + (1 - SIM.VEGAS.decent) * (SIM.BACK.whirls + SIM.PUZZLE.vegas * SIM.RETRY),
 };
 export function choiceTime(leg: number, id: Choice): ChoiceTime {
-  // (the gate's saving as her own way through it goes: rushed on a combo, its trip; otherwise square by square)
+  // (the gate's saving as her own way through it goes: square by square, or towed)
   const gate = (trip: number) => CUTS.guns.saves + CUTS.guns.trip - trip;
   const loads = (shots: number) => Math.max(0, shots - FIELD.SHOTS) * SIM.PUZZLE.load;
   const gunHits = RC.GUNS.at.length * (RACE.GAP.MODE === 'shared' ? 1 : RACE.GAP.HARD);
   switch (id) {
     case 'long': return timed(0, 0);
-    case 'quad': return timed(CUTS.guns.saves, SIM.PUZZLE.combo, true);
     case 'double': return timed(CUTS.double.saves, SIM.PUZZLE.double, true);
     case 'triple': return timed(CUTS.triple.saves, SIM.PUZZLE.triple, true);
-    case 'run': return timed(gate(SIM.GAP.RUN), SIM.GAP.RUN_HIT * PATCH.PIECES * SIM.PUZZLE.piece);
-    case 'shoot': return timed(gate(SIM.GAP.RUN), loads(gunHits));
+    case 'run': return timed(gate(SIM.GAP.RUN), RC.GUNS.at.length * SIM.GAP.RUN_HIT * RACE.GAP.HOLE * SIM.PUZZLE.piece);
+    case 'shoot': return timed(gate(SIM.GAP.RUN), loads(gunHits) + (gunHits - 1) * GUNS.RUN_OUT + SIM.GAP.STILL_HIT * RACE.GAP.HOLE * SIM.PUZZLE.piece);
     case 'bribe': return timed(gate(BRIBE.PAY + TOW) - CUTS.wreck.trip, SIM.PUZZLE.haul);
     case 'zigzag': return timed(SIM.ZIGZAG * HOPS.decent, 0, true);
     case 'rocks': return timed(CUTS.rocks.saves, loads(RACE.ROCKS.HITS));
@@ -502,7 +496,7 @@ export function helmMotion(h: Helm): Motion {
 /* Since 13 Nov a route is a plan (src/race-plan.ts: a choice for each leg), the same as yours: "it should all
    be in the same thing ... online, local should all be the same." Its shortcuts (`cuts`) and how it takes the
    gun gap (`gap`) are the plan's; a bot races by her own copy of it, changed when she gives a shortcut up. */
-export interface Route { name: string; plan: Plan; cuts: CutId[]; gap?: 'run' | 'combo' | 'shot' | 'bribe' }
+export interface Route { name: string; plan: Plan; cuts: CutId[]; gap?: 'run' | 'shot' | 'bribe' }
 /** A route by its plan (the long way's hops the zigzag's headwinds on leg 4; the rest weave through them). */
 const planned = (name: string, ...legs: [number, Plan[number]][]): Route => {
   const plan = longPlan();
@@ -512,7 +506,6 @@ const planned = (name: string, ...legs: [number, Plan[number]][]): Route => {
 export const ROUTES: Route[] = [
   planned('long', [3, 'zigzag']),
   planned('gap-run', [0, 'run']),
-  planned('gap-combo', [0, 'quad']),
   planned('gap-shot', [0, 'shoot']),
   planned('bribe', [0, 'bribe']),
   planned('headwind', [1, 'headwind']),
@@ -546,7 +539,7 @@ export const style = (name: string): Style => byName(STYLES, name);
 /** A racer: her route, style and skill, and her spot on the starting line (the long way's own, if none). */
 export interface Entrant { route: Route; style: Style; skill: Skill; spot?: number }
 /** Back yourself on your puzzles (RACE.md §1): a racer takes the route of the puzzle she's best at, a
-    level better at it than at the rest (the long way's is Sailing on the pilot, the gap's its combo, its
+    level better at it than at the rest (the long way's is Sailing on the pilot, the gap's its
     Gunnery or the patches as she runs it, the doubles' the Doubles). Every shortcut at once is an
     all-rounder's, a jack of all trades: no better at any, and a little slower at each than at her own skill
     (SIM.JACK: nobody's quite as sharp at every puzzle). (12 Nov: with every stopped puzzle sized about the
@@ -596,7 +589,7 @@ export interface RacerResult {
   hitsTaken: number;
   hitsGiven: number;
   /** Each snake that had her. */
-  swept: ('mid' | 'tight' | 'left')[];
+  swept: ('mid' | 'left')[];
   /** Each shortcut she went for: done or given up, and what it saved her (seconds; less than nothing if
       it cost her), the Sailing she'd have done meanwhile counted against it. */
   cuts: { id: CutId; done: boolean; saved: number; exit?: number }[];
@@ -619,7 +612,7 @@ interface Bot {
   cut: Cut | null; stage: number; work: number; full: number; tries: number;
   /** Seconds since she turned off the long way for the shortcut she's on; Sailing she's missed. */
   since: number; lost: number;
-  move: { kind: 'combo' | 'load' | 'hop'; left: number; id?: CutId } | null; combo: boolean;
+  move: { kind: 'load' | 'hop'; left: number; id?: CutId } | null;
   /** The Doubles and Triples she's built on the move, ready to break at their gaps. */
   ready: Set<CutId>; daze: number; trip: number; waited: number;
   /** The trade wind back up the course: hopped (or not yet), and the seconds still lining up her Double. */
@@ -739,8 +732,7 @@ export interface SimRun {
 /** What a bot's up to, as a spectator sees it: under way, stopped to puzzle at a shortcut, waiting her
     turn, carried through one, dazed (patching), or home; the shortcut she's at or on, its stage (the
     starlit door's Navigation, then its Vegas), the seconds of puzzling left and all told, the goes she's
-    had at a Vegas; and what she's puzzling at on the move (a combo for the gun gap, a Double or Triple
-    for a hop, a shot loaded by Gunnery) and its seconds left; the trade wind's Double being lined up. */
+    had at a Vegas; and what she's puzzling at on the move (a Double or Triple for a hop, a shot loaded by Gunnery) and its seconds left; the trade wind's Double being lined up. */
 export interface BotInfo {
   mode: 'sail' | 'stop' | 'wait' | 'trip' | 'daze' | 'done';
   /** Before the daze, what she was doing. */
@@ -751,7 +743,7 @@ export interface BotInfo {
   full: number;
   tries: number;
   daze: number;
-  move: { kind: 'combo' | 'load' | 'hop'; left: number; id?: CutId } | null;
+  move: { kind: 'load' | 'hop'; left: number; id?: CutId } | null;
   hop: number;
   /** Walked into the spot she's stopping at, not yet puzzling. */
   coming: boolean;
@@ -770,6 +762,8 @@ export interface BotInfo {
 /** How far round the long way a racer at `p` is (seconds of it), going by the stretch she's on, or the
     last she's below (in a spit, through a shortcut), or how far down the start's field she's got. */
 export function progressAt(p: { c: number; r: number }): number {
+  const bay = bayAlong(p.c, p.r);   // (in the fort's bay, round it: src/den-race.ts)
+  if (bay !== null) return bay * PACE;
   const r = Math.round(p.r);
   if (r < S[0].r) return ((p.r - RC.LINE.r) / (S[0].r + 0.5 - RC.LINE.r)) * tauAt(0, RACE.LONG_SPOT);
   let s = S.length - 1;
@@ -818,7 +812,7 @@ export function sail(o: SimOptions, sea?: Sea): SimRun {
       tau: progressAt(at), mode: 'sail', was: 'sail', spot: Math.round(at.c), delay: 0,
       helm: new Helm(at.r < S[0].r ? sea0 : courseWater(), at), pin: '', goal: null, walk: null, sq: { ...at }, tripFull: 0, stuck: 0, plan: null, came: 0, carried: [],
       sailor: sailorFor(i, e.route.name === 'long' ? best : e.skill, pace),
-      cut: null, stage: 0, work: 0, full: 0, tries: 0, since: 0, lost: 0, move: null, combo: false, ready: new Set(), daze: 0, trip: 0, waited: 0,
+      cut: null, stage: 0, work: 0, full: 0, tries: 0, since: 0, lost: 0, move: null, ready: new Set(), daze: 0, trip: 0, waited: 0,
       hopped: false, hop: 0, lefts: 0, purse: false, paid: false, owed: 0, done: new Set(), stop: null, inLine: new Set(), vegas: false, exit: 0,
       choices: [...e.route.plan], cuts: [...e.route.cuts], gap: e.route.gap, changes: [],
       res: { route: e.route.name, style: e.style.name, skill: e.skill, start, spot: Math.round(at.c), time: 0, place: 0, hitsTaken: 0, hitsGiven: 0, swept: [], cuts: [], exposed: [], rocks: { hits: 0, through: false, free: false } },
@@ -845,10 +839,11 @@ export function sail(o: SimOptions, sea?: Sea): SimRun {
   const grace = new Map<number, number>();
   const shots = (b: Bot) => field.racers[b.i].shots;
   const patchTime = (b: Bot, skill = b.skill) => draw(PATCH.PIECES * SIM.PUZZLE.piece, skill);
+  /** A hole from the gate's heavy guns patched, by her route's skill (RACE.GAP.HOLE: bigger than a broadside's). */
+  const gatePatch = (b: Bot) => draw(RACE.GAP.HOLE * SIM.PUZZLE.piece, b.best);
   let events: FieldEvent[] = [];
 
   for (const b of bots) {
-    if (b.gap === 'combo') b.move = { kind: 'combo', left: draw(SIM.PUZZLE.combo, b.best) };
     if (b.gap === 'shot' && shots(b) < 2 * need) b.move = { kind: 'load', left: draw(SIM.PUZZLE.load, b.best) };
     if (b.gap) b.res.cuts.push({ id: 'guns', done: false, saved: 0 });
     // (the rocks' route loads what it'll fire at them on the move, from the gun)
@@ -913,10 +908,12 @@ export function sail(o: SimOptions, sea?: Sea): SimRun {
     return true;
   };
   /** A snake has her: swept back to `tau`, a square at a time, the sweep's seconds all told. */
-  const swept = (b: Bot, snake: 'mid' | 'tight' | 'left', tau: number, secs: number) => {
+  const swept = (b: Bot, snake: 'mid' | 'left', tau: number, secs: number) => {
     b.res.swept.push(snake);
+    // (back onto the leg's row first, then along it: swept at a bend from below it, along her own row first would
+    // take her across the spit's land, 13 Nov)
     const at = here(b), to = squareAt(tau);
-    walk(b, [[to.c, at.r], [to.c, to.r]], null, secs);
+    walk(b, [[at.c, to.r], [to.c, to.r]], null, secs);
     b.sq.d = at.d;
     b.tau = tau;
     b.mode = 'trip'; b.trip = secs; b.tripFull = secs; b.cut = null; b.stop = null;
@@ -1041,11 +1038,6 @@ export function sail(o: SimOptions, sea?: Sea): SimRun {
     if (c.id === 'wreck') { b.purse = true; b.owed = b.since * (1 + sailWorth(b)) + b.lost - (tOutOf(b, c) - c.tIn); b.since = 0; b.lost = 0; }
     else record(b, c.id, true);
     b.tau = c.id === 'wreck' ? progressAt(end) : tOutOf(b, c); b.cut = null;
-    // (rushing the gap, the tight water past it: one move too many)
-    // (rushing it on a combo most of all; run a square at a time, half as often; its guns shot quiet, or
-    // their guard paid, she goes through at her leisure)
-    const run = b.gap === 'run' || (b.gap === 'bribe' && !b.paid), leisure = b.gap === 'shot' || b.paid;
-    if (c.id === 'guns' && snakes && !leisure && rand() < SIM.SNAKE.tight[b.best] * (run ? 0.5 : 1)) swept(b, 'tight', TIGHT_BACK, sweep(RC.SNAKES.TIGHT.length));
     // (the coins aboard, out of a wreck past the gate: on to the gate, as any racer who comes onto leg 1 past it
     // is, the few squares back to it part of the way through)
     if (c.id === 'wreck' && b.gap === 'bribe' && !b.done.has('guns') && b.tau >= cuts.guns.tIn) gap(b);
@@ -1067,32 +1059,35 @@ export function sail(o: SimOptions, sea?: Sea): SimRun {
     toHelm(b, here(b));
     b.cut = null; b.mode = 'sail'; b.stop = null;
   };
-  /** Through the gap, by her route: rushed past on her combo, past its guns quietened, its guard paid
-      (with the wreck's coins aboard: a moment at its gate, and she's towed through), or run. */
+  /** Through the gap, by her route: past its guns quietened, its guard paid (with the wreck's coins aboard: a
+      moment at its gate, and she's towed through), or run. */
   const gap = (b: Bot) => {
     const c = cuts.guns;
     if (b.cut !== c) { b.since = 0; b.cut = c; }
     if (b.gap === 'bribe' && b.purse) { b.paid = true; return through(b, BRIBE.PAY + TOW); }
-    if (b.gap === 'combo') {
-      if (b.combo) return through(b, c.trip);
-      // (not built yet: stop short, off its marks, and finish it)
-      go(b, c, b.move?.left ?? 0); b.move = null; return;
-    }
     if (b.gap === 'shot') {
       const short = 2 * need - shots(b);
       if (short > 0) {
         go(b, c, (b.move?.left ?? draw(SIM.PUZZLE.load, b.best)) + Math.max(0, short - 1) * draw(SIM.PUZZLE.load, b.best));
         b.move = null; return;
       }
+      // (her broadsides at its guns, two a gun, from beside the fort: the first rouses them, and the gun she's
+      // still to quieten fires on her, sitting there (13 Nov: as in the den). A quietening's one hit on a gun, the
+      // dents before it none: den-race.ts, GunGap.shot)
       field.racers[b.i].shots -= 2 * need;
-      for (const g of guns) { g.hits += need; g.quiet = g.hits >= CHECK.WRECK ? 0 : CHECK.QUIET; }
+      for (const g of guns) { g.hits += 1; g.quiet = g.hits >= CHECK.WRECK ? 0 : CHECK.QUIET; }
       roused = true;
-      return through(b, SIM.GAP.RUN);
+      let secs = SIM.GAP.RUN + (2 * need - 1) * GUNS.RUN_OUT;
+      if (rand() < SIM.GAP.STILL_HIT) { secs += gatePatch(b); b.res.hitsTaken++; events.push({ kind: 'shot', racer: -1, cells: [], hit: b.i }); }
+      return through(b, secs);
     }
-    // (run: a live gun that hasn't holed her yet may, once, as she goes through square by square)
+    // (run: each live gun that hasn't holed her yet may, as she goes through square by square: both of them, one
+    // after the other, since 13 Nov: GunGap.spares)
     let secs = SIM.GAP.RUN;
-    const g = guns.findIndex((x, k) => live(x) && !scored.has(`${k},${b.i}`));
-    if (g >= 0 && rand() < SIM.GAP.RUN_HIT) { scored.add(`${g},${b.i}`); secs += patchTime(b, b.best); b.res.hitsTaken++; events.push({ kind: 'shot', racer: -1, cells: [], hit: b.i }); }
+    guns.forEach((x, g) => {
+      if (!live(x) || scored.has(`${g},${b.i}`) || rand() >= SIM.GAP.RUN_HIT) return;
+      scored.add(`${g},${b.i}`); secs += gatePatch(b); b.res.hitsTaken++; events.push({ kind: 'shot', racer: -1, cells: [], hit: b.i });
+    });
     through(b, secs);
   };
   /** A puzzle done at a shortcut: through, or (a Vegas) through if it comes off. */
@@ -1100,8 +1095,7 @@ export function sail(o: SimOptions, sea?: Sea): SimRun {
     const c = b.cut!;
     if (c.id === 'guns') {
       b.stop = null;
-      if (b.gap === 'combo') b.combo = true;
-      else field.load(b.i, 2 * need - shots(b));
+      field.load(b.i, 2 * need - shots(b));
       return gap(b);
     }
     // (the starlit door opened by her Navigation: through the tunnel she goes, one stretch, up its cleft onto
@@ -1219,18 +1213,17 @@ export function sail(o: SimOptions, sea?: Sea): SimRun {
       } else if (b.mode === 'sail') {
         // On her spot on the line still, giving way to a racer beside her.
         if (b.delay > 0) { b.delay -= dt; continue; }
-        // Puzzling on the move: loading a shot by Gunnery, or building a combo for a gap (on her Sailing
-        // board, its clears carrying her as ever).
+        // Puzzling on the move: loading a shot by Gunnery, or building a Double or Triple for a gap (on her
+        // Sailing board, its clears carrying her as ever).
         if (!b.move && b.style.reload && shots(b) < FIELD.SHOTS) b.move = { kind: 'load', left: draw(SIM.PUZZLE.load, b.skill) };
-        // (the next Double or Triple her route hops, built on the move, once the gap's combo's done with)
+        // (the next Double or Triple her route hops, built on the move)
         const hopId = b.cuts.find((id) => (id === 'double' || id === 'triple') && !b.done.has(id) && !b.ready.has(id));
-        if (!b.move && hopId && (b.gap !== 'combo' || b.done.has('guns'))) b.move = { kind: 'hop', id: hopId, left: draw(SIM.PUZZLE[hopId as 'double' | 'triple'], b.best) };
+        if (!b.move && hopId) b.move = { kind: 'hop', id: hopId, left: draw(SIM.PUZZLE[hopId as 'double' | 'triple'], b.best) };
         const loading = b.move?.kind === 'load';
         if (b.move) {
           b.move.left -= dt;
           if (b.move.left <= 0) {
-            if (b.move.kind === 'combo') { b.combo = true; b.move = null; }
-            else if (b.move.kind === 'hop') { b.ready.add(b.move.id!); b.move = null; }
+            if (b.move.kind === 'hop') { b.ready.add(b.move.id!); b.move = null; }
             else {
               field.load(b.i);
               const rocks = b.cuts.includes('rocks') && !b.done.has('rocks') && !rocksDown(field) ? RACE.ROCKS.HITS - field.rocks - shots(b) : 0;

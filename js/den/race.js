@@ -38,6 +38,7 @@ import { fieldWorld, fieldTick, fieldHome, fieldShot, fieldHit, fieldAt, fieldRe
 import { forageWorld, forageKey, foragePrompt, forageHolds, forageTick, forageReset, forageCam, forageHover, forageClick } from './race-forage.js';
 import { bribeWorld, bribeKey, bribePrompt, bribeSpares, bribeTick, bribeReset, gateGun } from './race-bribe.js';
 import { rocksWorld, rocksShot, rocksTick, rocksReset } from './race-rocks.js';
+import { bayWorld, moleSquares, FORT_H } from './race-bay.js';
 import { netKey, netPrompt, netTick, netBefore, netInTick } from './race-net.js';
 import { NET } from '../race-net.js';
 import { planStep, planTick, planReset, planKey } from './race-plan.js';
@@ -92,7 +93,7 @@ function land(g) {
   RC.LAND.forEach((sq, i) => {
     const L = LOOK[i];
     for (const [c, r] of sq) {
-      if (doorSquares.has(`${c},${r}`)) continue;
+      if (doorSquares.has(`${c},${r}`) || moleSquares.has(`${c},${r}`)) continue;   // (the Empire's mole and fort: race-bay.js)
       const h = Math.min(L.h ?? bankTop(c, r), gapShoulder(c, r));
       square(c, r, h, L.low ? sandM : stoneM, L.low ? lowGrass : grassM);
       if (L.low && (c * 7 + r * 3) % 4 === 0) g.add(rock(seaX(c) + (Math.random() - 0.5) * 2.5, h, seaZ(r) + (Math.random() - 0.5) * 2.5, 0.5 + Math.random() * 0.4));
@@ -172,12 +173,12 @@ function build() {
   for (const [c, r] of RC.FIELD.HOP.ROCKS) for (let k = 0; k < 2; k++) W.g.add(rock(seaX(c) + (Math.random() - 0.5) * 2, 0.2, seaZ(r) + (Math.random() - 0.5) * 2, 0.9 + Math.random() * 0.4));
   // The gun gap: a turret either side on the spit, on the Empire's bastions (an imperial gate:
   // race-bribe.js), and the squares they're trained on.
-  for (const [c, r] of RC.GUNS.at) { const V = gateGun(); V.g.position.set(seaX(c), LOOK[0].h - 0.3, seaZ(r)); W.g.add(V.g); W.guns.push(V); }
+  for (const [c, r] of RC.GUNS.at) { const V = gateGun(); V.g.position.set(seaX(c), FORT_H - 0.3, seaZ(r)); W.g.add(V.g); W.guns.push(V); }
   RC.GUNS.marks.forEach((ms) => ms.forEach(([c, r]) => { const m = turretMark(seaX(c), seaZ(r)); W.g.add(m.g); W.rings.push({ c, r, m: m.m }); }));
   // The crane's footing on the neck.
   W.crane = craneMesh(); W.g.add(W.crane.g);
   scene.add(W.g);
-  startWorld(); marksWorld(); forageWorld(); bribeWorld(); fieldWorld(); rocksWorld(W.g);
+  startWorld(); marksWorld(); forageWorld(); bribeWorld(); bayWorld(); fieldWorld(); rocksWorld(W.g);
   return W;
 }
 /** Built the first time the sea's drawn (sailing.js). */
@@ -343,7 +344,8 @@ export function raceShot(hit, at) {
   const e = race.gap.shot(...hit);
   if (!e) return false;
   const fight = e.first ? ' It\'s a fight now: their guns are on her' : '';
-  if (e.did === 'quiet') toast(`A hit on the gun! That's quietened it for a while (${race.gap.guns[e.gun].left()} more to wreck it).${fight}`);
+  if (e.did === 'dented') toast(`A hit on the gun! It shrugs it off: one more to quieten it.${fight}`);
+  else if (e.did === 'quiet') toast(`A hit on the gun! That's quietened it for a while (${race.gap.guns[e.gun].left()} more to wreck it).${fight}`);
   else if (e.did === null) toast('A hit on the wrecked gun!');
   else {
     turretWrecked(race.W.guns[e.gun], at);
@@ -447,12 +449,13 @@ export function raceTick(dt) {
     if (R.state !== 'done') race.said.again = false;
     // [A] the gun gap's guns fire on her marks (and on her, once it's a fight); a hit holes her.
     // (never in a sheltered notch: the wreck's, beside the gate since 13 Nov)
-    for (const e of race.gap.tick(dt, h.spared() || bribeSpares() || sheltered(h.pose.c, h.pose.r) ? null : p, h.pose)) {
+    // (and run, both its guns hole her, one after the other: GunGap.spares, 13 Nov)
+    for (const e of race.gap.tick(dt, race.gap.spares(h) || bribeSpares() || sheltered(h.pose.c, h.pose.r) ? null : p, h.pose)) {
       const V = W.guns[e.gun], where = V3(seaX(e.to[0]), 0, seaZ(e.to[1]));
       if (e.kind === 'fire') { turretFire(V, e, where); continue; }
       turretLand(V, e);
       if (!e.hit) continue;
-      h.hit(deckHoleShape());
+      h.hit(deckHoleShape(RACE.GAP.HOLE));   // (the gate's heavy guns: a bigger hole)
       toast(e.aimed ? 'Hit! She\'s holed: patch her to sail on' : 'Hit! That gun had her on its mark: patch her to sail on', true);
     }
     // [B] idle in the headwind gap, she's blown back out of it.

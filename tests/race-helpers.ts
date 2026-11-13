@@ -42,10 +42,11 @@ export function hop(h: Helm, n: number, d = h.pose.d, each?: () => void): number
     second row beside it. */
 export const BEFORE_MID: [number, number] = [RC.SNAKES.MID[0][0] - 1, S[2].r + 1];
 /** The long way, from `h`'s pose on the starting line to over the finish, every shortcut shut: round
-    each spit's end, hopping the trade wind back up the course with a Double. `each` after every tick. */
+    each spit's end (spit 1's by way of the fort's bay since 13 Nov: round its mole's end and on round buoy 1),
+    hopping the trade wind back up the course with a Double. `each` after every tick. */
 export function longWay(h: Helm, each?: () => void): number {
   let t = 0;
-  for (const p of [[SAIL.COLS - 2, P[0].r0], [3, P[1].r1], BEFORE_MID] as [number, number][]) t += sail(h, p, 600, each);
+  for (const p of [[SAIL.COLS - 2, P[0].r0], RC.BAY.TURN, [SAIL.COLS - 2, P[0].r1], [3, P[1].r1], BEFORE_MID] as [number, number][]) t += sail(h, p, 600, each);
   t += hop(h, 2, 1, each);
   for (const p of [[SAIL.COLS - 2, P[2].r1], [3, P[3].r1], [SAIL.COLS - 2, P[4].r1], RC.FINISH] as [number, number][]) t += sail(h, p, 600, each);
   return t;

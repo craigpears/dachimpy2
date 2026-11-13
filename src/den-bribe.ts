@@ -10,15 +10,19 @@
    all the ideas in there ... to show how many different ways you have of really getting through the
    course." So (RACE.md §3):
    - The gun gap on the first spit is an imperial gate: its two guns trained on the way through, as ever,
-     and a guard at its gatehouse. Its ways through are as they were (a heavy combo rushes her past, or
-     shoot its guns quiet, or run it and be holed), and a third: pay the guard, and the gate lets her
+     and a guard at its gatehouse. Its ways through: shoot its guns quiet, or run it and be holed (by both its
+     guns since 13 Nov; rushing it on a heavy combo went the same day), and a third: pay the guard, and the gate lets her
      through: its guns hold their fire on her (src/den-race.ts, GunGap: ticked with no ship to fire on) and
      his men warp her through on the gate's line (towPath), out of the gatehouse's light airs and out of
      anyone's reach while she's towed, as a gust carries her. Without the tow she'd ghost through the light
      airs as slowly as running it, and the bribe would never be worth its haul (src/race-sim.ts).
-   - The money's apart from the gate: an old wreck run aground at the back of a notch off leg 1, just along
-     from the gate (13 Nov: past it, where most of the field comes down onto leg 1 by the start's hop; it was
-     five columns before it, out of sailing's reach from most of the line), where she lies to haul up its
+   - Since 13 Nov (an experiment: RACE.md §3, "The gate across the fort's bay") the gate's through the Empire's
+     fort at the root of a mole across a bay in spit 1, by the bend past leg 1's end: the long way goes right
+     round the bay, the gate cuts straight through to buoy 1 on its far side. So it saves a lot, and the price
+     is a bigger haul.
+   - The money's apart from the gate: an old wreck run aground at the back of a notch off leg 1, on the way to
+     the gate from wherever the field comes down onto the leg (13 Nov: where most of it comes down by the
+     start's hop; it was five columns before that, out of sailing's reach from most of the line), where she lies to haul up its
      coins by Treasure Haul (src/treasure-haul.ts, the real puzzle; the board laid on the water beside her, as
      at the den's other wrecks). Every racer goes for its coins before the gate, wherever it lies
      (src/race-plan.ts, goalOf). The notch is sheltered (as the barrier's and the crane's are:
@@ -26,8 +30,7 @@
      there in safety and spend it at the exposed gate in a moment.
    - The price (BRIBE.PRICE): so many coins, the board's coins hauled up and nothing else down there (no
      chest: a chest takes twenty moves and more to raise, worth far more than the gap saves). Set by the
-     simulation (src/race-sim.ts, RACE.md §8) so the bribe's way through the gap wins about its fair share:
-     the gap's a small shortcut, so it's a small haul.
+     simulation (src/race-sim.ts, RACE.md §8) so the bribe's way through the gap wins about its fair share.
    - Each racer hauls her own (as she clears her own barrier: RACE.md §12), one at a time in the notch
      (first come, first served: FIELD.SPOTS's 'wreck'); a new race, the wreck's coins are back.
    Nothing here knows of the 3D or the field: what you carry, the gate's answer, the guard's script. */
@@ -38,7 +41,7 @@ import { HAUL } from './den-haul.js';
 import { HALT, GRUMBLES, PAID, SHORT, AGAIN } from './lines/gate-guard.js';
 import type { Script } from './chatter.js';
 
-const RB = LAY.RACE.BRIBE, LEG = LAY.RACE.STRETCHES[0];
+const RB = LAY.RACE.BRIBE;
 
 export const BRIBE = {
   /** The guard's price: coins hauled up from the wreck. A player who plays any line he sees brings this
@@ -66,16 +69,17 @@ export const BRIBE = {
 
 /** In the wreck's notch, where she lies to haul. */
 export const atWreck = (c: number, r: number): boolean => Math.round(c) === RB.NOTCH[0] && Math.round(r) === RB.NOTCH[1];
-/** By the gate, where she pays: on leg 1, in front of the gun gap's way in or a square either side. */
+/** By the gate, where she pays: in front of its way in (on the bay's north side since 13 Nov: LAY.RACE.BAY), or
+    a square either side. */
 export const atGate = (c: number, r: number): boolean => {
   const x = Math.round(c), y = Math.round(r);
-  return Math.abs(x - RB.GATE[0]) <= 1 && (y === LEG.r || y === LEG.r + 1);
+  return Math.abs(x - RB.GATE[0]) <= 1 && y === RB.GATE[1];
 };
 /** Within earshot of the guard. */
 export const inEarshot = (c: number, r: number): boolean => Math.max(Math.abs(c - RB.GATE[0]), Math.abs(r - RB.GATE[1])) <= BRIBE.EARSHOT;
 
-/** The tow through the gate once she's paid, from where she is by it: along the leg to the gate's way in,
-    through the gap's three squares, and out onto leg 2, facing down (a turn to port is the way on). A gust's
+/** The tow through the gate once she's paid, from where she is by it: along the bay's north side to the gate's
+    way in, through the fort's three squares, and out by buoy 1, facing down (on down to leg 2 is the way on). A gust's
     squares (Helm.gust). */
 export function towPath(from: { c: number; r: number }): { c: number; r: number; d: number }[] {
   const [gc] = RB.GATE, out: { c: number; r: number; d: number }[] = [];

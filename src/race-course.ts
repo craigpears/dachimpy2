@@ -17,7 +17,10 @@
    Fixed for now: the starlit door (DOOR_COLS: on every course, where it is on the den's own), the rows (each
    leg two deep, each spit as deep as it is: the whirlpool channel's depth is what makes it a Vegas), the
    start's field (laid fresh from each race's seed: src/start-field.ts) and its hop, the left-hand trade
-   wind's gentle loops, the gun gap's Quad, the rocks' three hits (ROCKS in src/den-race.ts).
+   wind's gentle loops, the rocks' three hits (ROCKS in src/den-race.ts).
+   The fort's bay (13 Nov, an experiment: RACE.md §3): spit 1 holds a bay the long way goes round, the Empire's
+   mole out across it from the fort at the bend, the gate through the fort by buoy 1. Its `gun` is where the mole
+   ends (the bay's head): further out, a bigger bay, and the gate saves more.
    No gambles since 12 Nov (RACE.md §4, "No gambles"): the veiled wind and the turning pool are gone, and so
    are their numbers here (a share link made before then opens the den's own course). */
 
@@ -32,7 +35,8 @@ export interface Course {
       (their land runs from the left-hand edge to the column before it), 2 and 4 on the left (their land
       starts two columns past it). */
   buoys: number[];
-  /** Spit 1: the gun gap's gate, and the wreck in its notch (the bribe's coins). */
+  /** Spit 1: the fort's bay, the column its mole ends at (the gate's at buoy 1's, through the fort at the mole's
+      root: 13 Nov), and the wreck in its notch off leg 1 (the bribe's coins). */
   gun: number; wreck: number;
   /** Spit 2: the headwind gap (two columns, its dog-leg), the Double's gap, and the trade wind back (a
       gentle snake across leg 3, its loop up into spit 2: `mid` is its column on the leg, the loop three
@@ -60,15 +64,18 @@ export interface Course {
     The wreck just along from the gate since 13 Nov (it was at 14, five columns before it: out of sailing's reach
     from most of the line), where most of the field comes down onto leg 1 by the start's hop; and the guard's
     price 20 coins (it was 40: the bribe's in and out of a dead-end notch and back to the gate cost it what the
-    other stopped shortcuts don't, RACE.md §8). */
+    other stopped shortcuts don't, RACE.md §8).
+    The fort's bay (13 Nov, an experiment: RACE.md §3): its mole out to column 16, so the long way round it is
+    long and the gate through the fort at its root saves about what the whirlpools' Vegas does; the wreck where
+    it was, column 22, on leg 1 on the way to the gate from wherever the field comes down onto it. */
 export const DEFAULT_COURSE: Course = {
   buoys: [25, 2, 25, 2, 25],
-  gun: 19, wreck: 22,
+  gun: 16, wreck: 22,
   head: 12, double: 6, mid: 23,
   whirl: 12, rocks: 17, forage: 19,
   lock: 11,
   crane: 16, triple: 21, finish: 4,
-  clears: 6, frames: 'small', bundles: 2, coins: 20,
+  clears: 6, frames: 'small', bundles: 2, coins: 100,
 };
 /** The starlit door's two columns (12 Nov, public: fixed in place, not edited): its face on spit 2 off leg 2, its
     tunnel straight on under the course, up onto leg 3 and leg 5 (LAY.RACE.DOOR). Nothing else may cut through
@@ -105,7 +112,7 @@ export const COL_KEYS: ColKey[] = ['gun', 'wreck', 'head', 'double', 'mid', 'whi
     whirlpools and the way home to its left; the locks their berth to the right; the gun gap its guns either
     side. */
 export const PLACE: Record<ColKey, { spit: number; span: [number, number] }> = {
-  gun: { spit: 0, span: [-1, 1] }, wreck: { spit: 0, span: [0, 0] },
+  gun: { spit: 0, span: [0, 0] }, wreck: { spit: 0, span: [0, 0] },
   head: { spit: 1, span: [0, 1] }, double: { spit: 1, span: [0, 0] }, mid: { spit: 1, span: [-3, 0] },
   whirl: { spit: 2, span: [-3, 0] }, rocks: { spit: 2, span: [0, 0] }, forage: { spit: 2, span: [0, 0] },
   lock: { spit: 3, span: [0, 2] },
@@ -128,12 +135,13 @@ export function rangeOf(k: Course, id: ColKey): [number, number] {
     // (leg 1's long way starts at the starting line's column 13: the gate and the wreck past it; the wreck either
     // side of the gate, a column of land between (problems): every racer goes for its coins first, wherever it is,
     // back along the leg if need be: src/race-plan.ts, goalOf)
-    // (its tight water along leg 2 clear of the starlit door's water)
-    case 'gun': lo = Math.max(lo, DOOR_COLS[1] + 2); hi = Math.min(hi, b[0] - 2); break;
+    // (the fort's bay: its mole's end, a turn of two squares and land for the town past it, the bay at least six
+    // columns long to buoy 1's)
+    case 'gun': lo = 5; hi = b[0] - 6; break;
     case 'wreck': lo = Math.max(lo, 13); break;
-    // (from leg 2, before the tight water past the gun gap, out onto leg 3 before buoy 3)
-    case 'head': hi = Math.min(hi, k.gun - 3, b[2] - 3); break;
-    case 'double': hi = Math.min(hi, k.gun - 3, b[2] - 2); break;
+    // (from leg 2, out onto leg 3 before buoy 3)
+    case 'head': hi = Math.min(hi, b[2] - 3); break;
+    case 'double': hi = Math.min(hi, b[2] - 2); break;
     case 'mid': lo = Math.max(lo, b[1] + 6); hi = Math.min(hi, b[2] - 2); break;
     // (from leg 3, onto leg 4 past its zigzag)
     case 'whirl': lo = Math.max(lo, b[3] + 8, b[1] + 4); hi = Math.min(hi, b[2] - 2); break;
@@ -164,7 +172,8 @@ export function problems(k: Course): string[] {
   }
   // Each spit's ways through, a column of land apart.
   const bySpit: [number, number, string][][] = [[], [], [], [], []];
-  for (const id of COL_KEYS) if (PLACE[id].spit < 5) bySpit[PLACE[id].spit].push([...cols(k, id), NAMES[id]]);
+  // (the fort's bay, `gun`, is spit 1's own water, not a way through: the wreck's notch is off leg 1 above it)
+  for (const id of COL_KEYS) if (PLACE[id].spit < 5 && id !== 'gun') bySpit[PLACE[id].spit].push([...cols(k, id), NAMES[id]]);
   // (the starlit door, fixed in place: its face and its cleft in spit 2)
   bySpit[1].push([DOOR_COLS[0], DOOR_COLS[1], DOOR_NAME]);
   bySpit.forEach((spans, s) => {
@@ -195,7 +204,7 @@ export function problems(k: Course): string[] {
 
 /** Each feature's name, as the editor shows it. */
 export const NAMES: Record<ColKey, string> = {
-  gun: 'The imperial gate', wreck: 'The wreck',
+  gun: 'The imperial gate and the fort\'s bay', wreck: 'The wreck',
   head: 'The headwind gap', double: 'The Double\'s gap', mid: 'The trade wind back',
   whirl: 'The whirlpool channel', rocks: 'The rocks', forage: 'The barrier of driftwood',
   lock: 'The locks',

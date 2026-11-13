@@ -66,7 +66,7 @@ export const WATCH = {
 /** A racer's board, while she puzzles: which puzzle it is, and why (what the bar says of it). */
 export type Puzzle = 'sailing' | 'rowing' | 'bilge' | 'foraging' | 'gunnery' | 'carpentry';
 export type Why =
-  | 'pilot' | 'combo' | 'double' | 'triple' | 'vegas'
+  | 'pilot' | 'double' | 'triple' | 'vegas'
   | 'row' | 'lock' | 'barrier' | 'load' | 'crane' | 'patch';
 export interface BoardNow {
   puzzle: Puzzle;
@@ -86,7 +86,7 @@ export function boardOf(x: BotInfo | null): BoardNow | null {
   if (x.mode === 'daze') return at('carpentry', 'patch', x.daze, PATCH.PIECES * SIM.PUZZLE.piece);
   if (x.mode === 'stop') {
     switch (x.cut) {
-      case 'guns': return x.route === 'gap-shot' ? at('gunnery', 'load') : at('sailing', 'combo');
+      case 'guns': return at('gunnery', 'load');
       case 'headwind': return at('rowing', 'row');
       case 'double': return at('sailing', 'double');
       case 'triple': return at('sailing', 'triple');
@@ -100,7 +100,6 @@ export function boardOf(x: BotInfo | null): BoardNow | null {
   if (x.mode === 'sail') {
     const m = x.move;
     if (m?.kind === 'load') return at('gunnery', 'load', m.left, SIM.PUZZLE.load);
-    if (m?.kind === 'combo') return at('sailing', 'combo', m.left, SIM.PUZZLE.combo);
     if (m?.kind === 'hop') return at('sailing', m.id === 'triple' ? 'triple' : 'double', m.left, SIM.PUZZLE[m.id === 'triple' ? 'triple' : 'double']);
     return at('sailing', 'pilot', Infinity, Infinity);
   }
@@ -152,7 +151,7 @@ const WHERE: Record<CutId, string> = {
   door: 'the long way',   // (never: it's a secret, and nobody watched takes it)
 };
 const STOPPED: Record<CutId, (x: BotInfo) => string> = {
-  guns: (x) => (x.route === 'gap-shot' ? 'loading shots for the gun gap (Gunnery)' : 'building a big combo for the gun gap (Sailing)'),
+  guns: () => 'loading shots for the gun gap (Gunnery)',
   wreck: () => 'hauling coins from the wreck for the bribe (Treasure Haul)',
   headwind: () => 'rowing up the headwind gap',
   double: () => 'building a Double for the gap (Sailing)',
@@ -166,7 +165,7 @@ const STOPPED: Record<CutId, (x: BotInfo) => string> = {
   door: () => 'sailing the long way',
 };
 const CARRIED: Record<CutId, string> = {
-  guns: 'rushing the gun gap', wreck: 'off from the wreck, coins aboard', headwind: 'out of the headwind gap', double: 'hopping the gap on her Double',
+  guns: 'through the imperial gate, across the fort\'s bay', wreck: 'off from the wreck, coins aboard', headwind: 'out of the headwind gap', double: 'hopping the gap on her Double',
   whirls: 'zooming over the whirlpools on her Vegas!', rocks: 'through the gap the rocks were blasted out of', forage: 'through the barrier\'s gap', locks: 'up the locks and down',
   crane: 'hauled over the neck by the crane', triple: 'hopping the gap on her Triple', zigzag: 'hopping the zigzag\'s headwinds',
   door: 'sailing the long way',
@@ -189,7 +188,6 @@ export function doing(x: BotInfo | null, next: CutId | null, home: number | null
   if (m === 'trip') return x.cut ? CARRIED[x.cut] : 'carried a few squares back by the wind!';
   if (m === 'stop' && x.cut) return STOPPED[x.cut](x);
   if (x.hop > 0) return 'lining up a Double over the trade wind';
-  if (x.move?.kind === 'combo') return 'building a big combo for the gun gap (Sailing, on the move)';
   if (x.move?.kind === 'hop') return `building a ${x.move.id === 'triple' ? 'Triple' : 'Double'} on the move (Sailing)`;
   if (x.move?.kind === 'load') return 'loading a shot by Gunnery, under way';
   if (x.route === 'long' || !next || next === 'zigzag') return 'sailing the long way (Sailing on the pilot)';

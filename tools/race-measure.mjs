@@ -37,6 +37,9 @@ export function longWay(spot = RACE.LONG_SPOT, log = false) {
   let t = 0;
   const go = (at) => { const dt = to(h, at); t += dt; legs.push([at.join(','), dt.toFixed(1), `${h.pose.c},${h.pose.r}`]); };
   go([SAIL.COLS - 2, P[0].r0]);
+  // (round the fort's bay since 13 Nov: round its mole's end, and on round buoy 1)
+  go(RC.BAY.TURN);
+  go([SAIL.COLS - 2, P[0].r1]);
   go([3, P[1].r1]);
   go([RC.SNAKES.MID[0][0] - 1, S[2].r + 1]);
   h.pose.d = 1;
@@ -78,7 +81,8 @@ if (process.argv[1].endsWith('race-measure.mjs')) {
   // Each shortcut: the long way between, and her trip through.
   const G = RC.GUNS.way, B = RC.HEADWIND, M = RC.WHIRLS.MOUTH, Lk = RC.LOCKS, E = RC.CRANE, F = RC.FORAGE, D2 = RC.DOUBLE.WAY, T3 = RC.TRIPLE, Dr = RC.DOOR, Kr = RC.ROCKS;
   const bends = {
-    guns: [{ c: G[0][0], r: G[0][1] - 2, d: 1 }, [G[0][0], G[2][1] + 1]],
+    // (the gate through the fort, from leg 1's end to buoy 1: the long way round the fort's bay, 13 Nov)
+    guns: [{ c: G[0][0], r: S[0].r + 1, d: 1 }, [G[0][0], G[2][1] + 1]],
     headwind: [{ c: B[0][0], r: B[0][1] - 1, d: 3 }, [B[3][0], B[3][1] + 2]],
     double: [{ c: D2[0][0], r: D2[0][1] - 1, d: 3 }, [D2[2][0], D2[2][1] + 1]],
     whirls: [{ ...M }, RC.WHIRLS.OUT],
@@ -90,7 +94,8 @@ if (process.argv[1].endsWith('race-measure.mjs')) {
     door: [{ c: Dr.OFF[0][0], r: Dr.OFF[0][1], d: 3 }, Dr.EXITS[Dr.EXITS.length - 1].INTO[0]],
   };
   const trips = {
-    guns: () => { const h = new Helm(sea, { ...bends.guns[0], r: bends.guns[0].r + 1, d: 0 }); return hop(h, 4) + 0.5; },
+    // (run square by square, through the fort's light airs; the Quad that rushed it went, 13 Nov)
+    guns: () => { const h = new Helm(sea, bends.guns[0]); return to(h, bends.guns[1]); },
     run: () => { const h = new Helm(sea, bends.guns[0]); return to(h, bends.guns[1]); },
     headwind: () => 1 + (B.length + 2) * WIND.OARS,
     double: () => { const h = new Helm(sea, bends.double[0]); h.gust(gustPath(sea, h.pose, runFor(2))); return settle(h) + to(h, bends.double[1]); },   // (lined up from the leg: 12 Nov)
