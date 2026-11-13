@@ -1683,6 +1683,32 @@ columns 8 and 9. Like again, something really has gone wrong to even be in that 
 putting my focus on those trapped white pieces." The verdict on `P6` (it replaces the one first drawn from the
 twenty-sixth note): one of those two top whites freed, and not by the diamond.
 
+**The thirty-fourth note: reading the board's state, and how many columns it can still fill (the user, 13 Nov, on
+P7).** CC^8 at 589 s, 7.8 s before column 10 goes: whites everywhere, blacks low in the middle columns, browns along
+the top; the bot waits ("the column is ready"). "This isn't going to be specific test case answer, but it's going to
+probably be fit into more the strategy calculations ... if you think of an enum like there should be like an enum
+calculation that then feeds into other areas ... there is risk of not completing a full column ... I'm no longer
+thinking about how many pieces can I just generally get over to the left. I'm really starting to get specific about
+right how many columns do I think I can actually fill before I then need to start rescuing things out in the middle.
+So in this one, biggest risk I see is there are a lot of blacks trapped at the bottom. Especially columns five and six,
+they are at risk of being stranded and ruining the crystal clear ... I'll do a quick and easy moves to start with to
+fill in those columns on the right hand side. So those two blacks I'd pull down into columns 8 and 9. Browns can go
+up. That leaves about 3 or 4 kind of white spots ... my risk analysis is also looking ... at how many pieces are
+stuck. So I guess that's definitely a metric that's just really important on a board ... blacks all at the bottom,
+browns at the top, there's just not enough movement. So I'd be filling those two columns however I could and then
+getting things out of the way to the left as I said, especially those blacks and the brown at the top of column 5
+... That's a fantastic example of just things have gone really wrong, and then it would be into damage control, but
+you could still get like a crystal clear 6 or" (the message was cut off there).
+
+So the risk reader is more than a ranking of whites: it reads the board's state as one of a few named states (an
+enum: say healthy, at risk, damage control) that every other choice reads. What feeds it: how many pieces are stuck
+(blacks at the bottom and browns at the top, no movement); how many columns the junk on the board can still fill
+before the middle needs rescuing; and junk at risk of being stranded among the whites (blacks low in the middle
+columns, a brown at the top of one), which ruins the Crystal Clear. In damage control: the quick, easy fills first
+(blacks down and browns up into the columns by the fire, however they can), then the stranded junk out of the way to
+the left, aiming for the best chain still in reach, not the target. The verdict on `P7` (it replaces the one first
+drawn from the thirty-second note): it moves, its first drag filling a white's place in column 8 or 9.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
