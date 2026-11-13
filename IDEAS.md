@@ -2571,3 +2571,14 @@ make you really dizzy. We've tried porting carpentry to [mobile, to perfection?]
 played on a mobile phone with carpentry. That would be hilarious. That's fantastic as an idea." So: **Kikkit's
 Dizzy Carpentry**, an adventure of its own that has to be played on a phone, turning it to turn the pieces;
 Kikkit's joke being that Carpentry's been "ported to mobile" at last. (One of the little adventures, above.)
+
+## Dignity's tutorial: four-tier Duty Navigation in the werewolf den (13 Nov)
+
+A tutorial asked for by Dignity (the real pirate behind the checkpoint's commander; she): four-tier Duty Navigation,
+in the werewolf den. The user, 13 Nov: "I just wanted to make sure we had ... the 4-tier duty nav in the werewolf
+den to the kind of tutorials list that's been requested by Dignity." It hadn't been noted anywhere before this.
+The den already plays Duty Navigation (src/navigation.ts, its bots, the starlit door's three-star constellation),
+so the puzzle's there to teach from; Dignity, already in the den, the natural teacher. With its read version, as
+every tutorial has (RULES.md). To pin down with the user (or Dignity): what "four-tier" means here (four rings, a
+four-tier constellation, or the duty's tiers of difficulty), and what and where the werewolf den is (a place in
+Puzzle Pirates, or one to make), before anything's built.
