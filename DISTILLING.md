@@ -1676,6 +1676,12 @@ the gap? ... So I would be, yeah, fixing those top two in column 8, because thos
 the move itself seems fine, but again, it's missing the bigger danger and priority." The same lesson as P1 and P2: the
 whites at the top of the columns near the fire, with no way for junk to reach them, come first. The verdict on `P5`:
 one of column 8's top two whites freed.
+And on P6, CC^3 at 201 s, whites at the top of columns 8 and 9 with blacks under them; the bot played the diamond,
+two drags of five and six swaps from column 3: "Why are we doing these big, long, complicated moves? Like pull those
+blacks down at the bottom of column 8. Better yet, again, there are whites that are isolated and trapped at the top of
+columns 8 and 9. Like again, something really has gone wrong to even be in that situation. Absolutely, I would be
+putting my focus on those trapped white pieces." The verdict on `P6` (it replaces the one first drawn from the
+twenty-sixth note): one of those two top whites freed, and not by the diamond.
 
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?

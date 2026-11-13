@@ -230,9 +230,9 @@ export const VERDICTS: Readonly<Record<string, readonly Verdict[]>> = {
     expect: { freesAny: [[7, 0], [7, 1]], noBurn: true }, open: true,
   }],
   P6: [{
-    date: '13 Nov', from: 'DISTILLING.md, the twenty-sixth note',
-    note: 'A white at the top of the third column from the fire is in danger already: race junk into its place before it\'s walled in.',
-    expect: { frees: [7, 0] }, open: true,
+    date: '13 Nov',
+    note: "Why big, long, complicated moves? Pull the blacks down at the bottom of column 8. Better yet, the whites isolated and trapped at the top of columns 8 and 9 come first: something has gone wrong to even be in that situation, and all the focus goes on those trapped whites.",
+    expect: { freesAny: [[7, 0], [8, 0]], avoids: ['diamond'], noBurn: true }, open: true,
   }],
   P7: [{
     date: '13 Nov', from: 'DISTILLING.md, the thirty-second note',
