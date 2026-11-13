@@ -1721,6 +1721,16 @@ V sorted well before the late game. In the board's state (the thirty-fourth note
 left too long count as risk too. The verdict on `P8`: it moves, its first drag in column 9 or 10 taking a black up or a
 brown down.
 
+And on P9, CC^8's block phase at 102 s: the bot sweeps the brown at column 7, row 3 three swaps onto a white and lets
+go: "this feels like it's just stopped. Why not? ... I would keep dragging that down through the blacks to really
+reach the bottom. I think the better move would be dealing with the tail at the bottom left. So dragging those browns
+at the bottom of 7 and 8 just because then when you do come to that move at the top, you can drag that brown all the
+way down through ... yes, that is the relatively priority white piece that it's going for. So it's not bad, but I do
+think there's something to be said for the efficiency of sorting that bottom bit out and the kind of tail that you've
+got going on there." So in the block phase, a move that makes the next one longer and cleaner (the tail of junk at the
+V's bottom sorted first) can beat the priority white, and a sweep goes on while it can. The verdict on `P9`: its
+first drag a brown at the bottom of column 7 or 8 taken down.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
