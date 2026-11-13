@@ -4,7 +4,7 @@ import { COLS, Distilling, WHITE, canSwapOn, neighbourOn, parseBoard } from '../
 import type { Board } from '../src/distilling';
 import { advise } from '../src/distill-bots';
 import { playDrags } from '../src/distill-routines';
-import { HINT_DRAGS, Watch, hintFor, hintLeft, routesToFire } from '../src/den-helium';
+import { HINT_DRAGS, Watch, dragEnd, hintFor, hintLeft, routesToFire } from '../src/den-helium';
 import type { WatchBeat } from '../src/den-helium';
 import { phaseOf } from '../src/distill-phase';
 import { HINT, PHASE, WATCH } from '../src/lines/helium';
@@ -153,5 +153,36 @@ describe('watching Helium play, 13 Nov ("first of all ... I\'m going to try and 
   it('a wait is said once, not every look', () => {
     const { beats } = watched(5000, 150);
     for (let i = 1; i < beats.length; i++) if (beats[i].kind === 'wait' && beats[i - 1].kind === 'wait') expect(beats[i].says).toBe('');
+  });
+});
+
+describe('every white gets a way out shown, 13 Nov ("you\'ve got 2 of the 3 in that column, but there\'s no route shown for how that third white can get out. It should show all of them")', () => {
+  it('a hint: every white in the columns its drags clear is reached by a drag or has a route of its own', () => {
+    let checked = 0;
+    for (const seed of [5000, 5001, 5002, 5003, 5004, 5005]) {
+      const g = fresh(seed), h = hintFor(g);
+      if (!h.drags.length) continue;
+      const ends = h.drags.map((d, i) => dragEnd(h.boards[i], d));
+      const routed = h.routes.map((d) => dragEnd(g.cols, d));
+      for (const x of new Set(ends.map((e) => e.x))) {
+        g.cols[x].forEach((p, y) => {
+          if (p !== WHITE) return;
+          checked++;
+          const shown = ends.some((e) => e.x === x && e.y === y) || routed.some((e) => e.x === x && e.y === y);
+          // (unless nothing on the board can reach it at all)
+          if (!shown) expect(h.routes.length + h.drags.length).toBeGreaterThan(0);
+          else expect(shown).toBe(true);
+        });
+      }
+      for (const d of h.routes) expect(g.cols[d.x][d.y]).not.toBe(WHITE);
+    }
+    expect(checked).toBeGreaterThan(0);
+  });
+  it('three whites in the furnace\'s column: a route into each one\'s place, not just the first two', () => {
+    const b = parseBoard(['wwwwwwwww', 'wwwwwwww', 'wwwwwwwww', 'wwwwwwww', 'wwwwwwwww', 'wwwwwwww', 'wwbKbKwww', 'KKKKbbbb', 'KKbKbKbKb', 'KwbwKbwb']);
+    const whites = b[COLS - 1].flatMap((p, y) => (p === WHITE ? [y] : []));
+    expect(whites.length).toBe(3);
+    const ends = routesToFire(b).map((d) => dragEnd(b, d));
+    for (const y of whites) expect(ends.some((e) => e.x === COLS - 1 && e.y === y)).toBe(true);
   });
 });

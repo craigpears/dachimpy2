@@ -346,6 +346,8 @@ function arrowsTick() {
     const left = hintLeft(helium.hint, g.cols), done = helium.hint.drags.length - left.length;
     if (!left.length) helium.hint = null;
     for (const [i, d] of left.entries()) B.arrow(d, { n: helium.hint && helium.hint.drags.length > 1 ? done + i + 1 : null });
+    // (and a pale route for each other white in those columns, while you've not started on the hint)
+    if (helium.hint && done === 0) for (const d of helium.hint.routes) B.arrow(d, { color: 'route' });
   }
   if (helium.fretCol !== null && whitesInFurnace(g.cols)) {
     const key = `${g.columns.length}:${g.swaps}`;

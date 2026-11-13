@@ -21,7 +21,7 @@ import { LAY, type Pose } from './den-sail.js';
 import { shoreOf } from './den-isle.js';
 import { PACE, type Script } from './chatter.js';
 import { seeded } from './mirror-row.js';
-import { BURNT, COLS, Distilling, WHITE, goesUp, type Board } from './distilling.js';
+import { BURNT, COLS, Distilling, WHITE, goesUp, neighbourOn, type Board } from './distilling.js';
 import { HELIUM as HAND, advise, type Advice } from './distill-bots.js';
 import { ROUTINES, isJunk, playDrags } from './distill-routines.js';
 import { routesInto } from './distill-path.js';
@@ -420,17 +420,17 @@ export function askHelium(g: Pick<Distilling, 'cols' | 'chain' | 'timeLeft' | 'm
 export const HINT_DRAGS = 2;
 /** A hint: the planner's advice, their line (the phase and what they're working towards), the bar's note, the
     next drags to draw (not played), and the board before each and after the last, to follow you along them. */
-export interface Hint { advice: Advice | null; says: string; note: string; drags: Drag[]; boards: Board[] }
+export interface Hint { advice: Advice | null; says: string; note: string; drags: Drag[]; boards: Board[]; routes: Drag[] }
 const copyDrag = (d: Drag): Drag => ({ x: d.x, y: d.y, ways: [...d.ways] });
 /** The phase in the bar: its name and plan. */
 const phaseNote = (p: Phase): string => `${PHASES[p].label}: ${PHASES[p].plan}`;
 /** A hint on a board as it stands: the planner's next drag or two (its move's, then the move after it, looked
     ahead on the board the first leaves), and their line naming the phase. Nothing while it's sliding. */
 export function hintFor(g: Pick<Distilling, 'cols' | 'chain' | 'timeLeft' | 'movable'>): Hint {
-  if (!g.movable) return { advice: null, says: HELP_ELSE.busy, note: '', drags: [], boards: [] };
+  if (!g.movable) return { advice: null, says: HELP_ELSE.busy, note: '', drags: [], boards: [], routes: [] };
   const chain = g.chain, timeLeft = g.timeLeft(), a = advise({ cols: g.cols, chain, timeLeft });
   if (a.kind !== 'move' || !a.drags.length) {
-    return { advice: a, says: a.kind === 'move' ? HINT.none : helpFor(a).says, note: `${phaseNote(a.phase)} · now: ${a.label}`, drags: [], boards: [] };
+    return { advice: a, says: a.kind === 'move' ? HINT.none : helpFor(a).says, note: `${phaseNote(a.phase)} · now: ${a.label}`, drags: [], boards: [], routes: [] };
   }
   const drags = a.drags.slice(0, HINT_DRAGS).map(copyDrag), boards: Board[] = [copy(g.cols)];
   for (const d of drags) boards.push(playDrags(boards[boards.length - 1], [d])!);
@@ -441,7 +441,27 @@ export function hintFor(g: Pick<Distilling, 'cols' | 'chain' | 'timeLeft' | 'mov
       if (after) { drags.push(d); boards.push(after); }
     }
   }
-  return { advice: a, says: PHASE[a.phase].first, note: `${phaseNote(a.phase)} · next: ${a.label}: ${a.reason}`, drags, boards };
+  return { advice: a, says: PHASE[a.phase].first, note: `${phaseNote(a.phase)} · next: ${a.label}: ${a.reason}`, drags, boards, routes: otherWhites(g.cols, drags.map((d, i) => dragEnd(boards[i], d))) };
+}
+/** Where a drag's piece ends up, swap by swap. */
+export function dragEnd(cols: Board, d: Drag): { x: number; y: number } {
+  let x = d.x, y = d.y;
+  for (const w of d.ways) { const n = neighbourOn(cols, x, y, w); if (!n) break; [x, y] = n; }
+  return { x, y };
+}
+/** The hint's other whites: in the columns its drags clear, each white they don't reach gets a route of its own
+    (a junk piece's drag into its place, as the path search finds, on the board as it stands), so every white
+    there has a way out shown `ends` where the hint's drags end (the user, 13 Nov: "you've got 2 of the 3 in that column, but there's no route shown
+    for how that third white can get out. It should show all of them"). */
+export function otherWhites(cols: Board, ends: readonly { x: number; y: number }[]): Drag[] {
+  const out: Drag[] = [];
+  for (const x of new Set(ends.map((e) => e.x))) {
+    cols[x].forEach((p, y) => {
+      if (p !== WHITE || ends.some((e) => e.x === x && e.y === y)) return;
+      out.push(...routesInto(cols, { x, y, side: -1 }, HAND, 1));
+    });
+  }
+  return out;
 }
 const same = (a: Board, b: Board): boolean => a.length === b.length && a.every((c, x) => c.length === b[x].length && c.every((p, y) => p === b[x][y]));
 /** The hint's drags still to show on the board now: from the one you're up to, as you follow them; none once
@@ -454,9 +474,14 @@ export function hintLeft(h: Hint, cols: Board): Drag[] {
 /** Routes into the places of the whites in the furnace's column, the ones their nerves ring: for each, a few
     junk pieces' drags that would take its place (it then drops out left), the path search's (src/distill-path.ts,
     routesInto), cheapest first; at most `most` in all. */
-export function routesToFire(cols: Board, most = 4): Drag[] {
-  const out: Drag[] = [], x = COLS - 1;
-  cols[x].forEach((p, y) => { if (p === WHITE && out.length < most) out.push(...routesInto(cols, { x, y, side: -1 }, HAND, Math.min(2, most - out.length))); });
+export function routesToFire(cols: Board, most = 6): Drag[] {
+  const x = COLS - 1, whites = cols[x].flatMap((p, y) => (p === WHITE ? [y] : []));
+  // (one for every white first, so none is left without a way out; then a second each while there's room)
+  const out = whites.flatMap((y) => routesInto(cols, { x, y, side: -1 }, HAND, 1));
+  for (const y of whites) {
+    if (out.length >= most) break;
+    for (const d of routesInto(cols, { x, y, side: -1 }, HAND, 2).slice(1)) if (out.length < most) out.push(d);
+  }
   return out;
 }
 
