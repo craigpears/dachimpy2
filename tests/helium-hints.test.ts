@@ -146,7 +146,7 @@ describe('watching Helium play, 13 Nov ("first of all ... I\'m going to try and 
   it('each move line names its technique; the same again is "again", not the same line twice running', () => {
     const { beats } = watched(5000, 150), moves = beats.filter((b) => b.kind === 'move');
     expect(moves.length).toBeGreaterThan(10);
-    const known = new Set<string>([...Object.values(WATCH).filter((v): v is string => typeof v === 'string'), ...WATCH.again]);
+    const known = new Set<string>([...(Object.values(WATCH) as unknown[]).filter((v): v is string => typeof v === 'string'), ...WATCH.again]);
     for (const m of moves) expect(known.has(m.says), m.says).toBe(true);
     for (let i = 1; i < beats.length; i++) if (beats[i].kind === 'move' && beats[i - 1].kind === 'move') expect(beats[i].says).not.toBe(beats[i - 1].says);
   });

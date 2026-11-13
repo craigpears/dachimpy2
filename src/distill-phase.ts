@@ -17,8 +17,9 @@
    - block: Stage I, the whites mostly left (src/distill-score.ts, `blockPhase`): the junk moved in blocks, the V.
    - chain: Stage II, the Crystal Clears.
    Each phase weighs the techniques (`PHASE_WEIGHTS`): a move's worth is multiplied by its technique's weight
-   when it's ranked. The weights only tilt the choice; every technique stays on the menu, and when a piece is
-   stuck or a white's in danger they're all even (src/distill-bots.ts, `weigh`).
+   when it's ranked. The weights only tilt the choice; every technique stays on the menu, and while a white's in
+   danger they're all even (src/distill-bots.ts, `weigh`; till 13 Nov a piece stuck anywhere evened them too, and
+   something nearly always was, so they hardly ever applied: the twenty-eighth note).
 
    Pure: no randomness, no clock. */
 
@@ -61,11 +62,15 @@ type Weighted = RoutineName | 'path';
     tilt the choice between moves doing much the same, never rule one out. */
 export const PHASE_WEIGHTS: Readonly<Record<Phase, Readonly<Partial<Record<Weighted, number>>>>> = {
   // The whites out of the fire's side first: rescues and finishing the junk column, the sweep can wait.
-  fire: { rescue: 1.3, junkColumn: 1.15, path: 1.15, diamond: 0.9, store: 0.75, linePull: 0.85, leapfrog: 0.85, figureEight: 0.85 },
+  // The crawl's for later (the user, 13 Nov, the twenty-eighth note: crawls and loops "still being done at an
+  // early stage when there are much simpler techniques ... That's for ... mid or late game").
+  fire: { rescue: 1.3, junkColumn: 1.15, path: 1.15, diamond: 0.9, store: 0.75, linePull: 0.85, leapfrog: 0.85, figureEight: 0.8, crawl: 0.8 },
   // Junk over, fast: the sweep and the junk column; sorting and the slow techniques can wait.
-  fill: { diamond: 1.2, junkColumn: 1.15, turnOver: 1.1, store: 0.75, linePull: 0.85, figureEight: 0.85, hook: 0.9 },
-  // Blocks: the long drags that move junk together, the corner tools, the V; little turning over.
-  block: { hook: 1.2, store: 1.15, linePull: 1.15, leapfrog: 1.15, figureEight: 1.15, diamond: 1.1, turnOver: 0.85 },
+  fill: { diamond: 1.2, junkColumn: 1.15, turnOver: 1.1, store: 0.75, linePull: 0.85, figureEight: 0.8, crawl: 0.8, hook: 0.9 },
+  // Blocks: the long drags that move junk together, the corner tools, the V, a piece hooked in through it in one
+  // sweep rather than crawled across ("you can just drag stuff and loop, kind of hook things in through there in
+  // one big giant sweeping motion ... You don't need to crawl things across"); little turning over.
+  block: { hook: 1.2, store: 1.15, linePull: 1.15, leapfrog: 1.15, figureEight: 1.1, diamond: 1.1, turnOver: 0.85, crawl: 0.85 },
   // The chain: whites ferried right, a pair crawling or looping round when it's tight. (The channels themselves
   // left even: tilting toward them over the rescues cost the Learner whites, 5.5 a session against 5.3, 13 Nov.)
   chain: { crawl: 1.1, figureEight: 1.1, hook: 1.05 },

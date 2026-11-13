@@ -377,7 +377,7 @@ describe('Help, Helium\'s bubble too far to the right to be read (the user, 13 N
 });
 
 describe('"Help, Helium": your board read, the technique named, and played', () => {
-  const advice = (o: Partial<Advice>): Advice => ({ stage: 'junk', kind: 'move', routine: 'rescue', label: 'Save the whites', reason: 'a white by the fire', drags: [{ x: 8, y: 2, ways: [1] }], value: 1, sweep: false, ...o });
+  const advice = (o: Partial<Advice>): Advice => ({ stage: 'junk', phase: 'fire', kind: 'move', routine: 'rescue', label: 'Save the whites', reason: 'a white by the fire', drags: [{ x: 8, y: 2, ways: [1] }], value: 1, sweep: false, ...o });
   it('names the technique in their line, with the reason in the bar, and plays the drags', () => {
     const h = helpFor(advice({}));
     expect(h.says).toBe(HELP.rescue);

@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import { COLS, Distilling, WHITE, parseBoard } from '../src/distilling';
 import { FIRE_COLS, PHASES, PHASE_ORDER, PHASE_WEIGHTS, phaseOf, whitesByFire } from '../src/distill-phase';
-import { DistillBot, HELIUM, P, advise, contextFor, tierNamed, weigh } from '../src/distill-bots';
+import { DistillBot, HELIUM, P, advise, contextFor, dangerZones, levelNamed, weigh } from '../src/distill-bots';
 import { stuck } from '../src/distill-path';
 import { ROUTINES } from '../src/distill-routines';
 import type { Board } from '../src/distilling';
@@ -50,7 +50,7 @@ describe('the phase the bots think they\'re in, 13 Nov ("the bot should have thi
     expect(advise({ cols: board40() }).phase).toBe('block');
     expect(advise({ cols: board40(), chain: 2 }).phase).toBe('chain');
     const g = new Distilling(seeded(5001));
-    expect(new DistillBot(tierNamed('master')).plan(g).phase).toBe(phaseOf(g.cols, 'junk'));
+    expect(new DistillBot(levelNamed('cc3')).plan(g).phase).toBe(phaseOf(g.cols, 'junk'));
   });
 });
 
@@ -69,17 +69,23 @@ describe('each phase weighs the techniques, never rules one out, 13 Nov ("differ
     expect(PHASE_WEIGHTS.block.hook!).toBeGreaterThan(1);
     expect(PHASE_WEIGHTS.chain.crawl!).toBeGreaterThan(1);
   });
-  it('"it can always use all the techniques if it absolutely needs to, like it gets stuck" (13 Nov): stuck, the weights are even', () => {
-    // A white trapped on the top of column 7 (tests/distill-bots.test.ts, the path search's board).
+  it('the weights give way only for real danger, a white by the fire, not a piece stuck anywhere, 13 Nov ("it\'s certainly getting to more advanced techniques or late game techniques too quickly still, when there are alternative options open")', () => {
+    // A white trapped on the top of column 7 (tests/distill-bots.test.ts, the path search's board), out of the
+    // fire's way: stuck, but no danger, so the weights still rank the moves.
     const cols = parseBoard(['wwwwwwwww', 'wwwwwwww', 'wwwwwwwww', 'wwwwwwww', 'Kwwwwwwww', 'wwKKKKKK', 'wwKKKKKKK', 'KbKKKKKK', 'KKKKbbbbb', 'KKKKbbbb']);
     const ctx = contextFor(cols, 'junk', 0, 16);
     expect(stuck(cols, ctx).length).toBeGreaterThan(0);
-    const order = () => weigh({ cols, chain: 0, timeLeft: 12000 }, ctx, HELIUM).map((m) => JSON.stringify(m.move.drags));
-    const was = P.PHASES;
-    try {
-      const weighted = order();
-      P.PHASES = 0;
-      expect(order()).toEqual(weighted);
-    } finally { P.PHASES = was; }
+    expect(dangerZones(cols, 'junk', true)).toEqual([]);
+    const moves = weigh({ cols, chain: 0, timeLeft: 12000 }, ctx, HELIUM);
+    expect(moves.length).toBeGreaterThan(0);
+    for (const m of moves) expect(m.weighted).toBe(true);
+    // A white in the furnace's column: danger, every technique even.
+    const fire = parseBoard(['wwwwwwwww', 'wwwwwwww', 'wwwwwwwww', 'wwwwwwww', 'Kwwwwwwww', 'wwKKKKKK', 'wwKKKKKKK', 'KbKKKKKK', 'KKKKbbbbb', 'KKKwbbbb']);
+    for (const m of weigh({ cols: fire, chain: 0, timeLeft: 12000 }, contextFor(fire, 'junk', 0, 16), HELIUM)) expect(m.weighted).toBeFalsy();
+  });
+  it('crawls are for later: weighed down while the fire\'s side is cleared and the junk columns filled, and through the V a hook beats a crawl, 13 Nov ("You don\'t need to crawl things across. That\'s for ... mid or late game")', () => {
+    expect(PHASE_WEIGHTS.fire.crawl!).toBeLessThan(1);
+    expect(PHASE_WEIGHTS.fill.crawl!).toBeLessThan(1);
+    expect(PHASE_WEIGHTS.block.hook!).toBeGreaterThan(PHASE_WEIGHTS.block.crawl!);
   });
 });
