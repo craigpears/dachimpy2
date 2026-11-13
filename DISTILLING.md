@@ -1208,6 +1208,21 @@ columns to burn, and how hard they are to reach, set the priority. When they are
 to reach (low down, behind a spice, boxed in), that's the urgent work, before anything easy elsewhere; the harder
 to reach, the sooner to start, since it takes more moves.
 
+**The twenty-third note: once the whites are mostly left, move the junk in blocks and build the V (the user,
+13 Nov, watching the bots, `notes/distilling/40-whites-left-now-move-junk-in-blocks.webp`).** "the bot does get
+there, but it made me a bit anxious, and ... it's doing a lot of little fiddly things. I don't know if they're
+necessary always or not ... a lot of small, intricate moves ... So when it gets to this stage here ... I don't know
+if it's the fact that there is now more white than anything else, but I would just start pulling, like treating it
+more like blocks of things to move ... you've got the whites mostly over to the left. This is where you just start
+saying all those three browns, move them up, all the blacks on the bottom left, pull them all the way down and
+start building that V shape." The picture: the whites are a big block on the left and middle; the right-hand
+three columns are junk, browns near the top, blacks lower, scattered. So, at that point (whites the bulk of the
+board, mostly on the left): stop single-piece fiddling; move the junk as groups in long drags, the browns up
+together and the blacks down together, into the shape the chain wants, the V (most likely the channels of §3's
+Stage II: a line of blacks running up-right and a line of browns running down-right, meeting on the left, so the
+whites climb and slide through them to the right; to confirm with the user if it's not that). And fewer fiddly
+moves in general: a small move should earn its place.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
