@@ -1835,6 +1835,13 @@ the user's choice: "that's just not really a real situation. Like if you're in t
 panicking and trying to get as many things over as you can. You wouldn't get enough over in time ... I don't know how
 you would even get into that spot ... not a valid question, because something went wrong." Its lesson is upstream:
 the risk reader's job is never to arrive there.
+And P12 (CC^8 at CC^1, a brown in column 10, row 2, 2.5 s before it goes up) skipped too: "what really has gone
+wrong there? ... if you aren't good enough to avoid that situation in the first place ... the answer is I'll try and
+rescue the [brown] by kind of crawling a black and a brown ... over to that trap piece ... drag that brown in column 7
+up to column 9, and then like maybe another one so you could get that black at the top of column 6 to go and be the
+rescue party. But that's a big if in 2.5 seconds. And as I said, you would not get into that situation if you're any
+good." (One swap up-left hands that brown to the top of column 9, sending column 10 up clean with column 9's whole
+time left to free it; asked of the user, 13 Nov.)
 
 **The thirty-fifth note: a board reader, thinking in groups and patterns, not one piece (the user, 13 Nov, after
 P1 to P11).** "There is a clear need for ... risk management, feature that tells you there's a risk and detects it.
