@@ -100,7 +100,7 @@ describe('every move a named trick with a goal: the bots\' own', () => {
       for (const seed of [5000]) playSession(new Distilling(seeded(seed)), levelNamed('cc5'), 3, undefined, (a) => { if (a.kind === 'move' && !purposeful(a.steps!)) half++; });
     } finally { P.GOALS = was; }
     expect(half).toBeGreaterThan(0);
-  });
+  }, 90000);   // (a whole session of play: about 12 s alone, past the 20 s default with agents running beside it)
   it('a goal in plain words, for the pages: "1. The lift, then the ladder: ..."', () => {
     const lines = stepLines([{ tricks: ['lift', 'ladder'], name: 'the lift, then the ladder', goal: { kind: 'pull', says: 'carry the brown over to the colour in column 9' } }, { tricks: ['climb'], name: 'the climb', goal: null }]);
     expect(lines).toEqual(['1. The lift, then the ladder: carry the brown over to the colour in column 9', '2. The climb: no goal (a half move)']);

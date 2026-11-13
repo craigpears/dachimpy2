@@ -44,7 +44,7 @@ describe('the bots (12 Nov)', () => {
       expect(out.length).toBeGreaterThan(0);
       expect(out[0].filter((p) => p === WHITE)).toHaveLength(0);
     }
-  });
+  }, 90000);   // (every level in turn: past the 20 s default with agents running beside it)
   it('never burn a column with a white in it on purpose', () => {
     for (const t of LEVELS.slice(1)) {
       const g = new Distilling(seeded(5003));
