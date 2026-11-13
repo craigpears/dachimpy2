@@ -74,7 +74,6 @@ for (const w of pools) for (const [c, r] of w.squares) whirlSq.add(key(c, r));
 // What each wind is: a snake, the whirlpool channel's, a headwind to hop, the start's field.
 const kind = new Map();
 for (const [c, r] of RC.SNAKES.LEFT) kind.set(key(c, r), 'left');
-for (const [c, r] of RC.SNAKES.TIGHT) kind.set(key(c, r), 'tight');
 for (const [c, r] of RC.SNAKES.MID) kind.set(key(c, r), 'mid');
 for (const [c, r] of RC.WHIRLS.WINDS) kind.set(key(c, r), 'whirls');
 for (const [c, r] of [RC.DOUBLE.WIND, ...RC.TRIPLE, ...RC.ZIGZAG]) kind.set(key(c, r), 'hop');
@@ -135,7 +134,7 @@ add(`<defs>
 
 /* The winds: each square tinted, an arrow the way it blows. Snakes red, the rest in blue ink. */
 {
-  const tint = { left: 'rgba(170,45,20,.16)', tight: 'rgba(170,45,20,.16)', mid: 'rgba(170,45,20,.16)', whirls: 'rgba(40,74,96,.1)', hop: 'rgba(40,74,96,.16)', field: 'rgba(40,74,96,.12)' };
+  const tint = { left: 'rgba(170,45,20,.16)', mid: 'rgba(170,45,20,.16)', whirls: 'rgba(40,74,96,.1)', hop: 'rgba(40,74,96,.16)', field: 'rgba(40,74,96,.12)' };
   let arrows = { snake: '', blue: '' };
   for (let r = RBOT; r <= RTOP; r++) for (let c = 0; c < W; c++) {
     const d = sea.windAt(c, r);
@@ -144,7 +143,7 @@ add(`<defs>
     add(`<rect x="${f(x - SQ / 2)}" y="${f(y - SQ / 2)}" width="${SQ}" height="${SQ}" fill="${tint[k]}"/>`);
     const a = SQ * 0.32, h = SQ * 0.17;
     const s = `M${f(x - ux * a)} ${f(y - uy * a)}L${f(x + ux * a)} ${f(y + uy * a)}M${f(x + ux * (a - h) + sx * h)} ${f(y + uy * (a - h) + sy * h)}L${f(x + ux * a)} ${f(y + uy * a)}L${f(x + ux * (a - h) - sx * h)} ${f(y + uy * (a - h) - sy * h)}`;
-    if (k === 'left' || k === 'tight' || k === 'mid') arrows.snake += s; else arrows.blue += s;
+    if (k === 'left' || k === 'mid') arrows.snake += s; else arrows.blue += s;
   }
   add(`<path d="${arrows.blue}" fill="none" stroke="${BLUE}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>`);
   add(`<path d="${arrows.snake}" fill="none" stroke="${SNAKE}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>`);
@@ -296,7 +295,7 @@ const star = (x, y, s) => { let p = ''; for (let i = 0; i < 10; i++) { const a =
 {
   const S = RC.STRETCHES;
   const ways = [
-    [[RC.GUNS.way[0][0], S[0].r + 1], [RC.GUNS.way[2][0], S[1].r]],
+    [[RC.GUNS.way[0][0], S[0].r + 1], [RC.GUNS.way[2][0], RC.GUNS.way[2][1] + 1]],
     [[RC.BRIBE.NOTCH[0], S[0].r + 1], RC.BRIBE.NOTCH],
     [[RC.HEADWIND[0][0], S[1].r + 1], ...RC.HEADWIND, [RC.HEADWIND[RC.HEADWIND.length - 1][0], S[2].r]],
     [[RC.DOUBLE.WAY[0][0], S[1].r + 1], [RC.DOUBLE.WAY[0][0], S[2].r]],
@@ -402,13 +401,12 @@ const HOP = RC.FIELD.HOP;
 }
 const BIG = { size: 0.56, lh: 1.12 };
 const sp = (k) => (SP[k].r0 + SP[k].r1) / 2;
-// [A] spit 1: the imperial gate (its words on the spit beside it), the wreck in its notch.
-// (each on the far side from the other: the wreck just along from the gate since 13 Nov, either side of it in
-// a course from the editor)
-const wreckRight = RC.BRIBE.NOTCH[0] > RC.GUNS.gap[0];
-at(RC.GUNS.gap[0] + (wreckRight ? -1.6 : 1.6), sp(0) - 0.55, [T(wreckRight ? `The imperial gate · ${sv('guns')} ▸` : `◂ The imperial gate · ${sv('guns')}`), WIN(`Quad ${routeWin('gap-combo')} · shot ${routeWin('gap-shot')}`), WIN(`run ${routeWin('gap-run')} · bribe ${routeWin('bribe')}`)], { size: 0.46, lh: 1.1, anchor: wreckRight ? 'end' : 'start' });
-at(RC.BRIBE.NOTCH[0] + (wreckRight ? 0.6 : -0.6), sp(0) - 0.55, [T(wreckRight ? '◂ The wreck' : 'The wreck ▸'), N('haul the bribe'), N('(Treasure Haul,'), N('sheltered)')], { size: 0.42, lh: 1.08, anchor: wreckRight ? 'start' : 'end' });
-at(RC.SNAKES.TIGHT[0][0] - 0.6, RC.SNAKES.TIGHT[0][1], [['tight water ▸', SNAKE, 700]], { size: 0.5, anchor: 'end' });
+// [A] spit 1: the fort's bay (13 Nov): the long way round it, the Empire's mole across it; the imperial gate
+// through the fort at the mole's root, by buoy 1 (its words on the mole beside it); the wreck in its notch off leg 1.
+const BY = RC.BAY;
+at(RC.GUNS.gap[0] - 1.2, BY.MOLE + 0.05, [T(`The imperial gate · ${sv('guns')} ▸`), WIN(`shot ${routeWin('gap-shot')} · run ${routeWin('gap-run')} · bribe ${routeWin('bribe')}`)], { size: 0.46, lh: 1.1, anchor: 'end' });
+at(BY.TURN[0] - 0.9, BY.MOLE - 0.4, [T('The fort’s bay ▸'), N('the long way round it,'), N('round the Empire’s mole;'), N('its fort and town here')], { size: 0.44, lh: 1.08, anchor: 'end' });
+at(RC.BRIBE.NOTCH[0] - 0.6, RC.BRIBE.NOTCH[1] + 0.3, [T('The wreck ▸'), N('haul the bribe (Treasure Haul, sheltered)')], { size: 0.42, lh: 1.08, anchor: 'end' });
 // [B] spit 2: the Double's gap and the headwind gap (stacked between them), the starlit door, the trade wind back.
 at((RC.DOUBLE.WAY[0][0] + RC.HEADWIND[0][0]) / 2, SP[1].r0 + 0.05, [T('◂ Double’s gap'), N(`a Double · ${sv('double')}`)], { size: 0.44, lh: 1.05 });
 at((RC.DOUBLE.WAY[0][0] + RC.HEADWIND[0][0]) / 2, SP[1].r1 + 0.05, [T('Headwind gap ▸'), N(`row it · ${sv('headwind')} · ${routeWin('headwind')}`)], { size: 0.44, lh: 1.05 });
@@ -443,10 +441,9 @@ add('</g>');
 const RT = (n) => `${Math.floor(n / 60)}:${String(Math.round(n % 60)).padStart(2, '0')}`;
 const PUZZLE = {
   long: ['The long way round the buoys', 'Sailing on the pilot; hops the zigzag’s headwinds on Doubles'],
-  'gap-run': ['Gun gap, run a square at a time', 'no puzzle; holed once, patched by Carpentry'],
-  'gap-combo': ['Gun gap, rushed', 'a Quad (Sailing), held and broken as she’s lined up'],
-  'gap-shot': ['Gun gap, its guns shot quiet', 'her two starting shots, a hit a gun (Gunnery loads more)'],
-  bribe: ['Gun gap, its guard bribed', 'Treasure Haul at the wreck in its notch off leg 1 (sheltered), then pay at the gate and be towed through'],
+  'gap-run': ['The imperial gate, run a square at a time', 'no puzzle; holed by both its guns, patched by Carpentry'],
+  'gap-shot': ['The imperial gate, its guns shot quiet', 'two hits a gun: her two starting shots and two more loaded by Gunnery'],
+  bribe: ['The imperial gate, its guard bribed', 'Treasure Haul at the wreck in its notch off leg 1 (sheltered), then pay at the gate and be towed through'],
   headwind: ['Headwind gap, rowed', 'Rowing (mirror strokes); idle and she drifts back out'],
   doubles: ['The Double’s and Triple’s gaps', 'a Double, then a Triple, built on the move'],
   whirls: ['Whirlpool channel', 'a Sailing Vegas from its mouth; less sends her back'],
@@ -471,7 +468,7 @@ const rows = ROUTES.map((R) => {
 }).join('');
 const small = (title, list, by) => `<table class="mini"><tr><th colspan="2">${title}</th></tr>${list.map((k) => `<tr><td>${esc(k)}</td><td class="n">${pc(winOf(by[k]))}</td></tr>`).join('')}</table>`;
 const cutRows = Object.entries(rep.cuts).map(([id, c]) => `<tr><td>${esc(id)}</td><td class="n">${Math.round(CUTS[id].saves)}</td><td class="n">${pc(c.tried ? c.done / c.tried : 0)}</td>${SKILLS.map((k) => `<td class="n">${c.saved[k].n ? Math.round(c.saved[k].secs / c.saved[k].n) : '-'}</td>`).join('')}</tr>`).join('');
-const snakes = Object.entries(rep.bySnake).map(([k, x]) => `${k === 'left' ? 'the left-hand trade wind' : k === 'mid' ? 'the trade wind back across leg 3' : 'the tight water'}: ${x.n} swept (${pc(x.n / (RACES * SIZE))} of racers), ${pc(x.n ? x.wins / x.n : 0)} still won`).join('; ');
+const snakes = Object.entries(rep.bySnake).map(([k, x]) => `${k === 'left' ? 'the left-hand trade wind' : 'the trade wind back across leg 3'}: ${x.n} swept (${pc(x.n / (RACES * SIZE))} of racers), ${pc(x.n ? x.wins / x.n : 0)} still won`).join('; ');
 const K = rep.rocks, rocks = `down in ${pc(K.down / RACES)} of races; ${K.through} racers went through them, ${K.free} of them free on someone else\u2019s hits (they won ${pc(K.free ? K.freeWins / K.free : 0)})`;
 const today = new Date().toISOString().slice(0, 10);
 

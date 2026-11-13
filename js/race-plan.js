@@ -26,14 +26,14 @@ import { LAY, SAIL, Sea } from './den-sail.js';
 import { PilotChart } from './race-pilot.js';
 import { DOOR } from './den-door.js';
 import { fieldFor } from './start-field.js';
-import { LONG_ROUTE, routeRow } from './den-race.js';
+import { LONG_ROUTE, routeRow, bayAlong } from './den-race.js';
 import { gustPath } from './den-sailing.js';
 const RC = LAY.RACE, S = RC.STRETCHES, P = RC.SPITS;
 const opt = (id, name, short, puzzle, cuts = []) => ({ id, name, short, puzzle, cuts });
 const LONG = opt('long', 'The long way', 'Long way', 'Sailing on the pilot');
 /** Each leg's choices, the long way first, then its shortcuts in the order she comes to them. */
 export const LEGS = [
-    { n: 1, options: [LONG, opt('bribe', 'The wreck, then bribe the gate', 'Bribe', 'Treasure Haul', ['wreck', 'guns']), opt('quad', 'Rush the gate', 'Quad', 'Sailing: a Quad', ['guns']), opt('shoot', 'Shoot the gate quiet', 'Shoot', 'Gunnery', ['guns']), opt('run', 'Run the gate', 'Run', 'no puzzle: holed, likely', ['guns'])] },
+    { n: 1, options: [LONG, opt('bribe', 'The wreck, then bribe the gate', 'Bribe', 'Treasure Haul', ['wreck', 'guns']), opt('shoot', 'Shoot the gate quiet', 'Shoot', 'Gunnery', ['guns']), opt('run', 'Run the gate', 'Run', 'no puzzle: holed by both its guns', ['guns'])] },
     { n: 2, options: [LONG, opt('headwind', 'The headwind gap', 'Row', 'rowing', ['headwind']), opt('door', 'The starlit door', 'Door', 'Duty Navigation', ['door']), opt('double', 'The Double\'s gap', 'Double', 'Sailing: a Double', ['double'])] },
     { n: 3, options: [LONG, opt('whirls', 'The whirlpools', 'Vegas', 'Sailing: a Vegas', ['whirls']), opt('rocks', 'The rocks', 'Rocks', 'Gunnery: broadsides', ['rocks']), opt('forage', 'The driftwood', 'Driftwood', 'Foraging', ['forage'])] },
     { n: 4, options: [opt('long', 'The long way', 'Weave', 'weaving the zigzag: no puzzle'), opt('zigzag', 'Hop the zigzag', 'Hop', 'Sailing: a Double a headwind', ['zigzag']), opt('locks', 'The locks', 'Locks', 'Bilge', ['locks'])] },
@@ -76,9 +76,9 @@ export function readPlan(raw) {
 }
 /** The shortcuts a plan takes, in course order. */
 export const cutsOf = (plan) => plan.flatMap((id, leg) => optionOf(leg, id)?.cuts ?? []);
-/** How a plan takes the gun gap, if it does: run, rushed on a combo, its guns shot quiet, or its guard bribed. */
+/** How a plan takes the gun gap, if it does: run, its guns shot quiet, or its guard bribed. */
 export function gapOf(plan) {
-    return { run: 'run', quad: 'combo', shoot: 'shot', bribe: 'bribe' }[plan[0]] ?? undefined;
+    return { run: 'run', shoot: 'shot', bribe: 'bribe' }[plan[0]] ?? undefined;
 }
 /** The leg a shortcut's choice is on. */
 export const legOf = (id) => CUT_AT[id][0];
@@ -98,10 +98,11 @@ export const CUT_AT = {
     forage: [2, F.NOTCH[0]], locks: [3, L[0].at[0]], crane: [4, E.LEDGE[0]], triple: [4, T3[0][0]], zigzag: [3, Z[0][0] + 1], door: [DOOR.FROM, D.OFF[0][0]],
 };
 /** The long way's pins, in order, as the pilot sails it (tools/race-measure.mjs, tests/race-helpers.ts's
-    longWay): round each spit's end, to beside the trade wind back up the course (`hop`: hopped with a Double),
-    and on to the finish line. */
+    longWay): round each spit's end (spit 1's by way of the fort's bay since 13 Nov: round its mole's end, and on
+    round buoy 1), to beside the trade wind back up the course (`hop`: hopped with a Double), and on to the finish
+    line. */
 export const LONG_PINS = [
-    { at: [SAIL.COLS - 2, P[0].r0] }, { at: [3, P[1].r1] }, { at: [RC.SNAKES.MID[0][0] - 1, S[2].r + 1], hop: true },
+    { at: [SAIL.COLS - 2, P[0].r0] }, { at: [...RC.BAY.TURN] }, { at: [SAIL.COLS - 2, P[0].r1] }, { at: [3, P[1].r1] }, { at: [RC.SNAKES.MID[0][0] - 1, S[2].r + 1], hop: true },
     { at: [SAIL.COLS - 2, P[2].r1] }, { at: [3, P[3].r1] }, { at: [SAIL.COLS - 2, P[4].r1] }, { at: [RC.FINISH[0], RC.FINISH[1]] },
 ];
 /** The trade wind back up the course's pin. */
@@ -200,6 +201,9 @@ export function stretchOf(r) {
 /** How far round the long way a square is, in squares: by the stretch she's on (either of its two rows), or
     the last she's below (in a spit, through a shortcut: as far along it as it goes), or down the start's field. */
 export function roundAt(p) {
+    const bay = bayAlong(p.c, p.r); // (in the fort's bay, round it: src/den-race.ts)
+    if (bay !== null)
+        return bay;
     const r = Math.round(p.r);
     if (r < S[0].r)
         return ((p.r - RC.LINE.r) / (S[0].r + 0.5 - RC.LINE.r)) * roundTo(0, LONG_ROUTE[0][0]);
@@ -213,8 +217,7 @@ export const STOPS = {
     /** The trade wind back up the course, on the long way: hopped with a Double from right behind it. */
     mid: { id: 'mid', at: LONG_PINS[HOP_PIN].at, d: 1, board: 'sailing', need: 2, hold: true, say: 'The trade wind back · a Double hops her over' },
     zigzag: ZIG.map(([c, r], k) => ({ id: `zigzag${k}`, at: [c + 1, r], d: 3, board: 'sailing', need: 2, hold: true, say: `The zigzag's headwind ${k + 1} of ${ZIG.length} · a Double hops her over` })),
-    quad: { id: 'quad', at: [G[0][0], T(0) + 1], d: 0, board: 'sailing', need: 4, hold: true, say: 'The imperial gate · a Quad rushes her through', cut: 'guns' },
-    shoot: { id: 'shoot', at: [G[0][0] - 1, T(0) + 1], d: 1, board: 'gunnery', say: 'Off the gate\'s gun · Q: fire port to quieten it' },
+    shoot: { id: 'shoot', at: [G[0][0] - 1, G[0][1] - 1], d: 1, board: 'gunnery', say: 'Off the gate\'s gun · Q: fire port to quieten it' },
     wreck: { id: 'wreck', at: [...WR], board: 'treasure', say: 'The old wreck · haul up the guard\'s price' },
     pay: { id: 'pay', at: [...RC.BRIBE.GATE], board: 'pay', say: 'The imperial gate · paying the guard' },
     /** (lined up facing down into the gap before the oars go out, so the oars take her along it, not across its
@@ -375,11 +378,16 @@ export class Pilot {
                 const gap = gapOf(this.plan);
                 if (gap === 'bribe' && w.coins() >= w.price && !w.paid())
                     return go(STOPS.pay);
-                if (gap === 'combo')
-                    return go(STOPS.quad);
                 if (gap === 'shot' && !w.gunQuiet())
                     return go(STOPS.shoot);
-                return { kind: 'sail', to: [G[0][0], T(1)], open: 'guns' };
+                // (through the fort to buoy 1, past the way out: 13 Nov; there, she's through)
+                const out = [G[G.length - 1][0], G[G.length - 1][1] + 1];
+                if (at(p, out)) {
+                    this.done.add('guns');
+                    this.going = null;
+                    return this.next(h, w, depth + 1);
+                }
+                return { kind: 'sail', to: out, open: 'guns' };
             }
             // (rowing up the gap, the oars out: the board's steering her, not the pilot, till she's out on leg 3)
             // (and on its spot with the oars out, whichever way a stroke's turned her: they stay out)
@@ -436,8 +444,9 @@ export class Pilot {
         for it (holds); 'way', it would carry her into a shortcut's way through that her plan isn't taking her
         through just now. The user, 13 Nov: the plan changed while she was held facing into the gate for the Quad,
         and a gust carried her straight through it without paying or shooting. So a gust goes into a way through
-        only if it's the one she's in, or the one she's going for and may go through now: the gate rushed on its
-        Quad or run, its gun quiet once shot, its guard paid. The pilot then turns her onto the leg, and the next
+        only if it's the one she's in, or the one she's going for and may go through now: the gate's gun quiet once
+        shot, its guard paid (run, she sails it a square at a time: no gust rushes her past its guns since the Quad
+        went, 13 Nov). The pilot then turns her onto the leg, and the next
         gust goes along it. Null when it carries her (or the helm's yours: the pilot off, or your own moves). */
     gustHeld(h, w, run) {
         if (holds(this.order, run))
@@ -445,7 +454,7 @@ export class Pilot {
         if (!this.on || this.taken || run <= 0)
             return null;
         const from = h.gustFrom(), inIt = wayAt(from.c, from.r), gap = gapOf(this.plan);
-        const may = (id) => id === inIt || (id === this.going && (id !== 'guns' || gap === 'combo' || gap === 'run' || (gap === 'bribe' && w.paid()) || (gap === 'shot' && w.gunQuiet())));
+        const may = (id) => (id === inIt && id !== 'guns') || (id === this.going && (id !== 'guns' || (gap === 'bribe' && w.paid()) || (gap === 'shot' && w.gunQuiet())));
         for (const q of gustPath(h.sea, from, run)) {
             const id = wayAt(q.c, q.r);
             if (id && !may(id))

@@ -8,7 +8,9 @@
 // wreck run aground at the back of a notch (checkpoint.js's wreck, the same look): lie in the notch and Space
 // lays Treasure Haul's board on the water behind her (treasure.js, the one board), the guard's price in coins
 // to bring up. With them aboard, Space by the gate pays him: his guns hold their fire on her and his men warp
-// her through on the gate's line, out the far side onto leg 2. Touches the rest only through race.js's hooks.
+// her through on the gate's line. Since 13 Nov (an experiment) the gate stands in the Empire's fort at the root of
+// a mole across a bay in the race's first spit (race-bay.js): through it she comes out by buoy 1, the bay's far
+// side, where the long way goes right round. Touches the rest only through race.js's hooks.
 import * as THREE from 'three';
 import { LAY, SAIL } from '../den-sail.js';
 import { BRIBE, Bribe, GUARD_SAYS, atWreck, atGate, inEarshot, towPath } from '../den-bribe.js';
@@ -22,8 +24,9 @@ import { turretMesh } from './turret.js';
 import { wreckMesh } from './checkpoint.js';
 import { person } from './props-people.js';
 import { haul, haulOpen } from './treasure.js';
+import { FORT_H } from './race-bay.js';
 
-const RB = LAY.RACE.BRIBE, CELL = SAIL.CELL, LAND_H = 0.9;   // (spit 1's height: race.js, LOOK)
+const RB = LAY.RACE.BRIBE, CELL = SAIL.CELL, LAND_H = 0.9;   // (spit 1's height: race.js, LOOK; the fort's, FORT_H: race-bay.js)
 export const bribe = { k: new Bribe(), W: null, towing: false, said: false };
 
 /** One of the gun gap's guns, on the Empire's bastion (race.js builds them where they stand). */
@@ -35,17 +38,17 @@ function build() {
   // The gatehouse over the gap's way in: its towers on the spit either side, the arch over the water.
   const [[ca, ra], [cb]] = RB.TOWERS, z = seaZ(ra);
   const gh = gatehouse({ xa: seaX(ca), xb: seaX(cb), z, archY: 6.4, tw: 2.6, bannerH: 3 });
-  gh.position.y = LAND_H - 0.2;
+  gh.position.y = FORT_H - 0.2;
   W.g.add(gh);
   // A stone step at the foot of the left tower, on the leg's side, where the guard stands.
   const step = mesh(new THREE.BoxGeometry(1.6, 0.4, 1.1), mat('#d3c9b2', { flatShading: true, roughness: 0.9 }));
-  step.position.set(seaX(ca) + 0.5, LAND_H + 0.05, z + 1.85);
+  step.position.set(seaX(ca) + 0.5, FORT_H + 0.05, z + 1.85);
   W.g.add(step);
   // The guard, in the Empire's uniform, turned to whoever comes up the leg.
   const ship = () => (sail.on ? sail.helm.pose : null);
   W.guard = person({
     look: cleanLook({ ...UNIFORM, body: 'm', skin: 2, hair: 'short', hairCol: 'brown', beard: 'bushy' }),
-    parent: W.g, x: seaX(ca) + 0.5, y: LAND_H + 0.25, z: z + 1.85, yaw: Math.PI, idle: 'stand',
+    parent: W.g, x: seaX(ca) + 0.5, y: FORT_H + 0.25, z: z + 1.85, yaw: Math.PI, idle: 'stand',
     script: GUARD_SAYS, gap: PACE.ASIDE, wait: 0.4, bubble: 'page', shown: () => sail.on,
     earshot: () => { const s = ship(); return !!s && inEarshot(s.c, s.r) && voices.hears('gate', s.c, s.r); },
     face: () => { const s = ship(); return s && inEarshot(s.c, s.r) ? { x: seaX(s.c), z: seaZ(s.r) } : null; },
@@ -143,7 +146,7 @@ export function bribeTick(dt) {
   W.rope.visible = bribe.towing;
   if (bribe.towing) {
     // (from the arch's foot on the far side, taut to her bow)
-    const a = V3(seaX(RB.GATE[0]), LAND_H + 1.2, seaZ(RB.TOWERS[0][1]) - CELL * 0.5), b = sail.g.localToWorld(V3(1.6, SLOOP_DECK + 0.6, 0));
+    const a = V3(seaX(RB.GATE[0]), FORT_H + 1.2, seaZ(RB.TOWERS[0][1]) - CELL * 0.5), b = sail.g.localToWorld(V3(1.6, SLOOP_DECK + 0.6, 0));
     W.rope.position.copy(a).add(b).multiplyScalar(0.5);
     W.rope.scale.set(1, a.distanceTo(b), 1);
     W.rope.quaternion.setFromUnitVectors(V3(0, 1, 0), b.clone().sub(a).normalize());

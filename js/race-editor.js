@@ -22,7 +22,7 @@ export const ABOUT = {
     buoy2: { name: 'Buoy 3', what: 'Where spit 3 ends, on the right.', sizes: [] },
     buoy3: { name: 'Buoy 4', what: 'Where spit 4 ends, on the left. Leg 4\'s zigzag of headwinds goes with it.', sizes: [] },
     buoy4: { name: 'Buoy 5', what: 'Where spit 5 ends, on the right: the last bend before the run home.', sizes: [] },
-    gun: { name: NAMES.gun, what: 'The gun gap through spit 1, a gun either side: rush it on a Quad, shoot its guns quiet, run it and be holed, or pay its guard.', sizes: ['coins'] },
+    gun: { name: NAMES.gun, what: 'A bay in spit 1 the long way goes right round, the Empire\'s mole out across it to here; the gate through the fort at its root, by buoy 1, cuts it out: shoot its guns quiet, run it and be holed by both, or pay its guard. Further out, a bigger bay.', sizes: ['coins'] },
     wreck: { name: NAMES.wreck, what: 'An old wreck in a notch off leg 1, sheltered: Treasure Haul brings up the coins to bribe the gate\'s guard.', sizes: ['coins'] },
     head: { name: NAMES.head, what: 'Rowed through spit 2 against the wind (mirror strokes), its dog-leg at the far end.', sizes: [] },
     double: { name: NAMES.double, what: 'A small gap through spit 2, one wind blowing back across it: a Double hops it.', sizes: [] },
@@ -48,11 +48,13 @@ export function squaresOf(lay, id) {
         for (let r = s.r0; r <= s.r1; r++)
             for (const x of [c, c + (s.bend === 'R' ? 1 : -1)])
                 out.push([x, r]);
-        return out;
+        // (round buoy 1, the bend's water, not the fort's bay's fort and gate beside it: 13 Nov)
+        const fort = new Set([...lay.BAY.MOLE_AT, ...lay.GUNS.way].map(([x, y]) => key(x, y)));
+        return out.filter(([x, y]) => !fort.has(key(x, y)));
     }
     const pool = (p) => whirlpool(p).squares;
     switch (id) {
-        case 'gun': return [...lay.GUNS.way, ...lay.GUNS.at, ...lay.BRIBE.TOWERS, lay.BRIBE.GATE];
+        case 'gun': return [...lay.GUNS.way, ...lay.GUNS.at, ...lay.BRIBE.TOWERS, lay.BRIBE.GATE, ...lay.BAY.MOLE_AT, lay.BAY.TURN];
         case 'wreck': return [lay.BRIBE.NOTCH, lay.BRIBE.WRECK];
         case 'head': return lay.HEADWIND;
         case 'double': return lay.DOUBLE.WAY;
@@ -105,7 +107,9 @@ export function waterProblems(lay) {
     const R1 = lay.FINISH[1] + 1, W = 27;
     const water = (c, r) => c >= 0 && c < W && r > lay.R0 && r <= R1 && !land.has(key(c, r));
     // (the long way: a spit's rows only round its end, past its buoy)
-    const inSpit = (c, r) => lay.SPITS.some((s, i) => r >= s.r0 && r <= s.r1 && (s.bend === 'R' ? c < lay.BUOYS[i].at[0] : c > lay.BUOYS[i].at[0] + 1));
+    // (the fort's bay's water is the long way's, 13 Nov; its gate through the fort isn't)
+    const bay = new Set(lay.BAY.WATER.map(([c, r]) => key(c, r))), gate = new Set(lay.GUNS.way.map(([c, r]) => key(c, r)));
+    const inSpit = (c, r) => gate.has(key(c, r)) || (!bay.has(key(c, r)) && lay.SPITS.some((s, i) => r >= s.r0 && r <= s.r1 && (s.bend === 'R' ? c < lay.BUOYS[i].at[0] : c > lay.BUOYS[i].at[0] + 1)));
     const reach = (ok) => {
         const seen = new Set(), todo = [];
         for (let c = lay.LINE.c0; c <= lay.LINE.c1; c++)
@@ -157,7 +161,7 @@ export const fresh = () => ({ ...DEFAULT_COURSE, buoys: [...DEFAULT_COURSE.buoys
    round's wins, and what each shortcut saves. ---- */
 /** Each way round, as the balance check names it (the simulation's routes: src/race-sim.ts). */
 export const ROUTE_NAMES = {
-    long: 'The long way (hopping the zigzag)', 'gap-run': 'Gun gap, run a square at a time', 'gap-combo': 'Gun gap, rushed on a Quad',
+    long: 'The long way (hopping the zigzag)', 'gap-run': 'Gun gap, run a square at a time',
     'gap-shot': 'Gun gap, its guns shot quiet', bribe: 'Gun gap, its guard bribed', headwind: 'Headwind gap, rowed',
     doubles: 'The Double\'s and Triple\'s gaps', whirls: 'Whirlpools, a Vegas', rocks: 'Rocks, blasted (Gunnery)', forage: 'Barrier, Foraging', locks: 'Locks, Bilge',
     crane: 'Crane, Carpentry', door: 'The starlit door', every: 'Every shortcut it comes to',
@@ -169,7 +173,7 @@ export const CUT_NAMES = {
 };
 /** Which way round each feature is (to put its wins on the chart). */
 export const ROUTE_OF = {
-    gun: 'gap-combo', wreck: 'bribe', head: 'headwind', double: 'doubles', triple: 'doubles', whirl: 'whirls', rocks: 'rocks', forage: 'forage', lock: 'locks', crane: 'crane',
+    gun: 'gap-run', wreck: 'bribe', head: 'headwind', double: 'doubles', triple: 'doubles', whirl: 'whirls', rocks: 'rocks', forage: 'forage', lock: 'locks', crane: 'crane',
 };
 /** The balance test's band (tests/race-sim.test.ts): a way round winning between half and 1.6 times its fair share. */
 export const BAND = [0.5, 1.6];

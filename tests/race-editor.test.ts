@@ -113,7 +113,7 @@ describe('the balance check (12 Nov)', () => {
     const saves = Object.fromEntries(Object.entries(CUTS).map(([id, c]) => [id, c.saves]));
     const B = balanceOf(both, SIM.LONG, saves);
     expect(B.fair).toBe(0.25);
-    expect(B.long).toBe(223.5);
+    expect(B.long).toBe(265.8);
     expect(B.routes.length).toBeGreaterThan(0);
     for (const r of B.routes) expect(ROUTE_NAMES[r.id]).toBe(r.name);
     expect(B.cuts.find((c) => c.id === 'locks')!.saves).toBe(23);

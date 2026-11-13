@@ -52,11 +52,19 @@ How it sits with the other notes:
 - **The legs:** five legs, two squares deep, back and forth, a spit of land between each pair, the long way
   round each spit's end by its numbered buoy (§5). The course's own breeze blows out across it, so every leg
   is a reach and every bend a run. Leg 4 before the locks is the zigzag (§3).
+- **The fort's bay (13 Nov, on the experiment's branch: §3, "The gate across the fort's bay"):** spit 1 is eight
+  rows deep, a bay in it past leg 1's end. The long way turns down into it at the bend, sails west along its north
+  side, round the end of the Empire's mole (column 16) by its watchtower, and back east along its south side to
+  buoy 1, then down to leg 2. The fort at the mole's root by the bend holds the imperial gate; on the land at the
+  bay's head, a fort, a warehouse and a customs house, Port Decorum's own (`js/den/imperial-town.js`), and a market
+  by leg 1 (`js/den/race-bay.js`). The sea grew five rows for it (`SAIL.ROWS` 79).
 - **Home:** the run home is one square wide, the left-hand trade wind's loops beside it (§4), to a finish line
   across it between two towers (§5). Past the line, Space takes you back out to the starting buoy.
-- **Times:** the long way takes about 3:44 (223.5 s), from the long way's own spot on the line. Your rivals
+- **Times:** the long way takes about 3:44 (223.5 s), from the long way's own spot on the line (about 4:26,
+  265.8 s, round the fort's bay on the experiment's branch: the helm, `tools/race-measure.mjs`). Your rivals
   (§6) are home in about 3:13 (Kikkit, her Vegas chancy: 3:00 to 3:45), 3:24 (Tzz) and 3:36 (Dalnoth), so
-  you beat them on the shortcuts you're good at. Your best time's kept in this browser.
+  you beat them on the shortcuts you're good at (not measured again round the bay). Your best time's kept in this
+  browser.
 
 ## 3. Shortcuts (the ladders)
 
@@ -71,7 +79,8 @@ mouth. Sitting there, you're a sitting duck for anyone coming up behind (§6).
 | Shortcut | Puzzle | Kind | Saves (s) | State |
 |---|---|---|---|---|
 | Spit 1, the gun gap (column 19): an imperial gate, three squares deep, a gun either side of its mouth, its marks all in the spit | A Quad from the leg rushes her past (a big Sailing chain, or a Vegas rowed each side); or shoot its guns quiet; or pay its guard; a square at a time she's holed | On the move | 22 | Built (moved two columns in, 12 Nov) |
-| Leg 1, an old wreck in a notch just along from the gate (column 22), for the gate's bribe (§3, below) | Treasure Haul: 20 coins hauled up (about 9 s, 4 s a move; 40 till 13 Nov), paid at the gate in a moment, and she's towed through | Stopped dead, sheltered (the haul); a moment at the gate | 22, the gap's | Built 12 Nov (moved, its way in opened, 13 Nov) |
+| **Branch, 13 Nov:** spit 1, the imperial gate through the fort at the root of the Empire's mole across the fort's bay, by buoy 1 (below) | Shoot its guns quiet (two hits a gun: four shots); or pay its guard; or run it a square at a time and be holed by both guns (a 5-piece patch each). No Quad | Run or shot: on the move, then holed; bribe: a moment at the gate | 33 | Tried on a branch |
+| Leg 1, an old wreck in a notch just along from the gate (column 22), for the gate's bribe (§3, below) | Treasure Haul: 20 coins hauled up (about 9 s, 4 s a move; 40 till 13 Nov), paid at the gate in a moment, and she's towed through | Stopped dead, sheltered (the haul); a moment at the gate | 22, the gap's | Built 12 Nov (moved, its way in opened, 13 Nov); on the branch, column 22 before the gate, 100 coins (about 47 s) |
 | Spit 2, the headwind gap, a dog-leg at its far end | Rowing (mirror strokes); idle in it and the wind blows her back out | Rowing, slowly | 25 | Built (its cliffs low and its wind drawn, 12 Nov) |
 | Spit 2, a small gap, one wind blowing back across it | A Double, built on the move and broken in its mouth (it lines her up: 12 Nov) | On the move | 9 | Built |
 | The start's hop (§7) | A Double over its headwinds into its lane, down onto leg 1 toward buoy 1 | On the move | 10 | Built 12 Nov |
@@ -84,6 +93,49 @@ mouth. Sitting there, you're a sitting duck for anyone coming up behind (§6).
 | Spit 5, a gap with two winds blowing back across it (column 21) | A Triple | On the move | 14 | Built |
 | The starlit door: a tunnel from leg 2, one stretch under the spit, up a cleft onto leg 3 (§9) | Duty Navigation on the rock (one constellation of three stars, 12 Nov), and that alone carries her through | Stopped dead at the rock, exposed | 40 | Built (back to simple, 12 Nov) |
 | A Rigging passage of shifting, gusty winds | Rigging, its six pulleys as her rigging lines (§11) | On the move | ? | Idea |
+
+**The gate across the fort's bay (13 Nov, tried on a branch, kept only if the user likes it).** The user: the gate
+was "completely unbalanced ... you're saving a couple of tiles for the time you're spending quite a long time in
+the puzzle. It needs to be much more significant"; running it too easy ("just run it and just do a quick
+[Carpentry] puzzle to heal the damage"); the Quad "far too close to set up a combo and with little benefit"; the
+wreck "almost like on the left-hand side"; and "I want some variety. I don't just want them all to be in a
+straight line." A first try (a canal cutting leg 2 out altogether) was turned down the same evening: "To choose
+which route I do, including ... combining whichever puzzles I like the best ... I don't want to have to choose,
+but I do want that to be more meaningful again, that gate." So, as built on the branch:
+- **The bay:** spit 1 eight rows deep (the sea grew five rows, every row below with it). Past leg 1's end the
+  long way turns down into a bay, west along its north side, round the end of the Empire's mole (`gun` in the
+  course data is now the mole's end, column 16: further out, a bigger bay; the editor moves it) and east along
+  its south side to buoy 1 (`LAY.RACE.BAY`; `longRoute`, `bayAlong` in `src/den-race.ts`, the bay's place in
+  the race's progress; the pilot's pins round the mole's end and buoy 1).
+- **The gate:** through the fort at the mole's root by the bend, three squares, in from the bay's north side, out
+  at buoy 1. Both ways meet at buoy 1, so leg 2's door, headwind gap and Double's gap are all still ahead: the
+  course's rule (below). It saves 33 s (the helm; `RACE.DECENT.guns`). With the mole out to column 14 it saved
+  41, about the whirlpools' Vegas as the brief asked, but every way through the gate was then over the balance
+  band (§8), so the bay's a little smaller.
+- **Running it:** light airs all through the fort; gun 0 trained on its way in, gun 1 on its middle; their
+  shots on their marks come down in half a second (`RACE.GAP.FLIGHT`, the checkpoint's 0.9) and, off a fight,
+  a just-patched sloop isn't spared (`GunGap.spares`): so she's holed by one, patches, and is holed by the
+  other as she pulls away. The gate's guns are heavy: a 5-piece hole each (`RACE.GAP.HOLE`; a broadside's 3).
+  About 40 s of Carpentry for a decent player, for 33 s saved: costly, but the marks are plain and it's never
+  more than the two ("never rage-inducing").
+- **Shooting it quiet:** two hits a gun (`RACE.GAP.MODE` 'hits', `HARD` 2; a first hit only dents a gun), so
+  four shots: her two and two loaded by Gunnery; and firing them from beside the fort, the gun not yet quiet
+  fires on her (the simulation gives her one heavy hole, as the den's would).
+- **The bribe:** 100 coins (about 47 s of Treasure Haul for a decent player, the editor's most). The wreck stays
+  at column 22, in its notch off leg 1, now before the gate on the way to it from wherever the field comes down
+  (left of the hop at 13, by its lane at 21): no going back past the gate for it.
+- **The Quad's gone** (its leg 1 choice, its stop, its route `gap-combo`, its tests), and with it the tight water
+  past the old gate's way out onto leg 2.
+- **Scenery from the den's own:** Port Decorum's buildings moved out of `js/den/imperial-isle.js` into a shared
+  `js/den/imperial-town.js` (one module, both places): a fort, a warehouse and a customs house at the bay's head
+  facing out over it, a market by leg 1; the mole and fort in the Empire's stone, battlemented, a watchtower at
+  the mole's end, the gate's own gatehouse, guns and guard on the fort; all baked (`js/den/race-bay.js`).
+- **The course's rule (the user, 13 Nov): every shortcut rejoins the long way before its leg's buoy, so none skips
+  another leg's choices.** The gate keeps it now. Checked against the rest (`tests/race-sim.test.ts`): **the starlit
+  door** doesn't, and wasn't reworked: it comes up on leg 3 at column 15, past the whirlpool channel's mouth
+  (column 12), so a racer taking it can't take the whirlpools. **The headwind gap** is borderline: it comes up at
+  column 13, a column past the mouth, a square back for it. Every other shortcut rejoins before the next leg's
+  choices.
 
 **Shortcuts in proportion (built 12 Nov, the race's next pass).** Every stopped puzzle's shortcut (the gate's
 bribe or guns, the barrier, the locks, the crane, the rowing gap, the rocks) skips about the same stretch,
@@ -1066,7 +1118,51 @@ back to 0.5–1.6. 2000 races of four (`tools/race-map.mjs`), fair 25% (before �
 - Styles 22–26%; skill great 39%, good 25%, decent 11%; spots left 19%, above the hop 27%, right 30%. The
   barrier (0.56 of fair, 0.52 in the test's race) is now the nearest the band's floor of the routes held to it.
 
+**The gate across the fort's bay (13 Nov, tried on a branch: §3).** The balance test's own run (800 races of four,
+seed 1), fair 25%, as tuned, a run at a time: main as it was; the bay with the mole to column 14 (the gate 41 s),
+20 coins, a broadside's 3-piece hole; then 80 coins, 4-piece holes, shot firing under the second gun; then 100
+coins, 5-piece holes, both guns made to hit in the den too; then the mole to column 16 (the gate 33 s), kept:
+
+| Route | Main | 41 s, 20 coins | 41 s, 80 coins | 41 s, 100 coins | **33 s, kept** |
+|---|---|---|---|---|---|
+| The long way | 19.1% | 9.6% | 14.4% | 13.6% | **19.6%** |
+| Gate, run | 21.1% | 54.6% | 55.0% | 55.0% | **32.3%** |
+| Gate, Quad | 9.0% | (gone) | | | |
+| Gate, shot quiet | 33.0% | 51.8% | 36.2% | 43.3% | **20.5%** |
+| Bribe | 15.3% | 76.3% | 42.5% | 39.6% | **19.2%** |
+| Headwind, rowed | 16.8% | 10.0% | 15.2% | 12.0% | **18.4%** |
+| Doubles | 65.4% | 32.7% | 48.6% | 45.4% | **62.9%** |
+| Whirlpools' Vegas | 33.6% | 12.0% | 18.7% | 21.5% | **24.7%** |
+| Rocks | 20.9% | 12.7% | 18.5% | 17.8% | **24.4%** |
+| Barrier (Foraging) | 13.0% | 5.6% | 5.6% | 6.0% | **13.1%** |
+| Locks | 18.0% | 5.8% | 9.6% | 9.2% | **16.7%** |
+| Crane | 32.2% | 17.1% | 23.5% | 21.9% | **30.7%** |
+| Starlit door | 20.6% | 11.8% | 15.0% | 19.9% | **22.8%** |
+| Every shortcut | 28.2% | 33.1% | 26.4% | 24.8% | **19.0%** |
+
+- **Kept:** every route in the band (0.5 to 1.6 of fair) but the Doubles (2.52, out of it before as well, held
+  to its own wider band); the gate run 1.29, shot 0.82, bribe 0.77; the barrier the nearest the floor (0.53, 0.52
+  before). Styles 23.9 to 25.9%; skill great 37.9%, good 27.2%, decent 11.1%; spots left 18.4%, above the hop
+  27.8%, right 28.4%. What the gate really saved (decent / good / great, every way through it, her puzzling
+  counted): −9 / 1 / 3 s, against 6 / 10 / 9 on main: a decent player loses on it, a good one about breaks even.
+- **Why the bay's smaller than asked:** at 41 s every way through the gate won half its races or more however
+  its costs were raised within reason (100 coins is the editor's most; a 5-piece hole twice). At 33 s they sit in
+  the band. It's still half again the old gate's 22 s.
+- 2000 races of four (`tools/race-map.mjs`, `changelog/race-map.jpg`), fair 25%, main (§8, "The wreck made
+  usable") → the bay: the long way 19% → 19%, run 20% → 32%, Quad 9% → gone, shot quiet 32% → 19%, bribe 15% →
+  17%, headwind 17% → 16%, Doubles 62% → 66%, whirlpools 28% → 23%, rocks 24% → 23%, barrier 14% → 14%, locks
+  22% → 17%, crane 34% → 30%, door 26% → 26%, every shortcut 29% → 21%. Styles 23 to 26%; skill great 38%, good
+  26%, decent 12%; spots left 19%, above the hop 27%, right 29%.
+- **Modelled:** running it, each gun has her (0.9 a gun) and a 5-piece patch each; shooting it, four shots (her
+  two and two loaded by Gunnery on the move, stopping short of the gate to finish if she must), their firing
+  time, and the gun not yet quiet holing her as she fires (0.95); the bribe's 100 coins at 4 s a move. Checked in
+  the den's own rules too: run a square at a time, both guns hole her (`tests/den-race.test.ts`).
+
 **For the user to decide:**
+- The fort's bay (above, and §3): keep the branch? Its gate saves 33 s, not the 45 asked, for balance; running it
+  costs two 5-piece patches; the bribe's 100 coins is the editor's most. And the headwind gap and the starlit
+  door still comes up past the whirlpools' mouth, against the course's new rule (the headwind gap a column past
+  it: §3).
 - Moves and gusts (above): the Doubles and the gap's Quad out of the band (the bribe back in it since 13 Nov).
 - The bribe's price, 20 coins since 13 Nov (two or three moves of Treasure Haul): is it still a puzzle worth the
   gate, after the playtest's "doing an entire puzzle to get through one gate"? Raising it pushes the bribe back
@@ -1359,6 +1455,14 @@ check, a share link, and the den's own race for 3D.
   that the long way goes round, the Empire's fort on its shore, both coming out at the same buoy. And scenic:
   "reusing some of the assets ... we've got elsewhere to make the race a bit more scenic ... crossing the Imperial
   Fort would be cool" (Port Decorum's fort and town, the Empire's look). The experiment redirected to it.
+  **Tried on its branch (13 Nov), the bay version** (§3, "The gate across the fort's bay"; §8): spit 1 eight rows
+  deep, a bay past leg 1's end, the long way round the Empire's mole to buoy 1; the gate through the fort at the
+  mole's root, out at buoy 1, so leg 2's choices are all still there; the Quad and the tight water gone; the
+  wreck on leg 1 before the gate; run it and both guns hole her, a 5-piece patch each; shot quiet, two hits a gun;
+  bribed, 100 coins. It saves 33 s (41 with a bigger bay put every way through the gate over the balance band);
+  every route in the band but the Doubles, as before. Port Decorum's buildings shared (`js/den/imperial-town.js`)
+  and set round the bay. The course's rule holds for the gate; the starlit door breaks it (up on leg 3 past the
+  whirlpools' mouth) and the headwind gap is a column past it, left as they are for the user.
 
 ## 13. Where it lives
 
