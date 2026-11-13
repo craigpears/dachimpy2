@@ -9,9 +9,13 @@
    techniques they can pull off (their routines) and how fast (a moment to spot each drag, and a hand's
    speed along it), and how much they bank before the chain.
 
-   The planner (`choose`): the stage says which routines are on the menu, the board which of them apply,
-   and each routine's drags are weighed by how much they better the board (distill-routines' `measure`)
-   for the swaps and drags they take; with time short, only what saves the furnace's column. A column
+   The planner (`choose`): the stage says which routines are on the menu, the board which of them apply.
+   In Stage I every move they offer, a plain drag or a technique alike, is judged by the board it leaves
+   (src/distill-score.ts: whites left, junk right, junk columns done from the right), the score it gains a
+   second of a person's time, one look ahead (the user, 12 Nov, the eleventh note: "even just as a test of
+   moves"); the cheap plain drag that does as well wins, and a long plain one is the sweep, swept blind. In
+   the chain, a move is weighed by how much it betters the board (distill-routines' `measure`) less the
+   time it takes. With time short, only what saves the furnace's column. A column
    ready to go is burned at once when nothing worth doing is left (the better tiers). In the chain, past
    a few Crystal Clears, the top tiers take the endgame's gamble the way a player does (the user, 12 Nov:
    "like a game of Russian roulette"): chase the next column while the odds are fair, cash in (dismiss)
@@ -20,11 +24,12 @@
    `advise(board)` is the planner for anyone's board, a person's mid-game: the stage, the routine it would
    play now, why in a line, and its drags. "Help, Helium" will show that on the player's own board. */
 
-import { COLS, Distilling, SPICE, WHITE, neighbourOn } from './distilling.js';
+import { COLS, DOWN_RIGHT, Distilling, SPICE, UP_RIGHT, WHITE, neighbourOn } from './distilling.js';
 import type { Board, Column, DistillEvent } from './distilling.js';
 import {
-  M, ROUTINES, burnsClean, clear, colourLeft, fillTarget, isJunk, junkTarget, measure, playDrags, scarce, swapsIn, whitesFrom,
+  M, ROUTINES, burnsClean, clear, colourLeft, fillTarget, isJunk, junkTarget, measure, playDrags, swapsIn, whitesFrom,
 } from './distill-routines.js';
+import { boardScore } from './distill-score.js';
 import type { Ctx, Drag, Move, RoutineName } from './distill-routines.js';
 
 /** A tier of distiller (DISTILLING.md §4): the techniques it can pull off and its pace. */
@@ -66,24 +71,23 @@ export const tierNamed = (name: string): Tier => {
 };
 
 /** The routines on the menu in each stage, in the order they're preferred when they'd do as well. */
-/** The slow techniques (the seventh note: "very action heavy"), played only once plain drags stop getting
-    much over. */
-export const SLOW: readonly RoutineName[] = ['crawl', 'turnOver', 'linePull', 'figureEight', 'hook', 'leapfrog'];
 export const MENU: Readonly<Record<'junk' | 'chain', readonly RoutineName[]>> = {
   junk: ['rescue', 'junkColumn', 'turnOver', 'crawl', 'diamond', 'leapfrog', 'hook', 'figureEight', 'linePull', 'store'],
   chain: ['rescue', 'junkColumn', 'crawl', 'channel', 'diamond', 'leapfrog', 'hook', 'figureEight', 'linePull'],
 };
 /** The planner's weights (exported to tune from tools/distill-bots.mjs's PLAN). */
 export const P = {
-  /** A routine's cost: what each second of a person's time is worth (timeFor), and each turn within a drag;
-      SWAP the sweep's own cost a swap. */
+  /** A routine's cost: what each second of a person's time is worth in the chain (timeFor), and each turn
+      within a drag. */
   PER_SEC: 1,
   TURN_MS: 60,
-  SWAP: 0.08,
-  /** The least a routine must better the board by to be worth it, and the most for a ready column to
-      burn at once rather than wait while it's done. */
+  /** The chain: the least a routine must better the board by (`measure`) to be worth it. */
   MIN: 0.3,
-  SLACK: 2,
+  /** Stage I, judged by the board score (src/distill-score.ts) a second of a person's time: the least a
+      move must get to be worth it, and the most for a ready column to burn at once rather than wait while
+      it's done. */
+  RATE_MIN: 0.5,
+  SLACK: 3,
   /** ms left on the furnace below which only what saves its column counts. */
   URGENT: 5000,
   /** The gamble: from this many Crystal Clears in a row, a chain is cashed in when its next column can't
@@ -93,19 +97,10 @@ export const P = {
   CASH_MS: 4000,
   /** Stage I: how many columns past the one being built are kept clear of whites too. */
   AHEAD: 1,
-  /** A sweep: a drag at least this long. */
+  /** A sweep: one plain drag at least this long, all one way across, swept blind (no pause to think). */
   SWEEP_LONG: 3,
-  /** ... swept blind while it does nearly as well as the best thing to do (a careful rescue worth far more
-      comes first). */
-  SWEEP_AS_GOOD: 0.6,
-  /** Pieces plain drags could still get over at which it's sweeping time, and the slow techniques wait. */
-  PLENTY: 4,
-  /** Each swap that takes a piece back the wrong way. */
+  /** The chain: each swap that takes a piece back the wrong way. */
   BACK: 0.6,
-  /** Turning the right side over: played next unless something's worth more than this (a big rescue),
-      and so long as it costs the board no more than this by the measure. */
-  TURN_UNLESS: 12,
-  TURN_COST: 3,
 };
 
 /** What the planner says to do now: its stage, and a routine's drags, a burn, a wait or a dismiss, with
@@ -143,20 +138,30 @@ export function contextFor(cols: Board, stage: 'junk' | 'chain', burns: number, 
   return { stage, burnFrom, fill: fillTarget(cols, burnFrom), reach };
 }
 
-/** The start's sweeps: plain long drags of a black or a brown right over to the junk (the diamond's run,
-    carried on as far as it goes), each worth it for its swaps, best first; spotting one costs next to
-    nothing, it's done blind. None: sweeping has stopped getting junk right. */
-export function sweepsOn(cols: Board, ctx: Ctx, style: Style, base = measure(cols, ctx)): { move: Move; value: number }[] {
-  if (!style.routines.includes('diamond')) return [];
-  const out: { move: Move; value: number }[] = [];
-  for (const move of ROUTINES.diamond.find(cols, ctx)) {
-    if (move.drags.length !== 1 || move.drags[0].ways.length < P.SWEEP_LONG) continue;
-    const after = playDrags(cols, move.drags);
+/** A sweep: one plain drag, long, every swap the same way across (left or right), so it's swept blind with
+    hardly a pause (the user, 12 Nov: "It's just quick drag motions ... go, go, go"). */
+export function plainDrag(drags: readonly Drag[]): boolean {
+  if (drags.length !== 1 || drags[0].ways.length < P.SWEEP_LONG) return false;
+  const right = (w: number) => w === UP_RIGHT || w === DOWN_RIGHT, r = right(drags[0].ways[0]);
+  return drags[0].ways.every((w) => right(w) === r);
+}
+
+/** Stage I: a move judged by the board it leaves (src/distill-score.ts), the score it gains a second of a
+    person's time (the user, 12 Nov, the eleventh note: "even just as a test of moves"). One look ahead, no
+    search. Its last drag is let go where that's best: carried on while each swap still gets something over,
+    stopped before it only climbs through the junk (a black sent on up through the browns gets nothing). */
+export function judge(cols: Board, drags: readonly Drag[], style: Style, base = boardScore(cols)): { drags: Drag[]; value: number } | null {
+  if (!drags.length) return null;
+  const init = drags.slice(0, -1), last = drags[drags.length - 1];
+  let best: { drags: Drag[]; value: number } | null = null;
+  for (let k = last.ways.length; k >= 1; k--) {
+    const d = [...init, { x: last.x, y: last.y, ways: last.ways.slice(0, k) }];
+    const after = playDrags(cols, d);
     if (!after) continue;
-    const value = measure(after, ctx) - base - P.SWAP * swapsIn(move.drags);
-    if (value > P.MIN) out.push({ move, value });
+    const value = (boardScore(after) - base) / (timeFor(d, style, plainDrag(d)) / 1000);
+    if (!best || value > best.value) best = { drags: d, value };
   }
-  return out.sort((a, b) => b.value - a.value);
+  return best;
 }
 
 /** Turns within a move's drags: each change of way while a piece is held. */
@@ -192,22 +197,25 @@ export function backward(cols: Board, drags: readonly Drag[], stage: 'junk' | 'c
   return n;
 }
 
-/** Every move of the routines the style knows, on the board now, weighed: how much it betters the board,
-    less the person's time it takes and the ground it gives back, best first. With time short on a column
-    that needs saving, only moves that save it in time. `find` is the context the routines look with (a
-    second look with colour taken as scarce, say); the board's always measured by `ctx`. */
-export function weigh(sit: Situation, ctx: Ctx, style: Style, find: Ctx = ctx): { move: Move; value: number }[] {
-  const { cols } = sit, last = COLS - 1, base = measure(cols, ctx), burning = ctx.burnFrom <= last;
+/** Every move of the routines the style knows, on the board now, weighed, best first. Stage I: by the board
+    score it gains a second of a person's time (`judge`), its last drag let go where that's best. The chain:
+    how much it betters the board (`measure`), less the person's time it takes and the ground it gives back.
+    With time short on a column that needs saving, only moves that save it in time. */
+export function weigh(sit: Situation, ctx: Ctx, style: Style): { move: Move; value: number }[] {
+  const { cols } = sit, last = COLS - 1, burning = ctx.burnFrom <= last, one = ctx.stage === 'junk';
+  const base = one ? boardScore(cols) : measure(cols, ctx);
   const wrong = (b: Board) => (burning ? b[last].filter((p) => p === WHITE).length : junkAt(b[last]));
   const urgent = sit.timeLeft < P.URGENT && wrong(cols) > 0;
   const out: { move: Move; value: number }[] = [];
-  for (const name of MENU[find.stage]) {
+  for (const name of MENU[ctx.stage]) {
     if (!style.routines.includes(name)) continue;
-    for (const move of ROUTINES[name].find(cols, find)) {
+    for (const found of ROUTINES[name].find(cols, ctx)) {
+      const j = one ? judge(cols, found.drags, style, base) : null;
+      const move = j ? { ...found, drags: j.drags } : found;
       const after = playDrags(cols, move.drags);
-      if (!after) continue;
-      if (urgent && (wrong(after) >= wrong(cols) || msFor(move.drags, style) > sit.timeLeft)) continue;
-      const value = measure(after, ctx) - base - P.PER_SEC * timeFor(move.drags, style) / 1000 - P.BACK * backward(cols, move.drags, find.stage);
+      if (!after || (one && !j)) continue;
+      if (urgent && (wrong(after) >= wrong(cols) || msFor(move.drags, style, plainDrag(move.drags)) > sit.timeLeft)) continue;
+      const value = j ? j.value : measure(after, ctx) - base - P.PER_SEC * timeFor(move.drags, style) / 1000 - P.BACK * backward(cols, move.drags, ctx.stage);
       out.push({ move, value });
     }
   }
@@ -217,26 +225,13 @@ export function weigh(sit: Situation, ctx: Ctx, style: Style, find: Ctx = ctx): 
 /** Pick the routine for the board now (see the header). */
 export function choose(sit: Situation, ctx: Ctx, style: Style): Advice {
   const { cols } = sit, last = COLS - 1;
-  const base = measure(cols, ctx);
   const burning = ctx.burnFrom <= last;
   const furnace = cols[last];
   const ready = burning ? burnsClean(furnace) : clear(furnace);
   // What's wrong with the furnace's column, to save it when time's short.
   const wrong = (b: Board) => (burning ? b[last].filter((p) => p === WHITE).length : junkAt(b[last]));
-  const urgent = sit.timeLeft < P.URGENT && wrong(cols) > 0;
-  const gen = (c: Ctx) => weigh(sit, ctx, style, c);
-  let moves = gen(ctx);
-  // Count first (the ninth note): how many pieces plain drags could still get over. While that's high it's
-  // sweeping time, whatever happened a drag ago, and the slow techniques wait.
-  const sweeps = ctx.stage === 'junk' && !urgent ? sweepsOn(cols, ctx, style, base) : [];
-  const plain = new Set(sweeps.map((s) => `${s.move.drags[0].x},${s.move.drags[0].y}`)).size;
-  if (plain >= P.PLENTY) moves = moves.filter((m) => !SLOW.includes(m.move.routine));
-  let best = moves[0] && moves[0].value > P.MIN ? moves[0] : null;
-  // Colour plentiful but nothing cheaper gets anything over: the slow techniques after all.
-  if (!best && !sweeps.length && ctx.stage === 'junk' && ctx.scarce === undefined && !scarce(cols, ctx)) {
-    moves = gen({ ...ctx, scarce: true });
-    best = moves[0] && moves[0].value > P.MIN ? moves[0] : null;
-  }
+  const moves = weigh(sit, ctx, style);
+  const best = moves[0] && moves[0].value > (ctx.stage === 'junk' ? P.RATE_MIN : P.MIN) ? moves[0] : null;
   const advice = (kind: Advice['kind'], label: string, reason: string, m: { move: Move; value: number } | null = null): Advice => ({
     stage: ctx.stage, kind, routine: m?.move.routine ?? null, label, reason, drags: m?.move.drags ?? [], value: m?.value ?? 0, sweep: false,
   });
@@ -248,26 +243,15 @@ export function choose(sit: Situation, ctx: Ctx, style: Style): Advice {
       return advice('dismiss', 'Cash in', `the gamble: CC^${sit.chain} so far, and the next column needs ${need} more white${need > 1 ? 's' : ''} in ${(sit.timeLeft / 1000).toFixed(0)} s. Poor odds: cash in now`);
     }
   }
-  // The start is sweeping, decided by the board: while a plain long drag still takes a black or a brown
-  // over to the junk, sweep blind and fast, the best such drag each time; the techniques come in only when
-  // that stops getting junk right, or when the furnace's column needs saving.
-  const sweeping = sweeps.length > 0 && (plain >= P.PLENTY
-    ? !(best && best.move.routine === 'rescue' && best.value > 2 * sweeps[0].value)
-    : !best || sweeps[0].value >= P.SWEEP_AS_GOOD * best.value);
-  // Then, the sweep done, turn the right side over (blacks up its side, browns down), so what comes next
-  // from the left can hook in; only a big rescue comes first.
-  if (ctx.stage === 'junk' && !urgent && !sweeping) {
-    const turn = moves.filter((m) => m.move.routine === 'turnOver' && m.value > -P.TURN_COST)[0];
-    if (turn && (!best || best.value < P.TURN_UNLESS)) return advice('move', ROUTINES.turnOver.label, turn.move.reason, turn);
-  }
   // Burn a ready column at once when nothing much is left to do; in the chain, only when nothing is (a
   // Crystal Clear burned early is time lost ferrying whites for the next).
   if (ready && style.early && (!best || (ctx.stage === 'junk' && best.value < P.SLACK))) {
     return advice('burn', 'Burn now', burning ? "the furnace's column is all junk: burn it now" : 'the column is Crystal Clear: send it up now');
   }
-  if (sweeping) {
-    const sw = sweeps[0];
-    return { ...advice('move', 'The sweep', `go, go, go: ${sw.move.reason}`, sw), sweep: true };
+  // A plain long drag that wins is the sweep, swept blind: no technique needed, "quick drag brown up, black
+  // down, done" (the eleventh note).
+  if (best && ctx.stage === 'junk' && plainDrag(best.move.drags)) {
+    return { ...advice('move', 'The sweep', `go, go, go: ${best.move.reason}`, best), sweep: true };
   }
   if (best) {
     const gamble = !burning && sit.chain >= P.CASH_FROM && !ready && style.gamble

@@ -8,8 +8,9 @@
    - games: seeded boards per tier (default 40, seeds 5000 on), tiers: comma-separated, from
      'learner,master,grandmaster,ultimate' (default all four).
    TRACE=1 prints each column of the first game as it goes (TRACE=2 each routine played too). CAP=n stops
-   a session at n minutes (30). MEASURE='{"STUCK":6}', PLAN='{"SLACK":1}' and TIER='{"bank":7}' try other
-   weights, planner settings and tier settings. SEED=n starts the boards at seed n.
+   a session at n minutes (30). SCORE='{"TRAPPED":4}' (Stage I's board score, src/distill-score.ts),
+   MEASURE='{"STUCK":6}' (the chain's), PLAN='{"SLACK":1}' and TIER='{"bank":7}' try other weights, planner
+   settings and tier settings. SEED=n starts the boards at seed n.
 
    Run of 12 Nov (40 boards a tier), learner / master / grandmaster / ultimate: longest chain mean 1.5 /
    2.8 / 2.7 / 3.3, best 4 / 6 / 9 / 9, CC^6+ 0 / 4 / 4 / 8 of 40, CC^12 none; score a column 3.9 / 8.6 /
@@ -19,11 +20,16 @@
    CC^6+ 0 / 2 / 7 / 14 of 40, CC^12 none, swaps a drag 3.4 to 4.1.
    After the sixth to tenth notes (costs in a person's time, plain drags counted first, sorting and the slow
    techniques only once colour's scarce): chains 1.4 / 2.4 / 2.9 / 2.9, CC^6+ 0 / 3 / 7 / 6 of 40, CC^12 none;
-   minutes 5.7 / 3.2 / 3.0 / 2.7. Allowing the sorting whenever it pays gave the Ultimate 4.1 on 20 boards. */
+   minutes 5.7 / 3.2 / 3.0 / 2.7. Allowing the sorting whenever it pays gave the Ultimate 4.1 on 20 boards.
+   Judged by the board score (the eleventh to fourteenth notes: Stage I's moves by src/distill-score.ts, one
+   look ahead, a second of a person's time): chains 1.7 / 1.1 / 1.6 / 1.8, best 5 / 3 / 4 / 6, CC^6+ 0 / 0 / 0 /
+   1 of 40, CC^12 none; minutes 6.0 / 3.1 / 2.7 / 2.8; blacks no longer dragged up early, but the white block
+   banked smaller and less clean (DISTILLING.md §4, fifth run). */
 
 import { Distilling } from '../js/distilling.js';
 import { TIERS, P, tierNamed, playSession } from '../js/distill-bots.js';
 import { M } from '../js/distill-routines.js';
+import { S } from '../js/distill-score.js';
 import { seeded } from '../js/mirror-row.js';
 
 const GAMES = Number(process.argv[2]) || 40;
@@ -32,6 +38,7 @@ const CAP = Number(process.env.CAP) || 30, SEED = Number(process.env.SEED) || 50
 const L = 'wbK*x';
 if (process.env.MEASURE) Object.assign(M, JSON.parse(process.env.MEASURE));
 if (process.env.PLAN) Object.assign(P, JSON.parse(process.env.PLAN));
+if (process.env.SCORE) Object.assign(S, JSON.parse(process.env.SCORE));
 
 const avg = (a) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : NaN);
 const med = (a) => { const s = [...a].sort((x, y) => x - y); return s.length ? s[Math.floor(s.length / 2)] : NaN; };

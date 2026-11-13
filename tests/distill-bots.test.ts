@@ -2,12 +2,16 @@
    the routines of src/distill-routines.ts picked by stage, at a person's pace, by the rules (12 Nov). What
    each tier reaches is tools/distill-bots.mjs's to measure (DISTILLING.md §4). */
 import { describe, expect, it } from 'vitest';
-import { BLACK, BURN_TICKS, COLS, DOWN_RIGHT, Distilling, SHORT, TALL, WHITE, parseBoard } from '../src/distilling';
-import { HELIUM, MENU, SLOW, TIERS, advise, backward, choose, contextFor, playSession, sweepsOn, tierNamed, weigh } from '../src/distill-bots';
+import { BLACK, BURN_TICKS, COLS, DOWN_RIGHT, Distilling, SHORT, TALL, UP_LEFT, UP_RIGHT, WHITE, neighbourOn, parseBoard } from '../src/distilling';
+import { HELIUM, MENU, TIERS, advise, backward, choose, contextFor, judge, junkAcross, playSession, tierNamed, turnsIn, weigh } from '../src/distill-bots';
 import type { Advice } from '../src/distill-bots';
-import { ROUTINES, colourLeft, measure, playDrags } from '../src/distill-routines';
+import { ROUTINES, colourLeft, playDrags } from '../src/distill-routines';
+import type { Drag, RoutineName } from '../src/distill-routines';
 import type { Board } from '../src/distilling';
 import { seeded } from '../src/mirror-row';
+
+/** The slow techniques (the seventh note: "very action heavy"). */
+const SLOW: readonly RoutineName[] = ['crawl', 'turnOver', 'linePull', 'figureEight', 'hook', 'leapfrog'];
 
 const sea = (ch: string) => Array.from({ length: COLS }, (_, x) => ch.repeat(x % 2 === 0 ? TALL : SHORT));
 function board(at: [number, number, string][], cols = sea('w')): Board {
@@ -123,16 +127,6 @@ describe('the start is sweeping, the techniques after (12 Nov)', () => {
     const plain = first.filter((p) => p.routine === 'diamond').length, slow = first.filter((p) => SLOW.includes(p.routine!)).length;
     expect(plain).toBeGreaterThanOrEqual(slow);
   });
-  it('the techniques come in only once sweeping blind stops getting junk over (12 Nov: "it\'s only once you can\'t just do that blind ... that you start needing to do things")', () => {
-    // The sweep's end: whites left, browns top right, blacks bottom right, nothing left to sweep.
-    const cols = board([...column(7, 'bbbbKKKK'), ...column(8, 'bbbbKKKKK'), ...column(9, 'bbbbKKKK')]);
-    const ctx = contextFor(cols, 'junk', 0, 16);
-    expect(sweepsOn(cols, ctx, HELIUM)).toHaveLength(0);
-    const a = choose({ cols, chain: 0, timeLeft: 12000 }, ctx, HELIUM);
-    expect(a.sweep).toBe(false);
-    expect(a.routine).toBe('turnOver');
-    expect(a.reason).toMatch(/zigzagging up the side/);
-  });
 });
 describe('the cheapest technique that still works (12 Nov, the seventh to tenth notes)', () => {
   const ctxOf = (cols: Board, scarce?: boolean) => ({ ...contextFor(cols, 'junk', 0, 16), ...(scarce === undefined ? {} : { scarce }) });
@@ -155,19 +149,11 @@ describe('the cheapest technique that still works (12 Nov, the seventh to tenth 
     // notes/distilling/17-two-halves-close.webp, roughly: colour on the left, a gap of whites, junk on the right.
     const cols = parseBoard(['KwwwKbwbw', 'KwKwwbwb', 'wwKwwwbwb', 'wKwwwwbw', 'wwwwwwwww', 'wwwwwwww', 'KbKbKKbbb', 'KKbKbKbb', 'KbKbKKbbK', 'bKKKbbbb']);
     const ctx = ctxOf(cols);
-    const sweeps = sweepsOn(cols, ctx, HELIUM);
-    expect(new Set(sweeps.map((s) => `${s.move.drags[0].x},${s.move.drags[0].y}`)).size).toBeGreaterThanOrEqual(4);
     const a = choose({ cols, chain: 0, timeLeft: 12000 }, ctx, HELIUM);
     expect(a.sweep).toBe(true);
-    expect(a.routine).toBe('diamond');
+    expect(a.label).toBe('The sweep');
     expect(a.drags).toHaveLength(1);
-  });
-  it('a black taken to the bottom early is crawled on (12 Nov: "it\'s doing black to the bottom very well, but it\'s then not kind of crawled it")', () => {
-    // A black on the bottom of the whites with a brown beside it; colour not yet scarce.
-    const cols = board([[4, 8, 'K'], [3, 7, 'b'], ...column(8, 'wwwwKKKKK'), ...column(9, 'wwwwKKKK')]);
-    const a = choose({ cols, chain: 0, timeLeft: 12000 }, ctxOf(cols, false), HELIUM);
-    expect(a.routine).toBe('crawl');
-    expect(a.drags.length).toBeGreaterThan(1);
+    expect([BLACK, 1]).toContain(cols[a.drags[0].x][a.drags[0].y]);
   });
   it('another piece rather than a loop (12 Nov: "I\'ve got another black piece further up. I can just drag it down, fill in the gap, and then go brown up, down, up")', () => {
     // notes/distilling/18-another-black-not-a-loop.webp, roughly: a brown low in the middle with no way over
@@ -184,13 +170,44 @@ describe('the cheapest technique that still works (12 Nov, the seventh to tenth 
     const loop = ranked.find((m) => m.move.routine === 'crawl');
     if (loop) expect(way!.value).toBeGreaterThan(loop.value);
   });
-  it('colour stacked upright scores better than colour on a diagonal, the same junk got over (12 Nov: "you should not have a diagonal line of color and white above and below it")', () => {
-    const cols = board([[5, 3, 'K'], [4, 4, 'K'], [4, 6, 'K'], ...column(8, 'KKKKbbbbb'), ...column(9, 'KKKKbbbb')]);
-    const ctx = ctxOf(cols);
-    // Each drag takes one black a column right: one onto the black already in column 6, one into the whites.
-    const upright = playDrags(cols, [{ x: 4, y: 4, ways: [DOWN_RIGHT] }])!, diagonal = playDrags(cols, [{ x: 4, y: 6, ways: [DOWN_RIGHT] }])!;
-    expect(upright[5][4]).toBe(BLACK);
-    expect(diagonal[5][6]).toBe(BLACK);
-    expect(measure(upright, ctx)).toBeGreaterThan(measure(diagonal, ctx));
+});
+
+describe('judging the board, one drag ahead (12 Nov, the eleventh note)', () => {
+  const ctxOf = (cols: Board) => contextFor(cols, 'junk', 0, 16);
+  const ups = (drags: readonly Drag[]) => drags.flatMap((d) => d.ways).filter((w) => w === UP_RIGHT || w === UP_LEFT).length;
+  it('an early board: a black is dragged down-right into the junk, not up, 12 Nov ("you want blacks to the bottom right at this stage")', () => {
+    // notes/distilling/21-a-diagonal-of-blacks.webp's mistake: blacks in the whites on the left, the junk on the
+    // right with browns it could climb through. Early: plenty of colour.
+    const cols = board([...column(0, 'KKKKKKKKK'), ...column(1, 'KKKKKKKK'), ...column(2, 'KwKwKwKwK'),
+      ...column(7, 'bbbbbbbb'), ...column(8, 'bbbbbbbbK'), ...column(9, 'bbbbbbbK')]);
+    expect(colourLeft(cols)).toBeGreaterThan(0.45);
+    const a = choose({ cols, chain: 0, timeLeft: 12000 }, ctxOf(cols), HELIUM);
+    expect(a.kind).toBe('move');
+    expect(a.drags).toHaveLength(1);
+    const [d] = a.drags;
+    expect(cols[d.x][d.y]).toBe(BLACK);
+    // Down-right across the whites to the bottom, a step into the junk at most; never on up through the browns.
+    expect(d.ways[0]).toBe(DOWN_RIGHT);
+    expect(ups(a.drags)).toBeLessThanOrEqual(1);
+    let [x, y] = [d.x, d.y];
+    for (const w of d.ways) [x, y] = neighbourOn(cols, x, y, w)!;
+    expect(x).toBeGreaterThanOrEqual(6);
+    expect(y).toBeGreaterThan(d.y);
+  });
+  it('between a plain drag and a crawl that get the same junk over, the plain drag wins, 12 Nov ("quick drag brown up, black down, done")', () => {
+    // A black and a brown side by side in the whites, the junk on the right.
+    const cols = board([[3, 4, 'K'], [4, 4, 'b'], ...column(8, 'KKKKbbbbb'), ...column(9, 'KKKKbbbb')]);
+    // The crawl, looping them round each other (by the rules, checked): the black up past the brown and down,
+    // the brown up, then each on again in turn; each two columns over.
+    const crawl: Drag[] = [{ x: 3, y: 4, ways: [UP_RIGHT, DOWN_RIGHT] }, { x: 3, y: 4, ways: [UP_RIGHT] }, { x: 5, y: 4, ways: [UP_LEFT] }, { x: 5, y: 4, ways: [UP_RIGHT] }, { x: 4, y: 4, ways: [DOWN_RIGHT] }];
+    const after = playDrags(cols, crawl)!;
+    expect(after).not.toBeNull();
+    expect(turnsIn(crawl)).toBeGreaterThan(0);
+    // The same got over by plain drags: the black straight down-right, the brown straight up-right.
+    const plain: Drag[] = [{ x: 3, y: 4, ways: [DOWN_RIGHT, DOWN_RIGHT] }, { x: 4, y: 4, ways: [UP_RIGHT, UP_RIGHT] }];
+    const plainAfter = playDrags(cols, plain)!;
+    expect(plainAfter).not.toBeNull();
+    expect(junkAcross(plainAfter)).toBe(junkAcross(after));
+    expect(judge(cols, plain, HELIUM)!.value).toBeGreaterThan(judge(cols, crawl, HELIUM)!.value);
   });
 });
