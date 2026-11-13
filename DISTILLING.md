@@ -986,6 +986,31 @@ end (the user, 12 Nov, the same game on, `notes/distilling/30-` to `34-*`).**
   second and third notes) is done here, in the late game, while there's still junk to do it with: this is the
   "once you get down to two or three columns" of the tenth note.
 
+**The eighteenth note: the board-scoring bots' first move traps a white; think of it as a path (the user,
+13 Nov, watching the bots after the board score was merged, `notes/distilling/35-` and `36-*`).**
+- **What the bot did (`35-bot-drags-a-white-up-to-the-top.webp`, `36-the-white-left-trapped-top-right.webp`):**
+  "the very first thing they did was to drag this white upwards, and then like they went the entire way so
+  that there was a white trap right at the top. So I don't know how that's following the instruction of don't
+  trap things." In the first picture the green line is the bot's opening drag: a white near the top of the
+  middle columns taken up and right, all the way to the top of the second column from the right. The second
+  picture is the board after: that white sits at the very top right (it glows), with blacks below it and
+  round it, a "?" beside it. It's on the right, the junk side, cut off from the whites on the left: trapped.
+  The board score (§4) penalises a trapped white, so either it isn't seeing this one as trapped (at the top
+  edge, perhaps) or something else in the score outweighed it.
+- **What a person would do next:** "maybe like the next step I would have taken is to loop the brown around,
+  because I really want to get rid of that ... trapped white. But let's see. Yeah, nothing does that." Get a
+  junk piece round into the white's place (the brown looped round, the eighth and tenth notes' loop) so the
+  white can come out, rather than carrying on. "you want things to go in one smooth motion, but I don't feel
+  like it's really working."
+- **Model it as a path (A\*):** "I know you've got the techniques that we really want to use, but sometimes
+  ... I don't know if it's almost better to model it as a path ... in this case, feels more like a
+  pathfinding A-star style problem. Find the path of a piece that could take that white's place. But
+  obviously that pathfinding can involve loops." So, beside the named techniques: when a white's trapped (or
+  any piece is in the wrong place), search for the cheapest way to get a piece that belongs there into its
+  place, the moves a person would make, costed in their time (one smooth drag cheap, the eleventh note), and
+  loops allowed in the path. The named routines stay as the shapes such a search tends to find; the search
+  covers what they miss.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
