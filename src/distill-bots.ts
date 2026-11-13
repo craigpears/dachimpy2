@@ -588,9 +588,10 @@ export function weigh(sit: Situation, ctx: Ctx, style: Style): Weighed[] {
 }
 /** The chain's danger zones (`weigh`): the column being filled and the one after it, each while it's mostly white
     with a piece of junk in it that can't go left on its own (a brown on the top, a black on the bottom), the
-    column going up first. */
+    column going up first. Not while a white's still in the junk columns burning out ahead of the chain: saving those
+    comes first ("never burn a white"; Helium's plan, step one, clears the junk columns). */
 export function chainZones(cols: Board, ctx: Ctx): number[] {
-  if (ctx.stage !== 'chain' || !P.PAIR) return [];
+  if (ctx.stage !== 'chain' || !P.PAIR || (ctx.burnFrom < COLS && whitesFrom(cols, ctx.burnFrom) > 0)) return [];
   const out: number[] = [];
   for (const x of [ctx.fill, ctx.fill - 1]) {
     if (x < 0 || x >= Math.min(ctx.burnFrom, COLS) || !mostlyWhite(cols[x])) continue;

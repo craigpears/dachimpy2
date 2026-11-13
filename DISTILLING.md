@@ -472,7 +472,8 @@ Node, its result kept while the board's unchanged.
 **Urgent, and early.** In the chain, the column being filled and the one after it (`chainZones`), while mostly white
 with a piece of junk in it that can't go left, are a danger zone like a white by the fire: only moves that free it
 (`freed`) are offered, from the first look, ahead of anything easy elsewhere, the pair rescue's plan weighed among
-them (the hook's own way out, from CC^5, often wins on worth, taking the piece further left). Every level plays it
+them (the hook's own way out, from CC^5, often wins on worth, taking the piece further left). Saving a white from the
+junk columns burning out ahead of the chain still comes first. Every level plays it
 (it rides on the path search, which every level has); its label is "The pair rescue", its technique 'path' for
 Helium's lines. `P.PAIR` switches it off.
 
@@ -1132,6 +1133,10 @@ Plainly:
 - **Still not reached:** CC^5 one session in three short, CC^8 almost never (3.9 mean). The next levers: a wider plan
   for the bottom corner (five or six drags, or the pair crawled along), and building on the left while the chain waits.
 - **Not done:** the thirty-second note's diagonal of blacks (a Stage I change to the board score, not cheap to measure).
+- **After the run, one ordering:** the chain's danger zone now waits while a white is still in the junk columns burning
+  out ahead of the chain (the full test run caught CC^1, banking one column, playing a pair rescue as its first move on
+  seed 3 while a white sat in a column to burn). Checked on 5 boards only: CC^1 chains 3.6, CC^3 3.0, whites burned 0.4
+  a session each; not measured on 20.
 - **Its cost:** the search is about 20 ms where it runs, kept while the board's unchanged, and what found nothing kept
   for the same pieces round the column; the runs took 2 to 4 minutes for CC^1 to CC^3 (was about 1.5).
 
