@@ -24,7 +24,7 @@ import { seeded } from './mirror-row.js';
 import { BURNT, COLS, Distilling, WHITE, goesUp, type Board } from './distilling.js';
 import { advise, type Advice } from './distill-bots.js';
 import { ROUTINES, isJunk } from './distill-routines.js';
-import { AFTER, HELP, HELP_ELSE, LESSON, MISHAP, ONWARD, OPENING, PRAISE, STEP_ONE } from './lines/helium.js';
+import { AFTER, HELP, HELP_ELSE, LESSON, MISHAP, ONWARD, OPENING, PRAISE, STEP_ONE, TELL } from './lines/helium.js';
 import { AT_HELIUMS } from './lines/you.js';
 
 const H = LAY.HELIUM;
@@ -146,7 +146,7 @@ export const fireSide = (x: number): boolean => x >= COLS - STEPS[0].cols;
 export const whitesOnFireSide = (cols: Board): number => cols.reduce((n, col, x) => n + (fireSide(x) ? col.filter((p) => p === WHITE || p === BURNT).length : 0), 0);
 /** What they say once you've done step one yourself, in turn: that's it done, and the rest is from other
     pirates (the user, 13 Nov: "this is not a replacement for the game ... talk to people"). */
-export const stepDoneLines = (): string[] => [STEP_ONE.done, ONWARD];
+export const stepDoneLines = (): string[] => [STEP_ONE.done, ONWARD, TELL];
 /** A drag, as the planner gives them: the piece at (x, y) swapped each way in turn. */
 export type Drag = { x: number; y: number; ways: number[] };
 

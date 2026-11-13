@@ -23,7 +23,7 @@ import { seeded } from './mirror-row.js';
 import { BURNT, COLS, Distilling, WHITE, goesUp } from './distilling.js';
 import { advise } from './distill-bots.js';
 import { ROUTINES, isJunk } from './distill-routines.js';
-import { AFTER, HELP, HELP_ELSE, LESSON, MISHAP, ONWARD, OPENING, PRAISE, STEP_ONE } from './lines/helium.js';
+import { AFTER, HELP, HELP_ELSE, LESSON, MISHAP, ONWARD, OPENING, PRAISE, STEP_ONE, TELL } from './lines/helium.js';
 import { AT_HELIUMS } from './lines/you.js';
 const H = LAY.HELIUM;
 export const HELIUM = {
@@ -132,7 +132,7 @@ export const fireSide = (x) => x >= COLS - STEPS[0].cols;
 export const whitesOnFireSide = (cols) => cols.reduce((n, col, x) => n + (fireSide(x) ? col.filter((p) => p === WHITE || p === BURNT).length : 0), 0);
 /** What they say once you've done step one yourself, in turn: that's it done, and the rest is from other
     pirates (the user, 13 Nov: "this is not a replacement for the game ... talk to people"). */
-export const stepDoneLines = () => [STEP_ONE.done, ONWARD];
+export const stepDoneLines = () => [STEP_ONE.done, ONWARD, TELL];
 /** Whites walked out of the fire's side, left, swap by swap: the drags that do it on board `b` (changed as
     they're made), rightmost first, at most `most`; a white that can't get clear isn't dragged. */
 function clearFireSide(b, most = 16) {

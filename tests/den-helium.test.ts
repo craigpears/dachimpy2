@@ -15,7 +15,7 @@ import { smugglersAt } from '../src/den-smugglers';
 import { BURNT, COLS, Distilling, WHITE, neighbourOn, canSwapOn, parseBoard } from '../src/distilling';
 import { isJunk } from '../src/distill-routines';
 import type { Advice } from '../src/distill-bots';
-import { AFTER, HELP, HELP_ELSE, LESSON, MISHAP, ONWARD, OPENING, STEP_ONE } from '../src/lines/helium';
+import { AFTER, HELP, HELP_ELSE, LESSON, MISHAP, ONWARD, OPENING, STEP_ONE, TELL } from '../src/lines/helium';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -185,7 +185,9 @@ describe('Helium\'s lesson without the basics (the user, 13 Nov)', () => {
 
 describe('Helium sends you on to other pirates (the user, 13 Nov: "this is not a replacement for the game ... talk to people")', () => {
   it('says, once you\'ve done step one, that these are a few tricks and the rest is from other pirates', () => {
-    expect(stepDoneLines()).toEqual([STEP_ONE.done, ONWARD]);
+    expect(stepDoneLines()).toEqual([STEP_ONE.done, ONWARD, TELL]);
+    // The user, 13 Nov: "we should always end with, if you got any questions, you can always send me a tell on Emerald".
+    expect(stepDoneLines().at(-1)).toMatch(/tell on Emerald/);
     expect(ONWARD).toMatch(/other pirates/);
     expect(ONWARD).toMatch(/[Ww]atch them play/);
     expect(ONWARD).toMatch(/videos/);

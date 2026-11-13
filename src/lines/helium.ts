@@ -62,6 +62,11 @@ export const STEP_ONE = {
     after `done` (src/den-helium.ts, stepDoneLines). Offhand, as everything they say. */
 export const ONWARD = 'Few of my tricks, that. The rest\'s from other pirates. Ask about. Watch them play. Find their videos.';
 
+/** And always the last thing they say when a lesson ends, after ONWARD (the user, 13 Nov: "to really mess with
+    Helium, I feel like we should always end with, if you got any questions, you can always send me a tell on
+    Emerald"). The real Helium, on Emerald, can expect a few tells. */
+export const TELL = 'Any questions, send me a tell on Emerald. Any time.';
+
 /** A column burns with a white in it (the still goes bang): the first time, and then any of these. The
     user (11 Nov): "just for the comedic layer ... occasionally, distilleries have been known to blow up". */
 export const MISHAP = [
@@ -142,12 +147,14 @@ export const CHARACTER: Character = {
     { on: '13 Nov', said: 'if you are joking about her drinking, that it\'s like, oh, ... explains her behaviour really, but hang on, ... she was like that before she\'s drunk ... she\'s not that way because she\'s drinking, she\'s just that way anyway.' },
     { on: '12 Nov', said: 'playing and be able to press a button that says help helium and he starts showing you some moves on how you could get yourself out of the situation.' },
     { on: '12 Nov', said: 'helium should kind of detect what stage you\'re at and show you what technique ... It\'s context aware.' },
+    { on: '13 Nov', said: 'to really mess with Helium, I feel like we should always end with, if you got any questions, you can always send me a tell on Emerald.' },
     { on: '13 Nov', said: 'helium said to teach you some tricks, but ... don\'t forget, you know, the greatest love of the game is talking to other pirates ... this is not a replacement for the game ... this is a tool, a side adventure ... We should be watching people, looking at YouTube videos, talk to people, just whatever.' },
   ],
   lines: [
     { when: 'Coming up off their island the first time: the still goes bang, and they shrug it off (your lines between, src/lines/you.ts)', says: OPENING },
     { when: 'Their lesson\'s step one, straight after their opening, the whites on the fire\'s side ringed: as it starts (says), as they drag the whites out of the three columns next to the fire (clear), why (why), in the bar (note); when you\'ve cleared them yourself (done); your goal in the bar while you play (goal)', says: STEP_ONE },
     { when: 'Once you\'ve done step one yourself, after their "done": the rest is from other pirates', says: [ONWARD] },
+    { when: 'The last thing they say when a lesson ends, always, after the other pirates', says: [TELL] },
     {
       when: 'The end of their lesson: in their bubble (says) and in the bar at the foot of the screen (note)', says: LESSON,
       each: { yours: 'Handing you the board, step one the goal' },

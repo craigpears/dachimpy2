@@ -929,6 +929,8 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 >
 > "helium should kind of detect what stage you're at and show you what technique ... It's context aware." (the user, 12 Nov)
 >
+> "to really mess with Helium, I feel like we should always end with, if you got any questions, you can always send me a tell on Emerald." (the user, 13 Nov)
+>
 > "helium said to teach you some tricks, but ... don't forget, you know, the greatest love of the game is talking to other pirates ... this is not a replacement for the game ... this is a tool, a side adventure ... We should be watching people, looking at YouTube videos, talk to people, just whatever." (the user, 13 Nov)
 
 ### Coming up off their island the first time: the still goes bang, and they shrug it off (your lines between, src/lines/you.ts)
@@ -950,6 +952,10 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 ### Once you've done step one yourself, after their "done": the rest is from other pirates
 
 - "Few of my tricks, that. The rest's from other pirates. Ask about. Watch them play. Find their videos."
+
+### The last thing they say when a lesson ends, always, after the other pirates
+
+- "Any questions, send me a tell on Emerald. Any time."
 
 ### The end of their lesson: in their bubble (says) and in the bar at the foot of the screen (note)
 
