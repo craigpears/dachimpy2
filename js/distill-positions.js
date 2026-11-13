@@ -128,6 +128,11 @@ export const VERDICTS = {
             note: "No hurry for column 9's whites with column 10 to go first: quick, simple, easy moves. Drag the blacks down, like the two in column 8, down, down, then along the columns going down, and the browns up.",
             expect: { kind: 'move', sorts: true, noBurn: true }, open: true,
         }],
+    P4: [{
+            date: '13 Nov',
+            note: "Fill the right-hand columns' gaps as fast as you can: a brown that can go up and a black that can go down fill both whites' places in column 9 in two moves, rather than dragging one white as far as it goes and still leaving gaps on the right to fill.",
+            expect: { fills: 8, frees: 8, noBurn: true }, open: true,
+        }],
     P6: [{
             date: '13 Nov', from: 'DISTILLING.md, the twenty-sixth note',
             note: 'A white at the top of the third column from the fire is in danger already: race junk into its place before it\'s walled in.',
@@ -191,6 +196,12 @@ export function check(p, m, e) {
         const ok = !!first && !!end && ((held === BLACK && h(...end) > h(first.x, first.y)) || (held === BROWN && h(...end) < h(first.x, first.y)));
         if (!ok)
             out.push("its first drag isn't a black taken down or a brown taken up");
+    }
+    if (e.fills !== undefined) {
+        const held = first && cols[first.x][first.y], end = first && dragEnd(cols, first);
+        const ok = !!end && (held === BLACK || held === BROWN) && end[0] === e.fills && cols[end[0]][end[1]] === WHITE;
+        if (!ok)
+            out.push(`its first drag doesn${"'"}t carry junk into a white${"'"}s place in column ${e.fills + 1}`);
     }
     if (e.ends) {
         const end = first && dragEnd(cols, first);

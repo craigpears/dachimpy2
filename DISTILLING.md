@@ -1661,6 +1661,14 @@ reader of its own: for every white, how trapped it is (no move beside it, blacks
 below), how soon its column burns, and how much worse it gets if left; the whites ranked by that, the most at risk
 worked first (the top right before a white lower down that can wait), and the quick sorting moves when nothing is at
 risk yet. The open verdicts on P1, P2, P3, P6 and P7 are its tests.
+And on P4, two whites in column 9 (rows 7 and 9) with column 10 all black and going in 9.7 s; the bot brought a black
+beside one white and dragged it out left: "my instinct would just be like, there's a [brown] that can go up, there's
+a black that can go down, and take both of those. You'd fill both of those ... spaces in column 9 in 2 moves. So
+again, I feel like here I would be prioritising filling those right-hand columns with as much speed as I could,
+rather than worrying about how far I can drag this one white piece that's then still going to leave me with a lot
+of gaps on the right that I still need to fill." So by the fire, the measure is gaps filled per move: junk raced into
+the whites' places, the quickest drags first, not one white dragged a long way. The verdict on `P4`: the first drag
+carries junk into a white's place in column 9.
 
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
