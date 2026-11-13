@@ -1377,6 +1377,51 @@ round the whites, the right-hand columns and the bottom; once it's there, its bo
 than blacks (a brown at the bottom can still rise through the whites; a black there is stuck, the swap rule),
 and the three right-hand columns of junk are the store to grab a brown, or a black, from when one is wanted.
 
+**The twenty-sixth note: a white at the top by the fire, beside a spice, filled before it's walled in (the user,
+13 Nov, watching the Ultimate on seed 1, `notes/distilling/44-a-white-trapped-top-right-by-a-spice.webp`, and a
+second picture a few moves on, not kept).** "something that always would make me anxious that it isn't really
+prioritizing ... this top right here. It just moved the brown piece next to it. It should have moved it into that
+spot behind the [spice] piece ... where something can potentially get trapped. Like, I would be taking some of
+those browns in the far bottom left and be like racing them up there to fill those gaps in." Then, a few moves
+on: "It even moved some blacks in the way at the top that actually block getting that white piece out easily.
+Like, it was so easy. All you had to do was drag the brown pieces up. Why have you blocked it all in?" The
+pictures: a white at the top of the third column from the fire, a spice below-left of it; the bot put a brown
+under it and blacks either side of it at the top. Why (traced 13 Nov, seed 1 replayed to the user's board):
+the danger zones were only the furnace's column and the one before it, so a white in the third column, however
+easily trapped, wasn't urgent, and moves that boxed it in were scored on the board score alone. So: in the three
+right-hand columns a white at the top or bottom edge, or beside a spice, is in danger already; its place gets
+junk raced to it (from far off if need be), and no move takes away its way out.
+
+**The twenty-seventh note: three columns burned in a row, early (the user, 13 Nov, the same session).** "Did it
+just choose to burn things? Like 3 burns just happened in rapid succession before it even made another move. Is
+that why it's struggling and failing?" The bots burn a column the moment it's all junk when nothing better is
+worth doing (`style.early`). Counted over seeds 1 to 5 for the Ultimate: 46 early burns, 12 within 3 s of the
+one before, and 33 of them with whites still in the two columns that would slide up to the fire. Each early burn
+brings the whites a column closer with the stock of clear columns used up. So burn early only while the columns
+coming up next are clear too.
+
+**The twenty-eighth note: crawls and loops too early; through the V, one big sweeping hook (the user, 13 Nov).**
+"it's doing a lot of crawls and kind of looping things up motions while it's trying to get stuff across ... they're
+still being done at an early stage when there are much simpler techniques. Like when you've got that kind of ...
+V-shaped wall on the right-hand side, you can just drag stuff and loop, kind of hook things in through there in
+one big giant sweeping motion. That's really easy. You don't need to crawl things across. That's for ... mid or
+late game ... it's certainly getting to more advanced techniques or late game techniques too quickly still, when
+there are alternative options open." Why (traced 13 Nov): the phase weights are dropped whenever any piece on the
+board is stuck or a white's in danger, and something's nearly always stuck. Over seeds 1 to 5, of the Ultimate's
+Stage I moves only one was ranked with the phase weights on; crawls were played 59 times, in every phase. So the
+weights should give way only for real danger (the zones by the fire), not for any stuck piece anywhere.
+
+**The twenty-ninth note: a black left one short of its corner (the user, 13 Nov, two pictures, not kept).**
+"I don't know what it's just done with this black piece. It has decided to just leave it one short. Why? Like,
+there was an extra move there. You could have gotten that right, nice, tucked into the corner. And then that brown
+piece kind of right in the bottom middle could have then swept in to kind of help even up the bottom ... with just
+a few moves and using that brown in the middle bottom, you have a nice straight thing going on. Like, that's
+markedly improved quite quickly." The pictures: in the block phase, a black dragged across the whites and let go a
+place short of the junk at the bottom right, sitting among the whites; the user's drag takes it on into the
+corner, and then a brown low in the middle sweeps in along the bottom, the bottom row of junk level. So a block
+move is carried on to where the junk joins up (the corner, the row) when it's a swap or two more, not let go
+where the board score happens to peak.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
