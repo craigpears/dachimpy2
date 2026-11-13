@@ -1836,6 +1836,23 @@ panicking and trying to get as many things over as you can. You wouldn't get eno
 you would even get into that spot ... not a valid question, because something went wrong." Its lesson is upstream:
 the risk reader's job is never to arrive there.
 
+**The thirty-fifth note: a board reader, thinking in groups and patterns, not one piece (the user, 13 Nov, after
+P1 to P11).** "There is a clear need for ... risk management, feature that tells you there's a risk and detects it.
+But also what kind of tactics are in play, like, oh look, the biggest problem is maybe even from that risk, that can
+be an individual piece that's trapped, but also thinking on a bigger group level of are there risks on the board,
+like there's too many blacks and browns at the bottom, we need to go rescue them. Or we're in this phase of the game,
+there's a V down there, it's we need to go and fix that up ... I'm sure you can break several things out, like, a
+bit of pattern matching of some kind, to even just like be able to think in those bigger terms rather than just in
+one piece." So the bots get a board reader of its own, before any move is weighed:
+- **Risks, piece by piece:** each white's danger (trapped, no move beside it, junk unable to reach it, walled in;
+  how soon its column burns), the top of the columns near the fire above all (P1, P2, P5, P6).
+- **Risks, as groups, by pattern:** junk stranded among the whites (blacks at the bottom, browns at the top; P7,
+  P10), how many pieces are stuck, how many columns the junk can still fill, the V and its tail unsorted (P8, P9),
+  the right-hand pair not a ladder (P8).
+- **The board's state**, one of a few named (healthy, at risk, cracked, damage control; the thirty-fourth note),
+  and **the tactic in play**, named in words (free the trapped whites, fill by the fire, sort, fix the V, sort the
+  ladder, rescue the stranded junk, keep the tools), which every move's weighing then reads.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.
