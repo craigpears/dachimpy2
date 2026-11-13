@@ -2061,6 +2061,30 @@ minutes of play each, about 8 minutes to run), no two from the same session with
     distracted." What it should do: "the black in column 9 you want to replace with a brown, the same [row] as where
     the white is in column 8. Because then you've got a line of brown, so then you can replace the browns with
     blacks, which allows the whites to get up." A plan seen through to that white freed.
+  - **P16:** "disaster has already struck." Too late.
+  - **P17 (the block phase):** "Black down. Yeah, I agree with that. The only thing I think it's missing is the risk
+    that there's a lot of browns near the top left, blacks near the bottom left ... while those immediate moves are
+    fine, it's going to leave you ... stranding those other black pieces, so it should have raised them up": a brown
+    used to hoist the left's low blacks higher. A risk for the reader (a pattern: browns high and blacks low on the
+    left, the blacks to be stranded) and a move for the bot.
+  - **P18:** "too late. It's the problem happens before that. Like, you should have had like a channel of black and
+    brown pieces, so you can just move them up in position."
+  - **P19:** "a bad example ... stuff's gone bad already."
+  - **P20:** the reader wrong: "trapped whites are there? ... You just drop the blacks down, that's fine. Nothing's
+    trapped. Don't agree with that idea." What they'd do: quick moves, then hoisting: "dragging some of those in
+    column 7 down a bit and get the one in column 5 out of the way [a black in the middle of the board: 'that makes
+    dragging things around harder'], and then using the brown to kind of hoist up some in column 2 and 3. Certainly
+    that one that's in column 3 at the bottom."
+  - **P21 (the challenge, like P5):** not trapped: "there's a two-step solution, which is just drag the blacks in 6
+    and 7 down to the bottom ... trapped I define as being much more challenging than that, like requiring a
+    complicated move and high number of swaps."
+  - **P22 (like P6):** the same: only "technically trapped as in you can't move it, it's only one way ... it's just
+    so close."
+  - **So "trapped" is measured by what it takes to free the white,** not whether it can move this moment: a white
+    a short drag or two from free (the blacks above it dropped, say) isn't trapped; trapped is a complicated way out,
+    many swaps. The reader's trap measure (src/distill-risk.ts) to change, P20 to P22 its tests.
+  - **And earlier boards:** "I feel like you need to give me options earlier in the game because they're still
+    clearly big early game problems."
 - **Watching the CC^1 bot (13 Nov), the opening:** "for the fresh board, it just created kind of like a weird V shape
   of whites, and ... it should be like trying to build it in the second or third column, like close to what's being
   burnt, just to have a bit of burnt buffer. You build some fully [junk] columns, and then build behind it, but this
