@@ -24,7 +24,7 @@ import {
   actAfter, holdSecs, ringed, Nerves, NERVE, whitesInFurnace, onScreen, hintFor, hintLeft, routesToFire, Watch, PACE_WATCH,
   BEST_STORE, cleanBestChain, beatBest, SEEN_STORE,
   goalFor, biggerGoal, goalLines, fillIn, Batch, planFor, planTarget, PlanLines, crystalClears, flaskLevel, FLASK_STEPS,
-  TeachLines, SPOT_AFTER,
+  TeachLines, SPOT_AFTER, RUM,
 } from '../den-helium.js';
 import { LAY } from '../den-sail.js';
 import { Distilling, WHITE } from '../distilling.js';
@@ -609,7 +609,7 @@ export function heliumKey(key) {
 /** Space off their island: their lesson the first time (it begins as you come up), then to the still. True if it was for them. */
 export function heliumHail() {
   const p = sail.helm.pose;
-  if (!helium.W || helium.on || !helium.visit.again(onHeliumLanding(p.c, p.r), free())) return false;
+  if (!helium.W || helium.on || helium.away || !helium.visit.again(onHeliumLanding(p.c, p.r), free())) return false;
   sail.helm.moor(HELIUM_MOOR);
   atStill();
   return true;
@@ -696,7 +696,7 @@ export function heliumPrompt() {
     return `${lead} · Esc: leave the still`;
   }
   const p = sail.helm.pose;
-  if (!onHeliumLanding(p.c, p.r) || !helium.visit.seen || helium.play) return '';
+  if (!onHeliumLanding(p.c, p.r) || !helium.visit.seen || helium.play || helium.away) return '';
   return `Off ${HELIUM.NAME} · Space: Distilling at their still`;
 }
 
@@ -807,4 +807,40 @@ export function heliumReset() {
 export function heliumCheat() {
   sail.helm.moor(HELIUM_ARRIVE);
   sail.riding = false;
+}
+
+// ---------- their rum run's hooks (rumrun.js; src/den-rumrun.ts) ----------
+/** Casks filled at their still this voyage. */
+export const heliumCasks = () => helium.cellar.filled;
+/** Their casks go aboard: the cellar and the pile empty. Where they come from (the cask by the spout), in the world. */
+export function heliumShip() {
+  helium.cellar = new Cellar();
+  const at = helium.W?.distillery.caskAt() ?? V3(0, 0, 0);
+  helium.W?.distillery.reset();
+  return at;
+}
+/** Off on the run with you (true), or home again: not on their island meanwhile, no still, no chatter there. */
+export function heliumAway(on) {
+  helium.away = on;
+  const T = helium.W?.them;
+  if (!T) return;
+  T.p.g.visible = !on;
+  T.chatty = !on;
+  if (on) T.hush();
+}
+/** Their island figure quiet while the run's scene talks over them (true), or chattering again; its group, to
+    put a line over. */
+export function heliumQuiet(on) {
+  const T = helium.W?.them;
+  if (!T) return null;
+  T.chatty = !on && !helium.away;
+  if (on) T.hush();
+  return T.p.g;
+}
+/** A starting point for their rum run (menus.js): their lesson seen and `n` casks filled, on the pile. */
+export function heliumStock(n) {
+  helium.visit.seen = true;
+  helium.cellar = new Cellar();
+  helium.cellar.pour(RUM.CASK * n);
+  helium.W?.distillery.stock(helium.cellar.piled);
 }

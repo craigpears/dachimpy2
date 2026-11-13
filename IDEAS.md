@@ -2531,6 +2531,15 @@ the barrels a deck load that shows (and might shift or go over in a rough sea), 
 scene with that character's lines, and the checkpoint's guards (Dignity's) looking on as you sail past. (To
 shape with the user: what getting past the outposts is as play, perhaps the smugglers' back way through the
 beach, and what the run earns.)
+**A first version built (13 Nov; RULES.md, "Helium's rum run"),** on defaults to confirm: it starts at their
+still once two casks are filled; six barrels on her deck, Helium aboard as your spouse is drawn; Mischievious
+two and Kikkit one, either way round, then the rest to Port Decorum, at its jetty under the guard's nose or up
+the smugglers' beach; Helium whistling past the checkpoint and Port Decorum, Dignity remarking, its guards
+watching; it earns the barrels counted and Helium's thanks. Still open: the barrels shifting or going over in
+a rough sea; a sharper search at the checkpoint (a guard who comes aboard, say, or Dignity's spyglass on your
+deck) as play of its own; what a run earns beyond thanks, if anything; whether the smugglers' beach should be
+easier to reach for it than a Vegas; the smuggling ring and its penguin as the way in; more runs, each a
+little different.
 
 ## The grand frigate and the tunnel: "we can fix that later" (13 Nov)
 

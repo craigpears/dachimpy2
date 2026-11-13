@@ -168,6 +168,8 @@ export function distillery() {
     pour(runs) { st.runs.push(...runs); },
     /** Back to an empty cask and no pile (a fresh voyage). */
     reset() { st.runs = []; st.run = null; st.roll = null; st.fill = 0; st.piled = 0; pile.forEach((b) => { b.visible = false; }); setFill(0); cask.lid.visible = false; cask.g.position.copy(CASK_AT); cask.g.rotation.set(0, 0, 0); cask.g.scale.setScalar(1); },
+    /** `n` casks on the pile at once, none poured (a starting point: the rum run's). */
+    stock(n) { st.piled = Math.min(n, pile.length); pile.forEach((b, i) => { b.visible = i < st.piled; }); },
     tick(dt) {
       blastTick();
       const now = performance.now() / 1000;

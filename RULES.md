@@ -745,6 +745,39 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - **They know the others:** a big order of rum for Mischievious's next wedding, Kikkit at their stash
     again (src/lines/helium.ts). Not yet: the smuggling ring and the penguin's link to them, the coached
     replay, a demonstration per technique, the lesson's later steps.
+- **Helium's rum run (13 Nov), a first version.** The user: "Helium's run definitely seems ready ... go ahead
+  and just start ... be reasonable" (IDEAS.md, "Helium's rum run"). An island of its own in the code: its rules
+  src/den-rumrun.ts (tested), its 3D js/den/rumrun.js, its lines in each character's file in src/lines/
+  (`RUM_RUN`), through thin hooks (helium-isle.js's casks, away and quiet; whirlpools.js's kikkitQuiet;
+  imperial-isle.js's empireWatch and empireQuiet; dignity.js's dignityRemark; sailing.js's Space, Esc, prompt
+  and goal; a cheat, `?at=rumrun`). Defaults chosen, to confirm with the user:
+  - **It starts at their still:** off their island with two casks filled (Cellar: RUM_RUN.CASKS, a couple of
+    good columns) and not at the still, they ask you along, a little cutscene (your "Is... is this smuggling?",
+    their "Delivering. With extra whistling."). Space takes the rum aboard: the casks off their pile, six
+    barrels flying onto her deck, them with them (gone from their island meanwhile, no still till they're
+    home). Esc, not now: asked again once you've been back at the still.
+  - **The deck load:** six barrels in a pile forward of her mast (RUM_CAST.deck), the top ones ashore first, a
+    barrel fewer at each stop; out of the way while a puzzle's on her deck, as anyone aboard is. Helium stands
+    to port as your spouse stands to starboard, drawn the one way (js/den/aboard.js, shared with spouse.js).
+  - **The stops, each a little scene** (Space off it, settled; Space on through the lines, Esc skips, the
+    barrels delivered either way): the Wedding Isle, two barrels, Mischievious on her jetty waving it in (she's
+    there while there's rum coming), she brought alongside it; Kikkit's island, one barrel ("Not a stash,
+    Kikkit. A barrel."; Rodrigo says it's a stash), her ramble hushed meanwhile; either way round. Then the rest
+    (three) to Port Decorum, last ("Mischievious and Kikkit first. The Empire can wait."), two ways: its jetty,
+    the guard asking what's in the barrels ("Water." "Water." "For the fort. Very thirsty, your fort. Nothing
+    suspicious at all."), left on the jetty; or the smugglers' beach behind it, quietly, nobody about. Either
+    ends it; then Space off their island drops Helium home ("More casks, another run").
+  - **Past the Empire:** with rum aboard, coming into sight of the checkpoint (three rows either side of its
+    line, seven columns either side of its gate) or Port Decorum (two squares off its land, or behind its rocks),
+    Helium whistles ("Whoop-de-doop-de-doop-de-doo...", a hand to their mouth) and a line in turn ("Nothing
+    suspicious at all."), once a pass (25 s out of sight before again); at the checkpoint Dignity remarks from
+    her gate, in turn; at Port Decorum its guards turn to watch her by. No search and no new puzzle: the
+    checkpoint's guns are the danger, as they always were.
+  - **What it earns:** the barrels counted as delivered (this voyage) and Helium's thanks. No economy.
+  - The prompt carries the run's goal ("Rum run: the Wedding Isle (2 for Mischievious) and Kikkit's island (1
+    for Kikkit), either way round") while you sail.
+  Not yet (IDEAS.md): the barrels shifting or going over in a rough sea, a sharper search at the checkpoint,
+  the smuggling ring and its penguin, anything on the map's quests.
 - **Port Decorum, an island under imperial control, sketched (11 Nov).** "start sketching out even just
   like, even if it's just an empty island or something where you can't interact yet, is just some island
   that's, say, under imperial control ... to create trading mechanics, looting mechanics, smuggling

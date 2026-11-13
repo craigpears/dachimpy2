@@ -216,8 +216,14 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    and junk right, the junk column burned, and the next burned with a white in it, bang ("Oops. That
    happens sometimes. Don't worry about it."). Then it's yours, and "Help, Helium" while you play: they read
    your board, say what they'd do and why, name the technique, and do it. They mention the others: a big
-   order of rum for Mischievious's next wedding, Kikkit at their stash again. (The ring that leads you to
-   them, and where their rum goes, still to come.)
+   order of rum for Mischievious's next wedding, Kikkit at their stash again. And where their rum goes (13
+   Nov, a first version): fill a couple of casks and they ask you along on a rum run, the adventure after the
+   Vegas one, Distilling, the smuggling and the imperial island as one. The barrels piled on your sloop's deck
+   and Helium aboard, a wedding's worth to Mischievious's jetty and a barrel for Kikkit, either way round, then
+   the rest to Port Decorum: brazened out at its jetty under the guard's nose (past the checkpoint, its guns as
+   they always were), or quietly up the smugglers' beach round its back (the whirlpools' Vegas the only way
+   there). Past the Empire Helium plays it all innocent, whistling, "nothing suspicious at all", Dignity
+   taking notes. Then you take them home. (The ring that leads you to them still to come.)
    And out past Primates Rule, a buoy and a gate in a line of rocks: the sloop race (11 Nov), the den's
    own characters racing you round a zigzag course, Kikkit greedy for her Vegas, Tzz steady on her
    Doubles, Dalnoth with Umami aboard to do his foraging, firing on whoever sits still in the open; the
@@ -259,5 +265,6 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
 | Break loose crates | Planks that mend the wall for good |
 | Walk into the plot | Your shack, built the same way, any time |
 | Come up off Helium's island, past the checkpoint | Their Distilling lesson, then their still to play at, their help on H |
+| Fill a couple of casks at Helium's still | Their rum run: Helium and the barrels aboard, to Mischievious, Kikkit and Port Decorum, then home |
 | Build the crane at the hidden cove's ledge | Her way up the cliff to the clifftop lagoon, and its wreck's treasure (by Treasure Haul) |
 | Get past Dalnoth (to come) | His treasure, and his white monkey on your shoulder |

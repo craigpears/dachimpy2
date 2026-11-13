@@ -251,6 +251,21 @@ export function empirePrompt() {
   return `Off ${EMPIRE.NAME}, under imperial control · click the sea to drop a pin`;
 }
 
+/** Its guards turned to watch something go by (a world point { x, z }: Helium's rum run, rumrun.js), or (null)
+    back to looking out as they were. */
+export function empireWatch(at) {
+  for (const gd of empire.W?.guards ?? []) gd.lookAt = at;
+}
+/** The jetty guard hushed while someone else's scene talks with him (true), or grumbling again; his figure's
+    group, to put a line over. */
+export function empireQuiet(on) {
+  const gd = empire.W?.guards.find((x) => x.chatter?.script?.intro);
+  if (!gd) return null;
+  gd.chatty = !on;
+  if (on) gd.hush();
+  return gd.p.g;
+}
+
 /** A fresh voyage: whose it is to be said again, and the jetty guard to halt you again. */
 export function empireReset() {
   empire.sight = new Sighting();

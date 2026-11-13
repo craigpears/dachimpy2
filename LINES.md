@@ -83,6 +83,10 @@ Your own pirate, dressed as you like from the wardrobe (or as any real pirate in
 - *The first time, at her door:* "Oh! ...Oh, that's actually lovely."
 - *Asking him for another:* "...Yes. Still lovely."
 
+### Helium's rum run: as they ask you along, before their "Delivering"
+
+- *smuggling:* "Is... is this smuggling?"
+
 ## The den's pirate voice
 
 Not someone you meet: the den's own voice, a pirate's ("yer", "ye", "o'"), in the captions of the little tour round the captain's map. It only says what's there to see and how to work a thing: never how to get past the checkpoint, nor where a secret is (RULES.md, "Hidden gems, never hinted").
@@ -122,6 +126,12 @@ Witty, very cute, and a stickler for the rules (she hates paperwork, and writes 
 - *You wreck one of her guns:* "That was Imperial property!"
 - *You get through her gate, either way:* "This is going in my report. In very small, very cross handwriting."
 - *You come out round her by the locks (even if she never saw you sail up):* "Nobody uses the canal. Nobody!"
+
+### Helium's rum run: you sail by her gate with a deck of barrels, Helium whistling (one a pass, in turn)
+
+- "Barrels. And whistling. It's always the whistling."
+- "I'm writing down "whistled". In very small, very suspicious handwriting."
+- "That sloop is lower in the water than she was. Hm."
 
 ## Bella
 
@@ -481,6 +491,11 @@ Marry her, and she comes home with you: aboard the sloop, then at the den.
   - "Mended walls, raiders on the beach... it's a bit like a wedding, really."
   - "I've found a lovely spot for a band stand. Just saying."
 
+### Helium's rum run: on her jetty as their barrels come in for her weddings
+
+- *As you come alongside:* "Ooh, Helium's rum! Just in time. Three weddings before lunch!"
+- *The barrels rolled ashore, after Helium's:* "Who's getting married? Never mind. I'll find somebody. Hee hee!"
+
 ## The suitors
 
 A line of bachelors and bachelorettes on the Wedding Isle, blind-date style: they walk in with bouquets out, and each steps forward with a cheesy line ("Here are your bachelors!"). Men and women both, so anyone can find a match. Number one depends on the tone: in Dark humour, Barnaby, the groom left over from the last wedding (his bride had a mishap); in Happy and cheesy, Sweet William. Whatever a suitor mentions, they have (Lady Marigold's parrot is on her shoulder).
@@ -793,6 +808,12 @@ Loopy and off on twenty tangents at once, she can't get her lefts and rights rig
 - *lost:*
   - "Did I take a few lefts? I think I took a few lefts."
 
+### Helium's rum run: a barrel of their rum brought to her island
+
+- *As you come up:* "Is that a barrel? For me? A whole barrelehhh!"
+- *After Helium's "not a stash":* "Rodrigo says it's a stash. Rodrigo knows about stashes."
+- *After Helium's "Rodrigo's a monkey", the barrel ashore:* "He says that's exactly what a monkey would say."
+
 ## The penguin in the balaclava
 
 One of a colony of penguins on a floe out past Kikkit's whirlpools and their winds, beyond the reef: the bigger prize, only a Vegas carries you there. Exactly where she said, and in a balaclava, as she said, sneaking about the floe with a sack over his shoulder, up to something.
@@ -925,7 +946,7 @@ The sensible one, after Kikkit: she shows you plainly how a big Vegas is built, 
 
 On a little island of their own out past the checkpoint, by the smugglers' rocks, at a copper still with a board of Distilling on a stand beside it. A real Puzzle Pirates pirate (Helium of Emerald): Senior Officer of a crew of rum-makers, Revered at Distilling and Ultimate on the ocean, with distilleries on five islands and a tailoring stall beside Mischievious's. Drawn from their portrait: dark skin, white hair under a black cat-eared mask, an eyepatch, a gold hoop earring, a blue starfish on the cheek, a black Vampire raiment lined in gold, black pants, black fancy boots with plum tops, a hook for the left hand, and King, their plum monkey, on their shoulder.
 
-Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of their brews and unbothered when the balance goes wrong and the still goes bang ("Oops. That happens sometimes. Don't worry about it."). A short lesson on a real board, then it's yours, and "Help, Helium" while you play: they read your board, say what they'd do and why, name the technique, and do it. Knows the others: a big order of rum for Mischievious's next wedding, Kikkit at their stash again.
+Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of their brews and unbothered when the balance goes wrong and the still goes bang ("Oops. That happens sometimes. Don't worry about it."). A short lesson on a real board, then it's yours, and "Help, Helium" while you play: they read your board, say what they'd do and why, name the technique, and do it. Knows the others: a big order of rum for Mischievious's next wedding, Kikkit at their stash again. Fill a couple of casks and they take it on a run aboard your sloop, to Mischievious, to Kikkit, and past the Empire to Port Decorum, all innocence and whistling: "Nothing suspicious at all."
 
 > "Maybe he's got a secret distillery operation going. If you find his house, he ... teaches you how to make some rum. But he's very kind of by the by" (the user, 11 Nov)
 >
@@ -1207,6 +1228,40 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 - "Whites left, junk right. That's most of it. The rest is just showing off."
 - "Ask about, mind. Other pirates know tricks I've never seen."
 
+### Their rum run (src/den-rumrun.ts): once you've filled some casks, asking you, aboard your sloop with the barrels, past the Empire, and at each stop
+
+- *Off their island as you leave the still, the casks filled: asking you along:*
+  - "That's a few casks. Mischievious wants a wedding's worth. Kikkit wants... Kikkit wants."
+  - "And the rest goes to Port Decorum. The Empire loves rum. Just not where it comes from."
+  - "Fancy a run? Your sloop, my barrels. I'll come along. Keep an eye on them."
+- *After you ask whether it's smuggling:* "Smuggling? No. Delivering. With extra whistling."
+- *The barrels rolled aboard, and them with them:* "Right. Mischievious and Kikkit, either way round. Then Port Decorum. Mind the corners."
+- *Now and then while you sail, barrels aboard:*
+  - "Easy on the waves. That's a wedding's worth by the mast."
+  - "If anyone asks, it's ballast. Very tasty ballast."
+  - "Lovely sloop. Smells of rum now. You're welcome."
+  - "Don't sit on that one. That one's for the Empire."
+- *Sailing by the checkpoint or Port Decorum with barrels aboard: whistling:* "Whoop-de-doop-de-doop-de-doo..."
+- *Then, in turn:*
+  - "Nothing suspicious at all."
+  - "Just sailing. With some barrels. Of... sea."
+  - "Lovely day for not smuggling anything."
+- *At Port Decorum before Mischievious and Kikkit have theirs:* "Mischievious and Kikkit first. The Empire can wait. It's very good at waiting."
+- *Off the Wedding Isle, Mischievious on the jetty:*
+  - *hello:* "Two barrels, as ordered. One for the guests."
+  - *other:* "And one for whoever's getting married. Bit of luck, that."
+- *Off Kikkit's island:*
+  - *hello:* "One barrel. Not a stash, Kikkit. A barrel."
+  - *monkey:* "Rodrigo's a monkey."
+- *Brazening it out at Port Decorum's jetty, its guard asking what's in the barrels:*
+  - *water:* "Water."
+  - *fort:* "For the fort. Very thirsty, your fort. Nothing suspicious at all."
+- *Landing it quietly at the smugglers' beach behind Port Decorum:*
+  - *quiet:* "Nobody about. Lovely. Up the beach they go."
+  - *after:* "Someone'll be along for them. Someone always is."
+- *The barrels all gone:* "That's the lot. Drop me home, would you? The still won't blow itself up."
+- *Back off their island, hopping off:* "Ta. More casks, another run. Bring the sloop."
+
 ## Gravee
 
 A real pirate of the Emerald Ocean (by her pirate name only): captain of Just In Time, Lady of the flag Don't Open Till Doomsday, and a great collector of portraits: seven pages of them, most of herself in her many looks, and dozens of her "Definitive Proof" of a yeti. Drawn from her pirate page's portrait: a white Berserker pelt (a bear's head) over white hair, an eyepatch, a blue starfish stuck to her cheek, a green Dress top and Gown trimmed white, a hook for her left hand, a candle in her right, and Spud, her tan monkey.
@@ -1414,6 +1469,12 @@ For now there's nothing to do there: the island's sketched, to sail up to and lo
 - "No, you can't see the warehouse. Nobody sees the warehouse."
 - "Everything ashore is imperial property. Every last crate."
 - "Papers? No? Then no."
+
+### Helium's rum run, brazened out at the jetty: its guard and Helium
+
+- *As you come alongside with the barrels:* "Halt! No pirates in the harbour. And what's in the barrels?"
+- *After Helium's "Water.":* "Water."
+- *After the thirsty fort:* "...Leave them on the jetty. And move along. Before I think about it."
 
 ## The race's starter
 

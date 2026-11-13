@@ -118,6 +118,14 @@ export const BACK_OUT = [
     'You got out past the reef! And then the whirly ones got you. They always get you.',
     'So close! Did you see him? Was he still in his balaclava? He\'s up to something.',
 ];
+/** Helium's rum run (src/den-rumrun.ts): a barrel of their rum brought to her island. Delighted, and sure it's a
+    stash; Rodrigo agrees. Never a joke at her drinking (RULES.md): it's the barrel she's savouring. `hello` as
+    you come up, `stash` after Helium's "a barrel", `rodrigo` once it's ashore. */
+export const RUM_RUN = {
+    hello: 'Is that a barrel? For me? A whole barrelehhh!',
+    stash: 'Rodrigo says it\'s a stash. Rodrigo knows about stashes.',
+    rodrigo: 'He says that\'s exactly what a monkey would say.',
+};
 /** Racing you in the sloop race (src/den-rivals.ts), in Rodrigo's Revenge: greedy for the Vegas over the
     whirlpools (the user, 11 Nov: "maybe [Kikkit] goes greedy for the Vegases"), and she'll fire on anyone
     she finds sitting still as she goes by. */
@@ -161,5 +169,9 @@ export const CHARACTER = {
         { when: 'A whirlpool\'s had you, and its winds have thrown you back to her island (a new one each time)', says: BACK },
         { when: 'Thrown back after you\'d got out past the reef', says: BACK_OUT },
         { when: 'Racing you in the sloop race, over her sloop: on the starting line, and over the finish line first or after', says: RACER.says },
+        {
+            when: 'Helium\'s rum run: a barrel of their rum brought to her island', says: RUM_RUN,
+            each: { hello: 'As you come up', stash: 'After Helium\'s "not a stash"', rodrigo: 'After Helium\'s "Rodrigo\'s a monkey", the barrel ashore' },
+        },
     ],
 };

@@ -22,6 +22,7 @@ import { kikkitCheat, penguinsCheat } from './whirlpools.js';
 import { lodgingsOpen } from './lodgings.js';
 import { tzzCheat } from './balloon-isle.js';
 import { heliumCheat } from './helium-isle.js';
+import { rumCheat } from './rumrun.js';
 import { empireCheat } from './imperial-isle.js';
 import { smugglersCheat } from './smugglers.js';
 import { raceCheat, race } from './race.js';
@@ -592,6 +593,14 @@ function cheatHelium() {
   heliumCheat();
   cp.check.side = 'far';
 }
+/* Helium's rum run (js/den/rumrun.js): at sea off their island, their lesson seen and a few casks filled, so
+   they ask you along; the checkpoint told she's beyond it, as for Helium's still. */
+function cheatRumRun() {
+  if (cine) return;
+  if (!sail.on) cheatSail();
+  rumCheat();
+  cp.check.side = 'far';
+}
 /* Port Decorum, the imperial island (js/den/imperial-isle.js), out past the checkpoint: at sea, just off
    its jetty, and the checkpoint told she's beyond it (else, jumped there, she'd seem to have slipped
    round it by the locks, and Dignity would say so). */
@@ -725,6 +734,7 @@ const CHEAT_SECTIONS = [
     ["Vegas Island's penguins", cheatPenguins, 'penguins'],
     ["Tzz's balloon lesson", cheatTzz, 'tzz'],
     ["Helium's still (Distilling)", cheatHelium, 'helium'],
+    ["Helium's rum run", cheatRumRun, 'rumrun'],
     ['The imperial island', cheatEmpire, 'imperial'],
     ["The smugglers' beach", cheatSmugglers, 'smugglers'],
   ]],
