@@ -1815,6 +1815,27 @@ got going on there." So in the block phase, a move that makes the next one longe
 V's bottom sorted first) can beat the priority white, and a sweep goes on while it can. The verdict on `P9`: its
 first drag a brown at the bottom of column 7 or 8 taken down.
 
+And on P10, CC^8's block phase at 160 s: whites over most of the board, blacks stranded among them at the bottom
+(columns 1, 3, 5 and 7), browns at the top; the bot drags column 8's white one swap down-left, lifting the brown in
+column 7, row 5 up to the right. "Why are things only half moving? ... instead of pulling the white left, I would see
+this as moving the brown ... up to the right. And then ... pulling the other brown in quick succession ... this is a
+board in bad state ... because there's so many trapped pieces. Like black's at the bottom, surrounded by whites,
+browns at the top ... the immediate move is fine, but my actual attention is drawn to oh my god, how do I get those
+blacks out? So I'd actually be holding off on making any moves because as soon as you ... move those browns up, they
+might have been the browns that I needed to rescue the black pieces ... So I think for that reason, that's actually
+quite a bad move ... I'd switch strategy or tactics from trying to fill in the white column so they're brown with
+fixing cracked pieces." So the board's state (the thirty-fourth note) has a "cracked" reading too: junk stranded
+among the whites, which switches the bot from filling the columns by the fire to fixing it, and the browns in the
+middle become tools to keep, not junk to send right. The verdict on `P10`: the browns in columns 6 and 7, row 5 left
+where they are. ("Half moving": the page draws the bot's drag as it is, one swap; the reason's "down through the
+browns" oversells it.)
+
+And P11 (CC^3 at CC^2, 2.5 s before column 10 goes, the board junk everywhere and whites scattered): no verdict, by
+the user's choice: "that's just not really a real situation. Like if you're in that, you're just losing ... Start
+panicking and trying to get as many things over as you can. You wouldn't get enough over in time ... I don't know how
+you would even get into that spot ... not a valid question, because something went wrong." Its lesson is upstream:
+the risk reader's job is never to arrive there.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.

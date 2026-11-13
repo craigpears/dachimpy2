@@ -104,6 +104,8 @@ export interface Expect {
   frees?: number | [number, number];
   /** At least one of these whites freed (junk raced into its place, or the white moved on). */
   freesAny?: readonly (readonly [number, number])[];
+  /** These pieces left where they are (needed later: a brown kept in the middle to fix the board with). */
+  keeps?: readonly (readonly [number, number])[];
   /** After its move, no junk (brown, black, burnt white) left in this column. */
   clean?: number;
   /** The technique it plays, and those it mustn't. */
@@ -252,6 +254,11 @@ export const VERDICTS: Readonly<Record<string, readonly Verdict[]>> = {
     note: "Not bad, it goes for the white that's the priority, but it feels like it's just stopped: keep dragging that brown down through the blacks to really reach the bottom. The better move is the tail at the bottom left: drag the browns at the bottom of columns 7 and 8 down first, so that when you come to the move at the top you can drag that brown all the way down through. The efficiency of sorting that bottom bit out.",
     expect: { kind: 'move', startsIn: { x: [6, 7], y: [6, 8] }, ladder: true, noBurn: true }, open: true,
   }],
+  P10: [{
+    date: '13 Nov',
+    note: "The move itself is fine, but the board is in a bad state, something chosen wrong to get here: so many trapped pieces, blacks at the bottom surrounded by whites, browns at the top. How do I get those blacks out? Hold off: move those browns up to the right and they may be the browns needed to rescue the trapped blacks. Switch from filling the white columns to fixing the cracked pieces.",
+    expect: { keeps: [[5, 4], [6, 4]], noBurn: true }, open: true,
+  }],
 };
 
 /** The board of a position. */
@@ -322,6 +329,7 @@ export function check(p: Position, m: BotMove, e: Expect): string[] {
   if (typeof e.frees === 'number' && whitesIn(after, e.frees) >= whitesIn(cols, e.frees)) out.push(`no white leaves column ${e.frees + 1}`);
   if (Array.isArray(e.frees) && after[e.frees[0]][e.frees[1]] === WHITE) out.push(`the white at ${place(e.frees)} is still there`);
   if (e.freesAny && e.freesAny.every(([x, y]) => after[x][y] === WHITE)) out.push(`none of the whites at ${e.freesAny.map(place).join(' or ')} is freed`);
+  if (e.keeps) for (const [x, y] of e.keeps) if (after[x][y] !== cols[x][y]) out.push(`it moves the piece at ${place([x, y])}`);
   if (e.clean !== undefined && after[e.clean].some(isJunk)) out.push(`column ${e.clean + 1} still holds junk`);
   if (e.uses && m.technique !== e.uses) out.push(`it plays ${m.technique ?? 'nothing'}, not ${e.uses}`);
   if (e.avoids && m.technique && e.avoids.includes(m.technique)) out.push(`it plays ${m.technique}`);
