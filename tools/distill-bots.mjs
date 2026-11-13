@@ -53,7 +53,11 @@
    The bots as target chains (13 Nov, the thirtieth note), and the twenty-sixth to twenty-ninth notes' fixes: see
    DISTILLING.md §4, twelfth run. Whites burned later in a session traced and fixed (the bank left after a chain
    breaks chained again, a way out of a danger zone only when it leaves fewer whites, whites walled in by spice),
-   and a danger zone's saving moves ranked by the phase's weights: DISTILLING.md §4, thirteenth run. */
+   and a danger zone's saving moves ranked by the phase's weights: DISTILLING.md §4, thirteenth run.
+   The pair rescue in the chain (13 Nov: junk stuck on the edge of a column going up, freed first): chains 3.7 / 3.5 /
+   3.9 / 4.7 / 3.9 (were 2.4 / 2.4 / 2.5 / 3.6 / 3.0), columns up not Crystal Clear 4.3 / 4.4 / 4.5 / 4.0 / 5.5 a session
+   (were 7.0 / 7.3 / 7.8 / 6.1 / 7.0); the CHAIN line counts the chain's waits and those columns (DISTILLING.md §4,
+   fourteenth run). */
 
 import { Distilling, WHITE, BROWN, BLACK, BURNT, TALL, UP_LEFT, DOWN_LEFT, neighbourOn, canSwapOn } from '../js/distilling.js';
 import { LEVELS, P, bankFor, levelNamed, playSession } from '../js/distill-bots.js';
@@ -157,15 +161,23 @@ for (const name of NAMES) {
     let lastRoutine = '';
     // Stage I watched: moves that leave more whites trapped than before them (no column gone between), the
     // whites trapped as the chain starts, and the junk columns burned a minute of Stage I.
-    const watch = { early: { n: 0, quick: 0, whites: 0, lastBurn: -1e9 }, byPhase: {}, weighted: 0, stageOneMoves: 0, block: { moves: 0, small: 0, swaps: 0, ms: 0, from: null }, ties: 0, phases: {}, elsewhere: 0, leftMs: 0, stuckWaits: 0, trapping: 0, trappingNear: 0, sweeps: 0, sweepsTrapping: 0, moves: 0, atChain: null, stageOneMs: null, burnedInOne: 0 };
+    const watch = { early: { n: 0, quick: 0, whites: 0, lastBurn: -1e9 }, byPhase: {}, weighted: 0, stageOneMoves: 0, block: { moves: 0, small: 0, swaps: 0, ms: 0, from: null }, ties: 0, chainWaits: 0, chainWaitsJunk: 0, chainWaitMs: 0, notClear: 0, phases: {}, elsewhere: 0, leftMs: 0, stuckWaits: 0, trapping: 0, trappingNear: 0, sweeps: 0, sweepsTrapping: 0, moves: 0, atChain: null, stageOneMs: null, burnedInOne: 0 };
     let before = null;
-    let lastPlan = null;
+    let lastPlan = null, lastWait = null;
     const onPlan = (a) => {
       // Stage I time with whites left in the junk columns next to burn, and waits (nothing worth doing) then.
       const left = a.stage === 'junk' ? whitesNextToBurn(g.cols) : 0;
       if (lastPlan && lastPlan.left) watch.leftMs += g.time - lastPlan.t;
       if (left && a.kind === 'wait') watch.stuckWaits++;
       lastPlan = { t: g.time, left: left > 0 };
+      // The chain's waits (the thirteenth run: "the bot waits, nothing worth moving, about 300 times a session"):
+      // each wait, and those with junk still in the column going up, and the time they took.
+      if (lastWait) { watch.chainWaitMs += g.time - lastWait; lastWait = null; }
+      if (a.stage === 'chain' && a.kind === 'wait') {
+        watch.chainWaits++;
+        const col = g.cols[a.column ?? g.cols.length - 1];
+        if (col.some((p) => junkP(p))) { watch.chainWaitsJunk++; lastWait = g.time; }
+      }
       const now = whitesTrapped(g.cols), near = whitesTrapped(g.cols, true), cols = g.columns.length;
       if (before && before.cols === cols && now > before.n) watch.trapping++;
       if (before && before.cols === cols && near > before.near) watch.trappingNear++;
@@ -220,6 +232,8 @@ for (const name of NAMES) {
     const first = { gone: 0, junk: 0, at: null, junkBefore: null };
     const onColumn = (c) => {
       if (!c.up) watch.early.lastBurn = g.time;
+      // A column sent up not Crystal Clear: a chain broken, or never started.
+      if (c.up && c.chain === 0) watch.notClear++;
       if (!c.up && g.time <= 180000) watch.burnedBy3 = (watch.burnedBy3 ?? 0) + (c.whites ?? 0);
       if (first.at === null && !c.up && c.whites > 0) { first.at = first.gone + 1; first.junkBefore = first.junk; }
       first.gone++;
@@ -265,6 +279,7 @@ for (const name of NAMES) {
   for (const p of ['fire', 'fill', 'block', 'chain']) if (bph[p]) console.log(`    ${p.padEnd(6)} ${Object.entries(bph[p]).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${f1(v / GAMES)}`).join(', ')}`);
   const disasters = burnt.filter((x) => x.at <= EARLY).length;
   console.log(`SUMMARY ${tier.name} target ${tier.target ?? '-'}: chain mean ${f1(avg(chains))} (best ${Math.max(...chains)}), at target ${tier.target ? runs.filter((r) => r.longest >= tier.target).length : '-'}/${GAMES}; no white burned ${GAMES - burnt.length}/${GAMES}; disasters ${disasters}; whites burned ${f1(avg(runs.map((r) => r.whitesBurned)))} (in the first 3 minutes ${f1(avg(w.map((x) => x.burnedBy3 ?? 0)))}); points a minute ${f1(avg(runs.map((r) => r.points / r.minutes)))}; early burns ${f1(avg(ear.map((e) => e.n)))} (quick ${f1(avg(ear.map((e) => e.quick)))}, whites next ${f1(avg(ear.map((e) => e.whites)))}); weighted ${w.reduce((s, x) => s + x.weighted, 0)}/${w.reduce((s, x) => s + x.stageOneMoves, 0)}; chains a session ${f1(all.length / GAMES)}, mean ${f1(avg(all))}, at target ${all.filter((c) => c >= tier.target).length}/${all.length}`);
+  console.log(`CHAIN ${tier.name}: waits in the chain ${f1(avg(w.map((x) => x.chainWaits)))} a session, with junk in the column going up ${f1(avg(w.map((x) => x.chainWaitsJunk)))} (${f1(avg(w.map((x) => x.chainWaitMs / 1000)))} s); columns sent up not Crystal Clear ${f1(avg(w.map((x) => x.notClear)))} a session`);
   const used = {};
   for (const r of runs) for (const [k, v] of Object.entries(r.used)) used[k] = (used[k] ?? 0) + v;
   console.log(`  routines a session: ${Object.entries(used).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${f1(v / GAMES)}`).join(', ')}`);

@@ -229,6 +229,191 @@ export function openWay(cols, s, pace, limits = PATH) {
     }
     return best?.drags ?? null;
 }
+/** The pair rescue's limits (`pairRescue`): drags in a plan at most; a piece moved to open the way (an enabler) this
+    many squares from the stuck one or nearer, by up to ENABLE_SWAPS swaps, the cheapest ENABLE_BOARDS of them a step;
+    each piece brought round searched with NODES boards; SEARCHES such searches in all, a plan; a piece's own way out
+    left at most OUT swaps; the cheapest BRANCH ways on from each step followed; WORK boards looked at in all, so it
+    stays cheap enough to run on a move in the browser. */
+export const PAIR = { DRAGS: 4, NEAR: 4, ENABLE_SWAPS: 3, ENABLE_BOARDS: 25, NODES: 300, SEARCHES: 40, OUT: 10, BRANCH: 5, WORK: 30000 };
+/** Junk in the columns from `from` up to (not including) `to`. */
+export function junkBetween(cols, from, to = COLS) {
+    let n = 0;
+    for (let x = Math.max(0, from); x < Math.min(to, COLS); x++)
+        for (const p of cols[x])
+            if (isJunk(p))
+                n++;
+    return n;
+}
+/** Whether a board `after` has freed column x of the chain (`pairRescue`, and the planner's chain zones): less junk
+    from x on among the columns still to go up, none more in the column being filled or right of it, and not just
+    pushed on into the next column to go up (less from the one after the column being filled too). (Tried 13 Nov: that
+    last only while the next column's mostly white; no better over 20 boards a level, a few more whites burned.) */
+export function freed(cols, after, x, ctx) {
+    const to = Math.min(ctx.burnFrom, COLS), fill = Math.max(x, ctx.fill), away = Math.max(0, Math.min(x, ctx.fill - 1));
+    return junkBetween(after, x, to) < junkBetween(cols, x, to) && junkBetween(after, fill, to) <= junkBetween(cols, fill, to)
+        && junkBetween(after, away, to) < junkBetween(cols, away, to);
+}
+/** The cheapest drag of the piece at (x, y) out of its column on its own, left, at most `most` swaps: out of the
+    column `away` too if it can, else just out of its own. Null if it can't go. */
+function ownWayOut(cols, x, y, away, most, pace) {
+    const swapMs = 1000 / pace.rate;
+    let best = null;
+    const walk = (b, at, ways) => {
+        if (ways.length && at[0] < x) {
+            const turns = ways.filter((w, i) => i > 0 && w !== ways[i - 1]).length, ms = pace.spot + ways.length * swapMs + turns * PATH.TURN_MS;
+            const rank = (at[0] < away ? 0 : 1e6) + ms;
+            if (!best || rank < best.rank)
+                best = { drag: { x, y, ways: [...ways] }, b, ms, rank };
+            if (at[0] < away)
+                return;
+        }
+        if (ways.length >= most)
+            return;
+        for (const d of LEFT) {
+            const t = neighbourOn(b, at[0], at[1], d);
+            if (!t || !canSwapOn(b, at[0], at[1], t[0], t[1]))
+                continue;
+            const nb = b.map((c) => c.slice());
+            const p = nb[at[0]][at[1]];
+            nb[at[0]][at[1]] = nb[t[0]][t[1]];
+            nb[t[0]][t[1]] = p;
+            walk(nb, t, [...ways, d]);
+        }
+    };
+    walk(cols, [x, y], []);
+    const b = best;
+    return b ? { drag: b.drag, b: b.b, ms: b.ms } : null;
+}
+/** The pair rescue, in the chain (the user, 13 Nov, on a column of whites going up with a brown stuck at its top:
+    "this is absolute danger mode ... the first thing I would be doing here is just rescuing that brown piece ... You
+    got a brown piece there, look, that can move up, and then a black that can hop along the top, and you'd rescue
+    the brown piece. You'd then be able to pull it back"): junk stuck on the edge of a column of whites still to go
+    up (a brown on the top, a black on the bottom) needs pieces working together to get out, which no one drag does.
+    The cheapest plan, in a person's time, of up to PAIR.DRAGS drags that leaves less junk in column x and the
+    columns right of it still to go up, and none more in the column being filled: each step either a piece of the
+    column's junk going out left on its own, or a piece brought round into a stuck one's place (`bringRound`'s
+    search), either of them after a piece near it is moved to open the way (a brown lifted for a black to hop along
+    the top on, the freed piece moved off so the partner can follow it out). Its drags, or null if none in time. */
+export function pairRescue(cols, x, ctx, pace, timeLeft = Infinity, limits = PAIR) {
+    // The same board asked again (a bot waiting, the board unchanged): the plan found before.
+    const memo = `${x},${ctx.fill},${ctx.burnFrom},${ctx.reach},${pace.rate},${pace.spot},${limits === PAIR ? "" : JSON.stringify(limits)}:${cols.map((c) => c.join('')).join('|')}`;
+    if (PAIR_MEMO.has(memo)) {
+        const m = PAIR_MEMO.get(memo);
+        return m && m.ms <= timeLeft ? m.drags : null;
+    }
+    // Nothing found before with the same pieces round the column (its own and the few left of it, where the pieces that
+    // free it come from): nothing now either, while the rest of the board's play goes on further left.
+    const near = `${x},${ctx.fill},${ctx.burnFrom},${limits === PAIR ? '' : JSON.stringify(limits)}:${cols.slice(Math.max(0, x - limits.NEAR - 1)).map((c) => c.join('')).join('|')}`;
+    if (PAIR_NONE.has(near))
+        return null;
+    const r = pairPlan(cols, x, ctx, pace, limits);
+    if (PAIR_MEMO.size > 64)
+        PAIR_MEMO.clear();
+    if (PAIR_NONE.size > 256)
+        PAIR_NONE.clear();
+    PAIR_MEMO.set(memo, r);
+    if (!r)
+        PAIR_NONE.add(near);
+    return r && r.ms <= timeLeft ? r.drags : null;
+}
+const PAIR_MEMO = new Map(), PAIR_NONE = new Set();
+/** `pairRescue`'s search: the cheapest plan and its ms, or null. */
+function pairPlan(cols, x, ctx, pace, limits) {
+    const timeLeft = Infinity;
+    const away = Math.min(x, ctx.fill - 1), swapMs = 1000 / pace.rate;
+    if (!junkBetween(cols, x, Math.min(ctx.burnFrom, COLS)))
+        return null;
+    const done = (b) => freed(cols, b, x, ctx);
+    const search1 = { ...PATH, SWAPS: Math.min(PATH.SWAPS, ctx.reach) };
+    let best = null, searches = 0, work = 0;
+    const seen = new Map();
+    const step = (b, drags, ms) => {
+        if (ms > timeLeft || (best && ms >= best.ms) || work > limits.WORK)
+            return;
+        if (done(b)) {
+            best = { drags, ms };
+            return;
+        }
+        const left = limits.DRAGS - drags.length;
+        if (left <= 0)
+            return;
+        const key = b.map((c) => c.join('')).join('|');
+        if ((seen.get(key) ?? -1) >= left)
+            return;
+        seen.set(key, left);
+        const next = [];
+        // The column's junk: out on its own, or a piece brought round into its place.
+        const outOf = (bb, pre, ms0, budget) => {
+            for (let y = 0; y < bb[x].length; y++) {
+                if (!isJunk(bb[x][y]))
+                    continue;
+                const own = ownWayOut(bb, x, y, away, limits.OUT, pace);
+                if (own) {
+                    next.push({ b: own.b, drags: [...pre, own.drag], ms: ms0 + own.ms });
+                    continue;
+                }
+                if (budget < 1 || searches >= limits.SEARCHES || work > limits.WORK)
+                    continue;
+                searches++;
+                work += limits.NODES;
+                const r = search(bb, { x, y, side: -1 }, pace, search1, limits.NODES);
+                const after = r && playDrags(bb, r.drags);
+                if (r && after)
+                    next.push({ b: after, drags: [...pre, ...r.drags], ms: ms0 + r.ms });
+            }
+        };
+        outOf(b, drags, ms, 1);
+        // A piece near the column's stuck junk moved first, to open the way (no more than two drags left for it).
+        if (left >= 2) {
+            const firsts = [], keys = new Set();
+            for (let y = 0; y < b[x].length; y++) {
+                if (!isJunk(b[x][y]) || canGo(b, x, y, -1))
+                    continue;
+                const walk = (bb, from, at, ways) => {
+                    if (work++ > limits.WORK)
+                        return;
+                    if (ways.length) {
+                        const k = bb.map((c) => c.join('')).join('|');
+                        if (!keys.has(k)) {
+                            keys.add(k);
+                            const turns = ways.filter((w, i) => i > 0 && w !== ways[i - 1]).length;
+                            firsts.push({ drag: { x: from[0], y: from[1], ways: [...ways] }, b: bb, ms: pace.spot + ways.length * swapMs + turns * PATH.TURN_MS });
+                        }
+                    }
+                    if (ways.length >= limits.ENABLE_SWAPS)
+                        return;
+                    for (const d of ALL) {
+                        const t = neighbourOn(bb, at[0], at[1], d);
+                        if (!t || (t[0] === x && t[1] === y) || !canSwapOn(bb, at[0], at[1], t[0], t[1]))
+                            continue;
+                        const nb = bb.map((c) => c.slice());
+                        const p = nb[at[0]][at[1]];
+                        nb[at[0]][at[1]] = nb[t[0]][t[1]];
+                        nb[t[0]][t[1]] = p;
+                        walk(nb, from, t, [...ways, d]);
+                    }
+                };
+                for (let ex = 0; ex < COLS; ex++)
+                    for (let ey = 0; ey < b[ex].length; ey++) {
+                        if (b[ex][ey] === SPICE || (ex === x && ey === y) || apart(b, [ex, ey], [x, y]) > limits.NEAR)
+                            continue;
+                        walk(b, [ex, ey], [ex, ey], []);
+                    }
+            }
+            firsts.sort((a, c) => a.ms - c.ms);
+            for (const f of firsts.slice(0, limits.ENABLE_BOARDS)) {
+                if (best && ms + f.ms >= best.ms)
+                    break;
+                outOf(f.b, [...drags, f.drag], ms + f.ms, 1);
+            }
+        }
+        next.sort((a, c) => a.ms - c.ms);
+        for (const n of next.slice(0, limits.BRANCH))
+            step(n.b, n.drags, n.ms);
+    };
+    step(cols, [], 0);
+    return best;
+}
 const NAMES = ['white', 'brown', 'black', 'spice', 'burnt white'];
 /** Moves bringing a piece round to each stuck piece given (the first few; all that are stuck, the furnace's
     side first, if none are given). */

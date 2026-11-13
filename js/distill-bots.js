@@ -40,13 +40,16 @@
 import { BLACK, BROWN, COLS, DOWN_LEFT, DOWN_RIGHT, SPICE, TALL, UP_LEFT, UP_RIGHT, WHITE, neighbourOn } from './distilling.js';
 import { M, ROUTINES, burnsClean, canGo, clear, colourLeft, fillTarget, isJunk, junkTarget, measure, playDrags, swapsIn, whitesFrom, } from './distill-routines.js';
 import { blockPhase, boardScore, keptTools } from './distill-score.js';
-import { PATH, pathMoves, stuck } from './distill-path.js';
+import { PATH, freed, pairRescue, pathMoves, stuck } from './distill-path.js';
 import { phaseOf, weightIn } from './distill-phase.js';
 /** The path search when a white in the furnace's column has no other way out: longer drags, a wider look
     for a piece to move out of the way first. Run only then. */
 export const PATH_WIDE = { ...PATH, SWAPS: 16, NODES: 6000, ENABLE_NEAR: 6, ENABLE_BOARDS: 200, ENABLE_NODES: 600 };
 /** The path search's name for a player. */
 export const PATH_LABEL = 'Bring a piece round';
+/** The pair rescue's name for a player (`pairRescue`, src/distill-path.ts): pieces working together to free junk
+    stuck on the edge of a column of whites going up. */
+export const PAIR_LABEL = 'The pair rescue';
 /** A long plain drag's name for a player: no technique, just swept over (`plainDrag`). */
 export const SWEEP_LABEL = 'The sweep';
 /** The one pace every bot plays at (the user, 13 Nov: the levels are their targets, not their speed): a hand's
@@ -148,6 +151,9 @@ export const P = {
         right and the board scores no worse (`judge`, the thirty-second note: "you could go one step further, just do
         it"; 0 off). */
     ONWARD: 1,
+    /** The chain: junk stuck in a column of whites going up next, or the one after, freed first, by the pair rescue
+        if need be (`chainZones`, `pairRescue`; 0 off). */
+    PAIR: 1,
 };
 /** Junk in the furnace's column (spice is fine in a Crystal Clear). */
 const junkAt = (col) => col.filter((p) => p !== WHITE && p !== SPICE).length;
@@ -535,7 +541,51 @@ export function weigh(sit, ctx, style) {
         if (plan)
             return [plan];
     }
+    // The chain's danger (the user, 13 Nov, a brown stuck at the top of the column going up: "this is absolute danger
+    // mode ... the first thing I would be doing here is just rescuing that brown piece ... there was lots of time to
+    // rescue it even before now"): junk stuck in a column of whites going up next, or the one after, comes before
+    // anything easy elsewhere, from as soon as it's seen. Only what takes junk out of it is offered, the pair rescue's
+    // plan among them.
+    if (!one)
+        for (const zx of chainZones(cols, ctx)) {
+            const saving = (m) => freed(cols, m.after, zx, ctx) && (zx < last || msFor(m.move.drags, style) <= sit.timeLeft);
+            // (Weighed with whatever else frees it: the hook's own way out, for one, often takes twice the drags.)
+            if (style.path && P.PAIR) {
+                const plan = pairRescue(cols, zx, ctx, style, zx === last ? sit.timeLeft : Infinity);
+                if (plan)
+                    consider(pairMove(cols, zx, plan));
+            }
+            const saves = out.filter(saving);
+            if (saves.length)
+                return saves.map((m) => ({ ...m, saves: true })).sort((a, b) => b.value - a.value);
+        }
     return out.sort((a, b) => rank(b) - rank(a)).map((m) => (even ? m : { ...m, weighted: true }));
+}
+/** The chain's danger zones (`weigh`): the column being filled and the one after it, each while it's mostly white
+    with a piece of junk in it that can't go left on its own (a brown on the top, a black on the bottom), the
+    column going up first. Not while a white's still in the junk columns burning out ahead of the chain: saving those
+    comes first ("never burn a white"; Helium's plan, step one, clears the junk columns). */
+export function chainZones(cols, ctx) {
+    if (ctx.stage !== 'chain' || !P.PAIR || (ctx.burnFrom < COLS && whitesFrom(cols, ctx.burnFrom) > 0))
+        return [];
+    const out = [];
+    for (const x of [ctx.fill, ctx.fill - 1]) {
+        if (x < 0 || x >= Math.min(ctx.burnFrom, COLS) || !mostlyWhite(cols[x]))
+            continue;
+        if (cols[x].some((p, y) => isJunk(p) && !canGo(cols, x, y, -1)))
+            out.push(x);
+    }
+    return out;
+}
+const PIECE = ['white', 'brown', 'black', 'spice', 'burnt white'];
+/** The pair rescue's plan as a move, and why in a line. */
+function pairMove(cols, x, drags) {
+    const y = cols[x].findIndex((p, i) => isJunk(p) && !canGo(cols, x, i, -1)), what = PIECE[cols[x][y]] ?? 'piece';
+    const edge = y === 0 ? 'top' : y === cols[x].length - 1 ? 'bottom' : 'edge';
+    return {
+        routine: 'path', pair: true, drags,
+        reason: `the ${what} stuck on the ${edge} of column ${x + 1}, a column of whites going up: ${drags.length} drags, pieces working together to free it, before anything else`,
+    };
 }
 /** The routines a short plan's second move is looked for among (`setUp`). */
 const SAVERS = ['rescue', 'junkColumn', 'diamond', 'channel'];
@@ -653,7 +703,8 @@ export function choose(sit, ctx, style) {
     if (best) {
         const gamble = !burning && sit.chain >= P.CASH_FROM && !ready && style.gamble
             ? ` (the gamble: CC^${sit.chain} so far, chasing the next while the odds are fair)` : '';
-        return advice('move', best.move.routine === 'path' ? PATH_LABEL : ROUTINES[best.move.routine].label, best.move.reason + gamble, best);
+        const label = best.move.routine === 'path' ? (best.move.pair ? PAIR_LABEL : PATH_LABEL) : ROUTINES[best.move.routine].label;
+        return advice('move', label, best.move.reason + gamble, best);
     }
     return advice('wait', 'Wait', ready ? 'the column is ready: let the furnace take it' : 'nothing worth moving: wait for the next column');
 }

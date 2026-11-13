@@ -452,6 +452,31 @@ Now each white in the furnace's column, while it's a junk column being filled, c
 that column, so finishing it never moves the cost onto the next (tried on the column being filled, wherever it
 was, the bots stopped finishing columns).
 
+### The pair rescue: junk stuck on the edge of a column going up (13 Nov)
+The user, on a board in the chain, the furnace's column all white but a brown at its top: "this is absolute danger
+mode ... the first thing I would be doing here is just rescuing that brown piece, because that gives you your crystal
+clear 2 or 3 easily here. You got a brown piece there, look, that can move up, and then a black that can hop along the
+top, and you'd rescue the brown piece. You'd then be able to pull it back ... there was lots of time to rescue it even
+before now." A brown on the top of a column of whites can't move (browns rise in whites: it's already up), and a black
+can't travel along the top on its own (blacks sink in whites); it needs a brown up there first to climb. So no one
+drag frees it. Built as `pairRescue` (src/distill-path.ts): the cheapest plan, in a person's time, of up to four
+drags that leaves less junk in that column and the columns after it still to go up, and none pushed on into the next
+one (`freed`). Each step is a piece of the column's junk going out left on its own, or a piece brought round into a
+stuck one's place (the path search's one drag), either after a piece near it is moved first to open the way (up to
+three swaps). On the user's board (`STUCK_ON_TOP` in src/distill-guide.ts) it finds their move: the brown below the
+black lifted up to the top row; the black down into a white and up past it, down and up past the stuck brown, which
+drops out left; a white slid in past the freed brown; and the black sinks out after it. Upside down, the colours
+swapped, the same for a black stuck at the bottom, a brown brought along the bottom (tested). About 20 ms a search in
+Node, its result kept while the board's unchanged.
+
+**Urgent, and early.** In the chain, the column being filled and the one after it (`chainZones`), while mostly white
+with a piece of junk in it that can't go left, are a danger zone like a white by the fire: only moves that free it
+(`freed`) are offered, from the first look, ahead of anything easy elsewhere, the pair rescue's plan weighed among
+them (the hook's own way out, from CC^5, often wins on worth, taking the piece further left). Saving a white from the
+junk columns burning out ahead of the chain still comes first. Every level plays it
+(it rides on the path search, which every level has); its label is "The pair rescue", its technique 'path' for
+Helium's lines. `P.PAIR` switches it off.
+
 ### Decision time
 Keep burning full junk columns as long as you're sure the next one will be finished before the furnace;
 the more white columns you bank, the longer the chain. Near the end there's less room on the right to
@@ -1055,6 +1080,65 @@ Plainly:
   brown at the top, then a white under the black), which no chain routine finds and the path search's one drag can't.
   That's the next lever for the chains; and while it waits in the chain the bot could be building on the left.
 - The runs got slower (2 to 3 minutes a level for 20 boards, was about 1): the short plans' look ahead.
+
+### The pair rescue in the chain, urgent and early (13 Nov, fourteenth run)
+After the user's note on a brown stuck at the top of the column going up (§3, "The pair rescue"), and the thirteenth
+run's finding that such pieces break the chains. Built: `pairRescue` and `freed` (src/distill-path.ts), `chainZones`
+and the chain's danger zone in `weigh` (src/distill-bots.ts), the user's board as `STUCK_ON_TOP` (tested every level,
+and its mirror, a black at the bottom). The runner now counts the chain's waits (each wait, up to 250 ms, with junk
+in the column being filled) and the columns sent up not Crystal Clear.
+
+20 boards a level (seeds 5000 on). Round 0 is main before this work: the thirteenth run's code plus the changes made on
+main since, unmeasured till now (no bot burns by hand, a drag let go where the board's best with the reach at 40, a
+column banked per Crystal Clear of the target). Round 1, the pair rescue as it ships. (Round 2 tried `freed` letting
+junk go into the next column when that column's mostly junk: chains 3.6 / 3.5 / 3.6 / 4.6 / 3.8, a few more whites
+burned, sessions with none 10 / 10 / 12 / 15 / 10; not kept.)
+
+| Bot | Longest chain: mean (best) | Target reached | Sessions with no white burned | Whites burned (first 3 min) | Points a minute | Chain waits a session (s) | Columns up not Crystal Clear |
+|---|---|---|---|---|---|---|---|
+| CC^1, thirteenth run | 1.9 (4) | 20/20 | 13/20 | 0.6 (0.1) | 15.7 | about 300 (75 s), traced | 7 or 8, traced |
+| CC^1, round 0 | 2.4 (5) | 19/20 | 13/20 | 0.8 (0.3) | 11.0 | 1,178 (317) | 7.0 |
+| **CC^1, round 1** | **3.7 (6)** | **20/20** | **15/20** | **0.4 (0.1)** | **13.8** | 1,154 (311) | **4.3** |
+| CC^2, thirteenth run | 2.6 (5) | 15/20 | 15/20 | 0.6 (0.0) | 16.7 | | |
+| CC^2, round 0 | 2.4 (5) | 17/20 | 12/20 | 0.9 (0.3) | 10.7 | 1,162 (312) | 7.3 |
+| **CC^2, round 1** | **3.5 (6)** | **20/20** | **16/20** | **0.3 (0.1)** | **13.6** | 1,116 (301) | **4.4** |
+| CC^3, thirteenth run | 2.0 (4) | 6/20 | 14/20 | 0.6 (0.1) | 14.1 | | |
+| CC^3, round 0 | 2.5 (5) | 8/20 | 13/20 | 0.5 (0.3) | 11.2 | 1,011 (271) | 7.8 |
+| **CC^3, round 1** | **3.9 (7)** | **19/20** | 11/20 | 0.6 (0.3) | **13.6** | 1,033 (277) | **4.5** |
+| CC^5, thirteenth run | 2.5 (5) | 3/20 | 10/20 | 0.7 (0.1) | 12.2 | | |
+| CC^5, round 0 | 3.6 (8) | 7/20 | 16/20 | 0.2 (0.1) | 14.0 | 775 (208) | 6.1 |
+| **CC^5, round 1** | **4.7 (7)** | **13/20** | **18/20** | **0.1 (0.1)** | **16.3** | 634 (170) | **4.0** |
+| CC^8, thirteenth run | 2.6 (5) | 0/20 | 11/20 | 0.7 (0.1) | 12.4 | | |
+| CC^8, round 0 | 3.0 (5) | 0/20 | 12/20 | 0.6 (0.1) | 10.5 | 737 (197) | 7.0 |
+| **CC^8, round 1** | **3.9 (8)** | **1/20** | **13/20** | **0.5 (0.1)** | **13.3** | 614 (165) | **5.5** |
+
+No disasters in any round. Pieces brought round (the path search's moves, the pair rescue among them) went from 14 / 13
+/ 7 / 5 / 7 a session to 25 / 23 / 18 / 12 / 14.
+
+Plainly:
+- **What main's changes did on their own (round 0 against the thirteenth run):** longer chains for most levels (CC^5
+  2.5 to 3.6, CC^8 2.6 to 3.0, CC^1 1.9 to 2.4), but points a minute fell for the low ones (CC^1 15.7 to 11.0, CC^2 16.7
+  to 10.7): with no burns by hand every junk column waits out the furnace, and CC^1 banking one column is in the chain
+  nearly all session. Whites burned in the first 3 minutes rose a little at CC^1 to CC^3 (0.1 to 0.3). One run, so the
+  three changes can't be told apart from each other.
+- **The pair rescue (round 1 against round 0):** every level's mean chain up by about one (CC^3 2.5 to 3.9, CC^5 3.6 to
+  4.7), CC^1 to CC^3 reach their target in 19 or 20 sessions of 20, CC^5 in 13 (was 7), and the first CC^8 (1 of 20).
+  Columns sent up not Crystal Clear fell from 6 to 8 a session to 4 to 5.5; points a minute rose at every level (by 2 to 3).
+  Whites burned no worse, sessions with none up except CC^3.
+- **The waits didn't fall.** Counted this way the chain waits 600 to 1,200 times a session (2.5 to 5 minutes of an
+  8-minute session). Traced on CC^3 (2 sessions): nearly all with the column being filled mostly white, a piece of junk
+  stuck in it and whites to spare on the left, where neither the routines nor a four-drag pair rescue finds a way: most
+  often a black at the very bottom of the furnace's column (a tall column's bottom has one neighbour on the left), with
+  junk under the column before it. The rest are junk columns burning out ahead of the chain, nothing to do but wait.
+- **Still not reached:** CC^5 one session in three short, CC^8 almost never (3.9 mean). The next levers: a wider plan
+  for the bottom corner (five or six drags, or the pair crawled along), and building on the left while the chain waits.
+- **Not done:** the thirty-second note's diagonal of blacks (a Stage I change to the board score, not cheap to measure).
+- **After the run, one ordering:** the chain's danger zone now waits while a white is still in the junk columns burning
+  out ahead of the chain (the full test run caught CC^1, banking one column, playing a pair rescue as its first move on
+  seed 3 while a white sat in a column to burn). Checked on 5 boards only: CC^1 chains 3.6, CC^3 3.0, whites burned 0.4
+  a session each; not measured on 20.
+- **Its cost:** the search is about 20 ms where it runs, kept while the board's unchanged, and what found nothing kept
+  for the same pieces round the column; the runs took 2 to 4 minutes for CC^1 to CC^3 (was about 1.5).
 
 **Watching them, the first note (the user, 12 Nov, a screenshot of the Ultimate's board):** "the main
 thing is it just doesn't carry on the whole way to the right. It just kind of stops ... that black ... in

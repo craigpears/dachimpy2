@@ -34,9 +34,9 @@ import { ROUTINES, canGo, clear, copyBoard, junkTarget, playDrags, burnsClean, r
 import type { Ctx, Drag, RoutineName } from './distill-routines.js';
 import { FIRE_COLS, PHASES, PHASE_ORDER, phaseOf } from './distill-phase.js';
 import type { Phase } from './distill-phase.js';
-import { LEVELS, PATH_LABEL, PER_COLUMN, SWEEP_LABEL, bankFor, clearComingUp, dangerZones, edgeWhites, plainDrag } from './distill-bots.js';
+import { LEVELS, PATH_LABEL, PER_COLUMN, SWEEP_LABEL, bankFor, chainZones, clearComingUp, contextFor, dangerZones, edgeWhites, levelNamed, plainDrag } from './distill-bots.js';
 import { blockPhase, keptTools } from './distill-score.js';
-import { stuck } from './distill-path.js';
+import { bringRound, pairRescue, stuck } from './distill-path.js';
 import { STEP_ONE_CTX, afterOpening, beforeBang, lessonPlan, opening, lessonGame } from './den-helium.js';
 import { BEST, HELP, HELP_ELSE, NERVES, ONWARD, OPENING, PHASE, STEP_ONE, TELL } from './lines/helium.js';
 import { POSITIONS } from './distill-guide-boards.js';
@@ -44,8 +44,9 @@ import type { Position } from './distill-guide-boards.js';
 
 /** A technique on the page: a routine, the sweep (a long plain drag) or the path search (a piece brought round). */
 export type Technique = RoutineName | 'sweep' | 'path';
-/** The user's tricks (DISTILLING.md §3, the twentieth to twenty-ninth notes, and the thirty-first's fluid motion). */
-export const TRICKS = ['white', 'danger', 'edge', 'flick', 'blocks', 'kept', 'burnEarly', 'fluid'] as const;
+/** The user's tricks (DISTILLING.md §3, the twentieth to twenty-ninth notes, the thirty-first's fluid motion, and the
+    pair rescue in the chain, 13 Nov). */
+export const TRICKS = ['white', 'danger', 'edge', 'flick', 'blocks', 'kept', 'burnEarly', 'fluid', 'pair'] as const;
 export type Trick = typeof TRICKS[number];
 
 /** A section of the page under a phase: a technique or a trick; `longer`, one only the longer chains need. */
@@ -62,7 +63,7 @@ export const PLAN: Readonly<Record<Phase, readonly GuideItem[]>> = {
   fire: [trick('white'), trick('danger'), trick('edge'), tech('rescue'), tech('sweep')],
   fill: [tech('junkColumn'), tech('diamond'), trick('flick'), trick('burnEarly'), tech('turnOver')],
   block: [trick('blocks'), trick('kept'), tech('store'), tech('leapfrog'), trick('fluid')],
-  chain: [tech('channel'), tech('crawl', true), tech('hook', true), tech('figureEight', true), tech('linePull', true), tech('path')],
+  chain: [tech('channel'), trick('pair'), tech('crawl', true), tech('hook', true), tech('figureEight', true), tech('linePull', true), tech('path')],
 };
 
 /** A board to draw: its pieces, the drags on it (arrows, numbered in order), pieces ringed, columns shaded, the
@@ -307,6 +308,26 @@ export function isFluid(cols: Board, d: Drag): boolean {
   return ex >= from && amongBlacks(after, ex, ey) && unsorted(after, from) <= unsorted(cols, from) && whitesFrom(after, from) <= whitesFrom(cols, from);
 }
 
+// ---------------------------------------------------------------- the pair rescue, in the chain
+
+/** A brown stuck at the top of the column going up (the user, 13 Nov: "this is absolute danger mode ... the first
+    thing I would be doing here is just rescuing that brown piece ... You got a brown piece there, look, that can
+    move up, and then a black that can hop along the top"): the furnace's column all white but a brown at its top, a
+    black on the top row a few columns left, a brown below it that can move up, the junk on the left. */
+export const STUCK_ON_TOP: readonly string[] = ['bKbKbKbK', 'KbKbwKbKb', 'bKwbKbKw', 'KwbwKwbww', 'wwwwwwww', 'Kwwwwwwww', 'wbwwwwww', 'wwwwwwwww', 'wwwwwwww', 'bwwwwwwww'];
+
+/** The pair rescue on a board, live: the chain's zone (`chainZones`), its stuck piece, and the drags the bots'
+    `pairRescue` finds for the lowest target, which frees the column where no one piece brought round does. */
+export function pairOn(cols: Board): { zone: number | null; stuck: [number, number] | null; drags: Drag[]; frees: boolean } {
+  const ctx = contextFor(cols, 'chain', 0, LEVELS[0].reach), zone = chainZones(cols, ctx)[0] ?? null;
+  if (zone === null) return { zone, stuck: null, drags: [], frees: false };
+  const y = cols[zone].findIndex((p, i) => (p === BROWN || p === BLACK) && !canGo(cols, zone, i, -1));
+  const drags = pairRescue(cols, zone, ctx, levelNamed(LEVELS[0].name)) ?? [];
+  const after = drags.length ? playDrags(cols, drags) : null;
+  const alone = bringRound(cols, { x: zone, y, side: -1 }, levelNamed(LEVELS[0].name));
+  return { zone, stuck: [zone, y], drags, frees: !!after && !alone && after[zone].every((p) => p === WHITE || p === SPICE) };
+}
+
 /** The corner tools (keptTools): a brown in the bottom-left corner, a black in the top-left. */
 function toolsAt(cols: Board): [number, number][] {
   const out: [number, number][] = [];
@@ -338,6 +359,16 @@ export function trickExamples(): TrickExample[] {
         trick, says: null, level: firstLevel('turnOver')?.label ?? null,
         picture: { cols, drags: d ? [d] : [], rings: [], shade: range(from, COLS), from: 'A real game at Helium\'s still, the right side sorted' },
         shows: !!d && isFluid(cols, d),
+      });
+      continue;
+    }
+    if (trick === 'pair') {
+      // The user's board, the plan found on it live.
+      const cols = parseBoard(STUCK_ON_TOP), p = pairOn(cols);
+      out.push({
+        trick, says: HELP.path, level: every,
+        picture: { cols, drags: p.drags, rings: p.stuck ? [p.stuck] : [], shade: p.zone === null ? [] : [p.zone], from: 'A board laid to show it: a brown stuck at the top of the column going up, the chain on' },
+        shows: p.frees && p.drags.length >= 2,
       });
       continue;
     }

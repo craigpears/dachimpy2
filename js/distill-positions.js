@@ -99,7 +99,7 @@ export const POSITIONS = [
         id: "P11", moment: "junkUp", level: "cc3", seed: 1, ms: 135200, stage: "chain", burns: 0, chain: 2, timeLeft: 2500,
         what: "The chain at CC^2; column 10 goes up next with 1 brown in it, 2.5 s before it goes.",
         cols: ["wwKbKbbKb", "KKbKbKbK", "bbwbKbKbK", "bK*KbwKK", "bKKwK*KKb", "wKwKbKKK", "wwwKKbKKb", "wwwbbKbw", "bwwwwK*ww", "wwwwwbww"],
-        bot: { "phase": "chain", "kind": "wait", "technique": null, "label": "Wait", "reason": "nothing worth moving: wait for the next column", "drags": [], "column": 9 },
+        bot: { "phase": "chain", "kind": "move", "technique": "path", "label": "Bring a piece round", "reason": "the brown at column 10, row 6 is stuck: bring the white at column 8, row 8 round, looping, to take its place, and it's out left", "drags": [{ "x": 7, "y": 7, "ways": [1, 1, 0, 0, 0, 3] }], "column": 9 },
     },
     {
         id: "P12", moment: "junkUp", level: "cc8", seed: 2, ms: 303450, stage: "chain", burns: 0, chain: 1, timeLeft: 2550,
