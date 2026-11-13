@@ -32,6 +32,14 @@ in time the den becomes the thing itself (TODO.md, "Split the den off").
   pressure, but the pull is always the puzzle in front of you: the next hole, the next frame, the
   next load for the guns. Never a pressured fight against defeat. When in doubt, the easy side:
   "progression is fun. It's to be expected."
+- **A side adventure, never a replacement for the game.** Puzzle Pirates' greatest love is its people, talking
+  to other pirates, and the den never tries to take its place: it's a tool and a side adventure beside the real
+  game, not where you learn it all. When a character teaches (Helium, Tzz), they teach a few tricks and send you
+  on to the real ones: other pirates, watching them play, their videos, asking about (the user, 13 Nov: "don't
+  forget, you know, the greatest love of the game is talking to other pirates ... this is not a replacement for
+  the game ... this is a tool, a side adventure. It's not something that's trying to get the main focus ... we
+  should never be trying to learn exclusively here. We should be watching people, looking at YouTube videos,
+  talk to people").
 - **Faithful to Puzzle Pirates.** The puzzles are the real ones, played by their real rules and
   with their real keys. What's new is where they happen and what they do in the world.
 - **Immersive, in the world, never a separate screen.** A puzzle is a thing in the den (the wall,

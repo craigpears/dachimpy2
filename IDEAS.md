@@ -2541,3 +2541,8 @@ knowledge (the real pirates, the islands, the lore). You could ask it about your
 it, name the technique and show it, as "Help, Helium" does for Distilling, but for every puzzle, and answer
 questions about the game besides. A start that's already there: the bots' `advise` and Helium's lines. How
 it's built (in the den, a page of its own, or both) is to shape with the user.
+
+But a side adventure, never the place to learn it all (the user, the same day: "don't forget ... the greatest
+love of the game is talking to other pirates ... this is not a replacement for the game ... a tool, a side
+adventure ... We should be watching people, looking at YouTube videos, talk to people"). The tutor would
+say so itself, and point you to other pirates (STORY.md, the principles).

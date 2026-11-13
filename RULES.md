@@ -116,6 +116,14 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 
 Unlisted for now: reachable only by its URL until the user says to put it in the nav.
 
+- **The den sends you to other pirates (13 Nov).** It's a side adventure, not a replacement for Puzzle Pirates
+  or its people (STORY.md, the principles). A teacher in the den (Helium, Tzz, a tutor later) teaches a few
+  tricks and then says plainly the rest comes from other pirates: ask them, watch them play, their videos. Never
+  framed as the place to learn it all (the user, 13 Nov: "don't forget, you know, the greatest love of the game
+  is talking to other pirates ... this is not a replacement for the game ... this is a tool, a side adventure.
+  It's not something that's trying to get the main focus ... we should never be trying to learn exclusively
+  here. We should be watching people, looking at YouTube videos, talk to people").
+
 - **A demonstration shows its plan before it builds (12 Nov).** In any tutorial (Tzz's balloons, Helium's
   Distilling), the plan is on the board and said before the pieces go in, so every move is seen to serve
   it, not explained only at the end: "while she's building it, it's a bit like, wait, why were you putting
