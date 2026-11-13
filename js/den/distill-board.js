@@ -3,7 +3,7 @@
 // src/distilling.ts (one copy of it); this only draws a board of it wherever its caller puts it (a plane
 // in the scene, its picture painted on a canvas) and plays it by the real keys and mouse. It knows
 // nothing of the den (it imports only three.js and the rules), so a test page plays it on its own
-// (distilling-test.html). It's Helium's still (js/den/helium-isle.js, his island): the hooks below say
+// (distilling-test.html). It's Helium's still (js/den/helium-isle.js, her island): the hooks below say
 // when a column goes, up or burned (a white burned is his still's little bang), when the furnace warns,
 // and when it's over.
 import * as THREE from 'three';
@@ -13,7 +13,7 @@ import {
 
 /* Drawn after the real one (DISTILLING.md §2, from the client port's measures): a portrait panel 450
    by 600. The top strip, 135 high: "Distilling" in gold letters outlined dark, top centre; behind it
-   the shop: the distiller on the left by his barrels (Helium, since 12 Nov), a brass pot still (a tall polished cylinder, a
+   the shop: the distiller on the left by her barrels (Helium, since 12 Nov), a brass pot still (a tall polished cylinder, a
    domed lid, a tap), and right of it the flask, a glass cylinder (42 by 75 at 235, 55) with dark metal
    caps, tick marks up its right side and a white line at the level; a brass pipe from it to the right
    and down a chute at the board's top right, where columns sent up rise. The liquid rises with pieces
@@ -104,7 +104,7 @@ function panelCanvas() {
     g.fillStyle = lamp; g.fillRect(0, 0, PW, VY);
     // Barrels.
     for (const [bx, by, bw, bh] of [[92, 84, 38, 50], [118, 98, 34, 37]]) barrel(g, bx, by, bw, bh);
-    // The distiller: Helium, by his barrels.
+    // The distiller: Helium, by her barrels.
     distiller(g, 50, 135);
     // The pot still: a polished brass cylinder, a domed lid, a swan neck to the flask, a tap.
     potStill(g);
@@ -157,7 +157,7 @@ function barrel(g, x, y, w, h) {
   for (const f of [0.2, 0.8]) { g.beginPath(); g.moveTo(x + 2, y + h * f); g.quadraticCurveTo(x + w / 2, y + h * f + 3, x + w - 2, y + h * f); g.stroke(); }
 }
 function distiller(g, x, y) {
-  // Helium at his still (his Emerald portrait, 12 Nov; his look in the wardrobe, js/den-look.js's PIRATES):
+  // Helium at her still (her Emerald portrait, 12 Nov; her look in the wardrobe, js/den-look.js's PIRATES):
   // a black Vampire raiment lined in gold, dark skin, white hair swept up, a black cat-eared mask, and King,
   // his plum monkey, on his shoulder. (A stand-in distiller till 12 Nov: green coat, red sash, tricorn.)
   const skin = '#8a5530';

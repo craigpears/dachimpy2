@@ -669,13 +669,13 @@ export const LAY = {
       [19, 33], [18, 33], [17, 33], [16, 33], [15, 33], [14, 32], [13, 32], [12, 32], [11, 32], [10, 32], [10, 31],
     ] as [number, number][],
   },
-  /** Helium's island (12 Nov; src/den-helium.ts, js/den/helium-isle.js): his still, where he teaches
+  /** Helium's island (12 Nov; src/den-helium.ts, js/den/helium-isle.js): her still, where she teaches
       Distilling. The user (12 Nov): "maybe he can just have his own little island ... Maybe that can link
       into where the Smuggle Beach is ... I bet he just wants an island for him somewhere." So out past the
-      checkpoint, in the open water on the far side of the smugglers' rocks from their cove (where his rum
+      checkpoint, in the open water on the far side of the smugglers' rocks from their cove (where her rum
       would go out, once smuggling's built), two squares clear of the rocks and open sea all round. Shaped
-      as Tzz's, three squares, and everything of his placed from LAND[0]. MOOR: where she's brought
-      alongside as his lesson begins, out of its shot. */
+      as Tzz's, three squares, and everything of her placed from LAND[0]. MOOR: where she's brought
+      alongside as her lesson begins, out of its shot. */
   HELIUM: {
     LAND: [[22, 28], [23, 28], [22, 29]] as [number, number][],
     MOOR: { c: 21, r: 27, d: 2 } as Pose,

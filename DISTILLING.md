@@ -417,7 +417,7 @@ set me up for a longer CC without ruining my entire game?" So past about CC^10 i
 each new column is a bet, ferry its whites right in time or not, and a burn there ends the chain. For the
 bots: the top tiers take that bet the way a player would (chase the chain while the odds are fair, cash in
 when they're not), so a tier's CC^12 rate is a probability, and the goals are set from it ("reached CC^12
-in 1 run of 4"), not a promise. For Helium: his advice at that point is the bet, plainly put.
+in 1 run of 4"), not a promise. For Helium: her advice at that point is the bet, plainly put.
 
 ### Burn timing
 Right-click to burn as soon as the right column is ready: in Stage I, as soon as the junk column is
@@ -1020,14 +1020,14 @@ nice and illustrative". In order:
    techniques, like the hook, clearing each stage, obviously each thing should be funny." So a short
    demonstration per technique (the hook, the crawl, the figure of eight, the leapfrog, channels, when
    to burn) and per stage of a run (§3), each a little scene with its own joke. **Not drunk jokes:** the
-   user first had him drinking each demonstration's beer, then dropped it: "forget that part, I think
+   user first had her drinking each demonstration's beer, then dropped it: "forget that part, I think
    we've already got the [Kikkit] being the drunk part, he's just the creator of these things." Helium's
-   humour is the maker's: proud of his brews, his mishaps when the balance goes wrong (item 4).
-   Each demonstration shows its plan on the board before he starts (RULES.md, "A demonstration shows its
+   humour is the maker's: proud of her brews, her mishaps when the balance goes wrong (item 4).
+   Each demonstration shows its plan on the board before she starts (RULES.md, "A demonstration shows its
    plan before it builds"), the lesson the user drew from Tzz's Bingo.
    **"Help, Helium" while you play (12 Nov):** "playing and be able to press a button that says help
    helium and he starts showing you some moves on how you could get yourself out of the situation." So
-   mid-game a button asks him, and he plays the routine your board needs from where it stands (the same
+   mid-game a button asks her, and she plays the routine your board needs from where it stands (the same
    technique routines the bots and the lesson use), a few moves shown on your own board, then hands it
    back.
    **Context-aware, better than a set lesson (12 Nov):** "helium should kind of detect what stage you're
@@ -1035,25 +1035,25 @@ nice and illustrative". In order:
    organizing the pieces should you be using hooks? ... Oh, this is how I would rescue that piece. Look, I
    would draw these together in this way, the brown and black working together. You should be showing you
    like techniques relevant to the situation, I guess, is a lot better than a structured tutorial. It's
-   context aware." So Helium's teaching is mostly "Help, Helium": he reads your board (the planner's
-   stage and the routine it would pick, and why), says it in a line in his voice (whites left now; save
+   context aware." So Helium's teaching is mostly "Help, Helium": she reads your board (the planner's
+   stage and the routine it would pick, and why), says it in a line in her voice (whites left now; save
    that white at the top; time for the hook), and plays it on your board as the one smooth drag. A short
    opening lesson can still show the basics first.
    **The distiller in the panel becomes Helium (12 Nov).** The panel's top strip has a pirate distiller
    by the barrels, as the real one does; ours is a stand-in (a green coat, red sash, tricorn), drawn from
    the research's description, not anyone in particular. The user, seeing it: "I'm not sure what this
    graphic is either ... some kind of distilling sensei figure? ... it could work." So once Helium's drawn
-   (from his portrait, checked first), he's the one standing at the still, and the one who steps in on
+   (from her portrait, checked first), she's the one standing at the still, and the one who steps in on
    "Help, Helium".
-4. **Helium and his island** (IDEAS.md, "Helium, and Distilling"; his portrait checked first): his own
-   little island, perhaps by the smugglers' beach, his still on it, and his mishaps: when he gets the
+4. **Helium and her island** (IDEAS.md, "Helium, and Distilling"; her portrait checked first): her own
+   little island, perhaps by the smugglers' beach, her still on it, and her mishaps: when she gets the
    balance wrong, the still goes up with a bang ("Oops. That happens sometimes. Don't worry about it.").
    A burnt column in the puzzle could be its little bang.
-   **Built, a first pass (12 Nov):** his island past the checkpoint (`?at=helium`; src/den-helium.ts,
+   **Built, a first pass (12 Nov):** her island past the checkpoint (`?at=helium`; src/den-helium.ts,
    js/den/helium-isle.js), a short opening lesson on a real board (the swap rule, whites left and junk
-   right, the furnace's column burned, and a white burned: his bang and line), then your session at his
-   still, "Help, Helium" on H (`advise` said in his voice, naming the technique, its drags played on your
-   board), the bang whenever a white burns, and the panel's distiller drawn as him. Still to come: a
+   right, the furnace's column burned, and a white burned: her bang and line), then your session at her
+   still, "Help, Helium" on H (`advise` said in her voice, naming the technique, its drags played on your
+   board), the bang whenever a white burns, and the panel's distiller drawn as her. Still to come: a
    demonstration per technique, the coached replay (IDEAS.md), the smuggling ring.
 
 ## 6. Sources

@@ -37,9 +37,9 @@ export const BY_PRIMATES_RULE = 'Primates Rule, at anchor. She\'s not ready yet:
     11 Nov: "Penguin Island, and then you have the ... Smuggler's Beach there"): at the foot of the screen.
     Only once you're there: nothing names it before (RULES.md, "Hidden gems, never hinted"). */
 export const AT_SMUGGLERS_BEACH = 'A smugglers\' beach, round the back of Port Decorum! Not a guard in sight';
-/** Coming up off Helium's island the first time, his still just gone bang (src/den-helium.ts, opening; the
+/** Coming up off Helium's island the first time, her still just gone bang (src/den-helium.ts, opening; the
     user, 12 Nov: "your pirate's face could just kind of look very tense, just like, is it safe?" and "the
-    joke of you've got no eyebrows left"): over your head, between his lines. */
+    joke of you've got no eyebrows left"): over your head, between her lines. */
 export const AT_HELIUMS = {
     safe: 'Is... is it safe?',
     brows: 'You\'ve got no eyebrows left.',
@@ -73,7 +73,7 @@ export const CHARACTER = {
         },
         { when: 'Off Kikkit\'s island, once she\'s told her whole ramble the first time (wondering aloud)', says: [AFTER_KIKKIT] },
         { when: 'Sailing up near Primates Rule at anchor, still to come (once a voyage)', says: [BY_PRIMATES_RULE] },
-        { when: 'Off Helium\'s island the first time, his still just gone bang: between his lines', says: AT_HELIUMS },
+        { when: 'Off Helium\'s island the first time, her still just gone bang: between her lines', says: AT_HELIUMS },
         { when: 'Coming into the smugglers\' cove behind Port Decorum, by way of the whirlpools (once a voyage)', says: [AT_SMUGGLERS_BEACH] },
     ],
 };

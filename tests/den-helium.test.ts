@@ -1,6 +1,6 @@
-/* Helium's island, his lesson at the still and "Help, Helium" (src/den-helium.ts), 12 Nov: his own little
+/* Helium's island, her lesson at the still and "Help, Helium" (src/den-helium.ts), 12 Nov: her own little
    island by the smugglers' rocks, a short lesson on a real board (the swap rule, whites left and junk
-   right, a column burned, and his mishap), then your go with him to ask. The user: "helium should kind of
+   right, a column burned, and her mishap), then your go with her to ask. The user: "helium should kind of
    detect what stage you're at and show you what technique ... It's context aware." */
 import { describe, expect, it } from 'vitest';
 import {
@@ -22,7 +22,7 @@ const H = LAY.HELIUM;
 const SQUARES = Array.from({ length: SAIL.COLS * SAIL.ROWS }, (_, i) => [i % SAIL.COLS, Math.floor(i / SAIL.COLS)] as [number, number]);
 const RING = SQUARES.filter(([c, r]) => onHeliumLanding(c, r));
 
-describe('his island: a little place of its own, by the smugglers\' rocks', () => {
+describe('her island: a little place of its own, by the smugglers\' rocks', () => {
   it('is land on every sea, and the water round it always open', () => {
     for (let seed = 1; seed <= 8; seed++) {
       const s = new Sea(seed);
@@ -52,19 +52,19 @@ describe('his island: a little place of its own, by the smugglers\' rocks', () =
     expect(inHeliumEarshot(HELIUM_ARRIVE.c, HELIUM_ARRIVE.r)).toBe(true);
     expect(heliumShore().length).toBeGreaterThan(3);
   });
-  it('places him, his board and his still on his island\'s sand', () => {
+  it('places her, her board and her still on her island\'s sand', () => {
     const onIt = ([c, r]: readonly number[]) => H.LAND.some(([x, y]) => Math.abs(x - c) <= 0.75 && Math.abs(y - r) <= 0.75);
     expect(onIt([HELIUM_STANDS.c, HELIUM_STANDS.r])).toBe(true);
     expect(onIt(HELIUM_CAST.board.at)).toBe(true);
     for (const p of HELIUM_CAST.props) expect(onIt(p.at)).toBe(true);
-    expect(HELIUM_CAST.him.look).toBe('Helium');
+    expect(HELIUM_CAST.her.look).toBe('Helium');
     expect(HELIUM.NAME).toMatch(/Helium/);
   });
 });
 
-describe('his look: from his portrait, in the wardrobe', () => {
+describe('her look: from her portrait, in the wardrobe', () => {
   const LOOK_JS = readFileSync(join(__dirname, '..', 'js', 'den-look.js'), 'utf8').replace(/\r\n/g, '\n');
-  it('is one of the real pirates, a plum monkey on his shoulder', () => {
+  it('is one of the real pirates, a plum monkey on her shoulder', () => {
     const m = /\n {2}Helium: \{([^}]*)\}/.exec(LOOK_JS);
     expect(m).not.toBeNull();
     expect(m![1]).toMatch(/hat: 'feline'/);
@@ -74,14 +74,14 @@ describe('his look: from his portrait, in the wardrobe', () => {
   });
 });
 
-describe('his lesson: a real board, by the real rules', () => {
+describe('her lesson: a real board, by the real rules', () => {
   const g = lessonGame(), plan = lessonPlan(g.cols);
   it('is the same board every time, its furnace stopped', () => {
     expect(lessonGame().cols).toEqual(g.cols);
     expect(g.timeLeft()).toBe(Infinity);
     expect(LESSON_SEED).toBeGreaterThan(0);
   });
-  it('goes greeting, the swap rule, whites left, the furnace, his mishap, your go', () => {
+  it('goes greeting, the swap rule, whites left, the furnace, her mishap, your go', () => {
     expect(plan.map((b) => b.name)).toEqual(['greet', 'rule', 'ruleAfter', 'left', 'furnace', 'mishapSetup', 'mishap', 'yours']);
     expect(plan[0].says).toBe(GREET);
     expect(plan.find((b) => b.name === 'mishap')!.says).toBe('Oops. That happens sometimes. Don\'t worry about it.');
@@ -128,17 +128,17 @@ describe('his lesson: a real board, by the real rules', () => {
   });
 });
 
-describe('his opening, the first time: the still goes bang, and he shrugs it off (the user, 12 Nov)', () => {
+describe('her opening, the first time: the still goes bang, and she shrugs it off (the user, 12 Nov)', () => {
   const o = opening();
-  it('starts with the bang, then his everyday mishap and his offer', () => {
+  it('starts with the bang, then her everyday mishap and her offer', () => {
     expect(o[0].act.kind).toBe('bang');
     expect(o[0].says).toBe('');
     expect(o.slice(1, 3).map((b) => b.says)).toEqual([OPENING.mishap, OPENING.offer]);
   });
-  it('has you ask if it\'s safe and him say of course it is; then the eyebrows, and none of us have any', () => {
-    expect(o.map((b) => [b.who ?? 'him', b.says])).toEqual([
-      ['him', ''], ['him', OPENING.mishap], ['him', OPENING.offer],
-      ['you', AT_HELIUMS.safe], ['him', OPENING.safe], ['you', AT_HELIUMS.brows], ['him', OPENING.brows],
+  it('has you ask if it\'s safe and her say of course it is; then the eyebrows, and none of us have any', () => {
+    expect(o.map((b) => [b.who ?? 'her', b.says])).toEqual([
+      ['her', ''], ['her', OPENING.mishap], ['her', OPENING.offer],
+      ['you', AT_HELIUMS.safe], ['her', OPENING.safe], ['you', AT_HELIUMS.brows], ['her', OPENING.brows],
     ]);
     expect(OPENING.safe).toMatch(/Of course it's safe/);
     expect(OPENING.brows).toMatch(/developers/);
@@ -156,7 +156,7 @@ describe('the mishap: a white burned, and the still goes bang', () => {
     expect(bangs({ up: false, whites: 0, burnt: 0 })).toBe(false);
     expect(bangs({ up: true, whites: 4, burnt: 0 })).toBe(false);
   });
-  it('says his own line first, then the rest round and round', () => {
+  it('says her own line first, then the rest round and round', () => {
     expect(mishapLine(0)).toBe(MISHAP[0]);
     const later = Array.from({ length: MISHAP.length * 2 }, (_, i) => mishapLine(i + 1));
     expect(later).not.toContain(MISHAP[0]);
@@ -166,7 +166,7 @@ describe('the mishap: a white burned, and the still goes bang', () => {
 
 describe('"Help, Helium": your board read, the technique named, and played', () => {
   const advice = (o: Partial<Advice>): Advice => ({ stage: 'junk', kind: 'move', routine: 'rescue', label: 'Save the whites', reason: 'a white by the fire', drags: [{ x: 8, y: 2, ways: [1] }], value: 1, sweep: false, ...o });
-  it('names the technique in his line, with the reason in the bar, and plays the drags', () => {
+  it('names the technique in her line, with the reason in the bar, and plays the drags', () => {
     const h = helpFor(advice({}));
     expect(h.says).toBe(HELP.rescue);
     expect(h.note).toBe('Save the whites: a white by the fire');
@@ -206,8 +206,8 @@ describe('"Help, Helium": your board read, the technique named, and played', () 
   });
 });
 
-describe('his chatter', () => {
-  it('knows the others: Mischievious\'s weddings, Kikkit at his stash', () => {
+describe('her chatter', () => {
+  it('knows the others: Mischievious\'s weddings, Kikkit at her stash', () => {
     expect(AFTER.some((l) => /Mischievious/.test(l) && /wedding/.test(l))).toBe(true);
     expect(AFTER.some((l) => /Kikkit/.test(l) && /stash/.test(l))).toBe(true);
     expect(LESSON.yours.says).toMatch(/H/);
