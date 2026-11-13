@@ -19,8 +19,9 @@ import { CHARACTER as TZZ } from './tzz.js';
 import { CHARACTER as HELIUM } from './helium.js';
 import { CHARACTER as GRAVEE } from './gravee.js';
 import { CHARACTER as VAMPIRE } from './vampire.js';
+import { CHARACTER as ROOBEAR } from './roobear.js';
 import { CHARACTER as IMPERIAL_GUARDS } from './imperial-guards.js';
 import { CHARACTER as RACE } from './race.js';
 import { CHARACTER as GATE_GUARD } from './gate-guard.js';
 
-export const CHARACTERS: readonly Character[] = [DALNOTH, YOU, NARRATOR, DIGNITY, BELLA, UMAMI, MISCHIEVIOUS, SUITORS, SPOUSE, GUESTS, KEEPSAKE, KIKKIT, PENGUIN, TZZ, HELIUM, GRAVEE, VAMPIRE, IMPERIAL_GUARDS, RACE, GATE_GUARD];
+export const CHARACTERS: readonly Character[] = [DALNOTH, YOU, NARRATOR, DIGNITY, BELLA, UMAMI, MISCHIEVIOUS, SUITORS, SPOUSE, GUESTS, KEEPSAKE, KIKKIT, PENGUIN, TZZ, HELIUM, GRAVEE, VAMPIRE, ROOBEAR, IMPERIAL_GUARDS, RACE, GATE_GUARD];

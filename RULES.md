@@ -232,7 +232,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   something that I can put into the URL as well, so that I can share that animation with
   somebody." `den.html?at=` and a name opens the den straight there: the cheats' stages (`start`,
   `walk`, `gun-tower`, `built`) and their starts and scenes (`shack`, `map-scene`, `sea`,
-  `dignity`, `umami`, `wedding`, `married`, and since: `kikkit`, `penguins`, `tzz`, `imperial`, `smugglers`, `race`, `door`, `race-watch`, `lodgings`). Choosing one from the cheats puts its link in the address bar, and its
+  `dignity`, `umami`, `wedding`, `married`, and since: `kikkit`, `penguins`, `tzz`, `imperial`, `smugglers`, `race`, `door`, `race-watch`, `lodgings`, and any house by its id: `roobear`, `gravee`). Choosing one from the cheats puts its link in the address bar, and its
   button's tooltip shows it. A name that isn't one says so. A new scene or start gets a name too.
 - **The layout follows the screen's shape, not the device (11 Nov).** A tall, narrow window on a
   desktop gets the phone's layout (the wedding planner as a sheet along the bottom, say), and
@@ -426,6 +426,29 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     at least pointing in the general direction of the canvas." Any pirate who paints holds a brush
     (the talking pirates' 'paint' idle), stands facing the canvas within a brush's reach (toPaint, in
     src/den-houses.ts), and dabs at it.
+  - **Roobear's house, her ROOm (13 Nov).** The user: "she was really cute ... a really sweet interaction,
+    and I wanted to commemorate it, but ... I've not really got like a full adventure for her. So maybe just
+    do the small house." The district's second house, small (one room: `src/den-roobear.ts`, played by
+    `js/den/roobear-house.js` on the shared shell), a Cottage named "The ROOm", her sign over her answer
+    saying "Roobear's ROOm" and her hello "Welcome to my ROOm. xD" (her own joke: "a ROOm you mean? xD").
+    Robert, half kangaroo and half bear (`creatures.js`'s beast, our own, as the joey and the bear are,
+    never anyone's from a book), hops over and roobs your ear as the welcome, every visit, your eyes shut
+    (`bliss`); walk up to him and Space for another. He hops about after her, on her far side from you. Her
+    back wall hangs the guesses at her name, each a portrait of her in her own look: "Robert, a Monsieur"
+    (a beret, a moustache, a Breton shirt in her purple), "Roo + Bear" (a roo's ear, a bear's, a roo's
+    tail), "Did Someone Roob an Ear?" (her at a stranger's ear), "A Roo and a Bear" (with a joey and a
+    bear) and, the biggest, in the middle, her answer, "Robert the Kangaroo Bear that Roobs Ears" (Robert
+    roobing hers). Stop by one and she says whose guess it was: Dachimpy's three, Dignity's, her own (the
+    shell's remark; Tab for them close up). Her tour: the guesses, then her tea table (her crew, Tea Time).
+    Her link: `den.html?at=roobear`; any house opens by its id (`?at=gravee` too), a link with no cheat
+    button of its own (the district's is the one per place). No quest, nothing to take home yet.
+    - **Her look (IDEAS.md's description of her portrait, 13 Nov; not yet checked side by side):** deep
+      purple, not black; black hair pinned up with curls by her ears (`pinned`); a wreath of purple roses
+      with gold leaves (the Crown of roses now takes its second colour for its leaves: Kikkit's green); one
+      gold hoop, no patch; a strapless corset with a ruffled cuff on her right upper arm (`strapless`);
+      flare pants; a hook; a blue-and-white china bowl of blueberries (`blueberries`); a pale periwinkle
+      crow (`crow`, in atlantean). Her skin (fair) and her feet (black boots) aren't in the description:
+      guesses, to check against her portrait. The beret is a new hat for anyone too.
   - **Watching eyes are a piece (11 Nov).** "The vampire portrait that's following you definitely
     needs to be a normal thing." Any portrait can have eyes that follow you (`watch`): the Count's,
     and Dignity's "Off Duty (Never)", one eye under her patch.

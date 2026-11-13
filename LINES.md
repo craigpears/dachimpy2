@@ -4,7 +4,7 @@ Every character's lines, and who they are, made from `src/lines/` by `npm run bu
 (`tools/lines-doc.mjs`): change a line there, not here, and the game changes with it.
 This file's history in git shows every line as it's changed.
 
-[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava) · [Tzz](#tzz) · [Helium](#helium) · [Gravee](#gravee) · [The Count](#the-count) · [The imperial guards of Port Decorum](#the-imperial-guards-of-port-decorum) · [The race's starter](#the-races-starter) · [The guard at the race's gate](#the-guard-at-the-races-gate)
+[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava) · [Tzz](#tzz) · [Helium](#helium) · [Gravee](#gravee) · [The Count](#the-count) · [Roobear](#roobear) · [The imperial guards of Port Decorum](#the-imperial-guards-of-port-decorum) · [The race's starter](#the-races-starter) · [The guard at the race's gate](#the-guard-at-the-races-gate)
 
 ## Dalnoth
 
@@ -37,7 +37,7 @@ Beaten after the third wave, he leaves his cannon, rows in, stomps up the beach 
 
 ## You
 
-Your own pirate, dressed as you like from the wardrobe (or as any real pirate in it). You say little, and only at the den's short, cheesy moments: picking up the captain's map, and riding the crane up the cliff and down again, your own wedding, screaming at a vampire in Gravee's house, and sailing by Primates Rule, not ready yet, coming into the smugglers' cove behind Port Decorum, and, warily, at Helium's still just after it's gone bang.
+Your own pirate, dressed as you like from the wardrobe (or as any real pirate in it). You say little, and only at the den's short, cheesy moments: picking up the captain's map, and riding the crane up the cliff and down again, your own wedding, screaming at a vampire in Gravee's house, having an ear roobed in Roobear's, and sailing by Primates Rule, not ready yet, coming into the smugglers' cove behind Port Decorum, and, warily, at Helium's still just after it's gone bang.
 
 ### Picking up the captain's map, at the end of Dalnoth's cutscene
 
@@ -77,6 +77,11 @@ Your own pirate, dressed as you like from the wardrobe (or as any real pirate in
 ### Coming into the smugglers' cove behind Port Decorum, by way of the whirlpools (once a voyage)
 
 - "A smugglers' beach, round the back of Port Decorum! Not a guard in sight"
+
+### Robert the kangaroo bear roobing your ear, in Roobear's ROOm
+
+- *The first time, at her door:* "Oh! ...Oh, that's actually lovely."
+- *Asking him for another:* "...Yes. Still lovely."
 
 ## The den's pirate voice
 
@@ -1329,6 +1334,60 @@ The vampire who sleeps in the coffin at the bedside in Gravee's house (Bedside M
 - *Sitting bolt upright, nose to nose with you:* "AAAAH!"
 - *Lying back down as the lid shuts:* "Five more minutes..."
 - *Lifting it again, another time:* "Do you MIND?"
+
+## Roobear
+
+A real pirate of the Emerald Ocean (by her pirate name only): captain of the crew Tea Time, of the flag Do Not Reply, a Grand-Master Forager. Drawn from her pirate page's portrait as it's described: deep purple, not black, only her hair black, pinned up with curls by her ears under a wreath of dark purple roses with gold leaves; a gold hoop earring, a silver hook for her left hand, a blue-and-white china bowl of blueberries in her right, and a pale periwinkle crow on her shoulder.
+
+Warm and quietly funny. Asked what her name stands for, she answered that she could be Robert the kangaroo bear that roobs ears, and liked it; told she had a room in the den, "a ROOm you mean? xD". So her little house in the den's housing district is her ROOm, its walls hung with everyone's guesses at her name, the biggest frame her own answer; and Robert, half kangaroo and half bear, roobs your ear at the door. She rooms at Gravee's too.
+
+> "This absolutely needs to be a memory later, she needs her little house in the game." (the user, 12 Nov)
+>
+> "Or is she the Roobear that roobs ears? You need that." (the user, 12 Nov)
+>
+> "she was really cute ... a really sweet interaction, and I wanted to commemorate it" (the user, 13 Nov)
+
+### Answering the door when you knock
+
+- *Your first visit:* "Hi! Come in! Welcome to my ROOm. xD"
+- *Coming back:* "You came back! Robert missed your ears."
+
+### Robert roobs your ear
+
+- *The first time, at the door:* "That's Robert. He roobs ears. It's how he says hello."
+- *Asking him for another, one in turn:*
+  - "He likes you."
+  - "Robert! Give them their ear back."
+  - "Both ears is a special occasion."
+
+### Showing you round, as you come to each stop
+
+- *In the middle of her ROOm, before her gallery of guesses:*
+  - "So. My name. Everyone had a guess."
+  - "I hung all the guesses up. Have a look, I'll tell you whose was whose."
+- *At her tea table:*
+  - "And this is where we have tea. It's always tea time here."
+  - "It's my crew's name, actually. Tea Time."
+
+### About the guess you've stopped by or turned to look at (once a visit each), and under it in the close view
+
+- *Robert, a Monsieur:* "Dachimpy's guess. A French Robert. Very much a monsieur."
+- *Roo + Bear:* "Also Dachimpy's. A roo, plus a bear. Half and half."
+- *Did Someone Roob an Ear?:* "Dachimpy again: did someone roob an ear? The scene of the crime. I'm saying nothing."
+- *A Roo and a Bear (Dignity's guess):* "That one's Dignity's. A roo and a bear, from the books. Yes, abstract. She knows."
+- *Robert the Kangaroo Bear that Roobs Ears, the biggest frame:* "And that's mine. Robert the kangaroo bear that roobs ears. I like it."
+
+### Now and then, as you wander her ROOm after the tour
+
+- "Blueberry? They're good for your ears. Robert says."
+- "I room at Gravee's too, you know. This is my ROOm."
+- "Robert, not the frames."
+- "Gravee wants to paint Robert. He won't sit still."
+- "The crow's not Robert. Robert's the one with the ears."
+
+### As you leave
+
+- "Bye! Mind your ears!"
 
 ## The imperial guards of Port Decorum
 

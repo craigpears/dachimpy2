@@ -6,7 +6,7 @@
    A house only places them (its rules say where: src/den-gravee.ts's FURNISH). As in Puzzle Pirates,
    where furniture was something you bought and put anywhere in your house (YPPedia, Furniture).
 
-   The pieces: rug, runner, armchair, chair, table, candelabra, sconce, bed, coffin, easel, frame, door,
+   The pieces: rug, runner, armchair, chair, table, candelabra, sconce, bed, coffin, easel, frame, sign, door,
    and outdoors a still; and the skeleton set and its company (Primates Rule's deck): skeleton,
    skeletonChair, skeletalCannon, gibbet, armour, grandPiano, anchorChair, jar, toolChest; and cargo and a
    beach's things (the smugglers' beach): crate, barrel, tarpPile, lantern, rowboat. */
@@ -234,6 +234,25 @@ export function frame({ w = 0.8, h = 1.0, y = 1.75, picture = null, plaque = '',
     },
     setPlaque,
   };
+}
+/* A sign: a painted board with words on it (its own, `text`, in `ink` on `col`), `w` by `h` metres, its
+   back to a wall at its origin, its middle at height `y`; a gilt edge round it. Roobear's ROOm's, over her
+   answer; any house's or any door's. */
+export function sign({ text = '', w = 1.6, h = 0.42, y = 2.4, col = '#4a2a5e', ink = '#f2d89a' } = {}) {
+  const g = new THREE.Group(), px = 512, ph = Math.max(32, Math.round(px * h / w));
+  const face = canvasTex(px, ph, (c, W, H) => {
+    c.fillStyle = col; c.fillRect(0, 0, W, H);
+    c.strokeStyle = 'rgba(0,0,0,.35)'; c.lineWidth = 6; c.strokeRect(10, 10, W - 20, H - 20);
+    c.fillStyle = ink; c.textAlign = 'center'; c.textBaseline = 'middle';
+    let s = Math.round(H * 0.58);
+    do c.font = `700 ${s}px Alegreya, Georgia, serif`; while (c.measureText(text).width > W - 40 && --s > 12);
+    c.fillText(text, W / 2, H / 2 + 2);
+  });
+  g.add(box(w + 0.08, h + 0.08, 0.04, gilt, 0, y, 0.02));
+  const board = mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ map: face, roughness: 0.7, ...AHEAD }), false);
+  board.position.set(0, y, 0.045);
+  g.add(board);
+  return { g };
 }
 /* An easel: three legs, a ledge, a canvas on it (a picture: setPicture, as a frame's), and a palette
    hooked on one leg. Facing +z (the canvas's front). */
@@ -512,4 +531,4 @@ export function rowboat({ col = '#6e4a2c' } = {}) {
 
 /** Every piece by its kind (the name a house's rules use: src/den-gravee.ts's FURNISH; a ship's deck:
     src/den-frigate.ts; the smugglers' beach: src/den-smugglers.ts). */
-export const FURNITURE = { rug, runner, chair, armchair, table, bed, candelabra, sconce, coffin, easel, frame, door, still, skeleton, skeletonChair, skeletalCannon, gibbet, armour, grandPiano, anchorChair, jar, toolChest, crate, barrel, tarpPile, lantern, rowboat };
+export const FURNITURE = { rug, runner, chair, armchair, table, bed, candelabra, sconce, coffin, easel, frame, sign, door, still, skeleton, skeletonChair, skeletalCannon, gibbet, armour, grandPiano, anchorChair, jar, toolChest, crate, barrel, tarpPile, lantern, rowboat };

@@ -2,7 +2,7 @@
    tested in tests/den-houses.test.ts. js/den/lodgings.js draws the district's door in the den and its
    list of houses; js/den/house.js is the house shell every house is played in (its rooms, walking
    about them, the way out); each house's own scene is a module of its own (Gravee's:
-   js/den/gravee-house.js, its rules src/den-gravee.ts).
+   js/den/gravee-house.js, its rules src/den-gravee.ts; Roobear's: js/den/roobear-house.js, src/den-roobear.ts).
 
    The user (11 Nov): "more like ... old Puzzle Pirates, you have like the areas of houses and you have
    the enter a house stuff and you can choose whose house to go into. And maybe she's just one of them.
@@ -32,6 +32,9 @@ export interface House {
     pirate page, Emerald, 11 Nov). A friend's house is one more line here. */
 export const HOUSES: readonly House[] = [
   { id: 'gravee', owner: 'Gravee', name: 'Bedside Manors', kind: 'Manor', blurb: 'Portraits. A great many portraits.' },
+  // Roobear's (13 Nov): a little house of her own, as every pirate has (RULES.md), small as suits her. A house,
+  // but she calls it her ROOm (her own joke: "a ROOm you mean? xD"). Its rules: src/den-roobear.ts.
+  { id: 'roobear', owner: 'Roobear', name: 'The ROOm', kind: 'Cottage', blurb: 'A house. She calls it her ROOm.' },
 ];
 
 /** The house by its id, or null. */
@@ -85,6 +88,28 @@ export function step(plan: Plan, ox: number, oz: number, nx: number, nz: number,
   if (walkable(plan, nx, oz)) return [nx, oz];
   if (walkable(plan, ox, nz)) return [ox, nz];
   return [ox, oz];
+}
+
+/** A piece of furniture a house places (js/den/furniture.js has one of each kind, for anywhere): its kind,
+    where it stands, turned to face (`yaw`, radians: 0 faces you, toward +z), in its colour. */
+export interface Piece { kind: string; x: number; z: number; yaw?: number; col?: string }
+/** What you walk round: each piece's footprint, by kind (a coffin and a bed are long: two circles). */
+export function blocksOf(pieces: readonly Piece[]): Block[] {
+  const out: Block[] = [];
+  for (const p of pieces) {
+    const along = (r: number, half: number) => {
+      const y = p.yaw ?? 0, dx = Math.sin(y) * half, dz = Math.cos(y) * half;
+      out.push({ x: p.x + dx, z: p.z + dz, r }, { x: p.x - dx, z: p.z - dz, r });
+    };
+    if (p.kind === 'coffin') along(0.38, 0.55);
+    else if (p.kind === 'bed') along(0.95, 0.45);
+    else if (p.kind === 'armchair' || p.kind === 'table') out.push({ x: p.x, z: p.z, r: 0.5 });
+    else if (p.kind === 'easel') out.push({ x: p.x, z: p.z, r: 0.4 });
+    else if (p.kind === 'chair') out.push({ x: p.x, z: p.z, r: 0.35 });
+    else if (p.kind === 'candelabra') out.push({ x: p.x, z: p.z, r: 0.22 });
+    // (rugs and runners you walk over)
+  }
+  return out;
 }
 
 /** How long a line stays up in its bubble: long enough to read (seconds). */
@@ -338,6 +363,32 @@ export function remark(G: Gaze, seen: string | null, dt: number, still: boolean,
   if (!line || G.said.includes(line)) return { gaze: { ...gaze, said: [...G.said, seen] }, say: null };
   return { gaze: { ...gaze, said: [...G.said, seen, line] }, say: line };
 }
+
+// ---------- portraits on a house's walls ----------
+/* Any house's portraits are plain data (Gravee's gallery: src/den-gravee.ts; Roobear's guesses at her name:
+   src/den-roobear.ts), painted by js/den/portraits.js: each a sitter drawn by the pirate maker from a look,
+   with a backdrop behind. */
+type Dress = Record<string, string | number | boolean>;
+/** Someone beside a portrait's sitter (js/den/creatures.js draws the beasts): Robert the kangaroo bear, a
+    joey, a bear, or a pirate in a look; where they stand (`x` across, `z` toward you, metres from the
+    sitter), turned `yaw`; `pose`: 'rub' (a paw, or a hand, up at the sitter's ear) or 'bliss' (eyes shut,
+    smiling: having it rubbed). */
+export interface Company { kind: 'robert' | 'joey' | 'bear' | 'pirate'; look?: Dress; x: number; z: number; yaw?: number; pose?: 'rub' | 'bliss' }
+/** Who's in a portrait: a real pirate (their look in PIRATES, `dress` over it; `costume`: something on
+    over that, the kangaroo bear's ears and tail, say; `pose`: as Company's; `company`: who's beside them); a
+    yeti, beside Gravee; the vampire; or you. */
+export type Sitter =
+  | { who: 'pirate'; name: string; dress?: Dress; costume?: 'roo-bear'; pose?: 'rub' | 'bliss'; company?: readonly Company[] }
+  | { who: 'yeti'; name: string; dress?: Dress }
+  | { who: 'vampire' }
+  | { who: 'you' };
+export type Backdrop = 'bloodmoon' | 'snow' | 'beach' | 'crypt' | 'autumn' | 'witch' | 'sea' | 'den' | 'night' | 'pinksea' | 'cafe';
+/** The backdrops portraits.js paints. `pinksea`: a pink sky over a violet, sparkling sea (Roobear's portrait's);
+    `cafe`: a café wall under a striped awning (a monsieur's). */
+export const BACKDROPS: readonly Backdrop[] = ['bloodmoon', 'snow', 'beach', 'crypt', 'autumn', 'witch', 'sea', 'den', 'night', 'pinksea', 'cafe'];
+/** A portrait: its title (on its plaque), who's in it, what's behind them; `watch`: its eyes follow you
+    about the room (js/den/portraits.js's watching()). */
+export interface Portrait { id: string; title: string; sitter: Sitter; backdrop: Backdrop; watch?: boolean }
 
 /** At the front door, to go out? */
 export const atWayOut = (plan: Plan, x: number, z: number): boolean => Math.hypot(x - plan.out.x, z - plan.out.z) < plan.out.r;

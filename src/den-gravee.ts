@@ -17,7 +17,9 @@
    her bed (Bedside Manors). Lift its lid and he sits up, you both scream, and she sits you for a
    portrait, frozen mid-fright, that hangs pride of place in her hall, kept in this browser. No vampire
    game (yet: the rapid-Carpentry coffins wait, IDEAS.md). */
-import type { Plan, Block, Stretch, ShowSpot } from './den-houses.js';
+import type { Plan, Stretch, ShowSpot, Portrait, Piece } from './den-houses.js';
+export type { Piece } from './den-houses.js';
+export { blocksOf } from './den-houses.js';
 import { toPaint } from './den-houses.js';
 import { ON_A_PORTRAIT, ON_A_PROOF } from './lines/gravee.js';
 
@@ -45,9 +47,8 @@ export const ARRIVE = { you: { x: 0, z: 2.0 }, her: { x: 0.9, z: 0.6 } } as cons
 /** How high the walls are, and the front walls cut low so you can see in. */
 export const WALLS = { high: 3.2, low: 0.45 } as const;
 
-/** Her furniture, by kind (js/den/furniture.js has one of each, for anywhere): where it stands, turned
-    to face (`yaw`, radians: 0 faces you, toward +z). The house only places it. */
-export interface Piece { kind: string; x: number; z: number; yaw?: number; col?: string }
+/** Her furniture, by kind (js/den/furniture.js has one of each, for anywhere: src/den-houses.ts's Piece):
+    where it stands, turned to face. The house only places it. */
 export const COFFIN = { x: G1 + 7.6, z: -1.9, yaw: 0 } as const;
 export const EASEL = { x: G1 + 4.6, z: 0.6, yaw: -0.6 } as const;
 export const BED = { x: G1 + 3.2, z: -2.1 } as const;
@@ -71,39 +72,12 @@ export const FURNISH: readonly Piece[] = [
   { kind: 'chair', x: G1 + 8.6, z: 1.8, yaw: -2.6 },
 ];
 
-/** What you walk round: each piece's footprint, by kind (a coffin and a bed are long: two circles). */
-export function blocksOf(pieces: readonly Piece[]): Block[] {
-  const out: Block[] = [];
-  for (const p of pieces) {
-    const along = (r: number, half: number) => {
-      const y = p.yaw ?? 0, dx = Math.sin(y) * half, dz = Math.cos(y) * half;
-      out.push({ x: p.x + dx, z: p.z + dz, r }, { x: p.x - dx, z: p.z - dz, r });
-    };
-    if (p.kind === 'coffin') along(0.38, 0.55);
-    else if (p.kind === 'bed') along(0.95, 0.45);
-    else if (p.kind === 'armchair' || p.kind === 'table') out.push({ x: p.x, z: p.z, r: 0.5 });
-    else if (p.kind === 'easel') out.push({ x: p.x, z: p.z, r: 0.4 });
-    else if (p.kind === 'chair') out.push({ x: p.x, z: p.z, r: 0.35 });
-    else if (p.kind === 'candelabra') out.push({ x: p.x, z: p.z, r: 0.22 });
-    // (rugs and runners you walk over)
-  }
-  return out;
-}
-
 // ---------- the portraits ----------
-/** Who's in a portrait: Gravee in one of her looks (her look in the wardrobe, PIRATES.Gravee, with
-    `dress` over it); another real pirate she's met, by name (their look in PIRATES); a yeti, beside her;
-    the vampire; or you. `fright`: frozen mid-scream. `blur`: her yeti proof's famous focus. */
-export type Sitter =
-  | { who: 'pirate'; name: string; dress?: Record<string, string | number | boolean> }
-  | { who: 'yeti'; name: string; dress?: Record<string, string | number | boolean> }
-  | { who: 'vampire' }
-  | { who: 'you' };
-/** A portrait: its title (on its plaque), who's in it, what's behind them; `watch`: its eyes follow you
-    about the room (js/den/portraits.js's watching()). */
-export interface Portrait { id: string; title: string; sitter: Sitter; backdrop: Backdrop; watch?: boolean }
-export type Backdrop = 'bloodmoon' | 'snow' | 'beach' | 'crypt' | 'autumn' | 'witch' | 'sea' | 'den' | 'night';
-export const BACKDROPS: readonly Backdrop[] = ['bloodmoon', 'snow', 'beach', 'crypt', 'autumn', 'witch', 'sea', 'den', 'night'];
+/* Who's in each (src/den-houses.ts's Sitter, any house's): Gravee in one of her looks (her look in the
+   wardrobe, PIRATES.Gravee, with `dress` over it); another real pirate she's met, by name (their look in
+   PIRATES); a yeti, beside her; the vampire; or you. */
+export type { Sitter, Portrait, Backdrop } from './den-houses.js';
+export { BACKDROPS } from './den-houses.js';
 
 /* Her looks, from her gallery (Emerald, checked 11 Nov), each by its own title: what's over her look as
    she is now (her pirate page's portrait: PIRATES.Gravee in js/den-look.js). */

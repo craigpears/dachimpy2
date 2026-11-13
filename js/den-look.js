@@ -50,17 +50,20 @@ export const paletteOf = (look, slot) => (slot === 'fam' && FURRY[look.fam] ? FU
 export const PARTS = {
   // (Veil, Tiara: the tailor's. Butterfly, Feminine feline, Wicked witch: the palace shoppe's
   // Halloween masks and hats, women's only: YPPedia, Clothing (hats). Berserker pelt: a bear's head and
-  // its fur, either body, a prize from a 2011 event made since from a design: YPPedia; Gravee's, white.)
+  // its fur, either body, a prize from a 2011 event made since from a design: YPPedia; Gravee's, white. Crown of
+  // roses: the roses in its first colour, the leaves in its second: Kikkit's red and green, Roobear's purple and
+  // gold. Beret: a monsieur's, for Roobear's gallery, 13 Nov.)
   hat: {
-    m: [['none', 'No hat'], ['bandana', 'Bandana'], ['tricorne', 'Tricorne'], ['feathered', 'Feathered hat', 1], ['captain', "Captain's hat", 1], ['sleeping', 'Sleeping hat'], ['fez', 'Fez'], ['viking', 'Viking helmet'], ['roses', 'Crown of roses', 1], ['pelt', 'Berserker pelt']],
+    m: [['none', 'No hat'], ['bandana', 'Bandana'], ['tricorne', 'Tricorne'], ['feathered', 'Feathered hat', 1], ['captain', "Captain's hat", 1], ['sleeping', 'Sleeping hat'], ['fez', 'Fez'], ['viking', 'Viking helmet'], ['roses', 'Crown of roses', 1], ['pelt', 'Berserker pelt'], ['beret', 'Beret']],
     f: [['none', 'No hat'], ['bandana', 'Bandana'], ['tricorne', 'Tricorne'], ['feathered', 'Feathered hat', 1], ['captain', "Captain's hat", 1], ['sleeping', 'Sleeping hat'], ['wide', 'Wide-brimmed hat', 1], ['viking', 'Viking helmet'],
-      ['veil', 'Veil', 1], ['tiara', 'Tiara', 1], ['butterfly', 'Butterfly'], ['feline', 'Feminine feline', 1], ['witch', 'Wicked witch', 1], ['roses', 'Crown of roses', 1], ['pelt', 'Berserker pelt']],
+      ['veil', 'Veil', 1], ['tiara', 'Tiara', 1], ['butterfly', 'Butterfly'], ['feline', 'Feminine feline', 1], ['witch', 'Wicked witch', 1], ['roses', 'Crown of roses', 1], ['pelt', 'Berserker pelt'], ['beret', 'Beret']],
   },
   // (Swept up: Helium's, swept up off the face and over the crown, a fall of it by one cheek, 13 Nov. Twists:
-  // Tzz's, twisted locks drawn back over the head and tied behind, 13 Nov.)
+  // Tzz's, twisted locks drawn back over the head and tied behind, 13 Nov. Pinned up: Roobear's, a knot of curls
+  // on the back of the crown and a curl by each ear, 13 Nov.)
   hair: {
-    m: [['short', 'Short'], ['ponytail', 'Ponytail'], ['long', 'Long'], ['wavy', 'Wavy'], ['curly', 'Curly'], ['swept', 'Swept up'], ['twists', 'Twists'], ['bald', 'Bald']],
-    f: [['long', 'Long'], ['ponytail', 'Ponytail'], ['bun', 'Bun'], ['braids', 'Braids'], ['wavy', 'Wavy'], ['curly', 'Curly'], ['swept', 'Swept up'], ['twists', 'Twists'], ['short', 'Short']],
+    m: [['short', 'Short'], ['ponytail', 'Ponytail'], ['long', 'Long'], ['wavy', 'Wavy'], ['curly', 'Curly'], ['swept', 'Swept up'], ['twists', 'Twists'], ['pinned', 'Pinned up'], ['bald', 'Bald']],
+    f: [['long', 'Long'], ['ponytail', 'Ponytail'], ['bun', 'Bun'], ['braids', 'Braids'], ['wavy', 'Wavy'], ['curly', 'Curly'], ['swept', 'Swept up'], ['twists', 'Twists'], ['pinned', 'Pinned up'], ['short', 'Short']],
   },
   beard: {
     m: [['full', 'Full beard'], ['bushy', 'Bushy beard'], ['goatee', 'Goatee'], ['moustache', 'Moustache'], ['long', 'Long beard'], ['none', 'Clean-shaven']],
@@ -70,7 +73,7 @@ export const PARTS = {
     m: [['striped', 'Striped shirt', 1], ['plain', 'Plain shirt'], ['sash', 'Shirt with sash', 1], ['vest', 'Striped shirt with vest', 1], ['swashbuckler', "Swashbuckler's jacket", 1], ['buccaneer', 'Buccaneer jacket', 1], ['captain', "Captain's jacket", 1],
       ['frilly', 'Frilly shirt with sash', 1], ['raiment', 'Vampire raiment', 1], ['rag', 'Rag shirt']],
     f: [['striped', 'Striped shirt', 1], ['belt', 'Shirt with belt'], ['corset', 'Corset', 1], ['vest', 'Striped shirt with vest', 1], ['buccaneer', 'Buccaneer jacket', 1], ['swashbuckler', "Swashbuckler's jacket", 1], ['captain', "Captain's jacket", 1],
-      ['dresstop', 'Dress top', 1], ['frilly', 'Frilly shirt with sash', 1], ['midriff', 'Midriff blouse with scarf', 1], ['raiment', 'Vampire raiment', 1], ['tied', 'Top tied at the front'], ['rag', 'Rag shirt']],
+      ['dresstop', 'Dress top', 1], ['frilly', 'Frilly shirt with sash', 1], ['midriff', 'Midriff blouse with scarf', 1], ['raiment', 'Vampire raiment', 1], ['tied', 'Top tied at the front'], ['rag', 'Rag shirt'], ['strapless', 'Strapless corset', 1]],
   },
   // Round the waist, over whatever top (a plain belt isn't worn with a corset or a shirt with sash).
   waist: {
@@ -87,17 +90,18 @@ export const PARTS = {
     f: [['boots', 'Boots'], ['shoes', 'Buckle shoes'], ['fancy', 'Fancy boots', 1], ['curled', 'Curled slippers'], ['bare', 'Bare feet']],
   },
   // In the right hand: props, not clothing (only a bouquet and a present take a colour: its flowers', its paper).
-  // (The Atlantis trinket: Helium's, a glowing blue jar worked in gold, from their portrait, 13 Nov.)
+  // (The Atlantis trinket: Helium's, a glowing blue jar worked in gold, from their portrait, 13 Nov. A bowl of
+  // blueberries: Roobear's, blue-and-white china, 13 Nov.)
   hand: {
-    m: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug'], ['candle', 'Candle'], ['gift', 'Present'], ['atlantis', 'Atlantis trinket']],
-    f: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug'], ['candle', 'Candle'], ['gift', 'Present'], ['atlantis', 'Atlantis trinket']],
+    m: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug'], ['candle', 'Candle'], ['gift', 'Present'], ['atlantis', 'Atlantis trinket'], ['blueberries', 'Bowl of blueberries']],
+    f: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug'], ['candle', 'Candle'], ['gift', 'Present'], ['atlantis', 'Atlantis trinket'], ['blueberries', 'Bowl of blueberries']],
   },
   // (Squirrel, bat, krakling: real familiars, from expeditions and treasure chests: YPPedia, Familiar.
   // Dragon: from gold boxes; its first colour is its horns', its second its body's, as YPPedia says
-  // dragons' colours go: Tzz's D'rizzle, silver and vibrant red.)
+  // dragons' colours go: Tzz's D'rizzle, silver and vibrant red. Crow: Roobear's, pale periwinkle, 13 Nov.)
   fam: {
-    m: [['none', 'No familiar'], ['parrot', 'Parrot', 1], ['monkey', 'Monkey'], ['octopus', 'Octopus'], ['squirrel', 'Squirrel'], ['bat', 'Bat'], ['krakling', 'Krakling'], ['dragon', 'Dragon', 1]],
-    f: [['none', 'No familiar'], ['parrot', 'Parrot', 1], ['monkey', 'Monkey'], ['octopus', 'Octopus'], ['squirrel', 'Squirrel'], ['bat', 'Bat'], ['krakling', 'Krakling'], ['dragon', 'Dragon', 1]],
+    m: [['none', 'No familiar'], ['parrot', 'Parrot', 1], ['monkey', 'Monkey'], ['octopus', 'Octopus'], ['squirrel', 'Squirrel'], ['bat', 'Bat'], ['krakling', 'Krakling'], ['dragon', 'Dragon', 1], ['crow', 'Crow']],
+    f: [['none', 'No familiar'], ['parrot', 'Parrot', 1], ['monkey', 'Monkey'], ['octopus', 'Octopus'], ['squirrel', 'Squirrel'], ['bat', 'Bat'], ['krakling', 'Krakling'], ['dragon', 'Dragon', 1], ['crow', 'Crow']],
   },
 };
 // The props that take a colour (the rest are what they're made of).
@@ -191,7 +195,7 @@ export const PIRATES = Object.fromEntries(Object.entries({
   // named for him: the user, 10 Nov, "it's definitely Rodrigo").
   Kikkit: {
     body: 'f', skin: 1, hair: 'curly', hairCol: 'black', patch: true, earring: 'both', smile: false, tongue: true, tattoos: true, wristband: true,
-    hat: 'roses', hatCol: 'red', top: 'tied', topCol: 'red', waist: 'buckle', waistCol: 'black',
+    hat: 'roses', hatCol: 'red', hatCol2: 'green', top: 'tied', topCol: 'red', waist: 'buckle', waistCol: 'black',
     legs: 'ragged', legsCol: 'black', feet: 'bare', hand: 'jug', fam: 'monkey', famCol: 'brown',
   },
   // Gravee (her Emerald pirate page's portrait, checked 11 Nov), the portrait collector with a house in
@@ -230,6 +234,18 @@ export const PIRATES = Object.fromEntries(Object.entries({
     body: 'f', skin: 6, hair: 'swept', hairCol: 'silver', patch: true, earring: true, smile: true, hook: true, starfish: true,
     hat: 'feline', hatCol: 'black', hatCol2: 'black', top: 'raiment', topCol: 'black', topCol2: 'gold', waist: 'none',
     legs: 'pants', legsCol: 'black', feet: 'fancy', feetCol: 'black', feetCol2: 'plum', hand: 'atlantis', fam: 'monkey', famCol: 'plum',
+  },
+  // Roobear (her Emerald portrait, as IDEAS.md describes it, 12 Nov; drawn from the description, 13 Nov), with a
+  // little house of her own in the den's district (her ROOm): not all in black but deep purple, only her hair
+  // black, pinned up with loose curls by the ears, crowned with a wreath of dark purple roses with gold leaves;
+  // a gold hoop earring, no eyepatch, a small friendly smile; a strapless purple corset with a ruffled cuff on
+  // her upper arm, purple flare pants; a silver hook for her left hand, a blue-and-white china bowl heaped with
+  // blueberries in her right; and on her shoulder a pale periwinkle crow (atlantean: Dignity's facings' pale
+  // periwinkle). Her skin and her feet aren't in the description: fair, and black boots, till checked.
+  Roobear: {
+    body: 'f', skin: 0, hair: 'pinned', hairCol: 'black', patch: false, earring: true, smile: true, hook: true,
+    hat: 'roses', hatCol: 'purple', hatCol2: 'gold', top: 'strapless', topCol: 'purple', topCol2: 'purple', waist: 'none',
+    legs: 'flare', legsCol: 'purple', feet: 'boots', feetCol: 'black', hand: 'blueberries', fam: 'crow', famCol: 'atlantean',
   },
 }).map(([name, look]) => [name, cleanLook(look)]));
 
@@ -344,6 +360,17 @@ const glowTex = () => cached('glow', () => tex(64, 64, (g, w, h) => {
   g.fillStyle = gr; g.fillRect(0, 0, w, h);
 }));
 // A stone jug's glaze, XXX on it.
+// (Blue-and-white china, a lace pattern round it: Roobear's bowl of blueberries.)
+const chinaTex = () => cached('china', () => tex(128, 32, (g, w, h) => {
+  g.fillStyle = '#f7f6f2'; g.fillRect(0, 0, w, h);
+  g.strokeStyle = '#3554b0'; g.fillStyle = '#3554b0'; g.lineWidth = 1.5;
+  for (let x = 0; x < w; x += 16) {
+    g.beginPath(); g.arc(x + 8, h * 0.62, 6, 0, Math.PI); g.stroke();
+    g.beginPath(); g.arc(x + 8, h * 0.62, 2, 0, Math.PI * 2); g.fill();
+    g.beginPath(); g.arc(x, h * 0.3, 2.5, 0, Math.PI * 2); g.fill();
+  }
+  g.fillRect(0, h - 4, w, 2); g.fillRect(0, 2, w, 1.5);
+}));
 const jugTex = () => cached('jug', () => tex(64, 64, (g, w, h) => {
   g.fillStyle = '#cdbd9a'; g.fillRect(0, 0, w, h);
   g.fillStyle = '#5a3a22'; g.font = 'bold 13px serif'; g.textAlign = 'center'; g.fillText('XXX', w / 4, h * 0.6);
@@ -374,7 +401,7 @@ export function dressPirate(look, opts = {}) {
     striped: () => M('#ffffff', { map: stripeTex(top2, top) }), plain: () => M(top), sash: () => M(top), belt: () => M(top),
     vest: () => M('#ffffff', { map: stripeTex('white', top2) }), swashbuckler: () => M('white'), buccaneer: () => M('white'), captain: () => M('white'), corset: () => M('white'),
     dresstop: () => skin, midriff: () => skin, frilly: () => M('white'), raiment: () => M(top),   // (off the shoulder and a bare midriff: skin under them)
-    tied: () => (L.tattoos ? inked : skin),
+    tied: () => (L.tattoos ? inked : skin), strapless: () => (L.tattoos ? inked : skin),   // (bare shoulders over a strapless corset)
     rag: () => (F ? (L.tattoos ? inked : skin) : M(top)),   // (a woman's off one shoulder: skin under it)
   }[L.top]?.() || M(top);
   const coat = L.top === 'swashbuckler' || L.top === 'buccaneer' || L.top === 'captain', bucc = L.top === 'buccaneer';
@@ -464,7 +491,7 @@ export function dressPirate(look, opts = {}) {
     }
   };
   // (Nor anything round the waist of a midriff blouse: its scarf and belt are its own.)
-  if (!(L.waist === 'belt' && (L.top === 'sash' || L.top === 'corset' || L.top === 'frilly')) && L.top !== 'midriff') waist();
+  if (!(L.waist === 'belt' && (L.top === 'sash' || L.top === 'corset' || L.top === 'strapless' || L.top === 'frilly')) && L.top !== 'midriff') waist();
   const rAt = (y) => { for (let i = 1; i < shape.length; i++) if (shape[i][1] >= y) { const [r0, y0] = shape[i - 1], [r1, y1] = shape[i]; return r0 + (r1 - r0) * (y - y0) / (y1 - y0); } return shape[shape.length - 1][0]; };
   const ring = (r, tube, y, m, z = 0) => { const t = part(new THREE.TorusGeometry(r, tube, 6, 28), m, 0, y, z); t.rotation.x = Math.PI / 2; body.add(t); return t; };
   const brass = M('#e8b23a', { metalness: 0.6, roughness: 0.35 });
@@ -573,8 +600,9 @@ export function dressPirate(look, opts = {}) {
     const tails = part(new THREE.BoxGeometry(0.08, 0.26, 0.04), M(top2), 0.27, -0.06, 0.08);
     tails.rotation.z = 0.2;
     body.add(sash, tails);
-  } else if (L.top === 'corset') {
-    body.add(part(lathe(shape.filter(([, y]) => y <= 0.42), 1.05), M(top), 0, 0.03));
+  } else if (L.top === 'corset' || L.top === 'strapless') {
+    // (a strapless one up over the bust, the shoulders bare above it)
+    body.add(part(lathe(shape.filter(([, y]) => y <= (L.top === 'strapless' ? 0.47 : 0.42)), 1.05), M(top), 0, 0.03));
     for (let i = 0; i < 4; i++) {
       const y = 0.1 + i * 0.075;
       for (const s of [-1, 1]) {
@@ -723,7 +751,7 @@ export function dressPirate(look, opts = {}) {
   if (L.hair !== 'bald') {
     const cap = part(new THREE.SphereGeometry(hr + 0.014, 20, 12, 0, Math.PI * 2, 0, Math.PI * (F ? 0.6 : 0.55)), hairM, 0, 0.9, -0.005);
     // (Hair drawn back off the face starts higher on the brow, and comes further down the nape.)
-    cap.rotation.x = L.hair === 'swept' || L.hair === 'twists' ? -0.85 : -0.5;
+    cap.rotation.x = L.hair === 'swept' || L.hair === 'twists' || L.hair === 'pinned' ? -0.85 : -0.5;
     body.add(cap);
   }
   if (L.hair === 'long') {
@@ -855,6 +883,25 @@ export function dressPirate(look, opts = {}) {
     }
     body.add(part(mergeGeometries(strands), hairPlain, 0, 0, 0));
   } else if (L.hair === 'bun') body.add(part(new THREE.SphereGeometry(0.11, 12, 10), hairM, 0, 1.03, -0.17));
+  else if (L.hair === 'pinned') {
+    // Pinned up (Roobear's portrait, 12 Nov): drawn up off the neck into a knot of curls on the back of the
+    // crown, and a loose curl falling in front of each ear, past the jaw. Little balls, one mesh, as Curly's.
+    const curls = [];
+    let seed = 11;
+    const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const ball = (x, y, z, r) => { const g2 = new THREE.SphereGeometry(r, 7, 5); g2.translate(x, y, z); curls.push(g2); };
+    for (let i = 0; i < 16; i++) {
+      const a = rnd() * Math.PI * 2, e = rnd() * 1.3;
+      ball(Math.sin(a) * Math.cos(e) * 0.09, 1.0 + Math.sin(e) * 0.08, -0.17 + Math.cos(a) * Math.cos(e) * 0.06, 0.042 + rnd() * 0.02);
+    }
+    for (const s of [-1, 1]) {
+      for (let i = 0; i < 8; i++) {
+        const t = i / 7, a = t * Math.PI * 3.2;
+        ball(s * (hr - 0.005 + Math.cos(a) * 0.02), 0.93 - t * 0.22, 0.06 + Math.sin(a) * 0.02, 0.027 - t * 0.008);
+      }
+    }
+    body.add(part(mergeGeometries(curls), hairPlain, 0, 0, 0));
+  }
   else if (L.hair === 'braids') {
     for (const s of [-1, 1]) {
       for (let i = 0; i < 5; i++) body.add(part(new THREE.SphereGeometry(0.045 - i * 0.003, 8, 6), hairM, 0.2 * s, 0.82 - i * 0.075, 0.03));
@@ -1037,8 +1084,9 @@ export function dressPirate(look, opts = {}) {
     }
     holes();
   } else if (L.hat === 'roses') {
-    // A crown of roses (Kikkit's), round the top of the head, leaves between them.
-    const leaf = M('#3f7a2c'), n = 9;
+    // A crown of roses (Kikkit's, red; Roobear's wreath, dark purple with gold leaves), round the top of the
+    // head, leaves in its second colour between them.
+    const leaf = L.hatCol2 === 'gold' ? M(L.hatCol2, { metalness: 0.6, roughness: 0.35 }) : M(L.hatCol2), n = 9;
     for (let i = 0; i < n; i++) {
       const a = (i / n) * Math.PI * 2, rr = hr * 0.86;
       const rose = part(new THREE.SphereGeometry(0.05, 9, 7), hc, Math.sin(a) * rr, 1.07 + Math.cos(a) * 0.06, Math.cos(a) * rr - 0.02);
@@ -1047,6 +1095,15 @@ export function dressPirate(look, opts = {}) {
       lf.scale.set(1.4, 0.4, 0.7);
       hat.add(rose, lf);
     }
+  } else if (L.hat === 'beret') {
+    // A beret: a soft flat round cap worn tipped to one side, a little stalk on top (a monsieur's: Roobear's
+    // gallery, "Robert, a Monsieur").
+    const top0 = part(new THREE.SphereGeometry(hr + 0.07, 20, 10), hc, 0.03, 1.08, -0.02);
+    top0.scale.set(1, 0.32, 1);
+    top0.rotation.z = -0.22;
+    const band = part(new THREE.TorusGeometry(hr - 0.01, 0.018, 6, 24), hc, 0, 1.04, -0.01);
+    band.rotation.x = Math.PI / 2;
+    hat.add(top0, band, part(new THREE.CylinderGeometry(0.008, 0.012, 0.04, 6), hc, 0, 1.15, -0.02));
   } else if (L.hat === 'pelt') {
     // The Berserker pelt, as Puzzle Pirates' sat: a bear's head worn up on top of hers, in its colour
     // (Gravee's, white: a polar bear), its jaw over her brow, its snout out above her face with a black
@@ -1097,6 +1154,16 @@ export function dressPirate(look, opts = {}) {
       const puff = part(new THREE.SphereGeometry(0.1, 12, 10), white, 0, -0.04);
       puff.scale.set(1, 0.9, 1);
       sh.add(puff);
+    }
+    // A strapless corset's ruffled cuff, round the upper arm on her right (Roobear's): a band and a frill.
+    if (L.top === 'strapless' && s === -1) {
+      const rf = M(top, { side: THREE.DoubleSide });
+      sh.add(part(new THREE.CylinderGeometry(0.078 * ar, 0.078 * ar, 0.05, 12), rf, 0, -0.14));
+      for (let i = 0; i < 9; i++) {
+        const a = (i / 9) * Math.PI * 2, fr = part(new THREE.ConeGeometry(0.03, 0.06, 4, 1, true), rf, Math.sin(a) * 0.085 * ar, -0.19, Math.cos(a) * 0.085 * ar);
+        fr.rotation.set(Math.PI, a, 0);
+        sh.add(fr);
+      }
     }
     // The Dress top's puffed short sleeves, worn off the shoulder, banded in its second colour; the
     // midriff blouse's drape over the upper arm, gold bands on the forearms.
@@ -1279,6 +1346,23 @@ export function dressPirate(look, opts = {}) {
     at.scale.setScalar(1.3);   // (a good handful, as in the portrait)
     arms[0].add(at);
     held = at;
+  } else if (L.hand === 'blueberries') {
+    // A bowl of blueberries (Roobear's portrait, 12 Nov): a blue-and-white china bowl with a lace pattern,
+    // heaped with berries (one mesh of them, to stay cheap), held up level in the right hand.
+    const bw = new THREE.Group(), china = M('#ffffff', { map: chinaTex(), roughness: 0.3, side: THREE.DoubleSide });
+    bw.add(part(new THREE.LatheGeometry([[0.03, 0], [0.05, 0.004], [0.085, 0.03], [0.105, 0.07], [0.11, 0.075]].map(([r, y]) => new THREE.Vector2(r, y)), 18), china));
+    const berries = [];
+    let seed = 5;
+    const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    for (let i = 0; i < 26; i++) {
+      const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()) * 0.085, b = new THREE.SphereGeometry(0.019, 6, 5);
+      b.translate(Math.sin(a) * r, 0.07 + (0.085 - r) * 0.45 + rnd() * 0.01, Math.cos(a) * r);
+      berries.push(b);
+    }
+    bw.add(part(mergeGeometries(berries), M('#3a3f8a', { roughness: 0.55 })));
+    bw.position.set(0, -0.6, 0.1);
+    arms[0].add(bw);
+    held = bw;
   }
   // A familiar rides on the left shoulder, as in Puzzle Pirates' portraits.
   const fam = makeFamiliar(L);
@@ -1535,6 +1619,34 @@ function makeFamiliar(L) {
     [-1, 1].forEach((s) => g.add(part(new THREE.SphereGeometry(0.03, 8, 6), hide, 0.05 * s, 0.03, 0.04)));
     g.add(bodyM, tum, head, tail);
     Object.assign(fam, { head, wings, tail, arms });
+  } else if (L.fam === 'crow') {
+    // A crow (Roobear's, a pale periwinkle one): sleek, in one colour, a strong dark beak, bright little
+    // eyes, wings folded along its sides and a long square tail; it bobs and flaps as a parrot does.
+    const c = M(L.famCol, { roughness: 0.6 }), beakM = M('#33343c', { roughness: 0.4 });
+    const bodyM = part(new THREE.SphereGeometry(0.08, 12, 10), c, 0, 0.12, -0.01);
+    bodyM.scale.set(0.8, 1.15, 1.2);
+    bodyM.rotation.x = 0.35;
+    const head = new THREE.Group();
+    head.position.set(0, 0.23, 0.04);
+    head.add(part(new THREE.SphereGeometry(0.058, 12, 10), c));
+    const beak = part(new THREE.ConeGeometry(0.022, 0.085, 8), beakM, 0, -0.008, 0.085);
+    beak.rotation.x = Math.PI / 2 + 0.15;
+    head.add(beak);
+    [-1, 1].forEach((s) => { head.add(part(new THREE.SphereGeometry(0.013, 8, 6), black, 0.04 * s, 0.014, 0.038)); head.add(part(new THREE.SphereGeometry(0.004, 5, 4), white, 0.045 * s, 0.019, 0.047)); });
+    const wings = [-1, 1].map((s) => {
+      const w = new THREE.Group();
+      w.position.set(0.06 * s, 0.17, -0.01);
+      const f = part(new THREE.SphereGeometry(0.06, 10, 8), c, 0, -0.06, -0.02);
+      f.scale.set(0.3, 1.4, 1.1);
+      w.add(f);
+      g.add(w);
+      return w;
+    });
+    const tail = part(new THREE.BoxGeometry(0.07, 0.18, 0.015), c, 0, 0.0, -0.1);
+    tail.rotation.x = 0.6;
+    g.add(bodyM, head, tail);
+    [-1, 1].forEach((s) => g.add(part(new THREE.CylinderGeometry(0.006, 0.006, 0.06, 4), beakM, 0.03 * s, 0.02, 0.02)));
+    Object.assign(fam, { head, wings });
   }
   return fam;
 }
@@ -1543,7 +1655,7 @@ function makeFamiliar(L) {
 export function familiarTick(fam, dt) {
   if (!fam) return;
   const t = (fam.t += dt);
-  if (fam.kind === 'parrot') {
+  if (fam.kind === 'parrot' || fam.kind === 'crow') {
     fam.head.rotation.x = Math.sin(t * 3) * 0.12;
     fam.head.rotation.y = Math.sin(t * 0.7) * 0.5;
     const flap = (t % 5) < 0.8 ? Math.abs(Math.sin(t * 18)) * 0.9 : 0;
