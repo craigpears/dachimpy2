@@ -21,12 +21,12 @@ import { LAY, type Pose } from './den-sail.js';
 import { shoreOf } from './den-isle.js';
 import { PACE, type Script } from './chatter.js';
 import { seeded } from './mirror-row.js';
-import { BURNT, COLS, Distilling, WHITE, goesUp, neighbourOn, type Board } from './distilling.js';
-import { HELIUM as HAND, advise, type Advice } from './distill-bots.js';
-import { ROUTINES, isJunk, playDrags } from './distill-routines.js';
+import { BURNT, CARRY_ON, COLS, Distilling, SPICE, WHITE, goesUp, neighbourOn, type Board } from './distilling.js';
+import { HELIUM as HAND, advise, burnsLeft, type Advice } from './distill-bots.js';
+import { ROUTINES, clear, isJunk, junkTarget, playDrags } from './distill-routines.js';
 import { routesInto } from './distill-path.js';
 import { PHASES, type Phase } from './distill-phase.js';
-import { AFTER, BEST, HELP, HELP_ELSE, HINT, LESSON, MISHAP, NERVES, ONWARD, OPENING, PHASE, PRAISE, STEP_ONE, TELL, WATCH } from './lines/helium.js';
+import { AFTER, BEST, GOAL, HELP, HELP_ELSE, HINT, LESSON, MISHAP, NERVES, ONWARD, OPENING, PHASE, PLAN, PRAISE, STEP_ONE, TELL, WATCH } from './lines/helium.js';
 import { AT_HELIUMS } from './lines/you.js';
 
 const H = LAY.HELIUM;
@@ -150,9 +150,6 @@ export const STEPS = [
 export const fireSide = (x: number): boolean => x >= COLS - STEPS[0].cols;
 /** Whites (and burnt whites) left in step one's columns, on a board as it stands: none, and it's done. */
 export const whitesOnFireSide = (cols: Board): number => cols.reduce((n, col, x) => n + (fireSide(x) ? col.filter((p) => p === WHITE || p === BURNT).length : 0), 0);
-/** What they say once you've done step one yourself, in turn: that's it done, and the rest is from other
-    pirates (the user, 13 Nov: "this is not a replacement for the game ... talk to people"). */
-export const stepDoneLines = (): string[] => [STEP_ONE.done, ONWARD, TELL];
 /** A drag, as the planner gives them: the piece at (x, y) swapped each way in turn. */
 export type Drag = { x: number; y: number; ways: number[] };
 
@@ -429,9 +426,9 @@ export function helpFor(a: Advice): { says: string; note: string; plays: 'drags'
 }
 /** "Help, Helium" on a board as it stands (a person's, mid-game): the planner reads its stage and picks the
     routine (src/distill-bots.ts, advise), and they say it. Nothing while it's sliding. */
-export function askHelium(g: Pick<Distilling, 'cols' | 'chain' | 'timeLeft' | 'movable'>): { advice: Advice | null; says: string; note: string; plays: 'drags' | 'burn' | null } {
+export function askHelium(g: Pick<Distilling, 'cols' | 'chain' | 'timeLeft' | 'movable'>, target?: number): { advice: Advice | null; says: string; note: string; plays: 'drags' | 'burn' | null } {
   if (!g.movable) return { advice: null, says: HELP_ELSE.busy, note: '', plays: null };
-  const advice = advise({ cols: g.cols, chain: g.chain, timeLeft: g.timeLeft() });
+  const advice = advise({ cols: g.cols, chain: g.chain, timeLeft: g.timeLeft() }, { target });
   return { advice, ...helpFor(advice) };
 }
 
@@ -456,16 +453,16 @@ const copyDrag = (d: Drag): Drag => ({ x: d.x, y: d.y, ways: [...d.ways] });
 const phaseNote = (p: Phase): string => `${PHASES[p].label}: ${PHASES[p].plan}`;
 /** A hint on a board as it stands: the planner's next drag or two (its move's, then the move after it, looked
     ahead on the board the first leaves), and their line naming the phase. Nothing while it's sliding. */
-export function hintFor(g: Pick<Distilling, 'cols' | 'chain' | 'timeLeft' | 'movable'>): Hint {
+export function hintFor(g: Pick<Distilling, 'cols' | 'chain' | 'timeLeft' | 'movable'>, target?: number): Hint {
   if (!g.movable) return { advice: null, says: HELP_ELSE.busy, note: '', drags: [], boards: [], routes: [] };
-  const chain = g.chain, timeLeft = g.timeLeft(), a = advise({ cols: g.cols, chain, timeLeft });
+  const chain = g.chain, timeLeft = g.timeLeft(), a = advise({ cols: g.cols, chain, timeLeft }, { target });
   if (a.kind !== 'move' || !a.drags.length) {
     return { advice: a, says: a.kind === 'move' ? HINT.none : helpFor(a).says, note: `${phaseNote(a.phase)} · now: ${a.label}`, drags: [], boards: [], routes: [] };
   }
   const drags = a.drags.slice(0, HINT_DRAGS).map(copyDrag), boards: Board[] = [copy(g.cols)];
   for (const d of drags) boards.push(playDrags(boards[boards.length - 1], [d])!);
   if (drags.length < HINT_DRAGS) {
-    const next = advise({ cols: boards[boards.length - 1], chain, timeLeft });
+    const next = advise({ cols: boards[boards.length - 1], chain, timeLeft }, { target });
     if (next.kind === 'move' && next.drags.length) {
       const d = copyDrag(next.drags[0]), after = playDrags(boards[boards.length - 1], [d]);
       if (after) { drags.push(d); boards.push(after); }
@@ -532,9 +529,10 @@ export class Watch {
   private last: string | null = null;
   private agains = 0;
   private waited = false;
-  next(g: Pick<Distilling, 'cols' | 'chain' | 'timeLeft' | 'movable'>): WatchBeat {
+  /** `target`: the chain they're playing to (your goal at the still, planTarget); the planner's own when none. */
+  next(g: Pick<Distilling, 'cols' | 'chain' | 'timeLeft' | 'movable'>, target?: number): WatchBeat {
     if (!g.movable) return { kind: 'busy', says: '', note: '', phase: this.phase, drags: [] };
-    const a = advise({ cols: g.cols, chain: g.chain, timeLeft: g.timeLeft() }), phase = a.phase;
+    const a = advise({ cols: g.cols, chain: g.chain, timeLeft: g.timeLeft() }, { target }), phase = a.phase;
     if (phase !== this.phase) {
       const says = this.said.has(phase) ? PHASE[phase].again : PHASE[phase].first;
       this.said.add(phase); this.phase = phase; this.last = null; this.waited = false;
@@ -553,6 +551,132 @@ export class Watch {
     const says = this.waited ? '' : a.kind === 'move' ? WATCH.stuck : WATCH.wait;
     this.waited = true;
     return { kind: 'wait', says, note, phase, drags: [] };
+  }
+}
+
+// ---------- your goal at the still, and their plan for it ----------
+/* The user (13 Nov): "in the tutorial mode, obviously, if we're aiming for crystal clear one, the whole thing should
+   obviously just finish and then restart the next puzzle once you've hit that goal ... Might be a bit tedious if you
+   have to go through every single CC level one by one. So maybe you can say, you're aiming for at least one, but do a
+   few more if you can." So a batch at their still has a goal, at least your best plus one, a Crystal Clear 1 to
+   start; once the chain's reached it and then ends, the batch is done: their well done, your best kept, then the same
+   goal again or a bigger one, on a fresh board. And the structure after the goal ("there's no structure after it ...
+   try and get those three columns of blacks out of the way and start getting all the white pieces over here and like
+   highlighting some column ... and arrows of where they think the white pieces should go"): their plan for it, a
+   step at a time on your board, the planner's own (src/distill-bots.ts, advise, with the goal as its target). */
+
+/** Your goal at the still: at least your best plus one (a Crystal Clear 1 with none yet). */
+export const goalFor = (best: number): number => Math.max(0, best) + 1;
+/** A bigger goal, once a batch is done: past both the goal and your best. */
+export const biggerGoal = (goal: number, best: number): number => Math.max(goal, best) + 1;
+/** What they say as you sit down at the still for a batch: with no Crystal Clear yet, the first goal (one column of
+    whites); else your best to beat and the goal, at least one more. */
+export const goalLines = (best: number): string[] => (best > 0 ? [bestToBeat(best), fillIn(GOAL.set, goalFor(best))] : [BEST.none]);
+/** A line with its {n} (and {k}) filled in. */
+export const fillIn = (line: string, n: number, k = n + 1): string => line.replace(/\{n\}/g, String(n)).replace(/\{k\}/g, String(k));
+
+/** A batch at the still and its goal: each column as it leaves (`column`), 'met' as the chain first reaches the goal,
+    'done' once it's met and the chain's ended (a column that isn't a Crystal Clear left, up or burned), or the flask
+    filled, met or not; else null. `best`, the longest chain in it. */
+export class Batch {
+  readonly goal: number;
+  best = 0;
+  met = false;
+  done = false;
+  constructor(goal: number) { this.goal = Math.max(1, goal); }
+  column(c: { chain: number }, finished: boolean): 'met' | 'done' | null {
+    if (this.done) return null;
+    this.best = Math.max(this.best, c.chain);
+    const reached = !this.met && c.chain >= this.goal;
+    if (reached) this.met = true;
+    if (finished || (this.met && !reached && c.chain === 0)) { this.done = true; return 'done'; }
+    return reached ? 'met' : null;
+  }
+  /** Their lines as it's done: well done (`full`, the flask filled: their line for that), then the question (`ask`); the first batch of a visit
+      done with its goal met, the rest from other pirates and a tell on Emerald too (the user, 13 Nov: "this is not
+      a replacement for the game ... talk to people"; "always end with ... send me a tell on Emerald"). */
+  doneLines(first: boolean, full = false): string[] {
+    if (!this.met) return [fillIn(GOAL.short, this.goal)];
+    // (the tell always last: "we should always end with ... send me a tell on Emerald"; the question's in the bar
+    // and on the buttons then)
+    return [full ? PRAISE.finished : fillIn(GOAL.done, this.best), ...(first ? [ONWARD, TELL] : [GOAL.ask])];
+  }
+}
+
+/* The flask above the still fills a step for each Crystal Clear (the user, 13 Nov: "the jar thing at the top should
+   fill up each time you do a crystal clear ... one nth"), n the most there can be: the flask's full at FLASK pieces,
+   twelve columns sent up, so twelve Crystal Clears at the most before it ends, and from the twelfth in a row it
+   carries on (src/distilling.ts, CARRY_ON). */
+export const FLASK_STEPS = CARRY_ON;
+/** Crystal Clears sent up among the columns gone. */
+export const crystalClears = (columns: readonly { up: boolean; chain: number }[]): number => columns.filter((c) => c.up && c.chain >= 1).length;
+/** How full the flask's drawn (0 to 1): a FLASK_STEPS-th a Crystal Clear. */
+export const flaskLevel = (clears: number): number => Math.min(1, Math.max(0, clears) / FLASK_STEPS);
+
+/** Their plan's steps, in order (PLAN's lines): the junk columns to burn cleared of white; whites banked left
+    (only while there aren't enough on the board for the goal yet); the Crystal Clear built in its column, shaded
+    gold; and sent up, the junk ahead burned first. */
+export const PLAN_STEPS = ['clear', 'bank', 'build', 'send'] as const;
+export type PlanStep = (typeof PLAN_STEPS)[number];
+/** Their plan on a board as it stands: the step, the chain it's playing to (`target`), the column the Crystal Clear's
+    built in (gold; null till it's known), the columns to burn first (shaded), the pieces to ring (the whites to get
+    out of the junk, or the junk to get out of the gold column), how many to go, the planner's next drags (the
+    arrows), its advice, and the bar's line. */
+export interface Plan {
+  step: PlanStep; n: number; target: number; column: number | null; burn: number[];
+  ring: [number, number][]; left: number; drags: Drag[]; advice: Advice; note: string;
+}
+/** The chain they plan for: the goal, or once it's reached one more than the chain going ("more if you can"). */
+export const planTarget = (goal: number, chain: number): number => Math.max(goal, chain + 1);
+const range = (from: number, to: number): number[] => Array.from({ length: Math.max(0, to - from) }, (_, i) => from + i);
+const whereIn = (cols: Board, xs: readonly number[], is: (p: number) => boolean): [number, number][] =>
+  xs.flatMap((x) => cols[x].flatMap((p, y) => (is(p) ? [[x, y] as [number, number]] : [])));
+/** Their plan for your goal on a board (`timeLeft` Infinity while the fire's held): what the planner would do now
+    with the goal as its target (src/distill-bots.ts, advise), and which step of PLAN_STEPS that is. In its Stage I
+    (whites still to bank) the junk columns are the three next to the fire, then the junk being built from the right
+    (junkTarget); in the chain, the columns it burns before the chain (burnsLeft) and the column it's filling
+    (Advice's `column`). */
+export function planFor(g: { cols: Board; chain: number }, goal: number, timeLeft = Infinity): Plan {
+  const cols = g.cols, target = planTarget(goal, g.chain);
+  const advice = advise({ cols, chain: g.chain, timeLeft }, { target });
+  const drags = advice.kind === 'move' ? advice.drags.map(copyDrag) : [];
+  const isWhite = (p: number) => p === WHITE, junk = (p: number) => p !== WHITE && p !== SPICE;
+  const make = (step: PlanStep, column: number | null, burn: number[], ring: [number, number][], left: number): Plan => {
+    const n = PLAN_STEPS.indexOf(step) + 1, L = PLAN[step];
+    const detail = step === 'send' && !burn.length ? PLAN.send.up : L.note.replace('{k}', String(left));
+    return { step, n, target, column, burn, ring, left, drags, advice, note: `Step ${n} of ${PLAN_STEPS.length}, ${L.name}: ${detail}` };
+  };
+  if (advice.stage === 'junk') {
+    const fire = range(COLS - STEPS[0].cols, COLS), out = whereIn(cols, fire, isWhite);
+    if (out.length) return make('clear', null, fire, out, out.length);
+    return make('bank', null, range(junkTarget(cols), COLS), [], advice.whitesNeeded ?? 0);
+  }
+  const burn = range(COLS - (g.chain > 0 ? 0 : burnsLeft(cols)), COLS), column = advice.column ?? null;
+  const out = whereIn(cols, burn, isWhite);
+  if (out.length) return make('clear', column, burn, out, out.length);
+  if ((advice.whitesNeeded ?? 0) > 0 && column !== null && !burn.includes(column)) {
+    const ring = whereIn(cols, [column], junk);
+    return make('build', column, burn, ring, ring.length);
+  }
+  const next = COLS - burn.length - 1;
+  return make('send', next >= 0 && clear(cols[next]) ? next : column, burn, [], burn.length);
+}
+/** Their line as a step of the plan starts: in full the first time in a batch, `again` when it comes round for a
+    later column of the chain; nothing when it's the step already going, or one said already for this column (the
+    board going back and forth between two steps). */
+export class PlanLines {
+  private said = new Set<string>();
+  private steps = new Set<PlanStep>();
+  private last: PlanStep | null = null;
+  next(p: Pick<Plan, 'step'>, chain: number): string | null {
+    if (p.step === this.last) return null;
+    this.last = p.step;
+    const key = `${p.step}:${chain}`;
+    if (this.said.has(key)) return null;
+    this.said.add(key);
+    if (this.steps.has(p.step)) return PLAN[p.step].again;
+    this.steps.add(p.step);
+    return PLAN[p.step].says;
   }
 }
 

@@ -5,7 +5,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   HELIUM, HELIUM_ARRIVE, HELIUM_CAST, HELIUM_MOOR, HELIUM_STANDS, LESSON_SEED, Visit, askHelium, bangs, heliumAt, heliumShore, helpFor,
-  inHeliumEarshot, lessonGame, lessonPlan, lessonSecs, mishapLine, onHeliumLanding, opening, lessonBeats, afterOpening, ringed, holdSecs, actAfter, stepDoneLines,
+  inHeliumEarshot, lessonGame, lessonPlan, lessonSecs, mishapLine, onHeliumLanding, opening, lessonBeats, afterOpening, ringed, holdSecs, actAfter,
+  Batch, fillIn,
   Cellar, OPENING_BANG, RUM, lineSpot, pileSpot, praiseFor, worksFor, STEPS, whitesOnFireSide, beatSecs, PACE_LESSON, Nerves, NERVE, onScreen, cleanBestChain, bestToBeat, beatBest,
 } from '../src/den-helium';
 import { AT_HELIUMS } from '../src/lines/you';
@@ -15,7 +16,7 @@ import { smugglersAt } from '../src/den-smugglers';
 import { BURNT, COLS, Distilling, WHITE, neighbourOn, canSwapOn, parseBoard } from '../src/distilling';
 import { isJunk } from '../src/distill-routines';
 import type { Advice } from '../src/distill-bots';
-import { AFTER, BEST, FIRE, HELP, HELP_ELSE, LESSON, MISHAP, NERVES, ONWARD, OPENING, STEP_ONE, TELL } from '../src/lines/helium';
+import { AFTER, BEST, FIRE, GOAL, HELP, HELP_ELSE, LESSON, MISHAP, NERVES, ONWARD, OPENING, STEP_ONE, TELL } from '../src/lines/helium';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -184,10 +185,13 @@ describe('Helium\'s lesson without the basics (the user, 13 Nov)', () => {
 });
 
 describe('Helium sends you on to other pirates (the user, 13 Nov: "this is not a replacement for the game ... talk to people")', () => {
-  it('says, once you\'ve done step one, that these are a few tricks and the rest is from other pirates', () => {
-    expect(stepDoneLines()).toEqual([STEP_ONE.done, ONWARD, TELL]);
+  it('says, once your first batch at the still is done, that these are a few tricks and the rest is from other pirates', () => {
+    const b = new Batch(1);
+    b.column({ chain: 1 }, false); b.column({ chain: 0 }, false);
+    expect(b.doneLines(true)).toEqual([fillIn(GOAL.done, 1), ONWARD, TELL]);
     // The user, 13 Nov: "we should always end with, if you got any questions, you can always send me a tell on Emerald".
-    expect(stepDoneLines().at(-1)).toMatch(/tell on Emerald/);
+    expect(b.doneLines(true).at(-1)).toMatch(/tell on Emerald/);
+    expect(b.doneLines(false)).toEqual([fillIn(GOAL.done, 1), GOAL.ask]);   // (a later batch: just the question)
     expect(ONWARD).toMatch(/other pirates/);
     expect(ONWARD).toMatch(/[Ww]atch them play/);
     expect(ONWARD).toMatch(/videos/);
