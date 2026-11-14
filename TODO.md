@@ -570,6 +570,11 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   And no word block (14 Nov): "I don't like that opening thing of like know the basics or everything [is a] proof
   [of] concept. That's too much of a word block. I don't want a word block for the first thing people see on my
   site." The positioning lives in design.html; the front page opens with Dachimpy's welcome and pictures.
+  Then (14 Nov): a collage of a few things in each area; rowing in the new concepts; not "the new tutorials" but
+  "try out some new tutorials", "these are just experiments at the moment"; the three outside things (the Global
+  Cade Sim, Puzzle Practice, the Discord) plainly outside this site; and credit: "[AMH] created the new [Global
+  Cade Sim] ... I just don't want any hint of like for both of that and the practice puzzles, any hint like I'm
+  trying to take credit for them in any way, even by omission."
 - **The front page as the launch pad, and what the den is for (14 Nov):** below "what are you here for?", the
   changelog's link and a way to "jump to specific places ... then we could get rid of the cheats menu and we can
   have this as a launch pad into that." And a short, light section on the den's goals: "you want your own adventure
@@ -596,7 +601,7 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   exhibit after "And Then", its plaque and Dachimpy's line, and the link from the close view; also linked from the
   front page's practice choice, for blockade practice. The picture didn't reach the disk: the user to save the file.
   Then: the link is what deserves prominence, on the front page, its own "what are you here for?" choice: "if you want
-  to go play the new blockade sim made by [its maker]" (name to come from the user). The museum's picture can wait:
+  to go play the new blockade sim made by [its maker]": AMH (the user, 14 Nov). The museum's picture can wait:
   "I'm going to go at least do a better picture of it ... a bit more justice to get into the midst of things."
 
 ## Spotted along the way (not asked for)
