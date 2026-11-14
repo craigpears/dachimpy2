@@ -7,7 +7,10 @@
 <!-- A test page for a war frigate, unlinked like den.html (TODO.md, "Pictures of Primates Rule"): Primates
      Rule, Dachimpy's war frigate, beside the sloop for scale. Her plan and config are src/den-frigate.ts
      (compiled to js/den-frigate.js); her look is js/den/frigate.js, and the sloop's js/den/sloop.js, the
-     same the den draws. This page only stands them up side by side on a calm sea. -->
+     same the den draws. At anchor, it stands them up side by side on a calm sea. Sail (the default) puts
+     them on a small test sea of their own, both sailed by the den's helm by each one's handling, with a
+     narrow gap only the sloop fits and a boom only the frigate's broadside breaks (src/two-ships.ts and
+     src/ship-handling.ts; its 3D js/den/two-ships.js; RACE.md §11). -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -22,25 +25,51 @@
   .row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
   button { font: 700 14px 'Alegreya Sans', sans-serif; color: var(--ink); background: #3b2a1b; border: 1px solid #c9a35c; border-radius: 6px; padding: 3px 9px; cursor: pointer; }
   button.on { background: #6a4a1a; }
-  #stats { font-size: 13px; color: var(--dim); }
-  #stats b { color: var(--gold); }
-  @media (max-width: 700px) { .ui { top: auto; bottom: 12px; } p { display: none; } }
+  #stats, #handling { font-size: 13px; color: var(--dim); }
+  #stats b, #handling b { color: var(--gold); }
+  .toks { display: flex; gap: 4px; margin: 2px 0 8px; }
+  .tok { width: 30px; height: 30px; border: 1px solid var(--edge); border-radius: 6px; display: grid; place-items: center; font: 700 18px 'Alegreya Sans', sans-serif; background: #241810; color: var(--dim); }
+  .tok.lit { background: #6a4a1a; color: var(--ink); border-color: var(--gold); }
+  .tok.mine { color: var(--gold); }
+  #say { position: fixed; left: 50%; top: 14px; transform: translateX(-50%); width: max-content; max-width: min(520px, calc(100vw - 32px)); background: var(--panel); border: 1px solid var(--edge); border-radius: 8px; padding: 6px 12px; font-size: 15px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+  #say.on { opacity: 1; }
+  #say.bad { border-color: #c8572a; }
+  [hidden] { display: none !important; }
+  @media (max-width: 700px) { .ui { top: auto; bottom: 12px; } p { display: none; } #say { top: 10px; } }
 </style>
 </head>
 <body>
 <div class="ui">
-  <h1>Primates Rule</h1>
-  <p>Dachimpy's war frigate beside your sloop, sized by YPPedia's numbers. Drag to turn round them, the wheel or a pinch to zoom.</p>
   <div class="row">
-    <button data-view="side">Side</button>
-    <button data-view="deck">Deck</button>
-    <button data-view="bow">Bow</button>
-    <button data-view="stern">Stern</button>
-    <button id="sails" class="on">Sails</button>
+    <button data-mode="sail">Sail</button>
+    <button data-mode="look">At anchor</button>
   </div>
-  <div class="row" id="curves"></div>
-  <div id="stats"></div>
+  <div id="look" hidden>
+    <h1>Primates Rule</h1>
+    <p>Dachimpy's war frigate beside your sloop, sized by YPPedia's numbers. Drag to turn round them, the wheel or a pinch to zoom.</p>
+    <div class="row">
+      <button data-view="side">Side</button>
+      <button data-view="deck">Deck</button>
+      <button data-view="bow">Bow</button>
+      <button data-view="stern">Stern</button>
+      <button id="sails" class="on">Sails</button>
+    </div>
+    <div class="row" id="curves"></div>
+    <div id="stats"></div>
+  </div>
+  <div id="sail" hidden>
+    <h1>Two ships</h1>
+    <p>Sail either through the rocks to the buoy. Click the water to sail there; W A D put in a move, Q E fire a broadside, Tab switches ship. The sloop slips through the narrow gap; Primates Rule is too big for it, so she smashes the boom.</p>
+    <div class="row">
+      <button data-ship="sloop">Sloop</button>
+      <button data-ship="frigate">Primates Rule</button>
+      <button id="whole">Whole sea</button>
+    </div>
+    <div class="toks" id="toks"></div>
+    <div id="handling"></div>
+  </div>
 </div>
+<div id="say"></div>
 <script src="js/engine.js"></script>
 <script type="importmap">
   { "imports": {
@@ -53,14 +82,14 @@ import * as THREE from 'three';
 import { renderer, scene, camera, paintSky, pirate, makePirate } from './js/den/world.js';
 import { sloopMesh, SLOOP_DECK } from './js/den/sloop.js';
 import { frigateMesh } from './js/den/frigate.js';
+import { twoShipsSea } from './js/den/two-ships.js';
 import { PRIMATES_RULE, WAR_FRIGATE_PLAN, deckY } from './js/den-frigate.js';
 import { SLOOP, WAR_FRIGATE, SLOOP_HULL, SHAPES, SHIP_SHAPE } from './js/ships.js';
 
 const $ = (id) => document.getElementById(id);
 paintSky('#4f8fd0', '#cfe2ee');
-scene.fog.near = 60; scene.fog.far = 140;
-camera.far = 300; camera.updateProjectionMatrix();
-const sea = new THREE.Mesh(new THREE.CircleGeometry(120, 48).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#2f78a8', roughness: 0.35, metalness: 0.1 }));
+camera.far = 400; camera.updateProjectionMatrix();
+const sea = new THREE.Mesh(new THREE.CircleGeometry(220, 48).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#2f78a8', roughness: 0.35, metalness: 0.1 }));
 sea.receiveShadow = true;
 scene.add(sea);
 
@@ -76,7 +105,6 @@ for (const k of Object.keys(SHAPES)) {
   b.onclick = () => { params.set('curve', k); location.search = params.toString(); };
   $('curves').append(b);
 }
-sloop.position.set(0.5, 0, 6.2);
 scene.add(sloop);
 // Pirates for scale: you on her main deck, a crewmate on the sloop.
 pirate.g.position.set(0.9, deckY(WAR_FRIGATE_PLAN, 'waist'), -0.2); pirate.g.rotation.y = Math.PI / 2;
@@ -87,37 +115,103 @@ $('stats').innerHTML = `Her: <b>${f(H.len)}</b> m long, <b>${f(H.beam)}</b> abea
   `(the sloop ${f(SLOOP_HULL.len)} × ${f(SLOOP_HULL.beam)} × ${f(SLOOP_HULL.deep)}, deck ${f(SLOOP_HULL.deck)}). ` +
   `Hold ×<b>${WAR_FRIGATE.holdLitres / SLOOP.holdLitres}</b>, crew <b>${WAR_FRIGATE.crew}</b> to ${SLOOP.crew}, <b>${WAR_FRIGATE.guns}</b> large guns to ${SLOOP.guns} small.`;
 
-// An orbiting camera: turn round them, tilt, zoom.
+// An orbiting camera: turn round them, tilt, zoom. At anchor, round the two of them; sailing, it follows the
+// ship you're steering (or hangs over the whole sea).
 const VIEWS = {
   side: { yaw: 0.35, pitch: 0.32, dist: 26, at: [0, 3, 2.5] },
   deck: { yaw: 0.75, pitch: 0.78, dist: 17, at: [0, 2.2, 0] },
   bow: { yaw: 1.25, pitch: 0.28, dist: 18, at: [3, 2.5, 1.5] },
   stern: { yaw: -1.05, pitch: 0.38, dist: 16, at: [-4, 3, 0] },
 };
-const cam = { yaw: 0, pitch: 0, dist: 20, at: new THREE.Vector3() };
+const cam = { yaw: 0, pitch: 0, dist: 20, at: new THREE.Vector3(), follow: true };
+const keepParams = () => history.replaceState(null, '', '?' + params);
 const setView = (name) => {
   const v = VIEWS[name] || VIEWS.side;
   Object.assign(cam, { yaw: v.yaw, pitch: v.pitch, dist: v.dist }); cam.at.set(...v.at);
   document.querySelectorAll('[data-view]').forEach((b) => b.classList.toggle('on', b.dataset.view === name));
-  params.set('view', name); history.replaceState(null, '', '?' + params);   // (kept as you flip between curves)
+  params.set('view', name); keepParams();   // (kept as you flip between curves)
 };
 document.querySelectorAll('[data-view]').forEach((b) => { b.onclick = () => setView(b.dataset.view); });
-setView(params.get('view') || 'side');
 const showSails = (on) => { her.sails.visible = on; for (const arm of sloop.userData.sails) arm.visible = on; $('sails').classList.toggle('on', on); };
 $('sails').onclick = () => showSails(!her.sails.visible);
 if (params.get('sails') === '0') showSails(false);
 
+// ----- sailing them on the test sea (js/den/two-ships.js) -----
+let sayT = 0;
+const say = (text, bad = false) => { const el = $('say'); el.textContent = text; el.classList.add('on'); el.classList.toggle('bad', bad); sayT = 3 + text.length / 30; };
+const two = twoShipsSea({ sloop, frigate: her.g }, say);
+const TOK = { F: '↑', L: '↰', R: '↱' };
+const FOLLOW = { yaw: 0.5, pitch: 0.55, dist: 34 };
+const pick = (kind) => {
+  two.swap(kind);
+  document.querySelectorAll('[data-ship]').forEach((b) => b.classList.toggle('on', b.dataset.ship === kind));
+  const h = two.hud().h, sq = (n) => `${n} square${n > 1 ? 's' : ''}`;
+  $('handling').innerHTML = `<b>${h.tokens}</b> moves a turn, <b>${h.pace}</b> s a square, turns <b>${sq(h.radius)}</b> wide; ` +
+    `takes <b>${h.long} × ${h.wide}</b> ${h.long * h.wide > 1 ? 'squares' : 'square'}; <b>${h.shots}</b> ${h.guns} shot${h.shots > 1 ? 's' : ''} a side.`;
+  if (!cam.follow) { cam.follow = true; Object.assign(cam, FOLLOW); $('whole').classList.remove('on'); }
+};
+document.querySelectorAll('[data-ship]').forEach((b) => { b.onclick = () => pick(b.dataset.ship); });
+$('whole').onclick = () => {
+  cam.follow = !cam.follow; $('whole').classList.toggle('on', !cam.follow);
+  if (!cam.follow) { Object.assign(cam, { yaw: 0, pitch: 1.05, dist: 92 }); cam.at.set(0, 0, 0); } else Object.assign(cam, FOLLOW);
+};
+let mode = '';
+const setMode = (m) => {
+  mode = m === 'look' ? 'look' : 'sail';
+  document.querySelectorAll('[data-mode]').forEach((b) => b.classList.toggle('on', b.dataset.mode === mode));
+  $('look').hidden = mode !== 'look'; $('sail').hidden = mode !== 'sail';
+  two.on(mode === 'sail');
+  if (mode === 'look') {
+    her.g.position.set(0, 0, 0); her.g.rotation.set(0, 0, 0); sloop.position.set(0.5, 0, 6.2); sloop.rotation.set(0, 0, 0);
+    pirate.g.visible = true; scene.fog.near = 60; scene.fog.far = 140;
+    setView(params.get('view') || 'side');
+  } else {
+    pirate.g.visible = false; scene.fog.near = 120; scene.fog.far = 300;
+    cam.follow = true; Object.assign(cam, FOLLOW); $('whole').classList.remove('on');
+    pick(two.t.active);
+  }
+  params.set('mode', mode); keepParams();
+};
+document.querySelectorAll('[data-mode]').forEach((b) => { b.onclick = () => setMode(b.dataset.mode); });
+addEventListener('keydown', (e) => {
+  if (mode !== 'sail' || e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (k === 'tab') { e.preventDefault(); pick(two.t.other(two.t.active)); return; }
+  if (k === '1' || k === '2') { pick(k === '1' ? 'sloop' : 'frigate'); return; }
+  if (two.key(k)) e.preventDefault();
+});
+let hudSig = '';
+const hud = () => {
+  const s = two.hud(), n = s.h.tokens, sig = `${s.kind}|${s.moves.join('')}|${s.lit}|${s.mine}`;
+  if (sig === hudSig) return;
+  hudSig = sig;
+  $('toks').innerHTML = Array.from({ length: n }, (_, i) => {
+    const m = s.moves[i];
+    return `<div class="tok${i === s.lit ? ' lit' : ''}${s.lit < 0 && i < s.mine ? ' mine' : ''}">${m ? TOK[m] : '·'}</div>`;
+  }).join('');
+};
+
 const canvas = renderer.domElement, pts = new Map();
-let pinch = 0;
-canvas.addEventListener('pointerdown', (e) => { pts.set(e.pointerId, [e.clientX, e.clientY]); canvas.setPointerCapture(e.pointerId); });
-canvas.addEventListener('pointerup', (e) => { pts.delete(e.pointerId); pinch = 0; });
-canvas.addEventListener('pointercancel', (e) => { pts.delete(e.pointerId); pinch = 0; });
+let pinch = 0, down = null;
+const ray = new THREE.Raycaster(), water = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+canvas.addEventListener('pointerdown', (e) => { pts.set(e.pointerId, [e.clientX, e.clientY]); canvas.setPointerCapture(e.pointerId); down = { x: e.clientX, y: e.clientY, n: pts.size }; });
+canvas.addEventListener('pointerup', (e) => {
+  pts.delete(e.pointerId); pinch = 0;
+  // A click, not a drag: on the sea, the ship you're steering sails there.
+  if (mode === 'sail' && down && down.n === 1 && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 6) {
+    ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1), camera);
+    const at = ray.ray.intersectPlane(water, new THREE.Vector3());
+    if (at) two.click(at);
+  }
+  down = null;
+});
+canvas.addEventListener('pointercancel', (e) => { pts.delete(e.pointerId); pinch = 0; down = null; });
 canvas.addEventListener('pointermove', (e) => {
   const p = pts.get(e.pointerId);
   if (!p) return;
   if (pts.size === 2) {
     const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
-    if (pinch) cam.dist = Math.min(60, Math.max(4, cam.dist * pinch / d));
+    if (pinch) cam.dist = Math.min(140, Math.max(4, cam.dist * pinch / d));
     pinch = d;
   } else {
     cam.yaw -= (e.clientX - p[0]) * 0.006;
@@ -125,22 +219,30 @@ canvas.addEventListener('pointermove', (e) => {
   }
   p[0] = e.clientX; p[1] = e.clientY;
 });
-canvas.addEventListener('wheel', (e) => { e.preventDefault(); cam.dist = Math.min(60, Math.max(4, cam.dist * Math.exp(e.deltaY * 0.001))); }, { passive: false });
+canvas.addEventListener('wheel', (e) => { e.preventDefault(); cam.dist = Math.min(140, Math.max(4, cam.dist * Math.exp(e.deltaY * 0.001))); }, { passive: false });
 
 const clock = new THREE.Clock();
 function frame() {
   const dt = Math.min(0.05, clock.getDelta()), t = clock.elapsedTime;
   her.tick(dt);
-  // A gentle roll at anchor, each her own.
-  her.g.rotation.z = Math.sin(t * 0.6) * 0.012; her.g.position.y = Math.sin(t * 0.8) * 0.03;
-  sloop.rotation.z = Math.sin(t * 0.9 + 1) * 0.03; sloop.position.y = Math.sin(t * 1.1 + 2) * 0.04;
+  if (mode === 'sail') {
+    two.tick(dt);
+    if (cam.follow) cam.at.lerp(two.focus().setY(1.5), Math.min(1, dt * 4));
+    hud();
+    if ((sayT -= dt) <= 0) $('say').classList.remove('on');
+  } else {
+    // A gentle roll at anchor, each her own.
+    her.g.rotation.z = Math.sin(t * 0.6) * 0.012; her.g.position.y = Math.sin(t * 0.8) * 0.03;
+    sloop.rotation.z = Math.sin(t * 0.9 + 1) * 0.03; sloop.position.y = Math.sin(t * 1.1 + 2) * 0.04;
+  }
   camera.position.set(cam.at.x + Math.sin(cam.yaw) * Math.cos(cam.pitch) * cam.dist, cam.at.y + Math.sin(cam.pitch) * cam.dist, cam.at.z + Math.cos(cam.yaw) * Math.cos(cam.pitch) * cam.dist);
   camera.lookAt(cam.at);
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }
+setMode(params.get('mode'));
 frame();
-window.her = her; window.cam = cam;   // (for poking at them from the console)
+window.her = her; window.cam = cam; window.two = two;   // (for poking at them from the console)
 </script>
 </body>
 </html>

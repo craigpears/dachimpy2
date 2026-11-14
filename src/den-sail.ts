@@ -784,8 +784,8 @@ function dice(seed: number) {
 /** The board: its size and its rocks. Every open square can be sailed to from the mooring, and the
     water round the mooring is kept clear so you can always get out. */
 export class Sea {
-  readonly cols = SAIL.COLS;
-  readonly rows = SAIL.ROWS;
+  readonly cols: number = SAIL.COLS;   // (another board's, a smaller sea's: src/ship-handling.ts, ShipSea)
+  readonly rows: number = SAIL.ROWS;
   rocks = new Set<string>();
   /** The trade winds: the way each lane square blows (see LAY). */
   wind = new Map<string, number>();
@@ -846,8 +846,10 @@ export class Sea {
   /** Squares the scattered rocks keep off: the lanes and everything round them. */
   private keep = new Set<string>();
 
-  /** A sea of scattered rocks; with `lay`, the lanes, the canal and its locks, and the cove too (LAY). */
-  constructor(seed = 1, lay = true) {
+  /** A sea of scattered rocks; with `lay`, the lanes, the canal and its locks, and the cove too (LAY). With
+      `bare`, nothing at all: a board whose rocks whoever builds it lays (src/ship-handling.ts, ShipSea). */
+  constructor(seed = 1, lay = true, bare = false) {
+    if (bare) return;
     if (lay) this.lay();
     for (let tries = 0; tries < 50; tries++) {
       this.scatter(dice(seed + tries * 7919));
