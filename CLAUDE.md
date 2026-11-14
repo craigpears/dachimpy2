@@ -103,7 +103,8 @@ The changelog (the user, 11 Nov: "as each bigger feature's added, and it should 
 `changelog.html` and its teaser shots in `changelog/`, newest first. When a bigger feature lands (a
 place, a character, a puzzle, a cutscene, a ship; not a bug fix or a tweak), add an entry: the date, a
 title, a teaser shot or two taken from its `?at=` link (by the subagent that checks it in the browser),
-and a few lines in plain words. Pirate names only. One entry per real feature (the user, 12 Nov): a later pass on a feature
+and a few lines in plain words. Pirate names only. Every screenshot or teaser shot is taken dressed as Dachimpy and with nobody married: add `&as=dachimpy` to the
+`?at=` link (the user, 14 Nov: "me in my style ... the default for anything we're testing"). One entry per real feature (the user, 12 Nov): a later pass on a feature
 already there updates its entry, or joins a few passes into one, rather than adding another. An addition to a
 feature (a new theme, a new look) is a smaller update: `article class="small"` under the day's "Smaller updates",
 one thumbnail and a line or two.

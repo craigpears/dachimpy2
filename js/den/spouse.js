@@ -3,7 +3,7 @@
 // strolling about its floor and stopping for a word when you come up to them. (The rules:
 // src/den-spouse.ts; their lines: src/lines/. wedding.js says when you've married and when you leave.)
 import { spouseOf, cleanSpouse, homeLines, homeNews, leaving, settle, reopened, ABOARD, STROLL, Stroll, Chatter } from '../den-spouse.js';
-import { scene, keep, toast, burst, V3, bounds, obstacles, pirate, animateWalk, WALL_Z } from './world.js';
+import { scene, keep, toast, burst, V3, bounds, obstacles, pirate, animateWalk, WALL_Z, dressedAs } from './world.js';
 import { heightAt } from './land.js';
 import { sail } from './sea.js';
 import { bubble, bubbleAt } from './cine.js';
@@ -14,7 +14,8 @@ const KEY = 'carp.den.spouse';
 const kept = () => { try { return cleanSpouse(JSON.parse(localStorage.getItem(KEY))); } catch { return null; } };
 
 /** Your spouse (src/den-spouse.ts's Spouse) and where they are: on the isle with you, aboard her, at the den. */
-export const spouse = { who: kept(), where: reopened(), fig: null, stroll: null, chat: null, bub: null, line: null };
+// (Dressed as a real pirate for a screenshot, ?as=: nobody married, the shot kept neutral.)
+export const spouse = { who: dressedAs ? null : kept(), where: reopened(), fig: null, stroll: null, chat: null, bub: null, line: null };
 
 export { spouseOf };
 

@@ -851,6 +851,12 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   their sections below) in the order new concepts, tutorials, a bit of fun; each card's first picture big, the
   other two beside it; a bit of fun's Kikkit, then Gravee's gallery, then Umami.
 
+- **Teaser shots as Dachimpy, no spouse (14 Nov):** "For the umami, the capybara one, don't do a screenshot with a
+  spouse, just do it with like me configured in my kind of pink wig and things, maybe rescuing him. I just want that
+  to be more neutral. Same with approaching Kick It['s] Island. I want that me in my style ... put that as the
+  default for anything we're testing now." So `?as=dachimpy` dresses you as Dachimpy for the visit (your own look
+  kept, nobody married), every screenshot taken that way; Umami's and Kikkit's pictures retaken.
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
