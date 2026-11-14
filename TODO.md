@@ -690,6 +690,9 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   feedback on ... It's partly documentation, but also a test page." So a catalogue page for each kind of piece,
   each drawn from the same registry the den uses (so a new piece shows there by itself): colours (started 14 Nov,
   catalogue-colours.html), then furniture, hairstyles, clothes and familiars, each rendered.
+  The colours page with a scene beside it (14 Nov): "some test scene on the right ... a selection of distinct
+  furniture and a few pirates that are kind of spinning around, maybe through different outfits that end up being
+  dressed in the colour that you've selected."
 
 ## Spotted along the way (not asked for)
 
