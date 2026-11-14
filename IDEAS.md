@@ -2706,7 +2706,7 @@ Puzzle Pirates, or one to make), before anything's built.
     Don't reset the board: its first constellation is worth only 71.
   - Also in it: Rumble targeting (one on one, when to defend), when to retreat, the den's Foraging with its
     wolf head and moons, and its loot. Still unknown: "fren" (not in the guide).
-- **Who explains it (14 Nov):** Montebello (a real pirate; "they", the user: neutral pronouns, "make sure you
+- **Who explains it (14 Nov):** Multibella (a real pirate; "they", the user: neutral pronouns, "make sure you
   use neutral pronouns") was about to explain to the user how the chain counts (one move, as the guide says,
   or a streak across drops). The user: "I think [they] could win the [duty nav] explanation slot if so", so if
   their explanation is the one that lands, they may be the one credited for it (or teaching it) in the
@@ -2717,12 +2717,12 @@ Puzzle Pirates, or one to make), before anything's built.
   the constellation's place beside it wild (a clear in a chain wilds any slot on or beside what it cleared), the
   stars falling after it made the second clear (Double, +6), and a red falling into the wild place charted it on
   step 3: the board's first constellation, 71, times 3 is the +213.
-- **Montebello's explanation (14 Nov, pasted by the user), the correction:** two ways to make wilds:
+- **Multibella's explanation (14 Nov, pasted by the user), the correction:** two ways to make wilds:
   - a constellation charted as part of a combo makes the next constellation's centre ring wholly wild;
   - a combo that charts no constellation turns the places it cleared, and the places beside them, wild.
   In the run: the reds' clear on "Double" turned wild the constellation's place that already held a blue
   star (the wrong colour till then), and with it wild the blue counted, so the constellation charted on the
-  "Triple" step. No star had to fall into it. (Matches the guide; Montebello's the clearer telling, and the
+  "Triple" step. No star had to fall into it. (Matches the guide; Multibella's the clearer telling, and the
   one to credit for the explanation.)
 - **Why Dignity teaches it (14 Nov):** the user: "Maybe we could put Dignity in the game as [the one] to get [it
   from], because ... she's got to catch these pesky pirates trying to figure out the ways they're going around
