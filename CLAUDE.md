@@ -79,7 +79,7 @@ Every tutorial has the same shape (the user, 14 Nov; [TUTORIALS.md](TUTORIALS.md
 basics, phases, tricks and scenarios, and its teacher's opening choice), in `src/tutorial.ts`'s shape, knowing nothing
 of any puzzle; the read guide's sticky nav drawn from it by the hand-written `js/tutorial-nav.js`, the lesson's opening
 choice by `js/tutorial-choice.js`; both on their own in the unlinked `tutorial-test.html`. Distilling's,
-`src/distill-tutorial.ts`, a draft not wired yet (TUTORIALS.md §3 says what's left).
+`src/distill-tutorial.ts`, wired: the guide's nav from it, and Helium's lesson opening with its choice, the part picked played on its own board by `src/den-helium-tutor.ts` ("Show me this" links, `?at=helium&learn=<id>`).
 
 Read [STORY.md](STORY.md) for the den's story, its progression and the principles behind them, and keep it
 up to date as the story grows. Read [RULES.md](RULES.md) before changing gameplay or wording, and add to it whenever the user corrects a rule or gives design feedback.
