@@ -874,6 +874,10 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   had its own gold ring. So each place where Space does something shows one ring, wherever it is (the Wedding
   Isle, the rum run's stops), though Space still works anywhere round it.
 
+- **The front page's pictures one under another on a phone (14 Nov):** "it should certainly be three columns on
+  when it's bigger, but yeah, for phone, just make it single column ... each of the new concept ideas should be
+  underneath, collapse underneath each other." So three side by side on a wider screen, one a row on a phone.
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.

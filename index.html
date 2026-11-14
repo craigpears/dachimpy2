@@ -243,8 +243,9 @@
   @media (max-width: 640px) {
     .choice { padding: 12px 12px 14px; }
     .choice b { font-size: 21px; margin-bottom: 10px; }
-    .pics { gap: 8px; }
-    .pics figcaption { font-size: 13px; line-height: 1.25; }
+    /* On a phone, one under another (14 Nov: "for phone, just make it single column"). */
+    .pics { grid-template-columns: 1fr; gap: 12px; }
+    .pics figcaption { font-size: 15px; line-height: 1.3; }
   }
   /* Elsewhere, made by others (the user, 14 Nov: "Those things are elsewhere, but I still want them"), further down
      the page and compact, a line each (14 Nov: "a lot being crammed into a small area instead of gradually
