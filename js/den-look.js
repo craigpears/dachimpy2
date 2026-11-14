@@ -8,13 +8,9 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 // Every colour a pirate's drawn in (the clothing dyes, hair, fur, skin), each with where it came from, is
 // src/palette.ts: change or add a colour there, never here. The catalogue's colours page lists them all.
-<<<<<<< HEAD
 import { DYES, HAIR, HAIRS, FUR, FURS, FUR_FACE, SKIN } from './palette.js';
-=======
-import { DYES, HAIR, FUR, FUR_FACE, SKIN } from './palette.js';
 // Things in hand a scene needs too (a plate of cookies, a cookie, a paintbrush): js/den/held.js's, the one piece each.
 import { HELD } from './den/held.js';
->>>>>>> worktree-agent-a4313ba4b2a0e1c08
 export { DYES, HAIR, FUR, SKIN };
 // Furry familiars (fur in its natural colours or any dye: FUR), and the colour each falls back to.
 export const FURRY = { monkey: 'brown', squirrel: 'grey' };
