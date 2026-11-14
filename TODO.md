@@ -563,6 +563,23 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   page, which I think is the go-to." https://discord.gg/XtRHwP6XT
   And Dachimpy at the door (14 Nov): "put my little pink character in ... Obviously, I need to welcome you to the
   site. Like, would you like a cookie? That'd be hilarious."
+- **The front page as the launch pad, and what the den is for (14 Nov):** below "what are you here for?", the
+  changelog's link and a way to "jump to specific places ... then we could get rid of the cheats menu and we can
+  have this as a launch pad into that." And a short, light section on the den's goals: "you want your own adventure
+  ... or room ... the bigger islands ... need to have some mechanic or new tutorial or ... real longer adventure ...
+  But we also can do the smaller things, just like if you've got a nice little person or just want to show off,
+  have a nice 3D thing in your gallery ... find me on Discord ... send me a link to your pirate page, and we can put
+  a little room for you together ... I just need a feel for your personality ... I want this to be a fun,
+  discoverable place." Gravee's house (the vampire, the portraits) the bigger kind, Roobear's "just a bit of fun".
+  "I like things to be meaningful and funny, like ideally in a mechanical sense ... who knows, this could be a
+  proposal in a game ... most of ... this is just kind of going to be a dud, but ... there might be that one thing
+  that leads to something really fun, like ... the [sloop] races."
+- **Race online and crew play off the den's main menu (14 Nov):** "some of those buttons on the menu need to be a
+  bit more contextual ... race online, play with the crew. I don't think anybody's really cared so far, so I don't
+  want them as prominent menu positions if nobody cares." They stay, reachable where they belong (racing online
+  from the race's start, the crew where crews are), not up front. The feedback so far: people care about
+  "tutorials that are actually in demand, like werewolves"; the den is "cute and a bit of fun ... a bit of a goof";
+  "the [sloop] races is a thing, I think, with more potential."
 
 ## Spotted along the way (not asked for)
 
