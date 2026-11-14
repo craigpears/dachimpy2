@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { turnWide } from '../den-deal.js';
 import { WALK_CADENCE, newGait, gaitStep, gaitPose } from '../walk.js';
-import { dressPirate, familiarTick, cleanLook, cleanDen, drawFlag, PIRATES } from '../den-look.js';
+import { dressPirate, familiarTick, cleanLook, cleanDen, drawFlag, PIRATES, CAPYBARAS } from '../den-look.js';
 import { mat, mesh, canvasTex, woodTex } from './materials.js';
 export { mat, mesh, canvasTex, woodTex };
 
@@ -99,10 +99,11 @@ const saved = (key) => { try { return JSON.parse(localStorage.getItem(key)); } c
 export const keep = (key, v) => { try { localStorage.setItem(key, JSON.stringify(v)); } catch { /* storage unavailable */ } };
 // Dressed as one of the real pirates for a look round or a screenshot, ?as=dachimpy (any of PIRATES, by name), this
 // visit only, your own look kept as it is (the user, 14 Nov: teaser shots "me in my style", and no spouse in them).
+// Or as Umami the capybara, ?as=umami (CAPYBARAS: "a model that, you know, you can actually run around with", 14 Nov).
 const asPirate = (() => {
-  const name = new URLSearchParams(location.search).get('as');
-  const key = name && Object.keys(PIRATES).find((k) => k.toLowerCase() === name.toLowerCase());
-  return key ? PIRATES[key] : null;
+  const name = new URLSearchParams(location.search).get('as'), all = { ...PIRATES, ...CAPYBARAS };
+  const key = name && Object.keys(all).find((k) => k.toLowerCase() === name.toLowerCase());
+  return key ? all[key] : null;
 })();
 export const dressedAs = !!asPirate;
 export let myLook = cleanLook(asPirate ?? saved('carp.den.look'));

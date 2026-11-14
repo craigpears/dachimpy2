@@ -11,6 +11,8 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { DYES, HAIR, HAIRS, FUR, FURS, FUR_FACE, SKIN } from './palette.js';
 // Things in hand a scene needs too (a plate of cookies, a cookie, a paintbrush): js/den/held.js's, the one piece each.
 import { HELD } from './den/held.js';
+// Umami the capybara, the one model of him (a look whose body is 'capy' is drawn as him: dressCapybara).
+import { capybaraMesh, capyFur } from './den/capybara-model.js';
 export { DYES, HAIR, FUR, SKIN };
 // Furry familiars (fur in its natural colours or any dye: FUR), and the colour each falls back to.
 export const FURRY = { monkey: 'brown', squirrel: 'grey' };
@@ -78,6 +80,20 @@ export const PARTS = {
     f: [['none', 'No familiar'], ['parrot', 'Parrot', 1], ['monkey', 'Monkey'], ['octopus', 'Octopus'], ['squirrel', 'Squirrel'], ['bat', 'Bat'], ['krakling', 'Krakling'], ['dragon', 'Dragon', 1], ['crow', 'Crow']],
   },
 };
+/* A capybara (Umami, 14 Nov: "have they maybe dressed the capybara up in clothing? That would be so hilarious"): any
+   hat either body wears, a shirt or a jacket over his front, something round his middle, a familiar on his back;
+   no hair but his fur, nothing on his legs or feet, nothing in his paws. */
+PARTS.hat.capy = [...PARTS.hat.f, ...PARTS.hat.m.filter(([id]) => !PARTS.hat.f.some(([f]) => f === id))];
+PARTS.hair.capy = [['fur', 'His fur']];
+PARTS.beard.capy = [['none', 'None']];
+PARTS.top.capy = [['none', 'Just his fur'], ['striped', 'Striped shirt', 1], ['plain', 'Plain shirt'], ['vest', 'Striped shirt with vest', 1], ['swashbuckler', "Swashbuckler's jacket", 1], ['buccaneer', 'Buccaneer jacket', 1], ['captain', "Captain's jacket", 1]];
+PARTS.waist.capy = PARTS.waist.m;
+PARTS.legs.capy = [['none', 'Nothing']];
+PARTS.feet.capy = [['bare', 'Bare paws']];
+PARTS.hand.capy = [['none', 'Nothing']];
+PARTS.fam.capy = PARTS.fam.m;
+// The bodies a look can have: the wardrobe's "Pirate" choice.
+export const BODIES = [['m', 'Male'], ['f', 'Female'], ['capy', 'Capybara']];
 // The props that take a colour (the rest are what they're made of).
 export const HAND_DYED = ['bouquet', 'gift'];
 // Earrings: none, one or one in each ear. One is in the right ear, the eyepatch's side, as the portraits
@@ -99,12 +115,13 @@ const DYE_KEYS = ['hatCol', 'hatCol2', 'topCol', 'topCol2', 'waistCol', 'legsCol
 // Saves from before 10 Nov: 'coat' was the Swashbuckler's jacket on a man and the Buccaneer jacket on a woman.
 const OLD_TOP = { m: { coat: 'swashbuckler' }, f: { coat: 'buccaneer' } };
 const FEMALE = { hair: 'long', beard: 'none', top: 'corset', topCol: 'maroon', topCol2: 'gold', legs: 'long', legsCol: 'navy', hatCol: 'red' };
+const CAPY = { hair: 'fur', beard: 'none', hat: 'none', top: 'none', waist: 'none', legs: 'none', feet: 'bare', hand: 'none', patch: false, earring: false };
 
 // A look from anywhere (storage, a crewmate) made safe: only things on the lists get through.
 export function cleanLook(o) {
-  const o2 = o && typeof o === 'object' ? o : {}, body = o2.body === 'f' ? 'f' : 'm';
-  const src = { ...o2, top: OLD_TOP[body][o2.top] || o2.top };
-  const L = { ...DEFAULT_LOOK, ...(body === 'f' ? FEMALE : {}), body };
+  const o2 = o && typeof o === 'object' ? o : {}, body = BODIES.some(([b]) => b === o2.body) ? o2.body : 'm';
+  const src = { ...o2, top: OLD_TOP[body]?.[o2.top] || o2.top };
+  const L = { ...DEFAULT_LOOK, ...(body === 'f' ? FEMALE : body === 'capy' ? CAPY : {}), body };
   for (const slot of Object.keys(PARTS)) if (PARTS[slot][body].some(([id]) => id === src[slot])) L[slot] = src[slot];
   for (const kk of DYE_KEYS) if (DYES[src[kk]]) L[kk] = src[kk];
   if (!DYES[src.feetCol2]) L.feetCol2 = L.feetCol;   // (fancy boots' tops were the boots' own colour)
@@ -301,6 +318,10 @@ export const PIRATES = Object.fromEntries(Object.entries({
    you'd marry: her portrait now and four of her most distinct, each by its own title (and `plain`,
    the same in plain letters). Always her: the curls, a hook for her left hand. */
 const MISCH = { body: 'f', skin: 2, hair: 'curly', patch: false, earring: 'both', hook: true, waist: 'none', feet: 'shoes', feetCol: 'black' };
+/* Not a pirate, but dressed as one: Umami the capybara (the user, 14 Nov: "make it not just so the capybara is a
+   pet, but as a model that, you know, you can actually run around with ... Have it as a primary model"), in a
+   captain's hat and jacket and a red sash. den.html?as=umami plays as him. */
+export const CAPYBARAS = { Umami: cleanLook({ body: 'capy', hat: 'captain', hatCol: 'navy', hatCol2: 'gold', top: 'captain', topCol: 'navy', topCol2: 'gold', waist: 'sash', waistCol: 'red' }) };
 export const MISCHIEVIOUS_VERSIONS = [
   { title: 'Son of a Nutcracker!', plain: 'Son of a Nutcracker!', look: PIRATES.Mischievious },
   // (18 Feb 2023) Red curls, the red Feminine feline with black ears, a crimson Dress top and Gown, a
@@ -442,9 +463,25 @@ const TORSO = {
 };
 const lathe = (pts, scale = 1, from = 0, gap = 0) => new THREE.LatheGeometry(pts.map(([r, y]) => new THREE.Vector2(r * scale, y)), 20, from + gap, Math.PI * 2 - 2 * gap);
 
+// A strand of hair (or a wig's) as a tube tapering to a point at both ends (so no open end shows), `r` thick at its
+// middle; `ribs`, swelling and narrowing that many times along it, as a twisted lock does. Its geometry pushed onto
+// `into`, to be merged with the rest. (Shared by the hair and the hats: dressPirate, hatOf.)
+function strandTube(pts, r, ends, ribs, into, rad = 7) {
+  const curve = new THREE.CatmullRomCurve3(pts), segs = ribs ? ribs * 4 : 14, geo = new THREE.TubeGeometry(curve, segs, r, rad), q = geo.attributes.position, c = new THREE.Vector3();
+  for (let i = 0; i <= segs; i++) {
+    const t = i / segs, k = (ends + (1 - ends) * Math.sin(Math.PI * t) ** 0.5) * (ribs ? 0.78 + 0.22 * Math.abs(Math.sin(Math.PI * ribs * t)) : 1);
+    curve.getPointAt(t, c);
+    for (let j = 0; j <= rad; j++) { const x = i * (rad + 1) + j; q.setXYZ(x, c.x + (q.getX(x) - c.x) * k, c.y + (q.getY(x) - c.y) * k, c.z + (q.getZ(x) - c.z) * k); }
+  }
+  geo.computeVertexNormals();
+  into.push(geo);
+}
+const strandTwist = (pts, r, into) => strandTube(pts, r, 0.4, Math.max(3, Math.round(new THREE.CatmullRomCurve3(pts).getLength() / (r * 1.7))), into);
+
 /* A pirate in the given look. Returns the parts the den animates: `legs` and `arms` swing from
    the hip and shoulder, `body` is everything above the hips. `opts.sword` gives them a cutlass. */
 export function dressPirate(look, opts = {}) {
+  if (look?.body === 'capy') return dressCapybara(cleanLook(look));
   const L = { ...DEFAULT_LOOK, ...look }, F = L.body === 'f';
   L.top = OLD_TOP[L.body]?.[L.top] || L.top;
   const g = new THREE.Group(), body = new THREE.Group();
@@ -865,17 +902,8 @@ export function dressPirate(look, opts = {}) {
   // A strand as a tube tapering to a point at both ends (so no open end shows), `r` thick at its middle;
   // `ribs`, swelling and narrowing that many times along it, as a twisted lock does. Into `into` (`strands`,
   // plain; `fine`, streaked along its length).
-  const tube = (pts, r, ends = 0.25, ribs = 0, into = strands, rad = 7) => {
-    const curve = new THREE.CatmullRomCurve3(pts), segs = ribs ? ribs * 4 : 14, geo = new THREE.TubeGeometry(curve, segs, r, rad), q = geo.attributes.position, c = new THREE.Vector3();
-    for (let i = 0; i <= segs; i++) {
-      const t = i / segs, k = (ends + (1 - ends) * Math.sin(Math.PI * t) ** 0.5) * (ribs ? 0.78 + 0.22 * Math.abs(Math.sin(Math.PI * ribs * t)) : 1);
-      curve.getPointAt(t, c);
-      for (let j = 0; j <= rad; j++) { const x = i * (rad + 1) + j; q.setXYZ(x, c.x + (q.getX(x) - c.x) * k, c.y + (q.getY(x) - c.y) * k, c.z + (q.getZ(x) - c.z) * k); }
-    }
-    geo.computeVertexNormals();
-    into.push(geo);
-  };
-  const twist = (pts, r, into = strands) => tube(pts, r, 0.4, Math.max(3, Math.round(new THREE.CatmullRomCurve3(pts).getLength() / (r * 1.7))), into);
+  const tube = (pts, r, ends = 0.25, ribs = 0, into = strands, rad = 7) => strandTube(pts, r, ends, ribs, into, rad);
+  const twist = (pts, r, into = strands) => strandTwist(pts, r, into);
   const from = (az, el, out = 0.02) => dir(az, el).multiplyScalar(hr + out).add(new THREE.Vector3(0, 0.9, 0));
   // (A hat over the crown hides what's on top: strands over the head only without one.)
   const crownBare = ['none', 'veil', 'feline', 'butterfly', 'tiara', 'roses'].includes(L.hat);
@@ -1075,252 +1103,8 @@ export function dressPirate(look, opts = {}) {
     body.add(mo);
   }
 
-  // The hat.
-  const hat = new THREE.Group(), hc = M(L.hatCol), hc2 = M(L.hatCol2);
-  body.add(hat);
-  if (L.hat === 'bandana') {
-    const band = part(new THREE.SphereGeometry(hr + 0.012, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2.3), hc, 0, 0.93);
-    band.rotation.x = -0.18;
-    hat.add(band, part(new THREE.SphereGeometry(0.07, 10, 8), hc, 0, 1.0, -hr));
-    const tail = part(new THREE.BoxGeometry(0.07, 0.2, 0.03), hc, 0.04, 0.88, -hr - 0.03);
-    tail.rotation.z = 0.3;
-    hat.add(tail);
-  } else if (L.hat === 'tricorne') {
-    hat.add(part(new THREE.CylinderGeometry(0.2, 0.24, 0.18, 16), hc, 0, 1.15));
-    const brim = part(new THREE.ConeGeometry(0.44, 0.17, 3, 1, true), M(L.hatCol, { side: THREE.DoubleSide }), 0, 1.09);
-    brim.rotation.set(Math.PI, Math.PI, 0);
-    const trim = part(new THREE.TorusGeometry(0.44, 0.02, 4, 3), gold, 0, 1.175);
-    trim.rotation.set(-Math.PI / 2, 0, -Math.PI / 2);
-    hat.add(brim, trim);
-    hat.rotation.x = -0.1;
-  } else if (L.hat === 'feathered' || L.hat === 'wide') {
-    const wide = L.hat === 'wide';
-    hat.add(part(new THREE.CylinderGeometry(wide ? 0.5 : 0.43, wide ? 0.5 : 0.43, 0.025, 28), hc, 0, 1.08));
-    hat.add(part(new THREE.CylinderGeometry(0.19, 0.23, wide ? 0.17 : 0.22, 18), hc, 0, 1.19));
-    hat.add(part(new THREE.CylinderGeometry(0.235, 0.235, 0.05, 18), hc2, 0, 1.12));
-    if (!wide) {
-      const feather = part(new THREE.SphereGeometry(0.06, 10, 8), hc2, 0.14, 1.27, -0.12);
-      feather.scale.set(0.7, 0.45, 4.2);
-      feather.rotation.set(0.55, 0.45, 0);
-      hat.add(feather);
-    }
-    hat.rotation.z = wide ? -0.1 : 0.14;
-  } else if (L.hat === 'captain') {
-    const half = part(new THREE.CylinderGeometry(0.34, 0.34, 0.09, 24, 1, false, -Math.PI / 2, Math.PI), hc, 0, 1.07);
-    half.rotation.x = -Math.PI / 2;
-    half.scale.x = 1.3;
-    const trim = part(new THREE.TorusGeometry(0.34, 0.03, 6, 24, Math.PI), hc2, 0, 1.07, 0.03);
-    trim.scale.x = 1.3;
-    const trim2 = trim.clone();
-    trim2.position.z = -0.03;
-    hat.add(half, trim, trim2, part(new THREE.SphereGeometry(0.055, 10, 8), gold, 0, 1.2, 0.06));
-  } else if (L.hat === 'sleeping') {
-    const sm = M('#fff', { map: stripeTex(L.hatCol, 'white', 6) });
-    hat.add(part(new THREE.CylinderGeometry(0.17, hr + 0.015, 0.22, 16), sm, 0, 1.06));
-    const flop = part(new THREE.ConeGeometry(0.17, 0.42, 14), sm, 0.2, 1.15);
-    flop.rotation.z = -2.0;
-    hat.add(flop, part(new THREE.SphereGeometry(0.07, 10, 8), white, 0.39, 1.06));
-  } else if (L.hat === 'fez') {
-    hat.add(part(new THREE.CylinderGeometry(0.15, 0.19, 0.22, 16), hc, 0, 1.17));
-    const cord = part(new THREE.CylinderGeometry(0.01, 0.01, 0.16, 5), black, 0.08, 1.22, -0.08);
-    cord.rotation.z = 0.9;
-    hat.add(cord, part(new THREE.SphereGeometry(0.03, 8, 6), gold, 0.14, 1.17, -0.12));
-  } else if (L.hat === 'viking') {
-    // A steel dome with a gold rim, gold bands over the top and down the nose, a spike, white horns
-    // curling up and out, and a tuft of fur (the hat's colour) where each meets the helmet.
-    const steel = M('#d4d7dc', { metalness: 0.6, roughness: 0.35 }), gilt = M('#e0a92a', { metalness: 0.5, roughness: 0.4 }), ivory = M('#f2ead8', { roughness: 0.6 });
-    const at = (m, x, y, z) => { m.position.set(x, y, z); hat.add(m); return m; };
-    at(part(new THREE.SphereGeometry(hr + 0.025, 20, 10, 0, Math.PI * 2, 0, Math.PI * 0.5), steel), 0, 1.0, 0).scale.y = 0.75;
-    at(part(new THREE.TorusGeometry(hr + 0.025, 0.026, 6, 28), gilt), 0, 1.0, 0).rotation.x = Math.PI / 2;
-    const band = at(part(new THREE.TorusGeometry(hr + 0.03, 0.022, 6, 20, Math.PI), gilt), 0, 1.0, 0);
-    band.rotation.y = Math.PI / 2; band.scale.y = 0.75;
-    at(part(new THREE.TorusGeometry(hr + 0.03, 0.02, 6, 20, Math.PI), gilt), 0, 1.0, 0).scale.y = 0.75;
-    at(part(new THREE.BoxGeometry(0.045, 0.12, 0.025), gilt), 0, 0.95, hr + 0.015);
-    at(part(new THREE.ConeGeometry(0.035, 0.09, 8), steel), 0, 1.0 + hr * 0.75 + 0.05, 0);
-    for (const s of [-1, 1]) {
-      at(part(new THREE.ConeGeometry(0.07, 0.24, 10), ivory), s * (hr + 0.07), 1.1, 0).rotation.z = -s * 1.0;
-      at(part(new THREE.ConeGeometry(0.046, 0.22, 10), ivory), s * (hr + 0.197), 1.27, 0).rotation.z = -s * 0.25;
-      at(part(new THREE.SphereGeometry(0.075, 10, 8), hc), s * (hr + 0.02), 1.03, 0.02).scale.set(1, 1.2, 1.3);
-    }
-  } else if (L.hat === 'veil') {
-    // The Veil: a band over the crown in its second colour, gathered at the back, and a sheer veil in
-    // its first falling from there down her back.
-    const band = part(new THREE.TorusGeometry(hr - 0.02, 0.022, 6, 28, Math.PI), hc2, 0, 1.0, -0.02);
-    band.rotation.set(-0.35, 0, 0);
-    hat.add(band, part(new THREE.SphereGeometry(0.06, 10, 8), hc2, 0, 1.06, -hr + 0.02));
-    const veil = part(new THREE.CylinderGeometry(hr + 0.01, hr + 0.13, 0.62, 22, 1, true, Math.PI / 2 - 0.35, Math.PI + 0.7),
-      M(L.hatCol, { side: THREE.DoubleSide, transparent: true, opacity: 0.72 }), 0, 0.77, -0.04);
-    veil.castShadow = false;
-    hat.add(veil);
-  } else if (L.hat === 'tiara') {
-    // The Tiara: a crown of points round a band (the band in its second colour), jewels set in both.
-    const gilt = M(L.hatCol, { metalness: 0.55, roughness: 0.35 }), r = 0.17;
-    hat.add(part(new THREE.CylinderGeometry(r + 0.012, r + 0.02, 0.06, 22, 1, true), M(L.hatCol2, { side: THREE.DoubleSide }), 0, 1.08));
-    hat.add(part(new THREE.CylinderGeometry(r + 0.004, r + 0.004, 0.035, 22, 1, true), M(L.hatCol, { metalness: 0.55, roughness: 0.35, side: THREE.DoubleSide }), 0, 1.125));
-    for (let i = 0; i < 9; i++) {
-      const a = (i / 9) * Math.PI * 2, front = Math.cos(a), h = 0.09 + 0.06 * Math.max(0, front);
-      hat.add(part(new THREE.ConeGeometry(0.03, h, 4), gilt, Math.sin(a) * r, 1.14 + h / 2, Math.cos(a) * r));
-    }
-    for (const [x, c] of [[0, '#3a6ee8'], [-0.08, '#e8f0ff'], [0.08, '#e8f0ff']]) hat.add(part(new THREE.SphereGeometry(0.022, 8, 6), M(c, { roughness: 0.2, metalness: 0.2 }), x, 1.08, Math.sqrt(r * r - x * x) + 0.025));
-  } else if (L.hat === 'butterfly' || L.hat === 'feline') {
-    // A mask over the eyes (YPP's Halloween masks), with holes for them.
-    const eyesAt = [0.085, ...(L.patch ? [] : [-0.085])];
-    const holes = () => eyesAt.forEach((x) => {
-      const hole = part(new THREE.SphereGeometry(0.036, 10, 8), skin, x, 0.95, hr + 0.006);
-      hole.scale.z = 0.35;
-      hat.add(hole, part(new THREE.SphereGeometry(0.026, 8, 6), black, x, 0.95, hr + 0.014));
-    });
-    if (L.patch) {
-      const pt = part(new THREE.CylinderGeometry(0.07, 0.07, 0.02, 14), black, -0.09, 0.95, hr + 0.012);
-      pt.rotation.x = Math.PI / 2 - 0.3;
-      hat.add(pt);
-    }
-    if (L.hat === 'feline') {
-      // The Feminine feline: a cat's eye mask in its first colour, cat's ears in its second.
-      // (Looked at closely beside Helium's portrait, 13 Nov: a band right across both eyes, its outer corners
-      // flicked up as a cat's eye is; the ears big and rounded, their insides a lighter shade of them.)
-      const mask = part(new THREE.SphereGeometry(hr + 0.008, 24, 6, Math.PI / 2 - 1.25, 2.5, 1.04, 0.56), hc, 0, 0.9);
-      mask.material.side = THREE.DoubleSide;
-      hat.add(mask);
-      const innerCol = `#${new THREE.Color(hexOf(L.hatCol2)).lerp(new THREE.Color('#a4a4ac'), 0.3).getHexString()}`;
-      for (const s of [-1, 1]) {
-        const flick = part(new THREE.ConeGeometry(0.03, 0.09, 8), hc, s * 0.2, 0.985, 0.095);
-        flick.rotation.set(0, 0, -s * 0.9);
-        flick.scale.z = 0.4;
-        hat.add(flick);
-        // (Up out of any hair.)
-        const ear = part(new THREE.ConeGeometry(0.1, 0.21, 12), hc2, s * 0.16, 1.2, 0.0);
-        ear.rotation.set(0, 0, -s * 0.38);
-        ear.scale.z = 0.42;
-        hat.add(ear);
-        const inner = part(new THREE.ConeGeometry(0.062, 0.13, 10), M(innerCol, { roughness: 0.95 }), s * 0.155, 1.18, 0.03);
-        inner.rotation.set(0, 0, -s * 0.38);
-        inner.scale.z = 0.3;
-        hat.add(inner);
-      }
-    } else {
-      // The Butterfly: a big butterfly over the eyes and brow, its wings spotted black and white.
-      const wing = (x, y, rad, sx, sy, rz) => {
-        const w = part(new THREE.SphereGeometry(rad, 14, 10), hc, x, y, hr + 0.035);
-        w.scale.set(sx, sy, 0.22);
-        w.rotation.z = rz;
-        hat.add(w);
-        return w;
-      };
-      for (const s of [-1, 1]) {
-        wing(s * 0.12, 1.0, 0.11, 1.15, 0.85, s * 0.35);
-        wing(s * 0.09, 0.88, 0.075, 1, 0.9, -s * 0.4);
-        // (black edges and white spots)
-        for (const [x, y, r, c] of [[0.2, 1.06, 0.022, black], [0.15, 0.99, 0.016, white], [0.22, 0.97, 0.014, white], [0.12, 0.86, 0.014, black]]) {
-          const sp = part(new THREE.SphereGeometry(r, 8, 6), c, s * x, y, hr + 0.06);
-          sp.scale.z = 0.4;
-          hat.add(sp);
-        }
-      }
-      const thorax = part(new THREE.CapsuleGeometry(0.02, 0.16, 4, 8), black, 0, 0.95, hr + 0.07);
-      hat.add(thorax);
-      for (const s of [-1, 1]) {
-        const ant = part(new THREE.CylinderGeometry(0.005, 0.005, 0.13, 4), black, s * 0.03, 1.08, hr + 0.06);
-        ant.rotation.z = -s * 0.4;
-        hat.add(ant);
-      }
-    }
-    holes();
-  } else if (L.hat === 'roses') {
-    // A crown of roses (Kikkit's, red; Roobear's wreath, dark purple with gold leaves), round the top of the
-    // head, leaves in its second colour between them.
-    // (On wavy or long hair, laid in strands over the crown, it sits up and out on them, or they bury it:
-    // Whiterose's, 14 Nov.)
-    const leaf = L.hatCol2 === 'gold' ? M(L.hatCol2, { metalness: 0.6, roughness: 0.35 }) : M(L.hatCol2), n = 9;
-    const up = L.hair === 'wavy' || L.hair === 'long' ? 0.045 : 0;
-    for (let i = 0; i < n; i++) {
-      const a = (i / n) * Math.PI * 2, rr = hr * (0.86 + up * 1.6);
-      const rose = part(new THREE.SphereGeometry(0.05, 9, 7), hc, Math.sin(a) * rr, 1.07 + up + Math.cos(a) * 0.06, Math.cos(a) * rr - 0.02);
-      rose.scale.set(1, 0.75, 1);
-      const lf = part(new THREE.SphereGeometry(0.035, 6, 4), leaf, Math.sin(a + 0.35) * rr * 1.04, 1.06 + up + Math.cos(a + 0.35) * 0.06, Math.cos(a + 0.35) * rr * 1.04 - 0.02);
-      lf.scale.set(1.4, 0.4, 0.7);
-      hat.add(rose, lf);
-    }
-  } else if (L.hat === 'beehive') {
-    // A beehive wig (Dachimpy's, 13 Nov): a cap of it over the head, piled up high and round above, a band round
-    // its foot in its second colour, a curl over each ear; the face clear under it.
-    const cap = part(new THREE.SphereGeometry(hr + 0.025, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2.2), hc, 0, 0.94, -0.01);
-    cap.rotation.x = -0.18;
-    const pile = part(new THREE.SphereGeometry(0.27, 20, 14), hc, 0, 1.33, -0.04);
-    pile.scale.set(1, 1.3, 1);
-    const band = part(new THREE.TorusGeometry(0.235, 0.032, 8, 26), hc2, 0, 1.12, -0.03);
-    band.rotation.x = Math.PI / 2;
-    hat.add(cap, pile, band);
-    for (const sx of [-1, 1]) hat.add(part(new THREE.SphereGeometry(0.075, 10, 8), hc, sx * (hr - 0.01), 0.9, -0.05));
-    // Its hair in strands (14 Nov, from "Pinky and the pink" and "Cursed & Cookied": the user, "things like hair
-    // ... need more"): wound up round the pile in a spiral from the band to the top, and a ring of rolled curls
-    // round its foot under the band, over the ears and round the back; streaked as hair is.
-    const wig = [], hcHex = hexOf(L.hatCol);
-    for (let k = 0; k < 3; k++) {
-      const pts = [];
-      for (let i = 0; i <= 72; i++) {
-        // (up from the band, round twice, lying on the pile: a little outside its round, so it sits on it)
-        const t = i / 72, a = k * Math.PI * 2 / 3 + t * Math.PI * 2 * 2.2, el = -0.8 + t * 2.15;
-        const r = 0.282 * Math.cos(el), y = 1.33 + 0.362 * Math.sin(el);
-        pts.push(new THREE.Vector3(Math.sin(a) * r, y, Math.cos(a) * r - 0.04));
-      }
-      tube(pts, 0.042, 0.2, 0, wig, 7);
-    }
-    for (let i = 0; i < 14; i++) {
-      const a = (i / 14) * Math.PI * 2;
-      if (Math.cos(a) > 0.55) continue;   // (none over the face)
-      const c = new THREE.Vector3(Math.sin(a) * 0.245, 1.07, Math.cos(a) * 0.245 - 0.03), out = new THREE.Vector3(Math.sin(a), 0, Math.cos(a)).multiplyScalar(0.035);
-      twist([c.clone().add(new THREE.Vector3(0, 0.05, 0)), c.clone().add(out), c.clone().add(new THREE.Vector3(0, -0.06, 0)).add(out.clone().multiplyScalar(0.6))], 0.034, wig);
-    }
-    hat.add(part(mergeGeometries(wig), M('#ffffff', { map: strandTex(hcHex) }), 0, 0, 0));
-  } else if (L.hat === 'beret') {
-    // A beret: a soft flat round cap worn tipped to one side, a little stalk on top (a monsieur's: Roobear's
-    // gallery, "Robert, a Monsieur").
-    const top0 = part(new THREE.SphereGeometry(hr + 0.07, 20, 10), hc, 0.03, 1.08, -0.02);
-    top0.scale.set(1, 0.32, 1);
-    top0.rotation.z = -0.22;
-    const band = part(new THREE.TorusGeometry(hr - 0.01, 0.018, 6, 24), hc, 0, 1.04, -0.01);
-    band.rotation.x = Math.PI / 2;
-    hat.add(top0, band, part(new THREE.CylinderGeometry(0.008, 0.012, 0.04, 6), hc, 0, 1.15, -0.02));
-  } else if (L.hat === 'pelt') {
-    // The Berserker pelt, as Puzzle Pirates' sat: a bear's head worn up on top of hers, in its colour
-    // (Gravee's, white: a polar bear), its jaw over her brow, its snout out above her face with a black
-    // nose, its eyes shut, two fangs at her forehead, round ears, and its hide falling down her back. Her
-    // face shows clear underneath, from the den's camera looking down too (the user, 11 Nov, of Gravee: "I
-    // love her hat, but you really can't see her at all"): nothing of it comes down in front below her brow.
-    const white0 = L.hatCol === 'white';
-    const fur = M(L.hatCol, { roughness: 1 }), shade = white0 ? M('#c9d6e6') : M('#000000', { transparent: true, opacity: 0.25 });
-    const dome = part(new THREE.SphereGeometry(hr + 0.06, 20, 12, 0, Math.PI * 2, 0, Math.PI * 0.5), fur, 0, 1.03, -0.03);
-    dome.rotation.x = -0.12; dome.scale.set(1.08, 0.85, 1.1);
-    // (its face up on her brow, looking out the way she does)
-    const snout = part(new THREE.SphereGeometry(0.1, 14, 10), fur, 0, 1.195, hr * 0.85);
-    snout.scale.set(1.0, 0.75, 1.2);
-    const muzzle = part(new THREE.SphereGeometry(0.06, 10, 8), shade, 0, 1.185, hr * 0.85 + 0.09);
-    muzzle.scale.set(1.15, 0.75, 0.85);
-    hat.add(dome, snout, muzzle, part(new THREE.SphereGeometry(0.032, 10, 8), black, 0, 1.205, hr * 0.85 + 0.135));
-    for (const s of [-1, 1]) {
-      const ear = part(new THREE.SphereGeometry(0.066, 10, 8), fur, s * 0.19, 1.3, -0.04);
-      ear.scale.set(1, 1, 0.55);
-      const inner = part(new THREE.SphereGeometry(0.036, 8, 6), shade, s * 0.19, 1.3, -0.008);
-      inner.scale.set(1, 1, 0.4);
-      const shut = part(new THREE.CapsuleGeometry(0.009, 0.036, 2, 6), black, s * 0.085, 1.255, hr * 0.62);
-      shut.rotation.z = Math.PI / 2 + s * 0.25;
-      const fang = part(new THREE.ConeGeometry(0.016, 0.05, 6), white, s * 0.06, 1.1, hr + 0.005);
-      fang.rotation.x = Math.PI;
-      hat.add(ear, inner, shut, fang);
-    }
-    // Its hide, down her back (round behind her, not either side of her face).
-    hat.add(part(new THREE.CylinderGeometry(hr + 0.05, hr + 0.14, 0.52, 18, 1, true, Math.PI / 2 + 0.3, Math.PI - 0.6), M(L.hatCol, { roughness: 1, side: THREE.DoubleSide }), 0, 0.8, -0.03));
-  } else if (L.hat === 'witch') {
-    // The Wicked witch: a tall pointed black hat with a wide brim, bent at the tip, a band round it in
-    // its second colour (which is also her face's).
-    const brim = part(new THREE.CylinderGeometry(0.46, 0.46, 0.02, 28), hc, 0, 1.08);
-    const cone = part(new THREE.ConeGeometry(0.2, 0.42, 18), hc, 0, 1.3);
-    const tip = part(new THREE.ConeGeometry(0.075, 0.2, 12), hc, 0.05, 1.56, -0.04);
-    tip.rotation.set(-0.3, 0, -0.6);
-    hat.add(brim, cone, tip, part(new THREE.CylinderGeometry(0.2, 0.205, 0.05, 18), hc2, 0, 1.115));
-    hat.rotation.set(-0.08, 0, 0.08);
-  }
+  // The hat (hatOf, below: a capybara wears them too).
+  body.add(hatOf(L, hr, { skin, black, white, gold }));
 
   // Arms, from the shoulder.
   const shX = F ? 0.28 : 0.31, ar = F ? 0.85 : 1;
@@ -1559,6 +1343,329 @@ export function dressPirate(look, opts = {}) {
 // ---------- familiars ----------
 /** A familiar on its own (not on a shoulder): a look's `fam` and its colours. Kikkit's island has a
     crowd of them (js/den/kikkit.js); familiarTick animates it. */
+/* A hat in the look, `L.hat` in its colours (none: an empty group), for a head of radius `hr` whose centre is 0.9
+   up from the group's origin and which faces +z, as a pirate's does from their body. Pulled out of dressPirate
+   (14 Nov) so a capybara can wear one too (dressCapybara). `skin`, `black`, `white`, `gold`: the wearer's
+   materials (the masks' eyeholes show their face's). */
+function hatOf(L, hr, { skin, black, white, gold }) {
+  const hat = new THREE.Group(), hc = M(L.hatCol), hc2 = M(L.hatCol2);
+  if (L.hat === 'bandana') {
+    const band = part(new THREE.SphereGeometry(hr + 0.012, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2.3), hc, 0, 0.93);
+    band.rotation.x = -0.18;
+    hat.add(band, part(new THREE.SphereGeometry(0.07, 10, 8), hc, 0, 1.0, -hr));
+    const tail = part(new THREE.BoxGeometry(0.07, 0.2, 0.03), hc, 0.04, 0.88, -hr - 0.03);
+    tail.rotation.z = 0.3;
+    hat.add(tail);
+  } else if (L.hat === 'tricorne') {
+    hat.add(part(new THREE.CylinderGeometry(0.2, 0.24, 0.18, 16), hc, 0, 1.15));
+    const brim = part(new THREE.ConeGeometry(0.44, 0.17, 3, 1, true), M(L.hatCol, { side: THREE.DoubleSide }), 0, 1.09);
+    brim.rotation.set(Math.PI, Math.PI, 0);
+    const trim = part(new THREE.TorusGeometry(0.44, 0.02, 4, 3), gold, 0, 1.175);
+    trim.rotation.set(-Math.PI / 2, 0, -Math.PI / 2);
+    hat.add(brim, trim);
+    hat.rotation.x = -0.1;
+  } else if (L.hat === 'feathered' || L.hat === 'wide') {
+    const wide = L.hat === 'wide';
+    hat.add(part(new THREE.CylinderGeometry(wide ? 0.5 : 0.43, wide ? 0.5 : 0.43, 0.025, 28), hc, 0, 1.08));
+    hat.add(part(new THREE.CylinderGeometry(0.19, 0.23, wide ? 0.17 : 0.22, 18), hc, 0, 1.19));
+    hat.add(part(new THREE.CylinderGeometry(0.235, 0.235, 0.05, 18), hc2, 0, 1.12));
+    if (!wide) {
+      const feather = part(new THREE.SphereGeometry(0.06, 10, 8), hc2, 0.14, 1.27, -0.12);
+      feather.scale.set(0.7, 0.45, 4.2);
+      feather.rotation.set(0.55, 0.45, 0);
+      hat.add(feather);
+    }
+    hat.rotation.z = wide ? -0.1 : 0.14;
+  } else if (L.hat === 'captain') {
+    const half = part(new THREE.CylinderGeometry(0.34, 0.34, 0.09, 24, 1, false, -Math.PI / 2, Math.PI), hc, 0, 1.07);
+    half.rotation.x = -Math.PI / 2;
+    half.scale.x = 1.3;
+    const trim = part(new THREE.TorusGeometry(0.34, 0.03, 6, 24, Math.PI), hc2, 0, 1.07, 0.03);
+    trim.scale.x = 1.3;
+    const trim2 = trim.clone();
+    trim2.position.z = -0.03;
+    hat.add(half, trim, trim2, part(new THREE.SphereGeometry(0.055, 10, 8), gold, 0, 1.2, 0.06));
+  } else if (L.hat === 'sleeping') {
+    const sm = M('#fff', { map: stripeTex(L.hatCol, 'white', 6) });
+    hat.add(part(new THREE.CylinderGeometry(0.17, hr + 0.015, 0.22, 16), sm, 0, 1.06));
+    const flop = part(new THREE.ConeGeometry(0.17, 0.42, 14), sm, 0.2, 1.15);
+    flop.rotation.z = -2.0;
+    hat.add(flop, part(new THREE.SphereGeometry(0.07, 10, 8), white, 0.39, 1.06));
+  } else if (L.hat === 'fez') {
+    hat.add(part(new THREE.CylinderGeometry(0.15, 0.19, 0.22, 16), hc, 0, 1.17));
+    const cord = part(new THREE.CylinderGeometry(0.01, 0.01, 0.16, 5), black, 0.08, 1.22, -0.08);
+    cord.rotation.z = 0.9;
+    hat.add(cord, part(new THREE.SphereGeometry(0.03, 8, 6), gold, 0.14, 1.17, -0.12));
+  } else if (L.hat === 'viking') {
+    // A steel dome with a gold rim, gold bands over the top and down the nose, a spike, white horns
+    // curling up and out, and a tuft of fur (the hat's colour) where each meets the helmet.
+    const steel = M('#d4d7dc', { metalness: 0.6, roughness: 0.35 }), gilt = M('#e0a92a', { metalness: 0.5, roughness: 0.4 }), ivory = M('#f2ead8', { roughness: 0.6 });
+    const at = (m, x, y, z) => { m.position.set(x, y, z); hat.add(m); return m; };
+    at(part(new THREE.SphereGeometry(hr + 0.025, 20, 10, 0, Math.PI * 2, 0, Math.PI * 0.5), steel), 0, 1.0, 0).scale.y = 0.75;
+    at(part(new THREE.TorusGeometry(hr + 0.025, 0.026, 6, 28), gilt), 0, 1.0, 0).rotation.x = Math.PI / 2;
+    const band = at(part(new THREE.TorusGeometry(hr + 0.03, 0.022, 6, 20, Math.PI), gilt), 0, 1.0, 0);
+    band.rotation.y = Math.PI / 2; band.scale.y = 0.75;
+    at(part(new THREE.TorusGeometry(hr + 0.03, 0.02, 6, 20, Math.PI), gilt), 0, 1.0, 0).scale.y = 0.75;
+    at(part(new THREE.BoxGeometry(0.045, 0.12, 0.025), gilt), 0, 0.95, hr + 0.015);
+    at(part(new THREE.ConeGeometry(0.035, 0.09, 8), steel), 0, 1.0 + hr * 0.75 + 0.05, 0);
+    for (const s of [-1, 1]) {
+      at(part(new THREE.ConeGeometry(0.07, 0.24, 10), ivory), s * (hr + 0.07), 1.1, 0).rotation.z = -s * 1.0;
+      at(part(new THREE.ConeGeometry(0.046, 0.22, 10), ivory), s * (hr + 0.197), 1.27, 0).rotation.z = -s * 0.25;
+      at(part(new THREE.SphereGeometry(0.075, 10, 8), hc), s * (hr + 0.02), 1.03, 0.02).scale.set(1, 1.2, 1.3);
+    }
+  } else if (L.hat === 'veil') {
+    // The Veil: a band over the crown in its second colour, gathered at the back, and a sheer veil in
+    // its first falling from there down her back.
+    const band = part(new THREE.TorusGeometry(hr - 0.02, 0.022, 6, 28, Math.PI), hc2, 0, 1.0, -0.02);
+    band.rotation.set(-0.35, 0, 0);
+    hat.add(band, part(new THREE.SphereGeometry(0.06, 10, 8), hc2, 0, 1.06, -hr + 0.02));
+    const veil = part(new THREE.CylinderGeometry(hr + 0.01, hr + 0.13, 0.62, 22, 1, true, Math.PI / 2 - 0.35, Math.PI + 0.7),
+      M(L.hatCol, { side: THREE.DoubleSide, transparent: true, opacity: 0.72 }), 0, 0.77, -0.04);
+    veil.castShadow = false;
+    hat.add(veil);
+  } else if (L.hat === 'tiara') {
+    // The Tiara: a crown of points round a band (the band in its second colour), jewels set in both.
+    const gilt = M(L.hatCol, { metalness: 0.55, roughness: 0.35 }), r = 0.17;
+    hat.add(part(new THREE.CylinderGeometry(r + 0.012, r + 0.02, 0.06, 22, 1, true), M(L.hatCol2, { side: THREE.DoubleSide }), 0, 1.08));
+    hat.add(part(new THREE.CylinderGeometry(r + 0.004, r + 0.004, 0.035, 22, 1, true), M(L.hatCol, { metalness: 0.55, roughness: 0.35, side: THREE.DoubleSide }), 0, 1.125));
+    for (let i = 0; i < 9; i++) {
+      const a = (i / 9) * Math.PI * 2, front = Math.cos(a), h = 0.09 + 0.06 * Math.max(0, front);
+      hat.add(part(new THREE.ConeGeometry(0.03, h, 4), gilt, Math.sin(a) * r, 1.14 + h / 2, Math.cos(a) * r));
+    }
+    for (const [x, c] of [[0, '#3a6ee8'], [-0.08, '#e8f0ff'], [0.08, '#e8f0ff']]) hat.add(part(new THREE.SphereGeometry(0.022, 8, 6), M(c, { roughness: 0.2, metalness: 0.2 }), x, 1.08, Math.sqrt(r * r - x * x) + 0.025));
+  } else if (L.hat === 'butterfly' || L.hat === 'feline') {
+    // A mask over the eyes (YPP's Halloween masks), with holes for them.
+    const eyesAt = [0.085, ...(L.patch ? [] : [-0.085])];
+    const holes = () => eyesAt.forEach((x) => {
+      const hole = part(new THREE.SphereGeometry(0.036, 10, 8), skin, x, 0.95, hr + 0.006);
+      hole.scale.z = 0.35;
+      hat.add(hole, part(new THREE.SphereGeometry(0.026, 8, 6), black, x, 0.95, hr + 0.014));
+    });
+    if (L.patch) {
+      const pt = part(new THREE.CylinderGeometry(0.07, 0.07, 0.02, 14), black, -0.09, 0.95, hr + 0.012);
+      pt.rotation.x = Math.PI / 2 - 0.3;
+      hat.add(pt);
+    }
+    if (L.hat === 'feline') {
+      // The Feminine feline: a cat's eye mask in its first colour, cat's ears in its second.
+      // (Looked at closely beside Helium's portrait, 13 Nov: a band right across both eyes, its outer corners
+      // flicked up as a cat's eye is; the ears big and rounded, their insides a lighter shade of them.)
+      const mask = part(new THREE.SphereGeometry(hr + 0.008, 24, 6, Math.PI / 2 - 1.25, 2.5, 1.04, 0.56), hc, 0, 0.9);
+      mask.material.side = THREE.DoubleSide;
+      hat.add(mask);
+      const innerCol = `#${new THREE.Color(hexOf(L.hatCol2)).lerp(new THREE.Color('#a4a4ac'), 0.3).getHexString()}`;
+      for (const s of [-1, 1]) {
+        const flick = part(new THREE.ConeGeometry(0.03, 0.09, 8), hc, s * 0.2, 0.985, 0.095);
+        flick.rotation.set(0, 0, -s * 0.9);
+        flick.scale.z = 0.4;
+        hat.add(flick);
+        // (Up out of any hair.)
+        const ear = part(new THREE.ConeGeometry(0.1, 0.21, 12), hc2, s * 0.16, 1.2, 0.0);
+        ear.rotation.set(0, 0, -s * 0.38);
+        ear.scale.z = 0.42;
+        hat.add(ear);
+        const inner = part(new THREE.ConeGeometry(0.062, 0.13, 10), M(innerCol, { roughness: 0.95 }), s * 0.155, 1.18, 0.03);
+        inner.rotation.set(0, 0, -s * 0.38);
+        inner.scale.z = 0.3;
+        hat.add(inner);
+      }
+    } else {
+      // The Butterfly: a big butterfly over the eyes and brow, its wings spotted black and white.
+      const wing = (x, y, rad, sx, sy, rz) => {
+        const w = part(new THREE.SphereGeometry(rad, 14, 10), hc, x, y, hr + 0.035);
+        w.scale.set(sx, sy, 0.22);
+        w.rotation.z = rz;
+        hat.add(w);
+        return w;
+      };
+      for (const s of [-1, 1]) {
+        wing(s * 0.12, 1.0, 0.11, 1.15, 0.85, s * 0.35);
+        wing(s * 0.09, 0.88, 0.075, 1, 0.9, -s * 0.4);
+        // (black edges and white spots)
+        for (const [x, y, r, c] of [[0.2, 1.06, 0.022, black], [0.15, 0.99, 0.016, white], [0.22, 0.97, 0.014, white], [0.12, 0.86, 0.014, black]]) {
+          const sp = part(new THREE.SphereGeometry(r, 8, 6), c, s * x, y, hr + 0.06);
+          sp.scale.z = 0.4;
+          hat.add(sp);
+        }
+      }
+      const thorax = part(new THREE.CapsuleGeometry(0.02, 0.16, 4, 8), black, 0, 0.95, hr + 0.07);
+      hat.add(thorax);
+      for (const s of [-1, 1]) {
+        const ant = part(new THREE.CylinderGeometry(0.005, 0.005, 0.13, 4), black, s * 0.03, 1.08, hr + 0.06);
+        ant.rotation.z = -s * 0.4;
+        hat.add(ant);
+      }
+    }
+    holes();
+  } else if (L.hat === 'roses') {
+    // A crown of roses (Kikkit's, red; Roobear's wreath, dark purple with gold leaves), round the top of the
+    // head, leaves in its second colour between them.
+    // (On wavy or long hair, laid in strands over the crown, it sits up and out on them, or they bury it:
+    // Whiterose's, 14 Nov.)
+    const leaf = L.hatCol2 === 'gold' ? M(L.hatCol2, { metalness: 0.6, roughness: 0.35 }) : M(L.hatCol2), n = 9;
+    const up = L.hair === 'wavy' || L.hair === 'long' ? 0.045 : 0;
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2, rr = hr * (0.86 + up * 1.6);
+      const rose = part(new THREE.SphereGeometry(0.05, 9, 7), hc, Math.sin(a) * rr, 1.07 + up + Math.cos(a) * 0.06, Math.cos(a) * rr - 0.02);
+      rose.scale.set(1, 0.75, 1);
+      const lf = part(new THREE.SphereGeometry(0.035, 6, 4), leaf, Math.sin(a + 0.35) * rr * 1.04, 1.06 + up + Math.cos(a + 0.35) * 0.06, Math.cos(a + 0.35) * rr * 1.04 - 0.02);
+      lf.scale.set(1.4, 0.4, 0.7);
+      hat.add(rose, lf);
+    }
+  } else if (L.hat === 'beehive') {
+    // A beehive wig (Dachimpy's, 13 Nov): a cap of it over the head, piled up high and round above, a band round
+    // its foot in its second colour, a curl over each ear; the face clear under it.
+    const cap = part(new THREE.SphereGeometry(hr + 0.025, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2.2), hc, 0, 0.94, -0.01);
+    cap.rotation.x = -0.18;
+    const pile = part(new THREE.SphereGeometry(0.27, 20, 14), hc, 0, 1.33, -0.04);
+    pile.scale.set(1, 1.3, 1);
+    const band = part(new THREE.TorusGeometry(0.235, 0.032, 8, 26), hc2, 0, 1.12, -0.03);
+    band.rotation.x = Math.PI / 2;
+    hat.add(cap, pile, band);
+    for (const sx of [-1, 1]) hat.add(part(new THREE.SphereGeometry(0.075, 10, 8), hc, sx * (hr - 0.01), 0.9, -0.05));
+    // Its hair in strands (14 Nov, from "Pinky and the pink" and "Cursed & Cookied": the user, "things like hair
+    // ... need more"): wound up round the pile in a spiral from the band to the top, and a ring of rolled curls
+    // round its foot under the band, over the ears and round the back; streaked as hair is.
+    const wig = [], hcHex = hexOf(L.hatCol);
+    for (let k = 0; k < 3; k++) {
+      const pts = [];
+      for (let i = 0; i <= 72; i++) {
+        // (up from the band, round twice, lying on the pile: a little outside its round, so it sits on it)
+        const t = i / 72, a = k * Math.PI * 2 / 3 + t * Math.PI * 2 * 2.2, el = -0.8 + t * 2.15;
+        const r = 0.282 * Math.cos(el), y = 1.33 + 0.362 * Math.sin(el);
+        pts.push(new THREE.Vector3(Math.sin(a) * r, y, Math.cos(a) * r - 0.04));
+      }
+      strandTube(pts, 0.042, 0.2, 0, wig, 7);
+    }
+    for (let i = 0; i < 14; i++) {
+      const a = (i / 14) * Math.PI * 2;
+      if (Math.cos(a) > 0.55) continue;   // (none over the face)
+      const c = new THREE.Vector3(Math.sin(a) * 0.245, 1.07, Math.cos(a) * 0.245 - 0.03), out = new THREE.Vector3(Math.sin(a), 0, Math.cos(a)).multiplyScalar(0.035);
+      strandTwist([c.clone().add(new THREE.Vector3(0, 0.05, 0)), c.clone().add(out), c.clone().add(new THREE.Vector3(0, -0.06, 0)).add(out.clone().multiplyScalar(0.6))], 0.034, wig);
+    }
+    hat.add(part(mergeGeometries(wig), M('#ffffff', { map: strandTex(hcHex) }), 0, 0, 0));
+  } else if (L.hat === 'beret') {
+    // A beret: a soft flat round cap worn tipped to one side, a little stalk on top (a monsieur's: Roobear's
+    // gallery, "Robert, a Monsieur").
+    const top0 = part(new THREE.SphereGeometry(hr + 0.07, 20, 10), hc, 0.03, 1.08, -0.02);
+    top0.scale.set(1, 0.32, 1);
+    top0.rotation.z = -0.22;
+    const band = part(new THREE.TorusGeometry(hr - 0.01, 0.018, 6, 24), hc, 0, 1.04, -0.01);
+    band.rotation.x = Math.PI / 2;
+    hat.add(top0, band, part(new THREE.CylinderGeometry(0.008, 0.012, 0.04, 6), hc, 0, 1.15, -0.02));
+  } else if (L.hat === 'pelt') {
+    // The Berserker pelt, as Puzzle Pirates' sat: a bear's head worn up on top of hers, in its colour
+    // (Gravee's, white: a polar bear), its jaw over her brow, its snout out above her face with a black
+    // nose, its eyes shut, two fangs at her forehead, round ears, and its hide falling down her back. Her
+    // face shows clear underneath, from the den's camera looking down too (the user, 11 Nov, of Gravee: "I
+    // love her hat, but you really can't see her at all"): nothing of it comes down in front below her brow.
+    const white0 = L.hatCol === 'white';
+    const fur = M(L.hatCol, { roughness: 1 }), shade = white0 ? M('#c9d6e6') : M('#000000', { transparent: true, opacity: 0.25 });
+    const dome = part(new THREE.SphereGeometry(hr + 0.06, 20, 12, 0, Math.PI * 2, 0, Math.PI * 0.5), fur, 0, 1.03, -0.03);
+    dome.rotation.x = -0.12; dome.scale.set(1.08, 0.85, 1.1);
+    // (its face up on her brow, looking out the way she does)
+    const snout = part(new THREE.SphereGeometry(0.1, 14, 10), fur, 0, 1.195, hr * 0.85);
+    snout.scale.set(1.0, 0.75, 1.2);
+    const muzzle = part(new THREE.SphereGeometry(0.06, 10, 8), shade, 0, 1.185, hr * 0.85 + 0.09);
+    muzzle.scale.set(1.15, 0.75, 0.85);
+    hat.add(dome, snout, muzzle, part(new THREE.SphereGeometry(0.032, 10, 8), black, 0, 1.205, hr * 0.85 + 0.135));
+    for (const s of [-1, 1]) {
+      const ear = part(new THREE.SphereGeometry(0.066, 10, 8), fur, s * 0.19, 1.3, -0.04);
+      ear.scale.set(1, 1, 0.55);
+      const inner = part(new THREE.SphereGeometry(0.036, 8, 6), shade, s * 0.19, 1.3, -0.008);
+      inner.scale.set(1, 1, 0.4);
+      const shut = part(new THREE.CapsuleGeometry(0.009, 0.036, 2, 6), black, s * 0.085, 1.255, hr * 0.62);
+      shut.rotation.z = Math.PI / 2 + s * 0.25;
+      const fang = part(new THREE.ConeGeometry(0.016, 0.05, 6), white, s * 0.06, 1.1, hr + 0.005);
+      fang.rotation.x = Math.PI;
+      hat.add(ear, inner, shut, fang);
+    }
+    // Its hide, down her back (round behind her, not either side of her face).
+    hat.add(part(new THREE.CylinderGeometry(hr + 0.05, hr + 0.14, 0.52, 18, 1, true, Math.PI / 2 + 0.3, Math.PI - 0.6), M(L.hatCol, { roughness: 1, side: THREE.DoubleSide }), 0, 0.8, -0.03));
+  } else if (L.hat === 'witch') {
+    // The Wicked witch: a tall pointed black hat with a wide brim, bent at the tip, a band round it in
+    // its second colour (which is also her face's).
+    const brim = part(new THREE.CylinderGeometry(0.46, 0.46, 0.02, 28), hc, 0, 1.08);
+    const cone = part(new THREE.ConeGeometry(0.2, 0.42, 18), hc, 0, 1.3);
+    const tip = part(new THREE.ConeGeometry(0.075, 0.2, 12), hc, 0.05, 1.56, -0.04);
+    tip.rotation.set(-0.3, 0, -0.6);
+    hat.add(brim, cone, tip, part(new THREE.CylinderGeometry(0.2, 0.205, 0.05, 18), hc2, 0, 1.115));
+    hat.rotation.set(-0.08, 0, 0.08);
+  }
+  return hat;
+}
+/* A capybara dressed as a pirate (a look whose body is 'capy': Umami, CAPYBARAS), the same parts a pirate's
+   (dressPirate) so the den walks, turns and poses him as it does anyone: his back legs are his `legs` and his front
+   ones his `arms`, each swinging from its hip, so a stride is a trot; `body`, all of him but his legs. Facing +z, as
+   a pirate does, his feet on the ground. His hat on his head (hatOf, as a pirate wears it), a shirt or jacket over
+   his front, a belt or sash round his middle, an eyepatch and earrings, his familiar riding on his back; nothing in
+   his paws. (14 Nov: "have they maybe dressed the capybara up in clothing? That would be so hilarious.") */
+const CAPY_SIZE = 1.15;   // (a touch bigger than Umami at the den, to stand among pirates)
+function dressCapybara(L) {
+  const g = new THREE.Group(), rig = new THREE.Group(), body = new THREE.Group(), turn = new THREE.Group();
+  rig.scale.setScalar(CAPY_SIZE);
+  rig.position.y = 0.67 * CAPY_SIZE;   // (his feet 0.67 below his middle)
+  turn.rotation.y = -Math.PI / 2;   // (his model faces +x: turned to face +z)
+  const c = capybaraMesh(), head = c.userData.head;
+  g.add(rig); rig.add(body); body.add(turn); turn.add(c);
+  const black = M('#1d1a18'), white = M('white'), gold = M('#e8b23a', { metalness: 0.7, roughness: 0.3 });
+  // In his model's own frame (x forward, y up): his body an ellipsoid round (-0.12, -0.1), 0.625 long, 0.425 high,
+  // 0.4 wide; his head round (0.52, 0.12, 0.05).
+  const BX = -0.12, BY = -0.1, RX = 0.625, RY = 0.425, RZ = 0.4;
+  const ringAt = (x, r, thick, m, sy = 1, sz = 1) => { const t = part(new THREE.TorusGeometry(r, thick, 6, 28).rotateY(Math.PI / 2).scale(1, sy, sz), m, x, BY); c.add(t); return t; };
+  // A shirt or jacket over his front half, open behind (his rump bare).
+  if (L.top !== 'none') {
+    const striped = L.top === 'striped' || L.top === 'vest', jacket = ['swashbuckler', 'buccaneer', 'captain'].includes(L.top);
+    const cloth = striped ? M('#ffffff', { map: stripeTex(L.topCol2, L.topCol), side: THREE.DoubleSide }) : M(L.topCol, { side: THREE.DoubleSide });
+    const from = Math.acos(0.25);   // (round from just behind his middle, over his front)
+    const coat = part(new THREE.SphereGeometry(0.5, 22, 14, from, Math.PI * 2 - 2 * from).scale(RX / 0.5 * 1.04, RY / 0.5 * 1.04, RZ / 0.5 * 1.05), cloth, BX, BY);
+    c.add(coat);
+    // Its collar round his neck, in its second colour (a jacket's, or the vest's), and gold buttons down his chest.
+    if (jacket || L.top === 'vest') ringAt(0.36, 0.27, 0.045, M(L.topCol2), 1.05, 0.95);
+    if (jacket) for (const y of [-0.12, -0.24, -0.36]) {
+      const k = (y - BY) / RY, x = BX + RX * Math.sqrt(Math.max(0, 1 - k * k)) * 1.04 + 0.015;
+      c.add(part(new THREE.SphereGeometry(0.035, 8, 6), gold, x, y, 0));
+    }
+  }
+  // Round his middle: a belt (a buckle at his side), or a sash knotted there.
+  if (L.waist !== 'none') {
+    const sash = L.waist === 'sash', wc = M(L.waistCol);
+    ringAt(BX + 0.05, 0.42, sash ? 0.06 : 0.035, wc, 1.02, 0.97);
+    if (sash) { const knot = part(new THREE.SphereGeometry(0.07, 10, 8), wc, BX + 0.05, BY, RZ + 0.04); knot.scale.set(0.8, 1, 0.7); c.add(knot); }
+    else if (L.waist === 'buckle') c.add(part(new THREE.TorusGeometry(0.06, 0.018, 8, 18), gold, BX + 0.05, BY, RZ + 0.03));
+    else c.add(part(new THREE.BoxGeometry(0.1, 0.09, 0.03), gold, BX + 0.05, BY, RZ + 0.025));
+  }
+  // His hat, as a pirate wears it, over his ears (its front his snout's way).
+  const hatOn = new THREE.Group();
+  hatOn.position.set(-0.03, 0.04, -0.05);
+  hatOn.rotation.y = Math.PI / 2;
+  const hat = hatOf(L, 0.26, { skin: capyFur, black, white, gold });
+  hat.position.y = -0.9;
+  hatOn.add(hat);
+  head.add(hatOn);
+  // An eyepatch over one eye, its strap round his head; and earrings.
+  if (L.patch) {
+    const pt = part(new THREE.CylinderGeometry(0.075, 0.075, 0.02, 14).rotateX(Math.PI / 2), black, 0.15, 0.1, -0.25 - 0.012);
+    head.add(pt, part(new THREE.TorusGeometry(0.27, 0.012, 5, 28).rotateY(Math.PI / 2).scale(1, 1, 0.9), black, 0.12, 0.02, -0.05));
+  }
+  if (L.earring) for (const s of L.earring === 'both' ? [-1, 1] : [-1]) head.add(part(new THREE.TorusGeometry(0.035, 0.01, 6, 14), gold, -0.12, 0.19, s * 0.16 - 0.05 + s * 0.02));
+  // His legs, each on a hip of its own straight under the rig (so a swing about x is forward and back).
+  g.updateMatrixWorld(true);
+  const hips = c.userData.legs.map((leg) => {
+    const hip = new THREE.Group();
+    hip.position.copy(rig.worldToLocal(leg.getWorldPosition(new THREE.Vector3())));
+    rig.add(hip);
+    hip.updateMatrixWorld(true);
+    hip.attach(leg);
+    return hip;
+  });
+  // (back, back, front, front: each back leg with the front one across from it, a trot)
+  const legs = [hips[0], hips[1]], arms = [hips[2], hips[3]];
+  const fam = makeFamiliar(L);
+  if (fam) { fam.g.position.set(0, 0.36, -0.18); rig.add(fam.g); }
+  g.traverse((x) => { if (x.isMesh) x.castShadow = true; });
+  return { g, legs, arms, body, phase: 0, fam, look: L, held: null };
+}
 export const familiar = (look) => makeFamiliar(cleanLook({ body: 'f', ...look }));
 function makeFamiliar(L) {
   if (L.fam === 'none' || !PARTS.fam[L.body].some(([id]) => id === L.fam)) return null;

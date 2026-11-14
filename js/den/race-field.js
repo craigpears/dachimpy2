@@ -14,7 +14,7 @@ import { PIRATES } from '../den-look.js';
 import { scene, mat, mesh, V3, burst, tween, shake, worldLets, camera } from './world.js';
 import { sail, seaX, seaZ, liftAt, sloopMesh, SLOOP_DECK } from './sea.js';
 import { deckHoleShape } from './sea-puzzles.js';
-import { capybaraMesh } from './foraging.js';
+import { capybaraMesh } from './capybara-model.js';
 import { person } from './props-people.js';
 import { Sparkle, SURGE, surgeFor } from '../den-sailing.js';
 import { sparkleOn, sparkleFx, sparkleWhoosh } from './sail-sparkle.js';

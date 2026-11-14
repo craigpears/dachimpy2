@@ -2,7 +2,7 @@
 // of den.js.)
 import * as THREE from 'three';
 import { afterWave } from '../den-raids.js';
-import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, designOf, DYES, SKIN, HAIR, PARTS, EARRINGS, PIRATES, FLAGS, PATTERNS, DECOR, MAX_DECOR, BIOMES, twoColours, paletteOf, HAND_DYED } from '../den-look.js';
+import { dressPirate, familiarTick, cleanLook, randomLook, cleanDen, designOf, DYES, SKIN, HAIR, PARTS, EARRINGS, PIRATES, FLAGS, PATTERNS, DECOR, MAX_DECOR, BIOMES, twoColours, paletteOf, HAND_DYED, BODIES } from '../den-look.js';
 import { C, mixedTiling, S, CALM_SECS, k, rand, $, keep, myLook, denLook, scene, camera, mat, mesh, woodTex, wearLook, redrawFlag, designMat, flagpole, pirate, carry, bounds, obstacles, G, keys, raiders, wm, ray, burst, toast, worldLets } from './world.js';
 import { ramp, frames, openJob, frameState, stepTop, putFramePiece, finishFrame, HOUSE_PART, HOUSE_Z0, houseXF, paintHouse, startHouse, plotShow, applyBiome } from './land.js';
 import { wall, rest, ringOf, updateHole, updateStats, putPiece } from './wall.js';
@@ -337,7 +337,13 @@ export function dressRows() {
       inp.oninput = () => dress.edit.rename(inp.value.replace(/[^a-z0-9 '-]/gi, '').slice(0, 18));
       row('Name').append(inp);
     }
-    chooser(row('Pirate'), [['m', 'Male'], ['f', 'Female']], L.body, look('body'));
+    chooser(row('Pirate'), BODIES, L.body, look('body'));
+    if (L.body === 'capy') {
+      // (Umami's kind, 14 Nov: his fur's his own, so only what a capybara can wear on his face and ears)
+      toggle(row('Eyepatch'), L.patch, look('patch'));
+      chooser(row('Earrings'), EARRINGS, L.earring, look('earring'));
+      return;
+    }
     const sk = row('Skin');
     SKIN.forEach((c, i) => { const b = el('button', 'sw' + (i === L.skin ? ' cur' : '')); b.style.background = c; b.title = 'Skin'; b.setAttribute('aria-label', `Skin ${i + 1}`); b.onclick = () => look('skin')(i); sk.append(b); });
     const hr = row('Hair');
@@ -356,7 +362,8 @@ export function dressRows() {
     toggle(row('Wristband'), L.wristband, look('wristband'));
     toggle(row('Starfish'), L.starfish, look('starfish'));   // (stuck to the cheek: Gravee's)
   } else if (dress.tab === 'clothes') {
-    slot('Hat', 'hat'); slot('Top', 'top'); slot('Waist', 'waist'); slot('Legs', 'legs'); slot('Feet', 'feet'); slot('In hand', 'hand');
+    slot('Hat', 'hat'); slot('Top', 'top'); slot('Waist', 'waist');
+    if (L.body !== 'capy') { slot('Legs', 'legs'); slot('Feet', 'feet'); slot('In hand', 'hand'); }   // (a capybara: nothing on his legs or in his paws)
     box.append(el('p', 'note', `Clothes and dyes from the Puzzle Pirates tailor, and everything ${Object.keys(PIRATES).join(' and ')} wear.`));
   } else if (dress.tab === 'familiar') {
     slot('Familiar', 'fam');

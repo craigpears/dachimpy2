@@ -993,7 +993,11 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   capybara form" (the watched race has him at his sloop's helm as the capybara). And more: "make it not just so the
   capybara is a pet, but as a model that, you know, you can actually run around with them as a pirate. Who knows,
   have they maybe dressed the capybara up in clothing? That would be so hilarious. Have it as a primary model ...
-  Not if it's a huge project, but if it was easy enough to do."
+  Not if it's a huge project, but if it was easy enough to do." Done 14 Nov: a capybara is a body in the wardrobe
+  ("Pirate": Male, Female, Capybara), Umami's own model walking the den at a trot; he wears any hat, a shirt or
+  jacket over his front, a belt or sash, an eyepatch, earrings and a familiar on his back. Umami himself, in a
+  captain's hat and jacket and a red sash: den.html?as=umami. Still to see: how he looks seated, rowing and at
+  the helm (the den poses him as it does a pirate, his front legs as arms).
 
 - **The Distilling guide trimmed to its best moves (14 Nov):** "I love how we've got the moves like the hook, pull a
   line of browns. But ... some of the moves are good for behind the scenes but need hiding. Like, with these arrows,
