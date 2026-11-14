@@ -12,51 +12,47 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,500&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/site.css">
 <style>
-  :root { --ink: #2a1d13; --ink2: #5b4330; --gold: #e0a92a; --cream: #f6ead2; --dim: #cbb894; --edge: #5a412a; --paper: #f3e3c3; --paper2: #e8d2a8; }
-  * { box-sizing: border-box; }
-  html { background: #140d08; }
-  body { margin: 0; min-height: 100vh; color: var(--cream); font: 500 17px/1.5 'Alegreya Sans', system-ui, sans-serif;
-    background: #140d08 repeating-linear-gradient(90deg, rgba(255, 220, 160, 0.025) 0 2px, transparent 2px 120px); }
-  a { color: var(--gold); }
-  .wrap { max-width: 980px; margin: 0 auto; padding: 28px 16px 48px; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 28px 16px 48px; }
   header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 20px; margin-bottom: 8px; }
-  h1 { margin: 0; font: 700 clamp(30px, 6vw, 44px)/1.05 'Alegreya', serif; color: var(--gold); }
+  h1 { margin: 0; font: 700 clamp(30px, 6vw, 44px)/1.05 'Alegreya', serif; color: var(--title); }
   .lede { margin: 6px 0 0; color: var(--dim); max-width: 600px; }
   .links { display: flex; flex-wrap: wrap; gap: 10px; }
-  .play { display: inline-block; font: 700 17px 'Alegreya Sans'; color: var(--ink); background: var(--gold); border-radius: 8px; padding: 9px 18px; text-decoration: none; white-space: nowrap; }
-  .play:hover { background: #f0bd44; }
-  .play.ghost { color: var(--gold); background: transparent; border: 2px solid var(--gold); padding: 7px 16px; }
-  .play.ghost:hover { color: var(--ink); background: var(--gold); }
+  .play { display: inline-block; font: 700 17px 'Alegreya Sans'; color: var(--on-accent); background: var(--accent); border-radius: 8px; padding: 9px 18px; text-decoration: none; white-space: nowrap; }
+  .play:hover { background: var(--accent-hi); }
+  .play.ghost { color: var(--accent-text); background: transparent; border: 2px solid var(--accent); padding: 7px 16px; }
+  .play.ghost:hover { color: var(--on-accent); background: var(--accent); }
   nav.toc { margin: 18px 0 0; color: var(--dim); font-size: 15px; }
   nav.toc a { margin-right: 4px; }
   h2 { display: flex; align-items: center; gap: 14px; margin: 38px 0 14px; font: 700 22px 'Alegreya', serif; color: var(--dim); }
   h2::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--edge), transparent); }
-  article { background: linear-gradient(170deg, var(--paper), var(--paper2)); color: var(--ink); border: 1px solid #c9a35c; border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 40px rgba(120, 80, 30, 0.18); padding: 14px; margin: 0 0 20px; }
+  article { background: linear-gradient(170deg, var(--paper), var(--paper2)); color: var(--ink); border: 1px solid var(--paper-edge); border-radius: 12px;
+    box-shadow: 0 8px 24px var(--shadow), inset 0 0 40px var(--paper-glow); padding: 14px; margin: 0 0 20px; }
   .shots { display: grid; gap: 10px; grid-template-columns: 1fr; }
   .shots.two { grid-template-columns: 1fr 1fr; }
   .shots.three { grid-template-columns: 1fr 1fr 1fr; }
-  .shots a { display: block; border-radius: 7px; overflow: hidden; border: 2px solid #3b2a1b; background: #2a1c11; line-height: 0; }
+  .shots a { display: block; border-radius: 7px; overflow: hidden; border: 2px solid var(--frame); background: var(--well); line-height: 0; }
   .shots img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; transition: transform .25s; }
   .shots a:hover img { transform: scale(1.02); }
-  h3 { margin: 12px 2px 4px; font: 700 25px/1.15 'Alegreya', serif; color: #6b2a12; }
+  h3 { margin: 12px 2px 4px; font: 700 25px/1.15 'Alegreya', serif; color: var(--ink-head); }
   article p, article li { color: var(--ink2); max-width: 70ch; }
   article p { margin: 0 2px 6px; }
   article ul { margin: 2px 0 8px; padding-left: 22px; }
   article li { margin: 0 0 5px; }
   article b { color: var(--ink); }
-  .ask { font: italic 700 20px/1.3 'Alegreya', serif; color: #8a4b0f; margin: 4px 2px 8px; }
+  .ask { font: italic 700 20px/1.3 'Alegreya', serif; color: var(--link); margin: 4px 2px 8px; }
   .try { margin: 8px 2px 2px; font-weight: 700; font-size: 15px; }
-  .try a { color: #8a4b0f; }
+  .try a { color: var(--link); }
   .try code { font: 600 14px ui-monospace, Consolas, monospace; }
-  .note { font-style: italic; font-size: 15px; color: #7a6048; }
-  .note a { color: #8a4b0f; }
+  .note { font-style: italic; font-size: 15px; color: var(--ink2); }
+  .note a { color: var(--link); }
   /* A tall picture (the race's chart) beside its words, not cropped. */
   article.tall { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 4px 18px; align-items: start; }
   article.tall .shots img { aspect-ratio: auto; }
   article.tall h3 { margin-top: 4px; }
-  footer { margin-top: 40px; color: #8c7a60; font-size: 13px; text-align: center; }
+  footer { margin-top: 40px; color: var(--faint); font-size: 13px; text-align: center; }
   @media (max-width: 640px) {
     body { font-size: 16px; }
     .shots.two, .shots.three { grid-template-columns: 1fr; }
@@ -68,16 +64,12 @@
 </style>
 </head>
 <body>
+<script src="js/site-bar.js"></script>
 <div class="wrap">
   <header>
     <div>
       <h1>How the Pirate Den is designed</h1>
       <p class="lede">The thinking behind the den's places and puzzles, in plain words and pictures. It starts with the sloop race, where most of the thinking has gone lately.</p>
-    </div>
-    <div class="links">
-      <a class="play ghost" href="./" target="_self">Front page</a>
-      <a class="play ghost" href="changelog.html" target="_self">What's new</a>
-      <a class="play" href="den.html">Play the den</a>
     </div>
   </header>
   <nav class="toc">The race: <a href="#race" target="_self">snakes and ladders</a> · <a href="#fair" target="_self">every way can win</a> · <a href="#gates" target="_self">the gates</a> · <a href="#start" target="_self">the start</a> · <a href="#door" target="_self">the starlit door</a> · <a href="#plan" target="_self">planning your route</a> · <a href="#tactics" target="_self">racing each other</a> · <a href="#watch" target="_self">watching</a>. The den: <a href="#who" target="_self">who it's for</a> · <a href="#everywhere" target="_self">one puzzle everywhere</a> · <a href="#islands" target="_self">little islands</a> · <a href="#world" target="_self">in the world</a> · <a href="#host" target="_self">the host</a> · <a href="#read" target="_self">read versions</a> · <a href="#pirates" target="_self">real pirates</a>.</nav>

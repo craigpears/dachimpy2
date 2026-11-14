@@ -15,12 +15,9 @@
   const toPrimer = () => { if (/^#\//.test(location.hash)) location.replace('carpentry.html' + location.hash); };
   toPrimer();
   addEventListener('hashchange', toPrimer);
-  // The colour theme: the one picked at the top right (kept in this browser), or ?theme=<name> to try one (any
-  // [data-theme] block in the colours at the top of the styles). Set before the page draws, so it never flashes.
-  let theme = new URLSearchParams(location.search).get('theme');
-  if (!theme) { try { theme = localStorage.getItem('den.front.theme'); } catch { /* (no storage: the default) */ } }
-  if (theme && theme !== 'rose') document.documentElement.dataset.theme = theme;
 </script>
+<!-- The colour theme picked at the top right, on every page (css/site.css holds the colours and their themes). -->
+<script src="js/theme.js"></script>
 <meta name="description" content="Proofs of concept for learning Puzzle Pirates: tutorials played alongside a pirate in 3D or read at your own pace, a sloop race made of puzzles, and a den to look round.">
 <meta property="og:title" content="The Pirate Den">
 <meta property="og:description" content="Proofs of concept for learning Puzzle Pirates: tutorials played alongside a pirate in 3D or read at your own pace, a sloop race made of puzzles, and a den to look round.">
@@ -30,113 +27,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,500&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 3'%3E%3Cpath d='M0 0h2v1h1v2H1V2H0z' fill='%23e48fae'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/site.css">
 <link rel="stylesheet" href="css/banner.css">
 <style>
-  /* ===== The colours: every colour on the page is here, and only here (the user, 14 Nov: "it would be good to be
-     able to experiment with the color theme of the website ... my kind of rose purple kind of theme ... not in a
-     glaring way, but at least there's like the call for actions following that theme and something neutral for
-     the rest"). Neutrals for most of the page; the calls to action (the buttons, the links, the choices, the
-     sticky menu) in Dachimpy's rose and purple, the colours of their wig, braces and kilt.
-     To try a theme: change the values in :root, or copy the [data-theme="gold"] block below under a new name and
-     open the page with ?theme=<name> (?theme=gold shows the page's old gold look). ===== */
-  :root {
-    /* The neutrals: the dark page, its words, the picture frames. */
-    --bg: #151012;                         /* the page */
-    --bg-stripe: rgba(255, 228, 220, 0.025); /* its faint stripes */
-    --bar: rgba(21, 16, 18, 0.94);         /* behind the sticky menu */
-    --text: #f4ebe4;                       /* words on the dark */
-    --dim: #c6b8af;                        /* quieter words, section headings */
-    --faint: #9c8f88;                      /* the test pages and the footer */
-    --title: #f6e7da;                      /* the page's title and its big question */
-    --edge: #4c3c39;                       /* lines and rules */
-    --frame: #3a2d2b;                      /* round pictures */
-    --well: #241b1b;                       /* behind pictures while they load */
-    --shadow: rgba(0, 0, 0, 0.45);
-    --tile: rgba(255, 236, 228, 0.05);     /* a place on the launch pad */
-    --tile-hi: rgba(255, 236, 228, 0.11);
-    --plain-a: #4a3550; --plain-b: #2c2131; /* a choice with no picture (YPPedia, Puzzle Practice) */
-    /* The parchment: the cards. */
-    --paper: #f5ebdf; --paper2: #eadbc9;
-    --paper-edge: #c9ae94;
-    --paper-glow: rgba(120, 80, 60, 0.16);
-    --ink: #2b1f1b;                        /* words on parchment */
-    --ink2: #5a4740;
-    --ink-head: #5b2c26;                   /* a card's heading */
-    --coming-a: #ebdfcd; --coming-b: #e3d4be; --coming-edge: #ab927a; --coming-text: #665243;
-    /* The calls to action: rose and purple, kept to the top level (the banner, Play the den, the outlined buttons,
-       the menu) and to hover and focus; below that the page is neutral (the user, 14 Nov: "once you get below that
-       in the hierarchy, it feels like it needs to get a little bit more neutral, not massively off"). */
-    --accent: #e48fae;                     /* rose: a button, the menu's place, a choice's frame on hover */
-    --accent-hi: #f2aac3;                  /* ...hovered */
-    --accent-text: #f1b9cc;                /* a link or a choice's title on the dark */
-    --on-accent: #2d1121;                  /* words on a rose button */
-    --accent2: #9d65b9;                    /* purple: the launch pad's hover */
-    --accent2-text: #c9a9dc;               /* small purple labels ("made by...") */
-    --link: #962f65;                       /* a link on parchment */
-    --link-hi: #7a2a7e;                    /* ...hovered, toward purple */
-    /* The banner (Dachimpy's monkey on the treasure map's trail, at dusk). */
-    --sky-top: #1b1418; --sky-low: #45293b; --glow: rgba(228, 143, 174, 0.38);
-    --sea-top: #2d2030; --sea-low: #171114;
-    --land: #31232f; --land-lit: #4a3043;
-    --fur: #8b5a37; --fur-light: #e6c29c; --fur-line: #3b2418; --eye: #22150f; --hook: #d6cfd6;
-    --word-edge: #4a2242;                  /* round the wordmark's letters */
-    --sail: #f1e6dc; --hull: #5a3a2c;
-  }
-  /* The themes to pick from at the top right (the user, 14 Nov: "a theme picker in the top right ... dark gold,
-     black gold, blue, that kind of thing"), each a block over :root's rose. Every one's words are checked readable
-     (tests/front-page.test.ts). Dark gold: the old look, gold on brown. */
-  :root[data-theme="gold"] {
-    --bg: #140d08; --bg-stripe: rgba(255, 220, 160, 0.025); --bar: rgba(20, 13, 8, 0.94);
-    --text: #f6ead2; --dim: #cbb894; --faint: #a8967a; --title: #e0a92a; --edge: #5a412a; --frame: #3b2a1b; --well: #2a1c11;
-    --tile: rgba(255, 230, 180, 0.05); --tile-hi: rgba(255, 230, 180, 0.12); --plain-a: #3b5d4a; --plain-b: #24392d;
-    --paper: #f3e3c3; --paper2: #e8d2a8; --paper-edge: #c9a35c; --paper-glow: rgba(120, 80, 30, 0.18);
-    --ink: #2a1d13; --ink2: #5b4330; --ink-head: #6b2a12;
-    --coming-a: #eadbb8; --coming-b: #e3d1aa; --coming-edge: #a88a5c; --coming-text: #66513a;
-    --accent: #e0a92a; --accent-hi: #f0bd44; --accent-text: #e0a92a; --on-accent: #2a1d13;
-    --accent2: #e0a92a; --accent2-text: #d4b06a; --link: #8a4b0f; --link-hi: #6b2a12;
-    --sky-top: #142235; --sky-low: #3d6d93; --glow: rgba(224, 169, 42, 0.25); --sea-top: #2a5878; --sea-low: #142a3c;
-    --land: #23384c; --land-lit: #2f4a63; --word-edge: #1f3550;
-  }
-
-  /* Black and gold: gold on a near-black neutral. */
-  :root[data-theme="black"] {
-    --bg: #0e0e0f; --bg-stripe: rgba(255, 240, 200, 0.02); --bar: rgba(14, 14, 15, 0.94);
-    --text: #f2efe8; --dim: #bdb7ab; --faint: #9a958c; --title: #f4ecd8; --edge: #3a3631; --frame: #2a2724; --well: #1b1a19;
-    --tile: rgba(255, 250, 235, 0.05); --tile-hi: rgba(255, 250, 235, 0.11); --plain-a: #3a3428; --plain-b: #24211b;
-    --paper: #f4efe4; --paper2: #e7dfcd; --paper-edge: #bfae86; --paper-glow: rgba(90, 70, 30, 0.16);
-    --ink: #1d1a15; --ink2: #4d473d; --ink-head: #5a4318;
-    --coming-a: #ebe4d4; --coming-b: #e2d9c4; --coming-edge: #a89b7c; --coming-text: #5c5341;
-    --accent: #d4a537; --accent-hi: #e6bb52; --accent-text: #e2b84e; --on-accent: #17130a;
-    --accent2: #b08a3e; --accent2-text: #cdb27a; --link: #7a5a12; --link-hi: #5a4210;
-    --sky-top: #121212; --sky-low: #3a3324; --glow: rgba(212, 165, 55, 0.3); --sea-top: #22201c; --sea-low: #121110;
-    --land: #2a2721; --land-lit: #3b362c; --word-edge: #3a2f16;
-  }
-  /* Blue: sea blues on a slate neutral. */
-  :root[data-theme="blue"] {
-    --bg: #0f141b; --bg-stripe: rgba(200, 225, 255, 0.025); --bar: rgba(15, 20, 27, 0.94);
-    --text: #e9eef5; --dim: #b3bfcd; --faint: #8f9bab; --title: #eef3fa; --edge: #2e3a4a; --frame: #232d3a; --well: #18202a;
-    --tile: rgba(220, 235, 255, 0.05); --tile-hi: rgba(220, 235, 255, 0.11); --plain-a: #2e4766; --plain-b: #1d2c40;
-    --paper: #eef2f7; --paper2: #dfe6ef; --paper-edge: #a8b8cc; --paper-glow: rgba(60, 90, 130, 0.16);
-    --ink: #17202b; --ink2: #44515f; --ink-head: #1f3a5c;
-    --coming-a: #e2e8f0; --coming-b: #d7dfea; --coming-edge: #93a3b8; --coming-text: #4a5869;
-    --accent: #6fa8e8; --accent-hi: #92bff0; --accent-text: #9cc6f2; --on-accent: #0c1a2b;
-    --accent2: #7f8fe0; --accent2-text: #aab6ef; --link: #1f5fa8; --link-hi: #1a4a86;
-    --sky-top: #0f1824; --sky-low: #2c4a6b; --glow: rgba(111, 168, 232, 0.3); --sea-top: #1d3048; --sea-low: #0f1826;
-    --land: #1c2a3a; --land-lit: #27394d; --word-edge: #183152;
-  }
-
+  /* The front page's own look; its colours, and the page underneath, are css/site.css's. */
   /* The theme picker, top right above the banner: a swatch a theme, the one picked ringed. */
   .themes { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin: -14px 0 8px; font-size: 14px; color: var(--dim); }
   .themes button { width: 28px; height: 28px; padding: 0; border-radius: 50%; cursor: pointer; border: 2px solid var(--edge);
     background: linear-gradient(135deg, var(--a) 0 50%, var(--b) 50% 100%); }
   .themes button[aria-pressed="true"] { border-color: var(--text); box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
   .themes button:hover { border-color: var(--dim); }
-  * { box-sizing: border-box; }
-  html { background: var(--bg); scroll-behavior: smooth; }
-  body { margin: 0; min-height: 100vh; color: var(--text); font: 500 17px/1.5 'Alegreya Sans', system-ui, sans-serif;
-    background: var(--bg) repeating-linear-gradient(90deg, var(--bg-stripe) 0 2px, transparent 2px 120px); }
-  a { color: var(--accent-text); }
-  a:hover { color: var(--accent-hi); }
   img { display: block; max-width: 100%; }
   .wrap { max-width: 980px; margin: 0 auto; padding: 28px 16px 48px; }
   /* The bar, stuck to the top as you scroll (the user, 14 Nov: "I definitely need a sticky navigation menu"; then
@@ -152,7 +52,6 @@
   .jump .go a:hover, .jump .go a:focus-visible { color: var(--accent-text); }
   .jump .play { flex: none; padding: 10px 24px; font-size: 19px; }
   @media (max-width: 360px) { .jump .play { padding: 9px 16px; font-size: 17px; } }   /* both links still whole on the narrowest phones */
-  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .lede { margin: 14px 0 0; color: var(--dim); max-width: 640px; }
   .play { display: inline-block; font: 700 17px 'Alegreya Sans'; color: var(--on-accent); background: var(--accent); border-radius: 8px; padding: 9px 18px; text-decoration: none; white-space: nowrap; }
   .play:hover { color: var(--on-accent); background: var(--accent-hi); }
@@ -186,14 +85,8 @@
   .shots img, .pic img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; transition: transform .25s; }
   .shots a:hover img, a.pic:hover img { transform: scale(1.02); }
 
-  /* Usable first (the user, 14 Nov: "ideally like those colors, but not at the expense of like usability"): every
-     link and button shows where the keyboard is, rose on the dark, the link's own colour on parchment. */
-  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  /* (Where the keyboard is, on parchment: the link's own colour; on the dark, css/site.css's rose.) */
   .way:focus-visible { outline-color: var(--link); }
-  @media (prefers-reduced-motion: reduce) {
-    html { scroll-behavior: auto; }
-    *, *::before, *::after { animation: none !important; transition: none !important; }
-  }
   /* What this place is, tucked under the title; then straight to what you're here for (the user, 14 Nov: Dachimpy's
      cookie welcome "creates a lot of dead space and misses the key point"; it's for the den). */
   .about { max-width: 620px; color: var(--dim); font-size: 15px; margin: 4px 0 24px; }
@@ -294,7 +187,6 @@
   footer { margin-top: 40px; color: var(--faint); font-size: 13px; text-align: center; }
 
   @media (max-width: 640px) {
-    body { font-size: 16px; }
     .about { grid-column: 1 / -1; margin-top: 10px; }
     article.side { grid-template-columns: 1fr; }
     .cards { grid-template-columns: 1fr; }
@@ -471,7 +363,6 @@
       <a class="place" href="den.html?at=built"><img src="changelog/bilge-raid.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Everything built</b><i>The whole den, the beach beyond</i></span></a>
       <a class="place" href="den.html?at=shack"><img src="changelog/shack.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Your shack</b><i>Built from Carpentry pieces</i></span></a>
       <a class="place" href="den.html?at=map-scene"><img src="changelog/captains-map.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>The captain's map</b><i>Where the sea opens up</i></span></a>
-      <a class="place" href="den.html?at=married"><img src="changelog/wedding-gifts.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Home, married</b><i>Your spouse at the den</i></span></a>
     </section>
     <section>
       <h3>Out to sea</h3>

@@ -5,9 +5,14 @@ at its top (drawn by `js/banner.js`, its look `css/banner.css`, its sloop a laye
 loading splash in `den.html`, until the den's first frame, is drawn from the old title card instead, with the banner's sloop and wordmark) and a menu of its sections stuck to the top as you scroll, Dachimpy greeting you (their lines in
 `src/lines/dachimpy.ts`, `FRONT_PAGE`) and "what are you here for?": the den, the new concepts, the tutorials by
 puzzle (each its 3D lesson and its read version), the Global Cade Sim, practice, real pirates; then the launch pad,
-`#places`, every `?at=` link grouped with a picture each (the den's Places button, in place of a Cheats button),
+`#places`, every `?at=` link worth going to grouped with a picture each (the den's Places button, in place of a Cheats button),
 a room of your own (Dachimpy's words, `FRONT_PAGE.yourRoom`), and the test pages at its foot. A new tutorial, read
 version or `?at=` place goes on it too. It forwards an old primer link (`/#/daily`) on.
+The site's look, every page's (14 Nov: "the color theme and things need to carry on through the site"): the colours
+and their themes `css/site.css` (a page's own styles use them by name, never colours of their own:
+`tests/front-page.test.ts`), the theme picked on the front page applied in each page's head by `js/theme.js`, and on
+every page but the front page a bar across the top, home first, drawn by `js/site-bar.js` (first thing in the body;
+`data-static` where a page has a sticky menu of its own). A new page links all three.
 The primer, moved aside to `carpentry.html` ("a bit of fun for carpentry"), a static site with no build step:
 `carpentry.html`, `js/engine.js` (pieces, solver, scoring), `js/render.js` (SVG), `js/app.js` (pages).
 Preview with `python -m http.server 8642`.

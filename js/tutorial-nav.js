@@ -17,7 +17,8 @@ const STYLE_ID = 'tutorial-nav-style';
 /* Its look: the guides' (design.html's) dark wood and gold by default; a page sets the --tn-* properties to change it
    (--tn-bleed: how far it reaches out over the page's side padding). */
 const CSS = `
-.tnav { --tn-bg: rgba(20, 13, 8, 0.94); --tn-ink: #f6ead2; --tn-dim: #cbb894; --tn-gold: #e0a92a; --tn-edge: #5a412a; --tn-panel: #241710;
+/* (its colours the theme's, css/site.css, the old gold where a page hasn't it) */
+.tnav { --tn-bg: var(--bar, rgba(20, 13, 8, 0.94)); --tn-ink: var(--text, #f6ead2); --tn-dim: var(--dim, #cbb894); --tn-gold: var(--accent-text, #e0a92a); --tn-edge: var(--edge, #5a412a); --tn-panel: var(--well, #241710);
   position: sticky; top: 0; z-index: 30; margin: 0 calc(-1 * var(--tn-bleed, 0px)); padding: 0 var(--tn-bleed, 0px); background: var(--tn-bg); border-bottom: 1px solid var(--tn-edge);
   backdrop-filter: blur(4px); font: 600 15px/1.3 'Alegreya Sans', system-ui, sans-serif; color: var(--tn-ink); }
 .tnav .tn-bar { display: flex; align-items: center; gap: 4px; overflow-x: auto; scrollbar-width: none; padding: 6px 0; }

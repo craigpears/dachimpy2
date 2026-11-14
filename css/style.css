@@ -1,13 +1,16 @@
 /* ---------- tokens ---------- */
-:root {
+/* The primer's own colours, kept to it (its shell and its toast), so the site's bar over it keeps the site's (css/
+   site.css). Its call to action is the theme's, picked on the front page (14 Nov: "the color theme and things need
+   to carry on through the site"): the theme's link colour on its parchment, the theme's own on its dark. */
+.shell, #toast {
   --bg: #f2e9d6;
   --panel: #fbf6ea;
   --panel-2: #f6eedc;
   --ink: #2a2118;
   --muted: #6d5f4e;
   --line: #ddcdaf;
-  --accent: #9b3b2b;
-  --accent-ink: #fff6ea;
+  --accent: var(--link);
+  --accent-ink: var(--paper);
   --sea: #2c6a6e;
   --good: #2e7a4c;
   --good-bg: #e3f0e2;
@@ -44,31 +47,21 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  .shell, #toast {
     --bg: #17120d; --panel: #211a13; --panel-2: #1c1610; --ink: #efe4cf; --muted: #b3a188; --line: #3b3024;
-    --accent: #d9735c; --accent-ink: #1b120c; --sea: #6fb3b5;
+    --accent: var(--accent-text); --accent-ink: var(--on-accent); --sea: #6fb3b5;
     --good: #7cc596; --good-bg: #1d2e22; --bad: #e88473; --bad-bg: #36201b; --ok: #d9b65e; --ok-bg: #302814;
     --bench: #2e2218; --work: #4a3d30; --hole: #0d0906; --hole-edge: #000; --grain: rgba(25, 12, 2, 0.32);
     --shadow: 0 6px 18px -10px rgba(0, 0, 0, 0.6);
     color-scheme: dark;
   }
 }
-:root[data-theme="dark"] {
-  --bg: #17120d; --panel: #211a13; --panel-2: #1c1610; --ink: #efe4cf; --muted: #b3a188; --line: #3b3024;
-  --accent: #d9735c; --accent-ink: #1b120c; --sea: #6fb3b5;
-  --good: #7cc596; --good-bg: #1d2e22; --bad: #e88473; --bad-bg: #36201b; --ok: #d9b65e; --ok-bg: #302814;
-  --bench: #2e2218; --work: #4a3d30; --hole: #0d0906; --hole-edge: #000; --grain: rgba(25, 12, 2, 0.32);
-  --shadow: 0 6px 18px -10px rgba(0, 0, 0, 0.6);
-  color-scheme: dark;
-}
 
 /* ---------- base ---------- */
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
-body {
-  margin: 0; background: var(--bg); color: var(--ink);
-  font: 18px/1.55 var(--sans);
-}
+body { margin: 0; font: 18px/1.55 'Alegreya Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; }
+.shell { background: var(--bg); color: var(--ink); }
 h1, h2, h3 { font-family: var(--serif); line-height: 1.15; margin: 0 0 0.4em; font-weight: 700; }
 h1 { font-size: clamp(30px, 4.4vw, 44px); letter-spacing: -0.01em; }
 h2 { font-size: 26px; margin-top: 1.6em; }

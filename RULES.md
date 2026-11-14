@@ -3723,6 +3723,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   islands, houses, the sloop race, by puzzle), each a small picture and a line. A new place with a link goes
   there too. The Cheats button is gone from the panel; the backtick key still opens the cheat menu below, for
   skipping waves while trying things out.
+  Places worth going to, not bonuses (the user, 14 Nov, of "Home, married": "that's just like a bonus from the
+  marriage thing. It's not really something I want to guide people to"): a link that only shows a reward for
+  something done elsewhere stays off the launch pad (its `?at=` link still works, for trying things out).
 - **The cheat menu, for trying things out** (the backtick key; the Cheats button until 14 Nov). The user asked
   for a way to skip stages. It pauses the game while it's open. Playing alone only, as with a crew
   everyone's game would have to follow. Kept small: little buttons, few of them.

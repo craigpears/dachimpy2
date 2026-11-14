@@ -989,6 +989,40 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   All of it feeding tutorials later, Gunnery's with Rapportus and Balloffire. "No reason not to have them on the
   to-do list and start at least doing some of the basics on those. I'm sure that will evolve over time."
 
+- **Umami as a model you can play (14 Nov):** "when I say umami should take the place of [Gravee], I mean in the
+  capybara form" (the watched race has him at his sloop's helm as the capybara). And more: "make it not just so the
+  capybara is a pet, but as a model that, you know, you can actually run around with them as a pirate. Who knows,
+  have they maybe dressed the capybara up in clothing? That would be so hilarious. Have it as a primary model ...
+  Not if it's a huge project, but if it was easy enough to do."
+
+- **The Distilling guide trimmed to its best moves (14 Nov):** "I love how we've got the moves like the hook, pull a
+  line of browns. But ... some of the moves are good for behind the scenes but need hiding. Like, with these arrows,
+  I really can't even see what the crawl is. Those arrows are so confusing. [A] channel made for [a white] ... these
+  are scenarios, not moves. Like, it's all just a bit noisy. It feels like you've got to, like, find the diamonds in
+  the rough." The read version shows only the moves that teach well; the rest stay behind the scenes, for the bots;
+  scenarios kept apart from moves.
+
+- **A way home at the top of every page (14 Nov):** "we also need a easy way to get back to home on each of these
+  other pages at the top."
+
+- **The front page's colours through the whole site (14 Nov):** "the color theme and things need to carry on through
+  the site. It's just on the homepage right now." The theme you pick on the front page, and its look, on every page.
+
+- **No "Home, married" on the front page's places (14 Nov):** "why is there a cheat in a place like being at home and
+  married? That's not really very interesting ... that's just like a bonus from the marriage thing. It's not really
+  something I want to guide people to."
+
+- **What's new shows the front page as it is now (14 Nov):** "The What's New page needs updating with the front page
+  design": its front page entry still shows the first go (Dachimpy at the door with a cookie); the banner, the
+  choices and the themes since.
+
+- **Hugs and Cookies' entry doing justice to the opening (14 Nov):** "the [Dachimpy's house] Hugs and Cookies does
+  not feel like it does justice for my Hugs and Cookies opening." Its What's new entry shows the museum wall, not
+  the hug at the door and the cookie (to pin down with the user whether the opening itself wants more, too).
+
+- **Umami among the friends' portraits (14 Nov):** "Umami needs to be in the portraits too as a friend" (with his
+  capybara look, in the session making him a model you can play).
+
 ## Spotted along the way (not asked for)
 
 - **Distilling's timing tests trip when the machine's busy (14 Nov):** in a full test run, "cheap enough to run on
