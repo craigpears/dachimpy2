@@ -484,7 +484,16 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     - **The hall: a hug and a cookie at the door, every visit.** Dachimpy says hello, comes to your side and
       hugs you (the talking pirates' `hug` idle, your eyes shut), then holds out a plate of cookies (`offer`,
       holding furniture.js's `cookiePlate`), and you take one; their line and yours one after the other,
-      never over each other; the camera in close on you both. More from the plate on the hall's table (walk
+      never over each other; the camera in close on you both. The cookie really changes hands (the user, 14
+      Nov: "cookies need to actually be an animation in there"): they stand on your right as you face them
+      (your cookie hand on the camera's side) and step back a little after the hug; the plate held out level
+      between you; your hand reaches to it, takes one (the plate's one fewer), brings it up to your mouth and
+      you munch it in three bites, crumbs falling, your line after your first bite; then your hand down and on
+      to the museum (`cookieBeat`, tested). Dachimpy carries the plate of cookies about (put away for the hug).
+      Things in hand that a scene needs are wardrobe items too (the user, 14 Nov: "anything ... that's been in
+      a cutscene should be an item"): a plate of cookies, a cookie and Gravee's paintbrush so far, each one
+      piece in `js/den/held.js`, which the wardrobe and the talking pirates' idles both draw; `inHand` puts one
+      in anyone's right hand. More from the plate on the hall's table (walk
       up and Space). On its back wall, between two candelabras: a page, "Did you know?", telling how it began
       (watching Dlonelyone teach a new pirate to sail; teaching out loud like that wasn't a fit for Dachimpy, so
       Dachimpy.com was their own way of helping people learn. The user, 14 Nov: "I don't think that's a
