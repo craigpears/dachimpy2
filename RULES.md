@@ -139,6 +139,13 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   sync, like the animated version, the 2D static version ... I think that's true of everything ... for all
   tutorials, that needs to be a rule somewhere. So we could do the same with the TZZ tutorial of how to do
   doubles and bingos or Vegas.")
+- **Every tutorial has the same shape, and you can jump in anywhere (14 Nov).** One standard structure across all
+  puzzles: the basics, the phases, the tricks, the scenarios. The read guide has a sticky nav to each; the animated
+  lesson asks at the start what you're after (the basics, the early or mid game, a higher Crystal Clear, the end
+  game) and offers that part's scenarios or single tricks to pick from. Not a chatbot. (The user: "somebody might not
+  care about showing me basics ... They may be struggling with the end game"; "whatever structure we come up with
+  ... should be a standard generic thing ... jump to this, let me show you this trick. Let me show you this phase
+  ... general concepts that we'll cover across all puzzles.")
 
 - **A demonstration shows its plan before it builds (12 Nov).** In any tutorial (Tzz's balloons, Helium's
   Distilling), the plan is on the board and said before the pieces go in, so every move is seen to serve

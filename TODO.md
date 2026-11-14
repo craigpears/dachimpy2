@@ -626,6 +626,12 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     mid game? Are you trying to get your CC higher?", the end game too; then, for that part, a list of its
     scenarios to be shown, or the individual tricks, to pick from ("a drop down of like, here are the scenario[s]
     ... Are you wanting the individual tricks?"). Each a short lesson on a real board, as the lesson is now.
+  - **One standard structure for every puzzle (14 Nov):** "whatever structure we come up with ... should be a standard
+    generic thing. Like ... jump to this, let me show you this trick. Let me show you this phase. Like, those are
+    general concepts that we'll cover across all puzzles. So having some standard structure would be great." So a
+    shared tutorial module, knowing nothing of any puzzle: a tutorial's parts (the basics, its phases, its tricks,
+    its scenarios), the choice at the start, the lists to pick from, the read guide's sticky nav, all drawn from one
+    description each puzzle fills in; Distilling's first, Sailing's next with the same shape.
 
 ## Spotted along the way (not asked for)
 
