@@ -567,6 +567,9 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   two things ... a specific teaser of, like, go play [Mischievious's] wedding or the [sloop] race, the distilling
   ... give a sample of some of the things ... easy, scroll to view ... you can go into a section to see more, but it
   should at least show you some of the things at a glance without you having to click and interact."
+  And no word block (14 Nov): "I don't like that opening thing of like know the basics or everything [is a] proof
+  [of] concept. That's too much of a word block. I don't want a word block for the first thing people see on my
+  site." The positioning lives in design.html; the front page opens with Dachimpy's welcome and pictures.
 - **The front page as the launch pad, and what the den is for (14 Nov):** below "what are you here for?", the
   changelog's link and a way to "jump to specific places ... then we could get rid of the cheats menu and we can
   have this as a launch pad into that." And a short, light section on the den's goals: "you want your own adventure
