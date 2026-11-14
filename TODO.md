@@ -693,6 +693,11 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   (hair, beards, hats, clothes, familiars, colours), a list of names on one side and a grid of previews of each
   on the other, every colour shown with its Puzzle Pirates name; the previews drawn by the same registry as the
   catalogue pages.
+- **Cookies in hand, and the cookie handed over for real (14 Nov):** "for my character as well ... can we add to the
+  list of in-hand things, we need cookies. Obviously that fits with my welcome scene as well ... cookies need to
+  actually be an animation in there." So a plate of cookies (and a single cookie) among the wardrobe's things in
+  hand, Dachimpy's default; and at the house's door, after the hug, the cookie actually changes hands: the plate
+  held out, you reach and take one, it's in your hand, you munch it (crumbs), then on to the museum.
 
 ## Spotted along the way (not asked for)
 
