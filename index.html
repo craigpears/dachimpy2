@@ -155,7 +155,7 @@
   .bn-trail { fill: none; stroke: var(--text); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 9 9; opacity: .92; }
   .bn-x-edge { fill: none; stroke: var(--word-edge); stroke-width: 15; stroke-linecap: round; }
   .bn-x { fill: none; stroke: var(--accent); stroke-width: 9; stroke-linecap: round; }
-  .bn-word { font: 700 52px 'Alegreya Sans', system-ui, sans-serif; letter-spacing: .5px; fill: var(--text);
+  .bn-word { font: 700 46px 'Alegreya Sans', system-ui, sans-serif; letter-spacing: .5px; fill: var(--text);
     stroke: var(--word-edge); stroke-width: 8px; stroke-linejoin: round; paint-order: stroke; }
   .bn-fur { fill: var(--fur); stroke: var(--fur-line); stroke-width: 1.5; }
   .bn-limb { fill: none; stroke: var(--fur); stroke-linecap: round; }
@@ -169,24 +169,18 @@
   .bn-sail { fill: var(--sail); stroke: var(--fur-line); stroke-width: 1; }
   .bn-flag { fill: var(--accent2); }
   /* The bar, stuck to the top as you scroll (the user, 14 Nov: "I definitely need a sticky navigation menu"; then
-     "get the menu into one row and trim that"): the den's name at the left, a few plain links that slide sideways on
-     a phone rather than wrapping, Play the den at the right. */
+     "get the menu into one row and trim that"): a few plain links at the left, Play the den at the right, bigger
+     (14 Nov: the banner says whose den it is, so no title here). */
   .jump { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 6px 18px;
     margin: 14px -16px 0; padding: 8px 16px; background: var(--bar); border-bottom: 1px solid var(--edge); backdrop-filter: blur(4px); }
-  .jump h1 { margin: 0; flex: none; font: 700 22px/1 'Alegreya', serif; }
-  .jump .brand { color: var(--title); text-decoration: none; }
   .jump .go { display: flex; gap: 2px; flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
   .jump .go::-webkit-scrollbar { display: none; }
   .jump .go a { flex: none; padding: 5px 10px; border-radius: 999px; color: var(--dim); text-decoration: none; font-weight: 700; font-size: 15px; }
   /* The section you're in (marked by the script at the foot), and a hover: quiet, the bar's colour kept for its button. */
   .jump .go a[aria-current] { color: var(--text); background: var(--tile-hi); }
   .jump .go a:hover, .jump .go a:focus-visible { color: var(--accent-text); }
-  .jump .play { flex: none; padding: 7px 16px; font-size: 16px; }
-  /* On a phone: the name and the button on one line, the links their own sliding row under them. */
-  @media (max-width: 640px) {
-    .jump { flex-wrap: wrap; justify-content: space-between; padding-bottom: 4px; }
-    .jump .go { order: 3; flex-basis: 100%; margin: 0 -6px; }
-  }
+  .jump .play { flex: none; padding: 10px 24px; font-size: 19px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .lede { margin: 14px 0 0; color: var(--dim); max-width: 640px; }
   .play { display: inline-block; font: 700 17px 'Alegreya Sans'; color: var(--on-accent); background: var(--accent); border-radius: 8px; padding: 9px 18px; text-decoration: none; white-space: nowrap; }
   .play:hover { color: var(--on-accent); background: var(--accent-hi); }
@@ -239,11 +233,8 @@
   .choice:hover, .choice:focus-visible { border-color: var(--accent); }
   .choice b { display: block; margin: 0 2px 12px; font: 700 26px/1.15 'Alegreya', serif; color: var(--title); }
   .choice:hover b, .choice:focus-visible b { color: var(--accent-text); }
-  /* Its first picture big, the other two stacked beside it, about as tall (the user, 14 Nov: "Kick It can be the
-     half-width one, and then Grave[e] and ..."). */
-  .pics { display: grid; gap: 10px 14px; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); align-items: start; }
-  .pics figure:first-child { grid-row: span 2; }
-  .pics figure:first-child figcaption { font-size: 16px; }
+  /* Three pictures side by side, all the same size (14 Nov: a big one beside two small ones "is very jarring"). */
+  .pics { display: grid; gap: 14px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .pics figure { margin: 0; }
   .pics img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 7px; border: 1px solid var(--frame); transition: transform .3s; }
   .choice:hover .pics img { transform: scale(1.02); }
@@ -319,7 +310,8 @@
     body { font-size: 16px; }
     /* Taller for its width, so cut at the right (xMinYMid slice), and the ship sails in beside the X (fits down to 320px). */
     .banner { aspect-ratio: auto; height: 84px; }
-    .bn-ship { transform-box: fill-box; transform-origin: center; transform: translate(-360px, 3px) scale(.85); }
+    .bn-ship { display: none; }   /* (the longer wordmark takes its place) */
+    .bn-word { font-size: 40px; }
     .about { grid-column: 1 / -1; margin-top: 10px; }
     article.side { grid-template-columns: 1fr; }
     .cards { grid-template-columns: 1fr; }
@@ -335,6 +327,7 @@
 </head>
 <body>
 <div class="wrap" id="top">
+  <h1 class="sr-only">Dachimpy's Pirate Den</h1>
   <div class="themes" role="group" aria-label="Colour theme">
     <span>Theme</span>
     <button type="button" data-pick="rose" style="--a:#151012;--b:#e48fae" aria-label="Rose and purple" title="Rose and purple"></button>
@@ -342,7 +335,7 @@
     <button type="button" data-pick="black" style="--a:#0e0e0f;--b:#d4a537" aria-label="Black and gold" title="Black and gold"></button>
     <button type="button" data-pick="blue" style="--a:#0f141b;--b:#6fa8e8" aria-label="Blue" title="Blue"></button>
   </div>
-  <svg class="banner" viewBox="0 0 900 140" preserveAspectRatio="xMinYMid slice" role="img" aria-label="Dachimpy: a monkey hanging from a treasure map's dotted trail, which ends in an X, over an evening sea with a ship">
+  <svg class="banner" viewBox="0 0 900 140" preserveAspectRatio="xMinYMid slice" role="img" aria-label="Dachimpy's Pirate Den: a monkey hanging from a treasure map's dotted trail, which ends in an X, over an evening sea with a ship">
     <defs>
       <linearGradient id="bn-sky" x2="0" y2="1"><stop offset="0" class="bn-s1"/><stop offset="1" class="bn-s2"/></linearGradient>
       <linearGradient id="bn-sea" x2="0" y2="1"><stop offset="0" class="bn-s3"/><stop offset="1" class="bn-s4"/></linearGradient>
@@ -372,7 +365,7 @@
     <path class="bn-trail" d="M30 -8 Q 70 26 110 24 C 160 22 182 56 230 44 S 294 6 324 30 S 344 50 352 54"/>
     <path class="bn-x-edge" d="M356 46 L 384 76 M 384 46 L 356 76"/>
     <path class="bn-x" d="M356 46 L 384 76 M 384 46 L 356 76"/>
-    <text class="bn-word" x="116" y="116">Dachimpy</text>
+    <text class="bn-word" x="116" y="116">Dachimpy's Pirate Den</text>
     <!-- The monkey (no hat: "my monkeys don't have hats", the user, 14 Nov), hanging from the trail by one hand, a hook for the other. -->
     <g class="bn-monkey">
       <path class="bn-limb" stroke-width="5" d="M70 114 C 92 122 102 104 93 97 C 86 92 80 100 86 104"/>
@@ -397,11 +390,10 @@
     </g>
   </svg>
   <!-- One bar, stuck to the top as you scroll (the user, 14 Nov: "Are we able to get the menu into one row and trim
-       that somehow?"): the den's name,
+       that somehow?"): the two links that matter most,
        one, and Play the den, the one filled button; then trimmed to what matters most, 14 Nov: "places, what's new, and
        [the] call to the den"; How it's designed and the rest are lower on the page). -->
   <nav class="jump" aria-label="The Pirate Den">
-    <h1><a class="brand" href="#top">The Pirate Den</a></h1>
     <div class="go">
       <a href="#places">Places</a>
       <a href="changelog.html">What's new</a>

@@ -857,6 +857,14 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   default for anything we're testing now." So `?as=dachimpy` dresses you as Dachimpy for the visit (your own look
   kept, nobody married), every screenshot taken that way; Umami's and Kikkit's pictures retaken.
 
+- **The banner says what it is; the bar just two links and Play; the pictures even (14 Nov):** "I don't know why we
+  have the pirate den part there. It's just a title for the sake of it ... The banner already has the. I feel like
+  you just need to change the banner to have something better, like the [Dachimpy's] Pirate Den or something, and
+  then just have those two links. And the Play the Den on the right. Maybe a bit bigger for Play the Den." And the
+  big first picture: "look at how other sites do this ... they just have it three side by side, having different
+  heights ... for the pictures is very jarring." So the banner reads "Dachimpy's Pirate Den", the bar Places, What's
+  new and a bigger Play the den, and each choice's three pictures the same size side by side.
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
