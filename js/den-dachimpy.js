@@ -74,7 +74,7 @@ function museumRow(x0) {
 const M0 = 4.5;
 /** How long the museum is: room for every exhibit, a step at either end. */
 export const MUSEUM_LEN = Math.ceil(museumRow(0).end + 1.0);
-const M1 = M0 + MUSEUM_LEN, F1 = M1 + 21;
+const M1 = M0 + MUSEUM_LEN, F1 = M1 + 23;
 /** Three rooms in a row, the camera looking in from the front (their front walls cut low, a doll's house):
     the hall you come in at, the museum, and their friends' room. */
 export const PLAN = {
@@ -171,13 +171,23 @@ export const IN_PINK_COAT = {
     top: 'swashbuckler', topCol: 'pink', topCol2: 'pink', waist: 'none', legs: 'pants', legsCol: 'pink', bareLegs: false, feet: 'bare', fam: 'none',
 };
 const DAQUAN_GROUP = { hat: 'none', feet: 'bare' };
+/** "Welcome Back Dachimpy!" (Meridian, 29 Jun 2025, commissioned by Fable at Fable's Gallery on Drogeo Island): shaggy
+    brown hair, a patch and gold hoops, a white rag shirt and patched white shorts, a tan monkey on the shoulder.
+    Fable beside them in white rags too, crowned with ice blue roses, light blue boots, a hook, a blue parrot. (The
+    pale purple eggs both hold aren't in the wardrobe.) */
+export const WELCOME_BACK_RAGS = { ...IN_RAGS, fam: 'monkey', famCol: 'tan' };
+const FABLE_IN_RAGS = {
+    hat: 'roses', hatCol: 'ice blue', hatCol2: 'light blue', top: 'rag', topCol: 'white', legs: 'ragged', legsCol: 'white',
+    feet: 'boots', feetCol: 'light blue', hook: true, fam: 'parrot', famCol: 'aqua', famCol2: 'light blue',
+};
 export const FRIENDS = [
-    friend('dalnoth', along(-1, 8), { portrait: sat('Dalnoth', 'sea') }),
-    friend('dignity', along(-1, 7), { portrait: sat('Dignity', 'den') }),
-    friend('mischievious', along(-1, 6), { portrait: sat('Mischievious', 'cafe') }),
-    friend('monkeyMan', along(-1, 5), { portrait: sat('Dachimpy', 'beach', { dress: MONKEY_MAN }) }),
-    friend('gravee', along(-1, 4), { portrait: sat('Gravee', 'sea', { dress: GRAVEE_IN_RAGS, with: IN_RAGS }) }),
-    friend('balloffire', along(-1, 3), { portrait: sat('Balloffire', 'night') }),
+    friend('dalnoth', along(-1, 9), { portrait: sat('Dalnoth', 'sea') }),
+    friend('dignity', along(-1, 8), { portrait: sat('Dignity', 'den') }),
+    friend('mischievious', along(-1, 7), { portrait: sat('Mischievious', 'cafe') }),
+    friend('monkeyMan', along(-1, 6), { portrait: sat('Dachimpy', 'beach', { dress: MONKEY_MAN }) }),
+    friend('gravee', along(-1, 5), { portrait: sat('Gravee', 'sea', { dress: GRAVEE_IN_RAGS, with: IN_RAGS }) }),
+    friend('balloffire', along(-1, 4), { portrait: sat('Balloffire', 'night') }),
+    friend('felinee', along(-1, 3), { portrait: sat('Felinee', 'sea') }),
     mid('kikkit', along(-1, 2), { portrait: sat('Kikkit', 'bloodmoon', { dress: KIKKIT_CURSED, with: CURSED }) }),
     mid('zizzy', along(-1, 1), { portrait: sat('Zizzy', 'night', { dress: ZIZZY_PINK, with: IN_PINK }) }),
     mid('daquan', FC, { portrait: sat('Daquan', 'beach', { dress: DAQUAN_GROUP, with: IN_PINK_COAT }) }),
@@ -187,7 +197,7 @@ export const FRIENDS = [
     friend('tzz', along(1, 3), { portrait: sat('Tzz', 'autumn') }),
     friend('helium', along(1, 4), { portrait: sat('Helium', 'night') }),
     friend('roobear', along(1, 5), { portrait: sat('Roobear', 'pinksea') }),
-    friend('welcomeBack', along(1, 6), { page: 'welcomeBack' }),
+    friend('welcomeBack', along(1, 6), { portrait: sat('Fable', 'night', { dress: FABLE_IN_RAGS, with: WELCOME_BACK_RAGS, yaw: -0.3 }) }),
     friend('everyone', along(1, 7), { page: 'everyone' }),
     friend('thanks', along(1, 8), { page: 'thanks' }),
 ];

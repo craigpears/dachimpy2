@@ -243,10 +243,22 @@ describe('their friends\' room: the trinkets and the portraits (IDEAS.md, "The t
         const s = f.portrait.sitter.who === 'pirate' ? f.portrait.sitter : null;
         for (const name of [s!.name, ...(s!.company ?? []).map((c) => c.name ?? '')]) expect(pirates, name).toMatch(new RegExp(`\\n  ${name}: \\{`));
         expect(BACKDROPS).toContain(f.portrait.backdrop);
-      } else expect(['welcomeBack', 'everyone', 'thanks']).toContain(f.page);
+      } else expect(['everyone', 'thanks']).toContain(f.page);
     }
-    // (Fable's look isn't known: "Welcome Back Dachimpy!" is its title on a page, no figure)
-    expect(FRIENDS.find((f) => f.id === 'welcomeBack')).toMatchObject({ page: 'welcomeBack' });
+  });
+
+  it('has Fable in "Welcome Back Dachimpy!", and Felinee beside Kikkit (the user, 14 Nov: "Need Fable as one of the people in the portraits in my house"; Felinee "absolutely on the edge of being special"; "Put her next to Kikkit")', () => {
+    const back = FRIENDS.find((f) => f.id === 'welcomeBack')!;
+    expect(back.page).toBeUndefined();
+    const s = back.portrait!.sitter;
+    expect(s.who === 'pirate' && s.name).toBe('Fable');
+    expect(s.who === 'pirate' && s.company?.[0]).toMatchObject({ kind: 'pirate', name: 'Dachimpy' });
+    // ("Hot Pink and Indigo :)", Fable's own words)
+    expect(LOOK_JS).toMatch(/Fable: \{[\s\S]*?topCol: 'indigo', topCol2: 'hot pink'/);
+    const byX = [...FRIENDS].sort((a, b) => a.x - b.x).map((f) => f.id);
+    const k = byX.indexOf('kikkit');
+    expect(byX[k - 1]).toBe('felinee');
+    expect(FRIENDS.find((f) => f.id === 'felinee')!.middle).toBeFalsy();
   });
 
   it('recreates Dachimpy\'s own portraits with friends under their real titles (IDEAS.md, both oceans, 13 Nov)', () => {

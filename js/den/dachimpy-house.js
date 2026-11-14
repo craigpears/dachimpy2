@@ -12,7 +12,7 @@ import {
   HUG, COOKIE, hugSpot, atCookies, MUSEUM_LEN,
 } from '../den-dachimpy.js';
 import { blocksOf, readSecs } from '../den-houses.js';
-import { AT_THE_DOOR, THE_COOKIE, ANOTHER_COOKIE, TOUR_LINES, PLAQUES, PANELS, CHATTER, GOODBYE, THANKS, EVERYONE, WELCOME_BACK } from '../lines/dachimpy.js';
+import { AT_THE_DOOR, THE_COOKIE, ANOTHER_COOKIE, TOUR_LINES, PLAQUES, PANELS, CHATTER, GOODBYE, THANKS, EVERYONE } from '../lines/dachimpy.js';
 import { IN_DACHIMPYS_HOUSE } from '../lines/you.js';
 import { PACE } from '../chatter.js';
 import { FURNITURE, place } from './furniture.js';
@@ -23,10 +23,9 @@ import { photoTexture, photoArt, paintPage, pageTexture } from './exhibits.js';
 import { cine } from './cine.js';
 import { V3 } from './world.js';
 
-/** The pages: the museum's panels of story, the portrait with Fable (whose look's still to check: its title,
-    no figure), the one for everyone they blockaded with, and the thank-you (src/lines/dachimpy.ts). */
+/** The pages: the museum's panels of story, the one for everyone they blockaded with, and the thank-you
+    (src/lines/dachimpy.ts). */
 const pageOf = (id) => {
-  if (id === 'welcomeBack') return paintPage({ title: 'Welcome Back Dachimpy!', text: WELCOME_BACK, kind: 'night' });
   if (id === 'everyone') return paintPage({ title: 'Everyone I Blockaded With', text: EVERYONE, withHeart: true });
   if (id === 'thanks') return paintPage({ title: 'Thank You', text: THANKS, withHeart: true });
   return paintPage({ title: PANELS[id].title, text: PANELS[id].text, withHeart: id === 'began' || id === 'donation' });

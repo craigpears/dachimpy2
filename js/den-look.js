@@ -269,6 +269,22 @@ export const PIRATES = Object.fromEntries(Object.entries({
     hat: 'roses', hatCol: 'red', hatCol2: 'green', top: 'buccaneer', topCol: 'red', topCol2: 'black', waist: 'sash', waistCol: 'black',
     legs: 'short', legsCol: 'red', feet: 'boots', feetCol: 'black', hand: 'none', fam: 'none',
   },
+  // Fable (Meridian), who welcomed Dachimpy back (June 2025), from the pirate page's portrait (checked 14 Nov): fair
+  // skin, long blonde hair crowned with roses, an eyepatch, a Dress top and Gown in indigo with hot pink ("Hot Pink
+  // and Indigo :)", Fable's own words, 14 Nov), a pink octopus. (The gold thing in hand isn't in the wardrobe.)
+  Fable: {
+    body: 'f', skin: 0, hair: 'long', hairCol: 'blonde', patch: true, earring: false, smile: true,
+    hat: 'roses', hatCol: 'hot pink', hatCol2: 'green', top: 'dresstop', topCol: 'indigo', topCol2: 'hot pink', waist: 'none',
+    legs: 'gown', legsCol: 'indigo', legsCol2: 'hot pink', feet: 'shoes', feetCol: 'indigo', hand: 'none', fam: 'octopus', famCol: 'pink',
+  },
+  // Felinee (Emerald, from the Hunter days), from the pirate page's portrait (checked 14 Nov): fair skin, red hair to
+  // the shoulders, a navy vest over a light blue shirt, light blue trousers, blue shoes, an orange octopus (Peanut).
+  // (The green flask in hand isn't in the wardrobe.)
+  Felinee: {
+    body: 'f', skin: 0, hair: 'long', hairCol: 'red', patch: false, earring: false, smile: true,
+    hat: 'none', top: 'vest', topCol: 'navy', topCol2: 'light blue', waist: 'belt', waistCol: 'navy',
+    legs: 'pants', legsCol: 'light blue', feet: 'shoes', feetCol: 'blue', hand: 'none', fam: 'octopus', famCol: 'orange',
+  },
 }).map(([name, look]) => [name, cleanLook(look)]));
 
 /* Mischievious through her gallery (Emerald, 399 portraits, checked 11 Nov), to choose which of her

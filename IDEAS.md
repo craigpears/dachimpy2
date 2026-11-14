@@ -880,7 +880,7 @@ parked: too close to the wedding for a proof of concept. One for if people love 
   the furniture as modular pieces: RULES.md), then a tour of the entries to vote on. Parked with
   the fashion show, for the same reason; the houses make it nearer to hand.
   **Fable for it (14 Nov):** "I definitely have Fable down in the ideas list for a decorating competition
-  feature." Fable (who welcomed Dachimpy back, June 2025; pronouns and look to check) as its host or judge.
+  feature." Fable (who welcomed Dachimpy back, June 2025; she/her; her look in the den since 14 Nov) as its host or judge.
 
 ## Your own little island to decorate (11 Nov)
 
@@ -2861,3 +2861,14 @@ then the same moment done properly, a higher quality version, and the emote the 
 And "any point you can stop and draw a picture of the scene that you're at, like with Graves style": pause
 anywhere and have the scene painted as a picture, the way Gravee's easel paints your portrait. (The user said
 "disguised scene" and "emojis": read here as "the cutscene" and "emotes", to pin down with the user.)
+
+## Fable's little house, with a copy of Dachimpy in it (14 Nov)
+
+"Lol fable can have a little house with a copy of me. She loves her furnishing, helping in the St Jude's yearly
+fundraiser with Jazz. She also gave me a pet cat named Fable and an Octopus familiar named Fable as a joke so she
+could be all over me or something along those lines XD needs to appear in her house." So a house of Fable's in the
+housing district (she/her), furnished lavishly, since furnishing is her thing (and she's down to host or judge the
+decorating competition, above). In it: a copy of Dachimpy, with the cat named Fable and the octopus familiar named
+Fable all over them; and something of the St Jude's yearly fundraiser she helps run with Jazz. Her look's in the den
+now (indigo and hot pink, a crown of roses, a pink octopus), and she's in "Welcome Back Dachimpy!" on the friends'
+wall.

@@ -1576,6 +1576,7 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
 - *monkeyMan:* "The Monkey Man"
 - *gravee:* "Oh, Gawd!"
 - *balloffire:* "Balloffire, Top Gunner"
+- *felinee:* "Felinee, of Hunter"
 - *kikkit:* "Kikkit: Cursed & Cookied"
 - *zizzy:* "Zizzy: Pinky and the Pink"
 - *daquan:* "Daquan: Scabard's Group"
@@ -1596,6 +1597,7 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
 - *monkeyMan:* "Ha, the Monkey Man! That's me, 2007. Some things never change."
 - *gravee:* "Oh, Gawd! Gravee and me, in the jaws of her Familiar Plaice. That face says it all."
 - *balloffire:* "Balloffire! The best gunner I know. Watching her gun is pure magic."
+- *felinee:* "Felinee! From the Hunter days. Right next to Kikkit, where Felinee belongs."
 - *kikkit:* "Kikkit! Every Valentine's, a portrait, and always cookies."
 - *zizzy:* "Zizzy! Pinky and the pink: both of us in pink, of course."
 - *daquan:* "Daquan! My partner in crime through the whole thing. Right in the middle, where he belongs."
@@ -1604,15 +1606,14 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
 - *tzz:* "Tzz! She gave me my best teaming tip: don't stall. Ever."
 - *helium:* "Helium! Ask about the eyebrows. Actually, don't."
 - *roobear:* "Roobear! Robert roobed my ears too."
-- *welcomeBack:* "Fable welcomed me back, last June! It was so good to be home."
+- *welcomeBack:* "Fable! Welcome back, eggs and all, last June. It was so good to be home."
 - *everyone:* "Yay, all of you! Names change, I forget, but every one of you is here."
 - *thanks:* "That one's for everyone! It's the people that made it."
 
-### The pages on the friends' wall: the thank-you, everyone they blockaded with, and "Welcome Back Dachimpy!"
+### The pages on the friends' wall: the thank-you, and everyone they blockaded with
 
 - *thanks:* "To my friends on these walls, and everyone who isn't: everyone who makes Puzzle Pirates such an awesome place. Thank you."
 - *everyone:* "To everyone I blockaded with, whatever you're called now: Mems, Kenchio, my old Hunter crew, and all of you whose names I've lost. You're here!"
-- *welcomeBack:* "With Fable, June 2025."
 
 ### Now and then, as you wander after the tour
 

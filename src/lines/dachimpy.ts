@@ -130,6 +130,7 @@ export const FRIEND_TITLES = {
   monkeyMan: 'The Monkey Man',
   gravee: 'Oh, Gawd!',
   balloffire: 'Balloffire, Top Gunner',
+  felinee: 'Felinee, of Hunter',
   kikkit: 'Kikkit: Cursed & Cookied',
   zizzy: 'Zizzy: Pinky and the Pink',
   daquan: 'Daquan: Scabard\'s Group',
@@ -150,6 +151,7 @@ export const ON_A_FRIEND = {
   monkeyMan: 'Ha, the Monkey Man! That\'s me, 2007. Some things never change.',
   gravee: 'Oh, Gawd! Gravee and me, in the jaws of her Familiar Plaice. That face says it all.',
   balloffire: 'Balloffire! The best gunner I know. Watching her gun is pure magic.',
+  felinee: 'Felinee! From the Hunter days. Right next to Kikkit, where Felinee belongs.',
   kikkit: 'Kikkit! Every Valentine\'s, a portrait, and always cookies.',
   zizzy: 'Zizzy! Pinky and the pink: both of us in pink, of course.',
   daquan: 'Daquan! My partner in crime through the whole thing. Right in the middle, where he belongs.',
@@ -158,12 +160,10 @@ export const ON_A_FRIEND = {
   tzz: 'Tzz! She gave me my best teaming tip: don\'t stall. Ever.',
   helium: 'Helium! Ask about the eyebrows. Actually, don\'t.',
   roobear: 'Roobear! Robert roobed my ears too.',
-  welcomeBack: 'Fable welcomed me back, last June! It was so good to be home.',
+  welcomeBack: 'Fable! Welcome back, eggs and all, last June. It was so good to be home.',
   everyone: 'Yay, all of you! Names change, I forget, but every one of you is here.',
   thanks: 'That one\'s for everyone! It\'s the people that made it.',
 } as const;
-/** The page for "Welcome Back Dachimpy!" (with Fable, whose look's still to check: no figure). */
-export const WELCOME_BACK = 'With Fable, June 2025.';
 /** The thank-you, on a page in the friends' room: to everyone who makes Puzzle Pirates what it is. */
 export const THANKS = 'To my friends on these walls, and everyone who isn\'t: everyone who makes Puzzle Pirates such an awesome place. Thank you.';
 /** A page for everyone else they blockaded with, whose names have changed or slipped away (the user, 14 Nov:
@@ -247,7 +247,7 @@ export const CHARACTER: Character = {
     { when: 'About the exhibit you\'ve stopped by or turned to look at (once a visit each), and under it close up', says: ON_AN_EXHIBIT },
     { when: 'The titles on their friends\' portraits', says: FRIEND_TITLES },
     { when: 'About the friend\'s portrait you\'ve stopped by (once a visit each)', says: ON_A_FRIEND },
-    { when: 'The pages on the friends\' wall: the thank-you, everyone they blockaded with, and "Welcome Back Dachimpy!"', says: { thanks: THANKS, everyone: EVERYONE, welcomeBack: WELCOME_BACK } },
+    { when: 'The pages on the friends\' wall: the thank-you, and everyone they blockaded with', says: { thanks: THANKS, everyone: EVERYONE } },
     { when: 'Now and then, as you wander after the tour', says: CHATTER },
     { when: 'As you leave', says: [GOODBYE] },
     {
