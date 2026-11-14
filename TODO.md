@@ -541,6 +541,9 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   And practice (14 Nov): "if they want to practice a puzzle, then fine. We've got a few here that you can go practice
   in the fun [den]. But I'll put a link to where there's a bunch of practice puzzles ... I don't want to compete with
   it. It's what if you just want 2D practice? Here you go." Puzzle Practice: https://puzzle-practice.github.io/Puzzle_Practice/#/
+  And real people (14 Nov): "if they want a friendly community full of people ready to help them and have fun on the
+  game or watch some real people and have a real interaction ... here is the link to the Trophy Hunters Discord
+  page, which I think is the go-to." https://discord.gg/XtRHwP6XT
 
 ## Spotted along the way (not asked for)
 
