@@ -4,6 +4,8 @@ import * as THREE from 'three';
 import { turnWide } from '../den-deal.js';
 import { WALK_CADENCE, newGait, gaitStep, gaitPose } from '../walk.js';
 import { dressPirate, familiarTick, cleanLook, cleanDen, drawFlag } from '../den-look.js';
+import { mat, mesh, canvasTex, woodTex } from './materials.js';
+export { mat, mesh, canvasTex, woodTex };
 
 // The main puzzle's engine, turned for wide shapes (see turnWide in src/den-deal.ts).
 export const C = turnWide(window.Carp);
@@ -205,32 +207,8 @@ addEventListener('resize', fitCamera);
 fitCamera();
 
 // ---------- materials and little helpers ----------
-export const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.85, ...o });
-export function mesh(geo, m, shadow = true) {
-  const x = new THREE.Mesh(geo, m);
-  x.castShadow = shadow; x.receiveShadow = true;
-  return x;
-}
-export function canvasTex(w, h, draw) {
-  const cv = document.createElement('canvas');
-  cv.width = w; cv.height = h;
-  draw(cv.getContext('2d'), w, h);
-  const t = new THREE.CanvasTexture(cv);
-  t.colorSpace = THREE.SRGBColorSpace;
-  return t;
-}
+// (mat, mesh, canvasTex and woodTex are js/den/materials.js's, re-exported here: any piece can use them without the den.)
 const stripes = (a, b) => canvasTex(4, 64, (g) => { for (let i = 0; i < 8; i++) { g.fillStyle = i % 2 ? b : a; g.fillRect(0, i * 8, 4, 8); } });
-export const woodTex = canvasTex(128, 128, (g, w, h) => {
-  g.fillStyle = '#f2dcb8'; g.fillRect(0, 0, w, h);
-  for (let i = 0; i < 26; i++) {
-    g.strokeStyle = `rgba(110, 66, 30, ${0.12 + Math.random() * 0.22})`;
-    g.lineWidth = 1 + Math.random() * 2.5;
-    const y = Math.random() * h;
-    g.beginPath(); g.moveTo(0, y);
-    for (let x = 0; x <= w; x += 16) g.lineTo(x, y + Math.sin(x / 20 + i) * 2.5);
-    g.stroke();
-  }
-});
 export const groundTex = canvasTex(256, 256, (g, w, h) => {
   g.fillStyle = '#7a5c3d'; g.fillRect(0, 0, w, h);
   for (let i = 0; i < 900; i++) {

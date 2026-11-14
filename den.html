@@ -354,6 +354,7 @@
     .deco .foot { display: flex; gap: 8px; justify-content: center; align-items: center; color: var(--dim); font-size: 13px; }
     .palette { position: absolute; display: none; grid-template-columns: repeat(7, 26px); gap: 6px; padding: 10px; background: #1a120b; border: 1px solid var(--gold); border-radius: 10px; z-index: 1; }
     .palette.on { display: grid; }
+    .palette .all { grid-column: 1 / -1; margin-top: 2px; color: var(--gold); font-size: 13px; text-align: center; }
     @media (max-width: 640px) { .dress-box { flex-direction: column; align-items: center; } .dress-view { flex: none; } .dress-view canvas { width: 200px; height: 240px; } .dress-side { width: 100%; } .dress .pick b { min-width: 120px; } }
     /* The captain's map cutscene: black bars top and bottom, the den's own buttons and keys out of
        the way, and speech bubbles over the pirates. */
@@ -645,7 +646,7 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.H6VT5J7P.js');
+    import(local ? './js/den.js' : './js/den.G2GMY7K6.js');
   </script>
 </body>
 </html>

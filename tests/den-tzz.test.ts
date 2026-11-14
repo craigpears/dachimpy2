@@ -16,6 +16,7 @@ import { CHART, NOTES, WHIRLPOOLS } from '../src/den-map';
 import { RAMBLE, TANGENTS } from '../src/lines/kikkit';
 import { AFTER_KIKKIT } from '../src/lines/you';
 import { GREET, DOUBLE, BINGO, AFTER, ONWARD } from '../src/lines/tzz';
+import { DYES, HAIR } from '../src/palette';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -329,8 +330,10 @@ describe('she\'s only config, and the wardrobe has all she wears (RULES.md, "A c
     expect(parts.match(/\['rag', 'Rag shirt'\]/g)).toHaveLength(2);
     expect(parts.match(/\['knickers', 'Stripy knickers'\]/g)).toHaveLength(2);
     expect(parts.match(/\['dragon', 'Dragon', 1\]/g)).toHaveLength(2);
-    expect(LOOK_JS).toMatch(/silver: '#[0-9a-f]{6}', 'vibrant red': '#[0-9a-f]{6}'/);
-    expect(LOOK_JS).toMatch(/'light brown': '#[0-9a-f]{6}'/);
+    // (the wardrobe's colours: src/palette.ts)
+    expect(DYES.silver).toMatch(/^#[0-9a-f]{6}$/);
+    expect(DYES['vibrant red']).toMatch(/^#[0-9a-f]{6}$/);
+    expect(HAIR['light brown']).toMatch(/^#[0-9a-f]{6}$/);
     expect(LOOK_JS).toContain("['patch', 'smile', 'grin', 'hook', 'tongue', 'tattoos', 'wristband', 'starfish', 'pegleg', 'bareLegs']");
   });
 });
