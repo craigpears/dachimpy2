@@ -2839,8 +2839,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       here instead of bots?", "you can either wait for people, start with bots", "I [don't] think I want
       people to share codes. You should just see a lobby and be able to join it", and "I eventually found the
       race online thing. That really was not clear"):
-      - **The way in:** Race online on the den's top panel (from anywhere: out to the race's buoy and in to the
-        line), on the starter's card at the line, or O there.
+      - **The way in:** on the starter's card at the line, or O there; and Race online on the den's top panel
+        while in the race (only then, since 14 Nov: "race online, play with the crew. I don't think anybody's
+        really cared so far, so I don't want them as prominent menu positions").
       - **The open races** (three, `NET.LOBBIES`): each with what it's doing and who's in ("Waiting: Anne",
         "Racing now · next: Cara", "Nobody yet", "Full"), and Join, one click. A pirate name once (kept, as
         the crew's). No code to type or share; a private race's link, `den.html?at=race&race=CODE`, still works.
@@ -3597,11 +3598,18 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     frames are checked with a search of their own that gives up on a line as soon as the empty
     squares split into a pocket that isn't a multiple of five: a few milliseconds.
 - **The den's buttons sit in a row, all in view** (top left, under the stats): your pirate, your
-  den, decorate, pause, play with a crew, cheats. Discoverable matters more than tidy: folded into
+  den, decorate, pause, Places, what's new, the front page. Discoverable matters more than tidy: folded into
   a ☰ menu (8 Nov), the user missed seeing them, as they use your pirate, your den, decorate and
   the cheats a lot. Small text, but big enough to hit easily (shrunk right down, the "hit area is
-  tiny").
-- **The cheat menu, for trying things out** (the Cheats button, or the backtick key). The user asked
+  tiny"). Since 14 Nov, what nobody used is off it: Race online shows only in the race (and on the starter's
+  card), and Play with a crew is in Your den, by Done.
+- **Places: the front page as the launch pad (14 Nov).** "jump to specific places ... then we could get rid of
+  the cheats menu and we can have this as a launch pad into that." The den's Places button opens the front
+  page's "Jump straight to a place" (index.html#places): every `?at=` link, grouped (at the den, out to sea, the
+  islands, houses, the sloop race, by puzzle), each a small picture and a line. A new place with a link goes
+  there too. The Cheats button is gone from the panel; the backtick key still opens the cheat menu below, for
+  skipping waves while trying things out.
+- **The cheat menu, for trying things out** (the backtick key; the Cheats button until 14 Nov). The user asked
   for a way to skip stages. It pauses the game while it's open. Playing alone only, as with a crew
   everyone's game would have to follow. Kept small: little buttons, few of them.
   - **Skip to a stage:** the start, the walk, the gun tower, or everything built. The den starts

@@ -2,8 +2,10 @@
 
 The front page, `index.html` (14 Nov): hand-written, in the changelog's look, Dachimpy greeting you (their lines in
 `src/lines/dachimpy.ts`, `FRONT_PAGE`) and "what are you here for?": the den, the new concepts, the tutorials by
-puzzle (each its 3D lesson and its read version), practice, real pirates, and the test pages at its foot. A new
-tutorial, read version or place worth a look goes on it too. It forwards an old primer link (`/#/daily`) on.
+puzzle (each its 3D lesson and its read version), the Global Cade Sim, practice, real pirates; then the launch pad,
+`#places`, every `?at=` link grouped with a picture each (the den's Places button, in place of a Cheats button),
+a room of your own (Dachimpy's words, `FRONT_PAGE.yourRoom`), and the test pages at its foot. A new tutorial, read
+version or `?at=` place goes on it too. It forwards an old primer link (`/#/daily`) on.
 The primer, moved aside to `carpentry.html` ("a bit of fun for carpentry"), a static site with no build step:
 `carpentry.html`, `js/engine.js` (pieces, solver, scoring), `js/render.js` (SVG), `js/app.js` (pages).
 Preview with `python -m http.server 8642`.

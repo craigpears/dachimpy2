@@ -260,6 +260,7 @@ export function dressPanel(on, mode = 'pirate', tab = null) {
   if (tab || !dressTabsFor[mode].some(([id]) => id === dress.tab)) dress.tab = tab || dressTabsFor[mode][0][0];
   $('dress-title').textContent = mode === 'den' ? 'Your den' : dress.edit.title;
   $('dress-rand').style.display = mode === 'den' ? 'none' : '';
+  $('crew-btn').style.display = mode === 'den' ? '' : 'none';   // (the crew in Your den, off the top panel: 14 Nov)
   keys.clear();
   dressInit();
   dressModel();
@@ -423,6 +424,7 @@ $('den-btn').onclick = () => dressPanel(true, 'den');
 $('deco-btn').onclick = (e) => { e.currentTarget.blur(); decoMode(!deco.on); };
 $('dress-done').onclick = () => dressPanel(false);
 $('dress-rand').onclick = () => setLook(randomLook());
+$('crew-btn').addEventListener('click', () => dressPanel(false));   // (crew.js opens the crew's panel)
 $('dress').addEventListener('click', (e) => { if (e.target === $('dress')) dressPanel(false); else if (!e.target.closest('#palette')) palette(null); });
 
 /* A shortcut for trying things out (den.html?try=gundeck): the whole rampart and the gun deck
