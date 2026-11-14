@@ -1922,6 +1922,15 @@ Gunnery moves, then "now you try", on the den's one Gunnery module (the gun towe
 Their own way of showing it, and where you meet them (the gun tower, an island of their own), to
 settle with the user. Waits its turn (RULES.md, "Finish one thing at a time").
 
+**Free gunning as a juggling act (14 Nov).** The user's asked Balloffire for videos ("I'm struggling with how to
+demo freestyle gunning"). Her part can stick to the concept: "this is what the style is ... She can just demo the
+concept ... When we're introducing it, it's like this." And the cute bit: "her kind of doing some juggling acts,
+which to me is kind of what freestyle [gunning] feels like, where she's juggling some explosives and just like
+managing to get them all into the right cannons just at the right second, so when she throws and [juggles] them in,
+the cannons explode, and it's a bit of a magic trick." So her scene: Balloffire juggling powder and shot, tossing
+each into its cannon at the last moment, every gun firing on cue, a bow at the end; then the style shown plainly on
+a real Gunnery board. The detail waits on her videos.
+
 ## Gun tower: what's left (the tower itself is built; its rules are in RULES.md)
 
 - **Knocked flying:** get hit by their cannonball up on the wall and you're knocked clean off the
