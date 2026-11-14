@@ -512,6 +512,10 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     the familiar slot. The real portrait (Meridian, 5 Jan 2007): the two in matching red, a shirt and trousers, a
     gold buckle, white boots, each with a monkey on the shoulder, on a beach. Redo it to that, and look at it close
     up before it's shown.
+    Then: "I can't even see the blonde hair of [Sanne]. It just looks really wrong ... I'm pretty sure I've never
+    had long hair. And just everything just looks really wrong, like badly wrong. Quality and fidelity, everything
+    just really needs fixing." So the friends' portraits as a whole, drawn far closer to the real ones: Dachimpy
+    never with long hair, each friend's hair and colours as in their real portraits.
 
 ## Spotted along the way (not asked for)
 
