@@ -2773,6 +2773,14 @@ Puzzle Pirates, or one to make), before anything's built.
   Multibella (they) is in it too, the one who explains the wilds: they help you set up a combo (a clear beside a
   wrong-coloured star), then stand by munching chocolate chip cookies while you finish it. A nod to Dachimpy's
   cookies at their house. Their look from their pirate page, checked before they're drawn.
+- **Funny cutscenes, and Multibella at a star table (14 Nov):** "For the Wolf Den tutorial, we'll need some funny
+  cutscenes ... [Multibella] ... sneaky episodes ... make sure the werewolves don't turn ... see her like really
+  rapidly turning the duty nav things, maybe kind of on a table." Inspired by the glowing star-map tables of space
+  films (an inspiration for the feel only, nothing copied): a round chart table in a dark hut on the island, the
+  Duty Navigation wheel laid on it, its rings glowing, the stars lifting off it as she spins them frantically while
+  the moon outside wanes, a werewolf's shadow at the window turning back into a wolf-kin's with each chart. "That ...
+  kind of werewolf moon kind of symbology would be quite close." The moon on the board (the den's moon, the guide
+  above) fits it: the table's light is the moonlight. To shape with the user.
 - **Why Dignity teaches it (14 Nov):** the user: "Maybe we could put Dignity in the game as [the one] to get [it
   from], because ... she's got to catch these pesky pirates trying to figure out the ways they're going around
   their little outpost." Dignity, the checkpoint's commander, charts the stars to find the hidden ways pirates
