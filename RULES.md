@@ -482,6 +482,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       a ship in a bottle, a gold cup, a chest), and a page of thanks to everyone who makes Puzzle Pirates
       what it is.
     Their link: `den.html?at=dachimpy`.
+    - **Dachimpy's voice: buzzy and excited (the user, 14 Nov).** Not wry or dry ("still warm" made it
+      cringy): "usually it should be more like, yay, cookies, and kind of an excited reaction ... that kind of
+      buzzy, excited, great energy, I think is much more me."
     - **Dachimpy's look, from their in-game picture (13 Nov).** The first go, from words alone, "absolutely
       does not look like me"; then: "me at the back with my pink and purple wig, kilt, belt and braces, and
       shoes." So a tall pale pink beehive wig with a purple band (`beehive`, a hat with a second colour,

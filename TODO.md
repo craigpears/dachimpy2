@@ -472,6 +472,35 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   - **Dachimpy's museum house** (branch worktree-agent-a9e6c13b7d2601261, WIP): the house (`?at=dachimpy`) with its three rooms, every exhibit up close with its plaque, Sanne, Zizzy and Dachimpy's real look in the wardrobe, Roobear's ear-rub shot retaken. **Done 14 Nov:** finished (its changelog entry, the notes, the full tests passing), merged and live.
   - **Distilling's verdicts into fixes, and the lead-up batch** (branch worktree-agent-ac9deb765d59f5f59, WIP): P13 to P30 as tests (P15's plan, P21's two drops and P1's plan still open; P21 and P22 a new theme, "Close, not trapped"); the reader's trapped by what it takes to free a white, junk the wrong way up, a doomed white in column 10 given up; the hoist, the V's tip, the CC^1 buffer; the run: CC^8 better (chains 4.1 to 4.5), CC^1 more whites burned (0.5 to 0.9), CC^5's target 10 to 4 of 20 (to look at before merging); and P31 to P42 from the first 100 seconds, to judge. Full tests pass, but vitest exited 1 on an unhandled error to look into.
   - Next after them: the race plan on the parchment chart (the course is now the bay's).
+- **Dachimpy's museum: the order, the missing versions, and their voice (14 Nov):** after walking round it.
+  - **Their voice, too dry:** "what makes it a bit cringy is when the pirate's line says, still warm ...
+    usually it should be more like, yay, cookies, and kind of an excited reaction. I think that kind of buzzy,
+    excited, great energy, I think is much more me." The hug "a bit cringy, but then again, that's also partly
+    the idea". So every line of Dachimpy's goes buzzy and excited ("Yay, cookies!"), not wry.
+  - **The order, as it really happened** (the user's own telling; to confirm the unclear bits): the raw HTML
+    website first ("I thought I copy pasted you the pictures of just the kind of raw HTML website. Like that was
+    supposed to be the first one"); then the first Flash try ("wasn't even a prototype ... just the first time
+    I'm trying to do something with Flash"); the two before-Whirled boards ("certainly the prototype"); the
+    SmartFox set-up screen ("that wasn't even a wireframe, that is just the first version"); the lobby with
+    Team One next; then the more refined Blockade Sim lobby (its artwork paid for, as below); "Create your
+    game" is Whirled's lobby ("definitely when you get to [Whirled]"); then "that orangey one, and then the one
+    with a nicer background comes after that" (which pictures, to pin down); the finished thing in play last
+    ("looks about right"). The hand-cut sloop pictures were the earlier versions, before someone pointed out the
+    game's own files had the assets ("after all that time scraping ... I didn't need to go through all of that
+    pain").
+  - **The banner and the title card's story:** "somebody, I regretfully forget who, ... kindly donated some
+    money to help me do a [guide], and I spent the money, I think, on that banner", someone to do the art for
+    the splash screen and banner, and cutting out the sloop pictures for the first Blockade thing ("some of the
+    100 quid"). They sit where that happened, not first in the hall ("quite far in" as they are).
+  - **Missing: Dachimpy.com's versions** ("it's missing all the versions of dachimpi.com. Like, what happened to
+    all of those?") and **Shooting Dalnoth in each** ("Each version requires some variation of shooting
+    [Dalnoth] ... I think we were just blockading against them at the time, and then it's become tradition").
+    Not left out on purpose: the site's screenshots pasted on 11 Nov never reached the disk, so the museum had
+    only the twelve in `notes/museum/`. The site itself is on the user's NAS (`\nas-pears\Projects\Dachimpy.com\
+    Dachimpy.com`: v1, the raw HTML Bnav Guide with its practice boards and "Dalnoth traversing the board"; v2;
+    v3 with its banner, logo and Primates Rule's pictures; v4 and the latest, with Shoot Dalnoth's picture and
+    its Flash app). Real name, e-mail and forum handle cropped out of anything shown, as before.
+  - The cookie's fine as it is (on the table).
 
 ## Spotted along the way (not asked for)
 
