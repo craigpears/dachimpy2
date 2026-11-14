@@ -182,23 +182,24 @@ describe("the drop is smooth, not a row at a time (11 Nov: \"could also be a lot
    its column from the top instead: on top of whatever's over the nook, up the board. */
 describe('rotating after Space jumps the pair halfway back up the board (the user, 12 Nov 2026)', () => {
   it('pushed off a piece into a nook under a ledge, it lands in the nook', () => {
-    // A ledge over column 2 at row 13, a stack on it up to row 8; under it a nook two deep, walled by a
-    // pair in column 3 and reached only by turning from a flat pair beside it, on the floor at the left.
-    const ledge: Platform = { id: 1, r: 13, c: 2, w: 1, h: 1, targets: [{ r: 13, c: 2, colour: 1 }] };
-    const stack: [number, number, number][] = [8, 9, 10, 11, 12, 13].map((r, i) => [r, 2, i % 2 ? 0 : 2]);
-    const s = game([1, 0], [ledge], [[15, 0, 2], [15, 1, 2], [14, 3, 1], [15, 3, 1], ...stack]), p = new SailPair(s);
-    while (p.col > 0) p.slide(-1);
-    p.rush();   // (Space: down fast, on the floor at the left)
+    // A ledge over columns 5-7 at row 13; under it a nook two deep in column 5, beside a floor at the
+    // right, reached only by turning a flat pair slid in under the ledge along the floor from the middle.
+    // (Since 14 Nov a flat pair turned upright stands on its own row; under the ledge it can't, so it
+    // pushes off the floor into the nook.)
+    const ledge: Platform = { id: 1, r: 13, c: 5, w: 3, h: 1, targets: [5, 6, 7].map((c) => ({ r: 13, c, colour: 1 })) };
+    const s = game([1, 0], [ledge], [[15, 3, 2], [15, 4, 2], [15, 6, 2], [15, 7, 2]]), p = new SailPair(s);
+    p.rush();   // (Space: down fast, on the floor in the middle)
     while (p.row < H - 2) p.tick(1 / 60);
-    expect(p.slide(1)).toBe(true);   // (half under the stack)
-    expect(p.turnBy(1)).toBe(true);   // (upright, it'd go through the floor: it pushes off into the nook)
-    expect([p.row, p.col]).toEqual([H - 2, 2]);
+    for (let i = 0; i < 3; i++) expect(p.slide(1)).toBe(true);   // (in under the ledge, on the floor at the right)
+    expect(p.col).toBe(W - 2);
+    expect(p.turnBy(1)).toBe(true);   // (upright, it'd go through the floor or the ledge: it pushes off into the nook)
+    expect([p.row, p.col]).toEqual([H - 2, 5]);
     let res = null;
     for (let i = 0; i < 60 && !res; i++) res = p.tick(1 / 60);
     expect(res?.dropped).toBe(true);
-    expect(s.grid[H - 2][2]?.c).toBe(1);   // (where it was turned, not up on the stack)
-    expect(s.grid[H - 1][2]?.c).toBe(0);
-    expect(s.grid[7][2]).toBeNull();
+    expect(s.grid[H - 2][5]?.c).toBe(1);   // (where it was turned, not up on the ledge)
+    expect(s.grid[H - 1][5]?.c).toBe(0);
+    expect(s.grid[12][5]).toBeNull();
   });
   it('wherever it can be steered to rest, turning and pushing off, is a place moves() has', () => {
     let seed = 12;
@@ -224,6 +225,95 @@ describe('rotating after Space jumps the pair halfway back up the board (the use
         for (const q of next) if (!seen.has(q.join())) { seen.add(q.join()); todo.push(q); }
       }
     }
+  });
+});
+
+/* TODO.md, "Sailing: booching at the top too easy" (14 Nov): "when I rotate things, they do still seem to
+   jump up further than the visual position would indicate." A turn kept the pair's top row, so an upright
+   pair turned flat had its lower half jump up a row, and the board, easing from the old top row, slid it
+   about after. Now a turn keeps its lower row, and the board draws it turned where it is at once. */
+describe('rotating, the pair jumps up further than where it was drawn (the user, 14 Nov 2026)', () => {
+  /** The row its lower square's drawn on, between rows as it glides. */
+  const low = (p: SailPair) => p.y() + (p.turn & 1);
+  /** A pair fallen to `row` on an empty board, partway on to the next row. */
+  function falling(row: number) {
+    const p = new SailPair(game());
+    while (p.row < row) p.tick(FALL.SECS);
+    p.tick(FALL.SECS * 0.6);
+    return p;
+  }
+  it('upright, turned flat, it lies along its lower square\'s row, drawn where that was', () => {
+    for (const dir of [1, -1] as const) {
+      const p = falling(6);
+      p.turnBy(1);   // (upright, its lower square on row 6)
+      const was = low(p), bottom = Math.max(...p.cells().map(([r]) => r));
+      expect(p.turnBy(dir)).toBe(true);
+      expect(p.cells().every(([r]) => r === bottom)).toBe(true);   // (not up on its top square's row)
+      expect(low(p)).toBeCloseTo(was, 9);
+    }
+  });
+  it('flat, turned upright, it stands on its own row, drawn where it was', () => {
+    for (const dir of [1, -1] as const) {
+      const p = falling(6), was = low(p);
+      expect(p.turnBy(dir)).toBe(true);
+      expect(Math.max(...p.cells().map(([r]) => r))).toBe(6);
+      expect(low(p)).toBeCloseTo(was, 9);
+    }
+  });
+  it('turned round and round, it neither climbs nor sinks', () => {
+    const p = falling(6), was = low(p);
+    for (let i = 0; i < 8; i++) { p.turnBy(1); expect(low(p)).toBeCloseTo(was, 9); }
+    for (let i = 0; i < 8; i++) { p.turnBy(-1); expect(low(p)).toBeCloseTo(was, 9); }
+  });
+  it('at the top, turned upright, it hangs down from the top row (there\'s no row above)', () => {
+    const p = new SailPair(game());
+    expect(p.turnBy(1)).toBe(true);
+    expect(p.cells()).toEqual([[0, SPAWN[0], 0], [1, SPAWN[0], 1]]);
+  });
+});
+
+/* TODO.md, "Sailing: booching at the top too easy" (14 Nov): "it just feels really easy to booch on the
+   top. Like, it drops a bit too quickly. It feels very unforgiving when I'm trying to maximize the space
+   at the top ... maybe ... just be a bit slower when you're one tile away from booching." */
+describe('booching at the top is too easy: it drops too quickly (the user, 14 Nov 2026)', () => {
+  /** The middle columns stacked up to `top` (rows top to the bottom), the pair coming in over them. */
+  function stacked(top: number) {
+    const fill: [number, number, number][] = [];
+    for (let r = top; r < H; r++) for (const c of SPAWN) fill.push([r, c, (r + c) % 3]);
+    const s = game([0, 1], [], fill);
+    return { s, p: new SailPair(s) };
+  }
+  it('a tile from booching, it falls FALL.GRACE times slower, and waits as long before it lands', () => {
+    const { p } = stacked(2);   // (it'd come to rest on row 1, a tile under the top)
+    expect(p.nearTop()).toBe(true);
+    expect(p.tick(FALL.SECS * 1.1)).toBeNull();
+    expect(p.row).toBe(0);   // (at its own pace it'd be on row 1 by now)
+    expect(p.tick(FALL.SECS * FALL.GRACE - FALL.SECS * 1.1 + 0.01)).toBeNull();
+    expect(p.row).toBe(1);
+    expect(p.tick(FALL.SECS * 1.5)).toBeNull();   // (resting there, longer than a row's time before it lands)
+    expect(p.tick(FALL.SECS * FALL.GRACE - FALL.SECS * 1.5 + 0.01)?.dropped).toBe(true);
+  });
+  it('booching itself, it waits FALL.GRACE times as long too: time to steer it away', () => {
+    const { p } = stacked(1);   // (it'd come to rest on the top row)
+    expect(p.rest()).toBe(0);
+    expect(p.tick(FALL.SECS * 1.5)).toBeNull();
+    expect(p.slide(-1) && p.slide(-1)).toBe(true);   // (off the stack, to open columns)
+    expect(p.nearTop()).toBe(false);
+  });
+  it('steered off to open columns, or on an open board, it falls at its own pace', () => {
+    const { p } = stacked(2);
+    p.slide(-1); p.slide(-1);
+    expect(p.nearTop()).toBe(false);
+    p.tick(FALL.SECS * 1.1);
+    expect(p.row).toBe(1);
+  });
+  it('Space still speeds it near the top', () => {
+    const { p } = stacked(2);
+    p.rush();
+    let res = null, t = 0;
+    for (; t < 1 && !res; t += 1 / 60) res = p.tick(1 / 60);
+    expect(res?.dropped).toBe(true);
+    expect(t).toBeLessThan(FALL.SECS);
   });
 });
 

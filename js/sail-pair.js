@@ -7,7 +7,7 @@
    same steps Sailing.moves() searches (a column either way, a turn either way about its first square,
    pushing off what's in the way as Sailing.turned has it, a row down when it can sink), so wherever it comes to rest is a place moves() has, and it's dropped
    there (Sailing.drop with its row). It comes in at the top of the middle columns (SPAWN), turned 0,
-   and falls a row every FALL.SECS by itself. Space speeds it (rush, ease: TODO.md, "Sailing's keys as
+   and falls a row every FALL.SECS by itself, more slowly near the top (FALL.GRACE). Space speeds it (rush, ease: TODO.md, "Sailing's keys as
    the real game's", 11 Nov), never straight to the bottom: no key drops it. (slam() is for a pair
    steered by a show, Tzz's own, not for a key.) */
 import { SPAWN } from './sailing.js';
@@ -24,6 +24,14 @@ export const FALL = {
         a bit overpowered in sailing. It's like, whoa", so FAST went from 0.04 to 0.06 s a row: a quick tap
         (a tenth of a second down) is three or four rows now, not five or more. */
     BURST: 0.2,
+    /** A grace near the top: times slower it falls by itself while it'd come to rest with a square in the
+        top NEAR + 1 rows, booching or a tile from it (the user, 14 Nov: "it just feels really easy to booch
+        on the top. Like, it drops a bit too quickly ... maybe ... just be a bit slower when you're one tile
+        away from booching"): time to steer it into the last spaces up there, or away. Space still speeds
+        it as ever. */
+    GRACE: 2,
+    /** How many rows under the top row still count as near it (a tile from booching). */
+    NEAR: 1,
 };
 export class SailPair {
     game;
@@ -55,7 +63,7 @@ export class SailPair {
         this.col += dc;
         return true;
     }
-    /** A quarter turn clockwise (1) or back (-1), about its first square. Against a wall or a piece it
+    /** A quarter turn clockwise (1) or back (-1), keeping its lower row (Sailing.turned). Against a wall or a piece it
         pushes off it, as the real game does (the user, 11 Nov: "it doesn't turn when it's against the
         wall. If you rotate it and it's against the wall, it should kind of push away from the wall"):
         Sailing.turned, the same turn moves() searches. */
@@ -73,6 +81,8 @@ export class SailPair {
         (its row, if it's resting on something), so it glides down at any speed rather than hopping a row
         at a time (the user, 11 Nov, of Space: "could also be a lot smoother. That's noticeably jumpy"). */
     y() { return this.row + (this.sinks() ? Math.min(this.t, 1) : 0); }
+    /** Would it come to rest booching, or a tile from it (FALL.NEAR)? Then it falls FALL.GRACE times slower. */
+    nearTop() { return this.rest() <= FALL.NEAR; }
     /** The row it'd come to rest on, dropped straight down from here (for its shadow). */
     rest() {
         const r0 = this.row;
@@ -82,9 +92,12 @@ export class SailPair {
         this.row = r0;
         return r;
     }
-    /** Time going by: it falls a row every FALL.SECS (every FALL.FAST while Space speeds it), and when
-        it can't, it lands (what the drop earned), else null. `secs`: seconds a row, if not FALL.SECS. */
+    /** Time going by: it falls a row every FALL.SECS (every FALL.FAST while Space speeds it; FALL.GRACE
+        times slower by itself near the top, nearTop), and when it can't, it lands (what the drop earned),
+        else null. `secs`: seconds a row, if not FALL.SECS. */
     tick(dt, secs = FALL.SECS) {
+        if (this.nearTop())
+            secs *= FALL.GRACE;
         const fast = this.held ? dt : Math.min(dt, this.burst);
         this.burst = Math.max(0, this.burst - dt);
         this.t += fast / FALL.FAST + (dt - fast) / secs;
