@@ -503,6 +503,23 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     v3 with its banner, logo and Primates Rule's pictures; v4 and the latest, with Shoot Dalnoth's picture and
     its Flash app). Real name, e-mail and forum handle cropped out of anything shown, as before.
   - The cookie's fine as it is (on the table).
+  - **Done 14 Nov** (branch worktree-agent-a10095a7cebbed134): the order as told (src/den-dachimpy.ts's EXHIBITS),
+    the banner, title card and sloops moved to a page on the donation; Dachimpy.com's versions found in the old
+    site's archive (its own screenshots of versions one to five, and its pictures), the last version's home page
+    and Shoot Dalnoth page rebuilt from its own templates; Shoot Dalnoth in the first version (and Dalnoth
+    traversing the board) and the last. Every line excited first, the wry after. "Did you know?" without the
+    bravery (the user: "it wasn't a good fit for me. So this is what I did instead"). Privacy: version three's,
+    four's (Twitter) and five's other names blanked. Still to pin down: "the orangey one, then the one with a
+    nicer background" (no two such screens in the archive: the Team One lobby's orange bars and the sky lobby are
+    the likeliest; a second sky lobby, `SetupScreenSecondVersion`, is in the archive, not shown); and the site's
+    versions two to five had no Shoot Dalnoth in what was kept.
+  - **The friends' portraits (14 Nov):** "Monkey Couple" "oh my God, what is that?", "I'm pretty sure I've never
+    had long hair", "Quality and fidelity, everything just really needs fixing"; then: "I like how blocky people
+    are ... but I think things like hair and clothing need more", as Tzz and Helium got, "a bit higher quality than
+    Playmobil". **Done 14 Nov:** each dressed as the real portrait (yoweb, both oceans), painted close in bigger
+    frames; short, long, tied-back and wavy hair and the beehive wig laid in strands, streaked; plain shirts and
+    shirts with belt open at the neck with collar points and buttons; the sash knotted, its ends hanging. Left
+    for a follow-up: curly, bun, braids still balls and spheres (Kikkit's curls read well enough).
 
 ## Spotted along the way (not asked for)
 

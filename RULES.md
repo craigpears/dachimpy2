@@ -457,15 +457,30 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       hugs you (the talking pirates' `hug` idle, your eyes shut), then holds out a plate of cookies (`offer`,
       holding furniture.js's `cookiePlate`), and you take one; their line and yours one after the other,
       never over each other; the camera in close on you both. More from the plate on the hall's table (walk
-      up and Space). On its walls: the Dachimpy.com banner, high; the guide videos' title card; and a page,
-      "Did you know?", telling how it began (watching Dlonelyone teach a new pirate, and Dachimpy.com as the
-      quieter way of helping).
-    - **The museum: the old Blockade Simulator, oldest first.** The user's screenshots (`notes/museum/`,
-      not published) as `museum/*.jpg` (published, no wider than 1280; one cropped: "Create Your Game"
-      without its Invite Friends list, which showed another player's handle). Each framed with a card under
-      it, its plaque in Dachimpy's voice (`PLAQUES` in `src/lines/dachimpy.ts`: what IDEAS.md says of each
-      version, else what the screenshot plainly shows); pages of story where there's no picture ("Version
-      one", the Bnav Guide, and "And then": Flash gone, Whirled gone, the Global Cade Sim working perfectly).
+      up and Space). On its back wall, between two candelabras: a page, "Did you know?", telling how it began
+      (watching Dlonelyone teach a new pirate to sail; teaching out loud like that wasn't a fit for Dachimpy, so
+      Dachimpy.com was their own way of helping people learn. The user, 14 Nov: "I don't think that's a
+      representation of me ... it wasn't a good fit for me. So this is what I did instead": no bravery or lack of
+      confidence in it).
+    - **The museum: the story in the order it happened (14 Nov).** The user, after walking round it, told the
+      real order (TODO.md, "Dachimpy's museum: the order"): the raw HTML Bnav Guide first, with its first Shoot
+      Dalnoth ("Each version requires some variation of shooting [Dalnoth] ... it's become tradition") and
+      Dalnoth traversing the board; the first Flash try ("wasn't even a prototype"); the two boards before
+      Whirled; the SmartFox set-up screen ("not even a wireframe, that is just the first version"); the lobby
+      with Team One; a page on the donation (someone, the user forgets who, gave about a hundred quid toward a
+      guide) and what it paid for, the banner, the videos' title card and the sloops cut out by hand (before
+      someone pointed out the game's own files had them); the refined lobby; Create Your Game, on Whirled; the
+      finished thing; then Dachimpy.com's later versions, two to five and the last, and Shoot Dalnoth to the
+      end; then "And then" (Flash gone, Whirled gone, the Global Cade Sim working perfectly). Its pictures
+      (`notes/museum/`, not published) as `museum/01..21-*.jpg`, numbered as they hang (published, no wider
+      than 1280): the user's screenshots, and from the old site's archive on the user's drive its own
+      screenshots of each version and its pictures (the Bnav Guide, Shoot Dalnoth, Dalnoth traversing the
+      board), its last version's home page and Shoot Dalnoth page rebuilt from its own templates (no Flash:
+      the app's still in its place). Privacy: only the pirate name Dachimpy shows. Cropped or blanked: "Create
+      Your Game"'s Invite Friends list; version three's credit to another pirate; version four's Twitter feed
+      (real handles and a name); version five's credit for some clips. Each framed with a card under it, its
+      plaque in Dachimpy's voice (`PLAQUES` in `src/lines/dachimpy.ts`); pages of story where there's no
+      picture. The museum is as long as its pictures need (`MUSEUM_LEN`, worked out from them).
       Stop by one and Dachimpy says a line about it (the shell's remark); Tab for every exhibit close up,
       the screenshot as it is with its plaque under it (picture-view.js's `note`; an image keeps its own
       shape). Fond of the bugs: a little model of the old board stands by "Blockade!", its sloop sailing
@@ -481,6 +496,29 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       Dachimpy!", with Fable). A shelf of trinkets (furniture.js's `shelf`: a jar of cookies, a model sloop,
       a ship in a bottle, a gold cup, a chest), and a page of thanks to everyone who makes Puzzle Pirates
       what it is.
+    - **The friends' portraits, as they were painted (14 Nov).** "Monkey Couple" looked awful ("oh my God,
+      what is that?"), and "I'm pretty sure I've never had long hair ... Quality and fidelity, everything just
+      really needs fixing." So each recreated portrait dresses everyone as the real one (yoweb, both oceans,
+      looked at 14 Nov; only as reference, none of its art copied): "Monkey Couple" Dachimpy short-haired,
+      clean-shaven, hoops, a red shirt with a white sash at the waist, red trousers, a monkey, Sanne turned a
+      little so her blonde hair, tied back, shows; "The monkey man" shaggy short hair and beard, a ragged orange
+      shirt and patched blue shorts, no monkey; "Oh, Gawd!" both in rags, Dachimpy in white with a patch,
+      Gravee in a red bandana and black; "Cursed & Cookied" the beehive, a patch, a white frilly shirt and pink
+      stripy knickers, Kikkit in a red bandana and white; "Pinky and the pink" the beehive and a patch, Zizzy's
+      pink hair loose. Dachimpy never has long hair. And they're painted close (a portrait's `close`: knees up,
+      the sitters big in the frame, as Puzzle Pirates' own were), in bigger frames. Only Dachimpy's house
+      paints close; Gravee's and Roobear's portraits are as they were. The pirate maker is simple and blocky,
+      so they're a likeness, not the painted art.
+      Then the hair and the clothes (the user, 14 Nov: "I like how blocky people are for a large part, but I think
+      things like hair and clothing need more", as Tzz and Helium got on 13 Nov; "a bit higher quality than
+      Playmobil"): the bodies and faces stay blocky; the hair is laid in strands (den-look.js's shared `tube`,
+      `twist`, `over`), each streaked along its length (`strandTex`): short hair tufts from the crown to a ragged
+      fringe, long hair's fall in strands over its curtain, tied-back hair drawn back from a side parting to a
+      band and a tail of locks, wavy hair's crown from a side parting, and the beehive wig wound round in rolls
+      with rolled curls round its foot. Strands over the crown only without a hat (`crownBare`). For everyone who
+      wears those styles. Plain shirts and shirts with belt open at the neck, collar points either side, a placket
+      seam and bone buttons; a sash folded, knotted at the side, its two ends hanging. Curly, bun and braids are
+      still the old balls and spheres (a follow-up).
     Their link: `den.html?at=dachimpy`.
     - **Dachimpy's voice: buzzy and excited (the user, 14 Nov).** Not wry or dry ("still warm" made it
       cringy): "usually it should be more like, yay, cookies, and kind of an excited reaction ... that kind of

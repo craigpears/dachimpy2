@@ -910,6 +910,9 @@ doing the same: helping people learn. The user's feelings go on the plaque
 (11 Nov: "the emotion should be there ... a relatively light version of it. But yes, with the
 emotions."): told lightly, in a line or two, with the wish to do what she did and not quite the
 confidence to, and Dachimpy.com as the quieter way of helping that came of it.
+**Corrected (14 Nov):** no bravery or lack of confidence in it: "I don't think that's a representation of me ...
+I wanted to do that, but it wasn't a good fit for me. So this is what I did instead." So the page says they
+wanted to help people like that, teaching out loud wasn't them, and Dachimpy.com was their own way of doing it.
 
 **Dachimpy shows you round (11 Nov):** "It very much fits me, kind of just ... showing you around
 all the history of the things that I've built. They are my pride and joy." So the museum's guide is
@@ -1052,9 +1055,13 @@ and Sanne truly special in the middle, "Oh, Gawd!" with Gravee, "The Monkey Man"
 trinkets, the thank-you. Privacy: one screenshot cropped ("Create Your Game": its Invite Friends list showed
 another player's Whirled handle and picture); the rest show only the pirate name Dachimpy.
 Still open:
-- To collect: the v1 Bnav Guide page, the first shoot-Dalnoth board and the Dachimpy.com pages (no screenshots
-  yet: the Bnav Guide's a page of words for now), and pictures of the Global Cade Sim (its maker's pirate name,
-  "I think it's imaduck", to check before it's named: the museum says "someone else's" for now).
+- ~~To collect: the v1 Bnav Guide page, the first shoot-Dalnoth board and the Dachimpy.com pages~~ (found 14 Nov in
+  the old site's archive on the user's drive, and shown in order: RULES.md). Still to collect: pictures of the
+  Global Cade Sim (its maker's pirate name, "I think it's imaduck", to check before it's named: the museum says
+  "someone else's" for now). In the archive, not shown yet: a second sky lobby (`SetupScreenSecondVersion`), the
+  first set-up form (turn time, hull strength, crew skill), the war frigate's hand-cut rotations, the Distilling
+  Simulator's and the video pages of versions three to five, the Labour Management Database, the monkey pictures
+  for Hearts, Spades and Duty Navigation.
 - Dlonelyone: named on the "Did you know?" page from the user's spelling; her pirate page, portrait and ocean
   still to check, and she's not drawn.
 - The trinkets are stand-ins (a jar of cookies, a model sloop, a ship in a bottle, a gold cup, a chest): the

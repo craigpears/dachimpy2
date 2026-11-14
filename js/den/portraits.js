@@ -147,7 +147,7 @@ function compose(portrait, you) {
   const s = portrait.sitter, objs = [];
   let eyes = null;
   if (s.who === 'pirate') {
-    const look = lookOf(s.name, s.dress), p = sitFor(makePirate({ look }));
+    const look = lookOf(s.name, s.dress), p = sitFor(makePirate({ look }), s.yaw ?? 0.3);
     if (s.costume === 'roo-bear') rooBear(p);
     if (s.pose) pose(p, s.pose);
     objs.push(p.g);
@@ -158,7 +158,9 @@ function compose(portrait, you) {
       if (c.pose) pose(f, c.pose);
       objs.push(f.g);
     }
-    if (s.company?.length) { const cx = s.company.reduce((a, c) => a + c.x, 0) / (s.company.length + 1) * 0.8; aim(cx, 1.15, 5.4, cx, 1.0, 0); }
+    // (`close`: knees up, the sitters big in the frame, as Puzzle Pirates' own were)
+    if (s.company?.length) { const cx = s.company.reduce((a, c) => a + c.x, 0) / (s.company.length + 1) * (portrait.close ? 1 : 0.8); portrait.close ? aim(cx, 1.38, 4.5, cx, 1.3, 0) : aim(cx, 1.15, 5.4, cx, 1.0, 0); }
+    else if (portrait.close) aim(0.2, 1.4, 3.8, 0, 1.33, 0);
     else if (portrait.watch) {
       // Head and shoulders, close enough to see the eyes move.
       aim(0.25, 1.62, 2.3, 0, 1.5, 0);

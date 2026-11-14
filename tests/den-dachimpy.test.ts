@@ -5,11 +5,11 @@ import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   PLAN, ARRIVE, WALLS, EXHIBITS, hang, shotSize, SHOT_MAX, PAGE, exhibitLine, FRIENDS, FRIENDS_WALL, SPECIAL_SIGN, FURNISH,
-  COOKIES, atCookies, TOUR, stopAt, HUG, COOKIE, hugSpot, SHELF, MUSEUM_LEN,
+  COOKIES, atCookies, TOUR, stopAt, HUG, COOKIE, hugSpot, SHELF, MUSEUM_LEN, IN_RED, MONKEY_MAN, IN_RAGS,
 } from '../src/den-dachimpy';
 import { houseById, houseList, walkable, atWayOut, step, blocksOf, BACKDROPS, lookingAt, lookView, viewAt, LOOK_HOME, remark, GAZE_START, roomAt } from '../src/den-houses';
 import type { View, Gaze } from '../src/den-houses';
-import { AT_THE_DOOR, THE_COOKIE, ANOTHER_COOKIE, TOUR_LINES, PLAQUES, PANELS, ON_AN_EXHIBIT, ON_A_FRIEND, FRIEND_TITLES, THANKS, CHARACTER } from '../src/lines/dachimpy';
+import { AT_THE_DOOR, THE_COOKIE, ANOTHER_COOKIE, TOUR_LINES, PLAQUES, PANELS, ON_AN_EXHIBIT, ON_A_FRIEND, FRIEND_TITLES, THANKS, CHARACTER, GOODBYE } from '../src/lines/dachimpy';
 import { IN_DACHIMPYS_HOUSE } from '../src/lines/you';
 
 const ROOT = join(__dirname, '..');
@@ -64,10 +64,10 @@ describe('their house in the district, which doubles as the museum', () => {
   });
 });
 
-describe('the museum: the old Blockade Simulator and Dachimpy.com, oldest first (the screenshots in notes/museum/)', () => {
+describe('the museum: the old Blockade Simulator and Dachimpy.com, in order (the pictures in notes/museum/)', () => {
   it('shows every screenshot, published as a JPG no wider than 1280, its size as the data says', () => {
     const shots = EXHIBITS.filter((e) => e.kind === 'shot');
-    expect(shots).toHaveLength(12);
+    expect(shots).toHaveLength(21);
     for (const s of shots) {
       if (s.kind !== 'shot') continue;
       const file = join(ROOT, s.file);
@@ -85,7 +85,7 @@ describe('the museum: the old Blockade Simulator and Dachimpy.com, oldest first 
     expect(ignore.some((l) => /^\/?museum/.test(l))).toBe(false);
   });
 
-  it('keeps the oldest first, as numbered: the sim\'s screenshots in order down the museum', () => {
+  it('keeps them in order, as numbered, down the museum', () => {
     const inMuseum = EXHIBITS.filter((e) => H[e.id].room === 'museum');
     const xs = inMuseum.map((e) => H[e.id].x);
     expect([...xs].sort((a, b) => a - b)).toEqual(xs);
@@ -93,9 +93,8 @@ describe('the museum: the old Blockade Simulator and Dachimpy.com, oldest first 
     expect([...files].sort()).toEqual(files);
     expect(inMuseum[0].id).toBe('guide');
     expect(inMuseum[inMuseum.length - 1].id).toBe('gone');
-    // the hall: where it began, the title card, the banner over them
-    expect(EXHIBITS.filter((e) => H[e.id].room === 'hall').map((e) => e.id)).toEqual(['began', 'titleCard', 'banner']);
-    expect(H.banner.y).toBeGreaterThan(H.began.y + H.began.h / 2 + H.banner.h / 2 + 0.2);
+    // the hall: where it began (the banner and the title card moved on, to where the donation paid for them)
+    expect(EXHIBITS.filter((e) => H[e.id].room === 'hall').map((e) => e.id)).toEqual(['began']);
   });
 
   it('hangs each in its room, along its back wall, none overlapping, under the ceiling', () => {
@@ -109,7 +108,7 @@ describe('the museum: the old Blockade Simulator and Dachimpy.com, oldest first 
         if (h.card) expect(h.card.y - h.card.h / 2, `${h.id}'s plaque, above the wainscot`).toBeGreaterThan(0.88);
       }
       // side by side (the banner's over the others, so not counted)
-      const row = hung.filter((h) => h.id !== 'banner').sort((a, b) => a.x - b.x);
+      const row = [...hung].sort((a, b) => a.x - b.x);
       for (let i = 1; i < row.length; i++) {
         const a = row[i - 1], b = row[i], wa = Math.max(a.w, a.card?.w ?? 0), wb = Math.max(b.w, b.card?.w ?? 0);
         expect(b.x - wb / 2 - 0.2, `${a.id} | ${b.id}`).toBeGreaterThan(a.x + wa / 2);
@@ -146,7 +145,7 @@ describe('the museum: the old Blockade Simulator and Dachimpy.com, oldest first 
   });
 
   it('has Dachimpy say a line about whichever you stop by (once a visit), and under it close up', () => {
-    const exhibits = Object.entries(H).filter(([id]) => id !== 'banner').map(([id, h]) => ({ id, x: h.x, y: h.y, z: h.wall }));
+    const exhibits = Object.entries(H).map(([id, h]) => ({ id, x: h.x, y: h.y, z: h.wall }));
     for (const e of exhibits) {
       expect(exhibitLine(e.id), e.id).toBe((ON_AN_EXHIBIT as Record<string, string>)[e.id]);
       expect(exhibitLine(e.id)!.length).toBeLessThan(110);   // (a bubble)
@@ -171,16 +170,63 @@ describe('the museum: the old Blockade Simulator and Dachimpy.com, oldest first 
     expect(FURNISH.find((p) => p.kind === 'simModel')?.x).toBe(H.inPlay.x);
   });
 
-  it('starts where it all started: watching Dlonelyone teach a new pirate, and the quieter way of helping', () => {
+  it('starts where it all started: watching Dlonelyone teach a new pirate, and Dachimpy.com their own way of helping', () => {
     expect(PANELS.began.title).toBe('Did you know?');
     expect(PANELS.began.text).toMatch(/Dlonelyone/);
     expect(PANELS.began.text).toMatch(/Helping people learn/);
+    // (14 Nov: "I don't think that's a representation of me ... it wasn't a good fit for me. So this is what I did
+    // instead": no bravery or lack of confidence in it)
+    expect(PANELS.began.text).not.toMatch(/brave|confiden|shy|afraid/i);
+  });
+
+  it('runs in the order the user told it (14 Nov): the Bnav Guide, the first Flash try, the boards before Whirled, the first set-up screen, Team One, the donation and what it paid for, the refined lobby, Whirled, the finished thing, then the site\'s versions', () => {
+    const order = EXHIBITS.map((e) => e.id);
+    expect(order).toEqual([
+      'began', 'guide', 'shootDalnoth', 'traverses', 'first', 'beforeWhirled', 'jobbers', 'setup', 'teams',
+      'donation', 'banner', 'titleCard', 'rotations', 'rings', 'lobby', 'create', 'inPlay',
+      'siteV2', 'siteV3', 'siteV4', 'siteV5', 'siteLatest', 'dalnothApp', 'gone',
+    ]);
+    // the first set-up screen is "not even a wireframe, that is just the first version"
+    expect(EXHIBITS.find((e) => e.id === 'setup')!.title).not.toMatch(/wireframe/i);
+    expect(PLAQUES.setup).toMatch(/first version/i);
+    expect(PLAQUES.setup).not.toMatch(/^[^!]*plan/i);
+    // the banner, the title card and the sloops told with the donation that paid for them
+    expect(PANELS.donation.text).toMatch(/hundred quid/);
+    for (const id of ['banner', 'titleCard', 'rotations'] as const) expect(PLAQUES[id], id).toMatch(/gift|by hand/);
+    expect(PLAQUES.rotations).toMatch(/game's own files/);
+  });
+
+  it('shoots Dalnoth in the site\'s first version and to its last ("it\'s become tradition", 14 Nov)', () => {
+    expect(PLAQUES.shootDalnoth).toMatch(/Dalnoth/);
+    expect(PLAQUES.shootDalnoth).toMatch(/[Tt]radition/);
+    expect(PLAQUES.traverses).toMatch(/Dalnoth/);
+    expect(PLAQUES.dalnothApp).toMatch(/Dalnoth/);
+    const at = (id: string) => EXHIBITS.findIndex((e) => e.id === id);
+    expect(at('shootDalnoth')).toBe(at('guide') + 1);
+    expect(at('dalnothApp')).toBe(at('siteLatest') + 1);
   });
 
   it('shows only the pirate name Dachimpy: no real names, e-mails or other people\'s handles', () => {
     const all = JSON.stringify({ PLAQUES, PANELS, ON_AN_EXHIBIT, ON_A_FRIEND, FRIEND_TITLES, THANKS, CHARACTER });
     expect(all).not.toMatch(/@[a-z0-9-]+\.[a-z]/i);
-    expect(all).not.toMatch(/Wolfi/);
+    expect(all).not.toMatch(/Wolfi|Pears|nickbush|Wyriel|Natacha|ajmukemo|timdc|github\.io/i);
+  });
+});
+
+describe('Dachimpy\'s voice: buzzy and excited first, the wry line after (the user, 14 Nov: "We can have both")', () => {
+  /** A line's first sentence (a stop and a space ends one; "Dachimpy.com" doesn't). */
+  const first = (s: string) => s.match(/^.*?[.!?](?=\s|$)/)?.[0] ?? s;
+  it('opens every line they say, and every plaque, with an excited one', () => {
+    const lines: string[] = [
+      ...Object.values(AT_THE_DOOR), THE_COOKIE.first, ...THE_COOKIE.again, THE_COOKIE.onward, ...ANOTHER_COOKIE,
+      ...Object.values(TOUR_LINES).map((l) => l[0]), ...Object.values(PLAQUES), ...Object.values(ON_AN_EXHIBIT),
+      ...Object.values(ON_A_FRIEND), GOODBYE,
+    ];
+    for (const l of lines) expect(first(l), l).toMatch(/!$/);
+  });
+  it('keeps a wry line after, here and there (the user: "people say it fits me still")', () => {
+    expect(ANOTHER_COOKIE.join(' ')).toMatch(/I'm not counting\. I am counting/);
+    expect(ON_AN_EXHIBIT.gone).toMatch(/Shame, really/);
   });
 });
 
@@ -223,6 +269,29 @@ describe('their friends\' room: the trinkets and the portraits (IDEAS.md, "The t
       for (const s of FRIENDS.filter((g) => g.special)) expect(s.w * s.h).toBeGreaterThan(f.w * f.h);
     }
     expect(SPECIAL_SIGN.x).toBeCloseTo(mid, 5);
+  });
+
+  it('"Monkey Couple" looked awful (14 Nov: "oh my God, what is that?"; "I\'m pretty sure I\'ve never had long hair"): Dachimpy fully clothed in red, short hair, as in the real portrait', () => {
+    expect(IN_RED).toMatchObject({ top: 'plain', topCol: 'red', waist: 'sash', legs: 'pants', legsCol: 'red', bareLegs: false });
+    expect(IN_RED.top).not.toBe('sash');
+    for (const dress of [IN_RED, MONKEY_MAN, IN_RAGS]) expect(['short', 'bald']).toContain(dress.hair);
+    // every friend painted close, the sitters big in the frame; Sanne turned so her tied-back hair shows
+    for (const f of FRIENDS) if (f.portrait) expect(f.portrait.close, f.id).toBe(true);
+    const sanne = FRIENDS.find((f) => f.id === 'sanne')!.portrait!.sitter;
+    expect(sanne.who === 'pirate' && sanne.yaw).toBeLessThan(0);
+    // and it's only Dachimpy's that are painted close: Gravee's and Roobear's houses keep theirs as they were
+    expect(readFileSync(join(ROOT, 'src', 'den-gravee.ts'), 'utf8')).not.toMatch(/close: true/);
+    expect(readFileSync(join(ROOT, 'src', 'den-roobear.ts'), 'utf8')).not.toMatch(/close: true/);
+  });
+
+  it('draws the friends\' hair in strands, as Tzz\'s and Helium\'s are (14 Nov: "things like hair and clothing need more ... I just want the same"), and their shirts and sashes cut with care', () => {
+    // short, long, tied back and wavy hair, and the beehive wig, each laid in strands, streaked along them
+    for (const style of ['short', 'long', 'ponytail']) expect(LOOK_JS, style).toMatch(new RegExp(`L\\.hair === '${style}'[^\\n]*\\{[\\s\\S]{0,1600}?tube\\(`));
+    expect(LOOK_JS).toMatch(/L\.hat === 'beehive'[\s\S]{0,2400}?strandTex\(hcHex\)/);
+    expect(LOOK_JS).toMatch(/if \(fine\.length\) body\.add\(part\(mergeGeometries\(fine\), M\('#ffffff', \{ map: strandTex\(hairHex\) \}\)/);
+    // a plain shirt or a shirt with belt open at the neck, its collar points, buttons; a sash knotted
+    expect(LOOK_JS).toMatch(/if \(L\.top === 'plain' \|\| L\.top === 'belt'\) \{[\s\S]{0,900}?bone/);
+    expect(LOOK_JS).toMatch(/L\.waist === 'sash'[\s\S]{0,700}?const knot/);
   });
 
   it('has Sanne and Zizzy in the wardrobe from their Meridian portraits (13 Nov)', () => {
