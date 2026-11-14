@@ -3949,9 +3949,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   don't want the den becoming noisy. This is why we have like a modular system of islands"). Her own jetty and island,
   the ride's frame laid on the sea there, not a copy far away (the user: "Why is she in a jetty that's like miles away
   from her island"). Back aboard off her island after.
-- Her jetty, her ask ("an Aladdin-style adventure"), and a reason to fly: she's running rum to a blockade, so the
-  first leg is a lift to Helium's for it (the user: "she's helping with the blockade, so she's got to go pick the
-  [rum] up ... then ... from there to the blockade"; the second leg, Helium's to the blockade, still to come). You're
+- Her jetty, and a reason to fly: she's running rum to a blockade and needs to get to Helium's for it quick, so
+  the first leg is a lift there (the user: "she's helping with the blockade, so she's got to go pick the
+  [rum] up ... then ... from there to the blockade"; the second leg, Helium's to the blockade, still to come). The
+  magic carpet is your idea, not her ask (the user: "like you're the one that comes up with the idea ... I don't want
+  her to seem like she's demanding it"): "Any ideas?", and you suggest an Aladdin-style adventure; she says yes. You're
   dressed for it for this adventure only (a fez, a vest, a sash, patched trousers, bare feet, a monkey; your own body,
   face and hair kept), the carpet lashed on crates on the foredeck.
 - The trade wind runs straight down the sea from her jetty past Tzz's and Kikkit's islands (each calls out as you

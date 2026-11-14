@@ -103,9 +103,9 @@ Your own pirate, dressed as you like from the wardrobe (or as any real pirate in
 - *smuggling:* "Is... is this smuggling?"
 - *home:* "So... back home, then?"
 
-### Jazzmy asking for an Aladdin-style adventure, on her jetty: before you change into the part
+### Jazzmy on her jetty, needing to get to Helium's quick: your idea, before you change into the part
 
-- "Right. Leave it with me."
+- "Quick, is it? Leave it with me. How do you feel about an Aladdin-style adventure?"
 
 ### Her carpet ride far too fast: Jazzmy clean over the rocks and away over the horizon
 
@@ -1380,8 +1380,10 @@ Kind and practical, and encouraging ("You got this!"): the one who explained the
 
 A pirate of the Emerald Ocean, a Senior Officer of Down To Clown and a Lady of No Bamboozles, who owns Ice Spices on Armstrong Island. Long golden waves past her shoulders, winking, in black and gold with a white ruff, a silver chalice in her hand and an orange parrot on her shoulder (her portraits).
 
-She wanted her name to sound like Jasmine. In the den she asks for an Aladdin-style adventure and gets one: a magic carpet lashed on top of the sloop, "JASMINE" embroidered on it, crossed out, and "Jazzmy" stitched over the top.
+She wanted her name to sound like Jasmine. In the den she needs a quick lift to Helium's for a blockade's rum, and you have an idea: an Aladdin-style adventure, a magic carpet lashed on top of the sloop, "JASMINE" embroidered on it, crossed out, and "Jazzmy" stitched over the top.
 
+> "I'm not sure if it fits her to be asking for the magic carpet ride ... like you're the one that comes up with the idea ... I don't want her to seem like she's demanding it" (the user, 14 Nov)
+>
 > "she said she wanted to make her name sound like Jasmine" (the user, 14 Nov)
 >
 > "kind of exasperating at the end. It's like, oh, my name's not really Jasmine. It's like, I have this sad face" (the user, 14 Nov)
@@ -1394,9 +1396,9 @@ She wanted her name to sound like Jasmine. In the den she asks for an Aladdin-st
 
 ### On her jetty, as you come alongside, and once she's on the carpet
 
-- *As you come alongside:* "Ahoy! There you are. Take me somewhere exciting."
-- *Straight after:* "I want an Aladdin-style adventure. Magic carpet and everything."
-- *Straight after that:* "Oh, and I'm running rum to a blockade. Drop me at Helium's first?"
+- *As you come alongside:* "Ahoy! Oh, good timing."
+- *Straight after:* "I'm running rum out to a blockade, and Helium's got the rum. I need to get there quick. Any ideas?"
+- *After your idea: a magic carpet:* "A magic carpet? Oh, go on, then."
 - *Sat on the carpet, lashed on the sloop:* "Ooh, comfy. Right then. Let's fly!"
 
 ### Down the trade wind on the carpet, now and then, by how fast you're going

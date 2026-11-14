@@ -12,8 +12,10 @@
    think she'd want the 'my name's not even Jasmine' thing on there. That seems a bit personal").
 
    Then "we need a bit more of a game": she's running rum to a blockade ("she's got to go pick the [rum] up ... then
-   ... from there to the blockade"), so this, the first leg, takes her to Helium's for it. How it plays: her jetty, her
-   ask, you change and lash the carpet on, she climbs on. Then the trade wind, laid on the real sea straight down from
+   ... from there to the blockade"), so this, the first leg, takes her to Helium's for it. How it plays: her jetty, she
+   needs to get to Helium's quick, and the carpet's your idea, not her ask (the user: "like you're the one that comes
+   up with the idea ... I don't want her to seem like she's demanding it"); she says yes, you change and lash the
+   carpet on, she climbs on. Then the trade wind, laid on the real sea straight down from
    her island (LAY.JAZZMY.RUN), past Tzz's and Kikkit's islands (each calling out): it carries the sloop at its own
    pace (CRUISE), and holding Space leans into it, faster (LEAN) up to MAX; let go and she eases back to the wind's
    pace. Where it runs out, just short of the reef, the sloop stops dead and the carpet flies on at the speed she was
@@ -95,10 +97,10 @@ export type Result = Landed & { v: number };
 
 /** The adventure's steps, in order. Before `ready` they play by themselves (Space skips one); `ready` waits for you to
     lean into the wind, or sets off anyway; `fly` lasts as long as she's up; `card` waits for Again or Back. */
-export type Phase = 'arrive' | 'hello' | 'ask' | 'where' | 'plan' | 'dress' | 'lash' | 'board' | 'ready' | 'ride' | 'stop' | 'fly' | 'down' | 'punch' | 'card';
+export type Phase = 'arrive' | 'hello' | 'ask' | 'idea' | 'yes' | 'dress' | 'lash' | 'board' | 'ready' | 'ride' | 'stop' | 'fly' | 'down' | 'punch' | 'card';
 /** How long each step that plays by itself lasts (seconds). */
-export const SECS: Partial<Record<Phase, number>> = { arrive: 3.5, hello: 3.2, ask: 3.6, where: 3.6, plan: 2.4, dress: 2.2, lash: 3.6, board: 3, ready: 4, stop: 0.6, down: 2.6, punch: 4.5 };
-const ORDER: Phase[] = ['arrive', 'hello', 'ask', 'where', 'plan', 'dress', 'lash', 'board', 'ready', 'ride', 'stop', 'fly', 'down', 'punch', 'card'];
+export const SECS: Partial<Record<Phase, number>> = { arrive: 3.5, hello: 3.2, ask: 4.6, idea: 4.6, yes: 2.6, dress: 2.2, lash: 3.6, board: 3, ready: 4, stop: 0.6, down: 2.6, punch: 4.5 };
+const ORDER: Phase[] = ['arrive', 'hello', 'ask', 'idea', 'yes', 'dress', 'lash', 'board', 'ready', 'ride', 'stop', 'fly', 'down', 'punch', 'card'];
 
 export type Who = 'jazzmy' | 'you' | 'tzz' | 'kikkit' | 'helium' | 'guard';
 export type RideEvent =
@@ -112,8 +114,8 @@ export type RideEvent =
 const SAYS: Partial<Record<Phase, { who: Who; text: string }>> = {
   hello: { who: 'jazzmy', text: ON_HER_JETTY.hello },
   ask: { who: 'jazzmy', text: ON_HER_JETTY.ask },
-  where: { who: 'jazzmy', text: ON_HER_JETTY.where },
-  plan: { who: 'you', text: ON_THE_CARPET_RIDE },
+  idea: { who: 'you', text: ON_THE_CARPET_RIDE },
+  yes: { who: 'jazzmy', text: ON_HER_JETTY.yes },
   board: { who: 'jazzmy', text: ON_HER_JETTY.aboard },
 };
 /** Her lines down the wind: none closer together than this (seconds); the new mood held this long first; bored only

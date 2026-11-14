@@ -3,8 +3,8 @@
 // island (jazzmy-isle.js; den.html?at=carpet). carpetEnter() starts it there and carpetLeave() puts you back aboard;
 // den.js hands it the keys, each tick and the camera while it's on.
 //
-// The sloop comes alongside her jetty. She asks for an Aladdin-style adventure, and a lift to Helium's for rum she's
-// running to a blockade; you change into the part for this adventure only (a twirl: a fez, a vest, a sash, patched
+// The sloop comes alongside her jetty. She needs a quick lift to Helium's for rum she's running to a blockade, and
+// the magic carpet's your idea (an Aladdin-style adventure); she says yes, you change into the part for this adventure only (a twirl: a fez, a vest, a sash, patched
 // trousers, bare feet, a monkey); a carpet's lashed on crates on the foredeck, "JASMINE" embroidered on it, crossed
 // out, "Jazzmy" stitched over; she climbs on. Then the trade wind, a lane of streaks straight down the sea past Tzz's
 // and Kikkit's islands (each calling out) to just short of the reef: Space (or the held button on a phone) leans into
@@ -571,7 +571,7 @@ export function carpetTick(dt) {
   Y.g.position.y = SLOOP_DECK + 0.35;   // (the twirl's hop is added on each tick: from here)
   Y.arms[1].rotation.set(-0.8, 0, 0);
   if (P === 'stop') Y.body.rotation.x = 0.35; else Y.body.rotation.x = 0;
-  const opening = P === 'arrive' || P === 'hello' || P === 'ask' || P === 'where';
+  const opening = P === 'arrive' || P === 'hello' || P === 'ask' || P === 'idea' || P === 'yes';
   Y.g.rotation.y = opening ? YOU_TO_HER : Math.PI / 2;
   twirlTick(Y, dt, Math.PI / 2);
   poseJazz(J, P, R, dt, t);
@@ -596,7 +596,7 @@ export function carpetTick(dt) {
   leanBtn.classList.toggle('held', carpet.leaning);
   $('carpet-dive-btn').classList.toggle('held', P === 'fly' && leaning);
   steerBar.classList.toggle('on', flying);
-  skipBtn.classList.toggle('on', ['hello', 'ask', 'where', 'plan', 'dress', 'lash', 'board', 'down', 'punch'].includes(P));
+  skipBtn.classList.toggle('on', ['hello', 'ask', 'idea', 'yes', 'dress', 'lash', 'board', 'down', 'punch'].includes(P));
   if (sailing) {
     $('carpet-needle').style.left = `${meterAt(v) * 100}%`;
     $('carpet-left').textContent = P === 'ready' ? 'The wind runs out at the red buoys, just short of the reef.' : `The wind runs out in ${Math.ceil(R.left)} m`;
@@ -671,7 +671,7 @@ function poseJazz(J, P, R, dt, t) {
   }
   // On her jetty: waving as you come alongside, talking as she asks.
   J.g.position.y = 0.51;
-  IDLES[P === 'hello' || P === 'arrive' ? 'wave' : P === 'ask' || P === 'where' ? 'talk' : 'sway'](J, t, P === 'ask' || P === 'where');
+  IDLES[P === 'hello' || P === 'arrive' ? 'wave' : P === 'ask' || P === 'yes' ? 'talk' : 'sway'](J, t, P === 'ask' || P === 'yes');
   J.g.rotation.y = JETTY_YAW;
 }
 /** Turned to the camera (her face, to you). */
@@ -690,8 +690,8 @@ export function carpetCam() {
   // (the opening from the open sea off her island: the sloop coming alongside, then you and her together, her island
   // behind)
   if (P === 'arrive') C = { look: [(s.x - 1.45 + J.x) / 2, 1.3, J.z / 2], dist: tall ? 18 : 13, tilt: 0.28, yaw: -2.3 };
-  else if (P === 'hello' || P === 'ask' || P === 'where') C = { look: [(s.x - 1.45 + J.x) / 2, 1.7, J.z / 2], dist: tall ? 9.5 : 7, tilt: 0.2, yaw: -2.5 };
-  else if (P === 'plan' || P === 'dress') C = { look: [s.x - 1.45, 2.3, 0.6], dist: tall ? 7 : 5.2, tilt: 0.14, yaw: 2.8 };
+  else if (P === 'hello' || P === 'ask' || P === 'idea' || P === 'yes') C = { look: [(s.x - 1.45 + J.x) / 2, 2.3, J.z / 2], dist: tall ? 9.5 : 7.5, tilt: 0.2, yaw: -2.5 };   // (headroom for their bubbles)
+  else if (P === 'dress') C = { look: [s.x - 1.45, 2.3, 0.6], dist: tall ? 7 : 5.2, tilt: 0.14, yaw: 2.8 };
   else if (P === 'lash') C = { look: [s.x + CARPET.RUG_X, CARPET.DECK_H, 0], dist: 3.1, tilt: 1.05, yaw: -0.05 };
   else if (P === 'board') C = { look: [s.x + 0.4, 1.6, 0.8], dist: 8.5, tilt: 0.3, yaw: 2.6 };
   else if (P === 'ready' || P === 'ride') { const v = R.v; C = { look: [s.x + 4 + v * 0.3, 1.3, 0], dist: (tall ? 15 : 11) + v * 0.3, tilt: 0.3, yaw: -2.14 + Math.sin(carpet.t * 0.2) * 0.05 }; }

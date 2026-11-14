@@ -50,8 +50,13 @@ describe("Jazzmy's carpet ride", () => {
   });
   it('goes through every step in order, her jetty to the card', () => {
     const { events } = play(() => false);
-    const order: Phase[] = ['arrive', 'hello', 'ask', 'where', 'plan', 'dress', 'lash', 'board', 'ready', 'ride', 'stop', 'fly', 'down', 'punch', 'card'];
+    const order: Phase[] = ['arrive', 'hello', 'ask', 'idea', 'yes', 'dress', 'lash', 'board', 'ready', 'ride', 'stop', 'fly', 'down', 'punch', 'card'];
     expect(phases(events)).toEqual(order);
+  });
+  it('the carpet\'s your idea, not her ask (the user, 14 Nov: "I don\'t want her to seem like she\'s demanding it")', () => {
+    const { events } = play(() => false), says = events.filter((e) => e.kind === 'say') as Extract<RideEvent, { kind: 'say' }>[];
+    const firstCarpet = says.find((e) => /carpet|Aladdin/i.test(e.text))!;
+    expect(firstCarpet.who).toBe('you');
   });
   it('never says "my name\'s not even Jasmine" (the user, 14 Nov: "That seems a bit personal")', () => {
     for (const hold of [0, 6, 9, 30]) for (const t of said(play((r) => r.v < hold).events)) expect(t).not.toMatch(/Jasmine/i);

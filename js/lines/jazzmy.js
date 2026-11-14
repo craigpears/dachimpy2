@@ -1,8 +1,10 @@
-/** On her jetty, as the sloop comes alongside, and climbing onto the carpet. */
+/** On her jetty, as the sloop comes alongside: she's in a hurry for Helium's rum, and the carpet's your idea, not
+    hers (the user, 14 Nov: "like you're the one that comes up with the idea ... I don't want her to seem like she's
+    demanding it"); then climbing onto the carpet. */
 export const ON_HER_JETTY = {
-    hello: 'Ahoy! There you are. Take me somewhere exciting.',
-    ask: 'I want an Aladdin-style adventure. Magic carpet and everything.',
-    where: 'Oh, and I\'m running rum to a blockade. Drop me at Helium\'s first?',
+    hello: 'Ahoy! Oh, good timing.',
+    ask: 'I\'m running rum out to a blockade, and Helium\'s got the rum. I need to get there quick. Any ideas?',
+    yes: 'A magic carpet? Oh, go on, then.',
     aboard: 'Ooh, comfy. Right then. Let\'s fly!',
 };
 /** Down the trade wind on the carpet, by how fast she's going (src/den-carpet.ts's moodAt): a line now and then as
@@ -37,8 +39,9 @@ export const WHERE_SHE_ENDS_UP = {
 };
 export const CHARACTER = {
     name: 'Jazzmy',
-    who: 'A pirate of the Emerald Ocean, a Senior Officer of Down To Clown and a Lady of No Bamboozles, who owns Ice Spices on Armstrong Island. Long golden waves past her shoulders, winking, in black and gold with a white ruff, a silver chalice in her hand and an orange parrot on her shoulder (her portraits).\n\nShe wanted her name to sound like Jasmine. In the den she asks for an Aladdin-style adventure and gets one: a magic carpet lashed on top of the sloop, "JASMINE" embroidered on it, crossed out, and "Jazzmy" stitched over the top.',
+    who: 'A pirate of the Emerald Ocean, a Senior Officer of Down To Clown and a Lady of No Bamboozles, who owns Ice Spices on Armstrong Island. Long golden waves past her shoulders, winking, in black and gold with a white ruff, a silver chalice in her hand and an orange parrot on her shoulder (her portraits).\n\nShe wanted her name to sound like Jasmine. In the den she needs a quick lift to Helium\'s for a blockade\'s rum, and you have an idea: an Aladdin-style adventure, a magic carpet lashed on top of the sloop, "JASMINE" embroidered on it, crossed out, and "Jazzmy" stitched over the top.',
     theUser: [
+        { on: '14 Nov', said: 'I\'m not sure if it fits her to be asking for the magic carpet ride ... like you\'re the one that comes up with the idea ... I don\'t want her to seem like she\'s demanding it' },
         { on: '14 Nov', said: 'she said she wanted to make her name sound like Jasmine' },
         { on: '14 Nov', said: 'kind of exasperating at the end. It\'s like, oh, my name\'s not really Jasmine. It\'s like, I have this sad face' },
         { on: '14 Nov', said: 'I think the crossing out Jasmine with Jasmine works enough. I don\'t think you need a constant correction in the dialogue' },
@@ -46,7 +49,7 @@ export const CHARACTER = {
         { on: '14 Nov', said: 'we need more creative, just a few varied endings, like she crashes on the rocks and nothing really happens. Same with the water, yeah, that\'s very anticlimactic' },
     ],
     lines: [
-        { when: 'On her jetty, as you come alongside, and once she\'s on the carpet', says: ON_HER_JETTY, each: { hello: 'As you come alongside', ask: 'Straight after', where: 'Straight after that', aboard: 'Sat on the carpet, lashed on the sloop' } },
+        { when: 'On her jetty, as you come alongside, and once she\'s on the carpet', says: ON_HER_JETTY, each: { hello: 'As you come alongside', ask: 'Straight after', yes: 'After your idea: a magic carpet', aboard: 'Sat on the carpet, lashed on the sloop' } },
         {
             when: 'Down the trade wind on the carpet, now and then, by how fast you\'re going', says: ON_THE_CARPET,
             each: { bored: 'Slow (only once it\'s been slow a while)', happy: 'Going nicely', thrilled: 'Going fast', scared: 'Going too fast: if the wind ran out now, the rocks' },

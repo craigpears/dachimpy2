@@ -53,6 +53,9 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     was"; and your pirate "very out of the [shot]". Her island's own Jazzmy left standing on the jetty under the
     ride's (straight in by ?at=carpet her island wasn't built yet when it was hidden); the opening shots to frame
     you and her together again.
+  - Her not asking for it: "I'm not sure if it fits her to be asking for the magic carpet ride. Can it not be
+    something like a bit more natural, like you're the one that comes up with the idea? ... I don't want her to seem
+    like she's demanding it." She needs a quick lift to Helium's for the blockade's rum; the carpet's your idea.
   Done the same evening: five endings (paddle, skip, hammock, rocks, over the horizon), no Jasmine line, the meter from
   the wind's own pace; her island right behind the ride's jetty (her palms and stall shared, js/den/jazzmy-props.js);
   her hair long tumbling waves past the shoulders, after her classic portrait.

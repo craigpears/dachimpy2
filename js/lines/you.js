@@ -65,8 +65,8 @@ export const ON_THE_RUM_RUN = {
     smuggling: 'Is... is this smuggling?',
     home: 'So... back home, then?',
 };
-/** Jazzmy's magic carpet ride (src/den-carpet.ts): her ask answered, before you change into the part. */
-export const ON_THE_CARPET_RIDE = 'Right. Leave it with me.';
+/** Jazzmy's magic carpet ride (src/den-carpet.ts): her needing to get to Helium's quick, and your idea for it. */
+export const ON_THE_CARPET_RIDE = 'Quick, is it? Leave it with me. How do you feel about an Aladdin-style adventure?';
 /** Jazzmy flown clean over the rocks and away over the horizon, you watching her go. */
 export const AS_SHE_SAILS_OFF = '...She\'ll turn up.';
 export const CHARACTER = {
@@ -104,7 +104,7 @@ export const CHARACTER = {
         { when: 'At Dachimpy\'s door, every visit: their hug, their cookie; and asking for another from the plate', says: IN_DACHIMPYS_HOUSE, each: { hugged: 'Their hug', cookie: 'Their cookie', another: 'Another from the plate on the hall\'s table' } },
         { when: 'Sinking into Affame\'s cushion corner, among her teddies', says: IN_AFFAMES_HOUSE, each: { sunk: 'The first time', again: 'Another time' } },
         { when: 'Helium\'s rum run: as they ask you along, before their "Delivering" (`smuggling`); turned away at Port Decorum\'s jetty (`home`)', says: ON_THE_RUM_RUN },
-        { when: 'Jazzmy asking for an Aladdin-style adventure, on her jetty: before you change into the part', says: [ON_THE_CARPET_RIDE] },
+        { when: 'Jazzmy on her jetty, needing to get to Helium\'s quick: your idea, before you change into the part', says: [ON_THE_CARPET_RIDE] },
         { when: 'Her carpet ride far too fast: Jazzmy clean over the rocks and away over the horizon', says: [AS_SHE_SAILS_OFF] },
     ],
 };
