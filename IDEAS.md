@@ -2642,6 +2642,12 @@ could ask a question." As discussed:
   asking people. Again, I just don't want any impression that I'm trying to ... replace people interaction." So
   each answer comes with the pirate's portrait and name (with their
   say-so) or the guide it came from, and always ends by sending you to the Discord or to ask other pirates.
+- **Decided (14 Nov): no assistant built on the Discord's wisdom.** The user: "people ... would probably not like
+  that because ... even if it wasn't against Discord's terms, it undermines that social interaction thing. Like ...
+  if you got a question on [a] mechanic, that's what [YPP] Trophy Hunters is for. There's nothing you can't really
+  find there or ask about." So questions go to the people: the front page points there. (Of the server's own rules
+  on AI-generated content, "visual media created using AI", the user reads it as keeping out slop.) The catalogue of
+  guides may still be worth a page of its own; an assistant isn't planned.
 
 ## Making the puzzles mobile friendly, the hard ones too (13 Nov)
 
