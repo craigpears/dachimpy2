@@ -575,6 +575,10 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   Cade Sim, Puzzle Practice, the Discord) plainly outside this site; and credit: "[AMH] created the new [Global
   Cade Sim] ... I just don't want any hint of like for both of that and the practice puzzles, any hint like I'm
   trying to take credit for them in any way, even by omission."
+  Then (14 Nov): high level: the sloop race one item, the race watched, the course editor and the starlit door its
+  sub-things; the primer just "Carpentry", not "where it all started"; the external links one quick section near the
+  start, never repeated; no "successor" line for the Cade Sim; Puzzle Practice not called "2D", and nobody pointed
+  to practising in the den ("that is not what the point of this was").
 - **The front page as the launch pad, and what the den is for (14 Nov):** below "what are you here for?", the
   changelog's link and a way to "jump to specific places ... then we could get rid of the cheats menu and we can
   have this as a launch pad into that." And a short, light section on the den's goals: "you want your own adventure
