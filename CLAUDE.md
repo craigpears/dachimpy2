@@ -107,6 +107,9 @@ and a few lines in plain words. Pirate names only. One entry per real feature (t
 already there updates its entry, or joins a few passes into one, rather than adding another. An addition to a
 feature (a new theme, a new look) is a smaller update: `article class="small"` under the day's "Smaller updates",
 one thumbnail and a line or two.
+A house or little room in the housing district is a smaller update too, however special (the user, 14 Nov: "these
+small little rooms that get added should be relatively small on the page"); the big entries are for what matters
+most to the den as a whole, like the front page.
 Beside it, `design.html` ("How the Pirate Den is designed", 12 Nov), in the changelog's look and linked from its
 header: the thinking behind the den, high level and in plain words, a picture for each section (from
 `changelog/`), the sloop race first, then the den's wider principles. Keep it up to date with design thinking

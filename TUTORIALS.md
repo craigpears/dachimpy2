@@ -101,3 +101,18 @@ Tzz's balloon lesson (src/balloons.ts, src/den-tzz.ts) fits as it is; its read v
 - **The choice**, in her voice, breezy: something like "The basics? A Double? Building up to a Bingo? Or the big
   one, a Vegas?", her lines in src/lines/tzz.ts.
 - **Its read version**, `sailing-guide.html`, drawn from the same routines, with the same nav.
+
+## 5. A variant of a puzzle: the wolf den's Duty Navigation (Dignity), its basics first
+
+The user, 14 Nov: "for the werewolf [Duty Nav] thing, I think that should be obviously slightly differently
+structured in that it is something where you have to explain some of the basic mechanics because it is different.
+Like, how does it work? What are the differences to main [Duty Nav]? That should be part of the tutorial. Like,
+we'll probably do something more broadly at some point for the werewolves and how those work."
+
+So a variant's tutorial keeps the same shape but its **basics aren't left to the game's own tutorial**: they're
+taught, as what's different from the plain puzzle (here: the fourth, outer ring; wild slots and how a chain makes
+them; the moon and turning werewolves back; why every constellation should end a chain), with plain Duty
+Navigation's rules taken as known. Probably a `differs` part (or the basics marked as a variant's) in
+`src/tutorial.ts`, and a choice for it ("What's different here?"). The werewolves themselves (the expedition, the
+den's rounds, Rumble, the moon) get a wider explainer of their own later, not this lesson. The detail researched so
+far: IDEAS.md, "Dignity's tutorial: four-tier Duty Navigation in the werewolf den".

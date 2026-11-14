@@ -2814,6 +2814,9 @@ Puzzle Pirates, or one to make), before anything's built.
   their little outpost." Dignity, the checkpoint's commander, charts the stars to find the hidden ways pirates
   sneak round her outpost (the starlit door is one), so she's the natural teacher of Duty Navigation, and her
   lesson has a reason in the story: she's training you to hunt them, or you're learning her trick to slip past.
+- **Its basics taught, as what's different (14 Nov):** unlike the other tutorials, this one explains the mechanics,
+  since a wolf den's Navigation isn't plain Duty Navigation: how it works and how it differs. A wider explainer of the
+  werewolves themselves to come one day. TUTORIALS.md §5.
 
 ## Distilling with a higher skill cap: fun variations (13 Nov)
 

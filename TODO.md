@@ -777,6 +777,18 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   needs a mention as being an amazing guy that was a core contributor." So Tim DC in the museum, by the Blockade
   Simulator, a picture of him and a plaque crediting him (pirate name, look checked on his pirate page first).
 
+- **The front page's sticky menu out of order (14 Nov):** "why is the sticky menu in a different order than they
+  actually appear on the page? That's really off-putting." Elsewhere was fourth in the menu but first on the page.
+  Done: the menu follows the page, and a test keeps it that way.
+
+- **What's new: the little houses too big (14 Nov):** "me and my museum ... they're the small features, they're
+  special to me, but wow, you should not be having 3 giant pictures ... the front page is a much more important
+  feature." Done: Dachimpy's house and Roobear's ROOm are smaller updates, one thumbnail each; the front page is the
+  day's big entry.
+
+- **Tim DC's pirate name (14 Nov):** no picture needed after all, perhaps: "I guess it should just be like ... Tim DC,
+  what his pirate name was. I think he was Hunter, maybe?" To pin down with the user before his mention goes in.
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
