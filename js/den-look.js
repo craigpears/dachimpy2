@@ -285,6 +285,14 @@ export const PIRATES = Object.fromEntries(Object.entries({
     hat: 'none', top: 'vest', topCol: 'navy', topCol2: 'light blue', waist: 'belt', waistCol: 'navy',
     legs: 'pants', legsCol: 'light blue', feet: 'shoes', feetCol: 'blue', hand: 'none', fam: 'octopus', famCol: 'orange',
   },
+  // Affame (Emerald), the queen of sweetness, from her pirate page's portrait (checked 14 Nov): tan skin, long pink
+  // hair under a pink-and-navy striped wrap, a long navy coat with gold buttons, its magenta panel down the front.
+  // (Her pink fox Confetti isn't in the wardrobe yet, nor the glowing blue light in her hand.)
+  Affame: {
+    body: 'f', skin: 2, hair: 'wavy', hairCol: 'pink', patch: false, earring: false, smile: true,
+    hat: 'bandana', hatCol: 'pink', hatCol2: 'navy', top: 'buccaneer', topCol: 'navy', topCol2: 'magenta', waist: 'none',
+    legs: 'long', legsCol: 'magenta', legsCol2: 'navy', feet: 'shoes', feetCol: 'navy', hand: 'none', fam: 'none',
+  },
 }).map(([name, look]) => [name, cleanLook(look)]));
 
 /* Mischievious through her gallery (Emerald, 399 portraits, checked 11 Nov), to choose which of her

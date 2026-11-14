@@ -194,12 +194,13 @@ export const FRIENDS = [
     // (Sanne turned a little more, so her blonde hair, tied back, shows)
     mid('sanne', along(1, 1), { portrait: sat('Sanne', 'beach', { with: IN_RED, yaw: -0.45 }) }),
     mid('whiterose', along(1, 2), { portrait: sat('Whiterose', 'bloodmoon') }),
-    friend('tzz', along(1, 3), { portrait: sat('Tzz', 'autumn') }),
-    friend('helium', along(1, 4), { portrait: sat('Helium', 'night') }),
-    friend('roobear', along(1, 5), { portrait: sat('Roobear', 'pinksea') }),
-    friend('welcomeBack', along(1, 6), { portrait: sat('Fable', 'night', { dress: FABLE_IN_RAGS, with: WELCOME_BACK_RAGS, yaw: -0.3 }) }),
-    friend('everyone', along(1, 7), { page: 'everyone' }),
-    friend('thanks', along(1, 8), { page: 'thanks' }),
+    friend('affame', along(1, 3), { portrait: sat('Affame', 'night') }),
+    friend('tzz', along(1, 4), { portrait: sat('Tzz', 'autumn') }),
+    friend('helium', along(1, 5), { portrait: sat('Helium', 'night') }),
+    friend('roobear', along(1, 6), { portrait: sat('Roobear', 'pinksea') }),
+    friend('welcomeBack', along(1, 7), { portrait: sat('Fable', 'night', { dress: FABLE_IN_RAGS, with: WELCOME_BACK_RAGS, yaw: -0.3 }) }),
+    friend('everyone', along(1, 8), { page: 'everyone' }),
+    friend('thanks', along(1, 9), { page: 'thanks' }),
 ];
 /** The friends' wall (its face's z). */
 export const FRIENDS_WALL = FROOM.z0 + WALL_T;

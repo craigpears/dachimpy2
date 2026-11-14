@@ -2219,7 +2219,8 @@ flag's name, Imperial Coalition, to confirm on YPPedia.
 "Need to work affame into it somewhere... I have dubbed her the queen of sweetness so she can have a nice
 kind peaceful role somewhere." **Affame** (she; a real pirate, pirate name as the user spelt it, to check
 on her pirate page with her ocean and portrait before she's drawn, then into PIRATES): the queen of
-sweetness, a kind, peaceful part, where and what still open. (Nearby ideas it might sit with: Dachimpy's
+sweetness, a kind, peaceful part, where and what still open. On the friends' wall in Dachimpy's house since 14 Nov ("Affame is a sweety"), from her
+Emerald portrait (no portrait shared with Dachimpy on either ocean); her pink fox Confetti not in the wardrobe yet. (Nearby ideas it might sit with: Dachimpy's
 house with its cookies and hugs at the door, the houses that each give you something kind to do.)
 
 ## SunnyKira, a fan of the tutorials (11 Nov)
