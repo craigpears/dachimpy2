@@ -121,7 +121,8 @@ export const coveM = mat('#2f86b0', { roughness: 0.3, transparent: true, opacity
 export const stoneM = mat('#6b6158', { flatShading: true, roughness: 0.95 }), grassM = mat('#5f7d3a', { roughness: 1 });
 export function seaWorld() {
   const W = { g: new THREE.Group(), lanes: [] };
-  for (const { at: [c, r], d, n } of LAY.LANES) {
+  // (and the wind out of Helium's corner, a lane of its own: LAY.HELIUM.WIND)
+  for (const { at: [c, r], d, n } of [...LAY.LANES, ...LAY.HELIUM.WIND]) {
     const lane = windLane(c, r, d, n);
     W.g.add(lane.g);
     W.lanes.push(lane.tex);

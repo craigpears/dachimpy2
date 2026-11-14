@@ -244,7 +244,10 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    they'll show you how to sneak past Port Decorum's customs, and he tells you where to find Helium's
    island, where you learn to distil it. "He's a shifty penguin. [Kikkit] was right."
    Helium's island is there already (12 Nov): a little one of their own out past the checkpoint, across the
-   smugglers' rocks from their cove, their copper still on it and a board of Distilling on a stand. The
+   smugglers' rocks from their cove, their copper still on it and a board of Distilling on a stand. Their
+   corner of the sea has one way in and one way out (14 Nov): Kikkit's Double over her reef, then a turn to
+   starboard and the oars (no sail, bump or chain gets you in); and a wind from their island round under Port
+   Decorum's back, out toward its front. The
    first time you come up off it the still blows up as you arrive, and they treat it as an everyday thing
    ("of course it's safe"; and the eyebrows none of us have). Then they show you, offhand, as if it were nothing: the swap rule, whites left
    and junk right, the junk column burned, and the next burned with a white in it, bang ("Oops. That

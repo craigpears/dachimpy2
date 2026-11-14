@@ -26,9 +26,14 @@
    and "this is supposed to be a secret way round". A chain heading out to sea past Kikkit's island
    had carried her over the winds that feed the whirlpools, through the reef with them, and out the
    other side. Now the whirlpools are a way through only when you sail into them on purpose: up to
-   the mouth, then the chain (as Kikkit tells it), or your own moves onto their winds. */
+   the mouth, then the chain (as Kikkit tells it), or your own moves onto their winds.
+
+   And of a wind only the oars beat (a WindZone's `oars`), heading into it: Helium's corner's way in (14
+   Nov: "you have to do a 90-degree turn by rowing ... I think that should be the only way"), so no chain
+   carries her in where the sails can't. */
 import { path } from './den-sail.js';
 import { chainName, runFor, RUN } from './sailing.js';
+import { against, zoneAir } from './den-wind.js';
 /** The squares a gust of `n` takes her, from `from` straight ahead, a pose each; short of the first
     square she can't go to (and none if it's the first). From a wind gap's mouth, lined up first and
     carried over it (lineUp). */
@@ -94,6 +99,10 @@ function straight(sea, from, n) {
         if (!whirl && !pocket && (!sea.open(to.c, to.r) || sea.isLock(to.c, to.r) || sea.level(to.c, to.r) !== level))
             break;
         if (pocket && n < runFor(RUN.VEGAS))
+            break;
+        // (and of a wind only the oars beat, heading into it: Helium's corner's way in, 14 Nov)
+        const z = sea.zoneAt(to.c, to.r);
+        if (z?.oars && against(to.d, zoneAir(z)))
             break;
         out.push(to);
         at = to;

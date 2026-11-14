@@ -750,6 +750,24 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   perfecting this bit." Helium (their Emerald portrait, IDEAS.md) on a little island of their own out past the
   checkpoint, across the smugglers' rocks from their cove (LAY.HELIUM: three squares, in open water, on the
   captain's map unnamed, as Tzz's is). Their distillery behind them and Distilling's own board on a stand.
+  - **Their corner, one way in and one way out (14 Nov).** On the rum run: "If you want to get to Helium's
+    hideout, you have to do a 90-degree turn by rowing, because there's no way of bumping yourself there. I
+    really like that ... I think that should be the only way of getting to Helium's little corner ... But
+    there should be a wind still so that you can get from his den to the front of where the Imperial Fort is.
+    So it kind of becomes a one-way thing of getting back out." Their corner (between the checkpoint's reef,
+    the smugglers' rocks and the race's line of rocks) had been open to the sea round Port Decorum's back. Now
+    rocks drawn as the reef's shut its bottom off, and its water is hidden, as the smugglers' run is:
+    - **The one way in:** Kikkit's Double over her reef (KIKKIT.OUT, its far side), then a turn to starboard
+      there (the reef's in the way, so she turns where she is) and rowed in. The corridor's first square has a
+      wind of its own blowing out of it, only the oars beat (`WindZone.oars`): under sail she's in irons heading
+      in, and a Sailing chain's gust stops short of it, so no bump, gust or chain gets her in. The pilot never
+      takes her in from outside.
+    - **The one way out:** a wind from just below their island, out through a gap in those rocks (a bend
+      either side of it, so no gust runs in along it) and round under Port Decorum's back, leaving her at its
+      south-west corner heading up its side, open water straight on to its front and its jetty. It can't run
+      on up beside it: Port Decorum's two squares of open sea round its land, and Primates Rule's, are kept
+      clear of wind. Out along the corridor with the wind, she can sail back to Kikkit's reef too.
+    Tested in tests/helium-corner.test.ts (every move, bump, wind, gust and whirlpool walked from the den).
   - **Their distillery (13 Nov):** "If you look up a distillery on Puzzle Pirates, I think [Helium] needs to
     have at least a bigger setup. That little object that blows up in the background is very tiny." A
     distillery as the game's are (js/den/distillery.js, placed from HELIUM_CAST): a timber building open at

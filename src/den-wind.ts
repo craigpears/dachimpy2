@@ -127,8 +127,10 @@ export function moveTime(s: Strength, oars: boolean, point: Point = 'reach'): nu
    one down (LAY.ZONES in src/den-sail.ts); js/den/wind.js draws it, streaks on its water. */
 
 /** A patch of sea with its own wind: its squares (columns c0 to c1, rows r0 to r1), the way it
-    blows and how strong. */
-export interface WindZone { c0: number; c1: number; r0: number; r1: number; d: number; s: Strength }
+    blows and how strong. With `oars`, only the oars take her into it against its wind: a Sailing
+    chain's gust stops short of it too, as of a rock (src/den-sailing.ts; Helium's corner's way in,
+    14 Nov: "you have to do a 90-degree turn by rowing"). Otherwise a gust zooms over a zone. */
+export interface WindZone { c0: number; c1: number; r0: number; r1: number; d: number; s: Strength; oars?: boolean }
 
 /** Whether a square's in this zone. */
 export const inZone = (z: WindZone, c: number, r: number): boolean => c >= z.c0 && c <= z.c1 && r >= z.r0 && r <= z.r1;

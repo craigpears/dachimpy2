@@ -45,9 +45,10 @@ describe('their island: a little place of its own, by the smugglers\' rocks', ()
     expect(near).toBeLessThanOrEqual(4);
     expect(near).toBeGreaterThan(1.5);
   });
-  it('is reached from the open sea: its ring is water the den can sail to, not hidden', () => {
+  it('is reached only by Kikkit\'s whirlpools and the oars (14 Nov: "the only way of getting to Helium\'s little corner"): its ring is hidden water, as the smugglers\' run is', () => {
     const s = new Sea(1);
-    for (const [c, r] of RING) expect(s.hidden.has(`${c},${r}`)).toBe(false);
+    for (const [c, r] of RING) if (s.open(c, r)) expect(s.hidden.has(`${c},${r}`)).toBe(true);
+    // (the way in and the wind out: tests/helium-corner.test.ts)
   });
   it('puts her alongside on its ring, and its starting point beside it', () => {
     expect(onHeliumLanding(HELIUM_MOOR.c, HELIUM_MOOR.r)).toBe(true);
