@@ -2637,6 +2637,11 @@ could ask a question." As discussed:
 - **The Discord's wisdom, with permission, not scraped:** Discord's terms forbid scraping and self-bots, and the
   words are people's own. Ask the Trophy Hunters' admins: a pinned "tips" channel or a bot they add, or members
   sending in their own nuggets, each with the pirate's name only if they're happy to be credited.
+- **Answers show who said it (14 Nov):** "you would ask a question and then it would show you the picture of whoever
+  had answered it or where the source is. And again, it would just always point you back towards that Discord or
+  asking people. Again, I just don't want any impression that I'm trying to ..." (cut off; most likely: take credit
+  for others' wisdom, or replace the people). So each answer comes with the pirate's portrait and name (with their
+  say-so) or the guide it came from, and always ends by sending you to the Discord or to ask other pirates.
 
 ## Making the puzzles mobile friendly, the hard ones too (13 Nov)
 
