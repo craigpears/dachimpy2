@@ -256,7 +256,7 @@ function follow(dt, R, s, toLine) {
     reopen();
   } else if (me < 0 || mine?.bot) {
     // (not in this race: in the room while it's on, or her sloop's a bot's now)
-    if (mine?.bot && !rnet.out) { rnet.out = true; toast('A bot\'s sailing yer sloop home now: ye\'ll race the next one', true); }
+    if (mine?.bot && !rnet.out) { rnet.out = true; toast('The computer\'s sailing yer sloop home now: ye\'ll race the next one', true); }
     if (R.state === 'count' || R.state === 'on') R.quit();
   } else if (R.state === 'off' && rnet.phase === 'on') {
     // (sailed back out of the gate: out of the race, a bot sails her sloop)
@@ -350,7 +350,7 @@ function soonLeft(s) {
 function rows(s, how, order = [...s.racers.keys()]) {
   return order.map((i) => { const x = s.racers[i];
     const you = x.id === rnet.id && !!x.id, bot = !x.id || x.bot;
-    return `<li class="${bot ? 'bot' : 'pirate'}${you ? ' you' : ''}"><i style="background:${sailOf(s, i)}"></i><span>${esc(x.name)}${you ? ' (you)' : ''}</span><em>${!x.id ? 'bot' : x.bot ? 'bot sailing' : 'pirate'}</em><b>${how(x, i)}</b></li>`;
+    return `<li class="${bot ? 'bot' : 'pirate'}${you ? ' you' : ''}"><i style="background:${sailOf(s, i)}"></i><span>${esc(x.name)}${you ? ' (you)' : ''}</span><em>${!x.id ? 'computer' : x.bot ? 'computer sailing' : 'pirate'}</em><b>${how(x, i)}</b></li>`;
   }).join('');
 }
 /** The panel: shown on the line while it's asked for or you're in a room, and in the room whenever you're not
@@ -395,9 +395,9 @@ function panel(R) {
       const note = left !== null && starters.length ? `${starters.join(', ')} pressed Start: off in ${secs(left)}` : s.players.length > 1 ? 'Off when everyone\'s pressed Start' : 'Wait for pirates to join, or start now';
       sig = JSON.stringify(['lobby', s.fill, s.racers.map((x) => [x.name, x.id, x.spot]), s.players.map((p) => [p.name, p.ready]), note]);
       html = `${head}<img class="rn-chart" src="changelog/race-map.jpg" alt="The course" width="320" height="180">`
-        + `<div class="rn-sub"><span>${s.racers.length - bots} pirate${s.racers.length - bots === 1 ? '' : 's'}, ${bots} bot${bots === 1 ? '' : 's'}</span><span class="rn-fill">Racers <button data-act="fill" data-by="-1">−</button><b>${s.fill}</b><button data-act="fill" data-by="1">+</button></span></div>`
+        + `<div class="rn-sub"><span>${s.racers.length - bots} pirate${s.racers.length - bots === 1 ? '' : 's'}, ${bots} computer racer${bots === 1 ? '' : 's'}</span><span class="rn-fill">Racers <button data-act="fill" data-by="-1">−</button><b>${s.fill}</b><button data-act="fill" data-by="1">+</button></span></div>`
         + `<ul class="rn-who">${rows(s, (x) => { const p = x.id ? s.players.find((y) => y.id === x.id) : null; return p ? (p.ready ? 'Start ✓' : 'waiting') : ''; })}</ul>`
-        + `${choice(bots ? `Start now, ${bots} bot${bots === 1 ? '' : 's'}` : 'Start now')}<p class="rn-note">${esc(note)}</p>`;
+        + `${choice(bots ? `Start now, ${bots} computer racer${bots === 1 ? '' : 's'}` : 'Start now')}<p class="rn-note">${esc(note)}</p>`;
     } else if (s.phase === 'done') {
       // The places, then the lobby again for the next race.
       const note = left !== null ? `Next race's lobby in ${secs(left)}` : '';

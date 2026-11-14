@@ -1001,6 +1001,27 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 
 - "Any questions, send me a tell on Emerald. Any time."
 
+### Their opening choice, after their opening or on T at the still: their question (opening, then each choice's asks), their line over its list once it's picked (then); the part picked played on a real board (show as it's laid, after once it's played, afterNote in the bar), or not now
+
+- *opening:* "Right. What are you after?"
+- *basics:*
+  - *asks:* "The basics?"
+  - *then:* "The basics, then. Pick one."
+- *early:*
+  - *asks:* "Help with the early or mid game?"
+  - *then:* "Early on, then. A board where it goes wrong, or one trick at a time?"
+- *higher:*
+  - *asks:* "Trying to get your CC higher?"
+  - *then:* "Longer chains. That's banking, then the chain. Pick one."
+- *end:*
+  - *asks:* "The end game?"
+  - *then:* "The end game. A gamble, that. Pick one."
+- *chooseNote:* "Helium's island. Pick what to see: arrows and Enter, a number, or tap. Esc: back."
+- *show:* "{title}. Here, on a real board."
+- *after:* "That's the one. Your go now. T if you want another."
+- *afterNote:* "Your still: a fresh board. T: Helium shows you something else. H: Help, Helium. G: a hint. W: watch Helium play."
+- *notNow:* "Suit yourself. The still's yours. T if you change your mind."
+
 ### The end of their lesson: in their bubble (says) and in the bar at the foot of the screen (note)
 
 - *Before handing you the board: they hold the burner, the fire held to start:*

@@ -42,7 +42,7 @@
   Reach the top and the water washes the top rows away.</p>
 <div class="bar">
   <label><input type="radio" name="mode" value="solo" checked> Solo: one board, colours to a side</label>
-  <label><input type="radio" name="mode" value="crew"> Crew: a board a side (a bot rows starboard)</label>
+  <label><input type="radio" name="mode" value="crew"> Crew: a board a side (the computer rows starboard)</label>
   <label title="Off: the pair waits for you. On: it drops itself after a few seconds."><input type="checkbox" id="flow"> Flow timer</label>
   <button id="again">New run</button>
   <span id="seed" style="color:var(--mute)"></span>
@@ -90,7 +90,7 @@ function start() {
   Object.assign(shown, { oar: [0, 0], x: 0, y: 0, h: 0 }); aim.oar = [0, 0];
   $('combo').textContent = '';
   const box = $('boards'); box.innerHTML = ''; svgs = [];
-  (crew ? ['Port (you)', 'Starboard (bot)'] : ['Port | Starboard']).forEach((name, i) => {
+  (crew ? ['Port (you)', 'Starboard (computer)'] : ['Port | Starboard']).forEach((name, i) => {
     const d = document.createElement('div'); d.className = 'board';
     d.innerHTML = `<h2 style="color:${crew ? SIDE[i] : 'inherit'}">${name}</h2>`;
     const svg = el('svg', { width: W * CELL, height: (H + TOP) * CELL, viewBox: `0 0 ${W * CELL} ${(H + TOP) * CELL}` }, d);

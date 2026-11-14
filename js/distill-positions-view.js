@@ -26,7 +26,7 @@ function drawn(p) {
   const cols = parse(p.cols), bot = p.bot;
   // (The lead-up's whites the move shuts in, ringed.)
   const svg = board({ cols, drags: bot.drags, shade: bot.column !== undefined ? [bot.column] : [], rings: p.shut ?? [], burn: bot.kind === 'burn' },
-    `${p.id}: the board, and the bot's move drawn on it`);
+    `${p.id}: the board, and the practice player's move drawn on it`);
   const [x0, y0, w, h] = svg.getAttribute('viewBox').split(' ').map(Number);
   svg.setAttribute('viewBox', `${x0} ${y0 - 18} ${w} ${h + 18}`);
   cols.forEach((_, x) => {
@@ -74,8 +74,8 @@ function position(p) {
   a.appendChild(html('p', { className: 'what' }, p.what));
   const fig = html('figure', { className: 'pic' });
   fig.appendChild(drawn(p));
-  fig.appendChild(html('figcaption', {}, bot.drags.length > 1 ? 'The bot\'s drags, in order: 1 first. A dot where each is picked up, an arrow where it\'s let go.'
-    : bot.drags.length ? 'The bot\'s drag: a dot where it\'s picked up, an arrow where it\'s let go.' : 'The bot makes no drag here.'));
+  fig.appendChild(html('figcaption', {}, bot.drags.length > 1 ? 'The practice player\'s drags, in order: 1 first. A dot where each is picked up, an arrow where it\'s let go.'
+    : bot.drags.length ? 'The practice player\'s drag: a dot where it\'s picked up, an arrow where it\'s let go.' : 'The practice player makes no drag here.'));
   a.appendChild(fig);
   const dl = html('dl');
   const row = (k, v) => { dl.appendChild(html('dt', {}, k)); dl.appendChild(html('dd', {}, v)); };
@@ -99,7 +99,7 @@ function position(p) {
     dl.appendChild(dd);
   }
   if (bot.column !== undefined) row('Filling', `column ${bot.column + 1} (shaded), to go up Crystal Clear`);
-  row('Where', `the ${levelLabel(p.level)} bot, ${fromWhere(p)}; ${secs(p.timeLeft)} on the furnace${p.chain ? `; the chain at CC^${p.chain}` : ''}`);
+  row('Where', `the practice player aiming for ${levelLabel(p.level)}, ${fromWhere(p)}; ${secs(p.timeLeft)} on the furnace${p.chain ? `; the chain at CC^${p.chain}` : ''}`);
   a.appendChild(dl);
   if (p.plan) a.appendChild(planBox(p));
   const verdicts = VERDICTS[p.id] ?? [];
@@ -108,7 +108,7 @@ function position(p) {
     const box = html('div', { className: 'verdicts' });
     box.appendChild(html('b', {}, 'Your verdicts, tested:'));
     const ul = html('ul');
-    for (const v of verdicts) ul.appendChild(html('li', {}, `${v.date}${v.from ? ` (${v.from})` : ''}: ${v.note}${v.open ? ' Not done by the bot yet.' : ' The bot does it.'}`));
+    for (const v of verdicts) ul.appendChild(html('li', {}, `${v.date}${v.from ? ` (${v.from})` : ''}: ${v.note}${v.open ? ' Not done by the practice player yet.' : ' The practice player does it.'}`));
     box.appendChild(ul);
     a.appendChild(box);
   }
@@ -149,7 +149,7 @@ function toJudge(p) {
     dl.appendChild(dd);
   };
   row('Reader', readerLine(p));
-  row('Bot', bot.kind === 'move' ? `${bot.label}${bot.drags.length > 1 ? `, in ${bot.drags.length} drags` : ''}` : `${KIND[bot.kind] ?? bot.kind}: ${bot.reason}`);
+  row('Plays', bot.kind === 'move' ? `${bot.label}${bot.drags.length > 1 ? `, in ${bot.drags.length} drags` : ''}` : `${KIND[bot.kind] ?? bot.kind}: ${bot.reason}`);
   if (bot.steps?.length) {
     const ol = html('ol', { className: 'steps' });
     for (const st of bot.steps) {
@@ -160,7 +160,7 @@ function toJudge(p) {
     }
     row(bot.steps.length > 1 ? 'Drags' : 'Drag', ol);
   }
-  row('Where', `${levelLabel(p.level)} bot, ${fromWhere(p)}; ${secs(p.timeLeft)} on the furnace${p.chain ? `; the chain at CC^${p.chain}` : ''}${bot.column !== undefined ? `; filling column ${bot.column + 1} (shaded)` : ''}`);
+  row('Where', `the practice player aiming for ${levelLabel(p.level)}, ${fromWhere(p)}; ${secs(p.timeLeft)} on the furnace${p.chain ? `; the chain at CC^${p.chain}` : ''}${bot.column !== undefined ? `; filling column ${bot.column + 1} (shaded)` : ''}`);
   a.appendChild(dl);
   if (p.plan) a.appendChild(planBox(p));
   const q = html('p', { className: 'question' });
@@ -181,8 +181,8 @@ function draw() {
     const top = html('section', { className: 'theme tojudge', id: 'to-judge' });
     top.appendChild(html('h2', {}, `To judge: ${fresh[0].id} to ${fresh[fresh.length - 1].id}`));
     top.appendChild(html('p', { className: 'about' }, fresh.every((p) => p.batch === 'leadup')
-      ? `${fresh.length} new positions, from before the damage: in each, the bot's move (drawn) shuts in the ringed white. What should it have done instead? Answer in chat by number, as briefly as you like: “${fresh[0].id} the blacks down first”.`
-      : `${fresh.length} new positions. For each: is the bot's idea right? Answer in chat by number, as briefly as you like: “${fresh[0].id} yes, ${fresh[1]?.id ?? fresh[0].id} the blacks down first”.`));
+      ? `${fresh.length} new positions, from before the damage: in each, the practice player's move (drawn) shuts in the ringed white. What should it have done instead? Answer in chat by number, as briefly as you like: “${fresh[0].id} the blacks down first”.`
+      : `${fresh.length} new positions. For each: is the practice player's idea right? Answer in chat by number, as briefly as you like: “${fresh[0].id} yes, ${fresh[1]?.id ?? fresh[0].id} the blacks down first”.`));
     list.appendChild(top);
     const line = html('div', { className: 'tojudge' });
     line.appendChild(html('a', { href: '#to-judge', target: '_self' }, 'To judge'));

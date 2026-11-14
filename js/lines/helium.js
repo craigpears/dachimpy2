@@ -54,6 +54,25 @@ export const ONWARD = 'Few of my tricks, that. The rest\'s from other pirates. A
     Helium, I feel like we should always end with, if you got any questions, you can always send me a tell on
     Emerald"). The real Helium, on Emerald, can expect a few tells. */
 export const TELL = 'Any questions, send me a tell on Emerald. Any time.';
+/** Their opening choice, the one every tutorial has (src/tutorial.ts; src/distill-tutorial.ts, DISTILL_TUTORIAL): after
+    their opening, or on T at the still, a question in their voice and an answer a button, not a chatbot. The user (14
+    Nov): "Would you like me to start you [with] the basics? Would you like help with the early or mid game? Are you
+    trying to get your CC higher?", the end game too once it's ready. `opening` first, then each choice's question
+    (`asks`), and their line over its list once it's picked (`then`), `chooseNote` in the bar meanwhile. Then, for the part picked, played on a real board
+    (src/den-helium-tutor.ts): `show` as its board's laid ({title} its name), `after` once it's played (`afterNote` in the
+    bar), `notNow` if you'd rather not. Short and dry, as ever. */
+export const TUTOR = {
+    opening: 'Right. What are you after?',
+    basics: { asks: 'The basics?', then: 'The basics, then. Pick one.' },
+    early: { asks: 'Help with the early or mid game?', then: 'Early on, then. A board where it goes wrong, or one trick at a time?' },
+    higher: { asks: 'Trying to get your CC higher?', then: 'Longer chains. That\'s banking, then the chain. Pick one.' },
+    end: { asks: 'The end game?', then: 'The end game. A gamble, that. Pick one.' },
+    chooseNote: 'Helium\'s island. Pick what to see: arrows and Enter, a number, or tap. Esc: back.',
+    show: '{title}. Here, on a real board.',
+    after: 'That\'s the one. Your go now. T if you want another.',
+    afterNote: 'Your still: a fresh board. T: Helium shows you something else. H: Help, Helium. G: a hint. W: watch Helium play.',
+    notNow: 'Suit yourself. The still\'s yours. T if you change your mind.',
+};
 /** At your still, getting nervous as a white sits in the furnace's column and the fire comes round (the user,
     13 Nov: "imagine Helium getting nervous if you're not really clearing out the whites, because Helium's going
     to be nervous that the distiller is going to have a mishap"). For all their "perfectly normal", it's their
@@ -378,6 +397,10 @@ export const CHARACTER = {
         { when: 'Their lesson\'s step one, straight after their opening, the whites on the fire\'s side ringed: as it starts (says), as they drag the whites out of the three columns next to the fire (clear), why (why), in the bar (note)', says: STEP_ONE },
         { when: 'Your first batch at the still done, the goal met, after their "done": the rest is from other pirates', says: [ONWARD] },
         { when: 'The last thing they say when a lesson ends, always, after the other pirates', says: [TELL] },
+        {
+            when: 'Their opening choice, after their opening or on T at the still: their question (opening, then each choice\'s asks), their line over its list once it\'s picked (then); the part picked played on a real board (show as it\'s laid, after once it\'s played, afterNote in the bar), or not now',
+            says: TUTOR,
+        },
         {
             when: 'The end of their lesson: in their bubble (says) and in the bar at the foot of the screen (note)', says: LESSON,
             each: { burner: 'Before handing you the board: they hold the burner, the fire held to start', yours: 'Handing you the board: step one first, then your goal' },

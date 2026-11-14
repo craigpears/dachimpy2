@@ -1,7 +1,8 @@
-/* DRAFT, not wired yet: Distilling's tutorial described in the shape every tutorial shares (src/tutorial.ts,
-   TUTORIALS.md). TypeScript, compiled to js/distill-tutorial.js; tested in tests/tutorial.test.ts. Written 14 Nov while
-   Distilling's bots, tricks and guide were being reworked for the late game: finish it once that work's merged
-   (TUTORIALS.md, "Distilling: what's left to wire"). Nothing in the den or on distilling-guide.html uses it yet.
+/* Distilling's tutorial described in the shape every tutorial shares (src/tutorial.ts, TUTORIALS.md). TypeScript,
+   compiled to js/distill-tutorial.js; tested in tests/tutorial.test.ts. Wired 14 Nov: distilling-guide.html's sticky
+   nav is drawn from it (js/tutorial-nav.js), and Helium's lesson opens with its choice (js/tutorial-choice.js; what's
+   picked played on a real board by src/den-helium-tutor.ts). The end game waits on the late-game work (TUTORIALS.md,
+   "Distilling: what's left to wire").
 
    Drawn from what's there now, so it can't drift from them: the phases' names and plans from src/distill-phase.ts
    (PHASES), the guide's tricks and techniques under each phase from src/distill-guide.ts (PLAN, the page's order),
@@ -11,25 +12,14 @@
    version draws. The end game (CC^10 and past it, the carry-on at CC^12, when to stop: DISTILLING.md §3, "The
    endgame's gamble") is a phase marked `todo`, for the late-game work to fill.
 
-   Helium's lines for the opening choice (DRAFT_LINES) are drafts here, not in src/lines/helium.ts, so as not to touch
-   that file while it's being changed; they move there (as `TUTOR`) when this is wired. */
+   Helium's lines for the opening choice are theirs, src/lines/helium.ts's TUTOR. */
 import { PHASES, PHASE_ORDER } from './distill-phase.js';
 import { PLAN, READ_EXAMPLES, firstLevel, phaseExamples, readingExamples, techniqueExamples, trickExamples, trickTiles } from './distill-guide.js';
 import { ROUTINES } from './distill-routines.js';
 import { PATH_LABEL, SWEEP_LABEL } from './distill-bots.js';
 import { DRAG_TRICKS } from './distill-teach.js';
-import { TEACH } from './lines/helium.js';
+import { TEACH, TUTOR } from './lines/helium.js';
 import { afterOpening } from './den-helium.js';
-/** Helium's opening choice, in their voice (short, dry), after the user's own words: "Would you like me to start you
-    [with] the basics? Would you like help with the early or mid game? Are you trying to get your CC higher?", the end
-    game too. To move into src/lines/helium.ts when this is wired. */
-export const DRAFT_LINES = {
-    opening: 'Right. What are you after?',
-    basics: { asks: 'The basics?', then: 'The basics, then. Pick one.' },
-    early: { asks: 'Help with the early or mid game?', then: 'Early on, then. A board where it goes wrong, or one trick at a time?' },
-    higher: { asks: 'Trying to get your CC higher?', then: 'Longer chains. That\'s banking, then the chain. Pick one.' },
-    end: { asks: 'The end game?', then: 'The end game. A gamble, that. Pick one.' },
-};
 // ---------------------------------------------------------------- the basics
 /** The rules in brief, and setting a target: the guide's first two sections. Shown on the lesson's own board. */
 const BASICS = [
@@ -115,7 +105,7 @@ const SCENARIO_PARTS = [
     },
 ];
 // ---------------------------------------------------------------- the opening choice
-const L = DRAFT_LINES;
+const L = TUTOR;
 const CHOICES = [
     { id: 'basics', label: 'The basics', ...L.basics, covers: ['basics', ...DRAG_PARTS.map((p) => p.id)] },
     { id: 'early', label: 'The early or mid game', ...L.early, covers: ['fire', 'fill', 'block'] },
@@ -123,17 +113,13 @@ const CHOICES = [
     { id: 'higher', label: 'A higher Crystal Clear', ...L.higher, covers: ['target', 'store', 'leapfrog', 'chain'] },
     { id: 'end', label: 'The end game', ...L.end, covers: ['end'] },
 ];
-/** Distilling's tutorial, the draft (see the top of this file). */
+/** Distilling's tutorial (see the top of this file). */
 export const DISTILL_TUTORIAL = {
     puzzle: 'Distilling', teacher: 'Helium',
     basics: BASICS, phases: PHASE_PARTS, tricks: TRICK_PARTS, scenarios: SCENARIO_PARTS, choices: CHOICES,
     hello: L.opening,
     anchors: { basics: 'rules', phases: 'phases', tricks: 'tricks', scenarios: 'reading' },
 };
-/** Places on distilling-guide.html the parts link to that aren't there yet: ids to give the rules' four articles, and
-    the trick tiles (js/distill-guide-view.js draws them; an id each, `d-<trick>`). Part of the wiring; the test lets
-    these through and no others. */
-export const ANCHORS_TO_ADD = ['b-pieces', 'b-swaps', 'b-furnace', 'b-chains', ...DRAG_PARTS.map((p) => p.anchor)];
 // ---------------------------------------------------------------- what shows each part
 /** What a part's `shows` names, found: the guide's own picture of it (its board, its drags), so the lesson plays the
     board the read version draws. null if there's none (the test fails). Each kind worked out once, when first asked

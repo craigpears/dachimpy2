@@ -7,9 +7,9 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { SECTIONS, TutorialMenu, anchorOf, choicesOf, covered, findPart, navFor, openingOf, partsOf, problems, spy } from '../src/tutorial';
 import type { MenuEvent, Part, Tutorial } from '../src/tutorial';
-import { ANCHORS_TO_ADD, DISTILL_TUTORIAL, SCENARIO_READS, distillShows } from '../src/distill-tutorial';
+import { DISTILL_TUTORIAL, SCENARIO_READS, distillShows } from '../src/distill-tutorial';
 import { PHASE_ORDER } from '../src/distill-phase';
-import { PLAN, READ_EXAMPLES, readingExamples } from '../src/distill-guide';
+import { PLAN, READ_EXAMPLES, readingExamples, trickTiles } from '../src/distill-guide';
 import { DRAG_TRICKS } from '../src/distill-teach';
 
 // A made-up puzzle, to show the module knows nothing of any real one.
@@ -137,7 +137,7 @@ describe('the lesson\'s opening choice, in the teacher\'s voice, not a chatbot (
   });
 });
 
-describe('Distilling\'s description, the draft (to be finished after the late-game work)', () => {
+describe('Distilling\'s description (its end game to be finished after the late-game work)', () => {
   const T = DISTILL_TUTORIAL;
 
   it('is sound, and its opening asks only what\'s ready (the end game once it is)', () => {
@@ -170,15 +170,21 @@ describe('Distilling\'s description, the draft (to be finished after the late-ga
     }
   });
 
-  it('every part ready has its place on distilling-guide.html (or is in the wiring left to do)', () => {
+  it('every part ready has its place on distilling-guide.html, so its sticky nav lands on each (14 Nov)', () => {
     const html = readFileSync(join(__dirname, '../distilling-guide.html'), 'utf8');
     const there = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map((m) => m[1]));
-    for (const id of READ_EXAMPLES) there.add(`r-${id.toLowerCase()}`);   // (js/distill-guide-view.js draws these)
+    for (const id of READ_EXAMPLES) there.add(`r-${id.toLowerCase()}`);   // (js/distill-guide-view.js draws these,
+    for (const t of trickTiles()) there.add(`d-${t.trick}`);               // and the trick tiles)
     const nav = navFor(T);
-    for (const g of nav) expect(there.has(g.href.slice(1)) || ANCHORS_TO_ADD.includes(g.href.slice(1)), g.href).toBe(true);
-    for (const s of SECTIONS) for (const p of partsOf(T, s)) {
-      expect(there.has(anchorOf(p)) || ANCHORS_TO_ADD.includes(anchorOf(p)), `#${anchorOf(p)}`).toBe(true);
-    }
-    for (const a of ANCHORS_TO_ADD) expect(there.has(a), `#${a} is there now: take it off ANCHORS_TO_ADD`).toBe(false);
+    for (const g of nav) expect(there.has(g.href.slice(1)), g.href).toBe(true);
+    for (const s of SECTIONS) for (const p of partsOf(T, s)) expect(there.has(anchorOf(p)), `#${anchorOf(p)}`).toBe(true);
+  });
+
+  it('distilling-guide.html draws its sticky nav from the description, and the old table of contents is gone (14 Nov)', () => {
+    const html = readFileSync(join(__dirname, '../distilling-guide.html'), 'utf8');
+    const view = readFileSync(join(__dirname, '../js/distill-guide-view.js'), 'utf8');
+    expect(html).not.toMatch(/nav class="toc"|data-toc/);
+    expect(view).toMatch(/tutorialNav\(DISTILL_TUTORIAL/);
+    expect(view).toMatch(/id: `d-\$\{t\.trick\}`/);
   });
 });

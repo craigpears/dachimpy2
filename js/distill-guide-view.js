@@ -2,8 +2,13 @@
 // compiled. Everything it draws, and every name and line of Helium's in it, comes from js/distill-guide.js (src/
 // distill-guide.ts), worked out from the same code as Helium's lesson and the bots; the page's own words stay in the
 // page. It fills the page's slots: [data-phase], [data-technique], [data-trick] and [data-level] sections, and the
-// rules' [data-rules] figures.
+// rules' [data-rules] figures. The sticky nav along the top is the one every read guide has (js/tutorial-nav.js), drawn
+// from Distilling's tutorial (src/distill-tutorial.ts), and each part it links to gets a "Show me this" link into
+// Helium's lesson on that part (den.html?at=helium&learn=<id>: js/den/helium-isle.js).
 import { guide } from './distill-guide.js';
+import { tutorialNav } from './tutorial-nav.js';
+import { SECTIONS, anchorOf, partsOf } from './tutorial.js';
+import { DISTILL_TUTORIAL } from './distill-tutorial.js';
 import { WHITE, BROWN, BLACK, SPICE, BURNT, TALL, neighbourOn } from './distilling.js';
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -262,7 +267,7 @@ function draw() {
   // The tricks side by side (src/distill-guide.ts, trickTiles): each a small picture, cropped from the lesson's board,
   // its name, what you do and its rule in Helium's words.
   for (const box of document.querySelectorAll('[data-trick-tiles]')) for (const t of g.trickTiles) {
-    const f = html('figure', { id: `trick-${t.trick}` });
+    const f = html('figure', { id: `d-${t.trick}` });
     const svg = board(t.picture, `${t.name}: ${t.how}`);
     const { x: [x0, x1], y: [y0, y1] } = t.crop;
     svg.setAttribute('viewBox', `${2 + x0 * CELL} ${2 + y0 * CELL} ${(x1 - x0 + 1) * CELL + 4} ${(y1 - y0 + 1) * CELL + CELL / 2 + 4}`);
@@ -270,7 +275,7 @@ function draw() {
     f.appendChild(svg);
     const cap = html('figcaption');
     cap.appendChild(html('b', {}, t.name));
-    cap.appendChild(html('i', {}, `${t.how}${t.bots ? ' (the bots’ own)' : ''}`));
+    cap.appendChild(html('i', {}, `${t.how}${t.bots ? ' (Helium’s own)' : ''}`));
     cap.appendChild(document.createTextNode(t.rule));
     f.appendChild(cap);
     box.appendChild(f);
@@ -290,17 +295,20 @@ function draw() {
     a.appendChild(text);
     box.appendChild(a);
   }
-  // The table of contents: each phase's tricks and techniques, in the page's order, by their headings.
-  for (const [phase, items] of Object.entries(g.plan)) {
-    const box = document.querySelector(`[data-toc-phase="${phase}"] [data-toc-items]`);
-    if (!box) continue;
-    items.forEach((it, i) => {
-      const id = `${it.kind === 'trick' ? 'k' : 't'}-${it.name}`, h = document.getElementById(id)?.querySelector('h3');
-      if (i) box.appendChild(document.createTextNode(' · '));
-      box.appendChild(html('a', { href: `#${id}`, target: '_self' }, h?.textContent ?? it.name));
-    });
-  }
   document.body.classList.add('drawn');
+}
+
+/** The sticky nav, and a "Show me this" on each part it links to, into Helium's lesson on that part. */
+function nav() {
+  tutorialNav(DISTILL_TUTORIAL, { mount: document.querySelector('[data-failed]'), links: [{ title: 'Learn it from Helium', href: 'den.html?at=helium', target: '_blank' }] });
+  for (const s of SECTIONS) for (const p of partsOf(DISTILL_TUTORIAL, s)) {
+    const at = document.getElementById(anchorOf(p));
+    if (!at || at.querySelector(':scope .show-me')) continue;
+    const a = html('a', { className: 'show-me', href: `den.html?at=helium&learn=${encodeURIComponent(p.id)}` }, 'Show me this');
+    a.title = `${DISTILL_TUTORIAL.teacher} shows you ${p.title.toLowerCase()} on a real board`;
+    if (/^H[1-6]$/.test(at.tagName)) at.appendChild(a);
+    else (at.matches('article.board-side') ? at.lastElementChild : at.tagName === 'FIGURE' ? at.querySelector('figcaption') : at).appendChild(a);
+  }
 }
 
 try { draw(); } catch (e) {
@@ -308,3 +316,4 @@ try { draw(); } catch (e) {
   const n = document.querySelector('[data-failed]');
   if (n) n.hidden = false;
 }
+try { nav(); } catch (e) { console.error(e); }

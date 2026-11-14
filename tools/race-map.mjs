@@ -534,7 +534,7 @@ ${small('Stopped in the open, won the race', ['leader', 'pack', 'last'], Object.
 <h2>What each shortcut really saved</h2>
 <table><tr><th>Shortcut</th><th class="n">Laid to save</th><th class="n">Done</th><th class="n">decent</th><th class="n">good</th><th class="n">great</th></tr>${cutRows}</table>
 <p><small>Seconds, mean, by the racer's skill, her puzzling counted; less than nothing, it cost her.</small></p></div>
-<p class="fine">Drawn ${today}, for the Pirate Den’s changelog and design page, by tools/race-map.mjs from the course as laid (LAY.RACE) and src/race-sim.ts's bots (gun gap guns '${RACE.GAP.MODE}'); run it again after a change to the course.</p>
+<p class="fine">Drawn ${today}, for the Pirate Den’s changelog and design page, by tools/race-map.mjs from the course as laid (LAY.RACE) and src/race-sim.ts's computer racers (gun gap guns '${RACE.GAP.MODE}'); run it again after a change to the course.</p>
 </main></body></html>
 `;
 writeFileSync(OUT, html);

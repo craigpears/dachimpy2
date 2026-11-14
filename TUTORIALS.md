@@ -44,12 +44,13 @@ you can't get to.
   to pick, a digit for its row, Esc back a level, then shut; every other key goes through to the game. Touch: tap.
   A link can open it on a choice's list (`open`) or straight on a part (`play`), so the read guide's "show me this"
   can land in the lesson at that part.
-- One look at both on their own: the unlinked `tutorial-test.html` (Distilling's draft, stand-in sections).
+- One look at both on their own: the unlinked `tutorial-test.html` (Distilling's description, stand-in sections).
 
 ## 3. Distilling (Helium)
 
-The draft is `src/distill-tutorial.ts` (14 Nov), written while the late-game work was changing Distilling's bots,
-tricks and guide; it's not wired yet. Drawn from what's there, so it can't drift (tests/tutorial.test.ts):
+The description is `src/distill-tutorial.ts` (14 Nov), drawn from what's there, so it can't drift
+(tests/tutorial.test.ts). Wired the same day: distilling-guide.html's sticky nav is drawn from it, Helium's lesson
+opens with its choice, and every part it links to on the guide has a "Show me this" into the lesson on that part.
 
 - **Basics:** the guide's rules (the pieces, the swap rule, the furnace, Crystal Clears and chains), setting a
   target, and "At Helium's still: a goal, and a plan for it".
@@ -64,26 +65,29 @@ tricks and guide; it's not wired yet. Drawn from what's there, so it can't drift
   the state and tactic the planner reads there; and the end game's gamble, `todo`.
 - **What shows each:** the guide's own picture of it (`distillShows`), so the lesson plays the board the read version
   draws.
-- **The choice**, in Helium's voice (drafts): "Right. What are you after? The basics? Help with the early or mid
+- **The choice**, in Helium's voice (src/lines/helium.ts, `TUTOR`): "Right. What are you after? The basics? Help with the early or mid
   game? Trying to get your CC higher?", and "The end game?" once it's ready. The basics (with the drag tricks); the
   early or mid game (the first three phases); a higher Crystal Clear (setting a target, storing, the leapfrog, the
   chain); the end game.
 
-### What's left to wire (after the late-game work merges)
+### How it's wired (14 Nov)
+
+- **The read guide:** `tutorialNav(DISTILL_TUTORIAL, ...)` in js/distill-guide-view.js, in place of the old table of
+  contents; the rules' four articles have their ids (`b-pieces` ...), each trick tile its own (`d-climb` ...); a
+  "Show me this" on each part's place, `den.html?at=helium&learn=<id>`.
+- **The lesson:** after Helium's opening, the choice (`tutorialChoice`, loaded when it's first asked); at the still,
+  "Teach me" (T) puts it again. What's picked is played by src/den-helium-tutor.ts's `tutorBeats`: the part's own
+  board laid (`distillShows`), Helium's line (`TUTOR.show`), the pieces it's about ringed, its drags played at
+  PACE_LESSON (or its column burned), then a fresh board yours. Step one is the scenario `stepOne`, played as their
+  lesson always was (`lessonPlan`). A link's `learn=` plays that part straight away instead of the opening.
+
+### What's left (after the late-game work merges)
 
 1. **src/distill-tutorial.ts:** the end game's phase, its tricks and the gamble's board from the late-game work (drop
    their `todo`s); any trick or technique it added (the test fails until each is in); check the scenario phases
    (P7 and P27 put in the fire's side).
-2. **src/lines/helium.ts:** DRAFT_LINES move there as `TUTOR` (and into LINES.md by `npm run build`).
-3. **distilling-guide.html:** ids on the rules' four articles (`b-pieces`, `b-swaps`, `b-furnace`, `b-chains`); the
-   old `nav.toc` replaced by `tutorialNav(DISTILL_TUTORIAL, ...)`; and `ANCHORS_TO_ADD` emptied as they appear.
-4. **js/distill-guide-view.js:** an id on each trick tile (`d-climb` ...); the old table of contents' code removed.
-5. **src/den-helium.ts and js/den/helium-isle.js:** the choice before the lesson (after the opening, or on a key at
-   the still, "Teach me", T): `tutorialChoice(DISTILL_TUTORIAL, { onPlay })`, and `onPlay` turning a part's board
-   (`distillShows`) into beats, as `lessonPlan` does now for step one: the board laid, Helium's line, the drags
-   played at PACE_LESSON, then it's yours. Step one becomes the scenario `stepOne`; STEPS grows a step a phase.
-6. A "show me this" link on each guide section (`den.html?at=helium&learn=<id>`), opening the lesson on that part
-   (`TutorialMenu.play`).
+2. **STEPS grows a step a phase** (src/den-helium.ts): each phase's own beats in Helium's words, as step one has, in
+   place of the plain "{title}. Here, on a real board." the other parts get now.
 
 ## 4. Sailing (Tzz), next, in the same shape
 

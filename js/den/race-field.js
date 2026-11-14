@@ -84,7 +84,7 @@ function nameTag(name, sailCol, player) {
   const el = document.createElement('div');
   el.className = `tag boat${player ? ' pirate' : ' bot'}`;
   el.style.borderColor = sailCol;
-  el.innerHTML = player ? '' : '<small>bot</small>';
+  el.innerHTML = player ? '' : '<small>computer</small>';
   el.prepend(name);
   document.getElementById('tags').append(el);
   return el;
