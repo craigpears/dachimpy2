@@ -869,6 +869,11 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   or something, but I'd like the sloop on mobile." So on a phone the wordmark is smaller and the sloop is back,
   sailing in after it.
 
+- **One action point, not a grid of them (14 Nov):** off Mischievious's island, "what are all those circles ...
+  there should not be a huge grid of them, there should be one action point, not 9." Every square of a landing
+  had its own gold ring. So each place where Space does something shows one ring, wherever it is (the Wedding
+  Isle, the rum run's stops), though Space still works anywhere round it.
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.

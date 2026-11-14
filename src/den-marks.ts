@@ -1,5 +1,5 @@
 /* Pirate Den: where Space does something, marked. TypeScript, compiled to js/den-marks.js; tested in
-   tests/den-marks.test.ts. js/den/marks.js draws them: a gold ring pulsing on each square.
+   tests/den-marks.test.ts. js/den/marks.js draws them: a gold ring pulsing on each target's one square.
 
    The user (14 Nov), on Helium's rum run at Kikkit's island: "I eventually managed to throw her a barrel. But it
    took me a few places ... If there's only one square, because that works for the animation, then there should be
@@ -37,8 +37,18 @@ export function squaresRound(land: readonly Square[], ok: (c: number, r: number)
   return out;
 }
 
-/** Every part's targets, by name: set (or cleared, with none) as each part sees fit; the squares to mark, from where
-    she is (each target's squares when any of them is near). */
+/** A target's one mark (the user, 14 Nov, of a ring on every square of the Wedding Isle's landing: "there should be
+    one action point, not 9"): of its squares, the one nearest their middle (the first, of equals). Space still works
+    on any of them. */
+export function spotOf(squares: readonly Square[]): Square {
+  const mc = squares.reduce((a, [c]) => a + c, 0) / squares.length, mr = squares.reduce((a, [, r]) => a + r, 0) / squares.length;
+  let best = squares[0], d = Infinity;
+  for (const s of squares) { const e = (s[0] - mc) ** 2 + (s[1] - mr) ** 2; if (e < d - 1e-9) { d = e; best = s; } }
+  return best;
+}
+
+/** Every part's targets, by name: set (or cleared, with none) as each part sees fit; where to mark, from where she is
+    (each target's one mark, `spotOf`, when any of its squares is near). */
 export class Marks {
   private by = new Map<string, readonly Square[]>();
   set(name: string, squares: readonly Square[] | null | undefined): void {
@@ -49,7 +59,8 @@ export class Marks {
     const seen = new Set<string>(), out: Square[] = [];
     for (const sq of this.by.values()) {
       if (!sq.some(([x, y]) => Math.max(Math.abs(x - c), Math.abs(y - r)) <= near)) continue;
-      for (const s of sq) { const k = `${s[0]},${s[1]}`; if (!seen.has(k)) { seen.add(k); out.push(s); } }
+      const s = spotOf(sq), k = `${s[0]},${s[1]}`;
+      if (!seen.has(k)) { seen.add(k); out.push(s); }
     }
     return out;
   }
