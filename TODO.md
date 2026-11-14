@@ -580,6 +580,11 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   from the race's start, the crew where crews are), not up front. The feedback so far: people care about
   "tutorials that are actually in demand, like werewolves"; the den is "cute and a bit of fun ... a bit of a goof";
   "the [sloop] races is a thing, I think, with more potential."
+- **The Global Cade Sim in the museum, with a link (14 Nov):** "Need the new cade sim referenced too:
+  https://www.globalcadesim.com/#/lobby/36 Absolutely deserves a link. Not the best picture but a placeholder for now,
+  if I ever update it." The user's screenshot (Dachimpy sailing it against a bot, flags, whirlpools, winds) as its
+  exhibit after "And Then", its plaque and Dachimpy's line, and the link from the close view; also linked from the
+  front page's practice choice, for blockade practice. The picture didn't reach the disk: the user to save the file.
 
 ## Spotted along the way (not asked for)
 
