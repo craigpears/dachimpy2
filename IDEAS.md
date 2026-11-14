@@ -2817,6 +2817,18 @@ Puzzle Pirates, or one to make), before anything's built.
 - **Its basics taught, as what's different (14 Nov):** unlike the other tutorials, this one explains the mechanics,
   since a wolf den's Navigation isn't plain Duty Navigation: how it works and how it differs. A wider explainer of the
   werewolves themselves to come one day. TUTORIALS.md §5.
+- **A first version built (14 Nov):** the wolf den's hut (den.html?at=wolfden) with Dignity at its star table, the
+  four-ring board with wild places, the moon in the window, her lesson, and its read version, wolf-den-guide.html
+  (RULES.md, "The wolf den"). Still ideas: the rumbles, the den's Foraging, Multibella at the table with the cookies
+  (their look from their pirate page first), the funny cutscenes, a way to it on the sea.
+- **Vessel navigation training there too, maybe Daquan's (14 Nov):** "maybe this is where Daquan comes in, is doing
+  the VNav training ... I think it'd probably be like Blockade training ... Blockade Sim is definitely where you go to
+  PvP and fight each other, but definitely I think we fit into that training, the training tutorial version of it. It
+  would be funny just to have those giant wolf rigs, and you could kind of see the sloops maybe competing in the
+  background ... Something will be fun." So a tutorial of vessel navigation (sailing a ship in a fight, as in a
+  blockade) at the wolf den, perhaps taught by Daquan: the training version, the Global Cade Sim staying the place for
+  fighting each other. Giant wolf rigs (sails, or ships, dressed as wolves) to sail, sloops racing past in the
+  background. To shape with the user: what's taught, and Daquan's part (his look and ocean first).
 
 ## Distilling with a higher skill cap: fun variations (13 Nov)
 

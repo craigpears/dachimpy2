@@ -2603,6 +2603,26 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   It's just empty space. There's no graphic for it, which I think is what really confused me." So a
   platform is targets all over, or (half of them) targets on a zigzag with the gaps on the other, and
   a gap is drawn as nothing at all, only the platform's ledge running under it.
+- **The wolf den (14 Nov, a first version), Dignity's four-ring Duty Navigation.** Asked for by Dignity (the real
+  pirate); the user, 14 Nov: "build the building, the at least do a first version of it". A hut of its own on the
+  house shell (`den.html?at=wolfden`; not in the housing district's list), Dignity at a round star table, Duty
+  Navigation's wheel lying on it, the moon and a werewolf's head at the window, cookies on a side table. Walk up to
+  the table and Space to chart (the camera over the table, buttons along the bottom for a phone); T for her lessons.
+  The rules, a wolf den's board in `src/navigation.ts` (`den: true`), from the Wolf Dens Guide and Multibella's
+  telling (IDEAS.md):
+  - Four rings ("four-tier"): the fourth, the wheel's handles, has no constellation places; room to park stars. A
+    booch is a drop onto a star there. A line along a spoke is three or more in a row out from the centre.
+  - Constellations of 3 places in the centre, 2 in the middle, 1 in the third; a fresh board's first 3 and 1.
+  - Points: each ring's weight (3, 5, 9) times (1.5 times its places) squared, rounded down (71 the first, 125 the
+    usual), times the chart's step in the move's cascade; lines a point a star times their step. No par.
+  - Wild places (ringed in every colour, a paw print), filled by any star: a chart in a chain (a clear before or
+    after it in the same move) deals the next with its centre all wild, two or more clears a fourth wild place in it;
+    a combo's clear (the move's second step or later) turns wild the constellation's places on and beside what it
+    cleared. A plain chart deals plain.
+  - The cascade named over the stars as it goes: "Single! +3", "Double! +6", "Triple! Constellation! +18".
+  - The moon: about 200 charted points a werewolf (a pack of four here); every chart takes its points off; she says
+    when half are turned back and the last; then the next pack, the moon full again. Lesson boards don't count.
+  - Not yet: the rumbles, the den's Foraging, Multibella at the table, the cutscenes, a way to it on the sea.
 - **Duty Navigation (11 Nov), built by the real puzzle.** The night sky in front of a hidden cliff door,
   each constellation lighting its stars on the rock ("The starlit door", below). One module, `src/navigation.ts`,
   knowing nothing of the den; its look `js/den/nav-board.js` (`navBoard`); played on its own in the

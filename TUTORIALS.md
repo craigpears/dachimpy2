@@ -127,3 +127,14 @@ plain way, quick, and the combo way. The combo way is examples of setting combos
 the user shared of Umami's run (IDEAS.md, "What players say, and a looting run watched"), where he built it up at the
 bottom: "look, there's ... reds laid out here intentionally so that when this breaks, this falls down." Shown as Tzz's
 Sailing lesson shows its chain: the build and its plan marked on the board as it's played.
+
+### Built, a first version (14 Nov)
+
+`src/wolf-den-tutorial.ts`, in the one shape: its basics are what's different (four rings, the den's constellations,
+why chains pay, wild places, the moon), a phase (between the rumbles; the rumbles themselves `todo`), the tricks (the
+Trapdoor, the Echo, a combo beside the wrong star, don't reset the board) and the scenario (the run in the
+screenshots). Every part's shown on one of the lesson's boards, `src/den-wolfden.ts`'s BOARDS, each tested to do
+what its part says. Dignity's opening choice: what's different, the chains, a run. Her lesson lays the part's board
+on the star table and plays its moves (js/den/wolfden-house.js), then hands it to you; the read version,
+`wolf-den-guide.html`, draws every board before and after its moves with the den's own board. Not yet: the plain,
+quick way as a choice beside the combo way, and the build's plan marked on the board as Tzz's lesson marks hers.

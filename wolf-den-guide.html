@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<base target="_blank">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wolf den Navigation, the read version</title>
+<!-- The wolf den's read version (RULES.md, "Every tutorial has a read version, kept in sync"; 14 Nov, a first
+     version): Dignity's lesson at the wolf den's star table written down. The words are the page's own, by hand; every
+     board is drawn by js/wolf-den-guide-view.js with the den's own board (js/den/nav-board.js) from the lesson's boards
+     (src/den-wolfden.ts's BOARDS), each one before and after its moves, and the sticky nav from the tutorial's
+     description (src/wolf-den-tutorial.ts). Pirate names only. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,500&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/site.css">
+<style>
+  .wrap { max-width: 980px; margin: 0 auto; padding: 28px 16px 48px; --tn-bleed: 16px; }
+  header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 20px; margin-bottom: 8px; }
+  h1 { margin: 0; font: 700 clamp(30px, 6vw, 44px)/1.05 'Alegreya', serif; color: var(--title); }
+  .lede { margin: 6px 0 0; color: var(--dim); max-width: 640px; }
+  .play { display: inline-block; font: 700 17px 'Alegreya Sans'; color: var(--on-accent); background: var(--accent); border-radius: 8px; padding: 9px 18px; text-decoration: none; white-space: nowrap; }
+  .play:hover { background: var(--accent-hi); }
+  .tnav { margin-top: 18px; }
+  h2 { display: flex; align-items: center; gap: 14px; margin: 38px 0 14px; font: 700 22px 'Alegreya', serif; color: var(--dim); }
+  h2::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--edge), transparent); }
+  .intro { color: var(--dim); max-width: 70ch; margin: -4px 2px 16px; }
+  article { background: linear-gradient(170deg, var(--paper), var(--paper2)); color: var(--ink); border: 1px solid var(--paper-edge); border-radius: 12px;
+    box-shadow: 0 8px 24px var(--shadow), inset 0 0 40px var(--paper-glow); padding: 14px; margin: 0 0 20px; scroll-margin-top: 70px; }
+  h3 { margin: 4px 2px 4px; font: 700 25px/1.15 'Alegreya', serif; color: var(--ink-head); }
+  .sub { margin: 0 2px 8px; font-style: italic; color: var(--ink2); }
+  article p { margin: 6px 2px; max-width: 70ch; }
+  .boards { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
+  figure { margin: 0; flex: 1 1 260px; max-width: 360px; }
+  figure canvas { width: 100%; height: auto; display: block; border-radius: 50%; box-shadow: 0 4px 14px var(--shadow); }
+  figcaption { margin-top: 4px; font-size: 15px; color: var(--ink2); text-align: center; }
+  .failed { color: var(--dim); }
+  .credit { font-size: 15px; color: var(--ink2); }
+  section[id] { scroll-margin-top: 70px; }
+</style>
+</head>
+<body>
+<script src="js/site-bar.js" data-static></script>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Wolf den Navigation, the read version</h1>
+      <p class="lede">Dignity's lesson at the wolf den's star table, written down. A wolf den's Duty Navigation isn't the one you know: four rings, wild places, and points that pay only for chains. Every board here is one of her lesson's own, drawn by the den's board, before and after its moves.</p>
+    </div>
+    <div><a class="play" href="den.html?at=wolfden">Learn it from Dignity</a></div>
+  </header>
+  <p class="failed" data-failed hidden>The boards couldn't be drawn here. Try a newer browser, or open the page from the den's own site.</p>
+
+  <section id="basics">
+    <h2>What's different here</h2>
+    <p class="intro">Plain Duty Navigation's rules still hold: Up and Down pick a ring, Left and Right turn it, Space drops the next star down its spoke, and three of a colour in a line go. These are what a wolf den changes.</p>
+    <article id="rings" data-board="rings">
+      <h3>Four rings</h3>
+      <p class="sub">"Four-tier": the wheel's handles are a fourth ring.</p>
+      <p>The fourth, outer ring has no places of a constellation's. It's room to park stars and set up chains. A star stays up there only over a spoke that's full beneath it, and turns with its ring. Drop a star onto one there and it's a booch.</p>
+    </article>
+    <article id="constellations" data-board="rings">
+      <h3>The den's constellations</h3>
+      <p class="sub">Three in the centre, two in the middle, one in the third.</p>
+      <p>Every constellation after the first has three places in the centre ring, two in the middle and one in the third. A fresh board's first has only three in the centre and one in the middle, as on this board.</p>
+    </article>
+    <article id="chains" data-moves="run">
+      <h3>Why chains pay</h3>
+      <p class="sub">A constellation's points, times its step in the move.</p>
+      <p>Each ring's places score by weight: the centre 3, the middle 5, the third 9, times one and a half times its places, squared. That makes a fresh board's first worth 71 and the usual one 125. Chart it as the first thing a move does and that's all. Chart it after one clear in the same move and it's doubled; after two clears, tripled. A line on its own is a point a star, times its step. So the game is setting up a cascade whose last step charts the constellation.</p>
+    </article>
+    <article id="wilds" data-moves="run">
+      <h3>Wild places</h3>
+      <p class="sub">Ringed in every colour, a paw in the middle: any star will do.</p>
+      <p>There are two ways to make them. Chart a constellation as part of a combo (a clear before it, or after it, in the same move), and the next one's whole centre ring is wild; two clears or more add a fourth wild place to it. And a combo's clear that charts nothing turns the places it cleared, and the places beside them, wild. A plain chart deals the next one plain.</p>
+      <p class="credit">As Multibella tells it, who explained the wilds to the den.</p>
+    </article>
+    <article id="moon" data-board="rings">
+      <h3>The moon</h3>
+      <p class="sub">Every chart takes its points off it.</p>
+      <p>Each window between the rumbles starts with the moon full, about 200 charted points a werewolf in the next pack. Every constellation charted takes its points off it, and as it wanes the werewolves turn back to wolf-kin. When it's gone, the last one's turned back. In Dignity's hut you'll see it wane in the window.</p>
+    </article>
+  </section>
+
+  <section id="phases">
+    <h2>Between the rumbles</h2>
+    <article id="window" data-board="rings">
+      <h3>The puzzle window</h3>
+      <p class="sub">Chart all you can before the next pack comes.</p>
+      <p>Between rounds the crew splits between the stations. At Navigation, every chart turns werewolves back, so chart fast, and chart in chains: a chain's chart is worth twice or three times as much and leaves the next constellation's centre wild.</p>
+    </article>
+  </section>
+
+  <section id="tricks">
+    <h2>The tricks</h2>
+    <article id="trapdoor" data-moves="trapdoor">
+      <h3>The Trapdoor</h3>
+      <p class="sub">Clear, then chart.</p>
+      <p>Park the right star above a place, with a line ready to go under it. Here the third ring turns a place, a red lands over two reds down a spoke, they go, and the yellow parked in the fourth ring above them falls into the yellow place. The chart's on the move's second step, so it's doubled, and the next constellation's centre is wild. It works in plain Navigation too; it's the workhorse.</p>
+    </article>
+    <article id="echo" data-moves="echo">
+      <h3>The Echo</h3>
+      <p class="sub">Chart, then clear.</p>
+      <p>Put a pair beside a place, so that once it's charted the stars falling into the places it leaves make a line. Here the middle ring turns its red onto the red place; charted, it goes, and the blue above falls between two blues. The chart came first, so it isn't multiplied, but it was in a chain: the next centre is wild.</p>
+    </article>
+    <article id="beside" data-moves="run">
+      <h3>A combo beside the wrong star</h3>
+      <p class="sub">The wrong colour, made right.</p>
+      <p>A place holding the wrong colour isn't lost. Clear a combo beside it and it turns wild, and the star already in it counts. That's what happened in the run below: the blue in the yellow place charted.</p>
+    </article>
+    <article id="noReset" data-board="rings">
+      <h3>Don't reset the board</h3>
+      <p class="sub">A fresh board's first constellation is worth only 71.</p>
+      <p>A messy board is still worth playing on. Reset it and you're back to the small first constellation, and you lose the wild centre a chain left you.</p>
+    </article>
+  </section>
+
+  <section id="scenarios">
+    <h2>A run, start to finish</h2>
+    <article id="run" data-moves="run">
+      <h3>Single, Double, Triple Constellation</h3>
+      <p class="sub">"Single! +3", "Double! +6", "Triple! Constellation!"</p>
+      <p>A good player's run, from screenshots of a real one. A red dropped makes a line round the third ring: a Single. The orange above it falls onto two oranges down its spoke: a Double, and it's beside the yellow place holding a blue. That clear, in a combo, turns the place wild, the blue in it counts, and the constellation's charted on the third step, its points tripled.</p>
+    </article>
+  </section>
+</div>
+<script type="importmap">
+  { "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  } }
+</script>
+<script type="module" src="js/wolf-den-guide-view.js"></script>
+</body>
+</html>

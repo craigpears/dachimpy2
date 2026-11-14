@@ -117,7 +117,9 @@ describe('the balance check (12 Nov)', () => {
     expect(B.routes.length).toBeGreaterThan(0);
     for (const r of B.routes) expect(ROUTE_NAMES[r.id]).toBe(r.name);
     expect(B.cuts.find((c) => c.id === 'locks')!.saves).toBe(23);
-    expect(B.cuts.find((c) => c.id === 'rocks')!.saves).toBe(25);
+    // (the rocks' gap: out at its mouth since 14 Nov, saving what the mouth is worth, more than the helm's 25)
+    expect(B.cuts.find((c) => c.id === 'rocks')!.saves).toBe(CUTS.rocks.saves);
+    expect(CUTS.rocks.saves).toBeGreaterThan(25);
     expect('bets' in B).toBe(false);
     expect(B.routes.every((r) => r.ok === (r.wins >= BAND[0] * B.fair && r.wins <= BAND[1] * B.fair))).toBe(true);
   });

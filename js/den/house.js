@@ -34,13 +34,14 @@ import { GRAVEE_HOUSE } from './gravee-house.js';
 import { ROOBEAR_HOUSE } from './roobear-house.js';
 import { DACHIMPY_HOUSE } from './dachimpy-house.js';
 import { AFFAME_HOUSE } from './affame-house.js';
+import { WOLFDEN_HOUSE } from './wolfden-house.js';
 import { pictures, picturesOpen, picturesClose, picturesKey } from './picture-view.js';
 import { startAt } from '../picture-view.js';
 
 /** Where the houses are: well out of sight of the den, the sea and the Wedding Isle (at +400). */
 export const HOUSE_AT = V3(-400, 0, 0);
 /** Each house's scene, by its id in HOUSES. */
-const SCENES = { gravee: GRAVEE_HOUSE, roobear: ROOBEAR_HOUSE, dachimpy: DACHIMPY_HOUSE, affame: AFFAME_HOUSE };
+const SCENES = { gravee: GRAVEE_HOUSE, roobear: ROOBEAR_HOUSE, dachimpy: DACHIMPY_HOUSE, affame: AFFAME_HOUSE, wolfden: WOLFDEN_HOUSE };
 
 const toast = (text, bad = false) => denToast(text, bad, false, true);
 /** All there is of the house you're in. */
@@ -410,6 +411,8 @@ export function houseKey(key, e) {
   if (!house.on) return false;
   if (e.target instanceof HTMLInputElement) return true;
   if (pictures.on) return picturesKey(key, e);
+  // (a scene playing a puzzle of its own takes the keys it wants first: the wolf den's star table)
+  if (!cine && house.inst?.key?.(key, e)) { e.preventDefault?.(); return true; }
   if (key === 'tab') { e.preventDefault?.(); if (!e.repeat && !cine) openPictures(); return true; }
   if (house.view) { if (['escape', ' ', 'enter'].includes(key)) { e.preventDefault?.(); showPortrait(null); } return true; }
   if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) { e.preventDefault?.(); keys.add(key); house.to = null; return true; }

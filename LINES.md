@@ -149,6 +149,35 @@ Witty, very cute, and a stickler for the rules (she hates paperwork, and writes 
 - "I'm writing down "whistled". In very small, very suspicious handwriting."
 - "That sloop is lower in the water than she was. Hm."
 
+### The wolf den's hut, at her star table (four-tier Duty Navigation)
+
+- *You come in, the first time:* "Oh. It's you. Sit down, then. If I'm to catch pirates sneaking round my outpost, I need someone who can read stars."
+- *You come in again:* "Back again? The moon isn't going to chart itself."
+- *You first step up to the table:* "Four rings here, not three. The outer one has no places of its own. It's for parking stars. Officially."
+- *Your charts turn half the pack back:* "Half of them turned back already. I'm writing that down. In very neat handwriting."
+- *Your charts turn the last werewolf back: the moon's gone:* "That's the last of them back to wolf-kin. Moon's down. Nobody tell the Empire I was out here."
+- *A moment later: the moon's full again:* "And here comes the next pack. Of course it does."
+- *You chart a constellation in a chain:* "A chain! The next one's centre has gone wild. Don't waste it."
+- *You chart one with no chain (now and then):* "Charted. No chain, though. That's going in my report."
+- *You booch:* "You booched it. I'll need that in writing."
+- *You leave:* "Off you go. Mind the werewolves. And the paperwork."
+
+### Her lesson's opening choice, at the star table (T)
+
+- *Her opening line:* "Right. A wolf den's Navigation isn't the one you know."
+- *Her first question, and once it's picked:*
+  - *asks:* "Shall I start you on what's different here?"
+  - *then:* "What's different, then. Which bit?"
+- *Her second, and once it's picked:*
+  - *asks:* "Or the chains that pay?"
+  - *then:* "Chains. Pick one."
+- *Her third, and once it's picked:*
+  - *asks:* "Or shall I play you a run, start to finish?"
+  - *then:* "A run, then. Watch closely."
+- *As a lesson's board is laid ({title} its name):* "This one's {title}. Watch the board."
+- *Handing you the board:* "Your board now. I'll be here. Taking notes."
+- *Under it, in the bar:* "Chart what you can: each constellation turns werewolves back. T for her lessons again."
+
 ## Bella
 
 Dignity's lavender monkey, on her shoulder (a limited-edition monkey colour: what looked like little purple wings in the portrait is her curled tail). She's the one who fires the warning shot: she chatters, scampers down in quick monkey bounds to one of the checkpoint's real guns, salutes very stiffly, lights the fuse, covers her ears, and strikes a proud little pose, a fist pumped in the air.

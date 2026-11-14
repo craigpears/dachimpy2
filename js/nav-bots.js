@@ -10,7 +10,7 @@
      filled (its stars in place, the places under its marks held up), counting the moves.
    - planner: as greedy, but it may turn two rings before the drop.
    The evil constellation (needsCombo) they meet with its own sense of the board (comboWorth). */
-import { RINGS, SPOKES, needsCombo } from './navigation.js';
+import { SPOKES, needsCombo, fits } from './navigation.js';
 import { seeded } from './mirror-row.js';
 /** What a board left behind is worth to a navigator filling from the middle out. Rings turn on their
     own, so each ring is weighed by its best turn: the marks in it that turn would fill (less a little
@@ -21,7 +21,7 @@ export function worth(g) {
     const c = g.constellation, G = g.grid;
     let v = 0;
     if (c)
-        for (let r = 0; r < RINGS; r++) {
+        for (let r = 0; r < g.rings; r++) {
             const marks = c.marks.filter((m) => m.ring === r);
             if (!marks.length)
                 continue;
@@ -29,7 +29,7 @@ export function worth(g) {
             for (let k = 0; k < SPOKES; k++) {
                 let n = 0;
                 for (const m of marks)
-                    if (G[r][(m.spoke - k + SPOKES) % SPOKES]?.c === m.colour)
+                    if (fits(m, G[r][(m.spoke - k + SPOKES) % SPOKES]?.c))
                         n++;
                 top = Math.max(top, 12 * n - Math.min(k, SPOKES - k));
             }
@@ -40,20 +40,20 @@ export function worth(g) {
                         v += 2;
         }
     let outer = 0, all = 0;
-    for (let r = 0; r < RINGS; r++)
+    for (let r = 0; r < g.rings; r++)
         for (let s = 0; s < SPOKES; s++) {
             const x = G[r][s];
             if (!x)
                 continue;
             all++;
-            if (r === RINGS - 1)
+            if (r === g.rings - 1)
                 outer++;
             if (G[r][(s + 1) % SPOKES]?.c === x.c)
                 v += 1;
-            if (r + 1 < RINGS && G[r + 1][s]?.c === x.c)
+            if (r + 1 < g.rings && G[r + 1][s]?.c === x.c)
                 v += 1;
         }
-    if (G[RINGS - 1][g.next.spoke])
+    if (G[g.rings - 1][g.next.spoke])
         v -= 8;
     return v - outer * 3 - all * 0.5;
 }
@@ -79,7 +79,7 @@ export function comboWorth(g) {
             h++;
         if (G[r][(s + SPOKES - 1) % SPOKES]?.c === x.c)
             h++;
-        for (let rr = 0; rr < RINGS; rr++)
+        for (let rr = 0; rr < g.rings; rr++)
             if (rr !== r && G[rr][s]?.c === x.c)
                 h++;
         return h;
@@ -106,7 +106,7 @@ export function comboWorth(g) {
                     v -= 40 - 3 * help(ring, s);
             }
             let feed = 0;
-            if (ring + 1 < RINGS)
+            if (ring + 1 < g.rings)
                 for (const d of [-1, 1]) {
                     let f = 0;
                     for (const x of [gi, gj])
@@ -117,18 +117,18 @@ export function comboWorth(g) {
             best = Math.max(best, v + feed - Math.min(k, SPOKES - k) * 0.3);
         }
     let v = best, all = 0;
-    for (let r = 0; r < RINGS; r++)
+    for (let r = 0; r < g.rings; r++)
         for (let s = 0; s < SPOKES; s++) {
             const x = G[r][s];
             if (!x)
                 continue;
             all++;
-            if (r === RINGS - 1)
+            if (r === g.rings - 1)
                 v -= 5;
             if (r > ring && x.c !== COL)
                 v += 1.2 * help(r, s);
         }
-    if (G[RINGS - 1][g.next.spoke])
+    if (G[g.rings - 1][g.next.spoke])
         v -= 10;
     return v - all;
 }
@@ -162,16 +162,16 @@ function tryPlan(g, steps, drop) {
     // Filling it now is what counts, quicker the better; then the board it leaves.
     return (done ? 1e4 + done.points * 10 : 0) + worth(c) - moves * 1.5 + points * 0.2;
 }
-function plans(depth) {
+function plans(depth, rings) {
     const out = [];
-    for (let r = 0; r < RINGS; r++)
+    for (let r = 0; r < rings; r++)
         for (let k = 0; k < SPOKES; k++) {
             if (k === 0 && r > 0)
                 continue;
             const one = k ? turns(r, k) : [];
             out.push(one);
             if (depth > 1 && k)
-                for (let r2 = 0; r2 < RINGS; r2++)
+                for (let r2 = 0; r2 < rings; r2++)
                     if (r2 !== r)
                         for (let k2 = 1; k2 < SPOKES; k2++)
                             out.push([...one, ...turns(r2, k2)]);
@@ -180,10 +180,11 @@ function plans(depth) {
 }
 /** A navigator looking `depth` rings' turns ahead before its drop. */
 export function thinker(depth) {
-    const ps = plans(depth);
+    // (a plain board's three rings, or a wolf den's four)
+    const ps = [3, 4].map((r) => plans(depth, r));
     return (g) => {
         let best = null, top = -Infinity;
-        for (const steps of ps)
+        for (const steps of ps[g.rings - 3])
             for (const drop of [true, false]) {
                 if (!drop && !steps.length)
                     continue;
@@ -203,7 +204,7 @@ export const NAV_BOTS = {
         const x = rnd();
         if (x < 1 / 3)
             return { steps: [], drop: true };
-        return { steps: [[Math.floor(rnd() * RINGS), rnd() < 0.5 ? 1 : -1]], drop: false };
+        return { steps: [[Math.floor(rnd() * _g.rings), rnd() < 0.5 ? 1 : -1]], drop: false };
     },
     greedy: thinker(1),
     planner: thinker(2),

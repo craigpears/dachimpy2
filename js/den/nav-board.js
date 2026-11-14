@@ -249,6 +249,32 @@ function medallion(g, c, x, y, filled, glow, k = 1) {
   }
   g.restore();
 }
+/* A wolf den's wild place (14 Nov; the screenshots the user shared, "it looked multicoloured"; the guide's "a paw
+   print ringed in every colour"): its ring in every colour, a pale paw print in its dark middle; a star sitting in it
+   is drawn on top by the caller, and holding one it glows. */
+function wildMedallion(g, x, y, held, glow, k = 1) {
+  const R = 56 * k;
+  g.save();
+  if (glow > 0 || held) {
+    const gg = g.createRadialGradient(x, y, R * 0.6, x, y, R * 2);
+    gg.addColorStop(0, `rgba(255,255,255,${0.35 * Math.max(glow, held ? 0.6 : 0)})`); gg.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = gg; g.beginPath(); g.arc(x, y, R * 2, 0, Math.PI * 2); g.fill();
+  }
+  g.beginPath(); g.arc(x, y, R - 6, 0, Math.PI * 2); g.fillStyle = 'rgba(4,12,40,0.88)'; g.fill();
+  g.lineWidth = 15; g.strokeStyle = 'rgba(10,10,30,0.7)'; g.stroke();
+  for (let i = 0; i < COL.length; i++) {
+    const a0 = -Math.PI / 2 + i * 2 * Math.PI / COL.length;
+    g.lineWidth = 11; g.strokeStyle = COL[i].ring;
+    g.beginPath(); g.arc(x, y, R - 6, a0, a0 + 2 * Math.PI / COL.length + 0.02); g.stroke();
+  }
+  // (the paw: a pad and four toes)
+  g.fillStyle = 'rgba(230,226,246,0.8)';
+  g.beginPath(); g.ellipse(x, y + R * 0.14, R * 0.24, R * 0.2, 0, 0, Math.PI * 2); g.fill();
+  for (const [dx, dy, r] of [[-0.3, -0.12, 0.1], [-0.11, -0.3, 0.11], [0.11, -0.3, 0.11], [0.3, -0.12, 0.1]]) { g.beginPath(); g.arc(x + dx * R, y + dy * R, r * R, 0, Math.PI * 2); g.fill(); }
+  g.restore();
+}
+/** The cascade's steps by name, as the real board calls them over the stars. */
+const STEP_NAMES = ['Single', 'Double', 'Triple', 'Quadruple', 'Quintuple'];
 function hexA(hex, a) { const n = parseInt(hex.slice(1), 16); return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`; }
 const ease = (u) => u * u * (3 - 2 * u);
 const xy = (r, a) => [C + Math.cos(a) * r, C + Math.sin(a) * r];
@@ -275,6 +301,12 @@ const DROP_PER_RING = 0.32, RING_W = RING_R[1] - RING_R[0];
    `idle` (set it) hides the selected ring's light when nobody's at it. */
 export function navBoard(o = {}) {
   const game = o.game ?? new Navigation(o.random ?? Math.random, o.options ?? {});
+  /* A wolf den's board, four rings ("four-tier", 14 Nov): the wheel drawn a little smaller, its handles' rings the
+     fourth ring's places, and the next star waiting further out. Its cascades named over the stars as they go. */
+  const K = game.rings > RINGS ? 0.84 : 1, RR = K < 1 ? [...RING_R.map((r) => r * K), OUT * K] : RING_R;
+  const OUT_B = K < 1 ? 468 : OUT, SR = STAR_R * K, named = o.named ?? game.rings > RINGS;
+  const radius = (ring) => (ring < game.rings ? RR[ring] : OUT_B);
+  const ringAt = (r) => RR.findIndex((x) => Math.abs(x - r) < 0.6);
   const sky = o.sky !== false, CH = sky ? PANEL_H : S, OFF = (CH - S) / 2;
   const cv = document.createElement('canvas');
   cv.width = S; cv.height = CH;
@@ -298,7 +330,7 @@ export function navBoard(o = {}) {
     stars: new Map(),
     /** The constellation as drawn, and its fade (in for a new one, a flare as it goes). */
     shownCon: game.constellation, conFade: 1, conFlare: 0,
-    fx: [], flash: 0, ringGlow: [0, 0, 0], time: 0,
+    fx: [], flash: 0, ringGlow: [0, 0, 0, 0], time: 0,
   };
   // Lay the stars where the game has them now, without animating.
   const layNow = (grid) => {
@@ -316,7 +348,7 @@ export function navBoard(o = {}) {
       if (!x) return;
       seen.add(x.id);
       let st = b.stars.get(x.id);
-      if (!st) { st = { c: x.c, r: OUT, a: from ? ang(from.spoke) : ang(s) }; b.stars.set(x.id, st); }
+      if (!st) { st = { c: x.c, r: OUT_B, a: from ? ang(from.spoke) : ang(s) }; b.stars.set(x.id, st); }
       st.fr = st.r; st.fa = st.a; st.tr = radius(r);
       let d = ang(s) - st.a;
       d = Math.atan2(Math.sin(d), Math.cos(d));
@@ -337,6 +369,11 @@ export function navBoard(o = {}) {
     }
   };
 
+  // A cascade's step named over the wheel, rising and fading ("Single! +3", "Triple! Constellation! +213").
+  const say = (text, big = false) => {
+    const lower = b.fx.filter((f) => f.kind === 'words').length;
+    b.fx.push({ kind: 'words', text, big, x: C, y: C - 60 + lower * 62, t: 0, t0: big ? 1.6 : 1.1 });
+  };
   // Begin showing a stage.
   const begin = (st) => {
     // (straight on from a turn just ended)
@@ -350,8 +387,8 @@ export function navBoard(o = {}) {
       b.onBooch?.();
       return;
     }
-    if (st.kind === 'line') { b.lit = new Set(st.cleared); return; }
-    if (st.kind === 'constellation') { b.conFlare = 1; b.onConstellation?.(st.done); return; }
+    if (st.kind === 'line') { b.lit = new Set(st.cleared); if (named) say(`${STEP_NAMES[st.step - 1] ?? `${st.step}x`}! +${st.cleared.length * st.step}`); return; }
+    if (st.kind === 'constellation') { b.conFlare = 1; if (named) say(`${st.step > 1 ? `${STEP_NAMES[st.step - 1] ?? `${st.step}x`}! ` : ''}Constellation! +${st.done.points}`, true); b.onConstellation?.(st.done); return; }
     if (st.kind === 'deal') { b.shownCon = st.constellation; b.conFade = 0; b.onDeal?.(st.constellation); return; }
     aim(st.grid, st.kind === 'drop' ? b.dropFrom.shift() : null);
     // (a drop or a fall: as long as the furthest star has to go, at a steady pace)
@@ -374,8 +411,11 @@ export function navBoard(o = {}) {
   // The keys, as in the real puzzle: Left turns the ring selected anticlockwise, Right clockwise, Up
   // moves to the higher ring, Down to the lower, Space drops the star (WASD too).
   b.dropFrom = [];
+  // (each stage its step in the move's cascade, to name it: a line's or a constellation's)
   const did = (m) => {
     if (!m.moved) return m;
+    let step = 0;
+    for (const st of m.stages) if (st.kind === 'line' || st.kind === 'constellation') st.step = ++step;
     b.queue.push(...m.stages);
     b.onMove?.(m);
     return m;
@@ -403,9 +443,9 @@ export function navBoard(o = {}) {
     if (!ray.ray.intersectPlane(new THREE.Plane().setFromNormalAndCoplanarPoint(n, p0), p)) return false;
     group.worldToLocal(p);
     const d = Math.hypot(p.x, p.y) * S;
-    if (d > RING_R[RINGS - 1] + 60) return false;
+    if (d > RR[game.rings - 1] + 60 * K) return false;
     let best = 0;
-    for (let r = 1; r < RINGS; r++) if (Math.abs(RING_R[r] - d) < Math.abs(RING_R[best] - d)) best = r;
+    for (let r = 1; r < game.rings; r++) if (Math.abs(RR[r] - d) < Math.abs(RR[best] - d)) best = r;
     game.ring = best;
     return true;
   };
@@ -433,13 +473,14 @@ export function navBoard(o = {}) {
       if (b.stage.kind === 'deal') b.conFade = u;
       if (u >= 1) end(b.stage);
     }
-    for (let r = 0; r < RINGS; r++) b.ringGlow[r] = Math.max(0, b.ringGlow[r] - dt * 4);
+    for (let r = 0; r < game.rings; r++) b.ringGlow[r] = Math.max(0, (b.ringGlow[r] ?? 0) - dt * 4);
     b.flash = Math.max(0, b.flash - dt * 1.5);
     b.conFlare = Math.max(0, b.conFlare - dt * 1.2);
     for (let i = b.fx.length - 1; i >= 0; i--) {
       const f = b.fx[i];
       f.t += dt;
       if (f.kind === 'spark') { f.x += f.vx * dt; f.y += f.vy * dt; f.vx *= 0.94; f.vy *= 0.94; }
+      if (f.kind === 'words') f.y -= 40 * dt;
       if (f.t >= f.t0) b.fx.splice(i, 1);
     }
     draw();
@@ -452,23 +493,24 @@ export function navBoard(o = {}) {
     // The wheel and all on it, its middle the canvas's.
     g.save();
     g.translate(0, OFF);
-    g.drawImage(wheelCanvas(), 0, 0);
+    if (K < 1) { g.save(); g.translate(C, C); g.scale(K, K); g.translate(-C, -C); g.drawImage(wheelCanvas(), 0, 0); g.restore(); }
+    else g.drawImage(wheelCanvas(), 0, 0);
     // The ring selected, plainly: its band lit and a bright gold edge either side of it (one just turned,
     // brighter still for a moment). It was only a little brighter, hard to tell (the user, 13 Nov: "the
     // highlight between the selected ring and a non-selected ring is relatively minimal, so it's making it
     // hard to tell what ring").
-    for (let r = 0; r < RINGS; r++) {
-      const sel = r === game.ring && !b.idle, lift = Math.max(sel ? 0.5 + 0.08 * Math.sin(b.time * 3) : 0, b.ringGlow[r] * 0.6);
+    for (let r = 0; r < game.rings; r++) {
+      const sel = r === game.ring && !b.idle, lift = Math.max(sel ? 0.5 + 0.08 * Math.sin(b.time * 3) : 0, (b.ringGlow[r] ?? 0) * 0.6);
       if (lift <= 0) continue;
-      const w = r ? 46 : 30;
+      const w = (r ? 46 : 30) * K;
       g.save(); g.globalCompositeOperation = 'lighter';
       g.lineWidth = w; g.strokeStyle = `rgba(150,130,60,${lift})`;
-      g.beginPath(); g.arc(C, C, RING_R[r], 0, Math.PI * 2); g.stroke();
+      g.beginPath(); g.arc(C, C, RR[r], 0, Math.PI * 2); g.stroke();
       g.restore();
       if (sel) {
         g.save(); g.lineWidth = 4; g.strokeStyle = `rgba(255,214,106,${0.85 + 0.15 * Math.sin(b.time * 3)})`;
         g.shadowColor = '#ffd66a'; g.shadowBlur = 12;
-        for (const e of [-1, 1]) { g.beginPath(); g.arc(C, C, RING_R[r] + e * (w / 2 + 2), 0, Math.PI * 2); g.stroke(); }
+        for (const e of [-1, 1]) { g.beginPath(); g.arc(C, C, RR[r] + e * (w / 2 + 2), 0, Math.PI * 2); g.stroke(); }
         g.restore();
       }
     }
@@ -481,41 +523,47 @@ export function navBoard(o = {}) {
       const grid = shownGrid();
       for (const m of con.marks) {
         const [x, y] = xy(radius(m.ring), ang(m.spoke)), here = grid.get(`${m.ring},${m.spoke}`);
-        medallion(g, m.colour, x, y, here === m.colour || flare > 0, flare > 0 ? 1 + flare : 0, 1 + 0.3 * flare);
+        if (m.wild) wildMedallion(g, x, y, here !== undefined, flare > 0 ? 1 + flare : 0, K * (1 + 0.3 * flare));
+        else medallion(g, m.colour, x, y, here === m.colour || flare > 0, flare > 0 ? 1 + flare : 0, K * (1 + 0.3 * flare));
       }
       g.restore();
     }
     // The stars (on a place of the constellation's in its own colour, the coin shows it instead).
     const filled = new Set();
-    if (con) for (const m of con.marks) filled.add(`${m.ring},${m.spoke},${m.colour}`);
+    if (con) for (const m of con.marks) if (!m.wild) filled.add(`${m.ring},${m.spoke},${m.colour}`);
     for (const [id, s] of b.stars) {
       const [x, y] = xy(s.r, s.a);
-      const rr = RING_R.indexOf(Math.round(s.r)), sp = Math.round(((s.a + Math.PI / 2) / (2 * Math.PI / SPOKES) % SPOKES + SPOKES) % SPOKES);
+      const rr = ringAt(s.r), sp = Math.round(((s.a + Math.PI / 2) / (2 * Math.PI / SPOKES) % SPOKES + SPOKES) % SPOKES);
       if (rr >= 0 && filled.has(`${rr},${sp},${s.c}`) && !b.lit?.has(id)) continue;
       let k = 1;
       if (b.lit?.has(id)) {   // (a line about to go: ringed and swelling)
         const u = Math.min(1, b.t / TIME.line);
         k = 1 + 0.25 * u;
-        g.save(); g.lineWidth = 5; g.strokeStyle = `rgba(255,255,255,${0.5 + 0.5 * Math.sin(b.t * 40)})`; g.beginPath(); g.arc(x, y, STAR_R * 1.3, 0, Math.PI * 2); g.stroke(); g.restore();
+        g.save(); g.lineWidth = 5; g.strokeStyle = `rgba(255,255,255,${0.5 + 0.5 * Math.sin(b.t * 40)})`; g.beginPath(); g.arc(x, y, SR * 1.3, 0, Math.PI * 2); g.stroke(); g.restore();
       }
       if (s.flee) g.globalAlpha = Math.max(0, 1 - (s.r - s.fr) / (S - s.fr) * 1.5);
-      const R = STAR_R * k;
+      const R = SR * k;
       g.drawImage(starCanvas(s.c), x - R, y - R, 2 * R, 2 * R);
       g.globalAlpha = 1;
     }
     // The next star, out on its spoke's handle, a pale halo round it (not while one's still dropping in).
     if (!b.dropFrom.length && !(b.stage?.kind === 'booch')) {
-      const n = game.next, [x, y] = xy(OUT, ang(n.spoke)), p = 0.5 + 0.5 * Math.sin(b.time * 4);
-      const gg = g.createRadialGradient(x, y, STAR_R * 0.6, x, y, STAR_R * 1.5);
+      const n = game.next, [x, y] = xy(OUT_B, ang(n.spoke)), p = 0.5 + 0.5 * Math.sin(b.time * 4);
+      const gg = g.createRadialGradient(x, y, SR * 0.6, x, y, SR * 1.5);
       gg.addColorStop(0, `rgba(200,220,255,${0.45 + 0.15 * p})`); gg.addColorStop(1, 'rgba(160,190,255,0)');
-      g.fillStyle = gg; g.beginPath(); g.arc(x, y, STAR_R * 1.5, 0, Math.PI * 2); g.fill();
-      g.drawImage(starCanvas(n.c), x - STAR_R, y - STAR_R, 2 * STAR_R, 2 * STAR_R);
+      g.fillStyle = gg; g.beginPath(); g.arc(x, y, SR * 1.5, 0, Math.PI * 2); g.fill();
+      g.drawImage(starCanvas(n.c), x - SR, y - SR, 2 * SR, 2 * SR);
     }
     // Sparks and ghosts.
     for (const f of b.fx) {
       const u = f.t / f.t0;
       if (f.kind === 'spark') { g.fillStyle = f.col; g.globalAlpha = 1 - u; g.beginPath(); g.arc(f.x, f.y, 5 * (1 - u) + 1, 0, Math.PI * 2); g.fill(); }
-      else { const R = STAR_R * (1 + u); g.globalAlpha = 1 - u; g.drawImage(starCanvas(f.c), f.x - R, f.y - R, 2 * R, 2 * R); }
+      else if (f.kind === 'words') {
+        g.globalAlpha = Math.min(1, (1 - u) * 3);
+        g.font = `700 ${f.big ? 58 : 50}px "Book Antiqua", Palatino, Georgia, serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.lineJoin = 'round'; g.lineWidth = 10; g.strokeStyle = '#06102c'; g.strokeText(f.text, f.x, f.y);
+        g.fillStyle = f.big ? '#ffe680' : '#f2f4ff'; g.fillText(f.text, f.x, f.y);
+      } else { const R = SR * (1 + u); g.globalAlpha = 1 - u; g.drawImage(starCanvas(f.c), f.x - R, f.y - R, 2 * R, 2 * R); }
       g.globalAlpha = 1;
     }
     g.restore();
@@ -559,13 +607,15 @@ export function navBoard(o = {}) {
   const shownGrid = () => {
     const m = new Map();
     for (const s of b.stars.values()) {
-      const r = RING_R.indexOf(Math.round(s.r)), sp = Math.round(((s.a + Math.PI / 2) / (2 * Math.PI / SPOKES) % SPOKES + SPOKES) % SPOKES);
-      if (r >= 0 && Math.abs(s.r - RING_R[r]) < 1) m.set(`${r},${sp}`, s.c);
+      const r = ringAt(s.r), sp = Math.round(((s.a + Math.PI / 2) / (2 * Math.PI / SPOKES) % SPOKES + SPOKES) % SPOKES);
+      if (r >= 0) m.set(`${r},${sp}`, s.c);
     }
     return m;
   };
 
-  b.prompt = () => `Duty Navigation · Up / Down choose a ring · Left / Right turn it · Space drops the star · constellation ${game.completed + 1}, ${game.moves} moves (par ${game.constellation ? parFor(game.constellation.marks.length) : '-'})`;
+  b.prompt = () => (game.den
+    ? `Duty Navigation, four rings · Up / Down choose a ring · Left / Right turn it · Space drops the star · ${game.score} points`
+    : `Duty Navigation · Up / Down choose a ring · Left / Right turn it · Space drops the star · constellation ${game.completed + 1}, ${game.moves} moves (par ${game.constellation ? parFor(game.constellation.marks.length) : '-'})`);
   // The camera to play it from: straight on to its face, far enough back to see it all.
   b.camView = (camera) => {
     const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect);

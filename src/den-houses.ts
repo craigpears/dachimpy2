@@ -28,6 +28,9 @@ export interface House {
   kind: string;
   /** What the list says of it, in a few words. */
   blurb: string;
+  /** A place of its own on the house shell, away from the district (the wolf den's hut): not in its door's list,
+      reached by its link. */
+  away?: boolean;
 }
 
 /** The district's houses. Gravee's is the first (her manor on Admiral Island is "Bedside Manors": her
@@ -44,13 +47,16 @@ export const HOUSES: readonly House[] = [
   // Affame's (14 Nov), the queen of sweetness: a little cosy one, the four cartoons Dachimpy made her on its
   // walls, a heap of cushions and teddies to sink into. Its rules: src/den-affame.ts.
   { id: 'affame', owner: 'Affame', name: 'The Sweet Spot', kind: 'Cottage', blurb: 'Cushions, teddies, and the queen of sweetness.' },
+  // The wolf den's hut (14 Nov), its star table where Dignity teaches four-tier Duty Navigation: no house in the
+  // district, a place of its own on the same shell (`away`). Its rules: src/den-wolfden.ts.
+  { id: 'wolfden', owner: 'Dignity', name: 'The Wolf Den', kind: 'Hut', blurb: 'A star table, the moon at the window.', away: true },
 ];
 
 /** The house by its id, or null. */
 export const houseById = (id: string): House | null => HOUSES.find((h) => h.id === id) ?? null;
 
 /** The list as the door shows it: by owner, as Puzzle Pirates listed them. */
-export const houseList = (): House[] => [...HOUSES].sort((a, b) => a.owner.localeCompare(b.owner));
+export const houseList = (): House[] => HOUSES.filter((h) => !h.away).sort((a, b) => a.owner.localeCompare(b.owner));
 
 /** The district's door, dug into the den's left-hand cliff, facing in across the floor: between the
     torch by the armoury hoist and your shack's plot, a stretch of floor nothing else uses at any stage
