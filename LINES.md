@@ -1620,6 +1620,7 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
 
 - *Their hello:* "Ahoy! Welcome, welcome! Cookie? Yay, cookies!"
 - *Clicking the cookie (then the other cookies, in turn):* "Yay! There you go. Everyone who comes in gets one. House rule."
+- *Under it, all the while:* "So! What are you here for?"
 - *Under "A room of your own": what the den is for:*
   - "Want a room of your own in the den? Ooh, yes! Let's make one!"
   - "The islands each bring something new: a mechanic, a tutorial, or a proper long adventure. And a room of your own is a lovely thing too. Got a character you love, or something to show off? Have it in 3D, in a gallery of your own."

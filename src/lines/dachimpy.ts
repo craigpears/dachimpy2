@@ -180,6 +180,8 @@ export const GOODBYE = 'Byeee! Take a cookie for the road!';
 export const FRONT_PAGE = {
   hello: 'Ahoy! Welcome, welcome! Cookie? Yay, cookies!',
   cookie: 'Yay! There you go. Everyone who comes in gets one. House rule.',
+  /** Under the hello (and whatever cookie line's up), all the while, the big pictures straight below it. */
+  question: 'So! What are you here for?',
   /** Further down, under "A room of your own": what the den is for, a paragraph each (the user, 14 Nov: "you
       want your own adventure ... or room ... find me on Discord ... send me a link to your pirate page, and we
       can put a little room for you together"). */
@@ -228,7 +230,7 @@ export const CHARACTER: Character = {
     { when: 'As you leave', says: [GOODBYE] },
     {
       when: 'On the site\'s front page, at the top, holding out a plate of cookies', says: FRONT_PAGE,
-      each: { hello: 'Their hello', cookie: 'Clicking the cookie (then the other cookies, in turn)', yourRoom: 'Under "A room of your own": what the den is for' },
+      each: { hello: 'Their hello', cookie: 'Clicking the cookie (then the other cookies, in turn)', question: 'Under it, all the while', yourRoom: 'Under "A room of your own": what the den is for' },
     },
   ],
 };

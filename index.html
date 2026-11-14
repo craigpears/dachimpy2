@@ -61,37 +61,36 @@
   .shots img, .pic img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; transition: transform .25s; }
   .shots a:hover img, a.pic:hover img { transform: scale(1.02); }
 
-  /* Dachimpy at the door, a plate of cookies held out (their lines from src/lines/dachimpy.ts), and beside them
-     who the site's for: the intro. */
-  .welcome { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 0 22px; align-items: end; margin-top: 20px; }
+  /* Dachimpy at the door, a plate of cookies held out (their lines from src/lines/dachimpy.ts), saying hello and
+     asking what you're here for; under it, tucked away, what this place is. Pictures straight after. */
+  .welcome { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 0 22px; align-items: center; margin: 14px 0 22px; }
   .host { position: relative; margin: 0; }
-  .host img { width: 150px; height: auto; filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.55)); }
+  .host img { width: 130px; height: auto; filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.55)); }
   /* The cookie: over the plate in the picture, a click for one (and a "Yay!"). */
-  .cookie { position: absolute; left: 0; top: 52%; width: 62px; height: 38px; border: 0; padding: 0; background: none; cursor: pointer; border-radius: 50%; }
+  .cookie { position: absolute; left: 0; top: 52%; width: 54px; height: 34px; border: 0; padding: 0; background: none; cursor: pointer; border-radius: 50%; }
   .cookie:hover, .cookie:focus-visible { outline: 2px dashed var(--gold); outline-offset: 2px; }
   .crumb { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: #b9752e; pointer-events: none; animation: crumb .9s ease-in forwards; }
   @keyframes crumb { to { transform: translate(var(--dx), 70px) rotate(200deg); opacity: 0; } }
   .bubble { position: relative; margin: 0 0 16px; padding: 12px 16px; max-width: 520px; background: #fffaf0; color: var(--ink); border-radius: 14px;
     font: 700 21px/1.3 'Alegreya', serif; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4); }
-  .bubble:empty { display: none; }
-  .bubble::after { content: ''; position: absolute; left: -12px; bottom: 16px; border: 9px solid transparent; border-right: 14px solid #fffaf0; border-left: 0; }
+  .bubble:not(.on) { display: none; }   /* (its words come from the lines file, by script) */
+  .bubble::after { content: ''; position: absolute; left: -12px; top: 50%; margin-top: -9px; border: 9px solid transparent; border-right: 14px solid #fffaf0; border-left: 0; }
   .bubble.yay { animation: yay .35s ease-out; }
   @keyframes yay { 40% { transform: scale(1.04); } }
-  .intro { margin: 0 0 6px; }
-  .intro p { margin: 0 2px 8px; }
+  #question { display: block; margin-top: 4px; font-size: 26px; color: var(--rust); }
+  .about { max-width: 520px; color: var(--dim); font-size: 15px; }
+  .about summary { cursor: pointer; color: #d4b06a; font-weight: 700; width: max-content; }
+  .about summary:hover { color: var(--gold); }
+  .about p { margin: 6px 2px 0; }
+  .about b { color: var(--cream); }
 
   /* What are you here for? The choices as big pictures, each a jump to its section below. */
   .choices { display: grid; gap: 14px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .choice { position: relative; display: block; border-radius: 12px; overflow: hidden; border: 2px solid #3b2a1b; background: #2a1c11;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45); text-decoration: none; color: var(--cream); min-height: 210px; }
-  /* The Global Cade Sim's, no picture yet: a sea chart in CSS behind its words. */
-  .choice.chart { background: radial-gradient(circle at 70% 35%, rgba(255, 255, 255, 0.10) 0 14%, transparent 15%),
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 28px), repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 28px),
-    linear-gradient(160deg, #1f5d7a, #123a52); }
-  .pic.chartpic { display: grid; place-items: center; aspect-ratio: 16 / 9; line-height: 1.2; text-decoration: none;
-    background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px 24px), repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px 24px), linear-gradient(160deg, #1f5d7a, #123a52); }
-  .pic.chartpic span { font: 700 26px 'Alegreya', serif; color: var(--gold); text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6); }
-  .choice.chart::before { content: ''; position: absolute; left: 22%; top: 22%; width: 26px; height: 26px; border: 3px solid rgba(255, 255, 255, 0.35); border-radius: 50%; box-shadow: 70px 30px 0 -4px rgba(224, 169, 42, 0.5), 130px -6px 0 -6px rgba(255, 255, 255, 0.3); }
+  /* A picture shown whole, not cropped to 16:9 (the Global Cade Sim's, its controls along the bottom). */
+  .pic.whole img { aspect-ratio: auto; }
+  .choice.top img { object-position: top; }
   .choice img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
   .choice:hover img { transform: scale(1.04); }
   .choice span { position: absolute; left: 0; right: 0; bottom: 0; padding: 40px 14px 12px; background: linear-gradient(transparent, rgba(16, 10, 5, 0.92) 55%); }
@@ -161,9 +160,9 @@
     .talk { display: contents; }
     .host img { width: 92px; }
     .cookie { width: 40px; height: 26px; }
-    .bubble { font-size: 18px; margin: 0; }
-    .bubble::after { bottom: auto; top: 50%; margin-top: -9px; }
-    .intro { grid-column: 1 / -1; margin-top: 14px; }
+    .bubble { font-size: 17px; margin: 0; }
+    #question { font-size: 21px; }
+    .about { grid-column: 1 / -1; margin-top: 10px; }
     article.side { grid-template-columns: 1fr; }
     .cards { grid-template-columns: 1fr; }
     .shots.two { grid-template-columns: 1fr; }
@@ -200,22 +199,23 @@
       <button class="cookie" type="button" aria-label="Take a cookie" title="Take a cookie"></button>
     </figure>
     <div class="talk">
-      <p class="bubble" id="said" aria-live="polite"></p>
-      <article class="intro">
-        <p><b>Know the basics, and want to build up your technique?</b> You're in the right place. The game's own tutorials teach the basics; this is for the middle: the building blocks and techniques, a puzzle at a time.</p>
-        <p><b>Everything here is a proof of concept,</b> and every tutorial comes two ways. There's a nice fun version, a pirate who plays alongside you in 3D and gives you the situations and such as they come up. And there are static versions of everything, to read, for those that prefer it.</p>
-        <p>It won't take you to number one. Real mastery comes from playing the game and the people in it: <a href="#people">meet them</a>.</p>
-      </article>
+      <p class="bubble"><span id="said" aria-live="polite"></span><b id="question"></b></p>
+      <!-- Who it's for, tucked away (the user, 14 Nov: no "word block" first; "slightly hidden away so people can
+           click on it or expand it if they want it"). The fuller version is design.html's "Who it's for". -->
+      <details class="about">
+        <summary>What is this place?</summary>
+        <p><b>For the middle:</b> you know the basics (the game's own tutorials teach those) and want the techniques, a puzzle at a time.</p>
+        <p><b>Proofs of concept,</b> each tutorial two ways: a fun 3D one, a pirate playing alongside you, and a static one to read.</p>
+        <p><b>Real mastery</b> comes from the game and its people: <a href="#people">meet them</a>.</p>
+      </details>
     </div>
   </section>
 
-  <h2 class="ask" id="choose">What are you here for?</h2>
-
-  <nav class="choices" aria-label="What are you here for?">
+  <nav class="choices" id="choose" aria-label="What are you here for?">
     <a class="choice" href="#fun"><img src="changelog/den-wall.jpg" width="1280" height="720" alt=""><span><b>A bit of fun and a look around</b><i>A wedding, a gallery, penguins</i></span></a>
     <a class="choice" href="#concepts"><img src="changelog/race-field.jpg" width="1280" height="720" alt=""><span><b>Try some interesting new concepts</b><i>The sloop race, and more</i></span></a>
     <a class="choice" href="#tutorials"><img src="changelog/helium-lesson.jpg" width="800" height="600" alt=""><span><b>The new tutorials</b><i>By puzzle: Sailing, Distilling, Carpentry</i></span></a>
-    <a class="choice chart" href="#cadesim"><span><b>Want to play the new blockade sim?</b><i>The Global Cade Sim</i></span></a>
+    <a class="choice top" href="#cadesim"><img src="changelog/global-cade-sim.jpg" width="880" height="583" alt=""><span><b>Want to play the new blockade sim?</b><i>The Global Cade Sim</i></span></a>
     <a class="choice" href="#practice"><img src="changelog/gun-tower.jpg" width="1280" height="720" alt=""><span><b>I just want to practice a puzzle</b><i>Fair enough. Here's where</i></span></a>
     <a class="choice" href="#people"><img src="changelog/wardrobe.jpg" width="1280" height="720" alt=""><span><b>Meet real pirates</b><i>The heart of the game</i></span></a>
   </nav>
@@ -294,6 +294,8 @@
 
   <h2 id="tutorials">The new tutorials, by puzzle</h2>
 
+  <p class="lead">Each comes two ways: in 3D with a pirate playing alongside you, or to read at your own pace.</p>
+
   <article>
     <h3>Sailing</h3>
     <p>Tzz blows up balloon animals and plays them onto a real Sailing board, showing you how a chain is really built, a step at a time, the plan marked on the board before the pieces go in. Then it's your go.</p>
@@ -336,7 +338,7 @@
   <h2 id="cadesim">Want to play the new blockade sim?</h2>
 
   <article class="side">
-    <a class="pic chartpic" href="https://www.globalcadesim.com/#/lobby/36" target="_blank" rel="noopener"><span>Global Cade Sim</span></a>
+    <a class="pic whole" href="https://www.globalcadesim.com/#/lobby/36" target="_blank" rel="noopener"><img src="changelog/global-cade-sim.jpg" width="880" height="583" loading="lazy" alt="A blockade in the Global Cade Sim: Dachimpy's ship and a bot's among whirlpools, rocks and flags, the score and clock at the top, the move controls and chat along the bottom"></a>
     <div>
       <p><b>The Global Cade Sim</b>, made by <span data-maker>a fellow pirate</span>: real blockades, with real people. It's the successor to Dachimpy's old Blockade Simulator, all grown up, and the place to practise Battle Navigation and blockades with other pirates.</p>
       <p class="try"><a class="play" href="https://www.globalcadesim.com/#/lobby/36" target="_blank" rel="noopener">Play the Global Cade Sim</a></p>
@@ -348,10 +350,10 @@
   <article class="side">
     <a class="pic" href="den.html?at=gun-tower"><img src="changelog/gun-tower.jpg" width="1280" height="720" loading="lazy" alt="The gun tower's deck as a Gunnery board: four cannons, crates of stores, a powder barrel and buckets"></a>
     <div>
-      <p>Fair enough! There are a few you can play for fun in the den: Carpentry on its wall, <a href="den.html?at=gun-tower">Gunnery in the gun tower</a>, Bilge and Sailing once <a href="den.html?at=sea">you're out on the sloop</a>, and more on the islands.</p>
-      <p>This site's really about learning, though, so its puzzles come with places and pirates round them. If you just want plain 2D practice, Puzzle Practice has a whole bunch of puzzles ready to go. Here you go:</p>
+      <p>Fair enough! The den has a few to play for fun: Carpentry on its wall, <a href="den.html?at=gun-tower">Gunnery in the gun tower</a>, Bilge and Sailing <a href="den.html?at=sea">out on the sloop</a>.</p>
+      <p>For plain 2D practice of lots of puzzles, Puzzle Practice is the place. Here you go:</p>
       <p class="try"><a class="play ghost" href="https://puzzle-practice.github.io/Puzzle_Practice/#/" target="_blank" rel="noopener">Puzzle Practice</a></p>
-      <p>And for blockades, there's <a href="#cadesim">the Global Cade Sim</a>.</p>
+      <p>And for blockades, <a href="#cadesim">the Global Cade Sim</a>.</p>
     </div>
   </article>
 
@@ -360,8 +362,8 @@
   <article class="side">
     <span class="pic"><img src="changelog/wardrobe.jpg" width="1280" height="720" loading="lazy" alt="A line-up of real pirates in their outfits: Tzz, Gravee, Dalnoth, a pirate in a bear hat, Dignity, Mischievious and Kikkit"></span>
     <div>
-      <p>This is a sociable game. The den is a bit of fun and a bit of stuff on the side, but everything is about the people: playing puzzles together. Every teacher here sends you on to them in the end. So go do it!</p>
-      <p>If you want a friendly community full of people ready to help you and have fun on the game, or to watch some real pirates play and talk to them, the Trophy Hunters' Discord is the go-to. And for real mastery, the top puzzlers' videos and streams are out there too, on YouTube and Twitch.</p>
+      <p>It's a sociable game: everything's about the people, playing puzzles together. So go do it!</p>
+      <p>For a friendly crowd ready to help and have fun, or to watch real pirates play and chat, the Trophy Hunters' Discord is the go-to. The top puzzlers stream on Twitch and YouTube too.</p>
       <p class="try"><a class="play" href="https://discord.gg/XtRHwP6XT" target="_blank" rel="noopener">The Trophy Hunters' Discord</a></p>
     </div>
   </article>
@@ -456,8 +458,11 @@
   // Dachimpy's hello, and a cookie on a click: their lines are src/lines/dachimpy.ts's, never written here.
   import { FRONT_PAGE, ANOTHER_COOKIE } from './js/lines/dachimpy.js';
   const said = document.getElementById('said'), host = document.querySelector('.host');
-  const say = (line) => { said.textContent = line; said.classList.remove('yay'); void said.offsetWidth; said.classList.add('yay'); };
+  const bubble = said.parentElement;
+  const say = (line) => { said.textContent = line; bubble.classList.remove('yay'); void bubble.offsetWidth; bubble.classList.add('yay'); };
+  bubble.classList.add('on');
   said.textContent = FRONT_PAGE.hello;
+  document.getElementById('question').textContent = FRONT_PAGE.question;
   document.getElementById('your-room').replaceChildren(...FRONT_PAGE.yourRoom.map((line) => Object.assign(document.createElement('p'), { textContent: line })));
   let cookies = 0;
   document.querySelector('.cookie').addEventListener('click', (e) => {
