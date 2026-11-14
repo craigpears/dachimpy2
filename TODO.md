@@ -878,6 +878,12 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   when it's bigger, but yeah, for phone, just make it single column ... each of the new concept ideas should be
   underneath, collapse underneath each other." So three side by side on a wider screen, one a row on a phone.
 
+- **The front page's tutorials too wordy; Carpentry's picture dull (14 Nov):** "when you start getting to the
+  tutorials part of the page, it gets far too wordy again"; and Carpentry's picture "is not very interesting. It
+  should show at least a [which] picture fits, or ... the thing where it says like what solves this hole, or the
+  gambling ... something more visually interesting than the page that was picked." So fewer words there, and a
+  Carpentry shot of a puzzle being played.
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
