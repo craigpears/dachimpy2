@@ -647,6 +647,9 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   More names for that page (14 Nov): "is it Seatner? There's like Kenchio on Hunter. I mean, not really my close"
   (spellings to check). And the trinkets: "I need to go take a bunch of screenshots ... of all my trinkets because
   they all need to go in here" (the user's screenshots to come; the shelf's stand-ins until then).
+  And Whiterose (she), from Viridian, a place of her own: "she was so incredible. The one pirate you could really
+  trust to care about the life of the game instead of taking the most powerful side, she would switch from Vanguard
+  and play the other side, will always remember that ❤️ miss you whiterose!"
 
 ## Spotted along the way (not asked for)
 
