@@ -148,6 +148,18 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   ... general concepts that we'll cover across all puzzles.") How it's built: TUTORIALS.md, one description a
   puzzle (src/tutorial.ts), the nav and the choice drawn from it.
 
+- **Every adventure ends with something to keep (14 Nov).** "If you ... complete [any little adventure], there should
+  be some meaningful reward, even if it's a small token thing like a visible persistent change to the map, a creature
+  that carries along, or some furniture, some visual representation that you've completed that quest. Like Kikkit
+  going to live with the penguins." A quest's end is never only a toast: something you can see afterwards stays,
+  at the den, on the sea, or with you (Umami living at the den after his rescue is the model). Helium's rum run gets
+  a few barrels of rum for the den (TODO.md).
+- **Where Space does something is marked, everywhere (14 Nov).** "always make that a generic thing ... this is like a
+  quest or target ... you can do that for anything, even if it's just for interacting with the tutorial, it should
+  be clear." One shared marker (src/den-marks.ts, js/den/marks.js: a gold ring pulsing on the water) on the squares
+  where Space starts something, showing as she nears them: a quest's next stop, a place's starting point. A new
+  quest or place says its targets with `mark(name, squares)`; never a hidden square you find by trying several.
+  First on the rum run's stops and the Wedding Isle's landing.
 - **A demonstration shows its plan before it builds (12 Nov).** In any tutorial (Tzz's balloons, Helium's
   Distilling), the plan is on the board and said before the pieces go in, so every move is seen to serve
   it, not explained only at the end: "while she's building it, it's a bit like, wait, why were you putting

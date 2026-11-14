@@ -734,6 +734,36 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   ends up pointing at a rock that you then have to bump off. That's a bit weird." So keep the way round, but where
   the winds leave her she shouldn't be pointed straight at a rock (to pin down which wind with the user).
 
+- **Every adventure ends with something to keep (14 Nov):** "if you any little adventure that you complete, there
+  should be some meaningful reward, even if it's a small token thing like a visible persistent change to the map, a
+  creature that carries along, or some furniture, some visual representation that you've completed that quest. Like
+  Kikkit going to live with the penguins." First, Helium's rum run: "it just seems a bit anticlimactic at the end
+  ... it needs some little token thing, like, do you get a barrel of rum? ... some barrels of rum to decorate the den
+  or something." So Helium hands you a few barrels of rum at the end, and they're at the den for good (as Umami
+  stays with you after his quest). Then every other adventure checked for its keepsake; Kikkit's ending (moving to
+  Vegas Island, the penguins' island) is still to build. (RULES.md, "Every adventure ends with something to keep".)
+- **Sailing: booching at the top too easy (14 Nov):** "when I'm doing the sailing puzzle, it just feels really easy
+  to booch on the top. Like, it drops a bit too quickly. It feels very unforgiving when I'm trying to maximize the
+  space at the top. It's not fun to booch ... maybe ... just be a bit slower when you're one tile away from
+  booching." So the falling pair slows when it's a tile from booching.
+- **Helium's corner, one way in and one way out (14 Nov):** on the rum run, sailing for the back beach for the
+  first time: "If you want to get to Helium's hideout, you have to do a 90-degree turn by rowing, because there's
+  no way of bumping yourself there. I really like that ... I think that should be the only way of getting to
+  Helium's little corner ... But there should be a wind still so that you can get from his den to the front of
+  where the Imperial Fort is. So it kind of becomes a one-way thing of getting back out." So the smugglers' cove
+  reached only by that rowed turn, and a wind out of it carrying her round to the front of Port Decorum. Also "am I
+  supposed to be able to get to his by just doing a double instead of a Vegas over here?" (which spot, to pin down
+  with the user). And at Vegas Island "nothing happened with the penguins": they're a find for now; Kikkit's ending
+  there is still to build.
+- **The front page's banner redrawn, and a rose purple theme (14 Nov):** of the old Dachimpy.com banner put back:
+  "I wanted it done a bit better though, like design it so that it fits. I like the general look of the site, that's
+  just obviously does not fit, but do something that is inspired by it but fits with the colour scheme." So a banner
+  inspired by it (the monkey, the map's dotted trail, the X, the sea and a ship) drawn in the site's own look. And
+  "it would be good to be able to experiment with the color theme of the website ... I like my kind of rose purple
+  kind of theme ... not in a glaring way, but at least there's like the call for actions following that theme and
+  something neutral for the rest." So the buttons and links in Dachimpy's rose and purple, the rest neutral, the
+  colours in one place to try other themes.
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
