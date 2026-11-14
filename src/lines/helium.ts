@@ -395,6 +395,10 @@ export const AFTER = [
   'Ask about, mind. Other pirates know tricks I\'ve never seen.',
 ] as const;
 
+/** Jazzmy's carpet flying in over their island (src/den-carpet-flight.ts), and landing on it (src/den-carpet.ts). */
+export const AS_JAZZMY_FLIES_IN = 'Oh. Incoming. Mind the still.';
+export const WHEN_JAZZMY_LANDS = 'Hello. Rum\'s by the casks. Mind your eyebrows.';
+
 export const CHARACTER: Character = {
   name: 'Helium',
   who: 'On a little island of their own out past the checkpoint, by the smugglers\' rocks, at a copper still with '
@@ -426,6 +430,7 @@ export const CHARACTER: Character = {
     { on: '13 Nov', said: 'helium said to teach you some tricks, but ... don\'t forget, you know, the greatest love of the game is talking to other pirates ... this is not a replacement for the game ... this is a tool, a side adventure ... We should be watching people, looking at YouTube videos, talk to people, just whatever.' },
   ],
   lines: [
+    { when: 'Jazzmy\'s carpet flying in over their island, and landing on it', says: [AS_JAZZMY_FLIES_IN, WHEN_JAZZMY_LANDS] },
     { when: 'Coming up off their island the first time: the still goes bang, and they shrug it off (your lines between, src/lines/you.ts)', says: OPENING },
     { when: 'Their lesson\'s step one, straight after their opening, the whites on the fire\'s side ringed: as it starts (says), as they drag the whites out of the three columns next to the fire (clear), why (why), in the bar (note)', says: STEP_ONE },
     { when: 'Your first batch at the still done, the goal met, after their "done": the rest is from other pirates', says: [ONWARD] },

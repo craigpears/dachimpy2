@@ -47,6 +47,7 @@ import { spouse, spouseTick } from './den/spouse.js';
 import { keepsakes, keepsakeTick } from './den/keepsakes.js';
 import { wed, weddingKey, weddingDown, weddingMove, weddingUp, weddingWheel, weddingTick, weddingCam } from './den/wedding.js';
 import { house, houseKey, houseTick, houseCam, houseEnter } from './den/house.js';
+import { carpet, carpetKey, carpetTick, carpetCam } from './den/carpet.js';
 import { lodgings, lodgingsOpen, lodgingsKey, nearLodgings, lodgingsTick } from './den/lodgings.js';
 import { deco, decoMode, decoMove, decoClick, decoTurn, dress, dressPanel, dressRows, lookChanged, applyDen, buildAll, tileFor, fillFrame, cheats, skipTo, cheatPanel, startAt } from './den/menus.js';
 import './den/course-back.js';   // (a course from the race's editor: the way back to it)
@@ -89,6 +90,7 @@ addEventListener('keydown', (e) => {
   // On Mischievious's island: its own keys (js/den/wedding.js). In a house: its own (js/den/house.js).
   if (wed.on) { weddingKey(key, e); return; }
   if (house.on) { houseKey(key, e); return; }
+  if (carpet.on) { carpetKey(key, e); return; }   // (Jazzmy's carpet ride: js/den/carpet.js)
   if (chart.on && !deco.on) { e.preventDefault(); mapKey(key, e); return; }
   // Treasure Haul: its own keys (P still pauses).
   if (haul.on) { e.preventDefault(); if (!haulKey(key, e) && key === 'p' && !e.repeat) setPaused(true); return; }
@@ -152,7 +154,7 @@ function deckCellAt(x, y) {
 }
 renderer.domElement.addEventListener('mousemove', (e) => {
   if (wed.on) { weddingMove(e); return; }
-  if (house.on) return;
+  if (house.on || carpet.on) return;
   if (wm && keyAt) { if (Math.hypot(e.clientX - keyAt.x, e.clientY - keyAt.y) < 24) return; worldLets.keyAt = null; }
   if (deco.on) { decoMove(e); return; }
   if (haul.on) { haulHover(e.clientX, e.clientY); return; }
@@ -183,7 +185,7 @@ document.addEventListener('mouseleave', () => { raidsLets.cursor = null; });
 let drag = null;
 renderer.domElement.addEventListener('mousedown', (e) => {
   if (wed.on) { weddingDown(e); return; }
-  if (house.on) return;   // (a house's own clicks: js/den/house.js)
+  if (house.on || carpet.on) return;   // (a house's own clicks: js/den/house.js; the carpet ride's buttons: carpet.js)
   if (deco.on) { if (e.button === 2) drag = { x: e.clientX, y: e.clientY, moved: false, deco: e }; else decoClick(e); return; }
   if (e.button === 2) { drag = { x: e.clientX, y: e.clientY, moved: false }; return; }
   if (e.button !== 0 || G.over || cine) return;
@@ -236,7 +238,7 @@ addEventListener('mouseup', (e) => {
 let wheelAcc = 0, wheelT = 0;
 renderer.domElement.addEventListener('wheel', (e) => {
   if (wed.on) { weddingWheel(e); return; }
-  if (house.on) return;
+  if (house.on || carpet.on) return;
   if (deco.on) {
     wheelAcc += e.deltaY;
     if (Math.abs(wheelAcc) >= 40) { decoTurn(wheelAcc > 0 ? 1 : -1); wheelAcc = 0; }
@@ -373,7 +375,7 @@ function tick() {
 function frame() {
   tick();
   // Something new to start, offered on the thing itself where you're looking (js/den/start-mark.js).
-  startMark(sailOffer(), paused || cheats.open || G.over || !!cine || chart.on || deco.on || dress.open || lodgings.open || wed.on || house.on, 1 / 60);
+  startMark(sailOffer(), paused || cheats.open || G.over || !!cine || chart.on || deco.on || dress.open || lodgings.open || wed.on || house.on || carpet.on, 1 / 60);
   renderer.render(scene, camera);
   // Helium in the corner box when they're off the screen at their board (js/den/helium-isle.js, heliumInset); a
   // board on her deck popped out in a race, in its frame (js/den/pop-board.js, popInset).
@@ -390,26 +392,29 @@ function frame() {
   requestAnimationFrame(frame);
 }
 setInterval(() => { if (online() && performance.now() - lastT > 250) tick(); }, 200);
-/* In a house (js/den/house.js): the den waits, as it was, while you're inside; the house walks you about
-   and holds the camera, looking in as at a doll's house (a cutscene's shots over it). */
-function houseUpdate(dt) {
-  houseTick(dt);
+/* A place of its own, away from the den: the den waits, as it was, while you're there, and the place plays
+   itself and holds the camera (a cutscene's shots over it). In a house (js/den/house.js), which walks you about,
+   looking in as at a doll's house; on Jazzmy's carpet ride (js/den/carpet.js), out on a sunny sea, so its haze
+   further off (`far`, metres more). */
+function ownPlace(dt, tickIt, camOf, P, far = 0) {
+  tickIt(dt);
   cineTick(dt);
-  const C = cine ? cine.cam : houseCam();
+  const C = cine ? cine.cam : camOf();
   if (!C) return;
   v3.set(Math.sin(C.yaw) * Math.cos(C.tilt), Math.sin(C.tilt), Math.cos(C.yaw) * Math.cos(C.tilt)).multiplyScalar(C.dist).add(C.look);
-  const k = house.snap || C.cut ? 1 : Math.min(1, dt * (cine ? 7 : 4));
-  house.snap = false; C.cut = false;
+  const k = P.snap || C.cut ? 1 : Math.min(1, dt * (cine ? 7 : 4));
+  P.snap = false; C.cut = false;
   camAt.lerp(v3, k); camLook.lerp(C.look, k);
   camera.position.copy(camAt);
   camera.lookAt(camLook);
   hazeD = hazeD == null ? C.dist : hazeD + (C.dist - hazeD) * k;   // (k is 1 on a cut)
-  hazeAt(hazeD);
+  hazeAt(hazeD + far);
   skyDome.position.copy(camera.position);
   renderer.toneMappingExposure = 1;
 }
 function update(dt) {
-  if (house.on) { houseUpdate(dt); return; }
+  if (house.on) { ownPlace(dt, houseTick, houseCam, house); return; }
+  if (carpet.on) { ownPlace(dt, carpetTick, carpetCam, carpet, 120); return; }
   // Walk.
   let mx = 0, mz = 0;
   if (!G.over) {
@@ -893,6 +898,6 @@ if (startHere && !online() && !startAt(startHere)) toast(`No starting point call
 
 // For poking at it from the console.
 window.den = { watch, rowing, rowPull, tune, HP, skipTo, cheatPanel, fillFrame, tileFor, widenCells, widen, dropPiece, dropBoard, curLayer, layerOpen, breakHole, onFrame, cannonSpot, get wm() { return wm; }, newWall, doorOf, passable, weakSpot, decoMode, get deco() { return deco; }, get denLook() { return denLook; }, get gd() { return gd; }, get myLook() { return myLook; }, setLook(l) { worldLets.myLook = cleanLook(l); lookChanged(); }, setDen(d) { applyDen(cleanDen(d), true); }, startHouse, dressPanel, get dressTab() { return dress.tab; }, set dressTab(t) { dress.tab = t; dressRows(); }, buildAll, chalk, gunTick, loopsOf, addStore, gunSq, camera, net, onNet, sendSync, joinCrew, leaveCrew, openJob, finishFrame, frameFits, frames, putFramePiece, frameState, takeBack, canTakeBack, get lastPlaced() { return lastPlaced; }, get aimed() { return aimed; }, clickedFoe, get wall() { return wall; }, pirate, piles, neededLetters, fairPick, sword, rack, barracks, swordDrop, swordReward, swordBreak, lumber, toLumber, repairAll, newGame, raiders, G, get carry() { return carry; }, get patch() { return patch; }, get target() { return target; }, act, startWave, fireCannon, spawnRaider, fits, patchFits, place, pickUp, showPile, view, get ramp() { return ramp; }, heightAt, throwAt,
-  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, station, hold, holdSwap, board, ashore, patch, patchKey, patchPlace, deckHoleShape, haul, haulSwap, crane, gunnery, umami, wed, spouse, keepsakes, house, houseEnter, lodgingsOpen,
+  bilge, tide, bilgeEnter, bilgeSwap, dredge, sail, station, hold, holdSwap, board, ashore, patch, patchKey, patchPlace, deckHoleShape, haul, haulSwap, crane, gunnery, umami, wed, spouse, keepsakes, house, houseEnter, lodgingsOpen, carpet,
   // Run the game forward by hand (for testing while the tab is in the background).
   step(secs) { for (let t = 0; t < secs; t += 1 / 30) update(1 / 30); renderer.render(scene, camera); } };

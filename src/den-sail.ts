@@ -665,6 +665,19 @@ export const LAY = {
     LANDING: { c0: 15, c1: 16, r0: 3, r1: 6 },
     MOOR: { c: 16, r: 5, d: 0 } as Pose,
   },
+  /** Jazzmy's island (14 Nov; rules: src/den-jazzmy.ts), where you pick her up for her magic carpet ride: "put it
+      somewhere, don't put it in the den though ... This is why we have like a modular system of islands". Out in the
+      open water at the far right, past Multibella's: two squares of open sea at least to any rock or island, clear of
+      the winds. LAND: three squares; LANDING: the water off its left-hand shore, where Space starts the ride; MOOR:
+      where she lies while you're away on it. */
+  JAZZMY: {
+    LAND: [[24, 4], [25, 4], [24, 5]] as [number, number][],
+    LANDING: { c0: 22, c1: 23, r0: 3, r1: 6 },
+    MOOR: { c: 23, r: 5, d: 0 } as Pose,
+    /** Her carpet ride's trade wind (src/den-carpet.ts): straight down the sea from off her jetty, past Tzz's island
+        and Kikkit's, running out just short of the reef on the checkpoint's row; kept clear of rocks on every sea. */
+    RUN: { c: 22, r0: 5, r1: 16 },
+  },
   /** Port Decorum (11 Nov; src/den-imperial.ts, js/den/imperial-isle.js), an island under imperial
       control: "just some island that's, say, under imperial control ... to create trading mechanics,
       looting mechanics, smuggling mechanics". In imperial waters, where the main shipping lane leads:
@@ -944,6 +957,11 @@ export class Sea {
     for (const [c, r] of LAY.MULTIBELLA.LAND) { this.works.add(key(c, r)); for (let a = -2; a <= 2; a++) for (let b = -2; b <= 2; b++) this.keep.add(key(c + a, r + b)); }
     const MB = LAY.MULTIBELLA.LANDING;
     for (let c = MB.c0; c <= MB.c1; c++) for (let r = MB.r0; r <= MB.r1; r++) this.keep.add(key(c, r));
+    // Jazzmy's island, past Multibella's: the same.
+    for (const [c, r] of LAY.JAZZMY.LAND) { this.works.add(key(c, r)); for (let a = -2; a <= 2; a++) for (let b = -2; b <= 2; b++) this.keep.add(key(c + a, r + b)); }
+    const JZ = LAY.JAZZMY.LANDING;
+    for (let c = JZ.c0; c <= JZ.c1; c++) for (let r = JZ.r0; r <= JZ.r1; r++) this.keep.add(key(c, r));
+    for (let r = LAY.JAZZMY.RUN.r0; r <= LAY.JAZZMY.RUN.r1; r++) this.keep.add(key(LAY.JAZZMY.RUN.c, r));
     // Helium's island, past the checkpoint by the smugglers' rocks: land, the same; and their corner's one
     // way out, a wind, and its one way in, a wind of its own only the oars beat (its rocks are the reef's:
     // scatter; its water hidden: hide).

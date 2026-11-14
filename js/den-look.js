@@ -28,10 +28,11 @@ export const PARTS = {
   // its fur, either body, a prize from a 2011 event made since from a design: YPPedia; Gravee's, white. Crown of
   // roses: the roses in its first colour, the leaves in its second: Kikkit's red and green, Roobear's purple and
   // gold. Beret: a monsieur's, for Roobear's gallery, 13 Nov. Beehive wig: Dachimpy's, a tall wig piled up, a band
-  // round it in its second colour, from their in-game picture, 13 Nov.)
+  // round it in its second colour, from their in-game picture, 13 Nov. Fez: either body's since 14 Nov, for Jazzmy's
+  // carpet ride, which dresses you in one.)
   hat: {
     m: [['none', 'No hat'], ['bandana', 'Bandana'], ['tricorne', 'Tricorne'], ['feathered', 'Feathered hat', 1], ['captain', "Captain's hat", 1], ['sleeping', 'Sleeping hat'], ['fez', 'Fez'], ['viking', 'Viking helmet'], ['roses', 'Crown of roses', 1], ['pelt', 'Berserker pelt'], ['beret', 'Beret'], ['beehive', 'Beehive wig', 1]],
-    f: [['none', 'No hat'], ['bandana', 'Bandana'], ['tricorne', 'Tricorne'], ['feathered', 'Feathered hat', 1], ['captain', "Captain's hat", 1], ['sleeping', 'Sleeping hat'], ['wide', 'Wide-brimmed hat', 1], ['viking', 'Viking helmet'],
+    f: [['none', 'No hat'], ['bandana', 'Bandana'], ['tricorne', 'Tricorne'], ['feathered', 'Feathered hat', 1], ['captain', "Captain's hat", 1], ['sleeping', 'Sleeping hat'], ['wide', 'Wide-brimmed hat', 1], ['fez', 'Fez'], ['viking', 'Viking helmet'],
       ['veil', 'Veil', 1], ['tiara', 'Tiara', 1], ['butterfly', 'Butterfly'], ['feline', 'Feminine feline', 1], ['witch', 'Wicked witch', 1], ['roses', 'Crown of roses', 1], ['pelt', 'Berserker pelt'], ['beret', 'Beret'], ['beehive', 'Beehive wig', 1]],
   },
   // (Swept up: Helium's, swept up off the face and over the crown, a fall of it by one cheek, 13 Nov. Twists:
@@ -39,7 +40,7 @@ export const PARTS = {
   // on the back of the crown and a curl by each ear, 13 Nov.)
   hair: {
     m: [['short', 'Short'], ['ponytail', 'Ponytail'], ['long', 'Long'], ['wavy', 'Wavy'], ['curly', 'Curly'], ['swept', 'Swept up'], ['twists', 'Twists'], ['pinned', 'Pinned up'], ['bald', 'Bald']],
-    f: [['long', 'Long'], ['ponytail', 'Ponytail'], ['bun', 'Bun'], ['braids', 'Braids'], ['wavy', 'Wavy'], ['curly', 'Curly'], ['swept', 'Swept up'], ['twists', 'Twists'], ['pinned', 'Pinned up'], ['short', 'Short']],
+    f: [['long', 'Long'], ['ponytail', 'Ponytail'], ['bun', 'Bun'], ['braids', 'Braids'], ['wavy', 'Wavy'], ['curly', 'Curly'], ['swept', 'Swept up'], ['twists', 'Twists'], ['pinned', 'Pinned up'], ['short', 'Short'], ['tumble', 'Tumbling waves']],
   },
   beard: {
     m: [['full', 'Full beard'], ['bushy', 'Bushy beard'], ['goatee', 'Goatee'], ['moustache', 'Moustache'], ['long', 'Long beard'], ['none', 'Clean-shaven']],
@@ -236,6 +237,15 @@ export const PIRATES = Object.fromEntries(Object.entries({
     body: 'f', skin: 3, hair: 'wavy', hairCol: 'blonde', patch: false, earring: false, smile: true,
     hat: 'tricorne', hatCol: 'magenta', hatCol2: 'gold', top: 'vest', topCol: 'magenta', topCol2: 'rose', waist: 'none',
     legs: 'pants', legsCol: 'magenta', legsCol2: 'rose', feet: 'boots', feetCol: 'magenta', feetCol2: 'magenta', hand: 'cookie', fam: 'parrot', famCol: 'light blue', famCol2: 'pink',
+  },
+  // Jazzmy (her Emerald portrait, looked at 14 Nov), whose magic carpet ride is a little adventure of its own
+  // (js/den/carpet.js): fair skin, long golden waves well past her shoulders (her classic portrait), winking (the den's smile: there's no wink), a crown of black
+  // roses; a black jacket trimmed in gold over a white ruff; black trousers, dark boots; a silver chalice in her hand
+  // (the wardrobe's wine glass) and an orange parrot on her shoulder.
+  Jazzmy: {
+    body: 'f', skin: 0, hair: 'tumble', hairCol: 'blonde', patch: false, earring: false, smile: true,
+    hat: 'roses', hatCol: 'black', hatCol2: 'black', top: 'captain', topCol: 'black', topCol2: 'gold', waist: 'none',
+    legs: 'pants', legsCol: 'black', legsCol2: 'black', feet: 'boots', feetCol: 'shadow', feetCol2: 'shadow', hand: 'goblet', fam: 'parrot', famCol: 'orange', famCol2: 'gold',
   },
   // Roobear (her Emerald portrait, as IDEAS.md describes it, 12 Nov; drawn from the description, 13 Nov), with a
   // little house of her own in the den's district (her ROOm): not all in black but deep purple, only her hair
@@ -1013,6 +1023,62 @@ export function dressPirate(look, opts = {}) {
     sweep.scale.set(0.8, 1.5, 0.9);
     sweep.rotation.z = 0.35;
     body.add(sweep);
+  } else if (L.hair === 'tumble') {
+    // Tumbling waves (14 Nov, Jazzmy's: her classic portrait, long golden waves well past the shoulders, full at the
+    // crown, swept back off the face from a side part; the user, "very standard hair length/style in PP but nice still
+    // for hers to be unique"): a full crown, the fall round the head open only at the face, then down her back in
+    // wavy locks, the side ones falling behind her shoulders; two framing her face; strands back from the part.
+    const ends = 0.44, open = 0.9;
+    const crown = part(new THREE.SphereGeometry(hr + 0.05, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.5), hairM, 0, 0.94, -0.03);
+    crown.scale.set(1.08, 0.86, 1.08);
+    crown.rotation.x = -0.35;
+    body.add(crown);
+    // (round the head, to the nape)
+    const prof = [[hr - 0.02, 1.08], [hr + 0.04, 0.99], [hr + 0.065, 0.9], [hr + 0.075, 0.8], [hr + 0.06, 0.74]].map(([r, y]) => new THREE.Vector2(r, y));
+    const geo = new THREE.LatheGeometry(prof, 32, open, Math.PI * 2 - 2 * open), pos = geo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i), a = Math.atan2(x, z), k = 1 + Math.max(0, (0.99 - y) / 0.25) * 0.06 * Math.sin(a * 8 + y * 14);
+      pos.setXYZ(i, x * k, y, z * k);
+    }
+    geo.computeVertexNormals();
+    hairM.side = THREE.DoubleSide;
+    body.add(part(geo, hairM, 0, 0, -0.01));
+    // (down her back, behind the shoulders: a wide fall, waving)
+    const back = [[hr + 0.07, 0.84], [hr + 0.09, 0.72], [hr + 0.1, 0.6], [hr + 0.085, 0.5], [hr + 0.05, ends]].map(([r, y]) => new THREE.Vector2(r, y));
+    const bg = new THREE.LatheGeometry(back, 24, Math.PI * 0.62, Math.PI * 0.76), bp = bg.attributes.position;
+    for (let i = 0; i < bp.count; i++) {
+      const x = bp.getX(i), y = bp.getY(i), z = bp.getZ(i), a = Math.atan2(x, z), k = 1 + 0.06 * Math.sin(a * 9 + y * 12);
+      bp.setXYZ(i, x * k, y - (y < ends + 0.01 ? 0.03 * Math.sin(a * 7) ** 2 : 0), z * k - 0.02);
+    }
+    bg.computeVertexNormals();
+    body.add(part(bg, hairM));
+    // (a point round her head: `az` from the face, `out` off the scalp)
+    const at = (az, y, out) => new THREE.Vector3(Math.sin(az) * (hr + out), y, Math.cos(az) * (hr + out) - 0.01);
+    // Wavy locks over it all, fine and many ("high quality hair"), each drifting round behind her as it falls so
+    // none goes through a shoulder; the ones at the back longest.
+    for (let i = 0; i < 19; i++) {
+      const a = open + 0.12 + i * ((Math.PI * 2 - 2 * open - 0.24) / 18), w = 0.014 * Math.sin(i * 2.3);
+      const toBack = (t) => a + (Math.PI - a) * t, side = Math.abs(Math.sin(a)), low = ends + 0.02 + side * 0.08 + 0.02 * Math.cos(i * 1.7);
+      tube([at(a, 1.0, 0.04), at(a, 0.88, 0.08 + w), at(toBack(0.2), 0.76, 0.095), at(toBack(0.38) + 0.05 * Math.sin(i), 0.64, 0.105 + w), at(toBack(0.5), 0.54, 0.1), at(toBack(0.55), low, 0.075)], 0.03, 0.2, 3, fine);
+    }
+    // Framing her face: from the temple, down past the ear, then back behind the shoulder.
+    for (const s of [-1, 1]) {
+      const a = s * (open + 0.06);
+      tube([at(a, 1.0, 0.03), at(a, 0.88, 0.07), at(a + s * 0.12, 0.78, 0.085), at(a + s * 0.45, 0.67, 0.1), at(a + s * 0.75, 0.56, 0.1)], 0.04, 0.22, 2, fine);
+    }
+    // (back from the part, round the sides and back only, never down the face: they'd hang over her eyes)
+    if (crownBare) for (let i = 0; i < 14; i++) {
+      const a = open + 0.15 + i * ((Math.PI * 2 - 2 * open - 0.3) / 13);
+      tube(over(dir(0.35, 1.05), dir(a, 0.85), dir(a, 0.12), 0.05, 8), 0.034, 0.2, 0, fine);
+    }
+    // A little volume swept up and back off the brow from the part, high on the forehead.
+    const sweep = part(new THREE.SphereGeometry(0.085, 12, 8), hairM, -0.03, 1.1, 0.08);
+    sweep.scale.set(2.0, 0.7, 1.1);
+    sweep.rotation.z = 0.25;
+    body.add(sweep);
+    for (const [e1, e2, lift] of [[0.75, 0.62, 0.045], [0.85, 0.7, 0.05], [0.68, 0.58, 0.04]]) {
+      tube(over(dir(0.45, 1.05), dir(-0.1, e1), dir(-1.25, e2), lift, 9, 0.6), 0.038, 0.22, 0, fine);
+    }
   } else if (L.hair === 'curly') {
     // Curly: a big loose mass of curls, full on the crown and falling past the shoulders, open only
     // at the face (Mischievious's, 11 Nov). Each curl a little ball, all in one mesh to stay cheap.
@@ -1514,7 +1580,7 @@ function hatOf(L, hr, { skin, black, white, gold }) {
     // (On wavy or long hair, laid in strands over the crown, it sits up and out on them, or they bury it:
     // Whiterose's, 14 Nov.)
     const leaf = L.hatCol2 === 'gold' ? M(L.hatCol2, { metalness: 0.6, roughness: 0.35 }) : M(L.hatCol2), n = 9;
-    const up = L.hair === 'wavy' || L.hair === 'long' ? 0.045 : 0;
+    const up = L.hair === 'wavy' || L.hair === 'long' || L.hair === 'tumble' ? 0.045 : 0;
     for (let i = 0; i < n; i++) {
       const a = (i / n) * Math.PI * 2, rr = hr * (0.86 + up * 1.6);
       const rose = part(new THREE.SphereGeometry(0.05, 9, 7), hc, Math.sin(a) * rr, 1.07 + up + Math.cos(a) * 0.06, Math.cos(a) * rr - 0.02);

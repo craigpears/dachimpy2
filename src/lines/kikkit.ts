@@ -165,6 +165,9 @@ export const RACER: Racer = {
   },
 };
 
+/** Jazzmy's carpet ride (src/den-carpet-flight.ts) going by her island, the sloop with a carpet lashed on top. */
+export const AS_JAZZMY_SAILS_BY = 'Ooh! A magic carpetehhh! If you see a penguin up there, say hi!';
+
 export const CHARACTER: Character = {
   name: 'Kikkit',
   who: 'Out in the middle of nowhere on a little deserted island at the reef\'s near end, to the right of the '
@@ -190,6 +193,7 @@ export const CHARACTER: Character = {
     { on: '11 Nov', said: 'her mannerisms are definitely like everything ends in EH, so it\'s not a twirl, it\'s twirl EH.' },
   ],
   lines: [
+    { when: 'Jazzmy\'s carpet ride going by her island', says: [AS_JAZZMY_SAILS_BY] },
     { when: 'Her ramble, the first time you sail up to her island (and again, hailing her with Space)', says: RAMBLE },
     { when: 'Once she\'s told it all, never stopping while you\'re within earshot: tangents, round and round, a bit of the real way buried in them', says: TANGENTS },
     { when: 'A whirlpool\'s had you, and its winds have thrown you back to her island (a new one each time)', says: BACK },

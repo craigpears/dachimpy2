@@ -3941,3 +3941,40 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   (hiding the gaps between them) has the holes cut out of it, including fresh ones from the cannon.
 - **You must be able to see the raiders.** Behind the wall they show as red silhouettes through
   the stone; labels over each hole show its strength and who's attacking it.
+
+### Jazzmy's magic carpet ride (14 Nov)
+
+- A little adventure for Jazzmy, on the real sea from her own island past Multibella's (`?at=jazzmy`, `?at=carpet`;
+  src/den-jazzmy.ts, src/den-carpet.ts, src/den-carpet-flight.ts, js/den/carpet.js), never from the den (the user: "I
+  don't want the den becoming noisy. This is why we have like a modular system of islands"). Her own jetty and island,
+  the ride's frame laid on the sea there, not a copy far away (the user: "Why is she in a jetty that's like miles away
+  from her island"). Back aboard off her island after.
+- Her jetty, her ask ("an Aladdin-style adventure"), and a reason to fly: she's running rum to a blockade, so the
+  first leg is a lift to Helium's for it (the user: "she's helping with the blockade, so she's got to go pick the
+  [rum] up ... then ... from there to the blockade"; the second leg, Helium's to the blockade, still to come). You're
+  dressed for it for this adventure only (a fez, a vest, a sash, patched trousers, bare feet, a monkey; your own body,
+  face and hair kept), the carpet lashed on crates on the foredeck.
+- The trade wind runs straight down the sea from her jetty past Tzz's and Kikkit's islands (each calls out as you
+  go by: "an interaction of like [Kikkit] saying something ... as you fly over her") to just short of the reef. Space,
+  or a held button on a phone, leans into it; the meter shows where that launch alone would take her, flown straight
+  on: a splash, the reef, Helium's (the zone to aim for), past it. Untouched, the needle sits at the left (the user:
+  "if you don't even touch the space bar, it's like 80, 90% of the way through ... It looks a bit weird").
+- No puzzle needed to see a funny part (the user: "I don't want her to have to play the puzzle to see the funny
+  part"): doing nothing still reaches an ending, the splash short of the reef, a seagull landing on her head.
+- The flight is the game (the user: "what exactly are you doing on this magic carpet? Like, do I have to run some
+  kind of a course"): where the wind runs out the sloop stops dead and the carpet flies on, over the real sea and
+  everything on it (the user: "fly over all the assets that we've made"). Steer it left and right (A, D, the arrows,
+  or the buttons on a phone) through gusts hanging over the sea, which lift her again, and hold Space (the dive
+  button on a phone) to bring her down where you want her, so overshooting a place is never luck: one straight on to Helium's,
+  a trail off to her left round to Port Decorum, a trail on past Helium's to her right over the far reef to the race
+  course. An island catches her if she's low enough over it. Where she comes down is the ending, each its own little
+  scene (the user: "different little cutscenes depending on which kind of area she lands in"): short of the reef;
+  into rocks (a seagulls' nest, the carpet draped over them); the open sea; Helium's island (Helium's hello, rum);
+  Port Decorum (the guard: no permit); another island; the race course; off the edge of the sea (a twinkle).
+- The name joke is the carpet's alone: "JASMINE" embroidered, crossed out, "Jazzmy" stitched over. Nothing said
+  about it, ever (the user: "I don't think she'd want the 'my name's not even Jasmine' thing on there. That seems a
+  bit personal"); a test holds it.
+- Our own take: Aladdin's a folk tale, but the film's look and songs aren't ours. Our colours for the outfit, an
+  original tune if it ever gets music, no lyrics.
+- Still to come (TODO.md): the second leg to the blockade; Gravee painting her portrait ("Naturally [Gravee] taking
+  a portrait").

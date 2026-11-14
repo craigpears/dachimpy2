@@ -37,6 +37,7 @@ import { ISLE, isleShore, shoreOf } from './den-isle.js';
 import { KIKKIT, kikkitShore } from './den-kikkit.js';
 import { tzzShore } from './den-tzz.js';
 import { multibellaShore } from './den-multibella.js';
+import { jazzmyShore } from './den-jazzmy.js';
 import { empireShore } from './den-imperial.js';
 import { SMUGGLERS } from './den-smugglers.js';
 
@@ -147,6 +148,8 @@ export const CHART = {
   tzz: { shore: tzzShore().map(([c, r]): Square => [c - 0.5, r - 0.5]) },
   /** Multibella's island (14 Nov), off to the right of the den, her wolf den's hut on it: drawn, never named, as Tzz's. */
   multibella: { shore: multibellaShore().map(([c, r]): Square => [c - 0.5, r - 0.5]) },
+  /** Jazzmy's island (14 Nov), past Multibella's, where her magic carpet ride starts: drawn, never named, the same. */
+  jazzmy: { shore: jazzmyShore().map(([c, r]): Square => [c - 0.5, r - 0.5]) },
   /** Port Decorum (11 Nov), the imperial island past the checkpoint, where the shipping lane leads: no
       secret, so it's drawn, one point of interest (IMPERIAL), never named, nothing said of what's there. */
   empire: { shore: empireShore().map(([c, r]): Square => [c - 0.5, r - 0.5]) },

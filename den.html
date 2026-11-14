@@ -602,6 +602,38 @@
     .house-row small { color: var(--dim); }
     .house-row em { grid-column: 2; grid-row: 1 / span 3; align-self: center; font-style: normal; font-weight: 700; background: var(--gold); color: #2a1d13; border-radius: 6px; padding: 8px 14px; }
     body.housing .hud, body.housing .dock, body.housing .banner, body.housing .intro, body.housing #labels, body.housing .gunhelp, body.housing .sailhud, body.housing .map-hint { display: none; }
+    /* Jazzmy's carpet ride (js/den/carpet.js), a place of its own: its bar, the meter, the lean button held down, the
+       skip, the card at the end. */
+    body.carpeting .hud, body.carpeting .dock, body.carpeting .banner, body.carpeting .intro, body.carpeting #labels, body.carpeting .gunhelp, body.carpeting .sailhud, body.carpeting .map-hint, body.carpeting .sea-hud, body.carpeting .race-hud { display: none; }
+    body.carpeting canvas { touch-action: none; }
+    .carpet-hud { position: fixed; top: 14px; left: 14px; display: none; align-items: center; gap: 10px; background: var(--panel); border: 1px solid var(--gold); border-radius: 10px; padding: 8px 12px; z-index: 4; max-width: calc(100vw - 28px); box-sizing: border-box; }
+    body.carpeting .carpet-hud { display: flex; }
+    .carpet-hud button.mini { margin: 0; min-height: 34px; }
+    .carpet-meter, .carpet-lean, .carpet-steer, .carpet-skip, .carpet-card { display: none; }
+    body.carpeting .carpet-meter.on { display: block; position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); width: min(420px, calc(100vw - 32px)); background: var(--panel); border: 1px solid var(--gold); border-radius: 10px; padding: 8px 10px 6px; z-index: 4; box-sizing: border-box; text-align: center; }
+    .cm-zones { position: relative; display: flex; height: 26px; border-radius: 6px; overflow: hidden; font-size: 13px; font-weight: 700; color: #1c140c; }
+    .cm-zones span { display: flex; align-items: center; justify-content: center; }
+    .cm-short { background: #a9b9c4; }
+    .cm-rocks { background: #e0705a; }
+    .cm-sea { background: #8fd0e0; }
+    .cm-helium { background: #6fcf8a; }
+    #carpet-needle { position: absolute; top: -3px; bottom: -3px; width: 4px; margin-left: -2px; background: #fff; box-shadow: 0 0 0 2px #1c140c; border-radius: 2px; transition: left .08s linear; }
+    .carpet-meter small { display: block; margin-top: 4px; font-size: 13px; }
+    body.carpeting .carpet-lean.on { display: block; position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 4; min-height: 56px; padding: 0 24px; font-size: 18px; font-weight: 700; border-radius: 28px; border: 2px solid var(--gold); background: var(--panel); color: inherit; touch-action: none; user-select: none; -webkit-user-select: none; }
+    body.carpeting .carpet-lean.held { background: var(--gold); color: #1c140c; }
+    /* (steering the carpet in the air: held buttons either side, for a phone; the keys' words between) */
+    body.carpeting .carpet-steer.on { display: flex; position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 4; align-items: center; gap: 12px; width: min(460px, calc(100vw - 32px)); justify-content: space-between; }
+    .carpet-steer button.dive { flex: 1; font-size: 15px; font-weight: 700; color: inherit; }
+    body.carpeting .carpet-steer .dive.held, .carpet-steer button:active { background: var(--gold); color: #1c140c; }
+    .carpet-steer button { min-width: 64px; min-height: 56px; font-size: 22px; border-radius: 28px; border: 2px solid var(--gold); background: var(--panel); color: var(--gold); touch-action: none; user-select: none; }
+    body.carpeting .carpet-skip.on { display: block; position: fixed; right: 16px; bottom: 22px; z-index: 4; min-height: 44px; }
+    body.cine .carpet-skip { display: none !important; }
+    body.carpeting .carpet-card.on { display: flex; position: fixed; inset: 0; align-items: center; justify-content: center; z-index: 6; pointer-events: none; }
+    .carpet-card > div { pointer-events: auto; background: var(--panel); border: 1px solid var(--gold); border-radius: 12px; padding: 18px 22px; max-width: min(380px, calc(100vw - 32px)); box-sizing: border-box; text-align: center; margin-top: 40vh; }
+    .carpet-card h2 { margin: 0 0 6px; }
+    .carpet-card p { margin: 0 0 8px; }
+    .carpet-card .row { display: flex; gap: 10px; justify-content: center; align-items: center; margin-top: 10px; }
+    .carpet-say { max-width: 240px; }
     .house-hud { position: fixed; top: 14px; left: 14px; display: none; align-items: center; gap: 8px; flex-wrap: wrap; background: var(--panel); border: 1px solid var(--gold); border-radius: 10px; padding: 8px 12px; z-index: 4; max-width: calc(100vw - 28px); box-sizing: border-box; }
     body.housing .house-hud { display: flex; }
     body.cine .house-hud, body.cine .house-prompt { display: none !important; }
@@ -764,7 +796,7 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.3QWIVE7W.js')
+    import(local ? './js/den.js' : './js/den.74HZO2VM.js')
       .then(() => requestAnimationFrame(() => requestAnimationFrame(() => {   // (the den's first frame drawn: the splash fades)
         const s = document.getElementById('splash');
         s.classList.add('gone');

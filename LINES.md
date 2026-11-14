@@ -4,7 +4,7 @@ Every character's lines, and who they are, made from `src/lines/` by `npm run bu
 (`tools/lines-doc.mjs`): change a line there, not here, and the game changes with it.
 This file's history in git shows every line as it's changed.
 
-[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava) · [Tzz](#tzz) · [Helium](#helium) · [Multibella](#multibella) · [Gravee](#gravee) · [The Count](#the-count) · [Roobear](#roobear) · [Dachimpy](#dachimpy) · [Affame](#affame) · [The imperial guards of Port Decorum](#the-imperial-guards-of-port-decorum) · [The race's starter](#the-races-starter) · [The guard at the race's gate](#the-guard-at-the-races-gate)
+[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava) · [Tzz](#tzz) · [Helium](#helium) · [Multibella](#multibella) · [Jazzmy](#jazzmy) · [Gravee](#gravee) · [The Count](#the-count) · [Roobear](#roobear) · [Dachimpy](#dachimpy) · [Affame](#affame) · [The imperial guards of Port Decorum](#the-imperial-guards-of-port-decorum) · [The race's starter](#the-races-starter) · [The guard at the race's gate](#the-guard-at-the-races-gate)
 
 ## Dalnoth
 
@@ -102,6 +102,14 @@ Your own pirate, dressed as you like from the wardrobe (or as any real pirate in
 
 - *smuggling:* "Is... is this smuggling?"
 - *home:* "So... back home, then?"
+
+### Jazzmy asking for an Aladdin-style adventure, on her jetty: before you change into the part
+
+- "Right. Leave it with me."
+
+### Her carpet ride far too fast: Jazzmy clean over the rocks and away over the horizon
+
+- "...She'll turn up."
 
 ## The den's pirate voice
 
@@ -708,6 +716,10 @@ Loopy and off on twenty tangents at once, she can't get her lefts and rights rig
 >
 > "her mannerisms are definitely like everything ends in EH, so it's not a twirl, it's twirl EH." (the user, 11 Nov)
 
+### Jazzmy's carpet ride going by her island
+
+- "Ooh! A magic carpetehhh! If you see a penguin up there, say hi!"
+
 ### Her ramble, the first time you sail up to her island (and again, hailing her with Space)
 
 - "Ooh, hello! Have you seen a penguin? I really, really want a penguinehhh."
@@ -884,6 +896,10 @@ The sensible one, after Kikkit: she shows you plainly how a big Vegas is built, 
 >
 > "Tzz (the real one, in the game) to the user: "i just want to stream and talk about puzzles while i play"; the user: "\<3 that's always the heart of the game", and then "I think that's enough to actually add the spirit ... because that does need expressing."" (the user, 13 Nov)
 
+### Jazzmy's carpet ride going by her island
+
+- "A carpet? Ha. Easy. It's just balloons, really."
+
 ### Sailing up to her island, her lesson begins (or Space there, again)
 
 - *If you've not heard Kikkit out:* "Ahoy! Sailing, is it? Easy. It's just balloons."
@@ -997,6 +1013,11 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 > "the watch helium play option where he explains, well, you know, first of all, you know, I'm going to try and get rid of all the white pieces in all these columns, and then just kind of step by step what you're thinking based on the whatever technique or strategy" (the user, 13 Nov)
 >
 > "helium said to teach you some tricks, but ... don't forget, you know, the greatest love of the game is talking to other pirates ... this is not a replacement for the game ... this is a tool, a side adventure ... We should be watching people, looking at YouTube videos, talk to people, just whatever." (the user, 13 Nov)
+
+### Jazzmy's carpet flying in over their island, and landing on it
+
+- "Oh. Incoming. Mind the still."
+- "Hello. Rum's by the casks. Mind your eyebrows."
 
 ### Coming up off their island the first time: the still goes bang, and they shrug it off (your lines between, src/lines/you.ts)
 
@@ -1354,6 +1375,73 @@ Kind and practical, and encouraging ("You got this!"): the one who explained the
 - *As a lesson's board is laid ({title} its name):* "This one's {title}. I'll set it up, you watch the board."
 - *Handing you the board:* "Your board now. I'll be right here with the cookies."
 - *Under it, in the bar:* "Chart what you can: each constellation turns werewolves back. T for her lessons again."
+
+## Jazzmy
+
+A pirate of the Emerald Ocean, a Senior Officer of Down To Clown and a Lady of No Bamboozles, who owns Ice Spices on Armstrong Island. Long golden waves past her shoulders, winking, in black and gold with a white ruff, a silver chalice in her hand and an orange parrot on her shoulder (her portraits).
+
+She wanted her name to sound like Jasmine. In the den she asks for an Aladdin-style adventure and gets one: a magic carpet lashed on top of the sloop, "JASMINE" embroidered on it, crossed out, and "Jazzmy" stitched over the top.
+
+> "she said she wanted to make her name sound like Jasmine" (the user, 14 Nov)
+>
+> "kind of exasperating at the end. It's like, oh, my name's not really Jasmine. It's like, I have this sad face" (the user, 14 Nov)
+>
+> "I think the crossing out Jasmine with Jasmine works enough. I don't think you need a constant correction in the dialogue" (the user, 14 Nov)
+>
+> "I don't think she'd want the "my name's not even Jasmine" thing on there. That seems a bit personal" (the user, 14 Nov)
+>
+> "we need more creative, just a few varied endings, like she crashes on the rocks and nothing really happens. Same with the water, yeah, that's very anticlimactic" (the user, 14 Nov)
+
+### On her jetty, as you come alongside, and once she's on the carpet
+
+- *As you come alongside:* "Ahoy! There you are. Take me somewhere exciting."
+- *Straight after:* "I want an Aladdin-style adventure. Magic carpet and everything."
+- *Straight after that:* "Oh, and I'm running rum to a blockade. Drop me at Helium's first?"
+- *Sat on the carpet, lashed on the sloop:* "Ooh, comfy. Right then. Let's fly!"
+
+### Down the trade wind on the carpet, now and then, by how fast you're going
+
+- *Slow (only once it's been slow a while):*
+  - "Is this it?"
+  - "Can it go any faster?"
+  - "I've seen quicker barnacles."
+- *Going nicely:*
+  - "Ooh!"
+  - "This is lovely!"
+  - "Look at the sea!"
+- *Going fast:*
+  - "WHEEE!"
+  - "Faster! FASTER!"
+  - "I'm FLYING!"
+- *Going too fast: if the wind ran out now, the rocks:*
+  - "Too fast! TOO FAST!"
+  - "Are those ROCKS?"
+  - "Slow DOWN!"
+
+### Flying off the sloop as the wind runs out
+
+- *Too slow to clear the reef:* "Oh."
+- *Fast enough to clear it:* "WHEEEEEEEeeeee..."
+
+### In the air
+
+- *Through a gust:*
+  - "Ooh! A gust!"
+  - "Up we go!"
+  - "Wheee!"
+- *Dropping low, heading down:*
+  - "Up! UP!"
+  - "We're dropping!"
+
+### Where she comes down
+
+- *In the sea short of the reef, afloat on the carpet, paddling with her goblet, a seagull landing on her head:* "Well. This is peaceful."
+- *Into rocks: in a seagulls' nest on top, the carpet draped over them, the seagulls cross:* "I'm fine! The seagulls are not fine."
+- *In the open sea past the reef:* "Bit short. Bit wet. Lovely view, though."
+- *On Helium's island, after they've said hello:* "Rum! Right. Now, that blockade."
+- *In Port Decorum, after the guard's had his say:* "Fine. I'll fly back out, then."
+- *On someone else's island:* "Not Helium's. Nice, though."
+- *On the race course, past the far reef:* "Is this the race? Am I winning?"
 
 ## Gravee
 
@@ -1776,6 +1864,11 @@ Soldiers of the Empire in its crimson and gold, standing guard over Port Decorum
 For now there's nothing to do there: the island's sketched, to sail up to and look at, the place for trading, looting and smuggling to come.
 
 > "even if it's just an empty island or something where you can't interact yet, is just some island that's, say, under imperial control" (the user, 11 Nov)
+
+### Jazzmy's carpet flying over Port Decorum, and coming down in it
+
+- "Halt! No pirates in the harbour. Or over it."
+- "Flying carpets need a permit. You haven't got one. Off with you."
 
 ### The first time you come up off the island on a voyage, as the status line
 

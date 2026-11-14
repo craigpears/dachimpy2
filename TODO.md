@@ -10,6 +10,48 @@ the site (`.assetsignore` skips `*.md`).
 Built, but not yet played by the user (the user, 12 Nov: "keep a note of what is still to be play
 tested"). Struck off here once played; what the playtest corrects goes in RULES.md (or RACE.md).
 
+- **Jazzmy's magic carpet ride (14 Nov):** `?at=carpet`. Her jetty, the Aladdin outfit, the carpet on the sloop,
+  the trade wind on Space (a held button on a phone), the three endings and her sad face. Its rules: RULES.md.
+  Picked up from an island of her own on the sea (the user, 14 Nov: "put it somewhere, don't put it in the den
+  though ... I don't want the den becoming noisy. This is why we have like a modular system of islands"). Her look
+  high quality, her hair above all, in the den's general style (the user: "make sure like her hairdo and any things
+  relevant are good quality, because you know we've had to go through and refine hair and such in the past").
+  First look (14 Nov, evening), before it's pushed:
+  - Her jetty in the ride is miles from her island: "Why is she in a jetty that's like miles away from her island
+    when you go into the cutscene?" The ride's jetty is her island's, the island right there.
+  - No "my name's not even Jasmine": "I don't think she'd want the 'my name's not even Jasmine' thing on there.
+    That seems a bit personal." The crossed-out name on the carpet stays the joke.
+  - Better endings, a few and varied: "we need more creative, just a few varied endings, like she crashes on the
+    rocks and nothing really happens. Same with the water, yeah, that's very anticlimactic."
+  - Her hair long, past the shoulders, not a bob: "I don't think she identifies as really having that kind of
+    shorter shoulder length hair ... you look at a gallery and she's got long blonde hair ... well past the
+    shoulder. Very standard hair length/style in PP but nice still for hers to be unique". Her classic portrait:
+    emerald.puzzlepirates.com/yoweb/gallery/portrait.wm?pirate=Jazzmy&itemid=656054856&classic=true
+  - The meter: "if you don't even touch the space bar, it's like 80, 90% of the way through the plot range. It
+    looks a bit weird." Untouched, the needle should sit at the start of its range.
+  - More of a game: "I feel like we need a bit more of a game as well ... what exactly are you doing on this magic
+    carpet? Like, do I have to run some kind of a course or something? ... it's cute, it's fun, but ... it just kind
+    of feels halfway there as well." Then: "depending on how far you go, you end up at ... especially if you want to,
+    like, fly over all the assets that we've made. So you could fly over the den, [Kikkit's] island or something ...
+    I've got a blockade to get to. Can you fly me over? I don't know if blockade is the right fit for her ... Is she
+    going to Helium to get some rum? Or I don't know." A reason to fly and somewhere to get to, over the real sea.
+    And: "how fast you go affects kind of how far she goes and whereabouts in the map she can land and get to ...
+    different little cutscenes depending on which kind of area she lands in, whether that's close to the Imperial
+    Outpost, Helium's Distillery, the sailing area ... seeing like an interaction of like [Kikkit] saying something
+    ... as you fly over her"; "Naturally [Gravee] taking a portrait."
+    And two legs: "maybe a double step, like she's helping with the blockade, so she's got to go pick the [rum] up.
+    Yeah, so you go to there, she gets it, and then ... from there to the blockade ... a double jump ... fits what
+    she sounded like so far." Leg one to Helium's for the rum, leg two from there to a blockade.
+    Plan (14 Nov): the whole ride on the real sea, from her own jetty: the trade wind straight down past Tzz's and
+    Kikkit's islands (each calling out), running out just short of the reef at the checkpoint's row; the carpet
+    launched over it at her speed, then steered (left, right) through gusts that lift her further; where she comes
+    down is the ending (short of the reef, into it, the open sea, Helium's island, Port Decorum, further on). Then
+    leg two from Helium's (their still going bang to launch her?) to the blockade, round Port Decorum. Gravee's
+    portrait of it after.
+  Done the same evening: five endings (paddle, skip, hammock, rocks, over the horizon), no Jasmine line, the meter from
+  the wind's own pace; her island right behind the ride's jetty (her palms and stall shared, js/den/jazzmy-props.js);
+  her hair long tumbling waves past the shoulders, after her classic portrait.
+
 - **The sloop race, a full run (12 Nov):** the whole course with rivals, now with the locks a beat,
   the buoys always seen, the wind gaps lined up, the bribe gate (the wreck's coins by Treasure Haul),
   the driftwood barrier (Foraging), the crane. And the race's next pass (12 Nov): no gambles; the snakes a
@@ -40,6 +82,24 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   middle and night sky; the cove (each under "Asked for", below).
 
 ## Asked for
+
+- **A board to see what's ready (14 Nov):** "it would be good to actually have some, you know, Kanban style board
+  where I could then go and see that screenshot once it's done, or see some adventure that's been built once it's
+  done, rather than having to ask." A page, a card per thing asked for (asked, being done, ready to look at), its
+  screenshot or link on the card once it's ready.
+  Later the same day, wider: a basic system that tracks tasks and hands them to agents, "like at work I've got like
+  a Kanban style tool where you can create cards and ... it delegates them to an agent ... even if it's still me
+  interacting through this one session ... let's say, just dropping some text file into a folder that then gets
+  picked up by ... agents, so that there's a clear list of things and what their status is". Statuses like being
+  done, waiting for me to review, waiting for me to playtest. And grouped by stream of work, each remembering where
+  it got to: "because I can't even remember all the things I've got in progress". The streams named: the Distilling
+  guide and its tasks, the frigate test, the sloop race to check and iterate on, the training helpers (bots) that
+  make Kikkit and the others better at Sailing. A folder of task files (one a card: stream, status, what's asked,
+  what's ready to look at) is the source; the board reads it.
+
+- **The wolf den on a phone (14 Nov):** "fix the controls on mobile ... I've clicked on [Multibella's]. I can't even
+  see anything. Like, the menus and control instructions literally take the entire screen up." On a phone the wolf
+  den's panels must leave the board and the room in view.
 
 - **Raiders getting through mustn't end the game (9 Nov):** rethink what happens when raiders get
   in, because the den should let you go off on side quests, row out to the ship and explore: "I

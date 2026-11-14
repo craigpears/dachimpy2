@@ -37,6 +37,8 @@ import { online, guest, myId, send } from './crew.js';
 import { wed, weddingEnter, weddingLeave, plannedSpouse } from './wedding.js';
 import { spouse, spouseCheat } from './spouse.js';
 import { house, houseLeave, houseEnter } from './house.js';
+import { carpet } from './carpet.js';
+import { jazzmyCheat, jazzmyAboard } from './jazzmy-isle.js';
 import { LODGINGS, houseById } from '../den-houses.js';
 import { newGame } from '../den.js';
 
@@ -736,6 +738,18 @@ function toLodgings() {
   Object.assign(pirate, { x: LODGINGS.x + 1.05 * LODGINGS.face, z: LODGINGS.z, h: 0, hs: 0, hop: null });
   pirate.g.rotation.set(0, -Math.PI / 2 * LODGINGS.face, 0);
 }
+/* Jazzmy's island (js/den/jazzmy-isle.js), past Multibella's: at sea, off its landing. Her carpet ride's link goes on
+   straight into the ride, so it over, you're back aboard off her island. */
+function cheatJazzmy() {
+  if (cine) return;
+  if (!sail.on) cheatSail();
+  jazzmyCheat();
+}
+function cheatCarpet() {
+  if (cine || house.on || carpet.on || wed.on) return;
+  cheatJazzmy();
+  jazzmyAboard();
+}
 function cheatLodgings() {
   if (cine || house.on) return;
   toLodgings();
@@ -783,6 +797,9 @@ const CHEAT_SECTIONS = [
     // (Multibella's island and her wolf den's hut on it: four-ring Duty Navigation, 14 Nov)
     ["Multibella's island", cheatMultibella, 'multibella'],
     ['Her wolf den (Duty Navigation)', cheatWolfDen, 'wolfden'],
+    // (Jazzmy's island, and her magic carpet ride down a trade wind from it, a little adventure, 14 Nov)
+    ["Jazzmy's island", cheatJazzmy, 'jazzmy'],
+    ["Her magic carpet ride", cheatCarpet, 'carpet'],
   ]],
   ['The sloop race', [
     ['The sloop race', cheatRace, 'race'],

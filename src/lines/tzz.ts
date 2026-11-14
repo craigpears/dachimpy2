@@ -141,6 +141,9 @@ export const RACER: Racer = {
   },
 };
 
+/** Jazzmy's carpet ride (src/den-carpet-flight.ts) going by her island, the sloop with a carpet lashed on top. */
+export const AS_JAZZMY_SAILS_BY = 'A carpet? Ha. Easy. It\'s just balloons, really.';
+
 export const CHARACTER: Character = {
   name: 'Tzz',
   who: 'On a little island of her own a hop from Kikkit\'s, on the den\'s side of it, with a copper still behind '
@@ -170,6 +173,7 @@ export const CHARACTER: Character = {
     { on: '13 Nov', said: 'Tzz (the real one, in the game) to the user: "i just want to stream and talk about puzzles while i play"; the user: "<3 that\'s always the heart of the game", and then "I think that\'s enough to actually add the spirit ... because that does need expressing."' },
   ],
   lines: [
+    { when: 'Jazzmy\'s carpet ride going by her island', says: [AS_JAZZMY_SAILS_BY] },
     { when: 'Sailing up to her island, her lesson begins (or Space there, again)', says: GREET, each: { plain: 'If you\'ve not heard Kikkit out', heard: 'If you have' } },
     { when: 'Her lesson\'s first act: she blows up a Double\'s balloons onto her board, and you drop the pair that pops it', says: DOUBLE, each: LESSON_EACH },
     { when: 'Her lesson\'s last act: a Bingo, that Double with another on top, the last pair yours', says: BINGO, each: LESSON_EACH },

@@ -2922,19 +2922,3 @@ economy.
   store and charge up the Vegas and then that lets you past ... So it's more like you can use that shortcut if you
   have done a Vegas at any point. That would make more sense maybe than sitting there waiting. Otherwise, I can
   never see that being worth it." (RACE.md, the whirlpools' shortcut; a change to its rules, to design.)
-
-## Jazzmy's magic carpet ride down the trade winds (14 Nov)
-
-For Jazzmy (Emerald), who wanted her name to sound like Jasmine. The user's thought: the trend of a
-rug strapped to a car roof for a "magic carpet" ride that ends when someone brakes, done Puzzle
-Pirates style. A pirate in an Aladdin role and Jazzmy on a magic carpet lashed on top of the sloop,
-flying down a trade wind at full speed. The wind runs out, the sloop stops dead, the carpet keeps
-going, and they end up in the sea. The punchline is Jazzmy, soaked and sad-faced: "...my name's not
-even Jasmine." Ideas only so far: nothing picked.
-
-The user, later the same day: make it one of the little adventures, and the playable version ("I really
-love that"). You go and pick Jazzmy up; she says she wants an Aladdin-style adventure; you're dressed
-for it, for that adventure only (a fez, a vest, rags), and she comes along; her familiar too (in the
-film, the princess's tiger). The player is the Aladdin: "then it makes it more adventure-like." Going
-fast, she has a great time; too fast, you fly into the rocks. But she shouldn't have to play the
-puzzle to see the funny part: something as basic as holding Space must get you there.

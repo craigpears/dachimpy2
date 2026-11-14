@@ -21,6 +21,9 @@ export const RUM_RUN = {
     no: 'Nice try. This is an imperial jetty. No pirates, no pirate cargo. Off with you, before I think about it.',
     again: 'You again. Still no.',
 };
+/** Jazzmy's carpet flying over Port Decorum (src/den-carpet-flight.ts), and coming down in it (src/den-carpet.ts). */
+export const AS_JAZZMY_FLIES_OVER = 'Halt! No pirates in the harbour. Or over it.';
+export const WHEN_JAZZMY_LANDS = 'Flying carpets need a permit. You haven\'t got one. Off with you.';
 export const CHARACTER = {
     name: 'The imperial guards of Port Decorum',
     who: 'Soldiers of the Empire in its crimson and gold, standing guard over Port Decorum, the imperial port '
@@ -33,6 +36,7 @@ export const CHARACTER = {
         { on: '11 Nov', said: 'even if it\'s just an empty island or something where you can\'t interact yet, is just some island that\'s, say, under imperial control' },
     ],
     lines: [
+        { when: 'Jazzmy\'s carpet flying over Port Decorum, and coming down in it', says: [AS_JAZZMY_FLIES_OVER, WHEN_JAZZMY_LANDS] },
         { when: 'The first time you come up off the island on a voyage, as the status line', says: SIGHTED },
         { when: 'The jetty guard, as you first come within earshot', says: HALT },
         { when: 'Then, while you\'re within earshot, round and round', says: GRUMBLES },
