@@ -239,7 +239,11 @@
   .choice:hover, .choice:focus-visible { border-color: var(--accent); }
   .choice b { display: block; margin: 0 2px 12px; font: 700 26px/1.15 'Alegreya', serif; color: var(--title); }
   .choice:hover b, .choice:focus-visible b { color: var(--accent-text); }
-  .pics { display: grid; gap: 14px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  /* Its first picture big, the other two stacked beside it, about as tall (the user, 14 Nov: "Kick It can be the
+     half-width one, and then Grave[e] and ..."). */
+  .pics { display: grid; gap: 10px 14px; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); align-items: start; }
+  .pics figure:first-child { grid-row: span 2; }
+  .pics figure:first-child figcaption { font-size: 16px; }
   .pics figure { margin: 0; }
   .pics img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 7px; border: 1px solid var(--frame); transition: transform .3s; }
   .choice:hover .pics img { transform: scale(1.02); }
@@ -419,50 +423,10 @@
     </details>
 
   <nav class="choices" id="choose" aria-label="What are you here for?">
-    <a class="choice" href="#fun"><b>A bit of fun and a look around</b><span class="pics"><figure><img src="changelog/wedding.jpg" width="1280" height="720" alt=""><figcaption>Mischievious's wedding</figcaption></figure><figure><img src="changelog/gravee.jpg" width="1280" height="720" alt=""><figcaption>Gravee's gallery</figcaption></figure><figure><img src="changelog/vegas-island.jpg" width="1280" height="720" alt=""><figcaption>The penguins</figcaption></figure></span></a>
     <a class="choice" href="#concepts"><b>Try some interesting new concepts</b><span class="pics"><figure><img src="changelog/race-field.jpg" width="1280" height="720" alt=""><figcaption>The sloop race</figcaption></figure><figure><img src="changelog/starlit-door.jpg" width="1280" height="720" alt=""><figcaption>The starlit door</figcaption></figure><figure><img src="changelog/rowing.jpg" width="1280" height="720" alt=""><figcaption>Rowing</figcaption></figure></span></a>
     <a class="choice" href="#tutorials"><b>Try out some new tutorials</b><span class="pics"><figure><img src="changelog/helium-lesson.jpg" width="1280" height="720" alt=""><figcaption>Distilling, with Helium</figcaption></figure><figure><img src="changelog/tzz-lesson.jpg" width="1280" height="720" alt=""><figcaption>Sailing, with Tzz</figcaption></figure><figure><img src="changelog/distilling-guide.jpg" width="1280" height="720" alt=""><figcaption>Distilling, to read</figcaption></figure></span></a>
+    <a class="choice" href="#fun"><b>A bit of fun and a look around</b><span class="pics"><figure><img src="changelog/kikkit.jpg" width="1280" height="720" alt=""><figcaption>Kikkit's whirlpools</figcaption></figure><figure><img src="changelog/gravee.jpg" width="1280" height="720" alt=""><figcaption>Gravee's gallery</figcaption></figure><figure><img src="changelog/capybara-aboard.jpg" width="1280" height="720" alt=""><figcaption>Umami the capybara</figcaption></figure></span></a>
   </nav>
-
-  <h2 id="fun">A bit of fun and a look around</h2>
-
-  <article>
-    <div class="shots two">
-      <a href="den.html"><img src="changelog/den-wall.jpg" width="1280" height="720" loading="lazy" alt="The den: a stone wall with holes to mend, crates of Carpentry pieces, and the raiders' ship beyond"></a>
-      <a href="den.html?at=sea"><img src="changelog/sloop.jpg" width="1280" height="720" loading="lazy" alt="The old sloop at the den's jetty, the Bilge board in the shallows beside her"></a>
-    </div>
-    <h3>The den</h3>
-    <p>A pirate hideout dug into a cove, played through Puzzle Pirates' own puzzles. Mend the wall with Carpentry while raiders row in, man the gun tower, build yourself a shack. Then take the old sloop out: islands to find, pirates to meet, a wedding, a checkpoint to get past, and a race.</p>
-    <p class="try"><a class="play ghost" href="den.html">Into the den</a></p>
-  </article>
-
-  <div class="cards">
-    <article>
-      <a class="pic" href="den.html?at=wedding"><img src="changelog/wedding.jpg" width="1280" height="720" loading="lazy" alt="A beach wedding: guests on wooden benches, a flower arch, heart banners and a cake"></a>
-      <h3>The Wedding Isle</h3>
-      <p>Mischievious will marry anyone to anything. Choose the tone, the venue, the theme and the plot, then share your wedding as a link.</p>
-      <p class="try"><a href="den.html?at=wedding"><code>den.html?at=wedding</code></a></p>
-    </article>
-    <article>
-      <a class="pic" href="den.html?at=gravee"><img src="changelog/gravee.jpg" width="1280" height="720" loading="lazy" alt="Gravee, in a green dress and a polar bear pelt, showing you round her portraits by candlelight"></a>
-      <h3>Gravee's Bedside Manors</h3>
-      <p>A whole gallery of portraits, with Gravee showing you round by candlelight. Sit for one of your own. Mind the vampire.</p>
-      <p class="try"><a href="den.html?at=gravee"><code>den.html?at=gravee</code></a></p>
-    </article>
-    <article>
-      <a class="pic" href="den.html?at=penguins"><img src="changelog/vegas-island.jpg" width="1280" height="720" loading="lazy" alt="The sloop at Vegas Island, a little ice floe ringed by rocks past the whirlpools, penguins pottering on it"></a>
-      <h3>The penguins of Vegas Island</h3>
-      <p>Past Kikkit's whirlpools, if you can find the way, a little ice floe of penguins. One of them has a sack.</p>
-      <p class="try"><a href="den.html?at=kikkit"><code>?at=kikkit</code></a> · <a href="den.html?at=penguins"><code>?at=penguins</code></a></p>
-    </article>
-    <article>
-      <a class="pic" href="den.html?at=rumrun"><img src="changelog/rumrun-decorum.jpg" width="800" height="600" loading="lazy" alt="Off Port Decorum's jetty, its guard on the end of it, and Helium on the sloop's deck with the rum"></a>
-      <h3>Helium's rum run</h3>
-      <p>Barrels of rum on your deck and Helium aboard, whistling past the Empire. Nothing suspicious at all.</p>
-      <p class="try"><a href="den.html?at=rumrun"><code>den.html?at=rumrun</code></a></p>
-    </article>
-  </div>
-  <p class="more"><a href="#places">See every place in the den</a></p>
 
   <h2 id="concepts">Try some interesting new concepts</h2>
 
@@ -524,6 +488,46 @@
       <p class="try"><a href="carpentry.html"><code>carpentry.html</code></a></p>
     </div>
   </article>
+
+  <h2 id="fun">A bit of fun and a look around</h2>
+
+  <article>
+    <div class="shots two">
+      <a href="den.html"><img src="changelog/den-wall.jpg" width="1280" height="720" loading="lazy" alt="The den: a stone wall with holes to mend, crates of Carpentry pieces, and the raiders' ship beyond"></a>
+      <a href="den.html?at=sea"><img src="changelog/sloop.jpg" width="1280" height="720" loading="lazy" alt="The old sloop at the den's jetty, the Bilge board in the shallows beside her"></a>
+    </div>
+    <h3>The den</h3>
+    <p>A pirate hideout dug into a cove, played through Puzzle Pirates' own puzzles. Mend the wall with Carpentry while raiders row in, man the gun tower, build yourself a shack. Then take the old sloop out: islands to find, pirates to meet, a wedding, a checkpoint to get past, and a race.</p>
+    <p class="try"><a class="play ghost" href="den.html">Into the den</a></p>
+  </article>
+
+  <div class="cards">
+    <article>
+      <a class="pic" href="den.html?at=wedding"><img src="changelog/wedding.jpg" width="1280" height="720" loading="lazy" alt="A beach wedding: guests on wooden benches, a flower arch, heart banners and a cake"></a>
+      <h3>The Wedding Isle</h3>
+      <p>Mischievious will marry anyone to anything. Choose the tone, the venue, the theme and the plot, then share your wedding as a link.</p>
+      <p class="try"><a href="den.html?at=wedding"><code>den.html?at=wedding</code></a></p>
+    </article>
+    <article>
+      <a class="pic" href="den.html?at=gravee"><img src="changelog/gravee.jpg" width="1280" height="720" loading="lazy" alt="Gravee, in a green dress and a polar bear pelt, showing you round her portraits by candlelight"></a>
+      <h3>Gravee's Bedside Manors</h3>
+      <p>A whole gallery of portraits, with Gravee showing you round by candlelight. Sit for one of your own. Mind the vampire.</p>
+      <p class="try"><a href="den.html?at=gravee"><code>den.html?at=gravee</code></a></p>
+    </article>
+    <article>
+      <a class="pic" href="den.html?at=penguins"><img src="changelog/vegas-island.jpg" width="1280" height="720" loading="lazy" alt="The sloop at Vegas Island, a little ice floe ringed by rocks past the whirlpools, penguins pottering on it"></a>
+      <h3>The penguins of Vegas Island</h3>
+      <p>Past Kikkit's whirlpools, if you can find the way, a little ice floe of penguins. One of them has a sack.</p>
+      <p class="try"><a href="den.html?at=kikkit"><code>?at=kikkit</code></a> · <a href="den.html?at=penguins"><code>?at=penguins</code></a></p>
+    </article>
+    <article>
+      <a class="pic" href="den.html?at=rumrun"><img src="changelog/rumrun-decorum.jpg" width="800" height="600" loading="lazy" alt="Off Port Decorum's jetty, its guard on the end of it, and Helium on the sloop's deck with the rum"></a>
+      <h3>Helium's rum run</h3>
+      <p>Barrels of rum on your deck and Helium aboard, whistling past the Empire. Nothing suspicious at all.</p>
+      <p class="try"><a href="den.html?at=rumrun"><code>den.html?at=rumrun</code></a></p>
+    </article>
+  </div>
+  <p class="more"><a href="#places">See every place in the den</a></p>
 
   <h2 id="elsewhere">Elsewhere, made by others</h2>
 
