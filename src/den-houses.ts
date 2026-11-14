@@ -387,9 +387,9 @@ type Dress = Record<string, string | number | boolean>;
 export interface Company { kind: 'robert' | 'joey' | 'bear' | 'pirate'; look?: Dress; name?: string; x: number; z: number; yaw?: number; pose?: 'rub' | 'bliss' }
 /** Who's in a portrait: a real pirate (their look in PIRATES, `dress` over it; `costume`: something on
     over that, the kangaroo bear's ears and tail, say; `pose`: as Company's; `company`: who's beside them); a
-    yeti, beside Gravee; the vampire; or you. */
+    yeti, beside Gravee; the vampire; or you. `yaw`: how far they're turned (a quarter turn if not said). */
 export type Sitter =
-  | { who: 'pirate'; name: string; dress?: Dress; costume?: 'roo-bear'; pose?: 'rub' | 'bliss'; company?: readonly Company[] }
+  | { who: 'pirate'; name: string; dress?: Dress; costume?: 'roo-bear'; pose?: 'rub' | 'bliss'; company?: readonly Company[]; yaw?: number }
   | { who: 'yeti'; name: string; dress?: Dress }
   | { who: 'vampire' }
   | { who: 'you' };
@@ -398,8 +398,10 @@ export type Backdrop = 'bloodmoon' | 'snow' | 'beach' | 'crypt' | 'autumn' | 'wi
     `cafe`: a café wall under a striped awning (a monsieur's). */
 export const BACKDROPS: readonly Backdrop[] = ['bloodmoon', 'snow', 'beach', 'crypt', 'autumn', 'witch', 'sea', 'den', 'night', 'pinksea', 'cafe'];
 /** A portrait: its title (on its plaque), who's in it, what's behind them; `watch`: its eyes follow you
-    about the room (js/den/portraits.js's watching()). */
-export interface Portrait { id: string; title: string; sitter: Sitter; backdrop: Backdrop; watch?: boolean }
+    about the room (js/den/portraits.js's watching()); `close`: painted closer, knees up, the sitters big in
+    the frame, as Puzzle Pirates' own portraits were (Dachimpy's friends: the user, 14 Nov, "Quality and
+    fidelity, everything just really needs fixing"). */
+export interface Portrait { id: string; title: string; sitter: Sitter; backdrop: Backdrop; watch?: boolean; close?: boolean }
 
 /** At the front door, to go out? */
 export const atWayOut = (plan: Plan, x: number, z: number): boolean => Math.hypot(x - plan.out.x, z - plan.out.z) < plan.out.r;

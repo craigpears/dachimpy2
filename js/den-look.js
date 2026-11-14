@@ -380,6 +380,18 @@ const hairTex = (c) => cached(`hair${c}`, () => tex(128, 4, (g, w, h) => {
     g.fillStyle = `#${k.getHexString()}`; g.fillRect(x, 0, 1, h);
   }
 }));
+// A strand's own streaks, along it (round a tube, so down its length): its colour lighter and darker, a shine
+// down one side (14 Nov: the friends' hair, "a bit higher quality than Playmobil").
+const strandTex = (c) => cached(`strand${c}`, () => tex(4, 32, (g, w, h) => {
+  const base = new THREE.Color(hexOf(c)), k = new THREE.Color();
+  let seed = 5, v = 0;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let y = 0; y < h; y++) {
+    v = v * 0.5 + (rnd() - 0.5) * 0.7;
+    k.copy(base).offsetHSL(0, 0, v * 0.16 + 0.1 * Math.max(0, Math.cos((y / h) * Math.PI * 2)));
+    g.fillStyle = `#${k.getHexString()}`; g.fillRect(0, y, w, 1);
+  }
+}));
 // A soft round glow, bright in the middle and gone at the edge (something glowing: Helium's trinket).
 const glowTex = () => cached('glow', () => tex(64, 64, (g, w, h) => {
   const gr = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
@@ -513,9 +525,18 @@ export function dressPirate(look, opts = {}) {
       }
     } else if (L.waist === 'sash') {
       body.add(part(new THREE.CylinderGeometry(wr + 0.045, wr + 0.045, 0.11, 18), wc, 0, 0.1, 0.02));
-      const end = part(new THREE.BoxGeometry(0.09, 0.3, 0.04), wc, 0.17, -0.08, wr + 0.01);
-      end.rotation.z = 0.12;
-      body.add(end);
+      // (14 Nov, "Monkey Couple"'s white sash: wound round, its folds showing, knotted at the side, its two ends
+      // hanging, one longer, narrowing to their tips)
+      const fold = M(`#${new THREE.Color(hexOf(L.waistCol)).multiplyScalar(0.8).getHexString()}`);
+      for (const dy of [-0.035, 0.035]) { const t = part(new THREE.TorusGeometry(wr + 0.05, 0.008, 5, 28), fold, 0, 0.1 + dy, 0.02); t.rotation.x = Math.PI / 2; body.add(t); }
+      const knot = part(new THREE.SphereGeometry(0.05, 10, 8), wc, 0.16, 0.09, wr + 0.02);
+      knot.scale.set(1.2, 0.9, 0.8);
+      body.add(knot);
+      for (const [dx, len, rz] of [[0.0, 0.3, 0.1], [0.06, 0.22, -0.12]]) {
+        const end = part(new THREE.CylinderGeometry(0.045, 0.028, len, 8), wc, 0.16 + dx, 0.06 - len / 2, wr + 0.02);
+        end.scale.z = 0.4; end.rotation.z = rz;
+        body.add(end);
+      }
     }
   };
   // (Nor anything round the waist of a midriff blouse: its scarf and belt are its own.)
@@ -523,6 +544,22 @@ export function dressPirate(look, opts = {}) {
   const rAt = (y) => { for (let i = 1; i < shape.length; i++) if (shape[i][1] >= y) { const [r0, y0] = shape[i - 1], [r1, y1] = shape[i]; return r0 + (r1 - r0) * (y - y0) / (y1 - y0); } return shape[shape.length - 1][0]; };
   const ring = (r, tube, y, m, z = 0) => { const t = part(new THREE.TorusGeometry(r, tube, 6, 28), m, 0, y, z); t.rotation.x = Math.PI / 2; body.add(t); return t; };
   const brass = M('#e8b23a', { metalness: 0.6, roughness: 0.35 });
+  if (L.top === 'plain' || L.top === 'belt') {
+    // A plain shirt, or a shirt with belt (14 Nov, "Monkey Couple"'s red shirts): open at the neck in a V, the
+    // collar's points turned down either side of it, a placket down the front, its seam a shade darker, and
+    // little bone buttons on it.
+    const shade = M(`#${new THREE.Color(hexOf(top)).multiplyScalar(0.72).getHexString()}`), bone = M('#efe6cf', { roughness: 0.5 });
+    const vee = part(new THREE.ConeGeometry(0.06, 0.15, 3), inked, 0, 0.55, rAt(0.55) + 0.004);
+    vee.rotation.set(Math.PI, Math.PI, 0); vee.scale.z = 0.2;
+    body.add(vee);
+    for (const s of [-1, 1]) {
+      const pt = part(new THREE.BoxGeometry(0.075, 0.1, 0.012), M(top), 0.05 * s, 0.57, rAt(0.57) + 0.012);
+      pt.rotation.set(-0.25, 0, 0.55 * s);
+      body.add(pt);
+    }
+    body.add(part(new THREE.BoxGeometry(0.03, 0.36, 0.008), shade, 0, 0.3, rAt(0.3) + 0.004));
+    for (const y of [0.43, 0.33, 0.23, 0.13]) body.add(part(new THREE.SphereGeometry(0.012, 6, 5), bone, 0, y, rAt(y) + 0.01));
+  }
   if (L.top === 'dresstop') {
     // The Dress top: a bodice off the shoulder, a frill along its neckline in the second colour
     // (puffed short sleeves are with the arms).
@@ -789,22 +826,83 @@ export function dressPirate(look, opts = {}) {
     body.add(ring);
   }
 
+  // Hair laid in strands (13 Nov, Helium's and Tzz's; 14 Nov, every style Dachimpy's friends wear: the user,
+  // "things like hair and clothing need more ... the same" as Tzz and Helium got): each strand along a path over
+  // the head, from where it starts (a direction from the head's middle: `az` round from the face, + to the left,
+  // `el` up), up over `top`, to where it goes, lifted `lift` off the scalp at its middle. All one mesh a style.
+  const dir = (az, el) => new THREE.Vector3(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el));
+  // (`peak` under 1 lifts it most early on: a wave rising off the brow.)
+  const over = (a, top, b, lift, n = 9, peak = 1) => {
+    const pts = [];
+    for (let i = 0; i <= n; i++) {
+      const t = i / n, d = t < 0.5 ? a.clone().lerp(top, t * 2) : top.clone().lerp(b, t * 2 - 1);
+      pts.push(d.normalize().multiplyScalar(hr + 0.012 + lift * Math.sin(Math.PI * t ** peak)).add(new THREE.Vector3(0, 0.9, -0.005)));
+    }
+    return pts;
+  };
+  const strands = [], fine = [];
+  // A strand as a tube tapering to a point at both ends (so no open end shows), `r` thick at its middle;
+  // `ribs`, swelling and narrowing that many times along it, as a twisted lock does. Into `into` (`strands`,
+  // plain; `fine`, streaked along its length).
+  const tube = (pts, r, ends = 0.25, ribs = 0, into = strands, rad = 7) => {
+    const curve = new THREE.CatmullRomCurve3(pts), segs = ribs ? ribs * 4 : 14, geo = new THREE.TubeGeometry(curve, segs, r, rad), q = geo.attributes.position, c = new THREE.Vector3();
+    for (let i = 0; i <= segs; i++) {
+      const t = i / segs, k = (ends + (1 - ends) * Math.sin(Math.PI * t) ** 0.5) * (ribs ? 0.78 + 0.22 * Math.abs(Math.sin(Math.PI * ribs * t)) : 1);
+      curve.getPointAt(t, c);
+      for (let j = 0; j <= rad; j++) { const x = i * (rad + 1) + j; q.setXYZ(x, c.x + (q.getX(x) - c.x) * k, c.y + (q.getY(x) - c.y) * k, c.z + (q.getZ(x) - c.z) * k); }
+    }
+    geo.computeVertexNormals();
+    into.push(geo);
+  };
+  const twist = (pts, r, into = strands) => tube(pts, r, 0.4, Math.max(3, Math.round(new THREE.CatmullRomCurve3(pts).getLength() / (r * 1.7))), into);
+  const from = (az, el, out = 0.02) => dir(az, el).multiplyScalar(hr + out).add(new THREE.Vector3(0, 0.9, 0));
+  // (A hat over the crown hides what's on top: strands over the head only without one.)
+  const crownBare = ['none', 'veil', 'feline', 'butterfly', 'tiara', 'roses'].includes(L.hat);
+
   // Hair, tilted back so the face shows.
   if (L.hair !== 'bald') {
     const cap = part(new THREE.SphereGeometry(hr + 0.014, 20, 12, 0, Math.PI * 2, 0, Math.PI * (F ? 0.6 : 0.55)), hairM, 0, 0.9, -0.005);
     // (Hair drawn back off the face starts higher on the brow, and comes further down the nape.)
-    cap.rotation.x = L.hair === 'swept' || L.hair === 'twists' || L.hair === 'pinned' ? -0.85 : -0.5;
+    cap.rotation.x = L.hair === 'swept' || L.hair === 'twists' || L.hair === 'pinned' || L.hair === 'ponytail' ? -0.85 : -0.5;
     body.add(cap);
   }
-  if (L.hair === 'long') {
+  if (L.hair === 'short' && crownBare) {
+    // Short (14 Nov, Dachimpy's in "Monkey Couple" and "The monkey man"): tufts over the crown, falling forward
+    // and to the sides from the whorl at the back, the ends a ragged fringe at the brow and over the ears.
+    const whorl = dir(Math.PI - 0.3, 0.95);
+    for (let i = 0; i < 11; i++) {
+      const a = -1.55 + i * (3.1 / 10), e = 0.5 - 0.18 * Math.abs(a) / 1.55;
+      tube(over(whorl, dir(a * 0.6, 1.05), dir(a, e), 0.035, 8), 0.05 + 0.008 * Math.cos(a), 0.15, 0, fine);
+    }
+    for (const s of [-1, 1]) for (const [a, e] of [[1.75, 0.2], [2.2, 0.15], [2.65, 0.12]]) tube(over(whorl, dir(s * a * 0.8, 0.6), dir(s * a, e), 0.03, 7), 0.048, 0.15, 0, fine);
+  } else if (L.hair === 'long') {
     const curtain = part(new THREE.CylinderGeometry(hr + 0.008, hr + 0.04, F ? 0.5 : 0.36, 16, 1, true, Math.PI / 2, Math.PI), hairM, 0, F ? 0.68 : 0.76, -0.01);
     curtain.material.side = THREE.DoubleSide;
     body.add(curtain);
+    // Its fall in strands over the curtain (14 Nov): from the crown's edge down past the shoulders, a little
+    // apart, each swinging out and in again; over the top too, without a hat.
+    const len = F ? 0.5 : 0.36;
+    for (let i = 0; i < 13; i++) {
+      const a = 1.35 + i * ((Math.PI * 2 - 2.7) / 12), rr = hr + 0.03, wob = 0.012 * Math.sin(i * 2.1);
+      const at = (y, out) => new THREE.Vector3(Math.sin(a) * (rr + out), y, Math.cos(a) * (rr + out) - 0.01);
+      tube([at(0.95, -0.02), at(0.86, 0.012), at(0.86 - len * 0.45, 0.03 + wob), at(0.92 - len, 0.04)], 0.042, 0.2, 0, fine);
+    }
+    if (crownBare) for (let i = 0; i < 9; i++) { const a = -1.3 + i * (2.6 / 8); tube(over(dir(a * 0.4, 1.3), dir(a, 0.75), dir(Math.PI - a * 0.6, 0.15), 0.025, 8), 0.045, 0.2, 0, fine); }
   } else if (L.hair === 'ponytail') {
-    body.add(part(new THREE.SphereGeometry(0.05, 8, 6), hairM, 0, 0.88, -hr - 0.01));
-    const tail = part(new THREE.ConeGeometry(0.065, 0.36, 10), hairM, 0, 0.7, -hr - 0.05);
-    tail.rotation.x = Math.PI + 0.2;
-    body.add(tail);
+    // Tied back (14 Nov, Sanne's in "Monkey Couple"): drawn back from a side parting over the head in strands to
+    // a tie at the back, a band round it, and the tail falling from it in locks, swinging a little to one side.
+    const tie = from(Math.PI, 0.05, 0.03);
+    if (crownBare) for (let i = 0; i < 10; i++) {
+      const a = -1.45 + i * (2.9 / 9), e = 0.58 - 0.3 * Math.abs(a) / 1.45;
+      tube(over(dir(a, e), dir(a * 0.45 + 0.15, 1.12), dir(Math.PI + a * 0.15, 0.08), 0.022, 10), 0.045, 0.2, 0, fine);
+    }
+    const band = part(new THREE.TorusGeometry(0.045, 0.016, 6, 14), M(L.hatCol === 'none' ? 'black' : L.hatCol), tie.x, tie.y, tie.z - 0.01);
+    band.rotation.x = 0.3;
+    body.add(band, part(new THREE.SphereGeometry(0.052, 10, 8), hairM, tie.x, tie.y, tie.z));
+    for (const [dx, dz, len] of [[-0.03, 0, 0.36], [0.02, -0.015, 0.4], [0.035, 0.01, 0.33], [-0.01, -0.025, 0.38], [0, 0.015, 0.3]]) {
+      const p0 = tie.clone().add(new THREE.Vector3(0, -0.01, -0.02));
+      tube([p0, p0.clone().add(new THREE.Vector3(dx * 0.5, -len * 0.3, -0.06 + dz)), p0.clone().add(new THREE.Vector3(dx + 0.03, -len * 0.7, -0.04 + dz)), p0.clone().add(new THREE.Vector3(dx * 1.4 + 0.05, -len, -0.01 + dz))], 0.038, 0.12, 0, fine);
+    }
   } else if (L.hair === 'wavy') {
     // Wavy, loose and full to the shoulders, framing the face (the user, 10 Nov: "nice, long kind of
     // hair", not "straight long hair gathered at the back", no "bumps" or "pigtails"; and then "it
@@ -840,6 +938,12 @@ export function dressPirate(look, opts = {}) {
     };
     [[1.3, 0.3], [1.85, 0.36], [2.45, 0.34], [3.14, 0.38], [3.8, 0.34], [4.4, 0.36], [4.98, 0.3]].forEach(([a, len]) => lock(a, len, 0.05, 0.8));
     for (const s2 of [-1, 1]) lock(s2 * 0.95, 0.22, 0.06, 0.86, 0.03);   // (framing her face: short, full, not tails)
+    // (14 Nov, Zizzy's: strands from a side parting over the crown and down into the fall, so the crown isn't a
+    // smooth dome; under a hat they'd be hidden)
+    if (crownBare) for (let i = 0; i < 12; i++) {
+      const s3 = i < 5 ? 1 : -1, a = s3 > 0 ? 0.35 + i * 0.36 : -0.1 - (i - 5) * 0.33;
+      tube(over(dir(0.25, 1.05), dir(a * 0.75, 0.85), dir(a, 0.12), 0.05, 8), 0.045, 0.2, 0, fine);
+    }
     // The fringe, swept across from a side part, and a lock of it falling past one temple.
     const fringe = part(new THREE.SphereGeometry(0.085, 12, 8), hairM, 0.03, 1.07, 0.1);
     fringe.scale.set(2.1, 0.75, 1.15);
@@ -873,34 +977,7 @@ export function dressPirate(look, opts = {}) {
     if (!capped) for (const [x, y] of [[-0.12, 1.05], [-0.04, 1.08], [0.06, 1.07], [0.15, 1.02]]) ball(x, y, 0.17, 0.055);
     body.add(part(mergeGeometries(curls), hairPlain, 0, 0, 0));
   } else if (L.hair === 'swept' || L.hair === 'twists') {
-    // Hair laid over the head in strands, each along a path over it: from where it starts (a direction from
-    // the head's middle: `az` round from the face, + to the left, `el` up), up over `top`, to where it goes,
-    // lifted `lift` off the scalp at its middle. All one mesh, to stay cheap.
-    const dir = (az, el) => new THREE.Vector3(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el));
-    // (`peak` under 1 lifts it most early on: a wave rising off the brow.)
-    const over = (a, top, b, lift, n = 9, peak = 1) => {
-      const pts = [];
-      for (let i = 0; i <= n; i++) {
-        const t = i / n, d = t < 0.5 ? a.clone().lerp(top, t * 2) : top.clone().lerp(b, t * 2 - 1);
-        pts.push(d.normalize().multiplyScalar(hr + 0.012 + lift * Math.sin(Math.PI * t ** peak)).add(new THREE.Vector3(0, 0.9, -0.005)));
-      }
-      return pts;
-    };
-    const strands = [];
-    // A strand as a tube tapering to a point at both ends (so no open end shows), `r` thick at its middle;
-    // `ribs`, swelling and narrowing that many times along it, as a twisted lock does.
-    const tube = (pts, r, ends = 0.25, ribs = 0) => {
-      const curve = new THREE.CatmullRomCurve3(pts), segs = ribs ? ribs * 4 : 14, rad = 7, geo = new THREE.TubeGeometry(curve, segs, r, rad), q = geo.attributes.position, c = new THREE.Vector3();
-      for (let i = 0; i <= segs; i++) {
-        const t = i / segs, k = (ends + (1 - ends) * Math.sin(Math.PI * t) ** 0.5) * (ribs ? 0.78 + 0.22 * Math.abs(Math.sin(Math.PI * ribs * t)) : 1);
-        curve.getPointAt(t, c);
-        for (let j = 0; j <= rad; j++) { const x = i * (rad + 1) + j; q.setXYZ(x, c.x + (q.getX(x) - c.x) * k, c.y + (q.getY(x) - c.y) * k, c.z + (q.getZ(x) - c.z) * k); }
-      }
-      geo.computeVertexNormals();
-      strands.push(geo);
-    };
-    const twist = (pts, r) => tube(pts, r, 0.4, Math.max(3, Math.round(new THREE.CatmullRomCurve3(pts).getLength() / (r * 1.7))));
-    const from = (az, el, out = 0.02) => dir(az, el).multiplyScalar(hr + out).add(new THREE.Vector3(0, 0.9, 0));
+    // Swept up and twists (13 Nov): laid over the head in strands, the shared ones above; plain, each its own.
     if (L.hair === 'swept') {
       // Swept up (Helium's portrait, 13 Nov): drawn up off the brow in a full wave from a low side part on the
       // right, over the crown and back to the nape; a fall of it down by the right cheek; tucked behind the left ear.
@@ -923,7 +1000,7 @@ export function dressPirate(look, opts = {}) {
       for (const dx of [-0.05, 0, 0.05]) twist([knot, knot.clone().add(new THREE.Vector3(dx * 0.6, -0.12, -0.03)), knot.clone().add(new THREE.Vector3(dx, -0.3, -0.02))], 0.032);
       twist([from(-1.5, 0.3, 0.03), new THREE.Vector3(-hr - 0.03, 0.8, -0.05), new THREE.Vector3(-hr + 0.01, 0.64, -0.08)], 0.03);
     }
-    body.add(part(mergeGeometries(strands), hairPlain, 0, 0, 0));
+    // (merged with the rest of the strands, after)
   } else if (L.hair === 'bun') body.add(part(new THREE.SphereGeometry(0.11, 12, 10), hairM, 0, 1.03, -0.17));
   else if (L.hair === 'pinned') {
     // Pinned up (Roobear's portrait, 12 Nov): drawn up off the neck into a knot of curls on the back of the
@@ -950,6 +1027,9 @@ export function dressPirate(look, opts = {}) {
       body.add(part(new THREE.SphereGeometry(0.022, 6, 5), M(L.hatCol), 0.2 * s, 0.47, 0.03));
     }
   }
+  // The strands, each lot one mesh: plain (swept up, twists), and streaked along their length (the rest).
+  if (strands.length) body.add(part(mergeGeometries(strands), hairPlain, 0, 0, 0));
+  if (fine.length) body.add(part(mergeGeometries(fine), M('#ffffff', { map: strandTex(hairHex) }), 0, 0, 0));
   // A beard, in the same colour.
   if (L.beard === 'full' || L.beard === 'long' || L.beard === 'bushy') body.add(part(new THREE.SphereGeometry(0.17, 14, 10, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), hairM, 0, 0.82, 0.07));
   // A bushy beard: bigger, up the sides of the face.
@@ -1148,6 +1228,27 @@ export function dressPirate(look, opts = {}) {
     band.rotation.x = Math.PI / 2;
     hat.add(cap, pile, band);
     for (const sx of [-1, 1]) hat.add(part(new THREE.SphereGeometry(0.075, 10, 8), hc, sx * (hr - 0.01), 0.9, -0.05));
+    // Its hair in strands (14 Nov, from "Pinky and the pink" and "Cursed & Cookied": the user, "things like hair
+    // ... need more"): wound up round the pile in a spiral from the band to the top, and a ring of rolled curls
+    // round its foot under the band, over the ears and round the back; streaked as hair is.
+    const wig = [], hcHex = hexOf(L.hatCol);
+    for (let k = 0; k < 3; k++) {
+      const pts = [];
+      for (let i = 0; i <= 72; i++) {
+        // (up from the band, round twice, lying on the pile: a little outside its round, so it sits on it)
+        const t = i / 72, a = k * Math.PI * 2 / 3 + t * Math.PI * 2 * 2.2, el = -0.8 + t * 2.15;
+        const r = 0.282 * Math.cos(el), y = 1.33 + 0.362 * Math.sin(el);
+        pts.push(new THREE.Vector3(Math.sin(a) * r, y, Math.cos(a) * r - 0.04));
+      }
+      tube(pts, 0.042, 0.2, 0, wig, 7);
+    }
+    for (let i = 0; i < 14; i++) {
+      const a = (i / 14) * Math.PI * 2;
+      if (Math.cos(a) > 0.55) continue;   // (none over the face)
+      const c = new THREE.Vector3(Math.sin(a) * 0.245, 1.07, Math.cos(a) * 0.245 - 0.03), out = new THREE.Vector3(Math.sin(a), 0, Math.cos(a)).multiplyScalar(0.035);
+      twist([c.clone().add(new THREE.Vector3(0, 0.05, 0)), c.clone().add(out), c.clone().add(new THREE.Vector3(0, -0.06, 0)).add(out.clone().multiplyScalar(0.6))], 0.034, wig);
+    }
+    hat.add(part(mergeGeometries(wig), M('#ffffff', { map: strandTex(hcHex) }), 0, 0, 0));
   } else if (L.hat === 'beret') {
     // A beret: a soft flat round cap worn tipped to one side, a little stalk on top (a monsieur's: Roobear's
     // gallery, "Robert, a Monsieur").

@@ -14,6 +14,20 @@ whole cliffside of places to go. It began as a Carpentry primer and has outgrown
 Nov: "this is obviously far more interesting than the carpentry primer ... It has evolved"), so
 in time the den becomes the thing itself (TODO.md, "Split the den off").
 
+**Who it's for, and who it isn't (the user, 14 Nov).** The middle: "I know the basics, but I want to build up the
+technique ... see what the techniques are". The game's own tutorials teach the basics; the den gives "the building
+blocks and techniques". It isn't "here to get you to #1 ... that's not my goal": mastery comes from playing the
+game and the people in it (the Trophy Hunters Discord, the top puzzlers' videos and streams). "This is a sociable
+game ... this website here is for a bit of fun and a bit of stuff on the side, but everything is about the people
+and the love of that, playing puzzles together, so go do it." The front page says so, and every teacher in the den
+sends you on to other pirates.
+
+**What people like so far (the user, 14 Nov).** Tutorials "that are actually in demand, like werewolves" (four-tier
+Duty Navigation in the werewolf den); the den itself "cute and a bit of fun ... a bit of a goof", which is why the
+user enjoys it; the sloop races "a thing, I think, with more potential". Racing online and crews, not so far. And
+the den's spirit: a place for pirates' own rooms and adventures, "meaningful and funny, ideally in a mechanical
+sense", most of them duds, "but ... there might be that one thing that leads to something really fun".
+
 ## The principles
 
 - **Full of things to find.** "The game should be full of those little let's go explore,
@@ -197,9 +211,10 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    the small house only, to see where it goes.
    The third is Dachimpy's own (13 Nov), the user's pirate, which doubles as a museum: a hug and a
    cookie at the door, every visit, as Dachimpy always gave them; then the story of the Blockade
-   Simulator told on its walls, oldest first, from the user's own screenshots, each with a plaque in
-   Dachimpy's words, bugs and all (the sim was helping people learn in a quieter way, which is what the
-   den's teachers do too); and a room of friends, the truly special ones in the middle (Kikkit, Zizzy
+   Simulator and Dachimpy.com told on its walls in the order it happened (14 Nov), from the user's own
+   screenshots and the old site's own files, Dalnoth shot in its first version and its last, each with a
+   plaque in Dachimpy's excited words, bugs and all (Dachimpy.com was their own way of helping people learn,
+   which is what the den's teachers do too); and a room of friends, the truly special ones in the middle (Kikkit, Zizzy
    and Sanne), and a thank-you to everyone who makes Puzzle Pirates what it is. The museum keeps the
    story of the sims; the house keeps the people.
    Or find Kikkit on her little island right of the checkpoint, rambling the real way through her

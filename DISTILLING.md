@@ -2127,12 +2127,46 @@ minutes of play each, about 8 minutes to run), no two from the same session with
   three in from the fire, the columns to its right let burn as junk (a buffer), every white to the right of it brought
   left before its column goes; and never a white moved out of the target column.
 
+**The late game: whites go right, through channels made for them (the user, 14 Nov, watching CC^1;
+`notes/distilling/48-` to `50-*`). A position to keep as a test.**
+- **The position (`48-two-blacks-in-the-target.webp`):** the target column second from the fire, whites in it but
+  two blacks stuck among them (ringed in orange, rows 4 and 6). "The last move it just did, it started to make that
+  little triangle of whites in the bottom left. It seems to be that it can't figure out the technique to use to
+  clear those two black pieces." The user: "this is a test situation we need to keep."
+- **Too far right to start with:** "I find it a bit strange that it's trying to build the crystal clear so far to the
+  right. I know this is probably what I said to do, but ... a person would not be wanting to put themselves under so
+  much pressure, so they would have started it a bit further to the left. Which I think is probably partly the start
+  of the cause of this." So the first target starts further left than "two or three in from the fire" (this
+  corrects the 13 Nov opening note above): room to work before the fire reaches it.
+- **The late game runs in reverse:** "everything starts going in reverse ... almost late game style where you want
+  blacks again up here." Things are burning and whites now go **right**, into the target, not left. "This is a very
+  distinct phase that hasn't really shown up in the others because we've been worrying about maximizing the early
+  game, whereas this is starting the late game."
+- **The bottom black (`49-a-black-channel-for-the-bottom-one.webp`):** orange, moves that join the blacks in the
+  middle into a channel; green, a white from the left following it, down and along, then up into the target's
+  lower black's place. "they create a kind of channel for the white to go through. And then the white ... can then
+  follow that channel. So that's what I would expect it to plan out here."
+- **The top black (`50-a-brown-channel-for-the-top-one.webp`):** "much the same thing, except that it's kind of the
+  brown equivalent." Red: the brown at the top right (column 8) dragged down-left through the blacks to join the
+  browns in the middle, "a nice channel of brown pieces". Green: a white from column 3 "comes down through the brown,
+  up through the black, and then takes that second space" (the target's upper black). "So a move becomes a move
+  through the brown channel and then the black channel ... this is how the late game strategy works."
+- **Checked against the swap rule:** it holds. A white sinks through browns and rises through blacks, so a path
+  down a brown channel and then up a black one carries it the whole way in one drag. Its last swap, rising past
+  the target's black, is the black-over-white pair that swaps, and the black goes back along the path to where
+  the white came from. The brown dragged down-left first sinks through blacks, which also swaps.
+
 ### The batch judged: trapped by what it takes, the hoist, and the lead-up (13 Nov, seventeenth run)
 Every verdict on P13 to P30 is now a test (src/distill-positions.ts, VERDICTS; tests/distill-positions.test.ts), the
 past-saving ones (P13, P14, P16, P18, P19) recorded as "past saving, the lead-up wanted", with no test of the move. The
 judged batch moved under its themes, two new ones among them: "Close, not trapped" (P20, P21, P22: P21 and P22 were found
 as like P5 and P6, trapped; the user judged them not, so they moved, and the challenge test now checks the reader no
 longer reads them so) and "Hoisting" (P17). P26 moved to quick sorting (its doomed white given up, it reads so).
+- **Still doing it (14 Nov, after the merge; `notes/distilling/47-cc1-still-no-plan.webp`):** "No, it's still doing
+  it." The CC^1 bot a while in: its column second from the fire lit, whites in it broken up by blacks, the rest of the
+  whites spread across the middle and the bottom rows of columns 2 to 8, no buffer of junk built. "Maybe I'll keep
+  refreshing and go back and show ... where it actually starts to diverge. Because again, this is too late." The
+  opening (P.BUFFER, P.KEEP_FILL) is still off; earlier boards from the user to come, to aim the next try at.
 - **Trapped, measured by what it takes** (src/distill-risk.ts, `freeCost`; src/distill-read.ts, `isTrapped`): a white's
   cheapest way out in one drag or two (the swaps, two more a drag to spot and pick up: junk brought into its place,
   after any one piece of junk near it moved first). Trapped when there's none or it's 14 or more; or near the top (two
