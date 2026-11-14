@@ -1,7 +1,8 @@
 // The banner, drawn where this script is (`<script src="js/banner.js"></script>`): the monkey hanging from the
 // treasure map's dotted trail, the X, the evening sea and the sloop; its look is css/banner.css. One drawing for
 // the front page and the den's loading splash. A plain script, so it's there before the page first paints.
-document.currentScript.insertAdjacentHTML('beforebegin', `<svg class="monkey-banner" viewBox="0 0 900 140" preserveAspectRatio="xMinYMid slice" role="img" aria-label="Dachimpy's Pirate Den: a monkey hanging from a treasure map's dotted trail, which ends in an X, over an evening sea with a ship">
+document.currentScript.insertAdjacentHTML('beforebegin', `<div class="monkey-banner" role="img" aria-label="Dachimpy's Pirate Den: a monkey hanging from a treasure map's dotted trail, which ends in an X, over an evening sea with a ship">
+<svg class="mb-scene" viewBox="0 0 900 140" preserveAspectRatio="xMinYMid slice" aria-hidden="true">
   <defs>
     <linearGradient id="bn-sky" x2="0" y2="1"><stop offset="0" class="bn-s1"/><stop offset="1" class="bn-s2"/></linearGradient>
     <linearGradient id="bn-sea" x2="0" y2="1"><stop offset="0" class="bn-s3"/><stop offset="1" class="bn-s4"/></linearGradient>
@@ -18,15 +19,6 @@ document.currentScript.insertAdjacentHTML('beforebegin', `<svg class="monkey-ban
   <rect y="97" width="900" height="43" fill="url(#bn-sea)"/>
   <path class="bn-horizon" d="M0 97.5H900"/>
   <g class="bn-shimmer"><path d="M560 106h70M612 114h110M700 104h50M520 124h64M748 121h84M650 131h46M470 110h40"/></g>
-  <!-- The ship on the right, the old banner's ring round her (green then, rose now). -->
-  <g class="bn-ship">
-    <ellipse class="bn-ring" cx="802" cy="110" rx="36" ry="6.5"/>
-    <path class="bn-mast" d="M802 104V46"/>
-    <path class="bn-sail" d="M805 50 Q 830 70 824 98 L 805 98 Z"/>
-    <path class="bn-sail" d="M799 56 L 774 98 L 799 98 Z"/>
-    <path class="bn-flag" d="M802 46 l 16 3.5 -16 3.5 z"/>
-    <path class="bn-hull" d="M764 98 L 842 100 L 830 111 Q 802 116 776 111 Z"/>
-  </g>
   <!-- The treasure map's dotted trail, from the top corner to an X. -->
   <path class="bn-trail" d="M30 -8 Q 70 26 110 24 C 160 22 182 56 230 44 S 294 6 324 30 S 344 50 352 54"/>
   <path class="bn-x-edge" d="M356 46 L 384 76 M 384 46 L 356 76"/>
@@ -54,4 +46,17 @@ document.currentScript.insertAdjacentHTML('beforebegin', `<svg class="monkey-ban
     <circle class="bn-eye" cx="54" cy="72" r="1.1"/><circle class="bn-eye" cx="58" cy="72" r="1.1"/>
     <path class="bn-smile" d="M49 77 Q 56 84 63 77"/>
   </g>
-</svg>`);
+</svg>
+<!-- The ship, the old banner's ring round her (green then, rose now), a layer of her own pinned to the right-hand end
+     at every width (the user, 14 Nov: "make sure the sloop's always aligned to the right"). -->
+<svg class="mb-ship" viewBox="740 0 160 140" preserveAspectRatio="xMaxYMid meet" aria-hidden="true">
+  <g class="bn-ship">
+    <ellipse class="bn-ring" cx="802" cy="110" rx="36" ry="6.5"/>
+    <path class="bn-mast" d="M802 104V46"/>
+    <path class="bn-sail" d="M805 50 Q 830 70 824 98 L 805 98 Z"/>
+    <path class="bn-sail" d="M799 56 L 774 98 L 799 98 Z"/>
+    <path class="bn-flag" d="M802 46 l 16 3.5 -16 3.5 z"/>
+    <path class="bn-hull" d="M764 98 L 842 100 L 830 111 Q 802 116 776 111 Z"/>
+  </g>
+</svg>
+</div>`);

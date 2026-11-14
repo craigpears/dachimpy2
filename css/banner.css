@@ -6,8 +6,11 @@
    --sea-top, --sea-low, --land, --land-lit, --fur, --fur-light, --fur-line, --eye, --hook, --word-edge, --sail,
    --hull, --text, --accent, --accent-text, --accent2, --frame, --shadow. On a phone it's taller and cut at the
    right, the sloop sailing in nearer. */
-.monkey-banner { display: block; width: 100%; height: auto; aspect-ratio: 900 / 140; border-radius: 10px; border: 2px solid var(--frame);
-  box-shadow: 0 8px 24px var(--shadow); margin: 0 0 16px; background: var(--sky-top); }
+.monkey-banner { position: relative; overflow: hidden; display: block; width: 100%; aspect-ratio: 900 / 140; border-radius: 10px;
+  border: 2px solid var(--frame); box-shadow: 0 8px 24px var(--shadow); margin: 0 0 16px; background: var(--sky-top); }
+.mb-scene { display: block; width: 100%; height: 100%; }
+/* The sloop, always at the right-hand end (the user, 14 Nov). */
+.mb-ship { position: absolute; top: 0; right: 0; height: 100%; width: auto; aspect-ratio: 160 / 140; }
 .bn-s1 { stop-color: var(--sky-top); } .bn-s2 { stop-color: var(--sky-low); }
 .bn-s3 { stop-color: var(--sea-top); } .bn-s4 { stop-color: var(--sea-low); }
 .bn-g1 { stop-color: var(--glow); } .bn-g2 { stop-color: var(--glow); stop-opacity: 0; }
@@ -33,9 +36,12 @@
 .bn-flag { fill: var(--accent2); }
 
 @media (max-width: 640px) {
-  /* Taller for its width, so cut at the right (xMinYMid slice), and the ship sails in beside the X (fits down to 320px). */
+  /* Taller for its width, so the scene's cut at the right (xMinYMid slice), the sloop still at the right-hand end. */
   .monkey-banner { aspect-ratio: auto; height: 84px; }
-  /* The wordmark smaller, so the sloop still sails in after it (14 Nov: "I'd like the sloop on mobile"). */
+  /* The wordmark smaller, so the sloop has room after it (14 Nov: "I'd like the sloop on mobile"). */
   .bn-word { font-size: 30px; }
-  .bn-ship { transform-box: fill-box; transform-origin: center; transform: translate(-360px, 3px) scale(.8); }
+}
+@media (max-width: 360px) {
+  .monkey-banner { height: 76px; }
+  .bn-word { font-size: 26px; }
 }

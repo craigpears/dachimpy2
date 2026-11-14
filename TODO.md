@@ -904,6 +904,52 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   are tiny, especially on mobile." So each picture at the top goes straight to its thing, and the links under the
   sections are proper buttons, big enough to tap.
 
+- **The den's splash from the old title card, not the banner (14 Nov):** "I think I dropped it in the museum pieces.
+  There were two pieces at the same time, like one of which was like the tutorial splash screen that's got, yeah,
+  more of a square look, so it's better for a splash than the banner is." So the loading splash is drawn from the
+  old Dachimpy.com title card (the sea, big faint jigsaw pieces, the ship at the top right, the name in the middle),
+  in the den's colours, as the banner was from the old header.
+
+- **The banner's sloop always at the right (14 Nov):** "can we make sure the sloop's always aligned to the right?
+  The sloop being pushed more to the left is irritating me." On a phone the sloop sat in the middle; it keeps to the
+  right-hand end at every width.
+
+- **The paused notice hidden behind the boards (14 Nov):** "I keep coming back and it keeps saying it's paused,
+  but ... it's not on top, it's hidden behind the puzzling area. And luckily there's a tiny bit of the button
+  visible." The paused notice goes over everything.
+
+- **Get into the den quickly, on a phone too (14 Nov):** "I want people to get into it quick. I think it needs a
+  lot of just UX optimization. Like, I can't move the camera around on the mobile to see the race. It doesn't
+  automatically track or follow anything. Different orientations seem to hide too much or too little of different
+  things. Like ... that top bar can take up like a third of the screen, and I can't really see or tell what's going
+  on." So on a phone: the top bar small (or tucked away), the camera movable by touch, the race watched following
+  someone by default, and each orientation showing the sea and what matters.
+
+- **Watching a racer shows her racing, not an idle board (14 Nov):** "even if I click on observe Kick It, why have
+  I got a bunch of buttons and then there's a puzzle where nothing's happening? Like, the default, I would have
+  thought, is you see ... them puzzling on deck and in the sails, so you can kind of observe ... you have that
+  kind of nice observing version. That kind of solves this. How much can we fit on the screen at one time?" So
+  following a racer shows her sloop, her puzzling on deck and on her sails, with her board small or out of the
+  way, as much on the screen at once as fits.
+
+- **Sailing has an impact you can see (14 Nov, again; see "A rival's Sailing shows on her sails", 12 Nov):**
+  "there's still no impact of sailing ... when you see, for example, Kikkit complete a single or a double as she's
+  going along, you should visibly see the jump, the ship sparkle even a tiny bit and start moving faster. There's
+  no impact visible at the moment." Each clear: a visible surge, a sparkle on her sails, more speed.
+
+- **A watched racer's Sailing runs on its own, not in step with her moves (14 Nov):** "watching Kick-It ... her
+  sailing puzzle, it seems almost in sync with the turns. It's like a piece drops fluidly, she puts it in place,
+  and then it's like there's a pause waiting for the next turn ... this should be running relatively separately.
+  Or is it having performance issues waiting on the rest of the things to all update?" Her pieces should keep
+  coming at her own pace, not wait on the race's steps (to find out which it is).
+
+- **Teach the sailing bots to build Vegases (14 Nov):** "her sailing is just extremely [poor]. She's building a
+  giant combo of nothing. Though I do love that she got bopped by somebody, and you can see the little ... things
+  like rotating around her head. That was cool. But ... got to actually start teaching some sailing so we can see
+  her start building the Vegases, similar to how we've done the distilling training." So the Sailing bots trained
+  as Distilling's were (techniques, positions to critique, tests), so a good sailor like Kikkit builds real chains
+  and Vegases.
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
