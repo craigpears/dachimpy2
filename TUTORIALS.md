@@ -116,3 +116,10 @@ Navigation's rules taken as known. Probably a `differs` part (or the basics mark
 `src/tutorial.ts`, and a choice for it ("What's different here?"). The werewolves themselves (the expedition, the
 den's rounds, Rumble, the moon) get a wider explainer of their own later, not this lesson. The detail researched so
 far: IDEAS.md, "Dignity's tutorial: four-tier Duty Navigation in the werewolf den".
+
+Its opening choice and what it shows (the user, 14 Nov): "certainly start all their tips of ... you can just go
+regular [Duty Nav] style and get through it quickly, or you can do it using combos." So the choice offers both: the
+plain way, quick, and the combo way. The combo way is examples of setting combos up, the first from the screenshots
+the user shared of Umami's run (IDEAS.md, "What players say, and a looting run watched"), where he built it up at the
+bottom: "look, there's ... reds laid out here intentionally so that when this breaks, this falls down." Shown as Tzz's
+Sailing lesson shows its chain: the build and its plan marked on the board as it's played.
