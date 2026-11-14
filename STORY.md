@@ -195,6 +195,13 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    at her door, and her walls hold everyone's guesses at her name (Dachimpy's three, Dignity's from
    the books), her own answer the biggest frame. She rooms at Gravee's too. No adventure of hers yet:
    the small house only, to see where it goes.
+   The third is Dachimpy's own (13 Nov), the user's pirate, which doubles as a museum: a hug and a
+   cookie at the door, every visit, as Dachimpy always gave them; then the story of the Blockade
+   Simulator told on its walls, oldest first, from the user's own screenshots, each with a plaque in
+   Dachimpy's words, bugs and all (the sim was helping people learn in a quieter way, which is what the
+   den's teachers do too); and a room of friends, the truly special ones in the middle (Kikkit, Zizzy
+   and Sanne), and a thank-you to everyone who makes Puzzle Pirates what it is. The museum keeps the
+   story of the sims; the house keeps the people.
    Or find Kikkit on her little island right of the checkpoint, rambling the real way through her
    whirlpools (taken literally), and, with a Vegas, the penguins of Vegas Island beyond them. Once
    she's told it all you wonder aloud whether anyone could explain it with fewer tangents, and a hop
