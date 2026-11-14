@@ -632,6 +632,18 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     shared tutorial module, knowing nothing of any puzzle: a tutorial's parts (the basics, its phases, its tricks,
     its scenarios), the choice at the start, the lists to pick from, the read guide's sticky nav, all drawn from one
     description each puzzle fills in; Distilling's first, Sailing's next with the same shape.
+- **Dachimpy's friends' room: everyone's special; Daquan in the middle (14 Nov):** "I'm feeling a bit bad about
+  having a few people in my house that are labelled as the special ones, because everybody's special. Like, I feel
+  like they should have a prominent central position, but ... many of the other people that are there are special
+  as well. [Daquan] definitely needs a more prominent special position. He was my partner in crime through the
+  whole thing. But yeah, other people like [Gravee] and [Balloffire], people that I just vaguely remember, like
+  [Mems], there was the Hunter crew that I was in. Is it Aurora? ... So there are many names of people like that I
+  blockaded with, but they keep changing their names, and I can't remember who they are. So they're here. That
+  needs to get rid." So: the "Truly special" sign and every "truly special" line go; the middle of the wall stays for
+  the closest (Kikkit, Zizzy, Sanne) with Daquan there too, prominent, "partner in crime"; Gravee and Balloffire on
+  the wall; and a page for everyone else: Mems, the Hunter crew (its name, Aurora?, to check), and all the
+  blockaders whose names have changed, "they're here". Daquan's look (he) from his pirate page and his portraits
+  with Dachimpy; Balloffire's (she) and Mems's (they, not known) before they're drawn.
 
 ## Spotted along the way (not asked for)
 
