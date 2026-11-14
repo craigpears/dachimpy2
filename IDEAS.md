@@ -2717,6 +2717,11 @@ Puzzle Pirates, or one to make), before anything's built.
   the constellation's place beside it wild (a clear in a chain wilds any slot on or beside what it cleared), the
   stars falling after it made the second clear (Double, +6), and a red falling into the wild place charted it on
   step 3: the board's first constellation, 71, times 3 is the +213.
+- **Why Dignity teaches it (14 Nov):** the user: "Maybe we could put Dignity in the game as [the one] to get [it
+  from], because ... she's got to catch these pesky pirates trying to figure out the ways they're going around
+  their little outpost." Dignity, the checkpoint's commander, charts the stars to find the hidden ways pirates
+  sneak round her outpost (the starlit door is one), so she's the natural teacher of Duty Navigation, and her
+  lesson has a reason in the story: she's training you to hunt them, or you're learning her trick to slip past.
 
 ## Distilling with a higher skill cap: fun variations (13 Nov)
 
@@ -2754,3 +2759,8 @@ small ships because of the narrower gaps. I think that would be a cool proof of 
   board, both ships on it, the shape of the sea deciding which goes where. Ties in with "Bigger ships ride out the
   winds" (a deep-water mechanic) and Daquan's flotilla (the underdogs against the giant ship).
 - A proof of concept: something to look at and steer, not a full game; on its own test page, like frigate-test.html.
+- **Blasting through the gate (14 Nov):** the user, deciding the sloop race's imperial gate stays a choice
+  (RACE.md §12): a gate everyone has to fight through, racing to shoot it down first, fits a bigger ship: "if
+  you had a bigger ship with more guns ... you have to blast your way through the gate because that's the only
+  way you can clear enough space for your big ship." A race or a run for frigates, the gate too narrow until
+  it's blown open.

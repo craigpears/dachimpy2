@@ -1412,6 +1412,15 @@ check, a share link, and the den's own race for 3D.
 
 ## 12. Open questions
 
+- **Should everyone have to fight through the imperial gate? No (the user, 14 Nov, thinking it through).** "Does it
+  go against some of the rules and principles I've said about the [sloop] race to have everybody have to go
+  through the Imperial checkpoint ... contradictory to the idea that it's a race with options if everybody's got
+  to fight through the Imperial outpost." Making it the way for everyone would mean making running it harder, so
+  shooting it down paid, "but I think when we've tried that, it just gets rid of the feel of a race ... if you get
+  bogged down like that". So the gate stays a choice (the long way round the mole, or the gate: shot quiet, paid,
+  or run), as built. The fun of everyone racing to shoot it down first is kept for a bigger ship: "if you had a
+  bigger ship with more guns ... you have to blast your way through the gate because that's the only way you can
+  clear enough space for your big ship" (IDEAS.md, the frigate and the blockade board).
 - Shared shots or more hits for the obstacles (§6)? Settled by the simulation: shared (§6, §8).
 - Can the lead hold? How strong the "lead isn't safe" effect should be (§6). The simulation says it holds
   as it is (§6, "What it found").
