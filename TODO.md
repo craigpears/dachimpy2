@@ -538,6 +538,9 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   easily getting back to them just from the home page ... a link at the bottom to here are a few test pages, mostly
   for me, but ... if you want to see distilling being played at high speed, or the distilling setups that the
   tutorials have been trained on, that's all here."
+  And practice (14 Nov): "if they want to practice a puzzle, then fine. We've got a few here that you can go practice
+  in the fun [den]. But I'll put a link to where there's a bunch of practice puzzles ... I don't want to compete with
+  it. It's what if you just want 2D practice? Here you go." Puzzle Practice: https://puzzle-practice.github.io/Puzzle_Practice/#/
 
 ## Spotted along the way (not asked for)
 
