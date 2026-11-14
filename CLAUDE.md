@@ -1,6 +1,11 @@
 # Carpentry primer
 
-Static site, no build step: `index.html`, `js/engine.js` (pieces, solver, scoring), `js/render.js` (SVG), `js/app.js` (pages).
+The front page, `index.html` (14 Nov): hand-written, in the changelog's look, Dachimpy greeting you (their lines in
+`src/lines/dachimpy.ts`, `FRONT_PAGE`) and "what are you here for?": the den, the new concepts, the tutorials by
+puzzle (each its 3D lesson and its read version), practice, real pirates, and the test pages at its foot. A new
+tutorial, read version or place worth a look goes on it too. It forwards an old primer link (`/#/daily`) on.
+The primer, moved aside to `carpentry.html` ("a bit of fun for carpentry"), a static site with no build step:
+`carpentry.html`, `js/engine.js` (pieces, solver, scoring), `js/render.js` (SVG), `js/app.js` (pages).
 Preview with `python -m http.server 8642`.
 Leaderboard: `js/social.js` (client) and `worker/index.js` (Cloudflare Worker + D1); the den's crews `worker/crew.js`,
 and the race online's rooms `worker/race-room.js` (a thin adapter round `src/race-server.ts`; races written down

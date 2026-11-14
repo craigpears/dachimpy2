@@ -133,6 +133,14 @@ export const CHATTER = [
 ];
 /** Seeing you out. */
 export const GOODBYE = 'Bye! Take a cookie for the road!';
+/** On the site's front page (index.html), at the top, a plate of cookies held out: their hello, buzzy and
+    excited (RULES.md, "Dachimpy's voice"), before the page asks what you're here for; then, clicking the cookie,
+    the first one, and after it ANOTHER_COOKIE in turn (the user, 14 Nov: "Obviously, I need to welcome you to
+    the site. Like, would you like a cookie? That'd be hilarious."). */
+export const FRONT_PAGE = {
+    hello: 'Ahoy! Welcome, welcome! Cookie? Yay, cookies!',
+    cookie: 'Yay! There you go. Everyone who comes in gets one. House rule.',
+};
 export const CHARACTER = {
     name: 'Dachimpy',
     who: 'The user\'s own pirate, of the Emerald Ocean (they/them), drawn in their rose pink wig, belt and braces and '
@@ -163,5 +171,9 @@ export const CHARACTER = {
         { when: 'The thank-you on the friends\' wall, and the sign over the truly special ones', says: { thanks: THANKS, special: SPECIAL, welcomeBack: WELCOME_BACK } },
         { when: 'Now and then, as you wander after the tour', says: CHATTER },
         { when: 'As you leave', says: [GOODBYE] },
+        {
+            when: 'On the site\'s front page, at the top, holding out a plate of cookies', says: FRONT_PAGE,
+            each: { hello: 'Their hello', cookie: 'Clicking the cookie (then the other cookies, in turn)' },
+        },
     ],
 };

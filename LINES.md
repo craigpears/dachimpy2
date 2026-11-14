@@ -1592,6 +1592,11 @@ Warm, proud of everything they built, bugs and all, and well known for hugs and 
 
 - "Bye! Take a cookie for the road!"
 
+### On the site's front page, at the top, holding out a plate of cookies
+
+- *Their hello:* "Ahoy! Welcome, welcome! Cookie? Yay, cookies!"
+- *Clicking the cookie (then the other cookies, in turn):* "Yay! There you go. Everyone who comes in gets one. House rule."
+
 ## The imperial guards of Port Decorum
 
 Soldiers of the Empire in its crimson and gold, standing guard over Port Decorum, the imperial port out past the checkpoint: on the jetty's end, at the fort's gate, along the quay. The one on the jetty does the talking: by the book, politely unhelpful, a little smug that the harbour's shut to pirates.
