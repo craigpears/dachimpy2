@@ -32,7 +32,7 @@ import { netPlan } from './race-net.js';
 const stored = () => { try { return readPlan(localStorage.getItem(PLAN_STORE)); } catch { return readPlan(null); } };
 const keep = (p) => { try { localStorage.setItem(PLAN_STORE, writePlan(p)); } catch { /* (no storage: kept this voyage only) */ } };
 
-export const plan = { pilot: new Pilot(stored()), el: null, sig: '', opened: '', rowed: false, said: 0, racing: false, w: null, peek: false, hot: null, hotT: 0, chart: null };
+export const plan = { pilot: new Pilot(stored()), el: null, sig: '', opened: '', rowed: false, said: 0, racing: false, w: null, peek: false, hot: null, hotT: 0, chart: null, big: false };
 const P = () => plan.pilot;
 /** Racing under the pilot: aboard, the race on and not over for you. */
 const steering = (R) => sail.on && R.state === 'on';
@@ -133,7 +133,7 @@ function make() {
   const el = plan.el = document.createElement('div');
   el.id = 'raceplan';
   el.addEventListener('mousedown', press);
-  el.addEventListener('touchstart', (e) => { const t = e.target.closest('[data-pick],.rp-pilot,.rp-fold,.rp-tab'); if (t) { e.preventDefault(); press({ target: t, button: 0, stopPropagation() {}, preventDefault() {} }); } }, { passive: false });
+  el.addEventListener('touchstart', (e) => { const t = e.target.closest('[data-pick],.rp-pilot,.rp-fold,.rp-tab,.rp-big,.rp-chart'); if (t) { e.preventDefault(); press({ target: t, button: 0, stopPropagation() {}, preventDefault() {} }); } }, { passive: false });
   el.addEventListener('mouseover', (e) => { const b = e.target.closest('[data-pick]'); if (b) hot(Number(b.dataset.leg), b.dataset.pick); });
   el.addEventListener('mouseleave', () => { if (plan.hotT <= 0) hot(null); });
   el.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -145,10 +145,14 @@ function press(e) {
   const b = e.target.closest('[data-pick]');
   if (b) return pick(Number(b.dataset.leg), b.dataset.pick);
   if (e.target.closest('.rp-pilot')) return pilotToggle();
+  // (the course on the parchment chart, big, the choices on it where they are: plan-chart.js)
+  if (e.target.closest('.rp-big,.rp-chart')) { plan.big = !plan.big; return; }
   if (e.target.closest('.rp-tab')) { plan.peek = true; plan.sig = ''; return; }
   if (e.target.closest('.rp-fold')) { plan.peek = false; plan.sig = ''; }
 }
 let R0 = null;
+/** A choice taken, from the strip or the big chart (plan-chart.js): kept, and online said to the room. */
+export function planPick(leg, id) { pick(leg, id); }
 function pick(leg, id) {
   if (P().plan[leg] === id) { hot(leg, id, 3); return; }
   P().set(choose(P().plan, leg, id), R0?.clock?.() ?? 0);
@@ -234,12 +238,12 @@ export function planTick(R, show) {
     return;
   }
   const legs = P().plan.map((id, leg) => ({ leg, id })).filter((x) => x.leg >= from);
-  plan.el.innerHTML = `<div class="rp-head"><b>Your plan</b><button class="rp-pilot${P().on ? ' on' : ''}" title="T">Pilot ${P().on ? 'on' : 'off'}</button>${busy || phone() ? '<button class="rp-fold" title="Fold it away">✕</button>' : ''}</div>`
+  plan.el.innerHTML = `<div class="rp-head"><b>Your plan</b><button class="rp-big" title="M: the course on the chart, your choices on it">Chart</button><button class="rp-pilot${P().on ? ' on' : ''}" title="T">Pilot ${P().on ? 'on' : 'off'}</button>${busy || phone() ? '<button class="rp-fold" title="Fold it away">✕</button>' : ''}</div>`
     + `<div class="rp-now">${now}</div>${chartSvg()}<div class="rp-detail"></div>`
     + legs.map((x) => `<div class="rp-leg${x.leg === from && R.state === 'on' ? ' now' : ''}"><i title="Leg ${x.leg + 1}">${x.leg + 1}</i><span>`
       + LEGS[x.leg].options.map((op) => `<button data-leg="${x.leg}" data-pick="${op.id}" class="rp-opt${op.id === x.id ? ' on' : ''}" title="${op.name}: ${op.puzzle}">${op.short}</button>`).join('')
       + '</span></div>').join('')
-    + `<div class="rp-help">${phone() ? 'Tap a choice to take it' : 'Point at a choice to see it on the course · click to take it'}</div>`;
+    + `<div class="rp-help">${phone() ? 'Tap a choice to take it · Chart: see them all on the course' : 'Point at a choice to see it on the course · click to take it · M or Chart: where each one is'}</div>`;
   drawRoute();
   drawHot();
 }

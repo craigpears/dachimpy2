@@ -513,6 +513,25 @@ the rubble settle back after half a minute.
     anything with this." The strip named the choices and nothing more. **Done 13 Nov** (the strip, above): the
     course drawn small with your route on it, each choice's line as you point at it or take it, each choice's
     seconds against the long way from the simulation's measures, on a phone too; and your last plan kept.
+  - **For a new player, what each choice is and where: the plan on the parchment chart (the user, 13 Nov: "for a
+    new player, they don't know what those things correspond to. They've not seen the map before ... we've got the
+    nice 2D map for the chart kind of thing. Is it something that could be combined into that"). Built 14 Nov:**
+    the course big, drawn in the browser by the very drawing the changelog's chart is made with (`src/race-chart.ts`:
+    `sheet`, the paper, the sea, the land and everything on the water, from the course as laid and the race's own
+    start field; tools/race-map.mjs now draws its sheet with it too, its words where `wordsAt` puts them), never the
+    jpg. On it each leg's choices are written where they are (`choicePlaces`, tested in
+    `tests/race-plan-chart.test.ts`): each shortcut beside where she stops for its puzzle (the pilot's own `STOPS`,
+    a pointer ▸ ◂ at it when it's off to one side), its name and its puzzle; the gate's run and shoot stacked at the
+    gate, the bribe at its wreck; each leg's long way on the leg's water ("Leg 1: the long way →"). Your route in
+    gold, your stops ringed; pointing at a choice draws its line in blue over the long way it leaves (in red beneath:
+    the length the user asked to see, as lines, not numbers) and says what she does there (the stop's own words). A
+    click or tap takes it (the strip's own pick: kept, and said to the room online). No times or win rates (13 Nov:
+    "that's just a behind-the-scenes balance thing"). Opened from the strip (its Chart button, or a click on its
+    little chart) or M, on the line and in the race, the race going on meanwhile (a look costs seconds, as the
+    tactical view idea above had it); M, Esc, ✕ or a click off it shuts it; the strip stands down while it's open.
+    On a phone the chart fills the width with the panel below it. `js/den/plan-chart.js`, through race.js's
+    `chartTick` and `chartKey`. **Left open:** whether it should open by itself on the line the first time (the
+    TODO had it "shown big on the starting line"; today it's a key or a click away, over the starter's card).
 
 ## 6. Racing each other: position and risk
 
@@ -1487,6 +1506,9 @@ check, a share link, and the den's own race for 3D.
 - **Your plan (13 Nov, §5):** `src/race-plan.ts` (the legs and their choices, every racer's; where the pilot
   heads, `goalOf`, the ways in, `WAY_IN`; the stops and the `Pilot` that sails you by it), tested in
   `tests/race-plan.test.ts`; its strip and wiring `js/den/race-plan.js`.
+- **Your plan on the parchment chart (14 Nov, §5):** the chart's sheet and each choice where it is
+  `src/race-chart.ts` (`sheet`, `wordsAt`, `choicePlaces`; shared with `tools/race-map.mjs`), tested in
+  `tests/race-plan-chart.test.ts`; drawn big in the den by `js/den/plan-chart.js`.
 - **The race's rules:** `src/den-race.ts` (the line and your spot, the clock, the snakes, the buoys, the
   finish line, the barrier). Its course is `LAY.RACE` in `src/den-sail.ts`, measured by
   `tools/race-measure.mjs`. Its field of racers (several on one course, first come first served, shooting
