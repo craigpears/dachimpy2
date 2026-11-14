@@ -90,7 +90,7 @@ const MOMENT = {
     const by = [...new Set(near.map((w) => w.x + 1))].join(' and ');
     return {
       score: 6 * low + 3 * near.length + s.length / 10,
-      what: `The bot waits, with ${plural(s.length, 'piece')} stuck (${kinds})${near.length ? `, ${plural(near.length, 'white')} in column${by.includes('and') ? 's' : ''} ${by} by the fire with no way out left on ${near.length === 1 ? 'its' : 'their'} own${low ? `, ${low} of them low down` : ''}` : ''}; ${secs(c.timeLeft)} on the furnace.`,
+      what: `The practice player waits, with ${plural(s.length, 'piece')} stuck (${kinds})${near.length ? `, ${plural(near.length, 'white')} in column${by.includes('and') ? 's' : ''} ${by} by the fire with no way out left on ${near.length === 1 ? 'its' : 'their'} own${low ? `, ${low} of them low down` : ''}` : ''}; ${secs(c.timeLeft)} on the furnace.`,
     };
   },
   // In the chain, the furnace's column going up next with junk in it, the furnace near but time left to act (2.5 to 7 s).
@@ -111,7 +111,7 @@ const MOMENT = {
   chain: (c) => {
     if (c.stage !== 'chain' || c.advice.kind !== 'move' || c.chain < 2 || c.timeLeft > 12000 || c.timeLeft < 4000) return null;
     const col = c.advice.column ?? COLS - 1, j = c.cols[col].filter(isJunk).length;
-    return { score: c.chain + j - c.timeLeft / 6000, what: `The chain at CC^${c.chain}, the bot filling column ${col + 1} (${plural(j, 'piece')} of junk still in it), ${secs(c.timeLeft)} on the furnace.` };
+    return { score: c.chain + j - c.timeLeft / 6000, what: `The chain at CC^${c.chain}, the practice player filling column ${col + 1} (${plural(j, 'piece')} of junk still in it), ${secs(c.timeLeft)} on the furnace.` };
   },
   // The fire's side, early in the session (6 to 30 s in, past the opening sweeps), the more whites by the fire the better.
   early: (c) => {
@@ -362,7 +362,7 @@ if (MODE === 'refresh') {
       position.shut = e.shut;
       if (!again(position)) continue;
       const where = e.shut.map(([x, y]) => `column ${x + 1}, row ${y + 1}`).join(' and ');
-      position.what = `${secs(e.c.ms)} in, ${secs(e.c.timeLeft)} on the furnace: the white${e.shut.length > 1 ? 's' : ''} at ${where} (ringed) ${e.shut.length > 1 ? 'are' : 'is'} free enough here; after the bot's move ${e.shut.length > 1 ? 'they are' : 'it is'} trapped (a long, complicated way out, or none)${e.why === 'burned' ? ', and it burns' : ''}.`;
+      position.what = `${secs(e.c.ms)} in, ${secs(e.c.timeLeft)} on the furnace: the white${e.shut.length > 1 ? 's' : ''} at ${where} (ringed) ${e.shut.length > 1 ? 'are' : 'is'} free enough here; after the practice player's move ${e.shut.length > 1 ? 'they are' : 'it is'} trapped (a long, complicated way out, or none)${e.why === 'burned' ? ', and it burns' : ''}.`;
       found.push(position);
     }
     console.log(`${name} seed ${seed}: ${((Date.now() - t0) / 1000).toFixed(1)} s, ${(g.time / 60000).toFixed(1)} min of play, ${moments.length} moments; ${events.length} whites shut in, at ${events.map((e) => secs(e.c.ms)).join(', ') || 'none'}; whites burned ${g.whitesBurned}`);

@@ -93,13 +93,17 @@ export const lessonGame = (seed = LESSON_SEED): Distilling => new Distilling(see
 /** What a beat of their lesson does on the board: a drag (the piece at x, y swapped each way in turn), the
     furnace's column burned now, the still going bang on its own (a board with no white to burn), or nothing
     (they talk). */
-export type LessonAct = { kind: 'drag'; x: number; y: number; ways: number[] } | { kind: 'drags'; drags: { x: number; y: number; ways: number[] }[] } | { kind: 'burn' } | { kind: 'bang' } | { kind: 'none' };
+export type LessonAct = { kind: 'drag'; x: number; y: number; ways: number[] } | { kind: 'drags'; drags: { x: number; y: number; ways: number[] }[] } | { kind: 'burn' } | { kind: 'bang' } | { kind: 'none' }
+  /** A fresh board laid on their stand, these columns, as the beat begins (a part of their tutorial's own board:
+      src/den-helium-tutor.ts); their opening choice put to you, the lesson waiting on your answer. */
+  | { kind: 'lay'; cols: Board } | { kind: 'choose' };
 /** A beat of their lesson: their line (`says`, in their bubble; none, a moment with no words), what it shows
     in plain words (`note`, in the bar), and what they do. `mishap`: the column they burn has a white in it (the
     still goes bang as it goes into the furnace), `bang` how big. `marks`: the whites (and burnt whites) in
     the columns from this one rightward are ringed on the board while it's up (`ringed`). `step`: the
-    puzzle's step it's teaching (STEPS), shown in the bar. */
-export interface Beat { name: string; says: string; note: string; act: LessonAct; mishap?: boolean; bang?: number; marks?: number; who?: 'you'; step?: number }
+    puzzle's step it's teaching (STEPS), shown in the bar. `rings`: these pieces ringed while it's up (a picture's,
+    src/den-helium-tutor.ts). */
+export interface Beat { name: string; says: string; note: string; act: LessonAct; mishap?: boolean; bang?: number; marks?: number; rings?: [number, number][]; who?: 'you'; step?: number }
 /** Whether a piece in column `x` is ringed by a beat's `marks`: a white or burnt white from that column on. */
 export const ringed = (marks: number | undefined, x: number, p: number): boolean => marks !== undefined && x >= marks && (p === WHITE || p === BURNT);
 

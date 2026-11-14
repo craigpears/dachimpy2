@@ -19,7 +19,7 @@
 // point (menus.js).
 import * as THREE from 'three';
 import {
-  HELIUM_CAST, HELIUM, HELIUM_STANDS, HELIUM_MOOR, HELIUM_ARRIVE, Visit, lessonGame, lessonBeats, lessonSecs, mishapLine, askHelium,
+  HELIUM_CAST, HELIUM, HELIUM_STANDS, HELIUM_MOOR, HELIUM_ARRIVE, Visit, lessonGame, opening, lessonSecs, mishapLine, askHelium,
   onHeliumLanding, inHeliumEarshot, heliumShore, worksFor, praiseFor, Cellar, OPENING_BANG, lineSpot, PACE_LESSON,
   actAfter, holdSecs, ringed, Nerves, NERVE, whitesInFurnace, onScreen, hintFor, hintLeft, routesToFire, Watch, PACE_WATCH,
   BEST_STORE, cleanBestChain, beatBest, SEEN_STORE,
@@ -28,7 +28,7 @@ import {
 } from '../den-helium.js';
 import { LAY } from '../den-sail.js';
 import { Distilling, WHITE } from '../distilling.js';
-import { FIRE, GOAL, HINT, SPOT, WATCH } from '../lines/helium.js';
+import { FIRE, GOAL, HINT, SPOT, TUTOR, WATCH } from '../lines/helium.js';
 import { readSecs } from '../den-dignity.js';
 import { PACE } from '../chatter.js';
 import { PIRATES } from '../den-look.js';
@@ -42,6 +42,15 @@ import { FURNITURE } from './furniture.js';
 import { distillery } from './distillery.js';
 import { distillBoard } from './distill-board.js';
 import { cine, cinePlay, cineEnd, bubble, bubbleAt } from './cine.js';
+
+/* Their opening choice, the one every tutorial has (TUTORIALS.md; js/tutorial-choice.js), and the parts it plays
+   (src/den-helium-tutor.ts, from src/distill-tutorial.ts): set going only when it's first asked, so the den starts up
+   without working out the read guide's pictures. */
+const tutor = () => import('../den-helium-tutor.js');
+const chooser = () => import('../tutorial-choice.js');
+/* A "show me this" link from the read guide (distilling-guide.html: den.html?at=helium&learn=<id>): that part played
+   as you come up off their island, instead of their opening. Read once, for the starting point. */
+let learnOnce = (() => { try { return new URLSearchParams(location.search).get('learn'); } catch { return null; } })();
 
 /* Their ground: a sand slab's top, as on Tzz's island, so they stand on it. */
 const SAND = { y0: -0.4, h: 0.62 }, GROUND = SAND.y0 + SAND.h + 0.25;
@@ -220,36 +229,55 @@ function handTick(dt) {
    distillery: the furnace takes its column, then the next, a white in it ringed, and as the white goes into
    the furnace the still goes bang; they shrug it off; your own lines in it (`who: 'you'`) over your head on
    the sloop, kept on the screen. It's only ever seen once: their lesson plays the first time you come up
-   off their island, never again till the page is loaded afresh. */
-function lessonPlay() {
+   off their island, never again till the page is loaded afresh.
+   Then their opening choice (14 Nov; TUTORIALS.md, src/tutorial.ts): what are you after, the basics, the early or
+   mid game, a higher Crystal Clear; and that part's list, its phases, scenarios and tricks; the one picked played
+   next on a board of its own (src/den-helium-tutor.ts), step one their lesson as it was. `beats`: the lesson's
+   beats (by default the opening and the choice); `wide`: the opening's wide shot first, else in on the board. */
+function lessonPlay(beats = [...opening(), CHOOSE], { wide: opening = true } = {}) {
   const W = helium.W, P = PACE_LESSON;
   sail.helm.moor(HELIUM_MOOR);
   sail.riding = false;
   helium.on = false;
   newBoard(lessonGame(), false);
-  const B = helium.board, beats = lessonBeats(), lesson = beats.findIndex((b) => b.step);
   const them = W.them.p.g.getWorldPosition(V3(0, 0, 0)).add(V3(0, 1.9, 0)), at = W.boardAt.clone();
   const look = them.lerp(at, 0.6), dist = W.size * 2.7;
   // (the opening's shot, wider: their board and the still in its yard both in it, the still a little to the
   // side behind; then in on the board for the lesson, boardView)
   const still = W.distillery.g.getWorldPosition(V3(0, 0, 0)).add(V3(0, 1.8, 0));
   const wide = { look: at.clone().lerp(still, 0.45), dist: Math.max(dist * 1.25, at.distanceTo(still) * 2.1), tilt: 0.16, yaw: W.yaw + 0.22 };
-  let i = -1, t = 0, need = 0, acted = true, gap = 0, on = false, burned = false, zoom = false;
+  let i = -1, t = 0, need = 0, acted = true, gap = 0, on = false, burned = false, zoom = !opening, waiting = false, panel = null;
   W.them.lookAt = { x: look.x + Math.sin(W.yaw) * dist, z: look.z + Math.cos(W.yaw) * dist };   // (to the camera, their audience)
-  const goOn = () => { if (i >= 0 && t >= P.READ_FIRST) on = true; };
+  const goOn = () => { if (i >= 0 && t >= P.READ_FIRST && !waiting) on = true; };
   const click = (e) => { if (e.button === 0) goOn(); };
   addEventListener('pointerdown', click);
+  /* Their opening choice (src/tutorial.ts): the lesson waits on it; the part picked is played next, on a board of its
+     own (src/den-helium-tutor.ts); "Not now", and the still's yours. A "show me this" link's part instead, straight. */
+  const choose = (b) => {
+    waiting = c.choosing = true;
+    const go = (more) => { beats.splice(i + 1, 0, ...more); waiting = c.choosing = false; panel = null; };
+    Promise.all([tutor(), chooser()]).then(([T, C]) => {
+      if (helium.play !== c) return;
+      const learnt = b.learn ? T.learnBeats(b.learn) : [];
+      if (learnt.length) { go(learnt); return; }
+      panel = C.tutorialChoice(T.DISTILL_TUTORIAL, {
+        onPlay: (e) => go(T.tutorBeats(e.part)),
+        onClose: () => go([{ name: 'notNow', says: TUTOR.notNow, note: TUTOR.afterNote, act: { kind: 'none' } }]),
+      });
+    }, (e) => { console.error(e); go([]); });
+  };
   const c = {
-    cam: wide,
+    cam: opening ? wide : boardView(),
     started: performance.now(),
     /** Space or Enter: on to the next line, once this one's been up a moment (Esc still skips: cine.js). */
     key(k) { if (k === ' ' || k === 'enter') { goOn(); return true; } return false; },
     tick(dt) {
       t += dt;
       if (zoom) c.cam = boardView();
+      if (waiting) return;
       // (not till the camera's flown out to their island: the bang's the first thing to see)
-      if (i < 0 && t < 12 && camera.position.distanceTo(c.cam.look) > c.cam.dist * 1.6) return;
-      const b = beats[i];
+      if (i < 0 && opening && t < 12 && camera.position.distanceTo(c.cam.look) > c.cam.dist * 1.6) return;
+      const B = helium.board, b = beats[i];
       if (b && !acted && (t >= actAfter(b) || on)) {
         acted = true;
         if (b.act.kind === 'drag') play([b.act], null, P);
@@ -263,29 +291,57 @@ function lessonPlay() {
       i++;
       if (i >= beats.length) { cineEnd(false); return; }
       const n = beats[i];
+      // (a part of their tutorial on a board of its own, laid as its beat begins, in on it from then)
+      if (n.act.kind === 'lay') { newBoard(new Distilling(Math.random, { timer: false }).lay(n.act.cols), false); zoom = true; }
       if (n.who === 'you') { you.text(n.says, lessonSecs(n.says)); W.them.hush(); }
       else if (n.says) say(n.says);
       else W.them.hush();
       if (n.act.kind === 'bang') bang(false, n.bang ?? OPENING_BANG);
-      // (the whites it's about ringed on the board, a white burning till it's gone in)
+      // (the whites it's about ringed on the board, a white burning till it's gone in; or the picture's own rings)
       // (once it's burned, only the white going down: the column sliding in after it isn't)
       burned = false;
-      B.mark = n.marks === undefined ? null : (x, y, p, gone) => (gone ? burned && p === WHITE : !burned && ringed(n.marks, x, p));
+      const rung = n.rings ? new Set(n.rings.map(([x, y]) => `${x},${y}`)) : null;
+      helium.board.mark = rung ? (x, y, p, gone) => (gone ? burned && p === WHITE : !burned && rung.has(`${x},${y}`))
+        : n.marks === undefined ? null : (x, y, p, gone) => (gone ? burned && p === WHITE : !burned && ringed(n.marks, x, p));
       // (from step one, in on the board, as at your still: the whites they're moving close enough to follow;
       // the user, 13 Nov: "when he starts moving pieces ... it really should be zooming in on the board")
-      if (i === lesson) zoom = true;
+      if (n.step) zoom = true;
       noteFor(n.step ? `Step ${n.step}: ${n.note.replace(/^Step \d+: /, '')}` : n.note, 99);
-      t = 0; gap = 0; on = false; need = holdSecs(n); acted = n.act.kind === 'none' || n.act.kind === 'bang';
+      t = 0; gap = 0; on = false; need = holdSecs(n); acted = n.act.kind !== 'drag' && n.act.kind !== 'drags' && n.act.kind !== 'burn';
+      if (n.act.kind === 'choose') choose(n);
     },
     end() {
       removeEventListener('pointerdown', click);
+      panel?.close(); panel = null;
       helium.lessonSecs = (performance.now() - c.started) / 1000;   // (how long it ran, for a check)
       helium.play = null; helium.hand = []; helium.bigBang = 0; W.them.lookAt = null; atStill(true);
     },
   };
   helium.play = c;
   cinePlay(c);
-}/* Your own line over your head on the sloop, a few seconds, kept on the screen (you may be just out of the
+}
+/** Their opening choice as a beat of their lesson (`learn`: a part to play instead, from a link). */
+const CHOOSE = { name: 'choose', says: '', note: TUTOR.chooseNote, act: { kind: 'choose' } };
+
+/* "Teach me" at the still (T, or its button): their opening choice again, over your board; the part picked played as
+   their lesson is, on a board of its own, then a fresh board yours. "Not now", and your board's as it was. */
+export function heliumTeach() {
+  const B = helium.board;
+  if (!helium.on || !B || helium.hand.length || helium.choice) return;
+  stopWatch(false);
+  B.letGo();
+  B.paused = true;
+  helium.choice = 'asking';
+  Promise.all([tutor(), chooser()]).then(([T, C]) => {
+    if (!helium.on) { helium.choice = null; return; }
+    helium.choice = C.tutorialChoice(T.DISTILL_TUTORIAL, {
+      at: 'bottom',
+      onPlay: (e) => { helium.choice = null; const beats = T.tutorBeats(e.part); leave(); lessonPlay(beats, { wide: false }); },
+      onClose: () => { helium.choice = null; if (helium.board) helium.board.paused = helium.held; say(TUTOR.notNow); },
+    });
+  }, (e) => { console.error(e); helium.choice = null; B.paused = helium.held; });
+}
+/* Your own line over your head on the sloop, a few seconds, kept on the screen (you may be just out of the
    shot). */
 const you = {
   el: null, t: 0, at: V3(0, 0, 0),
@@ -394,6 +450,8 @@ function planTick(dt) {
 }
 function leave() {
   stopWatch(false);
+  if (helium.choice && helium.choice !== 'asking') helium.choice.close();
+  helium.choice = null;
   helium.on = false;
   helium.hand = [];
   helium.hint = null;
@@ -551,6 +609,7 @@ function helpButton(on) {
       btn.append(b);
       return b;
     };
+    add('helium-teach', 'Teach me (T)', heliumTeach);
     add('helium-hint', 'Hint (G)', heliumHint);
     watchBtn = add('helium-watch', 'Watch Helium (W)', heliumWatch);
     add('helium-help', 'Help, Helium (H)', heliumHelp);
@@ -599,6 +658,7 @@ export function heliumKey(key) {
   if (key === 'escape') { leave(); return true; }
   if (key === 'h') { heliumHelp(); return true; }
   if (key === 'g') { heliumHint(); return true; }
+  if (key === 't') { heliumTeach(); return true; }
   if (key === 'f') { holdFire(!helium.held); return true; }
   // (the batch done: R the same goal again, N a bigger one)
   if (helium.batch?.done && (key === 'r' || key === 'n')) { nextBatch(key === 'n'); return true; }
@@ -708,9 +768,14 @@ export function heliumTick(dt) {
     const p = sail.helm.pose;
     // The first time you come up beside their island, anywhere round it, settled and not at the Sailing
     // board: their lesson.
-    if (helium.visit.arrive(onHeliumLanding(p.c, p.r), free() && sail.helm.slot < 0 && !station.on)) { keepSeen(); lessonPlay(); }
+    if (helium.visit.arrive(onHeliumLanding(p.c, p.r), free() && sail.helm.slot < 0 && !station.on)) {
+      keepSeen();
+      // (a read guide's "show me this": that part straight away; else their opening, then their choice)
+      const learn = helium.learn; helium.learn = null;
+      if (learn) lessonPlay([{ ...CHOOSE, learn }], { wide: false }); else lessonPlay();
+    }
   }
-  if (helium.play) bar(`${helium.note} · Space: go on · Esc: skip`);
+  if (helium.play) bar(helium.play.choosing ? helium.note : `${helium.note} · Space: go on · Esc: skip`);
   watchTick(dt);
   handTick(dt);
   you.tick(dt);
@@ -805,6 +870,7 @@ export function heliumReset() {
 
 /** A starting point (menus.js): at sea, come up beside their island, so their lesson begins. */
 export function heliumCheat() {
+  helium.learn = learnOnce; learnOnce = null;
   sail.helm.moor(HELIUM_ARRIVE);
   sail.riding = false;
 }

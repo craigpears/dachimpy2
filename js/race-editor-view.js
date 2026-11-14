@@ -270,7 +270,7 @@ function coursePanel(problems) {
 
 function balancePanel() {
   const el = $('balance'), code = encodeCourse(course), fresh = bal && balCode === code, ok = !check(course).length;
-  const head = `<h2>Balance check</h2><p>A few hundred races of four of the simulation's bots, each way round as often as the others: does each way round win about its fair share?</p>
+  const head = `<h2>Balance check</h2><p>A few hundred races of four computer racers, each way round as often as the others: does each way round win about its fair share?</p>
     <div class="row"><button id="run"${ok ? '' : ' disabled'}>${bal ? 'Check again' : 'Check its balance'}</button> <span class="note" id="runs"></span></div>
     <div class="meter"><div id="meter"></div></div>`;
   if (!bal) { el.innerHTML = head; return; }

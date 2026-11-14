@@ -90,7 +90,7 @@ export interface Picture {
 /** A board a bot reached, as the page says it: the deal and how far in. */
 const fromPosition = (p: Position): string => {
   const s = Math.round(p.ms / 1000);
-  return `A real deal (seed ${p.seed}), ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')} in, as the ${p.bot.toUpperCase().replace('CC', 'CC^')} bot ${p.chosen ? 'played it' : 'found it'}`;
+  return `A real deal (seed ${p.seed}), ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')} in, as a practice player aiming for ${p.bot.toUpperCase().replace('CC', 'CC^')} ${p.chosen ? 'played it' : 'found it'}`;
 };
 const LESSON_FROM = 'Helium\'s lesson board';
 
