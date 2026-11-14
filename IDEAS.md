@@ -2643,8 +2643,48 @@ Puzzle Pirates, or one to make), before anything's built.
   nothing. That's how src/navigation.ts already scores: a line a point a star times its step in the cascade
   (+3, +6, +9 as in the pictures), and a constellation filled by a combo three times its points. Not yet in the
   den: the board naming the cascade "Single!", "Double!", "Triple!" over the stars. Still to pin down: what
-  "fren" is (the duty's top rating while looting, frenzy?) and whether a constellation's places really turn
-  wild (any colour) mid-cascade or only flash as it goes.
+  "fren" is. (The multicoloured place is a wild slot: the guide below.)
+- **A full guide to wolf dens (14 Nov):** "Wolf Dens Guide" by a player on r/ypp (Reddit couldn't be read here;
+  the Google Doc could). What it settles, in our own words:
+  - **The den:** on Woodhallow Isle, after beating werewolf ships at sea (a sloop or cutter's expedition). Six
+    rounds, each a Rumble against a pack of wolves, then a puzzle window where the crew splits between
+    Navigation and Foraging stations along the island's path (the beach, the village, the lair past gate 2).
+    The pack is crew size times 1, 1.3, 1.7, 2.25, 2.9, 3.75 by round; its share of werewolves (full health,
+    a bludgeon) grows from about half to all of it. Charting at Navigation turns werewolves back into
+    wolf-kin (half health, fists) before the next pack. The window is 2:00 after round 1, then 2:00 plus
+    3:00 times the share of the crew still standing. Once the last werewolf's turned back, everyone goes and
+    forages, which is what pays.
+  - **"Four-tier" is the board's four rings, most likely:** centre, middle, third and a fourth, outer ring
+    with no slots, "extra room, mainly for setting up chains" (a star there stays up only over a full column,
+    and turns with its ring). Ours has three rings, the next star waiting outside them; the real outer ring
+    is that space, playable.
+  - **Constellations:** normally 3 slots in the centre ring, 2 in the middle and 1 in the third; a fresh
+    board's first has 1 centre slot only. Ours grows from 1 star to 8 instead.
+  - **Scoring:** each ring scores weight times (1.5 times its slots) squared, rounded down, the weights
+    centre 3, middle 5, third 9: the first constellation 71, a standard one 125, one with 4 centre slots 173.
+    In a chain each step's points are times its step: a clear then the chart doubles it (250), two clears
+    triple it (375). Only clears before the chart multiply it; a line is 3 points (6 or 9 in a chain). The
+    constellation's checked before lines, as ours already does. So in the screenshots: "Single! +3" and
+    "Double! +6" were the first two clears, and "Triple! Constellation! +213" a chart on step 3 (71 times 3,
+    a fresh board's first constellation).
+  - **Wild slots (dens only), the multicoloured place:** a paw print ringed in every colour, filled by any
+    star. A constellation charted in a chain (a clear before or after it) deals the next with its 3 centre
+    slots wild; two or more clears add a fourth wild centre slot; a clear also turns wild any slot on or
+    beside the cells it cleared. A plain chart breaks the run. So in a den, finish every constellation with a
+    chain.
+  - **The moon:** each window starts full, about 200 charted points per werewolf in the next pack; each
+    chart takes its points off, and the moon's percentage of the werewolves are left (chat says when half
+    and when the last are turned back). The duty report draws each chart as a moon: thin for no chain,
+    fuller for a chain of 2, full for 3 or more.
+  - **Named chains (the guide's names, not the game's):** a Trapdoor clears then charts (a pair parked on
+    the ring above a slot, turned so a line clears and the right star drops in; multiplies the chart, and
+    works in normal Navigation too); an Echo charts then clears (a pair in the centre ring beside a slot, so
+    the stars falling into the emptied slots make a line; only wilds the next centre); "H" along a ring, "V"
+    down a column; Edge Pair, Sandwich, and a Trapdoor into an Edge Pair (clear, chart, clear). A triple
+    needs about eight stars in exact places and rarely pays the time; a double by Trapdoor is the workhorse.
+    Don't reset the board: its first constellation is worth only 71.
+  - Also in it: Rumble targeting (one on one, when to defend), when to retreat, the den's Foraging with its
+    wolf head and moons, and its loot. Still unknown: "fren" (not in the guide).
 
 ## Distilling with a higher skill cap: fun variations (13 Nov)
 
