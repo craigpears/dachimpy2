@@ -57,7 +57,7 @@ export type Tactic = 'quickSort' | 'blocks' | 'fillGaps' | 'freeTrapped' | 'sort
 /** Each state and tactic in plain words, for the pages and Helium. */
 export const STATES: Readonly<Record<BoardState, { label: string; about: string }>> = {
   healthy: { label: 'Healthy', about: 'nothing at risk: quick, simple moves' },
-  atRisk: { label: 'At risk', about: 'a white near the fire in danger, or the ladder on the right about to be lost' },
+  atRisk: { label: 'At risk', about: 'a white near the fire in danger, or the two right-hand columns unsorted with one about to go' },
   cracked: { label: 'Cracked', about: 'junk stranded among the whites: fix it before filling more' },
   damageControl: { label: 'Damage control', about: 'too many whites by the fire for the time and the junk left: save what can be saved' },
 };
@@ -66,7 +66,7 @@ export const TACTICS: Readonly<Record<Tactic, { label: string; about: string }>>
   blocks: { label: 'Blocks', about: 'whites mostly left: the junk moved in long drags, blocks at a time' },
   fillGaps: { label: 'Fill the gaps', about: 'junk raced into the whites\' places by the fire, the quickest first' },
   freeTrapped: { label: 'Free the trapped whites', about: 'the whites walled in near the fire freed first, the most at risk first' },
-  sortLadder: { label: 'Sort the ladder', about: 'the two right-hand columns sorted, blacks over browns, before one burns' },
+  sortLadder: { label: 'Sort the right-hand pair', about: 'the two right-hand columns sorted, blacks over browns, before one burns' },
   sortTail: { label: 'Sort the tail', about: 'the browns at the V\'s bottom sunk through the blacks, so the next sweep runs through' },
   fixCracks: { label: 'Fix the cracks', about: 'the stranded junk freed, the browns in the middle kept as tools' },
   chain: { label: 'The chain', about: 'whites right, Crystal Clears one after another' },

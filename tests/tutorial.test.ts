@@ -9,7 +9,7 @@ import { SECTIONS, TutorialMenu, anchorOf, choicesOf, covered, findPart, navFor,
 import type { MenuEvent, Part, Tutorial } from '../src/tutorial';
 import { DISTILL_TUTORIAL, SCENARIO_READS, distillShows } from '../src/distill-tutorial';
 import { PHASE_ORDER } from '../src/distill-phase';
-import { PLAN, READ_EXAMPLES, readingExamples, trickTiles } from '../src/distill-guide';
+import { BASIC_MOVES, PLAN, READ_EXAMPLES, RULES_OF_THUMB, readingExamples, trickTiles } from '../src/distill-guide';
 import { DRAG_TRICKS } from '../src/distill-teach';
 
 // A made-up puzzle, to show the module knows nothing of any real one.
@@ -146,12 +146,13 @@ describe('Distilling\'s description (its end game to be finished after the late-
     expect(ids(choicesOf(T))).toEqual(['basics', 'early', 'higher']);
   });
 
-  it('has every phase, technique and trick the guide has, in its phases, and every drag trick', () => {
+  it('has every phase, technique and trick the guide has, in its phases; its basics the rules of thumb and the basic moves, every drag trick and the leapfrog (14 Nov: no rules of the game, "for people who know the mechanics")', () => {
     expect(ids(partsOf(T, 'phases'))).toEqual([...PHASE_ORDER]);
     for (const phase of PHASE_ORDER) {
       expect(partsOf(T, 'tricks').filter((p) => p.phase === phase).map((p) => p.id)).toEqual(PLAN[phase].map((it) => it.name));
     }
-    expect(partsOf(T, 'tricks').filter((p) => !p.phase).map((p) => p.id)).toEqual([...DRAG_TRICKS, 'makeWay']);
+    expect(partsOf(T, 'tricks').filter((p) => !p.phase)).toEqual([]);
+    expect(partsOf(T, 'basics').map((p) => p.id)).toEqual([...RULES_OF_THUMB, ...DRAG_TRICKS, 'makeWay', ...BASIC_MOVES]);
     expect(partsOf(T, 'scenarios').map((p) => p.id)).toEqual(['stepOne', ...READ_EXAMPLES.map((id) => id.toLowerCase())]);
   });
 

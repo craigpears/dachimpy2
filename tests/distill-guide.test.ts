@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
-  BEHIND_THE_SCENES, PLAN, RULES_OF_THUMB, SORTED_RIGHT, STUCK_ON_TOP, TRICKS, pairOn, amongBlacks, endOf, firstLevel, fluidMotion, guide, isFluid, liveMove, phaseExamples, position, sameMove,
+  BASIC_MOVES, BEHIND_THE_SCENES, PLAN, RULES_OF_THUMB, SORTED_RIGHT, STUCK_ON_TOP, TRICKS, pairOn, amongBlacks, endOf, firstLevel, fluidMotion, guide, isFluid, liveMove, phaseExamples, position, sameMove,
   techniqueExamples, techniqueOrder, trickExamples, levelRows, unsorted, READ_EXAMPLES, readingExamples,
 } from '../src/distill-guide';
 import { STATES, TACTICS, readBoard } from '../src/distill-read';
@@ -41,7 +41,7 @@ const words = (s: string) => [...s.matchAll(/<p[^>]*>([^<]+(?:<[^p][^>]*>[^<]*)*
 
 const g = guide();
 /** What the page shows: the rules of thumb, and each phase's moves. */
-const shownItems: GuideItem[] = [...RULES_OF_THUMB.map((name): GuideItem => ({ kind: 'trick', name })), ...PHASE_ORDER.flatMap((p) => PLAN[p])];
+const shownItems: GuideItem[] = [...RULES_OF_THUMB.map((name): GuideItem => ({ kind: 'trick', name })), ...BASIC_MOVES.map((name): GuideItem => ({ kind: 'technique', name })), ...PHASE_ORDER.flatMap((p) => PLAN[p])];
 
 describe('the read version: a section for everything the code has (13 Nov, "everything\'s just kept in sync")', () => {
   it('has a section, in words, for every move it shows (the rest behind the scenes, 14 Nov)', () => {
@@ -65,12 +65,11 @@ describe('the read version: a section for everything the code has (13 Nov, "ever
     }
     expect([...at].sort((a, b) => a - b)).toEqual(at);
   });
-  it('has a line for every level, its target\'s own', () => {
-    for (const l of LEVELS) {
-      const s = section('data-level', l.name);
-      expect(s, `no line for the level ${l.label}`).not.toBeNull();
-      expect(words(s!).length).toBeGreaterThan(0);
-    }
+  it('teaches no rules or targets up front, straight to the rules of thumb (14 Nov: "I thought we agreed we\'re not sharing the rules and mechanics here, like we are for people who know the mechanics")', () => {
+    for (const gone of ['id="rules"', 'data-rules=', 'data-level=', 'id="target"', 'id="goal"']) expect(page, gone).not.toContain(gone);
+    const first = page.match(/<h2[^>]*id="([^"]+)"/)![1];
+    expect(first).toBe('thumb');
+    expect(LEVELS.length).toBeGreaterThan(0);   // (the levels still tag each move: "from CC^3")
   });
   it('has a section for each of the user\'s tricks it shows: the rules of thumb', () => {
     expect(TRICKS).toHaveLength(10);
@@ -87,14 +86,19 @@ describe('the read version: a section for everything the code has (13 Nov, "ever
     expect(g.quotes.onward).toBe(ONWARD);
     expect(g.quotes.tell).toBe(TELL);
   });
-  it('says the lesson shows plain moves first and asks you to spot more (13 Nov: "am I supposed to be able to figure out and spot similar things?")', () => {
-    const at = page.indexOf('id="goal"'), goal = page.slice(at, page.indexOf('</article>', at));
-    expect(goal).toMatch(/plain moves first/);
-    expect(goal).toMatch(/for you to find/);
-    expect(goal).toContain('data-quote="trick"');
-    expect(goal).toContain('data-quote="spot"');
+  it('puts the basic moves together after the rules of thumb, the leapfrog with them, in a line, not a list of names (14 Nov: "Climb, sink, lift, drop, weave, make way ... is that supposed to be a terminology setting thing"; "Leapfrog is kind of like in the basic rule of basic thing")', () => {
+    const at = page.indexOf('id="moves"'), end = page.indexOf('id="reading"'), moves = page.slice(at, end);
+    expect(at).toBeGreaterThan(page.indexOf('id="thumb"'));
+    expect(moves).toContain('data-trick-tiles');
+    for (const t of BASIC_MOVES) expect(moves).toContain(`data-technique="${t}"`);
+    expect(moves).not.toMatch(/the climb, a white up through blacks/);
     expect(g.quotes.trick).toBe(TEACH.lift.why);
     expect(g.quotes.spot).toBe(SPOT.three);
+  });
+  it('reads the board in a few lines, not a wall of text, and in plain words (14 Nov: "you get into a wall of text a bit too heavily")', () => {
+    const at = page.indexOf('id="reading"'), end = page.indexOf('id="phases"'), reading = page.slice(at, end);
+    expect(reading.replace(/<[^>]+>/g, '').split(/\s+/).length).toBeLessThan(130);
+    expect(reading.toLowerCase()).not.toContain('ladder');
   });
   it('writes no names or lines of the code\'s into the page by hand: they\'re drawn in', () => {
     for (const line of [...Object.values(HELP), ONWARD, TELL, BEST.none, ...PHASE_ORDER.map((p) => PHASE[p].first), ...PHASE_ORDER.map((p) => PHASES[p].plan)]) {
@@ -188,7 +192,7 @@ describe('the guide in the course of a game (13 Nov, "a few of the simple things
     for (const p of PHASE_ORDER) expect(PLAN[p].every((i) => i.kind === 'technique')).toBe(true);
   });
   it('lays the page out as the plan: each phase\'s heading and board, then its own sections, in order', () => {
-    let last = page.indexOf('id="target"');
+    let last = page.indexOf('id="reading"');
     for (const [k, p] of PHASE_ORDER.entries()) {
       const head = page.indexOf(`id="ph-${p}"`), board = page.indexOf(`data-phase="${p}"`);
       const next = k + 1 < PHASE_ORDER.length ? page.indexOf(`id="ph-${PHASE_ORDER[k + 1]}"`) : page.indexOf('id="then"');

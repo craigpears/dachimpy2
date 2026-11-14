@@ -14,22 +14,16 @@
 
    Helium's lines for the opening choice are theirs, src/lines/helium.ts's TUTOR. */
 import { PHASES, PHASE_ORDER } from './distill-phase.js';
-import { PLAN, READ_EXAMPLES, RULES_OF_THUMB, firstLevel, phaseExamples, readingExamples, techniqueExamples, trickExamples, trickTiles } from './distill-guide.js';
+import { BASIC_MOVES, PLAN, READ_EXAMPLES, RULES_OF_THUMB, firstLevel, phaseExamples, readingExamples, techniqueExamples, trickExamples, trickTiles } from './distill-guide.js';
 import { ROUTINES } from './distill-routines.js';
 import { PATH_LABEL, SWEEP_LABEL } from './distill-bots.js';
 import { DRAG_TRICKS } from './distill-teach.js';
 import { TEACH, TUTOR } from './lines/helium.js';
 import { afterOpening } from './den-helium.js';
 // ---------------------------------------------------------------- the basics
-/** The rules in brief, and setting a target: the guide's first two sections. Shown on the lesson's own board. */
-const BASICS = [
-    { id: 'pieces', title: 'The pieces', line: 'Whites are the rum; browns and blacks are junk; spice never moves; a burnt white spoils its column.', shows: { kind: 'board', ref: 'lesson' }, anchor: 'b-pieces' },
-    { id: 'swaps', title: 'The swap rule', line: 'Two touching bubbles swap only when the lower beats the upper, like rock, paper, scissors.', shows: { kind: 'board', ref: 'lesson' }, anchor: 'b-swaps' },
-    { id: 'furnace', title: 'The furnace', line: 'Every few seconds the right-hand column leaves: down the furnace if it\'s more black than white, else up.', shows: { kind: 'board', ref: 'lesson' }, anchor: 'b-furnace' },
-    { id: 'chains', title: 'Crystal Clears and chains', line: 'A column of only whites sent up is a Crystal Clear; one straight after another is a chain.', shows: { kind: 'board', ref: 'lesson' }, anchor: 'b-chains' },
-    { id: 'target', title: 'A Crystal Clear to aim for', line: 'Pick the chain you\'re after first: it says how many whites to bank before you send them up.', shows: { kind: 'board', ref: 'lesson' }, anchor: 'target' },
-    { id: 'goal', title: 'At Helium\'s still: a goal, and a plan for it', line: 'Clear the junk columns, bank the whites, build the Crystal Clear, send it up.', shows: { kind: 'moves', ref: 'phase:fire' }, anchor: 'goal' },
-];
+/* The basics are the rules of thumb and the basic moves, below (THUMB_PARTS, DRAG_PARTS, the leapfrog): no rules of
+   the game, no targets (the user, 14 Nov: "I thought we agreed we're not sharing the rules and mechanics here, like we
+   are for people who know the mechanics"). */
 // ---------------------------------------------------------------- the phases
 /** The guide's headings for the phases (distilling-guide.html), where they differ from PHASES' labels. */
 const PHASE_TITLES = { fire: 'The fire\'s side', fill: 'Filling the junk columns', block: 'Blocks and the V', chain: 'The chain' };
@@ -85,18 +79,23 @@ const itemPart = (phase) => (it) => {
         ? { id: it.name, title: techniqueTitle(it.name), line: TECHNIQUE_LINES[it.name], shows: { kind: 'moves', ref: `technique:${it.name}` }, phase, anchor: `t-${it.name}`, ...(level ? { tag: level } : {}) }
         : { id: it.name, title: TRICK_WORDS[it.name].title, line: TRICK_WORDS[it.name].line, shows: { kind: BURNS.includes(it.name) ? 'board' : 'moves', ref: `trick:${it.name}` }, phase, anchor: `k-${it.name}` };
 };
-const TRICK_PARTS = [...DRAG_PARTS, ...PHASE_ORDER.flatMap((p) => PLAN[p].map(itemPart(p)))];
+const TRICK_PARTS = PHASE_ORDER.flatMap((p) => PLAN[p].map(itemPart(p)));
 /** The rules of thumb (src/distill-guide.ts, RULES_OF_THUMB): with the basics, apart from the moves (14 Nov: "these
     are scenarios, not moves"). */
 const THUMB_PARTS = RULES_OF_THUMB.map((name) => ({
     id: name, title: TRICK_WORDS[name].title, line: TRICK_WORDS[name].line, shows: { kind: BURNS.includes(name) ? 'board' : 'moves', ref: `trick:${name}` }, anchor: `k-${name}`,
 }));
+/** The techniques with the basic moves (src/distill-guide.ts, BASIC_MOVES: the leapfrog). */
+const BASIC_PARTS = BASIC_MOVES.map((name) => {
+    const level = firstLevel(name)?.label;
+    return { id: name, title: techniqueTitle(name), line: TECHNIQUE_LINES[name], shows: { kind: 'moves', ref: `technique:${name}` }, anchor: `t-${name}`, ...(level ? { tag: level } : {}) };
+});
 // ---------------------------------------------------------------- the scenarios
 /** A board in trouble and what to do there: Helium's step one on their lesson board, and the positions the guide
     reads (READ_EXAMPLES), each with the state and tactic the planner reads on it (tested), and its phase. */
 export const SCENARIO_READS = {
     P2: { state: 'atRisk', tactic: 'freeTrapped', phase: 'fire', title: 'Whites trapped by the fire', line: 'Whites walled in near the fire: free them first, the most at risk first.' },
-    P8: { state: 'atRisk', tactic: 'sortLadder', phase: 'fill', title: 'The ladder about to be lost', line: 'The two right-hand columns unsorted with one about to burn: blacks over browns, now.' },
+    P8: { state: 'atRisk', tactic: 'sortLadder', phase: 'fill', title: 'The right-hand pair unsorted', line: 'The two right-hand columns unsorted with one about to burn: blacks over browns, now.' },
     P10: { state: 'cracked', tactic: 'fixCracks', phase: 'block', title: 'A cracked board', line: 'Junk stranded among the whites: stop filling and fix the cracks, the browns kept as tools.' },
     P7: { state: 'damageControl', tactic: 'fillGaps', phase: 'fire', title: 'Damage control', line: 'Too many whites by the fire for the time left: fill the gaps however you can, the quickest first.' },
     P27: { state: 'damageControl', tactic: 'fillGaps', phase: 'fire', title: 'Damage control, and the hoist', line: 'Browns sunk through blacks, lifting them, where a brown swept off to the top right would split them.' },
@@ -112,18 +111,18 @@ const SCENARIO_PARTS = [
 // ---------------------------------------------------------------- the opening choice
 const L = TUTOR;
 const CHOICES = [
-    { id: 'basics', label: 'The basics', ...L.basics, covers: ['basics', ...DRAG_PARTS.map((p) => p.id)] },
+    { id: 'basics', label: 'The basics', ...L.basics, covers: ['basics'] },
     { id: 'early', label: 'The early or mid game', ...L.early, covers: ['fire', 'fill', 'block'] },
-    // (banking whites for it, the junk along its rows, then the chain and its longer techniques)
-    { id: 'higher', label: 'A higher Crystal Clear', ...L.higher, covers: ['target', 'leapfrog', 'chain'] },
+    // (the junk along its rows, then the chain and its longer techniques)
+    { id: 'higher', label: 'A higher Crystal Clear', ...L.higher, covers: ['block', 'chain'] },
     { id: 'end', label: 'The end game', ...L.end, covers: ['end'] },
 ];
 /** Distilling's tutorial (see the top of this file). */
 export const DISTILL_TUTORIAL = {
     puzzle: 'Distilling', teacher: 'Helium',
-    basics: [...BASICS, ...THUMB_PARTS], phases: PHASE_PARTS, tricks: TRICK_PARTS, scenarios: SCENARIO_PARTS, choices: CHOICES,
+    basics: [...THUMB_PARTS, ...DRAG_PARTS, ...BASIC_PARTS], phases: PHASE_PARTS, tricks: TRICK_PARTS, scenarios: SCENARIO_PARTS, choices: CHOICES,
     hello: L.opening,
-    anchors: { basics: 'rules', phases: 'phases', tricks: 'tricks', scenarios: 'reading' },
+    anchors: { basics: 'thumb', phases: 'phases', tricks: 'phases', scenarios: 'reading' },
 };
 // ---------------------------------------------------------------- what shows each part
 /** What a part's `shows` names, found: the guide's own picture of it (its board, its drags), so the lesson plays the

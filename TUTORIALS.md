@@ -10,7 +10,9 @@ tutorial has the same shape, and you can jump in anywhere"); this is how they're
 
 One `Tutorial` (src/tutorial.ts) for each puzzle, in a file of the puzzle's own (`src/distill-tutorial.ts`):
 
-- **The basics:** the rules in brief, just enough to follow the rest (the game's own tutorial teaches them properly).
+- **The basics:** its rules of thumb and its basic moves, never the game's rules: the tutorials are for players who
+  know the mechanics (the user, 14 Nov: "I thought we agreed we're not sharing the rules and mechanics here"; the
+  game's own tutorial teaches them).
 - **The phases:** a game's stretches in order, each wanting different moves.
 - **The tricks:** each a move or a habit, met in a phase (`phase`), or any time (none).
 - **The scenarios:** a board in a particular kind of trouble, or a particular build, and what to do there; each in a

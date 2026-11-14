@@ -157,7 +157,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   [those] are scenarios, not moves ... find the diamonds in the rough." A move goes on the page if its picture shows
   it plainly and a player would use it; the rest stay behind the scenes, the bots still playing them. Rules of thumb
   (what to keep in mind all game) sit apart from the moves. Distilling's: src/distill-guide.ts, `PLAN`,
-  `RULES_OF_THUMB`, `BEHIND_THE_SCENES`.
+  `RULES_OF_THUMB`, `BEHIND_THE_SCENES`. And no rules of the game or targets up front, straight to the good bits
+  (14 Nov: "it feels like you really have to get past the junky thing still before you get to the good bits ... we
+  are for people who know the mechanics"): the rules of thumb first, then the basic moves, reading the board, the
+  phases; every board's arrows explained where the first boards are.
 - **Every tutorial has the same shape, and you can jump in anywhere (14 Nov).** One standard structure across all
   puzzles: the basics, the phases, the tricks, the scenarios. The read guide has a sticky nav to each; the animated
   lesson asks at the start what you're after (the basics, the early or mid game, a higher Crystal Clear, the end

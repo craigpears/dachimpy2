@@ -45,9 +45,14 @@ import { STATES, TACTICS, readBoard } from './distill-read.js';
 export const TRICKS = ['white', 'danger', 'edge', 'flick', 'blocks', 'kept', 'burnEarly', 'fluid', 'pair', 'channelIn'];
 const tech = (name, longer = false) => (longer ? { kind: 'technique', name, longer } : { kind: 'technique', name });
 const trick = (name) => ({ kind: 'trick', name });
-/** The rules of thumb, a section of their own before the phases, apart from the moves (the user, 14 Nov: "these are
-    scenarios, not moves"): what a player needs first, whatever they're doing. */
+/** The rules of thumb, the page's first section, apart from the moves (the user, 14 Nov: "these are scenarios, not
+    moves"; then, "once you start getting to the rules of thumb, they're great"): what a player needs first, whatever
+    they're doing. No rules or targets before them: the page is for players who know the game (14 Nov: "I thought we
+    agreed we're not sharing the rules and mechanics here"). */
 export const RULES_OF_THUMB = ['white', 'danger', 'edge'];
+/** The techniques with the basic moves, after the rules of thumb, not under a phase (14 Nov: "Leapfrog is kind of
+    like in the basic rule of basic thing"). */
+export const BASIC_MOVES = ['leapfrog'];
 /** The page's moves in the course of a game (the user, 13 Nov: "a few of the simple things are a bit out of order
     ... progression's a bit weird"): each phase in a game's order, and under it its own moves, simplest first. Only
     the ones that teach well (14 Nov: "I love how we've got the moves like the hook, pull a line of browns. But ...
@@ -56,8 +61,10 @@ export const RULES_OF_THUMB = ['white', 'danger', 'edge'];
 export const PLAN = {
     fire: [tech('sweep')],
     fill: [tech('diamond'), tech('turnOver')],
-    block: [tech('leapfrog')],
-    chain: [tech('hook', true), tech('linePull', true)],
+    // (pulling a line of browns with the blocks, junk moved along in rows; 14 Nov: "Pull a line of browns is in a weird
+    // spot", among the chain's)
+    block: [tech('linePull', true)],
+    chain: [tech('hook', true)],
 };
 /** The techniques and tricks the bots still play and the tests still check, each with its board worked out, but
     kept off the read version since 14 Nov (the crawl: "I really can't even see what the crawl is. Those arrows are so
