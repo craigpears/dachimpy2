@@ -7,10 +7,11 @@ import { PLAN, ARRIVE, FURNISH, GUESSES, guessLine, SIGN, TOUR, stopAt, RUB, RUB
 import { houseById, houseList, walkable, atWayOut, step, blocksOf, BACKDROPS, lookingAt, lookView, viewAt, LOOK_HOME, remark, GAZE_START } from '../src/den-houses';
 import type { View, Gaze } from '../src/den-houses';
 import { AT_THE_DOOR, ROBERT, TOUR_LINES, ON_A_GUESS } from '../src/lines/roobear';
+import { furnitureIds } from './furniture-files';
 
 const ROOT = join(__dirname, '..');
 const LOOK_JS = readFileSync(join(ROOT, 'js', 'den-look.js'), 'utf8').replace(/\r\n/g, '\n');
-const FURNITURE_JS = readFileSync(join(ROOT, 'js', 'den', 'furniture.js'), 'utf8');
+const FURNITURE_IDS = furnitureIds();
 const partsOf = (slot: string) => {
   const m = LOOK_JS.match(new RegExp(`\\n  ${slot}: \\{\\n    m: \\[([\\s\\S]*?)\\],\\n    f: \\[([\\s\\S]*?)\\],\\n  \\}`))!;
   return [...(m[1] + m[2]).matchAll(/\['([a-z]+)'/g)].map((x) => x[1]);
@@ -42,10 +43,10 @@ describe("her house in the district: a small one of her own (RULES.md, 'Every pi
 
   it('places only furniture the shared furniture module makes, each in her room, and her sign', () => {
     for (const p of FURNISH) {
-      expect(FURNITURE_JS, p.kind).toMatch(new RegExp(`\\b${p.kind}\\b`));
+      expect(FURNITURE_IDS, p.kind).toContain(p.kind);
       expect(p.x > ROOM.x0 && p.x < ROOM.x1 && p.z > ROOM.z0 && p.z < ROOM.z1, `${p.kind} at ${p.x},${p.z}`).toBe(true);
     }
-    expect(FURNITURE_JS).toMatch(/export const FURNITURE = \{[^}]*\bsign\b/);
+    expect(FURNITURE_IDS).toContain('sign');
     expect(SIGN.text).toMatch(/ROOm/);
   });
 });
