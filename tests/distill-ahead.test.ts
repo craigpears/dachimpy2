@@ -13,9 +13,8 @@ import { parseBoard } from '../src/distilling';
 
 /** Positions whose plan doesn't see its aim through yet, and why (13 Nov). */
 const OPEN: Readonly<Record<string, string>> = {
-  // Its first move sets column 8's white in row 2 moving; move 2 opens the way to it; move 3 turns to column 8's
-  // bottom white instead (the board read now ranks it the more at risk); move 4 comes back and frees it.
-  P1: 'move 3 frees column 8\'s bottom white first, then move 4 frees the white in row 2',
+  // (P1 was open till 14 Nov: move 3 turned to another white after move 2 opened the way to its own. Since, the white a
+  // move opens the way to is the next move's to free, `focusOf` in src/distill-bots.ts: freed by move 3.)
 };
 
 describe('the plan: the bot\'s next moves, played forward', () => {

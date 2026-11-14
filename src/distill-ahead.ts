@@ -17,7 +17,7 @@
 
 import { WHITE } from './distilling.js';
 import type { Board } from './distilling.js';
-import { chainContext, choose, contextFor, timeFor } from './distill-bots.js';
+import { chainContext, choose, contextFor, focusOf, timeFor } from './distill-bots.js';
 import type { Advice, Level } from './distill-bots.js';
 import { playDrags } from './distill-routines.js';
 import type { Drag } from './distill-routines.js';
@@ -48,10 +48,13 @@ export function ahead(s: Stand, level: Level, most = AHEAD.MOVES): Ahead {
   const moves: AheadMove[] = [];
   let aim: string | null = null, reached: number | null = null, ends = `${most} moves`;
   let done: ((b: Board, a: Advice) => boolean) | null = null, on: ((a: Advice) => boolean) | null = null;
+  // (The white a move opened the way to is the next move's to free, as the bots play: `focusOf`.)
+  let focus: { x: number; y: number } | null = null;
   for (let i = 0; i < most; i++) {
     const c = s.stage === 'chain' ? chainContext(cols, s.chain, burns, level.target, level.reach) : { ctx: contextFor(cols, s.stage, burns, level.reach), burns };
     burns = c.burns;
-    const a = choose({ cols, chain: s.chain, timeLeft }, c.ctx, level);
+    const a = choose({ cols, chain: s.chain, timeLeft }, c.ctx, level, focus);
+    focus = focusOf(a);
     if (a.kind !== 'move') { ends = a.kind === 'wait' ? 'it waits' : `it ${a.kind}s`; if (!i) aim = null; break; }
     moves.push({ cols, timeLeft, advice: a });
     const after = playDrags(cols, a.drags);

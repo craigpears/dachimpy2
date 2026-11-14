@@ -95,6 +95,55 @@ export function reachOf(cols, x, y) {
     const ul = neighbourOn(cols, x, y, UP_LEFT), dl = neighbourOn(cols, x, y, DOWN_LEFT);
     return 1 + Math.min(ul ? reachTo(cols, 2, ul, [x, y]) : Infinity, dl ? reachTo(cols, 1, dl, [x, y]) : Infinity);
 }
+/** What it takes to free a white, the user's measure of trapped (13 Nov, on P20 to P22: "there's a two-step solution,
+    which is just drag the blacks in 6 and 7 down to the bottom ... trapped I define as being much more challenging than
+    that, like requiring a complicated move and high number of swaps"): the cheapest way out in one drag or two, in
+    swaps, each drag counting FREE.DRAG swaps more for a person to spot and pick up. One drag: junk brought into its place
+    (`reachOf`). Two: first any piece of junk within FREE.NEAR columns to its left (or the column right of it) moved up
+    to FREE.SWAPS swaps, never the white itself, then the cheapest junk into its place on the board that leaves.
+    Infinity when nothing does in two. Costly: the board reader works it out only for the whites it flags. */
+export const FREE = { DRAG: 2, SWAPS: 6, NEAR: 4, NODES: 160 };
+export function freeCost(cols, x, y) {
+    const one = reachOf(cols, x, y);
+    let best = one === Infinity ? Infinity : one + FREE.DRAG;
+    if (best <= 1 + 2 * FREE.DRAG)
+        return best; // (no second drag can beat one drag of a swap or two)
+    const b = cols.map((c) => [...c]), path = [];
+    for (let px = Math.max(0, x - FREE.NEAR); px <= Math.min(COLS - 1, x + 1); px++) {
+        for (let py = 0; py < b[px].length; py++) {
+            if (!isJunk(b[px][py]))
+                continue;
+            let nodes = 0;
+            const dfs = (cx, cy) => {
+                if (path.length >= FREE.SWAPS || nodes++ > FREE.NODES)
+                    return;
+                for (const w of ALL) {
+                    const n = neighbourOn(b, cx, cy, w);
+                    if (!n || (n[0] === x && n[1] === y))
+                        continue;
+                    const p = b[cx][cy], q = b[n[0]][n[1]];
+                    if (q === SPICE || q === p || !(UP.includes(w) ? beats(p, q) : beats(q, p)))
+                        continue;
+                    b[cx][cy] = q;
+                    b[n[0]][n[1]] = p;
+                    path.push(w);
+                    const k = path.length;
+                    if (k + 2 * FREE.DRAG + 1 < best) {
+                        const r = reachOf(b, x, y);
+                        if (k + r + 2 * FREE.DRAG < best)
+                            best = k + r + 2 * FREE.DRAG;
+                        dfs(n[0], n[1]);
+                    }
+                    path.pop();
+                    b[n[0]][n[1]] = q;
+                    b[cx][cy] = p;
+                }
+            };
+            dfs(px, py);
+        }
+    }
+    return best;
+}
 /** The furnace's ms to each column (Stage I: every column before it burns first, a column's time each). */
 export const burnsIn = (x, timeLeft) => timeLeft + (COLS - 1 - x) * RISK.BURN_MS;
 /** Urgency at ms to burn: 1 at URGENT_MS, more as it nears (at most URGENT_MAX), less further off. */

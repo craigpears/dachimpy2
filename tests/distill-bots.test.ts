@@ -1,7 +1,7 @@
 /* Distilling's bots and their planner (src/distill-bots.ts): every bot the same plan, a target chain each, its
    techniques the routines of src/distill-routines.ts picked by stage, at a person's pace, by the rules (12 Nov).
    What each reaches is tools/distill-bots.mjs's to measure (DISTILLING.md §4). */
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { BLACK, BROWN, BURN_TICKS, COLS, DOWN_RIGHT, Distilling, SHORT, TALL, UP_LEFT, UP_RIGHT, WHITE, neighbourOn, parseBoard } from '../src/distilling';
 import { DistillBot, HELIUM, LEVELS, MENU, P, PAIR_LABEL, chainContext, chainOver, chainZones, nextChainAt, bankFor, brownSweep, clearComingUp, dangerZones, edgeWhites, joinedUp, levelFor, rightOrder, tieBreak, whitesInJunk, advise, backward, choose, contextFor, judge, junkAcross, levelNamed, playSession, tierNamed, turnsIn, weigh } from '../src/distill-bots';
 import type { Advice } from '../src/distill-bots';
@@ -664,5 +664,42 @@ describe('the chain\'s rule of thumb, shared with Helium (13 Nov: "if you\'ve go
     expect(a.letGo).toBe(true);
     expect(a.column).toBe(6);
     expect(a.read).toMatch(/can't go on into column 10/);
+  });
+});
+
+describe('the CC^1 opening (the user, 13 Nov, watching CC^1: "it should be like trying to build it in the second or third column, like close to what\'s being burnt, just to have a bit of burnt buffer")', () => {
+  // Built, and off by default since 14 Nov (it cost CC^1 whites in the bots' run: P.BUFFER, P.KEEP_FILL); tested with
+  // them on, for the user to decide.
+  const was = { BUFFER: P.BUFFER, KEEP_FILL: P.KEEP_FILL };
+  beforeAll(() => { P.BUFFER = 2; P.KEEP_FILL = 1; });
+  afterAll(() => { Object.assign(P, was); });
+  it('on a fresh board the first chain waits for a buffer: junk columns clear of white built or burned by the fire first, its whites got out, 13 Nov (and 14 Nov: a buffer begun in the chain burned its whites)', () => {
+    for (let seed = 1; seed <= 3; seed++) {
+      const g = new Distilling(seeded(seed)), bot = new DistillBot(levelNamed('cc1'));
+      expect(bot.plan(g).stage, `seed ${seed}`).toBe('junk');
+      let started = false;
+      playSession(g, levelNamed('cc1'), 2, undefined, (a) => {
+        if (started || a.stage !== 'chain') return;
+        started = true;
+        // Built right behind the junk: every column right of it is junk to burn (more junk than white), none a column
+        // of whites skipped over.
+        for (let x = a.column! + 1; x < COLS; x++) {
+          const c = g.cols[x], w = c.filter((p) => p === WHITE).length;
+          expect(c.length - w, `seed ${seed}, column ${x + 1}`).toBeGreaterThan(w);
+        }
+      });
+      expect(started, `seed ${seed}`).toBe(true);
+      expect(g.whitesBurned, `seed ${seed}`).toBe(0);
+    }
+  });
+  it('never a white moved back out of the column it\'s filling, 13 Nov ("it doesn\'t seem to actually try and get the whites there ... and then it\'s just moved that out")', () => {
+    for (let seed = 1; seed <= 2; seed++) {
+      const g = new Distilling(seeded(seed));
+      playSession(g, levelNamed('cc1'), 0.5, undefined, (a) => {
+        if (a.stage !== 'chain' || a.kind !== 'move' || a.column === undefined) return;
+        const after = playDrags(g.cols, a.drags);
+        if (after) expect(after[a.column].filter((p) => p === WHITE).length, `seed ${seed}`).toBeGreaterThanOrEqual(g.cols[a.column].filter((p) => p === WHITE).length);
+      });
+    }
   });
 });

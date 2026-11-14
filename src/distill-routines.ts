@@ -47,7 +47,9 @@ export type Step = [number, number, number];
 export interface Drag { x: number; y: number; ways: number[] }
 export type RoutineName = 'rescue' | 'junkColumn' | 'diamond' | 'turnOver' | 'store' | 'crawl' | 'figureEight' | 'linePull' | 'leapfrog' | 'hook' | 'channel';
 /** A routine's moves from where the board stands: its drags in order, and why, in plain words. */
-export interface Move { routine: RoutineName; drags: Drag[]; reason: string }
+/** A move: the routine it is, its drags, why in a line; `label`, a name of its own for a player where it's a trick the
+    routine's own label doesn't say (the board reader's hoist, a store's swaps used to bring blacks and browns together). */
+export interface Move { routine: RoutineName; drags: Drag[]; reason: string; label?: string }
 
 /** What the player is after. Stage I ('junk'): whites left, junk right, the junk columns from `burnFrom`
     to the furnace burned one at a time. Stage II ('chain'): whites right; the columns from `burnFrom`

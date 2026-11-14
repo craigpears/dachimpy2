@@ -15,7 +15,7 @@
 
    Pure: no randomness, no clock; knows nothing of the den. */
 import { WHITE } from './distilling.js';
-import { chainContext, choose, contextFor, timeFor } from './distill-bots.js';
+import { chainContext, choose, contextFor, focusOf, timeFor } from './distill-bots.js';
 import { playDrags } from './distill-routines.js';
 /** The plan's length. */
 export const AHEAD = { MOVES: 5 };
@@ -34,10 +34,13 @@ export function ahead(s, level, most = AHEAD.MOVES) {
     const moves = [];
     let aim = null, reached = null, ends = `${most} moves`;
     let done = null, on = null;
+    // (The white a move opened the way to is the next move's to free, as the bots play: `focusOf`.)
+    let focus = null;
     for (let i = 0; i < most; i++) {
         const c = s.stage === 'chain' ? chainContext(cols, s.chain, burns, level.target, level.reach) : { ctx: contextFor(cols, s.stage, burns, level.reach), burns };
         burns = c.burns;
-        const a = choose({ cols, chain: s.chain, timeLeft }, c.ctx, level);
+        const a = choose({ cols, chain: s.chain, timeLeft }, c.ctx, level, focus);
+        focus = focusOf(a);
         if (a.kind !== 'move') {
             ends = a.kind === 'wait' ? 'it waits' : `it ${a.kind}s`;
             if (!i)

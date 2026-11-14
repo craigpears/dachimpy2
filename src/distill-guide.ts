@@ -407,8 +407,9 @@ export function trickExamples(): TrickExample[] {
     pieces it's about ringed and the bot's move there drawn. */
 export interface ReadingExample { id: string; state: BoardState; tactic: Tactic; stateLabel: string; tacticLabel: string; about: string; why: string; picture: Picture }
 /** The positions the page reads (src/distill-positions.ts, the user's own critiques): a white trapped by the fire, the
-    ladder about to be lost, a cracked board, damage control. */
-export const READ_EXAMPLES = ['P2', 'P8', 'P10', 'P7'] as const;
+    ladder about to be lost, a cracked board, damage control, and damage control met by the hoist (13 Nov, P27: browns
+    sunk through blacks, lifting them, where a brown swept off to the top right would split them further). */
+export const READ_EXAMPLES = ['P2', 'P8', 'P10', 'P7', 'P27'] as const;
 /** Each READ_EXAMPLES position read, as the planner reads it, with the bot's move there now. */
 export function readingExamples(): ReadingExample[] {
   return READ_EXAMPLES.map((id) => {

@@ -38,6 +38,9 @@ export const PATTERN = {
   TAIL_ROWS: 3,
   /** The ladder: a column at least this share junk counts as junk. */
   JUNK_SHARE: 0.75,
+  /** Junk the wrong way up (`upsideDown`): the top and bottom this many half rows, and the pieces wrong at least. */
+  THIRD: 5,
+  UPSIDE_MIN: 6,
 };
 
 /** A piece found by a pattern. */
@@ -176,6 +179,26 @@ export function ladder(cols: Board, timeLeft: number): { cols: [number, number];
   return { cols: pair, unsorted: u, risk: u * near };
 }
 
+/** Junk sorted the wrong way up (the user, 13 Nov, on P17: "there's a lot of browns near the top left, blacks near
+    the bottom left ... it's going to leave you ... stranding those other black pieces, so it should have raised them
+    up"; on P23: "so many blacks at the bottom, browns at the top ... you get those whites only so far and then they're
+    going to get a bit stuck"): in the columns left of the finished junk columns (from `from`, up to `to`), the browns in
+    the top third and the blacks in the bottom third, against the other way round. A brown can't sink through whites nor
+    a black rise through them, so browns high and blacks low never meet: the blacks strand at the bottom, and the
+    whites' way up (past blacks) and down (past browns) closes. Hoisting is its fix (src/distill-goals.ts): a brown sunk
+    through the blacks, lifting them. `wrong`: the browns high and blacks low; `right`: the blacks high and browns low;
+    `flagged` when there are UPSIDE_MIN of the wrong at least and twice as many as the right. */
+export function upsideDown(cols: Board, from = 0, to = COLS - doneFromRight(cols)): { wrong: At[]; right: number; flagged: boolean } {
+  const wrong: At[] = [];
+  let right = 0;
+  for (let x = Math.max(0, from); x < Math.min(to, COLS); x++) cols[x].forEach((p, y) => {
+    const h = halfOf(cols, x, y), high = h <= PATTERN.THIRD, low = h >= 16 - PATTERN.THIRD;
+    if ((p === BROWN && high) || (p === BLACK && low)) wrong.push({ x, y });
+    else if ((p === BLACK && high) || (p === BROWN && low)) right++;
+  });
+  return { wrong, right, flagged: wrong.length >= PATTERN.UPSIDE_MIN && wrong.length >= 2 * right };
+}
+
 /** Every pattern on a board, read at once. */
 export interface Patterns {
   stranded: At[];
@@ -186,11 +209,13 @@ export interface Patterns {
   fillable: { columns: number; junk: number; needed: number };
   tail: { from: number; to: number; unsorted: At[] };
   ladder: { cols: [number, number]; unsorted: number; risk: number } | null;
+  /** Junk the wrong way up, browns high and blacks low (`upsideDown`). */
+  upsideDown: { wrong: At[]; right: number; flagged: boolean };
 }
 export function patternsOf(cols: Board, timeLeft: number): Patterns {
   const at = whitesSide(cols), s = stranded(cols, at), w = stuckWhites(cols), f = fillable(cols);
   return {
     stranded: s, stuckWhites: w, stuck: s.length + w.length, strandedShare: s.length + f.junk > 0 ? s.length / (s.length + f.junk) : 0,
-    fillable: f, tail: tail(cols), ladder: ladder(cols, timeLeft),
+    fillable: f, tail: tail(cols), ladder: ladder(cols, timeLeft), upsideDown: upsideDown(cols),
   };
 }

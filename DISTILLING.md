@@ -2127,6 +2127,110 @@ minutes of play each, about 8 minutes to run), no two from the same session with
   three in from the fire, the columns to its right let burn as junk (a buffer), every white to the right of it brought
   left before its column goes; and never a white moved out of the target column.
 
+### The batch judged: trapped by what it takes, the hoist, and the lead-up (13 Nov, seventeenth run)
+Every verdict on P13 to P30 is now a test (src/distill-positions.ts, VERDICTS; tests/distill-positions.test.ts), the
+past-saving ones (P13, P14, P16, P18, P19) recorded as "past saving, the lead-up wanted", with no test of the move. The
+judged batch moved under its themes, two new ones among them: "Close, not trapped" (P20, P21, P22: P21 and P22 were found
+as like P5 and P6, trapped; the user judged them not, so they moved, and the challenge test now checks the reader no
+longer reads them so) and "Hoisting" (P17). P26 moved to quick sorting (its doomed white given up, it reads so).
+- **Trapped, measured by what it takes** (src/distill-risk.ts, `freeCost`; src/distill-read.ts, `isTrapped`): a white's
+  cheapest way out in one drag or two (the swaps, two more a drag to spot and pick up: junk brought into its place,
+  after any one piece of junk near it moved first). Trapped when there's none or it's 14 or more; or near the top (two
+  half rows down at most), junk on three sides or more and more than a quick drag out (P1, P6: "there's just no way for
+  things to move as freely up there"). P20 and P22 now aren't (their ways out 5 and 6); P21's top whites are 12, one long
+  drag, so not either: the user's own two steps (the blacks in columns 6 and 7 dropped) aren't a way the search finds,
+  so that move's verdict is open. A trapped white that can still be freed comes before the quick fills (P5 kept its
+  reading so). P1, P2, P5 and P6 read as before.
+- **Risks the reader missed:** the junk the wrong way up (src/distill-patterns.ts, `upsideDown`: browns in the top third
+  and blacks in the bottom third, six at least and twice the other way round; P17, P23), the board then at risk and
+  the why line saying "hoist". And a white in the furnace's column nothing frees in time is given up as junk (`doomed`):
+  read no more, its zone dropped, so P26 no longer waits; it plays the quick fills.
+- **The hoist** (src/distill-bots.ts, `hoists`; src/distill-read.ts, `hoistDrags`, `hoistOrder`; the goal 'hoist' in
+  src/distill-goals.ts; its label "Hoist", the store routine's swaps): a brown sunk through blacks, lifting them, or a
+  black lifted through browns, left of the column being built, weighed by the order it gains (browns down, blacks up) a
+  second. In damage control the fills come only from junk two columns from the gap at most; with none, it hoists (P27
+  now hoists column 4's brown down through two blacks; P28 drops a near black into column 9). In the block phase with
+  the junk the wrong way up, hoists were on offer at 0.4 of a board score a second; off since 14 Nov (P.HOIST 0: it cost
+  CC^5 its target, below). P17's own left side has none to make yet (no brown touches a black there): the verdict tests
+  the reader seeing the risk.
+- **The V's tip** (`vTip`, `tipDrags`): sorting the ladder or the tail, a brown brought down to the leftmost black of the
+  V's bottom rows (joined to the junk on its right), in for it, first (P29: column 8's brown down three to column 7, row
+  7; P30: column 6's brown one swap down to column 7, row 8).
+- **The CC^1 opening** (P.BUFFER, P.KEEP_FILL): first built as a buffer begun in the chain, two columns by the fire
+  burned before the first Crystal Clear; then (14 Nov) as Stage I going on till two junk columns clear of white are built
+  or burned; and in the chain no move taking a white out of the column being filled. Both cost CC^1 whites in the bots'
+  run (below), so both are off by default, switchable, tested with them on (tests/distill-bots.test.ts): the user to
+  decide.
+- **A plan seen through** (14 Nov, `focusOf`, `choose`'s `focus`, P.FOLLOW): the white a move only opened the way to is
+  the next move's to free, read as if it were the one trapped white, unless something burning sooner needs the move (the
+  furnace's white, damage control, the ladder about to go). P1's plan now frees its white by move 3, every move on it:
+  no longer open (tests/distill-ahead.test.ts).
+- **Still open:** P15's plan seen through (its whites need three drags or more: a brown into column 9 in the white's row,
+  the line of browns swapped for blacks, the white up; nothing frees them in two drags, so the follow-through has
+  nothing to follow, and a plan of three drags isn't searched for), and P21's two drops (the user's two steps, the blacks
+  in columns 6 and 7 dropped, aren't a way into the whites' places the reader or the path search find).
+
+The seventeenth run, 20 boards a level (seeds 5000 on), against the sixteenth:
+
+| Bot | Longest chain: mean (best) | Target reached | Sessions with no white burned | Whites burned (first 3 min) | Points a minute | Columns up not Crystal Clear |
+|---|---|---|---|---|---|---|
+| CC^1, sixteenth | 3.6 (6) | 20/20 | 14/20 | 0.5 (0.3) | 13.1 | 4.5 |
+| **CC^1, seventeenth** | 3.4 (5) | 20/20 | 11/20 | 0.9 (0.4) | 12.6 | 4.8 |
+| CC^2, sixteenth | 3.8 (6) | 20/20 | 12/20 | 0.7 (0.3) | 13.6 | 4.7 |
+| **CC^2, seventeenth** | 3.5 (5) | 20/20 | 12/20 | 0.8 (0.3) | 12.8 | 5.0 |
+| CC^3, sixteenth | 3.4 (6) | 17/20 | 14/20 | 0.5 (0.3) | 13.5 | 4.6 |
+| **CC^3, seventeenth** | 3.5 (5) | 17/20 | 14/20 | 0.5 (0.3) | 12.9 | 4.7 |
+| CC^5, sixteenth | 4.3 (7) | 10/20 | 17/20 | 0.3 (0.1) | 15.2 | 3.9 |
+| **CC^5, seventeenth** | 4.0 (6) | **4/20** | 17/20 | 0.3 (0.0) | 14.9 | 4.0 |
+| CC^8, sixteenth | 4.1 (7) | 0/20 | 15/20 | 0.3 (0.1) | 14.2 | 4.5 |
+| **CC^8, seventeenth** | **4.5 (7)** | 0/20 | 14/20 | 0.5 (0.1) | **15.0** | 4.2 |
+
+Plainly: CC^3 holds; CC^8's chains are longer (4.1 to 4.5) and it scores more a minute (14.2 to 15.0), a few more whites
+burned (0.3 to 0.5); CC^1 burns more whites (0.5 to 0.9 a session, sessions with none 14 to 11), most likely the buffer
+columns' whites (the chain saves only the furnace's column's whites); CC^5 reaches its target in 4 sessions of 20, not
+10, its chains a little shorter (4.3 to 4.0).
+
+**Split, 14 Nov** (20 sessions a check, one tier each, `PLAN` and the new `READ` overrides of tools/distill-bots.mjs):
+- **CC^1's whites were the opening's.** With both off, CC^1 plays exactly as on main (3.6, 14/20, 0.5). The buffer begun
+  in the chain: 0.9 whites; with the chain made to save the buffer's whites (its columns danger zones): 1.1, and the
+  chain several times slower (the wide path search every move), so backed out. The buffer as Stage I going on till two
+  junk columns are clean: 0.8, chains 3.1. Keeping every white in the column being filled: 0.6, sessions with none 12
+  (also with an exception for a white moved to save another from a burning column). So both are off (P.BUFFER 0,
+  P.KEEP_FILL 0), and the opening the user asked for waits on their word.
+- **CC^5's target was the block phase's hoists and the quick fills first.** The buffer off: no change (4/20). The hoists
+  off: 7/20, chains 4.3. Then the quick sorting fills first off as well: 9/20, chains 4.7. The V's tip off, or damage
+  control's near fills off: no change. So the block phase's hoists are off (P.HOIST 0; damage control keeps its hoist,
+  P27), and the quick fills come first only when a doomed white has been given up (P26's case).
+
+After the fixes, every tier on the same 20 boards:
+
+| Bot | Longest chain: mean (best) | Target reached | Sessions with no white burned | Whites burned (first 3 min) | Points a minute | Columns up not Crystal Clear |
+|---|---|---|---|---|---|---|
+| CC^1, sixteenth (main) | 3.6 (6) | 20/20 | 14/20 | 0.5 (0.3) | 13.1 | 4.5 |
+| **CC^1, after** | 3.6 (6) | 20/20 | 14/20 | 0.5 (0.3) | 13.1 | 4.5 |
+| CC^2, sixteenth (main) | 3.8 (6) | 20/20 | 12/20 | 0.7 (0.3) | 13.6 | 4.7 |
+| **CC^2, after** | **3.9 (6)** | 20/20 | **13/20** | **0.5 (0.3)** | 13.6 | **4.5** |
+| CC^3, sixteenth (main) | 3.4 (6) | 17/20 | 14/20 | 0.5 (0.3) | 13.5 | 4.6 |
+| **CC^3, after** | **3.6 (6)** | 17/20 | 14/20 | 0.5 (0.3) | 13.0 | 4.7 |
+| CC^5, sixteenth (main) | 4.3 (7) | 10/20 | 17/20 | 0.3 (0.1) | 15.2 | 3.9 |
+| **CC^5, after** | 4.3 (6) | 9/20 | 16/20 | 0.3 (**0.0**) | **16.2** | 3.9 |
+| CC^8, sixteenth (main) | 4.1 (7) | 0/20 | 15/20 | 0.3 (0.1) | 14.2 | 4.5 |
+| **CC^8, after** | **4.2 (7)** | 0/20 | 15/20 | 0.3 (**0.0**) | **14.4** | **4.3** |
+
+CC^1 as on main; CC^2, CC^3 and CC^8 as good or better; CC^5 a session short of main on its target and on sessions with
+no white burned (9 and 16 of 20, against 10 and 17), its whites burned the same and its points a minute up (15.2 to 16.2).
+Not the follow-through (off, the same 9 and 16); what's left is the reader's own changes (trapped by what it takes, the
+doomed white given up, the junk the wrong way up), the verdicts' substance, so it's left at a session.
+
+**The lead-up batch, P31 to P42** (`tools/distill-positions.mjs leadup`, the new "To judge" section): the user, "the
+ones I really want to be judging are the things that have gotten me into that position beforehand", and then "try and
+get earlier in". From fresh play (CC^3, CC^5 and CC^8 on seeds 10 to 21, four minutes each, about 8 minutes to run): at
+every Stage I move, the whites from column 5 on in trouble (`inTrouble`: trapped by the new measure, a way out of 8 or
+more, or in the furnace's column past saving in time) counted before and after it; a move after which one more is is
+the moment, its board the last where that white was free enough, the move drawn, the white ringed (`shut`). 175 found;
+12 kept, the earliest first, one a deal, all in the first 100 s (most in the first 40). Each asks "What should the bot
+have done here instead?" Tested: each still shows its move, the ringed white out of trouble before it and in after.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.

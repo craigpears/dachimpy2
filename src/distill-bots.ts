@@ -51,12 +51,12 @@ import type { Board, Column, DistillEvent } from './distilling.js';
 import {
   M, ROUTINES, burnsClean, canGo, clear, colourLeft, fillTarget, isJunk, junkTarget, measure, playDrags, swapsIn, whitesFrom,
 } from './distill-routines.js';
-import { blockPhase, boardScore, keptTools, trappedWhite, wall } from './distill-score.js';
+import { blockPhase, boardScore, doneFromRight, keptTools, trappedWhite, wall } from './distill-score.js';
 import { PATH, freed, pairRescue, pathMoves, stuck } from './distill-path.js';
 import type { PathMove, Stuck } from './distill-path.js';
 import { phaseOf, weightIn } from './distill-phase.js';
 import type { Phase } from './distill-phase.js';
-import { TACTICS, ladderDrags, moves as movesAny, nearDrags, progress, quickFills, readBoard, sorts, tailDrags, toolBrowns } from './distill-read.js';
+import { TACTICS, hoistDrags, hoistOrder, ladderDrags, moves as movesAny, nearDrags, progress, quickFills, readBoard, sorts, tailDrags, tipDrags, toolBrowns } from './distill-read.js';
 import type { BoardState, Reading, Tactic } from './distill-read.js';
 import { joinPairs } from './distill-teach.js';
 import { ownGoal, purposeful, stepsFor } from './distill-goals.js';
@@ -221,6 +221,25 @@ export const P = {
       one that has (0 off). */
   GOALS: 1,
   GOAL_LOOK: 30,
+  /** The first chain: at least this many junk columns by the fire, built in Stage I (their whites got out, as Stage I
+      gets them out) or burned, before it starts: a buffer (`DistillBot`, the CC^1 opening; 0 off). Off since 14 Nov:
+      at 2 CC^1 burned more whites (0.5 a session to 0.8, sessions with none 14 of 20 to 9, chains 3.6 to 3.1); a buffer
+      begun in the chain instead burned 0.9, 1.1 with the chain made to save its whites. The user to decide. */
+  BUFFER: 0,
+  /** The chain: never a white taken out of the column it's filling (the CC^1 opening; 0 off). Off since 14 Nov: on, CC^1
+      burned 0.6 whites a session, not 0.5, sessions with none 12 of 20, not 14, chains 3.4, not 3.6. */
+  KEEP_FILL: 0,
+  /** A plan seen through: the white the last move opened the way to is freed next (`choose`'s `focus`; 0 off). */
+  FOLLOW: 1,
+  /** The block phase with the junk the wrong way up: a hoist's order gained a second (`hoists`) counts this much of a
+      board score gained a second (0 off). Off since 14 Nov: at 0.4 it cost CC^5 its target (10 sessions of 20 to 7, the
+      seventeenth run and a check); the hoist stays in damage control. */
+  HOIST: 0,
+  /** Quick sorting with a doomed white given up: its fills into the whites' places by the fire played first (P26; 0
+      off). Only then since 14 Nov: always, it cost CC^5 (with the hoist, 9 sessions of 20 at its target to 7). */
+  QUICK_FIRST: 1,
+  /** Sorting the ladder or the tail: a brown brought down to the V's tip first (P29, P30; 0 off). */
+  TIP: 1,
 };
 
 /** What the planner says to do now: its stage, and a routine's drags, a burn, a wait or a dismiss, with
@@ -583,7 +602,10 @@ export function weigh(sit: Situation, ctx: Ctx, style: Style, reading?: Reading)
   const block = one && blockPhase(cols), base = one ? boardScore(cols, block) : measure(cols, ctx);
   const wrong = (b: Board) => (burning ? b[last].filter((p) => p === WHITE).length : junkAt(b[last]));
   const urgent = sit.timeLeft < P.URGENT && wrong(cols) > 0;
-  const zones = dangerZones(cols, ctx.stage, burning);
+  // (The furnace's whites the board reader gave up as junk, past saving, aren't a danger zone: P26, "you're doomed on
+  // that white, that's going to be junk".)
+  const lost = one ? (reading?.given?.length ?? 0) : 0;
+  const zones = dangerZones(cols, ctx.stage, burning).filter((z) => !(z === last && lost > 0 && lost >= cols[last].filter((p) => p === WHITE).length));
   // Never a white into a danger zone (the furnace's column always, when it burns).
   const guard = zones.length ? Math.min(...zones) : burning ? last : COLS;
   const out: Weighed[] = [];
@@ -597,8 +619,13 @@ export function weigh(sit: Situation, ctx: Ctx, style: Style, reading?: Reading)
   const over = (b: Board) => { let n = 0; if (ctx.over) for (let x = ctx.over[0]; x <= ctx.over[1]; x++) n += b[x].filter((p) => p === WHITE).length; return n; };
   const over0 = over(cols);
   // What no move may do, wherever it comes from (a routine, the path search, the board reader's tactic).
+  const fillWhites = (b: Board) => (!one && ctx.fill >= 0 && ctx.fill < COLS ? b[ctx.fill].filter((p) => p === WHITE).length : 0), fill0 = fillWhites(cols);
   const admissible = (drags: readonly Drag[], after: Board): boolean => {
     if (ctx.over && over(after) > over0) return false;
+    // Never a white taken back out of the column the chain's filling (the user, 13 Nov, watching CC^1: its target column
+    // lit, "it doesn't seem to actually try and get the whites there ... and then it's just moved that out").
+    // (Unless the white goes to save another from a column burning: whites out of the columns to burn.)
+    if (P.KEEP_FILL && fillWhites(after) < fill0 && !(burning && whitesFrom(after, ctx.burnFrom) < whitesFrom(cols, ctx.burnFrom))) return false;
     if (urgent && (wrong(after) >= wrong(cols) || msFor(drags, style, plainDrag(drags)) > sit.timeLeft)) return false;
     if ((burning && wrong(after) > wrong(cols)) || whitesFrom(after, guard) > whitesFrom(cols, guard)) return false;
     // (A white got out of the two columns nearest the fire is more urgent, wherever it lands.)
@@ -703,6 +730,12 @@ export function weigh(sit: Situation, ctx: Ctx, style: Style, reading?: Reading)
     const plan = setUp(sit, ctx, style, out, zone, zone === edgeAt && zone < last - 1, base, block);
     if (plan) return [plan];
   }
+  // Quick sorting: its fills first, a black down or a brown up into a white's place by the fire (P26: "start getting the
+  // ones in column 9 out of the way and dragging those blacks down ... just in quick drag the black down motions").
+  if (P.QUICK_FIRST && r && r.tactic === 'quickSort' && r.targets.length && (r.given?.length ?? 0) > 0) {
+    const fills = out.filter((m) => { const d = m.move.drags[m.move.drags.length - 1], e = endOf(cols, d); return sorts(cols, d) && r.targets.some((t) => t.x === e[0] && t.y === e[1]) && m.after![e[0]][e[1]] !== WHITE; });
+    if (fills.length) return fills.sort((a, b) => b.value - a.value);
+  }
   // The V's tail sorted, so the next sweep runs through (P9), once no white's in danger.
   if (r && r.tactic === 'sortTail') {
     const t = byTactic(sit, ctx, style, r, out, admissible);
@@ -722,6 +755,12 @@ export function weigh(sit: Situation, ctx: Ctx, style: Style, reading?: Reading)
     }
     const saves = out.filter(saving);
     if (saves.length) return saves.map((m) => ({ ...m, saves: true })).sort((a, b) => b.value - a.value);
+  }
+  // The block phase with the junk the wrong way up, browns high and blacks low (the user, 13 Nov, P17: "it's going to
+  // leave you ... stranding those other black pieces, so it should have raised them up"): the hoists on offer too, their
+  // order gained a second weighed at P.HOIST against the board score's gain a second.
+  if (one && P.HOIST && r && block && r.patterns.upsideDown.flagged) {
+    for (const h of hoists(sit, style, r, admissible)) out.push({ ...h, value: h.value * P.HOIST });
   }
   return out.sort((a, b) => rank(b) - rank(a)).map((m) => (even ? m : { ...m, weighted: true }));
 }
@@ -779,6 +818,29 @@ export function byTactic(sit: Situation, ctx: Ctx, style: Style, r: Reading, out
     }
     return res.sort((a, b) => b.value - a.value);
   };
+  // The ladder and the tail: a brown brought down goes to the V's tip, swapped in for the black there, first (the user,
+  // 13 Nov, P29, P30: "the point of the browns down is you want them at that kind of bottom left tip ... Where it's just
+  // kind of pulling a random brown piece down at the moment. It's not really achieving the goal").
+  if (P.TIP && (r.tactic === 'sortLadder' || r.tactic === 'sortTail')) {
+    const tips: Weighed[] = [];
+    for (const d of tipDrags(cols, r)) {
+      const after = playDrags(cols, d);
+      if (!after || !admissible(d, after) || trappedNow(after) > trapped0) continue;
+      // (Not a brown from the furnace's column that can't be got out before it goes.)
+      if (d[0].x === last && msFor(d, style) > sit.timeLeft) continue;
+      const tip = endOf(cols, d[0]);
+      tips.push({ move: { routine: 'turnOver', drags: d, reason: `a brown brought down to the V's tip, column ${tip[0] + 1}, row ${tip[1] + 1}, swapped in for the black there` }, after, value: 1 / (timeFor(d, style) / 1000), tactic: r.tactic, saves: true });
+    }
+    if (tips.length) return tips.sort((a, b) => b.value - a.value);
+  }
+  if (r.tactic === 'fillGaps' && r.state === 'damageControl') {
+    const fills = ranked(cands);
+    if (fills.length) return fills;
+    // No junk near the gaps: hoist (P27: "there's not any time to zigzag stuff around, so you've got to do like hoisting
+    // things up and down with the browns"), blacks and browns brought together for the fills to come.
+    const hs = hoists(sit, style, r, admissible);
+    return hs.map((m) => ({ ...m, saves: true }));
+  }
   if (r.tactic !== 'freeTrapped') return ranked(cands);
   // The trapped whites one at a time, the most at risk first ("the top right first"): what frees it, a piece brought
   // round to it, the quick fills and short drags into its place among them; failing all of them, what opens the way to
@@ -796,6 +858,29 @@ export function byTactic(sit: Situation, ctx: Ctx, style: Style, r: Reading, out
   }
   return [];
 }
+
+/** The hoist (the user, 13 Nov, P17, P20, P27: "using the brown to kind of hoist up some in column 2 and 3"; "a nice
+    perfect cluster on the left of like browns and blacks close to each other ... hoist the black"): a brown sunk through
+    blacks, lifting them, or a black lifted through browns, left of the column being built, so blacks and browns come
+    together rather than split further (src/distill-read.ts, `hoistDrags`). Each admissible one, weighed by the swaps of
+    order it gains (`hoistOrder`, a brown down or a black up a place each) a second of a person's time, best first. */
+export function hoists(sit: Situation, style: Style, r: Reading, admissible: (drags: readonly Drag[], after: Board) => boolean): Weighed[] {
+  const { cols } = sit, to = Math.min(r.building, COLS - 1), base = hoistOrder(cols, to), out: Weighed[] = [];
+  if (!style.path) return out;
+  for (const d of hoistDrags(cols, to)) {
+    const after = playDrags(cols, d);
+    if (!after || !admissible(d, after)) continue;
+    const p = cols[d[0].x][d[0].y] === BROWN ? 'brown' : 'black';
+    const gain = (hoistOrder(after, to) - base) / 2;
+    out.push({
+      move: { routine: 'store', label: HOIST_LABEL, drags: d, reason: `hoist: the ${p} at column ${d[0].x + 1}, row ${d[0].y + 1} ${p === 'brown' ? 'sunk through the blacks, lifting them' : 'lifted up through the browns'}, blacks and browns brought together` },
+      after, value: gain / (timeFor(d, style) / 1000),
+    });
+  }
+  return out.sort((a, b) => b.value - a.value);
+}
+/** The hoist's name for a player. */
+export const HOIST_LABEL = 'Hoist';
 
 /** The chain's danger zones (`weigh`): the column being filled and the one after it, each while it's mostly white
     with a piece of junk in it that can't go left on its own (a brown on the top, a black on the bottom), the
@@ -886,8 +971,19 @@ export function clearComingUp(cols: Board): boolean {
 /** A set-up move's goal (`setUp`): next move's save, which it opens. */
 const SETUP_GOAL = "set up next move's save of the white by the fire";
 
+/** The white a move only opened the way to (its last goal's 'open', src/distill-goals.ts): the next move's `focus`. */
+export function focusOf(a: Advice): { x: number; y: number } | null {
+  if (a.kind !== 'move' || a.stage !== 'junk') return null;
+  for (let i = (a.steps?.length ?? 0) - 1; i >= 0; i--) {
+    const g = a.steps![i].goal;
+    if (!g || g.kind === 'makeWay') continue;
+    return g.kind === 'open' && g.at ? { ...g.at } : null;
+  }
+  return null;
+}
+
 /** Pick the routine for the board now (see the header). */
-export function choose(sit: Situation, ctx: Ctx, style: Style): Advice {
+export function choose(sit: Situation, ctx: Ctx, style: Style, focus: { x: number; y: number } | null = null): Advice {
   const { cols } = sit, last = COLS - 1;
   const burning = ctx.burnFrom <= last;
   const furnace = cols[last];
@@ -895,19 +991,36 @@ export function choose(sit: Situation, ctx: Ctx, style: Style): Advice {
   // What's wrong with the furnace's column, to save it when time's short.
   const wrong = (b: Board) => (burning ? b[last].filter((p) => p === WHITE).length : junkAt(b[last]));
   const reading = readBoard(cols, { stage: ctx.stage, timeLeft: sit.timeLeft });
-  const moves = weigh(sit, ctx, style, reading);
+  // A plan seen through (the user, 13 Nov: "make sure it actually follows through rather than just making a step towards
+  // it"): the white the last move opened the way to (`focus`) is freed next, while that can be done and nothing burning
+  // sooner needs the move (the furnace's white, damage control, the ladder about to go): the board read as if it were
+  // the one trapped white, its own moves first.
+  const keepOn = !!focus && ctx.stage === 'junk' && P.FOLLOW > 0 && cols[focus.x]?.[focus.y] === WHITE && reading.state !== 'damageControl'
+    && reading.tactic !== 'sortLadder' && !(reading.tactic === 'fillGaps' && reading.targets.some((t) => t.x === last));
+  const seeing: Reading | null = keepOn ? { ...reading, tactic: 'freeTrapped', targets: [focus!], why: `seeing it through: the white at column ${focus!.x + 1}, row ${focus!.y + 1}, its way just opened, freed next` } : null;
   // Every drag a named trick with a goal (src/distill-goals.ts): a move with a drag that has none, a half move, isn't
   // chosen; the first on offer whose drags all have one is (the user, 13 Nov: "it's not going to do a half move for no
   // reason, like everything ... has got a goal and a reason").
-  const aims: Aims = { ctx, reading: ctx.stage === 'junk' ? reading : null };
   const named = new Map<Weighed, DragStep[]>();
-  const stepsOf = (m: Weighed): DragStep[] => {
-    let st = named.get(m);
-    if (!st) { st = stepsFor(cols, joinPairs(cols, m.move.drags), m.setup ? { ...aims, setup: SETUP_GOAL } : aims); named.set(m, st); }
-    return st;
+  const stepsWith = (r: Reading) => {
+    const aims: Aims = { ctx, reading: ctx.stage === 'junk' ? r : null };
+    return (m: Weighed): DragStep[] => {
+      let st = named.get(m);
+      if (!st) { st = stepsFor(cols, joinPairs(cols, m.move.drags), m.setup ? { ...aims, setup: SETUP_GOAL } : aims); named.set(m, st); }
+      return st;
+    };
   };
+  let read = reading, moves: Weighed[] = [], stepsOf = stepsWith(reading);
+  const firstOk = () => (P.GOALS ? moves.slice(0, P.GOAL_LOOK).find((m) => purposeful(stepsOf(m))) : moves[0]);
+  let first: Weighed | undefined;
+  if (seeing) {
+    moves = weigh(sit, ctx, style, seeing).filter((m) => m.tactic === 'freeTrapped');
+    stepsOf = stepsWith(seeing);
+    first = firstOk();
+    if (first) read = seeing;
+  }
+  if (!first) { moves = weigh(sit, ctx, style, reading); stepsOf = stepsWith(reading); first = firstOk(); }
   const ok = (m: Weighed) => !P.GOALS || purposeful(stepsOf(m));
-  const first = P.GOALS ? moves.slice(0, P.GOAL_LOOK).find(ok) : moves[0];
   // A move saving a white from the furnace is played whatever it scores.
   const top = first && (first.saves || first.value > (ctx.stage === 'junk' ? P.RATE_MIN : P.MIN)) ? first : null;
   const best = top && ctx.stage === 'junk' && !top.saves && !top.tactic ? tieBreak(cols, moves, top, blockPhase(cols), ok) : top;
@@ -917,7 +1030,7 @@ export function choose(sit: Situation, ctx: Ctx, style: Style): Advice {
     ...(m ? { steps: stepsOf(m), how: stepsOf(m).map((x) => x.name).join('; then ') } : {}),
     ...(m?.weighted ? { weighted: true } : {}),
     ...(ctx.stage === 'chain' && ctx.fill >= 0 && ctx.fill < COLS ? { column: ctx.fill } : {}),
-    state: reading.state, tactic: reading.tactic, read: reading.why,
+    state: read.state, tactic: read.tactic, read: read.why,
   });
   // The endgame's gamble: the next Crystal Clear can't be filled in time.
   if (style.gamble && !burning && sit.chain >= P.CASH_FROM && !ready && sit.timeLeft < P.CASH_MS) {
@@ -932,13 +1045,13 @@ export function choose(sit: Situation, ctx: Ctx, style: Style): Advice {
   // Never."): the furnace takes each column in its own time, and that time goes on the next.
   // A plain long drag that wins is the sweep, swept blind: no technique needed, "quick drag brown up, black
   // down, done" (the eleventh note).
-  if (best && ctx.stage === 'junk' && plainDrag(best.move.drags)) {
+  if (best && ctx.stage === 'junk' && plainDrag(best.move.drags) && !(best.move as Move).label) {
     return { ...advice('move', SWEEP_LABEL, `go, go, go: ${best.tactic ? `${TACTICS[best.tactic].label.toLowerCase()}: ` : ''}${best.move.reason}`, best), sweep: true };
   }
   if (best) {
     const gamble = !burning && sit.chain >= P.CASH_FROM && !ready && style.gamble
       ? ` (the gamble: CC^${sit.chain} so far, chasing the next while the odds are fair)` : '';
-    const label = best.move.routine === 'path' ? ((best.move as PathMove).pair ? PAIR_LABEL : PATH_LABEL) : ROUTINES[best.move.routine].label;
+    const label = best.move.routine === 'path' ? ((best.move as PathMove).pair ? PAIR_LABEL : PATH_LABEL) : ((best.move as Move).label ?? ROUTINES[best.move.routine].label);
     // A move the tactic picked says so first.
     const why = best.tactic ? `${TACTICS[best.tactic].label.toLowerCase()}: ${best.move.reason}` : best.move.reason;
     return advice('move', label, why + gamble, best);
@@ -1030,6 +1143,10 @@ export class DistillBot {
       again, not rebuilt. */
   chained = false;
   private run = 0;
+  /** The white its last move opened the way to, freed next (`focusOf`); cleared as a column goes. */
+  focus: { x: number; y: number } | null = null;
+  /** Junk columns burned in Stage I so far: the first chain's buffer (P.BUFFER). */
+  junkGone = 0;
   /** Decisions made with the chain let go (`chainContext`). */
   letGo = 0;
   /** What it's doing now (the test page shows its label). */
@@ -1039,7 +1156,15 @@ export class DistillBot {
 
   plan(g: Distilling): Advice {
     const target = this.level.target;
-    if (this.stage === 'junk' && decisionTime(g.cols, bankFor(target))) { this.stage = 'chain'; this.burns = burnsLeft(g.cols); this.chained = true; }
+    // The first chain's column two or three in from the fire, the columns right of it burning as junk first, a buffer
+    // (the user, 13 Nov, watching CC^1: "it should be like trying to build it in the second or third column, like close to
+    // what's being burnt, just to have a bit of burnt buffer. You build some fully [junk] columns, and then build behind
+    // it"): Stage I goes on till P.BUFFER junk columns, clear of white, are built on the right or burned, its whites got
+    // out as Stage I gets them out. (Burning the columns as they stood instead, a buffer begun in the chain, burned CC^1's
+    // whites: 0.9 a session, not 0.5, the seventeenth run; and 1.1 with the chain made to save them.)
+    if (this.stage === 'junk' && decisionTime(g.cols, bankFor(target)) && (this.chained || doneFromRight(g.cols) + this.junkGone >= P.BUFFER)) {
+      this.stage = 'chain'; this.burns = burnsLeft(g.cols); this.chained = true;
+    }
     // After a chain broke, the whites still banked on the right are sent up, a new chain, not turned into junk
     // columns to burn (the thirteenth run, traced 13 Nov: back in Stage I with the bank still on the right, every
     // column reaching the fire was mostly white, and the bot filled it with junk to burn, a white or two burned
@@ -1051,7 +1176,8 @@ export class DistillBot {
       : { ctx: contextFor(g.cols, this.stage, this.burns, this.level.reach), burns: this.burns, letGo: false };
     this.burns = c.burns;
     if (c.letGo) this.letGo++;
-    const a = choose({ cols: g.cols, chain: g.chain, timeLeft: g.timeLeft() }, c.ctx, this.level);
+    const a = choose({ cols: g.cols, chain: g.chain, timeLeft: g.timeLeft() }, c.ctx, this.level, this.focus);
+    this.focus = focusOf(a);
     const t = a.technique ?? a.routine;
     if (t) this.used[t] = (this.used[t] ?? 0) + 1;
     this.last = { ...a, target, ...letGoNote(g.cols, c, g.chain, target, this.stage) };
@@ -1061,6 +1187,8 @@ export class DistillBot {
   /** A column went: note the chain, count down the junk columns before it, note the bank, and when the chain
       breaks go back to building (Stage I) toward the next. */
   seen(col: Column, g: Distilling): void {
+    this.focus = null;
+    if (this.stage === 'junk' && !col.up) this.junkGone++;
     if (col.chain > 0) this.run = col.chain;
     else if (this.run > 0) { this.chains.push(this.run); this.run = 0; }
     if (this.stage !== 'chain') return;
