@@ -1544,7 +1544,7 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
   - *text:* "Then someone so kind, a chef on Malachite whose name I wish I could remember, donated about a hundred quid to help me make a guide. Yay! I spent it on art: the banner, the title card for my videos, and the sloops cut out for the sim, every heading. Here they are!"
 - *gone:*
   - *title:* "And then"
-  - *text:* "Aww. Flash got deprecated and Whirled was taken down, and the sim went with them. But now there's AMH's Global Cade Sim, and it's fantastic! Online, beautifully done, everything a blockade sim should be. I'm jealous of the energy that's gone into it. It works perfectly. No ship ever spins into the rocks. Where's the fun in that?"
+  - *text:* "Aww. Flash got deprecated and Whirled was taken down, and the sim went with them. But now there's AMH's Global Cade Sim, and it's fantastic! Online, beautifully done, all a blockade sim should be. I'm jealous of the energy that's gone into it. It works perfectly. No ship ever spins into the rocks. Where's the fun in that?"
 
 ### About the exhibit you've stopped by or turned to look at (once a visit each), and under it close up
 

@@ -87,7 +87,7 @@ export const PANELS = {
   },
   gone: {
     title: 'And then',
-    text: 'Aww. Flash got deprecated and Whirled was taken down, and the sim went with them. But now there\'s AMH\'s Global Cade Sim, and it\'s fantastic! Online, beautifully done, everything a blockade sim should be. I\'m jealous of the energy that\'s gone into it. It works perfectly. No ship ever spins into the rocks. Where\'s the fun in that?',
+    text: 'Aww. Flash got deprecated and Whirled was taken down, and the sim went with them. But now there\'s AMH\'s Global Cade Sim, and it\'s fantastic! Online, beautifully done, all a blockade sim should be. I\'m jealous of the energy that\'s gone into it. It works perfectly. No ship ever spins into the rocks. Where\'s the fun in that?',
   },
 } as const;
 
