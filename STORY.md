@@ -14,6 +14,14 @@ whole cliffside of places to go. It began as a Carpentry primer and has outgrown
 Nov: "this is obviously far more interesting than the carpentry primer ... It has evolved"), so
 in time the den becomes the thing itself (TODO.md, "Split the den off").
 
+**Who it's for, and who it isn't (the user, 14 Nov).** The middle: "I know the basics, but I want to build up the
+technique ... see what the techniques are". The game's own tutorials teach the basics; the den gives "the building
+blocks and techniques". It isn't "here to get you to #1 ... that's not my goal": mastery comes from playing the
+game and the people in it (the Trophy Hunters Discord, the top puzzlers' videos and streams). "This is a sociable
+game ... this website here is for a bit of fun and a bit of stuff on the side, but everything is about the people
+and the love of that, playing puzzles together, so go do it." The front page says so, and every teacher in the den
+sends you on to other pirates.
+
 ## The principles
 
 - **Full of things to find.** "The game should be full of those little let's go explore,
