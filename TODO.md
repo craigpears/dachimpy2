@@ -711,6 +711,29 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   Dachimpy.com banner, the monkey with the map, back at the top. Puzzle Practice is made by Jice, not "the Puzzle
   Practice team". (Loved as it is: jumping straight to a place, the little things, the houses.)
 
+- **Helium's rum run: Port Decorum as a quest, turned away at the front first (14 Nov):** "there should be a bit
+  more of a visible show of ... more of a hint, even in the dialogue ... It should appear more like a quest. Like,
+  first of all, it sends you just to Port Decorum, and then it's like, oh, yeah, they're not happy ... You try to
+  deliver to the front at first, and then it gives you that ... cutscene of, oh, this is not for pirates or
+  something. So you then get the quest of, find a back way around ... it gives you more of a hint that it's for the
+  back beach." So the run sends you to Port Decorum plainly; at its jetty the guards turn the rum away, a little
+  scene; then a new quest, find a back way round, Helium's lines hinting at a quiet beach behind its rocks and the
+  way there; delivered at the smugglers' beach.
+
+- **A marker where Space does something, everywhere (14 Nov):** at Kikkit's island on the rum run: "I eventually
+  managed to throw her a barrel. But it took me a few places ... there's lots of spaces adjacent to [her] Island
+  that are at the front ... If there's only one square, because that works for the animation, then there should be
+  a better visual indication of it." And "always make that a generic thing ... this is like a quest or target ...
+  you can do that for anything, even if it's just for interacting with the tutorial, it should be clear ... on the
+  wedding island, she's on a little jetty. You could have a little flashing next to it ... a visual indication of
+  where the starting point is. Like, I've just found ... the space [for] Mischievious first time because I went next
+  to the jetty." So one shared marker (a pulsing ring on the water, or on the ground) on the exact square where
+  Space starts something: every quest's next stop, every place's starting point, tutorials too.
+- **The winds round the imperial gate, going backwards (14 Nov):** "It's accidental, actually, but I love that ...
+  you can get around the Imperial Gate if you're going backwards by going through the winds. It's a shame that it
+  ends up pointing at a rock that you then have to bump off. That's a bit weird." So keep the way round, but where
+  the winds leave her she shouldn't be pointed straight at a rock (to pin down which wind with the user).
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.

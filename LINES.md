@@ -89,9 +89,10 @@ Your own pirate, dressed as you like from the wardrobe (or as any real pirate in
 - *Their cookie:* "Mm! Still warm."
 - *Another from the plate on the hall's table:* "Just one more."
 
-### Helium's rum run: as they ask you along, before their "Delivering"
+### Helium's rum run: as they ask you along, before their "Delivering" (\`smuggling\`); turned away at Port Decorum's jetty (\`home\`)
 
 - *smuggling:* "Is... is this smuggling?"
+- *home:* "So... back home, then?"
 
 ## The den's pirate voice
 
@@ -1259,9 +1260,13 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 - *Off Kikkit's island:*
   - *hello:* "One barrel. Not a stash, Kikkit. A barrel."
   - *monkey:* "Rodrigo's a monkey."
-- *Brazening it out at Port Decorum's jetty, its guard asking what's in the barrels:*
+- *At Port Decorum's jetty, its guard asking what's in the barrels, then turning the rum away: Helium's hint at the back way (and \`again\`, back there after):*
   - *water:* "Water."
   - *fort:* "For the fort. Very thirsty, your fort. Nothing suspicious at all."
+  - *turned:* "Well. Not keen, are they."
+  - *backWay:* "Turn back with a deck of rum? No. There's always a back way. A quiet beach behind the fort's rocks, they say."
+  - *how:* "Can't sail straight round to it. But a big Vegas through Kikkit's whirlpools puts you by the penguins, and the water runs on from there..."
+  - *again:* "Back way. Right. Penguins."
 - *Landing it quietly at the smugglers' beach behind Port Decorum:*
   - *quiet:* "Nobody about. Lovely. Up the beach they go."
   - *after:* "Someone'll be along for them. Someone always is."
@@ -1671,11 +1676,12 @@ For now there's nothing to do there: the island's sketched, to sail up to and lo
 - "Everything ashore is imperial property. Every last crate."
 - "Papers? No? Then no."
 
-### Helium's rum run, brazened out at the jetty: its guard and Helium
+### Helium's rum run, tried at the jetty and turned away: its guard and Helium
 
 - *As you come alongside with the barrels:* "Halt! No pirates in the harbour. And what's in the barrels?"
 - *After Helium's "Water.":* "Water."
-- *After the thirsty fort:* "...Leave them on the jetty. And move along. Before I think about it."
+- *After the thirsty fort: turning the rum away:* "Nice try. This is an imperial jetty. No pirates, no pirate cargo. Off with you, before I think about it."
+- *Back at the jetty after that:* "You again. Still no."
 
 ## The race's starter
 

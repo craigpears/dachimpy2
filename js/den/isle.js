@@ -7,7 +7,8 @@
 // Space puts you ashore, at the wedding; leaving it, you're back aboard her there.
 import * as THREE from 'three';
 import { SAIL, LAY } from '../den-sail.js';
-import { isleAt, canLandIsle, isleMooring, isleShore } from '../den-isle.js';
+import { isleAt, canLandIsle, isleMooring, isleShore, isleLandingSquares } from '../den-isle.js';
+import { mark } from './marks.js';
 import { scene, mat, mesh, canvasTex, woodTex, flagpole, keys } from './world.js';
 import { torch } from './land.js';
 import { sail, seaX, seaZ } from './sea.js';
@@ -139,7 +140,11 @@ function build() {
 }
 
 /** Built the first time the sea's drawn (sailing.js), seen from the den's beach too. */
-export function isleWorld() { isle.g ||= build(); }
+export function isleWorld() {
+  isle.g ||= build();
+  // (where Space puts you ashore for the wedding, marked on the water: marks.js)
+  mark('isle', isleLandingSquares());
+}
 /** Each frame: the bunting fluttering. */
 export function isleTick() {
   if (!isle.g) return;

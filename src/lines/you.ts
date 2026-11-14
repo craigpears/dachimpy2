@@ -74,6 +74,7 @@ export const AT_HELIUMS = {
 /** Helium's rum run (src/den-rumrun.ts): as they ask you along, warily. */
 export const ON_THE_RUM_RUN = {
   smuggling: 'Is... is this smuggling?',
+  home: 'So... back home, then?',
 } as const;
 
 export const CHARACTER: Character = {
@@ -109,6 +110,6 @@ export const CHARACTER: Character = {
     { when: 'Coming into the smugglers\' cove behind Port Decorum, by way of the whirlpools (once a voyage)', says: [AT_SMUGGLERS_BEACH] },
     { when: 'Robert the kangaroo bear roobing your ear, in Roobear\'s ROOm', says: IN_ROOBEARS_HOUSE, each: { rubbed: 'The first time, at her door', again: 'Asking him for another' } },
     { when: 'At Dachimpy\'s door, every visit: their hug, their cookie; and asking for another from the plate', says: IN_DACHIMPYS_HOUSE, each: { hugged: 'Their hug', cookie: 'Their cookie', another: 'Another from the plate on the hall\'s table' } },
-    { when: 'Helium\'s rum run: as they ask you along, before their "Delivering"', says: ON_THE_RUM_RUN },
+    { when: 'Helium\'s rum run: as they ask you along, before their "Delivering" (`smuggling`); turned away at Port Decorum\'s jetty (`home`)', says: ON_THE_RUM_RUN },
   ],
 };

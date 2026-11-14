@@ -7,6 +7,7 @@
    checkpoint. Like the den's landing (src/den-beach.ts), a whole stretch of water off its jetty
    counts: from any square of it, Space brings her in alongside the jetty and puts you ashore, to
    the wedding. Leaving the wedding puts you back aboard her, there. */
+import { squaresIn } from './den-marks.js';
 import { LAY } from './den-sail.js';
 export const ISLE = {
     /** Its name, as the captain's map has it: the wedding's, not hers (the user, 11 Nov: "she's a primary
@@ -21,6 +22,10 @@ export function onIsleLanding(c, r) {
     const L = LAY.ISLE.LANDING;
     return c >= L.c0 && c <= L.c1 && r >= L.r0 && r <= L.r1 && !isleAt(c, r);
 }
+/** Its landing's squares, marked on the water (src/den-marks.ts; the user, 14 Nov: "on the wedding island, she's on
+    a little jetty. You could have a little flashing next to it ... a visual indication of where the starting point
+    is"). */
+export const isleLandingSquares = () => squaresIn(LAY.ISLE.LANDING, (c, r) => !onIsleLanding(c, r));
 /** Can you go ashore on the isle from where she is? On its landing, and not held up by a hole in her
     deck (a calm doesn't keep you aboard), as off the den's beach. */
 export function canLandIsle(h) {

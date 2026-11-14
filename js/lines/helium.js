@@ -318,6 +318,10 @@ export const RUM_RUN = {
     quay: {
         water: 'Water.',
         fort: 'For the fort. Very thirsty, your fort. Nothing suspicious at all.',
+        turned: 'Well. Not keen, are they.',
+        backWay: 'Turn back with a deck of rum? No. There\'s always a back way. A quiet beach behind the fort\'s rocks, they say.',
+        how: 'Can\'t sail straight round to it. But a big Vegas through Kikkit\'s whirlpools puts you by the penguins, and the water runs on from there...',
+        again: 'Back way. Right. Penguins.',
     },
     cove: {
         quiet: 'Nobody about. Lovely. Up the beach they go.',
@@ -439,7 +443,7 @@ export const CHARACTER = {
                 aboard: 'The barrels rolled aboard, and them with them', atSea: 'Now and then while you sail, barrels aboard',
                 tune: 'Sailing by the checkpoint or Port Decorum with barrels aboard: whistling', innocent: 'Then, in turn',
                 notYet: 'At Port Decorum before Mischievious and Kikkit have theirs', wedding: 'Off the Wedding Isle, Mischievious on the jetty',
-                kikkit: 'Off Kikkit\'s island', quay: 'Brazening it out at Port Decorum\'s jetty, its guard asking what\'s in the barrels',
+                kikkit: 'Off Kikkit\'s island', quay: 'At Port Decorum\'s jetty, its guard asking what\'s in the barrels, then turning the rum away: Helium\'s hint at the back way (and `again`, back there after)',
                 cove: 'Landing it quietly at the smugglers\' beach behind Port Decorum', last: 'The barrels all gone', home: 'Back off their island, hopping off',
             },
         },

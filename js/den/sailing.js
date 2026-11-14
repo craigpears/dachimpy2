@@ -36,6 +36,7 @@ import { empireWorld, empireTick, empirePrompt, empireReset } from './imperial-i
 import { primatesTick, primatesReset } from './moored.js';
 import { smugglersWorld, smugglersTick, smugglersPrompt, smugglersReset } from './smugglers.js';
 import { rumTick, rumKey, rumPrompt, rumGoal, rumReset } from './rumrun.js';
+import { marksTick } from './marks.js';
 import { raceWorld, raceTick, raceHelm, raceKey, racePrompt, raceShot, raceTarget, raceHitRival, raceHolds, raceReset, raceHover, raceClick, race } from './race.js';
 import { watch, watchTick, watchStop } from './race-watch.js';
 import { planTake } from './race-plan.js';   // (your moves take the helm from the race's pilot)
@@ -413,6 +414,7 @@ export function sailTick(dt) {
   smugglersTick();   // (the smugglers' beach, found: smugglers.js)
   raceTick(dt);   // (the race, its guns, its crane and the rival: race.js)
   watchTick(dt);   // (the race watched, four racers and no player: race-watch.js)
+  marksTick(dt, !!cine || watch.on);   // (where Space does something, marked on the water: marks.js)
   if (sail.on && !watch.on) sailHud();
 }
 // The oars' button on the sailing bar (on mousedown: the bar's redrawn as the tokens change, so a

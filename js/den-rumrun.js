@@ -14,9 +14,12 @@
      ask you along. Space takes the rum aboard (the casks off their pile, LOAD barrels on her deck, Helium with
      them); Esc, not now (they'll ask again the next time you leave the still with the casks).
    - The stops, each a little scene with that character's lines: the Wedding Isle (Mischievious on her jetty)
-     and Kikkit's island, either way round, then the rest to Port Decorum, last. Port Decorum two ways: brazened
-     out at its jetty under its guard's nose (past the checkpoint, the danger it always was), or landed quietly
-     at the smugglers' beach round its back (the whirlpools' Vegas the only way there). Either does.
+     and Kikkit's island, either way round, then the rest to Port Decorum, last. Port Decorum as a quest (the user,
+     14 Nov: "it sends you just to Port Decorum ... You try to deliver to the front at first, and then it gives you
+     that ... cutscene of, oh, this is not for pirates ... So you then get the quest of, find a back way around"):
+     at its jetty the guard turns the rum away (`turnAway`), Helium hinting at the back way, and a new quest's
+     given, to find it; landed quietly at the smugglers' beach round its back (the whirlpools' Vegas the only way
+     there). Found first, the beach does as well.
    - Past the Empire: sailing in sight of the checkpoint or Port Decorum with barrels aboard, Helium whistles and
      plays it innocent, Dignity remarks from her gate, Port Decorum's guards turn to watch. No new puzzle and no
      search: the checkpoint's guns are the danger, as they already are.
@@ -30,6 +33,7 @@ import { inSmugglersCove, onSmugglersRun, smugglersAt } from './den-smugglers.js
 import { EMPIRE_OFF, empireAt, inEmpireEarshot } from './den-imperial.js';
 import { onHeliumLanding } from './den-helium.js';
 import { readSecs } from './den-dignity.js';
+import { squaresIn, squaresRound } from './den-marks.js';
 import { RUM_RUN as HELIUM_SAYS } from './lines/helium.js';
 import { RUM_RUN as HER_SAYS } from './lines/mischievious.js';
 import { RUM_RUN as KIKKIT_SAYS } from './lines/kikkit.js';
@@ -85,6 +89,8 @@ export class RumRun {
     done = [];
     /** Port Decorum's way in, once it's done. */
     how = null;
+    /** Turned away at Port Decorum's jetty this run: the quest's now to find the back way. */
+    turnedAway = false;
     /** Barrels delivered, and runs finished (Helium home), this voyage. */
     delivered = 0;
     runs = 0;
@@ -105,7 +111,7 @@ export class RumRun {
     take() {
         if (this.step !== 'asked')
             return false;
-        Object.assign(this, { step: 'run', aboard: RUM_RUN.LOAD, done: [], how: null });
+        Object.assign(this, { step: 'run', aboard: RUM_RUN.LOAD, done: [], how: null, turnedAway: false });
         return true;
     }
     /** Helium's aboard (on the run, or being taken home). */
@@ -116,6 +122,16 @@ export class RumRun {
             return false;
         return id !== 'decorum' || STOPS.every((s) => s.id === 'decorum' || this.done.includes(s.id));
     }
+    /** Whether the rum can go ashore there this way: never under the guard's nose at Port Decorum's jetty. */
+    lands(id, how = null) { return this.open(id) && !(id === 'decorum' && how === 'quay'); }
+    /** At Port Decorum's jetty, the rum still aboard: the guard turns it away, the first time (true; then the quest's
+        to find the back way). */
+    turnAway() {
+        if (!this.open('decorum') || this.turnedAway)
+            return false;
+        this.turnedAway = true;
+        return true;
+    }
     /** How many barrels go ashore there: its own, or all that's left. */
     barrelsFor(id) {
         const n = stop(id).barrels;
@@ -124,7 +140,7 @@ export class RumRun {
     /** Rolls a stop's barrels ashore: how many (0 if it isn't open). Port Decorum's the last: then Helium's to
         take home. */
     deliver(id, how = null) {
-        if (!this.open(id))
+        if (!this.lands(id, how))
             return 0;
         const n = this.barrelsFor(id);
         this.aboard -= n;
@@ -155,8 +171,27 @@ export class RumRun {
             return `Rum run: ${left[0].name} (${n(left[0])}) and ${left[1].name} (${n(left[1])}), either way round`;
         if (left.length === 1)
             return `Rum run: ${left[0].name} next (${n(left[0])})`;
-        return `Rum run: the rest (${this.aboard}) to Port Decorum: its jetty, or round the back, quietly`;
+        if (!this.turnedAway)
+            return `Rum run: the rest (${this.aboard}) to Port Decorum`;
+        return `New quest: find a back way into Port Decorum (${this.aboard} barrels) · hint: Kikkit's whirlpools, past the penguins`;
     }
+}
+/** Where Space does the run's next thing, by stop, to be marked on the water (src/den-marks.ts; the user, 14 Nov:
+    "there should be a better visual indication of it"): the landings of the stops still open, Port Decorum's jetty
+    till you've been turned away there, then the smugglers' cove; with everything delivered, off Helium's island. */
+export function rumTargets(run) {
+    if (run.step === 'home')
+        return { helium: squaresRound(LAY.HELIUM.LAND, onHeliumLanding) };
+    if (run.step !== 'run')
+        return {};
+    const out = {};
+    if (run.open('wedding'))
+        out.wedding = squaresIn(LAY.ISLE.LANDING, (c, r) => !onIsleLanding(c, r));
+    if (run.open('kikkit'))
+        out.kikkit = squaresIn(LAY.KIKKIT.LANDING, (c, r) => !onKikkitLanding(c, r));
+    if (run.open('decorum'))
+        out.decorum = run.turnedAway ? LAY.SMUGGLERS.COVE.map(([c, r]) => [c, r]) : [[EMPIRE_OFF.c, EMPIRE_OFF.r]];
+    return out;
 }
 /** Sailing in sight of the Empire with barrels aboard: Helium whistles as she comes into sight, once a pass (not
     again till she's been out of sight a while). */
@@ -199,13 +234,17 @@ export function stopBeats(id, n, how = null) {
     if (id === 'kikkit')
         return [b('kikkit', KIKKIT_SAYS.hello, n), b('helium', HELIUM_SAYS.kikkit.hello), b('kikkit', KIKKIT_SAYS.stash), b('helium', HELIUM_SAYS.kikkit.monkey), b('kikkit', KIKKIT_SAYS.rodrigo)];
     const last = b('helium', HELIUM_SAYS.last);
-    if (how === 'cove')
-        return [b('helium', HELIUM_SAYS.cove.quiet, n), b('helium', HELIUM_SAYS.cove.after), last];
-    return [
-        b('guard', GUARD_SAYS.what), b('helium', HELIUM_SAYS.quay.water), b('guard', GUARD_SAYS.water), b('helium', HELIUM_SAYS.quay.fort),
-        b('guard', GUARD_SAYS.fine, n), b('helium', HELIUM_SAYS.tune), last,
-    ];
+    return [b('helium', HELIUM_SAYS.cove.quiet, n), b('helium', HELIUM_SAYS.cove.after), last];
 }
+/** At Port Decorum's jetty, the first time: the guard asks what's in the barrels, doesn't believe a word, and turns
+    the rum away; Helium, unbothered, hints at the back way. Nothing goes ashore. */
+export const turnAwayBeats = () => [
+    b('guard', GUARD_SAYS.what), b('helium', HELIUM_SAYS.quay.water), b('guard', GUARD_SAYS.water), b('helium', HELIUM_SAYS.quay.fort),
+    b('guard', GUARD_SAYS.no), b('helium', HELIUM_SAYS.quay.turned), b('you', YOU_SAY.home),
+    b('helium', HELIUM_SAYS.quay.backWay), b('helium', HELIUM_SAYS.quay.how),
+];
+/** Back at the jetty after that: once a visit. */
+export const againBeats = () => [b('guard', GUARD_SAYS.again), b('helium', HELIUM_SAYS.quay.again)];
 /** At Port Decorum before the other two have theirs. */
 export const notYetBeats = () => [b('helium', HELIUM_SAYS.notYet)];
 /** Home: they hop off. */

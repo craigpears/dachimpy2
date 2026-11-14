@@ -8,8 +8,9 @@
 // empireQuiet), Dignity's remark (dignity.js), and a starting point (menus.js, ?at=rumrun).
 import {
   RUM_RUN, RUM_CAST, STOPS, RumRun, Whistle, Scene, AT_SEA, atStop, inSight, dropFor,
-  askBeats, aboardBeats, stopBeats, notYetBeats, homeBeats, whistleBeats,
+  askBeats, aboardBeats, stopBeats, notYetBeats, homeBeats, whistleBeats, turnAwayBeats, againBeats, rumTargets,
 } from '../den-rumrun.js';
+import { mark } from './marks.js';
 import { HELIUM_ARRIVE } from '../den-helium.js';
 import { readSecs } from '../den-dignity.js';
 import { Chatter } from '../chatter.js';
@@ -212,6 +213,22 @@ function deliver(at) {
     toast(R.step === 'home' ? 'Every barrel delivered. Take Helium home' : `${n} barrel${n > 1 ? 's' : ''} ashore at ${where}`);
   }, drop.moor ? V3(seaX(drop.moor.c), 0, seaZ(drop.moor.r)) : undefined);
 }
+/** Port Decorum's jetty, the first time: the guard turns the rum away, Helium hints at the back way, and the quest's
+    to find it (the user, 14 Nov: "You try to deliver to the front at first ... So you then get the quest of, find
+    a back way around"). Nothing goes ashore. */
+function turnAway() {
+  const R = rum.run;
+  if (!R.turnAway()) return;
+  const drop = dropFor('decorum', 'quay');
+  if (drop.moor) { if (sail.helm.oars) sail.helm.row(false); sail.helm.moor({ ...drop.moor }); sail.riding = false; }
+  rum.heads.guard = empireQuiet(true);
+  rum.again = true;   // (not "still no" straight after)
+  const shore = V3(seaX(drop.at[0]), drop.y, seaZ(drop.at[1]));
+  play(turnAwayBeats(), shore, () => {}, () => {
+    empireQuiet(false);
+    toast('New quest: find a back way into Port Decorum', false, false, true);
+  }, drop.moor ? V3(seaX(drop.moor.c), 0, seaZ(drop.moor.r)) : undefined);
+}
 /** Home: they hop off, back on their island. */
 function home() {
   if (!rum.run.home()) return;
@@ -232,7 +249,8 @@ export function rumSpace() {
   if (!at) return false;
   if (at.id === 'helium' && R.step === 'asked') { take(); return true; }
   if (at.id === 'helium' && R.step === 'home') { home(); return true; }
-  if (at.id !== 'helium' && R.open(at.id)) { deliver(at); return true; }
+  if (at.id === 'decorum' && at.how === 'quay' && R.open('decorum') && !R.turnedAway) { turnAway(); return true; }
+  if (at.id !== 'helium' && R.lands(at.id, at.how ?? null)) { deliver(at); return true; }
   return false;
 }
 /** Keys at sea (sailing.js): Space and Enter as above; Esc, off their island when they've asked, not now. */
@@ -257,10 +275,11 @@ export function rumPrompt() {
   }
   if (!R.open(at.id)) return '';
   const n = R.barrelsFor(at.id), s = n > 1 ? 's' : '';
+  if (at.how === 'quay') return R.turnedAway ? '' : `Off Port Decorum's jetty · Space: deliver the rest (${n} barrel${s})`;
   if (at.id === 'wedding') return `Off the Wedding Isle · Space: roll Mischievious's rum ashore (${n} barrel${s})`;
   if (at.id === 'kikkit') return `Off Kikkit's island · Space: roll her barrel ashore`;
   if (at.how === 'cove') return `The smugglers' beach · Space: roll the rum up the beach, quietly (${n} barrel${s})`;
-  return `Off Port Decorum's jetty · Space: land the rum under the guard's nose (${n} barrel${s})`;
+  return '';
 }
 /** The run's goal, ahead of the sea's own prompt ('' with no run). */
 export const rumGoal = () => { const g = rum.run.goal(); return g ? `${g} · ` : ''; };
@@ -277,6 +296,12 @@ export function rumTick(dt) {
   const at = sail.on ? atStop(p.c, p.r) : null;
   if (at?.id === 'decorum' && R.step === 'run' && !R.open('decorum')) { if (!rum.notYet && !rum.talk && settled()) { rum.notYet = true; rum.talk = new Scene(notYetBeats()); } }
   else if (at?.id !== 'decorum') rum.notYet = false;
+  // Back at its jetty once turned away: "Still no", once a visit.
+  if (at?.how === 'quay' && R.step === 'run' && R.turnedAway) { if (!rum.again && !rum.talk && settled()) { rum.again = true; rum.heads.guard = empireQuiet(false) ?? rum.heads.guard; rum.talk = new Scene(againBeats()); } }
+  else if (at?.how !== 'quay') rum.again = false;
+  // Where Space does the next thing, marked on the water (marks.js).
+  const T = rumTargets(R);
+  for (const id of ['wedding', 'kikkit', 'decorum', 'helium']) mark(`rum:${id}`, T[id]);
   // Past the Empire with rum aboard: Helium whistles, Dignity remarks, Port Decorum's guards watch her go by.
   const rumAboard = R.heliumAboard && R.aboard > 0, sight = sail.on ? inSight(p.c, p.r) : null;
   const w = rum.whistle.tick(dt, sight, rumAboard);
@@ -325,7 +350,7 @@ function draw(dt) {
 export function rumReset() {
   if (rum.flying.length) landAll();
   for (const b of rum.ashore) scene.remove(b);
-  Object.assign(rum, { run: new RumRun(), whistle: new Whistle(), shown: 0, ashore: [], flying: [], talk: null, line: null, chat: freshChat(), notYet: false, tune: 0, boarded: false });
+  Object.assign(rum, { run: new RumRun(), whistle: new Whistle(), shown: 0, ashore: [], flying: [], talk: null, line: null, chat: freshChat(), notYet: false, again: false, tune: 0, boarded: false });
   if (rum.watching) empireWatch(null);
   rum.watching = false;
   heliumAway(false);

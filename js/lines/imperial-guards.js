@@ -18,7 +18,8 @@ export const GRUMBLES = [
 export const RUM_RUN = {
     what: 'Halt! No pirates in the harbour. And what\'s in the barrels?',
     water: 'Water.',
-    fine: '...Leave them on the jetty. And move along. Before I think about it.',
+    no: 'Nice try. This is an imperial jetty. No pirates, no pirate cargo. Off with you, before I think about it.',
+    again: 'You again. Still no.',
 };
 export const CHARACTER = {
     name: 'The imperial guards of Port Decorum',
@@ -36,8 +37,8 @@ export const CHARACTER = {
         { when: 'The jetty guard, as you first come within earshot', says: HALT },
         { when: 'Then, while you\'re within earshot, round and round', says: GRUMBLES },
         {
-            when: 'Helium\'s rum run, brazened out at the jetty: its guard and Helium', says: RUM_RUN,
-            each: { what: 'As you come alongside with the barrels', water: 'After Helium\'s "Water."', fine: 'After the thirsty fort' },
+            when: 'Helium\'s rum run, tried at the jetty and turned away: its guard and Helium', says: RUM_RUN,
+            each: { what: 'As you come alongside with the barrels', water: 'After Helium\'s "Water."', no: 'After the thirsty fort: turning the rum away', again: 'Back at the jetty after that' },
         },
     ],
 };

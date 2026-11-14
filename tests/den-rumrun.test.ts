@@ -5,8 +5,11 @@
 import { describe, expect, it } from 'vitest';
 import {
   RUM_RUN, RUM_CAST, STOPS, RumRun, Whistle, Scene, PACE_RUN, atStop, inSight, dropFor,
-  askBeats, aboardBeats, stopBeats, notYetBeats, homeBeats, whistleBeats, type StopId,
+  askBeats, aboardBeats, stopBeats, notYetBeats, homeBeats, whistleBeats, turnAwayBeats, againBeats, rumTargets, type StopId,
 } from '../src/den-rumrun';
+import { onIsleLanding } from '../src/den-isle';
+import { onKikkitLanding } from '../src/den-kikkit';
+import { onHeliumLanding } from '../src/den-helium';
 import { LAY, SAIL, Sea } from '../src/den-sail';
 import { HELIUM_ARRIVE, HELIUM_MOOR, Cellar, RUM } from '../src/den-helium';
 import { EMPIRE_OFF } from '../src/den-imperial';
@@ -60,7 +63,7 @@ describe('the stops: Mischievious and Kikkit either way round, then the rest to 
     expect(r.deliver('wedding')).toBe(0);   // (done already)
     expect(r.goal()).toMatch(/Kikkit's island next \(1 for Kikkit\)/);
     expect(r.deliver('kikkit')).toBe(1);
-    expect(r.goal()).toMatch(/the rest \(3\) to Port Decorum/);
+    expect(r.goal()).toBe('Rum run: the rest (3) to Port Decorum');
     expect(r.deliver('decorum', 'cove')).toBe(3);
     expect(r).toMatchObject({ step: 'home', aboard: 0, delivered: RUM_RUN.LOAD, how: 'cove' });
     expect(r.heliumAboard).toBe(true);
@@ -79,10 +82,59 @@ describe('the stops: Mischievious and Kikkit either way round, then the rest to 
 
   it('a barrel fewer on her deck at every stop, and every barrel delivered', () => {
     const r = taken(), left = [r.aboard];
-    for (const id of ['wedding', 'kikkit', 'decorum'] as StopId[]) { r.deliver(id, 'quay'); left.push(r.aboard); }
+    for (const id of ['wedding', 'kikkit', 'decorum'] as StopId[]) { r.deliver(id, 'cove'); left.push(r.aboard); }
     for (let i = 1; i < left.length; i++) expect(left[i]).toBeLessThan(left[i - 1]);
     expect(left.at(-1)).toBe(0);
     expect(STOPS.map((s) => s.id)).toEqual(['wedding', 'kikkit', 'decorum']);
+  });
+
+  it('Port Decorum as a quest: turned away at its jetty, then find the back way (the user, 14 Nov: "You try to deliver to the front at first ... So you then get the quest of, find a back way around")', () => {
+    const r = taken();
+    expect(r.turnAway()).toBe(false);   // (not till Mischievious and Kikkit have theirs)
+    r.deliver('wedding'); r.deliver('kikkit');
+    expect(r.goal()).not.toMatch(/back|quietly|cove|beach/);   // (sent plainly to Port Decorum first)
+    expect(r.deliver('decorum', 'quay')).toBe(0);   // (never under the guard's nose)
+    expect(r.turnAway()).toBe(true);
+    expect(r.turnAway()).toBe(false);   // (once)
+    expect(r.aboard).toBe(3);
+    expect(r.goal()).toMatch(/^New quest: find a back way into Port Decorum \(3 barrels\)/);
+    expect(r.goal()).toMatch(/Kikkit's whirlpools.*penguins/);   // (a hint at the way there)
+    expect(r.deliver('decorum', 'cove')).toBe(3);
+    expect(r.step).toBe('home');
+    r.home(); r.ask(); r.take();
+    expect(r.turnedAway).toBe(false);   // (a fresh run: the jetty tried again)
+  });
+
+  it('the turning away a scene: the guard, Helium\'s hint at the back way, nothing ashore', () => {
+    const s = new Scene(turnAwayBeats());
+    expect(s.rolls).toBe(0);
+    expect(s.beats.some((x) => x.who === 'guard')).toBe(true);
+    expect(s.beats.some((x) => x.who === 'you')).toBe(true);
+    const helium = s.beats.filter((x) => x.who === 'helium').map((x) => x.says).join(' ');
+    expect(helium).toMatch(/back way/);
+    expect(helium).toMatch(/whirlpools/);
+    expect(helium).toMatch(/penguins/);
+    expect(new Scene(againBeats()).rolls).toBe(0);
+  });
+
+  it('marks where Space does the next thing: each open stop\'s landing, the jetty then the cove, then home (the user, 14 Nov: "there should be a better visual indication of it")', () => {
+    const r = taken();
+    let T = rumTargets(r);
+    expect(Object.keys(T).sort()).toEqual(['kikkit', 'wedding']);
+    for (const [c, rr] of T.wedding!) expect(onIsleLanding(c, rr)).toBe(true);
+    for (const [c, rr] of T.kikkit!) { expect(onKikkitLanding(c, rr)).toBe(true); expect(atStop(c, rr)).toEqual({ id: 'kikkit' }); }
+    r.deliver('wedding'); r.deliver('kikkit');
+    T = rumTargets(r);
+    expect(Object.keys(T)).toEqual(['decorum']);
+    for (const [c, rr] of T.decorum!) expect(atStop(c, rr)).toEqual({ id: 'decorum', how: 'quay' });
+    r.turnAway();
+    for (const [c, rr] of rumTargets(r).decorum!) expect(atStop(c, rr)).toEqual({ id: 'decorum', how: 'cove' });
+    r.deliver('decorum', 'cove');
+    T = rumTargets(r);
+    expect(Object.keys(T)).toEqual(['helium']);
+    for (const [c, rr] of T.helium!) expect(onHeliumLanding(c, rr)).toBe(true);
+    r.home();
+    expect(rumTargets(r)).toEqual({});
   });
 
   it('nothing to deliver without a run', () => {
@@ -160,7 +212,7 @@ describe('"Nothing suspicious at all": whistling past the Empire', () => {
 
 describe('each stop a little scene with that character\'s lines', () => {
   it('rolls exactly that stop\'s barrels ashore, as it\'s said', () => {
-    const cases: [StopId, 'quay' | 'cove' | null, number][] = [['wedding', null, 2], ['kikkit', null, 1], ['decorum', 'quay', 3], ['decorum', 'cove', 3]];
+    const cases: [StopId, 'quay' | 'cove' | null, number][] = [['wedding', null, 2], ['kikkit', null, 1], ['decorum', 'cove', 3]];
     for (const [id, how, n] of cases) {
       const s = new Scene(stopBeats(id, n, how));
       expect(s.rolls, `${id} ${how}`).toBe(n);
@@ -168,7 +220,6 @@ describe('each stop a little scene with that character\'s lines', () => {
     }
     expect(stopBeats('wedding', 2)[0].who).toBe('mischievious');
     expect(stopBeats('kikkit', 1).filter((x) => x.who === 'kikkit').length).toBeGreaterThanOrEqual(2);
-    expect(stopBeats('decorum', 3, 'quay').some((x) => x.who === 'guard')).toBe(true);
     expect(stopBeats('decorum', 3, 'cove').some((x) => x.who === 'guard')).toBe(false);   // (nobody about)
     expect(new Scene(aboardBeats()).rolls).toBe(RUM_RUN.LOAD);
     for (const beats of [askBeats(), notYetBeats(), homeBeats()]) expect(new Scene(beats).rolls).toBe(0);
