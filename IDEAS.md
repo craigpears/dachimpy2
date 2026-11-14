@@ -2931,3 +2931,10 @@ Pirates style. A pirate in an Aladdin role and Jazzmy on a magic carpet lashed o
 flying down a trade wind at full speed. The wind runs out, the sloop stops dead, the carpet keeps
 going, and they end up in the sea. The punchline is Jazzmy, soaked and sad-faced: "...my name's not
 even Jasmine." Ideas only so far: nothing picked.
+
+The user, later the same day: make it one of the little adventures, and the playable version ("I really
+love that"). You go and pick Jazzmy up; she says she wants an Aladdin-style adventure; you're dressed
+for it, for that adventure only (a fez, a vest, rags), and she comes along; her familiar too (in the
+film, the princess's tiger). The player is the Aladdin: "then it makes it more adventure-like." Going
+fast, she has a great time; too fast, you fly into the rocks. But she shouldn't have to play the
+puzzle to see the funny part: something as basic as holding Space must get you there.
