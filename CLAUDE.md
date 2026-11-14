@@ -74,6 +74,11 @@ and the bots wherever it can be, and changed in the same work whenever the lesso
 Distilling's is `distilling-guide.html`: its pictures, names and Helium's lines from `src/distill-guide.ts`, drawn by
 the hand-written `js/distill-guide-view.js`; its later boards picked from bot play by `tools/distill-guide.mjs` into
 `src/distill-guide-boards.ts` (run it again when `tests/distill-guide.test.ts` says a board no longer shows its move).
+Every tutorial has the same shape (the user, 14 Nov; [TUTORIALS.md](TUTORIALS.md)): one description a puzzle (its
+basics, phases, tricks and scenarios, and its teacher's opening choice), in `src/tutorial.ts`'s shape, knowing nothing
+of any puzzle; the read guide's sticky nav drawn from it by the hand-written `js/tutorial-nav.js`, the lesson's opening
+choice by `js/tutorial-choice.js`; both on their own in the unlinked `tutorial-test.html`. Distilling's,
+`src/distill-tutorial.ts`, a draft not wired yet (TUTORIALS.md §3 says what's left).
 
 Read [STORY.md](STORY.md) for the den's story, its progression and the principles behind them, and keep it
 up to date as the story grows. Read [RULES.md](RULES.md) before changing gameplay or wording, and add to it whenever the user corrects a rule or gives design feedback.

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tutorial shape, on its own</title>
+<!-- Unlinked: the shared tutorial shape (TUTORIALS.md, src/tutorial.ts) on its own, with Distilling's draft description
+     (src/distill-tutorial.ts): the read guides' sticky nav (js/tutorial-nav.js) over stand-in sections, one for each
+     place it links to, and the lessons' opening choice (js/tutorial-choice.js) in Helium's words, what's picked shown
+     below rather than played on a board. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,500&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #140d08; color: #f6ead2; font: 500 17px/1.5 'Alegreya Sans', system-ui, sans-serif; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 16px 48px; --tn-bleed: 16px; }
+  h1 { margin: 20px 0 6px; font: 700 34px/1.1 'Alegreya', serif; color: #e0a92a; }
+  h2 { margin: 36px 0 10px; font: 700 22px 'Alegreya', serif; color: #cbb894; }
+  article { background: #f3e3c3; color: #2a1d13; border-radius: 12px; padding: 12px 14px; margin: 0 0 14px; min-height: 120px; }
+  article h3 { margin: 0 0 4px; font: 700 22px 'Alegreya', serif; color: #6b2a12; }
+  article code { font-size: 13px; color: #7a6048; }
+  button.ask { font: 700 16px 'Alegreya Sans'; color: #2a1d13; background: #e0a92a; border: 0; border-radius: 8px; padding: 9px 16px; cursor: pointer; }
+  #picked { color: #cbb894; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>The tutorial shape, on its own</h1>
+  <p>Distilling's draft description in the shared shape. <button class="ask" type="button" id="ask">Ask Helium</button> <span id="picked"></span></p>
+  <div id="sections"></div>
+</div>
+<script type="module">
+  import { navFor, findPart } from './js/tutorial.js';
+  import { tutorialNav } from './js/tutorial-nav.js';
+  import { tutorialChoice } from './js/tutorial-choice.js';
+  import { DISTILL_TUTORIAL as T } from './js/distill-tutorial.js';
+
+  // Stand-in sections, one for each place the nav links to.
+  const box = document.getElementById('sections');
+  for (const g of navFor(T)) {
+    const h = Object.assign(document.createElement('h2'), { id: g.href.slice(1), textContent: g.title });
+    box.appendChild(h);
+    for (const run of g.runs) for (const l of run.links) {
+      const p = findPart(T, l.id).part, a = document.createElement('article');
+      a.id = l.href.slice(1);
+      a.innerHTML = `<h3></h3><p></p><code></code>`;
+      a.querySelector('h3').textContent = p.title;
+      a.querySelector('p').textContent = p.line;
+      a.querySelector('code').textContent = `${p.phase ? `${p.phase} · ` : ''}shows ${p.shows.kind}: ${p.shows.ref}`;
+      box.appendChild(a);
+    }
+  }
+  // (in the page's column, above its heading, so it's sticky over the column)
+  tutorialNav(T, { mount: document.querySelector('.wrap h1'), links: [{ title: 'Learn it from Helium', href: '#' }] });
+
+  const picked = document.getElementById('picked');
+  const ask = () => tutorialChoice(T, {
+    onPlay: (e) => { picked.textContent = `Picked: ${e.part.title} (${e.section}, shows ${e.part.shows.ref})`; },
+    onClose: () => { picked.textContent = 'Not now.'; },
+  });
+  document.getElementById('ask').addEventListener('click', ask);
+  if (new URLSearchParams(location.search).has('ask')) ask();
+</script>
+</body>
+</html>
