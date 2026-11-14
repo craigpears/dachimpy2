@@ -567,6 +567,20 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   two things ... a specific teaser of, like, go play [Mischievious's] wedding or the [sloop] race, the distilling
   ... give a sample of some of the things ... easy, scroll to view ... you can go into a section to see more, but it
   should at least show you some of the things at a glance without you having to click and interact."
+  And no word block (14 Nov): "I don't like that opening thing of like know the basics or everything [is a] proof
+  [of] concept. That's too much of a word block. I don't want a word block for the first thing people see on my
+  site." The positioning lives in design.html; the front page opens with Dachimpy's welcome and pictures.
+  Then (14 Nov): a collage of a few things in each area; rowing in the new concepts; not "the new tutorials" but
+  "try out some new tutorials", "these are just experiments at the moment"; the three outside things (the Global
+  Cade Sim, Puzzle Practice, the Discord) plainly outside this site; and credit: "[AMH] created the new [Global
+  Cade Sim] ... I just don't want any hint of like for both of that and the practice puzzles, any hint like I'm
+  trying to take credit for them in any way, even by omission."
+  Then (14 Nov): high level: the sloop race one item, the race watched, the course editor and the starlit door its
+  sub-things; the primer just "Carpentry", not "where it all started"; the external links one quick section near the
+  start, never repeated; no "successor" line for the Cade Sim; Puzzle Practice not called "2D", and nobody pointed
+  to practising in the den ("that is not what the point of this was").
+  The outside three stay top-level choices (14 Nov): "They're still high level concepts. I just want to make it
+  clear that they are elsewhere ... a different line with some kind of subheading to show they're elsewhere."
 - **The front page as the launch pad, and what the den is for (14 Nov):** below "what are you here for?", the
   changelog's link and a way to "jump to specific places ... then we could get rid of the cheats menu and we can
   have this as a launch pad into that." And a short, light section on the den's goals: "you want your own adventure
@@ -593,7 +607,7 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   exhibit after "And Then", its plaque and Dachimpy's line, and the link from the close view; also linked from the
   front page's practice choice, for blockade practice. The picture didn't reach the disk: the user to save the file.
   Then: the link is what deserves prominence, on the front page, its own "what are you here for?" choice: "if you want
-  to go play the new blockade sim made by [its maker]" (name to come from the user). The museum's picture can wait:
+  to go play the new blockade sim made by [its maker]": AMH (the user, 14 Nov). The museum's picture can wait:
   "I'm going to go at least do a better picture of it ... a bit more justice to get into the midst of things."
 
 ## Spotted along the way (not asked for)
